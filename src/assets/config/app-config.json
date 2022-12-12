@@ -1,0 +1,48 @@
+{
+  "locale": "fr-FR",
+  "localeOptions": [
+    { "value": "en-EN", "label": "English" },
+    { "value": "fr-FR", "label": "Français" }
+  ],
+
+  "reseaux": ["doda", "demo"],
+
+  "nom": "test.sportes.fr",
+
+  "portupload": 33666,
+  "voirorgs": true,
+  "phrases" : [
+    ["leszsanglotszLONGSz", "garezauzGORILLEz"],
+    ["auzvillagezSANSz", "jaizmauvaisezREPUTATIONz"],
+    ["emilieemilieemilie", "emilieemilieemilie"]
+  ],
+  "forfaits" : { "0": 0, "XXS": 1, "XS": 2, "SM": 4, "MD": 8, "LG": 16, "XL": 32, "XXL": 64 },
+  "datetimeformat": { "timeZone": "Europe/Paris", "year": "numeric", "month": "2-digit", "day": "2-digit", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
+  "datetimeformat1": { "timeZone": "Europe/Paris", "year": "numeric", "month": "2-digit", "day": "2-digit", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
+  "datetimeformat2": { "timeZone": "Europe/Paris", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
+
+  "limitesjour": { "secrettemp": 60, "parrainage" : 14, "groupenonheb": 180 },
+  "lgnom": 20,
+  "lgtitre": 50,
+  "maxlgtextegen": 250,
+  "maxlgtextesecret": 5000,
+  "rappelblocageenminutes": 2,
+  "raisonsblocage": {
+    "1-Comptable": [10, 20, 30],
+    "2-Volume": [10, 0, 0],
+    "3-Organisation": [0, 20, 5],
+    "4-Autre": [0, 0, 0]
+  },
+  "motscles": { 
+    "255": { "fr-FR":"Statut/Nouveau", "en-EN":"Status/New" },
+    "254": { "fr-FR": "Visibilité/Liste noire", "en-EN":"Visibility/Black List" },
+    "253": { "fr-FR": "Compte/Parrain", "en-EN":"Account/Sponsor" },
+    "252": { "fr-FR":"Compte/Filleul", "en-EN":"Account/Sponsored" },
+    "251": { "fr-FR":"Visibilité/Favori", "en-EN":"Visibility/Favorite" },
+    "250": { "fr-FR":"Visibilité/Important", "en-EN":"Visibility/Important" },
+    "249": { "fr-FR":"Visibilité/Obsolète", "en-EN":"Visibility/Deprecated" },
+    "248": { "fr-FR":"Visibilité/A lire", "en-EN":"Visibility/To Read" },
+    "247": { "fr-FR":"Visibilité/A traiter", "en-EN":"Visibility/To Do" },
+    "246": { "fr-FR":"Visibilité/Poubelle", "en-EN":"Visibility/Trash" }
+  }
+}
