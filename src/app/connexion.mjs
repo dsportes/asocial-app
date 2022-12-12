@@ -7,8 +7,7 @@ import { DateJour } from './api.mjs'
 import { serial } from './schemas.mjs'
 import { NomAvatar } from './modele.mjs'
 import { resetRepertoire, initConnexion, deconnexion, compileToMap, compile, setSecret, setCv, getCv, delCv, setNg, Compte, Compta, Prefs, Avatar, NomTribu } from './modele.mjs'
-import { openIDB, closeIDB, deleteIDB, getCompte, getPrefs, getAvatars, getComptas,
-  getGroupes, getMembres, getCouples, getSecrets, getTribus, getCvs, commitRows,
+import { openIDB, closeIDB, deleteIDB, getCompte, getCvs, commitRows,
   getVIdCvs, lectureSessionSyncIdb, saveListeCvIds, gestionFichierCnx, TLfromIDB, FLfromIDB } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
 
@@ -21,11 +20,12 @@ export async function connecterCompte (phrase, razdb) {
   if (!phrase) return
   const session = stores.session
   session.phrase = phrase
+  session.setAuthToken()
 
-  const lsk = session.reseau + '-' + phrase.dpbh
+  const lsk = '$asocial$-' + phrase.dpbh
   if (stores.config.debug) console.log(lsk)
   const nb = localStorage.getItem(lsk)
-  session.nombase = nb || null
+  session.nombase = nb || ''
   session.statutIdb = false
   resetRepertoire()
   stores.reset()
@@ -44,11 +44,13 @@ export async function connecterCompte (phrase, razdb) {
       return
     }
     try {
-      const compte = await getCompte()
-      if (!compte || (compte.pcbh !== session.phrase.pcbh)) throw new AppExc(F_BRO, 2)
-      await new ConnexionCompte().run(compte, true)
+      const x = await getCompte() // x:false ou { id, k }
+      if (!x) throw new AppExc(F_BRO, 2)
+      session.compteId = x.id
+      session.clek = x.k
+      await new ConnexionCompte().run()
     } catch (e) {
-      afficherdiagnostic($t('OPmsg3', [e.message]))
+      afficherDiag($t('OPmsg3', [e.message]))
       await deleteIDB()
     }
 
@@ -60,18 +62,23 @@ export async function connecterCompte (phrase, razdb) {
     if (session.synchro && session.nombase) {
       try {
         await openIDB()
-        const compte = await getCompte()
-        if (compte && compte.pcbh === session.phrase.pcbh) {
-          const nb = await compte.getNombase()
-          if (nb === session.nombase) dbok = true
+        const x = await getCompte()
+        if (x) {
+          // Entête compte lu et décrypté par la phrase secrète
+          session.compteId = x.id
+          session.clek = x.k
+        } else {
+          session.compteId = 0
+          session.clek = null
+          session.nombase = ''
         }
       } catch (e) { }
-      if (!dbok) {
+      if (!session.nombase) {
         closeIDB()
         await deleteIDB()
       }
     }
-    await new ConnexionCompte().run(null, dbok)
+    await new ConnexionCompte().run()
 
   }
 }

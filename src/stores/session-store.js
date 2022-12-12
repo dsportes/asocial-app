@@ -1,14 +1,17 @@
 import { defineStore } from 'pinia';
 
 import stores from './stores.mjs'
+import { pbkfd, sha256 } from '../app/webcrypto.mjs'
+import { u8ToB64 } from '../app/util.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
     status: 0, // 0:fermée, 1:en chargement, >=10: ouverte
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
-    reseau: '',
     sessionId: '', // identifiant de session (random(6) -> base64)
+    authToken: '',
     phrase: null,
+
     dateJourConnx: null,
     sessionSync: null, // objet de trace de la dernière session suynchro (en IDB)
 
@@ -22,15 +25,13 @@ export const useSessionStore = defineStore('session', {
     statutNet: false,
     syncqueue: [], // accumulation des syncList reçues par webSocket
 
-    compte: null,
     estComptable: false,
+    compteId: 0,
     clek: null,
     clepubc: null,
-    prefs: null,
 
     avatarId: null,
     groupeId: null,
-    coupleId: null,
 
     blocage: 0, // niveau de blocage: 1-Alerte informative, 2:restriction de volume, 3:passif, 4:bloqué
     infoBlocage: false,
@@ -58,13 +59,30 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
-    resetReseau () { if (this.status === 0) this.reseau = '' },
-    setReseau (reseau) {
-      const config = stores.config
-      if (this.status === 0 && config.reseaux.indexOf(reseau) !==  -1 && !this.reseau !== reseau) this.reseau = reseau
+    async getNombase () {
+      if (!this.nombase) {
+        if (!this.clek) return ''
+        const x = await pbkfd(this.clek)
+        this.nombase = '$asocial$-' + u8ToB64(x, true)
+      }
+      return this.nombase
     },
+
+    /* authToken : base64 de la sérialisation de :
+    - `sessionId`
+    - `shax` : SHA de X, le PBKFD de la phrase complète.
+    - `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète.
+    */
+    setAuthToken () {
+      const token = {
+        sessionId: this.sessionId,
+        shax: sha256(session.phrase.pcb),
+        hps1: session.phrase.dpbh
+      }
+      session.authToken = u8ToB64(new Uint8Array(encode(token)))
+    },
+    
     setCompte (obj) { this.compte = obj },
-    setPrefs (obj) { this.prefs = obj },
 
     /* Gère les autorisations d'exécuter l'action
     - nmb : interdit avec un blocage à partir de nmb

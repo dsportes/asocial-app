@@ -44,7 +44,7 @@ export async function openIDB () {
   const session = stores.session
   try {
     db = new Dexie(session.nombase, { autoOpen: true })
-    db.version(2).stores(STORES)
+    db.version(1).stores(STORES)
     await db.open()
     session.statutIdb = true
   } catch (e) {
@@ -324,7 +324,18 @@ export async function getCompte () {
   const session = stores.session
   try {
     const idb = await db.compte.get('1')
-    return await decrypter(session.phrase.pcb, idb.data)
+    return decode(await decrypter(session.phrase.pcb, idb.data))
+  } catch (e) {
+    return false
+  }
+}
+
+export async function putCompte () {
+  const session = stores.session
+  try {
+    const x = { id: session.compteId, k: session.clek}
+    const data = await crypter(clek, new Uint8Array(encode(x)) , 1)
+    await db.compte.put({ id: '1', data })
   } catch (e) {
     throw EX2(e)
   }
