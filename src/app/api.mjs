@@ -1,4 +1,10 @@
 import { schemas, serial, deserial } from './schemas.mjs'
+import { encode, decode } from '@msgpack/msgpack'
+
+export function decodeIn(data, cible) {
+  const x = decode(data)
+  for (const [key, value] of Object.entries(x)) cible[key] = value
+}
 
 export const version = '1'
 

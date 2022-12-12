@@ -1,31 +1,25 @@
 import Dexie from 'dexie'
 import stores from '../stores/stores.mjs'
-import { Compte, Prefs, Tribu, Avatar, Compta, Groupe, Membre, Couple, Secret, Cv, SessionSync, ListeCvIds } from './modele.mjs'
-import { crypter, decrypter, sha256 } from './webcrypto.mjs'
-import { AppExc, E_DB } from './api.mjs'
-import { u8ToB64, Sid, edvol, sleep, difference, rnd6, html } from './util.mjs'
-import { t0n } from './api.mjs'
+import { encode, decode } from '@msgpack/msgpack'
+import { SessionSync } from './modele.mjs'
+import { crypter, decrypter } from './webcrypto.mjs'
+import { AppExc, E_DB, decodeIn } from './api.mjs'
+import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
 import { getSecret } from '../app/modele.mjs'
-import { forSchema, serialize, deserialize } from '../app/schemas.mjs'
-
-const decoder = new TextDecoder('utf-8')
-const encoder = new TextEncoder('utf-8')
 
 const STORES = {
-  sessionsync: 'id',
-  listecvids: 'id',
   compte: 'id',
-  compta: 'id',
-  prefs: 'id',
-  tribu: 'id',
-  chat: 'id',
-  avatar: 'id',
-  couple: 'id',
-  groupe: 'id',
-  membre: '[id+id2]', // im
-  secret: '[id+id2]', // ns
-  avsecret: '[id+id2]', // ns
-  cv: 'id',
+  sessionsync: 'id',
+  tribus: 'id',
+  comptas: 'id',
+  avatars: 'id',
+  chats: 'id+ids',
+  rdvs: 'id+ids',
+  groupes: 'id',
+  membre: '[id+ids]',
+  secrets: '[id+ids]',
+  avsecret: '[id+ids]',
+  cvs: 'id',  // data: cryptK { id, v, photo, info }
   fetat: 'id',
   fdata: 'id',
   loctxt: 'id',
@@ -71,7 +65,7 @@ export function closeIDB () {
 export async function deleteIDB (lsKey) {
   const session = stores.session
   try {
-    if (lsKey) localStorage.removeItem(session.reseau + '-' + session.phrase.dpbh)
+    if (lsKey) localStorage.removeItem('$asocial$-' + session.phrase.dpbh)
     await Dexie.delete(session.nombase)
     await sleep(100)
     console.log('RAZ db')
@@ -112,66 +106,7 @@ export async function saveSessionSync (idb) {
   }
 }
 
-export async function saveListeCvIds (v, setIds) {
-  try {
-    const row = new ListeCvIds().init(v, setIds).toIdb()
-    await db.listecvids.put({ id: '1', data: await crypter(stores.session.clek, row) })
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getVIdCvs () {
-  try {
-    const idb = await db.listecvids.get('1')
-    const x = new ListeCvIds()
-    if (idb) x.fromIdb(await decrypter(stores.session.clek, idb.data))
-    return [x.v, new Set(x.ids)]
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-/************************************************************************
-TexteLocal:
-- id: id du texte (random)
-- dh: date-heure d'enregistrement
-- txt: string MD gzippé
-*/
-
-forSchema({
-  name: 'idbTexteLocal',
-  cols: ['id', 'dh', 'txt']
-})
-
-export class TexteLocal {
-  constructor () {
-    this.id = 0
-    this.txt = 0
-    this.dh = 0
-  }
-
-  nouveau (txt) {
-    this.id = rnd6()
-    this.txt = txt
-    this.dh = new Date().getTime()
-    return this
-  }
-
-  fromIdb (idb) {
-    deserialize('idbTexteLocal', idb, this)
-    this.txt = decoder.decode(ungzip(this.txt))
-  }
-
-  toIdb () {
-    const x = this.txt
-    this.txt = gzip(encoder.encode(x))
-    const idb = serialize('idbTexteLocal', this)
-    this.txt = x
-    return idb
-  }
-}
-
+/**Text Local - TL **********************************************************************/
 export async function TLfromIDB () {
   const session = stores.session
   const tflocaux = stores.tflocaux
@@ -193,7 +128,7 @@ export async function TLins (txt) {
     tflocaux.setTexteLocal(tl)
     if (session.accesIdb) {
       const buf = await crypter(session.clek, tl.toIdb)
-      const cle = u8ToB64(await crypter(session.clek, Sid(id), 1), true)
+      const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
       await db.loctxt.put({ id: cle, data: buf })
     }
   } catch (e) {
@@ -212,7 +147,7 @@ export async function TLupd (id, txt) {
     tflocaux.setTexteLocal(tl)
     if (session.accesIdb) {
       const buf = await crypter(session.clek, tl.toIdb)
-      const cle = u8ToB64(await crypter(session.clek, Sid(tl.id), 1), true)
+      const cle = u8ToB64(await crypter(session.clek, '' + tl.id, 1), true)
       await db.loctxt.put({ id: cle, data: buf })
     }
   } catch (e) {
@@ -226,7 +161,7 @@ export async function TLdel (id) {
   try {
     const tl = tflocaux.delTexteLocal(id)
     if (session.accesIdb) {
-      const cle = u8ToB64(await crypter(session.clek, Sid(id), 1), true)
+      const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
       await db.loctxt.where({ id: cle }).delete()
     }
   } catch (e) {
@@ -234,50 +169,11 @@ export async function TLdel (id) {
   }
 }
 
-/* FichierLocal ************************************************
-locfic : index des fichiers locaux - id: random, crypté par la clé K
-- id: id du fichier
-- nom: nom du fichier
-- info: commentaire court facultatif
-- dh: date-heure d'enregistrement
-- type: type MIME
-- gz: true si le fichier a été stocké gzippé
-- lg: taille du fichier d'origine
-- sha: sha du fichier d'origine
-
+/** Fichier Local ********************************************
 locdata: contenu d'un fichier local
   - id: id du fichier local
   - data: contenu gzippé ou non crypté par la clé K
 */
-forSchema({
-  name: 'idbFichierLocal',
-  cols: ['id', 'nom', 'info', 'dh', 'type', 'gz', 'lg', 'sha']
-})
-
-export class FichierLocal {
-  constructor () {
-  }
-
-  nouveau (nom, info, type, u8) {
-    this.id = rnd6()
-    this.nom = nom
-    this.info = info
-    this.dh = new Date().getTime()
-    this.type = type
-    this.gz = type.startsWith('text/')
-    this.lg = u8.length
-    this.sha = sha256(u8)
-    return this
-  }
-
-  fromIdb (idb) {
-    deserialize('idbTexteLocal', idb, this)
-  }
-
-  toIdb () {
-    return serialize('idbTexteLocal', this)
-  }
-}
 
 export async function FLfromIDB () {
   const session = stores.session
@@ -299,7 +195,7 @@ export async function FLins (nom, info, type, u8) {
   try {
     const fl = new FichierLocal().nouveau(nom, info, type, u8)
     tflocaux.setFichierLocal(fl)
-    const cle = u8ToB64(await crypter(session.clek, Sid(fic.id), 1), true)
+    const cle = u8ToB64(await crypter(session.clek, '' + fic.id, 1), true)
     const buf = await crypter(session.clek, fl.gz ? gzipT(u8) : u8)
     const data = await crypter(session.clek, fl.toIdb)
     if (session.accesIdb) {
@@ -339,7 +235,7 @@ export async function FLupd (id, nom, info, type, u8) {
       fl.gz = type.startsWith('text/')
       if (session.accesIdb) buf = await crypter(session.clek, fl.gz ? gzipT(u8) : u8)
     }
-    const cle = u8ToB64(await crypter(session.clek, Sid(fl.id), 1), true)
+    const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
     const data = await crypter(session.clek, fl.toIdb)
     if (session.accesIdb) {
       await db.transaction('rw', ['locfic', 'locdata'], async () => {
@@ -363,7 +259,7 @@ export async function FLget (fl) { // get du CONTENU
   const session = stores.session
   if (!session.accesIdb) return fl.u8
   try {
-    const cle = u8ToB64(await crypter(session.clek, Sid(fl.id), 1), true)
+    const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
     const idb = await db.locdata.get(cle)
     if (idb) {
       const buf = await decrypter(session.clek, idb.data)
@@ -379,7 +275,7 @@ export async function FLdel (id) {
   const session = stores.session
   const tflocaux = stores.tflocaux
   try {
-    const cle = u8ToB64(await crypter(session.clek, Sid(id), 1), true)
+    const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
     if (session.accesIdb) {
       await data.db.transaction('rw', ['locfic', 'locdata'], async () => {
         await db.locfic.where({ id: cle }).delete()
@@ -419,74 +315,34 @@ export async function vuIDB (nb) {
 }
 
 /**********************************************************************
- * Lecture des objets de IDB
- */
+Lecture du compte : crypté par le PBKFD de la phrase secrète. { id, k }
+- id: id du compte
+- k: clé K 
+*/
+
 export async function getCompte () {
   const session = stores.session
   try {
     const idb = await db.compte.get('1')
-    return idb ? new Compte().fromIdb(await decrypter(session.phrase.pcb, idb.data)) : null
+    return await decrypter(session.phrase.pcb, idb.data)
   } catch (e) {
     throw EX2(e)
   }
 }
 
-export async function getPrefs () {
-  const session = stores.session
-  try {
-    const idb = await db.prefs.get('1')
-    return idb ? new Prefs().fromIdb(await decrypter(session.clek, idb.data)) : null
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getChat () {
-  const session = stores.session
-  try {
-    const idb = await db.chat.get('1')
-    return idb ? new Prefs().fromIdb(await decrypter(session.clek, idb.data)) : null
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getTribus () {
-  const session = stores.session
-  try {
-    const tribus = {}
-    await db.tribu.each(async (idb) => {
-      const x = new Tribu().fromIdb(await decrypter(session.clek, idb.data))
-      tribus[x.id] = x
-    })
-    return tribus
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getComptas () {
-  const session = stores.session
-  try {
-    const comptas = {}
-    await db.compta.each(async (idb) => {
-      const x = new Compta().fromIdb(await decrypter(session.clek, idb.data))
-      comptas[x.id] = x
-    })
-    return comptas
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-// Retourne une map : clé: id de l'avatar, valeur: son objet Avatar
-export async function getAvatars () {
+/** Lecture d'une collection complète : 
+Retourne une map: 
+  - clé: id ou id/ids
+  - valeur: row { _nom, id, ids, v, _data_} 
+*/
+export async function getColl (nom) {
   const session = stores.session
   try {
     const r = {}
-    await db.avatar.each(async (idb) => {
-      const x = new Avatar().fromIdb(await decrypter(session.clek, idb.data))
-      r[x.id] = x
+    await db[nom].each(async (idb) => { 
+      const row = await decrypter(session.clek, idb.data)
+      const pk = row.ids ? id + '/' + ids : id
+      r[pk] = row
     })
     return r
   } catch (e) {
@@ -494,93 +350,56 @@ export async function getAvatars () {
   }
 }
 
-export async function getGroupes () {
+/** Lecture de la collection des Cartes de Visite des contacts par chat.
+Retourne une map de clé 'id' et de valeur { id, v, photo, info }
+*/
+export async function getCvs () {
   const session = stores.session
   try {
     const r = {}
-    await db.groupe.each(async (idb) => {
-      const x = new Groupe().fromIdb(await decrypter(session.clek, idb.data))
-      r[x.id] = x
-    })
-    return r
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getCouples () {
-  const session = stores.session
-  try {
-    const r = {}
-    await db.couple.each(async (idb) => {
-      const x = new Couple().fromIdb(await decrypter(session.clek, idb.data))
-      r[x.id] = x
-    })
-    return r
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getMembres () {
-  const session = stores.session
-  try {
-    const r = {}
-    const v = {}
-    await db.membre.each(async (idb) => {
-      const x = new Membre().fromIdb(await decrypter(session.clek, idb.data))
-      let e = r[x.id]; if (!e) { e = {}; r[x.id] = e }
-      e[x.im] = x
-      const v1 = v[x.id]
-      if (!v1 || v1 < x.v) v[x.id] = x.v
-    })
-    return [r, v]
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getSecrets () {
-  const session = stores.session
-  try {
-    const r = {}
-    const v = {}
-    const sidms = new Set()
-    await db.secret.each(async (idb) => {
-      const x = new Secret().fromIdb(await decrypter(session.clek, idb.data))
-      let e = r[x.id]; if (!e) { e = {}; r[x.id] = e }
-      e[x.ns] = x
-      const v1 = v[x.id]
-      sidms.add(x.id)
-      if (!v1 || v1 < x.v) v[x.id] = x.v
-    })
-    return [r, v, sidms]
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getCvs (cvIds, buf) {
-  const session = stores.session
-  try {
-    const r = {}
-    await db.cv.each(async (row) => {
+    await db.cvs.each(async (row) => {
       const idb = await decrypter(session.clek, row.data)
-      const cv = new Cv().fromIdb(idb)
-      if (cvIds.has(cv.id)) {
-        r[cv.id] = cv
-      } else {
-        buf.supprIDB({ table: 'cv', id: cv.id })
-      }
+      r[idb.id] = decode(idb)
     })
     return r
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
+export async function getCv (id) {
+  const session = stores.session
+  const idk = u8ToB64(await crypter(clek, '' + id, 1), true)
+  try {
+    return decode(await db.cvs.get({ id: idk }))
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
+export async function delCv (id) {
+  const session = stores.session
+  const idk = u8ToB64(await crypter(clek, '' + id, 1), true)
+  try {
+    return await db.cvs.delete({ id: idk })
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
+export async function putCv (cv) { // { id, v, photo, info }
+  const session = stores.session
+  const idk = u8ToB64(await crypter(clek, '' + cv.id, 1), true)
+  const rowk = await crypter(clek, new Uint8Array(encode(cv)), 1)
+  try {
+    return await db.cvs.put({ id: idk, data: rowk })
   } catch (e) {
     throw EX2(e)
   }
 }
 
 /*
-Mise à jour / suppression de listes d'objets et purges globales par avatar / couple / groupe
+Mise à jour / suppression de listes de rows et purges globales par avatar / groupe
 */
 export async function commitRows (opBuf) {
   try {
@@ -590,99 +409,62 @@ export async function commitRows (opBuf) {
     // Objets à mettre à jour
     const lidb = []
     if (opBuf.lmaj && opBuf.lmaj.length) {
-      for (let i = 0; i < opBuf.lmaj.length; i++) {
-        const obj = opBuf.lmaj[i]
-        const x = { table: obj.table, row: {} }
-        x.row.id = t0n.has(obj.table) ? '1' : u8ToB64(await crypter(clek, Sid(obj.id), 1), true)
-        if (obj.id2) x.row.id2 = u8ToB64(await crypter(clek, Sid(obj.id2), 1), true)
-        if (obj.table === 'compte') {
-          x.row.data = await crypter(session.phrase.pcb, obj.toIdb)
-        } else {
-          x.row.data = await crypter(clek, obj.toIdb)
-        }
-        lidb.push(x)
+      for (const row of opBuf.lmaj) {
+        const idk = u8ToB64(await crypter(clek, '' + row.id, 1), true)
+        const idsk = row.ids ? u8ToB64(await crypter(clek, '' + row.ids, 1), true) : null
+        const rowk = await crypter(clek, new Uint8Array(encode(row)) , 1)
+        lidb.push({ table: row._nom, idk, idsk, rowk })
       }
     }
 
-    // Objets à supprimer individuellement
+    // Objets à supprimer individuellement - rows : { _nom, id, ids }
     const lidbs = []
     if (opBuf.lsuppr && opBuf.lsuppr.length) {
-      for (let i = 0; i < opBuf.lsuppr.length; i++) {
-        const obj = opBuf.lsuppr[i]
-        const x = { }
-        x.id = t0n.has(obj.table) ? '1' : u8ToB64(await crypter(clek, Sid(obj.id), 1), true)
-        if (obj.id2) x.id2 = u8ToB64(await crypter(clek, Sid(obj.id2), 1), true)
-        x.table = obj.table
-        lidbs.push(x)
-        if (obj.table === 'compte') {
-          lidbs.push({ table: 'prefs', id: '1' })
-          lidbs.push({ table: 'compta', id: '1' })
-        }
+      for (const row of opBuf.lsuppr) {
+        const idk = u8ToB64(await crypter(clek, '' + obj.id, 1), true)
+        const idsk = obj.ids ? u8ToB64(await crypter(clek, '' + obj.ids, 1), true) : null
+        lidbs.push({ table: row._nom, idk, idsk })
       }
-    }
-
-    // couples à supprimer
-    const idcc = []
-    if (opBuf.lcc && opBuf.lcc.size) {
-      for (const i of opBuf.lcc) idcc.push(u8ToB64(await crypter(clek, Sid(i), 1), true))
-    }
-
-    // set des Ids des couples n'accédant plus aux secrets à purger
-    const idcc2 = []
-    if (opBuf.lcc2 && opBuf.lcc2.size) {
-      for (const i of opBuf.lcc2) idcc.push(u8ToB64(await crypter(clek, Sid(i), 1), true))
     }
 
     // set des ids des avatars à purger
     const idac = []
     if (opBuf.lav && opBuf.lav.size) {
-      for (const i of opBuf.lav) idac.push(u8ToB64(await crypter(clek, Sid(i), 1), true))
+      for (const id of opBuf.lav) idac.push(u8ToB64(await crypter(clek, '' + id, 1), true))
     }
 
     // set des ids des groupes à purger
     const idgc = []
     if (opBuf.lgr && opBuf.lgr.size) {
-      for (const i of opBuf.lgr) idgc.push(u8ToB64(await crypter(clek, Sid(i), 1), true))
+      for (const id of opBuf.lgr) idgc.push(u8ToB64(await crypter(clek, '' + id, 1), true))
     }
 
     await db.transaction('rw', TABLES, async () => {
-      for (let i = 0; i < lidb.length; i++) {
-        const x = lidb[i]
-        await db[x.table].put(x.row)
+      for (const x of lidb) {
+        await db[x.table].put( { id: x.idk, data: x.rowk })
       }
 
-      for (let i = 0; i < lidbs.length; i++) {
-        const x = lidbs[i]
-        if (x.id2) {
-          await db[x.table].where({ id: x.id, id2: x.id2 }).delete()
+      for (const x of lidbs) {
+        if (x.idsk) {
+          await db[x.table].where({ id: x.idk, ids: x.idsk }).delete()
         } else {
-          await db[x.table].where({ id: x.id }).delete()
+          await db[x.table].where({ id: x.idk }).delete()
         }
       }
 
-      for (let i = 0; i < idcc.length; i++) {
-        const id = { id: idcc[i] }
-        await db.couple.where(id).delete()
-        await db.secret.where(id).delete()
+      for (const idk of idac) {
+        const id = { id: idk }
+        await db.avatars.where(id).delete()
+        await db.rdvs.where(id).delete()
+        await db.chats.where(id).delete()
+        await db.secrets.where(id).delete()
       }
 
-      for (let i = 0; i < idcc2.length; i++) {
-        const id = { id: idcc2[i] }
-        await db.secret.where(id).delete()
-      }
-
-      for (let i = 0; i < idac.length; i++) {
-        const id = { id: idac[i] }
-        await db.avatar.where(id).delete()
-        await db.compta.where(id).delete()
-        await db.secret.where(id).delete()
-      }
-
-      for (let i = 0; i < idgc.length; i++) {
-        const id = { id: idgc[i] }
-        await db.groupe.where(id).delete()
-        await db.membre.where(id).delete()
-        await db.secret.where(id).delete()
+      for (const idk of idgc) {
+        const id = { id: idk }
+        await db.groupes.where(id).delete()
+        await db.membres.where(id).delete()
+        await db.secrets.where(id).delete()
       }
     })
   } catch (e) {
@@ -736,7 +518,7 @@ async function getFetats (map) {
 
 export async function getFichierIDB (idf) {
   try {
-    const id = u8ToB64(await crypter(stores.session.clek, Sid(idf), 1), true)
+    const id = u8ToB64(await crypter(stores.session.clek, '' + idf, 1), true)
     const idb = await db.fdata.where({ id: id }).first()
     return !idb ? null : idb.data
   } catch (e) {
@@ -764,8 +546,8 @@ async function commitFic (lstAvSecrets, lstFetats) { // lst : array / set d'idfs
     const y = []
     for (const obj of lstAvSecrets) {
       const row = {}
-      row.id = u8ToB64(await crypter(session.clek, Sid(obj.id), 1), true)
-      row.id2 = u8ToB64(await crypter(data.clek, Sid(obj.id2), 1), true)
+      row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
+      row.id2 = u8ToB64(await crypter(data.clek, '' + obj.id2, 1), true)
       row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
       x.push(row)
       if (debug) console.log('IDB avsecret to ', obj.suppr ? 'DEL' : 'PUT', obj.pk)
@@ -773,7 +555,7 @@ async function commitFic (lstAvSecrets, lstFetats) { // lst : array / set d'idfs
 
     for (const obj of lstFetats) {
       const row = {}
-      row.id = u8ToB64(await crypter(session.clek, Sid(obj.id), 1), true)
+      row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
       row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
       y.push(row)
       if (debug) {
@@ -809,7 +591,7 @@ async function setFa (fetat, buf) { // buf : contenu du fichier non crypté
   try {
     const session = stores.session
     const row1 = {}
-    row1.id = u8ToB64(await crypter(session.clek, Sid(fetat.id), 1), true)
+    row1.id = u8ToB64(await crypter(session.clek, '' + fetat.id, 1), true)
     row1.data = await crypter(session.clek, fetat.toIdb)
     const row2 = { id: row1.id, data: buf }
     await db.transaction('rw', TABLES, async () => {
@@ -946,11 +728,12 @@ class Fetat {
   }
 
   get toIdb () {
-    return serialize('idbFetat', this)
+    const x = { ...this }
+    return new Uint8Array(encode(x))
   }
 
   fromIdb (idb) {
-    deserialize('idbFetat', idb, this)
+    decodeIn(idb, this)
     return this
   }
 
@@ -1021,11 +804,12 @@ class AvSecret {
   get estVide () { return !this.lidf.length && !Object.keys(this.mnom).length }
 
   get toIdb () {
-    return serialize('idbAvSecret', this)
+    const x = { ...this }
+    return new Uint8Array(encode(x))
   }
 
   fromIdb (idb) {
-    deserialize('idbAvSecret', idb, this)
+    decodeIn(idb, this)
     return this
   }
 

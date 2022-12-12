@@ -1,10 +1,11 @@
 import stores from '../stores/stores.mjs'
+import { encode, decode } from '@msgpack/msgpack'
 
 import { forSchema, serialize, deserialize, clone, serial, deserial } from './schemas.mjs'
 import { $t, hash, rnd6, intToB64, b64ToInt, u8ToB64, idToSid, dlvDepassee, titre, normpath, gzip, ungzip, ungzipT, egaliteU8, tru8 } from './util.mjs'
 import { random, pbkfd, sha256, decrypterRSA, crypterRSA, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
 
-import { IDCOMPTABLE, DateJour, Compteurs, UNITEV1, UNITEV2, chiffres } from './api.mjs'
+import { IDCOMPTABLE, DateJour, Compteurs, UNITEV1, UNITEV2, chiffres, decodeIn } from './api.mjs'
 
 import { closeIDB, getFichierIDB, saveSessionSync } from './db.mjs'
 import { openWS, closeWS } from './ws.mjs'
@@ -2572,43 +2573,6 @@ export class Secret {
   }
 }
 
-/* Liste des ids des CV chargées en IDB ****************************
-avec LA version correspondant à cet état chargé
-*/
-forSchema({
-  name: 'idbListeCvIds',
-  cols: ['v', 'lids']
-})
-
-export class ListeCvIds {
-  constructor () {
-    this.v = 0
-    this.ids = []
-  }
-
-  init (v, setIds) {
-    this.v = v
-    this.lids = Array.from(setIds)
-    return this
-  }
-
-  fromIdb (idb) {
-    if (!idb) {
-      this.v = 0
-      this.ids = new Set()
-    } else {
-      deserialize('idbListeCvIds', idb, this)
-      this.ids = new Set(this.lids)
-      delete this.lids
-    }
-    return this
-  }
-
-  toIdb () {
-    return serialize('idbListeCvIds', this)
-  }
-}
-
 /**SessionSync : Dernier état de session synchronisé***************************
 Uniquement sur IDB - pas de fromRow - compilé par fromIdb
 - dhdebutp : dh de début de la dernière session sync terminée
@@ -2671,5 +2635,78 @@ export class SessionSync {
 
   async save () {
     await saveSessionSync(serialize('idbSessionSync', this))
+  }
+}
+
+/************************************************************************
+TexteLocal:
+- id: id du texte (random)
+- dh: date-heure d'enregistrement
+- txt: string MD gzippé
+*/
+
+export class TexteLocal {
+  constructor () {
+    this.id = 0
+    this.txt = 0
+    this.dh = 0
+  }
+
+  nouveau (txt) {
+    this.id = rnd6()
+    this.txt = txt
+    this.dh = new Date().getTime()
+    return this
+  }
+
+  fromIdb (idb) {
+    decodeIn(idb, this)
+    this.txt = decoder.decode(ungzip(this.txt))
+  }
+
+  toIdb () {
+    const x = { ...this }
+    x.txt = gzip(encoder.encode(this.txt))
+    return encode(x)
+  }
+}
+
+/* FichierLocal ************************************************
+locfic : index des fichiers locaux - id: random, crypté par la clé K
+- id: id du fichier
+- nom: nom du fichier
+- info: commentaire court facultatif
+- dh: date-heure d'enregistrement
+- type: type MIME
+- gz: true si le fichier a été stocké gzippé
+- lg: taille du fichier d'origine
+- sha: sha du fichier d'origine
+
+locdata: contenu d'un fichier local
+  - id: id du fichier local
+  - data: contenu gzippé ou non crypté par la clé K
+*/
+
+export class FichierLocal {
+  constructor () { }
+
+  nouveau (nom, info, type, u8) {
+    this.id = rnd6()
+    this.nom = nom
+    this.info = info
+    this.dh = new Date().getTime()
+    this.type = type
+    this.gz = type.startsWith('text/')
+    this.lg = u8.length
+    this.sha = sha256(u8)
+    return this
+  }
+
+  fromIdb (idb) {
+    decodeIn(idb, this)
+  }
+
+  toIdb () {
+    return encode({ ...this })
   }
 }
