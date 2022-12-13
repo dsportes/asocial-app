@@ -342,13 +342,14 @@ export async function afficherDiag (diag, ok, cancel) {
   })
 }
 
-export function setTrigramme (nombase, reseau, trig) {
-  const x = localStorage.getItem('$$trigrammes')
+export function setTrigramme (nombase, trig) {
+  const nt = '$asocial$-trigrammes'
+  const x = localStorage.getItem(nt)
   const trigs = x ? deserial(b64ToU8(x)) : {}
   if (trig) {
-    trigs[nombase] = [reseau, trig]
+    trigs[nombase] = trig
   } else delete trigs[nombase]
-  localStorage.setItem('$$trigrammes', u8ToB64(serial(trigs), true))
+  localStorage.setItem(nt, u8ToB64(serial(trigs), true))
 }
 
 export function getTrigramme () {

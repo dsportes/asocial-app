@@ -13,7 +13,6 @@ export const useSessionStore = defineStore('session', {
     phrase: null,
 
     dateJourConnx: null,
-    sessionSync: null, // objet de trace de la dernière session suynchro (en IDB)
 
     opencours: null, // Objet opération de l'opération en cours (sauf ProcessQueue)
     sessionSync: null, // Objet de classe SessionSync trçant l'état de synchronisation d'une session sur IDB
@@ -41,6 +40,8 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
+    // Nom de l'entrée LocalStorage devant contenir le nom de la base
+    lsk (state) { return '$asocial$-' + state.phrase.dpbh},
     niveau (state) { return Math.floor(state.status / 10) },
     synchro (state) { return state.mode === 1 },
     incognito (state) { return state.mode === 2 },

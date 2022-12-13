@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { egalite } from '../app/util.mjs'
 
 export const useAvatarStore = defineStore('avatar', {
   state: () => ({
@@ -15,26 +14,40 @@ export const useAvatarStore = defineStore('avatar', {
         return e ? e.avatar : null 
       }
     },
-    getCv: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.cv : null 
-      }
-    },
-    getCompta: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.compta : null 
-      }
-    },
     // retourne le secret ns de l'avatar id
-    getSecret: (state) => { return (id, ns) => { 
+    getSecret: (state) => { return (id, ids) => { 
         const e = state.map.get(id)
-        return e ? e.secrets.get(ns) : null 
+        return e ? e.secrets.get(ids) : null 
       }
     },
     // retourne la Map des secrets (clé ns) de l'avatar id
     getSecrets: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.secrets : null 
+      }
+    },
+    // retourne le chat ids de l'avatar id
+    getChat: (state) => { return (id, ids) => { 
+      const e = state.map.get(id)
+      return e ? e.chats.get(ids) : null 
+    }
+    },
+    // retourne la Map des chats (clé ids) de l'avatar id
+    getChats: (state) => { return (id) => { 
+        const e = state.map.get(id)
+        return e ? e.chats : null 
+      }
+    },
+    // retourne le tdv ids de l'avatar id
+    getRdv: (state) => { return (id, ids) => { 
+      const e = state.map.get(id)
+      return e ? e.rdvs.get(ids) : null 
+    }
+    },
+    // retourne la Map des chats (clé ids) de l'avatar id
+    getRdvs: (state) => { return (id) => { 
+        const e = state.map.get(id)
+        return e ? e.rdvs : null 
       }
     }
   },
@@ -44,56 +57,52 @@ export const useAvatarStore = defineStore('avatar', {
       if (!avatar) return
       let e = this.map.get(avatar.id)
       if (!e) {
-        e = { avatar: avatar, cv: null, grIds: new Set(), cpIds: new Set(), secrets: new Map() }
+        e = { 
+          avatar: avatar, 
+          secrets: new Map(),
+          rdvs: new Map(),
+          chats: new Map
+         }
         this.map.set(avatar.id, e)
       } else e.avatar = avatar
-      const sg = avatar.groupeIds()
-      if (!egalite(sg, e.grIds)) this.setGrIds(e, sg)
-      const cp = avatar.coupleIds()
-      if (!egalite(cp, e.grIds)) this.setCpIds(e, cp)
-    },
-
-    /* Ces fonctions permettent de détecter plus facilement les changments 
-    de liste des groupes / couples sur les $onAction */
-    setGrIds (e, sg) {
-      e.grIds = sg
-    },
-    setCpIds (e, cp) {
-      e.cpIds = cp
     },
 
     setSecret (secret) {
       if (!secret) return
       const e = this.map.get(secret.id)
       if (!e) return
-      e.secrets.set(secret.ns, secret)
+      e.secrets.set(secret.ids, secret)
     },
-    delSecret (id, ns) {
+    delSecret (id, ids) {
       const e = this.map.get(id)
       if (!e) return
-      e.secrets.delete(ns)
+      e.secrets.delete(ids)
     },
 
-    setCv (cv) {
-      if (!cv) return
-      const e = this.map.get(cv.id)
+    setChat (chat) {
+      if (!chat) return
+      const e = this.map.get(chat.id)
       if (!e) return
-      e.cv = cv
+      e.chats.set(chat.ids, chat)
     },
-
-    delCv (id) {
-      if (!id) return
+    delChat (id, ids) {
       const e = this.map.get(id)
       if (!e) return
-      e.cv = null
+      e.chats.delete(ids)
     },
 
-    setCompta (compta) {
-      if (!compta) return
-      const e = this.map.get(compta.id)
+    setRdv (rdv) {
+      if (!rdv) return
+      const e = this.map.get(rdv.id)
       if (!e) return
-      e.compta = compta
+      e.rdvs.set(rdv.ids, rdv)
     },
+    delRdv (id, ids) {
+      const e = this.map.get(id)
+      if (!e) return
+      e.rdvs.delete(ids)
+    },
+
 
     del (id) {
       delete map[id]

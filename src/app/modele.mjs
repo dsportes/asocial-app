@@ -507,57 +507,6 @@ export class MdpAdmin {
   }
 }
 
-/****************************************************
- * Compilation des objets depuis des items
-****************************************************/
-
-// Création des objets selon leur table
-export function newObjet (table) {
-  switch (table) {
-    case 'tribu' : return new Tribu()
-    case 'compte' : return new Compte()
-    case 'compta' : return new Compta()
-    case 'prefs' : return new Prefs()
-    case 'avatar' : return new Avatar()
-    case 'cv' : return new Cv()
-    case 'couple' : return new Couple()
-    case 'contact' : return new Contact()
-    case 'invitgr' : return new Invitgr()
-    case 'invitcp' : return new Invitcp()
-    case 'groupe' : return new Groupe()
-    case 'membre' : return new Membre()
-    case 'secret' : return new Secret()
-  }
-}
-
-// compile un objet depuis un item { table, serial }
-export async function compile (item) {
-  if (!item) return null
-  const obj = newObjet(item.table)
-  // ça enregistre dans le répertoire les na / clés des avatars
-  await obj.fromRow(deserialize('row' + item.table, item.serial))
-  return obj
-}
-
-/* CompileToMap (items) ****************************
-- items : array de item { table, serial }
-- Map retournée : une map par table
-  - une entrée par pk de chaque objet
-  - valeur : objet le plus récent ayant cette pk
-***************************************************/
-export async function compileToMap (items) {
-  const res = {}
-  if (!items || !items.length) return res
-  for (let i = 0; i < items.length; i++) {
-    const obj = await compile(items[i])
-    let m = res[obj.table]
-    if (!m) m = {}; res[obj.table] = m
-    const av = m[obj.pk]
-    if (!av || av.v < obj.v) m[obj.pk] = obj
-  }
-  return res
-}
-
 /*
 Compile tous les items dans CacheSync
 - d'abord les items compte (afin que les clés des avatars soient enregistrées au répertoire)
@@ -740,10 +689,42 @@ export function compilNiv (jib, lj) {
   return [niv, ljc]
 }
 
+class DocGen {
+  get pk () { return this.id + (this.ids ? '/' + this.ids : '')}
+  async compile (d) { }
+}
 
 /****************************************************
  * Tous les objets
 ****************************************************/
+
+const classes = {
+  tribus: Tribu,
+  comptas: Compta,
+  avatars: Avatar,
+  groupes: Groupe,
+  secrets: Secret,
+  rdvs: Rdv,
+  chats: Chat,
+  membres: Membre,
+  cvs: Cv
+}
+
+// Retourne un objet depuis un 'row'
+export async function compile (row) {
+  if (!row) return null
+  const cl = classes[row._nom]
+  if (!cl) return null
+  const obj = new cl()
+  obj._nom = row._nom
+  obj.id = row.id
+  if (row.ids) obj.ids = row.ids
+  obj.v = row.v
+  if (row._data_) {
+     await obj.compile(decode(row._data_))
+  } else obj._zombi = true
+  return obj
+}
 
 /** Tribu *********************************
 - `id` : id de la tribu.
@@ -914,87 +895,176 @@ export class Tribu {
   }
 }
 
-/** Compte *********************************************************
-- `id` : id de l'avatar primaire du compte.
-- `v` :
-- `dpbh` : hashBin (53 bits) du PBKFD du début de la phrase secrète (32 bytes). Pour la connexion, l'id du compte n'étant pas connu de l'utilisateur.
-- `pcbh` : hashBin (53 bits) du PBKFD de la phrase complète pour quasi-authentifier une connexion avant un éventuel échec de décryptage de `kx`.
+/** Avatar *********************************************************
+**Données n'existant que pour un avatar principal**
 - `kx` : clé K du compte, cryptée par la X (phrase secrète courante).
 - `stp` : statut parrain (0: non, 1:oui).
 - `nctk` : nom complet `[nom, rnd]` de la tribu crypté,
   - soit par la clé K du compte,
   - soit par la clé publique de son avatar primaire après changement de tribu par le comptable.
-- `mack` {} : map des avatars du compte cryptée par la clé K.
-  - _Clé_: id,
-  - _valeur_: `[nom, rnd, cpriv]`
-    - `nom rnd` : nom et clé de l'avatar.
-    - `cpriv` : clé privée asymétrique.
-- `vsh`
+- `lavk` [] `[nom, cle, cpriv]` : array des avatars du compte cryptée par la clé K, position d'un avatar dans la liste donnée par le dernier chiffre de son id. `[nom, cle, cpriv]`
+  - `nom cle` : nom complet de l'avatar.
+  - `cpriv` : clé privée asymétrique.
+- `mck` {} : map des mots-clés du compte cryptée par la clé K. clé: code (1-255), valeur: 'categ/label'
+- `memok` : mémo personnel du compte.
+
+**Données disponibles pour les avatars primaires et secondaires**
+- `id`, 
+- `v`,
+- `vcv` : version de la carte de visite afin qu'une session puisse détecter (sans lire le document) si la carte de visite qu'elle détient est la plus récente ou non.
+- `dds` date de dernière signature.
+
+- `rsapub` : clé publique RSA de l'avatar.
+- `cvk` : carte de visite cryptée par la clé K, couple `[photo, info]`.
+- `lgrk` : map :
+  - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
+  - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation.
+  - une entrée est effacée par la résiliation du membre au groupe ou sur refus de l'invitation (ce qui l'empêche de continuer à utiliser la clé du groupe).
+- `invits` : map des invitations en cours
+  - _clé_ : `ni`, numéro d'invitation.
+  - _valeur_ : cryptée par la clé publique de l'avatar `[nom, cle, im]`.
+  - une entrée est effacée par l'annulation de l'invitation du membre au groupe ou sur acceptation ou refus de l'invitation.
+
+** Compilées**
+- nct: nom complet de la tribu
+**Remarques:**
+- une mise à jour de la carte de visite est redondée dans tous les groupes dont l'avatar est membre (cryptée par la clé du groupe).
 */
 
-forSchema({
-  name: 'idbCompte',
-  cols: ['id', 'v', 'dpbh', 'pcbh', 'k', 'stp', 'nctk', 'nctpc', 'chkt', 'nat', 'mac', 'nomdb', 'vsh']
-})
-
-export class Compte {
-  get table () { return 'compte' }
-  get sid () { return intToB64(this.id) } // La map this.mac a histiquement pour clé le sid des avatars
-  get pk () { return '1' }
-
+export class Avatar extends GenDoc {
+  get idxAv () { return this.id % 10 }
   get estParrain () { return this.stp === 1 } // retourne true si le compte est parrain
   get estComptable () { return this.id === IDCOMPTABLE } // retourne true si le compte est celui du comptable
+  get primaire () { return this.idxAv === 0 } // retourne l'objet avatar primaire du compte
+  get naprim () { return this.lav[0].na } // na de l'avatar primaire du compte
+  get apropos () { return this.nct ? ($t('tribus', 0) + ':' + this.nct.nom) : $t('comptable') }
 
-  get primaire () { return stores.avatar.get(this.id) } // retourne l'objet avatar primaire du compte
+  cpriv (id) { return this.primaire ? this.lav[id % 10].cpriv : null }
 
-  get naprim () { return this.mac[this.sid].na } // na de l'avatar primaire du compte
-
-  get apropos () {
-    return this.nat ? ($t('tribus', 0) + ':' + this.nat.nom) : $t('comptable')
-  }
-
-  /* calcul le nom de la base locale du compte
-    $$reseau-xxxx
-    xxxx : pbkfd de la clé k en base64
-  */
-  async getNombase () {
-    if (!this.nomdb) {
-      const x = await pbkfd(this.k)
-      this.nomdb = '$$' + stores.session.reseau + '-' + u8ToB64(x, true)
-    }
-    return this.nomdb
-  }
-
-  estAc (id) { // retourne true si id est l'id d'un avatar du compte
-    return this.mac[intToB64(id)] ? true : false
-  }
-
-  avatarNas (s) { // retourne (ou accumule dans s), le set des na des avatars du compte
-    const s1 = new Set()
-    for (const sid in this.mac) if (s) s.add(this.mac[sid].na); else s1.add(this.mac[sid].na)
-    return s || s1
-  }
+  // INTERNE : Enregistrement des na des avatars du compte. Effectué à la construction de l'objet
+  repAvatars () { if (this.primaire) this.lav.forEach(x => { setNg(x.na) }) }
 
   avatarIds (s) { // retourne (ou accumule dans s), le set des ids des avatars du compte
     const s1 = new Set()
-    for (const sid in this.mac) if (s) s.add(this.mac[sid].na.id); else s1.add(this.mac[sid].na.id)
+    if (this.primaire) for(let i = 0; i < this.lav; i++) {
+      const x = this.lav[i]
+      if (!x) continue
+      if (s) s.add(x.na.id); else s1.add(x.na.id)
+    }
+    return s || s1
+  }
+
+  avatarNas (s) { // retourne (ou accumule dans s), le set des ids des avatars du compte
+    const s1 = new Set()
+    if (this.primaire) for(let i = 0; i < this.lav; i++) {
+      const x = this.lav[i]
+      if (!x) continue
+      if (s) s.add(x.na); else s1.add(x.na)
+    }
     return s || s1
   }
 
   avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
-    for (const sid in this.mac) if (this.mac[sid].na.nom === n) return b64ToInt(sid)
+    if (!this.primaire) return 0
+    for(let i = 0; i < this.lav; i++) {
+      const x = this.lav[i]
+      if (!x) continue
+      if (x.na.nom === n) return x.na.id
+    }
     return 0
   }
 
   avatars () { // retourne la liste des noms des avatars du compte
     const l = []
-    for (const sid in this.mac) l.push(this.mac[sid].na.nom)
+    if (this.primaire) for(let i = 0; i < this.lav; i++) {
+      const x = this.lav[i]
+      if (!x) continue
+      l.push(x.na.nom)
+    }
     return l
   }
 
-  cpriv (avid) {
-    const e = this.mac[intToB64(avid || this.id)]
-    return e ? e.cpriv : null
+  estAc (id) { return this.avatarIds.has(id) }
+
+  /** compile *********************************************************/
+  async compile (row) {
+    const session = stores.session
+    this.vsh = row.vsh || 0
+    this.vcv = row.vcv || 0
+    this.rsapub = row.rsapub
+    this.stp = row.stp || 0
+    this.dds = row.dds || 0
+
+    if (this.primaire) { // Avatar principal
+      this.k = await decrypter(session.phrase.pcb, row.kx)
+      session.clek = this.k
+
+      /* `lavk` [] `[nom, cle, cpriv]` */
+      this.lav = []
+      for(let i = 0; i < 7; i++) {
+        const x = this.lavk[i]
+        if (!x) this.lav[i] = null
+        const [nom, cle, cpriv] = decode(await decrypter(session.clek, x))
+        this.lav[i] = { na: new NomAvatar(nom, cle), cpriv }
+      }
+
+      if (row.nctk) {
+        /* `nctk` : nom complet `[nom, rnd]` de la tribu crypté,
+          - soit par la clé K du compte,
+          - soit par la clé publique de son avatar primaire */
+        let nr
+        if (row.nctk.length === 256) {
+          const kp = this.cpriv(this.id)
+          tru8('Priv compte.fromRow nctk ' + this.id, kp)
+          nr = await decrypterRSA(kp, row.nctk)
+          this.nctkCleK = await crypter(session.clek, nr)
+        } else {
+          nr = await decrypter(session.clek, row.nctk)
+          this.nctkCleK = null
+        }
+        const [nom, cle] = deserial(nr)
+        this.nct = new NomTribu(nom, cle)
+      } else {
+        this.nct = null
+        this.nctk = null
+      }
+
+      if (row.mck) {
+        this.mc = decode(await decrypter(session.clek, row.mck))
+      } else this.mc = {}
+
+      if (row.memok) {
+        this.memo = await decrypterStr(session.clek, row.memok)
+      } else this.memo = ''
+
+      this.repAvatars()
+    }
+
+    if (row.cvk) { // carte de visite cryptée par la clé K, couple `[photo, info]`.
+      this.cv = decode(await decrypter(session.clek, row.cvk))
+    } else this.cv = null
+
+    this.lgr = {}
+    if (row.lgrk) { 
+      /* map : - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
+        - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation. */
+      for (const ni in row.lgrk) {
+        this.lgr[ni] = decode(await decrypter(session.clek, row.lgrk[ni]))
+      }
+    }
+
+    this.invits = {}
+    if (row.invits) {
+      /* map des invitations en cours - clé : `ni`, numéro d'invitation.
+        - _valeur_ : cryptée par la clé publique de l'avatar `[nom, cle, im]`.*/
+      const kp = this.cpriv(this.id)
+      tru8('Priv compte.fromRow nctk ' + this.id, kp)
+      for (const ni in row.invits) {
+        this.invits[ni] = decode(await decrypterRSA(kp, row.invits[ni]))
+      }
+    }
+
+    return this
   }
 
   nouveau (nomAvatar, cprivav) {
@@ -1014,46 +1084,7 @@ export class Compte {
     return this
   }
 
-  // INTERNE : est effectué dans fromRow et fromIdb - à la construction de l'objet
-  repAvatars () { this.avatarNas().forEach(na => { setNg(na) }) }
-
-  async fromRow (row) {
-    const session = stores.session
-    this.vsh = row.vsh || 0
-    this.id = row.id
-    this.v = row.v
-    this.stp = row.stp
-    this.dpbh = row.dpbh
-    this.k = await decrypter(session.phrase.pcb, row.kx)
-    this.pcbh = row.pcbh
-    session.clek = this.k
-    this.mac = {}
-    const m = deserial(await decrypter(this.k, row.mack))
-    for (const sid in m) {
-      const [nom, rnd, cpriv] = m[sid]
-      this.mac[sid] = { na: new NomAvatar(nom, rnd), cpriv: cpriv }
-    }
-    if (row.nctk) {
-      let nr
-      if (row.nctk.length === 256) {
-        const kp = this.cpriv(this.id)
-        tru8('Priv compte.fromRow nctk ' + this.id, kp)
-        nr = await decrypterRSA(kp, row.nctk)
-        this.nctkCleK = await crypter(this.k, nr)
-      } else {
-        nr = await decrypter(this.k, row.nctk)
-        this.nctkCleK = null
-      }
-      const [nom, rnd] = deserial(nr)
-      this.nat = new NomTribu(nom, rnd)
-    } else {
-      this.nat = null
-      this.nctk = null
-    }
-    this.repAvatars()
-    return this
-  }
-
+  /* En attente *******************************************
   async toRow () {
     const session = stores.session
     const r = { ...this }
@@ -1084,29 +1115,6 @@ export class Compte {
     return await crypter(stores.session.clek, serial(m))
   }
 
-  get toIdb () {
-    const r = { ...this }
-    r.mac = {}
-    for (const sid in this.mac) {
-      const x = this.mac[sid]
-      r.mac[sid] = [x.na.nom, x.na.rnd, x.cpriv]
-    }
-    return serialize('idbCompte', r)
-  }
-
-  fromIdb (idb) {
-    deserialize('idbCompte', idb, this)
-    stores.session.clek = this.k
-    const m = {}
-    for (const sid in this.mac) {
-      const [nom, rnd, cpriv] = this.mac[sid]
-      m[sid] = { na: new NomAvatar(nom, rnd), cpriv: cpriv }
-    }
-    this.mac = m
-    this.repAvatars()
-    return this
-  }
-
   getChkt (nat) {
     return hash(this.sid + '@' + nat.sid)
   }
@@ -1114,92 +1122,14 @@ export class Compte {
   getChktDeId (id) {
     return hash(intToB64(id) + '@' + this.nat.sid)
   }
-
+ 
   async setTribu (nat) {
     const session = stores.session
     this.nat = nat
     const nc = serial([nat.nom, nat.rnd])
     this.nctk = nat ? await crypter(session.clek, nc) : null
   }
-
-  get clone () {
-    return clone('idbCompte', this, new Compte())
-  }
-
-  av (id) { // retourne { na: , cpriv: }
-    return this.mac[intToB64(id)]
-  }
-}
-
-/** Prefs ***************************************************************
-- `id` : id du compte.
-- `v` :
-- `mapk` {} : map des préférences.
-  - _clé_ : code court (`mp, mc ...`)
-  - _valeur_ : sérialisation cryptée par la clé K du compte de l'objet JSON correspondant.
-- `vsh`
-*/
-
-forSchema({
-  name: 'idbPrefs',
-  cols: ['id', 'v', 'map', 'vsh']
-})
-
-export class Prefs {
-  get table () { return 'prefs' }
-  get pk () { return '1' }
-
-  get memo () { return this.map.mp }
-
-  get mc () { return this.map.mc }
-
-  get titre () { return this.memo ? titre(this.memo) : '' }
-
-  nouveau (id) {
-    this.id = id
-    this.v = 0
-    this.vsh = 0
-    this.map = { mp: '', mc: {} }
-    return this
-  }
-
-  async fromRow (row) {
-    const session = stores.session
-    this.vsh = row.vsh || 0
-    this.id = row.id
-    this.v = row.v
-    const m = deserial(row.mapk)
-    this.map = {}
-    this.map.mp = deserial(await decrypter(session.clek, m.mp))
-    this.map.mc = deserial(await decrypter(session.clek, m.mc))
-    return this
-  }
-
-  async sectionToRow (code) {
-    const x = this.map[code] || null
-    return await crypter(stores.session.clek, serial(x))
-  }
-
-  async toRow () {
-    const m = { }
-    m.mp = await this.sectionToRow('mp')
-    m.mc = await this.sectionToRow('mc')
-    const r = { id: this.id, v: this.v, vsh: this.vsh, mapk: serial(m) }
-    return serialize('rowprefs', r)
-  }
-
-  get toIdb () {
-    return serialize('idbPrefs', this)
-  }
-
-  fromIdb (idb) {
-    deserialize('idbPrefs', idb, this)
-    return this
-  }
-
-  get clone () {
-    return clone('idbPrefs', this, new Prefs())
-  }
+  */
 }
 
 /** Compta **********************************************************************
@@ -2634,7 +2564,7 @@ export class SessionSync {
   }
 
   async save () {
-    await saveSessionSync(serialize('idbSessionSync', this))
+    if (stores.session.synchro) await saveSessionSync(serialize('idbSessionSync', this))
   }
 }
 

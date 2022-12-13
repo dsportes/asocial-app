@@ -3,13 +3,14 @@ import stores from '../stores/stores.mjs'
 import { OperationUI } from './operations.mjs'
 import { $t, difference, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, getBlocage, hash } from './util.mjs'
 import { post } from './net.mjs'
-import { DateJour } from './api.mjs'
+import { AppExc, DateJour } from './api.mjs'
 import { serial } from './schemas.mjs'
 import { NomAvatar } from './modele.mjs'
 import { resetRepertoire, initConnexion, deconnexion, compileToMap, compile, setSecret, setCv, getCv, delCv, setNg, Compte, Compta, Prefs, Avatar, NomTribu } from './modele.mjs'
-import { openIDB, closeIDB, deleteIDB, getCompte, getCvs, commitRows,
+import { openIDB, closeIDB, deleteIDB, getCompte, getColl, getCvs, commitRows,
   getVIdCvs, lectureSessionSyncIdb, saveListeCvIds, gestionFichierCnx, TLfromIDB, FLfromIDB } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
+import { FsSyncSession } from './fssync.mjs'
 
 export async function reconnexion () {
   deconnexion(3)
@@ -101,12 +102,289 @@ class OpBufC {
     this.lsecsup = [] // liste des fichiers temporaires à faire supprimer sur le serveur en fin de connexion
   }
 
-  putIDB (obj) { this.lmaj.push(obj) }
-  supprIDB (obj) { this.lsuppr.push(obj) } // obj : {table, id, (sid2)}
+  putIDB (row) { this.lmaj.push(row); return row }
+  supprIDB (row) { this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
   async commitIDB () { await commitRows(this) }
 
   async gestionFichierCnx () {
     await gestionFichierCnx(this.mapSec)
+  }
+}
+
+/* Connexion en modes avion ******************************/
+export class ConnexionAvion extends OperationUI {
+  constructor () { super($t('OPcnx')) }
+
+  /* connecte la base locale en obtenant son nom depuis LocalStorage
+  */
+  async connectDb (session) {
+    const lsk = session.lsk
+    if (stores.config.debug) console.log(lsk)
+    session.nombase = localStorage.getItem(lsk)
+    if (!session.nombase) throw new AppExc(F_BRO, 4)
+    try {
+      await openIDB()
+    } catch (e) {
+      throw new AppExc(F_BRO, 5)
+    }
+    const x = await getCompte() // x:false ou { id, k }
+    if (!x) {
+      await deleteIDB()
+      throw new AppExc(F_BRO, 6)
+    }
+    session.compteId = x.id
+    session.clek = x.k
+  }
+
+  async run (phrase) {
+    try {
+      const session = stores.session
+      session.status = 1
+      session.sessionId = intToB64(rnd6())
+      session.phrase = phrase
+      session.dateJourConnx = new DateJour()
+      resetRepertoire()
+      stores.reset()
+
+      await connectIdb(session)
+
+      /* Do the job *****************************************
+      *******************************************************/
+
+      await gestionFichierCnx(this.buf.mapSec)
+      // Gestion des fichiers locaux et textes locaux
+      await TLfromIDB()
+      await FLfromIDB()
+      // enregistre l'heure du début effectif de la session
+      await session.sessionSync.setConnexion(this.dh)
+      console.log('Connexion compte : ' + this.compte.id)
+      this.finOK()
+      stores.ui.goto11()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Connexion en modes synchronisé et incognito ******************************/
+export class ConnexionSyncInc extends OperationUI {
+  constructor () { super($t('OPcnx')) }
+
+  /* connectDB connecte la base locale en obtenant son nom depuis LocalStorage:
+  - si elle exsite et est joignable, 
+    session.nombase donne le nom de la base
+    retour : 
+    - -1 si le cryptage n'est pas celui de la phrase secrète saisie
+    - 1 si le cryptage est cohérent
+  - sinon retour 0
+  */
+  async connectDb (session, razdb) {
+    const lsk = session.lsk
+    if (lsk) {
+      if (stores.config.debug) console.log(lsk)
+      session.nombase = localStorage.getItem(lsk)
+      if (!session.nombase) return 0 // base locale NON trouvée: devra être recréée à la fin
+    }
+    if (razdb) {
+      // base locale probablement existante mais RAZ demandée: devra être recréée à la fin
+      await deleteIDB()
+      return 0
+    }
+    try {
+      await openIDB()
+    } catch (e) {
+      // base locale non joignable: devra être recréée à la fin
+      closeIDB()
+      await deleteIDB()
+      return 0
+    }
+    const x = await getCompte()
+    if (!x) return -1
+    // Entête compte lu et décrypté par la phrase secrète
+    session.compteId = x.id
+    session.clek = x.k
+    return 1
+  }
+
+  reset () {
+    this.buf = new OpBufC()
+    this.dh = 0
+    this.session.blocage = 0
+  }
+
+  async tousAvatars (avatar, rowAvatar) {
+    const session = stores.session
+    const avReq = new Map() // versions des avatars requis à demander au serveur
+    const avRows = {} // rows de ceux-ci déjà détenus
+    this.avatarsToStore = {} // objets avatar à ranger en store
+    this.avatarsToStore[avatar.id] = avatar
+    this.idbVersions = {} // pour chaque avatar requis, la version détenue en IDB
+
+    avatar.avatarIds().forEach(id => {
+      this.idbVersions[id] = 0
+      if (id === avatar.id) { 
+        avReq.set(id, avatar.v)
+        avRows[id] = rowAvatar
+      } else avReq.set(id, 0)
+    })
+
+    if (session.accesIdb) {
+      Object.values(getColl('avatars')).forEach(row => {
+        if (!avReq.has(row.id)) {
+          this.buf.supprIDB({ _nom: 'avatars', id })
+        } else {
+          this.idbVersions[id] = row.id
+          const v = avReq.get(row.id)
+          if (row.v > v) { avReq.set(row.id, row.v); avRows[row.id] = row }
+        }
+      })
+    }
+
+    const args = { token: session.authToken, mapv: avReq }
+    const ret = this.tr(await post(this, 'GetAvatars', args))
+
+    for (const id in this.avatarsToStore) {
+      const r1 = ret.lst[id]
+      if (r1) { // On a trouvé plus récent que celui détenu en IDB ou acquis à la connexion
+        if (id === avatar.id) return false // l'avatar principal a changé depuis connexion
+        this.avatarsToStore[id] = await compile(this.buf.putIDB(row)) // mettre à jour IDB
+      } else {
+        // ne PAS mettre à jour IDB qui a déjà le dernier
+        this.avatarsToStore[id] = await compile(avRows[id]) 
+      }
+    }
+    return true
+  }
+
+  async run (phrase, razdb) {
+    try {
+      // session synchronisée ou incognito
+      const estFs = stores.config.fsSync
+      const session = stores.session
+      session.status = 1
+      session.sessionId = intToB64(rnd6())
+      session.phrase = phrase
+      session.setAuthToken()
+      session.dateJourConnx = new DateJour()
+      resetRepertoire()
+      stores.reset()
+
+      if (!estFs) {
+        await openWS()
+      } else {
+        session.fsSync = new FsSyncSession()
+      }
+
+      if (session.synchro) {
+        session.statutIdb = await connectIdb(session, razdb)
+      }
+
+      /* Do the job *****************************************
+      *******************************************************/
+
+      /* Amorce: authentification et get de avatar / compta / tribu */
+      this.reset()
+
+      /* on boucle si la version de l'avatar principal du compte a changé
+      au cours de ce bloc critique visant à obtenir tous les avatars et groupes requis
+      */
+      let nb = 0
+      while (true) {
+        if (nb++ > 5) throw new AppExc(E_BRO, 5)
+
+        const args = { token: session.authToken }
+        const ret = this.tr(await post(this, 'GetComptasTribusAvatars', args))
+        /* Login OK avec le serveur, mais phrase secrète changée depuis la session précédente */
+        if (session.synchro && session.statutIdb === -1) {
+          await deleteIDB()
+          session.statutIdb = 0
+        }
+        session.clepubc = ret.clepubc
+        const rowAvatars = ret.rowAvatars
+        this.avatar = compile(this.buf.putIDB(rowAvatars)) // cle K, repertoire des avatars
+        const compta = compile(this.buf.putIDB(ret.rowComptas))
+        const tribu = compile(this.buf.putIDB(ret.rowTribus))
+        session.estComptable = this.avatar.id === IDCOMPTABLE
+        session.compteId = this.avatar.id
+        /* objets de tous les avatars requis : liste maj / suppr IDB gérée */
+        if (await this.tousAvatars(avatar, rowAvatars)) {
+          if(await this.tousGroupes(avatarsToStore)) {    
+            // MAJ du store avec compta, tribu, tous les avatars, tous les groupes
+
+            // MAJ intermédiaire de IDB : évite d'avoir des avatars / groupes obsolètes pour la suite
+            if (session.statutIdb) {
+              await this.buf.commitIDB()
+              this.buf = new OpBufC()
+            }
+            break
+          }
+        }
+        this.reset()
+        stores.reset()
+        resetRepertoire()
+      }
+
+      /*
+      MAJ (éventuelle) de nctk par cryptage en clé K au lieu du RSA trouvé
+      NE PAS EFFECTUER AVANT : ça change la version du compte et sortirait
+      en erreur de la boucle précédente (où compte ne doit pas changer)
+      */
+      if (this.avatar.nctkCleK) {
+        const args = { token: session.authToken, id: this.avatar.id, nctk: this.avatar.nctkCleK }
+        this.tr(await post(this, 'm1', 'nctkCompte', args))
+      }
+  
+      this.BRK()
+      /* 
+      YES ! on a tous les objets maîtres :
+      tribu / compta / avatars / groupes abonnés et signés
+      */
+
+      // Signatures : ne touche pas les versions des avatars
+      const args = { token: session.authToken }
+      const ret = this.tr(await post(this, 'Signatures', args))
+      
+
+      // Finalisation en une seule fois, commit en IDB
+      if (session.synchro) {
+        if (!session.statutIdb) {
+          // Ouverture / création de la base qui n'existaiit pas
+          const nb = await session.getNombase()
+          localStorage.setItem(session.lsk, nb)
+          await openIDB()
+          setTrigramme(nb, await getTrigramme())
+        }
+        await this.buf.commitIDB()
+      }
+
+      if (session.statutIdb) await gestionFichierCnx(this.buf.mapSec)
+
+      /* Suppression des secrets temporaires ayant dépassé leur date limite
+      */
+      if (session.statutNet && this.buf.lsecsup.length) {
+        for (const s of this.buf.lsecsup) {
+          try {
+            const args = { ts: s.ts, id: s.id, ns: s.ns, varg: s.volarg() }
+            await new SupprSecret().run(args)
+          } catch (e) {
+            console.log(e.message)
+          }
+        }
+      }
+
+      if (session.statutIdb) { // Gestion des fichiers locaux et textes locaux
+        await TLfromIDB()
+        await FLfromIDB()
+      }
+
+      // enregistre l'heure du début effectif de la session
+      await session.sessionSync.setConnexion(this.dh)
+      console.log('Connexion compte : ' + this.compte.id)
+      this.finOK()
+      stores.ui.goto11()
+    } catch (e) {
+      await this.finKO(e)
+    }
   }
 }
 

@@ -137,8 +137,15 @@ export default {
   EX4018: 'store {0} inconnu',
 
   EX5001: 'La phrase secrète a changé depuis l\'authentification du compte. Vous allez être déconnecté et vous pourrez vous reconnecter avec la nouvelle phrase secrète.',
-  EX5002: 'Enregistrement compte non trouvé / incorrect',
   EX5003: 'Avatar déjà cité dans le groupe, ne pas pas être inscrit à nouveau',
+  EX5004: `Base locale non trouvée<br>
+  - soit la phrase secrète est incorrecte,<br>
+  - soit aucune session synchronisée n'a été ouverte antérieurement avec cette phrase secète,<br>
+  - soit la base locale a été détruite.<br>
+  Resaisir la phrase secrète ou se connecter en mode synchronisé ou incognito.`,
+  EX5005: `Base locale absente ou corrompue.<br>
+  Code erreur: {0}<br>Se connecter en mode synchronisé ou incognito.`,
+  EX5006: `Base locale corrompue.<br>Impossible d'en décrypter les données.`,
 
   EX6001: 'Clé RSA publique de l\'avatar non trouvée',
   EX6002: 'Base locale corrompue ?\nCompte non trouvé',

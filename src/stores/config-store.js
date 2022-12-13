@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const useConfigStore = defineStore('config', {
   state: () => ({
     $q: null,
+    fsSync: null,
     emojiIndex: null,
     localeOptions: [],
     locale: 'fr-FR',
