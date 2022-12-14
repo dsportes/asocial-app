@@ -18,8 +18,6 @@ export default boot(async ({ app /* Vue */ }) => {
   const cfg = require('../assets/config/app-config.json')
   cfg.help = await getJsonPub('help/help.json')
 
-  const icons = {}
-  cfg.reseaux.forEach(reseau => { icons[reseau] = require('../assets/config/' + reseau + '-icon.png') })
   cfg.logo = require('../assets/config/logo.png')
   cfg.cliccamera = require('../assets/cliccamera.b64').default
   cfg.iconAvatar = require('../assets/avatar.jpg')
@@ -33,11 +31,11 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.dev = process.env.DEV
 
   const p = process.env.DEV ? process.env.PORT_SERVEUR : window.location.port
-  cfg.urlwss = 'wss://' + cfg.nom + ':' + p + '/ws/'
-  cfg.urlserveur = 'https://' + cfg.nom + ':' + p
+  cfg.urlwss = 'wss://' + cfg.serveur + ':' + p + '/ws/'
+  cfg.urlserveur = 'https://' + cfg.serveur + ':' + p
   // console.log('urlserveur: ' + cfg.urlserveur + '  ---  urlwss: ' + cfg.urlwss)
 
-  stores.config.setConfig(cfg, icons, window.location.search)
+  stores.config.setConfig(cfg, window.location.search)
 
   setRequiredModules({ pako: pako })
 })

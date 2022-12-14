@@ -143,24 +143,10 @@ export function normpath (s, dot) { return s.replace(dot ? regexdot : regex, '_'
 
 export function edvol (vol) {
   const v = vol || 0
-  if (v <= 999) return v + 'o'
-  let s = '' + Math.round(v / 10)
-  if (v <= 9999) return s.substring(0, 1) + ',' + s.substring(1, 3) + 'Ko'
-  s = '' + Math.round(v / 100)
-  if (v <= 99999) return s.substring(0, 2) + ',' + s.substring(2, 4) + 'Ko'
-  s = '' + Math.round(v / 1000)
-  if (v <= 999999) return s + 'Ko'
-  s = '' + Math.round(v / 10000)
-  if (v <= 9999999) return s.substring(0, 1) + ',' + s.substring(1, 3) + 'Mo'
-  s = '' + Math.round(v / 100000)
-  if (v <= 99999999) return s.substring(0, 2) + ',' + s.substring(2, 4) + 'Mo'
-  s = '' + Math.round(v / 1000000)
-  if (v <= 999999999) return s + 'Mo'
-  s = '' + Math.round(v / 10000000)
-  if (v <= 9999999999) return s.substring(0, 1) + ',' + s.substring(1, 3) + 'Go'
-  s = '' + Math.round(v / 100000000)
-  if (v <= 99999999999) return s.substring(0, 2) + ',' + s.substring(2, 4) + 'Go'
-  return Math.round(v / 1000000000) + 'Go'
+  if (v < 1000) return v + 'o'
+  if (v < 1000000) return (v / 1000).toPrecision(3) + 'Ko'
+  if (v < 1000000000) return (v / 1000000).toPrecision(3) + 'Mo'
+  return (v / 1000000000).toPrecision(3) + 'Go'
 }
 
 export async function readFile (file, bin) {
@@ -232,24 +218,6 @@ export function b64ToU8 (s) {
   }
   return toByteArray(x.replace(/-/g, '+').replace(/_/g, '/'))
 }
-
-/*
-const c64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
-const rc64 = new Array(256)
-for (let i = 0; i < c64.length; i++) rc64[c64.charCodeAt(i)] = i
-
-export function intToB64 (n) {
-  let r = '', x = n
-  while (x > 0) { r += c64.charAt(x % 64); x = Math.floor(x / 64) }
-  return r
-}
-
-export function b64ToInt (s) {
-  let n = 0
-  for (let i = s.length - 1; i >= 0; i--) { n += rc64[s.charCodeAt(i)]; if (i) n = n * 64 }
-  return n
-}
-*/
 
 export function rnd6 () {
   const u8 = random(6)

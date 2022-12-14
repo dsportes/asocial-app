@@ -206,22 +206,17 @@ export class ConnexionSyncInc extends OperationUI {
     return 1
   }
 
-  reset () {
-    this.buf = new OpBufC()
-    this.dh = 0
-    this.session.blocage = 0
-  }
-
+  /** tousAvatars *******************************************************/
   async tousAvatars (avatar, rowAvatar) {
     const session = stores.session
     const avReq = new Map() // versions des avatars requis à demander au serveur
     const avRows = {} // rows de ceux-ci déjà détenus
-    this.avatarsToStore = {} // objets avatar à ranger en store
-    this.avatarsToStore[avatar.id] = avatar
-    this.idbVersions = {} // pour chaque avatar requis, la version détenue en IDB
+    const idbVersions = {} // pour chaque avatar requis, la version détenue en IDB
+    
+    this.avatarsToStore.set(avatar.id, avatar)
 
     avatar.avatarIds().forEach(id => {
-      this.idbVersions[id] = 0
+      idbVersions[id] = 0
       if (id === avatar.id) { 
         avReq.set(id, avatar.v)
         avRows[id] = rowAvatar
@@ -229,11 +224,11 @@ export class ConnexionSyncInc extends OperationUI {
     })
 
     if (session.accesIdb) {
-      Object.values(getColl('avatars')).forEach(row => {
+      getColl('avatars').forEach(row => {
         if (!avReq.has(row.id)) {
           this.buf.supprIDB({ _nom: 'avatars', id })
         } else {
-          this.idbVersions[id] = row.id
+          idbVersions[id] = row.id
           const v = avReq.get(row.id)
           if (row.v > v) { avReq.set(row.id, row.v); avRows[row.id] = row }
         }
@@ -243,19 +238,84 @@ export class ConnexionSyncInc extends OperationUI {
     const args = { token: session.authToken, mapv: avReq }
     const ret = this.tr(await post(this, 'GetAvatars', args))
 
-    for (const id in this.avatarsToStore) {
+    for (const id of this.avatarsToStore.keys()) {
       const r1 = ret.lst[id]
       if (r1) { // On a trouvé plus récent que celui détenu en IDB ou acquis à la connexion
         if (id === avatar.id) return false // l'avatar principal a changé depuis connexion
-        this.avatarsToStore[id] = await compile(this.buf.putIDB(row)) // mettre à jour IDB
+        this.avatarsToStore.set(id, await compile(this.buf.putIDB(row))) // mettre à jour IDB
       } else {
         // ne PAS mettre à jour IDB qui a déjà le dernier
-        this.avatarsToStore[id] = await compile(avRows[id]) 
+        this.avatarsToStore.set(id, await compile(avRows[id]))
       }
     }
     return true
   }
 
+  /** tousGroupes *******************************************************/
+  async tousGroupes (avatarsToStore) {
+    const session = stores.session
+    /* map des membres des groupes des avatars
+     - clé: id du groupe  - valeur: { ng: , mbs: [ids], v , dlv ,  } */
+    const mbsMap = { } // les v, dlv, ne sont pas renseignées pour l'instant
+    // liste de [{id: , v: }]
+    const avsLst = []
+    const abPlus = [] // ids des avatars et groupes auxquels s'abonner
+
+    avatarsToStore.valus().forEach(avatar => {
+      avsLst.push({ id: avatar.id, v: avatar.v })
+      abPlus.push(id)
+      avatar.membres(mbsMap)
+    })
+    const grRows = {}
+    if (session.accesIdb) {
+      getColl('groupes').forEach(row => {
+        const e = mbsMap[row.id]
+        if (!e) {
+          this.buf.supprIDB( { _nom: 'groupes', id: row.id})
+        } else {
+          grRows[row.id] = row
+          e.v = row.v
+        }
+      })
+    }
+    // mbsMap et avsLst sont les arguments de l'opération Signatures. Reste à y mettre les dlv
+    const jourJ = new DateJour().nbj
+    const dlv1 = (Math.floor(jourJ / 10) + 1) * 10
+    const dlv2 = dlv1 + 10
+    avsLst.forEach(x => { x.dlv = (x.id % 10 === 0) ? dlv1 : dlv2 })
+    for(const id of mbsMap) {
+      const e = mbsMap[id]
+      e.dlv = dlv2
+      abPlus.push(id)
+    }
+
+    if (session.fsSync) session.fsSync.abo(abPlus)
+    const args = { token: session.authToken, mbsMap, avsLst, abPlus }
+    const ret = this.tr(await post(this, 'Signatures', args))
+    if (ret.KO) return false // un des avatars a une version postérieure à celle passée en argument
+    /* Tous les avatars, groupes et membres sont signés avec les dlv demandées
+    ret.lst : array des rows des groupes de mbsMap ayant une version postérieure à celle détenu */
+    ret.lst.forEach(row => {
+      this.buf.putIDB(row)
+      mbsMap[row.id].row = row
+    })
+
+    for(const id of mbsMap) {
+      const e = mbsMap[id]
+      const r = e.row ? e.row : grRows[id]
+      this.groupesToStore.set(id, await compile(r))
+    }
+    return true
+  }
+
+  reset () {
+    this.buf = new OpBufC()
+    this.dh = 0
+    resetRepertoire()
+    stores.reset()
+  }
+
+  /** run **********************************************************/
   async run (phrase, razdb) {
     try {
       // session synchronisée ou incognito
@@ -266,8 +326,6 @@ export class ConnexionSyncInc extends OperationUI {
       session.phrase = phrase
       session.setAuthToken()
       session.dateJourConnx = new DateJour()
-      resetRepertoire()
-      stores.reset()
 
       if (!estFs) {
         await openWS()
@@ -275,23 +333,22 @@ export class ConnexionSyncInc extends OperationUI {
         session.fsSync = new FsSyncSession()
       }
 
-      if (session.synchro) {
-        session.statutIdb = await connectIdb(session, razdb)
-      }
+      if (session.synchro) session.statutIdb = await connectIdb(session, razdb)
 
-      /* Do the job *****************************************
-      *******************************************************/
+      /* Do the job *****************************************/
 
-      /* Amorce: authentification et get de avatar / compta / tribu */
       this.reset()
 
-      /* on boucle si la version de l'avatar principal du compte a changé
+      /* on boucle si la version de l'avatar principal du compte 
+      ou un de ses avatars secondaires ont changé
       au cours de ce bloc critique visant à obtenir tous les avatars et groupes requis
+      abonnés, signés, compilés avec la dernière version
       */
       let nb = 0
       while (true) {
         if (nb++ > 5) throw new AppExc(E_BRO, 5)
 
+        /* Authentification et get de avatar / compta / tribu */
         const args = { token: session.authToken }
         const ret = this.tr(await post(this, 'GetComptasTribusAvatars', args))
         /* Login OK avec le serveur, mais phrase secrète changée depuis la session précédente */
@@ -300,34 +357,34 @@ export class ConnexionSyncInc extends OperationUI {
           session.statutIdb = 0
         }
         session.clepubc = ret.clepubc
+        if (ret.credentials) session.fscredentials = ret.credentials
         const rowAvatars = ret.rowAvatars
         this.avatar = compile(this.buf.putIDB(rowAvatars)) // cle K, repertoire des avatars
-        const compta = compile(this.buf.putIDB(ret.rowComptas))
-        const tribu = compile(this.buf.putIDB(ret.rowTribus))
+        this.compta = compile(this.buf.putIDB(ret.rowComptas))
+        this.tribu = compile(this.buf.putIDB(ret.rowTribus))
         session.estComptable = this.avatar.id === IDCOMPTABLE
         session.compteId = this.avatar.id
-        /* objets de tous les avatars requis : liste maj / suppr IDB gérée */
-        if (await this.tousAvatars(avatar, rowAvatars)) {
-          if(await this.tousGroupes(avatarsToStore)) {    
-            // MAJ du store avec compta, tribu, tous les avatars, tous les groupes
+        
+        // session.blocage
+        if (session.estComptable || session.avion) session.blocage = 0
+        else session.blocage = this.tribu.stn < this.compta.stn ? this.compta.stn : this.tribu.stn
+        if (session.synchro && session.blocage === 4) session.mode = 2
 
-            // MAJ intermédiaire de IDB : évite d'avoir des avatars / groupes obsolètes pour la suite
-            if (session.statutIdb) {
-              await this.buf.commitIDB()
-              this.buf = new OpBufC()
-            }
+        this.avatarsToStore = new Map() // objets avatar à ranger en store
+        this.groupesToStore = new Map() // complilation des rows des groupes venat de IDB ou du serveur
+
+        if (await this.tousAvatars(avatar, rowAvatars)) {
+          if(await this.tousGroupes(this.avatarsToStore)) {
             break
           }
         }
         this.reset()
-        stores.reset()
-        resetRepertoire()
       }
 
       /*
       MAJ (éventuelle) de nctk par cryptage en clé K au lieu du RSA trouvé
       NE PAS EFFECTUER AVANT : ça change la version du compte et sortirait
-      en erreur de la boucle précédente (où compte ne doit pas changer)
+      en erreur de la boucle précédente (où avatar ne doit pas changer)
       */
       if (this.avatar.nctkCleK) {
         const args = { token: session.authToken, id: this.avatar.id, nctk: this.avatar.nctkCleK }
@@ -335,15 +392,36 @@ export class ConnexionSyncInc extends OperationUI {
       }
   
       this.BRK()
-      /* 
-      YES ! on a tous les objets maîtres :
-      tribu / compta / avatars / groupes abonnés et signés
-      */
+      /* YES ! on a tous les objets maîtres : tribu / compta / avatars / groupes abonnés et signés */
 
-      // Signatures : ne touche pas les versions des avatars
-      const args = { token: session.authToken }
-      const ret = this.tr(await post(this, 'Signatures', args))
-      
+      // MAJ intermédiaire de IDB : évite d'avoir des avatars / groupes obsolètes pour la suite
+      if (session.statutIdb) {
+        await this.buf.commitIDB()
+        this.buf = new OpBufC()
+      }
+    
+      // Rangement en store
+      session.compte = this.avatar
+      session.compta = this.compta
+      session.tribu = this.tribu
+      const avStore = stores.avatar
+      const grStore = stores.groupe
+      const syncitem = stores.syncitem 
+      this.avatarsToStore.forEach(av => { 
+        avStore.setAvatar(obj)
+        syncitem.push('05' + av.id, 0, 'SYava', [av.na.nom])
+      })
+      this.groupesToStore.forEach(gr => { 
+        grStore.setGroupe(gr) 
+        syncitem.push('10' + gr.id, 0, 'SYava', [gr.na.nom])
+      })
+      // tribu / people
+
+      // Itération sur chaque avatar: secrets, chats, sponsorings
+
+      // Itération sur chaque groupe: secrets, membres
+
+      // Remise à niveau des Cartes de visite des people "chat seulement" et "sponsor"
 
       // Finalisation en une seule fois, commit en IDB
       if (session.synchro) {

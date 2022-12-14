@@ -8,11 +8,9 @@ import { serial, deserial } from './schemas.mjs'
 const headers = { 'x-api-version': version }
 
 const decoder = new TextDecoder('utf-8')
-const encoder = new TextEncoder('utf-8')
 
 export async function ping () {
   const config = stores.config
-  const session = stores.session
   const ui = stores.ui
   const u = config.urlserveur + '/ping'
   ui.afficherMessage('ping - ' + u)
@@ -39,10 +37,10 @@ Retour :
 - OK : les bytes demandés
 - KO : null
 */
-export async function get (module, fonction, args) {
+export async function get (fonction, args) {
   const cfg = stores.config
   try {
-    const u = cfg.urlserveur + '/' + stores.session.reseau + '/' + module + '/' + fonction
+    const u = cfg.urlserveur + '/' + fonction
     const r = await axios({
       method: 'get',
       url: u,
@@ -64,21 +62,19 @@ export async function get (module, fonction, args) {
 /*
 Envoi une requête POST :
 - op : opération émettrice. Requise si interruptible, sinon facultative
-- module : module invoqué
-- fonction : code la fonction du module
+- fonction : classe de l'opération invoquée
 - args : objet avec les arguments qui seront transmis dans le body de la requête. Encodé par avro ou JSONStringify
 Retour :
 - OK : l'objet retourné par la fonction demandée - HTTP 400 : le résultat est un AppExc
 Exception : un AppExc avec les propriétés code, message, stack
 */
-export async function post (op, module, fonction, args) {
+export async function post (op, fonction, args) {
   let buf
   const config = stores.config
-  const session = stores.session
   try {
     if (op) op.BRK()
     const data = serial(args)
-    const u = config.urlserveur + '/' + session.reseau + '/' + module + '/' + fonction
+    const u = config.urlserveur + '/' + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
     const par = { method: 'post', url: u, data: data, headers: headers, responseType: 'arraybuffer' }
     if (op) par.cancelToken = op.cancelToken.token

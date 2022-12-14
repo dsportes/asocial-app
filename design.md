@@ -1,8 +1,10 @@
 TODO next :
-- db.mjs
-  - Gestion des fichiers hors-ligne à reprendre
-  - Gestion des textes locaux : un store à créer
-- 4 boutons du compte chat ...
+- connexion: people, chargement sous-collection, CV
+- reprendre tribu compta groupe membre - people sponsor tribu
+- connexion avion
+- création compte comptable
+- parrainage / acceptation
+
 
 # Application front-end A-social
 

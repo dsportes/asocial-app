@@ -492,7 +492,7 @@ export class PhraseContact {
     // this.phrase = texte
     this.clex = await pbkfd(texte)
     let hx = ''
-    for (let i = 0; i < texte.length; i = i + 2) hx += texte.charAt(i)
+    for (let i = 0; i < texte.length; i = i + 3) { hx += texte.charAt(i); hx += texte.charAt(i+1) }
     this.phch = hash(hx)
     return this
   }
@@ -912,7 +912,7 @@ export class Tribu {
 - `id`, 
 - `v`,
 - `vcv` : version de la carte de visite afin qu'une session puisse détecter (sans lire le document) si la carte de visite qu'elle détient est la plus récente ou non.
-- `dds` date de dernière signature.
+- `dlv` : date limite de validité.
 
 - `rsapub` : clé publique RSA de l'avatar.
 - `cvk` : carte de visite cryptée par la clé K, couple `[photo, info]`.
@@ -924,6 +924,10 @@ export class Tribu {
   - _clé_ : `ni`, numéro d'invitation.
   - _valeur_ : cryptée par la clé publique de l'avatar `[nom, cle, im]`.
   - une entrée est effacée par l'annulation de l'invitation du membre au groupe ou sur acceptation ou refus de l'invitation.
+- `pck` : phrase de contact cryptée par la clé K.
+- `hpc` : hash du PBKFD de la phrase de contact.
+- `dlpc` : date limite de validité de la phrase de contact.
+- `napc` : [nom, cle] de l'avatar cryptée par le PBKFD de la phrase de contact.
 
 ** Compilées**
 - nct: nom complet de la tribu
@@ -974,7 +978,7 @@ export class Avatar extends GenDoc {
     return 0
   }
 
-  avatars () { // retourne la liste des noms des avatars du compte
+  nomAvatars () { // retourne la liste des noms des avatars du compte
     const l = []
     if (this.primaire) for(let i = 0; i < this.lav; i++) {
       const x = this.lav[i]
@@ -986,6 +990,29 @@ export class Avatar extends GenDoc {
 
   estAc (id) { return this.avatarIds.has(id) }
 
+  /* Remplit la map avec les membres des groupes de l'avatar/
+  - clé: id du groupe
+  - valeur: { ng: , mbs: [ids] }
+  */
+  membres (map) {
+    for (const ni of this.lgr) {
+      const [nom, rnd, im] = this.lgr[ni]
+      const ng = new NomGroupe(nom, rnd)
+      const e = map[ng.id]
+      if (!e) { map[ng.id] = { ng: ng, mbs: [im] }} else e.mbs.push(im)
+    }
+  }
+
+  /* `napc` : [nom, cle] de l'avatar cryptée par le PBKFD de la phrase de contact.
+  texte : texte de la phrase de contact
+  Retourne le na de l'avatar décrypté depuis la phrase
+  */
+  async getNapc (texte) { 
+    const phrase = await new PhraseContact().init(texte)
+    const [nom, cle] = decode(decrypter(phrase.clex, this.napc))
+    return new NomAvatar(nom, cle)
+  }
+
   /** compile *********************************************************/
   async compile (row) {
     const session = stores.session
@@ -993,7 +1020,10 @@ export class Avatar extends GenDoc {
     this.vcv = row.vcv || 0
     this.rsapub = row.rsapub
     this.stp = row.stp || 0
-    this.dds = row.dds || 0
+    this.dlv = row.dlv || 0
+    this.hpc = row.hpc
+    this.dlpc = row.dlpc
+    this.napc = row.napc
 
     if (this.primaire) { // Avatar principal
       this.k = await decrypter(session.phrase.pcb, row.kx)
@@ -1039,6 +1069,10 @@ export class Avatar extends GenDoc {
 
       this.repAvatars()
     }
+
+    if (row.pck) { // carte de visite cryptée par la clé K, couple `[photo, info]`.
+      this.pc = await decrypterStr(session.clek, row.cvk)
+    } else this.pc = null
 
     if (row.cvk) { // carte de visite cryptée par la clé K, couple `[photo, info]`.
       this.cv = decode(await decrypter(session.clek, row.cvk))

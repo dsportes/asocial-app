@@ -3,12 +3,18 @@ import { defineStore } from 'pinia'
 export const useConfigStore = defineStore('config', {
   state: () => ({
     $q: null,
-    fsSync: null,
+    build: 0,
+    debug: false,
+    dev: false,
+    search: '',
+    
+    urlwss: '',
+    urlserveur: '',
+    fsSync: false,
+
     emojiIndex: null,
     localeOptions: [],
     locale: 'fr-FR',
-    reseaux: [],
-    icons: {},
     logo: '',
     help: {},
     cliccamera: '',
@@ -20,12 +26,7 @@ export const useConfigStore = defineStore('config', {
     iconSuperman: '',
     lgnom: 16,
     lgtitre: 50,
-    build: 0,
-    debug: false,
-    dev: false,
-    urlwss: '',
-    urlserveur: '',
-    search: '',
+
     phrases: [],
     dtf: null,
     dtf1: null,
@@ -43,11 +44,10 @@ export const useConfigStore = defineStore('config', {
   },
 
   actions: {
-    setConfig(cfg, icons, search) {
+    setConfig(cfg, search) {
       this.localeOptions = cfg.localeOptions
       this.locale = cfg.locale
-      this.reseaux = cfg.reseaux
-      this.icons = icons
+      this.fsSync = cfg.fsSync
       this.logo = cfg.logo
       this.cliccamera = cfg.cliccamera
       this.iconAvatar = cfg.iconAvatar

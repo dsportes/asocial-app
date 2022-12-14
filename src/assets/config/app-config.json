@@ -5,12 +5,10 @@
     { "value": "fr-FR", "label": "Français" }
   ],
 
-  "reseaux": ["doda", "demo"],
-
-  "nom": "test.sportes.fr",
-
+  "fsSync": false,
+  "serveur": "test.sportes.fr",
   "portupload": 33666,
-  "voirorgs": true,
+
   "phrases" : [
     ["leszsanglotszLONGSz", "garezauzGORILLEz"],
     ["auzvillagezSANSz", "jaizmauvaisezREPUTATIONz"],

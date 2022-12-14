@@ -49,7 +49,7 @@ module.exports = configure(function (ctx) {
     build: {
       env: {
         BUILD: 2211011200,
-        PORT_SERVEUR: 8443
+        PORT_SERVEUR: 8443 // Pour le DEV. En prod, c'est window.location.port (celui de l'URL de l'appli)
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'

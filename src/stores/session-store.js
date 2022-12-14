@@ -23,11 +23,14 @@ export const useSessionStore = defineStore('session', {
 
     statutNet: false,
     syncqueue: [], // accumulation des syncList reçues par webSocket
+    fscredentials: null, // pour connexion à Firestore
 
     estComptable: false,
     compteId: 0,
     clek: null,
     clepubc: null,
+    compta: null,
+    compte: null, // avatar principal
 
     avatarId: null,
     groupeId: null,

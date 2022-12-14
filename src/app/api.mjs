@@ -56,142 +56,6 @@ export const MC = {
   ATRAITER: 245
 }
 
-/* Cas particulier de 'tribu':
-Pour LE compte comptable, il n'y a pas de 'tribu' attaché au compte, MAIS toutes les tribus sont en store/db.
-Pour les comptes normaux, il y a une seule tribu attachée au compte et elle est stockée en IDB, et c'est la seule qui est en store/db.
-- vis à vis de IDB, c'est toujours un singleton ("la" tribu d'un compte).
-- vis à vis de store/db : c'est un singleton pour tous les comptes, SAUF pour le comptable.
-Donc on considère que 'tribu' N'EST PAS un singleton, et que dans le cas des comptes normaux et IDB
-il faut fournir son id (disponible dans compte.
-*/
-
-export const t0n = new Set(['compte', 'prefs']) // singletons
-export const t1n = new Set(['tribu', 'avatar', 'compta', 'couple', 'groupe', 'fetat', 'avsecret']) // clé à 1 niveau
-export const t2n = new Set(['membre', 'secret']) // clé à 2 niveaux
-
-/*
-- `versions` (id) : table des prochains numéros de versions (actuel et dernière sauvegarde) et autres singletons (id value)
-- `avrsa` (id) : clé publique d'un avatar
-- `trec` (id) : transfert de fichier en cours (uploadé mais pas encore enregistré comme fichier d'un secret)
-- `gcvol` (id) : GC des volumes des comptes disparus.
-
-_**Tables transmises au client**_
-
-- `compte` (id) : authentification et liste des avatars d'un compte
-- `prefs` (id) : données et préférences d'un compte
-- `compta` (id) : ligne comptable du compte
-- `cv` (id) : statut d'existence, signature et carte de visite des avatars, contacts et groupes
-- `avatar` (id) : données d'un avatar et liste de ses contacts et groupes
-- `couple` (id) : données d'un contact entre deux avatars
-- `groupe` (id) : données du groupe
-- `membre` (id, im) : données d'un membre du groupe
-- `secret` (id, ns) : données d'un secret d'un avatar, couple ou groupe
-- `contact` (phch) : parrainage ou rencontre de A0 vers un A1 à créer ou inconnu par une phrase de contact
-- `invitgr` (id, ni) : **NON persistante en IDB**. invitation reçue par un avatar à devenir membre d'un groupe
-- `invitcp` (id, ni) : **NON persistante en IDB**. invitation reçue par un avatar à devenir membre d'un couple
-- `tribu` (id) : données et compteurs d'une tribu.
-*/
-
-schemas.forSchema({
-  name: 'rowversions',
-  cols: ['id', 'v']
-})
-
-schemas.forSchema({
-  name: 'rowtribu',
-  cols: ['id', 'v', 'nbc', 'f1', 'f2', 'r1', 'r2', 'datak', 'mncpt', 'datat', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowtrec',
-  cols: ['id', 'idf', 'dlv']
-})
-
-schemas.forSchema({
-  name: 'rowcompte',
-  cols: ['id', 'v', 'dpbh', 'pcbh', 'kx', 'stp', 'nctk', 'mack', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowprefs',
-  cols: ['id', 'v', 'mapk', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowavrsa',
-  cols: ['id', 'clepub', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowcv',
-  cols: ['id', 'v', 'x', 'dds', 'cv', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowavatar',
-  cols: ['id', 'v', 'lgrk', 'lcck', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowcompta',
-  cols: ['id', 't', 'v', 'datat', 'data', 'sta', 'ard1', 'ard2', 'ard3', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowcouple',
-  cols: ['id', 'v', 'st', 'npi', 'v1', 'v2', 'mx10', 'mx20', 'mx11', 'mx21', 'dlv', 'datac', 'phk0', 'infok0', 'infok1', 'mc0', 'mc1', 'ardc', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowcontact',
-  cols: ['phch', 'dlv', 'datax', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowgroupe',
-  cols: ['id', 'v', 'dfh', 'st', 'mxim', 'imh', 'v1', 'v2', 'f1', 'f2', 'mcg', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowmembre',
-  cols: ['id', 'im', 'v', 'st', 'npi', 'vote', 'mc', 'infok', 'datag', 'ardg', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'rowinvitgr',
-  cols: ['id', 'ni', 'datap']
-})
-
-schemas.forSchema({
-  name: 'rowinvitcp',
-  cols: ['id', 'ni', 'datap']
-})
-
-schemas.forSchema({
-  name: 'rowsecret',
-  cols: ['id', 'ns', 'v', 'x', 'st', 'xp', 'v1', 'v2', 'mc', 'txts', 'mfas', 'refs', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'idbCv',
-  cols: ['id', 'v', 'x', 'dds', 'cv', 'vsh']
-})
-
-schemas.forSchema({
-  name: 'idbFetat',
-  cols: ['id', 'dhd', 'dhc', 'dhx', 'lg', 'nom', 'info', 'ids', 'ns', 'err']
-})
-
-schemas.forSchema({
-  name: 'idbAvSecret',
-  cols: ['id', 'ns', 'v', 'lidf', 'mnom']
-})
-
-schemas.forSchema({
-  name: 'syncList',
-  cols: ['sessionId', 'dh', 'rowItems']
-})
-
 /** Compteurs ***************************
 - `j` : jour de calcul
 - `v1 v1m` : volume v1 actuel et total du mois
@@ -393,9 +257,9 @@ export class Compteurs {
   }
 }
 
+/* DateJour *********************************************************/
 const j0 = Math.floor(new Date('2020-01-01T00:00:00').getTime() / 86400000)
 const nbjm = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-const nbjSuppr = 365
 
 const zeroPad = (num, places) => String(num).padStart(places, '0')
 
@@ -418,7 +282,6 @@ export class DateJour {
 
   get Date () { return new Date((j0 + this.nbj) * 86400000) }
 
-  get dateSuppr () { return -(this.nbj + nbjSuppr) }
 }
 
 export const j99 = new DateJour(new Date('2099-12-31T23:59:59')).nbj // 29220 = 365 * 80 + 20 (années bisextiles)

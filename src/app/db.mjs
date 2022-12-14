@@ -342,18 +342,18 @@ export async function putCompte () {
 }
 
 /** Lecture d'une collection complète : 
-Retourne une map: 
+Retourne une Map: 
   - clé: id ou id/ids
   - valeur: row { _nom, id, ids, v, _data_} 
 */
 export async function getColl (nom) {
   const session = stores.session
   try {
-    const r = {}
+    const r = new Map()
     await db[nom].each(async (idb) => { 
       const row = await decrypter(session.clek, idb.data)
       const pk = row.ids ? id + '/' + ids : id
-      r[pk] = row
+      r.set(pk, row)
     })
     return r
   } catch (e) {
