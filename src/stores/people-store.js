@@ -1,160 +1,131 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 
-/* Chaque element a pour clé l'id de l'avatar :
+/* 
+Un "people" est un avatar :
+- (M) soit un membre d'un des groupes du compte qui n'est PAS avatar du compte
+- (S) soit un sponsor de la tribu du compte qui n'est PAS avatar du compte
+- (C) soit l'interlocuteur d'un chat avec un avatar du compte
+Un people peut l'être à plusieurs titre:
+  - N fois pour M, N fois au titre C et 1 seule fois au titre S
+La "carte de visite" d'un people provient :
+  - de l'un membres M
+  - soit d'avoir été explictement recherchée si la condition M n'est pas remplie
+  - soit non disponible
+Chaque element a pour clé l'id de l'avatar :
 - na : nom d'avatar
-- cv : carte de viste de l'avatar
-- paraain : true si l'avatar est parrain de la tribu du compte (pas pour le comptable)
-- mbIds : set des ids de membre des groupes (forme : 'id/im')
-- cpIds: set des Ids des couples dont l'avatar est l'élément externe.
+- cv : carte de visite de l'avatar si elle a été explicitement chargée
+- sponsor (getter): true si l'avatar est sponsor de la tribu du compte
+- groupes : map des groupes {idg, im} auquel le people participe
 */
 export const usePeopleStore = defineStore('people', {
   state: () => ({
     map: new Map(),
-    parrains: new Set()
+    sponsors: new Set() // set des ids des sponsors (incluant les avatars du compte !)
   }),
 
   getters: {
-    getIds: (state) => { return Array.from(state.map.keys()) },
+    // Map des noms d'avatar des people (clé: id)
+    peoples: (state) => {
+      const m = new Map()
+      state.map.forEach(e => { m.set(e.na.id, e.na)})
+      return m
+    },
 
-    getParrains: (state) => { return state.parrains },
+    ids: (state) => { return Array.from(state.map.keys()) },
 
-    getPeople: (state) => { return (id) => { 
-        return state.map.get(id)
+    // retourne { na: cv: sponsor: true/false, groupes: Map(idg, im)
+    getPeople: (state) => { return (id) => {
+        const e = state.map.get(id)
+        if (!e) return null
+        const r = { ...e }
+        r.cv = this.getCv(id)
+        return r
       }
     },
     getNa: (state) => { return (id) => { 
         const e = state.map.get(id)
-        return e ? e.avatar : null 
+        return e ? e.na : null 
       }
     },
     getCv: (state) => { return (id) => { 
         const e = state.map.get(id)
-        return e ? e.cv : null 
+        if (!e) return null
+        if (e.cv) return e.cv
+        if (!e.groupes || !e.groupes.size) return null
+        const idg = e.groupes.keys().next().value
+        const im = e.groupes.get(idg).keys().next().value
+        const mb = stores.groupe.getMembre(idg, im)
+        return mb.cv
       }
     },
-    estParrain: (state) => { return (id) => {
-        return state.parrains.has(id) 
+    estSponsor: (state) => { return (id) => {
+        return state.sponsors.has(id) 
       }
     },
-    hasMbId: (state) => { return (id, idg, im) => { 
+
+    // Retourne l'Array des documents 'groupe' auquel ce people participe
+    getGroupes: (state) => { return (id) => { 
         const e = state.map.get(id)
-        if (!e) return false
-        return e.mbIds.has(idg + '/' + im)
+        if (!e) return null
+        const st = stores.groupe
+        const a = []
+        if (e.groupes && e.groupes.size)
+          e.groupes.forEach(idg => { a.push(st.getGroupe(idg)) })
+        return a
       }
     },
-    getMbIds: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        if (!e) return []
-        const r = []
-        if (!e.mbIds.size) return r
-        e.mbIds.forEach(s => {
-          const i = s.indexOf('/')
-          r.push([parseint(s.substring(0, n), parseInt(s.substring(n + 1)))])
-        })
-        return r 
-      }
-    },
+
+    // Retourne l'Array de TOUS les documents membre pour 
+    // TOUS les groupes auquel ce people id participe
     getMembres: (state) => { return (id) => { 
         const e = state.map.get(id)
-        if (!e) return []
-        const r = []
-        if (!e.mbIds.size) return r
-        const stg = stores.groupe
-        e.mbIds.forEach(s => {
-          const n = s.indexOf('/')
-          const idg = parseInt(s.substring(0, n))
-          const im = parseInt(s.substring(n + 1))
-          const mb = stg.getMembre(idg, im)
-          if (mb) r.push(mb)
-        })
-        return r 
+        if (!e || !e.groupes) return null
+        const st = stores.groupe
+        const a = []
+        e.groupes.forEach((im, idg) => { a.push(st.getMembre(idg, im)) })
+        return a
       }
     },
-    hasCpId: (state) => { return (id, idc) => { 
+
+    // Retourne LE document membre de ce people id dans LE groupe idg
+    getMembre: (state) => { return (id, idg) => { 
         const e = state.map.get(id)
-        if (!e) return false
-        return e.cpIds.has(idc)
+        if (!e || !e.groupes) return null
+        const im = e.groupes.get(idg)
+        return im ? stores.groupe.getMembre(idg, im) : null
       }
-    },
-    getCpIds: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        if (!e) return []
-        if (!e.cpIds.size) return []
-        return Array.from(e.cpIds)
-      }
-    },
-    getCouples: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        if (!e) return []
-        if (!e.cpIds.size) return []
-        const r = []
-        const stc = stores.couple
-        e.cpIds.forEach(id => {
-          const cp = stc.getCouple(id)
-          if (cp) r.push(cp)
-        })
-        return r
-      }
-    },
+    }
   },
 
   actions: {
-    setNa (na) {
-      if (!na) return
-      if (!this.map.get(na.id)) this.newPeople(na)
-    },
-
     /* Cette méthode permet de détecter plus facilement sur les $onAction
     les créations de people (avatars externes)
-    - si opt, ne créé pas un nouvel élément s'il y est déjà */
-    newPeople (na, opt) {
-      const  e = { na: na, cv: null, mbIds: new Set(), cpIds: new Set() }
-      if (!opt) {
-        this.map.set(na.id, e)
-      } else {
-        if (!this.map.has(na.id)) this.map.set(na.id, e)
-      }
+    - si reset, recrée une entrée avec juste na */
+    newPeople (na, reset) {
+      const  e = { na: na, cv: null, groupes: new Map() }
+      if (!this.map.has(na.id) || reset) this.map.set(na.id, e)
       return this.map.get(na.id)
     },
 
-    addMbId (id, idg, im) {
+    // Inscrit que cepeople id est le membre im du groupe idg
+    // OU si im est 0, supprime la participation de CE people au groupe
+    setMbId (id, idg, im) {
       const e = this.map.get(id)
       if (!e) return
-      const pk = idg + '/' + im
-      if (!e.mbIds.has(pk)) e.mbIds.add(pk)
+      const g = e.groupes.get(idg)
+      if (!g) {
+        if (im) e.groupes.set(idg, im)
+      } else {
+        if (im) e.groupes.set(idg, im); else e.groupes.delete(idg)
+      }
     },
 
-    remMbId (id, idg, im) {
-      const e = this.map.get(id)
-      if (e) return
-      const pk = idg + '/' + im
-      if (e.mbIds.has(pk)) e.mbIds.delete(pk)
-    },
-
-    addCpId (id, idc) {
-      const e = this.map.get(id)
-      if (!e) return
-      if (!e.cpIds.has(idc)) e.cpIds.add(idc)
-    },
-
-    remCpId (id, idc) {
-      const e = this.map.get(id)
-      if (!e) return
-      if (!e.cpIds.has(idc)) e.cpIds.delete(idc)
-    },
-
-    setCv (cv) {
+    setCv (cv) { // cv: { v, photo, info }
       if (!cv) return
       const e = this.map.get(cv.id)
-      if (!e) return
+      if (!e || e.groupes.size) return // N'enregistre pas de CV pour un people membre d'un groupe
       e.cv = cv
-    },
-
-    setParrain (id, estParrain) {
-      if (!id) return
-      if (!this.map.get(id)) return
-      if (estParrain) this.parrains.add(id); else this.parrains.delete(id)
     },
 
     delCv (id) {
@@ -162,6 +133,11 @@ export const usePeopleStore = defineStore('people', {
       const e = this.map.get(id)
       if (!e) return
       e.cv = null
+    },
+
+    setSponsors (ids) { // array des id des sponsors
+      if (!ids) return
+      this.sponsors = new Set(ids)
     },
 
     del (id) {

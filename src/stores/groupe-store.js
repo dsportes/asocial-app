@@ -1,22 +1,32 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 
+/* Store maître des groupes du compte courant :
+- groupes : les groupes dont un des avatars du compte courant est membre
+Sous-collection pour chaque groupe id :
+  - secrets : getSecrets(id)
+  - membres : getMembres(id)
+*/
+
 export const useGroupeStore = defineStore('groupe', {
   state: () => ({
     map: new Map()
   }),
 
   getters: {
-    getIds: (state) => { return Array.from(state.map.keys()) },
+    // Map dont la clé est l'id du groupe et la valeur le document groupe
+    groupes: (state) => {
+      const m = new Map()
+      state.map.forEach(e => { const g = e.groupe; m.set(g.id, g)})
+      return m
+    },
+
+    // liste (array) des ids des groupes
+    ids: (state) => { return Array.from(state.map.keys()) },
 
     getGroupe: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.groupe : null 
-      }
-    },
-    getCv: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.cv : null 
       }
     },
     getMembre: (state) => { return (id, im) => { 
@@ -77,20 +87,6 @@ export const useGroupeStore = defineStore('groupe', {
       const e = this.map.get(id)
       if (!e) return
       e.secrets.delete(ns)
-    },
-
-    setCv (cv) {
-      if (!cv) return
-      const e = this.map.get(cv.id)
-      if (!e) return
-      e.cv = cv
-    },
-
-    delCv (id) {
-      if (!id) return
-      const e = this.map.get(id)
-      if (!e) return
-      e.cv = null
     },
 
     del (id) {

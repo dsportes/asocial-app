@@ -727,126 +727,77 @@ export async function compile (row) {
 }
 
 /** Tribu *********************************
-- `id` : id de la tribu.
-- 'v'
+- `id` : numéro de la tribu
+- `v` : sa version
+- `dh` : date-heure dernière modification.
+- `dhb` : =dh quand la tribu est bloquée
+
 - `nbc` : nombre de comptes actifs dans la tribu.
-- `f1 f2` : sommes des volumes V1 et V2 déjà attribués comme forfaits aux comptes de la tribu.
+- `a1 a2` : sommes des volumes V1 et V2 déjà attribués comme forfaits aux comptes de la tribu.
 - `r1 r2` : volumes V1 et V2 en réserve pour attribution aux comptes actuels et futurs de la tribu.
-- `datak` : cryptée par la clé K du comptable :
-  - `[nom, rnd]`: nom immuable et clé de la tribu.
-  - `info` : commentaire privé du comptable.
+- `infok` : commentaire privé du comptable crypté par la clé K du comptable :
 - `mncpt` : map des noms complets des parrains:
-  - _valeur_ : `[nom, rnd]` crypté par la clé de la tribu
-  - _clé_ : (`chkt`), hash (integer) de (id du parrain base64 + id tribu base64)
-  - l'ajout d'un parrain ne se fait que par le comptable mais un retrait peut s'effectuer aussi par un traitement de GC
-- `datat` : cryptée par la clé de la tribu :
-  - `st` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
+  - _clé_ : `id` du parrain.
+  - _valeur_ :
+    - `na` : `[nom, rnd]` crypté par la clé de la tribu. ("na" est un NomTribu une fois compilé))
+    - `cv` : `[photo, info]` carte de visite cryptée par la clé de la tribu
+  - l'ajout d'un parrain ne se fait que par le comptable mais un retrait peut s'effectuer aussi par un traitement de GC.
+- `blocaget` : cryptée par la clé de la tribu : ("blocage" quand compilé)
+  - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
   - `c`: 1 si positionné par le comptable (dans une tribu toujours 1)
   - `txt` : libellé explicatif du blocage.
   - `jib` : jour initial de la procédure de blocage
   - `lj` : `[j12 j23 j34]` : nb de jours de passage des niveaux de 1 à 2, 2 à 3, 3 à 4.
   - `dh` : date-heure de dernier changement du statut de blocage.
-- `vsh`
 */
 
-forSchema({
-  name: 'idbTribu',
-  cols: ['id', 'v', 'nbc', 'f1', 'f2', 'r1', 'r2', 'na', 'mncp', 'info', 'blocage', 'vsh']
-})
-
-export class Tribu {
-  get table () { return 'tribu' }
-  get pk () { return '' + this.id }
-
+export class Tribu extends GenDoc {
   get nom () { return this.na.nom }
-  get stn () { return this.blocage ? this.blocage.stn : 0 }
-  get str () { return this.blocage ? this.blocage.st : 0 }
-  get txt () { return this.str ? this.blocage.txt : '' }
-  get ist () { return !this.nbc ? 4 : this.stn }
   get clet () { return this.na.rnd }
+  get stn () { return this.blocage ? this.blocage.stn : 0 }
+  get ist () { return !this.nbc ? 4 : this.stn } // "index" du statut de blocage
 
-  async fromRow (row) {
+  async compile (row) {
     const session = stores.session
     this.vsh = row.vsh || 0
     this.id = row.id
+    this.dh = row.dh
     this.v = row.v
-    if (session.estComptable) {
-      // Le comptable peut décrypter le na de TOUTE tribu (il a été crypté par sa clé K)
-      const [x, info] = deserial(await decrypter(session.clek, row.datak))
-      this.na = new NomTribu(x[0], x[1])
-      this.info = info || ''
-      setNg(this.na)
-    } else {
-      /* Un compte normal n'a le droit d'accèder qu'à SA tribu.
-      Son na est disponible dans le compte et a forcément été décrypté avant.
-      */
-      this.na = session.compte.nat
-      this.info = ''
-    }
+
     this.nbc = row.nbc
-    this.f1 = row.f1
-    this.f2 = row.f2
+    this.a1 = row.a1
+    this.a2 = row.a2
     this.r1 = row.r1
     this.r2 = row.r2
+    this.info = session.estComptable ? await decrypterStr(session.clek, row.infok) : ''
 
-    const mx = (row.mncpt ? deserial(row.mncpt) : null) || {}
-    this.mncp = {}
-    for (const chkt in mx) {
-      const nr = await decrypter(this.clet, mx[chkt])
-      this.mncp[chkt] = deserial(nr)
-    }
-    this.blocage = !row.datat ? null : deserial(await decrypter(this.clet, row.datat))
-    if (this.blocage) {
-      const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
-      this.blocage.stn = niv
-      this.blocage.ljc = ljc
-    }
-    this.regParrains()
-    return this
-  }
-
-  regParrains () {
-    for (const chkt in this.mncp) {
-      const nr = this.mncp[chkt]
-      const na = new NomAvatar(nr[0], nr[1])
+    this.mncpt = row.mncpt ? decode(row.mncpt) : {}
+    for (const id in this.mncpt) {
+      const e = this.mncpt[id]
+      const [nom, cle] = decode(await decrypter(this.clet, e.na))
+      e.na = new NomAvatar(nom, cle)
       setNg(na)
+      e.cv = e.cv ? await decrypter(this.clet, e.cv) : null
     }
-  }
-
-  get naParrains () { // array des na des parrains
-    const r = []
-    for (const chkt in this.mncp) {
-      const nr = this.mncp[chkt]
-      const na = new NomAvatar(nr[0], nr[1])
-      r.push(na)
-    }
-    return r
-  }
-
-  idParrains (s) { // set des ids des parrains accumulés dans s
-    const r = s || new Set()
-    for (const chkt in this.mncp) {
-      const nr = this.mncp[chkt]
-      const na = new NomAvatar(nr[0], nr[1])
-      r.add(na.id)
-    }
-    return r
-  }
-
-  fromIdb (idb) {
-    deserialize('idbTribu', idb, this)
+    this.blocage = !row.blocaget ? null : decode(await decrypter(this.clet, row.blocaget))
     if (this.blocage) {
       const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
       this.blocage.stn = niv
       this.blocage.ljc = ljc
+      this.dhb = this.dh
     }
-    this.regParrains()
-    return this
   }
 
-  get toIdb () {
-    const r = { ...this }
-    return serialize('idbTribu', r)
+  get naSponsors () { // array des na des parrains
+    const r = []
+    for (const id in this.mncp) r.push(this.mncpt[id].na)
+    return r
+  }
+
+  get idSponsors () { // array des id des parrains
+    const r = []
+    for (const id in this.mncp) r.push(this.mncpt[id].na.id)
+    return r
   }
 
   nouvelle (nom, info, r1, r2) {
@@ -865,6 +816,7 @@ export class Tribu {
     return this
   }
 
+  /*
   async toRow () {
     const r = { ...this }
     r.datak = await this.getDatak(this.info)
@@ -893,6 +845,7 @@ export class Tribu {
   getChktDeId (id) {
     return hash(idToSid(id) + '@' + this.na.sid)
   }
+  */
 }
 
 /** Avatar *********************************************************
@@ -994,6 +947,7 @@ export class Avatar extends GenDoc {
   - clé: id du groupe
   - valeur: { ng: , mbs: [ids] }
   */
+
   membres (map) {
     for (const ni of this.lgr) {
       const [nom, rnd, im] = this.lgr[ni]
@@ -1011,6 +965,12 @@ export class Avatar extends GenDoc {
     const phrase = await new PhraseContact().init(texte)
     const [nom, cle] = decode(decrypter(phrase.clex, this.napc))
     return new NomAvatar(nom, cle)
+  }
+
+  // na d'un des avatar du compte
+  naAvatar (id) {
+    const i = id % 10
+    return this.lav[i].na
   }
 
   /** compile *********************************************************/
@@ -1052,9 +1012,9 @@ export class Avatar extends GenDoc {
           nr = await decrypter(session.clek, row.nctk)
           this.nctkCleK = null
         }
-        const [nom, cle] = deserial(nr)
+        const [nom, cle] = decode(nr)
         this.nct = new NomTribu(nom, cle)
-      } else {
+      } else { // Ne devrait JAMAIS se produire, même le comptable a une tribu
         this.nct = null
         this.nctk = null
       }
@@ -1067,6 +1027,7 @@ export class Avatar extends GenDoc {
         this.memo = await decrypterStr(session.clek, row.memok)
       } else this.memo = ''
 
+      setNg(this.nct)
       this.repAvatars()
     }
 
@@ -1167,45 +1128,52 @@ export class Avatar extends GenDoc {
 }
 
 /** Compta **********************************************************************
-- `id` : de l'avatar.
-- `t` : id de la tribu pour un avatar primaire (0 pour un seconadaire). Par convention l'avatar principal du comptable (qui n'a pas de tribu) à `1` dans `t`.
-- `v` :
-- `datat` : seulement pour un avatar primaire, cryptée par la clé de la tribu :
-  - `st` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
-  - `c`: 1 si positionné par le comptable (dans une tribu toujours 1)
-  - `txt` : libellé explicatif du blocage.
-  - `jib` : jour initial de la procédure de blocage
-  - `lj` : `[j01 j12 j23 j34]` : nb de jours de passage des niveaux 0 à 1, 1 à 2, 2 à 3, 3 à 4.
-  - `dh` : date-heure de dernier changement du statut de blocage.
-- `data`: compteurs sérialisés (non cryptés)
-- `sta` : statut de l'ardose `(c i1 i2 i3)`
-- `ard1 ard2 ard3` : textes cryptés par la clé de la tribu :
-  - `t dh na`
-- `vsh` :
-
-sta: c i1 i2 i3
-- c : ardoise intéressant le comptable
-- Trois indicateurs `i1` (pour le compte), `i2` (pour un parrain de la tribu), `i3` (pour le comptable) traduisent la position de chaque interlocuteur vis à vis de l'ardoise :
-  - `0` : l'ardoise **n'a pas été lue**, du moins dans sa dernière mise à jour.
-  - `1` : l'ardoise **a été lue** mais le sujet reste à traiter du point de l'interlocuteur.
-  - `2` : l'ardoise **a été lue et le sujet est clos** du point de vue de l'interlocuteur
+- `id` : numéro du compte
+- `idt` : id de la tribu
+- `v` : version
+- `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte.
+- `shay` : SHA du SHA de X (PBKFD de la phrase secrète).
+- `nat`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu. (compilé en "na")
+- `trcp` : `[nom, clé]` de la tribu crypté par la clé publique du comptable.
+- `compteurs`: compteurs sérialisés (non cryptés).
+- `blocaget` : blocage du compte (cf `blocaget` de tribu).
+- `lavv` : array des dernières versions de chaque avatar du compte, indexée par l'index de l'avatar dans son compte (le dernier chiffre de son id).
 */
 
-forSchema({
-  name: 'idbCompta',
-  cols: ['id', 't', 'v', 'blocage', 'data', 'sta', 'ard1', 'ard2', 'ard3', 'vsh']
-})
-
-
-export class Compta {
-  get table () { return 'compta' }
-  get pk () { return '' + this.id }
-
-  get estPrimaire () { return this.t !== 0 }
+export class Compta extends GenDoc {
   get stn () { return this.blocage ? this.blocage.stn : 0 }
-  get str () { return this.blocage ? this.blocage.st : 0 }
-  get staa () { return chiffres(this.staa, 4) }
-  get clet () { return this.t > 1 ? data.repertoire.cle(this.t) : null }
+  get clet () { return repertoire.cle(this.idt) }
+
+  async compile (row) {
+    this.vsh = row.vsh || 0
+    this.id = row.id
+    this.idt = row.idt
+    this.v = row.v
+
+    this.hps1 = row.hps1
+    this.shay = row.shay
+    const [nom, cle] = decode(await decrypter(this.clet, row.nat))
+    this.na = new NomAvatar(nom, cle)
+    setNg(na)
+
+    this.trcp = row.trcp
+    this.compteurs = new Compteurs(row.compteurs).calculauj()
+    this.blocage = !row.blocaget ? null : decode(await decrypter(this.clet, row.blocaget))
+    if (this.blocage) {
+      const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
+      this.blocage.stn = niv
+      this.blocage.ljc = ljc
+      this.idtb = this.idt
+    }
+    this.lavv = row.lavv
+  }
+
+  // Pour le comptable seulement 
+  async nomTribu () {
+    const cpriv = stores.avatar.compte.cpriv(IDCOMPTABLE)
+    const [nom, cle] = decode(await decrypterRSA(cpriv, this.trcp))
+    return new NomTribu(nom, cle)
+  }
 
   nouveau (id, t) {
     this.id = id
@@ -1221,585 +1189,41 @@ export class Compta {
     return this
   }
 
+}
+
+/** Sponsoring ************************************************************
+- `id` : id de l'avatar.
+- `ids` : hash de la phrase de parrainage, 
+- `v`
+- `dlv` : date limite de validité
+
+- `descrx` : crypté par X, le PBKFD de la phrase de sponsoring
+  - `na` : `[nom, cle]` de P / A.
+  - `cv` : `[photo, info]` de P / A.
+  - `naf` : `[nom, cle]` attribué au filleul.
+  - `nct` : `[nom, cle]` de sa tribu.
+  - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
+  - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+*/
+
+export class Sponsoring extends GenDoc {
+
   async fromRow (row) {
-    this.vsh = row.vsh || 0
     this.id = row.id
-    this.t = row.t
+    this.ids = row.ids
     this.v = row.v
-    this.st = row.st
-    this.compteurs = new Compteurs(row.data).calculauj()
-    if (this.t && this.id !== IDCOMPTABLE) {
-      const compte = stores.session.compte
-      this.blocage = !row.datat ? null : deserial(await decrypter(compte.nat.rnd, row.datat))
-      if (this.blocage) {
-        const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
-        this.blocage.stn = niv
-        this.blocage.ljc = ljc
-      }
-    }
-    this.dh = row.dh
-    this.txtt = row.txtt
-    this.sta = row.sta
-    if (this.sta && this.t > 1) {
-      this.ard1 = row.ard1 ? deserial(await crypt.decrypter(this.clet, row.ard1)) : null
-      this.ard2 = row.ard1 ? deserial(await crypt.decrypter(this.clet, row.ard2)) : null
-      this.ard3 = row.ard1 ? deserial(await crypt.decrypter(this.clet, row.ard3)) : null
-    }
-    return this
-  }
-
-  async toRow () {
-    const r = { ...this }
-    r.data = this.compteurs.calculauj().serial
-    if (this.t && this.id !== IDCOMPTABLE) {
-      const compte = stores.session.compte
-      r.datat = await crypter(compte.nat.rnd, serial(this.blocage))
-    }
-    return serialize('rowcompta', r)
-  }
-
-  get toIdb () {
-    this.data = serial(this.compteurs.calculauj())
-    const x = serialize('idbCompta', this)
-    delete this.data
-    return x
-  }
-
-  fromIdb (idb) {
-    deserialize('idbCompta', idb, this)
-    this.compteurs = new Compteurs(this.data).calculauj()
-    if (this.blocage) {
-      const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
-      this.blocage.stn = niv
-      this.blocage.ljc = ljc
-    }
-    delete this.data
-    return this
-  }
-
-  get clone () {
-    this.compteurs.calculauj()
-    return clone('idbCompta', this, new Compta())
-  }
-}
-
-/** Avatar ****************************************************************************
-- `id` : id de l'avatar
-- `v` :
-- `lgrk` : map :
-  - _clé_ : `ni`, numéro d'invitation (aléatoire 4 bytes) obtenue sur `invitgr`.
-  - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur `invitgr`.
-  - une entrée est effacée par la résiliation du membre au groupe ou sur refus de l'invitation (ce qui lui empêche de continuer à utiliser la clé du groupe).
-- `lcck` : map :
-  - _clé_ : `ni`, numéro pseudo aléatoire. Hash de (`cc` en hexa suivi de `0` ou `1`).
-  - _valeur_ : clé `cc` cryptée par la clé K de l'avatar cible. Le hash d'une clé d'un couple donne son id.
-- `vsh`
-*/
-
-forSchema({
-  name: 'idbAvatar',
-  cols: ['id', 'v', 'lgr', 'lcc', 'vsh']
-})
-
-export class Avatar {
-  get table () { return 'avatar' }
-  get sid () { return idToSid(this.id) }
-  get pk () { return '' + this.id }
-
-  get na () { return getNg(this.id) }
-  get cle () { return getCle(this.id) }
-  get nomc () { return this.na.nomc }
-  get disparu () { return getDisparu(this.id) }
-  get estPrimaire () { return stores.session.compte.id === this.id }
-  get estParrain () { return stores.session.compte.estParrain }
-
-  constructor () {
-    this.m1gr = new Map() // clé:ni val: { na du groupe, im de l'avatar dans le groupe }
-    this.m2gr = new Map() // clé:idg (id du groupe), val:[im, ni]
-    this.mcc = new Map() // clé: ni, val: clé cc
-  }
-
-  /* Retourne LE membre de l'avatar du compte pour un groupe d'id donné */
-  membre (idg) {
-    const x = this.m2gr.get(idg)
-    if (!x) return null
-    const im = typeof x[0] === 'string' ? parseInt(x[0]) : x[0]
-    return stores.membre.get(idg, im)
-  }
-
-  im (idg) {
-    const x = this.m2gr.get(idg)
-    if (!x) return 0
-    const im = typeof x[0] === 'string' ? parseInt(x[0]) : x[0]
-    return im
-  }
-
-  ni (idg) {
-    const x = this.m2gr.get(idg)
-    if (!x) return 0
-    const ni = typeof x[1] === 'string' ? parseInt(x[1]) : x[1]
-    return ni
-  }
-
-  groupeIds (s) {
-    const s1 = new Set()
-    this.m1gr.forEach(e => { if (s) s.add(e.na.id); else s1.add(e.na.id) })
-    return s || s1
-  }
-
-  groupeNas (s) {
-    const s1 = new Set()
-    this.m1gr.forEach(e => { if (s) s.add(e.na); else s1.add(e.na) })
-    return s || s1
-  }
-
-  coupleIds (s) {
-    const s1 = new Set()
-    this.mcc.forEach(na => { if (s) s.add(na.id); else s1.add(na.id) })
-    return s || s1
-  }
-
-  coupleNas (s) {
-    const s1 = new Set()
-    this.mcc.forEach(na => { if (s) s.add(na); else s1.add(na) })
-    return s || s1
-  }
-
-  // INTERNE dans fromRow fromIDB
-  repGroupes () { this.m1gr.forEach(e => { setNg(e.na) }) }
-  repCouples () { this.mcc.forEach(na => { setNg(na) }) }
-
-  nouveau (id, niCouple, naCouple) { // naCouple : création lors d'une acceptation de parrainage
-    this.id = id
-    this.v = 0
-    this.vsh = 0
-    if (naCouple) this.mcc.set(niCouple, naCouple)
-    return this
-  }
-
-  async compileLists (lgr, lcc, brut) {
-    const clek = stores.session.clek
-    this.mcc.clear()
-    if (lcc) {
-      for (const ni in lcc) {
-        const y = lcc[ni]
-        const cc = brut ? y : await decrypter(clek, y)
-        const na = new NomContact('x', cc)
-        this.mcc.set(ni, na)
-      }
-    }
-    this.m1gr.clear()
-    if (lgr) {
-      for (const nis in lgr) {
-        const ni = parseInt(nis)
-        const y = lgr[ni]
-        const x = deserial(brut ? y : await decrypter(clek, y))
-        const na = new NomGroupe(x[0], x[1])
-        const id = na.id
-        this.m1gr.set(ni, { na: na, im: x[2] })
-        this.m2gr.set(id, [x[2], ni])
-      }
-    }
-  }
-
-  decompileListsBrut () {
-    const lgr = this.m1gr.size ? {} : null
-    if (this.m1gr.size) for (const [ni, x] of this.m1gr) lgr[ni] = serial([x.na.nom, x.na.rnd, x.im])
-    const lcc = this.mcc.size ? {} : null
-    if (this.mcc.size) for (const [ni, na] of this.mcc) lcc[ni] = na.rnd
-    return [lgr, lcc]
-  }
-
-  async decompileLists () {
-    const clek = stores.session.clek
-    const lgr = this.m1gr.size ? {} : null
-    if (this.m1gr.size) {
-      for (const [ni, x] of this.m1gr) {
-        lgr[ni] = await crypter(clek, serial([x.na.nom, x.na.rnd, x.im]))
-      }
-    }
-    const lcc = this.mcc.size ? {} : null
-    if (this.mcc.size) {
-      for (const [ni, na] of this.mcc) {
-        lcc[ni] = await crypter(clek, na.rnd)
-      }
-    }
-    return [lgr, lcc]
-  }
-
-  async fromRow (row) { // ['id', 'v', 'lgr', 'lcc', 'vsh']
-    this.vsh = row.vsh || 0
-    this.id = row.id
-    this.v = row.v
-    await this.compileLists(row.lgrk ? deserial(row.lgrk) : null, row.lcck ? deserial(row.lcck) : null)
-    this.repGroupes()
-    this.repCouples()
-    return this
-  }
-
-  async toRow () { // pour un nouvel avatar seulement
-    const [lgr, lcc] = await this.decompileLists()
-    const r = { id: this.id, v: this.v, lgrk: serial(lgr), lcck: serial(lcc), vsh: 0 }
-    return serialize('rowavatar', r)
-  }
-
-  get toIdb () {
-    const r = { ...this }
-    const [lgr, lcc] = this.decompileListsBrut()
-    r.lgr = lgr
-    r.lcc = lcc
-    return serialize('idbAvatar', r)
-  }
-
-  fromIdb (idb) {
-    deserialize('idbAvatar', idb, this)
-    this.compileLists(this.lgr, this.lcc, true)
-    this.repGroupes()
-    this.repCouples()
-    delete this.lgr
-    delete this.lcc
-    return this
-  }
-
-  get clone () {
-    return clone('idbAvatar', this, new Avatar())
-  }
-}
-
-/** Cv **************************************************************
-cols: ['id', 'v', 'x', 'dds', 'cv', 'vsh']
-forSchema({ // dans api.mjs
-  name: 'idbCv',
-  cols: ['id', 'v', 'x', 'dds', 'cv', 'vsh']
-})
-*/
-export class Cv {
-  get table () { return 'cv' }
-  get cle () { return getCle(this.id) }
-  get pk () { return '' + this.id }
-
-  constructor () {
-    this.id = 0
-    this.v = 0
-    this.x = 0
-    this.dds = 0
-    this.cv = null
-    this.vsh = 0
-  }
-
-  init (id, photo, info) {
-    this.id = id
-    this.cv = [photo, info]
-    return this
-  }
-
-  async fromRow (row) { // row : rowCv - item retour de sync
-    this.id = row.id
-    this.v = row.v
-    this.x = row.x
-    this.dds = row.dds
-    this.cv = row.cv ? deserial(await decrypter(this.cle, row.cv)) : null
-    return this
-  }
-
-  async toRow (_photo, _info) { // seulement la cv (photo, info)
-    return await crypter(this.cle, serial(this.cv))
-  }
-
-  get toIdb () {
-    return serialize('idbCv', this)
-  }
-
-  fromIdb (idb) {
-    deserialize('idbCv', idb, this)
-    return this
-  }
-}
-
-/** couple *****************************************************************
-- `id` : id du contact
-- `v` :
-- `st` : quatre chiffres `p o 0 1` : phase / état
-  - `p` : phase - (1) en attente, (2) hors délai, (3) refusé, (4) actif, (5) orphelin.
-  - `o` : origine du contact: (0) direct, (1) parrainage, (2) rencontre.
-  - `0` : pour A0 - (0) pas de partage de secrets, (1) partage de secrets, (2) disparu.
-  - `1` : pour A1 -
-- 'npi' :xx : ne pas communiquer (pour 0 et 1)
-- `v1 v2` : volumes actuels des secrets.
-- `mx10 mx20` : maximum des volumes autorisés pour A0
-- `mx11 mx21` : maximum des volumes autorisés pour A1
-- `dlv` : date limite de validité éventuelle de prise de contact.
-- `datac` : données cryptées par la clé `cc` du couple :
-  - `x` : `[nom, rnd], [nom, rnd]` : nom et clé d'accès à la carte de visite respectivement de A0 et A1.
-- `phk0` : phrase de parrainage / rencontre cryptée par la clé K du parrain (sera détruite après acceptation / refus hors délai).
-- `infok0 infok1` : commentaires personnels cryptés par leur clé K, respectivement de A0 et A1.
-- `mc0 mc1` : mots clé définis respectivement par A0 et A1.
-- `ardc` : ardoise commune cryptée par la clé cc. [dh, texte]
-- `vsh` :
-*/
-
-forSchema({
-  name: 'idbCouple',
-  cols: ['id', 'v', 'st', 'npi', 'tp', 'autp', 'v1', 'v2', 'mx10', 'mx20', 'mx11', 'mx21', 'dlv', 'data', 'phrase', 'idI', 'idE', 'info', 'mc', 'dh', 'ard', 'vsh']
-})
-
-export class Couple {
-  get table () { return 'couple' }
-  // get sid () { return idToSid(this.id) }
-  get pk () { return '' + this.id }
-  // get pkv () { return this.sid + '/' + this.v } // TODO : vérifier l'utilité
-
-  get stp () { return Math.floor(this.st / 1000) }
-  get orig () { return Math.floor(this.st / 100) % 10 }
-  get st01 () { return [Math.floor(this.st / 10) % 10, this.st % 10] }
-  get stI () { return this.st01[this.avc] }
-  get stE () { return this.st01[this.ava] }
-
-  get cle () { return getCle(this.id) }
-  get na () { return getNg(this.id) }
-  get cv () { return stores.cv.get(this.id) }
-  get nomC () { return this.data[0][0] + '_' + this.data[1][0] }
-  get nomf () { return normpath(this.nomC) }
-  get nomE () { return this.naE && this.stE !== 2 ? this.naE.nomc : this.data[this.ava][0] }
-  get nomEs () { return this.data[this.ava][0] }
-  get nomI () { return this.naI.nomc }
-  get nomIs () { return this.data[this.avc][0] }
-  get max1E () { return this.avc === 1 ? this.mx10 : this.mx11 }
-  get max2E () { return this.avc === 1 ? this.mx20 : this.mx21 }
-  get max1I () { return this.avc === 1 ? this.mx11 : this.mx10 }
-  get max2I () { return this.avc === 1 ? this.mx21 : this.mx20 }
-
-  get nomc () { return this.nomE }
-  get dhed () { return dhcool(this.dh) }
-
-  naDeIm (im) { return im === this.avc + 1 ? this.naI : this.naE }
-
-  async phraseContact () {
-    if (!this.data.phrase) return null
-    const pc = new PhraseContact()
-    await pc.init(this.data.phrase)
-    return pc
-  }
-
-  setIdIE (x, cle) { // cle : non null pour réception d'un couple HORS session (accepatation / refus parrainage)
-    const na0 = x[0][1] ? new NomAvatar(x[0][0], x[0][1]) : null
-    const na1 = x[1][1] ? new NomAvatar(x[1][0], x[1][1]) : null
-    const id0 = na0 ? na0.id : 0
-    const id1 = na1 ? na1.id : 0
-    this.avc = !cle && stores.session.compte.estAc(id0) ? 0 : 1 // position 0 / 1 de l'avatar du compte
-    this.ava = this.avc ? 0 : 1 // position 0 / 1 de l'autre avatar
-    this.idI = this.avc ? id1 : id0
-    this.naI = this.avc ? na1 : na0
-    this.idE = this.ava ? id1 : id0
-    this.naE = this.ava ? na1 : na0
-    const npi0 = this.npi ? Math.floor(this.npi / 10) : 0
-    const npi1 = this.npi ? this.npi % 10 : 0
-    this.npiI = this.avc ? npi1 : npi0
-    this.npiE = this.ava ? npi1 : npi0
-    const na = new NomContact(this.nomC, cle || this.cle)
-    if (!cle) setNg(na); else this.naTemp = na
-  }
-
-  // INTERNE fromRow fromIDB
-  setRepE () { if (this.naE) setNg(this.naE) }
-
-  nouveauR (naI, nomf, cc, mot, pp, max, dlv, npi) {
-    this.v = 0
-    this.vsh = 0
-    this.st = 1200 + (max[0] ? 10 : 0) // en attente, rencontre, partage secrets ou non
-    this.npi = npi ? 10 : 0
-    this.naI = naI
-    this.idI = naI.id
-    this.naE = null
-    this.idE = 0
-    this.avc = 0
-    const na = new NomContact(naI.nom + '_' + nomf, cc)
-    this.id = na.id
-    setNg(na)
-    this.v1 = 0
-    this.v2 = 0
-    this.mx10 = max[0]
-    this.mx20 = max[1]
-    this.mx11 = 0
-    this.mx21 = 0
-    this.dlv = dlv
-    this.mc0 = null
-    this.mc1 = null
-    this.info = null
-    this.ard = mot
-    this.dh = new Date().getTime()
-    this.data = [[naI.nom, naI.rnd], [nomf, null]]
-    this.phrase = pp
-    return this
-  }
-
-  nouveauP (naI, naE, cc, mot, pp, max, dlv, npi) {
-    this.v = 0
-    this.vsh = 0
-    this.st = 1100 + (max[0] ? 10 : 0) // en attente, parrainage, partage secrets ou non
-    this.npi = npi ? 10 : 0
-    this.naI = naI
-    this.idI = naI.id
-    this.naE = naE
-    this.idE = naE.id
-    this.avc = 0
-    setNg(naE)
-    const na = new NomContact(naI.nom + '_' + naE.nom, cc)
-    this.id = na.id
-    setNg(na)
-    this.v1 = 0
-    this.v2 = 0
-    this.mx10 = max[0]
-    this.mx20 = max[1]
-    this.mx11 = 0
-    this.mx21 = 0
-    this.dlv = dlv
-    this.mc0 = null
-    this.mc1 = null
-    this.info = null
-    this.ard = mot
-    this.dh = new Date().getTime()
-    this.data = [[naI.nom, naI.rnd], [naE.nom, naE.rnd]]
-    this.phrase = pp
-    return this
-  }
-
-  nouveauC (naI, naE, cc, mot, max, npi) {
-    this.v = 0
-    this.vsh = 0
-    this.st = 1000 + (max[0] ? 10 : 0) // en attente, direct, partage secrets ou non
-    this.npi = npi ? 10 : 0
-    this.naI = naI
-    this.idI = naI.id
-    this.naE = naE
-    this.idE = naE.id
-    this.avc = 0
-    const na = new NomContact(naI.nom + '_' + naE.nom, cc)
-    this.id = na.id
-    setNg(na)
-    this.v1 = 0
-    this.v2 = 0
-    this.mx10 = max[0]
-    this.mx20 = max[1]
-    this.mx11 = 0
-    this.mx21 = 0
-    this.dlv = 0
-    this.mc0 = null
-    this.mc1 = null
-    this.info = null
-    this.ard = mot
-    this.dh = new Date().getTime()
-    this.data = [[naI.nom, naI.rnd], [naE.nom, naE.rnd]]
-    this.phrase = null
-    return this
-  }
-
-  dlvEtat () { if (this.dlv && this.stp === 1 && dlvDepassee(this.dlv)) this.st += 1000 }
-
-  // cols: ['id', 'v', 'st', 'dds', 'v1', 'v2', 'mx10', 'mx20', 'mx11', 'mx21', 'dlv', 'data', 'info0', 'info1', 'mc0', 'mc1', 'dh', 'ard', 'vsh']
-  async fromRow (row, cle) { // cle : non null pour réception d'un couple HORS session (acceptation / refus parrainage)
-    if (cle) this.cc = cle // NON persistante, utile pour acceptation de parrainage
-    this.vsh = row.vsh || 0
-    this.id = row.id
-    this.v = row.v
-    this.tp = row.tp
-    this.autp = row.autp
-    this.st = row.st
-    this.npi = row.npi || 0
-    this.v1 = row.v1
-    this.v2 = row.v2
-    this.mx10 = row.mx10
-    this.mx20 = row.mx20
-    this.mx11 = row.mx11
-    this.mx21 = row.mx21
     this.dlv = row.dlv
-    const clec = getCle(this.id)
-    this.data = deserial(await decrypter(this.cc || clec, row.datac))
-    this.setIdIE(this.data, cle)
-    const x = row.ardc ? deserial(await decrypter(this.cc || clec, row.ardc)) : [0, '']
-    this.dh = x[0]
-    this.ard = x[1]
-    const clek = stores.session.clek // pas de clek dans Accepttation / refus de parrainage (HORS CONNEXION)
-    if (this.avc === 0) {
-      this.mc = row.mc0 || new Uint8Array([])
-      this.info = row.infok0 && clek ? await decrypterStr(clek, row.infok0) : ''
-      this.phrase = row.phk0 && clek ? await decrypterStr(clek, row.phk0) : ''
-    } else {
-      this.mc = row.mc1 || new Uint8Array([])
-      this.info = row.infok1 && clek ? await decrypterStr(clek, row.infok1) : ''
-      this.phrase = ''
-    }
-    this.dlvEtat()
-    this.setRepE()
-    return this
+    this.vsh = row.vsh || 0
+    this.descrx = row.descrx
   }
 
-  async toRow () { // pour création de couple seulement
-    const clek = stores.session.clek
-    const r = { ...this }
-    r.datac = await crypter(this.cle, serial(r.data))
-    r.ardc = await crypter(this.cle, serial([r.dh, r.ard]))
-    r.phk0 = this.phrase ? await crypt.crypter(clek, this.phrase) : null
-    r.infok0 = null
-    r.infok1 = null
-    return serialize('rowcouple', r)
+  async decrypterDescr (clex) {
+    const x = decode(await decrypter(clex, this.descrx))
+    this.descr = { cv: x.cv, sp: x.sp, quotas: x.quotas }
+    this.descr.na = new NomAvatar(x.na[0], x.na[1])
+    this.descr.naf = new NomAvatar(x.naf[0], x.naf[1])
+    this.descr.nct = new NomTribu(x.nct[0], x.nct[1])
   }
-
-  async datacRenc (avatar) { // TODO : à vérifier, BUG probable
-    const data = this.data
-    data[1][1] = avatar.na.rnd
-    return await crypter(this.cc || this.cle, serial(data))
-  }
-
-  async toArdc (ard, cc) {
-    return await crypter(this.cc || cc || this.cle, serial([new Date().getTime(), ard]))
-  }
-
-  get toIdb () {
-    return serialize('idbCouple', this)
-  }
-
-  fromIdb (idb) {
-    deserialize('idbCouple', idb, this)
-    this.dlvEtat()
-    this.setIdIE(this.data)
-    this.setRepE()
-    return this
-  }
-
-  async phch () {
-    const pc = new PhraseContact()
-    await pc.init(this.phrase)
-    return pc.phch
-  }
-}
-
-/** Contact ************************************************************
-- `phch` : hash de la phrase de contact convenue entre le parrain A0 et son filleul A1 (s'il accepte)
-- `dlv`
-- `datax` : cryptée par le PBKFD de la phrase de contact:
-  - `cc` : clé du couple (donne son id).
-  - `naf` : nom de A1 pour première vérification immédiate en session que la phrase est a priori bien destinée à cet avatar. Le nom de A1 figure dans le nom du couple après celui de A0.
-  - Pour un parrainage seulement
-    - `nct` : `[nom, rnd]` nom complet de la tribu.
-    - `parrain` : vrai si le compte parrainé est parrain (créé par le Comptable, le seul qui peut le faire)
-    - `forfaits` : `[f1, f2]` forfaits attribués par le parrain.
-  - Pour une rencontre seulement
-    - `idt` : id de la tribu de A0 SEULEMENT SI A0 en est parrain.
-- `vsh` :
-*/
-
-forSchema({
-  name: 'idbContact',
-  cols: ['phch', 'dlv', 'ccx', 'vsh']
-})
-
-export class Contact {
-  get table () { return 'contact' }
-  // get sid () { return idToSid(this.phch) }
-  get pk () { return '' + this.id }
-
-  get horsLimite () { return dlvDepassee(this.dlv) }
 
   async nouveau (phch, clex, dlv, cc, naf, idt, nct, parrain, forfaits) { // clex : PBKFD de la phrase de contact
     this.vsh = 0
@@ -1817,150 +1241,105 @@ export class Contact {
     this.datax = await crypter(clex, serial(d))
     return this
   }
+}
+
+/** Chat ************************************************************
+- `id`
+- `ids` : identifiant du chat relativement à son avatar.
+- `v`
+- `dlv` : pour effacement automatique des chats trop vieux. Chaque exemplaire a sa dlv que l'avatar peut modifier.
+
+- `mc` : mots clés attribués par l'avatar au chat
+- `contc` : contenu crypté par la clé de l'avatar (celle de sa carte de visite).
+  - `na` : `[nom, cle]` de _l'autre_.
+  - `dh`  : date-heure de l'item.
+  - `txt` : texte du chat.
+*/
+
+export class Chat extends GenDoc {
 
   async fromRow (row) {
-    this.vsh = row.vsh || 0
-    this.phch = row.phch
-    this.datax = row.datax
+    this.id = row.id
+    this.ids = row.ids
+    this.v = row.v
     this.dlv = row.dlv
+    this.vsh = row.vsh || 0
+    this.mc = row.mc
+    this.naI = stores.avatar.compte.naAvatar(this.id)
+    const x = decode(await decrypter(this.naI.cle, row.contc))
+    this.naE = new NomAvatar[x.na[0], x.na[1]]
+    this.dh = x.dh
+    this.txt = x.txt
+  }
+
+  static getIds (naI, naE) {{
+    const id0 = naI.id
+    const id1 = naE.id
+    const k = id0 < id1 ? id0 + '/' + id1 : id1 + '/' + id0
+    return hash(k)
+  }}
+
+  async nouveau () { 
     return this
-  }
-
-  async getData (clex) {
-    return deserial(await decrypter(clex, this.datax))
-  }
-
-  async getCcIdNom (clex) {
-    const d = await this.getData(clex)
-    const na = new NomContact(d.naf, d.cc)
-    return [d.cc, na.id, d.naf]
-  }
-
-  toRow () {
-    return serialize('rowcontact', this)
-  }
-}
-
-/** Invitgr **********************************/
-/*
-- `id` : id du membre invité.
-- `ni` : numéro d'invitation.
-- `datap` : crypté par la clé publique du membre invité (recrypté en datak par la clé k)
-  - `nom rnd im` : nom complet du groupe (donne sa clé).
-Jamais stocké en IDB : dès réception, le row avatar correspondant est "régularisé"
-*/
-
-export class Invitgr {
-  get table () { return 'invitgr' }
-  get pk () { return this.id + '/' + this.ni }
-
-  async fromRow (row) {
-    const session = stores.session
-    this.id = row.id
-    this.ni = row.ni
-    const cpriv = session.compte.cpriv(row.id)
-    tru8('Invitgr.fromRow dec datap ' + this.id, cpriv)
-    const x = deserial(await decrypterRSA(cpriv, row.datap))
-    this.idg = hash(x[1]) + 2 // pour le traitement de régularisation (abonnement au groupe)
-    this.datak = await crypter(session.clek, serial(x))
-    return this
-  }
-
-  async toRow (clepub) {
-    tru8('Invitgr.toRow cr data ' + this.id, clepub)
-    const datap = await crypterRSA(clepub, serial(this.data))
-    const r = { id: this.id, ni: this.ni, datap }
-    return serialize('rowinvitgr', r)
-  }
-}
-
-/** Invitcp *************************************************************
-- `id` : id du membre invité.
-- `ni` : numéro d'invitation.
-- `datap` : clé cc du couple cryptée par la clé publique du membre invité (recrypté en datak par la clé k)
-Jamais stocké en IDB : dès réception, le row avatar correspondant est "régularisé"
-*/
-
-export class Invitcp {
-  get table () { return 'invitcp' }
-  get pk () { return '' + this.id + '/' + this.ni }
-
-  async fromRow (row) {
-    const session = stores.session
-    this.id = row.id
-    this.ni = row.ni
-    const cpriv = session.compte.av(row.id).cpriv
-    tru8('Invitcp.fromRow dec datap ' + this.id, cpriv)
-    const x = await decrypterRSA(cpriv, row.datap)
-    this.idc = hash(x) + 1 // pour le traitement de régularisation (abonnement au groupe)
-    this.datak = await crypter(session.clek, x)
-    return this
-  }
-
-  async toRow (id, ni, cc, clepub) {
-    tru8('Invitcp.toRow cr data ' + id, clepub)
-    const datap = await crypterRSA(clepub, cc)
-    const r = { id, ni, datap }
-    return serialize('rowinvitcp', r)
   }
 }
 
 /** Groupe ***********************************************************************
 - `id` : id du groupe.
-- `v` :
-- `dds` :
-- `dfh` : date (jour) de fin d'hébergement du groupe par son hébergeur
-- `st` : `x y`
-    - `x` : 1-ouvert (accepte de nouveaux membres), 2-fermé (ré-ouverture en vote)
-    - `y` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
+- `v`, 
+- `dlv` : plus haute `dlv` des membres, 
+- `dfh` : jour de fin d'hébergement quand le groupe n'est plus hébergé,
+
+- `dnv` : dernier numéro de version utilisé sur le groupe.
+- `stx` : 1-ouvert (accepte de nouveaux membres), 2-fermé (ré-ouverture en vote)
+- `sty` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
 - `mxim` : dernier `im` de membre attribué.
+- `idhg` : id du compte hébergeur crypté par la clé du groupe.
 - `imh` : indice `im` du membre dont le compte est hébergeur.
 - `v1 v2` : volumes courants des secrets du groupe.
-- `f1 f2` : forfaits attribués par le compte hébergeur.
-- `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé G du groupe.
-- `vsh`
+- `q1 q2` : quotas attribués par le compte hébergeur.
+- `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
+- `cvg` : carte de visite du groupe crypté par la clé du groupe `[photo, info]`. 
 */
 
-forSchema({
-  name: 'idbGroupe',
-  cols: ['id', 'v', 'dfh', 'st', 'mxim', 'imh', 'v1', 'v2', 'f1', 'f2', 'mc', 'vsh']
-})
-
-export class Groupe {
-  get table () { return 'groupe' }
-  // get sid () { return idToSid(this.id) }
-  get pk () { return '' + this.id }
-  get estZombi () { return this.dfh === 99999 }
-
-  get cv () { return stores.cv.get(this.id) }
-  get photo () { const cv = this.cv; return cv ? cv[0] : '' }
-  get info () { const cv = this.cv; return cv ? cv[1] : '' }
-
+export class Groupe extends GenDoc {
   get cle () { return getCle(this.id) }
   get na () { return getNg(this.id) }
   get nom () { return this.na.nom }
   get nomc () { return this.na.nomc }
-  // nomEdMb (m) { const t = m.titre; return t ? (t + ' [' + this.nomEd + ']') : this.nomEd }
+  get photo () { const cv = this.cv; return cv ? cv[0] : '' }
+  get info () { const cv = this.cv; return cv ? cv[1] : '' }
+  get pc1 () { return Math.round(this.v1 / UNITEV1 / this.q1) }
+  get pc2 () { return Math.round(this.v2 / UNITEV2 / this.q2) }
 
-  get nomf () { return normpath(this.na.nom) }
 
-  get stx () { return Math.floor(this.st / 10) }
-  get sty () { return this.st % 10 }
+  async compile (row) {
+    this.vsh = row.vsh || 0
+    this.id = row.id
+    this.v = row.v
+    this.dfh = row.dfh || 0
+    this.dlv = row.dlv
+    if (row._zombi) { this._zombi = true; return }
 
-  get pc1 () { return Math.round(this.v1 / UNITEV1 / this.f1) }
-  get pc2 () { return Math.round(this.v2 / UNITEV2 / this.f2) }
-
-  // retourla liste (array) des im des membres du groupe
-  get lstIm () { return stores.membre.listeImDeGr(this.id) }
-
-  estHeb (avid) { const na = this.naHeb; return na && !this.dfh && na.id === avid }
-
-  get naHeb () {
-    if (this.dfh) return null
-    const m = stores.membre.get(this.id, this.imh)
-    return m ? m.namb : null
+    this.dnv = row.dnv
+    this.stx = row.stx
+    this.sty = row.sty
+    this.mxim = row.mxim
+    this.idh = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
+    this.imh = row.imh || 0
+    this.v1 = row.v1
+    this.v2 = row.v2
+    this.q1 = row.q1
+    this.q2 = row.q2
+    this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
+    this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
   }
 
+  get mbHeb () { // membre hébergeur
+    return  this.dfh ? null : stores.membre.getMembre(this.id, this.imh)
+  }
+
+  /* En attente *************************************************
   imDeId (id) {
     const membre = stores.membre
     for (const im in this.lstIm) {
@@ -2015,6 +1394,7 @@ export class Groupe {
     const i = s.indexOf('/')
     return i === -1 ? { c: '', n: s } : { c: s.substring(0, i), n: s.substring(i + 1) }
   }
+  */
 
   nouveau (id, forfaits) {
     this.id = id
@@ -2032,38 +1412,6 @@ export class Groupe {
     return this
   }
 
-  async fromRow (row) {
-    this.vsh = row.vsh || 0
-    this.id = row.id
-    this.v = row.v
-    this.dfh = row.dfh
-    if (!this.estZombi) {
-      this.st = row.st
-      this.mxim = row.mxim
-      this.mc = row.mcg ? deserial(await decrypter(this.cle, row.mcg)) : {}
-      this.imh = row.imh
-      this.v1 = row.v1
-      this.v2 = row.v2
-      this.f1 = row.f1
-      this.f2 = row.f2
-    } else { // utilité ? a du être fait par le GC
-      this.st = 0
-      this.mxim = 0
-      this.mc = null
-      this.imh = 0
-      this.v1 = 0
-      this.v2 = 0
-      this.f1 = 0
-      this.f2 = 0
-    }
-    return this
-  }
-
-  async toRow () {
-    const r = { ...this }
-    r.mcg = Object.keys(r.mc).length ? await crypter(this.cle, serial(this.mc)) : null
-    return serialize('rowgroupe', r)
-  }
 
   async toIdhg (idc) {
     return await crypter(this.cle, '' + idc)
@@ -2076,76 +1424,54 @@ export class Groupe {
   async toMcg (mc) {
     return Object.keys(mc).length ? await crypter(this.cle, serial(mc)) : null
   }
-
-  get toIdb () {
-    return serialize('idbGroupe', this)
-  }
-
-  fromIdb (idb) {
-    deserialize('idbGroupe', idb, this)
-    return this
-  }
 }
 
 /** Membre ***********************************************************
-- `id` : id du **groupe**.
-- `im` : indice du membre dans le groupe.
-- `v` :
-- `st` : `x p`
-  - `x` : 0:envisagé, 1:invité, 2:actif (invitation acceptée), 3: inactif (invitation refusée), 4: inactif (résilié), 5: inactif (disparu).
-  - `p` : 0:lecteur, 1:auteur, 2:animateur.
-- 'npi' : 1 si ne pas communiquer aux autres membres
+- `id` : id du groupe.
+- `ids`: identifiant, indice de membre relatif à son groupe.
+- `v`
+- `dlv` : date de dernière signature lors de la connexion du compte de l'avatar membre du groupe.
+
+- `stx` : 0:pressenti, 1:invité, 2:actif (invitation acceptée), 3: refusé (invitation refusée), 4: résilié, 5: disparu.
+- `laa` : 0:lecteur, 1:auteur, 2:animateur.
+- `npi` : 0: accepte d'être invité, 1: ne le souhaite pas.
 - `vote` : vote de réouverture.
 - `mc` : mots clés du membre à propos du groupe.
 - `infok` : commentaire du membre à propos du groupe crypté par la clé K du membre.
-- `datag` : données cryptées par la clé du groupe. (immuable)
-  - `nom, rnd` : nom complet de l'avatar.
-  - `ni` : numéro d'invitation du membre dans `invitgr`. Permet de supprimer l'invitation et d'effacer le groupe dans son avatar (clé de `lgrk`).
-  - `idi` : id du membre qui l'a _envisagé_.
-- `ardg` : ardoise du membre vis à vis du groupe. Couple `[dh, texte]` crypté par la clé du groupe. Contient le texte d'invitation puis la réponse de l'invité cryptée par la clé du groupe. Ensuite l'ardoise peut être écrite par le membre (actif) et les animateurs.
-- `vsh`
+- `datag` : données, immuables, cryptées par la clé du groupe :
+  - `nom` `cle` : nom complet de l'avatar.
+  - `ni` : numéro d'invitation du membre. Permet de supprimer l'invitation et d'effacer le groupe dans son avatar (clé de `lgrk`).
+	- `idi` : id du membre qui l'a _pressenti_.
+- `cvg` : carte de visite du membre `[photo, info]` crypté par la clé du groupe.
 */
 
-forSchema({
-  name: 'idbMembre',
-  cols: ['id', 'im', 'v', 'st', 'npi', 'vote', 'mc', 'info', 'data', 'ard', 'dh', 'vsh']
-})
-
-export class Membre {
-  get table () { return 'membre' }
-  // get sid () { return idToSid(this.id) }
-  get id2 () { return this.im }
-  get pk () { return this.id + '/' + this.id2 }
-  // get pkv () { return this.sid + '/' + this.id2 + '/' + this.v } // TODO : utilité à vérifier
-
-  get stx () { return this.st < 0 ? -1 : Math.floor(this.st / 10) }
-  get stp () { return this.st < 0 ? -1 : this.st % 10 }
-
-  // De l'avatar membre
-  get estAc () { return stores.session.compte.estAc(this.namb.id) }
-  get cvm () { return stores.cv.get(this.namb.id) }
-  get photom () { const cv = this.cvm; return cv ? cv[0] : '' }
-  get infom () { const cv = this.cvm; return cv ? cv[1] : '' }
-  get clem () { return getCle(this.namb.id) }
-  get nomc () { return this.namb.nomc }
-
-  /*
-  get titre () { // TODO : utilité à vérifier
-    if (!this.info) return ''
-    const i = this.info.indexOf('\n')
-    const t1 = i === -1 ? this.info : this.info.substring(0, i)
-    return t1.length <= 20 ? t1 : t1.substring(0, 20) + '...'
-  }
-  */
-
+export class Membre extends GenDoc {
   // Du groupe
   get cleg () { return getCle(this.id) }
-  get na () { return getNg(this.id) }
+  get ng () { return getNg(this.id) } // nom complet du groupe
+  
+  // De l'avatar membre
+  get estAc () { return stores.avatar.compte.estAc(this.na.id) }
+  get clem () { return this.namb.cle }
+  // na : nom complet de l'avatar membre
 
-  get dhed () { return dhcool(this.dh) }
+  async compile (row) {
+    this.vsh = row.vsh || 0
+    this.id = row.id
+    this.im = row.ids
+    this.v = row.v
+    this.dlv = row.dlv
 
-  // INTERNE
-  setRepE () { if (!this.estAc) setNg(this.namb) }
+    this.stx = row.stx
+    this.laa = row.laa
+    this.npi = row.npi || 0
+    this.vote = row.vote || 0
+    this.mc = row.mc
+    this.data = decode(await decrypter(this.cleg, row.datag))
+    this.na = new NomAvatar(this.data.nom, this.data.cle)
+    if (!this.estAc) setNg(this.namb)
+    this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
+  }
 
   nouveau (id, st, im, na, idi) {
     /* id du groupe, statut, indice membre,
@@ -2171,112 +1497,84 @@ export class Membre {
     return this
   }
 
-  async fromRow (row) {
-    this.vsh = row.vsh || 0
-    this.id = row.id
-    this.im = row.im
-    this.v = row.v
-    this.st = row.st
-    this.npi = row.npi || 0
-    this.vote = row.vote
-    this.data = deserial(await decrypter(this.cleg, row.datag))
-    this.namb = new NomAvatar(this.data.nom, this.data.rnd)
-    const [d, t] = row.ardg ? deserial(await decrypter(this.cleg, row.ardg)) : [0, '']
-    this.ard = t
-    this.dh = d
-    this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
-    this.mc = row.mc
-    this.setRepE()
-    return this
-  }
-
-  async toArdg (ard) {
-    return ard ? await crypter(this.cleg, serial([new Date().getTime(), ard])) : null
-  }
-
-  async toRow () {
-    const r = { ...this }
-    r.datag = await crypter(this.cleg, serial(this.data))
-    r.ardg = this.ard ? await crypter(this.cleg, serial([this.dh, this.ard])) : null
-    r.infok = this.estAc && this.info ? await crypter(stores.session.clek, this.info) : null
-    return serialize('rowmembre', r)
-  }
-
-  get toIdb () {
-    return serialize('idbMembre', this)
-  }
-
-  fromIdb (idb) {
-    deserialize('idbMembre', idb, this)
-    this.namb = new NomAvatar(this.data.nom, this.data.rnd)
-    this.setRepE()
-    return this
-  }
 }
 
 /** Secret ****************************************************
-- `id` : id du groupe ou de l'avatar.
-- `ns` : numéro du secret.
-- `x` : jour de suppression (0 si existant).
-- `v` :
+- `id` : id de l'avatar ou du groupe.
+- `ids` : identifiant relatif à son avatar.
+- `v` : sa version.
+
 - `st` :
-  - `99999` pour un *permanent*.
+  - `99999` pour un _permanent_.
   - `dlv` pour un _temporaire_.
-- `xp` : _xxxp_ (`p` reste de la division par 10)
-   - `xxx` : exclusivité : l'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `x` (un animateur a toujours le droit de gestion de protection et de changement du `x`). Pour un secret de couple : 1 ou 2.
-    - `p` : 0: pas protégé, 1: protégé en écriture.
+- `imx` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `x`. 
+- `p` : 0: pas protégé, 1: protégé en écriture.
 - `v1` : volume du texte
 - `v2` : volume total des fichiers attachés
 - `mc` :
-  - secret personnel ou de couple : vecteur des index de mots clés.
+  - secret personnel : vecteur des index de mots clés.
   - secret de groupe : map sérialisée,
     - _clé_ : `im` de l'auteur (0 pour les mots clés du groupe),
     - _valeur_ : vecteur des index des mots clés attribués par le membre.
 - `txts` : crypté par la clé du secret.
-  - `d` : date-heure de dernière modification du texte
-  - `l` : liste des auteurs (pour un secret de couple ou de groupe).
-  - `t` : texte gzippé ou non
-- `mfas` : sérialisation de la map des fichiers attachés.
-- `refs` : couple `[id, ns]` crypté par la clé du secret référençant un autre secret
-(référence de voisinage qui par principe, lui, n'aura pas de `refs`).
-- `vsh`
+  - `d` : date-heure de dernière modification du texte.
+  - `l` : liste des auteurs pour un secret de groupe.
+  - `t` : texte gzippé ou non.
+- `mfas` : map des fichiers attachés.
+- `refs` : couple `[id, ids]` crypté par la clé du secret référençant un autre secret _référence de voisinage_ qui par principe, lui, n'aura pas de `refs`).
 
 **Map `mfas` des fichiers attachés dans un secret:**
 - _clé_ `idf`: identifiant du fichier en base64.
-- _valeur_ : couple `[lg, data]`
+- _valeur_ : { lg, datas }
   - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v2 d'un secret.
-  - `data` : sérialisation cryptée par la clé S du secret de : `{ nom, info, dh, type, gz, lg, sha }`.
+  - `datas` : sérialisation cryptée par la clé S du secret de : `{ nom, info, dh, type, gz, lg, sha }`.
 */
 
-forSchema({
-  name: 'idbSecret',
-  cols: ['id', 'ns', 'v', 'x', 'st', 'xp', 'v1', 'v2', 'mc', 'txt', 'mfa', 'ref', 'vsh']
-})
+export class Secret extends GenDoc {
+  get cle () { return getCle(this.id) }
+  get deGroupe () { return this.id % 10 === 8 }
 
-export class Secret {
-  get table () { return 'secret' }
-  // get sid () { return idToSid(this.id) }
-  get id2 () { return this.ns }
-  // get sid2 () { return idToSid(this.ns) }
-  get pk () { return this.id + '/' + this.ns }
+  async compile (row) {
+    this.vsh = row.vsh || 0
+    this.id = row.id
+    this.ns = row.ids
+    this.v = row.v
+
+    this._zombi = row._zombi
+    if (this._zombi) return
+    this.st = row.st
+    this.imx = row.imx
+    this.v1 = row.v1
+    this.v2 = row.v2
+    this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || new Uint8Array([]))
+    this.txt = decode(await decrypter(cle, row.txts))
+    this.txt.t = ungzip(this.txt.t)
+    this.ref = row.refs ? decode(await decrypter(this.cle, row.refs)) : null
+
+    this.mfa = {}
+    this.nbfa = 0
+    if (this.v2) {
+      const map = row.mfas ? deserial(row.mfas) : {}
+      for (const idf in map) {
+        const x = map[idf]
+        const y = { lg: x.lg }
+        this.mfa[idf] = y
+        y.data = decode(await decrypter(cle, x.datas))
+        this.nbfa++
+      }
+    }
+  }
+
+  get avatar () { return this.deGroupe ? null : stores.avatar.getAvatar(this.id) }
+  get groupe () { return !this.deGroupe ? null : stores.groupe.getGroupe(this.id) }
 
   // TODO : gestion des voisins d'un secret
   get pkref () { return !this.ref ? '' : (idToSid(this.ref[0]) + '/' + this.ref[1]) }
-
-  // get vk () { return this.pk + '@' + this.v } // TODO : utilité à vérifier
-
-  get suppr () { return this.x > 0 }
-
   get horsLimite () { return this.st < 0 || this.st >= 99999 ? false : dlvDepassee(this.st) }
-  get ts () { return this.id % 4 } // 0:personnel 1:couple 2:groupe
-  get exclu () { return Math.floor(this.xp / 10) }
-  get protect () { return this.xp % 10 }
-  // get titre () { return this.suppr ? 'SUPPRIMÉ' : titreSecret(this.txt && this.txt.t ? this.txt.t : '???') }
   get nbj () { return this.st <= 0 || this.st === 99999 ? 0 : (this.st - getJourJ()) }
   get dh () { return this.suppr ? '?' : dhcool(this.txt.d * 1000) }
 
-  get cle () { return this.ts ? getCle(this.id) : stores.session.clek }
-
+  /* En attente ***************************************************
   get nomf () {
     if (this.suppr) return 'SUPPRIMÉ@' + this.sid2
     const i = this.txt.t.indexOf('\n')
@@ -2284,20 +1582,14 @@ export class Secret {
     return normpath(t) + '@' + this.sid2
   }
 
-  get avatar () { return this.ts !== 0 ? null : stores.avatar.get(this.id) }
-  get couple () { return this.ts !== 1 ? null : stores.couple.get(this.id) }
-  get groupe () { return this.ts !== 2 ? null : stores.groupe.get(this.id) }
-
   get nomEdACG () {
     return this.ts === 0 ? this.avatar.nomc : (this.ts === 1 ? this.couple.nomc : this.groupe.nomc)
   }
 
   get mcg () { return this.ts === 2 && this.mc ? this.mc[0] || new Uint8Array([]) : new Uint8Array([]) }
 
-  /*
-  Si id est celui d'un avatar accédant au secret, retourne id
-  Sinon retourne l'un des avatars du compte accédant au secret
-  */
+  // Si id est celui d'un avatar accédant au secret, retourne id
+  // Sinon retourne l'un des avatars du compte accédant au secret
   avatarAcc (id) {
     if (this.ts === 0) {
       return this.id === id ? id : this.id
@@ -2331,45 +1623,6 @@ export class Secret {
     return l
   }
 
-  cloneSuppr () {
-    const s = new Secret()
-    s.id = this.id
-    s.ns = this.ns
-    s.x = 1
-    s.v = -1
-    s.ref = this.ref
-    return s
-  }
-
-  nouveau (id, ref) {
-    this.id = id
-    this.ns = rnd6()
-    this.v = 0
-    this.x = 0
-    this.st = 99999 // getJourJ() + cfg().limitesjour.secrettemp
-    this.xp = 0
-    this.txt = { t: '', d: Math.floor(new Date().getTime() / 1000) }
-    this.ref = ref || null
-  }
-
-  nouveauP (id, ref) {
-    this.nouveau(id, ref)
-    this.mc = new Uint8Array([])
-    return this
-  }
-
-  nouveauC (id, ref) { // im : 0 ou 1 (couple.avc)
-    this.nouveau(id, ref)
-    this.mc = { 1: new Uint8Array([]), 2: new Uint8Array([]) }
-    return this
-  }
-
-  nouveauG (id, ref, im) {
-    this.nouveau(id, ref)
-    this.mc = { 0: new Uint8Array([]), im: new Uint8Array([]) }
-    return this
-  }
-
   async toRowTxt (txt, im) {
     const x = { d: Math.floor(new Date().getTime() / 1000), t: gzip(txt) }
     if (this.ts) {
@@ -2388,63 +1641,28 @@ export class Secret {
     const x = await crypter(this.cle, serial(fic))
     return [fic.lg, x]
   }
+  */
 
-  async fromRow (row) {
-    this.vsh = row.vsh || 0
-    this.id = row.id
-    this.ns = row.ns
-    this.x = row.x || 0
-    this.v = row.v
-    const cle = this.cle
-    this.ref = row.refs ? deserial(await decrypter(cle, row.refs)) : null
-    if (!this.suppr) {
-      this.st = row.st
-      this.xp = row.xp
-      this.v1 = row.v1
-      this.v2 = row.v2
-      try {
-        this.txt = deserial(await decrypter(cle, row.txts))
-        this.txt.t = ungzip(this.txt.t)
-      } catch (e) {
-        console.log(e.toString())
-        this.txt = { t: $t('illisible'), d: Math.floor(new Date().getTime() / 1000) }
-      }
-      if (this.ts === 0) {
-        this.mc = row.mc || new Uint8Array([])
-      } else {
-        this.mc = row.mc ? deserial(row.mc) : {}
-      }
-      this.mfa = {}
-      this.nbfa = 0
-      if (this.v2) {
-        const map = row.mfas ? deserial(row.mfas) : {}
-        for (const idf in map) {
-          this.mfa[idf] = deserial(await decrypter(cle, map[idf][1]))
-          this.mfa[idf].idf = parseInt(idf)
-          this.nbfa++
-        }
-      }
-    }
+  nouveau (id, ref) {
+    this.id = id
+    this.ns = rnd6()
+    this.v = 0
+    this.x = 0
+    this.st = 99999 // getJourJ() + cfg().limitesjour.secrettemp
+    this.xp = 0
+    this.txt = { t: '', d: Math.floor(new Date().getTime() / 1000) }
+    this.ref = ref || null
+  }
+
+  nouveauP (id, ref) {
+    this.nouveau(id, ref)
+    this.mc = new Uint8Array([])
     return this
   }
 
-  get toIdb () {
-    let t
-    if (!this.x) {
-      t = this.txt.t
-      this.txt.t = gzip(this.txt.t)
-    }
-    const idb = serialize('idbSecret', this)
-    if (!this.x) this.txt.t = t
-    return idb
-  }
-
-  fromIdb (idb) {
-    deserialize('idbSecret', idb, this)
-    this.txt.t = ungzip(this.txt.t)
-    this.nbfa = 0
-    // eslint-disable-next-line no-unused-vars
-    if (this.v2) for (const idf in this.mfa) this.nbfa++
+  nouveauG (id, ref, im) {
+    this.nouveau(id, ref)
+    this.mc = { 0: new Uint8Array([]), im: new Uint8Array([]) }
     return this
   }
 

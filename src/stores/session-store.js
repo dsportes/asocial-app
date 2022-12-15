@@ -26,11 +26,10 @@ export const useSessionStore = defineStore('session', {
     fscredentials: null, // pour connexion à Firestore
 
     estComptable: false,
-    compteId: 0,
+    // ??? compteId: 0,
+    // compte est un getter
     clek: null,
     clepubc: null,
-    compta: null,
-    compte: null, // avatar principal
 
     avatarId: null,
     groupeId: null,
@@ -43,6 +42,7 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
+    compte (state) { return stores.avatar.compte },
     // Nom de l'entrée LocalStorage devant contenir le nom de la base
     lsk (state) { return '$asocial$-' + state.phrase.dpbh},
     niveau (state) { return Math.floor(state.status / 10) },

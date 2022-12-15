@@ -1,19 +1,50 @@
 import { defineStore } from 'pinia'
 
+/* Store maître du compte courant :
+- compte : avatar principal du compte courant
+- compta : compta du compte courant
+- tribu : tribu actuelle du compte courants
+- avatars : les avatars du compte courant
+  Sous-collection pour chaque avatar id :
+  - secrets : getSecrets(id)
+  - chats : getChats(id)
+  - sponsorings : getSponsorings(id)
+*/
+
 export const useAvatarStore = defineStore('avatar', {
   state: () => ({
-    map: new Map()
+    map: new Map(),
+    compteId: 0,
+    avatarP: null,
+    comptaP: null,
   }),
 
   getters: {
-    // retourne la liste des ids des avatars DU COMPTE enregistrés
-    getIds: (state) => { return Array.from(state.map.keys()) },
+    /* retourne l'avatar principal du compte actuellement connecté */
+    compte: (state) => { return state.avatarP },
+
+    /* retourne la compta de l'avatar principal du compte actuellement connecté */
+    compta: (state) => { return state.comptaP },
+
+    /* retourne la compta de l'avatar principal du compte actuellement connecté */
+    tribu: (state) => { return state.tribuP },
+
+    // Map dont la clé est l'id de l'avatar et la valeur le document avatar
+    avatars: (state) => {
+      const m = new Map()
+      state.map.forEach(e => { const a = e.avatar; m.set(a.id, a)})
+      return m
+    },
+
+    // liste (array) des ids des avatars DU COMPTE enregistrés
+    ids: (state) => { return Array.from(state.map.keys()) },
 
     getAvatar: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.avatar : null 
       }
     },
+
     // retourne le secret ns de l'avatar id
     getSecret: (state) => { return (id, ids) => { 
         const e = state.map.get(id)
@@ -38,21 +69,38 @@ export const useAvatarStore = defineStore('avatar', {
         return e ? e.chats : null 
       }
     },
-    // retourne le tdv ids de l'avatar id
-    getRdv: (state) => { return (id, ids) => { 
+    // retourne le sponsoring d'id ids de l'avatar id
+    getSponsoring: (state) => { return (id, ids) => { 
       const e = state.map.get(id)
-      return e ? e.rdvs.get(ids) : null 
+      return e ? e.sponsorings.get(ids) : null 
     }
     },
-    // retourne la Map des chats (clé ids) de l'avatar id
-    getRdvs: (state) => { return (id) => { 
+    // retourne la Map des sponsorings (clé ids) de l'avatar id
+    getSponsorings: (state) => { return (id) => { 
         const e = state.map.get(id)
-        return e ? e.rdvs : null 
+        return e ? e.sponsorings : null 
       }
     }
   },
 
   actions: {
+    setCompte (avatar, compta, tribu) { // avatar principal du compte connecté
+      if (!avatar) { this.compteId = 0; this.compte = null; return }
+      this.compteId = avatar.id
+      this.avatarP = avatar
+      this.setTribu(tribu)
+      this.setCompta(compta)
+      this.setAvatar(avatar)
+    },
+
+    setCompta (compta) {
+      this.comptaP = compta
+    },
+
+    setTribu (tribu) {
+      this.tribuP = tribu
+    },
+
     setAvatar (avatar) {
       if (!avatar) return
       let e = this.map.get(avatar.id)
@@ -60,11 +108,12 @@ export const useAvatarStore = defineStore('avatar', {
         e = { 
           avatar: avatar, 
           secrets: new Map(),
-          rdvs: new Map(),
+          sponsorings: new Map(),
           chats: new Map
          }
         this.map.set(avatar.id, e)
       } else e.avatar = avatar
+      if (avatar.id === this.compteId) this.avaataP = avatar
     },
 
     setSecret (secret) {
@@ -91,16 +140,16 @@ export const useAvatarStore = defineStore('avatar', {
       e.chats.delete(ids)
     },
 
-    setRdv (rdv) {
-      if (!rdv) return
-      const e = this.map.get(rdv.id)
+    setSponsoring (sponsoring) {
+      if (!sponsoring) return
+      const e = this.map.get(sponsoring.id)
       if (!e) return
-      e.rdvs.set(rdv.ids, rdv)
+      e.sponsorings.set(sponsoring.ids, sponsoring)
     },
-    delRdv (id, ids) {
+    delSponsoring (id, ids) {
       const e = this.map.get(id)
       if (!e) return
-      e.rdvs.delete(ids)
+      e.sponsorings.delete(ids)
     },
 
 

@@ -1,10 +1,9 @@
 TODO next :
-- connexion: people, chargement sous-collection, CV
-- reprendre tribu compta groupe membre - people sponsor tribu
+- connexion: people / membre / tribu, chargement sous-collection, CV
+- reprendre store people avec tribu / membre
 - connexion avion
 - création compte comptable
-- parrainage / acceptation
-
+- sponsoring / acceptation
 
 # Application front-end A-social
 
