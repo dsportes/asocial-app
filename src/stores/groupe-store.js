@@ -67,7 +67,7 @@ export const useGroupeStore = defineStore('groupe', {
       if (!e) return
       e.membres.set(membre.im, membre)
       const na = membre.namb
-      const compte = stores.session.compte
+      const compte = stores.avatar.compte
       if (compte.estAc(na.id)) return // c'est un des avatars du compte
       // c'est vraiement un avatar externe
       const people = stores.people

@@ -99,16 +99,14 @@ export const usePeopleStore = defineStore('people', {
   },
 
   actions: {
-    /* Cette méthode permet de détecter plus facilement sur les $onAction
-    les créations de people (avatars externes)
-    - si reset, recrée une entrée avec juste na */
+    /*  */
     newPeople (na, reset) {
       const  e = { na: na, cv: null, groupes: new Map() }
       if (!this.map.has(na.id) || reset) this.map.set(na.id, e)
       return this.map.get(na.id)
     },
 
-    // Inscrit que cepeople id est le membre im du groupe idg
+    // Inscrit que ce people id est le membre im du groupe idg
     // OU si im est 0, supprime la participation de CE people au groupe
     setMbId (id, idg, im) {
       const e = this.map.get(id)
