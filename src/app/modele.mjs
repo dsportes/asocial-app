@@ -953,9 +953,8 @@ export class Avatar extends GenDoc {
   - clé: id du groupe
   - valeur: { ng: , mbs: [ids] }
   */
-
   membres (map) {
-    for (const ni of this.lgr) {
+    for (const ni in this.lgr) {
       const [nom, rnd, im] = this.lgr[ni]
       const ng = new NomGroupe(nom, rnd)
       const e = map[ng.id]

@@ -235,8 +235,9 @@ export class ConnexionSyncInc extends OperationUI {
       })
     }
 
-    const args = { token: session.authToken, mapv: avReq }
+    const args = { token: session.authToken, mapv: avReq, idc: avatar.id, vc: avatar.v }
     const ret = this.tr(await post(this, 'GetAvatars', args))
+    if (!ret.OK) return false
 
     for (const id of this.avatarsToStore.keys()) {
       const r1 = ret.lst[id]
@@ -255,16 +256,16 @@ export class ConnexionSyncInc extends OperationUI {
   async tousGroupes (avatarsToStore) {
     const session = stores.session
     /* map des membres des groupes des avatars
-     - clé: id du groupe  - valeur: { ng: , mbs: [ids], v , dlv ,  } */
-    const mbsMap = { } // les v, dlv, ne sont pas renseignées pour l'instant
-    // liste de [{id: , v: }]
-    const avsLst = []
+     - clé: id du groupe  - valeur: { ng, mbs: [ids], v , dlv } */
+    const mbsMap = { } 
+
+    const avsLst = [] // liste de [{id: , v: }] - versions des avatars qui ne doivent pas avoir changées
     const abPlus = [] // ids des avatars et groupes auxquels s'abonner
 
-    avatarsToStore.valus().forEach(avatar => {
+    avatarsToStore.values().forEach(avatar => {
       avsLst.push({ id: avatar.id, v: avatar.v })
       abPlus.push(id)
-      avatar.membres(mbsMap)
+      avatar.membres(mbsMap) // v, dlv, de mbsmap ne sont pas renseignées pour l'instant
     })
     const grRows = {}
     if (session.accesIdb) {
@@ -274,7 +275,7 @@ export class ConnexionSyncInc extends OperationUI {
           this.buf.supprIDB( { _nom: 'groupes', id: row.id})
         } else {
           grRows[row.id] = row
-          e.v = row.v
+          e.v = row.v // v de mbsmap est renseignée
         }
       })
     }
