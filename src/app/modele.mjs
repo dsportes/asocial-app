@@ -788,16 +788,22 @@ export class Tribu extends GenDoc {
     }
   }
 
-  get naSponsors () { // array des na des parrains
+  get naSponsors () { // array des na des sponsors
     const r = []
     for (const id in this.mncp) r.push(this.mncpt[id].na)
     return r
   }
 
-  get idSponsors () { // array des id des parrains
+  get idSponsors () { // array des id des sponsors
     const r = []
     for (const id in this.mncp) r.push(this.mncpt[id].na.id)
     return r
+  }
+
+  // retourne la CV du sponsor d'id donné
+  cvSponsor (id) {
+    const x = this.mncpt[id]
+    return x ? x.cv : null
   }
 
   nouvelle (nom, info, r1, r2) {

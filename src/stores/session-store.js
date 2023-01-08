@@ -42,7 +42,11 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
+    // trois alias utiles
     compte (state) { return stores.avatar.compte },
+    compta (state) { return stores.avatar.compta },
+    tribu (state) { return stores.avatar.tribu },
+
     // Nom de l'entrée LocalStorage devant contenir le nom de la base
     lsk (state) { return '$asocial$-' + state.phrase.dpbh},
     niveau (state) { return Math.floor(state.status / 10) },

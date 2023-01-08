@@ -7,11 +7,11 @@ Un "people" est un avatar :
 - (S) soit un sponsor de la tribu du compte qui n'est PAS avatar du compte
 - (C) soit l'interlocuteur d'un chat avec un avatar du compte
 Un people peut l'être à plusieurs titre:
-  - N fois pour M, N fois au titre C et 1 seule fois au titre S
+  - N fois pour M, N fois au titre C, N fois au titre S
 La "carte de visite" d'un people provient :
   - de l'un membres M
   - soit d'avoir été explictement recherchée si la condition M n'est pas remplie
-  - soit non disponible
+  - soit de la tribu dont le people est sponsor (où figure sa CV)
 Chaque element a pour clé l'id de l'avatar :
 - na : nom d'avatar
 - cv : carte de visite de l'avatar si elle a été explicitement chargée
@@ -34,7 +34,7 @@ export const usePeopleStore = defineStore('people', {
 
     ids: (state) => { return Array.from(state.map.keys()) },
 
-    // retourne { na: cv: sponsor: true/false, groupes: Map(idg, im)
+    // retourne { na, cv, sponsor: true/false, groupes: Map(idg, im)}
     getPeople: (state) => { return (id) => {
         const e = state.map.get(id)
         if (!e) return null
@@ -48,11 +48,23 @@ export const usePeopleStore = defineStore('people', {
         return e ? e.na : null 
       }
     },
+    /* Retourne, 
+    - soit la CV explicitement chargée
+    - soit s'il est sponsor, de la tribu où sa CV/na sont enregistrées
+    - soit la CV trouvée sur le document membre du premier groupe 
+      auquel appartient le people
+    - soit { photo:'', info:'' } (mais c'est anormal)
+    */
     getCv: (state) => { return (id) => { 
         const e = state.map.get(id)
         if (!e) return null
-        if (e.cv) return e.cv
-        if (!e.groupes || !e.groupes.size) return null
+        if (e.cv) return e.cv // cv explicitement chargée
+        if (state.estSponsor(id)) {
+          const tribu = stores.avatar.tribu
+          const cv = tribu ? tribu.cvSponsor(id) : null
+          if (cv) return cv
+        }
+        if (!e.groupes || !e.groupes.size) return { photo:'', info:'' }
         const idg = e.groupes.keys().next().value
         const im = e.groupes.get(idg).keys().next().value
         const mb = stores.groupe.getMembre(idg, im)

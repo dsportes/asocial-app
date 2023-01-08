@@ -308,6 +308,11 @@ export class ConnexionSyncInc extends OperationUI {
     return true
   }
 
+  // Chargement pour un avatar de ses secrets, chats, sponsorings
+  chargerSCS (avid) {
+
+  }
+
   reset () {
     this.buf = new OpBufC()
     this.dh = 0
@@ -359,31 +364,38 @@ export class ConnexionSyncInc extends OperationUI {
         session.clepubc = ret.clepubc
         if (ret.credentials) session.fscredentials = ret.credentials
         const rowAvatars = ret.rowAvatars
-        this.avatar = compile(this.buf.putIDB(rowAvatars)) // cle K, repertoire des avatars
+        this.avatar = compile(this.buf.putIDB(rowAvatars)) // cle K, répertoire des avatars
         this.compta = compile(this.buf.putIDB(ret.rowComptas))
         this.tribu = compile(this.buf.putIDB(ret.rowTribus))
         session.estComptable = this.avatar.id === IDCOMPTABLE
         session.compteId = this.avatar.id
         
         // session.blocage
-        if (session.estComptable || session.avion) session.blocage = 0
-        else session.blocage = this.tribu.stn < this.compta.stn ? this.compta.stn : this.tribu.stn
+        if (session.estComptable || session.avion) {
+          session.blocage = 0 }
+        else {
+          session.blocage = this.tribu.stn < this.compta.stn ? this.compta.stn : this.tribu.stn
+        }
+        // Une session synchronisée d'un compte "bloqué" est en "incognito" (plus de maj locale)
         if (session.synchro && session.blocage === 4) session.mode = 2
 
         this.avatarsToStore = new Map() // objets avatar à ranger en store
         this.groupesToStore = new Map() // complilation des rows des groupes venat de IDB ou du serveur
 
         if (await this.tousAvatars(avatar, rowAvatars)) {
+          // Versions inchangées, on continue
           if(await this.tousGroupes(this.avatarsToStore)) {
+            // versions inchangées, c'est fini et OK
             break
           }
         }
+        // les versions ont changées depuis le début de l'opération, on recommence
         this.reset()
       }
 
       /*
       MAJ (éventuelle) de nctk par cryptage en clé K au lieu du RSA trouvé
-      NE PAS EFFECTUER AVANT : ça change la version du compte et sortirait
+      NE PAS EFFECTUER AVANT dans la boucle: ça change la version du compte et sortirait
       en erreur de la boucle précédente (où avatar ne doit pas changer)
       */
       if (this.avatar.nctkCleK) {
@@ -392,7 +404,7 @@ export class ConnexionSyncInc extends OperationUI {
       }
   
       this.BRK()
-      /* YES ! on a tous les objets maîtres : tribu / compta / avatars / groupes abonnés et signés */
+      /* YES ! on a tous les objets maîtres : tribu / compta / avatars / groupes abonnés PAS signés */
 
       // MAJ intermédiaire de IDB : évite d'avoir des avatars / groupes obsolètes pour la suite
       if (session.statutIdb) {
@@ -401,10 +413,8 @@ export class ConnexionSyncInc extends OperationUI {
       }
     
       // Rangement en store
-      session.compte = this.avatar
-      session.compta = this.compta
-      session.tribu = this.tribu
       const avStore = stores.avatar
+      avStore.setCompte(this.avatar, this.compta, this.tribu)
       const grStore = stores.groupe
       const syncitem = stores.syncitem 
       this.avatarsToStore.forEach(av => { 
@@ -415,9 +425,15 @@ export class ConnexionSyncInc extends OperationUI {
         grStore.setGroupe(gr) 
         syncitem.push('10' + gr.id, 0, 'SYava', [gr.na.nom])
       })
-      // tribu / people
+      // inscription des sponsors de la tribu (pas avatar du compte) en tant que people
+      const peStore = stores.people
+      const t = this.tribu.mncpt
+      for (const idsp in t) {
+        if (!this.avatar.estAc(idsp)) peStore.newPeople(t[idsp].na, true)
+      }
 
       // Itération sur chaque avatar: secrets, chats, sponsorings
+      for (const avid of avStore.ids) chargerSCS(avid)
 
       // Itération sur chaque groupe: secrets, membres
 

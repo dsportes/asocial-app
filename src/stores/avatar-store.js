@@ -17,6 +17,7 @@ export const useAvatarStore = defineStore('avatar', {
     compteId: 0,
     avatarP: null,
     comptaP: null,
+    tribuP: null
   }),
 
   getters: {
@@ -26,7 +27,7 @@ export const useAvatarStore = defineStore('avatar', {
     /* retourne la compta de l'avatar principal du compte actuellement connecté */
     compta: (state) => { return state.comptaP },
 
-    /* retourne la compta de l'avatar principal du compte actuellement connecté */
+    /* retourne la tribu de l'avatar principal du compte actuellement connecté */
     tribu: (state) => { return state.tribuP },
 
     // Map dont la clé est l'id de l'avatar et la valeur le document avatar
