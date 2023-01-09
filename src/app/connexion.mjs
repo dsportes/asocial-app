@@ -240,10 +240,10 @@ export class ConnexionSyncInc extends OperationUI {
     if (!ret.OK) return false
 
     for (const id of this.avatarsToStore.keys()) {
-      const r1 = ret.lst[id]
-      if (r1) { // On a trouvé plus récent que celui détenu en IDB ou acquis à la connexion
+      const rowAvatar = ret.rowAvatars[id]
+      if (rowAvatar) { // On a trouvé plus récent que celui détenu en IDB ou acquis à la connexion
         if (id === avatar.id) return false // l'avatar principal a changé depuis connexion
-        this.avatarsToStore.set(id, await compile(this.buf.putIDB(row))) // mettre à jour IDB
+        this.avatarsToStore.set(id, await compile(this.buf.putIDB(rowAvatar))) // mettre à jour IDB
       } else {
         // ne PAS mettre à jour IDB qui a déjà le dernier
         this.avatarsToStore.set(id, await compile(avRows[id]))
@@ -255,18 +255,30 @@ export class ConnexionSyncInc extends OperationUI {
   /** tousGroupes *******************************************************/
   async tousGroupes (avatarsToStore) {
     const session = stores.session
+
+    const jourJ = stores.config.limitesjour.dlv + new DateJour().nbj
+    const dlv1 = (Math.floor(jourJ / 10) + 1) * 10
+    const dlv2 = dlv1 + 10
+
     /* map des membres des groupes des avatars
-     - clé: id du groupe  - valeur: { ng, mbs: [ids], v , dlv } */
+     - clé: id du groupe  - valeur: { idg, mbs: [ids], v , dlv } */
     const mbsMap = { } 
 
-    const avsLst = [] // liste de [{id: , v: }] - versions des avatars qui ne doivent pas avoir changées
+    /* map des avatars du compte
+     - clé: id de l'avatar  - valeur: { v , dlv } 
+     v : version qui bne doit pas avoir changé */
+    const avsMap = {}  
+      
     const abPlus = [] // ids des avatars et groupes auxquels s'abonner
 
     avatarsToStore.values().forEach(avatar => {
-      avsLst.push({ id: avatar.id, v: avatar.v })
+      avsMap[avatar.id] = { v: avatar.v, dlv: (avatar.id % 10 === 0) ? dlv1 : dlv2 }
       abPlus.push(id)
-      avatar.membres(mbsMap) // v, dlv, de mbsmap ne sont pas renseignées pour l'instant
+      // maj de la liste des ids des membres de chaque groupe auquel participe l'avatar
+      avatar.membres(mbsMap)
+      // v, dlv, de mbsMap ne sont pas renseignées pour l'instant
     })
+  
     const grRows = {}
     if (session.accesIdb) {
       getColl('groupes').forEach(row => {
@@ -275,28 +287,23 @@ export class ConnexionSyncInc extends OperationUI {
           this.buf.supprIDB( { _nom: 'groupes', id: row.id})
         } else {
           grRows[row.id] = row
-          e.v = row.v // v de mbsmap est renseignée
+          e.v = row.v // v et dlv de mbsMap sont renseignées
+          e.dlv = dlv2
+          abPlus.push(row.id)    
         }
       })
     }
-    // mbsMap et avsLst sont les arguments de l'opération Signatures. Reste à y mettre les dlv
-    const jourJ = new DateJour().nbj
-    const dlv1 = (Math.floor(jourJ / 10) + 1) * 10
-    const dlv2 = dlv1 + 10
-    avsLst.forEach(x => { x.dlv = (x.id % 10 === 0) ? dlv1 : dlv2 })
-    for(const id of mbsMap) {
-      const e = mbsMap[id]
-      e.dlv = dlv2
-      abPlus.push(id)
-    }
 
     if (session.fsSync) session.fsSync.abo(abPlus)
-    const args = { token: session.authToken, mbsMap, avsLst, abPlus }
-    const ret = this.tr(await post(this, 'Signatures', args))
+
+    // mbsMap, avsLst, abPlus sont les arguments de l'opération SignaturesEtGroupes
+    const args = { token: session.authToken, mbsMap, avsMap, abPlus }
+    const ret = this.tr(await post(this, 'SignaturesEtGroupes', args))
     if (ret.KO) return false // un des avatars a une version postérieure à celle passée en argument
+
     /* Tous les avatars, groupes et membres sont signés avec les dlv demandées
-    ret.lst : array des rows des groupes de mbsMap ayant une version postérieure à celle détenu */
-    ret.lst.forEach(row => {
+    ret.rowGroupes : array des rows des groupes de mbsMap ayant une version postérieure à celle détenue */
+    ret.rowGroupes.forEach(row => {
       this.buf.putIDB(row)
       mbsMap[row.id].row = row
     })
@@ -309,11 +316,122 @@ export class ConnexionSyncInc extends OperationUI {
     return true
   }
 
-  // Chargement pour un avatar de ses secrets, chats, sponsorings
-  chargerSCS (avid) {
-
+  /** Chargement pour un avatar de ses secrets postérieurs au plus récent ************/
+  async chargerSecrets (id, estGr) {
+    let v = 0
+    let n1 = 0, n2 = 0
+    let rows = {}
+    this.cSecrets.forEach(row => { 
+      if (row.id === id) {
+        if (row.v > v) v = row.v
+        rows[row.ids] = row
+        n1++
+      } 
+    })
+    const args = { token: session.authToken, id, v }
+    const ret = this.tr(await post(this, 'ChargerSecrets', args))
+    if (ret.rowSecrets && ret.rowSecrets.length) {
+      for (const row of ret.rowSecrets) {
+        this.buf.putIDB(row)
+        rows[row.ids] = row
+        n2++
+      }
+    }
+    const avgrStore = estGr ? stores.groupes : stores.avatars
+    for (const ids of rows) {
+      const secret = await compile(rows[ids])
+      avgrStore.setSecret(secret)
+    }
+    return [n1, n2]
   }
 
+  /** Chargement pour un avatar de ses chats postérieurs au plus récent ************/
+  async chargerChats (id) {
+    let v = 0
+    let n1 = 0, n2 = 0
+    let rows = {}
+    this.cChats.forEach(row => { 
+      if (row.id === id) {
+        if (row.v > v) v = row.v
+        rows[row.ids] = row
+        n1++
+      }
+    })
+    const args = { token: session.authToken, id, v }
+    const ret = this.tr(await post(this, 'ChargerChats', args))
+    if (ret.rowChats  && ret.rowChats.length) {
+      for (const row of ret.rowChats) {
+        this.buf.putIDB(row)
+        rows[row.ids] = row
+        n2++
+      }
+    }
+    const avStore = stores.avatars
+    for (const ids of rows) {
+      const chat = await compile(rows[ids])
+      avStore.setChat(chat)
+    }
+    return [n1, n2]
+  }
+  
+  /** Chargement pour un avatar de ses sponsorings postérieurs au plus récent ************/
+  async chargerSponsorings (id) {
+    let v = 0
+    let n1 = 0, n2 = 0
+    let rows = {}
+    this.cSponsorings.forEach(row => { 
+      if (row.id === id) {
+        if (row.v > v) v = row.v
+        rows[row.ids] = row
+        n1++
+      }
+    })
+    const args = { token: session.authToken, id, v }
+    const ret = this.tr(await post(this, 'ChargerSponsorings', args))
+    if (ret.rowSponsorings  && ret.rowSponsorings.length) {
+      for (const row of ret.rowSponsorings) {
+        this.buf.putIDB(row)
+        rows[row.ids] = row
+        n2++
+      }
+    }
+    const avStore = stores.avatars
+    for (const ids of rows) {
+      const sponsoring = await compile(rows[ids])
+      avStore.setSponsoring(sponsoring)
+    }
+    return [n1, n2]
+  }
+
+  /** Chargement pour un groupe de ses membres postérieurs au plus récent ************/
+  async chargerMembres (id) {
+    let v = 0
+    let n1 = 0, n2 = 0
+    let rows = {}
+    this.cMembres.forEach(row => { 
+      if (row.id === id) {
+        if (row.v > v) v = row.v
+        rows[row.ids] = row
+        n1++
+      }
+    })
+    const args = { token: session.authToken, id, v }
+    const ret = this.tr(await post(this, 'ChargerMembres', args))
+    if (ret.rowMembres  && ret.rowMembres.length) {
+      for (const row of ret.rowMembres) {
+        this.buf.putIDB(row)
+        rows[row.ids] = row
+        n2++
+      }
+    }
+    const grStore = stores.groupes
+    for (const ids of rows) {
+      const membre = await compile(rows[ids])
+      grStore.setMembre(membre)
+    }
+    return [n1, n2]
+  }
+  
   reset () {
     this.buf = new OpBufC()
     this.dh = 0
@@ -356,7 +474,7 @@ export class ConnexionSyncInc extends OperationUI {
 
         /* Authentification et get de avatar / compta / tribu */
         const args = { token: session.authToken }
-        const ret = this.tr(await post(this, 'GetComptasTribusAvatars', args))
+        const ret = this.tr(await post(this, 'GetComptaTribuAvatar', args))
         /* Login OK avec le serveur, mais phrase secrète changée depuis la session précédente */
         if (session.synchro && session.statutIdb === -1) {
           await deleteIDB()
@@ -364,10 +482,10 @@ export class ConnexionSyncInc extends OperationUI {
         }
         session.clepubc = ret.clepubc
         if (ret.credentials) session.fscredentials = ret.credentials
-        const rowAvatars = ret.rowAvatars
-        this.avatar = compile(this.buf.putIDB(rowAvatars)) // cle K, répertoire des avatars
-        this.compta = compile(this.buf.putIDB(ret.rowComptas))
-        this.tribu = compile(this.buf.putIDB(ret.rowTribus))
+        const rowAvatar = ret.rowAvatar
+        this.avatar = compile(this.buf.putIDB(rowAvatar)) // cle K, répertoire des avatars
+        this.compta = compile(this.buf.putIDB(ret.rowCompta))
+        this.tribu = compile(this.buf.putIDB(ret.rowTribu))
         session.estComptable = this.avatar.id === IDCOMPTABLE
         session.compteId = this.avatar.id
         
@@ -424,19 +542,55 @@ export class ConnexionSyncInc extends OperationUI {
       })
       this.groupesToStore.forEach(gr => { 
         grStore.setGroupe(gr) 
-        syncitem.push('10' + gr.id, 0, 'SYava', [gr.na.nom])
+        syncitem.push('10' + gr.id, 0, 'SYgro', [gr.na.nom])
       })
       // inscription des sponsors de la tribu (pas avatar du compte) en tant que people
       const peStore = stores.people
       const t = this.tribu.mncpt
       for (const idsp in t) {
-        if (!this.avatar.estAc(idsp)) peStore.newPeople(t[idsp].na, true)
+        if (!this.avatar.estAc(idsp)) {
+          const e = t[idsp]
+          peStore.setPeopleSponsor(e.na, e.cv)
+        }
       }
 
+      // Chargement depuis IDB des Maps
+      this.cSecrets = session.statutIdb ? (await getColl('secrets')).values() : []
+      this.cChats = session.statutIdb ? (await getColl('chats')).values() : []
+      this.cSponsorings = session.statutIdb ? (await getColl('sponsorings')).values() : []
+      this.cMembres = session.statutIdb ? (await getColl('membres')).values() : []
+
       // Itération sur chaque avatar: secrets, chats, sponsorings
-      for (const avid of avStore.ids) chargerSCS(avid)
+      for (const id of avStore.ids) {
+        const na = getNg(id)
+        let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
+        const [x1, x2] = await chargerSecrets(id)
+        n1 = x1
+        n2 = x2
+        syncitem.push('05' + id, 0, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        const [x3, x4] = await chargerChats(id)
+        n3 = x3
+        n4 = x4
+        syncitem.push('05' + id, 0, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        const [x5, x6] = await chargerChats(id)
+        n5 = x5
+        n6 = x6
+        syncitem.push('05' + id, 0, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+      }
 
       // Itération sur chaque groupe: secrets, membres
+      for (const id of grStore.ids) {
+        const na = getNg(id)
+        let n1 = 0, n2 = 0, n3 = 0, n4 = 0
+        const [x1, x2] = await chargerSecrets(id, true)
+        n1 = x1
+        n2 = x2
+        syncitem.push('05' + id, 0, 'SYgro2', [na.nom, n1, n2, n3, n4])
+        const [x3, x4] = await chargerMembres(id)
+        n3 = x3
+        n4 = x4
+        syncitem.push('05' + id, 0, 'SYgro2', [na.nom, n1, n2, n3, n4])
+      }
 
       // Remise à niveau des Cartes de visite des people "chat seulement" et "sponsor"
 

@@ -1,6 +1,6 @@
 TODO next :
-- connexion: people / membre / tribu, chargement sous-collection, CV
-- reprendre store people avec tribu / membre
+- CV { vcv photo info } - vcv étant la version de la CV dans son avatar
+- connexion: chargement sous-collection, CV
 - connexion avion
 - création compte comptable
 - sponsoring / acceptation

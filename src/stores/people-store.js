@@ -10,13 +10,15 @@ Un people peut l'être à plusieurs titre:
   - N fois pour M, N fois au titre C, N fois au titre S
 La "carte de visite" d'un people provient :
   - de l'un membres M
-  - soit d'avoir été explictement recherchée si la condition M n'est pas remplie
   - soit de la tribu dont le people est sponsor (où figure sa CV)
+  - soit d'avoir été explictement recherchée s'il n'est connu que pour chat
 Chaque element a pour clé l'id de l'avatar :
 - na : nom d'avatar
 - cv : carte de visite de l'avatar si elle a été explicitement chargée
+- estChat: true si le people est apparu au moins une fois dans la session
+  dans un chat, même s'il n'apparaît plus
 - sponsor (getter): true si l'avatar est sponsor de la tribu du compte
-- groupes : map des groupes {idg, im} auquel le people participe
+- groupes : map des groupes cle:idg, valeur:ids auquel le people participe
 */
 export const usePeopleStore = defineStore('people', {
   state: () => ({
@@ -48,29 +50,14 @@ export const usePeopleStore = defineStore('people', {
         return e ? e.na : null 
       }
     },
-    /* Retourne, 
-    - soit la CV explicitement chargée
-    - soit s'il est sponsor, de la tribu où sa CV/na sont enregistrées
-    - soit la CV trouvée sur le document membre du premier groupe 
-      auquel appartient le people
-    - soit { photo:'', info:'' } (mais c'est anormal)
-    */
+
+    /* Retourne la CV */
     getCv: (state) => { return (id) => { 
         const e = state.map.get(id)
-        if (!e) return null
-        if (e.cv) return e.cv // cv explicitement chargée
-        if (state.estSponsor(id)) {
-          const tribu = stores.avatar.tribu
-          const cv = tribu ? tribu.cvSponsor(id) : null
-          if (cv) return cv
-        }
-        if (!e.groupes || !e.groupes.size) return { photo:'', info:'' }
-        const idg = e.groupes.keys().next().value
-        const im = e.groupes.get(idg).keys().next().value
-        const mb = stores.groupe.getMembre(idg, im)
-        return mb.cv
+        return e ? e.cv : null
       }
     },
+
     estSponsor: (state) => { return (id) => {
         return state.sponsors.has(id) 
       }
@@ -111,7 +98,52 @@ export const usePeopleStore = defineStore('people', {
   },
 
   actions: {
-    /*  */
+    setPeopleSponsor (na, cv) {
+      const e = this.map.get(na.id) || { na: na, groupes: new Map() }
+      e.cv = cv
+      this.map.set(na.id, e)
+      this.sponsors.add(na.id)
+      return e
+    },
+
+    unsetPeopleSponsor (id) {
+      const e = this.map.get(na.id)
+      if (!e) return
+      this.sponsors.delete(id)
+      if (!e.estChat && !groupes.size) this.map.delete(id)
+    },
+
+    setPeopleMembre (na, idg, ids, cv) {
+      const e = this.map.get(na.id) || { na: na, groupes: new Map() }
+      e.cv = cv
+      e.groupes.set(idg, ids)
+      this.map.set(na.id, e)
+      return e
+    },
+
+    unsetPeopleMembre (id, idg) {
+      const e = this.map.get(id)
+      if (!e) return
+      e.groupes.delete(idg)
+      if (!e.estChat && !groupes.size) this.map.delete(id)
+    },
+
+    setPeopleChat (na, cv) {
+      const e = this.map.get(id) || { na: na, groupes: new Map() }
+      if (cv) e.cv = cv
+      e.estChat = true
+      this.map.set(id, e)
+      return e
+    },
+
+    setCv (id, cv) { // cv: { photo, info }
+      const e = this.map.get(id)
+      if (!e) return
+      e.cv = cv
+      return e
+    },
+
+    /*
     newPeople (na, reset) {
       const  e = { na: na, cv: null, groupes: new Map() }
       if (!this.map.has(na.id) || reset) this.map.set(na.id, e)
@@ -149,6 +181,7 @@ export const usePeopleStore = defineStore('people', {
       if (!ids) return
       this.sponsors = new Set(ids)
     },
+    */
 
     del (id) {
       delete this.map[id]

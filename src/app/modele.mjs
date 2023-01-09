@@ -951,14 +951,14 @@ export class Avatar extends GenDoc {
 
   /* Remplit la map avec les membres des groupes de l'avatar/
   - clé: id du groupe
-  - valeur: { ng: , mbs: [ids] }
+  - valeur: { idg: , mbs: [ids] }
   */
   membres (map) {
     for (const ni in this.lgr) {
       const [nom, rnd, im] = this.lgr[ni]
-      const ng = new NomGroupe(nom, rnd)
-      const e = map[ng.id]
-      if (!e) { map[ng.id] = { ng: ng, mbs: [im] }} else e.mbs.push(im)
+      const idg = new NomGroupe(nom, rnd).id
+      const e = map[idg]
+      if (!e) { map[igd] = { idg, mbs: [im] } } else e.mbs.push(im)
     }
   }
 

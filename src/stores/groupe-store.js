@@ -70,11 +70,7 @@ export const useGroupeStore = defineStore('groupe', {
       const compte = stores.avatar.compte
       if (compte.estAc(na.id)) return // c'est un des avatars du compte
       // c'est vraiement un avatar externe
-      const people = stores.people
-      if (!people.getNa(na.id)) people.setNa(na)
-      if (!people.hasMbId(na.id, membre.id, membre.im)) {
-        people.addMbId(na.id, membre.id, membre.im)
-      }
+      stores.people.setPeopleMembre(na, membre.id, membre.im, membre.cv)
     },
 
     setSecret (secret) {

@@ -84,7 +84,11 @@ export const useConfigStore = defineStore('config', {
         if (val) m[idx] = val
       }
       this.motscles = m
-      this.limitesjour = cfg.limitesjour || { secrettemp: 60, parrainage: 14, groupenonheb: 180 }
+      this.limitesjour = cfg.limitesjour || { }
+      if (!this.limitesjour.dlv) this.limitesjour.dlv = 365
+      if (!this.limitesjour.secrettemp) this.limitesjour.secrettemp = 80
+      if (!this.limitesjour.sponsoring) this.limitesjour.sponsoring = 14
+      if (!this.limitesjour.groupenonheb) this.limitesjour.groupenonheb = 120
       this.raisonsblocage = cfg.raisonsblocage
     },
 

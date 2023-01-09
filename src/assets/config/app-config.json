@@ -19,7 +19,7 @@
   "datetimeformat1": { "timeZone": "Europe/Paris", "year": "numeric", "month": "2-digit", "day": "2-digit", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
   "datetimeformat2": { "timeZone": "Europe/Paris", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
 
-  "limitesjour": { "secrettemp": 60, "parrainage" : 14, "groupenonheb": 180 },
+  "limitesjour": { "dlv": 365, "secrettemp": 60, "parrainage" : 14, "groupenonheb": 120 },
   "lgnom": 20,
   "lgtitre": 50,
   "maxlgtextegen": 250,
