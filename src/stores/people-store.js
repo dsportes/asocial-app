@@ -94,13 +94,23 @@ export const usePeopleStore = defineStore('people', {
         const im = e.groupes.get(idg)
         return im ? stores.groupe.getMembre(idg, im) : null
       }
-    }
+    },
+
+    /* Retourne le Set des id des people n'étant que chat */
+    getPeopleChat: (state) => {
+      const s = new Set()
+      Array.from(state.map.values()).forEach (e => {
+        const id = e.na.id
+        if (!state.sponsors.has(id) && !e.groupes.size) s.add(id)
+      })
+      return s
+    },
   },
 
   actions: {
     setPeopleSponsor (na, cv) {
       const e = this.map.get(na.id) || { na: na, groupes: new Map() }
-      e.cv = cv
+      if (cv && (!e.cv || e.cv.v < cv.v)) e.cv = cv
       this.map.set(na.id, e)
       this.sponsors.add(na.id)
       return e
@@ -115,7 +125,7 @@ export const usePeopleStore = defineStore('people', {
 
     setPeopleMembre (na, idg, ids, cv) {
       const e = this.map.get(na.id) || { na: na, groupes: new Map() }
-      e.cv = cv
+      if (cv && (!e.cv || e.cv.v < cv.v)) e.cv = cv
       e.groupes.set(idg, ids)
       this.map.set(na.id, e)
       return e
@@ -130,16 +140,16 @@ export const usePeopleStore = defineStore('people', {
 
     setPeopleChat (na, cv) {
       const e = this.map.get(id) || { na: na, groupes: new Map() }
-      if (cv) e.cv = cv
+      if (cv && (!e.cv || e.cv.v < cv.v)) e.cv = cv
       e.estChat = true
       this.map.set(id, e)
       return e
     },
 
-    setCv (id, cv) { // cv: { photo, info }
+    setCv (id, cv) { // cv: { v, photo, info }
       const e = this.map.get(id)
       if (!e) return
-      e.cv = cv
+      if (cv && (!e.cv || e.cv.v < cv.v)) e.cv = cv
       return e
     },
 

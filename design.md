@@ -1,6 +1,6 @@
 TODO next :
-- CV { vcv photo info } - vcv étant la version de la CV dans son avatar
-- connexion: chargement sous-collection, CV
+- NomAvatar etc. id à revoir (/10 + n, hash à reprendre ...)
+- connexion: SupprSecret pas écrit sur le serveur
 - connexion avion
 - création compte comptable
 - sponsoring / acceptation

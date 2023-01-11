@@ -65,24 +65,24 @@ export const useGroupeStore = defineStore('groupe', {
       if (!membre) return
       const e = this.map.get(membre.id)
       if (!e) return
-      e.membres.set(membre.im, membre)
+      e.membres.set(membre.ids, membre)
       const na = membre.namb
       const compte = stores.avatar.compte
       if (compte.estAc(na.id)) return // c'est un des avatars du compte
       // c'est vraiement un avatar externe
-      stores.people.setPeopleMembre(na, membre.id, membre.im, membre.cv)
+      stores.people.setPeopleMembre(na, membre.id, membre.ids, membre.cv)
     },
 
     setSecret (secret) {
       if (!secret) return
       const e = this.map.get(secret.id)
       if (!e) return
-      e.secrets.set(secret.ns, secret)
+      e.secrets.set(secret.ids, secret)
     },
-    delSecret (id, ns) {
+    delSecret (id, ids) {
       const e = this.map.get(id)
       if (!e) return
-      e.secrets.delete(ns)
+      e.secrets.delete(ids)
     },
 
     del (id) {

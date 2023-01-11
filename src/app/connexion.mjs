@@ -8,7 +8,7 @@ import { serial } from './schemas.mjs'
 import { NomAvatar } from './modele.mjs'
 import { resetRepertoire, initConnexion, deconnexion, compileToMap, compile, setSecret, setCv, getCv, delCv, setNg, Compte, Compta, Prefs, Avatar, NomTribu } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getColl, getCvs, commitRows,
-  getVIdCvs, lectureSessionSyncIdb, saveListeCvIds, gestionFichierCnx, TLfromIDB, FLfromIDB } from './db.mjs'
+  getVIdCvs, lectureSessionSyncIdb, saveListeCvIds, gestionFichierCnx, TLfromIDB, FLfromIDB, putCv } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 
@@ -99,7 +99,7 @@ class OpBufC {
     this.lcc2 = new Set() // set des Ids des couples n'accédant plus aux secrets à purger
     this.lgr = new Set() // set des ids des groupes à purger
     this.mapSec = {} // pour traitement final des fichiers locaux
-    this.lsecsup = [] // liste des fichiers temporaires à faire supprimer sur le serveur en fin de connexion
+    this.lsecsup = [] // liste des secrets temporaires à faire supprimer sur le serveur en fin de connexion
   }
 
   putIDB (row) { this.lmaj.push(row); return row }
@@ -318,6 +318,7 @@ export class ConnexionSyncInc extends OperationUI {
 
   /** Chargement pour un avatar de ses secrets postérieurs au plus récent ************/
   async chargerSecrets (id, estGr) {
+    const session = stores.session
     let v = 0
     let n1 = 0, n2 = 0
     let rows = {}
@@ -338,15 +339,22 @@ export class ConnexionSyncInc extends OperationUI {
       }
     }
     const avgrStore = estGr ? stores.groupes : stores.avatars
+    const auj = new DateJour().nbj
     for (const ids of rows) {
       const secret = await compile(rows[ids])
-      avgrStore.setSecret(secret)
+      if (session.statutNet && secret.st < auj) { // secret temporaire à supprimer
+        this.buf.lsecsup.push(secret)
+      } else {
+        avgrStore.setSecret(secret)
+        if (session.statutIdb) this.buf.mapSec[secret.pk] = ssecret // Pour gestion des fichiers
+      }
     }
     return [n1, n2]
   }
 
   /** Chargement pour un avatar de ses chats postérieurs au plus récent ************/
   async chargerChats (id) {
+    const session = stores.session
     let v = 0
     let n1 = 0, n2 = 0
     let rows = {}
@@ -376,6 +384,7 @@ export class ConnexionSyncInc extends OperationUI {
   
   /** Chargement pour un avatar de ses sponsorings postérieurs au plus récent ************/
   async chargerSponsorings (id) {
+    const session = stores.session
     let v = 0
     let n1 = 0, n2 = 0
     let rows = {}
@@ -405,6 +414,7 @@ export class ConnexionSyncInc extends OperationUI {
 
   /** Chargement pour un groupe de ses membres postérieurs au plus récent ************/
   async chargerMembres (id) {
+    const session = stores.session
     let v = 0
     let n1 = 0, n2 = 0
     let rows = {}
@@ -432,6 +442,41 @@ export class ConnexionSyncInc extends OperationUI {
     return [n1, n2]
   }
   
+  async majCvChat(idb) {
+    const session = stores.session
+    let n2 = 0
+    const peStore = stores.people
+    // Remise à niveau des Cartes de visite des people "chat seulement"
+    // set des ids des people n'ayant ni entrée groupe ni sponsor tribu.
+    const idChats = peStore.getPeopleChat // set des people n'étant "que" chat
+    const n1 = idChats.size
+    const mcv = {}
+    idChats.forEach(id => { mcv[id] = 0 })
+    const mcvIdb = idb ? await getCvs() : {}
+    for(const id of mcvIdb) {
+      const cvIdb = mcvIdb[id]
+      if (idChats.has(cvIdb.id)) { // CV utile, rechercher une version plus récente
+        const cv = { v: cvIdb.v, photo: cvIdb.photo, info:cvIdb.info }
+        peStore.setCv(cvIdb.id, cv)
+        mcv[id] = cvIdb.id
+      } else { // CV inutile, purge de IDB
+        await delCv(id)
+      }
+    }
+    const args = { token: session.authToken, mcv }
+    const ret = this.tr(await post(this, 'ChargeCvs', args))
+    if (ret.rowCvs && ret.rowCvs.length) {
+      for (const row of ret.rowCvs) {
+        n2++
+        const cv = await compile(row).cv
+        peStore.setCv(id, cv)
+        cv.id = row.id
+        await putCv(cv)
+      }
+    }
+    return [n1, n2]
+  }
+
   reset () {
     this.buf = new OpBufC()
     this.dh = 0
@@ -567,15 +612,15 @@ export class ConnexionSyncInc extends OperationUI {
         const [x1, x2] = await chargerSecrets(id)
         n1 = x1
         n2 = x2
-        syncitem.push('05' + id, 0, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
         const [x3, x4] = await chargerChats(id)
         n3 = x3
         n4 = x4
-        syncitem.push('05' + id, 0, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
         const [x5, x6] = await chargerChats(id)
         n5 = x5
         n6 = x6
-        syncitem.push('05' + id, 0, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
       }
 
       // Itération sur chaque groupe: secrets, membres
@@ -585,19 +630,35 @@ export class ConnexionSyncInc extends OperationUI {
         const [x1, x2] = await chargerSecrets(id, true)
         n1 = x1
         n2 = x2
-        syncitem.push('05' + id, 0, 'SYgro2', [na.nom, n1, n2, n3, n4])
+        syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
         const [x3, x4] = await chargerMembres(id)
         n3 = x3
         n4 = x4
-        syncitem.push('05' + id, 0, 'SYgro2', [na.nom, n1, n2, n3, n4])
+        syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
       }
 
-      // Remise à niveau des Cartes de visite des people "chat seulement" et "sponsor"
+      // Remise à niveau des Cartes de visite des people "chat seulement"
+      {
+        const [n1, n2] = await majCvChat(session.statutIdb)
+        syncitem.push('15' + id, 1, 'SYcvs', [n1, n2])
+      }
 
+      /* Suppression des secrets temporaires ayant dépassé leur date limite */
+      if (session.statutNet && this.buf.lsecsup.length) {
+        for (const s of this.buf.lsecsup) {
+          try {
+            const args = { token: session.authToken, id: s.id, ids: s.ids, volarg: s.volarg() }
+            const ret = this.tr(await post(this, 'SupprSecret', args))
+          } catch (e) {
+            console.log(e.message)
+          }
+        }
+      }
+      
       // Finalisation en une seule fois, commit en IDB
       if (session.synchro) {
         if (!session.statutIdb) {
-          // Ouverture / création de la base qui n'existaiit pas
+          // Ouverture / création de la base qui n'existait pas
           const nb = await session.getNombase()
           localStorage.setItem(session.lsk, nb)
           await openIDB()
@@ -607,19 +668,6 @@ export class ConnexionSyncInc extends OperationUI {
       }
 
       if (session.statutIdb) await gestionFichierCnx(this.buf.mapSec)
-
-      /* Suppression des secrets temporaires ayant dépassé leur date limite
-      */
-      if (session.statutNet && this.buf.lsecsup.length) {
-        for (const s of this.buf.lsecsup) {
-          try {
-            const args = { ts: s.ts, id: s.id, ns: s.ns, varg: s.volarg() }
-            await new SupprSecret().run(args)
-          } catch (e) {
-            console.log(e.message)
-          }
-        }
-      }
 
       if (session.statutIdb) { // Gestion des fichiers locaux et textes locaux
         await TLfromIDB()

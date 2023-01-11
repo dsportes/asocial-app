@@ -369,6 +369,8 @@ export default {
   SYava2: 'avatar : {0} secrets:{1}/{2} chats:{3}/{4} sponsorings:{5}/{6}',
   SYgro: 'groupe : {0}',
   SYgro2: 'groupe : {0} secrets:{1}/{2} membres:{3}/{4}',
+  SYcvs: 'cartes de visite : {0} requises, {1} mises à jour',
+  /*
   SYcou: 'contact : {0}',
   SYas: 'avatar : {0} - {1} secret(s)',
   SYgr: 'groupe : {0} - {1} secret(s)',
@@ -377,6 +379,7 @@ export default {
   SYcv: 'cartes de visite : {0} requises',
   SYcv2: 'cartes de visite : {0} requises, {1} à supprimer',
   SYcv3: 'cartes de visite : {0} requises, {1} rechargées, {2} supprimées',
+  */
 
   IBec: 'Procédures de blocage en cours',
   IB0: 'Pas de procédure de blocage ouverte',

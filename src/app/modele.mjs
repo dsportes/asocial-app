@@ -641,7 +641,7 @@ export class CacheSync {
   }
 
   setSecret (obj) {
-    const x = this.getSecret(obj.id, obj.ns)
+    const x = this.getSecret(obj.id, obj.ids)
     if (!x || x.v < obj.v) this.secrets.set(obj.pk, obj)
   }
   getSecret (id, ns, actuel) {
@@ -689,14 +689,13 @@ export function compilNiv (jib, lj) {
   return [niv, ljc]
 }
 
-class DocGen {
-  get pk () { return this.id + (this.ids ? '/' + this.ids : '')}
-  async compile (d) { }
-}
-
 /****************************************************
- * Tous les objets
+ * Tous les objets Documents
 ****************************************************/
+class GenDoc {
+  get pk () { return this.id + (this.ids ? '/' + this.ids : '')}
+  async compile (row) { }
+}
 
 const classes = {
   tribus: Tribu,
@@ -737,10 +736,10 @@ export async function compile (row) {
 - `r1 r2` : volumes V1 et V2 en réserve pour attribution aux comptes actuels et futurs de la tribu.
 - `infok` : commentaire privé du comptable crypté par la clé K du comptable :
 - `mncpt` : map des noms complets des parrains:
-  - _clé_ : `id` du parrain.
+  - _clé_ : `id` du sponsor.
   - _valeur_ :
     - `na` : `[nom, rnd]` crypté par la clé de la tribu. ("na" est un NomTribu une fois compilé))
-    - `cv` : `[photo, info]` carte de visite cryptée par la clé de la tribu
+    - `cv` : `[photo, info]` carte de visite cryptée par la clé du sponsor
   - l'ajout d'un parrain ne se fait que par le comptable mais un retrait peut s'effectuer aussi par un traitement de GC.
 - `blocaget` : cryptée par la clé de la tribu : ("blocage" quand compilé)
   - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
@@ -777,7 +776,7 @@ export class Tribu extends GenDoc {
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       e.na = new NomAvatar(nom, cle)
       setNg(na)
-      e.cv = e.cv ? await decrypter(this.clet, e.cv) : null
+      e.cv = e.cv ? decode(await decrypter(cle, e.cv)) : null
     }
     this.blocage = !row.blocaget ? null : decode(await decrypter(this.clet, row.blocaget))
     if (this.blocage) {
@@ -874,7 +873,7 @@ export class Tribu extends GenDoc {
 - `dlv` : date limite de validité.
 
 - `rsapub` : clé publique RSA de l'avatar.
-- `cvk` : carte de visite cryptée par la clé K, couple `[photo, info]`.
+- `cvk` : carte de visite cryptée par la clé K `{v, photo, info}`.
 - `lgrk` : map :
   - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
   - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation.
@@ -1036,12 +1035,12 @@ export class Avatar extends GenDoc {
       this.repAvatars()
     }
 
-    if (row.pck) { // carte de visite cryptée par la clé K, couple `[photo, info]`.
+    if (row.pck) { // phrase de contact cryptée par la clé K.
       this.pc = await decrypterStr(session.clek, row.cvk)
     } else this.pc = null
 
-    if (row.cvk) { // carte de visite cryptée par la clé K, couple `[photo, info]`.
-      this.cv = decode(await decrypter(session.clek, row.cvk))
+    if (row.cva) { // carte de visite cryptée par la clé K, `{v, photo, info}`.
+      this.cv = decode(await decrypter(getCle(this.id), row.cva))
     } else this.cv = null
 
     this.lgr = {}
@@ -1130,6 +1129,15 @@ export class Avatar extends GenDoc {
     this.nctk = nat ? await crypter(session.clek, nc) : null
   }
   */
+}
+
+/* Cv : n'a qu'un seul champ - id: de l'avatar
+cv : { v, photo, info } - crypté par la clé de l'avatar
+*/
+export class Cv extends GenDoc {
+  async compile (row) {
+    this.cv = deserial(await decrypter(getCle(this.id), row.cva))
+  }
 }
 
 /** Compta **********************************************************************
@@ -1304,7 +1312,7 @@ export class Chat extends GenDoc {
 - `v1 v2` : volumes courants des secrets du groupe.
 - `q1 q2` : quotas attribués par le compte hébergeur.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
-- `cvg` : carte de visite du groupe crypté par la clé du groupe `[photo, info]`. 
+- `cvg` : carte de visite du groupe crypté par la clé du groupe `{v, photo, info}`. 
 */
 
 export class Groupe extends GenDoc {
@@ -1447,7 +1455,7 @@ export class Groupe extends GenDoc {
   - `nom` `cle` : nom complet de l'avatar.
   - `ni` : numéro d'invitation du membre. Permet de supprimer l'invitation et d'effacer le groupe dans son avatar (clé de `lgrk`).
 	- `idi` : id du membre qui l'a _pressenti_.
-- `cvg` : carte de visite du membre `[photo, info]` crypté par la clé du groupe.
+- `cvm` : carte de visite du membre `{v, photo, info}` crypté par la clé du membre.
 */
 
 export class Membre extends GenDoc {
@@ -1463,7 +1471,7 @@ export class Membre extends GenDoc {
   async compile (row) {
     this.vsh = row.vsh || 0
     this.id = row.id
-    this.im = row.ids
+    this.ids = row.ids
     this.v = row.v
     this.dlv = row.dlv
 
@@ -1473,9 +1481,10 @@ export class Membre extends GenDoc {
     this.vote = row.vote || 0
     this.mc = row.mc
     this.data = decode(await decrypter(this.cleg, row.datag))
-    this.na = new NomAvatar(this.data.nom, this.data.cle)
+    this.namb = new NomAvatar(this.data.nom, this.data.cle)
     if (!this.estAc) setNg(this.namb)
     this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
+    this.cv = row.cvm ? decode(await decrypter(clem, row.cvm)) : null
   }
 
   nouveau (id, st, im, na, idi) {
@@ -1542,7 +1551,7 @@ export class Secret extends GenDoc {
   async compile (row) {
     this.vsh = row.vsh || 0
     this.id = row.id
-    this.ns = row.ids
+    this.ids = row.ids
     this.v = row.v
 
     this._zombi = row._zombi
@@ -1650,7 +1659,7 @@ export class Secret extends GenDoc {
 
   nouveau (id, ref) {
     this.id = id
-    this.ns = rnd6()
+    this.ids = rnd6()
     this.v = 0
     this.x = 0
     this.st = 99999 // getJourJ() + cfg().limitesjour.secrettemp
@@ -1706,9 +1715,10 @@ export class Secret extends GenDoc {
 
   /* argument arg pour la gestion des volumes v1 et v2 lors de la création
   et maj des secrets (texte et fichier attaché):
-  - id : du couple ou du groupe pour respect des volumes max, en pratique id du secret
-  - idc : identifiant de l'avatar, compta à qui imputer (hébergeur pour un groupe)
-  - idc2 : identifiant du second avatar pour un secret de couple. Est null si le couple est solo.
+  - idg : du groupe pour respect des volumes max (en pratique id du secret)
+  - idc : compta à qui imputer le volume
+    - pour un secret personel, id du compte de l'avatar
+    - pour un secret de groupe : id du compte de l'hébergeur idhg du groupe (crypté par la clé g)
   - dv1 : delta de volume v1. Si > 0 c'est une augmentation de volume
   - dv2 : delta de volume v2.
   */
