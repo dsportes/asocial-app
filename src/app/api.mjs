@@ -1,10 +1,4 @@
-import { schemas, serial, deserial } from './schemas.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-
-export function decodeIn(data, cible) {
-  const x = decode(data)
-  for (const [key, value] of Object.entries(x)) cible[key] = value
-}
 
 export const version = '1'
 
@@ -42,73 +36,43 @@ export function appexc (e) {
   return !e ? null : (e instanceof AppExc ? e : new AppExc(E_BRO, 0, [e.message], e.stack || ''))
 }
 
-export const MC = {
-  NOUVEAU: 255,
-  LISTENOIRE: 254,
-  PARRAIN: 253,
-  FILLEUL: 252,
-  INTRODUCTEUR: 251,
-  INTRODUIT: 250,
-  FAVORI: 249,
-  IMPORTANT: 248,
-  OBSOLETE: 247,
-  ALIRE: 246,
-  ATRAITER: 245
-}
-
 /** Compteurs ***************************
 - `j` : jour de calcul
 - `v1 v1m` : volume v1 actuel et total du mois
 - `v2 v2m` : volume v2 actuel et total du mois
 - `trm` : volume transféré dans le mois
-- `f1 f2` : forfait de v1 et v2
+- `q1 q2` : quotas de v1 et v2
 - `tr` : array de 14 compteurs (les 14 derniers jours) de volume journalier de transfert
-- `rtr` : ratio de la moyenne des tr / forfait v2
+- `rtr` : ratio de la moyenne des tr / quota v2 en pourcentage (125 => 125%)
 - `hist` : array de 12 éléments, un par mois. 4 bytes par éléments.
-  - `f1 f2` : forfaits du mois
-  - `r1` : ratio du v1 du mois par rapport à son forfait.
-  - `r2` : ratio du v2 du mois par rapport à son forfait.
-  - `r3` : ratio des transferts cumulés du mois / volume du forfait v2
-- `s1 s2` : pour un avatar primaire, total des forfaits attribués aux secondaires.
-- v1c v2c : total des v1 et v2 pour tous les avatars du compte constaté lors de la dernière connexion.
+  - `q1 q2` : quotas du mois
+  - `r1` : ratio du v1 du mois par rapport à son quota.
+  - `r2` : ratio du v2 du mois par rapport à son quota.
+  - `r3` : ratio des transferts cumulés du mois / volume du quota v2
 */
 
-const lch1 = ['j', 'v1', 'v1m', 'v2', 'v2m', 'trm', 'f1', 'f2', 'rtr', 's1', 's2', 'v1c', 'v2c']
+const lch1 = ['j', 'v1', 'v1m', 'v2', 'v2m', 'trm', 'q1', 'q2', 'rtr']
 const NTRJ = 14
 
 function mx255 (x) { const n = Math.round(x * 100); return n > 255 ? 255 : n }
 
 export class Compteurs {
   constructor (data) {
-    const src = data ? deserial(data) : null
-    this.j = src ? src.j : new DateJour().nbj
-    this.v1 = src ? src.v1 : 0
-    this.v1m = src ? src.v1m : 0
-    this.v2 = src ? src.v2 : 0
-    this.v2m = src ? src.v2m : 0
-    this.trm = src ? src.trm : 0
-    this.f1 = src ? src.f1 : 0
-    this.f2 = src ? src.f2 : 0
+    const src = data ? decode(data) : null
+    lch1.forEach(f => { this[f] = src ? src[f] : 0 }); 
     if (src) {
       this.tr = src.tr
       this.hist = src.hist
     } else {
+      this.j = new DateJour().nbj
       this.tr = new Array(NTRJ)
       this.tr.fill(0, 0, NTRJ)
       this.hist = new Array(12)
       for (let i = 0; i < 12; i++) this.hist[i] = new Uint8Array([0, 0, 0, 0, 0])
     }
     this.setRtr()
-    this.s1 = src ? (src.s1 || 0) : 0
-    this.s2 = src ? (src.s2 || 0) : 0
-    this.v1c = src ? (src.v1c || 0) : 0
-    this.v2c = src ? (src.v2c || 0) : 0
     this.maj = false
-  }
-
-  setRtr () {
-    let s = 0; this.tr.forEach(n => { s += n })
-    this.rtr = s === 0 ? 0 : (this.f2 ? mx255(s / (this.f2 * UNITEV2)) : 255)
+    this.calculauj()
   }
 
   get copie () { // retourne un {...} contenant les champs (ce N'EST PAS un OBJET Compteurs)
@@ -125,64 +89,48 @@ export class Compteurs {
     return c
   }
 
-  get serial () { this.maj = false; return serial(this.copie) }
+  get serial () { return new Uint8Array(encode(this.copie)) }
 
   setV1 (delta) {
-    this.calculauj()
-    if (this.v1 + delta > this.f1 * UNITEV1) return false
+    const ok = this.v1 + delta <= this.q1 * UNITEV1
     this.v1m = Math.round(((this.v1m * this.dj.jj) + delta) / this.dj.jj)
     this.v1 = this.v1 + delta
-    this.hist[this.dj.mm - 1][2] = mx255(this.v1m / this.f1 * UNITEV1)
+    this.hist[this.dj.mm - 1][2] = mx255(this.v1m / this.q1 * UNITEV1)
     this.maj = true
-    return true
+    return ok
   }
 
   setV2 (delta) {
-    this.calculauj()
-    if (this.v2 + delta > this.f2 * UNITEV2) return false
+    const ok = this.v2 + delta <= this.q2 * UNITEV2
     this.v2m = Math.round(((this.v2m * this.dj.jj) + delta) / this.dj.jj)
     this.v2 = this.v2 + delta
-    this.hist[this.dj.mm - 1][3] = mx255(this.v2m / this.f2 * UNITEV2)
+    this.hist[this.dj.mm - 1][3] = mx255(this.v2m / this.q2 * UNITEV2)
     this.maj = true
-    return true
+    return ok
   }
 
   setTr (delta) {
-    this.calculauj()
     this.trm = Math.round(((this.trm * this.dj.jj) + delta) / this.dj.jj)
-    this.hist[this.dj.mm - 1][4] = mx255(this.trm / this.f2 * UNITEV2)
+    this.hist[this.dj.mm - 1][4] = mx255(this.trm / this.q2 * UNITEV2)
     this.tr[0] = this.tr[0] + delta
     this.setRtr()
     this.maj = true
-    return true
   }
 
-  setF1 (f) {
-    this.calculauj()
-    if (this.v1 > f * UNITEV1) return false
-    this.f1 = f
-    this.hist[this.dj.mm - 1][2] = mx255(this.v1m / this.f1 * UNITEV1)
+  setQ1 (q) {
+    const ok = this.v1 <= q * UNITEV1
+    this.q1 = q
+    this.hist[this.dj.mm - 1][2] = mx255(this.v1m / this.q1 * UNITEV1)
     this.maj = true
-    return true
+    return ok
   }
 
-  setF2 (f) {
-    this.calculauj()
-    if (this.v2 > f * UNITEV2) return false
-    this.f2 = f
-    this.hist[this.dj.mm - 1][3] = mx255(this.v2m / this.f2 * UNITEV2)
+  setQ2 (q) {
+    const ok = this.v2 <= q * UNITEV2
+    this.q2 = q
+    this.hist[this.dj.mm - 1][3] = mx255(this.v2m / this.q2 * UNITEV2)
     this.maj = true
-    return true
-  }
-
-  setAS (delta) { // maj forfaits attribués à un avatar secondaire
-    if ((this.v1 > (this.f1 - delta[0]) * UNITEV1) || (this.v2 > (this.f2 - delta[1]) * UNITEV2)) return false
-    this.f1 = this.f1 - delta[0]
-    this.f2 = this.f2 - delta[1]
-    this.s1 = this.s1 + delta[0]
-    this.s2 = this.s2 + delta[1]
-    this.maj = true
-    return true
+    return ok
   }
 
   shiftTr (nj) {
@@ -196,10 +144,15 @@ export class Compteurs {
     this.setRtr()
   }
 
+  setRtr () {
+    let s = 0; this.tr.forEach(n => { s += n })
+    this.rtr = s === 0 ? 0 : (this.q2 ? mx255(s / (this.q2 * UNITEV2)) : 255)
+  }
+
   calculauj () { // recalcul à aujourd'hui en fonction du dernier jour de calcul
     const dj = new DateJour()
+    if (dj.nbj === this.j) return // déjà normalisé, calculé aujourd'hui
     this.dj = dj
-    if (dj.nbj === this.j) return this // déjà normalisé, calculé aujourd'hui
     this.maj = true
     const dja = new DateJour(this.j)
     if (dja.aa === dj.aa && dja.mm === dj.mm) {
@@ -208,26 +161,26 @@ export class Compteurs {
       this.v1m = Math.round(((this.v1m * dja.jj) + (this.v1 * (dj.jj - dja.jj))) / dj.jj)
       this.v2m = Math.round(((this.v2m * dja.jj) + (this.v2 * (dj.jj - dja.jj))) / dj.jj)
       this.trm = Math.round((this.trm * dja.jj) / dj.jj)
-      this.hist[dj.mm - 1][2] = mx255(this.v1m / this.f1 * UNITEV1)
-      this.hist[dj.mm - 1][3] = mx255(this.v2m / this.f2 * UNITEV2)
-      this.hist[dj.mm - 1][4] = mx255(this.trm / this.f2 * UNITEV2)
+      this.hist[dj.mm - 1][2] = mx255(this.v1m / this.q1 * UNITEV1)
+      this.hist[dj.mm - 1][3] = mx255(this.v2m / this.q2 * UNITEV2)
+      this.hist[dj.mm - 1][4] = mx255(this.trm / this.q2 * UNITEV2)
       this.shiftTr(dj.jj - dja.jj)
     } else {
       // Moyennes sur le dernier mois de calcul
       const v1m = Math.round(((this.v1m * dja.jj) + (this.v1 * (dja.nbjm - dja.jj))) / dja.jj)
       const v2m = Math.round(((this.v2m * dja.jj) + (this.v2 * (dja.nbjm - dja.jj))) / dja.jj)
       const trm = Math.round((this.trm * dja.jj) / dja.jj)
-      const r1 = mx255(v1m / this.f1 * UNITEV1)
-      const r2 = mx255(v2m / this.f2 * UNITEV2)
-      const r3 = mx255(trm / this.f2 * UNITEV2)
+      const r1 = mx255(v1m / this.q1 * UNITEV1)
+      const r2 = mx255(v2m / this.q2 * UNITEV2)
+      const r3 = mx255(trm / this.q2 * UNITEV2)
 
       if ((dj.mm === dja.mm + 1 && dj.aa === dja.aa) || (dj.mm === 1 && dja.mm === 1 && dj.aa === dja.aa + 1)) {
         // dernier calcul le mois précédent
         this.v1m = v1m
         this.v2m = v2m
         this.trm = 0
-        this.hist[dja.mm - 1] = new Uint8Array([this.f1, this.f2, r1, r2, r3])
-        this.hist[dj.mm - 1] = new Uint8Array([this.f1, this.f2, r1, r2, 0])
+        this.hist[dja.mm - 1] = new Uint8Array([this.q1, this.q2, r1, r2, r3])
+        this.hist[dj.mm - 1] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
         this.shiftTr(dja.nbjm - dja.jj + dj.jj) // shift de l'historique
       } else {
         // plus d'un mois depuis le dernier calcul
@@ -238,28 +191,27 @@ export class Compteurs {
         this.trm = 0
         this.shiftTr(NTRJ) // shift de l'historique (raz, plus de NTRJ jours
         if (nbm >= 12) {
-          for (let i = 0; i < 12; i++) this.hist[i] = new Uint8Array([this.f1, this.f2, r1, r2, 0])
+          for (let i = 0; i < 12; i++) this.hist[i] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
         } else {
-          this.hist[dja.mm - 1] = new Uint8Array([this.f1, this.f2, r1, r2, r3]) // le dernier mois calculé
+          this.hist[dja.mm - 1] = new Uint8Array([this.q1, this.q2, r1, r2, r3]) // le dernier mois calculé
           if (dja.mm < dj.mm) {
             // dans la même année : suivant avec tr = 0
-            for (let i = dja.mm; i < dj.mm; i++) this.hist[i] = new Uint8Array([this.f1, this.f2, r1, r2, 0])
+            for (let i = dja.mm; i < dj.mm; i++) this.hist[i] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
           } else {
             // sur fin d'anée et début suivante avec tr = 0
-            for (let i = dja.mm; i < 12; i++) this.hist[i] = new Uint8Array([this.f1, this.f2, r1, r2, 0])
-            for (let i = 0; i < dj.mm; i++) this.hist[i] = new Uint8Array([this.f1, this.f2, r1, r2, 0])
+            for (let i = dja.mm; i < 12; i++) this.hist[i] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
+            for (let i = 0; i < dj.mm; i++) this.hist[i] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
           }
         }
       }
     }
     this.j = this.dj.nbj
-    return this
   }
 }
 
-/* DateJour *********************************************************/
 const j0 = Math.floor(new Date('2020-01-01T00:00:00').getTime() / 86400000)
 const nbjm = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+const nbjSuppr = 365
 
 const zeroPad = (num, places) => String(num).padStart(places, '0')
 
@@ -282,6 +234,7 @@ export class DateJour {
 
   get Date () { return new Date((j0 + this.nbj) * 86400000) }
 
+  get dateSuppr () { return -(this.nbj + nbjSuppr) }
 }
 
 export const j99 = new DateJour(new Date('2099-12-31T23:59:59')).nbj // 29220 = 365 * 80 + 20 (années bisextiles)

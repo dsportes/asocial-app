@@ -693,6 +693,8 @@ export function compilNiv (jib, lj) {
  * Tous les objets Documents
 ****************************************************/
 class GenDoc {
+  static deGroupe (id) { return id && id % 10 === 8 }
+  static idCompta (id) { return Math.floor(id / 10) * 10 }
   get pk () { return this.id + (this.ids ? '/' + this.ids : '')}
   async compile (row) { }
 }
@@ -1586,7 +1588,10 @@ export class Secret extends GenDoc {
   get pkref () { return !this.ref ? '' : (idToSid(this.ref[0]) + '/' + this.ref[1]) }
   get horsLimite () { return this.st < 0 || this.st >= 99999 ? false : dlvDepassee(this.st) }
   get nbj () { return this.st <= 0 || this.st === 99999 ? 0 : (this.st - getJourJ()) }
-  get dh () { return this.suppr ? '?' : dhcool(this.txt.d * 1000) }
+  get dh () { return dhcool(this.txt.d * 1000) }
+
+  get idCompta () { return this.deGroupe ? this.groupe.idh : GenDoc.idCompta(this.id) }
+  get idGroupe () { return this.deGroupe ? this.id : 0 }
 
   /* En attente ***************************************************
   get nomf () {
@@ -1711,36 +1716,6 @@ export class Secret extends GenDoc {
   nomDeIdf (idf) {
     const x = this.mfa[idf]
     return x ? x.nom : null
-  }
-
-  /* argument arg pour la gestion des volumes v1 et v2 lors de la création
-  et maj des secrets (texte et fichier attaché):
-  - idg : du groupe pour respect des volumes max (en pratique id du secret)
-  - idc : compta à qui imputer le volume
-    - pour un secret personel, id du compte de l'avatar
-    - pour un secret de groupe : id du compte de l'hébergeur idhg du groupe (crypté par la clé g)
-  - dv1 : delta de volume v1. Si > 0 c'est une augmentation de volume
-  - dv2 : delta de volume v2.
-  */
-  volarg () {
-    const a = { id: this.id, dv1: 0, dv2: 0, vt: 0, idc: 0, idc2: 0 }
-    if (this.ts === 0) {
-      a.idc = this.id
-    } else if (this.ts === 1) {
-      const c = this.couple
-      if (c.stI === 1 && c.stE === 1) {
-        a.idc = c.idI
-        a.idc2 = c.idE
-      } else if (c.stI === 1) {
-        a.idc = c.idI
-      } else if (c.stE === 1) {
-        a.idc = c.idE
-      }
-    } else {
-      const na = this.groupe.naHeb
-      a.idc = na ? na.id : 0 // 0 : groupe non hébergé
-    }
-    return a
   }
 
   async getFichier (idf, ida) {
