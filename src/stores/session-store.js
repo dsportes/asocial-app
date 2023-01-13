@@ -2,7 +2,8 @@ import { defineStore } from 'pinia';
 
 import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
-import { u8ToB64 } from '../app/util.mjs'
+import { u8ToB64, intToB64, rnd6 } from '../app/util.mjs'
+import { DateJour } from '../app/api.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -11,28 +12,25 @@ export const useSessionStore = defineStore('session', {
     sessionId: '', // identifiant de session (random(6) -> base64)
     authToken: '',
     phrase: null,
-
     dateJourConnx: null,
-
-    opencours: null, // Objet opération de l'opération en cours (sauf ProcessQueue)
-    sessionSync: null, // Objet de classe SessionSync trçant l'état de synchronisation d'une session sur IDB
-
-    statutIdb: false,
+    lsk: '',
     nombase: '',
     volumeTable: '',
 
-    statutNet: false,
+    opencours: null, // Objet opération de l'opération en cours (sauf ProcessQueue)
+
+    sessionSync: null, // Objet de classe SessionSync traçant l'état de synchronisation d'une session sur IDB
+
     syncqueue: [], // accumulation des syncList reçues par webSocket
+
     fscredentials: null, // pour connexion à Firestore
 
     estComptable: false,
-    // ??? compteId: 0,
-    // compte est un getter
+    compteId: 0,
     clek: null,
     clepubc: null,
-
-    avatarId: null,
-    groupeId: null,
+    avatarId: 0, // avatar "courant"
+    groupeId: 0, // groupe "courant"
 
     blocage: 0, // niveau de blocage: 1-Alerte informative, 2:restriction de volume, 3:passif, 4:bloqué
     infoBlocage: false,
@@ -47,8 +45,6 @@ export const useSessionStore = defineStore('session', {
     compta (state) { return stores.avatar.compta },
     tribu (state) { return stores.avatar.tribu },
 
-    // Nom de l'entrée LocalStorage devant contenir le nom de la base
-    lsk (state) { return '$asocial$-' + state.phrase.dpbh},
     niveau (state) { return Math.floor(state.status / 10) },
     synchro (state) { return state.mode === 1 },
     incognito (state) { return state.mode === 2 },
@@ -67,13 +63,27 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
-    async getNombase () {
-      if (!this.nombase) {
-        if (!this.clek) return ''
-        const x = await pbkfd(this.clek)
-        this.nombase = '$asocial$-' + u8ToB64(x, true)
+    init (phrase) {
+      this.sessionId = intToB64(rnd6())
+      this.phrase = phrase
+      if (phrase) {
+        this.phrase = phrase
+        this.lsk = '$asocial$-' + phrase.dpbh
+        const token = {
+          sessionId: this.sessionId,
+          shax: sha256(session.phrase.pcb),
+          hps1: session.phrase.dpbh
+        }
+        session.authToken = u8ToB64(new Uint8Array(encode(token)), true)
+        this.nombase = localStorage.getItem(this.lsk) || ''
       }
-      return this.nombase
+      this.dateJourConnx = new DateJour()
+      this.status = 1
+    },
+    async setNombase () { // Après avoir obtenu cle K du serveur
+      const x = await pbkfd(this.clek)
+      this.nombase = '$asocial$-' + u8ToB64(x, true)
+      localStorage.setItem(this.lsk, this.nombase)
     },
 
     /* authToken : base64 de la sérialisation de :

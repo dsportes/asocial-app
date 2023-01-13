@@ -4,89 +4,70 @@ import { OperationUI } from './operations.mjs'
 import { $t, difference, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, getBlocage, hash } from './util.mjs'
 import { post } from './net.mjs'
 import { AppExc, DateJour } from './api.mjs'
-import { serial } from './schemas.mjs'
 import { NomAvatar } from './modele.mjs'
 import { resetRepertoire, initConnexion, deconnexion, compileToMap, compile, setSecret, setCv, getCv, delCv, setNg, Compte, Compta, Prefs, Avatar, NomTribu } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getColl, getCvs, commitRows,
-  getVIdCvs, lectureSessionSyncIdb, saveListeCvIds, gestionFichierCnx, TLfromIDB, FLfromIDB, putCv } from './db.mjs'
+  getVIdCvs, lectureSessionSyncIdb, saveListeCvIds, gestionFichierCnx, TLfromIDB, FLfromIDB, putCv, getAvatarPrimaire, putCompte } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
+import { openWS } from './ws.mjs'
 
-export async function reconnexion () {
-  deconnexion(3)
-  connecterCompte (stores.session.phrase, false) 
+export async function reconnexionCompte () {
+  const session = stores.session
+  const phrase = session.phrase
+  deconnexion(true)
+  connecterCompte (phrase) 
+}
+
+async function initSession (phrase) {
+  const session = stores.session
+  session.init(phrase)
+  if (session.accesNet) {
+    if (!stores.config.fsSync) {
+      await openWS()
+      session.fsSync = null
+    } else {
+      session.fsSync = new FsSyncSession()
+    }
+  }
+  resetRepertoire()
+  stores.reset()
 }
 
 export async function connecterCompte (phrase, razdb) {
   if (!phrase) return
   const session = stores.session
-  session.phrase = phrase
-  session.setAuthToken()
-
-  const lsk = '$asocial$-' + phrase.dpbh
-  if (stores.config.debug) console.log(lsk)
-  const nb = localStorage.getItem(lsk)
-  session.nombase = nb || ''
-  session.statutIdb = false
-  resetRepertoire()
-  stores.reset()
+  await initSession(phrase)
+  if (session.synchro && session.nombase && razdb) {
+    localStorage.removeItem(session.lsk)
+    await deleteIDB()
+  }
 
   if (session.avion) {
-
-    // session avion
-    if (!session.nombase) {
+    if (!session.nombase) { // nom base pas trouvé en localStorage de clé lsk
       await afficherDiag($t('OPmsg1'))
+      deconnexion(true)
       return
     }
     try {
       await openIDB()
     } catch (e) {
       await afficherDiag($t('OPmsg2', [e.message]))
+      deconnexion()
       return
     }
-    try {
-      const x = await getCompte() // x:false ou { id, k }
-      if (!x) throw new AppExc(F_BRO, 2)
-      session.compteId = x.id
-      session.clek = x.k
-      await new ConnexionCompte().run()
-    } catch (e) {
-      afficherDiag($t('OPmsg3', [e.message]))
-      await deleteIDB()
+    const x = await getCompte() // x:false ou { id, k }
+    if (!x) {
+      await afficherDiag($t('OPmsg3'))
+      deconnexion()
+      return
     }
-
-  } else {
-
-    // session synchronisée ou incognito
-    if (session.synchro && session.nombase && razdb) await deleteIDB()
-    let dbok = false
-    if (session.synchro && session.nombase) {
-      try {
-        await openIDB()
-        const x = await getCompte()
-        if (x) {
-          // Entête compte lu et décrypté par la phrase secrète
-          session.compteId = x.id
-          session.clek = x.k
-        } else {
-          session.compteId = 0
-          session.clek = null
-          session.nombase = ''
-        }
-      } catch (e) { }
-      if (!session.nombase) {
-        closeIDB()
-        await deleteIDB()
-      }
-    }
-    await new ConnexionCompte().run()
-
+    session.compteId = x.id
+    session.clek = x.k
   }
-}
 
-/**********************************************************************************
-Opération de connexion à un compte par sa phrase secrète (synchronisé et incognito)
-**********************************************************************************/
+  await new ConnexionCompte().run()
+}
 
 /** OpBufC : utilisé seulment en connexion ************/
 class OpBufC {
@@ -111,100 +92,12 @@ class OpBufC {
   }
 }
 
-/* Connexion en modes avion ******************************/
-export class ConnexionAvion extends OperationUI {
+/**********************************************************************************
+Opération de connexion à un compte par sa phrase secrète (synchronisé, incognito, avion)
+**********************************************************************************/
+
+export class ConnexionCompte extends OperationUI {
   constructor () { super($t('OPcnx')) }
-
-  /* connecte la base locale en obtenant son nom depuis LocalStorage
-  */
-  async connectDb (session) {
-    const lsk = session.lsk
-    if (stores.config.debug) console.log(lsk)
-    session.nombase = localStorage.getItem(lsk)
-    if (!session.nombase) throw new AppExc(F_BRO, 4)
-    try {
-      await openIDB()
-    } catch (e) {
-      throw new AppExc(F_BRO, 5)
-    }
-    const x = await getCompte() // x:false ou { id, k }
-    if (!x) {
-      await deleteIDB()
-      throw new AppExc(F_BRO, 6)
-    }
-    session.compteId = x.id
-    session.clek = x.k
-  }
-
-  async run (phrase) {
-    try {
-      const session = stores.session
-      session.status = 1
-      session.sessionId = intToB64(rnd6())
-      session.phrase = phrase
-      session.dateJourConnx = new DateJour()
-      resetRepertoire()
-      stores.reset()
-
-      await connectIdb(session)
-
-      /* Do the job *****************************************
-      *******************************************************/
-
-      await gestionFichierCnx(this.buf.mapSec)
-      // Gestion des fichiers locaux et textes locaux
-      await TLfromIDB()
-      await FLfromIDB()
-      // enregistre l'heure du début effectif de la session
-      await session.sessionSync.setConnexion(this.dh)
-      console.log('Connexion compte : ' + this.compte.id)
-      this.finOK()
-      stores.ui.goto11()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* Connexion en modes synchronisé et incognito ******************************/
-export class ConnexionSyncInc extends OperationUI {
-  constructor () { super($t('OPcnx')) }
-
-  /* connectDB connecte la base locale en obtenant son nom depuis LocalStorage:
-  - si elle exsite et est joignable, 
-    session.nombase donne le nom de la base
-    retour : 
-    - -1 si le cryptage n'est pas celui de la phrase secrète saisie
-    - 1 si le cryptage est cohérent
-  - sinon retour 0
-  */
-  async connectDb (session, razdb) {
-    const lsk = session.lsk
-    if (lsk) {
-      if (stores.config.debug) console.log(lsk)
-      session.nombase = localStorage.getItem(lsk)
-      if (!session.nombase) return 0 // base locale NON trouvée: devra être recréée à la fin
-    }
-    if (razdb) {
-      // base locale probablement existante mais RAZ demandée: devra être recréée à la fin
-      await deleteIDB()
-      return 0
-    }
-    try {
-      await openIDB()
-    } catch (e) {
-      // base locale non joignable: devra être recréée à la fin
-      closeIDB()
-      await deleteIDB()
-      return 0
-    }
-    const x = await getCompte()
-    if (!x) return -1
-    // Entête compte lu et décrypté par la phrase secrète
-    session.compteId = x.id
-    session.clek = x.k
-    return 1
-  }
 
   /** tousAvatars *******************************************************/
   async tousAvatars (avatar, rowAvatar) {
@@ -235,12 +128,16 @@ export class ConnexionSyncInc extends OperationUI {
       })
     }
 
-    const args = { token: session.authToken, mapv: avReq, idc: avatar.id, vc: avatar.v }
-    const ret = this.tr(await post(this, 'GetAvatars', args))
-    if (!ret.OK) return false
+    let rowAvatars = {}
+    if (session.accesNet) {
+      const args = { token: session.authToken, mapv: avReq, idc: avatar.id, vc: avatar.v }
+      const ret = this.tr(await post(this, 'GetAvatars', args))
+      if (!ret.OK) return false
+      rowAvatars = ret.rowAvatars
+    }
 
     for (const id of this.avatarsToStore.keys()) {
-      const rowAvatar = ret.rowAvatars[id]
+      const rowAvatar = rowAvatars[id]
       if (rowAvatar) { // On a trouvé plus récent que celui détenu en IDB ou acquis à la connexion
         if (id === avatar.id) return false // l'avatar principal a changé depuis connexion
         this.avatarsToStore.set(id, await compile(this.buf.putIDB(rowAvatar))) // mettre à jour IDB
@@ -296,14 +193,19 @@ export class ConnexionSyncInc extends OperationUI {
 
     if (session.fsSync) session.fsSync.abo(abPlus)
 
-    // mbsMap, avsLst, abPlus sont les arguments de l'opération SignaturesEtGroupes
-    const args = { token: session.authToken, mbsMap, avsMap, abPlus }
-    const ret = this.tr(await post(this, 'SignaturesEtGroupes', args))
-    if (ret.KO) return false // un des avatars a une version postérieure à celle passée en argument
+    let rowGroupes = {}
+
+    if (session.accesNet) {
+      // mbsMap, avsLst, abPlus sont les arguments de l'opération SignaturesEtGroupes
+      const args = { token: session.authToken, mbsMap, avsMap, abPlus }
+      const ret = this.tr(await post(this, 'SignaturesEtGroupes', args))
+      if (ret.KO) return false // un des avatars a une version postérieure à celle passée en argument
+      rowGroupes = ret.rowGroupes
+    }
 
     /* Tous les avatars, groupes et membres sont signés avec les dlv demandées
-    ret.rowGroupes : array des rows des groupes de mbsMap ayant une version postérieure à celle détenue */
-    ret.rowGroupes.forEach(row => {
+    rowGroupes : array des rows des groupes de mbsMap ayant une version postérieure à celle détenue */
+    rowGroupes.forEach(row => {
       this.buf.putIDB(row)
       mbsMap[row.id].row = row
     })
@@ -329,10 +231,16 @@ export class ConnexionSyncInc extends OperationUI {
         n1++
       } 
     })
-    const args = { token: session.authToken, id, v }
-    const ret = this.tr(await post(this, 'ChargerSecrets', args))
-    if (ret.rowSecrets && ret.rowSecrets.length) {
-      for (const row of ret.rowSecrets) {
+
+    let rowSecrets
+
+    if (session.accesNet) {
+      const args = { token: session.authToken, id, v }
+      const ret = this.tr(await post(this, 'ChargerSecrets', args))
+      rowSecrets = ret.rowSecrets
+    }
+    if (rowSecrets && rowSecrets.length) {
+      for (const row of rowSecrets) {
         this.buf.putIDB(row)
         rows[row.ids] = row
         n2++
@@ -342,11 +250,11 @@ export class ConnexionSyncInc extends OperationUI {
     const auj = new DateJour().nbj
     for (const ids of rows) {
       const secret = await compile(rows[ids])
-      if (session.statutNet && secret.st < auj) { // secret temporaire à supprimer
+      if (session.accesNet && secret.st < auj) { // secret temporaire à supprimer
         this.buf.lsecsup.push(secret)
       } else {
         avgrStore.setSecret(secret)
-        if (session.statutIdb) this.buf.mapSec[secret.pk] = ssecret // Pour gestion des fichiers
+        if (session.accesIdb) this.buf.mapSec[secret.pk] = secret // Pour gestion des fichiers
       }
     }
     return [n1, n2]
@@ -365,10 +273,17 @@ export class ConnexionSyncInc extends OperationUI {
         n1++
       }
     })
-    const args = { token: session.authToken, id, v }
-    const ret = this.tr(await post(this, 'ChargerChats', args))
-    if (ret.rowChats  && ret.rowChats.length) {
-      for (const row of ret.rowChats) {
+
+    let rowChats
+
+    if (session.accesNet) {
+      const args = { token: session.authToken, id, v }
+      const ret = this.tr(await post(this, 'ChargerChats', args))
+      rowChats = ret.rowChats
+    }
+
+    if (rowChats  && rowChats.length) {
+      for (const row of rowChats) {
         this.buf.putIDB(row)
         rows[row.ids] = row
         n2++
@@ -395,10 +310,16 @@ export class ConnexionSyncInc extends OperationUI {
         n1++
       }
     })
-    const args = { token: session.authToken, id, v }
-    const ret = this.tr(await post(this, 'ChargerSponsorings', args))
-    if (ret.rowSponsorings  && ret.rowSponsorings.length) {
-      for (const row of ret.rowSponsorings) {
+
+    let rowSponsorings
+
+    if (session.accesNet) {
+      const args = { token: session.authToken, id, v }
+      const ret = this.tr(await post(this, 'ChargerSponsorings', args))
+      rowSponsorings = ret.rowSponsorings
+    }
+    if (rowSponsorings  && rowSponsorings.length) {
+      for (const row of rowSponsorings) {
         this.buf.putIDB(row)
         rows[row.ids] = row
         n2++
@@ -425,10 +346,16 @@ export class ConnexionSyncInc extends OperationUI {
         n1++
       }
     })
-    const args = { token: session.authToken, id, v }
-    const ret = this.tr(await post(this, 'ChargerMembres', args))
-    if (ret.rowMembres  && ret.rowMembres.length) {
-      for (const row of ret.rowMembres) {
+
+    let rowMembres
+
+    if (session.accesNet) {
+      const args = { token: session.authToken, id, v }
+      const ret = this.tr(await post(this, 'ChargerMembres', args))
+      rowMembres = ret.rowMembres
+    }
+    if (rowMembres  && rowMembres.length) {
+      for (const row of rowMembres) {
         this.buf.putIDB(row)
         rows[row.ids] = row
         n2++
@@ -442,8 +369,9 @@ export class ConnexionSyncInc extends OperationUI {
     return [n1, n2]
   }
   
-  async majCvChat(idb) {
+  async majCvChat() {
     const session = stores.session
+    const idb = session.accesIdb
     let n2 = 0
     const peStore = stores.people
     // Remise à niveau des Cartes de visite des people "chat seulement"
@@ -463,9 +391,15 @@ export class ConnexionSyncInc extends OperationUI {
         await delCv(id)
       }
     }
-    const args = { token: session.authToken, mcv }
-    const ret = this.tr(await post(this, 'ChargeCvs', args))
-    if (ret.rowCvs && ret.rowCvs.length) {
+
+    let rowCvs
+
+    if (session.accesNet) {
+      const args = { token: session.authToken, mcv }
+      const ret = this.tr(await post(this, 'ChargeCvs', args))
+      rowCvs = ret.rowCvs
+    }
+    if (rowCvs && rowCvs.length) {
       for (const row of ret.rowCvs) {
         n2++
         const cv = await compile(row).cv
@@ -477,36 +411,55 @@ export class ConnexionSyncInc extends OperationUI {
     return [n1, n2]
   }
 
-  reset () {
-    this.buf = new OpBufC()
-    this.dh = 0
-    resetRepertoire()
-    stores.reset()
+  async phase0Net () {
+    const session = stores.session
+    /* Authentification et get de avatar / compta / tribu */
+    const args = { token: session.authToken }
+    const ret = this.tr(await post(this, 'GetComptaTribuAvatar', args))
+    session.clepubc = ret.clepubc
+    if (ret.credentials) session.fscredentials = ret.credentials
+    const rowAvatar = ret.rowAvatar
+    this.avatar = await compile(this.buf.putIDB(rowAvatar)) 
+    // session.clek, session.compteId OK. Répertoire des avatars OK
+    this.compta = await compile(this.buf.putIDB(ret.rowCompta))
+    this.tribu = await compile(this.buf.putIDB(ret.rowTribu))
+
+    if (!session.nombase) await session.setNombase() // maintenant que la cle K est connue
+
+    if (session.synchro) {
+      let dbok = false
+      try {
+        await openIDB()
+        const x = await getCompte()
+        if (x) dbok = true
+        /* Login OK avec le serveur, MAIS phrase secrète changée depuis la session précédente */
+      } catch (e) { }
+      if (!dbok) {
+        closeIDB()
+        await deleteIDB()
+        await openIDB()
+        setTrigramme(session.nombase, await getTrigramme())
+      }
+    }
+  }
+
+  async phase0Avion () {
+    // session.compteId et session.clek OK
+    const rowAvatar = await getAvatarPrimaire()
+    this.avatar = await compile(rowAvatar) 
+    const rowCompta = await getCompta()
+    this.compta = await compile(rowCompta) 
+    const rowTribu = await getTribu(this.compta.idt)
+    this.tribu = await compile(rowTribu)
   }
 
   /** run **********************************************************/
-  async run (phrase, razdb) {
+  async run () {
     try {
       // session synchronisée ou incognito
-      const estFs = stores.config.fsSync
       const session = stores.session
-      session.status = 1
-      session.sessionId = intToB64(rnd6())
-      session.phrase = phrase
-      session.setAuthToken()
-      session.dateJourConnx = new DateJour()
-
-      if (!estFs) {
-        await openWS()
-      } else {
-        session.fsSync = new FsSyncSession()
-      }
-
-      if (session.synchro) session.statutIdb = await connectIdb(session, razdb)
-
-      /* Do the job *****************************************/
-
-      this.reset()
+      this.buf = new OpBufC()
+      this.dh = 0
 
       /* on boucle si la version de l'avatar principal du compte 
       ou un de ses avatars secondaires ont changé
@@ -517,27 +470,19 @@ export class ConnexionSyncInc extends OperationUI {
       while (true) {
         if (nb++ > 5) throw new AppExc(E_BRO, 5)
 
-        /* Authentification et get de avatar / compta / tribu */
-        const args = { token: session.authToken }
-        const ret = this.tr(await post(this, 'GetComptaTribuAvatar', args))
-        /* Login OK avec le serveur, mais phrase secrète changée depuis la session précédente */
-        if (session.synchro && session.statutIdb === -1) {
-          await deleteIDB()
-          session.statutIdb = 0
+        if (session.avion) {
+          await this.phase0Avion()
+        } else {
+          await this.phase0Net()
         }
-        session.clepubc = ret.clepubc
-        if (ret.credentials) session.fscredentials = ret.credentials
-        const rowAvatar = ret.rowAvatar
-        this.avatar = compile(this.buf.putIDB(rowAvatar)) // cle K, répertoire des avatars
-        this.compta = compile(this.buf.putIDB(ret.rowCompta))
-        this.tribu = compile(this.buf.putIDB(ret.rowTribu))
+
         session.estComptable = this.avatar.id === IDCOMPTABLE
         session.compteId = this.avatar.id
         
         // session.blocage
         if (session.estComptable || session.avion) {
-          session.blocage = 0 }
-        else {
+          session.blocage = 0
+        } else {
           session.blocage = this.tribu.stn < this.compta.stn ? this.compta.stn : this.tribu.stn
         }
         // Une session synchronisée d'un compte "bloqué" est en "incognito" (plus de maj locale)
@@ -554,7 +499,10 @@ export class ConnexionSyncInc extends OperationUI {
           }
         }
         // les versions ont changées depuis le début de l'opération, on recommence
-        this.reset()
+        this.buf = new OpBufC()
+        this.dh = 0
+        resetRepertoire()
+        stores.reset()
       }
 
       /*
@@ -562,7 +510,7 @@ export class ConnexionSyncInc extends OperationUI {
       NE PAS EFFECTUER AVANT dans la boucle: ça change la version du compte et sortirait
       en erreur de la boucle précédente (où avatar ne doit pas changer)
       */
-      if (this.avatar.nctkCleK) {
+      if (session.accesNet && this.avatar.nctkCleK) {
         const args = { token: session.authToken, id: this.avatar.id, nctk: this.avatar.nctkCleK }
         this.tr(await post(this, 'm1', 'nctkCompte', args))
       }
@@ -571,7 +519,7 @@ export class ConnexionSyncInc extends OperationUI {
       /* YES ! on a tous les objets maîtres : tribu / compta / avatars / groupes abonnés PAS signés */
 
       // MAJ intermédiaire de IDB : évite d'avoir des avatars / groupes obsolètes pour la suite
-      if (session.statutIdb) {
+      if (session.accesIdb) {
         await this.buf.commitIDB()
         this.buf = new OpBufC()
       }
@@ -600,10 +548,10 @@ export class ConnexionSyncInc extends OperationUI {
       }
 
       // Chargement depuis IDB des Maps
-      this.cSecrets = session.statutIdb ? (await getColl('secrets')).values() : []
-      this.cChats = session.statutIdb ? (await getColl('chats')).values() : []
-      this.cSponsorings = session.statutIdb ? (await getColl('sponsorings')).values() : []
-      this.cMembres = session.statutIdb ? (await getColl('membres')).values() : []
+      this.cSecrets = session.accesIdb ? (await getColl('secrets')).values() : []
+      this.cChats = session.accesIdb ? (await getColl('chats')).values() : []
+      this.cSponsorings = session.accesIdb ? (await getColl('sponsorings')).values() : []
+      this.cMembres = session.accesIdb ? (await getColl('membres')).values() : []
 
       // Itération sur chaque avatar: secrets, chats, sponsorings
       for (const id of avStore.ids) {
@@ -639,12 +587,12 @@ export class ConnexionSyncInc extends OperationUI {
 
       // Remise à niveau des Cartes de visite des people "chat seulement"
       {
-        const [n1, n2] = await majCvChat(session.statutIdb)
+        const [n1, n2] = await this.majCvChat()
         syncitem.push('15' + id, 1, 'SYcvs', [n1, n2])
       }
 
       /* Suppression des secrets temporaires ayant dépassé leur date limite */
-      if (session.statutNet && this.buf.lsecsup.length) {
+      if (session.accesNet && this.buf.lsecsup.length) {
         for (const s of this.buf.lsecsup) {
           try {
             const args = { token: session.authToken, id: s.id, ids: s.ids, idc: s.idCompta, idg: s.idGroupe }
@@ -657,19 +605,13 @@ export class ConnexionSyncInc extends OperationUI {
       
       // Finalisation en une seule fois, commit en IDB
       if (session.synchro) {
-        if (!session.statutIdb) {
-          // Ouverture / création de la base qui n'existait pas
-          const nb = await session.getNombase()
-          localStorage.setItem(session.lsk, nb)
-          await openIDB()
-          setTrigramme(nb, await getTrigramme())
-        }
+        await putCompte()
         await this.buf.commitIDB()
       }
 
-      if (session.statutIdb) await gestionFichierCnx(this.buf.mapSec)
-
-      if (session.statutIdb) { // Gestion des fichiers locaux et textes locaux
+      if (session.accesIdb) { 
+        await gestionFichierCnx(this.buf.mapSec)
+        // Gestion des fichiers locaux et textes locaux
         await TLfromIDB()
         await FLfromIDB()
       }
@@ -720,8 +662,7 @@ export class AcceptationParrainage extends OperationUI {
     try {
       // LE COMPTE EST CELUI DU FILLEUL
       this.session = stores.session
-      this.session.phrase = arg.ps
-      await initConnexion()
+      await initSession(args.ps)
 
       const [nom, rnd] = datactc.nct
       const nat = new NomTribu(nom, rnd)
@@ -751,7 +692,7 @@ export class AcceptationParrainage extends OperationUI {
       /* si le compte est parrain, il va être enregistré
       dans sa tribu dans la liste des parrains */
       const chkt = arg.estpar ? hash(compte.sid + '@' + nat.sid) : 0
-      const ncpart = arg.estpar ? await crypter(rnd, serial([compte.naprim.nom, compte.naprim.rnd])) : 0
+      const ncpart = arg.estpar ? await crypter(rnd, encode([compte.naprim.nom, compte.naprim.rnd])) : 0
 
       const args = {
         sessionId: this.session.sessionId,
@@ -796,22 +737,24 @@ export class RefusParrainage extends OperationUI {
 
   /* arg :
   - ard : réponse du filleul
-  - pph : hash phrase de parrainage
+  - phch : hash phrase de parrainage
   */
   async run (couple, phch, ard) {
     try {
       this.session = stores.session
-      this.session.accesIdb = false
-      this.session.accesNet = true
-      await initConnexion()
+      await initSession() // SANS phrase
+      if (stores.config.fsSync) await openWS()
+      resetRepertoire()
+      stores.reset()
+
       const args = {
         sessionId: this.session.sessionId,
         idc: couple.id,
-        phch: arg.phch,
+        phch: phch,
         ardc: await couple.toArdc(ard, couple.cc)
       }
       await post(this, 'm1', 'refusRencontre', args)
-      await deconnexion(1)
+      deconnexion(true)
     } catch (e) {
       await this.finKO(e)
     }
@@ -837,10 +780,7 @@ export class CreationCompteComptable extends OperationUI {
     try {
       const session = stores.session
       session.mode = 2
-      session.phrase = phrase
-      session.statutIdb = false
-      session.statutNet = true
-      await initConnexion()
+      await initSession(phrase)
 
       const kpav = await genKeyPair()
       tru8('Priv Comptable', kpav.privateKey)

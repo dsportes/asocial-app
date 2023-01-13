@@ -111,8 +111,8 @@
 
 <script>
 import { reactive, ref } from 'vue'
+import { encode, decode } from '@msgpack/msgpack'
 
-import { serial } from '../app/schemas.mjs'
 import stores from '../stores/stores.mjs'
 import { crypter } from '../app/webcrypto.mjs'
 import { edvol } from '../app/util.mjs'
@@ -173,7 +173,7 @@ export default {
     async memoeditAut () { if (await this.session.aut(3, true)) this.memoedit = true },
     async memook (m) {
       this.memoed.undo()
-      const datak = await crypter(this.session.clek, serial(m))
+      const datak = await crypter(this.session.clek, encode(m))
       await new PrefCompte().run('mp', datak)
       this.memoedit = false
     },
@@ -185,7 +185,7 @@ export default {
     async mcleditAut () { if (await this.session.aut(3, true)) this.mcledit = true },
     async okmc (mmc) {
       if (!await this.session.aut(3, true)) return
-      const datak = await crypter(this.session.clek, serial(mmc))
+      const datak = await crypter(this.session.clek, encode(mmc))
       await new PrefCompte().run('mc', datak)
     },
 

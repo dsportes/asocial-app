@@ -64,8 +64,8 @@
 <script>
 import { ref } from 'vue'
 import Dexie from 'dexie'
+import { encode, decode } from '@msgpack/msgpack'
 import { sleep, edvol, afficherDiag, b64ToU8, u8ToB64 } from '../app/util.mjs'
-import { deserial, serial } from '../app/schemas.mjs'
 import stores from '../stores/stores.mjs'
 import { vuIDB } from '../app/db.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -111,7 +111,7 @@ export default ({
       const x = localStorage.getItem('$$trigrammes')
       let trigs = ['', '']
       try {
-        trigs = deserial(b64ToU8(x))
+        trigs = decode(b64ToU8(x))
       } catch (e) {
         console.log('LocalStorage: entrée $$trigrammes non trouvée / illisible')
       }
@@ -150,7 +150,7 @@ export default ({
           trigs[nb] = [it.reseau, it.trig]
           nbbases.value++
         }
-        localStorage.setItem('$$trigrammes', u8ToB64(serial(trigs), true))
+        localStorage.setItem('$$trigrammes', u8ToB64(encode(trigs), true))
         console.log('RAZ db ' + nombase + ' réseau:' + it.reseau + ' trig:' + it.trig)
       } catch (e) {
         console.log(e.toString())

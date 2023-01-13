@@ -80,6 +80,7 @@
 
 <script>
 import { ref, watch } from 'vue'
+import { decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 
@@ -87,7 +88,6 @@ import { $t, afficherDiag, dlvDepassee, tru8 } from '../app/util.mjs'
 import { connecterCompte, CreationCompteComptable } from '../app/connexion.mjs'
 import { PhraseContact, Contact, NomContact, Couple } from '../app/modele.mjs'
 import { get } from '../app/net.mjs'
-import { deserial } from '../app/schemas.mjs'
 
 import ChoixLangue from '../components/ChoixLangue.vue'
 import ChoixReseau from '../components/ChoixReseau.vue'
@@ -139,7 +139,7 @@ export default {
           this.raz()
         } else {
           try {
-            const [row, clepubc] = deserial(new Uint8Array(resp))
+            const [row, clepubc] = decode(new Uint8Array(resp))
             this.clepubc = clepubc
             const contact = await new Contact().fromRow(row)
             tru8('Login ph parr clepubc ' + contact.id, clepubc)
@@ -157,7 +157,7 @@ export default {
               this.raz()
               return
             }
-            const row2 = deserial(new Uint8Array(resp2))
+            const row2 = decode(new Uint8Array(resp2))
             this.coupleloc = await new Couple().fromRow(row2, this.datactc.cc)
             this.raz()
             this.dialcp = true

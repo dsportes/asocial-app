@@ -1,7 +1,7 @@
 /* gestion WebSocket */
 import stores from '../stores/stores.mjs'
+import { decode } from '@msgpack/msgpack'
 
-import { deserial } from './schemas.mjs'
 import { AppExc, E_WS, PINGTO } from './api.mjs'
 import { sleep, traiterQueue } from './util.mjs'
 
@@ -42,7 +42,6 @@ export function closeWS (e) {
   if (e) {
     setExc(e)
   } else {
-    stores.session.statutnet = false
     if (ws) { try { ws.close() } catch (e) {} }
   }
 }
@@ -50,7 +49,6 @@ export function closeWS (e) {
 function setExc (e) {
   console.log('Exception ws : ' + e.code + ' wss: ' + url)
   exc = e
-  stores.session.statutNet = false
   if (ws) { try { ws.close() } catch (e) {} }
 }
 
@@ -61,7 +59,7 @@ export async function openWS () {
   const session = stores.session
   return new Promise((resolve, reject) => {
     try {
-      url = config.urlwss + session.reseau
+      url = config.urlwss
       if (debug) console.log('wss: ' + url)
       if (heartBeatTo) { clearTimeout(heartBeatTo); heartBeatTo = null }
       ws = new WebSocket(url)
@@ -77,7 +75,6 @@ export async function openWS () {
         ws = null
         if (heartBeatTo) { clearTimeout(heartBeatTo); heartBeatTo = null }
         if (exc && session.status > 0) stores.ui.afficherExc(exc) // pas de await !
-        session.statutnet = false
       }
       ws.onmessage = onmessage
       ws.onopen = (event) => {
@@ -87,7 +84,6 @@ export async function openWS () {
           heartBeat(session.sessionId)
           resolve()
         } catch (e) {
-          session.statutnet = false
           reject(EX2(e))
         }
       }
@@ -107,7 +103,7 @@ async function onmessage (m) {
   const sessionId = session.sessionId
   const ab = await m.data.arrayBuffer()
   const msg = new Uint8Array(ab)
-  const syncList = deserial(msg) // syncList : { sessionId, dh, rowItems }
+  const syncList = decode(msg) // syncList : { sessionId, dh, rowItems }
   if (syncList.sessionId !== sessionId) return
 
   const pong = !syncList.rowItems

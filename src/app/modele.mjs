@@ -1,7 +1,6 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { forSchema, serialize, deserialize, clone, serial, deserial } from './schemas.mjs'
 import { $t, hash, rnd6, intToB64, b64ToInt, u8ToB64, idToSid, dlvDepassee, titre, normpath, gzip, ungzip, ungzipT, egaliteU8, tru8 } from './util.mjs'
 import { random, pbkfd, sha256, decrypterRSA, crypterRSA, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
 
@@ -111,43 +110,14 @@ export function setDisparu (id) { const e = repertoire.rep[id]; if (e) e.x = tru
 Gestion de la session
 ************************************************************/
 
-export async function initConnexion () {
+/* mode : si true, garder le mode */
+export function deconnexion (mode) {
   const session = stores.session
-  session.status = 1
-  session.sessionId = intToB64(rnd6())
-  session.dateJourConnx = new DateJour()
-  if (session.accesNet) {
-    await openWS()
-  }
-}
-
-/* option : garder de session
-- 0 : rien
-- 1 : reseau
-- 2 : reseau mode
-- 3 : reseau mode phrase
-*/
-export function deconnexion (option) {
-  const session = stores.session
-  let reseau, mode, phrase
-  if (option) {
-    if (option >= 1) reseau = session.reseau
-    if (option >= 2) mode = session.mode
-    if (option >= 3) phrase = session.phrase
-  }
-  if (session.statutIdb) {
-    closeIDB()
-  }
-  if (session.statutnet) {
-    closeWS()
-  }
-  session.$reset()
-  if (option) {
-    if (option >= 1) session.reseau = reseau
-    if (option >= 2) session.mode = mode
-    if (option >= 3) session.phrase = phrase
-  }
+  const mode = session.mode
+  if (session.accesIdb) closeIDB()
+  if (session.accesNet) closeWS()
   stores.reset()
+  session.$reset()
 }
 
 /***********************************************************
@@ -994,6 +964,7 @@ export class Avatar extends GenDoc {
     if (this.primaire) { // Avatar principal
       this.k = await decrypter(session.phrase.pcb, row.kx)
       session.clek = this.k
+      session.compteId = this.id
 
       /* `lavk` [] `[nom, cle, cpriv]` */
       this.lav = []
@@ -1138,7 +1109,7 @@ cv : { v, photo, info } - crypté par la clé de l'avatar
 */
 export class Cv extends GenDoc {
   async compile (row) {
-    this.cv = deserial(await decrypter(getCle(this.id), row.cva))
+    this.cv = decode(await decrypter(getCle(this.id), row.cva))
   }
 }
 
@@ -1253,7 +1224,7 @@ export class Sponsoring extends GenDoc {
       d.parrain = parrain
       d.forfaits = forfaits
     }
-    this.datax = await crypter(clex, serial(d))
+    this.datax = await crypter(clex, encode(d))
     return this
   }
 }
@@ -1433,11 +1404,11 @@ export class Groupe extends GenDoc {
   }
 
   async toCvg (cv) {
-    return await crypter(this.cle, serial([cv.ph, cv.info]))
+    return await crypter(this.cle, encode([cv.ph, cv.info]))
   }
 
   async toMcg (mc) {
-    return Object.keys(mc).length ? await crypter(this.cle, serial(mc)) : null
+    return Object.keys(mc).length ? await crypter(this.cle, encode(mc)) : null
   }
 }
 
@@ -1570,7 +1541,7 @@ export class Secret extends GenDoc {
     this.mfa = {}
     this.nbfa = 0
     if (this.v2) {
-      const map = row.mfas ? deserial(row.mfas) : {}
+      const map = row.mfas ? decode(row.mfas) : {}
       for (const idf in map) {
         const x = map[idf]
         const y = { lg: x.lg }
@@ -1754,11 +1725,6 @@ Uniquement sur IDB - pas de fromRow - compilé par fromIdb
 - dhpong: dh du dernier pong reçu
 */
 
-forSchema({
-  name: 'idbSessionSync',
-  cols: ['dhdebutp', 'dhfinp', 'dhdebut', 'dhsync', 'dhpong']
-})
-
 function max (a) { let m = 0; a.forEach(x => { if (x > m) m = x }); return m }
 
 export class SessionSync {
@@ -1771,7 +1737,10 @@ export class SessionSync {
   }
 
   fromIdb (idb) {
-    deserialize('idbSessionSync', idb, this)
+    const row = decode(idb)
+    this.dhdebut = row.dhdebut
+    this.dhsync = row.dhsync
+    this.dhpong = row.dhpong
     this.dhdebutp = this.dhdebut
     this.dhfinp = max([this.dhdebut, this.dhsync, this.dhpong])
     return this
@@ -1795,18 +1764,17 @@ export class SessionSync {
     await this.save()
   }
 
-  clone () {
-    const c = new SessionSync()
-    c.dhdebutp = this.dhdebutp
-    c.dhfinp = this.dhfinp
-    c.dhdebut = this.dhdebut
-    c.dhsync = this.dhsync
-    c.dhpong = this.dhpong
-    return c
-  }
-
   async save () {
-    if (stores.session.synchro) await saveSessionSync(serialize('idbSessionSync', this))
+    if (stores.session.synchro) {
+      const x = { 
+        dhdebutp: this.dhdebutp,
+        dhfinp: this.dhfinp,
+        dhdebut: this.dhdebut,
+        dhsync: this.dhsync,
+        dhpong: this.dhpong
+      }
+      await saveSessionSync(encode(x))
+    }
   }
 }
 

@@ -83,7 +83,7 @@ export default ({
     },
 
     async pingIDB () {
-      if (!this.session.statutIdb) {
+      if (!this.session.accesIdb) {
         this.resultat3a = $t('TP1')
       } else {
         this.resultat3a = '-'

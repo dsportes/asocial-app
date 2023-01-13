@@ -25,7 +25,7 @@
 import stores from '../stores/stores.mjs'
 
 import { deconnexion } from '../app/modele.mjs'
-import { reconnexion } from '../app/connexion.mjs'
+import { reconnexionCompte } from '../app/connexion.mjs'
 import { html } from '../app/util.mjs'
 
 const lcont = new Set([1, 4, 6, 7])
@@ -62,11 +62,11 @@ export default ({
   methods: {
     deconnecter () {
       this.ui.resetExc()
-      deconnexion(2)
+      deconnexion()
     },
     async reconnecter () {
       this.ui.resetExc()
-      await reconnexion()
+      await reconnexionCompte()
     },
     continuer () {
       const resolve = this.ui.dialogueerreurresolve

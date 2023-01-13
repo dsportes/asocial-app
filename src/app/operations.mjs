@@ -7,7 +7,6 @@ import { post } from './net.mjs'
 import { compileToMap, NomAvatar, Avatar, Compta, getNg, Couple, Contact, setCv, SessionSync } from './modele.mjs'
 import { genKeyPair } from './webcrypto.mjs'
 import { openIDB, deleteIDB, saveListeCvIds, commitRows } from './db.mjs'
-import { serial } from './schemas.mjs'
 
 /* Opération générique ******************************************/
 export class Operation {
@@ -213,13 +212,11 @@ export class OperationUI extends Operation {
     // création de la base IDB et chargement des rows compte avatar ...
     if (this.session.synchro) { // synchronisé : IL FAUT OUVRIR IDB (et écrire dedans)
       this.BRK()
-      this.session.statutIdb = true
-      const lskey = this.session.reseau + '-' + compte.dpbh
-      await deleteIDB(lskey) // normalement c'est inutile
+      // A revoir
       try {
         await openIDB()
       } catch (e) {
-        await deleteIDB(lskey)
+        await deleteIDB()
         throw e
       }
       localStorage.setItem(lskey, this.session.nombase)
@@ -573,7 +570,7 @@ export class EnregBlocage extends OperationUI {
 
   async run (id, clet, bloc) { // natc: na de la tribu OU du compte
     try {
-      const datat = bloc ? await crypter(clet, serial(bloc)) : null
+      const datat = bloc ? await crypter(clet, encode(bloc)) : null
       const args = { sessionId: stores.session.sessionId, id, datat }
       await post(this, 'm1', 'enregBlocage', args)
       this.finOK()

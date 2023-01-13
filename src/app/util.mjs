@@ -1,9 +1,9 @@
 import stores from '../stores/stores.mjs'
+import { encode, decode } from '@msgpack/msgpack'
 
 import { useI18n } from 'vue-i18n'
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
-import { deserial, serial } from './schemas.mjs'
 import { reconnexion } from './connexion.mjs'
 import { ProcessQueue } from './synchro.mjs'
 
@@ -313,11 +313,11 @@ export async function afficherDiag (diag, ok, cancel) {
 export function setTrigramme (nombase, trig) {
   const nt = '$asocial$-trigrammes'
   const x = localStorage.getItem(nt)
-  const trigs = x ? deserial(b64ToU8(x)) : {}
+  const trigs = x ? decode(b64ToU8(x)) : {}
   if (trig) {
     trigs[nombase] = trig
   } else delete trigs[nombase]
-  localStorage.setItem(nt, u8ToB64(serial(trigs), true))
+  localStorage.setItem(nt, u8ToB64(encode(trigs), true))
 }
 
 export function getTrigramme () {

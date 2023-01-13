@@ -46,9 +46,7 @@ export async function openIDB () {
     db = new Dexie(session.nombase, { autoOpen: true })
     db.version(1).stores(STORES)
     await db.open()
-    session.statutIdb = true
   } catch (e) {
-    session.statutIdb = false
     throw EX1(e)
   }
 }
@@ -59,20 +57,18 @@ export function closeIDB () {
     try { db.close() } catch (e) {}
   }
   db = null
-  session.statutIdb = false
 }
 
 export async function deleteIDB (lsKey) {
   const session = stores.session
   try {
-    if (lsKey) localStorage.removeItem('$asocial$-' + session.phrase.dpbh)
     await Dexie.delete(session.nombase)
     await sleep(100)
     console.log('RAZ db')
   } catch (e) {
     console.log(e.toString())
   }
-  session.statutIdb = false
+  db = null
 }
 
 /** Gestion de l'état de la dernière session ***********************************************************/
@@ -99,8 +95,7 @@ export async function lectureSessionSyncIdb () {
 export async function saveSessionSync (idb) {
   try {
     const session = stores.session
-    if (session.accesIdb)
-      await db.sessionsync.put({ id: '1', data: await crypter(session.clek, idb) })
+    await db.sessionsync.put({ id: '1', data: await crypter(session.clek, idb) })
   } catch (e) {
     throw EX2(e)
   }
@@ -336,6 +331,36 @@ export async function putCompte () {
     const x = { id: session.compteId, k: session.clek}
     const data = await crypter(clek, new Uint8Array(encode(x)) , 1)
     await db.compte.put({ id: '1', data })
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
+export async function getAvatarPrimaire () {
+  const session = stores.session
+  try {
+    const idb = await db.avatars.get(session.compteId)
+    return decode(await decrypter(session.clek, idb.data))
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
+export async function getCompta () {
+  const session = stores.session
+  try {
+    const idb = await db.comptas.get(session.compteId)
+    return decode(await decrypter(session.clek, idb.data))
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
+export async function getCompta (idt) {
+  const session = stores.session
+  try {
+    const idb = await db.tribus.get(idt)
+    return decode(await decrypter(session.clek, idb.data))
   } catch (e) {
     throw EX2(e)
   }

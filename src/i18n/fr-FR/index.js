@@ -238,6 +238,8 @@ export default {
   Erreur dans la saisie de la ligne 1 de la phrase ?`,
   OPmsg2: `La base locale est absente ou corrompue.<br>
   Code erreur: {0}<br>Se connecter en mode synchronisé ou incognito.`,
+  OPmsg3: `La base locale est corrompue et ne peut pas être décryptée.<br>
+  Se connecter en mode synchronisé ou incognito.`,
   OPmsg4: 'Votre compte vient d\'être débloqué',
   OPmsg5: 'Votre compte vient d\'être complètement bloqué',
   OPmsg6: 'Vous allez être déconnecté et reconnecté afin de bénéficier de cette nouvelle situation.',

@@ -282,7 +282,7 @@ export default {
   }},
 
   methods: {
-    deconnexion () { deconnexion(1) },
+    deconnexion () { deconnexion() },
     async reconnexion () { await reconnexion() },
 
     async infoBlocage () { await this.ui.ouvrirInfoBlocage(true) },

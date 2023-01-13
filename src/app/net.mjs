@@ -1,9 +1,8 @@
 import axios from 'axios'
+import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-
 import { AppExc, version, E_BRO, E_SRV, E_BRK } from './api.mjs'
-import { serial, deserial } from './schemas.mjs'
 
 const headers = { 'x-api-version': version }
 
@@ -73,7 +72,7 @@ export async function post (op, fonction, args) {
   const config = stores.config
   try {
     if (op) op.BRK()
-    const data = serial(args)
+    const data = encode(args)
     const u = config.urlserveur + '/' + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
     const par = { method: 'post', url: u, data: data, headers: headers, responseType: 'arraybuffer' }
@@ -88,7 +87,7 @@ export async function post (op, fonction, args) {
   }
   // les status HTTP non 2xx sont tombés en exception
   try {
-    return deserial(buf)
+    return decode(buf)
   } catch (e) { // Résultat mal formé
     throw new AppExc(E_BRO, 2, [op ? op.nom : '', e.message])
   }
