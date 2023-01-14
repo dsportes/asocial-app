@@ -21,12 +21,14 @@ export const useSessionStore = defineStore('session', {
 
     sessionSync: null, // Objet de classe SessionSync traçant l'état de synchronisation d'une session sur IDB
 
-    syncqueue: [], // accumulation des syncList reçues par webSocket
+    syncEncours: false,
 
     fscredentials: null, // pour connexion à Firestore
+    fsSync: null, // Objet de synchro pour Firestore
 
     estComptable: false,
     compteId: 0,
+    tribuId: 0,
     clek: null,
     clepubc: null,
     avatarId: 0, // avatar "courant"
@@ -52,13 +54,9 @@ export const useSessionStore = defineStore('session', {
     accesNet (state) { return state.mode === 1 || state.mode === 2},
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status > 1 },
+
+    // Avatar courant
     avC (state) { return stores.avatar.getAvatar(state.avatarId) },
-    tribu (state) {
-      if (state.estComptable) return null
-      const idt = state.compte.nat.id
-      return stores.tribu.getTribu(idt) 
-    },
-    getPrefs (state) { return state.prefs },
 
   },
 
@@ -99,8 +97,6 @@ export const useSessionStore = defineStore('session', {
       }
       session.authToken = u8ToB64(new Uint8Array(encode(token)))
     },
-    
-    setCompte (obj) { this.compte = obj },
 
     /* Gère les autorisations d'exécuter l'action
     - nmb : interdit avec un blocage à partir de nmb

@@ -3,7 +3,7 @@ import stores from '../stores/stores.mjs'
 import { decode } from '@msgpack/msgpack'
 
 import { AppExc, E_WS, PINGTO } from './api.mjs'
-import { sleep, traiterQueue } from './util.mjs'
+import { SyncQueue } from './sync.mjs'
 
 function dhtToString (dht) {
   return new Date(Math.floor(dht / 1000)).toISOString() + ' (' + (dht % 1000) + ')'
@@ -103,40 +103,21 @@ async function onmessage (m) {
   const sessionId = session.sessionId
   const ab = await m.data.arrayBuffer()
   const msg = new Uint8Array(ab)
-  const syncList = decode(msg) // syncList : { sessionId, dh, rowItems }
+  const syncList = decode(msg) // syncList : { sessionId, rows[] }
   if (syncList.sessionId !== sessionId) return
 
-  const pong = !syncList.rowItems
-  if (debug) console.log('Liste sync reçue: ' + dhtToString(syncList.dh) + ' sessionId:' + syncList.sessionId + (!pong ? ' nb rowItems:' + syncList.rowItems.length : ' - pong'))
+  const pong = !syncList.rows
+  if (debug) console.log('Liste sync reçue - sessionId:' + syncList.sessionId + 
+    (!pong ? ' nb rows:' + syncList.rows.length : ' - pong: ' + dhtToString(syncList.dh)))
 
   if (pong) {
     pongrecu = true
     if (session.status > 1 && session.sessionSync) {
       await session.sessionSync.setDhPong(Math.floor(syncList.dh / 1000))
     }
-    return
+  } else {
+    syncList.rows.forEach(row => { SyncQueue.push(row) })
   }
-
-  session.syncqueue.push(syncList) // syncList : { sessionId, dh, rowItems }
-
-  if (!job && session.status > 1) { job = true; startJob(sessionId) }
-}
-
-function startJob(sessionId) {
-  setTimeout(async () => {
-    const session = stores.session
-    while (session.syncqueue.length) {
-      if (session.sessionId !== sessionId) { job = false; break }
-      if (session.opencours) {
-        await sleep(50)
-      } else {
-        const q = session.syncqueue
-        session.syncqueue = []
-        await traiterQueue(q)
-      }
-    }
-    job = false
-  }, 1)
 }
 
 function heartBeat (sid) {

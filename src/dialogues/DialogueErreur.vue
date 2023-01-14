@@ -1,6 +1,7 @@
 <template>
     <q-card v-if="ui.exc" class="q-ma-xs moyennelargeur">
       <q-card-section>
+        <div v-if="exc.sync" class="titre-lg">{{$t('ERsync')}}</div>
         <div class="titre-lg">{{$t('EX' + exc.majeur)}}</div>
       </q-card-section>
       <q-card-section>
@@ -41,7 +42,7 @@ export default ({
     },
     rec () {
       const s = this.session
-      return !this.exc.sync && s.status > 1 && s.phrase
+      return (!this.exc.sync && s.status > 1 && s.phrase) || this.exc.sync
     },
     cont () {
       const s = this.session

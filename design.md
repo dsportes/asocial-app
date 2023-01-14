@@ -6,6 +6,8 @@ TODO next :
 - sponsoring / acceptation
 - revoir GestionBase : tout faux, reseau, suppression base ...
 
+ws : reprendre la gestion des msg de notification reçus
+
 # Application front-end A-social
 
 ## Structure de la vue principale App.vue

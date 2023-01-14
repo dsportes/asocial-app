@@ -198,8 +198,8 @@ export default {
   EX9100: 'Données d\'authentification non trouvées dans la requête',
   EX9100: 'Données d\'authentification illisibles (détail: {0})',
   EX9101: 'Compte non authentifié',
+  EX9102: 'Session inconnue du serveur: se reconnecter',
 
-  LOGchr: 'Changer de réseau',
   LOGreinit: 'Ré-initialiser complètement la base locale',
   LOGrazbl: '<b>Attention:</b> la base locale sera effacée et rechargée totalement.' +
   '<BR>Ceci peut alonger <b>significativement</b> la durée d\'initialisation (comme le mode <i>incognito</i>).' +
@@ -229,6 +229,7 @@ export default {
   ERrec: 'Tenter de se reconnecter',
   ERcont: 'Poursuivre la session quand-même',
   ERmod: 'Continuer pour modifier les données',
+  ERsync: 'Rupture irrémédiable de la synchronisation des données.',
 
   OPok: 'Succès de l\'opération {0}',
   OPko: 'Echec de l\'opération {0}',

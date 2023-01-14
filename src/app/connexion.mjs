@@ -1,11 +1,12 @@
 import stores from '../stores/stores.mjs'
 
 import { OperationUI } from './operations.mjs'
-import { $t, difference, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, getBlocage, hash } from './util.mjs'
+import { SyncQueue } from './sync.mjs'
+import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, getBlocage, hash } from './util.mjs'
 import { post } from './net.mjs'
-import { AppExc, DateJour } from './api.mjs'
+import { DateJour } from './api.mjs'
 import { NomAvatar } from './modele.mjs'
-import { resetRepertoire, initConnexion, deconnexion, compileToMap, compile, setSecret, setCv, getCv, delCv, setNg, Compte, Compta, Prefs, Avatar, NomTribu } from './modele.mjs'
+import { resetRepertoire, deconnexion, compile, delCv, setNg, Compte, Compta, Prefs, Avatar, NomTribu } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getColl, getCvs, commitRows,
   getVIdCvs, lectureSessionSyncIdb, saveListeCvIds, gestionFichierCnx, TLfromIDB, FLfromIDB, putCv, getAvatarPrimaire, putCompte } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
@@ -130,9 +131,8 @@ export class ConnexionCompte extends OperationUI {
 
     let rowAvatars = {}
     if (session.accesNet) {
-      const args = { token: session.authToken, mapv: avReq, idc: avatar.id, vc: avatar.v }
+      const args = { token: session.authToken, mapv: avReq }
       const ret = this.tr(await post(this, 'GetAvatars', args))
-      if (!ret.OK) return false
       rowAvatars = ret.rowAvatars
     }
 
@@ -146,7 +146,6 @@ export class ConnexionCompte extends OperationUI {
         this.avatarsToStore.set(id, await compile(avRows[id]))
       }
     }
-    return true
   }
 
   /** tousGroupes *******************************************************/
@@ -161,21 +160,25 @@ export class ConnexionCompte extends OperationUI {
      - clé: id du groupe  - valeur: { idg, mbs: [ids], v , dlv } */
     const mbsMap = { } 
 
-    /* map des avatars du compte
-     - clé: id de l'avatar  - valeur: { v , dlv } 
-     v : version qui bne doit pas avoir changé */
+    /* map des avatars du compte - clé: id de l'avatar  - valeur: dlv } */
     const avsMap = {}  
       
-    const abPlus = [] // ids des avatars et groupes auxquels s'abonner
-
     avatarsToStore.values().forEach(avatar => {
-      avsMap[avatar.id] = { v: avatar.v, dlv: (avatar.id % 10 === 0) ? dlv1 : dlv2 }
-      abPlus.push(id)
-      // maj de la liste des ids des membres de chaque groupe auquel participe l'avatar
-      avatar.membres(mbsMap)
-      // v, dlv, de mbsMap ne sont pas renseignées pour l'instant
+      avsMap[avatar.id] = avatar.id % 10 === 0 ? dlv1 : dlv2
+      avatar.membres(mbsMap) // v, dlv, de mbsMap ne sont pas renseignées pour l'instant
     })
   
+    // Récupération des ids des groupes pour abonnement
+    const abPlus = [] // ids des groupes auxquels s'abonner
+    for (const id of mbsMap) {
+      const idg = parseInt(idg)
+      if (session.fsSync) {
+        await session.fsSync(idg)
+      } else {
+        abPlus.push(parseInt(idg))
+      }
+    }
+
     const grRows = {}
     if (session.accesIdb) {
       getColl('groupes').forEach(row => {
@@ -199,7 +202,6 @@ export class ConnexionCompte extends OperationUI {
       // mbsMap, avsLst, abPlus sont les arguments de l'opération SignaturesEtGroupes
       const args = { token: session.authToken, mbsMap, avsMap, abPlus }
       const ret = this.tr(await post(this, 'SignaturesEtGroupes', args))
-      if (ret.KO) return false // un des avatars a une version postérieure à celle passée en argument
       rowGroupes = ret.rowGroupes
     }
 
@@ -215,7 +217,6 @@ export class ConnexionCompte extends OperationUI {
       const r = e.row ? e.row : grRows[id]
       this.groupesToStore.set(id, await compile(r))
     }
-    return true
   }
 
   /** Chargement pour un avatar de ses secrets postérieurs au plus récent ************/
@@ -413,13 +414,27 @@ export class ConnexionCompte extends OperationUI {
 
   async phase0Net () {
     const session = stores.session
-    /* Authentification et get de avatar / compta / tribu */
+    /* Authentification et get de avatar / compta / tribu
+    ET abonnement à compta sur le serveur
+    */
     const args = { token: session.authToken }
+
+    { // Coonexion : récupération de l'id du compte, clepubc, fscredentials
+      const ret = this.tr(await post(this, 'ConnexionCompte', args))
+      session.clepubc = ret.clepubc
+      session.compteId = ret.compteId
+      session.tribuId = ret.tribuId
+      session.estComptable = session.compteId === IDCOMPTABLE
+      if (ret.credentials) session.fscredentials = ret.credentials
+      if (session.fsSync) {
+        await session.fsSync.setCompte()
+        await session.fsSync.setTribu()
+      }
+    }
+
     const ret = this.tr(await post(this, 'GetComptaTribuAvatar', args))
-    session.clepubc = ret.clepubc
-    if (ret.credentials) session.fscredentials = ret.credentials
     const rowAvatar = ret.rowAvatar
-    this.avatar = await compile(this.buf.putIDB(rowAvatar)) 
+    this.avatar = await compile(this.buf.putIDB(rowAvatar))
     // session.clek, session.compteId OK. Répertoire des avatars OK
     this.compta = await compile(this.buf.putIDB(ret.rowCompta))
     this.tribu = await compile(this.buf.putIDB(ret.rowTribu))
@@ -461,49 +476,26 @@ export class ConnexionCompte extends OperationUI {
       this.buf = new OpBufC()
       this.dh = 0
 
-      /* on boucle si la version de l'avatar principal du compte 
-      ou un de ses avatars secondaires ont changé
-      au cours de ce bloc critique visant à obtenir tous les avatars et groupes requis
-      abonnés, signés, compilés avec la dernière version
-      */
-      let nb = 0
-      while (true) {
-        if (nb++ > 5) throw new AppExc(E_BRO, 5)
-
-        if (session.avion) {
-          await this.phase0Avion()
-        } else {
-          await this.phase0Net()
-        }
-
-        session.estComptable = this.avatar.id === IDCOMPTABLE
-        session.compteId = this.avatar.id
-        
-        // session.blocage
-        if (session.estComptable || session.avion) {
-          session.blocage = 0
-        } else {
-          session.blocage = this.tribu.stn < this.compta.stn ? this.compta.stn : this.tribu.stn
-        }
-        // Une session synchronisée d'un compte "bloqué" est en "incognito" (plus de maj locale)
-        if (session.synchro && session.blocage === 4) session.mode = 2
-
-        this.avatarsToStore = new Map() // objets avatar à ranger en store
-        this.groupesToStore = new Map() // complilation des rows des groupes venat de IDB ou du serveur
-
-        if (await this.tousAvatars(avatar, rowAvatars)) {
-          // Versions inchangées, on continue
-          if(await this.tousGroupes(this.avatarsToStore)) {
-            // versions inchangées, c'est fini et OK
-            break
-          }
-        }
-        // les versions ont changées depuis le début de l'opération, on recommence
-        this.buf = new OpBufC()
-        this.dh = 0
-        resetRepertoire()
-        stores.reset()
+      if (session.avion) {
+        await this.phase0Avion()
+      } else {
+        await this.phase0Net()
       }
+
+      // session.blocage
+      if (session.estComptable || session.avion) {
+        session.blocage = 0
+      } else {
+        session.blocage = this.tribu.stn < this.compta.stn ? this.compta.stn : this.tribu.stn
+      }
+      // Une session synchronisée d'un compte "bloqué" est en "incognito" (plus de maj locale)
+      if (session.synchro && session.blocage === 4) session.mode = 2
+
+      this.avatarsToStore = new Map() // objets avatar à ranger en store
+      this.groupesToStore = new Map() // complilation des rows des groupes venant de IDB ou du serveur
+
+      await this.tousAvatars(avatar, rowAvatars)
+      await this.tousGroupes(this.avatarsToStore)
 
       /*
       MAJ (éventuelle) de nctk par cryptage en clé K au lieu du RSA trouvé
@@ -565,7 +557,7 @@ export class ConnexionCompte extends OperationUI {
         n3 = x3
         n4 = x4
         syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
-        const [x5, x6] = await chargerChats(id)
+        const [x5, x6] = await chargerSponsorings(id)
         n5 = x5
         n6 = x6
         syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
@@ -619,6 +611,8 @@ export class ConnexionCompte extends OperationUI {
       // enregistre l'heure du début effectif de la session
       await session.sessionSync.setConnexion(this.dh)
       console.log('Connexion compte : ' + this.compte.id)
+      session.statut = 2
+      SyncQueue.traiterQueue()
       this.finOK()
       stores.ui.goto11()
     } catch (e) {

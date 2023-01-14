@@ -87,6 +87,12 @@ export class Operation {
 
 export class OperationWS extends Operation {
   constructor (nomop) { super(nomop) }
+
+  async finKO (e) {
+    const exc = appexc(e)
+    exc.sync = true
+    await stores.ui.afficherExc(exc)
+  }
 }
 
 export class OperationUI extends Operation {

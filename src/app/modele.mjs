@@ -7,7 +7,7 @@ import { random, pbkfd, sha256, decrypterRSA, crypterRSA, crypter, decrypter, de
 import { IDCOMPTABLE, DateJour, Compteurs, UNITEV1, UNITEV2, chiffres, decodeIn } from './api.mjs'
 
 import { closeIDB, getFichierIDB, saveSessionSync } from './db.mjs'
-import { openWS, closeWS } from './ws.mjs'
+import { closeWS } from './ws.mjs'
 
 /* Gestion en stores des secrets et des cv *************/
 export function setSecret (s) {
@@ -845,7 +845,7 @@ export class Tribu extends GenDoc {
 - `dlv` : date limite de validité.
 
 - `rsapub` : clé publique RSA de l'avatar.
-- `cvk` : carte de visite cryptée par la clé K `{v, photo, info}`.
+- `cva` : carte de visite cryptée par la clé de l'avatar `{v, photo, info}`.
 - `lgrk` : map :
   - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
   - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation.
@@ -856,7 +856,6 @@ export class Tribu extends GenDoc {
   - une entrée est effacée par l'annulation de l'invitation du membre au groupe ou sur acceptation ou refus de l'invitation.
 - `pck` : phrase de contact cryptée par la clé K.
 - `hpc` : hash du PBKFD de la phrase de contact.
-- `dlpc` : date limite de validité de la phrase de contact.
 - `napc` : [nom, cle] de l'avatar cryptée par le PBKFD de la phrase de contact.
 
 ** Compilées**
@@ -958,7 +957,6 @@ export class Avatar extends GenDoc {
     this.stp = row.stp || 0
     this.dlv = row.dlv || 0
     this.hpc = row.hpc
-    this.dlpc = row.dlpc
     this.napc = row.napc
 
     if (this.primaire) { // Avatar principal
@@ -1105,7 +1103,7 @@ export class Avatar extends GenDoc {
 }
 
 /* Cv : n'a qu'un seul champ - id: de l'avatar
-cv : { v, photo, info } - crypté par la clé de l'avatar
+cva : { v, photo, info } - crypté par la clé de l'avatar
 */
 export class Cv extends GenDoc {
   async compile (row) {
