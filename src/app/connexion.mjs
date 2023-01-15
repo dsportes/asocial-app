@@ -404,8 +404,8 @@ export class ConnexionCompte extends OperationUI {
       session.estComptable = session.compteId === IDCOMPTABLE
       if (ret.credentials) session.fscredentials = ret.credentials
       if (session.fsSync) {
-        await session.fsSync.setCompte()
-        await session.fsSync.setTribu()
+        await session.fsSync.setCompte(session.compteId)
+        await session.fsSync.setTribu(session.tribuId)
       }
     }
 
@@ -415,7 +415,6 @@ export class ConnexionCompte extends OperationUI {
     // session.clek, session.compteId OK. Répertoire des avatars OK
     this.compta = await compile(this.buf.putIDB(ret.rowCompta))
     this.tribu = await compile(this.buf.putIDB(ret.rowTribu))
-    session.setBlocage()
 
     if (!session.nombase) await session.setNombase() // maintenant que la cle K est connue
 
@@ -478,6 +477,8 @@ export class ConnexionCompte extends OperationUI {
       // Rangement en store
       const avStore = stores.avatar
       avStore.setCompte(this.avatar, this.compta, this.tribu)
+      session.setBlocage()
+
       const grStore = stores.groupe
       const syncitem = stores.syncitem 
       this.avatarsToStore.forEach(av => { 
@@ -488,15 +489,6 @@ export class ConnexionCompte extends OperationUI {
         grStore.setGroupe(gr) 
         syncitem.push('10' + gr.id, 0, 'SYgro', [gr.na.nom])
       })
-      // inscription des sponsors de la tribu (pas avatar du compte) en tant que people
-      const peStore = stores.people
-      const t = this.tribu.mncpt
-      for (const idsp in t) {
-        if (!this.avatar.estAc(idsp)) {
-          const e = t[idsp]
-          peStore.setPeopleSponsor(e.na, e.cv)
-        }
-      }
 
       // Chargement depuis IDB des Maps des secrets, chats, sponsorings, membres trouvés en IDB
       this.cSecrets = session.accesIdb ? (await getColl('secrets')).values() : []
@@ -508,15 +500,15 @@ export class ConnexionCompte extends OperationUI {
       for (const id of avStore.ids) {
         const na = getNg(id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
-        const [x1, x2] = await chargerSecrets(id)
+        const [x1, x2] = await this.chargerSecrets(id)
         n1 = x1
         n2 = x2
         syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
-        const [x3, x4] = await chargerChats(id)
+        const [x3, x4] = await this.chargerChats(id)
         n3 = x3
         n4 = x4
         syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
-        const [x5, x6] = await chargerSponsorings(id)
+        const [x5, x6] = await this.chargerSponsorings(id)
         n5 = x5
         n6 = x6
         syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
@@ -526,11 +518,11 @@ export class ConnexionCompte extends OperationUI {
       for (const id of grStore.ids) {
         const na = getNg(id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
-        const [x1, x2] = await chargerSecrets(id, true)
+        const [x1, x2] = await this.chargerSecrets(id, true)
         n1 = x1
         n2 = x2
         syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
-        const [x3, x4] = await chargerMembres(id)
+        const [x3, x4] = await this.chargerMembres(id)
         n3 = x3
         n4 = x4
         syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])

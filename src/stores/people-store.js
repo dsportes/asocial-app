@@ -117,7 +117,7 @@ export const usePeopleStore = defineStore('people', {
     },
 
     unsetPeopleSponsor (id) {
-      const e = this.map.get(na.id)
+      const e = this.map.get(id)
       if (!e) return
       this.sponsors.delete(id)
       if (!e.estChat && !groupes.size) this.map.delete(id)

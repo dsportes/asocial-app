@@ -11,11 +11,11 @@ export class FsSyncSession {
   /*
   Mettre un row reçu à triter : SyncQueue.push(row)
   */
-  async setCompte () {
-    // TODO - s'abonner à la compta : id this.session.compteId
+  async setCompte (id) {
+    // TODO - s'abonner à la compta
   }
-  async setTribu () {
-    // TODO - s'abonner à la tribu : id this.session.tribuId
+  async setTribu (id) {
+    // TODO - s'abonner à la tribu
   }
   async setGroupe (id) {
     // TODO - s'abonner au groupe

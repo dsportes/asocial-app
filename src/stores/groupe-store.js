@@ -56,7 +56,7 @@ export const useGroupeStore = defineStore('groupe', {
       if (!groupe) return
       let e = this.map.get(groupe.id)
       if (!e) {
-        e = { groupe: groupe, cv: null, membres: new Map(), secrets: new Map() }
+        e = { groupe: groupe, membres: new Map(), secrets: new Map() }
         this.map.set(groupe.id, e)
       } else e.groupe = groupe
     },
@@ -68,9 +68,9 @@ export const useGroupeStore = defineStore('groupe', {
       e.membres.set(membre.ids, membre)
       const na = membre.namb
       const compte = stores.avatar.compte
-      if (compte.estAc(na.id)) return // c'est un des avatars du compte
-      // c'est vraiement un avatar externe
-      stores.people.setPeopleMembre(na, membre.id, membre.ids, membre.cv)
+      if (compte.estAc(na.id)) return // c'est un des avatars du compte, pas concerné par people
+      // ajoute ou remplace le people, met à jour sa cv le cas échéant
+      stores.people.setPeopleMembre(na, membre.id, membre.ids, membre.cv) 
     },
 
     setSecret (secret) {
@@ -78,7 +78,9 @@ export const useGroupeStore = defineStore('groupe', {
       const e = this.map.get(secret.id)
       if (!e) return
       e.secrets.set(secret.ids, secret)
+      // TODO : gérer les ajouts / suppressions de fichiers ayant une copie locale
     },
+
     delSecret (id, ids) {
       const e = this.map.get(id)
       if (!e) return

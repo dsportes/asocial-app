@@ -98,8 +98,19 @@ export const useAvatarStore = defineStore('avatar', {
       this.comptaP = compta
     },
 
-    setTribu (tribu) {
+    setTribu (tribu) { // set ou remplacement de la tribu
+      const peStore = stores.people
+      if (this.tribuP) { // remplacement - enlève des people
+        for (const idsp in this.tribuP.mncpt) peStore.unsetPeopleSponsor(parseInt(idsp))
+      }
       this.tribuP = tribu
+      const t = tribu.mncpt
+      for (const idsp in t) {
+        if (!this.avatarP.estAc(idsp)) {
+          const e = t[idsp]
+          peStore.setPeopleSponsor(e.na, e.cv)
+        }
+      }
     },
 
     setAvatar (avatar) {

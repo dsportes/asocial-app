@@ -1754,7 +1754,7 @@ export class SessionSync {
     await this.save()
   }
 
-  async setDhSync (dh) { // appel à la fin de chaque synchro (processQueue)
+  async setDhSync (dh) { // appel à la fin de chaque synchro
     if (stores.session.status < 2) return
     this.dhsync = dh
     this.dhpong = dh

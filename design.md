@@ -1,6 +1,5 @@
 TODO next :
 - NomAvatar etc. id à revoir (/10 + n, hash à reprendre ...)
-- connexion: SupprSecret pas écrit sur le serveur
 - connexion avion
 - création compte comptable
 - sponsoring / acceptation

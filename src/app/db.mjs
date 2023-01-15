@@ -426,6 +426,7 @@ export async function putCv (cv) { // { id, v, photo, info }
 /** OpBufC : buffer des actions de mise à jour de IDB ***************************/
 export class IDBbuffer {
   constructor () {
+    this.idb = stores.session.accesIdb
     this.lmaj = [] // rows à modifier / insérer en IDB
     this.lsuppr = [] // row { _nom, id, ids } à supprimer de IDB
     this.lav = new Set() // set des ids des avatars à purger (avec secrets, sponsorings, chats)
@@ -434,11 +435,11 @@ export class IDBbuffer {
     this.lsecsup = [] // liste des secrets temporaires à faire supprimer sur le serveur en fin de connexion
   }
 
-  putIDB (row) { this.lmaj.push(row); return row }
-  supprIDB (row) { this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
-  purgeAvatarIDB (id) { this.lav.add(id) }
-  purgeGroupeIDB (id) { this.lgr.add(id) }
-  async commitIDB (setCompteClek) { await commitRows(this, setCompteClek) }
+  putIDB (row) { if (this.idb) this.lmaj.push(row); return row }
+  supprIDB (row) { if (this.idb) this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
+  purgeAvatarIDB (id) { if (this.idb) this.lav.add(id) }
+  purgeGroupeIDB (id) { if (this.idb) this.lgr.add(id) }
+  async commitIDB (setCompteClek) { if (this.idb) await commitRows(this, setCompteClek) }
 }
 
 /** Mises à jour / purges globales de IDB *****************************************/

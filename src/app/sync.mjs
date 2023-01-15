@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { OperationWS } from './operations.mjs'
 import { reconnexionCompte } from './connexion.mjs'
 import { compile } from './modele.mjs'
-import { IDBbuffer } from './db.mjs'
+import { IDBbuffer, gestionFichierSync } from './db.mjs'
 
 export class SyncQueue {
   static queue = []
@@ -23,6 +23,7 @@ export class SyncQueue {
       const op = row._nom === 'comptas' ? new OnchangeCompta() :
        (row._nom === 'groupes'  ? new OnchangeGroupe() : new Onchangetribu())
       await op.run(row)
+      if (session.synchro) session.sessionSync.setDhSync(new Date().getTime())
       session.syncEncours = false
       SyncQueue.traiterQueue()
     }, 50)
@@ -42,7 +43,7 @@ export class OnchangeCompta extends OperationWS {
 /*
 La maj de la tribu peut affecter :
 - le statut de blocage
-- la liste des parrains: en plus, en moins, CV changée - maj de people
+- la liste des parrains: maj de people
 */
 export class OnchangeTribu extends OperationWS {
   constructor () { super($t('OPsync')) }
@@ -53,24 +54,76 @@ export class OnchangeTribu extends OperationWS {
       this.buf = new IDBbuffer()
       const tribu = await compile(row)
       this.buf.putIDB(row)
-      const av = session.tribu // état avant
-      // TODO
 
-      /* commits */
+      /* commits IDB */
       this.buf.commitIDB()
 
-      const avStore = stores.avatar
-      avStore.setTribu(tribu)
+      /* Maj des stores */
+      stores.avatar.setTribu(tribu) // Remplace les sponsors dans people
       const chg = session.setBlocage()
       if (chg > 1) await alerteBlocage (chg)
+      
     } catch (e) { await this.finKO(e) }
   }
 }
 
+/* Changement du groupe
+Passage en _zombi : plus de membres ni de secrets
+La maj d'un groupe peut affecter :
+- la liste des secrets
+- la liste des membres et le changement de leur carte de visite
+*/
 export class OnchangeGroupe extends OperationWS {
   
+  async nvSecrets (id, v) {
+    const args = { token: session.authToken, id, v }
+    const ret = this.tr(await post(this, 'ChargerSecrets', args))
+    return ret.rowSecrets
+  }
+
+  async nvMembres (id, v) {
+    const args = { token: session.authToken, id, v }
+    const ret = this.tr(await post(this, 'ChargerMembres', args))
+    return ret.rowMembres
+  }
+
   async run (row) {
     try {
+      const session = stores.session
+      const grStore = stores.groupe
+      this.buf = new IDBbuffer()
+      const groupe = await compile(row)
+      const avGr = grStore.get(groupe.id)
+      const nvMbs = [] // Array des membres à ranger en store
+      const nvSecs = [] // Array des secrets à ranger en store
+
+      if (groupe._zombi) {
+        this.buf.purgeGroupeIDB(groupe.id) 
+      } else {
+        const nvMbrows = await this.nvMembres(groupe.id, avGr.v)
+        for (const rowm of nvMbrows) {
+          nvMbs.push(await compile(rowm)) // membre ajouté / modifié
+          this.buf.putIDB(rowm)
+        }
+        const nvSecrows = await this.nvSecrets(groupe.id, avGr.v)
+        for (const rows of nvSecrows) {
+          const s = await compile(rows)
+          if (session.synchro) this.buf.mapSec[s.pk] = s
+          nvSecs.push(s) // secret ajouté / modifié
+          this.buf.putIDB(rows)
+        }
+      }
+      this.buf.putIDB(row) // groupe modifié
+
+      /* commits IDB */
+      this.buf.commitIDB()
+
+      /* Maj des stores */
+      grStore.setGroupe(groupe)
+      nvMbs.forEach(m => { grStore.setMembre(m) })
+      nvSecs.forEach(s => { grStore.setSecret(s) })
+
+      if (session.synchro) await gestionFichierSync(this.buf.mapSec)
 
     } catch (e) { await this.finKO(e) }
   }
