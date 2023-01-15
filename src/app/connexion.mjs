@@ -7,8 +7,8 @@ import { post } from './net.mjs'
 import { DateJour } from './api.mjs'
 import { NomAvatar } from './modele.mjs'
 import { resetRepertoire, deconnexion, compile, delCv, setNg, Compte, Compta, Prefs, Avatar, NomTribu } from './modele.mjs'
-import { openIDB, closeIDB, deleteIDB, getCompte, getColl, getCvs, commitRows,
-  getVIdCvs, lectureSessionSyncIdb, saveListeCvIds, gestionFichierCnx, TLfromIDB, FLfromIDB, putCv, getAvatarPrimaire, putCompte } from './db.mjs'
+import { openIDB, closeIDB, deleteIDB, getCompte, getAvatarPrimaire, getColl, getCvs, putCv,
+  IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB  } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS } from './ws.mjs'
@@ -70,29 +70,6 @@ export async function connecterCompte (phrase, razdb) {
   await new ConnexionCompte().run()
 }
 
-/** OpBufC : utilisé seulment en connexion ************/
-class OpBufC {
-  constructor () {
-    this.lmaj = [] // objets à modifier / insérer en IDB
-    this.lsuppr = [] // objets (du moins {table id (id2))} à supprimer de IDB
-
-    this.lav = new Set() // set des ids des avatars à purger
-    this.lcc = new Set() // set des ids des couples à purger
-    this.lcc2 = new Set() // set des Ids des couples n'accédant plus aux secrets à purger
-    this.lgr = new Set() // set des ids des groupes à purger
-    this.mapSec = {} // pour traitement final des fichiers locaux
-    this.lsecsup = [] // liste des secrets temporaires à faire supprimer sur le serveur en fin de connexion
-  }
-
-  putIDB (row) { this.lmaj.push(row); return row }
-  supprIDB (row) { this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
-  async commitIDB () { await commitRows(this) }
-
-  async gestionFichierCnx () {
-    await gestionFichierCnx(this.mapSec)
-  }
-}
-
 /**********************************************************************************
 Opération de connexion à un compte par sa phrase secrète (synchronisé, incognito, avion)
 **********************************************************************************/
@@ -120,7 +97,7 @@ export class ConnexionCompte extends OperationUI {
     if (session.accesIdb) {
       getColl('avatars').forEach(row => {
         if (!avReq.has(row.id)) {
-          this.buf.supprIDB({ _nom: 'avatars', id })
+          this.buf.purgeAvatarIDB(row.id)
         } else {
           idbVersions[id] = row.id
           const v = avReq.get(row.id)
@@ -184,7 +161,7 @@ export class ConnexionCompte extends OperationUI {
       getColl('groupes').forEach(row => {
         const e = mbsMap[row.id]
         if (!e) {
-          this.buf.supprIDB( { _nom: 'groupes', id: row.id})
+          this.buf.purgeGroupeIDB(row.id)
         } else {
           grRows[row.id] = row
           e.v = row.v // v et dlv de mbsMap sont renseignées
@@ -433,11 +410,12 @@ export class ConnexionCompte extends OperationUI {
     }
 
     const ret = this.tr(await post(this, 'GetComptaTribuAvatar', args))
-    const rowAvatar = ret.rowAvatar
-    this.avatar = await compile(this.buf.putIDB(rowAvatar))
+    this.rowAvatar = ret.rowAvatar
+    this.avatar = await compile(this.buf.putIDB(this.rowAvatar))
     // session.clek, session.compteId OK. Répertoire des avatars OK
     this.compta = await compile(this.buf.putIDB(ret.rowCompta))
     this.tribu = await compile(this.buf.putIDB(ret.rowTribu))
+    session.setBlocage()
 
     if (!session.nombase) await session.setNombase() // maintenant que la cle K est connue
 
@@ -460,8 +438,8 @@ export class ConnexionCompte extends OperationUI {
 
   async phase0Avion () {
     // session.compteId et session.clek OK
-    const rowAvatar = await getAvatarPrimaire()
-    this.avatar = await compile(rowAvatar) 
+    this.rowAvatar = await getAvatarPrimaire()
+    this.avatar = await compile(this.rowAvatar) 
     const rowCompta = await getCompta()
     this.compta = await compile(rowCompta) 
     const rowTribu = await getTribu(this.compta.idt)
@@ -473,7 +451,7 @@ export class ConnexionCompte extends OperationUI {
     try {
       // session synchronisée ou incognito
       const session = stores.session
-      this.buf = new OpBufC()
+      this.buf = new IDBbuffer()
       this.dh = 0
 
       if (session.avion) {
@@ -481,39 +459,20 @@ export class ConnexionCompte extends OperationUI {
       } else {
         await this.phase0Net()
       }
-
-      // session.blocage
-      if (session.estComptable || session.avion) {
-        session.blocage = 0
-      } else {
-        session.blocage = this.tribu.stn < this.compta.stn ? this.compta.stn : this.tribu.stn
-      }
-      // Une session synchronisée d'un compte "bloqué" est en "incognito" (plus de maj locale)
-      if (session.synchro && session.blocage === 4) session.mode = 2
+      // this.avatar this.rowAvatar this.compta this.tribu
 
       this.avatarsToStore = new Map() // objets avatar à ranger en store
       this.groupesToStore = new Map() // complilation des rows des groupes venant de IDB ou du serveur
 
-      await this.tousAvatars(avatar, rowAvatars)
-      await this.tousGroupes(this.avatarsToStore)
-
-      /*
-      MAJ (éventuelle) de nctk par cryptage en clé K au lieu du RSA trouvé
-      NE PAS EFFECTUER AVANT dans la boucle: ça change la version du compte et sortirait
-      en erreur de la boucle précédente (où avatar ne doit pas changer)
-      */
-      if (session.accesNet && this.avatar.nctkCleK) {
-        const args = { token: session.authToken, id: this.avatar.id, nctk: this.avatar.nctkCleK }
-        this.tr(await post(this, 'm1', 'nctkCompte', args))
-      }
+      await this.tousAvatars(this.avatar, this.rowAvatar)
+      await this.tousGroupes(this.avatarsToStore) // Avatars et Groupes signés
   
       this.BRK()
-      /* YES ! on a tous les objets maîtres : tribu / compta / avatars / groupes abonnés PAS signés */
 
       // MAJ intermédiaire de IDB : évite d'avoir des avatars / groupes obsolètes pour la suite
       if (session.accesIdb) {
         await this.buf.commitIDB()
-        this.buf = new OpBufC()
+        this.buf = new IDBbuffer()
       }
     
       // Rangement en store
@@ -539,7 +498,7 @@ export class ConnexionCompte extends OperationUI {
         }
       }
 
-      // Chargement depuis IDB des Maps
+      // Chargement depuis IDB des Maps des secrets, chats, sponsorings, membres trouvés en IDB
       this.cSecrets = session.accesIdb ? (await getColl('secrets')).values() : []
       this.cChats = session.accesIdb ? (await getColl('chats')).values() : []
       this.cSponsorings = session.accesIdb ? (await getColl('sponsorings')).values() : []
@@ -583,23 +542,28 @@ export class ConnexionCompte extends OperationUI {
         syncitem.push('15' + id, 1, 'SYcvs', [n1, n2])
       }
 
-      /* Suppression des secrets temporaires ayant dépassé leur date limite */
-      if (session.accesNet && this.buf.lsecsup.length) {
-        for (const s of this.buf.lsecsup) {
-          try {
-            const args = { token: session.authToken, id: s.id, ids: s.ids, idc: s.idCompta, idg: s.idGroupe }
-            const ret = this.tr(await post(this, 'SupprSecret', args))
-          } catch (e) {
-            console.log(e.message)
+      /* Mises à jour éventuelles du serveur **********************************************/
+      if (session.accesNet ) {
+        /*MAJ (éventuelle) de nctk par cryptage en clé K au lieu du RSA trouvé */
+        if (this.avatar.nctkCleK) {
+          const args = { token: session.authToken, id: this.avatar.id, nctk: this.avatar.nctkCleK }
+          this.tr(await post(this, 'm1', 'nctkCompte', args))
+        }
+        /* Suppression des secrets temporaires ayant dépassé leur date limite */
+        if (this.buf.lsecsup.length) {
+          for (const s of this.buf.lsecsup) {
+            try {
+              const args = { token: session.authToken, id: s.id, ids: s.ids, idc: s.idCompta, idg: s.idGroupe }
+              const ret = this.tr(await post(this, 'SupprSecret', args))
+            } catch (e) {
+              console.log(e.message)
+            }
           }
         }
       }
       
-      // Finalisation en une seule fois, commit en IDB
-      if (session.synchro) {
-        await putCompte()
-        await this.buf.commitIDB()
-      }
+      // Finalisation en une seule fois de l'écriture du nouvel état en IDB
+      if (session.synchro) await this.buf.commitIDB(true) // MAJ compte.id / cle K
 
       if (session.accesIdb) { 
         await gestionFichierCnx(this.buf.mapSec)

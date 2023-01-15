@@ -84,6 +84,30 @@ export const useSessionStore = defineStore('session', {
       localStorage.setItem(this.lsk, this.nombase)
     },
 
+    /* Calcul du blocage depuis compta et tribu
+    Retourne la nature du changement:
+    - 0: pas de changement
+    - 1: le changement n'affecte pas le blocage / déblocage
+    - 2: le compte VIENT d'être bloqué
+    - 3: le compte VIENT d'être débloqué
+    */
+    setBlocage () {
+      if (this.estComptable || this.avion) {
+        this.blocage = 0
+        return
+      }
+      const av = this.blocage
+      let ap = 0
+      if (this.tribu.stn > ap) ap = this.tribu.stn
+      if (this.compta.stn > ap) ap = compta.stn
+      this.blocage = ap
+      if (this.synchro && this.blocage === 4) this.mode = 2
+      if (av === ap) return 0
+      if (av === 4 && ap < 4) return 3
+      if (av < 4 && ap === 4) return 2
+      return 1
+    },
+
     /* authToken : base64 de la sérialisation de :
     - `sessionId`
     - `shax` : SHA de X, le PBKFD de la phrase complète.

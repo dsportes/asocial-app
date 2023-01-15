@@ -6,6 +6,8 @@ export class FsSyncSession {
     this.session = stores.session
   }
 
+  close () { } // PAS ASYNC !!! Déconnexion n'est async
+
   /*
   Mettre un row reçu à triter : SyncQueue.push(row)
   */

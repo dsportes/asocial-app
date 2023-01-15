@@ -8,6 +8,7 @@ import { IDCOMPTABLE, DateJour, Compteurs, UNITEV1, UNITEV2, chiffres, decodeIn 
 
 import { closeIDB, getFichierIDB, saveSessionSync } from './db.mjs'
 import { closeWS } from './ws.mjs'
+import { SyncQueue } from './sync.mjs'
 
 /* Gestion en stores des secrets et des cv *************/
 export function setSecret (s) {
@@ -110,14 +111,17 @@ export function setDisparu (id) { const e = repertoire.rep[id]; if (e) e.x = tru
 Gestion de la session
 ************************************************************/
 
-/* mode : si true, garder le mode */
-export function deconnexion (mode) {
+/* garderMode : si true, garder le mode */
+export function deconnexion (garderMode) {
   const session = stores.session
   const mode = session.mode
   if (session.accesIdb) closeIDB()
   if (session.accesNet) closeWS()
   stores.reset()
   session.$reset()
+  if (garderMode) session.mode = mode
+  SyncQueue.reset()
+  if (session.fsSync) session.fsSync.close()
 }
 
 /***********************************************************

@@ -325,17 +325,6 @@ export async function getCompte () {
   }
 }
 
-export async function putCompte () {
-  const session = stores.session
-  try {
-    const x = { id: session.compteId, k: session.clek}
-    const data = await crypter(clek, new Uint8Array(encode(x)) , 1)
-    await db.compte.put({ id: '1', data })
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
 export async function getAvatarPrimaire () {
   const session = stores.session
   try {
@@ -434,10 +423,26 @@ export async function putCv (cv) { // { id, v, photo, info }
   }
 }
 
-/*
-Mise à jour / suppression de listes de rows et purges globales par avatar / groupe
-*/
-export async function commitRows (opBuf) {
+/** OpBufC : buffer des actions de mise à jour de IDB ***************************/
+export class IDBbuffer {
+  constructor () {
+    this.lmaj = [] // rows à modifier / insérer en IDB
+    this.lsuppr = [] // row { _nom, id, ids } à supprimer de IDB
+    this.lav = new Set() // set des ids des avatars à purger (avec secrets, sponsorings, chats)
+    this.lgr = new Set() // set des ids des groupes à purger (avec secrets, membres)
+    this.mapSec = {} // map des secrets (cle: id/ids, valeur: secret) pour gestion des fichiers locaux
+    this.lsecsup = [] // liste des secrets temporaires à faire supprimer sur le serveur en fin de connexion
+  }
+
+  putIDB (row) { this.lmaj.push(row); return row }
+  supprIDB (row) { this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
+  purgeAvatarIDB (id) { this.lav.add(id) }
+  purgeGroupeIDB (id) { this.lgr.add(id) }
+  async commitIDB (setCompteClek) { await commitRows(this, setCompteClek) }
+}
+
+/** Mises à jour / purges globales de IDB *****************************************/
+export async function commitRows (opBuf, setCompteClek) {
   try {
     const session = stores.session
     const clek = session.clek
@@ -476,11 +481,17 @@ export async function commitRows (opBuf) {
     }
 
     await db.transaction('rw', TABLES, async () => {
-      for (const x of lidb) {
+      if (setCompteClek) {
+        const x = { id: session.compteId, k: session.clek}
+        const data = await crypter(clek, new Uint8Array(encode(x)) , 1)
+        await db.compte.put({ id: '1', data })
+      }
+
+      for (const x of lidb) { // tous objets
         await db[x.table].put( { id: x.idk, data: x.rowk })
       }
 
-      for (const x of lidbs) {
+      for (const x of lidbs) { // tous objets à supprimer
         if (x.idsk) {
           await db[x.table].where({ id: x.idk, ids: x.idsk }).delete()
         } else {
@@ -491,7 +502,7 @@ export async function commitRows (opBuf) {
       for (const idk of idac) {
         const id = { id: idk }
         await db.avatars.where(id).delete()
-        await db.rdvs.where(id).delete()
+        await db.sponsorings.where(id).delete()
         await db.chats.where(id).delete()
         await db.secrets.where(id).delete()
       }
