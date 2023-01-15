@@ -1,5 +1,8 @@
+import stores from '../stores/stores.mjs'
 import { OperationWS } from './operations.mjs'
 import { reconnexionCompte } from './connexion.mjs'
+import { compile } from './modele.mjs'
+import { IDBbuffer } from './db.mjs'
 
 export class SyncQueue {
   static queue = []
@@ -36,12 +39,30 @@ export class OnchangeCompta extends OperationWS {
   }
 }
 
+/*
+La maj de la tribu peut affecter :
+- le statut de blocage
+- la liste des parrains: en plus, en moins, CV changée - maj de people
+*/
 export class OnchangeTribu extends OperationWS {
   constructor () { super($t('OPsync')) }
 
   async run (row) {
     try {
+      const session = stores.session
+      this.buf = new IDBbuffer()
+      const tribu = await compile(row)
+      this.buf.putIDB(row)
+      const av = session.tribu // état avant
+      // TODO
 
+      /* commits */
+      this.buf.commitIDB()
+
+      const avStore = stores.avatar
+      avStore.setTribu(tribu)
+      const chg = session.setBlocage()
+      if (chg > 1) await alerteBlocage (chg)
     } catch (e) { await this.finKO(e) }
   }
 }
@@ -63,7 +84,7 @@ En retour :
 - 3: le compte VIENT d'être débloqué
 Dans les cas 2 et 3, ouverture d'un dialogue pour déconnexion
 */
-export async function alerteBlocage (chg) {
+async function alerteBlocage (chg) {
   const $q = stores.config.$q
   return new Promise((resolve) => {
     if (chg < 2) { resolve(); return }
