@@ -1,12 +1,12 @@
 import stores from '../stores/stores.mjs'
 
 import { AppExc, appexc } from './api.mjs'
-import { $t, hash, tru8, u8ToHex, getJourJ, getTrigramme, setTrigramme, getBlocage } from './util.mjs'
+import { $t, hash, tru8, u8ToHex, getJourJ, getTrigramme, setTrigramme } from './util.mjs'
 import { random, crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { compileToMap, NomAvatar, Avatar, Compta, getNg, Couple, Contact, setCv, SessionSync } from './modele.mjs'
+import { NomAvatar, Avatar, Compta, getNg, SessionSync } from './modele.mjs'
 import { genKeyPair } from './webcrypto.mjs'
-import { openIDB, deleteIDB, saveListeCvIds, commitRows } from './db.mjs'
+import { openIDB, deleteIDB, commitRows } from './db.mjs'
 
 /* Opération générique ******************************************/
 export class Operation {
@@ -24,7 +24,7 @@ export class Operation {
   /* 
   Retrait des groupes détectés zombis
   des listes des groupes accédés par les avatars du compte
-  */
+
   async groupesZombis (lgr) {
     if (lgr.size) {
       const session = stores.session
@@ -40,59 +40,7 @@ export class Operation {
       }
     }
   }
-
-  /* Obtention des invitGr du compte et traitement de régularisation ***********************************/
-  async getInvitGrs (compte) {
-    const session = stores.session
-    const ids = compte.avatarIds()
-    const ret = this.tr(await post(this, 'm1', 'chargerInvitGr', { sessionId: session.sessionId, ids: Array.from(ids) }))
-    const lstInvitGr = []
-    const m = await compileToMap(ret.rowItems)
-    if (m.invitgr) for (const pk in m.invitgr) lstInvitGr.push(m.invitgr[pk])
-    await this.traitInvitGr(lstInvitGr)
-  }
-
-  /* Traitement des invitGr, appel de régularisation ********************************/
-  async traitInvitGr (lstInvitGr) {
-    const session = stores.session
-    for (let i = 0; i < lstInvitGr.length; i++) {
-      const iv = lstInvitGr[i]
-      const args = { sessionId: session.sessionId, id: iv.id, idg: iv.idg, ni: iv.ni, datak: iv.datak }
-      this.tr(await post(this, 'm1', 'regulGr', args))
-    }
-  }
-
-  /* Obtention des invitCp du compte et traitement de régularisation ***********************************/
-  async getInvitCps (compte) {
-    const session = stores.session
-    const ids = compte.avatarIds()
-    const ret = this.tr(await post(this, 'm1', 'chargerInvitCp', { sessionId: session.sessionId, ids: Array.from(ids) }))
-    const lstInvitCp = []
-    const m = await compileToMap(ret.rowItems)
-    if (m.invitcp) for (const pk in m.invitcp) lstInvitCp.push(m.invitcp[pk])
-    await this.traitInvitCp(lstInvitCp)
-  }
-
-  /* Traitement des invitCp, appel de régularisation ********************************/
-  async traitInvitCp (lstInvitCp) {
-    const session = stores.session
-    for (let i = 0; i < lstInvitCp.length; i++) {
-      const iv = lstInvitCp[i]
-      const args = { sessionId: session.sessionId, id: iv.id, idc: iv.idc, ni: iv.ni, datak: iv.datak }
-      this.tr(await post(this, 'm1', 'regulCp', args))
-    }
-  }
-
-}
-
-export class OperationWS extends Operation {
-  constructor (nomop) { super(nomop) }
-
-  async finKO (e) {
-    const exc = appexc(e)
-    exc.sync = true
-    await stores.ui.afficherExc(exc)
-  }
+  */
 }
 
 export class OperationUI extends Operation {

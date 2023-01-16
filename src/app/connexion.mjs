@@ -2,22 +2,35 @@ import stores from '../stores/stores.mjs'
 
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
-import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, getBlocage, hash } from './util.mjs'
+import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash } from './util.mjs'
 import { post } from './net.mjs'
 import { DateJour } from './api.mjs'
 import { NomAvatar } from './modele.mjs'
-import { resetRepertoire, deconnexion, compile, delCv, setNg, Compte, Compta, Prefs, Avatar, NomTribu } from './modele.mjs'
+import { resetRepertoire, compile, Compta, Avatar, NomTribu } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getAvatarPrimaire, getColl, getCvs, putCv,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB  } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS } from './ws.mjs'
 
+/* garderMode : si true, garder le mode */
+export function deconnexion (garderMode) {
+  const session = stores.session
+  const mode = session.mode
+  if (session.accesIdb) closeIDB()
+  if (session.accesNet) closeWS()
+  stores.reset()
+  session.$reset()
+  if (garderMode) session.mode = mode
+  SyncQueue.reset()
+  if (session.fsSync) session.fsSync.close()
+}
+
 export async function reconnexionCompte () {
   const session = stores.session
   const phrase = session.phrase
   deconnexion(true)
-  connecterCompte (phrase) 
+  await connecterCompte (phrase) 
 }
 
 async function initSession (phrase) {

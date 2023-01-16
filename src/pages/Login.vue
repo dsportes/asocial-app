@@ -86,7 +86,7 @@ import stores from '../stores/stores.mjs'
 
 import { $t, afficherDiag, dlvDepassee, tru8 } from '../app/util.mjs'
 import { connecterCompte, CreationCompteComptable } from '../app/connexion.mjs'
-import { PhraseContact, Contact, NomContact, Couple } from '../app/modele.mjs'
+import { PhraseContact, NomContact } from '../app/modele.mjs'
 import { get } from '../app/net.mjs'
 
 import ChoixLangue from '../components/ChoixLangue.vue'

@@ -4,18 +4,11 @@ import { encode, decode } from '@msgpack/msgpack'
 import { useI18n } from 'vue-i18n'
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
-import { reconnexion } from './connexion.mjs'
-import { ProcessQueue } from './synchro.mjs'
 
 let pako
 
 export function setRequiredModules (m) { 
   pako = m.pako
-}
-
-export async function traiterQueue (q) {
-  const op = new ProcessQueue()
-  await op.run(q) // ne sort jamais en exception
 }
 
 const decoder = new TextDecoder('utf-8')
@@ -228,7 +221,7 @@ export function rnd6 () {
 
 /* retourne un safe integer hash:
 - d'un string
-- d'un u8 : dans ce cas le hash est multiple de 4
+- d'un u8
 */
 export function hash (arg) {
   const t = typeof arg
@@ -242,7 +235,7 @@ export function hash (arg) {
   }
   h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909)
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909)
-  return 4294967296 * (2097151 & h2) + (bin ? + ((h1 >> 2) << 2) : (h1 >>> 0))
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0)
 }
 
 export function u8ToInt (u8) {

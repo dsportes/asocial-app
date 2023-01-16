@@ -1,5 +1,5 @@
 import stores from '../stores/stores.mjs'
-import { OperationWS } from './operations.mjs'
+import { Operation } from './operations.mjs'
 import { reconnexionCompte } from './connexion.mjs'
 import { compile } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'
@@ -27,6 +27,28 @@ export class SyncQueue {
       session.syncEncours = false
       SyncQueue.traiterQueue()
     }, 50)
+  }
+}
+
+export class OperationWS extends Operation {
+  constructor (nomop) { super(nomop) }
+
+  async nvSM (id, v) { // nouveaux secrets et membres
+    const args = { token: session.authToken, id, v }
+    const ret = this.tr(await post(this, 'ChargerMS', args))
+    return [ret.rowSecrets, ret.rowMembres]
+  }
+
+  async nvSCS (id, v) { // nouveaux secrets, chats, sponsorings
+    const args = { token: session.authToken, id, v }
+    const ret = this.tr(await post(this, 'ChargerSCS', args))
+    return [ret.rowSecrets, ret.rowChats, ret.rowSponsorings]
+  }
+
+  async finKO (e) {
+    const exc = appexc(e)
+    exc.sync = true
+    await stores.ui.afficherExc(exc)
   }
 }
 
@@ -74,18 +96,6 @@ La maj d'un groupe peut affecter :
 - la liste des membres et le changement de leur carte de visite
 */
 export class OnchangeGroupe extends OperationWS {
-  
-  async nvSecrets (id, v) {
-    const args = { token: session.authToken, id, v }
-    const ret = this.tr(await post(this, 'ChargerSecrets', args))
-    return ret.rowSecrets
-  }
-
-  async nvMembres (id, v) {
-    const args = { token: session.authToken, id, v }
-    const ret = this.tr(await post(this, 'ChargerMembres', args))
-    return ret.rowMembres
-  }
 
   async run (row) {
     try {
@@ -100,12 +110,11 @@ export class OnchangeGroupe extends OperationWS {
       if (groupe._zombi) {
         this.buf.purgeGroupeIDB(groupe.id) 
       } else {
-        const nvMbrows = await this.nvMembres(groupe.id, avGr.v)
+        const [nvSecrows, nvMbrows] = await this.nvSM(groupe.id, avGr.v)
         for (const rowm of nvMbrows) {
           nvMbs.push(await compile(rowm)) // membre ajouté / modifié
           this.buf.putIDB(rowm)
         }
-        const nvSecrows = await this.nvSecrets(groupe.id, avGr.v)
         for (const rows of nvSecrows) {
           const s = await compile(rows)
           if (session.synchro) this.buf.mapSec[s.pk] = s

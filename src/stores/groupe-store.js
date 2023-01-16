@@ -10,7 +10,8 @@ Sous-collection pour chaque groupe id :
 
 export const useGroupeStore = defineStore('groupe', {
   state: () => ({
-    map: new Map()
+    map: new Map(),
+    voisins: new Map()
   }),
 
   getters: {
@@ -48,6 +49,11 @@ export const useGroupeStore = defineStore('groupe', {
         const e = state.map.get(id)
         return e ? e.secrets : null 
       }
+    },
+    // retourne le Set des pk des voisins du secret (id, ids)
+    getVoisins: (state) => { return (id, ids) => {
+        return state.voisins.get(id + '/' + ids) || new Set()
+      }
     }
   },
 
@@ -78,13 +84,30 @@ export const useGroupeStore = defineStore('groupe', {
       const e = this.map.get(secret.id)
       if (!e) return
       e.secrets.set(secret.ids, secret)
+      const ref = secret.refs
+      if (ref) {
+        const pk = ref[0] + '/' + ref[1]
+        let v = this.voisins.get(pk)
+        if (!v) { v = new Set(); this.voisins.set(pk, v) }
+        v.add(secret.pk)
+      }
       // TODO : gérer les ajouts / suppressions de fichiers ayant une copie locale
     },
 
     delSecret (id, ids) {
       const e = this.map.get(id)
       if (!e) return
-      e.secrets.delete(ids)
+      const secret = e.secrets.get(ids)
+      if (secret) {
+        e.secrets.delete(ids)
+        const ref = secret.refs
+        if (ref) {
+          const pk = ref[0] + '/' + ref[1]
+          let v = this.voisins.get(pk)
+          if (v) v.delete(secret.pk)
+          if (!v.size) this.voisins.delete(pk)
+        }
+      }
     },
 
     del (id) {

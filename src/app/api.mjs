@@ -216,6 +216,10 @@ const nbjSuppr = 365
 const zeroPad = (num, places) => String(num).padStart(places, '0')
 
 export class DateJour {
+  static nj () {
+    return Math.floor(new Date().getTime() / 86400000) - j0
+  }
+
   constructor (j) {
     const d = !j ? new Date() : (j instanceof Date ? j : new Date((j0 + j) * 86400000))
     this.aa = d.getFullYear() % 100

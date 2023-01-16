@@ -1,87 +1,40 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { $t, hash, rnd6, intToB64, b64ToInt, u8ToB64, idToSid, dlvDepassee, titre, normpath, gzip, ungzip, ungzipT, egaliteU8, tru8 } from './util.mjs'
-import { random, pbkfd, sha256, decrypterRSA, crypterRSA, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
+import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, dlvDepassee, titre, gzip, ungzip, ungzipT, egaliteU8, tru8, splitPK } from './util.mjs'
+import { random, pbkfd, sha256, decrypterRSA, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
 
-import { IDCOMPTABLE, DateJour, Compteurs, UNITEV1, UNITEV2, chiffres, decodeIn } from './api.mjs'
+import { IDCOMPTABLE, Compteurs, UNITEV1, UNITEV2, DateJour } from './api.mjs'
 
-import { closeIDB, getFichierIDB, saveSessionSync } from './db.mjs'
-import { closeWS } from './ws.mjs'
-import { SyncQueue } from './sync.mjs'
+import { getFichierIDB, saveSessionSync } from './db.mjs'
 
-/* Gestion en stores des secrets et des cv *************/
-export function setSecret (s) {
-  if (!s) return
-  stores.secret.setSecret(s) // référence des secrets et de leurs voisinage
-  switch (s.id % 4) { // listage dans leur "maître" (avatar, couple ou groupe)
-    case 0 : { stores.avatar.setSecret(s); return }
-    case 1 : { stores.couple.setSecret(s); return }
-    case 2 : { stores.groupe.setSecret(s); return }
-  }
+const decoder = new TextDecoder('utf-8')
+
+function decodeIn (buf, cible) {
+  const x = decode(buf)
+  for (const p in x) cible[p] = x[p]
 }
 
-export function getSecret (id, ns) {
-  return stores.secret.getSecret(id, ns)
+export function getSecret (id, ids) {
+  const st = id % 10 === 8 ? stores.groupe : stores.avatar
+  return st.getSecret(id, ids)
 }
 
-export function delSecret (id, ns) {
-  stores.secret.delSecret(id, ns)
-  switch (id % 4) {
-    case 0 : { return stores.avatar.delSecret(id, ns) }
-    case 1 : { return stores.couple.delSecret(id, ns) }
-    case 2 : { return stores.groupe.delSecret(id, ns) }
-  }
-}
-
-export function setCv (cv) {
-  if (!cv) return
-  switch (cv.id % 4) {
-    case 0 : {
-      const compte = stores.session.compte
-      if (compte.estAc(cv.id)) {
-        stores.avatar.setCv(cv)
-      } else {
-        stores.people.setCv(cv)
-      }
-      return
-    }
-    case 2 : { 
-      stores.groupe.setCv(cv)
-      return
-    }
-  }
+// Retourne l'array des [id, ids] des secrets voisins de celui passé en argument
+export function getVoisins(id, ids) {
+  const r = []
+  stores.avatar.getVoisins(id, ids).forEach(pk => { r.push(splitPK(pk)) })
+  stores.groupe.getVoisins(id, ids).forEach(pk => { r.push(splitPK(pk)) })
+  return r
 }
 
 export function getCv (id) {
-  switch (id % 4) {
-    case 0 : {
-      const compte = stores.session.compte
-      if (compte.estAc(id)) {
-        return stores.avatar.getCv(id)
-      } else {
-        return stores.people.getCv(id)
-      }
-    }
-    case 2 : { 
-      return stores.groupe.getCv(id)
-    }
-  }
-}
-
-export function delCv (id) {
-  switch (id % 4) {
-    case 0 : {
-      const compte = stores.session.compte
-      if (compte.estAc(id)) {
-        return stores.avatar.delCv(id)
-      } else {
-        return stores.people.delCv(id)
-      }
-    }
-    case 2 : { 
-      return stores.groupe.delCv(id)
-    }
+  if (id % 10 !== 8) {
+    const avStore = stores.avatar
+    const av = avStore.getAvatar(id)
+    if (av) return av ? av.cv : stores.people.getCv(id)
+  } else { 
+    return stores.groupe.getCv(id)
   }
 }
 
@@ -108,23 +61,6 @@ export function getDisparu (id) { const e = repertoire.rep[id]; return e && e.x 
 export function setDisparu (id) { const e = repertoire.rep[id]; if (e) e.x = true }
 
 /***********************************************************
-Gestion de la session
-************************************************************/
-
-/* garderMode : si true, garder le mode */
-export function deconnexion (garderMode) {
-  const session = stores.session
-  const mode = session.mode
-  if (session.accesIdb) closeIDB()
-  if (session.accesNet) closeWS()
-  stores.reset()
-  session.$reset()
-  if (garderMode) session.mode = mode
-  SyncQueue.reset()
-  if (session.fsSync) session.fsSync.close()
-}
-
-/***********************************************************
 NomGenerique : NomAvatar / NomContact / NomGroupe / NomTribu
 ************************************************************/
 export class NomGenerique {
@@ -133,11 +69,12 @@ export class NomGenerique {
     this.rnd = rnd || random(32)
   }
 
-  get t () { return this.id % 4 }
+  get estGroupe () { return this.id % 10 === 8 }
+  get estTribu () { return this.id % 10 === 9 }
+  get estAvatar () { return this.id % 10 < 8 }
   get nomc () { return this.nom + '#' + ('' + this.id).substring(0, 4) }
   // get nomf () { return normpath(this.nomc) }
-  get sid () { return intToB64(this.id) } // dans la table mac d'un compte, la clé est le sid des avatars
-  get disparu () { return getDisparu(this.id) }
+  get sid () { return intToB64(this.id) }
   get cv () { return getCv(this.id) }
 
   egal (ng) {
@@ -145,23 +82,22 @@ export class NomGenerique {
   }
 
   get photo () {
-    if (this.disparu) return ''
-    const cv = this.cv
-    return cv && cv.cv ? (cv.cv[0] || '') : ''
+    const cv = getCv(this.id)
+    return cv ? cv.photo : ''
   }
 
   get info () {
-    if (this.disparu) return $t('MOdis')
-    const cv = this.cv
-    return cv && cv.cv ? (cv.cv[1] || '') : ''
+    const cv = getCv(this.id)
+    return cv ? cv.info : ''
   }
 
 }
 
 export class NomAvatar extends NomGenerique {
-  constructor (nom, rnd) {
+  // idx : de 0 à 7, index de l'avatar secondaire dans son primaire
+  constructor (nom, rnd, idx) {
     super(nom, rnd)
-    this.id = nom !== 'Comptable' ? hash(this.rnd) : IDCOMPTABLE
+    this.id = nom !== 'Comptable' ? (Math.round(hash(this.rnd) / 10) * 10) + idx : IDCOMPTABLE
   }
 
   get titre () {
@@ -172,55 +108,33 @@ export class NomAvatar extends NomGenerique {
   get photoDef () {
     const cfg = stores.config
     if (this.id === IDCOMPTABLE) return cfg.iconSuperman
-    if (this.disparu) return cfg.disparu
     return this.photo || cfg.iconAvatar
   }
 
   clone () {
-    return new NomAvatar(this.nom, this.rnd)
-  }
-}
-
-export class NomContact extends NomGenerique {
-  constructor (nom, rnd) {
-    super(nom, rnd)
-    this.id = hash(this.rnd) + 1
-  }
-
-  get photoDef () {
-    const cfg = stores.config
-    if (this.disparu) return cfg.disparu
-    const cv = this.cv
-    return this.photo || cfg.iconContact
-  }
-
-  clone () {
-    return new NomContact(this.nom, this.rnd)
+    return new NomAvatar(this.nom, this.rnd, (this.id % 10))
   }
 }
 
 export class NomGroupe extends NomGenerique {
   constructor (nom, rnd) {
     super(nom, rnd)
-    this.id = hash(this.rnd) + 2
+    this.id = (Math.round(hash(this.rnd) / 10) * 10) + 8
   }
 
   get photoDef () {
-    const cfg = stores.config
-    if (this.disparu) return cfg.disparu
-    const cv = this.cv
-    return this.photo || cfg.iconGroupe
+    return this.photo || stores.config.iconGroupe
   }
 
   clone () {
-    return new NomContact(this.nom, this.rnd)
+    return new NomGroupe(this.nom, this.rnd)
   }
 }
 
 export class NomTribu extends NomGenerique {
   constructor (nom, rnd) {
     super(nom, rnd)
-    this.id = hash(this.rnd) + 3
+    this.id = (Math.round(hash(this.rnd) / 10) * 10) + 9
   }
 
   clone () {
@@ -481,170 +395,6 @@ export class MdpAdmin {
   }
 }
 
-/*
-Compile tous les items dans CacheSync
-- d'abord les items compte (afin que les clés des avatars soient enregistrées au répertoire)
-- ouis les avatars (afin que les clés des comptes et groupes soient enregistrées au répertoire)
-- puis tous les autres
-Pour chaque objet il n'est enregistré en cache que si sa version est postérieure à 
-celle actuellement en store ET à celle actuellement en cache
-*/
-export async function compileToCache (items, cache) {
-  if (!items || !items.length) return
-
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i]
-    if (item.table !== 'compte') continue
-    const obj = await compile(item)
-    cache.setCompte(obj)
-  }
-    
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i]
-    if (item.table !== 'avatar') continue
-    const obj = await compile(item)
-    cache.setAvatar(obj)
-  }
-
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i]
-    if (item.table === 'avatar' || item.table === 'compte') continue
-    const obj = await compile(item)
-    switch (obj.table) {
-      case 'prefs' : { cache.setPrefs(obj); break }
-      case 'tribu' : { cache.setTribu(obj); break }
-      case 'compta' : { cache.setCompta(obj); break }
-      case 'groupe' : { cache.setGroupe(obj); break }
-      case 'couple' : { cache.setCouple(obj); break }
-      case 'secret' : { cache.setSecret(obj); break }
-      case 'cv' : { cache.setCv(obj); break }
-      case 'invitgr' : { cache.setInvitgr(obj); break }
-      case 'invitcp' : { cache.setInvitcp(obj); break }
-    }
-  }
-}
-
-/* CacheSync ***************************************************/
-export class CacheSync {
-  constructor () {
-    this.compte = null
-    this.prefs = null
-    this.chat = null
-    this.avatars = new Map()
-    this.tribus = new Map()
-    this.comptas = new Map()
-    this.groupes = new Map()
-    this.couples = new Map()
-    this.membres = new Map()
-    this.secrets = new Map()
-    this.cvs = new Map()
-    this.invitgrs = new Map()
-    this.invitcps = new Map()
-  }
-
-  setCompte (obj) {
-    const x = this.getCompte()
-    if (!x || x.v < obj.v) this.compte = obj
-  }
-  getCompte (actuel) {
-    const ac = stores.session.compte
-    return actuel ? ac : this.compte || ac
-  }
-
-  setPrefs (obj) {
-    const x = this.getPrefs()
-    if (!x || x.v < obj.v) this.prefs = obj
-  }
-  getPrefs (actuel) {
-    const ac = stores.session.prefs
-    return actuel ? ac : this.prefs || ac
-  }
-
-  setTribu (obj) { 
-    const x = this.getTribu(obj.id)
-    if (!x || x.v < obj.v) this.tribus.set(obj.id, obj)
-  }
-  getTribu (id, actuel) { 
-    const x = stores.tribu.getTribu(id)
-    return actuel ? x : this.tribus.get(id) || x
-  }
-
-  setAvatar (obj) {
-    const x = this.getAvatar(obj.id)
-    if (!x || x.v < obj.v) this.avatars.set(obj.id, obj)
-  }
-  getAvatar (id, actuel) {
-    const x = stores.avatar.getAvatar(id)
-    return actuel ? x : this.avatars.get(id) || x
-  }
-
-  setCompta (obj) {
-    const x = this.getCompta(obj.id)
-    if (!x || x.v < obj.v) this.comptas.set(obj.id, obj)
-  }
-  getCompta (id, actuel) {
-    const x = stores.avatar.getCompta(id)
-    return actuel ? x : this.comptas.get(id) || x
-  }
-
-  setGroupe (obj) {
-    const x = this.getGroupe(obj.id)
-    if (!x || x.v < obj.v) this.groupes.set(obj.id, obj)
-  }
-  getGroupe (id, actuel) {
-    const x = stores.groupe.getGroupe(id)
-    return actuel ? x : this.groupes.get(id) || x
-  }
-
-  setCouple (obj) {
-    const x = this.getCouple(obj.id)
-    if (!x || x.v < obj.v) this.couples.set(obj.id, obj)
-  }
-  getCouple (id) {
-    const x = stores.couple.getCouple(id)
-    return actuel ? x : this.couples.get(id) || x
-  }
-
-  setMembre (obj) {
-    const x = this.getMembre(obj.id)
-    if (!x || x.v < obj.v) this.membres.set(obj.id, obj)
-  }
-  getMembre (id) {
-    const x = stores.groupe.getMembre(id)
-    return actuel ? x : this.membres.get(id) || x
-  }
-
-  setSecret (obj) {
-    const x = this.getSecret(obj.id, obj.ids)
-    if (!x || x.v < obj.v) this.secrets.set(obj.pk, obj)
-  }
-  getSecret (id, ns, actuel) {
-    const ac = getSecret(id, ns)
-    return actuel ? x : this.secrets.get(id + '/' + ns) || x
-  }
-
-  setCv (obj) {
-    const x = this.getCv(obj.id)
-    if (!x || x.v < obj.v) this.cvs.set(obj.id, obj)
-  }
-  getCv (id, actuel) {
-    const x = getCv(id)
-    return actuel ? x : this.cvs.get(id) || x
-  }
-
-  setInvitgr (obj) {
-    const x = this.getInvitgr(pk)
-    if (!x || x.v < obj.v) this.invitgrs.set(obj.pk, obj)
-  }
-  getInvitgr (pk) { return this.invitgrs.get(pk) }
-
-  setInvitcp (obj) {
-    const x = this.getInvitcp(pk)
-    if (!x || x.v < obj.v) this.invitcps.set(obj.pk, obj)
-  }
-  getInvitcp (pk) { return this.invitcps.get(pk) } 
-}
-
 /* Calcul du niveau d'un blocage
 ljc : [[j, n] ...] : à partir de j inclus, c'est le niveau n
 stn : niveau au jour de connexion
@@ -679,13 +429,16 @@ const classes = {
   avatars: Avatar,
   groupes: Groupe,
   secrets: Secret,
-  rdvs: Rdv,
+  sponsorings: Sponsoring,
   chats: Chat,
   membres: Membre,
   cvs: Cv
 }
 
-// Retourne un objet depuis un 'row'
+/* Retourne un objet depuis un 'row'
+Si le row a une dlv inférieure à la date du jour, retourne un objet avec _zombi = true
+Les objets ont au moins les proriétés _nom, id, (ids), (dlv) même _zombi
+*/
 export async function compile (row) {
   if (!row) return null
   const cl = classes[row._nom]
@@ -694,10 +447,14 @@ export async function compile (row) {
   obj._nom = row._nom
   obj.id = row.id
   if (row.ids) obj.ids = row.ids
+  if (row.dlv) obj.dlv = row.dlv
   obj.v = row.v
-  if (row._data_) {
+  const z = row.dlv && row.dlv < DateJour.nj()
+  if (!z && row._data_) {
      await obj.compile(decode(row._data_))
-  } else obj._zombi = true
+  } else {
+    obj._zombi = true
+  }
   return obj
 }
 

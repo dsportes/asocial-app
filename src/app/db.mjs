@@ -3,9 +3,14 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { SessionSync } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
-import { AppExc, E_DB, decodeIn } from './api.mjs'
+import { AppExc, E_DB } from './api.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
 import { getSecret } from '../app/modele.mjs'
+
+function decodeIn (buf, cible) {
+  const x = decode(buf)
+  for (const p in x) cible[p] = x[p]
+}
 
 const STORES = {
   compte: 'id',
@@ -339,16 +344,6 @@ export async function getCompta () {
   const session = stores.session
   try {
     const idb = await db.comptas.get(session.compteId)
-    return decode(await decrypter(session.clek, idb.data))
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getCompta (idt) {
-  const session = stores.session
-  try {
-    const idb = await db.tribus.get(idt)
     return decode(await decrypter(session.clek, idb.data))
   } catch (e) {
     throw EX2(e)

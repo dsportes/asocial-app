@@ -25,8 +25,7 @@
 <script>
 import stores from '../stores/stores.mjs'
 
-import { deconnexion } from '../app/modele.mjs'
-import { reconnexionCompte } from '../app/connexion.mjs'
+import { reconnexionCompte, deconnexion } from '../app/connexion.mjs'
 import { html } from '../app/util.mjs'
 
 const lcont = new Set([1, 4, 6, 7])

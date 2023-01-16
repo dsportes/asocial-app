@@ -224,8 +224,7 @@ import { ref } from 'vue'
 import stores from './stores/stores.mjs'
 
 import { $t } from './app/util.mjs'
-import { deconnexion } from './app/modele.mjs'
-import { reconnexion } from './app/connexion.mjs'
+import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
 import TitreBanner from './components/TitreBanner.vue'
@@ -283,7 +282,7 @@ export default {
 
   methods: {
     deconnexion () { deconnexion() },
-    async reconnexion () { await reconnexion() },
+    async reconnexion () { await reconnexionCompte() },
 
     async infoBlocage () { await this.ui.ouvrirInfoBlocage(true) },
     async panelcontactsAut () { if (await this.session.aut(4)) this.ui.panelContacts = true },
