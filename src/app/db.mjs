@@ -351,18 +351,15 @@ export async function getCompta () {
 }
 
 /** Lecture d'une collection complète : 
-Retourne une Map: 
-  - clé: id ou id/ids
-  - valeur: row { _nom, id, ids, v, _data_} 
+Retourne l'array des rows reçus du serveur : { _nom, id, ids, v, dlv, _data_} 
 */
 export async function getColl (nom) {
   const session = stores.session
   try {
-    const r = new Map()
+    const r = []
     await db[nom].each(async (idb) => { 
       const row = await decrypter(session.clek, idb.data)
-      const pk = row.ids ? id + '/' + ids : id
-      r.set(pk, row)
+      r.push(row)
     })
     return r
   } catch (e) {

@@ -91,50 +91,50 @@ export class ConnexionCompte extends OperationUI {
   constructor () { super($t('OPcnx')) }
 
   /** tousAvatars *******************************************************/
-  async tousAvatars (avatar, rowAvatar) {
+  async tousAvatars () {
     const session = stores.session
-    const avReq = new Map() // versions des avatars requis à demander au serveur
-    const avRows = {} // rows de ceux-ci déjà détenus
-    const idbVersions = {} // pour chaque avatar requis, la version détenue en IDB
-    
-    this.avatarsToStore.set(avatar.id, avatar)
-
-    avatar.avatarIds().forEach(id => {
-      idbVersions[id] = 0
-      if (id === avatar.id) { 
-        avReq.set(id, avatar.v)
-        avRows[id] = rowAvatar
-      } else avReq.set(id, 0)
-    })
-
-    if (session.accesIdb) {
-      getColl('avatars').forEach(row => {
-        if (!avReq.has(row.id)) {
-          this.buf.purgeAvatarIDB(row.id)
-        } else {
-          idbVersions[id] = row.id
-          const v = avReq.get(row.id)
-          if (row.v > v) { avReq.set(row.id, row.v); avRows[row.id] = row }
-        }
+    const avModifs = new Set()
+    const avToSuppr = new Set()
+    const avRequis = new Set()
+    const avToStore = new Map()
+    while (true) { // boucle si la version de l'avatar principal a changé
+      let ok = true
+      avModifs.clear()
+      avToSuppr.clear()
+      avRequis.clear()
+      avToStore.clear()
+      const mapv = {} // versions des avatars requis à demander au serveur
+      this.avatar.avatarIds(avRequis)
+      avRequis.forEach(id => {
+        if (id === this.avatar.id) {
+          mapv[id] = this.avatar.v
+          avToStore.set(id, this.avatar)
+        } else mapv[id] = 0 
       })
-    }
 
-    let rowAvatars = {}
-    if (session.accesNet) {
-      const args = { token: session.authToken, mapv: avReq }
-      const ret = this.tr(await post(this, 'GetAvatars', args))
-      rowAvatars = ret.rowAvatars
-    }
-
-    for (const id of this.avatarsToStore.keys()) {
-      const rowAvatar = rowAvatars[id]
-      if (rowAvatar) { // On a trouvé plus récent que celui détenu en IDB ou acquis à la connexion
-        if (id === avatar.id) return false // l'avatar principal a changé depuis connexion
-        this.avatarsToStore.set(id, await compile(this.buf.putIDB(rowAvatar))) // mettre à jour IDB
-      } else {
-        // ne PAS mettre à jour IDB qui a déjà le dernier
-        this.avatarsToStore.set(id, await compile(avRows[id]))
+      for (const row of this.cAvatars) {
+        if (row.id !== this.avatar.id) {
+          const av = await compile(row)
+          avToStore.set(row.id, av)
+          mapv[row.id] = row.v
+        }
       }
+
+      if (session.accesNet) {
+        const args = { token: session.authToken, mapv }
+        const ret = this.tr(await post(this, 'GetAvatars', args))
+        if (ret.rowAvatars && ret.rowAvatars.length) {
+          for (const row of rowAvatars) {
+            const av = await compile(row)
+            if (row.id === this.avatar.id) {
+              this.avatar = av // la version de l'avatar principal a changé
+              this.ok = false
+            }
+            avToStore.set(row.id, av)
+          }
+        }
+      }
+      if (this.ok) break
     }
   }
 
@@ -148,7 +148,7 @@ export class ConnexionCompte extends OperationUI {
 
     /* map des membres des groupes des avatars
      - clé: id du groupe  - valeur: { idg, mbs: [ids], v , dlv } */
-    const mbsMap = { } 
+    const mbsMap = {} 
 
     /* map des avatars du compte - clé: id de l'avatar  - valeur: dlv } */
     const avsMap = {}  
@@ -157,6 +157,8 @@ export class ConnexionCompte extends OperationUI {
       avsMap[avatar.id] = avatar.id % 10 === 0 ? dlv1 : dlv2
       avatar.membres(mbsMap) // v, dlv, de mbsMap ne sont pas renseignées pour l'instant
     })
+
+
   
     // Récupération des ids des groupes pour abonnement
     const abPlus = [] // ids des groupes auxquels s'abonner
@@ -210,20 +212,18 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** Chargement pour un avatar de ses secrets postérieurs au plus récent ************/
-  async chargerSecrets (id, estGr) {
+  async chargerSecrets (id, v, estGr) {
     const session = stores.session
-    let v = 0
     let n1 = 0, n2 = 0
-    let rows = {}
-    this.cSecrets.forEach(row => { 
+    const rows = {}
+    for (const row of this.cSecrets) { 
       if (row.id === id) {
-        if (row.v > v) v = row.v
         rows[row.ids] = row
         n1++
       } 
-    })
+    }
 
-    let rowSecrets
+    let rowSecrets // array
 
     if (session.accesNet) {
       const args = { token: session.authToken, id, v }
@@ -239,7 +239,7 @@ export class ConnexionCompte extends OperationUI {
     }
     const avgrStore = estGr ? stores.groupes : stores.avatars
     const auj = new DateJour().nbj
-    for (const ids of rows) {
+    for (const ids in rows) {
       const secret = await compile(rows[ids])
       if (session.accesNet && secret.st < auj) { // secret temporaire à supprimer
         this.buf.lsecsup.push(secret)
@@ -252,36 +252,38 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** Chargement pour un avatar de ses chats postérieurs au plus récent ************/
-  async chargerChats (id) {
+  async chargerChats (id, v) {
     const session = stores.session
-    let v = 0
     let n1 = 0, n2 = 0
-    let rows = {}
-    this.cChats.forEach(row => { 
+    const rows = {}
+    for (const row of this.cChats) { 
       if (row.id === id) {
-        if (row.v > v) v = row.v
         rows[row.ids] = row
         n1++
       }
-    })
+    }
 
-    let rowChats
+    let rowChats // array
 
     if (session.accesNet) {
       const args = { token: session.authToken, id, v }
       const ret = this.tr(await post(this, 'ChargerChats', args))
       rowChats = ret.rowChats
     }
-
-    if (rowChats  && rowChats.length) {
+    if (rowChats && rowChats.length) {
       for (const row of rowChats) {
-        this.buf.putIDB(row)
-        rows[row.ids] = row
-        n2++
+        if (row.dlv) { // les chats ayant une dlv sont à supprimer
+          this.buf.supprIDB(row)
+          delete rows[row.ids]
+        } else {
+          this.buf.putIDB(row)
+          rows[row.ids] = row
+          n2++
+        }
       }
     }
     const avStore = stores.avatars
-    for (const ids of rows) {
+    for (const ids in rows) {
       const chat = await compile(rows[ids])
       avStore.setChat(chat)
     }
@@ -289,18 +291,18 @@ export class ConnexionCompte extends OperationUI {
   }
   
   /** Chargement pour un avatar de ses sponsorings postérieurs au plus récent ************/
-  async chargerSponsorings (id) {
+  async chargerSponsorings (id, v) {
     const session = stores.session
-    let v = 0
     let n1 = 0, n2 = 0
-    let rows = {}
-    this.cSponsorings.forEach(row => { 
+    const rows = {}
+    for (const row of this.cSponsorings) { 
       if (row.id === id) {
-        if (row.v > v) v = row.v
-        rows[row.ids] = row
-        n1++
+        if (row.dlv <= this.auj) {
+          rows[row.ids] = row
+          n1++
+        }
       }
-    })
+    }
 
     let rowSponsorings
 
@@ -311,13 +313,18 @@ export class ConnexionCompte extends OperationUI {
     }
     if (rowSponsorings  && rowSponsorings.length) {
       for (const row of rowSponsorings) {
-        this.buf.putIDB(row)
-        rows[row.ids] = row
-        n2++
+        if (row.dlv <= this.auj) { // ignore les sponsorings de dlv dépassée
+          this.buf.putIDB(row)
+          rows[row.ids] = row
+          n2++
+        } else {
+          this.buf.supprIDB(row)
+          delete rows[row.ids]
+        }
       }
     }
     const avStore = stores.avatars
-    for (const ids of rows) {
+    for (const ids in rows) {
       const sponsoring = await compile(rows[ids])
       avStore.setSponsoring(sponsoring)
     }
@@ -325,31 +332,39 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** Chargement pour un groupe de ses membres postérieurs au plus récent ************/
-  async chargerMembres (id) {
+  async chargerMembres (groupe) {
     const session = stores.session
-    let v = 0
     let n1 = 0, n2 = 0
-    let rows = {}
-    this.cMembres.forEach(row => { 
-      if (row.id === id) {
-        if (row.v > v) v = row.v
-        rows[row.ids] = row
-        n1++
+    const rows = {}
+    for (const row of this.cMembres.forEach) { 
+      if (row.id === groupe.id) {
+        if (row.dlv > this.auj) {
+          this.buf.supprIDB(row)
+          this.mbsDisparus.add(row.ids)
+        } else {
+          rows[row.ids] = row
+          n1++
+        }
       }
-    })
+    }
 
     let rowMembres
 
     if (session.accesNet) {
-      const args = { token: session.authToken, id, v }
+      const args = { token: session.authToken, id: groupe.id, v: groupe.v }
       const ret = this.tr(await post(this, 'ChargerMembres', args))
       rowMembres = ret.rowMembres
     }
     if (rowMembres  && rowMembres.length) {
       for (const row of rowMembres) {
-        this.buf.putIDB(row)
-        rows[row.ids] = row
-        n2++
+        if (row.dlv > this.auj) {
+          this.buf.supprIDB(row)
+          this.mbsDisparus.add(row.ids)
+        } else {
+          this.buf.putIDB(row)
+          rows[row.ids] = row
+          n2++
+        }
       }
     }
     const grStore = stores.groupes
@@ -409,13 +424,15 @@ export class ConnexionCompte extends OperationUI {
     */
     const args = { token: session.authToken }
 
-    { // Coonexion : récupération de l'id du compte, clepubc, fscredentials
+    { // Connexion : récupération de l'id du compte, clepubc, fscredentials
       const ret = this.tr(await post(this, 'ConnexionCompte', args))
       session.clepubc = ret.clepubc
       session.compteId = ret.compteId
       session.tribuId = ret.tribuId
       session.estComptable = session.compteId === IDCOMPTABLE
       if (ret.credentials) session.fscredentials = ret.credentials
+      this.rowAvatar = ret.rowAvatar
+      this.avatar = await compile(this.buf.putIDB(this.rowAvatar))  
       if (session.fsSync) {
         await session.fsSync.setCompte(session.compteId)
         await session.fsSync.setTribu(session.tribuId)
@@ -463,6 +480,7 @@ export class ConnexionCompte extends OperationUI {
     try {
       // session synchronisée ou incognito
       const session = stores.session
+      this.auj = DateJour.nj()
       this.buf = new IDBbuffer()
       this.dh = 0
 
@@ -473,10 +491,12 @@ export class ConnexionCompte extends OperationUI {
       }
       // this.avatar this.rowAvatar this.compta this.tribu
 
+      this.cAvatars = session.accesIdb ? await getColl('avatars') : []
       this.avatarsToStore = new Map() // objets avatar à ranger en store
-      this.groupesToStore = new Map() // complilation des rows des groupes venant de IDB ou du serveur
-
       await this.tousAvatars(this.avatar, this.rowAvatar)
+
+      this.cGroupes = session.accesIdb ? await getColl('groupes') : []
+      this.groupesToStore = new Map() // complilation des rows des groupes venant de IDB ou du serveur
       await this.tousGroupes(this.avatarsToStore) // Avatars et Groupes signés
   
       this.BRK()
@@ -504,41 +524,48 @@ export class ConnexionCompte extends OperationUI {
       })
 
       // Chargement depuis IDB des Maps des secrets, chats, sponsorings, membres trouvés en IDB
-      this.cSecrets = session.accesIdb ? (await getColl('secrets')).values() : []
-      this.cChats = session.accesIdb ? (await getColl('chats')).values() : []
-      this.cSponsorings = session.accesIdb ? (await getColl('sponsorings')).values() : []
-      this.cMembres = session.accesIdb ? (await getColl('membres')).values() : []
+      this.cSecrets = session.accesIdb ? await getColl('secrets') : []
+      this.cChats = session.accesIdb ? await getColl('chats') : []
+      this.cSponsorings = session.accesIdb ? await getColl('sponsorings') : []
+      this.cMembres = session.accesIdb ? await getColl('membres') : []
 
       // Itération sur chaque avatar: secrets, chats, sponsorings
-      for (const id of avStore.ids) {
-        const na = getNg(id)
+      for (const avatar of avStore.avatars.values()) {
+        const na = getNg(avatar.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
-        const [x1, x2] = await this.chargerSecrets(id)
+        const [x1, x2] = await this.chargerSecrets(avatar.id, avatar.v)
         n1 = x1
         n2 = x2
         syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
-        const [x3, x4] = await this.chargerChats(id)
+        const [x3, x4] = await this.chargerChats(avatar.id, avatar.v)
         n3 = x3
         n4 = x4
         syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
-        const [x5, x6] = await this.chargerSponsorings(id)
+        const [x5, x6] = await this.chargerSponsorings(avatar.id, avatar.v)
         n5 = x5
         n6 = x6
         syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
       }
 
       // Itération sur chaque groupe: secrets, membres
-      for (const id of grStore.ids) {
+      this.mbsDisparus = new Set()
+      for (const groupe of grStore.groupes.values) {
         const na = getNg(id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
-        const [x1, x2] = await this.chargerSecrets(id, true)
+        const [x1, x2] = await this.chargerSecrets(groupe.id, groupe.v, true)
         n1 = x1
         n2 = x2
         syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
-        const [x3, x4] = await this.chargerMembres(id)
+        const [x3, x4] = await this.chargerMembres(groupe)
         n3 = x3
         n4 = x4
         syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
+      }
+
+      if (this.mbsDisparus.size) {
+        /* Sur le serveur, le GC quotidien est censé avoir mis les statuts ast[ids] à 0
+        dans le grooupe du membre. Retard possible, la session le met en local */
+        groupe.setDisparu(this.mbsDisparus)
       }
 
       // Remise à niveau des Cartes de visite des people "chat seulement"

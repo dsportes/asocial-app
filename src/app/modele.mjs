@@ -449,8 +449,7 @@ export async function compile (row) {
   if (row.ids) obj.ids = row.ids
   if (row.dlv) obj.dlv = row.dlv
   obj.v = row.v
-  const z = row.dlv && row.dlv < DateJour.nj()
-  if (!z && row._data_) {
+  if (row._data_) {
      await obj.compile(decode(row._data_))
   } else {
     obj._zombi = true
@@ -691,6 +690,16 @@ export class Avatar extends GenDoc {
       const e = map[idg]
       if (!e) { map[igd] = { idg, mbs: [im] } } else e.mbs.push(im)
     }
+  }
+
+  // Retourne le numéro d'invitation de l'avatar pour le groupe id
+  niDeGroupe (id) {
+    for (const ni in this.lgr) {
+      const [nom, rnd, im] = this.lgr[ni]
+      const idg = new NomGroupe(nom, rnd).id
+      if (idg === id) return ni
+    }
+    return 0
   }
 
   /* `napc` : [nom, cle] de l'avatar cryptée par le PBKFD de la phrase de contact.
@@ -937,18 +946,40 @@ export class Compta extends GenDoc {
 }
 
 /** Sponsoring ************************************************************
-- `id` : id de l'avatar.
+P est le parrain-sponsor, F est le filleul.
+
+_data_
+- `id` : id de l'avatar sponsor.
 - `ids` : hash de la phrase de parrainage, 
 - `v`
 - `dlv` : date limite de validité
 
-- `descrx` : crypté par X, le PBKFD de la phrase de sponsoring
-  - `na` : `[nom, cle]` de P / A.
-  - `cv` : `[photo, info]` de P / A.
+- `st` : statut. 0: en attente réponse, 1: refusé, 2: accepté, 3: détruit
+- `descr` : crypté par le PBKFD de la phrase de sponsoring
+  - `na` : `[nom, cle]` de P.
+  - `cv` : `[photo, info]` de P.
+  - `ard` : ardoise de bienvenue du sponsor / réponse du filleul
   - `naf` : `[nom, cle]` attribué au filleul.
   - `nct` : `[nom, cle]` de sa tribu.
   - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
   - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+
+**Remarques**
+- la `dlv` d'un sponsoring est fixe. Le sponsoring est purgé par le GC quotidien après cette date, en session et sur le serveur, les rows ayant dépassé cette limite sont supprimé et ne sont pas traités.
+- Le sponsor peut détruire physiquement son `sponsoring` avant acceptation, en cas de remord son statut passe à 3.
+
+**Si le filleul refuse le parrainage :** 
+- Il écrit dans `ard` au parrain expliquant sa raison et met le statut du `sponsoring` à 1. 
+
+**Si le filleul ne fait rien à temps :** 
+- `sponsoring` finit par être purgé par `dlv`. 
+
+**Si le filleul accepte le parrainage :** 
+- Le filleul crée son compte / avatar principal `naf` donne l'id de son avatar et son nom. Les infos de tribu pour le compte sont obtenu de `nct`.
+- la `compta` du filleul est créée et créditée des quotas attribués par le parrain.
+- la `tribu` est mise à jour (quotas / réserves), éventuellement le filleul est mis dans la liste des sponsors.
+- un `chat` de remerciement est écrit par le filleul au parrain.
+- le statut du `sponsoring` est 2.
 */
 
 export class Sponsoring extends GenDoc {
@@ -964,7 +995,7 @@ export class Sponsoring extends GenDoc {
 
   async decrypterDescr (clex) {
     const x = decode(await decrypter(clex, this.descrx))
-    this.descr = { cv: x.cv, sp: x.sp, quotas: x.quotas }
+    this.descr = { cv: x.cv, sp: x.sp, quotas: x.quotas, ard: x.ard }
     this.descr.na = new NomAvatar(x.na[0], x.na[1])
     this.descr.naf = new NomAvatar(x.naf[0], x.naf[1])
     this.descr.nct = new NomTribu(x.nct[0], x.nct[1])
@@ -989,15 +1020,36 @@ export class Sponsoring extends GenDoc {
 }
 
 /** Chat ************************************************************
+Un chat est une ardoise commune à deux avatars A et B:
+- pour être écrite par A :
+  - A doit connaître le `[nom, cle]` de B : membre du même groupe, sponsor de la tribu, ou par donnée de la phrase de contact de B.
+  - le chat est dédoublé, une fois sur A et une fois sur B.
+  - dans l'avatar A, le contenu est crypté par la clé de A.
+  - dans l'avatar B, le contenu est crypté par la clé de B.
+- un chat a un comportement d'ardoise : chacun _écrase_ la totalité du contenu.
+- si A essaie d'écrire à B et que B a disparu, la `dlv` est positionnée sur les deux exemplaires si elle ne l'était pas déjà.
+
+**Suppression d'un chat**
+- chacun peut supprimer son chat : par exemple A supprime son chat avec B
+- côté A, la `dlv` du chat avec B est positionnée au jour courant + 365 (afin de permettre la synchronisation sur plusieurs sessions / appareils): c'est le GC quotidien qui le purgera.
+- en session comme en serveur, dès qu'il y a une `dlv`, le chat est considéré comme inexistant.
+- si B réécrit un chat à A, côté A la `dlv` du chat de B est remise à 0. Le chat _renaît_ (s'il avait été supprimé).
+
+**Cartes de visite**
+- à la création, puis à chaque mise à jour du texte, les cartes de visites sont remises à jour.
+- en session, une action permet de les rafraîchir sans modifier le texte et la date-heure du texte.
+
+_data_:
 - `id`
-- `ids` : identifiant du chat relativement à son avatar.
+- `ids` : identifiant du chat relativement à son avatar, hash de la concaténation des deux ids de A et B.
 - `v`
-- `dlv` : pour effacement automatique des chats trop vieux. Chaque exemplaire a sa dlv que l'avatar peut modifier.
+- `dlv` : la dlv permet au GC de purger les chats. Dès qu'il y a une dlv, le chat est considéré comme inexistant autant en session que pour le serveur.
 
 - `mc` : mots clés attribués par l'avatar au chat
-- `contc` : contenu crypté par la clé de l'avatar (celle de sa carte de visite).
+- `contc` : contenu crypté par la clé de l'avatar lecteur (celle de sa carte de visite).
   - `na` : `[nom, cle]` de _l'autre_.
-  - `dh`  : date-heure de l'item.
+  - `cv` : `{v, photo, info}` carte de visite de l'autre au moment de la création / dernière mise à jour du chat.
+  - `dh`  : date-heure de dernière mise à jour.
   - `txt` : texte du chat.
 */
 
@@ -1007,14 +1059,18 @@ export class Chat extends GenDoc {
     this.id = row.id
     this.ids = row.ids
     this.v = row.v
-    this.dlv = row.dlv
-    this.vsh = row.vsh || 0
-    this.mc = row.mc
-    this.naI = stores.avatar.compte.naAvatar(this.id)
-    const x = decode(await decrypter(this.naI.cle, row.contc))
-    this.naE = new NomAvatar[x.na[0], x.na[1]]
-    this.dh = x.dh
-    this.txt = x.txt
+    if (row.dlv) {
+      this._zombi = true
+    } else {
+      this.vsh = row.vsh || 0
+      this.mc = row.mc
+      this.naI = stores.avatar.compte.naAvatar(this.id)
+      const x = decode(await decrypter(this.naI.cle, row.contc))
+      this.naE = new NomAvatar[x.na[0], x.na[1]]
+      this.cv = x.cv
+      this.dh = x.dh
+      this.txt = x.txt
+    }
   }
 
   static getIds (naI, naE) {{
@@ -1030,21 +1086,27 @@ export class Chat extends GenDoc {
 }
 
 /** Groupe ***********************************************************************
+_data_:
 - `id` : id du groupe.
-- `v`, 
+- `v` : version, du groupe, ses secrets, ses membres. 
 - `dlv` : plus haute `dlv` des membres, 
 - `dfh` : jour de fin d'hébergement quand le groupe n'est plus hébergé,
 
-- `dnv` : dernier numéro de version utilisé sur le groupe.
 - `stx` : 1-ouvert (accepte de nouveaux membres), 2-fermé (ré-ouverture en vote)
 - `sty` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
-- `mxim` : dernier `im` de membre attribué.
+- `ast` : array des statuts des membres (dès qu'ils ont été pressentis) :
+  - 10:pressenti, 
+  - 20,21,22:invité en tant que lecteur / auteur / animateur, 
+  - 30,31,32:actif (invitation acceptée) en tant que lecteur / auteur / animateur, 
+  - 40: invitation refusée,
+  - 50: suspendu, 
+  - 0: disparu / oublié
 - `idhg` : id du compte hébergeur crypté par la clé du groupe.
 - `imh` : indice `im` du membre dont le compte est hébergeur.
 - `v1 v2` : volumes courants des secrets du groupe.
 - `q1 q2` : quotas attribués par le compte hébergeur.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
-- `cvg` : carte de visite du groupe crypté par la clé du groupe `{v, photo, info}`. 
+- `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`. 
 */
 
 export class Groupe extends GenDoc {
@@ -1069,7 +1131,7 @@ export class Groupe extends GenDoc {
     this.dnv = row.dnv
     this.stx = row.stx
     this.sty = row.sty
-    this.mxim = row.mxim
+    this.ast = row.ast
     this.idh = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
     this.imh = row.imh || 0
     this.v1 = row.v1
@@ -1082,6 +1144,10 @@ export class Groupe extends GenDoc {
 
   get mbHeb () { // membre hébergeur
     return  this.dfh ? null : stores.membre.getMembre(this.id, this.imh)
+  }
+
+  setDisparus(setIds) { // statuts des membres disparus
+    setIds.forEach(ids => { this.ast[ids] = 0 })
   }
 
   /* En attente *************************************************
