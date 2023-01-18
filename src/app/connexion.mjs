@@ -93,122 +93,138 @@ export class ConnexionCompte extends OperationUI {
   /** tousAvatars *******************************************************/
   async tousAvatars () {
     const session = stores.session
-    const avModifs = new Set()
+    const avRowsModifies = []
     const avToSuppr = new Set()
     const avRequis = new Set()
-    const avToStore = new Map()
-    while (true) { // boucle si la version de l'avatar principal a changé
-      let ok = true
-      avModifs.clear()
+
+    while (true) { // boucle si la version de compta a changé
+      avRowsModifies.length = 0
       avToSuppr.clear()
       avRequis.clear()
-      avToStore.clear()
+      this.avatarsToStore.clear()
+
       const mapv = {} // versions des avatars requis à demander au serveur
-      this.avatar.avatarIds(avRequis)
+
+      this.avatar.avatarIds(this.avRequis)
       avRequis.forEach(id => {
         if (id === this.avatar.id) {
           mapv[id] = this.avatar.v
-          avToStore.set(id, this.avatar)
+          this.avatarsToStore.set(id, this.avatar)
         } else mapv[id] = 0 
       })
 
       for (const row of this.cAvatars) {
         if (row.id !== this.avatar.id) {
-          const av = await compile(row)
-          avToStore.set(row.id, av)
-          mapv[row.id] = row.v
+          if (this.avRequis.has(row.id)) {
+            const av = await compile(row)
+            this.avatarsToStore.set(row.id, av)
+            mapv[row.id] = row.v
+          } else {
+            // avatars trouvés en IDB mais plus référencés dans l'avatar principal
+            avToSuppr.add(row.id)
+          }
         }
       }
 
       if (session.accesNet) {
-        const args = { token: session.authToken, mapv }
+        const args = { token: session.authToken, vcompta: this.compta.v, mapv }
         const ret = this.tr(await post(this, 'GetAvatars', args))
+        if (!ret.OK) { 
+          // compta a changé : on recharge compta, tribu, avatar et on boucle
+          await this.getCTA()
+          continue
+        }
         if (ret.rowAvatars && ret.rowAvatars.length) {
-          for (const row of rowAvatars) {
+          for (const row of ret.rowAvatars) {
             const av = await compile(row)
-            if (row.id === this.avatar.id) {
-              this.avatar = av // la version de l'avatar principal a changé
-              this.ok = false
-            }
-            avToStore.set(row.id, av)
+            this.avatarsToStore.set(row.id, av)
           }
         }
       }
-      if (this.ok) break
+      break
     }
+
+    return [avRowsModifies, avToSuppr]
   }
 
   /** tousGroupes *******************************************************/
-  async tousGroupes (avatarsToStore) {
+  async tousGroupes () {
     const session = stores.session
 
-    const jourJ = stores.config.limitesjour.dlv + new DateJour().nbj
+    const jourJ = stores.config.limitesjour.dlv + this.auj
     const dlv1 = (Math.floor(jourJ / 10) + 1) * 10
     const dlv2 = dlv1 + 10
 
-    /* map des membres des groupes des avatars
+    const grRequis = new Set()
+
+    /* map des membres des groupes auxquels participent au moins un des avatars
      - clé: id du groupe  - valeur: { idg, mbs: [ids], v , dlv } */
     const mbsMap = {} 
 
     /* map des avatars du compte - clé: id de l'avatar  - valeur: dlv } */
     const avsMap = {}  
       
-    avatarsToStore.values().forEach(avatar => {
+    this.avatarsToStore.values().forEach(avatar => {
+      avatar.idGroupes(grRequis)
       avsMap[avatar.id] = avatar.id % 10 === 0 ? dlv1 : dlv2
       avatar.membres(mbsMap) // v, dlv, de mbsMap ne sont pas renseignées pour l'instant
     })
-
-
   
     // Récupération des ids des groupes pour abonnement
     const abPlus = [] // ids des groupes auxquels s'abonner
-    for (const id of mbsMap) {
-      const idg = parseInt(idg)
+    for (const id of grRequis) {
+      const e = mbsMap[id]
+      if (e) { e.dlv = dlv2; e.v = 0 }
       if (session.fsSync) {
-        await session.fsSync(idg)
+        await session.fsSync.setGroupe(id)
       } else {
-        abPlus.push(parseInt(idg))
+        abPlus.push(id)
       }
     }
 
-    const grRows = {}
+    const grRows = {} // Map des rows des groupes par id du groupe
     if (session.accesIdb) {
-      getColl('groupes').forEach(row => {
-        const e = mbsMap[row.id]
-        if (!e) {
+      this.cGroupes.forEach(row => {
+        if (!grRequis.has(row.id)) {
           this.buf.purgeGroupeIDB(row.id)
         } else {
           grRows[row.id] = row
-          e.v = row.v // v et dlv de mbsMap sont renseignées
-          e.dlv = dlv2
-          abPlus.push(row.id)    
+          const e = mbsMap[row.id]
+          if (e) e.v = row.v
         }
       })
     }
 
-    if (session.fsSync) session.fsSync.abo(abPlus)
-
-    let rowGroupes = {}
-
     if (session.accesNet) {
-      // mbsMap, avsLst, abPlus sont les arguments de l'opération SignaturesEtGroupes
+      // mbsMap, avsMap, abPlus sont les arguments de l'opération SignaturesEtGroupes
       const args = { token: session.authToken, mbsMap, avsMap, abPlus }
       const ret = this.tr(await post(this, 'SignaturesEtGroupes', args))
-      rowGroupes = ret.rowGroupes
+      if (ret.rowGroupes && ret.rowGroupes.length) {
+        ret.rowGroupes.forEach(row => {
+          this.buf.putIDB(row)
+          grRows[row.id] = row
+        })
+      }
     }
 
-    /* Tous les avatars, groupes et membres sont signés avec les dlv demandées
-    rowGroupes : array des rows des groupes de mbsMap ayant une version postérieure à celle détenue */
-    rowGroupes.forEach(row => {
-      this.buf.putIDB(row)
-      mbsMap[row.id].row = row
-    })
+    /* Certains groupes peuvent être des groupes supprimés
+    mais que les avatars qui les référencent n'ont pas encore enlevés de leur
+    liste des groupes.
+    */
+    const zombis = new Set()
 
-    for(const id of mbsMap) {
-      const e = mbsMap[id]
-      const r = e.row ? e.row : grRows[id]
-      this.groupesToStore.set(id, await compile(r))
+    /* Tous les avatars, groupes et membres sont signés avec les dlv demandées */
+    for(const id in grRows) {
+      const r = grRows[id]
+      const gr = await compile(r)
+      if (gr._zombi) {
+        zombis.add(gr.id)
+        this.buf.purgeGroupeIDB(gr.id)
+      } else {
+        this.groupesToStore.set(gr.id, gr)
+      }
     }
+    return zombis
   }
 
   /** Chargement pour un avatar de ses secrets postérieurs au plus récent ************/
@@ -336,7 +352,7 @@ export class ConnexionCompte extends OperationUI {
     const session = stores.session
     let n1 = 0, n2 = 0
     const rows = {}
-    for (const row of this.cMembres.forEach) { 
+    for (const row of this.cMembres) { 
       if (row.id === groupe.id) {
         if (row.dlv > this.auj) {
           this.buf.supprIDB(row)
@@ -368,53 +384,22 @@ export class ConnexionCompte extends OperationUI {
       }
     }
     const grStore = stores.groupes
-    for (const ids of rows) {
+    for (const ids in rows) {
       const membre = await compile(rows[ids])
       grStore.setMembre(membre)
     }
     return [n1, n2]
   }
-  
-  async majCvChat() {
-    const session = stores.session
-    const idb = session.accesIdb
-    let n2 = 0
-    const peStore = stores.people
-    // Remise à niveau des Cartes de visite des people "chat seulement"
-    // set des ids des people n'ayant ni entrée groupe ni sponsor tribu.
-    const idChats = peStore.getPeopleChat // set des people n'étant "que" chat
-    const n1 = idChats.size
-    const mcv = {}
-    idChats.forEach(id => { mcv[id] = 0 })
-    const mcvIdb = idb ? await getCvs() : {}
-    for(const id of mcvIdb) {
-      const cvIdb = mcvIdb[id]
-      if (idChats.has(cvIdb.id)) { // CV utile, rechercher une version plus récente
-        const cv = { v: cvIdb.v, photo: cvIdb.photo, info:cvIdb.info }
-        peStore.setCv(cvIdb.id, cv)
-        mcv[id] = cvIdb.id
-      } else { // CV inutile, purge de IDB
-        await delCv(id)
-      }
-    }
 
-    let rowCvs
-
-    if (session.accesNet) {
-      const args = { token: session.authToken, mcv }
-      const ret = this.tr(await post(this, 'ChargeCvs', args))
-      rowCvs = ret.rowCvs
-    }
-    if (rowCvs && rowCvs.length) {
-      for (const row of ret.rowCvs) {
-        n2++
-        const cv = await compile(row).cv
-        peStore.setCv(id, cv)
-        cv.id = row.id
-        await putCv(cv)
-      }
-    }
-    return [n1, n2]
+  async getCTA () {
+    const args = { token: stores.session.authToken }
+    const ret = this.tr(await post(this, 'GetComptaTribuAvatar', args))
+    this.rowAvatar = ret.rowAvatar
+    this.rowCompta = ret.rowCompta
+    this.rowTribu = ret.rowTribu
+    this.avatar = await compile(this.rowAvatar)
+    this.compta = await compile(this.rowCompta)
+    this.tribu = await compile(this.rowTribu)
   }
 
   async phase0Net () {
@@ -423,28 +408,19 @@ export class ConnexionCompte extends OperationUI {
     ET abonnement à compta sur le serveur
     */
     const args = { token: session.authToken }
-
-    { // Connexion : récupération de l'id du compte, clepubc, fscredentials
-      const ret = this.tr(await post(this, 'ConnexionCompte', args))
-      session.clepubc = ret.clepubc
-      session.compteId = ret.compteId
-      session.tribuId = ret.tribuId
-      session.estComptable = session.compteId === IDCOMPTABLE
-      if (ret.credentials) session.fscredentials = ret.credentials
-      this.rowAvatar = ret.rowAvatar
-      this.avatar = await compile(this.buf.putIDB(this.rowAvatar))  
-      if (session.fsSync) {
-        await session.fsSync.setCompte(session.compteId)
-        await session.fsSync.setTribu(session.tribuId)
-      }
+    // Connexion : récupération de l'id du compte, clepubc, fscredentials
+    const ret = this.tr(await post(this, 'ConnexionCompte', args))
+    session.clepubc = ret.clepubc
+    session.compteId = ret.compteId
+    session.tribuId = ret.tribuId
+    session.estComptable = session.compteId === IDCOMPTABLE
+    if (ret.credentials) session.fscredentials = ret.credentials
+    if (session.fsSync) {
+      await session.fsSync.setCompte(session.compteId)
+      await session.fsSync.setTribu(session.tribuId)
     }
 
-    const ret = this.tr(await post(this, 'GetComptaTribuAvatar', args))
-    this.rowAvatar = ret.rowAvatar
-    this.avatar = await compile(this.buf.putIDB(this.rowAvatar))
-    // session.clek, session.compteId OK. Répertoire des avatars OK
-    this.compta = await compile(this.buf.putIDB(ret.rowCompta))
-    this.tribu = await compile(this.buf.putIDB(ret.rowTribu))
+    this.getCTA()
 
     if (!session.nombase) await session.setNombase() // maintenant que la cle K est connue
 
@@ -469,10 +445,10 @@ export class ConnexionCompte extends OperationUI {
     // session.compteId et session.clek OK
     this.rowAvatar = await getAvatarPrimaire()
     this.avatar = await compile(this.rowAvatar) 
-    const rowCompta = await getCompta()
-    this.compta = await compile(rowCompta) 
-    const rowTribu = await getTribu(this.compta.idt)
-    this.tribu = await compile(rowTribu)
+    this.rowCompta = await getCompta()
+    this.compta = await compile(this.rowCompta) 
+    this.rowTribu = await getTribu(this.compta.idt)
+    this.tribu = await compile(this.rowTribu)
   }
 
   /** run **********************************************************/
@@ -480,6 +456,8 @@ export class ConnexionCompte extends OperationUI {
     try {
       // session synchronisée ou incognito
       const session = stores.session
+      const avStore = stores.avatar
+
       this.auj = DateJour.nj()
       this.buf = new IDBbuffer()
       this.dh = 0
@@ -489,15 +467,28 @@ export class ConnexionCompte extends OperationUI {
       } else {
         await this.phase0Net()
       }
-      // this.avatar this.rowAvatar this.compta this.tribu
 
       this.cAvatars = session.accesIdb ? await getColl('avatars') : []
       this.avatarsToStore = new Map() // objets avatar à ranger en store
-      await this.tousAvatars(this.avatar, this.rowAvatar)
+      const [avRowsModifies, avToSuppr] = await this.tousAvatars()
+
+      if (session.accesIdb) {
+        this.buf.putIDB(this.rowCompta)
+        this.buf.putIDB(this.rowTribu)
+        avRowsModifies.forEach(row => { this.buf.putIDB(row) })
+        avToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
+      }
+
+      // Rangement en store
+      avStore.setCompte(this.avatar, this.compta, this.tribu)
+      session.setBlocage()
+      this.avatarsToStore.values().forEach(av => { 
+        if (av.id !== this.avatar.id) avStore.setAvatar(av)
+      })
 
       this.cGroupes = session.accesIdb ? await getColl('groupes') : []
       this.groupesToStore = new Map() // complilation des rows des groupes venant de IDB ou du serveur
-      await this.tousGroupes(this.avatarsToStore) // Avatars et Groupes signés
+      const grZombis = await this.tousGroupes() // Avatars et Groupes signés
   
       this.BRK()
 
@@ -506,11 +497,24 @@ export class ConnexionCompte extends OperationUI {
         await this.buf.commitIDB()
         this.buf = new IDBbuffer()
       }
-    
-      // Rangement en store
-      const avStore = stores.avatar
-      avStore.setCompte(this.avatar, this.compta, this.tribu)
-      session.setBlocage()
+
+      this.BRK()
+
+      if (session.accesNet && grZombis.size) {
+        /* Traitement des groupes zombis 
+        Les retirer (par anticipation) des avatars qui les référencent 
+        mapIdNi : map
+          - clé : id d'un avatar
+          - valeur : array des ni des groupes ciblés
+        */
+        const mapIdNi = {}
+        this.avatarsToStore.forEach(av => { 
+          const ani = av.niDeGroupes(grZombis, true)
+          if (ani.length) mapIdNi[av.id] = ani
+        })
+        const args = { token: session.authToken, mapIdNi }
+        this.tr(await post(this, 'EnleverGroupesAvatars', args))
+      }
 
       const grStore = stores.groupe
       const syncitem = stores.syncitem 
@@ -548,7 +552,6 @@ export class ConnexionCompte extends OperationUI {
       }
 
       // Itération sur chaque groupe: secrets, membres
-      this.mbsDisparus = new Set()
       for (const groupe of grStore.groupes.values) {
         const na = getNg(id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
@@ -556,22 +559,19 @@ export class ConnexionCompte extends OperationUI {
         n1 = x1
         n2 = x2
         syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
+
+        this.mbsDisparus = new Set()
         const [x3, x4] = await this.chargerMembres(groupe)
         n3 = x3
         n4 = x4
         syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
-      }
 
-      if (this.mbsDisparus.size) {
-        /* Sur le serveur, le GC quotidien est censé avoir mis les statuts ast[ids] à 0
-        dans le grooupe du membre. Retard possible, la session le met en local */
-        groupe.setDisparu(this.mbsDisparus)
-      }
-
-      // Remise à niveau des Cartes de visite des people "chat seulement"
-      {
-        const [n1, n2] = await this.majCvChat()
-        syncitem.push('15' + id, 1, 'SYcvs', [n1, n2])
+        if (this.mbsDisparus.size) {
+          /* Sur le serveur, le GC quotidien est censé avoir mis les statuts ast[ids] à 0
+          dans le groupe du membre. Retard possible, la session le met en local */
+          groupe.setDisparus(this.mbsDisparus)
+        }
+  
       }
 
       /* Mises à jour éventuelles du serveur **********************************************/

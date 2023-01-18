@@ -692,6 +692,30 @@ export class Avatar extends GenDoc {
     }
   }
 
+  /* Ids des groupes de l'avatar, accumulés dans le set s
+  */
+  idGroupes (s) {
+    const x = s || new Set()
+    for (const ni in this.lgr) {
+      const [nom, rnd, im] = this.lgr[ni]
+      x.add(new NomGroupe(nom, rnd).id)
+    }
+    return x
+  }
+
+  /* Retourne les numéros d'invitation de l'avatar pour les groupes de setg
+  si del, supprime ces entrées */
+  niDeGroupes (setg, del) {
+    const ani = []
+    for (const ni in this.lgr) {
+      const [nom, rnd, im] = this.lgr[ni]
+      const idg = new NomGroupe(nom, rnd).id
+      if (setg.has(idg)) ani.push(ni)
+    }
+    if (del) ani.forEach(ni => { delete this.lgr[ni] })
+    return ani
+  }
+
   // Retourne le numéro d'invitation de l'avatar pour le groupe id
   niDeGroupe (id) {
     for (const ni in this.lgr) {
