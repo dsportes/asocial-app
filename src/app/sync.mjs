@@ -30,34 +30,14 @@ export class SyncQueue {
   }
 }
 
+/* OperatioWS *********************************************************************/
 export class OperationWS extends Operation {
   constructor (nomop) { super(nomop) }
-
-  async nvSM (id, v) { // nouveaux secrets et membres
-    const args = { token: session.authToken, id, v }
-    const ret = this.tr(await post(this, 'ChargerMS', args))
-    this.rowSecrets = ret.rowSecrets
-    this.rowMembres = ret.rowMembres
-  }
-
-  async nvSCS (id, v) { // nouveaux secrets, chats, sponsorings
-    const args = { token: session.authToken, id, v }
-    const ret = this.tr(await post(this, 'ChargerSCS', args))
-    this.rowSecrets = ret.rowSecrets
-    this.rowChats = ret.rowChats
-    this.rowSponsorings = ret.rowSponsorings
-  }
 
   async nvTribu (id) { // tribu la plus récente
     const args = { token: session.authToken, id }
     const ret = this.tr(await post(this, 'GetTribu', args))
     this.nvTribu = ret.rowTribu
-  }
-
-  async nvAvatar (id) { // avatar le plus récent
-    const args = { token: session.authToken, id }
-    const ret = this.tr(await post(this, 'GetAvatar', args))
-    this.nvAvatar = ret.rowAvatar
   }
 
   async nvGroupe (id) { // groupe le plus récent
@@ -80,7 +60,36 @@ export class OnchangeCompta extends OperationWS {
     await this.nvTribu(idt)
     const avTribu = stores.avatar.tribu
     if (this.nvTribu.v <= avTribu.v) { this.nvTribu = null; return }
-    // TODO
+    const args = { token: session.authToken, id: idt }
+    const ret = this.tr(await post(this, 'EnleverGroupesAvatars', args))  
+    const row = ret.rowTribu
+    this.buf.putIDB(row)
+    const tribu = compile(row)
+    stores.avatar.setTribu(tribu)
+  }
+
+  /* Changement d'un avatar qui existait
+  - id : de l'avatar
+  - v : version détenue dans la session
+  */
+  async chargtAvatar (id, v) {
+    const args = { token: session.authToken, id }
+    const ret = this.tr(await post(this, 'GetAvatar', args))
+    const row = ret.rowAvatar
+    const avatar = await compile(row)
+    this.buf.putIDB(row)
+    const e = { av: avatar, lch: [], lsp: [], lsc: [] }
+    this.avChange.set(id, e)
+    if (id % 10 === 0) this.avatarP = avatar
+    // (re) chargement des secrets, chats, sponsorings
+    args.v = v
+    const ret2 = this.tr(await post(this, 'ChargerSCS', args))
+    e.lsc = ret2.rowSecrets
+    e.lch = ret2.rowChats
+    e.lsp = ret2.rowSponsorings
+    
+    // TODO : changement dans la liste des groupes (en plus ou en moins)
+
   }
 
   async run (row) {
@@ -92,7 +101,31 @@ export class OnchangeCompta extends OperationWS {
       this.avCompta = avStore.compta
       if (this.compta.v <= this.avCompta.v) return
 
-      if (this.compta.idt !== this.avCompta.idt) await chtTribu(this.compta.idt)
+      if (this.compta.idt !== this.avCompta.idt) await this.chgTribu(this.compta.idt)
+
+      // gestion des avatars ayant changé (s'il y en a)
+      this.avatarP = avStore.compte
+      this.avChange = new Map()
+      this.avSuppr = new Set()
+      // D'abord l'avatar principal
+      if (this.compta.lavv[0] > this.avatarP.v) {
+        await this.chargtAvatar(this.compta.id)
+      }
+
+      for (let i = 0; i < 8; i++) {
+        // commence par l'avatar principal qui peut recharger this.avatarP
+        const apv = this.compta.lavv[i]
+        const avv = this.avCompta.lavv[i]
+        const avid = i ? this.avatarP.idAvIdx(i) : this.compta.id
+        if (avv) {
+          if (apv > avv) {
+            this.chargtAvatar(avid, avv)
+          } else if (!apv && avv) {
+            this.buf.purgeAvatarIDB(avid)
+            this.avSuppr.add(avid)
+          }
+        }
+      }
 
       this.buf.putIDB(row)
 
@@ -102,6 +135,9 @@ export class OnchangeCompta extends OperationWS {
       /* Maj des stores */
       avStore.setCompta(this.compta)
       const chg = session.setBlocage()
+      this.avSuppr.forEach(id => { avStore.del(id) })
+      this.avChange.values().forEach(e => { avStore.lotMaj(e) })
+
       if (chg > 1) await alerteBlocage (chg)
       
     } catch (e) { await this.finKO(e) }
@@ -150,6 +186,7 @@ export class OnchangeGroupe extends OperationWS {
     try {
       const session = stores.session
       const grStore = stores.groupe
+      const avStore = stores.avatar
       this.buf = new IDBbuffer()
       const groupe = await compile(row)
       const avGr = grStore.get(groupe.id)
@@ -157,9 +194,22 @@ export class OnchangeGroupe extends OperationWS {
       const nvSecs = [] // Array des secrets à ranger en store
 
       if (groupe._zombi) {
-        this.buf.purgeGroupeIDB(groupe.id) 
+        this.buf.purgeGroupeIDB(groupe.id)
+        grStore.del(groupe.id)
+        avGr._zombi = true // gestion en affichage si le groupe est référencé en UI
+        // On l'enlève par anticipation des groupes référencés par les avatars qui le référence
+        const mapIdNi = avStore.avatarsDeGroupe(groupe.id, true)
+
+        if (mapIdNi) {
+          // On fait effectuer la maj des avatars concernés pour le retirer de lgr
+          const args = { token: session.authToken, mapIdNi }
+          this.tr(await post(this, 'EnleverGroupesAvatars', args))  
+        }
       } else {
-        await this.nvSM(groupe.id, avGr.v)
+        const args = { token: session.authToken, id: groupe.id, v: avGr.v }
+        const ret = this.tr(await post(this, 'ChargerMS', args))
+        this.rowSecrets = ret.rowSecrets
+        this.rowMembres = ret.rowMembres
         for (const rowm of this.rowMembres) {
           nvMbs.push(await compile(rowm)) // membre ajouté / modifié
           this.buf.putIDB(rowm)
@@ -170,16 +220,15 @@ export class OnchangeGroupe extends OperationWS {
           nvSecs.push(s) // secret ajouté / modifié
           this.buf.putIDB(rows)
         }
+        this.buf.putIDB(row) // groupe modifié
+        /* Maj des stores */
+        grStore.setGroupe(groupe)
+        if (nvMbs.length) nvMbs.forEach(m => { grStore.setMembre(m) })
+        if (nvSecs.length) nvSecs.forEach(s => { grStore.setSecret(s) })
       }
-      this.buf.putIDB(row) // groupe modifié
 
       /* commits IDB */
       this.buf.commitIDB()
-
-      /* Maj des stores */
-      grStore.setGroupe(groupe)
-      nvMbs.forEach(m => { grStore.setMembre(m) })
-      nvSecs.forEach(s => { grStore.setSecret(s) })
 
       if (session.synchro) await gestionFichierSync(this.buf.mapSec)
 

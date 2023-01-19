@@ -716,12 +716,16 @@ export class Avatar extends GenDoc {
     return ani
   }
 
-  // Retourne le numéro d'invitation de l'avatar pour le groupe id
-  niDeGroupe (id) {
+  /* Retourne le numéro d'invitation de l'avatar pour le groupe id
+  si del, supprime ces entrées */
+  niDeGroupe (id, del) {
     for (const ni in this.lgr) {
       const [nom, rnd, im] = this.lgr[ni]
       const idg = new NomGroupe(nom, rnd).id
-      if (idg === id) return ni
+      if (idg === id) {
+        if (del) delete this.lgr[ni]
+        return ni
+      }
     }
     return 0
   }
@@ -740,6 +744,10 @@ export class Avatar extends GenDoc {
   naAvatar (id) {
     const i = id % 10
     return this.lav[i].na
+  }
+
+  idAvIdx (idx) {
+    this.lav[idx].na.id
   }
 
   /** compile *********************************************************/

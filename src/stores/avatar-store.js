@@ -87,8 +87,7 @@ export const useAvatarStore = defineStore('avatar', {
     getVoisins: (state) => { return (id, ids) => {
         return state.voisins.get(id + '/' + ids) || new Set()
       }
-    }
-  
+    }  
   },
 
   actions: {
@@ -132,7 +131,7 @@ export const useAvatarStore = defineStore('avatar', {
          }
         this.map.set(avatar.id, e)
       } else e.avatar = avatar
-      if (avatar.id === this.compteId) this.avaataP = avatar
+      if (avatar.id === this.compteId) this.avatarP = avatar
     },
 
     setSecret (secret) {
@@ -189,9 +188,41 @@ export const useAvatarStore = defineStore('avatar', {
       e.sponsorings.delete(ids)
     },
 
+    /* Avatars référençant un groupe donné: liste de [avatar, ni]
+    - si del, supprime les entrées
+    - retourne mapIdNi : map ou null si aucun
+      - clé : id d'un avatar
+      - valeur : array des ni des groupes ciblés
+    */
+    avatarsDeGroupe (idg, del) {
+      const mapIdNi = {}
+      let x = false
+      this.map.forEach(e => { 
+        const a = e.avatar
+        const ni = a.niDeGroupe(idg, del)
+        if (ni) {
+          let y = mapIdNi[a.id]
+          if (!y) { y = []; mapIdNi[a.id] = y }
+          y.push(ni)
+          x = true
+        }
+      })
+      return x ? mapIdNi : null
+    },
+
+    /* Mise jour groupée pour un avatar
+    e : { av: avatar, ch: [], sp: [], sc: [] }
+    */
+    lotMaj ({av, lch, lsp, lsc}) {
+      const id = av.id
+      this.setAvatar(av)
+      lsc.forEach(s => { this.setSecret(s) })
+      lsp.forEach(s => { this.setSponsoring(s) })
+      lch.forEach(c => { this.setChat(c) })
+    },
 
     del (id) {
-      delete map[id]
+      delete this.map[id]
     }
   }
 })
