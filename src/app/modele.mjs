@@ -747,7 +747,8 @@ export class Avatar extends GenDoc {
   }
 
   idAvIdx (idx) {
-    this.lav[idx].na.id
+    const x = this.lav[idx]
+    return x ? x.na.id : 0
   }
 
   /** compile *********************************************************/

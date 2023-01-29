@@ -111,6 +111,8 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     del (id) {
+      const e = map[id]
+      if (e) e._zombi = true
       delete map[id]
     }
   }

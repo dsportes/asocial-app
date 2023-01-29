@@ -199,6 +199,7 @@ export const useAvatarStore = defineStore('avatar', {
       let x = false
       this.map.forEach(e => { 
         const a = e.avatar
+        // supprime l'entrée ni dans ldg de l'avatar qui ne référence plus ce groupe
         const ni = a.niDeGroupe(idg, del)
         if (ni) {
           let y = mapIdNi[a.id]
