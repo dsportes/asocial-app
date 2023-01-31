@@ -20,4 +20,10 @@ export class FsSyncSession {
   async setGroupe (id) {
     // TODO - s'abonner au groupe
   }
+  async unsetTribu (id) {
+    // TODO - s'abonner à la tribu
+  }
+  async unsetGroupe (id) {
+    // TODO - s'abonner au groupe
+  }
 }

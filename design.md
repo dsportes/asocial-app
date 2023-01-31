@@ -1,5 +1,4 @@
 TODO next :
-- sync : sur changement d'avatar, groupes en plus et moins, mettre à jour les abonnements. Traiter le cas : groupe en plus et revient en zombi ! Sur le serveur demande d'un groupe, version 0 et groupe inexistant / zombi
 - connexion avion
 - création compte comptable
 - sponsoring / acceptation

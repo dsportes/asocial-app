@@ -1152,7 +1152,6 @@ export class Groupe extends GenDoc {
   get pc1 () { return Math.round(this.v1 / UNITEV1 / this.q1) }
   get pc2 () { return Math.round(this.v2 / UNITEV2 / this.q2) }
 
-
   async compile (row) {
     this.vsh = row.vsh || 0
     this.id = row.id

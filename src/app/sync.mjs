@@ -35,9 +35,14 @@ export class OperationWS extends Operation {
   constructor (nomop) { super(nomop) }
 
   async nvGroupe (id) { // groupe le plus récent
-    const args = { token: session.authToken, id }
+    const args = { token: session.authToken, id, abPlus: [id] }
     const ret = this.tr(await post(this, 'GetGroupe', args))
-    return ret.rowGroupe
+    const rowg = ret.rowGroupe
+    if (!rowg || rowg._zombi) return null
+    const session = stores.session
+    if (session.fsSync) session.fsSync.setGroupe(id)
+    this.buf.putIDB(rowg)
+    return await compile(rowg)
   }
 
   async setGroupe (idg, v) { // Id du groupe, version détenue
@@ -53,8 +58,6 @@ export class OperationWS extends Operation {
       this.nvSecs.push(s) // secret ajouté / modifié
       this.buf.putIDB(rows)
     }
-    this.buf.putIDB(row) // groupe modifié
-    if (this.nvGrps) this.nvGrps.push(await compile(row))
   }
 
   async finKO (e) {
@@ -128,9 +131,9 @@ export class OnchangeCompta extends OperationWS {
       */
       if (this.compta.lavv[0] > this.avatarP.v) {
         await this.chargtAvatar(this.compta.id)
-      } else {
-        this.avatarP.idGroupes(this.grUtiles)
       }
+      this.avatarP.idGroupes(this.grUtiles)
+
       // les avatars secondaires
       for (let i = 1; i < 8; i++) {
         const apv = this.compta.lavv[i]
@@ -165,10 +168,20 @@ export class OnchangeCompta extends OperationWS {
       })
       if (this.grToAdd.size) {
         for (const id of Array.from(this.grToAdd.values())) {
-          await setGroupe(id, 0)
+          const g = await this.nvGroupe(id)
+          if (g) {
+            this.nvGrps.push(g)
+            await setGroupe(id, 0)
+          }
         }
       }
       this.buf.putIDB(row)
+
+      if (this.grToDel.size && !session.fsSync) {
+        // désabonnements des groupes détruits
+        const args = { token: session.authToken, id, abMoins: Array.from(this.grToDel) }
+        const ret = this.tr(await post(this, 'GestionAb', args))    
+      }
 
       /* commits IDB */
       this.buf.commitIDB()
@@ -181,7 +194,10 @@ export class OnchangeCompta extends OperationWS {
       this.avChange.values().forEach(e => { avStore.lotMaj(e) })
 
       // Insertion / suppression des groupes nouveaux / inutiles
-      this.grToDel.forEach(id => { grStore.del(id) })
+      this.grToDel.forEach(id => { 
+        if (session.fsSync) session.fsSync.unsetGroupe(id)
+        grStore.del(id)
+      })
       if (this.nvGrps.length) this.nvGrps.forEach(g => { grStore.setGroupe(g) })
       if (this.nvMbs.length) this.nvMbs.forEach(m => { grStore.setMembre(m) })
       if (this.nvSecs.length) this.nvSecs.forEach(s => { grStore.setSecret(s) })
@@ -238,8 +254,6 @@ export class OnchangeGroupe extends OperationWS {
       this.buf = new IDBbuffer()
       const groupe = await compile(row)
       const avGr = grStore.get(groupe.id)
-      this.nvMbs = [] // Array des membres à ranger en store
-      this.nvSecs = [] // Array des secrets à ranger en store
 
       if (groupe._zombi) {
         this.buf.purgeGroupeIDB(groupe.id)
@@ -248,11 +262,14 @@ export class OnchangeGroupe extends OperationWS {
         const mapIdNi = avStore.avatarsDeGroupe(groupe.id, true)
 
         if (mapIdNi) {
-          // On fait effectuer la maj des avatars concernés pour le retirer de lgr
-          const args = { token: session.authToken, mapIdNi }
+          /* On fait effectuer la maj des avatars concernés 
+          pour le retirer de lgr. /désabonnement du groupe */
+          const args = { token: session.authToken, mapIdNi, abMoins: [groupe.id] }
           this.tr(await post(this, 'EnleverGroupesAvatars', args))  
         }
       } else {
+        this.nvMbs = [] // Array des membres à ranger en store
+        this.nvSecs = [] // Array des secrets à ranger en store  
         await this.setGroupe(groupe.id, avGr.v)
         /* Maj des stores */
         grStore.setGroupe(groupe)

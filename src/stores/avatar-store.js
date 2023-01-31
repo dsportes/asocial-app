@@ -223,7 +223,11 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     del (id) {
-      delete this.map[id]
+      const e = this.map[id]
+      if (e) {
+        e._zombi = true
+        delete this.map[id]
+      }
     }
   }
 })
