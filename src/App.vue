@@ -7,14 +7,11 @@
         :disable="session.niveau <= 1" @click="ui.goto11"/>
 
       <q-toolbar-title style="max-height:1.3rem;" class="row no-wrap items-center">
-        <span v-if="session.reseau" class="titre-md row no-wrap items-center">
-          <img class="logo" :src="config.icons[session.reseau]"/>
-          <span v-if="!session.ok">{{session.reseau.substring(0,6)}}</span>
-        </span>
+        <!--img class="logo" :src="config.logo"/-->
         <titre-banner v-if="session.ok && session.compte.estComptable"
           class-titre="titre-md" :titre="$t('MLAestc')"  :id-objet="session.compte.id"/>
         <span v-if="session.ok && !session.compte.estComptable" class="row no-wrap">
-          <titre-banner v-if="session.ok && !session.compte.estComptable" class-titre="titre-md"
+          <titre-banner class-titre="titre-md"
             :titre="session.compte.estParrain ? $t('MLAcptp') : $t('MLAcptn')" 
             :id-objet="session.compte.id"/>
           <span class="titre-md q-ml-sm">{{$t('MLAtri', [session.compte.nat.nom])}}</span>
@@ -35,13 +32,9 @@
         </q-menu>
       </q-icon>
 
-      <q-btn v-if="session.blocage===1" class="q-mr-xs" dense icon="notification_important" color="warning" 
-        @click="infoBlocage()"/>
-      <q-btn v-if="session.blocage===2" class="q-mr-xs" dense icon="fullscreen_exit" color="warning"
-        @click="infoBlocage()"/>
-      <q-btn v-if="session.blocage===3" class="q-mr-xs" dense icon="edit_off" color="negative"
-        @click="infoBlocage()"/>
-      <q-btn v-if="session.blocage===4" class="q-mr-xs" dense icon="lock_outline" color="negative"
+      <q-btn v-if="session.blocage" class="q-mr-xs" dense
+        :icon="['','notification_important', 'fullscreen_exit', 'edit_off', 'lock_outline'][session.blocage]"
+        :color="['','warning','warning','negative','negative'][session.blocage]" 
         @click="infoBlocage()"/>
 
       <q-btn class="q-ml-xs" v-if="session.synchro" @click="ui.infoSession = true"
@@ -270,7 +263,7 @@ export default {
     ardf () {
       return !this.session.ok ? 0 : (!this.maCompta.sta ? 1 : (this.maCcompta.staa[1] === 0 ? 1 : 2))
     },
-    maCompta () { return stores.avatar.getCompta(this.session.compte.id) },
+    maCompta () { return avStore.compta },
     naMaTribu () { return this.session.compte.nat }
   },
 
@@ -302,6 +295,7 @@ export default {
     config.$q = $q
     const session = stores.session
     const ui = stores.ui
+    const avStore = stores.avatar
 
     console.log($t('build', [config.build, config.debug]))
  
@@ -321,6 +315,7 @@ export default {
       session,
       config,
       ui,
+      avStore,
       infonet,
       infoidb,
       infomode,
