@@ -26,6 +26,7 @@ export const useConfigStore = defineStore('config', {
     iconSuperman: '',
     lgnom: 16,
     lgtitre: 50,
+    nomDuComptable: '',
 
     phrases: [],
     dtf: null,
@@ -45,10 +46,14 @@ export const useConfigStore = defineStore('config', {
 
   actions: {
     setConfig(cfg, search) {
+      this.search = search && search.length > 1 ? search.substring(1) : ''
       this.localeOptions = cfg.localeOptions
       this.locale = cfg.locale
       this.fsSync = cfg.fsSync
       this.logo = cfg.logo
+      this.nomDuComptable = cfg.nomDuComptable || 'Comptable'
+      this.nomTribuPrimitive = cfg.nomTribuPrimitive || 'Primitive'
+      this.allocComptable = cfg.allocComptable || [32, 32, 256, 256]
       this.cliccamera = cfg.cliccamera
       this.iconAvatar = cfg.iconAvatar
       this.iconGroupe = cfg.iconGroupe
@@ -64,10 +69,6 @@ export const useConfigStore = defineStore('config', {
       this.urlserveur = cfg.urlserveur
       this.help = cfg.help
       this.phrases = cfg.phrases
-      if (search && search.length > 1) { 
-        this.search = search.substring(1)
-        if (this.search !== '666' && this.reseaux.indexOf(this.search) !== -1) this.reseauDef = this.search
-      }
       this.dtf = new Intl.DateTimeFormat(this.locale, cfg.datetimeformat)
       this.dtf1 = new Intl.DateTimeFormat(this.locale, cfg.datetimeformat1)
       this.dtf2 = new Intl.DateTimeFormat(this.locale, cfg.datetimeformat2)

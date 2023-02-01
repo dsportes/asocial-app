@@ -524,7 +524,7 @@ export class EnregBlocage extends OperationUI {
 
   async run (id, clet, bloc) { // natc: na de la tribu OU du compte
     try {
-      const datat = bloc ? await crypter(clet, encode(bloc)) : null
+      const datat = bloc ? await crypter(clet, new Uint8Array(encode(bloc))) : null
       const args = { sessionId: stores.session.sessionId, id, datat }
       await post(this, 'm1', 'enregBlocage', args)
       this.finOK()

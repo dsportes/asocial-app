@@ -2,7 +2,7 @@ import { encode, decode } from '@msgpack/msgpack'
 
 export const version = '1'
 
-export const IDCOMPTABLE = 9007199254740988
+export const IDCOMPTABLE = 9007199254740980
 
 export const UNITEV1 = 250000
 export const UNITEV2 = 25000000
@@ -64,7 +64,8 @@ export class Compteurs {
       this.tr = src.tr
       this.hist = src.hist
     } else {
-      this.j = new DateJour().nbj
+      this.dj = new DateJour()
+      this.j = this.dj.nbj
       this.tr = new Array(NTRJ)
       this.tr.fill(0, 0, NTRJ)
       this.hist = new Array(12)

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
@@ -69,10 +70,11 @@ export const useSessionStore = defineStore('session', {
         this.lsk = '$asocial$-' + phrase.dpbh
         const token = {
           sessionId: this.sessionId,
-          shax: sha256(session.phrase.pcb),
-          hps1: session.phrase.dpbh
+          shax: phrase.shax,
+          hps1: phrase.dpbh
         }
-        session.authToken = u8ToB64(new Uint8Array(encode(token)), true)
+        const x = new Uint8Array(encode(token))
+        this.authToken = u8ToB64(new Uint8Array(x), true)
         this.nombase = localStorage.getItem(this.lsk) || ''
       }
       this.dateJourConnx = new DateJour()

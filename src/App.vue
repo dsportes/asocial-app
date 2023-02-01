@@ -7,17 +7,17 @@
         :disable="session.niveau <= 1" @click="ui.goto11"/>
 
       <q-toolbar-title style="max-height:1.3rem;" class="row no-wrap items-center">
-        <!--img class="logo" :src="config.logo"/-->
+        <img class="logo" :src="config.logo"/>
         <titre-banner v-if="session.ok && session.compte.estComptable"
           class-titre="titre-md" :titre="$t('MLAestc')"  :id-objet="session.compte.id"/>
         <span v-if="session.ok && !session.compte.estComptable" class="row no-wrap">
           <titre-banner class-titre="titre-md"
             :titre="session.compte.estParrain ? $t('MLAcptp') : $t('MLAcptn')" 
             :id-objet="session.compte.id"/>
-          <span class="titre-md q-ml-sm">{{$t('MLAtri', [session.compte.nat.nom])}}</span>
+          <span class="titre-md q-ml-sm">{{$t('MLAtri', [session.compte.nct.nom])}}</span>
         </span>
       </q-toolbar-title>
-
+<!--
       <q-icon v-if="session.ok && !session.compte.estComptable && ardf" size="sm"
         class="q-mx-xs cursor-pointer" name="chat" :color="ardf === 1 ? 'yellow-7' : 'green-5'">
         <q-menu transition-show="flip-up" transition-hide="flip-down">
@@ -31,7 +31,7 @@
           </q-banner>
         </q-menu>
       </q-icon>
-
+-->
       <q-btn v-if="session.blocage" class="q-mr-xs" dense
         :icon="['','notification_important', 'fullscreen_exit', 'edit_off', 'lock_outline'][session.blocage]"
         :color="['','warning','warning','negative','negative'][session.blocage]" 
@@ -257,14 +257,14 @@ export default {
     tbclass () { return this.$q.dark.isActive ? ' sombre1' : ' clair1' },
     titreAv () { return this.session.avC.na.titre },
     nomcAv () { 
-      const x = this.session.avC
-      return x.nomc
+      const x = this.session.avC // avatar courant
+      return x ? x.na.nomc : '???'
     },
     ardf () {
       return !this.session.ok ? 0 : (!this.maCompta.sta ? 1 : (this.maCcompta.staa[1] === 0 ? 1 : 2))
     },
-    maCompta () { return avStore.compta },
-    naMaTribu () { return this.session.compte.nat }
+    maCompta () { return this.session.compta },
+    naMaTribu () { return this.session.compte.nct }
   },
 
   watch : {
@@ -298,12 +298,6 @@ export default {
     const avStore = stores.avatar
 
     console.log($t('build', [config.build, config.debug]))
- 
-    if (config.reseaux.length === 1) {
-      session.reseau = config.reseaux[0]
-    } else {
-      if (config.reseauDef) session.reseau = config.reseauDef
-    }
 
     const infomode = ref(false)
     const infonet = ref(false)

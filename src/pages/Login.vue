@@ -8,17 +8,7 @@
         <choix-langue style="position:relative;top:-5px"/>
       </div>
     </q-card-section>
-    <q-card-section>
-      <div v-if="session.reseau" class="q-gutter-md row justify-center">
-        <span class="titre-md">{{$t('reseau',[session.reseau])}}</span>
-        <q-btn v-if="session.reseau" color="primary" :label="$t('LOGchr')" size="sm" dense @click="session.resetReseau()"/>
-      </div>
-      <div v-else>
-        <q-separator/>
-          <choix-reseau/>
-        <q-separator/>
-      </div>
-    </q-card-section>
+
     <q-card-section v-if="!q666">
       <div class="q-gutter-md row justify-center">
         <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
@@ -64,7 +54,7 @@
     <AcceptParrain :couple="coupleloc" :datactc="datactc" :clepubc="clepubc" :phch="phch" :close="fermerap" />
   </q-dialog>
 
-  <q-card v-if="q666 && session.reseau" class="q-ma-xs moyennelargeur fs-md">
+  <q-card v-if="q666" class="q-ma-xs moyennelargeur fs-md">
     <q-card-section class="column items-center">
       <div class="titre-lg text-center">{{$t('LOGcc')}}</div>
     </q-card-section>
@@ -86,11 +76,10 @@ import stores from '../stores/stores.mjs'
 
 import { $t, afficherDiag, dlvDepassee, tru8 } from '../app/util.mjs'
 import { connecterCompte, CreationCompteComptable } from '../app/connexion.mjs'
-import { PhraseContact, NomContact } from '../app/modele.mjs'
+import { PhraseContact } from '../app/modele.mjs'
 import { get } from '../app/net.mjs'
 
 import ChoixLangue from '../components/ChoixLangue.vue'
-import ChoixReseau from '../components/ChoixReseau.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import AcceptParrain from '../dialogues/AcceptParrain.vue'
@@ -99,7 +88,7 @@ export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Login',
 
-  components: { ChoixLangue, ChoixReseau, BoutonHelp, PhraseSecrete, AcceptParrain },
+  components: { ChoixLangue, BoutonHelp, PhraseSecrete, AcceptParrain },
 
   computed: {
     creationDemandee () { 

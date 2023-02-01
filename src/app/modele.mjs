@@ -1,8 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-
 import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, dlvDepassee, titre, gzip, ungzip, ungzipT, egaliteU8, tru8, splitPK } from './util.mjs'
-import { random, pbkfd, sha256, decrypterRSA, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
+import { random, pbkfd, sha256, crypterRSA, decrypterRSA, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
 
 import { IDCOMPTABLE, Compteurs, UNITEV1, UNITEV2, DateJour } from './api.mjs'
 
@@ -94,10 +93,14 @@ export class NomGenerique {
 }
 
 export class NomAvatar extends NomGenerique {
+  static nomDuComptable = ''
   // idx : de 0 à 7, index de l'avatar secondaire dans son primaire
   constructor (nom, rnd, idx) {
     super(nom, rnd)
-    this.id = nom !== 'Comptable' ? (Math.round(hash(this.rnd) / 10) * 10) + idx : IDCOMPTABLE
+    if (!NomAvatar.nomDuComptable) {
+      NomAvatar.nomDuComptable = stores.config.nomDuComptable
+    }
+    this.id = nom !== NomAvatar.nomDuComptable ? (Math.round(hash(this.rnd) / 10) * 10) + idx : IDCOMPTABLE
   }
 
   get titre () {
@@ -367,6 +370,11 @@ export class Phrase {
     // this.debut = debut
     // this.fin = fin
   }
+
+  get shax () { return sha256(this.pcb) }
+
+  get shay () { return sha256(this.shax) }  
+  
   /*
   razDebutFin () {
     this.debut = ''
@@ -420,19 +428,8 @@ class GenDoc {
   static deGroupe (id) { return id && id % 10 === 8 }
   static idCompta (id) { return Math.floor(id / 10) * 10 }
   get pk () { return this.id + (this.ids ? '/' + this.ids : '')}
+  static _iv (id, v) { return ((id % 1000000 ) * 1000000) + v}
   async compile (row) { }
-}
-
-const classes = {
-  tribus: Tribu,
-  comptas: Compta,
-  avatars: Avatar,
-  groupes: Groupe,
-  secrets: Secret,
-  sponsorings: Sponsoring,
-  chats: Chat,
-  membres: Membre,
-  cvs: Cv
 }
 
 /* Retourne un objet depuis un 'row'
@@ -470,7 +467,7 @@ export async function compile (row) {
 - `mncpt` : map des noms complets des parrains:
   - _clé_ : `id` du sponsor.
   - _valeur_ :
-    - `na` : `[nom, rnd]` crypté par la clé de la tribu. ("na" est un NomTribu une fois compilé))
+    - `na` : `[nom, rnd]` crypté par la clé de la tribu. ("na" est un NomAvatar une fois compilé))
     - `cv` : `[photo, info]` carte de visite cryptée par la clé du sponsor
   - l'ajout d'un parrain ne se fait que par le comptable mais un retrait peut s'effectuer aussi par un traitement de GC.
 - `blocaget` : cryptée par la clé de la tribu : ("blocage" quand compilé)
@@ -537,6 +534,27 @@ export class Tribu extends GenDoc {
     return x ? x.cv : null
   }
 
+  static async primitiveRow (nt, na, a1, a2, r1, r2) {
+    const config = stores.config
+    const ac = config.allocComptable
+    const r = {}
+    r.vsh = 0
+    r.id = nt.id
+    r.v = 1
+    r.iv = GenDoc._iv(r.id, r.v)
+    r.dh = 0
+    r.dhb = 0
+    r.nbc = 1
+    r.a1 = a1
+    r.a2 = a2
+    r.r1 = r1
+    r.r2 = r2
+    r.mncpt = { }
+    r.mncpt[na.id] = { na: await crypter(nt.rnd, new Uint8Array(encode([na.nom, na.rnd]))) }
+    const _data_ = new Uint8Array(encode(r))
+    return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, dh: r.dh, dhb: r.rhb, _data_ }
+  }
+
   nouvelle (nom, info, r1, r2) {
     this.vsh = 0
     this.na = new NomTribu(nom)
@@ -544,8 +562,8 @@ export class Tribu extends GenDoc {
     this.v = 0
     this.info = info
     this.nbc = 0
-    this.f1 = 0
-    this.f2 = 0
+    this.a1 = 0
+    this.a2 = 0
     this.r1 = r1
     this.r2 = r2
     this.mncp = {}
@@ -556,7 +574,7 @@ export class Tribu extends GenDoc {
   /*
   async toRow () {
     const r = { ...this }
-    r.datak = await this.getDatak(this.info)
+    r.infok = await this.getDatak(this.info)
     r.mncpt = null
     r.datat = !this.blocage ? null : await crypter(this.clet, serial(this.blocage))
     return serialize('rowtribu', r)
@@ -586,7 +604,7 @@ export class Tribu extends GenDoc {
 }
 
 /** Avatar *********************************************************
-**Données n'existant que pour un avatar principal**
+**Données n'existant que pour un avatar primaire**
 - `kx` : clé K du compte, cryptée par la X (phrase secrète courante).
 - `stp` : statut parrain (0: non, 1:oui).
 - `nctk` : nom complet `[nom, rnd]` de la tribu crypté,
@@ -631,6 +649,7 @@ export class Avatar extends GenDoc {
   get primaire () { return this.idxAv === 0 } // retourne l'objet avatar primaire du compte
   get naprim () { return this.lav[0].na } // na de l'avatar primaire du compte
   get apropos () { return this.nct ? ($t('tribus', 0) + ':' + this.nct.nom) : $t('comptable') }
+  get na () { return getNg(this.id) }
 
   cpriv (id) { return this.primaire ? this.lav[id % 10].cpriv : null }
 
@@ -840,21 +859,27 @@ export class Avatar extends GenDoc {
     return this
   }
 
-  nouveau (nomAvatar, cprivav) {
+  static async primaireRow (na, cpriv, cpub, nt, estParrain) {
+    const r = {}
     const session = stores.session
-    this.id = nomAvatar.id
-    this.v = 0
-    this.dpbh = session.phrase.dpbh
-    this.pcbh = session.phrase.pcbh
-    this.k = random(32)
-    session.clek = this.k
-    this.stp = 0
-    this.nat = null
-    this.mac = { }
-    this.mac[nomAvatar.sid] = { na: nomAvatar, cpriv: cprivav }
-    setNg(nomAvatar)
-    this.vsh = 0
-    return this
+    const config = stores.config
+    r.id = na.id
+    const idx = r.id % 10
+    r.v = 1
+    r.iv = GenDoc._iv(r.id, r.v)
+    r.vcv = 0
+    r.ivc = GenDoc._iv(r.id, r.vcv)
+    r.dlv = DateJour.nj() + config.limitesjour.dlv
+    const k = random(32)
+    r.kx = await crypter(session.phrase.pcb, k)
+    session.clek = k
+    r.stp = estParrain ? 1 : 0
+    r.nctk = await crypter(k, new Uint8Array(encode([nt.nom, nt.rnd])))
+    r.lavk = await crypter(k, new Uint8Array(encode([[na.nom, na.rnd, cpriv]])))
+    r.rsapub = cpub
+    const _data_ = new Uint8Array(encode(r))
+    const row = { _nom: 'avatars', id: r.id, v: r.v, iv: r.iv, vcv: r.vcv, ivc: r.ivc, _data_ }
+    return row
   }
 
   /* En attente *******************************************
@@ -905,7 +930,7 @@ export class Avatar extends GenDoc {
   */
 }
 
-/* Cv : n'a qu'un seul champ - id: de l'avatar
+/* Cv : n'a qu'un seul champ cva - id: de l'avatar
 cva : { v, photo, info } - crypté par la clé de l'avatar
 */
 export class Cv extends GenDoc {
@@ -944,7 +969,7 @@ export class Compta extends GenDoc {
     setNg(na)
 
     this.trcp = row.trcp
-    this.compteurs = new Compteurs(row.compteurs).calculauj()
+    this.compteurs = new Compteurs(row.compteurs)
     this.blocage = !row.blocaget ? null : decode(await decrypter(this.clet, row.blocaget))
     if (this.blocage) {
       const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
@@ -962,18 +987,28 @@ export class Compta extends GenDoc {
     return new NomTribu(nom, cle)
   }
 
-  nouveau (id, t) {
-    this.id = id
-    this.t = t
-    this.v = 0
-    this.vsh = 0
-    this.compteurs = new Compteurs()
-    this.blocage = null
-    this.sta = 0
-    this.ard1 = null
-    this.ard2 = null
-    this.ard3 = null
-    return this
+  static async row (na, nt, q1, q2) {
+    const session = stores.session
+    const r = {}
+    r.id = na.id
+    r.idt = nt.id
+    r.idtb = 0
+    r.v = 1
+    r.vsh = 0
+    r.iv = GenDoc._iv(r.id, r.v)
+    r.hps1 = session.phrase.dpbh
+    r.shay = session.phrase.shay
+    r.nat = await crypter(nt.rnd, new Uint8Array(encode([na.nom, na.rnd])))
+    r.trcp = await crypterRSA(session.clepubc, new Uint8Array(encode([nt.nom, nt.rnd])))
+    const c = new Compteurs()
+    c.setQ1(q1)
+    c.setQ2(q2)
+    r.compteurs = c.serial
+    r.lavv = new Array(8)
+    for(let i = 1; i < 8; i++) r.lavv[i] = 0
+    r.lavv[0] = r.v
+    const _data_ = new Uint8Array(encode(r))
+    return { _nom: 'comptas', id: r.id, v: r.v, iv: r.iv, idt: r.idt, idtb: r.idtb, hps1: r.hps1, _data_ }
   }
 
 }
@@ -1047,7 +1082,7 @@ export class Sponsoring extends GenDoc {
       d.parrain = parrain
       d.forfaits = forfaits
     }
-    this.datax = await crypter(clex, encode(d))
+    this.datax = await crypter(clex, new Uint8Array(encode(d)))
     return this
   }
 }
@@ -1261,11 +1296,11 @@ export class Groupe extends GenDoc {
   }
 
   async toCvg (cv) {
-    return await crypter(this.cle, encode([cv.ph, cv.info]))
+    return await crypter(this.cle, new Uint8Array(encode([cv.ph, cv.info])))
   }
 
   async toMcg (mc) {
-    return Object.keys(mc).length ? await crypter(this.cle, encode(mc)) : null
+    return Object.keys(mc).length ? await crypter(this.cle, new Uint8Array(encode(mc))) : null
   }
 }
 
@@ -1630,7 +1665,7 @@ export class SessionSync {
         dhsync: this.dhsync,
         dhpong: this.dhpong
       }
-      await saveSessionSync(encode(x))
+      await saveSessionSync(new Uint8Array(encode(x)))
     }
   }
 }
@@ -1664,7 +1699,7 @@ export class TexteLocal {
   toIdb () {
     const x = { ...this }
     x.txt = gzip(encoder.encode(this.txt))
-    return encode(x)
+    return new Uint8Array(encode(x))
   }
 }
 
@@ -1706,4 +1741,16 @@ export class FichierLocal {
   toIdb () {
     return encode({ ...this })
   }
+}
+
+const classes = {
+  tribus: Tribu,
+  comptas: Compta,
+  avatars: Avatar,
+  groupes: Groupe,
+  secrets: Secret,
+  sponsorings: Sponsoring,
+  chats: Chat,
+  membres: Membre,
+  cvs: Cv
 }

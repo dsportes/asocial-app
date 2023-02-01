@@ -173,7 +173,7 @@ export default {
     async memoeditAut () { if (await this.session.aut(3, true)) this.memoedit = true },
     async memook (m) {
       this.memoed.undo()
-      const datak = await crypter(this.session.clek, encode(m))
+      const datak = await crypter(this.session.clek, new Uint8Array(encode(m)))
       await new PrefCompte().run('mp', datak)
       this.memoedit = false
     },
@@ -185,7 +185,7 @@ export default {
     async mcleditAut () { if (await this.session.aut(3, true)) this.mcledit = true },
     async okmc (mmc) {
       if (!await this.session.aut(3, true)) return
-      const datak = await crypter(this.session.clek, encode(mmc))
+      const datak = await crypter(this.session.clek, new Uint8Array(encode(mmc)))
       await new PrefCompte().run('mc', datak)
     },
 

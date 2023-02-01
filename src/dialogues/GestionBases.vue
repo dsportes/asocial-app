@@ -150,7 +150,7 @@ export default ({
           trigs[nb] = [it.reseau, it.trig]
           nbbases.value++
         }
-        localStorage.setItem('$$trigrammes', u8ToB64(encode(trigs), true))
+        localStorage.setItem('$$trigrammes', u8ToB64(new Uint8Array(encode(trigs)), true))
         console.log('RAZ db ' + nombase + ' réseau:' + it.reseau + ' trig:' + it.trig)
       } catch (e) {
         console.log(e.toString())

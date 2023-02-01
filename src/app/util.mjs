@@ -310,7 +310,7 @@ export function setTrigramme (nombase, trig) {
   if (trig) {
     trigs[nombase] = trig
   } else delete trigs[nombase]
-  localStorage.setItem(nt, u8ToB64(encode(trigs), true))
+  localStorage.setItem(nt, u8ToB64(new Uint8Array(encode(trigs)), true))
 }
 
 export function getTrigramme () {

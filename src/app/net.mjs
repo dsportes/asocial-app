@@ -29,8 +29,7 @@ export async function ping () {
 
 /*
 Envoi une requête GET :
-- module : module invoqué
-- fonction : code la fonction du module
+- fonction : code de la fonction
 - args : objet avec les arguments qui seront transmis en query string
 Retour :
 - OK : les bytes demandés
@@ -39,7 +38,7 @@ Retour :
 export async function get (fonction, args) {
   const cfg = stores.config
   try {
-    const u = cfg.urlserveur + '/' + fonction
+    const u = cfg.urlserveur + '/op/' + fonction
     const r = await axios({
       method: 'get',
       url: u,
@@ -72,8 +71,8 @@ export async function post (op, fonction, args) {
   const config = stores.config
   try {
     if (op) op.BRK()
-    const data = encode(args)
-    const u = config.urlserveur + '/' + fonction
+    const data = new Uint8Array(encode(args))
+    const u = config.urlserveur + '/op/' + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
     const par = { method: 'post', url: u, data: data, headers: headers, responseType: 'arraybuffer' }
     if (op) par.cancelToken = op.cancelToken.token

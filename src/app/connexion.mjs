@@ -5,13 +5,12 @@ import { SyncQueue } from './sync.mjs'
 import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash } from './util.mjs'
 import { post } from './net.mjs'
 import { DateJour } from './api.mjs'
-import { NomAvatar } from './modele.mjs'
-import { resetRepertoire, compile, Compta, Avatar, NomTribu } from './modele.mjs'
-import { openIDB, closeIDB, deleteIDB, getCompte, getAvatarPrimaire, getColl, getCvs, putCv,
+import { resetRepertoire, compile, Compta, Avatar, Tribu, NomAvatar, NomTribu, setNg } from './modele.mjs'
+import { openIDB, closeIDB, deleteIDB, getCompte, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB  } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
-import { openWS } from './ws.mjs'
+import { openWS, closeWS } from './ws.mjs'
 
 /* garderMode : si true, garder le mode */
 export function deconnexion (garderMode) {
@@ -605,7 +604,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       // enregistre l'heure du début effectif de la session
-      await session.sessionSync.setConnexion(this.dh)
+      if (session.synchro) await session.sessionSync.setConnexion(this.dh)
       console.log('Connexion compte : ' + this.compte.id)
       session.statut = 2
       SyncQueue.traiterQueue()
@@ -682,7 +681,7 @@ export class AcceptationParrainage extends OperationUI {
       /* si le compte est parrain, il va être enregistré
       dans sa tribu dans la liste des parrains */
       const chkt = arg.estpar ? hash(compte.sid + '@' + nat.sid) : 0
-      const ncpart = arg.estpar ? await crypter(rnd, encode([compte.naprim.nom, compte.naprim.rnd])) : 0
+      const ncpart = arg.estpar ? await crypter(rnd, new Uint8Array(encode([compte.naprim.nom, compte.naprim.rnd]))) : 0
 
       const args = {
         sessionId: this.session.sessionId,
@@ -769,35 +768,39 @@ export class CreationCompteComptable extends OperationUI {
   async run (phrase) {
     try {
       const session = stores.session
+      const config = stores.config
+      const ac = config.allocComptable
       session.mode = 2
       await initSession(phrase)
 
       const kpav = await genKeyPair()
       tru8('Priv Comptable', kpav.privateKey)
       tru8('Pub Comptable', kpav.publicKey)
+      session.clepubc = kpav.publicKey
 
-      const nomAvatar = new NomAvatar('Comptable') // nouveau
+      const nt = new NomTribu(config.nomTribuPrimitive)
+      setNg(nt)
+      const na = new NomAvatar(config.nomDuComptable)
+      setNg(na)
 
-      const compte = new Compte().nouveau(nomAvatar, kpav.privateKey)
-      // nouveau() enregistre la clé K dans session.clek
-      const rowCompte = await compte.toRow()
+      const rowAvatar = await Avatar.primaireRow (na, kpav.privateKey, kpav.publicKey, nt, true)
+      const rowTribu = await Tribu.primitiveRow (nt, na, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])
+      const rowCompta = await Compta.row (na, nt, ac[0], ac[1])
 
-      const prefs = new Prefs().nouveau(compte.id)
-      const rowPrefs = await prefs.toRow()
-
-      const compta = new Compta().nouveau(compte.id, 1) // 1: avatar primaire
-      compta.compteurs.setF1(255)
-      compta.compteurs.setF2(255)
-      const rowCompta = await compta.toRow()
-
-      const avatar = new Avatar().nouveau(compte.id)
-      const rowAvatar = await avatar.toRow()
-
-      const args = { sessionId: session.sessionId, clePubAv: kpav.publicKey, rowCompte, rowCompta, rowAvatar, rowPrefs }
-      const ret = this.tr(await post(this, 'm1', 'creationCompteComptable', args))
+      const args = { token: stores.session.authToken, rowTribu, rowCompta, rowAvatar }
+      this.tr(await post(this, 'CreationCompteComptable', args))
 
       // Le compte vient d'être créé, clek est enregistrée
-      await this.postCreation(ret)
+      const avatar = await compile(rowAvatar)
+      const tribu = await compile(rowTribu)
+      const compta = await compile(rowCompta)
+      stores.avatar.setCompte(avatar, compta, tribu)
+
+      console.log('Connexion compte : ' + compta.id)
+      session.statut = 2
+      SyncQueue.traiterQueue()
+      this.finOK()
+      stores.ui.goto11()
     } catch (e) {
       this.finKO(e)
     }

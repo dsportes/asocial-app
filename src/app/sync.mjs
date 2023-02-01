@@ -7,7 +7,7 @@ import { IDBbuffer, gestionFichierSync } from './db.mjs'
 export class SyncQueue {
   static queue = []
 
-  static reset () { SyncQueue.length = 0 }
+  static reset () { SyncQueue.queue.length = 0 }
 
   static push (row) {
     SyncQueue.queue.push(row)
