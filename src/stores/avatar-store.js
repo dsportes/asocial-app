@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import stores from './stores.mjs'
 
 /* Store maître du compte courant :
 Sous-collection pour chaque avatar id :
@@ -112,7 +113,7 @@ export const useAvatarStore = defineStore('avatar', {
       this.tribuP = tribu
       const t = tribu.mncpt
       for (const idsp in t) {
-        if (!this.avatarP.estAc(idsp)) {
+        if (!this.avatarP.estAc(parseInt(idsp))) {
           const e = t[idsp]
           peStore.setPeopleSponsor(e.na, e.cv)
         }

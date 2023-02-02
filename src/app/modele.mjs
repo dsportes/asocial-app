@@ -480,6 +480,7 @@ export async function compile (row) {
 */
 
 export class Tribu extends GenDoc {
+  get na () { return getNg(this.id) }
   get nom () { return this.na.nom }
   get clet () { return this.na.rnd }
   get stn () { return this.blocage ? this.blocage.stn : 0 }
@@ -497,15 +498,15 @@ export class Tribu extends GenDoc {
     this.a2 = row.a2
     this.r1 = row.r1
     this.r2 = row.r2
-    this.info = session.estComptable ? await decrypterStr(session.clek, row.infok) : ''
+    this.info = session.estComptable && row.infok ? await decrypterStr(session.clek, row.infok) : ''
 
-    this.mncpt = row.mncpt ? decode(row.mncpt) : {}
+    this.mncpt = row.mncpt || {}
     for (const id in this.mncpt) {
       const e = this.mncpt[id]
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       e.na = new NomAvatar(nom, cle)
-      setNg(na)
-      e.cv = e.cv ? decode(await decrypter(cle, e.cv)) : null
+      setNg(e.na)
+      e.cv = e.cv ? decode(await decrypter(e.na.rnd, e.cv)) : null
     }
     this.blocage = !row.blocaget ? null : decode(await decrypter(this.clet, row.blocaget))
     if (this.blocage) {
@@ -646,7 +647,7 @@ export class Avatar extends GenDoc {
   get idxAv () { return this.id % 10 }
   get estParrain () { return this.stp === 1 } // retourne true si le compte est parrain
   get estComptable () { return this.id === IDCOMPTABLE } // retourne true si le compte est celui du comptable
-  get primaire () { return this.idxAv === 0 } // retourne l'objet avatar primaire du compte
+  get primaire () { return this.idxAv === 0 } // retourne true si l'objet avatar est primaire du compte
   get naprim () { return this.lav[0].na } // na de l'avatar primaire du compte
   get apropos () { return this.nct ? ($t('tribus', 0) + ':' + this.nct.nom) : $t('comptable') }
   get na () { return getNg(this.id) }
@@ -654,11 +655,11 @@ export class Avatar extends GenDoc {
   cpriv (id) { return this.primaire ? this.lav[id % 10].cpriv : null }
 
   // INTERNE : Enregistrement des na des avatars du compte. Effectué à la construction de l'objet
-  repAvatars () { if (this.primaire) this.lav.forEach(x => { setNg(x.na) }) }
+  repAvatars () { if (this.primaire) this.lav.forEach(x => { if (x) setNg(x.na) }) }
 
   avatarIds (s) { // retourne (ou accumule dans s), le set des ids des avatars du compte
     const s1 = new Set()
-    if (this.primaire) for(let i = 0; i < this.lav; i++) {
+    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
       const x = this.lav[i]
       if (!x) continue
       if (s) s.add(x.na.id); else s1.add(x.na.id)
@@ -668,7 +669,7 @@ export class Avatar extends GenDoc {
 
   avatarNas (s) { // retourne (ou accumule dans s), le set des ids des avatars du compte
     const s1 = new Set()
-    if (this.primaire) for(let i = 0; i < this.lav; i++) {
+    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
       const x = this.lav[i]
       if (!x) continue
       if (s) s.add(x.na); else s1.add(x.na)
@@ -678,7 +679,7 @@ export class Avatar extends GenDoc {
 
   avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
     if (!this.primaire) return 0
-    for(let i = 0; i < this.lav; i++) {
+    for(let i = 0; i < this.lav.length; i++) {
       const x = this.lav[i]
       if (!x) continue
       if (x.na.nom === n) return x.na.id
@@ -688,7 +689,7 @@ export class Avatar extends GenDoc {
 
   nomAvatars () { // retourne la liste des noms des avatars du compte
     const l = []
-    if (this.primaire) for(let i = 0; i < this.lav; i++) {
+    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
       const x = this.lav[i]
       if (!x) continue
       l.push(x.na.nom)
@@ -696,7 +697,13 @@ export class Avatar extends GenDoc {
     return l
   }
 
-  estAc (id) { return this.avatarIds.has(id) }
+  estAc (id) {
+    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
+      const x = this.lav[i]
+      if (x && x.na.id === id) return true
+    }
+    return false
+  }
 
   /* Remplit la map avec les membres des groupes de l'avatar/
   - clé: id du groupe
@@ -787,12 +794,15 @@ export class Avatar extends GenDoc {
       session.compteId = this.id
 
       /* `lavk` [] `[nom, cle, cpriv]` */
-      this.lav = []
-      for(let i = 0; i < 7; i++) {
-        const x = this.lavk[i]
-        if (!x) this.lav[i] = null
-        const [nom, cle, cpriv] = decode(await decrypter(session.clek, x))
-        this.lav[i] = { na: new NomAvatar(nom, cle), cpriv }
+      this.lav = new Array(8)
+      for(let i = 0; i < 8; i++) {
+        const x = row.lavk[i]
+        if (!x) {
+          this.lav[i] = null
+        } else {
+          const [nom, cle, cpriv] = decode(await decrypter(session.clek, x))
+          this.lav[i] = { na: new NomAvatar(nom, cle), cpriv }
+        }
       }
 
       if (row.nctk) {
@@ -811,6 +821,7 @@ export class Avatar extends GenDoc {
         }
         const [nom, cle] = decode(nr)
         this.nct = new NomTribu(nom, cle)
+        setNg(this.nct)
       } else { // Ne devrait JAMAIS se produire, même le comptable a une tribu
         this.nct = null
         this.nctk = null
@@ -824,7 +835,6 @@ export class Avatar extends GenDoc {
         this.memo = await decrypterStr(session.clek, row.memok)
       } else this.memo = ''
 
-      setNg(this.nct)
       this.repAvatars()
     }
 
@@ -875,10 +885,11 @@ export class Avatar extends GenDoc {
     session.clek = k
     r.stp = estParrain ? 1 : 0
     r.nctk = await crypter(k, new Uint8Array(encode([nt.nom, nt.rnd])))
-    r.lavk = await crypter(k, new Uint8Array(encode([[na.nom, na.rnd, cpriv]])))
+    const y = await crypter(k, new Uint8Array(encode([na.nom, na.rnd, cpriv])))
+    r.lavk = [y, null, null, null, null, null, null, null]
     r.rsapub = cpub
     const _data_ = new Uint8Array(encode(r))
-    const row = { _nom: 'avatars', id: r.id, v: r.v, iv: r.iv, vcv: r.vcv, ivc: r.ivc, _data_ }
+    const row = { _nom: 'avatars', id: r.id, v: r.v, iv: r.iv, vcv: r.vcv, ivc: r.ivc, dlv: r.dlv, _data_ }
     return row
   }
 
@@ -954,7 +965,7 @@ export class Cv extends GenDoc {
 
 export class Compta extends GenDoc {
   get stn () { return this.blocage ? this.blocage.stn : 0 }
-  get clet () { return repertoire.cle(this.idt) }
+  get clet () { return getCle(this.idt) }
 
   async compile (row) {
     this.vsh = row.vsh || 0
@@ -966,7 +977,7 @@ export class Compta extends GenDoc {
     this.shay = row.shay
     const [nom, cle] = decode(await decrypter(this.clet, row.nat))
     this.na = new NomAvatar(nom, cle)
-    setNg(na)
+    setNg(this.na)
 
     this.trcp = row.trcp
     this.compteurs = new Compteurs(row.compteurs)

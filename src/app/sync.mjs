@@ -15,14 +15,17 @@ export class SyncQueue {
   }
 
   static traiterQueue () {
+    const session = stores.session
     if (session.syncEncours || session.status < 2 || !SyncQueue.queue.length) return
     session.syncEncours = true
     const row = SyncQueue.queue.splice(0, 1)
     setTimeout(async () => {
       session.syncEncours = true
-      const op = row._nom === 'comptas' ? new OnchangeCompta() :
-       (row._nom === 'groupes'  ? new OnchangeGroupe() : new Onchangetribu())
-      await op.run(row)
+      let op
+      if (row._nom === 'comptas') op = new OnchangeCompta()
+      else if (row._nom === 'groupes') op = new OnchangeGroupe()
+      else if (row._nom === 'tribus') op = new OnchangeTribu()
+      if (op) await op.run(row)
       if (session.synchro) session.sessionSync.setDhSync(new Date().getTime())
       session.syncEncours = false
       SyncQueue.traiterQueue()

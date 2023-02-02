@@ -783,20 +783,30 @@ export class CreationCompteComptable extends OperationUI {
       const na = new NomAvatar(config.nomDuComptable)
       setNg(na)
 
+      session.compteId = na.id
+      session.tribuId = nt.id
+      session.estComptable = true
+
       const rowAvatar = await Avatar.primaireRow (na, kpav.privateKey, kpav.publicKey, nt, true)
       const rowTribu = await Tribu.primitiveRow (nt, na, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])
       const rowCompta = await Compta.row (na, nt, ac[0], ac[1])
 
-      const args = { token: stores.session.authToken, rowTribu, rowCompta, rowAvatar }
-      this.tr(await post(this, 'CreationCompteComptable', args))
-
+      const args = { token: stores.session.authToken, rowTribu, rowCompta, rowAvatar, abPlus: [nt.id] }
+      const ret = this.tr(await post(this, 'CreationCompteComptable', args))
+  
       // Le compte vient d'être créé, clek est enregistrée
       const avatar = await compile(rowAvatar)
       const tribu = await compile(rowTribu)
       const compta = await compile(rowCompta)
       stores.avatar.setCompte(avatar, compta, tribu)
 
-      console.log('Connexion compte : ' + compta.id)
+      if (ret.credentials) session.fscredentials = ret.credentials
+      if (session.fsSync) {
+        await session.fsSync.setCompte(session.compteId)
+        await session.fsSync.setTribu(session.tribuId)
+      }
+
+      console.log('Connexion compte : ' + na.id)
       session.statut = 2
       SyncQueue.traiterQueue()
       this.finOK()
