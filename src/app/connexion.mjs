@@ -4,7 +4,7 @@ import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash } from './util.mjs'
 import { post } from './net.mjs'
-import { DateJour } from './api.mjs'
+import { DateJour, IDCOMPTABLE } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, NomAvatar, NomTribu, setNg } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB  } from './db.mjs'
@@ -419,9 +419,9 @@ export class ConnexionCompte extends OperationUI {
       await session.fsSync.setTribu(session.tribuId)
     }
 
-    this.getCTA()
+    await this.getCTA()
 
-    if (!session.nombase) await session.setNombase() // maintenant que la cle K est connue
+    if (session.accesIdb && !session.nombase) await session.setNombase() // maintenant que la cle K est connue
 
     if (session.synchro) {
       let dbok = false
