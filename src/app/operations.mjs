@@ -189,36 +189,6 @@ export class OperationUI extends Operation {
   }
 }
 
-
-/* echoTexte **************************************************/
-export class EchoTexte extends OperationUI {
-  constructor () { super($t('OPecho')) }
-
-  async run (texte, to) {
-    try {
-      const r = await post(null, 'm1', 'echoTexte', { texte, to })
-      console.log('Echo : ' + r.texte)
-      return this.finOK(r)
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* erreurFonc *******************************************/
-export class ErreurFonc extends OperationUI {
-  constructor () { super($t('OPerreurFonc')) }
-
-  async run (detail, to) {
-    try {
-      const r = await post(null, 'm1', 'erreurFonc', { detail, to })
-      return this.finOK(r)
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
 /******************************************************
 Recherche les "people" d'ids donnés dans lids
 - en inscrit un en people s'il n'y est pas

@@ -5,7 +5,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash } from './util.mjs'
 import { post } from './net.mjs'
 import { DateJour, IDCOMPTABLE } from './api.mjs'
-import { resetRepertoire, compile, Compta, Avatar, Tribu, NomAvatar, NomTribu, setNg } from './modele.mjs'
+import { resetRepertoire, compile, Compta, Avatar, Tribu, NomAvatar, NomTribu, setNg, getNg } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB  } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
@@ -104,7 +104,7 @@ export class ConnexionCompte extends OperationUI {
 
       const mapv = {} // versions des avatars requis à demander au serveur
 
-      this.avatar.avatarIds(this.avRequis)
+      this.avatar.avatarIds(avRequis)
       avRequis.forEach(id => {
         if (id === this.avatar.id) {
           mapv[id] = this.avatar.v
@@ -163,7 +163,7 @@ export class ConnexionCompte extends OperationUI {
     /* map des avatars du compte - clé: id de l'avatar  - valeur: dlv } */
     const avsMap = {}  
       
-    this.avatarsToStore.values().forEach(avatar => {
+    this.avatarsToStore.forEach(avatar => {
       avatar.idGroupes(grRequis)
       avsMap[avatar.id] = avatar.id % 10 === 0 ? dlv1 : dlv2
       avatar.membres(mbsMap) // v, dlv, de mbsMap ne sont pas renseignées pour l'instant
@@ -481,7 +481,7 @@ export class ConnexionCompte extends OperationUI {
       // Rangement en store
       avStore.setCompte(this.avatar, this.compta, this.tribu)
       session.setBlocage()
-      this.avatarsToStore.values().forEach(av => { 
+      this.avatarsToStore.forEach(av => { // (value, key) =>
         if (av.id !== this.avatar.id) avStore.setAvatar(av)
       })
 
@@ -518,7 +518,7 @@ export class ConnexionCompte extends OperationUI {
       const grStore = stores.groupe
       const syncitem = stores.syncitem 
       this.avatarsToStore.forEach(av => { 
-        avStore.setAvatar(obj)
+        avStore.setAvatar(av)
         syncitem.push('05' + av.id, 0, 'SYava', [av.na.nom])
       })
       this.groupesToStore.forEach(gr => { 
@@ -539,31 +539,31 @@ export class ConnexionCompte extends OperationUI {
         const [x1, x2] = await this.chargerSecrets(avatar.id, avatar.v)
         n1 = x1
         n2 = x2
-        syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
         const [x3, x4] = await this.chargerChats(avatar.id, avatar.v)
         n3 = x3
         n4 = x4
-        syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
         const [x5, x6] = await this.chargerSponsorings(avatar.id, avatar.v)
         n5 = x5
         n6 = x6
-        syncitem.push('05' + id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
       }
 
       // Itération sur chaque groupe: secrets, membres
-      for (const groupe of grStore.groupes.values) {
+      for (const groupe of grStore.groupes.values()) {
         const na = getNg(id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
         const [x1, x2] = await this.chargerSecrets(groupe.id, groupe.v, true)
         n1 = x1
         n2 = x2
-        syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
+        syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
 
         this.mbsDisparus = new Set()
         const [x3, x4] = await this.chargerMembres(groupe)
         n3 = x3
         n4 = x4
-        syncitem.push('10' + id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
+        syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
 
         if (this.mbsDisparus.size) {
           /* Sur le serveur, le GC quotidien est censé avoir mis les statuts ast[ids] à 0
@@ -605,7 +605,7 @@ export class ConnexionCompte extends OperationUI {
 
       // enregistre l'heure du début effectif de la session
       if (session.synchro) await session.sessionSync.setConnexion(this.dh)
-      console.log('Connexion compte : ' + this.compte.id)
+      console.log('Connexion compte : ' + this.compta.id)
       session.statut = 2
       SyncQueue.traiterQueue()
       this.finOK()
@@ -791,7 +791,7 @@ export class CreationCompteComptable extends OperationUI {
       const rowTribu = await Tribu.primitiveRow (nt, na, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])
       const rowCompta = await Compta.row (na, nt, ac[0], ac[1])
 
-      const args = { token: stores.session.authToken, rowTribu, rowCompta, rowAvatar, abPlus: [nt.id] }
+      const args = { token: stores.session.authToken, rowTribu, rowCompta, rowAvatar, pcbh: phrase.pcbh, abPlus: [nt.id] }
       const ret = this.tr(await post(this, 'CreationCompteComptable', args))
   
       // Le compte vient d'être créé, clek est enregistrée
@@ -813,6 +813,58 @@ export class CreationCompteComptable extends OperationUI {
       stores.ui.goto11()
     } catch (e) {
       this.finKO(e)
+    }
+  }
+}
+
+/** Opérations de type "ping" non authentifiées du tout */
+
+/** Echo du texte envoyé ***************************************
+args.token donne les éléments d'authentification du compte.
+args.to : délai en secondes avant retour de la réponse
+args.texte : texte à renvoyer en écho
+Retour:
+- echo : texte d'entrée retourné
+*/
+export class EchoTexte extends OperationUI {
+  constructor () { super($t('OPecho')) }
+
+  async run (texte, to) {
+    try {
+      const ret = this.tr(await post(this, 'EchoTexte', { to, texte }))
+      console.log('Echo : ' + ret.echo)
+      return this.finOK(ret.echo)
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
+/* ErreurFonc *******************************************/
+export class ErreurFonc extends OperationUI {
+  constructor () { super($t('OPerreurFonc')) }
+
+  async run (texte, to) {
+    try {
+      this.tr(await post(this, 'ErreurFonc', { to, texte }))
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
+/* PingDB *******************************************/
+export class PingDB extends OperationUI {
+  constructor () { super($t('OPpingdb')) }
+
+  async run () {
+    try {
+      const ret = this.tr(await post(this, 'PingDB', { }))
+      this.finOK()
+      return ret
+    } catch (e) {
+      return await this.finKO(e)
     }
   }
 }

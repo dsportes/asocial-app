@@ -48,6 +48,7 @@ export default {
   auja: 'aujourd\'hui à {0}',
   hiera: 'hier à {0}',
   lea: 'le {0} à {1}',
+  nondate: '(non daté)',
 
   jour0: 'Dimanche',
   jour1: 'Lundi',
@@ -249,6 +250,7 @@ export default {
 
   OPecho: 'Test d\'écho.',
   OPerreurFonc: 'Test d\'erreur fonctionnelle',
+  OPpingdb: 'Test de ping de la base distante',
   OPsync: 'Opération de synchronisation',
   OPccc: 'Créer le compte du comptable',
   OPcnx: 'Se connecter à un compte',
@@ -451,10 +453,9 @@ export default {
   // TestPing
   TP1: 'La base n\'est pas accessible avant connexion à un compte en mode synchronisé ou avion',
   TP2: 'Possible seulement en mode incognito ou synchronisé',
-  TP3: 'Possible seulement en mode incognito ou synchronisé et si le réseau a été choisie',
   TP4: 'Possible seulement en mode avion ou synchronisé après connexion à un compte',
   TPt1: 'Test des accès',
-  TPt2: 'Accès au serveur distant<',
+  TPt2: 'Accès au serveur distant',
   TPt3: 'Accès à la base sur le serveur distant',
   TPt4: 'Accès à la base locale d\'un compte',
 

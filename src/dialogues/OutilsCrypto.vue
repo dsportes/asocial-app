@@ -12,7 +12,7 @@
     </q-card-section>
     <q-separator/>
     <q-card-section>
-      <phrase-secrete v-on:ok-ps="okps" icon-valider="check" label-ok="OK"></phrase-secrete>
+      <phrase-secrete v-on:ok-ps="okps" icon-valider="check" label-valider="OK"></phrase-secrete>
     </q-card-section>
     <q-card-section class="q-ma-xs">
       <div class='t1 q-mt-sm'>{{$t('OCh1')}}</div>
@@ -29,7 +29,7 @@
 import stores from '../stores/stores.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { EchoTexte, ErreurFonc } from '../app/operations.mjs'
+import { EchoTexte, ErreurFonc } from '../app/connexion.mjs'
 import { afficherDiag } from '../app/util.mjs'
 
 export default ({
@@ -51,17 +51,17 @@ export default ({
       await new ErreurFonc().run(this.$t('OCer'), 1)
     },
     async testEcho () {
-      const texte = 'bla bla bla'
+      const texte = this.$t('OCt1')
       const to = 1
-      const r = await new EchoTexte().run({texte, to})
-      afficherDiag(this.$t('OCec', [texte, r.texte.texte, to]))
+      const r = await new EchoTexte().run(texte, to)
+      afficherDiag(this.$t('OCec', [texte, r, to]))
     }
   },
 
   setup () {
     return {
       session: stores.session,
-      ui: dtores.ui
+      ui: stores.ui
     }
   }
 })

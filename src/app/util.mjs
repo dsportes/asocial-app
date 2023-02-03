@@ -78,7 +78,7 @@ export function aujhier () {
 }
 
 export function dhcool (timems, sec) {
-  if (!timems) return '(non daté)'
+  if (!timems) return $t('nondate')
   aujhier()
   const d = new Date(timems)
   const mm = auj.getFullYear() === d.getFullYear() && auj.getMonth() === d.getMonth()

@@ -366,7 +366,7 @@ export class Phrase {
     this.pcb = await pbkfd(debut + '\n' + fin)
     this.pcb64 = u8ToB64(this.pcb)
     this.pcbh = hash(this.pcb)
-    this.dpbh = hash(await pbkfd(debut))
+    this.dpbh = hash(await pbkfd(debut)) // hps1 dans compta
     // this.debut = debut
     // this.fin = fin
   }

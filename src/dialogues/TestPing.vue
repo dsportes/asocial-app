@@ -16,12 +16,12 @@
     </q-card-section>
     <q-card-section>
       <div class="titre-lg">{{$t('TPt3')}}</div>
-      <div v-if="session.accesNet && session.reseau" class="q-ml-md">
+      <div v-if="session.accesNet" class="q-ml-md">
         <q-btn dense label="Ping de la base sur le serveur" color="primary" @click="pingsrvdb"/>
         <div>{{ resultat2a }}</div>
         <div v-html="resultat2b"/>
       </div>
-      <div v-else class="q-ml-md text-italic">{{$t('TP3')}}</div>
+      <div v-else class="q-ml-md text-italic">{{$t('TP2')}}</div>
     </q-card-section>
     <q-card-section>
       <div class="titre-lg">{{$t('TPt4')}}</div>
@@ -39,6 +39,7 @@ import { dhcool, $t, html } from '../app/util.mjs'
 import { ping, post } from '../app/net.mjs'
 import stores from '../stores/stores.mjs'
 import { getCompte } from '../app/db.mjs'
+import { PingDB } from '../app/connexion.mjs'
 
 export default ({
   name: 'TestPing',
@@ -73,9 +74,9 @@ export default ({
       this.resultat2a = '-'
       this.resultat2b = '-'
       try {
-        const ret = await post(null, 'm1', 'pingdb', {})
+        const ret = await new PingDB().run()
         this.resultat2a = 'OK'
-        this.resultat2b = dhcool(Math.floor(ret.dhc / 1000), true)
+        this.resultat2b = dhcool(ret.dh, true)
       } catch (exc) {
         this.resultat2a = 'KO'
         this.resultat2b = html(exc)
