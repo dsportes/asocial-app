@@ -128,7 +128,7 @@ export const useAvatarStore = defineStore('avatar', {
           avatar: avatar, 
           secrets: new Map(),
           sponsorings: new Map(),
-          chats: new Map
+          chats: new Map()
          }
         this.map.set(avatar.id, e)
       } else e.avatar = avatar

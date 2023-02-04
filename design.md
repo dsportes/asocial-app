@@ -1,6 +1,5 @@
 TODO next :
 - connexion avion
-- création compte comptable
 - sponsoring / acceptation
 - revoir GestionBase : tout faux, reseau, suppression base ...
 
