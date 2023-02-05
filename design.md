@@ -7,19 +7,94 @@ TODO next :
 
 ## Structure de la vue principale App.vue
 Deux zones :
-- q-header : zone fixe en haut
-  - barre I : icônes ouvrant des dialogues à gauche et à droite + Réseau
-  - barre S : Session (Compte)
-  - barre A : Avatar
-  - barre C : Contact
-  - barre G : Groupe
-  - onglets :
-    - CA : Détail du compte / Avatars
-    - CAT : Détail du compte / Avatars / Tribus
-    - ACGS : Détail de l'avatar / Contacts / Groupes / Secrets
-    - GMS : Détail du groupe / Membres / Secrets
-    - CS : Détail du contact / Secrets
-- q-page-container : page courante.
+- `header` : zone fixe en haut
+  - barre _Avatar_ :
+    - nom de l'avatar courant: un clic ouvre le panneau droit de détail de l'avatar
+    - 5 icônes ouvrant :
+      - la page `blocage`,
+      - la page `session` et rappelant le mode de la session (synchronisé, incognito, avion),
+      - la boîte de dialogue `deconnexion`
+      - le panneau gauche `aide`.
+  - barre _Groupe_ : 
+    - nom du groupe courant (quand il y en a un): un clic ouvre le panneau droit de détail de l'avatar,
+    - choix du mode clair / foncé
+    - bouton de choix de la langue.
+  - barre _Titre de la page_ : 
+    - pour certaines pages, un _bloc de navigation_,
+    - le titre de la page courante,
+    - une icône de fermeture de la page et retour à l'accueil (sauf pour la page `accueil`)
+    - une icône d'ouverture du panneau gauche d'aide.
+- `page-container` : page courante.
+
+### Pages
+Les pages occupent la partie `page-container` :
+- elles ont un titre, constant et peuvent se rapporter,
+  - à rien (de facto la session),
+  - à l'avatar courant: `secrets groupes chats sponsorings`
+  - au groupe courant : `secrets membres`
+
+Quand la session est en état :
+- 0 : non connecté, la page `login` s'affiche,
+- 1 : en chargement, la page `session` s'affiche,
+- 2 : connecté, toutes les autres pages, celle _par défaut_ étant `accueil`.
+
+#### Page `login`
+Page proposant le dialogue de connexion. Elle n'est visible que quand la session n'est pas connectée.
+
+#### Page `session`
+Elle affiche l'état de la session. Elle est visible :
+- quand la session est en statut 1 en cours de chargement.
+- sur demande quand la session est en statut 2 : bouton `session` dans la barre _Avatar_ ou bouton `session` de la page `accueil`.
+
+Elle affiche l'état courant du chargement de la session : une fois la session ouverte (statut 2) cet état est constant.
+
+#### Page `accueil`
+Elle comporte quatre groupes de boutons ouvrant des pages ou des panneaux gauches ou droits :
+
+**Groupe 1, relatif à la session :**
+- `deconnexion` : ouvre le dialogue de confirmation de la demande déconnexion,
+- `aide` : ouvre le panneau gauche d'aide,
+- `session` : ouvre la page `session`,
+- `toutestribus`: pour le comptable seulement ouvre la page `toutestribus` listant toutes les tribus,
+- `mesavatars` : ouvre la page `mesavatars` listant les avatars du compte,
+- `mesgroupes` : ouvre la page `mesgroupes` listant tous les groupes dont au moins un des avatars du compte est membre,
+- `mescontacts` : ouvre le panneau droit `mescontacts` listant tous les contacts du compte,
+- `matribu` : ouvre la page `matribu`,
+- `messponsorings` : ouvre la page `messponsorings` listant les sponsorings en cours pour tous les avatars du compte,
+- `secretsrecents` : ouvre la page `secretsrecents` listant les secrets des groupes ayant été créés / modifiés récemment,
+- `fichiersavion` : ouvre la page `fichiersavion` listant les fichiers accessibles en mode avion (modes synchronisé et avion),
+- `tflocaux` : ouvre la page `tflocaux` listant les textes et fichiers locaux (modes synchronisé et avion).
+
+**Groupe 2, relatif à l'avatar courant :**
+- `apropos` : ouvre le panneau droit de détail de l'avatar,
+- `secrets` : ouvre la page `avsecrets` listant les secrets de l'avatar,
+- `chats` : ouvre la page `chats` listant les chats de l'avatar,
+- `groupes` : ouvre la page `groupes` listant les groupes dont l'avatar est membre,
+- `sponsorings` : ouvre la page listant les `sponsorings` en cours déclarés par cet avatar,
+- `invitations` : ouvre la page `invitations` listant les invitations de l'avatar reçues pour participer à un groupe.
+
+**Groupe 3, relatif au groupe courant (quand il y en a un) :**
+- `apropos` : ouvre le panneau droit de détail du groupe,
+- `secrets` : ouvre la page grsecrets listant les secrets du groupe,
+- `membres` : ouvre la page membres listant les membres du groupe,
+
+**Groupe 4, préférences et outils**
+- `baseslocales` : ouvre une boîte de dialogue `baseslocales` de gestion des bases locales au poste gérant les sessions synchronisées et avion.
+- `outils` : ouvre une boîte de dialogue `outils`,
+  - de test des accès au serveur et à la base locale, 
+  - de test d'une opération d'écho et d'une opération en erreur,
+  - de test des phrases secrètes.
+
+Le **Groupe 4** se retrouve aussi en bas de la page de login.
+
+#### Pages en mode formulaire / liste, filtre
+Les pages `mesgroupes groupes membres avsecrets grsecrets secretsrecents toutestribus` peuvent basculer entre les modes _formulaire_ et _liste_.
+- en mode liste, tous les items sont listés,
+- en mode formulaire, un seul item est listé et une barre de navigation permet de passer aux items précédent, suivant, premier, dernier
+
+Un **filtre** est un panneau qui permet de définir des critères et sélection et de tri sur une liste :
+- quand la fenêtre est large, le panneau de filtre s'inscrit à droite toujours visible,
+- quand la fenêtre est étroite, le panneau apparaît disparaît sur action sur un bouton.
 
 ### État de la session
 Store : `session-store.js`
@@ -31,41 +106,10 @@ Store : `session-store.js`
 - 3 : avion
 
 #### `status`
-- `status` : 0, 1, 11, 12, 21, 22, 23, 31, 41, 42
-- `niveau` : principal - status / 10
+- 0 : non connecté,
+- 1 : connexion en cours,
+- 2 : connecté, session en cours.
 
-##### Niveau 0 - Non connecté
-Barre I :
-- status 0 : non connecté. Page : `Login`
-- status 1 : session en chargement. Page : `Chargement`
-
-##### Niveau 1 : session en cours, compte connu
-Barres I S - Onglet CA (CAT si _estComptable_
-- status 10 : pas d'onglet sélectionné. Page `Message` : _sélectionner détail du compte ou liste des avatars_
-- status 11 : onglet _Compte_ sélectionné. Page `Compte`
-- status 12 : onglet _Avatars_ sélectionné. Page `Avatars`
-- status 13 (_estComptable_) : onglet _Tribus_ sélectionné. Page `Tribus`
-
-##### Niveau 2 : avatar courant
-Barres I S A - Onglet ACGS
-- status 20 : pas d'onglet sélectionné. Page `Message` : _sélectionner détail de l'avatar, ou liste des contacts, groupes, secrets_
-- status 21 : onglet _Avatar_ sélectionné. Page `Avatar`
-- status 22 : onglet _Contacts_ sélectionné. Page `Contacts`
-- status 23 : onglet _Groupes_ sélectionné. Page `Groupes`
-- status 24 : onglet _Secrets_ sélectionné. Page `Secrets`
-
-##### Niveau 3 (c) : contact courant, avatar courant
-Barres I S A C - Onglet CS
-- status 30 : pas d'onglet sélectionné. Page `Message` : _sélectionner détail du contact, ou liste des secrets_
-- status 31 : onglet _Contact_ sélectionné. Page `Contact`
-- status 32 : onglet _Secrets_ sélectionné. Page `Secrets`
-
-##### Niveau 3 (g) : groupe courant, avatar courant
-Barres I S A G - Onglet CS
-- status 35 : pas d'onglet sélectionné. Page `Message` : _sélectionner détail du groupe, ou liste des membres, secrets_
-- status 36 : onglet _Groupe_ sélectionné. Page `Groupe`
-- status 37 : onglet _Membres_ sélectionné. Page `Membres`
-- status 38 : onglet _Secrets_ sélectionné. Page `Secrets`
 
 ### `form` : formulaire / liste
 Booléen : si `true` les pages `Contacts Groupes Membres Secrets Tribus` sont en mode _formulaire_, sinon en mode _liste_.
