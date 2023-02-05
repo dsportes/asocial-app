@@ -5,7 +5,6 @@
       <div class="row justify-between items-center">
         <bouton-help page="page3"/>
         <div class="titre-xl">{{$t('bonjour')}}</div>
-        <choix-langue style="position:relative;top:-5px"/>
       </div>
     </q-card-section>
 
@@ -79,7 +78,6 @@ import { connecterCompte, CreationCompteComptable } from '../app/connexion.mjs'
 import { PhraseContact } from '../app/modele.mjs'
 import { get } from '../app/net.mjs'
 
-import ChoixLangue from '../components/ChoixLangue.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import AcceptParrain from '../dialogues/AcceptParrain.vue'
@@ -88,7 +86,7 @@ export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Login',
 
-  components: { ChoixLangue, BoutonHelp, PhraseSecrete, AcceptParrain },
+  components: { BoutonHelp, PhraseSecrete, AcceptParrain },
 
   computed: {
     creationDemandee () { 

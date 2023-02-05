@@ -35,6 +35,8 @@ export default {
   merci: 'Merci {0}',
   contient: 'contient',
   debute: 'débute par',
+  langue: 'Choix de la langue',
+  clairfonce: 'Choix style clair / foncé',
 
   enalerte: 'En alerte',
   ensursis: 'En sursis',

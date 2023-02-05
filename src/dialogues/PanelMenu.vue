@@ -7,7 +7,6 @@
 
   <div class="column items-start">
     <div class="text-primary font-mono fs-md q-pl-md q-ma-none">{{$t('PMEbuild', [config.build])}}</div>
-    <choix-langue class="q-ml-md q-b-sm"/>
     <q-btn flat :label="$t('PMEmod')" @click="tgdark" />
     <q-btn flat :label="$t('PMEgbl')" color="primary" @click="ouvrirbases"/>
     <q-btn flat :label="$t('PMEtac')" color="primary" @click="ouvrirping"/>
@@ -25,7 +24,7 @@ import stores from '../stores/stores.mjs'
 export default ({
   name: 'PanelMenu',
 
-  components: { ChoixLangue },
+  components: { },
 
   data () {
     return {

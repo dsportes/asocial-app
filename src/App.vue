@@ -60,7 +60,10 @@
       <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" @click="drc=true">
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
       </q-btn>
-
+      <q-btn dense size="md" icon="contrast" @click="tgdark">
+        <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
+      </q-btn>
+      <bouton-langue/>
       <bouton-help page="page1"/>
     </q-toolbar>
 
@@ -244,11 +247,12 @@ import OutilsCrypto from './dialogues/OutilsCrypto.vue'
 import PanelMenu from './dialogues/PanelMenu.vue'
 import ArdoiseTribu from './dialogues/ArdoiseTribu.vue'
 import PanelCompta from './dialogues/PanelCompta.vue'
+import BoutonLangue from './components/BoutonLangue.vue'
 
 export default {
   name: 'App',
 
-  components: { BoutonHelp, TitreBanner,
+  components: { BoutonHelp, BoutonLangue, TitreBanner,
     Login, Synchro, DialogueErreur, DialogueHelp, InfoBlocage, InfoSession, RapportSynchro, OutilsCrypto,
     TestPing, GestionBases, PanelContacts, PanelMenu, ArdoiseTribu, PanelCompta,
     Page10, Page11, Page12, Page20, Page21, Page22, Page23 },
@@ -274,6 +278,7 @@ export default {
   }},
 
   methods: {
+    tgdark () { this.$q.dark.toggle() },
     deconnexion () { deconnexion() },
     async reconnexion () { await reconnexionCompte() },
 
