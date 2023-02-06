@@ -48,7 +48,7 @@ export const useUiStore = defineStore('ui', {
   actions: {
     async setPage (p) {
       this.page = null
-      await sleep(500)
+      await sleep(200)
       this.page = p
     },
     goto10 () { stores.session.status = 10; this.tabCompte = 'detailCompte' },

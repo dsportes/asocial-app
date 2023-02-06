@@ -610,7 +610,7 @@ export class ConnexionCompte extends OperationUI {
       console.log('Connexion compte : ' + this.compta.id)
       session.status = 2
       SyncQueue.traiterQueue()
-      await sleep(2000)
+      await sleep(500)
       stores.ui.setPage('accueil')
       this.finOK()
     } catch (e) {
@@ -818,7 +818,7 @@ export class CreationCompteComptable extends OperationUI {
       this.finOK()
     } catch (e) {
       await this.finKO(e)
-      await stores.ui.setPage('login')
+      stores.ui.setPage('login')
     }
   }
 }

@@ -7,17 +7,16 @@
         <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
         <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
         <q-radio dense v-model="session.mode" :val="3" :label="$t('avion')" />
-        <bouton-help class="q-ml-lg" page="page1"/>
-      </div>  
+      </div>
+    </q-card-section>
 
-      <div v-if="session.mode">
-        <phrase-secrete label-valider="LOGconn" icon-valider="send" v-on:ok-ps="onps"></phrase-secrete>
-        <div v-if="session.accesIdb">
-          <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
-            class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
-          <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
-            class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
-        </div>
+    <q-card-section v-if="!q666" :class="!session.mode ? 'disabled' : ''">
+      <phrase-secrete label-valider="LOGconn" icon-valider="send" v-on:ok-ps="onps"></phrase-secrete>
+      <div v-if="session.accesIdb">
+        <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
+          class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
+        <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
+          class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
       </div>
     </q-card-section>
   </q-card>
@@ -72,7 +71,6 @@ import { connecterCompte, CreationCompteComptable } from '../app/connexion.mjs'
 import { PhraseContact } from '../app/modele.mjs'
 import { get } from '../app/net.mjs'
 
-import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import AcceptParrain from '../dialogues/AcceptParrain.vue'
 
@@ -80,7 +78,7 @@ export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'PageLogin',
 
-  components: { BoutonHelp, PhraseSecrete, AcceptParrain },
+  components: { PhraseSecrete, AcceptParrain },
 
   computed: {
     creationDemandee () { 

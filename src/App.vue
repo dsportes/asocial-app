@@ -78,21 +78,13 @@
   </q-drawer>
 
   <q-page-container>
-    <transition appear
-      leave-active-class="animated animate__fadeOut"
+    <transition-group appear
+      leave-active-class="animated animate__slideOutLeft"
       enter-active-class="animated animate__slideInRight">
       <page-login class="page" v-if="ui.page === 'login'"/>
-    </transition>
-    <transition appear
-      leave-active-class="animated animate__fadeOut"
-      enter-active-class="animated animate__slideInRight">
       <page-session class="page" v-if="ui.page === 'session'"/>
-    </transition>
-    <transition appear
-      leave-active-class="animated animate__fadeOut"
-      enter-active-class="animated animate__slideInRight">
       <page-accueil class="page" v-if="ui.page === 'accueil'"/>
-    </transition>
+    </transition-group>
   </q-page-container>
 
   <q-dialog v-model="ui.aunmessage" seamless position="bottom">
@@ -240,19 +232,21 @@ export default {
 </script>
 
 <style lang="css">
-@import 'animate.css'
+.animate__slideInRight {
+  --animate-duration: 0.2s;
+}
+.animate__slideOutLeft {
+  --animate-duration: 0.2s;
+}
 </style>
 
 <style lang="css">
-/*
-.page {
-  animation-duration: 8s;
-}
-*/
+@import 'animate.css'
 </style>
 
 <style lang="sass" scoped>
 @import './css/app.sass'
+
 .q-toolbar
   padding: 0 !important
   min-height: 0 !important
