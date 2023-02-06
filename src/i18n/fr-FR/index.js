@@ -217,6 +217,32 @@ export default {
   LOGppinv: 'Cette phrase de parrainage n\'est plus valide',
   LOGppatt: 'Pas de parrainage en attente avec cette phrase',
 
+  // OutilsTests.vue
+  OTtit: 'Outils et tests',
+  OTcpt: 'Comptes synchronisés',
+  OTtst: 'Tests d\'accès',
+  OTps: 'Phrase secrète',
+  OTh1: 'Hash de la ligne 1',
+  OTcx: 'Clé X (PBKFD de la phrase complète)',
+  OThcx: 'Hash de la clé X',
+  OTec: 'Test d\'écho - émis: [{0}] - reçu: [{1}] - délai:{2}s',
+  OTer: 'Erreur simulée',
+  OTt1: 'Test d\'écho',
+  OTt2: 'Simulation d\'erreur',
+  // TestPing
+  TP1: 'La base n\'est pas accessible avant connexion à un compte en mode synchronisé ou avion',
+  TP2: 'Possible seulement en mode incognito ou synchronisé',
+  TP4: 'Possible seulement en mode avion ou synchronisé après connexion à un compte',
+  TPt1: 'Test des accès',
+  TPt2: 'Accès au serveur distant',
+  TPt3: 'Accès à la base sur le serveur distant',
+  TPt4: 'Accès à la base locale d\'un compte',
+  // Gestion des bases
+  GBtit: 'Gestion des bases locales',
+  GBnc: 'Aucune session ne doit être ouverte quand on veut gérer la suppression de bases locales inutiles',
+  GBnb: 'Aucune base locale trouvée',
+  GBcl: 'Cliquer sur la base à supprimer',
+  
   // DialogueHelp.vue
   HLPaide: 'Page d\'aide : ',
   HLPaidebd: 'Page d\'aide bientôt disponible',
@@ -340,13 +366,16 @@ export default {
   UTIesp: 'En savoir plus sur le blocage',
 
   // App.vue / MainLayout
-  MLAard1: 'Nouvelle information à lire sur votre ardoise de tribu.',
-  MLAard2: 'Votre ardoise de tribu a des informations (toutes déjà lues).',
-  MLAardb: 'Ardoise de tribu',
-  MLAestc: 'Compte du Comptable',
-  MLAcptn: 'Compte',
-  MLAcptp: 'Compte (parrain)',
+  Pnull: '',
+  Plogin: 'Connexion à un compte',
+  Plogin666: 'Création du compte du comptable',
+  Paccueil: 'Accueil',
+  Psession: 'Etat de la session ouverte',
+
+  MLAcptp: '(parrain)',
   MLAtri: 'Tribu : {0}',
+  MLAsfer: '(pas de compte connecté)',
+  MLAngr: '(pas de groupe sélectionné)',
   MLActc: 'Contacts',
   MLAfic: 'Fichiers-avion',
   MLAchat: 'Chat-Comptable',
@@ -451,31 +480,6 @@ export default {
   PMEras: 'Rapport de Synchronisation',
   PMEcry: 'Outils de cryptographie',
   PMEbuild: 'Build: {0}',
-
-  // TestPing
-  TP1: 'La base n\'est pas accessible avant connexion à un compte en mode synchronisé ou avion',
-  TP2: 'Possible seulement en mode incognito ou synchronisé',
-  TP4: 'Possible seulement en mode avion ou synchronisé après connexion à un compte',
-  TPt1: 'Test des accès',
-  TPt2: 'Accès au serveur distant',
-  TPt3: 'Accès à la base sur le serveur distant',
-  TPt4: 'Accès à la base locale d\'un compte',
-
-  // OutilsCrypto
-  OCtit: 'Outils de cryptography',
-  OCh1: 'Hash de la ligne 1',
-  OCcx: 'Clé X (PBKFD de la phrase complète)',
-  OChcx: 'Hash de la clé X',
-  OCec: 'Test d\'écho - émis: [{0}] - reçu: [{1}] - délai:{2}s',
-  OCer: 'Erreur simulée',
-  OCt1: 'Test d\'écho',
-  OCt2: 'Simulation d\'erreur',
-
-  // Gestion des bases
-  GBtit: 'Gestion des bases locales',
-  GBnc: 'Aucune session ne doit être ouverte quand on veut gérer la suppression de bases locales inutiles',
-  GBnb: 'Aucune base locale trouvée',
-  GBcl: 'Cliquer sur la base à supprimer',
 
   // Fiche avatar
   FAnocv: 'Pas d\'autre information',

@@ -18,7 +18,6 @@
 
 <script>
 import { useQuasar } from 'quasar'
-import ChoixLangue from '../components/ChoixLangue.vue'
 import stores from '../stores/stores.mjs'
 
 export default ({

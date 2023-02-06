@@ -1,16 +1,13 @@
 <template>
   <q-page>
-    <rapport-synchro/>
+    Page accueil
   </q-page>
 </template>
 
 <script>
-import RapportSynchro from '../components/RapportSynchro.vue'
 
 export default {
-  name: 'Sync',
-
-  components: { RapportSynchro }
+  name: 'PageAccueil',
 
 }
 </script>

@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 
 import stores from './stores.mjs'
+import { sleep } from '../app/util.mjs'
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
+    page: 'login',
     dialogueerreur: false,
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
@@ -26,7 +28,7 @@ export const useUiStore = defineStore('ui', {
     menu: false,
     rapportSynchro: false,
     rapportSynchroMenu: false,
-    outilsCrypto: false,
+    outilsTests: false,
     nouvelAvatar: false,
     repartirForfaits: false,
     choixEmoji: false,
@@ -44,6 +46,11 @@ export const useUiStore = defineStore('ui', {
   },
 
   actions: {
+    async setPage (p) {
+      this.page = null
+      await sleep(500)
+      this.page = p
+    },
     goto10 () { stores.session.status = 10; this.tabCompte = 'detailCompte' },
     goto11 () { stores.session.status = 11; this.tabCompte = 'listeAvatars' },
     goto12 () { stores.session.status = 12; this.tabCompte = 'listeTribus' },

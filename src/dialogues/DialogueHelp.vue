@@ -10,7 +10,6 @@
           <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
         </q-btn>
         <q-toolbar-title class="titre-lg">{{titre(pagec())}}</q-toolbar-title>
-        <choix-langue style="position:relative;top:-5px"/>
       </q-toolbar>
     </q-header>
 
@@ -39,12 +38,11 @@ import { useI18n } from 'vue-i18n'
 import stores from '../stores/stores.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
-import ChoixLangue from '../components/ChoixLangue.vue'
 
 export default ({
   name: 'DialogueHelp',
 
-  components: { ChoixLangue, ShowHtml },
+  components: { ShowHtml },
 
   data () {
     return {

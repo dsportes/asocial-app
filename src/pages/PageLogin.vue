@@ -1,12 +1,6 @@
 <template>
 <q-page class="column align-start items-center">
   <q-card flat class="q-ma-xs petitelargeur fs-md column justify-center">
-    <q-card-section>
-      <div class="row justify-between items-center">
-        <bouton-help page="page3"/>
-        <div class="titre-xl">{{$t('bonjour')}}</div>
-      </div>
-    </q-card-section>
 
     <q-card-section v-if="!q666">
       <div class="q-gutter-md row justify-center">
@@ -84,7 +78,7 @@ import AcceptParrain from '../dialogues/AcceptParrain.vue'
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Login',
+  name: 'PageLogin',
 
   components: { BoutonHelp, PhraseSecrete, AcceptParrain },
 
@@ -110,8 +104,8 @@ export default {
   },
 
   methods: {
-    async onps (phrase) {
-      await connecterCompte(phrase, this.razdb)
+    onps (phrase) {
+      connecterCompte(phrase, this.razdb)
     },
     crypterphrase () {
       if (!this.phrase) return

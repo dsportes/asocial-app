@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
-import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash } from './util.mjs'
+import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { DateJour, IDCOMPTABLE } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, NomAvatar, NomTribu, setNg, getNg } from './modele.mjs'
@@ -23,6 +23,7 @@ export function deconnexion (garderMode) {
   if (garderMode) session.mode = mode
   SyncQueue.reset()
   if (session.fsSync) session.fsSync.close()
+  stores.ui.setPage('login')
 }
 
 export async function reconnexionCompte () {
@@ -420,7 +421,6 @@ export class ConnexionCompte extends OperationUI {
     }
 
     await this.getCTA()
-
     if (session.accesIdb && !session.nombase) await session.setNombase() // maintenant que la cle K est connue
 
     if (session.synchro) {
@@ -453,6 +453,8 @@ export class ConnexionCompte extends OperationUI {
   /** run **********************************************************/
   async run () {
     try {
+      await stores.ui.setPage('session')
+
       // session synchronisée ou incognito
       const session = stores.session
       const avStore = stores.avatar
@@ -606,12 +608,14 @@ export class ConnexionCompte extends OperationUI {
       // enregistre l'heure du début effectif de la session
       if (session.synchro) await session.sessionSync.setConnexion(this.dh)
       console.log('Connexion compte : ' + this.compta.id)
-      session.statut = 2
+      session.status = 2
       SyncQueue.traiterQueue()
+      await sleep(2000)
+      stores.ui.setPage('accueil')
       this.finOK()
-      stores.ui.goto11()
     } catch (e) {
       await this.finKO(e)
+      stores.ui.setPage('login')
     }
   }
 }
@@ -767,6 +771,7 @@ export class CreationCompteComptable extends OperationUI {
 
   async run (phrase) {
     try {
+      await stores.ui.setPage('session')
       const session = stores.session
       const config = stores.config
       const ac = config.allocComptable
@@ -807,12 +812,13 @@ export class CreationCompteComptable extends OperationUI {
       }
 
       console.log('Connexion compte : ' + na.id)
-      session.statut = 2
+      session.status = 2
       SyncQueue.traiterQueue()
+      stores.ui.setPage('accueil')
       this.finOK()
-      stores.ui.goto11()
     } catch (e) {
-      this.finKO(e)
+      await this.finKO(e)
+      await stores.ui.setPage('login')
     }
   }
 }

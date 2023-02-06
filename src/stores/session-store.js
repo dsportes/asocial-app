@@ -47,6 +47,7 @@ export const useSessionStore = defineStore('session', {
     compte (state) { return stores.avatar.compte },
     compta (state) { return stores.avatar.compta },
     tribu (state) { return stores.avatar.tribu },
+    groupe (state) { return stores.groupe.getGroupe(state.groupeId)},
 
     niveau (state) { return Math.floor(state.status / 10) },
     synchro (state) { return state.mode === 1 },

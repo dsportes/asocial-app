@@ -46,6 +46,7 @@ export const useConfigStore = defineStore('config', {
 
   actions: {
     setConfig(cfg, search) {
+      this.debug = true // cfg.debug
       this.search = search && search.length > 1 ? search.substring(1) : ''
       this.localeOptions = cfg.localeOptions
       this.locale = cfg.locale
@@ -63,7 +64,6 @@ export const useConfigStore = defineStore('config', {
       this.lgnom = cfg.lgnom || 16
       this.lgtitre = cfg.lgtitre || 50
       this.build = cfg.build
-      this.debug = cfg.debug
       this.dev = cfg.dev
       this.urlwss = cfg.urlwss
       this.urlserveur = cfg.urlserveur

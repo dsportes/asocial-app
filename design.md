@@ -10,19 +10,24 @@ Deux zones :
 - `header` : zone fixe en haut
   - barre _Avatar_ :
     - nom de l'avatar courant: un clic ouvre le panneau droit de détail de l'avatar
-    - 5 icônes ouvrant :
+    - 7 icônes ouvrant :
       - la page `blocage`,
       - la page `session` et rappelant le mode de la session (synchronisé, incognito, avion),
       - la boîte de dialogue `deconnexion`
+      - `outils` : ouvre une boîte de dialogue `outils`,
+        - de gestion des bases locales pour chaque compte ayant accédé en mode synchro à l'application.
+        - de test des accès au serveur et à la base locale, d'une opération d'écho et d'une opération en erreur,
+        - de test des phrases secrètes.
+      - **de switch entre les modes** clair et foncé,
+      - **de choix de la langue**,
       - le panneau gauche `aide`.
   - barre _Groupe_ : 
     - nom du groupe courant (quand il y en a un): un clic ouvre le panneau droit de détail de l'avatar,
-    - choix du mode clair / foncé
-    - bouton de choix de la langue.
-  - barre _Titre de la page_ : 
-    - pour certaines pages, un _bloc de navigation_,
+  - barre _Titre de la page_ :
+    - une icône de retour à l'accueil (sauf pour la page `accueil`)
+    - pour les pages affichant une liste longue, un _bloc de navigation_,
     - le titre de la page courante,
-    - une icône de fermeture de la page et retour à l'accueil (sauf pour la page `accueil`)
+    - pour les pages affichant une liste longue, un bouton ouvrant le panneau droite de filtre,
     - une icône d'ouverture du panneau gauche d'aide.
 - `page-container` : page courante.
 
@@ -39,7 +44,10 @@ Quand la session est en état :
 - 2 : connecté, toutes les autres pages, celle _par défaut_ étant `accueil`.
 
 #### Page `login`
-Page proposant le dialogue de connexion. Elle n'est visible que quand la session n'est pas connectée.
+Page proposant le dialogue de connexion.
+- elle n'est visible que quand la session n'est pas connectée.
+- elle permet d'accepter un sponsoring pour un nouveau compte.
+- sur option `?666` dans l'URL elle propose la création du compte du comptable.
 
 #### Page `session`
 Elle affiche l'état de la session. Elle est visible :
@@ -49,7 +57,7 @@ Elle affiche l'état de la session. Elle est visible :
 Elle affiche l'état courant du chargement de la session : une fois la session ouverte (statut 2) cet état est constant.
 
 #### Page `accueil`
-Elle comporte quatre groupes de boutons ouvrant des pages ou des panneaux gauches ou droits :
+Elle comporte trois groupes de boutons ouvrant des pages ou des panneaux gauches ou droits :
 
 **Groupe 1, relatif à la session :**
 - `deconnexion` : ouvre le dialogue de confirmation de la demande déconnexion,
@@ -78,23 +86,14 @@ Elle comporte quatre groupes de boutons ouvrant des pages ou des panneaux gauche
 - `secrets` : ouvre la page grsecrets listant les secrets du groupe,
 - `membres` : ouvre la page membres listant les membres du groupe,
 
-**Groupe 4, préférences et outils**
-- `baseslocales` : ouvre une boîte de dialogue `baseslocales` de gestion des bases locales au poste gérant les sessions synchronisées et avion.
-- `outils` : ouvre une boîte de dialogue `outils`,
-  - de test des accès au serveur et à la base locale, 
-  - de test d'une opération d'écho et d'une opération en erreur,
-  - de test des phrases secrètes.
-
-Le **Groupe 4** se retrouve aussi en bas de la page de login.
-
 #### Pages en mode formulaire / liste, filtre
 Les pages `mesgroupes groupes membres avsecrets grsecrets secretsrecents toutestribus` peuvent basculer entre les modes _formulaire_ et _liste_.
 - en mode liste, tous les items sont listés,
 - en mode formulaire, un seul item est listé et une barre de navigation permet de passer aux items précédent, suivant, premier, dernier
 
-Un **filtre** est un panneau qui permet de définir des critères et sélection et de tri sur une liste :
-- quand la fenêtre est large, le panneau de filtre s'inscrit à droite toujours visible,
-- quand la fenêtre est étroite, le panneau apparaît disparaît sur action sur un bouton.
+Un **filtre** est un panneau latéral droite qui offre le choix de paramètres de sélection et de tri pour l'une des listes ci-dessus :
+- quand la fenêtre est large, le panneau de filtre est automatiquement visible,
+- quand la fenêtre est étroite, le panneau apparaît / disparaît sur action sur le bouton `filtre`.
 
 ### État de la session
 Store : `session-store.js`
