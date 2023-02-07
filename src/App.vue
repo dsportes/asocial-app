@@ -4,6 +4,14 @@
     <q-toolbar>
       <bouton-help page="page1"/>
 
+      <bouton-langue/>
+      <q-btn dense size="md" icon="contrast" @click="tgdark">
+        <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
+      </q-btn>
+      <q-btn dense size="md" icon="settings" @click="ui.outilsTests = true">
+        <q-tooltip>{{$t('MLAout')}}</q-tooltip>
+      </q-btn>
+
       <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession"
         dense size="md" icon="autorenew" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
@@ -20,7 +28,7 @@
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-btn>
 
-      <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" @click="drc = true">
+      <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" @click="ui.dialoguedrc = true">
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
       </q-btn>
 
@@ -30,22 +38,15 @@
         @click="infoBlocage()"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-md">
-        <span v-if="session.ok">{{session.compte.na.nomc}}</span>
+        <span v-if="session.ok">{{session.avC.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
       </q-toolbar-title>
+
     </q-toolbar>
 
     <q-toolbar inset>
-      <bouton-langue/>
-      <q-btn dense size="md" icon="contrast" @click="tgdark">
-        <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
-      </q-btn>
-      <q-btn flat dense size="md" icon="settings" @click="ui.outilsTests = true">
-        <q-tooltip>{{$t('MLAout')}}</q-tooltip>
-      </q-btn>
-
       <q-toolbar-title class="titre-lg text-right cursor-pointer q-mx-md">
-        <span v-if="session.groupeId">{{session.groupe.na.nomc}}</span>
+        <span v-if="session.groupeId">{{session.grC.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAngr')}}</span>
       </q-toolbar-title>
     </q-toolbar>
@@ -79,17 +80,17 @@
     </div>
   </q-dialog>
 
-  <q-dialog v-model="drc">
+  <q-dialog v-model="ui.dialoguedrc">
     <q-card  class="q-ma-xs petitelargeur">
       <q-card-section>
         <div class="titre-lg">{{$t('MLAdrc')}}</div>
       </q-card-section>
       <q-card-actions vertical align="center">
-        <q-btn dense size="md" color="warning"
+        <q-btn class="w15" dense size="md" color="warning"
           icon="logout" :label="$t('MLAdecon')" @click="deconnexion" v-close-popup/>
-        <q-btn class="q-ma-xs" dense size="md" color="warning"
+        <q-btn class="q-ma-xs w15" dense size="md" color="warning"
           icon="logout" :label="$t('MLArecon')" @click="reconnexion" v-close-popup/>
-        <q-btn class="q-ma-xs" dense size="md" color="primary"
+        <q-btn class="q-ma-xs w15" dense size="md" color="primary"
           :label="$t('MLAcont')" v-close-popup/>
       </q-card-actions>
     </q-card>

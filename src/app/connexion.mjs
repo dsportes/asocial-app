@@ -15,9 +15,10 @@ import { openWS, closeWS } from './ws.mjs'
 /* garderMode : si true, garder le mode */
 export function deconnexion (garderMode) {
   const session = stores.session
+  const config = stores.config
   const mode = session.mode
   if (session.accesIdb) closeIDB()
-  if (session.accesNet) closeWS()
+  if (session.accesNet && !config.fsSync) closeWS()
   stores.reset()
   session.$reset()
   if (garderMode) session.mode = mode
@@ -35,9 +36,10 @@ export async function reconnexionCompte () {
 
 async function initSession (phrase) {
   const session = stores.session
+  const config = stores.config
   session.init(phrase)
   if (session.accesNet) {
-    if (!stores.config.fsSync) {
+    if (!config.fsSync) {
       await openWS()
       session.fsSync = null
     } else {
@@ -421,6 +423,8 @@ export class ConnexionCompte extends OperationUI {
     }
 
     await this.getCTA()
+    session.avatarId = session.compteId
+
     if (session.accesIdb && !session.nombase) await session.setNombase() // maintenant que la cle K est connue
 
     if (session.synchro) {
@@ -442,8 +446,10 @@ export class ConnexionCompte extends OperationUI {
 
   async phase0Avion () {
     // session.compteId et session.clek OK
+    const session = stores.session
     this.rowAvatar = await getAvatarPrimaire()
-    this.avatar = await compile(this.rowAvatar) 
+    this.avatar = await compile(this.rowAvatar)
+    session.avatarId = session.compteId
     this.rowCompta = await getCompta()
     this.compta = await compile(this.rowCompta) 
     this.rowTribu = await getTribu(this.compta.idt)
@@ -790,6 +796,7 @@ export class CreationCompteComptable extends OperationUI {
 
       session.compteId = na.id
       session.tribuId = nt.id
+      session.avatarId = session.compteId
       session.estComptable = true
 
       const rowAvatar = await Avatar.primaireRow (na, kpav.privateKey, kpav.publicKey, nt, true)

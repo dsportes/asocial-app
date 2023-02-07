@@ -47,18 +47,17 @@ export const useSessionStore = defineStore('session', {
     compte (state) { return stores.avatar.compte },
     compta (state) { return stores.avatar.compta },
     tribu (state) { return stores.avatar.tribu },
-    groupe (state) { return stores.groupe.getGroupe(state.groupeId)},
+
+    // Avatar et groupes courants
+    avC (state) { return stores.avatar.getAvatar(state.avatarId) },
+    grC (state) { return stores.groupe.getGroupe(state.groupeId)},
 
     synchro (state) { return state.mode === 1 },
     incognito (state) { return state.mode === 2 },
     avion (state) { return state.mode === 3 },
     accesNet (state) { return state.mode === 1 || state.mode === 2},
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
-    ok (state) { return state.status > 1 },
-
-    // Avatar courant
-    avC (state) { return stores.avatar.getAvatar(state.avatarId) },
-
+    ok (state) { return state.status > 1 }
   },
 
   actions: {

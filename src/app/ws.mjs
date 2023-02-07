@@ -10,7 +10,7 @@ function dhtToString (dht) {
 }
 
 
-let url, pongrecu, debug, heartBeatTo, ws, exc, closeparsession = false, job = false
+let url, pongrecu, debug, heartBeatTo, ws, exc, job = false
 
 function reset () {
   url = ''
@@ -19,7 +19,6 @@ function reset () {
   heartBeatTo = null
   ws = null
   exc = null
-  closeparsession = false
 }
 
 // // 'Erreur à l\'ouverture de la connexion avec le serveur ( {0} ).\nDétail: {1}',
@@ -37,19 +36,16 @@ function EX3 () { return new AppExc(E_WS, 3, [url])}
 // 'ping / pong : pong non reçu ( {0} ).',
 function EX4 () { return new AppExc(E_WS, 4, [url]) }
 
-export function closeWS (e) {
-  closeparsession = true
-  if (e) {
-    setExc(e)
-  } else {
-    if (ws) { try { ws.close() } catch (e) {} }
-  }
+export function closeWS () {
+  if (heartBeatTo) { clearTimeout(heartBeatTo); heartBeatTo = null }
+  if (ws) { try { ws.close(); } catch (e) { } }
 }
 
 function setExc (e) {
   console.log('Exception ws : ' + e.code + ' wss: ' + url)
-  exc = e
-  if (ws) { try { ws.close() } catch (e) {} }
+  if (heartBeatTo) { clearTimeout(heartBeatTo); heartBeatTo = null }
+  if (ws) { try { ws.close(); } catch (e) { } }
+  if (stores.session.status > 0) stores.ui.afficherExc(e) // pas de await !
 }
 
 export async function openWS () {
@@ -57,9 +53,11 @@ export async function openWS () {
   const config = stores.config
   debug = config.debug
   const session = stores.session
+  const sessionId = session.sessionId
   return new Promise((resolve, reject) => {
     try {
       url = config.urlwss
+      exc = null
       if (debug) console.log('wss: ' + url)
       if (heartBeatTo) { clearTimeout(heartBeatTo); heartBeatTo = null }
       ws = new WebSocket(url)
@@ -68,13 +66,12 @@ export async function openWS () {
         reject()
       }
       ws.onclose = () => {
-        if (!closeparsession) {
-          // fermeture du webSocket par le serveur
-          exc = EX3()
+        if (session.sessionId === sessionId) {
+          /* fermeture du webSocket par le serveur ou par défaut de pong (exc non null)
+          alors que la session est encore vivante */
+          if (heartBeatTo) { clearTimeout(heartBeatTo); heartBeatTo = null }
+          if (stores.session.status > 0) stores.ui.afficherExc(exc || EX3()) // pas de await !
         }
-        ws = null
-        if (heartBeatTo) { clearTimeout(heartBeatTo); heartBeatTo = null }
-        if (exc && session.status > 0) stores.ui.afficherExc(exc) // pas de await !
       }
       ws.onmessage = onmessage
       ws.onopen = (event) => {

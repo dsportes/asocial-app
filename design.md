@@ -61,7 +61,6 @@ Elle comporte trois groupes de boutons ouvrant des pages ou des panneaux gauches
 
 **Groupe 1, relatif à la session :**
 - `deconnexion` : ouvre le dialogue de confirmation de la demande déconnexion,
-- `aide` : ouvre le panneau gauche d'aide,
 - `session` : ouvre la page `session`,
 - `toutestribus`: pour le comptable seulement ouvre la page `toutestribus` listant toutes les tribus,
 - `mesavatars` : ouvre la page `mesavatars` listant les avatars du compte,

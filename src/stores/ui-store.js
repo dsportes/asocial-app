@@ -17,8 +17,7 @@ export const useUiStore = defineStore('ui', {
     message: null,
     aunmessage: false,
 
-    tabCompte: 'listeAvatars',
-    tabAvatar: 'detailAvatar',
+    dialoguedrc: false,
 
     panelContacts: false,
     fichiersAvion: false,
@@ -50,37 +49,6 @@ export const useUiStore = defineStore('ui', {
       this.page = null
       await sleep(200)
       this.page = p
-    },
-    goto10 () { stores.session.status = 10; this.tabCompte = 'detailCompte' },
-    goto11 () { stores.session.status = 11; this.tabCompte = 'listeAvatars' },
-    goto12 () { stores.session.status = 12; this.tabCompte = 'listeTribus' },
-    
-    goto20 (avid) {
-      const session = stores.session
-      if (avid) session.avatarId = avid
-      session.status = 20
-      this.tabAvatar = 'detailAvatar'
-    },
-
-    goto21 (avid) {
-      const session = stores.session
-      if (avid) session.avatarId = avid
-      session.status = 21
-      this.tabAvatar = 'listeSecrets'
-    },
-
-    goto22 (avid) {
-      const session = stores.session
-      if (avid) session.avatarId = avid
-      session.status = 22
-      this.tabAvatar = 'listeContacts'
-    },
-
-    goto23 (avid) {
-      const session = stores.session
-      if (avid) session.avatarId = avid
-      session.status = 23
-      this.tabAvatar = 'listeGroupes'
     },
 
     afficherMessage (texte, important) {
