@@ -68,6 +68,7 @@ Elle comporte trois groupes de boutons ouvrant des pages ou des panneaux gauches
 - `mesgroupes` : ouvre la page `mesgroupes` listant tous les groupes dont au moins un des avatars du compte est membre,
 - `mescontacts` : ouvre le panneau droit `mescontacts` listant tous les contacts du compte,
 - `matribu` : ouvre la page `matribu`,
+- `macompta` : ouvre la page `macompta`,
 - `messponsorings` : ouvre la page `messponsorings` listant les sponsorings en cours pour tous les avatars du compte,
 - `secretsrecents` : ouvre la page `secretsrecents` listant les secrets des groupes ayant été créés / modifiés récemment,
 - `fichiersavion` : ouvre la page `fichiersavion` listant les fichiers accessibles en mode avion (modes synchronisé et avion),

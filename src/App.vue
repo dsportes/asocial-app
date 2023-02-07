@@ -3,26 +3,19 @@
   <q-header elevated>
     <q-toolbar>
       <bouton-help page="page1"/>
-      <bouton-langue/>
-      <q-btn dense size="md" icon="contrast" @click="tgdark">
-        <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
-      </q-btn>
-      <q-btn flat dense size="md" icon="settings" @click="ui.outilsTests = true">
-        <q-tooltip>{{$t('PMEtit')}}</q-tooltip>
-      </q-btn>
 
-      <q-btn class="q-mr-xs" v-if="session.synchro" @click="ui.infoSession = true"
+      <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession"
         dense size="md" icon="autorenew" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-btn>
 
-      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito"  @click="ui.infoSession = true"
+      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito"  @click="infoSession"
         size="sm" square color="primary">
         <img src="~assets/incognito_blanc.svg">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-avatar>
 
-      <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="ui.infoSession = true"
+      <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession"
         dense size="md" icon="airplanemode_active" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-btn>
@@ -36,19 +29,21 @@
         :color="['','warning','warning','negative','negative'][session.blocage]" 
         @click="infoBlocage()"/>
 
-      <q-toolbar-title class="titre-lg text-right cursor-pointer q-mx-md">
-        <span v-if="session.ok">
-          <span>{{session.compte.na.nomc}}</span>
-          <!--
-          <span class="titre-md q-mr-xs">{{$t('MLAtri', [session.compte.nct.nom])}}</span>
-          -->
-          <span v-if="session.compte.estParrain" class="titre-md q-mr-xs">{{$t('MLAcptp')}}</span>
-        </span>
+      <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-md">
+        <span v-if="session.ok">{{session.compte.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
       </q-toolbar-title>
     </q-toolbar>
 
     <q-toolbar inset>
+      <bouton-langue/>
+      <q-btn dense size="md" icon="contrast" @click="tgdark">
+        <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
+      </q-btn>
+      <q-btn flat dense size="md" icon="settings" @click="ui.outilsTests = true">
+        <q-tooltip>{{$t('MLAout')}}</q-tooltip>
+      </q-btn>
+
       <q-toolbar-title class="titre-lg text-right cursor-pointer q-mx-md">
         <span v-if="session.groupeId">{{session.groupe.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAngr')}}</span>
@@ -57,21 +52,11 @@
 
     <q-toolbar inset class="bg-secondary text-white">
       <bouton-help page="page1"/>
+      <q-btn :disable="!aHome" flat icon="home" size="md" :color="aHome ? 'warning' : ''" dense @click="gotoAccueilLogin"/>
       <q-toolbar-title class="titre-lg text-center cursor-pointer q-mx-md">
         {{$t('P' + ui.page)}}
       </q-toolbar-title>
     </q-toolbar>
-<!--
-    <q-toolbar style="max-height:1.3rem;" v-if="session.niveau > 1" inset :class="tbclass">
-      <q-btn dense icon="play_arrow" class="play" :color="session.niveau === 2 ? 'grey-5' : 'green-5'"
-        :disable="session.niveau === 2" @click="ui.goto20"/>
-      <q-toolbar-title class="q-pl-md titre-md row items-center no-wrap">
-        <span class="titre-md q-px-sm">{{$t('avatar')}}</span>
-        <titre-banner class-titre="titre-md" :titre="nomcAv" :id-objet="session.avC.id"/>
-        <span class="titre-md q-ml-sm">{{titreAv}}</span>
-      </q-toolbar-title>
-    </q-toolbar>
--->
   </q-header>
 
   <q-drawer v-model="ui.menu" show-if-above side="right" bordered>
@@ -173,6 +158,8 @@ export default {
 
   computed: {
     tbclass () { return this.$q.dark.isActive ? ' sombre1' : ' clair1' },
+    aHome () { return (this.session.status > 1 && this.ui.page !== 'accueil')
+      || (!this.session.status && this.ui.page !== 'login') },
     maCompta () { return this.session.compta },
     naMaTribu () { return this.session.compte.nct }
   },
@@ -185,6 +172,10 @@ export default {
 
   methods: {
     tgdark () { this.$q.dark.toggle() },
+    infoSession () { this.ui.setPage('session') },
+    gotoAccueilLogin () {
+      this.ui.setPage(this.session.status > 1 ? 'accueil' : 'login')
+    },
     deconnexion () { deconnexion() },
     async reconnexion () { await reconnexionCompte() },
 

@@ -1,22 +1,28 @@
 <template>
-  <q-card class="moyennelargeur fs-md">
-    <q-toolbar class="bg-secondary text-white">
+<q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
+  <q-header elevated class="bg-secondary text-white">
+    <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="ui.outilsTests = false"/>
-      <q-toolbar-title class="titre-lg q-ml-sm">{{$t('OTtit')}}</q-toolbar-title>
+      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('OTtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar class="bg-secondary text-white">
-      <q-tabs v-model="tab" inline-label no-caps dense>
+    <q-toolbar inset>
+      <q-tabs v-model="tab" inline-label outside-arrows mobile-arrows no-caps class="full-width">
         <q-tab name="tst" :label="$t('OTtst')" @click="tab='tst'"/>
         <q-tab name="cpt" :label="$t('OTcpt')" @click="tab='cpt'"/>
         <q-tab name="ps" :label="$t('OTps')" @click="tab='ps'"/>
       </q-tabs>
     </q-toolbar>
+  </q-header>
+
+  <q-page-container>
+    <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.build])}}</div>
 
     <q-card-section v-if="tab === 'tst'">
-      <div class="q-ma-sm"><q-btn flat :label="$t('OTt1')" @click="testEcho"/></div>
-      <div class="q-ma-sm"><q-btn flat :label="$t('OTt2')" @click="testErr"/></div>
+      <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt1')" @click="testEcho"/>
+      <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt2')" @click="testErr"/>
     </q-card-section>
+
     <q-card-section v-if="tab === 'tst'">
       <div class="titre-lg">{{$t('TPt2')}}</div>
       <div v-if="session.accesNet" class="q-ml-md">
@@ -26,6 +32,7 @@
       </div>
       <div v-else class="q-ml-md text-italic">{{$t('TP2')}}</div>
     </q-card-section>
+
     <q-card-section v-if="tab === 'tst'">
       <div class="titre-lg">{{$t('TPt3')}}</div>
       <div v-if="session.accesNet" class="q-ml-md">
@@ -35,6 +42,7 @@
       </div>
       <div v-else class="q-ml-md text-italic">{{$t('TP2')}}</div>
     </q-card-section>
+
     <q-card-section v-if="tab === 'tst'">
       <div class="titre-lg">{{$t('TPt4')}}</div>
       <div v-if="session.ok && session.accesNet" class="q-ml-md">
@@ -77,37 +85,38 @@
         </div>
       </div>
     </q-card-section>
+  </q-page-container>
 
-    <q-dialog v-model="running">
-      <q-card>
-        <div class="column items-center">
-          <q-spinner-hourglass persistent color="primary" size="3rem" @click="running=false"/>
-          <div class="fs-md font-mono q-mt-md">{{session.volumeTable}}</div>
+  <q-dialog v-model="running">
+    <q-card>
+      <div class="column items-center">
+        <q-spinner-hourglass persistent color="primary" size="3rem" @click="running=false"/>
+        <div class="fs-md font-mono q-mt-md">{{session.volumeTable}}</div>
+      </div>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="suppbase">
+    <q-card>
+      <q-card-section>
+        <div class="titre-lg">Propriétaire: {{itdel.trig}}</div>
+        <div class="fs-sm font-mono">Nom de la base: {{itdel.nb}}</div>
+        <div v-if="!itdel.dpbh.length" class="titre-md text-bold bg-yellow-5 text-negative">
+          Cette base ne peut PLUS être accédée : elle peut être supprimée sans risque
         </div>
-      </q-card>
-    </q-dialog>
+        <div v-if="itdel.dpbh.length > 1" class="titre-md text-bold text-warning">
+          Cette base peut être accédée par 2 phrases secrètes, probablement la dernière et une ancienne.
+        </div>
+      </q-card-section>
+      <q-card-actions>
+        <q-btn dense label="Je conserve la base" color="primary" v-close-popup/>
+        <q-btn dense label="Je supprime la base" icon="delete" color="warning"
+          @click="deleteIDB(itdel.nb)" v-close-popup/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 
-    <q-dialog v-model="suppbase">
-      <q-card>
-        <q-card-section>
-          <div class="titre-lg">Propriétaire: {{itdel.trig}}</div>
-          <div class="fs-sm font-mono">Nom de la base: {{itdel.nb}}</div>
-          <div v-if="!itdel.dpbh.length" class="titre-md text-bold bg-yellow-5 text-negative">
-            Cette base ne peut PLUS être accédée : elle peut être supprimée sans risque
-          </div>
-          <div v-if="itdel.dpbh.length > 1" class="titre-md text-bold text-warning">
-            Cette base peut être accédée par 2 phrases secrètes, probablement la dernière et une ancienne.
-          </div>
-        </q-card-section>
-        <q-card-actions>
-          <q-btn dense label="Je conserve la base" color="primary" v-close-popup/>
-          <q-btn dense label="Je supprime la base" icon="delete" color="warning"
-            @click="deleteIDB(itdel.nb)" v-close-popup/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-  </q-card>
+</q-layout>
 </template>
 
 <script>
@@ -128,6 +137,10 @@ export default ({
   name: 'OutilsTests',
 
   components: { PhraseSecrete, BoutonHelp },
+
+  computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
+  },
 
   data () {
     return {
@@ -224,6 +237,7 @@ export default ({
 
   setup () {
     const session = stores.session
+    const config = stores.config
     const ui = stores.ui
     const bases = {}
     const nbbases = ref(0)
@@ -285,6 +299,7 @@ export default ({
 
     return {
       session,
+      config,
       ui,
       bases,
       nbbases,

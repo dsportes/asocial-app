@@ -209,16 +209,17 @@ export default {
   '<BR>Les fichiers attachés aux secrets conservés sur cet appareil ne seront plus accessibles en mode avion',
 
   LOGconn: 'Se Connecter',
-  LOGpar: 'Un parrain vous a communiqué une phrase secrète pour créer vous-même votre compte ?',
-  LOGphr: 'Phrase communiquée par le parrain',
+  LOGpar: 'Un sponsor vous a communiqué une phrase secrète pour créer vous-même votre compte ?',
+  LOGphr: 'Phrase communiquée par le sponsor',
   LOGcrea: 'Je créé mon compte ...',
   LOGcc: 'Création du compte du Comptable',
-  LOGnopp: 'Cette phrase de parrainage est introuvable',
-  LOGppinv: 'Cette phrase de parrainage n\'est plus valide',
-  LOGppatt: 'Pas de parrainage en attente avec cette phrase',
+  LOGnopp: 'Cette phrase de sponsoring est introuvable',
+  LOGppinv: 'Cette phrase de sponsoring n\'est plus valide',
+  LOGppatt: 'Pas de sponsoring en attente avec cette phrase',
 
   // OutilsTests.vue
   OTtit: 'Outils et tests',
+  OTbuild: 'Build: {0}',
   OTcpt: 'Comptes synchronisés',
   OTtst: 'Tests d\'accès',
   OTps: 'Phrase secrète',
@@ -376,6 +377,7 @@ export default {
   MLAtri: 'Tribu : {0}',
   MLAsfer: '(pas de compte connecté)',
   MLAngr: '(pas de groupe sélectionné)',
+  MLAout: 'Outils et tests techniques',
   MLActc: 'Contacts',
   MLAfic: 'Fichiers-avion',
   MLAchat: 'Chat-Comptable',
@@ -430,7 +432,7 @@ export default {
   ISsy3: 'Début de celle en cours',
   ISsy4: 'Dernière synchronisation',
   ISsy5: 'Dernier signe de vie du serveur',
-  ISnc: 'Information disponible seulement après connexion',
+  ISnc: 'Information disponible seulement après connexion en mode synchronisé ou avion',
 
   // PanelContacts
   PCnom: "Nom ...",
@@ -479,7 +481,7 @@ export default {
   PMEtac: 'Tests d\'accès',
   PMEras: 'Rapport de Synchronisation',
   PMEcry: 'Outils de cryptographie',
-  PMEbuild: 'Build: {0}',
+
 
   // Fiche avatar
   FAnocv: 'Pas d\'autre information',

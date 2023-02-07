@@ -1,31 +1,29 @@
 <template>
 <q-page class="column align-start items-center">
-  <q-card flat class="q-ma-xs petitelargeur fs-md column justify-center">
 
-    <q-card-section v-if="!q666">
-      <div class="q-gutter-md row justify-center">
-        <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
-        <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
-        <q-radio dense v-model="session.mode" :val="3" :label="$t('avion')" />
-      </div>
-    </q-card-section>
+  <q-card v-if="!q666" class="q-mt-md petitelargeur fs-md column justify-center">
+    <div class="q-gutter-md row justify-center full-width">
+      <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
+      <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
+      <q-radio dense v-model="session.mode" :val="3" :label="$t('avion')" />
+    </div>
 
-    <q-card-section v-if="!q666" :class="!session.mode ? 'disabled' : ''">
+    <div :class="'full-width q-pa-sm ' + (!session.mode ? 'disabled' : '')">
       <phrase-secrete label-valider="LOGconn" icon-valider="send" v-on:ok-ps="onps"></phrase-secrete>
-      <div v-if="session.accesIdb">
+      <div :class="!session.synchro ? 'disabled' : ''">
         <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
           class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
         <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
           class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
       </div>
-    </q-card-section>
-  </q-card>
+    </div>
 
-  <q-card v-if="!q666 && (session.accesNet)" class="q-mt-lg petitelargeur column items-start">
-    <div class="titre-md">{{$t('LOGpar')}}</div>
-    <q-btn v-if="!creationDemandee" flat color="warning" icon="add_circle" :label="$t('LOGcrea')" @click="btncd=true"/>
-    <div v-else>
-      <q-card-section class="petitelargeur">
+    <q-separator class="q-my-md"/>
+
+    <div :class="'full-width q-pa-sm column items-start' + (!session.accesNet ? ' disabled' : '')">
+      <div class="titre-md">{{$t('LOGpar')}}</div>
+      <q-btn v-if="!btncd" flat dense color="warning" icon="add_circle" :label="$t('LOGcrea')" @click="btncd = true"/>
+      <div v-else class="full-width">
         <q-input class="full-width" dense v-model="phrase" :label="$t('LOGphr')"
           @keydown.enter.prevent="crypterphrase" :type="isPwd ? 'password' : 'text'"
           :hint="$t('entree')">
@@ -38,24 +36,19 @@
         <div v-if="encours" class="fs-md text-italic text-primary">{{$t('cryptage')}}
           <q-spinner color="primary" size="2rem" :thickness="3" />
         </div>
-      </q-card-section>
+      </div>
     </div>
+  </q-card>
+
+  <q-card v-if="q666" class="q-mt-md petitelargeur fs-md column justify-center">
+    <div class="titre-lg text-center">{{$t('LOGcc')}}</div>
+    <phrase-secrete class="q-my-md" :init-val="phrase" v-on:ok-ps="creercc"
+      icon-valider="check" label-valider="creer"/>
   </q-card>
 
   <q-dialog v-model="dialcp">
     <AcceptParrain :couple="coupleloc" :datactc="datactc" :clepubc="clepubc" :phch="phch" :close="fermerap" />
   </q-dialog>
-
-  <q-card v-if="q666" class="q-ma-xs moyennelargeur fs-md">
-    <q-card-section class="column items-center">
-      <div class="titre-lg text-center">{{$t('LOGcc')}}</div>
-    </q-card-section>
-
-    <q-card-section>
-      <phrase-secrete class="q-ma-xs" :init-val="phrase" v-on:ok-ps="creercc"
-        icon-valider="check" label-valider="creer"></phrase-secrete>
-    </q-card-section>
-  </q-card>
 
 </q-page>
 </template>
@@ -80,16 +73,10 @@ export default {
 
   components: { PhraseSecrete, AcceptParrain },
 
-  computed: {
-    creationDemandee () { 
-      return this.btncd === true 
-    }
-  },
-
   data () {
     return {
-      btncd: 'false',
-      phrase: null,
+      btncd: false,
+      phrase: '',
       isPwd: false,
       encours: false,
       dialcp: false,
@@ -177,8 +164,8 @@ export default {
 
     return {
       session,
-      q666: config.search === '666',
       config,
+      q666: config.search === '666',
       razdb
     }
   }
@@ -188,5 +175,5 @@ export default {
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .q-card__section
-  padding: 0.3rem !important
+  padding: 0 !important
 </style>
