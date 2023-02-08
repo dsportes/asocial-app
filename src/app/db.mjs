@@ -476,7 +476,7 @@ export async function commitRows (opBuf, setCompteClek) {
     await db.transaction('rw', TABLES, async () => {
       if (setCompteClek) {
         const x = { id: session.compteId, k: session.clek}
-        const data = await crypter(clek, new Uint8Array(encode(x)) , 1)
+        const data = await crypter(session.phrase.pcb, new Uint8Array(encode(x)) , 1)
         await db.compte.put({ id: '1', data })
       }
 

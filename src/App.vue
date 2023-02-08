@@ -70,6 +70,7 @@
       <page-login class="page" v-if="ui.page === 'login'"/>
       <page-session class="page" v-if="ui.page === 'session'"/>
       <page-accueil class="page" v-if="ui.page === 'accueil'"/>
+      <page-compte class="page" v-if="ui.page === 'compte'"/>
     </transition-group>
   </q-page-container>
 
@@ -137,6 +138,7 @@ import BoutonHelp from './components/BoutonHelp.vue'
 import PageLogin from './pages/PageLogin.vue'
 import PageSession from './pages/PageSession.vue'
 import PageAccueil from './pages/PageAccueil.vue'
+import PageCompte from './pages/PageCompte.vue'
 
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
@@ -152,7 +154,7 @@ export default {
 
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests,
-    PageLogin, PageSession, PageAccueil,
+    PageLogin, PageSession, PageAccueil, PageCompte,
     DialogueErreur, DialogueHelp, InfoBlocage, 
     PanelContacts, PanelCompta
    },

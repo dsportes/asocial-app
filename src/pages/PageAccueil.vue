@@ -35,7 +35,8 @@
     </div>
     <q-separator class="q-my-sm"/>
       <div class="row items-center justify-center q-gutter-sm">
-        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesav')">
+        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesav')"
+        @click="ui.setPage('compte')">
           <q-badge color="teal-10" rounded floating>{{nbtav}}</q-badge>
         </q-btn>
         <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmesgr')">

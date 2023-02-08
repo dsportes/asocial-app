@@ -3,6 +3,9 @@ import { Operation } from './operations.mjs'
 import { reconnexionCompte } from './connexion.mjs'
 import { compile } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'
+import { $t } from './util.mjs'
+import { appexc } from './api.mjs'
+import { post } from './net.mjs'
 
 export class SyncQueue {
   static queue = []
@@ -18,7 +21,7 @@ export class SyncQueue {
     const session = stores.session
     if (session.syncEncours || session.status < 2 || !SyncQueue.queue.length) return
     session.syncEncours = true
-    const row = SyncQueue.queue.splice(0, 1)
+    const [row] = SyncQueue.queue.splice(0, 1)
     setTimeout(async () => {
       session.syncEncours = true
       let op
@@ -88,6 +91,7 @@ export class OnchangeCompta extends OperationWS {
   - v : version détenue dans la session
   */
   async chargtAvatar (id, v) {
+    const session = stores.session
     const args = { token: session.authToken, id }
     const ret = this.tr(await post(this, 'GetAvatar', args))
     const row = ret.rowAvatar
@@ -97,7 +101,7 @@ export class OnchangeCompta extends OperationWS {
     this.avChange.set(id, e)
     if (id % 10 === 0) this.avatarP = avatar
     // (re) chargement des secrets, chats, sponsorings
-    args.v = v
+    args.v = v || 0
     const ret2 = this.tr(await post(this, 'ChargerSCS', args))
     e.lsc = ret2.rowSecrets
     e.lch = ret2.rowChats
@@ -194,7 +198,7 @@ export class OnchangeCompta extends OperationWS {
       avStore.setCompta(this.compta)
       const chg = session.setBlocage()
       this.avSuppr.forEach(id => { avStore.del(id) })
-      this.avChange.values().forEach(e => { avStore.lotMaj(e) })
+      this.avChange.forEach(e => { avStore.lotMaj(e) })
 
       // Insertion / suppression des groupes nouveaux / inutiles
       this.grToDel.forEach(id => { 
@@ -207,7 +211,9 @@ export class OnchangeCompta extends OperationWS {
 
       if (chg > 1) await alerteBlocage (chg)
       
-    } catch (e) { await this.finKO(e) }
+    } catch (e) { 
+      await this.finKO(e)
+    }
   }
 }
 

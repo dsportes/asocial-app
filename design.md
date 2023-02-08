@@ -1,4 +1,5 @@
 TODO next :
+- FicheAvatar : gérer les restrictions d'accès - Phrase de contact - Ops
 - connexion avion
 - sponsoring / acceptation
 - revoir GestionBase : tout faux, reseau, suppression base ...

@@ -130,5 +130,5 @@ function heartBeat (sid) {
       ws.send(sid) // ping
       heartBeat(sid)
     }
-  }, PINGTO * 1000)
+  }, PINGTO * 1000 * (debug ? 1000 : 1))
 }

@@ -1,11 +1,11 @@
 <template>
 <div>
   <div v-if="!fs" style="position:relative">
-    <div v-if="zoom || edit" class="row btn q-gutter-xs">
-      <q-btn v-if="edit" dense color="primary" icon="edit" size="xs" @click.stop="editer">
+    <div v-if="zoom || edit" class="row btn">
+      <q-btn v-if="edit" dense color="primary" icon="edit" size="sm" @click.stop="editer">
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="zoom" dense color="primary" icon="fullscreen" size="xs" @click.stop="fs=true">
+      <q-btn v-if="zoom" class="q-ml-xs" dense color="primary" icon="fullscreen" size="sm" @click.stop="fs=true">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
       </q-btn>
     </div>

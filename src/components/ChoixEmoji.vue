@@ -5,8 +5,11 @@
     <Picker :data="emojiIndex" 
       set="google" title="" emoji="question" native
       :i18n="cfgi18n()" :emoji-size="18" @select="showEmoji" />
-    <q-btn dense icon="check" color="green-5" @click="ok"
-      style="position:absolute;top:0;right:0"/>
+    <div class="bg-white row" style="position:absolute;top:35px;right:8px">
+      <div class="col fs-xl" style="width:6rem;min-height:2rem;">{{entree}}</div>
+      <q-btn class="col-auto" dense size="md" icon="backspace" color="primary" @click="bs"/>
+      <q-btn class="col-auto" dense size="md" icon="check" color="green-5" @click="ok"/>
+    </div>
   </div>
 </q-dialog>
 </template>
@@ -56,6 +59,9 @@ export default {
     showEmoji (emoji) {
       this.entree += emoji.native
     },
+    bs () {
+      this.entree = this.entree.substring(0, this.entree.length - 2)
+    },
     cfgi18n () {
       return {
         search: this.$t('EMOsearch1'),
@@ -102,7 +108,7 @@ export default {
   padding: 2px 0 !important
 }
 .emoji-mart-bar {
-  margin-right: 30px;
+  margin-right: 0px;
   background: white !important
 }
 .emoji-mart-search input {

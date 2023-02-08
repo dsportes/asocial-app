@@ -1,13 +1,14 @@
 <template>
-<q-card class="colomn shadow-8">
-  <q-toolbar class="bg-secondary text-white q-gutter-xs">
+<q-card>
+  <q-toolbar class="bg-secondary text-white">
     <q-btn v-if="!motscles.mc.st.enedition" dense size="md" color="primary" icon="mode_edit" label="Editer" @click="startEdit"/>
     <q-btn v-if="motscles.mc.st.enedition" dense size="md" color="primary" icon="add_circle" label="Nouveau" @click="ajoutermc"/>
-    <q-btn v-if="motscles.mc.st.enedition" dense size="md" color="primary" icon="undo" label="Annuler" @click="cancelEdit"/>
-    <q-btn v-if="motscles.mc.st.enedition" :disable="!motscles.mc.st.modifie" dense size="md" icon="check" color="warning" label="Valider" @click="okEdit"/>
+    <q-btn v-if="motscles.mc.st.enedition" dense class="q-ml-xs" size="md" color="primary" icon="undo" label="Annuler" @click="cancelEdit"/>
+    <q-btn v-if="motscles.mc.st.enedition" :disable="!motscles.mc.st.modifie" dense class="q-ml-xs" size="md" icon="check" color="warning" label="Valider" @click="okEdit"/>
     <q-space/>
     <bouton-help page="page1"/>
   </q-toolbar>
+
   <div ref="root">
     <div v-if="ajouter" class="column border1 q-ma-xs q-pa-sm full-width">
       <div class="row justify-start q-gutter-xs">
@@ -21,12 +22,13 @@
         <q-input class="inp" v-model="nom" label="Nom" counter maxlength="12" placeholder="Par exemple: Ecologie">
           <template v-slot:hint>3 à 12 lettres, émoji conseillé en tête</template>
           <template v-slot:append>
-            <q-btn label="❤️" size="md" dense @click="ui.choixEmoji=true"/>
+            <q-btn label="❤️" size="md" dense @click="ouvriremoji"/>
           </template>
         </q-input>
       </div>
     </div>
   </div>
+
   <q-splitter v-model="splitterModel" class="col full-width">
     <template v-slot:before>
       <q-tabs v-model="tab" no-caps vertical >
@@ -66,13 +68,13 @@ export default ({
   components: { BoutonHelp, ChoixEmoji },
 
   computed: {
-    inp () { return this.root.querySelector('#ta').querySelector('input') }
   },
 
   data () {
     return {
       ajouter: false,
       emoji: false,
+      inp: null,
       idx: 0,
       nom: '',
       categ: ''
@@ -80,6 +82,10 @@ export default ({
   },
 
   methods: {
+    ouvriremoji () {
+      this.inp = this.root.querySelector('#ta').querySelector('input')
+      this.ui.choixEmoji=true
+    },
     startEdit () {
       this.motscles.debutEdition()
     },
@@ -141,17 +147,28 @@ export default ({
 
   setup (props) {
     const session = stores.session
+    const avStore = stores.avatar
+    const grStore = stores.groupe
     const ui = stores.ui
 
     const motscles = toRef(props, 'motscles')
     motscles.value.recharger()
-    session.$onAction(({ name, args, after }) => {
+    avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setPrefs') {
+        if (name === 'setAvatar') {
           motscles.value.recharger()
         }
       })
     })
+    if (motscles.value.idg) {
+      grStore.$onAction(({ name, args, after }) => {
+        after((result) => {
+          if (name === 'setGroupe') {
+            motscles.value.recharger()
+          }
+        })
+      })
+    }
 
     const root = ref(null)
     const tab = ref('')
@@ -182,8 +199,10 @@ export default ({
   width: 80%
   max-width: 20rem
 .q-toolbar
-  padding: 2px !important
+  padding: 0 !important
   min-height: 0 !important
+.q-btn
+  padding: 0 !important
 .border1
   border-radius: 5px
   border: 1px solid $grey-5

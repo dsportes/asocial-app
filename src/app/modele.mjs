@@ -28,10 +28,10 @@ export function getVoisins(id, ids) {
 }
 
 export function getCv (id) {
-  if (id % 10 !== 8) {
+  if (id % 10 < 8) {
     const avStore = stores.avatar
     const av = avStore.getAvatar(id)
-    if (av) return av ? av.cv : stores.people.getCv(id)
+    return av ? av.cv : stores.people.getCv(id)
   } else { 
     return stores.groupe.getCv(id)
   }
@@ -171,7 +171,7 @@ export class Motscles {
 
   edit (u8, court, groupeId) {
     if (!u8 || !u8.length) return ''
-    const gr = groupeId ? data.getGroupe(groupeId) : null
+    const gr = groupeId ? stores.groupe.getGroupe(groupeId) : null
     const l = []
     for (let i = 0; i < u8.length; i++) {
       const n = u8[i]
@@ -238,14 +238,14 @@ export class Motscles {
     this.mc.lcategs.length = 0
     this.fusion(stores.config.motscles)
     if (this.mode === 1 || (this.mode === 3 && !this.idg)) {
-      const cpt = stores.session.getPrefs
-      this.mapc = cpt ? cpt.mc : {}
+      const cpt = stores.session.compte
+      this.mapc = cpt.mc || {}
       this.fusion(this.mapc)
       if (this.mode === 1) this.src = this.mapc
     }
     if (this.mode === 2 || (this.mode === 3 && this.idg)) {
       const gr = stores.groupe.getGroupe(this.idg)
-      this.mapg = gr ? gr.mc : {}
+      this.mapg = gr ? (gr.mc || {}) : {}
       if (this.mode === 2) this.src = this.mapg
       this.fusion(this.mapg)
     }
@@ -667,6 +667,15 @@ export class Avatar extends GenDoc {
     return s || s1
   }
 
+  get lstAvatarNas () { // retourne l'array des na des avatars du compte
+    const a = []
+    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
+      const x = this.lav[i]
+      if (x) a.push(x.na)
+    }
+    return a
+  }
+
   avatarNas (s) { // retourne (ou accumule dans s), le set des ids des avatars du compte
     const s1 = new Set()
     if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
@@ -831,7 +840,7 @@ export class Avatar extends GenDoc {
         this.mc = decode(await decrypter(session.clek, row.mck))
       } else this.mc = {}
 
-      if (row.memok) {
+      if (row.memok && row.memok !== 'mp') {
         this.memo = await decrypterStr(session.clek, row.memok)
       } else this.memo = ''
 

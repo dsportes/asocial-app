@@ -164,7 +164,7 @@ export default {
   EX7006: 'Fichier non trouvé', // 6
 
   EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
-  EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation',
+  EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
   EX8003: 'Erreur d\'ID pour le compte Comptable',
   EX8004: 'Compte Comptable déjà créé',
   EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
@@ -283,6 +283,10 @@ export default {
   OPsync: 'Opération de synchronisation',
   OPccc: 'Créer le compte du comptable',
   OPcnx: 'Se connecter à un compte',
+
+  OPmemo: 'Changement du memo d\'un compte',
+  OPmotscles: 'Changement des mots clés d\'un compte',
+
   OPcps: 'Changer de phrase secrete de connexion',
   OPnch: 'Ajouter un item sur un "chat"',
   OPsch: 'Sélectionner des "chats"',
@@ -372,6 +376,7 @@ export default {
   Plogin666: 'Création du compte du comptable',
   Paccueil: 'Accueil',
   Psession: 'Etat de la session ouverte',
+  Pcompte: 'Mon compte, ses avatars',
 
   MLAcptp: '(parrain)',
   MLAtri: 'Tribu : {0}',
@@ -404,7 +409,7 @@ export default {
   ACmembres: 'Ses membres',
   ACsponsorings: 'Ses sponsorings',
   ACinvitations: 'Invitations de ses groupes',
-  ACmesav: 'Mes avatars',
+  ACmesav: 'Mon compte mes avatars',
   ACmesgr: 'Mes groupes',
   ACmesctc: 'Mes contacts',
   ACmatribu: 'Ma tribu',
@@ -517,17 +522,18 @@ export default {
   IR3: 'Blocage complet en cours',
   IR4: 'Lecture seulement: mode avion',
 
-  // Page10 (Compte) et NouvelAvatar
-  CPTaptrib: 'A propos de ma tribu {0}',
-  CPTimptrib: 'Les ressources du compte sont imputées à la tribu {0}',
+  // Page (Compte) et NouvelAvatar
   CPTmemo: 'Mémo du compte',
   CPTnomemo: 'pas de mémo enregistré',
+  CPTchps: 'Changer la phrase secrète',
+
+  CPTaptrib: 'A propos de ma tribu {0}',
+  CPTimptrib: 'Les ressources du compte sont imputées à la tribu {0}',
   CPTkwc: 'Mots clés du compte',
   CPTnvav: 'Nouvel avatar',
   CPTnvav2: 'Création d\'un nouvel avatar',
   CPTchq: 'Quotas attribués',
   CPTrep: 'Répartir les quotas entre les avatars',
-  CPTchps: 'Changer la phrase secrète',
   CPTchps2: 'Changement de la phrase secrète de connexion au compte',
   CPTchps2: 'Changement de la phrase secrète de connexion au compte',
   CPTvcp: 'Changer la phrase',

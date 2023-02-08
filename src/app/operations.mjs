@@ -78,114 +78,64 @@ export class OperationUI extends Operation {
     await ui.afficherExc(exc)
     return exc
   }
+}
 
-  /* Charge depuis le serveurs les Ccv requises :
-  - soit postérieures à v
-  - soit sans contrainte de version
-  */
-  async chargerCv (l1, l2, v) { // utiles : set des avatars utiles
-    const session = stores.session
-    const chg = {}
-    if (l1.length || l2.length) {
-      const args = { sessionId: session.sessionId, v, l1, l2 }
-      const ret = this.tr(await post(this, 'm1', 'chargerCVs', args))
-      const m = await compileToMap(ret.rowItems)
-      if (m.cv) for(const pk in m.cv) chg[pk] = m.cv[pk]
+/* Changement du memo d'un compte ******************************************
+*/
+export class MemoCompte extends OperationUI {
+  constructor () { super($t('OPmemo')) }
+
+  async run (memok) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, memok }
+      const ret = this.tr(await post(this, 'MemoCompte', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
     }
-    return chg
   }
+}
 
-  /*
-  1) Après création du compte comptable
-  2) Après acceptation d'un parrainage (compte est celui créé)
-  */
-  async postCreation (ret) {
-    this.session = stores.session
+/* Changement des mots clés d'un compte ******************************************
+*/
+export class MotsclesCompte extends OperationUI {
+  constructor () { super($t('OPmotscles')) }
 
-    this.session.clepubc = ret.clepubc
-    tru8('Pub Comptable data.clepubc', ret.clepubc)
-
-    const mapRows = await compileToMap(ret.rowItems)
-
-    const compte = mapRows.compte['1']
-    this.session.setCompte(compte)
-    this.session.estComptable = compte.estComptable
-    this.session.nombase = await compte.getNombase()
-
-    const prefs = mapRows.prefs['1']
-    this.session.setPrefs(prefs)
-
-    const avatar = mapRows.avatar[compte.id]
-    stores.avatar.setAvatar(avatar)
-
-    const compta = mapRows.compta[compte.id]
-    stores.avatar.setCompta(compta)
-
-    const lmaj = [compte, compta, prefs, avatar]
-
-    const lstcv = new Set()
-    let tribu = null
-    let couple = null
-    let vcv = 0 // version des CV la plus récente
-
-    if (!compte.estComptable) {
-      tribu = mapRows.tribu[compte.nat.id]
-      stores.tribu.setTribu(tribu)
-      lmaj.push(tribu)
-
-      const x = Object.values(mapRows.couple)
-      couple = x[0]
-      stores.couple.setCouple(couple)
-      lmaj.push(couple)
+  async run (mck) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, mck }
+      const ret = this.tr(await post(this, 'MotsclesCompte', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
     }
+  }
+}
 
-    if (compte.estComptable) {
-      this.session.blocage = 0
-    } else {
-      getBlocage(tribu, compta)
+/** Changement de phrase secrete ****************************************************
+args.token: éléments d'authentification du compte.
+args.hps1: dans compta, `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte.
+args.shay: SHA du SHA de X (PBKFD de la phrase secrète).
+args.pcbh : hash de la cle X (hash du PBKFD de la phrase complète).
+args.kx: clé K cryptée par la phrase secrète
+*/
+export class ChangementPS extends OperationUI {
+  constructor () { super($t('OPcps')) }
+
+  async run (ps) {
+    try {
+      const session = stores.session
+      const kx = await crypter(ps.pcb, session.clek)
+      const args = { token: session.authToken, hps1: ps.dpbh, pcbh: ps.pcbh, shay: ps.shay, kx }
+      await post(this, 'ChangementPS', args)
+      session.chgps(ps)
+      if (session.synchro) commitRows(new IDBbuffer(), true)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
     }
-
-    // Récupération et traitement de la CV du parrain
-    if (couple) lstcv.add(couple.naE.id)
-    if (tribu) tribu.idParrains(lstcv)
-
-    if (!compte.estComptable) {
-      const chg = await this.chargerCv([], Array.from(lstcv), 0)
-      const peopleSt = stores.people
-      for (const id in chg) {
-        const cv = chg[id]
-        const na = getNg(cv.id)
-        if (cv.v > vcv) vcv = cv.v
-        peopleSt.newPeople(na)
-        setCv(cv)
-        lmaj.push(cv)
-        peopleSt.setParrain(cv.id, true)
-      }
-    }
-
-    // création de la base IDB et chargement des rows compte avatar ...
-    if (this.session.synchro) { // synchronisé : IL FAUT OUVRIR IDB (et écrire dedans)
-      this.BRK()
-      // A revoir
-      try {
-        await openIDB()
-      } catch (e) {
-        await deleteIDB()
-        throw e
-      }
-      localStorage.setItem(lskey, this.session.nombase)
-      const trig = await getTrigramme()
-      setTrigramme(this.session.nombase, this.session.reseau, trig)
-
-      if (lstcv.size) await saveListeCvIds(vcv, lstcv)
-      await commitRows({ lmaj, lsuppr: [] })
-      this.session.sessionSync = new SessionSync()
-      await this.session.sessionSync.setConnexion(this.dh)
-    }
-
-    console.log('Connexion compte : ' + compte.id)
-    this.finOK()
-    stores.ui.goto11()
   }
 }
 
@@ -270,44 +220,6 @@ export class CreationAvatar extends OperationUI {
         } else {
           break
         }
-      }
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/******************************************************
-Changement de phrase secrete
-args:
-- sessionId
-- id: du compte
-- dpbh
-- pcbh
-- kx
-*/
-export class ChangementPS extends OperationUI {
-  constructor () { super($t('OPcps')) }
-
-  async run (ps) {
-    try {
-      const session = stores.session
-      const c = session.compte
-      const avdpbh = c.dpbh // AVANT changement
-      const kx = await c.nouvKx(ps)
-      const args = { sessionId: session.sessionId, id: c.id, dpbh: ps.dpbh, pcbh: ps.pcbh, kx }
-      const ret = await post(this, 'm1', 'changementPS', args)
-      session.phrase = ps
-      const r = await this.compileToMap(ret.rowItems)
-      session.compte = r.compte['1']
-      const apdpbh = r.dpbh
-      if (session.synchro) {
-        let lsk = session.reseau + '-' + avdpbh
-        localStorage.removeItem(lsk)
-        const nb = await r.compte.getNombase()
-        lsk = session.reseau + '-' + apdpbh
-        localStorage.setItem(lsk, nb)
       }
       this.finOK()
     } catch (e) {

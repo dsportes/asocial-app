@@ -6,7 +6,7 @@
       <q-btn :disable="!md" class="col-auto q-mr-xs" size="md" label="TEXTE" :color="md ? 'warning' : 'purple'" push flat dense @click="md=false"></q-btn>
       <q-btn :disable="md" class="col-auto q-mr-xs" size="md" label="HTML" dense flat push @click="md=true"></q-btn>
       <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="❤️" size="md"
-        dense flat push @click="ui.choixEmoji=true">
+        dense flat push @click="ouvriremojimd1">
       </q-btn>
       <q-btn v-if="modifie" class="col-auto q-mr-xs" icon="undo" size="md" dense flat push @click="undo"></q-btn>
       <q-btn v-if="modifie && labelOk" class="col-auto q-mr-xs" icon="check" :label="labelOk" size="md" dense flat push color="warning" @click="ok"></q-btn>
@@ -25,7 +25,7 @@
         <q-btn :disable="!md" class="col-auto q-mr-xs" size="md" label="TXT" :color="md ? 'warning' : 'purple'" push flat dense @click="md=false"></q-btn>
         <q-btn :disable="md" class="col-auto q-mr-xs" size="md" label="HTML" dense flat push @click="md=true"></q-btn>
         <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="❤️" size="md"
-          dense flat push @click="ui.choixEmoji=true">
+          dense flat push @click="ouvriremojimd2">
         </q-btn>  
         <q-btn v-if="modifie" class="col-auto q-mr-xs" icon="undo" size="md" dense flat push @click="undo"></q-btn>
         <q-btn v-if="modifie && labelOk" class="col-auto q-mr-xs" icon="check" :label="labelOk" size="md" dense flat push color="warning" @click="ok"></q-btn>
@@ -65,21 +65,26 @@ export default ({
     },
     modifie () {
       return this.textelocal !== this.texteinp
-    },
-    inp () {
-      const r = this.max ? this.root2 : this.root
-      return r.querySelector('textarea')
     }
   },
 
   data () {
     return {
+      inp: null,
       emoji: false,
       max: false
     }
   },
 
   methods: {
+    ouvriremojimd1 () {
+      this.inp = this.root.querySelector('textarea')
+      this.ui.choixEmoji=true
+    },
+    ouvriremojimd2 () {
+      this.inp = this.root2.querySelector('textarea')
+      this.ui.choixEmoji=true
+    },
     ok () {
       this.max = false
       this.taille = this.tailleM ? 1 : 0
@@ -160,6 +165,6 @@ export default ({
 <style lang="sass" scoped>
 @import '../css/input.sass'
 .q-toolbar
-  padding: 2px 0 !important
-  height: 25px !important
+  padding: 0 !important
+  min-height: 0 !important
 </style>

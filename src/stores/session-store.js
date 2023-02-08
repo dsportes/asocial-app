@@ -35,7 +35,13 @@ export const useSessionStore = defineStore('session', {
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
 
-    blocage: 0, // niveau de blocage: 1-Alerte informative, 2:restriction de volume, 3:passif, 4:bloqué
+    /* niveau de blocage:
+     1-Alerte informative,
+     2:restriction de volume, (en baisse)
+     3:passif, (pas de maj -sauf chat sponsor / comptable)
+     4:bloqué
+    */
+    blocage: 0,
     infoBlocage: false,
     infoBlocageResolve: null,
     rappelBlocage: 0,
@@ -85,6 +91,25 @@ export const useSessionStore = defineStore('session', {
       localStorage.setItem(this.lsk, this.nombase)
     },
 
+    chgps (phrase) {
+      /*
+      Suppression de l'ancienne clé lsk donnant le nom de la base du compte
+      Recalcul de la nouvelle clé lsk donnant le même nom qu'avant
+      Changement du token d'accès
+      */
+      localStorage.removeItem(this.lsk)
+      this.phrase = phrase
+      this.lsk = '$asocial$-' + phrase.dpbh
+      localStorage.setItem(this.lsk, this.nombase)
+      const token = {
+        sessionId: this.sessionId,
+        shax: phrase.shax,
+        hps1: phrase.dpbh
+      }
+      const x = new Uint8Array(encode(token))
+      this.authToken = u8ToB64(new Uint8Array(x), true)
+    },
+
     /* Calcul du blocage depuis compta et tribu
     Retourne la nature du changement:
     - 0: pas de changement
@@ -95,7 +120,7 @@ export const useSessionStore = defineStore('session', {
     setBlocage () {
       if (this.estComptable || this.avion) {
         this.blocage = 0
-        return
+        return 0
       }
       const av = this.blocage
       let ap = 0
@@ -128,13 +153,13 @@ export const useSessionStore = defineStore('session', {
     - cnx : connexion requise (modes synchronisé et incognito)
     */
     auts (nmb, cnx) {
-      return !((cnx && this.mode > 2) || this.blocage >= nmb)
+      return !((cnx && this.avion) || this.blocage >= nmb)
     },
     
     async aut (nmb, cnx) {    
-      if ((cnx && this.mode > 2) || this.blocage >= nmb) { // action interdite : explication(s)
+      if ((cnx && this.avion) || this.blocage >= nmb) { // action interdite : explication(s)
         return new Promise((resolve) => {
-          const av = this.mode > 2
+          const av = this.avion
           stores.config.$q.dialog({
             dark: true,
             html: true,
