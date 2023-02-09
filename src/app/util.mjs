@@ -295,7 +295,7 @@ export async function afficherDiag (diag, ok, cancel) {
         title: $t('UTIatt'),
         message: diag,
         ok: { color: 'primary', label: $t(ok) },
-        cancel: { color: 'warning', label: $t(concel) },
+        cancel: { color: 'warning', label: $t(cancel) },
       })
       .onOk(() => { resolve(true) })
       .onCancel(() => { resolve(false) })

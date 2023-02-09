@@ -109,9 +109,9 @@ export class NomAvatar extends NomGenerique {
   }
 
   get photoDef () {
+    if (this.photo) return this.photo
     const cfg = stores.config
-    if (this.id === IDCOMPTABLE) return cfg.iconSuperman
-    return this.photo || cfg.iconAvatar
+    return this.id === IDCOMPTABLE ? cfg.iconSuperman : cfg.iconAvatar
   }
 
   clone () {
@@ -385,7 +385,7 @@ export class Phrase {
 
 export class PhraseContact {
   async init (texte) {
-    // this.phrase = texte
+    this.phrase = texte
     this.clex = await pbkfd(texte)
     let hx = ''
     for (let i = 0; i < texte.length; i = i + 3) { hx += texte.charAt(i); hx += texte.charAt(i+1) }
@@ -633,8 +633,8 @@ export class Tribu extends GenDoc {
   - _clé_ : `ni`, numéro d'invitation.
   - _valeur_ : cryptée par la clé publique de l'avatar `[nom, cle, im]`.
   - une entrée est effacée par l'annulation de l'invitation du membre au groupe ou sur acceptation ou refus de l'invitation.
-- `pck` : phrase de contact cryptée par la clé K.
-- `hpc` : hash du PBKFD de la phrase de contact.
+- `pck` : PBKFD de la phrase de contact cryptée par la clé K.
+- `hpc` : hash de la phrase de contact.
 - `napc` : [nom, cle] de l'avatar cryptée par le PBKFD de la phrase de contact.
 
 ** Compilées**
@@ -768,12 +768,13 @@ export class Avatar extends GenDoc {
   /* `napc` : [nom, cle] de l'avatar cryptée par le PBKFD de la phrase de contact.
   texte : texte de la phrase de contact
   Retourne le na de l'avatar décrypté depuis la phrase
-  */
+  
   async getNapc (texte) { 
     const phrase = await new PhraseContact().init(texte)
     const [nom, cle] = decode(decrypter(phrase.clex, this.napc))
     return new NomAvatar(nom, cle)
   }
+  */
 
   // na d'un des avatar du compte
   naAvatar (id) {
@@ -848,7 +849,7 @@ export class Avatar extends GenDoc {
     }
 
     if (row.pck) { // phrase de contact cryptée par la clé K.
-      this.pc = await decrypterStr(session.clek, row.cvk)
+      this.pc = await decrypterStr(session.clek, row.pck)
     } else this.pc = null
 
     if (row.cva) { // carte de visite cryptée par la clé K, `{v, photo, info}`.
@@ -1134,14 +1135,16 @@ _data_:
 - `dlv` : la dlv permet au GC de purger les chats. Dès qu'il y a une dlv, le chat est considéré comme inexistant autant en session que pour le serveur.
 
 - `mc` : mots clés attribués par l'avatar au chat
-- `contc` : contenu crypté par la clé de l'avatar lecteur (celle de sa carte de visite).
+- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé de _l'autre_
+- `contc` : contenu crypté par la clé de l'avatar _lecteur_.
   - `na` : `[nom, cle]` de _l'autre_.
-  - `cv` : `{v, photo, info}` carte de visite de l'autre au moment de la création / dernière mise à jour du chat.
   - `dh`  : date-heure de dernière mise à jour.
   - `txt` : texte du chat.
 */
 
 export class Chat extends GenDoc {
+  get cle () { return getCle(this.id) }
+  get naI () { return getNg(this.id) }
 
   async fromRow (row) {
     this.id = row.id
@@ -1152,12 +1155,11 @@ export class Chat extends GenDoc {
     } else {
       this.vsh = row.vsh || 0
       this.mc = row.mc
-      this.naI = stores.avatar.compte.naAvatar(this.id)
-      const x = decode(await decrypter(this.naI.cle, row.contc))
+      const x = decode(await decrypter(this.cle, row.contc))
       this.naE = new NomAvatar[x.na[0], x.na[1]]
-      this.cv = x.cv
       this.dh = x.dh
       this.txt = x.txt
+      this.cv = row.cva ? decode(await decrypter(this.naE.rnd, row.cva)) : null
     }
   }
 

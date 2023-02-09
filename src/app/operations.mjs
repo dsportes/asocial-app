@@ -1,12 +1,13 @@
 import stores from '../stores/stores.mjs'
+import { encode, decode } from '@msgpack/msgpack'
 
 import { AppExc, appexc } from './api.mjs'
-import { $t, hash, tru8, u8ToHex, getJourJ, getTrigramme, setTrigramme } from './util.mjs'
+import { $t, hash, u8ToHex, getJourJ } from './util.mjs'
 import { random, crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { NomAvatar, Avatar, Compta, getNg, SessionSync } from './modele.mjs'
-import { genKeyPair } from './webcrypto.mjs'
-import { openIDB, deleteIDB, commitRows } from './db.mjs'
+import { NomAvatar, Avatar, Compta, getNg, getCle } from './modele.mjs'
+import { genKeyPair, decrypter } from './webcrypto.mjs'
+import { commitRows } from './db.mjs'
 
 /* Opération générique ******************************************/
 export class Operation {
@@ -114,6 +115,39 @@ export class MotsclesCompte extends OperationUI {
   }
 }
 
+/* Maj de la carte de visite d'un avatar ******************************************
+args.token
+args.id : id de l'avatar dont la Cv est mise à jour
+args.v: version de l'avatar incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
+args.cva: {v, photo, info} crypté par la clé de l'avatar
+args.lmbs: array des [idg, im] des membres où dupliquer cette Cv
+args.lchats: array des [id, ids] des chats où dupliquer cette Cv
+args.ltribus: array des id des tribu dont l'avatar est sponsor et où duppliquer la CV
+*/
+export class MajCv extends OperationUI {
+  constructor () { super($t('OPmcv')) }
+
+  async run (avatar, photo, info) {
+    try {
+      const session = stores.session
+      while (true) {
+        const lmbs = [] // TODO
+        const lchats = [] // TODO
+        const ltribus = [] // TODO
+        const v = avatar.v + 1
+        const cva = await crypter(getCle(avatar.id), new Uint8Array(encode({v, photo, info})))
+        const args = { token: session.authToken, id: avatar.id, v, cva, lmbs, lchats, ltribus }
+        const ret = this.tr(await post(this, 'MajCv', args))
+        if (ret.OK) break
+        await sleep(500)
+      }
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /** Changement de phrase secrete ****************************************************
 args.token: éléments d'authentification du compte.
 args.hps1: dans compta, `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte.
@@ -138,6 +172,77 @@ export class ChangementPS extends OperationUI {
     }
   }
 }
+
+/** Changement de phrase secrete ****************************************************
+args.token: éléments d'authentification du compte.
+args.id: de l'avatar
+args.hpc: hash de la phrase de contact (SUPPRESSION si null)
+args.napc: na de l'avatar crypté par le PBKFD de la phrase
+args.pck: phrase de contact cryptée par la clé K du compte
+*/
+export class ChangementPC extends OperationUI {
+  constructor () { super($t('OPcpc')) }
+
+  async run (na, p) {
+    try {
+      const session = stores.session
+      const pck = p ? await crypter(session.clek, p.phrase) : null
+      const napc = p ? await crypter(p.clex, new Uint8Array(encode([na.nom, na.rnd]))) : null
+      const args = { token: session.authToken, id: na.id, hpc: p ? p.phch : null, napc, pck }
+      await post(this, 'ChangementPC', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/** Récupération de l'avatar ayant une phrase de contact donnée *******
+args.token: éléments d'authentification du compte.
+args.hpc: hash de la phrase de contact
+Retour: idnapc : {id, napc}
+- id : id de l'avatar ayant ce hash de phrase de contact (0 si aucun)
+- napc : na de l'avatar ayant cette phrase de contact crypté par le PBKFD de cette phrase
+
+Retour: {id, na}
+- id : id de l'avatar ayant ce hash de phrase de contact (0 si aucun)
+- na : na de l'avatar ayant cette phrase de contact décrypté 
+  par le PBKFD de cette phrase OU null si non décryptable
+*/
+export class GetAvatarPC extends OperationUI {
+  constructor () { super($t('OPcpc')) }
+
+  async run (p) { // p: objet PhraseContact
+    try {
+      const session = stores.session
+      let res
+      const args = { token: session.authToken, hpc: p.phch }
+      const ret = this.tr(await post(this, 'GetAvatarPC', args))
+      const { id, napc } = ret.idnapc
+      if (id) {
+        try {
+          const x = decode(await decrypter(p.clex, napc))
+          const na = new NomAvatar(x[0], x[1])
+          res = { id, na }
+        } catch (e) {
+          res = { id, na: null }
+        }
+      } else {
+        res = {id: 0, na: null }
+      }
+      this.finOK()
+      return res
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+
+
+
+
+
 
 /******************************************************
 Recherche les "people" d'ids donnés dans lids
@@ -287,27 +392,6 @@ export class GetCompta extends OperationUI {
       const r = await compileToMap(ret.rowItems)
       this.finOK()
       return r.compta[id]
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/******************************************************
-Mise à jour d'une carte de visite
-A_SRV, '07-Carte de visite non trouvée'
-*/
-export class MajCv extends OperationUI {
-  constructor () {
-    super($t('OPmcv'))
-  }
-
-  async run (cv) {
-    try {
-      const cvc = await cv.toRow()
-      const args = { sessionId: stores.session.sessionId, id: cv.id, cv: cvc }
-      await post(this, 'm1', 'majCV', args)
-      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

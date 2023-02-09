@@ -286,8 +286,11 @@ export default {
 
   OPmemo: 'Changement du memo d\'un compte',
   OPmotscles: 'Changement des mots clés d\'un compte',
-
+  OPmcv: 'Mettre à jour une carte de visite',
   OPcps: 'Changer de phrase secrete de connexion',
+  OPcpc: 'Changer de phrase de contact',
+
+
   OPnch: 'Ajouter un item sur un "chat"',
   OPsch: 'Sélectionner des "chats"',
   OPrch: 'Ré-initialiser un "chat"',
@@ -304,7 +307,6 @@ export default {
   OPrqc: 'Répartir les quotas entre les avatars d\'un compte',
   OPccv: 'Obtenir des cartes de visite non trouvées dans la session',
   OPmpr: 'Mettre à jour la préférence d\'un compte',
-  OPmcv: 'Mettre à jour une carte de visite',
   OPcsc: 'Créer un nouveau secret',
   OPmsc: 'Mettre à jour un secret',
   OPssc: 'Supprimer un secret',
@@ -515,6 +517,16 @@ export default {
 
   // Fiche avatar
   FAnocv: 'Pas d\'autre information',
+  FAphc: 'Déclaration de la phrase de contact',
+  FAsup: 'Supprimer la phrase de contact actuelle',
+  FAdpc: 'Définir la phrase de contact',
+  FApc: 'Phrase de contact',
+  FAnpc: 'Pas de phrase de contact ',
+  FApcms: 'La modifier / supprimer',
+  FAdeclpc: 'En déclarer une',
+  FAerr1: 'Cette phrase est déjà celle de l\'avatar : rien n\'est changé',
+  FAerr2: 'Cette phrase a déjà choisie par un autre avatar. En attribuer une autre',
+  FAerr3: 'Cette phrase est trop proche de celle déjà choisie par un autre avatar. En attribuer une autre',
 
   IR0: '',
   IR1: 'Volumes des secrets contraints à baisser: blocage en cours',

@@ -33,7 +33,7 @@
           <video ref="webcam" autoplay playsinline width="240" height="180" :class="camOn ? '' : 'd-none'"></video>
           <canvas ref="canvas" class="d-none"></canvas>
           <audio ref="sound" :src="cliccamera()" preload = "auto"></audio>
-          <div v-if="!camOn" class="camoff">$t('CVoff')</div>
+          <div v-if="!camOn" class="camoff">{{$t('CVoff')}}</div>
         </div>
         <div class=" q-py-md">
           <cropper ref="cropper" class="cropper"
