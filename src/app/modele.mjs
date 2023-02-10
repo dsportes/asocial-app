@@ -1044,67 +1044,76 @@ _data_
 - `dlv` : date limite de validité
 
 - `st` : statut. 0: en attente réponse, 1: refusé, 2: accepté, 3: détruit
+- `pspk` : phrase de sponsoring cryptée par la clé K du sponsor.
+- `bpspk` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
 - `descr` : crypté par le PBKFD de la phrase de sponsoring
   - `na` : `[nom, cle]` de P.
-  - `cv` : `[photo, info]` de P.
-  - `ard` : ardoise de bienvenue du sponsor / réponse du filleul
+  - `cv` : `{ v, photo, info }` de P.
   - `naf` : `[nom, cle]` attribué au filleul.
   - `nct` : `[nom, cle]` de sa tribu.
   - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
   - `quotas` : `[v1, v2]` quotas attribués par le parrain.
-
-**Remarques**
-- la `dlv` d'un sponsoring est fixe. Le sponsoring est purgé par le GC quotidien après cette date, en session et sur le serveur, les rows ayant dépassé cette limite sont supprimé et ne sont pas traités.
-- Le sponsor peut détruire physiquement son `sponsoring` avant acceptation, en cas de remord son statut passe à 3.
-
-**Si le filleul refuse le parrainage :** 
-- Il écrit dans `ard` au parrain expliquant sa raison et met le statut du `sponsoring` à 1. 
-
-**Si le filleul ne fait rien à temps :** 
-- `sponsoring` finit par être purgé par `dlv`. 
-
-**Si le filleul accepte le parrainage :** 
-- Le filleul crée son compte / avatar principal `naf` donne l'id de son avatar et son nom. Les infos de tribu pour le compte sont obtenu de `nct`.
-- la `compta` du filleul est créée et créditée des quotas attribués par le parrain.
-- la `tribu` est mise à jour (quotas / réserves), éventuellement le filleul est mis dans la liste des sponsors.
-- un `chat` de remerciement est écrit par le filleul au parrain.
-- le statut du `sponsoring` est 2.
+- `ardx` : ardoise de bienvenue du sponsor / réponse du filleul cryptée par le PBKFD de la phrase de sponsoring
 */
 
 export class Sponsoring extends GenDoc {
 
+  /* Par l'avatar sponsor */
   async fromRow (row) {
     this.id = row.id
     this.ids = row.ids
     this.v = row.v
     this.dlv = row.dlv
     this.vsh = row.vsh || 0
-    this.descrx = row.descrx
+    const clek = stores.session.clek
+    this.psp = await decrypterStr(clek, row.pspk)
+    const clex = await decrypter(clek, row.bpspk)
+    this.ard = await decrypterStr(clex, row.ardx)
+    await decrypterDescr(clex, row.descrx)
   }
 
-  async decrypterDescr (clex) {
-    const x = decode(await decrypter(clex, this.descrx))
-    this.descr = { cv: x.cv, sp: x.sp, quotas: x.quotas, ard: x.ard }
+  /* Par le candidat sponsorisé qui connaît la clé X
+    du fait qu'il connaît la phrase de sponsoring
+  */
+  async fromRow2 (row, clex) {
+    this.id = row.id
+    this.ids = row.ids
+    this.v = row.v
+    this.dlv = row.dlv
+    this.vsh = row.vsh || 0
+    this.ard = await decrypterStr(clex, row.ardx)
+    await decrypterDescr(clex, row.descrx)
+  }
+
+  async decrypterDescr (clex, descrx) {
+    const x = decode(await decrypter(clex, descrx))
+    this.descr = { cv: x.cv, sp: x.sp, quotas: x.quotas }
     this.descr.na = new NomAvatar(x.na[0], x.na[1])
     this.descr.naf = new NomAvatar(x.naf[0], x.naf[1])
     this.descr.nct = new NomTribu(x.nct[0], x.nct[1])
   }
 
-  async nouveau (phch, clex, dlv, cc, naf, idt, nct, parrain, forfaits) { // clex : PBKFD de la phrase de contact
-    this.vsh = 0
-    this.phch = phch
-    if (!cc) cc = random(32)
-    this.dlv = dlv
-    const d = { cc: cc, naf: naf } // naf : [nom, rnd] du compte
-    if (idt) {
-      d.idt = idt
-    } else {
-      d.nct = nct
-      d.parrain = parrain
-      d.forfaits = forfaits
-    }
-    this.datax = await crypter(clex, new Uint8Array(encode(d)))
-    return this
+  async nouveauRow (phrase, dlv, naf, sp, quotas, ard) {
+    /* row : sans version ! (manquante dans row et row.data) 
+      - `na` : `[nom, cle]` de P.
+      - `cv` : `{ v, photo, info }` de P.
+      - `naf` : `[nom, cle]` attribué au filleul.
+      - `nct` : `[nom, cle]` de sa tribu.
+      - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
+      - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+    */
+    const session = stores.session
+    const av = session.avC
+    const d = { vsh: 0, na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [naf.nom, naf.rnd], sp, quotas}
+    const x = session.compte.nct
+    d.nct = [x.nom, x.rnd]
+    const descrx = await crypter(phrase.clex, new Unint8Array(encode(d)))
+    const ardx = await crypter(phrase.clex, ard || '')
+    const pspk = await crypter(session.clek, phrase.phrase)
+    const bpspk = await crypter(session.clek, phrase.pcb)
+    const _data_ = { id: av.id, ids: phrase.phch, dlv, pspk, bpspk, descrx, ardx}
+    const row = { id: av.id, ids: phrase.phch, dlv, _data_ }
+    return row
   }
 }
 

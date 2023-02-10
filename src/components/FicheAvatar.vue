@@ -136,7 +136,7 @@ export default {
     // console.log(av.value.na.nom)
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setAvatar') {
+        if (name === 'setAvatar' && args[0] === av.value.id) {
           avatar.value = avStore.getAvatar(av.value.id)
         }
       })

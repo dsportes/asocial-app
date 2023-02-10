@@ -27,11 +27,12 @@
     </div>
 
     <!-- Mots clés du compte -->
-    <div v-if="session.auts(4)">
-      <div class="titre-md q-pt-md q-pb-sm">{{$t('CPTkwc')}}</div>
-      <mots-cles class="full-width" :motscles="motscles" @ok="okmc"></mots-cles>
+    <div v-if="session.auts(4)" class="row items-center q-my-sm">
+      <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
+      <q-btn icon="open_in_new" size="sm" color="primary" @click="mcedit = true"/>
     </div>
 
+    <!-- Avatars du compte -->
     <div v-for="(na, idx) in compte.lstAvatarNas" :key="na.id">
       <q-separator class="q-my-sm"/>
       <div class="row items-start">
@@ -40,6 +41,17 @@
         <fiche-avatar edit :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')" :na="na" :idx="idx"/>
       </div>
     </div>
+
+    <!-- Dialogue d'édition des mots clés du compte -->
+    <q-dialog v-model="mcedit">
+      <q-card class="petitelargeur shadow-8">
+        <q-toolbar class="bg-secondary text-white">
+          <q-toolbar-title class="titre-lg full-width">{{$t('CPTkwc')}}</q-toolbar-title>
+          <q-btn dense flat size="md" icon="close" @click="mcedit=false"/>
+        </q-toolbar>
+      <mots-cles class="full-width" :motscles="motscles" @ok="okmc"></mots-cles>
+      </q-card>
+    </q-dialog>
 
     <!-- Dialogue d'édition du mémo du compte -->
     <q-dialog v-model="memoedit">
@@ -107,7 +119,8 @@ export default {
       ps: null,
       memoedit: false,
       mcledit: false,
-      nvpar: false
+      nvpar: false,
+      mcedit: false,
     }
   },
 
@@ -167,5 +180,5 @@ export default {
   padding: 0 !important
   min-height: 0 !important
 .q-btn
-  padding: 0 !important
+  padding: 2px 4px !important
 </style>

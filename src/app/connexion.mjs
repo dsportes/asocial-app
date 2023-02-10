@@ -423,7 +423,7 @@ export class ConnexionCompte extends OperationUI {
     }
 
     await this.getCTA()
-    session.avatarId = session.compteId
+    session.setAvatarCourant(session.compteId)
 
     if (session.accesIdb && !session.nombase) await session.setNombase() // maintenant que la cle K est connue
 
@@ -449,7 +449,7 @@ export class ConnexionCompte extends OperationUI {
     const session = stores.session
     this.rowAvatar = await getAvatarPrimaire()
     this.avatar = await compile(this.rowAvatar)
-    session.avatarId = session.compteId
+    session.setAvatarCourant(session.compteId)
     this.rowCompta = await getCompta()
     this.compta = await compile(this.rowCompta) 
     this.rowTribu = await getTribu(this.compta.idt)
@@ -796,7 +796,7 @@ export class CreationCompteComptable extends OperationUI {
 
       session.compteId = na.id
       session.tribuId = nt.id
-      session.avatarId = session.compteId
+      session.setAvatarCourant(session.compteId)
       session.estComptable = true
 
       const rowAvatar = await Avatar.primaireRow (na, kpav.privateKey, kpav.publicKey, nt, true)

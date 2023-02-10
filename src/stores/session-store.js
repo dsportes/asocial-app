@@ -91,6 +91,10 @@ export const useSessionStore = defineStore('session', {
       localStorage.setItem(this.lsk, this.nombase)
     },
 
+    setAvatarCourant (i) {
+      this.avatarId = id
+    },
+    
     chgps (phrase) {
       /*
       Suppression de l'ancienne clé lsk donnant le nom de la base du compte
