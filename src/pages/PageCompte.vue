@@ -102,7 +102,7 @@ import InfoRestriction from '../components/InfoRestriction.vue'
 import MotsCles from '../components/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import FicheAvatar from '../components/FicheAvatar.vue'
-import NouveauParrainage from '../dialogues/NouveauParrainage.vue'
+import NouveauParrainage from '../dialogues/NouveauSponsoring.vue'
 
 export default {
   name: 'PageCompte',

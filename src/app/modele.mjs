@@ -1046,6 +1046,7 @@ _data_
 - `st` : statut. 0: en attente réponse, 1: refusé, 2: accepté, 3: détruit
 - `pspk` : phrase de sponsoring cryptée par la clé K du sponsor.
 - `bpspk` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
+- `dh`: date-heure du derbnier changement d'état
 - `descr` : crypté par le PBKFD de la phrase de sponsoring
   - `na` : `[nom, cle]` de P.
   - `cv` : `{ v, photo, info }` de P.
@@ -1064,7 +1065,9 @@ export class Sponsoring extends GenDoc {
     this.ids = row.ids
     this.v = row.v
     this.dlv = row.dlv
+    this.st = row.st
     this.vsh = row.vsh || 0
+    this.dh = row.dh
     const clek = stores.session.clek
     this.psp = await decrypterStr(clek, row.pspk)
     const clex = await decrypter(clek, row.bpspk)
@@ -1080,6 +1083,8 @@ export class Sponsoring extends GenDoc {
     this.ids = row.ids
     this.v = row.v
     this.dlv = row.dlv
+    this.st = row.st
+    this.dh = row.dh
     this.vsh = row.vsh || 0
     this.ard = await decrypterStr(clex, row.ardx)
     await decrypterDescr(clex, row.descrx)
@@ -1093,7 +1098,7 @@ export class Sponsoring extends GenDoc {
     this.descr.nct = new NomTribu(x.nct[0], x.nct[1])
   }
 
-  async nouveauRow (phrase, dlv, naf, sp, quotas, ard) {
+  static async nouveauRow (phrase, dlv, nom, sp, quotas, ard) {
     /* row : sans version ! (manquante dans row et row.data) 
       - `na` : `[nom, cle]` de P.
       - `cv` : `{ v, photo, info }` de P.
@@ -1104,14 +1109,25 @@ export class Sponsoring extends GenDoc {
     */
     const session = stores.session
     const av = session.avC
-    const d = { vsh: 0, na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [naf.nom, naf.rnd], sp, quotas}
+    const n = new NomAvatar(nom, 0)
+    const d = { vsh: 0, na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, quotas}
     const x = session.compte.nct
     d.nct = [x.nom, x.rnd]
     const descrx = await crypter(phrase.clex, new Unint8Array(encode(d)))
     const ardx = await crypter(phrase.clex, ard || '')
     const pspk = await crypter(session.clek, phrase.phrase)
     const bpspk = await crypter(session.clek, phrase.pcb)
-    const _data_ = { id: av.id, ids: phrase.phch, dlv, pspk, bpspk, descrx, ardx}
+    const _data_ = { 
+      id: av.id,
+      ids: phrase.phch,
+      dlv,
+      st: 1,
+      dh: new Date().getTime(),
+      pspk,
+      bpspk,
+      descrx,
+      ardx
+    }
     const row = { id: av.id, ids: phrase.phch, dlv, _data_ }
     return row
   }

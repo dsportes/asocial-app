@@ -126,7 +126,7 @@ import ShowHtml from '../components/ShowHtml.vue'
 import InfoRestriction from '../components/InfoRestriction.vue'
 import MotsCles from '../components/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import NouveauParrainage from '../dialogues/NouveauParrainage.vue'
+import NouveauParrainage from '../dialogues/NouveauSponsoring.vue'
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names

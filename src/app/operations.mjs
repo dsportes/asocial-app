@@ -238,6 +238,66 @@ export class GetAvatarPC extends OperationUI {
   }
 }
 
+/** Nouveau Sponsoring ****************************************************
+arg :
+  - sessionId: data.sessionId,
+  - rowCouple
+  - rowContact
+  - id: id de l'avatar
+  - ni: clé d'accès à lcck de l'avatar
+  - datak : clé cc cryptée par la clé k
+  - sec : true si avatar accède aux secrets du contact
+*/
+
+export class NouveauParrainage extends OperationUI {
+  constructor () {
+    super($t('OPpnc'))
+  }
+
+  async run (arg) {
+    /* Arg
+    nat: this.session.estComptable ? this.naTribu : this.session.compte.nat,
+    phch: this.pc.phch, // le hash de la clex (integer)
+    pp: this.pc.phrase, // phrase de parrainage (string)
+    clex: this.pc.clex, // PBKFD de pp (u8)
+    id: this.session.id,
+    max: this.max,
+    forfaits: this.forfaits,
+    parrain: this.estParrain,
+    nomf: this.nom, // nom du filleul (string)
+    mot: this.mot,
+    npi: this.npi
+    */
+    try {
+      /* `lcck` : map : de avatar
+          - _clé_ : `ni`, numéro pseudo aléatoire. Hash de (`cc` en hexa suivi de `0` ou `1`).
+          - _valeur_ : clé `cc` cryptée par la clé K de l'avatar cible. Le hash d'une clé d'un couple donne son id.
+      */
+     const session = stores.session
+      const cc = random(32) // clé du couple
+      const ni = hash(u8ToHex(cc) + '0')
+      const datak = await crypter(session.clek, cc)
+      const nap = getNg(arg.id) // na de l'avatar créateur
+      const naf = new NomAvatar(arg.nomf) // na de l'avatar du filleul
+      const dlv = getJourJ() + stores.config.limitesjour.parrainage
+
+      const couple = new Couple().nouveauP(nap, naf, cc, arg.mot, arg.pp, arg.max, dlv, arg.npi)
+      couple.mc0 = new Uint8Array([252])
+      couple.mc1 = new Uint8Array([253])
+      const rowCouple = await couple.toRow()
+
+      const nct = [arg.nat.nom, arg.nat.rnd]
+      const contact = await new Contact().nouveau(arg.phch, arg.clex, dlv, cc, [naf.nom, naf.rnd], 0, nct, arg.parrain, arg.forfaits)
+      const rowContact = contact.toRow()
+
+      const args = { sessionId: session.sessionId, rowCouple, rowContact, ni, datak, id: nap.id, sec: arg.max[0] > 0 }
+      await post(this, 'm1', 'nouveauParrainage', args)
+      return this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
 
 
 
@@ -394,68 +454,6 @@ export class GetCompta extends OperationUI {
       return r.compta[id]
     } catch (e) {
       await this.finKO(e)
-    }
-  }
-}
-
-/******************************************************************
-Parrainage :
-arg :
-  - sessionId: data.sessionId,
-  - rowCouple
-  - rowContact
-  - id: id de l'avatar
-  - ni: clé d'accès à lcck de l'avatar
-  - datak : clé cc cryptée par la clé k
-  - sec : true si avatar accède aux secrets du contact
-*/
-
-export class NouveauParrainage extends OperationUI {
-  constructor () {
-    super($t('OPpnc'))
-  }
-
-  async run (arg) {
-    /* Arg
-    nat: this.session.estComptable ? this.naTribu : this.session.compte.nat,
-    phch: this.pc.phch, // le hash de la clex (integer)
-    pp: this.pc.phrase, // phrase de parrainage (string)
-    clex: this.pc.clex, // PBKFD de pp (u8)
-    id: this.session.id,
-    max: this.max,
-    forfaits: this.forfaits,
-    parrain: this.estParrain,
-    nomf: this.nom, // nom du filleul (string)
-    mot: this.mot,
-    npi: this.npi
-    */
-    try {
-      /* `lcck` : map : de avatar
-          - _clé_ : `ni`, numéro pseudo aléatoire. Hash de (`cc` en hexa suivi de `0` ou `1`).
-          - _valeur_ : clé `cc` cryptée par la clé K de l'avatar cible. Le hash d'une clé d'un couple donne son id.
-      */
-     const session = stores.session
-      const cc = random(32) // clé du couple
-      const ni = hash(u8ToHex(cc) + '0')
-      const datak = await crypter(session.clek, cc)
-      const nap = getNg(arg.id) // na de l'avatar créateur
-      const naf = new NomAvatar(arg.nomf) // na de l'avatar du filleul
-      const dlv = getJourJ() + stores.config.limitesjour.parrainage
-
-      const couple = new Couple().nouveauP(nap, naf, cc, arg.mot, arg.pp, arg.max, dlv, arg.npi)
-      couple.mc0 = new Uint8Array([252])
-      couple.mc1 = new Uint8Array([253])
-      const rowCouple = await couple.toRow()
-
-      const nct = [arg.nat.nom, arg.nat.rnd]
-      const contact = await new Contact().nouveau(arg.phch, arg.clex, dlv, cc, [naf.nom, naf.rnd], 0, nct, arg.parrain, arg.forfaits)
-      const rowContact = contact.toRow()
-
-      const args = { sessionId: session.sessionId, rowCouple, rowContact, ni, datak, id: nap.id, sec: arg.max[0] > 0 }
-      await post(this, 'm1', 'nouveauParrainage', args)
-      return this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
     }
   }
 }

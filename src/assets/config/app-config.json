@@ -17,7 +17,7 @@
   "nomDuComptable": "Comptable",
   "nomTribuPrimitive": "Primitive",
   "allocComptable": [32, 32, 256, 256],
-  "forfaits": { "0": 0, "XXS": 1, "XS": 2, "SM": 4, "MD": 8, "LG": 16, "XL": 32, "XXL": 64 },
+  "quotas": { "0": 0, "XXS": 1, "XS": 2, "SM": 4, "MD": 8, "LG": 16, "XL": 32, "XXL": 64 },
   "datetimeformat": { "timeZone": "Europe/Paris", "year": "numeric", "month": "2-digit", "day": "2-digit", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
   "datetimeformat1": { "timeZone": "Europe/Paris", "year": "numeric", "month": "2-digit", "day": "2-digit", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
   "datetimeformat2": { "timeZone": "Europe/Paris", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },

@@ -1,10 +1,14 @@
 <template>
-  <q-card class="q-ma-xs moyennelargeur fs-md">
-    <q-toolbar class="bg-secondary text-white">
+<q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
+  <q-header elevated class="bg-secondary text-white">
+    <q-toolbar>
+      <q-btn dense size="md" color="warning" icon="close" @click="close"/>
+      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
-      <q-toolbar-title class="titre-lg q-pl-sm">{{$t('NPtit')}}</q-toolbar-title>
-      <q-btn dense size="md" color="warning" icon="close" @click="close()"/>
     </q-toolbar>
+  </q-header>
+
+  <q-page-container>
 
     <q-card-section>
       <q-stepper v-model="step" vertical color="primary" animated>
@@ -45,9 +49,9 @@
           </q-stepper-navigation>
         </q-step>
 
-        <q-step :name="4" title="Forfaits attribués" icon="settings" :done="step > 4" >
-          <choix-forfaits v-model="forfaits" :f1="4" :f2="4"/>
-          <div v-if="session.estComptable">
+        <q-step :name="4" :title="$t('NPquo')" icon="settings" :done="step > 4" >
+          <choix-quotas v-model="quotas" :f1="4" :f2="4"/>
+          <div v-if="avParrain">
             <div style="margin-left:-0.8rem" class="text-primary">
               <q-toggle v-model="estParrain" size="md" :color="estParrain ? 'warning' : 'primary'"
                 :label="estParrain ? $t('NPcpa') : $t('NPcsta')"/>
@@ -65,7 +69,7 @@
 
         <q-step :name="5" :title="$t('NPmax')" icon="settings" :done="step > 5" >
           <div class="titre-md text-warning">{{$t('NPzero')}}</div>
-          <choix-forfaits v-model="max" :f1="1" :f2="1"/>
+          <choix-quotas v-model="max" :f1="1" :f2="1"/>
           <q-stepper-navigation>
             <q-btn flat @click="step = 4" color="primary" :label="$t('precedent')" class="q-ml-sm" />
             <q-btn flat @click="step = 6" color="primary" :label="$t('suivant')" class="q-ml-sm" />
@@ -77,8 +81,8 @@
           <div>{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nom}}</span></div>
           <div>{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div>{{$t('NPquo')}} :<br>
-            <span class="font-mono q-pl-md">v1: {{ed1(forfaits[0])}}</span>
-            <span class="font-mono q-pl-lg">v2: {{ed2(forfaits[1])}}</span>
+            <span class="font-mono q-pl-md">v1: {{ed1(quotas[0])}}</span>
+            <span class="font-mono q-pl-lg">v2: {{ed2(quotas[1])}}</span>
           </div>
           <div v-if="estParrain" class="text-warning">{{$t('NPcp')}}</div>
           <div>{{$t('NPmv')}} :<br>
@@ -93,15 +97,15 @@
 
       </q-stepper>
     </q-card-section>
-  </q-card>
+  </q-page-container>
+</q-layout>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue'
 import NomAvatar from '../components/NomAvatar.vue'
-import ChoixForfaits from '../components/ChoixForfaits.vue'
+import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
-import { NouveauParrainage } from '../app/operations.mjs'
 import { edvol } from '../app/util.mjs'
 import { PhraseContact } from '../app/modele.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
@@ -109,27 +113,28 @@ import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 
 export default ({
-  name: 'NouveauParrainage',
+  name: 'NouveauSponsoring',
 
-  /* La tribu n'est nécessaire que pour une action du Comptable
+  /* La tribu est nécessaire pour une action du Comptable
   qui lui peut choisir la tribu du parrainé */
   props: { close: Function, naTribu: Object },
 
-  components: { ChoixForfaits, NomAvatar, EditeurMd, BoutonHelp },
+  components: { ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp },
 
   computed: {
-    dlclass () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
+    dlclass () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    avParrain () { return this.session.avC.estParrain }
   },
 
   data () {
     return {
       isPwd: false,
       step: 1,
-      forfaits: [],
+      quotas: [],
       max: [],
-      estParrain: this.session.estComptable,
       nom: '',
       phrase: '',
+      estParrain: false,
       npi: false,
       pc: null,
       mot: '',
@@ -200,32 +205,12 @@ export default ({
       }
     },
     async confirmer () {
-      const arg = {
-        nat: this.session.estComptable ? this.naTribu : this.session.compte.nat,
-        phch: this.pc.phch, // le hash de la clex (integer)
-        pp: this.pc.phrase, // phrase de parrainage (string)
-        clex: this.pc.clex, // PBKFD de pp (u8)
-        id: this.session.compte.id,
-        max: this.max,
-        forfaits: this.forfaits,
-        parrain: this.estParrain,
-        nomf: this.nom, // nom du filleul (string)
-        mot: this.mot,
-        npi: this.npi
-      }
-      const [st, ex] = await new NouveauParrainage().run(arg)
-      if (st) {
-        this.mot = ''
-        this.nom = ''
-        this.max = [1, 1]
-        this.forfaits = [1, 1]
-        this.estParrain = this.session.estComptable
-        this.pc = null
-        this.ui.goto22(this.session.compte.id) // avatar courant
-        if (this.close) this.close()
-      } else {
-        console.log(ex.message)
-      }
+      // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) {
+      const row = Sponsoring.nouveauRow(this.pc, 0, this.nom, this.estParrain, this.quotas, this.mot)
+      try {
+        await new NouveauParrainage().run(row)
+        this.close()
+      } catch {}
     },
     corriger () {
       this.step = 1

@@ -39,7 +39,7 @@
           </div>
           <div v-else>{{$t('APAnos')}}</div>
           <div class="titre-md text-warning">{{$t('APAnos2')}}</div>
-          <choix-forfaits v-model="max" :f1="couple.mx10 || 1" :f2="couple.mx20 || 1"/>
+          <choix-quotas v-model="max" :f1="couple.mx10 || 1" :f2="couple.mx20 || 1"/>
           <div v-if="couple.npiE===1">{{$t('APAper')}}</div>
           <div v-if="couple.npiE===0">{{$t('APAper2')}}</div>
           <div style="margin-left:-0.8rem" class="text-primary">
@@ -82,7 +82,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationParrainage, RefusParrainage } from '../app/connexion.mjs'
 import { getJourJ, edvol } from '../app/util.mjs'
-import ChoixForfaits from '../components/ChoixForfaits.vue'
+import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 
 export default ({
@@ -101,7 +101,7 @@ export default ({
     - `idt` : id de la tribu de A0 SEULEMENT SI A0 en est parrain.
   */
 
-  components: { PhraseSecrete, EditeurMd, ShowHtml, ChoixForfaits },
+  components: { PhraseSecrete, EditeurMd, ShowHtml, ChoixQuotas },
 
   computed: {
     estpar () { return this.datactc && this.datactc.parrain },

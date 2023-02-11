@@ -1,14 +1,14 @@
 <template>
   <q-card-section class="q-pt-none shadow-8 row justify-between fullwidth">
     <div class="col-6">
-      <div class="titre-md">{{$t('CFOv1t', [ed1(f1n)])}}</div>
+      <div class="titre-md">{{$t('CQv1', [ed1(f1n)])}}</div>
       <div class="row justify-around">
         <q-select class="col-5" v-model="f1c" :options="options1" :disable="lecture" dense options-dense/>
         <q-input class="col-5" v-model.number="f1n" type="number" :disable="lecture" dense :rules="[val => val >= 0 && val <= maxx || ('0 - ' + maxx)]"/>
       </div>
     </div>
     <div class="col-6">
-      <div class="titre-md">{{$t('CFOv2f', [ed2(f2n)])}}</div>
+      <div class="titre-md">{{$t('CQv2', [ed2(f2n)])}}</div>
       <div class="row justify-around">
         <q-select class="col-5" v-model="f2c" :options="options2" :disable="lecture" dense options-dense/>
         <q-input class="col-5" v-model.number="f2n" type="number" :disable="lecture" dense :rules="[val => val >= 0 && val <= maxx || ('0 - ' + maxx)]"/>
@@ -32,7 +32,7 @@ import stores from '../stores/stores.mjs'
 import { UNITEV2, UNITEV1 } from '../app/api.mjs'
 
 export default {
-  name: 'ChoixForfaits',
+  name: 'ChoixQuotas',
   emits: ['update:modelValue', 'valider'],
   props: { modelValue: Array, lecture: Boolean, labelValider: String, f1: Number, f2: Number, v1: Number, v2: Number, max: Number },
 
