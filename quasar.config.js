@@ -47,6 +47,9 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
     build: {
+      // this is a configuration passed on
+      // to the underlying Webpack
+      devtool: 'source-map',
       env: {
         BUILD: 2211011200,
         PORT_SERVEUR: 8443 // Pour le DEV. En prod, c'est window.location.port (celui de l'URL de l'appli)

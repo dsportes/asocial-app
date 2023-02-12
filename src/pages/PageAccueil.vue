@@ -10,7 +10,8 @@
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACgroupes')">
           <q-badge color="teal-10" rounded floating>{{nbgrps}}</q-badge>
         </q-btn>
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACsponsorings')">
+        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACsponsorings')"
+          @click="ui.setPage('sponsorings')">
           <q-badge color="teal-10" rounded floating>{{nbspons}}</q-badge>
         </q-btn>
         <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACinvitations')">

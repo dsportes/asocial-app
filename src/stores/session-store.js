@@ -91,7 +91,7 @@ export const useSessionStore = defineStore('session', {
       localStorage.setItem(this.lsk, this.nombase)
     },
 
-    setAvatarCourant (i) {
+    setAvatarCourant (id) {
       this.avatarId = id
     },
     

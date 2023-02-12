@@ -331,7 +331,7 @@ export class ConnexionCompte extends OperationUI {
     }
     if (rowSponsorings  && rowSponsorings.length) {
       for (const row of rowSponsorings) {
-        if (row.dlv <= this.auj) { // ignore les sponsorings de dlv dépassée
+        if (row.dlv >= this.auj) { // ignore les sponsorings de dlv dépassée
           this.buf.putIDB(row)
           rows[row.ids] = row
           n2++
@@ -341,7 +341,7 @@ export class ConnexionCompte extends OperationUI {
         }
       }
     }
-    const avStore = stores.avatars
+    const avStore = stores.avatar
     for (const ids in rows) {
       const sponsoring = await compile(rows[ids])
       avStore.setSponsoring(sponsoring)

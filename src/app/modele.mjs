@@ -1060,7 +1060,7 @@ _data_
 export class Sponsoring extends GenDoc {
 
   /* Par l'avatar sponsor */
-  async fromRow (row) {
+  async compile (row) {
     this.id = row.id
     this.ids = row.ids
     this.v = row.v
@@ -1072,13 +1072,13 @@ export class Sponsoring extends GenDoc {
     this.psp = await decrypterStr(clek, row.pspk)
     const clex = await decrypter(clek, row.bpspk)
     this.ard = await decrypterStr(clex, row.ardx)
-    await decrypterDescr(clex, row.descrx)
+    await this.decrypterDescr(clex, row.descrx)
   }
 
   /* Par le candidat sponsorisé qui connaît la clé X
     du fait qu'il connaît la phrase de sponsoring
   */
-  async fromRow2 (row, clex) {
+  async fromRow (row, clex) {
     this.id = row.id
     this.ids = row.ids
     this.v = row.v
@@ -1087,48 +1087,48 @@ export class Sponsoring extends GenDoc {
     this.dh = row.dh
     this.vsh = row.vsh || 0
     this.ard = await decrypterStr(clex, row.ardx)
-    await decrypterDescr(clex, row.descrx)
+    await this.decrypterDescr(clex, row.descrx)
   }
 
   async decrypterDescr (clex, descrx) {
     const x = decode(await decrypter(clex, descrx))
     this.descr = { cv: x.cv, sp: x.sp, quotas: x.quotas }
     this.descr.na = new NomAvatar(x.na[0], x.na[1])
-    this.descr.naf = new NomAvatar(x.naf[0], x.naf[1])
+    this.descr.naf = new NomAvatar(x.naf[0], x.naf[1], 0)
     this.descr.nct = new NomTribu(x.nct[0], x.nct[1])
   }
 
-  static async nouveauRow (phrase, dlv, nom, sp, quotas, ard) {
-    /* row : sans version ! (manquante dans row et row.data) 
-      - `na` : `[nom, cle]` de P.
-      - `cv` : `{ v, photo, info }` de P.
-      - `naf` : `[nom, cle]` attribué au filleul.
-      - `nct` : `[nom, cle]` de sa tribu.
+  static async nouveauRow (phrase, dlv, nom, nct, sp, quotas, ard) {
+    /* 
+      - 'phrase: objet phrase
+      - 'dlv'
+      - 'nom': nom de l'avatar du compte à créer
+      - `nct` : `[nom, cle]` de la tribu.
       - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
       - `quotas` : `[v1, v2]` quotas attribués par le parrain.
     */
     const session = stores.session
     const av = session.avC
     const n = new NomAvatar(nom, 0)
-    const d = { vsh: 0, na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, quotas}
-    const x = session.compte.nct
-    d.nct = [x.nom, x.rnd]
-    const descrx = await crypter(phrase.clex, new Unint8Array(encode(d)))
+    const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, quotas}
+    d.nct = [nct.nom, nct.rnd]
+    const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))
     const ardx = await crypter(phrase.clex, ard || '')
     const pspk = await crypter(session.clek, phrase.phrase)
-    const bpspk = await crypter(session.clek, phrase.pcb)
-    const _data_ = { 
+    const bpspk = await crypter(session.clek, phrase.clex)
+    const _data_ = new Uint8Array(encode({ 
       id: av.id,
       ids: phrase.phch,
       dlv,
-      st: 1,
+      st: 0,
       dh: new Date().getTime(),
       pspk,
       bpspk,
       descrx,
-      ardx
-    }
-    const row = { id: av.id, ids: phrase.phch, dlv, _data_ }
+      ardx,
+      vsh: 0
+    }))
+    const row = { _nom: 'sponsorings', id: av.id, ids: phrase.phch, dlv, _data_ }
     return row
   }
 }

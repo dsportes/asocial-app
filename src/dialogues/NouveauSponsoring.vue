@@ -49,46 +49,30 @@
           </q-stepper-navigation>
         </q-step>
 
-        <q-step :name="4" :title="$t('NPquo')" icon="settings" :done="step > 4" >
-          <choix-quotas v-model="quotas" :f1="4" :f2="4"/>
+        <q-step :name="4" :title="$t('NPquo1')" icon="settings" :done="step > 4" >
+          <choix-quotas :quotas="quotas"/>
           <div v-if="avParrain">
             <div style="margin-left:-0.8rem" class="text-primary">
               <q-toggle v-model="estParrain" size="md" :color="estParrain ? 'warning' : 'primary'"
-                :label="estParrain ? $t('NPcpa') : $t('NPcsta')"/>
+                :label="estParrain ? $t('NPcpa') : $t('NPcstd')"/>
             </div>
-          </div>
-          <div style="margin-left:-0.8rem" class="text-primary">
-            <q-toggle v-model="npi" size="md" :color="npi ? 'warning' : 'primary'"
-              :label="npi ? $t('NPnpi') : $t('NPinv')"/>
           </div>
           <q-stepper-navigation>
             <q-btn flat @click="step = 3" color="primary" :label="$t('precedent')" class="q-ml-sm" />
-            <q-btn flat @click="step = 5" color="primary" :label="$t('suivant')" class="q-ml-sm" />
+            <q-btn flat @click="step = 5" :disable="quotas.err"
+              color="primary" :label="$t('suivant')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
 
-        <q-step :name="5" :title="$t('NPmax')" icon="settings" :done="step > 5" >
-          <div class="titre-md text-warning">{{$t('NPzero')}}</div>
-          <choix-quotas v-model="max" :f1="1" :f2="1"/>
-          <q-stepper-navigation>
-            <q-btn flat @click="step = 4" color="primary" :label="$t('precedent')" class="q-ml-sm" />
-            <q-btn flat @click="step = 6" color="primary" :label="$t('suivant')" class="q-ml-sm" />
-          </q-stepper-navigation>
-        </q-step>
-
-        <q-step :name="6" :title="$t('NPconf')" icon="check" :done="step > 6" >
+        <q-step :name="5" :title="$t('NPconf')" icon="check" :done="step > 6" >
           <div>{{$t('NPphr')}} : <span class="font-mono q-pl-md">{{phrase}}</span></div>
           <div>{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nom}}</span></div>
           <div>{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div>{{$t('NPquo')}} :<br>
-            <span class="font-mono q-pl-md">v1: {{ed1(quotas[0])}}</span>
-            <span class="font-mono q-pl-lg">v2: {{ed2(quotas[1])}}</span>
+            <span class="font-mono q-pl-md">v1: {{ed1(quotas.q1)}}</span>
+            <span class="font-mono q-pl-lg">v2: {{ed2(quotas.q2)}}</span>
           </div>
           <div v-if="estParrain" class="text-warning">{{$t('NPcp')}}</div>
-          <div>{{$t('NPmv')}} :<br>
-            <span class="font-mono q-pl-md">v1: {{ed1(max[0])}}</span>
-            <span class="font-mono q-pl-lg">v2: {{ed2(max[1])}}</span>
-          </div>
           <q-stepper-navigation>
             <q-btn flat @click="corriger" color="primary" :label="$t('corriger')" class="q-ml-sm" />
             <q-btn @click="confirmer" color="warning" :label="$t('confirmer')" icon="check" class="q-ml-sm" />
@@ -102,22 +86,23 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, toRef, onMounted } from 'vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { edvol } from '../app/util.mjs'
-import { PhraseContact } from '../app/modele.mjs'
-import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { PhraseContact, Sponsoring } from '../app/modele.mjs'
+import { UNITEV1, UNITEV2, DateJour } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import { AjoutSponsoring } from '../app/operations.mjs'
 
 export default ({
   name: 'NouveauSponsoring',
 
   /* La tribu est nécessaire pour une action du Comptable
   qui lui peut choisir la tribu du parrainé */
-  props: { close: Function, naTribu: Object },
+  props: { close: Function, tribu: Object },
 
   components: { ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp },
 
@@ -130,7 +115,6 @@ export default ({
     return {
       isPwd: false,
       step: 1,
-      quotas: [],
       max: [],
       nom: '',
       phrase: '',
@@ -206,9 +190,11 @@ export default ({
     },
     async confirmer () {
       // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) {
-      const row = Sponsoring.nouveauRow(this.pc, 0, this.nom, this.estParrain, this.quotas, this.mot)
+      const q = [this.quotas.q1, this.quotas.q2]
+      const dlv = DateJour.nj() + this.limj
+      const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, this.nct, this.estParrain, q, this.mot)
       try {
-        await new NouveauParrainage().run(row)
+        await new AjoutSponsoring().run(row)
         this.close()
       } catch {}
     },
@@ -217,10 +203,14 @@ export default ({
     }
   },
 
-  setup () {
+  setup (props) {
+    const limj = stores.config.limitesjour.sponsoring
     const step1 = ref(null)
     const step2 = ref(null)
     const step3 = ref(null)
+    const tribu = toRef(props, 'tribu')
+    const quotas = ref(null)
+    quotas.value = { q1: 1, q2: 1, m1: tribu.value.r1, m2: tribu.value.r2 }
 
     onMounted(() => {
       setTimeout(() => {
@@ -230,10 +220,13 @@ export default ({
     })
 
     return {
+      nct: tribu.value.na,
+      limj,
       step1,
       step2,
       step3,
       session: stores.session,
+      quotas,
       ui: stores.ui
     }
   }

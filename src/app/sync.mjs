@@ -103,9 +103,9 @@ export class OnchangeCompta extends OperationWS {
     // (re) chargement des secrets, chats, sponsorings
     args.v = v || 0
     const ret2 = this.tr(await post(this, 'ChargerSCS', args))
-    e.lsc = ret2.rowSecrets
-    e.lch = ret2.rowChats
-    e.lsp = ret2.rowSponsorings
+    for (const x of ret2.rowSecrets) e.lsc.push(await compile(x))
+    for (const x of ret2.rowChats) e.lch.push(await compile(x))
+    for (const x of ret2.rowSponsorings) e.lsp.push(await compile(x))
     avatar.idGroupes(this.grUtiles)
   }
 
