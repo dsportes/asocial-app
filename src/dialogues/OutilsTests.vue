@@ -24,11 +24,6 @@
     </q-card-section>
 
     <q-card-section v-if="tab === 'tst'">
-      <choix-quotas :quotas="quotas" @change="traceq(quotas)"/>
-    </q-card-section>
-
-
-    <q-card-section v-if="tab === 'tst'">
       <div class="titre-lg">{{$t('TPt2')}}</div>
       <div v-if="session.accesNet" class="q-ml-md">
         <q-btn dense label="Ping du serveur" color="primary" @click="pingsrv"/>
@@ -131,7 +126,6 @@ import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
-import ChoixQuotas from '../components/ChoixQuotas.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { EchoTexte, ErreurFonc } from '../app/connexion.mjs'
 import { dhcool, $t, html, afficherDiag, sleep, edvol, b64ToU8, u8ToB64 } from '../app/util.mjs'
@@ -142,7 +136,7 @@ import { PingDB } from '../app/connexion.mjs'
 export default ({
   name: 'OutilsTests',
 
-  components: { PhraseSecrete, BoutonHelp, ChoixQuotas },
+  components: { PhraseSecrete, BoutonHelp },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
