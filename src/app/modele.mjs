@@ -1046,7 +1046,7 @@ _data_
 - `st` : statut. 0: en attente réponse, 1: refusé, 2: accepté, 3: détruit
 - `pspk` : phrase de sponsoring cryptée par la clé K du sponsor.
 - `bpspk` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
-- `dh`: date-heure du derbnier changement d'état
+- `dh`: date-heure du dernier changement d'état
 - `descr` : crypté par le PBKFD de la phrase de sponsoring
   - `na` : `[nom, cle]` de P.
   - `cv` : `{ v, photo, info }` de P.
@@ -1072,30 +1072,31 @@ export class Sponsoring extends GenDoc {
     this.psp = await decrypterStr(clek, row.pspk)
     const clex = await decrypter(clek, row.bpspk)
     this.ard = await decrypterStr(clex, row.ardx)
-    await this.decrypterDescr(clex, row.descrx)
+    this.descr = {}
+    await Sponsoring.decrypterDescr(this.descr, clex, row.descrx)
   }
 
   /* Par le candidat sponsorisé qui connaît la clé X
     du fait qu'il connaît la phrase de sponsoring
   */
-  async fromRow (row, clex) {
-    this.id = row.id
-    this.ids = row.ids
-    this.v = row.v
-    this.dlv = row.dlv
-    this.st = row.st
-    this.dh = row.dh
-    this.vsh = row.vsh || 0
-    this.ard = await decrypterStr(clex, row.ardx)
-    await this.decrypterDescr(clex, row.descrx)
+  static async fromRow (row, clex) {
+    const x = decode(row._data_)
+    const obj = {}
+    obj.ard = await decrypterStr(clex, x.ardx)
+    await Sponsoring.decrypterDescr(obj, clex, x.descrx)
+    return obj
   }
 
-  async decrypterDescr (clex, descrx) {
+  static async decrypterDescr (obj, clex, descrx) {
     const x = decode(await decrypter(clex, descrx))
-    this.descr = { cv: x.cv, sp: x.sp, quotas: x.quotas }
-    this.descr.na = new NomAvatar(x.na[0], x.na[1])
-    this.descr.naf = new NomAvatar(x.naf[0], x.naf[1], 0)
-    this.descr.nct = new NomTribu(x.nct[0], x.nct[1])
+    obj.cv = x.cv
+    obj.sp = x.sp
+    obj.quotas = x.quotas
+    obj.dlv = x.dlv
+    obj.dh = x.dh
+    obj.na = new NomAvatar(x.na[0], x.na[1])
+    obj.naf = new NomAvatar(x.naf[0], x.naf[1], 0)
+    obj.nct = new NomTribu(x.nct[0], x.nct[1])
   }
 
   static async nouveauRow (phrase, dlv, nom, nct, sp, quotas, ard) {

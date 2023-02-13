@@ -1,4 +1,50 @@
 <template>
+<q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
+  <q-header elevated class="bg-secondary text-white">
+    <q-toolbar>
+      <q-btn dense size="md" color="warning" icon="close" @click="close"/>
+      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NPtit')}}</q-toolbar-title>
+      <bouton-help page="page1"/>
+    </q-toolbar>
+  </q-header>
+
+  <q-page-container>
+    <q-page>
+      <div :class="'titre-md text-' + clr(sp)">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
+      <div class="titre-md">{{$t('NPphr')}}
+        <span class="q-ml-sm font-mono text-bold fs-md">{{pc.phrase}}</span>
+      </div>
+      <div class="titre-md">{{$t('NPdlv')}}
+        <span class="q-ml-sm font-mono text-bold fs-md">{{dlved(sp)}}</span>
+      </div>
+      <div class="titre-md">{{$t('NPnom')}}
+        <span class="text-bold font-mono q-px-md">{{sp.naf.nom}}</span>
+      </div>
+
+      <div class="col-auto column items-center q-mr-sm">
+        <img class="photomax" :src="sp.na.photoDef" />
+      </div>
+      <div class="col">
+        <div>
+          <span class="text-bold fs-md q-mr-sm">{{sp.na.nom}}</span> 
+          <span class="text-bold fs-sm font-mono q-mr-sm">#{{na.id}}</span> 
+        </div>
+        <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
+          zoom maxh="4rem" :texte="info"/>
+        <div v-else class="text-italic">{{$t('FAnocv')}}</div>
+      </div>
+
+      <div class="titre-md">{{$t('NPtribu')}}
+        <span class="text-bold font-mono q-px-md">{{sp.nct.nom}}</span>
+        <span v-if="sp.descr.sp" class="text-italic q-px-md">{{$t('NPspons')}}</span>
+      </div>
+      <div class="titre-md">{{$t('NPquo')}} :
+        <span class="font-mono q-pl-md">v1: {{ed1(sp.quotas[0])}}</span>
+        <span class="font-mono q-pl-lg">v2: {{ed2(sp.quotas[1])}}</span>
+      </div>
+      <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
+      <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard"/>
+
   <q-card class="q-ma-xs moyennelargeur fs-md">
     <q-card-section class="column items-center">
       <div class="titre-lg text-center">{{$t('APAtit', [estpar ? $t('APApa') : $t('APAfi')])}}</div>
@@ -74,6 +120,8 @@
       </q-stepper>
     </q-card-section>
   </q-card>
+  </q-page-container>
+</q-layout>
 </template>
 
 <script>
@@ -86,28 +134,30 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 
 export default ({
-  name: 'AcceptParrain',
+  name: 'AcceptationSponsoring',
 
-  props: { couple: Object, phch: Number, close: Function, clepubc: Object, datactc: Object },
+  props: { sp: Object, pc: Object, close: Function, clepubc: Object },
   /*
-  `datactc` :
-  - `cc` : clé du couple (donne son id).
-  - `nom` : nom de A1 pour première vérification immédiate en session que la phrase est a priori bien destinée à cet avatar. Le nom de A1 figure dans le nom du couple après celui de A0.
-  - Pour un parrainage seulement
-    - `nct` : `[nom, rnd]` nom complet de la tribu.
-    - `parrain` : true si parrain
-    - `forfaits` : `[f1, f2]` forfaits attribués par le parrain.
-  - Pour une rencontre seulement
-    - `idt` : id de la tribu de A0 SEULEMENT SI A0 en est parrain.
+  pc : object Phrase (?)
+  clepubc : clé publique du comptable
+  sp : objet Sponsoring décodé
+    - `ard`: ardoise.
+    - 'dlv': 
+    - `na` : du sponsor P.
+    - `cv` : du sponsor P.
+    - `naf` : na attribué au filleul.
+    - `nct` : de sa tribu.
+    - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
+    - `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
   components: { PhraseSecrete, EditeurMd, ShowHtml, ChoixQuotas },
 
   computed: {
-    estpar () { return this.datactc && this.datactc.parrain },
-    nomTribu () { return this.datactc ? this.datactc.nct[0] : '' },
-    textedef () { return this.$t('merci', [this.couple.nomEs + ',\n\n' + this.couple.ard]) },
-    valid () { return this.couple.dlv - this.jourJ},
+    estpar () { return this.sp.sp },
+    nomTribu () { return this.sp.nct[0] || '' },
+    textedef () { return this.$t('merci', [this.sp.na[0] + ',\n\n' + this.ard]) },
+    valid () { return this.sp.dlv},
   },
 
   data () {
@@ -124,6 +174,10 @@ export default ({
   },
 
   methods: {
+    dlved (sp) { 
+      return new DateJour(sp.dlv).aaaammjj
+    },
+    clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
     fermer () {

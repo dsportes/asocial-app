@@ -1,4 +1,5 @@
 TODO next :
+- PB !!!!!!!!!!! NomAvatar(nom, rnd) ne donne PLUS / ne transmet PLUS un id
 - FicheAvatar : gérer les restrictions d'accès - Phrase de contact - Ops
 - connexion avion
 - sponsoring / acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à reprendre

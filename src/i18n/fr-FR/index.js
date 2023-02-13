@@ -214,9 +214,12 @@ export default {
   LOGphr: 'Phrase communiquée par le sponsor',
   LOGcrea: 'Je créé mon compte ...',
   LOGcc: 'Création du compte du Comptable',
-  LOGnopp: 'Cette phrase de sponsoring est introuvable',
-  LOGppinv: 'Cette phrase de sponsoring n\'est plus valide',
+  LOGnopp: 'Phrase de sponsoring introuvable',
+  LOGppinv: 'Date de validité de la phrase de sponsoring dépassée',
   LOGppatt: 'Pas de sponsoring en attente avec cette phrase',
+  LOGsp1: 'Sponsoring dèjà refusé',
+  LOGsp2: 'Sponsoring dèjà accepté',
+  LOGsp3: 'Sponsoring annulé par le sponsor',
 
   // OutilsTests.vue
   OTtit: 'Outils et tests',

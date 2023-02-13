@@ -47,7 +47,7 @@
   </q-card>
 
   <q-dialog v-model="dialcp">
-    <AcceptParrain :couple="coupleloc" :datactc="datactc" :clepubc="clepubc" :phch="phch" :close="fermerap" />
+    <AcceptationSponsoring :sp="sp" :clepubc="clepubc" :pc="pc" :close="fermerap" />
   </q-dialog>
 
 </q-page>
@@ -55,23 +55,22 @@
 
 <script>
 import { ref, watch } from 'vue'
-import { decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 
 import { $t, afficherDiag, dlvDepassee, tru8 } from '../app/util.mjs'
 import { connecterCompte, CreationCompteComptable } from '../app/connexion.mjs'
 import { PhraseContact } from '../app/modele.mjs'
-import { get } from '../app/net.mjs'
+import { post } from '../app/net.mjs'
 
 import PhraseSecrete from '../components/PhraseSecrete.vue'
-import AcceptParrain from '../dialogues/AcceptParrain.vue'
+import AcceptationSponsoring from '../dialogues/AcceptationSponsoring.vue'
 
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'PageLogin',
 
-  components: { PhraseSecrete, AcceptParrain },
+  components: { PhraseSecrete, AcceptationSponsoring },
 
   data () {
     return {
@@ -96,41 +95,46 @@ export default {
       if (!this.phrase) return
       this.encours = true
       setTimeout(async () => {
-        const pc = await new PhraseContact().init(this.phrase)
-        this.phch = pc.phch
-        this.encours = false
-        const resp = await get('m1', 'getContact', { phch: pc.phch })
-        if (!resp || !resp.length) {
-          await afficherDiag(this.$t('LOGnopp'))
-          this.raz()
-        } else {
-          try {
-            const [row, clepubc] = decode(new Uint8Array(resp))
-            this.clepubc = clepubc
-            const contact = await new Contact().fromRow(row)
-            tru8('Login ph parr clepubc ' + contact.id, clepubc)
-            if (dlvDepassee(contact.dlv)) {
-              await afficherDiag(this.$t('LOGppinv'))
-              this.raz()
-              return
-            }
-            this.datactc = await contact.getData(pc.clex)
-            // { cc, nom, nct, parrain, forfaits, idt }
-            const naf = new NomContact('fake', this.datactc.cc)
-            const resp2 = await get('m1', 'getCouple', { id: naf.id })
-            if (!resp2) {
-              await afficherDiag(this.$t('LOGppatt'))
-              this.raz()
-              return
-            }
-            const row2 = decode(new Uint8Array(resp2))
-            this.coupleloc = await new Couple().fromRow(row2, this.datactc.cc)
+        try {
+          this.pc = await new PhraseContact().init(this.phrase)
+          this.encours = false
+          /* Recherche sponsoring ******
+          args.ids : hash de la phrase de contact
+          Retour:
+          - rowSponsoring s'il existe
+          - clepubc
+          */
+          const res = await post(this, 'ChercherSponsoring', { ids: this.pc.phch })
+          if (!res || !res.rowSponsoring) {
+            await afficherDiag(this.$t('LOGnopp'))
             this.raz()
-            this.dialcp = true
-          } catch (e) {
-            console.log(e)
-            this.raz()
+            return
           }
+        } catch (e) {
+          console.log(e)
+          this.raz()
+          return
+        }
+        try {
+          this.sp = await Sonsoring.fromRow(res.rowSponsoring, this.pc.clex)
+          this.clepubc = res.clepubc
+          if (this.sp.dlv <  DateJour.nj()) {
+            await afficherDiag(this.$t('LOGppinv'))
+            this.raz()
+            return                  
+          }
+          if (this.sp.st !== 0) {
+            await afficherDiag(this.$t('LOGsp' + this.sp.st))
+            this.raz()
+            return                  
+          }
+          this.dialcp = true
+          this.raz()
+          return
+        } catch (e) {
+          await afficherDiag(this.$t('LOGppatt'))
+          this.raz()
+          return         
         }
       }, 1)
     },
