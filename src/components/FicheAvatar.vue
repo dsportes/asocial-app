@@ -13,7 +13,7 @@
       <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
         zoom maxh="4rem" :texte="info"/>
       <div v-else class="text-italic">{{$t('FAnocv')}}</div>
-      <q-btn class="q-my-xs" flat size="sm" :label="$t('CVedit')" icon="edit" dense color="primary" @click="editerCV"/>
+      <q-btn v-if="!estComptable" class="q-my-xs" flat size="sm" :label="$t('CVedit')" icon="edit" dense color="primary" @click="editerCV"/>
       <div class="q-mt-sm" v-if="avatar.pc">
         <div>
           <span class="titre-md text-italic">{{$t('FApc')}}</span>
@@ -64,6 +64,7 @@
 import { toRef, ref } from 'vue'
 
 import stores from '../stores/stores.mjs'
+import { IDCOMPTABLE } from '../app/api.mjs'
 import ShowHtml from './ShowHtml.vue'
 import CarteVisite from '../components/CarteVisite.vue'
 import { MajCv, GetAvatarPC, ChangementPC } from '../app/operations.mjs'
@@ -80,7 +81,8 @@ export default {
   components: { ShowHtml, CarteVisite, InfoRestriction, BoutonHelp },
 
   computed: {
-    info () { return this.na.info }
+    info () { return this.na.info },
+    estComptable () { return this.na.id === IDCOMPTABLE }
   },
 
   data () {

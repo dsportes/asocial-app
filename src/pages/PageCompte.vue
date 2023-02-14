@@ -81,7 +81,7 @@
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
     <q-dialog v-model="nvpar" persistent class="moyennelargeur">
-      <nouveau-parrainage :close="fermerParrainage" />
+      <nouveau-sponsoring :close="fermerParrainage" :tribu="tribu"/>
     </q-dialog>
 
   </q-page>
@@ -102,12 +102,12 @@ import InfoRestriction from '../components/InfoRestriction.vue'
 import MotsCles from '../components/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import FicheAvatar from '../components/FicheAvatar.vue'
-import NouveauParrainage from '../dialogues/NouveauSponsoring.vue'
+import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 
 export default {
   name: 'PageCompte',
 
-  components: { NouveauParrainage, BoutonHelp, FicheAvatar, PhraseSecrete, EditeurMd, ShowHtml, InfoRestriction, MotsCles },
+  components: { NouveauSponsoring, BoutonHelp, FicheAvatar, PhraseSecrete, EditeurMd, ShowHtml, InfoRestriction, MotsCles },
 
   computed: {
     memo () { return this.session.compte.memo }
@@ -158,6 +158,7 @@ export default {
   setup () {
     const session = stores.session
     const compte = session.compte
+    const tribu = session.tribu
     const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
     const motscles = new Motscles(mc, 1)
     const memoed = ref(null)
@@ -167,7 +168,8 @@ export default {
       session,
       motscles,
       memoed,
-      compte
+      compte,
+      tribu
     }
   }
 

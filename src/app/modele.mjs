@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, dlvDepassee, titre, gzip, ungzip, ungzipT, egaliteU8, tru8, splitPK } from './util.mjs'
 import { random, pbkfd, sha256, crypterRSA, decrypterRSA, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
 
-import { IDCOMPTABLE, Compteurs, UNITEV1, UNITEV2, DateJour } from './api.mjs'
+import { IDCOMPTABLE, RNDCOMPTABLE, Compteurs, UNITEV1, UNITEV2, DateJour } from './api.mjs'
 
 import { getFichierIDB, saveSessionSync } from './db.mjs'
 
@@ -64,14 +64,28 @@ NomGenerique : NomAvatar / NomContact / NomGroupe / NomTribu
 ************************************************************/
 export class NomGenerique {
   constructor (nom, rnd) {
-    this.nom = nom
-    this.rnd = rnd || random(32)
+    let c = false
+    if (typeof rnd === 'number' ) {
+      if (rnd === -1) {
+        this.rnd = RNDCOMPTABLE
+        c = true
+       } else { 
+        this.rnd = random(32)
+        this.rnd[0] = rnd
+        c = false
+      }
+    } else {
+      this.rnd = rnd
+      c = egaliteU8(this.rnd, RNDCOMPTABLE)
+    }
+    this.nom = c ? stores.config.nomDuComptable : nom
+    this.id = c ? IDCOMPTABLE : (Math.round(hash(this.rnd) / 10) * 10) + this.rnd[0]
   }
 
   get estGroupe () { return this.id % 10 === 8 }
   get estTribu () { return this.id % 10 === 9 }
   get estAvatar () { return this.id % 10 < 8 }
-  get nomc () { return this.nom + '#' + ('' + this.id).substring(0, 4) }
+  get nomc () { return this.nom + (this.id === IDCOMPTABLE ? '' : ('#' + ('' + this.id).substring(0, 4))) }
   // get nomf () { return normpath(this.nomc) }
   get sid () { return intToB64(this.id) }
   get cv () { return getCv(this.id) }
@@ -81,11 +95,13 @@ export class NomGenerique {
   }
 
   get photo () {
+    if (this.id === IDCOMPTABLE) return stores.config.iconSuperman
     const cv = getCv(this.id)
     return cv ? cv.photo : ''
   }
 
   get info () {
+    if (this.id === IDCOMPTABLE) return stores.config.nomDuComptable
     const cv = getCv(this.id)
     return cv ? cv.info : ''
   }
@@ -93,56 +109,30 @@ export class NomGenerique {
 }
 
 export class NomAvatar extends NomGenerique {
-  static nomDuComptable = ''
-  // idx : de 0 à 7, index de l'avatar secondaire dans son primaire
-  constructor (nom, rnd, idx) {
-    super(nom, rnd)
-    if (!NomAvatar.nomDuComptable) {
-      NomAvatar.nomDuComptable = stores.config.nomDuComptable
-    }
-    this.id = nom !== NomAvatar.nomDuComptable ? (Math.round(hash(this.rnd) / 10) * 10) + idx : IDCOMPTABLE
-  }
+  constructor (nom, rnd) { super(nom, rnd) }
 
   get titre () {
     const info = this.info
     return info ? titre(info) : ''
   }
 
-  get photoDef () {
-    if (this.photo) return this.photo
-    const cfg = stores.config
-    return this.id === IDCOMPTABLE ? cfg.iconSuperman : cfg.iconAvatar
-  }
+  get photoDef () { return this.photo || stores.config.iconAvatar }
 
-  clone () {
-    return new NomAvatar(this.nom, this.rnd, (this.id % 10))
-  }
+  clone () { return new NomAvatar(this.nom, this.rnd) }
 }
 
 export class NomGroupe extends NomGenerique {
-  constructor (nom, rnd) {
-    super(nom, rnd)
-    this.id = (Math.round(hash(this.rnd) / 10) * 10) + 8
-  }
+  constructor (nom, rnd) { super(nom, rnd || 8) }
 
-  get photoDef () {
-    return this.photo || stores.config.iconGroupe
-  }
+  get photoDef () { return this.photo || stores.config.iconGroupe }
 
-  clone () {
-    return new NomGroupe(this.nom, this.rnd)
-  }
+  clone () { return new NomGroupe(this.nom, this.rnd) }
 }
 
 export class NomTribu extends NomGenerique {
-  constructor (nom, rnd) {
-    super(nom, rnd)
-    this.id = (Math.round(hash(this.rnd) / 10) * 10) + 9
-  }
+  constructor (nom, rnd) { super(nom, rnd || 9) }
 
-  clone () {
-    return new NomTribu(this.nom, this.rnd)
-  }
+  clone () { return new NomTribu(this.nom, this.rnd) }
 }
 
 /******************************************************

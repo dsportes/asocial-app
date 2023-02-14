@@ -791,7 +791,7 @@ export class CreationCompteComptable extends OperationUI {
 
       const nt = new NomTribu(config.nomTribuPrimitive)
       setNg(nt)
-      const na = new NomAvatar(config.nomDuComptable)
+      const na = new NomAvatar('', -1)
       setNg(na)
 
       session.compteId = na.id

@@ -44,7 +44,7 @@
       </div>
       <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
       <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard"/>
-
+<!--
   <q-card class="q-ma-xs moyennelargeur fs-md">
     <q-card-section class="column items-center">
       <div class="titre-lg text-center">{{$t('APAtit', [estpar ? $t('APApa') : $t('APAfi')])}}</div>
@@ -120,6 +120,8 @@
       </q-stepper>
     </q-card-section>
   </q-card>
+  -->
+    </q-page>
   </q-page-container>
 </q-layout>
 </template>
@@ -130,7 +132,6 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationParrainage, RefusParrainage } from '../app/connexion.mjs'
 import { getJourJ, edvol } from '../app/util.mjs'
-import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 
 export default ({
@@ -151,13 +152,14 @@ export default ({
     - `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
-  components: { PhraseSecrete, EditeurMd, ShowHtml, ChoixQuotas },
+  components: { /* PhraseSecrete, EditeurMd, */ ShowHtml },
 
   computed: {
     estpar () { return this.sp.sp },
     nomTribu () { return this.sp.nct[0] || '' },
     textedef () { return this.$t('merci', [this.sp.na[0] + ',\n\n' + this.ard]) },
     valid () { return this.sp.dlv},
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
   },
 
   data () {
