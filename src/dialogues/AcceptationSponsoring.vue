@@ -9,7 +9,7 @@
   </q-header>
 
   <q-page-container>
-    <q-page>
+    <q-page class="q-pa-sm">
       <div :class="'titre-md text-' + clr(sp)">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
       <div class="titre-md">{{$t('NPphr')}}
         <span class="q-ml-sm font-mono text-bold fs-md">{{pc.phrase}}</span>
@@ -20,30 +20,42 @@
       <div class="titre-md">{{$t('NPnom')}}
         <span class="text-bold font-mono q-px-md">{{sp.naf.nom}}</span>
       </div>
-
-      <div class="col-auto column items-center q-mr-sm">
-        <img class="photomax" :src="sp.na.photoDef" />
-      </div>
-      <div class="col">
-        <div>
-          <span class="text-bold fs-md q-mr-sm">{{sp.na.nom}}</span> 
-          <span class="text-bold fs-sm font-mono q-mr-sm">#{{na.id}}</span> 
+      <div class="q-mt-md titre-md">{{$t('NPsponsor')}}</div>
+      <div class="row items-start">
+        <img class="photomax col-auto q-mr-sm" :src="sp.na.photoDef" />
+        <div class="col column">
+          <div>
+            <span class="text-bold fs-md q-mr-sm">{{sp.na.nom}}</span> 
+            <span class="text-bold fs-sm font-mono q-mr-sm">#{{sp.na.id}}</span> 
+          </div>
+          <show-html v-if="sp.na.info" class="q-my-xs border1" zoom maxh="4rem" :texte="sp.na.info"/>
+          <div v-else class="text-italic">{{$t('FAnocv')}}</div>
         </div>
-        <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
-          zoom maxh="4rem" :texte="info"/>
-        <div v-else class="text-italic">{{$t('FAnocv')}}</div>
       </div>
 
-      <div class="titre-md">{{$t('NPtribu')}}
+      <div class="q-mt-md titre-md">{{$t('NPtribu')}}
         <span class="text-bold font-mono q-px-md">{{sp.nct.nom}}</span>
-        <span v-if="sp.descr.sp" class="text-italic q-px-md">{{$t('NPspons')}}</span>
+        <span v-if="sp.sp" class="text-italic q-px-md">{{$t('NPspons')}}</span>
       </div>
       <div class="titre-md">{{$t('NPquo')}} :
         <span class="font-mono q-pl-md">v1: {{ed1(sp.quotas[0])}}</span>
         <span class="font-mono q-pl-lg">v2: {{ed2(sp.quotas[1])}}</span>
       </div>
       <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
-      <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard"/>
+      <show-html class="q-mb-xs border1" zoom maxh="4rem" :texte="sp.ard"/>
+
+      <div class="q-my-md q-pa- md q-gutter-md row justify-center full-width border1">
+        <q-radio dense v-model="accdec" :val="1" :label="$t('NPacc')" />
+        <q-radio dense v-model="accdec" :val="2" :label="$t('NPdec')" />
+      </div>
+
+      <div v-if="accdec===1">
+        <phrase-secrete :init-val="ps" v-on:ok-ps="okps" verif icon-valider="check" :label-valider="$t('OK')"/>
+        <editeur-md class="full-width height-8" v-model="texte" :texte="sp.ard" editable modetxt hors-session/>
+        <q-btn flat @click="fermer()" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
+        <q-btn flat @click="refuser()" color="warning" :label="$t('APAdec2')" class="q-ml-sm" />
+      </div>
+
 <!--
   <q-card class="q-ma-xs moyennelargeur fs-md">
     <q-card-section class="column items-center">
@@ -130,9 +142,10 @@
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
-import { AcceptationParrainage, RefusParrainage } from '../app/connexion.mjs'
-import { getJourJ, edvol } from '../app/util.mjs'
-import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+// import { AcceptationParrainage, RefusParrainage } from '../app/connexion.mjs'
+import { getJourJ, edvol, dhcool } from '../app/util.mjs'
+import { UNITEV1, UNITEV2, DateJour } from '../app/api.mjs'
+import BoutonHelp from '../components/BoutonHelp.vue'
 
 export default ({
   name: 'AcceptationSponsoring',
@@ -152,7 +165,7 @@ export default ({
     - `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
-  components: { /* PhraseSecrete, EditeurMd, */ ShowHtml },
+  components: { /* PhraseSecrete, EditeurMd, */ ShowHtml, BoutonHelp },
 
   computed: {
     estpar () { return this.sp.sp },
@@ -164,6 +177,7 @@ export default ({
 
   data () {
     return {
+      accdec: 0,
       isPwd: false,
       jourJ: getJourJ(),
       max: [1, 1],
@@ -171,14 +185,13 @@ export default ({
       ps: null,
       apsf: false,
       texte: '',
-      npi: false
+      npi: false,
+      dhcool: dhcool
     }
   },
 
   methods: {
-    dlved (sp) { 
-      return new DateJour(sp.dlv).aaaammjj
-    },
+    dlved (sp) { return new DateJour(sp.dlv).aaaammjj },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
@@ -206,17 +219,20 @@ export default ({
     async confirmer () {
       const arg = { ps: this.ps, ard: this.texte, phch: this.phch, max: this.max, estpar: this.estpar, clepubc: this.clepubc, npi: this.npi }
       this.razps()
-      await new AcceptationParrainage().run(this.couple, this.datactc, arg)
+      // await new AcceptationParrainage().run(this.couple, this.datactc, arg)
       this.fermer()
     },
     async refuser () {
       this.razps()
-      await new RefusParrainage().run(this.couple, this.phch, this.texte)
+      // await new RefusParrainage().run(this.couple, this.phch, this.texte)
       this.fermer()
     }
   },
 
   setup () {
+    // console.log('Accept Spons')
+    return {
+    }
   }
 })
 </script>
@@ -225,18 +241,7 @@ export default ({
 @import '../css/app.sass'
 .border1
   border: 1px solid grey
-.q-dialog__inner
-  padding: 0 !important
-</style>
-<style lang="sass">
-.q-stepper--vertical
-  padding: 4px !important
-.q-stepper--bordered
-  border: none
-.q-stepper__tab
-  padding: 2px 0 !important
-.q-stepper__step-inner
-  padding: 0px 2px 2px 18px !important
-.q-stepper__nav
+.q-toolbar
+  min-height: 0 !important
   padding: 0 !important
 </style>

@@ -46,7 +46,7 @@
       icon-valider="check" label-valider="creer"/>
   </q-card>
 
-  <q-dialog v-model="dialcp">
+  <q-dialog v-model="dialcp" persistent full-height>
     <AcceptationSponsoring :sp="sp" :clepubc="clepubc" :pc="pc" :close="fermerap" />
   </q-dialog>
 
@@ -58,16 +58,15 @@ import { ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
-import { $t, afficherDiag, dlvDepassee, tru8 } from '../app/util.mjs'
+import { $t, afficherDiag } from '../app/util.mjs'
 import { connecterCompte, CreationCompteComptable } from '../app/connexion.mjs'
-import { PhraseContact } from '../app/modele.mjs'
-import { post } from '../app/net.mjs'
-
+import { PhraseContact, Sponsoring } from '../app/modele.mjs'
+import { ChercherSponsoring } from '../app/operations.mjs'
+import { DateJour } from '../app/api.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import AcceptationSponsoring from '../dialogues/AcceptationSponsoring.vue'
 
 export default {
-  // eslint-disable-next-line vue/multi-word-component-names
   name: 'PageLogin',
 
   components: { PhraseSecrete, AcceptationSponsoring },
@@ -104,37 +103,37 @@ export default {
           - rowSponsoring s'il existe
           - clepubc
           */
-          const res = await post(this, 'ChercherSponsoring', { ids: this.pc.phch })
+          const res = await new ChercherSponsoring().run(this.pc.phch)
           if (!res || !res.rowSponsoring) {
             await afficherDiag(this.$t('LOGnopp'))
             this.raz()
             return
           }
+          try {
+            this.sp = await Sponsoring.fromRow(res.rowSponsoring, this.pc.clex)
+            this.clepubc = res.clepubc
+            if (this.sp.dlv <  DateJour.nj()) {
+              await afficherDiag(this.$t('LOGppinv'))
+              this.raz()
+              return                  
+            }
+            if (this.sp.st !== 0) {
+              await afficherDiag(this.$t('LOGsp' + this.sp.st))
+              this.raz()
+              return                  
+            }
+            this.dialcp = true
+            this.raz()
+            return
+          } catch (e) {
+            await afficherDiag(this.$t('LOGppatt'))
+            this.raz()
+            return         
+          }
         } catch (e) {
           console.log(e)
           this.raz()
           return
-        }
-        try {
-          this.sp = await Sonsoring.fromRow(res.rowSponsoring, this.pc.clex)
-          this.clepubc = res.clepubc
-          if (this.sp.dlv <  DateJour.nj()) {
-            await afficherDiag(this.$t('LOGppinv'))
-            this.raz()
-            return                  
-          }
-          if (this.sp.st !== 0) {
-            await afficherDiag(this.$t('LOGsp' + this.sp.st))
-            this.raz()
-            return                  
-          }
-          this.dialcp = true
-          this.raz()
-          return
-        } catch (e) {
-          await afficherDiag(this.$t('LOGppatt'))
-          this.raz()
-          return         
         }
       }, 1)
     },

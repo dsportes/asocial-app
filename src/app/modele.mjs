@@ -1072,6 +1072,11 @@ export class Sponsoring extends GenDoc {
   static async fromRow (row, clex) {
     const x = decode(row._data_)
     const obj = {}
+    obj.dlv = x.dlv
+    obj.id = x.id
+    obj.ids = x.ids
+    obj.dh = x.dh
+    obj.st = x.st
     obj.ard = await decrypterStr(clex, x.ardx)
     await Sponsoring.decrypterDescr(obj, clex, x.descrx)
     return obj
@@ -1082,8 +1087,6 @@ export class Sponsoring extends GenDoc {
     obj.cv = x.cv
     obj.sp = x.sp
     obj.quotas = x.quotas
-    obj.dlv = x.dlv
-    obj.dh = x.dh
     obj.na = new NomAvatar(x.na[0], x.na[1])
     obj.naf = new NomAvatar(x.naf[0], x.naf[1], 0)
     obj.nct = new NomTribu(x.nct[0], x.nct[1])

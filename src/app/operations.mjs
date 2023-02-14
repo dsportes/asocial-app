@@ -259,6 +259,25 @@ export class AjoutSponsoring extends OperationUI {
   }
 }
 
+/** Chercher Sponsoring ****************************************************
+args.token: éléments d'authentification du compte.
+args.rowSponsoring : row Sponsoring, sans la version
+Retour:
+*/
+
+export class ChercherSponsoring extends OperationUI {
+  constructor () { super($t('OPcsp')) }
+
+  async run (ids) {
+    try {
+      const ret = this.tr(await post(this, 'ChercherSponsoring', { ids }))
+      this.finOK()
+      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
 
 
 
