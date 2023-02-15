@@ -344,7 +344,7 @@ export class CreationAvatar extends OperationUI {
     let n = 1
     try {
       while (true) {
-        const nomAvatar = new NomAvatar(nom) // FAUX !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        const nomAvatar = new NomAvatar(nom, 1)
         const kpav = await genKeyPair()
 
         const compte = session.compte

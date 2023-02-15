@@ -47,6 +47,12 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
+    getVersionAv: (state) => { return (id) => { 
+        const e = state.map.get(id)
+        return e ? e.v : 0 
+      }
+    },
+
     // retourne le secret ns de l'avatar id
     getSecret: (state) => { return (id, ids) => { 
         const e = state.map.get(id)
@@ -93,7 +99,6 @@ export const useAvatarStore = defineStore('avatar', {
 
   actions: {
     setCompte (avatar, compta, tribu) { // avatar principal du compte connecté
-      if (!avatar) { this.compteId = 0; this.compte = null; return }
       this.compteId = avatar.id
       this.avatarP = avatar
       this.setTribu(tribu)
@@ -126,6 +131,7 @@ export const useAvatarStore = defineStore('avatar', {
       if (!e) {
         e = { 
           avatar: avatar, 
+          v: avatar.v,
           secrets: new Map(),
           sponsorings: new Map(),
           chats: new Map()
@@ -133,6 +139,11 @@ export const useAvatarStore = defineStore('avatar', {
         this.map.set(avatar.id, e)
       } else e.avatar = avatar
       if (avatar.id === this.compteId) this.avatarP = avatar
+    },
+
+    setVersionAv (id, v) {
+      let e = this.map.get(avatar.id)
+      if (!e) { if (e.v < v) e.v = v }
     },
 
     setSecret (secret) {

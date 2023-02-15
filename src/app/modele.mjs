@@ -82,10 +82,13 @@ export class NomGenerique {
     this.id = c ? IDCOMPTABLE : (Math.round(hash(this.rnd) / 10) * 10) + this.rnd[0]
   }
 
-  get estGroupe () { return this.id % 10 === 8 }
-  get estTribu () { return this.id % 10 === 9 }
-  get estAvatar () { return this.id % 10 < 8 }
-  get nomc () { return this.nom + (this.id === IDCOMPTABLE ? '' : ('#' + ('' + this.id).substring(0, 4))) }
+  get estGroupe () { return this.id % 10 === 2 }
+  get estTribu () { return this.id % 10 === 3 }
+  get estAvatar () { return this.id % 10 < 2 }
+  get estAvatarP () { return this.id % 10 === 0 }
+  get estAvatarS () { return this.id % 10 === 1 }
+  get estComptable () { return this.id === IDCOMPTABLE }
+  get nomc () { return this.nom + (this.estComptable ? '' : ('#' + ('' + this.id).substring(0, 4))) }
   // get nomf () { return normpath(this.nomc) }
   get sid () { return intToB64(this.id) }
   get cv () { return getCv(this.id) }
@@ -450,15 +453,16 @@ export async function compile (row) {
 - `dh` : date-heure dernière modification.
 - `dhb` : =dh quand la tribu est bloquée
 
+- `ntk` : `[nom, rnd]` de la tribu crypté par la clé K du comptable.
+- `infok` : commentaire privé du comptable crypté par la clé K du comptable.
 - `nbc` : nombre de comptes actifs dans la tribu.
 - `a1 a2` : sommes des volumes V1 et V2 déjà attribués comme forfaits aux comptes de la tribu.
 - `r1 r2` : volumes V1 et V2 en réserve pour attribution aux comptes actuels et futurs de la tribu.
-- `infok` : commentaire privé du comptable crypté par la clé K du comptable :
-- `mncpt` : map des noms complets des parrains:
+- `msps` : map des sponsors:
   - _clé_ : `id` du sponsor.
   - _valeur_ :
-    - `na` : `[nom, rnd]` crypté par la clé de la tribu. ("na" est un NomAvatar une fois compilé))
-    - `cv` : `[photo, info]` carte de visite cryptée par la clé du sponsor
+    - `na` : `[nom, rnd]` du sponsor crypté par la clé de la tribu.
+    - `cv` : `{v, photo, info}` carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
   - l'ajout d'un parrain ne se fait que par le comptable mais un retrait peut s'effectuer aussi par un traitement de GC.
 - `blocaget` : cryptée par la clé de la tribu : ("blocage" quand compilé)
   - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
@@ -483,16 +487,21 @@ export class Tribu extends GenDoc {
     this.dh = row.dh
     this.v = row.v
 
+    if (session.estComptable) {
+      this.nt = await decrypter(session.clek, row.ntk)
+      this.info = row.infok ? await decrypter(session.clek, row.infok) : ''
+    } else {
+      this.ntk = row.ntk
+    }
     this.nbc = row.nbc
     this.a1 = row.a1
     this.a2 = row.a2
     this.r1 = row.r1
     this.r2 = row.r2
-    this.info = session.estComptable && row.infok ? await decrypterStr(session.clek, row.infok) : ''
 
-    this.mncpt = row.mncpt || {}
-    for (const id in this.mncpt) {
-      const e = this.mncpt[id]
+    this.msps = row.msps || {}
+    for (const id in this.msps) {
+      const e = this.msps[id]
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       e.na = new NomAvatar(nom, cle)
       setNg(e.na)
@@ -509,25 +518,23 @@ export class Tribu extends GenDoc {
 
   get naSponsors () { // array des na des sponsors
     const r = []
-    for (const id in this.mncp) r.push(this.mncpt[id].na)
+    for (const id in this.msps) r.push(this.msps[id].na)
     return r
   }
 
   get idSponsors () { // array des id des sponsors
     const r = []
-    for (const id in this.mncp) r.push(this.mncpt[id].na.id)
+    for (const id in this.msps) r.push(this.msps[id].na.id)
     return r
   }
 
   // retourne la CV du sponsor d'id donné
   cvSponsor (id) {
-    const x = this.mncpt[id]
+    const x = this.msps[id]
     return x ? x.cv : null
   }
 
-  static async primitiveRow (nt, na, a1, a2, r1, r2) {
-    const config = stores.config
-    const ac = config.allocComptable
+  static async primitiveRow (nt, a1, a2, r1, r2) {
     const r = {}
     r.vsh = 0
     r.id = nt.id
@@ -540,13 +547,12 @@ export class Tribu extends GenDoc {
     r.a2 = a2
     r.r1 = r1
     r.r2 = r2
-    r.mncpt = { }
-    r.mncpt[na.id] = { na: await crypter(nt.rnd, new Uint8Array(encode([na.nom, na.rnd]))) }
+    r.ntk = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, dh: r.dh, dhb: r.rhb, _data_ }
   }
 
-  nouvelle (nom, info, r1, r2) {
+  nouvelle (nom, info, r1, r2) { // A REVISER
     this.vsh = 0
     this.na = new NomTribu(nom)
     this.id = this.na.id
@@ -595,114 +601,36 @@ export class Tribu extends GenDoc {
 }
 
 /** Avatar *********************************************************
-**Données n'existant que pour un avatar primaire**
-- `kx` : clé K du compte, cryptée par la X (phrase secrète courante).
-- `stp` : statut parrain (0: non, 1:oui).
-- `nctk` : nom complet `[nom, rnd]` de la tribu crypté,
-  - soit par la clé K du compte,
-  - soit par la clé publique de son avatar primaire après changement de tribu par le comptable.
-- `lavk` [] `[nom, cle, cpriv]` : array des avatars du compte cryptée par la clé K, position d'un avatar dans la liste donnée par le dernier chiffre de son id. `[nom, cle, cpriv]`
-  - `nom cle` : nom complet de l'avatar.
-  - `cpriv` : clé privée asymétrique.
-- `mck` {} : map des mots-clés du compte cryptée par la clé K. clé: code (1-255), valeur: 'categ/label'
+**_data_  : données n'existant que pour un avatar principal**
+- `mck` {} : map des mots-clés du compte cryptée par la clé K
 - `memok` : mémo personnel du compte.
 
-**Données disponibles pour les avatars primaires et secondaires**
+**_data_ : données disponibles pour les avatars primaires et secondaires**
 - `id`, 
 - `v`,
-- `vcv` : version de la carte de visite afin qu'une session puisse détecter (sans lire le document) si la carte de visite qu'elle détient est la plus récente ou non.
-- `dlv` : date limite de validité.
+- `vcv` : version de la carte de visite afin qu'une opération puisse détecter (sans lire le document) si la carte de visite est plus récente que celle qu'il connaît.
 
-- `rsapub` : clé publique RSA de l'avatar.
-- `cva` : carte de visite cryptée par la clé de l'avatar `{v, photo, info}`.
+- `cva` : carte de visite cryptée par la clé CV de l'avatar `{v, photo, info}`.
 - `lgrk` : map :
   - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
-  - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation.
-  - une entrée est effacée par la résiliation du membre au groupe ou sur refus de l'invitation (ce qui l'empêche de continuer à utiliser la clé du groupe).
+  - _valeur_ : cryptée par la clé K du compte de `[nomg, clég, im]` reçu sur une invitation.
+  - une entrée est effacée par la résiliation du membre au groupe (ce qui l'empêche de continuer à utiliser la clé du groupe).
 - `invits` : map des invitations en cours
   - _clé_ : `ni`, numéro d'invitation.
-  - _valeur_ : cryptée par la clé publique de l'avatar `[nom, cle, im]`.
+  - _valeur_ : cryptée par la clé CV de l'avatar `[nomg, clég, im]`.
   - une entrée est effacée par l'annulation de l'invitation du membre au groupe ou sur acceptation ou refus de l'invitation.
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `hpc` : hash de la phrase de contact.
-- `napc` : [nom, cle] de l'avatar cryptée par le PBKFD de la phrase de contact.
-
-** Compilées**
-- nct: nom complet de la tribu
-**Remarques:**
-- une mise à jour de la carte de visite est redondée dans tous les groupes dont l'avatar est membre (cryptée par la clé du groupe).
+- `napc` : `[nom, clé]` de l'avatar cryptée par le PBKFD de la phrase de contact.
 */
 
 export class Avatar extends GenDoc {
-  get idxAv () { return this.id % 10 }
   get estParrain () { return this.stp === 1 } // retourne true si le compte est parrain
   get estComptable () { return this.id === IDCOMPTABLE } // retourne true si le compte est celui du comptable
-  get primaire () { return this.idxAv === 0 } // retourne true si l'objet avatar est primaire du compte
+  get primaire () { return this.id % 10 === 0 } // retourne true si l'objet avatar est primaire du compte
   get naprim () { return this.lav[0].na } // na de l'avatar primaire du compte
   get apropos () { return this.nct ? ($t('tribus', 0) + ':' + this.nct.nom) : $t('comptable') }
   get na () { return getNg(this.id) }
-
-  cpriv (id) { return this.primaire ? this.lav[id % 10].cpriv : null }
-
-  // INTERNE : Enregistrement des na des avatars du compte. Effectué à la construction de l'objet
-  repAvatars () { if (this.primaire) this.lav.forEach(x => { if (x) setNg(x.na) }) }
-
-  avatarIds (s) { // retourne (ou accumule dans s), le set des ids des avatars du compte
-    const s1 = new Set()
-    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
-      const x = this.lav[i]
-      if (!x) continue
-      if (s) s.add(x.na.id); else s1.add(x.na.id)
-    }
-    return s || s1
-  }
-
-  get lstAvatarNas () { // retourne l'array des na des avatars du compte
-    const a = []
-    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
-      const x = this.lav[i]
-      if (x) a.push(x.na)
-    }
-    return a
-  }
-
-  avatarNas (s) { // retourne (ou accumule dans s), le set des ids des avatars du compte
-    const s1 = new Set()
-    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
-      const x = this.lav[i]
-      if (!x) continue
-      if (s) s.add(x.na); else s1.add(x.na)
-    }
-    return s || s1
-  }
-
-  avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
-    if (!this.primaire) return 0
-    for(let i = 0; i < this.lav.length; i++) {
-      const x = this.lav[i]
-      if (!x) continue
-      if (x.na.nom === n) return x.na.id
-    }
-    return 0
-  }
-
-  nomAvatars () { // retourne la liste des noms des avatars du compte
-    const l = []
-    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
-      const x = this.lav[i]
-      if (!x) continue
-      l.push(x.na.nom)
-    }
-    return l
-  }
-
-  estAc (id) {
-    if (this.primaire) for(let i = 0; i < this.lav.length; i++) {
-      const x = this.lav[i]
-      if (x && x.na.id === id) return true
-    }
-    return false
-  }
 
   /* Remplit la map avec les membres des groupes de l'avatar/
   - clé: id du groupe
@@ -766,72 +694,21 @@ export class Avatar extends GenDoc {
   }
   */
 
-  // na d'un des avatar du compte
-  naAvatar (id) {
-    const i = id % 10
-    return this.lav[i].na
-  }
-
-  idAvIdx (idx) {
-    const x = this.lav[idx]
-    return x ? x.na.id : 0
-  }
-
   /** compile *********************************************************/
   async compile (row) {
     const session = stores.session
     this.vsh = row.vsh || 0
     this.vcv = row.vcv || 0
-    this.rsapub = row.rsapub
-    this.stp = row.stp || 0
-    this.dlv = row.dlv || 0
     this.hpc = row.hpc
     this.napc = row.napc
+    const kcv = getCle(this.id)
 
     if (this.primaire) { // Avatar principal
-      this.k = await decrypter(session.phrase.pcb, row.kx)
-      session.clek = this.k
-      session.compteId = this.id
-
-      /* `lavk` [] `[nom, cle, cpriv]` */
-      this.lav = new Array(8)
-      for(let i = 0; i < 8; i++) {
-        const x = row.lavk[i]
-        if (!x) {
-          this.lav[i] = null
-        } else {
-          const [nom, cle, cpriv] = decode(await decrypter(session.clek, x))
-          this.lav[i] = { na: new NomAvatar(nom, cle), cpriv }
-        }
-      }
-
-      if (row.nctk) {
-        /* `nctk` : nom complet `[nom, rnd]` de la tribu crypté,
-          - soit par la clé K du compte,
-          - soit par la clé publique de son avatar primaire */
-        let nr
-        if (row.nctk.length === 256) {
-          const kp = this.cpriv(this.id)
-          tru8('Priv compte.fromRow nctk ' + this.id, kp)
-          nr = await decrypterRSA(kp, row.nctk)
-          this.nctkCleK = await crypter(session.clek, nr)
-        } else {
-          nr = await decrypter(session.clek, row.nctk)
-          this.nctkCleK = null
-        }
-        const [nom, cle] = decode(nr)
-        this.nct = new NomTribu(nom, cle)
-        setNg(this.nct)
-      } else { // Ne devrait JAMAIS se produire, même le comptable a une tribu
-        this.nct = null
-        this.nctk = null
-      }
-
       if (row.mck) {
         this.mc = decode(await decrypter(session.clek, row.mck))
       } else this.mc = {}
 
-      if (row.memok && row.memok !== 'mp') {
+      if (row.memok) {
         this.memo = await decrypterStr(session.clek, row.memok)
       } else this.memo = ''
 
@@ -842,8 +719,8 @@ export class Avatar extends GenDoc {
       this.pc = await decrypterStr(session.clek, row.pck)
     } else this.pc = null
 
-    if (row.cva) { // carte de visite cryptée par la clé K, `{v, photo, info}`.
-      this.cv = decode(await decrypter(getCle(this.id), row.cva))
+    if (row.cva) { // carte de visite cryptée par la clé de la CV de l'avatar, `{v, photo, info}`.
+      this.cv = decode(await decrypter(kcv, row.cva))
     } else this.cv = null
 
     this.lgr = {}
@@ -858,38 +735,24 @@ export class Avatar extends GenDoc {
     this.invits = {}
     if (row.invits) {
       /* map des invitations en cours - clé : `ni`, numéro d'invitation.
-        - _valeur_ : cryptée par la clé publique de l'avatar `[nom, cle, im]`.*/
-      const kp = this.cpriv(this.id)
-      tru8('Priv compte.fromRow nctk ' + this.id, kp)
+        - _valeur_ : cryptée par la clé CV de l'avatar `[nom, cle, im]`.*/
       for (const ni in row.invits) {
-        this.invits[ni] = decode(await decrypterRSA(kp, row.invits[ni]))
+        this.invits[ni] = decode(await decrypter(kcv, row.invits[ni]))
       }
     }
 
     return this
   }
 
-  static async primaireRow (na, cpriv, cpub, nt, estParrain) {
+  static async primaireRow (na) {
     const r = {}
-    const session = stores.session
-    const config = stores.config
     r.id = na.id
-    const idx = r.id % 10
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
     r.vcv = 0
     r.ivc = GenDoc._iv(r.id, r.vcv)
-    r.dlv = DateJour.nj() + config.limitesjour.dlv
-    const k = random(32)
-    r.kx = await crypter(session.phrase.pcb, k)
-    session.clek = k
-    r.stp = estParrain ? 1 : 0
-    r.nctk = await crypter(k, new Uint8Array(encode([nt.nom, nt.rnd])))
-    const y = await crypter(k, new Uint8Array(encode([na.nom, na.rnd, cpriv])))
-    r.lavk = [y, null, null, null, null, null, null, null]
-    r.rsapub = cpub
     const _data_ = new Uint8Array(encode(r))
-    const row = { _nom: 'avatars', id: r.id, v: r.v, iv: r.iv, vcv: r.vcv, ivc: r.ivc, dlv: r.dlv, _data_ }
+    const row = { _nom: 'avatars', id: r.id, v: r.v, iv: r.iv, vcv: r.vcv, ivc: r.ivc, _data_ }
     return row
   }
 
@@ -956,18 +819,60 @@ export class Cv extends GenDoc {
 - `v` : version
 - `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte.
 - `shay` : SHA du SHA de X (PBKFD de la phrase secrète).
-- `nat`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu. (compilé en "na")
-- `trcp` : `[nom, clé]` de la tribu crypté par la clé publique du comptable.
+- `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
+- `stp` : statut parrain (0: non, 1:oui).
+- `mavk` : map des avatars du compte cryptée par sa clé K. 
+  - _clé_ : id de l'avatar.
+  - _valeur_ : `[nom clé]` : son nom complet.
+- `nct` : `[nom, clé]` de la tribu crypté,
+  - soit par la clé CV de l'avatar principal (figure dans `mavk`),
+  - soit pour le Comptable par sa clé K (sa clé CV étant une constante publique).
+- `nat`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
+  (un sponsor de la tribu peut ainsi lister les membres de la tribu)
 - `compteurs`: compteurs sérialisés (non cryptés).
 - `blocaget` : blocage du compte (cf `blocaget` de tribu).
-- `lavv` : array des dernières versions de chaque avatar du compte, indexée par l'index de l'avatar dans son compte (le dernier chiffre de son id).
 */
 
 export class Compta extends GenDoc {
   get stn () { return this.blocage ? this.blocage.stn : 0 }
   get clet () { return getCle(this.idt) }
 
+  // INTERNE : Enregistrement des na des avatars du compte. Effectué à la construction de l'objet
+  repAvatars () { for (const id in this.mav) setNg(this.mav[id]) }
+
+  avatarIds (s) { // retourne (ou accumule dans s), le set des ids des avatars du compte
+    const s1 = new Set()
+    for (const ids in this.mav) {
+      if (s) s.add(parseInt(ids)); else s1.add(parseInt(ids))
+    }
+    return s || s1
+  }
+
+  get lstAvatarNas () { // retourne l'array des na des avatars du compte
+    const a = []
+    for(const id in this.mav) { a.push(this.mav[id]) }
+    return a
+  }
+
+  avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
+    for(const id in this.mav) {
+      const x = this.mav[id]
+      if (x.nom === n) return x.id
+    }
+    return 0
+  }
+
+  // na d'un des avatars du compte
+  naAvatar (id) { return this.mav[id] || null}
+
+  estAc (id) { return this.naAvatar(id) !== null }
+
   async compile (row) {
+    const session = stores.session
+    this.k = await decrypter(session.phrase.pcb, row.kx)
+    session.clek = this.k
+    session.compteId = this.id
+
     this.vsh = row.vsh || 0
     this.id = row.id
     this.idt = row.idt
@@ -975,11 +880,28 @@ export class Compta extends GenDoc {
 
     this.hps1 = row.hps1
     this.shay = row.shay
-    const [nom, cle] = decode(await decrypter(this.clet, row.nat))
-    this.na = new NomAvatar(nom, cle)
-    setNg(this.na)
+    this.stp = row.stp
 
-    this.trcp = row.trcp
+    /* `mavk` {id} `[nom, cle]` */
+    const m = decode(await decrypter(session.clek, row.mavk))
+    this.mav = {}
+    for(const id in m) {
+      const [nom, cle] = m[id]
+      const na = new NomAvatar(nom, cle)
+      this.mav[id] = na
+      setNg(na) 
+      if (na.estAvatarP) this.naprim = na
+    }
+    
+    /* `nct` : `[nom, clé]` de la tribu crypté,
+      - soit par la clé CV de l'avatar principal (figure dans `mavk`),
+      - soit pour le Comptable par sa clé K (sa clé CV étant une constante publique).
+    */
+    const cx = session.estComptable ? session.clek : this.naprim.rnd
+    const [nom, cle] = decode(await decrypter(cx, row.nct))
+    this.nct = new NomTribu(nom, cle)
+    setNg(this.nct)
+
     this.compteurs = new Compteurs(row.compteurs)
     this.blocage = !row.blocaget ? null : decode(await decrypter(this.clet, row.blocaget))
     if (this.blocage) {
@@ -991,35 +913,40 @@ export class Compta extends GenDoc {
     this.lavv = row.lavv
   }
 
-  // Pour le comptable seulement 
-  async nomTribu () {
-    const cpriv = stores.avatar.compte.cpriv(IDCOMPTABLE)
-    const [nom, cle] = decode(await decrypterRSA(cpriv, this.trcp))
-    return new NomTribu(nom, cle)
-  }
-
-  static async row (na, nt, q1, q2) {
+  static async row (na, nt, q1, q2, estParrain) { // création d'une compta
     const session = stores.session
     const r = {}
     r.id = na.id
-    r.idt = nt.id
-    r.idtb = 0
     r.v = 1
-    r.vsh = 0
     r.iv = GenDoc._iv(r.id, r.v)
+    r.vcv = 0
+    r.ivc = GenDoc._iv(r.id, r.vcv)
+    r.vsh = 0
+
+    const k = random(32)
+    r.kx = await crypter(session.phrase.pcb, k)
+    session.clek = k
+    r.stp = estParrain ? 1 : 0
     r.hps1 = session.phrase.dpbh
     r.shay = session.phrase.shay
+
+    const cx = na.estComptable ? session.clek : na.rnd
+    r.nct = decode(await decrypter(cx, new Uint8Array(encode([nt.nom, nt.rnd]))))
+    r.idt = nt.id
+    r.idtb = 0
     r.nat = await crypter(nt.rnd, new Uint8Array(encode([na.nom, na.rnd])))
-    r.trcp = await crypterRSA(session.clepubc, new Uint8Array(encode([nt.nom, nt.rnd])))
+
+    const m = { }
+    m[na.id] = [na.nom, na.rnd]
+    r.mavk = await crypter(session.clek, new Uint8Array(encode(m)))
+
     const c = new Compteurs()
     c.setQ1(q1)
     c.setQ2(q2)
     r.compteurs = c.serial
-    r.lavv = new Array(8)
-    for(let i = 1; i < 8; i++) r.lavv[i] = 0
-    r.lavv[0] = r.v
     const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'comptas', id: r.id, v: r.v, iv: r.iv, idt: r.idt, idtb: r.idtb, hps1: r.hps1, _data_ }
+    return { _nom: 'comptas', 
+      id: r.id, v: r.v, iv: r.iv, idt: r.idt, idtb: r.idtb, hps1: r.hps1, _data_ }
   }
 
 }

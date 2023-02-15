@@ -107,7 +107,7 @@ export class ConnexionCompte extends OperationUI {
 
       const mapv = {} // versions des avatars requis à demander au serveur
 
-      this.avatar.avatarIds(avRequis)
+      this.compta.avatarIds(avRequis)
       avRequis.forEach(id => {
         if (id === this.avatar.id) {
           mapv[id] = this.avatar.v
@@ -165,15 +165,17 @@ export class ConnexionCompte extends OperationUI {
 
     /* map des avatars du compte - clé: id de l'avatar  - valeur: dlv } */
     const avsMap = {}  
-      
+
+    const abPlus = [] // ids des avatars et des groupes auxquels s'abonner
+
     this.avatarsToStore.forEach(avatar => {
+      abPlus.push(avatar.id)
       avatar.idGroupes(grRequis)
       avsMap[avatar.id] = avatar.id % 10 === 0 ? dlv1 : dlv2
       avatar.membres(mbsMap) // v, dlv, de mbsMap ne sont pas renseignées pour l'instant
     })
   
     // Récupération des ids des groupes pour abonnement
-    const abPlus = [] // ids des groupes auxquels s'abonner
     for (const id of grRequis) {
       const e = mbsMap[id]
       if (e) { e.dlv = dlv2; e.v = 0 }
@@ -393,15 +395,23 @@ export class ConnexionCompte extends OperationUI {
     return [n1, n2]
   }
 
-  async getCTA () {
-    const args = { token: stores.session.authToken }
-    const ret = this.tr(await post(this, 'GetComptaTribuAvatar', args))
+  async getGTA () {
+    const session = stores.session
+    /* Authentification et get de avatar / compta / tribu
+    ET abonnement à compta sur le serveur
+    */
+    const args = { token: session.authToken }
+    // Connexion : récupération de rowCompta rowAvatar rowTribu fscredentials
+    const ret = this.tr(await post(this, 'ConnexionCompte', args))
+    if (ret.credentials) session.fscredentials = ret.credentials
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
     this.rowTribu = ret.rowTribu
     this.avatar = await compile(this.rowAvatar)
     this.compta = await compile(this.rowCompta)
     this.tribu = await compile(this.rowTribu)
+    session.tribuId = ret.tribuId
+    if (session.fsSync) await session.fsSync.setTribu(session.tribuId)
   }
 
   async phase0Net () {
@@ -409,21 +419,12 @@ export class ConnexionCompte extends OperationUI {
     /* Authentification et get de avatar / compta / tribu
     ET abonnement à compta sur le serveur
     */
-    const args = { token: session.authToken }
-    // Connexion : récupération de l'id du compte, clepubc, fscredentials
-    const ret = this.tr(await post(this, 'ConnexionCompte', args))
-    session.clepubc = ret.clepubc
-    session.compteId = ret.compteId
-    session.tribuId = ret.tribuId
-    session.estComptable = session.compteId === IDCOMPTABLE
-    if (ret.credentials) session.fscredentials = ret.credentials
-    if (session.fsSync) {
-      await session.fsSync.setCompte(session.compteId)
-      await session.fsSync.setTribu(session.tribuId)
-    }
-
     await this.getCTA()
+    session.compteId = ret.compteId
+    session.estComptable = session.compteId === IDCOMPTABLE
     session.setAvatarCourant(session.compteId)
+
+    if (session.fsSync) await session.fsSync.setCompte(session.compteId)
 
     if (session.accesIdb && !session.nombase) await session.setNombase() // maintenant que la cle K est connue
 
@@ -489,7 +490,7 @@ export class ConnexionCompte extends OperationUI {
       // Rangement en store
       avStore.setCompte(this.avatar, this.compta, this.tribu)
       session.setBlocage()
-      this.avatarsToStore.forEach(av => { // (value, key) =>
+      this.avatarsToStore.forEach(av => {
         if (av.id !== this.avatar.id) avStore.setAvatar(av)
       })
 
@@ -784,11 +785,6 @@ export class CreationCompteComptable extends OperationUI {
       session.mode = 2
       await initSession(phrase)
 
-      const kpav = await genKeyPair()
-      tru8('Priv Comptable', kpav.privateKey)
-      tru8('Pub Comptable', kpav.publicKey)
-      session.clepubc = kpav.publicKey
-
       const nt = new NomTribu(config.nomTribuPrimitive)
       setNg(nt)
       const na = new NomAvatar('', -1)
@@ -799,11 +795,20 @@ export class CreationCompteComptable extends OperationUI {
       session.setAvatarCourant(session.compteId)
       session.estComptable = true
 
-      const rowAvatar = await Avatar.primaireRow (na, kpav.privateKey, kpav.publicKey, nt, true)
+      const rowCompta = await Compta.row (na, nt, ac[0], ac[1], true) // set de session.clek
       const rowTribu = await Tribu.primitiveRow (nt, na, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])
-      const rowCompta = await Compta.row (na, nt, ac[0], ac[1])
+      const rowAvatar = await Avatar.primaireRow (na)
+      const r = {
+        id: na.id,
+        v: 1,
+        iv: GenDoc._iv(na.id, 1),
+        dlv: DateJour.nj() + config.limitesjour.dlv
+      }
+      const _data_ = new Uint8Array(encode(r))
+      r._data_ = _data_
+      r._nom = 'versions'
 
-      const args = { token: stores.session.authToken, rowTribu, rowCompta, rowAvatar, pcbh: phrase.pcbh, abPlus: [nt.id] }
+      const args = { token: stores.session.authToken, rowTribu, rowCompta, rowAvatar, rowVersion: r, pcbh: phrase.pcbh, abPlus: [nt.id] }
       const ret = this.tr(await post(this, 'CreationCompteComptable', args))
   
       // Le compte vient d'être créé, clek est enregistrée
