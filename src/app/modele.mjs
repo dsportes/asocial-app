@@ -835,35 +835,21 @@ export class Compta extends GenDoc {
   get stn () { return this.blocage ? this.blocage.stn : 0 }
   get clet () { return getCle(this.idt) }
 
-  // INTERNE : Enregistrement des na des avatars du compte. Effectué à la construction de l'objet
-  repAvatars () { for (const id in this.mav) setNg(this.mav[id]) }
-
-  avatarIds (s) { // retourne (ou accumule dans s), le set des ids des avatars du compte
-    const s1 = new Set()
-    for (const ids in this.mav) {
-      if (s) s.add(parseInt(ids)); else s1.add(parseInt(ids))
-    }
-    return s || s1
-  }
+  get avatarIds () { return new Set(this.mav.keys()) } // retourne (ou accumule dans s), le set des ids des avatars du compte
 
   get lstAvatarNas () { // retourne l'array des na des avatars du compte
-    const a = []
-    for(const id in this.mav) { a.push(this.mav[id]) }
-    return a
+    const a = []; for(const na of this.mav.values()) { a.push(na) }; return a
   }
 
   avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
-    for(const id in this.mav) {
-      const x = this.mav[id]
-      if (x.nom === n) return x.id
-    }
+    for(const na of this.mav.values()) { if (na.nom === n) return na.id }
     return 0
   }
 
   // na d'un des avatars du compte
-  naAvatar (id) { return this.mav[id] || null}
+  naAvatar (id) { return this.mav.get(id) || null}
 
-  estAc (id) { return this.naAvatar(id) !== null }
+  estAc (id) { return this.mav.get(id) !== null }
 
   async compile (row) {
     const session = stores.session
@@ -882,11 +868,11 @@ export class Compta extends GenDoc {
 
     /* `mavk` {id} `[nom, cle]` */
     const m = decode(await decrypter(session.clek, row.mavk))
-    this.mav = {}
+    this.mav = new Map()
     for(const id in m) {
       const [nom, cle] = m[id]
       const na = new NomAvatar(nom, cle)
-      this.mav[id] = na
+      this.mav.set(id, na)
       setNg(na) 
       if (na.estAvatarP) this.naprim = na
     }

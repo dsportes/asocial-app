@@ -3,7 +3,7 @@ import { Operation } from './operations.mjs'
 import { reconnexionCompte } from './connexion.mjs'
 import { compile } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'
-import { $t } from './util.mjs'
+import { $t, difference, intersection } from './util.mjs'
 import { appexc } from './api.mjs'
 import { post } from './net.mjs'
 
@@ -26,7 +26,7 @@ export class SyncQueue {
       session.syncEncours = true
       let op
       if (row._nom === 'comptas') op = new OnchangeCompta()
-      else if (row._nom === 'groupes') op = new OnchangeGroupe()
+      else if (row._nom === 'versions') op = new OnchangeVersion()
       else if (row._nom === 'tribus') op = new OnchangeTribu()
       if (op) await op.run(row)
       if (session.synchro) session.sessionSync.setDhSync(new Date().getTime())
@@ -73,6 +73,27 @@ export class OperationWS extends Operation {
   }
 }
 
+export class OnchangeVersion extends OperationWS {
+  constructor () { super($t('OPsync')) }
+  async run (row) {
+    try {
+      if (row.id % 10 <= 0) await this.runAv(row); else await this.runGr(row)
+    } catch (e) { 
+      await this.finKO(e)
+    }
+  }
+
+  async runAv (row) {
+    const session = stores.session
+    const avStore = stores.avatar
+  }
+
+  async runGr (row) {
+    const session = stores.session
+    const avStore = stores.avatar
+  }
+}
+
 export class OnchangeCompta extends OperationWS {
   constructor () { super($t('OPsync')) }
 
@@ -103,13 +124,168 @@ export class OnchangeCompta extends OperationWS {
     // (re) chargement des secrets, chats, sponsorings
     args.v = v || 0
     const ret2 = this.tr(await post(this, 'ChargerSCS', args))
-    for (const x of ret2.rowSecrets) e.lsc.push(await compile(x))
+    for (const x of ret2.rowSecrets) {
+      e.lsc.push(await compile(x))
+    }
     for (const x of ret2.rowChats) e.lch.push(await compile(x))
     for (const x of ret2.rowSponsorings) e.lsp.push(await compile(x))
     avatar.idGroupes(this.grUtiles)
   }
 
+  async ajoutGr (id) { // ajout du groupe id
+    const vidb = Versions.get(id)
+    const session = stores.session
+    const args = { token: session.authToken, id, v: vidb }
+    const ret = this.tr(await post(this, 'ChargerGMS', args))
+    this.versions[id, ret.vgroupe]
+    let groupe = null
+    if (ret.rowGroupe) {
+      const row = ret.rowGroupe
+      groupe = await compile(row)
+      this.buf.putIDB(row)
+    }
+    const e = { gr: groupe, lmb: [], lsc: [] }
+    this.grAjoutes.set(id, e)
+    for (const x of ret.rowSecrets) {
+      this.buf.putIDB(x)
+      e.lsc.push(await compile(x))
+    }
+    for (const x of ret.rowMembres) {
+      this.buf.putIDB(x)
+      e.lmb.push(await compile(x))
+    }
+  }
+
+  async supprAv (id) { // suppression de l'avatar id
+    this.buf.purgeAvatarIDB(id)
+  }
+
+  async ajoutAv (id) { // ajout de l'avatar id
+    const vidb = Versions.get(id)    
+    const session = stores.session
+    const args = { token: session.authToken, id, v: vidb }
+    const ret = this.tr(await post(this, 'GetAvatar', args))
+    this.versions[id, ret.vavatar]
+    let avatar = null
+    if (ret.rowAvatar) {
+      const row = ret.rowAvatar
+      avatar = await compile(row)
+      avatar.idGroupes(this.aplgr) // ajout des groupes requis
+      this.buf.putIDB(row)
+    } else {
+      const a = stores.avatar.getAvatar(id)
+      if (a) a.idGroupes(this.aplgr) // ajout des groupes requis
+    }
+    const e = { av: avatar, lch: [], lsp: [], lsc: [] }
+    this.avAjoutes.set(id, e)
+    for (const x of ret2.rowSecrets) {
+      this.buf.putIDB(x)
+      e.lsc.push(await compile(x))
+    }
+    for (const x of ret2.rowChats) {
+      this.buf.putIDB(x)
+      e.lch.push(await compile(x))
+    }
+    for (const x of ret2.rowSponsorings) {
+      this.buf.putIDB(x)
+      e.lsp.push(await compile(x))
+    }
+  }
+
   async run (row) {
+    try {
+      const session = stores.session
+      const avStore = stores.avatar
+      this.versions = {}
+
+      this.compta = await compile(row)
+      this.avCompta = avStore.compta
+      if (this.compta.v <= this.avCompta.v) return
+
+      if (this.compta.idt !== this.avCompta.idt) await this.chgTribu(this.compta.idt)
+
+      this.avAjoutes = new Map() // avatars ajoutés
+      const avlav = this.avCompta.avatarIds
+      const aplav = this.compta.avatarIds
+      this.avMoins = difference(avlav, aplav)
+      this.avPlus = difference(aplav, avlav)
+
+      if (this.avMoins.size || this.avPlus.size) {
+        this.aplgr = new Set() // groupes utiles après
+        // ceux des avatars inchangés
+        intersection(avlav, aplav).forEach(id => { 
+          const a = avStore.getAvatar(id)
+          if (a) a.idGroupes(this.aplgr)
+        })
+      }
+      if (this.avMoins.size) for (const id of this.avMoins) await this.supprAv(id)
+      if (this.avPlus.size) for (const id of this.avPlus) await this.ajoutAv(id)
+
+      if (this.avMoins.size || this.avPlus.size) {
+        const avlgr = new Set(grStore.ids) // groupes utiles avant
+        this.grMoins = difference(avlgr, this.aplgr)
+        this.grPlus = difference(this.aplgr, avlgr)
+        if (this.grMoins.size) for (const id of this.grMoins) await this.supprGr(id)
+        if (this.grPlus.size) for (const id of this.grPlus) await this.ajoutGr(id)
+      }
+
+
+
+      this.grToDel = new Set()
+      this.grToAdd = new Set()
+      this.grExistants.forEach(id => { 
+        if (!this.grUtiles.has(id)) {
+          this.grToDel.add(id)
+          this.buf.purgeGroupeIDB(groupe.id)
+        }  
+      })
+      this.grUtiles.forEach(id => { 
+        if (!this.grExistants.has(id)) this.grToAdd.add(id)
+      })
+      if (this.grToAdd.size) {
+        for (const id of Array.from(this.grToAdd.values())) {
+          const g = await this.nvGroupe(id)
+          if (g) {
+            this.nvGrps.push(g)
+            await setGroupe(id, 0)
+          }
+        }
+      }
+      this.buf.putIDB(row)
+
+      if (this.grToDel.size && !session.fsSync) {
+        // désabonnements des groupes détruits
+        const args = { token: session.authToken, id, abMoins: Array.from(this.grToDel) }
+        const ret = this.tr(await post(this, 'GestionAb', args))    
+      }
+
+      /* commits IDB */
+      this.buf.commitIDB()
+
+      /* Maj des stores */
+      if (this.tribu) avStore.setTribu(tribu)
+      avStore.setCompta(this.compta)
+      const chg = session.setBlocage()
+      this.avSuppr.forEach(id => { avStore.del(id) })
+      this.avChange.forEach(e => { avStore.lotMaj(e) })
+
+      // Insertion / suppression des groupes nouveaux / inutiles
+      this.grToDel.forEach(id => { 
+        if (session.fsSync) session.fsSync.unsetGroupe(id)
+        grStore.del(id)
+      })
+      if (this.nvGrps.length) this.nvGrps.forEach(g => { grStore.setGroupe(g) })
+      if (this.nvMbs.length) this.nvMbs.forEach(m => { grStore.setMembre(m) })
+      if (this.nvSecs.length) this.nvSecs.forEach(s => { grStore.setSecret(s) })
+
+      if (chg > 1) await alerteBlocage (chg)
+      
+    } catch (e) { 
+      await this.finKO(e)
+    }
+  }
+
+  async run1 (row) {
     try {
       const session = stores.session
       const avStore = stores.avatar

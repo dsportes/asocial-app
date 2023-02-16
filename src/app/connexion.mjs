@@ -98,7 +98,6 @@ export class ConnexionCompte extends OperationUI {
     const session = stores.session
     const avRowsModifies = []
     const avToSuppr = new Set()
-    const avRequis = new Set()
 
     while (true) { // boucle si la version de compta a changé
       avRowsModifies.length = 0
@@ -108,7 +107,7 @@ export class ConnexionCompte extends OperationUI {
 
       const mapv = {} // versions des avatars requis à demander au serveur
 
-      this.compta.avatarIds(avRequis)
+      const avRequis = this.compta.avatarIds
       avRequis.forEach(id => {
         if (id === this.avatar.id) {
           mapv[id] = this.avatar.v

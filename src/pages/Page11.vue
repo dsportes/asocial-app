@@ -8,7 +8,7 @@
         <q-btn size="md" icon="add" :label="$t('CPTnvav')" color="primary" no-caps dense @click="ouvrirnv"/>
         <bouton-help class="q-ml-sm" page="page1"/>
       </div>
-      <div v-if="session.compte.avatarIds().size > 1">
+      <div v-if="session.compte.avatarIds.size > 1">
         <q-btn class="q-ml-sm" size="md"
           icon="manage_accounts" no-caps :label="$t('CPTrep')" color="primary" dense @click="ouvrirrf"/>
         <bouton-help class="q-ml-sm" page="page1"/>
