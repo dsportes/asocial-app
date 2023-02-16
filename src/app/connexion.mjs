@@ -6,7 +6,7 @@ import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash, slee
 import { post } from './net.mjs'
 import { DateJour, IDCOMPTABLE } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, NomAvatar, NomTribu, setNg, getNg } from './modele.mjs'
-import { openIDB, closeIDB, deleteIDB, getCompte, getAvatarPrimaire, getColl,
+import { openIDB, closeIDB, deleteIDB, getCompte, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB  } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
@@ -142,6 +142,13 @@ export class ConnexionCompte extends OperationUI {
             this.avatarsToStore.set(row.id, av)
           }
         }
+
+        // obtention de la liste des groupes requis et signatures
+        const ok = await groupesRequisSignatures()
+        if (!ok) {
+          await this.getCTA()
+          continue
+        }
       }
       break
     }
@@ -150,65 +157,62 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** tousGroupes *******************************************************/
-  async tousGroupes () {
+  async groupesRequisSignatures () {
     const session = stores.session
 
     const jourJ = stores.config.limitesjour.dlv + this.auj
     const dlv1 = (Math.floor(jourJ / 10) + 1) * 10
     const dlv2 = dlv1 + 10
 
-    const grRequis = new Set()
+    this.grRequis = new Set()
 
     /* map des membres des groupes auxquels participent au moins un des avatars
-     - clé: id du groupe  - valeur: { idg, mbs: [ids], v , dlv } */
+     - clé: id du groupe  - valeur: { idg, mbs: [ids], dlv } */
     const mbsMap = {} 
 
-    /* map des avatars du compte - clé: id de l'avatar  - valeur: dlv } */
-    const avsMap = {}  
+    /* map des avatars du compte - clé: id de l'avatar  - valeur: {v, dlv} } */
+    const avsMap = {} 
 
-    const abPlus = [] // ids des avatars et des groupes auxquels s'abonner
+    // ids des avatars et des groupes auxquels s'abonner
+    const abPlus = []
 
-    this.avatarsToStore.forEach(avatar => {
-      abPlus.push(avatar.id)
-      avatar.idGroupes(grRequis)
-      avsMap[avatar.id] = avatar.id % 10 === 0 ? dlv1 : dlv2
-      avatar.membres(mbsMap) // v, dlv, de mbsMap ne sont pas renseignées pour l'instant
-    })
+    for(const avatar of this.avatarsToStore) {
+      if (session.fsSync) await session.fsSync.setAvatar(avatar.id); else abPlus.push(avatar.id)
+      avatar.idGroupes(this.grRequis)
+      avsMap[avatar.id] = { v: avatar.id, dlv: avatar.id % 10 === 0 ? dlv1 : dlv2 }
+      avatar.membres(mbsMap, dlv2)
+    }
   
-    // Récupération des ids des groupes pour abonnement
-    for (const id of grRequis) {
-      const e = mbsMap[id]
-      if (e) { e.dlv = dlv2; e.v = 0 }
-      if (session.fsSync) {
-        await session.fsSync.setGroupe(id)
-      } else {
-        abPlus.push(id)
-      }
+    // Abonnements aux groupes requis
+    for (const id of this.grRequis) {
+      if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
     }
 
+    if (session.accesNet) {
+      const args = { token: session.authToken, vcompta: this.compta.v, mbsMap, avsMap, abPlus }
+      const ret = this.tr(await post(this, 'SignaturesEtVersions', args))
+      if (ret.OK === false) return false
+      this.versions = ret.versions
+    }
+    return true
+  }
+
+  async chargerGroupes () {
     const grRows = {} // Map des rows des groupes par id du groupe
     if (session.accesIdb) {
       this.cGroupes.forEach(row => {
-        if (!grRequis.has(row.id)) {
-          this.buf.purgeGroupeIDB(row.id)
-        } else {
-          grRows[row.id] = row
-          const e = mbsMap[row.id]
-          if (e) e.v = row.v
-        }
+        if (!this.grRequis.has(row.id)) this.buf.purgeGroupeIDB(row.id); else grRows[row.id] = row
       })
     }
 
     if (session.accesNet) {
-      // mbsMap, avsMap, abPlus sont les arguments de l'opération SignaturesEtGroupes
-      const args = { token: session.authToken, mbsMap, avsMap, abPlus }
-      const ret = this.tr(await post(this, 'SignaturesEtGroupes', args))
-      if (ret.rowGroupes && ret.rowGroupes.length) {
-        ret.rowGroupes.forEach(row => {
-          this.buf.putIDB(row)
-          grRows[row.id] = row
-        })
-      }
+      const mapv = {} // version détenue en session pour chaque groupe requis
+      this.grRequis.forEach(id => { const r = grRows[id] ; mapv[id] = r ? r.v : 0 })
+      const args = { token: session.authToken, mapv }
+      const ret = this.tr(await post(this, 'getGroupes', args))
+      if (ret.rowGroupes) ret.roupes.forEach(row => {
+        grRows[row.id] = row
+      })
     }
 
     /* Certains groupes peuvent être des groupes supprimés
@@ -232,7 +236,7 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** Chargement pour un avatar de ses secrets postérieurs au plus récent ************/
-  async chargerSecrets (id, v, estGr) {
+  async chargerSecrets (id, vidb, vsrv, estGr) {
     const session = stores.session
     let n1 = 0, n2 = 0
     const rows = {}
@@ -245,8 +249,8 @@ export class ConnexionCompte extends OperationUI {
 
     let rowSecrets // array
 
-    if (session.accesNet) {
-      const args = { token: session.authToken, id, v }
+    if (session.accesNet && vsrv > vidb) {
+      const args = { token: session.authToken, id, v: vidb }
       const ret = this.tr(await post(this, 'ChargerSecrets', args))
       rowSecrets = ret.rowSecrets
     }
@@ -272,7 +276,7 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** Chargement pour un avatar de ses chats postérieurs au plus récent ************/
-  async chargerChats (id, v) {
+  async chargerChats (id, vidb, vsrv) {
     const session = stores.session
     let n1 = 0, n2 = 0
     const rows = {}
@@ -285,8 +289,8 @@ export class ConnexionCompte extends OperationUI {
 
     let rowChats // array
 
-    if (session.accesNet) {
-      const args = { token: session.authToken, id, v }
+    if (session.accesNet && vsrv > vidb) {
+      const args = { token: session.authToken, id, v: vidb }
       const ret = this.tr(await post(this, 'ChargerChats', args))
       rowChats = ret.rowChats
     }
@@ -311,7 +315,7 @@ export class ConnexionCompte extends OperationUI {
   }
   
   /** Chargement pour un avatar de ses sponsorings postérieurs au plus récent ************/
-  async chargerSponsorings (id, v) {
+  async chargerSponsorings (id, vidb, vsrv) {
     const session = stores.session
     let n1 = 0, n2 = 0
     const rows = {}
@@ -326,12 +330,12 @@ export class ConnexionCompte extends OperationUI {
 
     let rowSponsorings
 
-    if (session.accesNet) {
-      const args = { token: session.authToken, id, v }
+    if (session.accesNet && vsrv > vidb) {
+      const args = { token: session.authToken, id, v: vidb }
       const ret = this.tr(await post(this, 'ChargerSponsorings', args))
       rowSponsorings = ret.rowSponsorings
     }
-    if (rowSponsorings  && rowSponsorings.length) {
+    if (rowSponsorings && rowSponsorings.length) {
       for (const row of rowSponsorings) {
         if (row.dlv >= this.auj) { // ignore les sponsorings de dlv dépassée
           this.buf.putIDB(row)
@@ -352,12 +356,12 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** Chargement pour un groupe de ses membres postérieurs au plus récent ************/
-  async chargerMembres (groupe) {
+  async chargerMembres (id, vidb, vsrv) {
     const session = stores.session
     let n1 = 0, n2 = 0
     const rows = {}
     for (const row of this.cMembres) { 
-      if (row.id === groupe.id) {
+      if (row.id === id) {
         if (row.dlv > this.auj) {
           this.buf.supprIDB(row)
           this.mbsDisparus.add(row.ids)
@@ -370,8 +374,8 @@ export class ConnexionCompte extends OperationUI {
 
     let rowMembres
 
-    if (session.accesNet) {
-      const args = { token: session.authToken, id: groupe.id, v: groupe.v }
+    if (session.accesNet && vidb < vsrv) {
+      const args = { token: session.authToken, id, v: vidb }
       const ret = this.tr(await post(this, 'ChargerMembres', args))
       rowMembres = ret.rowMembres
     }
@@ -479,6 +483,7 @@ export class ConnexionCompte extends OperationUI {
       this.cAvatars = session.accesIdb ? await getColl('avatars') : []
       this.avatarsToStore = new Map() // objets avatar à ranger en store
       const [avRowsModifies, avToSuppr] = await this.tousAvatars()
+      // this.versions : map. Pour chaque avatar / groupe requis, la version de sa sous-coll détenue en serveur
 
       if (session.accesIdb) {
         this.buf.putIDB(this.rowCompta)
@@ -495,8 +500,8 @@ export class ConnexionCompte extends OperationUI {
       })
 
       this.cGroupes = session.accesIdb ? await getColl('groupes') : []
-      this.groupesToStore = new Map() // complilation des rows des groupes venant de IDB ou du serveur
-      const grZombis = await this.tousGroupes() // Avatars et Groupes signés
+      this.groupesToStore = new Map() // compilation des rows des groupes venant de IDB ou du serveur
+      const grZombis = await this.chargerGroupes()
   
       this.BRK()
 
@@ -535,6 +540,10 @@ export class ConnexionCompte extends OperationUI {
         syncitem.push('10' + gr.id, 0, 'SYgro', [gr.na.nom])
       })
 
+      // Versions des sous-collections par avatar / groupe
+      if (session.accesNet) await loadVersions(); else Versions.reset()
+      // this.versions : map. Pour chaque avatar / groupe requis, la version de sa sous-coll détenue en serveur
+
       // Chargement depuis IDB des Maps des secrets, chats, sponsorings, membres trouvés en IDB
       this.cSecrets = session.accesIdb ? await getColl('secrets') : []
       this.cChats = session.accesIdb ? await getColl('chats') : []
@@ -543,36 +552,42 @@ export class ConnexionCompte extends OperationUI {
 
       // Itération sur chaque avatar: secrets, chats, sponsorings
       for (const avatar of avStore.avatars.values()) {
+        const vidb = Versions.get(id)
+        const vsrv = this.versions[id] || 0    
         const na = getNg(avatar.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
-        const [x1, x2] = await this.chargerSecrets(avatar.id, avatar.v)
+        const [x1, x2] = await this.chargerSecrets(avatar.id, vidb, vsrv, false)
         n1 = x1
         n2 = x2
         syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
-        const [x3, x4] = await this.chargerChats(avatar.id, avatar.v)
+        const [x3, x4] = await this.chargerChats(avatar.id, vidb, vsrv)
         n3 = x3
         n4 = x4
         syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
-        const [x5, x6] = await this.chargerSponsorings(avatar.id, avatar.v)
+        const [x5, x6] = await this.chargerSponsorings(avatar.id, vidb, vsrv)
         n5 = x5
         n6 = x6
         syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        if (vidb < vsrv) Versions.set(id, vsrv)
       }
 
       // Itération sur chaque groupe: secrets, membres
       for (const groupe of grStore.groupes.values()) {
+        const vidb = Versions.get(id)
+        const vsrv = this.versions[id] || 0    
         const na = getNg(id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
-        const [x1, x2] = await this.chargerSecrets(groupe.id, groupe.v, true)
+        const [x1, x2] = await this.chargerSecrets(groupe.id, vidb, vsrv, true)
         n1 = x1
         n2 = x2
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
 
         this.mbsDisparus = new Set()
-        const [x3, x4] = await this.chargerMembres(groupe)
+        const [x3, x4] = await this.chargerMembres(groupe.id, vidb, vsrv)
         n3 = x3
         n4 = x4
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
+        if (vidb < vsrv) Versions.set(id, vsrv)
 
         if (this.mbsDisparus.size) {
           /* Sur le serveur, le GC quotidien est censé avoir mis les statuts ast[ids] à 0
@@ -584,11 +599,6 @@ export class ConnexionCompte extends OperationUI {
 
       /* Mises à jour éventuelles du serveur **********************************************/
       if (session.accesNet ) {
-        /*MAJ (éventuelle) de nctk par cryptage en clé K au lieu du RSA trouvé */
-        if (this.avatar.nctkCleK) {
-          const args = { token: session.authToken, id: this.avatar.id, nctk: this.avatar.nctkCleK }
-          this.tr(await post(this, 'm1', 'nctkCompte', args))
-        }
         /* Suppression des secrets temporaires ayant dépassé leur date limite */
         if (this.buf.lsecsup.length) {
           for (const s of this.buf.lsecsup) {
@@ -603,7 +613,7 @@ export class ConnexionCompte extends OperationUI {
       }
       
       // Finalisation en une seule fois de l'écriture du nouvel état en IDB
-      if (session.synchro) await this.buf.commitIDB(true) // MAJ compte.id / cle K
+      if (session.synchro) await this.buf.commitIDB(true, true) // MAJ compte.id / cle K et versions
 
       if (session.accesIdb) { 
         await gestionFichierCnx(this.buf.mapSec)

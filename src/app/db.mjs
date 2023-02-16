@@ -5,7 +5,7 @@ import { SessionSync } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
 import { AppExc, E_DB } from './api.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
-import { getSecret } from '../app/modele.mjs'
+import { getSecret, Versions } from '../app/modele.mjs'
 
 function decodeIn (buf, cible) {
   const x = decode(buf)
@@ -14,14 +14,15 @@ function decodeIn (buf, cible) {
 
 const STORES = {
   compte: 'id',
+  versions: 'id',
   sessionsync: 'id',
   tribus: 'id',
   comptas: 'id',
   avatars: 'id',
   chats: 'id+ids',
-  rdvs: 'id+ids',
+  sponsorings: 'id+ids',
   groupes: 'id',
-  membre: '[id+ids]',
+  membres: '[id+ids]',
   secrets: '[id+ids]',
   avsecret: '[id+ids]',
   cvs: 'id',  // data: cryptK { id, v, photo, info }
@@ -74,6 +75,22 @@ export async function deleteIDB (lsKey) {
     console.log(e.toString())
   }
   db = null
+}
+
+// Chargement des versions
+export async function loadVersions () {
+  try {
+    const session = stores.session
+    if (session.accesIdb) {
+      try {
+        const r = await db.versions.get('1')
+        const idb = r.data ? await decrypter(session.clek, r.data) : null
+        return Versions.load(idb)
+      } catch (e) {} // session vide si pas lisible sur IDB
+    } else return Versions.reset()
+  } catch (e) {
+    throw EX2(e)
+  }
 }
 
 /** Gestion de l'état de la dernière session ***********************************************************/
@@ -431,11 +448,11 @@ export class IDBbuffer {
   supprIDB (row) { if (this.idb) this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
   purgeAvatarIDB (id) { if (this.idb) this.lav.add(id) }
   purgeGroupeIDB (id) { if (this.idb) this.lgr.add(id) }
-  async commitIDB (setCompteClek) { if (this.idb) await commitRows(this, setCompteClek) }
+  async commitIDB (setCompteClek, setVersions) { if (this.idb) await commitRows(this, setCompteClek, setVersions) }
 }
 
 /** Mises à jour / purges globales de IDB *****************************************/
-export async function commitRows (opBuf, setCompteClek) {
+export async function commitRows (opBuf, setCompteClek, setVersions) {
   try {
     const session = stores.session
     const clek = session.clek
@@ -478,6 +495,11 @@ export async function commitRows (opBuf, setCompteClek) {
         const x = { id: session.compteId, k: session.clek}
         const data = await crypter(session.phrase.pcb, new Uint8Array(encode(x)) , 1)
         await db.compte.put({ id: '1', data })
+      }
+
+      if (setVersions && Versions.toSave) {
+        const data = await crypter(session.clek, Versions.toIdb() , 1)
+        await db.versions.put({ id: '1', data })
       }
 
       for (const x of lidb) { // tous objets

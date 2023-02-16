@@ -37,6 +37,25 @@ export function getCv (id) {
   }
 }
 
+/* Versions (statique) ***********************************
+Versions des sous-collections d'avatars et groupes
+*/
+export class Versions {
+  static map = {}
+  static toSave = false
+
+  static reset () { Versions.map = {}; Versions.toSave = false; return Versions.map }
+  static get (id) { return Versions.map[id] || 0 }
+  static set (id, v) { Versions.map[id] = v; Versions.toSave = true }
+  static del (id) { delete Versions.map[id]; Versions.toSave = true }
+  static load (idb) { 
+    Versions.map = idb ? decode(idb) : {}
+    Versions.toSave = false
+    return Versions.map
+  }
+  static toIdb () { Versions.toSave = false; return new Uint8Array(encode(Versions.map))}
+}
+
 /* Répertoire (statique) *********************************
 - `resetRepertoire ()` : réinitialisation
 - `setNg (ng)` : enregistrement d'un nom générique
@@ -631,28 +650,24 @@ export class Avatar extends GenDoc {
   get naprim () { return this.lav[0].na } // na de l'avatar primaire du compte
   get apropos () { return this.nct ? ($t('tribus', 0) + ':' + this.nct.nom) : $t('comptable') }
   get na () { return getNg(this.id) }
+  get nbGroupes () { return this.lgr.size }
+  get nbInvits () { return this.invits.size }
 
   /* Remplit la map avec les membres des groupes de l'avatar/
   - clé: id du groupe
-  - valeur: { idg: , mbs: [ids] }
+  - valeur: { idg: , mbs: [ids], dlv }
   */
-  membres (map) {
-    for (const ni in this.lgr) {
-      const [nom, rnd, im] = this.lgr[ni]
-      const idg = new NomGroupe(nom, rnd).id
-      const e = map[idg]
-      if (!e) { map[igd] = { idg, mbs: [im] } } else e.mbs.push(im)
+  membres (map, dlv) {
+    for (const t of this.lgr) {
+      const e = map[t.ng.id]
+      if (!e) { map[t.ng.id] = { idg, mbs: [t.im], dlv } } else e.mbs.push(t.im)
     }
   }
 
-  /* Ids des groupes de l'avatar, accumulés dans le set s
-  */
+  /* Ids des groupes de l'avatar, accumulés dans le set s */
   idGroupes (s) {
     const x = s || new Set()
-    for (const ni in this.lgr) {
-      const [nom, rnd, im] = this.lgr[ni]
-      x.add(new NomGroupe(nom, rnd).id)
-    }
+    for (const t of this.lgr) x.add(t.ng.id)
     return x
   }
 
@@ -660,39 +675,22 @@ export class Avatar extends GenDoc {
   si del, supprime ces entrées */
   niDeGroupes (setg, del) {
     const ani = []
-    for (const ni in this.lgr) {
-      const [nom, rnd, im] = this.lgr[ni]
-      const idg = new NomGroupe(nom, rnd).id
-      if (setg.has(idg)) ani.push(ni)
-    }
-    if (del) ani.forEach(ni => { delete this.lgr[ni] })
+    for (const t of this.lgr) if (setg.has(t.ng.id)) ani.push(t.ni)
+    if (del) ani.forEach(ni => { this.lgr.delete(ni) })
     return ani
   }
 
-  /* Retourne le numéro d'invitation de l'avatar pour le groupe id
-  si del, supprime ces entrées */
-  niDeGroupe (id, del) {
-    for (const ni in this.lgr) {
-      const [nom, rnd, im] = this.lgr[ni]
-      const idg = new NomGroupe(nom, rnd).id
-      if (idg === id) {
-        if (del) delete this.lgr[ni]
-        return ni
+  /* Retourne le numéro d'invitation de l'avatar pour le groupe idg
+  si del, supprime cette entrée */
+  niDeGroupe (idg, del) {
+    for (const t of this.lgr) {
+      if (idg === t.ng.id) {
+        if (del) this.lgr.delete(t.ni)
+        return t.ni
       }
     }
     return 0
   }
-
-  /* `napc` : [nom, cle] de l'avatar cryptée par le PBKFD de la phrase de contact.
-  texte : texte de la phrase de contact
-  Retourne le na de l'avatar décrypté depuis la phrase
-  
-  async getNapc (texte) { 
-    const phrase = await new PhraseContact().init(texte)
-    const [nom, cle] = decode(decrypter(phrase.clex, this.napc))
-    return new NomAvatar(nom, cle)
-  }
-  */
 
   /** compile *********************************************************/
   async compile (row) {
@@ -711,8 +709,6 @@ export class Avatar extends GenDoc {
       if (row.memok) {
         this.memo = await decrypterStr(session.clek, row.memok)
       } else this.memo = ''
-
-      this.repAvatars()
     }
 
     if (row.pck) { // phrase de contact cryptée par la clé K.
@@ -723,21 +719,23 @@ export class Avatar extends GenDoc {
       this.cv = decode(await decrypter(kcv, row.cva))
     } else this.cv = null
 
-    this.lgr = {}
+    this.lgr = new Map()
     if (row.lgrk) { 
       /* map : - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
         - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation. */
       for (const ni in row.lgrk) {
-        this.lgr[ni] = decode(await decrypter(session.clek, row.lgrk[ni]))
+        const [nom, rnd, im] = decode(await decrypter(session.clek, row.lgrk[ni]))
+        this.lgr.set(parseInt(ni), { ng: new NomGroupe(nom, rnd), ni, im})
       }
     }
 
-    this.invits = {}
+    this.invits = new Map()
     if (row.invits) {
       /* map des invitations en cours - clé : `ni`, numéro d'invitation.
         - _valeur_ : cryptée par la clé CV de l'avatar `[nom, cle, im]`.*/
       for (const ni in row.invits) {
-        this.invits[ni] = decode(await decrypter(kcv, row.invits[ni]))
+        const [nom, rnd, im] = decode(await decrypter(kcv, row.invits[ni]))
+        this.invits.set(parseInt(ni), { ng: new NomGroupe(nom, rnd), ni, im})
       }
     }
 
