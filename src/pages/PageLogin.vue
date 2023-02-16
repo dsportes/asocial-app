@@ -42,7 +42,7 @@
 
   <q-card v-if="q666" class="q-mt-md petitelargeur fs-md column justify-center">
     <div class="titre-lg text-center">{{$t('LOGcc')}}</div>
-    <phrase-secrete class="q-my-md" :init-val="phrase" v-on:ok-ps="creercc"
+    <phrase-secrete class="q-my-md" v-on:ok-ps="creercc"
       icon-valider="check" label-valider="creer"/>
   </q-card>
 
@@ -147,7 +147,7 @@ export default {
     },
     async creercc (ps) {
       if (!ps) return
-      this.phrase = null
+      this.phrase = ''
       await new CreationCompteComptable().run(ps)
     }
   },

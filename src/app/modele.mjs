@@ -144,7 +144,7 @@ export class NomAvatar extends NomGenerique {
 }
 
 export class NomGroupe extends NomGenerique {
-  constructor (nom, rnd) { super(nom, rnd || 8) }
+  constructor (nom, rnd) { super(nom, rnd || 2) }
 
   get photoDef () { return this.photo || stores.config.iconGroupe }
 
@@ -152,7 +152,7 @@ export class NomGroupe extends NomGenerique {
 }
 
 export class NomTribu extends NomGenerique {
-  constructor (nom, rnd) { super(nom, rnd || 9) }
+  constructor (nom, rnd) { super(nom, rnd || 3) }
 
   clone () { return new NomTribu(this.nom, this.rnd) }
 }
@@ -436,7 +436,7 @@ export function compilNiv (jib, lj) {
 /****************************************************
  * Tous les objets Documents
 ****************************************************/
-class GenDoc {
+export class GenDoc {
   static deGroupe (id) { return id && id % 10 === 8 }
   static idCompta (id) { return Math.floor(id / 10) * 10 }
   get pk () { return this.id + (this.ids ? '/' + this.ids : '')}
@@ -908,7 +908,6 @@ export class Compta extends GenDoc {
       this.blocage.ljc = ljc
       this.idtb = this.idt
     }
-    this.lavv = row.lavv
   }
 
   static async row (na, nt, q1, q2, estParrain) { // création d'une compta
@@ -929,7 +928,7 @@ export class Compta extends GenDoc {
     r.shay = session.phrase.shay
 
     const cx = na.estComptable ? session.clek : na.rnd
-    r.nct = decode(await decrypter(cx, new Uint8Array(encode([nt.nom, nt.rnd]))))
+    r.nct = await crypter(cx, new Uint8Array(encode([nt.nom, nt.rnd])))
     r.idt = nt.id
     r.idtb = 0
     r.nat = await crypter(nt.rnd, new Uint8Array(encode([na.nom, na.rnd])))

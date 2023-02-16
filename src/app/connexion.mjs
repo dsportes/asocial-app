@@ -1,11 +1,12 @@
 import stores from '../stores/stores.mjs'
+import { encode } from '@msgpack/msgpack'
 
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
-import { $t, tru8, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash, sleep } from './util.mjs'
+import { $t, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { DateJour, IDCOMPTABLE } from './api.mjs'
-import { resetRepertoire, compile, Compta, Avatar, Tribu, NomAvatar, NomTribu, setNg, getNg } from './modele.mjs'
+import { resetRepertoire, compile, Compta, Avatar, Tribu, NomAvatar, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB  } from './db.mjs'
 import { genKeyPair, crypter } from './webcrypto.mjs'
@@ -144,7 +145,7 @@ export class ConnexionCompte extends OperationUI {
         }
 
         // obtention de la liste des groupes requis et signatures
-        const ok = await groupesRequisSignatures()
+        const ok = await this.groupesRequisSignatures()
         if (!ok) {
           await this.getCTA()
           continue
@@ -176,10 +177,10 @@ export class ConnexionCompte extends OperationUI {
     // ids des avatars et des groupes auxquels s'abonner
     const abPlus = []
 
-    for(const avatar of this.avatarsToStore) {
+    for(const avatar of this.avatarsToStore.values()) {
       if (session.fsSync) await session.fsSync.setAvatar(avatar.id); else abPlus.push(avatar.id)
       avatar.idGroupes(this.grRequis)
-      avsMap[avatar.id] = { v: avatar.id, dlv: avatar.id % 10 === 0 ? dlv1 : dlv2 }
+      avsMap[avatar.id] = { v: avatar.v, dlv: avatar.id % 10 === 0 ? dlv1 : dlv2 }
       avatar.membres(mbsMap, dlv2)
     }
   
@@ -198,6 +199,7 @@ export class ConnexionCompte extends OperationUI {
   }
 
   async chargerGroupes () {
+    const session = stores.session
     const grRows = {} // Map des rows des groupes par id du groupe
     if (session.accesIdb) {
       this.cGroupes.forEach(row => {
@@ -206,13 +208,15 @@ export class ConnexionCompte extends OperationUI {
     }
 
     if (session.accesNet) {
-      const mapv = {} // version détenue en session pour chaque groupe requis
-      this.grRequis.forEach(id => { const r = grRows[id] ; mapv[id] = r ? r.v : 0 })
-      const args = { token: session.authToken, mapv }
-      const ret = this.tr(await post(this, 'getGroupes', args))
-      if (ret.rowGroupes) ret.roupes.forEach(row => {
-        grRows[row.id] = row
-      })
+      if (this.grRequis.size) {
+        const mapv = {} // version détenue en session pour chaque groupe requis
+        this.grRequis.forEach(id => { const r = grRows[id] ; mapv[id] = r ? r.v : 0 })
+        const args = { token: session.authToken, mapv }
+        const ret = this.tr(await post(this, 'getGroupes', args))
+        if (ret.rowGroupes) ret.roupes.forEach(row => {
+          grRows[row.id] = row
+        })
+      }
     }
 
     /* Certains groupes peuvent être des groupes supprimés
@@ -399,7 +403,7 @@ export class ConnexionCompte extends OperationUI {
     return [n1, n2]
   }
 
-  async getGTA () {
+  async getCTA () {
     const session = stores.session
     /* Authentification et get de avatar / compta / tribu
     ET abonnement à compta sur le serveur
@@ -411,10 +415,13 @@ export class ConnexionCompte extends OperationUI {
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
     this.rowTribu = ret.rowTribu
+    session.compteId = this.rowAvatar.id
+    session.estComptable = session.compteId === IDCOMPTABLE
+    session.setAvatarCourant(session.compteId)
     this.avatar = await compile(this.rowAvatar)
     this.compta = await compile(this.rowCompta)
     this.tribu = await compile(this.rowTribu)
-    session.tribuId = ret.tribuId
+    session.tribuId = this.tribu.id
     if (session.fsSync) await session.fsSync.setTribu(session.tribuId)
   }
 
@@ -424,9 +431,6 @@ export class ConnexionCompte extends OperationUI {
     ET abonnement à compta sur le serveur
     */
     await this.getCTA()
-    session.compteId = ret.compteId
-    session.estComptable = session.compteId === IDCOMPTABLE
-    session.setAvatarCourant(session.compteId)
 
     if (session.fsSync) await session.fsSync.setCompte(session.compteId)
 
@@ -541,7 +545,7 @@ export class ConnexionCompte extends OperationUI {
       })
 
       // Versions des sous-collections par avatar / groupe
-      if (session.accesNet) await loadVersions(); else Versions.reset()
+      if (session.accesIdb) await loadVersions(); else Versions.reset()
       // this.versions : map. Pour chaque avatar / groupe requis, la version de sa sous-coll détenue en serveur
 
       // Chargement depuis IDB des Maps des secrets, chats, sponsorings, membres trouvés en IDB
@@ -552,8 +556,8 @@ export class ConnexionCompte extends OperationUI {
 
       // Itération sur chaque avatar: secrets, chats, sponsorings
       for (const avatar of avStore.avatars.values()) {
-        const vidb = Versions.get(id)
-        const vsrv = this.versions[id] || 0    
+        const vidb = Versions.get(avatar.id)
+        const vsrv = this.versions[avatar.id] || 0    
         const na = getNg(avatar.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
         const [x1, x2] = await this.chargerSecrets(avatar.id, vidb, vsrv, false)
@@ -568,13 +572,13 @@ export class ConnexionCompte extends OperationUI {
         n5 = x5
         n6 = x6
         syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
-        if (vidb < vsrv) Versions.set(id, vsrv)
+        if (vidb < vsrv) Versions.set(avatar.id, vsrv)
       }
 
       // Itération sur chaque groupe: secrets, membres
       for (const groupe of grStore.groupes.values()) {
-        const vidb = Versions.get(id)
-        const vsrv = this.versions[id] || 0    
+        const vidb = Versions.get(groupe.id)
+        const vsrv = this.versions[groupe.id] || 0    
         const na = getNg(id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
         const [x1, x2] = await this.chargerSecrets(groupe.id, vidb, vsrv, true)
@@ -587,7 +591,7 @@ export class ConnexionCompte extends OperationUI {
         n3 = x3
         n4 = x4
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
-        if (vidb < vsrv) Versions.set(id, vsrv)
+        if (vidb < vsrv) Versions.set(groupe.id, vsrv)
 
         if (this.mbsDisparus.size) {
           /* Sur le serveur, le GC quotidien est censé avoir mis les statuts ast[ids] à 0
@@ -830,6 +834,7 @@ export class CreationCompteComptable extends OperationUI {
       if (ret.credentials) session.fscredentials = ret.credentials
       if (session.fsSync) {
         await session.fsSync.setCompte(session.compteId)
+        await session.fsSync.setAvatar(session.compteId)
         await session.fsSync.setTribu(session.tribuId)
       }
 
