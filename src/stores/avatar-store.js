@@ -188,35 +188,36 @@ export const useAvatarStore = defineStore('avatar', {
       e.sponsorings.delete(ids)
     },
 
-    /* Avatars référençant un groupe donné: liste de [avatar, ni]
-    - si del, supprime les entrées
-    - retourne mapIdNi : map ou null si aucun
+    /* Avatars référençant un des groupes du set donné
+    - supprime les entrées correspondantes
+    - retourne mapIdNi : Map
       - clé : id d'un avatar
       - valeur : array des ni des groupes ciblés
     */
-    avatarsDeGroupe (idg, del) {
-      const mapIdNi = {}
-      let x = false
-      this.map.forEach(e => { 
-        const a = e.avatar
-        // supprime l'entrée ni dans ldg de l'avatar qui ne référence plus ce groupe
-        const ni = a.niDeGroupe(idg, del)
-        if (ni) {
-          let y = mapIdNi[a.id]
-          if (!y) { y = []; mapIdNi[a.id] = y }
-          y.push(ni)
-          x = true
-        }
-      })
+    avatarsDeGroupes (setg) {
+      const mapIdNi = []
+      const x = false
+      if (setg && setg.size) {
+        this.map.forEach(e => { 
+          const a = e.avatar
+          // supprime les entrées des groupes dans l'avatar, retourne l'array de leur ni
+          const ani = a.niDeGroupes(setg)
+          ani.forEach(ni => {
+            let y = mapIdNi[a.id]
+            if (!y) { y = []; mapIdNi[a.id] = y }
+            y.push(ni)
+            x = true
+          })
+        })
+      }
       return x ? mapIdNi : null
     },
 
     /* Mise jour groupée pour un avatar
-    e : { av: avatar, ch: [], sp: [], sc: [] }
+    e : { av: avatar, lch: [], lsp: [], lsc: [] }
     */
     lotMaj ({av, lch, lsp, lsc}) {
-      const id = av.id
-      this.setAvatar(av)
+      if (av) this.setAvatar(av)
       lsc.forEach(s => { this.setSecret(s) })
       lsp.forEach(s => { this.setSponsoring(s) })
       lch.forEach(c => { this.setChat(c) })

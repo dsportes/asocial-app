@@ -108,7 +108,7 @@ export default ({
 
   computed: {
     dlclass () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    avParrain () { return this.session.avC.estParrain }
+    avParrain () { return this.session.estParrain }
   },
 
   data () {

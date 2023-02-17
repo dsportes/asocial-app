@@ -110,6 +110,15 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
+    /* Mise jour groupée pour un groupe
+    e : { gr, lmb: [], lsc: [] }
+    */
+    lotMaj ({gr, lmb, lsc}) {
+      if (gr) this.setGroupe(gr)
+      lsc.forEach(s => { this.setSecret(s) })
+      lmb.forEach(m => { this.setMembre(m) })
+    },
+
     del (id) {
       const e = this.map[id]
       if (e) {

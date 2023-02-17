@@ -4,7 +4,7 @@ import { encode } from '@msgpack/msgpack'
 import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6 } from '../app/util.mjs'
-import { DateJour } from '../app/api.mjs'
+import { DateJour, IDCOMPTABLE } from '../app/api.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -27,11 +27,9 @@ export const useSessionStore = defineStore('session', {
     fscredentials: null, // pour connexion à Firestore
     fsSync: null, // Objet de synchro pour Firestore
 
-    estComptable: false,
     compteId: 0,
     tribuId: 0,
     clek: null,
-    clepubc: null,
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
 
@@ -54,6 +52,9 @@ export const useSessionStore = defineStore('session', {
     compta (state) { return stores.avatar.compta },
     tribu (state) { return stores.avatar.tribu },
 
+    estParrain (state) { return stores.avatar.compta && stores.avatar.compta.estParrain },
+    estComptable (state) { return state.compteId === IDCOMPTABLE },
+    
     // Avatar et groupes courants
     avC (state) { return stores.avatar.getAvatar(state.avatarId) },
     grC (state) { return stores.groupe.getGroupe(state.groupeId)},

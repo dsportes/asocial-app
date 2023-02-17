@@ -150,10 +150,9 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 export default ({
   name: 'AcceptationSponsoring',
 
-  props: { sp: Object, pc: Object, close: Function, clepubc: Object },
+  props: { sp: Object, pc: Object, close: Function },
   /*
   pc : object Phrase (?)
-  clepubc : clé publique du comptable
   sp : objet Sponsoring décodé
     - `ard`: ardoise.
     - 'dlv': 
@@ -217,7 +216,7 @@ export default ({
       }
     },
     async confirmer () {
-      const arg = { ps: this.ps, ard: this.texte, phch: this.phch, max: this.max, estpar: this.estpar, clepubc: this.clepubc, npi: this.npi }
+      const arg = { ps: this.ps, ard: this.texte, phch: this.phch, max: this.max, estpar: this.estpar, npi: this.npi }
       this.razps()
       // await new AcceptationParrainage().run(this.couple, this.datactc, arg)
       this.fermer()

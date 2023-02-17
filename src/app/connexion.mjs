@@ -102,7 +102,6 @@ export class ConnexionCompte extends OperationUI {
     while (true) { // boucle si la version de compta a changé
       avRowsModifies.length = 0
       avToSuppr.clear()
-      avRequis.clear()
       this.avatarsToStore.clear()
 
       const mapv = {} // versions des avatars requis à demander au serveur
@@ -117,7 +116,7 @@ export class ConnexionCompte extends OperationUI {
 
       for (const row of this.cAvatars) {
         if (row.id !== this.avatar.id) {
-          if (this.avRequis.has(row.id)) {
+          if (avRequis.has(row.id)) {
             const av = await compile(row)
             this.avatarsToStore.set(row.id, av)
             mapv[row.id] = row.v
@@ -415,10 +414,9 @@ export class ConnexionCompte extends OperationUI {
     this.rowCompta = ret.rowCompta
     this.rowTribu = ret.rowTribu
     session.compteId = this.rowAvatar.id
-    session.estComptable = session.compteId === IDCOMPTABLE
     session.setAvatarCourant(session.compteId)
-    this.avatar = await compile(this.rowAvatar)
     this.compta = await compile(this.rowCompta)
+    this.avatar = await compile(this.rowAvatar)
     this.tribu = await compile(this.rowTribu)
     session.tribuId = this.tribu.id
     if (session.fsSync) await session.fsSync.setTribu(session.tribuId)
@@ -519,13 +517,13 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesNet && grZombis.size) {
         /* Traitement des groupes zombis 
         Les retirer (par anticipation) des avatars qui les référencent 
-        mapIdNi : map
+        mapIdNi : Map
           - clé : id d'un avatar
           - valeur : array des ni des groupes ciblés
         */
         const mapIdNi = {}
         this.avatarsToStore.forEach(av => { 
-          const ani = av.niDeGroupes(grZombis, true)
+          const ani = av.niDeGroupes(grZombis)
           if (ani.length) mapIdNi[av.id] = ani
         })
         const args = { token: session.authToken, mapIdNi }
@@ -658,7 +656,6 @@ export class AcceptationParrainage extends OperationUI {
   - max : [v1, v2] volumes max pour les secrets du couple
   - estpar : si le compte à créer est parrain aussi
   - phch : hash phrase de contact
-  - clepubc
   - npi
 
   datactc :
@@ -806,7 +803,6 @@ export class CreationCompteComptable extends OperationUI {
       session.compteId = na.id
       session.tribuId = nt.id
       session.setAvatarCourant(session.compteId)
-      session.estComptable = true
 
       const rowCompta = await Compta.row (na, nt, ac[0], ac[1], true) // set de session.clek
       const rowTribu = await Tribu.primitiveRow (nt, na, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])

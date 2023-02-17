@@ -673,7 +673,7 @@ async function setFa (fetat, buf) { // buf : contenu du fichier non crypté
 Gestion des fichiers hors-ligne : fin de connexion et synchronisation
 **********************************************************************/
 
-/* Fin de synchronisation : liste des secrets notifiés */
+/* Fin de synchronisation : map des secrets notifiés */
 export async function gestionFichierSync (lst) {
   const avst = stores.avsecret
   const fest = stores.fetat

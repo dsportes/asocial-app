@@ -11,7 +11,7 @@
       </div>
     </div>
 
-    <div v-if="session.compte.estParrain" class="column items-center q-py-sm q-gutter-xs">
+    <div v-if="session.estParrain" class="column items-center q-py-sm q-gutter-xs">
       <div>
         <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
           :label="$t('P10nvp')" color="warning" dense @click="ouvrirParrainage"/>

@@ -47,7 +47,7 @@
   </q-card>
 
   <q-dialog v-model="dialcp" persistent full-height>
-    <AcceptationSponsoring :sp="sp" :clepubc="clepubc" :pc="pc" :close="fermerap" />
+    <AcceptationSponsoring :sp="sp" :pc="pc" :close="fermerap" />
   </q-dialog>
 
 </q-page>
@@ -79,7 +79,6 @@ export default {
       encours: false,
       dialcp: false,
       phch: 0,
-      clepubc: null,
       datactc: null,
       coupleloc: null,
       /* clex: null, pph: 0, p: null */
@@ -101,7 +100,6 @@ export default {
           args.ids : hash de la phrase de contact
           Retour:
           - rowSponsoring s'il existe
-          - clepubc
           */
           const res = await new ChercherSponsoring().run(this.pc.phch)
           if (!res || !res.rowSponsoring) {
@@ -111,7 +109,6 @@ export default {
           }
           try {
             this.sp = await Sponsoring.fromRow(res.rowSponsoring, this.pc.clex)
-            this.clepubc = res.clepubc
             if (this.sp.dlv <  DateJour.nj()) {
               await afficherDiag(this.$t('LOGppinv'))
               this.raz()

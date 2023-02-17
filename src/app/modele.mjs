@@ -39,6 +39,20 @@ export function getCv (id) {
 
 /* Versions (statique) ***********************************
 Versions des sous-collections d'avatars et groupes
+- chaque sous collection identifiée par un id d'avatar ou de groupe a une version courante
+- au chargement depuis IDB elle donne la version stockée en base:
+  - pour un avatar : l'avatar, ses secrets, chats, sponsorings sont tous disponibles
+    et consistents jusqu'à cette version v. 
+  - pour un groupe : le groupe, ses secrets, ses membres.
+- au chargement, pour chaque sous-collection, LA version de la sous-collection peut progresser
+  suite au chargement de tous les documents de la sous-collection estampillée à une version postérieure.
+- en synchronisation, les sous-collections évoluent de même globalement.
+- pour une entrée donnée, la version v d'une sous-collection évolue en fonction des synchronisations.
+- même en l'absence de IDB, la map donne l'état courant des stores
+- en mode avion, la map n'évolue pas depuis le chargement initial, les stores non plus.
+La map globale Versions est sauvegardée sur IDB :
+- en fin de chargement,
+- en fin de chaque synchronisation.
 */
 export class Versions {
   static map = {}
@@ -644,8 +658,6 @@ export class Tribu extends GenDoc {
 */
 
 export class Avatar extends GenDoc {
-  get estParrain () { return this.stp === 1 } // retourne true si le compte est parrain
-  get estComptable () { return this.id === IDCOMPTABLE } // retourne true si le compte est celui du comptable
   get primaire () { return this.id % 10 === 0 } // retourne true si l'objet avatar est primaire du compte
   get naprim () { return this.lav[0].na } // na de l'avatar primaire du compte
   get apropos () { return this.nct ? ($t('tribus', 0) + ':' + this.nct.nom) : $t('comptable') }
@@ -673,23 +685,11 @@ export class Avatar extends GenDoc {
 
   /* Retourne les numéros d'invitation de l'avatar pour les groupes de setg
   si del, supprime ces entrées */
-  niDeGroupes (setg, del) {
+  niDeGroupes (setg) {
     const ani = []
     for (const t of this.lgr) if (setg.has(t.ng.id)) ani.push(t.ni)
-    if (del) ani.forEach(ni => { this.lgr.delete(ni) })
+    ani.forEach(ni => { this.lgr.delete(ni) })
     return ani
-  }
-
-  /* Retourne le numéro d'invitation de l'avatar pour le groupe idg
-  si del, supprime cette entrée */
-  niDeGroupe (idg, del) {
-    for (const t of this.lgr) {
-      if (idg === t.ng.id) {
-        if (del) this.lgr.delete(t.ni)
-        return t.ni
-      }
-    }
-    return 0
   }
 
   /** compile *********************************************************/
@@ -832,6 +832,7 @@ export class Cv extends GenDoc {
 */
 
 export class Compta extends GenDoc {
+  get estParrain () { return this.stp === 1 }
   get stn () { return this.blocage ? this.blocage.stn : 0 }
   get clet () { return getCle(this.idt) }
 
