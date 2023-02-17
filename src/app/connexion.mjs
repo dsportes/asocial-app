@@ -639,7 +639,7 @@ export class ConnexionCompte extends OperationUI {
 }
 
 /******************************************************************
-Acceptation d'un parrainage
+Acceptation d'un sponsoring
 X_SRV, '03-Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète'
 X_SRV, '04-Une phrase secrète semblable est déjà utilisée. Changer a minima la première ligne de la phrase secrète pour ce nouveau compte'
 X_SRV, '18-Réserves de volume insuffisantes du parrain pour les forfaits attribués compte'
@@ -647,28 +647,22 @@ A_SRV, '17-Avatar parrain : données de comptabilité absentes'
 A_SRV, '24-Couple non trouvé'
 */
 
-export class AcceptationParrainage extends OperationUI {
+export class AcceptationSponsoring extends OperationUI {
   constructor () { super($t('OPapa')) }
 
-  /* arg :
-  - ps : phrase secrète
-  - ard : réponse du filleul
-  - max : [v1, v2] volumes max pour les secrets du couple
-  - estpar : si le compte à créer est parrain aussi
-  - phch : hash phrase de contact
-  - npi
-
-  datactc :
-  - `cc` : clé du couple (donne son id).
-  - `naf` : [nom, rnd] nom complet de A1 pour première vérification immédiate en session que la phrase est a priori bien destinée à cet avatar. Le nom de A1 figure dans le nom du couple après celui de A0.
-  - Pour un parrainage seulement
-    - `nct` : `[nom, rnd]` nom complet de la tribu.
-    - `parrain` : true si parrain
-    - `forfaits` : `[f1, f2]` forfaits attribués par le parrain.
-  - Pour une rencontre seulement
-    - `idt` : id de la tribu de A0 SEULEMENT SI A0 en est parrain.
-  */
-  async run (couple, datactc, arg) {
+  async run (sp, ids, reponse) {
+    /* sp : objet Sponsoring
+    - `ard`: ardoise.
+    - 'dlv': 
+    - `na` : du sponsor P.
+    - `cv` : du sponsor P.
+    - `naf` : na attribué au filleul.
+    - `nct` : de sa tribu.
+    - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
+    - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+    reponse : texte du sponsorisé
+    ids : ids du sponsoring
+    */
     try {
       // LE COMPTE EST CELUI DU FILLEUL
       this.session = stores.session
@@ -734,36 +728,19 @@ export class AcceptationParrainage extends OperationUI {
   }
 }
 
-/* Refus de parrainage *************************************************
-Refus d'une rencontre / parrainage
-args :
-  - sessionid
-  - idc: id du couple
-  - phch: id de phrase de contact
-  - ardc : du contact
+/* Refus d'un sponsoring *************************************************
+args.id ids : identifiant du sponsoring
+args.arx : réponse du filleul
 */
-export class RefusParrainage extends OperationUI {
+export class RefusSponsoring extends OperationUI {
   constructor () { super($t('OPdpa')) }
 
-  /* arg :
-  - ard : réponse du filleul
-  - phch : hash phrase de parrainage
-  */
-  async run (couple, phch, ard) {
+  async run (sp, ardx) { // ids du sponsoring
     try {
-      this.session = stores.session
-      await initSession() // SANS phrase
-      if (stores.config.fsSync) await openWS()
-      resetRepertoire()
-      stores.reset()
-
-      const args = {
-        sessionId: this.session.sessionId,
-        idc: couple.id,
-        phch: phch,
-        ardc: await couple.toArdc(ard, couple.cc)
-      }
-      await post(this, 'm1', 'refusRencontre', args)
+      const session = stores.session
+      await initSession()
+      const args = { token: session.authToken, ids: sp.ids, ardx }
+      await post(this, 'RefusSponsoring', args)
       deconnexion(true)
     } catch (e) {
       await this.finKO(e)

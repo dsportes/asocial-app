@@ -473,7 +473,8 @@ export async function compile (row) {
   if (row.dlv) obj.dlv = row.dlv
   obj.v = row.v
   if (row._data_) {
-     await obj.compile(decode(row._data_))
+    const x = decode(row._data_)
+    await obj.compile(x)
   } else {
     obj._zombi = true
   }

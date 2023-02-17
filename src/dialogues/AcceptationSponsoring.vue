@@ -44,7 +44,7 @@
       <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
       <show-html class="q-mb-xs border1" zoom maxh="4rem" :texte="sp.ard"/>
 
-      <div class="q-my-md q-pa- md q-gutter-md row justify-center full-width border1">
+      <div class="q-my-sm q-gutter-md row justify-center full-width">
         <q-radio dense v-model="accdec" :val="1" :label="$t('NPacc')" />
         <q-radio dense v-model="accdec" :val="2" :label="$t('NPdec')" />
       </div>
@@ -52,87 +52,18 @@
       <div v-if="accdec===1">
         <phrase-secrete :init-val="ps" v-on:ok-ps="okps" verif icon-valider="check" :label-valider="$t('OK')"/>
         <editeur-md class="full-width height-8" v-model="texte" :texte="sp.ard" editable modetxt hors-session/>
-        <q-btn flat @click="fermer()" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
-        <q-btn flat @click="refuser()" color="warning" :label="$t('APAdec2')" class="q-ml-sm" />
+        <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
+        <q-btn flat @click="confirmer" color="warning" :disable="ps === null"
+          :label="$t('APAconf')" class="q-ml-sm" />
       </div>
 
-<!--
-  <q-card class="q-ma-xs moyennelargeur fs-md">
-    <q-card-section class="column items-center">
-      <div class="titre-lg text-center">{{$t('APAtit', [estpar ? $t('APApa') : $t('APAfi')])}}</div>
-    </q-card-section>
+      <div v-if="accdec===2">
+        <editeur-md class="full-width height-8" v-model="texte" :texte="sp.ard" editable modetxt hors-session/>
+        <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
+        <q-btn flat @click="refuser" color="warning"
+          :label="$t('APAdec2')" class="q-ml-sm" />
+      </div>
 
-    <q-card-section>
-      <q-stepper v-model="step" vertical color="primary" animated>
-        <q-step :name="1" :title="$t('APApp')" icon="settings" :done="step > 1">
-          <div>{{$t('APAtr', [nomTribu])}}</div>
-          <div>{{$t('APAnc')}} : <span class="font-mono q-pl-md">{{couple.nomIs}}</span></div>
-          <div>{{$t('APAnpa')}} : <span class="font-mono q-pl-md">{{couple.nomEs}}</span></div>
-          <div>{{$t('APAqdc')}} :
-            <span class="font-mono q-pl-md">v1: {{ed1(datactc.forfaits[0])}}</span>
-            <span class="font-mono q-pl-lg">v2: {{ed2(datactc.forfaits[1])}}</span>
-          </div>
-          <div class="t1" v-if="valid">{{$t('APAval')}} : <span class="sp1">{{$t('jour', valid, { count: valid })}}</span></div>
-          <show-html class="full-width height-6 border1" :texte="couple.ard" />
-          <q-stepper-navigation>
-            <q-btn flat @click="fermer()" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
-            <q-btn flat @click="step=5" color="primary" :label="$t('refuser')" class="q-ml-sm" />
-            <q-btn flat @click="step=2" color="warning" :label="$t('continuer')" class="q-ml-sm" />
-          </q-stepper-navigation>
-        </q-step>
-
-        <q-step :name="2" :title="$t('APAps')" icon="settings" :done="step > 2">
-          <div class="fs-sm q-py-sm">{{$t('APAps2')}}</div>
-          <phrase-secrete :init-val="ps" class="q-ma-xs" v-on:ok-ps="okps" verif icon-valider="check" label-valider="continuer"></phrase-secrete>
-          <q-stepper-navigation>
-            <q-btn flat @click="fermer()" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
-            <q-btn flat @click="refuser()" color="primary" :label="$t('refuser')" class="q-ml-sm" />
-          </q-stepper-navigation>
-        </q-step>
-
-        <q-step :name="3" :title="$t('APAess')" icon="settings" :done="step > 3" >
-          <div v-if="couple.stE===1">{{$t('APAesp')}} :<br>
-            <span class="font-mono q-pl-md">Maximum v1: {{ed1(couple.mx10)}}</span><br>
-            <span class="font-mono q-pl-md">Maximum v2: {{ed2(couple.mx20)}}</span>
-          </div>
-          <div v-else>{{$t('APAnos')}}</div>
-          <div class="titre-md text-warning">{{$t('APAnos2')}}</div>
-          <choix-quotas v-model="max" :f1="couple.mx10 || 1" :f2="couple.mx20 || 1"/>
-          <div v-if="couple.npiE===1">{{$t('APAper')}}</div>
-          <div v-if="couple.npiE===0">{{$t('APAper2')}}</div>
-          <div style="margin-left:-0.8rem" class="text-primary">
-            <q-toggle v-model="npi" size="md" :color="npi ? 'warning' : 'primary'"
-              :label="npi ? $t('APAper4') : $t('APAper3')"/>
-          </div>
-          <q-stepper-navigation>
-            <q-btn flat @click="step = 2" color="primary" :label="$t('precedent')" class="q-ml-sm" />
-            <q-btn flat @click="step = 4" color="primary" :label="$t('suivant')" class="q-ml-sm" />
-          </q-stepper-navigation>
-        </q-step>
-
-        <q-step :name="4" :title="$t('APAmer')" icon="check" :done="step > 3" >
-          <editeur-md class="full-width height-8" v-model="texte" :texte="textedef" editable modetxt hors-session/>
-          <q-stepper-navigation>
-            <q-btn flat @click="step=1" color="primary" :label="$t('corriger')" class="q-ml-sm" />
-            <q-btn flat @click="fermer()" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
-            <q-btn flat @click="step=5" color="primary" :label="$t('refuser')" class="q-ml-sm" />
-            <q-btn @click="confirmer" color="warning" :label="$t('APAconf')" icon="check" class="q-ml-sm" />
-          </q-stepper-navigation>
-        </q-step>
-
-        <q-step :name="5" :title="$t('APAdec')" icon="check" :done="step > 6" >
-          <editeur-md class="full-width height-8" v-model="texte" :texte="couple.ard" editable modetxt hors-session/>
-          <q-stepper-navigation>
-            <q-btn flat @click="step=1" color="primary" :label="$t('corriger')" class="q-ml-sm" />
-            <q-btn flat @click="fermer()" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
-            <q-btn flat @click="refuser()" color="warning" :label="$t('APAdec2')" class="q-ml-sm" />
-          </q-stepper-navigation>
-        </q-step>
-
-      </q-stepper>
-    </q-card-section>
-  </q-card>
-  -->
     </q-page>
   </q-page-container>
 </q-layout>
@@ -142,18 +73,21 @@
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
-// import { AcceptationParrainage, RefusParrainage } from '../app/connexion.mjs'
+import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
 import { getJourJ, edvol, dhcool } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, DateJour } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import { crypter } from '../app/webcrypto.mjs'
 
 export default ({
   name: 'AcceptationSponsoring',
 
   props: { sp: Object, pc: Object, close: Function },
   /*
-  pc : object Phrase (?)
+  pc : object Phrase
   sp : objet Sponsoring décodé
+    - id
+    - ids
     - `ard`: ardoise.
     - 'dlv': 
     - `na` : du sponsor P.
@@ -164,7 +98,7 @@ export default ({
     - `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
-  components: { /* PhraseSecrete, EditeurMd, */ ShowHtml, BoutonHelp },
+  components: { PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp },
 
   computed: {
     estpar () { return this.sp.sp },
@@ -216,14 +150,15 @@ export default ({
       }
     },
     async confirmer () {
-      const arg = { ps: this.ps, ard: this.texte, phch: this.phch, max: this.max, estpar: this.estpar, npi: this.npi }
+      const ardx = await crypter(this.pc.clex, this.texte)
+      await new AcceptationSponsoring().run(this.sp, ardx)
       this.razps()
-      // await new AcceptationParrainage().run(this.couple, this.datactc, arg)
       this.fermer()
     },
     async refuser () {
+      const ardx = await crypter(this.pc.clex, this.texte)
+      await new RefusSponsoring().run(this.sp, ardx)
       this.razps()
-      // await new RefusParrainage().run(this.couple, this.phch, this.texte)
       this.fermer()
     }
   },

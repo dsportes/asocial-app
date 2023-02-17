@@ -22,26 +22,6 @@ export class Operation {
     return ret
   }
 
-  /* 
-  Retrait des groupes détectés zombis
-  des listes des groupes accédés par les avatars du compte
-
-  async groupesZombis (lgr) {
-    if (lgr.size) {
-      const session = stores.session
-      const avatar = stores.avatar
-      for (const id of session.compte.avatarIds()) {
-        const a = avatar.get(id)
-        for (const idg of a.groupeIds()) {
-          if (lgr.has(idg)) {
-            const args = { sessionId: session.sessionId, id: a.id, ni: a.ni(idg) }
-            this.tr(await post(this, 'm1', 'supprAccesGrAv', args))
-          }
-        }
-      }
-    }
-  }
-  */
 }
 
 export class OperationUI extends Operation {
@@ -90,7 +70,7 @@ export class MemoCompte extends OperationUI {
     try {
       const session = stores.session
       const args = { token: session.authToken, memok }
-      const ret = this.tr(await post(this, 'MemoCompte', args))
+      this.tr(await post(this, 'MemoCompte', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -107,7 +87,7 @@ export class MotsclesCompte extends OperationUI {
     try {
       const session = stores.session
       const args = { token: session.authToken, mck }
-      const ret = this.tr(await post(this, 'MotsclesCompte', args))
+      this.tr(await post(this, 'MotsclesCompte', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)

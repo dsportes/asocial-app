@@ -169,9 +169,9 @@ export default {
   EX8004: 'Compte Comptable déjà créé',
   EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
   EX8007: 'Phrase de sponsoring déjà déclarée.',
+  EX8008: 'Phrase de sponsoring non trouvée.',
 
   EX8006: 'Forfait V1 insuffisant pour l\'attribution souhaitée au nouvel avatar',
-  EX8008: 'Phrase de parrainage / rendez-vous non trouvée.',
   EX8009: 'Forfait V1 insuffisant pour supporter les secrets du contact.',
   EX8010: 'Forfait V2 insuffisant pour supporter les secrets du contact.',
   EX8011: 'Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète',

@@ -199,7 +199,7 @@ export default ({
       } catch {}
     },
     corriger () {
-      this.step = 1
+      this.step = 4
     }
   },
 

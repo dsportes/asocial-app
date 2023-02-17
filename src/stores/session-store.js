@@ -54,7 +54,7 @@ export const useSessionStore = defineStore('session', {
 
     estParrain (state) { return stores.avatar.compta && stores.avatar.compta.estParrain },
     estComptable (state) { return state.compteId === IDCOMPTABLE },
-    
+
     // Avatar et groupes courants
     avC (state) { return stores.avatar.getAvatar(state.avatarId) },
     grC (state) { return stores.groupe.getGroupe(state.groupeId)},
@@ -70,19 +70,18 @@ export const useSessionStore = defineStore('session', {
   actions: {
     init (phrase) {
       this.sessionId = intToB64(rnd6())
-      this.phrase = phrase
       if (phrase) {
         this.phrase = phrase
         this.lsk = '$asocial$-' + phrase.dpbh
-        const token = {
-          sessionId: this.sessionId,
-          shax: phrase.shax,
-          hps1: phrase.dpbh
-        }
-        const x = new Uint8Array(encode(token))
-        this.authToken = u8ToB64(new Uint8Array(x), true)
-        this.nombase = localStorage.getItem(this.lsk) || ''
       }
+      const token = {
+        sessionId: this.sessionId,
+        shax: phrase ? phrase.shax : null,
+        hps1: phrase ? phrase.dpbh : null
+      }
+      const x = new Uint8Array(encode(token))
+      this.authToken = u8ToB64(new Uint8Array(x), true)
+      this.nombase = this.lsk ? localStorage.getItem(this.lsk) : ''
       this.dateJourConnx = new DateJour()
       this.status = 1
     },
