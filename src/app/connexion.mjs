@@ -650,8 +650,9 @@ A_SRV, '24-Couple non trouvé'
 export class AcceptationSponsoring extends OperationUI {
   constructor () { super($t('OPapa')) }
 
-  async run (sp, ids, reponse) {
+  async run (sp, ardx, txt, ps) {
     /* sp : objet Sponsoring
+    - id ids : identifiant
     - `ard`: ardoise.
     - 'dlv': 
     - `na` : du sponsor P.
@@ -660,68 +661,75 @@ export class AcceptationSponsoring extends OperationUI {
     - `nct` : de sa tribu.
     - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
     - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+    ardx : reponse cryptée par la cleX du sponsoring
     reponse : texte du sponsorisé
-    ids : ids du sponsoring
+    ps: phrase secrète du nouveau compte
     */
     try {
       // LE COMPTE EST CELUI DU FILLEUL
       this.session = stores.session
-      await initSession(args.ps)
+      await initSession(ps)
 
-      const [nom, rnd] = datactc.nct
-      const nat = new NomTribu(nom, rnd)
+      setNg(sp.nct)
+      setNg(sp.naf)
 
-      this.BRK()
-      const kpav = await genKeyPair()
-      const compte = new Compte().nouveau(couple.naI, kpav.privateKey)
-      if (arg.estpar) compte.stp = 1
-      // nouveau() génère et enregistre la clé K dans la session
-      await compte.setTribu(nat)
-      const rowCompte = await compte.toRow()
-      this.session.setCompte(compte) // prématuré mais nécessaire pour compta.toRow() ci-dessous
-      this.session.nombase = await compte.getNombase()
-      const prefs = new Prefs().nouveau(compte.id)
-      const rowPrefs = await prefs.toRow()
+      session.compteId = sp.naf.id
+      session.tribuId = sp.nct.id
+      session.setAvatarCourant(session.compteId)
 
-      const ni = hash(u8ToHex(couple.cc) + '1')
-      const avatar = new Avatar().nouveau(compte.id, ni, couple.naTemp)
-      const rowAvatar = await avatar.toRow()
-
-      const compta = new Compta()
-      compta.nouveau(compte.id, nat.id)
-      compta.compteurs.setF1(datactc.forfaits[0])
-      compta.compteurs.setF2(datactc.forfaits[1])
-      const rowCompta = await compta.toRow()
-
-      /* si le compte est parrain, il va être enregistré
-      dans sa tribu dans la liste des parrains */
-      const chkt = arg.estpar ? hash(compte.sid + '@' + nat.sid) : 0
-      const ncpart = arg.estpar ? await crypter(rnd, new Uint8Array(encode([compte.naprim.nom, compte.naprim.rnd]))) : 0
-
-      const args = {
-        sessionId: this.session.sessionId,
-        clePubAv: kpav.publicKey, // clé publique de l'avatar créé
-        rowCompte, // compte créé
-        rowCompta, // compta du compte créé
-        rowAvatar, // premier avatar du compte créé
-        rowPrefs, // préférences du compte créé
-        idCouple: couple.id, // id du couple
-        phch: arg.phch, // hash de la phrase de contact
-        idavp: couple.idE, // id de l'avatar parrain
-        idt: nat.id, // id de la tribu de A1
-        f1: datactc.forfaits[0],
-        f2: datactc.forfaits[1],
-        chkt, // clé d'accès à mncpt dans la table des parrains de la tribu, si le compte est parrain
-        ncpart, // nom complet du compte s'il est parrain, crypté par la clé de la tribu
-        ardc: await couple.toArdc(arg.ard, couple.cc),
-        estPar: arg.estpar,
-        sec: arg.max[0] !== 0, // le filleul accède aux secrets du couple
-        npi: arg.npi
+      const rowCompta = await Compta.row(sp.naf, sp.nct, sp.quotas[0], sp.quotas[1], sp.sp === 1) // set de session.clek
+      const rowAvatar = await Avatar.primaireRow(sp.naf)
+      const rowVersion = {
+        id: sp.naf.id,
+        v: 1,
+        iv: GenDoc._iv(sp.naf.id, 1),
+        dlv: DateJour.nj() + config.limitesjour.dlv
       }
-      const ret = this.tr(await post(this, 'm1', 'acceptParrainage', args))
+      const _data_ = new Uint8Array(encode(r))
+      rowVersion._data_ = _data_
+      rowVersion._nom = 'versions'
 
-      // Le compte vient d'être créé et clek enregistrée
-      await this.postCreation(ret) // fin commune avec la création de compte comptable
+      /* Element de msps d'id du nouveau compte, si le compte est sponsor
+      - _valeur_ :
+      - `na` : `[nom, rnd]` du sponsor crypté par la clé de la tribu.
+      - `cv` : `{v, photo, info}` carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
+      */
+      let mspse = null
+      if (sp.sp === 1) {
+        const na = await crypter(sp.nct.rnd, new Uint8Array(encode([sp.naf.nom, sp.naf.rnd])))
+        mspse = new Uint8Array(encode({ na }))
+      }
+
+      // chatI : chat pour le compte, chatE : chat pour son sponsor
+      const dh = new Date().getTime()
+      const rowChatI = Chat.nouveauRow(sp.naf, sp.na, dh, txt) 
+      const rowChatE = Chat.nouveauRow(sp.na, sp.naf, dh, txt) 
+
+      const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion,
+        rowChatI, rowChatE, ardx, mspse, pcbh: ps.pcbh, abPlus: [sp.nct.id, sp.naf.id] }
+      const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
+      // Retourne: rowTribu
+  
+      // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
+      const avatar = await compile(rowAvatar)
+      const tribu = await compile(ret.rowTribu)
+      const compta = await compile(rowCompta)
+      stores.avatar.setCompte(avatar, compta, tribu)
+      const chat = await compile(rowChatI)
+      stores.avatar.setChat(chat)
+
+      if (ret.credentials) session.fscredentials = ret.credentials
+      if (session.fsSync) {
+        await session.fsSync.setCompte(session.compteId)
+        await session.fsSync.setAvatar(session.compteId)
+        await session.fsSync.setTribu(session.tribuId)
+      }
+
+      console.log('Connexion compte : ' + session.compteId)
+      session.status = 2
+      SyncQueue.traiterQueue()
+      stores.ui.setPage('accueil')
+      this.finOK()
     } catch (e) {
       return await this.finKO(e)
     }

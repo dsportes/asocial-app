@@ -151,7 +151,7 @@ export default ({
     },
     async confirmer () {
       const ardx = await crypter(this.pc.clex, this.texte)
-      await new AcceptationSponsoring().run(this.sp, ardx)
+      await new AcceptationSponsoring().run(this.sp, ardx, this.texte, this.ps)
       this.razps()
       this.fermer()
     },

@@ -1101,8 +1101,14 @@ export class Chat extends GenDoc {
     return hash(k)
   }}
 
-  async nouveau () { 
-    return this
+  static async nouveauRow (naI, naE, dh, txt) {
+    const ids = Chat.getIds(naI, naE)
+    const id = naI.id
+    const r = { id, ids, v: 0, dlv: 0}
+    const x = { na: [naE.nom, naE.rnd], dh: dh, txt: txt }
+    r.contc = await crypter(naI.rnd, new Uint8Array(encode(x)))
+    const _data_ = new Uint8Array(encode(r))
+    return { _nom: 'chats', id, ids, v: 0, dlv: 0, _data_}
   }
 }
 
