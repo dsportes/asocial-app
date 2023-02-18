@@ -3,13 +3,13 @@ import { encode } from '@msgpack/msgpack'
 
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
-import { $t, u8ToHex, getTrigramme, setTrigramme, afficherDiag, hash, sleep } from './util.mjs'
+import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
-import { DateJour, IDCOMPTABLE } from './api.mjs'
-import { resetRepertoire, compile, Compta, Avatar, Tribu, NomAvatar, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
+import { DateJour } from './api.mjs'
+import { resetRepertoire, compile, Compta, Avatar, Tribu, Chat, NomAvatar, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB  } from './db.mjs'
-import { genKeyPair, crypter } from './webcrypto.mjs'
+import { crypter } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS, closeWS } from './ws.mjs'
 
@@ -669,6 +669,9 @@ export class AcceptationSponsoring extends OperationUI {
       // LE COMPTE EST CELUI DU FILLEUL
       this.session = stores.session
       await initSession(ps)
+      this.auj = DateJour.nj()
+      this.buf = new IDBbuffer()
+      this.dh = 0
 
       setNg(sp.nct)
       setNg(sp.naf)
@@ -706,19 +709,41 @@ export class AcceptationSponsoring extends OperationUI {
       const rowChatE = Chat.nouveauRow(sp.na, sp.naf, dh, txt) 
 
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion,
-        rowChatI, rowChatE, ardx, mspse, pcbh: ps.pcbh, abPlus: [sp.nct.id, sp.naf.id] }
+        rowChatI, rowChatE, ardx, mspse, abPlus: [sp.nct.id, sp.naf.id] }
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
-      // Retourne: rowTribu
-  
+      // Retourne: credentials, rowTribu
+      if (ret.credentials) session.fscredentials = ret.credentials
+      const rowTribu = ret.rowTribu
+
       // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
       const avatar = await compile(rowAvatar)
-      const tribu = await compile(ret.rowTribu)
+      const tribu = await compile(rowTribu)
       const compta = await compile(rowCompta)
       stores.avatar.setCompte(avatar, compta, tribu)
       const chat = await compile(rowChatI)
       stores.avatar.setChat(chat)
+      Versions.reset()
+      Versions.set(session.compteId, 1)
 
-      if (ret.credentials) session.fscredentials = ret.credentials
+      if (session.fsSync) await session.fsSync.setCompte(session.compteId)
+
+      if (session.synchro) {
+        try {
+          await session.setNombase()
+          await openIDB()
+          setTrigramme(session.nombase, await getTrigramme())
+          // Finalisation en une seule fois de l'écriture du nouvel état en IDB
+          this.buf.putIDB(rowCompta)
+          this.buf.putIDB(rowAvatar)
+          this.buf.putIDB(rowChatI)
+          this.buf.putIDB(rowTribu)
+          await this.buf.commitIDB(true, true) // MAJ compte.id / cle K et versions
+        } catch(e) {
+          this.session.mode = 2
+          await afficherDiag(this.$t('LOGnoidb'))
+        }
+      }
+  
       if (session.fsSync) {
         await session.fsSync.setCompte(session.compteId)
         await session.fsSync.setAvatar(session.compteId)
