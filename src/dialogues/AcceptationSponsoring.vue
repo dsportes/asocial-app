@@ -49,15 +49,18 @@
         <q-radio dense v-model="accdec" :val="2" :label="$t('NPdec')" />
       </div>
 
-      <div v-if="accdec===1">
+      <div v-if="accdec===1 && !ps">
         <phrase-secrete :init-val="ps" v-on:ok-ps="okps" verif icon-valider="check" :label-valider="$t('OK')"/>
+      </div>
+      <div v-if="accdec===1 && ps">
+        <div class="titre-md q-mt-sm">{{$t('NPmota')}}</div>
         <editeur-md class="full-width height-8" v-model="texte" :texte="sp.ard" editable modetxt hors-session/>
         <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
-        <q-btn flat @click="confirmer" color="warning" :disable="ps === null"
-          :label="$t('APAconf')" class="q-ml-sm" />
+        <q-btn flat @click="confirmer" color="warning" :label="$t('APAconf')" class="q-ml-sm" />
       </div>
 
       <div v-if="accdec===2">
+        <div class="titre-md q-mt-sm">{{$t('NPmotd')}}</div>
         <editeur-md class="full-width height-8" v-model="texte" :texte="sp.ard" editable modetxt hors-session/>
         <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
         <q-btn flat @click="refuser" color="warning"
@@ -114,7 +117,6 @@ export default ({
       isPwd: false,
       jourJ: getJourJ(),
       max: [1, 1],
-      step: 1,
       ps: null,
       apsf: false,
       texte: '',
@@ -129,36 +131,25 @@ export default ({
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
     fermer () {
-      this.razps()
       this.texte = ''
       this.apsf = false
-      this.step = 1
       this.isPwd = false
       this.ps = null
       if (this.close) this.close()
     },
-    razps () {
-      if (this.ps) {
-        this.ps.debut = ''
-        this.ps.fin = ''
-      }
-    },
     okps (ps) {
       if (ps) {
         this.ps = ps
-        this.step = 3
       }
     },
     async confirmer () {
       const ardx = await crypter(this.pc.clex, this.texte)
       await new AcceptationSponsoring().run(this.sp, ardx, this.texte, this.ps)
-      this.razps()
       this.fermer()
     },
     async refuser () {
       const ardx = await crypter(this.pc.clex, this.texte)
       await new RefusSponsoring().run(this.sp, ardx)
-      this.razps()
       this.fermer()
     }
   },

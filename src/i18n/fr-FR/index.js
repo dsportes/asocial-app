@@ -281,6 +281,8 @@ export default {
   NPcry: 'Cryptage en cours ...',
   NPavp: 'Nom de l\'avatar primaire du compte',
   NPmot: 'Mot de bienvenue pour le futur compte',
+  NPmota: 'Mot de remerciement pour le sponsor',
+  NPmotd: 'Explication du refus de sponsoring pour le sponsor',
   NP10s: 'De 10 à 140 signes ({0}',
   NPquo1: 'Quotas d\'espace V1 / V2 attribués au nouveau compte',
   NPcpa: 'Compte parrain lui-même',

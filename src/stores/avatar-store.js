@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
+import { hash } from '../app/util.mjs'
 
 /* Store maître du compte courant :
 Sous-collection pour chaque avatar id :
@@ -169,11 +170,14 @@ export const useAvatarStore = defineStore('avatar', {
       const e = this.map.get(chat.id)
       if (!e) return
       e.chats.set(chat.ids, chat)
+      stores.people.setPeopleChat(chat.naE, chat.id, chat.cv)
     },
-    delChat (id, ids) {
+    delChat (id, id2) {
       const e = this.map.get(id)
       if (!e) return
+      const ids = hash(id < id2 ? id + '/' + id2 : id2 + '/' + id)
       e.chats.delete(ids)
+      stores.people.unsetPeopleChat(id, id2)
     },
 
     setSponsoring (sponsoring) {

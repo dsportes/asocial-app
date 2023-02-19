@@ -14,18 +14,17 @@ function decodeIn (buf, cible) {
 
 const STORES = {
   compte: 'id',
-  versions: 'id',
+  avgrversions: 'id',
   sessionsync: 'id',
   tribus: 'id',
   comptas: 'id',
   avatars: 'id',
-  chats: 'id+ids',
-  sponsorings: 'id+ids',
+  chats: '[id+ids]',
+  sponsorings: '[id+ids]',
   groupes: 'id',
   membres: '[id+ids]',
   secrets: '[id+ids]',
   avsecret: '[id+ids]',
-  cvs: 'id',  // data: cryptK { id, v, photo, info }
   fetat: 'id',
   fdata: 'id',
   loctxt: 'id',
@@ -37,11 +36,11 @@ const TABLES = []
 for (const x in STORES) TABLES.push(x)
 
 function EX1 (e) {
-  return e instanceof AppExc ? e : new AppExc(E_DB, 1, [e.message], e.stack || '')
+  return e instanceof AppExc ? e : new AppExc(E_DB, 1, [e.message])
 }
 
 function EX2 (e) {
-  return e instanceof AppExc ? e : new AppExc(E_DB, 2, [e.message], e.stack || '')
+  return e instanceof AppExc ? e : new AppExc(E_DB, 2, [e.message])
 }
 
 let db
@@ -49,7 +48,9 @@ let db
 export async function openIDB () {
   const session = stores.session
   try {
-    db = new Dexie(session.nombase, { autoOpen: true })
+    const nb = session.nombase
+    console.log('Open: [' + nb + ']')
+    db = new Dexie(nb, { autoOpen: true })
     db.version(1).stores(STORES)
     await db.open()
   } catch (e) {
@@ -83,7 +84,7 @@ export async function loadVersions () {
     const session = stores.session
     if (session.accesIdb) {
       try {
-        const r = await db.versions.get('1')
+        const r = await db.avgrversions.get('1')
         const idb = r.data ? await decrypter(session.clek, r.data) : null
         return Versions.load(idb)
       } catch (e) {} // session vide si pas lisible sur IDB
@@ -105,7 +106,9 @@ export async function lectureSessionSyncIdb () {
         const r = await db.sessionsync.get('1')
         const idb = await decrypter(session.clek, r.data)
         s.fromIdb(idb)
-      } catch (e) {} // session vide si pas lisible sur IDB
+      } catch (e) {
+        console.log('Pas de sessionsync en IDB')
+      } // session vide si pas lisible sur IDB
     }
     session.sessionSync = s
   } catch (e) {
@@ -350,7 +353,8 @@ export async function getCompte () {
 export async function getAvatarPrimaire () {
   const session = stores.session
   try {
-    const idb = await db.avatars.get(session.compteId)
+    const idk = u8ToB64(await crypter(session.clek, '' + session.compteId, 1), true)
+    const idb = await db.avatars.get(idk)
     return decode(await decrypter(session.clek, idb.data))
   } catch (e) {
     throw EX2(e)
@@ -360,7 +364,19 @@ export async function getAvatarPrimaire () {
 export async function getCompta () {
   const session = stores.session
   try {
-    const idb = await db.comptas.get(session.compteId)
+    const idk = u8ToB64(await crypter(session.clek, '' + session.compteId, 1), true)
+    const idb = await db.comptas.get(idk)
+    return decode(await decrypter(session.clek, idb.data))
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
+export async function getTribu (idt) {
+  const session = stores.session
+  try {
+    const idk = u8ToB64(await crypter(session.clek, '' + idt, 1), true)
+    const idb = await db.tribus.get(idk)
     return decode(await decrypter(session.clek, idb.data))
   } catch (e) {
     throw EX2(e)
@@ -375,7 +391,7 @@ export async function getColl (nom) {
   try {
     const r = []
     await db[nom].each(async (idb) => { 
-      const row = await decrypter(session.clek, idb.data)
+      const row = decode(await decrypter(session.clek, idb.data))
       r.push(row)
     })
     return r
@@ -384,15 +400,16 @@ export async function getColl (nom) {
   }
 }
 
+
 /** Lecture de la collection des Cartes de Visite des contacts par chat.
 Retourne une map de clé 'id' et de valeur { id, v, photo, info }
-*/
+
 export async function getCvs () {
   const session = stores.session
   try {
     const r = {}
-    await db.cvs.each(async (row) => {
-      const idb = await decrypter(session.clek, row.data)
+    await db.cvs.each(async (idb) => {
+      const idb = await decrypter(session.clek, idb.data)
       r[idb.id] = decode(idb)
     })
     return r
@@ -431,11 +448,12 @@ export async function putCv (cv) { // { id, v, photo, info }
     throw EX2(e)
   }
 }
+*/
 
 /** OpBufC : buffer des actions de mise à jour de IDB ***************************/
 export class IDBbuffer {
   constructor () {
-    this.idb = stores.session.accesIdb
+    this.synchro = stores.session.synchro
     this.lmaj = [] // rows à modifier / insérer en IDB
     this.lsuppr = [] // row { _nom, id, ids } à supprimer de IDB
     this.lav = new Set() // set des ids des avatars à purger (avec secrets, sponsorings, chats)
@@ -444,11 +462,11 @@ export class IDBbuffer {
     this.lsecsup = [] // liste des secrets temporaires à faire supprimer sur le serveur en fin de connexion
   }
 
-  putIDB (row) { if (this.idb) this.lmaj.push(row); return row }
-  supprIDB (row) { if (this.idb) this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
-  purgeAvatarIDB (id) { if (this.idb) this.lav.add(id) }
-  purgeGroupeIDB (id) { if (this.idb) this.lgr.add(id) }
-  async commitIDB (setCompteClek, setVersions) { if (this.idb) await commitRows(this, setCompteClek, setVersions) }
+  putIDB (row) { if (this.synchro) this.lmaj.push(row); return row }
+  supprIDB (row) { if (this.synchro) this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
+  purgeAvatarIDB (id) { if (this.synchro) this.lav.add(id) }
+  purgeGroupeIDB (id) { if (this.synchro) this.lgr.add(id) }
+  async commitIDB (setCompteClek, setVersions) { if (this.synchro) await commitRows(this, setCompteClek, setVersions) }
 }
 
 /** Mises à jour / purges globales de IDB *****************************************/
@@ -456,6 +474,11 @@ export async function commitRows (opBuf, setCompteClek, setVersions) {
   try {
     const session = stores.session
     const clek = session.clek
+
+    const x = setCompteClek ? { id: session.compteId, k: session.clek } : null
+    const dataCompte = x ? await crypter(session.phrase.pcb, new Uint8Array(encode(x))) : null
+
+    const dataVersions = setVersions && Versions.toSave ? await crypter(session.clek, Versions.toIdb()) : null
 
     // Objets à mettre à jour
     const lidb = []
@@ -491,19 +514,19 @@ export async function commitRows (opBuf, setCompteClek, setVersions) {
     }
 
     await db.transaction('rw', TABLES, async () => {
-      if (setCompteClek) {
-        const x = { id: session.compteId, k: session.clek}
-        const data = await crypter(session.phrase.pcb, new Uint8Array(encode(x)) , 1)
-        await db.compte.put({ id: '1', data })
+      if (dataCompte) {
+        await db.compte.put({ id: '1', data: dataCompte })
       }
-
-      if (setVersions && Versions.toSave) {
-        const data = await crypter(session.clek, Versions.toIdb() , 1)
-        await db.versions.put({ id: '1', data })
+      if (dataVersions) {
+        await db.avgrversions.put({ id: '1', data: dataVersions })
       }
 
       for (const x of lidb) { // tous objets
-        await db[x.table].put( { id: x.idk, data: x.rowk })
+        if (x.idsk) {
+          await db[x.table].put( { id: x.idk, ids: x.idsk, data: x.rowk })
+        } else {
+          await db[x.table].put( { id: x.idk, data: x.rowk })
+        }
       }
 
       for (const x of lidbs) { // tous objets à supprimer

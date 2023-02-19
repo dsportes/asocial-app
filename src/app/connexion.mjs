@@ -7,8 +7,8 @@ import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { DateJour } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, Chat, NomAvatar, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
-import { openIDB, closeIDB, deleteIDB, getCompte, loadVersions, getAvatarPrimaire, getColl,
-  IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB  } from './db.mjs'
+import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
+  IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS, closeWS } from './ws.mjs'
@@ -111,6 +111,7 @@ export class ConnexionCompte extends OperationUI {
         if (id === this.avatar.id) {
           mapv[id] = this.avatar.v
           this.avatarsToStore.set(id, this.avatar)
+          avRowsModifies.push(this.avatar)
         } else mapv[id] = 0 
       })
 
@@ -139,6 +140,7 @@ export class ConnexionCompte extends OperationUI {
           for (const row of ret.rowAvatars) {
             const av = await compile(row)
             this.avatarsToStore.set(row.id, av)
+            avRowsModifies.push(av)
           }
         }
 
@@ -263,7 +265,7 @@ export class ConnexionCompte extends OperationUI {
         n2++
       }
     }
-    const avgrStore = estGr ? stores.groupes : stores.avatars
+    const avgrStore = estGr ? stores.groupe : stores.avatar
     const auj = new DateJour().nbj
     for (const ids in rows) {
       const secret = await compile(rows[ids])
@@ -308,7 +310,7 @@ export class ConnexionCompte extends OperationUI {
         }
       }
     }
-    const avStore = stores.avatars
+    const avStore = stores.avatar
     for (const ids in rows) {
       const chat = await compile(rows[ids])
       avStore.setChat(chat)
@@ -393,7 +395,7 @@ export class ConnexionCompte extends OperationUI {
         }
       }
     }
-    const grStore = stores.groupes
+    const grStore = stores.groupe
     for (const ids in rows) {
       const membre = await compile(rows[ids])
       grStore.setMembre(membre)
@@ -447,6 +449,7 @@ export class ConnexionCompte extends OperationUI {
         await openIDB()
         setTrigramme(session.nombase, await getTrigramme())
       }
+      lectureSessionSyncIdb()
     }
   }
 
@@ -507,12 +510,10 @@ export class ConnexionCompte extends OperationUI {
       this.BRK()
 
       // MAJ intermédiaire de IDB : évite d'avoir des avatars / groupes obsolètes pour la suite
-      if (session.accesIdb) {
-        await this.buf.commitIDB()
+      if (session.synchro) {
+        await this.buf.commitIDB(true)
         this.buf = new IDBbuffer()
       }
-
-      this.BRK()
 
       if (session.accesNet && grZombis.size) {
         /* Traitement des groupes zombis 
@@ -554,7 +555,7 @@ export class ConnexionCompte extends OperationUI {
       // Itération sur chaque avatar: secrets, chats, sponsorings
       for (const avatar of avStore.avatars.values()) {
         const vidb = Versions.get(avatar.id)
-        const vsrv = this.versions[avatar.id] || 0    
+        const vsrv = this.versions && this.versions[avatar.id] || 0    
         const na = getNg(avatar.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
         const [x1, x2] = await this.chargerSecrets(avatar.id, vidb, vsrv, false)
@@ -575,7 +576,7 @@ export class ConnexionCompte extends OperationUI {
       // Itération sur chaque groupe: secrets, membres
       for (const groupe of grStore.groupes.values()) {
         const vidb = Versions.get(groupe.id)
-        const vsrv = this.versions[groupe.id] || 0    
+        const vsrv = this.versions && this.versions[groupe.id] || 0    
         const na = getNg(id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
         const [x1, x2] = await this.chargerSecrets(groupe.id, vidb, vsrv, true)
@@ -667,7 +668,8 @@ export class AcceptationSponsoring extends OperationUI {
     */
     try {
       // LE COMPTE EST CELUI DU FILLEUL
-      this.session = stores.session
+      const session = stores.session
+      const config = stores.config
       await initSession(ps)
       this.auj = DateJour.nj()
       this.buf = new IDBbuffer()
@@ -680,15 +682,15 @@ export class AcceptationSponsoring extends OperationUI {
       session.tribuId = sp.nct.id
       session.setAvatarCourant(session.compteId)
 
-      const rowCompta = await Compta.row(sp.naf, sp.nct, sp.quotas[0], sp.quotas[1], sp.sp === 1) // set de session.clek
+      const rowCompta = await Compta.row(sp.naf, sp.nct, sp.quotas[0], sp.quotas[1], sp.sp) // set de session.clek
       const rowAvatar = await Avatar.primaireRow(sp.naf)
       const rowVersion = {
         id: sp.naf.id,
         v: 1,
         iv: GenDoc._iv(sp.naf.id, 1),
-        dlv: DateJour.nj() + config.limitesjour.dlv
+        dlv: this.auj + config.limitesjour.dlv
       }
-      const _data_ = new Uint8Array(encode(r))
+      const _data_ = new Uint8Array(encode(rowVersion))
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
@@ -698,17 +700,17 @@ export class AcceptationSponsoring extends OperationUI {
       - `cv` : `{v, photo, info}` carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
       */
       let mspse = null
-      if (sp.sp === 1) {
+      if (sp.sp) {
         const na = await crypter(sp.nct.rnd, new Uint8Array(encode([sp.naf.nom, sp.naf.rnd])))
         mspse = new Uint8Array(encode({ na }))
       }
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
       const dh = new Date().getTime()
-      const rowChatI = Chat.nouveauRow(sp.naf, sp.na, dh, txt) 
-      const rowChatE = Chat.nouveauRow(sp.na, sp.naf, dh, txt) 
+      const rowChatI = await Chat.nouveauRow(sp.naf, sp.na, dh, txt) 
+      const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, dh, txt) 
 
-      const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion,
+      const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
         rowChatI, rowChatE, ardx, mspse, abPlus: [sp.nct.id, sp.naf.id] }
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
@@ -732,12 +734,14 @@ export class AcceptationSponsoring extends OperationUI {
           await session.setNombase()
           await openIDB()
           setTrigramme(session.nombase, await getTrigramme())
+          lectureSessionSyncIdb()
           // Finalisation en une seule fois de l'écriture du nouvel état en IDB
           this.buf.putIDB(rowCompta)
           this.buf.putIDB(rowAvatar)
           this.buf.putIDB(rowChatI)
           this.buf.putIDB(rowTribu)
           await this.buf.commitIDB(true, true) // MAJ compte.id / cle K et versions
+          await session.sessionSync.setConnexion(this.dh)
         } catch(e) {
           this.session.mode = 2
           await afficherDiag(this.$t('LOGnoidb'))

@@ -393,20 +393,12 @@ export class Phrase {
     this.pcb64 = u8ToB64(this.pcb)
     this.pcbh = hash(this.pcb)
     this.dpbh = hash(await pbkfd(debut)) // hps1 dans compta
-    // this.debut = debut
-    // this.fin = fin
   }
 
   get shax () { return sha256(this.pcb) }
 
   get shay () { return sha256(this.shax) }  
-  
-  /*
-  razDebutFin () {
-    this.debut = ''
-    this.fin = ''
-  }
-  */
+
 }
 
 export class PhraseContact {
@@ -535,7 +527,7 @@ export class Tribu extends GenDoc {
 
     this.msps = row.msps || {}
     for (const id in this.msps) {
-      const e = this.msps[id]
+      const e = decode(this.msps[id])
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       e.na = new NomAvatar(nom, cle)
       setNg(e.na)
@@ -874,7 +866,7 @@ export class Compta extends GenDoc {
     for(const id in m) {
       const [nom, cle] = m[id]
       const na = new NomAvatar(nom, cle)
-      this.mav.set(id, na)
+      this.mav.set(parseInt(id), na)
       setNg(na) 
       if (na.estAvatarP) this.naprim = na
     }
@@ -1077,7 +1069,7 @@ export class Chat extends GenDoc {
   get cle () { return getCle(this.id) }
   get naI () { return getNg(this.id) }
 
-  async fromRow (row) {
+  async compile (row) {
     this.id = row.id
     this.ids = row.ids
     this.v = row.v
@@ -1087,7 +1079,7 @@ export class Chat extends GenDoc {
       this.vsh = row.vsh || 0
       this.mc = row.mc
       const x = decode(await decrypter(this.cle, row.contc))
-      this.naE = new NomAvatar[x.na[0], x.na[1]]
+      this.naE = new NomAvatar(x.na[0], x.na[1])
       this.dh = x.dh
       this.txt = x.txt
       this.cv = row.cva ? decode(await decrypter(this.naE.rnd, row.cva)) : null
@@ -1104,7 +1096,7 @@ export class Chat extends GenDoc {
   static async nouveauRow (naI, naE, dh, txt) {
     const ids = Chat.getIds(naI, naE)
     const id = naI.id
-    const r = { id, ids, v: 0, dlv: 0}
+    const r = { id, ids, v: 0, dlv: 0, iv: GenDoc._iv(naI.id, 0)}
     const x = { na: [naE.nom, naE.rnd], dh: dh, txt: txt }
     r.contc = await crypter(naI.rnd, new Uint8Array(encode(x)))
     const _data_ = new Uint8Array(encode(r))
