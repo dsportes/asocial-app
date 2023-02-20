@@ -41,7 +41,9 @@ export const useConfigStore = defineStore('config', {
 
   }),
 
+  
   getters: {
+    motscles (state) { return state.motsclesloc[useI18n().locale] }
   },
 
   actions: {
@@ -49,6 +51,8 @@ export const useConfigStore = defineStore('config', {
       this.debug = true // cfg.debug
       this.search = search && search.length > 1 ? search.substring(1) : ''
       this.localeOptions = cfg.localeOptions
+      this.locales = []
+      this.localeOptions.forEach(t => {this.locales.push(t.value)})
       this.locale = cfg.locale
       this.fsSync = cfg.fsSync
       this.logo = cfg.logo
@@ -77,14 +81,17 @@ export const useConfigStore = defineStore('config', {
       this.maxlgtextegen = cfg.maxlgtextegen || 250
       this.maxlgtextesecret = cfg.maxlgtextesecret || 5000
       const mc = cfg.motscles
-      const m = {}
-      for (const idx in mc) {
-        const e = mc[idx]
-        let val = e[this.locale]
-        if (!val) val = e.fr
-        if (val) m[idx] = val
-      }
-      this.motscles = m
+      this.motsclesloc = {}
+      this.locales.forEach(l => { 
+        const lmc = {}
+        this.motsclesloc[l] = lmc
+        for (const idx in mc) {
+          const e = mc[idx]
+          let val = e[l]
+          if (!val) val = e[this.locale]
+          if (val) lmc[idx] = val
+        }
+      })
       this.limitesjour = cfg.limitesjour || { }
       if (!this.limitesjour.dlv) this.limitesjour.dlv = 365
       if (!this.limitesjour.secrettemp) this.limitesjour.secrettemp = 80

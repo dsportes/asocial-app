@@ -49,7 +49,7 @@
           <q-toolbar-title class="titre-lg full-width">{{$t('CPTkwc')}}</q-toolbar-title>
           <q-btn dense flat size="md" icon="close" @click="mcedit=false"/>
         </q-toolbar>
-      <mots-cles class="full-width" :motscles="motscles" @ok="okmc"></mots-cles>
+      <mots-cles class="full-width" ducompte @ok="okmc"/>
       </q-card>
     </q-dialog>
 
@@ -159,8 +159,10 @@ export default {
     const session = stores.session
     const compte = session.compte
     const tribu = session.tribu
+
     const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
     const motscles = new Motscles(mc, 1)
+
     const memoed = ref(null)
 
     return {

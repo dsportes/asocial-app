@@ -1,7 +1,6 @@
 export default {
   bonjour: 'Bonjour !',
   build: 'Build: {0} - Debug: {1}',
-  reseau: 'Réseau : {0}',
   aide: 'Un peu d\'aide ... ',
 
   sync: 'Synchronisé',
@@ -37,6 +36,7 @@ export default {
   debute: 'débute par',
   langue: 'Choix de la langue',
   clairfonce: 'Choix style clair / foncé',
+  supprime: 'SUPPRIMÉ',
 
   enalerte: 'En alerte',
   ensursis: 'En sursis',
@@ -472,6 +472,8 @@ export default {
   ACidb: '(en mode synchronisé et avion seulement)',
   ACinfs: 'Relativement à la session. Tribu: "{0}"',
   ACcptspons: 'Le compte est un sponsor de la tribu',
+
+  CHtxt: 'Texte du chat',
 
   SYtit: 'Chargement et synchronisation des données du compte',
   SYcpt: 'Compte et comptabilité',

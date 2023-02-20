@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { hash } from '../app/util.mjs'
+import { hash, egaliteU8 } from '../app/util.mjs'
 
 /* Store maître du compte courant :
 Sous-collection pour chaque avatar id :
@@ -16,6 +16,7 @@ export const useAvatarStore = defineStore('avatar', {
   state: () => ({
     map: new Map(),
     voisins: new Map(),
+    motscles: null, // mots clés du compte
     compteId: 0, // id de l'avatar principal du compte courant
     avatarP: null, // avatar principal du compte courant
     comptaP: null, // compta actuelle du compte courants
@@ -101,6 +102,10 @@ export const useAvatarStore = defineStore('avatar', {
       this.setAvatar(avatar)
     },
 
+    setMotscles (mc) {
+      this.motscles = mc
+    },
+
     setCompta (compta) {
       this.comptaP = compta
     },
@@ -131,7 +136,15 @@ export const useAvatarStore = defineStore('avatar', {
           chats: new Map()
          }
         this.map.set(avatar.id, e)
-      } else e.avatar = avatar
+        if (avatar.id % 10 === 0) this.setMotscles (avatar.mc)
+      } else {
+        if (avatar.id % 10 === 0) {
+          const mcav = new Uint8Array(encode(e.avatar.mc))
+          const mcap = new Uint8Array(encode(avatar.mc))
+          if (!egaliteU8(mcav, mcap )) this.setMotscles(avatar.mc)
+        }
+        e.avatar = avatar
+      }
       if (avatar.id === this.compteId) this.avatarP = avatar
     },
 

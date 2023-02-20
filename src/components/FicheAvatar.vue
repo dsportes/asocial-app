@@ -2,7 +2,7 @@
   <q-card :class="'row items-start ' + dkli(idx)">
     <info-restriction :niveau="3" cnx/>
 
-    <div class="col-auto column items-center q-mr-sm">
+    <div class="col-auto items-center q-mr-sm">
       <img class="photomax" :src="avatar.na.photoDef" />
     </div>
     <div class="col">

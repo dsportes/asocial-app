@@ -37,12 +37,12 @@ export const usePeopleStore = defineStore('people', {
 
     ids: (state) => { return Array.from(state.map.keys()) },
 
-    // retourne { na, cv, sponsor: true/false, groupes: Map(idg, im)}
+    // retourne { na, cv, sponsor: true/false, chats: Set(), groupes: Map(idg, im)}
     getPeople: (state) => { return (id) => {
         const e = state.map.get(id)
         if (!e) return null
         const r = { ...e }
-        r.cv = this.getCv(id)
+        r.sponsor = state.sponsors.has(id)
         return r
       }
     },

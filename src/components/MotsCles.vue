@@ -59,11 +59,12 @@ import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixEmoji from './ChoixEmoji.vue'
 import BoutonHelp from './BoutonHelp.vue'
+import { Motscles } from '../app/modele.mjs.mjs'
 
 export default ({
   name: 'MotsCles',
 
-  props: { motscles: Object, lecture: Boolean },
+  props: { ducompte: Boolean, lecture: Boolean }, // si pas "ducompte" c'est "du groupe"
 
   components: { BoutonHelp, ChoixEmoji },
 
@@ -147,32 +148,14 @@ export default ({
 
   setup (props) {
     const session = stores.session
-    const avStore = stores.avatar
-    const grStore = stores.groupe
+    const ducompte = toRef(props, 'ducompte')
     const ui = stores.ui
 
-    const motscles = toRef(props, 'motscles')
-    motscles.value.recharger()
-    avStore.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setAvatar') {
-          motscles.value.recharger()
-        }
-      })
-    })
-    if (motscles.value.idg) {
-      grStore.$onAction(({ name, args, after }) => {
-        after((result) => {
-          if (name === 'setGroupe') {
-            motscles.value.recharger()
-          }
-        })
-      })
-    }
+    const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
+    const motscles = new Motscles(mc, true, ducompte.value ? true : false, ducompte.value ? false : true)
 
     const root = ref(null)
     const tab = ref('')
- 
     tab.value = motscles.value.mc.lcategs[0]
 
     watch(() => motscles.value, (ap, av) => {

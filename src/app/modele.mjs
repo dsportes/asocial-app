@@ -175,16 +175,90 @@ export class NomTribu extends NomGenerique {
  * classe MotsCles
 ******************************************************/
 export class Motscles {
+
+  /* Retourne un couple {c, n} (categorie, nom) depuis un string "c/n" */
+  static cn (s) { 
+    const j = cn.indexOf('/')
+    const c = j === -1 ? $t('obsolete') : c.substring(0, j)
+    const n = j === -1 ? cn : cn.substring(j + 1)
+    return {c, n}
+  }
+
+  /* Retourne le couple {c, n} du motclé d'indice n dans la map mc */
+  static motcle (mc, n) {
+    const s = mc[n]
+    if (!s) return s ? Motscles.cn(s) : { c: '', n: '' }
+  }
+
+  /* Retourne la Map idx:{c, n} fusionnée depuis,
+  - celle de la configuration
+  - celle du compte,
+  - celle du groupe courant
+  */
+  static mapMC (deConfig, duCompte, duGroupe) {
+    const m = new Map()
+    if (deConfig) {
+      const mx = stores.config.motscles
+      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
+    }
+    if (duCompte) {
+      const mx = stores.avatar.motcles || {}
+      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
+    }
+    if (duGroupe) {
+      const g = stores.session.grC
+      if (g) {
+        mx = g.motscles || null
+        if (mx) for (const i in mx) { m.set(i, Motscles.cn(mx[i]))}
+      }
+    }
+    return m
+  }
+
+  static editU8 (u8, mapMC) {
+    if (!u8 || !u8.length || !mapMC) return ''
+    const l = []
+    for (let j = 0; j < u8.length; j++) {
+      const i = u8[j]
+      const e = mapMC[i]
+      if (e && e.n) l.push(e.n)
+    }
+    return l.join(' / ')
+  }
+
   /*
   Mode 1 : chargement des mots clés du compte et l'organisation en vue d'éditer ceux du compte
-  Mode 2 : chargement des mots clés du groupe idg et l'organisation en vue d'éditer ceux du groupe
+  Mode 2 : chargement des mots clés du groupe courant et l'organisation en vue d'éditer ceux du groupe
   Mode 3 : chargement des mots clés du compte OU du groupe idg et de l'organisation pour SELECTION
   */
-  constructor (mc, mode, idg) {
-    this.mode = mode
-    this.idg = idg
+ /* Objet Motscles
+ - mc : objet UI réactif associé
+ - edit: true mode édition, false mode sélection
+ - cpt: true source du compte
+ - gr: source du groupe courant
+ Si edit c'est cpt OU gr. En sélection ça peut être cpt et gr
+ Si pas edit, les mots clés de la configuration sont chargés
+ */
+  constructor (mc, edit, cpt, gr) { // mc : objet editeur / selecteur de UI
+    this.edit = edit
+    this.cpt = cpt
+    this.gr = gr
     this.mc = mc
-    this.mapAll = new Map()
+    this.recharger()
+  }
+
+  recharger () {
+    if (this.mc.st.enedition) return
+    delete this.localIdx
+    delete this.localNom
+    delete this.apres
+    delete this.avant
+    this.mc.categs.clear()
+    this.mc.lcategs.length = 0
+    this.mapAll = Motscles.mapMC(!this.edit, this.cpt, this.gr)
+    this.mapAll.forEach((value, key) => { this.setCateg(value.c, key, value.n) })
+    this.tri()
+    return this
   }
 
   aMC (idx) {
@@ -195,88 +269,39 @@ export class Motscles {
     return this.mapAll.get(idx)
   }
 
-  edit (u8, court, groupeId) {
-    if (!u8 || !u8.length) return ''
-    const gr = groupeId ? stores.groupe.getGroupe(groupeId) : null
-    const l = []
-    for (let i = 0; i < u8.length; i++) {
-      const n = u8[i]
-      const x = n >= 100 && n < 200 && gr ? gr.motcle(n) : this.mapAll.get(n)
-      if (x && x.n && x.n.length) {
-        if (court && x.n.charCodeAt(0) > 1000) {
-          // commence par un emoji
-          l.push(String.fromCodePoint(x.n.codePointAt(0)))
-        } else {
-          l.push(x.n)
-        }
-      }
-    }
-    return l.join(court ? ' ' : ' / ')
-  }
-
   debutEdition () {
-    if (this.mode === 3 || !this.src) return
-    this.premier = this.mode === 1 ? 1 : 100
-    this.dernier = this.mode === 1 ? 99 : 199
+    if (!this.edit) return
+    this.premier = this.cpt ? 1 : 100
+    this.dernier = this.cpt ? 99 : 199
     this.mc.st.enedition = true
     this.localIdx = {}
     this.localNom = {}
-    for (const y in this.src) {
-      const idx = parseInt(y)
-      const nc = this.src[idx]
-      const [categ, nom] = this.split(nc)
-      this.localIdx[idx] = nc
-      this.localNom[nom] = [idx, categ]
-    }
+    this.src = {}
+    this.mapAll.forEach((value, key) => {
+      if (key <= this.premier && key >= this.dernier) {
+        const nc = value.c + '/' + value.n
+        this.localIdx[key] = nc
+        this.localNom[value.n] = [key, value.c]
+        this.src[key] = nc
+      }
+    })
     this.avant = this.flatMap(this.src)
     this.apres = this.avant
   }
 
-  flatMap (map) {
-    const a = []
+  flatMap (map) { // pour détection des changements
+    const a = [], b = []
     for (const idx in map) a.push(parseInt(idx))
-    a.sort()
-    const b = []
-    for (let i = 0; i < a.length; i++) {
-      const idx = a[i]
-      b.push(idx + '/' + map[idx])
-    }
+    a.sort((x, y) => { x < y ? -1 : (x === y ? 0 : 1)})
+    a.forEach((v, idx) => { b.push(idx + '/' + v) })
     return b.join('&')
   }
 
   finEdition () {
-    if (this.mode === 3) return
+    if (!this.edit) return
     this.mc.st.enedition = false
     this.mc.st.modifie = false
-    const r = this.localIdx
-    this.recharger()
-    return r
-  }
-
-  recharger () {
-    if (this.mc.st.enedition) return
-    this.mapAll.clear()
-    delete this.localIdx
-    delete this.localNom
-    delete this.apres
-    delete this.avant
-    this.mc.categs.clear()
-    this.mc.lcategs.length = 0
-    this.fusion(stores.config.motscles)
-    if (this.mode === 1 || (this.mode === 3 && !this.idg)) {
-      const cpt = stores.session.compte
-      this.mapc = cpt.mc || {}
-      this.fusion(this.mapc)
-      if (this.mode === 1) this.src = this.mapc
-    }
-    if (this.mode === 2 || (this.mode === 3 && this.idg)) {
-      const gr = stores.groupe.getGroupe(this.idg)
-      this.mapg = gr ? (gr.mc || {}) : {}
-      if (this.mode === 2) this.src = this.mapg
-      this.fusion(this.mapg)
-    }
-    this.tri()
-    return this
+    return this.localIdx
   }
 
   split (nc) {
@@ -318,16 +343,6 @@ export class Motscles {
       if (!x.length) {
         this.mc.categs.delete(categ)
       }
-    }
-  }
-
-  fusion (map) {
-    for (const i in map) {
-      const idx = parseInt(i)
-      const nc = map[i]
-      const [categ, nom] = this.split(nc)
-      this.setCateg(categ, idx, nom)
-      this.mapAll.set(idx, { n: nom, c: categ })
     }
   }
 
@@ -1063,6 +1078,11 @@ _data_:
   - `na` : `[nom, cle]` de _l'autre_.
   - `dh`  : date-heure de dernière mise à jour.
   - `txt` : texte du chat.
+  Compilé:
+  - dh
+  - naE
+  - txt
+  - cv
 */
 
 export class Chat extends GenDoc {
