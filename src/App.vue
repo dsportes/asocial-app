@@ -72,6 +72,7 @@
       <page-accueil class="page" v-if="ui.page === 'accueil'"/>
       <page-compte class="page" v-if="ui.page === 'compte'"/>
       <page-sponsorings class="page" v-if="ui.page === 'sponsorings'"/>
+      <page-chats class="page" v-if="ui.page === 'chats'"/>
     </transition-group>
   </q-page-container>
 
@@ -141,6 +142,7 @@ import PageSession from './pages/PageSession.vue'
 import PageAccueil from './pages/PageAccueil.vue'
 import PageCompte from './pages/PageCompte.vue'
 import PageSponsorings from './pages/PageSponserings.vue'
+import PageChats from './pages/PageChats.vue'
 
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
@@ -156,7 +158,7 @@ export default {
 
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests,
-    PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings,
+    PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     DialogueErreur, DialogueHelp, InfoBlocage, 
     PanelContacts, PanelCompta
    },

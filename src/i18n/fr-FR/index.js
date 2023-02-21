@@ -417,6 +417,7 @@ export default {
   UTIesp: 'En savoir plus sur le blocage',
 
   // Motsclés
+  MCaucun: 'Pas de mots clés attachés à ce chat',
   MCer1: 'Seuls les mots clés obsolètes peuvent être supprimés',
   MCer2: 'Ce mot clé n\'est pas modifiable dans ce contexte',
   MCer2b: 'Les mots clés de la configuration ne sont pas modifiables',
@@ -433,6 +434,7 @@ export default {
   Psession: 'Etat de la session ouverte',
   Pcompte: 'Mon compte, ses avatars',
   Psponsorings: 'Mes sponsorings, en cours / récents',
+  Pchats: 'Mes chats',
 
   MLAcptp: '(parrain)',
   MLAtri: 'Tribu : {0}',
@@ -462,6 +464,7 @@ export default {
   ACaproposav: 'Information',
   ACsecrets: 'Ses secrets',
   ACgroupes: 'Ses groupes',
+  ACchats: 'Ses chats',
   ACmembres: 'Ses membres',
   ACsponsorings: 'Ses sponsorings',
   ACinvitations: 'Invitations de ses groupes',
@@ -483,6 +486,7 @@ export default {
   ACcptspons: 'Le compte est un sponsor de la tribu',
 
   CHtxt: 'Texte du chat',
+  CHnch: 'Aucun chat ouvert',
 
   SYtit: 'Chargement et synchronisation des données du compte',
   SYcpt: 'Compte et comptabilité',

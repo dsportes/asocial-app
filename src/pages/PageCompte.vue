@@ -82,12 +82,10 @@
 </template>
 
 <script>
-import { reactive, ref } from 'vue'
 import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { crypter /*, decrypterStr */ } from '../app/webcrypto.mjs'
-import { Motscles } from '../app/modele.mjs'
 import { ChangementPS, MemoCompte, MotsclesCompte } from '../app/operations.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'

@@ -7,10 +7,10 @@
         <div v-else class="font-mono">{{dhcool(chat.dh)}}</div>
       </div>
       <apercu-motscles class="full-width" :groupe-id="0" @ok="changeMc"
-        :motscles="motscles" :edit="session.auts(3, true)" :src="chat.mc || new Uint8Array(0)"/>
+        :mapmc="mapmc" :edit="session.auts(3, true)" :src="chat.mc || u0"/>
       <div v-if="!chat.z" class="row">
         <show-html class="col q-mr-sm bord" :idx="idx" zoom maxh="3rem" :texte="chat.txt"/>
-        <q-btn class="col-auto" size="sm" icon="edit" color="primary" @click="editer"/>
+        <q-btn class="col-auto btn1" icon="edit" color="warning" @click="editer"/>
       </div>
     </div>
 
@@ -34,20 +34,22 @@ import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import EditeurMd from './EditeurMd.vue'
-import { dhcool } from '../app/util.mjs.mjs'
-import { Motscles } from '../app/modele.mjs.mjs'
+import { dhcool } from '../app/util.mjs'
+import { getNg } from '../app/modele.mjs'
+import ApercuMotscles from './ApercuMotscles.vue'
 
 export default {
   name: 'ApercuChat',
 
-  props: { id: Number, ids: Number, idx: Number },
+  props: { id: Number, ids: Number, idx: Number, mapmc: Object },
   /* Compilé: { id (avatar), dh, naE, txt } */
 
-  components: { ShowHtml, EditeurMd },
+  components: { ShowHtml, EditeurMd, ApercuMotscles },
 
   computed: { },
 
   data () { return {
+    u0: new Uint8Array([]),
     chatedit: false,
     dhcool: dhcool
   }},
@@ -78,6 +80,7 @@ export default {
     }
 
     const chat = ref(getC())
+    console.log(dhcool(chat.value.dh), new Date(chat.value.dh).toISOString())
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
         if ((name === 'setChat' && args[0].id === id.value && args[0].ids === ids.value) ||
@@ -87,14 +90,10 @@ export default {
       })
     })
 
-    const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
-    const motscles = new Motscles(mc, 1)
-
     return {
       session,
       naI,
-      chat,
-      motscles
+      chat
     }
   }
 }
@@ -107,4 +106,11 @@ export default {
 .nom
   max-height: 1.3rem
   overflow: hidden
+.q-toolbar
+  padding: 0 !important
+  min-height: 0 !important
+.btn1
+  padding: 0 !important
+  width: 1.5rem !important
+  height: 1.5rem !important
 </style>

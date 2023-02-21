@@ -10,6 +10,10 @@
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACgroupes')">
           <q-badge color="teal-10" rounded floating>{{nbgrps}}</q-badge>
         </q-btn>
+        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACchats')"
+          @click="ui.setPage('chats')">
+          <q-badge color="teal-10" rounded floating>{{nbchats}}</q-badge>
+        </q-btn>
         <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACsponsorings')"
           @click="ui.setPage('sponsorings')">
           <q-badge color="teal-10" rounded floating>{{nbspons}}</q-badge>
@@ -55,17 +59,17 @@
     </div>
     <q-separator class="q-my-sm"/>
 
-    <div class="q-my-xs titre-md text-bold text-italic">{{$t('ACinfs', [session.tribu.na.nom])}}</div>
+    <div class="q-my-xs q-px-sm titre-md text-bold text-italic">{{$t('ACinfs', [session.tribu.na.nom])}}</div>
     <div v-if="session.estParrain" 
-      class="q-my-xs titre-md text-bold text-italic text-warning">{{$t('ACcptspons')}}</div>
-    <div class="q-mt-sm row items-center q-gutter-sm">
+      class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning">{{$t('ACcptspons')}}</div>
+    <div class="q-mt-sm q-px-sm row items-center q-gutter-sm">
       <q-btn class="btn1" dense no-caps color="negative" :label="$t('ACdecnx')"
         @click="ui.dialoguedrc = true"/>
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmasession')"
         @click="ui.setPage('session')" />
       <q-btn v-if="session.estComptable" class="btn1" dense no-caps color="primary" :label="$t('ACtribus')" />
     </div>
-    <div :class="'q-mt-sm ' + (!session.accesIdb ? ' disabled' : '')" class="column q-gutter-sm">
+    <div :class="'q-mt-sm q-px-sm ' + (!session.accesIdb ? ' disabled' : '')" class="column q-gutter-sm">
       <div v-if="session.incognito" class="titre-md text-italic">{{$t('ACidb')}}</div>
       <q-btn class="btn3" dense no-caps color="primary" :label="$t('ACficav')" />
       <q-btn class="btn3" dense no-caps color="primary" :label="$t('ACtfloc')" />
@@ -84,6 +88,7 @@ export default {
     nbgrsecs () { return 15 },
     nbmbs () { return 6 },
     nbgrps () { return 5 },
+    nbchats () { return 2 },
     nbspons () { return 1 },
     nbinvits () { return 0 },
     nbtav () { return 1 },
