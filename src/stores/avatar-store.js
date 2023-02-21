@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { hash, egaliteU8 } from '../app/util.mjs'
+import { encode } from '@msgpack/msgpack'
 
 /* Store maître du compte courant :
 Sous-collection pour chaque avatar id :
@@ -102,6 +103,7 @@ export const useAvatarStore = defineStore('avatar', {
       this.setAvatar(avatar)
     },
 
+    /* Sert surtout à pouvoir attacher un écouteur pour détecter les changements de mc */
     setMotscles (mc) {
       this.motscles = mc
     },
@@ -139,9 +141,9 @@ export const useAvatarStore = defineStore('avatar', {
         if (avatar.id % 10 === 0) this.setMotscles (avatar.mc)
       } else {
         if (avatar.id % 10 === 0) {
-          const mcav = new Uint8Array(encode(e.avatar.mc))
-          const mcap = new Uint8Array(encode(avatar.mc))
-          if (!egaliteU8(mcav, mcap )) this.setMotscles(avatar.mc)
+          const mcav = new Uint8Array(encode(e.avatar.mc || {}))
+          const mcap = new Uint8Array(encode(avatar.mc || {}))
+          if (!egaliteU8(mcav, mcap )) this.setMotscles(avatar.mc || {})
         }
         e.avatar = avatar
       }

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
@@ -36,14 +37,17 @@ export const useConfigStore = defineStore('config', {
     forfaits: {},
     maxlgtextegen: 250,
     maxlgtextesecret: 5000,
-    motscles: {},
+    motsclesloc: {},
     limitesjour: {},
 
   }),
 
   
   getters: {
-    motscles (state) { return state.motsclesloc[useI18n().locale] }
+    motscles (state) { 
+      const lg = useI18n().locale.value
+      return state.motsclesloc[lg]
+    }
   },
 
   actions: {

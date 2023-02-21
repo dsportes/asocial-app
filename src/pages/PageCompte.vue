@@ -10,7 +10,7 @@
       </div>
       <div v-if="session.estParrain"> <!-- Parrainer un nouveau compte -->
         <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
-          :label="$t('P10nvp')" color="warning" dense @click="ouvrirParrainage"/>
+          :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring"/>
         <bouton-help class="q-ml-sm" page="page1"/>
       </div>
     </div>
@@ -29,7 +29,7 @@
     <!-- Mots clés du compte -->
     <div v-if="session.auts(4)" class="row items-center q-my-sm">
       <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
-      <q-btn icon="open_in_new" size="sm" color="primary" @click="mcedit = true"/>
+      <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
     </div>
 
     <!-- Avatars du compte -->
@@ -43,18 +43,12 @@
     </div>
 
     <!-- Dialogue d'édition des mots clés du compte -->
-    <q-dialog v-model="mcedit">
-      <q-card class="petitelargeur shadow-8">
-        <q-toolbar class="bg-secondary text-white">
-          <q-toolbar-title class="titre-lg full-width">{{$t('CPTkwc')}}</q-toolbar-title>
-          <q-btn dense flat size="md" icon="close" @click="mcedit=false"/>
-        </q-toolbar>
-      <mots-cles class="full-width" ducompte @ok="okmc"/>
-      </q-card>
+    <q-dialog v-model="mcledit" persistent>
+      <mots-cles class="full-width" :duGroupe="0" @ok="okmc" :titre="$t('CPTkwc')"/>
     </q-dialog>
 
     <!-- Dialogue d'édition du mémo du compte -->
-    <q-dialog v-model="memoedit">
+    <q-dialog v-model="memoedit" persistent>
       <q-card class="petitelargeur shadow-8">
         <q-toolbar class="bg-secondary text-white">
           <q-toolbar-title class="titre-lg full-width">{{$t('CPTmdc')}}</q-toolbar-title>
@@ -66,7 +60,7 @@
     </q-dialog>
 
     <!-- Dialogue de changement de la phrase secrète -->
-    <q-dialog v-model="chgps">
+    <q-dialog v-model="chgps" persistent>
       <q-card class="q-mt-lg petitelargeur">
         <q-card-section>
           <div class="titre-lg text-center q-ma-md">{{$t('CPTchps2')}}</div>
@@ -81,7 +75,7 @@
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
     <q-dialog v-model="nvpar" persistent class="moyennelargeur">
-      <nouveau-sponsoring :close="fermerParrainage" :tribu="tribu"/>
+      <nouveau-sponsoring :close="fermerSponsoring" :tribu="tribu"/>
     </q-dialog>
 
   </q-page>
@@ -146,13 +140,15 @@ export default {
 
     async mcleditAut () { if (await this.session.aut(3, true)) this.mcledit = true },
     async okmc (mmc) {
-      if (!await this.session.aut(3, true)) return
-      const mck = await crypter(this.session.clek, new Uint8Array(encode(mmc)))
-      await new MotsclesCompte().run(mck)
+      this.mcledit = false
+      if (mmc !== false) {
+        const mck = await crypter(this.session.clek, new Uint8Array(encode(mmc)))
+        await new MotsclesCompte().run(mck)
+      }
     },
 
-    ouvrirParrainage () { this.nvpar = true },
-    fermerParrainage() { this.nvpar = false }
+    async ouvrirSponsoring () { if (await this.session.aut(3, true)) this.nvpar = true },
+    fermerSponsoring() { this.nvpar = false }
   },
 
   setup () {
@@ -160,15 +156,11 @@ export default {
     const compte = session.compte
     const tribu = session.tribu
 
-    const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
-    const motscles = new Motscles(mc, 1)
-
     const memoed = ref(null)
 
     return {
       ui: stores.ui,
       session,
-      motscles,
       memoed,
       compte,
       tribu

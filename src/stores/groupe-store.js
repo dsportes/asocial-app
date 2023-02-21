@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
+import { encode } from '@msgpack/msgpack'
 
 /* Store maître des groupes du compte courant :
 - groupes : les groupes dont un des avatars du compte courant est membre
@@ -58,13 +59,22 @@ export const useGroupeStore = defineStore('groupe', {
   },
 
   actions: {
+    /* Sert à pouvoir attacher un écouteur pour détecter les changements de mc */
+    setMotscles (id, mc) {
+    },
+    
     setGroupe (groupe) {
       if (!groupe) return
       let e = this.map.get(groupe.id)
       if (!e) {
         e = { groupe: groupe, membres: new Map(), secrets: new Map() }
         this.map.set(groupe.id, e)
-      } else e.groupe = groupe
+      } else {
+        const mcav = new Uint8Array(encode(e.groupe.mc || {}))
+        const mcap = new Uint8Array(encode(groupe.mc || {}))
+        if (!egaliteU8(mcav, mcap )) this.setMotscles(groupe.id)
+        e.groupe = groupe
+      }
     },
 
     setMembre (membre) {

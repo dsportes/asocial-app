@@ -19,7 +19,7 @@ export default {
   renoncer: 'Renoncer',
   corriger: 'Corriger',
   creer: 'Créer',
-  obsolete: 'Obsolète',
+  obs: '_Obsolète_',
   annuler: 'Annuler',
   refuser: 'Refuser',
   fermer: 'Fermer',
@@ -416,6 +416,15 @@ export default {
   UTImsi: 'Passer en mode synchronisé ou incognito.',
   UTIesp: 'En savoir plus sur le blocage',
 
+  // Motsclés
+  MCer1: 'Seuls les mots clés obsolètes peuvent être supprimés',
+  MCer2: 'Ce mot clé n\'est pas modifiable dans ce contexte',
+  MCer2b: 'Les mots clés de la configuration ne sont pas modifiables',
+  MCer3: 'Ce nom est actuellement attribué au mot clé #{0}, catégorie [{1}]',
+  MCer4: 'Impossible d\'ajouter un mot clé, maximum atteint',
+  MCer5: 'Un mot clé "obsolète" ne peut pas être attribué.',
+  MCchoix: 'Attribution de mots clés',
+  MChint: '3 à 12 lettres, première majuscule. Vide pour \'Obsolète\'',
   // App.vue / MainLayout
   Pnull: '',
   Plogin: 'Connexion à un compte',

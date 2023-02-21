@@ -178,9 +178,9 @@ export class Motscles {
 
   /* Retourne un couple {c, n} (categorie, nom) depuis un string "c/n" */
   static cn (s) { 
-    const j = cn.indexOf('/')
-    const c = j === -1 ? $t('obsolete') : c.substring(0, j)
-    const n = j === -1 ? cn : cn.substring(j + 1)
+    const j = s.indexOf('/')
+    const c = j === -1 ? $t('obsolete') : s.substring(0, j)
+    const n = j === -1 ? s : s.substring(j + 1)
     return {c, n}
   }
 
@@ -190,23 +190,21 @@ export class Motscles {
     if (!s) return s ? Motscles.cn(s) : { c: '', n: '' }
   }
 
-  /* Retourne la Map idx:{c, n} fusionnée depuis,
+  /* Construit une Map idx:{c, n} fusionnée depuis,
   - celle de la configuration
-  - celle du compte,
-  - celle du groupe courant
+  - celle du compte (true / false)
+  - celle du groupe d'id donné (0 su aucun)
   */
-  static mapMC (deConfig, duCompte, duGroupe) {
+  static mapMC (duCompte, duGroupe) {
     const m = new Map()
-    if (deConfig) {
-      const mx = stores.config.motscles
-      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-    }
+    const mx = stores.config.motscles
+    for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
     if (duCompte) {
-      const mx = stores.avatar.motcles || {}
+      const mx = stores.avatar.motscles || {}
       for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
     }
     if (duGroupe) {
-      const g = stores.session.grC
+      const g = stores.groupe.getGroupe(duGroupe)
       if (g) {
         mx = g.motscles || null
         if (mx) for (const i in mx) { m.set(i, Motscles.cn(mx[i]))}
@@ -215,50 +213,52 @@ export class Motscles {
     return m
   }
 
+  static nom (idx, mapMC) {
+    const e = mapMC[idx]
+    return e && e.n ? e.n : ''
+  }
+
   static editU8 (u8, mapMC) {
     if (!u8 || !u8.length || !mapMC) return ''
     const l = []
-    for (let j = 0; j < u8.length; j++) {
-      const i = u8[j]
-      const e = mapMC[i]
-      if (e && e.n) l.push(e.n)
-    }
+    for (let j = 0; j < u8.length; j++) { l.push(Motscles.nom(u8[j, mapMC]))}
     return l.join(' / ')
   }
 
-  /*
-  Mode 1 : chargement des mots clés du compte et l'organisation en vue d'éditer ceux du compte
-  Mode 2 : chargement des mots clés du groupe courant et l'organisation en vue d'éditer ceux du groupe
-  Mode 3 : chargement des mots clés du compte OU du groupe idg et de l'organisation pour SELECTION
-  */
- /* Objet Motscles
- - mc : objet UI réactif associé
- - edit: true mode édition, false mode sélection
- - cpt: true source du compte
- - gr: source du groupe courant
- Si edit c'est cpt OU gr. En sélection ça peut être cpt et gr
- Si pas edit, les mots clés de la configuration sont chargés
- */
-  constructor (mc, edit, cpt, gr) { // mc : objet editeur / selecteur de UI
-    this.edit = edit
-    this.cpt = cpt
-    this.gr = gr
-    this.mc = mc
-    this.recharger()
-  }
+  /* Objet Motscles
+  - mc : objet UI réactif associé
+  - edit: true mode édition, false mode sélection
+  - duCompte: true, mots clés du compte
+  - duGroupe: id mots clés du groupe id
+  Si edit c'est cpt OU gr. En sélection ça peut être cpt et gr
+  Les mots clés de la configuration sont chargés mais NON modifiables
 
-  recharger () {
-    if (this.mc.st.enedition) return
-    delete this.localIdx
-    delete this.localNom
-    delete this.apres
-    delete this.avant
-    this.mc.categs.clear()
-    this.mc.lcategs.length = 0
-    this.mapAll = Motscles.mapMC(!this.edit, this.cpt, this.gr)
-    this.mapAll.forEach((value, key) => { this.setCateg(value.c, key, value.n) })
+  En sélection, l'objet est immutable.
+  En édition il ne peut subir qu'un seul cycle d'édition: 
+  - debutEdition
+  - changerMC supprMc
+  - finEdition : retourne la map "source" modifiée
+  */
+  constructor (mc, edit, duCompte, duGroupe) { // mc : objet editeur / selecteur de UI
+    this.edit = edit
+    this.cpt = duCompte ? true : false
+    this.gr = duGroupe || 0
+    this.mc = mc
+    this.localIdx = {} // map de clé idx. valeur: nom/categ
+    this.localNom = {} // map de clé nom. valeur: [idx, categ]
+    this.premier = this.cpt ? 1 : 100
+    this.dernier = this.cpt ? 99 : 199
+    this.mc.categs.clear() // Map: clé: nom catégorie, valeur: [[nom, idx] ...] (mots clés ayant cette catégorie)
+    this.mc.lcategs.length = 0 // Liste des catégories existantes
+    const mapAll = Motscles.mapMC(this.cpt, this.gr)
+    const obs = $t('obs')
+    this.mapAll = new Map()
+    mapAll.forEach((value, key) => {
+      const cx = value.c === '$' ? obs : value.c
+      this.mapAll.set(key, { c: cx, n: value.n })
+      this.setCateg(cx, key, value.n) 
+    })
     this.tri()
-    return this
   }
 
   aMC (idx) {
@@ -271,14 +271,10 @@ export class Motscles {
 
   debutEdition () {
     if (!this.edit) return
-    this.premier = this.cpt ? 1 : 100
-    this.dernier = this.cpt ? 99 : 199
     this.mc.st.enedition = true
-    this.localIdx = {}
-    this.localNom = {}
     this.src = {}
     this.mapAll.forEach((value, key) => {
-      if (key <= this.premier && key >= this.dernier) {
+      if (key >= this.premier && key <= this.dernier) {
         const nc = value.c + '/' + value.n
         this.localIdx[key] = nc
         this.localNom[value.n] = [key, value.c]
@@ -293,7 +289,7 @@ export class Motscles {
     const a = [], b = []
     for (const idx in map) a.push(parseInt(idx))
     a.sort((x, y) => { x < y ? -1 : (x === y ? 0 : 1)})
-    a.forEach((v, idx) => { b.push(idx + '/' + v) })
+    a.forEach(t => { b.push(t + '/' + map[t]) })
     return b.join('&')
   }
 
@@ -301,7 +297,15 @@ export class Motscles {
     if (!this.edit) return
     this.mc.st.enedition = false
     this.mc.st.modifie = false
-    return this.localIdx
+    // map de clé idx. valeur: nom/categ
+    const m = {}
+    const obs = $t('obs') + '/'
+    for (const idx in this.localIdx) {
+      const nc = this.localIdx[idx]
+      const nx = nc.startsWith(obs) ? '$/' + nc.substring(obs.length) : nc
+      m[idx] = nx
+    }
+    return m
   }
 
   split (nc) {
@@ -311,91 +315,72 @@ export class Motscles {
     return [categ, nom]
   }
 
+  /* Ajoute le couple [nom, idx] à la catégorie s'il n'existait pas déjà : idx est clé */
   setCateg (categ, idx, nom) {
     let x = this.mc.categs.get(categ)
-    if (!x) {
-      x = []
-      this.mc.categs.set(categ, x)
-    }
+    if (!x) { x = []; this.mc.categs.set(categ, x); this.tri() }
     let trouve = false
-    for (let i = 0; i < x.length; i++) {
-      if (x[i][1] === idx) {
-        x[i][0] = nom
-        trouve = true
-        break
-      }
-    }
+    x.forEach(y => { if (y[1] === idx) { y[0] = nom; trouve = true }})
     if (!trouve) x.push([nom, idx])
   }
 
+  /* Supprime le terme idx de la catégorie, supprime la catégorie si elle est vide */
   delCateg (categ, idx) {
     const x = this.mc.categs.get(categ)
     if (!x) return
     let j = -1
-    for (let i = 0; i < x.length; i++) {
-      if (x[i][1] === idx) {
-        j = i
-        break
-      }
-    }
-    if (j !== -1) {
-      x.splice(j, 1)
-      if (!x.length) {
-        this.mc.categs.delete(categ)
-      }
-    }
+    for (let i = 0; i < x.length; i++) if (x[i][1] === ''+idx) { j = i; break }
+    if (j !== -1) x.splice(j, 1)
+    if (!x.length) { this.mc.categs.delete(categ); this.tri()  }
   }
 
   tri () {
     this.mc.lcategs.length = 0
     const s = new Set()
     this.mc.categs.forEach((v, k) => {
-      if (!s.has(k)) {
-        this.mc.lcategs.push(k)
-        s.add(k)
-      }
+      if (!s.has(k)) { this.mc.lcategs.push(k); s.add(k) }
       if (v.length > 1) v.sort((a, b) => { return a[0] < b[0] ? -1 : a[0] === b[0] ? 0 : 1 })
     })
     if (this.mc.lcategs.length > 1) this.mc.lcategs.sort()
   }
 
-  supprMC (idx) {
-    if (!this.mc.enedition || idx < this.premier || idx > this.dernier) return $t('UTIer1')
+  supprMC (idx) { // méthode locale : la suppression d'un mot clé est son affectation à nom/catg vide
     const ancnc = this.localIdx[idx]
     if (!ancnc) return
     const [anccateg, ancnom] = this.split(ancnc)
     delete this.localNom[ancnom]
     delete this.localIdx[idx]
-    this.delCateg(anccateg, idx)
+    this.delCateg(anccateg, ''+idx)
     this.apres = this.flatMap(this.localIdx)
     this.mc.st.modifie = this.apres !== this.avant
-    this.mapAll.delete(idx)
+    this.mapAll.delete(''+idx)
   }
 
+  // si nc nom/categ est vide, suppression de idx. Retourne un texte d'erreur, si échec
   changerMC (idx, nc) {
-    if (!this.mc.st.enedition || (idx !== 0 && (idx < this.premier || idx > this.dernier))) return $t('UTIer1')
-    if (idx && !nc) return this.supprMC(idx)
+    if (idx !== 0 && (idx < this.premier || idx > this.dernier)) 
+      return $t(idx > 199 ? 'MCer2b' : 'MCer2')
+    if (idx && !nc) { this.supprMC(idx); return false }
     const [categ, nom] = this.split(nc)
     const x = this.localNom[nom]
-    if (x && x[0] !== idx) return $t('UTIer2', [x[0], x[1]])
+    if (x && x[0] !== idx) return $t('MCer3', [x[0], x[1]])
     if (idx) {
       const ancnc = this.localIdx[idx]
       const [anccateg, ancnom] = this.split(ancnc)
       delete this.localNom[ancnom]
-      this.delCateg(anccateg, idx)
+      this.delCateg(anccateg, ''+idx)
     } else {
-      for (let i = this.premier; i < this.dernier; i++) {
-        if (!this.localIdx[i]) { idx = i; break }
-      }
-      if (!idx) return $t('UTIer3')
+      // Nouveau mot clé: recherche un index
+      for (let i = this.premier; i < this.dernier; i++) if (!this.localIdx[i]) { idx = i; break }
+      if (!idx) return $t('MCer4')
     }
     this.localIdx[idx] = nc
     this.localNom[nom] = [idx, categ]
-    this.setCateg(categ, idx, nom)
+    this.setCateg(categ, ''+idx, nom)
     this.tri()
     this.apres = this.flatMap(this.localIdx)
     this.mc.st.modifie = this.apres !== this.avant
-    this.mapAll.set(idx, { n: nom, c: categ })
+    this.mapAll.set(''+idx, { n: nom, c: categ })
   }
 }
 

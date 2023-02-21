@@ -4,7 +4,8 @@
     <q-toolbar-title class="titre-lg">{{titre}}</q-toolbar-title>
     <bouton-help page="page1" />
     <q-btn class="q-ml-xs" size="md" :disable="!modif" dense color="warning" icon="check" label="OK" @click="ok"/>
-    <q-btn class="q-ml-xs" size="md" dense flat icon="close" @click="undo"/>
+    <q-btn :disable="!modif" class="q-ml-xs" size="md" dense flat icon="undo" @click="undo"/>
+    <q-btn :disable="modif" class="q-ml-xs" size="md" dense flat icon="close" @click="close"/>
   </q-toolbar>
 
   <div class="q-pa-md col row justify-start">
@@ -43,7 +44,7 @@ import { Motscles } from '../app/modele.mjs.mjs'
 export default ({
   name: 'ChoixMotscles',
 
-  props: { decompte: Boolean, degroupe: Boolean, src: Object, close: Function, titre: String },
+  props: { duCompte: Boolean, duGroupe: Number, src: Object, titre: String },
 
   components: { BoutonHelp },
 
@@ -66,32 +67,34 @@ export default ({
       const x = this.motscles.getMC(idx)
       return !x ? '' : x.c + '@' + x.n
     },
+    close () {
+      this.$emit('ok', false)
+    },
     ok () {
       this.$emit('ok', this.srclocal)
-      if (this.close) this.close()
     },
     undo () {
       this.srclocal = this.srcinp
-      if (this.close) this.close()
     },
     seldesel (idx) {
       if (this.selecte(idx)) {
         this.srclocal = deselect(this.srclocal, idx)
       } else {
         const x = this.motscles.getMC(idx)
-        if (x && x.c === 'obsolète') {
-          afficherdiagnostic('Un mot clé "obsolète" ne peut pas être attribué.')
+        if (x && x.c === $t('obsolete')) {
+          this.session.afficherDiag($t('MCer5'))
         } else this.srclocal = select(this.srclocal, idx)
       }
     }
   },
 
   setup (props) {
-    const ducompte = toRef(props, 'ducompte')
-    const degroupe = toRef(props, 'degroupe')
+    const duCompte = toRef(props, 'duCompte')
+    const duGroupe = toRef(props, 'duGroupe')
 
+    // Objet motscles en sélection : immutable
     const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
-    const motscles = new Motscles(mc, false, ducompte.value, dugroupe.value)
+    const motscles = new Motscles(mc, false, duCompte.value || false, duGroupe.value || 0)
 
     const src = toRef(props, 'src')
     const local = reactive({ inp: null, src: null })
@@ -103,15 +106,14 @@ export default ({
     srcinp.value = src.value || new Uint8Array([])
     srclocal.value = src.value || new Uint8Array([])
 
-    watch(
-      () => src.value,
-      (ap, av) => {
-        if (equ8(srclocal.value, srcinp.value) && !equ8(srclocal.value, ap)) {
-          // srclocal n'était PAS modifié, ni égal à la nouvelle valeur : alignement sur la nouvelle valeur
-          srclocal.value = ap
-        }
-        srcinp.value = ap
-      })
+    // Discutable : la source peut changer pendant que le dialogue de sélection est en cours. Pourquoi pas */
+    watch( () => src.value, (ap, av) => {
+      if (equ8(srclocal.value, srcinp.value) && !equ8(srclocal.value, ap)) {
+        // srclocal n'était PAS modifié, ni égal à la nouvelle valeur : alignement sur la nouvelle valeur
+        srclocal.value = ap
+      }
+      srcinp.value = ap
+    })
 
     return {
       srcinp,
