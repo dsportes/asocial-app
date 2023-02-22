@@ -8,12 +8,13 @@
     <q-btn :disable="modif" class="q-ml-xs" size="md" dense flat icon="close" @click="close"/>
   </q-toolbar>
 
-  <div class="q-pa-md col row justify-start">
-    <div v-for="idx in srclocal" :key="idx" class="radius q-ma-xs q-px-xs bg-yellow text-black cursor-pointer">
-      <span v-if="aMC(idx)" @click="seldesel(idx)">{{ed(idx)}}</span>
+  <div class="q-pa-md row justify-start">
+    <div v-for="idx in srclocal" :key="idx" 
+      class="radius q-ma-xs q-px-xs bg-yellow text-black cursor-pointer fs-md font-mono">
+      <span :class="sty(idx)" @click="seldesel(idx)">{{ed(idx)}}</span>
     </div>
   </div>
-  <q-splitter v-model="splitterModel" class="col" style="width:100%">
+  <q-splitter v-model="splitterModel" class="full-width">
     <template v-slot:before>
       <q-tabs v-model="tab" no-caps vertical >
         <q-tab v-for="categ in motscles.mc.lcategs" :key="categ" :name="categ" :label="categ" />
@@ -38,7 +39,7 @@
 <script>
 import { toRef, ref, watch, reactive } from 'vue'
 import BoutonHelp from './BoutonHelp.vue'
-import { egaliteU8, select, deselect, $t, afficherDiag } from '../app/util.mjs'
+import { egaliteU8, select, deselect, cloneU8, $t, afficherDiag } from '../app/util.mjs'
 import { Motscles } from '../app/modele.mjs'
 
 export default ({
@@ -49,13 +50,17 @@ export default ({
   components: { BoutonHelp },
 
   computed: {
-    modif () { return egaliteU8(this.srclocal, this.srcinp) }
+    modif () { return !egaliteU8(this.srclocal, this.srcinp) }
   },
 
   data () { return {
   }},
 
   methods: {
+    sty (idx) {
+      if (idx < 100) return ''
+      return idx <= 199 ? 'text-italic' : 'text-bold'
+    },
     selecte (idx) {
       if (!this.srclocal) return false
       return this.srclocal.find((e) => e === idx)
@@ -65,7 +70,8 @@ export default ({
     },
     ed (idx) {
       const x = this.motscles.getMC(idx)
-      return !x ? '' : x.c + '@' + x.n
+      const t = !x ? '' : x.c + '@' + x.n
+      return t
     },
     close () {
       this.$emit('ok', false)
@@ -74,9 +80,10 @@ export default ({
       this.$emit('ok', this.srclocal)
     },
     undo () {
-      this.srclocal = this.srcinp
+      this.srclocal = cloneU8(this.srcinp)
     },
-    seldesel (idx) {
+    seldesel (n) {
+      const idx = parseInt(n)
       if (this.selecte(idx)) {
         this.srclocal = deselect(this.srclocal, idx)
       } else {
@@ -103,16 +110,16 @@ export default ({
 
     const tab = ref('')
     tab.value = motscles.mc.lcategs[0]
-    srcinp.value = src.value || new Uint8Array([])
-    srclocal.value = src.value || new Uint8Array([])
+    srcinp.value = src.value ? cloneU8(src.value) : new Uint8Array([])
+    srclocal.value = cloneU8(srcinp.value)
 
     // Discutable : la source peut changer pendant que le dialogue de sélection est en cours. Pourquoi pas */
     watch( () => src.value, (ap, av) => {
       if (egaliteU8(srclocal.value, srcinp.value) && !egaliteU8(srclocal.value, ap)) {
         // srclocal n'était PAS modifié, ni égal à la nouvelle valeur : alignement sur la nouvelle valeur
-        srclocal.value = ap
+        srclocal.value = cloneU8(ap)
       }
-      srcinp.value = ap
+      srcinp.value = cloneU8(ap)
     })
 
     return {

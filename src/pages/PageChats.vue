@@ -4,8 +4,13 @@
 
     <div v-if="!chats.length" class="titre-lg text-italic">{{$t('CHnch')}}</div>
 
-    <div v-else v-for="(chat, idx) in chats" :key="chat.ids">
-      <apercu-chat class="q-my-sm" :id="chat.id" :ids="chat.ids" :idx="idx" :mapmc="mapmc"/>
+    <q-btn class="q-my-sm" size="md" no-caps flat dense color="primary" 
+      :label="$t('CVraf')" @click="rafCvs"/>
+    
+    <div v-if="chats.length">
+      <div v-for="(chat, idx) in chats" :key="chat.ids">
+        <apercu-chat class="q-my-sm" :id="chat.id" :ids="chat.ids" :idx="idx" :mapmc="mapmc"/>
+      </div>
     </div>
 
   </q-page>
@@ -17,6 +22,7 @@ import stores from '../stores/stores.mjs'
 import ApercuChat from '../components/ApercuChat.vue'
 import { Motscles } from '../app/modele.mjs'
 import InfoRestriction from '../components/InfoRestriction.vue'
+import { ChargerCvs } from '../app/operations.mjs'
 
 export default {
   name: 'PageChats',
@@ -27,6 +33,10 @@ export default {
   },
 
   methods: {
+    async rafCvs () {
+      const n = await new ChargerCvs().run()
+      stores.ui.afficherMessage(this.$t('CVraf2', [n]), false)
+    }
   },
 
   data () {

@@ -20,6 +20,7 @@ import { toRef, ref } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
+import { IDCOMPTABLE } from '../app/api.mjs'
 
 export default {
   name: 'ApercuPeople',
@@ -41,7 +42,7 @@ export default {
     const pStore = stores.people
     const config = stores.config
     const id = toRef(props, 'id')
-    const phDef = (id.value === IDCOMPTABLE ? config.iconSuperman : config.iconAvtar)
+    const phDef = (id.value === IDCOMPTABLE ? config.iconSuperman : config.iconAvatar)
 
     function getP () {
       const p = pStore.getPeople(id.value)
@@ -53,7 +54,7 @@ export default {
     const p = ref(getP())
     pStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'getElt' && args[0] === id.value) {
+        if (name === 'getElt' && args[0].id === id.value) {
           p.value = getP()
         }
       })

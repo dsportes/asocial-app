@@ -2,10 +2,12 @@
 <div>
   <div :class="'row justify-between ' + dkli(idx)">
     <div v-if="!src.length" class="titre-md text-italic">{{$t('MCaucun')}}</div>
-    <div v-else class="col row font-mono fs-md">
-      <span v-for="idx in src" :key="idx" :class="sty(src[idx]) + ' q-mr-sm'">{{nom(src[idx])}}</span>
+    <div v-else class="col row font-mono fs-sm">
+      <div class="titre-md text-bold q-mr-sm">{{src.length ? $t('MCmc') : $t('MCaucun')}}</div>
+      <span v-for="idx in src" :key="idx" 
+        :class="sty(idx) + ' cmc q-mr-sm'">{{nom(idx)}}</span>
     </div>
-    <q-btn v-if="edit" class="col-auto btn1" size="sm" icon="edit" color="primary" @click="editer">
+    <q-btn v-if="edit" class="col-auto btn1" size="sm" icon="edit" color="warning" @click="editer">
       <q-tooltip class="bg-white text-primary">{{$t('editer')}}</q-tooltip>
     </q-btn>
   </div>
@@ -55,7 +57,7 @@ export default ({
     const mapMC = toRef(props, 'mapmc')
     function nom (idx) {
       if (!mapMC.value) return ''
-      const e = mapMC.value[idx]
+      const e = mapMC.value.get(''+idx)
       return e && e.n ? e.n : ''
     }
     return {
@@ -71,4 +73,9 @@ export default ({
 .btn1
   padding: 0 !important
   width: 1.5rem !important
+.cmc
+  border-radius: 3px
+  border: 1px solid $warning
+  padding: 0
+  height: 1.2rem
 </style>

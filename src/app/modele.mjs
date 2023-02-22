@@ -262,11 +262,11 @@ export class Motscles {
   }
 
   aMC (idx) {
-    return this.mapAll.has(idx) || false
+    return this.mapAll.has(""+idx) || false
   }
 
   getMC (idx) {
-    return this.mapAll.get(idx)
+    return this.mapAll.get(""+idx)
   }
 
   debutEdition () {
@@ -800,7 +800,9 @@ cva : { v, photo, info } - crypté par la clé de l'avatar
 */
 export class Cv extends GenDoc {
   async compile (row) {
-    this.cv = decode(await decrypter(getCle(this.id), row.cva))
+    const k = getCle(this.id)
+    const b = await decrypter(k, row.cva)
+    this.cv = decode(b)
   }
 }
 

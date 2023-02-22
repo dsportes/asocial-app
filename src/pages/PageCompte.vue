@@ -33,7 +33,7 @@
     </div>
 
     <!-- Avatars du compte -->
-    <div v-for="(na, idx) in compte.lstAvatarNas" :key="na.id">
+    <div v-for="(na, idx) in compta.lstAvatarNas" :key="na.id">
       <q-separator class="q-my-sm"/>
       <div class="row items-start">
         <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
@@ -83,6 +83,7 @@
 
 <script>
 import { encode } from '@msgpack/msgpack'
+import { ref } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { crypter /*, decrypterStr */ } from '../app/webcrypto.mjs'
@@ -152,6 +153,7 @@ export default {
   setup () {
     const session = stores.session
     const compte = session.compte
+    const compta = session.compta
     const tribu = session.tribu
 
     const memoed = ref(null)
@@ -161,6 +163,7 @@ export default {
       session,
       memoed,
       compte,
+      compta,
       tribu
     }
   }

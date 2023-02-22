@@ -85,11 +85,11 @@ export function dhcool (timems, sec) {
   const d = [dx.getFullYear(), dx.getMonth(), dx.getDate()]
   const mm = auj[0] === d[0] && auj[1] === d[1]
   if (mm && auj[2] === d[2]) {
-    const t = stores.config.dtf2.format(d)
+    const t = stores.config.dtf2.format(dx)
     return $t('auja', [sec ? t : t.substring(0, 5)])
   }
   if (hier[0] === d[0] && hier[1] === d[1] && hier[2] === d[2]) {
-    const t = stores.config.dtf2.format(d)
+    const t = stores.config.dtf2.format(dx)
     return $t('hiera', [sec ? t : t.substring(0, 5)])
   }
   if (mm) {
@@ -128,6 +128,30 @@ export function splitPK(pk) {
   const i = pk.indexOf('/')
   if (i === -1) return { id: parseInt(pk), id2: 0}
   return { id: parseInt(pk.substring(0, i)), id2: parseInt(pk.substring(i + 1))}
+}
+
+export function deselect (u8, idx) {
+  if (!u8) return new Uint8Array(0)
+  const s = new Set(u8)
+  if (!s.has(idx)) return u8
+  s.delete(idx)
+  const l = Array.from(s)
+  return new Uint8Array(l.sort())
+}
+
+export function select (u8, idx) {
+  if (!u8) return new Uint8Array([idx])
+  const s = new Set(u8)
+  s.add(idx)
+  const l = Array.from(s)
+  return new Uint8Array(l.sort())
+}
+
+export function cloneU8 (u8) {
+  if (!u8) return null
+  const r = new Uint8Array(u8.length)
+  u8.forEach((x, i) => { r[i] = x })
+  return r
 }
 
 // eslint-disable-next-line no-control-regex

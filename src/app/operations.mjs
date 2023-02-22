@@ -2,10 +2,10 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { AppExc, appexc } from './api.mjs'
-import { $t, hash, u8ToHex, getJourJ } from './util.mjs'
-import { random, crypter } from './webcrypto.mjs'
+import { $t } from './util.mjs'
+import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { NomAvatar, Avatar, Compta, getNg, getCle } from './modele.mjs'
+import { NomAvatar, Avatar, Compta, getNg, getCle, compile} from './modele.mjs'
 import { genKeyPair, decrypter } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
@@ -153,7 +153,7 @@ export class ChangementPS extends OperationUI {
   }
 }
 
-/** Changement de phrase secrete ****************************************************
+/** Changement de phrase sz contact ****************************************************
 args.token: éléments d'authentification du compte.
 args.id: de l'avatar
 args.hpc: hash de la phrase de contact (SUPPRESSION si null)
@@ -223,7 +223,6 @@ args.token: éléments d'authentification du compte.
 args.rowSponsoring : row Sponsoring, sans la version
 Retour:
 */
-
 export class AjoutSponsoring extends OperationUI {
   constructor () { super($t('OPcsp')) }
 
@@ -244,7 +243,6 @@ args.token: éléments d'authentification du compte.
 args.rowSponsoring : row Sponsoring, sans la version
 Retour:
 */
-
 export class ChercherSponsoring extends OperationUI {
   constructor () { super($t('OPcsp')) }
 
@@ -259,7 +257,103 @@ export class ChercherSponsoring extends OperationUI {
   }
 }
 
+/** Changer le texte d'un chat *********************************************
+args.token: éléments d'authentification du compte.
+args.idI : id (côté compte)
+args.idE : id (côté de l'autre)
+args.ids : id du chat
+args.contI : contenu crypté côté compte
+args.contE : contenu crypté côté autre
+Retour:
+*/
+export class MajTexteChat extends OperationUI {
+  constructor () { super($t('OPmajtch')) }
 
+  async run (chat, txt) {
+    try {
+      const session = stores.session
+      const dh = new Date().getTime()
+      const args = { token: session.authToken }
+      args.idI = chat.naI.id
+      args.idE = chat.naE.id
+      args.ids = chat.ids
+      
+      const cI = { na: [chat.naE.nom, chat.naE.rnd], dh: dh, txt: txt }
+      args.contI = await crypter(chat.naI.rnd, new Uint8Array(encode(cI)))
+      const cE = { na: [chat.naI.nom, chat.naI.rnd], dh: dh, txt: txt }
+      args.contE = await crypter(chat.naE.rnd, new Uint8Array(encode(cE)))
+      const ret = this.tr(await post(this, 'MajTexteChat', args))
+      this.finOK()
+      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Changer les mots clés d'un chat *********************************
+args.token: éléments d'authentification du compte.
+args.mc : u8 des mots clés
+args.id ids : id du chat
+Retour:
+*/
+export class MajMotsclesChat extends OperationUI {
+  constructor () { super($t('OPmajtch')) }
+
+  async run (id, ids, mc) {
+    try {
+      const session = stores.session
+      const dh = new Date().getTime()
+      const args = { token: session.authToken, id, ids, mc }
+      const ret = this.tr(await post(this, 'MajMotsclesChat', args))
+      this.finOK()
+      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Charger, quand nécessaire, les cartes de visite des chats d'un avatar *********************************
+args.token: éléments d'authentification du compte.
+args.mcv : cle: id, valeur: version détenue en session (ou 0)
+Retour:
+rowCvs: liste des row Cv { _nom: 'cvs', id, _data_ }
+  _data_ : cva {v, photo, info} cryptée par la clé de son avatar
+*/
+export class ChargerCvs extends OperationUI {
+  constructor () { super($t('OPccv')) }
+
+  async run () {
+    try {
+      const session = stores.session
+      const id = session.avatarId
+      const pStore = stores.people
+      const avStore = stores.avatar
+
+      const chats = avStore.getChats(id)
+      const mcv = {}
+      chats.forEach(c => { mcv[c.naE.id] = 0 })
+      for (const x in mcv) {
+        const idp = parseInt(x)
+        const cv = pStore.getCv(idp)
+        if (cv) mcv[id] = cv.v
+      }
+      const args = { token: session.authToken, mcv }
+      const ret = this.tr(await post(this, 'ChargerCvs', args))
+      let n = 0
+      if (ret.rowCvs) for(const row of ret.rowCvs) {
+        const obj = await compile(row)
+        const na = getNg(obj.id)
+        pStore.setCv(na, obj.cv)
+        n++
+      }
+      return this.finOK(n, true)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
 
 
 
@@ -284,7 +378,7 @@ export class GetCVs extends OperationUI {
       if (l2.length && session.accesNet) {
         const args = { sessionId: session.sessionId, v: 0, l1: [], l2 }
         const ret = await post(this, 'm1', 'chargerCVs', args)
-        const m = await compileToMap(ret.rowItems)
+        const m = await compile(ret.rowItems)
         for (const pk in m.cv) {
           const cv = m.cv[pk]
           people.newPeople(cv.id, true)

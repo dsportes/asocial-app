@@ -194,11 +194,14 @@ export default {
   EX9003: 'Compte non trouvé ({0})',
   EX9004: 'Ligne comptable non trouvée ({0})',
   EX9005: 'Chat non trouvé ({0})',
-  EX9007: 'Secret non trouvé ({0})',
+  EX9007: 'Secret non trouvé ({0} / {1})',
   EX9008: 'Avatar non trouvé ({0})',
   EX9009: 'Groupe non trouvé ({0})',
-  EX9010: 'Membre non trouvé ({0})',
+  EX9010: 'Membre non trouvé ({0} / {1})',
   EX9011: 'Ligne comptable de l\'avatar hébergeur non trouvée ({0})',
+  EX9012: 'Chat non trouvé ({0} / {1})',
+  EX9013: 'Sponsoring non trouvé ({0} / {1})',
+
   EX9100: 'Données d\'authentification non trouvées dans la requête',
   EX9100: 'Données d\'authentification illisibles (détail: {0})',
   EX9101: 'Compte non authentifié',
@@ -333,7 +336,7 @@ export default {
   OPmcv: 'Mettre à jour une carte de visite',
   OPcps: 'Changer de phrase secrete de connexion',
   OPcpc: 'Changer de phrase de contact',
-
+  OPccv: 'Rafraîchir des cartes de visite',
 
   OPnch: 'Ajouter un item sur un "chat"',
   OPsch: 'Sélectionner des "chats"',
@@ -349,7 +352,6 @@ export default {
   OPcct: 'Changer un compte de tribu',
   OPmqc: 'Mettre à jour les quotas d\'un compte',
   OPrqc: 'Répartir les quotas entre les avatars d\'un compte',
-  OPccv: 'Obtenir des cartes de visite non trouvées dans la session',
   OPmpr: 'Mettre à jour la préférence d\'un compte',
   OPcsc: 'Créer un nouveau secret',
   OPmsc: 'Mettre à jour un secret',
@@ -361,6 +363,9 @@ export default {
   OPrac: 'Ré-activer l\'accès aux secrets d\'un contact',
   OPsuc: 'Supprimer un contact',
   OPcsp: 'Créer un nouveau sponsoring',
+  OPmajtch: 'Mise à jour du texte d\'un chat',
+  OPmajmcch: 'Mise à jour des mots clés d\'un chat',
+
   OPrdv: 'Prendre rendez-vous avec un avatar',
   OPprl: 'Prolonger une proposition (de contact, parrainage ou rendez-vous)',
   OPcco: 'Créer un nouveau contact',
@@ -417,7 +422,8 @@ export default {
   UTIesp: 'En savoir plus sur le blocage',
 
   // Motsclés
-  MCaucun: 'Pas de mots clés attachés à ce chat',
+  MCmc: 'Mots clés :',
+  MCaucun: 'Aucun mots clés',
   MCer1: 'Seuls les mots clés obsolètes peuvent être supprimés',
   MCer2: 'Ce mot clé n\'est pas modifiable dans ce contexte',
   MCer2b: 'Les mots clés de la configuration ne sont pas modifiables',
@@ -681,6 +687,8 @@ export default {
   CVmav: 'C\'était mieux avant!',
   CVoff: 'Caméra non démarrée',
   CVedit: 'Editer la carte de visite',
+  CVraf: 'Rafraîchir les cartes de visite',
+  CVraf2: 'Nombre de cartes de visite rechargées : {0}',
 
   // Panel Comptabilité
   PCOtit: 'Comptabilité de {0}',

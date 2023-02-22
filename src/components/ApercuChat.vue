@@ -1,11 +1,11 @@
 <template>
   <q-card>
     <div :class="'column q-px-sm ' + dkli(idx)">
-      <div class="row justify-between">
-        <div class="fs-md q-mr-sm nom">{{chat.naE.nomc}}</div>
+      <div class="row justify-end">
         <div v-if="chat.z" class="text-negative text-bold">{{$t('supprime')}}</div>
-        <div v-else class="font-mono">{{dhcool(chat.dh)}}</div>
+        <div v-else class="font-mono fs-md">{{dhcool(chat.dh)}}</div>
       </div>
+      <apercu-people class="bordb" :id="chat.naE.id" :idx="idx"/>
       <apercu-motscles :groupe-id="0" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
         :mapmc="mapmc" :edit="session.auts(3, true)" :src="chat.mc || u0"/>
       <div v-if="!chat.z" class="row items-start">
@@ -37,6 +37,8 @@ import EditeurMd from './EditeurMd.vue'
 import { dhcool } from '../app/util.mjs'
 import { getNg } from '../app/modele.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
+import ApercuPeople from './ApercuPeople.vue'
+import { MajMotsclesChat, MajTexteChat } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuChat',
@@ -44,7 +46,7 @@ export default {
   props: { id: Number, ids: Number, idx: Number, mapmc: Object },
   /* Compilé: { id (avatar), dh, naE, txt } */
 
-  components: { ShowHtml, EditeurMd, ApercuMotscles },
+  components: { ShowHtml, EditeurMd, ApercuMotscles, ApercuPeople },
 
   computed: { },
 
@@ -60,11 +62,11 @@ export default {
       if (await this.session.aut(3, true)) this.chatedit = true
     },
     async chatok (txt) {
-      console.log(txt)
+      await new MajTexteChat().run(this.chat, txt)
       this.chatedit = false
     },
     async changeMc (mc) {
-      console.log(mc[0])
+      await new MajMotsclesChat().run(this.id, this.ids, mc)
     }
   },
 
@@ -103,6 +105,8 @@ export default {
 @import '../css/app.sass'
 .bord
   border-top: 1px solid $grey-5
+.bordb
+  border-bottom: 1px solid $grey-5
 .nom
   max-height: 1.3rem
   overflow: hidden
