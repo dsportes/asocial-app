@@ -416,6 +416,7 @@ export class ConnexionCompte extends OperationUI {
     this.rowCompta = ret.rowCompta
     this.rowTribu = ret.rowTribu
     session.compteId = this.rowAvatar.id
+    if (session.estComptable) session.mode = 2
     session.setAvatarCourant(session.compteId)
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)

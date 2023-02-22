@@ -1,16 +1,16 @@
 <template>
-  <div>
-    <div :class="'column ' + dkli(idx)">
+  <q-card>
+    <div :class="'column q-px-sm ' + dkli(idx)">
       <div class="row justify-between">
-        <div class="fs-md q-mr-sm nom">{{naI.nomc}}</div>
+        <div class="fs-md q-mr-sm nom">{{chat.naE.nomc}}</div>
         <div v-if="chat.z" class="text-negative text-bold">{{$t('supprime')}}</div>
         <div v-else class="font-mono">{{dhcool(chat.dh)}}</div>
       </div>
-      <apercu-motscles class="full-width" :groupe-id="0" @ok="changeMc"
+      <apercu-motscles :groupe-id="0" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
         :mapmc="mapmc" :edit="session.auts(3, true)" :src="chat.mc || u0"/>
-      <div v-if="!chat.z" class="row">
+      <div v-if="!chat.z" class="row items-start">
         <show-html class="col q-mr-sm bord" :idx="idx" zoom maxh="3rem" :texte="chat.txt"/>
-        <q-btn class="col-auto btn1" icon="edit" color="warning" @click="editer"/>
+        <div class="col-auto self-start"><q-btn class="btn1" icon="edit" size="sm" color="warning" @click="editer"/></div>
       </div>
     </div>
 
@@ -21,11 +21,11 @@
           <q-toolbar-title class="titre-lg full-width">{{$t('CHtxt')}}</q-toolbar-title>
           <q-btn dense flat size="md" icon="close" @click="chatedit=false"/>
         </q-toolbar>
-        <editeur-md ref="memoed" class="height-10"
+        <editeur-md ref="memoed" style="height:70vh"
           :texte="chat.txt" editable modetxt :label-ok="$t('OK')" @ok="chatok"/>
       </q-card>
     </q-dialog>
-  </div>
+  </q-card>
 </template>
 <script>
 
@@ -61,6 +61,7 @@ export default {
     },
     async chatok (txt) {
       console.log(txt)
+      this.chatedit = false
     },
     async changeMc (mc) {
       console.log(mc[0])
@@ -80,7 +81,7 @@ export default {
     }
 
     const chat = ref(getC())
-    console.log(dhcool(chat.value.dh), new Date(chat.value.dh).toISOString())
+
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
         if ((name === 'setChat' && args[0].id === id.value && args[0].ids === ids.value) ||
@@ -102,7 +103,6 @@ export default {
 @import '../css/app.sass'
 .bord
   border-top: 1px solid $grey-5
-  border-bottom: 1px solid $grey-5
 .nom
   max-height: 1.3rem
   overflow: hidden
@@ -112,5 +112,4 @@ export default {
 .btn1
   padding: 0 !important
   width: 1.5rem !important
-  height: 1.5rem !important
 </style>

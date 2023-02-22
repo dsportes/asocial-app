@@ -1,12 +1,11 @@
 <template>
-  <q-page class="column q-pl-xs q-mr-sm">
+  <q-page class="q-pa-sm">
     <info-restriction :niveau="3" cnx/>
 
     <div v-if="!chats.length" class="titre-lg text-italic">{{$t('CHnch')}}</div>
 
     <div v-else v-for="(chat, idx) in chats" :key="chat.ids">
-      <apercu-chat :id="chat.id" :ids="chat.ids" :idx="idx" :mapmc="mapmc"/>
-      <q-separator class="q-my-sm"/>
+      <apercu-chat class="q-my-sm" :id="chat.id" :ids="chat.ids" :idx="idx" :mapmc="mapmc"/>
     </div>
 
   </q-page>

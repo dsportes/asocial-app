@@ -1,16 +1,16 @@
 <template>
 <div>
-  <div :class="'full-width row justify-between ' + dkli(idx)">
+  <div :class="'row justify-between ' + dkli(idx)">
     <div v-if="!src.length" class="titre-md text-italic">{{$t('MCaucun')}}</div>
     <div v-else class="col row font-mono fs-md">
       <span v-for="idx in src" :key="idx" :class="sty(src[idx]) + ' q-mr-sm'">{{nom(src[idx])}}</span>
     </div>
-    <q-btn v-if="edit" class="col-auto q-mr-sm" size="sm" icon="edit" color="primary" @click="editer">
+    <q-btn v-if="edit" class="col-auto btn1" size="sm" icon="edit" color="primary" @click="editer">
       <q-tooltip class="bg-white text-primary">{{$t('editer')}}</q-tooltip>
     </q-btn>
   </div>
   <q-dialog v-model="mcedit" persistent>
-    <choix-motscles :motscles="motscles" :src="src" :du-groupe="duGroupe" :du-compte="duCompte"
+    <choix-motscles :src="src" :du-groupe="duGroupe" :du-compte="duCompte"
       :titre="$t('MCchoix')" @ok="okmc"/>
   </q-dialog>
 </div>
@@ -19,11 +19,14 @@
 <script>
 import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
+import ChoixMotscles from './ChoixMotscles.vue'
 
 export default ({
   name: 'ApercuMotscles',
 
-  props: { mapmc: Object, src: Object, edit: Boolean, idx: Number, ok: Function },
+  props: { mapmc: Object, src: Object, edit: Boolean, idx: Number, duCompte: Boolean, duGroupe: Number },
+
+  components: { ChoixMotscles },
 
   computed: {
   },
@@ -38,7 +41,7 @@ export default ({
       if (this.edit && await this.session.aut(3, true)) this.mcedit = true
     },
     okmc (mc) { 
-      if (this.ok && mc) this.ok(mc)
+      if (mc) this.$emit('ok', mc)
       this.mcedit = false
     },
     sty (idx) {
@@ -65,4 +68,7 @@ export default ({
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.btn1
+  padding: 0 !important
+  width: 1.5rem !important
 </style>

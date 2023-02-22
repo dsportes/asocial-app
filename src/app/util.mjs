@@ -71,30 +71,32 @@ export function dhstring (date) { return stores.config.dtf.format(date) }
 let auj, hier
 export function aujhier () {
   const now = new Date()
-  if (auj && now.getFullYear() === auj.getFullYear() && now.getMonth() === auj.getMonth() && now.getDate() === auj.getDate()) return [auj, hier]
-  auj = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  hier = new Date(auj.getTime() - 86400000)
-  return [auj, hier]
+  const n = [now.getFullYear(), now.getMonth(), now.getDate()]
+  if (auj && n[0] === auj[0] && n[1] === auj[1] && n[2] === auj[2]) return
+  const h = new Date(now.getTime() - 86400000)
+  auj = n
+  hier = [h.getFullYear(), h.getMonth(), h.getDate()]
 }
 
 export function dhcool (timems, sec) {
   if (!timems) return $t('nondate')
   aujhier()
-  const d = new Date(timems)
-  const mm = auj.getFullYear() === d.getFullYear() && auj.getMonth() === d.getMonth()
-  if (mm && auj.getDate() === d.getDate()) {
+  const dx = new Date(timems)
+  const d = [dx.getFullYear(), dx.getMonth(), dx.getDate()]
+  const mm = auj[0] === d[0] && auj[1] === d[1]
+  if (mm && auj[2] === d[2]) {
     const t = stores.config.dtf2.format(d)
     return $t('auja', [sec ? t : t.substring(0, 5)])
   }
-  if (hier.getFullYear() === d.getFullYear() && hier.getMonth() === d.getMonth() && hier.getDate() === d.getDate()) {
+  if (hier[0] === d[0] && hier[1] === d[1] && hier[2] === d[2]) {
     const t = stores.config.dtf2.format(d)
     return $t('hiera', [sec ? t : t.substring(0, 5)])
   }
   if (mm) {
-    const t = stores.config.dtf2.format(d)
-    return $t('lea', [d.getDay(), sec ? t : t.substring(0, 5)])
+    const t = stores.config.dtf2.format(dx)
+    return $t('lea', [d[2], sec ? t : t.substring(0, 5)])
   }
-  const t = stores.config.dtf1.format(d)
+  const t = stores.config.dtf1.format(dx)
   return sec ? t : t.substring(0, t.length - 3)
 }
 

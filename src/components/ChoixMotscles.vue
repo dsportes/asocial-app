@@ -38,8 +38,8 @@
 <script>
 import { toRef, ref, watch, reactive } from 'vue'
 import BoutonHelp from './BoutonHelp.vue'
-import { equ8, select, deselect, afficherdiagnostic } from '../app/util.mjs'
-import { Motscles } from '../app/modele.mjs.mjs'
+import { egaliteU8, select, deselect, $t, afficherDiag } from '../app/util.mjs'
+import { Motscles } from '../app/modele.mjs'
 
 export default ({
   name: 'ChoixMotscles',
@@ -49,7 +49,7 @@ export default ({
   components: { BoutonHelp },
 
   computed: {
-    modif () { return !this.equ8(this.srclocal, this.srcinp) }
+    modif () { return egaliteU8(this.srclocal, this.srcinp) }
   },
 
   data () { return {
@@ -81,8 +81,8 @@ export default ({
         this.srclocal = deselect(this.srclocal, idx)
       } else {
         const x = this.motscles.getMC(idx)
-        if (x && x.c === $t('obsolete')) {
-          this.session.afficherDiag($t('MCer5'))
+        if (x && x.c === $t('obs')) {
+          afficherDiag($t('MCer5'))
         } else this.srclocal = select(this.srclocal, idx)
       }
     }
@@ -102,13 +102,13 @@ export default ({
     const srcinp = toRef(local, 'inp')
 
     const tab = ref('')
-    tab.value = motscles.value.mc.lcategs[0]
+    tab.value = motscles.mc.lcategs[0]
     srcinp.value = src.value || new Uint8Array([])
     srclocal.value = src.value || new Uint8Array([])
 
     // Discutable : la source peut changer pendant que le dialogue de sélection est en cours. Pourquoi pas */
     watch( () => src.value, (ap, av) => {
-      if (equ8(srclocal.value, srcinp.value) && !equ8(srclocal.value, ap)) {
+      if (egaliteU8(srclocal.value, srcinp.value) && !egaliteU8(srclocal.value, ap)) {
         // srclocal n'était PAS modifié, ni égal à la nouvelle valeur : alignement sur la nouvelle valeur
         srclocal.value = ap
       }
@@ -116,9 +116,9 @@ export default ({
     })
 
     return {
+      motscles,
       srcinp,
       srclocal,
-      equ8,
       tab,
       splitterModel: ref(33) // start at 33%
     }
