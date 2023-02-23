@@ -457,13 +457,14 @@ export class ConnexionCompte extends OperationUI {
   async phase0Avion () {
     // session.compteId et session.clek OK
     const session = stores.session
-    this.rowAvatar = await getAvatarPrimaire()
-    this.avatar = await compile(this.rowAvatar)
-    session.setAvatarCourant(session.compteId)
     this.rowCompta = await getCompta()
     this.compta = await compile(this.rowCompta) 
     this.rowTribu = await getTribu(this.compta.idt)
     this.tribu = await compile(this.rowTribu)
+    session.tribuId = this.tribu.id
+    this.rowAvatar = await getAvatarPrimaire()
+    this.avatar = await compile(this.rowAvatar)
+    session.setAvatarCourant(session.compteId)
   }
 
   /** run **********************************************************/

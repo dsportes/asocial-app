@@ -10,6 +10,7 @@ import { usePeopleStore } from './people-store.js'
 import { useSecretStore } from './secret-store.js'
 import { useSyncitemStore } from './syncitem-store.js'
 import { useFetatStore } from './fetat-store.js'
+import { useFiltreStore } from './filtre-store.js'
 import { useAvsecretStore } from './avsecret-store.js'
 import { useTflocauxStore } from './tflocaux-store.js'
 
@@ -19,7 +20,7 @@ import { useListeTribusStore } from './liste-tribus.js'
 
 // Hors de cette liste : config, session
 const listeStores = ['tribu', 'avatar', 'groupe', 'couple', 'people', 
-'secret', 'syncitem', 'fetat', 'avsecret', 'tflocaux',
+'secret', 'syncitem', 'fetat', 'avsecret', 'tflocaux', 'filtre',
 'listeContacts', 'listeAvatars', 'listeTribus']
 
 class Stores {
@@ -37,10 +38,12 @@ class Stores {
   get fetat() { return this.fetatStore || (this.fetatStore = useFetatStore()) }
   get avsecret() { return this.avsecretStore || (this.avsecretStore = useAvsecretStore()) }
   get tflocaux() { return this.tflocauxStore || (this.tflocauxStore = useTflocauxStore()) }
+  get filtre() { return this.filtreStore || (this.filtreStore = useFiltreStore()) }
 
   get listeContacts() { return this.listeContactsStore || (this.listeContactsStore = useListeContactsStore()) }
   get listeAvatars() { return this.listeAvatarsStore || (this.listeAvatarsStore = useListeAvatarsStore()) }
   get listeTribus() { return this.listeTribusStore || (this.listeTribusStore = useListeTribusStore()) }
+
 
   reset() {
     for(const id of listeStores) {

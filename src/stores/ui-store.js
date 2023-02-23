@@ -6,6 +6,9 @@ import { sleep } from '../app/util.mjs'
 export const useUiStore = defineStore('ui', {
   state: () => ({
     page: 'login',
+    etroite: false,
+    filtre: false,
+    seuillarge: 800,
     dialogueerreur: false,
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
@@ -45,10 +48,18 @@ export const useUiStore = defineStore('ui', {
   },
 
   actions: {
+    setEtroite (v) {
+      this.etroite = v
+    },
     async setPage (p) {
+      this.menu = false
+      const pagesF = new Set(['chats', 'compte'])
       this.page = null
       await sleep(200)
       this.page = p
+      this.filtre = pagesF.has(p)
+      // ouvre le filtre si la page en a un ET que la fenêtre est large
+      if (this.filtre && !this.etroite) this.menu = true
     },
 
     afficherMessage (texte, important) {

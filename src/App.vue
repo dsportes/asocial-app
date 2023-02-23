@@ -1,5 +1,5 @@
 <template>
-<q-layout view="hHh lpR fFf">
+<q-layout view="hHh LPR lfr">
   <q-header elevated>
     <q-toolbar>
       <bouton-help page="page1"/>
@@ -50,17 +50,36 @@
         <span v-else class="titre-md text-italic">{{$t('MLAngr')}}</span>
       </q-toolbar-title>
     </q-toolbar>
-
-    <q-toolbar inset class="bg-secondary text-white">
+    <q-toolbar inset class="full-width bg-secondary text-white">
       <bouton-help page="page1"/>
-      <q-btn :disable="!aHome" flat icon="home" size="md" :color="aHome ? 'warning' : ''" dense @click="gotoAccueilLogin"/>
-      <q-toolbar-title class="titre-lg text-center cursor-pointer q-mx-md">
-        {{$t('P' + ui.page)}}
+      <q-btn :disable="!aHome" flat icon="home" size="md" 
+        :color="aHome ? 'warning' : 'grey'" dense @click="gotoAccueilLogin()"/>
+      <q-toolbar-title class="titre-lg text-center">
+        <span>{{$t('P' + ui.page)}}</span>
       </q-toolbar-title>
+
+      <q-btn v-if="ui.etroite && ui.filtre" class='q-mr-sm text-warning'
+        dense size="md" icon="filter_alt" @click="ouvrFiltre">
+        <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
+      </q-btn>
+
     </q-toolbar>
   </q-header>
 
-  <q-drawer v-model="ui.menu" show-if-above side="right" bordered>
+  <q-drawer v-if="ui.filtre" v-model="ui.menu" side="right" bordered persistent
+    class="bg-grey-3" :width="250" :breakpoint="ui.seuillarge"
+    :overlay="ui.etroite">
+    <q-scroll-area class="fit">
+      <q-card>
+        <div class="row justify-bettween">
+          <q-btn v-if="ui.etroite" class="q-mr-sm" icon="chevron_right" color="warning" size="md" dense @click="fermFiltre"/>
+          <div class="titre-lg">Filtre ...</div>
+        </div>
+        <q-cars-section v-if="ui.page === 'chats'">
+          <filtre-chats/>
+        </q-cars-section>
+      </q-card>
+    </q-scroll-area>
   </q-drawer>
 
   <q-page-container>
@@ -136,6 +155,7 @@ import { $t } from './app/util.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
+import BoutonLangue from './components/BoutonLangue.vue'
 
 import PageLogin from './pages/PageLogin.vue'
 import PageSession from './pages/PageSession.vue'
@@ -144,11 +164,12 @@ import PageCompte from './pages/PageCompte.vue'
 import PageSponsorings from './pages/PageSponserings.vue'
 import PageChats from './pages/PageChats.vue'
 
+import FiltreChats from './components/FiltreChats.vue'
+
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
 import DialogueHelp from './dialogues/DialogueHelp.vue'
 import InfoBlocage from './dialogues/InfoBlocage.vue'
-import BoutonLangue from './components/BoutonLangue.vue'
 
 import PanelContacts from './dialogues/PanelContacts.vue'
 import PanelCompta from './dialogues/PanelCompta.vue'
@@ -159,6 +180,7 @@ export default {
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
+    FiltreChats,
     DialogueErreur, DialogueHelp, InfoBlocage, 
     PanelContacts, PanelCompta
    },
@@ -171,13 +193,21 @@ export default {
     naMaTribu () { return this.session.compte.nct }
   },
 
-  watch : {
+  // Transmet au store ui **le franchissement du seuil** etroit / large
+  watch: {
+    "$q.screen.width"() {
+      const et = this.$q.screen.width < this.ui.seuillarge
+      if (et !== this.ui.etroite) this.ui.setEtroite(et)
+    }
   },
 
   data () { return {
   }},
 
   methods: {
+    ouvrFiltre () { this.ui.menu = true },
+    fermFiltre () { this.ui.menu = false },
+
     tgdark () { this.$q.dark.toggle() },
     infoSession () { this.ui.setPage('session') },
     gotoAccueilLogin () {
@@ -202,8 +232,12 @@ export default {
 
     const config = stores.config
     config.$q = $q
-    const session = stores.session
+
+
     const ui = stores.ui
+    ui.etroite = $q.screen.width < ui.seuillarge
+
+    const session = stores.session
     const avStore = stores.avatar
 
     console.log($t('build', [config.build, config.debug]))
@@ -212,7 +246,23 @@ export default {
     const infonet = ref(false)
     const infoidb = ref(false)
     const drc = ref(false)
-    const menuouvert = ref(false)
+
+    /* Gère le **changement de largeur** de la fenêtre selon la page actuellement affichée:
+    - si elle **devient** étroite, ferme le drawer de filtre
+    - si elle **devient** large, ET que la page a un filtre, ouvre le drawer de filtre
+    */
+    ui.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setEtroite'){
+          const et = ui.etroite
+          ui.menu = false
+          if (!et && ui.filtre) 
+              setTimeout(() => {
+                ui.menu = true
+              }, 500)
+          }
+      })
+    })
 
     return {
       session,
@@ -222,8 +272,7 @@ export default {
       infonet,
       infoidb,
       infomode,
-      drc,
-      menuouvert
+      drc
     }
   }
 }

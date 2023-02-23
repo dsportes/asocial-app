@@ -464,6 +464,7 @@ export default {
   MLAt2s: 'Secrets',
   MLAt2c: 'Contacts',
   MLAt2g: 'Groupes',
+  MLAfiltre: 'Ouvrir les paramètres du filtre',
 
   ACav: 'Relativement à l\'avatar "{0}"',
   ACgr: 'Relativement au groupe "{0}"',
