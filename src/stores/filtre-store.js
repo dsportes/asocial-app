@@ -2,15 +2,21 @@ import { defineStore } from 'pinia';
 
 export const useFiltreStore = defineStore('filtre', {
   state: () => ({
-    chats : { }
+    filtre: { 
+      chats: {}
+    },
+    contexte : {
+      chats: {}
+    }
   }),
 
   getters: {
   },
 
   actions: {
-    setFChats (f) {
-      this.chats = f
+    setFiltre (nom, champ, val) {
+      let f = this.filtre[nom]; if (!f) { f = {}; this.filtre[nom] = f}
+      f[champ] = val
     }
   }
 })

@@ -59,26 +59,30 @@
       </q-toolbar-title>
 
       <q-btn v-if="ui.etroite && ui.filtre" class='q-mr-sm text-warning'
-        dense size="md" icon="filter_alt" @click="ouvrFiltre">
+        dense size="md" icon="search" @click="ouvrFiltre">
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </q-btn>
 
     </q-toolbar>
   </q-header>
 
-  <q-drawer v-if="ui.filtre" v-model="ui.menu" side="right" bordered persistent
-    class="bg-grey-3" :width="250" :breakpoint="ui.seuillarge"
+  <q-drawer v-if="ui.filtre" v-model="ui.menu" side="right" elevated persistent
+    :width="250" :breakpoint="ui.seuillarge"
     :overlay="ui.etroite">
-    <q-scroll-area class="fit">
-      <q-card>
-        <div class="row justify-bettween">
+    <q-scroll-area :class="'q-pa-xs fit ' + dkli(1)">
+      <div>
+        <div class="row justify-bettween q-mb-md">
           <q-btn v-if="ui.etroite" class="q-mr-sm" icon="chevron_right" color="warning" size="md" dense @click="fermFiltre"/>
-          <div class="titre-lg">Filtre ...</div>
+          <div class="titre-lg">{{$t('MLArech')}}</div>
         </div>
-        <q-cars-section v-if="ui.page === 'chats'">
-          <filtre-chats/>
-        </q-cars-section>
-      </q-card>
+        <div v-if="ui.page === 'chats'" class="column justify-start">
+          <filtre-nbj nom="chats"/>
+          <filtre-nom nom="chats"/>
+          <filtre-txt nom="chats"/>
+          <filtre-mc nom="chats" attr="mcp"/>
+          <filtre-mc nom="chats" attr="mcn"/>
+        </div>
+      </div>
     </q-scroll-area>
   </q-drawer>
 
@@ -164,7 +168,10 @@ import PageCompte from './pages/PageCompte.vue'
 import PageSponsorings from './pages/PageSponserings.vue'
 import PageChats from './pages/PageChats.vue'
 
-import FiltreChats from './components/FiltreChats.vue'
+import FiltreNom from './components/FiltreNom.vue'
+import FiltreTxt from './components/FiltreTxt.vue'
+import FiltreMc from './components/FiltreMc.vue'
+import FiltreNbj from './components/FiltreNbj.vue'
 
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
@@ -180,7 +187,7 @@ export default {
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    FiltreChats,
+    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj,
     DialogueErreur, DialogueHelp, InfoBlocage, 
     PanelContacts, PanelCompta
    },
@@ -205,6 +212,8 @@ export default {
   }},
 
   methods: {
+    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+
     ouvrFiltre () { this.ui.menu = true },
     fermFiltre () { this.ui.menu = false },
 
@@ -232,7 +241,6 @@ export default {
 
     const config = stores.config
     config.$q = $q
-
 
     const ui = stores.ui
     ui.etroite = $q.screen.width < ui.seuillarge

@@ -74,6 +74,7 @@ export default {
   RBL3: 'Organisation',
   RBL4: 'Autre',
 
+  items: 'Aucun item | Un item | {count} items',
   comptes: 'Pas de compte | Un compte | {count} comptes',
   parrains: 'Pas de parrain | Un parrain | {count} parrains',
 
@@ -465,6 +466,13 @@ export default {
   MLAt2c: 'Contacts',
   MLAt2g: 'Groupes',
   MLAfiltre: 'Ouvrir les paramètres du filtre',
+  MLArech: 'Recherche ...',
+
+  FInom: 'Début du nom du contact',
+  FItxt: 'Texte cherché dans les chats',
+  FImcp: 'Ayant les mots-clés ...',
+  FImcn: 'Mais N\'ayant PAS les mots clés ...',
+  FIjours: 'Modifiés dans les N jours',
 
   ACav: 'Relativement à l\'avatar "{0}"',
   ACgr: 'Relativement au groupe "{0}"',
@@ -494,6 +502,7 @@ export default {
 
   CHtxt: 'Texte du chat',
   CHnch: 'Aucun chat ouvert',
+  CHnch2: 'Aucun chat sur {0} ne répond au critère de recherche',
 
   SYtit: 'Chargement et synchronisation des données du compte',
   SYcpt: 'Compte et comptabilité',

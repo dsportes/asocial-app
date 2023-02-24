@@ -6,7 +6,7 @@
         <div v-else class="font-mono fs-md">{{dhcool(chat.dh)}}</div>
       </div>
       <apercu-people class="bordb" :id="chat.naE.id" :idx="idx"/>
-      <apercu-motscles :groupe-id="0" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
+      <apercu-motscles @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
         :mapmc="mapmc" :edit="session.auts(3, true)" :src="chat.mc || u0"/>
       <div v-if="!chat.z" class="row items-start">
         <show-html class="col q-mr-sm bord" :idx="idx" zoom maxh="3rem" :texte="chat.txt"/>

@@ -40,8 +40,7 @@ export const useUiStore = defineStore('ui', {
     ardoiseTNaTribu: null,
 
     comptaObj: null,
-    panelCompta: false,
-
+    panelCompta: false
   }),
 
   getters: {

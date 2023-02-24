@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
-import { u8ToB64, intToB64, rnd6 } from '../app/util.mjs'
+import { u8ToB64, intToB64, rnd6, $t } from '../app/util.mjs'
 import { DateJour, IDCOMPTABLE } from '../app/api.mjs'
 
 export const useSessionStore = defineStore('session', {
@@ -164,12 +164,13 @@ export const useSessionStore = defineStore('session', {
       if ((cnx && this.avion) || this.blocage >= nmb) { // action interdite : explication(s)
         return new Promise((resolve) => {
           const av = this.avion
+          const b = this.blocage
           stores.config.$q.dialog({
             dark: true,
             html: true,
-            title: $t('UTI' + av ? 'ac2' : 'ac1'),
+            title: $t('UTI' + (av ? 'ac2' : 'ac1')),
             message: (av ? $t('UTImsi') : '') +
-              (this.blocage ? '<br><span class="titre-lg text-warning text-bold">' + $t('IB' + b) + '</span>' : ''),
+              (b ? '<br><span class="titre-lg text-warning text-bold">' + $t('IB' + b) + '</span>' : ''),
             cancel: !this.blocage ? null : { label: $t('UTIesp'), color: 'primary' },
             ok: { color: 'warning', label: $t('jailu') }
           }).onOk(async () => {
