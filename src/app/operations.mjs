@@ -5,7 +5,7 @@ import { AppExc, appexc } from './api.mjs'
 import { $t } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { NomAvatar, Avatar, Compta, getNg, getCle, compile} from './modele.mjs'
+import { NomAvatar, Avatar, Compta, Chat, getNg, getCle, compile} from './modele.mjs'
 import { genKeyPair, decrypter } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
@@ -261,7 +261,8 @@ export class ChercherSponsoring extends OperationUI {
 args.token: éléments d'authentification du compte.
 args.idI : id (côté compte)
 args.idE : id (côté de l'autre)
-args.ids : id du chat
+args.idsI : ids du chat
+args.idsE : ids du chat
 args.contI : contenu crypté côté compte
 args.contE : contenu crypté côté autre
 Retour:
@@ -276,7 +277,8 @@ export class MajTexteChat extends OperationUI {
       const args = { token: session.authToken }
       args.idI = chat.naI.id
       args.idE = chat.naE.id
-      args.ids = chat.ids
+      args.idsI = Chat.getIds(chat.naI, chat.naE)
+      args.idsE = Chat.getIds(chat.naE, chat.naI)
       
       const cI = { na: [chat.naE.nom, chat.naE.rnd], dh: dh, txt: txt }
       args.contI = await crypter(chat.naI.rnd, new Uint8Array(encode(cI)))

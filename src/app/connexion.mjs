@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
-import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
+import { $t, getTrigramme, setTrigramme, afficherDiag, sleep, hash } from './util.mjs'
 import { post } from './net.mjs'
 import { DateJour } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, Chat, NomAvatar, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
@@ -414,12 +414,17 @@ export class ConnexionCompte extends OperationUI {
     if (ret.credentials) session.fscredentials = ret.credentials
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
-    this.rowTribu = ret.rowTribu
     session.compteId = this.rowAvatar.id
     if (session.estComptable) session.mode = 2
     session.setAvatarCourant(session.compteId)
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
+
+    {
+      const args = { token: session.authToken, id: this.compta.idt }
+      const ret = this.tr(await post(this, 'GetTribu', args))
+      this.rowTribu = ret.rowTribu
+    }
     this.tribu = await compile(this.rowTribu)
     session.tribuId = this.tribu.id
     if (session.fsSync) await session.fsSync.setTribu(session.tribuId)
@@ -643,11 +648,16 @@ export class ConnexionCompte extends OperationUI {
 
 /******************************************************************
 Acceptation d'un sponsoring
-X_SRV, '03-Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète'
-X_SRV, '04-Une phrase secrète semblable est déjà utilisée. Changer a minima la première ligne de la phrase secrète pour ce nouveau compte'
-X_SRV, '18-Réserves de volume insuffisantes du parrain pour les forfaits attribués compte'
-A_SRV, '17-Avatar parrain : données de comptabilité absentes'
-A_SRV, '24-Couple non trouvé'
+args...
+token: authToken,
+rowCompta, rowAvatar, rowVersion: du compte / avatar en création
+idt: id de sa tribu
+ids: ids du sponsoring
+rowChatI: chatI (interne) pour le compte en création
+rowChatE: chatE (externe) pour le sponsor - version à fixer
+ardx: ardoise du sponsoring à mettre à jour (avec statut 2 accepté)
+mbtrid : id de son élément mbtr (hash de la clé `rnd` du membre)
+mbtre: élément de la map mbtr de sa tribu
 */
 
 export class AcceptationSponsoring extends OperationUI {
@@ -696,16 +706,18 @@ export class AcceptationSponsoring extends OperationUI {
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
-      /* Element de msps d'id du nouveau compte, si le compte est sponsor
+      /* Element de mbtr du nouveau compte
+      - _clé_ : (hash de la clé `rnd` du membre)
       - _valeur_ :
       - `na` : `[nom, rnd]` du sponsor crypté par la clé de la tribu.
+      - 'sp' : true si sponsor
       - `cv` : `{v, photo, info}` carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
       */
-      let mspse = null
-      if (sp.sp) {
-        const na = await crypter(sp.nct.rnd, new Uint8Array(encode([sp.naf.nom, sp.naf.rnd])))
-        mspse = new Uint8Array(encode({ na }))
-      }
+      const mbtrid = hash(sp.naf.rnd)
+      const na = await crypter(sp.nct.rnd, new Uint8Array(encode([sp.naf.nom, sp.naf.rnd])))
+      const x = { na }
+      if (sp.sp) x.sp = true
+      const mbtre = new Uint8Array(encode(x))
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
       const dh = new Date().getTime()
@@ -713,7 +725,7 @@ export class AcceptationSponsoring extends OperationUI {
       const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, dh, txt) 
 
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
-        rowChatI, rowChatE, ardx, mspse, abPlus: [sp.nct.id, sp.naf.id] }
+        rowChatI, rowChatE, ardx, idt: session.tribuId, mbtrid, mbtre, abPlus: [sp.nct.id, sp.naf.id] }
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
       if (ret.credentials) session.fscredentials = ret.credentials
@@ -788,16 +800,10 @@ export class RefusSponsoring extends OperationUI {
 }
 
 /* Création du compte Comptable******************************************
-On poste :
-- les rows Compte, Compta, Prefs, v et dds à 0
-- les clés publiques du compte et de l'avatar pour la table avrsa
-- le row Avatar, v à 0
-Retour:
-- dh, sessionId
-- rowItems retournés : compte compta prefs avatar
-X_SRV, '02-Cette phrase secrète n\'est pas reconnue comme étant l\'une des comptables de l\'organisation')
-X_SRV, '03-Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète'
-X_SRV, '04-Une phrase secrète semblable est déjà utilisée. Changer a minima la première ligne de la phrase secrète pour ce nouveau compte'
+args.token donne les éléments d'authentification du compte.
+args.pcbh : hash de la cle X (hash du PBKFD de la phrase complète)
+args.rowAvatar, rowTribu, rowCompta du compte du comptable
+args.rowVersion: version de l'avatar (avec sa dlv) 
 */
 export class CreationCompteComptable extends OperationUI {
   constructor () { super($t('OPccc')) }
@@ -820,9 +826,9 @@ export class CreationCompteComptable extends OperationUI {
       session.tribuId = nt.id
       session.setAvatarCourant(session.compteId)
 
-      const rowCompta = await Compta.row (na, nt, ac[0], ac[1], true) // set de session.clek
-      const rowTribu = await Tribu.primitiveRow (nt, na, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])
-      const rowAvatar = await Avatar.primaireRow (na)
+      const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true) // set de session.clek
+      const rowTribu = await Tribu.primitiveRow(nt, na, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])
+      const rowAvatar = await Avatar.primaireRow(na)
       const r = {
         id: na.id,
         v: 1,

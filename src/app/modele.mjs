@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, dlvDepassee, titre, gzip, ungzip, ungzipT, egaliteU8, tru8, splitPK } from './util.mjs'
-import { random, pbkfd, sha256, crypterRSA, decrypterRSA, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
+import { random, pbkfd, sha256, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
 
 import { IDCOMPTABLE, RNDCOMPTABLE, Compteurs, UNITEV1, UNITEV2, DateJour } from './api.mjs'
 
@@ -476,20 +476,19 @@ export async function compile (row) {
 /** Tribu *********************************
 - `id` : numéro de la tribu
 - `v` : sa version
-- `dh` : date-heure dernière modification.
-- `dhb` : =dh quand la tribu est bloquée
+- `dh` : date-heure dernière modification du blocage (si bloquée).
+- `dhb` : = dh quand la tribu est bloquée
 
-- `ntk` : `[nom, rnd]` de la tribu crypté par la clé K du comptable.
+- `nctkc` : `[nom, rnd]` de la tribu crypté par la clé K du comptable.
 - `infok` : commentaire privé du comptable crypté par la clé K du comptable.
-- `nbc` : nombre de comptes actifs dans la tribu.
 - `a1 a2` : sommes des volumes V1 et V2 déjà attribués comme forfaits aux comptes de la tribu.
 - `r1 r2` : volumes V1 et V2 en réserve pour attribution aux comptes actuels et futurs de la tribu.
-- `msps` : map des sponsors:
-  - _clé_ : `id` du sponsor.
+- `mbtr` : map des membres de la tribu:
+  - _clé_ : id pseudo aléatoire, hash de la clé `rnd` du membre.
   - _valeur_ :
-    - `na` : `[nom, rnd]` du sponsor crypté par la clé de la tribu.
-    - `cv` : `{v, photo, info}` carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
-  - l'ajout d'un parrain ne se fait que par le comptable mais un retrait peut s'effectuer aussi par un traitement de GC.
+    - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
+    - `sp` : si `true` / présent, c'est un sponsor.
+    - `cv` : `{v, photo, info}`, uniquement pour un sponsor, sa carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
 - `blocaget` : cryptée par la clé de la tribu : ("blocage" quand compilé)
   - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
   - `c`: 1 si positionné par le comptable (dans une tribu toujours 1)
@@ -514,20 +513,20 @@ export class Tribu extends GenDoc {
     this.v = row.v
 
     if (session.estComptable) {
-      this.nt = await decrypter(session.clek, row.ntk)
+      // Le comptable peut décoder n'importe quelle tribu
+      const [nom, rnd] = decode(await decrypter(session.clek, row.nctkc))
+      const na = new NomTribu(nom, rnd)
+      setNg(na)
       this.info = row.infok ? await decrypter(session.clek, row.infok) : ''
-    } else {
-      this.ntk = row.ntk
     }
-    this.nbc = row.nbc
     this.a1 = row.a1
     this.a2 = row.a2
     this.r1 = row.r1
     this.r2 = row.r2
 
-    this.msps = row.msps || {}
-    for (const id in this.msps) {
-      const e = decode(this.msps[id])
+    this.mbtr = row.mbtr || {}
+    for (const x in this.mbtr) {
+      const e = decode(this.mbtr[x])
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       e.na = new NomAvatar(nom, cle)
       setNg(e.na)
@@ -538,26 +537,42 @@ export class Tribu extends GenDoc {
       const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
       this.blocage.stn = niv
       this.blocage.ljc = ljc
-      this.dhb = this.dh
     }
   }
 
   get naSponsors () { // array des na des sponsors
     const r = []
-    for (const id in this.msps) r.push(this.msps[id].na)
+    for (const x in this.mbtr) {
+      const e = this.mbtr[x]
+      if (e.sp) r.push(e.na)
+    }
+    return r
+  }
+
+  get naMembres () { // array des na des membres
+    const r = []
+    for (const x in this.mbtr) r.push(this.mbtr[id].na)
     return r
   }
 
   get idSponsors () { // array des id des sponsors
     const r = []
-    for (const id in this.msps) r.push(this.msps[id].na.id)
+    for (const x in this.mbtr) {
+      const e = this.mbtr[x]
+      if (e.sp) r.push(e.na.id)
+    }
     return r
   }
 
   // retourne la CV du sponsor d'id donné
   cvSponsor (id) {
-    const x = this.msps[id]
-    return x ? x.cv : null
+    for (const x in this.mbtr) {
+      const e = this.mbtr[x]
+      if (e.na.id === id) {
+        return e.cv ? e.cv : null
+      }
+    }
+    return null
   }
 
   static async primitiveRow (nt, a1, a2, r1, r2) {
@@ -568,62 +583,15 @@ export class Tribu extends GenDoc {
     r.iv = GenDoc._iv(r.id, r.v)
     r.dh = 0
     r.dhb = 0
-    r.nbc = 1
     r.a1 = a1
     r.a2 = a2
     r.r1 = r1
     r.r2 = r2
-    r.ntk = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
+    r.mbtr = {}
+    r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, dh: r.dh, dhb: r.rhb, _data_ }
   }
-
-  nouvelle (nom, info, r1, r2) { // A REVISER
-    this.vsh = 0
-    this.na = new NomTribu(nom)
-    this.id = this.na.id
-    this.v = 0
-    this.info = info
-    this.nbc = 0
-    this.a1 = 0
-    this.a2 = 0
-    this.r1 = r1
-    this.r2 = r2
-    this.mncp = {}
-    this.blocage = null
-    return this
-  }
-
-  /*
-  async toRow () {
-    const r = { ...this }
-    r.infok = await this.getDatak(this.info)
-    r.mncpt = null
-    r.datat = !this.blocage ? null : await crypter(this.clet, serial(this.blocage))
-    return serialize('rowtribu', r)
-  }
-
-  async getDatak (info) {
-    const x = [[this.na.nom, this.na.rnd], info || '']
-    return await crypter(stores.session.clek, serial(x))
-  }
-
-  async getmncpt () {
-    const mncpt = {}
-    for (const chkt of this.mncp) {
-      mncpt[chkt] = await crypter(this.clet, this.mncp[chkt])
-    }
-    return mncpt
-  }
-
-  static getChktDeId (idc, nat) {
-    return hash(idToSid(idc) + '@' + nat.sid)
-  }
-
-  getChktDeId (id) {
-    return hash(idToSid(id) + '@' + this.na.sid)
-  }
-  */
 }
 
 /** Avatar *********************************************************
@@ -808,20 +776,18 @@ export class Cv extends GenDoc {
 
 /** Compta **********************************************************************
 - `id` : numéro du compte
-- `idt` : id de la tribu
 - `v` : version
-- `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte.
-- `shay` : SHA du SHA de X (PBKFD de la phrase secrète).
+- `dhb` : date-heure `dh` du blocage quand elle est non nulle (qu'il y a un blocage).
+- `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte : sert d'accès au row compta à la connexion au compte.
+- `shay` : SHA du SHA de X (PBKFD de la phrase secrète). Permet de vérifier la détention de la phrase secrète complète.
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
 - `stp` : statut parrain (0: non, 1:oui).
-- `mavk` : map des avatars du compte cryptée par sa clé K. 
+- `mavk` : map des avatars du compte cryptée par la clé K du compte. 
   - _clé_ : id de l'avatar.
   - _valeur_ : `[nom clé]` : son nom complet.
-- `nct` : `[nom, clé]` de la tribu crypté,
-  - soit par la clé CV de l'avatar principal (figure dans `mavk`),
-  - soit pour le Comptable par sa clé K (sa clé CV étant une constante publique).
-- `nat`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
-  (un sponsor de la tribu peut ainsi lister les membres de la tribu)
+- `nctk` : `[nom, clé]` de la tribu crypté par la clé K du compte.
+- `nctkc` : `[nom, clé]` de la tribu crypté par la clé K **du Comptable**: 
+- `napt`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
 - `compteurs`: compteurs sérialisés (non cryptés).
 - `blocaget` : blocage du compte (cf `blocaget` de tribu).
 */
@@ -829,7 +795,7 @@ export class Cv extends GenDoc {
 export class Compta extends GenDoc {
   get estParrain () { return this.stp === 1 }
   get stn () { return this.blocage ? this.blocage.stn : 0 }
-  get clet () { return getCle(this.idt) }
+  get clet () { return this.nat.rnd }
 
   get avatarIds () { return new Set(this.mav.keys()) } // retourne (ou accumule dans s), le set des ids des avatars du compte
 
@@ -843,7 +809,7 @@ export class Compta extends GenDoc {
   }
 
   // na d'un des avatars du compte
-  naAvatar (id) { return this.mav.get(id) || null}
+  naAvatar (id) { return id === this.id ? this.nap : this.mav.get(id) || null}
 
   estAc (id) { return this.mav.get(id) !== null }
 
@@ -855,8 +821,15 @@ export class Compta extends GenDoc {
 
     this.vsh = row.vsh || 0
     this.id = row.id
-    this.idt = row.idt
     this.v = row.v
+
+    const [nomt, rndt] = decode(await decrypter(session.clek, row.nctk))
+    this.nct = new NomTribu(nomt, rndt)
+    this.idt = this.nct.id
+    setNg(this.idt, this.nct)
+    const [nomp, rndp] = decode(await decrypter(rndt, row.napt))
+    this.nap = new NomAvatar(nomp, rndp)
+    setNg(this.id, this.nap)
 
     this.hps1 = row.hps1
     this.shay = row.shay
@@ -873,26 +846,20 @@ export class Compta extends GenDoc {
       if (na.estAvatarP) this.naprim = na
     }
     
-    /* `nct` : `[nom, clé]` de la tribu crypté,
-      - soit par la clé CV de l'avatar principal (figure dans `mavk`),
-      - soit pour le Comptable par sa clé K (sa clé CV étant une constante publique).
-    */
-    const cx = session.estComptable ? session.clek : this.naprim.rnd
-    const [nom, cle] = decode(await decrypter(cx, row.nct))
-    this.nct = new NomTribu(nom, cle)
-    setNg(this.nct)
-
     this.compteurs = new Compteurs(row.compteurs)
     this.blocage = !row.blocaget ? null : decode(await decrypter(this.clet, row.blocaget))
     if (this.blocage) {
       const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
       this.blocage.stn = niv
       this.blocage.ljc = ljc
-      this.idtb = this.idt
     }
   }
 
-  static async row (na, nt, q1, q2, estParrain) { // création d'une compta
+  static async row (na, nt, nctkc, q1, q2, estParrain) { 
+    /* création d'une compta
+    Pour le comptable le paramètre nctkc est null (il est calculé). 
+    Pour les autres, c'est le nctkc pris dans la tribu exi
+    */
     const session = stores.session
     const r = {}
     r.id = na.id
@@ -900,6 +867,8 @@ export class Compta extends GenDoc {
     r.iv = GenDoc._iv(r.id, r.v)
     r.vcv = 0
     r.ivc = GenDoc._iv(r.id, r.vcv)
+    r.dh = 0
+    r.dhb = 0
     r.vsh = 0
 
     const k = random(32)
@@ -909,11 +878,9 @@ export class Compta extends GenDoc {
     r.hps1 = session.phrase.dpbh
     r.shay = session.phrase.shay
 
-    const cx = na.estComptable ? session.clek : na.rnd
-    r.nct = await crypter(cx, new Uint8Array(encode([nt.nom, nt.rnd])))
-    r.idt = nt.id
-    r.idtb = 0
-    r.nat = await crypter(nt.rnd, new Uint8Array(encode([na.nom, na.rnd])))
+    r.nctk = await crypter(k, new Uint8Array(encode([nt.nom, nt.rnd])))
+    r.nctkc = nctkc || r.nctk
+    r.napt = await crypter(nt.rnd, new Uint8Array(encode([na.nom, na.rnd])))
 
     const m = { }
     m[na.id] = [na.nom, na.rnd]
@@ -925,7 +892,7 @@ export class Compta extends GenDoc {
     r.compteurs = c.serial
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'comptas', 
-      id: r.id, v: r.v, iv: r.iv, idt: r.idt, idtb: r.idtb, hps1: r.hps1, _data_ }
+      id: r.id, v: r.v, iv: r.iv, dhb: r.dhb, hps1: r.hps1, _data_ }
   }
 
 }
@@ -1055,7 +1022,9 @@ Un chat est une ardoise commune à deux avatars A et B:
 
 _data_:
 - `id`
-- `ids` : identifiant du chat relativement à son avatar, hash de la concaténation des deux ids de A et B.
+- `ids` : identifiant du chat relativement à son avatar,
+    Pour A, hash du cryptage de `idA/idB` par le `rnd` de A.
+    Pour B, hash du cryptage de `idB/idA` par le `rnd` de B.
 - `v`
 - `dlv` : la dlv permet au GC de purger les chats. Dès qu'il y a une dlv, le chat est considéré comme inexistant autant en session que pour le serveur.
 
@@ -1094,10 +1063,7 @@ export class Chat extends GenDoc {
   }
 
   static getIds (naI, naE) {{
-    const id0 = naI.id
-    const id1 = naE.id
-    const k = id0 < id1 ? id0 + '/' + id1 : id1 + '/' + id0
-    return hash(k)
+    return hash(crypter(naI.rnd, naI.id + '/' + naE.id))
   }}
 
   static async nouveauRow (naI, naE, dh, txt) {
