@@ -501,7 +501,7 @@ export async function compile (row) {
 export class Tribu extends GenDoc {
   get na () { return getNg(this.id) }
   get nom () { return this.na.nom }
-  get clet () { return this.na.rnd }
+  get clet () { return getCle(this.id) }
   get stn () { return this.blocage ? this.blocage.stn : 0 }
   get ist () { return !this.nbc ? 4 : this.stn } // "index" du statut de blocage
 
@@ -519,6 +519,7 @@ export class Tribu extends GenDoc {
       setNg(na)
       this.info = row.infok ? await decrypter(session.clek, row.infok) : ''
     }
+    this.nctkc = row.nctkc
     this.a1 = row.a1
     this.a2 = row.a2
     this.r1 = row.r1
@@ -795,7 +796,7 @@ export class Cv extends GenDoc {
 export class Compta extends GenDoc {
   get estParrain () { return this.stp === 1 }
   get stn () { return this.blocage ? this.blocage.stn : 0 }
-  get clet () { return this.nat.rnd }
+  get clet () { return this.nct.rnd }
 
   get avatarIds () { return new Set(this.mav.keys()) } // retourne (ou accumule dans s), le set des ids des avatars du compte
 
@@ -826,7 +827,7 @@ export class Compta extends GenDoc {
     const [nomt, rndt] = decode(await decrypter(session.clek, row.nctk))
     this.nct = new NomTribu(nomt, rndt)
     this.idt = this.nct.id
-    setNg(this.idt, this.nct)
+    setNg(this.nct)
     const [nomp, rndp] = decode(await decrypter(rndt, row.napt))
     this.nap = new NomAvatar(nomp, rndp)
     setNg(this.id, this.nap)
@@ -960,24 +961,26 @@ export class Sponsoring extends GenDoc {
     obj.cv = x.cv
     obj.sp = x.sp
     obj.quotas = x.quotas
+    obj.nctkc = x.nctkc
     obj.na = new NomAvatar(x.na[0], x.na[1])
     obj.naf = new NomAvatar(x.naf[0], x.naf[1], 0)
     obj.nct = new NomTribu(x.nct[0], x.nct[1])
   }
 
-  static async nouveauRow (phrase, dlv, nom, nct, sp, quotas, ard) {
+  static async nouveauRow (phrase, dlv, nom, nctkc, nct, sp, quotas, ard) {
     /* 
       - 'phrase: objet phrase
       - 'dlv'
       - 'nom': nom de l'avatar du compte à créer
       - `nct` : `[nom, cle]` de la tribu.
+      - 'nctkc' : nom complet tribu crypté par la clé K du comptable
       - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
       - `quotas` : `[v1, v2]` quotas attribués par le parrain.
     */
     const session = stores.session
     const av = session.avC
     const n = new NomAvatar(nom, 0)
-    const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, quotas}
+    const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, nctkc, quotas}
     d.nct = [nct.nom, nct.rnd]
     const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))
     const ardx = await crypter(phrase.clex, ard || '')
@@ -1062,14 +1065,15 @@ export class Chat extends GenDoc {
     }
   }
 
-  static getIds (naI, naE) {{
-    return hash(crypter(naI.rnd, naI.id + '/' + naE.id))
+  static async getIds (naI, naE) {{
+    return hash(await crypter(naI.rnd, naI.id + '/' + naE.id, 1))
   }}
 
-  static async nouveauRow (naI, naE, dh, txt) {
-    const ids = Chat.getIds(naI, naE)
+  static async nouveauRow (naI, naE, dh, txt, mc) {
+    const ids = await Chat.getIds(naI, naE)
     const id = naI.id
     const r = { id, ids, v: 0, dlv: 0, iv: GenDoc._iv(naI.id, 0)}
+    if (mc) r.mc = mc
     const x = { na: [naE.nom, naE.rnd], dh: dh, txt: txt }
     r.contc = await crypter(naI.rnd, new Uint8Array(encode(x)))
     const _data_ = new Uint8Array(encode(r))

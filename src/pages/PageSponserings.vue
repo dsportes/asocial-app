@@ -64,7 +64,11 @@ export default {
   components: { BoutonHelp, NouveauSponsoring, InfoRestriction, ShowHtml },
 
   computed: {
-    sponsorings () { return Array.from(this.avStore.getSponsorings(this.avatar.id).values()) || [] }
+    sponsorings () { 
+      const r = Array.from(this.avStore.getSponsorings(this.avatar.id).values()) || []
+      r.sort((a,b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)} )
+      return r
+    }
   },
 
   data () {

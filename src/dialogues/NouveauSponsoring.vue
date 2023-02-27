@@ -192,7 +192,7 @@ export default ({
       // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) {
       const q = [this.quotas.q1, this.quotas.q2]
       const dlv = DateJour.nj() + this.limj
-      const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, this.nct, this.estParrain, q, this.mot)
+      const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, this.tribu.nctkc, this.nct, this.estParrain, q, this.mot)
       try {
         await new AjoutSponsoring().run(row)
         this.close()

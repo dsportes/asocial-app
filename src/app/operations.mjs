@@ -277,8 +277,8 @@ export class MajTexteChat extends OperationUI {
       const args = { token: session.authToken }
       args.idI = chat.naI.id
       args.idE = chat.naE.id
-      args.idsI = Chat.getIds(chat.naI, chat.naE)
-      args.idsE = Chat.getIds(chat.naE, chat.naI)
+      args.idsI = await Chat.getIds(chat.naI, chat.naE)
+      args.idsE = await Chat.getIds(chat.naE, chat.naI)
       
       const cI = { na: [chat.naE.nom, chat.naE.rnd], dh: dh, txt: txt }
       args.contI = await crypter(chat.naI.rnd, new Uint8Array(encode(cI)))

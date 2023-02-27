@@ -2,7 +2,7 @@
 <q-page class="column align-start items-center">
 
   <q-card v-if="!q666" class="q-mt-md petitelargeur fs-md column justify-center">
-    <div class="q-gutter-md row justify-center full-width">
+    <div :class="'q-mt-sm q-pb-md q-gutter-md row justify-center full-width bord' + (!session.mode ? '1' : '2')">
       <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
       <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
       <q-radio dense v-model="session.mode" :val="3" :label="$t('avion')" />
@@ -176,4 +176,9 @@ export default {
 @import '../css/app.sass'
 .q-card__section
   padding: 0 !important
+.bord1
+  border-radius: 6px
+  border: 2px solid $warning !important
+.bord2
+  border: 2px solid transparent !important
 </style>

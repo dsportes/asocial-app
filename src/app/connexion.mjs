@@ -671,6 +671,7 @@ export class AcceptationSponsoring extends OperationUI {
     - `na` : du sponsor P.
     - `cv` : du sponsor P.
     - `naf` : na attribué au filleul.
+    - 'nctkc' : nc tribu par clé K du comptable
     - `nct` : de sa tribu.
     - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
     - `quotas` : `[v1, v2]` quotas attribués par le parrain.
@@ -694,7 +695,7 @@ export class AcceptationSponsoring extends OperationUI {
       session.tribuId = sp.nct.id
       session.setAvatarCourant(session.compteId)
 
-      const rowCompta = await Compta.row(sp.naf, sp.nct, sp.quotas[0], sp.quotas[1], sp.sp) // set de session.clek
+      const rowCompta = await Compta.row(sp.naf, sp.nct, sp.nctkc, sp.quotas[0], sp.quotas[1], sp.sp) // set de session.clek
       const rowAvatar = await Avatar.primaireRow(sp.naf)
       const rowVersion = {
         id: sp.naf.id,
@@ -721,8 +722,8 @@ export class AcceptationSponsoring extends OperationUI {
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
       const dh = new Date().getTime()
-      const rowChatI = await Chat.nouveauRow(sp.naf, sp.na, dh, txt) 
-      const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, dh, txt) 
+      const rowChatI = await Chat.nouveauRow(sp.naf, sp.na, dh, txt, new Uint8Array([252])) 
+      const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, dh, txt, new Uint8Array([253])) 
 
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
         rowChatI, rowChatE, ardx, idt: session.tribuId, mbtrid, mbtre, abPlus: [sp.nct.id, sp.naf.id] }
