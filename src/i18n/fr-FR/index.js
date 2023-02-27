@@ -366,6 +366,7 @@ export default {
   OPcsp: 'Créer un nouveau sponsoring',
   OPmajtch: 'Mise à jour du texte d\'un chat',
   OPmajmcch: 'Mise à jour des mots clés d\'un chat',
+  OPreactch: 'Obtention d\'un chat',
 
   OPrdv: 'Prendre rendez-vous avec un avatar',
   OPprl: 'Prolonger une proposition (de contact, parrainage ou rendez-vous)',
@@ -473,6 +474,9 @@ export default {
   FImcp: 'Ayant les mots-clés ...',
   FImcn: 'Mais N\'ayant PAS les mots clés ...',
   FIjours: 'Modifiés dans les N jours',
+
+  CChtit: 'Chat avec un contact par sa phrase de contact',
+  CChnopc: 'Aucun contact n\'a déclaré cette phrase de contact',
 
   ACav: 'Relativement à l\'avatar "{0}"',
   ACgr: 'Relativement au groupe "{0}"',

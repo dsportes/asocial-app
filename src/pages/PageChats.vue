@@ -7,6 +7,9 @@
     <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps flat dense color="primary" 
       :label="$t('CVraf')" @click="rafCvs"/>
 
+    <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps flat dense color="primary" 
+      :label="$t('CChtit')" @click="ouvrircc"/>
+
     <div v-if="!chats.length" class="titre-lg text-italic">{{$t('CHnch')}}</div>
     <div v-if="chats.length && !fchats.length" class="titre-lg text-italic">
       {{$t('CHnch2', [chats.length])}}
@@ -18,6 +21,10 @@
       </div>
     </div>
 
+    <q-dialog v-model="cc" persistent style="height:50vh">
+      <contact-chat :close="closecc"/>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -25,6 +32,7 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuChat from '../components/ApercuChat.vue'
+import ContactChat from '../dialogues/ContactChat.vue'
 import { Motscles } from '../app/modele.mjs'
 import InfoRestriction from '../components/InfoRestriction.vue'
 import { ChargerCvs } from '../app/operations.mjs'
@@ -33,12 +41,14 @@ import { intersection, difference, $t } from '../app/util.mjs'
 export default {
   name: 'PageChats',
 
-  components: { ApercuChat, InfoRestriction },
+  components: { ApercuChat, InfoRestriction, ContactChat },
 
   computed: {
   },
 
   methods: {
+    ouvrircc () { this.cc = true },
+    closecc () { this.cc = false },
     async rafCvs () {
       const n = await new ChargerCvs().run()
       stores.ui.afficherMessage(this.$t('CVraf2', [n]), false)
@@ -47,6 +57,7 @@ export default {
 
   data () {
     return {
+      cc: false
     }
   },
 

@@ -1074,10 +1074,14 @@ export class Chat extends GenDoc {
     const id = naI.id
     const r = { id, ids, v: 0, dlv: 0, iv: GenDoc._iv(naI.id, 0)}
     if (mc) r.mc = mc
-    const x = { na: [naE.nom, naE.rnd], dh: dh, txt: txt }
-    r.contc = await crypter(naI.rnd, new Uint8Array(encode(x)))
+    r.contc = await Chat.getContc (naI, naE, dh, txt)
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'chats', id, ids, v: 0, dlv: 0, _data_}
+  }
+
+  static async getContc (naI, naE, dh, txt) {
+    const x = { na: [naE.nom, naE.rnd], dh: dh, txt: txt }
+    return await crypter(naI.rnd, new Uint8Array(encode(x)))
   }
 }
 

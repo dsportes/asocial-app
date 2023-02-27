@@ -56,7 +56,6 @@ export async function connecterCompte (phrase, razdb) {
   const session = stores.session
   await initSession(phrase)
   if (session.synchro && session.nombase && razdb) {
-    localStorage.removeItem(session.lsk)
     await deleteIDB()
   }
 
@@ -111,7 +110,6 @@ export class ConnexionCompte extends OperationUI {
         if (id === this.avatar.id) {
           mapv[id] = this.avatar.v
           this.avatarsToStore.set(id, this.avatar)
-          avRowsModifies.push(this.avatar)
         } else mapv[id] = 0 
       })
 
@@ -140,7 +138,7 @@ export class ConnexionCompte extends OperationUI {
           for (const row of ret.rowAvatars) {
             const av = await compile(row)
             this.avatarsToStore.set(row.id, av)
-            avRowsModifies.push(av)
+            avRowsModifies.push(row)
           }
         }
 
@@ -499,6 +497,7 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesIdb) {
         this.buf.putIDB(this.rowCompta)
         this.buf.putIDB(this.rowTribu)
+        this.buf.putIDB(this.rowAvatar)
         avRowsModifies.forEach(row => { this.buf.putIDB(row) })
         avToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
       }

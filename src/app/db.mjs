@@ -87,7 +87,9 @@ export async function loadVersions () {
         const r = await db.avgrversions.get('1')
         const idb = r.data ? await decrypter(session.clek, r.data) : null
         return Versions.load(idb)
-      } catch (e) {} // session vide si pas lisible sur IDB
+      } catch (e) {
+        Versions.reset()
+      } // session vide si pas lisible sur IDB
     } else return Versions.reset()
   } catch (e) {
     throw EX2(e)
@@ -390,11 +392,15 @@ export async function getColl (nom) {
   const session = stores.session
   try {
     const r = []
-    await db[nom].each(async (idb) => { 
-      const row = decode(await decrypter(session.clek, idb.data))
-      r.push(row)
+    await db[nom].each(idb => { 
+      r.push(idb.data)
     })
-    return r
+    const x = []
+    for(const data of r) {
+      const row = decode(await decrypter(session.clek, data))
+      x.push(row)
+    }
+    return x
   } catch (e) {
     throw EX2(e)
   }

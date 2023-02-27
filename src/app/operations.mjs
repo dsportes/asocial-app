@@ -5,7 +5,7 @@ import { AppExc, appexc } from './api.mjs'
 import { $t } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { NomAvatar, Avatar, Compta, Chat, getNg, getCle, compile} from './modele.mjs'
+import { NomAvatar, Avatar, Compta, Chat, getNg, setNg, getCle, compile} from './modele.mjs'
 import { genKeyPair, decrypter } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
@@ -184,9 +184,9 @@ Retour: idnapc : {id, napc}
 - id : id de l'avatar ayant ce hash de phrase de contact (0 si aucun)
 - napc : na de l'avatar ayant cette phrase de contact crypté par le PBKFD de cette phrase
 
-Retour: {id, na}
+Retour: idnapc: {id, napc}
 - id : id de l'avatar ayant ce hash de phrase de contact (0 si aucun)
-- na : na de l'avatar ayant cette phrase de contact décrypté 
+- napc : na de l'avatar ayant cette phrase de contact décrypté 
   par le PBKFD de cette phrase OU null si non décryptable
 */
 export class GetAvatarPC extends OperationUI {
@@ -280,10 +280,8 @@ export class MajTexteChat extends OperationUI {
       args.idsI = await Chat.getIds(chat.naI, chat.naE)
       args.idsE = await Chat.getIds(chat.naE, chat.naI)
       
-      const cI = { na: [chat.naE.nom, chat.naE.rnd], dh: dh, txt: txt }
-      args.contI = await crypter(chat.naI.rnd, new Uint8Array(encode(cI)))
-      const cE = { na: [chat.naI.nom, chat.naI.rnd], dh: dh, txt: txt }
-      args.contE = await crypter(chat.naE.rnd, new Uint8Array(encode(cE)))
+      args.contI = await Chat.getContc(chat.naI, chat.naE, dh, txt)
+      args.contE = await Chat.getContc(chat.naE, chat.naI, dh, txt)
       const ret = this.tr(await post(this, 'MajTexteChat', args))
       this.finOK()
       return ret
@@ -310,6 +308,84 @@ export class MajMotsclesChat extends OperationUI {
       const ret = this.tr(await post(this, 'MajMotsclesChat', args))
       this.finOK()
       return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Réactivation d'un chat *********************************
+naI, naE : na du chat
+Retour: objet chat, enregistré en store et IDB
+*/
+export class ReactivationChat extends OperationUI {
+  constructor () { super($t('OPreactch')) }
+
+  async run (naI, naE) {
+    try {
+      setNg(naI)
+      setNg(naE)
+      let chat
+      const session = stores.session
+      const avStore =  stores.avatar
+      // const dh = new Date().getTime()
+
+      const idI = naI.id
+      const idE = naE.id
+      const idsI = await Chat.getIds(naI, naE)
+      const idsE = await Chat.getIds(naE, naI)
+
+      chat = avStore.getChat(idI, idsI)
+      if (chat) {
+        this.finOK()
+        return chat
+      }
+
+      let txt
+      let dh
+      /* Lecture d'un Chat **********************
+      args.token: éléments d'authentification du compte.
+      args.id ids : id du chat
+      args.v : version détenue en session
+      Retour:
+      rowChat: chat s'il existe
+      */
+      const args = { token: session.authToken, id: idE, ids: idsE, v: 0 }
+      const ret = this.tr(await post(this, 'GetChat', args))
+      if (ret.rowChat) {
+        const chatE = await compile(ret.rowChat)
+        txt = chatE.txt
+        dh = chatE.txt
+      } else {
+        dh = new Date().getTime()
+        txt = ''
+      }
+
+      { // On écrit le chat, possiblement avec un texte vide s'il n'avait pas été trouvé
+        /* Changer le texte d'un chat ****** MajTexteChat
+        args.token: éléments d'authentification du compte.
+        args.idI : id (côté compte)
+        args.idE : id (côté de l'autre)
+        args.idsI : ids du chat
+        args.idsE : ids du chat
+        args.contI : contenu crypté côté compte
+        args.contE : contenu crypté côté autre
+        Retour:
+        rowChatI
+        */
+        const args = { token: session.authToken }
+        args.idI = idI
+        args.idE = idE
+        args.idsI = idsI
+        args.idsE = idsE  
+        args.contI = await Chat.getContc(naI, naE, dh, txt)
+        args.contE = await Chat.getContc(naE, naI, dh, txt)
+        const ret = this.tr(await post(this, 'MajTexteChat', args))
+        chat = await compile(ret.rowChatI)
+        avStore.setChat(chat)
+      }
+      this.finOK()
+      return chat
     } catch (e) {
       await this.finKO(e)
     }
