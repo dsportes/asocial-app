@@ -11,6 +11,7 @@ export const useSessionStore = defineStore('session', {
     status: 0, // 0:fermée, 1:en chargement, >=10: ouverte
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
+    dh: 0,
     authToken: '',
     phrase: null,
     dateJourConnx: null,

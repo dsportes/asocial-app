@@ -77,7 +77,7 @@ import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
-import { getJourJ, edvol, dhcool } from '../app/util.mjs'
+import { edvol, dhcool } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, DateJour } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { crypter } from '../app/webcrypto.mjs'
@@ -115,7 +115,7 @@ export default ({
     return {
       accdec: 0,
       isPwd: false,
-      jourJ: getJourJ(),
+      jourJ: DateJour.nj(),
       max: [1, 1],
       ps: null,
       apsf: false,

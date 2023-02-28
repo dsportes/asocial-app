@@ -158,12 +158,26 @@ export default {
 
     const memoed = ref(null)
 
+    const lstAv = ref([])
+
+    function setLstAv () {
+      const x = compta.lstAvatarNas
+      x.sort((a,b) => { return a.rnd[0] === 0 ? -1 : (b.rnd[0] === 0 ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
+      lstAv.value = x
+    }
+    stores.avatar.$onAction(({ name, args, after }) => {
+      after((result) => { if (name === 'setCompta') setLstAv() })
+    })
+
+    setLstAv()
+    
     return {
       ui: stores.ui,
       session,
       memoed,
       compte,
       compta,
+      lstAv,
       tribu
     }
   }

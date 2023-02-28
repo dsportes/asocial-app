@@ -28,20 +28,20 @@
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-btn>
 
-      <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" @click="ui.dialoguedrc = true">
-        <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
-      </q-btn>
-
       <q-btn v-if="session.blocage" dense
         :icon="['','notification_important', 'fullscreen_exit', 'edit_off', 'lock_outline'][session.blocage]"
         :color="['','warning','warning','negative','negative'][session.blocage]" 
         @click="infoBlocage()"/>
 
-      <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-md">
+      <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
         <span v-if="session.ok">{{session.avC.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
       </q-toolbar-title>
 
+      <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" @click="ui.dialoguedrc = true">
+        <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
+        <span class="fs-sm font-mono">{{hmsm(session.dh)}}</span>
+      </q-btn>
     </q-toolbar>
 
     <q-toolbar inset>
@@ -151,11 +151,11 @@
 
 <script>
 import { useQuasar } from 'quasar'
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 
 import stores from './stores/stores.mjs'
 
-import { $t } from './app/util.mjs'
+import { $t, hmsm } from './app/util.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -209,6 +209,7 @@ export default {
   },
 
   data () { return {
+    hmsm: hmsm
   }},
 
   methods: {

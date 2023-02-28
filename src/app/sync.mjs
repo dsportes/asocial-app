@@ -193,6 +193,7 @@ export class OperationWS extends Operation {
 
     const chg = session.setBlocage()
     if (chg > 1) await this.alerteBlocage (chg)
+    if (session.dh < this.dh) session.dh = this.dh
   }
 
   /* On vient de positionner le blocage : const chg = session.setBlocage()

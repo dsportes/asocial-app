@@ -17,8 +17,7 @@ export class Operation {
 
   tr (ret) {
     if (!this.dh) this.dh = 0
-    const t = Math.floor(ret.dh / 1000)
-    if (this.dh < t) this.dh = t
+    if (this.dh < ret.dh) this.dh = ret.dh
     return ret
   }
 
@@ -44,6 +43,7 @@ export class OperationUI extends Operation {
 
   finOK (res, silence) {
     const session = stores.session
+    session.dh = this.dh
     session.opencours = null
     if (!silence) stores.ui.afficherMessage($t('OPok', [this.nom]), false)
     return res

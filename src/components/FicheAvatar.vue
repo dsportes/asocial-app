@@ -129,17 +129,17 @@ export default {
     async supprPC () {
       await new ChangementPC().run(this.avatar.na)
     }
-},
+  },
 
   setup (props) {
     const avStore = stores.avatar
     const av = toRef(props, 'na')
     const avatar = ref(avStore.getAvatar(av.value.id))
-    // console.log(av.value.na.nom)
+
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setAvatar' && args[0] === av.value.id) {
-          avatar.value = avStore.getAvatar(av.value.id)
+        if (name === 'setAvatar' && args[0].id === av.value.id) {
+          avatar.value = args[0]
         }
       })
     })

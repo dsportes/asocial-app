@@ -4,6 +4,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import { useI18n } from 'vue-i18n'
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
+import { DateJour } from './api.mjs'
 
 let pako
 
@@ -58,13 +59,8 @@ export function sleep (delai) {
   return new Promise((resolve) => { setTimeout(() => resolve(), delai) })
 }
 
-const j0 = Math.floor(new Date('2020-01-01T00:00:00').getTime() / 86400000)
-export function getJourJ () {
-  return Math.floor(new Date().getTime() / 86400000) - j0
-}
-
 /* `dlv` : date limite de validité, en nombre de jours depuis le 1/1/2020. */
-export function dlvDepassee (dlv) { return dlv !== 0 && dlv < getJourJ() }
+export function dlvDepassee (dlv) { return dlv !== 0 && dlv < DateJour.nj() }
 
 export function dhstring (date) { return stores.config.dtf.format(date) }
 
@@ -98,6 +94,11 @@ export function dhcool (timems, sec) {
   }
   const t = stores.config.dtf1.format(dx)
   return sec ? t : t.substring(0, t.length - 3)
+}
+
+export function hmsm (t, milli) {
+  const m = milli ? '.' + ('' + (t % 1000)).padStart(3, '0') : ''
+  return stores.config.dtf2.format(new Date(t)) + m
 }
 
 /* gzip / ungzip ***************************************************/

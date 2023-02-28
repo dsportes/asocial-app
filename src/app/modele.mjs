@@ -1382,7 +1382,7 @@ export class Secret extends GenDoc {
   // TODO : gestion des voisins d'un secret
   get pkref () { return !this.ref ? '' : (idToSid(this.ref[0]) + '/' + this.ref[1]) }
   get horsLimite () { return this.st < 0 || this.st >= 99999 ? false : dlvDepassee(this.st) }
-  get nbj () { return this.st <= 0 || this.st === 99999 ? 0 : (this.st - getJourJ()) }
+  get nbj () { return this.st <= 0 || this.st === 99999 ? 0 : (this.st - DateJour.nj()) }
   get dh () { return dhcool(this.txt.d * 1000) }
 
   get idCompta () { return this.deGroupe ? this.groupe.idh : GenDoc.idCompta(this.id) }
@@ -1462,7 +1462,7 @@ export class Secret extends GenDoc {
     this.ids = rnd6()
     this.v = 0
     this.x = 0
-    this.st = 99999 // getJourJ() + cfg().limitesjour.secrettemp
+    this.st = 99999 // DateJour.nj()() + cfg().limitesjour.secrettemp
     this.xp = 0
     this.txt = { t: '', d: Math.floor(new Date().getTime() / 1000) }
     this.ref = ref || null
