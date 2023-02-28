@@ -115,6 +115,12 @@ export const useSessionStore = defineStore('session', {
       this.authToken = u8ToB64(new Uint8Array(x), true)
     },
 
+    setDh (dh) {
+      if (dh && dh > this.dh) {
+        this.dh = dh
+      }
+    },
+
     /* Calcul du blocage depuis compta et tribu
     Retourne la nature du changement:
     - 0: pas de changement

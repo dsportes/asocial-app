@@ -59,7 +59,7 @@ import ShowHtml from './ShowHtml.vue'
 import InfoTxt from './InfoTxt.vue'
 import stores from '../stores/stores.mjs'
 import { IDCOMPTABLE } from '../app/api.mjs'
-import { GetCompta, GetTribuCompte } from '../app/operations.mjs'
+import { GetCompta } from '../app/operations.mjs'
 import { afficherDiag } from '../app/util.mjs'
 import { getNg } from '../app/modele.mjs'
 
@@ -183,7 +183,7 @@ export default {
       if (idt) {
         this.estPrimaire = true
         this.aMemeTribu = c.estComptable ? false : (idt === c.nat.id)
-        const [parrain, nctk] = await new GetTribuCompte().run(id)
+        // const [parrain, nctk] = await new GetTribuCompte().run(id)
         if (c.estComptable) {
           this.naTribu = getNg(idt)
         } else {

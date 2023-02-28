@@ -181,6 +181,8 @@ import InfoBlocage from './dialogues/InfoBlocage.vue'
 import PanelContacts from './dialogues/PanelContacts.vue'
 import PanelCompta from './dialogues/PanelCompta.vue'
 
+import { crypter } from './app/webcrypto.mjs'
+
 export default {
   name: 'App',
 
@@ -243,6 +245,12 @@ export default {
     const config = stores.config
     config.$q = $q
 
+    /*
+    setTimeout(async () => {
+      try { await crypter(new Uint8Array(3), 'toto')
+      } catch(e) { console.log(e.code); console.log(e.stack) } }, 500)
+    */
+   
     const ui = stores.ui
     ui.etroite = $q.screen.width < ui.seuillarge
 

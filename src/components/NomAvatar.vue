@@ -17,7 +17,7 @@
       </template>
     </q-input>
     <div class="row justify-between items-center no-wrap">
-      <q-btn color="primary" flat :label="$t('corriger')" size="md" @click="ko" />
+      <q-btn flat dense color="primary" icon="close" :label="$t('renoncer')" @click="ko" />
       <q-btn v-if="phase < 3" color="warning" glossy :label="labelVal()" size="md" :icon-right="iconValider"
       :disable="r1(nom) !== true || r2(nom) !== true" @click="ok" />
     </div>
@@ -57,7 +57,7 @@ export default {
         if (this.verif) {
           this.phase = 2
           this.nom = ''
-          this.$emit('ok-nom', null)
+          // this.$emit('ok-nom', null)
         } else {
           this.phase = 3
           this.$emit('ok-nom', this.nom)
@@ -68,7 +68,7 @@ export default {
           this.$emit('ok-nom', this.nom)
         } else {
           this.phase = 1
-          this.$emit('ok-nom', null)
+          // this.$emit('ok-nom', null)
         }
       }
     },

@@ -715,53 +715,6 @@ export class Avatar extends GenDoc {
     const row = { _nom: 'avatars', id: r.id, v: r.v, iv: r.iv, vcv: r.vcv, ivc: r.ivc, _data_ }
     return row
   }
-
-  /* En attente *******************************************
-  async toRow () {
-    const session = stores.session
-    const r = { ...this }
-    const m = {}
-    for (const sid in this.mac) {
-      const x = this.mac[sid]
-      m[sid] = [x.na.nom, x.na.rnd, x.cpriv]
-    }
-    r.mack = await crypter(session.clek, serial(m))
-    r.kx = await crypter(session.phrase.pcb, this.k)
-    const nr = !this.nat ? null : serial([this.nat.nom, this.nat.rnd])
-    r.nctk = !this.nat ? null : (this.nctk ? this.nctk : await crypter(this.k, nr))
-    return serialize('rowcompte', r)
-  }
-
-  async nouvKx (phrase) {
-    return await crypter(phrase.pcb, this.k)
-  }
-
-  async ajoutAvatar (na, kpav) {
-    const m = {}
-    for (const sid in this.mac) {
-      const x = this.mac[sid]
-      m[sid] = [x.na.nom, x.na.rnd, x.cpriv]
-    }
-    m[na.sid] = [na.nom, na.rnd, kpav.privateKey]
-    setNg(na)
-    return await crypter(stores.session.clek, serial(m))
-  }
-
-  getChkt (nat) {
-    return hash(this.sid + '@' + nat.sid)
-  }
-
-  getChktDeId (id) {
-    return hash(intToB64(id) + '@' + this.nat.sid)
-  }
- 
-  async setTribu (nat) {
-    const session = stores.session
-    this.nat = nat
-    const nc = serial([nat.nom, nat.rnd])
-    this.nctk = nat ? await crypter(session.clek, nc) : null
-  }
-  */
 }
 
 /* Cv : n'a qu'un seul champ cva - id: de l'avatar
@@ -854,6 +807,15 @@ export class Compta extends GenDoc {
       this.blocage.stn = niv
       this.blocage.ljc = ljc
     }
+  }
+
+  async ajoutAvatarMavk (nvna) {
+    const m = {}
+    for(const na of this.mav.values()) {
+      m[na.id] = [na.nom, na.rnd]
+    }
+    m[nvna.id] = [nvna.nom, nvna.rnd]
+    return await crypter(stores.session.clek, new Uint8Array(encode(m)))
   }
 
   static async row (na, nt, nctkc, q1, q2, estParrain) { 

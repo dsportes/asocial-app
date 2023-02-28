@@ -172,7 +172,7 @@ export class OperationWS extends Operation {
 
     // Maj des stores
     if (this.compta) avStore.setCompta(this.compta)
-    if (this.tribu) avStore.setTribu(tribu)
+    if (this.tribu) avStore.setTribu(this.tribu)
 
     this.avSuppr.forEach(id => { avStore.del(id) })
     this.avMaj.forEach(e => { avStore.lotMaj(e) })
@@ -193,7 +193,7 @@ export class OperationWS extends Operation {
 
     const chg = session.setBlocage()
     if (chg > 1) await this.alerteBlocage (chg)
-    if (session.dh < this.dh) session.dh = this.dh
+    session.setDh(this.dh)
   }
 
   /* On vient de positionner le blocage : const chg = session.setBlocage()
@@ -271,6 +271,7 @@ export class OnchangeCompta extends OperationWS {
       this.init()
       const session = stores.session
       const avStore = stores.avatar
+      const grStore = stores.groupe
       this.compta = await compile(row)
       this.avCompta = avStore.compta  
       if (this.compta.v <= this.avCompta.v) return

@@ -13,6 +13,11 @@
           :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring"/>
         <bouton-help class="q-ml-sm" page="page1"/>
       </div>
+      <div> <!-- Nouvel avatar -->
+        <q-btn class="q-ml-sm" size="md" icon="add" no-caps
+          :label="$t('CPTnvav')" color="warning" dense @click="ouvrirNvav"/>
+        <bouton-help class="q-ml-sm" page="page1"/>
+      </div>
     </div>
 
     <!-- Mémo du compte -->
@@ -33,7 +38,7 @@
     </div>
 
     <!-- Avatars du compte -->
-    <div v-for="(na, idx) in compta.lstAvatarNas" :key="na.id">
+    <div v-for="(na, idx) in lstAv" :key="na.id">
       <q-separator class="q-my-sm"/>
       <div class="row items-start">
         <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
@@ -45,6 +50,15 @@
     <!-- Dialogue d'édition des mots clés du compte -->
     <q-dialog v-model="mcledit" persistent>
       <mots-cles class="full-width" :duGroupe="0" @ok="okmc" :titre="$t('CPTkwc')"/>
+    </q-dialog>
+
+    <!-- Dialogue de création d'un nouvel avatar -->
+    <q-dialog v-model="nvav" persistent>
+      <q-card class="moyennelargeur">
+        <div class="titre-lg q-my-sm">{{$t('CPTnvav2')}}</div>
+        <nom-avatar icon-valider="check" verif 
+          :label-valider="$t('valider')" @ok-nom="oknomav" />
+      </q-card>
     </q-dialog>
 
     <!-- Dialogue d'édition du mémo du compte -->
@@ -75,7 +89,7 @@
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
     <q-dialog v-model="nvpar" persistent class="moyennelargeur">
-      <nouveau-sponsoring :close="fermerSponsoring" :tribu="tribu"/>
+      <nouveau-sponsoring :close="fermerSponsoring" :tribu="session.tribu"/>
     </q-dialog>
 
   </q-page>
@@ -87,7 +101,7 @@ import { ref } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { crypter /*, decrypterStr */ } from '../app/webcrypto.mjs'
-import { ChangementPS, MemoCompte, MotsclesCompte } from '../app/operations.mjs'
+import { ChangementPS, MemoCompte, MotsclesCompte, NouvelAvatar } from '../app/operations.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
@@ -95,12 +109,14 @@ import InfoRestriction from '../components/InfoRestriction.vue'
 import MotsCles from '../components/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import FicheAvatar from '../components/FicheAvatar.vue'
+import NomAvatar from '../components/NomAvatar.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
+import { afficherDiag } from '../app/util.mjs'
 
 export default {
   name: 'PageCompte',
 
-  components: { NouveauSponsoring, BoutonHelp, FicheAvatar, PhraseSecrete, EditeurMd, ShowHtml, InfoRestriction, MotsCles },
+  components: { NomAvatar, NouveauSponsoring, BoutonHelp, FicheAvatar, PhraseSecrete, EditeurMd, ShowHtml, InfoRestriction, MotsCles },
 
   computed: {
     memo () { return this.session.compte.memo }
@@ -114,10 +130,15 @@ export default {
       mcledit: false,
       nvpar: false,
       mcedit: false,
+      nvav: false,
+      nomav: ''
     }
   },
 
   methods: {
+    async ouvrirNvav () { 
+      if (await this.session.aut(4, true)) { this.nvav = true; this.nomav = '' }
+    },
     async ouvrirchgps () { 
       if (await this.session.aut(4, true)) { this.chgps = true; this.ps = null }
     },
@@ -126,6 +147,20 @@ export default {
       await new ChangementPS().run(this.ps)
       this.ps = null
       this.chgps = false
+    },
+
+    courant (id) {
+      this.session.setAvatarCourant(id)
+    },
+
+    async oknomav (nom) {
+      if (!nom) { this.nvav = false; return }
+      if (this.compta.avatarDeNom(nom)) {
+        await afficherDiag(this.$t('CPTndc'))
+        return
+      }
+      this.nvav = false
+      await new NouvelAvatar().run(nom)
     },
 
     async memoeditAut () { if (await this.session.aut(3, true)) this.memoedit = true },
@@ -152,33 +187,35 @@ export default {
 
   setup () {
     const session = stores.session
-    const compte = session.compte
-    const compta = session.compta
-    const tribu = session.tribu
+    const avStore = stores.avatar
 
     const memoed = ref(null)
 
     const lstAv = ref([])
+    const compta = ref()
 
     function setLstAv () {
-      const x = compta.lstAvatarNas
+      const c = avStore.compta
+      const x = c.lstAvatarNas
       x.sort((a,b) => { return a.rnd[0] === 0 ? -1 : (b.rnd[0] === 0 ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
       lstAv.value = x
+      compta.value = c
     }
     stores.avatar.$onAction(({ name, args, after }) => {
-      after((result) => { if (name === 'setCompta') setLstAv() })
+      after((result) => { 
+        if (name === 'setCompta') 
+          setLstAv()
+      })
     })
 
     setLstAv()
-    
+
     return {
       ui: stores.ui,
       session,
       memoed,
-      compte,
       compta,
-      lstAv,
-      tribu
+      lstAv
     }
   }
 

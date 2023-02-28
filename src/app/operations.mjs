@@ -1,11 +1,11 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { AppExc, appexc } from './api.mjs'
+import { AppExc, appexc, DateJour } from './api.mjs'
 import { $t } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { NomAvatar, Avatar, Compta, Chat, getNg, setNg, getCle, compile} from './modele.mjs'
+import { GenDoc, NomAvatar, Avatar, Compta, Chat, getNg, setNg, getCle, compile} from './modele.mjs'
 import { genKeyPair, decrypter } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
@@ -43,7 +43,7 @@ export class OperationUI extends Operation {
 
   finOK (res, silence) {
     const session = stores.session
-    session.dh = this.dh
+    session.setDh(this.dh)
     session.opencours = null
     if (!silence) stores.ui.afficherMessage($t('OPok', [this.nom]), false)
     return res
@@ -143,7 +143,7 @@ export class ChangementPS extends OperationUI {
       const session = stores.session
       const kx = await crypter(ps.pcb, session.clek)
       const args = { token: session.authToken, hps1: ps.dpbh, pcbh: ps.pcbh, shay: ps.shay, kx }
-      await post(this, 'ChangementPS', args)
+      this.tr(await post(this, 'ChangementPS', args))
       session.chgps(ps)
       if (session.synchro) commitRows(new IDBbuffer(), true)
       this.finOK()
@@ -169,7 +169,7 @@ export class ChangementPC extends OperationUI {
       const pck = p ? await crypter(session.clek, p.phrase) : null
       const napc = p ? await crypter(p.clex, new Uint8Array(encode([na.nom, na.rnd]))) : null
       const args = { token: session.authToken, id: na.id, hpc: p ? p.phch : null, napc, pck }
-      await post(this, 'ChangementPC', args)
+      this.tr(await post(this, 'ChangementPC', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -433,6 +433,43 @@ export class ChargerCvs extends OperationUI {
   }
 }
 
+/* Nouvel avatar *********************************
+args.token: éléments d'authentification du compte.
+args.rowAvatar : row du nouvel avatar
+args.rowVersion : row de le la version de l'avatar
+args.mavk: mavk de comta incluant le nouvel avatar
+Retour:
+*/
+export class NouvelAvatar extends OperationUI {
+  constructor () { super($t('OPmajtch')) }
+
+  async run (nom) {
+    try {
+      const session = stores.session
+      const na = new NomAvatar(nom, 1)
+      const rowAvatar = await Avatar.primaireRow(na)
+
+      const rowVersion = {
+        id: na.id,
+        v: 1,
+        iv: GenDoc._iv(na.id, 1),
+        dlv: DateJour.nj() + stores.config.limitesjour.dlv
+      }
+      const _data_ = new Uint8Array(encode(rowVersion))
+      rowVersion._data_ = _data_
+      rowVersion._nom = 'versions'
+
+      const mavk = await session.compta.ajoutAvatarMavk(na)
+      const args = { token: session.authToken, rowAvatar, rowVersion, mavk }
+      const ret = this.tr(await post(this, 'NouvelAvatar', args))
+      this.finOK()
+      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 
 
 /******************************************************
@@ -455,7 +492,7 @@ export class GetCVs extends OperationUI {
 
       if (l2.length && session.accesNet) {
         const args = { sessionId: session.sessionId, v: 0, l1: [], l2 }
-        const ret = await post(this, 'm1', 'chargerCVs', args)
+        const ret = this.tr(await post(this, 'm1', 'chargerCVs', args))
         const m = await compile(ret.rowItems)
         for (const pk in m.cv) {
           const cv = m.cv[pk]
@@ -509,7 +546,7 @@ export class CreationAvatar extends OperationUI {
         const rowCompta = await compta.toRow()
 
         const args = { sessionId: session.sessionId, idc: compte.id, vcav: compte.v, clePub: kpav.publicKey, mack, rowAvatar, rowCompta, forfaits }
-        const ret = await post(this, 'm1', 'creationAvatar', args)
+        const ret = this.tr(await post(this, 'm1', 'creationAvatar', args))
         if (ret.statut === 1) {
           stores.ui.afficherMessage($t('OPiter', [n++]))
           await sleep(2000)
@@ -524,54 +561,6 @@ export class CreationAvatar extends OperationUI {
   }
 }
 
-/******************************************************
-Mise à jour d'une préférence d'un compte
-X_SRV, '06-Compte non trouvé. Ne devrait pas arriver (bug probable)'
-*/
-export class PrefCompte extends OperationUI {
-  constructor () { super($t('OPmpr')) }
-
-  async run (code, datak) {
-    const session = stores.session
-    try {
-      const args = {
-        sessionId: session.sessionId, 
-        id: session.compte.id, 
-        code: code, 
-        datak: datak
-      }
-      await post(this, 'm1', 'prefCompte', args)
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/***********************************
-Get parrain / tribu d'uncompte, pour le comptable seulement
-args:
-- sessionId
-- id : id du compte
-Retourne:
-result.parrain : 1 si parrain
-result.nctk : nom complet `[nom, rnd]` de la tribu cryptée par la clé K.
-*/
-export class GetTribuCompte extends OperationUI {
-  constructor () { super($t('OPxtn')) }
-
-  async run (id) {
-    try {
-      const args = { sessionId: stores.session.sessionId, id }
-      const ret = await post(this, 'm1', 'getTribuCompte', args)
-      this.finOK()
-      return [ret.parrain, ret.nctk]
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /******************************************************/
 export class GetCompta extends OperationUI {
   constructor () { super($t('OPxco')) }
@@ -579,7 +568,7 @@ export class GetCompta extends OperationUI {
   async run (id) {
     try {
       const args = { sessionId: stores.session.sessionId, id }
-      const ret = await post(this, 'm1', 'getCompta', args)
+      const ret = this.tr(await post(this, 'm1', 'getCompta', args))
       const r = await compileToMap(ret.rowItems)
       this.finOK()
       return r.compta[id]
@@ -599,7 +588,7 @@ export class InforesTribu extends OperationUI {
     try {
       const datak = info ? await tribu.getDatak(info) : null
       const args = { sessionId: stores.session.sessionId, idt: tribu.id, datak, reserves }
-      await post(this, 'm1', 'inforesTribu', args)
+      this.tr(await post(this, 'm1', 'inforesTribu', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -621,7 +610,7 @@ export class EnregBlocage extends OperationUI {
     try {
       const datat = bloc ? await crypter(clet, new Uint8Array(encode(bloc))) : null
       const args = { sessionId: stores.session.sessionId, id, datat }
-      await post(this, 'm1', 'enregBlocage', args)
+      this.tr(await post(this, 'm1', 'enregBlocage', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
