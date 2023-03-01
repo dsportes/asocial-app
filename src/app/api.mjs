@@ -218,7 +218,6 @@ export class Compteurs {
 
 const j0 = Math.floor(new Date('2020-01-01T00:00:00').getTime() / 86400000)
 const nbjm = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-const nbjSuppr = 365
 
 const zeroPad = (num, places) => String(num).padStart(places, '0')
 
@@ -244,8 +243,6 @@ export class DateJour {
   get nbjm () { return nbjm[this.mm] + (this.aa % 4 === 0 ? 1 : 0) }
 
   get Date () { return new Date((j0 + this.nbj) * 86400000) }
-
-  get dateSuppr () { return -(this.nbj + nbjSuppr) }
 
   // Retourne la liste des indice des 14 derniers jours (précédent le jour j)
   get lst14j () {
