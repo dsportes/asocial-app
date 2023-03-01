@@ -491,19 +491,16 @@ export async function compile (row) {
     - `cv` : `{v, photo, info}`, uniquement pour un sponsor, sa carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
 - `blocaget` : cryptée par la clé de la tribu : ("blocage" quand compilé)
   - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
-  - `c`: 1 si positionné par le comptable (dans une tribu toujours 1)
+  - `id`: id du sponsor ou du comptable gérant le blocage absent pour un blocage _tribu_ -implicite-).
   - `txt` : libellé explicatif du blocage.
   - `jib` : jour initial de la procédure de blocage
-  - `lj` : `[j12 j23 j34]` : nb de jours de passage des niveaux de 1 à 2, 2 à 3, 3 à 4.
-  - `dh` : date-heure de dernier changement du statut de blocage.
-*/
+  - `nja njl` : nb de jours passés en niveau _alerte_, et _lecture_.
+  - `dh` : date-heure de dernier changement du statut de blocage.*/
 
 export class Tribu extends GenDoc {
   get na () { return getNg(this.id) }
-  get nom () { return this.na.nom }
   get clet () { return getCle(this.id) }
   get stn () { return this.blocage ? this.blocage.stn : 0 }
-  get ist () { return !this.nbc ? 4 : this.stn } // "index" du statut de blocage
 
   async compile (row) {
     const session = stores.session

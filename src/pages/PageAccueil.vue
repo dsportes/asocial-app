@@ -53,7 +53,9 @@
         <q-badge color="teal-10" rounded floating>{{nbtct}}</q-badge>
       </q-btn>
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmatribu')" />
-      <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmacompta')" />
+      <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmacompta')"
+        @click="ui.setPage('compta')"
+      />
     </div>
     <div class="full-width q-mt-sm column q-gutter-sm">
       <q-btn class="btn3" dense no-caps color="primary" :label="$t('ACmessecrets')" />

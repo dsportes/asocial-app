@@ -97,6 +97,7 @@
       <page-sponsorings class="page" v-if="ui.page === 'sponsorings'"/>
       <page-chats class="page" v-if="ui.page === 'chats'"/>
       <page-aproposav class="page" v-if="ui.page === 'aproposav'"/>
+      <page-compta class="page" v-if="ui.page === 'compta'"/>
     </transition-group>
   </q-page-container>
 
@@ -139,14 +140,6 @@
     <info-blocage/>
   </q-dialog>
 
-  <q-dialog v-if="ui.panelContacts" v-model="ui.panelContacts" full-height position="left">
-    <panel-contacts/>
-  </q-dialog>
-
-  <q-dialog v-if="ui.panelCompta" v-model="ui.panelCompta" full-height position="right">
-    <panel-compta/>
-  </q-dialog>
-
 </q-layout>
 </template>
 
@@ -169,6 +162,7 @@ import PageCompte from './pages/PageCompte.vue'
 import PageSponsorings from './pages/PageSponserings.vue'
 import PageChats from './pages/PageChats.vue'
 import PageAproposav from './pages/PageAproposav.vue'
+import PageCompta from './pages/PageCompta.vue'
 
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
@@ -181,9 +175,8 @@ import DialogueHelp from './dialogues/DialogueHelp.vue'
 import InfoBlocage from './dialogues/InfoBlocage.vue'
 
 import PanelContacts from './dialogues/PanelContacts.vue'
-import PanelCompta from './dialogues/PanelCompta.vue'
 
-import { crypter } from './app/webcrypto.mjs'
+// import { crypter } from './app/webcrypto.mjs'
 
 export default {
   name: 'App',
@@ -191,9 +184,9 @@ export default {
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats, PageAproposav,
+    PageCompta,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj,
-    DialogueErreur, DialogueHelp, InfoBlocage, 
-    PanelContacts, PanelCompta
+    DialogueErreur, DialogueHelp, InfoBlocage
    },
 
   computed: {

@@ -68,6 +68,19 @@ export default {
   jourc5: 'Ve',
   jourc6: 'Sa',
   jourc7: 'Di',
+  mois: 'Mois',
+  mois1: 'Janvier',
+  mois2: 'Février',
+  mois3: 'Mars',
+  mois4: 'Avril',
+  mois5: 'Mai',
+  mois6: 'Juin',
+  mois7: 'Juillet',
+  mois8: 'Août',
+  mois9: 'Septembre',
+  mois10: 'Octobre',
+  mois11: 'Novembre',
+  mois12: 'Décembre',
 
   RBL1: 'Comptable',
   RBL2: 'Volume',
@@ -445,6 +458,7 @@ export default {
   Psponsorings: 'Mes sponsorings, en cours / récents',
   Pchats: 'Mes chats',
   Paproposav: 'A propos de l\'avatar courant',
+  Pcompta: 'Compteurs de comptabilité du compte',
 
   MLAcptp: '(parrain)',
   MLAtri: 'Tribu : {0}',
@@ -596,7 +610,6 @@ export default {
   PMEras: 'Rapport de Synchronisation',
   PMEcry: 'Outils de cryptographie',
 
-
   // Fiche avatar
   FAnocv: 'Pas d\'autre information',
   FAphc: 'Déclaration de la phrase de contact',
@@ -676,21 +689,23 @@ export default {
   NAe1: 'Entre 4 et 24 caractères',
   NAe2: 'Caractères interdits',
 
-  // Ardoise Tribu
-  ARDtit: 'Tribu {0} - Ardoise de {1}',
-  ARDoat: 'Ouvrir son ardoise dans sa tribu',
-  ARDafc: 'Afficher la comptabilité',
-  ARDafb: 'Afficher le blocage',
-  ARDtri: 'tribu inconnue',
-  ARDnf: 'Pas d\'action proposée pour cet avatar',
-  ARDm1: 'Aucun compte ne peut accéder à la comptabilité du comptable (qui ne peut pas être bloqué)',
-  ARDm2: 'Seul un compte parrain peut accéder à la comptabilité ou au blocage des autres comptes (de la même tribu)',
-  ARDm3: 'Cet avatar n`est pas de la même tribu. Un parrain ne peut pas accéder à la comptabilité ou au blocage d\'un compte d\'une autre tribu',
-  
-  // Fiche People
-  FPEprim: 'primaire',
-  FPEppa: 'Seul un parrain de la tribu peut ouvrir les ardoises tribu des comptes de sa tribu',
-
+  // Compteurs
+  CPTj: 'Date de calcul',
+  CPTv1: 'Volume V1 occupé actuellement',
+  CPTv1m: 'Volume V1 occupé en moyenne dans le mois courant',
+  CPTv2: 'Volume V2 occupé actuellement',
+  CPTv2m: 'Volume V2 occupé en moyenne dans le mois courant',
+  CPTtrm: 'Volume total V2 en transfert poste <-> serveur dans le mois courant',
+  CPTq1: 'Quota attribué en volume V1 (texte des secrets)',
+  CPTq2: 'Quota attribué en volume V2 (fichiers des secrets)',
+  CPTtr: 'Volume du jour V2 en transfert poste <-> serveur (14 derniers jours)',
+  CPTrtr: 'Estimation sur les 14 derniers jours du volume mensuel transféré / quota V2',
+  CPTHist: 'Historique sur les 12 derniers mois complets',
+  CPTHq1: 'q1 : Quota (au dernier jour du mois) attribué en volume V1 (texte des secrets)',
+  CPTHq2: 'q2 : Quota (au dernier jour du mois) attribué en volume V2 (fichiers des secrets)',
+  CPTHr1: 'r1 : Rapport de la moyene du volume V1 occupé dans le mois / quota du mois',
+  CPTHr2: 'r2 : Rapport de la moyene du volume V2 occupé dans le mois / quota du mois',
+  CPTHr3: 'r3 : Rapport du volume V2 transféré dans le mois / quota du mois',
 
   CVgph: 'Garder la photo initiale',
   CVcph: 'Changer la photo',

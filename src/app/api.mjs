@@ -152,6 +152,7 @@ export class Compteurs {
 
   setRtr () {
     let s = 0; this.tr.forEach(n => { s += n })
+    s = s * 30 / this.tr.length
     this.rtr = s === 0 ? 0 : (this.q2 ? mx255(s / (this.q2 * UNITEV2)) : 255)
   }
 
@@ -245,6 +246,31 @@ export class DateJour {
   get Date () { return new Date((j0 + this.nbj) * 86400000) }
 
   get dateSuppr () { return -(this.nbj + nbjSuppr) }
+
+  // Retourne la liste des indice des 14 derniers jours (précédent le jour j)
+  get lst14j () {
+    const l = new Array(14)
+    let j = this.js
+    for(let i = 0; i < 14; i++){
+      j--
+      if (j === 0) j = 7
+      l[i] = j
+    }
+    return l
+  }
+
+  // Retourne la liste des indice des 12 derniers mois (précédent le jour j)
+  get lst12m () {
+    const l = new Array(12)
+    let j = this.mm
+    for(let i = 0; i < 12; i++){
+      j--
+      if (j === 0) j = 12
+      l[i] = j
+    }
+    return l
+  }
+  
 }
 
 export const j99 = new DateJour(new Date('2099-12-31T23:59:59')).nbj // 29220 = 365 * 80 + 20 (années bisextiles)
