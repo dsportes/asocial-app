@@ -444,6 +444,7 @@ export default {
   Pcompte: 'Mon compte, ses avatars',
   Psponsorings: 'Mes sponsorings, en cours / récents',
   Pchats: 'Mes chats',
+  Paproposav: 'A propos de l\'avatar courant',
 
   MLAcptp: '(parrain)',
   MLAtri: 'Tribu : {0}',

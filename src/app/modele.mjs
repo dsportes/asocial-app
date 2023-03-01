@@ -753,8 +753,10 @@ export class Compta extends GenDoc {
 
   get avatarIds () { return new Set(this.mav.keys()) } // retourne (ou accumule dans s), le set des ids des avatars du compte
 
-  get lstAvatarNas () { // retourne l'array des na des avatars du compte
-    const a = []; for(const na of this.mav.values()) { a.push(na) }; return a
+  get lstAvatarNas () { // retourne l'array des na des avatars du compte (trié ordre alpha, primaire en tête)
+    const t = []; for(const na of this.mav.values()) { t.push(na) }
+    t.sort((a,b) => { return a.rnd[0] === 0 ? -1 : (b.rnd[0] === 0 ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
+    return t
   }
 
   avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)

@@ -38,7 +38,7 @@
     </div>
 
     <!-- Avatars du compte -->
-    <div v-for="(na, idx) in lstAv" :key="na.id">
+    <div v-for="(na, idx) in avStore.compta.lstAvatarNas" :key="na.id">
       <q-separator class="q-my-sm"/>
       <div class="row items-start">
         <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
@@ -155,7 +155,7 @@ export default {
 
     async oknomav (nom) {
       if (!nom) { this.nvav = false; return }
-      if (this.compta.avatarDeNom(nom)) {
+      if (this.avStore.compta.avatarDeNom(nom)) {
         await afficherDiag(this.$t('CPTndc'))
         return
       }
@@ -191,15 +191,10 @@ export default {
 
     const memoed = ref(null)
 
+    /*
     const lstAv = ref([])
-    const compta = ref()
-
     function setLstAv () {
-      const c = avStore.compta
-      const x = c.lstAvatarNas
-      x.sort((a,b) => { return a.rnd[0] === 0 ? -1 : (b.rnd[0] === 0 ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
-      lstAv.value = x
-      compta.value = c
+      lstAv.value = avStore.compta.lstAvatarNas
     }
     stores.avatar.$onAction(({ name, args, after }) => {
       after((result) => { 
@@ -207,15 +202,15 @@ export default {
           setLstAv()
       })
     })
-
     setLstAv()
+    */
 
     return {
       ui: stores.ui,
+      avStore,
       session,
-      memoed,
-      compta,
-      lstAv
+      memoed
+      // lstAv
     }
   }
 

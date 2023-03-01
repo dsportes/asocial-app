@@ -3,7 +3,8 @@
     <div class="q-pa-sm">
       <div class="q-my-xs titre-md text-bold text-italic">{{$t('ACav', [session.avC.na.nomc])}}</div>
       <div class="row items-center q-gutter-sm">
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACaproposav')" />
+        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACaproposav')"
+          @click="ui.setPage('aproposav')"/>
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACsecrets')">
           <q-badge color="teal-10" rounded floating>{{nbavsecs}}</q-badge>
         </q-btn>
@@ -84,16 +85,19 @@ export default {
   name: 'PageAccueil',
 
   computed: {
-    nbavsecs () { return 22 },
-    nbgrsecs () { return 15 },
-    nbmbs () { return 6 },
-    nbgrps () { return 5 },
-    nbchats () { return 2 },
-    nbspons () { return 1 },
-    nbinvits () { return 0 },
-    nbtav () { return 1 },
-    nbtgr () { return 1 },
-    nbtct () { return 1 },
+    elt () { return this.avStore.getElt(this.session.avatarId) },
+    nbavsecs () { return this.elt.secrets.size },
+    nbchats () { return this.elt.chats.size },
+    nbspons () { return this.elt.sponsorings.size },
+    nbinvits () { return this.elt.avatar.invits.size },
+    nbgrps () { return this.elt.avatar.lgr.size },
+
+    nbgrsecs () { return '?' },
+    nbmbs () { return '?' },
+
+    nbtav () { return this.avStore.compta.mav.size },
+    nbtgr () { return this.grStore.map.size },
+    nbtct () { return this.pStore.map.size },
     nbtsp () { return 1 },
     nbtiv () { return 1 }
   },
@@ -109,7 +113,10 @@ export default {
   setup () {
     return {
       ui: stores.ui,
-      session: stores.session
+      session: stores.session,
+      avStore: stores.avatar,
+      pStore: stores.people,
+      grStore: stores.groupe
     }
   }
 

@@ -552,6 +552,16 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesIdb) await loadVersions(); else Versions.reset()
       // this.versions : map. Pour chaque avatar / groupe requis, la version de sa sous-coll détenue en serveur
 
+      // Comptable seulement : chargement des tribus
+      if (session.estComptable) {
+        const args = { token: session.authToken }
+        const ret = this.tr(await post(this, 'ChargerTribus', args))
+        if (ret.rowTribus && ret.rowTribus.length) for(const row of ret.rowTribus) {
+          const tribu = await compile(row)
+          avStore.setTribuC(tribu)
+        }
+      }
+
       // Chargement depuis IDB des Maps des secrets, chats, sponsorings, membres trouvés en IDB
       this.cSecrets = session.accesIdb ? await getColl('secrets') : []
       this.cChats = session.accesIdb ? await getColl('chats') : []

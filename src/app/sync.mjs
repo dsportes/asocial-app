@@ -42,9 +42,14 @@ export class OperationWS extends Operation {
 
   /* Maj de la tribu */
   async majTribu (row, avId) {
-    const avTribu = stores.avatar.tribu
-    if (row.v <= avTribu.v) return
-    this.buf.putIDB(row)
+    if (stores.session.estComptable) {
+      const avTribu = stores.avatar.getTribu(row.id)
+      if (row.v <= avTribu.v) return
+    } else {
+      const avTribu = stores.avatar.tribu
+      if (row.v <= avTribu.v) return
+      this.buf.putIDB(row)
+    }
     this.tribu = await compile(row)
   }
 
@@ -172,7 +177,13 @@ export class OperationWS extends Operation {
 
     // Maj des stores
     if (this.compta) avStore.setCompta(this.compta)
-    if (this.tribu) avStore.setTribu(this.tribu)
+    if (this.tribu) {
+      if (session.estComptable) {
+        avStore.setTribu(this.tribu)
+      } else {
+        avStore.setTribuC(this.tribu)
+      }
+    }
 
     this.avSuppr.forEach(id => { avStore.del(id) })
     this.avMaj.forEach(e => { avStore.lotMaj(e) })

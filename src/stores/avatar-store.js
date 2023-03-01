@@ -20,8 +20,9 @@ export const useAvatarStore = defineStore('avatar', {
     motscles: null, // mots clés du compte
     compteId: 0, // id de l'avatar principal du compte courant
     avatarP: null, // avatar principal du compte courant
-    comptaP: null, // compta actuelle du compte courants
-    tribuP: null // tribu actuelle du compte courants
+    comptaP: null, // compta actuelle du compte courant
+    tribuP: null, // tribu actuelle du compte courant
+    maptr: new Map() // Map des tribus, uniquement pour le Comptable
   }),
 
   getters: {
@@ -41,8 +42,29 @@ export const useAvatarStore = defineStore('avatar', {
       return m
     },
 
+    /* Array des tribus, pour le Comptable, 
+     triée par ordre alphabétique de leur nom, la Primitive en tête
+    */
+    tribus: (state) => {
+      const t = Array.from(state.maptr.values())
+      const idp = state.tribuP.id
+      t.sort((a,b) => { return (a.id === idp ? -1 : 
+        (b.id === idp ? 1: (a.na.nom < b.na.nom ? -1 : (a.na.nom === b.na.nom ? 0 : 1))) )})
+      return t
+    },
+
     // liste (array) des ids des avatars DU COMPTE enregistrés
     ids: (state) => { return Array.from(state.map.keys()) },
+
+    getTribu: (state) => { return (id) => { 
+        return state.maptr.get(id)
+      }
+    },
+
+    getElt: (state) => { return (id) => { 
+        return state.map.get(id)
+      }
+    },
 
     getAvatar: (state) => { return (id) => { 
         const e = state.map.get(id)
@@ -125,6 +147,11 @@ export const useAvatarStore = defineStore('avatar', {
           peStore.setPeopleSponsor(e.na, e.cv)
         }
       }
+    },
+
+    setTribuC (tribu) { // set d'une tribu quelconque pour le Comptable
+      if (tribu.id === this.tribuP.id) this.setTribu(tribu)
+      this.maptr.set(tribu.id, tribu)
     },
 
     setAvatar (avatar) {
