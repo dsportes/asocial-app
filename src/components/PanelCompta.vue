@@ -1,7 +1,7 @@
 <template>
   <q-card class="q-pa-sm">
 
-    <div class="titre-lg q-my-md">{{$t('CPTj')}} : {{dhcool(new Date().getTime())}}</div>
+    <div class="titre-lg q-my-md">{{$t('CPTj')}} : {{edj}}</div>
 
     <div class="row items-start">
       <div class="col-2 text-center font-mono">{{c.q1 + ' / ' + ed1(c.q1)}}</div>
@@ -39,7 +39,7 @@
 
     <div class="titre-md q-mt-md">{{$t('CPTtr')}}</div>
     <div class="q-my-sm q-ml-md">
-      <div v-for="(x, i) in lst14j" :key="i" class="row items-start">
+      <div v-for="(x, i) in lst14j()" :key="i" class="row items-start">
         <div class="col-2 text-center font-mono">{{ed(c.tr[i])}}</div>
         <div class="col-10 fs-md">{{$t('jour' + x)}}</div>
       </div>
@@ -62,7 +62,7 @@
     </div>
 
     <div class="q-my-sm q-ml-md">
-      <div v-for="(x, i) in lst12m" :key="i" class="row items-center">
+      <div v-for="(x, i) in lst12m()" :key="i" class="row items-center">
         <div class="col-2 text-center font-mono">{{c.hist[i][0]}}</div>
         <div class="col-2 text-center font-mono">{{c.hist[i][1]}}</div>
         <div class="col-1 text-center font-mono">{{c.hist[i][2]}}%</div>
@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
 
 /** Compteurs ***************************
@@ -102,8 +102,9 @@ export default ({
   components: { },
 
   computed: {
-    lst14j () { return this.c.dj.lst14j },
-    lst12m () { return this.c.dj.lst12m }
+    edj () { return AMJ.editDeAmj(this.c.j) },
+    lst14jx () { return this.c.dj.lst14j },
+    lst12mx () { return this.c.dj.lst12m }
   },
 
   data () {
@@ -115,7 +116,32 @@ export default ({
   methods: {
     ed (v) { return edvol(v) },
     ed1 (v) { return edvol(v * UNITEV1) },
-    ed2 (v) { return edvol(v * UNITEV2) }
+    ed2 (v) { return edvol(v * UNITEV2) },
+
+    // Retourne la liste des indice des 14 derniers jours (précédent le jour j)
+    lst14j () {
+      const l = new Array(14)
+      let j = AMJ.jDeAmjUtc(this.c.j)
+      for(let i = 0; i < 14; i++){
+        j--
+        if (j === 0) j = 7
+        l[i] = j
+      }
+      return l
+    },
+  
+    // Retourne la liste des indice des 12 derniers mois (précédent le jour j)
+    lst12m () {
+      const l = new Array(12)
+      let j = AMJ.mm(this.c.j)
+      for(let i = 0; i < 12; i++){
+        j--
+        if (j === 0) j = 12
+        l[i] = j
+      }
+      return l
+    }
+
   },
 
   setup () {

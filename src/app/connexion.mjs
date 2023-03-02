@@ -5,7 +5,7 @@ import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, getTrigramme, setTrigramme, afficherDiag, sleep, hash } from './util.mjs'
 import { post } from './net.mjs'
-import { DateJour } from './api.mjs'
+import { AMJ } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, Chat, NomAvatar, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
@@ -264,7 +264,7 @@ export class ConnexionCompte extends OperationUI {
       }
     }
     const avgrStore = estGr ? stores.groupe : stores.avatar
-    const auj = new DateJour().nbj
+    const auj = AMJ.amjUtc()
     for (const ids in rows) {
       const secret = await compile(rows[ids])
       if (session.accesNet && secret.st < auj) { // secret temporaire à supprimer
@@ -479,7 +479,7 @@ export class ConnexionCompte extends OperationUI {
       const session = stores.session
       const avStore = stores.avatar
 
-      this.auj = DateJour.nj()
+      this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
       this.dh = 0
 
@@ -693,7 +693,7 @@ export class AcceptationSponsoring extends OperationUI {
       const session = stores.session
       const config = stores.config
       await initSession(ps)
-      this.auj = DateJour.nj()
+      this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
       this.dh = 0
 
@@ -843,7 +843,7 @@ export class CreationCompteComptable extends OperationUI {
         id: na.id,
         v: 1,
         iv: GenDoc._iv(na.id, 1),
-        dlv: DateJour.nj() + config.limitesjour.dlv
+        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), config.limitesjour.dlv)
       }
       const _data_ = new Uint8Array(encode(r))
       r._data_ = _data_

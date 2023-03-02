@@ -78,7 +78,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
-import { UNITEV1, UNITEV2, DateJour } from '../app/api.mjs'
+import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { crypter } from '../app/webcrypto.mjs'
 
@@ -115,7 +115,7 @@ export default ({
     return {
       accdec: 0,
       isPwd: false,
-      jourJ: DateJour.nj(),
+      jourJ: AMJ.amjUtc(),
       max: [1, 1],
       ps: null,
       apsf: false,
@@ -126,7 +126,7 @@ export default ({
   },
 
   methods: {
-    dlved (sp) { return new DateJour(sp.dlv).aaaammjj },
+    dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },

@@ -9,8 +9,7 @@
   </q-header>
 
   <q-page-container>
-
-    <q-card-section>
+    <q-page>
       <q-stepper v-model="step" vertical color="primary" animated>
         <q-step :name="1" :title="$t('NPphr')" icon="settings" :done="step > 1">
           <span class="fs-sm q-py-sm">{{$t('NPnpc')}}</span>
@@ -34,7 +33,7 @@
           <nom-avatar class="q-ma-xs" v-on:ok-nom="oknom" verif icon-valider="check" label-valider="Suivant"></nom-avatar>
           </div>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 2" color="primary" :label="$t('precedent')" class="q-ml-sm" />
+            <q-btn flat @click="step = 1" color="primary" :label="$t('precedent')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
 
@@ -80,7 +79,7 @@
         </q-step>
 
       </q-stepper>
-    </q-card-section>
+    </q-page>
   </q-page-container>
 </q-layout>
 </template>
@@ -92,7 +91,7 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { edvol } from '../app/util.mjs'
 import { PhraseContact, Sponsoring } from '../app/modele.mjs'
-import { UNITEV1, UNITEV2, DateJour } from '../app/api.mjs'
+import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { AjoutSponsoring } from '../app/operations.mjs'
@@ -191,7 +190,7 @@ export default ({
     async confirmer () {
       // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) {
       const q = [this.quotas.q1, this.quotas.q2]
-      const dlv = DateJour.nj() + this.limj
+      const dlv = AMJ.amjUtcPlusNbj(AMJ.amjUtc(), this.limj)
       const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, this.tribu.nctkc, this.nct, this.estParrain, q, this.mot)
       try {
         await new AjoutSponsoring().run(row)
@@ -246,6 +245,11 @@ export default ({
 </style>
 
 <style lang="sass">
+.q-toolbar
+  padding: 0 !important
+  min-height: 0 !important
+.q-btn
+  padding: 0 !important
 .q-stepper--vertical
   padding: 4px !important
 .q-stepper--bordered

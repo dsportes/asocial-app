@@ -51,7 +51,7 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { DateJour, UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { dhcool, edvol } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import InfoRestriction from '../components/InfoRestriction.vue'
@@ -84,9 +84,7 @@ export default {
 
     async nouveausp () { if (await this.session.aut(3)) this.nvsp = true },
     closesp () { this.nvsp = false },
-    dlved (sp) { 
-      return new DateJour(sp.dlv).aaaammjj
-    },
+    dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     async prolonger (sp) {},
     async annuler (sp) {}

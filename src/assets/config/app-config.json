@@ -37,8 +37,8 @@
   "motscles": { 
     "255": { "fr-FR": "Statut/Nouveau", "en-EN": "Status/New" },
     "254": { "fr-FR": "Visibilité/Liste noire", "en-EN": "Visibility/Black List" },
-    "253": { "fr-FR": "Compte/Parrain", "en-EN": "Account/Sponsor" },
-    "252": { "fr-FR": "Compte/Filleul", "en-EN": "Account/Sponsored" },
+    "253": { "fr-FR": "Compte/Sponsorisé", "en-EN": "Account/Sponsored" },
+    "252": { "fr-FR": "Compte/Sponsor", "en-EN": "Account/Sponsor" },
     "251": { "fr-FR": "Visibilité/Favori", "en-EN": "Visibility/Favorite" },
     "250": { "fr-FR": "Visibilité/Important", "en-EN": "Visibility/Important" },
     "249": { "fr-FR": "Visibilité/Obsolète", "en-EN": "Visibility/Deprecated" },

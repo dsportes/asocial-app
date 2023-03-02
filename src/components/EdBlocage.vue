@@ -60,7 +60,6 @@ import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
 import { $t, dhcool } from '../app/util.mjs'
 import { Tribu, compilNiv } from '../app/modele.mjs'
-import { DateJour } from '../app/api.mjs'
 import { EnregBlocage } from '../app/operations.mjs'
 
 export default {
@@ -81,8 +80,8 @@ export default {
   methods: {
     fermer () { if (this.close) this.close() },
     ed (nbj) {
-      const d = new DateJour(nbj)
-      return this.$t('jourc' + d.js) + ' ' + d.jjmmaaaa
+      // const d = new DateJour(nbj)
+      // return this.$t('jourc' + d.js) + ' ' + d.jjmmaaaa
     },
     editer () {
       if (!this.s.dh) this.reset(1, this.K.jconnx)
@@ -145,7 +144,7 @@ export default {
     const naCompte = toRef(props, 'naCompte')
 
     const K = {
-      jconnx: session.dateJourConnx.nbj,
+      jconnx: session.dateJourConnx,
       ljb: [],
       lrb: [],
       options: []

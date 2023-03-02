@@ -4,7 +4,7 @@ import { encode } from '@msgpack/msgpack'
 import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t } from '../app/util.mjs'
-import { DateJour, IDCOMPTABLE } from '../app/api.mjs'
+import { AMJ, IDCOMPTABLE } from '../app/api.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -14,7 +14,7 @@ export const useSessionStore = defineStore('session', {
     dh: 0,
     authToken: '',
     phrase: null,
-    dateJourConnx: null,
+    dateJourConnx: 0,
     lsk: '',
     nombase: '',
     volumeTable: '',
@@ -83,7 +83,7 @@ export const useSessionStore = defineStore('session', {
       const x = new Uint8Array(encode(token))
       this.authToken = u8ToB64(new Uint8Array(x), true)
       this.nombase = this.lsk ? localStorage.getItem(this.lsk) : ''
-      this.dateJourConnx = new DateJour()
+      this.dateJourConnx = AMJ.amjUtc()
       this.status = 1
     },
     async setNombase () { // Après avoir obtenu cle K du serveur

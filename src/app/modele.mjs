@@ -1,9 +1,9 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, dlvDepassee, titre, gzip, ungzip, ungzipT, egaliteU8, tru8, splitPK } from './util.mjs'
+import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, titre, gzip, ungzip, ungzipT, egaliteU8, tru8, splitPK } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
 
-import { IDCOMPTABLE, RNDCOMPTABLE, Compteurs, UNITEV1, UNITEV2, DateJour } from './api.mjs'
+import { IDCOMPTABLE, RNDCOMPTABLE, Compteurs, UNITEV1, UNITEV2 } from './api.mjs'
 
 import { getFichierIDB, saveSessionSync } from './db.mjs'
 
@@ -433,8 +433,8 @@ export function compilNiv (jib, lj) {
     const x = lj[n]
     if (x) { ljc.push([d, n + 1]); d += x }
   }
-  ljc.push([d, 4])
-  const nj = stores.session.dateJourConnx.nbj
+  ljc.push([d, 4]) // !!!!!!!!!!!!!!!! A REVOIR !!!!!!!!!!!!!!!!!!!!!!
+  const nj = stores.session.dateJourConnx
   for (let n = ljc.length - 1; n >= 0; n--) { if (nj >= ljc[n][0]) { niv = ljc[n][1]; break } }
   return [niv, ljc]
 }
@@ -1341,9 +1341,12 @@ export class Secret extends GenDoc {
   get groupe () { return !this.deGroupe ? null : stores.groupe.getGroupe(this.id) }
 
   // TODO : gestion des voisins d'un secret
+
+  /* `dlv` : date limite de validité, en nombre de jours depuis le 1/1/2020. */
+
   get pkref () { return !this.ref ? '' : (idToSid(this.ref[0]) + '/' + this.ref[1]) }
-  get horsLimite () { return this.st < 0 || this.st >= 99999 ? false : dlvDepassee(this.st) }
-  get nbj () { return this.st <= 0 || this.st === 99999 ? 0 : (this.st - DateJour.nj()) }
+  // get horsLimite () { return this.st < 0 || this.st >= 99999 ? false : dlvDepassee(this.st) }
+  get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
   get dh () { return dhcool(this.txt.d * 1000) }
 
   get idCompta () { return this.deGroupe ? this.groupe.idh : GenDoc.idCompta(this.id) }
@@ -1423,7 +1426,7 @@ export class Secret extends GenDoc {
     this.ids = rnd6()
     this.v = 0
     this.x = 0
-    this.st = 99999 // DateJour.nj()() + cfg().limitesjour.secrettemp
+    this.st = 99999999
     this.xp = 0
     this.txt = { t: '', d: Math.floor(new Date().getTime() / 1000) }
     this.ref = ref || null

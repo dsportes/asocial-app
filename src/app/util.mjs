@@ -59,9 +59,6 @@ export function sleep (delai) {
   return new Promise((resolve) => { setTimeout(() => resolve(), delai) })
 }
 
-/* `dlv` : date limite de validité, en nombre de jours depuis le 1/1/2020. */
-export function dlvDepassee (dlv) { return dlv !== 0 && dlv < DateJour.nj() }
-
 export function dhstring (date) { return stores.config.dtf.format(date) }
 
 let auj, hier
@@ -97,6 +94,7 @@ export function dhcool (timems, sec) {
 }
 
 export function hmsm (t, milli) {
+  if (!t) return '?'
   const m = milli ? '.' + ('' + (t % 1000)).padStart(3, '0') : ''
   return stores.config.dtf2.format(new Date(t)) + m
 }

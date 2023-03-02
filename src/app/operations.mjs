@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { AppExc, appexc, DateJour } from './api.mjs'
+import { AppExc, appexc, AMJ } from './api.mjs'
 import { $t } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
@@ -453,7 +453,7 @@ export class NouvelAvatar extends OperationUI {
         id: na.id,
         v: 1,
         iv: GenDoc._iv(na.id, 1),
-        dlv: DateJour.nj() + stores.config.limitesjour.dlv
+        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), stores.config.limitesjour.dlv)
       }
       const _data_ = new Uint8Array(encode(rowVersion))
       rowVersion._data_ = _data_

@@ -24,7 +24,7 @@
           <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" :key="idx" @click="selph(p)">{{idx}}</span>
         </div>
         <div>
-          <q-btn color="primary" flat :label="$t('PSren')" size="md" @click="ko" />
+          <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" size="md" @click="ko" />
           <q-btn color="warning" glossy :label="labelVal()" size="md" :icon-right="iconValider"
             :disable="!ligne1 || !ligne2 || ligne1.length < 16 || ligne2.length < 16" @click="ok" />
         </div>
