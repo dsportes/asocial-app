@@ -59,8 +59,6 @@ export function sleep (delai) {
   return new Promise((resolve) => { setTimeout(() => resolve(), delai) })
 }
 
-export function dhstring (date) { return stores.config.dtf.format(date) }
-
 let auj, hier
 export function aujhier () {
   const now = new Date()
@@ -78,25 +76,38 @@ export function dhcool (timems, sec) {
   const d = [dx.getFullYear(), dx.getMonth(), dx.getDate()]
   const mm = auj[0] === d[0] && auj[1] === d[1]
   if (mm && auj[2] === d[2]) {
-    const t = stores.config.dtf2.format(dx)
-    return $t('auja', [sec ? t : t.substring(0, 5)])
+    return $t('auja', [hms(dx, sec)])
   }
   if (hier[0] === d[0] && hier[1] === d[1] && hier[2] === d[2]) {
-    const t = stores.config.dtf2.format(dx)
-    return $t('hiera', [sec ? t : t.substring(0, 5)])
+    return $t('hiera', [hms(dx, sec)])
   }
   if (mm) {
-    const t = stores.config.dtf2.format(dx)
-    return $t('lea', [d[2], sec ? t : t.substring(0, 5)])
+    return $t('lea', [d[2], hms(dx, sec)])
   }
-  const t = stores.config.dtf1.format(dx)
-  return sec ? t : t.substring(0, t.length - 3)
+  return aaaammjj(dx) + ' ' + hms(dx, sec)
 }
 
-export function hmsm (t, milli) {
+export function hms (t, sec) {
   if (!t) return '?'
-  const m = milli ? '.' + ('' + (t % 1000)).padStart(3, '0') : ''
-  return stores.config.dtf2.format(new Date(t)) + m
+  const d = t instanceof Date ? t : new Date(t)
+  const hh = AMJ.zp(d.getHours())
+  const mm = ':' + AMJ.zp(d.getMinutes())
+  const ss = sec ? ':' + AMJ.zp(d.getSeconds()) : ''
+  return hh + mm + ss
+}
+
+export function aaaammjj (t) { 
+  if (!t) return '?'
+  const d = t instanceof Date ? t : new Date(t)
+  const aa = d.getFullYear()
+  const mm = '-' + AMJ.zp(d.getMonth() + 1)
+  const jj = '-' + AMJ.zp(d.getDate())
+  return aa + mm + jj
+}
+
+export function dhstring (t, sec) { 
+  const d = t instanceof Date ? t : new Date(t)
+  return aaaammjj(d) + ' ' + hms(d, sec)
 }
 
 /* gzip / ungzip ***************************************************/

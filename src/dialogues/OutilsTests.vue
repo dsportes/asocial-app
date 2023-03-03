@@ -11,12 +11,18 @@
         <q-tab name="tst" :label="$t('OTtst')" @click="tab='tst'"/>
         <q-tab name="cpt" :label="$t('OTcpt')" @click="tab='cpt'"/>
         <q-tab name="ps" :label="$t('OTps')" @click="tab='ps'"/>
+        <q-tab name="sb" :label="$t('OTsb')" @click="tab='sb'"/>
+
       </q-tabs>
     </q-toolbar>
   </q-header>
 
   <q-page-container>
     <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.build])}}</div>
+
+    <q-card-section v-if="tab === 'sb'">
+      <synthese-blocage :bl-tr="bltr" :bl-co="blco"/>
+    </q-card-section>
 
     <q-card-section v-if="tab === 'tst'">
       <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt1')" @click="testEcho"/>
@@ -127,16 +133,18 @@ import { encode, decode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import SyntheseBlocage from '../components/SyntheseBlocage.vue'
 import { EchoTexte, ErreurFonc } from '../app/connexion.mjs'
 import { dhcool, $t, html, afficherDiag, sleep, edvol, b64ToU8, u8ToB64 } from '../app/util.mjs'
 import { ping } from '../app/net.mjs'
 import { getCompte, vuIDB } from '../app/db.mjs'
 import { PingDB } from '../app/connexion.mjs'
+import { Blocage } from '../app/modele.mjs'
 
 export default ({
   name: 'OutilsTests',
 
-  components: { PhraseSecrete, BoutonHelp },
+  components: { PhraseSecrete, BoutonHelp, SyntheseBlocage },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -303,7 +311,18 @@ export default ({
 
     getBases()
 
+    let bltr = new Blocage(new Uint8Array(encode({
+      jib: 20230101, nja: 30, njl: 30
+    })))
+    
+    let blco = new Blocage(new Uint8Array(encode({
+      jib: 20230301, nja: 30, njl: 30
+    })))
+    // bltr = null
+
     return {
+      bltr,
+      blco,
       session,
       config,
       ui,

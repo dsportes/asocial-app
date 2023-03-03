@@ -36,7 +36,7 @@ import ContactChat from '../dialogues/ContactChat.vue'
 import { Motscles } from '../app/modele.mjs'
 import InfoRestriction from '../components/InfoRestriction.vue'
 import { ChargerCvs } from '../app/operations.mjs'
-import { intersection, difference, $t } from '../app/util.mjs'
+import { intersection, difference, $t, hms } from '../app/util.mjs'
 
 export default {
   name: 'PageChats',
@@ -137,7 +137,7 @@ export default {
         r.push(c)
       }
       fchats.value = r
-      msg.value = stores.config.dtf2.format(new Date()) + ' / ' + $t('items', r.length, { count: r.length })
+      msg.value = hms(new Date(), true) + ' / ' + $t('items', r.length, { count: r.length })
       setTimeout(() => {
         msg.value = ''
       }, 1000)

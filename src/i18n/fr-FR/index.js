@@ -244,6 +244,7 @@ export default {
   OTcpt: 'Comptes synchronisés',
   OTtst: 'Tests d\'accès',
   OTps: 'Phrase secrète',
+  OTsb: 'Blocage',
   OTh1: 'Hash de la ligne 1',
   OTcx: 'Clé X (PBKFD de la phrase complète)',
   OThcx: 'Hash de la clé X',
@@ -719,6 +720,22 @@ export default {
   CVedit: 'Editer la carte de visite',
   CVraf: 'Rafraîchir les cartes de visite',
   CVraf2: 'Nombre de cartes de visite rechargées : {0}',
+
+  // Synthèse Blocage
+  SBtitt: 'Procédure de blocage ouverte sur la "tribu"',
+  SBtitc: 'Procédure de blocage ouverte sur le "compte"',
+  SBtittc: 'Procédures de blocage ouvertes sur la "tribu" et le "compte"',
+  SBtr: 'Tribu',
+  SBco: 'Compte',
+  SBnj: '',
+  SBdp: 'Début de la procédure :',
+  SBal: '"Alerte" jusqu\'au :',
+  SBls: '"Lecture seule" jusqu\'au :',
+  SBbl: '"Bloquée" jusqu\'au :',
+  SBn0: 'Compte en "alerte". ',
+  SBn1: 'Compte en "lecture seulement". ',
+  SBn2: 'Compte "bloqué". ',
+  SBdisp: 'Résiliation automatique le {0} (dans {1} jours)',
 
   // Panel Comptabilité
   PCOtit: 'Comptabilité de {0}',

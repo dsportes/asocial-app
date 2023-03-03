@@ -40,7 +40,7 @@
 
       <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" @click="ui.dialoguedrc = true">
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
-        <span class="fs-sm font-mono">{{hmsm(session.dh)}}</span>
+        <span class="fs-sm font-mono">{{hms(session.dh)}}</span>
       </q-btn>
     </q-toolbar>
 
@@ -149,7 +149,7 @@ import { ref, reactive } from 'vue'
 
 import stores from './stores/stores.mjs'
 
-import { $t, hmsm } from './app/util.mjs'
+import { $t, hms } from './app/util.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -206,7 +206,7 @@ export default {
   },
 
   data () { return {
-    hmsm: hmsm
+    hms: hms
   }},
 
   methods: {

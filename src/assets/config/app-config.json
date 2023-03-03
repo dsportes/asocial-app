@@ -18,9 +18,6 @@
   "nomTribuPrimitive": "Primitive",
   "allocComptable": [32, 32, 256, 256],
   "quotas": { "0": 0, "XXS": 1, "XS": 2, "SM": 4, "MD": 8, "LG": 16, "XL": 32, "XXL": 64 },
-  "datetimeformat": { "timeZone": "Europe/Paris", "year": "numeric", "month": "2-digit", "day": "2-digit", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
-  "datetimeformat1": { "timeZone": "Europe/Paris", "year": "numeric", "month": "2-digit", "day": "2-digit", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
-  "datetimeformat2": { "timeZone": "Europe/Paris", "hour": "2-digit", "minute": "2-digit", "second": "2-digit" },
 
   "limitesjour": { "dlv": 365, "secrettemp": 60, "sponsoring" : 14, "groupenonheb": 120 },
   "lgnom": 20,
@@ -29,10 +26,10 @@
   "maxlgtextesecret": 5000,
   "rappelblocageenminutes": 2,
   "raisonsblocage": {
-    "1-Comptable": [10, 20, 30],
-    "2-Volume": [10, 0, 0],
-    "3-Organisation": [0, 20, 5],
-    "4-Autre": [0, 0, 0]
+    "1-Comptable": [10, 30],
+    "2-Volume": [10, 0],
+    "3-Organisation": [0, 20],
+    "4-Autre": [0, 0]
   },
   "motscles": { 
     "255": { "fr-FR": "Statut/Nouveau", "en-EN": "Status/New" },

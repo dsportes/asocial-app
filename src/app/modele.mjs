@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, titre, gzip, ungzip, ungzipT, egaliteU8, tru8, splitPK } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
 
-import { IDCOMPTABLE, RNDCOMPTABLE, Compteurs, UNITEV1, UNITEV2 } from './api.mjs'
+import { IDCOMPTABLE, RNDCOMPTABLE, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
 
 import { getFichierIDB, saveSessionSync } from './db.mjs'
 
@@ -25,16 +25,6 @@ export function getVoisins(id, ids) {
   stores.avatar.getVoisins(id, ids).forEach(pk => { r.push(splitPK(pk)) })
   stores.groupe.getVoisins(id, ids).forEach(pk => { r.push(splitPK(pk)) })
   return r
-}
-
-export function getCv (id) {
-  if (id % 10 < 8) {
-    const avStore = stores.avatar
-    const av = avStore.getAvatar(id)
-    return av ? av.cv : stores.people.getCv(id)
-  } else { 
-    return stores.groupe.getCv(id)
-  }
 }
 
 /* Versions (statique) ***********************************
@@ -421,22 +411,53 @@ export class MdpAdmin {
   }
 }
 
-/* Calcul du niveau d'un blocage
-ljc : [[j, n] ...] : à partir de j inclus, c'est le niveau n
-stn : niveau au jour de connexion
-*/
-export function compilNiv (jib, lj) {
-  if (!jib) return [0, []]
-  const ljc = []
-  let niv = 0, d = jib
-  for (let n = 0; n <= 2; n++) {
-    const x = lj[n]
-    if (x) { ljc.push([d, n + 1]); d += x }
+const lstfBlocage = ['stn', 'id', 'txt', 'jib', 'nja', 'njl', 'dh']
+export class Blocage {
+
+  /* Attributs: 
+  - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
+  - `id`: id du sponsor ou du comptable gérant le blocage absent pour un blocage _tribu_ -implicite-).
+  - `txt` : libellé explicatif du blocage.
+  - `jib` : jour initial de la procédure de blocage
+  - `nja njl` : nb de jours passés en niveau _alerte_, et _lecture_.
+  - `dh` : date-heure de dernier changement du statut de blocage.
+  Attributs calculés (pour le jour courant):
+  - niv : niveau actuel (0: alerte, 1:lecture, 2:bloqué)
+  - njra: nb jours restant sur le niveau alerte
+  - njrl: nb jours restant sur le niveau lecture
+  - njrb: nb jours restant à vivre bloqué
+  - dja : dernier jour en alerte
+  - djl : dernier jour en lecture
+  - djb : dernier jour en blocage (fin de vie du compte)
+  */
+  constructor (buf) {
+    const r = decode(buf)
+    for (const f of lstfBlocage) this[f] = r[f]
+    this.recalculBloc()
   }
-  ljc.push([d, 4]) // !!!!!!!!!!!!!!!! A REVOIR !!!!!!!!!!!!!!!!!!!!!!
-  const nj = stores.session.dateJourConnx
-  for (let n = ljc.length - 1; n >= 0; n--) { if (nj >= ljc[n][0]) { niv = ljc[n][1]; break } }
-  return [niv, ljc]
+
+  encode () {
+    const buf = {}
+    for (const f of lstfBlocage) buf[f] = this[f]
+    return new Uint8Array(encode(buf))
+  }
+
+  recalculBloc () {
+    try {
+    this.djb = AMJ.amjUtcPlusNbj(this.jib, stores.config.limitesjour.dlv)
+    this.dja = AMJ.amjUtcPlusNbj(this.jib, this.nja)
+    this.djl = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl)
+    const now = AMJ.amjUtc()
+    this.njrb = AMJ.diff(this.djb, now)
+    if (now > this.djl) { this.niv = 2; this.njra = 0; this.njrl = 0; return }
+    this.njrl = AMJ.diff(this.djl, now)
+    if (now > this.dja) { this.niv = 1; this.njra = 0; return }
+    this.njra = AMJ.diff(this.dja, now)
+    this.niv = 0
+    } catch (e) {
+      console.log(e)
+    }
+  }
 }
 
 /****************************************************
@@ -476,11 +497,10 @@ export async function compile (row) {
 /** Tribu *********************************
 - `id` : numéro de la tribu
 - `v` : sa version
-- `dh` : date-heure dernière modification du blocage (si bloquée).
-- `dhb` : = dh quand la tribu est bloquée
 
 - `nctkc` : `[nom, rnd]` de la tribu crypté par la clé K du comptable.
 - `infok` : commentaire privé du comptable crypté par la clé K du comptable.
+- `msgt` : message du comptable aux comptes de la tribu (crypté par la clé de la tribu).
 - `a1 a2` : sommes des volumes V1 et V2 déjà attribués comme forfaits aux comptes de la tribu.
 - `r1 r2` : volumes V1 et V2 en réserve pour attribution aux comptes actuels et futurs de la tribu.
 - `mbtr` : map des membres de la tribu:
@@ -488,6 +508,7 @@ export async function compile (row) {
   - _valeur_ :
     - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
     - `sp` : si `true` / présent, c'est un sponsor.
+    - `bl` : si `true`, le compte fait l'objet d'une procédure de blocage.
     - `cv` : `{v, photo, info}`, uniquement pour un sponsor, sa carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
 - `blocaget` : cryptée par la clé de la tribu : ("blocage" quand compilé)
   - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
@@ -516,6 +537,7 @@ export class Tribu extends GenDoc {
       setNg(na)
       this.info = row.infok ? await decrypter(session.clek, row.infok) : ''
     }
+    this.msg = row.msgt ? await decrypter(this.clet, row.msgt) : ''
     this.nctkc = row.nctkc
     this.a1 = row.a1
     this.a2 = row.a2
@@ -527,15 +549,14 @@ export class Tribu extends GenDoc {
       const e = decode(this.mbtr[x])
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       e.na = new NomAvatar(nom, cle)
+      e.bl = e.bl ? true : false
       setNg(e.na)
       e.cv = e.cv ? decode(await decrypter(e.na.rnd, e.cv)) : null
     }
-    this.blocage = !row.blocaget ? null : decode(await decrypter(this.clet, row.blocaget))
-    if (this.blocage) {
-      const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
-      this.blocage.stn = niv
-      this.blocage.ljc = ljc
-    }
+    if (row.blocaget) {
+      const b = await decrypter(this.clet, row.blocaget)
+      this.blocage = new Blocage(b)
+    } else this.blocage = null
   }
 
   get naSponsors () { // array des na des sponsors
@@ -579,8 +600,6 @@ export class Tribu extends GenDoc {
     r.id = nt.id
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
-    r.dh = 0
-    r.dhb = 0
     r.a1 = a1
     r.a2 = a2
     r.r1 = r1
@@ -588,7 +607,7 @@ export class Tribu extends GenDoc {
     r.mbtr = {}
     r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, dh: r.dh, dhb: r.rhb, _data_ }
+    return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, _data_ }
   }
 }
 
@@ -728,7 +747,6 @@ export class Cv extends GenDoc {
 /** Compta **********************************************************************
 - `id` : numéro du compte
 - `v` : version
-- `dhb` : date-heure `dh` du blocage quand elle est non nulle (qu'il y a un blocage).
 - `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte : sert d'accès au row compta à la connexion au compte.
 - `shay` : SHA du SHA de X (PBKFD de la phrase secrète). Permet de vérifier la détention de la phrase secrète complète.
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
@@ -800,12 +818,11 @@ export class Compta extends GenDoc {
     }
     
     this.compteurs = new Compteurs(row.compteurs)
-    this.blocage = !row.blocaget ? null : decode(await decrypter(this.clet, row.blocaget))
-    if (this.blocage) {
-      const [niv, ljc] = compilNiv(this.blocage.jib, this.blocage.lj)
-      this.blocage.stn = niv
-      this.blocage.ljc = ljc
-    }
+
+    if (row.blocaget) {
+      const b = await decrypter(this.clet, row.blocaget)
+      this.blocage = new Blocage(b)
+    } else this.blocage = null
   }
 
   async ajoutAvatarMavk (nvna) {
@@ -829,8 +846,6 @@ export class Compta extends GenDoc {
     r.iv = GenDoc._iv(r.id, r.v)
     r.vcv = 0
     r.ivc = GenDoc._iv(r.id, r.vcv)
-    r.dh = 0
-    r.dhb = 0
     r.vsh = 0
 
     const k = random(32)
@@ -854,7 +869,7 @@ export class Compta extends GenDoc {
     r.compteurs = c.serial
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'comptas', 
-      id: r.id, v: r.v, iv: r.iv, dhb: r.dhb, hps1: r.hps1, _data_ }
+      id: r.id, v: r.v, iv: r.iv, hps1: r.hps1, _data_ }
   }
 
 }

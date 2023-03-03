@@ -59,7 +59,7 @@ import stores from '../stores/stores.mjs'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
 import { $t, dhcool } from '../app/util.mjs'
-import { Tribu, compilNiv } from '../app/modele.mjs'
+import { Tribu } from '../app/modele.mjs'
 import { EnregBlocage } from '../app/operations.mjs'
 
 export default {
@@ -240,7 +240,7 @@ export default {
     }
 
     function compljc () {
-      const [niv, ljc] = compilNiv(s.jib, [s.jn1, s.jn2, s.jn3])
+      // const [niv, ljc] = compilNiv(s.jib, [s.jn1, s.jn2, s.jn3])
       s.stn = niv
       s.ljc = ljc
     }
