@@ -725,6 +725,7 @@ export default {
   SBtitt: 'Procédure de blocage ouverte sur la "tribu"',
   SBtitc: 'Procédure de blocage ouverte sur le "compte"',
   SBtittc: 'Procédures de blocage ouvertes sur la "tribu" et le "compte"',
+  SBgco: 'La gestion du blocage "compte" a été préempté par le Comptable',
   SBtr: 'Tribu',
   SBco: 'Compte',
   SBnj: '',

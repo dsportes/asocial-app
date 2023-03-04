@@ -24,13 +24,6 @@
   "lgtitre": 50,
   "maxlgtextegen": 250,
   "maxlgtextesecret": 5000,
-  "rappelblocageenminutes": 2,
-  "raisonsblocage": {
-    "1-Comptable": [10, 30],
-    "2-Volume": [10, 0],
-    "3-Organisation": [0, 20],
-    "4-Autre": [0, 0]
-  },
   "motscles": { 
     "255": { "fr-FR": "Statut/Nouveau", "en-EN": "Status/New" },
     "254": { "fr-FR": "Visibilité/Liste noire", "en-EN": "Visibility/Black List" },

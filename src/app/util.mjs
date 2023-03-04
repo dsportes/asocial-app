@@ -4,7 +4,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import { useI18n } from 'vue-i18n'
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
-import { DateJour } from './api.mjs'
+import { AMJ } from './api.mjs'
 
 let pako
 

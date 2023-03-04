@@ -4,6 +4,7 @@
     <div v-if="blTr && !blCo" class="titre-md text-center text-bold text-italic">{{$t('SBtitt')}}</div>
     <div v-if="!blTr && blCo" class="titre-md text-center text-bold text-italic">{{$t('SBtitc')}}</div>
     <div v-if="blTr && blCo" class="titre-md text-center text-bold text-italic">{{$t('SBtittc')}}</div>
+    <div v-if="blCo && !blCo.sp" class="titre-md text-center text-italic">{{$t('SBgco')}}</div>
 
     <div class="titre-md text-center q-my-sm">{{$t('SBn' + niv) + $t('SBdisp', [djb, njrb])}}</div>
 

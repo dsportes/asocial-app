@@ -158,10 +158,12 @@ export class ConnexionCompte extends OperationUI {
   /** tousGroupes *******************************************************/
   async groupesRequisSignatures () {
     const session = stores.session
-
-    const jourJ = stores.config.limitesjour.dlv + this.auj
-    const dlv1 = (Math.floor(jourJ / 10) + 1) * 10
-    const dlv2 = dlv1 + 10
+    // En UTC la division d'une date est multiple de 86400000
+    const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
+    const tdlv1 = (Math.floor(tjourJ / 10) + 1) * 10
+    const tdlv2 = dlv1 + 10
+    const dlv1 = AMJ.amjUtcDeT(tdlv1 * 86400000)
+    const dlv2 = AMJ.amjUtcDeT(tdlv2 * 86400000)
 
     this.grRequis = new Set()
 

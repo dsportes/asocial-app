@@ -411,16 +411,13 @@ export class MdpAdmin {
   }
 }
 
-const lstfBlocage = ['stn', 'id', 'txt', 'jib', 'nja', 'njl', 'dh']
+const lstfBlocage = ['sp', 'jib', 'nja', 'njl', 'dh']
 export class Blocage {
 
   /* Attributs: 
-  - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
-  - `id`: id du sponsor ou du comptable gérant le blocage absent pour un blocage _tribu_ -implicite-).
-  - `txt` : libellé explicatif du blocage.
-  - `jib` : jour initial de la procédure de blocage
-  - `nja njl` : nb de jours passés en niveau _alerte_, et _lecture_.
-  - `dh` : date-heure de dernier changement du statut de blocage.
+  - `sp`: `true` si créé / gérée par un sponsor (absent pour un blocage _tribu_). Lorsque le comptable a pris le contrôle sur une procédure de blocage de compte, un sponsor ne peut plus la modifier / remplacer / supprimer.
+  - `jib` : jour initial de la procédure de blocage sous la forme `aaaammjj`.
+  - `nja njl` : nb de jours passés en niveau _alerte_, et _lecture seule_.
   Attributs calculés (pour le jour courant):
   - niv : niveau actuel (0: alerte, 1:lecture, 2:bloqué)
   - njra: nb jours restant sur le niveau alerte
@@ -500,7 +497,8 @@ export async function compile (row) {
 
 - `nctkc` : `[nom, rnd]` de la tribu crypté par la clé K du comptable.
 - `infok` : commentaire privé du comptable crypté par la clé K du comptable.
-- `msgt` : message du comptable aux comptes de la tribu (crypté par la clé de la tribu).
+- `notifco` : notification du comptable à la tribu (cryptée par la clé de la tribu).
+- `notifsp` : notification d'un sponsor à la tribu (cryptée par la clé de la tribu).
 - `a1 a2` : sommes des volumes V1 et V2 déjà attribués comme forfaits aux comptes de la tribu.
 - `r1 r2` : volumes V1 et V2 en réserve pour attribution aux comptes actuels et futurs de la tribu.
 - `mbtr` : map des membres de la tribu:
@@ -510,13 +508,8 @@ export async function compile (row) {
     - `sp` : si `true` / présent, c'est un sponsor.
     - `bl` : si `true`, le compte fait l'objet d'une procédure de blocage.
     - `cv` : `{v, photo, info}`, uniquement pour un sponsor, sa carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
-- `blocaget` : cryptée par la clé de la tribu : ("blocage" quand compilé)
-  - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
-  - `id`: id du sponsor ou du comptable gérant le blocage absent pour un blocage _tribu_ -implicite-).
-  - `txt` : libellé explicatif du blocage.
-  - `jib` : jour initial de la procédure de blocage
-  - `nja njl` : nb de jours passés en niveau _alerte_, et _lecture_.
-  - `dh` : date-heure de dernier changement du statut de blocage.*/
+- `blocaget` : blocage crypté par la clé de la tribu.
+*/
 
 export class Tribu extends GenDoc {
   get na () { return getNg(this.id) }
@@ -537,12 +530,14 @@ export class Tribu extends GenDoc {
       setNg(na)
       this.info = row.infok ? await decrypter(session.clek, row.infok) : ''
     }
-    this.msg = row.msgt ? await decrypter(this.clet, row.msgt) : ''
     this.nctkc = row.nctkc
     this.a1 = row.a1
     this.a2 = row.a2
     this.r1 = row.r1
     this.r2 = row.r2
+
+    this.notifco = row.notifco ? decode(await decrypter(this.clet, row.notifco)) : null
+    this.notifsp = row.notifsp ? decode(await decrypter(this.clet, row.notifsp)) : null
 
     this.mbtr = row.mbtr || {}
     for (const x in this.mbtr) {
@@ -747,10 +742,14 @@ export class Cv extends GenDoc {
 /** Compta **********************************************************************
 - `id` : numéro du compte
 - `v` : version
+- `dhb` : date-heure `dh` du blocage quand elle est non nulle (qu'il y a un blocage).
 - `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte : sert d'accès au row compta à la connexion au compte.
 - `shay` : SHA du SHA de X (PBKFD de la phrase secrète). Permet de vérifier la détention de la phrase secrète complète.
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
 - `stp` : statut parrain (0: non, 1:oui).
+- `notifco` : notification du comptable au compte (cryptée par la clé de l'avatar principal du compte).
+- `notifsp` : notification d'un sponsor au compte (cryptée par la clé de l'avatar principal du compte).
+- `dhvu` : date-heure de dernière vue des notifications par le titualire du compte, cryptée par la clé du compte.
 - `mavk` : map des avatars du compte cryptée par la clé K du compte. 
   - _clé_ : id de l'avatar.
   - _valeur_ : `[nom clé]` : son nom complet.
@@ -758,7 +757,9 @@ export class Cv extends GenDoc {
 - `nctkc` : `[nom, clé]` de la tribu crypté par la clé K **du Comptable**: 
 - `napt`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
 - `compteurs`: compteurs sérialisés (non cryptés).
-- `blocaget` : blocage du compte (cf `blocaget` de tribu).
+- `blocaget` : blocage du compte crypté par la clé de la tribu.
+- `dhdq` : date-heure de détection du _dépassement_ des quotas.
+- `dhrq` : date-heure de détection du retour au _respect_ des quotas. 
 */
 
 export class Compta extends GenDoc {
@@ -806,6 +807,9 @@ export class Compta extends GenDoc {
     this.shay = row.shay
     this.stp = row.stp
 
+    this.notifco = row.notifco ? decode(await decrypter(this.nap.rnd, row.notifco)) : null
+    this.notifsp = row.notifsp ? decode(await decrypter(this.nap.rnd, row.notifsp)) : null
+
     /* `mavk` {id} `[nom, cle]` */
     const m = decode(await decrypter(session.clek, row.mavk))
     this.mav = new Map()
@@ -823,6 +827,9 @@ export class Compta extends GenDoc {
       const b = await decrypter(this.clet, row.blocaget)
       this.blocage = new Blocage(b)
     } else this.blocage = null
+
+    this.dhdq = row.dhdq || 0
+    this.dhrq = row.dhrq || 0
   }
 
   async ajoutAvatarMavk (nvna) {
@@ -863,6 +870,8 @@ export class Compta extends GenDoc {
     m[na.id] = [na.nom, na.rnd]
     r.mavk = await crypter(session.clek, new Uint8Array(encode(m)))
 
+    r.dhdq = 0
+    r.dhrq = 0
     const c = new Compteurs()
     c.setQ1(q1)
     c.setQ2(q2)
