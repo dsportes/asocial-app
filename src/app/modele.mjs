@@ -539,14 +539,22 @@ export class Tribu extends GenDoc {
     this.notifco = row.notifco ? decode(await decrypter(this.clet, row.notifco)) : null
     this.notifsp = row.notifsp ? decode(await decrypter(this.clet, row.notifsp)) : null
 
+    this.nbsp = 0
+    this.nbco = 0
+    this.nbbl = 0
+
     this.mbtr = row.mbtr || {}
     for (const x in this.mbtr) {
       const e = decode(this.mbtr[x])
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       e.na = new NomAvatar(nom, cle)
+      e.sp = e.sp ? true : false
       e.bl = e.bl ? true : false
       setNg(e.na)
       e.cv = e.cv ? decode(await decrypter(e.na.rnd, e.cv)) : null
+      if (e.sp) this.nbsp++
+      this.nbco++
+      if (e.bl) this.nbbl++
     }
     if (row.blocaget) {
       const b = await decrypter(this.clet, row.blocaget)

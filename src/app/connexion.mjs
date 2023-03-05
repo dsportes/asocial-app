@@ -161,7 +161,7 @@ export class ConnexionCompte extends OperationUI {
     // En UTC la division d'une date est multiple de 86400000
     const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
     const tdlv1 = (Math.floor(tjourJ / 10) + 1) * 10
-    const tdlv2 = dlv1 + 10
+    const tdlv2 = tdlv1 + 10
     const dlv1 = AMJ.amjUtcDeT(tdlv1 * 86400000)
     const dlv2 = AMJ.amjUtcDeT(tdlv2 * 86400000)
 
@@ -712,7 +712,7 @@ export class AcceptationSponsoring extends OperationUI {
         id: sp.naf.id,
         v: 1,
         iv: GenDoc._iv(sp.naf.id, 1),
-        dlv: this.auj + config.limitesjour.dlv
+        dlv: AMJ.amjUtcPlusNbj(this.auj, config.limitesjour.dlv)
       }
       const _data_ = new Uint8Array(encode(rowVersion))
       rowVersion._data_ = _data_

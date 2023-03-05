@@ -1,3 +1,7 @@
+BUG en cours : sur acceptation sponsoring, le squotas ne sont pas traités et pas répercués sur la tribu.
+
+PageTribus filtre blocage. Aperçu tribu en chantier
+
 TODO next :
 - FicheAvatar : gérer les restrictions d'accès - Phrase de contact - Ops
 - sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à reprendre !!!!!!!!!!!!!!!

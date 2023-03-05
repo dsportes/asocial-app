@@ -460,7 +460,8 @@ export default {
   Pchats: 'Mes chats',
   Paproposav: 'A propos de l\'avatar courant',
   Pcompta: 'Compteurs de comptabilité du compte',
-
+  Ptribus: 'Toutes les tribus',
+  
   MLAcptp: '(parrain)',
   MLAtri: 'Tribu : {0}',
   MLAsfer: '(pas de compte connecté)',
@@ -486,11 +487,24 @@ export default {
   MLAfiltre: 'Ouvrir les paramètres du filtre',
   MLArech: 'Recherche ...',
 
+  FItri: 'Tri',
   FInom: 'Début du nom du contact',
   FItxt: 'Texte cherché dans les chats',
   FImcp: 'Ayant les mots-clés ...',
   FImcn: 'Mais N\'ayant PAS les mots clés ...',
   FIjours: 'Modifiés dans les N jours',
+  FInomt: 'Début du nom de la tribu',
+  FItxtt: 'Texte cherché dans le commentaire',
+  FItxtn: 'Texte cherché dans les notifications',
+  FIavecbl: 'Tribus ayant un blocage en cours',
+
+  TRItribus0: "Aucun",
+  TRItribus1: "Volume V1 attribué",
+  TRItribus2: "Volume V2 attribué",
+  TRItribus3: "Volume V1 disponible",
+  TRItribus4: "Volume V2 disponible",
+  TRItribus5: "Volume V1 total",
+  TRItribus6: "Volume V2 total",
 
   CChtit: 'Chat avec un contact par sa phrase de contact',
   CChnopc: 'Aucun contact n\'a déclaré cette phrase de contact',
@@ -592,6 +606,12 @@ export default {
   P20rdv: 'Rendez-vous avec un avatar extérieur',
 
   P22tit: 'Contacts de l\'avatar {0}',
+
+  // Page Tribus
+  PTnv: 'Nouvelle tribu',
+  PTnch2: 'Aucune tribu sur {0} ne répond au critère de recherche',
+  PTex: 'Nom déjà attribué à une tribu',
+  PTnoinfo: 'Pas de commentaires',
 
   // Panel Tribu
   PTvide: 'Aucune tribu ne répond au critère de filtre',

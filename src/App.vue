@@ -82,6 +82,13 @@
           <filtre-mc nom="chats" attr="mcp"/>
           <filtre-mc nom="chats" attr="mcn"/>
         </div>
+        <div v-if="ui.page === 'tribus'" class="column justify-start">
+          <filtre-nomt nom="tribus"/>
+          <filtre-txtt nom="tribus"/>
+          <filtre-txtn nom="tribus"/>
+          <!--filtre-avecbl nom="tribus"/-->
+          <filtre-tri nom="tribus" :nb-options="7"/>
+        </div>
       </div>
     </q-scroll-area>
   </q-drawer>
@@ -98,6 +105,7 @@
       <page-chats class="page" v-if="ui.page === 'chats'"/>
       <page-aproposav class="page" v-if="ui.page === 'aproposav'"/>
       <page-compta class="page" v-if="ui.page === 'compta'"/>
+      <page-tribus class="page" v-if="ui.page === 'tribus'"/>
     </transition-group>
   </q-page-container>
 
@@ -145,7 +153,7 @@
 
 <script>
 import { useQuasar } from 'quasar'
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 
 import stores from './stores/stores.mjs'
 
@@ -163,20 +171,21 @@ import PageSponsorings from './pages/PageSponserings.vue'
 import PageChats from './pages/PageChats.vue'
 import PageAproposav from './pages/PageAproposav.vue'
 import PageCompta from './pages/PageCompta.vue'
+import PageTribus from './pages/PageTribus.vue'
 
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
+import FiltreNomt from './components/FiltreNomt.vue'
+import FiltreTxtt from './components/FiltreTxtt.vue'
+import FiltreTxtn from './components/FiltreTxtn.vue'
+import FiltreTri from './components/FiltreTri.vue'
 
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
 import DialogueHelp from './dialogues/DialogueHelp.vue'
 import InfoBlocage from './dialogues/InfoBlocage.vue'
-
-import PanelContacts from './dialogues/PanelContacts.vue'
-
-// import { crypter } from './app/webcrypto.mjs'
 
 export default {
   name: 'App',
@@ -184,8 +193,8 @@ export default {
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats, PageAproposav,
-    PageCompta,
-    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj,
+    PageCompta, PageTribus,
+    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreNomt, FiltreTxtt, FiltreTxtn, FiltreTri,
     DialogueErreur, DialogueHelp, InfoBlocage
    },
 

@@ -45,7 +45,7 @@ export const useAvatarStore = defineStore('avatar', {
     /* Array des tribus, pour le Comptable, 
      triée par ordre alphabétique de leur nom, la Primitive en tête
     */
-    tribus: (state) => {
+    getTribus: (state) => {
       const t = Array.from(state.maptr.values())
       const idp = state.tribuP.id
       t.sort((a,b) => { return (a.id === idp ? -1 : 
@@ -152,6 +152,10 @@ export const useAvatarStore = defineStore('avatar', {
     setTribuC (tribu) { // set d'une tribu quelconque pour le Comptable
       if (tribu.id === this.tribuP.id) this.setTribu(tribu)
       this.maptr.set(tribu.id, tribu)
+    },
+
+    delTribuC (id) { // delete d'une tribu quelconque pour le Comptable
+       this.maptr.delete(id)
     },
 
     setAvatar (avatar) {

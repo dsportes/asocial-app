@@ -56,6 +56,10 @@
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmacompta')"
         @click="ui.setPage('compta')"
       />
+      <q-btn v-if="session.estComptable" class="btn1" dense no-caps color="primary"
+        :label="$t('ACtribus')" @click="ui.setPage('tribus')"
+      />
+
     </div>
     <div class="full-width q-mt-sm column q-gutter-sm">
       <q-btn class="btn3" dense no-caps color="primary" :label="$t('ACmessecrets')" />
@@ -70,7 +74,6 @@
         @click="ui.dialoguedrc = true"/>
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmasession')"
         @click="ui.setPage('session')" />
-      <q-btn v-if="session.estComptable" class="btn1" dense no-caps color="primary" :label="$t('ACtribus')" />
     </div>
     <div :class="'q-mt-sm q-px-sm ' + (!session.accesIdb ? ' disabled' : '')" class="column q-gutter-sm">
       <div v-if="session.incognito" class="titre-md text-italic">{{$t('ACidb')}}</div>
