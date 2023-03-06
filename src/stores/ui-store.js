@@ -6,6 +6,7 @@ import { sleep } from '../app/util.mjs'
 export const useUiStore = defineStore('ui', {
   state: () => ({
     page: 'login',
+    pageback: '',
     etroite: false,
     filtre: false,
     seuillarge: 800,
@@ -52,13 +53,20 @@ export const useUiStore = defineStore('ui', {
     },
     async setPage (p) {
       this.menu = false
-      const pagesF = new Set(['chats', 'compte'])
+      const pagesF = new Set(['chats', 'compte', 'tribus'])
+      const pagesB = new Set(['tribus'])
+      this.pageback = pagesB.has(this.page) ? this.page : ''
       this.page = null
       await sleep(200)
       this.page = p
       this.filtre = pagesF.has(p)
       // ouvre le filtre si la page en a un ET que la fenêtre est large
       if (this.filtre && !this.etroite) this.menu = true
+    },
+
+    async setPageBack () {
+      if (!this.pageback) return
+      await this.setPage(this.pageback)
     },
 
     afficherMessage (texte, important) {

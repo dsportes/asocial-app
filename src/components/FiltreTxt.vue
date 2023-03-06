@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-input dense counter v-model="val"
-      :label="$t('FItxt')"
+      :label="$t('FI' + prop)"
       @keydown.enter.prevent="ok" type="text" :hint="$t('entree')">
       <template v-slot:append>
         <span :class="val.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="val=''"/></span>
@@ -17,7 +17,7 @@ import { ref, toRef } from 'vue'
 export default ({
   name: 'FiltreTxt',
 
-  props: { nom: String },
+  props: { nom: String, prop: String },
 
   data () {
     return { }
@@ -25,7 +25,7 @@ export default ({
 
   methods: {
     ok () {
-      this.st.setFiltre(this.nom, 'txt', this.val)
+      this.st.setFiltre(this.nom, this.prop, this.val)
     }
   },
 
@@ -33,8 +33,9 @@ export default ({
     const st = stores.filtre
     const val = ref('')
     const nom = toRef(props, 'nom')
+    const prop = toRef(props, 'prop')
     const x = st.filtre[nom.value]
-    val.value = x && x.txt ? x.txt : ''
+    val.value = x && x[prop.value] ? x[prop.value] : ''
     return {
       st,
       val

@@ -545,7 +545,7 @@ export class Tribu extends GenDoc {
 
     this.mbtr = row.mbtr || {}
     for (const x in this.mbtr) {
-      const e = decode(this.mbtr[x])
+      const e = this.mbtr[x]
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       e.na = new NomAvatar(nom, cle)
       e.sp = e.sp ? true : false
@@ -598,6 +598,7 @@ export class Tribu extends GenDoc {
   }
 
   static async primitiveRow (nt, a1, a2, r1, r2) {
+    const naComptable = getNg(IDCOMPTABLE)
     const r = {}
     r.vsh = 0
     r.id = nt.id
@@ -607,7 +608,35 @@ export class Tribu extends GenDoc {
     r.a2 = a2
     r.r1 = r1
     r.r2 = r2
-    r.mbtr = {}
+    r.mbtr = { }
+    /* - `mbtr` : map des membres de la tribu:
+    - _clé_ : id pseudo aléatoire, hash de la clé `rnd` du membre.
+    - _valeur_ :
+      - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
+      - `sp` : si `true` / présent, c'est un sponsor.
+      - `bl` : si `true`, le compte fait l'objet d'une procédure de blocage.
+      - `cv` : `{v, photo, info}`, uniquement pour un sponsor, sa carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
+    */
+    r.mbtr['' + hash(naComptable.rnd)] = { 
+      na : await crypter(nt.rnd, new Uint8Array(encode([naComptable.nom, naComptable.rnd]))),
+      sp: true
+    }
+    r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
+    const _data_ = new Uint8Array(encode(r))
+    return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, _data_ }
+  }
+
+  static async nouvelleRow (nt, r1, r2) {
+    const r = {}
+    r.vsh = 0
+    r.id = nt.id
+    r.v = 1
+    r.iv = GenDoc._iv(r.id, r.v)
+    r.a1 = 0
+    r.a2 = 0
+    r.r1 = r1
+    r.r2 = r2
+    r.mbtr = { }
     r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, _data_ }

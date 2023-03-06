@@ -52,7 +52,8 @@
       <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesctc')">
         <q-badge color="teal-10" rounded floating>{{nbtct}}</q-badge>
       </q-btn>
-      <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmatribu')" />
+      <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmatribu')"
+        @click="maTribu()"/>
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmacompta')"
         @click="ui.setPage('compta')"
       />
@@ -108,6 +109,10 @@ export default {
   },
 
   methods: {
+    maTribu () { 
+      this.session.setTribuCourante(0)
+      this.ui.setPage('tribu')
+    }
   },
 
   data () {

@@ -1,20 +1,22 @@
 <template>
-  <div :class="'petitelargeur bord' + (mv.err ? 'ko' : 'ok')">
+  <q-card-section :class="'q-mx-sm q-pt-none shadow-8 fs-md bord' + (mv.err ? 'ko' : 'ok')">
     <div class="row  items-center">
       <div class="col-5 titre-md">{{$t('CQt1', [ed1(mv.q1)])}}</div>
       <q-select class="col-2" v-model="q1s" :options="options" :disable="lecture" dense options-dense/>
-      <q-input class="col-2 q-px-xs" v-model.number="mv.q1" type="number" :disable="lecture" dense/>
-      <span :class="'col-2 text-center font-mono fs-md' + (mv.q1 > mv.m1 ? ' text-warning' : '')">{{$t('CQmax', [mv.m1])}}</span>
+      <q-input class="col-2 q-px-sm" v-model.number="mv.q1" type="number" :disable="lecture" dense/>
+      <span :class="'col-2 text-center fs-sm' + ((mv.q1 > mv.max1 || mv.q1 < mv.min1) ? ' text-warning' : '')">
+        {{mv.min1 + '...' + mv.max1}}</span>
       <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo1"/>
     </div>
     <div class="row items-center">
       <div class="col-5 titre-md">{{$t('CQt2', [ed2(mv.q2)])}}</div>
       <q-select class="col-2" v-model="q2s" :options="options" :disable="lecture" dense options-dense/>
-      <q-input class="col-2 q-px-xs" v-model.number="mv.q2" type="number" :disable="lecture" dense/>
-      <span :class="'col-2 text-center font-mono fs-md' + (mv.q2 > mv.m2 ? ' text-warning' : '')">{{$t('CQmax', [mv.m2])}}</span>
+      <q-input class="col-2 q-px-sm" v-model.number="mv.q2" type="number" :disable="lecture" dense/>
+      <span :class="'col-2 text-center fs-sm' + ((mv.q2 > mv.max2 || mv.q2 < mv.min2) ? ' text-warning' : '')">
+        {{mv.min2 + '...' + mv.max2}}</span>
       <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo2"/>
     </div>
-  </div>
+  </q-card-section>
 </template>
 <script>
 import { edvol, $t } from '../app/util.mjs'
@@ -38,10 +40,11 @@ export default {
 
   setup (props, context) {
     const lecture = toRef(props, 'lecture')
-    const mv = toRef(props, 'quotas') // { q1 q2 m1 m2 err }
+    const mv = toRef(props, 'quotas') // { q1 q2 max1 max2 err }
 
-    function mx () {
-      mv.value.err = (mv.value.q1 > mv.value.m1) || (mv.value.q2 > mv.value.m2) || mv.value.q1 < 0 || mv.value.q2 < 0
+    function mx () { mv.value.err = 
+      (mv.value.q1 > mv.value.max1) || (mv.value.q2 > mv.value.max2) ||
+      (mv.value.q1 < mv.value.min2) || (mv.value.q2 < mv.value.min2) 
     }
 
     const q1i = mv.value.q1 // valeurs initiales

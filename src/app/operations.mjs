@@ -5,7 +5,7 @@ import { AppExc, appexc, AMJ } from './api.mjs'
 import { $t } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { GenDoc, NomAvatar, Avatar, Compta, Chat, getNg, setNg, getCle, compile} from './modele.mjs'
+import { GenDoc, NomAvatar, NomTribu, Avatar, Compta, Chat, Tribu, getNg, setNg, getCle, compile} from './modele.mjs'
 import { genKeyPair, decrypter } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
@@ -470,9 +470,32 @@ export class NouvelAvatar extends OperationUI {
   }
 }
 
+/* Nouvelle tribu *********************************
+args.token: éléments d'authentification du compte.
+args.rowTribu : row de la nouvelle tribu
+Retour:
+*/
+export class NouvelleTribu extends OperationUI {
+  constructor () { super($t('OPnvtr')) }
+
+  async run (nom, q1, q2) {
+    try {
+      const session = stores.session
+      const nt = new NomTribu(nom)
+      const rowTribu = await Tribu.nouvelleRow(nt, q1, q2)
+      const args = { token: session.authToken, rowTribu }
+      const ret = this.tr(await post(this, 'NouvelleTribu', args))
+      this.finOK()
+      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
 
 
-/******************************************************
+
+/*************************************************************************************************
 Recherche les "people" d'ids donnés dans lids
 - en inscrit un en people s'il n'y est pas
 - si sa CV est manquante, va la chercher

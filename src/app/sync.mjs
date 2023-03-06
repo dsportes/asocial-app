@@ -333,9 +333,14 @@ export class OnchangeTribu extends OperationWS {
       this.init()
       const avStore = stores.avatar
       const tribu = await compile(row)
-      if (tribu.v <= avStore.tribu.v) return
-
-      await this.majTribu(row)
+      if (stores.session.estComptable) {
+        const avTr = avStore.getTribu(tribu.id)
+        if (avTr && avTr.v >= tribu.v) return
+        avStore.setTribuC(tribu)
+      } else {
+        if (tribu.v <= avStore.tribu.v) return
+        await this.majTribu(row)
+      }
 
       await this.final()
     } catch (e) { 

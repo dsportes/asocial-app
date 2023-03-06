@@ -56,8 +56,7 @@
     <q-dialog v-model="nvav" persistent>
       <q-card class="moyennelargeur">
         <div class="titre-lg q-my-sm">{{$t('CPTnvav2')}}</div>
-        <nom-avatar icon-valider="check" verif 
-          :label-valider="$t('valider')" @ok-nom="oknomav" />
+        <nom-avatar icon-valider="check" verif :label-valider="$t('valider')" @ok-nom="oknomav" />
       </q-card>
     </q-dialog>
 

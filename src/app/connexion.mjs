@@ -6,7 +6,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, getTrigramme, setTrigramme, afficherDiag, sleep, hash } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ } from './api.mjs'
-import { resetRepertoire, compile, Compta, Avatar, Tribu, Chat, NomAvatar, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
+import { resetRepertoire, compile, Compta, Avatar, Tribu, Chat, NomAvatar, NomTribu, naComptable, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter } from './webcrypto.mjs'
@@ -484,6 +484,8 @@ export class ConnexionCompte extends OperationUI {
       this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
       this.dh = 0
+      const naComptable = new NomAvatar('', -1)
+      setNg(naComptable)
 
       if (session.avion) {
         await this.phase0Avion()
@@ -669,6 +671,7 @@ rowChatE: chatE (externe) pour le sponsor - version à fixer
 ardx: ardoise du sponsoring à mettre à jour (avec statut 2 accepté)
 mbtrid : id de son élément mbtr (hash de la clé `rnd` du membre)
 mbtre: élément de la map mbtr de sa tribu
+quotas : `[v1, v2]` quotas attribués par le parrain.
 */
 
 export class AcceptationSponsoring extends OperationUI {
@@ -737,7 +740,7 @@ export class AcceptationSponsoring extends OperationUI {
       const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, dh, txt, new Uint8Array([253])) 
 
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
-        rowChatI, rowChatE, ardx, idt: session.tribuId, mbtrid, mbtre, abPlus: [sp.nct.id, sp.naf.id] }
+        rowChatI, rowChatE, ardx, idt: session.tribuId, mbtrid, mbtre, quotas: sp.quotas, abPlus: [sp.nct.id, sp.naf.id] }
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
       if (ret.credentials) session.fscredentials = ret.credentials
@@ -839,7 +842,7 @@ export class CreationCompteComptable extends OperationUI {
       session.setAvatarCourant(session.compteId)
 
       const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true) // set de session.clek
-      const rowTribu = await Tribu.primitiveRow(nt, na, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])
+      const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])
       const rowAvatar = await Avatar.primaireRow(na)
       const r = {
         id: na.id,

@@ -16,15 +16,14 @@
         <span :class="nom.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="nom=''"/></span>
       </template>
     </q-input>
-    <div class="row justify-between items-center no-wrap">
+    <div v-if="labelValider" class="row justify-between items-center no-wrap">
       <q-btn flat dense color="primary" icon="close" :label="$t('renoncer')" @click="ko" />
-      <q-btn v-if="phase < 3" color="warning" glossy :label="labelVal()" size="md" :icon-right="iconValider"
+      <q-btn v-if="phase < 3" color="warning" glossy :label="labelValider" size="md" :icon-right="iconValider"
       :disable="r1(nom) !== true || r2(nom) !== true" @click="ok" />
     </div>
   </q-card-section>
 </template>
 <script>
-import { ref, onMounted } from 'vue'
 
 export default {
   name: 'NomAvatar',
@@ -47,9 +46,6 @@ export default {
     r1 (val) {
       // eslint-disable-next-line no-control-regex
       return /[<>:"/\\|?*\x00-\x1F]/.test(val) ? this.$t('NAe2') : true
-    },
-    labelVal () {
-      return this.phase < 2 ? this.$t('OK') : this.labelValider
     },
     ok () {
       if (this.phase < 2 || this.phase === 3) {

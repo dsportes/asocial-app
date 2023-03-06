@@ -54,6 +54,8 @@
       <bouton-help page="page1"/>
       <q-btn :disable="!aHome" flat icon="home" size="md" 
         :color="aHome ? 'warning' : 'grey'" dense @click="gotoAccueilLogin()"/>
+      <q-btn v-if="ui.pageback" flat icon="arrow_back" size="md" 
+        dense @click="gotoBack()"/>
       <q-toolbar-title class="titre-lg text-center">
         <span>{{$t('P' + ui.page)}}</span>
       </q-toolbar-title>
@@ -76,17 +78,17 @@
           <div class="titre-lg">{{$t('MLArech')}}</div>
         </div>
         <div v-if="ui.page === 'chats'" class="column justify-start">
-          <filtre-nbj nom="chats"/>
-          <filtre-nom nom="chats"/>
-          <filtre-txt nom="chats"/>
+          <filtre-nbj nom="chats" prop='nbj'/>
+          <filtre-nom nom="chats" prop='nom'/>
+          <filtre-txt nom="chats" prop='txt'/>
           <filtre-mc nom="chats" attr="mcp"/>
           <filtre-mc nom="chats" attr="mcn"/>
         </div>
         <div v-if="ui.page === 'tribus'" class="column justify-start">
-          <filtre-nomt nom="tribus"/>
-          <filtre-txtt nom="tribus"/>
-          <filtre-txtn nom="tribus"/>
-          <!--filtre-avecbl nom="tribus"/-->
+          <filtre-nom nom="tribus" prop='nomt'/>
+          <filtre-txt nom="tribus" prop='txtt'/>
+          <filtre-txt nom="tribus" prop='txtn'/>
+          <filtre-avecbl nom="tribus"/>
           <filtre-tri nom="tribus" :nb-options="7"/>
         </div>
       </div>
@@ -106,6 +108,7 @@
       <page-aproposav class="page" v-if="ui.page === 'aproposav'"/>
       <page-compta class="page" v-if="ui.page === 'compta'"/>
       <page-tribus class="page" v-if="ui.page === 'tribus'"/>
+      <page-tribu class="page" v-if="ui.page === 'tribu'"/>
     </transition-group>
   </q-page-container>
 
@@ -172,14 +175,13 @@ import PageChats from './pages/PageChats.vue'
 import PageAproposav from './pages/PageAproposav.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageTribus from './pages/PageTribus.vue'
+import PageTribu from './pages/PageTribu.vue'
 
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
-import FiltreNomt from './components/FiltreNomt.vue'
-import FiltreTxtt from './components/FiltreTxtt.vue'
-import FiltreTxtn from './components/FiltreTxtn.vue'
+import FiltreAvecbl from './components/FiltreAvecbl.vue'
 import FiltreTri from './components/FiltreTri.vue'
 
 import OutilsTests from './dialogues/OutilsTests.vue'
@@ -188,13 +190,14 @@ import DialogueHelp from './dialogues/DialogueHelp.vue'
 import InfoBlocage from './dialogues/InfoBlocage.vue'
 
 export default {
+  displayName: 'App',
   name: 'App',
 
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats, PageAproposav,
-    PageCompta, PageTribus,
-    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreNomt, FiltreTxtt, FiltreTxtn, FiltreTri,
+    PageCompta, PageTribus, PageTribu,
+    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri,
     DialogueErreur, DialogueHelp, InfoBlocage
    },
 
@@ -228,6 +231,9 @@ export default {
     infoSession () { this.ui.setPage('session') },
     gotoAccueilLogin () {
       this.ui.setPage(this.session.status > 1 ? 'accueil' : 'login')
+    },
+    gotoBack () {
+      this.ui.setPageBack()
     },
     deconnexion () { deconnexion() },
     async reconnexion () { await reconnexionCompte() },

@@ -31,11 +31,11 @@ export default ({
     const nom = toRef(props, 'nom')
     const nbOptions = toRef(props, 'nbOptions')
     const x = st.tri[nom.value]
-    val.value = x
     const options = []
     for(let i = 0; i < nbOptions.value; i++){
       options.push({ value: i, label: $t('TRI' + nom.value + i)})
     }
+    val.value = options[x || 0]
     return {
       st,
       val,

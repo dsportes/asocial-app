@@ -30,7 +30,7 @@
 
         <q-step :name="2" :title="$t('NPavp')" icon="settings" :done="step > 3" >
           <div ref="step2">
-          <nom-avatar class="q-ma-xs" v-on:ok-nom="oknom" verif icon-valider="check" label-valider="Suivant"></nom-avatar>
+          <nom-avatar class="q-ma-xs" v-on:ok-nom="oknom" verif icon-valider="check" :label-valider="$t('suivant')"></nom-avatar>
           </div>
           <q-stepper-navigation>
             <q-btn flat @click="step = 1" color="primary" :label="$t('precedent')" class="q-ml-sm" />
@@ -209,7 +209,7 @@ export default ({
     const step3 = ref(null)
     const tribu = toRef(props, 'tribu')
     const quotas = ref(null)
-    quotas.value = { q1: 1, q2: 1, m1: tribu.value.r1, m2: tribu.value.r2 }
+    quotas.value = { q1: 1, q2: 1, max1: tribu.value.r1, max2: tribu.value.r2, min1: 0, min2: 0 }
 
     onMounted(() => {
       setTimeout(() => {

@@ -33,6 +33,7 @@ export const useSessionStore = defineStore('session', {
     clek: null,
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
+    tribuCId: 0, // tribu courante pour le comptable
 
     /* niveau de blocage:
      1-Alerte informative,
@@ -95,7 +96,11 @@ export const useSessionStore = defineStore('session', {
     setAvatarCourant (id) {
       this.avatarId = id
     },
-    
+
+    setTribuCourante (id) {
+      this.tribuCId = id
+    },
+
     chgps (phrase) {
       /*
       Suppression de l'ancienne clé lsk donnant le nom de la base du compte
