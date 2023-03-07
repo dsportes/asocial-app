@@ -415,7 +415,7 @@ const lstfBlocage = ['sp', 'jib', 'nja', 'njl', 'dh']
 export class Blocage {
 
   /* Attributs: 
-  - `sp`: `true` si créé / gérée par un sponsor (absent pour un blocage _tribu_). Lorsque le comptable a pris le contrôle sur une procédure de blocage de compte, un sponsor ne peut plus la modifier / remplacer / supprimer.
+  - `sp`: id du sponsor si créé / gérée par un sponsor (absent / 0 pour un blocage _tribu_). Lorsque le comptable a pris le contrôle sur une procédure de blocage de compte, un sponsor ne peut plus la modifier / remplacer / supprimer.
   - `jib` : jour initial de la procédure de blocage sous la forme `aaaammjj`.
   - `nja njl` : nb de jours passés en niveau _alerte_, et _lecture seule_.
   Attributs calculés (pour le jour courant):
@@ -427,10 +427,23 @@ export class Blocage {
   - djl : dernier jour en lecture
   - djb : dernier jour en blocage (fin de vie du compte)
   */
-  constructor (buf) {
-    const r = decode(buf)
-    for (const f of lstfBlocage) this[f] = r[f]
+  constructor (buf, sp) {
+    if (buf) {
+      const r = decode(buf)
+      for (const f of lstfBlocage) this[f] = r[f]
+      this.sp = r.sp || 0
+    } else {
+      this.sp = sp
+      this.jib = AMJ.amjUtc()
+      this.nja = 30
+      this.njl = 30
+      this.dh = 0
+    }
     this.recalculBloc()
+  }
+
+  clone () {
+    return new Blocage(this.encode()) 
   }
 
   encode () {
@@ -528,7 +541,7 @@ export class Tribu extends GenDoc {
       const [nom, rnd] = decode(await decrypter(session.clek, row.nctkc))
       const na = new NomTribu(nom, rnd)
       setNg(na)
-      this.info = row.infok ? await decrypter(session.clek, row.infok) : ''
+      this.info = row.infok ? await decrypterStr(session.clek, row.infok) : ''
     }
     this.nctkc = row.nctkc
     this.a1 = row.a1
@@ -800,7 +813,7 @@ export class Cv extends GenDoc {
 */
 
 export class Compta extends GenDoc {
-  get estParrain () { return this.stp === 1 }
+  get estSponsor () { return this.stp === 1 }
   get stn () { return this.blocage ? this.blocage.stn : 0 }
   get clet () { return this.nct.rnd }
 
@@ -878,7 +891,7 @@ export class Compta extends GenDoc {
     return await crypter(stores.session.clek, new Uint8Array(encode(m)))
   }
 
-  static async row (na, nt, nctkc, q1, q2, estParrain) { 
+  static async row (na, nt, nctkc, q1, q2, estSponsor) { 
     /* création d'une compta
     Pour le comptable le paramètre nctkc est null (il est calculé). 
     Pour les autres, c'est le nctkc pris dans la tribu exi
@@ -895,7 +908,7 @@ export class Compta extends GenDoc {
     const k = random(32)
     r.kx = await crypter(session.phrase.pcb, k)
     session.clek = k
-    r.stp = estParrain ? 1 : 0
+    r.stp = estSponsor ? 1 : 0
     r.hps1 = session.phrase.dpbh
     r.shay = session.phrase.shay
 

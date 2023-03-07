@@ -54,7 +54,7 @@ export const useSessionStore = defineStore('session', {
     compta (state) { return stores.avatar.compta },
     tribu (state) { return stores.avatar.tribu },
 
-    estParrain (state) { return stores.avatar.compta && stores.avatar.compta.estParrain },
+    estSponsor (state) { return stores.avatar.compta && stores.avatar.compta.estSponsor },
     estComptable (state) { return state.compteId === IDCOMPTABLE },
 
     // Avatar et groupes courants

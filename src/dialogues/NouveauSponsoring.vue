@@ -52,8 +52,8 @@
           <choix-quotas :quotas="quotas"/>
           <div v-if="avParrain">
             <div style="margin-left:-0.8rem" class="text-primary">
-              <q-toggle v-model="estParrain" size="md" :color="estParrain ? 'warning' : 'primary'"
-                :label="estParrain ? $t('NPcpa') : $t('NPcstd')"/>
+              <q-toggle v-model="estSponsor" size="md" :color="estSponsor ? 'warning' : 'primary'"
+                :label="estSponsor ? $t('NPcpa') : $t('NPcstd')"/>
             </div>
           </div>
           <q-stepper-navigation>
@@ -71,7 +71,7 @@
             <span class="font-mono q-pl-md">v1: {{ed1(quotas.q1)}}</span>
             <span class="font-mono q-pl-lg">v2: {{ed2(quotas.q2)}}</span>
           </div>
-          <div v-if="estParrain" class="text-warning">{{$t('NPcp')}}</div>
+          <div v-if="estSponsor" class="text-warning">{{$t('NPcp')}}</div>
           <q-stepper-navigation>
             <q-btn flat @click="corriger" color="primary" :label="$t('corriger')" class="q-ml-sm" />
             <q-btn @click="confirmer" color="warning" :label="$t('confirmer')" icon="check" class="q-ml-sm" />
@@ -100,14 +100,14 @@ export default ({
   name: 'NouveauSponsoring',
 
   /* La tribu est nécessaire pour une action du Comptable
-  qui lui peut choisir la tribu du parrainé */
+  qui lui peut choisir la tribu du sponsorisé */
   props: { close: Function, tribu: Object },
 
   components: { ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp },
 
   computed: {
     dlclass () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    avParrain () { return this.session.estParrain }
+    avParrain () { return this.session.estSponsor }
   },
 
   data () {
@@ -117,7 +117,7 @@ export default ({
       max: [],
       nom: '',
       phrase: '',
-      estParrain: false,
+      estSponsor: false,
       npi: false,
       pc: null,
       mot: '',
@@ -191,7 +191,7 @@ export default ({
       // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) {
       const q = [this.quotas.q1, this.quotas.q2]
       const dlv = AMJ.amjUtcPlusNbj(AMJ.amjUtc(), this.limj)
-      const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, this.tribu.nctkc, this.nct, this.estParrain, q, this.mot)
+      const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, this.tribu.nctkc, this.nct, this.estSponsor, q, this.mot)
       try {
         await new AjoutSponsoring().run(row)
         this.close()

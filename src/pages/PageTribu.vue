@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <apercu-tribu class="q-my-sm" :id="session.tribuCId || session.tribuId" :idx="0"/>
+    <apercu-tribu class="q-my-sm" :id="session.tribuCId || session.tribuId" :idx="0" :edit="ed"/>
   </q-page>
 </template>
 
@@ -14,6 +14,7 @@ export default {
   components : { ApercuTribu },
 
   computed: {
+    ed () { return this.session.estComptable || this.session.estSponsor }
   },
 
   methods: {

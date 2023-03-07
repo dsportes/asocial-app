@@ -8,7 +8,7 @@
           :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
         <bouton-help class="q-ml-sm" page="page1"/>
       </div>
-      <div v-if="session.estParrain"> <!-- Parrainer un nouveau compte -->
+      <div v-if="session.estSponsor"> <!-- Parrainer un nouveau compte -->
         <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
           :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring"/>
         <bouton-help class="q-ml-sm" page="page1"/>

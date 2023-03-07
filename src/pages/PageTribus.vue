@@ -2,7 +2,7 @@
   <q-page class="q-pa-sm">
     <div v-if="msg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{msg}}</div>
 
-    <div class="petitelargeu q-my-sm">
+    <div class="petitelargeur q-my-sm">
       <div class="row">
         <div class="col-6"></div>
         <div class="col-3 fs-md text-italic text-center">Volume V1</div>
@@ -39,7 +39,7 @@
         <div class="row items-start">
           <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
             :color="tribu.id === session.tribuCId ? 'warning' : 'primary'" @click="courant(tribu.id)"/>
-          <apercu-tribu class="q-my-sm" :id="tribu.id" :idx="idx"/>
+          <apercu-tribu class="q-my-sm" :id="tribu.id" :idx="idx" edit/>
         </div>
       </div>
     </div>

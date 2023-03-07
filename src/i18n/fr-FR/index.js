@@ -239,6 +239,8 @@ export default {
   OTer: 'Erreur simulée',
   OTt1: 'Test d\'écho',
   OTt2: 'Simulation d\'erreur',
+  OTsb: 'Blocage',
+
   // TestPing
   TP1: 'La base n\'est pas accessible avant connexion à un compte en mode synchronisé ou avion',
   TP2: 'Possible seulement en mode incognito ou synchronisé',
@@ -527,16 +529,23 @@ export default {
   SYgro: 'groupe : {0}',
   SYgro2: 'groupe : {0} secrets:{1}/{2} membres:{3}/{4}',
   SYcvs: 'cartes de visite : {0} requises, {1} mises à jour',
-  /*
-  SYcou: 'contact : {0}',
-  SYas: 'avatar : {0} - {1} secret(s)',
-  SYgr: 'groupe : {0} - {1} secret(s)',
-  SYgrm: 'groupe : {0} - {1} secret(s) - {2} membre(s)',
-  SYcs: 'contact : {0} - {1} secret(s)',
-  SYcv: 'cartes de visite : {0} requises',
-  SYcv2: 'cartes de visite : {0} requises, {1} à supprimer',
-  SYcv3: 'cartes de visite : {0} requises, {1} rechargées, {2} supprimées',
-  */
+ 
+  NTtr: 'Notification de "tribu" émise par {0}',
+  NTco: 'Notification de "compte" émise par {0}',
+  NTtr2: 'Notification de "tribu"',
+  NTco3: 'Notification de "compte"',
+  NTnco: 'Pas de notification de "compte" du comptable',
+  NTnsp: 'Pas de notification de "compte" d\'un sponsor',
+  NTncotr: 'Pas de notification de "tribu" du comptable',
+  NTnsptr: 'Pas de notification de "tribu" d\'un sponsor',
+  NTunsp: 'un sponsor de la tribu',
+  NTecr: 'En écrire une',
+  NT1: 'Informative',
+  NT2: 'Importante',
+  NT3: 'Grave',
+  NTv1: "Volume V1 attribué / réservé",
+  NTv2: "Volume V2 attribué / réservé",
+  NTcom: 'Commentaires sur la tribu {0}',
 
   IBec: 'Procédures de blocage en cours',
   IB0: 'Pas de procédure de blocage ouverte',
@@ -602,6 +611,7 @@ export default {
   PTattr: 'Attribué aux comptes',
   PTrest: 'Restant attribuable aux comptes',
   PTtotal: 'Total attribué aux tribus',
+  PTecr: 'En écrire un',
 
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',
@@ -706,7 +716,7 @@ export default {
   FPEprim: 'primaire',
   FPEppa: 'Seul un parrain de la tribu peut ouvrir les ardoises tribu des comptes de sa tribu',
 
-
+  // Carte Visite
   CVgph: 'Garder la photo initiale',
   CVcph: 'Changer la photo',
   CVfph: 'Choisir un fichier photo',
@@ -754,4 +764,24 @@ export default {
   EBLcp: 'Contrôlé par',
   EBLnbj: 'Nombre de jours passés sur un niveau avant de passer au suivant',
   EBLniv: 'Niveau',
+
+  // Synthèse blocage
+  SBtitt: 'Blocage "tribu"',
+  SBtitc: 'Blocage "compte"',
+  SBtittc: 'Blocage "tribu" ET "compte"',
+  SBn0: 'Alerte. ',
+  SBn1: 'Lecture seulement. ',
+  SBn2: 'Compte bloqué. ',
+  SBdisp: 'Disparition du compte le {0} (dans {1} jours).',
+  SBdisp2: 'Disparition dans {1} jours.',
+  SBnj: 'Nb.j',
+  SBdp: 'Début de la procédure',
+  SBal: 'En alerte jusqu\'à',
+  SBls: 'En lecture seule jusqu\'à',
+  SBbl: 'Bloqué jusqu\'à',
+  SBtr: 'Tribu',
+  SBco: 'Compte',
+  SBdet: 'Détail du blocage de {0}',
+  SBnv: 'Nouveau blocage de {0}',
+  SNnon: 'Pas de procédure de blocage en cours.'
 }

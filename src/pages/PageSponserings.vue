@@ -2,7 +2,7 @@
   <q-page>
     <info-restriction :niveau="3" cnx/>
 
-    <div v-if="session.estParrain"> <!-- Nouveau sponsoring -->
+    <div v-if="session.estSponsor"> <!-- Nouveau sponsoring -->
       <q-btn class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts" no-caps
         :label="$t('NPnouv')" color="warning" dense @click="nouveausp"/>
       <bouton-help class="q-ml-sm" page="page1"/>

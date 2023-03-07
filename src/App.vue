@@ -28,10 +28,11 @@
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-btn>
 
-      <q-btn v-if="session.blocage" dense
-        :icon="['','notification_important', 'fullscreen_exit', 'edit_off', 'lock_outline'][session.blocage]"
-        :color="['','warning','warning','negative','negative'][session.blocage]" 
-        @click="infoBlocage()"/>
+      <notif-ico class="q-ml-xs" :gravite="0" :alire="0" @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" clickable :gravite="1" :alire="1" @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" :gravite="2" :alire="0" @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" clickable :gravite="3" :alire="2" @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" clickable :gravite="3" :alire="3" @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
         <span v-if="session.ok">{{session.avC.na.nomc}}</span>
@@ -165,6 +166,7 @@ import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
+import NotifIco from './components/NotifIco.vue'
 
 import PageLogin from './pages/PageLogin.vue'
 import PageSession from './pages/PageSession.vue'
@@ -194,7 +196,7 @@ export default {
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, OutilsTests,
+    BoutonHelp, BoutonLangue, OutilsTests, NotifIco,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats, PageAproposav,
     PageCompta, PageTribus, PageTribu,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri,
@@ -223,6 +225,10 @@ export default {
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+
+    clickNotif () {
+      console.log('click notif')
+    },
 
     ouvrFiltre () { this.ui.menu = true },
     fermFiltre () { this.ui.menu = false },

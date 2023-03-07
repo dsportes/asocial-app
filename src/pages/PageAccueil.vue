@@ -68,7 +68,7 @@
     <q-separator class="q-my-sm"/>
 
     <div class="q-my-xs q-px-sm titre-md text-bold text-italic">{{$t('ACinfs', [session.tribu.na.nom])}}</div>
-    <div v-if="session.estParrain" 
+    <div v-if="session.estSponsor" 
       class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning">{{$t('ACcptspons')}}</div>
     <div class="q-mt-sm q-px-sm row items-center q-gutter-sm">
       <q-btn class="btn1" dense no-caps color="negative" :label="$t('ACdecnx')"

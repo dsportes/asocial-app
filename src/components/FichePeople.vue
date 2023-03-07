@@ -81,7 +81,7 @@ export default {
   watch: {
     menuOuvert (ap, av) {     
       if (ap) {
-        this.estParrain = false
+        this.estSponsor = false
         this.naTribu = null
         this.estPrimaire = false
         this.aMemeTribu = false
@@ -95,7 +95,7 @@ export default {
     return {
       compta: null,
       menuOuvert: false,
-      estParrain: false,
+      estSponsor: false,
       naTribu: null,
       estPrimaire: false,
       aMemeTribu: false,
@@ -135,7 +135,7 @@ export default {
       if (this.session.estComptable) {
         ok = true
       } else {
-        if (!this.session.estParrain || !this.aMemeTribu) {
+        if (!this.session.estSponsor || !this.aMemeTribu) {
           await afficherDiag(this.$t('FPEppa'))
         } else {
           ok = true
@@ -151,7 +151,7 @@ export default {
     },
 
     /* 
-    Obtient estParrain, naTribu, estPrimaire, aMemeTribu ET éventuellement compta 
+    Obtient estSponsor, naTribu, estPrimaire, aMemeTribu ET éventuellement compta 
     Invoquée à chaque ouverture du menu (avant choix d'une option).
     Complète l'information tribu / parrain à l'affichage
     */
@@ -162,14 +162,14 @@ export default {
       this.clicMenu = true
 
       if (id === IDCOMPTABLE) { // l'avatar pointé est le comptable
-        this.estParrain = true
+        this.estSponsor = true
         this.estPrimaire = true
         return true
       }
 
       if (c.estAc(id)) { // l'avatar pointé est un des avatars du compte
         // MAIS normalement désormais les avatars du compte NE SONT PLUS dans people
-        this.estParrain = c.estParrain
+        this.estSponsor = c.estSponsor
         this.naTribu = c.nat
         this.estPrimaire = id === c.id
         this.aMemeTribu = true
@@ -189,7 +189,7 @@ export default {
         } else {
           this.naTribu = this.aMemeTribu ? c.nat : null
         }
-        this.estParrain = this.naTribu ? parrain : 0
+        this.estSponsor = this.naTribu ? parrain : 0 // ???????????????????????????????????????
       }
     },
 
