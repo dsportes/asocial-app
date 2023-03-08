@@ -42,179 +42,155 @@ export function appexc (e) {
 }
 
 /** Compteurs ***************************
-- `j` : jour de calcul
-- `v1 v1m` : volume v1 actuel et total du mois
-- `v2 v2m` : volume v2 actuel et total du mois
-- `trm` : volume transféré dans le mois
-- `q1 q2` : quotas de v1 et v2
-- `tr` : array de 14 compteurs (les 14 derniers jours) de volume journalier de transfert
-- `rtr` : ratio de la moyenne des tr / quota v2 en pourcentage (125 => 125%)
-- `hist` : array de 12 éléments, un par mois. 4 bytes par éléments.
-  - `q1 q2` : quotas du mois
-  - `r1` : ratio du v1 du mois par rapport à son quota.
-  - `r2` : ratio du v2 du mois par rapport à son quota.
-  - `r3` : ratio des transferts cumulés du mois / volume du quota v2
+- `j` : **date du dernier calcul enregistré** : par exemple le 17 Mai de l'année A
+- **pour le mois en cours**, celui de la date ci-dessus :
+  - `q1 q2`: quotas actuels.
+  - `v1 v2 v1m v2m`: volume actuel des secrets et moyens sur le mois en cours.
+  - `trj` : transferts cumulés du jour.
+  - `trm` : transferts cumulés du mois.
+- `tr8` : log des volumes des transferts cumulés journaliers de pièces jointes 
+  sur les 7 derniers jours + total (en tête) sur ces 7 jours.
+- **pour les 12 mois antérieurs** `hist` (dans l'exemple ci-dessus Mai de A-1 à Avril de A),
+  - `q1 q2` quotas q1 et q2 au dernier jour du mois.
+  - `v1 v2` log des volumes moyens du mois (log de v1m v2m ci-dessus au dernier jour du mois)
+  - `tr` log du total des transferts des pièces jointes dans le mois (log de trm à la fin du mois).
 */
 
-const lch1 = ['j', 'v1', 'v1m', 'v2', 'v2m', 'trm', 'q1', 'q2', 'rtr']
-const NTRJ = 14
-
-function mx255 (x) { const n = Math.round(x * 100); return n > 255 ? 255 : n }
+const lch1 = ['v1', 'v1m', 'v2', 'v2m', 'q1', 'q2', 'q1m', 'q2m', 'trj', 'trm']
+const NTRJ = 8
 
 export class Compteurs {
   constructor (data) {
     const src = data ? decode(data) : null
-    lch1.forEach(f => { this[f] = src ? src[f] : 0 }); 
+    this.tr8 = new Array(NTRJ)
+    this.tr8.fill(0, 0, NTRJ)
+    this.hist = new Array(12)
+    for (let i = 0; i < 12; i++) this.hist[i] = new Uint8Array([0, 0, 0, 0, 0])
     if (src) {
-      this.tr = src.tr
-      this.hist = src.hist
+      this.j = src.j
+      lch1.forEach(f => { this[f] = src[f] || 0 })
+      if (src.tr8) for(let i = 0; i < NTRJ; i++) this.tr8[i] = src.tr8[i] || 0
+      if (src.hist) for(let i = 0; i < 12; i++) {
+        const h = src.hist[i] || new Uint8Array([0, 0, 0, 0, 0])
+        for(let j = 0; j < 5; j++) this.hist[i][j] = h[j] || 0
+      }
     } else {
-      this.dj = AMJ.amjUtc()
-      this.j = this.dj
-      this.tr = new Array(NTRJ)
-      this.tr.fill(0, 0, NTRJ)
-      this.hist = new Array(12)
-      for (let i = 0; i < 12; i++) this.hist[i] = new Uint8Array([0, 0, 0, 0, 0])
+      this.j = AMJ.amjUtc()
     }
-    this.setRtr()
     this.maj = false
+    this.amj = AMJ.aaaammjj(this.j) // [aaaa, mm, jj] "avant"
     this.calculauj()
   }
 
-  get copie () { // retourne un {...} contenant les champs (ce N'EST PAS un OBJET Compteurs)
-    const c = {}
+  get serial () { // retourne un {...} contenant les champs (ce N'EST PAS un OBJET Compteurs)
+    const c = { j: this.j, tr8: this.tr8, hist: this.hist }
     lch1.forEach(f => { c[f] = this[f] })
-    c.tr = new Array(NTRJ)
-    for (let i = 0; i < NTRJ; i++) c.tr[i] = this.tr[i]
-    c.hist = new Array(12)
-    for (let i = 0; i < 12; i++) {
-      const x = new Uint8Array(5)
-      for (let j = 0; j < 5; j++) x[j] = this.hist[i][j]
-      c.hist[i] = x
-    }
-    return c
+    return new Uint8Array(encode(c))
   }
 
-  get serial () { return new Uint8Array(encode(this.copie)) }
+  get volMoyTr7 () { return Math.round(pow(this.tr8[0]) / 7) }
+  get volQ2 () { return this.q2 * UNITV2 }
 
   setV1 (delta) {
-    const ok = this.v1 + delta <= this.q1 * UNITEV1
-    this.v1m = Math.round(((this.v1m * AMJ.jj(this.dj)) + delta) / AMJ.jj(this.dj))
-    this.v1 = this.v1 + delta
-    this.hist[AMJ.mm(this.dj) - 1][2] = mx255(this.v1m / this.q1 * UNITEV1)
-    this.maj = true
-    return ok
+    if (delta) {
+      this.v1m = Math.round(((this.v1m * this.amj[2]) + delta) / this.amj[2])
+      this.v1 = this.v1 + delta
+      this.maj = true
+    }
+    return this.v1 <= this.q1 * UNITEV2
   }
 
   setV2 (delta) {
-    const ok = this.v2 + delta <= this.q2 * UNITEV2
-    this.v2m = Math.round(((this.v2m * AMJ.jj(this.dj)) + delta) / AMJ.jj(this.dj))
-    this.v2 = this.v2 + delta
-    this.hist[AMJ.mm(this.dj) - 1][3] = mx255(this.v2m / this.q2 * UNITEV2)
-    this.maj = true
-    return ok
+    if (delta) {
+      this.v2m = Math.round(((this.v2m * this.amj[2]) + delta) / this.amj[2])
+      this.v2 = this.v2 + delta
+      this.maj = true
+    }
+    return this.v2 <= this.q2 * UNITEV2
   }
 
   setTr (delta) {
-    this.trm = Math.round(((this.trm * AMJ.jj(this.dj)) + delta) / AMJ.jj(this.dj))
-    this.hist[AMJ.mm(this.dj) - 1][4] = mx255(this.trm / this.q2 * UNITEV2)
-    this.tr[0] = this.tr[0] + delta
-    this.setRtr()
-    this.maj = true
+    if (delta) {
+      this.trj += delta
+      this.trm += delta
+      this.maj = true
+    }
   }
 
   setQ1 (q) {
-    const ok = this.v1 <= q * UNITEV1
-    this.q1 = q
-    this.hist[AMJ.mm(this.dj) - 1][2] = mx255(this.v1m / this.q1 * UNITEV1)
-    this.maj = true
-    return ok
+    if (q !== this.q1) {
+      this.q1 = q
+      this.maj = true
+    }
+    return this.v1 <= this.q1 * UNITEV1
   }
 
   setQ2 (q) {
-    const ok = this.v2 <= q * UNITEV2
-    this.q2 = q
-    this.hist[AMJ.mm(this.dj) - 1][3] = mx255(this.v2m / this.q2 * UNITEV2)
-    this.maj = true
-    return ok
-  }
-
-  shiftTr (nj) {
-    if (nj <= 0) return
-    if (nj >= NTRJ) {
-      this.tr.fill(0, 0, NTRJ)
-    } else {
-      // eslint-disable-next-line for-direction
-      for (let i = NTRJ - 1; i >= 0; i--) this.tr[i] = i > nj ? this.tr[i - nj] : 0
+    if (q !== this.q2) {
+      this.q2 = q
+      this.maj = true
     }
-    this.setRtr()
+    return this.v2 <= this.q2 * UNITEV2
   }
 
-  setRtr () {
-    let s = 0; this.tr.forEach(n => { s += n })
-    s = s * 30 / this.tr.length
-    this.rtr = s === 0 ? 0 : (this.q2 ? mx255(s / (this.q2 * UNITEV2)) : 255)
+  shiftTr8 (nj) {
+    if (nj >= NTRJ - 1) {
+      this.tr8.fill(0, 0, NTRJ)
+    } else {
+      const a = new Array(NTRJ)
+      a.fill(0, 0, NTRJ)
+      const t = 0
+      for(let i = nj + 1, j = 1; i < NTRJ; i++, j++) {
+        a[j] = this.tr8[i]
+        t += pow(a[j])
+      }
+      a[0] = log(t)
+    }
   }
 
   calculauj () { // recalcul à aujourd'hui en fonction du dernier jour de calcul
     const dj = AMJ.amjUtc() // dj: entier aaaammjj
-    if (dj === this.j) { this.dj = dj; return } // déjà normalisé, calculé aujourd'hui
-    this.dj = dj
+    if (dj === this.j) return // déjà normalisé, calculé aujourd'hui
+
     this.maj = true
-    const [djaaa, djamm, djajj] = AMJ.aaaammjj(this.j) // "avant"
-    const [djaa, djmm, djjj]  = AMJ.aaaammjj(this.dj) // "maintenant"
+    const [djaaa, djamm, djajj] = this.amj // "avant"
+    const [djaa, djmm, djjj]  = AMJ.aaaammjj(dj) // "maintenant"
+
+    // Dans tous les cas, shiftTr8
+    const nj = AMJ.diff(dj, this.j)
+    this.shiftTr8(nj) // shift de tr8
+
     if (djaaa === djaa && djamm === djmm) {
-      // Dans le même mois
-      // Recalcul des moyennes du mois et shift de tr (recalcul rtr)
+      // Dans le même mois : calcul des moyennes du mois
       this.v1m = Math.round(((this.v1m * djajj) + (this.v1 * (djjj - djajj))) / djjj)
       this.v2m = Math.round(((this.v2m * djajj) + (this.v2 * (djjj - djajj))) / djjj)
-      this.trm = Math.round((this.trm * djajj) / djjj)
-      this.hist[djmm - 1][2] = mx255(this.v1m / this.q1 * UNITEV1)
-      this.hist[djmm - 1][3] = mx255(this.v2m / this.q2 * UNITEV2)
-      this.hist[djmm - 1][4] = mx255(this.trm / this.q2 * UNITEV2)
-      this.shiftTr(djjj - djajj)
     } else {
-      // Moyennes sur le dernier mois de calcul
+      // Calcul de fin de mois du mois en cours : q1 q2 v1 v2 tr
       const nbjm = AMJ.djm(djaaa, djamm)
-      const v1m = Math.round(((this.v1m * djajj) + (this.v1 * (nbjm - djajj))) / djajj)
-      const v2m = Math.round(((this.v2m * djajj) + (this.v2 * (nbjm - djajj))) / djajj)
-      const trm = Math.round((this.trm * djajj) / djajj)
-      const r1 = mx255(v1m / this.q1 * UNITEV1)
-      const r2 = mx255(v2m / this.q2 * UNITEV2)
-      const r3 = mx255(trm / this.q2 * UNITEV2)
+      const q1 = this.q1
+      const q2 = this.q2
+      const v1 = log(Math.round(((this.v1m * djajj) + (this.v1 * (nbjm - djajj))) / djajj))
+      const v2 = log(Math.round(((this.v2m * djajj) + (this.v2 * (nbjm - djajj))) / djajj))
+      const tr = log(this.trm)
 
-      if ((djmm === djamm + 1 && djaa === djaaa) || (djmm === 1 && djamm === 1 && djaa === djaaa + 1)) {
-        // dernier calcul le mois précédent
-        this.v1m = v1m
-        this.v2m = v2m
-        this.trm = 0
-        this.hist[djamm - 1] = new Uint8Array([this.q1, this.q2, r1, r2, r3])
-        this.hist[djmm - 1] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
-        this.shiftTr(nbjm - djajj + djjj) // shift de l'historique
-      } else {
-        // plus d'un mois depuis le dernier calcul
-        // fin du mois du dernier calcul : nb jours du mois du dernier calcul - dja.nbjm
-        const nbm = 12 - djamm + djmm + (12 * (djaa - djaaa)) // nb de mois depuis dernier calcul
-        this.v1m = v1m
-        this.v2m = v2m
-        this.trm = 0
-        this.shiftTr(NTRJ) // shift de l'historique (raz, plus de NTRJ jours
-        if (nbm >= 12) {
-          for (let i = 0; i < 12; i++) this.hist[i] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
-        } else {
-          this.hist[djamm - 1] = new Uint8Array([this.q1, this.q2, r1, r2, r3]) // le dernier mois calculé
-          if (djamm < djmm) {
-            // dans la même année : suivant avec tr = 0
-            for (let i = djamm; i < djmm; i++) this.hist[i] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
-          } else {
-            // sur fin d'anée et début suivante avec tr = 0
-            for (let i = djamm; i < 12; i++) this.hist[i] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
-            for (let i = 0; i < djmm; i++) this.hist[i] = new Uint8Array([this.q1, this.q2, r1, r2, 0])
-          }
-        }
+      // Reset du mois en cours (q1 q2 v1 v2 v1m v2m sont inchangés)
+      this.trj = 0
+      this.trm = 0
+
+      // Maj de hist du mois qui vient de se terminer: djaaa, djamm
+      this.hist[djamm - 1] = new Uint8Array([q1, q2, v1, v2, tr])
+
+      // Prolongation de cet historique (sauf tr) pour les mois suivants jusqu'à djaa, djmm exclus
+      let a = djaaa, m = djamm
+      while (true) {
+        m++
+        if (m === 13) { a++; m = 1 }
+        if (a === djaa && m === djmm) break
+        this.hist[m - 1] = new Uint8Array([q1, q2, v1, v2, 0])
       }
     }
-    this.j = this.dj
+    this.j = dj
+    this.amj = [djaa, djmm, djjj]
   }
 }
 
@@ -295,8 +271,9 @@ export class AMJ {
   // Retourne l'amj + N jours (locale) de celle passée en argument
   static amjUtcPlusNbj(amj, nbj) {
     const d = new Date(AMJ.tDeAmjUtc(amj))
-    d.setDate(d.getDate() + nbj)
-    return AMJ.amjUtcDeT(d.getTime())
+    return AMJ.amjUtcDeT(d.getTime() + (nbj * 86400000)) // OK parce que UTC
+    // d.setDate(d.getDate() + nbj)
+    // return AMJ.amjUtcDeT(d.getTime())
   }
 
   // Retourne l'amj + N jours (utc) de celle passée en argument
@@ -374,6 +351,33 @@ export class AMJ {
   
 }
 
+const K = 1000
+const N = 20
+
+export function log(v) {
+  if (v === 0) return 0
+  if (v <= 1000) return 1
+  const x = Math.log10(v / K)
+  return Math.round(x * N)
+}
+
+export function pow(l) {
+  if (l === 0) return 0
+  if (l === 1) return 1000
+  const x = Math.pow(10, l / N)
+  return Math.round(x * K)
+}
+
+export function edvol (vol) {
+  const v = vol || 0
+  if (v < 1000) return v + 'o'
+  if (v < 1000000) return (v / 1000).toPrecision(3) + 'Ko'
+  if (v < 1000000000) return (v / 1000000).toPrecision(3) + 'Mo'
+  if (v < 1000000000000) return (v / 1000000000).toPrecision(3) + 'Go'
+  if (v < 1000000000000000) return (v / 1000000000000).toPrecision(3) + 'To'
+  return (v / 1000000000000000).toPrecision(3) + 'Po'
+}
+  
 /* Tests
 console.log(AMJ.amjLoc(), AMJ.amjUtc())
 

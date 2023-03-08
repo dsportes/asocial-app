@@ -175,7 +175,9 @@ export function edvol (vol) {
   if (v < 1000) return v + 'o'
   if (v < 1000000) return (v / 1000).toPrecision(3) + 'Ko'
   if (v < 1000000000) return (v / 1000000).toPrecision(3) + 'Mo'
-  return (v / 1000000000).toPrecision(3) + 'Go'
+  if (v < 1000000000000) return (v / 1000000000).toPrecision(3) + 'Go'
+  if (v < 1000000000000000) return (v / 1000000000000).toPrecision(3) + 'To'
+  return (v / 1000000000000000).toPrecision(3) + 'Po'
 }
 
 export async function readFile (file, bin) {
