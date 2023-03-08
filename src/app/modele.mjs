@@ -427,7 +427,7 @@ export class Blocage {
   - djl : dernier jour en lecture
   - djb : dernier jour en blocage (fin de vie du compte)
   */
-  constructor (buf, sp) {
+  constructor (buf, sp, nja, njl) {
     if (buf) {
       const r = decode(buf)
       for (const f of lstfBlocage) this[f] = r[f]
@@ -435,8 +435,8 @@ export class Blocage {
     } else {
       this.sp = sp
       this.jib = AMJ.amjUtc()
-      this.nja = 30
-      this.njl = 30
+      this.nja = nja || 30
+      this.njl = njl || 30
       this.dh = 0
     }
     this.recalculBloc()
@@ -454,16 +454,16 @@ export class Blocage {
 
   recalculBloc () {
     try {
-    this.djb = AMJ.amjUtcPlusNbj(this.jib, stores.config.limitesjour.dlv)
-    this.dja = AMJ.amjUtcPlusNbj(this.jib, this.nja)
-    this.djl = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl)
-    const now = AMJ.amjUtc()
-    this.njrb = AMJ.diff(this.djb, now)
-    if (now > this.djl) { this.niv = 2; this.njra = 0; this.njrl = 0; return }
-    this.njrl = AMJ.diff(this.djl, now)
-    if (now > this.dja) { this.niv = 1; this.njra = 0; return }
-    this.njra = AMJ.diff(this.dja, now)
-    this.niv = 0
+      this.djb = AMJ.amjUtcPlusNbj(this.jib, stores.config.limitesjour.dlv)
+      this.dja = AMJ.amjUtcPlusNbj(this.jib, this.nja)
+      this.djl = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl)
+      const now = AMJ.amjUtc()
+      this.njrb = AMJ.diff(this.djb, now)
+      if (now > this.djl) { this.niv = 2; this.njra = 0; this.njrl = 0; return }
+      this.njrl = AMJ.diff(this.djl, now)
+      if (now > this.dja) { this.niv = 1; this.njra = 0; return }
+      this.njra = AMJ.diff(this.dja, now)
+      this.niv = 0
     } catch (e) {
       console.log(e)
     }
@@ -512,28 +512,25 @@ export async function compile (row) {
 - `infok` : commentaire privé du comptable crypté par la clé K du comptable.
 - `notifco` : notification du comptable à la tribu (cryptée par la clé de la tribu).
 - `notifsp` : notification d'un sponsor à la tribu (cryptée par la clé de la tribu).
-- `a1 a2` : sommes des volumes V1 et V2 déjà attribués comme forfaits aux comptes de la tribu.
-- `r1 r2` : volumes V1 et V2 en réserve pour attribution aux comptes actuels et futurs de la tribu.
-- `mbtr` : map des membres de la tribu:
-  - _clé_ : id pseudo aléatoire, hash de la clé `rnd` du membre.
-  - _valeur_ :
-    - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
-    - `sp` : si `true` / présent, c'est un sponsor.
-    - `bl` : si `true`, le compte fait l'objet d'une procédure de blocage.
-    - `cv` : `{v, photo, info}`, uniquement pour un sponsor, sa carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
 - `blocaget` : blocage crypté par la clé de la tribu.
+- `cpt` : sérialisation non cryptée des compteurs suivants:
+  - `a1 a2` : sommes des volumes V1 et V2 déjà attribués comme forfaits aux comptes de la tribu.
+  - `r1 r2` : volumes V1 et V2 en réserve pour attribution aux comptes actuels et futurs de la tribu.
+  - `nbc` : nombre de comptes.
+  - `nbsp` : nombre de sponsors.
+  - `cbl` : nombre de comptes ayant un blocage.
+  - `nco[0..2]` : nombre de comptes ayant une notification du comptable, par gravité.
+  - `nsp[0..2]` : nombre de comptes ayant une notification d'un sponsor, par gravité.
 */
 
 export class Tribu extends GenDoc {
   get na () { return getNg(this.id) }
   get clet () { return getCle(this.id) }
-  get stn () { return this.blocage ? this.blocage.stn : 0 }
 
   async compile (row) {
     const session = stores.session
     this.vsh = row.vsh || 0
     this.id = row.id
-    this.dh = row.dh
     this.v = row.v
 
     if (session.estComptable) {
@@ -544,96 +541,22 @@ export class Tribu extends GenDoc {
       this.info = row.infok ? await decrypterStr(session.clek, row.infok) : ''
     }
     this.nctkc = row.nctkc
-    this.a1 = row.a1
-    this.a2 = row.a2
-    this.r1 = row.r1
-    this.r2 = row.r2
-
     this.notifco = row.notifco ? decode(await decrypter(this.clet, row.notifco)) : null
     this.notifsp = row.notifsp ? decode(await decrypter(this.clet, row.notifsp)) : null
-
-    this.nbsp = 0
-    this.nbco = 0
-    this.nbbl = 0
-
-    this.mbtr = row.mbtr || {}
-    for (const x in this.mbtr) {
-      const e = this.mbtr[x]
-      const [nom, cle] = decode(await decrypter(this.clet, e.na))
-      e.na = new NomAvatar(nom, cle)
-      e.sp = e.sp ? true : false
-      e.bl = e.bl ? true : false
-      setNg(e.na)
-      e.cv = e.cv ? decode(await decrypter(e.na.rnd, e.cv)) : null
-      if (e.sp) this.nbsp++
-      this.nbco++
-      if (e.bl) this.nbbl++
-    }
     if (row.blocaget) {
       const b = await decrypter(this.clet, row.blocaget)
       this.blocage = new Blocage(b)
     } else this.blocage = null
-  }
-
-  get naSponsors () { // array des na des sponsors
-    const r = []
-    for (const x in this.mbtr) {
-      const e = this.mbtr[x]
-      if (e.sp) r.push(e.na)
-    }
-    return r
-  }
-
-  get naMembres () { // array des na des membres
-    const r = []
-    for (const x in this.mbtr) r.push(this.mbtr[id].na)
-    return r
-  }
-
-  get idSponsors () { // array des id des sponsors
-    const r = []
-    for (const x in this.mbtr) {
-      const e = this.mbtr[x]
-      if (e.sp) r.push(e.na.id)
-    }
-    return r
-  }
-
-  // retourne la CV du sponsor d'id donné
-  cvSponsor (id) {
-    for (const x in this.mbtr) {
-      const e = this.mbtr[x]
-      if (e.na.id === id) {
-        return e.cv ? e.cv : null
-      }
-    }
-    return null
+    this.cpt = decode(row.cpt)
   }
 
   static async primitiveRow (nt, a1, a2, r1, r2) {
-    const naComptable = getNg(IDCOMPTABLE)
     const r = {}
     r.vsh = 0
     r.id = nt.id
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
-    r.a1 = a1
-    r.a2 = a2
-    r.r1 = r1
-    r.r2 = r2
-    r.mbtr = { }
-    /* - `mbtr` : map des membres de la tribu:
-    - _clé_ : id pseudo aléatoire, hash de la clé `rnd` du membre.
-    - _valeur_ :
-      - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
-      - `sp` : si `true` / présent, c'est un sponsor.
-      - `bl` : si `true`, le compte fait l'objet d'une procédure de blocage.
-      - `cv` : `{v, photo, info}`, uniquement pour un sponsor, sa carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
-    */
-    r.mbtr['' + hash(naComptable.rnd)] = { 
-      na : await crypter(nt.rnd, new Uint8Array(encode([naComptable.nom, naComptable.rnd]))),
-      sp: true
-    }
+    r.cpt = { a1, a2, r1, r2, nbc: 1, nbsp: 1, cbl: 0, nco: [0, 0, 0], nsp: [0, 0, 0]}
     r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, _data_ }
@@ -645,14 +568,114 @@ export class Tribu extends GenDoc {
     r.id = nt.id
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
-    r.a1 = 0
-    r.a2 = 0
-    r.r1 = r1
-    r.r2 = r2
-    r.mbtr = { }
+    r.cpt = { a1: 0, a2: 0, r1, r2, nbc: 0, nbsp: 0, cbl: 0, nco: [0, 0, 0], nsp: [0, 0, 0]}
     r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, _data_ }
+  }
+}
+
+/** Tribu2 *********************************
+- `id` : numéro de la tribu
+- `v` : sa version
+
+- `mbtr` : map des comptes de la tribu:
+  - _clé_ : id pseudo aléatoire, hash de la clé `rnd` du compte.
+  - _valeur_ :
+    - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
+    - `sp` : si `true` / présent, c'est un sponsor.
+    - `q1 q2` : quotas de volumes V1 et V2 (redondance dans l'attribut `compteurs` de `compta`)
+    - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
+    - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
+    - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
+    - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
+*/
+
+export class Tribu2 extends GenDoc {
+  get na () { return getNg(this.id) }
+  get clet () { return getCle(this.id) }
+
+  async compile (row) {
+    const session = stores.session
+    this.vsh = row.vsh || 0
+    this.id = row.id
+    this.v = row.v
+
+    this.mbtr = {}
+    for (const x in (row.mbtr || {})) {
+      const e = this.mbtr[x]
+      const r = {}
+      this.mbtr[x] = r
+      const [nom, cle] = decode(await decrypter(this.clet, e.na))
+      r.na = new NomAvatar(nom, cle)
+      r.sp = e.sp ? true : false
+      r.bl = e.bl ? true : false
+      setNg(r.na)
+      r.q1 = e.q1 || 0
+      r.q2 = e.q2 || 0
+      if (e.blocaget) {
+        const b = await decrypter(this.clet, e.blocaget)
+        r.blocage = new Blocage(b)
+      } else r.blocage = null
+      r.cv = e.cv ? decode(await decrypter(e.na.rnd, e.cv)) : null
+      r.notifco = e.notifco ? decode(await decrypter(this.clet, e.notifco)) : null
+      r.notifsp = e.notifsp ? decode(await decrypter(this.clet, e.notifsp)) : null
+    }
+  }
+
+  get naSponsors () { // array des na des sponsors
+    const r = []
+    for (const x in this.mbtr) {
+      const e = this.mbtr[x]
+      if (e.sp) r.push(e.na)
+    }
+    return r
+  }
+
+  get naComptes () { // array des na des membres
+    const r = []
+    for (const x in this.mbtr) r.push(this.mbtr[id].na)
+    return r
+  }
+
+  // retourne la CV du compte d'id donné
+  cvCompte (id) {
+    for (const x in this.mbtr) {
+      const e = this.mbtr[x]
+      if (e.na.id === id) {
+        return e.cv ? e.cv : null
+      }
+    }
+    return null
+  }
+
+  static async primitiveRow (nt, q1, q2) {
+    const naComptable = getNg(IDCOMPTABLE)
+    const r = {}
+    r.vsh = 0
+    r.id = nt.id
+    r.v = 1
+    r.iv = GenDoc._iv(r.id, r.v)
+    r.mbtr = { }
+    r.mbtr['' + hash(naComptable.rnd)] = { 
+      na : await crypter(nt.rnd, new Uint8Array(encode([naComptable.nom, naComptable.rnd]))),
+      sp: true,
+      q1: q1,
+      q2: q2,
+    }
+    const _data_ = new Uint8Array(encode(r))
+    return { _nom: 'tribu2s', id: r.id, v: r.v, iv: r.iv, _data_ }
+  }
+
+  static async nouvelleRow (nt) {
+    const r = {}
+    r.vsh = 0
+    r.id = nt.id
+    r.v = 1
+    r.iv = GenDoc._iv(r.id, r.v)
+    r.mbtr = { }
+    const _data_ = new Uint8Array(encode(r))
+    return { _nom: 'tribu2s', id: r.id, v: r.v, iv: r.iv, _data_ }
   }
 }
 
@@ -1715,6 +1738,7 @@ export class FichierLocal {
 
 const classes = {
   tribus: Tribu,
+  tribu2s: Tribu2,
   comptas: Compta,
   avatars: Avatar,
   groupes: Groupe,

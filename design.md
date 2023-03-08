@@ -1,4 +1,5 @@
-BUG en cours : sur acceptation sponsoring, le squotas ne sont pas traités et pas répercués sur la tribu.
+Store avatar : gestion tribu2
+Toutes opérations et sync avec tribu2
 
 PageTribus filtre blocage. Aperçu tribu en chantier
 

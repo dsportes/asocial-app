@@ -89,7 +89,8 @@ export class Compteurs {
   }
 
   get volMoyTr7 () { return Math.round(pow(this.tr8[0]) / 7) }
-  get volQ2 () { return this.q2 * UNITV2 }
+
+  get volQ2 () { return this.q2 * UNITEV2 }
 
   setV1 (delta) {
     if (delta) {
@@ -139,7 +140,7 @@ export class Compteurs {
     } else {
       const a = new Array(NTRJ)
       a.fill(0, 0, NTRJ)
-      const t = 0
+      let t = 0
       for(let i = nj + 1, j = 1; i < NTRJ; i++, j++) {
         a[j] = this.tr8[i]
         t += pow(a[j])
@@ -182,6 +183,7 @@ export class Compteurs {
 
       // Prolongation de cet historique (sauf tr) pour les mois suivants jusqu'à djaa, djmm exclus
       let a = djaaa, m = djamm
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         m++
         if (m === 13) { a++; m = 1 }
