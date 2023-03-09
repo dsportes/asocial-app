@@ -15,13 +15,13 @@
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PTrest')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ r1 + ' / ' + ed1(r1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ r2 + ' / ' + ed2(r2)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ (q1 - a1) + ' / ' + ed1(q1 - a1)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ (q2 - a2) + ' / ' + ed2(q2 - a2)}}</div>
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PTtotal')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ (a1 + r1) + ' / ' + ed1(a1 + r1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ (a2 + r2) + ' / ' + ed2(a2 + r2)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ q1 + ' / ' + ed1(q1)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ q2 + ' / ' + ed2(q2)}}</div>
       </div>
     </div>
 
@@ -126,8 +126,8 @@ export default {
 
     const a1 = ref(0)
     const a2 = ref(0)
-    const r1 = ref(0)
-    const r2 = ref(0)
+    const q1 = ref(0)
+    const q2 = ref(0)
 
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
@@ -183,7 +183,7 @@ export default {
     }
 
     function filtrer () {
-      a1.value = 0; a2.value = 0; r1.value = 0; r2.value = 0
+      a1.value = 0; a2.value = 0; q1.value = 0; q2.value = 0
       let f = fStore.filtre.tribus
       if (!f) { 
         ftribus.value = tribus.value
@@ -194,7 +194,7 @@ export default {
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
       for (const t of tribus.value) {
-        a1.value += t.a1; a2.value += t.a2; r1.value += t.r1; r2.value += t.r2
+        a1.value += t.cpt.a1 || 0; a2.value += t.cpt.a2 || 0; q1.value += t.cpt.q1 || 0; q2.value += t.cpt.q2 || 0
         if (f.avecbl && !t.blocage) continue
         if (f.nomt && !t.na.nom.startsWith(f.nomt)) continue
         if (f.txtt && (!t.info || t.info.indexOf(f.txtt) === -1)) continue
@@ -223,7 +223,7 @@ export default {
       session,
       ftribus,
       tribus,
-      a1, a2, r1, r2,
+      a1, a2, q1, q2,
       msg
     }
   }

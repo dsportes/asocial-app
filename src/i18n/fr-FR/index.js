@@ -543,8 +543,8 @@ export default {
   NT1: 'Informative',
   NT2: 'Importante',
   NT3: 'Grave',
-  NTv1: "Volume V1 attribué / réservé",
-  NTv2: "Volume V2 attribué / réservé",
+  NTv1: "Volume V1 attribué / quota tribu",
+  NTv2: "Volume V2 attribué / quota tribu",
   NTcom: 'Commentaires sur la tribu {0}',
 
   IBec: 'Procédures de blocage en cours',
@@ -612,6 +612,8 @@ export default {
   PTrest: 'Restant attribuable aux comptes',
   PTtotal: 'Total attribué aux tribus',
   PTecr: 'En écrire un',
+  PTntfc: 'Comptes notifiés par le Comptable ',
+  PTntfs: 'Comptes notifiés par un sponsor ',
 
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',

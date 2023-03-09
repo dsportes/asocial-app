@@ -419,7 +419,7 @@ export class Blocage {
   - `jib` : jour initial de la procédure de blocage sous la forme `aaaammjj`.
   - `nja njl` : nb de jours passés en niveau _alerte_, et _lecture seule_.
   Attributs calculés (pour le jour courant):
-  - niv : niveau actuel (0: alerte, 1:lecture, 2:bloqué)
+  - niv : niveau actuel (1: alerte, 2:lecture, 3:bloqué)
   - njra: nb jours restant sur le niveau alerte
   - njrl: nb jours restant sur le niveau lecture
   - njrb: nb jours restant à vivre bloqué
@@ -459,11 +459,11 @@ export class Blocage {
       this.djl = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl)
       const now = AMJ.amjUtc()
       this.njrb = AMJ.diff(this.djb, now)
-      if (now > this.djl) { this.niv = 2; this.njra = 0; this.njrl = 0; return }
+      if (now > this.djl) { this.niv = 3; this.njra = 0; this.njrl = 0; return }
       this.njrl = AMJ.diff(this.djl, now)
-      if (now > this.dja) { this.niv = 1; this.njra = 0; return }
+      if (now > this.dja) { this.niv = 2; this.njra = 0; return }
       this.njra = AMJ.diff(this.dja, now)
-      this.niv = 0
+      this.niv = 1
     } catch (e) {
       console.log(e)
     }
@@ -504,6 +504,16 @@ export async function compile (row) {
   return obj
 }
 
+export class Notif extends GenDoc {
+
+  async compile (row) {
+    this.txt = row.txt || ''
+    this.g = row.g || 0
+    this.dh = row.dh || 0
+    this.id = 0
+  }
+}
+
 /** Tribu *********************************
 - `id` : numéro de la tribu
 - `v` : sa version
@@ -514,13 +524,13 @@ export async function compile (row) {
 - `notifsp` : notification d'un sponsor à la tribu (cryptée par la clé de la tribu).
 - `blocaget` : blocage crypté par la clé de la tribu.
 - `cpt` : sérialisation non cryptée des compteurs suivants:
-  - `a1 a2` : sommes des volumes V1 et V2 déjà attribués comme forfaits aux comptes de la tribu.
-  - `r1 r2` : volumes V1 et V2 en réserve pour attribution aux comptes actuels et futurs de la tribu.
+  - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
+  - `q1 q2` : quotas actuels de la tribu
   - `nbc` : nombre de comptes.
   - `nbsp` : nombre de sponsors.
   - `cbl` : nombre de comptes ayant un blocage.
-  - `nco[0..2]` : nombre de comptes ayant une notification du comptable, par gravité.
-  - `nsp[0..2]` : nombre de comptes ayant une notification d'un sponsor, par gravité.
+  - `nco[0..2]` : nombres de comptes ayant une notification du comptable, par gravité.
+  - `nsp[0..2]` : nombres de comptes ayant une notification d'un sponsor, par gravité.
 */
 
 export class Tribu extends GenDoc {
@@ -550,25 +560,27 @@ export class Tribu extends GenDoc {
     this.cpt = decode(row.cpt)
   }
 
-  static async primitiveRow (nt, a1, a2, r1, r2) {
+  static async primitiveRow (nt, a1, a2, q1, q2) {
     const r = {}
     r.vsh = 0
     r.id = nt.id
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
-    r.cpt = { a1, a2, r1, r2, nbc: 1, nbsp: 1, cbl: 0, nco: [0, 0, 0], nsp: [0, 0, 0]}
+    const cpt = { a1, a2, q1, q2, nbc: 1, nbsp: 1, cbl: 0, nco: [0, 0, 0], nsp: [0, 0, 0]}
+    r.cpt = new Uint8Array(encode(cpt))
     r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, _data_ }
   }
 
-  static async nouvelleRow (nt, r1, r2) {
+  static async nouvelleRow (nt, q1, q2) {
     const r = {}
     r.vsh = 0
     r.id = nt.id
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
-    r.cpt = { a1: 0, a2: 0, r1, r2, nbc: 0, nbsp: 0, cbl: 0, nco: [0, 0, 0], nsp: [0, 0, 0]}
+    const cpt = { a1: 0, a2: 0, q1, q2, nbc: 0, nbsp: 0, cbl: 0, nco: [0, 0, 0], nsp: [0, 0, 0]}
+    r.cpt = new Uint8Array(encode(cpt))
     r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, _data_ }
@@ -581,11 +593,13 @@ export class Tribu extends GenDoc {
 
 - `mbtr` : map des comptes de la tribu:
   - _clé_ : id pseudo aléatoire, hash de la clé `rnd` du compte.
+    Dans l'objet c'est l'id du compte
   - _valeur_ :
     - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
     - `sp` : si `true` / présent, c'est un sponsor.
-    - `q1 q2` : quotas de volumes V1 et V2 (redondance dans l'attribut `compteurs` de `compta`)
+    - `q1 q2` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
     - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
+    - 'gco gsp' : gravités des notifco et notifsp.
     - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
     - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
     - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
@@ -603,9 +617,8 @@ export class Tribu2 extends GenDoc {
 
     this.mbtr = {}
     for (const x in (row.mbtr || {})) {
-      const e = this.mbtr[x]
+      const e = row.mbtr[x]
       const r = {}
-      this.mbtr[x] = r
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       r.na = new NomAvatar(nom, cle)
       r.sp = e.sp ? true : false
@@ -620,6 +633,7 @@ export class Tribu2 extends GenDoc {
       r.cv = e.cv ? decode(await decrypter(e.na.rnd, e.cv)) : null
       r.notifco = e.notifco ? decode(await decrypter(this.clet, e.notifco)) : null
       r.notifsp = e.notifsp ? decode(await decrypter(this.clet, e.notifsp)) : null
+      this.mbtr[r.na.id] = r
     }
   }
 
@@ -649,7 +663,7 @@ export class Tribu2 extends GenDoc {
     return null
   }
 
-  static async primitiveRow (nt, q1, q2) {
+  static async primitiveRow (nt, q1, q2) { // q1 q2 : quotas attribués au Comptable
     const naComptable = getNg(IDCOMPTABLE)
     const r = {}
     r.vsh = 0

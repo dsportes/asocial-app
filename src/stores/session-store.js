@@ -28,19 +28,16 @@ export const useSessionStore = defineStore('session', {
     fscredentials: null, // pour connexion à Firestore
     fsSync: null, // Objet de synchro pour Firestore
 
-    compteId: 0,
-    tribuId: 0,
     clek: null,
+
+    compteId: 0, // id du compte / son avatar principal
+    tribuId: 0, // id de la tribu actuelle du compte
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
-    tribuCId: 0, // tribu courante pour le comptable
+    tribuCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
 
-    /* niveau de blocage:
-     1-Alerte informative,
-     2:restriction de volume, (en baisse)
-     3:passif, (pas de maj -sauf chat sponsor / comptable)
-     4:bloqué
-    */
+    // niveau de blocage: (1: alerte, 2:lecture, 3:bloqué)
+    notifG: null,
     blocage: 0,
     infoBlocage: false,
     infoBlocageResolve: null,
@@ -53,6 +50,7 @@ export const useSessionStore = defineStore('session', {
     compte (state) { return stores.avatar.compte },
     compta (state) { return stores.avatar.compta },
     tribu (state) { return stores.avatar.tribu },
+    tribu2 (state) { return stores.avatar.tribu2 },
 
     estSponsor (state) { return stores.avatar.compta && stores.avatar.compta.estSponsor },
     estComptable (state) { return state.compteId === IDCOMPTABLE },
@@ -124,6 +122,10 @@ export const useSessionStore = defineStore('session', {
       if (dh && dh > this.dh) {
         this.dh = dh
       }
+    },
+
+    setNotifGlobale (notif) {
+      this.notifG = notif
     },
 
     /* Calcul du blocage depuis compta et tribu

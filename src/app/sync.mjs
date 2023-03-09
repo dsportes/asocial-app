@@ -28,6 +28,8 @@ export class SyncQueue {
       if (row._nom === 'comptas') op = new OnchangeCompta()
       else if (row._nom === 'versions') op = new OnchangeVersion()
       else if (row._nom === 'tribus') op = new OnchangeTribu()
+      else if (row._nom === 'tribu2s') op = new OnchangeTribu2()
+      else if (row._nom === 'singletons') op = new OnchangeNotif()
       if (op) await op.run(row)
       if (session.synchro) session.sessionSync.setDhSync(new Date().getTime())
       session.syncEncours = false
@@ -39,19 +41,6 @@ export class SyncQueue {
 /* OperatioWS *********************************************************************/
 export class OperationWS extends Operation {
   constructor (nomop) { super(nomop) }
-
-  /* Maj de la tribu */
-  async majTribu (row, avId) {
-    if (stores.session.estComptable) {
-      const avTribu = stores.avatar.getTribu(row.id)
-      if (row.v <= avTribu.v) return
-    } else {
-      const avTribu = stores.avatar.tribu
-      if (row.v <= avTribu.v) return
-      this.buf.putIDB(row)
-    }
-    this.tribu = await compile(row)
-  }
 
   supprGr (id) { // suppression du groupe id
     this.buf.purgeGroupeIDB(id)
@@ -142,6 +131,7 @@ export class OperationWS extends Operation {
 
     this.compta = null // compta mise à jour
     this.tribu = null  // tribu mise à jour ou ajoutée. L'id de celle supprimée est dans abMoins.
+    this.tribu2 = null
 
     this.abPlus = new Set() // abonnements de synchronisation ajoutés
     this.abMoins = new Set() // abonnements de synchronisation supprimés
@@ -177,13 +167,8 @@ export class OperationWS extends Operation {
 
     // Maj des stores
     if (this.compta) avStore.setCompta(this.compta)
-    if (this.tribu) {
-      if (session.estComptable) {
-        avStore.setTribu(this.tribu)
-      } else {
-        avStore.setTribuC(this.tribu)
-      }
-    }
+    if (this.tribu) avStore.setTribuC(this.tribu)
+    if (this.tribu2) avStore.setTribu2(this.tribu2)
 
     this.avSuppr.forEach(id => { avStore.del(id) })
     this.avMaj.forEach(e => { avStore.lotMaj(e) })
@@ -332,17 +317,62 @@ export class OnchangeTribu extends OperationWS {
     try {
       this.init()
       const avStore = stores.avatar
-      const tribu = await compile(row)
+      
       if (stores.session.estComptable) {
-        const avTr = avStore.getTribu(tribu.id)
-        if (avTr && avTr.v >= tribu.v) return
-        avStore.setTribuC(tribu)
+        const avTr = avStore.getTribu(row.id)
+        if ((!avTr || avTr.v < row.v) || (avStore.tribu.v < row.v)) {
+          // tribu du compte ou de la collection à rafraîchir
+          this.tribu = await compile(row)
+        }
       } else {
-        if (tribu.v <= avStore.tribu.v) return
-        await this.majTribu(row)
+        if (row.v > avStore.tribu.v) {
+          this.buf.putIDB(row)
+          this.tribu = await compile(row)
+        }
       }
 
-      await this.final()
+      if (this.tribu) await this.final()
+    } catch (e) { 
+      await this.finKO(e)
+    }
+  }
+}
+
+export class OnchangeTribu2 extends OperationWS {
+  constructor () { super($t('OPsync')) }
+
+  async run (row) {
+    try {
+      const session = stores.session
+      const avStore = stores.avatar
+      this.init()
+
+      if (row.id === session.tribuId) {
+        const avTr = avStore.tribu2
+        if (row.v > avTr.v) {
+          this.buf.putIDB(row)
+          this.tribu2 = await compile(row)
+        }
+      }
+
+      if (row.id === session.tribuCId) {
+        const avTr = avStore.tribu2C
+        if (row.v > avTr.v && !this.tribu2) this.tribu2 = await compile(row)
+      }
+
+      if (this.tribu2) await this.final()
+    } catch (e) { 
+      await this.finKO(e)
+    }
+  }
+}
+
+export class OnchangeNotif extends OperationWS {
+  constructor () { super($t('OPsync')) }
+
+  async run (row) {
+    try {
+      if (row.id === 'notif') stores.session.setNotifGlobale(await compile(row))
     } catch (e) { 
       await this.finKO(e)
     }

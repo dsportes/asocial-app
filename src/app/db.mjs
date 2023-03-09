@@ -17,6 +17,7 @@ const STORES = {
   avgrversions: 'id',
   sessionsync: 'id',
   tribus: 'id',
+  tribu2s: 'id',
   comptas: 'id',
   avatars: 'id',
   chats: '[id+ids]',
@@ -379,6 +380,17 @@ export async function getTribu (idt) {
   try {
     const idk = u8ToB64(await crypter(session.clek, '' + idt, 1), true)
     const idb = await db.tribus.get(idk)
+    return decode(await decrypter(session.clek, idb.data))
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
+export async function getTribu2 (idt) {
+  const session = stores.session
+  try {
+    const idk = u8ToB64(await crypter(session.clek, '' + idt, 1), true)
+    const idb = await db.tribu2s.get(idk)
     return decode(await decrypter(session.clek, idb.data))
   } catch (e) {
     throw EX2(e)

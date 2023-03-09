@@ -10,24 +10,48 @@
         class="col-auto q-ml-sm btn2" size="sm" dense icon="edit" @click="editer"/>
     </div>
     <div v-else class="q-ml-md q-my-xs">
-      <span class="text-italic">{{$t('PTnoinfo')}}</span>
+      <span class="titre-sm">{{$t('PTnoinfo')}}</span>
       <q-btn v-if="edit && session.estComptable" class="q-ml-sm" size="sm" dense
         :label="$t('PTecr')" color="primary" icon="edit" @click="editer"/>
     </div>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
     <div class="q-ml-md q-mt-xs row peitelargeur">
-      <div class="col-6 text-right">{{$t('NTv1')}}</div>
-      <div class="col-3 text-center font-mono">{{t.a1}} - {{ed1(t.a1)}}</div>
-      <div class="col-3 text-center font-mono">{{t.r1}} - {{ed1(t.r1)}}</div>
+      <div class="col-6 titre-sm">{{$t('NTv1')}}</div>
+      <div class="col-3 text-center font-mono">{{t.cpt.a1 || 0}} - {{ed1(t.cpt.a1 || 0)}}</div>
+      <div class="col-3 text-center font-mono">{{t.cpt.q1 || 0}} - {{ed1(t.cpt.q1 || 0)}}</div>
     </div>
     <div class="q-ml-md q-mb-xs row peitelargeur">
-      <div class="col-6 text-right">{{$t('NTv2')}}</div>
-      <div class="col-3 text-center font-mono">{{t.a2}} - {{ed2(t.a2)}}</div>
-      <div class="col-3 text-center font-mono">{{t.r2}} - {{ed2(t.r2)}}</div>
+      <div class="col-6 titre-sm">{{$t('NTv2')}}</div>
+      <div class="col-3 text-center font-mono">{{t.cpt.a2 || 0}} - {{ed2(t.cpt.a2 || 0)}}</div>
+      <div class="col-3 text-center font-mono">{{t.cpt.q2 || 0}} - {{ed2(t.cpt.q2 || 0)}}</div>
     </div>
+
+    <div class="q-ml-md q-mt-sm row justify-start">
+      <div class="col-6 titre-sm">{{$t('PTntfc')}}</div>
+      <div class="col-6">
+        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[0]}}</span>
+        <notif-ico :gravite="1"/>
+        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[1]}}</span>
+        <notif-ico :gravite="2"/>
+        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[2]}}</span>
+        <notif-ico :gravite="3"/>
+      </div>
+    </div>
+    <div class="q-ml-md q-mt-xs row justify-start">
+      <div class="col-6 titre-sm">{{$t('PTntfs')}}</div>
+      <div class="col-6">
+        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[0]}}</span>
+        <notif-ico :gravite="1"/>
+        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[1]}}</span>
+        <notif-ico :gravite="2"/>
+        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[2]}}</span>
+        <notif-ico :gravite="3"/>
+      </div>
+    </div>
+
     <div v-if="t.blocage">
-      <span class="titre-md q-my-xs">{{$t('SBn' + t.blocage.niv) + $t('SBdisp2', [t.blocage.njrb])}}</span>
+      <span class="titre-sm q-my-sm text-warning">{{$t('SBn' + t.blocage.niv) + $t('SBdisp2', [t.blocage.njrb])}}</span>
       <q-btn v-if="edit && session.estComptable" color="primary" 
         class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl"/>
       <q-btn v-else color="primary" 
@@ -35,7 +59,7 @@
     </div>
     <div v-else>
       <div v-if="edit && session.estComptable">
-        <span class="titre-md q-my-xs text-italic">{{$t('SNnon')}}</span>
+        <span class="titre-sm q-my-sm text-italic">{{$t('SNnon')}}</span>
         <q-btn color="primary" class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl"/>
       </div>
     </div>
@@ -79,6 +103,7 @@ import { SetAttribut } from '../app/operations.mjs'
 import { crypter } from '../app/webcrypto.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
+import NotifIco from './NotifIco.vue'
 import SyntheseBlocage from './SyntheseBlocage.vue'
 import { Blocage } from '../app/modele.mjs'
 
@@ -87,7 +112,7 @@ export default {
 
   props: { id: Number, idx: Number, edit: Boolean },
 
-  components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, SyntheseBlocage },
+  components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, SyntheseBlocage, NotifIco },
 
   computed: { },
 

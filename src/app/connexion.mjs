@@ -6,7 +6,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, getTrigramme, setTrigramme, afficherDiag, sleep, hash } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ } from './api.mjs'
-import { resetRepertoire, compile, Compta, Avatar, Tribu, Chat, NomAvatar, NomTribu, naComptable, GenDoc, setNg, getNg, Versions } from './modele.mjs'
+import { resetRepertoire, compile, Compta, Avatar, Tribu, Tribu2, Chat, NomAvatar, NomTribu, naComptable, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter } from './webcrypto.mjs'
@@ -421,11 +421,13 @@ export class ConnexionCompte extends OperationUI {
     this.avatar = await compile(this.rowAvatar)
 
     {
-      const args = { token: session.authToken, id: this.compta.idt }
+      const args = { token: session.authToken, id: this.compta.idt, tribu2: true, abPlus: [this.compta.idt] }
       const ret = this.tr(await post(this, 'GetTribu', args))
       this.rowTribu = ret.rowTribu
+      this.rowTribu2 = ret.rowTribu2
     }
     this.tribu = await compile(this.rowTribu)
+    this.tribu2 = await compile(this.rowTribu)
     session.tribuId = this.tribu.id
     if (session.fsSync) await session.fsSync.setTribu(session.tribuId)
   }
@@ -466,6 +468,8 @@ export class ConnexionCompte extends OperationUI {
     this.compta = await compile(this.rowCompta) 
     this.rowTribu = await getTribu(this.compta.idt)
     this.tribu = await compile(this.rowTribu)
+    this.rowTribu2 = await getTribu(this.compta.idt)
+    this.tribu2 = await compile(this.rowTribu2)
     session.tribuId = this.tribu.id
     this.rowAvatar = await getAvatarPrimaire()
     this.avatar = await compile(this.rowAvatar)
@@ -501,13 +505,14 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesIdb) {
         this.buf.putIDB(this.rowCompta)
         this.buf.putIDB(this.rowTribu)
+        this.buf.putIDB(this.rowTribu2)
         this.buf.putIDB(this.rowAvatar)
         avRowsModifies.forEach(row => { this.buf.putIDB(row) })
         avToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
       }
 
       // Rangement en store
-      avStore.setCompte(this.avatar, this.compta, this.tribu)
+      avStore.setCompte(this.avatar, this.compta, this.tribu, this.tribu2)
       session.setBlocage()
       this.avatarsToStore.forEach(av => {
         if (av.id !== this.avatar.id) avStore.setAvatar(av)
@@ -688,7 +693,7 @@ export class AcceptationSponsoring extends OperationUI {
     - 'nctkc' : nc tribu par clé K du comptable
     - `nct` : de sa tribu.
     - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
-    - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+    - `quotas` : `[q1, q2]` quotas attribués par le parrain.
     ardx : reponse cryptée par la cleX du sponsoring
     reponse : texte du sponsorisé
     ps: phrase secrète du nouveau compte
@@ -721,16 +726,22 @@ export class AcceptationSponsoring extends OperationUI {
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
-      /* Element de mbtr du nouveau compte
+      /* Element de mbtr de tribu2 du nouveau compte
       - _clé_ : (hash de la clé `rnd` du membre)
       - _valeur_ :
-      - `na` : `[nom, rnd]` du sponsor crypté par la clé de la tribu.
-      - 'sp' : true si sponsor
-      - `cv` : `{v, photo, info}` carte de visite cryptée par la clé CV du sponsor (le `rnd` ci-dessus).
+    - _valeur_ :
+      - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
+      - `sp` : si `true` / présent, c'est un sponsor.
+      - `q1 q2` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
+      - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
+      - 'gco gsp' : gravités des notifco et notifsp.
+      - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
+      - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
+      - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
       */
       const mbtrid = hash(sp.naf.rnd)
       const na = await crypter(sp.nct.rnd, new Uint8Array(encode([sp.naf.nom, sp.naf.rnd])))
-      const x = { na }
+      const x = { na, q1: sp.quotas[0], q2: sp.quotas[1] }
       if (sp.sp) x.sp = true
       const mbtre = new Uint8Array(encode(x))
 
@@ -745,12 +756,14 @@ export class AcceptationSponsoring extends OperationUI {
       // Retourne: credentials, rowTribu
       if (ret.credentials) session.fscredentials = ret.credentials
       const rowTribu = ret.rowTribu
+      const rowTribu2 = ret.rowTribu2
 
       // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
       const avatar = await compile(rowAvatar)
       const tribu = await compile(rowTribu)
+      const tribu2 = await compile(rowTribu2)
       const compta = await compile(rowCompta)
-      stores.avatar.setCompte(avatar, compta, tribu)
+      stores.avatar.setCompte(avatar, compta, tribu, tribu2)
       const chat = await compile(rowChatI)
       stores.avatar.setChat(chat)
       Versions.reset()
@@ -769,6 +782,7 @@ export class AcceptationSponsoring extends OperationUI {
           this.buf.putIDB(rowAvatar)
           this.buf.putIDB(rowChatI)
           this.buf.putIDB(rowTribu)
+          this.buf.putIDB(rowTribu2)
           await this.buf.commitIDB(true, true) // MAJ compte.id / cle K et versions
           await session.sessionSync.setConnexion(this.dh)
         } catch(e) {
@@ -819,6 +833,8 @@ args.token donne les éléments d'authentification du compte.
 args.pcbh : hash de la cle X (hash du PBKFD de la phrase complète)
 args.rowAvatar, rowTribu, rowCompta du compte du comptable
 args.rowVersion: version de l'avatar (avec sa dlv) 
+args.rowTribu
+args.rowTribu2
 */
 export class CreationCompteComptable extends OperationUI {
   constructor () { super($t('OPccc')) }
@@ -842,7 +858,8 @@ export class CreationCompteComptable extends OperationUI {
       session.setAvatarCourant(session.compteId)
 
       const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true) // set de session.clek
-      const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2] - ac[0], ac[3] - ac[1])
+      const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])
+      const rowTribu2 = await Tribu2.primitiveRow(nt, ac[0], ac[1])
       const rowAvatar = await Avatar.primaireRow(na)
       const r = {
         id: na.id,
@@ -854,14 +871,15 @@ export class CreationCompteComptable extends OperationUI {
       r._data_ = _data_
       r._nom = 'versions'
 
-      const args = { token: stores.session.authToken, rowTribu, rowCompta, rowAvatar, rowVersion: r, pcbh: phrase.pcbh, abPlus: [nt.id] }
+      const args = { token: stores.session.authToken, rowTribu, rowTribu2, rowCompta, rowAvatar, rowVersion: r, pcbh: phrase.pcbh, abPlus: [nt.id] }
       const ret = this.tr(await post(this, 'CreationCompteComptable', args))
   
       // Le compte vient d'être créé, clek est enregistrée
       const avatar = await compile(rowAvatar)
       const tribu = await compile(rowTribu)
+      const tribu2 = await compile(rowTribu2)
       const compta = await compile(rowCompta)
-      stores.avatar.setCompte(avatar, compta, tribu)
+      stores.avatar.setCompte(avatar, compta, tribu, tribu2)
 
       if (ret.credentials) session.fscredentials = ret.credentials
       if (session.fsSync) {

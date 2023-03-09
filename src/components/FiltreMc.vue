@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="'q-mb-sm full-width ' + dkli">
     <div class="q-mt-sm titre-md">{{$t('FI' + attr)}}</div>
     <apercu-motscles @ok="ok" :idx="0" du-compte :du-groupe="groupeId"
       :mapmc="mapmc" edit :src="src"/>
@@ -20,6 +20,10 @@ export default ({
 
   data () {
     return { }
+  },
+
+  computed: {
+    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') }
   },
 
   methods: {

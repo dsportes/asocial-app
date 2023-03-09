@@ -12,7 +12,7 @@
     </div>
     <show-html v-if="ntf" class="q-my-xs bord" :idx="idx" zoom maxh="3rem" :texte="ntf.txt"/>
     <div v-if="!ntf">
-      <span class="fs-md q-mr-sm">{{$t((sponsor ? 'NTnsp' : 'NTnco') + (estTribu ? 'tr' : ''))}}</span> 
+      <span class="titre-sm q-mr-sm">{{$t((sponsor ? 'NTnsp' : 'NTnco') + (estTribu ? 'tr' : ''))}}</span> 
       <q-btn v-if="edit" size="sm" dense icon="add" color="primary" :label="$t('NTecr')" @click="editer"/>
     </div>
 

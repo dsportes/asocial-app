@@ -18,10 +18,11 @@ export const useAvatarStore = defineStore('avatar', {
     map: new Map(),
     voisins: new Map(),
     motscles: null, // mots clés du compte
-    compteId: 0, // id de l'avatar principal du compte courant
     avatarP: null, // avatar principal du compte courant
     comptaP: null, // compta actuelle du compte courant
     tribuP: null, // tribu actuelle du compte courant
+    tribu2P: null, // tribu2 actuelle du compte courant
+    tribu2CP: null, // tribu2 "courante" pour le comptable
     maptr: new Map() // Map des tribus, uniquement pour le Comptable
   }),
 
@@ -34,6 +35,12 @@ export const useAvatarStore = defineStore('avatar', {
 
     /* retourne la tribu de l'avatar principal du compte actuellement connecté */
     tribu: (state) => { return state.tribuP },
+
+    /* retourne la tribu de l'avatar principal du compte actuellement connecté */
+    tribu2: (state) => { return state.tribu2P },
+
+    /* retourne la tribu de l'avatar principal du compte actuellement connecté */
+    tribu2C: (state) => { return state.tribu2CP },
 
     // Map dont la clé est l'id de l'avatar et la valeur le document avatar
     avatars: (state) => {
@@ -117,12 +124,12 @@ export const useAvatarStore = defineStore('avatar', {
   },
 
   actions: {
-    setCompte (avatar, compta, tribu) { // avatar principal du compte connecté
-      this.compteId = avatar.id
+    setCompte (avatar, compta, tribu, tribu2) { // avatar principal du compte connecté
       this.avatarP = avatar
       this.setTribu(tribu)
       this.setCompta(compta)
       this.setAvatar(avatar)
+      this.setTribu2(tribu2)
     },
 
     /* Sert surtout à pouvoir attacher un écouteur pour détecter les changements de mc */
@@ -135,16 +142,29 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     setTribu (tribu) { // set ou remplacement de la tribu
-      const peStore = stores.people
-      if (this.tribuP) { // remplacement - enlève des people
-        for (const idsp in this.tribuP.mncpt) peStore.unsetPeopleSponsor(parseInt(idsp))
-      }
       this.tribuP = tribu
-      const t = tribu.mncpt
-      for (const idsp in t) {
-        if (!this.avatarP.estAc(parseInt(idsp))) {
-          const e = t[idsp]
-          peStore.setPeopleSponsor(e.na, e.cv)
+    },
+
+    setTribu2 (tribu2) { // set ou remplacement de la tribu
+      const session = stores.session
+      if (session.tribuCid === tribu2.id) {
+        // tribu "courante" affichée pour le comptable
+        this.tribu2CP = tribu2
+      }
+      if (session.tribuId === tribu2.id) {
+        // tribu (actuelle) du compte : gestion des people
+        const peStore = stores.people
+        if (this.tribu2P) { // remplacement - enlève des people
+          for (const id in this.tribu2P.mbtr) {
+            peStore.unsetPeopleSponsor(parseInt(id))
+          }
+        }
+        this.tribu2P = tribu2
+        for (const id in tribu2.mbtr) {
+          if (!this.comptaP.estAc(parseInt(id))) {
+            const e = tribu2.mbtr[id]
+            peStore.setPeopleSponsor(e.na, e.cv)
+          }
         }
       }
     },
@@ -178,7 +198,7 @@ export const useAvatarStore = defineStore('avatar', {
         }
         e.avatar = avatar
       }
-      if (avatar.id === this.compteId) this.avatarP = avatar
+      if (avatar.id === stores.session.compteId) this.avatarP = avatar
     },
 
     setSecret (secret) {

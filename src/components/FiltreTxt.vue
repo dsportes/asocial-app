@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="'q-mb-sm full-width ' + dkli">
     <q-input dense counter v-model="val"
       :label="$t('FI' + prop)"
       @keydown.enter.prevent="ok" type="text" :hint="$t('entree')">
@@ -17,7 +17,7 @@ import { ref, toRef } from 'vue'
 export default ({
   name: 'FiltreTxt',
 
-  props: { nom: String, prop: String },
+  props: { nom: String, prop: String, idx: Number },
 
   data () {
     return { }
@@ -27,6 +27,10 @@ export default ({
     ok () {
       this.st.setFiltre(this.nom, this.prop, this.val)
     }
+  },
+
+  computed: {
+    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') }
   },
 
   setup (props) {

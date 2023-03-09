@@ -1,6 +1,6 @@
 <template>
-  <div class="full-width">
-    <q-checkbox v-model="val" :label="$t('FIavecbl')" />
+  <div :class="'q-mb-sm full-width ' + dkli">
+    <q-checkbox v-model="val" class="cb" :label="$t('FIavecbl')" />
   </div>
 </template>
 
@@ -11,7 +11,7 @@ import { ref, toRef } from 'vue'
 export default ({
   name: 'FiltreAvecbl',
 
-  props: { nom: String },
+  props: { nom: String, idx: Number },
 
   data () {
     return { 
@@ -22,6 +22,10 @@ export default ({
     val (ap) {
       this.st.setFiltre(this.nom, 'avecbl', ap === true ? true : false)
     }
+  },
+
+  computed: {
+    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') }
   },
 
   setup (props) {
@@ -40,4 +44,7 @@ export default ({
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.cb
+  position: relative
+  left: -10px
 </style>

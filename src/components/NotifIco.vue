@@ -13,11 +13,11 @@ export default ({
     alire: Number, // gravité la plus haute des notifications à lire. 0:toutes lues
     clickable: Boolean },
   computed: {
-    tclr () { return 'text-' + ['green-3 ','primary ','orange-9 ','negative '][this.gravite] },
-    tclr2 () { return ' text-' + ['green-3 ','primary ','orange-9 ','negative '][this.alire] },
-    bgclr () { return 'bg-' + ['none ','yellow-1 ','yellow-2 ','yellow-5 '][this.gravite] },
-    ico () { return ['check','report','warning','notifications'][this.gravite] },
-    ico2 () { return ['check','report','warning','notifications'][this.alire] }
+    tclr () { return 'text-' + ['green-3 ','primary ','orange-9 ','negative '][this.gravite || 0] },
+    tclr2 () { return ' text-' + ['green-3 ','primary ','orange-9 ','negative '][this.alire || 0] },
+    bgclr () { return 'bg-' + ['none ','yellow-1 ','yellow-2 ','yellow-5 '][this.gravite || 0] },
+    ico () { return ['check','report','warning','notifications'][this.gravite || 0] },
+    ico2 () { return ['check','report','warning','notifications'][this.alire || 0] }
   }
 })
 </script>

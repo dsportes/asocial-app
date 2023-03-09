@@ -1,5 +1,5 @@
 <template>
-  <div class="full-width">
+  <div :class="'q-mb-sm full-width ' + dkli">
     <q-select v-model="val" dense options-dense :options="options" :label="$t('FItri')" />
   </div>
 </template>
@@ -12,7 +12,7 @@ import { $t } from '../app/util.mjs'
 export default ({
   name: 'FiltreTri',
 
-  props: { nom: String, nbOptions: Number },
+  props: { nom: String, nbOptions: Number, idx: Number },
 
   data () {
     return {
@@ -23,6 +23,10 @@ export default ({
     val (ap) {
       this.st.setTri(this.nom, ap)
     }
+  },
+
+  computed: {
+    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') }
   },
 
   setup (props) {

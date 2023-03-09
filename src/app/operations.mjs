@@ -5,7 +5,7 @@ import { AppExc, appexc, AMJ } from './api.mjs'
 import { $t } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { GenDoc, NomAvatar, NomTribu, Avatar, Compta, Chat, Tribu, getNg, setNg, getCle, compile} from './modele.mjs'
+import { GenDoc, NomAvatar, NomTribu, Avatar, Compta, Chat, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
 import { genKeyPair, decrypter } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
@@ -483,7 +483,8 @@ export class NouvelleTribu extends OperationUI {
       const session = stores.session
       const nt = new NomTribu(nom)
       const rowTribu = await Tribu.nouvelleRow(nt, q1, q2)
-      const args = { token: session.authToken, rowTribu }
+      const rowTribu2 = await Tribu2.nouvelleRow(nt)
+      const args = { token: session.authToken, rowTribu, rowTribu2 }
       const ret = this.tr(await post(this, 'NouvelleTribu', args))
       this.finOK()
       return ret

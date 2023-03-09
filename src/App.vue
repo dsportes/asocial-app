@@ -79,18 +79,18 @@
           <div class="titre-lg">{{$t('MLArech')}}</div>
         </div>
         <div v-if="ui.page === 'chats'" class="column justify-start">
-          <filtre-nbj nom="chats" prop='nbj'/>
-          <filtre-nom nom="chats" prop='nom'/>
-          <filtre-txt nom="chats" prop='txt'/>
-          <filtre-mc nom="chats" attr="mcp"/>
-          <filtre-mc nom="chats" attr="mcn"/>
+          <filtre-nbj nom="chats" prop='nbj' :idx="0"/>
+          <filtre-nom nom="chats" prop='nom' :idx="1"/>
+          <filtre-txt nom="chats" prop='txt' :idx="0"/>
+          <filtre-mc nom="chats" attr="mcp" :idx="1"/>
+          <filtre-mc nom="chats" attr="mcn" :idx="0"/>
         </div>
         <div v-if="ui.page === 'tribus'" class="column justify-start">
-          <filtre-nom nom="tribus" prop='nomt'/>
-          <filtre-txt nom="tribus" prop='txtt'/>
-          <filtre-txt nom="tribus" prop='txtn'/>
-          <filtre-avecbl nom="tribus"/>
-          <filtre-tri nom="tribus" :nb-options="7"/>
+          <filtre-nom nom="tribus" prop='nomt' :idx="0"/>
+          <filtre-txt nom="tribus" prop='txtt' :idx="1"/>
+          <filtre-txt nom="tribus" prop='txtn' :idx="0"/>
+          <filtre-avecbl nom="tribus" :idx="1"/>
+          <filtre-tri nom="tribus" :nb-options="7" :idx="0"/>
         </div>
       </div>
     </q-scroll-area>
