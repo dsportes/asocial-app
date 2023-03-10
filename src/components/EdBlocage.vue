@@ -34,8 +34,8 @@ import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import SyntheseBlocage from './SyntheseBlocage.vue'
 import BoutonHelp from './BoutonHelp.vue'
-// import { Blocage } from '../app/modele.mjs'
-// import { SetAttributeTribu } from '../app/operations.mjs'
+import { crypter } from '../app/webcrypto.mjs'
+import { SetAttributTribu } from '../app/operations.mjs'
 
 export default {
   name: 'EdBlocage',
@@ -52,7 +52,7 @@ export default {
   props: { blTr: Object, blCo: Object, naTr: Object, naCo: Object, edit: Boolean, close: Function },
 
   computed: {
-    err () { return this.nja < 0 || this.njl < 0 || (this.nja + this.njl >= 365) }
+    err () { return this.bloc.nja < 0 || this.bloc.njl < 0 || (this.bloc.nja + this.bloc.njl >= 365) }
   },
 
   watch: {
@@ -77,7 +77,11 @@ export default {
       this.bloc.recalculBloc()
     },
     async valider () {
-      console.log(JSON.stringify(this.bloc))
+      const buf = this.bloc.encode()
+      const val = await crypter(this.na.rnd, buf)
+      await new SetAttributTribu().run(this.na.id, 'blocaget', val)
+      // console.log(JSON.stringify(this.bloc))
+      this.closebl()
     },
     async supprimer () {
       console.log(JSON.stringify(this.bloc))

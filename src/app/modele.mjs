@@ -459,9 +459,9 @@ export class Blocage {
       this.djl = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl)
       const now = AMJ.amjUtc()
       this.njrb = AMJ.diff(this.djb, now)
-      if (now > this.djl) { this.niv = 3; this.njra = 0; this.njrl = 0; return }
+      if (now >= this.djl) { this.niv = 3; this.njra = 0; this.njrl = 0; return }
       this.njrl = AMJ.diff(this.djl, now)
-      if (now > this.dja) { this.niv = 2; this.njra = 0; return }
+      if (now >= this.dja) { this.niv = 2; this.njra = 0; return }
       this.njra = AMJ.diff(this.dja, now)
       this.niv = 1
     } catch (e) {
