@@ -54,9 +54,6 @@
       </q-btn>
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmatribu')"
         @click="maTribu()"/>
-      <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmacompta')"
-        @click="ui.setPage('compta')"
-      />
       <q-btn v-if="session.estComptable" class="btn1" dense no-caps color="primary"
         :label="$t('ACtribus')" @click="ui.setPage('tribus')"
       />

@@ -201,6 +201,18 @@ export default {
         if (f.txtn &&
           (!t.notifco || t.notifco.txt.indexOf(f.txtn) === -1) &&
           (!t.notifcp || t.notifcp.indexOf(f.txtn) === -1)) continue
+        if (f.notif) {
+          let x = t.cpt.nco || [0, 0, 0]
+          const nco = [x[0]+x[1]+x[2], x[2]+x[1], x[2]]
+          x = t.cpt.nsp || [0, 0, 0]
+          const nsp = [x[0]+x[1]+x[2], x[2]+x[1], x[2]]
+          const okn =
+            (t.notifco && t.notifco.g >= f.notif) ||
+            (t.notifsp && t.notifsp.g >= f.notif) ||
+            (nco[f.notif - 1]) ||
+            (nsp[f.notif - 1])
+          if (!okn) continue
+        }
         r.push(t)
       }
       ftribus.value = r

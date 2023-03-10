@@ -844,9 +844,6 @@ export class Cv extends GenDoc {
 - `nctkc` : `[nom, clé]` de la tribu crypté par la clé K **du Comptable**: 
 - `napt`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
 - `compteurs`: compteurs sérialisés (non cryptés).
-- `blocaget` : blocage du compte crypté par la clé de la tribu.
-- `dhdq` : date-heure de détection du _dépassement_ des quotas.
-- `dhrq` : date-heure de détection du retour au _respect_ des quotas. 
 */
 
 export class Compta extends GenDoc {
@@ -894,9 +891,6 @@ export class Compta extends GenDoc {
     this.shay = row.shay
     this.stp = row.stp
 
-    this.notifco = row.notifco ? decode(await decrypter(this.nap.rnd, row.notifco)) : null
-    this.notifsp = row.notifsp ? decode(await decrypter(this.nap.rnd, row.notifsp)) : null
-
     /* `mavk` {id} `[nom, cle]` */
     const m = decode(await decrypter(session.clek, row.mavk))
     this.mav = new Map()
@@ -909,14 +903,14 @@ export class Compta extends GenDoc {
     }
     
     this.compteurs = new Compteurs(row.compteurs)
+    // TEST !!!!!!!!!!!!!
+    const c = this.compteurs
+    c.v1 = Math.round(this.compteurs.q1 * UNITEV1 * 0.3)
+    c.v2 = Math.round(this.compteurs.q2 * UNITEV2 * 0.02)
 
-    if (row.blocaget) {
-      const b = await decrypter(this.clet, row.blocaget)
-      this.blocage = new Blocage(b)
-    } else this.blocage = null
-
-    this.dhdq = row.dhdq || 0
-    this.dhrq = row.dhrq || 0
+    this.compteurs.pc1 = Math.round( (this.compteurs.v1 * 100) / (this.compteurs.q1 * UNITEV1))
+    this.compteurs.pc2 = Math.round( (this.compteurs.v2 * 100) / (this.compteurs.q2 * UNITEV2))
+    this.pc = this.compteurs.pc1 < this.compteurs.pc2 ? this.compteurs.pc2 : this.compteurs.pc1
   }
 
   async ajoutAvatarMavk (nvna) {
@@ -957,8 +951,6 @@ export class Compta extends GenDoc {
     m[na.id] = [na.nom, na.rnd]
     r.mavk = await crypter(session.clek, new Uint8Array(encode(m)))
 
-    r.dhdq = 0
-    r.dhrq = 0
     const c = new Compteurs()
     c.setQ1(q1)
     c.setQ2(q2)

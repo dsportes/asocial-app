@@ -1,5 +1,5 @@
 <template>
-  <q-icon size="sm" style="position-relative; border-radius: 5px"
+  <q-icon size="sm" style="position:relative; border-radius: 5px"
     :name="ico" :class="tclr + bgclr + (clickable ? ' cursor-pointer':'')">
     <q-icon v-if="alire" size="14px" :name="ico2" :class="'rond ' + bgclr + tclr2"/>
   </q-icon>

@@ -4,6 +4,7 @@
       <span class="text-bold fs-md q-mr-sm">{{t.na.nom}}</span> 
       <span class="text-bold fs-sm font-mono q-mr-sm">#{{id}}</span> 
     </div>
+
     <div v-if="t.info" class="q-ml-md q-my-xs bord row">
       <show-html class="col" :idx="idx" zoom maxh="3rem" :texte="t.info"/>
       <q-btn v-if="edit && session.estComptable" color="primary" 
@@ -14,8 +15,10 @@
       <q-btn v-if="edit && session.estComptable" class="q-ml-sm" size="sm" dense
         :label="$t('PTecr')" color="primary" icon="edit" @click="editer"/>
     </div>
+
     <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
+
     <div class="q-ml-md q-mt-xs row peitelargeur">
       <div class="col-6 titre-sm">{{$t('NTv1')}}</div>
       <div class="col-3 text-center font-mono">{{t.cpt.a1 || 0}} - {{ed1(t.cpt.a1 || 0)}}</div>
@@ -53,28 +56,19 @@
     <div v-if="t.blocage">
       <span class="titre-sm q-my-sm text-warning">{{$t('SBn' + t.blocage.niv) + $t('SBdisp2', [t.blocage.njrb])}}</span>
       <q-btn v-if="edit && session.estComptable" color="primary" 
-        class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl"/>
+        class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl(true)"/>
       <q-btn v-else color="primary" 
-        class="q-ml-sm btn2" size="sm" dense icon="open_in_new" :label="$t('detail')" @click="affichbl"/>
+        class="q-ml-sm btn2" size="sm" dense icon="open_in_new" :label="$t('detail')" @click="(editerbl(false))"/>
     </div>
     <div v-else>
       <div v-if="edit && session.estComptable">
         <span class="titre-sm q-my-sm text-italic">{{$t('SNnon')}}</span>
-        <q-btn color="primary" class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl"/>
+        <q-btn color="primary" class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl(true)"/>
       </div>
     </div>
     
     <q-dialog v-model="edbl" persistent>
-      <q-card class="petitelargeur">
-        <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="closebl"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">
-            {{$t(bloc.dh ? 'SBdet' : 'SBnv', [t.na.nom])}}
-          </q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-        <synthese-blocage :bl-tr="bloc"/>
-      </q-card>
+      <ed-blocage :bl-tr="bloc" :na-tr="t.na" :edit="edaff" :close="closebl"/>
     </q-dialog>
 
     <q-dialog v-model="edcom" persistent>
@@ -84,7 +78,7 @@
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NTcom', [t.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
-        <editeur-md style="height:50vh" :lgmax="1000" editable :texte="t.info"
+        <editeur-md style="height:50vh" :lgmax="250" editable :texte="t.info"
           :label-ok="$t('valider')" modetxt @ok="valider"/>
       </q-card>
     </q-dialog>
@@ -99,12 +93,12 @@ import ShowHtml from './ShowHtml.vue'
 import ApercuNotif from './ApercuNotif.vue'
 import { edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { SetAttribut } from '../app/operations.mjs'
+import { SetAttributTribu } from '../app/operations.mjs'
 import { crypter } from '../app/webcrypto.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
 import NotifIco from './NotifIco.vue'
-import SyntheseBlocage from './SyntheseBlocage.vue'
+import EdBlocage from './EdBlocage.vue'
 import { Blocage } from '../app/modele.mjs'
 
 export default {
@@ -112,13 +106,14 @@ export default {
 
   props: { id: Number, idx: Number, edit: Boolean },
 
-  components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, SyntheseBlocage, NotifIco },
+  components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, EdBlocage, NotifIco },
 
   computed: { },
 
   data () { return {
     edcom: false,
     edbl: false,
+    edaff: false,
     info: '',
     bloc: null
   }},
@@ -133,17 +128,14 @@ export default {
     },
     async valider (txt) {
       const buf = txt ? await crypter(this.session.clek, txt) : null
-      await new SetAttribut().run(this.id, 'infok', buf)
+      await new SetAttributTribu().run(this.id, 'infok', buf)
       this.close()
     },
     close () { this.edcom = false},
-    editerbl () {
+    editerbl (ed) {
       this.bloc = this.t.blocage ? this.t.blocage.clone() : new Blocage(null, 0)
       this.edbl = true
-    },
-    afficherbl () {
-      this.bloc = this.t.blocage ? this.t.blocage.clone() : new Blocage(null, 0)
-      this.edbl = true
+      this.edaff = ed
     },
     closebl () { this.edbl = false }
   },

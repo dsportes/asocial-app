@@ -494,21 +494,22 @@ export class NouvelleTribu extends OperationUI {
   }
 }
 
-/* Set d'un attribut d'une tribu ou d'une compta *********************************
+/* Set d'un attribut d'une tribu *********************************
 args.token: éléments d'authentification du compte.
-args.id : id du compte ou de la tribu
+args.id : id de la tribu
 args.attr: nom de l'attribut
 args.val: valeur de l'attribut
+args.val2: valeur de l'attribut "annexe"
 Retour:
 */
-export class SetAttribut extends OperationUI {
+export class SetAttributTribu extends OperationUI {
   constructor () { super($t('OPnvtr')) }
 
-  async run (id, attr, val) {
+  async run (id, attr, val, val2) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, attr, val }
-      const ret = this.tr(await post(this, 'SetAttribut', args))
+      const args = { token: session.authToken, id, attr, val, val2: val2 || 0 }
+      const ret = this.tr(await post(this, 'SetAttributTribu', args))
       this.finOK()
       return ret
     } catch (e) {

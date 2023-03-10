@@ -28,6 +28,12 @@
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-btn>
 
+      <div v-if="session.status>1" @click="pageCompta" style="position:relative"
+        :class="'cursor-pointer q-mr-xs bg2 ' + pccl">
+        <q-knob v-model="pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
+        <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{pc + '%'}}</div>
+      </div>
+
       <notif-ico class="q-ml-xs" :gravite="0" :alire="0" @click="clickNotif"/>
       <notif-ico class="q-ml-xs" clickable :gravite="1" :alire="1" @click="clickNotif"/>
       <notif-ico class="q-ml-xs" :gravite="2" :alire="0" @click="clickNotif"/>
@@ -90,7 +96,8 @@
           <filtre-txt nom="tribus" prop='txtt' :idx="1"/>
           <filtre-txt nom="tribus" prop='txtn' :idx="0"/>
           <filtre-avecbl nom="tribus" :idx="1"/>
-          <filtre-tri nom="tribus" :nb-options="7" :idx="0"/>
+          <filtre-notif nom="tribus" :idx="0"/>
+          <filtre-tri nom="tribus" :nb-options="7" :idx="1"/>
         </div>
       </div>
     </q-scroll-area>
@@ -185,6 +192,7 @@ import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
 import FiltreAvecbl from './components/FiltreAvecbl.vue'
 import FiltreTri from './components/FiltreTri.vue'
+import FiltreNotif from './components/FiltreNotif.vue'
 
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
@@ -199,7 +207,7 @@ export default {
     BoutonHelp, BoutonLangue, OutilsTests, NotifIco,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats, PageAproposav,
     PageCompta, PageTribus, PageTribu,
-    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri,
+    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif,
     DialogueErreur, DialogueHelp, InfoBlocage
    },
 
@@ -208,7 +216,9 @@ export default {
     aHome () { return (this.session.status > 1 && this.ui.page !== 'accueil')
       || (!this.session.status && this.ui.page !== 'login') },
     maCompta () { return this.session.compta },
-    naMaTribu () { return this.session.compte.nct }
+    naMaTribu () { return this.session.compte.nct },
+    pc () { return this.session.compta.pc },
+    pccl () {return this.pc < 80 ? 'bg-transparent' : (this.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
   },
 
   // Transmet au store ui **le franchissement du seuil** etroit / large
@@ -247,11 +257,9 @@ export default {
     async infoBlocage () { await this.ui.ouvrirInfoBlocage(true) },
     async panelcontactsAut () { if (await this.session.aut(4)) this.ui.panelContacts = true },
     async fichiersavionAut () { if (await this.session.aut(4)) this.ui.fichiersAvion = true },
-    ouvrirftlocal () { this.dialogueftlocal = true },
-    ouvrirTribu () { },
-    ouvrirArdoise () {
-      this.ui.ouvrirArdoiseTribu(this.maCompta, this.naMaTribu)
-    }
+
+    pageCompta () { this.ui.setPage('compta') }
+
   },
 
   setup () {
@@ -337,4 +345,11 @@ export default {
   color: $negative
   font-weight: bold
   border: 2px solid $negative
+.bdg1
+  position: absolute
+  top: 6px
+  width: 24px
+.bg2
+  border-radius: 5px
+  padding: 2px
 </style>

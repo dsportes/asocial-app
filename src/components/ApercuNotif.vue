@@ -49,7 +49,7 @@ import EditeurMd from './EditeurMd.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import NotifIco from './NotifIco.vue'
 import { crypter } from '../app/webcrypto.mjs'
-import { SetAttribut } from '../app/operations.mjs'
+import { SetAttributTribu } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuNotif',
@@ -91,7 +91,7 @@ export default {
         id: this.session.estComptable ? 0 : this.session.compteId }
       // crypté par la clé de la tribu si source tribu, du compte si source compte
       const buf = await crypter(getCle(this.src.id), new Uint8Array(encode(e)))
-      await new SetAttribut().run(this.src.id, this.tribu ? 'notiftr' : 'notifco', buf)
+      await new SetAttributTribu().run(this.src.id, this.sponsor ? 'notifsp' : 'notifco', buf, this.g)
       this.close()
     }
   },
