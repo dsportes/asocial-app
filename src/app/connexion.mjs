@@ -427,7 +427,7 @@ export class ConnexionCompte extends OperationUI {
       this.rowTribu2 = ret.rowTribu2
     }
     this.tribu = await compile(this.rowTribu)
-    this.tribu2 = await compile(this.rowTribu)
+    this.tribu2 = await compile(this.rowTribu2)
     session.tribuId = this.tribu.id
     if (session.fsSync) await session.fsSync.setTribu(session.tribuId)
   }

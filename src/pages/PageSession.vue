@@ -5,11 +5,6 @@
         <span class="text-italic titre-md">{{$t('ISst')}}</span>
         <span class="q-ml-md text-bold">{{st}}</span>
       </div>
-      <div :class="'titre-md q-mt-md text-italic' + cb">{{$t('IBec')}}</div>
-      <div v-if="session.ok">
-        <div :class="'q-ml-md text-bold ' + cb">{{$t('IB' + session.blocage)}}</div>
-      </div>
-      <div v-else class="q-ml-md titre-md text-italic">{{$t('ISnc')}}</div>
 
       <div class="titre-md q-mt-md">{{$t('ISdcs')}}</div>
       <div v-if="session.ok && dsync">

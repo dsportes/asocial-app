@@ -138,11 +138,14 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     setCompta (compta) {
+      const bl = this.comptaP && ((this.comptaP.dhvu || 0) !== (compta.dhvu || 0))
       this.comptaP = compta
+      if (bl) stores.session.setBlocage()
     },
 
     setTribu (tribu) { // set ou remplacement de la tribu
       this.tribuP = tribu
+      if (this.tribu2P) stores.session.setBlocage()
     },
 
     setTribu2 (tribu2) { // set ou remplacement de la tribu
@@ -166,6 +169,7 @@ export const useAvatarStore = defineStore('avatar', {
             peStore.setPeopleSponsor(e.na, e.cv)
           }
         }
+        session.setBlocage()
       }
     },
 

@@ -1,7 +1,7 @@
 <template>
   <q-icon size="sm" style="position:relative; border-radius: 6px"
     :name="ico" :class="tclr + bgclr + (clickable ? ' cursor-pointer':'')">
-    <div v-if="alire" class="rond"></div>
+    <span v-if="alire" class="rond"></span>
   </q-icon>
 </template>
 

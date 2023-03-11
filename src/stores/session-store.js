@@ -36,13 +36,11 @@ export const useSessionStore = defineStore('session', {
     groupeId: 0, // groupe "courant"
     tribuCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
 
-    // niveau de blocage: (1: alerte, 2:lecture, 3:bloqué)
-    notifG: null,
-    blocage: 0,
-    infoBlocage: false,
-    infoBlocageResolve: null,
-    rappelBlocage: 0,
-    dernierBlocage: this
+    // blocage et notification
+    nivbl: 0,
+    alirebl: false,
+    gntf: 0,
+    alirentf: false
   }),
 
   getters: {
@@ -128,28 +126,36 @@ export const useSessionStore = defineStore('session', {
       this.notifG = notif
     },
 
-    /* Calcul du blocage depuis compta et tribu
-    Retourne la nature du changement:
-    - 0: pas de changement
-    - 1: le changement n'affecte pas le blocage / déblocage
-    - 2: le compte VIENT d'être bloqué
-    - 3: le compte VIENT d'être débloqué
+    /* Calcul du blocage depuis tribu, tribu2, compta (si chgt dhvu)
     */
     setBlocage () {
-      if (this.estComptable || this.avion) {
-        this.blocage = 0
-        return 0
+      const self = this
+      function ntfx (ntf) {
+        if (ntf) {
+          if (ntf.g > self.gntf) self.gntf = ntf.g
+          if (ntf.dh > dhvu) self.alirentf = true
+        }  
       }
-      const av = this.blocage
-      let ap = 0
-      if (this.tribu.stn > ap) ap = this.tribu.stn
-      if (this.compta.stn > ap) ap = compta.stn
-      this.blocage = ap
-      if (this.synchro && this.blocage === 4) this.mode = 2
-      if (av === ap) return 0
-      if (av === 4 && ap < 4) return 3
-      if (av < 4 && ap === 4) return 2
-      return 1
+      function blx (bl) {
+        if (bl) {
+          if (bl.niv > self.nivbl) self.nivbl = bl.niv
+          if (bl.dh > dhvu) self.alirebl = true
+        }  
+      }
+      const avStore = stores.avatar
+      const tr = avStore.tribu
+      const et2 = avStore.tribu2.mbtr[this.compteId]
+      const dhvu = avStore.compta.dhvu || 0
+      this.nivbl = 0
+      this.alirebl = false
+      this.gntf = 0
+      this.alirentf = false
+      ntfx(tr.notifco)
+      ntfx(tr.notifsp)
+      ntfx(et2.notifco)
+      ntfx(et2.notifsp)
+      blx(tr.blocage)
+      blx(et2.blocage)
     },
 
     /* authToken : base64 de la sérialisation de :

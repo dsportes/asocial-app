@@ -1,13 +1,13 @@
 <template>
   <q-card class="q-pa-sm moyennelargeur">
 
-    <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-lg bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
-      <div class="titre-lg">{{$t('CPTal1a', [c.pc1])}}</div>
+    <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
+      <div class="titre-md">{{$t('CPTal1a', [c.pc1])}}</div>
       <div>{{$t('CPTal1b')}}</div>
     </div>
 
-    <div v-if="c.pc2 >= 100" class="q-my-sm q-mx-lg bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
-      <div class="titre-lg">{{$t('CPTal2a', [c.pc2])}}</div>
+    <div v-if="c.pc2 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
+      <div class="titre-md">{{$t('CPTal2a', [c.pc2])}}</div>
       <div>{{$t('CPTal2b')}}</div>
     </div>
 

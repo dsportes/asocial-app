@@ -34,10 +34,8 @@
         <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{pc + '%'}}</div>
       </div>
 
-      <notif-ico class="q-ml-xs" :gravite="0" @click="clickNotif"/>
-      <notif-ico class="q-ml-xs" clickable :gravite="1" alire @click="clickNotif"/>
-      <notif-ico class="q-ml-xs" :gravite="2" @click="clickNotif"/>
-      <notif-ico class="q-ml-xs" clickable :gravite="3" alire @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" v-if="session.gntf" clickable :gravite="session.gntf" :alire="session.alirentf" @click="clickNotif"/>
+      <blocage-ico class="q-ml-xs" v-if="session.nivbl" clickable :niveau="session.nivbl" :alire="session.alirebl" @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
         <span v-if="session.ok">{{session.avC.na.nomc}}</span>
@@ -154,10 +152,6 @@
     <outils-tests/>
   </q-dialog>
 
-  <q-dialog v-if="ui.infoBlocage" v-model="ui.infoBlocage" full-height persistent>
-    <info-blocage/>
-  </q-dialog>
-
 </q-layout>
 </template>
 
@@ -173,6 +167,7 @@ import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
 import NotifIco from './components/NotifIco.vue'
+import BlocageIco from './components/BlocageIco.vue'
 
 import PageLogin from './pages/PageLogin.vue'
 import PageSession from './pages/PageSession.vue'
@@ -196,18 +191,17 @@ import FiltreNotif from './components/FiltreNotif.vue'
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
 import DialogueHelp from './dialogues/DialogueHelp.vue'
-import InfoBlocage from './dialogues/InfoBlocage.vue'
 
 export default {
   displayName: 'App',
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, OutilsTests, NotifIco,
+    BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats, PageAproposav,
     PageCompta, PageTribus, PageTribu,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif,
-    DialogueErreur, DialogueHelp, InfoBlocage
+    DialogueErreur, DialogueHelp
    },
 
   computed: {
@@ -236,7 +230,11 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
 
     clickNotif () {
-      console.log('click notif')
+      this.ui.setPage('compta', 'notif')
+    },
+
+    pageCompta () { 
+      this.ui.setPage('compta', 'compta')
     },
 
     ouvrFiltre () { this.ui.menu = true },
@@ -256,9 +254,6 @@ export default {
     async infoBlocage () { await this.ui.ouvrirInfoBlocage(true) },
     async panelcontactsAut () { if (await this.session.aut(4)) this.ui.panelContacts = true },
     async fichiersavionAut () { if (await this.session.aut(4)) this.ui.fichiersAvion = true },
-
-    pageCompta () { this.ui.setPage('compta') }
-
   },
 
   setup () {

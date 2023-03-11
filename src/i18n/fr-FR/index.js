@@ -98,13 +98,6 @@ export default {
   comptes: 'Pas de compte | Un compte | {count} comptes',
   parrains: 'Pas de parrain | Un parrain | {count} parrains',
 
-  // statuts couple
-  STCP1: 'en attente',
-  STCP2: 'hors délai',
-  STCP3: 'refusé',
-  STCP4: 'actif',
-  STCP5: 'orphelin',
-
   // statuts membre
   STMB0: 'envisagé',
   STMB1: 'invité',
@@ -468,7 +461,7 @@ export default {
   Pchats: 'Mes chats',
   Ptribus: 'Toutes les tribus',
   Ptribu: 'Ma tribu courante',
-  Pcompta: 'Décompte des volumes utilisés',
+  Pcompta: 'Notifications, blocages, volumes',
   Paproposav: 'A propos de l\'avatar',
 
   MLAcptp: '(parrain)',
@@ -590,6 +583,13 @@ export default {
   ISsy4: 'Dernière synchronisation',
   ISsy5: 'Dernier signe de vie du serveur',
   ISnc: 'Information disponible seulement après connexion en mode synchronisé ou avion',
+
+  // page notification, blocage, compta, chats
+  PNCtit: 'Etat général de la session',
+  PNCntf: 'Notifications et blocages',
+  PNCesp: 'Volumes utilisés',
+  PNCchats: 'Chats d\'urgence',
+  PNCntfTrCo: 'Notification sur la "tribu" posée par le Comptable',
 
   // PanelContacts
   PCnom: "Nom ...",
@@ -818,6 +818,7 @@ export default {
   SBtitt: 'Blocage "tribu"',
   SBtitc: 'Blocage "compte"',
   SBtittc: 'Blocage "tribu" ET "compte"',
+  SBgco: '(par le Ccomptable)',
   SBn1: 'Alerte. ',
   SBn2: 'Lecture seulement. ',
   SBn3: 'Compte bloqué. ',

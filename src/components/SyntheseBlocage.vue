@@ -1,19 +1,19 @@
 <template>
   <q-card class="shadow-8 q-pa-sm">
 
-    <div>
-      <span v-if="blTr && !blCo" class="titre-md text-center text-bold text-italic">
+    <div class="text-center">
+      <span v-if="blTr && !blCo" class="titre-md text-bold text-italic">
         {{$t('SBtitt')}}</span>
-      <span v-if="!blTr && blCo" class="titre-md text-center text-bold text-italic">
+      <span v-if="!blTr && blCo" class="titre-md text-bold text-italic">
         {{$t('SBtitc')}}</span>
-      <span v-if="blTr && blCo" class="titre-md text-center text-bold text-italic">
+      <span v-if="blTr && blCo" class="titre-md text-bold text-italic">
         {{$t('SBtittc')}}</span>
-      <blocage-ico :niveau="niv" class="q-mr-xs q-ml-sm"/>
-      <span v-if="blCo && !blCo.sp" class="titre-md text-center text-italic">
+      <span v-if="blCo && !blCo.sp" class="titre-md text-italic">
         {{$t('SBgco')}}</span>
+        <span>.</span>
+      <blocage-ico :niveau="niv" class="q-mr-xs q-ml-sm"/>
+      <span class="titre-md">{{$t('SBn' + niv) + $t('SBdisp', [djb, njrb])}}</span>
     </div>
-
-    <div class="titre-md text-center q-my-sm">{{$t('SBn' + niv) + $t('SBdisp', [djb, njrb])}}</div>
 
     <div class="row">
       <div :class="col"></div>

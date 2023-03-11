@@ -7,6 +7,7 @@ export const useUiStore = defineStore('ui', {
   state: () => ({
     page: 'login',
     pageback: '',
+    pagetab: '',
     etroite: false,
     filtre: false,
     seuillarge: 800,
@@ -51,7 +52,7 @@ export const useUiStore = defineStore('ui', {
     setEtroite (v) {
       this.etroite = v
     },
-    async setPage (p) {
+    async setPage (p, tab) {
       this.menu = false
       const pagesF = new Set(['chats', 'tribus'])
       const pagesB = new Set(['tribus'])
@@ -62,6 +63,7 @@ export const useUiStore = defineStore('ui', {
       this.filtre = pagesF.has(p)
       // ouvre le filtre si la page en a un ET que la fenêtre est large
       if (this.filtre && !this.etroite) this.menu = true
+      this.pagetab = tab || ''
     },
 
     async setPageBack () {
