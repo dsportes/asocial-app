@@ -474,8 +474,6 @@ export class Blocage {
  * Tous les objets Documents
 ****************************************************/
 export class GenDoc {
-  static deGroupe (id) { return id && id % 10 === 8 }
-  static idCompta (id) { return Math.floor(id / 10) * 10 }
   get pk () { return this.id + (this.ids ? '/' + this.ids : '')}
   static _iv (id, v) { return ((id % 1000000 ) * 1000000) + v}
   async compile (row) { }
@@ -833,10 +831,7 @@ export class Cv extends GenDoc {
 - `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte : sert d'accès au row compta à la connexion au compte.
 - `shay` : SHA du SHA de X (PBKFD de la phrase secrète). Permet de vérifier la détention de la phrase secrète complète.
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
-- `stp` : statut parrain (0: non, 1:oui).
-- `notifco` : notification du comptable au compte (cryptée par la clé de l'avatar principal du compte).
-- `notifsp` : notification d'un sponsor au compte (cryptée par la clé de l'avatar principal du compte).
-- `dhvu` : date-heure de dernière vue des notifications par le titualire du compte, cryptée par la clé du compte.
+- `dhvu` : date-heure de dernière vue des notifications par le titualire du compte, cryptée par la clé K.
 - `mavk` : map des avatars du compte cryptée par la clé K du compte. 
   - _clé_ : id de l'avatar.
   - _valeur_ : `[nom clé]` : son nom complet.
@@ -889,7 +884,7 @@ export class Compta extends GenDoc {
 
     this.hps1 = row.hps1
     this.shay = row.shay
-    this.stp = row.stp
+    this.dhvu = row.dhvu ? parseInt(await decrypterStr(session.clek, row.dhvu)) : 0
 
     /* `mavk` {id} `[nom, cle]` */
     const m = decode(await decrypter(session.clek, row.mavk))

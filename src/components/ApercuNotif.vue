@@ -49,12 +49,16 @@ import EditeurMd from './EditeurMd.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import NotifIco from './NotifIco.vue'
 import { crypter } from '../app/webcrypto.mjs'
-import { SetAttributTribu } from '../app/operations.mjs'
+import { SetAttributTribu, SetAttributTribu2 } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuNotif',
 
-  props: { src: Object, sponsor: Boolean, idx: Number, edit: Boolean },
+  props: { // la notif est soit au niveau Tribu, soit au niveau "compte" (tribu2)
+    src: Object, // elt de tribu2 pour une notification de niveau compte, tribu pour une notification
+    nat: Object, // na de la tribu du compte pour un aperçu de niveau "compte" (tribu2) (sinon c'est src.na)
+    sponsor: Boolean, // aperçu de la notification du sponsor, sinon c'est celle du comptable
+    idx: Number, edit: Boolean },
 
   components: { ShowHtml, EditeurMd, BoutonHelp, NotifIco },
 
@@ -90,8 +94,12 @@ export default {
       const e = { dh: new Date().getTime(), g: this.g, txt: txt, 
         id: this.session.estComptable ? 0 : this.session.compteId }
       // crypté par la clé de la tribu si source tribu, du compte si source compte
-      const buf = await crypter(getCle(this.src.id), new Uint8Array(encode(e)))
-      await new SetAttributTribu().run(this.src.id, this.sponsor ? 'notifsp' : 'notifco', buf, this.g)
+      const buf = await crypter(this.nat.rnd, new Uint8Array(encode(e)))
+      if (this.estTribu) {
+        await new SetAttributTribu().run(this.src.id, this.sponsor ? 'notifsp' : 'notifco', buf)
+      } else { // src.na: na du compte
+        await new SetAttributTribu2().run(this.nat.id, this.src.na, this.sponsor ? 'notifsp' : 'notifco', buf, this.g)
+      }
       this.close()
     }
   },

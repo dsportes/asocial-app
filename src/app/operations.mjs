@@ -495,20 +495,23 @@ export class NouvelleTribu extends OperationUI {
 }
 
 /* Set d'un attribut d'une tribu *********************************
+  - `infok` : commentaire privé du comptable crypté par la clé K du comptable.
+  - `notifco` : notification du comptable à la tribu (cryptée par la clé de la tribu).
+  - `notifsp` : notification d'un sponsor à la tribu (cryptée par la clé de la tribu).
+  - `blocaget` : blocage crypté par la clé de la tribu.
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
 args.attr: nom de l'attribut
 args.val: valeur de l'attribut
-args.val2: valeur de l'attribut "annexe"
 Retour:
 */
 export class SetAttributTribu extends OperationUI {
   constructor () { super($t('OPnvtr')) }
 
-  async run (id, attr, val, val2) {
+  async run (id, attr, val) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, attr, val, val2: val2 || 0 }
+      const args = { token: session.authToken, id, attr, val }
       const ret = this.tr(await post(this, 'SetAttributTribu', args))
       this.finOK()
       return ret
@@ -518,13 +521,19 @@ export class SetAttributTribu extends OperationUI {
   }
 }
 
-/* Set d'un attribut de l'entrée d'un compte d'une tribu2 *********************************
+/* Set d'un attribut QUI IMPACTE tribu de l'entrée d'un compte d'une tribu2 - PAS la CV *******
+  - `sp` : si `true` / présent, c'est un sponsor.
+  - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
+  - 'gco gsp' : gravités des notifco et notifsp.
+  - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
+  - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
+  - quotas: `[q1, q2]` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
-args.attr: nom de l'attribut
 args.hrnd: id de l'élément du compte dans mbtr
+args.attr: nom de l'attribut
 args.val: valeur de l'attribut
-args.val2: valeur de l'attribut "annexe"
+args.val2: valeur de l'attribut "gco / gsp"
 Retour:
 */
 export class SetAttributTribu2 extends OperationUI {
@@ -544,6 +553,27 @@ export class SetAttributTribu2 extends OperationUI {
   }
 }
 
+/* Set du dhvu d'une compta *********************************
+args.token: éléments d'authentification du compte.
+args.dhvu : dhvu cryptée par la clé K
+Retour:
+*/
+export class SetDhvuCompta extends OperationUI {
+  constructor () { super($t('OPdhvu')) }
+
+  async run () {
+    try {
+      const session = stores.session
+      const dhvu = await crypter(session.clek, '' + (new Date().getTime()))
+      const args = { token: session.authToken, dhvu }
+      const ret = this.tr(await post(this, 'SetDhvuCompta', args))
+      this.finOK()
+      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
 
 
 

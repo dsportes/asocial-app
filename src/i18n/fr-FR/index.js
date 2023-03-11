@@ -389,6 +389,7 @@ export default {
   OPmajtch: 'Mise à jour du texte d\'un chat',
   OPmajmcch: 'Mise à jour des mots clés d\'un chat',
   OPnvtr: 'Nouvelle tribu',
+  OPdhvu: 'Maj de la date-heure de "vu" d\'une compta',
 
   OPrdv: 'Prendre rendez-vous avec un avatar',
   OPprl: 'Prolonger une proposition (de contact, parrainage ou rendez-vous)',

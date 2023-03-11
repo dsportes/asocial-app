@@ -106,7 +106,10 @@ import { Blocage } from '../app/modele.mjs'
 export default {
   name: 'ApercuTribu',
 
-  props: { id: Number, idx: Number, edit: Boolean },
+  props: { 
+    id: Number, // id de la tribu
+    idx: Number, edit: Boolean 
+  },
 
   components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, EdBlocage, NotifIco, BlocageIco },
 

@@ -51,7 +51,10 @@ export default {
    3) blTr: édition de blTr seul, IL N'Y A PAS de blocage compte
    naCompte : pour enregistrer le blocage dans Tribu2 dans l'entrée du compte
   */
-  props: { blTr: Object, blCo: Object, naTr: Object, naCo: Object, naCompte: Object, edit: Boolean, close: Function },
+  props: { blTr: Object, blCo: Object, 
+    naTr: Object, // na de la tribu bloquée OU de la tribu du compte bloqué
+    naCo: Object, // na du compte (blCo est présent et c'est le blocage "compte" qui est édité)
+    edit: Boolean, close: Function },
 
   computed: {
     err () { return this.bloc.nja < 0 || this.bloc.njl < 0 || (this.bloc.nja + this.bloc.njl >= 365) }
@@ -83,9 +86,9 @@ export default {
       const buf = this.bloc.encode()
       const val = await crypter(this.na.rnd, buf)
       if (this.blCo) {
-        await new SetAttributTribu2().run(this.na.id, this.naCompte, 'blocaget', val)
+        await new SetAttributTribu2().run(this.naTr.id, this.naCo, 'blocaget', val)
       } else {
-        await new SetAttributTribu().run(this.na.id, 'blocaget', val)
+        await new SetAttributTribu().run(this.naTr.id, 'blocaget', val)
       }
       // console.log(JSON.stringify(this.bloc))
       this.closebl()
