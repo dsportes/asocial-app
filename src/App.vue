@@ -34,11 +34,10 @@
         <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{pc + '%'}}</div>
       </div>
 
-      <notif-ico class="q-ml-xs" :gravite="0" :alire="0" @click="clickNotif"/>
-      <notif-ico class="q-ml-xs" clickable :gravite="1" :alire="1" @click="clickNotif"/>
-      <notif-ico class="q-ml-xs" :gravite="2" :alire="0" @click="clickNotif"/>
-      <notif-ico class="q-ml-xs" clickable :gravite="3" :alire="2" @click="clickNotif"/>
-      <notif-ico class="q-ml-xs" clickable :gravite="3" :alire="3" @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" :gravite="0" @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" clickable :gravite="1" alire @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" :gravite="2" @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" clickable :gravite="3" alire @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
         <span v-if="session.ok">{{session.avC.na.nomc}}</span>

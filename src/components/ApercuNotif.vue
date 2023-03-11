@@ -3,7 +3,7 @@
     <div v-if="ntf" class="row justify-between">
       <div>
         <span class="fs-md q-mr-sm">{{$t(estTribu ? 'NTtr' : 'NTco', [emet])}}</span> 
-        <notif-ico :gravite="ntf.g || 1" :alire="0"/>
+        <notif-ico :gravite="ntf.g || 1"/>
       </div>
       <div>
         <span class="fs-sm q-mr-xs">{{dh}}</span>
@@ -21,7 +21,7 @@
       <q-toolbar>
         <q-btn dense size="md" color="warning" icon="close" @click="close"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t(estTribu ? 'NTtr2' : 'NTco2')}}</q-toolbar-title>
-        <notif-ico class="q-mx-xs" :gravite="g" :alire="0"/>
+        <notif-ico class="q-mx-xs" :gravite="g"/>
         <bouton-help page="page1"/>
       </q-toolbar>
       <div class="q-mt-sm q-pb-md q-gutter-md row justify-center full-width">

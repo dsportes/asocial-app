@@ -1,23 +1,22 @@
 <template>
   <q-icon size="sm" style="position:relative; border-radius: 6px"
     :name="ico" :class="tclr + bgclr + (clickable ? ' cursor-pointer':'')">
-    <!--q-icon v-if="alire" size="14px" :name="ico2" :class="'rond ' + bgclr + tclr2"/-->
     <div v-if="alire" class="rond"></div>
   </q-icon>
 </template>
 
 <script>
 export default ({
-  name: 'NotifIco',
+  name: 'BlocageIco',
   props: { 
-    gravite: Number, // gravité de la notification: 0:PAS de notfication, 1:basse, 2:moyenne, 3:haute
+    niveau: Number, // niveau du blocage: 0:PAS de blocage, 1:alerte, 2:lecture seule, 3:bloqué
     alire: Boolean, // présence de l'indicateur à lire
     clickable: Boolean 
   },
   computed: {
-    tclr () { return 'text-' + ['green-3 ','primary ','orange-9 ','negative '][this.gravite || 0] },
-    bgclr () { return 'bg-' + ['none ','yellow-1 ','yellow-2 ','yellow-5 '][this.gravite || 0] },
-    ico () { return ['check','report','warning','notifications'][this.gravite || 0] }
+    tclr () { return 'text-' + ['green-3 ','primary ','orange-9 ','negative '][this.niveau || 0] },
+    bgclr () { return 'bg-' + ['none ','yellow-1 ','yellow-2 ','yellow-5 '][this.niveau || 0] },
+    ico () { return ['check','alarm_on','lock_open','lock'][this.niveau || 0] }
   }
 })
 </script>

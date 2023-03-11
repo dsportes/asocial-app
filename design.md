@@ -1,28 +1,3 @@
-{
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "firefox",
-      "request": "launch",
-      "name": "vuejs: chrome",
-      "url": "https://localhost:8343",
-      "webRoot": "${workspaceFolder}/src",
-      "pathMappings": [
-        {
-          "url": "webpack://asocial/src",
-          "path": "${workspaceFolder}/src"
-        }
-      ]
-    }
-  ]
-}
-
-
-Store avatar : gestion tribu2
-Toutes opérations et sync avec tribu2
 
 PageTribus filtre blocage. Aperçu tribu en chantier
 
@@ -381,3 +356,36 @@ Création du configStore qui va contenir la configuration
 choix-langue
 - la liste des localeOptions est récupéré de configStore
 - le modèle locale est la locale de i18n
+
+
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Quasar App: chrome",
+      "url": "https://localhost:8343",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMapPathOverrides": {
+        "webpack://asocial/./src/*": "${webRoot}/*"
+      }
+    },
+    {
+      "type": "firefox",
+      "request": "launch",
+      "name": "Quasar App: firefox",
+      "url": "https://localhost:8343",
+      "webRoot": "${workspaceFolder}/src",
+      "pathMappings": [
+        {
+          "url": "webpack://asocial/src",
+          "path": "${workspaceFolder}/src"
+        }
+      ]
+    }
+  ]
+}

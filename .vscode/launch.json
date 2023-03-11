@@ -5,9 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Quasar App: chrome",
+      "url": "https://localhost:8343",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMapPathOverrides": {
+        "webpack://asocial/./src/*": "${webRoot}/*"
+      }
+    },
+    {
       "type": "firefox",
       "request": "launch",
-      "name": "vuejs: chrome",
+      "name": "Quasar App: firefox",
       "url": "https://localhost:8343",
       "webRoot": "${workspaceFolder}/src",
       "pathMappings": [

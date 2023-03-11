@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { AppExc, appexc, AMJ } from './api.mjs'
-import { $t } from './util.mjs'
+import { $t, hash } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { GenDoc, NomAvatar, NomTribu, Avatar, Compta, Chat, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
@@ -517,6 +517,33 @@ export class SetAttributTribu extends OperationUI {
     }
   }
 }
+
+/* Set d'un attribut de l'entrée d'un compte d'une tribu2 *********************************
+args.token: éléments d'authentification du compte.
+args.id : id de la tribu
+args.attr: nom de l'attribut
+args.hrnd: id de l'élément du compte dans mbtr
+args.val: valeur de l'attribut
+args.val2: valeur de l'attribut "annexe"
+Retour:
+*/
+export class SetAttributTribu2 extends OperationUI {
+  constructor () { super($t('OPnvtr')) }
+
+  async run (id, na, attr, val, val2) {
+    try {
+      const session = stores.session
+      const hrnd = hash(na.rnd)
+      const args = { token: session.authToken, id, hrnd, attr, val, val2: val2 || 0 }
+      const ret = this.tr(await post(this, 'SetAttributTribu2', args))
+      this.finOK()
+      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 
 
 

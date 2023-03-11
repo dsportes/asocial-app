@@ -1,10 +1,17 @@
 <template>
   <q-card class="shadow-8 q-pa-sm">
 
-    <div v-if="blTr && !blCo" class="titre-md text-center text-bold text-italic">{{$t('SBtitt')}}</div>
-    <div v-if="!blTr && blCo" class="titre-md text-center text-bold text-italic">{{$t('SBtitc')}}</div>
-    <div v-if="blTr && blCo" class="titre-md text-center text-bold text-italic">{{$t('SBtittc')}}</div>
-    <div v-if="blCo && !blCo.sp" class="titre-md text-center text-italic">{{$t('SBgco')}}</div>
+    <div>
+      <span v-if="blTr && !blCo" class="titre-md text-center text-bold text-italic">
+        {{$t('SBtitt')}}</span>
+      <span v-if="!blTr && blCo" class="titre-md text-center text-bold text-italic">
+        {{$t('SBtitc')}}</span>
+      <span v-if="blTr && blCo" class="titre-md text-center text-bold text-italic">
+        {{$t('SBtittc')}}</span>
+      <blocage-ico :niveau="niv" class="q-mr-xs q-ml-sm"/>
+      <span v-if="blCo && !blCo.sp" class="titre-md text-center text-italic">
+        {{$t('SBgco')}}</span>
+    </div>
 
     <div class="titre-md text-center q-my-sm">{{$t('SBn' + niv) + $t('SBdisp', [djb, njrb])}}</div>
 
@@ -24,7 +31,7 @@
     </div>
 
     <!-- niveau alerte -->
-    <div :class="'row q-mt-xs items-center bord' + (niv === 0 ? '1' : '0')">
+    <div :class="'row q-mt-xs items-center bord' + (niv === 1 ? '1' : '0')">
       <div :class="col + ' text-right text-italic'">{{$t('SBal')}}</div>
       <div :class="'col-3 text-center ' + (av('dja') === 1 ? 'text-bold' : 'fs-sm')">{{val(1,'dja')}}</div>
       <div v-if="blTr && blCo" :class="'col-3 text-center ' + (av('dja') === 2 ? 'text-bold' : 'fs-sm')">{{val(2,'dja')}}</div>
@@ -32,7 +39,7 @@
     </div>
 
     <!-- niveau lecture seule -->
-    <div :class="'row q-mt-xs items-center bord' + (niv === 1 ? '1' : '0')">
+    <div :class="'row q-mt-xs items-center bord' + (niv === 2 ? '1' : '0')">
       <div :class="col + ' text-right text-italic'">{{$t('SBls')}}</div>
       <div :class="'col-3 text-center ' + (av('djl') === 1 ? 'text-bold' : 'fs-sm')">{{val(1,'djl')}}</div>
       <div v-if="blTr && blCo" :class="'col-3 text-center ' + (av('djl') === 2 ? 'text-bold' : 'fs-sm')">{{val(2,'djl')}}</div>
@@ -40,10 +47,10 @@
     </div>
 
     <!-- niveau bloqué -->
-    <div :class="'row q-mt-xs items-center bord' + (niv === 2 ? '1' : '0')">
+    <div :class="'row q-mt-xs items-center bord' + (niv === 3 ? '1' : '0')">
       <div :class="col + ' text-right text-italic'">{{$t('SBbl')}}</div>
       <div :class="'col-3 text-center ' + (av('djb') === 1 ? 'text-bold' : 'fs-sm')">{{val(1,'djb')}}</div>
-      <div v-if="blTr && blCo" :class="'col-3 text-center ' + (av('djl') === 2 ? 'text-bold' : 'fs-sm')">{{val(2,'djb')}}</div>
+      <div v-if="blTr && blCo" :class="'col-3 text-center ' + (av('djb') === 2 ? 'text-bold' : 'fs-sm')">{{val(2,'djb')}}</div>
       <div class="col-1 text-center">{{njrb ? njrb + 'j' : ''}}</div>
     </div>
 
@@ -53,7 +60,9 @@
 </template>
 <script>
 
+import BlocageIco from './BlocageIco.vue'
 import { AMJ } from '../app/api.mjs'
+
   /* Attributs: 
   - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
   - `id`: id du sponsor ou du comptable gérant le blocage absent pour un blocage _tribu_ -implicite-).
@@ -76,7 +85,7 @@ export default {
 
   props: { blTr: Object, blCo: Object },
 
-  components: { },
+  components: { BlocageIco },
 
   computed: {
     ent1 () { return this.blTr ? this.$t('SBtr') : this.$t('SBco') },

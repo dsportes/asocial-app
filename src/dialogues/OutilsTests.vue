@@ -312,7 +312,7 @@ export default ({
     getBases()
 
     let bltr = new Blocage(new Uint8Array(encode({
-      jib: 20230101, nja: 30, njl: 45
+      jib: 20230101, nja: 30, njl: 39
     })))
     
     let blco = new Blocage(new Uint8Array(encode({

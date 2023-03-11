@@ -8,16 +8,18 @@
       </q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <synthese-blocage :bl-tr="blTr && !blTr.fake ? blTr : null" :bl-co="blCo"/>
+    <synthese-blocage :bl-tr="blTr || null" :bl-co="blCo || null"/>
     <q-card-section v-if="edit">
       <q-separator/>
-      <div v-if="bloc.dh">
+      <div v-if="bloc.dh" class="row items-center">
         <span class="titre-md text-italc">{{$t('SBreset')}}</span>
-        <q-btn color="primay" size="md" class="q-ml-md" icon="check" @click="reset"/>
+        <q-btn class="q-ml-md" color="primary" size="sm" icon="check" @click="reset()"/>
       </div>
       <div :class="'q-mt-sm text-italic fs-md ' + (err ? 'text-warning bg-yellow-3' : '')">{{$t('SBdiag')}}</div>
-      <q-input dense class="inp1 q-my-sm" v-model="nja" type="number" :label="$t('SBnja')"/>
-      <q-input dense class="inp1 q-my-sm" v-model="njl" type="number" :label="$t('SBnjl')"/>
+      <q-input dense clearable class="inp1 q-my-sm" v-model.number="nja" type="number" :label="$t('SBnja')">
+      </q-input>
+      <q-input dense clearable class="inp1 q-my-sm" v-model.number="njl" type="number" :label="$t('SBnjl')">
+      </q-input>
     </q-card-section>
     <div v-if="edit" class="column items-center">
       <q-btn class="q-mt-sm" :disabled="err"
@@ -35,7 +37,8 @@ import stores from '../stores/stores.mjs'
 import SyntheseBlocage from './SyntheseBlocage.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import { crypter } from '../app/webcrypto.mjs'
-import { SetAttributTribu } from '../app/operations.mjs'
+import { SetAttributTribu, SetAttributTribu2 } from '../app/operations.mjs'
+import { AMJ } from '../app/api.mjs'
 
 export default {
   name: 'EdBlocage',
@@ -43,13 +46,12 @@ export default {
   components: { SyntheseBlocage, BoutonHelp },
 
   /*
-   1) blTr et blCo : édition de blCo,
-      vue de synthèse avec le blocage tribu blTr
-   2) blTr.fake et blCo: édition de blCo,
-      IL N'Y A Pas de blocage tribu
-   3) blTr (sans blCo): édition de blTr seul
+   1) blTr et blCo : édition de blCo, vue de synthèse avec le blocage tribu blTr
+   2) blCo: édition de blCo, IL N'Y A PAS de blocage tribu
+   3) blTr: édition de blTr seul, IL N'Y A PAS de blocage compte
+   naCompte : pour enregistrer le blocage dans Tribu2 dans l'entrée du compte
   */
-  props: { blTr: Object, blCo: Object, naTr: Object, naCo: Object, edit: Boolean, close: Function },
+  props: { blTr: Object, blCo: Object, naTr: Object, naCo: Object, naCompte: Object, edit: Boolean, close: Function },
 
   computed: {
     err () { return this.bloc.nja < 0 || this.bloc.njl < 0 || (this.bloc.nja + this.bloc.njl >= 365) }
@@ -57,11 +59,11 @@ export default {
 
   watch: {
     nja (ap) {
-      this.bloc.nja = parseInt(ap)
+      this.bloc.nja = ap || 0
       this.bloc.recalculBloc()
     },
     njl (ap) {
-      this.bloc.njl = parseInt(ap)
+      this.bloc.njl = ap || 0
       this.bloc.recalculBloc()
     }
   },
@@ -77,9 +79,14 @@ export default {
       this.bloc.recalculBloc()
     },
     async valider () {
+      this.bloc.dh = new Date().getTime()
       const buf = this.bloc.encode()
       const val = await crypter(this.na.rnd, buf)
-      await new SetAttributTribu().run(this.na.id, 'blocaget', val)
+      if (this.blCo) {
+        await new SetAttributTribu2().run(this.na.id, this.naCompte, 'blocaget', val)
+      } else {
+        await new SetAttributTribu().run(this.na.id, 'blocaget', val)
+      }
       // console.log(JSON.stringify(this.bloc))
       this.closebl()
     },

@@ -54,6 +54,7 @@
     </div>
 
     <div v-if="t.blocage">
+      <blocage-ico :niveau="t.blocage.niv" class="q-mr-xs"/>
       <span class="titre-sm q-my-sm text-warning">{{$t('SBn' + t.blocage.niv) + $t('SBdisp2', [t.blocage.njrb])}}</span>
       <q-btn v-if="edit && session.estComptable" color="primary" 
         class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl(true)"/>
@@ -99,6 +100,7 @@ import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
 import NotifIco from './NotifIco.vue'
 import EdBlocage from './EdBlocage.vue'
+import BlocageIco from './BlocageIco.vue'
 import { Blocage } from '../app/modele.mjs'
 
 export default {
@@ -106,7 +108,7 @@ export default {
 
   props: { id: Number, idx: Number, edit: Boolean },
 
-  components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, EdBlocage, NotifIco },
+  components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, EdBlocage, NotifIco, BlocageIco },
 
   computed: { },
 
