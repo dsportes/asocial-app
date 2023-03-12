@@ -19,7 +19,7 @@
     <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
 
-    <div class="q-ml-md q-mt-xs row peitelargeur items-center">
+    <div class="q-ml-md q-mt-xs row largeur30 items-center">
       <div class="col-1">
         <q-btn v-if="session.estComptable" size="sm" icon="edit" dense color="primary" @click="editerq"/>
       </div>
@@ -27,7 +27,7 @@
       <div class="col-3 text-center font-mono">{{t.cpt.a1 || 0}} - {{ed1(t.cpt.a1 || 0)}}</div>
       <div class="col-3 text-center font-mono">{{t.cpt.q1 || 0}} - {{ed1(t.cpt.q1 || 0)}}</div>
     </div>
-    <div class="q-ml-md q-mb-xs row peitelargeur">
+    <div class="q-ml-md q-mb-xs row largeur30">
       <div class="col-1">
         <q-btn v-if="session.estComptable" size="sm" icon="edit" dense color="primary" @click="editerq"/>
       </div>
@@ -36,7 +36,7 @@
       <div class="col-3 text-center font-mono">{{t.cpt.q2 || 0}} - {{ed2(t.cpt.q2 || 0)}}</div>
     </div>
 
-    <div class="q-ml-md q-mt-sm row justify-start">
+    <div class="q-ml-md q-mt-sm row largeur30 justify-start">
       <div class="col-6 titre-sm">{{$t('PTntfc')}}</div>
       <div class="col-6">
         <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[0]}}</span>
@@ -47,7 +47,7 @@
         <notif-ico :gravite="3"/>
       </div>
     </div>
-    <div class="q-ml-md q-mt-xs row justify-start">
+    <div class="q-ml-md q-mt-xs row largeur30 justify-start">
       <div class="col-6 titre-sm">{{$t('PTntfs')}}</div>
       <div class="col-6">
         <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[0]}}</span>
@@ -160,7 +160,7 @@ export default {
     const id = toRef(props, 'id')
 
     function getT () {
-      const t = avStore.getTribu(id.value)
+      const t = id.value === session.tribuId ? session.tribu : avStore.getTribu(id.value)
       return t
     }
 

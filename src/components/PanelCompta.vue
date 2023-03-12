@@ -1,5 +1,5 @@
 <template>
-  <q-card class="q-pa-sm moyennelargeur">
+  <q-card class="q-pa-sm largeur40">
 
     <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
       <div class="titre-md">{{$t('CPTal1a', [c.pc1])}}</div>

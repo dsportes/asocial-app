@@ -1,6 +1,5 @@
 <template>
   <q-page>
-    <info-restriction :niveau="3" cnx/>
 
     <div v-if="session.estSponsor"> <!-- Nouveau sponsoring -->
       <q-btn class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts" no-caps
@@ -8,8 +7,7 @@
       <bouton-help class="q-ml-sm" page="page1"/>
     </div>
 
-    <q-separator class="q-my-sm"/>
-    <div class="titre-lg q-my-md">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</div>
+    <div class="titre-lg q-px-sm q-my-md">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</div>
 
     <div v-for="sp in sponsorings" :key="sp.ids" class="q-pa-sm q-mb-md">
       <q-separator class="q-mt-md"/>
@@ -54,14 +52,13 @@ import stores from '../stores/stores.mjs'
 import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { dhcool, edvol } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import InfoRestriction from '../components/InfoRestriction.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 
 export default {
   name: 'PageSponsorings',
 
-  components: { BoutonHelp, NouveauSponsoring, InfoRestriction, ShowHtml },
+  components: { BoutonHelp, NouveauSponsoring, ShowHtml },
 
   computed: {
     sponsorings () { 

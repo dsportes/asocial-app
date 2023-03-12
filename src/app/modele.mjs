@@ -615,7 +615,7 @@ export class Tribu2 extends GenDoc {
 
     this.mbtr = {}
     for (const x in (row.mbtr || {})) {
-      const e = row.mbtr[x]
+      const e = decode(row.mbtr[x])
       const r = {}
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       r.na = new NomAvatar(nom, cle)

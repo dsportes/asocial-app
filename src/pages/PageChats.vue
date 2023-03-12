@@ -2,8 +2,6 @@
   <q-page class="q-pa-sm">
     <div v-if="msg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{msg}}</div>
 
-    <info-restriction :niveau="3" cnx/>
-
     <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps flat dense color="primary" 
       :label="$t('CVraf')" @click="rafCvs"/>
 
@@ -34,14 +32,13 @@ import stores from '../stores/stores.mjs'
 import ApercuChat from '../components/ApercuChat.vue'
 import ContactChat from '../dialogues/ContactChat.vue'
 import { Motscles } from '../app/modele.mjs'
-import InfoRestriction from '../components/InfoRestriction.vue'
 import { ChargerCvs } from '../app/operations.mjs'
 import { intersection, difference, $t, hms } from '../app/util.mjs'
 
 export default {
   name: 'PageChats',
 
-  components: { ApercuChat, InfoRestriction, ContactChat },
+  components: { ApercuChat, ContactChat },
 
   computed: {
   },

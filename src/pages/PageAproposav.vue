@@ -1,7 +1,7 @@
 <template>
 <q-page class="column items-center q-pa-md">
 
-  <q-card class="moyennelargeur fs-md">
+  <q-card class="largeur40 fs-md">
     <fiche-avatar edit :na="session.avC.na"/>
   </q-card>
 

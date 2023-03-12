@@ -229,29 +229,30 @@ export default {
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
 
-    clickNotif () {
-      this.ui.setPage('compta', 'notif')
-    },
-
-    pageCompta () { 
-      this.ui.setPage('compta', 'compta')
-    },
-
     ouvrFiltre () { this.ui.menu = true },
     fermFiltre () { this.ui.menu = false },
 
     tgdark () { this.$q.dark.toggle() },
-    infoSession () { this.ui.setPage('session') },
+
+    clickNotif () {
+      this.ui.setPage('compta', 'notif')
+    },
+    pageCompta () { 
+      this.ui.setPage('compta', 'compta')
+    },
+    infoSession () { 
+      this.ui.setPage('session')
+    },
     gotoAccueilLogin () {
       this.ui.setPage(this.session.status > 1 ? 'accueil' : 'login')
     },
     gotoBack () {
       this.ui.setPageBack()
     },
+    
     deconnexion () { deconnexion() },
     async reconnexion () { await reconnexionCompte() },
 
-    async infoBlocage () { await this.ui.ouvrirInfoBlocage(true) },
     async panelcontactsAut () { if (await this.session.aut(4)) this.ui.panelContacts = true },
     async fichiersavionAut () { if (await this.session.aut(4)) this.ui.fichiersAvion = true },
   },

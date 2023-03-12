@@ -34,15 +34,7 @@ export const useUiStore = defineStore('ui', {
     rapportSynchroMenu: false,
     outilsTests: false,
     nouvelAvatar: false,
-    repartirForfaits: false,
     choixEmoji: false,
-
-    ardoiseTribu: false,
-    ardoiseTCompta: null,
-    ardoiseTNaTribu: null,
-
-    comptaObj: null,
-    panelCompta: false
   }),
 
   getters: {
@@ -112,42 +104,6 @@ export const useUiStore = defineStore('ui', {
       } else {
         this.helpstack.splice(this.helpstack.length - 1, 1)
       }
-    },
-
-    async ouvrirInfoBlocage (force) {
-      const session = stores.session
-      if (!session.rappelBlocage) session.rappelBlocage = stores.config.rappelblocageenminutes
-      const t = new Date().getTime()
-      // On n'ouvre pas si c'est la dernière ouverture est récente et que la demande n'est pas impérative
-      if (!force && (t - session.dernierBlocage < (session.rappelBlocage * 60000))) return
-      return new Promise((resolve) => {
-        session.dernierBlocage = t
-        session.infoBlocageResolve = resolve
-        session.infoBlocage = true
-      })
-    },
-    fermerInfoBlocage () { 
-      const session = stores.session
-      session.infoBlocage = false
-      if (session.infoBlocageResolve) session.infoBlocageResolve()
-    },
-    
-    ouvrirArdoiseTribu (compta, naTribu) {
-      this.ardoiseTCompta = compta
-      this.ardoiseTNaTribu = naTribu
-      this.ardoiseTribu = true
-    },
-
-    ouvrirCompta (compta, na) {
-      this.comptaObj = {
-        x: compta.compteurs,
-        av: {
-          na: na,
-          estPrimaire: compta.estPrimaire
-        }
-      } 
-      this.panelCompta = true    
-    },
-    fermerCompta () { this.panelCompta = false },
+    }
   }
 })

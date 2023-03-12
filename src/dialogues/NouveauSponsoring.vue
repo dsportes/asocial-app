@@ -9,7 +9,7 @@
   </q-header>
 
   <q-page-container>
-    <q-page>
+    <q-page :class="dkli()">
       <q-stepper v-model="step" vertical color="primary" animated>
         <q-step :name="1" :title="$t('NPphr')" icon="settings" :done="step > 1">
           <span class="fs-sm q-py-sm">{{$t('NPnpc')}}</span>
@@ -107,7 +107,7 @@ export default ({
 
   computed: {
     dlclass () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    avParrain () { return this.session.estSponsor }
+    avParrain () { return this.session.estSponsor || this.session.estComptable }
   },
 
   data () {
@@ -156,6 +156,7 @@ export default ({
   },
 
   methods: {
+    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (this.idx ? 'clair' + (this.idx % 2) : 'clair0') },
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
     r1 (val) { return (val.length > 15 && val.length < 33) || this.$t('NP16') },

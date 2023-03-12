@@ -22,7 +22,7 @@
             <apercu-compte :na="c.na" :cv="c.cv" :idx="idx"/>
             <div v-if="session.estSponsor" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
-            <div class="q-mb-xs row items-center">
+            <div class="q-mb-xs row largeur30 items-center">
               <div class="col-1">
                 <q-btn v-if="session.estSponsor || session.estComptable" size="sm" icon="edit" 
                   dense color="primary" @click="editerq(c)"/>
@@ -42,7 +42,7 @@
     </q-card>
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
-    <q-dialog v-model="nvsp" persistent class="moyennelargeur">
+    <q-dialog v-model="nvsp" persistent full-height>
       <nouveau-sponsoring :close="fermerSponsoring" :tribu="t"/>
     </q-dialog>
 
@@ -87,7 +87,7 @@ export default {
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     courant (c) { this.ccid = c.na.id },
-    ouvrirSponsoring () { this.nvsp = false },
+    ouvrirSponsoring () { this.nvsp = true },
     fermerSponsoring () { this.nvsp = false },
     ed1 (v) { return edvol(v * UNITEV1) },
     ed2 (v) { return edvol(v * UNITEV2) },
