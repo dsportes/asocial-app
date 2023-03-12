@@ -38,6 +38,8 @@ export default {
   langue: 'Choix de la langue',
   clairfonce: 'Choix style clair / foncé',
   supprime: 'SUPPRIMÉ',
+  editavion: 'Les mises à jour ne sont pas possibles en mode avion.',
+  editlecture: 'Les mises à jour ne sont pas possibles quand le compte est "bloqué en lecture seulement"',
 
   gravite0: '(aucune)',
   gravite1: 'basse',
@@ -547,14 +549,14 @@ export default {
   SYgro2: 'groupe : {0} secrets:{1}/{2} membres:{3}/{4}',
   SYcvs: 'cartes de visite : {0} requises, {1} mises à jour',
  
-  NTtr: 'Notification de "tribu" émise par {0}',
-  NTco: 'Notification de "compte" émise par {0}',
-  NTtr2: 'Notification de "tribu"',
-  NTco3: 'Notification de "compte"',
-  NTnco: 'Pas de notification de "compte" du comptable',
-  NTnsp: 'Pas de notification de "compte" d\'un sponsor',
-  NTncotr: 'Pas de notification de "tribu" du comptable',
-  NTnsptr: 'Pas de notification de "tribu" d\'un sponsor',
+  NTtr: 'Notifications à tous les comptes de la tribu (par {0})',
+  NTco: 'Notification au compte (par {0})',
+  NTtr2: 'Notifications à tous les comptes de la tribu',
+  NTco2: 'Notification pour le seul compte',
+  NTnco: 'Pas de notification du compte par le comptable',
+  NTnsp: 'Pas de notification du compte par un sponsor',
+  NTncotr: 'Pas de notifications à tous les comptes de la tribu par le comptable',
+  NTnsptr: 'Pas de notifications à tous les comptes de la tribu par un sponsor',
   NTunsp: 'un sponsor de la tribu',
   NTecr: 'En écrire une',
   NT1: 'Informative',
@@ -563,6 +565,7 @@ export default {
   NTv1: "Volume V1 attribué / quota tribu",
   NTv2: "Volume V2 attribué / quota tribu",
   NTcom: 'Commentaires sur la tribu {0}',
+  NTci: 'Un sponsor ne peut pas émettre une notification au Comptable',
 
   IBec: 'Procédures de blocage en cours',
   IB0: 'Pas de procédure de blocage ouverte',
@@ -638,6 +641,15 @@ export default {
   PTecr: 'En écrire un',
   PTntfc: 'Comptes notifiés par le Comptable ',
   PTntfs: 'Comptes notifiés par un sponsor ',
+  PTcvide: 'Aucun compte de la tribu (sur {0}) ne répond au critère de filtre',
+  PTq1: 'Quota V1 (texte des secrets)',
+  PTq2: 'Quota V2 (fichiers des secrets)',
+  PTq12: 'Quotas V1 (textes) / V2 (fichiers)',
+  PTsp: 'Sponsor de la tribu',
+  PTqu: 'Ajustement des quotas du compte',
+  PTqut: 'Ajustement des quotas de la tribu',
+  PTnvc: 'Sponsoring d\'un nouveau compte',
+  PTpasc: 'Il n\'est pas possible de bloquer le Comptable',
 
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',
@@ -646,7 +658,6 @@ export default {
   PMEtac: 'Tests d\'accès',
   PMEras: 'Rapport de Synchronisation',
   PMEcry: 'Outils de cryptographie',
-
 
   // Fiche avatar
   FAnocv: 'Pas d\'autre information',

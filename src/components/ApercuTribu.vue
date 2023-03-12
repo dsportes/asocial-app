@@ -19,13 +19,19 @@
     <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
 
-    <div class="q-ml-md q-mt-xs row peitelargeur">
-      <div class="col-6 titre-sm">{{$t('NTv1')}}</div>
+    <div class="q-ml-md q-mt-xs row peitelargeur items-center">
+      <div class="col-1">
+        <q-btn v-if="session.estComptable" size="sm" icon="edit" dense color="primary" @click="editerq"/>
+      </div>
+      <div class="col-5 titre-sm">{{$t('NTv1')}}</div>
       <div class="col-3 text-center font-mono">{{t.cpt.a1 || 0}} - {{ed1(t.cpt.a1 || 0)}}</div>
       <div class="col-3 text-center font-mono">{{t.cpt.q1 || 0}} - {{ed1(t.cpt.q1 || 0)}}</div>
     </div>
     <div class="q-ml-md q-mb-xs row peitelargeur">
-      <div class="col-6 titre-sm">{{$t('NTv2')}}</div>
+      <div class="col-1">
+        <q-btn v-if="session.estComptable" size="sm" icon="edit" dense color="primary" @click="editerq"/>
+      </div>
+      <div class="col-5 titre-sm">{{$t('NTv2')}}</div>
       <div class="col-3 text-center font-mono">{{t.cpt.a2 || 0}} - {{ed2(t.cpt.a2 || 0)}}</div>
       <div class="col-3 text-center font-mono">{{t.cpt.q2 || 0}} - {{ed2(t.cpt.q2 || 0)}}</div>
     </div>
@@ -53,25 +59,9 @@
       </div>
     </div>
 
-    <div v-if="t.blocage">
-      <blocage-ico :niveau="t.blocage.niv" class="q-mr-xs"/>
-      <span class="titre-sm q-my-sm text-warning">{{$t('SBn' + t.blocage.niv) + $t('SBdisp2', [t.blocage.njrb])}}</span>
-      <q-btn v-if="edit && session.estComptable" color="primary" 
-        class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl(true)"/>
-      <q-btn v-else color="primary" 
-        class="q-ml-sm btn2" size="sm" dense icon="open_in_new" :label="$t('detail')" @click="(editerbl(false))"/>
-    </div>
-    <div v-else>
-      <div v-if="edit && session.estComptable">
-        <span class="titre-sm q-my-sm text-italic">{{$t('SNnon')}}</span>
-        <q-btn color="primary" class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl(true)"/>
-      </div>
-    </div>
-    
-    <q-dialog v-model="edbl" persistent>
-      <ed-blocage :bl-tr="bloc" :na-tr="t.na" :edit="edaff" :close="closebl"/>
-    </q-dialog>
+    <apercu-blocage :blocage="t.blocage" :edit="edit" :idx="idx" :na-tr="t.na"/>
 
+    <!-- Edition du commentaire attachée à une tribu -->
     <q-dialog v-model="edcom" persistent>
       <q-card class="petitelargeur">
         <q-toolbar>
@@ -83,6 +73,22 @@
           :label-ok="$t('valider')" modetxt @ok="valider"/>
       </q-card>
     </q-dialog>
+
+    <!-- Dialogue de mise à jour des quotas de la tribu -->
+    <q-dialog v-model="edq" persistent>
+      <q-card class="petitelargeur">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" color="warning" icon="close" @click="edq = false"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqut')}}</q-toolbar-title>
+        </q-toolbar>
+        <choix-quotas class="q-mt-sm" :quotas="quotas" />
+        <q-card-actions>
+          <q-btn :disabled="quotas.err" dense size="md" color="primary" 
+            icon="check" :label="$t('ok')" @click="validerq"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </div>
 </template>
 <script>
@@ -92,6 +98,8 @@ import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import ApercuNotif from './ApercuNotif.vue'
+import ApercuBlocage from '../components/ApercuBlocage.vue'
+import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { SetAttributTribu } from '../app/operations.mjs'
@@ -99,28 +107,25 @@ import { crypter } from '../app/webcrypto.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
 import NotifIco from './NotifIco.vue'
-import EdBlocage from './EdBlocage.vue'
-import BlocageIco from './BlocageIco.vue'
-import { Blocage } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuTribu',
 
   props: { 
     id: Number, // id de la tribu
-    idx: Number, edit: Boolean 
+    idx: Number, edit: Boolean
   },
 
-  components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, EdBlocage, NotifIco, BlocageIco },
+  components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, NotifIco, ApercuBlocage, ChoixQuotas },
 
   computed: { },
 
   data () { return {
     edcom: false,
-    edbl: false,
-    edaff: false,
     info: '',
-    bloc: null
+    bloc: null,
+    quotas: {},
+    edq: false
   }},
 
   methods: {
@@ -137,12 +142,16 @@ export default {
       this.close()
     },
     close () { this.edcom = false},
-    editerbl (ed) {
-      this.bloc = this.t.blocage ? this.t.blocage.clone() : new Blocage(null, 0)
-      this.edbl = true
-      this.edaff = ed
+    editerq () {
+      this.quotas = { q1: this.t.cpt.q1, q2: this.t.cpt.q2, min1: 0, min2: 0, 
+        max1: 9999,
+        max2: 9999
+      }
+      this.edq = true
     },
-    closebl () { this.edbl = false }
+    validerq () {
+      console.log(JSON.stringify(this.quotas))
+    }
   },
 
   setup (props) {

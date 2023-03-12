@@ -1,7 +1,5 @@
 <template>
   <q-card :class="'row items-start ' + dkli(idx)">
-    <info-restriction :niveau="3" cnx/>
-
     <div class="col-auto items-center q-mr-sm">
       <img class="photomax" :src="avatar.na.photoDef" />
     </div>
@@ -68,7 +66,6 @@ import { IDCOMPTABLE } from '../app/api.mjs'
 import ShowHtml from './ShowHtml.vue'
 import CarteVisite from '../components/CarteVisite.vue'
 import { MajCv, GetAvatarPC, ChangementPC } from '../app/operations.mjs'
-import InfoRestriction from '../components/InfoRestriction.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { afficherDiag } from '../app/util.mjs'
 import { PhraseContact } from '../app/modele.mjs'
@@ -78,7 +75,7 @@ export default {
 
   props: { na: Object, idx: Number, edit: Boolean },
 
-  components: { ShowHtml, CarteVisite, InfoRestriction, BoutonHelp },
+  components: { ShowHtml, CarteVisite, BoutonHelp },
 
   computed: {
     info () { return this.na.info },

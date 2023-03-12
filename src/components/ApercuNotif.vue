@@ -2,7 +2,7 @@
   <div :class="'q-my-xs col items-start ' + dkli(idx)">
     <div v-if="ntf" class="row justify-between">
       <div>
-        <span class="fs-md q-mr-sm">{{$t(estTribu ? 'NTtr' : 'NTco', [emet])}}</span> 
+        <span class="titre-sm q-mr-sm">{{$t(estTribu ? 'NTtr' : 'NTco', [emet])}}</span> 
         <notif-ico :gravite="ntf.g || 1"/>
       </div>
       <div>
@@ -16,9 +16,10 @@
       <q-btn v-if="edit" size="sm" dense icon="add" color="primary" :label="$t('NTecr')" @click="editer"/>
     </div>
 
+  <!-- Edition d'une notification -->
   <q-dialog v-model="edntf" persistent>
     <q-card class="petitelargeur">
-      <q-toolbar>
+      <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="close" @click="close"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t(estTribu ? 'NTtr2' : 'NTco2')}}</q-toolbar-title>
         <notif-ico class="q-mx-xs" :gravite="g"/>
@@ -42,21 +43,22 @@
 import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { dhcool } from '../app/util.mjs'
-import { Tribu, getCle } from '../app/modele.mjs'
+import { dhcool, afficherDiag } from '../app/util.mjs'
+import { Tribu } from '../app/modele.mjs'
 import ShowHtml from './ShowHtml.vue'
 import EditeurMd from './EditeurMd.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import NotifIco from './NotifIco.vue'
 import { crypter } from '../app/webcrypto.mjs'
 import { SetAttributTribu, SetAttributTribu2 } from '../app/operations.mjs'
+import { IDCOMPTABLE } from '../app/api.mjs'
 
 export default {
   name: 'ApercuNotif',
 
   props: { // la notif est soit au niveau Tribu, soit au niveau "compte" (tribu2)
     src: Object, // elt de tribu2 pour une notification de niveau compte, tribu pour une notification
-    nat: Object, // na de la tribu du compte pour un aperçu de niveau "compte" (tribu2) (sinon c'est src.na)
+    naTr: Object, // na de la tribu du compte pour un aperçu de niveau "compte" (tribu2) (sinon c'est src.na)
     sponsor: Boolean, // aperçu de la notification du sponsor, sinon c'est celle du comptable
     idx: Number, edit: Boolean },
 
@@ -85,6 +87,11 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     close () { this.edntf = false },
     async editer () {
+      if (! await this.session.edit()) return
+      if (!this.estTribu && this.src.na.id === IDCOMPTABLE && !this.session.estComptable) {
+        await afficherDiag(this.$t('NTci'))
+        return
+      }
       if (this.ntf) { 
         this.g = this.ntf.g || 1; this.txt = this.ntf.txt || ''
       } else { this.g = 1; this.txt = '' }
@@ -94,11 +101,12 @@ export default {
       const e = { dh: new Date().getTime(), g: this.g, txt: txt, 
         id: this.session.estComptable ? 0 : this.session.compteId }
       // crypté par la clé de la tribu si source tribu, du compte si source compte
-      const buf = await crypter(this.nat.rnd, new Uint8Array(encode(e)))
       if (this.estTribu) {
+        const buf = await crypter(this.src.na.rnd, new Uint8Array(encode(e)))
         await new SetAttributTribu().run(this.src.id, this.sponsor ? 'notifsp' : 'notifco', buf)
       } else { // src.na: na du compte
-        await new SetAttributTribu2().run(this.nat.id, this.src.na, this.sponsor ? 'notifsp' : 'notifco', buf, this.g)
+        const buf = await crypter(this.naTr.rnd, new Uint8Array(encode(e)))
+        await new SetAttributTribu2().run(this.naTr.id, this.src.na, this.sponsor ? 'notifsp' : 'notifco', buf, this.g)
       }
       this.close()
     }

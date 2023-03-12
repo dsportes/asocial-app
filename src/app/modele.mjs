@@ -661,6 +661,9 @@ export class Tribu2 extends GenDoc {
     return null
   }
 
+  // Retourne la liste des comptes de la tribu (elt de mbtr)
+  listeComptes () { return Object.values(this.mbtr) }
+
   static async primitiveRow (nt, q1, q2) { // q1 q2 : quotas attribués au Comptable
     const naComptable = getNg(IDCOMPTABLE)
     const r = {}

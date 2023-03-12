@@ -26,7 +26,10 @@ import { UNITEV2, UNITEV1 } from '../app/api.mjs'
 
 export default {
   name: 'ChoixQuotas',
-  props: { quotas: Object, lecture: Boolean },
+  props: { 
+    quotas: Object, // { q1, q2, min1, min2, max1, max2, err}
+    lecture: Boolean
+  },
 
   data () {
     return {
@@ -40,7 +43,7 @@ export default {
 
   setup (props, context) {
     const lecture = toRef(props, 'lecture')
-    const mv = toRef(props, 'quotas') // { q1 q2 max1 max2 err }
+    const mv = toRef(props, 'quotas')
 
     function mx () { mv.value.err = 
       (mv.value.q1 > mv.value.max1) || (mv.value.q2 > mv.value.max2) ||

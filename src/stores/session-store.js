@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
-import { u8ToB64, intToB64, rnd6, $t } from '../app/util.mjs'
+import { u8ToB64, intToB64, rnd6, $t, afficherDiag } from '../app/util.mjs'
 import { AMJ, IDCOMPTABLE } from '../app/api.mjs'
 
 export const useSessionStore = defineStore('session', {
@@ -172,6 +172,18 @@ export const useSessionStore = defineStore('session', {
       session.authToken = u8ToB64(new Uint8Array(encode(token)))
     },
 
+    async edit () {
+      if (this.mode === 3) {
+        await afficherDiag($t('editavion'))
+        return false
+      }
+      if (this.nivbl >= 2) {
+        await afficherDiag($t('editlecture'))
+        return false
+      }
+      return true
+    },
+    
     /* Gère les autorisations d'exécuter l'action
     - nmb : interdit avec un blocage à partir de nmb
     - cnx : connexion requise (modes synchronisé et incognito)

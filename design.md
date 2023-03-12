@@ -1,3 +1,5 @@
+ApercuTribu : changer les quotas de la tribu
+PageTribu: changer les quotas du compte
 
 PageTribus filtre blocage. Aperçu tribu en chantier
 

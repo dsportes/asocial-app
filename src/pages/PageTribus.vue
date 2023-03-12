@@ -176,8 +176,7 @@ export default {
       if (!f) return
       const x = []
       ftribus.value.forEach(t => { x.push(t) })
-      const crit = f.value
-      x.sort(fnt[f.value])
+      x.sort(fnt[f])
       ftribus.value = x
       fmsg()
     }

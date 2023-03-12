@@ -1,6 +1,5 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm">
-    <info-restriction :niveau="3" cnx/>
 
     <div class="row items-center justify-center q-py-sm q-gutter-lg">
       <div> <!-- Changement de phrase secrète -->
@@ -104,7 +103,6 @@ import { ChangementPS, MemoCompte, MotsclesCompte, NouvelAvatar } from '../app/o
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
-import InfoRestriction from '../components/InfoRestriction.vue'
 import MotsCles from '../components/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import FicheAvatar from '../components/FicheAvatar.vue'
@@ -115,7 +113,7 @@ import { afficherDiag } from '../app/util.mjs'
 export default {
   name: 'PageCompte',
 
-  components: { NomAvatar, NouveauSponsoring, BoutonHelp, FicheAvatar, PhraseSecrete, EditeurMd, ShowHtml, InfoRestriction, MotsCles },
+  components: { NomAvatar, NouveauSponsoring, BoutonHelp, FicheAvatar, PhraseSecrete, EditeurMd, ShowHtml, MotsCles },
 
   computed: {
     memo () { return this.session.compte.memo }
