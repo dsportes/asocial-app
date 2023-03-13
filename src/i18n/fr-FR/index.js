@@ -267,6 +267,7 @@ export default {
   GBnc: 'Aucune session ne doit être ouverte quand on veut gérer la suppression de bases locales inutiles',
   GBnb: 'Aucune base locale trouvée',
   GBcl: 'Cliquer sur la base à supprimer',
+  GBvol: 'Volume de la base',
   
   // DialogueHelp.vue
   HLPaide: 'Page d\'aide : ',
@@ -500,6 +501,7 @@ export default {
   FImcn: 'Mais N\'ayant PAS les mots clés ...',
   FIjours: 'Modifiés dans les N jours',
   FIavecbl: 'Tribus en cours de blocage',
+  FIavecsp: 'Comptes "sponsor" seulement',
   FInotif: 'Ayant une notification ... {0}',
   FItri: 'Tier par ...',
   TRItribus0: '(non trié)',
@@ -509,6 +511,10 @@ export default {
   TRItribus4: 'Volume V2 restant',
   TRItribus5: 'Volume V1 total',
   TRItribus6: 'Volume V2 total',
+  TRItribu20: '(non trié)',
+  TRItribu21: 'Par quota V1 décroissant',
+  TRItribu22: 'Par quota V1 décroissant',
+
 
   ACav: 'Relativement à l\'avatar "{0}"',
   ACgr: 'Relativement au groupe "{0}"',
@@ -533,7 +539,7 @@ export default {
   ACficav: 'Fichiers accesibles en mode avion',
   ACtfloc: 'Textes et fichiers locaux',
   ACidb: '(en mode synchronisé et avion seulement)',
-  ACinfs: 'Relativement à la session. Tribu: "{0}"',
+  ACinfs: 'Tribu du compte: "{0}"',
   ACcptspons: 'Le compte est un sponsor de la tribu',
 
   CHtxt: 'Texte du chat',
@@ -651,6 +657,7 @@ export default {
   PTqut: 'Ajustement des quotas de la tribu',
   PTnvc: 'Sponsoring d\'un nouveau compte',
   PTpasc: 'Il n\'est pas possible de bloquer le Comptable',
+  PTcompta: 'Volumes utilisés par {0}',
 
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',
@@ -672,6 +679,8 @@ export default {
   FAerr1: 'Cette phrase est déjà celle de l\'avatar : rien n\'est changé',
   FAerr2: 'Cette phrase a déjà choisie par un autre avatar. En attribuer une autre',
   FAerr3: 'Cette phrase est trop proche de celle déjà choisie par un autre avatar. En attribuer une autre',
+  FAerr4: 'Le Comptable n\'a pas de carte de visite',
+  FAerr5: 'Le Comptable n\'a pas de phrase de contact',
 
   IR0: '',
   IR1: 'Volumes des secrets contraints à baisser: blocage en cours',

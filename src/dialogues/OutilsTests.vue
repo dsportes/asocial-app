@@ -2,7 +2,7 @@
 <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="ui.outilsTests = false"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="close"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('OTtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -11,18 +11,12 @@
         <q-tab name="tst" :label="$t('OTtst')" @click="tab='tst'"/>
         <q-tab name="cpt" :label="$t('OTcpt')" @click="tab='cpt'"/>
         <q-tab name="ps" :label="$t('OTps')" @click="tab='ps'"/>
-        <q-tab name="sb" :label="$t('OTsb')" @click="tab='sb'"/>
-
       </q-tabs>
     </q-toolbar>
   </q-header>
 
   <q-page-container>
     <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.build])}}</div>
-
-    <q-card-section v-if="tab === 'sb'">
-      <synthese-blocage :bl-tr="bltr" :bl-co="blco"/>
-    </q-card-section>
 
     <q-card-section v-if="tab === 'tst'">
       <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt1')" @click="testEcho"/>
@@ -81,11 +75,11 @@
             <div class="fs-md q-mt-sm">{{it.nb}}</div>
             <div class="q-pl-md q-mb-sm row items.center">
               <div class="col-2">{{it.trig}}</div>
-              <div :class="'col-1 font-mono' + (it.dpbh.length!==1 ? ' text-warning bg-yellow-5':'')">{{it.dpbh.length}}</div>
+              <div class="col-1 font-mono">{{it.dpbh}}</div>
               <div v-if="it.v1" class="col-2 font-mono">{{edvol(it.v1 + it.v2)}}</div>
               <div v-if="it.v1" class="col-4 font-mono">(fichiers: {{edvol(it.v2)}})</div>
               <q-btn v-if="it.v1===0 && !running" class="col-6" @click.stop="getVU(it.nb)"
-                size="md" dense color="primary" no-caps label="Volume de la base"/>
+                size="md" dense color="primary" no-caps :label="$t('GBvol')"/>
             </div>
           </div>
         </div>
@@ -133,7 +127,6 @@ import { encode, decode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import SyntheseBlocage from '../components/SyntheseBlocage.vue'
 import { EchoTexte, ErreurFonc } from '../app/connexion.mjs'
 import { dhcool, $t, html, afficherDiag, sleep, edvol, b64ToU8, u8ToB64 } from '../app/util.mjs'
 import { ping } from '../app/net.mjs'
@@ -144,7 +137,9 @@ import { Blocage } from '../app/modele.mjs'
 export default ({
   name: 'OutilsTests',
 
-  components: { PhraseSecrete, BoutonHelp, SyntheseBlocage },
+  props: { close: Function },
+
+  components: { PhraseSecrete, BoutonHelp },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -259,31 +254,29 @@ export default ({
     function getBases () {
       // trigs[nombase] = [reseau, trig]
       // localStore : key: reseau-dpbh val = nombase
-      nbbases.value = 0
-      const x = localStorage.getItem('$$trigrammes')
-      let trigs = ['', '']
+      const nt = '$asocial$-trigrammes'
+      const x = localStorage.getItem(nt)
+      let trigs
       try {
         trigs = decode(b64ToU8(x))
       } catch (e) {
-        console.log('LocalStorage: entrée $$trigrammes non trouvée / illisible')
+        console.log('LocalStorage: entrée $asocial$-trigrammes non trouvée / illisible')
       }
       for (const nb in trigs) {
         const i = trigs[nb]
-        bases[nb] = { nb: nb, reseau: i[0], trig: i[1], dpbh: [], v1: 0, v2: 0 }
+        bases[nb] = { nb: nb, trig: i, dpbh: [], v1: 0, v2: 0 }
         nbbases.value++
       }
       for (const lsk in localStorage) {
-        const i = lsk.indexOf('-')
-        if (i === -1 || i === lsk.length) continue
-        const reseau = lsk.substring(0, i)
-        const dpbh = lsk.substring(i + 1)
+        if (!lsk.startsWith('$asocial$-') || lsk === nt) continue
+        const dpbh = parseInt(lsk.substring('$asocial$-'.length))
         const nb = localStorage.getItem(lsk)
         const x = bases[nb]
         if (x) {
-          x.dpbh.push(dpbh)
+          x.dpbh = dpbh
         } else {
           nbbases.value++
-          bases[nb] = { nb: nb, reseau: reseau, trig: '???', dpbh: [dpbh], v1: 0, v2: 0 }
+          bases[nb] = { nb: nb, trig: '???', dpbh: dpbh, v1: 0, v2: 0 }
         }
       }
     }

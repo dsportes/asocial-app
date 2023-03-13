@@ -8,7 +8,7 @@
       <q-btn dense size="md" icon="contrast" @click="tgdark">
         <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
       </q-btn>
-      <q-btn dense size="md" icon="settings" @click="ui.outilsTests = true">
+      <q-btn dense size="md" icon="settings" @click="outilsTests = true">
         <q-tooltip>{{$t('MLAout')}}</q-tooltip>
       </q-btn>
 
@@ -97,6 +97,13 @@
           <filtre-notif nom="tribus" :idx="0"/>
           <filtre-tri nom="tribus" :nb-options="7" :idx="1"/>
         </div>
+        <div v-if="ui.page === 'tribu'" class="column justify-start">
+          <filtre-nom nom="tribu2" prop='nomt' :idx="0"/>
+          <filtre-avecsp nom="tribu2" :idx="1"/>
+          <filtre-avecbl nom="tribu2" :idx="0"/>
+          <filtre-notif nom="tribu2" :idx="1"/>
+          <filtre-tri nom="tribu2" :nb-options="3" :idx="0"/>
+        </div>
       </div>
     </q-scroll-area>
   </q-drawer>
@@ -149,8 +156,8 @@
     <dialogue-help/>
   </q-dialog>
 
-  <q-dialog v-if="ui.outilsTests" v-model="ui.outilsTests" full-height persistent>
-    <outils-tests/>
+  <q-dialog v-if="outilsTests" v-model="outilsTests" full-height persistent>
+    <outils-tests :close="closeOutils"/>
   </q-dialog>
 
 </q-layout>
@@ -186,6 +193,7 @@ import FiltreTxt from './components/FiltreTxt.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
 import FiltreAvecbl from './components/FiltreAvecbl.vue'
+import FiltreAvecsp from './components/FiltreAvecsp.vue'
 import FiltreTri from './components/FiltreTri.vue'
 import FiltreNotif from './components/FiltreNotif.vue'
 
@@ -201,7 +209,7 @@ export default {
     BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats, PageAproposav,
     PageCompta, PageTribus, PageTribu,
-    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif,
+    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif, FiltreAvecsp,
     DialogueErreur, DialogueHelp
    },
 
@@ -224,7 +232,8 @@ export default {
   },
 
   data () { return {
-    hms: hms
+    hms: hms,
+    outilsTests: false
   }},
 
   methods: {
@@ -253,6 +262,8 @@ export default {
     
     deconnexion () { deconnexion() },
     async reconnexion () { await reconnexionCompte() },
+
+    closeOutils () { this.outilsTests = false },
 
     async panelcontactsAut () { if (await this.session.aut(4)) this.ui.panelContacts = true },
     async fichiersavionAut () { if (await this.session.aut(4)) this.ui.fichiersAvion = true },

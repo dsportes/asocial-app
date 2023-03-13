@@ -94,7 +94,14 @@ export default {
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     r1 (val) { return (val.length > 15 && val.length < 33) || this.$t('NP16') },
-    async editerCV () { if (await this.session.aut(3, true)) this.edition = true },
+    async editerCV () { 
+      if (!await this.session.edit()) return
+      if (this.avatar.id === IDCOMPTABLE) {
+        await afficherDiag(this.$t('FAerr4'))
+        return
+      }
+      this.edition = true
+    },
     closeCV () { this.edition = false },
     async cvchangee (res) {
       if (res && this.na) {
@@ -102,7 +109,12 @@ export default {
       }
     },
     razphrase () { this.pc = '' },
-    editerpc () {
+    async editerpc () {
+      if (!await this.session.edit()) return
+      if (this.avatar.id === IDCOMPTABLE) {
+        await afficherDiag(this.$t('FAerr5'))
+        return
+      }
       this.editionpc = true
       this.pc = this.avatar.pc || ''
     },

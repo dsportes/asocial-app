@@ -60,13 +60,24 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <!-- Affichage des compteurs de compta du compte "courant"-->
+    <q-dialog v-model="cptdial" persistent>
+      <q-card style="width: 700px; max-width: 80vw;">
+      <q-toolbar class="bg-secondary text-white">
+        <q-btn dense size="md" color="warning" icon="close" @click="cptdial = false"/>
+        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [ccna.nomc])}}</q-toolbar-title>
+      </q-toolbar>
+      <panel-compta :c="cpt" style="margin:0 auto"/>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { UNITEV1, UNITEV2, Compteurs } from '../app/api.mjs'
 import { edvol, hms, $t } from '../app/util.mjs'
 import ApercuTribu from '../components/ApercuTribu.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
@@ -74,11 +85,13 @@ import ApercuBlocage from '../components/ApercuBlocage.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
+import PanelCompta from '../components/PanelCompta.vue'
+import { GetCompteursCompta } from '../app/operations.mjs'
 
 export default {
   name: 'PageTribu',
 
-  components : { ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
+  components : { PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
 
   computed: {
     ed () { return this.session.estComptable || this.session.estSponsor },
@@ -86,7 +99,6 @@ export default {
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-    courant (c) { this.ccid = c.na.id },
     ouvrirSponsoring () { this.nvsp = true },
     fermerSponsoring () { this.nvsp = false },
     ed1 (v) { return edvol(v * UNITEV1) },
@@ -102,15 +114,25 @@ export default {
     },
     validerq (c) {
       console.log(JSON.stringify(this.quotas))
-    }
+    },
+    async courant (c) { 
+      this.ccid = c.na.id
+      this.ccna = c.na
+      const res = await new GetCompteursCompta().run(c.na.id)
+      this.cpt = new Compteurs(res)
+      this.cptdial = true
+    },
   },
 
   data () {
     return {
       ccid: 0, // compte "courant" dans la liste
+      ccna: null,
       nvsp: false,
       edq: false,
-      quotas: {}
+      quotas: {},
+      cptdial: false,
+      cpt: null
     }
   },
 
@@ -192,8 +214,10 @@ export default {
     })
 
     function f0 (a,b) { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0) }
+    function f1 (a,b) { return a.q1 < b.q1 ? 1 : (a.q1 > b.q1 ? -1 : 0) }
+    function f2 (a,b) { return a.q2 < b.q2 ? 1 : (a.q2 > b.q2 ? -1 : 0) }
 
-    const fnt = [f0]
+    const fnt = [f0, f1, f2]
     function trier () {
       const f = fStore.tri.tribu2
       if (!f) return
@@ -208,6 +232,15 @@ export default {
       if (!f) { flc.value = lc.value; return }
       const r = []
       for (const c of lc.value) {
+        if (f.nomt && !c.na.nom.startsWith(f.nomt)) continue
+        if (f.avecbl && !c.blocage) continue
+        if (f.avecsp && !c.sp) continue
+        if (f.notif) {
+          const nt1 = !c.notifco && !c.notifsp
+          const nt2 = !((c.notifco && c.notifco.g) || (c.notifsp && c.notifsp.g))
+          if (f.notif === 1 && nt1) continue
+          if (f.notif === 2 && nt2) continue
+        }
         r.push(c)
       }
       flc.value = r

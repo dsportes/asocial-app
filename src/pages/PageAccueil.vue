@@ -41,9 +41,15 @@
     </div>
     <q-separator class="q-my-sm"/>
 
+    <div class="q-my-xs q-px-sm titre-md text-bold text-italic">{{$t('ACinfs', [session.tribu.na.nom])}}</div>
+    <div v-if="session.estSponsor" 
+      class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning">{{$t('ACcptspons')}}</div>
+
     <div class="row items-center q-pa-sm q-gutter-sm">
+      <q-btn class="btn1" dense no-caps color="negative" :label="$t('ACdecnx')"
+        @click="ui.dialoguedrc = true"/>
       <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesav')"
-      @click="ui.setPage('compte')">
+        @click="ui.setPage('compte')">
         <q-badge color="teal-10" rounded floating>{{nbtav}}</q-badge>
       </q-btn>
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmesgr')">
@@ -55,24 +61,16 @@
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmatribu')"
         @click="maTribu()"/>
       <q-btn v-if="session.estComptable" class="btn1" dense no-caps color="primary"
-        :label="$t('ACtribus')" @click="ui.setPage('tribus')"
-      />
-
+        :label="$t('ACtribus')" @click="ui.setPage('tribus')">
+        <q-badge color="teal-10" rounded floating>{{nbttr}}</q-badge>
+      </q-btn>
     </div>
+
     <div class="full-width q-mt-sm column q-gutter-sm">
       <q-btn class="btn3" dense no-caps color="primary" :label="$t('ACmessecrets')" />
     </div>
     <q-separator class="q-my-sm"/>
 
-    <div class="q-my-xs q-px-sm titre-md text-bold text-italic">{{$t('ACinfs', [session.tribu.na.nom])}}</div>
-    <div v-if="session.estSponsor" 
-      class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning">{{$t('ACcptspons')}}</div>
-    <div class="q-mt-sm q-px-sm row items-center q-gutter-sm">
-      <q-btn class="btn1" dense no-caps color="negative" :label="$t('ACdecnx')"
-        @click="ui.dialoguedrc = true"/>
-      <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmasession')"
-        @click="ui.setPage('session')" />
-    </div>
     <div :class="'q-mt-sm q-px-sm ' + (!session.accesIdb ? ' disabled' : '')" class="column q-gutter-sm">
       <div v-if="session.incognito" class="titre-md text-italic">{{$t('ACidb')}}</div>
       <q-btn class="btn3" dense no-caps color="primary" :label="$t('ACficav')" />
@@ -101,6 +99,7 @@ export default {
     nbtav () { return this.avStore.compta.mav.size },
     nbtgr () { return this.grStore.map.size },
     nbtct () { return this.pStore.map.size },
+    nbttr () { return this.avStore.nbTribus },
     nbtsp () { return 1 },
     nbtiv () { return 1 }
   },

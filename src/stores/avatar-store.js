@@ -68,6 +68,10 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
+    nbTribus: (state) => {
+      return state.maptr.size
+    },
+
     getElt: (state) => { return (id) => { 
         return state.map.get(id)
       }

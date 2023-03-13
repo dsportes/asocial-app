@@ -546,9 +546,8 @@ export class SetAttributTribu2 extends OperationUI {
       const hrnd = hash(na.rnd)
       const args = { token: session.authToken, id, hrnd, attr, 
         val, val2: val2 || 0, exq: exq || false }
-      const ret = this.tr(await post(this, 'SetAttributTribu2', args))
+      this.tr(await post(this, 'SetAttributTribu2', args))
       this.finOK()
-      return ret
     } catch (e) {
       await this.finKO(e)
     }
@@ -568,14 +567,35 @@ export class SetDhvuCompta extends OperationUI {
       const session = stores.session
       const dhvu = await crypter(session.clek, '' + (new Date().getTime()))
       const args = { token: session.authToken, dhvu }
-      const ret = this.tr(await post(this, 'SetDhvuCompta', args))
+      this.tr(await post(this, 'SetDhvuCompta', args))
       this.finOK()
-      return ret
     } catch (e) {
       await this.finKO(e)
     }
   }
 }
+
+/* Get "compteurs" d'une compta *********************************
+args.token: éléments d'authentification du compte.
+args.id : id de la compta
+Retour:
+- compteurs : objet compteurs de cette compta
+*/
+export class GetCompteursCompta extends OperationUI {
+  constructor () { super($t('OPdhvu')) }
+
+  async run (id) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id }
+      const ret = this.tr(await post(this, 'GetCompteursCompta', args))
+      return this.finOK(ret.compteurs, true)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 
 
 

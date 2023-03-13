@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 
-import stores from './stores.mjs'
 import { sleep } from '../app/util.mjs'
 
 export const useUiStore = defineStore('ui', {
@@ -8,9 +7,12 @@ export const useUiStore = defineStore('ui', {
     page: 'login',
     pageback: '',
     pagetab: '',
-    etroite: false,
+
     filtre: false,
+
+    etroite: false,
     seuillarge: 800,
+
     dialogueerreur: false,
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
@@ -22,18 +24,8 @@ export const useUiStore = defineStore('ui', {
     message: null,
     aunmessage: false,
 
-    dialoguedrc: false,
+    dialoguedrc: false, // App et page accueil
 
-    panelContacts: false,
-    fichiersAvion: false,
-    infoSession: false,
-    testPing: false,
-    gestionBases: false,
-    menu: false,
-    rapportSynchro: false,
-    rapportSynchroMenu: false,
-    outilsTests: false,
-    nouvelAvatar: false,
     choixEmoji: false,
   }),
 
@@ -46,7 +38,7 @@ export const useUiStore = defineStore('ui', {
     },
     async setPage (p, tab) {
       this.menu = false
-      const pagesF = new Set(['chats', 'tribus'])
+      const pagesF = new Set(['chats', 'tribus', 'tribu'])
       const pagesB = new Set(['tribus'])
       this.pageback = pagesB.has(this.page) ? this.page : ''
       this.page = null
