@@ -527,8 +527,8 @@ export class Notif extends GenDoc {
   - `nbc` : nombre de comptes.
   - `nbsp` : nombre de sponsors.
   - `cbl` : nombre de comptes ayant un blocage.
-  - `nco[0..2]` : nombres de comptes ayant une notification du comptable, par gravité.
-  - `nsp[0..2]` : nombres de comptes ayant une notification d'un sponsor, par gravité.
+  - `nco[0, 1]` : nombres de comptes ayant une notification du comptable, par gravité.
+  - `nsp[0, 1]` : nombres de comptes ayant une notification d'un sponsor, par gravité.
 */
 
 export class Tribu extends GenDoc {
@@ -564,7 +564,7 @@ export class Tribu extends GenDoc {
     r.id = nt.id
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
-    const cpt = { a1, a2, q1, q2, nbc: 1, nbsp: 1, cbl: 0, nco: [0, 0, 0], nsp: [0, 0, 0]}
+    const cpt = { a1, a2, q1, q2, nbc: 1, nbsp: 1, cbl: 0, nco: [0, 0], nsp: [0, 0]}
     r.cpt = new Uint8Array(encode(cpt))
     r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
@@ -577,7 +577,7 @@ export class Tribu extends GenDoc {
     r.id = nt.id
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
-    const cpt = { a1: 0, a2: 0, q1, q2, nbc: 0, nbsp: 0, cbl: 0, nco: [0, 0, 0], nsp: [0, 0, 0]}
+    const cpt = { a1: 0, a2: 0, q1, q2, nbc: 0, nbsp: 0, cbl: 0, nco: [0, 0], nsp: [0, 0]}
     r.cpt = new Uint8Array(encode(cpt))
     r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
@@ -597,7 +597,7 @@ export class Tribu extends GenDoc {
     - `sp` : si `true` / présent, c'est un sponsor.
     - `q1 q2` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
     - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
-    - 'gco gsp' : gravités des notifco et notifsp.
+    - 'gco gsp' : gravités des notifco et notifsp (true / false).
     - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
     - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
     - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
@@ -672,12 +672,13 @@ export class Tribu2 extends GenDoc {
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
     r.mbtr = { }
-    r.mbtr['' + hash(naComptable.rnd)] = { 
+    const e = { 
       na : await crypter(nt.rnd, new Uint8Array(encode([naComptable.nom, naComptable.rnd]))),
       sp: true,
       q1: q1,
       q2: q2,
     }
+    r.mbtr['' + hash(naComptable.rnd)] = new Uint8Array(encode(e))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribu2s', id: r.id, v: r.v, iv: r.iv, _data_ }
   }

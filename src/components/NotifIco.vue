@@ -10,14 +10,14 @@
 export default ({
   name: 'NotifIco',
   props: { 
-    gravite: Number, // gravité de la notification: 0:PAS de notfication, 1:basse, 2:moyenne, 3:haute
+    gravite: Boolean, // gravité de la notification (importante = true)
     alire: Boolean, // présence de l'indicateur à lire
     clickable: Boolean 
   },
   computed: {
-    tclr () { return 'text-' + ['green-3 ','primary ','orange-9 ','negative '][this.gravite || 0] },
-    bgclr () { return 'bg-' + ['none ','yellow-1 ','yellow-2 ','yellow-5 '][this.gravite || 0] },
-    ico () { return ['check','report','warning','notifications'][this.gravite || 0] }
+    tclr () { return this.gravite ? 'text-negative ' : 'text-primary ' },
+    bgclr () { return this.gravite ? 'bg-yellow-5 ' : 'bg-yellow-2 ' },
+    ico () { return this.gravite ? 'notifications' : 'report' }
   }
 })
 </script>

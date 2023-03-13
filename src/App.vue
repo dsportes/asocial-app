@@ -34,7 +34,8 @@
         <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{pc + '%'}}</div>
       </div>
 
-      <notif-ico class="q-ml-xs" v-if="session.gntf" clickable :gravite="session.gntf" :alire="session.alirentf" @click="clickNotif"/>
+      <notif-ico class="q-ml-xs" v-if="session.gntf" clickable :alire="session.alirentf" 
+        :gravite="session.gntf === 2" @click="clickNotif"/>
       <blocage-ico class="q-ml-xs" v-if="session.nivbl" clickable :niveau="session.nivbl" :alire="session.alirebl" @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">

@@ -19,43 +19,31 @@
     <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
 
-    <div class="q-ml-md q-mt-xs row largeur30 items-center">
-      <div class="col-1">
-        <q-btn v-if="session.estComptable" size="sm" icon="edit" dense color="primary" @click="editerq"/>
-      </div>
-      <div class="col-5 titre-sm">{{$t('NTv1')}}</div>
-      <div class="col-3 text-center font-mono">{{t.cpt.a1 || 0}} - {{ed1(t.cpt.a1 || 0)}}</div>
-      <div class="col-3 text-center font-mono">{{t.cpt.q1 || 0}} - {{ed1(t.cpt.q1 || 0)}}</div>
-    </div>
     <div class="q-ml-md q-mb-xs row largeur30">
+      <div class="col-5 titre-sm">{{$t('NTvx')}}</div>
+      <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx1', [q1, pc1])}}</div>
+      <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx2', [q2, pc2])}}</div>
       <div class="col-1">
         <q-btn v-if="session.estComptable" size="sm" icon="edit" dense color="primary" @click="editerq"/>
       </div>
-      <div class="col-5 titre-sm">{{$t('NTv2')}}</div>
-      <div class="col-3 text-center font-mono">{{t.cpt.a2 || 0}} - {{ed2(t.cpt.a2 || 0)}}</div>
-      <div class="col-3 text-center font-mono">{{t.cpt.q2 || 0}} - {{ed2(t.cpt.q2 || 0)}}</div>
     </div>
 
     <div class="q-ml-md q-mt-sm row largeur30 justify-start">
       <div class="col-6 titre-sm">{{$t('PTntfc')}}</div>
       <div class="col-6">
         <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[0]}}</span>
-        <notif-ico :gravite="1"/>
+        <notif-ico/>
         <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[1]}}</span>
-        <notif-ico :gravite="2"/>
-        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[2]}}</span>
-        <notif-ico :gravite="3"/>
+        <notif-ico gravite/>
       </div>
     </div>
     <div class="q-ml-md q-mt-xs row largeur30 justify-start">
       <div class="col-6 titre-sm">{{$t('PTntfs')}}</div>
       <div class="col-6">
         <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[0]}}</span>
-        <notif-ico :gravite="1"/>
+        <notif-ico/>
         <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[1]}}</span>
-        <notif-ico :gravite="2"/>
-        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[2]}}</span>
-        <notif-ico :gravite="3"/>
+        <notif-ico gravite/>
       </div>
     </div>
 
@@ -118,7 +106,18 @@ export default {
 
   components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, NotifIco, ApercuBlocage, ChoixQuotas },
 
-  computed: { },
+  computed: { 
+    q1 () { return this.ed1(this.t.cpt.q1 || 0)},
+    q2 () { return this.ed2(this.t.cpt.q2 || 0)},
+    pc1 () {
+      const x = this.t.cpt
+      return !x.a1 || !x.q1 ? 0 : (Math.round((x.a1 * 100) / (x.q1 * UNITEV1)))
+    },
+    pc2 () {
+      const x = this.t.cpt
+      return !x.a2 || !x.q2 ? 0 : (Math.round((x.a2 * 100) / (x.q2 * UNITEV2)))
+    }
+  },
 
   data () { return {
     edcom: false,

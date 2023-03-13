@@ -3,7 +3,7 @@
     <div v-if="ntf" class="row justify-between">
       <div>
         <span class="titre-sm q-mr-sm">{{$t(estTribu ? 'NTtr' : 'NTco', [emet])}}</span> 
-        <notif-ico :gravite="ntf.g || 1"/>
+        <notif-ico :gravite="ntf.g ? true : false"/>
       </div>
       <div>
         <span class="fs-sm q-mr-xs">{{dh}}</span>
@@ -22,14 +22,10 @@
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="close" @click="close"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t(estTribu ? 'NTtr2' : 'NTco2')}}</q-toolbar-title>
-        <notif-ico class="q-mx-xs" :gravite="g"/>
+        <notif-ico class="q-mx-xs" :gravite="g ? true : false"/>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <div class="q-mt-sm q-pb-md q-gutter-md row justify-center full-width">
-        <q-radio dense v-model="g" :val="1" :label="$t('NT1')" />
-        <q-radio dense v-model="g" :val="2" :label="$t('NT2')" />
-        <q-radio dense v-model="g" :val="3" :label="$t('NT3')" />
-      </div>
+      <q-checkbox v-model="g" class="cb q-mt-sm q-pb-md" :label="$t('NT1')" />
 <!--  props: { lgmax: Number, modelValue: String, texte: String, labelOk: String, editable: Boolean, idx: Number, modetxt: Boolean, horsSession: Boolean },
 -->
       <editeur-md style="height:50vh" :lgmax="1000" editable :texte="txt"
@@ -79,7 +75,7 @@ export default {
 
   data () { return {
     edntf: false,
-    g: 0,
+    g: false,
     txt: 0
   }},
 
@@ -98,7 +94,7 @@ export default {
       this.edntf = true
     },
     async valider (txt) {
-      const e = { dh: new Date().getTime(), g: this.g, txt: txt, 
+      const e = { dh: new Date().getTime(), g: this.g ? true : false, txt: txt, 
         id: this.session.estComptable ? 0 : this.session.compteId }
       // crypté par la clé de la tribu si source tribu, du compte si source compte
       if (this.estTribu) {
@@ -127,4 +123,7 @@ export default {
 @import '../css/app.sass'
 .bord
   border: 1px solid $grey-5
+.cb
+  position: relative
+  left: -10px
 </style>

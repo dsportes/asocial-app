@@ -3,9 +3,17 @@
     <q-btn no-caps flat :label="$t('FInotif', [$t('gravite' + val)])">
     <q-menu anchor="bottom left" self="top left">
       <q-list style="min-width: 50px">
-        <q-item v-for="g in [0, 1, 2 ,3]" :key="g" clickable v-close-popup @click="val=g">
-          <notif-ico class="q-mr-sm" :gravite="g" />
-          <span class="fs-md text-italic">{{$t('gravite' + g)}}</span>
+        <q-item clickable v-close-popup @click="val=0">
+          <span class="fs-md text-italic">{{$t('gravite0')}}</span>
+        </q-item>
+        <q-item clickable v-close-popup @click="val=1">
+          <notif-ico class="q-mr-sm" />
+          <notif-ico class="q-mr-xs" gravite />
+          <span class="fs-md text-italic">{{$t('gravite1')}}</span>
+        </q-item>
+        <q-item clickable v-close-popup @click="val=2">
+          <notif-ico class="q-mr-sm" gravite />
+          <span class="fs-md text-italic">{{$t('gravite2')}}</span>
         </q-item>
       </q-list>
     </q-menu>

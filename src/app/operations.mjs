@@ -534,16 +534,18 @@ args.hrnd: id de l'élément du compte dans mbtr
 args.attr: nom de l'attribut
 args.val: valeur de l'attribut
 args.val2: valeur de l'attribut "gco / gsp"
+args.exq: lever une exception en cas dépassement des quotas de la tribu
 Retour:
 */
 export class SetAttributTribu2 extends OperationUI {
   constructor () { super($t('OPnvtr')) }
 
-  async run (id, na, attr, val, val2) {
+  async run (id, na, attr, val, val2, exq) {
     try {
       const session = stores.session
       const hrnd = hash(na.rnd)
-      const args = { token: session.authToken, id, hrnd, attr, val, val2: val2 || 0 }
+      const args = { token: session.authToken, id, hrnd, attr, 
+        val, val2: val2 || 0, exq: exq || false }
       const ret = this.tr(await post(this, 'SetAttributTribu2', args))
       this.finOK()
       return ret

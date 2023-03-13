@@ -871,7 +871,8 @@ export class CreationCompteComptable extends OperationUI {
       r._data_ = _data_
       r._nom = 'versions'
 
-      const args = { token: stores.session.authToken, rowTribu, rowTribu2, rowCompta, rowAvatar, rowVersion: r, pcbh: phrase.pcbh, abPlus: [nt.id] }
+      const args = { token: stores.session.authToken, rowTribu, rowTribu2, 
+        rowCompta, rowAvatar, rowVersion: r, pcbh: phrase.pcbh, abPlus: [nt.id] }
       const ret = this.tr(await post(this, 'CreationCompteComptable', args))
   
       // Le compte vient d'être créé, clek est enregistrée

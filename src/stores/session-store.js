@@ -132,7 +132,8 @@ export const useSessionStore = defineStore('session', {
       const self = this
       function ntfx (ntf) {
         if (ntf) {
-          if (ntf.g > self.gntf) self.gntf = ntf.g
+          if (self.gntf === 0) self.gntf = 1
+          if (ntf.g) self.gntf = 2
           if (ntf.dh > dhvu) self.alirentf = true
         }  
       }

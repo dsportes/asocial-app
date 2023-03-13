@@ -41,10 +41,9 @@ export default {
   editavion: 'Les mises à jour ne sont pas possibles en mode avion.',
   editlecture: 'Les mises à jour ne sont pas possibles quand le compte est "bloqué en lecture seulement"',
 
-  gravite0: '(aucune)',
-  gravite1: 'basse',
-  gravite2: 'moyenne',
-  gravite3: 'importante',
+  gravite0: '(ignorer)',
+  gravite1: 'normale ou importante',
+  gravite2: 'importante',
 
   enalerte: 'En alerte',
   ensursis: 'En sursis',
@@ -559,11 +558,13 @@ export default {
   NTnsptr: 'Pas de notifications à tous les comptes de la tribu par un sponsor',
   NTunsp: 'un sponsor de la tribu',
   NTecr: 'En écrire une',
-  NT1: 'Informative',
-  NT2: 'Importante',
-  NT3: 'Grave',
-  NTv1: "Volume V1 attribué / quota tribu",
-  NTv2: "Volume V2 attribué / quota tribu",
+  NT1: 'Notification importante',
+  NTv1: 'Volume V1 attribué / quota tribu',
+  NTv2: 'Volume V2 attribué / quota tribu',
+  NTvx: 'Quotas de la tribu (% attribués)',
+  NTvx1: 'V1: {0} ({1}%)',
+  NTvx2: 'V2: {0} ({1}%)',
+
   NTcom: 'Commentaires sur la tribu {0}',
   NTci: 'Un sponsor ne peut pas émettre une notification au Comptable',
 
