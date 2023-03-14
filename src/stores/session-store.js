@@ -19,7 +19,9 @@ export const useSessionStore = defineStore('session', {
     nombase: '',
     volumeTable: '',
 
-    opencours: null, // Objet opération de l'opération en cours (sauf ProcessQueue)
+    opEncours: null,
+    opSpinner: 0,
+    opDialog: false,
 
     sessionSync: null, // Objet de classe SessionSync traçant l'état de synchronisation d'une session sur IDB
 
@@ -189,6 +191,29 @@ export const useSessionStore = defineStore('session', {
       return true
     },
     
+    opCount () {
+      const self = this
+      if (this.opTimer) clearTimeout(this.opTimer)
+      this.opTimer = setTimeout(() => {
+        self.opSpinner++
+        self.opCount()
+      }, 1000)
+    },
+
+    startOp (op) {
+      this.opEncours = op
+      this.opSpinner = 0
+      this.opDialog = true
+      this.opCount()
+    },
+
+    finOp () {
+      if (this.opTimer) clearTimeout(this.opTimer)
+      this.opEncours = null
+      this.opSpinner = 0
+      this.opDialog = false
+    },
+
     /* Gère les autorisations d'exécuter l'action
     - nmb : interdit avec un blocage à partir de nmb
     - cnx : connexion requise (modes synchronisé et incognito)

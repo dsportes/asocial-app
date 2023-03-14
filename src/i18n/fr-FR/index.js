@@ -469,6 +469,10 @@ export default {
   Pcompta: 'Notifications, blocages, volumes',
   Paproposav: 'A propos de l\'avatar',
 
+  MLAbrk: 'Opération en cours',
+  MLAcf: 'Voulez-vous vraiement arrêter l\'opération en cours "{0}"',
+  MLAcf3: 'Non, je la laisse se poursuivre',
+  MLAcf4: 'Oui, je veux l\'interrompre (si possible)',
   MLAcptp: '(parrain)',
   MLAtri: 'Tribu : {0}',
   MLAsfer: '(pas de compte connecté)',

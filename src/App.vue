@@ -160,6 +160,40 @@
     <outils-tests :close="closeOutils"/>
   </q-dialog>
 
+  <q-dialog v-model="session.opDialog" seamless position="top" full-width persistent transition-show="scale" transition-hide="scale">
+    <div class="q-mt-sm column items-center">
+      <transition
+        appear
+        enter-active-class="animated fadeIn"
+        leave-active-class="animated fadeOut"
+      >
+        <div v-if="session.opSpinner >= 2" 
+          class="spinlargeur height-4 row items-center justify-between no-wrap text-black bg-amber-2 q-pa-sm"
+          style="margin:0 auto; overflow:hidden;">
+          <div class="col column items-center">
+            <div class="text-bold">{{$t('MLAbrk')}}</div>
+            <div class="text-bold">{{session.opEncours.nom}}</div>
+          </div>
+          <div class="col-auto q-mt-sm cursor-pointer column items-center" style="position:relative" @click="cfstop()">
+            <q-spinner color="primary" size="3rem" :thickness="4"/>
+            <q-badge color="negative" class="text-white stopbtn">{{session.opSpinner}}</q-badge>
+          </div>
+        </div>
+      </transition>
+    </div>
+  </q-dialog>
+
+  <q-dialog v-model="confirmstopop">
+    <q-card>
+      <q-card-section class="q-pa-md fs-md text-center">
+        {{$t('MLAcf', [session.opEncours ? session.opEncours.nom : '???'])}}</q-card-section>
+      <q-card-actions align="right">
+        <q-btn flat :label="$t('MLAcf3')" color="warning" v-close-popup/>
+        <q-btn flat :label="$t('MLAcf4')" color="primary" v-close-popup  @click="stopop"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
 </q-layout>
 </template>
 
@@ -233,12 +267,20 @@ export default {
 
   data () { return {
     hms: hms,
-    outilsTests: false
+    outilsTests: false,
+    confirmstopop: false
   }},
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
 
+    cfstop () {
+      this.confirmstopop = true
+    },
+    stopop () {
+      const op = this.session.opEncours
+      if (op && op.stop) op.stop()
+    },
     ouvrFiltre () { this.ui.menu = true },
     fermFiltre () { this.ui.menu = false },
 
@@ -341,7 +383,12 @@ export default {
 
 <style lang="sass" scoped>
 @import './css/app.sass'
-
+.stopbtn
+  position: relative
+  top: -2rem
+.spinlargeur
+  width: 15rem
+  max-width: 95vw
 .q-toolbar
   padding: 0 !important
   min-height: 0 !important

@@ -26,12 +26,15 @@ export class Operation {
 export class OperationUI extends Operation {
   constructor (nomop) {
     super(nomop)
-    stores.session.opencours = this
+    stores.session.startOp(this)
     this.cancelToken = null
     this.break = false
   }
 
-  BRK () { if (this.break) throw new AppExc(E_BRK, 0) }
+  BRK () { 
+    if (this.break) 
+      throw new AppExc(E_BRK, 0)
+  }
 
   stop () {
     if (this.cancelToken) {
@@ -44,7 +47,7 @@ export class OperationUI extends Operation {
   finOK (res, silence) {
     const session = stores.session
     session.setDh(this.dh)
-    session.opencours = null
+    session.finOp()
     if (!silence) stores.ui.afficherMessage($t('OPok', [this.nom]), false)
     return res
   }
@@ -54,7 +57,7 @@ export class OperationUI extends Operation {
     const session = stores.session
     const ui = stores.ui
     // if (exc.code === 5001) session.phrase = null
-    session.opencours = null
+    session.finOp()
     ui.afficherMessage($t('OPko', [this.nom]), true)
     await ui.afficherExc(exc)
     return exc
