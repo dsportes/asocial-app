@@ -1,7 +1,7 @@
 <template>
   <q-page>
 
-    <div v-if="session.estSponsor"> <!-- Nouveau sponsoring -->
+    <div v-if="session.estSponsor || estComptable"> <!-- Nouveau sponsoring -->
       <q-btn class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts" no-caps
         :label="$t('NPnouv')" color="warning" dense @click="nouveausp"/>
       <bouton-help class="q-ml-sm" page="page1"/>
@@ -49,7 +49,7 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { AMJ, UNITEV1, UNITEV2, IDCOMPTABLE } from '../app/api.mjs'
 import { dhcool, edvol } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
@@ -65,7 +65,8 @@ export default {
       const r = Array.from(this.avStore.getSponsorings(this.avatar.id).values()) || []
       r.sort((a,b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)} )
       return r
-    }
+    },
+    estComptable () { return this.avatar.id === IDCOMPTABLE }
   },
 
   data () {

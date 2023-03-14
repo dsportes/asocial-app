@@ -120,16 +120,16 @@ export class NomGenerique {
     return this.nom === ng.nom && this.id === ng.id && egaliteU8(this.rnd, ng.rnd)
   }
 
-  get photo () {
-    if (this.id === IDCOMPTABLE) return stores.config.iconSuperman
-    const cv = getCv(this.id)
-    return cv ? cv.photo : ''
-  }
-
   get info () {
     if (this.id === IDCOMPTABLE) return stores.config.nomDuComptable
-    const cv = getCv(this.id)
+    const cv = this.getCv(this.id)
     return cv ? cv.info : ''
+  }
+
+  get photo () {
+    if (this.id === IDCOMPTABLE) return stores.config.iconSuperman
+    const cv = this.getCv(this.id)
+    return cv ? cv.photo : ''
   }
 
 }
@@ -142,6 +142,12 @@ export class NomAvatar extends NomGenerique {
     return info ? titre(info) : ''
   }
 
+  getCv () {
+    if (this.id === IDCOMPTABLE) return null
+    const av = stores.avatar.getAvatar(this.id)
+    return av && av.cv ? av.cv : null
+  }
+
   get photoDef () { return this.photo || stores.config.iconAvatar }
 
   clone () { return new NomAvatar(this.nom, this.rnd) }
@@ -149,6 +155,12 @@ export class NomAvatar extends NomGenerique {
 
 export class NomGroupe extends NomGenerique {
   constructor (nom, rnd) { super(nom, rnd || 2) }
+
+  getCv () {
+    if (this.id === IDCOMPTABLE) return null
+    const gr = stores.groupe.getGroupe(this.id)
+    return gr && gr.cv ? gr.cv : null
+  }
 
   get photoDef () { return this.photo || stores.config.iconGroupe }
 
@@ -661,6 +673,10 @@ export class Tribu2 extends GenDoc {
     return null
   }
 
+  mb (id) {
+    return this.mbtr[id || stores.session.compteId]
+  }
+
   // Retourne la liste des comptes de la tribu (elt de mbtr)
   listeComptes () { return Object.values(this.mbtr) }
 
@@ -902,10 +918,11 @@ export class Compta extends GenDoc {
     }
     
     this.compteurs = new Compteurs(row.compteurs)
-    // TEST !!!!!!!!!!!!!
+    /* TEST !!!!!!!!!!!!!
     const c = this.compteurs
     c.v1 = Math.round(this.compteurs.q1 * UNITEV1 * 0.3)
     c.v2 = Math.round(this.compteurs.q2 * UNITEV2 * 0.02)
+    */
 
     this.compteurs.pc1 = Math.round( (this.compteurs.v1 * 100) / (this.compteurs.q1 * UNITEV1))
     this.compteurs.pc2 = Math.round( (this.compteurs.v2 * 100) / (this.compteurs.q2 * UNITEV2))

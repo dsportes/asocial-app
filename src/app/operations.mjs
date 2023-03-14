@@ -596,6 +596,30 @@ export class GetCompteursCompta extends OperationUI {
   }
 }
 
+/* Get Tribu et Tribu2 *********************************
+args.token: éléments d'authentification du compte.
+args.id : id de la tribu
+args.tribu2 : true si retourner tribu2 avec
+Retour:
+- rowtribu: row de la tribu
+- rowTribu2
+*/
+export class GetTribu extends OperationUI {
+  constructor () { super($t('OPtrib')) }
+
+  async run (id) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, tribu2: true}
+      const ret = this.tr(await post(this, 'GetTribu', args))
+      const tribu = await compile(ret.rowTribu)
+      const tribu2 = await compile(ret.rowTribu2)
+      return this.finOK([tribu, tribu2], true)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
 
 
 

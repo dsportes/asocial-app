@@ -7,7 +7,7 @@ import { $t, getTrigramme, setTrigramme, afficherDiag, sleep, hash } from './uti
 import { post } from './net.mjs'
 import { AMJ } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, Tribu2, Chat, NomAvatar, NomTribu, naComptable, GenDoc, setNg, getNg, Versions } from './modele.mjs'
-import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
+import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
@@ -56,7 +56,7 @@ export async function connecterCompte (phrase, razdb) {
   const session = stores.session
   await initSession(phrase)
   if (session.synchro && session.nombase && razdb) {
-    await deleteIDB()
+    await deleteIDB(session.nombase)
   }
 
   if (session.avion) {
@@ -453,7 +453,7 @@ export class ConnexionCompte extends OperationUI {
       } catch (e) { }
       if (!dbok) {
         closeIDB()
-        await deleteIDB()
+        await deleteIDB(session.nombase)
         await openIDB()
         setTrigramme(session.nombase, await getTrigramme())
       }
@@ -468,7 +468,7 @@ export class ConnexionCompte extends OperationUI {
     this.compta = await compile(this.rowCompta) 
     this.rowTribu = await getTribu(this.compta.idt)
     this.tribu = await compile(this.rowTribu)
-    this.rowTribu2 = await getTribu(this.compta.idt)
+    this.rowTribu2 = await getTribu2(this.compta.idt)
     this.tribu2 = await compile(this.rowTribu2)
     session.tribuId = this.tribu.id
     this.rowAvatar = await getAvatarPrimaire()

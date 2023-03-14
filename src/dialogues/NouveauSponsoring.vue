@@ -156,7 +156,7 @@ export default ({
   },
 
   methods: {
-    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (this.idx ? 'clair' + (this.idx % 2) : 'clair0') },
+    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
     r1 (val) { return (val.length > 15 && val.length < 33) || this.$t('NP16') },

@@ -69,7 +69,7 @@ import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { afficherDiag, hms, $t, edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { NouvelleTribu } from '../app/operations.mjs'
+import { NouvelleTribu, GetTribu } from '../app/operations.mjs'
 
 export default {
   name: 'PageChats',
@@ -101,8 +101,9 @@ export default {
       await new NouvelleTribu().run(this.nom, this.quotas.q1, this.quotas.q2)
       this.closent()
     },
-    courant (id) {
-      this.session.setTribuCourante(id)
+    async courant (id) {
+      const [ ,t2] = await new GetTribu().run(id)
+      this.session.setTribuCourante(t2)
       this.ui.setPage('tribu')
     }
   },
@@ -225,6 +226,7 @@ export default {
 
     return {
       ui: stores.ui,
+      avStore,
       session,
       ftribus,
       tribus,

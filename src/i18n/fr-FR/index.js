@@ -267,7 +267,10 @@ export default {
   GBnc: 'Aucune session ne doit être ouverte quand on veut gérer la suppression de bases locales inutiles',
   GBnb: 'Aucune base locale trouvée',
   GBcl: 'Cliquer sur la base à supprimer',
-  GBvol: 'Volume de la base',
+  GBvol: 'Calcul du Volume',
+  GBfi: 'Fichiers : {0}',
+  GBm1: 'Cette base ne peut PLUS être accédée : elle peut être supprimée sans conséquences.',
+  GBm2: '          Cette base peut encore être accédée par une phrase secrète: sa suppression interdira le mode "avion" pour ce compte.',
   
   // DialogueHelp.vue
   HLPaide: 'Page d\'aide : ',

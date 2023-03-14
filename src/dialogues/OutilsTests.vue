@@ -9,7 +9,7 @@
     <q-toolbar inset>
       <q-tabs v-model="tab" inline-label outside-arrows mobile-arrows no-caps class="full-width">
         <q-tab name="tst" :label="$t('OTtst')" @click="tab='tst'"/>
-        <q-tab name="cpt" :label="$t('OTcpt')" @click="tab='cpt'"/>
+        <q-tab name="cpt" :label="$t('OTcpt')" @click="ouvCpt()"/>
         <q-tab name="ps" :label="$t('OTps')" @click="tab='ps'"/>
       </q-tabs>
     </q-toolbar>
@@ -70,16 +70,21 @@
         <div v-if="!nbbases" class="titre-lg text-italic">{{$t('GBnb')}}</div>
         <div v-else>
           <div class="titre-md text-italic text-warning">{{$t('GBcl')}}</div>
-          <div v-for="it in bases" :key="it.nb" class="zone items-center fs-md cursor-pointer zone"
-            @click="itdel=it;suppbase=true">
-            <div class="fs-md q-mt-sm">{{it.nb}}</div>
+          <div v-for="it in bases" :key="it.nb" class="zone items-center fs-md zone">
+            <div>
+              <q-btn v-if="it.vu" class="q-mr-sm" icon="delete" size="sm" round
+                color="warning" @click="itdel=it;suppbase=true"/>
+              <span class="fs-md q-mt-sm">{{it.nb}}</span>
+            </div>
             <div class="q-pl-md q-mb-sm row items.center">
               <div class="col-2">{{it.trig}}</div>
-              <div class="col-1 font-mono">{{it.dpbh}}</div>
-              <div v-if="it.v1" class="col-2 font-mono">{{edvol(it.v1 + it.v2)}}</div>
-              <div v-if="it.v1" class="col-4 font-mono">(fichiers: {{edvol(it.v2)}})</div>
-              <q-btn v-if="it.v1===0 && !running" class="col-6" @click.stop="getVU(it.nb)"
-                size="md" dense color="primary" no-caps :label="$t('GBvol')"/>
+              <div class="col-3 fs-sm font-mono">{{it.dpbh}}</div>
+              <div v-if="it.vu" class="col-3 text-center font-mono">{{edvol(it.v1 + it.v2)}}</div>
+              <div v-if="it.vu" class="col-4 text-center font-mono">{{$t('GBfi', [edvol(it.v2)])}}</div>
+              <span v-if="!it.vu" class="col-7 text-right">
+                <q-btn :disable="running" @click.stop="getVU(it)"
+                  size="md" dense color="primary" no-caps :label="$t('GBvol')"/>
+              </span>
             </div>
           </div>
         </div>
@@ -101,17 +106,17 @@
       <q-card-section>
         <div class="titre-lg">Propriétaire: {{itdel.trig}}</div>
         <div class="fs-sm font-mono">Nom de la base: {{itdel.nb}}</div>
-        <div v-if="!itdel.dpbh.length" class="titre-md text-bold bg-yellow-5 text-negative">
-          Cette base ne peut PLUS être accédée : elle peut être supprimée sans risque
+        <div v-if="!itdel.dpbh" class="titre-md text-bold bg-yellow-5 text-negative">
+          {{$t('GBm1')}}
         </div>
-        <div v-if="itdel.dpbh.length > 1" class="titre-md text-bold text-warning">
-          Cette base peut être accédée par 2 phrases secrètes, probablement la dernière et une ancienne.
+        <div v-if="itdel.dpbh" class="titre-md text-bold text-warning">
+          {{$t('GBm2')}}
         </div>
       </q-card-section>
       <q-card-actions>
         <q-btn dense label="Je conserve la base" color="primary" v-close-popup/>
         <q-btn dense label="Je supprime la base" icon="delete" color="warning"
-          @click="deleteIDB(itdel.nb)" v-close-popup/>
+          @click="delIDB(itdel)" v-close-popup/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -130,7 +135,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import { EchoTexte, ErreurFonc } from '../app/connexion.mjs'
 import { dhcool, $t, html, afficherDiag, sleep, edvol, b64ToU8, u8ToB64 } from '../app/util.mjs'
 import { ping } from '../app/net.mjs'
-import { getCompte, vuIDB } from '../app/db.mjs'
+import { getCompte, vuIDB, deleteIDB } from '../app/db.mjs'
 import { PingDB } from '../app/connexion.mjs'
 import { Blocage } from '../app/modele.mjs'
 
@@ -168,6 +173,11 @@ export default ({
   },
 
   methods: {
+    ouvCpt () {
+      this.getBases()
+      this.tab='cpt'
+    },
+
     okps (ps) {
       this.ps = ps
     },
@@ -230,13 +240,13 @@ export default ({
       }
     },
 
-    async getVU (nb) {
+    async getVU (it) {
       this.running = true
       try {
-        const [v1, v2] = await vuIDB(nb)
-        const it = this.bases[nb]
+        const [v1, v2] = await vuIDB(it.nb)
         it.v1 = v1
         it.v2 = v2
+        it.vu = true
       } catch (e) {
         afficherDiag(e.message)
       }
@@ -251,10 +261,12 @@ export default ({
     const bases = {}
     const nbbases = ref(0)
 
+    const pfx = '$asocial$-'
+
     function getBases () {
       // trigs[nombase] = [reseau, trig]
       // localStore : key: reseau-dpbh val = nombase
-      const nt = '$asocial$-trigrammes'
+      const nt = pfx + 'trigrammes'
       const x = localStorage.getItem(nt)
       let trigs
       try {
@@ -264,45 +276,41 @@ export default ({
       }
       for (const nb in trigs) {
         const i = trigs[nb]
-        bases[nb] = { nb: nb, trig: i, dpbh: [], v1: 0, v2: 0 }
+        bases[nb] = { nb: nb, trig: i, dpbh: [], v1: 0, v2: 0, vu: false }
         nbbases.value++
       }
       for (const lsk in localStorage) {
-        if (!lsk.startsWith('$asocial$-') || lsk === nt) continue
-        const dpbh = parseInt(lsk.substring('$asocial$-'.length))
+        if (!lsk.startsWith(pfx) || lsk === nt) continue
+        const dpbh = lsk.substring(pfx.length)
         const nb = localStorage.getItem(lsk)
         const x = bases[nb]
         if (x) {
           x.dpbh = dpbh
         } else {
           nbbases.value++
-          bases[nb] = { nb: nb, trig: '???', dpbh: dpbh, v1: 0, v2: 0 }
+          bases[nb] = { nb: nb, trig: '???', dpbh: dpbh, v1: 0, v2: 0, vu: false }
         }
       }
     }
 
-    async function deleteIDB (nombase) {
+    async function delIDB (it) {
       try {
-        const it = bases[nombase]
-        it.dpbh.forEach(dpbh => { localStorage.removeItem(it.reseau + '-' + dpbh) })
-        await Dexie.delete(nombase)
-        await sleep(100)
-        delete bases[nombase]
+        deleteIDB(it.nb)
+        localStorage.removeItem(pfx + it.dpbh)
+        delete bases[it.nb]
         nbbases.value = 0
         const trigs = {}
         for (const nb in bases) {
-          const it = bases[nb]
-          trigs[nb] = [it.reseau, it.trig]
+          trigs[nb] = bases[nb].nb
           nbbases.value++
         }
-        localStorage.setItem('$$trigrammes', u8ToB64(new Uint8Array(encode(trigs)), true))
-        console.log('RAZ db ' + nombase + ' réseau:' + it.reseau + ' trig:' + it.trig)
+        const buf = u8ToB64(new Uint8Array(encode(trigs)), true)
+        localStorage.setItem(pfx + 'trigrammes', buf)
+        console.log('RAZ db ' + nombase + ' trig:' + it.trig)
       } catch (e) {
         console.log(e.toString())
       }
     }
-
-    getBases()
 
     let bltr = new Blocage(new Uint8Array(encode({
       jib: 20230101, nja: 30, njl: 39
@@ -321,7 +329,8 @@ export default ({
       ui,
       bases,
       nbbases,
-      deleteIDB
+      getBases,
+      delIDB
     }
   }
 })

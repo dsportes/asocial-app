@@ -46,31 +46,33 @@ function EX2 (e) {
 
 let db
 
+async function ouverture (nb) {
+  console.log('Open: [' + nb + ']')
+  db = new Dexie(nb, { autoOpen: true })
+  db.version(1).stores(STORES)
+  await db.open()
+  return db
+}
+
 export async function openIDB () {
   const session = stores.session
   try {
-    const nb = session.nombase
-    console.log('Open: [' + nb + ']')
-    db = new Dexie(nb, { autoOpen: true })
-    db.version(1).stores(STORES)
-    await db.open()
+    db = await ouverture (session.nombase)
   } catch (e) {
     throw EX1(e)
   }
 }
 
 export function closeIDB () {
-  const session = stores.session
   if (db && db.isOpen()) {
     try { db.close() } catch (e) {}
   }
   db = null
 }
 
-export async function deleteIDB (lsKey) {
-  const session = stores.session
+export async function deleteIDB (nb) {
   try {
-    await Dexie.delete(session.nombase)
+    await Dexie.delete(nb)
     await sleep(100)
     console.log('RAZ db')
   } catch (e) {
@@ -79,7 +81,35 @@ export async function deleteIDB (lsKey) {
   db = null
 }
 
-// Chargement des versions
+/*************************************************************************
+Calcul du volume utile d'une base
+- v1: volume de tout sauf des fichiers
+- v2: volume des tables fichiers locaux (fdata, flocdata)
+- map: volume par table. clé: nom de la table, valeur: volume utile de la table
+*/
+export async function vuIDB (nb) {
+  const session = stores.session
+  session.volumeTable = ''
+  const db = await ouverture(nb)
+  let v1 = 0, v2 = 0
+  const map = {}
+  for (const x in STORES) {
+    let v = 0
+    await db[x].each(async (idb) => { 
+      v += idb.data.length
+    })
+    session.volumeTable = x + ': ' + edvol(v)
+    if (x === 'fdata' || x === 'locdata') v2 += v; else v1 += v
+    map[x] = v
+    await sleep(50)
+  }
+  db.close()
+  return [v1, v2, map]
+}
+
+/*************************************************************************
+Chargement des versions des avatars et groupes
+*/
 export async function loadVersions () {
   try {
     const session = stores.session
@@ -309,32 +339,6 @@ export async function FLdel (id) {
   } catch (e) {
     throw data.setErDB(EX2(e))
   }
-}
-
-/*************************************************************************
-Calcul du volume utile d'une base
-- v1: volume de tout sauf des fichiers
-- v2: volume des tables fichiers locaux (fdata, flocdata)
-- map: volume par table. clé: nom de la table, valeur: volume utile de la table
-*/
-export async function vuIDB (nb) {
-  const session = stores.session
-  session.volumeTable = ''
-  const db = new Dexie(nb, { autoOpen: true })
-  db.version(2).stores(STORES)
-  await db.open()
-  let v1 = 0, v2 = 0
-  const map = {}
-  for (const x in STORES) {
-    let v = 0
-    await db[x].each(async (idb) => { v += idb.data.length })
-    session.volumeTable = x + ': ' + edvol(v)
-    if (x === 'fdata' || x === 'locdata') v2 += v; else v1 += v
-    map[x] = v
-    await sleep(50)
-  }
-  db.close()
-  return [v1, v2, map]
 }
 
 /**********************************************************************

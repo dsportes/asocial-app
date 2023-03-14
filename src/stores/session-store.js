@@ -49,8 +49,11 @@ export const useSessionStore = defineStore('session', {
     compta (state) { return stores.avatar.compta },
     tribu (state) { return stores.avatar.tribu },
     tribu2 (state) { return stores.avatar.tribu2 },
-
-    estSponsor (state) { return stores.avatar.compta && stores.avatar.compta.estSponsor },
+    mbtr (state) { const t2 = stores.avatar.tribu2; return t2 ? t2.mb() : null },
+    estSponsor (state) { 
+      const x = state.mbtr
+      return x ? x.sp : false 
+    },
     estComptable (state) { return state.compteId === IDCOMPTABLE },
 
     // Avatar et groupes courants
@@ -93,8 +96,9 @@ export const useSessionStore = defineStore('session', {
       this.avatarId = id
     },
 
-    setTribuCourante (id) {
-      this.tribuCId = id
+    setTribuCourante (t2) {
+      this.tribuCId = t2.id
+      stores.avatar.setTribuCourante(t2)
     },
 
     chgps (phrase) {

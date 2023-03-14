@@ -177,6 +177,10 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
+    setTribuCourante (t2) {
+      this.tribu2CP = t2
+    },
+
     setTribuC (tribu) { // set d'une tribu quelconque pour le Comptable
       if (tribu.id === this.tribuP.id) this.setTribu(tribu)
       this.maptr.set(tribu.id, tribu)
