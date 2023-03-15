@@ -98,11 +98,16 @@
           <filtre-tri nom="tribus" :nb-options="7" :idx="1"/>
         </div>
         <div v-if="ui.page === 'tribu'" class="column justify-start">
-          <filtre-nom nom="tribu2" prop='nomt' :idx="0"/>
+          <filtre-nom nom="tribu2" prop='nomc' :idx="0"/>
           <filtre-avecsp nom="tribu2" :idx="1"/>
           <filtre-avecbl nom="tribu2" :idx="0"/>
           <filtre-notif nom="tribu2" :idx="1"/>
           <filtre-tri nom="tribu2" :nb-options="3" :idx="0"/>
+        </div>
+        <div v-if="ui.page === 'people'" class="column justify-start">
+          <filtre-nom nom="people" prop='nom' :idx="0"/>
+          <filtre-tribu nom="people" :idx="1"/>
+          <filtre-avecgr nom="people" :idx="0"/>
         </div>
       </div>
     </q-scroll-area>
@@ -122,6 +127,7 @@
       <page-compta class="page" v-if="ui.page === 'compta'"/>
       <page-tribus class="page" v-if="ui.page === 'tribus'"/>
       <page-tribu class="page" v-if="ui.page === 'tribu'"/>
+      <page-people class="page" v-if="ui.page === 'people'"/>
     </transition-group>
   </q-page-container>
 
@@ -221,12 +227,15 @@ import PageAproposav from './pages/PageAproposav.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageTribus from './pages/PageTribus.vue'
 import PageTribu from './pages/PageTribu.vue'
+import PagePeople from './pages/PagePeople.vue'
 
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
 import FiltreAvecbl from './components/FiltreAvecbl.vue'
+import FiltreAvecgr from './components/FiltreAvecgr.vue'
+import FiltreTribu from './components/FiltreTribu.vue'
 import FiltreAvecsp from './components/FiltreAvecsp.vue'
 import FiltreTri from './components/FiltreTri.vue'
 import FiltreNotif from './components/FiltreNotif.vue'
@@ -242,8 +251,9 @@ export default {
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats, PageAproposav,
-    PageCompta, PageTribus, PageTribu,
+    PageCompta, PageTribus, PageTribu, PagePeople,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif, FiltreAvecsp,
+    FiltreAvecgr, FiltreTribu,
     DialogueErreur, DialogueHelp
    },
 

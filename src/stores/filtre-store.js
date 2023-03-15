@@ -5,7 +5,8 @@ export const useFiltreStore = defineStore('filtre', {
     filtre: { 
       chats: {},
       tribus: {},
-      tribu2: {}
+      tribu2: {},
+      people: {},
     },
     contexte : {
       chats: {}

@@ -31,7 +31,6 @@ export default {
   personnel: 'PERSONNEL ',
   entree: 'Presser "Entrée" à la fin de la saisie',
   cryptage: 'Cryptage en cours ...',
-  jour: 'zéro jour | un jour | {count} jours',
   merci: 'Merci {0}',
   contient: 'contient',
   debute: 'débute par',
@@ -44,6 +43,10 @@ export default {
   gravite0: '(ignorer)',
   gravite1: 'normale ou importante',
   gravite2: 'importante',
+
+  roletribu0: '(ignoer)',
+  roletribu1: 'Compte de ma tribu',
+  roletribu2: 'Sponsor de ma tribu',
 
   enalerte: 'En alerte',
   ensursis: 'En sursis',
@@ -388,6 +391,7 @@ export default {
   OPmajmcch: 'Mise à jour des mots clés d\'un chat',
   OPnvtr: 'Nouvelle tribu',
   OPdhvu: 'Maj de la date-heure de "vu" d\'une compta',
+  OPtrib: 'Obtention de la tribu',
 
   OPrdv: 'Prendre rendez-vous avec un avatar',
   OPprl: 'Prolonger une proposition (de contact, parrainage ou rendez-vous)',
@@ -468,6 +472,7 @@ export default {
   Ptribu: 'Ma tribu courante',
   Pcompta: 'Notifications, blocages, volumes',
   Paproposav: 'A propos de l\'avatar',
+  Ppeople: 'Tous mes contacts',
 
   MLAbrk: 'Opération en cours',
   MLAcf: 'Voulez-vous vraiement arrêter l\'opération en cours "{0}"',
@@ -501,6 +506,7 @@ export default {
 
   FInom: 'Début du nom du contact',
   FInomt: 'Début du nom de la tribu',
+  FInomc: 'Début du nom du compte',
   FItxt: 'Texte cherché dans les chats',
   FItxtt: 'Texte cherché dans les commentaires',
   FItxtn: 'Texte cherché dans les notifications',
@@ -509,7 +515,9 @@ export default {
   FIjours: 'Modifiés dans les N jours',
   FIavecbl: 'Tribus en cours de blocage',
   FIavecsp: 'Comptes "sponsor" seulement',
+  FIavecgr: 'Membre d\'un groupe',
   FInotif: 'Ayant une notification ... {0}',
+  FItribu: 'De ma tribu ... {0}',
   FItri: 'Tier par ...',
   TRItribus0: '(non trié)',
   TRItribus1: 'Volume V1 attribué',
@@ -521,7 +529,6 @@ export default {
   TRItribu20: '(non trié)',
   TRItribu21: 'Par quota V1 décroissant',
   TRItribu22: 'Par quota V1 décroissant',
-
 
   ACav: 'Relativement à l\'avatar "{0}"',
   ACgr: 'Relativement au groupe "{0}"',
@@ -549,9 +556,17 @@ export default {
   ACinfs: 'Tribu du compte: "{0}"',
   ACcptspons: 'Le compte est un sponsor de la tribu',
 
+  // Pge people et ApercuPeople
+  APtr1: 'Membre de ma tribu',
+  APtr2: 'Sponsor de ma tribu',
+  APch: 'Aucun chat ouvert| Chat ouvert avec :| Chats ouverts avec :',
+  APgr: 'Membre d\'aucun groupe | Membre du groupe :| Membres des groupes :',
+  APnb: 'Aucun contact sur {0} ne répond au critère de recherche',
+
   CHtxt: 'Texte du chat',
   CHnch: 'Aucun chat ouvert',
   CHnch2: 'Aucun chat sur {0} ne répond au critère de recherche',
+  CHov: 'Ouvrir un chat depuis une "phrase de contact"',
 
   SYtit: 'Chargement et synchronisation des données du compte',
   SYcpt: 'Compte et comptabilité',

@@ -38,7 +38,7 @@ export const useUiStore = defineStore('ui', {
     },
     async setPage (p, tab) {
       this.menu = false
-      const pagesF = new Set(['chats', 'tribus', 'tribu'])
+      const pagesF = new Set(['chats', 'tribus', 'tribu', 'people'])
       const pagesB = new Set(['tribus'])
       this.pageback = pagesB.has(this.page) ? this.page : ''
       this.page = null

@@ -56,11 +56,13 @@ export default ({
   setup (props) {
     const session = stores.session
     const mapMC = toRef(props, 'mapmc')
+
     function nom (idx) {
       if (!mapMC.value) return ''
       const e = mapMC.value.get(''+idx)
       return e && e.n ? e.n : ''
     }
+    
     return {
       session,
       nom

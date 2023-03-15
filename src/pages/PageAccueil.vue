@@ -55,7 +55,8 @@
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmesgr')">
         <q-badge color="teal-10" rounded floating>{{nbtgr}}</q-badge>
       </q-btn>
-      <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesctc')">
+      <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesctc')"
+        @click="ui.setPage('people')">
         <q-badge color="teal-10" rounded floating>{{nbtct}}</q-badge>
       </q-btn>
       <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmatribu')"

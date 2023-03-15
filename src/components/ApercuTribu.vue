@@ -81,7 +81,7 @@
 </template>
 <script>
 
-import { toRef, ref } from 'vue'
+import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
@@ -171,6 +171,14 @@ export default {
         }
       })
     })
+
+    /* Nécessaire pour tracker le changement d'id
+    Dans une liste le composant N'EST PAS rechargé quand la liste change */
+    watch(() => id.value, (ap, av) => {
+        t.value = getT()
+      }
+    )
+
 
     return {
       session,

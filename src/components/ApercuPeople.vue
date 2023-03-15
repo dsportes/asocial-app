@@ -11,16 +11,26 @@
       <show-html v-if="p.info" class="q-my-xs bord" :idx="idx" 
         zoom maxh="3rem" :texte="p.info"/>
       <div v-else class="text-italic">{{$t('FAnocv')}}</div>
+      <div v-if="p.sp" :class="'fs-md ' + (p.sp === 2 ? 'text-bold' : '')">{{$t('APtr' + p.sp)}}</div>
+      <div v-if="p.avch.length" class="row items-center">
+        <span class="text-italic">{{$t('APch', p.avch.length)}}</span>
+        <span v-for="n in p.avch" :key="n" class="q-ml-sm q-px-xs bord">{{n}}</span>
+      </div>
+      <div v-if="p.gr.length" class="row items-center">
+        <span class="text-italic">{{$t('APgr', p.gr.length)}}</span>
+        <span v-for="n in p.gr" :key="n" class="q-ml-sm q-px-xs bord">{{n}}</span>
+      </div>
     </div>
   </div>
 </template>
 <script>
 
-import { toRef, ref } from 'vue'
+import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import { IDCOMPTABLE } from '../app/api.mjs'
+import { getNg } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuPeople',
@@ -42,16 +52,33 @@ export default {
     const pStore = stores.people
     const config = stores.config
     const id = toRef(props, 'id')
-    const phDef = (id.value === IDCOMPTABLE ? config.iconSuperman : config.iconAvatar)
+    
+    function getPh() { return id.value === IDCOMPTABLE ? config.iconSuperman : config.iconAvatar }  
+    const phDef = ref(getPh())
 
     function getP () {
       const p = pStore.getPeople(id.value)
       p.info = p.cv ? (p.cv.info || '') : ''
-      p.photo = p.cv ? (p.cv.photo || phDef) : phDef
+      p.photo = p.cv ? (p.cv.photo || phDef.value) : phDef.value
+      p.avch = []
+      p.chats.forEach(id => { p.avch.push(getNg(id).nom) })
+      p.avch.sort((a,b) => { a < b ? -1 : (a > b ? 1 : 0)})
+      p.gr = []
+      for(const idg of p.groupes.keys()) { p.gr.push(getNg(idg).nom) }
+      p.gr.sort((a,b) => { a < b ? -1 : (a > b ? 1 : 0)})
       return p
     }
 
     const p = ref(getP())
+
+    /* Nécessaire pour tracker le changement d'id
+    Dans une liste le composant N'EST PAS rechargé quand la liste change */
+    watch(() => id.value, (ap, av) => {
+        p.value = getP()
+        phDef.value = getPh()
+      }
+    )
+
     pStore.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'getElt' && args[0].id === id.value) {

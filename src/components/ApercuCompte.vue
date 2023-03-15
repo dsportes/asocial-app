@@ -16,7 +16,7 @@
 </template>
 <script>
 
-import { toRef } from 'vue'
+import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
@@ -44,7 +44,15 @@ export default {
   setup (props) {
     const config = stores.config
     const na = toRef(props, 'na')
-    const phDef = (na.value.id === IDCOMPTABLE ? config.iconSuperman : config.iconAvatar)
+    function getPh() { return na.value.id === IDCOMPTABLE ? config.iconSuperman : config.iconAvatar }
+    const phDef = ref(getPh())
+
+    /* Nécessaire pour tracker le changement d'id
+    Dans une liste le composant N'EST PAS rechargé quand la liste change */
+    watch(() => na.value, (ap, av) => {
+        phDef.value = getPh()
+      }
+    )
 
     return {
       phDef

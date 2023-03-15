@@ -16,6 +16,7 @@ La "carte de visite" d'un people provient :
 La plus récente est conservée. 
 Chaque element a pour clé l'id de l'avatar :
 - na : nom d'avatar
+- sp: 0: pas membre de la tribu, 1: simple membre de la tribu, 2: sponsor de la tribu
 - cv : carte de visite de l'avatar si elle a été explicitement chargée
 - chats: set des ids du compte avec qui il a un chat ouvert.
 - sponsor (getter): true si l'avatar est sponsor de la tribu du compte
@@ -23,8 +24,7 @@ Chaque element a pour clé l'id de l'avatar :
 */
 export const usePeopleStore = defineStore('people', {
   state: () => ({
-    map: new Map(),
-    sponsors: new Set() // set des ids des sponsors (incluant les avatars du compte !)
+    map: new Map()
   }),
 
   getters: {
@@ -37,13 +37,11 @@ export const usePeopleStore = defineStore('people', {
 
     ids: (state) => { return Array.from(state.map.keys()) },
 
-    // retourne { na, cv, sponsor: true/false, chats: Set(), groupes: Map(idg, im)}
+    // retourne { na, cv, sp, chats: Set(), groupes: Map(idg, im)}
     getPeople: (state) => { return (id) => {
         const e = state.map.get(id)
         if (!e) return null
-        const r = { ...e }
-        r.sponsor = state.sponsors.has(id)
-        return r
+        return e
       }
     },
     getNa: (state) => { return (id) => { 
@@ -59,8 +57,9 @@ export const usePeopleStore = defineStore('people', {
       }
     },
 
-    estSponsor: (state) => { return (id) => {
-        return state.sponsors.has(id) 
+    estSponsor: (state) => { return (id) => { // retourne 0, 1 (membre), 2 (sponsor)
+        const e = state.map.get(id)
+        return e ? e.sp : 0
       }
     },
 
@@ -132,24 +131,24 @@ export const usePeopleStore = defineStore('people', {
   actions: {
     getElt (na, cv) {
       let e = this.map.get(na.id) 
-      if (!e) { e = { na: na, groupes: new Map(), chats: new Set() }; this.map.set(na.id, e) }
+      if (!e) { e = { na: na, sp: 0, groupes: new Map(), chats: new Set() }; this.map.set(na.id, e) }
       if (cv && (!e.cv || e.cv.v < cv.v)) e.cv = cv
       return e
     },
 
     delElt (id, e) {
-      if (!this.sponsors.has(id) && !e.chats.size && !e.groupes.size) this.map.delete(id)
+      if (!e.sp && !e.chats.size && !e.groupes.size) this.map.delete(id)
     },
   
-    setPeopleSponsor (na, cv) {
+    setPeopleTribu (na, cv, sp) { // Sponsor ou simple membre de la tribu
       const e = this.getElt(na, cv)
-      this.sponsors.add(na.id)
+      e.sp = sp
     },
 
-    unsetPeopleSponsor (id) {
+    unsetPeopleTribu (id) {
       const e = this.map.get(id)
       if (!e) return
-      this.sponsors.delete(id)
+      e.sp = 0
       this.delElt(id, e)
     },
 

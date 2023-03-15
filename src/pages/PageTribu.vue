@@ -19,7 +19,9 @@
           <q-btn class="col-auto" flat icon="navigate_next" size="md"
             :color="c.na.id === ccid ? 'warning' : 'primary'" @click="courant(c)"/>
           <div class="col q-pr-xs">
-            <apercu-compte :na="c.na" :cv="c.cv" :idx="idx"/>
+            <apercu-compte v-if="estAvc(c.na)" :na="c.na" :cv="c.cv" :idx="idx"/>
+            <apercu-people v-else :id="c.na.id" :idx="idx"/>
+
             <div v-if="session.estSponsor" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
             <div class="q-mb-xs row largeur30 items-center">
@@ -84,6 +86,7 @@ import ApercuNotif from '../components/ApercuNotif.vue'
 import ApercuBlocage from '../components/ApercuBlocage.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
+import ApercuPeople from '../components/ApercuPeople.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import { GetCompteursCompta } from '../app/operations.mjs'
@@ -91,7 +94,7 @@ import { GetCompteursCompta } from '../app/operations.mjs'
 export default {
   name: 'PageTribu',
 
-  components : { PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
+  components : { ApercuPeople, PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
 
   computed: {
     ed () { return this.session.estComptable || this.session.estSponsor },
@@ -103,6 +106,9 @@ export default {
     fermerSponsoring () { this.nvsp = false },
     ed1 (v) { return edvol(v * UNITEV1) },
     ed2 (v) { return edvol(v * UNITEV2) },
+    estAvc (na) {
+      return this.avStore.getAvatar(na.id) !== null
+    },
     async editerq (c) {
       if (! await this.session.edit()) return
       this.quotas = { q1: c.q1, q2: c.q2, min1: 0, min2: 0, 
@@ -232,7 +238,7 @@ export default {
       if (!f) { flc.value = lc.value; return }
       const r = []
       for (const c of lc.value) {
-        if (f.nomt && !c.na.nom.startsWith(f.nomt)) continue
+        if (f.nomc && !c.na.nom.startsWith(f.nomc)) continue
         if (f.avecbl && !c.blocage) continue
         if (f.avecsp && !c.sp) continue
         if (f.notif) {
@@ -260,6 +266,7 @@ export default {
 
     return {
       session,
+      avStore,
       tc, t, lc, flc,
       msg
     }

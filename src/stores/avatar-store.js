@@ -163,14 +163,14 @@ export const useAvatarStore = defineStore('avatar', {
         const peStore = stores.people
         if (this.tribu2P) { // remplacement - enlève des people
           for (const id in this.tribu2P.mbtr) {
-            peStore.unsetPeopleSponsor(parseInt(id))
+            peStore.unsetPeopleTribu(parseInt(id))
           }
         }
         this.tribu2P = tribu2
         for (const id in tribu2.mbtr) {
           if (!this.comptaP.estAc(parseInt(id))) {
             const e = tribu2.mbtr[id]
-            peStore.setPeopleSponsor(e.na, e.cv)
+            peStore.setPeopleTribu(e.na, e.cv, e.sp ? 2 : 1)
           }
         }
         session.setBlocage()
