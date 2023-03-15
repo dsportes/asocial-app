@@ -57,6 +57,11 @@ export const usePeopleStore = defineStore('people', {
       }
     },
 
+    estPeople: (state) => { return (id) => { // retourne 0, 1 (membre), 2 (sponsor)
+        return state.map.has(id)
+      }
+    },
+
     estSponsor: (state) => { return (id) => { // retourne 0, 1 (membre), 2 (sponsor)
         const e = state.map.get(id)
         return e ? e.sp : 0

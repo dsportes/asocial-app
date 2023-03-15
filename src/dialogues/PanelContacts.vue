@@ -31,7 +31,7 @@
 <script>
 import { watch, computed } from 'vue'
 import stores from '../stores/stores.mjs'
-import FichePeople from '../components/FichePeople.vue'
+import FichePeople from './PanelPeople.vue'
 
 export default ({
   name: 'PanelContacts',

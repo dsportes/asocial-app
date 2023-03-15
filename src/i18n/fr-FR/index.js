@@ -556,12 +556,13 @@ export default {
   ACinfs: 'Tribu du compte: "{0}"',
   ACcptspons: 'Le compte est un sponsor de la tribu',
 
-  // Pge people et ApercuPeople
+  // Pege people et ApercuPeople
   APtr1: 'Membre de ma tribu',
   APtr2: 'Sponsor de ma tribu',
   APch: 'Aucun chat ouvert| Chat ouvert avec :| Chats ouverts avec :',
   APgr: 'Membre d\'aucun groupe | Membre du groupe :| Membres des groupes :',
   APnb: 'Aucun contact sur {0} ne répond au critère de recherche',
+  APtit: 'Détail du contact {0}',
 
   CHtxt: 'Texte du chat',
   CHnch: 'Aucun chat ouvert',

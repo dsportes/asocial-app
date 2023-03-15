@@ -5,8 +5,8 @@
     </div>
     <div class="col">
       <div>
-        <span class="text-bold fs-md q-mr-sm">{{na.nomc}}</span> 
-        <span class="text-bold fs-sm font-mono q-mr-sm">#{{na.id}}</span> 
+        <span class="text-bold fs-md q-mr-sm">{{elt.na.nomc}}</span> 
+        <span class="text-bold fs-sm font-mono q-mr-sm">#{{elt.na.id}}</span> 
       </div>
       <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
         zoom maxh="3rem" :texte="info"/>
@@ -16,8 +16,6 @@
 </template>
 <script>
 
-import { toRef, ref, watch } from 'vue'
-
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import { IDCOMPTABLE } from '../app/api.mjs'
@@ -25,13 +23,14 @@ import { IDCOMPTABLE } from '../app/api.mjs'
 export default {
   name: 'ApercuCompte',
 
-  props: { na: Object, cv: Object, idx: Number },
+  props: { elt: Object, idx: Number },
 
   components: { ShowHtml },
 
   computed: {
-    info () { return this.cv ? (this.cv.info || '') : '' },
-    photo () { return this.cv ? (this.cv.photo || this.phDef) : this.phDef },
+    phDef() { return this.elt.na.id === IDCOMPTABLE ? this.config.iconSuperman : this.config.iconAvatar },
+    info () { return this.elt.cv ? (this.elt.cv.info || '') : '' },
+    photo () { return this.elt.cv ? (this.elt.cv.photo || this.phDef) : this.phDef },
   },
 
   data () { return {
@@ -43,19 +42,8 @@ export default {
 
   setup (props) {
     const config = stores.config
-    const na = toRef(props, 'na')
-    function getPh() { return na.value.id === IDCOMPTABLE ? config.iconSuperman : config.iconAvatar }
-    const phDef = ref(getPh())
-
-    /* Nécessaire pour tracker le changement d'id
-    Dans une liste le composant N'EST PAS rechargé quand la liste change */
-    watch(() => na.value, (ap, av) => {
-        phDef.value = getPh()
-      }
-    )
-
     return {
-      phDef
+      config
     }
   }
 }

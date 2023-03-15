@@ -83,6 +83,11 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
+    estAvatar: (state) => { return (id) => { 
+        return state.map.has(id)
+      }
+    },
+
     // retourne le secret ns de l'avatar id
     getSecret: (state) => { return (id, ids) => { 
         const e = state.map.get(id)

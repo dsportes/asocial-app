@@ -19,10 +19,11 @@
           <q-btn class="col-auto" flat icon="navigate_next" size="md"
             :color="c.na.id === ccid ? 'warning' : 'primary'" @click="courant(c)"/>
           <div class="col q-pr-xs">
-            <apercu-compte v-if="estAvc(c.na)" :na="c.na" :cv="c.cv" :idx="idx"/>
-            <apercu-people v-else :id="c.na.id" :idx="idx"/>
+            <apercu-compte v-if="type(c.na)===3" :elt="c" :idx="idx"/>
+            <apercu-people v-if="type(c.na)===2" :id="c.na.id" :idx="idx"/>
+            <fiche-avatar v-if="type(c.na)===1" :na="c.na" :idx="idx"/>
 
-            <div v-if="session.estSponsor" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
+            <div v-if="c.sp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
             <div class="q-mb-xs row largeur30 items-center">
               <div class="col-1">
@@ -46,6 +47,11 @@
     <!-- Dialogue de création d'un nouveau sponsoring -->
     <q-dialog v-model="nvsp" persistent full-height>
       <nouveau-sponsoring :close="fermerSponsoring" :tribu="t"/>
+    </q-dialog>
+
+    <!-- Fiche people détaillée -->
+    <q-dialog v-model="fipeople" persistent full-height>
+      <panel-people :close="fermerFipeople" :id="ccid"/>
     </q-dialog>
 
     <!-- Dialogue de mise à jour des quotas du compte -->
@@ -87,6 +93,8 @@ import ApercuBlocage from '../components/ApercuBlocage.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
 import ApercuPeople from '../components/ApercuPeople.vue'
+import FicheAvatar from '../components/FicheAvatar.vue'
+import PanelPeople from '../dialogues/PanelPeople.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import { GetCompteursCompta } from '../app/operations.mjs'
@@ -94,7 +102,7 @@ import { GetCompteursCompta } from '../app/operations.mjs'
 export default {
   name: 'PageTribu',
 
-  components : { ApercuPeople, PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
+  components : { PanelPeople, FicheAvatar, ApercuPeople, PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
 
   computed: {
     ed () { return this.session.estComptable || this.session.estSponsor },
@@ -104,10 +112,13 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     ouvrirSponsoring () { this.nvsp = true },
     fermerSponsoring () { this.nvsp = false },
+    fermerFipeople () { this.fipeople = false },
     ed1 (v) { return edvol(v * UNITEV1) },
     ed2 (v) { return edvol(v * UNITEV2) },
-    estAvc (na) {
-      return this.avStore.getAvatar(na.id) !== null
+    type (na) {
+      if (this.avStore.estAvatar(na.id)) return 1
+      if (this.pStore.estPeople(na.id)) return 2
+      return 3
     },
     async editerq (c) {
       if (! await this.session.edit()) return
@@ -122,11 +133,19 @@ export default {
       console.log(JSON.stringify(this.quotas))
     },
     async courant (c) { 
+      const t = this.type(c.na)
       this.ccid = c.na.id
       this.ccna = c.na
-      const res = await new GetCompteursCompta().run(c.na.id)
-      this.cpt = new Compteurs(res)
-      this.cptdial = true
+      if (t === 1) {
+        this.session.setAvatarCourant(c.na.id)
+        await this.ui.setPage('aproposav')
+      } else if (t === 2) {
+        this.fipeople = true
+      } else if (t === 3) {
+        const res = await new GetCompteursCompta().run(c.na.id)
+        this.cpt = new Compteurs(res)
+        this.cptdial = true
+      }
     },
   },
 
@@ -138,7 +157,8 @@ export default {
       edq: false,
       quotas: {},
       cptdial: false,
-      cpt: null
+      cpt: null,
+      fipeople: false
     }
   },
 
@@ -163,7 +183,9 @@ export default {
 
     const session = stores.session
     const avStore = stores.avatar
+    const pStore = stores.people
     const fStore = stores.filtre
+    const ui = stores.ui
 
     const tc = !session.tribuCId || session.tribuCId === session.tribuId // true si c'est la tribu du compte
     const t = ref(tc ? avStore.tribu : avStore.getTribu(session.tribuCId)) // tribu
@@ -267,6 +289,8 @@ export default {
     return {
       session,
       avStore,
+      pStore,
+      ui,
       tc, t, lc, flc,
       msg
     }

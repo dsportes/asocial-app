@@ -11,17 +11,20 @@
       <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
         zoom maxh="4rem" :texte="info"/>
       <div v-else class="text-italic">{{$t('FAnocv')}}</div>
-      <q-btn v-if="!estComptable" class="q-my-xs" flat size="sm" :label="$t('CVedit')" icon="edit" dense color="primary" @click="editerCV"/>
+      <q-btn v-if="!estComptable && edit" class="q-my-xs" flat size="sm" :label="$t('CVedit')" 
+        icon="edit" dense color="primary" @click="editerCV"/>
       <div class="q-mt-sm" v-if="avatar.pc">
         <div>
           <span class="titre-md text-italic">{{$t('FApc')}}</span>
-          <q-btn class="q-ml-lg" dense flat color="primary" size="sm" :label="$t('FApcms')" @click="editerpc"/>
+          <q-btn v-if="edit" class="q-ml-lg" dense flat color="primary" size="sm"
+            :label="$t('FApcms')" @click="editerpc"/>
          </div>
         <div class="q-ml-lg font-mono fs-md text-bold">[{{avatar.pc}}]</div>
       </div>
       <div v-else>
         <span class="titre-md text-italic">{{$t('FAnpc')}}</span>
-        <q-btn class="q-ml-sm" dense flat color="primary" size="sm" :label="$t('FAdeclpc')" @click="editerpc"/>
+        <q-btn v-if="edit" class="q-ml-sm" dense flat color="primary" size="sm"
+          :label="$t('FAdeclpc')" @click="editerpc"/>
       </div>
     </div>
 
@@ -59,7 +62,7 @@
 </template>
 <script>
 
-import { toRef, ref } from 'vue'
+import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { IDCOMPTABLE } from '../app/api.mjs'
@@ -142,16 +145,25 @@ export default {
 
   setup (props) {
     const avStore = stores.avatar
-    const av = toRef(props, 'na')
-    const avatar = ref(avStore.getAvatar(av.value.id))
+    const na = toRef(props, 'na')
+
+    function getAv() { return avStore.getAvatar(na.value.id) }
+    const avatar = ref(getAv())
 
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setAvatar' && args[0].id === av.value.id) {
+        if (name === 'setAvatar' && args[0].id === na.value.id) {
           avatar.value = args[0]
         }
       })
     })
+
+    /* Nécessaire pour tracker le changement d'id
+    Dans une liste le composant N'EST PAS rechargé quand la liste change */
+    watch(() => na.value, (ap, av) => {
+        avatar.value = getAv()
+      }
+    )
 
     return {
       avatar,
