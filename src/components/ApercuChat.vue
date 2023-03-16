@@ -38,7 +38,7 @@ import { dhcool } from '../app/util.mjs'
 import { getNg } from '../app/modele.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import ApercuPeople from './ApercuPeople.vue'
-import { MajMotsclesChat, MajTexteChat } from '../app/operations.mjs'
+import { MajMotsclesChat, SetChats } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuChat',
@@ -62,7 +62,7 @@ export default {
       if (await this.session.aut(3, true)) this.chatedit = true
     },
     async chatok (txt) {
-      await new MajTexteChat().run(this.chat, txt)
+      await new SetChats().run(this.chat, txt)
       this.chatedit = false
     },
     async changeMc (mc) {

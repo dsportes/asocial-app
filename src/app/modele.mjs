@@ -1111,6 +1111,7 @@ _data_:
 - `v`
 - `dlv` : la dlv permet au GC de purger les chats. Dès qu'il y a une dlv, le chat est considéré comme inexistant autant en session que pour le serveur.
 
+- `sa` : si `true`, le chat a été supprimé par _l'autre_.
 - `mc` : mots clés attribués par l'avatar au chat
 - `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé de _l'autre_
 - `contc` : contenu crypté par la clé de l'avatar _lecteur_.
@@ -1136,6 +1137,7 @@ export class Chat extends GenDoc {
       this._zombi = true
     } else {
       this.vsh = row.vsh || 0
+      this.sa = row.sa || false
       this.mc = row.mc
       const x = decode(await decrypter(this.cle, row.contc))
       this.naE = new NomAvatar(x.na[0], x.na[1])
@@ -1152,11 +1154,11 @@ export class Chat extends GenDoc {
   static async nouveauRow (naI, naE, dh, txt, mc) {
     const ids = await Chat.getIds(naI, naE)
     const id = naI.id
-    const r = { id, ids, v: 0, dlv: 0, iv: GenDoc._iv(naI.id, 0)}
+    const r = { id, ids, dlv: 0, sa: false } // v vcv cva sont mis par le serveur
     if (mc) r.mc = mc
     r.contc = await Chat.getContc (naI, naE, dh, txt)
     const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'chats', id, ids, v: 0, dlv: 0, _data_}
+    return { _nom: 'chats', id, ids, _data_}
   }
 
   static async getContc (naI, naE, dh, txt) {

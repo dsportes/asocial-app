@@ -7,7 +7,7 @@ PageTribus filtre blocage. Aperçu tribu en chantier
 TODO next :
 - FicheAvatar : gérer les restrictions d'accès - Phrase de contact - Ops
 - sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à reprendre !!!!!!!!!!!!!!!
-- revoir GestionBase : tout faux, reseau, suppression base ...
+- en connexion / synchronisation, quand un groupe change, il faut supprimer tous les membres dont le statut est 0 (disparu / oublié). La maj d'un membre dont le statut est 0 dans son groupe est à ignorer.
 
 # Application front-end A-social
 

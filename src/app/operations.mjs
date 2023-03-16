@@ -260,7 +260,14 @@ export class ChercherSponsoring extends OperationUI {
   }
 }
 
-/** Changer le texte d'un chat *********************************************
+/* Set chats ***********************************************************
+L'un ou l'autre des chats I et E peuvent ne pas exister :
+- ils sont créés avec des mots clés vide
+Les cartes de visite des deux côtés sont mises à jour.
+
+Si I n'a pas de chat, il lui faut d'abord en obtenir le contenu éventuel connu de E
+- il doit en effet en crypter le contenu avant SetChats
+
 args.token: éléments d'authentification du compte.
 args.idI : id (côté compte)
 args.idE : id (côté de l'autre)
@@ -269,8 +276,9 @@ args.idsE : ids du chat
 args.contI : contenu crypté côté compte
 args.contE : contenu crypté côté autre
 Retour:
+rowChatI
 */
-export class MajTexteChat extends OperationUI {
+export class SetChats extends OperationUI {
   constructor () { super($t('OPmajtch')) }
 
   async run (chat, txt) {
@@ -285,7 +293,7 @@ export class MajTexteChat extends OperationUI {
       
       args.contI = await Chat.getContc(chat.naI, chat.naE, dh, txt)
       args.contE = await Chat.getContc(chat.naE, chat.naI, dh, txt)
-      const ret = this.tr(await post(this, 'MajTexteChat', args))
+      const ret = this.tr(await post(this, 'SetChats', args))
       this.finOK()
       return ret
     } catch (e) {
@@ -311,6 +319,32 @@ export class MajMotsclesChat extends OperationUI {
       const ret = this.tr(await post(this, 'MajMotsclesChat', args))
       this.finOK()
       return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Supprimer un chat ******************************
+args.token: éléments d'authentification du compte.
+args.idI : id (côté compte)
+args.idE : id (côté de l'autre)
+args.idsI : ids du chat
+args.idsE : ids du chat
+Retour:
+*/
+export class SupprimerChat extends OperationUI {
+  constructor () { super($t('OPreactch')) }
+
+  async run (naI, naE) {
+    try {
+      const args = { token: stores.session.authToken }
+      args.idI = naI.id
+      args.idE = naE.id
+      args.idsI = await Chat.getIds(naI, naE)
+      args.idsE = await Chat.getIds(naE, naI) 
+      this.tr(await post(this, 'SupprimerChat', args))
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }
@@ -364,18 +398,8 @@ export class ReactivationChat extends OperationUI {
         txt = ''
       }
 
-      { // On écrit le chat, possiblement avec un texte vide s'il n'avait pas été trouvé
-        /* Changer le texte d'un chat ****** MajTexteChat
-        args.token: éléments d'authentification du compte.
-        args.idI : id (côté compte)
-        args.idE : id (côté de l'autre)
-        args.idsI : ids du chat
-        args.idsE : ids du chat
-        args.contI : contenu crypté côté compte
-        args.contE : contenu crypté côté autre
-        Retour:
-        rowChatI
-        */
+      { 
+        // On écrit le chat, avec un texte vide s'il n'avait pas été trouvé
         const args = { token: session.authToken }
         args.idI = idI
         args.idE = idE
@@ -383,12 +407,11 @@ export class ReactivationChat extends OperationUI {
         args.idsE = idsE  
         args.contI = await Chat.getContc(naI, naE, dh, txt)
         args.contE = await Chat.getContc(naE, naI, dh, txt)
-        const ret = this.tr(await post(this, 'MajTexteChat', args))
+        const ret = this.tr(await post(this, 'SetChats', args))
         chat = await compile(ret.rowChatI)
         avStore.setChat(chat)
       }
-      this.finOK()
-      return chat
+      return this.finOK(chat)
     } catch (e) {
       await this.finKO(e)
     }
