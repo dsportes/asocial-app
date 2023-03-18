@@ -1170,8 +1170,8 @@ export class Chat extends GenDoc {
 /** Groupe ***********************************************************************
 _data_:
 - `id` : id du groupe.
-- `v` : version, du groupe, ses secrets, ses membres. 
-- `dlv` : plus haute `dlv` des membres, 
+- `v` : version du groupe.
+- 'dlv': date de purge d'un groupe _zombi_.
 - `dfh` : jour de fin d'hébergement quand le groupe n'est plus hébergé,
 
 - `stx` : 1-ouvert (accepte de nouveaux membres), 2-fermé (ré-ouverture en vote)
