@@ -504,6 +504,7 @@ export async function compile (row) {
   obj.id = row.id
   if (row.ids) obj.ids = row.ids
   if (row.dlv) obj.dlv = row.dlv
+  if (row.dfh) obj.dfh = row.dfh
   obj.v = row.v
   if (row._data_) {
     const x = decode(row._data_)
@@ -762,12 +763,18 @@ export class Avatar extends GenDoc {
   }
 
   /* Retourne les numéros d'invitation de l'avatar pour les groupes de setg
-  si del, supprime ces entrées */
+  */
   niDeGroupes (setg) {
-    const ani = []
-    for (const t of this.lgr) if (setg.has(t.ng.id)) ani.push(t.ni)
-    ani.forEach(ni => { this.lgr.delete(ni) })
-    return ani
+    const ani = new Set()
+    for (const t of this.lgr) if (setg.has(t.ng.id)) {
+      ani.add(t.ni)
+      this.lgr.delete(ni)
+    }
+    for (const t of this.invits) if (setg.has(t.ng.id)) {
+      ani.add(t.ni)
+      this.invits.delete(ni)
+    }
+    return Array.from(ani)
   }
 
   /** compile *********************************************************/
@@ -847,7 +854,6 @@ export class Cv extends GenDoc {
 /** Compta **********************************************************************
 - `id` : numéro du compte
 - `v` : version
-- `dhb` : date-heure `dh` du blocage quand elle est non nulle (qu'il y a un blocage).
 - `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte : sert d'accès au row compta à la connexion au compte.
 - `shay` : SHA du SHA de X (PBKFD de la phrase secrète). Permet de vérifier la détention de la phrase secrète complète.
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
@@ -891,8 +897,6 @@ export class Compta extends GenDoc {
     session.compteId = this.id
 
     this.vsh = row.vsh || 0
-    this.id = row.id
-    this.v = row.v
 
     const [nomt, rndt] = decode(await decrypter(session.clek, row.nctk))
     this.nct = new NomTribu(nomt, rndt)
@@ -1005,10 +1009,6 @@ export class Sponsoring extends GenDoc {
 
   /* Par l'avatar sponsor */
   async compile (row) {
-    this.id = row.id
-    this.ids = row.ids
-    this.v = row.v
-    this.dlv = row.dlv
     this.st = row.st
     this.vsh = row.vsh || 0
     this.dh = row.dh
@@ -1105,16 +1105,18 @@ Un chat est une ardoise commune à deux avatars A et B:
 
 _data_:
 - `id`
-- `ids` : identifiant du chat relativement à son avatar,
-    Pour A, hash du cryptage de `idA/idB` par le `rnd` de A.
-    Pour B, hash du cryptage de `idB/idA` par le `rnd` de B.
+- `ids` : identifiant du chat relativement à son avatar, hash du cryptage de `idA/idB` par le `rnd` de A.
 - `v`
+- `vcv` : version de la carte de visite
 - `dlv` : la dlv permet au GC de purger les chats. Dès qu'il y a une dlv, le chat est considéré comme inexistant autant en session que pour le serveur.
 
-- `sa` : si `true`, le chat a été supprimé par _l'autre_.
+- `st` : statut:
+  - 0 : le chat est vivant des 2 côtés
+  - 1 : le chat a été supprimé par _l'autre_ de son côté.
+  - 2 : _l'autre_ a été détecté disparu : 
 - `mc` : mots clés attribués par l'avatar au chat
-- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé de _l'autre_
-- `contc` : contenu crypté par la clé de l'avatar _lecteur_.
+- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé CV de _l'autre_
+- `contc` : contenu crypté par la clé CV de l'avatar _lecteur_.
   - `na` : `[nom, cle]` de _l'autre_.
   - `dh`  : date-heure de dernière mise à jour.
   - `txt` : texte du chat.
@@ -1130,14 +1132,11 @@ export class Chat extends GenDoc {
   get naI () { return getNg(this.id) }
 
   async compile (row) {
-    this.id = row.id
-    this.ids = row.ids
-    this.v = row.v
     if (row.dlv) {
       this._zombi = true
     } else {
       this.vsh = row.vsh || 0
-      this.sa = row.sa || false
+      this.st = row.st || 0
       this.mc = row.mc
       const x = decode(await decrypter(this.cle, row.contc))
       this.naE = new NomAvatar(x.na[0], x.na[1])
@@ -1154,7 +1153,7 @@ export class Chat extends GenDoc {
   static async nouveauRow (naI, naE, dh, txt, mc) {
     const ids = await Chat.getIds(naI, naE)
     const id = naI.id
-    const r = { id, ids, dlv: 0, sa: false } // v vcv cva sont mis par le serveur
+    const r = { id, ids, dlv: 0, st: 0 } // v vcv cva sont mis par le serveur
     if (mc) r.mc = mc
     r.contc = await Chat.getContc (naI, naE, dh, txt)
     const _data_ = new Uint8Array(encode(r))
@@ -1170,23 +1169,21 @@ export class Chat extends GenDoc {
 /** Groupe ***********************************************************************
 _data_:
 - `id` : id du groupe.
-- `v` : version du groupe.
-- 'dlv': date de purge d'un groupe _zombi_.
-- `dfh` : jour de fin d'hébergement quand le groupe n'est plus hébergé,
+- `v` : version, du groupe, ses secrets, ses membres. 
+- `iv`
+- `dfh` : date de fin d'hébergement.
 
-- `stx` : 1-ouvert (accepte de nouveaux membres), 2-fermé (ré-ouverture en vote)
-- `sty` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
-- `ast` : array des statuts des membres (dès qu'ils ont été pressentis) :
-  - 10:pressenti, 
-  - 20,21,22:invité en tant que lecteur / auteur / animateur, 
-  - 30,31,32:actif (invitation acceptée) en tant que lecteur / auteur / animateur, 
-  - 40: invitation refusée,
-  - 50: suspendu, 
-  - 0: disparu / oublié
 - `idhg` : id du compte hébergeur crypté par la clé du groupe.
 - `imh` : indice `im` du membre dont le compte est hébergeur.
-- `v1 v2` : volumes courants des secrets du groupe.
-- `q1 q2` : quotas attribués par le compte hébergeur.
+- `stx` : 1-ouvert (accepte de nouveaux membres), 2-fermé (ré-ouverture en vote)
+- `sty` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
+- `ast` : array des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
+  - 10: contact, 
+  - 20,21,22: invité en tant que lecteur / auteur / animateur, 
+  - 30,31,32: **actif** (invitation acceptée) en tant que lecteur / auteur / animateur, 
+  - 40: invitation refusée,
+  - 50: résilié / suspendu, 
+  - 0: disparu / oublié.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`. 
 */
@@ -1203,16 +1200,10 @@ export class Groupe extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    this.id = row.id
-    this.v = row.v
-    this.dfh = row.dfh || 0
-    this.dlv = row.dlv
-    if (row._zombi) { this._zombi = true; return }
-
-    this.dnv = row.dnv
-    this.stx = row.stx
-    this.sty = row.sty
-    this.ast = row.ast
+    this.dnv = row.dnv || 0
+    this.stx = row.stx || 1
+    this.sty = row.sty || 0
+    this.ast = row.ast || new Uint8Array([0])
     this.idh = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
     this.imh = row.imh || 0
     this.v1 = row.v1
@@ -1322,88 +1313,68 @@ export class Groupe extends GenDoc {
 - `id` : id du groupe.
 - `ids`: identifiant, indice de membre relatif à son groupe.
 - `v`
-- `dlv` : date de dernière signature lors de la connexion du compte de l'avatar membre du groupe.
+- `vcv` : version de la carte de visite du membre
+- `dlv` : date de dernière signature + 365 lors de la connexion du compte de l'avatar membre du groupe.
 
-- `stx` : 0:pressenti, 1:invité, 2:actif (invitation acceptée), 3: refusé (invitation refusée), 4: résilié, 5: disparu.
-- `laa` : 0:lecteur, 1:auteur, 2:animateur.
-- `npi` : 0: accepte d'être invité, 1: ne le souhaite pas.
+- `ddi` : date de la dernière invitation
+- `dda` : date de début d'activité (jour de la première acceptation)
+- `dfa` : date de fin d'activité (jour de la dernière suspension)
 - `vote` : vote de réouverture.
 - `mc` : mots clés du membre à propos du groupe.
 - `infok` : commentaire du membre à propos du groupe crypté par la clé K du membre.
 - `datag` : données, immuables, cryptées par la clé du groupe :
-  - `nom` `cle` : nom complet de l'avatar.
-  - `ni` : numéro d'invitation du membre. Permet de supprimer l'invitation et d'effacer le groupe dans son avatar (clé de `lgrk`).
-	- `idi` : id du membre qui l'a _pressenti_.
-- `cvm` : carte de visite du membre `{v, photo, info}` crypté par la clé du membre.
+  - `nom` `rnd` : nom complet de l'avatar.
+  - `ni` : numéro aléatoire d'invitation du membre. Permet de supprimer l'invitation et d'effacer le groupe dans son avatar (clé de `lgrk invits`).
+	- `idi` : indice du membre qui l'a inscrit en comme _contact_.
+- `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
 */
 
 export class Membre extends GenDoc {
   // Du groupe
   get cleg () { return getCle(this.id) }
   get ng () { return getNg(this.id) } // nom complet du groupe
-  
-  // De l'avatar membre
-  get estAc () { return stores.avatar.compte.estAc(this.na.id) }
-  get clem () { return this.namb.cle }
   // na : nom complet de l'avatar membre
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    this.id = row.id
-    this.ids = row.ids
-    this.v = row.v
-    this.dlv = row.dlv
-
-    this.stx = row.stx
-    this.laa = row.laa
-    this.npi = row.npi || 0
+    this.ddi = row.ddi || 0
+    this.dda = row.dda || 0
+    this.dfa = row.dfa || 0
     this.vote = row.vote || 0
-    this.mc = row.mc
+    this.mc = row.mc || new Uint8Array([])
     this.data = decode(await decrypter(this.cleg, row.datag))
-    this.namb = new NomAvatar(this.data.nom, this.data.cle)
-    if (!this.estAc) setNg(this.namb)
+    this.na = new NomAvatar(this.data.nom, this.data.rnd)
+    this.estAc = stores.avatar.compte.estAc(this.na.id)
+    if (!this.estAc) setNg(this.na)
     this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
-    this.cv = row.cvm ? decode(await decrypter(clem, row.cvm)) : null
+    this.cv = row.cva ? decode(await decrypter(this.na.rnd, row.cva)) : null
   }
 
-  nouveau (id, st, im, na, idi) {
-    /* id du groupe, statut, indice membre,
+  static async nouveau (nag, im, na, idi) {
+    /* na du groupe, indice membre,
     NomAvatar du membre, id de l'invitant (fac, sinon c'est le membre lui-même */
-    this.id = id
-    this.im = im
-    this.v = 0
-    this.st = st
-    this.npi = 0
-    this.vote = 0
-    this.mc = new Uint8Array([])
-    this.info = ''
-    this.ard = ''
-    this.dh = 0
-    this.data = {
-      nom: na.nom,
-      rnd: na.rnd,
-      ni: rnd6(),
-      idi: idi || na.id
-    }
-    this.namb = na
-    this.vsh = 0
-    return this
+    const _data_ = { id: nag.id, im, v: 0, vcv: 0, dda: 0, ddi: 0, dfa: 0, vote: 0, mc: new Uint8Array([]), info: null }
+    const data = { nom: na.nom, rnd: na.rnd, ni: rnd6(), idi: idi || na.id  }
+    _data_.datag = await crypter((nag.rnd, new Uint8Array(encode(data))))
+    const r = { _nom: 'membres', id: nag.id, im, v: 0, vcv: 0, _data_}
+    return new Uint8Array(encode(r))
   }
 
 }
 
 /** Secret ****************************************************
+_data_:
 - `id` : id de l'avatar ou du groupe.
 - `ids` : identifiant relatif à son avatar.
 - `v` : sa version.
 
 - `st` :
-  - `99999` pour un _permanent_.
-  - `dlv` pour un _temporaire_.
-- `imx` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `x`. 
+  - `99999999` pour un _permanent_.
+  - `aaaammjj` date limite de validité pour un _temporaire_.
+- `im` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `ids`. 
 - `p` : 0: pas protégé, 1: protégé en écriture.
 - `v1` : volume du texte
-- `v2` : volume total des fichiers attachés
+- `v2` : volume total des fichiers attachés.
 - `mc` :
   - secret personnel : vecteur des index de mots clés.
   - secret de groupe : map sérialisée,
@@ -1414,7 +1385,7 @@ export class Membre extends GenDoc {
   - `l` : liste des auteurs pour un secret de groupe.
   - `t` : texte gzippé ou non.
 - `mfas` : map des fichiers attachés.
-- `refs` : couple `[id, ids]` crypté par la clé du secret référençant un autre secret _référence de voisinage_ qui par principe, lui, n'aura pas de `refs`).
+- `refs` : couple `[id, ids]` crypté par la clé du secret référençant un autre secret _référence de voisinage_ qui par principe, lui, n'aura pas de `refs`.
 
 **Map `mfas` des fichiers attachés dans un secret:**
 - _clé_ `idf`: identifiant du fichier en base64.
@@ -1425,36 +1396,26 @@ export class Membre extends GenDoc {
 
 export class Secret extends GenDoc {
   get cle () { return getCle(this.id) }
-  get deGroupe () { return this.id % 10 === 8 }
+  get ng () { return getNg(this.id) }
+
 
   async compile (row) {
-    this.vsh = row.vsh || 0
-    this.id = row.id
-    this.ids = row.ids
-    this.v = row.v
-
-    this._zombi = row._zombi
-    if (this._zombi) return
-    this.st = row.st
-    this.imx = row.imx
-    this.v1 = row.v1
-    this.v2 = row.v2
+    this.st = row.st || 99999999
+    this.im = row.im || 0
+    this.p = row.p || 0
+    this.v1 = row.v1 || 0
+    this.v2 = row.v2 || 0
+    this.deGroupe = this.ng.estGroupe
     this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || new Uint8Array([]))
     this.txt = decode(await decrypter(cle, row.txts))
     this.txt.t = ungzip(this.txt.t)
     this.ref = row.refs ? decode(await decrypter(this.cle, row.refs)) : null
 
-    this.mfa = {}
-    this.nbfa = 0
+    this.mfa = new Map()
     if (this.v2) {
       const map = row.mfas ? decode(row.mfas) : {}
-      for (const idf in map) {
-        const x = map[idf]
-        const y = { lg: x.lg }
-        this.mfa[idf] = y
-        y.data = decode(await decrypter(cle, x.datas))
-        this.nbfa++
-      }
+      for (const idf in map) 
+        this.mfa.set(idf, decode(await decrypter(cle, map[idf].datas)))
     }
   }
 
@@ -1462,8 +1423,6 @@ export class Secret extends GenDoc {
   get groupe () { return !this.deGroupe ? null : stores.groupe.getGroupe(this.id) }
 
   // TODO : gestion des voisins d'un secret
-
-  /* `dlv` : date limite de validité, en nombre de jours depuis le 1/1/2020. */
 
   get pkref () { return !this.ref ? '' : (idToSid(this.ref[0]) + '/' + this.ref[1]) }
   // get horsLimite () { return this.st < 0 || this.st >= 99999 ? false : dlvDepassee(this.st) }

@@ -213,7 +213,7 @@ export class ConnexionCompte extends OperationUI {
         this.grRequis.forEach(id => { const r = grRows[id] ; mapv[id] = r ? r.v : 0 })
         const args = { token: session.authToken, mapv }
         const ret = this.tr(await post(this, 'getGroupes', args))
-        if (ret.rowGroupes) ret.roupes.forEach(row => {
+        if (ret.rowGroupes) ret.rowGroupes.forEach(row => {
           grRows[row.id] = row
         })
       }
@@ -269,6 +269,7 @@ export class ConnexionCompte extends OperationUI {
     const auj = AMJ.amjUtc()
     for (const ids in rows) {
       const secret = await compile(rows[ids])
+      
       if (session.accesNet && secret.st < auj) { // secret temporaire à supprimer
         this.buf.lsecsup.push(secret)
       } else {

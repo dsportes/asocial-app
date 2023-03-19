@@ -294,8 +294,7 @@ export class SetChats extends OperationUI {
       args.contI = await Chat.getContc(chat.naI, chat.naE, dh, txt)
       args.contE = await Chat.getContc(chat.naE, chat.naI, dh, txt)
       const ret = this.tr(await post(this, 'SetChats', args))
-      this.finOK()
-      return ret
+      return this.finOK(ret)
     } catch (e) {
       await this.finKO(e)
     }
@@ -365,34 +364,34 @@ export class ReactivationChat extends OperationUI {
       let chat
       const session = stores.session
       const avStore =  stores.avatar
-      // const dh = new Date().getTime()
+      const pStore = stores.people
 
       const idI = naI.id
       const idE = naE.id
       const idsI = await Chat.getIds(naI, naE)
       const idsE = await Chat.getIds(naE, naI)
 
-      chat = avStore.getChat(idI, idsI)
-      if (chat) {
-        this.finOK()
-        return chat
-      }
-
       let txt
       let dh
-      /* Lecture d'un Chat **********************
+      /* Lecture d'un Chat (E) **********************
       args.token: éléments d'authentification du compte.
       args.id ids : id du chat
       args.v : version détenue en session
       Retour:
+      disparu: true si l'avatar E a disparu
       rowChat: chat s'il existe
       */
       const args = { token: session.authToken, id: idE, ids: idsE, v: 0 }
       const ret = this.tr(await post(this, 'GetChat', args))
+      if (ret.disparu) {
+        pStore.setDisparu(idE)
+        return this.finOK([true, null])
+      }
+
       if (ret.rowChat) {
         const chatE = await compile(ret.rowChat)
         txt = chatE.txt
-        dh = chatE.txt
+        dh = chatE.dh
       } else {
         dh = new Date().getTime()
         txt = ''
@@ -411,7 +410,7 @@ export class ReactivationChat extends OperationUI {
         chat = await compile(ret.rowChatI)
         avStore.setChat(chat)
       }
-      return this.finOK(chat)
+      return this.finOK([false, chat])
     } catch (e) {
       await this.finKO(e)
     }

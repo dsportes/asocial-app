@@ -71,7 +71,15 @@ export default ({
         await afficherDiag(this.$t('CChnopc'))
       } else {
         this.naE = na
-        this.chat = await new ReactivationChat().run(this.naI, this.naE)
+        const idsI = await Chat.getIds(this.naI, this.naE)
+        this.chat = avStore.getChat(this.naI.id, idsI)
+        if (this.chat) return
+        const [disparu, chat] = await new ReactivationChat().run(this.naI, this.naE)
+        if (disparu) {
+          await afficherDiag(this.$t('avdisp'))
+        } else {
+          this.chat = chat
+        }
       }
     }
   },

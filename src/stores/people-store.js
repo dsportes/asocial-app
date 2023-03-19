@@ -144,6 +144,13 @@ export const usePeopleStore = defineStore('people', {
     delElt (id, e) {
       if (!e.sp && !e.chats.size && !e.groupes.size) this.map.delete(id)
     },
+
+    setDisparu (id) {
+      const e = this.map.get(na.id)
+      if (e) {
+        // TODO
+      }
+    },
   
     setPeopleTribu (na, cv, sp) { // Sponsor ou simple membre de la tribu
       const e = this.getElt(na, cv)

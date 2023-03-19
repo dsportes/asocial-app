@@ -56,6 +56,7 @@ export default {
   avatar: 'Avatar',
   tribus: 'Tribu | Tribu | Tribus',
   comptable: 'Comptable',
+  avdisp: 'Cet avatar a disparu (compte supprimé)',
 
   auja: 'aujourd\'hui à {0}',
   hiera: 'hier à {0}',
@@ -184,7 +185,7 @@ export default {
   EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
   EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
   EX8003: 'Erreur d\'ID pour le compte Comptable',
-  EX8004: 'Compte Comptable déjà créé',
+  EX800nopc4: 'Compte Comptable déjà créé',
   EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
   EX8007: 'Phrase de sponsoring déjà déclarée.',
   EX8008: 'Phrase de sponsoring non trouvée.',
@@ -207,7 +208,6 @@ export default {
   EX8066: 'Maximum de volume V2 pour les secrets du couple dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8067: 'Groupe sans hébergeur {0} : augmentation de volumer interdit.',
 
-  EX9001: 'Clé publique du comptable non disponible.',
   EX9002: 'Tribu non trouvée ({0})',
   EX9003: 'Compte non trouvé ({0})',
   EX9004: 'Ligne comptable non trouvée ({0})',
@@ -623,6 +623,10 @@ export default {
   PNCesp: 'Volumes utilisés',
   PNCchats: 'Chats d\'urgence',
   PNCntfTrCo: 'Notification sur la "tribu" posée par le Comptable',
+
+  // ContactChat
+  CChtit: 'Joindre un avatar par sa phrase de contact',
+  CChnopc: 'Aucun avatar n\'a enregistré cette phrase de contact',
 
   // PanelContacts
   PCnom: "Nom ...",
