@@ -392,6 +392,7 @@ export default {
   OPnvtr: 'Nouvelle tribu',
   OPdhvu: 'Maj de la date-heure de "vu" d\'une compta',
   OPtrib: 'Obtention de la tribu',
+  OPnotif: 'Attribution d\'une notification générale',
 
   OPrdv: 'Prendre rendez-vous avec un avatar',
   OPprl: 'Prolonger une proposition (de contact, parrainage ou rendez-vous)',
@@ -576,11 +577,13 @@ export default {
   SYgro: 'groupe : {0}',
   SYgro2: 'groupe : {0} secrets:{1}/{2} membres:{3}/{4}',
   SYcvs: 'cartes de visite : {0} requises, {1} mises à jour',
- 
+
+  NTng: 'Notification générale du Comptable',
   NTtr: 'Notifications à tous les comptes de la tribu (par {0})',
   NTco: 'Notification au compte (par {0})',
   NTtr2: 'Notifications à tous les comptes de la tribu',
   NTco2: 'Notification pour le seul compte',
+  NTnng: 'Pas de notification générale du Comptable',
   NTnco: 'Pas de notification du compte par le comptable',
   NTnsp: 'Pas de notification du compte par un sponsor',
   NTncotr: 'Pas de notifications à tous les comptes de la tribu par le comptable',
@@ -597,7 +600,7 @@ export default {
   NTcom: 'Commentaires sur la tribu {0}',
   NTci: 'Un sponsor ne peut pas émettre une notification au Comptable',
   NTgl: 'Seul le Comptable peut émettre une notification globale.',
-  
+
   IBec: 'Procédures de blocage en cours',
   IB0: 'Pas de procédure de blocage ouverte',
   IB1: 'Restrictions et blocages imminents mais sans conséquence pour l\'instant',
@@ -720,6 +723,7 @@ export default {
   CPTmemo: 'Mémo du compte',
   CPTnomemo: 'pas de mémo enregistré',
   CPTchps: 'Changer la phrase secrète',
+  CPTnbloc: 'Aucune procédure de blocage en cours.',
 
   CPTaptrib: 'A propos de ma tribu {0}',
   CPTimptrib: 'Les ressources du compte sont imputées à la tribu {0}',
@@ -868,6 +872,7 @@ export default {
   SBtitc: 'Blocage "compte"',
   SBtittc: 'Blocage "tribu" ET "compte"',
   SBgco: '(par le Ccomptable)',
+  SBn0: 'Pas de blocage',
   SBn1: 'Alerte. ',
   SBn2: 'Lecture seulement. ',
   SBn3: 'Compte bloqué. ',

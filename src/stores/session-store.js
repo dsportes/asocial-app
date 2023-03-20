@@ -139,7 +139,7 @@ export const useSessionStore = defineStore('session', {
     setBlocage () {
       const self = this
       function ntfx (ntf) {
-        if (ntf) {
+        if (ntf && ntf.dh) {
           if (self.gntf === 0) self.gntf = 1
           if (ntf.g) self.gntf = 2
           if (ntf.dh > dhvu) self.alirentf = true
@@ -159,7 +159,7 @@ export const useSessionStore = defineStore('session', {
       this.alirebl = false
       this.gntf = 0
       this.alirentf = false
-      if (this.notifG) this.gntf = this.notifG.g ? 2 : 1
+      ntfx(this.notifG)
       ntfx(tr.notifco)
       ntfx(tr.notifsp)
       ntfx(et2.notifco)

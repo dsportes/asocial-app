@@ -518,7 +518,7 @@ export async function compile (row) {
 export class Singletons extends GenDoc {
 
   async compile (row) {
-    if (row.id === 1) {
+    if (this.id === 1) {
       this.txt = row.txt || ''
       this.g = row.g || 0
       this.dh = row.dh || 0

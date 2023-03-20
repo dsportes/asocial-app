@@ -650,6 +650,26 @@ export class GetTribu extends OperationUI {
   }
 }
 
+/* Set notification générale *****************************************************
+args.token donne les éléments d'authentification du compte.
+args.notifG : l'objet notification { txt, dh, g }
+Retour:
+*/
+export class SetNotifG extends OperationUI {
+  constructor () { super($t('OPnotif')) }
+
+  async run (notifG) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, notifG}
+      this.tr(await post(this, 'SetNotifG', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+  
 
 
 /*************************************************************************************************

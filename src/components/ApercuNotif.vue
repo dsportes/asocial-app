@@ -1,8 +1,9 @@
 <template>
   <div :class="'q-my-xs col items-start ' + dkli(idx)">
-    <div v-if="ntf" class="row justify-between">
+    <div v-if="ntf && ntf.dh" class="row justify-between">
       <div>
-        <span class="titre-sm q-mr-sm">{{$t(estTribu ? 'NTtr' : 'NTco', [emet])}}</span> 
+        <span v-if="estGlob" class="titre-sm q-mr-sm">{{$t('NTng')}}</span> 
+        <span v-else class="titre-sm q-mr-sm">{{$t(estTribu ? 'NTtr' : 'NTco', [emet])}}</span> 
         <notif-ico :gravite="ntf.g ? true : false"/>
       </div>
       <div>
@@ -10,10 +11,12 @@
         <q-btn v-if="edit" size="sm" dense icon="edit" color="primary" @click="editer"/>
       </div>
     </div>
-    <show-html v-if="ntf" class="q-my-xs bord" :idx="idx" zoom maxh="3rem" :texte="ntf.txt"/>
-    <div v-if="!ntf">
-      <span class="titre-sm q-mr-sm">{{$t((sponsor ? 'NTnsp' : 'NTnco') + (estTribu ? 'tr' : ''))}}</span> 
-      <q-btn v-if="edit" size="sm" dense icon="add" color="primary" :label="$t('NTecr')" @click="editer"/>
+    <show-html v-if="ntf && ntf.dh" class="q-my-xs bord" :idx="idx" zoom maxh="3rem" :texte="ntf.txt"/>
+    <div v-if="!ntf || !ntf.dh">
+      <span v-if="estGlob" class="titre-sm q-mr-sm">{{$t('NTnng')}}</span> 
+      <span v-else class="titre-sm q-mr-sm">{{$t((sponsor ? 'NTnsp' : 'NTnco') + (estTribu ? 'tr' : ''))}}</span> 
+      <q-btn v-if="edit && (!estGlob || session.estComptable)" 
+        size="sm" dense icon="add" color="primary" :label="$t('NTecr')" @click="editer"/>
     </div>
 
   <!-- Edition d'une notification -->
@@ -46,7 +49,7 @@ import EditeurMd from './EditeurMd.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import NotifIco from './NotifIco.vue'
 import { crypter } from '../app/webcrypto.mjs'
-import { SetAttributTribu, SetAttributTribu2 } from '../app/operations.mjs'
+import { SetAttributTribu, SetAttributTribu2, SetNotifG } from '../app/operations.mjs'
 import { IDCOMPTABLE } from '../app/api.mjs'
 
 export default {
@@ -85,7 +88,7 @@ export default {
     close () { this.edntf = false },
     async editer () {
       if (! await this.session.edit()) return
-      if (!this.estGlob) {
+      if (this.estGlob) {
         if (!this.session.estComptable) {
           await afficherDiag(this.$t('NTgl'))
           return
@@ -100,8 +103,13 @@ export default {
       this.edntf = true
     },
     async valider (txt) {
-      const e = { dh: new Date().getTime(), g: this.g ? true : false, txt: txt, 
-        id: this.session.estComptable ? 0 : this.session.compteId }
+      const e = { dh: new Date().getTime(), g: this.g ? true : false, txt: txt}
+      if (this.estGlob) {
+        await new SetNotifG().run(e)
+        this.close()
+        return
+      }
+      e.id = this.session.estComptable ? 0 : this.session.compteId 
       // crypté par la clé de la tribu si source tribu, du compte si source compte
       if (this.estTribu) {
         const buf = await crypter(this.src.na.rnd, new Uint8Array(encode(e)))

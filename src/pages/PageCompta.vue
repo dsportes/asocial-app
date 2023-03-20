@@ -25,8 +25,15 @@
 
     <q-separator v-if="(c.pc2 >= 100) || (c.pc1 >= 100)" class="q-my-md"/>
 
-    <synthese-blocage :blTr="blTr" :blCo="blCo"/>
+    <synthese-blocage v-if="blTr || blCo" :blTr="blTr" :blCo="blCo"/>
+    <div v-else class="titre-lg text-italic">{{$t('CPTnbloc')}}</div>
+
     <q-separator class="q-my-md"/>
+
+    <div>
+      <apercu-notif edit />
+      <q-separator class="q-my-sm"/>
+    </div>
 
     <div v-if="ntfTrCo">
       <apercu-notif :src="tr" />

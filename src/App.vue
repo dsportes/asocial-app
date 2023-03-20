@@ -43,7 +43,7 @@
       </div>
 
       <!-- Notifications -->
-      <notif-ico class="q-ml-xs" v-if="session.gntf" clickable :alire="session.alirentf" 
+      <notif-ico class="q-ml-xs" v-if="session.gntf || session.estComptable" clickable :alire="session.alirentf" 
         :gravite="session.gntf === 2" @click="clickNotif"/>
 
       <!-- Blocages -->

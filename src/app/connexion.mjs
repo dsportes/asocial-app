@@ -415,7 +415,7 @@ export class ConnexionCompte extends OperationUI {
     // Connexion : récupération de rowCompta rowAvatar rowTribu fscredentials
     const ret = this.tr(await post(this, 'ConnexionCompte', args))
     if (ret.credentials) session.fscredentials = ret.credentials
-    session.setNotifGlobale(ret.notifG)
+    this.notifG = ret.notifG
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
     session.compteId = this.rowAvatar.id
@@ -517,7 +517,7 @@ export class ConnexionCompte extends OperationUI {
 
       // Rangement en store
       avStore.setCompte(this.avatar, this.compta, this.tribu, this.tribu2)
-      session.setBlocage()
+      session.setNotifGlobale(this.notifG)
       this.avatarsToStore.forEach(av => {
         if (av.id !== this.avatar.id) avStore.setAvatar(av)
       })
@@ -762,7 +762,7 @@ export class AcceptationSponsoring extends OperationUI {
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
       if (ret.credentials) session.fscredentials = ret.credentials
-      session.setNotifGlobale(ret.notifG)
+      const notifG = ret.notifG
       const rowTribu = ret.rowTribu
       const rowTribu2 = ret.rowTribu2
 
@@ -772,6 +772,7 @@ export class AcceptationSponsoring extends OperationUI {
       const tribu2 = await compile(rowTribu2)
       const compta = await compile(rowCompta)
       stores.avatar.setCompte(avatar, compta, tribu, tribu2)
+      session.setNotifGlobale(notifG)
       const chat = await compile(rowChatI)
       stores.avatar.setChat(chat)
       Versions.reset()
