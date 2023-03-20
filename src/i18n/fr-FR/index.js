@@ -596,7 +596,8 @@ export default {
 
   NTcom: 'Commentaires sur la tribu {0}',
   NTci: 'Un sponsor ne peut pas émettre une notification au Comptable',
-
+  NTgl: 'Seul le Comptable peut émettre une notification globale.',
+  
   IBec: 'Procédures de blocage en cours',
   IB0: 'Pas de procédure de blocage ouverte',
   IB1: 'Restrictions et blocages imminents mais sans conséquence pour l\'instant',

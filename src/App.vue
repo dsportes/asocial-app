@@ -5,37 +5,48 @@
       <bouton-help page="page1"/>
 
       <bouton-langue/>
+
+      <!-- Dark ou clair -->
       <q-btn dense size="md" icon="contrast" @click="tgdark">
         <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
       </q-btn>
+
+      <!-- Outils et tests -->
       <q-btn dense size="md" icon="settings" @click="outilsTests = true">
         <q-tooltip>{{$t('MLAout')}}</q-tooltip>
       </q-btn>
 
+      <!-- Information session : mode synchro -->
       <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession"
         dense size="md" icon="autorenew" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-btn>
 
+      <!-- Information session : mode incognito -->
       <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito"  @click="infoSession"
         size="sm" square color="primary">
         <img src="~assets/incognito_blanc.svg">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-avatar>
 
+      <!-- Information session : mode avion -->
       <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession"
         dense size="md" icon="airplanemode_active" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-btn>
 
+      <!-- Comptabilité des volumes -->
       <div v-if="session.status>1" @click="pageCompta" style="position:relative"
         :class="'cursor-pointer q-mr-xs bg2 ' + pccl">
         <q-knob v-model="pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
         <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{pc + '%'}}</div>
       </div>
 
+      <!-- Notifications -->
       <notif-ico class="q-ml-xs" v-if="session.gntf" clickable :alire="session.alirentf" 
         :gravite="session.gntf === 2" @click="clickNotif"/>
+
+      <!-- Blocages -->
       <blocage-ico class="q-ml-xs" v-if="session.nivbl" clickable :niveau="session.nivbl" :alire="session.alirebl" @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
@@ -43,6 +54,7 @@
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
       </q-toolbar-title>
 
+      <!-- Déconnexion -->
       <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" @click="ui.dialoguedrc = true">
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
         <span class="fs-sm font-mono">{{hms(session.dh)}}</span>

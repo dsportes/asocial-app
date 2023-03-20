@@ -384,7 +384,11 @@ export class ReactivationChat extends OperationUI {
       const args = { token: session.authToken, id: idE, ids: idsE, v: 0 }
       const ret = this.tr(await post(this, 'GetChat', args))
       if (ret.disparu) {
-        pStore.setDisparu(idE)
+        const args2 = pStore.setDisparu(naE)
+        if (args2) { // Maj (éventuelle) des volumes affectés de la tribu et de tribu2
+          args2.token = session.authToken
+          this.tr(await post(this, 'DisparitionCompte', args2))
+        }
         return this.finOK([true, null])
       }
 

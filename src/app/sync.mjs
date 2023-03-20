@@ -29,7 +29,7 @@ export class SyncQueue {
       else if (row._nom === 'versions') op = new OnchangeVersion()
       else if (row._nom === 'tribus') op = new OnchangeTribu()
       else if (row._nom === 'tribu2s') op = new OnchangeTribu2()
-      else if (row._nom === 'singletons') op = new OnchangeNotif()
+      else if (row._nom === 'singletons') op = new OnchangeSingleton()
       if (op) await op.run(row)
       if (session.synchro) session.sessionSync.setDhSync(new Date().getTime())
       session.syncEncours = false
@@ -48,31 +48,67 @@ export class OperationWS extends Operation {
     this.grSuppr.add(id)
   }
 
+  async destectMbDisp (id, ids) {
+    const args = { token: session.authToken, id, ids }
+    this.tr(await post(this, 'DisparitionMembre', args))
+  }
+
   async majGr (id) { // Maj ou ajout du groupe id
     const vcour = Versions.get(id)
     const session = stores.session
     const args = { token: session.authToken, id, v: vcour }
     const ret = this.tr(await post(this, 'ChargerGMS', args))
     this.versions(id, ret.vgroupe.v)
-    const groupe = ret.rowGroupe ? await compile(ret.rowGroupe) : null
+    const groupe = await compile(ret.rowGroupe)
+    const avgr = stores.groupe.getGroupe(id) // groupe actuel
 
-    if (groupe && groupe._zombi) {
+    if (avgr && groupe && groupe._zombi) {
+      // le groupe existait et on vient de le découvrir _zombi
       this.supprGr(id)
-    } else {
-      this.buf.putIDB(ret.rowGroupe)
-      const e = { gr: groupe, lmb: [], lsc: [] }
-      this.grMaj.set(id, e)
-      if (ret.rowSecrets) for (const x of ret.rowSecrets) {
-        this.buf.putIDB(x)
-        e.lsc.push(await compile(x))
-        if (session.accesIdb) this.buf.mapSec[secret.pk] = secret // Pour gestion des fichiers
-      }
-      if (ret.rowMembres) for (const x of ret.rowMembres) {
-        this.buf.putIDB(x)
-        e.lmb.push(await compile(x))
-      }
-      if (vcour === 0) this.abPlus.add(id) // c'était un ajout
+      return
     }
+  
+    if (!avgr && !groupe) return // le groupe n'existait pas et n'existe toujours pas
+
+    // le groupe existait ou existe désormais
+    if (groupe) this.buf.putIDB(ret.rowGroupe) // il a changé
+    const gr = groupe || avgr // groupe actuel, mis à jour ou non
+    const e = { gr: gr, lmb: [], lsc: [] }
+    this.grMaj.set(id, e)
+    if (ret.rowSecrets) for (const x of ret.rowSecrets) {
+      this.buf.putIDB(x)
+      e.lsc.push(await compile(x))
+      if (session.accesIdb) this.buf.mapSec[secret.pk] = secret // Pour gestion des fichiers
+    }
+    const setDisp = new Set()
+    if (ret.rowMembres) for (const x of ret.rowMembres) {
+      const st = gr.ast[x.ids] // statut du membre
+      if (x.dlv < this.auj) {
+        /* membre disparu par sa dlv */
+        this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
+        e.lmb.push({ id: gr.id, ids, _zombi: true }) 
+        if (st) await this.destectMbDisp (gr.id, ids)
+      } else {
+        if (!st) {
+          // membre détecté disparu par son statut dans son groupe
+          this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
+          e.lmb.push({ id: gr.id, ids, _zombi: true })   
+        } else {
+          // membre vraiment pas disparu
+          this.buf.putIDB(x)
+          e.lmb.push(await compile(x))
+        }
+      }
+    }
+
+    // Détection des membres disparus d'après leur statut
+    for(let ids = 1; ids < gr.ast.length; ids++) {
+      if (gr.ast[ids] || !avgr.ast[ids]) continue // pas disparu ou l'était déjà
+      // on vient de détecter sa disparition par ast
+      this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
+      e.lmb.push({ id: gr.id, ids, _zombi: true })
+    }
+    if (vcour === 0) this.abPlus.add(id) // c'était un ajout
   }
 
   supprAv (id) { // suppression de l'avatar id
@@ -190,48 +226,6 @@ export class OperationWS extends Operation {
     const chg = session.setBlocage()
     if (chg > 1) await this.alerteBlocage (chg)
     session.setDh(this.dh)
-  }
-
-  /* On vient de positionner le blocage : const chg = session.setBlocage()
-  En retour :
-  - 0: pas de changement
-  - 1: le changement n'affecte pas le blocage / déblocage
-  - 2: le compte VIENT d'être bloqué
-  - 3: le compte VIENT d'être débloqué
-  Dans les cas 2 et 3, ouverture d'un dialogue pour déconnexion
-  */
-  async alerteBlocage (chg) {
-    const $q = stores.config.$q
-    return new Promise((resolve) => {
-      if (chg < 2) { resolve(); return }
-      /*
-      OPmsg4: 'Votre compte vient d\'être débloqué',
-      OPmsg5: 'Votre compte vient d\'être complètement bloqué',
-      OPmsg6: 'Vous allez être déconnecté et reconnecté afin de bénéficier de cette nouvelle situation.',
-      */
-      let t = '', m = ''
-      if (chg === 3) {
-        t = $t('OPmsg4')
-        m = $t('OPmsg6')
-      } else {
-        t = $t('OPmsg5')
-        m = $t('OPmsg6')
-      }
-    
-      $q.dialog({
-        dark: true,
-        title: t,
-        message: m,
-        ok: { color: 'warning', label: $t('jailu') },
-        persistent: true
-      }).onOk(async () => {
-        await reconnexionCompte()
-        resolve()
-      }).onDismiss(async () => {
-        await reconnexionCompte()
-        resolve()
-      })
-    })
   }
 
   async finKO (e) {
@@ -367,12 +361,12 @@ export class OnchangeTribu2 extends OperationWS {
   }
 }
 
-export class OnchangeNotif extends OperationWS {
+export class OnchangeSingleton extends OperationWS {
   constructor () { super($t('OPsync')) }
 
   async run (row) {
     try {
-      if (row.id === 'notif') stores.session.setNotifGlobale(await compile(row))
+      if (row.id === 1) stores.session.setNotifGlobale(await compile(row))
     } catch (e) { 
       await this.finKO(e)
     }

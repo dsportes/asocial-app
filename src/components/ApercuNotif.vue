@@ -61,8 +61,9 @@ export default {
   components: { ShowHtml, EditeurMd, BoutonHelp, NotifIco },
 
   computed: { 
-    ntf () { return this.src[this.sponsor ? 'notifsp' : 'notifco'] },
+    ntf () { return !this.src ? this.session.notifG : this.src[this.sponsor ? 'notifsp' : 'notifco'] },
     dh () { return this.ntf && this.ntf.dh ? dhcool(this.ntf.dh) : '' },
+    estGlob () { return !this.src },
     estTribu () { return this.src instanceof Tribu },
     emet () { 
       if (this.ntf.sp) {
@@ -84,7 +85,12 @@ export default {
     close () { this.edntf = false },
     async editer () {
       if (! await this.session.edit()) return
-      if (!this.estTribu && this.src.na.id === IDCOMPTABLE && !this.session.estComptable) {
+      if (!this.estGlob) {
+        if (!this.session.estComptable) {
+          await afficherDiag(this.$t('NTgl'))
+          return
+        }
+      } else if (!this.estTribu && this.src.na.id === IDCOMPTABLE && !this.session.estComptable) {
         await afficherDiag(this.$t('NTci'))
         return
       }

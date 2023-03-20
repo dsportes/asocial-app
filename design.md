@@ -5,7 +5,6 @@ PageTribu: changer les quotas du compte
 PageTribus filtre blocage. Aperçu tribu en chantier
 
 TODO next :
-- QUESTION: faut-il supprimer la CV d'un avatar E disparu ? et d'un membre (oui s'il a demandé l'oubli) ? TRAITER setDisparu dans stores.people 
 - FicheAvatar : gérer les restrictions d'accès - Phrase de contact - Ops
 - sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à reprendre !!!!!!!!!!!!!!!
 - en connexion / synchronisation, quand un groupe change, il faut supprimer tous les membres dont le statut est 0 (disparu / oublié). La maj d'un membre dont le statut est 0 dans son groupe est à ignorer.

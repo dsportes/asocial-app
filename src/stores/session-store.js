@@ -42,6 +42,7 @@ export const useSessionStore = defineStore('session', {
     nivbl: 0,
     alirebl: false,
     gntf: 0,
+    notifG: null,
     alirentf: false
   }),
 
@@ -130,9 +131,10 @@ export const useSessionStore = defineStore('session', {
 
     setNotifGlobale (notif) {
       this.notifG = notif
+      this.setBlocage()
     },
 
-    /* Calcul du blocage depuis tribu, tribu2, compta (si chgt dhvu)
+    /* Calcul des niveaux de notification et de blocage max
     */
     setBlocage () {
       const self = this
@@ -157,6 +159,7 @@ export const useSessionStore = defineStore('session', {
       this.alirebl = false
       this.gntf = 0
       this.alirentf = false
+      if (this.notifG) this.gntf = this.notifG.g ? 2 : 1
       ntfx(tr.notifco)
       ntfx(tr.notifsp)
       ntfx(et2.notifco)

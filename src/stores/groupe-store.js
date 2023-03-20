@@ -81,12 +81,23 @@ export const useGroupeStore = defineStore('groupe', {
       if (!membre) return
       const e = this.map.get(membre.id)
       if (!e) return
-      e.membres.set(membre.ids, membre)
-      const na = membre.namb
       const compte = stores.avatar.compte
-      if (compte.estAc(na.id)) return // c'est un des avatars du compte, pas concerné par people
-      // ajoute ou remplace le people, met à jour sa cv le cas échéant
-      stores.people.setPeopleMembre(na, membre.id, membre.ids, membre.cv) 
+      const pStore = stores.people
+      if (membre._zombi) {
+        // membre disparu
+        const m = e.membres.get(membre.ids)
+        if (!m) return // membre déjà traité disparu
+        e.membres.delete(membre.ids)
+        const na = m.na
+        if (compte.estAc(na.id)) return
+        pStore.unsetPeopleMembre(na.id, membre.id)
+      } else {
+        e.membres.set(membre.ids, membre)
+        const na = membre.na
+        if (compte.estAc(na.id)) return // c'est un des avatars du compte, pas concerné par people
+        // ajoute ou remplace le people, met à jour sa cv le cas échéant
+        pStore.setPeopleMembre(na, membre.id, membre.ids, membre.cv) 
+      }
     },
 
     setSecret (secret) {

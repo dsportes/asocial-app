@@ -5,18 +5,19 @@ import { hash } from '../app/util.mjs'
 /* 
 Un "people" est un avatar :
 - (M) soit un membre d'un des groupes du compte qui n'est PAS avatar du compte
-- (S) soit un sponsor de la tribu du compte qui n'est PAS avatar du compte
+- (T) soit un compte de la tribu du compte (qui n'est PAS avatar du compte)
 - (C) soit l'interlocuteur d'un chat avec un avatar du compte
 Un people peut l'être à plusieurs titre:
-  - N fois pour M, N fois au titre C, 1 fois au titre S
+  - N fois pour M, N fois au titre C, 1 fois au titre T
 La "carte de visite" d'un people provient :
   - de l'un membres M
-  - soit de la tribu dont le people est sponsor (où figure sa CV)
+  - soit de la tribu dont le people est compte (où figure sa CV)
   - soit d'un des chats
 La plus récente est conservée. 
 Chaque element a pour clé l'id de l'avatar :
 - na : nom d'avatar
-- sp: 0: pas membre de la tribu, 1: simple membre de la tribu, 2: sponsor de la tribu
+- disparu : true si le people a été détecté disparu
+- sp: 0: pas compte de la tribu, 1: simple compte de la tribu, 2: sponsor de la tribu
 - cv : carte de visite de l'avatar si elle a été explicitement chargée
 - chats: set des ids du compte avec qui il a un chat ouvert.
 - sponsor (getter): true si l'avatar est sponsor de la tribu du compte
@@ -145,10 +146,16 @@ export const usePeopleStore = defineStore('people', {
       if (!e.sp && !e.chats.size && !e.groupes.size) this.map.delete(id)
     },
 
-    setDisparu (id) {
+    setDisparu (na) {
       const e = this.map.get(na.id)
-      if (e) {
-        // TODO
+      if (!e) return null
+      if (e.disparu) return null
+      e.disparu = true
+      if (!e.sp) return null 
+      return { // args de l'opération DisparitionCompte
+        idt: stores.session.tribuId,
+        idc: na.id,
+        hrnd: hash(na.rnd)
       }
     },
   

@@ -501,11 +501,11 @@ export async function compile (row) {
   if (!cl) return null
   const obj = new cl()
   obj._nom = row._nom
-  obj.id = row.id
+  obj.id = row.id || 0
   if (row.ids) obj.ids = row.ids
   if (row.dlv) obj.dlv = row.dlv
   if (row.dfh) obj.dfh = row.dfh
-  obj.v = row.v
+  obj.v = row.v || 0
   if (row._data_) {
     const x = decode(row._data_)
     await obj.compile(x)
@@ -515,13 +515,14 @@ export async function compile (row) {
   return obj
 }
 
-export class Notif extends GenDoc {
+export class Singletons extends GenDoc {
 
   async compile (row) {
-    this.txt = row.txt || ''
-    this.g = row.g || 0
-    this.dh = row.dh || 0
-    this.id = 0
+    if (row.id === 1) {
+      this.txt = row.txt || ''
+      this.g = row.g || 0
+      this.dh = row.dh || 0
+    }
   }
 }
 
@@ -1218,8 +1219,19 @@ export class Groupe extends GenDoc {
     return  this.dfh ? null : stores.membre.getMembre(this.id, this.imh)
   }
 
-  setDisparus(setIds) { // statuts des membres disparus
-    setIds.forEach(ids => { this.ast[ids] = 0 })
+  async destectMbDisp (id, ids) {
+    const args = { token: session.authToken, id, ids }
+    this.tr(await post(this, 'DisparitionMembre', args))
+  }
+
+  async setDisparus(setIds) { // check / maj des statuts des membres disparus
+    for(const ids of setIds) {
+      if (this.ast[ids]) {
+        this.ast[ids] = 0
+        const args = { token: session.authToken, id: this.id, ids }
+        this.tr(await post(this, 'DisparitionMembre', args))
+      }
+    }
   }
 
   /* En attente *************************************************
@@ -1720,6 +1732,7 @@ export class FichierLocal {
 }
 
 const classes = {
+  singletons: Singletons,
   tribus: Tribu,
   tribu2s: Tribu2,
   comptas: Compta,

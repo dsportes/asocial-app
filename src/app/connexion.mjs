@@ -225,7 +225,7 @@ export class ConnexionCompte extends OperationUI {
     */
     const zombis = new Set()
 
-    /* Tous les avatars, groupes et membres sont signés avec les dlv demandées */
+    /* Tous les avatars et membres sont signés avec les dlv demandées */
     for(const id in grRows) {
       const r = grRows[id]
       const gr = await compile(r)
@@ -361,13 +361,14 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** Chargement pour un groupe de ses membres postérieurs au plus récent ************/
-  async chargerMembres (id, vidb, vsrv) {
+  async chargerMembres (groupe, vidb, vsrv) {
+    const id = groupe.id
     const session = stores.session
     let n1 = 0, n2 = 0
     const rows = {}
     for (const row of this.cMembres) { 
       if (row.id === id) {
-        if (row.dlv > this.auj) {
+        if (row.dlv < this.auj || !groupe.ast[row.ids]) {
           this.buf.supprIDB(row)
           this.mbsDisparus.add(row.ids)
         } else {
@@ -386,7 +387,7 @@ export class ConnexionCompte extends OperationUI {
     }
     if (rowMembres  && rowMembres.length) {
       for (const row of rowMembres) {
-        if (row.dlv > this.auj) {
+        if (row.dlv < this.auj || !groupe.ast[row.ids]) {
           this.buf.supprIDB(row)
           this.mbsDisparus.add(row.ids)
         } else {
@@ -396,6 +397,7 @@ export class ConnexionCompte extends OperationUI {
         }
       }
     }
+    
     const grStore = stores.groupe
     for (const ids in rows) {
       const membre = await compile(rows[ids])
@@ -413,6 +415,7 @@ export class ConnexionCompte extends OperationUI {
     // Connexion : récupération de rowCompta rowAvatar rowTribu fscredentials
     const ret = this.tr(await post(this, 'ConnexionCompte', args))
     if (ret.credentials) session.fscredentials = ret.credentials
+    session.setNotifGlobale(ret.notifG)
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
     session.compteId = this.rowAvatar.id
@@ -611,7 +614,7 @@ export class ConnexionCompte extends OperationUI {
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
 
         this.mbsDisparus = new Set()
-        const [x3, x4] = await this.chargerMembres(groupe.id, vidb, vsrv)
+        const [x3, x4] = await this.chargerMembres(groupe, vidb, vsrv)
         n3 = x3
         n4 = x4
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
@@ -619,10 +622,13 @@ export class ConnexionCompte extends OperationUI {
 
         if (this.mbsDisparus.size) {
           /* Sur le serveur, le GC quotidien est censé avoir mis les statuts ast[ids] à 0
-          dans le groupe du membre. Retard possible, la session le met en local */
+          dans le groupe du membre. 
+          Retard possible : dlv détectée sur un membre, 
+          - vérifier que son ast est à 0 (l'y forcer)
+          - le faire inscrire dans le serveur
+          */
           groupe.setDisparus(this.mbsDisparus)
         }
-  
       }
 
       /* Mises à jour éventuelles du serveur **********************************************/
@@ -756,6 +762,7 @@ export class AcceptationSponsoring extends OperationUI {
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
       if (ret.credentials) session.fscredentials = ret.credentials
+      session.setNotifGlobale(ret.notifG)
       const rowTribu = ret.rowTribu
       const rowTribu2 = ret.rowTribu2
 
@@ -875,7 +882,7 @@ export class CreationCompteComptable extends OperationUI {
       const args = { token: stores.session.authToken, rowTribu, rowTribu2, 
         rowCompta, rowAvatar, rowVersion: r, pcbh: phrase.pcbh, abPlus: [nt.id] }
       const ret = this.tr(await post(this, 'CreationCompteComptable', args))
-  
+      session.setNotifGlobale({ txt: '', dh: 0, g: 0 })
       // Le compte vient d'être créé, clek est enregistrée
       const avatar = await compile(rowAvatar)
       const tribu = await compile(rowTribu)
