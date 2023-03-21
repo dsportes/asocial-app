@@ -3,14 +3,11 @@
 
     <div class="text-center">
       <span v-if="blTr && !blCo" class="titre-md text-bold text-italic">
-        {{$t('SBtitt')}}</span>
+        {{$t('SBtitt', [ntr])}}</span>
       <span v-if="!blTr && blCo" class="titre-md text-bold text-italic">
-        {{$t('SBtitc')}}</span>
+        {{$t('SBtitc', [nco])}}</span>
       <span v-if="blTr && blCo" class="titre-md text-bold text-italic">
-        {{$t('SBtittc')}}</span>
-      <span v-if="blCo && !blCo.sp" class="titre-md text-italic">
-        {{$t('SBgco')}}</span>
-        <span>.</span>
+        {{$t('SBtittc', [ntr, nco])}}</span>
       <blocage-ico :niveau="niv" class="q-mr-xs q-ml-sm"/>
       <span class="titre-md">{{$t('SBn' + niv) + $t('SBdisp', [djb, njrb])}}</span>
     </div>
@@ -60,8 +57,10 @@
 </template>
 <script>
 
+import { toRef } from 'vue'
 import BlocageIco from './BlocageIco.vue'
 import { AMJ } from '../app/api.mjs'
+import { getNg } from '../app/modele.mjs'
 
   /* Attributs: 
   - `stn` : raison majeure du blocage : 0 à 9 repris dans la configuration de l'organisation.
@@ -95,6 +94,20 @@ export default {
     s2 () { return this.blCo },
     atr () { return this.blTr },
     aco () { return this.blCo },
+    ntr () { 
+      if (this.blTr && this.blTr.sp) {
+        const na = getNg(this.blTr.sp)
+        return na ? na.nomc : this.$t('SBnsp')
+      } 
+      return this.blTr ? this.$t('SBnco') : ''
+    },
+    nco () { 
+      if (this.blCo && this.blCo.sp) {
+        const na = getNg(this.blCo.sp)
+        return na ? na.nomc : this.$t('SBnsp')
+      } 
+      return this.blCo ? this.$t('SBnco') : ''
+    },
     niv () { return this.max(this.atr ? this.blTr.niv : 0, this.aco ? this.blCo.niv : 0)},
     njra () { return this.min(this.atr ? this.blTr.njra : 0, this.aco ? this.blCo.njra : 0)},
     njrl () { return this.min(this.atr ? this.blTr.njrl : 0, this.aco ? this.blCo.njrl : 0)},
@@ -118,7 +131,9 @@ export default {
     min (a, b) { return (a && (a < b || !b)) ? a : b }
   },
 
-  setup () {
+  setup (props) {
+    const blTr = toRef(props, 'blTr')
+    const blCo = toRef(props, 'blCo')
     return {
     }
   }

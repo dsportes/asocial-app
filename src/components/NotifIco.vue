@@ -12,12 +12,13 @@ export default ({
   props: { 
     gravite: Boolean, // gravité de la notification (importante = true)
     alire: Boolean, // présence de l'indicateur à lire
-    clickable: Boolean 
+    clickable: Boolean,
+    neutre: Boolean 
   },
   computed: {
     tclr () { return this.gravite ? 'text-negative ' : 'text-primary ' },
     bgclr () { return this.gravite ? 'bg-yellow-5 ' : 'bg-yellow-2 ' },
-    ico () { return this.gravite ? 'notifications' : 'report' }
+    ico () { return this.neutre ? 'report_off' : (this.gravite ? 'notifications' : 'report') }
   }
 })
 </script>

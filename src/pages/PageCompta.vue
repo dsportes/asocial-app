@@ -30,7 +30,7 @@
 
     <q-separator class="q-my-md"/>
 
-    <div>
+    <div v-if="session.estComptable || (session.notifG && session.notifG.dh)">
       <apercu-notif edit />
       <q-separator class="q-my-sm"/>
     </div>

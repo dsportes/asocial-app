@@ -15,7 +15,7 @@
 
     <q-card v-if="flc.length">
       <div v-for="(c, idx) in flc" :key="c.na.id">
-        <div :class="'row items-start ' + dkli(idx)">
+        <div :class="'q-mb-md row items-start ' + dkli(idx)">
           <q-btn class="col-auto" flat icon="navigate_next" size="md"
             :color="c.na.id === ccid ? 'warning' : 'primary'" @click="courant(c)"/>
           <div class="col q-pr-xs">
@@ -25,7 +25,7 @@
 
             <div v-if="c.sp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
-            <div class="q-mb-xs row largeur30 items-center">
+            <div v-if="vis(c)" class="q-mb-xs row largeur30 items-center">
               <div class="col-1">
                 <q-btn v-if="session.estSponsor || session.estComptable" size="sm" icon="edit" 
                   dense color="primary" @click="editerq(c)"/>
@@ -35,10 +35,14 @@
               <div class="col-3 text-center font-mono">{{c.q2}} - {{ed2(c.q2)}}</div>
             </div>
 
-            <apercu-blocage :blocage="c.blocage" :edit="session.estComptable" :idx="idx"
+            <apercu-blocage v-if="vis(c)" :blocage="c.blocage" :edit="ed" :idx="idx"
               :na-tr="t.na" :bl-tr="t.blocage" :na-co="c.na"/>
-            <apercu-notif class="q-my-xs" :src="c" :na-tr="t.na" :edit="session.estComptable" :idx="idx"/>
-            <apercu-notif class="q-my-xs" :src="c" :na-tr="t.na" sponsor :edit="session.estSponsor" :idx="idx"/>
+            <apercu-notif v-if="vis2(c, 'co')"
+              class="q-my-xs" :src="c" :na-tr="t.na"
+              :edit="session.estComptable" :idx="idx"/>
+            <apercu-notif v-if="vis2(c, 'sp')"
+              class="q-my-xs" :src="c" :na-tr="t.na" sponsor
+              :edit="session.estSponsor" :idx="idx"/>
           </div>
         </div>
       </div>
@@ -110,6 +114,14 @@ export default {
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+    vis (c) { 
+      return (this.session.estComptable || this.session.estSponsor || (c.na.id === this.session.compteId))
+    },
+    vis2 (c, cosp) {
+      if (!this.vis(c)) return false
+      if (this.ed) return true
+      return c['notif' + cosp]
+    },
     ouvrirSponsoring () { this.nvsp = true },
     fermerSponsoring () { this.nvsp = false },
     fermerFipeople () { this.fipeople = false },

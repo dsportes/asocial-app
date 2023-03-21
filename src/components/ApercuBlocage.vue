@@ -9,7 +9,7 @@
         class="q-ml-sm btn2" size="sm" dense icon="open_in_new" :label="$t('detail')" @click="(editerbl(false))"/>
     </div>
     <div v-else>
-      <div v-if="edit && session.estComptable">
+      <div v-if="edit && (session.estComptable || session.estSponsor)">
         <span class="titre-sm q-my-sm text-italic">{{$t('SNnon')}}</span>
         <q-btn color="primary" class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl(true)"/>
       </div>
@@ -65,7 +65,8 @@ export default {
         afficherDiag($t('PTpasc'))
         return
       }
-      this.bloc = this.blocage ? this.blocage.clone() : new Blocage(null, 0)
+      const aut = this.session.estComptable ? 0 : this.session.compteId
+      this.bloc = this.blocage ? this.blocage.clone() : new Blocage(null, aut)
       this.edbl = true
       this.edaff = ed
     },

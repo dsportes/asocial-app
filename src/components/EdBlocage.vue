@@ -21,7 +21,9 @@
       <q-input dense clearable class="inp1 q-my-sm" v-model.number="njl" type="number" :label="$t('SBnjl')">
       </q-input>
     </q-card-section>
-    <div v-if="edit" class="column items-center">
+    <div v-if="edit" class="row items-center justify-around q-mb-md">
+      <q-btn class="q-mt-sm" 
+        icon="check" :label="$t('renoncer')" color="warning" @click="closebl"/>
       <q-btn class="q-mt-sm" :disabled="err"
         icon="check" :label="$t('valider')" color="primary" @click="valider"/>
       <q-btn v-if="bloc.dh" class="q-my-sm" :disabled="err"
@@ -105,7 +107,7 @@ export default {
     const blTr = toRef(props, 'blTr')
     const naCo = toRef(props, 'naCo')
     const naTr = toRef(props, 'naTr')
-    const cas = ref(blCo.value ? (blTr.value && blTr.value.fake ? 2 : 1) : 3)
+    const cas = ref(blCo.value ? (blTr.value ? 1 : 2) : 3)
     const na = ref(blCo.value ? naCo.value : naTr.value)
     const bloc = ref(blCo.value || blTr.value)
     const nja = ref(bloc.value.nja)

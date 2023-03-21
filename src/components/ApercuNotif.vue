@@ -24,13 +24,14 @@
     <q-card class="petitelargeur">
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="close" @click="close"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t(estTribu ? 'NTtr2' : 'NTco2')}}</q-toolbar-title>
+        <q-toolbar-title class="titre-lg text-center q-mx-sm">
+          {{$t(estTribu ? 'NTtr2' : 'NTco2')}}
+        </q-toolbar-title>
         <notif-ico class="q-mx-xs" :gravite="g ? true : false"/>
         <bouton-help page="page1"/>
       </q-toolbar>
       <q-checkbox v-model="g" class="cb q-mt-sm q-pb-md" :label="$t('NT1')" />
-<!--  props: { lgmax: Number, modelValue: String, texte: String, labelOk: String, editable: Boolean, idx: Number, modetxt: Boolean, horsSession: Boolean },
--->
+      <!--  props: { lgmax: Number, modelValue: String, texte: String, labelOk: String, editable: Boolean, idx: Number, modetxt: Boolean, horsSession: Boolean },-->
       <editeur-md style="height:50vh" :lgmax="1000" editable :texte="txt"
         :label-ok="$t('valider')" modetxt @ok="valider"/>
     </q-card>
@@ -43,7 +44,7 @@ import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { dhcool, afficherDiag } from '../app/util.mjs'
-import { Tribu } from '../app/modele.mjs'
+import { Tribu, getNg } from '../app/modele.mjs'
 import ShowHtml from './ShowHtml.vue'
 import EditeurMd from './EditeurMd.vue'
 import BoutonHelp from './BoutonHelp.vue'
@@ -59,7 +60,8 @@ export default {
     src: Object, // elt de tribu2 pour une notification de niveau compte, tribu pour une notification
     naTr: Object, // na de la tribu du compte pour un aperçu de niveau "compte" (tribu2) (sinon c'est src.na)
     sponsor: Boolean, // aperçu de la notification du sponsor, sinon c'est celle du comptable
-    idx: Number, edit: Boolean },
+    idx: Number,
+    edit: Boolean },
 
   components: { ShowHtml, EditeurMd, BoutonHelp, NotifIco },
 
@@ -69,8 +71,8 @@ export default {
     estGlob () { return !this.src },
     estTribu () { return this.src instanceof Tribu },
     emet () { 
-      if (this.ntf.sp) {
-        const nsp = getNg(this.ntf.sp)
+      if (this.ntf.id) {
+        const nsp = getNg(this.ntf.id)
         return nsp ? nsp.nomc : this.$t('NTunsp')
       }
       return this.cfg.nomDuComptable
@@ -103,7 +105,11 @@ export default {
       this.edntf = true
     },
     async valider (txt) {
-      const e = { dh: new Date().getTime(), g: this.g ? true : false, txt: txt}
+      const e = { 
+        dh: txt ? new Date().getTime() : 0,
+        g: this.g ? true : false,
+        txt: txt
+      }
       if (this.estGlob) {
         await new SetNotifG().run(e)
         this.close()
@@ -113,10 +119,18 @@ export default {
       // crypté par la clé de la tribu si source tribu, du compte si source compte
       if (this.estTribu) {
         const buf = await crypter(this.src.na.rnd, new Uint8Array(encode(e)))
-        await new SetAttributTribu().run(this.src.id, this.sponsor ? 'notifsp' : 'notifco', buf)
+        await new SetAttributTribu().run(
+          this.src.id, 
+          this.sponsor ? 'notifsp' : 'notifco',
+          !txt ? null : buf)
       } else { // src.na: na du compte
         const buf = await crypter(this.naTr.rnd, new Uint8Array(encode(e)))
-        await new SetAttributTribu2().run(this.naTr.id, this.src.na, this.sponsor ? 'notifsp' : 'notifco', buf, this.g)
+        await new SetAttributTribu2().run(
+          this.naTr.id, 
+          this.src.na, 
+          this.sponsor ? 'notifsp' : 'notifco',
+          !txt ? null : buf,
+          this.g)
       }
       this.close()
     }
