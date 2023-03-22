@@ -1,7 +1,10 @@
 <template>
-  <q-btn icon="help" dense :size="size || 'md'" @click="ouvrir">
+<span @click="ouvrir">
+  <q-btn icon="help" dense :size="size || 'md'">
     <q-tooltip class="bg-white text-primary">{{titre}}</q-tooltip>
   </q-btn>
+  <span v-if="label" class="q-ml-sm">{{label}}</span>
+</span>
 </template>
 <script>
 import stores from '../stores/stores.mjs'
@@ -9,7 +12,7 @@ import stores from '../stores/stores.mjs'
 export default ({
   name: 'BoutonHelp',
 
-  props: { size: String, page: String },
+  props: { size: String, page: String, label: String },
 
   computed: {
     titre () {

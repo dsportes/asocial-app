@@ -8,7 +8,11 @@
       </q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <synthese-blocage :bl-tr="blTr || null" :bl-co="blCo || null"/>
+
+    <synthese-blocage v-if="cas === 1" :bl-tr="blTr" :bl-co="bloc"/>
+    <synthese-blocage v-if="cas === 2" :bl-tr="null" :bl-co="bloc"/>
+    <synthese-blocage v-if="cas === 3" :bl-tr="bloc" :bl-co="null"/>
+
     <q-card-section v-if="edit">
       <q-separator/>
       <div v-if="bloc.dh" class="row items-center">
@@ -86,7 +90,7 @@ export default {
     async valider () {
       this.bloc.dh = new Date().getTime()
       const buf = this.bloc.encode()
-      const val = await crypter(this.na.rnd, buf)
+      const val = await crypter(this.naTr.rnd, buf)
       if (this.blCo) {
         await new SetAttributTribu2().run(this.naTr.id, this.naCo, 'blocaget', val)
       } else {
@@ -109,7 +113,8 @@ export default {
     const naTr = toRef(props, 'naTr')
     const cas = ref(blCo.value ? (blTr.value ? 1 : 2) : 3)
     const na = ref(blCo.value ? naCo.value : naTr.value)
-    const bloc = ref(blCo.value || blTr.value)
+    const cl  = cas.value !== 1 ? blCo.value.clone() : blTr.value.clone()
+    const bloc = ref(cl)
     const nja = ref(bloc.value.nja)
     const njl = ref(bloc.value.njl)
 

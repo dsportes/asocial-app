@@ -6,7 +6,7 @@
       <q-btn v-if="edit && session.estComptable" color="primary" 
         class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl(true)"/>
       <q-btn v-else color="primary" 
-        class="q-ml-sm btn2" size="sm" dense icon="open_in_new" :label="$t('detail')" @click="(editerbl(false))"/>
+        class="q-ml-sm btn2" size="sm" dense icon="open_in_new" :label="$t('detail')" @click="editerbl(edx)"/>
     </div>
     <div v-else>
       <div v-if="edit && (session.estComptable || session.estSponsor)">
@@ -50,6 +50,7 @@ export default {
   components: { EdBlocage, BlocageIco },
 
   computed: {
+    edx () { return this.session.estComptable || this.blocage.sp },
     dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (this.idx ? 'clair' + (this.idx % 2) : 'clair0') },
   },
 

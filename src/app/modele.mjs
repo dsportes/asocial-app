@@ -624,8 +624,6 @@ export class Tribu2 extends GenDoc {
   async compile (row) {
     const session = stores.session
     this.vsh = row.vsh || 0
-    this.id = row.id
-    this.v = row.v
 
     this.mbtr = {}
     for (const x in (row.mbtr || {})) {

@@ -4,7 +4,7 @@
     <q-toolbar>
       <bouton-help page="page1"/>
 
-      <bouton-langue/>
+      <bouton-langue style="position:relative;top:2px;"/>
 
       <!-- Dark ou clair -->
       <q-btn dense size="md" icon="contrast" @click="tgdark">

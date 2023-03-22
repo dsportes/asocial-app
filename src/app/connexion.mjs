@@ -518,6 +518,13 @@ export class ConnexionCompte extends OperationUI {
       // Rangement en store
       avStore.setCompte(this.avatar, this.compta, this.tribu, this.tribu2)
       session.setNotifGlobale(this.notifG)
+
+      // En cas de blocage grave, plus de synchronisation
+      if (session.nivbl === 3 && session.mode === 1) {
+        session.mode = 2
+        await afficherDiag($t('CNXdeg'))
+      }
+
       this.avatarsToStore.forEach(av => {
         if (av.id !== this.avatar.id) avStore.setAvatar(av)
       })
@@ -662,7 +669,11 @@ export class ConnexionCompte extends OperationUI {
       session.status = 2
       SyncQueue.traiterQueue()
       await sleep(500)
-      stores.ui.setPage('accueil')
+      if (session.nivbl || session.alirentf) {
+        stores.ui.setPage('compta', 'notif')
+      } else {
+        stores.ui.setPage('accueil')
+      }
       this.finOK()
     } catch (e) {
       await this.finKO(e)
