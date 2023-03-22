@@ -255,6 +255,7 @@ export const useAvatarStore = defineStore('avatar', {
       e.chats.set(chat.ids, chat)
       stores.people.setPeopleChat(chat.naE, chat.id, chat.cv)
     },
+    
     delChat (id, id2) {
       const e = this.map.get(id)
       if (!e) return

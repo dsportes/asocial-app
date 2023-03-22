@@ -187,6 +187,7 @@ export const usePeopleStore = defineStore('people', {
       const e = this.getElt(na, cv)
       e.chats.add(id2)
     },
+    
     unsetPeopleChat (id, id2) {
       const e = this.map.get(id)
       if (!e) return

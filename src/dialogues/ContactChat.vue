@@ -30,7 +30,7 @@
 <script>
 import { ref } from 'vue'
 import ApercuChat from '../components/ApercuChat.vue'
-import { PhraseContact, Motscles } from '../app/modele.mjs'
+import { PhraseContact, Motscles, Chat } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import { afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -65,19 +65,26 @@ export default ({
     razphrase () { this.pc = '' },
 
     async ok () {
+      const pStore = stores.people
+      const avStore = stores.avatar
       const p = await new PhraseContact().init(this.pc)
-      const { id, na } = await new GetAvatarPC().run(p)
+      const { cv, na } = await new GetAvatarPC().run(p)
       if (!na) {
         await afficherDiag(this.$t('CChnopc'))
       } else {
         this.naE = na
         const idsI = await Chat.getIds(this.naI, this.naE)
         this.chat = avStore.getChat(this.naI.id, idsI)
-        if (this.chat) return
+        if (this.chat) {
+          pStore.setPeopleChat (na, this.naI.id, cv) // na: du people, id2: de l'avatar ayant un chat avec lui
+          return
+        }
         const [disparu, chat] = await new ReactivationChat().run(this.naI, this.naE)
         if (disparu) {
+          pStore.setDisparu(this.naE)
           await afficherDiag(this.$t('avdisp'))
         } else {
+          avStore.setChat(chat)
           this.chat = chat
         }
       }

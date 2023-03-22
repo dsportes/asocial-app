@@ -201,20 +201,19 @@ export class GetAvatarPC extends OperationUI {
       let res
       const args = { token: session.authToken, hpc: p.phch }
       const ret = this.tr(await post(this, 'GetAvatarPC', args))
-      const { id, napc } = ret.idnapc
-      if (id) {
+      if (ret.cvnpac) {
         try {
+          const { cv, napc } = ret.cvnapc
           const x = decode(await decrypter(p.clex, napc))
           const na = new NomAvatar(x[0], x[1])
-          res = { id, na }
+          res = { cv, na }
         } catch (e) {
-          res = { id, na: null }
+          res = { }
         }
       } else {
-        res = {id: 0, na: null }
+        res = { }
       }
-      this.finOK()
-      return res
+      return this.finOK(res)
     } catch (e) {
       await this.finKO(e)
     }
