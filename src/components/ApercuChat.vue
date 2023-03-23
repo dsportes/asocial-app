@@ -1,14 +1,20 @@
 <template>
   <q-card>
     <div :class="'column q-px-sm ' + dkli(idx)">
-      <div class="row justify-end">
-        <div v-if="chat.z" class="text-negative text-bold">{{$t('supprime')}}</div>
-        <div v-else class="font-mono fs-md">{{dhcool(chat.dh)}}</div>
+      <div v-if="!chat" class="row justify-end">
+        <div v-if="affnai" class="titre-md text-italic">{{$t('CHnch2', [naI.nom])}}</div>
+        <div v-else class="titre-md text-italic">{{$t('CHnch3', [naE.nom])}}</div>
+        <q-btn class="btn1" icon="edit" size="sm" color="warning" :label="$t('CHoch')" @click="editer"/>
       </div>
-      <apercu-people class="bordb" :id="chat.naE.id" :idx="idx"/>
-      <apercu-motscles @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
-        :mapmc="mapmc" :edit="session.auts(3, true)" :src="chat.mc || u0"/>
-      <div v-if="!chat.z" class="row items-start">
+      <div v-else class="row justify-end">
+        <div v-if="affnai" class="titre-md text-italic">{{$t('CHoch2', [naI.nom])}}</div>
+        <div v-else class="titre-md text-italic">{{$t('CHoch3', [naE.nom])}}</div>
+        <div class="font-mono fs-md">{{dhcool(chat.dh)}}</div>
+      </div>
+      <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx"/>
+      <apercu-motscles v-if="chat" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
+        :mapmc="mapmc" :edit="session.editable" :src="chat.mc || u0"/>
+      <div v-if="chat" class="row items-start">
         <show-html class="col q-mr-sm bord" :idx="idx" zoom maxh="3rem" :texte="chat.txt"/>
         <div class="col-auto self-start"><q-btn class="btn1" icon="edit" size="sm" color="warning" @click="editer"/></div>
       </div>
@@ -35,16 +41,15 @@ import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import EditeurMd from './EditeurMd.vue'
 import { dhcool } from '../app/util.mjs'
-import { getNg } from '../app/modele.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import ApercuPeople from './ApercuPeople.vue'
-import { MajMotsclesChat, SetChats } from '../app/operations.mjs'
+import { MajMotsclesChat, SetChats, ReactivationChat } from '../app/operations.mjs'
+import { IDCOMPTABLE } from 'src/app/api.mjs'
 
 export default {
   name: 'ApercuChat',
 
-  props: { id: Number, ids: Number, idx: Number, mapmc: Object },
-  /* Compilé: { id (avatar), dh, naE, txt } */
+  props: { naI: Object, naE: Object, ids: Number, idx: Number, mapmc: Object, affnai: Boolean },
 
   components: { ShowHtml, EditeurMd, ApercuMotscles, ApercuPeople },
 
@@ -59,35 +64,51 @@ export default {
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async editer () {
-      if (await this.session.aut(3, true)) this.chatedit = true
+      if (this.session.mode === 3) {
+        await afficherDiag(this.$t('CHav'))
+      }
+      const csp = this.naE.id === IDCOMPTABLE || (stores.people.estSponsor(this.naE.id) === 2)
+      if (this.session.nivbl === 3 && !csp) {
+        await afficherDiag(this.$t('CHbl'))
+      }
+      if (this.chat) {
+        this.chatedit = true
+        return
+      }
+      const [disp, chat] = await new ReactivationChat().run(this.naI, this.naE)
+      if (disp) {
+        await afficherDiag(this.$t('CHdisp'))
+        return
+      }
+      this.chat = chat
+      this.chatedit = true
     },
+
     async chatok (txt) {
       await new SetChats().run(this.chat, txt)
       this.chatedit = false
     },
+
     async changeMc (mc) {
-      await new MajMotsclesChat().run(this.id, this.ids, mc)
+      await new MajMotsclesChat().run(this.naI.id, this.ids, mc)
     }
   },
 
   setup (props) {
     const session = stores.session
     const avStore = stores.avatar
-    const id = toRef(props, 'id')
+    const naI = toRef(props, 'naI')
+    const naE = toRef(props, 'naE')
     const ids = toRef(props, 'ids')
-    const naI = getNg(id.value)
 
-    function getC () {
-      const c = avStore.getChat(id.value, ids.value)
-      return c || { id: naI.id, z: true }
-    }
+    function getC () { return avStore.getChat(naI.value.id, ids.value) }
 
     const chat = ref(getC())
 
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if ((name === 'setChat' && args[0].id === id.value && args[0].ids === ids.value) ||
-          (name === 'delChat' && args[0] === id.value && args[1] === ids.value)){
+        if ((name === 'setChat' && args[0].id === naI.value.id && args[0].ids === ids.value) ||
+          (name === 'delChat' && args[0] === naI.value.id && args[1] === ids.value)){
           chat.value = getC()
         }
       })
@@ -95,7 +116,14 @@ export default {
 
     /* Nécessaire pour tracker le changement d'id
     Dans une liste le composant N'EST PAS rechargé quand la liste change */
-    watch(() => id.value, (ap, av) => {
+    watch(() => naI.value, (ap, av) => {
+        chat.value = getC()
+      }
+    )
+
+    /* Nécessaire pour tracker le changement d'id
+    Dans une liste le composant N'EST PAS rechargé quand la liste change */
+    watch(() => naE.value, (ap, av) => {
         chat.value = getC()
       }
     )
@@ -109,7 +137,6 @@ export default {
 
     return {
       session,
-      naI,
       chat
     }
   }

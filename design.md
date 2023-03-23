@@ -1,15 +1,17 @@
 Suppression de notification globale et tribu / compte
+Suppression de blocage dans EdBlocage ...
+Chats d'urgence
+PagePeople et FichePeople
 
 ApercuTribu, volumes étranges
 ApercuTribu : changer les quotas de la tribu
 PageTribu: changer les quotas du compte
 
-PageTribus filtre blocage. Aperçu tribu en chantier
+PageTribus filtre blocage.
 
 TODO next :
 - FicheAvatar : gérer les restrictions d'accès - Phrase de contact - Ops
 - sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à reprendre !!!!!!!!!!!!!!!
-- en connexion / synchronisation, quand un groupe change, il faut supprimer tous les membres dont le statut est 0 (disparu / oublié). La maj d'un membre dont le statut est 0 dans son groupe est à ignorer.
 
 # Application front-end A-social
 

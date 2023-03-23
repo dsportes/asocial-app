@@ -58,12 +58,12 @@ export const usePeopleStore = defineStore('people', {
       }
     },
 
-    estPeople: (state) => { return (id) => { // retourne 0, 1 (membre), 2 (sponsor)
+    estPeople: (state) => { return (id) => { 
         return state.map.has(id)
       }
     },
 
-    estSponsor: (state) => { return (id) => { // retourne 0, 1 (membre), 2 (sponsor)
+    estSponsor: (state) => { return (id) => { // retourne 0, 1 (compte de la tribu), 2 (sponsor de la tribu)
         const e = state.map.get(id)
         return e ? e.sp : 0
       }

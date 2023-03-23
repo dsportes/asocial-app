@@ -15,7 +15,7 @@
     
     <div v-if="fchats.length">
       <div v-for="(chat, idx) in fchats" :key="chat.ids">
-        <apercu-chat class="q-my-sm" :id="chat.id" :ids="chat.ids" :idx="idx" :mapmc="mapmc"/>
+        <apercu-chat class="q-my-sm" :na-i="chat.naI" :na-e="chat.naE" :ids="chat.ids" :idx="idx" :mapmc="mapmc"/>
       </div>
     </div>
 

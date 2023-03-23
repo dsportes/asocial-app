@@ -12,8 +12,8 @@
     <q-card style="height:50vh">
     <q-card-section>
       <q-input dense v-model="pc" :label="$t('NPphl')" counter :rules="[r1]" maxlength="32"
-        :type="isPwd ? 'password' : 'text'"
-        @keydown.enter.prevent="ok" :hint="$t('entree')">
+        :type="isPwd ? 'password' : 'text'" :hint="$t('entree')"
+        @keydown.enter.prevent="ok">
         <template v-slot:append>
           <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
           <span :class="pc.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="razphrase"/></span>
@@ -21,7 +21,7 @@
       </q-input>
     </q-card-section>
 
-    <apercu-chat v-if="chat" class="q-my-sm" :id="chat.id" :ids="chat.ids" :idx="0" :mapmc="mapmc"/>
+    <apercu-chat v-if="chat" class="q-my-sm" :na-e="chat.naE" :na-i="chat.naI" :ids="chat.ids" :idx="0" :mapmc="mapmc"/>
     </q-card>
   </q-page-container>
 </q-layout>
@@ -65,6 +65,7 @@ export default ({
     razphrase () { this.pc = '' },
 
     async ok () {
+      this.chat = null
       const pStore = stores.people
       const avStore = stores.avatar
       const p = await new PhraseContact().init(this.pc)
@@ -76,11 +77,13 @@ export default ({
         const idsI = await Chat.getIds(this.naI, this.naE)
         this.chat = avStore.getChat(this.naI.id, idsI)
         if (this.chat) {
-          pStore.setPeopleChat (na, this.naI.id, cv) // na: du people, id2: de l'avatar ayant un chat avec lui
+          // MAJ éventuelle de la CV : na: du people, id2: de l'avatar ayant un chat avec lui, cv
+          pStore.setPeopleChat (this.naE, this.naI.id, cv) 
           return
         }
-        const [disparu, chat] = await new ReactivationChat().run(this.naI, this.naE)
-        if (disparu) {
+        const [disp, chat] = await new ReactivationChat().run(this.naI, this.naE)
+        if (disp) {
+          // Improbable : on a accédé à sa phrase de contact juste avant !!!
           pStore.setDisparu(this.naE)
           await afficherDiag(this.$t('avdisp'))
         } else {

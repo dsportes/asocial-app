@@ -15,13 +15,14 @@
 
     <q-card-section v-if="edit">
       <q-separator/>
-      <div v-if="bloc.dh" class="row items-center">
-        <span class="titre-md text-italc">{{$t('SBreset')}}</span>
-        <q-btn class="q-ml-md" color="primary" size="sm" icon="check" @click="reset()"/>
-      </div>
+      <div v-if="maxavd > 0" class="q-mt-sm text-italic fs-md">{{$t('SBavd1')}}</div>
+      <q-input  v-if="maxavd > 0" dense clearable class="inp1 q-my-sm" v-model.number="avd" type="number" :label="$t('SBavd2', [maxavd])">
+      </q-input>
+
       <div :class="'q-mt-sm text-italic fs-md ' + (err ? 'text-warning bg-yellow-3' : '')">{{$t('SBdiag')}}</div>
       <q-input dense clearable class="inp1 q-my-sm" v-model.number="nja" type="number" :label="$t('SBnja')">
       </q-input>
+
       <q-input dense clearable class="inp1 q-my-sm" v-model.number="njl" type="number" :label="$t('SBnjl')">
       </q-input>
     </q-card-section>
@@ -63,7 +64,8 @@ export default {
     edit: Boolean, close: Function },
 
   computed: {
-    err () { return this.bloc.nja < 0 || this.bloc.njl < 0 || (this.bloc.nja + this.bloc.njl >= 365) }
+    err () { return this.bloc.nja < 0 || this.bloc.njl < 0 || (this.bloc.nja + this.bloc.njl >= 365) },
+    maxavd () { return AMJ.diff(AMJ.amjUtc(), this.blocav.jib) }
   },
 
   watch: {
@@ -74,19 +76,22 @@ export default {
     njl (ap) {
       this.bloc.njl = ap || 0
       this.bloc.recalculBloc()
+    },
+    avd (ap) {
+      if (ap < 0) this.avd = 0
+      if (ap > this.maxavd) this.avd = this.maxavd
+      this.bloc.jib = AMJ.amjUtcPlusNbj(this.blocav.jib, this.avd)
+      this.bloc.recalculBloc()
     }
   },
 
   data () {
     return {
+      avd: 0
     }
   },
 
   methods: {
-    reset () {
-      this.bloc.jib = AMJ.amjUtc()
-      this.bloc.recalculBloc()
-    },
     async valider () {
       this.bloc.dh = new Date().getTime()
       const buf = this.bloc.encode()
@@ -100,7 +105,8 @@ export default {
       this.closebl()
     },
     async supprimer () {
-      console.log(JSON.stringify(this.bloc))
+      // TODO
+      console.log(JSON.stringify(this.blocav))
     },
     closebl () { if (this.close) this.close()}
   },
@@ -113,8 +119,8 @@ export default {
     const naTr = toRef(props, 'naTr')
     const cas = ref(blCo.value ? (blTr.value ? 1 : 2) : 3)
     const na = ref(blCo.value ? naCo.value : naTr.value)
-    const cl  = cas.value !== 1 ? blCo.value.clone() : blTr.value.clone()
-    const bloc = ref(cl)
+    const blocav = cas.value !== 1 ? blCo.value : blTr.value
+    const bloc = ref(blocav.clone())
     const nja = ref(bloc.value.nja)
     const njl = ref(bloc.value.njl)
 
@@ -124,7 +130,8 @@ export default {
       njl,
       cas,
       na,
-      bloc
+      bloc,
+      blocav
     }
   }
 }

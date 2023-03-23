@@ -58,6 +58,8 @@ export const useSessionStore = defineStore('session', {
       return x ? x.sp : false 
     },
     estComptable (state) { return state.compteId === IDCOMPTABLE },
+    
+    editable (state) { return state.mode < 3 && state.nivbl < 2 },
 
     // Avatar et groupes courants
     avC (state) { return stores.avatar.getAvatar(state.avatarId) },
