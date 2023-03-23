@@ -97,6 +97,7 @@ export default {
       const buf = this.bloc.encode()
       const val = await crypter(this.naTr.rnd, buf)
       if (this.blCo) {
+        // async run (id, na, attr, val, val2, exq)
         await new SetAttributTribu2().run(this.naTr.id, this.naCo, 'blocaget', val)
       } else {
         await new SetAttributTribu().run(this.naTr.id, 'blocaget', val)
@@ -105,8 +106,12 @@ export default {
       this.closebl()
     },
     async supprimer () {
-      // TODO
-      console.log(JSON.stringify(this.blocav))
+       if (this.blCo) {
+        await new SetAttributTribu2().run(this.naTr.id, this.naCo, 'blocaget', null)
+      } else {
+        await new SetAttributTribu().run(this.naTr.id, 'blocaget', null)
+      }
+      // console.log(JSON.stringify(this.blocav))
     },
     closebl () { if (this.close) this.close()}
   },
