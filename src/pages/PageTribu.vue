@@ -42,7 +42,7 @@
               :edit="session.estComptable" :idx="idx"/>
             <apercu-notif v-if="vis2(c, 'sp')"
               class="q-my-xs" :src="c" :na-tr="t.na" sponsor
-              :edit="session.estSponsor" :idx="idx"/>
+              :edit="session.estSponsor && !session.estComptable" :idx="idx"/>
           </div>
         </div>
       </div>

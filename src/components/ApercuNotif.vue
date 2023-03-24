@@ -12,11 +12,10 @@
       </div>
     </div>
     <show-html v-if="ntf && ntf.dh" class="q-my-xs bord" :idx="idx" zoom maxh="3rem" :texte="ntf.txt"/>
-    <div v-if="!ntf || !ntf.dh">
+    <div v-if="(!ntf || !ntf.dh) && edit && (!estGlob || session.estComptable)">
       <span v-if="estGlob" class="titre-sm q-mr-sm">{{$t('NTnng')}}</span> 
       <span v-else class="titre-sm q-mr-sm">{{$t((sponsor ? 'NTnsp' : 'NTnco') + (estTribu ? 'tr' : ''))}}</span> 
-      <q-btn v-if="edit && (!estGlob || session.estComptable)" 
-        size="sm" dense icon="add" color="primary" :label="$t('NTecr')" @click="editer"/>
+      <q-btn size="sm" dense icon="edit" color="primary" :label="$t('NTecr')" @click="editer"/>
     </div>
 
   <!-- Edition d'une notification -->

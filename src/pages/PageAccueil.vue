@@ -36,7 +36,7 @@
 
       <!-- Information session : mode incognito -->
       <div v-if="session.incognito" class="btn2" @click="infoSession">
-        <q-avatar class="cursor-pointer q-mr-xs" size="sm" square color="primary">
+        <q-avatar class="q-mr-xs" size="sm" square color="primary">
           <img src="~assets/incognito_blanc.svg">
         </q-avatar>
         <span>{{$t('MLAinfm')}}</span>
@@ -44,7 +44,7 @@
 
       <!-- Information session : mode avion -->
       <div v-if="session.avion" class="btn2" @click="infoSession">
-        <q-btn class="cursor-pointer q-mr-xs" dense size="md" icon="airplanemode_active" color="primary"/>
+        <q-btn class="q-mr-xs" dense size="md" icon="airplanemode_active" color="primary"/>
         <span>{{$t('MLAinfm')}}</span>
       </div>
 
@@ -70,6 +70,12 @@
       <div class="btn2" @click="clickNotif">
         <blocage-ico class="q-ml-xs" clickable :niveau="session.nivbl" :alire="session.alirebl"/>
         <span class="q-ml-xs">{{$t('MLAbloc')}}</span>
+      </div>
+
+      <!-- Chats d'urgence -->
+      <div class="btn2" @click="clickNotif2">
+        <q-btn class="q-mr-xs" dense size="md" icon="chat"/>
+        <span class="q-ml-xs">{{$t('MLAchats')}}</span>
       </div>
 
     </div>

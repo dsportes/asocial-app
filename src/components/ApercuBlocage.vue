@@ -11,7 +11,8 @@
     <div v-else>
       <div v-if="edit && (session.estComptable || session.estSponsor)">
         <span class="titre-sm q-my-sm text-italic">{{$t('SNnon')}}</span>
-        <q-btn color="primary" class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl(true)"/>
+        <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('NTcre')"
+          dense icon="edit" @click="editerbl(true)"/>
       </div>
     </div>
 

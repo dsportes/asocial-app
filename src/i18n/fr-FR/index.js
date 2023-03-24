@@ -487,6 +487,7 @@ export default {
   MLAvol: 'Occupation de l\'espace',
   MLAntf: 'Notifications',
   MLAbloc: 'Blocage du compte',
+  MLAchats: 'Chats Comptable & sponsors',
   MLActc: 'Contacts',
   MLAfic: 'Fichiers-avion',
   MLAchat: 'Chat-Comptable',
@@ -605,6 +606,7 @@ export default {
   NTnsptr: 'Pas de notifications à tous les comptes de la tribu par un sponsor',
   NTunsp: 'un sponsor de la tribu',
   NTecr: 'En écrire une',
+  NTcre: 'En créer une',
   NT1: 'Notification importante',
   NTv1: 'Volume V1 attribué / quota tribu',
   NTv2: 'Volume V2 attribué / quota tribu',
@@ -780,6 +782,8 @@ export default {
   CPTal1b: 'Création d\'un secret impossible, mise à jour autorisée seulement en cas de réduction de la taille du texte.',
   CPTal2a: 'Dépassement du quota pour les fichiers attachés aux secrets ({0}%).',
   CPTal2b: 'Ajouts et remplacements de fichiers attachés à un secret autorisés seulement si le volume total du secret est en réduction.',
+
+  CPTtitch: 'Chats avec le Comptable et les sponsors de la tribu',
 
   // choix quotas
   CQt1: 'Quota V1 (textes): {0}',

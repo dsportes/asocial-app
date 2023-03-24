@@ -40,7 +40,7 @@ export default ({
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async editer () {
-      if (! await session.edit()) return
+      if (! await this.session.edit()) return
       if (this.edit) this.mcedit = true
     },
     okmc (mc) { 

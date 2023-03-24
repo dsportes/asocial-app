@@ -1,7 +1,7 @@
 <template>
 <div>
   <q-toolbar class="row justify-between">
-    <q-btn class="col-auto q-mr-md" dense size="md" color="warning" 
+    <q-btn v-if="tab==='notif'" class="col-auto q-mr-md" dense size="md" color="warning" 
       icon="check" :label="$t('jailu')" @click="vuclose()"/>
     <q-tabs  class="col" v-model="tab" inline-label outside-arrows mobile-arrows no-caps>
       <q-tab name="notif" :label="$t('PNCntf')" @click="tab='notif'"/>
@@ -58,25 +58,33 @@
   </div>
 
   <div v-if="tab==='chats'">
+    <div class="titre-lg text-italic text-center q-my-md">{{$t('CPTtitch')}}</div>
 
+    <div v-for="(e, idx) in lsp" :key="idx">
+      <apercu-chat class="q-my-sm"
+        :na-i="naCpt" :na-e="e.na" :ids="e.ids" :idx="idx" :mapmc="mapmc"/>
+    </div>
   </div>
 </div>
 </template>
 
 <script>
 
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import SyntheseBlocage from '../components/SyntheseBlocage.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
+import ApercuChat from '../components/ApercuChat.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
+import { getNg, Motscles, Chat } from '../app/modele.mjs'
+import { IDCOMPTABLE } from '../app/api.mjs'
 
 export default {
   name: 'PageCompta',
 
-  components: { PanelCompta, SyntheseBlocage, ApercuNotif },
+  components: { PanelCompta, SyntheseBlocage, ApercuNotif, ApercuChat },
 
   computed: {
     c () { return this.session.compta.compteurs },
@@ -107,14 +115,50 @@ export default {
   setup () {
     const session = stores.session
     const avStore = stores.avatar
+    const pStore = stores.people
+    const naComptable = getNg(IDCOMPTABLE)
+    const naCpt = getNg(session.compteId)
     const ui = stores.ui
+    const lsp = ref()
+    const mapmc = ref(Motscles.mapMC(true, 0))
+
+    async function getSponsors () {
+      const r = []
+      if (!session.estComptable) {
+        const idsc = await Chat.getIds(naCpt, naComptable)
+        r.push({ na: naComptable, ids: idsc})
+      }
+      for(const na of pStore.naSponsors) {
+        if (na.id !== session.compteId) {
+          const ids = await Chat.getIds(naCpt, na)
+          r.push({ na, ids})
+        }
+      }
+      lsp.value = r
+    }
+
+    pStore.$onAction(({ name, args, after }) => {
+      after(async (result) => {
+        if (name === 'setPeopleTribu') {
+          await getSponsors()
+        }
+      })
+    })
+
+    onMounted(async () => {
+      await getSponsors()
+    })
+
     const tab = ref()
     tab.value = ui.pagetab || 'notif'
     return {
       session,
       ui,
       avStore,
-      tab
+      tab,
+      naCpt,
+      mapmc,
+      lsp
     }
   }
 }

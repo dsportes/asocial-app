@@ -210,7 +210,10 @@ export default ({
     const step3 = ref(null)
     const tribu = toRef(props, 'tribu')
     const quotas = ref(null)
-    quotas.value = { q1: 1, q2: 1, max1: tribu.value.r1, max2: tribu.value.r2, min1: 0, min2: 0 }
+    quotas.value = { q1: 1, q2: 1, 
+      max1: tribu.value.q1 > tribu.value.a1 ? tribu.value.q1 - tribu.value.a1 : 0, 
+      max2: tribu.value.q2 > tribu.value.a2 ? tribu.value.q2 - tribu.value.a2 : 0,
+      min1: 0, min2: 0 }
 
     onMounted(() => {
       setTimeout(() => {

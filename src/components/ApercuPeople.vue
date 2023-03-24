@@ -12,11 +12,11 @@
         zoom maxh="3rem" :texte="p.info"/>
       <div v-else class="text-italic">{{$t('FAnocv')}}</div>
       <div v-if="p.sp" :class="'fs-md ' + (p.sp === 2 ? 'text-bold' : '')">{{$t('APtr' + p.sp)}}</div>
-      <div v-if="p.avch.length" class="row items-center">
+      <div v-if="!simple && p.avch.length" class="row items-center">
         <span class="text-italic">{{$t('APch', p.avch.length)}}</span>
         <span v-for="n in p.avch" :key="n" class="q-ml-sm q-px-xs bord">{{n}}</span>
       </div>
-      <div v-if="p.gr.length" class="row items-center">
+      <div v-if="!simple && p.gr.length" class="row items-center">
         <span class="text-italic">{{$t('APgr', p.gr.length)}}</span>
         <span v-for="n in p.gr" :key="n" class="q-ml-sm q-px-xs bord">{{n}}</span>
       </div>
@@ -35,7 +35,7 @@ import { getNg } from '../app/modele.mjs'
 export default {
   name: 'ApercuPeople',
 
-  props: { id: Number, idx: Number },
+  props: { id: Number, idx: Number, simple: Boolean },
 
   components: { ShowHtml },
 

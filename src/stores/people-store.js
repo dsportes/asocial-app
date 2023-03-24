@@ -36,6 +36,12 @@ export const usePeopleStore = defineStore('people', {
       return m
     },
 
+    naSponsors: (state) => {
+      const t = []
+      state.map.forEach(e => { if (e.sp === 2) t.push(e.na) })
+      return t
+    },
+
     ids: (state) => { return Array.from(state.map.keys()) },
 
     // retourne { na, cv, sp, chats: Set(), groupes: Map(idg, im)}
