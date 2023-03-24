@@ -2,13 +2,13 @@
   <q-card>
     <div :class="'column q-px-sm ' + dkli(idx)">
       <div v-if="!chat" class="row justify-end">
-        <div v-if="affnai" class="titre-md text-italic">{{$t('CHnch2', [naI.nom])}}</div>
-        <div v-else class="titre-md text-italic">{{$t('CHnch3', [naE.nom])}}</div>
+        <div v-if="affnai" class="titre-md text-italic q-mr-lg">{{$t('CHnch2', [naI.nom])}}</div>
+        <div v-else class="titre-md text-italic q-mr-lg">{{$t('CHnch3', [naE.nom])}}</div>
         <q-btn class="btn1" icon="edit" size="sm" color="warning" :label="$t('CHoch')" @click="editer"/>
       </div>
       <div v-else class="row justify-end">
-        <div v-if="affnai" class="titre-md text-italic">{{$t('CHoch2', [naI.nom])}}</div>
-        <div v-else class="titre-md text-italic">{{$t('CHoch3', [naE.nom])}}</div>
+        <div v-if="affnai" class="titre-md text-italic q-mr-lg">{{$t('CHoch2', [naI.nom])}}</div>
+        <div v-else class="titre-md text-italic q-mr-lg">{{$t('CHoch3', [naE.nom])}}</div>
         <div class="font-mono fs-md">{{dhcool(chat.dh)}}</div>
       </div>
       <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx"/>

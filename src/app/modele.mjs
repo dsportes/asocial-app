@@ -467,13 +467,13 @@ export class Blocage {
   recalculBloc () {
     try {
       this.djb = AMJ.amjUtcPlusNbj(this.jib, stores.config.limitesjour.dlv)
-      this.dja = AMJ.amjUtcPlusNbj(this.jib, this.nja)
-      this.djl = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl)
+      this.dja = AMJ.amjUtcPlusNbj(this.jib, this.nja - 1)
+      this.djl = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl - 1)
       const now = AMJ.amjUtc()
       this.njrb = AMJ.diff(this.djb, now)
-      if (now >= this.djl) { this.niv = 3; this.njra = 0; this.njrl = 0; return }
+      if (now > this.djl) { this.niv = 3; this.njra = 0; this.njrl = 0; return }
       this.njrl = AMJ.diff(this.djl, now)
-      if (now >= this.dja) { this.niv = 2; this.njra = 0; return }
+      if (now > this.dja) { this.niv = 2; this.njra = 0; return }
       this.njra = AMJ.diff(this.dja, now)
       this.niv = 1
     } catch (e) {
@@ -887,7 +887,7 @@ export class Compta extends GenDoc {
   // na d'un des avatars du compte
   naAvatar (id) { return id === this.id ? this.nap : this.mav.get(id) || null}
 
-  estAc (id) { return this.mav.get(id) !== null }
+  estAc (id) { return this.mav.has(id) }
 
   async compile (row) {
     const session = stores.session

@@ -909,7 +909,8 @@ export default {
   SBavd2: 'de 0 à {0} jours',
   SBnja: 'NJA : Nombre de jours en niveau "alerte"',
   SBnjl: 'NLS : Nombre de jours en niveau "lecture seule"',
-  SBdiag: 'NJA et NJS sont positifs ou 0, leur somme est inférieure à 365',
+  SBdiag: 'NJA et NJS doivent être positifs ou 0 et leur somme inférieure à 365.',
+  SBdiag2: 'La date de début de la procédure peut être avancée jusqu\'à aujourd\'hui MAIS PAS PLUS.',
   SNnon: 'Pas de procédure de blocage en cours.',
   SBdel: 'Supprimer ce blocage',
 }

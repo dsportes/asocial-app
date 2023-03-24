@@ -9,7 +9,7 @@
       <span v-if="blTr && blCo" class="titre-md text-bold text-italic">
         {{$t('SBtittc', [ntr, nco])}}</span>
       <blocage-ico :niveau="niv" class="q-mr-xs q-ml-sm"/>
-      <span class="titre-md">{{$t('SBn' + niv) + $t('SBdisp', [djb, njrb])}}</span>
+      <span class="titre-md">{{$t('SBn' + niv) + $t('SBdisp', [jdisp, njrb])}}</span>
     </div>
 
     <div class="row">
@@ -112,7 +112,9 @@ export default {
     njra () { return this.min(this.atr ? this.blTr.njra : 0, this.aco ? this.blCo.njra : 0)},
     njrl () { return this.min(this.atr ? this.blTr.njrl : 0, this.aco ? this.blCo.njrl : 0)},
     njrb () { return this.min(this.atr ? this.blTr.njrb : 0, this.aco ? this.blCo.njrb : 0)},
-    djb () { return AMJ.editDeAmj(this.min(this.atr ? this.blTr.djb : 0, this.aco ? this.blCo.djb : 0))},
+    djba () { return this.min(this.atr ? this.blTr.djb : 0, this.aco ? this.blCo.djb : 0)},
+    djb () { return AMJ.editDeAmj(this.djba)},
+    jdisp () { return AMJ.editDeAmj(AMJ.amjUtcPlusNbj(this.djba, 1))}
   },
 
   data () { return {

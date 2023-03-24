@@ -173,7 +173,8 @@ export const useAvatarStore = defineStore('avatar', {
         }
         this.tribu2P = tribu2
         for (const id in tribu2.mbtr) {
-          if (!this.comptaP.estAc(parseInt(id))) {
+          const ac = this.comptaP.estAc(parseInt(id))
+          if (!ac) {
             const e = tribu2.mbtr[id]
             peStore.setPeopleTribu(e.na, e.cv, e.sp ? 2 : 1)
           }

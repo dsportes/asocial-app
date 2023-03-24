@@ -10,11 +10,11 @@
       <div v-else class="titre-lg q-pa-xs text-negative bg-yellow-5">{{$t('IB'+session.blocage)}}</div>
     </q-card-section>
     <q-card-section v-if="session.compte">
-      <ed-blocage v-if="session.tribu" lecture 
+      <ed-blocage v-if="session.tribu" 
         :na-tribu="session.tribu.na" 
         :na-compte="nacompte"
         :source="session.tribu"/>
-      <ed-blocage v-if="compta" lecture 
+      <ed-blocage v-if="compta"
         :na-tribu="session.tribu.na" 
         :na-compte="nacompte"
         :source="compta"/>

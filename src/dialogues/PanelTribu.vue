@@ -70,7 +70,7 @@
 
   <q-dialog v-model="editBl" persistent class="moyennelargeur" full-height position="right">
     <ed-blocage class="q-my-md" :source="state.t" :na-tribu="state.t.na"
-      :lecture="!session.estComptable" :close="closeEdBl"/>
+      :edit="session.estComptable" :close="closeEdBl"/>
   </q-dialog>
 
   <q-dialog v-model="nvpar" persistent class="moyennelargeur">

@@ -15,11 +15,11 @@
 
     <q-card-section v-if="edit">
       <q-separator/>
-      <div v-if="maxavd > 0" class="q-mt-sm text-italic fs-md">{{$t('SBavd1')}}</div>
-      <q-input  v-if="maxavd > 0" dense clearable class="inp1 q-my-sm" v-model.number="avd" type="number" :label="$t('SBavd2', [maxavd])">
+      <div v-if="maxavd > 0" :class="'q-mt-sm text-italic fs-md ' + (err2 ? 'text-warning text-bold bg-yellow-3' : '')">{{$t('SBdiag2')}}</div>
+      <q-input v-if="maxavd > 0" dense clearable class="inp1 q-my-sm" v-model.number="avd" type="number" :label="$t('SBavd2', [maxavd])">
       </q-input>
 
-      <div :class="'q-mt-sm text-italic fs-md ' + (err ? 'text-warning bg-yellow-3' : '')">{{$t('SBdiag')}}</div>
+      <div :class="'q-mt-sm text-italic fs-md ' + (err ? 'text-warning text-bold bg-yellow-3' : '')">{{$t('SBdiag')}}</div>
       <q-input dense clearable class="inp1 q-my-sm" v-model.number="nja" type="number" :label="$t('SBnja')">
       </q-input>
 
@@ -29,9 +29,9 @@
     <div v-if="edit" class="row items-center justify-around q-mb-md">
       <q-btn class="q-mt-sm" 
         icon="check" :label="$t('renoncer')" color="warning" @click="closebl"/>
-      <q-btn class="q-mt-sm" :disabled="err"
+      <q-btn class="q-mt-sm" :disabled="err || err2"
         icon="check" :label="$t('valider')" color="primary" @click="valider"/>
-      <q-btn v-if="bloc.dh" class="q-my-sm" :disabled="err"
+      <q-btn v-if="bloc.dh" class="q-my-sm" :disabled="err || err2"
         icon="close" :label="$t('SBdel')" color="warning" @click="supprimer"/>
     </div>
   </q-card>
@@ -65,23 +65,22 @@ export default {
 
   computed: {
     err () { return this.bloc.nja < 0 || this.bloc.njl < 0 || (this.bloc.nja + this.bloc.njl >= 365) },
-    maxavd () { return AMJ.diff(AMJ.amjUtc(), this.blocav.jib) }
+    err2 () { return this.bloc.jib < this.blocav.jib || this.bloc.jib > this.auj },
+    maxavd () { return AMJ.diff(this.auj, this.blocav.jib) }
   },
 
   watch: {
     nja (ap) {
-      this.bloc.nja = ap || 0
-      this.bloc.recalculBloc()
+      this.bloc.nja = ap
+      if (!this.err) this.bloc.recalculBloc()
     },
     njl (ap) {
-      this.bloc.njl = ap || 0
-      this.bloc.recalculBloc()
+      this.bloc.njl = ap
+      if (!this.err) this.bloc.recalculBloc()
     },
     avd (ap) {
-      if (ap < 0) this.avd = 0
-      if (ap > this.maxavd) this.avd = this.maxavd
-      this.bloc.jib = AMJ.amjUtcPlusNbj(this.blocav.jib, this.avd)
-      this.bloc.recalculBloc()
+      this.bloc.jib = AMJ.amjUtcPlusNbj(this.blocav.jib, ap)
+      if (!this.err2) this.bloc.recalculBloc()
     }
   },
 
@@ -118,6 +117,7 @@ export default {
 
   setup (props) {
     const session = stores.session
+    const auj = AMJ.amjUtc()
     const blCo = toRef(props, 'blCo')
     const blTr = toRef(props, 'blTr')
     const naCo = toRef(props, 'naCo')
@@ -131,6 +131,7 @@ export default {
 
     return {
       session,
+      auj,
       nja,
       njl,
       cas,
