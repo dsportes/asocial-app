@@ -72,10 +72,10 @@ export default {
       p.info = p.cv ? (p.cv.info || '') : ''
       p.photo = p.cv ? (p.cv.photo || phDef.value) : phDef.value
       p.avch = []
-      p.chats.forEach(id => { p.avch.push(getNg(id).nom) })
+      Array.from(p.chats.keys()).forEach(id => { p.avch.push(getNg(id).nom) })
       p.avch.sort((a,b) => { a < b ? -1 : (a > b ? 1 : 0)})
       p.gr = []
-      for(const idg of p.groupes.keys()) { p.gr.push(getNg(idg).nom) }
+      Array.from(p.groupes.keys()).forEach(idg => { p.gr.push(getNg(idg).nom) })
       p.gr.sort((a,b) => { a < b ? -1 : (a > b ? 1 : 0)})
       return p
     }

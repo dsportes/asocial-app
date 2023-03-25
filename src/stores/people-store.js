@@ -19,9 +19,9 @@ Chaque element a pour clé l'id de l'avatar :
 - disparu : true si le people a été détecté disparu
 - sp: 0: pas compte de la tribu, 1: simple compte de la tribu, 2: sponsor de la tribu
 - cv : carte de visite de l'avatar si elle a été explicitement chargée
-- chats: set des ids du compte avec qui il a un chat ouvert.
+- chats: Map par chats, cle id(de l'avatar) valeur [idsI, idsE].
 - sponsor (getter): true si l'avatar est sponsor de la tribu du compte
-- groupes : map des groupes cle:idg, valeur:ids auquel le people participe
+- groupes : Map des groupes cle:idg, valeur:ids auquel le people participe
 */
 export const usePeopleStore = defineStore('people', {
   state: () => ({
@@ -114,30 +114,23 @@ export const usePeopleStore = defineStore('people', {
         return !e ? new Set() : e.chats
       }
     },
-
-    /* Retourne l'array des objets chats d'un people */
-    getChats: (state) => { return (id) => { 
+  
+    /* Export pour rafraîchir CV
+    { idE, vcv, lch: [{idI, idsI, idsE} ...], lmb: [{idg, im} ...] }
+    */
+    exportPourCv: (state) => { return (id) => { 
         const e = state.map.get(id)
-        if (!e || ! e.chats.size) return []
+        if (!e) return null
         const avStore = stores.avatar
-        const l = []
+        const lch = []
+        const lmb = []
         e.chats.forEach(id2 => {
           const ids = hash(id < id2 ? id + '/' + id2 : id2 + '/' + id)
           l.push(avStore.getChat(id, ids))
         })
         return l
       }
-    },
-  
-    /* Retourne le Set des id des people n'étant que chat ???????????? */
-    getPeopleChat: (state) => {
-      const s = new Set()
-      state.map.values().forEach (e => {
-        const id = e.na.id
-        if (!state.sponsors.has(id) && !e.groupes.size) s.add(id)
-      })
-      return s
-    },
+    }
   },
   
   actions: {
@@ -145,7 +138,7 @@ export const usePeopleStore = defineStore('people', {
       let e = this.map.get(na.id)
       if (!e) {
         if (disp) return null
-        e = { na: na, sp: 0, groupes: new Map(), chats: new Set() }; this.map.set(na.id, e)
+        e = { na: na, sp: 0, groupes: new Map(), chats: new Map() }; this.map.set(na.id, e)
       }
       if (cv && (!e.cv || e.cv.v < cv.v)) e.cv = cv
       return e
@@ -192,9 +185,9 @@ export const usePeopleStore = defineStore('people', {
       this.delElt(id, e)
     },
 
-    setPeopleChat (na, id2, cv) { // na: du people, id2: de l'avatar ayant un chat avec lui
-      const e = this.getElt(na, cv)
-      e.chats.add(id2)
+    setPeopleChat (chat, cv) { // naE: du people, idI: de l'avatar ayant un chat avec lui
+      const e = this.getElt(chat.naE, cv)
+      e.chats.set(chat.id, [chat.ids, chat.idsE])
     },
     
     unsetPeopleChat (id, id2) {

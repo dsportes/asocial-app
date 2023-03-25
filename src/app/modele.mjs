@@ -1139,6 +1139,7 @@ export class Chat extends GenDoc {
       this.mc = row.mc
       const x = decode(await decrypter(this.cle, row.contc))
       this.naE = new NomAvatar(x.na[0], x.na[1])
+      this.idsE = await Chat.getIds(this.naE, this.naI)
       this.dh = x.dh
       this.txt = x.txt
       this.cv = row.cva ? decode(await decrypter(this.naE.rnd, row.cva)) : null

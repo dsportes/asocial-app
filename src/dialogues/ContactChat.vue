@@ -78,7 +78,7 @@ export default ({
         this.chat = avStore.getChat(this.naI.id, idsI)
         if (this.chat) {
           // MAJ éventuelle de la CV : na: du people, id2: de l'avatar ayant un chat avec lui, cv
-          pStore.setPeopleChat (this.naE, this.naI.id, cv) 
+          pStore.setPeopleChat (this.chat, cv) 
           return
         }
         const [disp, chat] = await new ReactivationChat().run(this.naI, this.naE)

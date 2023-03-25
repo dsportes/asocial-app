@@ -2,10 +2,10 @@
   <q-page class="q-pa-sm">
     <div v-if="msg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{msg}}</div>
 
-    <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps flat dense color="primary" 
+    <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps dense color="primary" 
       :label="$t('CVraf')" @click="rafCvs"/>
 
-    <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps flat dense color="primary" 
+    <q-btn v-if="session.accesNet" class="q-ml-md q-my-sm" size="md" no-caps dense color="primary" 
       :label="$t('CChtit')" @click="ouvrircc"/>
 
     <div v-if="!chats.length" class="titre-lg text-italic">{{$t('CHnch')}}</div>
