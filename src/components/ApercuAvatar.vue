@@ -6,6 +6,7 @@
     <div class="col">
       <div>
         <span class="text-bold fs-md q-mr-sm">{{na.nomc}}</span> 
+        <span class="text-bold fs-md q-mr-sm">[{{$t('moi')}}]</span> 
         <span class="text-bold fs-sm font-mono q-mr-sm">#{{na.id}}</span> 
       </div>
       <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
@@ -30,7 +31,7 @@
 
     <!-- Dialogue d'édition de la carte de visite -->
     <q-dialog v-model="edition">
-      <carte-visite :photo-init="na.photo" :info-init="na.info" :na="na"
+      <carte-visite :photo-init="avatar.na.photoDef" :info-init="info" :na="na"
         :close="closeCV" @ok="cvchangee"/>
     </q-dialog>
 
@@ -67,21 +68,21 @@ import { toRef, ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import { IDCOMPTABLE } from '../app/api.mjs'
 import ShowHtml from './ShowHtml.vue'
-import CarteVisite from '../components/CarteVisite.vue'
+import CarteVisite from './CarteVisite.vue'
 import { MajCv, GetAvatarPC, ChangementPC } from '../app/operations.mjs'
-import BoutonHelp from '../components/BoutonHelp.vue'
+import BoutonHelp from './BoutonHelp.vue'
 import { afficherDiag } from '../app/util.mjs'
 import { PhraseContact } from '../app/modele.mjs'
 
 export default {
-  name: 'FicheAvatar',
+  name: 'ApercuAvatar',
 
   props: { na: Object, idx: Number, edit: Boolean },
 
   components: { ShowHtml, CarteVisite, BoutonHelp },
 
   computed: {
-    info () { return this.na.info },
+    info () { return this.avatar.cv ? this.avatar.cv.info : '' },
     estComptable () { return this.na.id === IDCOMPTABLE }
   },
 

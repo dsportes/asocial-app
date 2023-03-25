@@ -10,7 +10,7 @@
 
   <q-page-container>
     <q-card style="min-height:50vh" class="q-pa-sm">
-      <apercu-people :id=id />
+      <apercu-people :id="id" simple />
     </q-card>
   </q-page-container>
 </q-layout>

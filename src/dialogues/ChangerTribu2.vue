@@ -9,7 +9,7 @@
 
       <div v-if="!cref.na" class="titre-md">Aucun avatar copiée.</div>
       <div v-else class="titre-md">Dernier avatar copié :
-        <fiche-avatar :na-avatar="cref.na" />
+        <apercu-avatar :na-avatar="cref.na" />
         <div v-if="cref.ok" class="fs-md q-my-xs">
           Tribu actuelle : {{cref.nata.nom}}
           <span v-if="cref.stpa" class="text-bold q-ml-md text-warning"> est PARRAIN</span>
@@ -60,7 +60,7 @@
 <script>
 import { useStore } from 'vuex'
 import { toRef, ref, computed, reactive, watch, onMounted } from 'vue'
-import FicheAvatar from './FicheAvatar.vue'
+import ApercuAvatar from './ApercuAvatar.vue'
 import { NomAvatar, edvol, afficherdiagnostic } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { GetCompta, GetTribuCompte, ChangerTribu } from '../app/operations.mjs'
@@ -69,7 +69,7 @@ const msg = 'Réserves insuffisantes de la nouvelle tribu pour accueillir le com
 
 export default ({
   name: 'ChangerTribu',
-  components: { FicheAvatar },
+  components: { ApercuAvatar },
   props: { close: Function, tribu: Object },
 
   data () {

@@ -11,7 +11,6 @@
         <apercu-people class="q-my-sm" :id="p.na.id" :idx="idx"/>
       </div>
     </div>
-
   </q-page>
 </template>
 
@@ -43,11 +42,11 @@ export default {
     const session = stores.session
     const fStore = stores.filtre
 
-    function getPeople () { // Array de chats (Map des chats (clé ids) de l'avatar id)
+    function getPeople () {
       return Array.from(pStore.map.values())
     }
 
-    const lp = ref(getPeople()) // Map des chats (clé ids) de l'avatar id
+    const lp = ref(getPeople())
     const flp = ref()
     const msg = ref('')
 

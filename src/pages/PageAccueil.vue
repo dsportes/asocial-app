@@ -112,11 +112,13 @@
 
       <q-separator color="orange" class="q-my-sm"/>
 
-      <div class="q-my-sm q-px-sm titre-md text-bold text-italic text-center">{{$t('ACav', [session.avC.na.nomc])}}</div>
+      <div class="q-my-sm q-px-sm titre-md text-bold text-center">
+        <span class="text-italic">{{$t('ACav')}}</span>
+        <q-btn class="q-ml-md" dense :label="session.avC.na.nomc" no-caps
+          icon-right="open_in_new" @click="ui.detailsavatar = true"/>
+      </div>
 
       <div class="row items-center q-mx-lg justify-center fs-md">
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACaproposav')"
-          @click="ui.setPage('aproposav')"/>
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACsecrets')">
           <q-badge color="teal-10" rounded floating>{{nbavsecs}}</q-badge>
         </q-btn>

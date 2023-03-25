@@ -4,9 +4,13 @@
       <img class="photomax" :src="p.photo" />
     </div>
     <div class="col">
-      <div>
-        <span class="text-bold fs-md q-mr-sm">{{p.na.nomc}}</span> 
-        <span class="text-bold fs-sm font-mono q-mr-sm">#{{id}}</span> 
+      <div class="row justify-between">
+        <div>
+          <span class="text-bold fs-md q-mr-sm">{{p.na.nomc}}</span> 
+          <span class="text-bold fs-sm font-mono q-mr-sm">#{{id}}</span> 
+        </div>
+        <q-btn v-if="!simple" dense size="sm" color="primary" icon="add"
+          :label="$t('details')" @click="ouvrirdetails"/>
       </div>
       <show-html v-if="p.info" class="q-my-xs bord" :idx="idx" 
         zoom maxh="3rem" :texte="p.info"/>
@@ -21,6 +25,7 @@
         <span v-for="n in p.gr" :key="n" class="q-ml-sm q-px-xs bord">{{n}}</span>
       </div>
     </div>
+
   </div>
 </template>
 <script>
@@ -42,14 +47,20 @@ export default {
   computed: { },
 
   data () { return {
+    detailspeople: false
   }},
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+    ouvrirdetails () {
+      this.ui.peopleId = this.id
+      this.ui.detailspeople = true
+    }
   },
 
   setup (props) {
     const pStore = stores.people
+    const ui = stores.ui
     const config = stores.config
     const id = toRef(props, 'id')
     
@@ -88,7 +99,8 @@ export default {
     })
 
     return {
-      p
+      p,
+      ui
     }
   }
 }

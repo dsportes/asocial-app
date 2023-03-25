@@ -52,7 +52,8 @@
       <blocage-ico class="q-ml-xs" v-if="session.nivbl" clickable :niveau="session.nivbl" :alire="session.alirebl" @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
-        <span v-if="session.ok">{{session.avC.na.nomc}}</span>
+        <q-btn v-if="session.ok" class="titre-lg" dense no-caps 
+          :label="session.avC.na.nomc" @click="ouvrirav" />
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
       </q-toolbar-title>
 
@@ -137,7 +138,6 @@
       <page-compte class="page" v-if="ui.page === 'compte'"/>
       <page-sponsorings class="page" v-if="ui.page === 'sponsorings'"/>
       <page-chats class="page" v-if="ui.page === 'chats'"/>
-      <page-aproposav class="page" v-if="ui.page === 'aproposav'"/>
       <page-compta class="page" v-if="ui.page === 'compta'"/>
       <page-tribus class="page" v-if="ui.page === 'tribus'"/>
       <page-tribu class="page" v-if="ui.page === 'tribu'"/>
@@ -179,6 +179,29 @@
   <q-dialog v-if="outilsTests" v-model="outilsTests" full-height persistent>
     <outils-tests :close="closeOutils"/>
   </q-dialog>
+
+  <q-dialog v-model="ui.detailspeople" full-height persistent>
+    <panel-people :id="ui.peopleId" :close="closepp"/>
+  </q-dialog>
+
+  <q-dialog v-model="ui.detailsavatar" full-height persistent>
+    <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
+      <q-header elevated class="bg-secondary text-white">
+        <q-toolbar>
+          <q-btn dense size="md" color="warning" icon="close" @click="closeav"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [session.avC.na.nom])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+      </q-header>
+
+      <q-page-container>
+        <q-card style="min-height:50vh" class="q-pa-sm largeur40">
+          <apercu-avatar edit :na="session.avC.na"/>
+        </q-card>
+      </q-page-container>
+    </q-layout>
+  </q-dialog>
+
 
   <q-dialog v-model="session.opDialog" seamless position="top" full-width persistent transition-show="scale" transition-hide="scale">
     <div class="q-mt-sm column items-center">
@@ -237,11 +260,12 @@ import PageAccueil from './pages/PageAccueil.vue'
 import PageCompte from './pages/PageCompte.vue'
 import PageSponsorings from './pages/PageSponserings.vue'
 import PageChats from './pages/PageChats.vue'
-import PageAproposav from './pages/PageAproposav.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageTribus from './pages/PageTribus.vue'
 import PageTribu from './pages/PageTribu.vue'
 import PagePeople from './pages/PagePeople.vue'
+import PanelPeople from './dialogues/PanelPeople.vue'
+import ApercuAvatar from './components/ApercuAvatar.vue'
 
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
@@ -263,9 +287,9 @@ export default {
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco,
-    PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats, PageAproposav,
-    PageCompta, PageTribus, PageTribu, PagePeople,
+    BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco, ApercuAvatar,
+    PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
+    PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu,
     DialogueErreur, DialogueHelp
@@ -309,6 +333,10 @@ export default {
     fermFiltre () { this.ui.menu = false },
 
     tgdark () { this.$q.dark.toggle() },
+
+    closepp () { this.ui.detailspeople = false },
+    closeav () { this.ui.detailsavatar = false },
+    ouvrirav () { this.ui.detailsavatar = true },
 
     clickNotif () {
       this.ui.setPage('compta', 'notif')

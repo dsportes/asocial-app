@@ -141,9 +141,12 @@ export const usePeopleStore = defineStore('people', {
   },
   
   actions: {
-    getElt (na, cv) {
-      let e = this.map.get(na.id) 
-      if (!e) { e = { na: na, sp: 0, groupes: new Map(), chats: new Set() }; this.map.set(na.id, e) }
+    getElt (na, cv, disp) {
+      let e = this.map.get(na.id)
+      if (!e) {
+        if (disp) return null
+        e = { na: na, sp: 0, groupes: new Map(), chats: new Set() }; this.map.set(na.id, e)
+      }
       if (cv && (!e.cv || e.cv.v < cv.v)) e.cv = cv
       return e
     },
@@ -153,7 +156,7 @@ export const usePeopleStore = defineStore('people', {
     },
 
     setDisparu (na) {
-      const e = this.map.get(na.id)
+      const e = this.getElt(na, null, true)
       if (!e) return null
       if (e.disparu) return null
       e.disparu = true

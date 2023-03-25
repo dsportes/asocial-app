@@ -2,7 +2,7 @@
   <div :class="dkli">
     <div v-if="blocage">
       <blocage-ico :niveau="blocage.niv" class="q-mr-xs"/>
-      <span class="titre-sm q-my-sm text-warning">{{$t('SBn' + blocage.niv) + $t('SBdisp2', [blocage.njrb])}}</span>
+      <span class="titre-sm q-my-sm text-negative text-bold bg-yellow-3">{{$t('SBn' + blocage.niv) + $t('SBdisp2', [blocage.njrb])}}</span>
       <q-btn v-if="edit && session.estComptable" color="primary" 
         class="q-ml-sm btn2" size="sm" dense icon="edit" @click="editerbl(true)"/>
       <q-btn v-else color="primary" 

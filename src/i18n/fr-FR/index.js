@@ -13,6 +13,7 @@ export default {
 
   OK: 'OK',
   ok: 'OK',
+  moi: 'moi',
   jailu: 'J\'ai lu',
   continuer: 'Continuer',
   changer: 'Changer',
@@ -37,6 +38,7 @@ export default {
   langue: 'Choix de la langue',
   clairfonce: 'Choix style clair / foncé',
   supprime: 'SUPPRIMÉ',
+  details: 'Plus de détails',
   editavion: 'Les mises à jour ne sont pas possibles en mode avion.',
   editlecture: 'Les mises à jour ne sont pas possibles quand le compte est "bloqué en lecture seulement"',
 
@@ -44,7 +46,7 @@ export default {
   gravite1: 'normale ou importante',
   gravite2: 'importante',
 
-  roletribu0: '(ignoer)',
+  roletribu0: '(ignorer)',
   roletribu1: 'Compte de ma tribu',
   roletribu2: 'Sponsor de ma tribu',
 
@@ -535,7 +537,7 @@ export default {
   TRItribu21: 'Par quota V1 décroissant',
   TRItribu22: 'Par quota V1 décroissant',
 
-  ACav: 'Relativement à l\'avatar "{0}"',
+  ACav: 'Relativement à l\'avatar',
   ACgr: 'Relativement au groupe "{0}"',
   ACaproposav: 'Information',
   ACsecrets: 'Ses secrets',
@@ -547,7 +549,7 @@ export default {
   ACmesav: 'Mon compte mes avatars',
   ACmesgr: 'Mes groupes',
   ACmesctc: 'Mes contacts',
-  ACmatribu: 'Tribu {0}',
+  ACmatribu: 'Ma tribu "{0}"',
   ACmacompta: 'Ma comptabilité',
   ACmesspons: 'Mes sponsorings',
   ACmesinvits: 'Mes invitations',
@@ -571,6 +573,7 @@ export default {
   APgr: 'Membre d\'aucun groupe | Membre du groupe :| Membres des groupes :',
   APnb: 'Aucun contact sur {0} ne répond au critère de recherche',
   APtit: 'Détail du contact {0}',
+  APtitav: 'Détail de l\'avatar {0}',
 
   CHtxt: 'Texte du chat',
   CHnch: 'Aucun chat ouvert',
@@ -610,9 +613,9 @@ export default {
   NT1: 'Notification importante',
   NTv1: 'Volume V1 attribué / quota tribu',
   NTv2: 'Volume V2 attribué / quota tribu',
-  NTvx: 'Quotas de la tribu (% attribués)',
-  NTvx1: 'V1: {0} ({1}%)',
-  NTvx2: 'V2: {0} ({1}%)',
+  NTvx: 'Quotas V1 / V2 de la tribu (%attribués)',
+  NTvx1: '{0} ({1}%)',
+  NTvx2: '{0} ({1}%)',
 
   NTcom: 'Commentaires sur la tribu {0}',
   NTci: 'Un sponsor ne peut pas émettre une notification au Comptable',

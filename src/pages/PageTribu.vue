@@ -21,11 +21,11 @@
           <div class="col q-pr-xs">
             <apercu-compte v-if="type(c.na)===3" :elt="c" :idx="idx"/>
             <apercu-people v-if="type(c.na)===2" :id="c.na.id" :idx="idx"/>
-            <fiche-avatar v-if="type(c.na)===1" :na="c.na" :idx="idx"/>
+            <apercu-avatar v-if="type(c.na)===1" :na="c.na" :idx="idx"/>
 
             <div v-if="c.sp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
-            <div v-if="vis(c)" class="q-mb-xs row largeur30 items-center">
+            <div v-if="vis(c)" class="q-mb-xs row largeur40 items-center">
               <div class="col-1">
                 <q-btn v-if="session.estSponsor || session.estComptable" size="sm" icon="edit" 
                   dense color="primary" @click="editerq(c)"/>
@@ -97,7 +97,7 @@ import ApercuBlocage from '../components/ApercuBlocage.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
 import ApercuPeople from '../components/ApercuPeople.vue'
-import FicheAvatar from '../components/FicheAvatar.vue'
+import ApercuAvatar from '../components/ApercuAvatar.vue'
 import PanelPeople from '../dialogues/PanelPeople.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import PanelCompta from '../components/PanelCompta.vue'
@@ -106,7 +106,7 @@ import { GetCompteursCompta } from '../app/operations.mjs'
 export default {
   name: 'PageTribu',
 
-  components : { PanelPeople, FicheAvatar, ApercuPeople, PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
+  components : { PanelPeople, ApercuAvatar, ApercuPeople, PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
 
   computed: {
     ed () { return this.session.estComptable || this.session.estSponsor },
@@ -150,7 +150,7 @@ export default {
       this.ccna = c.na
       if (t === 1) {
         this.session.setAvatarCourant(c.na.id)
-        await this.ui.setPage('aproposav')
+        this.ui.detailsavatar = true
       } else if (t === 2) {
         this.fipeople = true
       } else if (t === 3) {

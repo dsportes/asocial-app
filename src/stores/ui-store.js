@@ -17,6 +17,11 @@ export const useUiStore = defineStore('ui', {
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
 
+    detailspeople: false,
+    peopleId: 0,
+
+    detailsavatar: false,
+    
     dialoguehelp: false,
     helpstack: [],
 

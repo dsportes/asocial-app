@@ -42,7 +42,7 @@
       <div class="row items-start">
         <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
           :color="na.id === session.avatarId ? 'warning' : 'primary'" @click="courant(na.id)"/>
-        <fiche-avatar edit :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')" :na="na" :idx="idx"/>
+        <apercu-avatar edit :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')" :na="na" :idx="idx"/>
       </div>
     </div>
 
@@ -105,7 +105,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import MotsCles from '../components/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import FicheAvatar from '../components/FicheAvatar.vue'
+import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import { afficherDiag } from '../app/util.mjs'
@@ -113,7 +113,7 @@ import { afficherDiag } from '../app/util.mjs'
 export default {
   name: 'PageCompte',
 
-  components: { NomAvatar, NouveauSponsoring, BoutonHelp, FicheAvatar, PhraseSecrete, EditeurMd, ShowHtml, MotsCles },
+  components: { NomAvatar, NouveauSponsoring, BoutonHelp, ApercuAvatar, PhraseSecrete, EditeurMd, ShowHtml, MotsCles },
 
   computed: {
     memo () { return this.session.compte.memo }

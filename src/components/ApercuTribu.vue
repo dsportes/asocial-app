@@ -19,7 +19,7 @@
     <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
 
-    <div class="q-ml-md q-mb-xs row largeur30">
+    <div class="q-ml-md q-mb-xs row largeur40">
       <div class="col-5 titre-sm">{{$t('NTvx')}}</div>
       <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx1', [q1, pc1])}}</div>
       <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx2', [q2, pc2])}}</div>
@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <div class="q-ml-md q-mt-sm row largeur30 justify-start">
+    <div class="q-ml-md q-mt-sm row largeur40 justify-start">
       <div class="col-6 titre-sm">{{$t('PTntfc')}}</div>
       <div class="col-6">
         <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[0]}}</span>
@@ -37,7 +37,7 @@
         <notif-ico gravite/>
       </div>
     </div>
-    <div class="q-ml-md q-mt-xs row largeur30 justify-start">
+    <div class="q-ml-md q-mt-xs row largeur40 justify-start">
       <div class="col-6 titre-sm">{{$t('PTntfs')}}</div>
       <div class="col-6">
         <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[0]}}</span>
@@ -47,7 +47,7 @@
       </div>
     </div>
 
-    <apercu-blocage :blocage="t.blocage" :edit="edit" :idx="idx" :na-tr="t.na"/>
+    <apercu-blocage class="q-ml-md" :blocage="t.blocage" :edit="edit" :idx="idx" :na-tr="t.na"/>
 
     <!-- Edition du commentaire attachée à une tribu -->
     <q-dialog v-model="edcom" persistent>
@@ -85,7 +85,7 @@ import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
-import ApercuNotif from './ApercuNotif.vue'
+import ApercuNotif from '../components/ApercuNotif.vue'
 import ApercuBlocage from '../components/ApercuBlocage.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { edvol } from '../app/util.mjs'
