@@ -112,6 +112,14 @@ export const useAvatarStore = defineStore('avatar', {
         return e ? e.chats : null 
       }
     },
+    // retourne l'array des idE des chats de l'avatar id
+    getChatIdEs: (state) => { return (id) => { 
+        const a = []
+        const e = state.map.get(id)
+        if (e.chats) e.chats.forEach((chat, ids) => { a.push(chat.idE) })
+        return a
+      }
+    },
     // retourne le sponsoring d'id ids de l'avatar id
     getSponsoring: (state) => { return (id, ids) => { 
       const e = state.map.get(id)

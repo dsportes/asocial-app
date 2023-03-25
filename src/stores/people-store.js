@@ -29,20 +29,14 @@ export const usePeopleStore = defineStore('people', {
   }),
 
   getters: {
-    // Map des noms d'avatar des people (clé: id)
-    peoples: (state) => {
-      const m = new Map()
-      state.map.forEach(e => { m.set(e.na.id, e.na)})
-      return m
-    },
+    // Array des ids des people
+    peopleIds: (state) => { return Array.from(state.map.keys()) },
 
     naSponsors: (state) => {
       const t = []
       state.map.forEach(e => { if (e.sp === 2) t.push(e.na) })
       return t
     },
-
-    ids: (state) => { return Array.from(state.map.keys()) },
 
     // retourne { na, cv, sp, chats: Set(), groupes: Map(idg, im)}
     getPeople: (state) => { return (id) => {
@@ -116,19 +110,17 @@ export const usePeopleStore = defineStore('people', {
     },
   
     /* Export pour rafraîchir CV
-    { idE, vcv, lch: [{idI, idsI, idsE} ...], lmb: [{idg, im} ...] }
+    { idE, vcv, lch: [[idI, idsI, idsE] ...], lmb: [[idg, im] ...] }
     */
-    exportPourCv: (state) => { return (id) => { 
-        const e = state.map.get(id)
+    exportPourCv: (state) => { return (idE) => { 
+        const e = state.map.get(idE)
         if (!e) return null
-        const avStore = stores.avatar
         const lch = []
         const lmb = []
-        e.chats.forEach(id2 => {
-          const ids = hash(id < id2 ? id + '/' + id2 : id2 + '/' + id)
-          l.push(avStore.getChat(id, ids))
-        })
-        return l
+        e.chats.forEach((val, idI) => { lch.push([idI, val[0], val[1]]) })
+        e.groupes.forEach((ids, idg) => { lch.push([idg, ids]) })
+        const vcv = e.cv ? e.cv.v : 0
+        return { idE, vcv, lch, lmb }
       }
     }
   },

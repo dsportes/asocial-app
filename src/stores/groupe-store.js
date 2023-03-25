@@ -41,6 +41,14 @@ export const useGroupeStore = defineStore('groupe', {
         return e ? e.membres : null 
       }
     },
+    getMembreIdEs: (state) => { return (id) => {
+      const a = []
+        const e = state.map.get(id)
+        const compte = stores.avatar.compte
+        if (e.membres) e.membres.forEach((m, im) => { if (!m.estAc) a.push(m.na.id) })
+        return a 
+      }
+    },
     getSecret: (state) => { return (id, ns) => { 
         const e = state.map.get(id)
         return e ? e.secrets.get(ns) : null 

@@ -420,6 +420,53 @@ export class ReactivationChat extends OperationUI {
   }
 }
 
+/* Rafraîchir les CV, quand nécessaire *********************************
+args.token: éléments d'authentification du compte.
+args.cibles : array de  { idE, vcv, lch: [[idI, idsI, idsE] ...], lmb: [[idg, im] ...] }
+Retour: les chats et membres de la cible sont mis à jour
+*/
+export class RafraichirCvs extends OperationUI {
+  constructor () { super($t('OPccv')) }
+
+  async run (id) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
+    try {
+      const session = stores.session
+      const id = session.avatarId
+      const pStore = stores.people
+
+      const toutes = [] // toutes les cibles
+      if (!id) {
+        pStore.peopleIds.forEach(idE => { 
+          const exp = pStore.exportPourCv(idE)
+          if (exp) toutes.push(exp)
+        })
+      } else if (id % 10 <= 1) {
+        stores.avatar.getChatIdEs(id).forEach(idE => { 
+          const exp = pStore.exportPourCv(idE)
+          if (exp) toutes.push(exp)
+        })
+      } else {
+        stores.groupe.getMembreIdEs(id).forEach(idE => { 
+          const exp = pStore.exportPourCv(idE)
+          if (exp) toutes.push(exp)
+        })
+      }
+      
+      let next = 0
+      while (next < toutes.length) {
+        const cibles = []
+        for (const i = 0; i < 10 && next < toutes.length; i++, next++) cible.push(toutes[next])
+        const args = { token: session.authToken, cibles }
+        this.tr(await post(this, 'RafraichirCvs', args))
+      }
+
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* Charger, quand nécessaire, les cartes de visite des chats d'un avatar *********************************
 args.token: éléments d'authentification du compte.
 args.mcv : cle: id, valeur: version détenue en session (ou 0)
