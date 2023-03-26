@@ -577,8 +577,8 @@ export default {
 
   CHtxt: 'Texte du chat',
   CHnch: 'Aucun chat ouvert',
-  CHnch2: 'Pas de chat ouvert par {0}',
-  CHnch3: 'Pas de chat ouvert avec {0}',
+  CHnch2b: 'Pas de chat ouvert par {0}',
+  CHnch3b: 'Pas de chat ouvert avec {0}',
   CHoch2: 'Chat ouvert par {0}',
   CHoch3: 'Chat ouvert avec {0}',
   CHnch2: 'Aucun chat sur {0} ne répond au critère de recherche',
@@ -920,4 +920,8 @@ export default {
   SBdiag2: 'La date de début de la procédure peut être avancée jusqu\'à aujourd\'hui MAIS PAS PLUS.',
   SNnon: 'Pas de procédure de blocage en cours.',
   SBdel: 'Supprimer ce blocage',
+
+  // PanelPeople
+  PPchats: 'Chats',
+  PPgroupes: 'Participations aux groupes',
 }

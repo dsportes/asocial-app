@@ -1,17 +1,8 @@
-Suppression de notification globale et tribu / compte
-Suppression de blocage dans EdBlocage ...
-Chats d'urgence
-PagePeople et FichePeople
-
-ApercuTribu, volumes étranges
-ApercuTribu : changer les quotas de la tribu
-PageTribu: changer les quotas du compte
-
-PageTribus filtre blocage.
 
 TODO next :
-- FicheAvatar : gérer les restrictions d'accès - Phrase de contact - Ops
-- sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à reprendre !!!!!!!!!!!!!!!
+- Comptable : sponsor/plus/moins, changer de tribu
+- ApercuAvatar : vérifier les restrictions d'accès - Phrase de contact - Ops
+- sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à VERIFIER !!!!!!!!!!!!!!!
 
 # Application front-end A-social
 

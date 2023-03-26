@@ -101,7 +101,6 @@ export default {
       } else {
         await new SetAttributTribu().run(this.naTr.id, 'blocaget', val)
       }
-      // console.log(JSON.stringify(this.bloc))
       this.closebl()
     },
     async supprimer () {
@@ -110,7 +109,7 @@ export default {
       } else {
         await new SetAttributTribu().run(this.naTr.id, 'blocaget', null)
       }
-      // console.log(JSON.stringify(this.blocav))
+      this.closebl()
     },
     closebl () { if (this.close) this.close()}
   },
