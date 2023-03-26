@@ -451,16 +451,18 @@ export class RafraichirCvs extends OperationUI {
           if (exp) toutes.push(exp)
         })
       }
-      
+      const nt = toutes.length
       let next = 0
+      let nr = 0
       while (next < toutes.length) {
         const cibles = []
-        for (const i = 0; i < 10 && next < toutes.length; i++, next++) cible.push(toutes[next])
+        for (let i = 0; i < 10 && next < toutes.length; i++, next++) cibles.push(toutes[next])
         const args = { token: session.authToken, cibles }
-        this.tr(await post(this, 'RafraichirCvs', args))
+        const ret = this.tr(await post(this, 'RafraichirCvs', args))
+        nr += ret.nbrech
       }
 
-      this.finOK()
+      return this.finOK([nt, nr], true)
     } catch (e) {
       await this.finKO(e)
     }

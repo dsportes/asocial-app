@@ -14,7 +14,7 @@ import ApercuMotscles from './ApercuMotscles.vue'
 export default ({
   name: 'FiltreMc',
 
-  props: { nom: String, attr: String },
+  props: { nom: String, attr: String, idx: Number },
 
   components : { ApercuMotscles },
 

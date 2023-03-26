@@ -2,6 +2,9 @@
   <q-page class="q-pa-sm">
     <div v-if="msg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{msg}}</div>
 
+    <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps dense color="primary" 
+      :label="$t('CVraf')" @click="rafCvs"/>
+
     <div v-if="lp.length && !flp.length" class="titre-lg text-italic">
       {{$t('APnb', [lp.length])}}
     </div>
@@ -20,6 +23,7 @@ import stores from '../stores/stores.mjs'
 import ApercuPeople from '../components/ApercuPeople.vue'
 import { $t, hms } from '../app/util.mjs'
 import { IDCOMPTABLE } from '../app/api.mjs'
+import { RafraichirCvs } from '../app/operations.mjs'
 
 export default {
   name: 'PagePeople',
@@ -30,6 +34,10 @@ export default {
   },
 
   methods: {
+    async rafCvs () {
+      const [nt, nr] = await new RafraichirCvs().run(0)
+      stores.ui.afficherMessage(this.$t('CVraf2', [nr, nt - nr]), false)
+    }
   },
 
   data () {

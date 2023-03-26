@@ -32,7 +32,7 @@ import stores from '../stores/stores.mjs'
 import ApercuChat from '../components/ApercuChat.vue'
 import ContactChat from '../dialogues/ContactChat.vue'
 import { Motscles } from '../app/modele.mjs'
-import { ChargerCvs } from '../app/operations.mjs'
+import { RafraichirCvs } from '../app/operations.mjs'
 import { intersection, difference, $t, hms } from '../app/util.mjs'
 
 export default {
@@ -47,8 +47,8 @@ export default {
     ouvrircc () { this.cc = true },
     closecc () { this.cc = false },
     async rafCvs () {
-      const n = await new ChargerCvs().run()
-      stores.ui.afficherMessage(this.$t('CVraf2', [n]), false)
+      const [nt, nr] = await new RafraichirCvs().run(this.session.avatarId)
+      stores.ui.afficherMessage(this.$t('CVraf2', [nr, nt - nr]), false)
     }
   },
 

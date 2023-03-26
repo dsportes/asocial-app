@@ -852,7 +852,7 @@ export default {
   CVoff: 'Caméra non démarrée',
   CVedit: 'Editer la carte de visite',
   CVraf: 'Rafraîchir les cartes de visite',
-  CVraf2: 'Nombre de cartes de visite rechargées : {0}',
+  CVraf2: '{0} carte(s) de visite mises à jour, {1} étaient à jour.',
 
   // Panel Comptabilité
   PCOtit: 'Comptabilité de {0}',
