@@ -169,7 +169,7 @@ export const useAvatarStore = defineStore('avatar', {
 
     setTribu2 (tribu2) { // set ou remplacement de la tribu
       const session = stores.session
-      if (session.tribuCid === tribu2.id) {
+      if (session.tribuCId === tribu2.id) {
         // tribu "courante" affichée pour le comptable
         this.tribu2CP = tribu2
       }

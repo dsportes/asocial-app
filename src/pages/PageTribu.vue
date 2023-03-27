@@ -220,18 +220,11 @@ export default {
           }
         })
       })
-    } else {
-      avStore.$onAction(({ name, args, after }) => {
-        after((result) => {
-          if (name === 'setTribuC') {
-            t.value = avStore.getTribu(session.tribuCId)
-          }
-        })
-      })
     }
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setTribu2') {
+        if (name === 'setTribuC' || name === 'setTribu2') {
+          t.value = avStore.getTribu(session.tribuCId)
           lc.value = getlc()
           filtrer(); trier()
         }

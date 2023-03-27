@@ -636,6 +636,7 @@ export class GetCompteursCompta extends OperationUI {
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
 args.tribu2 : true si retourner tribu2 avec
+args.setC: déclarer la tribu courante
 Retour:
 - rowtribu: row de la tribu
 - rowTribu2
@@ -643,10 +644,10 @@ Retour:
 export class GetTribu extends OperationUI {
   constructor () { super($t('OPtrib')) }
 
-  async run (id) {
+  async run (id, setC) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, tribu2: true}
+      const args = { token: session.authToken, id, tribu2: true, setC: setC || false}
       const ret = this.tr(await post(this, 'GetTribu', args))
       const tribu = await compile(ret.rowTribu)
       const tribu2 = await compile(ret.rowTribu2)

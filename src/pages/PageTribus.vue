@@ -102,7 +102,7 @@ export default {
       this.closent()
     },
     async courant (id) {
-      const [ ,t2] = await new GetTribu().run(id)
+      const [ ,t2] = await new GetTribu().run(id, true)
       this.session.setTribuCourante(t2)
       this.ui.setPage('tribu')
     }

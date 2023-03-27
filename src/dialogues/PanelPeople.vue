@@ -38,6 +38,31 @@
 
     </q-card>
   </q-page-container>
+
+  <!-- Changement de statut sponsor -->
+  <q-dialog v-model="chgSp" persistent>
+    <q-card class="bg-secondary text-white petitelargeur q-pa-sm">
+        <div v-if="infoTr.mb.sp" class="text-center q-my-md titre-md">{{$t('PPsp', [infoTr.tribu.na.nom])}}</div>
+        <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [infoTr.tribu.na.nom])}}</div>
+      <q-card-actions align="center">
+        <q-btn dense color="primary" :label="$t('renoncer')" @click="chgSp=false"/>
+        <q-btn v-if="infoTr.mb.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
+        <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <!-- Affichage des compteurs de compta du compte "courant"-->
+  <q-dialog v-model="cptdial" persistent full-height>
+    <q-card style="width: 800px; max-width: 80vw;">
+    <q-toolbar class="bg-secondary text-white">
+      <q-btn dense size="md" color="warning" icon="close" @click="cptdial = false"/>
+      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [p.na.nomc])}}</q-toolbar-title>
+    </q-toolbar>
+    <panel-compta :c="cpt" style="margin:0 auto"/>
+    </q-card>
+  </q-dialog>
+
 </q-layout>
 </template>
 <script>
@@ -47,12 +72,15 @@ import stores from '../stores/stores.mjs'
 import ApercuPeople from '../components/ApercuPeople.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import PanelCompta from '../components/PanelCompta.vue'
 // import { afficherDiag } from '../app/util.mjs'
 import { Chat, Motscles } from '../app/modele.mjs'
+import { GetCompteursCompta, SetAttributTribu2 } from '../app/operations.mjs'
+import { Compteurs } from '../app/api.mjs'
 
 export default {
   name: 'PanelPeople',
-  components: { ApercuPeople, BoutonHelp, ApercuChat },
+  components: { ApercuPeople, BoutonHelp, ApercuChat, PanelCompta },
 
   props: { id: Number, close: Function },
 
@@ -64,6 +92,9 @@ export default {
   
   data () {
     return {
+      chgSp: false,
+      cptdial: false,
+      cpt: null
     }
   },
 
@@ -71,8 +102,16 @@ export default {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     fermer () { if (this.close) this.close() },
     chgTribu () {},
-    chgSponsor () {},
-    voirCompta () {}
+    chgSponsor () { this.chgSp = true},
+    async voirCompta () {
+      const res = await new GetCompteursCompta().run(this.id)
+      this.cpt = new Compteurs(res)
+      this.cptdial = true
+    },
+    async changerSp(estSp) { // (id, na, attr, val, val2, exq)
+      await new SetAttributTribu2().run(this.trId, this.p.na, 'sp', estSp)
+      this.chgSp = false
+    }
   },
 
   setup (props) {
@@ -97,8 +136,8 @@ export default {
 
     const infoTr = reactive({ tribu: null, tribu2: null, mb: null })
     function setInfoTr() {
-      infoTr.tribu = avStore.getTribu(trId.value) // tribu
       const tc = !session.tribuCId || session.tribuCId === session.tribuId // true si c'est la tribu du compte
+      infoTr.tribu = tc ? avStore.tribu : avStore.getTribu(trId.value) // tribu
       infoTr.tribu2 = tc ? avStore.tribu2 : avStore.tribu2C
       infoTr.mb = infoTr.tribu2.mb(id.value)
     }
@@ -106,7 +145,7 @@ export default {
     // setTribuCourante
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setTribuC') {
+        if (name === 'setTribuC' || name === 'setTribu2' || name === 'setTribu') {
           setInfoTr()
         }
       })
@@ -120,6 +159,7 @@ export default {
       ids,
       lstAvc,
       infoTr,
+      trId,
       p
     }
   }
