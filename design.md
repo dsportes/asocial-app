@@ -1,6 +1,6 @@
 
 TODO next :
-- Comptable : sponsor/plus/moins, changer de tribu
+- Comptable : changer de tribu
 - ApercuAvatar : vérifier les restrictions d'accès - Phrase de contact - Ops
 - sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à VERIFIER !!!!!!!!!!!!!!!
 

@@ -144,7 +144,6 @@
         <div class="q-my-sm q-px-sm titre-md text-bold text-italic text-center full-width">
           {{session.groupeId ? $t('ACgr', [session.grC.na.nomc]) : $t('MLAngr')}}
         </div>
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACaproposav')" />
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACsecrets')">
           <q-badge color="teal-10" rounded floating>{{nbgrsecs}}</q-badge>
         </q-btn>

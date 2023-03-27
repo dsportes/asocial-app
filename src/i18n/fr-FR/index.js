@@ -546,6 +546,8 @@ export default {
   ACmembres: 'Ses membres',
   ACsponsorings: 'Ses sponsorings',
   ACinvitations: 'Invitations de ses groupes',
+  ACpourav: 'Pour l\'avatar {0}',
+  ACpourgr: 'Pour le groupe {0}',
   ACmesav: 'Mon compte mes avatars',
   ACmesgr: 'Mes groupes',
   ACmesctc: 'Mes contacts',
