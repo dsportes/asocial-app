@@ -11,6 +11,17 @@
   <q-page-container>
     <q-card style="min-height:50vh" class="q-pa-sm">
       <apercu-people :id="id" simple />
+      <div class="row">
+        <div v-if="infoTr.mb.sp" class="titre-md text-bold text-warning">{{$t('PPsp', [infoTr.tribu.na.nom])}}</div>
+        <div v-else class="titre-md">{{$t('PPco', [infoTr.tribu.na.nom])}}</div>
+        <q-btn v-if="session.estComptable" class="q-ml-sm" dense color="primary" size="sm"
+          :label="$t('PPcht')" @click="chgTribu"/>
+        <q-btn v-if="session.estComptable" class="q-ml-sm" dense color="primary" size="sm"
+          :label="$t('PPchsp')" @click="chgSponsor"/>
+      </div>
+
+      <q-btn v-if="session.estComptable || session.estSponsor" class="q-my-sm" dense color="primary" size="sm"
+          :label="$t('PPcompta')" @click="voirCompta"/>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
@@ -59,6 +70,9 @@ export default {
   methods: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     fermer () { if (this.close) this.close() },
+    chgTribu () {},
+    chgSponsor () {},
+    voirCompta () {}
   },
 
   setup (props) {
@@ -66,11 +80,14 @@ export default {
     const id = toRef(props, 'id')
     const session = stores.session
     const pStore = stores.people
+    const avStore = stores.avatar
 
     const lstAvc = session.compta.lstAvatarNas
     const ids = reactive({})
     const mapmc = ref(Motscles.mapMC(true, 0))
     const p = ref(pStore.getPeople(id.value))
+
+    const trId = ref(session.tribuCId || session.tribuId)
 
     onMounted(async () => {
       for(const na of lstAvc) {
@@ -78,11 +95,31 @@ export default {
       }
     })
 
+    const infoTr = reactive({ tribu: null, tribu2: null, mb: null })
+    function setInfoTr() {
+      infoTr.tribu = avStore.getTribu(trId.value) // tribu
+      const tc = !session.tribuCId || session.tribuCId === session.tribuId // true si c'est la tribu du compte
+      infoTr.tribu2 = tc ? avStore.tribu2 : avStore.tribu2C
+      infoTr.mb = infoTr.tribu2.mb(id.value)
+    }
+
+    // setTribuCourante
+    avStore.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setTribuC') {
+          setInfoTr()
+        }
+      })
+    })
+
+    setInfoTr()
+
     return {
       session,
       mapmc,
       ids,
       lstAvc,
+      infoTr,
       p
     }
   }

@@ -924,4 +924,9 @@ export default {
   // PanelPeople
   PPchats: 'Chats',
   PPgroupes: 'Participations aux groupes',
+  PPsp: 'Sponsor de la tribu "{0}"',
+  PPco: 'Compte de la tribu "{0}"',
+  PPcht: 'Changer de tribu',
+  PPchsp: 'Changer le statut de "sponsor"',
+  PPcompta: 'Voir l\'utilisation des volumes',
 }
