@@ -263,6 +263,12 @@ export class OnchangeCompta extends OperationWS {
       const avStore = stores.avatar
       const grStore = stores.groupe
       this.compta = await compile(row)
+      /* Dans compta, nctk a peut-être été recrypté */
+      if (this.compta.nctk) {
+        const args = { token: session.authToken, nctk: this.compta.nctk }
+        this.tr(await post(this, 'MajNctkCompta', args))
+        delete this.compta.nctk
+      }
       this.avCompta = avStore.compta  
       if (this.compta.v <= this.avCompta.v) return
 

@@ -590,6 +590,79 @@ export class SetAttributTribu2 extends OperationUI {
   }
 }
 
+/* Changer un compte de tribu *********************************
+args.token: éléments d'authentification du compte.
+args.id : id du compte qui change de tribu
+args.trIdav : id de la tribu quittée
+args.trIdap : id de la tribu intégrée
+args.hrnd : clé de l'entrée du compte dans mbtr de sa tribu2
+args.mbtr : entrée mbtr dans sa nouvelle tribu
+Sur Compta:
+args.nctk : `[nom, clé]` de la tribu crypté par la clé CV du compte.
+args.nctkc : `[nom, clé]` de la tribu crypté par la clé K **du Comptable**: 
+args.napt: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
+Retour:
+*/
+export class ChangerTribu extends OperationUI {
+  constructor () { super($t('OPchtr')) }
+
+  async run (na, nvTrid) { // na du compte, 
+    try {
+      const session = stores.session
+      const avStore = stores.avatar
+      const naTrap = getNg(nvTrid)
+      const tribu2 = session.tribuCId ? avStore.tribu2C : avStore.tribu2
+
+      /*
+      - `mbtr` : map des comptes de la tribu:
+      - _clé_ : id pseudo aléatoire, hash de la clé `rnd` du compte.
+        Dans l'objet c'est l'id du compte
+      - _valeur_ :
+        - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
+        - `sp` : si `true` / présent, c'est un sponsor.
+        - `q1 q2` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
+        - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
+        - 'gco gsp' : gravités des notifco et notifsp (true / false).
+        - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
+        - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
+        - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
+      */
+      const m = tribu2.mbtr[na.id]
+      const napt = await crypter(naTrap.rnd, new Uint8Array(encode([na.nom, na.rnd])))
+      const mnv = { 
+        na: napt,
+        sp: m.sp,
+        q1: m.q1,
+        q2: m.q2,
+        gco: m.gco,
+        gsp: m.gsp,
+        cv: m.cv
+      }
+      if (m.blocage) mnv.blocage = await crypter(naTrap.rnd, m.blocage.encode())
+      if (m.notifco) mnv.notifco = await crypter(naTrap.rnd, new Uint8Array(encode(m.notifco)))
+      if (m.notifsp) mnv.notifsp = await crypter(naTrap.rnd, new Uint8Array(encode(m.notifsp)))
+      const mbtr = new Uint8Array(encode(mnv))
+
+      const trbuf = new Uint8Array(encode([naTrap.nom, naTrap.rnd]))
+      const nctk = await crypter(na.rnd, trbuf)
+      const nctkc = await crypter(session.clek, trbuf)
+
+      const args = { token: session.authToken, 
+        id: na.id,
+        trIdav: tribu2.id,
+        trIdap: nvTrid,
+        hrnd: hash(na.rnd), 
+        mbtr, nctk, nctkc, napt
+      }
+      const ret = this.tr(await post(this, 'ChangerTribu', args))
+      this.finOK()
+      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* Set du dhvu d'une compta *********************************
 args.token: éléments d'authentification du compte.
 args.dhvu : dhvu cryptée par la clé K

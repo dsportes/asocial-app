@@ -506,6 +506,13 @@ export class ConnexionCompte extends OperationUI {
       const [avRowsModifies, avToSuppr] = await this.tousAvatars()
       // this.versions : map. Pour chaque avatar / groupe requis, la version de sa sous-coll détenue en serveur
 
+      /* Dans compta, nctk a peut-être été recrypté */
+      if (session.accesNet && this.compta.nctk) {
+        const args = { token: session.authToken, nctk: this.compta.nctk }
+        this.tr(await post(this, 'MajNctkCompta', args))
+        delete this.compta.nctk
+      }
+
       if (session.accesIdb) {
         this.buf.putIDB(this.rowCompta)
         this.buf.putIDB(this.rowTribu)

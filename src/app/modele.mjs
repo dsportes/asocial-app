@@ -897,18 +897,6 @@ export class Compta extends GenDoc {
 
     this.vsh = row.vsh || 0
 
-    const [nomt, rndt] = decode(await decrypter(session.clek, row.nctk))
-    this.nct = new NomTribu(nomt, rndt)
-    this.idt = this.nct.id
-    setNg(this.nct)
-    const [nomp, rndp] = decode(await decrypter(rndt, row.napt))
-    this.nap = new NomAvatar(nomp, rndp)
-    setNg(this.id, this.nap)
-
-    this.hps1 = row.hps1
-    this.shay = row.shay
-    this.dhvu = row.dhvu ? parseInt(await decrypterStr(session.clek, row.dhvu)) : 0
-
     /* `mavk` {id} `[nom, cle]` */
     const m = decode(await decrypter(session.clek, row.mavk))
     this.mav = new Map()
@@ -919,6 +907,32 @@ export class Compta extends GenDoc {
       setNg(na) 
       if (na.estAvatarP) this.naprim = na
     }
+    /* On connait MAINTENANT le na du compte (donc son rnd) */
+    
+    let b
+    let ck = true
+    try {
+      b = await decrypter(session.clek, row.nctk)
+    } catch (e) {
+      // Le Comptable a crypter la tribu par le rnd du compte (il ne connait pas K)
+      b = await decrypter(this.naprim.rnd, row.nctk)
+      ck = false
+    }
+    const [nomt, rndt] = decode(b)
+    if (!ck) {
+      this.nctk = await crypter(session.clek, new Uint8Array(encode([nomt, rndt])))
+    }
+    this.nct = new NomTribu(nomt, rndt)
+    this.idt = this.nct.id
+    setNg(this.nct)
+
+    const [nomp, rndp] = decode(await decrypter(rndt, row.napt))
+    this.nap = new NomAvatar(nomp, rndp)
+    setNg(this.id, this.nap)
+
+    this.hps1 = row.hps1
+    this.shay = row.shay
+    this.dhvu = row.dhvu ? parseInt(await decrypterStr(session.clek, row.dhvu)) : 0
     
     this.compteurs = new Compteurs(row.compteurs)
     /* TEST !!!!!!!!!!!!!

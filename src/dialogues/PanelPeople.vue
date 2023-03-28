@@ -114,7 +114,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import { edvol } from '../app/util.mjs'
 import { Chat, Motscles } from '../app/modele.mjs'
-import { GetCompteursCompta, SetAttributTribu2 } from '../app/operations.mjs'
+import { GetCompteursCompta, SetAttributTribu2, ChangerTribu } from '../app/operations.mjs'
 import { Compteurs, UNITEV1, UNITEV2 } from '../app/api.mjs'
 
 export default {
@@ -153,7 +153,10 @@ export default {
     },
     selTr (x) { if (x.ok) this.tribus.sel = x },
     async changerTr () {
-      console.log()
+      const trc = this.tribus.sel.id === this.session.tribuId
+      const nvTr = trc ? this.avStore.tribu : this.avStore.getTribu(this.tribus.sel.id)
+      await new ChangerTribu().run(this.p.na, nvTr.id)
+      this.session.setTribuCourante(nvTr)
     }
   },
 
@@ -242,6 +245,7 @@ export default {
 
     return {
       session,
+      avStore,
       mapmc,
       ids,
       lstAvc,

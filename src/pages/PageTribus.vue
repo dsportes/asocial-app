@@ -166,10 +166,10 @@ export default {
     function f0 (a,b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
     function f1 (a,b) { return a.a1 > b.a1 ? -1 : (a.a1 < b.a1 ? 1 : f0(a,b)) }
     function f2 (a,b) { return a.a2 > b.a2 ? -1 : (a.a2 < b.a2 ? 1 : f0(a,b)) }
-    function f3 (a,b) { return a.r1 > b.r1 ? -1 : (a.r1 < b.r1 ? 1 : f0(a,b)) }
-    function f4 (a,b) { return a.r2 > b.r2 ? -1 : (a.r2 < b.r2 ? 1 : f0(a,b)) }
-    function f5 (a,b) { return a.a1 + a.r1 > b.a1 + b.r1 ? -1 : (a.a1 + a.r1 < b.a1 + b.r1 ? 1 : f0(a,b)) }
-    function f6 (a,b) { return a.a2 + a.r2 > b.a2 + b.r2 ? -1 : (a.a2 + a.r2 < b.a2 + b.r2 ? 1 : f0(a,b)) }
+    function f3 (a,b) { return a.q1 - a.a1 > b.q1 - b.a1 ? -1 : (a.q1 - a.a1 < b.q1 - b.a1 ? 1 : f0(a,b)) }
+    function f4 (a,b) { return a.q2 - a.a2 > b.q2 - b.a2 ? -1 : (a.q2 - a.a2 < b.q2 - b.a2 ? 1 : f0(a,b)) }
+    function f5 (a,b) { return a.q1 > b.q1 ? -1 : (a.q1 < b.q1 ? 1 : f0(a,b)) }
+    function f6 (a,b) { return a.q2 > b.q2 ? -1 : (a.q2 < b.q2 ? 1 : f0(a,b)) }
 
     const fnt = [f0, f1, f2, f3, f4, f5, f6]
     function trier () {

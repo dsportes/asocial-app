@@ -36,10 +36,10 @@ export const useAvatarStore = defineStore('avatar', {
     /* retourne la tribu de l'avatar principal du compte actuellement connecté */
     tribu: (state) => { return state.tribuP },
 
-    /* retourne la tribu de l'avatar principal du compte actuellement connecté */
+    /* retourne la tribu2 de l'avatar principal du compte actuellement connecté */
     tribu2: (state) => { return state.tribu2P },
 
-    /* retourne la tribu de l'avatar principal du compte actuellement connecté */
+    /* retourne la tribu2 "courante" */
     tribu2C: (state) => { return state.tribu2CP },
 
     // Map dont la clé est l'id de l'avatar et la valeur le document avatar
