@@ -933,4 +933,12 @@ export default {
   PPcompta: 'Voir l\'utilisation des volumes',
   PPkosp: 'Retirer la qualité de sponsor',
   PPoksp: 'Conférer la qualité de sponsor',
+  PPchgtr: 'Départ de {0} de la tribu "{1}"',
+  PPqv1: 'Quota de volume V1: {0} - ({1}) - Occupé à {2}%',
+  PPqv2: 'Quota de volume V2: {0} - ({1}) - Occupé à {2}%',
+  PPc1: 'OK',
+  PPc2: 'Nom',
+  PPc3: 'Q. disp. V1',
+  PPc4: 'Q. disp. V2',
+  PPnt: 'Début du nom de la future tribu',
 }

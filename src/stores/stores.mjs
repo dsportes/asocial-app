@@ -14,14 +14,10 @@ import { useFiltreStore } from './filtre-store.js'
 import { useAvsecretStore } from './avsecret-store.js'
 import { useTflocauxStore } from './tflocaux-store.js'
 
-import { useListeContactsStore } from './liste-contacts.js'
-import { useListeAvatarsStore } from './liste-avatars.js'
-import { useListeTribusStore } from './liste-tribus.js'
-
 // Hors de cette liste : config, session
 const listeStores = ['tribu', 'avatar', 'groupe', 'couple', 'people', 
-'secret', 'syncitem', 'fetat', 'avsecret', 'tflocaux', 'filtre',
-'listeContacts', 'listeAvatars', 'listeTribus']
+'secret', 'syncitem', 'fetat', 'avsecret', 'tflocaux', 'filtre'
+]
 
 class Stores {
   get config() { return this.configStore || (this.configStore = useConfigStore()) }
@@ -39,11 +35,6 @@ class Stores {
   get avsecret() { return this.avsecretStore || (this.avsecretStore = useAvsecretStore()) }
   get tflocaux() { return this.tflocauxStore || (this.tflocauxStore = useTflocauxStore()) }
   get filtre() { return this.filtreStore || (this.filtreStore = useFiltreStore()) }
-
-  get listeContacts() { return this.listeContactsStore || (this.listeContactsStore = useListeContactsStore()) }
-  get listeAvatars() { return this.listeAvatarsStore || (this.listeAvatarsStore = useListeAvatarsStore()) }
-  get listeTribus() { return this.listeTribusStore || (this.listeTribusStore = useListeTribusStore()) }
-
 
   reset() {
     for(const id of listeStores) {

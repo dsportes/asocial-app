@@ -558,8 +558,8 @@ export class Tribu extends GenDoc {
     if (session.estComptable) {
       // Le comptable peut décoder n'importe quelle tribu
       const [nom, rnd] = decode(await decrypter(session.clek, row.nctkc))
-      const na = new NomTribu(nom, rnd)
-      setNg(na)
+      this.naC = new NomTribu(nom, rnd)
+      setNg(this.naC)
       this.info = row.infok ? await decrypterStr(session.clek, row.infok) : ''
     }
     this.nctkc = row.nctkc

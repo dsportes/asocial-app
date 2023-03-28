@@ -39,6 +39,45 @@
     </q-card>
   </q-page-container>
 
+  <!-- Changement de tribu -->
+  <q-dialog v-model="chgTr" persistent>
+    <q-card class="moyennelargeur">
+      <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [p.na.nom, infoTr.tribu.na.nom])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqv1', [cpt.q1, edv1(cpt.q1), pc1])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqv2', [cpt.q2, edv2(cpt.q2), pc2])}}</div>
+
+      <q-separator class="q-mt-sm"/>
+
+      <q-card-section>
+        <q-input filled v-model="tribus.f" :label="$t('PPnt')" />
+        <div class="titre-md text-italic row items-center">
+          <div class="col-2 text-center">{{$t('PPc1')}}</div>
+          <div class="col-4">{{$t('PPc2')}}</div>
+          <div class="col-3 text-center">{{$t('PPc3')}}</div>
+          <div class="col-3 text-center" >{{$t('PPc4')}}</div>
+        </div>
+      </q-card-section>
+
+      <q-card-section style="height: 30vh" class="scroll bord1">
+        <div v-for="x in tribus.flst" :key="x.id" 
+          :class="'row items-center cursor-pointer' + (x === tribus.sel ? ' bord2' : '')"
+          @click="selTr(x)">
+          <q-icon class="col-2 text-center" :name="x.ok ? 'check' : 'close'" size="md" :color="x.ok ? 'primary' : 'negative'" />
+          <div class="col-4">{{x.nom}}</div>
+          <div class="col-3 text-center">{{x.r1}}</div>
+          <div class="col-3 text-center">{{x.r2}}</div>
+        </div>
+      </q-card-section>
+
+      <q-separator />      
+      <q-card-actions align="center">
+        <q-btn dense color="primary" :label="$t('renoncer')" @click="chgTr=false"/>
+        <q-btn dense color="warning" :label="$t('valider')" :disable="!tribus.sel"
+          v-close-popup @click="changerTr()"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
   <!-- Changement de statut sponsor -->
   <q-dialog v-model="chgSp" persistent>
     <q-card class="bg-secondary text-white petitelargeur q-pa-sm">
@@ -46,8 +85,8 @@
         <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [infoTr.tribu.na.nom])}}</div>
       <q-card-actions align="center">
         <q-btn dense color="primary" :label="$t('renoncer')" @click="chgSp=false"/>
-        <q-btn v-if="infoTr.mb.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
-        <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
+        <q-btn v-if="infoTr.mb.sp" dense color="warning" :label="$t('PPkosp')" v-close-popup  @click="changerSp(false)"/>
+        <q-btn v-else dense color="warning" :label="$t('PPoksp')" v-close-popup  @click="changerSp(true)"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -67,16 +106,16 @@
 </template>
 <script>
 
-import { toRef, ref, onMounted, reactive } from 'vue'
+import { toRef, ref, onMounted, reactive, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuPeople from '../components/ApercuPeople.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PanelCompta from '../components/PanelCompta.vue'
-// import { afficherDiag } from '../app/util.mjs'
+import { edvol } from '../app/util.mjs'
 import { Chat, Motscles } from '../app/modele.mjs'
 import { GetCompteursCompta, SetAttributTribu2 } from '../app/operations.mjs'
-import { Compteurs } from '../app/api.mjs'
+import { Compteurs, UNITEV1, UNITEV2 } from '../app/api.mjs'
 
 export default {
   name: 'PanelPeople',
@@ -85,6 +124,8 @@ export default {
   props: { id: Number, close: Function },
 
   computed: {
+    pc1 () { return this.cpt.q1 ? Math.round((this.cpt.v1 * 100) / (this.cpt.q1 * UNITEV1)) : 0 },
+    pc2 () { return this.cpt.q2 ? Math.round((this.cpt.v2 * 100) / (this.cpt.q2 * UNITEV2)) : 0 }
   },
 
   watch: {
@@ -93,24 +134,26 @@ export default {
   data () {
     return {
       chgSp: false,
-      cptdial: false,
-      cpt: null
+      chgTr: false,
+      cptdial: false
     }
   },
 
   methods: {
+    edv1 (v) { return edvol(v * UNITEV1) },
+    edv2 (v) { return edvol(v * UNITEV2) },
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     fermer () { if (this.close) this.close() },
-    chgTribu () {},
-    chgSponsor () { this.chgSp = true},
-    async voirCompta () {
-      const res = await new GetCompteursCompta().run(this.id)
-      this.cpt = new Compteurs(res)
-      this.cptdial = true
-    },
+    chgTribu () { this.chgTr = true },
+    chgSponsor () { this.chgSp = true },
+    voirCompta () { this.cptdial = true },
     async changerSp(estSp) { // (id, na, attr, val, val2, exq)
       await new SetAttributTribu2().run(this.trId, this.p.na, 'sp', estSp)
       this.chgSp = false
+    },
+    selTr (x) { if (x.ok) this.tribus.sel = x },
+    async changerTr () {
+      console.log()
     }
   },
 
@@ -123,12 +166,55 @@ export default {
 
     const lstAvc = session.compta.lstAvatarNas
     const ids = reactive({})
+    const tribus = reactive({ f:'', lst: [], flst: [], sel: null })
     const mapmc = ref(Motscles.mapMC(true, 0))
     const p = ref(pStore.getPeople(id.value))
+    const cpt = ref()
 
     const trId = ref(session.tribuCId || session.tribuId)
 
+    async function loadCpt () {
+      const res = await new GetCompteursCompta().run(id.value)
+      cpt.value = new Compteurs(res)
+    }
+
+    function getTribus () {
+      const y = []
+      const q1 = cpt.value.q1
+      const q2 = cpt.value.q2
+      const l = avStore.getTribus
+      l.forEach(x => { 
+        if (x.id !== trId.value) {
+          const t = x.cpt
+          const ok = ((t.q1 - t.a1) >= q1) &&  ((t.q2 - t.a2) >= q2)
+          y.push({ nom: x.naC.nom, id: x.id, q1: t.q1, q2: t.q2, r1: t.q1 - t.a1, r2: t.q2 - t.a1, ok   })
+        }
+      })
+      tribus.lst = y
+    }
+
+    function filtreTribus () {
+      const t = []
+      const f = tribus.f
+      tribus.lst.forEach(x => { if (x.nom.startsWith(f)) t.push(x) })
+      tribus.flst = t
+      tribus.sel = null
+      if (tribus.flst.length === 1) {
+        const x = tribus.flst[0]
+        if (x.ok) tribus.sel = x
+      }
+    }
+
+    // Filtre du nom des tribus
+    watch(() => tribus.f, (ap, av) => {
+        filtreTribus()
+      }
+    )
+
     onMounted(async () => {
+      await loadCpt()
+      getTribus()
+      filtreTribus()
       for(const na of lstAvc) {
         ids[na.id] = await Chat.getIds(na, p.value.na)
       }
@@ -142,11 +228,12 @@ export default {
       infoTr.mb = infoTr.tribu2.mb(id.value)
     }
 
-    // setTribuCourante
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'setTribuC' || name === 'setTribu2' || name === 'setTribu') {
           setInfoTr()
+          getTribus()
+          filtreTribus()
         }
       })
     })
@@ -160,6 +247,8 @@ export default {
       lstAvc,
       infoTr,
       trId,
+      cpt,
+      tribus,
       p
     }
   }
@@ -167,18 +256,10 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bord
-  border-top: 1px solid $grey-5
-.bord2p
-  border-radius: 3px
-  border: 2px solid $warning
-  font-weight: bold
-  padding: 1px 3px
-.ptim
-  font-variant: small-caps
-.menu
-  min-width: 15rem
-  padding: 3px
-  border-radius: 3px
+.bord1
   border: 1px solid $grey-5
+.bord2
+  background: $yellow-3
+  color: black
+  font-weight: bold
 </style>
