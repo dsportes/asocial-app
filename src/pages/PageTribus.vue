@@ -132,17 +132,18 @@ export default {
 
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setTribuC') {
+        if (name === 'setTribu' || name === 'seTribu2' || name === 'delTribuC') {
           tribus.value = avStore.getTribus
           filtrer(); trier()
         }
       })
     })
-    avStore.$onAction(({ name, args, after }) => {
+
+    session.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'delTribuC') {
+        if (name === 'setTribuCId') {
           tribus.value = avStore.getTribus
-          filtrer(); trier();
+          filtrer(); trier()
         }
       })
     })

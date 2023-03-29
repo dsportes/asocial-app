@@ -517,8 +517,8 @@ export async function commitRows (opBuf, setCompteClek, setVersions) {
     const lidbs = []
     if (opBuf.lsuppr && opBuf.lsuppr.length) {
       for (const row of opBuf.lsuppr) {
-        const idk = u8ToB64(await crypter(clek, '' + obj.id, 1), true)
-        const idsk = obj.ids ? u8ToB64(await crypter(clek, '' + obj.ids, 1), true) : null
+        const idk = u8ToB64(await crypter(clek, '' + row.id, 1), true)
+        const idsk = row.ids ? u8ToB64(await crypter(clek, '' + row.ids, 1), true) : null
         lidbs.push({ table: row._nom, idk, idsk })
       }
     }

@@ -226,14 +226,24 @@ export default {
     const infoTr = reactive({ tribu: null, tribu2: null, mb: null })
     function setInfoTr() {
       const tc = !session.tribuCId || session.tribuCId === session.tribuId // true si c'est la tribu du compte
-      infoTr.tribu = tc ? avStore.tribu : avStore.getTribu(trId.value) // tribu
-      infoTr.tribu2 = tc ? avStore.tribu2 : avStore.tribu2C
-      infoTr.mb = infoTr.tribu2.mb(id.value)
+      infoTr.tribu = avStore.tribuC
+      infoTr.tribu2 = avStore.tribu2C
+      infoTr.mb = avStore.tribu2C.mb(id.value)
     }
 
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setTribuC' || name === 'setTribu2' || name === 'setTribu') {
+        if (name === 'setTribu2' || name === 'setTribu' || name === 'delTribuC') {
+          setInfoTr()
+          getTribus()
+          filtreTribus()
+        }
+      })
+    })
+
+    session.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setTribuCId') {
           setInfoTr()
           getTribus()
           filtreTribus()

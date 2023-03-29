@@ -548,9 +548,29 @@ export class SetAttributTribu extends OperationUI {
     try {
       const session = stores.session
       const args = { token: session.authToken, id, attr, val }
-      const ret = this.tr(await post(this, 'SetAttributTribu', args))
+      this.tr(await post(this, 'SetAttributTribu', args))
       this.finOK()
-      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Set des quotas d'une tribu *********************************
+args.token: éléments d'authentification du compte.
+args.id : id de la tribu
+args.q1 args.q2 : quotas
+Retour:
+*/
+export class SetQuotasTribu extends OperationUI {
+  constructor () { super($t('OPnvtr')) }
+
+  async run (id, q1, q2) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, q1, q2 }
+      this.tr(await post(this, 'SetQuotasTribu', args))
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

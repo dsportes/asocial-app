@@ -16,6 +16,8 @@
         :label="$t('PTecr')" color="primary" icon="edit" @click="editer"/>
     </div>
 
+    <div class="q-ml-md titre-md">{{$t('NTnbcsp', [t.cpt.nbc, t.cpt.nbsp])}}</div>
+
     <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
 
@@ -90,7 +92,7 @@ import ApercuBlocage from '../components/ApercuBlocage.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { SetAttributTribu } from '../app/operations.mjs'
+import { SetAttributTribu, SetQuotasTribu } from '../app/operations.mjs'
 import { crypter } from '../app/webcrypto.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
@@ -111,11 +113,11 @@ export default {
     q2 () { return this.ed2(this.t.cpt.q2 || 0)},
     pc1 () {
       const x = this.t.cpt
-      return !x.a1 || !x.q1 ? 0 : (Math.round((x.a1 * 100) / (x.q1 * UNITEV1)))
+      return !x.a1 || !x.q1 ? 0 : (Math.round((x.a1 * 100) / x.q1))
     },
     pc2 () {
       const x = this.t.cpt
-      return !x.a2 || !x.q2 ? 0 : (Math.round((x.a2 * 100) / (x.q2 * UNITEV2)))
+      return !x.a2 || !x.q2 ? 0 : (Math.round((x.a2 * 100) / x.q2))
     }
   },
 
@@ -148,8 +150,9 @@ export default {
       }
       this.edq = true
     },
-    validerq () {
-      console.log(JSON.stringify(this.quotas))
+    async validerq () {
+      await new SetQuotasTribu().run(this.id, this.quotas.q1, this.quotas.q2)
+      this.edq = false
     }
   },
 
@@ -158,15 +161,15 @@ export default {
     const session = stores.session
     const id = toRef(props, 'id')
 
-    function getT () {
-      const t = id.value === session.tribuId ? session.tribu : avStore.getTribu(id.value)
-      return t
+    function getT () { 
+      return avStore.getTribu(id.value)
     }
 
     const t = ref(getT())
+
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if ((name === 'setTribuC' || name === 'setTribu') && args[0].id === id.value) {
+        if ((name === 'setTribu' || name === 'setTribu2') && args[0].id === id.value) {
           t.value = getT()
         }
       })

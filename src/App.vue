@@ -174,8 +174,7 @@
         :color="aHome ? 'warning' : 'grey'" dense @click="gotoAccueilLogin()"/>
       <q-btn v-if="ui.pageback" flat icon="arrow_back" size="md" 
         dense @click="gotoBack()"/>
-      <q-toolbar-title class="titre-lg text-center">
-        <span>{{$t('P' + ui.page)}}</span>
+      <q-toolbar-title class="titre-lg text-center"><span>{{titrePage}}</span>
       </q-toolbar-title>
 
       <q-btn v-if="ui.etroite && ui.filtre" class='q-mr-sm text-warning'
@@ -345,6 +344,7 @@ import { ref } from 'vue'
 import stores from './stores/stores.mjs'
 
 import { $t, hms } from './app/util.mjs'
+import { getNg } from './app/modele.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -401,7 +401,12 @@ export default {
     naMaTribu () { return this.session.compte.nct },
     pc () { return this.session.compta.pc },
     pccl () {return this.pc < 80 ? 'bg-transparent' : (this.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
-  },
+    titrePage () {
+      const p = this.ui.page
+      const arg = p === 'tribu' ? getNg(this.session.tribuCId).nom : ''
+      return this.$t('P' + p, [arg])
+    }
+},
 
   // Transmet au store ui **le franchissement du seuil** etroit / large
   watch: {

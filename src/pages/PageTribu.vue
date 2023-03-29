@@ -207,24 +207,24 @@ export default {
     
     function getlc () {
       const tc = !session.tribuCId || session.tribuCId === session.tribuId // true si c'est la tribu du compte
-      t.value = tc ? avStore.tribu : avStore.getTribu(session.tribuCId) // tribu
-      t2.value = tc ? avStore.tribu2 : avStore.tribu2C
-      lc.value = t2.value ? t2.value.listeComptes() : []
+      t.value = avStore.tribuC // tribu
+      t2.value = avStore.tribu2C
+      lc.value = avStore.tribu2C.listeComptes()
     }
 
     getlc()
 
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setTribu') {
+        if (name === 'setTribu' || name === 'setTribu2' || name === 'delTribuC') {
           getlc(); filtrer(); trier()
         }
       })
     })
 
-    avStore.$onAction(({ name, args, after }) => {
+    session.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setTribuC' || name === 'setTribu2') {
+        if (name === 'setTribuCId') {
           getlc(); filtrer(); trier()
         }
       })
