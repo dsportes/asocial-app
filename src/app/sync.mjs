@@ -203,7 +203,7 @@ export class OperationWS extends Operation {
 
     // Maj des stores
     if (this.compta) avStore.setCompta(this.compta)
-    if (this.tribu) avStore.setTribuC(this.tribu)
+    if (this.tribu) avStore.setTribu(this.tribu)
     if (this.tribu2) avStore.setTribu2(this.tribu2)
 
     this.avSuppr.forEach(id => { avStore.del(id) })

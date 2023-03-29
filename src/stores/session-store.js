@@ -36,6 +36,7 @@ export const useSessionStore = defineStore('session', {
     tribuId: 0, // id de la tribu actuelle du compte
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
+    tribuId: 0, // id de la tribu actuelle du compte
     tribuCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
 
     // blocage et notification
@@ -97,14 +98,11 @@ export const useSessionStore = defineStore('session', {
       localStorage.setItem(this.lsk, this.nombase)
     },
 
-    setAvatarCourant (id) {
-      this.avatarId = id
-    },
+    setAvatarCourant (id) { this.avatarId = id},
 
-    setTribuCourante (t2) {
-      this.tribuCId = t2.id
-      stores.avatar.setTribuCourante(t2)
-    },
+    setTribuId(id) { this.tribuId = id },
+
+    setTribuCId (id) { this.tribuCId = id },
 
     chgps (phrase) {
       /*

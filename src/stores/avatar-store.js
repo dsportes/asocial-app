@@ -20,7 +20,6 @@ export const useAvatarStore = defineStore('avatar', {
     motscles: null, // mots clés du compte
     avatarP: null, // avatar principal du compte courant
     comptaP: null, // compta actuelle du compte courant
-    tribuP: null, // tribu actuelle du compte courant
     tribu2P: null, // tribu2 actuelle du compte courant
     tribu2CP: null, // tribu2 "courante" pour le comptable
     maptr: new Map() // Map des tribus, uniquement pour le Comptable
@@ -34,10 +33,13 @@ export const useAvatarStore = defineStore('avatar', {
     compta: (state) => { return state.comptaP },
 
     /* retourne la tribu de l'avatar principal du compte actuellement connecté */
-    tribu: (state) => { return state.tribuP },
+    tribu: (state) => { return state.maptr.get(stores.session.tribuId) },
 
     /* retourne la tribu2 de l'avatar principal du compte actuellement connecté */
     tribu2: (state) => { return state.tribu2P },
+
+    /* retourne la tribu "courante" */
+    tribuC: (state) => { return state.maptr.get(stores.session.tribuCId) },
 
     /* retourne la tribu2 "courante" */
     tribu2C: (state) => { return state.tribu2CP },
@@ -54,7 +56,7 @@ export const useAvatarStore = defineStore('avatar', {
     */
     getTribus: (state) => {
       const t = Array.from(state.maptr.values())
-      const idp = state.tribuP.id
+      const idp = stores.session.tribuId
       t.sort((a,b) => { return (a.id === idp ? -1 : 
         (b.id === idp ? 1: (a.na.nom < b.na.nom ? -1 : (a.na.nom === b.na.nom ? 0 : 1))) )})
       return t
@@ -144,7 +146,10 @@ export const useAvatarStore = defineStore('avatar', {
 
   actions: {
     setCompte (avatar, compta, tribu, tribu2) { // avatar principal du compte connecté
+      const session = stores.session
       this.avatarP = avatar
+      session.setTribuId(tribu.id)
+      session.setTribuCId(tribu.id)
       this.setTribu(tribu)
       this.setCompta(compta)
       this.setAvatar(avatar)
@@ -162,17 +167,31 @@ export const useAvatarStore = defineStore('avatar', {
       if (bl) stores.session.setBlocage()
     },
 
-    setTribu (tribu) { // set ou remplacement de la tribu
-      this.tribuP = tribu
-      if (this.tribu2P) stores.session.setBlocage()
+    /* set d'une tribu courante (pour le Comptable)
+    ou par convention (sans paramètre) rend "courante" la tribu de la session
+    */
+    setTribuC (tribu, tribu2) { 
+      const session = stores.session
+      if (!tribu) {
+        // Par convention, rend "courante" la tribu de la session
+        this.tribu2CP = this.tribu2P
+        session.setTribuCId(session.tribuId)
+      } else {
+        session.setTribuCId(tribu.id)
+        this.setTribu(tribu)
+        this.setTribu2(tribu2)
+      }
     },
 
-    setTribu2 (tribu2) { // set ou remplacement de la tribu
+    setTribu (tribu) { // set / remplacement de la tribu SEULE de la session
       const session = stores.session
-      if (session.tribuCId === tribu2.id) {
-        // tribu "courante" affichée pour le comptable
-        this.tribu2CP = tribu2
-      }
+      this.maptr.set(tribu.id, tribu)
+      if (session.tribuId === tribu.id && this.tribu2P && (this.tribu2P.id === tribu.id)) stores.session.setBlocage()
+    },
+
+    setTribu2 (tribu2) { // set ou remplacement de la tribu2 SEULE
+      const session = stores.session
+      this.tribu2CP = tribu2
       if (session.tribuId === tribu2.id) {
         // tribu (actuelle) du compte : gestion des people
         const peStore = stores.people
@@ -189,17 +208,8 @@ export const useAvatarStore = defineStore('avatar', {
             peStore.setPeopleTribu(e.na, e.cv, e.sp ? 2 : 1)
           }
         }
-        session.setBlocage()
       }
-    },
-
-    setTribuCourante (t2) {
-      this.tribu2CP = t2
-    },
-
-    setTribuC (tribu) { // set d'une tribu quelconque pour le Comptable
-      if (tribu.id === this.tribuP.id) this.setTribu(tribu)
-      this.maptr.set(tribu.id, tribu)
+      if (session.tribuId === tribu2.id && (this.tribu.id === tribu2.id)) stores.session.setBlocage()
     },
 
     delTribuC (id) { // delete d'une tribu quelconque pour le Comptable

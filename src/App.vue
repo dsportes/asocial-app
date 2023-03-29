@@ -458,7 +458,7 @@ export default {
     closeOutils () { this.outilsTests = false },
 
     maTribu () { 
-      this.session.setTribuCourante(0)
+      this.avStore.setTribuC()
       this.ui.setPage('tribu')
     },
 

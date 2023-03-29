@@ -199,34 +199,33 @@ export default {
     const fStore = stores.filtre
     const ui = stores.ui
 
-    const tc = !session.tribuCId || session.tribuCId === session.tribuId // true si c'est la tribu du compte
-    const t = ref(tc ? avStore.tribu : avStore.getTribu(session.tribuCId)) // tribu
+    const t = ref() // tribu
+    const t2 = ref() // tribu2
     const lc = ref() // liste de comptes
     const flc = ref() // liste des comptes filtrée et triée
     const msg = ref('') // message fugitif après réaffichage
     
     function getlc () {
-      const x = tc ? avStore.tribu2 : avStore.tribu2C
-      return x ? x.listeComptes() : []
+      const tc = !session.tribuCId || session.tribuCId === session.tribuId // true si c'est la tribu du compte
+      t.value = tc ? avStore.tribu : avStore.getTribu(session.tribuCId) // tribu
+      t2.value = tc ? avStore.tribu2 : avStore.tribu2C
+      lc.value = t2.value ? t2.value.listeComptes() : []
     }
 
-    lc.value = getlc()
+    getlc()
 
-    if (tc) {
-      avStore.$onAction(({ name, args, after }) => {
-        after((result) => {
-          if (name === 'setTribu') {
-            t.value = avStore.tribu
-          }
-        })
+    avStore.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setTribu') {
+          getlc(); filtrer(); trier()
+        }
       })
-    }
+    })
+
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'setTribuC' || name === 'setTribu2') {
-          t.value = avStore.getTribu(session.tribuCId)
-          lc.value = getlc()
-          filtrer(); trier()
+          getlc(); filtrer(); trier()
         }
       })
     })
@@ -296,7 +295,7 @@ export default {
       avStore,
       pStore,
       ui,
-      tc, t, lc, flc,
+      t, lc, flc,
       msg
     }
   }

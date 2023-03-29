@@ -155,8 +155,8 @@ export default {
     async changerTr () {
       const trc = this.tribus.sel.id === this.session.tribuId
       const nvTr = trc ? this.avStore.tribu : this.avStore.getTribu(this.tribus.sel.id)
-      await new ChangerTribu().run(this.p.na, nvTr.id)
-      this.session.setTribuCourante(nvTr)
+      const [t, t2] = await new ChangerTribu().run(this.p.na, nvTr.id)
+      this.avStore.setTribuC(t, t2)
     }
   },
 
@@ -266,4 +266,6 @@ export default {
   background: $yellow-3
   color: black
   font-weight: bold
+.q-card__section
+  padding: 2px !important
 </style>

@@ -585,7 +585,7 @@ export class ConnexionCompte extends OperationUI {
         const ret = this.tr(await post(this, 'ChargerTribus', args))
         if (ret.rowTribus && ret.rowTribus.length) for(const row of ret.rowTribus) {
           const tribu = await compile(row)
-          avStore.setTribuC(tribu)
+          avStore.setTribu(tribu)
         }
       }
 

@@ -634,9 +634,9 @@ export class ChangerTribu extends OperationUI {
         sp: m.sp,
         q1: m.q1,
         q2: m.q2,
-        gco: m.gco,
-        gsp: m.gsp,
-        cv: m.cv
+        gco: m.gco || 0,
+        gsp: m.gsp || 0,
+        cv: m.cv || null
       }
       if (m.blocage) mnv.blocage = await crypter(naTrap.rnd, m.blocage.encode())
       if (m.notifco) mnv.notifco = await crypter(naTrap.rnd, new Uint8Array(encode(m.notifco)))
@@ -655,8 +655,9 @@ export class ChangerTribu extends OperationUI {
         mbtr, nctk, nctkc, napt
       }
       const ret = this.tr(await post(this, 'ChangerTribu', args))
-      this.finOK()
-      return ret
+      const t = await compile(ret.rowTribu)
+      const t2 = await compile(ret.rowTribu2)
+      return this.finOK([t, t2])
     } catch (e) {
       await this.finKO(e)
     }

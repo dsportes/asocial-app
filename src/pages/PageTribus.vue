@@ -102,8 +102,8 @@ export default {
       this.closent()
     },
     async courant (id) {
-      const [ ,t2] = await new GetTribu().run(id, true)
-      this.session.setTribuCourante(t2)
+      const [t ,t2] = await new GetTribu().run(id, true)
+      this.avStore.setTribuC(t, t2)
       this.ui.setPage('tribu')
     }
   },
