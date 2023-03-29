@@ -901,13 +901,13 @@ export class CreationCompteComptable extends OperationUI {
       const args = { token: stores.session.authToken, rowTribu, rowTribu2, 
         rowCompta, rowAvatar, rowVersion: r, pcbh: phrase.pcbh, abPlus: [nt.id] }
       const ret = this.tr(await post(this, 'CreationCompteComptable', args))
-      session.setNotifGlobale({ txt: '', dh: 0, g: 0 })
       // Le compte vient d'être créé, clek est enregistrée
       const avatar = await compile(rowAvatar)
       const tribu = await compile(rowTribu)
       const tribu2 = await compile(rowTribu2)
       const compta = await compile(rowCompta)
       stores.avatar.setCompte(avatar, compta, tribu, tribu2)
+      session.setNotifGlobale({ txt: '', dh: 0, g: 0 })
 
       if (ret.credentials) session.fscredentials = ret.credentials
       if (session.fsSync) {

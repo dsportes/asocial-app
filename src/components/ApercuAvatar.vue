@@ -30,13 +30,13 @@
     </div>
 
     <!-- Dialogue d'édition de la carte de visite -->
-    <q-dialog v-model="edition">
+    <q-dialog v-model="edition" persistent>
       <carte-visite :photo-init="avatar.na.photoDef" :info-init="info" :na="na"
         :close="closeCV" @ok="cvchangee"/>
     </q-dialog>
 
     <!-- Dialogue d'édition de la phrase de contact -->
-    <q-dialog v-model="editionpc">
+    <q-dialog v-model="editionpc" persistent>
       <q-card class="q-ma-xs moyennelargeur fs-md">
         <q-toolbar class="bg-secondary text-white">
           <bouton-help page="page1"/>

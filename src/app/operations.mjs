@@ -2,11 +2,11 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { AppExc, appexc, AMJ } from './api.mjs'
-import { $t, hash } from './util.mjs'
+import { $t, hash, u8ToB64 } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { GenDoc, NomAvatar, NomTribu, Avatar, Compta, Chat, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
-import { genKeyPair, decrypter } from './webcrypto.mjs'
+import { GenDoc, NomAvatar, NomTribu, Avatar, Chat, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
+import { decrypter } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
 /* Opération générique ******************************************/
@@ -563,7 +563,7 @@ args.q1 args.q2 : quotas
 Retour:
 */
 export class SetQuotasTribu extends OperationUI {
-  constructor () { super($t('OPnvtr')) }
+  constructor () { super($t('OPqtr')) }
 
   async run (id, q1, q2) {
     try {
@@ -594,12 +594,12 @@ args.exq: lever une exception en cas dépassement des quotas de la tribu
 Retour:
 */
 export class SetAttributTribu2 extends OperationUI {
-  constructor () { super($t('OPnvtr')) }
+  constructor () { super($t('OPmajtr')) }
 
   async run (id, na, attr, val, val2, exq) {
     try {
       const session = stores.session
-      const hrnd = hash(na.rnd)
+      const hrnd = hash(u8ToB64(na.rnd))
       const args = { token: session.authToken, id, hrnd, attr, 
         val, val2: val2 || 0, exq: exq || false }
       this.tr(await post(this, 'SetAttributTribu2', args))
@@ -671,7 +671,7 @@ export class ChangerTribu extends OperationUI {
         id: na.id,
         trIdav: tribu2.id,
         trIdap: nvTrid,
-        hrnd: hash(na.rnd), 
+        hrnd: hash(u8ToB64(na.rnd)), 
         mbtr, nctk, nctkc, napt
       }
       const ret = this.tr(await post(this, 'ChangerTribu', args))

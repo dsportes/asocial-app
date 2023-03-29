@@ -392,6 +392,8 @@ export default {
   OPmajtch: 'Mise à jour du texte d\'un chat',
   OPmajmcch: 'Mise à jour des mots clés d\'un chat',
   OPnvtr: 'Nouvelle tribu',
+  OPmajtr: 'Mise à jour d\'une tribu',
+  OPqtr: 'Mise à jour des quotas d\'une tribu',
   OPchtr: 'Changer un compte de tribu',
   OPdhvu: 'Maj de la date-heure de "vu" d\'une compta',
   OPtrib: 'Obtention de la tribu',

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { hash } from '../app/util.mjs'
+import { hash, u8ToB64 } from '../app/util.mjs'
 
 /* 
 Un "people" est un avatar :
@@ -149,7 +149,7 @@ export const usePeopleStore = defineStore('people', {
       return { // args de l'opération DisparitionCompte
         idt: stores.session.tribuId,
         idc: na.id,
-        hrnd: hash(na.rnd)
+        hrnd: hash(u8ToB64(na.rnd))
       }
     },
   
