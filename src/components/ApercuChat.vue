@@ -11,7 +11,7 @@
         <div v-else class="titre-md text-italic q-mr-lg">{{$t('CHoch3', [naE.nom])}}</div>
         <div class="font-mono fs-md">{{dhcool(chat.dh)}}</div>
       </div>
-      <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" simple/>
+      <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
       <apercu-motscles v-if="chat" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
         :mapmc="mapmc" :edit="session.editable" :src="chat.mc || u0"/>
       <div v-if="chat" class="row items-start">

@@ -12,7 +12,7 @@
     <q-card style="min-height:50vh" class="q-pa-sm">
       <apercu-people :id="session.peopleId" simple />
       <div class="row">
-        <div v-if="avStore.mbPeC.sp" class="titre-md text-bold text-warning">{{$t('PPsp', [avStore.tribuC.na.nom])}}</div>
+        <div v-if="avStore.mbPeC && avStore.mbPeC.sp" class="titre-md text-bold text-warning">{{$t('PPsp', [avStore.tribuC.na.nom])}}</div>
         <div v-else class="titre-md">{{$t('PPco', [avStore.tribuC.na.nom])}}</div>
         <q-btn v-if="session.estComptable" class="q-ml-sm" dense color="primary" size="sm"
           :label="$t('PPcht')" @click="chgTribu"/>
@@ -106,7 +106,7 @@
 </template>
 <script>
 
-import { toRef, ref, onMounted, reactive, watch } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuPeople from '../components/ApercuPeople.vue'
 import ApercuChat from '../components/ApercuChat.vue'
@@ -163,7 +163,6 @@ export default {
     const pStore = stores.people
     const avStore = stores.avatar
 
-    const n = pStore.peC.na.nom
     const mapmc = ref(Motscles.mapMC(true, 0))
 
     const lstAvc = avStore.compta.lstAvatarNas

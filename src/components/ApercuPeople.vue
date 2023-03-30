@@ -53,12 +53,13 @@ export default {
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     ouvrirdetails () {
-      this.ui.peopleId = this.id
+      this.session.setPeopleId(this.id)
       this.ui.detailspeople = true
     }
   },
 
   setup (props) {
+    const session = stores.session
     const pStore = stores.people
     const ui = stores.ui
     const config = stores.config
@@ -99,6 +100,7 @@ export default {
     })
 
     return {
+      session,
       p,
       ui
     }

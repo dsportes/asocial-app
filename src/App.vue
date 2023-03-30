@@ -52,8 +52,9 @@
       <blocage-ico class="q-ml-xs" v-if="session.nivbl" clickable :niveau="session.nivbl" :alire="session.alirebl" @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
-        <q-btn v-if="session.ok" class="titre-lg" dense no-caps 
-          :label="avStore.avC.na.nomc" @click="ouvrirav" />
+        <span v-if="session.ok" class="titre-lg cursor-pointer"  @click="ouvrirav">
+          {{avStore.avC.na.nomc}}
+        </span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
       </q-toolbar-title>
 
@@ -278,7 +279,7 @@
   </q-dialog>
 
   <q-dialog v-model="ui.detailspeople" full-height persistent>
-    <panel-people :id="ui.peopleId" :close="closepp"/>
+    <panel-people :id="session.peopleId" :close="closepp"/>
   </q-dialog>
 
   <q-dialog v-model="ui.detailsavatar" full-height persistent>

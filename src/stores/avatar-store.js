@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { hash, egaliteU8 } from '../app/util.mjs'
+import { hash, egaliteU8, difference, intersection } from '../app/util.mjs'
 import { encode } from '@msgpack/msgpack'
 
 /* Store maître du compte courant :
@@ -54,7 +54,7 @@ export const useAvatarStore = defineStore('avatar', {
     /* retourne la tribu2 "courante" */
     tribu2C: (state) => { return state.tribu2CP },
     
-    // Avatar et groupes courants
+    // Avatar courant
     avC (state) { 
       const e = state.map.get(stores.session.avatarId)
       return e ? e.avatar : null 
@@ -289,7 +289,36 @@ export const useAvatarStore = defineStore('avatar', {
         r.push(t)
       }
       return r
-    }
+    },
+
+    // PageChats ******************************************
+    pcLc: (state) => { 
+      return Array.from(state.map.get(stores.session.avatarId).chats.values())
+    },
+
+    pcLcF: (state) => {
+      const f = stores.filtre.filtre.chats
+      if (!f) { stores.session.fmsg(state.pcLc.length); return state.pcLc }
+      f.limj = f.nbj ? (new Date().getTime() - (f.nbj * 86400000)) : 0
+      f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
+      f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
+      const r = []
+      for (const c of state.pcLc) {
+        if (f.limj && c.dh < f.limj) break
+        if (f.nom && !c.naE.nom.startsWith(f.nom)) continue
+        if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
+        if (f.setp.size || f.setn.size) {
+          const s = c.mc && c.mc.length ? new Set(c.mc) : new Set()
+          if (f.setp.size && difference(f.setp, s).size) continue
+          if (f.setn.size && intersection(f.setn, s).size) continue          
+        }        
+        r.push(c)
+      }
+      r.sort((a, b) => { return a.dh > b.dh ? -1 : (a.dh === b.dh ? 0 : 1) })
+      stores.session.fmsg(r.length)
+      return r
+    },
+
   },
 
   actions: {

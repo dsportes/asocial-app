@@ -60,9 +60,9 @@
   <div v-if="tab==='chats'">
     <div class="titre-lg text-italic text-center q-my-md">{{$t('CPTtitch')}}</div>
 
-    <div v-for="(e, idx) in lsp" :key="idx">
+    <div v-for="(na, idx) in pStore.naSponsors" :key="idx">
       <apercu-chat class="q-my-sm"
-        :na-i="naCpt" :na-e="e.na" :ids="e.ids" :idx="idx" :mapmc="mapmc"/>
+        :na-i="naCpt" :na-e="na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
     </div>
   </div>
 </div>
@@ -70,7 +70,7 @@
 
 <script>
 
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
@@ -116,49 +116,32 @@ export default {
     const session = stores.session
     const avStore = stores.avatar
     const pStore = stores.people
-    const naComptable = getNg(IDCOMPTABLE)
-    const naCpt = getNg(session.compteId)
     const ui = stores.ui
-    const lsp = ref()
+
+    const naCpt = getNg(session.compteId)
     const mapmc = ref(Motscles.mapMC(true, 0))
 
-    async function getSponsors () {
-      const r = []
-      if (!session.estComptable) {
-        const idsc = await Chat.getIds(naCpt, naComptable)
-        r.push({ na: naComptable, ids: idsc})
-      }
+    const ids = reactive({})
+    onMounted(async () => {
+      ids[IDCOMPTABLE] = await Chat.getIds(naCpt, getNg(IDCOMPTABLE))
       for(const na of pStore.naSponsors) {
         if (na.id !== session.compteId) {
-          const ids = await Chat.getIds(naCpt, na)
-          r.push({ na, ids})
+          ids[na.id] = await Chat.getIds(naCpt, na)
         }
       }
-      lsp.value = r
-    }
-
-    pStore.$onAction(({ name, args, after }) => {
-      after(async (result) => {
-        if (name === 'setPeopleTribu') {
-          await getSponsors()
-        }
-      })
-    })
-
-    onMounted(async () => {
-      await getSponsors()
     })
 
     const tab = ref()
     tab.value = ui.pagetab || 'notif'
     return {
       session,
+      pStore,
       ui,
       avStore,
       tab,
       naCpt,
-      mapmc,
-      lsp
+      ids,
+      mapmc
     }
   }
 }

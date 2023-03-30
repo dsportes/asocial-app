@@ -123,6 +123,7 @@ export default {
     return {
       chgps: false,
       ps: null,
+      memoed: null,
       memoedit: false,
       mcledit: false,
       nvpar: false,
@@ -186,28 +187,10 @@ export default {
     const session = stores.session
     const avStore = stores.avatar
 
-    const memoed = ref(null)
-
-    /*
-    const lstAv = ref([])
-    function setLstAv () {
-      lstAv.value = avStore.compta.lstAvatarNas
-    }
-    stores.avatar.$onAction(({ name, args, after }) => {
-      after((result) => { 
-        if (name === 'setCompta') 
-          setLstAv()
-      })
-    })
-    setLstAv()
-    */
-
     return {
       ui: stores.ui,
       avStore,
-      session,
-      memoed
-      // lstAv
+      session
     }
   }
 

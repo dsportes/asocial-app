@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { hash, u8ToB64 } from '../app/util.mjs'
+import { IDCOMPTABLE } from '../app/api.mjs'
+import { getNg } from '../app/modele.mjs'
 
 /* 
 Un "people" est un avatar :
@@ -37,8 +39,8 @@ export const usePeopleStore = defineStore('people', {
     // Array des ids des people
     peopleIds: (state) => { return Array.from(state.map.keys()) },
 
-    naSponsors: (state) => {
-      const t = []
+    naSponsors: (state) => { // Y compris celui du Comptable
+      const t = [getNg(IDCOMPTABLE)]
       state.map.forEach(e => { if (e.sp === 2) t.push(e.na) })
       return t
     },
@@ -127,7 +129,31 @@ export const usePeopleStore = defineStore('people', {
         const vcv = e.cv ? e.cv.v : 0
         return { idE, vcv, lch, lmb }
       }
-    }
+    },
+
+    // PagePeople ********************************************
+    peLp: (state) => { 
+      return Array.from(state.map.values())
+    },
+
+    peLpF: (state) => {
+      const f = stores.filtre.filtre.people
+      if (!f) { stores.session.fmsg(state.peLp.length); return state.peLp }
+      const r = []
+      for (const p of state.peLp) {
+        if (f.nom && !p.na.nom.startsWith(f.nom)) continue
+        if (f.roletr && (p.sp < f.roletr)) continue
+        if (f.avecgr && (!p.groupes.size)) continue
+        r.push(p)
+      }
+      r.sort((a, b) => { 
+        return (a.na.id === IDCOMPTABLE || a.na.nom < b.na.nom) ? -1 : (a.na.nom > b.na.nom ? 1 : 0)
+      })
+      stores.session.fmsg(r.length)
+      return r
+    },
+
+
   },
   
   actions: {
