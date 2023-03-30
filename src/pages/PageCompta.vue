@@ -87,7 +87,7 @@ export default {
   components: { PanelCompta, SyntheseBlocage, ApercuNotif, ApercuChat },
 
   computed: {
-    c () { return this.session.compta.compteurs },
+    c () { return this.avStore.compta.compteurs },
     tr () { return this.avStore.tribu },
     et2 () { return this.avStore.tribu2.mbtr[this.session.compteId] },
     blTr () { return this.tr.blocage || null },

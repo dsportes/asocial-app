@@ -40,7 +40,7 @@
 
     <!-- Dialogue de création d'un sponsoring -->
     <q-dialog v-if="nvsp" v-model="nvsp" full-height persistent>
-      <nouveau-sponsoring :close="closesp" :tribu="session.tribu"/>
+      <nouveau-sponsoring :close="closesp" :tribu="avStore.tribu"/>
     </q-dialog>
 
   </q-page>
@@ -91,17 +91,11 @@ export default {
   setup () {
     const session = stores.session
     const avStore = stores.avatar
-    const avatar = ref(session.avC)
+    const avatar = ref(avStore.avC)
+    // TODO
     avStore.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'setAvatar' && args[0] === session.avatarId) {
-          avatar.value = avStore.getAvatar(session.avatarId)
-        }
-      })
-    })
-    session.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setAvatarCourant') {
           avatar.value = avStore.getAvatar(session.avatarId)
         }
       })

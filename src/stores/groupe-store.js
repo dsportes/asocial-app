@@ -16,6 +16,12 @@ export const useGroupeStore = defineStore('groupe', {
   }),
 
   getters: {
+    // groupe courant
+    grC (state) { 
+      const e = state.map.get(stores.session.groupeId)
+      return e ? e.groupe : null 
+    },
+    
     // Map dont la clé est l'id du groupe et la valeur le document groupe
     groupes: (state) => {
       const m = new Map()

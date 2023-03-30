@@ -22,7 +22,17 @@ export const useAvatarStore = defineStore('avatar', {
     comptaP: null, // compta actuelle du compte courant
     tribu2P: null, // tribu2 actuelle du compte courant
     tribu2CP: null, // tribu2 "courante" pour le comptable
-    maptr: new Map() // Map des tribus, uniquement pour le Comptable
+    maptr: new Map(), // Map des tribus, uniquement pour le Comptable
+
+    // PanelPeople
+    ppSelId: 0, // Tribu sélectionnée
+    ppFiltre: '',
+
+    // Dernier compteurs de compta chargé
+    ccCpt: null,
+
+    // stats tribus
+    stt: { a1: 0, a2: 0, q1: 0, q2: 0 },
   }),
 
   getters: {
@@ -43,6 +53,12 @@ export const useAvatarStore = defineStore('avatar', {
 
     /* retourne la tribu2 "courante" */
     tribu2C: (state) => { return state.tribu2CP },
+    
+    // Avatar et groupes courants
+    avC (state) { 
+      const e = state.map.get(stores.session.avatarId)
+      return e ? e.avatar : null 
+    },
 
     // Map dont la clé est l'id de l'avatar et la valeur le document avatar
     avatars: (state) => {
@@ -141,7 +157,139 @@ export const useAvatarStore = defineStore('avatar', {
     getVoisins: (state) => { return (id, ids) => {
         return state.voisins.get(id + '/' + ids) || new Set()
       }
-    }  
+    },
+
+    /** PanelPeople ****************************************************/
+    // elt mbtr dans tribu2 pour la tribu courante et le people courant
+    mbPeC: (state) => {
+      const t2 = state.tribu2CP
+      const peId = stores.session.peopleId
+      return t2 && peId ? t2.mbtr[peId] : null
+    },
+
+    ppTribus: (state) => {
+      const y = []
+      let q1 = 0, q2 = 0
+      if (state.ccCpt) { q1 = state.ccCpt.q1; q2 = state.ccCpt.q2 }
+      const l = state.getTribus
+      const idt = stores.session.tribuCId
+      l.forEach(x => { 
+        if (x.id !== idt) {
+          const t = x.cpt
+          const ok = ((t.q1 - t.a1) >= q1) &&  ((t.q2 - t.a2) >= q2)
+          y.push({ nom: x.naC.nom, id: x.id, q1: t.q1, q2: t.q2, r1: t.q1 - t.a1, r2: t.q2 - t.a1, ok   })
+        }
+      })
+      return y
+    },
+
+    ppTribusF: (state) => {
+      const t = []
+      const f = state.ppFiltre
+      state.ppTribus.forEach(x => { 
+        if (x.nom.startsWith(f)) t.push(x)
+      })
+      if (t.length === 1) if (t[0].ok) state.ppSelId = t[0].id
+      return t
+    },
+
+    ppSelTr: (state) => { return state.maptr.get(state.ppSelId) },
+
+    // PageTribu ***************************************************    
+    ptLcFT: (state) => {
+      const f = stores.filtre.tri.tribu2
+      const lcF = state.ptLcF
+      function comp (a, b) {
+        switch (f.value) {
+          case 0 : { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0) }
+          case 1 : { return a.q1 < b.q1 ? 1 : (a.q1 > b.q1 ? -1 : 0) }
+          case 2 : { return a.q2 < b.q2 ? 1 : (a.q2 > b.q2 ? -1 : 0) }
+        }
+      }
+      if (!f) { stores.session.fmsg(lcF.length); return lcF }
+      const x = []; lcF.forEach(t => { x.push(t) })
+      x.sort(comp)
+      stores.session.fmsg(x.length)
+      return x
+    },
+
+    ptLcF: (state) => {
+      const f = stores.filtre.filtre.tribu2
+      if (!f) { stores.session.fmsg(state.ptLc.length); return state.getTribus }
+      const r = []
+      for (const c of state.ptLc) {
+        if (f.nomc && !c.na.nom.startsWith(f.nomc)) continue
+        if (f.avecbl && !c.blocage) continue
+        if (f.avecsp && !c.sp) continue
+        if (f.notif) {
+          const nt1 = !c.notifco && !c.notifsp
+          const nt2 = !((c.notifco && c.notifco.g) || (c.notifsp && c.notifsp.g))
+          if (f.notif === 1 && nt1) continue
+          if (f.notif === 2 && nt2) continue
+        }
+        r.push(c)
+      }
+      stores.session.fmsg(r.length)
+      return r
+    },
+
+    ptLc: (state) => {
+      return Object.values(state.tribu2CP.mbtr)
+    },
+
+    // PageTribus ***************************************************    
+    ptLtFT: (state) => {
+      const f = stores.filtre.tri.tribus
+      const ltF = state.ptLtF
+      function f0 (a, b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
+      function comp (x, y) {
+        const a = x.cpt
+        const b = y.cpt
+        switch (f.value) {
+          case 0 : { return f0(x, y) }
+          case 1 : { return a.a1 > b.a1 ? -1 : (a.a1 < b.a1 ? 1 : f0(x,y)) }
+          case 2 : { return a.a2 > b.a2 ? -1 : (a.a2 < b.a2 ? 1 : f0(x,y)) }
+          case 3 : { return a.q1 - a.a1 > b.q1 - b.a1 ? -1 : (a.q1 - a.a1 < b.q1 - b.a1 ? 1 : f0(x,y)) }
+          case 4 : { return a.q2 - a.a2 > b.q2 - b.a2 ? -1 : (a.q2 - a.a2 < b.q2 - b.a2 ? 1 : f0(x,y)) }
+          case 5 : { return a.q1 > b.q1 ? -1 : (a.q1 < b.q1 ? 1 : f0(x,y)) }
+          case 6 : {  return a.q2 > b.q2 ? -1 : (a.q2 < b.q2 ? 1 : f0(x,y)) }
+        }
+      }
+      if (!f) { stores.session.fmsg(ltF.length); return ltF }
+      const x = []; ltF.forEach(t => { x.push(t) })
+      x.sort(comp)
+      stores.session.fmsg(x.length)
+      return x
+    },
+
+    ptLtF: (state) => {
+      const f = stores.filtre.filtre.tribus
+      state.stt = { a1: 0, a2: 0, q1: 0, q2: 0 }
+      f.limj = f.nbj ? (new Date().getTime() - (f.nbj * 86400000)) : 0
+      f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
+      f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
+      const r = []
+      for (const t of state.getTribus) {
+        state.stt.a1 += t.cpt.a1 || 0
+        state.stt.a2 += t.cpt.a2 || 0
+        state.stt.q1 += t.cpt.q1 || 0
+        state.sttq2 += t.cpt.q2 || 0
+        if (f.avecbl && !t.blocage) continue
+        if (f.nomt && !t.na.nom.startsWith(f.nomt)) continue
+        if (f.txtt && (!t.info || t.info.indexOf(f.txtt) === -1)) continue
+        if (f.txtn &&
+          (!t.notifco || t.notifco.txt.indexOf(f.txtn) === -1) &&
+          (!t.notifcp || t.notifcp.indexOf(f.txtn) === -1)) continue
+        if (f.notif) {
+          const x = t.cpt.nco || [0, 0]
+          const y = t.cpt.nsp || [0, 0]
+          if (f.notif === 1 && (x[0] + x[1] + y[0] + y[1] === 0)) continue
+          if (f.notif === 2 && (x[1] + y[1] === 0)) continue
+        }
+        r.push(t)
+      }
+      return r
+    }
   },
 
   actions: {

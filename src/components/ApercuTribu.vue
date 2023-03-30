@@ -161,9 +161,7 @@ export default {
     const session = stores.session
     const id = toRef(props, 'id')
 
-    function getT () { 
-      return avStore.getTribu(id.value)
-    }
+    function getT () { return avStore.getTribu(id.value) }
 
     const t = ref(getT())
 

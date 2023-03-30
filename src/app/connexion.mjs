@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
-import { $t, getTrigramme, setTrigramme, afficherDiag, sleep, hash } from './util.mjs'
+import { $t, getTrigramme, setTrigramme, afficherDiag, sleep, hash, u8ToB64 } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, Tribu2, Chat, NomAvatar, NomTribu, naComptable, GenDoc, setNg, getNg, Versions } from './modele.mjs'
@@ -78,7 +78,7 @@ export async function connecterCompte (phrase, razdb) {
       deconnexion()
       return
     }
-    session.compteId = x.id
+    session.setCompteId(x.id)
     session.clek = x.k
   }
 
@@ -420,7 +420,7 @@ export class ConnexionCompte extends OperationUI {
     this.rowCompta = ret.rowCompta
     session.compteId = this.rowAvatar.id
     if (session.estComptable) session.mode = 2
-    session.setAvatarCourant(session.compteId)
+    session.setAvatarId(session.compteId)
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
 
@@ -432,7 +432,7 @@ export class ConnexionCompte extends OperationUI {
     }
     this.tribu = await compile(this.rowTribu)
     this.tribu2 = await compile(this.rowTribu2)
-    session.tribuId = this.tribu.id
+    session.setTribuId(this.tribu.id)
     if (session.fsSync) await session.fsSync.setTribu(session.tribuId)
   }
 
@@ -474,10 +474,10 @@ export class ConnexionCompte extends OperationUI {
     this.tribu = await compile(this.rowTribu)
     this.rowTribu2 = await getTribu2(this.compta.idt)
     this.tribu2 = await compile(this.rowTribu2)
-    session.tribuId = this.tribu.id
+    session.setTribuId(this.tribu.id)
     this.rowAvatar = await getAvatarPrimaire()
     this.avatar = await compile(this.rowAvatar)
-    session.setAvatarCourant(session.compteId)
+    session.setAvatarId(session.compteId)
   }
 
   /** run **********************************************************/
@@ -735,9 +735,9 @@ export class AcceptationSponsoring extends OperationUI {
       setNg(sp.nct)
       setNg(sp.naf)
 
-      session.compteId = sp.naf.id
-      session.tribuId = sp.nct.id
-      session.setAvatarCourant(session.compteId)
+      session.setCompteId(sp.naf.id)
+      session.setTribuId(sp.nct.id)
+      session.setAvatarId(session.compteId)
 
       const rowCompta = await Compta.row(sp.naf, sp.nct, sp.nctkc, sp.quotas[0], sp.quotas[1], sp.sp) // set de session.clek
       const rowAvatar = await Avatar.primaireRow(sp.naf)
@@ -764,7 +764,7 @@ export class AcceptationSponsoring extends OperationUI {
       - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
       - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
       */
-      const mbtrid = hash(sp.naf.rnd)
+      const mbtrid = hash(u8ToB64(sp.naf.rnd))
       const na = await crypter(sp.nct.rnd, new Uint8Array(encode([sp.naf.nom, sp.naf.rnd])))
       const x = { na, q1: sp.quotas[0], q2: sp.quotas[1] }
       if (sp.sp) x.sp = true
@@ -880,9 +880,9 @@ export class CreationCompteComptable extends OperationUI {
       const na = new NomAvatar('', -1)
       setNg(na)
 
-      session.compteId = na.id
-      session.tribuId = nt.id
-      session.setAvatarCourant(session.compteId)
+      session.setCompteId(na.id)
+      session.setTribuId(nt.id)
+      session.setAvatarId(session.compteId)
 
       const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true) // set de session.clek
       const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])

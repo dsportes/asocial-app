@@ -1,20 +1,20 @@
 <template>
   <q-page class="q-pa-sm">
-    <div v-if="msg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{msg}}</div>
+    <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <apercu-tribu class="q-py-sm" :id="session.tribuCId || session.tribuId" :idx="0" :edit="ed"/>
+    <apercu-tribu class="q-py-sm" :id="session.tribuCId" :idx="0" :edit="ed"/>
 
     <q-separator color="orange" class="q-my-md"/>
 
     <q-btn v-if="session.estComptable" class="q-mb-md" size="md" flat dense color="primary" 
       :label="$t('PTnvc')" @click="ouvrirSponsoring"/>
 
-    <div v-if="!flc.length" class="col-auto titre-lg text-italic">
-      {{$t('PTcvide', [lc.length])}}
+    <div v-if="!avStore.ptLcFT.length" class="col-auto titre-lg text-italic">
+      {{$t('PTcvide', [avStore.ptLc.length])}}
     </div>
 
-    <q-card v-if="flc.length">
-      <div v-for="(c, idx) in flc" :key="c.na.id">
+    <q-card v-if="avStore.ptLcFT.length">
+      <div v-for="(c, idx) in avStore.ptLcFT" :key="c.na.id">
         <div :class="'q-mb-md row items-start ' + dkli(idx)">
           <q-btn class="col-auto" flat icon="navigate_next" size="md"
             :color="c.na.id === ccid ? 'warning' : 'primary'" @click="courant(c)"/>
@@ -36,12 +36,12 @@
             </div>
 
             <apercu-blocage v-if="vis(c)" :blocage="c.blocage" :edit="ed" :idx="idx"
-              :na-tr="t.na" :bl-tr="t.blocage" :na-co="c.na"/>
+              :na-tr="avStore.tribuC.na" :bl-tr="avStore.tribuC.blocage" :na-co="c.na"/>
             <apercu-notif v-if="vis2(c, 'co')"
-              class="q-my-xs" :src="c" :na-tr="t.na"
+              class="q-my-xs" :src="c" :na-tr="avStore.tribuC.na"
               :edit="session.estComptable" :idx="idx"/>
             <apercu-notif v-if="vis2(c, 'sp')"
-              class="q-my-xs" :src="c" :na-tr="t.na" sponsor
+              class="q-my-xs" :src="c" :na-tr="avStore.tribuC.na" sponsor
               :edit="session.estSponsor && !session.estComptable" :idx="idx"/>
           </div>
         </div>
@@ -50,12 +50,12 @@
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
     <q-dialog v-model="nvsp" persistent full-height>
-      <nouveau-sponsoring :close="fermerSponsoring" :tribu="t"/>
+      <nouveau-sponsoring :close="fermerSponsoring" :tribu="avStore.tribuC"/>
     </q-dialog>
 
     <!-- Fiche people détaillée -->
     <q-dialog v-model="fipeople" persistent full-height>
-      <panel-people :close="fermerFipeople" :id="ccid"/>
+      <panel-people :close="fermerFipeople"/>
     </q-dialog>
 
     <!-- Dialogue de mise à jour des quotas du compte -->
@@ -80,7 +80,7 @@
         <q-btn dense size="md" color="warning" icon="close" @click="cptdial = false"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [ccna.nomc])}}</q-toolbar-title>
       </q-toolbar>
-      <panel-compta :c="cpt" style="margin:0 auto"/>
+      <panel-compta :c="avStore.ccCpt" style="margin:0 auto"/>
       </q-card>
     </q-dialog>
   </q-page>
@@ -115,7 +115,7 @@ export default {
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     vis (c) { 
-      return (this.session.estComptable || this.session.estSponsor || (c.na.id === this.session.compteId))
+      return (this.session.estComptable || this.session.estSponsor || (c.na.id === this.avStore.compteId))
     },
     vis2 (c, cosp) {
       if (!this.vis(c)) return false
@@ -135,8 +135,8 @@ export default {
     async editerq (c) {
       if (! await this.session.edit()) return
       this.quotas = { q1: c.q1, q2: c.q2, min1: 0, min2: 0, 
-        max1: this.t.cpt.q1 - this.t.cpt.a1,
-        max2: this.t.cpt.q2 - this.t.cpt.a2,
+        max1: this.avStore.tribuC.cpt.q1 - this.avStore.tribuC.cpt.a1,
+        max2: this.avStore.tribuC.cpt.q2 - this.avStore.tribuC.cpt.a2,
         c: c
         }
       this.edq = true
@@ -149,13 +149,14 @@ export default {
       this.ccid = c.na.id
       this.ccna = c.na
       if (t === 1) {
-        this.session.setAvatarCourant(c.na.id)
+        this.session.setAvatarId(c.na.id)
         this.ui.detailsavatar = true
       } else if (t === 2) {
+        this.session.setPeopleId(c.na.id)
         this.fipeople = true
       } else if (t === 3) {
         const res = await new GetCompteursCompta().run(c.na.id)
-        this.cpt = new Compteurs(res)
+        this.avStore.ccCpt = new Compteurs(res)
         this.cptdial = true
       }
     },
@@ -176,13 +177,7 @@ export default {
 
   setup () {
     /*
-    tc = true si la page affiche la tribu du compte. 
-      - false pour le cas du Comptable qui inspecte une tribu "courante" quelconque,
-      laquelle ne change pas d'id tant que la page est affichée
-    L'id de la tribu du compte est supposée inchangée tant que la page est ouvert:
-      - on ignore une synchronisation de changement de tribu pendant ce lapse de temps.
-
-    Elément de lc:
+    Elément de ptLc :
     - `na` : du membre crypté par la clé de la tribu.
     - `sp` : si `true` / présent, c'est un sponsor.
     - `q1 q2` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
@@ -196,107 +191,13 @@ export default {
     const session = stores.session
     const avStore = stores.avatar
     const pStore = stores.people
-    const fStore = stores.filtre
     const ui = stores.ui
-
-    const t = ref() // tribu
-    const t2 = ref() // tribu2
-    const lc = ref() // liste de comptes
-    const flc = ref() // liste des comptes filtrée et triée
-    const msg = ref('') // message fugitif après réaffichage
     
-    function getlc () {
-      const tc = !session.tribuCId || session.tribuCId === session.tribuId // true si c'est la tribu du compte
-      t.value = avStore.tribuC // tribu
-      t2.value = avStore.tribu2C
-      lc.value = avStore.tribu2C.listeComptes()
-    }
-
-    getlc()
-
-    avStore.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setTribu' || name === 'setTribu2' || name === 'delTribuC') {
-          getlc(); filtrer(); trier()
-        }
-      })
-    })
-
-    session.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setTribuCId') {
-          getlc(); filtrer(); trier()
-        }
-      })
-    })
-
-    fStore.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setFiltre' && args[0] === 'tribu2') {
-          filtrer(); trier()
-        }
-      })
-    })
-    fStore.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setTri' && args[0] === 'tribu2') {
-          trier()
-        }
-      })
-    })
-
-    function f0 (a,b) { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0) }
-    function f1 (a,b) { return a.q1 < b.q1 ? 1 : (a.q1 > b.q1 ? -1 : 0) }
-    function f2 (a,b) { return a.q2 < b.q2 ? 1 : (a.q2 > b.q2 ? -1 : 0) }
-
-    const fnt = [f0, f1, f2]
-    function trier () {
-      const f = fStore.tri.tribu2
-      if (!f) return
-      const x = []; flc.value.forEach(t => { x.push(t) })
-      x.sort(fnt[f])
-      flc.value = x
-      fmsg()
-    }
-
-    function filtrer () {
-      const f = fStore.filtre.tribu2
-      if (!f) { flc.value = lc.value; return }
-      const r = []
-      for (const c of lc.value) {
-        if (f.nomc && !c.na.nom.startsWith(f.nomc)) continue
-        if (f.avecbl && !c.blocage) continue
-        if (f.avecsp && !c.sp) continue
-        if (f.notif) {
-          const nt1 = !c.notifco && !c.notifsp
-          const nt2 = !((c.notifco && c.notifco.g) || (c.notifsp && c.notifsp.g))
-          if (f.notif === 1 && nt1) continue
-          if (f.notif === 2 && nt2) continue
-        }
-        r.push(c)
-      }
-      flc.value = r
-      fmsg()
-    }
-
-    function fmsg () {
-      const r = flc.value
-      msg.value = hms(new Date(), true) + ' / ' + $t('items', r.length, { count: r.length })
-      setTimeout(() => {
-        msg.value = ''
-      }, 1000)
-    }
-
-    filtrer()
-    trier()
-
     return {
       session,
       avStore,
       pStore,
-      ui,
-      t, lc, flc,
-      msg
+      ui
     }
   }
 

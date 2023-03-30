@@ -38,8 +38,8 @@
       <!-- Comptabilité des volumes -->
       <div v-if="session.status>1" @click="pageCompta" style="position:relative"
         :class="'cursor-pointer q-mr-xs bg2 ' + pccl">
-        <q-knob v-model="pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
-        <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{pc + '%'}}</div>
+        <q-knob v-model="avStore.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
+        <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{avStore.compta.pc + '%'}}</div>
       </div>
 
       <!-- Notifications -->
@@ -53,7 +53,7 @@
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
         <q-btn v-if="session.ok" class="titre-lg" dense no-caps 
-          :label="session.avC.na.nomc" @click="ouvrirav" />
+          :label="avStore.avC.na.nomc" @click="ouvrirav" />
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
       </q-toolbar-title>
 
@@ -66,7 +66,7 @@
 
     <q-toolbar inset>
       <q-toolbar-title class="titre-lg text-right cursor-pointer q-mx-md">
-        <span v-if="session.groupeId">{{session.grC.na.nomc}}</span>
+        <span v-if="session.groupeId">{{grStore.grC.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAngr')}}</span>
       </q-toolbar-title>
     </q-toolbar>
@@ -92,7 +92,7 @@
             </q-item>
             <q-item clickable  @click="maTribu()">
               <q-item-section>
-                <q-item-label lines="1">{{$t('ACmatribu', [session.tribu.na.nom])}}</q-item-label>
+                <q-item-label lines="1">{{$t('ACmatribu', [avStore.tribu.na.nom])}}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item v-if="session.estComptable" clickable  @click="ui.setPage('tribus')">
@@ -108,7 +108,7 @@
             <q-separator color="white"/>
             <q-item clickabe @click="ui.detailsavatar = true">
               <q-item-section>
-                <q-item-label lines="1" class="text-italic text-bold text-right">{{$t('ACpourav', [session.avC.na.nomc])}}</q-item-label>
+                <q-item-label lines="1" class="text-italic text-bold text-right">{{$t('ACpourav', [avStore.avC.na.nomc])}}</q-item-label>
               </q-item-section>
             </q-item>
             <q-separator color="white"/>
@@ -141,7 +141,7 @@
             <div v-if="session.groupeId">
               <q-item clickabe @click="ui.detailsgroupe = true">
                 <q-item-section>
-                  <q-item-label lines="1" class="text-italic text-bold text-right">{{$t('ACpourgr', [session.grC.na.nomc])}}</q-item-label>
+                  <q-item-label lines="1" class="text-italic text-bold text-right">{{$t('ACpourgr', [grStore.grC.na.nomc])}}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-separator color="white"/>
@@ -286,14 +286,14 @@
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="closeav"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [session.avC.na.nom])}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [avStore.avC.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
       </q-header>
 
       <q-page-container>
         <q-card style="min-height:50vh" class="q-pa-sm largeur40">
-          <apercu-avatar edit :na="session.avC.na"/>
+          <apercu-avatar edit :na="avStore.avC.na"/>
         </q-card>
       </q-page-container>
     </q-layout>
@@ -397,10 +397,7 @@ export default {
     tbclass () { return this.$q.dark.isActive ? ' sombre1' : ' clair1' },
     aHome () { return (this.session.status > 1 && this.ui.page !== 'accueil')
       || (!this.session.status && this.ui.page !== 'login') },
-    maCompta () { return this.session.compta },
-    naMaTribu () { return this.session.compte.nct },
-    pc () { return this.session.compta.pc },
-    pccl () {return this.pc < 80 ? 'bg-transparent' : (this.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
+    pccl () {return this.avStore.compta.pc < 80 ? 'bg-transparent' : (this.avStore.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
     titrePage () {
       const p = this.ui.page
       const arg = p === 'tribu' ? getNg(this.session.tribuCId).nom : ''
@@ -489,6 +486,7 @@ export default {
 
     const session = stores.session
     const avStore = stores.avatar
+    const grStore = stores.groupe
 
     console.log($t('build', [config.build, config.debug]))
 
@@ -519,6 +517,7 @@ export default {
       config,
       ui,
       avStore,
+      grStore,
       infonet,
       infoidb,
       infomode,

@@ -3,17 +3,17 @@
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
-      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtit', [p.na.nom])}}</q-toolbar-title>
+      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtit', [pStore.peC.na.nom])}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
   </q-header>
 
   <q-page-container>
     <q-card style="min-height:50vh" class="q-pa-sm">
-      <apercu-people :id="id" simple />
+      <apercu-people :id="session.peopleId" simple />
       <div class="row">
-        <div v-if="infoTr.mb.sp" class="titre-md text-bold text-warning">{{$t('PPsp', [infoTr.tribu.na.nom])}}</div>
-        <div v-else class="titre-md">{{$t('PPco', [infoTr.tribu.na.nom])}}</div>
+        <div v-if="avStore.mbPeC.sp" class="titre-md text-bold text-warning">{{$t('PPsp', [avStore.tribuC.na.nom])}}</div>
+        <div v-else class="titre-md">{{$t('PPco', [avStore.tribuC.na.nom])}}</div>
         <q-btn v-if="session.estComptable" class="q-ml-sm" dense color="primary" size="sm"
           :label="$t('PPcht')" @click="chgTribu"/>
         <q-btn v-if="session.estComptable" class="q-ml-sm" dense color="primary" size="sm"
@@ -27,9 +27,9 @@
 
       <div class="titre-md text-italic y-mb-sm">{{$t('PPchats')}}</div>
 
-      <div v-for="(na, idx) in session.compta.lstAvatarNas" :key="na.id">
+      <div v-for="(na, idx) in avStore.compta.lstAvatarNas" :key="na.id">
         <apercu-chat class="q-my-md" affnai
-          :na-i="na" :na-e="p.na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
+          :na-i="na" :na-e="pStore.peC.na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
       </div>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
@@ -42,14 +42,14 @@
   <!-- Changement de tribu -->
   <q-dialog v-model="chgTr" persistent>
     <q-card class="moyennelargeur">
-      <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [p.na.nom, infoTr.tribu.na.nom])}}</div>
-      <div class="q-mx-sm titre-md">{{$t('PPqv1', [cpt.q1, edv1(cpt.q1), pc1])}}</div>
-      <div class="q-mx-sm titre-md">{{$t('PPqv2', [cpt.q2, edv2(cpt.q2), pc2])}}</div>
+      <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [pStore.peC.na.nom, avStore.tribuC.na.nom])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqv1', [avStore.ccCpt.q1, edv1(avStore.ccCpt.q1), pc1])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqv2', [avStore.ccCpt.q2, edv2(avStore.ccCpt.q2), pc2])}}</div>
 
       <q-separator class="q-mt-sm"/>
 
       <q-card-section>
-        <q-input filled v-model="tribus.f" :label="$t('PPnt')" />
+        <q-input filled v-model="avStore.ppFiltre" :label="$t('PPnt')" />
         <div class="titre-md text-italic row items-center">
           <div class="col-2 text-center">{{$t('PPc1')}}</div>
           <div class="col-4">{{$t('PPc2')}}</div>
@@ -59,8 +59,8 @@
       </q-card-section>
 
       <q-card-section style="height: 30vh" class="scroll bord1">
-        <div v-for="x in tribus.flst" :key="x.id" 
-          :class="'row items-center cursor-pointer' + (x === tribus.sel ? ' bord2' : '')"
+        <div v-for="x in avStore.ppTribusF" :key="x.id" 
+          :class="'row items-center cursor-pointer' + (x.id === avStore.ppSelId ? ' bord2' : '')"
           @click="selTr(x)">
           <q-icon class="col-2 text-center" :name="x.ok ? 'check' : 'close'" size="md" :color="x.ok ? 'primary' : 'negative'" />
           <div class="col-4">{{x.nom}}</div>
@@ -72,7 +72,7 @@
       <q-separator />      
       <q-card-actions align="center">
         <q-btn dense color="primary" :label="$t('renoncer')" @click="chgTr=false"/>
-        <q-btn dense color="warning" :label="$t('valider')" :disable="!tribus.sel"
+        <q-btn dense color="warning" :label="$t('valider')" :disable="!avStore.ppSelId"
           v-close-popup @click="changerTr()"/>
       </q-card-actions>
     </q-card>
@@ -81,11 +81,11 @@
   <!-- Changement de statut sponsor -->
   <q-dialog v-model="chgSp" persistent>
     <q-card class="bg-secondary text-white petitelargeur q-pa-sm">
-        <div v-if="infoTr.mb.sp" class="text-center q-my-md titre-md">{{$t('PPsp', [infoTr.tribu.na.nom])}}</div>
-        <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [infoTr.tribu.na.nom])}}</div>
+        <div v-if="avStore.mbPeC.sp" class="text-center q-my-md titre-md">{{$t('PPsp', [avStore.tribuC.na.nom])}}</div>
+        <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [avStore.tribuC.na.nom])}}</div>
       <q-card-actions align="center">
         <q-btn dense color="primary" :label="$t('renoncer')" @click="chgSp=false"/>
-        <q-btn v-if="infoTr.mb.sp" dense color="warning" :label="$t('PPkosp')" v-close-popup  @click="changerSp(false)"/>
+        <q-btn v-if="avStore.mbPeC.sp" dense color="warning" :label="$t('PPkosp')" v-close-popup  @click="changerSp(false)"/>
         <q-btn v-else dense color="warning" :label="$t('PPoksp')" v-close-popup  @click="changerSp(true)"/>
       </q-card-actions>
     </q-card>
@@ -98,7 +98,7 @@
       <q-btn dense size="md" color="warning" icon="close" @click="cptdial = false"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [p.na.nomc])}}</q-toolbar-title>
     </q-toolbar>
-    <panel-compta :c="cpt" style="margin:0 auto"/>
+    <panel-compta :c="avStore.ccCpt" style="margin:0 auto"/>
     </q-card>
   </q-dialog>
 
@@ -121,11 +121,11 @@ export default {
   name: 'PanelPeople',
   components: { ApercuPeople, BoutonHelp, ApercuChat, PanelCompta },
 
-  props: { id: Number, close: Function },
+  props: { close: Function },
 
   computed: {
-    pc1 () { return this.cpt.q1 ? Math.round((this.cpt.v1 * 100) / (this.cpt.q1 * UNITEV1)) : 0 },
-    pc2 () { return this.cpt.q2 ? Math.round((this.cpt.v2 * 100) / (this.cpt.q2 * UNITEV2)) : 0 }
+    pc1 () { return this.avStore.ccCpt.q1 ? Math.round((this.avStore.ccCpt.v1 * 100) / (this.avStore.ccCpt.q1 * UNITEV1)) : 0 },
+    pc2 () { return this.avStore.ccCpt.q2 ? Math.round((this.avStore.ccCpt.v2 * 100) / (this.avStore.ccCpt.q2 * UNITEV2)) : 0 }
   },
 
   watch: {
@@ -144,126 +144,45 @@ export default {
     edv2 (v) { return edvol(v * UNITEV2) },
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     fermer () { if (this.close) this.close() },
-    chgTribu () { this.chgTr = true },
+    chgTribu () { this.avStore.ppFiltre = ''; this.chgTr = true },
     chgSponsor () { this.chgSp = true },
     voirCompta () { this.cptdial = true },
     async changerSp(estSp) { // (id, na, attr, val, val2, exq)
-      await new SetAttributTribu2().run(this.trId, this.p.na, 'sp', estSp)
+      await new SetAttributTribu2().run(this.session.tribuCId, this.pStore.peC.na, 'sp', estSp)
       this.chgSp = false
     },
-    selTr (x) { if (x.ok) this.tribus.sel = x },
+    selTr (x) { if (x.ok) this.avStore.ppSelId = x.id },
     async changerTr () {
-      const trc = this.tribus.sel.id === this.session.tribuId
-      const nvTr = trc ? this.avStore.tribu : this.avStore.getTribu(this.tribus.sel.id)
-      const [t, t2] = await new ChangerTribu().run(this.p.na, nvTr.id)
+      const [t, t2] = await new ChangerTribu().run(this.pStore.peC.na, this.avStore.ppSelId)
       this.avStore.setTribuC(t, t2)
     }
   },
 
   setup (props) {
-    const ui = stores.ui
-    const id = toRef(props, 'id')
     const session = stores.session
     const pStore = stores.people
     const avStore = stores.avatar
 
-    const lstAvc = session.compta.lstAvatarNas
-    const ids = reactive({})
-    const tribus = reactive({ f:'', lst: [], flst: [], sel: null })
+    const n = pStore.peC.na.nom
     const mapmc = ref(Motscles.mapMC(true, 0))
-    const p = ref(pStore.getPeople(id.value))
-    const cpt = ref()
 
-    const trId = ref(session.tribuCId || session.tribuId)
-
-    async function loadCpt () {
-      const res = await new GetCompteursCompta().run(id.value)
-      cpt.value = new Compteurs(res)
-    }
-
-    function getTribus () {
-      const y = []
-      const q1 = cpt.value.q1
-      const q2 = cpt.value.q2
-      const l = avStore.getTribus
-      l.forEach(x => { 
-        if (x.id !== trId.value) {
-          const t = x.cpt
-          const ok = ((t.q1 - t.a1) >= q1) &&  ((t.q2 - t.a2) >= q2)
-          y.push({ nom: x.naC.nom, id: x.id, q1: t.q1, q2: t.q2, r1: t.q1 - t.a1, r2: t.q2 - t.a1, ok   })
-        }
-      })
-      tribus.lst = y
-    }
-
-    function filtreTribus () {
-      const t = []
-      const f = tribus.f
-      tribus.lst.forEach(x => { if (x.nom.startsWith(f)) t.push(x) })
-      tribus.flst = t
-      tribus.sel = null
-      if (tribus.flst.length === 1) {
-        const x = tribus.flst[0]
-        if (x.ok) tribus.sel = x
-      }
-    }
-
-    // Filtre du nom des tribus
-    watch(() => tribus.f, (ap, av) => {
-        filtreTribus()
-      }
-    )
-
+    const lstAvc = avStore.compta.lstAvatarNas
+    const ids = reactive({})
     onMounted(async () => {
-      await loadCpt()
-      getTribus()
-      filtreTribus()
+      const res = await new GetCompteursCompta().run(session.peopleId)
+      avStore.ccCpt = new Compteurs(res)
       for(const na of lstAvc) {
-        ids[na.id] = await Chat.getIds(na, p.value.na)
+        ids[na.id] = await Chat.getIds(na, pStore.peC.na)
       }
     })
-
-    const infoTr = reactive({ tribu: null, tribu2: null, mb: null })
-    function setInfoTr() {
-      const tc = !session.tribuCId || session.tribuCId === session.tribuId // true si c'est la tribu du compte
-      infoTr.tribu = avStore.tribuC
-      infoTr.tribu2 = avStore.tribu2C
-      infoTr.mb = avStore.tribu2C.mb(id.value)
-    }
-
-    avStore.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setTribu2' || name === 'setTribu' || name === 'delTribuC') {
-          setInfoTr()
-          getTribus()
-          filtreTribus()
-        }
-      })
-    })
-
-    session.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setTribuCId') {
-          setInfoTr()
-          getTribus()
-          filtreTribus()
-        }
-      })
-    })
-
-    setInfoTr()
 
     return {
       session,
       avStore,
+      pStore,
       mapmc,
       ids,
-      lstAvc,
-      infoTr,
-      trId,
-      cpt,
-      tribus,
-      p
+      lstAvc
     }
   }
 }

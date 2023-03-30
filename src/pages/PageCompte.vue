@@ -67,7 +67,7 @@
           <q-btn dense flat size="md" icon="close" @click="memoedit=false"/>
         </q-toolbar>
         <editeur-md ref="memoed" class="height-10"
-          :texte="session.compte.memo || ''" editable modetxt :label-ok="$t('OK')" @ok="memook"/>
+          :texte="avStore.compte.memo || ''" editable modetxt :label-ok="$t('OK')" @ok="memook"/>
       </q-card>
     </q-dialog>
 
@@ -87,7 +87,7 @@
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
     <q-dialog v-model="nvpar" persistent class="moyennelargeur">
-      <nouveau-sponsoring :close="fermerSponsoring" :tribu="session.tribu"/>
+      <nouveau-sponsoring :close="fermerSponsoring" :tribu="avStore.tribu"/>
     </q-dialog>
 
   </q-page>
@@ -116,7 +116,7 @@ export default {
   components: { NomAvatar, NouveauSponsoring, BoutonHelp, ApercuAvatar, PhraseSecrete, EditeurMd, ShowHtml, MotsCles },
 
   computed: {
-    memo () { return this.session.compte.memo }
+    memo () { return this.avStore.compte.memo }
   },
 
   data () {
@@ -147,7 +147,7 @@ export default {
     },
 
     courant (id) {
-      this.session.setAvatarCourant(id)
+      this.session.setAvatarId(id)
     },
 
     async oknomav (nom) {

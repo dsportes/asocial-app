@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
-import { u8ToB64, intToB64, rnd6, $t, afficherDiag } from '../app/util.mjs'
+import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
 import { AMJ, IDCOMPTABLE } from '../app/api.mjs'
 
 export const useSessionStore = defineStore('session', {
@@ -38,33 +38,24 @@ export const useSessionStore = defineStore('session', {
     groupeId: 0, // groupe "courant"
     tribuId: 0, // id de la tribu actuelle du compte
     tribuCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
+    peopleId: 0, // people "courant"
 
     // blocage et notification
     nivbl: 0,
     alirebl: false,
     gntf: 0,
     notifG: null,
-    alirentf: false
+    alirentf: false,
+
+    // message fmsg de report après filtrage
+    filtreMsg: ''
   }),
 
   getters: {
-    // trois alias utiles
-    compte (state) { return stores.avatar.compte },
-    compta (state) { return stores.avatar.compta },
-    tribu (state) { return stores.avatar.tribu },
-    tribu2 (state) { return stores.avatar.tribu2 },
-    mbtr (state) { const t2 = stores.avatar.tribu2; return t2 ? t2.mb() : null },
-    estSponsor (state) { 
-      const x = state.mbtr
-      return x ? x.sp : false 
-    },
+    estSponsor (state) { return (stores.avatar.tribu2 && stores.avatar.tribu2.sp) || false },
     estComptable (state) { return state.compteId === IDCOMPTABLE },
     
     editable (state) { return state.mode < 3 && state.nivbl < 2 },
-
-    // Avatar et groupes courants
-    avC (state) { return stores.avatar.getAvatar(state.avatarId) },
-    grC (state) { return stores.groupe.getGroupe(state.groupeId)},
 
     synchro (state) { return state.mode === 1 },
     incognito (state) { return state.mode === 2 },
@@ -98,11 +89,18 @@ export const useSessionStore = defineStore('session', {
       localStorage.setItem(this.lsk, this.nombase)
     },
 
-    setAvatarCourant (id) { this.avatarId = id},
+
+    setCompteId (id) { this.compteId = id},
+
+    setAvatarId (id) { this.avatarId = id},
 
     setTribuId(id) { this.tribuId = id },
 
     setTribuCId (id) { this.tribuCId = id },
+
+    setPeopleId (id) { this.peopleId = id },
+
+    setGroupeId (id) { this.groupeId = id },
 
     chgps (phrase) {
       /*
@@ -132,6 +130,13 @@ export const useSessionStore = defineStore('session', {
     setNotifGlobale (notif) {
       this.notifG = notif
       this.setBlocage()
+    },
+
+    fmsg (n) {
+      this.filtreMsg = hms(new Date(), true) + ' / ' + $t('items', n, { count: n })
+      setTimeout(() => {
+        this.filtreMsg = ''
+      }, 1000)
     },
 
     /* Calcul des niveaux de notification et de blocage max

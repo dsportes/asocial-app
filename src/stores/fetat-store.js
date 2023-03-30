@@ -81,7 +81,7 @@ export const useFetatStore = defineStore('fetat', {
             } else {
               /* imputation sur LA COMPTA de l'avatar courant (s'il y en a) 
               ou sur celle de l'avatar primaire du compte. idc : id de la compta */
-              const idc = session.avatarId || session.compte.id
+              const idc = session.avatarId || session.compteId
               const args = { sessionId: data.sessionId, id: e.ids, ts: e.ns % 3, idf: e.id, idc, vt: e.lg }
               const r = await get('m1', 'getUrl', args)
               if (!r) throw new AppExc(E_BRO, 3, [Sid(e.id)])

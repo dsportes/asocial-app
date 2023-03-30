@@ -673,13 +673,6 @@ export class Tribu2 extends GenDoc {
     return null
   }
 
-  mb (id) {
-    return this.mbtr[id || stores.session.compteId]
-  }
-
-  // Retourne la liste des comptes de la tribu (elt de mbtr)
-  listeComptes () { return Object.values(this.mbtr) }
-
   static async primitiveRow (nt, q1, q2) { // q1 q2 : quotas attribués au Comptable
     const naComptable = getNg(IDCOMPTABLE)
     const r = {}
@@ -893,7 +886,7 @@ export class Compta extends GenDoc {
     const session = stores.session
     this.k = await decrypter(session.phrase.pcb, row.kx)
     session.clek = this.k
-    session.compteId = this.id
+    session.setCompteId(this.id)
 
     this.vsh = row.vsh || 0
 
@@ -1070,8 +1063,7 @@ export class Sponsoring extends GenDoc {
       - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
       - `quotas` : `[v1, v2]` quotas attribués par le parrain.
     */
-    const session = stores.session
-    const av = session.avC
+    const av = stores.avatar.avC
     const n = new NomAvatar(nom, 0)
     const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, nctkc, quotas}
     d.nct = [nct.nom, nct.rnd]
@@ -1484,7 +1476,7 @@ export class Secret extends GenDoc {
     const g = this.groupe
     if (g.membreParId(id)) return id
     let idr = id
-    stores.session.compte.avatarIds().forEach(idm => {
+    stores.avatar.compte.avatarIds().forEach(idm => {
       if (g.membreParId(idm)) idr = idm
     })
     return idr

@@ -51,8 +51,8 @@
       <!-- Comptabilité des volumes -->
       <div class="btn2 row items-center" @click="pageCompta">
         <div style="position:relative" :class="'q-mr-xs bg2 ' + pccl">
-          <q-knob v-model="pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
-          <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{pc + '%'}}</div>
+          <q-knob v-model="avStore.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
+          <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{avStore.compta.pc + '%'}}</div>
         </div>
         <span>{{$t('MLAvol')}}</span>
       </div>
@@ -101,7 +101,7 @@
           @click="ui.setPage('people')">
           <q-badge color="teal-10" rounded floating>{{nbtct}}</q-badge>
         </q-btn>
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmatribu', [session.tribu.na.nom])"
+        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmatribu', [avStore.tribu.na.nom])"
           @click="maTribu()"/>
         <q-btn v-if="session.estComptable" class="btn1" dense no-caps color="primary"
           :label="$t('ACtribus')" @click="ui.setPage('tribus')">
@@ -114,7 +114,7 @@
 
       <div class="q-my-sm q-px-sm titre-md text-bold text-center">
         <span class="text-italic">{{$t('ACav')}}</span>
-        <q-btn class="q-ml-md" dense :label="session.avC.na.nomc" no-caps
+        <q-btn class="q-ml-md" dense :label="avStore.avC.na.nomc" no-caps
           icon-right="open_in_new" @click="ui.detailsavatar = true"/>
       </div>
 
@@ -142,7 +142,7 @@
 
       <div :class="'row items-center q-mx-lg justify-center fs-md' + (!session.groupeId ? ' disabled' : '')">
         <div class="q-my-sm q-px-sm titre-md text-bold text-italic text-center full-width">
-          {{session.groupeId ? $t('ACgr', [session.grC.na.nomc]) : $t('MLAngr')}}
+          {{session.groupeId ? $t('ACgr', [grStore.grC.na.nomc]) : $t('MLAngr')}}
         </div>
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACsecrets')">
           <q-badge color="teal-10" rounded floating>{{nbgrsecs}}</q-badge>
@@ -199,8 +199,7 @@ export default {
     nbtsp () { return 1 },
     nbtiv () { return 1 },
 
-    pc () { return this.session.compta.pc },
-    pccl () {return this.pc < 80 ? 'bg-transparent' : (this.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
+    pccl () {return this.avStore.compta.pc < 80 ? 'bg-transparent' : (this.avStore.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
   },
 
   methods: {
