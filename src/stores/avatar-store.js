@@ -159,6 +159,12 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
+    // Set des ids des groupes de l'avatar courant
+    getGrIds: (state) => {
+      const e = state.map.get(stores.session.avatarId)
+      return e ? e.grIds : new Set()
+    },
+
     /** PanelPeople ****************************************************/
     // elt mbtr dans tribu2 pour la tribu courante et le people courant
     mbPeC: (state) => {
@@ -264,16 +270,16 @@ export const useAvatarStore = defineStore('avatar', {
 
     ptLtF: (state) => {
       const f = stores.filtre.filtre.tribus
-      state.stt = { a1: 0, a2: 0, q1: 0, q2: 0 }
+      const stt = { a1: 0, a2: 0, q1: 0, q2: 0 }
       f.limj = f.nbj ? (new Date().getTime() - (f.nbj * 86400000)) : 0
       f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
       for (const t of state.getTribus) {
-        state.stt.a1 += t.cpt.a1 || 0
-        state.stt.a2 += t.cpt.a2 || 0
-        state.stt.q1 += t.cpt.q1 || 0
-        state.sttq2 += t.cpt.q2 || 0
+        stt.a1 += t.cpt.a1 || 0
+        stt.a2 += t.cpt.a2 || 0
+        stt.q1 += t.cpt.q1 || 0
+        stt.q2 += t.cpt.q2 || 0
         if (f.avecbl && !t.blocage) continue
         if (f.nomt && !t.na.nom.startsWith(f.nomt)) continue
         if (f.txtt && (!t.info || t.info.indexOf(f.txtt) === -1)) continue
@@ -288,6 +294,7 @@ export const useAvatarStore = defineStore('avatar', {
         }
         r.push(t)
       }
+      stores.filtre.stats.tribus = stt
       return r
     },
 
@@ -401,7 +408,8 @@ export const useAvatarStore = defineStore('avatar', {
           avatar: avatar, 
           secrets: new Map(),
           sponsorings: new Map(),
-          chats: new Map()
+          chats: new Map(),
+          grIds: new Set() // Ids des groupes dont l'avatar est membre
          }
         this.map.set(avatar.id, e)
         if (avatar.id % 10 === 0) this.setMotscles (avatar.mc)
@@ -414,6 +422,16 @@ export const useAvatarStore = defineStore('avatar', {
         e.avatar = avatar
       }
       if (avatar.id === stores.session.compteId) this.avatarP = avatar
+    },
+
+    setAvatarGr (id, idg) {
+      const e = this.map.get(id)
+      if (e) e.grIds.add(idg)
+    },
+
+    delAvatarGr (id, idg) {
+      const e = this.map.get(id)
+      if (e) e.grIds.delete(idg)
     },
 
     setSecret (secret) {

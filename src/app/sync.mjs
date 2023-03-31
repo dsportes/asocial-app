@@ -86,7 +86,7 @@ export class OperationWS extends Operation {
       e.lsc.push(await compile(x))
       if (session.accesIdb) this.buf.mapSec[secret.pk] = secret // Pour gestion des fichiers
     }
-    const setDisp = new Set()
+
     if (ret.rowMembres) for (const x of ret.rowMembres) {
       const st = gr.ast[x.ids] // statut du membre
       if (x.dlv < this.auj) {

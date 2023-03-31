@@ -16,7 +16,7 @@ La "carte de visite" d'un people provient :
   - soit de la tribu dont le people est compte (où figure sa CV)
   - soit d'un des chats
 La plus récente est conservée. 
-Chaque element a pour clé l'id de l'avatar :
+Chaque element de la map (ayant pour clé l'id de l'avatar) :
 - na : nom d'avatar
 - disparu : true si le people a été détecté disparu
 - sp: 0: pas compte de la tribu, 1: simple compte de la tribu, 2: sponsor de la tribu

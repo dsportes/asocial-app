@@ -716,6 +716,11 @@ export default {
   PTpasc: 'Il n\'est pas possible de bloquer le Comptable',
   PTcompta: 'Volumes utilisés par {0}',
 
+  // Page groupes
+  PGnv: 'Nouveau groupe',
+  PTvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
+
+
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',
   PMEmod: 'Mode foncé / clair',

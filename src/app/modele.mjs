@@ -1207,27 +1207,18 @@ export class Groupe extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    this.dnv = row.dnv || 0
+    this.dfh = row.dfh || 0
     this.stx = row.stx || 1
     this.sty = row.sty || 0
     this.ast = row.ast || new Uint8Array([0])
     this.idh = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
     this.imh = row.imh || 0
-    this.v1 = row.v1
-    this.v2 = row.v2
-    this.q1 = row.q1
-    this.q2 = row.q2
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
   }
 
   get mbHeb () { // membre hébergeur
     return  this.dfh ? null : stores.membre.getMembre(this.id, this.imh)
-  }
-
-  async destectMbDisp (id, ids) {
-    const args = { token: session.authToken, id, ids }
-    this.tr(await post(this, 'DisparitionMembre', args))
   }
 
   async setDisparus(setIds) { // check / maj des statuts des membres disparus
@@ -1360,19 +1351,21 @@ export class Membre extends GenDoc {
     this.dfa = row.dfa || 0
     this.vote = row.vote || 0
     this.mc = row.mc || new Uint8Array([])
-    this.data = decode(await decrypter(this.cleg, row.datag))
-    this.na = new NomAvatar(this.data.nom, this.data.rnd)
+    const data = decode(await decrypter(this.cleg, row.datag))
+    this.na = new NomAvatar(data.nom, data.rnd)
+    this.ni = data.ni
+    this.idi = data.idi
     this.estAc = stores.avatar.compte.estAc(this.na.id)
     if (!this.estAc) setNg(this.na)
     this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
-    this.cv = row.cva ? decode(await decrypter(this.na.rnd, row.cva)) : null
+    this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
   }
 
-  static async nouveau (nag, im, na, idi) {
+  static async nouveau (nag, im, na, idi, ni) {
     /* na du groupe, indice membre,
     NomAvatar du membre, id de l'invitant (fac, sinon c'est le membre lui-même */
     const _data_ = { id: nag.id, im, v: 0, vcv: 0, dda: 0, ddi: 0, dfa: 0, vote: 0, mc: new Uint8Array([]), info: null }
-    const data = { nom: na.nom, rnd: na.rnd, ni: rnd6(), idi: idi || na.id  }
+    const data = { nom: na.nom, rnd: na.rnd, ni, idi: idi || na.id  }
     _data_.datag = await crypter((nag.rnd, new Uint8Array(encode(data))))
     const r = { _nom: 'membres', id: nag.id, im, v: 0, vcv: 0, _data_}
     return new Uint8Array(encode(r))
