@@ -54,11 +54,14 @@ export class OperationWS extends Operation {
   }
 
   async majGr (id) { // Maj ou ajout du groupe id
+    // ret.rowGroupe peut être absent
+    // ret.vgroupe est TOUJOURS présent un row dont la data donne v1 v2 q1 q2
     const vcour = Versions.get(id)
     const session = stores.session
     const args = { token: session.authToken, id, v: vcour }
     const ret = this.tr(await post(this, 'ChargerGMS', args))
     this.versions(id, ret.vgroupe.v)
+
     const groupe = await compile(ret.rowGroupe)
     const avgr = stores.groupe.getGroupe(id) // groupe actuel
 
@@ -69,6 +72,9 @@ export class OperationWS extends Operation {
     }
   
     if (!avgr && !groupe) return // le groupe n'existait pas et n'existe toujours pas
+
+    const vols = decode(ret.vgroupe._data_) // vols: {v1, v2, q1, q2}
+    if (groupe) groupe.vols = vols; else if (avgr) avgr.vols = vols
 
     // le groupe existait ou existe désormais
     if (groupe) this.buf.putIDB(ret.rowGroupe) // il a changé

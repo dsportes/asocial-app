@@ -190,6 +190,13 @@ export class ConnexionCompte extends OperationUI {
     }
 
     if (session.accesNet) {
+      /*
+      Retour:
+      - OK: true / false (un avatar a changé de version)
+      - versions: map pour chaque avatar / groupe de:
+        { v }: pour un avatar
+        { v, vols: {v1, v2, q1, q2} } : pour un groupe
+      */
       const args = { token: session.authToken, vcompta: this.compta.v, mbsMap, avsMap, abPlus }
       const ret = this.tr(await post(this, 'SignaturesEtVersions', args))
       if (ret.OK === false) return false
@@ -504,8 +511,11 @@ export class ConnexionCompte extends OperationUI {
       this.cAvatars = session.accesIdb ? await getColl('avatars') : []
       this.avatarsToStore = new Map() // objets avatar à ranger en store
       const [avRowsModifies, avToSuppr] = await this.tousAvatars()
-      // this.versions : map. Pour chaque avatar / groupe requis, la version de sa sous-coll détenue en serveur
-
+      /* this.versions :  map pour chaque avatar / groupe de :
+        { v }: pour un avatar
+        { v, vols: {v1, v2, q1, q2} } : pour un groupe
+      */
+      
       /* Dans compta, nctk a peut-être été recrypté */
       if (session.accesNet && this.compta.nctk) {
         const args = { token: session.authToken, nctk: this.compta.nctk }
@@ -577,7 +587,10 @@ export class ConnexionCompte extends OperationUI {
 
       // Versions des sous-collections par avatar / groupe
       if (session.accesIdb) await loadVersions(); else Versions.reset()
-      // this.versions : map. Pour chaque avatar / groupe requis, la version de sa sous-coll détenue en serveur
+      /* this.versions :  map pour chaque avatar / groupe de :
+        { v }: pour un avatar
+        { v, vols: {v1, v2, q1, q2} } : pour un groupe
+      */
 
       // Comptable seulement : chargement des tribus
       if (session.estComptable) {
@@ -598,7 +611,8 @@ export class ConnexionCompte extends OperationUI {
       // Itération sur chaque avatar: secrets, chats, sponsorings
       for (const avatar of avStore.avatars.values()) {
         const vidb = Versions.get(avatar.id)
-        const vsrv = this.versions && this.versions[avatar.id] || 0    
+        const vx = this.versions && this.versions[avatar.id] ? this.versions[avatar.id] : { v: 0 }
+        const vsrv = vx.v
         const na = getNg(avatar.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
         const [x1, x2] = await this.chargerSecrets(avatar.id, vidb, vsrv, false)
@@ -619,7 +633,9 @@ export class ConnexionCompte extends OperationUI {
       // Itération sur chaque groupe: secrets, membres
       for (const groupe of grStore.groupes.values()) {
         const vidb = Versions.get(groupe.id)
-        const vsrv = this.versions && this.versions[groupe.id] || 0    
+        const vx = this.versions && this.versions[groupe.id] ? this.versions[groupe.id] : { v: 0 }
+        const vsrv = vx.v
+        if (vx.vols) groupe.vols = vx.vols
         const na = getNg(id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
         const [x1, x2] = await this.chargerSecrets(groupe.id, vidb, vsrv, true)
