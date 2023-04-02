@@ -101,7 +101,7 @@ export default {
   RBL3: 'Organisation',
   RBL4: 'Autre',
 
-  items: 'Aucun item | Un item | {count} items',
+  items: 'Aucun item PGv Un item | {count} items',
   comptes: 'Pas de compte | Un compte | {count} comptes',
   parrains: 'Pas de parrain | Un parrain | {count} parrains',
 
@@ -621,7 +621,7 @@ export default {
   NTnbcsp: '{0} compte(s) dont {1} sponsor(s)',
   NTv1: 'Volume V1 attribué / quota tribu',
   NTv2: 'Volume V2 attribué / quota tribu',
-  NTvx: 'Quotas V1 / V2 de la tribu (%attribués)',
+  NTvx: 'Quotas V1 / V2 (%attribués)',
   NTvx1: '{0} ({1}%)',
   NTvx2: '{0} ({1}%)',
 
@@ -728,7 +728,11 @@ export default {
   PGtgr: 'Détail du groupe',
   PGtmb: 'Membres',
   PGsec: 'Ses secrets',
-
+  PGfh: 'Ce groupe N\'EST PLUS hébergé, disparition {0}',
+  PGhb: 'Groupe hébergé par {0}',
+  PGferme: 'Invitations bloquées. Aucun vote pour réouvrir | Invitations bloquées. Un vote pour réouvrir | Invitations bloquées. {count} votes pour réouvrir',
+  PGouvert: 'Invitations autorisées',
+  
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',
   PMEmod: 'Mode foncé / clair',
