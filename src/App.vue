@@ -65,12 +65,6 @@
       </q-btn>
     </q-toolbar>
 
-    <q-toolbar inset>
-      <q-toolbar-title class="titre-lg text-right cursor-pointer q-mx-md">
-        <span v-if="session.groupeId">{{grStore.grC.na.nomc}}</span>
-        <span v-else class="titre-md text-italic">{{$t('MLAngr')}}</span>
-      </q-toolbar-title>
-    </q-toolbar>
     <q-toolbar inset class="full-width bg-secondary text-white">
       <bouton-help page="page1"/>
       <q-btn v-if="session.ok && session.nivbl !== 2" size="md" icon="menu">
@@ -184,6 +178,28 @@
       </q-btn>
 
     </q-toolbar>
+
+    <q-toolbar v-if="ui.page === 'compta'" inset 
+      class="full-width bg-secondary text-white row justify-between">
+      <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
+        <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setPageTab('notif')"/>
+        <q-tab name="compta" :label="$t('PNCesp')" @click="ui.setPageTab('compta')"/>
+        <q-tab name="chats" :label="$t('PNCchats')" @click="ui.setPageTab('chats')"/>
+      </q-tabs>
+      <q-btn v-if="ui.pagetab==='notif'" class="col-auto q-px-sm" dense size="md" color="warning" 
+        icon="check" :label="$t('jailu')" @click="ui.jailu()"/>
+    </q-toolbar>
+
+    <q-toolbar v-if="ui.page === 'groupe'" inset 
+      class="full-width bg-secondary text-white row justify-between">
+      <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
+        <q-tab name="notif" :label="$t('PGtgr')" @click="ui.setPageTab('groupe')"/>
+        <q-tab name="compta" :label="$t('PGtmb')" @click="ui.setPageTab('membres')"/>
+      </q-tabs>
+      <q-btn class="col-auto q-px-sm" dense size="md" color="warning" 
+        icon="check" :label="$t('PGsec')" @click="ui.secrets()"/>
+    </q-toolbar>
+
   </q-header>
 
   <q-drawer v-if="ui.filtre" v-model="ui.menu" side="right" elevated persistent
@@ -222,6 +238,12 @@
           <filtre-tribu nom="people" :idx="1"/>
           <filtre-avecgr nom="people" :idx="0"/>
         </div>
+        <div v-if="ui.page === 'groupes'" class="column justify-start">
+        </div>
+        <div v-if="ui.page === 'groupesac'" class="column justify-start">
+        </div>
+        <div v-if="ui.page === 'groupe'" class="column justify-start">
+        </div>
       </div>
     </q-scroll-area>
   </q-drawer>
@@ -240,6 +262,9 @@
       <page-tribus class="page" v-if="ui.page === 'tribus'"/>
       <page-tribu class="page" v-if="ui.page === 'tribu'"/>
       <page-people class="page" v-if="ui.page === 'people'"/>
+      <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
+      <page-groupesac class="page" v-if="ui.page === 'groupesac'"/>
+      <page-groupe class="page" v-if="ui.page === 'groupe'"/>    
     </transition-group>
   </q-page-container>
 
@@ -357,7 +382,7 @@ import PageLogin from './pages/PageLogin.vue'
 import PageSession from './pages/PageSession.vue'
 import PageAccueil from './pages/PageAccueil.vue'
 import PageCompte from './pages/PageCompte.vue'
-import PageSponsorings from './pages/PageSponserings.vue'
+import PageSponsorings from './pages/PageSponsorings.vue'
 import PageChats from './pages/PageChats.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageTribus from './pages/PageTribus.vue'
@@ -365,6 +390,8 @@ import PageTribu from './pages/PageTribu.vue'
 import PagePeople from './pages/PagePeople.vue'
 import PanelPeople from './dialogues/PanelPeople.vue'
 import ApercuAvatar from './components/ApercuAvatar.vue'
+import PageGroupes from './pages/PageGroupes.vue'
+import PageGroupe from './pages/PageGroupe.vue'
 
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
@@ -388,7 +415,7 @@ export default {
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco, ApercuAvatar,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople,
+    PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PageGroupe, PageGroupes,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu,
     DialogueErreur, DialogueHelp
@@ -401,7 +428,14 @@ export default {
     pccl () {return this.avStore.compta.pc < 80 ? 'bg-transparent' : (this.avStore.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
     titrePage () {
       const p = this.ui.page
-      const arg = p === 'tribu' ? getNg(this.session.tribuCId).nom : ''
+      let arg = ''
+      switch (p) {
+        case 'tribu' : { arg = getNg(this.session.tribuCId).nom; break }
+        case 'chats' : { arg = this.avStore.avC.nom; break }
+        case 'sponsorings' : { arg = this.avStore.avC.na.nom; break }
+        case 'groupesac' : { arg = this.avStore.avC.na.nom; break }
+        case 'groupe' : { arg = this.avStore.grC.na.nom; break }
+      }
       return this.$t('P' + p, [arg])
     }
 },
@@ -553,7 +587,7 @@ export default {
   padding: 0 !important
   min-height: 0 !important
 .q-btn
-  padding: 0 !important
+  padding: 0 2px !important
 .q-item
   min-height: 0 !important
 .msgimp
@@ -568,4 +602,6 @@ export default {
 .bg2
   border-radius: 5px
   padding: 2px
+.q-tab
+  min-height: 0 !important
 </style>

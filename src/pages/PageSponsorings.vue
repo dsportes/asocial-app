@@ -9,32 +9,34 @@
 
     <div class="titre-lg q-px-sm q-my-md">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</div>
 
-    <div v-for="sp in sponsorings" :key="sp.ids" class="q-pa-sm q-mb-md">
-      <q-separator class="q-mt-md"/>
-      <div :class="'titre-md text-' + clr(sp)">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
-      <div class="titre-md">{{$t('NPphr')}}
-        <span class="q-ml-sm font-mono text-bold fs-md">{{sp.psp}}</span>
-      </div>
-      <div class="titre-md">{{$t('NPdlv')}}
-        <span class="q-ml-sm font-mono text-bold fs-md">{{dlved(sp)}}</span>
-      </div>
-      <div class="titre-md">{{$t('NPnom')}}
-        <span class="text-bold font-mono q-px-md">{{sp.descr.naf.nom}}</span>
-      </div>
-      <div class="titre-md">{{$t('NPtribu')}}
-        <span class="text-bold font-mono q-px-md">{{sp.descr.nct.nom}}</span>
-        <span v-if="sp.descr.sp" class="text-italic q-px-md">{{$t('NPspons')}}</span>
-      </div>
-      <div class="titre-md">{{$t('NPquo')}} :
-        <span class="font-mono q-pl-md">v1: {{ed1(sp.descr.quotas[0])}}</span>
-        <span class="font-mono q-pl-lg">v2: {{ed2(sp.descr.quotas[1])}}</span>
-      </div>
-      <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
-      <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard"/>
+    <div v-for="(sp, idx) in sponsorings" :key="sp.ids">
+      <q-separator color="orange" class="q-mt-sm"/>
+      <div :class="'q-px-sm ' + dkli(idx)">
+        <div :class="'titre-md text-' + clr(sp)">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
+        <div class="titre-md">{{$t('NPphr')}}
+          <span class="q-ml-sm font-mono text-bold fs-md">{{sp.psp}}</span>
+        </div>
+        <div class="titre-md">{{$t('NPdlv')}}
+          <span class="q-ml-sm font-mono text-bold fs-md">{{dlved(sp)}}</span>
+        </div>
+        <div class="titre-md">{{$t('NPnom')}}
+          <span class="text-bold font-mono q-px-md">{{sp.descr.naf.nom}}</span>
+        </div>
+        <div class="titre-md">{{$t('NPtribu')}}
+          <span class="text-bold font-mono q-px-md">{{sp.descr.nct.nom}}</span>
+          <span v-if="sp.descr.sp" class="text-italic q-px-md">{{$t('NPspons')}}</span>
+        </div>
+        <div class="titre-md">{{$t('NPquo')}} :
+          <span class="font-mono q-pl-md">v1: {{ed1(sp.descr.quotas[0])}}</span>
+          <span class="font-mono q-pl-lg">v2: {{ed2(sp.descr.quotas[1])}}</span>
+        </div>
+        <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
+        <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard" :idx="idx"/>
 
-      <div v-if="sp.st===0">
-        <q-btn class="q-mr-md" color="primary" size="sm" dense :label="$t('NPprol')" @click="prolonger(sp)"/>
-        <q-btn color="warning" size="sm" dense :label="$t('NPann')" @click="annuler(sp)"/>
+        <div v-if="sp.st===0">
+          <q-btn class="q-mr-md" color="primary" size="sm" dense :label="$t('NPprol')" @click="prolonger(sp)"/>
+          <q-btn color="warning" size="sm" dense :label="$t('NPann')" @click="annuler(sp)"/>
+        </div>
       </div>
     </div>
 
@@ -77,6 +79,7 @@ export default {
   },
 
   methods: {
+    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
 
@@ -115,5 +118,4 @@ export default {
 @import '../css/app.sass'
 .bord
   border-top: 1px solid $grey-5
-  border-bottom: 1px solid $grey-5
 </style>

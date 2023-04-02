@@ -471,13 +471,15 @@ export default {
   Plogin666: 'Création du compte du comptable',
   Paccueil: 'Accueil',
   Psession: 'Etat de la session ouverte',
-  Pcompte: 'Mon compte, ses avatars',
-  Psponsorings: 'Mes sponsorings, en cours / récents',
-  Pchats: 'Mes chats',
+  Pcompte: 'Mon compte et ses avatars',
+  Psponsorings: 'Sponsorings de {0}',
+  Pchats: 'Chats de {0}',
   Ptribus: 'Toutes les tribus',
   Ptribu: 'Tribu {0}',
   Pcompta: 'Notifications, blocages, volumes',
-  Paproposav: 'A propos de l\'avatar',
+  Pgroupes: 'Tous les groupes',
+  Pgroupesac: 'Groupes de {0}',
+  Pgroupe: 'Groupe {0}',
   Ppeople: 'Tous mes contacts',
 
   MLAbrk: 'Opération en cours',
@@ -719,7 +721,13 @@ export default {
   // Page groupes
   PGnv: 'Nouveau groupe',
   PTvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
-
+  PGvut: 'Volume total réellement utilisé',
+  PGvq: 'Somme des quotas attribués',
+  PGnocv: 'Pas d\'autre information',
+  PGnoan: 'Aucun des avatars du compte n\'est "animateur" du groupe. Edition de la carte de viste non autorisée',
+  PGtgr: 'Détail du groupe',
+  PGtmb: 'Membres',
+  PGsec: 'Ses secrets',
 
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',

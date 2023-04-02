@@ -5,27 +5,27 @@
     <div class="petitelargeur q-my-sm">
       <div class="row">
         <div class="col-6"></div>
-        <div class="col-3 fs-md text-italic text-center">Volume V1</div>
-        <div class="col-3 fs-md text-italic text-center">Volume V2</div>
+        <div class="col-3 fs-md text-italic text-center">V1</div>
+        <div class="col-3 fs-md text-italic text-center">V2</div>
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PTattr')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ avStore.stt.a1 + ' / ' + ed1(avStore.stt.a1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ avStore.stt.a2 + ' / ' + ed2(avStore.stt.a2)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ stats.tribus.a1 + ' / ' + ed1(stats.tribus.a1)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ stats.tribus.a2 + ' / ' + ed2(stats.tribus.a2)}}</div>
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PTrest')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ (avStore.stt.q1 - avStore.stt.a1) + ' / ' + ed1(avStore.stt.q1 - avStore.stt.a1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ (avStore.stt.q2 - avStore.stt.a2) + ' / ' + ed2(avStore.stt.q2 - avStore.stt.a2)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ (stats.tribus.q1 - stats.tribus.a1) + ' / ' + ed1(stats.tribus.q1 - stats.tribus.a1)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ (stats.tribus.q2 - stats.tribus.a2) + ' / ' + ed2(stats.tribus.q2 - stats.tribus.a2)}}</div>
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PTtotal')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ avStore.stt.q1 + ' / ' + ed1(avStore.stt.q1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ avStore.stt.q2 + ' / ' + ed2(avStore.stt.q2)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ stats.tribus.q1 + ' / ' + ed1(stats.tribus.q1)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ stats.tribus.q2 + ' / ' + ed2(stats.tribus.q2)}}</div>
       </div>
     </div>
 
-    <q-separator />
+    <q-separator color="orange"/>
 
     <q-btn class="q-my-sm" size="md" flat dense color="primary" 
       :label="$t('PTnv')" @click="ouvrirnt"/>
@@ -66,7 +66,7 @@ import stores from '../stores/stores.mjs'
 import ApercuTribu from '../components/ApercuTribu.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import { afficherDiag, hms, $t, edvol } from '../app/util.mjs'
+import { afficherDiag, edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouvelleTribu, GetTribu } from '../app/operations.mjs'
 
@@ -118,10 +118,12 @@ export default {
   setup () {
     const avStore = stores.avatar
     const session = stores.session
+    const stats = stores.filtre.stats
 
     return {
       ui: stores.ui,
       avStore,
+      stats,
       session
     }
   }

@@ -1,5 +1,6 @@
 <template>
 <div>
+  <!--
   <q-toolbar class="row justify-between">
     <q-btn v-if="tab==='notif'" class="col-auto q-mr-md" dense size="md" color="warning" 
       icon="check" :label="$t('jailu')" @click="vuclose()"/>
@@ -9,10 +10,10 @@
       <q-tab name="chats" :label="$t('PNCchats')" @click="tab='chats'"/>
     </q-tabs>
   </q-toolbar>
+-->
+  <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto" :c="avStore.compta.compteurs"/>
 
-  <panel-compta v-if="tab==='compta'" style="margin:0 auto" :c="session.compta.compteurs"/>
-
-  <div v-if="tab==='notif'" class="q-pa-sm">
+  <div v-if="ui.pagetab==='notif'" class="q-pa-sm">
     <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
       <div class="titre-md">{{$t('CPTal1a', [c.pc1])}}</div>
       <div>{{$t('CPTal1b')}}</div>
@@ -57,7 +58,7 @@
 
   </div>
 
-  <div v-if="tab==='chats'">
+  <div v-if="ui.pagetab==='chats'">
     <div class="titre-lg text-italic text-center q-my-md">{{$t('CPTtitch')}}</div>
 
     <div v-for="(na, idx) in pStore.naSponsors" :key="idx">
@@ -104,12 +105,6 @@ export default {
   },
 
   methods: {
-    async vuclose () {
-      if (this.session.accesNet) {
-        await new SetDhvuCompta().run()
-      }
-      this.ui.setPage('accueil')
-    }
   },
 
   setup () {
@@ -131,14 +126,26 @@ export default {
       }
     })
 
-    const tab = ref()
-    tab.value = ui.pagetab || 'notif'
+    async function vuclose () {
+      if (this.session.accesNet) {
+        await new SetDhvuCompta().run()
+      }
+      this.ui.setPage('accueil')
+    }
+
+    ui.$onAction(({ name, args, after }) => {
+      after(async (result) => {
+        if ((name === 'jailu')){
+          await vuclose()
+        }
+      })
+    })
+
     return {
       session,
       pStore,
       ui,
       avStore,
-      tab,
       naCpt,
       ids,
       mapmc

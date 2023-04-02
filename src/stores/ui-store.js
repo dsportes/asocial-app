@@ -42,8 +42,8 @@ export const useUiStore = defineStore('ui', {
     },
     async setPage (p, tab) {
       this.menu = false
-      const pagesF = new Set(['chats', 'tribus', 'tribu', 'people'])
-      const pagesB = new Set(['tribus'])
+      const pagesF = new Set(['chats', 'tribus', 'tribu', 'people', 'groupes', 'groupesac', 'groupe'])
+      const pagesB = new Set(['tribus', 'groupes', 'groupesac'])
       this.pageback = pagesB.has(this.page) ? this.page : ''
       this.page = null
       await sleep(200)
@@ -51,7 +51,11 @@ export const useUiStore = defineStore('ui', {
       this.filtre = pagesF.has(p)
       // ouvre le filtre si la page en a un ET que la fenêtre est large
       if (this.filtre && !this.etroite) this.menu = true
-      this.pagetab = tab || ''
+      this.setPageTab(tab || '')
+    },
+
+    setPageTab (tab) {
+      this.pagetab = tab
     },
 
     async setPageBack () {
@@ -100,6 +104,10 @@ export const useUiStore = defineStore('ui', {
       } else {
         this.helpstack.splice(this.helpstack.length - 1, 1)
       }
-    }
+    },
+
+    // Fonctions internes à une page. Appel par dérection ui.$onAction
+    jailu () { },
+    secrets () { }
   }
 })

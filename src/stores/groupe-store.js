@@ -54,9 +54,22 @@ export const useGroupeStore = defineStore('groupe', {
         return e ? e.membres.get(im) : null 
       }
     },
+    getMbac: (state) => { return (idg, im) => { 
+        const e = state.map.get(idg)
+        return e ? e.mbac.get(im) : null 
+      }
+    },
     getMembres: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.membres : null 
+      }
+    },
+    compteEstAnim: (state) => { return (id) => { 
+        const e = state.map.get(id)
+        if (!e) return false
+        const ast = e.groupe.ast
+        for (const m of e.mbacs) if (ast[m.ids] === 22) return true
+        return false
       }
     },
     /*
@@ -93,58 +106,26 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
-    // PageGroupes ***************************************************    
+    // PageGroupes ***************************************************
     pgLgFT: (state) => {
-      const f = stores.filtre.tri.groupes
-      const ltF = state.ptLtF
-      function f0 (a, b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
-      function comp (x, y) {
-        const a = x.cpt
-        const b = y.cpt
-        switch (f.value) {
-          case 0 : { return f0(x, y) }
-          case 1 : { return a.a1 > b.a1 ? -1 : (a.a1 < b.a1 ? 1 : f0(x,y)) }
-          case 2 : { return a.a2 > b.a2 ? -1 : (a.a2 < b.a2 ? 1 : f0(x,y)) }
-          case 3 : { return a.q1 - a.a1 > b.q1 - b.a1 ? -1 : (a.q1 - a.a1 < b.q1 - b.a1 ? 1 : f0(x,y)) }
-          case 4 : { return a.q2 - a.a2 > b.q2 - b.a2 ? -1 : (a.q2 - a.a2 < b.q2 - b.a2 ? 1 : f0(x,y)) }
-          case 5 : { return a.q1 > b.q1 ? -1 : (a.q1 < b.q1 ? 1 : f0(x,y)) }
-          case 6 : {  return a.q2 > b.q2 ? -1 : (a.q2 < b.q2 ? 1 : f0(x,y)) }
-        }
+      function f0 (x, y) {
+        const a = x.groupe, b = y.groupe
+        return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) 
       }
-      if (!f) { stores.session.fmsg(ltF.length); return ltF }
-      const x = []; ltF.forEach(t => { x.push(t) })
-      x.sort(comp)
-      stores.session.fmsg(x.length)
-      return x
-    },
-
-    pgLgF: (state) => {
       const f = stores.filtre.filtre.groupes
       const stt = { v1: 0, v2: 0, q1: 0, q2: 0 }
-      f.limj = f.nbj ? (new Date().getTime() - (f.nbj * 86400000)) : 0
-      f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
-      f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
-      for (const t of state.pgLg) {
-        stt.a1 += t.cpt.a1 || 0
-        stt.a2 += t.cpt.a2 || 0
-        stt.q1 += t.cpt.q1 || 0
-        stt.q2 += t.cpt.q2 || 0
-        if (f.avecbl && !t.blocage) continue
-        if (f.nomt && !t.na.nom.startsWith(f.nomt)) continue
-        if (f.txtt && (!t.info || t.info.indexOf(f.txtt) === -1)) continue
-        if (f.txtn &&
-          (!t.notifco || t.notifco.txt.indexOf(f.txtn) === -1) &&
-          (!t.notifcp || t.notifcp.indexOf(f.txtn) === -1)) continue
-        if (f.notif) {
-          const x = t.cpt.nco || [0, 0]
-          const y = t.cpt.nsp || [0, 0]
-          if (f.notif === 1 && (x[0] + x[1] + y[0] + y[1] === 0)) continue
-          if (f.notif === 2 && (x[1] + y[1] === 0)) continue
-        }
+      for (const e of state.pgLg) {
+        const g = e.groupe
+        stt.a1 += g.vols.v1 || 0
+        stt.a2 += g.vols.v2 || 0
+        stt.q1 += g.vols.q1 || 0
+        stt.q2 += g.vols.q2 || 0
+        // TODO
         r.push(t)
       }
       stores.filtre.stats.groupes = stt
+      r.sort(f0)
       return r
     },
 
@@ -198,11 +179,27 @@ export const useGroupeStore = defineStore('groupe', {
         if (membre.estAc) {
           // un des avatars du compte: enreg dans son avatar
           stores.avatar.setAvatarGr(na.id, membre.id)
+          e.mbacs.set(membre.ids, membre)
         } else {
           // ajoute ou remplace le people, met à jour sa cv le cas échéant
           pStore.setPeopleMembre(na, membre.id, membre.ids, membre.cv)
         }
       }
+    },
+
+    delMembre (id, ids) {
+      const e = this.map.get(id)
+      if (!e) return
+      const m = e.membres.get(ids)
+      if (!m) return
+      const idp = m.na.id
+      if (m.estAc) {
+        stores.avatar.delAvatarGr(idp, id)
+        delete m.mbacs(ids)
+      } else {
+        stores.people.unsetPeopleMembre(idp, id)
+      }
+      delete m.membres(ids)
     },
 
     setSecret (secret) {
