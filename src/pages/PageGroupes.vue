@@ -33,7 +33,7 @@
         <div class="row items-start">
           <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
             :color="e.groupe.id === session.groupeId ? 'warning' : 'primary'" @click="courant(e)"/>
-          <apercu-groupe class="q-my-sm" :eltg="e" :idx="idx" edit/>
+          <apercu-groupe class="q-my-sm" :eltg="e" :idx="idx"/>
         </div>
       </div>
     </div>
