@@ -1,5 +1,5 @@
 <template>
-  <div :class="'q-mb-sm full-width ' + dkli">
+  <div :class="'q-pa-xs full-width ' + dkli">
     <q-input dense counter v-model="val"
       :label="$t('FI' + prop)"
       @keydown.enter.prevent="ok" type="text" :hint="$t('entree')">

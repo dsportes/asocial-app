@@ -1,5 +1,5 @@
 <template>
-  <div :class="'q-mb-sm full-width ' + dkli">
+  <div :class="'q-pa-xs full-width ' + dkli">
     <q-btn no-caps flat :label="$t('FInotif', [$t('gravite' + val)])">
     <q-menu anchor="bottom left" self="top left">
       <q-list style="min-width: 50px">

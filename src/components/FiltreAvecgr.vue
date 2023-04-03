@@ -1,5 +1,5 @@
 <template>
-  <div :class="'q-mb-sm full-width ' + dkli">
+  <div :class="'q-pa-xs full-width ' + dkli">
     <q-checkbox v-model="val" class="cb" :label="$t('FIavecgr')" />
   </div>
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <div :class="'q-mb-sm full-width ' + dkli">
+  <div :class="'q-pa-xs full-width ' + dkli">
     <q-select v-model="val" dense options-dense :options="options" :label="$t('FIjours')" />
   </div>
 </template>

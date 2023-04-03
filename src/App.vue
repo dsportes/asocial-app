@@ -202,10 +202,10 @@
 
   </q-header>
 
-  <q-drawer v-if="ui.filtre" v-model="ui.menu" side="right" elevated persistent
+  <q-drawer v-if="ui.filtre" v-model="ui.menu" side="right" elevated bordered persistent
     :width="250" :breakpoint="ui.seuillarge"
     :overlay="ui.etroite">
-    <q-scroll-area :class="'q-pa-xs fit ' + dkli(1)">
+    <q-scroll-area :class="'fit ' + dkli(1)">
       <div>
         <div class="row justify-bettween q-mb-md">
           <q-btn v-if="ui.etroite" class="q-mr-sm" icon="chevron_right" color="warning" size="md" dense @click="fermFiltre"/>
@@ -498,9 +498,6 @@ export default {
       this.avStore.setTribuC()
       this.ui.setPage('tribu')
     },
-
-    async panelcontactsAut () { if (await this.session.aut(4)) this.ui.panelContacts = true },
-    async fichiersavionAut () { if (await this.session.aut(4)) this.ui.fichiersAvion = true },
   },
 
   setup () {
@@ -509,12 +506,6 @@ export default {
 
     const config = stores.config
     config.$q = $q
-
-    /*
-    setTimeout(async () => {
-      try { await crypter(new Uint8Array(3), 'toto')
-      } catch(e) { console.log(e.code); console.log(e.stack) } }, 500)
-    */
    
     const ui = stores.ui
     ui.etroite = $q.screen.width < ui.seuillarge
@@ -529,23 +520,6 @@ export default {
     const infonet = ref(false)
     const infoidb = ref(false)
     const drc = ref(false)
-
-    /* Gère le **changement de largeur** de la fenêtre selon la page actuellement affichée:
-    - si elle **devient** étroite, ferme le drawer de filtre
-    - si elle **devient** large, ET que la page a un filtre, ouvre le drawer de filtre
-    */
-    ui.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setEtroite'){
-          const et = ui.etroite
-          ui.menu = false
-          if (!et && ui.filtre) 
-              setTimeout(() => {
-                ui.menu = true
-              }, 500)
-          }
-      })
-    })
 
     return {
       session,

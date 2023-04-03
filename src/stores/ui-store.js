@@ -8,8 +8,8 @@ export const useUiStore = defineStore('ui', {
     pageback: '',
     pagetab: '',
 
-    pagesF: new Set(['compta', 'chats', 'tribus', 'tribu', 'people', 'groupes', 'groupesac', 'groupe']),
-    tabF: new Set(['chats', 'membres']),
+    pagesF: new Set(['chats', 'tribus', 'tribu', 'people', 'groupes', 'groupesac', 'groupe']),
+    tabF: new Set(['membres']),
     pagesB: new Set(['tribus', 'groupes', 'groupesac']),
     menu: false,
 
@@ -48,6 +48,9 @@ export const useUiStore = defineStore('ui', {
   actions: {
     setEtroite (v) {
       this.etroite = v
+      this.menu = false
+      if (!this.etroite && this.filtre) 
+        setTimeout(() => { this.menu = true }, 500)
     },
     async setPage (p, tab) {
       this.menu = false
