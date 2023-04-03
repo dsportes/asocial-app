@@ -1,5 +1,5 @@
 <template>
-  <q-page>
+  <div>
     <div class="row q-mx-lg justify-center fs-md">
 
       <!-- Déconnexion -->
@@ -165,7 +165,7 @@
       <outils-tests :close="closeOutils"/>
     </q-dialog>
 
-  </q-page>
+  </div>
 </template>
 
 <script>

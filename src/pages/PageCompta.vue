@@ -1,16 +1,5 @@
 <template>
 <div>
-  <!--
-  <q-toolbar class="row justify-between">
-    <q-btn v-if="tab==='notif'" class="col-auto q-mr-md" dense size="md" color="warning" 
-      icon="check" :label="$t('jailu')" @click="vuclose()"/>
-    <q-tabs  class="col" v-model="tab" inline-label outside-arrows mobile-arrows no-caps>
-      <q-tab name="notif" :label="$t('PNCntf')" @click="tab='notif'"/>
-      <q-tab name="compta" :label="$t('PNCesp')" @click="tab='compta'"/>
-      <q-tab name="chats" :label="$t('PNCchats')" @click="tab='chats'"/>
-    </q-tabs>
-  </q-toolbar>
--->
   <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto" :c="avStore.compta.compteurs"/>
 
   <div v-if="ui.pagetab==='notif'" class="q-pa-sm">

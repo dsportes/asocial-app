@@ -1,5 +1,5 @@
 <template>
-  <q-card class="q-pa-sm full-width">
+  <div class="q-pa-sm full-width">
 
     <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
       <div class="titre-md">{{$t('CPTal1a', [c.pc1])}}</div>
@@ -86,7 +86,7 @@
       </div>
     </div>
 
-  </q-card>
+  </div>
 </template>
 
 <script>

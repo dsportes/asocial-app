@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-sm">
+  <q-page>
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
     <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps dense color="primary" 

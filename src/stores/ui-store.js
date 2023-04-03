@@ -8,7 +8,12 @@ export const useUiStore = defineStore('ui', {
     pageback: '',
     pagetab: '',
 
-    filtre: false,
+    pagesF: new Set(['compta', 'chats', 'tribus', 'tribu', 'people', 'groupes', 'groupesac', 'groupe']),
+    tabF: new Set(['chats', 'membres']),
+    pagesB: new Set(['tribus', 'groupes', 'groupesac']),
+    menu: false,
+
+    // filtre: false,
 
     etroite: false,
     seuillarge: 800,
@@ -34,6 +39,10 @@ export const useUiStore = defineStore('ui', {
   }),
 
   getters: {
+    filtre: (state) => {
+      if (!state.pagesF.has(state.page)) return false
+      return !state.pagetab || state.tabF.has(state.pagetab)
+    }
   },
 
   actions: {
@@ -42,20 +51,16 @@ export const useUiStore = defineStore('ui', {
     },
     async setPage (p, tab) {
       this.menu = false
-      const pagesF = new Set(['chats', 'tribus', 'tribu', 'people', 'groupes', 'groupesac', 'groupe'])
-      const pagesB = new Set(['tribus', 'groupes', 'groupesac'])
-      this.pageback = pagesB.has(this.page) ? this.page : ''
+      this.pageback = this.pagesB.has(this.page) ? this.page : ''
       this.page = null
       await sleep(200)
       this.page = p
-      this.filtre = pagesF.has(p)
-      // ouvre le filtre si la page en a un ET que la fenêtre est large
-      if (this.filtre && !this.etroite) this.menu = true
       this.setPageTab(tab || '')
     },
 
     setPageTab (tab) {
       this.pagetab = tab
+      this.menu = this.filtre && !this.etroite
     },
 
     async setPageBack () {

@@ -172,12 +172,12 @@ export function normpath (s, dot) { return s.replace(dot ? regexdot : regex, '_'
 
 export function edvol (vol) {
   const v = vol || 0
-  if (v < 1000) return v + 'o'
-  if (v < 1000000) return (v / 1000).toPrecision(3) + 'Ko'
-  if (v < 1000000000) return (v / 1000000).toPrecision(3) + 'Mo'
-  if (v < 1000000000000) return (v / 1000000000).toPrecision(3) + 'Go'
-  if (v < 1000000000000000) return (v / 1000000000000).toPrecision(3) + 'To'
-  return (v / 1000000000000000).toPrecision(3) + 'Po'
+  if (v < 1000) return v + 'B'
+  if (v < 1000000) return (v / 1000).toPrecision(3) + 'KB'
+  if (v < 1000000000) return (v / 1000000).toPrecision(3) + 'MB'
+  if (v < 1000000000000) return (v / 1000000000).toPrecision(3) + 'GB'
+  if (v < 1000000000000000) return (v / 1000000000000).toPrecision(3) + 'TB'
+  return (v / 1000000000000000).toPrecision(3) + 'PB'
 }
 
 export async function readFile (file, bin) {

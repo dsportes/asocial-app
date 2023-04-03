@@ -172,7 +172,7 @@
       <q-toolbar-title class="titre-lg text-center"><span>{{titrePage}}</span>
       </q-toolbar-title>
 
-      <q-btn v-if="ui.etroite && ui.filtre" class='q-mr-sm text-warning'
+      <q-btn v-if="ui.etroite && ui.filtre" color="warning"
         dense size="md" icon="search" @click="ouvrFiltre">
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </q-btn>
@@ -193,8 +193,8 @@
     <q-toolbar v-if="ui.page === 'groupe'" inset 
       class="full-width bg-secondary text-white row justify-between">
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
-        <q-tab name="notif" :label="$t('PGtgr')" @click="ui.setPageTab('groupe')"/>
-        <q-tab name="compta" :label="$t('PGtmb')" @click="ui.setPageTab('membres')"/>
+        <q-tab name="groupe" :label="$t('PGtgr')" @click="ui.setPageTab('groupe')"/>
+        <q-tab name="membres" :label="$t('PGtmb')" @click="ui.setPageTab('membres')"/>
       </q-tabs>
       <q-btn class="col-auto q-px-sm" dense size="md" color="warning" 
         icon="check" :label="$t('PGsec')" @click="ui.secrets()"/>
@@ -431,7 +431,7 @@ export default {
       let arg = ''
       switch (p) {
         case 'tribu' : { arg = getNg(this.session.tribuCId).nom; break }
-        case 'chats' : { arg = this.avStore.avC.nom; break }
+        case 'chats' : { arg = this.avStore.avC.na.nom; break }
         case 'sponsorings' : { arg = this.avStore.avC.na.nom; break }
         case 'groupesac' : { arg = this.avStore.avC.na.nom; break }
         case 'groupe' : { arg = this.avStore.grC.na.nom; break }
@@ -569,6 +569,9 @@ export default {
 .animate__slideOutLeft {
   --animate-duration: 0.2s;
 }
+/* Sinon les boutons en haut à droite dans toolbar sont partiellement masqués à droite par 
+un élément qui apparaît quand le drawer est caché*/
+.q-drawer__opener { z-index: 1 !important }
 </style>
 
 <style lang="css">
