@@ -21,6 +21,10 @@ export const useGroupeStore = defineStore('groupe', {
       const e = state.map.get(stores.session.groupeId)
       return e ? e.groupe : null 
     },
+
+    egrC (state) { 
+      return state.map.get(stores.session.groupeId)
+    },
     
     /* Map de TOUS les groupes. 
       clé: id du groupe, 
@@ -72,6 +76,14 @@ export const useGroupeStore = defineStore('groupe', {
         return false
       }
     },
+    compteEstAnimC: (state) => {
+      const e = state.map.get(stores.session.groupeId)
+      if (!e) return false
+      const ast = e.groupe.ast
+      for (const m of e.mbacs) if (ast[m.ids] === 22) return true
+      return false
+    },
+
     /*
     // Array des membres avatars du compte
     getMembresAC: (state) => { return (id) => {
@@ -132,6 +144,26 @@ export const useGroupeStore = defineStore('groupe', {
     pgLg: (state) => {
       const f = stores.filtre.filtre.groupes
       return f.tous ? state.groupes : state.groupesAC
+    },
+
+    // PageGroupe - membres people ***************************************************
+    pgLmFT: (state) => {
+      function f0 (a, b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
+      const f = stores.filtre.filtre.groupe
+      const r = []
+      for (const e of state.pgLm) {
+        // TODO
+        r.push(t)
+      }
+      r.sort(f0)
+      return r
+    },
+
+    pgLm (state) {
+      const t = []
+      const e = state.map.get(stores.session.groupeId)
+      if (e) e.membres.forEach(m => { if (!m.estAc) t.push(e) })
+      return t
     },
 
   },

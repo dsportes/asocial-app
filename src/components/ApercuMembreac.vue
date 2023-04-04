@@ -5,11 +5,11 @@
     </div>
 
     <!-- Dialogue d'édition -->
-    <q-dialog v-model="edit" persistent>
+    <q-dialog v-model="editX" persistent>
       <q-card class="moyennelargeur shadow-8">
         <q-toolbar class="bg-secondary text-white">
           <q-toolbar-title class="titre-lg full-width">{{$t('CHtxt')}}</q-toolbar-title>
-          <q-btn dense flat size="md" icon="close" @click="edit=false"/>
+          <q-btn dense flat size="md" icon="close" @click="editX=false"/>
         </q-toolbar>
 
       </q-card>
@@ -18,21 +18,20 @@
 </template>
 <script>
 
-import { toRef, ref, watch } from 'vue'
+// import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
 export default {
   name: 'ApercuMembreac',
 
-  props: { idg: Number, im: Number, idx: Number },
+  props: { mb: Object, idx: Number, edit: Function },
 
   components: {  },
 
   computed: { },
 
   data () { return {
-    edit: false,
   }},
 
   methods: {
@@ -40,10 +39,12 @@ export default {
   },
 
   setup (props) {
-    const idg = toRef(props, 'idg')
-    const im = toRef(props, 'im')
     const session = stores.session
     const gSt = stores.groupe
+
+    /*
+    const idg = toRef(props, 'idg')
+    const im = toRef(props, 'im')
 
     function getM () { return gSt.getMbac(idg.value, im.value) }
 
@@ -58,24 +59,24 @@ export default {
       })
     })
 
-    /* Nécessaire pour tracker le changement d'id
-    Dans une liste le composant N'EST PAS rechargé quand la liste change */
+    // Nécessaire pour tracker le changement d'id
+    // Dans une liste le composant N'EST PAS rechargé quand la liste change
     watch(() => idg.value, (ap, av) => {
           mb.value = getM()
       }
     )
 
-    /* Nécessaire pour tracker le changement d'id
-    Dans une liste le composant N'EST PAS rechargé quand la liste change */
+    // Nécessaire pour tracker le changement d'id
+    // Dans une liste le composant N'EST PAS rechargé quand la liste change
     watch(() => im.value, (ap, av) => {
           mb.value = getM()
       }
     )
+    */
 
     return {
       session,
-      gSt,
-      mb
+      gSt
     }
   }
 }

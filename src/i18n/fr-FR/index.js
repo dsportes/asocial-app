@@ -20,6 +20,8 @@ export default {
   valider: 'Valider',
   renoncer: 'Renoncer',
   corriger: 'Corriger',
+  confirm: 'Pour confirmer taper {0}',
+  rienconf: 'Rien à confirmer',
   creer: 'Créer',
   obs: '_Obsolète_',
   annuler: 'Annuler',
@@ -45,6 +47,43 @@ export default {
   gravite0: '(ignorer)',
   gravite1: 'normale ou importante',
   gravite2: 'importante',
+
+  /*
+  - 10: contact, 
+  - 20,21,22: invité en tant que lecteur / auteur / animateur, 
+  - 30,31,32: **actif** (invitation acceptée) en tant que lecteur / auteur / animateur, 
+  - 40: invitation refusée,
+  - 50: résilié / suspendu, 
+  - 0: disparu / oublié.
+  */
+  statutmb0: 'Membre "disparu" (pas / plus de compte actif)',
+  statutmb10: 'Simple contact du groupe',
+  statutmb20: 'Invité à être "lecteur"',
+  statutmb21: 'Invité à être "auteur"',
+  statutmb22: 'Invité à être "animateur"',
+  statutmb30: 'Membre actif "lecteur"',
+  statutmb31: 'Membre actif "auteur"',
+  statutmb32: 'Membre actif "animateur"',
+  statutmb40: 'Membre actif "lecteur"',
+  statutmb50: 'Membre "résilié" (peut être ré-invité)',
+
+  action1: 'L\'oublier définitivement',
+  action2: 'Supprimer son invitation',
+  action2b: 'Supprimer son invitation ET l\'oublier',
+  action3: 'Résilier son accès au groupe',
+  action3b: 'Résilier son accès au groupe ET l\'oublier',
+
+
+  action22: 'Changer son invitation en "animateur"',
+  action21: 'Changer son invitation en "auteur"',
+  action20: 'Changer son invitation en "lecteur"',
+  action32: 'Changer son statut en "animateur"',
+  action31: 'Changer son statut en "auteur"',
+  action30: 'Changer son statur en "lecteur"',
+  action42: 'Le ré-inviter comme "animateur"',
+  action41: 'Le ré-inviter comme "auteur"',
+  action40: 'Le ré-inviter comme "lecteur"',
+
 
   roletribu0: '(ignorer)',
   roletribu1: 'Compte de ma tribu',
@@ -730,9 +769,23 @@ export default {
   PGsec: 'Ses secrets',
   PGfh: 'Ce groupe N\'EST PLUS hébergé, disparition {0}',
   PGhb: 'Groupe hébergé par {0}',
+  PGheb: 'Hébergeur du groupe.',
+  PGfond: 'Fondateur.',
+  PGct1: 'Inscrit comme "contact" par {0}.',
+  PGct2: 'Inscrit comme "contact" par #{0} (oublié ou disparu).',
   PGferme: 'Invitations bloquées. Aucun vote pour réouvrir | Invitations bloquées. Un vote pour réouvrir | Invitations bloquées. {count} votes pour réouvrir',
   PGouvert: 'Invitations autorisées',
-  
+  PGnope: 'Le groupe n\'a aucun autre membre que les avatars du compte',
+  PGnomb: 'Aucun membre (sur {0}) ne répond au critère de sélection',
+  PGpasanst1: 'Vous n\'êtes pas animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre',
+  PGpasanst2: 'Même en tant qu\'animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre lui-même animateur',
+  PGchanger: 'Changer...',
+  PGavote: 'A voté pour autoriser les invitations au groupe',
+  PGddi: 'Dernière invitation',
+  PGdda: 'Premier début d\'activité',
+  PGdfa: 'Dernière fin d\'activité',
+
+
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',
   PMEmod: 'Mode foncé / clair',

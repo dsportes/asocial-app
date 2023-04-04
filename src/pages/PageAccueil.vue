@@ -226,7 +226,7 @@ export default {
 
     infoSession () { 
       this.ui.setPage('session')
-    },
+    }
   },
 
   data () {

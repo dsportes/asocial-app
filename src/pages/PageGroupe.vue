@@ -1,13 +1,26 @@
 <template>
-  <q-page>
+<q-page>
+  <div v-if="ui.pagetab==='groupe'" class="q-pa-sm">
+    <apercu-groupe class="q-my-sm" :eltg="gSt.egrC" :idx="0"/>
+  </div>
 
-    <!-- Dialogue d'édition de la carte de visite -->
-    <q-dialog v-model="editCv" persistent>
-      <carte-visite :photo-init="eg.groupe.photo || photoDef" :info-init="eg.groupe.info" :na="eg.groupe.na"
-        :close="closeCV" @ok="cvchangee"/>
-    </q-dialog>
+  <div v-if="ui.pagetab==='membres'" class="q-pa-sm">
+    <div v-if="!gSt.pgLm.length" class="titre-lg text-italic">
+      {{$t('PGnope')}}</div>
+    <div v-if="gSt.pgLm.length && !gSt.pgLmFT.length" class="titre-lg text-italic">
+      {{$t('PGnomb', [gSt.pgLm.length])}}</div>
 
-  </q-page>
+    <apercu-membrepe v-for="(m, idx) of gSt.pgLmFT" :key="idx"
+      class="q-my-sm" :mb="m" :idx="idx"/>
+  </div>
+
+  <!-- Dialogue d'édition de la carte de visite -->
+  <q-dialog v-model="editCv" persistent>
+    <carte-visite :photo-init="eg.groupe.photo || photoDef" :info-init="eg.groupe.info" :na="eg.groupe.na"
+      :close="closeCV" @ok="cvchangee"/>
+  </q-dialog>
+
+</q-page>
 </template>
 
 <script>
@@ -20,6 +33,7 @@ export default {
   },
 
   methods: {
+    // Fonctions d'édition des éléments du groupe (boutons dans "apercu")
     async edit (cible) {
       if (!await this.session.edit()) return
       switch (cible) {
@@ -58,9 +72,12 @@ export default {
   },
 
   setup () {
+    const session = stores.session
+    const gS = stores.groupe
     return {
       ui: stores.ui,
-      session: stores.session
+      session,
+      gS
     }
   }
 
