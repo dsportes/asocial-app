@@ -1,9 +1,11 @@
 <template>
 <q-page>
+  <!-- Tab "groupe" -------------------------------------------------->
   <div v-if="ui.pagetab==='groupe'" class="q-pa-sm">
     <apercu-groupe class="q-my-sm" :eltg="gSt.egrC" :idx="0"/>
   </div>
 
+  <!-- Tab "membres" -------------------------------------------------->
   <div v-if="ui.pagetab==='membres'" class="q-pa-sm">
     <div v-if="!gSt.pgLm.length" class="titre-lg text-italic">
       {{$t('PGnope')}}</div>
@@ -14,20 +16,17 @@
       class="q-my-sm" :mb="m" :idx="idx"/>
   </div>
 
-  <!-- Dialogue d'édition de la carte de visite -->
-  <q-dialog v-model="editCv" persistent>
-    <carte-visite :photo-init="eg.groupe.photo || photoDef" :info-init="eg.groupe.info" :na="eg.groupe.na"
-      :close="closeCV" @ok="cvchangee"/>
-  </q-dialog>
-
 </q-page>
 </template>
 
 <script>
 import stores from '../stores/stores.mjs'
+import ApercuMembrepe from '../components/ApercuMembrepe.vue'
 
 export default {
   name: 'PageGroupe',
+
+  components: { ApercuMembrepe },
 
   computed: {
   },
@@ -37,7 +36,6 @@ export default {
     async edit (cible) {
       if (!await this.session.edit()) return
       switch (cible) {
-        case 'cv' : return await editerCV()
         case 'quotas' : return await editerQuotas()
         case 'vote' : return await editerVote()
         case 'heb' : return await editerHeb()

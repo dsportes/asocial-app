@@ -1,39 +1,20 @@
 <template>
-  <q-card :class="'row items-start ' + dkli(idx)">
-    <div class="col-auto items-center q-mr-sm">
-      <img class="photomax" :src="avatar.na.photoDef" />
-    </div>
-    <div class="col">
-      <div>
-        <span class="text-bold fs-md q-mr-sm">{{na.nomc}}</span> 
-        <span class="text-bold fs-md q-mr-sm">[{{$t('moi')}}]</span> 
-        <span class="text-bold fs-sm font-mono q-mr-sm">#{{na.id}}</span> 
-      </div>
-      <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
-        zoom maxh="4rem" :texte="info"/>
-      <div v-else class="text-italic">{{$t('FAnocv')}}</div>
-      <q-btn v-if="!estComptable && edit" class="q-my-xs" flat size="sm" :label="$t('CVedit')" 
-        icon="edit" dense color="primary" @click="editerCV"/>
-      <div class="q-mt-sm" v-if="avatar.pc">
-        <div>
-          <span class="titre-md text-italic">{{$t('FApc')}}</span>
-          <q-btn v-if="edit" class="q-ml-lg" dense flat color="primary" size="sm"
-            :label="$t('FApcms')" @click="editerpc"/>
-         </div>
-        <div class="q-ml-lg font-mono fs-md text-bold">[{{avatar.pc}}]</div>
-      </div>
-      <div v-else>
-        <span class="titre-md text-italic">{{$t('FAnpc')}}</span>
-        <q-btn v-if="edit" class="q-ml-sm" dense flat color="primary" size="sm"
-          :label="$t('FAdeclpc')" @click="editerpc"/>
-      </div>
-    </div>
+  <q-card :class="dkli(idx)">
+    <apercu-genx :na="na" :cv="avatar.cv" :idx="idx" est-avc :cvchangee="cvchangee"/>
 
-    <!-- Dialogue d'édition de la carte de visite -->
-    <q-dialog v-model="edition" persistent>
-      <carte-visite :photo-init="avatar.na.photoDef" :info-init="info" :na="na"
-        :close="closeCV" @ok="cvchangee"/>
-    </q-dialog>
+    <div class="q-mt-sm" v-if="avatar.pc">
+      <div>
+        <span class="titre-md text-italic">{{$t('FApc')}}</span>
+        <q-btn v-if="edit" class="q-ml-lg" dense flat color="primary" size="sm"
+          :label="$t('FApcms')" @click="editerpc"/>
+        </div>
+      <div class="q-ml-lg font-mono fs-md text-bold">[{{avatar.pc}}]</div>
+    </div>
+    <div v-else>
+      <span class="titre-md text-italic">{{$t('FAnpc')}}</span>
+      <q-btn v-if="edit && !avatar.na.estComptable" class="q-ml-sm" dense flat color="primary" size="sm"
+        :label="$t('FAdeclpc')" @click="editerpc"/>
+    </div>
 
     <!-- Dialogue d'édition de la phrase de contact -->
     <q-dialog v-model="editionpc" persistent>
@@ -66,11 +47,9 @@
 import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { IDCOMPTABLE } from '../app/api.mjs'
-import ShowHtml from './ShowHtml.vue'
-import CarteVisite from './CarteVisite.vue'
 import { MajCv, GetAvatarPC, ChangementPC } from '../app/operations.mjs'
 import BoutonHelp from './BoutonHelp.vue'
+import ApercuGenx from './ApercuGenx.vue'
 import { afficherDiag } from '../app/util.mjs'
 import { PhraseContact } from '../app/modele.mjs'
 
@@ -79,16 +58,13 @@ export default {
 
   props: { na: Object, idx: Number, edit: Boolean },
 
-  components: { ShowHtml, CarteVisite, BoutonHelp },
+  components: { BoutonHelp, ApercuGenx },
 
   computed: {
-    info () { return this.avatar.cv ? this.avatar.cv.info : '' },
-    estComptable () { return this.na.id === IDCOMPTABLE }
   },
 
   data () {
     return {
-      edition: false,
       editionpc: false,
       pc: '',
       isPwd: false
@@ -98,15 +74,6 @@ export default {
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     r1 (val) { return (val.length > 15 && val.length < 33) || this.$t('NP16') },
-    async editerCV () { 
-      if (!await this.session.edit()) return
-      if (this.avatar.id === IDCOMPTABLE) {
-        await afficherDiag(this.$t('FAerr4'))
-        return
-      }
-      this.edition = true
-    },
-    closeCV () { this.edition = false },
     async cvchangee (res) {
       if (res && this.na) {
         await new MajCv().run(this.avatar, res.ph, res.info)
@@ -115,10 +82,6 @@ export default {
     razphrase () { this.pc = '' },
     async editerpc () {
       if (!await this.session.edit()) return
-      if (this.avatar.id === IDCOMPTABLE) {
-        await afficherDiag(this.$t('FAerr5'))
-        return
-      }
       this.editionpc = true
       this.pc = this.avatar.pc || ''
     },

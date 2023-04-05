@@ -181,7 +181,7 @@ export const usePeopleStore = defineStore('people', {
       return { // args de l'opération DisparitionCompte
         idt: stores.session.tribuId,
         idc: na.id,
-        hrnd: hash(u8ToB64(na.rnd))
+        hrnd: na.hrnd
       }
     },
   

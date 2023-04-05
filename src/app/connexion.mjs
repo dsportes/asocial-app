@@ -780,7 +780,7 @@ export class AcceptationSponsoring extends OperationUI {
       - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
       - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
       */
-      const mbtrid = hash(u8ToB64(sp.naf.rnd))
+      const mbtrid = sp.naf.hrnd
       const na = await crypter(sp.nct.rnd, new Uint8Array(encode([sp.naf.nom, sp.naf.rnd])))
       const x = { na, q1: sp.quotas[0], q2: sp.quotas[1] }
       if (sp.sp) x.sp = true

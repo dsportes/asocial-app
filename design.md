@@ -1,7 +1,7 @@
 
 TODO next :
-- Comptable : changer de tribu
-- ApercuAvatar : vérifier les restrictions d'accès - Phrase de contact - Ops
+- Comptable : changer de tribu ??? fait ???
+- BUG : julien -> chats -> people Comptable appraît ssd93
 - sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à VERIFIER !!!!!!!!!!!!!!!
 
 # Application front-end A-social

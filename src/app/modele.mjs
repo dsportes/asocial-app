@@ -120,6 +120,13 @@ export class NomGenerique {
     return this.nom === ng.nom && this.id === ng.id && egaliteU8(this.rnd, ng.rnd)
   }
 
+  get defIcon () {
+    const cfg = stores.config
+    if (this.estComptable) return cfg.iconSuperman
+    if (this.estGroupe) return cfg.iconGroupe
+    return cfg.iconAvatar
+  }
+
   get info () {
     if (this.id === IDCOMPTABLE) return stores.config.nomDuComptable
     const cv = this.getCv(this.id)
@@ -132,6 +139,7 @@ export class NomGenerique {
     return cv ? cv.photo : ''
   }
 
+  get hrnd () { return hash(u8ToB64(this.rnd)) }
 }
 
 export class NomAvatar extends NomGenerique {
@@ -688,7 +696,7 @@ export class Tribu2 extends GenDoc {
       q1: q1,
       q2: q2,
     }
-    r.mbtr['' + hash(naComptable.rnd)] = new Uint8Array(encode(e))
+    r.mbtr[na.hrnd] = new Uint8Array(encode(e))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribu2s', id: r.id, v: r.v, iv: r.iv, _data_ }
   }
@@ -861,7 +869,6 @@ export class Cv extends GenDoc {
 */
 
 export class Compta extends GenDoc {
-  get estSponsor () { return this.stp === 1 }
   get stn () { return this.blocage ? this.blocage.stn : 0 }
   get clet () { return this.nct.rnd }
 

@@ -103,9 +103,9 @@ args.token
 args.id : id de l'avatar dont la Cv est mise à jour
 args.v: version de l'avatar incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
 args.cva: {v, photo, info} crypté par la clé de l'avatar
-args.lmbs: array des [idg, im] des membres où dupliquer cette Cv
-args.lchats: array des [id, ids] des chats où dupliquer cette Cv
-args.ltribus: array des id des tribu dont l'avatar est sponsor et où duppliquer la CV
+SI C'EST LE COMPTE, pour dupliquer la CV
+args.idTr: id de sa tribu (où dupliquer la CV)
+args.hrnd: clé d'entrée de la map mbtr
 */
 export class MajCv extends OperationUI {
   constructor () { super($t('OPmcv')) }
@@ -114,12 +114,15 @@ export class MajCv extends OperationUI {
     try {
       const session = stores.session
       while (true) {
-        const lmbs = [] // TODO
-        const lchats = [] // TODO
-        const ltribus = [] // TODO
+        let idtr = 0, hrnd = 0
+        const compta = stores.avatar.compte
+        if (compta.id === avatar.id) {
+          idtr = compta.idt
+          hrnd = avatar.na.hrmd
+        }
         const v = avatar.v + 1
         const cva = await crypter(getCle(avatar.id), new Uint8Array(encode({v, photo, info})))
-        const args = { token: session.authToken, id: avatar.id, v, cva, lmbs, lchats, ltribus }
+        const args = { token: session.authToken, id: avatar.id, v, cva, idTr, hrnd }
         const ret = this.tr(await post(this, 'MajCv', args))
         if (ret.OK) break
         await sleep(500)
@@ -130,6 +133,34 @@ export class MajCv extends OperationUI {
     }
   }
 }
+
+/* Maj de la carte de visite d'un groupe ******************************************
+args.token: éléments d'authentification du compte.
+args.id : id du groupe dont la Cv est mise à jour
+args.v: version du groupe incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
+args.cvg: {v, photo, info} crypté par la clé du groupe
+*/
+export class MajCvGr extends OperationUI {
+  constructor () { super($t('OPmcv')) }
+
+  async run (groupe, photo, info) {
+    try {
+      const session = stores.session
+      while (true) {
+        const v = groupe.v + 1
+        const cvg = await crypter(getCle(groupe.id), new Uint8Array(encode({v, photo, info})))
+        const args = { token: session.authToken, id: avatar.id, v, cvg }
+        const ret = this.tr(await post(this, 'MajCvGr', args))
+        if (ret.OK) break
+        await sleep(500)
+      }
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 
 /** Changement de phrase secrete ****************************************************
 args.token: éléments d'authentification du compte.
@@ -599,8 +630,7 @@ export class SetAttributTribu2 extends OperationUI {
   async run (id, na, attr, val, val2, exq) {
     try {
       const session = stores.session
-      const hrnd = hash(u8ToB64(na.rnd))
-      const args = { token: session.authToken, id, hrnd, attr, 
+      const args = { token: session.authToken, id, hrnd: na.hrnd, attr, 
         val, val2: val2 || 0, exq: exq || false }
       this.tr(await post(this, 'SetAttributTribu2', args))
       this.finOK()
@@ -671,7 +701,7 @@ export class ChangerTribu extends OperationUI {
         id: na.id,
         trIdav: tribu2.id,
         trIdap: nvTrid,
-        hrnd: hash(u8ToB64(na.rnd)), 
+        hrnd: na.hrnd, 
         mbtr, nctk, nctkc, napt
       }
       const ret = this.tr(await post(this, 'ChangerTribu', args))

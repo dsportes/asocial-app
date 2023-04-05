@@ -1,43 +1,33 @@
 <template>
-  <q-card>
-    <div :class="'column q-px-sm ' + dkli(idx)">
-      <div class="col-auto items-center q-mr-sm">
-        <img class="photomax" :src="photo" />
+  <div>
+    <div :class="dkli(idx)">
+      <apercu-genx :na="mb.na" :cv="mb.cv" :ids="mb.ids" :idx="idx" detail-people/>
+
+      <div>
+        <span class="fs-md q-mr-md">{{$t('statutmb' + st)}}</span>
+        <q-btn dense size="sm" color="primary" icon="settings" :label="$t('PGchanger')"/>
       </div>
-      <div class="col">
-        <div>
-          <span class="text-bold fs-md q-mr-sm">{{mb.na.nomc}}</span>
-          <span class="text-bold fs-sm font-mono q-mr-sm">#{{mb.ids}}</span> 
-        </div>
-        <show-html v-if="info" class="q-my-xs bord" :idx="idx" zoom maxh="4rem" :texte="info"/>
-        <div v-else class="text-italic">{{$t('PGnocv')}}</div>
 
-        <div>
-          <span class="fs-md q-mr-md">{{$t('statutmb' + st)}}</span>
-          <q-btn dense size="sm" color="primary" icon="settings" :label="$t('PGchanger')"/>
-        </div>
+      <div class="fs-md">
+        <span v-if="m.ids === gSt.grC.imh" class="q-mr-xs">{{$t('PCheb')}}</span>
+        <span v-if="m.ids === 1" class="q-mr-xs">{{$t('PCfond')}}</span>
+        <span v-if="m.ids === gSt.grC.imh" class="q-mr-xs">{{$t('PCheb')}}</span>
+        <span v-if="m.idi && gSt.grC.ast[m.idi]" class="q-mr-xs">
+          {{$t('PCct1', [mbidi ? mbidi.na.nomc : '?'])}}</span>
+        <span v-if="m.idi && !gSt.grC.ast[m.idi]" class="q-mr-xs">{{$t('PCct2', [m.idi])}}</span>
+      </div>
 
-        <div class="fs-md">
-          <span v-if="m.ids === gSt.grC.imh" class="q-mr-xs">{{$t('PCheb')}}</span>
-          <span v-if="m.ids === 1" class="q-mr-xs">{{$t('PCfond')}}</span>
-          <span v-if="m.ids === gSt.grC.imh" class="q-mr-xs">{{$t('PCheb')}}</span>
-          <span v-if="m.idi && gSt.grC.ast[m.idi]" class="q-mr-xs">
-            {{$t('PCct1', [mbidi ? mbidi.na.nomc : '?'])}}</span>
-          <span v-if="m.idi && !gSt.grC.ast[m.idi]" class="q-mr-xs">{{$t('PCct2', [m.idi])}}</span>
-        </div>
+      <div v-if="mb.vote && gSt.grC.stx===2" class="titre-md text-italic">{{$t('PGavote')}}</div>
 
-        <div v-if="mb.vote && gSt.grC.stx===2" class="titre-md text-italic">{{$t('PGavote')}}</div>
-
-        <div class="row petite largeur titre-md text-italic">
-          <div col="4">{{$t('PGddi')}}</div>
-          <div col="4">{{$t('PGdda')}}</div>
-          <div col="4">{{$t('PGdfa')}}</div>
-        </div>
-        <div class="row petite largeur fs-md font-mono">
-          <div col="4">{{ddi}}</div>
-          <div col="4">{{dda}}</div>
-          <div col="4">{{dja}}</div>
-        </div>
+      <div class="row petite largeur titre-md text-italic">
+        <div col="4">{{$t('PGddi')}}</div>
+        <div col="4">{{$t('PGdda')}}</div>
+        <div col="4">{{$t('PGdfa')}}</div>
+      </div>
+      <div class="row petite largeur fs-md font-mono">
+        <div col="4">{{ddi}}</div>
+        <div col="4">{{dda}}</div>
+        <div col="4">{{dja}}</div>
       </div>
     </div>
 
@@ -85,7 +75,7 @@
         <bouton-confirm :actif="action!==0" :confirmer="actionSt"/>
       </q-card-actions>
     </q-dialog>
-  </q-card>
+  </div>
 </template>
 <script>
 // import { toRef, ref, watch } from 'vue'
@@ -93,13 +83,14 @@
 import { afficherDiag, dhcool } from 'src/app/util.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from './BoutonConfirm.vue'
+import ApercuGenx from './ApercuGenx.vue'
 
 export default {
   name: 'ApercuMembrepe',
 
   props: { mb: Object, idx: Number },
 
-  components: { BoutonConfirm },
+  components: { BoutonConfirm, ApercuGenx },
 
   computed: {
     photo () { return this.mb && this.mb.cv && this.mb.cv.photo ? this.mb.cv.photo : this.photoDef },
@@ -140,6 +131,10 @@ export default {
     closeSt () {
       this.chgSt = false
       this.action = 0
+    },
+    ouvrirdetails () {
+      this.session.setPeopleId(this.mb.na.id)
+      this.ui.detailspeople = true
     }
   },
 
