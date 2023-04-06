@@ -318,7 +318,7 @@
       </q-header>
 
       <q-page-container>
-        <q-card style="min-height:50vh" class="q-pa-sm largeur40">
+        <q-card class="q-pa-sm largeur40">
           <apercu-avatar edit :na="avStore.avC.na"/>
         </q-card>
       </q-page-container>

@@ -17,13 +17,13 @@
     <q-card-section v-if="enedition">
       <div class="q-mb-sm column justify-center">
         <q-file v-model="fileList" :label="$t('CVcph')" accept=".jpg, .jpeg, .png" max-file-size="4000000" max-file="1"/>
-        <div class="row justify-center">
+        <div class="row justify-center q-gutter-sm">
           <q-btn flat :disable="camOn" color="primary" :label="$t('CVdwc')" @click="startCam" />
           <q-btn flat :disable="!camOn" :label="$t('CVawc')" @click="stopCam" />
           <q-btn flat :disable="camOn" icon="flip_camera_ios" @click="flipCam" />
         </div>
         <q-btn flat :disable="!camOn" color="primary" :label="$t('CVpph')" @click="snapCam" />
-        <div class="row justify-center">
+        <div class="row justify-center q-gutter-sm">
           <q-btn icon="check" small-caps :disable="!file.b64" color="warning" :label="$t('CVtop')" @click="phok" />
           <q-btn icon="undo" small-caps :label="$t('CVmav')" @click="undoph" />
         </div>

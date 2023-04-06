@@ -9,19 +9,24 @@
   </q-header>
 
   <q-page-container>
-    <q-card style="min-height:50vh" class="q-pa-sm">
+    <q-card class="q-pa-sm">
       <apercu-people :id="session.peopleId" simple />
       <div class="row">
-        <div v-if="avStore.mbPeC && avStore.mbPeC.sp" class="titre-md text-bold text-warning">{{$t('PPsp', [avStore.tribuC.na.nom])}}</div>
-        <div v-else class="titre-md">{{$t('PPco', [avStore.tribuC.na.nom])}}</div>
-        <q-btn v-if="session.estComptable" class="q-ml-sm" dense color="primary" size="sm"
-          :label="$t('PPcht')" @click="chgTribu"/>
-        <q-btn v-if="session.estComptable" class="q-ml-sm" dense color="primary" size="sm"
-          :label="$t('PPchsp')" @click="chgSponsor"/>
+        <div v-if="avStore.mbPeC">
+          <div v-if="avStore.mbPeC.sp" class="titre-md text-bold text-warning">
+            {{$t('PPsp', [avStore.tribuC.na.nom])}}</div>
+          <div v-else class="titre-md">{{$t('PPco', [avStore.tribuC.na.nom])}}</div>
+        </div>
       </div>
 
-      <q-btn v-if="session.estComptable || session.estSponsor" class="q-my-sm" dense color="primary" size="sm"
+      <div class="row justify-center">
+        <q-btn v-if="session.estComptable" class="q-mr-sm" dense color="primary" size="sm"
+          :label="$t('PPcht')" @click="chgTribu"/>
+        <q-btn v-if="session.estComptable" class="q-mr-sm" dense color="primary" size="sm"
+          :label="$t('PPchsp')" @click="chgSponsor"/>
+        <q-btn v-if="session.estComptable || session.estSponsor" dense color="primary" size="sm"
           :label="$t('PPcompta')" @click="voirCompta"/>
+      </div>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
@@ -93,13 +98,19 @@
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
   <q-dialog v-model="cptdial" persistent full-height>
-    <q-card style="width: 800px; max-width: 80vw;">
-    <q-toolbar class="bg-secondary text-white">
-      <q-btn dense size="md" color="warning" icon="close" @click="cptdial = false"/>
-      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [p.na.nomc])}}</q-toolbar-title>
-    </q-toolbar>
-    <panel-compta :c="avStore.ccCpt" style="margin:0 auto"/>
-    </q-card>
+    <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
+      <q-header elevated class="bg-secondary text-white">
+        <q-toolbar>
+          <q-btn dense size="md" color="warning" icon="close" @click="cptdial = false"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [pStore.peC.na.nomc])}}</q-toolbar-title>
+        </q-toolbar>
+      </q-header>
+      <q-page-container>
+        <q-card>
+          <panel-compta :c="avStore.ccCpt" style="margin:0 auto"/>
+        </q-card>
+      </q-page-container>
+    </q-layout>
   </q-dialog>
 
 </q-layout>
@@ -124,6 +135,7 @@ export default {
   props: { close: Function },
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     pc1 () { return this.avStore.ccCpt.q1 ? Math.round((this.avStore.ccCpt.v1 * 100) / (this.avStore.ccCpt.q1 * UNITEV1)) : 0 },
     pc2 () { return this.avStore.ccCpt.q2 ? Math.round((this.avStore.ccCpt.v2 * 100) / (this.avStore.ccCpt.q2 * UNITEV2)) : 0 }
   },
@@ -142,7 +154,6 @@ export default {
   methods: {
     edv1 (v) { return edvol(v * UNITEV1) },
     edv2 (v) { return edvol(v * UNITEV2) },
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     fermer () { if (this.close) this.close() },
     chgTribu () { this.avStore.ppFiltre = ''; this.chgTr = true },
     chgSponsor () { this.chgSp = true },
@@ -196,4 +207,6 @@ export default {
   font-weight: bold
 .q-card__section
   padding: 2px !important
+.q-btn
+  padding: 0 3px !important
 </style>

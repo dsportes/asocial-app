@@ -87,7 +87,8 @@
 
     <div v-if="session.nivbl < 3">
       <div v-if="session.estSponsor" 
-        class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning text-center">{{$t('ACcptspons')}}</div>
+        class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning text-center">
+        {{$t('ACcptspons')}}</div>
 
       <div class="row items-center q-mx-lg justify-center fs-md">
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesav')"

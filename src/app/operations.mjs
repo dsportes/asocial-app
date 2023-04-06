@@ -114,10 +114,10 @@ export class MajCv extends OperationUI {
     try {
       const session = stores.session
       while (true) {
-        let idtr = 0, hrnd = 0
+        let idTr = 0, hrnd = 0
         const compta = stores.avatar.compte
         if (compta.id === avatar.id) {
-          idtr = compta.idt
+          idTr = compta.idt
           hrnd = avatar.na.hrmd
         }
         const v = avatar.v + 1
