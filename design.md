@@ -1,6 +1,5 @@
 
 TODO next :
-- BUG : julien -> chats -> people Comptable apparaît ssd93
 - sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à VERIFIER !!!!!!!!!!!!!!!
 
 # Application front-end A-social
