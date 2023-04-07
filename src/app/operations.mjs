@@ -2,10 +2,11 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { AppExc, appexc, AMJ } from './api.mjs'
-import { $t, hash, u8ToB64 } from './util.mjs'
+import { $t, rnd6 } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { GenDoc, NomAvatar, NomTribu, Avatar, Chat, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
+import { GenDoc, NomAvatar, NomTribu, NomGroupe, Avatar, Chat, 
+  Groupe, Membre, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
 import { decrypter } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
@@ -795,6 +796,44 @@ export class SetNotifG extends OperationUI {
       const session = stores.session
       const args = { token: session.authToken, notifG}
       this.tr(await post(this, 'SetNotifG', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Nouveau groupe *****************************************************
+args.token donne les éléments d'authentification du compte.
+args.rowGroupe : le groupe créé
+args.rowMembre : le membre
+args.id: id de l'avatar créateur
+args.quotas : [q1, q2] attribué au groupe
+args.ni: numéro d'invitation de son créateur (clé dans lgrk)
+args.avgr: élément de lgrk dans l'avatar créateur
+Retour:
+*/
+export class NouveauGroupe extends OperationUI {
+  constructor () { super($t('OPnvgr')) }
+
+  async run (nom, ferme, quotas) { // quotas: [q1, q2]
+    try {
+      const session = stores.session
+      const nag = new NomGroupe(nom)
+      const rowGroupe = await Groupe.rowNouveauGroupe(nag, ferme)
+      setNg(nag)
+      const na = getNg(session.avatarId)
+      const ni = rnd6()
+      // En UTC la division d'une date est multiple de 86400000
+      const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
+      const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
+      const dlv = AMJ.amjUtcDeT(tdlv * 86400000)
+
+      const rowMembre = await Membre.rowNouveauMembre (nag, na, 1, ni, 1, dlv)
+      const avgr = await crypter(session.clek, new Uint8Array(encode([nag.nom, nag.rnd, 1])))
+      const args = { token: session.authToken, rowGroupe, rowMembre, id: session.avatarId,
+        quotas: [quotas.q1, quotas.q2], ni, avgr, abPlus: [nag.id]}
+      this.tr(await post(this, 'NouveauGroupe', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)

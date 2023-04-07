@@ -95,7 +95,8 @@
           @click="ui.setPage('compte')">
           <q-badge color="teal-10" rounded floating>{{nbtav}}</q-badge>
         </q-btn>
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmesgr')">
+        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmesgr')"
+          @click="ui.setPage('groupes')">
           <q-badge color="teal-10" rounded floating>{{nbtgr}}</q-badge>
         </q-btn>
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesctc')"
@@ -123,7 +124,8 @@
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACsecrets')">
           <q-badge color="teal-10" rounded floating>{{nbavsecs}}</q-badge>
         </q-btn>
-        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACgroupes')">
+        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACgroupes')"
+          @click="ui.setPage('groupesac')">
           <q-badge color="teal-10" rounded floating>{{nbgrps}}</q-badge>
         </q-btn>
         <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACchats')"

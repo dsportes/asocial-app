@@ -76,7 +76,7 @@
               </q-item-section>
             </q-item>
             <q-item clickable>
-              <q-item-section>
+              <q-item-section clickable @click="ui.setPage('groupes')">
                 <q-item-label lines="1">{{$t('ACmesgr')}}</q-item-label>
               </q-item-section>
             </q-item>
@@ -113,7 +113,7 @@
               </q-item-section>
             </q-item>
             <q-item clickable>
-              <q-item-section>
+              <q-item-section clickable @click="ui.setPage('groupesac')">
                 <q-item-label lines="1">{{$t('ACgroupes')}}</q-item-label>
               </q-item-section>
             </q-item>
@@ -263,7 +263,7 @@
       <page-tribu class="page" v-if="ui.page === 'tribu'"/>
       <page-people class="page" v-if="ui.page === 'people'"/>
       <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
-      <page-groupesac class="page" v-if="ui.page === 'groupesac'"/>
+      <page-groupes class="page" v-if="ui.page === 'groupesac'"/>
       <page-groupe class="page" v-if="ui.page === 'groupe'"/>    
     </transition-group>
   </q-page-container>

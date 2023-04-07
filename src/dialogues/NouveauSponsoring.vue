@@ -9,7 +9,7 @@
   </q-header>
 
   <q-page-container>
-    <q-page :class="dkli()">
+    <q-page :class="dkli">
       <q-stepper v-model="step" vertical color="primary" animated>
         <q-step :name="1" :title="$t('NPphr')" icon="settings" :done="step > 1">
           <span class="fs-sm q-py-sm">{{$t('NPnpc')}}</span>
@@ -106,6 +106,7 @@ export default ({
   components: { ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp },
 
   computed: {
+    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     dlclass () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     avParrain () { return this.session.estSponsor || this.session.estComptable }
   },
@@ -156,7 +157,6 @@ export default ({
   },
 
   methods: {
-    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
     r1 (val) { return (val.length > 15 && val.length < 33) || this.$t('NP16') },

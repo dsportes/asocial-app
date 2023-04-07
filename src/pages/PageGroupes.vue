@@ -2,8 +2,8 @@
   <q-page class="q-pa-sm">
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <q-btn class="q-my-sm" size="md" flat dense color="primary" 
-      :label="$t('PGnv')" @click="ouvrirnt"/>
+    <q-btn class="q-my-sm" size="md" dense color="primary" 
+      :label="$t('PGcrea')" @click="nvGr"/>
 
     <div class="petitelargeur q-my-sm">
       <div class="row">
@@ -38,6 +38,29 @@
       </div>
     </div>
 
+    <!-- Nouveau groupe ------------------------------------------------>
+    <q-dialog v-model="crGr" persistent>
+      <q-card class="petitelargeur shadow-8 column">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" color="warning" icon="close" @click="closeGr"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PGcrea')}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+        <div class="q-pa-xs">
+          <div class="titre-md q-mb-xs text-center">{{$t('PGnom', [nom || '?'])}}</div>
+          <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="okNom"/>
+          <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
+          <choix-quotas :quotas="quotas" />
+          <q-checkbox v-model="ferme" class="cb" :label="$t('PGferme')" />
+          <q-card-actions align="right">
+            <q-btn dense flat color="warning" :label="$t('renoncer')" v-close-popup />
+            <q-btn dense flat color="primary" :disable="quotas.err || !nom"
+              :label="$t('creer')" v-close-popup @click="okCreation" />
+          </q-card-actions>
+        </div>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -45,11 +68,19 @@
 import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { edvol } from '../app/util.mjs'
+import ChoixQuotas from '../components/ChoixQuotas.vue'
+import NomAvatar from '../components/NomAvatar.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
+import ApercuGroupe from '../components/ApercuGroupe.vue'
+import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { NouveauGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'PageGroupes',
 
   props: { tous: Boolean },
+
+  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGroupe },
 
   computed: {
   },
@@ -63,24 +94,46 @@ export default {
     async courant (elt) {
       this.session.setGroupeId(elt.groupe.id)
       this.ui.setPage('groupe')
+    },
+
+    async nvGr () {
+      if (!await this.session.edit()) return
+      const cpt = this.avStore.compta.compteurs
+      let max1 = Math.floor(((cpt.q1 * UNITEV1) - cpt.v1) / UNITEV1)
+      if (max1 < 0) max1 = 0
+      let max2 = Math.floor(((cpt.q2 * UNITEV2) - cpt.v2) / UNITEV2)
+      if (max2 < 0) max2 = 0
+      this.quotas = { q1: 0, q2: 0, min1: 0, min2: 0, max1, max2, err: ''}
+      this.nom = ''
+      this.ferme = false
+      this.crGr = true
+    },
+    okNom (n) { this.nom = n },
+    closeGr () { this.crGr = false },
+    async okCreation () {
+      console.log(this.nom, this.quotas.q1, this.quotas.q2, this.ferme)
+      await new NouveauGroupe().run(this.nom, this.ferme, this.quotas)
     }
   },
 
   data () {
     return {
+      quotas: null, // { q1, q2, min1, min2, max1, max2, err}
+      crGr: false,
+      nom: '',
+      ferme: false
     }
   },
 
   setup (props) {
-    const gSt = stores.groupe
     const tous = toRef(props, 'tous')
     stores.filtre.filtre.groupes.tous = tous.value || false
-    const stats = stores.filtre.stats
     return {
       ui: stores.ui,
       session: stores.session,
-      stats,
-      gSt
+      avStore: stores.avatar,
+      stats: stores.filtre.stats,
+      gSt: stores.groupe
     }
   }
 

@@ -19,7 +19,7 @@
   </q-card-section>
 </template>
 <script>
-import { edvol, $t } from '../app/util.mjs'
+import { edvol } from '../app/util.mjs'
 import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import { UNITEV2, UNITEV1 } from '../app/api.mjs'

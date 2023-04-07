@@ -835,6 +835,8 @@ export class Avatar extends GenDoc {
     r.iv = GenDoc._iv(r.id, r.v)
     r.vcv = 0
     r.ivc = GenDoc._iv(r.id, r.vcv)
+    r.lgrk = {}
+    r.invits = {}
     const _data_ = new Uint8Array(encode(r))
     const row = { _nom: 'avatars', id: r.id, v: r.v, iv: r.iv, vcv: r.vcv, ivc: r.ivc, _data_ }
     return row
@@ -1189,7 +1191,7 @@ _data_:
 
 - `idhg` : id du compte hébergeur crypté par la clé du groupe.
 - `imh` : indice `im` du membre dont le compte est hébergeur.
-- `stx` : 1-ouvert (accepte de nouveaux membres), 2-fermé (ré-ouverture en vote)
+- `stx` : 0: ouvert (accepte de nouveaux membres), 1:fermé (ré-ouverture en vote)
 - `sty` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
 - `ast` : array des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
   - 10: contact, 
@@ -1207,15 +1209,13 @@ export class Groupe extends GenDoc {
   get na () { return getNg(this.id) }
   get nom () { return this.na.nom }
   get nomc () { return this.na.nomc }
-  get photo () { const cv = this.cv; return cv ? cv[0] : '' }
-  get info () { const cv = this.cv; return cv ? cv[1] : '' }
-  get pc1 () { return Math.round(this.v1 / UNITEV1 / this.q1) }
-  get pc2 () { return Math.round(this.v2 / UNITEV2 / this.q2) }
+  get pc1 () { return Math.round(this.vols.v1 / UNITEV1 / this.vols.q1) }
+  get pc2 () { return Math.round(this.vols.v2 / UNITEV2 / this.vols.q2) }
 
   async compile (row) {
     this.vsh = row.vsh || 0
     this.dfh = row.dfh || 0
-    this.stx = row.stx || 1
+    this.stx = row.stx || 0
     this.sty = row.sty || 0
     this.ast = row.ast || new Uint8Array([0])
     this.idh = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
@@ -1295,22 +1295,20 @@ export class Groupe extends GenDoc {
   }
   */
 
-  nouveau (id, forfaits) {
-    this.id = id
-    this.v = 0
-    this.dfh = 0
-    this.st = 10
-    this.mxim = 1
-    this.imh = 1
-    this.v1 = 0
-    this.v2 = 0
-    this.f1 = forfaits[0]
-    this.f2 = forfaits[1]
-    this.mc = {}
-    this.vsh = 0
-    return this
+  static async rowNouveauGroupe (na, ferme) {
+    const r = {
+      id: na.id,
+      v: 0,
+      dfh: 0,
+      stx: ferme ? 1 : 0,
+      sty: 0,
+      imh: 1,
+      ast: new Uint8Array([0, 32]),
+      idhg: await crypter(na.rnd, '' + stores.session.compteId)
+    }
+    const _data_ = new Uint8Array(encode(r))
+    return { _nom: 'groupes', id: r.id, v: r.v, _data_ }
   }
-
 
   async toIdhg (idc) {
     return await crypter(this.cle, '' + idc)
@@ -1341,7 +1339,7 @@ export class Groupe extends GenDoc {
 - `datag` : données, immuables, cryptées par la clé du groupe :
   - `nom` `rnd` : nom complet de l'avatar.
   - `ni` : numéro aléatoire d'invitation du membre. Permet de supprimer l'invitation et d'effacer le groupe dans son avatar (clé de `lgrk invits`).
-	- `idi` : indice du membre qui l'a inscrit en comme _contact_.
+	- `imc` : indice du membre qui l'a inscrit en comme _contact_.
 - `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
 */
 
@@ -1361,21 +1359,19 @@ export class Membre extends GenDoc {
     const data = decode(await decrypter(this.cleg, row.datag))
     this.na = new NomAvatar(data.nom, data.rnd)
     this.ni = data.ni
-    this.idi = data.idi
+    this.imc = data.imc
     this.estAc = stores.avatar.compte.estAc(this.na.id)
     if (!this.estAc) setNg(this.na)
     this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
   }
 
-  static async nouveau (nag, im, na, idi, ni) {
-    /* na du groupe, indice membre,
-    NomAvatar du membre, id de l'invitant (fac, sinon c'est le membre lui-même */
-    const _data_ = { id: nag.id, im, v: 0, vcv: 0, dda: 0, ddi: 0, dfa: 0, vote: 0, mc: new Uint8Array([]), info: null }
-    const data = { nom: na.nom, rnd: na.rnd, ni, idi: idi || na.id  }
-    _data_.datag = await crypter((nag.rnd, new Uint8Array(encode(data))))
-    const r = { _nom: 'membres', id: nag.id, im, v: 0, vcv: 0, _data_}
-    return new Uint8Array(encode(r))
+  static async rowNouveauMembre (nag, na, im, ni, imc, dlv) {
+    const r = { id: nag.id, ids: im, v: 0, dlv, ddi: 0, dda: 0, dfa: 0, mc: new Uint8Array([]) }
+    const x = { nom: na.nom, rnd: na.rnd, ni, imc }
+    r.datag = await crypter(nag.rnd, new Uint8Array(encode(x)))
+    const _data_ = new Uint8Array(encode(r))
+    return { _nom: 'membres', id: r.id, ids: r.ids, v: r.v, _data_ }
   }
 
 }

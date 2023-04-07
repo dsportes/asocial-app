@@ -402,6 +402,7 @@ export default {
   OPcps: 'Changer de phrase secrete de connexion',
   OPcpc: 'Changer de phrase de contact',
   OPccv: 'Rafraîchir des cartes de visite',
+  OPnvgr: 'Créer un nouveau groupe',
 
   OPnch: 'Ajouter un item sur un "chat"',
   OPsch: 'Sélectionner des "chats"',
@@ -759,7 +760,7 @@ export default {
 
   // Page groupes
   PGnv: 'Nouveau groupe',
-  PTvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
+  PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
   PGvut: 'Volume total réellement utilisé',
   PGvq: 'Somme des quotas attribués',
   PGnocv: 'Pas d\'autre information',
@@ -784,7 +785,10 @@ export default {
   PGddi: 'Dernière invitation',
   PGdda: 'Premier début d\'activité',
   PGdfa: 'Dernière fin d\'activité',
-
+  PGcrea: 'Création d\'un nouveau groupe',
+  PGnom: 'Nom du groupe à créer: {0}',
+  PGferme: 'Le groupe est "fermé", n\'accepte pas de nouveau membre',
+  PGquotas: 'Quotas de volume V1 / V2 maximum pour les secrets du groupe',
 
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',

@@ -6,6 +6,7 @@
   ],
 
   "fsSync": false,
+  "serveur2": "192.168.1.4",
   "serveur": "test.sportes.fr",
   "portupload": 33666,
 
