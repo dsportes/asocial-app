@@ -41,8 +41,8 @@ export const useGroupeStore = defineStore('groupe', {
       const m = new Map()
       const grIds = stores.avatar.getGrIds
       grIds.forEach(idg => {
-        const e = state.map.get(id)
-        if (e) m.set(id, e)
+        const e = state.map.get(idg)
+        if (e) m.set(idg, e)
       })
       return m
     },
@@ -136,7 +136,7 @@ export const useGroupeStore = defineStore('groupe', {
         stt.q1 += g.vols.q1 || 0
         stt.q2 += g.vols.q2 || 0
         // TODO
-        r.push(t)
+        r.push(e)
       }
       stores.filtre.stats.groupes = stt
       r.sort(f0)

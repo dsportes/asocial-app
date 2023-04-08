@@ -636,7 +636,7 @@ export class ConnexionCompte extends OperationUI {
         const vx = this.versions && this.versions[groupe.id] ? this.versions[groupe.id] : { v: 0 }
         const vsrv = vx.v
         if (vx.vols) groupe.vols = vx.vols
-        const na = getNg(id)
+        const na = getNg(groupe.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
         const [x1, x2] = await this.chargerSecrets(groupe.id, vidb, vsrv, true)
         n1 = x1

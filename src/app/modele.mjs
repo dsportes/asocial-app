@@ -1366,7 +1366,7 @@ export class Membre extends GenDoc {
     this.na = new NomAvatar(data.nom, data.rnd)
     this.ni = data.ni
     this.imc = data.imc
-    this.estAc = stores.avatar.compte.estAc(this.na.id)
+    this.estAc = stores.avatar.compta.estAc(this.na.id)
     if (!this.estAc) setNg(this.na)
     this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null

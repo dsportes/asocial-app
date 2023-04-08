@@ -21,11 +21,12 @@ Traiter l'hébergement, affichage et bouton
       </div>
     </div>
 
-    <apercu-membreac v-for="m in eg.mbac" :key="m.na.id" class="q-mt-sm" :idg="m.id" :im="m.ids"/>
+    <apercu-membreac v-for="m in eg.mbacs" :key="m.na.id" class="q-mt-sm" :idg="m.id" :im="m.ids"/>
   </div>
 </template>
 
 <script>
+import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuMembreac from './ApercuMembreac.vue'
 import ApercuGenx from './ApercuGenx.vue'
@@ -41,16 +42,16 @@ export default {
   components: { ApercuMembreac, ApercuGenx },
 
   computed: {
-    dfh () { return dhcool(AMJ.tDeAmjUtc(eg.groupe.dfh)) },
+    dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },
     heb () {
-      const m = eg.membres.get(eg.groupe.imh)
+      const m = this.eg.membres.get(this.eg.groupe.imh)
       return this.$t('PGhb', [m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': '')])
     },
-    q1 () { const v = eg.groupe.vols; return v.q1 + ' - ' + edvol(v.q1 * UNITEV1) },
-    q2 () { const v = eg.groupe.vols; return v.q2 + ' - ' + edvol(v.q2 * UNITEV2) },
-    pc1 () { const v = eg.groupe.vols; return Math.round((v.v1 * 100) / (v.q1 * UNITEV1)) },
-    pc2 () { const v = eg.groupe.vols; return Math.round((v.v2 * 100) / (v.q2 * UNITEV2)) },
-    nbv () { let n = 0; eg.membres.forEach(m => { if (m.vote) n++ }); return n }
+    q1 () { const v = this.eg.groupe.vols; return v.q1 + ' - ' + edvol(v.q1 * UNITEV1) },
+    q2 () { const v = this.eg.groupe.vols; return v.q2 + ' - ' + edvol(v.q2 * UNITEV2) },
+    pc1 () { const v = this.eg.groupe.vols; return Math.round((v.v1 * 100) / (v.q1 * UNITEV1)) },
+    pc2 () { const v = this.eg.groupe.vols; return Math.round((v.v2 * 100) / (v.q2 * UNITEV2)) },
+    nbv () { let n = 0; this.eg.membres.forEach(m => { if (m.vote) n++ }); return n }
   },
 
   data () { return {
@@ -66,6 +67,7 @@ export default {
   },
 
   setup (props) {
+    const eg = toRef(props, 'eg')
     const session = stores.session
     const gSt = stores.groupe
     const photoDef = stores.config.iconGroupe

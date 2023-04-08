@@ -28,12 +28,12 @@
       {{$t('PGvide', [gSt.pgLg.size])}}
     </div>
 
-    <div v-if="gSt.pgLgFT.size">
-      <div v-for="(e, idx) in gSt.listeGrFT" :key="e.groupe.id">
+    <div v-if="gSt.pgLgFT.length">
+      <div v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id">
         <div class="row items-start">
           <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
             :color="e.groupe.id === session.groupeId ? 'warning' : 'primary'" @click="courant(e)"/>
-          <apercu-groupe class="q-my-sm" :eltg="e" :idx="idx"/>
+          <apercu-groupe class="col q-my-sm" :eg="e" :idx="idx"/>
         </div>
       </div>
     </div>
