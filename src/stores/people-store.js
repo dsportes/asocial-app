@@ -133,15 +133,11 @@ export const usePeopleStore = defineStore('people', {
     },
 
     // PagePeople ********************************************
-    peLp: (state) => { 
-      return Array.from(state.map.values())
-    },
-
     peLpF: (state) => {
       const f = stores.filtre.filtre.people
       if (!f) { stores.session.fmsg(state.peLp.length); return state.peLp }
       const r = []
-      for (const p of state.peLp) {
+      for (const [, p] of state.map) {
         if (f.nom && !p.na.nom.startsWith(f.nom)) continue
         if (f.roletr && (p.sp < f.roletr)) continue
         if (f.avecgr && (!p.groupes.size)) continue

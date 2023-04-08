@@ -750,16 +750,16 @@ export class Avatar extends GenDoc {
   - valeur: { idg: , mbs: [ids], dlv }
   */
   membres (map, dlv) {
-    for (const t of this.lgr) {
+    for (const [ ,t] of this.lgr) {
       const e = map[t.ng.id]
-      if (!e) { map[t.ng.id] = { idg, mbs: [t.im], dlv } } else e.mbs.push(t.im)
+      if (!e) { map[t.ng.id] = { idg: t.ng.id, mbs: [t.im], dlv } } else e.mbs.push(t.im)
     }
   }
 
   /* Ids des groupes de l'avatar, accumulés dans le set s */
   idGroupes (s) {
     const x = s || new Set()
-    for (const t of this.lgr) x.add(t.ng.id)
+    for (const [ ,t] of this.lgr) x.add(t.ng.id)
     return x
   }
 
@@ -767,11 +767,11 @@ export class Avatar extends GenDoc {
   */
   niDeGroupes (setg) {
     const ani = new Set()
-    for (const t of this.lgr) if (setg.has(t.ng.id)) {
+    for (const [ ,t] of this.lgr) if (setg.has(t.ng.id)) {
       ani.add(t.ni)
       this.lgr.delete(ni)
     }
-    for (const t of this.invits) if (setg.has(t.ng.id)) {
+    for (const [ ,t] of this.invits) if (setg.has(t.ng.id)) {
       ani.add(t.ni)
       this.invits.delete(ni)
     }
@@ -809,9 +809,12 @@ export class Avatar extends GenDoc {
     if (row.lgrk) { 
       /* map : - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
         - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation. */
-      for (const ni in row.lgrk) {
+      for (const nx in row.lgrk) {
+        const ni = parseInt(nx)
         const [nom, rnd, im] = decode(await decrypter(session.clek, row.lgrk[ni]))
-        this.lgr.set(parseInt(ni), { ng: new NomGroupe(nom, rnd), ni, im})
+        const ng = new NomGroupe(nom, rnd)
+        setNg(ng)
+        this.lgr.set(ni, { ng, im})
       }
     }
 
@@ -819,9 +822,12 @@ export class Avatar extends GenDoc {
     if (row.invits) {
       /* map des invitations en cours - clé : `ni`, numéro d'invitation.
         - _valeur_ : cryptée par la clé CV de l'avatar `[nom, cle, im]`.*/
-      for (const ni in row.invits) {
+      for (const nx in row.invits) {
+        const ni = parseInt(nx)
         const [nom, rnd, im] = decode(await decrypter(kcv, row.invits[ni]))
-        this.invits.set(parseInt(ni), { ng: new NomGroupe(nom, rnd), ni, im})
+        const ng = new NomGroupe(nom, rnd)
+        setNg(ng)
+        this.invits.set(ni, { ng, im})
       }
     }
 

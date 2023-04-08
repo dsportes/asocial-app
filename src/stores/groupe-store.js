@@ -31,7 +31,9 @@ export const useGroupeStore = defineStore('groupe', {
       valeur: { groupe, membres, mbacs, secrets }
     */
     groupes: (state) => {
-      return state.map
+      const m = new Map()
+      state.map.forEach(e => { const g = e.groupe; m.set(g.id, g)})
+      return m
     },
 
     // Map des groupes RESTREINTE à ceux de l'avatar courant.
@@ -72,7 +74,7 @@ export const useGroupeStore = defineStore('groupe', {
         const e = state.map.get(id)
         if (!e) return false
         const ast = e.groupe.ast
-        for (const m of e.mbacs) if (ast[m.ids] === 22) return true
+        for (const [, m] of e.mbacs) if (ast[m.ids] === 32) return true
         return false
       }
     },
@@ -80,7 +82,7 @@ export const useGroupeStore = defineStore('groupe', {
       const e = state.map.get(stores.session.groupeId)
       if (!e) return false
       const ast = e.groupe.ast
-      for (const m of e.mbacs) if (ast[m.ids] === 22) return true
+      for (const [, m] of e.mbacs) if (ast[m.ids] === 32) return true
       return false
     },
 
@@ -127,7 +129,7 @@ export const useGroupeStore = defineStore('groupe', {
       const f = stores.filtre.filtre.groupes
       const stt = { v1: 0, v2: 0, q1: 0, q2: 0 }
       const r = []
-      for (const e of state.pgLg) {
+      for (const [, e] of state.pgLg) {
         const g = e.groupe
         stt.a1 += g.vols.v1 || 0
         stt.a2 += g.vols.v2 || 0

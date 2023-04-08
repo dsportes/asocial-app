@@ -219,7 +219,7 @@ export class ConnexionCompte extends OperationUI {
         const mapv = {} // version détenue en session pour chaque groupe requis
         this.grRequis.forEach(id => { const r = grRows[id] ; mapv[id] = r ? r.v : 0 })
         const args = { token: session.authToken, mapv }
-        const ret = this.tr(await post(this, 'getGroupes', args))
+        const ret = this.tr(await post(this, 'GetGroupes', args))
         if (ret.rowGroupes) ret.rowGroupes.forEach(row => {
           grRows[row.id] = row
         })
@@ -609,7 +609,7 @@ export class ConnexionCompte extends OperationUI {
       this.cMembres = session.accesIdb ? await getColl('membres') : []
 
       // Itération sur chaque avatar: secrets, chats, sponsorings
-      for (const avatar of avStore.avatars.values()) {
+      for (const [,avatar] of avStore.avatars) {
         const vidb = Versions.get(avatar.id)
         const vx = this.versions && this.versions[avatar.id] ? this.versions[avatar.id] : { v: 0 }
         const vsrv = vx.v
@@ -631,7 +631,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       // Itération sur chaque groupe: secrets, membres
-      for (const groupe of grStore.groupes.values()) {
+      for (const [,groupe] of grStore.groupes) {
         const vidb = Versions.get(groupe.id)
         const vx = this.versions && this.versions[groupe.id] ? this.versions[groupe.id] : { v: 0 }
         const vsrv = vx.v
