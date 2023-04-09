@@ -12,7 +12,7 @@
     <div v-if="gSt.pgLm.length && !gSt.pgLmFT.length" class="titre-lg text-italic">
       {{$t('PGnomb', [gSt.pgLm.length])}}</div>
 
-    <apercu-membrepe v-for="(m, idx) of gSt.pgLmFT" :key="idx"
+    <apercu-membre v-for="(m, idx) of gSt.pgLmFT" :key="idx"
       class="q-my-sm" :mb="m" :idx="idx"/>
   </div>
 
@@ -21,12 +21,12 @@
 
 <script>
 import stores from '../stores/stores.mjs'
-import ApercuMembrepe from '../components/ApercuMembrepe.vue'
+import ApercuMembre from '../components/ApercuMembre.vue'
 
 export default {
   name: 'PageGroupe',
 
-  components: { ApercuMembrepe },
+  components: { ApercuMembre },
 
   computed: {
   },

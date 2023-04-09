@@ -33,7 +33,7 @@
         <div class="row items-start">
           <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
             :color="e.groupe.id === session.groupeId ? 'warning' : 'primary'" @click="courant(e)"/>
-          <apercu-groupe class="col q-my-sm" :eg="e" :idx="idx"/>
+          <apercu-groupe class="col q-my-sm" :eg="e" :idx="idx" :mapmc="mapmc"/>
         </div>
       </div>
     </div>
@@ -65,9 +65,10 @@
 </template>
 
 <script>
-import { toRef } from 'vue'
+import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { edvol } from '../app/util.mjs'
+import { Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -126,13 +127,21 @@ export default {
   },
 
   setup (props) {
+    const fStore = stores.filtre
+
     const tous = toRef(props, 'tous')
-    stores.filtre.filtre.groupes.tous = tous.value || false
+    fStore.filtre.groupes.tous = tous.value || false
+
+    const mapmc = ref(Motscles.mapMC(true, 0))
+    fStore.contexte.groupes.mapmc = mapmc.value
+    fStore.contexte.groupes.groupeId = 0
+
     return {
       ui: stores.ui,
       session: stores.session,
       avStore: stores.avatar,
       stats: stores.filtre.stats,
+      mapmc,
       gSt: stores.groupe
     }
   }

@@ -27,7 +27,7 @@
           <q-toolbar-title class="titre-lg full-width">{{$t('CHtxt')}}</q-toolbar-title>
           <q-btn dense flat size="md" icon="close" @click="chatedit=false"/>
         </q-toolbar>
-        <editeur-md ref="memoed" style="height:70vh"
+        <editeur-md style="height:70vh"
           :texte="chat.txt" editable modetxt :label-ok="$t('OK')" @ok="chatok"/>
       </q-card>
     </q-dialog>

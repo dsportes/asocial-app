@@ -14,6 +14,7 @@ export default {
   OK: 'OK',
   ok: 'OK',
   moi: 'moi',
+  moi2: '{0} [moi]',
   jailu: 'J\'ai lu',
   continuer: 'Continuer',
   changer: 'Changer',
@@ -789,7 +790,10 @@ export default {
   PGnom: 'Nom du groupe à créer: {0}',
   PGferme: 'Le groupe est "fermé", n\'accepte pas de nouveau membre',
   PGquotas: 'Quotas de volume V1 / V2 maximum pour les secrets du groupe',
-
+  PGinfo: 'Commentaires à propos du groupe',
+  PGnoinfo: 'Pas de commentaires à propos du groupe',
+  PGmc: 'Mots clés attachés au groupe',
+  
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',
   PMEmod: 'Mode foncé / clair',
@@ -1019,4 +1023,5 @@ export default {
   PPc3: 'Q. disp. V1',
   PPc4: 'Q. disp. V2',
   PPnt: 'Début du nom de la future tribu',
+
 }

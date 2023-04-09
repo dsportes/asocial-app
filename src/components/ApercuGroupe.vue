@@ -17,18 +17,19 @@ Traiter l'hébergement, affichage et bouton
       <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx1', [q1, pc1])}}</div>
       <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx2', [q2, pc2])}}</div>
       <div class="col-1">
-        <q-btn size="sm" icon="edit" dense color="primary" @click="edit('quotas', eg.groupe)"/>
+        <q-btn class="btn1" size="sm" icon="edit" dense color="primary" @click="edit('quotas', eg.groupe)"/>
       </div>
     </div>
 
-    <apercu-membreac v-for="m in eg.mbacs" :key="m.na.id" class="q-mt-sm" :idg="m.id" :im="m.ids"/>
+    <apercu-membre v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm" 
+      :mb="m" :gr="eg.groupe" :idx="idx" :mapmc="mapmc"/>
   </div>
 </template>
 
 <script>
-import { toRef } from 'vue'
+// import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
-import ApercuMembreac from './ApercuMembreac.vue'
+import ApercuMembre from './ApercuMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import { edvol, dhcool } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
@@ -37,9 +38,14 @@ import { MajCvGr } from '../app/operations.mjs'
 export default {
   name: 'ApercuGroupe',
 
-  props: { eg: Object, idx: Number, edit: Function },
+  props: { 
+    eg: Object,
+    idx: Number,
+    mapmc: Object,
+    edit: Function
+  },
 
-  components: { ApercuMembreac, ApercuGenx },
+  components: { ApercuMembre, ApercuGenx },
 
   computed: {
     dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },
@@ -67,7 +73,12 @@ export default {
   },
 
   setup (props) {
+    /*
     const eg = toRef(props, 'eg')
+    for (const [, m] of eg.value.mbacs) {
+      console.log(m.na.id)
+    }
+    */
     const session = stores.session
     const gSt = stores.groupe
     const photoDef = stores.config.iconGroupe
@@ -92,6 +103,6 @@ export default {
   padding: 0 !important
   min-height: 0 !important
 .btn1
-  padding: 0 !important
+  padding: 1px !important
   width: 1.5rem !important
 </style>

@@ -56,7 +56,16 @@ export default ({
 
   emits: ['update:modelValue', 'ok'],
 
-  props: { lgmax: Number, modelValue: String, texte: String, labelOk: String, editable: Boolean, idx: Number, modetxt: Boolean, horsSession: Boolean },
+  props: { 
+    lgmax: Number, 
+    modelValue: String, 
+    texte: String, 
+    labelOk: String, 
+    editable: Boolean, 
+    idx: Number, 
+    modetxt: Boolean, 
+    horsSession: Boolean
+  },
 
   computed: {
     dlclass () {

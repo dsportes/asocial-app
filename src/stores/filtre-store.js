@@ -11,7 +11,8 @@ export const useFiltreStore = defineStore('filtre', {
       groupe: {}
     },
     contexte : {
-      chats: {}
+      chats: {},
+      groupes: {}
     },
     tri: {
       tribus: 0,

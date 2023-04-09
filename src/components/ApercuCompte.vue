@@ -5,7 +5,7 @@
     </div>
     <div class="col">
       <div>
-        <span class="text-bold fs-md q-mr-sm">{{elt.na.nomc}}</span> 
+        <span class="text-bold fs-md q-mr-sm">{{elt.na.nom}}</span> 
         <span class="text-bold fs-sm font-mono q-mr-sm">#{{elt.na.id}}</span> 
       </div>
       <show-html v-if="info" class="q-my-xs bord" :idx="idx" 

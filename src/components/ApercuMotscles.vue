@@ -26,7 +26,14 @@ import ChoixMotscles from './ChoixMotscles.vue'
 export default ({
   name: 'ApercuMotscles',
 
-  props: { mapmc: Object, src: Object, edit: Boolean, idx: Number, duCompte: Boolean, duGroupe: Number },
+  props: { 
+    mapmc: Object, 
+    src: Object, 
+    edit: Boolean, 
+    idx: Number, 
+    duCompte: Boolean, 
+    duGroupe: Number
+  },
 
   components: { ChoixMotscles },
 

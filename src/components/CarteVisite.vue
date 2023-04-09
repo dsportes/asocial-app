@@ -45,7 +45,8 @@
     </q-card-section>
     <q-separator />
     <q-card-section>
-      <editeur-md ref="md" :texte="infolocal" v-model="resultat.info" editable modetxt style="height:10rem"></editeur-md>
+      <editeur-md ref="md" :texte="infolocal" v-model="resultat.info"
+        editable modetxt style="height:10rem"></editeur-md>
     </q-card-section>
     <q-separator />
     <q-card-actions align="right">

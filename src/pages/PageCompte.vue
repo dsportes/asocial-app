@@ -20,7 +20,7 @@
     </div>
 
     <!-- Mémo du compte -->
-    <div v-if="session.auts(4)" class="q-py-sm">
+    <div class="q-py-sm">
       <div class="titre-md">{{$t('CPTmemo')}}</div>
       <show-html v-if="memo" class="q-ml-lg bord" maxh="5rem" :texte="memo" zoom
         :edit="session.auts(3, true)" @edit="memoeditAut"/>
@@ -66,7 +66,7 @@
           <q-toolbar-title class="titre-lg full-width">{{$t('CPTmdc')}}</q-toolbar-title>
           <q-btn dense flat size="md" icon="close" @click="memoedit=false"/>
         </q-toolbar>
-        <editeur-md ref="memoed" class="height-10"
+        <editeur-md class="height-10"
           :texte="avStore.compte.memo || ''" editable modetxt :label-ok="$t('OK')" @ok="memook"/>
       </q-card>
     </q-dialog>
@@ -95,7 +95,6 @@
 
 <script>
 import { encode } from '@msgpack/msgpack'
-import { ref } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { crypter /*, decrypterStr */ } from '../app/webcrypto.mjs'
@@ -161,16 +160,15 @@ export default {
       await new NouvelAvatar().run(nom)
     },
 
-    async memoeditAut () { if (await this.session.aut(3, true)) this.memoedit = true },
+    async memoeditAut () { if (await this.session.edit()) this.memoedit = true },
     async memook (m) {
-      this.memoed.undo()
       const memok = await crypter(this.session.clek, m)
       // const z = await decrypterStr(this.session.clek, memok)
       await new MemoCompte().run(memok)
       this.memoedit = false
     },
 
-    async mcleditAut () { if (await this.session.aut(3, true)) this.mcledit = true },
+    async mcleditAut () { if (await this.session.edit()) this.mcledit = true },
     async okmc (mmc) {
       this.mcledit = false
       if (mmc !== false) {
