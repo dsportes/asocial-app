@@ -1374,6 +1374,7 @@ export class Membre extends GenDoc {
 
   static async rowNouveauMembre (nag, na, im, ni, imc, dlv) {
     const r = { id: nag.id, ids: im, v: 0, dlv, ddi: 0, dda: 0, dfa: 0, mc: new Uint8Array([]) }
+    if (dlv) r.dda = new Date().getTime()
     const x = { nom: na.nom, rnd: na.rnd, ni, imc }
     r.datag = await crypter(nag.rnd, new Uint8Array(encode(x)))
     const _data_ = new Uint8Array(encode(r))

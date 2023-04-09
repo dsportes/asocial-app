@@ -24,6 +24,8 @@ export const useUiStore = defineStore('ui', {
 
     detailspeople: false,
 
+    detailsmembre: false,
+
     detailsavatar: false,
     
     dialoguehelp: false,

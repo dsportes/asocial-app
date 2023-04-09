@@ -36,6 +36,7 @@ export const useSessionStore = defineStore('session', {
     tribuId: 0, // id de la tribu actuelle du compte
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
+    membreId: 0, // membre "courant" (son im/ids dans son groupe)
     tribuId: 0, // id de la tribu actuelle du compte
     tribuCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
     peopleId: 0, // people "courant"

@@ -21,6 +21,9 @@ export const useGroupeStore = defineStore('groupe', {
       const e = state.map.get(stores.session.groupeId)
       return e ? e.groupe : null 
     },
+    eg (state) { 
+      return state.map.get(stores.session.groupeId)
+    },
 
     egrC (state) { 
       return state.map.get(stores.session.groupeId)
@@ -60,6 +63,12 @@ export const useGroupeStore = defineStore('groupe', {
         return e ? e.membres.get(im) : null 
       }
     },
+    membreC: (state) => {
+      const session = stores.session
+      const e = state.map.get(session.groupeId)
+      return e ? e.membres.get(session.membreId) : null 
+    },
+
     getMbac: (state) => { return (idg, im) => { 
         const e = state.map.get(idg)
         return e ? e.mbac.get(im) : null 
@@ -70,32 +79,6 @@ export const useGroupeStore = defineStore('groupe', {
         return e ? e.membres : null 
       }
     },
-    compteEstAnim: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        if (!e) return false
-        const ast = e.groupe.ast
-        for (const [, m] of e.mbacs) if (ast[m.ids] === 32) return true
-        return false
-      }
-    },
-    compteEstAnimC: (state) => {
-      const e = state.map.get(stores.session.groupeId)
-      if (!e) return false
-      const ast = e.groupe.ast
-      for (const [, m] of e.mbacs) if (ast[m.ids] === 32) return true
-      return false
-    },
-
-    /*
-    // Array des membres avatars du compte
-    getMembresAC: (state) => { return (id) => {
-        const a = []
-        const e = state.map.get(id)
-        if (e.membres) e.membres.forEach((m, im) => { if (m.estAc) a.push(m) })
-        return a
-      }
-    },
-    */
     // Array des Ids des membres "people" du groupe id
     getMembreIdEs: (state) => { return (id) => {
         const a = []
@@ -174,6 +157,15 @@ export const useGroupeStore = defineStore('groupe', {
     /* Sert à pouvoir attacher un écouteur pour détecter les changements de mc */
     setMotscles (id, mc) {
     },
+
+    setAnimHeb (e) {
+      const g = e.groupe
+      g.estAnim = false
+      for (const [, m] of e.mbacs) {
+        if (g.ast[m.ids] === 32) e.estAnim = true
+        if (m.ids === g.imh) e.estHeb = true
+      }
+    },
     
     setGroupe (groupe) {
       if (!groupe) return
@@ -183,7 +175,9 @@ export const useGroupeStore = defineStore('groupe', {
           groupe: groupe, 
           membres: new Map(), // tous membres
           mbacs: new Map(), // membres avatars du compte
-          secrets: new Map()
+          secrets: new Map(),
+          estAnim: false, // un des avatars du compte est animateur du groupe
+          estHeb: false // un des avatars du compte est hébergeur du groupe
         }
         this.map.set(groupe.id, e)
       } else {
@@ -192,6 +186,7 @@ export const useGroupeStore = defineStore('groupe', {
         if (!egaliteU8(mcav, mcap )) this.setMotscles(groupe.id, mcap)
         e.groupe = groupe
       }
+      this.setAnimHeb(e)
     },
 
     setMembre (membre) {
@@ -219,6 +214,7 @@ export const useGroupeStore = defineStore('groupe', {
           pStore.setPeopleMembre(na, membre.id, membre.ids, membre.cv)
         }
       }
+      this.setAnimHeb(e)
     },
 
     delMembre (id, ids) {

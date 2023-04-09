@@ -307,6 +307,10 @@
     <panel-people :id="session.peopleId" :close="closepp"/>
   </q-dialog>
 
+  <q-dialog v-model="ui.detailsmembre" full-height persistent>
+    <panel-membre/>
+  </q-dialog>
+
   <q-dialog v-model="ui.detailsavatar" full-height persistent>
     <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
       <q-header elevated class="bg-secondary text-white">
@@ -389,6 +393,7 @@ import PageTribus from './pages/PageTribus.vue'
 import PageTribu from './pages/PageTribu.vue'
 import PagePeople from './pages/PagePeople.vue'
 import PanelPeople from './dialogues/PanelPeople.vue'
+import PanelMembre from './dialogues/PanelMembre.vue'
 import ApercuAvatar from './components/ApercuAvatar.vue'
 import PageGroupes from './pages/PageGroupes.vue'
 import PageGroupe from './pages/PageGroupe.vue'
@@ -415,7 +420,8 @@ export default {
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco, ApercuAvatar,
     PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PageGroupe, PageGroupes,
+    PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
+    PageGroupe, PageGroupes,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu,
     DialogueErreur, DialogueHelp

@@ -1,7 +1,6 @@
 <template>
   <div>
     <div :class="dkli(idx)">
-      <q-separator v-if="!people" color="orange"/>
       <apercu-genx v-if="people" :na="mb.na" :cv="mb.cv" :ids="mb.ids" :idx="idx" detail-people/>
 
       <div v-else>
@@ -32,14 +31,23 @@
       </div>
 
       <div class="fs-md">
-        <span v-if="mb.ids === gr.imh" class="q-mr-xs">{{$t('PGheb')}}</span>
         <span v-if="mb.ids === 1" class="q-mr-xs">{{$t('PGfond')}}</span>
-        <span v-if="mb.idi && gr.ast[mb.idi]" class="q-mr-xs">
+        <span v-if="mb.idi && eg.groupe.ast[mb.idi]" class="q-mr-xs">
           {{$t('PCct1', [mbidi ? mbidi.na.nomc : '?'])}}</span>
-        <span v-if="mb.idi && !gr.ast[mb.idi]" class="q-mr-xs">{{$t('PCct2', [mb.idi])}}</span>
+        <span v-if="mb.idi && !eg.groupe.ast[mb.idi]" class="q-mr-xs">{{$t('PCct2', [mb.idi])}}</span>
       </div>
 
-      <div v-if="mb.vote && gr.stx===2" class="titre-md text-italic">{{$t('PGavote')}}</div>
+      <!--div class="row justify-between">
+        <span v-if="!eg.groupe.dfh" class="q-mr-xs">{{heb}}</span>
+        <span v-else class="text-warning text-bold q-mr-xs">{{$t('PGnheb', [dfh])}}</span>
+        <q-btn v-if="eg.estHeb" dense size="sm" color="warning" :label="$t('PGnpah')"
+          @click="finHeb"/>
+        <q-btn v-else dense size="sm" color="warning" :label="$t('PGah')"
+          @click="debHeb"/>
+      </div-->
+
+
+      <div v-if="mb.vote && eg.groupe.stx===2" class="titre-md text-italic">{{$t('PGavote')}}</div>
 
       <div class="row titre-md text-italic">
         <div class="col-4 text-center">{{$t('PGddi')}}</div>
@@ -131,7 +139,7 @@ export default {
 
   props: { 
     mb: Object,
-    gr: Object,
+    eg: Object,
     mapmc: Object,
     idx: Number, 
     people: Boolean
@@ -142,7 +150,7 @@ export default {
   computed: {
     photo () { return this.mb && this.mb.cv && this.mb.cv.photo ? this.mb.cv.photo : this.photoDef },
     info () { return this.mb && this.mb.cv ? this.mb.cv.info || '' : '' },
-    st () { return this.gr.ast[this.mb.ids] },
+    st () { return this.eg.groupe.ast[this.mb.ids] },
     ddi () { return this.mb.ddi ? dhcool(this.mb.ddi) : '-' },
     dda () { return this.mb.dda ? dhcool(this.mb.dda) : '-' },
     dfa () { return this.mb.dfa ? dhcool(this.mb.dfa) : '-' },
@@ -159,7 +167,7 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async changeSt () {
       if (!await this.session.edit()) return
-      const an = this.gSt.compteEstAnim(this.gr.id)
+      const an = this.eg.estAnim
       if (!an) {
         await afficherDiag(this.$t('PGpasanst1'))
         return

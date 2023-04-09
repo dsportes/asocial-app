@@ -770,9 +770,12 @@ export default {
   PGtmb: 'Membres',
   PGsec: 'Ses secrets',
   PGfh: 'Ce groupe N\'EST PLUS hébergé, disparition {0}',
-  PGhb: 'Groupe hébergé par {0}',
+  PGhb: 'Groupe hébergé par',
+  PGfd: 'Groupe fondé par',
   PGheb: 'Hébergeur du groupe.',
+  PGnheb: 'N\'est PLUS hébergé. Disparition du groupe {0}',
   PGfond: 'Fondateur.',
+  PGnfond: 'Le fondateur du groupe a disparu',
   PGct1: 'Inscrit comme "contact" par {0}.',
   PGct2: 'Inscrit comme "contact" par #{0} (oublié ou disparu).',
   PGferme: 'Invitations bloquées. Aucun vote pour réouvrir | Invitations bloquées. Un vote pour réouvrir | Invitations bloquées. {count} votes pour réouvrir',
@@ -784,8 +787,8 @@ export default {
   PGchanger: 'Changer...',
   PGavote: 'A voté pour autoriser les invitations au groupe',
   PGddi: 'Dernière invitation',
-  PGdda: 'Premier début d\'activité',
-  PGdfa: 'Dernière fin d\'activité',
+  PGdda: 'Début d\'activité',
+  PGdfa: 'Fin d\'activité',
   PGcrea: 'Création d\'un nouveau groupe',
   PGnom: 'Nom du groupe à créer: {0}',
   PGferme: 'Le groupe est "fermé", n\'accepte pas de nouveau membre',
@@ -793,7 +796,12 @@ export default {
   PGinfo: 'Commentaires à propos du groupe',
   PGnoinfo: 'Pas de commentaires à propos du groupe',
   PGmc: 'Mots clés attachés au groupe',
-  
+
+  PMGtit: 'Membre {0}',
+  PMGtit1: 'Membre disparu',
+  PMGtit2: 'Groupe disparu',
+  PMGtit3: 'Groupe {0}',
+
   // PanelMenu.vue
   PMEtit: 'Préférences, etc.',
   PMEmod: 'Mode foncé / clair',

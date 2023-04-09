@@ -1,9 +1,20 @@
 <template>
-<!--
-Traiter l'hébergement, affichage et bouton
--->
   <div :class="dkli(idx)">
     <apercu-genx :na="eg.groupe.na" :cv="eg.groupe.cv" :idx="idx" :cvchangee="cvchangee"/>
+
+    <div v-if="!eg.groupe.dfh" class="fs-md">
+      <span class="fs-md q-mr-sm">{{$t('PGhb')}}</span>
+      <q-btn class="btn2" dense size="md" no-caps icon-right="open_in_new" 
+        :label="heb" @click="detailMb(eg.groupe.imh)"/>
+    </div>
+    <div v-else class="fs-md text-warning text-bold">{{$t('PGnheb', [dfh])}}</div>
+
+    <div v-if="fond">
+      <span class="fs-md q-mr-sm">{{$t('PGfd')}}</span>
+      <q-btn class="btn2" dense size="md" no-caps icon-right="open_in_new" 
+        :label="fond" @click="detailMb(1)"/>
+    </div>
+    <div v-else class="fs-md">{{$t('PGnfond')}}</div>
 
     <div class="q-mt-xs row justify-between">
       <div v-if="eg.groupe.stx === 2" class="titre-md text-bold text-warning">{{$t('PGferme', nbv, { count: nbv })}}</div>
@@ -21,8 +32,10 @@ Traiter l'hébergement, affichage et bouton
       </div>
     </div>
 
-    <apercu-membre v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm" 
-      :mb="m" :gr="eg.groupe" :idx="idx" :mapmc="mapmc"/>
+    <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
+      <q-separator color="orange"/>
+      <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>
+    </div>
   </div>
 </template>
 
@@ -51,7 +64,13 @@ export default {
     dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },
     heb () {
       const m = this.eg.membres.get(this.eg.groupe.imh)
-      return this.$t('PGhb', [m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': '')])
+      return m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': '')
+    },
+    fond () {
+      if (!this.eg.groupe.ast[1]) return ''
+      const m = this.eg.membres.get(1)
+      if (!m) return ''
+      return m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': '')
     },
     q1 () { const v = this.eg.groupe.vols; return v.q1 + ' - ' + edvol(v.q1 * UNITEV1) },
     q2 () { const v = this.eg.groupe.vols; return v.q2 + ' - ' + edvol(v.q2 * UNITEV2) },
@@ -69,6 +88,11 @@ export default {
       if (res && this.na) {
         await new MajCvGr().run(this.eg.groupe, res.ph, res.info)
       }
+    },
+    detailMb (im) {
+      this.ui.detailsmembre = true
+      this.session.groupeId = this.eg.groupe.id
+      this.session.membreId = im
     }
   },
 
@@ -80,10 +104,12 @@ export default {
     }
     */
     const session = stores.session
+    const ui = stores.ui
     const gSt = stores.groupe
     const photoDef = stores.config.iconGroupe
     return {
       session,
+      ui,
       photoDef,
       gSt
     }
@@ -105,4 +131,7 @@ export default {
 .btn1
   padding: 1px !important
   width: 1.5rem !important
+.btn2
+  padding: 0 2px !important
+  border-bottom: 1px solid $primary
 </style>
