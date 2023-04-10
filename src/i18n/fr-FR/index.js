@@ -210,6 +210,7 @@ export default {
   EX5005: `Base locale absente ou corrompue.<br>
   Code erreur: {0}<br>Se connecter en mode synchronisé ou incognito.`,
   EX5006: `Base locale corrompue.<br>Impossible d'en décrypter les données.`,
+  EX5007: 'Le sponsor a disparu (compte résilié)',
 
   EX6001: 'Clé RSA publique de l\'avatar non trouvée',
   EX6002: 'Base locale corrompue ?\nCompte non trouvé',
@@ -396,6 +397,7 @@ export default {
   OPsync: 'Opération de synchronisation',
   OPccc: 'Créer le compte du comptable',
   OPcnx: 'Se connecter à un compte',
+  OPpub: 'Obtention d\'une clé publique',
 
   OPmemo: 'Changement du memo d\'un compte',
   OPmotscles: 'Changement des mots clés d\'un compte',

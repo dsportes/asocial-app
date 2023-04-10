@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, titre, gzip, ungzip, ungzipT, egaliteU8, tru8, splitPK } from './util.mjs'
-import { random, pbkfd, sha256, crypter, decrypter, decrypterStr } from './webcrypto.mjs'
+import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, genKeyPair, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 
 import { IDCOMPTABLE, RNDCOMPTABLE, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
 
@@ -723,15 +723,14 @@ export class Tribu2 extends GenDoc {
 - `v`,
 - `vcv` : version de la carte de visite afin qu'une opération puisse détecter (sans lire le document) si la carte de visite est plus récente que celle qu'il connaît.
 
+- `pub` : clé publique RSA
+- `privk`: clé privée RSA cryptée par la clé K.
 - `cva` : carte de visite cryptée par la clé CV de l'avatar `{v, photo, info}`.
 - `lgrk` : map :
   - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
   - _valeur_ : cryptée par la clé K du compte de `[nomg, clég, im]` reçu sur une invitation.
   - une entrée est effacée par la résiliation du membre au groupe (ce qui l'empêche de continuer à utiliser la clé du groupe).
-- `invits` : map des invitations en cours
-  - _clé_ : `ni`, numéro d'invitation.
-  - _valeur_ : cryptée par la clé CV de l'avatar `[nomg, clég, im]`.
-  - une entrée est effacée par l'annulation de l'invitation du membre au groupe ou sur acceptation ou refus de l'invitation.
+  - pour une invitation en attente _valeur_ est cryptée par la clé publique RSA de l'avatar
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `hpc` : hash de la phrase de contact.
 - `napc` : `[nom, clé]` de l'avatar cryptée par le PBKFD de la phrase de contact.
@@ -781,6 +780,7 @@ export class Avatar extends GenDoc {
   /** compile *********************************************************/
   async compile (row) {
     const session = stores.session
+    const gSt = stores.groupe
     this.vsh = row.vsh || 0
     this.vcv = row.vcv || 0
     this.hpc = row.hpc
@@ -797,6 +797,9 @@ export class Avatar extends GenDoc {
       } else this.memo = ''
     }
 
+    this.priv = await decrypterStr(session.clek, row.privk)
+    this.pub = row.pub
+
     if (row.pck) { // phrase de contact cryptée par la clé K.
       this.pc = await decrypterStr(session.clek, row.pck)
     } else this.pc = null
@@ -811,38 +814,37 @@ export class Avatar extends GenDoc {
         - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation. */
       for (const nx in row.lgrk) {
         const ni = parseInt(nx)
-        const [nom, rnd, im] = decode(await decrypter(session.clek, row.lgrk[ni]))
-        const ng = new NomGroupe(nom, rnd)
-        setNg(ng)
-        this.lgr.set(ni, { ng, im})
-      }
-    }
-
-    this.invits = new Map()
-    if (row.invits) {
-      /* map des invitations en cours - clé : `ni`, numéro d'invitation.
-        - _valeur_ : cryptée par la clé CV de l'avatar `[nom, cle, im]`.*/
-      for (const nx in row.invits) {
-        const ni = parseInt(nx)
-        const [nom, rnd, im] = decode(await decrypter(kcv, row.invits[ni]))
-        const ng = new NomGroupe(nom, rnd)
-        setNg(ng)
-        this.invits.set(ni, { ng, im})
+        const lgrc = row.lgrk[ni]
+        if (lgrc.length === 256) {
+          // c'est une invitation
+          const [nom, rnd, im] = decode(await decrypterRSA(this.priv, lgrc))
+          const ng = new NomGroupe(nom, rnd)
+          setNg(ng)
+          this.lgr.set(ni, { ng, im})  
+          gSt.setInivit(ng.id, this.id)
+        } else {
+          const [nom, rnd, im] = decode(await decrypter(session.clek, lgrc))
+          const ng = new NomGroupe(nom, rnd)
+          setNg(ng)
+          this.lgr.set(ni, { ng, im})  
+          gSt.delInivit(ng.id, this.id)
+        }
       }
     }
 
     return this
   }
 
-  static async primaireRow (na) {
+  static async primaireRow (na, publicKey, privateKey) {
     const r = {}
     r.id = na.id
     r.v = 1
     r.iv = GenDoc._iv(r.id, r.v)
     r.vcv = 0
     r.ivc = GenDoc._iv(r.id, r.vcv)
+    r.privk = await crypter(stores.session.clek, privateKey)
+    r.pub = publicKey
     r.lgrk = {}
-    r.invits = {}
     const _data_ = new Uint8Array(encode(r))
     const row = { _nom: 'avatars', id: r.id, v: r.v, iv: r.iv, vcv: r.vcv, ivc: r.ivc, _data_ }
     return row
@@ -1136,29 +1138,46 @@ _data_:
   - 1 : le chat a été supprimé par _l'autre_ de son côté.
   - 2 : _l'autre_ a été détecté disparu : 
 - `mc` : mots clés attribués par l'avatar au chat
-- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé CV de _l'autre_
-- `contc` : contenu crypté par la clé CV de l'avatar _lecteur_.
+- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé CV de _l'autre_.
+- `ccPubI` : clé `cc` du chat cryptée par la clé publique RSA de I.
+- `ccPubE` : clé `cc` du chat cryptée par la clé publique RSA de E.
+- `ccK` : clé `cc` du chat cryptée par la clé K du compte de I.
+- `seq` : numéro d'ordre séquentiel pour détecter en cas de maj parrallèles la plus récente.
+- `contc` : contenu crypté par la clé `cc` du chat.
   - `na` : `[nom, cle]` de _l'autre_.
   - `dh`  : date-heure de dernière mise à jour.
   - `txt` : texte du chat.
+
   Compilé:
+  - seq
   - dh
   - naE
   - txt
   - cv
+  - cle
 */
 
 export class Chat extends GenDoc {
-  get cle () { return getCle(this.id) }
   get naI () { return getNg(this.id) }
 
   async compile (row) {
+    const avStore = stores.avatar
+    const session = stores.session
     if (row.dlv) {
       this._zombi = true
     } else {
       this.vsh = row.vsh || 0
       this.st = row.st || 0
       this.mc = row.mc
+      this.seq = row.seq
+      if (!row.ccK) {
+        const av = avStore.getAvatar(this.id)
+        this.cle = await decrypterRSA(av.priv, row.ccPub)
+        this.ccK = await crypter(session.clek, this.cle)
+      } else {
+        this.cle = await decrypter(session.clek, row.ccK)
+        this.ccK = row.ccK
+      }
       const x = decode(await decrypter(this.cle, row.contc))
       this.naE = new NomAvatar(x.na[0], x.na[1])
       this.idsE = await Chat.getIds(this.naE, this.naI)
@@ -1172,19 +1191,32 @@ export class Chat extends GenDoc {
     return hash(await crypter(naI.rnd, naI.id + '/' + naE.id, 1))
   }}
 
-  static async nouveauRow (naI, naE, dh, txt, mc) {
+  /*
+  naI, naE : na des avatars I et E
+  dh : date-heure d'écriture
+  txt: texte du chat
+  seq: numéro de séquence du "source" d'où txt a été modifié
+  cc: clé du chat : si null créé random
+  publicKey: clé publique de I. Si null récupérée depuis son avatar
+  mc: mot clés attribués
+  */
+  static async nouveauRow (naI, naE, dh, txt, seq, cc, pubI, pubE, ccK, mc) {
+    const ccPubI = await crypterRSA(pubI, cc)
+    const ccPubE = await crypterRSA(pubE, cc)
+
     const ids = await Chat.getIds(naI, naE)
     const id = naI.id
-    const r = { id, ids, dlv: 0, st: 0 } // v vcv cva sont mis par le serveur
+    const r = { id, ids, dlv: 0, st: 0, seq,
+      ccK: ccK, ccPubI, ccPubE } // v vcv cva sont mis par le serveur
     if (mc) r.mc = mc
-    r.contc = await Chat.getContc (naI, naE, dh, txt)
+    r.contc = await Chat.getContc (naE, dh, txt, cc)
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'chats', id, ids, _data_}
   }
 
-  static async getContc (naI, naE, dh, txt) {
-    const x = { na: [naE.nom, naE.rnd], dh: dh, txt: txt }
-    return await crypter(naI.rnd, new Uint8Array(encode(x)))
+  static async getContc (na, dh, txt, cc) {
+    const x = { na: [na.nom, na.rnd], dh: dh, txt: txt }
+    return await crypter(cc, new Uint8Array(encode(x)))
   }
 }
 

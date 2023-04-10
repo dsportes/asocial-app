@@ -3,16 +3,22 @@ import stores from './stores.mjs'
 import { encode } from '@msgpack/msgpack'
 
 /* Store maître des groupes du compte courant :
-- groupes : les groupes dont un des avatars du compte courant est membre
-Sous-collection pour chaque groupe id :
-  - secrets : getSecrets(id) - Map de clé ids -> objet secret
-  - membres : getMembres(id) - Map de clé ids -> objet membre
+- map : des groupes dont un des avatars du compte courant est membre
+  Sous-collection pour chaque groupe id :
+    groupe: l'objet Groupe
+    membres: new Map(), // tous membres
+    mbacs: new Map(), // membres avatars du compte
+    secrets: new Map(),
+    estAnim: false, // un des avatars du compte est animateur du groupe
+    estHeb: false // un des avatars du compte est hébergeur du groupe
+- invits: pour chaque avatar, le Set des ids des groupes dont il est invité en attente
 */
 
 export const useGroupeStore = defineStore('groupe', {
   state: () => ({
     map: new Map(),
     voisins: new Map(),
+    invits: new Map()
   }),
 
   getters: {
@@ -156,6 +162,18 @@ export const useGroupeStore = defineStore('groupe', {
   actions: {
     /* Sert à pouvoir attacher un écouteur pour détecter les changements de mc */
     setMotscles (id, mc) {
+    },
+
+    setInvit (idg, ida) { // id du groupe et de l'avatar invité
+      const e = this.invits.get(ida)
+      if (!e) { e = new Set(); this.invits.set(ida, e)}
+      e.add(idg)
+    },
+
+    delInvit (idg, ida) { // id du groupe et de l'avatar invité
+      const e = this.invits.get(ida)
+      if (!e) return
+      e.delete(idg)
     },
 
     setAnimHeb (e) {

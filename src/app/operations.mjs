@@ -7,7 +7,7 @@ import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { GenDoc, NomAvatar, NomTribu, NomGroupe, Avatar, Chat, 
   Groupe, Membre, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
-import { decrypter } from './webcrypto.mjs'
+import { decrypter, crypterRSA } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
 /* Opération générique ******************************************/
@@ -423,11 +423,19 @@ export class ReactivationChat extends OperationUI {
         return this.finOK([true, null])
       }
 
+      let cle, chatE, ccK, ccPubE
       if (ret.rowChat) {
-        const chatE = await compile(ret.rowChat)
+        chatE = await compile(ret.rowChat)
+        cle = chatE.cle
+        ccK = chatE.cck
         txt = chatE.txt
         dh = chatE.dh
       } else {
+        cle = random(32)
+        ccK = await crypter(session.clek, cle)
+        const pubE = await asStore.getPub().run(sp.na.id)
+        if (!pubE) throw new AppExc(F_BRO, 7) // zarbi !!! on vient de récupérer le chat
+        ccPubE = await crypterRSA(pubE, cle)
         dh = new Date().getTime()
         txt = ''
       }
@@ -515,7 +523,10 @@ export class NouvelAvatar extends OperationUI {
     try {
       const session = stores.session
       const na = new NomAvatar(nom, 1)
-      const rowAvatar = await Avatar.primaireRow(na)
+
+      const { publicKey, privateKey } = await genKeyPair()
+
+      const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)
 
       const rowVersion = {
         id: na.id,

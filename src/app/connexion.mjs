@@ -3,13 +3,13 @@ import { encode } from '@msgpack/msgpack'
 
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
-import { $t, getTrigramme, setTrigramme, afficherDiag, sleep, hash, u8ToB64 } from './util.mjs'
+import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, Tribu2, Chat, NomAvatar, NomTribu, naComptable, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
-import { crypter } from './webcrypto.mjs'
+import { crypter, random, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS, closeWS } from './ws.mjs'
 
@@ -755,8 +755,10 @@ export class AcceptationSponsoring extends OperationUI {
       session.setTribuId(sp.nct.id)
       session.setAvatarId(session.compteId)
 
+      const { publicKey, privateKey } = await genKeyPair()
+
       const rowCompta = await Compta.row(sp.naf, sp.nct, sp.nctkc, sp.quotas[0], sp.quotas[1], sp.sp) // set de session.clek
-      const rowAvatar = await Avatar.primaireRow(sp.naf)
+      const rowAvatar = await Avatar.primaireRow(sp.naf, publicKey, privateKey)
       const rowVersion = {
         id: sp.naf.id,
         v: 1,
@@ -787,9 +789,17 @@ export class AcceptationSponsoring extends OperationUI {
       const mbtre = new Uint8Array(encode(x))
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
+      const cc = random(32)
+      const ccKI = await crypter(session.cleK, cc)
+      if (!pubE) pubE = await stores.avatar.getPub(naE.id)
+      if (!pubE) return null
+      if (!pubI) pubI = stores.avatar.getAvatar(naI.id).pub
       const dh = new Date().getTime()
-      const rowChatI = await Chat.nouveauRow(sp.naf, sp.na, dh, txt, new Uint8Array([252])) 
-      const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, dh, txt, new Uint8Array([253])) 
+
+      // (naI, naE, dh, txt, seq, cc, pubI, pubE, ccK, mc)
+      const rowChatI = await Chat.nouveauRow(sp.naf, sp.na, dh, txt, 1, cc, publicKey, pubE, ccKI, new Uint8Array([252])) 
+      const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, dh, txt, 1, cc, pubE, publicKey, null, new Uint8Array([253])) 
+      if (!rowChatI || !rowChatE) throw new AppExc(F_BRO, 7)
 
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
         rowChatI, rowChatE, ardx, idt: session.tribuId, mbtrid, mbtre, quotas: sp.quotas, abPlus: [sp.nct.id, sp.naf.id] }
@@ -903,7 +913,10 @@ export class CreationCompteComptable extends OperationUI {
       const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true) // set de session.clek
       const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])
       const rowTribu2 = await Tribu2.primitiveRow(nt, ac[0], ac[1])
-      const rowAvatar = await Avatar.primaireRow(na)
+
+      const { publicKey, privateKey } = await genKeyPair()
+
+      const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)
       const r = {
         id: na.id,
         v: 1,
