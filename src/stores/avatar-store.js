@@ -3,6 +3,7 @@ import stores from './stores.mjs'
 import { hash, egaliteU8, difference, intersection } from '../app/util.mjs'
 import { encode } from '@msgpack/msgpack'
 import { E_WS, AppExc } from '../app/api.mjs'
+import { post } from '../app/net.mjs'
 
 /* Store maître du compte courant :
 Sous-collection pour chaque avatar id :
@@ -539,7 +540,7 @@ export const useAvatarStore = defineStore('avatar', {
     async getPub (id) {
       try {
         const args = { token: stores.session.authToken, id }
-        const ret = this.tr(await post(this, 'GetPub', args))
+        const ret = await post(null, 'GetPub', args)
         return ret.pub
       } catch (e) {
         throw new AppExc(E_WS, 3)

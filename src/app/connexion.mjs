@@ -9,7 +9,7 @@ import { AMJ } from './api.mjs'
 import { resetRepertoire, compile, Compta, Avatar, Tribu, Tribu2, Chat, NomAvatar, NomTribu, naComptable, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
-import { crypter, random, crypterRSA, decrypterRSA } from './webcrypto.mjs'
+import { crypter, random, genKeyPair } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS, closeWS } from './ws.mjs'
 
@@ -794,7 +794,7 @@ export class AcceptationSponsoring extends OperationUI {
       const contcI = await Chat.getContc(sp.na, dh, txt, cc)
       const contcE = await Chat.getContc(sp.naf, dh, txt, cc)
 
-      const pubE = await stores.avatar.getPub(naE.id)
+      const pubE = await stores.avatar.getPub(sp.na.id)
       if (!pubE) throw new AppExc(F_BRO, 7)
 
       // (naI, naE, contc, cc, pubE, mc)

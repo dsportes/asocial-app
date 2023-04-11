@@ -88,7 +88,7 @@ export default {
     },
     closent () { this.nt = false },
     async oknom (nom) { 
-      for(const tribu of this.tribus) {
+      for(const tribu of this.avStore.getTribus) {
         if (tribu.na.nom === nom) {
           await afficherDiag(this.$t('PTex'))
           return

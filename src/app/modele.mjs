@@ -696,7 +696,7 @@ export class Tribu2 extends GenDoc {
       q1: q1,
       q2: q2,
     }
-    r.mbtr[na.hrnd] = new Uint8Array(encode(e))
+    r.mbtr[naComptable.hrnd] = new Uint8Array(encode(e))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribu2s', id: r.id, v: r.v, iv: r.iv, _data_ }
   }
@@ -1081,6 +1081,7 @@ export class Sponsoring extends GenDoc {
       - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
       - `quotas` : `[v1, v2]` quotas attribués par le parrain.
     */
+    const session = stores.session
     const av = stores.avatar.avC
     const n = new NomAvatar(nom, 0)
     const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, nctkc, quotas}
@@ -1163,12 +1164,12 @@ export class Chat extends GenDoc {
     this.st = row.st || 0
     this.mc = row.mc
     this.seq = row.seq
-    if (!row.ccK) {
+    if (row.cc.length === 256) {
       const av = avStore.getAvatar(this.id)
-      this.cle = await decrypterRSA(av.priv, row.ccPub)
+      this.cle = await decrypterRSA(av.priv, row.cc)
       this.ccK = await crypter(session.clek, this.cle)
     } else {
-      this.cle = await decrypter(session.clek, row.ccK)
+      this.cle = await decrypter(session.clek, row.cc)
       this.ccK = null
     }
     const x = decode(await decrypter(this.cle, row.contc))
@@ -1202,7 +1203,6 @@ export class Chat extends GenDoc {
     } else {
       r.cc = await crypter(stores.session.clek, cc)
     }
-    r.contc = await Chat.getContc (naE, dh, txt, cc)
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'chats', id, ids, _data_}
   }

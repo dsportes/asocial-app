@@ -252,6 +252,7 @@ export default {
   EX8065: 'Maximum de volume V1 pour les secrets du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8066: 'Maximum de volume V2 pour les secrets du couple dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8067: 'Groupe sans hébergeur {0} : augmentation de volumer interdit.',
+  EX8101: 'Compte non authentifié',
 
   EX9002: 'Tribu non trouvée ({0})',
   EX9003: 'Compte non trouvé ({0})',
@@ -265,10 +266,7 @@ export default {
   EX9012: 'Chat non trouvé ({0} / {1})',
   EX9013: 'Sponsoring non trouvé ({0} / {1})',
 
-  EX9100: 'Données d\'authentification non trouvées dans la requête',
   EX9100: 'Données d\'authentification illisibles (détail: {0})',
-  EX9101: 'Compte non authentifié',
-  EX9102: 'Session inconnue du serveur: se reconnecter',
 
   LOGreinit: 'Ré-initialiser complètement la base locale',
   LOGrazbl: '<b>Attention:</b> la base locale sera effacée et rechargée totalement.' +

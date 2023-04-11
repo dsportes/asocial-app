@@ -136,9 +136,6 @@
           @click="ui.setPage('sponsorings')">
           <q-badge color="teal-10" rounded floating>{{nbspons}}</q-badge>
         </q-btn>
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACinvitations')">
-          <q-badge color="teal-10" rounded floating>{{nbinvits}}</q-badge>
-        </q-btn>
       </div>
 
       <q-separator color="orange" class="q-my-sm"/>
@@ -189,7 +186,6 @@ export default {
     nbavsecs () { return this.elt.secrets.size },
     nbchats () { return this.elt.chats.size },
     nbspons () { return this.elt.sponsorings.size },
-    nbinvits () { return this.elt.avatar.invits.size },
     nbgrps () { return this.elt.avatar.lgr.size },
 
     nbgrsecs () { return '?' },
