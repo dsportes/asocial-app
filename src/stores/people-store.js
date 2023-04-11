@@ -206,8 +206,13 @@ export const usePeopleStore = defineStore('people', {
     },
 
     setPeopleChat (chat, cv) { // naE: du people, idI: de l'avatar ayant un chat avec lui
-      const e = this.getElt(chat.naE, cv)
-      e.chats.set(chat.id, [chat.ids, chat.idsE])
+      if (chat.st === 1) {
+        // naE disparu
+        this.setDisparu(chat.naE)
+      } else {
+        const e = this.getElt(chat.naE, cv)
+        e.chats.set(chat.id, [chat.ids, chat.idsE])  
+      }
     },
     
     unsetPeopleChat (id, id2) {

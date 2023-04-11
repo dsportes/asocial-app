@@ -1131,18 +1131,14 @@ _data_:
 - `ids` : identifiant du chat relativement à son avatar, hash du cryptage de `idA/idB` par le `rnd` de A.
 - `v`
 - `vcv` : version de la carte de visite
-- `dlv` : la dlv permet au GC de purger les chats. Dès qu'il y a une dlv, le chat est considéré comme inexistant autant en session que pour le serveur.
 
 - `st` : statut:
   - 0 : le chat est vivant des 2 côtés
-  - 1 : le chat a été supprimé par _l'autre_ de son côté.
-  - 2 : _l'autre_ a été détecté disparu : 
+  - 1 : _l'autre_ a été détecté disparu : 
 - `mc` : mots clés attribués par l'avatar au chat
 - `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé CV de _l'autre_.
-- `ccPubI` : clé `cc` du chat cryptée par la clé publique RSA de I.
-- `ccPubE` : clé `cc` du chat cryptée par la clé publique RSA de E.
-- `ccK` : clé `cc` du chat cryptée par la clé K du compte de I.
-- `seq` : numéro d'ordre séquentiel pour détecter en cas de maj parrallèles la plus récente.
+- `cc` : clé `cc` du chat cryptée par la clé K du compte de I ou par la clé publique de I.
+- `seq` : numéro de séquence de changement du texte.
 - `contc` : contenu crypté par la clé `cc` du chat.
   - `na` : `[nom, cle]` de _l'autre_.
   - `dh`  : date-heure de dernière mise à jour.
@@ -1154,7 +1150,7 @@ _data_:
   - naE
   - txt
   - cv
-  - cle
+  - cc (décryptée)
 */
 
 export class Chat extends GenDoc {
@@ -1163,28 +1159,24 @@ export class Chat extends GenDoc {
   async compile (row) {
     const avStore = stores.avatar
     const session = stores.session
-    if (row.dlv) {
-      this._zombi = true
+    this.vsh = row.vsh || 0
+    this.st = row.st || 0
+    this.mc = row.mc
+    this.seq = row.seq
+    if (!row.ccK) {
+      const av = avStore.getAvatar(this.id)
+      this.cle = await decrypterRSA(av.priv, row.ccPub)
+      this.ccK = await crypter(session.clek, this.cle)
     } else {
-      this.vsh = row.vsh || 0
-      this.st = row.st || 0
-      this.mc = row.mc
-      this.seq = row.seq
-      if (!row.ccK) {
-        const av = avStore.getAvatar(this.id)
-        this.cle = await decrypterRSA(av.priv, row.ccPub)
-        this.ccK = await crypter(session.clek, this.cle)
-      } else {
-        this.cle = await decrypter(session.clek, row.ccK)
-        this.ccK = row.ccK
-      }
-      const x = decode(await decrypter(this.cle, row.contc))
-      this.naE = new NomAvatar(x.na[0], x.na[1])
-      this.idsE = await Chat.getIds(this.naE, this.naI)
-      this.dh = x.dh
-      this.txt = x.txt
-      this.cv = row.cva ? decode(await decrypter(this.naE.rnd, row.cva)) : null
+      this.cle = await decrypter(session.clek, row.ccK)
+      this.ccK = null
     }
+    const x = decode(await decrypter(this.cle, row.contc))
+    this.naE = new NomAvatar(x.na[0], x.na[1])
+    this.idsE = await Chat.getIds(this.naE, this.naI)
+    this.dh = x.dh
+    this.txt = x.txt
+    this.cv = row.cva ? decode(await decrypter(this.naE.rnd, row.cva)) : null
   }
 
   static async getIds (naI, naE) {{
@@ -1200,15 +1192,16 @@ export class Chat extends GenDoc {
   publicKey: clé publique de I. Si null récupérée depuis son avatar
   mc: mot clés attribués
   */
-  static async nouveauRow (naI, naE, dh, txt, seq, cc, pubI, pubE, ccK, mc) {
-    const ccPubI = await crypterRSA(pubI, cc)
-    const ccPubE = await crypterRSA(pubE, cc)
-
+  static async nouveauRow (naI, naE, contc, cc, pubE, mc) {
     const ids = await Chat.getIds(naI, naE)
     const id = naI.id
-    const r = { id, ids, dlv: 0, st: 0, seq,
-      ccK: ccK, ccPubI, ccPubE } // v vcv cva sont mis par le serveur
+    const r = { id, ids, st: 0, seq: 1, contc } // v vcv cva sont mis par le serveur
     if (mc) r.mc = mc
+    if (pubE) {
+      r.cc = await crypterRSA(pubE, cc)
+    } else {
+      r.cc = await crypter(stores.session.clek, cc)
+    }
     r.contc = await Chat.getContc (naE, dh, txt, cc)
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'chats', id, ids, _data_}

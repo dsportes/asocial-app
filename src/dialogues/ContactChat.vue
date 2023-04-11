@@ -39,8 +39,6 @@ import { ReactivationChat, GetAvatarPC } from '../app/operations.mjs'
 export default ({
   name: 'ContactChat',
 
-  /* La tribu est nécessaire pour une action du Comptable
-  qui lui peut choisir la tribu du parrainé */
   props: { close: Function },
 
   components: { ApercuChat, BoutonHelp },
@@ -74,21 +72,23 @@ export default ({
         await afficherDiag(this.$t('CChnopc'))
       } else {
         this.naE = na
-        const idsI = await Chat.getIds(this.avStore.avC.na, this.naE)
-        this.chat = avStore.getChat(this.avStore.avC.na.id, idsI)
+        this.naI = this.avStore.avC.na
+        const idsI = await Chat.getIds(this.naI, this.naE)
+        this.chat = avStore.getChat(this.naI.id, idsI)
+
         if (this.chat) {
           // MAJ éventuelle de la CV : na: du people, id2: de l'avatar ayant un chat avec lui, cv
           pStore.setPeopleChat (this.chat, cv) 
           return
         }
-        const [disp, chat] = await new ReactivationChat().run(this.avStore.avC.na, this.naE)
-        if (disp) {
-          // Improbable : on a accédé à sa phrase de contact juste avant !!!
-          pStore.setDisparu(this.naE)
-          await afficherDiag(this.$t('avdisp'))
-        } else {
-          avStore.setChat(chat)
+        
+        const txt = '*' + this.$st('bonjour2', [this.naE.nom])
+        const [st, chat] = await NouveauChat().run(this.naI, this.naE, txt)
+        if (st === 0) {
+          await afficherDiag(this.$t('OPnvch0'))
+        } else  {
           this.chat = chat
+          if (st === 2) await afficherDiag(this.$t('OPnvch2'))
         }
       }
     }

@@ -308,7 +308,7 @@ args.contI : contenu crypté côté compte
 args.contE : contenu crypté côté autre
 Retour:
 rowChatI
-*/
+
 export class SetChats extends OperationUI {
   constructor () { super($t('OPmajtch')) }
 
@@ -331,6 +331,7 @@ export class SetChats extends OperationUI {
     }
   }
 }
+*/
 
 /* Changer les mots clés d'un chat *********************************
 args.token: éléments d'authentification du compte.
@@ -381,84 +382,106 @@ export class SupprimerChat extends OperationUI {
   }
 }
 
-/* Réactivation d'un chat *********************************
-naI, naE : na du chat
-Retour: objet chat, enregistré en store et IDB
+/* Nouveau chat *********************************
+args.token: éléments d'authentification du compte.
+args.idI idsI : id du chat, côté interne
+args.idE idsE : id du chat côté externe
+args.ccKI : clé cc cryptée par la clé K du compte de I
+args.ccPE ! clé cc cryptée par la clé publique de l'avatar E
+args.contc : contenu du chat crypté par la clé cc
+Retour:
+st: 
+  0 : E a disparu
+  1 : chat créé avec le contenu contc
+  2 : le chat était déjà créé, retour de chatI avec le contenu qui existait
+rowChat: chat I créé (sauf st = 0)
 */
-export class ReactivationChat extends OperationUI {
-  constructor () { super($t('OPreactch')) }
+export class NouveauChat extends OperationUI {
+  constructor () { super($t('OPnvch')) }
 
-  async run (naI, naE) {
+  async run (naI, naE, txt) {
     try {
-      setNg(naI)
-      setNg(naE)
-      let chat
       const session = stores.session
       const avStore =  stores.avatar
-      const pStore = stores.people
+
+      setNg(naI)
+      setNg(naE)
+      const cc = random(32)
+      const pubE = await avStore.getPub(naE.id)
+      const ccPE = await crypterRSA(pubE, cc)
+      const ccKI = await crypter(session.clek, cc)
+      const dh = new Date().getTime()
+      const contcI = await Chat.getContc(naE, dh, txt, cc)
+      const contcE = await Chat.getContc(naI, dh, txt, cc)
 
       const idI = naI.id
       const idE = naE.id
       const idsI = await Chat.getIds(naI, naE)
       const idsE = await Chat.getIds(naE, naI)
 
-      let txt
-      let dh
-      /* Lecture d'un Chat (E) **********************
-      args.token: éléments d'authentification du compte.
-      args.id ids : id du chat
-      args.v : version détenue en session
-      Retour:
-      disparu: true si l'avatar E a disparu
-      rowChat: chat s'il existe
-      */
-      const args = { token: session.authToken, id: idE, ids: idsE, v: 0 }
-      const ret = this.tr(await post(this, 'GetChat', args))
-      if (ret.disparu) {
-        const args2 = pStore.setDisparu(naE)
-        if (args2) { // Maj (éventuelle) des volumes affectés de la tribu et de tribu2
-          args2.token = session.authToken
-          this.tr(await post(this, 'DisparitionCompte', args2))
-        }
-        return this.finOK([true, null])
-      }
-
-      let cle, chatE, ccK, ccPubE
-      if (ret.rowChat) {
-        chatE = await compile(ret.rowChat)
-        cle = chatE.cle
-        ccK = chatE.cck
-        txt = chatE.txt
-        dh = chatE.dh
-      } else {
-        cle = random(32)
-        ccK = await crypter(session.clek, cle)
-        const pubE = await asStore.getPub().run(sp.na.id)
-        if (!pubE) throw new AppExc(F_BRO, 7) // zarbi !!! on vient de récupérer le chat
-        ccPubE = await crypterRSA(pubE, cle)
-        dh = new Date().getTime()
-        txt = ''
-      }
-
-      { 
-        // On écrit le chat, avec un texte vide s'il n'avait pas été trouvé
-        const args = { token: session.authToken }
-        args.idI = idI
-        args.idE = idE
-        args.idsI = idsI
-        args.idsE = idsE  
-        args.contI = await Chat.getContc(naI, naE, dh, txt)
-        args.contE = await Chat.getContc(naE, naI, dh, txt)
-        const ret = this.tr(await post(this, 'SetChats', args))
-        chat = await compile(ret.rowChatI)
+      const args = { token: session.authToken, idI, idsI, idE, idsE, ccKI, ccPE, contcI, contcE }
+      const ret = this.tr(await post(this, 'NouveauChat', args))
+      const st = ret.st
+      let chat
+      if (st !== 0) {
+        chat = await compile(ret.rowChat)
         avStore.setChat(chat)
       }
-      return this.finOK([false, chat])
+      return this.finOK([st, chat])
     } catch (e) {
       await this.finKO(e)
     }
   }
 }
+
+/* MAJ Chat **********************
+args.token: éléments d'authentification du compte.
+args.idI idsI : id du chat, côté interne
+args.idE idsE : id du chat côté externe
+args.ccKI : clé cc cryptée par la clé K du compte de I.
+  Seulement si en session la clé cc était cryptée par la clé publique
+args.seq : numéro de séquence à partir duquel contc a été créé
+args.contcI : contenu du chat I crypté par la clé cc
+args.contcE : contenu du chat E crypté par la clé cc
+Retour:
+st: 
+  1 : chat créé avec le contenu contc
+  2 : le chat existant a un contenu plus récent que celui sur lequel était basé contc. Retour de chatI
+rowChat:
+*/
+export class MajChat extends OperationUI {
+  constructor () { super($t('OPmajch')) }
+
+  async run (naI, naE, txt, chat) {
+    try {
+      const session = stores.session
+      const avStore =  stores.avatar
+
+      setNg(naI)
+      setNg(naE)
+      const ccKI = chat.ccK ? await crypter(session.clek, chat.cc) : null
+      const dh = new Date().getTime()
+      const contcI = await Chat.getContc(naE, dh, txt, cc)
+      const contcE = await Chat.getContc(naI, dh, txt, cc)
+      const seq = chat.seq
+
+      const idI = naI.id
+      const idE = naE.id
+      const idsI = await Chat.getIds(naI, naE)
+      const idsE = await Chat.getIds(naE, naI)
+
+      const args = { token: session.authToken, idI, idsI, idE, idsE, ccKI, seq, contcI, contcE }
+      const ret = this.tr(await post(this, 'MajChat', args))
+      const st = ret.st
+      const chat = await compile(ret.rowChat)
+      avStore.setChat(chat)
+      return this.finOK([st, chat])
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 
 /* Rafraîchir les CV, quand nécessaire *********************************
 args.token: éléments d'authentification du compte.

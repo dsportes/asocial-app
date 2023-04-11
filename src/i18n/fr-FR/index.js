@@ -1,5 +1,7 @@
 export default {
   bonjour: 'Bonjour !',
+  bonjour2: 'Bonjour {0} !',
+
   build: 'Build: {0} - Debug: {1}',
   aide: 'Un peu d\'aide ... ',
 
@@ -407,7 +409,8 @@ export default {
   OPccv: 'Rafraîchir des cartes de visite',
   OPnvgr: 'Créer un nouveau groupe',
 
-  OPnch: 'Ajouter un item sur un "chat"',
+  OPnvch: 'Créer un nouveau "chat"',
+  OPmajch: 'Mettre à jour un "chat"',
   OPsch: 'Sélectionner des "chats"',
   OPrch: 'Ré-initialiser un "chat"',
   OPlch: 'Obtenir un "chat"',
@@ -441,6 +444,10 @@ export default {
   OPdhvu: 'Maj de la date-heure de "vu" d\'une compta',
   OPtrib: 'Obtention de la tribu',
   OPnotif: 'Attribution d\'une notification générale',
+
+  OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
+  OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui que vous avez saisi.',
+  OPmajch2: 'Le "chat" a été mis à jour en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui que vous avez saisi.',
 
   OPrdv: 'Prendre rendez-vous avec un avatar',
   OPprl: 'Prolonger une proposition (de contact, parrainage ou rendez-vous)',

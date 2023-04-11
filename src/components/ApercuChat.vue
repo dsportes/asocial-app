@@ -9,14 +9,16 @@
       <div v-else class="row justify-end">
         <div v-if="affnai" class="titre-md text-italic q-mr-lg">{{$t('CHoch2', [naI.nom])}}</div>
         <div v-else class="titre-md text-italic q-mr-lg">{{$t('CHoch3', [naE.nom])}}</div>
-        <div class="font-mono fs-md">{{dhcool(chat.dh)}}</div>
+        <div class="font-mono fs-md">{{dhcool(chat.dh) + ' #' + chat.seq}}</div>
       </div>
       <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
       <apercu-motscles v-if="chat" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
         :mapmc="mapmc" :edit="session.editable" :src="chat.mc || u0"/>
       <div v-if="chat" class="row items-start">
         <show-html class="col q-mr-sm bord" :idx="idx" zoom maxh="3rem" :texte="chat.txt"/>
-        <div class="col-auto self-start"><q-btn class="btn1" icon="edit" size="sm" color="warning" @click="editer"/></div>
+        <div class="col-auto self-start">
+          <q-btn class="btn1" icon="edit" size="sm" color="warning" @click="editer"/>
+        </div>
       </div>
     </div>
 
@@ -40,10 +42,10 @@ import { toRef, ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import EditeurMd from './EditeurMd.vue'
-import { dhcool } from '../app/util.mjs'
+import { dhcool, afficherDiag } from '../app/util.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import ApercuPeople from './ApercuPeople.vue'
-import { MajMotsclesChat, SetChats, ReactivationChat } from '../app/operations.mjs'
+import { MajMotsclesChat, NouveauChat, MajChat } from '../app/operations.mjs'
 import { IDCOMPTABLE } from 'src/app/api.mjs'
 
 export default {
@@ -71,21 +73,23 @@ export default {
       if (this.session.nivbl === 3 && !csp) {
         await afficherDiag(this.$t('CHbl'))
       }
-      if (this.chat) {
-        this.chatedit = true
-        return
-      }
-      const [disp, chat] = await new ReactivationChat().run(this.naI, this.naE)
-      if (disp) {
-        await afficherDiag(this.$t('CHdisp'))
-        return
-      }
-      this.chat = chat
       this.chatedit = true
     },
 
     async chatok (txt) {
-      await new SetChats().run(this.chat, txt)
+      if (!this.chat) {
+        const [st, chat] = await NouveauChat().run(this.naI, this.naE, txt)
+        if (st === 0) {
+          await afficherDiag(this.$t('OPnvch0'))
+        } else  {
+          this.chat = chat
+          if (st === 2) await afficherDiag(this.$t('OPnvch2'))
+        }
+      } else {
+        const [st, chat] = await MajChat().run(this.naI, this.naE, txt, this.chat)
+        this.chat = chat
+        if (st === 2) await afficherDiag(this.$t('OPmajch2'))
+      }
       this.chatedit = false
     },
 

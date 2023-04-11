@@ -790,16 +790,16 @@ export class AcceptationSponsoring extends OperationUI {
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
       const cc = random(32)
-      const ccKI = await crypter(session.cleK, cc)
-      if (!pubE) pubE = await stores.avatar.getPub(naE.id)
-      if (!pubE) return null
-      if (!pubI) pubI = stores.avatar.getAvatar(naI.id).pub
       const dh = new Date().getTime()
+      const contcI = await Chat.getContc(sp.na, dh, txt, cc)
+      const contcE = await Chat.getContc(sp.naf, dh, txt, cc)
 
-      // (naI, naE, dh, txt, seq, cc, pubI, pubE, ccK, mc)
-      const rowChatI = await Chat.nouveauRow(sp.naf, sp.na, dh, txt, 1, cc, publicKey, pubE, ccKI, new Uint8Array([252])) 
-      const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, dh, txt, 1, cc, pubE, publicKey, null, new Uint8Array([253])) 
-      if (!rowChatI || !rowChatE) throw new AppExc(F_BRO, 7)
+      const pubE = await stores.avatar.getPub(naE.id)
+      if (!pubE) throw new AppExc(F_BRO, 7)
+
+      // (naI, naE, contc, cc, pubE, mc)
+      const rowChatI = await Chat.nouveauRow(sp.naf, sp.na, contcI, cc, null, new Uint8Array([252])) 
+      const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, contcE, cc, pubE, new Uint8Array([253])) 
 
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
         rowChatI, rowChatE, ardx, idt: session.tribuId, mbtrid, mbtre, quotas: sp.quotas, abPlus: [sp.nct.id, sp.naf.id] }
@@ -809,6 +809,7 @@ export class AcceptationSponsoring extends OperationUI {
       const notifG = ret.notifG
       const rowTribu = ret.rowTribu
       const rowTribu2 = ret.rowTribu2
+      const rowChat = ret.rowChat
 
       // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
       const avatar = await compile(rowAvatar)
@@ -817,7 +818,7 @@ export class AcceptationSponsoring extends OperationUI {
       const compta = await compile(rowCompta)
       stores.avatar.setCompte(avatar, compta, tribu, tribu2)
       session.setNotifGlobale(notifG)
-      const chat = await compile(rowChatI)
+      const chat = await compile(rowChat)
       stores.avatar.setChat(chat)
       Versions.reset()
       Versions.set(session.compteId, 1)
