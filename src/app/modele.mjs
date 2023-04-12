@@ -797,7 +797,7 @@ export class Avatar extends GenDoc {
       } else this.memo = ''
     }
 
-    this.priv = await decrypterStr(session.clek, row.privk)
+    this.priv = await decrypter(session.clek, row.privk)
     this.pub = row.pub
 
     if (row.pck) { // phrase de contact cryptée par la clé K.
@@ -1166,13 +1166,13 @@ export class Chat extends GenDoc {
     this.seq = row.seq
     if (row.cc.length === 256) {
       const av = avStore.getAvatar(this.id)
-      this.cle = await decrypterRSA(av.priv, row.cc)
-      this.ccK = await crypter(session.clek, this.cle)
+      this.cc = await decrypterRSA(av.priv, row.cc)
+      this.ccK = await crypter(session.clek, this.cc)
     } else {
-      this.cle = await decrypter(session.clek, row.cc)
+      this.cc = await decrypter(session.clek, row.cc)
       this.ccK = null
     }
-    const x = decode(await decrypter(this.cle, row.contc))
+    const x = decode(await decrypter(this.cc, row.contc))
     this.naE = new NomAvatar(x.na[0], x.na[1])
     this.idsE = await Chat.getIds(this.naE, this.naI)
     this.dh = x.dh

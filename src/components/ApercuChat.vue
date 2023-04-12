@@ -78,7 +78,7 @@ export default {
 
     async chatok (txt) {
       if (!this.chat) {
-        const [st, chat] = await NouveauChat().run(this.naI, this.naE, txt)
+        const [st, chat] = await new NouveauChat().run(this.naI, this.naE, txt)
         if (st === 0) {
           await afficherDiag(this.$t('OPnvch0'))
         } else  {
@@ -86,7 +86,7 @@ export default {
           if (st === 2) await afficherDiag(this.$t('OPnvch2'))
         }
       } else {
-        const [st, chat] = await MajChat().run(this.naI, this.naE, txt, this.chat)
+        const [st, chat] = await new MajChat().run(this.naI, this.naE, txt, this.chat)
         this.chat = chat
         if (st === 2) await afficherDiag(this.$t('OPmajch2'))
       }

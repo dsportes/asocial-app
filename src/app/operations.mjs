@@ -7,7 +7,7 @@ import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { GenDoc, NomAvatar, NomTribu, NomGroupe, Avatar, Chat, 
   Groupe, Membre, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
-import { decrypter, crypterRSA } from './webcrypto.mjs'
+import { decrypter, crypterRSA, genKeyPair } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
 
 /* Opération générique ******************************************/
@@ -461,8 +461,8 @@ export class MajChat extends OperationUI {
       setNg(naE)
       const ccKI = chat.ccK ? await crypter(session.clek, chat.cc) : null
       const dh = new Date().getTime()
-      const contcI = await Chat.getContc(naE, dh, txt, cc)
-      const contcE = await Chat.getContc(naI, dh, txt, cc)
+      const contcI = await Chat.getContc(naE, dh, txt, chat.cc)
+      const contcE = await Chat.getContc(naI, dh, txt, chat.cc)
       const seq = chat.seq
 
       const idI = naI.id
@@ -473,9 +473,9 @@ export class MajChat extends OperationUI {
       const args = { token: session.authToken, idI, idsI, idE, idsE, ccKI, seq, contcI, contcE }
       const ret = this.tr(await post(this, 'MajChat', args))
       const st = ret.st
-      const chat = await compile(ret.rowChat)
-      avStore.setChat(chat)
-      return this.finOK([st, chat])
+      const ch = await compile(ret.rowChat)
+      avStore.setChat(ch)
+      return this.finOK([st, ch])
     } catch (e) {
       await this.finKO(e)
     }

@@ -1020,7 +1020,7 @@ export default {
   SNnon: 'Pas de procédure de blocage en cours.',
   SBdel: 'Supprimer ce blocage',
 
-  // PanelPeople
+  // PanelPeople et apercu compte
   PPchats: 'Chats',
   PPgroupes: 'Participations aux groupes',
   PPsp: 'Sponsor de la tribu "{0}"',
@@ -1038,5 +1038,6 @@ export default {
   PPc3: 'Q. disp. V1',
   PPc4: 'Q. disp. V2',
   PPnt: 'Début du nom de la future tribu',
+  PPact: 'Actions sur le compte',
 
 }

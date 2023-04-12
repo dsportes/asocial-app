@@ -53,7 +53,10 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
-    estSponsor (state) { return (stores.avatar.tribu2 && stores.avatar.tribu2.sp) || false },
+    estSponsor (state) { 
+      const t2 = stores.avatar.tribu2.mbtr[state.compteId]
+      return (t2 && t2.sp) || false 
+    },
     estComptable (state) { return state.compteId === IDCOMPTABLE },
     
     editable (state) { return state.mode < 3 && state.nivbl < 2 },
@@ -90,7 +93,7 @@ export const useSessionStore = defineStore('session', {
       localStorage.setItem(this.lsk, this.nombase)
     },
 
-
+    // pour tracking des changements sur $onAction
     setCompteId (id) { this.compteId = id},
 
     setAvatarId (id) { this.avatarId = id},
@@ -102,6 +105,8 @@ export const useSessionStore = defineStore('session', {
     setPeopleId (id) { this.peopleId = id },
 
     setGroupeId (id) { this.groupeId = id },
+
+    setMembreId (id) { this.membreId = id },
 
     chgps (phrase) {
       /*

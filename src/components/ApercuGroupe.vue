@@ -92,7 +92,7 @@ export default {
     detailMb (im) {
       this.ui.detailsmembre = true
       this.session.groupeId = this.eg.groupe.id
-      this.session.membreId = im
+      this.session.setMembreId(im)
     }
   },
 
