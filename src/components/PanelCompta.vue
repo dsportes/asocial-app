@@ -90,6 +90,7 @@
 </template>
 
 <script>
+// import { toRef } from 'vue'
 import { UNITEV1, UNITEV2, AMJ, pow } from '../app/api.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
 
@@ -157,7 +158,8 @@ export default ({
 
   },
 
-  setup () {
+  setup (props) {
+    // const cx = toRef(props, 'c')
     return {
     }
   }

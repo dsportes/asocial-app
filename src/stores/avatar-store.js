@@ -167,6 +167,12 @@ export const useAvatarStore = defineStore('avatar', {
       return e ? e.grIds : new Set()
     },
 
+    // elt mbtr dans tribu2 pour la tribu courante et le compte id
+    mbCpt: (state) => { return (id) => { 
+        const t2 = state.tribu2CP
+        return t2 && id ? t2.mbtr[id] : null
+      }
+    },
     /** PanelPeople ****************************************************/
     // elt mbtr dans tribu2 pour la tribu courante et le people courant
     mbPeC: (state) => {
