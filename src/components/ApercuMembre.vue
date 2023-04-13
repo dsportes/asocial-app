@@ -3,9 +3,12 @@
     <div :class="dkli(idx)">
       <apercu-genx v-if="people" :na="mb.na" :cv="mb.cv" :ids="mb.ids" :idx="idx" detail-people/>
 
-      <div v-else>
-        <span class="titre-lg text-bold text-primary">{{$t('moi2', [mb.na.nom])}}</span>
-        <span class="q-ml-lg font-mono fs-sm">{{'#' + mb.na.id}}</span>
+      <div v-else class="row justify-between">
+        <div>
+          <span class="titre-lg text-bold text-primary">{{$t('moi2', [mb.na.nom])}}</span>
+          <span class="q-ml-lg font-mono fs-sm">{{'#' + mb.na.id}}</span>
+        </div>
+        <bouton-membre v-if="!nopanel" :eg="eg" :im="mb.ids" btn/>
       </div>
 
       <div>
@@ -36,16 +39,6 @@
           {{$t('PCct1', [mbidi ? mbidi.na.nomc : '?'])}}</span>
         <span v-if="mb.idi && !eg.groupe.ast[mb.idi]" class="q-mr-xs">{{$t('PCct2', [mb.idi])}}</span>
       </div>
-
-      <!--div class="row justify-between">
-        <span v-if="!eg.groupe.dfh" class="q-mr-xs">{{heb}}</span>
-        <span v-else class="text-warning text-bold q-mr-xs">{{$t('PGnheb', [dfh])}}</span>
-        <q-btn v-if="eg.estHeb" dense size="sm" color="warning" :label="$t('PGnpah')"
-          @click="finHeb"/>
-        <q-btn v-else dense size="sm" color="warning" :label="$t('PGah')"
-          @click="debHeb"/>
-      </div-->
-
 
       <div v-if="mb.vote && eg.groupe.stx===2" class="titre-md text-italic">{{$t('PGavote')}}</div>
 
@@ -129,6 +122,7 @@
 import { afficherDiag, dhcool } from 'src/app/util.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from './BoutonConfirm.vue'
+import BoutonMembre from './BoutonMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import ShowHtml from './ShowHtml.vue'
 import EditeurMd from './EditeurMd.vue'
@@ -142,10 +136,11 @@ export default {
     eg: Object,
     mapmc: Object,
     idx: Number, 
-    people: Boolean
+    people: Boolean,
+    nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
   },
 
-  components: { BoutonConfirm, ApercuGenx, ShowHtml, EditeurMd, ApercuMotscles },
+  components: { BoutonConfirm, ApercuGenx, ShowHtml, EditeurMd, ApercuMotscles, BoutonMembre },
 
   computed: {
     photo () { return this.mb && this.mb.cv && this.mb.cv.photo ? this.mb.cv.photo : this.photoDef },

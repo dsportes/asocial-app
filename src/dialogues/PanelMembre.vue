@@ -1,5 +1,5 @@
 <template>
-<q-layout container view="hHh lpR fFf" :class="sty + ' bord'" style="width:80vw">
+<q-layout container view="hHh lpR fFf" :class="sty + bcf" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
@@ -12,7 +12,7 @@
   <q-page-container>
     <q-card>
       <apercu-membre class="q-pa-sm" v-if="eg && mb"
-        :eg="eg" :mb="mb" :idx="0" :mapmc="mapmc" :people="people"/>
+        :eg="eg" :mb="mb" :idx="0" :mapmc="mapmc" :people="people" nopanel/>
       <q-toolbar class="bg-secondary text-white">
         <q-toolbar-title v-if="eg" class="titre-lg text-center q-mx-sm">{{$t('PMGtit3', [eg.groupe.na.nomc])}}</q-toolbar-title>
         <q-toolbar-title v-else class="titre-lg text-center q-mx-sm">{{$t('PMGtit2')}}</q-toolbar-title>
@@ -39,7 +39,8 @@ export default {
   props: { },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    sty () { return this.$q.dark.isActive ? 'sombre ' : 'clair ' },
+    bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
   },
 
   watch: {
@@ -77,6 +78,4 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bord
-  border: 1px solid $grey-5
 </style>

@@ -821,13 +821,13 @@ export class Avatar extends GenDoc {
           const ng = new NomGroupe(nom, rnd)
           setNg(ng)
           this.lgr.set(ni, { ng, im})  
-          gSt.setInivit(ng.id, this.id)
+          gSt.setInvit(ng.id, this.id)
         } else {
           const [nom, rnd, im] = decode(await decrypter(session.clek, lgrc))
           const ng = new NomGroupe(nom, rnd)
           setNg(ng)
           this.lgr.set(ni, { ng, im})  
-          gSt.delInivit(ng.id, this.id)
+          gSt.delInvit(ng.id, this.id)
         }
       }
     }

@@ -51,7 +51,7 @@
           <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="okNom"/>
           <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
           <choix-quotas :quotas="quotas" />
-          <q-checkbox v-model="ferme" class="cb" :label="$t('PGferme')" />
+          <q-checkbox v-model="una" class="cb" :label="$t('PGuna')" />
           <q-card-actions align="right">
             <q-btn dense flat color="warning" :label="$t('renoncer')" v-close-popup />
             <q-btn dense flat color="primary" :disable="quotas.err || !nom"
@@ -106,14 +106,14 @@ export default {
       if (max2 < 0) max2 = 0
       this.quotas = { q1: 0, q2: 0, min1: 0, min2: 0, max1, max2, err: ''}
       this.nom = ''
-      this.ferme = false
+      this.una = false
       this.crGr = true
     },
     okNom (n) { this.nom = n },
     closeGr () { this.crGr = false },
     async okCreation () {
-      console.log(this.nom, this.quotas.q1, this.quotas.q2, this.ferme)
-      await new NouveauGroupe().run(this.nom, this.ferme, this.quotas)
+      console.log(this.nom, this.quotas.q1, this.quotas.q2, this.una)
+      await new NouveauGroupe().run(this.nom, this.una, this.quotas)
     }
   },
 
@@ -122,7 +122,7 @@ export default {
       quotas: null, // { q1, q2, min1, min2, max1, max2, err}
       crGr: false,
       nom: '',
-      ferme: false
+      una: false
     }
   },
 

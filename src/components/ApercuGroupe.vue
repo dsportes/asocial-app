@@ -4,23 +4,21 @@
 
     <div v-if="!eg.groupe.dfh" class="fs-md">
       <span class="fs-md q-mr-sm">{{$t('PGhb')}}</span>
-      <q-btn class="btn2" dense size="md" no-caps icon-right="open_in_new" 
-        :label="heb" @click="detailMb(eg.groupe.imh)"/>
+      <bouton-membre :eg="eg" :im="eg.groupe.imh" />
     </div>
     <div v-else class="fs-md text-warning text-bold">{{$t('PGnheb', [dfh])}}</div>
 
     <div v-if="fond">
       <span class="fs-md q-mr-sm">{{$t('PGfd')}}</span>
-      <q-btn class="btn2" dense size="md" no-caps icon-right="open_in_new" 
-        :label="fond" @click="detailMb(1)"/>
+      <bouton-membre :eg="eg" :im="1" />
     </div>
     <div v-else class="fs-md">{{$t('PGnfond')}}</div>
 
     <div class="q-mt-xs row justify-between">
-      <div v-if="eg.groupe.stx === 2" class="titre-md text-bold text-warning">{{$t('PGferme', nbv, { count: nbv })}}</div>
-      <div v-else class="titre-md">{{$t('PGouvert')}}</div>
+      <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('PGuna')}}</div>
+      <div v-else class="titre-md">{{$t('PGsimple')}}</div>
       <q-btn v-if="edit" class="q-ml-sm" size="sm" :label="$t('details')" 
-        icon="edit" dense color="primary" @click="edit('vote', eg.groupe)"/>
+        icon="edit" dense color="primary" @click="editUna"/>
     </div>
 
     <div class="q-mt-xs row largeur40">
@@ -28,7 +26,7 @@
       <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx1', [q1, pc1])}}</div>
       <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx2', [q2, pc2])}}</div>
       <div class="col-1">
-        <q-btn class="btn1" size="sm" icon="edit" dense color="primary" @click="edit('quotas', eg.groupe)"/>
+        <q-btn class="btn1" size="sm" icon="edit" dense color="primary" @click="chgQuotas"/>
       </div>
     </div>
 
@@ -47,6 +45,7 @@ import ApercuGenx from './ApercuGenx.vue'
 import { edvol, dhcool } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import { MajCvGr } from '../app/operations.mjs'
+import BoutonMembre from './BoutonMembre.vue'
 
 export default {
   name: 'ApercuGroupe',
@@ -58,14 +57,10 @@ export default {
     edit: Function
   },
 
-  components: { ApercuMembre, ApercuGenx },
+  components: { ApercuMembre, ApercuGenx, BoutonMembre },
 
   computed: {
     dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },
-    heb () {
-      const m = this.eg.membres.get(this.eg.groupe.imh)
-      return m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': '')
-    },
     fond () {
       if (!this.eg.groupe.ast[1]) return ''
       const m = this.eg.membres.get(1)
@@ -76,10 +71,12 @@ export default {
     q2 () { const v = this.eg.groupe.vols; return v.q2 + ' - ' + edvol(v.q2 * UNITEV2) },
     pc1 () { const v = this.eg.groupe.vols; return Math.round((v.v1 * 100) / (v.q1 * UNITEV1)) },
     pc2 () { const v = this.eg.groupe.vols; return Math.round((v.v2 * 100) / (v.q2 * UNITEV2)) },
-    nbv () { let n = 0; this.eg.membres.forEach(m => { if (m.vote) n++ }); return n }
+    // nbv () { let n = 0; this.eg.membres.forEach(m => { if (m.vote) n++ }); return n }
   },
 
   data () { return {
+    editerUna: false,
+    changerQuotas: false,
   }},
 
   methods: {
@@ -89,10 +86,13 @@ export default {
         await new MajCvGr().run(this.eg.groupe, res.ph, res.info)
       }
     },
-    detailMb (im) {
-      this.ui.detailsmembre = true
-      this.session.groupeId = this.eg.groupe.id
-      this.session.setMembreId(im)
+    chgQuotas () {
+      // TODO
+      this.changerQuotas = true
+    },
+    editUna () {
+      // TODO 
+      this.editerUna = true
     }
   },
 
@@ -131,7 +131,4 @@ export default {
 .btn1
   padding: 1px !important
   width: 1.5rem !important
-.btn2
-  padding: 0 2px !important
-  border-bottom: 1px solid $primary
 </style>

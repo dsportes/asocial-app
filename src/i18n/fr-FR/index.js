@@ -138,14 +138,7 @@ export default {
   mois11: 'Novembre',
   mois12: 'Décembre',
 
-  RBL1: 'Comptable',
-  RBL2: 'Volume',
-  RBL3: 'Organisation',
-  RBL4: 'Autre',
-
-  items: 'Aucun item PGv Un item | {count} items',
-  comptes: 'Pas de compte | Un compte | {count} comptes',
-  parrains: 'Pas de parrain | Un parrain | {count} parrains',
+  items: 'Aucun item | Un item | {count} items',
 
   // statuts membre
   STMB0: 'envisagé',
@@ -325,7 +318,7 @@ export default {
   HLPprec: 'Page d\'aide précédente',
   HLPvoir: 'Voir aussi ...',
 
-  // Page sponsorings - Nouveau Parrainage
+  // Page sponsorings - Nouveau sponsoring
   NPnouv: 'Sponsoriser un nouveau compte',
   NPnosp: 'Aucun sponsoring n\'est actuellement en cours ou récent',
   NPspex: 'Liste des sponsorings actuellement en cours ou récents',
@@ -345,7 +338,7 @@ export default {
   NPann: 'Annuler',
   NPtribu: 'Tribu:',
   NPtit: 'Sponsoring d\'un nouveau compte',
-  NPnpc: 'Phrase à ne communiquer qu\'au titulaire du compte parrainé',
+  NPnpc: 'Phrase à ne communiquer qu\'au titulaire du compte sponsorisé',
   NPphl: 'Phrase libre',
   NPpe: 'Presser "Entrée" à la fin de la saisie',
   NPcry: 'Cryptage en cours ...',
@@ -355,13 +348,13 @@ export default {
   NPmotd: 'Explication du refus de sponsoring pour le sponsor',
   NP10s: 'De 10 à 140 signes ({0}',
   NPquo1: 'Quotas d\'espace V1 / V2 attribués au nouveau compte',
-  NPcpa: 'Compte parrain lui-même',
+  NPcpa: 'Compte sponsor lui-même',
   NPcstd: 'Compte standard',
   NPconf: 'Confirmation',
   NPnav: 'Nom de l\'avatar',
   NPmotc: 'Mot de bienvenue',
   NPquo: 'Quotas attribués au nouveau compte',
-  NPcp: 'C\'est un compte PARRAIN',
+  NPcp: 'C\'est un compte SPONSOR',
   NPbj: 'Bonjour {0} !',
   NP16: 'De 16 à 32 signes',
 
@@ -416,7 +409,6 @@ export default {
   OPxco: 'Obtentir la comptabilité d\'un avatar',
   OPbtc: 'Enregistrer le blocage d\'une tribu ou d\'un compte',
   OPxtn: 'Obtenir le nom de la tribu d\'un compte',
-  OPvtc: 'Vérifier qu\'un autre compte est parrain de la tribu du compte',
   OPntr: 'Créer une nouvelle tribu',
   OPmtr: 'Mettre à jour le commentaire et les réserves d\'une tribu',
   OPcct: 'Changer un compte de tribu',
@@ -447,15 +439,8 @@ export default {
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui que vous avez saisi.',
   OPmajch2: 'Le "chat" a été mis à jour en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui que vous avez saisi.',
 
-  OPrdv: 'Prendre rendez-vous avec un avatar',
-  OPprl: 'Prolonger une proposition (de contact, parrainage ou rendez-vous)',
-  OPcco: 'Créer un nouveau contact',
-  OPaco: 'Accepter la proposition de contact d\'un avatar',
-  OPdco: 'Décliner la proposition de contact d\'un avatar',
-  OPard: 'Accepter le rendez-vous d\'un avatar',
-  OPdrd: 'Décliner le rendez-vous / parrainage d\'un avatar',
-  OPapa: 'Accepter le parrainage d\'un nouveau compte',
-  OPdpa: 'Décliner le parrainage d\'un nouveau compte',
+  OPapa: 'Accepter le sponsoring d\'un nouveau compte',
+  OPdpa: 'Décliner le sponsoring d\'un nouveau compte',
   OPmco: 'Mettre à jour un contact',
   OPnpc: 'Basculer l\'indicateur d\'un contact d\'acceptation des invitations à un groupe',
   OPnav: 'Créer un avatar',
@@ -534,7 +519,6 @@ export default {
   MLAcf: 'Voulez-vous vraiement arrêter l\'opération en cours "{0}"',
   MLAcf3: 'Non, je la laisse se poursuivre',
   MLAcf4: 'Oui, je veux l\'interrompre (si possible)',
-  MLAcptp: '(parrain)',
   MLAtri: 'Tribu : {0}',
   MLAsfer: '(pas de compte connecté)',
   MLAngr: '(pas de groupe sélectionné)',
@@ -715,12 +699,7 @@ export default {
   PCmb: 'Membre {1}({0}) du groupe:',
   PCav: 'Contact {1}({0}) de:',
 
-  P10tit: 'Détail du compte',
-  P10cep: 'Le compte est PARRAIN de la tribu',
-  P10nbc: 'La tribu n\'a pas de compte | La tribu a un compte | La tribu a {count} comptes',
-  P10par1: 'La tribu n\'a pas de parrain | La tribu a UN parrain | La tribu a {count} parrains',
-  P10par2: 'La tribu n\'a pas d`autre parrain | La tribu a UN autre parrain | La tribu a {count} autres parrains',
-  P10nvp: 'Parrainer un nouveau compte',
+  P10nvp: 'Sponsoriser un nouveau compte',
 
   P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
 
@@ -741,12 +720,9 @@ export default {
   // Panel Tribu
   PTvide: 'Aucune tribu (sur {0}) ne répond au critère de filtre',
   PTtit: 'Tribu {0}',
-  PTptr: 'Parrain de la tribu | Parrain de la tribu | Parrains de la tribu',
   PTci: 'Commentaires / information',
   PTvat: 'Volumes déjà attribués aux comptes de la tribu',
   PTres: 'Réserves restantes de volumes à attribuer',
-  PTpnc: 'Parrainer un nouveau compte',
-  PTtrf: 'Transférer un compte et/ou changer son statut parrain',
   PTnv: 'Nouvelle tribu',
   PTnoinfo: 'Pas de commentaires',
   PTattr: 'Attribué aux comptes',
@@ -785,7 +761,7 @@ export default {
   PGnfond: 'Le fondateur du groupe a disparu',
   PGct1: 'Inscrit comme "contact" par {0}.',
   PGct2: 'Inscrit comme "contact" par #{0} (oublié ou disparu).',
-  PGferme: 'Invitations bloquées. Aucun vote pour réouvrir | Invitations bloquées. Un vote pour réouvrir | Invitations bloquées. {count} votes pour réouvrir',
+  PGferme1: 'Invitations bloquées. Aucun vote pour réouvrir | Invitations bloquées. Un vote pour réouvrir | Invitations bloquées. {count} votes pour réouvrir',
   PGouvert: 'Invitations autorisées',
   PGnope: 'Le groupe n\'a aucun autre membre que les avatars du compte',
   PGnomb: 'Aucun membre (sur {0}) ne répond au critère de sélection',
@@ -798,7 +774,8 @@ export default {
   PGdfa: 'Fin d\'activité',
   PGcrea: 'Création d\'un nouveau groupe',
   PGnom: 'Nom du groupe à créer: {0}',
-  PGferme: 'Le groupe est "fermé", n\'accepte pas de nouveau membre',
+  PGsimple: 'Une invitation est faite sur demande d\'un seul animateur',
+  PGuna: 'Une invitation requiert l\'unanimité des animateurs',
   PGquotas: 'Quotas de volume V1 / V2 maximum pour les secrets du groupe',
   PGinfo: 'Commentaires à propos du groupe',
   PGnoinfo: 'Pas de commentaires à propos du groupe',
@@ -923,22 +900,7 @@ export default {
   NAph3: 'Nom confirmé',
   NAe1: 'Entre 4 et 24 caractères',
   NAe2: 'Caractères interdits',
-
-  // Ardoise Tribu
-  ARDtit: 'Tribu {0} - Ardoise de {1}',
-  ARDoat: 'Ouvrir son ardoise dans sa tribu',
-  ARDafc: 'Afficher la comptabilité',
-  ARDafb: 'Afficher le blocage',
-  ARDtri: 'tribu inconnue',
-  ARDnf: 'Pas d\'action proposée pour cet avatar',
-  ARDm1: 'Aucun compte ne peut accéder à la comptabilité du comptable (qui ne peut pas être bloqué)',
-  ARDm2: 'Seul un compte parrain peut accéder à la comptabilité ou au blocage des autres comptes (de la même tribu)',
-  ARDm3: 'Cet avatar n`est pas de la même tribu. Un parrain ne peut pas accéder à la comptabilité ou au blocage d\'un compte d\'une autre tribu',
   
-  // Fiche People
-  FPEprim: 'primaire',
-  FPEppa: 'Seul un parrain de la tribu peut ouvrir les ardoises tribu des comptes de sa tribu',
-
   // Carte Visite
   CVgph: 'Garder la photo initiale',
   CVcph: 'Changer la photo',
@@ -953,40 +915,10 @@ export default {
   CVraf: 'Rafraîchir les cartes de visite',
   CVraf2: '{0} carte(s) de visite mises à jour, {1} étaient à jour.',
 
-  // Panel Comptabilité
-  PCOtit: 'Comptabilité de {0}',
-
-  // Acceptation de parrainage
-  APAtit: 'Acceptation du parrainage de votre compte {0}',
-  APApa: 'PARRAIN lui-même',
-  APAfi: 'filleul (non parrain)',
-  APApp: 'Proposition de parrainage',
-  APAnc: 'Nom de votre compte (et de votre avatar primaire)',
-  APAnpa: 'Nom du parrain',
-  APAqdc: 'Quotas attribués à votre compte',
-  APAtr: 'Votre compte est rattaché à la tribu : {0}',
-  APAval: 'Validité de la proposition',
-  APAps: 'Votre phrase secrète',
-  APAps2: 'Saisir et confirmer votre phrase secrète de connexion qui permettra de vous authentifier.',
-  APAess: 'Espace maximum attribué pour les secrets partagés avec votre parrain',
-  APAesp: 'Votre parrain a de son côté attribuer l\'espace maximal suivant',
-  APAnos: 'Votre parrain a opté POUR NE PAS PARTAGER de secrets avec vous',
-  APAnos2: 'Mettre 0 pour NE PAS PARTAGER de secrets avec votre parrain',
-  APAper: 'Votre parrain a demandé à NE PAS ETRE INVITE à vos groupes)',
-  APAper2: 'Votre parrain accepte d\'être invité à vos groupes)',
-  APAper3: 'Ce contact est PERSONNEL (le parrain ne peut pas m\'inviter à ses groupes)',
-  APAper4: 'Le parrain peut m\'inviter à ce groupe',
-  APAmer: 'Rermerciement et acceptation',
+  // Acceptation de sponsoring
   APAconf: 'Confirmer la création du compte',
   APAdec: 'Remerciement et explication : pourquoi je décline la proposition',
-  APAdec2: 'Décliner définitivement ce parrainage',
-
-  EBLcs: 'Consultation seulement',
-  EBLlc: 'le Comptable',
-  EBLup: 'un parrain',
-  EBLcp: 'Contrôlé par',
-  EBLnbj: 'Nombre de jours passés sur un niveau avant de passer au suivant',
-  EBLniv: 'Niveau',
+  APAdec2: 'Décliner définitivement ce sponsoring',
 
   // Synthèse blocage
   SBtitt: 'Blocage "tribu" par {0}',

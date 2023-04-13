@@ -1,6 +1,6 @@
 import stores from '../stores/stores.mjs'
 import { Operation } from './operations.mjs'
-import { reconnexionCompte } from './connexion.mjs'
+import { decode } from '@msgpack/msgpack'
 import { compile, Versions } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'
 import { $t, difference, intersection } from './util.mjs'
@@ -60,7 +60,7 @@ export class OperationWS extends Operation {
     const session = stores.session
     const args = { token: session.authToken, id, v: vcour }
     const ret = this.tr(await post(this, 'ChargerGMS', args))
-    this.versions(id, ret.vgroupe.v)
+    this.versions.set(id, ret.vgroupe.v)
 
     const groupe = await compile(ret.rowGroupe)
     const avgr = stores.groupe.getGroupe(id) // groupe actuel
@@ -73,7 +73,7 @@ export class OperationWS extends Operation {
   
     if (!avgr && !groupe) return // le groupe n'existait pas et n'existe toujours pas
 
-    const vols = decode(ret.vgroupe._data_) // vols: {v1, v2, q1, q2}
+    const vols = decode(ret.vgroupe._data_).vols // vols: {v1, v2, q1, q2}
     if (groupe) groupe.vols = vols; else if (avgr) avgr.vols = vols
 
     // le groupe existait ou existe désormais
