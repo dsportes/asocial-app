@@ -1222,8 +1222,10 @@ _data_:
 
 - `idhg` : id du compte hébergeur crypté par la clé du groupe.
 - `imh` : indice `im` du membre dont le compte est hébergeur.
-- `stx` : 0: ouvert (accepte de nouveaux membres), 1:fermé (ré-ouverture en vote)
-- `sty` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
+- `msu` : mode _simple_ ou _unanime_.
+  - `null` : mode simple.
+  - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
+- `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
 - `ast` : array des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
   - 10: contact, 
   - 20,21,22: invité en tant que lecteur / auteur / animateur, 
@@ -1246,8 +1248,8 @@ export class Groupe extends GenDoc {
   async compile (row) {
     this.vsh = row.vsh || 0
     this.dfh = row.dfh || 0
-    this.stx = row.stx || 0
-    this.sty = row.sty || 0
+    this.msu = row.msu || null
+    this.pe = row.pe || 0
     this.ast = row.ast || new Uint8Array([0])
     this.idh = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
     this.imh = row.imh || 0
@@ -1267,6 +1269,33 @@ export class Groupe extends GenDoc {
         this.tr(await post(this, 'DisparitionMembre', args))
       }
     }
+  }
+
+  static async rowNouveauGroupe (na, unanime) {
+    const r = {
+      id: na.id,
+      v: 0,
+      dfh: 0,
+      msu: unanime ? new Uint8Array([]) : null,
+      pe: 0,
+      imh: 1,
+      ast: new Uint8Array([0, 32]),
+      idhg: await crypter(na.rnd, '' + stores.session.compteId)
+    }
+    const _data_ = new Uint8Array(encode(r))
+    return { _nom: 'groupes', id: r.id, v: r.v, _data_ }
+  }
+
+  async toIdhg (idc) {
+    return await crypter(this.cle, '' + idc)
+  }
+
+  async toCvg (cv) {
+    return await crypter(this.cle, new Uint8Array(encode([cv.ph, cv.info])))
+  }
+
+  async toMcg (mc) {
+    return Object.keys(mc).length ? await crypter(this.cle, new Uint8Array(encode(mc))) : null
   }
 
   /* En attente *************************************************
@@ -1325,33 +1354,6 @@ export class Groupe extends GenDoc {
     return i === -1 ? { c: '', n: s } : { c: s.substring(0, i), n: s.substring(i + 1) }
   }
   */
-
-  static async rowNouveauGroupe (na, ferme) {
-    const r = {
-      id: na.id,
-      v: 0,
-      dfh: 0,
-      stx: ferme ? 1 : 0,
-      sty: 0,
-      imh: 1,
-      ast: new Uint8Array([0, 32]),
-      idhg: await crypter(na.rnd, '' + stores.session.compteId)
-    }
-    const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'groupes', id: r.id, v: r.v, _data_ }
-  }
-
-  async toIdhg (idc) {
-    return await crypter(this.cle, '' + idc)
-  }
-
-  async toCvg (cv) {
-    return await crypter(this.cle, new Uint8Array(encode([cv.ph, cv.info])))
-  }
-
-  async toMcg (mc) {
-    return Object.keys(mc).length ? await crypter(this.cle, new Uint8Array(encode(mc))) : null
-  }
 }
 
 /** Membre ***********************************************************
@@ -1364,7 +1366,9 @@ export class Groupe extends GenDoc {
 - `ddi` : date de la dernière invitation
 - `dda` : date de début d'activité (jour de la première acceptation)
 - `dfa` : date de fin d'activité (jour de la dernière suspension)
-- `vote` : vote de réouverture.
+- `inv` : validation de la dernière invitation:
+  - `null` : le membre n'a pas été invité où le mode d'invitation du groupe était _simple_ au moment de l'invitation.
+  - `[ids]` : liste des indices des animateurs ayant validé la dernière invitation.
 - `mc` : mots clés du membre à propos du groupe.
 - `infok` : commentaire du membre à propos du groupe crypté par la clé K du membre.
 - `datag` : données, immuables, cryptées par la clé du groupe :
@@ -1385,7 +1389,7 @@ export class Membre extends GenDoc {
     this.ddi = row.ddi || 0
     this.dda = row.dda || 0
     this.dfa = row.dfa || 0
-    this.vote = row.vote || 0
+    this.inv = row.inv || null
     this.mc = row.mc || new Uint8Array([])
     const data = decode(await decrypter(this.cleg, row.datag))
     this.na = new NomAvatar(data.nom, data.rnd)
@@ -1400,7 +1404,7 @@ export class Membre extends GenDoc {
   static async rowNouveauMembre (nag, na, im, ni, imc, dlv) {
     const r = { id: nag.id, ids: im, v: 0, dlv, ddi: 0, dda: 0, dfa: 0, mc: new Uint8Array([]) }
     if (dlv) r.dda = new Date().getTime()
-    const x = { nom: na.nom, rnd: na.rnd, ni, imc }
+    const x = { nom: na.nom, rnd: na.rnd, ni, imc, inv: null }
     r.datag = await crypter(nag.rnd, new Uint8Array(encode(x)))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'membres', id: r.id, ids: r.ids, v: r.v, _data_ }
