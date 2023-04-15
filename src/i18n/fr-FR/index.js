@@ -654,6 +654,7 @@ export default {
   NTv1: 'Volume V1 attribué / quota tribu',
   NTv2: 'Volume V2 attribué / quota tribu',
   NTvx: 'Quotas V1 / V2 (%attribués)',
+  NTvxb: 'Quotas V1 / V2 (% d\'utilisation)',
   NTvx1: '{0} ({1}%)',
   NTvx2: '{0} ({1}%)',
 

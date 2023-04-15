@@ -21,13 +21,8 @@
         icon="edit" dense color="primary" @click="editUna"/>
     </div>
 
-    <div class="q-mt-xs row largeur40">
-      <div class="col-5 titre-sm">{{$t('NTvx')}}</div>
-      <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx1', [q1, pc1])}}</div>
-      <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx2', [q2, pc2])}}</div>
-      <div class="col-1">
-        <q-btn class="btn1" size="sm" icon="edit" dense color="primary" @click="chgQuotas"/>
-      </div>
+    <div class="q-mt-xs">
+      <quotas-vols :vols="eg.groupe.vols"/>
     </div>
 
     <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
@@ -46,6 +41,7 @@ import { edvol, dhcool } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import { MajCvGr } from '../app/operations.mjs'
 import BoutonMembre from './BoutonMembre.vue'
+import QuotasVols from './QuotasVols.vue'
 
 export default {
   name: 'ApercuGroupe',
@@ -57,7 +53,7 @@ export default {
     edit: Function
   },
 
-  components: { ApercuMembre, ApercuGenx, BoutonMembre },
+  components: { ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },
 
   computed: {
     dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },
