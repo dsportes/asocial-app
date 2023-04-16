@@ -141,13 +141,12 @@ export class ConnexionCompte extends OperationUI {
             avRowsModifies.push(row)
           }
         }
-
-        // obtention de la liste des groupes requis et signatures
-        const ok = await this.groupesRequisSignatures()
-        if (!ok) {
-          await this.getCTA()
-          continue
-        }
+      }
+      // obtention de la liste des groupes requis et signatures
+      const ok = await this.groupesRequisSignatures()
+      if (!ok) {
+        await this.getCTA()
+        continue
       }
       break
     }
@@ -222,6 +221,7 @@ export class ConnexionCompte extends OperationUI {
         const ret = this.tr(await post(this, 'GetGroupes', args))
         if (ret.rowGroupes) ret.rowGroupes.forEach(row => {
           grRows[row.id] = row
+          this.buf.putIDB(row)
         })
       }
     }

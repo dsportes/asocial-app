@@ -121,8 +121,8 @@ export const useGroupeStore = defineStore('groupe', {
       const r = []
       for (const [, e] of state.pgLg) {
         const g = e.groupe
-        stt.a1 += g.vols.v1 || 0
-        stt.a2 += g.vols.v2 || 0
+        stt.v1 += g.vols.v1 || 0
+        stt.v2 += g.vols.v2 || 0
         stt.q1 += g.vols.q1 || 0
         stt.q2 += g.vols.q2 || 0
         // TODO
@@ -135,7 +135,7 @@ export const useGroupeStore = defineStore('groupe', {
 
     pgLg: (state) => {
       const f = stores.filtre.filtre.groupes
-      return f.tous ? state.groupes : state.groupesAC
+      return f.tous ? state.map : state.groupesAC
     },
 
     // PageGroupe - membres people ***************************************************
