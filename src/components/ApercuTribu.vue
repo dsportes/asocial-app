@@ -21,14 +21,12 @@
     <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
 
-    <div class="q-ml-md q-mb-xs row largeur40">
-      <div class="col-5 titre-sm">{{$t('NTvx')}}</div>
-      <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx1', [q1, pc1])}}</div>
-      <div class="col-3 fs-sm text-bold font-mono">{{$t('NTvx2', [q2, pc2])}}</div>
-      <div class="col-1">
-        <q-btn v-if="session.estComptable" size="sm" icon="edit" dense color="primary" @click="editerq"/>
-      </div>
+    <div class="q-ml-md q-mb-xs row largeur40 items-center">
+      <quotas-vols :vols="t.cpt" />
+        <q-btn v-if="session.estComptable" size="sm" class="q-ml-lg"
+          icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq"/>
     </div>
+
 
     <div class="q-ml-md q-mt-sm row largeur40 justify-start">
       <div class="col-6 titre-sm">{{$t('PTntfc')}}</div>
@@ -97,6 +95,7 @@ import { crypter } from '../app/webcrypto.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
 import NotifIco from './NotifIco.vue'
+import QuotasVols from './QuotasVols.vue'
 
 export default {
   name: 'ApercuTribu',
@@ -106,7 +105,7 @@ export default {
     idx: Number, edit: Boolean
   },
 
-  components: { ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, NotifIco, ApercuBlocage, ChoixQuotas },
+  components: { QuotasVols, ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, NotifIco, ApercuBlocage, ChoixQuotas },
 
   computed: { 
     q1 () { return this.ed1(this.t.cpt.q1 || 0)},

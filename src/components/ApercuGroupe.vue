@@ -2,17 +2,11 @@
   <div :class="dkli(idx)">
     <apercu-genx :na="eg.groupe.na" :cv="eg.groupe.cv" :idx="idx" :cvchangee="cvchangee"/>
 
-    <div v-if="!eg.groupe.dfh" class="fs-md">
-      <span class="fs-md q-mr-sm">{{$t('PGhb')}}</span>
-      <bouton-membre :eg="eg" :im="eg.groupe.imh" />
-    </div>
-    <div v-else class="fs-md text-warning text-bold">{{$t('PGnheb', [dfh])}}</div>
-
     <div v-if="fond">
-      <span class="fs-md q-mr-sm">{{$t('PGfd')}}</span>
+      <span class="q-mt-xs fs-md q-mr-sm">{{$t('PGfd')}}</span>
       <bouton-membre :eg="eg" :im="1" />
     </div>
-    <div v-else class="fs-md">{{$t('PGnfond')}}</div>
+    <div v-else class="q-mt-xs fs-md text-italic">{{$t('PGnfond')}}</div>
 
     <div class="q-mt-xs row justify-between">
       <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('PGuna')}}</div>
@@ -21,8 +15,20 @@
         icon="edit" dense color="primary" @click="editUna"/>
     </div>
 
-    <div class="q-mt-xs">
-      <quotas-vols :vols="eg.groupe.vols"/>
+    <div :class="'q-mt-xs q-pa-xs' + bcf">
+      <div class="row justify-between">
+        <div v-if="!eg.groupe.dfh" class="col fs-md">
+          <span class="fs-md q-mr-sm">{{$t('PGhb')}}</span>
+          <bouton-membre :eg="eg" :im="eg.groupe.imh" />
+        </div>
+        <div v-else class="col fs-md text-warning text-bold">{{$t('PGnheb', [dfh])}}</div>
+        <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
+          icon="settings" @click="gererHeb"/>
+      </div>
+      <div class="q-mt-xs">
+        <quotas-vols :vols="eg.groupe.vols"/>
+        <!-- POUR TEST quotas-vols :vols="{ a1:1, a2:2, v1:200000, v2:70000000, q1:0, q2:3 }"/-->
+      </div>
     </div>
 
     <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
@@ -56,6 +62,8 @@ export default {
   components: { ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },
 
   computed: {
+    bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
+
     dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },
     fond () {
       if (!this.eg.groupe.ast[1]) return ''
@@ -77,13 +85,15 @@ export default {
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+
     async cvchangee (res) {
       if (res && this.na) {
         await new MajCvGr().run(this.eg.groupe, res.ph, res.info)
       }
     },
-    chgQuotas () {
+    gererHeb () {
       // TODO
+      console.log('gérer')
       this.changerQuotas = true
     },
     editUna () {
@@ -114,6 +124,8 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.borda
+  border: 1px solid $grey-5
 .bord
   border-top: 1px solid $grey-5
 .bordb

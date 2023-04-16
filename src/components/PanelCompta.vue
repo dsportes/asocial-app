@@ -1,5 +1,8 @@
 <template>
   <div class="q-pa-sm full-width">
+    <div class="q-my-sm q-mx-sm">
+      <quotas-vols :vols="c" />
+    </div>
 
     <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
       <div class="titre-md">{{$t('CPTal1a', [c.pc1])}}</div>
@@ -93,6 +96,7 @@
 // import { toRef } from 'vue'
 import { UNITEV1, UNITEV2, AMJ, pow } from '../app/api.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
+import QuotasVols from './QuotasVols.vue'
 
 /** Compteurs ***************************
 - `j` : **date du dernier calcul enregistré** : par exemple le 17 Mai de l'année A
@@ -114,7 +118,7 @@ export default ({
 
   props: { c: Object },
 
-  components: { },
+  components: { QuotasVols },
 
   computed: {
     edj () { return AMJ.editDeAmj(this.c.j) }

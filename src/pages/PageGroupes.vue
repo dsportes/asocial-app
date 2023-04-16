@@ -6,6 +6,10 @@
       :label="$t('PGcrea')" @click="nvGr"/>
 
     <div class="petitelargeur q-my-sm">
+      <div class="q-my-sm q-mx-sm">
+        <quotas-vols :vols="stats.groupes" />
+      </div>
+
       <div class="row">
         <div class="col-6"></div>
         <div class="col-3 fs-md text-italic text-center">V1</div>
@@ -73,6 +77,7 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGroupe from '../components/ApercuGroupe.vue'
+import QuotasVols from '../components/QuotasVols.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouveauGroupe } from '../app/operations.mjs'
 
@@ -81,7 +86,7 @@ export default {
 
   props: { tous: Boolean },
 
-  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGroupe },
+  components: { QuotasVols, ChoixQuotas, NomAvatar, BoutonHelp, ApercuGroupe },
 
   computed: {
   },

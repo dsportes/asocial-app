@@ -26,13 +26,9 @@
             <div v-if="c.sp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
             <div v-if="vis(c)" class="q-mb-xs row largeur40 items-center">
-              <div class="col-1">
-                <q-btn v-if="session.estSponsor || session.estComptable" size="sm" icon="edit" 
-                  dense color="primary" @click="editerq(c)"/>
-              </div>
-              <div class="col-5 titre-sm">{{$t('PTq12')}}</div>
-              <div class="col-3 text-center font-mono">{{c.q1}} - {{ed1(c.q1)}}</div>
-              <div class="col-3 text-center font-mono">{{c.q2}} - {{ed2(c.q2)}}</div>
+              <quotas-vols :vols="c" />
+              <q-btn v-if="session.estSponsor || session.estComptable" size="sm" class="q-ml-lg"
+                  icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
             </div>
 
             <apercu-blocage v-if="vis(c)" :blocage="c.blocage" :edit="ed" :idx="idx"
@@ -101,12 +97,13 @@ import ApercuAvatar from '../components/ApercuAvatar.vue'
 import PanelPeople from '../dialogues/PanelPeople.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import PanelCompta from '../components/PanelCompta.vue'
+import QuotasVols from '../components/QuotasVols.vue'
 import { GetCompteursCompta } from '../app/operations.mjs'
 
 export default {
   name: 'PageTribu',
 
-  components : { PanelPeople, ApercuAvatar, ApercuPeople, PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
+  components : { QuotasVols, PanelPeople, ApercuAvatar, ApercuPeople, PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
 
   computed: {
     ed () { return this.session.estComptable || this.session.estSponsor },

@@ -3,6 +3,10 @@
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
     <div class="petitelargeur q-my-sm">
+      <div class="q-my-sm q-mx-sm">
+        <quotas-vols :vols="stats.tribus" />
+      </div>
+
       <div class="row">
         <div class="col-6"></div>
         <div class="col-3 fs-md text-italic text-center">V1</div>
@@ -66,6 +70,7 @@ import stores from '../stores/stores.mjs'
 import ApercuTribu from '../components/ApercuTribu.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
+import QuotasVols from '../components/QuotasVols.vue'
 import { afficherDiag, edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouvelleTribu, GetTribu } from '../app/operations.mjs'
@@ -73,7 +78,7 @@ import { NouvelleTribu, GetTribu } from '../app/operations.mjs'
 export default {
   name: 'PageChats',
 
-  components: { NomAvatar, ApercuTribu, ChoixQuotas },
+  components: { QuotasVols, NomAvatar, ApercuTribu, ChoixQuotas },
 
   computed: {
   },
