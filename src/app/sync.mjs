@@ -60,7 +60,9 @@ export class OperationWS extends Operation {
     const session = stores.session
     const args = { token: session.authToken, id, v: vcour }
     const ret = this.tr(await post(this, 'ChargerGMS', args))
-    this.versions.set(id, ret.vgroupe.v)
+
+    const objv = Versions.compile(ret.vgroupe)
+    this.versions.set(id, objv)
 
     const groupe = await compile(ret.rowGroupe)
     const avgr = stores.groupe.getGroupe(id) // groupe actuel
@@ -73,13 +75,11 @@ export class OperationWS extends Operation {
   
     if (!avgr && !groupe) return // le groupe n'existait pas et n'existe toujours pas
 
-    const vols = decode(ret.vgroupe._data_).vols // vols: {v1, v2, q1, q2}
-    if (groupe) groupe.vols = vols; else if (avgr) avgr.vols = vols
-
     // le groupe existait ou existe désormais
     if (groupe) this.buf.putIDB(ret.rowGroupe) // il a changé
+
     const gr = groupe || avgr // groupe actuel, mis à jour ou non
-    const e = { gr: gr, lmb: [], lsc: [] }
+    const e = { id: id, gr: gr, lmb: [], lsc: [], objv: objv }
     this.grMaj.set(id, e)
     if (ret.rowSecrets) for (const x of ret.rowSecrets) {
       this.buf.putIDB(x)
@@ -128,7 +128,10 @@ export class OperationWS extends Operation {
     const session = stores.session
     const args = { token: session.authToken, id, v: vcour }
     const ret = this.tr(await post(this, 'ChargerASCS', args))
-    this.versions.set(id, ret.vavatar.v)
+
+    const objv = Versions.compile(ret.vavatar)
+    this.versions.set(id, objv)
+
     let avatar = null
     if (ret.rowAvatar) {
       avatar = await compile(ret.rowAvatar)
@@ -204,7 +207,7 @@ export class OperationWS extends Operation {
 
     // commit IDB
     const x = this.versions.size === 0
-    if (x) for(const id in this.versions.keys()) Versions.set(id, this.versions.get(id))
+    if (x) for(const [id, objv] of this.versions) Versions.set(id, objv)
     this.buf.commitIDB(false, x)
 
     // Maj des stores

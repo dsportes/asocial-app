@@ -11,7 +11,7 @@
     <div class="q-mt-xs row justify-between">
       <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('PGuna')}}</div>
       <div v-else class="titre-md">{{$t('PGsimple')}}</div>
-      <q-btn v-if="edit" class="q-ml-sm" size="sm" :label="$t('details')" 
+      <q-btn class="q-ml-sm" size="sm" :label="$t('details')" 
         icon="edit" dense color="primary" @click="editUna"/>
     </div>
 
@@ -26,7 +26,7 @@
           icon="settings" @click="gererHeb"/>
       </div>
       <div class="q-mt-xs">
-        <quotas-vols :vols="eg.groupe.vols"/>
+        <quotas-vols :vols="eg.objv.vols"/>
         <!-- POUR TEST quotas-vols :vols="{ a1:1, a2:2, v1:200000, v2:70000000, q1:0, q2:3 }"/-->
       </div>
     </div>
@@ -55,8 +55,7 @@ export default {
   props: { 
     eg: Object,
     idx: Number,
-    mapmc: Object,
-    edit: Function
+    mapmc: Object
   },
 
   components: { ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },

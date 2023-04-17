@@ -2,7 +2,7 @@
 <q-page>
   <!-- Tab "groupe" -------------------------------------------------->
   <div v-if="ui.pagetab==='groupe'" class="q-pa-sm">
-    <apercu-groupe class="q-my-sm" :eltg="gSt.egrC" :idx="0"/>
+    <apercu-groupe class="q-my-sm" :eg="gSt.egrC" :idx="0" :mapmc="mapmc"/>
   </div>
 
   <!-- Tab "membres" -------------------------------------------------->
@@ -12,70 +12,60 @@
     <div v-if="gSt.pgLm.length && !gSt.pgLmFT.length" class="titre-lg text-italic">
       {{$t('PGnomb', [gSt.pgLm.length])}}</div>
 
+    <!--
+      props: { 
+        mb: Object,
+        eg: Object,
+        mapmc: Object,
+        idx: Number, 
+        people: Boolean,
+        nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
+      },
+    -->
     <apercu-membre v-for="(m, idx) of gSt.pgLmFT" :key="idx"
-      class="q-my-sm" :mb="m" :idx="idx"/>
+      class="q-my-sm" :mb="m" :eg="gSt.egrC" :mapmc="mapmc" people :idx="idx"/>
   </div>
 
 </q-page>
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuMembre from '../components/ApercuMembre.vue'
+import ApercuGroupe from '../components/ApercuGroupe.vue'
+import { Motscles } from '../app/modele.mjs'
 
 export default {
   name: 'PageGroupe',
 
-  components: { ApercuMembre },
+  components: { ApercuMembre, ApercuGroupe },
 
   computed: {
   },
 
   methods: {
-    // Fonctions d'édition des éléments du groupe (boutons dans "apercu")
-    async edit (cible) {
-      if (!await this.session.edit()) return
-      switch (cible) {
-        case 'quotas' : return await editerQuotas()
-        case 'vote' : return await editerVote()
-        case 'heb' : return await editerHeb()
-      }
-    },
-    async editerCV () { 
-      if (!this.gSt.compteEstAnim(this.eg.groupe.id) ) {
-        await afficherDiag(this.$t('PGnoan'))
-        return
-      }
-      this.editCV = true
-    },
-    closeCV () { this.editCV = false },
-    async cvchangee () {
-      // TODO
-    },
-    async editerQuotas() {
-      // TODO
-    },
-    async editerVote() { 
-      // TODO
-    },
-    async editerHeb() { 
-      // TODO
-    },
   },
 
   data () {
     return {
-      editCV: false
     }
   },
 
   setup () {
     const session = stores.session
-    const gS = stores.groupe
+    const gSt = stores.groupe
+    const fStore = stores.filtre
+
+    const mapmc = ref(Motscles.mapMC(true, 0))
+    fStore.contexte.groupes.mapmc = mapmc.value
+    fStore.contexte.groupes.groupeId = 0
+
     return {
       ui: stores.ui,
       session,
-      gS
+      mapmc,
+      gSt
     }
   }
 

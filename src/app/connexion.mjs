@@ -200,7 +200,10 @@ export class ConnexionCompte extends OperationUI {
       const ret = this.tr(await post(this, 'SignaturesEtVersions', args))
       if (ret.OK === false) return false
       this.versions = ret.versions
-    }
+    } 
+    
+    if (session.accesIdb) await loadVersions() // chargement des versions depuis IDB
+
     return true
   }
 
@@ -209,7 +212,9 @@ export class ConnexionCompte extends OperationUI {
     const grRows = {} // Map des rows des groupes par id du groupe
     if (session.accesIdb) {
       this.cGroupes.forEach(row => {
-        if (!this.grRequis.has(row.id)) this.buf.purgeGroupeIDB(row.id); else grRows[row.id] = row
+        if (!this.grRequis.has(row.id)) 
+          this.buf.purgeGroupeIDB(row.id)
+          else grRows[row.id] = row
       })
     }
 
@@ -243,6 +248,7 @@ export class ConnexionCompte extends OperationUI {
         this.groupesToStore.set(gr.id, gr)
       }
     }
+
     return zombis
   }
 
@@ -584,13 +590,12 @@ export class ConnexionCompte extends OperationUI {
         grStore.setGroupe(gr) 
         syncitem.push('10' + gr.id, 0, 'SYgro', [gr.na.nom])
       })
-
-      // Versions des sous-collections par avatar / groupe
-      if (session.accesIdb) await loadVersions(); else Versions.reset()
-      /* this.versions :  map pour chaque avatar / groupe de :
-        { v }: pour un avatar
-        { v, vols: {v1, v2, q1, q2} } : pour un groupe
-      */
+      /* Chargement en store des versions des groupes */
+      for(const idx in this.versions) {
+        const id = parseInt(idx)
+        const objv = this.versions[idx]
+        if (id % 10 === 2) grStore.setVols(id, objv)
+      }
 
       // Comptable seulement : chargement des tribus
       if (session.estComptable) {
@@ -610,9 +615,11 @@ export class ConnexionCompte extends OperationUI {
 
       // Itération sur chaque avatar: secrets, chats, sponsorings
       for (const [,avatar] of avStore.avatars) {
-        const vidb = Versions.get(avatar.id)
-        const vx = this.versions && this.versions[avatar.id] ? this.versions[avatar.id] : { v: 0 }
-        const vsrv = vx.v
+        const vidb = Versions.get(avatar.id).v
+        const objv = this.versions && this.versions[avatar.id] ? this.versions[avatar.id] : { v: 0 }
+        const vsrv = objv.v
+        if (vidb < vsrv) Versions.set(avatar.id, objv)
+
         const na = getNg(avatar.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
         const [x1, x2] = await this.chargerSecrets(avatar.id, vidb, vsrv, false)
@@ -627,15 +634,21 @@ export class ConnexionCompte extends OperationUI {
         n5 = x5
         n6 = x6
         syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
-        if (vidb < vsrv) Versions.set(avatar.id, vsrv)
       }
 
       // Itération sur chaque groupe: secrets, membres
       for (const [,groupe] of grStore.groupes) {
-        const vidb = Versions.get(groupe.id)
-        const vx = this.versions && this.versions[groupe.id] ? this.versions[groupe.id] : { v: 0 }
-        const vsrv = vx.v
-        if (vx.vols) groupe.vols = vx.vols
+        const objidb = Versions.get(groupe.id)
+        const vidb = objidb.v
+        const objv = this.versions && this.versions[groupe.id] ? this.versions[groupe.id] : 
+          { v: 0, vols: { v1: 0, v2: 0, q1: 0, q2: 0 } }
+        const vsrv = objv.v
+        if (vidb < vsrv) {
+          Versions.set(groupe.id, objv)
+        } else {
+          grStore.setVols(groupe.id, objidb)
+        }
+
         const na = getNg(groupe.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
         const [x1, x2] = await this.chargerSecrets(groupe.id, vidb, vsrv, true)
@@ -648,7 +661,6 @@ export class ConnexionCompte extends OperationUI {
         n3 = x3
         n4 = x4
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
-        if (vidb < vsrv) Versions.set(groupe.id, vsrv)
 
         if (this.mbsDisparus.size) {
           /* Sur le serveur, le GC quotidien est censé avoir mis les statuts ast[ids] à 0
@@ -821,7 +833,7 @@ export class AcceptationSponsoring extends OperationUI {
       const chat = await compile(rowChat)
       stores.avatar.setChat(chat)
       Versions.reset()
-      Versions.set(session.compteId, 1)
+      Versions.set(session.compteId, { v: 1 })
 
       if (session.fsSync) await session.fsSync.setCompte(session.compteId)
 

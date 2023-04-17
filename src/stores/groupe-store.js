@@ -33,7 +33,8 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     egrC (state) { 
-      return state.map.get(stores.session.groupeId)
+      const e = state.map.get(stores.session.groupeId)
+      return e
     },
     
     /* Map de TOUS les groupes. 
@@ -120,12 +121,12 @@ export const useGroupeStore = defineStore('groupe', {
       const stt = { v1: 0, v2: 0, q1: 0, q2: 0 }
       const r = []
       for (const [, e] of state.pgLg) {
-        const g = e.groupe
-        stt.v1 += g.vols.v1 || 0
-        stt.v2 += g.vols.v2 || 0
-        stt.q1 += g.vols.q1 || 0
-        stt.q2 += g.vols.q2 || 0
-        // TODO
+        const v = e.objv.vols
+        stt.v1 += v.v1 || 0
+        stt.v2 += v.v2 || 0
+        stt.q1 += v.q1 || 0
+        stt.q2 += v.q2 || 0
+        // TODO filtre des groupes
         r.push(e)
       }
       stores.filtre.stats.groupes = stt
@@ -144,7 +145,7 @@ export const useGroupeStore = defineStore('groupe', {
       const f = stores.filtre.filtre.groupe
       const r = []
       for (const e of state.pgLm) {
-        // TODO
+        // TODO filtre des membres
         r.push(t)
       }
       r.sort(f0)
@@ -196,16 +197,24 @@ export const useGroupeStore = defineStore('groupe', {
           mbacs: new Map(), // membres avatars du compte
           secrets: new Map(),
           estAnim: false, // un des avatars du compte est animateur du groupe
-          estHeb: false // un des avatars du compte est hébergeur du groupe
+          estHeb: false, // un des avatars du compte est hébergeur du groupe
+          objv: { v: 0, vols: {v1: 0, v2: 0, q1: 0, q2: 0} } //  { v, vols: {v1, v2, q1, q2} }
         }
         this.map.set(groupe.id, e)
       } else {
-        const mcav = new Uint8Array(encode(e.groupe.mc || {}))
-        const mcap = new Uint8Array(encode(groupe.mc || {}))
-        if (!egaliteU8(mcav, mcap )) this.setMotscles(groupe.id, mcap)
-        e.groupe = groupe
+        if (groupe.v > e.groupe.v) {
+          const mcav = new Uint8Array(encode(e.groupe.mc || {}))
+          const mcap = new Uint8Array(encode(groupe.mc || {}))
+          if (!egaliteU8(mcav, mcap )) this.setMotscles(groupe.id, mcap)
+          e.groupe = groupe
+        }
       }
       this.setAnimHeb(e)
+    },
+
+    setVols (id, objv) {
+      const e = this.map.get(id)
+      if (e && objv.v > e.objv.v) e.objv = objv
     },
 
     setMembre (membre) {
@@ -285,8 +294,9 @@ export const useGroupeStore = defineStore('groupe', {
     /* Mise jour groupée pour un groupe
     e : { gr, lmb: [], lsc: [] }
     */
-    lotMaj ({gr, lmb, lsc}) {
+    lotMaj ({id, gr, lmb, lsc, objv}) {
       if (gr) this.setGroupe(gr)
+      if (objv) this.setVols (id, objv)
       lsc.forEach(s => { this.setSecret(s) })
       lmb.forEach(m => { this.setMembre(m) })
     },

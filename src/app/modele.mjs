@@ -49,8 +49,14 @@ export class Versions {
   static toSave = false
 
   static reset () { Versions.map = {}; Versions.toSave = false; return Versions.map }
-  static get (id) { return Versions.map[id] || 0 }
-  static set (id, v) { Versions.map[id] = v; Versions.toSave = true }
+  static get (id) { return Versions.map[id] || { v: 0 } }
+  static set (id, objv) { // objv: { v, vols: {v1, v2, q1, q2} }
+    const e = Versions.map[id]
+    if (!e || e.v < objv.v) {
+      Versions.map[id] = objv
+      Versions.toSave = true
+    }
+  } 
   static del (id) { delete Versions.map[id]; Versions.toSave = true }
   static load (idb) { 
     Versions.map = idb ? decode(idb) : {}
@@ -58,6 +64,10 @@ export class Versions {
     return Versions.map
   }
   static toIdb () { Versions.toSave = false; return new Uint8Array(encode(Versions.map))}
+
+  static compile (row) { // objv: { v, vols: {v1, v2, q1, q2} }
+    return row ? decode(row._data_) : null
+  }
 }
 
 /* Répertoire (statique) *********************************
@@ -533,6 +543,7 @@ export class Singletons extends GenDoc {
     }
   }
 }
+
 
 /** Tribu *********************************
 - `id` : numéro de la tribu

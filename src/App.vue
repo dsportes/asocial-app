@@ -440,7 +440,7 @@ export default {
         case 'chats' : { arg = this.avStore.avC.na.nom; break }
         case 'sponsorings' : { arg = this.avStore.avC.na.nom; break }
         case 'groupesac' : { arg = this.avStore.avC.na.nom; break }
-        case 'groupe' : { arg = this.avStore.grC.na.nom; break }
+        case 'groupe' : { arg = this.grStore.grC.na.nom; break }
       }
       return this.$t('P' + p, [arg])
     }

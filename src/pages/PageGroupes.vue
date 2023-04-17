@@ -94,7 +94,7 @@ export default {
 
     async courant (elt) {
       this.session.setGroupeId(elt.groupe.id)
-      this.ui.setPage('groupe')
+      this.ui.setPage('groupe', 'groupe')
     },
 
     async nvGr () {
