@@ -1,7 +1,5 @@
 
 TODO next :
-ApercuCompte doit permettre d'ouvrir les trois actions qu'il y a sur PanelPeople
-
 - sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à VERIFIER !!!!!!!!!!!!!!!
 
 # Application front-end A-social

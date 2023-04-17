@@ -82,83 +82,14 @@
 
     <q-separator color="orange" class="q-ma-sm"/>
 
-    <div v-if="session.nivbl === 3" class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning text-center cursor-pointer"
+    <div v-if="session.nivbl === 3" class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning cursor-pointer"
       @click="clickNotif2">{{$t('ACbloc')}}</div>
 
     <div v-if="session.nivbl < 3">
       <div v-if="session.estSponsor" 
-        class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning text-center">
-        {{$t('ACcptspons')}}</div>
-
-      <div class="row items-center q-mx-lg justify-center fs-md">
-        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesav')"
-          @click="ui.setPage('compte')">
-          <q-badge color="teal-10" rounded floating>{{nbtav}}</q-badge>
-        </q-btn>
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmesgr')"
-          @click="ui.setPage('groupes')">
-          <q-badge color="teal-10" rounded floating>{{nbtgr}}</q-badge>
-        </q-btn>
-        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACmesctc')"
-          @click="ui.setPage('people')">
-          <q-badge color="teal-10" rounded floating>{{nbtct}}</q-badge>
-        </q-btn>
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmatribu', [avStore.tribu.na.nom])"
-          @click="maTribu()"/>
-        <q-btn v-if="session.estComptable" class="btn1" dense no-caps color="primary"
-          :label="$t('ACtribus')" @click="ui.setPage('tribus')">
-          <q-badge color="teal-10" rounded floating>{{nbttr}}</q-badge>
-        </q-btn>
-        <q-btn class="btn3" dense no-caps color="primary" :label="$t('ACmessecrets')" />
-      </div>
-
-      <q-separator color="orange" class="q-my-sm"/>
-
-      <div class="q-my-sm q-px-sm titre-md text-bold text-center">
-        <span class="text-italic">{{$t('ACav')}}</span>
-        <q-btn class="q-ml-md" dense :label="avStore.avC.na.nomc" no-caps
-          icon-right="open_in_new" @click="ui.detailsavatar = true"/>
-      </div>
-
-      <div class="row items-center q-mx-lg justify-center fs-md">
-        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACsecrets')">
-          <q-badge color="teal-10" rounded floating>{{nbavsecs}}</q-badge>
-        </q-btn>
-        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACgroupes')"
-          @click="ui.setPage('groupesac')">
-          <q-badge color="teal-10" rounded floating>{{nbgrps}}</q-badge>
-        </q-btn>
-        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACchats')"
-          @click="ui.setPage('chats')">
-          <q-badge color="teal-10" rounded floating>{{nbchats}}</q-badge>
-        </q-btn>
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACsponsorings')"
-          @click="ui.setPage('sponsorings')">
-          <q-badge color="teal-10" rounded floating>{{nbspons}}</q-badge>
-        </q-btn>
-      </div>
-
-      <q-separator color="orange" class="q-my-sm"/>
-
-      <div :class="'row items-center q-mx-lg justify-center fs-md' + (!session.groupeId ? ' disabled' : '')">
-        <div class="q-my-sm q-px-sm titre-md text-bold text-italic text-center full-width">
-          {{session.groupeId ? $t('ACgr', [grStore.grC.na.nomc]) : $t('MLAngr')}}
-        </div>
-        <q-btn class="btn1" dense no-caps color="warning" :label="$t('ACsecrets')">
-          <q-badge color="teal-10" rounded floating>{{nbgrsecs}}</q-badge>
-        </q-btn>
-        <q-btn class="btn1" dense no-caps color="primary" :label="$t('ACmembres')">
-          <q-badge color="teal-10" rounded floating>{{nbmbs}}</q-badge>
-        </q-btn>
-      </div>
-
-      <q-separator color="orange" class="q-my-sm"/>
-
-      <div :class="'row items-center q-mx-lg justify-center fs-md ' + (!session.accesIdb ? ' disabled' : '')">
-        <div v-if="session.incognito" class="titre-md text-italic full-width text-center">{{$t('ACidb')}}</div>
-        <q-btn class="btn3" dense no-caps color="primary" :label="$t('ACficav')" />
-        <q-btn class="btn3" dense no-caps color="primary" :label="$t('ACtfloc')" />
-      </div>
+        class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning">
+        {{$t('ACcptspons')}}</div>      
+      <page-menu/>
     </div>
 
     <q-dialog v-if="outilsTests" v-model="outilsTests" full-height persistent>
@@ -175,38 +106,18 @@ import BoutonLangue from '../components/BoutonLangue.vue'
 import NotifIco from '../components/NotifIco.vue'
 import BlocageIco from '../components/BlocageIco.vue'
 import OutilsTests from '../dialogues/OutilsTests.vue'
+import PageMenu from '../pages/PageMenu.vue'
 
 export default {
   name: 'PageAccueil',
 
-  components: { BoutonHelp, BoutonLangue, NotifIco, BlocageIco, OutilsTests },
+  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIco, BlocageIco, OutilsTests },
 
   computed: {
-    elt () { return this.avStore.getElt(this.session.avatarId) },
-    nbavsecs () { return this.elt.secrets.size },
-    nbchats () { return this.elt.chats.size },
-    nbspons () { return this.elt.sponsorings.size },
-    nbgrps () { return this.elt.avatar.lgr.size },
-
-    nbgrsecs () { return '?' },
-    nbmbs () { return '?' },
-
-    nbtav () { return this.avStore.compta.mav.size },
-    nbtgr () { return this.grStore.map.size },
-    nbtct () { return this.pStore.map.size },
-    nbttr () { return this.avStore.nbTribus },
-    nbtsp () { return 1 },
-    nbtiv () { return 1 },
-
     pccl () {return this.avStore.compta.pc < 80 ? 'bg-transparent' : (this.avStore.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
   },
 
   methods: {
-    maTribu () { 
-      this.avStore.setTribuC()
-      this.ui.setPage('tribu')
-    },
-        
     tgdark () { this.$q.dark.toggle() },
 
     closeOutils () { this.outilsTests = false },

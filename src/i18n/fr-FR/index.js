@@ -576,7 +576,7 @@ export default {
   TRItribu22: 'Par quota V1 décroissant',
 
   ACav: 'Relativement à l\'avatar',
-  ACgr: 'Relativement au groupe "{0}"',
+  ACgr: 'Relativement au groupe',
   ACaproposav: 'Information',
   ACsecrets: 'Ses secrets',
   ACgroupes: 'Ses groupes',
@@ -585,7 +585,7 @@ export default {
   ACsponsorings: 'Ses sponsorings',
   ACinvitations: 'Invitations de ses groupes',
   ACpourav: 'Pour l\'avatar {0}',
-  ACpourgr: 'Pour le groupe {0}',
+  ACpourgr: 'Groupe courant {0}',
   ACmesav: 'Mon compte mes avatars',
   ACmesgr: 'Mes groupes',
   ACmesctc: 'Mes contacts',

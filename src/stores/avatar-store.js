@@ -62,6 +62,11 @@ export const useAvatarStore = defineStore('avatar', {
       return e ? e.avatar : null 
     },
 
+    // Element avatar courant
+    eavC (state) { 
+      return state.map.get(stores.session.avatarId)
+    },
+
     // Map dont la clé est l'id de l'avatar et la valeur le document avatar
     avatars: (state) => {
       const m = new Map()

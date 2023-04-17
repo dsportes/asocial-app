@@ -68,101 +68,8 @@
     <q-toolbar inset class="full-width bg-secondary text-white">
       <bouton-help page="page1"/>
       <q-btn v-if="session.ok && session.nivbl !== 2" size="md" icon="menu">
-        <q-menu class="bg-secondary text-white titre-md" auto-close>
-          <q-list style="min-width: 100px">
-            <q-item clickable @click="ui.setPage('compte')">
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACmesav')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable>
-              <q-item-section clickable @click="ui.setPage('groupes')">
-                <q-item-label lines="1">{{$t('ACmesgr')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable @click="ui.setPage('people')">
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACmesctc')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable  @click="maTribu()">
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACmatribu', [avStore.tribu.na.nom])}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item v-if="session.estComptable" clickable  @click="ui.setPage('tribus')">
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACtribus')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable>
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACmessecrets')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-separator color="white"/>
-            <q-item clickabe @click="ui.detailsavatar = true">
-              <q-item-section>
-                <q-item-label lines="1" class="text-italic text-bold text-right">{{$t('ACpourav', [avStore.avC.na.nomc])}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-separator color="white"/>
-            <q-item clickable>
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACsecrets')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable>
-              <q-item-section clickable @click="ui.setPage('groupesac')">
-                <q-item-label lines="1">{{$t('ACgroupes')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable @click="ui.setPage('chats')">
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACchats')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable @click="ui.setPage('sponsorings')">
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACsponsorings')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable  @click="maTribu()">
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACinvitations')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-separator color="white"/>
-            <div v-if="session.groupeId">
-              <q-item clickabe @click="ui.detailsgroupe = true">
-                <q-item-section>
-                  <q-item-label lines="1" class="text-italic text-bold text-right">{{$t('ACpourgr', [grStore.grC.na.nomc])}}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-separator color="white"/>
-              <q-item clickable>
-                <q-item-section>
-                  <q-item-label lines="1">{{$t('ACsecrets')}}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item clickable>
-                <q-item-section>
-                  <q-item-label lines="1">{{$t('ACmembres')}}</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-separator color="white"/>
-            </div>
-            <q-item v-if="!session.incognito" clickable>
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACficav')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item v-if="!session.incognito" clickable>
-              <q-item-section>
-                <q-item-label lines="1">{{$t('ACtfloc')}}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
+        <q-menu max-height="90vh" class="bg-secondary text-white" auto-close>
+          <page-menu/>
         </q-menu>
       </q-btn>
       <q-btn :disable="!aHome" flat icon="home" size="md" 
@@ -382,6 +289,7 @@ import BoutonLangue from './components/BoutonLangue.vue'
 import NotifIco from './components/NotifIco.vue'
 import BlocageIco from './components/BlocageIco.vue'
 
+import PageMenu from './pages/PageMenu.vue'
 import PageLogin from './pages/PageLogin.vue'
 import PageSession from './pages/PageSession.vue'
 import PageAccueil from './pages/PageAccueil.vue'
@@ -419,7 +327,7 @@ export default {
 
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco, ApercuAvatar,
-    PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
+    PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
     PageGroupe, PageGroupes,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif, FiltreAvecsp,
@@ -498,12 +406,7 @@ export default {
     deconnexion () { deconnexion() },
     async reconnexion () { await reconnexionCompte() },
 
-    closeOutils () { this.outilsTests = false },
-
-    maTribu () { 
-      this.avStore.setTribuC()
-      this.ui.setPage('tribu')
-    },
+    closeOutils () { this.outilsTests = false }
   },
 
   setup () {
