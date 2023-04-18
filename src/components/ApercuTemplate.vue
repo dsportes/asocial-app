@@ -41,13 +41,13 @@ export default {
 
   setup (props) {
     const session = stores.session
-    const avStore = stores.avatar
+    const aSt = stores.avatar
 
-    function getC () { return avStore.getChat(naI.value.id, ids.value) }
+    function getC () { return aSt.getChat(naI.value.id, ids.value) }
 
     const chat = ref(getC())
 
-    avStore.$onAction(({ name, args, after }) => {
+    aSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if ((name === 'setChat' && args[0].id === naI.value.id && args[0].ids === ids.value) ||
           (name === 'delChat' && args[0] === naI.value.id && args[1] === ids.value)){

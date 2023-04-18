@@ -22,13 +22,13 @@
       </div>
       <div class="q-mt-md titre-md">{{$t('NPsponsor')}}</div>
       <div class="row items-start">
-        <img class="photomax col-auto q-mr-sm" :src="sp.na.photoDef" />
+        <img class="photomax col-auto q-mr-sm" :src="photoP" />
         <div class="col column">
           <div>
             <span class="text-bold fs-md q-mr-sm">{{sp.na.nom}}</span> 
             <span class="text-bold fs-sm font-mono q-mr-sm">#{{sp.na.id}}</span> 
           </div>
-          <show-html v-if="sp.na.info" class="q-my-xs border1" zoom maxh="4rem" :texte="sp.na.info"/>
+          <show-html v-if="sp.na.info" class="q-my-xs border1" zoom maxh="4rem" :texte="infoP"/>
           <div v-else class="text-italic">{{$t('FAnocv')}}</div>
         </div>
       </div>
@@ -106,6 +106,8 @@ export default ({
   components: { PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp },
 
   computed: {
+    photoP () { return this.sp.cv && this.cv.photo ? this.cv.photo : this.na.defIcon },
+    infoP () { return this.sp.cv && this.cv.info ? this.cv.info : '' },
     estpar () { return this.sp.sp },
     nomTribu () { return this.sp.nct[0] || '' },
     textedef () { return this.$t('merci', [this.sp.na[0] + ',\n\n' + this.ard]) },

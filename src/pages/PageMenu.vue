@@ -17,7 +17,7 @@
   </q-item>
   <q-item clickable  @click="maTribu()">
     <q-item-section>
-      <q-item-label lines="1">{{$t('ACmatribu', [avStore.tribu.na.nom])}}</q-item-label>
+      <q-item-label lines="1">{{$t('ACmatribu', [aSt.tribu.na.nom])}}</q-item-label>
     </q-item-section>
   </q-item>
   <q-item v-if="session.estComptable" clickable  @click="ui.setPage('tribus')">
@@ -33,7 +33,7 @@
   <q-separator color="orange"/>
   <q-item clickable @click="ui.detailsavatar = true" clas="row items-center">
     <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACav')}}</span>
-    <q-btn class="q-ml-md text-bold" dense :label="avStore.avC.na.nomc" no-caps
+    <q-btn class="q-ml-md text-bold" dense :label="aSt.avC.na.nomc" no-caps
       icon-right="open_in_new" @click="ui.detailsavatar = true"/>
   </q-item>
   <q-item clickable>
@@ -67,7 +67,7 @@
   <q-separator color="orange"/>
   <q-item v-if="session.groupeId" clickable @click="ui.setPage('groupe', 'groupe')">
     <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACgr')}}</span>
-    <q-btn class="q-ml-md text-bold" dense :label="grStore.grC.na.nomc" no-caps
+    <q-btn class="q-ml-md text-bold" dense :label="gSt.egrC.groupe.na.nomc" no-caps
       icon-right="open_in_new" @click="ui.setPage('groupe', 'groupe')"/>
   </q-item>
   <q-item v-if="session.groupeId" clickable @click="ui.setPage('groupe', 'membres')">
@@ -98,26 +98,26 @@ export default {
   name: 'PageMenu',
 
   computed: {
-    nbavsecs () { return this.avStore.eavC.secrets.size },
-    nbchats () { return this.avStore.eavC.chats.size },
-    nbspons () { return this.avStore.eavC.sponsorings.size },
-    nbgrps () { return this.avStore.eavC.avatar.lgr.size },
+    nbavsecs () { return this.aSt.eavC.secrets.size },
+    nbchats () { return this.aSt.eavC.chats.size },
+    nbspons () { return this.aSt.eavC.sponsorings.size },
+    nbgrps () { return this.aSt.eavC.avatar.lgr.size },
 
     nbgrsecs () { return '?' },
     nbmbs () { return '?' },
 
-    nbtav () { return this.avStore.compta.mav.size },
-    nbtgr () { return this.grStore.map.size },
-    nbtgrsec () { return this.grStore.egrC.secrets.size },
-    nbtct () { return this.pStore.map.size },
-    nbttr () { return this.avStore.nbTribus },
+    nbtav () { return this.aSt.compta.mav.size },
+    nbtgr () { return this.gSt.map.size },
+    nbtgrsec () { return this.gSt.egrC.secrets.size },
+    nbtct () { return this.pSt.map.size },
+    nbttr () { return this.aSt.nbTribus },
     nbtsp () { return 1 },
     nbtiv () { return 1 },
   },
 
   methods: {
     maTribu () { 
-      this.avStore.setTribuC()
+      this.aSt.setTribuC()
       this.ui.setPage('tribu')
     },
   },
@@ -129,10 +129,10 @@ export default {
 
   setup () {
     return {
-      avStore: stores.avatar,
+      aSt: stores.avatar,
       ui: stores.ui,
       session: stores.session,
-      grStore: stores.groupe
+      gSt: stores.groupe
     }
   }
 

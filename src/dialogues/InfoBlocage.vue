@@ -9,13 +9,13 @@
       <div v-if="session.blocage <= 2" class="titre-lg q-pa-xs">{{$t('IB'+session.blocage)}}</div>
       <div v-else class="titre-lg q-pa-xs text-negative bg-yellow-5">{{$t('IB'+session.blocage)}}</div>
     </q-card-section>
-    <q-card-section v-if="avSt.compte">
-      <ed-blocage v-if="avStore.tribu" 
-        :na-tribu="avStore.tribu.na" 
+    <q-card-section v-if="aSt.compte">
+      <ed-blocage v-if="aSt.tribu" 
+        :na-tribu="aSt.tribu.na" 
         :na-compte="nacompte"
-        :source="avStore.tribu"/>
+        :source="aSt.tribu"/>
       <ed-blocage v-if="compta"
-        :na-tribu="avStore.tribu.na" 
+        :na-tribu="aSt.tribu.na" 
         :na-compte="nacompte"
         :source="compta"/>
     </q-card-section>
@@ -32,11 +32,11 @@ export default ({
 
   computed: {
     compta () { 
-      const x = this.avSt.getCompta(this.avSt.compte.id) 
+      const x = this.aSt.getCompta(this.aSt.compte.id) 
       return x
     },
     nacompte () { 
-      const x = this.avSt.compte.naprim
+      const x = this.aSt.compte.naprim
       return x
     }
   },
@@ -44,7 +44,7 @@ export default ({
   setup () {
     return { 
       session: stores.session,
-      avSt: stores.avatar
+      aSt: stores.avatar
     }
   }
 })

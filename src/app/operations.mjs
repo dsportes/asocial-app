@@ -114,12 +114,13 @@ export class MajCv extends OperationUI {
   async run (avatar, photo, info) {
     try {
       const session = stores.session
+      const aSt = stores.avatar
       while (true) {
         let idTr = 0, hrnd = 0
-        const compta = stores.avatar.compte
+        const compta = aSt.compta
         if (compta.id === avatar.id) {
           idTr = compta.idt
-          hrnd = avatar.na.hrmd
+          hrnd = avatar.na.hrnd
         }
         const v = avatar.v + 1
         const cva = await crypter(getCle(avatar.id), new Uint8Array(encode({v, photo, info})))
@@ -402,12 +403,12 @@ export class NouveauChat extends OperationUI {
   async run (naI, naE, txt) {
     try {
       const session = stores.session
-      const avStore =  stores.avatar
+      const aSt =  stores.avatar
 
       setNg(naI)
       setNg(naE)
       const cc = random(32)
-      const pubE = await avStore.getPub(naE.id)
+      const pubE = await aSt.getPub(naE.id)
       const ccPE = await crypterRSA(pubE, cc)
       const ccKI = await crypter(session.clek, cc)
       const dh = new Date().getTime()
@@ -425,7 +426,7 @@ export class NouveauChat extends OperationUI {
       let chat
       if (st !== 0) {
         chat = await compile(ret.rowChat)
-        avStore.setChat(chat)
+        aSt.setChat(chat)
       }
       return this.finOK([st, chat])
     } catch (e) {
@@ -455,7 +456,7 @@ export class MajChat extends OperationUI {
   async run (naI, naE, txt, chat) {
     try {
       const session = stores.session
-      const avStore =  stores.avatar
+      const aSt =  stores.avatar
 
       setNg(naI)
       setNg(naE)
@@ -474,7 +475,7 @@ export class MajChat extends OperationUI {
       const ret = this.tr(await post(this, 'MajChat', args))
       const st = ret.st
       const ch = await compile(ret.rowChat)
-      avStore.setChat(ch)
+      aSt.setChat(ch)
       return this.finOK([st, ch])
     } catch (e) {
       await this.finKO(e)
@@ -495,22 +496,24 @@ export class RafraichirCvs extends OperationUI {
     try {
       const session = stores.session
       const id = session.avatarId
-      const pStore = stores.people
+      const pSt = stores.people
+      const aSt = stores.avatar
+      const gSt = stores.groupe
 
       const toutes = [] // toutes les cibles
       if (!id) {
-        pStore.peopleIds.forEach(idE => { 
-          const exp = pStore.exportPourCv(idE)
+        pSt.peopleIds.forEach(idE => { 
+          const exp = pSt.exportPourCv(idE)
           if (exp) toutes.push(exp)
         })
       } else if (id % 10 <= 1) {
-        stores.avatar.getChatIdEs(id).forEach(idE => { 
-          const exp = pStore.exportPourCv(idE)
+        aSt.getChatIdEs(id).forEach(idE => { 
+          const exp = pSt.exportPourCv(idE)
           if (exp) toutes.push(exp)
         })
       } else {
-        stores.groupe.getMembreIdEs(id).forEach(idE => { 
-          const exp = pStore.exportPourCv(idE)
+        gSt.getMembreIdEs(id).forEach(idE => { 
+          const exp = pSt.exportPourCv(idE)
           if (exp) toutes.push(exp)
         })
       }
@@ -545,6 +548,8 @@ export class NouvelAvatar extends OperationUI {
   async run (nom) {
     try {
       const session = stores.session
+      const aSt = stores.avatar
+
       const na = new NomAvatar(nom, 1)
 
       const { publicKey, privateKey } = await genKeyPair()
@@ -561,7 +566,7 @@ export class NouvelAvatar extends OperationUI {
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
-      const mavk = await stores.avatar.compta.ajoutAvatarMavk(na)
+      const mavk = await aSt.compta.ajoutAvatarMavk(na)
       const args = { token: session.authToken, rowAvatar, rowVersion, mavk }
       const ret = this.tr(await post(this, 'NouvelAvatar', args))
       this.finOK()
@@ -694,9 +699,9 @@ export class ChangerTribu extends OperationUI {
   async run (na, nvTrid) { // na du compte, 
     try {
       const session = stores.session
-      const avStore = stores.avatar
+      const aSt = stores.avatar
       const naTrap = getNg(nvTrid)
-      const tribu2 = session.tribuCId ? avStore.tribu2C : avStore.tribu2
+      const tribu2 = session.tribuCId ? aSt.tribu2C : aSt.tribu2
 
       /*
       - `mbtr` : map des comptes de la tribu:

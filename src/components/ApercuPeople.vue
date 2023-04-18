@@ -40,12 +40,12 @@ export default {
 
   setup (props) {
     const session = stores.session
-    const pStore = stores.people
+    const pSt = stores.people
     const ui = stores.ui
     const id = toRef(props, 'id')
     
     function getP () {
-      const p = pStore.getPeople(id.value)
+      const p = pSt.getPeople(id.value)
       p.avch = []
       p.chats.forEach((val, id) => { p.avch.push(getNg(id).nom) })
       p.avch.sort((a,b) => { a < b ? -1 : (a > b ? 1 : 0)})
@@ -64,7 +64,7 @@ export default {
       }
     )
 
-    pStore.$onAction(({ name, args, after }) => {
+    pSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'getElt' && args[0].id === id.value) {
           p.value = getP()

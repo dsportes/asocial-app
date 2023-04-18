@@ -61,7 +61,7 @@ export default {
     const ui = stores.ui
 
     const mapmc = ref(Motscles.mapMC(true, 0))
-    const eg = ref(gSt.eg)
+    const eg = ref(egrC)
     const mb = ref(gSt.membreC)
     if (eg.value && !eg.value.groupe.ast[session.membreId]) mb.value = null
     const people = ref(mb.value ? !mb.value.estAc : false)

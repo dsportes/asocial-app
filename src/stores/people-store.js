@@ -81,10 +81,10 @@ export const usePeopleStore = defineStore('people', {
     getGroupes: (state) => { return (id) => { 
         const e = state.map.get(id)
         if (!e) return null
-        const st = stores.groupe
+        const gSt = stores.groupe
         const a = []
         if (e.groupes && e.groupes.size)
-          e.groupes.forEach(idg => { a.push(st.getGroupe(idg)) })
+          e.groupes.forEach(idg => { a.push(gSt.getGroupe(idg)) })
         return a
       }
     },
@@ -94,19 +94,20 @@ export const usePeopleStore = defineStore('people', {
     getMembres: (state) => { return (id) => { 
         const e = state.map.get(id)
         if (!e || !e.groupes) return null
-        const st = stores.groupe
+        const gSt = stores.groupe
         const a = []
-        e.groupes.forEach((im, idg) => { a.push(st.getMembre(idg, im)) })
+        e.groupes.forEach((im, idg) => { a.push(gSt.getMembre(idg, im)) })
         return a
       }
     },
 
     // Retourne LE document membre de ce people id dans LE groupe idg
     getMembre: (state) => { return (id, idg) => { 
+        const gSt = stores.groupe
         const e = state.map.get(id)
         if (!e || !e.groupes) return null
         const im = e.groupes.get(idg)
-        return im ? stores.groupe.getMembre(idg, im) : null
+        return im ? gSt.getMembre(idg, im) : null
       }
     },
 

@@ -37,7 +37,7 @@
     </div>
 
     <!-- Avatars du compte -->
-    <div v-for="(na, idx) in avStore.compta.lstAvatarNas" :key="na.id">
+    <div v-for="(na, idx) in aSt.compta.lstAvatarNas" :key="na.id">
       <q-separator class="q-my-sm"/>
       <div class="row items-start">
         <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
@@ -67,7 +67,7 @@
           <q-btn dense flat size="md" icon="close" @click="memoedit=false"/>
         </q-toolbar>
         <editeur-md class="height-10"
-          :texte="avStore.compte.memo || ''" editable modetxt :label-ok="$t('OK')" @ok="memook"/>
+          :texte="aSt.compte.memo || ''" editable modetxt :label-ok="$t('OK')" @ok="memook"/>
       </q-card>
     </q-dialog>
 
@@ -87,7 +87,7 @@
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
     <q-dialog v-model="nvpar" persistent class="moyennelargeur">
-      <nouveau-sponsoring :close="fermerSponsoring" :tribu="avStore.tribu"/>
+      <nouveau-sponsoring :close="fermerSponsoring" :tribu="aSt.tribu"/>
     </q-dialog>
 
   </q-page>
@@ -115,7 +115,7 @@ export default {
   components: { NomAvatar, NouveauSponsoring, BoutonHelp, ApercuAvatar, PhraseSecrete, EditeurMd, ShowHtml, MotsCles },
 
   computed: {
-    memo () { return this.avStore.compte.memo }
+    memo () { return this.aSt.compte.memo }
   },
 
   data () {
@@ -152,7 +152,7 @@ export default {
 
     async oknomav (nom) {
       if (!nom) { this.nvav = false; return }
-      if (this.avStore.compta.avatarDeNom(nom)) {
+      if (this.aSt.compta.avatarDeNom(nom)) {
         await afficherDiag(this.$t('CPTndc'))
         return
       }
@@ -183,11 +183,11 @@ export default {
 
   setup () {
     const session = stores.session
-    const avStore = stores.avatar
+    const aSt = stores.avatar
 
     return {
       ui: stores.ui,
-      avStore,
+      aSt,
       session
     }
   }

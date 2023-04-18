@@ -5,7 +5,6 @@ import { useUiStore } from './ui-store.js'
 import { useTribuStore } from './tribu-store.js'
 import { useAvatarStore } from './avatar-store.js'
 import { useGroupeStore } from './groupe-store.js'
-import { useCoupleStore } from './couple-store.js'
 import { usePeopleStore } from './people-store.js'
 import { useSecretStore } from './secret-store.js'
 import { useSyncitemStore } from './syncitem-store.js'
@@ -15,7 +14,7 @@ import { useAvsecretStore } from './avsecret-store.js'
 import { useTflocauxStore } from './tflocaux-store.js'
 
 // Hors de cette liste : config, session
-const listeStores = ['tribu', 'avatar', 'groupe', 'couple', 'people', 
+const listeStores = ['tribu', 'avatar', 'groupe', 'people', 
 'secret', 'syncitem', 'fetat', 'avsecret', 'tflocaux', 'filtre'
 ]
 
@@ -27,7 +26,6 @@ class Stores {
   get tribu() { return this.tribuStore || (this.tribuStore = useTribuStore()) }
   get avatar() { return this.avatarStore || (this.avatarStore = useAvatarStore()) }
   get groupe() { return this.groupeStore || (this.groupeStore = useGroupeStore()) }
-  get couple() { return this.coupleStore || (this.coupleStore = useCoupleStore()) }
   get people() { return this.peopleStore || (this.peopleStore = usePeopleStore()) }
   get secret() { return this.secretStore || (this.secretStore = useSecretStore()) }
   get syncitem() { return this.syncitemStore || (this.syncitemStore = useSyncitemStore()) }

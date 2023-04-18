@@ -12,14 +12,14 @@
   <!-- Changement de tribu -->
   <q-dialog v-model="chgTr" persistent>
     <q-card class="moyennelargeur">
-      <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [na.nom, avStore.tribuC.na.nom])}}</div>
-      <div class="q-mx-sm titre-md">{{$t('PPqv1', [avStore.ccCpt.q1, edv1(avStore.ccCpt.q1), pc1])}}</div>
-      <div class="q-mx-sm titre-md">{{$t('PPqv2', [avStore.ccCpt.q2, edv2(avStore.ccCpt.q2), pc2])}}</div>
+      <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [na.nom, aSt.tribuC.na.nom])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqv1', [aSt.ccCpt.q1, edv1(aSt.ccCpt.q1), pc1])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqv2', [aSt.ccCpt.q2, edv2(aSt.ccCpt.q2), pc2])}}</div>
 
       <q-separator class="q-mt-sm"/>
 
       <q-card-section>
-        <q-input filled v-model="avStore.ppFiltre" :label="$t('PPnt')" />
+        <q-input filled v-model="aSt.ppFiltre" :label="$t('PPnt')" />
         <div class="titre-md text-italic row items-center">
           <div class="col-2 text-center">{{$t('PPc1')}}</div>
           <div class="col-4">{{$t('PPc2')}}</div>
@@ -29,8 +29,8 @@
       </q-card-section>
 
       <q-card-section style="height: 30vh" class="scroll bord1">
-        <div v-for="x in avStore.ppTribusF" :key="x.id" 
-          :class="'row items-center cursor-pointer' + (x.id === avStore.ppSelId ? ' bord2' : '')"
+        <div v-for="x in aSt.ppTribusF" :key="x.id" 
+          :class="'row items-center cursor-pointer' + (x.id === aSt.ppSelId ? ' bord2' : '')"
           @click="selTr(x)">
           <q-icon class="col-2 text-center" :name="x.ok ? 'check' : 'close'" size="md" :color="x.ok ? 'primary' : 'negative'" />
           <div class="col-4">{{x.nom}}</div>
@@ -42,7 +42,7 @@
       <q-separator />      
       <q-card-actions align="center">
         <q-btn dense color="primary" :label="$t('renoncer')" @click="chgTr=false"/>
-        <q-btn dense color="warning" :label="$t('valider')" :disable="!avStore.ppSelId"
+        <q-btn dense color="warning" :label="$t('valider')" :disable="!aSt.ppSelId"
           v-close-popup @click="changerTr()"/>
       </q-card-actions>
     </q-card>
@@ -51,11 +51,11 @@
   <!-- Changement de statut sponsor -->
   <q-dialog v-model="chgSp" persistent>
     <q-card class="bg-secondary text-white petitelargeur q-pa-sm">
-        <div v-if="avStore.mbCpt(na.id).sp" class="text-center q-my-md titre-md">{{$t('PPsp', [avStore.tribuC.na.nom])}}</div>
-        <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [avStore.tribuC.na.nom])}}</div>
+        <div v-if="aSt.mbCpt(na.id).sp" class="text-center q-my-md titre-md">{{$t('PPsp', [aSt.tribuC.na.nom])}}</div>
+        <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [aSt.tribuC.na.nom])}}</div>
       <q-card-actions align="center">
         <q-btn dense color="primary" :label="$t('renoncer')" @click="chgSp=false"/>
-        <q-btn v-if="avStore.mbCpt(na.id).sp" dense color="warning" :label="$t('PPkosp')" v-close-popup  @click="changerSp(false)"/>
+        <q-btn v-if="aSt.mbCpt(na.id).sp" dense color="warning" :label="$t('PPkosp')" v-close-popup  @click="changerSp(false)"/>
         <q-btn v-else dense color="warning" :label="$t('PPoksp')" v-close-popup  @click="changerSp(true)"/>
       </q-card-actions>
     </q-card>
@@ -72,7 +72,7 @@
       </q-header>
       <q-page-container>
         <q-card>
-          <panel-compta :c="avStore.ccCpt" style="margin:0 auto"/>
+          <panel-compta :c="aSt.ccCpt" style="margin:0 auto"/>
         </q-card>
       </q-page-container>
     </q-layout>
@@ -97,8 +97,8 @@ export default {
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    pc1 () { return this.avStore.ccCpt.q1 ? Math.round((this.avStore.ccCpt.v1 * 100) / (this.avStore.ccCpt.q1 * UNITEV1)) : 0 },
-    pc2 () { return this.avStore.ccCpt.q2 ? Math.round((this.avStore.ccCpt.v2 * 100) / (this.avStore.ccCpt.q2 * UNITEV2)) : 0 }
+    pc1 () { return this.aSt.ccCpt.q1 ? Math.round((this.aSt.ccCpt.v1 * 100) / (this.aSt.ccCpt.q1 * UNITEV1)) : 0 },
+    pc2 () { return this.aSt.ccCpt.q2 ? Math.round((this.aSt.ccCpt.v2 * 100) / (this.aSt.ccCpt.q2 * UNITEV2)) : 0 }
   },
 
   watch: {
@@ -116,37 +116,37 @@ export default {
     edv1 (v) { return edvol(v * UNITEV1) },
     edv2 (v) { return edvol(v * UNITEV2) },
     async chgTribu () { 
-      this.avStore.ccCpt = new Compteurs(await new GetCompteursCompta().run(this.na.id))
-      this.avStore.ppFiltre = ''
+      this.aSt.ccCpt = new Compteurs(await new GetCompteursCompta().run(this.na.id))
+      this.aSt.ppFiltre = ''
       this.chgTr = true
     },
     async chgSponsor () { 
       this.chgSp = true
     },
     async voirCompta () { 
-      this.avStore.ccCpt = new Compteurs(await new GetCompteursCompta().run(this.na.id))
+      this.aSt.ccCpt = new Compteurs(await new GetCompteursCompta().run(this.na.id))
       this.cptdial = true
     },
     async changerSp(estSp) { // (id, na, attr, val, val2, exq)
       await new SetAttributTribu2().run(this.session.tribuCId, this.na, 'sp', estSp)
       this.chgSp = false
     },
-    selTr (x) { if (x.ok) this.avStore.ppSelId = x.id },
+    selTr (x) { if (x.ok) this.aSt.ppSelId = x.id },
     async changerTr () {
-      const [t, t2] = await new ChangerTribu().run(this.na, this.avStore.ppSelId)
-      this.avStore.setTribuC(t, t2)
+      const [t, t2] = await new ChangerTribu().run(this.na, this.aSt.ppSelId)
+      this.aSt.setTribuC(t, t2)
     }
   },
 
   setup () {
     const session = stores.session
-    const pStore = stores.people
-    const avStore = stores.avatar
+    const pSt = stores.people
+    const aSt = stores.avatar
 
     return {
       session,
-      avStore,
-      pStore
+      aSt,
+      pSt
     }
   }
 }

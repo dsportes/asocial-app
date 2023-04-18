@@ -8,13 +8,13 @@
     <q-btn v-if="session.accesNet" class="q-ml-md q-my-sm" size="md" no-caps dense color="primary" 
       :label="$t('CChtit')" @click="ouvrircc"/>
 
-    <div v-if="!avStore.pcLc.length" class="titre-lg text-italic">{{$t('CHnch')}}</div>
-    <div v-if="avStore.pcLc.length && !avStore.pcLcF.length" class="titre-lg text-italic">
-      {{$t('CHnch2', [avStore.pcLc.length])}}
+    <div v-if="!aSt.pcLc.length" class="titre-lg text-italic">{{$t('CHnch')}}</div>
+    <div v-if="aSt.pcLc.length && !aSt.pcLcF.length" class="titre-lg text-italic">
+      {{$t('CHnch2', [aSt.pcLc.length])}}
     </div>
     
-    <div v-if="avStore.pcLcF.length">
-      <div v-for="(chat, idx) in avStore.pcLcF" :key="chat.ids">
+    <div v-if="aSt.pcLcF.length">
+      <div v-for="(chat, idx) in aSt.pcLcF" :key="chat.ids">
         <apercu-chat class="q-my-sm" :na-i="chat.naI" :na-e="chat.naE" :ids="chat.ids" :idx="idx" :mapmc="mapmc"/>
       </div>
     </div>
@@ -58,7 +58,7 @@ export default {
   },
 
   setup () {
-    const avStore = stores.avatar
+    const aSt = stores.avatar
     const session = stores.session
     const fStore = stores.filtre
 
@@ -69,7 +69,7 @@ export default {
     return {
       ui: stores.ui,
       session,
-      avStore,
+      aSt,
       mapmc
     }
   }

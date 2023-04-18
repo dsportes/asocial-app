@@ -38,8 +38,8 @@
       <!-- Comptabilité des volumes -->
       <div v-if="session.status>1" @click="pageCompta" style="position:relative"
         :class="'cursor-pointer q-mr-xs bg2 ' + pccl">
-        <q-knob v-model="avStore.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
-        <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{avStore.compta.pc + '%'}}</div>
+        <q-knob v-model="aSt.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
+        <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{aSt.compta.pc + '%'}}</div>
       </div>
 
       <!-- Notifications -->
@@ -53,7 +53,7 @@
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
         <span v-if="session.ok" class="titre-lg cursor-pointer"  @click="ouvrirav">
-          {{avStore.avC.na.nomc}}
+          {{aSt.avC.na.nomc}}
         </span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
       </q-toolbar-title>
@@ -100,11 +100,11 @@
     <q-toolbar v-if="ui.page === 'groupe'" inset 
       class="full-width bg-secondary text-white row justify-between">
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
-        <q-tab name="groupe" :label="$t('PGtgr')" @click="ui.setPageTab('groupe')"/>
-        <q-tab name="membres" :label="$t('PGtmb')" @click="ui.setPageTab('membres')"/>
+        <q-tab name="groupe" :label="$t('ACtgr')" @click="ui.setPageTab('groupe')"/>
+        <q-tab name="membres" :label="$t('ACtmb')" @click="ui.setPageTab('membres')"/>
       </q-tabs>
       <q-btn class="col-auto q-px-sm" dense size="md" color="warning" 
-        icon="check" :label="$t('PGsec')" @click="ui.secrets()"/>
+        icon="check" :label="$t('ACsec')" @click="ui.secrets()"/>
     </q-toolbar>
 
   </q-header>
@@ -223,14 +223,14 @@
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="closeav"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [avStore.avC.na.nom])}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [aSt.avC.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
       </q-header>
 
       <q-page-container>
         <q-card class="q-pa-sm largeur40">
-          <apercu-avatar edit :na="avStore.avC.na"/>
+          <apercu-avatar edit :na="aSt.avC.na"/>
         </q-card>
       </q-page-container>
     </q-layout>
@@ -339,16 +339,16 @@ export default {
     tbclass () { return this.$q.dark.isActive ? ' sombre1' : ' clair1' },
     aHome () { return (this.session.status > 1 && this.ui.page !== 'accueil')
       || (!this.session.status && this.ui.page !== 'login') },
-    pccl () {return this.avStore.compta.pc < 80 ? 'bg-transparent' : (this.avStore.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
+    pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
     titrePage () {
       const p = this.ui.page
       let arg = ''
       switch (p) {
         case 'tribu' : { arg = getNg(this.session.tribuCId).nom; break }
-        case 'chats' : { arg = this.avStore.avC.na.nom; break }
-        case 'sponsorings' : { arg = this.avStore.avC.na.nom; break }
-        case 'groupesac' : { arg = this.avStore.avC.na.nom; break }
-        case 'groupe' : { arg = this.grStore.grC.na.nom; break }
+        case 'chats' : { arg = this.aSt.avC.na.nom; break }
+        case 'sponsorings' : { arg = this.aSt.avC.na.nom; break }
+        case 'groupesac' : { arg = this.aSt.avC.na.nom; break }
+        case 'groupe' : { arg = this.gSt.egrC.groupe.na.nom; break }
       }
       return this.$t('P' + p, [arg])
     }
@@ -420,8 +420,8 @@ export default {
     ui.etroite = $q.screen.width < ui.seuillarge
 
     const session = stores.session
-    const avStore = stores.avatar
-    const grStore = stores.groupe
+    const aSt = stores.avatar
+    const gSt = stores.groupe
 
     console.log($t('build', [config.build, config.debug]))
 
@@ -434,8 +434,8 @@ export default {
       session,
       config,
       ui,
-      avStore,
-      grStore,
+      aSt,
+      gSt,
       infonet,
       infoidb,
       infomode,

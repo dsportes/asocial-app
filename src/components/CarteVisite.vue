@@ -177,7 +177,7 @@ export default ({
     const photolocal = ref('')
     const enedition = ref(false) // en Ref pour pouvoir le traiter dans le watch
     const nom = ref('')
-    const sid = ref('')
+    // const sid = ref('')
 
     const infoInit = toRef(props, 'infoInit') // pour pouvoir mettre un watch sur le changement de la propriété
     const photoInit = toRef(props, 'photoInit') // pour pouvoir mettre un watch sur le changement de la propriété
@@ -187,7 +187,7 @@ export default ({
 
     function init () {
       nom.value = na.value.nom
-      sid.value = na.value.sid
+      // sid.value = na.value.sid
       infolocal.value = infoInit.value
       photolocal.value = photoInit.value ? photoInit.value : phdef
       resultat.info = infolocal.value
@@ -208,7 +208,7 @@ export default ({
 
     watch(na, (ap, av) => {
       nom.value = ap.nom
-      sid.value = ap.sid
+      // sid.value = ap.sid
     })
 
     init()
@@ -217,7 +217,7 @@ export default ({
       phdef,
       clic,
       nom,
-      sid,
+      // sid,
       md,
       webcam,
       canvas,

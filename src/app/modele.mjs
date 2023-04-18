@@ -14,19 +14,6 @@ function decodeIn (buf, cible) {
   for (const p in x) cible[p] = x[p]
 }
 
-export function getSecret (id, ids) {
-  const st = id % 10 === 8 ? stores.groupe : stores.avatar
-  return st.getSecret(id, ids)
-}
-
-// Retourne l'array des [id, ids] des secrets voisins de celui passé en argument
-export function getVoisins(id, ids) {
-  const r = []
-  stores.avatar.getVoisins(id, ids).forEach(pk => { r.push(splitPK(pk)) })
-  stores.groupe.getVoisins(id, ids).forEach(pk => { r.push(splitPK(pk)) })
-  return r
-}
-
 /* Versions (statique) ***********************************
 Versions des sous-collections d'avatars et groupes
 - chaque sous collection identifiée par un id d'avatar ou de groupe a une version courante
@@ -122,13 +109,7 @@ export class NomGenerique {
   get estAvatarS () { return this.id % 10 === 1 }
   get estComptable () { return this.id === IDCOMPTABLE }
   get nomc () { return this.nom + (this.estComptable ? '' : ('#' + ('' + this.id).substring(0, 4))) }
-  // get nomf () { return normpath(this.nomc) }
-  get sid () { return intToB64(this.id) }
-  get cv () { return getCv(this.id) }
-
-  egal (ng) {
-    return this.nom === ng.nom && this.id === ng.id && egaliteU8(this.rnd, ng.rnd)
-  }
+  get hrnd () { return hash(u8ToB64(this.rnd)) }
 
   get defIcon () {
     const cfg = stores.config
@@ -137,59 +118,16 @@ export class NomGenerique {
     return cfg.iconAvatar
   }
 
-  get info () {
-    if (this.id === IDCOMPTABLE) return stores.config.nomDuComptable
-    const cv = this.getCv(this.id)
-    return cv ? cv.info : ''
+  egal (ng) {
+    return this.nom === ng.nom && this.id === ng.id && egaliteU8(this.rnd, ng.rnd)
   }
-
-  get photo () {
-    if (this.id === IDCOMPTABLE) return stores.config.iconSuperman
-    const cv = this.getCv(this.id)
-    return cv ? cv.photo : ''
-  }
-
-  get hrnd () { return hash(u8ToB64(this.rnd)) }
 }
 
-export class NomAvatar extends NomGenerique {
-  constructor (nom, rnd) { super(nom, rnd) }
+export class NomAvatar extends NomGenerique { constructor (nom, rnd) { super(nom, rnd) } }
 
-  get titre () {
-    const info = this.info
-    return info ? titre(info) : ''
-  }
+export class NomGroupe extends NomGenerique { constructor (nom, rnd) { super(nom, rnd || 2) } }
 
-  getCv () {
-    if (this.id === IDCOMPTABLE) return null
-    const av = stores.avatar.getAvatar(this.id)
-    return av && av.cv ? av.cv : null
-  }
-
-  get photoDef () { return this.photo || stores.config.iconAvatar }
-
-  clone () { return new NomAvatar(this.nom, this.rnd) }
-}
-
-export class NomGroupe extends NomGenerique {
-  constructor (nom, rnd) { super(nom, rnd || 2) }
-
-  getCv () {
-    if (this.id === IDCOMPTABLE) return null
-    const gr = stores.groupe.getGroupe(this.id)
-    return gr && gr.cv ? gr.cv : null
-  }
-
-  get photoDef () { return this.photo || stores.config.iconGroupe }
-
-  clone () { return new NomGroupe(this.nom, this.rnd) }
-}
-
-export class NomTribu extends NomGenerique {
-  constructor (nom, rnd) { super(nom, rnd || 3) }
-
-  clone () { return new NomTribu(this.nom, this.rnd) }
-}
+export class NomTribu extends NomGenerique { constructor (nom, rnd) { super(nom, rnd || 3) } }
 
 /******************************************************
  * classe MotsCles
@@ -216,15 +154,17 @@ export class Motscles {
   - celle du groupe d'id donné (0 su aucun)
   */
   static mapMC (duCompte, duGroupe) {
+    const aSt = stores.avatar
+    const gSt = stores.groupe
     const m = new Map()
     const mx = stores.config.motscles
     for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
     if (duCompte) {
-      const mx = stores.avatar.motscles || {}
+      const mx = aSt.motscles || {}
       for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
     }
     if (duGroupe) {
-      const g = stores.groupe.getGroupe(duGroupe)
+      const g = gSt.getGroupe(duGroupe)
       if (g) {
         mx = g.motscles || null
         if (mx) for (const i in mx) { m.set(i, Motscles.cn(mx[i]))}
@@ -893,8 +833,6 @@ export class Compta extends GenDoc {
   get stn () { return this.blocage ? this.blocage.stn : 0 }
   get clet () { return this.nct.rnd }
 
-  get avatarIds () { return new Set(this.mav.keys()) } // retourne (ou accumule dans s), le set des ids des avatars du compte
-
   get lstAvatarNas () { // retourne l'array des na des avatars du compte (trié ordre alpha, primaire en tête)
     const t = []; for(const na of this.mav.values()) { t.push(na) }
     t.sort((a,b) => { return a.rnd[0] === 0 ? -1 : (b.rnd[0] === 0 ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
@@ -905,11 +843,6 @@ export class Compta extends GenDoc {
     for(const na of this.mav.values()) { if (na.nom === n) return na.id }
     return 0
   }
-
-  // na d'un des avatars du compte
-  naAvatar (id) { return id === this.id ? this.nap : this.mav.get(id) || null}
-
-  estAc (id) { return this.mav.has(id) }
 
   async compile (row) {
     const session = stores.session
@@ -929,6 +862,7 @@ export class Compta extends GenDoc {
       setNg(na) 
       if (na.estAvatarP) this.naprim = na
     }
+    this.avatarIds = new Set(this.mav.keys())
     /* On connait MAINTENANT le na du compte (donc son rnd) */
     
     let b
@@ -1093,7 +1027,8 @@ export class Sponsoring extends GenDoc {
       - `quotas` : `[v1, v2]` quotas attribués par le parrain.
     */
     const session = stores.session
-    const av = stores.avatar.avC
+    const aSt = stores.avatar
+    const av = aSt.avC
     const n = new NomAvatar(nom, 0)
     const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, nctkc, quotas}
     d.nct = [nct.nom, nct.rnd]
@@ -1169,14 +1104,14 @@ export class Chat extends GenDoc {
   get naI () { return getNg(this.id) }
 
   async compile (row) {
-    const avStore = stores.avatar
+    const aSt = stores.avatar
     const session = stores.session
     this.vsh = row.vsh || 0
     this.st = row.st || 0
     this.mc = row.mc
     this.seq = row.seq
     if (row.cc.length === 256) {
-      const av = avStore.getAvatar(this.id)
+      const av = aSt.getAvatar(this.id)
       this.cc = await decrypterRSA(av.priv, row.cc)
       this.ccK = await crypter(session.clek, this.cc)
     } else {
@@ -1309,55 +1244,7 @@ export class Groupe extends GenDoc {
     return Object.keys(mc).length ? await crypter(this.cle, new Uint8Array(encode(mc))) : null
   }
 
-  /* En attente *************************************************
-  imDeId (id) {
-    const membre = stores.membre
-    for (const im in this.lstIm) {
-      const m = membre.get(this.id, im)
-      if (m.namb.id === id) return im
-    }
-    return 0
-  }
-
-  auteurs () { // TODO : uitilité à vérifier
-    const membre = stores.membre
-    const l = []
-    for (const im in this.lstIm) {
-      const m = membre.get(this.id, im)
-      if (m.stp) l.push(im + '-' + m.nomc)
-    }
-    return l
-  }
-
-  nbActifsInvites () { // actif et invité
-    const membre = stores.membre
-    let n = 0
-    for (const im in this.lstIm) {
-      const m = membre.get(this.id, im)
-      if (m.stx === 1 || m.stx === 2) n++
-    }
-    return n
-  }
-
-  membreParId (id) {
-    const membre = stores.membre
-    for (const im in this.lstIm) {
-      const m = membre.get(this.id, im)
-      if (m.namb.id === id) return m
-    }
-    return null
-  }
-
-  maxStp () {
-    const membre = stores.membre
-    let mx = 0
-    for (const im in this.lstIm) {
-      const m = membre.get(this.id, im)
-      if (m.estAc && m.stp > mx) mx = m.stp
-    }
-    return mx
-  }
-
+  /*
   motcle (n) { // utilisé par util / Motscles
     const s = this.mc[n]
     if (!s) return ''
@@ -1396,6 +1283,7 @@ export class Membre extends GenDoc {
   // na : nom complet de l'avatar membre
 
   async compile (row) {
+    const aSt = stores.avatar
     this.vsh = row.vsh || 0
     this.ddi = row.ddi || 0
     this.dda = row.dda || 0
@@ -1406,7 +1294,7 @@ export class Membre extends GenDoc {
     this.na = new NomAvatar(data.nom, data.rnd)
     this.ni = data.ni
     this.imc = data.imc
-    this.estAc = stores.avatar.compta.estAc(this.na.id)
+    this.estAc = aSt.compta.avatarIds.has(this.na.id)
     if (!this.estAc) setNg(this.na)
     this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
@@ -1480,11 +1368,6 @@ export class Secret extends GenDoc {
     }
   }
 
-  get avatar () { return this.deGroupe ? null : stores.avatar.getAvatar(this.id) }
-  get groupe () { return !this.deGroupe ? null : stores.groupe.getGroupe(this.id) }
-
-  // TODO : gestion des voisins d'un secret
-
   get pkref () { return !this.ref ? '' : (idToSid(this.ref[0]) + '/' + this.ref[1]) }
   // get horsLimite () { return this.st < 0 || this.st >= 99999 ? false : dlvDepassee(this.st) }
   get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
@@ -1520,7 +1403,8 @@ export class Secret extends GenDoc {
     const g = this.groupe
     if (g.membreParId(id)) return id
     let idr = id
-    stores.avatar.compte.avatarIds().forEach(idm => {
+    const aSt = stores.avatar
+    aSt.compte.avatarIds().forEach(idm => {
       if (g.membreParId(idm)) idr = idm
     })
     return idr

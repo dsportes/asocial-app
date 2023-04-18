@@ -156,15 +156,15 @@ export default {
   },
 
   setup (props) {
-    const avStore = stores.avatar
+    const aSt = stores.avatar
     const session = stores.session
     const id = toRef(props, 'id')
 
-    function getT () { return avStore.getTribu(id.value) }
+    function getT () { return aSt.getTribu(id.value) }
 
     const t = ref(getT())
 
-    avStore.$onAction(({ name, args, after }) => {
+    aSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if ((name === 'setTribu' || name === 'setTribu2') && args[0].id === id.value) {
           t.value = getT()

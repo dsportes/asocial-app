@@ -13,16 +13,16 @@
 
       <div>
         <span class="fs-md q-mr-md">{{$t('statutmb' + st)}}</span>
-        <q-btn dense size="sm" color="primary" icon="settings" @click="changeSt" :label="$t('PGchanger')"/>
+        <q-btn dense size="sm" color="primary" icon="settings" @click="changeSt" :label="$t('AMchanger')"/>
       </div>
 
       <!-- Info à propos du groupe -->
       <div v-if="!people" class="q-py-sm">
-        <div class="titre-md">{{$t('PGinfo')}}</div>
-        <show-html v-if="mb.info" class="q-ml-lg bord" maxh="5rem" :texte="mb.info" zoom
+        <div v-if="mb.info" class="titre-md">{{$t('AMinfo')}}</div>
+        <show-html v-if="mb.info" class="bord" maxh="5rem" :texte="mb.info" zoom
           @edit="editInfo"/>
-        <div v-else class="q-ml-lg row">
-          <div class="col fs-md text-italic">({{$t('PGnoinfo')}})</div>
+        <div v-else class="row">
+          <div class="col fs-md text-italic">({{$t('AMnoinfo')}})</div>
           <q-btn class="col-auto btn1" size="sm" dense icon="edit" color="primary" @click="editInfo"/>
         </div>
       </div>
@@ -34,18 +34,16 @@
       </div>
 
       <div class="fs-md">
-        <span v-if="mb.ids === 1" class="q-mr-xs">{{$t('PGfond')}}</span>
+        <span v-if="mb.ids === 1" class="q-mr-xs">{{$t('AMfond')}}</span>
         <span v-if="mb.idi && eg.groupe.ast[mb.idi]" class="q-mr-xs">
-          {{$t('PCct1', [mbidi ? mbidi.na.nomc : '?'])}}</span>
-        <span v-if="mb.idi && !eg.groupe.ast[mb.idi]" class="q-mr-xs">{{$t('PCct2', [mb.idi])}}</span>
+          {{$t('AMct1', [mbidi ? mbidi.na.nomc : '?'])}}</span>
+        <span v-if="mb.idi && !eg.groupe.ast[mb.idi]" class="q-mr-xs">{{$t('AMct2', [mb.idi])}}</span>
       </div>
 
-      <div v-if="mb.vote && eg.groupe.stx===2" class="titre-md text-italic">{{$t('PGavote')}}</div>
-
       <div class="row titre-md text-italic">
-        <div class="col-4 text-center">{{$t('PGddi')}}</div>
-        <div class="col-4 text-center">{{$t('PGdda')}}</div>
-        <div class="col-4 text-center">{{$t('PGdfa')}}</div>
+        <div class="col-4 text-center">{{$t('AMddi')}}</div>
+        <div class="col-4 text-center">{{$t('AMdda')}}</div>
+        <div class="col-4 text-center">{{$t('AMdfa')}}</div>
       </div>
       <div class="row fs-md font-mono">
         <div class="col-4 text-center">{{ddi}}</div>
@@ -58,7 +56,7 @@
     <q-dialog v-model="infoedit" persistent>
       <q-card class="petitelargeur shadow-8">
         <q-toolbar class="bg-secondary text-white">
-          <q-toolbar-title class="titre-lg full-width">{{$t('PGinfo')}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg full-width">{{$t('AMinfo')}}</q-toolbar-title>
           <q-btn dense flat size="md" icon="close" @click="infoedit=false"/>
         </q-toolbar>
         <editeur-md class="height-10"
@@ -164,11 +162,11 @@ export default {
       if (!await this.session.edit()) return
       const an = this.eg.estAnim
       if (!an) {
-        await afficherDiag(this.$t('PGpasanst1'))
+        await afficherDiag(this.$t('AMpasanst1'))
         return
       }
       if (an && this.st === 32 && !this.mb.estAc) {
-        await afficherDiag(this.$t('PGpasanst2'))
+        await afficherDiag(this.$t('AMpasanst2'))
         return
       }
       this.action = 0

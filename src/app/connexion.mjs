@@ -255,6 +255,8 @@ export class ConnexionCompte extends OperationUI {
   /** Chargement pour un avatar de ses secrets postérieurs au plus récent ************/
   async chargerSecrets (id, vidb, vsrv, estGr) {
     const session = stores.session
+    const aSt = stores.avatar
+    const gSt = stores.groupe
     let n1 = 0, n2 = 0
     const rows = {}
     for (const row of this.cSecrets) { 
@@ -278,7 +280,6 @@ export class ConnexionCompte extends OperationUI {
         n2++
       }
     }
-    const avgrStore = estGr ? stores.groupe : stores.avatar
     const auj = AMJ.amjUtc()
     for (const ids in rows) {
       const secret = await compile(rows[ids])
@@ -286,7 +287,7 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesNet && secret.st < auj) { // secret temporaire à supprimer
         this.buf.lsecsup.push(secret)
       } else {
-        avgrStore.setSecret(secret)
+        (estGr ? gSt : aSt).setSecret(secret)
         if (session.accesIdb) this.buf.mapSec[secret.pk] = secret // Pour gestion des fichiers
       }
     }
@@ -324,10 +325,10 @@ export class ConnexionCompte extends OperationUI {
         }
       }
     }
-    const avStore = stores.avatar
+    const aSt = stores.avatar
     for (const ids in rows) {
       const chat = await compile(rows[ids])
-      avStore.setChat(chat)
+      aSt.setChat(chat)
     }
     return [n1, n2]
   }
@@ -365,10 +366,10 @@ export class ConnexionCompte extends OperationUI {
         }
       }
     }
-    const avStore = stores.avatar
+    const aSt = stores.avatar
     for (const ids in rows) {
       const sponsoring = await compile(rows[ids])
-      avStore.setSponsoring(sponsoring)
+      aSt.setSponsoring(sponsoring)
     }
     return [n1, n2]
   }
@@ -411,10 +412,10 @@ export class ConnexionCompte extends OperationUI {
       }
     }
     
-    const grStore = stores.groupe
+    const gSt = stores.groupe
     for (const ids in rows) {
       const membre = await compile(rows[ids])
-      grStore.setMembre(membre)
+      gSt.setMembre(membre)
     }
     return [n1, n2]
   }
@@ -500,7 +501,7 @@ export class ConnexionCompte extends OperationUI {
 
       // session synchronisée ou incognito
       const session = stores.session
-      const avStore = stores.avatar
+      const aSt = stores.avatar
 
       this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
@@ -539,7 +540,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       // Rangement en store
-      avStore.setCompte(this.avatar, this.compta, this.tribu, this.tribu2)
+      aSt.setCompte(this.avatar, this.compta, this.tribu, this.tribu2)
       session.setNotifGlobale(this.notifG)
 
       // En cas de blocage grave, plus de synchronisation
@@ -549,7 +550,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       this.avatarsToStore.forEach(av => {
-        if (av.id !== this.avatar.id) avStore.setAvatar(av)
+        if (av.id !== this.avatar.id) aSt.setAvatar(av)
       })
 
       this.cGroupes = session.accesIdb ? await getColl('groupes') : []
@@ -580,21 +581,21 @@ export class ConnexionCompte extends OperationUI {
         this.tr(await post(this, 'EnleverGroupesAvatars', args))
       }
 
-      const grStore = stores.groupe
+      const gSt = stores.groupe
       const syncitem = stores.syncitem 
       this.avatarsToStore.forEach(av => { 
-        avStore.setAvatar(av)
+        aSt.setAvatar(av)
         syncitem.push('05' + av.id, 0, 'SYava', [av.na.nom])
       })
       this.groupesToStore.forEach(gr => { 
-        grStore.setGroupe(gr) 
+        gSt.setGroupe(gr) 
         syncitem.push('10' + gr.id, 0, 'SYgro', [gr.na.nom])
       })
       /* Chargement en store des versions des groupes */
       for(const idx in this.versions) {
         const id = parseInt(idx)
         const objv = this.versions[idx]
-        if (id % 10 === 2) grStore.setVols(id, objv)
+        if (id % 10 === 2) gSt.setVols(id, objv)
       }
 
       // Comptable seulement : chargement des tribus
@@ -603,7 +604,7 @@ export class ConnexionCompte extends OperationUI {
         const ret = this.tr(await post(this, 'ChargerTribus', args))
         if (ret.rowTribus && ret.rowTribus.length) for(const row of ret.rowTribus) {
           const tribu = await compile(row)
-          avStore.setTribu(tribu)
+          aSt.setTribu(tribu)
         }
       }
 
@@ -614,7 +615,8 @@ export class ConnexionCompte extends OperationUI {
       this.cMembres = session.accesIdb ? await getColl('membres') : []
 
       // Itération sur chaque avatar: secrets, chats, sponsorings
-      for (const [,avatar] of avStore.avatars) {
+      for (const [,e] of aSt.map) {
+        const avatar = e.avatar
         const vidb = Versions.get(avatar.id).v
         const objv = this.versions && this.versions[avatar.id] ? this.versions[avatar.id] : { v: 0 }
         const vsrv = objv.v
@@ -637,7 +639,8 @@ export class ConnexionCompte extends OperationUI {
       }
 
       // Itération sur chaque groupe: secrets, membres
-      for (const [,groupe] of grStore.groupes) {
+      for (const [,eg] of gSt.map) {
+        const groupe = eg.groupe
         const objidb = Versions.get(groupe.id)
         const vidb = objidb.v
         const objv = this.versions && this.versions[groupe.id] ? this.versions[groupe.id] : 
@@ -646,7 +649,7 @@ export class ConnexionCompte extends OperationUI {
         if (vidb < vsrv) {
           Versions.set(groupe.id, objv)
         } else {
-          grStore.setVols(groupe.id, objidb)
+          gSt.setVols(groupe.id, objidb)
         }
 
         const na = getNg(groupe.id)
@@ -755,6 +758,8 @@ export class AcceptationSponsoring extends OperationUI {
       // LE COMPTE EST CELUI DU FILLEUL
       const session = stores.session
       const config = stores.config
+      const aSt = stores.avatar
+
       await initSession(ps)
       this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
@@ -806,7 +811,7 @@ export class AcceptationSponsoring extends OperationUI {
       const contcI = await Chat.getContc(sp.na, dh, txt, cc)
       const contcE = await Chat.getContc(sp.naf, dh, txt, cc)
 
-      const pubE = await stores.avatar.getPub(sp.na.id)
+      const pubE = await aSt.getPub(sp.na.id)
       if (!pubE) throw new AppExc(F_BRO, 7)
 
       // (naI, naE, contc, cc, pubE, mc)
@@ -828,10 +833,10 @@ export class AcceptationSponsoring extends OperationUI {
       const tribu = await compile(rowTribu)
       const tribu2 = await compile(rowTribu2)
       const compta = await compile(rowCompta)
-      stores.avatar.setCompte(avatar, compta, tribu, tribu2)
+      aSt.setCompte(avatar, compta, tribu, tribu2)
       session.setNotifGlobale(notifG)
       const chat = await compile(rowChat)
-      stores.avatar.setChat(chat)
+      aSt.setChat(chat)
       Versions.reset()
       Versions.set(session.compteId, { v: 1 })
 
@@ -910,6 +915,7 @@ export class CreationCompteComptable extends OperationUI {
       await stores.ui.setPage('session')
       const session = stores.session
       const config = stores.config
+      const aSt = stores.avatar
       const ac = config.allocComptable
       session.mode = 2
       await initSession(phrase)
@@ -948,7 +954,7 @@ export class CreationCompteComptable extends OperationUI {
       const tribu = await compile(rowTribu)
       const tribu2 = await compile(rowTribu2)
       const compta = await compile(rowCompta)
-      stores.avatar.setCompte(avatar, compta, tribu, tribu2)
+      aSt.setCompte(avatar, compta, tribu, tribu2)
       session.setNotifGlobale({ txt: '', dh: 0, g: 0 })
 
       if (ret.credentials) session.fscredentials = ret.credentials

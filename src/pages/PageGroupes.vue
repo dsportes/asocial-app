@@ -99,7 +99,7 @@ export default {
 
     async nvGr () {
       if (!await this.session.edit()) return
-      const cpt = this.avStore.compta.compteurs
+      const cpt = this.aSt.compta.compteurs
       let max1 = Math.floor(((cpt.q1 * UNITEV1) - cpt.v1) / UNITEV1)
       if (max1 < 0) max1 = 0
       let max2 = Math.floor(((cpt.q2 * UNITEV2) - cpt.v2) / UNITEV2)
@@ -139,7 +139,7 @@ export default {
     return {
       ui: stores.ui,
       session: stores.session,
-      avStore: stores.avatar,
+      aSt: stores.avatar,
       stats: stores.filtre.stats,
       mapmc,
       gSt: stores.groupe

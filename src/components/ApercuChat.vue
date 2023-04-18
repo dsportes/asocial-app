@@ -69,7 +69,8 @@ export default {
       if (this.session.mode === 3) {
         await afficherDiag(this.$t('CHav'))
       }
-      const csp = this.naE.id === IDCOMPTABLE || (stores.people.estSponsor(this.naE.id) === 2)
+      const pSt = stores.people
+      const csp = this.naE.id === IDCOMPTABLE || (pSt.estSponsor(this.naE.id) === 2)
       if (this.session.nivbl === 3 && !csp) {
         await afficherDiag(this.$t('CHbl'))
       }
@@ -100,16 +101,16 @@ export default {
 
   setup (props) {
     const session = stores.session
-    const avStore = stores.avatar
+    const aSt = stores.avatar
     const naI = toRef(props, 'naI')
     const naE = toRef(props, 'naE')
     const ids = toRef(props, 'ids')
 
-    function getC () { return avStore.getChat(naI.value.id, ids.value) }
+    function getC () { return aSt.getChat(naI.value.id, ids.value) }
 
     const chat = ref(getC())
 
-    avStore.$onAction(({ name, args, after }) => {
+    aSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if ((name === 'setChat' && args[0].id === naI.value.id && args[0].ids === ids.value) ||
           (name === 'delChat' && args[0] === naI.value.id && args[1] === ids.value)){

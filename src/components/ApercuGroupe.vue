@@ -3,14 +3,14 @@
     <apercu-genx :na="eg.groupe.na" :cv="eg.groupe.cv" :idx="idx" :cvchangee="cvchangee"/>
 
     <div v-if="fond">
-      <span class="q-mt-xs fs-md q-mr-sm">{{$t('PGfd')}}</span>
+      <span class="q-mt-xs fs-md q-mr-sm">{{$t('AGfond')}}</span>
       <bouton-membre :eg="eg" :im="1" />
     </div>
-    <div v-else class="q-mt-xs fs-md text-italic">{{$t('PGnfond')}}</div>
+    <div v-else class="q-mt-xs fs-md text-italic">{{$t('AGnfond')}}</div>
 
     <div class="q-mt-xs row justify-between">
-      <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('PGuna')}}</div>
-      <div v-else class="titre-md">{{$t('PGsimple')}}</div>
+      <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('AGuna')}}</div>
+      <div v-else class="titre-md">{{$t('AGsimple')}}</div>
       <q-btn class="q-ml-sm" size="sm" :label="$t('details')" 
         icon="edit" dense color="primary" @click="editUna"/>
     </div>
@@ -18,10 +18,10 @@
     <div :class="'q-mt-xs q-pa-xs' + bcf">
       <div class="row justify-between">
         <div v-if="!eg.groupe.dfh" class="col fs-md">
-          <span class="fs-md q-mr-sm">{{$t('PGhb')}}</span>
+          <span class="fs-md q-mr-sm">{{$t('AGheb')}}</span>
           <bouton-membre :eg="eg" :im="eg.groupe.imh" />
         </div>
-        <div v-else class="col fs-md text-warning text-bold">{{$t('PGnheb', [dfh])}}</div>
+        <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [dfh])}}</div>
         <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
           icon="settings" @click="gererHeb"/>
       </div>
@@ -80,6 +80,14 @@ export default {
   data () { return {
     editerUna: false,
     changerQuotas: false,
+    /* cas:
+    1: l'avatar courant est hébergeur du groupe
+    2: il y a un hébergeur (pas moi) et je suis animateur
+    3: il y a un hébergeur (pas moi) et je ne suis pas animateur
+    4: pas d'hébergeur et l'avatar courant est animateur
+    5: pas d'hébergeur, avatar courant pas animateur, et il y a des animateurs
+    6: pas d'hébergeur, avatar courant pas animateur, et il n'y pas d'animateur
+    */
   }},
 
   methods: {
@@ -90,7 +98,22 @@ export default {
         await new MajCvGr().run(this.eg.groupe, res.ph, res.info)
       }
     },
+    
+    setCas () {
+      const g = this.eg.groupe
+      const anims = this.gSt.animIds(this.eg)
+      const b = anims.has(session.avatarId)
+      if (g.imh) {
+        const m = this.eg.membres.get(g.imh)
+        if (m && m.na.id === session.avatarId) return 1
+        return b ? 2 : 3
+      } else {
+        return b ? 4 : (anims.size ? 5 : 6)
+      }
+    },
+
     gererHeb () {
+      this.cas = this.setCas
       // TODO
       console.log('gérer')
       this.changerQuotas = true

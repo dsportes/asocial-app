@@ -54,7 +54,8 @@ export const useSessionStore = defineStore('session', {
 
   getters: {
     estSponsor (state) { 
-      const t2 = stores.avatar.tribu2.mbtr[state.compteId]
+      const aSt = stores.avatar
+      const t2 = aSt.tribu2.mbtr[state.compteId]
       return (t2 && t2.sp) || false 
     },
     estComptable (state) { return state.compteId === IDCOMPTABLE },
@@ -162,10 +163,10 @@ export const useSessionStore = defineStore('session', {
           if (bl.dh > dhvu) self.alirebl = true
         }  
       }
-      const avStore = stores.avatar
-      const tr = avStore.tribu
-      const et2 = avStore.tribu2.mbtr[this.compteId]
-      const dhvu = avStore.compta.dhvu || 0
+      const aSt = stores.avatar
+      const tr = aSt.tribu
+      const et2 = aSt.tribu2.mbtr[this.compteId]
+      const dhvu = aSt.compta.dhvu || 0
       this.nivbl = 0
       this.alirebl = false
       this.gntf = 0

@@ -5,12 +5,12 @@
     <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps dense color="primary" 
       :label="$t('CVraf')" @click="rafCvs"/>
 
-    <div v-if="pStore.peLp && !pStore.peLpF" class="titre-lg text-italic">
-      {{$t('APnb', [pStore.peLp.length])}}
+    <div v-if="pSt.peLp && !pSt.peLpF" class="titre-lg text-italic">
+      {{$t('APnb', [pSt.peLp.length])}}
     </div>
     
-    <div v-if="pStore.peLpF.length">
-      <div v-for="(p, idx) in pStore.peLpF" :key="p.id">
+    <div v-if="pSt.peLpF.length">
+      <div v-for="(p, idx) in pSt.peLpF" :key="p.id">
         <apercu-people class="q-my-sm" :id="p.na.id" :idx="idx"/>
       </div>
     </div>
@@ -43,13 +43,13 @@ export default {
   },
 
   setup () {
-    const pStore = stores.people
+    const pSt = stores.people
     const session = stores.session
 
     return {
       ui: stores.ui,
       session,
-      pStore
+      pSt
     }
   }
 

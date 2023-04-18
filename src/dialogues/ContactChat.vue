@@ -64,21 +64,21 @@ export default ({
 
     async ok () {
       this.chat = null
-      const pStore = stores.people
-      const avStore = stores.avatar
+      const pSt = stores.people
+      const aSt = stores.avatar
       const p = await new PhraseContact().init(this.pc)
       const { cv, na } = await new GetAvatarPC().run(p)
       if (!na) {
         await afficherDiag(this.$t('CChnopc'))
       } else {
         this.naE = na
-        this.naI = this.avStore.avC.na
+        this.naI = this.aSt.avC.na
         const idsI = await Chat.getIds(this.naI, this.naE)
-        this.chat = avStore.getChat(this.naI.id, idsI)
+        this.chat = aSt.getChat(this.naI.id, idsI)
 
         if (this.chat) {
           // MAJ éventuelle de la CV : na: du people, id2: de l'avatar ayant un chat avec lui, cv
-          pStore.setPeopleChat (this.chat, cv) 
+          pSt.setPeopleChat (this.chat, cv) 
           return
         }
         

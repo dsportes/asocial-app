@@ -51,8 +51,8 @@
       <!-- Comptabilité des volumes -->
       <div class="btn2 row items-center" @click="pageCompta">
         <div style="position:relative" :class="'q-mr-xs bg2 ' + pccl">
-          <q-knob v-model="avStore.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
-          <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{avStore.compta.pc + '%'}}</div>
+          <q-knob v-model="aSt.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
+          <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{aSt.compta.pc + '%'}}</div>
         </div>
         <span>{{$t('MLAvol')}}</span>
       </div>
@@ -114,7 +114,7 @@ export default {
   components: { PageMenu, BoutonHelp, BoutonLangue, NotifIco, BlocageIco, OutilsTests },
 
   computed: {
-    pccl () {return this.avStore.compta.pc < 80 ? 'bg-transparent' : (this.avStore.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
+    pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
   },
 
   methods: {
@@ -149,9 +149,7 @@ export default {
     return {
       ui: stores.ui,
       session: stores.session,
-      avStore: stores.avatar,
-      pStore: stores.people,
-      grStore: stores.groupe
+      aSt: stores.avatar,
     }
   }
 

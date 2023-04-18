@@ -108,13 +108,13 @@ export default {
   },
 
   setup (props) {
-    const avStore = stores.avatar
+    const aSt = stores.avatar
     const na = toRef(props, 'na')
 
-    function getAv() { return avStore.getAvatar(na.value.id) }
+    function getAv() { return aSt.getAvatar(na.value.id) }
     const avatar = ref(getAv())
 
-    avStore.$onAction(({ name, args, after }) => {
+    aSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'setAvatar' && args[0].id === na.value.id) {
           avatar.value = args[0]

@@ -603,6 +603,9 @@ export default {
   ACinfs: 'Tribu du compte: "{0}"',
   ACcptspons: 'Le compte est un sponsor de la tribu',
   ACbloc: 'Le compte est "bloqué" : les seules actions possibles sont l\'échange de chats avec le Comptable et les sponsors de votre tribu.',
+  ACtgr: 'Détail du groupe',
+  ACtmb: 'Membres',
+  ACsec: 'Ses secrets',
 
   CNXdeg: 'Le compte est bloqué. Seuls les modes "avion" et "incognito" étant admis, votre session a été mise en mode "incognito".',
 
@@ -745,43 +748,31 @@ export default {
   PTpasc: 'Il n\'est pas possible de bloquer le Comptable',
   PTcompta: 'Volumes utilisés par {0}',
 
-  // Page groupes
-  PGnv: 'Nouveau groupe',
+  // Page groupe(s)
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
   PGvut: 'Volume total réellement utilisé',
   PGvq: 'Somme des quotas attribués',
   PGnocv: 'Pas d\'autre information',
-  PGnoan: 'Aucun des avatars du compte n\'est "animateur" du groupe. Edition de la carte de viste non autorisée',
-  PGtgr: 'Détail du groupe',
-  PGtmb: 'Membres',
-  PGsec: 'Ses secrets',
-  PGfh: 'Ce groupe N\'EST PLUS hébergé, disparition {0}',
-  PGhb: 'Groupe hébergé par',
-  PGfd: 'Groupe fondé par',
-  PGheb: 'Hébergeur du groupe.',
-  PGnheb: 'N\'est PLUS hébergé. Disparition du groupe {0}',
-  PGfond: 'Fondateur.',
-  PGnfond: 'Le fondateur du groupe a disparu',
-  PGct1: 'Inscrit comme "contact" par {0}.',
-  PGct2: 'Inscrit comme "contact" par #{0} (oublié ou disparu).',
   PGnope: 'Le groupe n\'a aucun autre membre que les avatars du compte',
   PGnomb: 'Aucun membre (sur {0}) ne répond au critère de sélection',
-  PGpasanst1: 'Vous n\'êtes pas animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre',
-  PGpasanst2: 'Même en tant qu\'animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre lui-même animateur',
-  PGchanger: 'Changer...',
-
-  PGddi: 'Dernière invitation',
-  PGdda: 'Début d\'activité',
-  PGdfa: 'Fin d\'activité',
   PGcrea: 'Création d\'un nouveau groupe',
   PGnom: 'Nom du groupe à créer: {0}',
-  PGsimple: 'Invitations sur demande d\'un seul animateur',
-  PGuna: 'Invitations sur unanimité des animateurs',
   PGquotas: 'Quotas de volume V1 / V2 maximum pour les secrets du groupe',
-  PGinfo: 'Commentaires à propos du groupe',
-  PGnoinfo: 'Pas de commentaires à propos du groupe',
-  PGmc: 'Mots clés attachés au groupe',
 
+  // Aperçu Membre
+  AMct1: 'Inscrit comme "contact" par {0}.',
+  AMct2: 'Inscrit comme "contact" par #{0} (oublié ou disparu).',
+  AMinfo: 'Commentaires à propos du groupe',
+  AMnoinfo: 'Pas de commentaires à propos du groupe',
+  AMchanger: 'Changer...',
+  AMddi: 'Dernière invitation',
+  AMdda: 'Début d\'activité',
+  AMdfa: 'Fin d\'activité',
+  AMfond: 'Fondateur.',
+  AMpasanst1: 'Vous n\'êtes pas animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre',
+  AMpasanst2: 'Même en tant qu\'animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre lui-même animateur',
+
+  // Quotas Vols
   PGq1: 'Quota de volume V1 (textes des secrets): [{0}] soit {1}',
   PGq10: 'AUCUN quota de volume V1 (textes des secrets)',
   PGv1u: 'Volume V1 utilisé : {0} soit {1}',
@@ -795,18 +786,19 @@ export default {
   PGv2u0: 'Volume V2 utilisé : {0}',
   PGv2a0: 'Quotas V2 déjà attribués : [{0}] soit {1}',
 
+  // Aperçu groupe
+  AGheb: 'Hébergeur du groupe.',
+  AGnheb: 'N\'est PLUS hébergé. Disparition du groupe {0}',
+  AGfond: 'Fondateur.',
+  AGnfond: 'Le fondateur du groupe a disparu',
+  AGsimple: 'Invitations sur demande d\'un seul animateur',
+  AGuna: 'Invitations sur unanimité des animateurs',
+
+  // Panel Membre
   PMGtit: 'Membre {0}',
   PMGtit1: 'Membre disparu',
   PMGtit2: 'Groupe disparu',
   PMGtit3: 'Groupe {0}',
-
-  // PanelMenu.vue
-  PMEtit: 'Préférences, etc.',
-  PMEmod: 'Mode foncé / clair',
-  PMEgbl: 'Gestion des bases locales',
-  PMEtac: 'Tests d\'accès',
-  PMEras: 'Rapport de Synchronisation',
-  PMEcry: 'Outils de cryptographie',
 
   // Fiche avatar
   FAnocv: 'Pas d\'autre information',

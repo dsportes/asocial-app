@@ -24,33 +24,25 @@ export const useGroupeStore = defineStore('groupe', {
 
   getters: {
     // groupe courant
-    grC (state) { 
-      const e = state.map.get(stores.session.groupeId)
-      return e ? e.groupe : null 
-    },
-    eg (state) { 
-      return state.map.get(stores.session.groupeId)
-    },
-
     egrC (state) { 
-      const e = state.map.get(stores.session.groupeId)
-      return e
+      return state.map.get(stores.session.groupeId)
     },
     
     /* Map de TOUS les groupes. 
       clé: id du groupe, 
       valeur: { groupe, membres, mbacs, secrets }
-    */
     groupes: (state) => {
       const m = new Map()
       state.map.forEach(e => { const g = e.groupe; m.set(g.id, g)})
       return m
     },
+    */
 
     // Map des groupes RESTREINTE à ceux de l'avatar courant.
     groupesAC: (state) => {
+      const aSt = stores.avatar
       const m = new Map()
-      const grIds = stores.avatar.getGrIds
+      const grIds = aSt.getGrIds
       grIds.forEach(idg => {
         const e = state.map.get(idg)
         if (e) m.set(idg, e)
@@ -59,7 +51,7 @@ export const useGroupeStore = defineStore('groupe', {
     },
     
     // liste (array) des ids des groupes
-    ids: (state) => { return Array.from(state.map.keys()) },
+    // ids: (state) => { return Array.from(state.map.keys()) },
 
     getGroupe: (state) => { return (id) => { 
         const e = state.map.get(id)
@@ -108,6 +100,19 @@ export const useGroupeStore = defineStore('groupe', {
     // retourne le Set des pk des voisins du secret (id, ids)
     getVoisins: (state) => { return (id, ids) => {
         return state.voisins.get(id + '/' + ids) || new Set()
+      }
+    },
+
+    membreDeId: (state) => { return (e, id) => {
+        for (const [,m] of e.membres) { if (m.na.id === id) return m }
+        return null
+      }
+    },
+
+    animIds: (state) => { return (e) => {
+        const s = new Set()
+        for (const [,m] of e.membres) { if (e.groupe.ast[m.ids] === 32) s.add(m.na.id) }
+        return s
       }
     },
 
@@ -218,10 +223,11 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     setMembre (membre) {
+      const aSt = stores.avatar
       if (!membre) return
       const e = this.map.get(membre.id)
       if (!e) return
-      const pStore = stores.people
+      const pSt = stores.people
       if (membre._zombi) {
         // membre disparu : c'est sync qui a détecté que le membre n'existait plus
         const m = e.membres.get(membre.ids)
@@ -229,33 +235,35 @@ export const useGroupeStore = defineStore('groupe', {
         e.membres.delete(membre.ids)
         const na = m.na
         if (m.estAc) return
-        pStore.unsetPeopleMembre(na.id, membre.id)
+        pSt.unsetPeopleMembre(na.id, membre.id)
       } else {
         e.membres.set(membre.ids, membre)
         const na = membre.na
         if (membre.estAc) {
           // un des avatars du compte: enreg dans son avatar
-          stores.avatar.setAvatarGr(na.id, membre.id)
+          aSt.setAvatarGr(na.id, membre.id)
           e.mbacs.set(membre.ids, membre)
         } else {
           // ajoute ou remplace le people, met à jour sa cv le cas échéant
-          pStore.setPeopleMembre(na, membre.id, membre.ids, membre.cv)
+          pSt.setPeopleMembre(na, membre.id, membre.ids, membre.cv)
         }
       }
       this.setAnimHeb(e)
     },
 
     delMembre (id, ids) {
+      const pSt = stores.people
+      const aSt = stores.avatar
       const e = this.map.get(id)
       if (!e) return
       const m = e.membres.get(ids)
       if (!m) return
       const idp = m.na.id
       if (m.estAc) {
-        stores.avatar.delAvatarGr(idp, id)
+        aSt.delAvatarGr(idp, id)
         delete m.mbacs(ids)
       } else {
-        stores.people.unsetPeopleMembre(idp, id)
+        pSt.unsetPeopleMembre(idp, id)
       }
       delete m.membres(ids)
     },

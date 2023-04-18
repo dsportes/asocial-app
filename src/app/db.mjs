@@ -5,7 +5,7 @@ import { SessionSync } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
 import { AppExc, E_DB } from './api.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
-import { getSecret, Versions } from '../app/modele.mjs'
+import { Versions } from '../app/modele.mjs'
 
 function decodeIn (buf, cible) {
   const x = decode(buf)
@@ -867,7 +867,14 @@ class Fetat {
 
   async abandon () {
     stores.fetat.abandon(this.id)
-    const s = getSecret(this.ids, this.ns)
+    let s
+    if (ids % 10 === 2) {
+      const gSt = stores.groupe
+      s = gSt.getSecret(this.ids, this.ns)
+    } else {      
+      const aSt = stores.avatar
+      s = aSt.getSecret(this.ids, this.ns)
+    }
     if (!s) return
     const nom = s.nomDeIdf(this.id)
     await gestionFichierMaj(s, false, this.id, nom)

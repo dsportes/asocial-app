@@ -58,6 +58,7 @@ export class OperationWS extends Operation {
     // ret.vgroupe est TOUJOURS présent un row dont la data donne v1 v2 q1 q2
     const vcour = Versions.get(id)
     const session = stores.session
+    const gSt = stores.groupe
     const args = { token: session.authToken, id, v: vcour }
     const ret = this.tr(await post(this, 'ChargerGMS', args))
 
@@ -65,7 +66,7 @@ export class OperationWS extends Operation {
     this.versions.set(id, objv)
 
     const groupe = await compile(ret.rowGroupe)
-    const avgr = stores.groupe.getGroupe(id) // groupe actuel
+    const avgr = gSt.getGroupe(id) // groupe actuel
 
     if (avgr && groupe && groupe._zombi) {
       // le groupe existait et on vient de le découvrir _zombi
@@ -126,6 +127,7 @@ export class OperationWS extends Operation {
   async majAv (id) { // Maj ou ajout de l'avatar id
     const vcour = Versions.get(id)    
     const session = stores.session
+    const aSt = stores.avatar
     const args = { token: session.authToken, id, v: vcour }
     const ret = this.tr(await post(this, 'ChargerASCS', args))
 
@@ -153,7 +155,7 @@ export class OperationWS extends Operation {
       e.lsp.push(await compile(x))
     }
     if (vcour === 0) this.abPlus.add(id) // c'était un ajout
-    const a = avatar ? avatar : stores.avatar.getAvatar(id)
+    const a = avatar ? avatar : aSt.getAvatar(id)
     a.idGroupes(this.grRequis) // ajout des groupes requis
   }
 
@@ -186,8 +188,8 @@ export class OperationWS extends Operation {
 
   async final () {
     const session = stores.session
-    const avStore = stores.avatar
-    const grStore = stores.groupe
+    const aSt = stores.avatar
+    const gSt = stores.groupe
 
     // désabonnements
     if (session.fsSync && this.abPlus.size) for (const id of this.abPlus) {
@@ -211,17 +213,17 @@ export class OperationWS extends Operation {
     this.buf.commitIDB(false, x)
 
     // Maj des stores
-    if (this.compta) avStore.setCompta(this.compta)
-    if (this.tribu) avStore.setTribu(this.tribu)
-    if (this.tribu2) avStore.setTribu2(this.tribu2)
+    if (this.compta) aSt.setCompta(this.compta)
+    if (this.tribu) aSt.setTribu(this.tribu)
+    if (this.tribu2) aSt.setTribu2(this.tribu2)
 
-    this.avSuppr.forEach(id => { avStore.del(id) })
-    this.avMaj.forEach(e => { avStore.lotMaj(e) })
+    this.avSuppr.forEach(id => { aSt.del(id) })
+    this.avMaj.forEach(e => { aSt.lotMaj(e) })
     // Retire en store les groupes supprimés / zombis des avatars qui les référencent
-    const mapIdNi = avStore.avatarsDeGroupes(this.grSuppr)
+    const mapIdNi = aSt.avatarsDeGroupes(this.grSuppr)
 
-    this.grSuppr.forEach(id => { grStore.del(id) })
-    this.grMaj.forEach(e => { grStore.lotMaj(e) })
+    this.grSuppr.forEach(id => { gSt.del(id) })
+    this.grMaj.forEach(e => { gSt.lotMaj(e) })
 
     if (mapIdNi) {
       /* On effectue la maj de tous les avatars concernés 
@@ -269,8 +271,8 @@ export class OnchangeCompta extends OperationWS {
     try {
       this.init()
       const session = stores.session
-      const avStore = stores.avatar
-      const grStore = stores.groupe
+      const aSt = stores.avatar
+      const gSt = stores.groupe
       this.compta = await compile(row)
       /* Dans compta, nctk a peut-être été recrypté */
       if (this.compta.nctk) {
@@ -278,7 +280,7 @@ export class OnchangeCompta extends OperationWS {
         this.tr(await post(this, 'MajNctkCompta', args))
         delete this.compta.nctk
       }
-      this.avCompta = avStore.compta  
+      this.avCompta = aSt.compta  
       if (this.compta.v <= this.avCompta.v) return
 
       this.buf.putIDB(this.compta)
@@ -297,7 +299,7 @@ export class OnchangeCompta extends OperationWS {
 
       if (avMoins.size || avPlus.size) {
         intersection(avlav, aplav).forEach(id => { 
-          const a = avStore.getAvatar(id)
+          const a = aSt.getAvatar(id)
           if (a) a.idGroupes(this.grRequis)
         })
       }
@@ -305,7 +307,7 @@ export class OnchangeCompta extends OperationWS {
       if (avPlus.size) for (const id of avPlus) await this.majAv(id)
 
       if (avMoins.size || avPlus.size) {
-        const avlgr = new Set(grStore.ids) // groupes utiles avant
+        const avlgr = new Set(gSt.ids) // groupes utiles avant
         const grMoins = difference(avlgr, this.grRequis)
         const grPlus = difference(this.grRequis, avlgr)
         if (grMoins.size) for (const id of grMoins) this.supprGr(id)
@@ -325,16 +327,16 @@ export class OnchangeTribu extends OperationWS {
   async run (row) {
     try {
       this.init()
-      const avStore = stores.avatar
+      const aSt = stores.avatar
       
       if (stores.session.estComptable) {
-        const avTr = avStore.getTribu(row.id)
-        if ((!avTr || avTr.v < row.v) || (avStore.tribu.v < row.v)) {
+        const avTr = aSt.getTribu(row.id)
+        if ((!avTr || avTr.v < row.v) || (aSt.tribu.v < row.v)) {
           // tribu du compte ou de la collection à rafraîchir
           this.tribu = await compile(row)
         }
       } else {
-        if (row.v > avStore.tribu.v) {
+        if (row.v > aSt.tribu.v) {
           this.buf.putIDB(row)
           this.tribu = await compile(row)
         }
@@ -353,11 +355,11 @@ export class OnchangeTribu2 extends OperationWS {
   async run (row) {
     try {
       const session = stores.session
-      const avStore = stores.avatar
+      const aSt = stores.avatar
       this.init()
 
       if (row.id === session.tribuId) {
-        const avTr = avStore.tribu2
+        const avTr = aSt.tribu2
         if (row.v > avTr.v) {
           this.buf.putIDB(row)
           this.tribu2 = await compile(row)
@@ -365,7 +367,7 @@ export class OnchangeTribu2 extends OperationWS {
       }
 
       if (row.id === session.tribuCId) {
-        const avTr = avStore.tribu2C
+        const avTr = aSt.tribu2C
         if (row.v > avTr.v && !this.tribu2) this.tribu2 = await compile(row)
       }
 

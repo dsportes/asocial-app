@@ -3,7 +3,7 @@
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
-      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtit', [pStore.peC.na.nom])}}</q-toolbar-title>
+      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtit', [pSt.peC.na.nom])}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
   </q-header>
@@ -12,22 +12,22 @@
     <q-card class="q-pa-sm">
       <apercu-people :id="session.peopleId" simple />
       <div class="row">
-        <div v-if="avStore.mbPeC">
-          <div v-if="avStore.mbPeC.sp" class="titre-md text-bold text-warning">
-            {{$t('PPsp', [avStore.tribuC.na.nom])}}</div>
-          <div v-else class="titre-md">{{$t('PPco', [avStore.tribuC.na.nom])}}</div>
+        <div v-if="aSt.mbPeC">
+          <div v-if="aSt.mbPeC.sp" class="titre-md text-bold text-warning">
+            {{$t('PPsp', [aSt.tribuC.na.nom])}}</div>
+          <div v-else class="titre-md">{{$t('PPco', [aSt.tribuC.na.nom])}}</div>
         </div>
       </div>
 
-      <barre-people v-if="session.estComptable || session.estSponsor" :na="pStore.peC.na"/>
+      <barre-people v-if="session.estComptable || session.estSponsor" :na="pSt.peC.na"/>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
       <div class="titre-md text-italic y-mb-sm">{{$t('PPchats')}}</div>
 
-      <div v-for="(na, idx) in avStore.compta.lstAvatarNas" :key="na.id">
+      <div v-for="(na, idx) in aSt.compta.lstAvatarNas" :key="na.id">
         <apercu-chat class="q-my-md" affnai
-          :na-i="na" :na-e="pStore.peC.na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
+          :na-i="na" :na-e="pSt.peC.na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
       </div>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
@@ -72,22 +72,22 @@ export default {
 
   setup (props) {
     const session = stores.session
-    const pStore = stores.people
-    const avStore = stores.avatar
+    const pSt = stores.people
+    const aSt = stores.avatar
 
     const mapmc = ref(Motscles.mapMC(true, 0))
 
     const ids = reactive({})
     onMounted(async () => {
-      for(const na of avStore.compta.lstAvatarNas) {
-        ids[na.id] = await Chat.getIds(na, pStore.peC.na)
+      for(const na of aSt.compta.lstAvatarNas) {
+        ids[na.id] = await Chat.getIds(na, pSt.peC.na)
       }
     })
 
     return {
       session,
-      avStore,
-      pStore,
+      aSt,
+      pSt,
       mapmc,
       ids
     }

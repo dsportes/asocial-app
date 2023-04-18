@@ -1,6 +1,6 @@
 <template>
 <div>
-  <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto" :c="avStore.compta.compteurs"/>
+  <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto" :c="aSt.compta.compteurs"/>
 
   <div v-if="ui.pagetab==='notif'" class="q-pa-sm">
     <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
@@ -50,7 +50,7 @@
   <div v-if="ui.pagetab==='chats'">
     <div class="titre-lg text-italic text-center q-my-md">{{$t('CPTtitch')}}</div>
 
-    <div v-for="(na, idx) in pStore.naSponsors" :key="idx">
+    <div v-for="(na, idx) in pSt.naSponsors" :key="idx">
       <apercu-chat class="q-my-sm"
         :na-i="naCpt" :na-e="na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
     </div>
@@ -77,9 +77,9 @@ export default {
   components: { PanelCompta, SyntheseBlocage, ApercuNotif, ApercuChat },
 
   computed: {
-    c () { return this.avStore.compta.compteurs },
-    tr () { return this.avStore.tribu },
-    et2 () { return this.avStore.tribu2.mbtr[this.session.compteId] },
+    c () { return this.aSt.compta.compteurs },
+    tr () { return this.aSt.tribu },
+    et2 () { return this.aSt.tribu2.mbtr[this.session.compteId] },
     blTr () { return this.tr.blocage || null },
     blCo () { return this.et2.blocage || null },
     ntfTrCo () { return this.tr.notifco || null },
@@ -98,8 +98,8 @@ export default {
 
   setup () {
     const session = stores.session
-    const avStore = stores.avatar
-    const pStore = stores.people
+    const aSt = stores.avatar
+    const pSt = stores.people
     const ui = stores.ui
 
     const naCpt = getNg(session.compteId)
@@ -108,7 +108,7 @@ export default {
     const ids = reactive({})
     onMounted(async () => {
       ids[IDCOMPTABLE] = await Chat.getIds(naCpt, getNg(IDCOMPTABLE))
-      for(const na of pStore.naSponsors) {
+      for(const na of pSt.naSponsors) {
         if (na.id !== session.compteId) {
           ids[na.id] = await Chat.getIds(naCpt, na)
         }
@@ -132,9 +132,9 @@ export default {
 
     return {
       session,
-      pStore,
+      pSt,
       ui,
-      avStore,
+      aSt,
       naCpt,
       ids,
       mapmc

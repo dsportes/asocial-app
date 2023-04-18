@@ -26,15 +26,12 @@ export const useAvatarStore = defineStore('avatar', {
     tribu2CP: null, // tribu2 "courante" pour le comptable
     maptr: new Map(), // Map des tribus, uniquement pour le Comptable
 
-    // PanelPeople
-    ppSelId: 0, // Tribu sélectionnée
+    // Filtre des tribus dans BarrePeople
     ppFiltre: '',
-
+    ppSelId: 0,
+    
     // Dernier compteurs de compta chargé
-    ccCpt: null,
-
-    // stats tribus
-    stt: { a1: 0, a2: 0, q1: 0, q2: 0 },
+    ccCpt: null
   }),
 
   getters: {
@@ -65,13 +62,6 @@ export const useAvatarStore = defineStore('avatar', {
     // Element avatar courant
     eavC (state) { 
       return state.map.get(stores.session.avatarId)
-    },
-
-    // Map dont la clé est l'id de l'avatar et la valeur le document avatar
-    avatars: (state) => {
-      const m = new Map()
-      state.map.forEach(e => { const a = e.avatar; m.set(a.id, a)})
-      return m
     },
 
     /* Array des tribus, pour le Comptable, 
@@ -391,18 +381,18 @@ export const useAvatarStore = defineStore('avatar', {
       this.tribu2CP = tribu2
       if (session.tribuId === tribu2.id) {
         // tribu (actuelle) du compte : gestion des people
-        const peStore = stores.people
+        const pSt = stores.people
         if (this.tribu2P) { // remplacement - enlève des people
           for (const id in this.tribu2P.mbtr) {
-            peStore.unsetPeopleTribu(parseInt(id))
+            pSt.unsetPeopleTribu(parseInt(id))
           }
         }
         this.tribu2P = tribu2
         for (const id in tribu2.mbtr) {
-          const ac = this.comptaP.estAc(parseInt(id))
+          const ac = this.comptaP.avatarIds.has(parseInt(id))
           if (!ac) {
             const e = tribu2.mbtr[id]
-            peStore.setPeopleTribu(e.na, e.cv, e.sp ? 2 : 1)
+            pSt.setPeopleTribu(e.na, e.cv, e.sp ? 2 : 1)
           }
         }
       }
@@ -479,18 +469,20 @@ export const useAvatarStore = defineStore('avatar', {
 
     setChat (chat) {
       if (!chat) return
+      const pSt = stores.people
       const e = this.map.get(chat.id)
       if (!e) return
       e.chats.set(chat.ids, chat)
-      stores.people.setPeopleChat(chat, chat.cv)
+      pSt.setPeopleChat(chat, chat.cv)
     },
     
     delChat (id, id2) {
       const e = this.map.get(id)
       if (!e) return
+      const pSt = stores.people
       const ids = hash(id < id2 ? id + '/' + id2 : id2 + '/' + id)
       e.chats.delete(ids)
-      stores.people.unsetPeopleChat(id, id2)
+      pSt.unsetPeopleChat(id, id2)
     },
 
     setSponsoring (sponsoring) {

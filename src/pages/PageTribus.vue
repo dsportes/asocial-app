@@ -34,12 +34,12 @@
     <q-btn class="q-my-sm" size="md" flat dense color="primary" 
       :label="$t('PTnv')" @click="ouvrirnt"/>
 
-    <div v-if="!avStore.ptLtFT.length" class="titre-lg text-italic">
-      {{$t('PTvide', [avStore.getTribus.length])}}
+    <div v-if="!aSt.ptLtFT.length" class="titre-lg text-italic">
+      {{$t('PTvide', [aSt.getTribus.length])}}
     </div>
 
-    <div v-if="avStore.ptLtFT.length">
-      <div v-for="(tribu, idx) in avStore.ptLtFT" :key="tribu.id">
+    <div v-if="aSt.ptLtFT.length">
+      <div v-for="(tribu, idx) in aSt.ptLtFT" :key="tribu.id">
         <div class="row items-start">
           <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
             :color="tribu.id === session.tribuCId ? 'warning' : 'primary'" @click="courant(tribu.id)"/>
@@ -93,7 +93,7 @@ export default {
     },
     closent () { this.nt = false },
     async oknom (nom) { 
-      for(const tribu of this.avStore.getTribus) {
+      for(const tribu of this.aSt.getTribus) {
         if (tribu.na.nom === nom) {
           await afficherDiag(this.$t('PTex'))
           return
@@ -107,7 +107,7 @@ export default {
     },
     async courant (id) {
       const [t ,t2] = await new GetTribu().run(id, true)
-      this.avStore.setTribuC(t, t2)
+      this.aSt.setTribuC(t, t2)
       this.ui.setPage('tribu')
     }
   },
@@ -121,13 +121,13 @@ export default {
   },
 
   setup () {
-    const avStore = stores.avatar
+    const aSt = stores.avatar
     const session = stores.session
     const stats = stores.filtre.stats
 
     return {
       ui: stores.ui,
-      avStore,
+      aSt,
       stats,
       session
     }

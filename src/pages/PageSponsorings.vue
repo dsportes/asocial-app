@@ -42,7 +42,7 @@
 
     <!-- Dialogue de création d'un sponsoring -->
     <q-dialog v-if="nvsp" v-model="nvsp" full-height persistent>
-      <nouveau-sponsoring :close="closesp" :tribu="avStore.tribu"/>
+      <nouveau-sponsoring :close="closesp" :tribu="aSt.tribu"/>
     </q-dialog>
 
   </q-page>
@@ -64,7 +64,7 @@ export default {
 
   computed: {
     sponsorings () { 
-      const r = Array.from(this.avStore.getSponsorings(this.avatar.id).values()) || []
+      const r = Array.from(this.aSt.getSponsorings(this.avatar.id).values()) || []
       r.sort((a,b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)} )
       return r
     },
@@ -93,20 +93,20 @@ export default {
 
   setup () {
     const session = stores.session
-    const avStore = stores.avatar
-    const avatar = ref(avStore.avC)
+    const aSt = stores.avatar
+    const avatar = ref(aSt.avC)
     // TODO
-    avStore.$onAction(({ name, args, after }) => {
+    aSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'setAvatar' && args[0] === session.avatarId) {
-          avatar.value = avStore.getAvatar(session.avatarId)
+          avatar.value = aSt.getAvatar(session.avatarId)
         }
       })
     })
 
     return {
       avatar,
-      avStore,
+      aSt,
       session
     }
   }
