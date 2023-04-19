@@ -879,3 +879,25 @@ export class NouveauGroupe extends OperationUI {
     }
   }
 }
+
+/* Changement des mots clés d'un compte ******************************************
+args.token donne les éléments d'authentification du compte.
+args.mcg : map des mots clés cryptée par la clé du groupe
+args.idg : id du groupe
+Retour:
+*/
+export class MotsclesGroupe extends OperationUI {
+  constructor () { super($t('OPmotsclesgr')) }
+
+  async run (mmc, nag) {
+    try {
+      const session = stores.session
+      const mcg = await crypter(nag.rnd, new Uint8Array(encode(mmc)))
+      const args = { token: session.authToken, mcg, idg: nag.id }
+      this.tr(await post(this, 'MotsclesGroupe', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

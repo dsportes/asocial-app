@@ -31,10 +31,22 @@
       </div>
     </div>
 
+    <!-- Mots clés du groupe -->
+    <div class="row items-center q-my-sm">
+      <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
+      <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
+    </div>
+
     <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
       <q-separator color="orange"/>
       <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>
     </div>
+
+    <!-- Dialogue d'édition des mots clés du groupe -->
+    <q-dialog v-model="mcledit" persistent>
+      <mots-cles class="full-width" :duGroupe="eg.groupe.id" @ok="okmc" :titre="$t('AGmc')"
+        :lecture="!eg.estAnim || !session.editable"/>
+    </q-dialog>
 
     <!-- Gérer le mode simple / unanime -->
     <q-dialog v-model="editerUna" full-height persistent>
@@ -161,13 +173,14 @@ import ApercuMembre from './ApercuMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import { edvol, dhcool } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
-import { MajCvGr } from '../app/operations.mjs'
 import BoutonMembre from './BoutonMembre.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import QuotasVols from './QuotasVols.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
+import MotsCles from './MotsCles.vue'
 import { getNg } from '../app/modele.mjs'
+import { MotsclesGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuGroupe',
@@ -178,7 +191,7 @@ export default {
     mapmc: Object
   },
 
-  components: { ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },
+  components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },
 
   computed: {
     bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
@@ -227,18 +240,28 @@ export default {
     ar1: false,
     ar2: false,
     lstVotes: [],
-    cfu: false // Choix de changement de mode non confirmé
+    cfu: false, // Choix de changement de mode non confirmé
+    mcledit: false
   }},
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
 
-    async cvchangee (res) {
+    async cvchangee (res) { // CV du GROUPE !
       if (res && this.na) {
         await new MajCvGr().run(this.eg.groupe, res.ph, res.info)
       }
     },
+
+    async mcleditAut (res) { this.mcledit = true },
     
+    async okmc (mmc) {
+      this.mcledit = false
+      if (mmc !== false) {
+        await new MotsclesGroupe().run(mmc, this.eg.groupe.na)
+      }
+    },
+
     setCas () {
       const g = this.eg.groupe
       this.anims = this.gSt.animIds(this.eg)

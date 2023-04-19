@@ -54,6 +54,10 @@ export default {
   gravite1: 'normale ou importante',
   gravite2: 'importante',
 
+  tmc0: 'Compte',
+  tmc1: 'Groupe',
+  tmc2: 'App.',
+  
   /*
   - 10: contact, 
   - 20,21,22: invité en tant que lecteur / auteur / animateur, 
@@ -397,6 +401,7 @@ export default {
 
   OPmemo: 'Changement du memo d\'un compte',
   OPmotscles: 'Changement des mots clés d\'un compte',
+  OPmotsclesgr: 'Changement des mots clés d\'un groupe',
   OPmcv: 'Mettre à jour une carte de visite',
   OPcps: 'Changer de phrase secrete de connexion',
   OPcpc: 'Changer de phrase de contact',
@@ -827,6 +832,7 @@ export default {
   AGupasan: 'Vous n\'êtes pas animateur, vous ne pouvez pas agir sur ce mode.',
   AGumu: 'Passer en mode UNANIME',
   AGums: 'Changer ma décision pour retourner au mode "SIMPLE"',
+  AGmc: 'Mots clés du groupe',
 
   // Panel Membre
   PMGtit: 'Membre {0}',

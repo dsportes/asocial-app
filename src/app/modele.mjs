@@ -157,16 +157,16 @@ export class Motscles {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const m = new Map()
-    const mx = stores.config.motscles
+    let mx = stores.config.motscles
     for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
     if (duCompte) {
-      const mx = aSt.motscles || {}
+      mx = aSt.motscles || {}
       for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
     }
     if (duGroupe) {
       const g = gSt.getGroupe(duGroupe)
       if (g) {
-        mx = g.motscles || null
+        mx = g.mc || null
         if (mx) for (const i in mx) { m.set(i, Motscles.cn(mx[i]))}
       }
     }

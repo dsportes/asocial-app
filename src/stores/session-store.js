@@ -67,7 +67,9 @@ export const useSessionStore = defineStore('session', {
     avion (state) { return state.mode === 3 },
     accesNet (state) { return state.mode === 1 || state.mode === 2},
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
-    ok (state) { return state.status > 1 }
+    ok (state) { return state.status > 1 },
+
+    editable (state) { return state.mode < 3 && state.nivbl < 2 }
   },
 
   actions: {

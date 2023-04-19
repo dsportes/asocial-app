@@ -1,16 +1,17 @@
 <template>
 <q-card class="petitelargeur shadow-8">
   <q-toolbar class="bg-secondary text-white">
-    <q-btn v-if="!motscles.mc.st.enedition" dense size="md" color="primary"
+    <q-btn v-if="!motscles.mc.st.enedition && !lecture" dense size="md" color="primary"
       icon="mode_edit" label="Editer" @click="startEdit"/>
-    <q-btn v-if="!motscles.mc.st.enedition" class="q-ml-xs" dense size="md" color="warning"
+    <q-btn v-if="!motscles.mc.st.enedition && !lecture" class="q-ml-xs" dense size="md" color="warning"
       icon="close" @click="cancelEdit"/>
-    <q-btn v-if="motscles.mc.st.enedition" dense size="md" color="primary"
+    <q-btn v-if="motscles.mc.st.enedition && !lecture" dense size="md" color="primary"
       icon="add_circle" label="Nouveau" @click="ajoutermc"/>
-    <q-btn v-if="motscles.mc.st.enedition" dense class="q-ml-xs" size="md" color="primary"
+    <q-btn v-if="motscles.mc.st.enedition && !lecture" dense class="q-ml-xs" size="md" color="primary"
       icon="undo" label="Annuler" @click="cancelEdit"/>
-    <q-btn v-if="motscles.mc.st.enedition" :disable="!motscles.mc.st.modifie" dense class="q-ml-xs" size="md" color="warning"
+    <q-btn v-if="motscles.mc.st.enedition && !lecture" :disable="!motscles.mc.st.modifie" dense class="q-ml-xs" size="md" color="warning"
       icon="check" label="Valider" @click="okEdit"/>
+    <q-btn v-if="lecture" dense size="md" color="warning" icon="close" @click="cancelEdit"/>
     <q-toolbar-title class="titre-md full-width">{{titre}}</q-toolbar-title>
     <bouton-help page="page1"/>
   </q-toolbar>
@@ -45,8 +46,10 @@
       <q-tab-panels v-model="tab" animated swipeable vertical transition-prev="jump-up" transition-next="jump-up" >
         <q-tab-panel v-for="categ in motscles.mc.lcategs" :key="categ" :name="categ">
           <div v-for="item in motscles.mc.categs.get(categ)" :key="item[1]+'/'+item[0]">
-            <span class="fs-md">{{item[0]}}</span><span class="fs-sm font-mono q-px-xs">[{{item[1]}}]</span>
-            <span v-if="motscles.mc.st.enedition && item[1] < 200">
+            <span class="fs-md">{{item[0]}}</span>
+            <span class="fs-sm font-mono q-px-xs">[{{item[1]}}]</span>
+            <span class="fs-sm q-px-xs text-italic">{{$t('tmc' + Math.floor(item[1] / 100))}}</span>
+            <span v-if="motscles.mc.st.enedition && ((item[1] < 200 && item[1] >= 100 && motscles.gr) || (item[1] < 100 && !motscles.gr))">
               <q-btn icon="mode_edit" size="sm" color="primary" dense @click="edit(categ, item[0], item[1])"></q-btn>
               <q-btn class="q-ml-sm" v-if="categ === obs" icon="close" color="warning" size="sm" dense @click="suppr(categ, item[1])"></q-btn>
             </span>
