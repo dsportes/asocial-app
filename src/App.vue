@@ -236,7 +236,6 @@
     </q-layout>
   </q-dialog>
 
-
   <q-dialog v-model="session.opDialog" seamless position="top" full-width persistent transition-show="scale" transition-hide="scale">
     <div class="q-mt-sm column items-center">
       <transition

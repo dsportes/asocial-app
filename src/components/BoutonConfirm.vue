@@ -4,7 +4,9 @@
 </template>
 <script>
 
+import { toRef, ref } from 'vue'
 import { random } from '../app/webcrypto.mjs'
+
 export default ({
   name: 'BoutonConfirm',
 
@@ -28,8 +30,6 @@ export default ({
 
   data () {
     return {
-      text: '',
-      code: ''
     }
   },
 
@@ -37,7 +37,11 @@ export default ({
   },
   
   setup () {
+    const text = ref('')
+    const code = ref('' + random(1))
     return {
+      text,
+      code
     }
   } 
 })
