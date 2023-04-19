@@ -167,6 +167,9 @@ export const useGroupeStore = defineStore('groupe', {
   },
 
   actions: {
+    test1 (e) {
+      e.groupe.msu = new Uint8Array([1])
+    },
     /* Sert à pouvoir attacher un écouteur pour détecter les changements de mc */
     setMotscles (id, mc) {
     },

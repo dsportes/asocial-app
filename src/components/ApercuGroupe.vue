@@ -36,6 +36,57 @@
       <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>
     </div>
 
+    <!-- Gérer le mode simple / unanime -->
+    <q-dialog v-model="editerUna" full-height persistent>
+      <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
+        <q-header elevated class="bg-secondary text-white">
+          <q-toolbar>
+            <q-btn dense size="md" color="warning" icon="close" @click="closeU"/>
+            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGuna', [eg.groupe.na.nom])}}</q-toolbar-title>
+            <bouton-help page="page1"/>
+          </q-toolbar>
+        </q-header>
+
+        <q-page-container>
+          <q-page class="q-pa-sm">
+            <div class="titre-lg text-center text-bold q-my-sm" v-if="eg.groupe.msu===null">{{$t('AGms')}}</div>
+            <div class="titre-lg text-center text-bold q-my-sm" v-else>{{$t('AGmu')}}</div>
+            <div class="titre-md q-my-sm">{{$t('AGu1')}}</div>
+            <div class="titre-md q-my-sm">{{$t('AGu2')}}</div>
+            <div class="titre-md q-my-sm" v-if="eg.groupe.msu">{{$t('AGu3')}}</div>
+            <div class="titre-md q-my-sm" v-else>{{$t('AGu4')}}</div>
+            <div v-if="eg.groupe.msu">
+              <div class="largeur30 maauto column items-center">
+                <q-separator class="q-my-sm full-width" color="orange"/>
+                <div class="titre-md text-italic" >{{$t('AGu5')}}</div>
+                <div v-for="(v, idx) in lstVotes" :key="idx" :class="'row ' + dkli(idx)">
+                  <div class="col-8 fs-md">{{v.nom}}</div>
+                  <div class="col-2"></div>
+                  <div class="col-2 fs-md">{{$t(v.oui ? 'oui' : 'non')}}</div>
+                </div>
+                <q-separator class="q-my-sm full-width" color="orange"/>
+              </div>
+            </div>
+            <div v-if="!estAnim">
+              <div class="titre-md text-center">{{$t('AGupasan')}}</div>
+              <q-btn class="q-ml-md" dense size="md" color="primary" :label="$t('jailu')" @click="closeU"/>
+            </div>
+            <div v-else class="text-center">
+              <q-btn v-if="eg.groupe.msu" :label="$t('AGums')" dense size="md" 
+                color="warning" @click="cfu = true"/>
+              <q-btn v-else :label="$t('AGumu')" dense size="md" 
+                color="warning" @click="cfu = true"/>
+              <div class="q-mt-md row justify-center q-gutter-md">
+                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="closeU"/>
+                <bouton-confirm :actif="cfu" :confirmer="chgU"/>
+              </div>
+            </div>
+         </q-page>
+        </q-page-container>
+      </q-layout>
+    </q-dialog>
+
+    <!-- Gérer l'hébergement, changer les quotas -->
     <q-dialog v-model="changerQuotas" full-height persistent>
       <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
         <q-header elevated class="bg-secondary text-white">
@@ -71,6 +122,7 @@
               <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="primary" :label="$t('AGbtncq')" @click="gotocq"/>
               <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="warning" :label="$t('AGbtnfh')" @click="step = 2"/>
               <q-btn class="q-ma-md" v-if="cas===2 || cas === 4 || cas === 6" size="md" color="primary" :label="$t('AGbtnfh')" @click="gotocq"/>
+              <q-btn class="q-ma-md" v-if="cas===3 || cas === 5" size="md" color="primary" :label="$t('jailu')" @click="gotocq"/>
             </div>
 
             <div v-if="step === 2" class="q-ma-md">
@@ -95,7 +147,6 @@
                 <q-btn v-if="!q.err && !al1 && !al2" size="md" dense :label="$t('confirmer')" color="primary" @click="chgQ"/>
               </div>
             </div>
-
           </q-page>
         </q-page-container>
       </q-layout>
@@ -174,7 +225,9 @@ export default {
     rst1: 'OB',
     rst2: 'OB',
     ar1: false,
-    ar2: false
+    ar2: false,
+    lstVotes: [],
+    cfu: false // Choix de changement de mode non confirmé
   }},
 
   methods: {
@@ -198,7 +251,7 @@ export default {
         return this.estAnim ? 4 : (this.anims.size ? 5 : 6)
       }
     },
-    gererHeb () {
+    async gererHeb () {
       this.step = 0
       this.cas = this.setCas()
       this.changerQuotas = true
@@ -229,20 +282,43 @@ export default {
       this.ar1 = r1 < (cpt.q1 * UNITEV1 * 0.1)
       this.ar2 = r2 < (cpt.q2 * UNITEV2 * 0.1)
     },
-    
-    editUna () {
-      // TODO 
+
+    async editUna () {
+      if (!await this.session.edit()) return
+      // this.gSt.test1(this.eg)
       this.editerUna = true
+      this.anims = this.gSt.animIds(this.eg)
+      this.estAnim = this.anims.has(this.session.avatarId)
+      this.lstVotes = []
+      const g = this.eg.groupe
+      if (g.msu) {
+        for (let ids = 1; ids < g.ast.length; ids++) {
+          if (g.ast[ids] === 32) {
+            const oui = g.msu.indexOf(ids) !== -1
+            const nom = this.eg.membres.get(ids).na.nom
+            this.lstVotes.push({ nom, oui })
+          }
+        }
+      }
     },
+    closeU () { this.editerUna = false },
 
-    finHeb () {
+    async finHeb () {
+      if (!await this.session.edit())  { this.closeQ(); return }
       this.closeQ()
       // TODO
     },
 
-    chgQ () {
+    async chgQ () {
+      if (!await this.session.edit()) { this.closeQ(); return }
       this.closeQ()
       // TODO
+    },
+
+    async chgU () {
+      if (!await this.session.edit())  { this.closeU(); return }
+      // TODO
+      this.closeU()
     }
   },
 
@@ -287,4 +363,6 @@ export default {
 .btn1
   padding: 1px !important
   width: 1.5rem !important
+.q-btn
+  padding: 1px 5px !important
 </style>

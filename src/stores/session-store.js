@@ -194,12 +194,12 @@ export const useSessionStore = defineStore('session', {
       session.authToken = u8ToB64(new Uint8Array(encode(token)))
     },
 
-    async edit () {
-      if (this.mode === 3) {
+    async edit (tst) {
+      if (this.mode === 3 || tst === 1) {
         await afficherDiag($t('editavion'))
         return false
       }
-      if (this.nivbl >= 2) {
+      if (this.nivbl >= 2 || tst === 2) {
         await afficherDiag($t('editlecture'))
         return false
       }

@@ -13,6 +13,8 @@ export default {
   desc: 'tri desc.',
   detail: 'Détails',
 
+  oui: 'oui',
+  non: 'non',
   OK: 'OK',
   ok: 'OK',
   moi: 'moi',
@@ -814,6 +816,17 @@ export default {
   AGmx: 'Vous ne pouvez pas allouer des quotas supérieurs à ce qu\'il vous reste en volumes libres sur votre compte.',
   AGdisp1: 'Il vous restera {0} disponibles pour des textes de secrets personels.',
   AGdisp2: 'Il vous restera {0} disponibles pour les fichiers attachés à vos secrets personels.',
+  AGuna: 'Gérer le mode simple / unanime',
+  AGu1: 'Mode "simple" : un seul des animateurs peut "inviter" un contact à être membre du groupe.',
+  AGu2: 'Mode "unanime" : if faut que TOUS les animateurs "invitent" un contact à être membre du groupe pour que l\'invitation soit effective.',
+  AGu3: 'Pour revenir au mode "simple", il faut que TOUS les animateurs l\'aient demandé.',
+  AGu4: 'Pour passer au mode "unanime", il suffit qu\'UN animateur le demande',
+  AGu5: 'Etat des demandes des animateurs',
+  AGmu: 'Mode actuel : UNANIME',
+  AGms: 'Mode actuel : SIMPLE',
+  AGupasan: 'Vous n\'êtes pas animateur, vous ne pouvez pas agir sur ce mode.',
+  AGumu: 'Passer en mode UNANIME',
+  AGums: 'Changer ma décision pour retourner au mode "SIMPLE"',
 
   // Panel Membre
   PMGtit: 'Membre {0}',
