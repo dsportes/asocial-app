@@ -1347,7 +1347,6 @@ export class Secret extends GenDoc {
   get cle () { return getCle(this.id) }
   get ng () { return getNg(this.id) }
 
-
   async compile (row) {
     this.st = row.st || 99999999
     this.im = row.im || 0
@@ -1373,8 +1372,12 @@ export class Secret extends GenDoc {
   get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
   get dh () { return dhcool(this.txt.d * 1000) }
 
-  get idCompta () { return this.deGroupe ? this.groupe.idh : GenDoc.idCompta(this.id) }
-  get idGroupe () { return this.deGroupe ? this.id : 0 }
+  get idCompta () { 
+    if (this.deGroupe) {
+      const gSt = stores.groupe
+      return gSt.getGroupe(this.id).idh
+    } else return stores.session.compteId
+  }
 
   /* En attente ***************************************************
   get nomf () {

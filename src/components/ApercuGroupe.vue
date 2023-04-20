@@ -328,14 +328,16 @@ export default {
 
     async finHeb () {
       if (!await this.session.edit())  { this.closeQ(); return }
+      await new FinHebGroupe().run(this.eg.groupe.id)
       this.closeQ()
-      // TODO
     },
 
     async chgQ () {
       if (!await this.session.edit()) { this.closeQ(); return }
+      const t = this.cas === 1 ? 1 : (this.cas === 2 ? 3 : 2)
+      const idd = t === 3 ? this.eg.groupe.idh : 0
+      await new HebGroupe().run(t, this.eg.groupe.na, idd, this.q.q1, this.q.q2 )
       this.closeQ()
-      // TODO
     },
 
     async chgU () {
@@ -345,13 +347,7 @@ export default {
     }
   },
 
-  setup (props) {
-    /*
-    const eg = toRef(props, 'eg')
-    for (const [, m] of eg.value.mbacs) {
-      console.log(m.na.id)
-    }
-    */
+  setup () {
     const session = stores.session
     const ui = stores.ui
     const gSt = stores.groupe

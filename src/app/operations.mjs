@@ -901,3 +901,79 @@ export class MotsclesGroupe extends OperationUI {
     }
   }
 }
+
+/* Hébergement d'un groupe *****************************************************
+args.token donne les éléments d'authentification du compte.
+args.t : 1: chg quotas, 2: prise d'hébergement, 3: transfert d'hébergement
+args.idd : (3) id du compte de départ en cas de transfert
+args.ida : id du compte (d'arrivée en cas de prise / transfert)
+args.idg : id du groupe
+args.idhg : (2, 3) id du compte d'arrivée en cas de transfert CRYPTE par la clé du groupe
+args.q1, q2 :
+1-Cas changement de quotas :
+- les volumes et quotas sur compta a sont inchangés
+- sur la version du groupe, q1 et q2 sont mis à jour
+2-Prise hébergement
+- les volumes v1 et v2 sont pris sur le groupe
+- les volumes (pas les quotas) sont augmentés sur compta a
+- sur la version du groupe, q1 et q2 sont mis à jour
+- sur le groupe, idhg est mis à jour
+3-Cas de transfert :
+- les volumes v1 et v2 sont pris sur le groupe
+- les volumes (pas les quotas) sont diminués sur compta d
+- les volumes (pas les quotas) sont augmentés sur compta a
+- sur la version du groupe, q1 et q2 sont mis à jour
+- sur le groupe, idhg est mis à jour
+Retour:
+*/
+export class HebGroupe extends OperationUI {
+  constructor () { super($t('OPhebgr')) }
+
+  async run (t, nag, idd, q1, q2) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, t, q1, q2, ida: session.compteId }
+      if (t > 1) { // prise et transfert heb
+        args.idhg = await crypter(nag.rnd, '' + session.compteId)
+        if (t === 2) args.idd = idd
+      }
+      this.tr(await post(this, 'HebGroupe', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Fin d'ébergement d'un groupe *****************************************************
+args.token donne les éléments d'authentification du compte.
+args.id : id du compte
+args.idg : id du groupe
+args.dfh : date de fin d'hébergement
+Traitement :
+- les volumes v1 et v2 sont pris sur le groupe
+- les volumes (pas les quotas) sont diminués sur la compta du compte
+- sur le groupe :
+  - dfh : date du jour + N jours
+  - idhg, imh : 0
+Retour:
+*/
+export class FinHebGroupe extends OperationUI {
+  constructor () { super($t('OPfhebgr')) }
+
+  async run (idg) {
+    try {
+      const session = stores.session
+      const cfg = stores.config
+      const args = { token: session.authToken, 
+        id: session.compteId,
+        idg,
+        dfh: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), cfg.limitesjour.groupenonheb)
+      }
+      this.tr(await post(this, 'FinHebGroupe', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

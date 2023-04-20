@@ -682,8 +682,8 @@ export class ConnexionCompte extends OperationUI {
         if (this.buf.lsecsup.length) {
           for (const s of this.buf.lsecsup) {
             try {
-              const args = { token: session.authToken, id: s.id, ids: s.ids, idc: s.idCompta, idg: s.idGroupe }
-              const ret = this.tr(await post(this, 'SupprSecret', args))
+              const args = { token: session.authToken, id: s.id, ids: s.ids, idc: s.idCompta }
+              this.tr(await post(this, 'SupprSecret', args))
             } catch (e) {
               console.log(e.message)
             }
