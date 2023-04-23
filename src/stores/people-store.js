@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { hash, u8ToB64 } from '../app/util.mjs'
-import { IDCOMPTABLE } from '../app/api.mjs'
+import { ID } from '../app/api.mjs'
 import { getNg } from '../app/modele.mjs'
 
 /* 
@@ -41,7 +41,7 @@ export const usePeopleStore = defineStore('people', {
 
     naSponsors: (state) => { // Y compris celui du Comptable (sauf pour le comptable)
       const t = []
-      if (stores.session.compteId !== IDCOMPTABLE) t.push(getNg(IDCOMPTABLE))
+      if (stores.session.estComptable) t.push(session.naComptable)
       state.map.forEach(e => { if (e.sp === 2) t.push(e.na) })
       return t
     },
@@ -145,7 +145,7 @@ export const usePeopleStore = defineStore('people', {
         r.push(p)
       }
       r.sort((a, b) => { 
-        return (a.na.id === IDCOMPTABLE || a.na.nom < b.na.nom) ? -1 : (a.na.nom > b.na.nom ? 1 : 0)
+        return (ID.estComptable(a.na.id) || a.na.nom < b.na.nom) ? -1 : (a.na.nom > b.na.nom ? 1 : 0)
       })
       stores.session.fmsg(r.length)
       return r

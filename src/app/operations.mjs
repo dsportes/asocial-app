@@ -178,7 +178,7 @@ export class ChangementPS extends OperationUI {
     try {
       const session = stores.session
       const kx = await crypter(ps.pcb, session.clek)
-      const args = { token: session.authToken, hps1: ps.dpbh, pcbh: ps.pcbh, shay: ps.shay, kx }
+      const args = { token: session.authToken, hps1: ps.hps1, pcbh: ps.pcbh, shay: ps.shay, kx }
       this.tr(await post(this, 'ChangementPS', args))
       session.chgps(ps)
       if (session.synchro) commitRows(new IDBbuffer(), true)

@@ -19,7 +19,7 @@
 
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
-import { IDCOMPTABLE } from '../app/api.mjs'
+import { ID } from '../app/api.mjs'
 import BarrePeople from './BarrePeople.vue'
 
 export default {
@@ -30,7 +30,7 @@ export default {
   components: { ShowHtml, BarrePeople },
 
   computed: {
-    phDef() { return this.elt.na.id === IDCOMPTABLE ? this.config.iconSuperman : this.config.iconAvatar },
+    phDef() { return ID.estComptable(this.elt.na.id) ? this.config.iconSuperman : this.config.iconAvatar },
     info () { return this.elt.cv ? (this.elt.cv.info || '') : '' },
     photo () { return this.elt.cv ? (this.elt.cv.photo || this.phDef) : this.phDef },
   },

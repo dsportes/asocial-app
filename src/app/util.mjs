@@ -257,14 +257,27 @@ export function rnd6 () {
   return r
 }
 
-/* retourne un safe integer hash:
+/* retourne un safe integer (53 bits) hash:
 - d'un string
 - d'un u8
 */
 export function hash (arg) {
   const t = typeof arg
   const bin = t !== 'string'
-  // https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+  /* https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+    Many of the answers here are the same String.hashCode hash function taken 
+    from Java. It dates back to 1981 from Gosling Emacs, 
+    is extremely weak, and makes zero sense performance-wise in
+    modern JavaScript. 
+    In fact, implementations could be significantly faster by using ES6 Math.imul,
+    but no one took notice. 
+    We can do much better than this, at essentially identical performance.
+    Here's one I did—cyrb53, a simple but high quality 53-bit hash. 
+    It's quite fast, provides very good* hash distribution,
+    and because it outputs 53 bits, has significantly lower collision rates
+    compared to any 32-bit hash.
+    Also, you can ignore SA's CC license as it's public domain on my GitHub.
+  */
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57
   for (let i = 0, ch; i < arg.length; i++) {
     ch = bin ? arg[i] : arg.charCodeAt(i)

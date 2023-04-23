@@ -50,7 +50,7 @@ import BoutonHelp from './BoutonHelp.vue'
 import NotifIco from './NotifIco.vue'
 import { crypter } from '../app/webcrypto.mjs'
 import { SetAttributTribu, SetAttributTribu2, SetNotifG } from '../app/operations.mjs'
-import { IDCOMPTABLE } from '../app/api.mjs'
+import { ID } from '../app/api.mjs'
 
 export default {
   name: 'ApercuNotif',
@@ -94,7 +94,7 @@ export default {
           await afficherDiag(this.$t('NTgl'))
           return
         }
-      } else if (!this.estTribu && this.src.na.id === IDCOMPTABLE && !this.session.estComptable) {
+      } else if (!this.estTribu && ID.estComptable(this.src.na.id) && !this.session.estComptable) {
         await afficherDiag(this.$t('NTci'))
         return
       }

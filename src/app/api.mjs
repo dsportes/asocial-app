@@ -2,12 +2,26 @@ import { encode, decode } from '@msgpack/msgpack'
 
 export const version = '1'
 
-export const IDCOMPTABLE = 9007199254740980
-export const RNDCOMPTABLE = new Uint8Array(
-  [0, 255, 255, 255, 255, 255, 255, 255, 
-    255, 255, 255, 255, 255, 255, 255, 255, 
-    255, 255, 255, 255, 255, 255, 255, 255, 
-    255, 255, 255, 255, 255, 255, 255, 255])
+export const d13 = 10 * 1000 * 1000 * 1000 * 1000
+export const d14 = d13 * 10
+
+export class ID {
+  static estComptable (id) { id % d13 === 0}
+
+  static estGroupe (id) { return Math.floor(id / d13) % 10 === 2 }
+
+  static estTribu (id) { return Math.floor(id / d13) % 10 === 3 }
+
+  static estAvatar (id) { return Math.floor(id / d13) % 10 < 2 }
+
+  static estCompte (id) { return Math.floor(id / d13) % 10 === 0 }
+
+  static estAvatarS (id) { return Math.floor(id / d13) % 10 === 1 }
+
+  static type (id) { return Math.floor(id / d13) % 10 }
+
+  static ns (id) { return Math.floor(id / d14)}
+}
 
 export const UNITEV1 = 250000
 export const UNITEV2 = 25000000

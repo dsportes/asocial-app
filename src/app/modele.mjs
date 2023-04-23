@@ -1,9 +1,9 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, titre, gzip, ungzip, ungzipT, egaliteU8, tru8, splitPK } from './util.mjs'
+import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, gzip, ungzip, ungzipT } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, genKeyPair, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 
-import { IDCOMPTABLE, RNDCOMPTABLE, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
+import { d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
 
 import { getFichierIDB, saveSessionSync } from './db.mjs'
 
@@ -80,35 +80,25 @@ export function getDisparu (id) { const e = repertoire.rep[id]; return e && e.x 
 export function setDisparu (id) { const e = repertoire.rep[id]; if (e) e.x = true }
 
 /***********************************************************
-NomGenerique : NomAvatar / NomContact / NomGroupe / NomTribu
+NomGenerique : NomAvatar, NomGroupe, NomTribu
 ************************************************************/
 export class NomGenerique {
-  constructor (nom, rnd) {
-    let c = false
-    if (typeof rnd === 'number' ) {
-      if (rnd === -1) {
-        this.rnd = RNDCOMPTABLE
-        c = true
-       } else { 
-        this.rnd = random(32)
-        this.rnd[0] = rnd
-        c = false
-      }
-    } else {
-      this.rnd = rnd
-      c = egaliteU8(this.rnd, RNDCOMPTABLE)
-    }
-    this.nom = c ? stores.config.nomDuComptable : nom
-    this.id = c ? IDCOMPTABLE : (Math.round(hash(this.rnd) / 10) * 10) + this.rnd[0]
+  constructor (n, nom, rnd) {
+    this.id = (((rnd[0] * 100) + rnd[1]) * d13) + n
+    this.nomx = nom
+    this.rnd = rnd
   }
 
-  get estGroupe () { return this.id % 10 === 2 }
-  get estTribu () { return this.id % 10 === 3 }
-  get estAvatar () { return this.id % 10 < 2 }
-  get estAvatarP () { return this.id % 10 === 0 }
-  get estAvatarS () { return this.id % 10 === 1 }
-  get estComptable () { return this.id === IDCOMPTABLE }
-  get nomc () { return this.nom + (this.estComptable ? '' : ('#' + ('' + this.id).substring(0, 4))) }
+  get ns () { return this.rnd[0] }
+  get type () { return this.rnd[1] }
+  get estComptable () { this.id % d13 === 0}
+  get estGroupe () { return this.rnd[1] === 2 }
+  get estTribu () { return this.rnd[1] === 3 }
+  get estAvatar () { return this.rnd[1] < 2 }
+  get estCompte () { return this.rnd[1] === 0 }
+  get estAvatarS () { return this.rnd[1] === 1 }
+  get nom () { return this.nomx || stores.config.nomDuComptable }
+  get nomc () { return !this.nomx ? stores.config.nomDuComptable : (this.nomx + '#' + (this.id % 4)) }
   get hrnd () { return hash(u8ToB64(this.rnd)) }
 
   get defIcon () {
@@ -118,16 +108,56 @@ export class NomGenerique {
     return cfg.iconAvatar
   }
 
-  egal (ng) {
-    return this.nom === ng.nom && this.id === ng.id && egaliteU8(this.rnd, ng.rnd)
+  egal (ng) { return this.nom === ng.nom && this.id === ng.id }
+
+  // Factories
+
+  static from([nom, rnd]) {
+    let z = true; for (let i = 2; i < 32; i++) if(rnd[i]) { z = false; break }
+    const n = z ? 0 : (hash(rnd) % d13)
+    if (rnd[1] <= 1) return new NomAvatar(n, nom, rnd)
+    if (rnd[1] === 2) return new NomGroupe(n, nom, rnd)
+    return new NomTribu(n, nom, rnd)
+  }
+
+  static comptable(ns) {
+    const rnd = new Uint8Array(32)
+    rnd[0] = ns
+    return new NomAvatar(0, stores.config.nomDu, rnd)
+  }
+
+  static compte(ns, nom) {
+    const rnd = random(32)
+    rnd[0] = ns
+    return new NomAvatar(hash(rnd) % d13, nom, rnd)
+  }
+
+  static avatar(ns, nom) {
+    const rnd = random(32)
+    rnd[0] = ns
+    rnd[1] = 1
+    return new NomAvatar(hash(rnd) % d13, nom, rnd)
+  }
+
+  static groupe(ns, nom) {
+    const rnd = random(32)
+    rnd[0] = ns
+    rnd[1] = 2
+    return new NomGroupe(hash(rnd) % d13, nom, rnd)
+  }
+
+  static tribu(ns, nom) {
+    const rnd = random(32)
+    rnd[0] = ns
+    rnd[1] = 3
+    return new NomTribu(hash(rnd) % d13, nom, rnd)
   }
 }
 
-export class NomAvatar extends NomGenerique { constructor (nom, rnd) { super(nom, rnd) } }
-
-export class NomGroupe extends NomGenerique { constructor (nom, rnd) { super(nom, rnd || 2) } }
-
-export class NomTribu extends NomGenerique { constructor (nom, rnd) { super(nom, rnd || 3) } }
+// NE PAS UTILISER ces constructeurs MAIS les factories de NomGenerique
+export class NomAvatar extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
+export class NomGroupe extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
+export class NomTribu extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
 
 /******************************************************
  * classe MotsCles
@@ -350,12 +380,13 @@ export class Motscles {
 export class Phrase {
   async init (debut, fin) {
     this.pcb = await pbkfd(debut + '\n' + fin)
-    this.pcb64 = u8ToB64(this.pcb)
     this.pcbh = hash(this.pcb)
-    this.dpbh = hash(await pbkfd(debut)) // hps1 dans compta
+    this.hps1 = hash(await pbkfd(debut))
   }
 
   get shax () { return sha256(this.pcb) }
+
+  get shax64 () { return u8ToB64(this.shax) }
 
   get shay () { return sha256(this.shax) }  
 
@@ -634,7 +665,7 @@ export class Tribu2 extends GenDoc {
 
 
   static async primitiveRow (nt, q1, q2) { // q1 q2 : quotas attribués au Comptable
-    const naComptable = getNg(IDCOMPTABLE)
+    const naComptable = stores.session.naComptable
     const r = {}
     r.vsh = 0
     r.id = nt.id
@@ -929,7 +960,7 @@ export class Compta extends GenDoc {
     r.kx = await crypter(session.phrase.pcb, k)
     session.clek = k
     r.stp = estSponsor ? 1 : 0
-    r.hps1 = session.phrase.dpbh
+    r.hps1 = session.phrase.hps1
     r.shay = session.phrase.shay
 
     r.nctk = await crypter(k, new Uint8Array(encode([nt.nom, nt.rnd])))

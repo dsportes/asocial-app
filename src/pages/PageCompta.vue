@@ -69,7 +69,7 @@ import ApercuNotif from '../components/ApercuNotif.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
 import { getNg, Motscles, Chat } from '../app/modele.mjs'
-import { IDCOMPTABLE } from '../app/api.mjs'
+import { ID } from '../app/api.mjs'
 
 export default {
   name: 'PageCompta',
@@ -107,7 +107,7 @@ export default {
 
     const ids = reactive({})
     onMounted(async () => {
-      ids[IDCOMPTABLE] = await Chat.getIds(naCpt, getNg(IDCOMPTABLE))
+      ids[session.naComptable.id] = await Chat.getIds(naCpt, session.naComptable)
       for(const na of pSt.naSponsors) {
         if (na.id !== session.compteId) {
           ids[na.id] = await Chat.getIds(naCpt, na)

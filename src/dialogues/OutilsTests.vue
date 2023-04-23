@@ -56,9 +56,9 @@
     <q-card-section v-if="tab === 'ps'">
       <phrase-secrete v-on:ok-ps="okps" icon-valider="check" label-valider="OK"></phrase-secrete>
       <div class='t1 q-mt-slg'>{{$t('OTh1')}}</div>
-      <div class='t2'>{{ ps ? ps.dpbh : '?'}}</div>
+      <div class='t2'>{{ ps ? ps.hps1 : '?'}}</div>
       <div class='t1 q-mt-sm'>{{$t('OTcx')}}</div>
-      <div class='t2'>{{ ps ? ps.pcb64 : '?' }}</div>
+      <div class='t2'>{{ ps ? ps.shax64 : '?' }}</div>
       <div class='t1 q-mt-sm'>{{$t('OThcx')}}</div>
       <div class='t2'>{{ ps ? ps.pcbh : '?' }}</div>
     </q-card-section>
@@ -78,7 +78,7 @@
             </div>
             <div class="q-pl-md q-mb-sm row items.center">
               <div class="col-2">{{it.trig}}</div>
-              <div class="col-3 fs-sm font-mono">{{it.dpbh}}</div>
+              <div class="col-3 fs-sm font-mono">{{it.hps1}}</div>
               <div v-if="it.vu" class="col-3 text-center font-mono">{{edvol(it.v1 + it.v2)}}</div>
               <div v-if="it.vu" class="col-4 text-center font-mono">{{$t('GBfi', [edvol(it.v2)])}}</div>
               <span v-if="!it.vu" class="col-7 text-right">
@@ -106,10 +106,10 @@
       <q-card-section>
         <div class="titre-lg">Propriétaire: {{itdel.trig}}</div>
         <div class="fs-sm font-mono">Nom de la base: {{itdel.nb}}</div>
-        <div v-if="!itdel.dpbh" class="titre-md text-bold bg-yellow-5 text-negative">
+        <div v-if="!itdel.hps1" class="titre-md text-bold bg-yellow-5 text-negative">
           {{$t('GBm1')}}
         </div>
-        <div v-if="itdel.dpbh" class="titre-md text-bold text-warning">
+        <div v-if="itdel.hps1" class="titre-md text-bold text-warning">
           {{$t('GBm2')}}
         </div>
       </q-card-section>
@@ -265,7 +265,7 @@ export default ({
 
     function getBases () {
       // trigs[nombase] = [reseau, trig]
-      // localStore : key: reseau-dpbh val = nombase
+      // localStore : key: reseau-hps1 val = nombase
       const nt = pfx + 'trigrammes'
       const x = localStorage.getItem(nt)
       let trigs
@@ -276,19 +276,19 @@ export default ({
       }
       for (const nb in trigs) {
         const i = trigs[nb]
-        bases[nb] = { nb: nb, trig: i, dpbh: [], v1: 0, v2: 0, vu: false }
+        bases[nb] = { nb: nb, trig: i, hps1: [], v1: 0, v2: 0, vu: false }
         nbbases.value++
       }
       for (const lsk in localStorage) {
         if (!lsk.startsWith(pfx) || lsk === nt) continue
-        const dpbh = lsk.substring(pfx.length)
+        const hps1 = lsk.substring(pfx.length)
         const nb = localStorage.getItem(lsk)
         const x = bases[nb]
         if (x) {
-          x.dpbh = dpbh
+          x.hps1 = hps1
         } else {
           nbbases.value++
-          bases[nb] = { nb: nb, trig: '???', dpbh: dpbh, v1: 0, v2: 0, vu: false }
+          bases[nb] = { nb: nb, trig: '???', hps1: hps1, v1: 0, v2: 0, vu: false }
         }
       }
     }
@@ -296,7 +296,7 @@ export default ({
     async function delIDB (it) {
       try {
         deleteIDB(it.nb)
-        localStorage.removeItem(pfx + it.dpbh)
+        localStorage.removeItem(pfx + it.hps1)
         delete bases[it.nb]
         nbbases.value = 0
         const trigs = {}

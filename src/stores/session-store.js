@@ -4,13 +4,16 @@ import { encode } from '@msgpack/msgpack'
 import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
-import { AMJ, IDCOMPTABLE } from '../app/api.mjs'
+import { AMJ, ID } from '../app/api.mjs'
+import { setNg } from '../app/modele.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
-    status: 0, // 0:fermée, 1:en chargement, >=10: ouverte
+    status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
+    ns: 0, // namespace de 10 à 89 : 0 pour "admin"
+    naComptable: null,
     dh: 0,
     /* authToken : base64 de la sérialisation de :
     - `sessionId`
@@ -38,6 +41,7 @@ export const useSessionStore = defineStore('session', {
     clek: null,
 
     compteId: 0, // id du compte / son avatar principal
+    estComptable: false,
     tribuId: 0, // id de la tribu actuelle du compte
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
@@ -63,8 +67,7 @@ export const useSessionStore = defineStore('session', {
       const t2 = aSt.tribu2.mbtr[state.compteId]
       return (t2 && t2.sp) || false 
     },
-    estComptable (state) { return state.compteId === IDCOMPTABLE },
-    
+
     editable (state) { return state.mode < 3 && state.nivbl < 2 },
 
     synchro (state) { return state.mode === 1 },
@@ -72,7 +75,7 @@ export const useSessionStore = defineStore('session', {
     avion (state) { return state.mode === 3 },
     accesNet (state) { return state.mode === 1 || state.mode === 2},
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
-    ok (state) { return state.status > 1 },
+    ok (state) { return state.status === 2 },
 
     editable (state) { return state.mode < 3 && state.nivbl < 2 }
   },
@@ -82,12 +85,12 @@ export const useSessionStore = defineStore('session', {
       this.sessionId = intToB64(rnd6())
       if (phrase) {
         this.phrase = phrase
-        this.lsk = '$asocial$-' + phrase.dpbh
+        this.lsk = '$asocial$-' + phrase.hps1
       }
       const token = {
         sessionId: this.sessionId,
         shax: phrase ? phrase.shax : null,
-        hps1: phrase ? phrase.dpbh : null
+        hps1: phrase ? phrase.hps1 : null
       }
       const x = new Uint8Array(encode(token))
       this.authToken = u8ToB64(new Uint8Array(x), true)
@@ -103,7 +106,15 @@ export const useSessionStore = defineStore('session', {
     },
 
     // pour tracking des changements sur $onAction
-    setCompteId (id) { this.compteId = id},
+    setCompteId (id) {
+      this.ns = ID.ns(id)
+      this.compteId = id
+      if (this.ns) {
+        this.estComptable = ID.estComptable(id)
+        this.naComptable = NomGenerique.comptable(this.ns)
+        setNg(this.naComptable)
+      }
+    },
 
     setAvatarId (id) { this.avatarId = id},
 
@@ -125,12 +136,12 @@ export const useSessionStore = defineStore('session', {
       */
       localStorage.removeItem(this.lsk)
       this.phrase = phrase
-      this.lsk = '$asocial$-' + phrase.dpbh
+      this.lsk = '$asocial$-' + phrase.hps1
       localStorage.setItem(this.lsk, this.nombase)
       const token = {
         sessionId: this.sessionId,
         shax: phrase.shax,
-        hps1: phrase.dpbh
+        hps1: phrase.hps1
       }
       const x = new Uint8Array(encode(token))
       this.authToken = u8ToB64(new Uint8Array(x), true)

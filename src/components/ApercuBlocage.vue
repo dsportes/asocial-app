@@ -34,7 +34,7 @@ import EdBlocage from './EdBlocage.vue'
 import BlocageIco from './BlocageIco.vue'
 import { Blocage } from '../app/modele.mjs'
 import { afficherDiag } from '../app/util.mjs'
-import { IDCOMPTABLE } from '../app/api.mjs'
+import { ID } from '../app/api.mjs'
 
 export default {
   name: 'ApercuBlocage',
@@ -63,7 +63,7 @@ export default {
   methods: {
     async editerbl (ed) {
       if (! await this.session.edit()) return
-      if (this.naCo && this.naCo.id === IDCOMPTABLE) {
+      if (this.naCo && ID.estComptable(this.naCo.id)) {
         afficherDiag($t('PTpasc'))
         return
       }

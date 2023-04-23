@@ -36,7 +36,7 @@
       </q-btn>
 
       <!-- Comptabilité des volumes -->
-      <div v-if="session.status>1" @click="pageCompta" style="position:relative"
+      <div v-if="session.status === 2" @click="pageCompta" style="position:relative"
         :class="'cursor-pointer q-mr-xs bg2 ' + pccl">
         <q-knob v-model="aSt.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
         <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{aSt.compta.pc + '%'}}</div>
@@ -59,7 +59,8 @@
       </q-toolbar-title>
 
       <!-- Déconnexion -->
-      <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" @click="ui.dialoguedrc = true">
+      <q-btn v-if="session.status > 1" dense size="md" color="warning" icon="logout"
+        @click="discon">
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
         <span class="fs-sm font-mono">{{hms(session.dh)}}</span>
       </q-btn>
@@ -159,6 +160,7 @@
     <transition-group appear
       leave-active-class="animated animate__slideOutLeft"
       enter-active-class="animated animate__slideInRight">
+      <page-admin class="page" v-if="ui.page === 'admin'"/>
       <page-login class="page" v-if="ui.page === 'login'"/>
       <page-session class="page" v-if="ui.page === 'session'"/>
       <page-accueil class="page" v-if="ui.page === 'accueil'"/>
@@ -288,6 +290,7 @@ import BoutonLangue from './components/BoutonLangue.vue'
 import NotifIco from './components/NotifIco.vue'
 import BlocageIco from './components/BlocageIco.vue'
 
+import PageAdmin from './pages/PageAdmin.vue'
 import PageMenu from './pages/PageMenu.vue'
 import PageLogin from './pages/PageLogin.vue'
 import PageSession from './pages/PageSession.vue'
@@ -326,7 +329,7 @@ export default {
 
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco, ApercuAvatar,
-    PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
+    PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
     PageGroupe, PageGroupes,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif, FiltreAvecsp,
@@ -336,7 +339,7 @@ export default {
 
   computed: {
     tbclass () { return this.$q.dark.isActive ? ' sombre1' : ' clair1' },
-    aHome () { return (this.session.status > 1 && this.ui.page !== 'accueil')
+    aHome () { return (this.session.status === 2 && this.ui.page !== 'accueil')
       || (!this.session.status && this.ui.page !== 'login') },
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
     titrePage () {
@@ -370,6 +373,10 @@ export default {
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
 
+    discon () {
+      if (this.session.status === 3) deconnexion(); else this.ui.dialoguedrc = true
+    },
+
     cfstop () {
       this.confirmstopop = true
     },
@@ -396,7 +403,7 @@ export default {
       this.ui.setPage('session')
     },
     gotoAccueilLogin () {
-      this.ui.setPage(this.session.status > 1 ? 'accueil' : 'login')
+      this.ui.setPage(this.session.status === 2 ? 'accueil' : 'login')
     },
     gotoBack () {
       this.ui.setPageBack()

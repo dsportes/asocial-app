@@ -428,11 +428,17 @@ export class ConnexionCompte extends OperationUI {
     const args = { token: session.authToken }
     // Connexion : récupération de rowCompta rowAvatar rowTribu fscredentials
     const ret = this.tr(await post(this, 'ConnexionCompte', args))
+    if (ret.admin) {           
+      session.setCompteId(0)
+      return
+    }
+
     if (ret.credentials) session.fscredentials = ret.credentials
     this.notifG = ret.notifG
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
     session.compteId = this.rowAvatar.id
+
     if (session.estComptable) session.mode = 2
     session.setAvatarId(session.compteId)
     this.compta = await compile(this.rowCompta)
@@ -452,11 +458,6 @@ export class ConnexionCompte extends OperationUI {
 
   async phase0Net () {
     const session = stores.session
-    /* Authentification et get de avatar / compta / tribu
-    ET abonnement à compta sur le serveur
-    */
-    await this.getCTA()
-
     if (session.fsSync) await session.fsSync.setCompte(session.compteId)
 
     if (session.accesIdb && !session.nombase) await session.setNombase() // maintenant que la cle K est connue
@@ -506,12 +507,20 @@ export class ConnexionCompte extends OperationUI {
       this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
       this.dh = 0
-      const naComptable = new NomAvatar('', -1)
-      setNg(naComptable)
 
       if (session.avion) {
         await this.phase0Avion()
       } else {
+        /* Authentification et get de avatar / compta / tribu
+        ET abonnement à compta sur le serveur
+        */
+        await this.getCTA()
+        if (!session.ns) { // C'est une session ADMIN
+          session.mode = 2
+          session.status = 3
+          stores.ui.setPage('admin')
+          return this.finOK()
+        }
         await this.phase0Net()
       }
 

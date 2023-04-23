@@ -46,7 +46,7 @@ import { dhcool, afficherDiag } from '../app/util.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import ApercuPeople from './ApercuPeople.vue'
 import { MajMotsclesChat, NouveauChat, MajChat } from '../app/operations.mjs'
-import { IDCOMPTABLE } from 'src/app/api.mjs'
+import { ID } from 'src/app/api.mjs'
 
 export default {
   name: 'ApercuChat',
@@ -70,7 +70,7 @@ export default {
         await afficherDiag(this.$t('CHav'))
       }
       const pSt = stores.people
-      const csp = this.naE.id === IDCOMPTABLE || (pSt.estSponsor(this.naE.id) === 2)
+      const csp = ID.estComptable(this.naE.id) || (pSt.estSponsor(this.naE.id) === 2)
       if (this.session.nivbl === 3 && !csp) {
         await afficherDiag(this.$t('CHbl'))
       }
