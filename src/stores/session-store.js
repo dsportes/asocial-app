@@ -12,6 +12,11 @@ export const useSessionStore = defineStore('session', {
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
     dh: 0,
+    /* authToken : base64 de la sérialisation de :
+    - `sessionId`
+    - `shax` : SHA de X, le PBKFD de la phrase complète.
+    - `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète.
+    */
     authToken: '',
     phrase: null,
     dateJourConnx: 0,
@@ -90,6 +95,7 @@ export const useSessionStore = defineStore('session', {
       this.dateJourConnx = AMJ.amjUtc()
       this.status = 1
     },
+
     async setNombase () { // Après avoir obtenu cle K du serveur
       const x = await pbkfd(this.clek)
       this.nombase = '$asocial$-' + u8ToB64(x, true)
@@ -182,20 +188,6 @@ export const useSessionStore = defineStore('session', {
       blx(et2.blocage)
     },
 
-    /* authToken : base64 de la sérialisation de :
-    - `sessionId`
-    - `shax` : SHA de X, le PBKFD de la phrase complète.
-    - `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète.
-    */
-    setAuthToken () {
-      const token = {
-        sessionId: this.sessionId,
-        shax: sha256(session.phrase.pcb),
-        hps1: session.phrase.dpbh
-      }
-      session.authToken = u8ToB64(new Uint8Array(encode(token)))
-    },
-
     async edit (tst) {
       if (this.mode === 3 || tst === 1) {
         await afficherDiag($t('editavion'))
@@ -229,42 +221,6 @@ export const useSessionStore = defineStore('session', {
       this.opEncours = null
       this.opSpinner = 0
       this.opDialog = false
-    },
-
-    /* Gère les autorisations d'exécuter l'action
-    - nmb : interdit avec un blocage à partir de nmb
-    - cnx : connexion requise (modes synchronisé et incognito)
-    */
-    auts (nmb, cnx) {
-      return !((cnx && this.avion) || this.blocage >= nmb)
-    },
-    
-    async aut (nmb, cnx) {    
-      if ((cnx && this.avion) || this.blocage >= nmb) { // action interdite : explication(s)
-        return new Promise((resolve) => {
-          const av = this.avion
-          const b = this.blocage
-          stores.config.$q.dialog({
-            dark: true,
-            html: true,
-            title: $t('UTI' + (av ? 'ac2' : 'ac1')),
-            message: (av ? $t('UTImsi') : '') +
-              (b ? '<br><span class="titre-lg text-warning text-bold">' + $t('IB' + b) + '</span>' : ''),
-            cancel: !this.blocage ? null : { label: $t('UTIesp'), color: 'primary' },
-            ok: { color: 'warning', label: $t('jailu') }
-          }).onOk(async () => {
-            resolve(false)
-          }).onCancel(async () => {
-            if (b) await stores.ui.ouvrirInfoBlocage(true)
-            resolve(false)
-          }).onDismiss(() => {
-            resolve(false)
-          })
-        })
-      }
-      // action autorisée : rappel du blocage en cours éventuel
-      if (this.blocage) await stores.ui.ouvrirInfoBlocage()
-      return true
     }
   }
 })
