@@ -229,7 +229,7 @@ export default {
 
   EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
   EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
-  EX8003: 'Erreur d\'ID pour le compte Comptable',
+  EX8003: 'Espace déjà créé.',
   EX800nopc4: 'Compte Comptable déjà créé',
   EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
   EX8007: 'Phrase de sponsoring déjà déclarée.',
@@ -395,7 +395,7 @@ export default {
   OPerreurFonc: 'Test d\'erreur fonctionnelle',
   OPpingdb: 'Test de ping de la base distante',
   OPsync: 'Opération de synchronisation',
-  OPccc: 'Créer le compte du comptable',
+  OPcre: 'Créer un nouvel espace',
   OPcnx: 'Se connecter à un compte',
   OPpub: 'Obtention d\'une clé publique',
 
@@ -616,6 +616,9 @@ export default {
   ACsec: 'Ses secrets',
 
   CNXdeg: 'Le compte est bloqué. Seuls les modes "avion" et "incognito" étant admis, votre session a été mise en mode "incognito".',
+
+  // PageAdmin et ApercuEspace
+  ESne: 'Nouvel espace:',
 
   // Pege people et ApercuPeople
   APtr1: 'Membre de ma tribu',

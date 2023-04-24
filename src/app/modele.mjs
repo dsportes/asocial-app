@@ -476,7 +476,7 @@ export class Blocage {
 ****************************************************/
 export class GenDoc {
   get pk () { return this.id + (this.ids ? '/' + this.ids : '')}
-  static _iv (id, v) { return ((id % 1000000 ) * 1000000) + v}
+  static _iv (id, v) { return (Math.floor(id / 1000000 ) * 1000000) + v}
   async compile (row) { }
 }
 
@@ -504,17 +504,42 @@ export async function compile (row) {
   return obj
 }
 
-export class Singletons extends GenDoc {
+/** Espaces **************************************
+- `id` : de l'espace de 10 à 89.
+- `v`
+_data_:
+- `notifA` : notification de l'administrateur, cryptée par la clé du Comptable.
+- `notifC` : notification du Comptable cryptée par la clé du Comptable.
+- `blocage`: de l'administrateur.
+- `t` : taille de l'espace, de 1 à 9, fixé par l'administrateur :
+  son poids relatif dans l'ensemble des espaces.
+*/
+export class Espace extends GenDoc {
 
   async compile (row) {
-    if (this.id === 1) {
-      this.txt = row.txt || ''
-      this.g = row.g || 0
-      this.dh = row.dh || 0
-    }
+    // la clé est le rnd du Comptable de l'espace
+    const cle = new Uint8Array(32); cle[0] = this.id
+    if (row.notifA) {
+      this.notifA = decode(await decrypter(cle, row.notifA))
+      this.notifA.v = this.v
+    } else this.notifA = null
+    if (row.notifC) {
+      this.notifC = decode(await decrypter(cle, row.notifC))
+      this.notifC.v = this.v
+    } else this.notifC = null
+    if (row.blocage) {
+      const b = await decrypter(cle, row.blocage)
+      this.blocage = new Blocage(b)
+      this.blocage.v = this.v
+    } else this.blocage = null
+    this.t = row.t || 0
+  }
+
+  static async nouveau (id) {
+    const r = { id, v: 1, t: 1, notifA: null, notifC: null, blocage: null }
+    return { _nom: 'espaces', id, v: 1, _data_: new Uint8Array(encode(r))}
   }
 }
-
 
 /** Tribu *********************************
 - `id` : numéro de la tribu
@@ -548,7 +573,7 @@ export class Tribu extends GenDoc {
     if (session.estComptable) {
       // Le comptable peut décoder n'importe quelle tribu
       const [nom, rnd] = decode(await decrypter(session.clek, row.nctkc))
-      this.naC = new NomTribu(nom, rnd)
+      this.naC = NomGenerique.from([nom, rnd])
       setNg(this.naC)
       this.info = row.infok ? await decrypterStr(session.clek, row.infok) : ''
     }
@@ -620,7 +645,7 @@ export class Tribu2 extends GenDoc {
       const e = decode(row.mbtr[x])
       const r = {}
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
-      r.na = new NomAvatar(nom, cle)
+      r.na = NomGenerique.from([nom, cle])
       r.sp = e.sp ? true : false
       r.bl = e.bl ? true : false
       setNg(r.na)
@@ -800,13 +825,13 @@ export class Avatar extends GenDoc {
         if (lgrc.length === 256) {
           // c'est une invitation
           const [nom, rnd, im] = decode(await decrypterRSA(this.priv, lgrc))
-          const ng = new NomGroupe(nom, rnd)
+          const ng = NomGenerique.from([nom, rnd])
           setNg(ng)
           this.lgr.set(ni, { ng, im})  
           gSt.setInvit(ng.id, this.id)
         } else {
           const [nom, rnd, im] = decode(await decrypter(session.clek, lgrc))
-          const ng = new NomGroupe(nom, rnd)
+          const ng = NomGenerique.from([nom, rnd])
           setNg(ng)
           this.lgr.set(ni, { ng, im})  
           gSt.delInvit(ng.id, this.id)
@@ -888,7 +913,7 @@ export class Compta extends GenDoc {
     this.mav = new Map()
     for(const id in m) {
       const [nom, cle] = m[id]
-      const na = new NomAvatar(nom, cle)
+      const na = NomGenerique.from([nom, cle])
       this.mav.set(parseInt(id), na)
       setNg(na) 
       if (na.estAvatarP) this.naprim = na
@@ -909,12 +934,12 @@ export class Compta extends GenDoc {
     if (!ck) {
       this.nctk = await crypter(session.clek, new Uint8Array(encode([nomt, rndt])))
     }
-    this.nct = new NomTribu(nomt, rndt)
+    this.nct = NomGenerique.from([nomt, rndt])
     this.idt = this.nct.id
     setNg(this.nct)
 
     const [nomp, rndp] = decode(await decrypter(rndt, row.napt))
-    this.nap = new NomAvatar(nomp, rndp)
+    this.nap = NomGenerique.from([nomp, rndp])
     setNg(this.id, this.nap)
 
     this.hps1 = row.hps1
@@ -1042,9 +1067,9 @@ export class Sponsoring extends GenDoc {
     obj.sp = x.sp
     obj.quotas = x.quotas
     obj.nctkc = x.nctkc
-    obj.na = new NomAvatar(x.na[0], x.na[1])
-    obj.naf = new NomAvatar(x.naf[0], x.naf[1], 0)
-    obj.nct = new NomTribu(x.nct[0], x.nct[1])
+    obj.na = NomGenerique.from(x.na)
+    obj.naf = NomGenerique.from(x.naf)
+    obj.nct =  NomGenerique.from(x.nct)
   }
 
   static async nouveauRow (phrase, dlv, nom, nctkc, nct, sp, quotas, ard) {
@@ -1060,7 +1085,7 @@ export class Sponsoring extends GenDoc {
     const session = stores.session
     const aSt = stores.avatar
     const av = aSt.avC
-    const n = new NomAvatar(nom, 0)
+    const n = NomGenerique.avatar(session.ns, nom)
     const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, nctkc, quotas}
     d.nct = [nct.nom, nct.rnd]
     const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))
@@ -1150,7 +1175,7 @@ export class Chat extends GenDoc {
       this.ccK = null
     }
     const x = decode(await decrypter(this.cc, row.contc))
-    this.naE = new NomAvatar(x.na[0], x.na[1])
+    this.naE = NomGenerique.from(x.na)
     this.idsE = await Chat.getIds(this.naE, this.naI)
     this.dh = x.dh
     this.txt = x.txt
@@ -1322,7 +1347,7 @@ export class Membre extends GenDoc {
     this.inv = row.inv || null
     this.mc = row.mc || new Uint8Array([])
     const data = decode(await decrypter(this.cleg, row.datag))
-    this.na = new NomAvatar(data.nom, data.rnd)
+    this.na = NomGenerique.from([data.nom, data.rnd])
     this.ni = data.ni
     this.imc = data.imc
     this.estAc = aSt.compta.avatarIds.has(this.na.id)
@@ -1699,7 +1724,7 @@ export class FichierLocal {
 }
 
 const classes = {
-  singletons: Singletons,
+  espaces: Espace,
   tribus: Tribu,
   tribu2s: Tribu2,
   comptas: Compta,

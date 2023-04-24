@@ -6,7 +6,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ } from './api.mjs'
-import { resetRepertoire, compile, Compta, Avatar, Tribu, Tribu2, Chat, NomAvatar, NomTribu, naComptable, GenDoc, setNg, getNg, Versions } from './modele.mjs'
+import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter, random, genKeyPair } from './webcrypto.mjs'
@@ -430,19 +430,23 @@ export class ConnexionCompte extends OperationUI {
     const ret = this.tr(await post(this, 'ConnexionCompte', args))
     if (ret.admin) {           
       session.setCompteId(0)
+      if (ret.espaces) for (const e of ret.espaces) {
+        session.setEspace(row.id, await compile(r))
+      }
       return
     }
 
     if (ret.credentials) session.fscredentials = ret.credentials
-    this.notifG = ret.notifG
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
+    this.rowEspace = ret.rowEspace
     session.compteId = this.rowAvatar.id
 
     if (session.estComptable) session.mode = 2
     session.setAvatarId(session.compteId)
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
+    this.espace = await compile(this.rowEspace)
 
     {
       const args = { token: session.authToken, id: this.compta.idt, tribu2: true, abPlus: [this.compta.idt] }
@@ -550,7 +554,11 @@ export class ConnexionCompte extends OperationUI {
 
       // Rangement en store
       aSt.setCompte(this.avatar, this.compta, this.tribu, this.tribu2)
-      session.setNotifGlobale(this.notifG)
+      if (this.espace) {
+        session.setNotifA(this.espace.notifA)
+        session.setNotifC(this.espace.notifC)
+        session.setBlocageA(this.espace.blocage)
+      }
 
       // En cas de blocage grave, plus de synchronisation
       if (session.nivbl === 3 && session.mode === 1) {
@@ -908,6 +916,63 @@ export class RefusSponsoring extends OperationUI {
   }
 }
 
+/* Création d'un nouvel espace et du comptable associé
+args.token donne les éléments d'authentification du compte.
+args.rowEspace : espace créé
+args.rowAvatar, rowTribu, rowCompta du compte du comptable
+args.rowVersion: version de l'avatar (avec sa dlv) 
+args.rowTribu
+args.rowTribu2
+Retour: rien. Si OK le rowEspace est celui créé en session
+*/
+export class CreerEspace extends OperationUI {
+  constructor () { super($t('OPcre')) }
+
+  async run (ns) {
+    try {
+      const session = stores.session
+      const config = stores.config
+      const ac = config.allocComptable
+
+      const rowEspace = await Espace.nouveau(ns)
+
+      const nt = NomGenerique.tribu(ns, config.nomTribuPrimitive)
+      setNg(nt)
+      const na = NomGenerique.comptable(ns)
+      setNg(na)
+
+      const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true) // set de session.clek
+      const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])
+      const rowTribu2 = await Tribu2.primitiveRow(nt, ac[0], ac[1])
+
+      const { publicKey, privateKey } = await genKeyPair()
+      const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)
+
+      const r = {
+        id: na.id,
+        v: 1,
+        iv: GenDoc._iv(na.id, 1),
+        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), config.limitesjour.dlv)
+      }
+      const _data_ = new Uint8Array(encode(r))
+      r._data_ = _data_
+      r._nom = 'versions'
+
+      const args = { token: stores.session.authToken, rowEspace, rowTribu, rowTribu2, 
+        rowCompta, rowAvatar, rowVersion: r }
+      this.tr(await post(this, 'CreerEspace', args))
+      
+      const espace = await compile(rowEspace)
+      session.setEspace(espace) // Maj de la map espaces
+
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+      stores.ui.setPage('login')
+    }
+  }
+}
+
 /* Création du compte Comptable******************************************
 args.token donne les éléments d'authentification du compte.
 args.pcbh : hash de la cle X (hash du PBKFD de la phrase complète)
@@ -915,7 +980,7 @@ args.rowAvatar, rowTribu, rowCompta du compte du comptable
 args.rowVersion: version de l'avatar (avec sa dlv) 
 args.rowTribu
 args.rowTribu2
-*/
+
 export class CreationCompteComptable extends OperationUI {
   constructor () { super($t('OPccc')) }
 
@@ -984,6 +1049,7 @@ export class CreationCompteComptable extends OperationUI {
     }
   }
 }
+*/
 
 /** Opérations de type "ping" non authentifiées du tout */
 

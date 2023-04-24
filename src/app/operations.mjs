@@ -5,7 +5,7 @@ import { AppExc, appexc, AMJ } from './api.mjs'
 import { $t, rnd6 } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { GenDoc, NomAvatar, NomTribu, NomGroupe, Avatar, Chat, 
+import { GenDoc, NomGenerique, Avatar, Chat, 
   Groupe, Membre, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair } from './webcrypto.mjs'
 import { commitRows } from './db.mjs'
@@ -238,7 +238,7 @@ export class GetAvatarPC extends OperationUI {
         try {
           const { cv, napc } = ret.cvnapc
           const x = decode(await decrypter(p.clex, napc))
-          const na = new NomAvatar(x[0], x[1])
+          const na = NomGenerique.from(x)
           res = { cv, na }
         } catch (e) {
           res = { }
@@ -550,7 +550,7 @@ export class NouvelAvatar extends OperationUI {
       const session = stores.session
       const aSt = stores.avatar
 
-      const na = new NomAvatar(nom, 1)
+      const na = NomGenerique.avatar(session.ns, nom)
 
       const { publicKey, privateKey } = await genKeyPair()
 
@@ -588,7 +588,7 @@ export class NouvelleTribu extends OperationUI {
   async run (nom, q1, q2) {
     try {
       const session = stores.session
-      const nt = new NomTribu(nom)
+      const nt = NomGenerique.tribu(session.ns, nom)
       const rowTribu = await Tribu.nouvelleRow(nt, q1, q2)
       const rowTribu2 = await Tribu2.nouvelleRow(nt)
       const args = { token: session.authToken, rowTribu, rowTribu2 }
@@ -858,7 +858,7 @@ export class NouveauGroupe extends OperationUI {
   async run (nom, ferme, quotas) { // quotas: [q1, q2]
     try {
       const session = stores.session
-      const nag = new NomGroupe(nom)
+      const nag = NomGenerique.groupe(session.ns, nom)
       const rowGroupe = await Groupe.rowNouveauGroupe(nag, ferme)
       setNg(nag)
       const na = getNg(session.avatarId)

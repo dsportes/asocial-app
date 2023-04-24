@@ -29,7 +29,7 @@ export class SyncQueue {
       else if (row._nom === 'versions') op = new OnchangeVersion()
       else if (row._nom === 'tribus') op = new OnchangeTribu()
       else if (row._nom === 'tribu2s') op = new OnchangeTribu2()
-      else if (row._nom === 'singletons') op = new OnchangeSingleton()
+      else if (row._nom === 'espaces') op = new OnchangeEspace()
       if (op) await op.run(row)
       if (session.synchro) session.sessionSync.setDhSync(new Date().getTime())
       session.syncEncours = false
@@ -378,12 +378,16 @@ export class OnchangeTribu2 extends OperationWS {
   }
 }
 
-export class OnchangeSingleton extends OperationWS {
+export class OnchangeEspace extends OperationWS {
   constructor () { super($t('OPsync')) }
 
   async run (row) {
     try {
-      if (row.id === 1) stores.session.setNotifGlobale(await compile(row))
+      const session = stores.session
+      const esp = await compile(row)
+      session.setNotifA(esp.notifA)
+      session.setNotifC(esp.notifC)
+      session.setBlocageA(esp.blocage)
     } catch (e) { 
       await this.finKO(e)
     }

@@ -27,6 +27,8 @@ export const useSessionStore = defineStore('session', {
     nombase: '',
     volumeTable: '',
 
+    espaces: new Map(), // SEULEMENT pour admin - liste des espaces
+
     opEncours: null,
     opSpinner: 0,
     opDialog: false,
@@ -54,7 +56,9 @@ export const useSessionStore = defineStore('session', {
     nivbl: 0,
     alirebl: false,
     gntf: 0,
-    notifG: null,
+    notifA: null,
+    notifC: null,
+    blocageA: null,
     alirentf: false,
 
     // message fmsg de report après filtrage
@@ -77,7 +81,15 @@ export const useSessionStore = defineStore('session', {
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
 
-    editable (state) { return state.mode < 3 && state.nivbl < 2 }
+    editable (state) { return state.mode < 3 && state.nivbl < 2 },
+
+    // PageAdmin ***************************************************    
+    paLeFT: (state) => {
+      const x = []; state.espaces.forEach(e => { x.push(e) })
+      x.sort((a, b) => { return a.id < b.id ? -1 : (a.id === b.id ? 0 : 1)})
+      return x
+    }
+
   },
 
   actions: {
@@ -128,6 +140,11 @@ export const useSessionStore = defineStore('session', {
 
     setMembreId (id) { this.membreId = id },
 
+    setEspace (espace) {
+      // SEULEMENT pour admin
+      this.espaces.set(espace.id, espace)
+    },
+
     chgps (phrase) {
       /*
       Suppression de l'ancienne clé lsk donnant le nom de la base du compte
@@ -153,9 +170,25 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    setNotifGlobale (notif) {
-      this.notifG = notif
-      this.setBlocage()
+    setNotifA (notif) {
+      if (notif && (!this.notifA || notif.v > this.notifA.v)) {
+        this.notifA = notif
+        this.setBlocage()
+      }
+    },
+
+    setNotifC (notif) {
+      if (notif && (!this.notifC || notif.v > this.notifC.v)) {
+        this.notifC = notif
+        this.setBlocage()
+      }
+    },
+
+    setBlocageA (blocage) {
+      if (blocage && (!this.blocageA || blocage.v > this.blocageA.v)) {
+        this.blocageA = blocage
+        this.setBlocage()
+      }
     },
 
     fmsg (n) {
@@ -190,11 +223,13 @@ export const useSessionStore = defineStore('session', {
       this.alirebl = false
       this.gntf = 0
       this.alirentf = false
-      ntfx(this.notifG)
+      ntfx(this.notifA)
+      ntfx(this.notifC)
       ntfx(tr.notifco)
       ntfx(tr.notifsp)
       ntfx(et2.notifco)
       ntfx(et2.notifsp)
+      blx(this.blocageA)
       blx(tr.blocage)
       blx(et2.blocage)
     },
