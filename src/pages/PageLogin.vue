@@ -1,7 +1,7 @@
 <template>
 <q-page class="column align-start items-center">
 
-  <q-card v-if="!q666" class="q-mt-md petitelargeur fs-md column justify-center">
+  <q-card class="q-mt-md petitelargeur fs-md column justify-center">
     <div :class="'q-mt-sm q-pb-md q-gutter-md row justify-center full-width bord' + (!session.mode ? '1' : '2')">
       <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
       <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
@@ -40,12 +40,6 @@
     </div>
   </q-card>
 
-  <q-card v-if="q666" class="q-mt-md petitelargeur fs-md column justify-center">
-    <div class="titre-lg text-center">{{$t('LOGcc')}}</div>
-    <phrase-secrete class="q-my-md" v-on:ok-ps="creercc"
-      icon-valider="check" label-valider="creer"/>
-  </q-card>
-
   <q-dialog v-model="dialcp" persistent full-height>
     <AcceptationSponsoring :sp="sp" :pc="pc" :close="fermerap" />
   </q-dialog>
@@ -59,7 +53,7 @@ import { ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { $t, afficherDiag } from '../app/util.mjs'
-import { connecterCompte, CreationCompteComptable } from '../app/connexion.mjs'
+import { connecterCompte } from '../app/connexion.mjs'
 import { PhraseContact, Sponsoring } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ } from '../app/api.mjs'
@@ -141,11 +135,6 @@ export default {
     fermerap () {
       this.dialcp = false
       this.btncd = false
-    },
-    async creercc (ps) {
-      if (!ps) return
-      this.phrase = ''
-      await new CreationCompteComptable().run(ps)
     }
   },
 
@@ -165,7 +154,6 @@ export default {
     return {
       session,
       config,
-      q666: config.search === '666',
       razdb
     }
   }

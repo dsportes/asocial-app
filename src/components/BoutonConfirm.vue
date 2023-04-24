@@ -1,5 +1,5 @@
 <template>
-  <q-input style="width:12rem" dense outlined standout="bg-warning text-white" :disable="!actif" v-model="text" 
+  <q-input style="width:14rem" dense outlined standout="bg-warning text-white" :disable="!actif" v-model="text" 
     :label="actif ? $t('confirm', [code]) : $t('rienconf')" />  
 </template>
 <script>

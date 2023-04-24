@@ -254,6 +254,7 @@ export default {
   EX8067: 'Groupe sans hébergeur {0} : augmentation de volumer interdit.',
   EX8101: 'Compte non authentifié',
 
+  EX9001: 'Espace non trouvé ({0})',
   EX9002: 'Tribu non trouvée ({0})',
   EX9003: 'Compte non trouvé ({0})',
   EX9004: 'Ligne comptable non trouvée ({0})',

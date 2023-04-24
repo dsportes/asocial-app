@@ -1,13 +1,13 @@
 <template>
   <q-page class="q-pa-xs">
-    <div class="titre-md q-my-sm row">
-      <q-btn v-if="!ns" dense size="md" icon="add" class="q-mr-sm"
+    <div class="titre-md q-my-sm row items-center">
+      <q-btn v-if="!ns" dense size="md" icon="add" class="q-mr-sm btn1"
         color="primary" @click="plusNS"/>
       <q-btn v-if="ns" dense size="md" icon="undo" class="q-mr-sm"
         color="primary" @click="cancelNS"/>
       <div class="titre-md text-bold q-mr-sm">{{$t('ESne')}}</div>
       <div class="fs-lg font-mono text-bold q-mr-sm">{{ns}}</div>
-      <bouton-confirm :actif="ns" :confirm="creerNS"/>
+      <bouton-confirm :actif="ns !== 0" :confirmer="creerNS"/>
     </div>
 
     <div v-for="(e, idx) in session.paLeFT" :key="e.id">
@@ -21,6 +21,7 @@
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ApercuEspace from '../components/ApercuEspace.vue'
+import { CreerEspace } from '../app/connexion.mjs'
 
 export default {
   name: 'PageAdmin',
@@ -42,6 +43,7 @@ export default {
     },
     async creerNS () {
       await new CreerEspace().run(this.ns)
+      this.ns = 0
     }
   },
 
@@ -63,4 +65,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.btn1
+  max-height: 1.5rem
 </style>

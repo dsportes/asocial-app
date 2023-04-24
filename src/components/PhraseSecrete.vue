@@ -65,6 +65,12 @@ export default ({
           this.ligne1 = s
           this.ligne2 = s
         }
+      } else if (ap && ap.length === 3 && ap.startsWith('!')) {
+        const c = ap.substring(1, 3)
+        let s = ''
+        for (let i = 0; i < 8; i++) s += c
+        this.ligne1 = s
+        this.ligne2 = s
       }
     }
   },

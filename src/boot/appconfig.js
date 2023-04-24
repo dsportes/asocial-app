@@ -35,7 +35,7 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.urlserveur = 'https://' + cfg.serveur + ':' + p
   // console.log('urlserveur: ' + cfg.urlserveur + '  ---  urlwss: ' + cfg.urlwss)
 
-  stores.config.setConfig(cfg, window.location.search)
+  stores.config.setConfig(cfg)
 
   setRequiredModules({ pako: pako })
 })

@@ -6,7 +6,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ } from './api.mjs'
-import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
+import { resetRepertoire, compile, Phrase, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter, random, genKeyPair } from './webcrypto.mjs'
@@ -941,9 +941,12 @@ export class CreerEspace extends OperationUI {
       const na = NomGenerique.comptable(ns)
       setNg(na)
 
-      const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true) // set de session.clek
+      let s = ''; for (let i = 0; i < 8; i++) s += ns
+      const phrase = await new Phrase().init(s, s)
+
+      const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true, phrase) // set de session.clek
       const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])
-      const rowTribu2 = await Tribu2.primitiveRow(nt, ac[0], ac[1])
+      const rowTribu2 = await Tribu2.primitiveRow(nt, ac[0], ac[1], na)
 
       const { publicKey, privateKey } = await genKeyPair()
       const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)

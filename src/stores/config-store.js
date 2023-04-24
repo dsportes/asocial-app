@@ -7,7 +7,6 @@ export const useConfigStore = defineStore('config', {
     build: 0,
     debug: false,
     dev: false,
-    search: '',
     
     urlwss: '',
     urlserveur: '',
@@ -51,9 +50,8 @@ export const useConfigStore = defineStore('config', {
   },
 
   actions: {
-    setConfig(cfg, search) {
+    setConfig(cfg) {
       this.debug = true // cfg.debug
-      this.search = search && search.length > 1 ? search.substring(1) : ''
       this.localeOptions = cfg.localeOptions
       this.locales = []
       this.localeOptions.forEach(t => {this.locales.push(t.value)})

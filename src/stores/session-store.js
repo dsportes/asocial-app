@@ -5,7 +5,7 @@ import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
-import { setNg } from '../app/modele.mjs'
+import { setNg, NomGenerique } from '../app/modele.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({

@@ -84,8 +84,8 @@ NomGenerique : NomAvatar, NomGroupe, NomTribu
 ************************************************************/
 export class NomGenerique {
   constructor (n, nom, rnd) {
-    this.id = (((rnd[0] * 100) + rnd[1]) * d13) + n
-    this.nomx = nom
+    this.id = (((rnd[0] * 10) + rnd[1]) * d13) + n
+    this.nomx = nom || ''
     this.rnd = rnd
   }
 
@@ -115,7 +115,7 @@ export class NomGenerique {
   static from([nom, rnd]) {
     let z = true; for (let i = 2; i < 32; i++) if(rnd[i]) { z = false; break }
     const n = z ? 0 : (hash(rnd) % d13)
-    if (rnd[1] <= 1) return new NomAvatar(n, nom, rnd)
+    if (rnd[1] <= 1) return new NomAvatar(n, n ? nom : '', rnd) // Peut être Comptable
     if (rnd[1] === 2) return new NomGroupe(n, nom, rnd)
     return new NomTribu(n, nom, rnd)
   }
@@ -382,6 +382,7 @@ export class Phrase {
     this.pcb = await pbkfd(debut + '\n' + fin)
     this.pcbh = hash(this.pcb)
     this.hps1 = hash(await pbkfd(debut))
+    return this
   }
 
   get shax () { return sha256(this.pcb) }
@@ -689,8 +690,8 @@ export class Tribu2 extends GenDoc {
   }
 
 
-  static async primitiveRow (nt, q1, q2) { // q1 q2 : quotas attribués au Comptable
-    const naComptable = stores.session.naComptable
+  static async primitiveRow (nt, q1, q2, naC) { // q1 q2 : quotas attribués au Comptable
+    const naComptable = naC || stores.session.naComptable
     const r = {}
     r.vsh = 0
     r.id = nt.id
@@ -967,7 +968,7 @@ export class Compta extends GenDoc {
     return await crypter(stores.session.clek, new Uint8Array(encode(m)))
   }
 
-  static async row (na, nt, nctkc, q1, q2, estSponsor) { 
+  static async row (na, nt, nctkc, q1, q2, estSponsor, phrase) { 
     /* création d'une compta
     Pour le comptable le paramètre nctkc est null (il est calculé). 
     Pour les autres, c'est le nctkc pris dans la tribu exi
@@ -982,18 +983,19 @@ export class Compta extends GenDoc {
     r.vsh = 0
 
     const k = random(32)
-    r.kx = await crypter(session.phrase.pcb, k)
+    const ph = phrase || session.phrase
+    r.kx = await crypter(ph.pcb, k)
     session.clek = k
     r.stp = estSponsor ? 1 : 0
-    r.hps1 = session.phrase.hps1
-    r.shay = session.phrase.shay
+    r.hps1 = ph.hps1
+    r.shay = ph.shay
 
     r.nctk = await crypter(k, new Uint8Array(encode([nt.nom, nt.rnd])))
     r.nctkc = nctkc || r.nctk
     r.napt = await crypter(nt.rnd, new Uint8Array(encode([na.nom, na.rnd])))
 
     const m = { }
-    m[na.id] = [na.nom, na.rnd]
+    m[na.id] = [na.nomx, na.rnd]
     r.mavk = await crypter(session.clek, new Uint8Array(encode(m)))
 
     const c = new Compteurs()
