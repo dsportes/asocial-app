@@ -98,7 +98,7 @@ export class NomGenerique {
   get estCompte () { return this.rnd[1] === 0 }
   get estAvatarS () { return this.rnd[1] === 1 }
   get nom () { return this.nomx || stores.config.nomDuComptable }
-  get nomc () { return !this.nomx ? stores.config.nomDuComptable : (this.nomx + '#' + (this.id % 4)) }
+  get nomc () { return !this.nomx ? stores.config.nomDuComptable : (this.nomx + '#' + (this.id % 10000)) }
   get hrnd () { return hash(u8ToB64(this.rnd)) }
 
   get defIcon () {

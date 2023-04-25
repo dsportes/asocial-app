@@ -51,7 +51,7 @@
           <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="okNom"/>
           <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
           <choix-quotas :quotas="quotas" />
-          <q-checkbox v-model="una" class="cb" :label="$t('PGuna')" />
+          <q-checkbox v-model="una" class="cb" :label="$t('AGuna')" />
           <q-card-actions align="right">
             <q-btn dense flat color="warning" :label="$t('renoncer')" v-close-popup />
             <q-btn dense flat color="primary" :disable="quotas.err || !nom"

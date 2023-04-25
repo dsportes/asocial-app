@@ -59,7 +59,7 @@ export class OperationWS extends Operation {
     const vcour = Versions.get(id)
     const session = stores.session
     const gSt = stores.groupe
-    const args = { token: session.authToken, id, v: vcour }
+    const args = { token: session.authToken, id, v: vcour.v }
     const ret = this.tr(await post(this, 'ChargerGMS', args))
 
     const objv = Versions.compile(ret.vgroupe)
@@ -128,7 +128,7 @@ export class OperationWS extends Operation {
     const vcour = Versions.get(id)    
     const session = stores.session
     const aSt = stores.avatar
-    const args = { token: session.authToken, id, v: vcour }
+    const args = { token: session.authToken, id, v: vcour.v }
     const ret = this.tr(await post(this, 'ChargerASCS', args))
 
     const objv = Versions.compile(ret.vavatar)

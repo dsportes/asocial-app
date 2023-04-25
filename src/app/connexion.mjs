@@ -78,6 +78,7 @@ export async function connecterCompte (phrase, razdb) {
       deconnexion()
       return
     }
+    session.setCompteId(x.id) // Important, requis pour lire ensuite compta ...
     session.clek = x.k
   }
 
