@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { AppExc, appexc, AMJ } from './api.mjs'
+import { ID, AppExc, appexc, AMJ } from './api.mjs'
 import { $t, rnd6 } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
@@ -168,7 +168,6 @@ export class MajCvGr extends OperationUI {
 args.token: éléments d'authentification du compte.
 args.hps1: dans compta, `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte.
 args.shay: SHA du SHA de X (PBKFD de la phrase secrète).
-args.pcbh : hash de la cle X (hash du PBKFD de la phrase complète).
 args.kx: clé K cryptée par la phrase secrète
 */
 export class ChangementPS extends OperationUI {
@@ -178,7 +177,7 @@ export class ChangementPS extends OperationUI {
     try {
       const session = stores.session
       const kx = await crypter(ps.pcb, session.clek)
-      const args = { token: session.authToken, hps1: ps.hps1, pcbh: ps.pcbh, shay: ps.shay, kx }
+      const args = { token: session.authToken, hps1: ps.hps1, shay: ps.shay, kx }
       this.tr(await post(this, 'ChangementPS', args))
       session.chgps(ps)
       if (session.synchro) commitRows(new IDBbuffer(), true)
@@ -506,7 +505,7 @@ export class RafraichirCvs extends OperationUI {
           const exp = pSt.exportPourCv(idE)
           if (exp) toutes.push(exp)
         })
-      } else if (id % 10 <= 1) {
+      } else if (ID.estAvatar(id)) {
         aSt.getChatIdEs(id).forEach(idE => { 
           const exp = pSt.exportPourCv(idE)
           if (exp) toutes.push(exp)

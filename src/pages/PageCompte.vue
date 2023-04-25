@@ -23,15 +23,16 @@
     <div class="q-py-sm">
       <div class="titre-md">{{$t('CPTmemo')}}</div>
       <show-html v-if="memo" class="q-ml-lg bord" maxh="5rem" :texte="memo" zoom
-        :edit="session.auts(3, true)" @edit="memoeditAut"/>
+          @edit="memoeditAut"/>
       <div v-else class="q-ml-lg row">
         <div class="col fs-md text-italic">({{$t('CPTnomemo')}})</div>
-        <q-btn class="col-auto" size="sm" dense icon="edit" color="primary" @click="memoeditAut"/>
+        <q-btn class="col-auto" size="sm" dense icon="edit" color="primary" 
+          @click="memoeditAut"/>
       </div>
     </div>
 
     <!-- Mots clés du compte -->
-    <div v-if="session.auts(4)" class="row items-center q-my-sm">
+    <div class="row items-center q-my-sm">
       <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
       <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
     </div>
@@ -76,7 +77,7 @@
       <q-card class="q-mt-lg petitelargeur">
         <q-card-section>
           <div class="titre-lg text-center q-ma-md">{{$t('CPTchps2')}}</div>
-          <phrase-secrete class="q-ma-xs" v-on:ok-ps="okps" verif icon-valider="check" :label-valider="$t('continuer')"></phrase-secrete>
+          <phrase-secrete class="q-ma-xs" v-on:ok-ps="okps" verif icon-valider="check" label-valider="continuer"></phrase-secrete>
         </q-card-section>
         <q-card-actions>
           <q-btn dense :label="$t('renoncer')" color="primary" icon="close" v-close-popup/>
@@ -134,10 +135,10 @@ export default {
 
   methods: {
     async ouvrirNvav () { 
-      if (await this.session.aut(4, true)) { this.nvav = true; this.nomav = '' }
+      if (await this.session.edit()) { this.nvav = true; this.nomav = '' }
     },
     async ouvrirchgps () { 
-      if (await this.session.aut(4, true)) { this.chgps = true; this.ps = null }
+      if (await this.session.edit()) { this.chgps = true; this.ps = null }
     },
     okps (ps) { this.ps = ps },
     async changerps () {
@@ -177,7 +178,7 @@ export default {
       }
     },
 
-    async ouvrirSponsoring () { if (await this.session.aut(3, true)) this.nvpar = true },
+    async ouvrirSponsoring () { if (await this.session.edit()) this.nvpar = true },
     fermerSponsoring() { this.nvpar = false }
   },
 

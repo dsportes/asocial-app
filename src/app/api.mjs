@@ -6,7 +6,7 @@ export const d13 = 10 * 1000 * 1000 * 1000 * 1000
 export const d14 = d13 * 10
 
 export class ID {
-  static estComptable (id) { id % d13 === 0}
+  static estComptable (id) { return id % d13 === 0 }
 
   static estGroupe (id) { return Math.floor(id / d13) % 10 === 2 }
 

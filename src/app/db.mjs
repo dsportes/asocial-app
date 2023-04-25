@@ -3,7 +3,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { SessionSync } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
-import { AppExc, E_DB } from './api.mjs'
+import { ID, AppExc, E_DB } from './api.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
 import { Versions } from '../app/modele.mjs'
 
@@ -868,7 +868,7 @@ class Fetat {
   async abandon () {
     stores.fetat.abandon(this.id)
     let s
-    if (ids % 10 === 2) {
+    if (ID.estGroupe(ids)) {
       const gSt = stores.groupe
       s = gSt.getSecret(this.ids, this.ns)
     } else {      

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { encode } from '@msgpack/msgpack'
 import { egaliteU8 } from '../app/util.mjs'
+// import { ID } from '../app/api.mjs'
 
 /* Store maître des groupes du compte courant :
 - map : des groupes dont un des avatars du compte courant est membre

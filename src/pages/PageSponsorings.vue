@@ -83,7 +83,7 @@ export default {
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
 
-    async nouveausp () { if (await this.session.aut(3)) this.nvsp = true },
+    async nouveausp () { if (await this.session.edit()) this.nvsp = true },
     closesp () { this.nvsp = false },
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },

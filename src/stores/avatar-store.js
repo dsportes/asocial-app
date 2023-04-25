@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { hash, egaliteU8, difference, intersection } from '../app/util.mjs'
 import { encode } from '@msgpack/msgpack'
-import { E_WS, AppExc } from '../app/api.mjs'
+import { ID, E_WS, AppExc } from '../app/api.mjs'
 import { post } from '../app/net.mjs'
 
 /* Store maître du compte courant :
@@ -415,9 +415,9 @@ export const useAvatarStore = defineStore('avatar', {
           grIds: new Set() // Ids des groupes dont l'avatar est membre
          }
         this.map.set(avatar.id, e)
-        if (avatar.id % 10 === 0) this.setMotscles (avatar.mc)
+        if (ID.estCompte(avatar.id)) this.setMotscles (avatar.mc)
       } else {
-        if (avatar.id % 10 === 0) {
+        if (ID.estCompte(avatar.id)) {
           const mcav = new Uint8Array(encode(e.avatar.mc || {}))
           const mcap = new Uint8Array(encode(avatar.mc || {}))
           if (!egaliteU8(mcav, mcap )) this.setMotscles(avatar.mc || {})

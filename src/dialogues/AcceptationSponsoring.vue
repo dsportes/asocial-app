@@ -54,7 +54,7 @@
       </div>
       <div v-if="accdec===1 && ps">
         <div class="titre-md q-mt-sm">{{$t('NPmota')}}</div>
-        <editeur-md class="full-width height-8" v-model="texte" :texte="sp.ard" 
+        <editeur-md class="full-width height-8" v-model="texte" :texte="textedef" 
           editable modetxt hors-session/>
         <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
         <q-btn flat @click="confirmer" color="warning" :label="$t('APAconf')" class="q-ml-sm" />
@@ -62,7 +62,7 @@
 
       <div v-if="accdec===2">
         <div class="titre-md q-mt-sm">{{$t('NPmotd')}}</div>
-        <editeur-md class="full-width height-8" v-model="texte" :texte="sp.ard"
+        <editeur-md class="full-width height-8" v-model="texte" :texte="textedef"
           editable modetxt hors-session/>
         <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
         <q-btn flat @click="refuser" color="warning"
@@ -106,11 +106,11 @@ export default ({
   components: { PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp },
 
   computed: {
-    photoP () { return this.sp.cv && this.cv.photo ? this.cv.photo : this.na.defIcon },
-    infoP () { return this.sp.cv && this.cv.info ? this.cv.info : '' },
+    photoP () { return this.sp.cv && this.sp.cv.photo ? this.sp.cv.photo : this.sp.na.defIcon },
+    infoP () { return this.sp.cv && this.sp.cv.info ? this.sp.cv.info : '' },
     estpar () { return this.sp.sp },
     nomTribu () { return this.sp.nct[0] || '' },
-    textedef () { return this.$t('merci', [this.sp.na[0] + ',\n\n' + this.ard]) },
+    textedef () { return this.$t('merci', [this.sp.na.nom + ',\n\n' + this.sp.ard]) },
     valid () { return this.sp.dlv},
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
   },

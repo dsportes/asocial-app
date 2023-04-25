@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, gzip, ungzip, ungzipT } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, genKeyPair, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 
-import { d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
+import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
 
 import { getFichierIDB, saveSessionSync } from './db.mjs'
 
@@ -91,7 +91,7 @@ export class NomGenerique {
 
   get ns () { return this.rnd[0] }
   get type () { return this.rnd[1] }
-  get estComptable () { this.id % d13 === 0}
+  get estComptable () { return this.id % d13 === 0 }
   get estGroupe () { return this.rnd[1] === 2 }
   get estTribu () { return this.rnd[1] === 3 }
   get estAvatar () { return this.rnd[1] < 2 }
@@ -745,7 +745,7 @@ export class Tribu2 extends GenDoc {
 */
 
 export class Avatar extends GenDoc {
-  get primaire () { return this.id % 10 === 0 } // retourne true si l'objet avatar est primaire du compte
+  get primaire () { return ID.estCompte(this.id) } // retourne true si l'objet avatar est primaire du compte
   get naprim () { return this.lav[0].na } // na de l'avatar primaire du compte
   get apropos () { return this.nct ? ($t('tribus', 0) + ':' + this.nct.nom) : $t('comptable') }
   get na () { return getNg(this.id) }
@@ -905,7 +905,6 @@ export class Compta extends GenDoc {
     const session = stores.session
     this.k = await decrypter(session.phrase.pcb, row.kx)
     session.clek = this.k
-    session.setCompteId(this.id)
 
     this.vsh = row.vsh || 0
 

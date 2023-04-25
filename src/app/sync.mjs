@@ -4,7 +4,7 @@ import { decode } from '@msgpack/msgpack'
 import { compile, Versions } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'
 import { $t, difference, intersection } from './util.mjs'
-import { appexc } from './api.mjs'
+import { appexc, ID } from './api.mjs'
 import { post } from './net.mjs'
 
 export class SyncQueue {
@@ -193,14 +193,14 @@ export class OperationWS extends Operation {
 
     // désabonnements
     if (session.fsSync && this.abPlus.size) for (const id of this.abPlus) {
-      if (id % 10 === 1) await session.fsSync.setAvatar(id)
-      if (id % 10 === 2) await session.fsSync.setGroupe(id)
-      if (id % 10 === 3) await session.fsSync.setTribu(id)
+      if (ID.estAvatarS(id)) await session.fsSync.setAvatar(id)
+      if (ID.estGroupe(id)) await session.fsSync.setGroupe(id)
+      if (ID.estTribu(id)) await session.fsSync.setTribu(id)
     }
     if (session.fsSync && this.abMoins.size) for (const id of this.abMoins) {
-      if (id % 10 === 1) await session.fsSync.unsetAvatar(id)
-      if (id % 10 === 2) await session.fsSync.unsetGroupe(id)
-      if (id % 10 === 3) await session.fsSync.unsetTribu(id)
+      if (ID.estAvatarS(id)) await session.fsSync.unsetAvatar(id)
+      if (ID.estGroupe(id)) await session.fsSync.unsetGroupe(id)
+      if (ID.estTribu(id)) await session.fsSync.unsetTribu(id)
     }
     if (!session.fsSync && (this.abPlus.size || this.abMoins.size)) {
       const args = { token: session.authToken, abMoins: this.abMoins, abPlus: this.abPlus }
@@ -252,7 +252,7 @@ export class OnchangeVersion extends OperationWS {
   async run (row) {
     try {
       this.init()
-      if (row.id % 10 === 2) {
+      if (ID.estGroupe(row.id)) {
         await this.majGr(row.id)
       } else {
         await this.majAv(row.id)

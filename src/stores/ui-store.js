@@ -116,8 +116,9 @@ export const useUiStore = defineStore('ui', {
       }
     },
 
-    // Fonctions internes à une page. Appel par dérection ui.$onAction
-    jailu () { },
+    // Fonctions internes à une page. Appel par détection ui.$onAction
+    jailu () { }, // Invoquée par App.vue, le bouton fait partie de la toolbar
+  
     secrets () { }
   }
 })

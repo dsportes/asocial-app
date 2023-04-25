@@ -5,7 +5,7 @@ import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
-import { AMJ } from './api.mjs'
+import { AMJ, ID } from './api.mjs'
 import { resetRepertoire, compile, Phrase, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
@@ -78,7 +78,6 @@ export async function connecterCompte (phrase, razdb) {
       deconnexion()
       return
     }
-    session.setCompteId(x.id)
     session.clek = x.k
   }
 
@@ -179,7 +178,7 @@ export class ConnexionCompte extends OperationUI {
     for(const avatar of this.avatarsToStore.values()) {
       if (session.fsSync) await session.fsSync.setAvatar(avatar.id); else abPlus.push(avatar.id)
       avatar.idGroupes(this.grRequis)
-      avsMap[avatar.id] = { v: avatar.v, dlv: avatar.id % 10 === 0 ? dlv1 : dlv2 }
+      avsMap[avatar.id] = { v: avatar.v, dlv: ID.estCompte(avatar.id) ? dlv1 : dlv2 }
       avatar.membres(mbsMap, dlv2)
     }
   
@@ -440,9 +439,10 @@ export class ConnexionCompte extends OperationUI {
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
     this.rowEspace = ret.rowEspace
-    session.compteId = this.rowAvatar.id
+    session.setCompteId(this.rowCompta.id)
 
     if (session.estComptable) session.mode = 2
+
     session.setAvatarId(session.compteId)
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
@@ -488,7 +488,9 @@ export class ConnexionCompte extends OperationUI {
     // session.compteId et session.clek OK
     const session = stores.session
     this.rowCompta = await getCompta()
-    this.compta = await compile(this.rowCompta) 
+    this.compta = await compile(this.rowCompta)
+    session.setCompteId(this.rowCompta.id)
+
     this.rowTribu = await getTribu(this.compta.idt)
     this.tribu = await compile(this.rowTribu)
     this.rowTribu2 = await getTribu2(this.compta.idt)
@@ -612,7 +614,7 @@ export class ConnexionCompte extends OperationUI {
       for(const idx in this.versions) {
         const id = parseInt(idx)
         const objv = this.versions[idx]
-        if (id % 10 === 2) gSt.setVols(id, objv)
+        if (ID.estGroupe(id)) gSt.setVols(id, objv)
       }
 
       // Comptable seulement : chargement des tribus
@@ -840,7 +842,7 @@ export class AcceptationSponsoring extends OperationUI {
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
       if (ret.credentials) session.fscredentials = ret.credentials
-      const notifG = ret.notifG
+
       const rowTribu = ret.rowTribu
       const rowTribu2 = ret.rowTribu2
       const rowChat = ret.rowChat
@@ -850,10 +852,19 @@ export class AcceptationSponsoring extends OperationUI {
       const tribu = await compile(rowTribu)
       const tribu2 = await compile(rowTribu2)
       const compta = await compile(rowCompta)
+
       aSt.setCompte(avatar, compta, tribu, tribu2)
-      session.setNotifGlobale(notifG)
+
+      const espace = await compile(ret.rowEspace)
+      if (espace) {
+        session.setNotifA(espace.notifA)
+        session.setNotifC(espace.notifC)
+        session.setBlocageA(espace.blocage)
+      }
+
       const chat = await compile(rowChat)
       aSt.setChat(chat)
+
       Versions.reset()
       Versions.set(session.compteId, { v: 1 })
 
@@ -976,84 +987,6 @@ export class CreerEspace extends OperationUI {
   }
 }
 
-/* Création du compte Comptable******************************************
-args.token donne les éléments d'authentification du compte.
-args.pcbh : hash de la cle X (hash du PBKFD de la phrase complète)
-args.rowAvatar, rowTribu, rowCompta du compte du comptable
-args.rowVersion: version de l'avatar (avec sa dlv) 
-args.rowTribu
-args.rowTribu2
-
-export class CreationCompteComptable extends OperationUI {
-  constructor () { super($t('OPccc')) }
-
-  async run (phrase) {
-    try {
-      await stores.ui.setPage('session')
-      const session = stores.session
-      const config = stores.config
-      const aSt = stores.avatar
-      const ac = config.allocComptable
-      session.mode = 2
-      await initSession(phrase)
-
-      const nt = new NomTribu(config.nomTribuPrimitive)
-      setNg(nt)
-      const na = new NomAvatar('', -1)
-      setNg(na)
-
-      session.setCompteId(na.id)
-      session.setTribuId(nt.id)
-      session.setAvatarId(session.compteId)
-
-      const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true) // set de session.clek
-      const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])
-      const rowTribu2 = await Tribu2.primitiveRow(nt, ac[0], ac[1])
-
-      const { publicKey, privateKey } = await genKeyPair()
-
-      const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)
-      const r = {
-        id: na.id,
-        v: 1,
-        iv: GenDoc._iv(na.id, 1),
-        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), config.limitesjour.dlv)
-      }
-      const _data_ = new Uint8Array(encode(r))
-      r._data_ = _data_
-      r._nom = 'versions'
-
-      const args = { token: stores.session.authToken, rowTribu, rowTribu2, 
-        rowCompta, rowAvatar, rowVersion: r, pcbh: phrase.pcbh, abPlus: [nt.id] }
-      const ret = this.tr(await post(this, 'CreationCompteComptable', args))
-      // Le compte vient d'être créé, clek est enregistrée
-      const avatar = await compile(rowAvatar)
-      const tribu = await compile(rowTribu)
-      const tribu2 = await compile(rowTribu2)
-      const compta = await compile(rowCompta)
-      aSt.setCompte(avatar, compta, tribu, tribu2)
-      session.setNotifGlobale({ txt: '', dh: 0, g: 0 })
-
-      if (ret.credentials) session.fscredentials = ret.credentials
-      if (session.fsSync) {
-        await session.fsSync.setCompte(session.compteId)
-        await session.fsSync.setAvatar(session.compteId)
-        await session.fsSync.setTribu(session.tribuId)
-      }
-
-      console.log('Connexion compte : ' + na.id)
-      session.status = 2
-      SyncQueue.traiterQueue()
-      stores.ui.setPage('accueil')
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-      stores.ui.setPage('login')
-    }
-  }
-}
-*/
-
 /** Opérations de type "ping" non authentifiées du tout */
 
 /** Echo du texte envoyé ***************************************
@@ -1105,3 +1038,67 @@ export class PingDB extends OperationUI {
     }
   }
 }
+
+/* Get de l'espace du compte de la session *****************************************************
+args.token donne les éléments d'authentification du compte.
+args.ns
+Retour:
+- rowEspace
+*/
+export class GetEspace extends OperationUI {
+  constructor () { super($t('OPsetesp')) }
+
+  async run (ns) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns: ns || session.ns }
+      const ret = this.tr(await post(this, 'GetEspace', args ))
+      const espace = await compile(ret.rowEspace)
+      if (espace) {
+        session.setNotifA(espace.notifA)
+        session.setNotifC(espace.notifC)
+        session.setBlocageA(espace.blocage)
+      }
+      return this.finOK(espace)
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
+/* Set notifications / blocage généraux *****************************************************
+args.token donne les éléments d'authentification du compte.
+args.ns
+args.notifA : si false, suppression, si null rien, sinon remplace
+args.notifC : si false, suppression, si null rien, sinon remplace
+args.blocage : si false, suppression, si null rien, sinon remplace
+args.t : si non 0, remplace
+Retour: rowEspace
+*/
+export class SetEspace extends OperationUI {
+  constructor () { super($t('OPsetesp')) }
+
+  async run (ntfA, ntfC, bloc, t, ns) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken,
+        ns: ns || session.ns,
+        notifA: ntfA === undefined ? null : (ntfA === false ? false : new Uint8Array(encode(ntfA))),
+        notifC: ntfC === undefined ? null : (ntfC === false ? false : new Uint8Array(encode(ntfC))),
+        blocage: bloc === undefined ? null : (bloc === false ? false : new Uint8Array(encode(bloc))),
+        t: t === undefined ? 0 : t
+      }
+      const ret = this.tr(await post(this, 'SetEspace', args ))
+      const espace = await compile(ret.rowEspace)
+      if (espace) {
+        session.setNotifA(espace.notifA)
+        session.setNotifC(espace.notifC)
+        session.setBlocageA(espace.blocage)
+      }
+      return this.finOK(espace)
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
