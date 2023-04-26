@@ -20,6 +20,7 @@
 
     <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
     <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
+    <apercu-blocage class="q-ml-md" :blocage="t.blocage" :edit="edit" :idx="idx" :na-tr="t.na"/>
 
     <div class="q-ml-md q-mb-xs row largeur40 items-center">
       <quotas-vols :vols="t.cpt" />
@@ -46,8 +47,6 @@
         <notif-ico gravite/>
       </div>
     </div>
-
-    <apercu-blocage class="q-ml-md" :blocage="t.blocage" :edit="edit" :idx="idx" :na-tr="t.na"/>
 
     <!-- Edition du commentaire attachée à une tribu -->
     <q-dialog v-model="edcom" persistent>

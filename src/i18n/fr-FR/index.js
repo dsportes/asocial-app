@@ -972,6 +972,16 @@ export default {
   APAdec2: 'Décliner définitivement ce sponsoring',
 
   // Synthèse blocage
+  SBc1: 'Tous les comptes sont',
+  SBc2: 'Les comptes de la tribu {0} sont',
+  SBc3: 'Le compte {0} est',
+  SBst1: 'en alerte de résiliation',
+  SBst2: 'en lecture seulement',
+  SBst3: 'en blocage total',
+  SBst4: 'résilié(s)',
+  SNnon: 'Pas de procédure de blocage en cours.',
+  SBcre: 'En créer une',
+
   SBtitt: 'Blocage "tribu" par {0}',
   SBtitc: 'Blocage "compte" par {0}',
   SBtittc: 'Blocage "tribu" par {0} ET "compte" par {1}',
@@ -1000,7 +1010,6 @@ export default {
   SBnjl: 'NLS : Nombre de jours en niveau "lecture seule"',
   SBdiag: 'NJA et NJS doivent être positifs ou 0 et leur somme inférieure à 365.',
   SBdiag2: 'La date de début de la procédure peut être avancée jusqu\'à aujourd\'hui MAIS PAS PLUS.',
-  SNnon: 'Pas de procédure de blocage en cours.',
   SBdel: 'Supprimer ce blocage',
 
   // PanelPeople et apercu compte

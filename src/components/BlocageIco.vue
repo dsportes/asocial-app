@@ -16,7 +16,7 @@ export default ({
   computed: {
     tclr () { return 'text-' + ['green-3 ','primary ','orange-9 ','negative '][this.niveau || 0] },
     bgclr () { return 'bg-' + ['none ','yellow-1 ','yellow-2 ','yellow-5 '][this.niveau || 0] },
-    ico () { return ['check','alarm_on','lock_open','lock'][this.niveau || 0] }
+    ico () { return ['check','alarm_on','lock_open','lock','close'][this.niveau || 0] }
   }
 })
 </script>

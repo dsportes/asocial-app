@@ -417,17 +417,19 @@ const lstfBlocage = ['sp', 'jib', 'nja', 'njl', 'dh']
 export class Blocage {
 
   /* Attributs: 
-  - `sp`: id du sponsor si créé / gérée par un sponsor (absent / 0 pour un blocage _tribu_). Lorsque le comptable a pris le contrôle sur une procédure de blocage de compte, un sponsor ne peut plus la modifier / remplacer / supprimer.
+  - `sp`: id du sponsor si créé / gérée par un sponsor (absent / 0 pour un blocage _tribu_).
+    Lorsque le comptable a pris le contrôle sur une procédure de blocage de compte, un sponsor ne peut plus la modifier / remplacer / supprimer.
   - `jib` : jour initial de la procédure de blocage sous la forme `aaaammjj`.
   - `nja njl` : nb de jours passés en niveau _alerte_, et _lecture seule_.
   Attributs calculés (pour le jour courant):
-  - niv : niveau actuel (1: alerte, 2:lecture, 3:bloqué)
-  - njra: nb jours restant sur le niveau alerte
-  - njrl: nb jours restant sur le niveau lecture
-  - njrb: nb jours restant à vivre bloqué
-  - dja : dernier jour en alerte
-  - djl : dernier jour en lecture
-  - djb : dernier jour en blocage (fin de vie du compte)
+  - niv : niveau actuel (1: alerte, 2:lecture, 3:bloqué, 4:résilié)
+  - njl : nombre de jours avant d'être en lecture seulement (0 si déjà atteint)
+  - njb : nombre de jours avant d'être bloqué (0 si déjà atteint)
+  - njr : nombre de jours avant d'être résilié
+  - pjl : premier jour en lecture seulement (0 si passé)
+  - pjb : premier jour en blocage total (0 si passé)
+  - pjr : premier jour de résiliation
+  
   */
   constructor (buf, sp, nja, njl) {
     if (buf) {
@@ -456,16 +458,20 @@ export class Blocage {
 
   recalculBloc () {
     try {
-      this.djb = AMJ.amjUtcPlusNbj(this.jib, stores.config.limitesjour.dlv)
-      this.dja = AMJ.amjUtcPlusNbj(this.jib, this.nja - 1)
-      this.djl = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl - 1)
       const now = AMJ.amjUtc()
-      this.njrb = AMJ.diff(this.djb, now)
-      if (now > this.djl) { this.niv = 3; this.njra = 0; this.njrl = 0; return }
-      this.njrl = AMJ.diff(this.djl, now)
-      if (now > this.dja) { this.niv = 2; this.njra = 0; return }
-      this.njra = AMJ.diff(this.dja, now)
       this.niv = 1
+ 
+      this.pjl = AMJ.amjUtcPlusNbj(this.jib, this.nja)
+      if (this.pjl <= now) { this.pjl = 0; this.njl = 0; this.niv = 2 }
+      else this.njl = AMJ.diff(this.pjl, now)
+
+      this.pjb = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl)
+      if (this.pjb <= now) { this.pjb = 0; this.njb = 0; this.niv = 3 } 
+      else this.njb = AMJ.diff(this.pjb, now)
+
+      this.pjr = AMJ.amjUtcPlusNbj(this.jib, stores.config.limitesjour.dlv + 1)
+      if (this.pjr <= now) { this.pjr = 0; this.niv = 4 } 
+      else this.njr = AMJ.diff(this.pjb, now)
     } catch (e) {
       console.log(e)
     }

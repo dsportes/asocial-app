@@ -123,7 +123,7 @@ export default {
     const naTr = toRef(props, 'naTr')
     const cas = ref(blCo.value ? (blTr.value ? 1 : 2) : 3)
     const na = ref(blCo.value ? naCo.value : naTr.value)
-    const blocav = cas.value !== 1 ? blCo.value : blTr.value
+    const blocav = cas.value === 2 ? blCo.value : blTr.value
     const bloc = ref(blocav.clone())
     const nja = ref(bloc.value.nja)
     const njl = ref(bloc.value.njl)
