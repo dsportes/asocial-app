@@ -90,14 +90,16 @@ export default {
           await afficherDiag(this.t('ANmx1'))
         }
       } else { // Notification générale
-        this.ntf = this.notif || new Notification(null, 0, 0)
+        this.ntf = this.notif ? this.notif.clone() :
+          new Notification(null, 0, 0)
         this.ro = 0
       }
     },
 
     async editerC () { // Comptable
       if (this.naCible) {
-        this.ntf = this.notif || new Notification(null, 0, this.naCible.id)
+        this.ntf = this.notif ? this.notif.clone() : 
+          new Notification(null, session.compteId, this.naCible.id)
         this.ro = 0
       } else { // Notification générale
         if (this.notif) {
@@ -110,17 +112,53 @@ export default {
     },
 
     async editerS () { // Compte standard ou sponsor de sa tribu
-      if (this.naCible) {
-        if (!await this.session.edit()) return
-        if (this.naCible.estTribu) {
-
-        } else {
-          
+      if (!await this.session.edit()) return
+      if (this.naCible.estTribu) {
+        // Notif de tribu
+        if (this.notif) {
+          if (this.session.estSponsor){
+            if (ID.estComptable(this.notif.idSource)) {
+              this.ntf = this.notif
+              this.ro = 5
+            } else {
+              this.ntf = this.notif.clone()
+              this.ro = 0
+            }
+          } else {
+            this.ntf = this.notif
+            this.ro = 4
+          }
+        } else { // création d'une notif tribu
+          if (this.session.estSponsor){
+            this.ntf = new Notification(null, session.compteId, this.naCible.id)
+            this.ro = 0
+          } else {
+            await afficherDiag(this.t('ANmx4')) 
+          }
         }
-
-
-        this.ntf = this.notif || new Notification(null, 0, this.naCible.id)
-        this.ro = 0
+      } else if (this.naCible.estCompte) {
+        // notif de compte
+        if (this.notif) {
+          if (this.session.estSponsor){
+            if (ID.estComptable(this.notif.idSource)) {
+              this.ntf = this.notif
+              this.ro = 6
+            } else {
+              this.ntf = this.notif.clone()
+              this.ro = 0
+            }
+          } else {
+            this.ntf = this.notif
+            this.ro = 7
+          }
+        } else { // création d'une notif compte
+          if (this.session.estSponsor){
+            this.ntf = new Notification(null, session.compteId, this.naCible.id)
+            this.ro = 0
+          } else {
+            await afficherDiag(this.t('ANmx7')) 
+          }
+        }
       } else { // Notification générale
         if (this.notif) {
           this.ntf = this.notif

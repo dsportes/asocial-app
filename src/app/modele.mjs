@@ -424,7 +424,13 @@ export class Notification {
   - `texte` : texte informatif, pourquoi, que faire ...
   - `dh` : date-heure de dernière modification (informative).
   Calculés en fonction du jour courant:
-  - niv : niveau de blocage. 0: pas de blocage, 1:lecture seule, 2:restreint, 3:résilié
+  - niv : niveau d'alerte
+    0: pas de blocage,
+    1: alerte simple
+    2: alerte grave (une procédure de blocage est planifiée)
+    3: lecture seule, 
+    4: ni lecture ni écriture,
+    5: résilié
   - d1 : date d'atteinte du niveau 1
   - n1 : nombre de jours avant d'atteindre le niveau 1
   - d2 : date d'atteinte du niveau 2

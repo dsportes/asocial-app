@@ -52,8 +52,16 @@ export const useSessionStore = defineStore('session', {
     tribuCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
     peopleId: 0, // people "courant"
 
-    // blocage / notification
-    nivbl: 0, // Niveau de blocage : 0-pas de limitations, 1-lecture seulement, 2-restreint, 3-résilié
+    /* blocage / notification
+    - niv : niveau d'alerte
+      0: pas de blocage,
+      1: alerte simple
+      2: alerte grave (une procédure de blocage est planifiée)
+      3: lecture seule, 
+      4: ni lecture ni écriture,
+      5: résilié
+    */
+    nivbl: 0,
     alire: false, // Il y a des notifications à lire
     notifG: null, // notification générale courante
 
@@ -68,7 +76,7 @@ export const useSessionStore = defineStore('session', {
       return (t2 && t2.sp) || false 
     },
 
-    editable (state) { return state.mode < 3 && state.nivbl < 2 },
+    editable (state) { return state.mode < 3 && state.nivbl < 4 },
 
     synchro (state) { return state.mode === 1 },
     incognito (state) { return state.mode === 2 },
