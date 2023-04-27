@@ -137,7 +137,7 @@ export default {
     },
     async valider (txt) {
       const buf = txt ? await crypter(this.session.clek, txt) : null
-      await new SetAttributTribu().run(this.id, 'infok', buf)
+      await new SetInfoTribu().run(this.id, 'infok', buf)
       this.close()
     },
     close () { this.edcom = false},

@@ -1,146 +1,142 @@
 <template>
-  <div :class="'q-my-xs col items-start ' + dkli(idx)">
-    <div v-if="ntf && ntf.dh" class="row justify-between">
-      <div>
-        <span v-if="estGlob" class="titre-sm q-mr-sm">{{$t('NTng')}}</span> 
-        <span v-else class="titre-sm q-mr-sm">{{$t(estTribu ? 'NTtr' : 'NTco', [emet])}}</span> 
-        <notif-ico :gravite="ntf.g ? true : false"/>
-      </div>
-      <div>
-        <span class="fs-sm q-mr-xs">{{dh}}</span>
-        <q-btn v-if="edit" size="sm" dense icon="edit" color="primary" @click="editer"/>
-      </div>
+  <div :class="dkli(idx)">
+    <div v-if="notif" class="row q-my-sm">
+      <div class="titre-sm">{{$t('SBc' + tC, [nomC])}}</div>
+      <div class="titre-sm q-ml-xs text-bold">{{$t('SBst' + blocage.niv)}}</div>
+      <notif-icon :niveau="blocage.niv" class="q-ml-md cursor-pointer" @click="editer"/>
     </div>
-    <show-html v-if="ntf && ntf.dh" class="q-my-xs bord" :idx="idx" zoom maxh="3rem" :texte="ntf.txt"/>
-    <div v-if="(!ntf || !ntf.dh) && edit && (!estGlob || session.estComptable)">
-      <span v-if="estGlob" class="titre-sm q-mr-sm text-italic">{{$t('NTnng')}}</span> 
-      <span v-else class="titre-sm q-mr-sm text-italic">{{$t((sponsor ? 'NTnsp' : 'NTnco') + (estTribu ? 'tr' : ''))}}</span> 
-      <q-btn size="sm" dense icon="edit" color="primary" :label="$t('NTecr')" @click="editer"/>
+    <div v-else>
+      <div v-if="editable">
+        <span class="titre-sm q-my-sm text-italic">{{$t('SNnon')}}</span>
+        <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('SBcre')"
+          dense icon="edit" @click="editer"/>
+      </div>
     </div>
 
-  <!-- Edition d'une notification -->
-  <q-dialog v-model="edntf" persistent>
-    <q-card class="petitelargeur">
-      <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="close"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">
-          {{$t(estTribu ? 'NTtr2' : 'NTco2')}}
-        </q-toolbar-title>
-        <notif-ico class="q-mx-xs" :gravite="g ? true : false"/>
-        <bouton-help page="page1"/>
-      </q-toolbar>
-      <q-checkbox v-model="g" class="cb q-mt-sm q-pb-md" :label="$t('NT1')" />
-      <!--  props: { lgmax: Number, modelValue: String, texte: String, labelOk: String, editable: Boolean, idx: Number, modetxt: Boolean, horsSession: Boolean },-->
-      <editeur-md style="height:50vh" :lgmax="1000" editable :texte="txt"
-        :label-ok="$t('valider')" modetxt @ok="valider"/>
-    </q-card>
+  <q-dialog v-model="ouvert" full-height persistent>
+    <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
+      <q-header elevated class="bg-secondary text-white">
+        <q-toolbar>
+          <q-btn dense size="md" color="warning" icon="close" @click="close"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [aSt.avC.na.nom])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+      </q-header>
+
+      <q-page-container>
+        <q-card class="q-pa-sm largeur40">
+          <apercu-avatar edit :na="aSt.avC.na"/>
+        </q-card>
+      </q-page-container>
+    </q-layout>
   </q-dialog>
+
   </div>
 </template>
 <script>
 
-import { encode } from '@msgpack/msgpack'
-
 import stores from '../stores/stores.mjs'
-import { dhcool, afficherDiag } from '../app/util.mjs'
-import { Tribu, getNg } from '../app/modele.mjs'
-import ShowHtml from './ShowHtml.vue'
-import EditeurMd from './EditeurMd.vue'
-import BoutonHelp from './BoutonHelp.vue'
-import NotifIco from './NotifIco.vue'
-import { crypter } from '../app/webcrypto.mjs'
-import { SetAttributTribu, SetAttributTribu2, SetNotifG } from '../app/operations.mjs'
+import NotifIcon from './NotifIcon.vue'
+import { Notification } from '../app/modele.mjs'
+import { afficherDiag } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
 export default {
   name: 'ApercuNotif',
 
-  props: { // la notif est soit au niveau Tribu, soit au niveau "compte" (tribu2)
-    src: Object, // elt de tribu2 pour une notification de niveau compte, tribu pour une notification
-    naTr: Object, // na de la tribu du compte pour un aperçu de niveau "compte" (tribu2) (sinon c'est src.na)
-    sponsor: Boolean, // aperçu de la notification du sponsor, sinon c'est celle du comptable
-    idx: Number,
-    edit: Boolean },
+  props: { 
+    notif: Object, // notification existante, null pour création éventuelle
+    naCible: Object, // NomTribu, NomAvatar ou null pour global de la notification à créer
+    idx: Number
+  },
 
-  components: { ShowHtml, EditeurMd, BoutonHelp, NotifIco },
+  components: { NotifIcon },
 
-  computed: { 
-    ntf () { return !this.src ? this.session.notifG : this.src[this.sponsor ? 'notifsp' : 'notifco'] },
-    dh () { return this.ntf && this.ntf.dh ? dhcool(this.ntf.dh) : '' },
-    estGlob () { return !this.src },
-    estTribu () { return this.src instanceof Tribu },
-    emet () { 
-      if (this.ntf.id) {
-        const nsp = getNg(this.ntf.id)
-        return nsp ? nsp.nomc : this.$t('NTunsp')
-      }
-      return this.cfg.nomDuComptable
-    },
+  computed: {
+    // Type de cible : 1:Global, 2:Tribu, 3:Compte
+    tC () { return !this.naCible ? 1 : (this.naCible.estTribu ? 2 : 3) },
+    nomC () { return this.tC === 1 ? this.$t('admin') : this.naCible.nom },
+    // id de la source : 1:Admin, 2:Comptable, 3:Sponsor
+    idS () { return !this.naSrc ? 0 : this.naSrc.id },
+    nomS () { return !this.naSrc ? this.$t('admin') : this.naSrc.nom },
+    // 
+    edx () { return this.session.estComptable || this.blocage.sp },
   },
 
   data () { return {
-    edntf: false,
-    g: false,
-    txt: 0
+    ntf: null, // notification en édition
+    ouvert: false,
+    ro: 0, // raison d'être en affichage sans édition
   }},
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-    close () { this.edntf = false },
+
     async editer () {
-      if (! await this.session.edit()) return
-      if (this.estGlob) {
-        if (!this.session.estComptable) {
-          await afficherDiag(this.$t('NTgl'))
-          return
-        }
-      } else if (!this.estTribu && ID.estComptable(this.src.na.id) && !this.session.estComptable) {
-        await afficherDiag(this.$t('NTci'))
-        return
-      }
-      if (this.ntf) { 
-        this.g = this.ntf.g || 1; this.txt = this.ntf.txt || ''
-      } else { this.g = 1; this.txt = '' }
-      this.edntf = true
+      this.ro = -1
+      if (!session.ns) await editerA()
+      else if (session.estComptable) await editerC()
+      else await editerS()
+      if (this.ro >= 0) this.ouvert = true
     },
-    async valider (txt) {
-      const e = { 
-        dh: txt ? new Date().getTime() : 0,
-        g: this.g ? true : false,
-        txt: txt
+
+    async editerA () { // Administrateur
+      if (this.naCible) {
+        // notification T ou C, pas éditable par admin
+        if (this.notif){ 
+          this.ntf = this.notif
+          this.ro = 1
+        } else {
+          await afficherDiag(this.t('ANmx1'))
+        }
+      } else { // Notification générale
+        this.ntf = this.notif || new Notification(null, 0, 0)
+        this.ro = 0
       }
-      if (this.estGlob) {
-        await new SetNotifG().run(e)
-        this.close()
-        return
+    },
+
+    async editerC () { // Comptable
+      if (this.naCible) {
+        this.ntf = this.notif || new Notification(null, 0, this.naCible.id)
+        this.ro = 0
+      } else { // Notification générale
+        if (this.notif) {
+          this.ntf = this.notif
+          this.ro = 2
+        } else {
+          await afficherDiag(this.t('ANmx2'))        
+        }
       }
-      e.id = this.session.estComptable ? 0 : this.session.compteId 
-      // crypté par la clé de la tribu si source tribu, du compte si source compte
-      if (this.estTribu) {
-        const buf = await crypter(this.src.na.rnd, new Uint8Array(encode(e)))
-        await new SetAttributTribu().run(
-          this.src.id, 
-          this.sponsor ? 'notifsp' : 'notifco',
-          !txt ? null : buf)
-      } else { // src.na: na du compte
-        const buf = await crypter(this.naTr.rnd, new Uint8Array(encode(e)))
-        await new SetAttributTribu2().run(
-          this.naTr.id, 
-          this.src.na, 
-          this.sponsor ? 'notifsp' : 'notifco',
-          !txt ? null : buf,
-          this.g)
+    },
+
+    async editerS () { // Compte standard ou sponsor de sa tribu
+      if (this.naCible) {
+        if (!await this.session.edit()) return
+        if (this.naCible.estTribu) {
+
+        } else {
+          
+        }
+
+
+        this.ntf = this.notif || new Notification(null, 0, this.naCible.id)
+        this.ro = 0
+      } else { // Notification générale
+        if (this.notif) {
+          this.ntf = this.notif
+          this.ro = 3
+        } else {
+          await afficherDiag(this.t('ANmx3'))        
+        }
       }
-      this.close()
-    }
+    },
+
+    close () { this.ouvert = false }
   },
 
-  setup (props) {
+  setup () {
     const session = stores.session
-    const cfg = stores.config
-
     return {
-      cfg,
       session
     }
   }
@@ -148,9 +144,4 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bord
-  border: 1px solid $grey-5
-.cb
-  position: relative
-  left: -10px
 </style>

@@ -413,65 +413,68 @@ export class MdpAdmin {
   }
 }
 
-const lstfBlocage = ['sp', 'jib', 'nja', 'njl', 'dh']
-export class Blocage {
+const lstfnotif = ['idSource', 'idCible', 'jbl', 'nj', 'texte', 'dh']
+export class Notification {
 
   /* Attributs: 
-  - `sp`: id du sponsor si créé / gérée par un sponsor (absent / 0 pour un blocage _tribu_).
-    Lorsque le comptable a pris le contrôle sur une procédure de blocage de compte, un sponsor ne peut plus la modifier / remplacer / supprimer.
-  - `jib` : jour initial de la procédure de blocage sous la forme `aaaammjj`.
-  - `nja njl` : nb de jours passés en niveau _alerte_, et _lecture seule_.
-  Attributs calculés (pour le jour courant):
-  - niv : niveau actuel (1: alerte, 2:lecture, 3:bloqué, 4:résilié)
-  - njl : nombre de jours avant d'être en lecture seulement (0 si déjà atteint)
-  - njb : nombre de jours avant d'être bloqué (0 si déjà atteint)
-  - njr : nombre de jours avant d'être résilié
-  - pjl : premier jour en lecture seulement (0 si passé)
-  - pjb : premier jour en blocage total (0 si passé)
-  - pjr : premier jour de résiliation
-  
+  - `source`: id de la source, du Comptable ou du sponsor, par convention 0 pour l'administrateur.
+  - `cible` : 0 pour le global, sinon id de la tribu ou du compte.
+  - `jbl` : jour de déclenchement de la procédure de blocage sous la forme `aaaammjj`, 0 s'il n'y a pas de procédure de blocage en cours.
+  - `nj` : en cas de procédure ouverte, nombre de jours après son ouverture avant de basculer en niveau 2.
+  - `texte` : texte informatif, pourquoi, que faire ...
+  - `dh` : date-heure de dernière modification (informative).
+  Calculés en fonction du jour courant:
+  - niv : niveau de blocage. 0: pas de blocage, 1:lecture seule, 2:restreint, 3:résilié
+  - d1 : date d'atteinte du niveau 1
+  - n1 : nombre de jours avant d'atteindre le niveau 1
+  - d2 : date d'atteinte du niveau 2
+  - n2 : nombre de jours avant d'atteindre le niveau 2
+  - d3 : date d'atteinte du niveau 3
+  - n3 : nombre de jours avant d'atteindre le niveau 3
   */
-  constructor (buf, sp, nja, njl) {
+  constructor (buf, idSource, idCible) {
     if (buf) {
       const r = decode(buf)
-      for (const f of lstfBlocage) this[f] = r[f]
-      this.sp = r.sp || 0
+      for (const f of lstfnotif) this[f] = r[f]
     } else {
-      this.sp = sp
-      this.jib = AMJ.amjUtc()
-      this.nja = nja || 30
-      this.njl = njl || 30
+      this.idSource = idSource
+      this.idCible = idCible
+      this.jbl = 0
+      this.nj = 0
+      this.texte = ''
       this.dh = 0
     }
-    this.recalculBloc()
+    this.calcul()
   }
 
-  clone () {
-    return new Blocage(this.encode()) 
-  }
+  clone () { return new Notification(this.encode()) }
 
   encode () {
     const buf = {}
-    for (const f of lstfBlocage) buf[f] = this[f]
+    for (const f of lstfnotif) buf[f] = this[f]
     return new Uint8Array(encode(buf))
   }
 
-  recalculBloc () {
+  calcul () {
     try {
+      this.n1 = 0; this.d1 = 0; this.n2 = 0; this.d2 = 0; this.n3 = 0; this.d3 = 0
+      if (!jbl) { this.niv = 0; return }
+
       const now = AMJ.amjUtc()
-      this.niv = 1
- 
-      this.pjl = AMJ.amjUtcPlusNbj(this.jib, this.nja)
-      if (this.pjl <= now) { this.pjl = 0; this.njl = 0; this.niv = 2 }
-      else this.njl = AMJ.diff(this.pjl, now)
+      this.d3 = AMJ.amjUtcPlusNbj(this.jbl, stores.config.limitesjour.dlv + 1)
+      if (this.d3 <= now) { this.niv = 3; return } // date de résiliation atteinte ou dépassée
+      this.n3 = AMJ.diff(this.d3, now)
 
-      this.pjb = AMJ.amjUtcPlusNbj(this.jib, this.nja + this.njl)
-      if (this.pjb <= now) { this.pjb = 0; this.njb = 0; this.niv = 3 } 
-      else this.njb = AMJ.diff(this.pjb, now)
+      this.d2 = AMJ.amjUtcPlusNbj(this.jbl, this.nj)
+      if (this.d2 <= now) { this.niv = 2; return } // date de restriction atteinte ou dépassée
+      if (this.d2 > this.d3) this.d2 = 0 // la date de restriction ne sera jamais atteinte
+      else this.n2 = AMJ.diff(this.d2, now)
 
-      this.pjr = AMJ.amjUtcPlusNbj(this.jib, stores.config.limitesjour.dlv + 1)
-      if (this.pjr <= now) { this.pjr = 0; this.niv = 4 } 
-      else this.njr = AMJ.diff(this.pjb, now)
+      this.d1 = AMJ.amjUtc(this.jbl)
+      if (this.d1 <= now) { this.niv = 1; return } // date de lecture seule atteinte ou dépassée
+      if (this.d1 > this.d3) this.d1 = 0 // la date de lecture seule ne sera jamis atteinte
+      else this.n1 = AMJ.diff(this.d1, now)
+      this.niv = 0
     } catch (e) {
       console.log(e)
     }
@@ -526,24 +529,15 @@ export class Espace extends GenDoc {
   async compile (row) {
     // la clé est le rnd du Comptable de l'espace
     const cle = new Uint8Array(32); cle[0] = this.id
-    if (row.notifA) {
-      this.notifA = decode(await decrypter(cle, row.notifA))
-      this.notifA.v = this.v
-    } else this.notifA = null
-    if (row.notifC) {
-      this.notifC = decode(await decrypter(cle, row.notifC))
-      this.notifC.v = this.v
-    } else this.notifC = null
-    if (row.blocage) {
-      const b = await decrypter(cle, row.blocage)
-      this.blocage = new Blocage(b)
-      this.blocage.v = this.v
-    } else this.blocage = null
+    if (row.notif) {
+      this.notif = new Notification(await decrypter(cle, row.notif))
+      this.notif.v = this.v
+    } else this.notif = null
     this.t = row.t || 0
   }
 
   static async nouveau (id) {
-    const r = { id, v: 1, t: 1, notifA: null, notifC: null, blocage: null }
+    const r = { id, v: 1, t: 1, notif: null }
     return { _nom: 'espaces', id, v: 1, _data_: new Uint8Array(encode(r))}
   }
 }
@@ -554,17 +548,14 @@ export class Espace extends GenDoc {
 
 - `nctkc` : `[nom, rnd]` de la tribu crypté par la clé K du comptable.
 - `infok` : commentaire privé du comptable crypté par la clé K du comptable.
-- `notifco` : notification du comptable à la tribu (cryptée par la clé de la tribu).
-- `notifsp` : notification d'un sponsor à la tribu (cryptée par la clé de la tribu).
-- `blocaget` : blocage crypté par la clé de la tribu.
+- `notif` : notification comptable / sponsor à la tribu (cryptée par la clé de la tribu).
 - `cpt` : sérialisation non cryptée des compteurs suivants:
   - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
   - `q1 q2` : quotas actuels de la tribu
   - `nbc` : nombre de comptes.
   - `nbsp` : nombre de sponsors.
-  - `cbl` : nombre de comptes ayant un blocage.
-  - `nco[0, 1]` : nombres de comptes ayant une notification du comptable, par gravité.
-  - `nsp[0, 1]` : nombres de comptes ayant une notification d'un sponsor, par gravité.
+  - `ncoS` : nombres de comptes ayant une notification simple.
+  - `ncoB` : nombres de comptes ayant une notification bloquante.
 */
 
 export class Tribu extends GenDoc {
@@ -585,12 +576,7 @@ export class Tribu extends GenDoc {
       this.info = row.infok ? await decrypterStr(session.clek, row.infok) : ''
     }
     this.nctkc = row.nctkc
-    this.notifco = row.notifco ? decode(await decrypter(this.clet, row.notifco)) : null
-    this.notifsp = row.notifsp ? decode(await decrypter(this.clet, row.notifsp)) : null
-    if (row.blocaget) {
-      const b = await decrypter(this.clet, row.blocaget)
-      this.blocage = new Blocage(b)
-    } else this.blocage = null
+    this.notif = row.notif ? new Notification(await decrypter(this.clet, row.notif)) : null
     this.cpt = decode(row.cpt)
   }
 
@@ -632,10 +618,8 @@ export class Tribu extends GenDoc {
     - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
     - `sp` : si `true` / présent, c'est un sponsor.
     - `q1 q2` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
-    - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
-    - 'gco gsp' : gravités des notifco et notifsp (true / false).
-    - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
-    - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
+    - 'ntfb' : true si la notification est bloquante
+    - `notif` : notification du compte (cryptée par la clé de la tribu).
     - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
 */
 
@@ -663,8 +647,7 @@ export class Tribu2 extends GenDoc {
         r.blocage = new Blocage(b)
       } else r.blocage = null
       r.cv = e.cv ? decode(await decrypter(e.na.rnd, e.cv)) : null
-      r.notifco = e.notifco ? decode(await decrypter(this.clet, e.notifco)) : null
-      r.notifsp = e.notifsp ? decode(await decrypter(this.clet, e.notifsp)) : null
+      r.notif = e.notif ? new Notification(await decrypter(this.clet, e.notif)) : null
       this.mbtr[r.na.id] = r
     }
   }

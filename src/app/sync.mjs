@@ -1,5 +1,6 @@
 import stores from '../stores/stores.mjs'
 import { Operation } from './operations.mjs'
+import { deconnexion } from './connexion.mjs'
 import { decode } from '@msgpack/msgpack'
 import { compile, Versions } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'
@@ -234,8 +235,8 @@ export class OperationWS extends Operation {
 
     if (session.accesIdb) await gestionFichierSync(this.buf.mapSec)
 
-    const chg = session.setBlocage()
-    if (chg > 1) await this.alerteBlocage (chg)
+    session.setBlocage()
+    if (session.nivbl > 2 && !session.estComptable) deconnexion()
     session.setDh(this.dh)
   }
 
@@ -385,9 +386,7 @@ export class OnchangeEspace extends OperationWS {
     try {
       const session = stores.session
       const esp = await compile(row)
-      session.setNotifA(esp.notifA)
-      session.setNotifC(esp.notifC)
-      session.setBlocageA(esp.blocage)
+      session.setNotif(esp.notif)
     } catch (e) { 
       await this.finKO(e)
     }

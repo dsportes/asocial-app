@@ -52,14 +52,10 @@ export const useSessionStore = defineStore('session', {
     tribuCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
     peopleId: 0, // people "courant"
 
-    // blocage et notification
-    nivbl: 0,
-    alirebl: false,
-    gntf: 0,
-    notifA: null,
-    notifC: null,
-    blocageA: null,
-    alirentf: false,
+    // blocage / notification
+    nivbl: 0, // Niveau de blocage : 0-pas de limitations, 1-lecture seulement, 2-restreint, 3-résilié
+    alire: false, // Il y a des notifications à lire
+    notifG: null, // notification générale courante
 
     // message fmsg de report après filtrage
     filtreMsg: ''
@@ -170,23 +166,9 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    setNotifA (notif) {
-      if (notif && (!this.notifA || notif.v > this.notifA.v)) {
-        this.notifA = notif
-        this.setBlocage()
-      }
-    },
-
-    setNotifC (notif) {
-      if (notif && (!this.notifC || notif.v > this.notifC.v)) {
-        this.notifC = notif
-        this.setBlocage()
-      }
-    },
-
-    setBlocageA (blocage) {
-      if (blocage && (!this.blocageA || blocage.v > this.blocageA.v)) {
-        this.blocageA = blocage
+    setNotif (notif) { // Notification générale
+      if (notif && (!this.notifG || notif.v > this.notifG.v)) {
+        this.notifG = notif
         this.setBlocage()
       }
     },
@@ -198,21 +180,14 @@ export const useSessionStore = defineStore('session', {
       }, 1000)
     },
 
-    /* Calcul des niveaux de notification et de blocage max
+    /* Calcul du niveau de notification / blocage max
     */
     setBlocage () {
       const self = this
       function ntfx (ntf) {
         if (ntf && ntf.dh) {
-          if (self.gntf === 0) self.gntf = 1
-          if (ntf.g) self.gntf = 2
-          if (ntf.dh > dhvu) self.alirentf = true
-        }  
-      }
-      function blx (bl) {
-        if (bl) {
-          if (bl.niv > self.nivbl) self.nivbl = bl.niv
-          if (bl.dh > dhvu) self.alirebl = true
+          if (ntf.dh > dhvu) self.alire = true
+          if (ntf.niv > self.nivbl) self.nivbl = ntf.niv
         }  
       }
       const aSt = stores.avatar
@@ -220,18 +195,10 @@ export const useSessionStore = defineStore('session', {
       const et2 = aSt.tribu2.mbtr[this.compteId]
       const dhvu = aSt.compta.dhvu || 0
       this.nivbl = 0
-      this.alirebl = false
-      this.gntf = 0
-      this.alirentf = false
-      ntfx(this.notifA)
-      ntfx(this.notifC)
-      ntfx(tr.notifco)
-      ntfx(tr.notifsp)
-      ntfx(et2.notifco)
-      ntfx(et2.notifsp)
-      blx(this.blocageA)
-      blx(tr.blocage)
-      blx(et2.blocage)
+      this.alire = false
+      ntfx(this.notifG)
+      ntfx(tr.notif)
+      ntfx(et2.notif)
     },
 
     async edit (tst) {

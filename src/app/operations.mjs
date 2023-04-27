@@ -600,24 +600,45 @@ export class NouvelleTribu extends OperationUI {
   }
 }
 
-/* Set d'un attribut d'une tribu *********************************
-  - `infok` : commentaire privé du comptable crypté par la clé K du comptable.
-  - `notifco` : notification du comptable à la tribu (cryptée par la clé de la tribu).
-  - `notifsp` : notification d'un sponsor à la tribu (cryptée par la clé de la tribu).
-  - `blocaget` : blocage crypté par la clé de la tribu.
+/* Set info tribu : commentaire privé du comptable crypté par la clé K du comptable.
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
 args.attr: nom de l'attribut
 args.val: valeur de l'attribut
 Retour:
 */
-export class SetAttributTribu extends OperationUI {
-  constructor () { super($t('OPnvtr')) }
+export class SetInfoTribu extends OperationUI {
+  constructor () { super($t('OPinfotr')) }
 
-  async run (id, attr, val) {
+  async run (id, info) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, attr, val }
+      const val = info ? await crypter(session.clek, info) : null
+      const args = { token: session.authToken, id, attr: 'infok', val }
+      this.tr(await post(this, 'SetAttributTribu', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Set `notif` tribu : notification de la tribu (cryptée par la clé de la tribu).
+args.token: éléments d'authentification du compte.
+args.id : id de la tribu
+args.attr: nom de l'attribut
+args.val: valeur de l'attribut
+Retour:
+*/
+export class SetNotifT extends OperationUI {
+  constructor () { super($t('OPntftr')) }
+
+  async run (id, notifT) {
+    try {
+      const session = stores.session
+      const cle = getCle(id)
+      const val = notifT ? await crypter(cle, notifT.encode()) : null
+      const args = { token: session.authToken, id, attr: 'notif', val }
       this.tr(await post(this, 'SetAttributTribu', args))
       this.finOK()
     } catch (e) {
@@ -647,30 +668,51 @@ export class SetQuotasTribu extends OperationUI {
   }
 }
 
+/* Set notification de compte dans tribu2
+args.token: éléments d'authentification du compte.
+args.id : id de la tribu
+args.hrnd: id de l'élément du compte dans mbtr
+args.notif: notification du compte
+args.ntfb : true / false notification bloquuante
+Retour:
+*/
+export class SetNotifC extends OperationUI {
+  constructor () { super($t('OPntfco')) }
+
+  async run (id, na, notifC) {
+    try {
+      const session = stores.session
+      const cle = getCle(id)
+      const notif = notifC ? await crypter(cle, notifC.encode()) : null
+      const args = { token: session.authToken, id, hrnd: na.hrnd, notif, 
+        ntfb: notifC && notifC.jbl ? true : false }
+      this.tr(await post(this, 'SetAttributTribu2', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* Set d'un attribut QUI IMPACTE tribu de l'entrée d'un compte d'une tribu2 - PAS la CV *******
   - `sp` : si `true` / présent, c'est un sponsor.
-  - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
-  - 'gco gsp' : gravités des notifco et notifsp.
-  - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
-  - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
   - quotas: `[q1, q2]` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
 args.hrnd: id de l'élément du compte dans mbtr
 args.attr: nom de l'attribut
 args.val: valeur de l'attribut
-args.val2: valeur de l'attribut "gco / gsp"
 args.exq: lever une exception en cas dépassement des quotas de la tribu
 Retour:
 */
 export class SetAttributTribu2 extends OperationUI {
   constructor () { super($t('OPmajtr')) }
 
-  async run (id, na, attr, val, val2, exq) {
+  async run (id, na, attr, val, exq) {
     try {
       const session = stores.session
       const args = { token: session.authToken, id, hrnd: na.hrnd, attr, 
-        val, val2: val2 || 0, exq: exq || false }
+        val, exq: exq || false }
       this.tr(await post(this, 'SetAttributTribu2', args))
       this.finOK()
     } catch (e) {
@@ -710,10 +752,8 @@ export class ChangerTribu extends OperationUI {
         - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
         - `sp` : si `true` / présent, c'est un sponsor.
         - `q1 q2` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
-        - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
-        - 'gco gsp' : gravités des notifco et notifsp (true / false).
-        - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
-        - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
+        - 'ntfb' : true si la notification est bloquante
+        - `notif` : notification du compte (cryptée par la clé de la tribu).
         - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
       */
       const m = tribu2.mbtr[na.id]
@@ -723,13 +763,10 @@ export class ChangerTribu extends OperationUI {
         sp: m.sp,
         q1: m.q1,
         q2: m.q2,
-        gco: m.gco || 0,
-        gsp: m.gsp || 0,
+        ntfb: m.ntfb,
         cv: m.cv || null
       }
-      if (m.blocage) mnv.blocage = await crypter(naTrap.rnd, m.blocage.encode())
-      if (m.notifco) mnv.notifco = await crypter(naTrap.rnd, new Uint8Array(encode(m.notifco)))
-      if (m.notifsp) mnv.notifsp = await crypter(naTrap.rnd, new Uint8Array(encode(m.notifsp)))
+      mnv.notif = m.notif ? await crypter(naTrap.rnd, m.notif.encode()) : null
       const mbtr = new Uint8Array(encode(mnv))
 
       const trbuf = new Uint8Array(encode([naTrap.nom, naTrap.rnd]))
@@ -823,16 +860,19 @@ export class GetTribu extends OperationUI {
 
 /* Set notification générale *****************************************************
 args.token donne les éléments d'authentification du compte.
-args.notifG : l'objet notification { txt, dh, g }
+args.ns
+args.notif
 Retour:
 */
 export class SetNotifG extends OperationUI {
-  constructor () { super($t('OPnotif')) }
+  constructor () { super($t('OPntfg')) }
 
-  async run (notifG) {
+  async run (ns, notifG) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, notifG}
+      const naComptable = NomGenerique.comptable(ns)
+      const notif = !notifG ? null : await crypter(naComptable.rnd, notifG.encode())
+      const args = { token: session.authToken, ns, notif}
       this.tr(await post(this, 'SetNotifG', args))
       this.finOK()
     } catch (e) {
@@ -879,7 +919,7 @@ export class NouveauGroupe extends OperationUI {
   }
 }
 
-/* Changement des mots clés d'un compte ******************************************
+/* Changement des mots clés d'un groupe ******************************************
 args.token donne les éléments d'authentification du compte.
 args.mcg : map des mots clés cryptée par la clé du groupe
 args.idg : id du groupe

@@ -557,11 +557,7 @@ export class ConnexionCompte extends OperationUI {
 
       // Rangement en store
       aSt.setCompte(this.avatar, this.compta, this.tribu, this.tribu2)
-      if (this.espace) {
-        session.setNotifA(this.espace.notifA)
-        session.setNotifC(this.espace.notifC)
-        session.setBlocageA(this.espace.blocage)
-      }
+      if (this.espace) session.setNotif(this.espace.notif)
 
       // En cas de blocage grave, plus de synchronisation
       if (session.nivbl === 3 && session.mode === 1) {
@@ -857,11 +853,7 @@ export class AcceptationSponsoring extends OperationUI {
       aSt.setCompte(avatar, compta, tribu, tribu2)
 
       const espace = await compile(ret.rowEspace)
-      if (espace) {
-        session.setNotifA(espace.notifA)
-        session.setNotifC(espace.notifC)
-        session.setBlocageA(espace.blocage)
-      }
+      if (espace) session.setNotif(espace.notif)
 
       const chat = await compile(rowChat)
       aSt.setChat(chat)
@@ -1055,11 +1047,7 @@ export class GetEspace extends OperationUI {
       const args = { token: session.authToken, ns: ns || session.ns }
       const ret = this.tr(await post(this, 'GetEspace', args ))
       const espace = await compile(ret.rowEspace)
-      if (espace) {
-        session.setNotifA(espace.notifA)
-        session.setNotifC(espace.notifC)
-        session.setBlocageA(espace.blocage)
-      }
+      if (espace) session.setNotif(espace.notif)
       return this.finOK(espace)
     } catch (e) {
       return await this.finKO(e)
@@ -1091,11 +1079,7 @@ export class SetEspace extends OperationUI {
       }
       const ret = this.tr(await post(this, 'SetEspace', args ))
       const espace = await compile(ret.rowEspace)
-      if (espace) {
-        session.setNotifA(espace.notifA)
-        session.setNotifC(espace.notifC)
-        session.setBlocageA(espace.blocage)
-      }
+      if (espace) session.setNotif(espace.notif)
       return this.finOK(espace)
     } catch (e) {
       return await this.finKO(e)

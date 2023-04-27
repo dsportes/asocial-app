@@ -127,7 +127,7 @@ export default {
       this.aSt.ccCpt = new Compteurs(await new GetCompteursCompta().run(this.na.id))
       this.cptdial = true
     },
-    async changerSp(estSp) { // (id, na, attr, val, val2, exq)
+    async changerSp(estSp) { // (id, na, attr, val, exq)
       await new SetAttributTribu2().run(this.session.tribuCId, this.na, 'sp', estSp)
       this.chgSp = false
     },
