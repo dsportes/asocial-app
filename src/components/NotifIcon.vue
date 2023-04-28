@@ -3,7 +3,7 @@
   <q-menu v-if="info">
     <div class="titre-md q-pa-xs text-white bg-secondary bord">{{$t('ANlong' + niv)}}</div>
   </q-menu>
-  <span v-if="label">{{$t('ANcourt' + niv)}}</span>
+  <span v-if="cible !== 0">{{$t('ANcourt' + niv, [$t('ANcible' + cible)])}}</span>
   <q-icon size="sm" style="position:relative; border-radius: 6px" :name="ico">
     <span v-if="alire" class="rond"></span>
   </q-icon>
@@ -17,7 +17,7 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
 
 export default ({
-  name: 'BlocageIco',
+  name: 'NotifIcon',
   props: { 
     /* niv : niveau d'alerte
       0: pas de blocage,
@@ -29,7 +29,7 @@ export default ({
     */
     niv: Number,
     alire: Boolean, // présence de l'indicateur à lire
-    label: Boolean, // true: un label précède l'icône
+    cible: Number, // 1:G, 2:Tribu 3:Compte - si non 0, un label précède l'icône
     info: Boolean // si définie, une info bulle explique le statut
   },
   computed: {

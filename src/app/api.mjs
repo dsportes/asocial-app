@@ -242,7 +242,7 @@ export class AMJ {
   static editDeAmj (amj, jma) { 
     if (!amj) return '?'
     const [a, m, j] = AMJ.aaaammjj(amj)
-    return jma ? ('' + a + '-' + AMJ.zp(m) + '-' + AMJ.zp(j)) :
+    return !jma ? ('' + a + '-' + AMJ.zp(m) + '-' + AMJ.zp(j)) :
       ('' + j + '/' + m + '/' + a)
   }
   

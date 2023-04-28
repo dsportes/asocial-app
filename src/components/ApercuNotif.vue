@@ -1,16 +1,17 @@
 <template>
   <div :class="dkli(idx)">
-    <div v-if="notif" class="row q-my-sm">
-      <div class="titre-sm">{{$t('SBc' + tC, [nomC])}}</div>
-      <div class="titre-sm q-ml-xs text-bold">{{$t('SBst' + blocage.niv)}}</div>
-      <notif-icon :niveau="blocage.niv" class="q-ml-md cursor-pointer" @click="editer"/>
-    </div>
-    <div v-else>
-      <div v-if="editable">
-        <span class="titre-sm q-my-sm text-italic">{{$t('SNnon')}}</span>
-        <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('SBcre')"
+    <div v-if="notif" class="column q-my-sm">
+      <div class="row justify-between">
+        <notif-icon :niv="notif.niv" :cible="tC" info/>
+        <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('ANplus')"
           dense icon="edit" @click="editer"/>
       </div>
+      <show-html class="q-mt-sm bord" :texte="notif.texte" :idx="idx" maxh="3rem" zoom/>
+    </div>
+    <div v-else class="row justify-between">
+      <notif-icon :niv="0" :cible="tC" info/>
+      <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('ANcre')"
+        dense icon="edit" @click="editer"/>
     </div>
 
   <q-dialog v-model="ouvert" full-height persistent>
@@ -18,28 +19,109 @@
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="close"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [aSt.avC.na.nom])}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">
+            {{$t('alerte') + ' ' + $t('ANcible' + tC, [nomC])}}
+          </q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
       </q-header>
 
       <q-page-container>
-        <q-card class="q-pa-sm largeur40">
-          <apercu-avatar edit :na="aSt.avC.na"/>
-        </q-card>
+        <q-page class="q-pa-sm">
+          <div v-if="ro > 0" class="q-pa-xs titre-md text-bold text-italic text-center text-warning bg-yellow-3">
+            {{$t('ANro' + ro)}}
+          </div>
+          <div class="q-mt-sm row justify-between">
+            <div class="titre-lg">{{$t('ANemet', [nomS])}}</div>
+            <div class="fs-md font-mono">{{dhc}}</div>
+          </div>
+
+          <show-html class="q-mt-sm bord" :texte="ntf.texte" :idx="idx" maxh="5rem" 
+            :edit="ro===0" zoom @edit="txtedit=true"/>
+
+          <div class="q-mt-sm titre-md text-bold">
+            <span v-if="ntf.niv<2">{{$t('ANlon' + ntf.niv)}}</span>
+            <span v-if="ntf.niv===2" class="text-warning bg-yellow-3">{{$t('ANlon' + ntf.niv)}}</span>
+            <span v-if="ntf.niv>2" class="text-negative bg-yellow-5">{{$t('ANlon' + ntf.niv)}}</span>
+          </div>
+          <div v-if="ntf.niv>1 && ntf.niv<5" class="q-my-xs titre-sm text-italic">{{$t('ANlong' + ntf.niv)}}</div>
+
+          <div style="height:4rem">
+          <div v-if="ntf.n3 > 0" class="q-ml-md titre-md">
+            {{$t('ANlon3') + ' ' + $t('ANle', [edd(ntf.jbl), ntf.n3])}}</div>
+          <div v-if="ntf.n4 > 0" class="q-ml-md titre-md">
+            {{$t('ANlon4') + ' ' + $t('ANle', [edd(ntf.d4), ntf.n4])}}</div>
+          <div v-if="ntf.n5 > 0" class="q-ml-md titre-md">
+            {{$t('ANlon5') + ' ' + $t('ANle', [edd(ntf.d5), ntf.n5])}}</div>
+          </div>
+
+          <div v-if="ro === 0">
+            <q-separator color="orange" class="q-my-sm"/>
+            <div v-if="ntf.jbl!==0">
+              <div class="fs-md text-italic q-my-xs">{{$t('ANed0', [dp])}}</div>
+              <div class="column q-ml-md q-gutter-sm">
+                <q-radio dense v-model="choix" :val="1" :label="$t('ANed1')" />
+                <q-radio dense v-model="choix" :val="2" :label="$t('ANed2')" />
+                <q-radio dense v-model="choix" :val="3" :label="$t('ANed3')" />
+              </div>
+            </div>
+            <div v-else>
+              <q-radio dense v-model="choix" :val="4" :label="$t('ANed4')" />
+            </div>
+
+            <div v-if="choix >= 3" class="fs-md q-my-sm row items-end">
+              <span class ="q-mr-sm">{{$t('ANdp', [edd(ntf.jbl)])}}</span>
+              <q-input dense clearable class="inp1" v-model.number="np" type="number"
+               :label="$t('AN365')">
+              </q-input>
+            </div>
+
+            <div v-if="ntf.jbl > 0" class="fs-md q-my-sm row items-end">
+              <span class ="q-mr-sm">{{$t('ANd4')}}</span>
+              <q-input dense clearable class="inp1" v-model.number="nj" type="number" 
+                :label="$t('AN365')">
+              </q-input>
+            </div>
+
+            <div class="row q-my-md q-gutter-lg">
+              <q-btn flat color="primary" icon="close" dense size="md" 
+                :label="$t('renoncer')" @click="close"/>
+              <q-btn flat color="primary" icon="undo" dense size="md" 
+                :disable="!chg" :label="$t('annuler')" @click="undo"/>
+              <q-btn color="warning" icon="check" dense size="md" 
+                :disable="!chg" :label="$t('valider')" @click="valider"/>
+            </div>
+          </div>
+        </q-page>
       </q-page-container>
     </q-layout>
+  </q-dialog>
+
+  <!-- Dialogue d'édition du texte de l'alerte -->
+  <q-dialog v-model="txtedit" persistent>
+    <q-card class="petitelargeur shadow-8">
+      <q-toolbar class="bg-secondary text-white">
+        <q-toolbar-title class="titre-lg full-width">{{$t('ANtxt')}}</q-toolbar-title>
+        <q-btn dense flat size="md" icon="close" @click="txtedit=false"/>
+      </q-toolbar>
+      <editeur-md class="height-10"
+        :texte="ntf.texte || ''" editable modetxt :label-ok="$t('OK')" @ok="texteok"/>
+    </q-card>
   </q-dialog>
 
   </div>
 </template>
 <script>
 
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import NotifIcon from './NotifIcon.vue'
+import BoutonHelp from './BoutonHelp.vue'
+import EditeurMd from './EditeurMd.vue'
+import ShowHtml from './ShowHtml.vue'
 import { Notification } from '../app/modele.mjs'
-import { afficherDiag } from '../app/util.mjs'
-import { ID } from '../app/api.mjs'
+import { afficherDiag, dhcool } from '../app/util.mjs'
+import { AMJ, ID } from '../app/api.mjs'
 
 export default {
   name: 'ApercuNotif',
@@ -50,34 +132,105 @@ export default {
     idx: Number
   },
 
-  components: { NotifIcon },
+  components: { NotifIcon, BoutonHelp, EditeurMd, ShowHtml },
 
   computed: {
     // Type de cible : 1:Global, 2:Tribu, 3:Compte
     tC () { return !this.naCible ? 1 : (this.naCible.estTribu ? 2 : 3) },
-    nomC () { return this.tC === 1 ? this.$t('admin') : this.naCible.nom },
-    // id de la source : 1:Admin, 2:Comptable, 3:Sponsor
-    idS () { return !this.naSrc ? 0 : this.naSrc.id },
-    nomS () { return !this.naSrc ? this.$t('admin') : this.naSrc.nom },
-    // 
-    edx () { return this.session.estComptable || this.blocage.sp },
+    nomC () { return !this.naCible ? '' : this.naCible.nom },
+
+    // Nom de la source
+    nomS () { return !this.ntf.source ? this.$t('admin') : getNg(this.ntf.source).nomC },
+    dhc () { return this.ntf.dh ? dhcool(this.ntf.dh) : ''},
+
+    dp () { return AMJ.editDeAmj(this.ntf.jbl, true) },
+    chg () { return !this.notif || 
+      (this.notif.jbl !== this.ntf.jbl) || 
+      (this.notif.nj !== this.ntf.nj) ||
+      (this.notif.texte !== this.ntf.texte)
+    }
   },
 
   data () { return {
-    ntf: null, // notification en édition
+    txtedit: false,
     ouvert: false,
     ro: 0, // raison d'être en affichage sans édition
+    choix: 0, // procédure en cours
+    jbl: 0,
+    np: 0,
+    nj: 0
   }},
+
+  watch: {
+    choix (ap, av) {
+      switch (ap) {
+      case 1: { // ajuster
+        this.np = 0
+        this.nj = this.ntf.nj
+        break
+      }
+      case 2: { // annuler
+        this.ntf.jbl = 0
+        this.ntf.nj = 0
+        this.np = 0
+        this.nj = 0
+        break
+      }
+      case 3: { // réinit
+        this.ntf.jbl = this.auj
+        this.np = 0
+        this.nj = this.ntf.nj
+        break
+      }
+      case 4: { // nouvelle
+        this.ntf.jbl = this.auj
+        this.ntf.nj = 30
+        this.np = 0
+        this.nj = 30
+        this.choix = 1
+        break
+      }
+      }
+      this.ntf.calcul()
+    },
+    np (ap, av) {
+      const x = ap // ? parseInt(ap) : 0
+      if (x < 0 || x > 365) return
+      this.ntf.jbl = AMJ.amjUtcPlusNbj(this.auj, x)
+      this.ntf.calcul()
+    },
+    nj (ap, av) {
+      const x = ap // ? parseInt(ap) : 0
+      if (x < 0 || x > 365) return
+      this.ntf.nj = x
+      this.ntf.calcul()
+    },
+  },
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
 
+    edd (d) { return AMJ.editDeAmj(d, true) },
+    texteok (t) { this.ntf.texte = t; this.txtedit = false },
+
+    undo () {
+      this.ntf = this.ntfx ? this.ntfx.clone() : this.notif.clone()
+      this.reset()
+    },
+
+    reset () {
+      this.choix = this.ntf.jbl === 0 ? 0 : 1
+    },
+
     async editer () {
       this.ro = -1
-      if (!session.ns) await editerA()
-      else if (session.estComptable) await editerC()
-      else await editerS()
-      if (this.ro >= 0) this.ouvert = true
+      if (!this.session.ns) await this.editerA()
+      else if (this.session.estComptable) await this.editerC()
+      else await this.editerS()
+      if (this.ro >= 0) {
+        if (this.ro === 0) this.reset()
+        this.ouvert = true
+      }
     },
 
     async editerA () { // Administrateur
@@ -90,8 +243,8 @@ export default {
           await afficherDiag(this.t('ANmx1'))
         }
       } else { // Notification générale
-        this.ntf = this.notif ? this.notif.clone() :
-          new Notification(null, 0, 0)
+        this.ntf = this.notif ? this.notif.clone() : new Notification(null, 0, 0)
+        this.ntfx = this.ntf.clone()
         this.ro = 0
       }
     },
@@ -99,7 +252,8 @@ export default {
     async editerC () { // Comptable
       if (this.naCible) {
         this.ntf = this.notif ? this.notif.clone() : 
-          new Notification(null, session.compteId, this.naCible.id)
+          new Notification(null, this.session.compteId, this.naCible.id)
+        this.ntfx = this.ntf.clone()
         this.ro = 0
       } else { // Notification générale
         if (this.notif) {
@@ -130,7 +284,8 @@ export default {
           }
         } else { // création d'une notif tribu
           if (this.session.estSponsor){
-            this.ntf = new Notification(null, session.compteId, this.naCible.id)
+            this.ntf = new Notification(null, this.session.compteId, this.naCible.id)
+            this.ntfx = this.ntf.clone()
             this.ro = 0
           } else {
             await afficherDiag(this.t('ANmx4')) 
@@ -153,7 +308,8 @@ export default {
           }
         } else { // création d'une notif compte
           if (this.session.estSponsor){
-            this.ntf = new Notification(null, session.compteId, this.naCible.id)
+            this.ntf = new Notification(null, this.session.compteId, this.naCible.id)
+            this.ntfx = this.ntf.clone()
             this.ro = 0
           } else {
             await afficherDiag(this.t('ANmx7')) 
@@ -169,17 +325,33 @@ export default {
       }
     },
 
-    close () { this.ouvert = false }
+    close () { this.ouvert = false },
+
+    async valider () {
+      console.log('valider', this.ntf.niv)
+    }
   },
 
   setup () {
     const session = stores.session
+    const auj = AMJ.amjUtc()
+    const ntf = ref(null)
+    const ntfc = ref(null)
     return {
-      session
+      session,
+      auj,
+      ntf,
+      ntfc
     }
   }
 }
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.bord
+  border: 1px solid $grey-5
+  border-radius: 5px
+  padding: 2px
+.inp1
+  width: 5rem
 </style>

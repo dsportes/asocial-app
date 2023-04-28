@@ -18,34 +18,17 @@
 
     <div class="q-ml-md titre-md">{{$t('NTnbcsp', [t.cpt.nbc, t.cpt.nbsp])}}</div>
 
-    <apercu-notif class="q-ml-md q-my-xs" :src="t" :edit="edit && session.estComptable" :idx="idx"/>
-    <apercu-notif class="q-ml-md q-my-xs" :src="t" sponsor :edit="edit && !session.estComptable" :idx="idx"/>
-    <apercu-blocage class="q-ml-md" :blocage="t.blocage" :edit="edit" :idx="idx" :na-tr="t.na"/>
+    <apercu-notif :notif="t.notif" :na-cible="t.na" :idx="0"/>
 
     <div class="q-ml-md q-mb-xs row largeur40 items-center">
       <quotas-vols :vols="t.cpt" />
-        <q-btn v-if="session.estComptable" size="sm" class="q-ml-lg"
-          icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq"/>
+      <q-btn v-if="session.estComptable" size="sm" class="q-ml-lg"
+        icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq"/>
     </div>
 
-
-    <div class="q-ml-md q-mt-sm row largeur40 justify-start">
-      <div class="col-6 titre-sm">{{$t('PTntfc')}}</div>
-      <div class="col-6">
-        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[0]}}</span>
-        <notif-ico/>
-        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nco[1]}}</span>
-        <notif-ico gravite/>
-      </div>
-    </div>
-    <div class="q-ml-md q-mt-xs row largeur40 justify-start">
-      <div class="col-6 titre-sm">{{$t('PTntfs')}}</div>
-      <div class="col-6">
-        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[0]}}</span>
-        <notif-ico/>
-        <span class="q-ml-md font-mono q-mr-xs">{{t.cpt.nsp[1]}}</span>
-        <notif-ico gravite/>
-      </div>
+    <div class="q-ml-md q-mt-sm">
+      <div class="titre-md">{{$t('PTncoS', [t.cpt.ncoS])}}</div>
+      <div class="titre-md">{{$t('PTncoB', [t.cpt.ncoB])}}</div>
     </div>
 
     <!-- Edition du commentaire attachée à une tribu -->
@@ -85,15 +68,13 @@ import { toRef, ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
-import ApercuBlocage from '../components/ApercuBlocage.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { SetAttributTribu, SetQuotasTribu } from '../app/operations.mjs'
+import { SetQuotasTribu } from '../app/operations.mjs'
 import { crypter } from '../app/webcrypto.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
-import NotifIco from './NotifIco.vue'
 import QuotasVols from './QuotasVols.vue'
 
 export default {
@@ -104,7 +85,7 @@ export default {
     idx: Number, edit: Boolean
   },
 
-  components: { QuotasVols, ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, NotifIco, ApercuBlocage, ChoixQuotas },
+  components: { QuotasVols, ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, ChoixQuotas },
 
   computed: { 
     q1 () { return this.ed1(this.t.cpt.q1 || 0)},
@@ -177,7 +158,6 @@ export default {
         t.value = getT()
       }
     )
-
 
     return {
       session,

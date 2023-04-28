@@ -43,13 +43,8 @@
       </div>
 
       <!-- Notifications -->
-      <notif-ico class="q-ml-xs" v-if="session.estComptable" clickable :alire="session.alirentf" 
-        :gravite="session.gntf === 2" :neutre="session.gntf === 0" @click="clickNotif"/>
-      <notif-ico class="q-ml-xs" v-if="!session.estComptable && session.gntf" clickable :alire="session.alirentf" 
-        :gravite="session.gntf === 2" @click="clickNotif"/>
-
-      <!-- Blocages -->
-      <blocage-ico class="q-ml-xs" v-if="session.nivbl" clickable :niveau="session.nivbl" :alire="session.alirebl" @click="clickNotif"/>
+      <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
+        :cible="0" @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
         <span v-if="session.ok" class="titre-lg cursor-pointer"  @click="ouvrirav">
@@ -287,8 +282,7 @@ import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
-import NotifIco from './components/NotifIco.vue'
-import BlocageIco from './components/BlocageIco.vue'
+import NotifIcon from './components/NotifIcon.vue'
 
 import PageAdmin from './pages/PageAdmin.vue'
 import PageMenu from './pages/PageMenu.vue'
@@ -328,7 +322,7 @@ export default {
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, OutilsTests, NotifIco, BlocageIco, ApercuAvatar,
+    BoutonHelp, BoutonLangue, OutilsTests, NotifIcon, ApercuAvatar,
     PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
     PageGroupe, PageGroupes,

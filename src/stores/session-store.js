@@ -200,7 +200,7 @@ export const useSessionStore = defineStore('session', {
       }
       const aSt = stores.avatar
       const tr = aSt.tribu
-      const et2 = aSt.tribu2.mbtr[this.compteId]
+      const et2 = aSt.mbtr
       const dhvu = aSt.compta.dhvu || 0
       this.nivbl = 0
       this.alire = false

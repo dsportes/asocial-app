@@ -162,6 +162,12 @@ export const useAvatarStore = defineStore('avatar', {
       return e ? e.grIds : new Set()
     },
 
+    // elt mbtr dans tribu2 pour la tribu courante et le compte courant
+    mbtr: (state) => {
+      const t2 = state.tribu2P
+      return t2.mbtr[state.compte.id]
+    },
+    
     // elt mbtr dans tribu2 pour la tribu courante et le compte id
     mbCpt: (state) => { return (id) => { 
         const t2 = state.tribu2CP
@@ -228,13 +234,10 @@ export const useAvatarStore = defineStore('avatar', {
       const r = []
       for (const c of state.ptLc) {
         if (f.nomc && !c.na.nom.startsWith(f.nomc)) continue
-        if (f.avecbl && !c.blocage) continue
         if (f.avecsp && !c.sp) continue
         if (f.notif) {
-          const nt1 = !c.notifco && !c.notifsp
-          const nt2 = !((c.notifco && c.notifco.g) || (c.notifsp && c.notifsp.g))
-          if (f.notif === 1 && nt1) continue
-          if (f.notif === 2 && nt2) continue
+          if (!c.notif) continue
+          if (f.notif === 2 && c.notif.niv < 2) continue
         }
         r.push(c)
       }

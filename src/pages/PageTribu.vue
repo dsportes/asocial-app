@@ -31,14 +31,8 @@
                   icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
             </div>
 
-            <apercu-blocage v-if="vis(c)" :blocage="c.blocage" :edit="ed" :idx="idx"
-              :na-tr="aSt.tribuC.na" :bl-tr="aSt.tribuC.blocage" :na-co="c.na"/>
-            <apercu-notif v-if="vis2(c, 'co')"
-              class="q-my-xs" :src="c" :na-tr="aSt.tribuC.na"
-              :edit="session.estComptable" :idx="idx"/>
-            <apercu-notif v-if="vis2(c, 'sp')"
-              class="q-my-xs" :src="c" :na-tr="aSt.tribuC.na" sponsor
-              :edit="session.estSponsor && !session.estComptable" :idx="idx"/>
+            <apercu-notif class="q-my-xs" :notif="c.notif" :na-cible="c.na.id" :idx="idx"/>
+
           </div>
         </div>
       </div>
@@ -89,7 +83,6 @@ import { UNITEV1, UNITEV2, Compteurs } from '../app/api.mjs'
 import { edvol, hms, $t } from '../app/util.mjs'
 import ApercuTribu from '../components/ApercuTribu.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
-import ApercuBlocage from '../components/ApercuBlocage.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
 import ApercuPeople from '../components/ApercuPeople.vue'
@@ -103,7 +96,8 @@ import { GetCompteursCompta } from '../app/operations.mjs'
 export default {
   name: 'PageTribu',
 
-  components : { QuotasVols, PanelPeople, ApercuAvatar, ApercuPeople, PanelCompta, ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuBlocage, ApercuNotif, ChoixQuotas  },
+  components : { QuotasVols, PanelPeople, ApercuAvatar, ApercuPeople, PanelCompta, 
+    ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuNotif, ChoixQuotas  },
 
   computed: {
     ed () { return this.session.estComptable || this.session.estSponsor },

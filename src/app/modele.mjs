@@ -420,23 +420,9 @@ export class Notification {
   - `source`: id de la source, du Comptable ou du sponsor, par convention 0 pour l'administrateur.
   - `cible` : 0 pour le global, sinon id de la tribu ou du compte.
   - `jbl` : jour de déclenchement de la procédure de blocage sous la forme `aaaammjj`, 0 s'il n'y a pas de procédure de blocage en cours.
-  - `nj` : en cas de procédure ouverte, nombre de jours après son ouverture avant de basculer en niveau 2.
+  - `nj` : en cas de procédure ouverte, nombre de jours après son ouverture avant de basculer en niveau 4.
   - `texte` : texte informatif, pourquoi, que faire ...
   - `dh` : date-heure de dernière modification (informative).
-  Calculés en fonction du jour courant:
-  - niv : niveau d'alerte
-    0: pas de blocage,
-    1: alerte simple
-    2: alerte grave (une procédure de blocage est planifiée)
-    3: lecture seule, 
-    4: ni lecture ni écriture,
-    5: résilié
-  - d1 : date d'atteinte du niveau 1
-  - n1 : nombre de jours avant d'atteindre le niveau 1
-  - d2 : date d'atteinte du niveau 2
-  - n2 : nombre de jours avant d'atteindre le niveau 2
-  - d3 : date d'atteinte du niveau 3
-  - n3 : nombre de jours avant d'atteindre le niveau 3
   */
   constructor (buf, idSource, idCible) {
     if (buf) {
@@ -450,6 +436,8 @@ export class Notification {
       this.texte = ''
       this.dh = 0
     }
+    if (this.nj > 365) this.nj = 365
+    if (this.nj < 0) this.nj = 0
     this.calcul()
   }
 
@@ -461,26 +449,40 @@ export class Notification {
     return new Uint8Array(encode(buf))
   }
 
+  /*  Calculés en fonction du jour courant:
+  - niv : niveau d'alerte
+    0: pas de blocage,
+    1: alerte simple
+    2: alerte grave (une procédure de blocage est planifiée)
+    3: lecture seule, 
+    4: ni lecture ni écriture,
+    5: résilié
+  - d3 : date d'atteinte du niveau 3
+  - n3 : nombre de jours avant d'atteindre le niveau 3
+  - d4 : date d'atteinte du niveau 2
+  - n4 : nombre de jours avant d'atteindre le niveau 4
+  - d5 : date d'atteinte du niveau 3
+  - n5 : nombre de jours avant d'atteindre le niveau 5
+  - np : nombre de jours avant que la procédure de blocage ne s'engage (niv 2 seulement)
+  */
   calcul () {
     try {
-      this.n1 = 0; this.d1 = 0; this.n2 = 0; this.d2 = 0; this.n3 = 0; this.d3 = 0
-      if (!jbl) { this.niv = 0; return }
+      this.n3 = 0; this.n4 = 0; this.n5 = 0; this.d4 = 0; this.d5 = 0
+      if (!this.jbl) { this.niv = 1; return }
 
-      const now = AMJ.amjUtc()
-      this.d3 = AMJ.amjUtcPlusNbj(this.jbl, stores.config.limitesjour.dlv + 1)
-      if (this.d3 <= now) { this.niv = 3; return } // date de résiliation atteinte ou dépassée
-      this.n3 = AMJ.diff(this.d3, now)
+      const auj = AMJ.amjUtc()
+      this.n3 = AMJ.diff(this.jbl, auj)
+      this.d4 = AMJ.amjUtcPlusNbj(this.jbl, this.nj)
+      this.n4 = AMJ.diff(this.d4, auj)
+      if (this.n4 === this.n3) this.n3 = 0
+      this.d5 = AMJ.amjUtcPlusNbj(this.jbl, stores.config.limitesjour.dlv)
+      this.n5 = AMJ.diff(this.d5, auj)
+      if (this.n5 === this.n4) this.n4 = 0
 
-      this.d2 = AMJ.amjUtcPlusNbj(this.jbl, this.nj)
-      if (this.d2 <= now) { this.niv = 2; return } // date de restriction atteinte ou dépassée
-      if (this.d2 > this.d3) this.d2 = 0 // la date de restriction ne sera jamais atteinte
-      else this.n2 = AMJ.diff(this.d2, now)
-
-      this.d1 = AMJ.amjUtc(this.jbl)
-      if (this.d1 <= now) { this.niv = 1; return } // date de lecture seule atteinte ou dépassée
-      if (this.d1 > this.d3) this.d1 = 0 // la date de lecture seule ne sera jamis atteinte
-      else this.n1 = AMJ.diff(this.d1, now)
-      this.niv = 0
+      if (this.n5 <= 0) { this.niv = 5; return } // date de résiliation atteinte ou dépassée
+      if (this.n4 <= 0) { this.niv = 4; return } // date de blocage ecritures atteinte ou dépassée
+      if (this.n3 <= 0) { this.niv = 3; return } // date de blocage lectures atteinte ou dépassée
+      this.niv = 2
     } catch (e) {
       console.log(e)
     }

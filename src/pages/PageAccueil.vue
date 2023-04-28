@@ -59,17 +59,8 @@
 
       <!-- Notifications -->
       <div class="btn2" @click="clickNotif">
-        <notif-ico class="q-ml-xs" v-if="session.estComptable" clickable :alire="session.alirentf" 
-          :gravite="session.gntf === 2" :neutre="session.gntf === 0"/>
-        <notif-ico class="q-ml-xs" v-else clickable :alire="session.alirentf" 
-          :gravite="session.gntf === 2" :neutre="session.gntf === 0"/>
+        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
         <span class="q-ml-xs">{{$t('MLAntf')}}</span>
-      </div>
-
-      <!-- Blocages -->
-      <div class="btn2" @click="clickNotif">
-        <blocage-ico class="q-ml-xs" clickable :niveau="session.nivbl" :alire="session.alirebl"/>
-        <span class="q-ml-xs">{{$t('MLAbloc')}}</span>
       </div>
 
       <!-- Chats d'urgence -->
@@ -103,15 +94,14 @@
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
-import NotifIco from '../components/NotifIco.vue'
-import BlocageIco from '../components/BlocageIco.vue'
+import NotifIcon from '../components/NotifIcon.vue'
 import OutilsTests from '../dialogues/OutilsTests.vue'
 import PageMenu from '../pages/PageMenu.vue'
 
 export default {
   name: 'PageAccueil',
 
-  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIco, BlocageIco, OutilsTests },
+  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIcon, OutilsTests },
 
   computed: {
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },

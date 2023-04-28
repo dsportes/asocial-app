@@ -53,6 +53,10 @@
       <div v-else class="q-ml-md text-italic">{{$t('TP4')}}</div>
     </q-card-section>
 
+    <q-card-section v-if="tab === 'tst'">
+      <apercu-notif :notif="notif" :na-cible="naCible" :idx="0"/>
+    </q-card-section>
+
     <q-card-section v-if="tab === 'ps'">
       <phrase-secrete v-on:ok-ps="okps" icon-valider="check" label-valider="OK"></phrase-secrete>
       <div class='t1 q-mt-slg'>{{$t('OTh1')}}</div>
@@ -137,14 +141,15 @@ import { dhcool, $t, html, afficherDiag, sleep, edvol, b64ToU8, u8ToB64 } from '
 import { ping } from '../app/net.mjs'
 import { getCompte, vuIDB, deleteIDB } from '../app/db.mjs'
 import { PingDB } from '../app/connexion.mjs'
-import { Blocage } from '../app/modele.mjs'
+import { Notification, NomGenerique } from '../app/modele.mjs'
+import ApercuNotif from '../components/ApercuNotif.vue'
 
 export default ({
   name: 'OutilsTests',
 
   props: { close: Function },
 
-  components: { PhraseSecrete, BoutonHelp },
+  components: { PhraseSecrete, BoutonHelp, ApercuNotif },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -312,25 +317,33 @@ export default ({
       }
     }
 
-    let bltr = new Blocage(new Uint8Array(encode({
-      jib: 20230101, nja: 30, njl: 39
+    // const naCible = NomGenerique.tribu(10, 'Chouette')
+    // const naCible = NomGenerique.compte(10, 'Tom')
+    const naCible = null
+
+    // const naSource = NomGenerique.compte(10, 'Tom')
+    // const naSource = NomGenerique.comptable(10)
+    const naSource = null
+
+    const notif = new Notification(new Uint8Array(encode({
+      jbl: 20230428,
+      nj: 0,
+      idSource: naSource ? naSource.id : 0,
+      idCible: naCible ? naCible.id : 0,
+      texte: 'Super alerte',
+      dh: new Date().getTime()
     })))
     
-    let blco = new Blocage(new Uint8Array(encode({
-      jib: 20230301, nja: 30, njl: 38, sp: true
-    })))
-    // bltr = null
-
     return {
-      bltr,
-      blco,
       session,
       config,
       ui,
       bases,
       nbbases,
       getBases,
-      delIDB
+      delIDB,
+      naCible,
+      notif
     }
   }
 })

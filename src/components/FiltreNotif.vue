@@ -7,12 +7,9 @@
           <span class="fs-md text-italic">{{$t('gravite0')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=1">
-          <notif-ico class="q-mr-sm" />
-          <notif-ico class="q-mr-xs" gravite />
           <span class="fs-md text-italic">{{$t('gravite1')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=2">
-          <notif-ico class="q-mr-sm" gravite />
           <span class="fs-md text-italic">{{$t('gravite2')}}</span>
         </q-item>
       </q-list>
@@ -24,14 +21,13 @@
 <script>
 import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
-import NotifIco from './NotifIco.vue'
 
 export default ({
   name: 'FiltreNotif',
 
   props: { nom: String, idx: Number },
 
-  components: { NotifIco },
+  components: { },
 
   data () {
     return {

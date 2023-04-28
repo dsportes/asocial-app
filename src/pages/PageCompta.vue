@@ -13,37 +13,11 @@
       <div>{{$t('CPTal2b')}}</div>
     </div>
 
-    <q-separator v-if="(c.pc2 >= 100) || (c.pc1 >= 100)" class="q-my-md"/>
-
-    <synthese-blocage v-if="blTr || blCo" :blTr="blTr" :blCo="blCo"/>
-    <div v-else class="titre-lg text-italic">{{$t('CPTnbloc')}}</div>
-
     <q-separator class="q-my-md"/>
 
-    <div v-if="session.estComptable || (session.notifG && session.notifG.dh)">
-      <apercu-notif edit />
-      <q-separator class="q-my-sm"/>
-    </div>
-
-    <div v-if="ntfTrCo">
-      <apercu-notif :src="tr" />
-      <q-separator class="q-my-sm"/>
-    </div>
-
-    <div v-if="ntfTrSp">
-      <apercu-notif :src="tr" sponsor/>
-      <q-separator class="q-my-sm"/>
-    </div>
-
-    <div v-if="ntfCoCo">
-      <apercu-notif :src="et2" />
-      <q-separator class="q-my-sm"/>
-    </div>
-
-    <div v-if="ntfCoSp">
-      <apercu-notif :src="et2" sponsor/>
-      <q-separator class="q-my-sm"/>
-    </div>
+    <apercu-notif v-if="session.status>1" :notif="session.notifG" :na-cible="0"/>
+    <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" :na-cible="session.naComptable"/>
+    <apercu-notif v-if="session.ok" :notif="aSt.mbtr.notif" :na-cible="aSt.compte.na"/>
 
   </div>
 
@@ -64,17 +38,15 @@ import { ref, onMounted, reactive } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
-import SyntheseBlocage from '../components/SyntheseBlocage.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
 import { getNg, Motscles, Chat } from '../app/modele.mjs'
-import { ID } from '../app/api.mjs'
 
 export default {
   name: 'PageCompta',
 
-  components: { PanelCompta, SyntheseBlocage, ApercuNotif, ApercuChat },
+  components: { PanelCompta, ApercuNotif, ApercuChat },
 
   computed: {
     c () { return this.aSt.compta.compteurs },
