@@ -33,9 +33,9 @@ export default ({
     info: Boolean // si définie, une info bulle explique le statut
   },
   computed: {
-    tclr () { return 'text-' + txt[this.niv]},
-    bgclr () { return 'bg-' + bg[this.niv] },
-    ico () { return ic[this.niv] }
+    tclr () { return 'text-' + txt[this.niv || 0]},
+    bgclr () { return 'bg-' + bg[this.niv || 0] },
+    ico () { return ic[this.niv || 0] }
   }
 })
 </script>

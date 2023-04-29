@@ -1,5 +1,5 @@
 <template>
-<div>
+<q-page>
   <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto" :c="aSt.compta.compteurs"/>
 
   <div v-if="ui.pagetab==='notif'" class="q-pa-sm">
@@ -15,9 +15,7 @@
 
     <q-separator class="q-my-md"/>
 
-    <apercu-notif v-if="session.status>1" :notif="session.notifG" :na-cible="0"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" :na-cible="session.naComptable"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.mbtr.notif" :na-cible="aSt.compte.na"/>
+    <synthese-blocage />
 
   </div>
 
@@ -29,7 +27,7 @@
         :na-i="naCpt" :na-e="na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
     </div>
   </div>
-</div>
+</q-page>
 </template>
 
 <script>
@@ -38,15 +36,15 @@ import { ref, onMounted, reactive } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
-import ApercuNotif from '../components/ApercuNotif.vue'
 import ApercuChat from '../components/ApercuChat.vue'
+import SyntheseBlocage from '../components/SyntheseBlocage.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
 import { getNg, Motscles, Chat } from '../app/modele.mjs'
 
 export default {
   name: 'PageCompta',
 
-  components: { PanelCompta, ApercuNotif, ApercuChat },
+  components: { SyntheseBlocage, PanelCompta, ApercuChat },
 
   computed: {
     c () { return this.aSt.compta.compteurs },

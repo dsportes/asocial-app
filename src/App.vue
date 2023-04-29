@@ -63,7 +63,7 @@
 
     <q-toolbar inset class="full-width bg-secondary text-white">
       <bouton-help page="page1"/>
-      <q-btn v-if="session.ok && session.nivbl !== 2" size="md" icon="menu">
+      <q-btn v-if="session.ok && session.niv !== 2" size="md" icon="menu">
         <q-menu max-height="90vh" class="bg-secondary text-white" auto-close>
           <page-menu/>
         </q-menu>

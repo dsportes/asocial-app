@@ -40,8 +40,9 @@ export const usePeopleStore = defineStore('people', {
     peopleIds: (state) => { return Array.from(state.map.keys()) },
 
     naSponsors: (state) => { // Y compris celui du Comptable (sauf pour le comptable)
+      const session = stores.session
       const t = []
-      if (stores.session.estComptable) t.push(session.naComptable)
+      if (!session.estComptable) t.push(session.naComptable)
       state.map.forEach(e => { if (e.sp === 2) t.push(e.na) })
       return t
     },

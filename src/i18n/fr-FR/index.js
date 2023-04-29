@@ -151,7 +151,7 @@ export default {
   items: 'Aucun item | Un item | {count} items',
 
   // statuts membre
-  STMB0: 'envisagé',
+  STMB0: 'contact',
   STMB1: 'invité',
   STMB2: 'actif',
   STMB3: 'invitation refusée',
@@ -312,6 +312,7 @@ export default {
   TPt2: 'Accès au serveur distant',
   TPt3: 'Accès à la base sur le serveur distant',
   TPt4: 'Accès à la base locale d\'un compte',
+
   // Gestion des bases
   GBtit: 'Gestion des bases locales',
   GBnc: 'Aucune session ne doit être ouverte quand on veut gérer la suppression de bases locales inutiles',
@@ -328,6 +329,13 @@ export default {
   HLPfermer: 'Fermer l\'aide',
   HLPprec: 'Page d\'aide précédente',
   HLPvoir: 'Voir aussi ...',
+
+  // Stats tribus
+  STtit: 'Statistiques de l\'espace {0} - {1} tribu(s) - {2}',
+  STl1: 'Somme des quotas (V1 / V2) attribués aux tribus',
+  STl2: 'Somme des quotas (V1 / V2) attribués aux comptes',
+  STl3: 'Nombre total de comptes / dont sponsors',
+  STl4: 'Nombre total de comptes ayant une alerte (simple / bloquante)',
 
   // Page sponsorings - Nouveau sponsoring
   NPnouv: 'Sponsoriser un nouveau compte',

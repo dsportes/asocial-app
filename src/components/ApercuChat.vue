@@ -71,7 +71,7 @@ export default {
       }
       const pSt = stores.people
       const csp = ID.estComptable(this.naE.id) || (pSt.estSponsor(this.naE.id) === 2)
-      if (this.session.nivbl === 3 && !csp) {
+      if (this.session.niv === 3 && !csp) {
         await afficherDiag(this.$t('CHbl'))
       }
       this.chatedit = true

@@ -2,32 +2,9 @@
   <q-page class="q-pa-sm">
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <div class="petitelargeur q-my-sm">
-      <div class="q-my-sm q-mx-sm">
-        <quotas-vols :vols="stats.tribus" />
-      </div>
+    <stats-tribus class="q-my-sm q-mx-xs" :stats="session.stats" :ns="session.ns"/>
 
-      <div class="row">
-        <div class="col-6"></div>
-        <div class="col-3 fs-md text-italic text-center">V1</div>
-        <div class="col-3 fs-md text-italic text-center">V2</div>
-      </div>
-      <div class="row">
-        <div class="col-6 fs-md text-italic text-right">{{$t('PTattr')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ stats.tribus.a1 + ' / ' + ed1(stats.tribus.a1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ stats.tribus.a2 + ' / ' + ed2(stats.tribus.a2)}}</div>
-      </div>
-      <div class="row">
-        <div class="col-6 fs-md text-italic text-right">{{$t('PTrest')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ (stats.tribus.q1 - stats.tribus.a1) + ' / ' + ed1(stats.tribus.q1 - stats.tribus.a1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ (stats.tribus.q2 - stats.tribus.a2) + ' / ' + ed2(stats.tribus.q2 - stats.tribus.a2)}}</div>
-      </div>
-      <div class="row">
-        <div class="col-6 fs-md text-italic text-right">{{$t('PTtotal')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ stats.tribus.q1 + ' / ' + ed1(stats.tribus.q1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ stats.tribus.q2 + ' / ' + ed2(stats.tribus.q2)}}</div>
-      </div>
-    </div>
+    <quotas-vols class="q-my-sm q-mx-xs" :vols="session.stats" />
 
     <q-separator color="orange"/>
 
@@ -71,6 +48,7 @@ import ApercuTribu from '../components/ApercuTribu.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import QuotasVols from '../components/QuotasVols.vue'
+import StatsTribus from '../components/StatsTribus.vue'
 import { afficherDiag, edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouvelleTribu, GetTribu } from '../app/operations.mjs'
@@ -78,7 +56,7 @@ import { NouvelleTribu, GetTribu } from '../app/operations.mjs'
 export default {
   name: 'PageChats',
 
-  components: { QuotasVols, NomAvatar, ApercuTribu, ChoixQuotas },
+  components: { StatsTribus, QuotasVols, NomAvatar, ApercuTribu, ChoixQuotas },
 
   computed: {
   },

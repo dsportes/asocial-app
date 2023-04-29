@@ -61,7 +61,7 @@ export const useSessionStore = defineStore('session', {
       4: ni lecture ni écriture,
       5: résilié
     */
-    nivbl: 0,
+    niv: 0,
     alire: false, // Il y a des notifications à lire
     notifG: null, // notification générale courante
     stats: { dh: 0 }, // stats générale de l'espace
@@ -77,7 +77,7 @@ export const useSessionStore = defineStore('session', {
       return (t2 && t2.sp) || false 
     },
 
-    editable (state) { return state.mode < 3 && state.nivbl < 4 },
+    editable (state) { return state.mode < 3 && state.niv < 4 },
 
     synchro (state) { return state.mode === 1 },
     incognito (state) { return state.mode === 2 },
@@ -86,7 +86,7 @@ export const useSessionStore = defineStore('session', {
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
 
-    editable (state) { return state.mode < 3 && state.nivbl < 2 },
+    editable (state) { return state.mode < 3 && state.niv < 2 },
 
     // PageAdmin ***************************************************    
     paLeFT: (state) => {
@@ -146,7 +146,7 @@ export const useSessionStore = defineStore('session', {
     setMembreId (id) { this.membreId = id },
 
     setStats (stats) { this.stats = stats},
-    
+
     setEspace (espace, admin) {
       if (admin) {
         // SEULEMENT pour admin
@@ -203,26 +203,27 @@ export const useSessionStore = defineStore('session', {
       function ntfx (ntf) {
         if (ntf && ntf.dh) {
           if (ntf.dh > dhvu) self.alire = true
-          if (ntf.niv > self.nivbl) self.nivbl = ntf.niv
+          if (ntf.niv > self.niv) self.niv = ntf.niv
         }  
       }
       const aSt = stores.avatar
       const tr = aSt.tribu
       const et2 = aSt.mbtr
       const dhvu = aSt.compta.dhvu || 0
-      this.nivbl = 0
+      this.niv = 0
       this.alire = false
       ntfx(this.notifG)
       ntfx(tr.notif)
       ntfx(et2.notif)
     },
 
-    async edit (tst) {
-      if (this.mode === 3 || tst === 1) {
+    async edit (avionSeulement) {
+      if (this.mode === 3) {
         await afficherDiag($t('editavion'))
         return false
       }
-      if (this.nivbl >= 2 || tst === 2) {
+      if (avionSeulement) return true
+      if (this.niv >= 2) {
         await afficherDiag($t('editlecture'))
         return false
       }

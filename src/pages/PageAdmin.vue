@@ -11,7 +11,8 @@
     </div>
 
     <div v-for="(e, idx) in session.paLeFT" :key="e.id">
-      <apercu-espace :esp="e" :idx="idx"/>
+      <apercu-espace class="q-my-md" :esp="e" :idx="idx"/>
+      <q-seapartor class="q-my-sm" color="orange"/>
     </div>
 
   </q-page>

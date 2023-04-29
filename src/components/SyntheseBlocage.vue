@@ -1,8 +1,8 @@
 <template>
   <q-card class="shadow-8 q-pa-sm">
 
-    <apercu-notif v-if="session.status>1" :notif="session.notifG" :na-cible="0"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" :na-cible="session.naComptable"/>
+    <apercu-notif v-if="session.status>1" :notif="session.notifG"/>
+    <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" :na-cible="aSt.tribu.na"/>
     <apercu-notif v-if="session.ok" :notif="aSt.mbtr.notif" :na-cible="aSt.compte.na"/>
 
     <div style="height:2px;width:100%"/>
@@ -11,10 +11,11 @@
 </template>
 <script>
 
-import { toRef } from 'vue'
+// import { toRef } from 'vue'
+import stores from '../stores/stores.mjs'
 import ApercuNotif from './ApercuNotif.vue'
-import { AMJ } from '../app/api.mjs'
-import { getNg } from '../app/modele.mjs'
+// import { AMJ } from '../app/api.mjs'
+// import { getNg } from '../app/modele.mjs'
 
 export default {
   name: 'SyntheseBlocage',

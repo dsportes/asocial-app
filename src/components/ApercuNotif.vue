@@ -240,7 +240,7 @@ export default {
           this.ntf = this.notif
           this.ro = 1
         } else {
-          await afficherDiag(this.t('ANmx1'))
+          await afficherDiag(this.$t('ANmx1'))
         }
       } else { // Notification générale
         this.ntf = this.notif ? this.notif.clone() : new Notification(null, 0, 0)
@@ -250,6 +250,7 @@ export default {
     },
 
     async editerC () { // Comptable
+      if (!await this.session.edit(true)) return
       if (this.naCible) {
         this.ntf = this.notif ? this.notif.clone() : 
           new Notification(null, this.session.compteId, this.naCible.id)
@@ -260,7 +261,7 @@ export default {
           this.ntf = this.notif
           this.ro = 2
         } else {
-          await afficherDiag(this.t('ANmx2'))        
+          await afficherDiag(this.$t('ANmx2'))        
         }
       }
     },
@@ -288,7 +289,7 @@ export default {
             this.ntfx = this.ntf.clone()
             this.ro = 0
           } else {
-            await afficherDiag(this.t('ANmx4')) 
+            await afficherDiag(this.$t('ANmx4')) 
           }
         }
       } else if (this.naCible.estCompte) {
@@ -312,7 +313,7 @@ export default {
             this.ntfx = this.ntf.clone()
             this.ro = 0
           } else {
-            await afficherDiag(this.t('ANmx7')) 
+            await afficherDiag(this.$t('ANmx7')) 
           }
         }
       } else { // Notification générale
@@ -320,7 +321,7 @@ export default {
           this.ntf = this.notif
           this.ro = 3
         } else {
-          await afficherDiag(this.t('ANmx3'))        
+          await afficherDiag(this.$t('ANmx3'))        
         }
       }
     },
@@ -328,7 +329,35 @@ export default {
     close () { this.ouvert = false },
 
     async valider () {
-      console.log('valider', this.ntf.niv)
+      switch (this.tc) {
+        case 1: { // notifG
+          const args = { token: session.authToken,
+            ns: session.ns, 
+            notif: ntf.encode()
+          }
+          this.tr(await post(this, 'SetNotifG', args))
+          break
+        }
+        case 2: { // notif Tribu
+          const args = { token: session.authToken, 
+            attr: 'notif',
+            id: this.naCible.id, 
+            val: ntf.encode()
+          }
+          this.tr(await post(this, 'SetAttributTribu', args))
+          break
+        }
+        case 3: { // notif Compte
+          const args = { token: session.authToken, 
+            hrnd: this.naCible.hrnd,
+            id: this.naCible.id, 
+            notif: ntf.encode(),
+            ntfb: ntf.jbl !== 0
+          }
+          this.tr(await post(this, 'SetNotifC', args))
+          break
+        }
+      }
     }
   },
 

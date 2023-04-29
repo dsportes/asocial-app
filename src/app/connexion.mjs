@@ -422,6 +422,7 @@ export class ConnexionCompte extends OperationUI {
 
   async getCTA () {
     const session = stores.session
+    const aSt = stores.avatar
     /* Authentification et get de avatar / compta / tribu
     ET abonnement à compta sur le serveur
     */
@@ -433,6 +434,8 @@ export class ConnexionCompte extends OperationUI {
       if (ret.espaces) for (const e of ret.espaces) {
         session.setEspace(await compile(e), true)
       }
+      aSt.statsTribus()
+      // const stats = session.stats
       return
     }
 
@@ -558,7 +561,7 @@ export class ConnexionCompte extends OperationUI {
       if (this.espace) session.setEspace(this.espace)
 
       // En cas de blocage grave, plus de synchronisation
-      if (session.nivbl === 3 && session.mode === 1) {
+      if (session.niv === 3 && session.mode === 1) {
         session.mode = 2
         await afficherDiag($t('CNXdeg'))
       }
@@ -616,13 +619,13 @@ export class ConnexionCompte extends OperationUI {
       if (session.estComptable) {
         this.cTribus = session.accesIdb ? await getColl('tribus') : []
         const ltr = new Map()
-        const mvtr = []
+        const mvtr = {}
         this.cTribus.forEach(r => {
-          ltr.set(row.id, row)
+          ltr.set(r.id, r)
           mvtr[r.id] = r.v
         })
         if (session.accesNet) {
-          const args = { token: session.authToken, mvtr }
+          const args = { token: session.authToken, mvtr: mvtr }
           const ret = this.tr(await post(this, 'ChargerTribus', args))
           const delids = new Set(ret.delids)
           if (ret.rowTribus.length) for(const row of ret.rowTribus) {
@@ -752,7 +755,7 @@ export class ConnexionCompte extends OperationUI {
       session.status = 2
       SyncQueue.traiterQueue()
       await sleep(500)
-      if (session.nivbl || session.alirentf) {
+      if (session.niv || session.alirentf) {
         stores.ui.setPage('compta', 'notif')
       } else {
         stores.ui.setPage('accueil')

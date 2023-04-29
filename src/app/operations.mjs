@@ -8,7 +8,7 @@ import { post } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, 
   Groupe, Membre, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair } from './webcrypto.mjs'
-import { commitRows } from './db.mjs'
+import { commitRows, IDBbuffer } from './db.mjs'
 
 /* Opération générique ******************************************/
 export class Operation {

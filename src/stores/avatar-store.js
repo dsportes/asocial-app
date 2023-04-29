@@ -25,6 +25,7 @@ export const useAvatarStore = defineStore('avatar', {
     tribu2P: null, // tribu2 actuelle du compte courant
     tribu2CP: null, // tribu2 "courante" pour le comptable
     maptr: new Map(), // Map des tribus, uniquement pour le Comptable
+    lc: ['ntr', 'a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB'],
 
     // Filtre des tribus dans BarrePeople
     ppFiltre: '',
@@ -273,16 +274,11 @@ export const useAvatarStore = defineStore('avatar', {
 
     ptLtF: (state) => {
       const f = stores.filtre.filtre.tribus
-      const stt = { a1: 0, a2: 0, q1: 0, q2: 0 }
       f.limj = f.nbj ? (new Date().getTime() - (f.nbj * 86400000)) : 0
       f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
       for (const t of state.getTribus) {
-        stt.a1 += t.cpt.a1 || 0
-        stt.a2 += t.cpt.a2 || 0
-        stt.q1 += t.cpt.q1 || 0
-        stt.q2 += t.cpt.q2 || 0
         if (f.avecbl && !t.blocage) continue
         if (f.nomt && !t.na.nom.startsWith(f.nomt)) continue
         if (f.txtt && (!t.info || t.info.indexOf(f.txtt) === -1)) continue
@@ -290,7 +286,6 @@ export const useAvatarStore = defineStore('avatar', {
         if (f.notif && (!t.notif || (f.notif === 2 && t.notif.niv < 2))) continue
         r.push(t)
       }
-      stores.filtre.stats.tribus = stt
       return r
     },
 
@@ -370,7 +365,13 @@ export const useAvatarStore = defineStore('avatar', {
       if (session.estComptable && !nostat) this.statsTribus()
     },
 
-    statsTribus () {
+    /* Calcul la stats des tribus (actuelle ou par anticipation avant d'enregistrer une tribu).
+    SI l'argument tribu est donné,
+    - inclut cette tribu, à la place de celle en store, ou en plus si elle n'y est pas
+    - retourne la stats calculée, ne la stocke pas en store
+    Permet une évaluation prévisionnelle AVANT maj de la tribu au serveur
+    */
+    statsTribus (tribu) {
       /*
       - `cpt` : sérialisation non cryptée des compteurs suivants:
         - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
@@ -380,13 +381,24 @@ export const useAvatarStore = defineStore('avatar', {
         - `ncoS` : nombres de comptes ayant une notification simple.
         - `ncoB` : nombres de comptes ayant une notification bloquante.
       */
-      const lc = ['a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB']
-      const stats = { dh: new Date().getTime() }
-      lc.forEach(f => { stats[f] = 0 })
-      for (const [,t] of this.maptr) {
-        lc.forEach(f => { stats[f] += (t[f] || 0) })      
+      const stats = { dh: new Date().getTime(), ntr: 0 }
+      this.lc.forEach(f => { stats[f] = 0 })
+      if (tribu && !this.maptr.has(tribu.id)) {
+        stats.ntr++
+        this.lc.forEach(f => { 
+          if (f !== 'ntr') stats[f] += (tribu.cpt[f] || 0)
+        })
       }
-      stores.session.setStats(stats)
+      for (const [,t] of this.maptr) {
+        if (!tribu || tribu.id !== t.id) {
+          stats.ntr++
+          this.lc.forEach(f => { 
+            if (f !== 'ntr') stats[f] += (t.cpt[f] || 0)
+          })
+        } 
+      }
+      if (!tribu) stores.session.setStats(stats)
+      return stats
     },
 
     setTribu2 (tribu2) { // set ou remplacement de la tribu2 SEULE

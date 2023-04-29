@@ -528,13 +528,14 @@ export async function compile (row) {
 _data_:
 - `notif` : notification de l'administrateur, cryptée par la clé du Comptable.
 - `stats`: statistiques sérialisées de l'espace par le comptable 
-  {'a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB' }
+  {'ntr', 'a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB' }
 - `t` : taille de l'espace, de 1 à 9, fixé par l'administrateur
   son poids relatif dans l'ensemble des espaces.
 */
 export class Espace extends GenDoc {
 
   async compile (row) {
+    const aSt = stores.avatar
     // la clé est le rnd du Comptable de l'espace
     const cle = new Uint8Array(32); cle[0] = this.id
     if (row.notif) {
@@ -542,7 +543,10 @@ export class Espace extends GenDoc {
       this.notif.v = this.v
     } else this.notif = null
     this.t = row.t || 0
-    this.stats = row.stats ? decode(row.stats) : { dh: 0 }
+    this.stats = { dh: 0}
+    const r = row.stats ? decode(row.stats) : { }
+    this.stats.dh = r.dh || 0
+    aSt.lc.forEach(f => { this.stats[f] = r[f] || 0 })
   }
 
   static async nouveau (id) {

@@ -1,28 +1,26 @@
 <template>
-  <div class="row">
-    <div class="row col-auto">
-      <div class="font-mono fs-lg q-mx-sm">{{esp.id}}</div>
-      <div class="font-mono fs-lg q-mx-sm">{{esp.t}}</div>
-    </div>
-    <div class="col column">
-      <div class="text-italic">Pas de notification de l'administrateur</div>
-      <div class="text-italic">Pas de notification du Comptable de l'espace</div>
-    </div>
+  <div :class="dkli(idx)">
+    <stats-tribus :stats="esp.stats" :ns="esp.id"/>
+    <apercu-notif :notif="esp.notif" :idx="idx"/>
   </div>
 </template>
 
 <script>
 import stores from '../stores/stores.mjs'
+import StatsTribus from './StatsTribus.vue'
 
 export default {
   name: 'ApercuEspace',
 
   props: { esp: Object, idx: Number },
 
+  components: { StatsTribus },
+
   computed: {
   },
 
   methods: {
+    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
   },
 
   data () {

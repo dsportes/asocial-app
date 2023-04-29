@@ -59,7 +59,7 @@
 
       <!-- Notifications -->
       <div class="btn2" @click="clickNotif">
-        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv" :cible="0"/>
         <span class="q-ml-xs">{{$t('MLAntf')}}</span>
       </div>
 
@@ -73,10 +73,10 @@
 
     <q-separator color="orange" class="q-ma-sm"/>
 
-    <div v-if="session.nivbl === 3" class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning cursor-pointer"
+    <div v-if="session.niv === 3" class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning cursor-pointer"
       @click="clickNotif2">{{$t('ACbloc')}}</div>
 
-    <div v-if="session.nivbl < 3">
+    <div v-if="session.niv < 3">
       <div v-if="session.estSponsor" 
         class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning">
         {{$t('ACcptspons')}}</div>      
