@@ -386,7 +386,7 @@ export class OnchangeEspace extends OperationWS {
     try {
       const session = stores.session
       const esp = await compile(row)
-      session.setNotif(esp.notif)
+      session.setEspace(esp)
     } catch (e) { 
       await this.finKO(e)
     }

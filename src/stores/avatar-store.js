@@ -235,10 +235,7 @@ export const useAvatarStore = defineStore('avatar', {
       for (const c of state.ptLc) {
         if (f.nomc && !c.na.nom.startsWith(f.nomc)) continue
         if (f.avecsp && !c.sp) continue
-        if (f.notif) {
-          if (!c.notif) continue
-          if (f.notif === 2 && c.notif.niv < 2) continue
-        }
+        if (f.notif && (!c.notif || (f.notif === 2 && c.notif.niv < 2))) continue
         r.push(c)
       }
       stores.session.fmsg(r.length)
@@ -289,15 +286,8 @@ export const useAvatarStore = defineStore('avatar', {
         if (f.avecbl && !t.blocage) continue
         if (f.nomt && !t.na.nom.startsWith(f.nomt)) continue
         if (f.txtt && (!t.info || t.info.indexOf(f.txtt) === -1)) continue
-        if (f.txtn &&
-          (!t.notifco || t.notifco.txt.indexOf(f.txtn) === -1) &&
-          (!t.notifcp || t.notifcp.indexOf(f.txtn) === -1)) continue
-        if (f.notif) {
-          const x = t.cpt.nco || [0, 0]
-          const y = t.cpt.nsp || [0, 0]
-          if (f.notif === 1 && (x[0] + x[1] + y[0] + y[1] === 0)) continue
-          if (f.notif === 2 && (x[1] + y[1] === 0)) continue
-        }
+        if (f.txtn && (!t.notif || t.notif.txt.indexOf(f.txtn) === -1) ) continue
+        if (f.notif && (!t.notif || (f.notif === 2 && t.notif.niv < 2))) continue
         r.push(t)
       }
       stores.filtre.stats.tribus = stt
@@ -373,10 +363,30 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
-    setTribu (tribu) { // set / remplacement de la tribu SEULE de la session
+    setTribu (tribu, nostat) { // set / remplacement de la tribu SEULE de la session
       const session = stores.session
       this.maptr.set(tribu.id, tribu)
       if (session.tribuId === tribu.id && this.tribu2P && (this.tribu2P.id === tribu.id)) stores.session.setBlocage()
+      if (session.estComptable && !nostat) this.statsTribus()
+    },
+
+    statsTribus () {
+      /*
+      - `cpt` : sérialisation non cryptée des compteurs suivants:
+        - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
+        - `q1 q2` : quotas actuels de la tribu
+        - `nbc` : nombre de comptes.
+        - `nbsp` : nombre de sponsors.
+        - `ncoS` : nombres de comptes ayant une notification simple.
+        - `ncoB` : nombres de comptes ayant une notification bloquante.
+      */
+      const lc = ['a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB']
+      const stats = { dh: new Date().getTime() }
+      lc.forEach(f => { stats[f] = 0 })
+      for (const [,t] of this.maptr) {
+        lc.forEach(f => { stats[f] += (t[f] || 0) })      
+      }
+      stores.session.setStats(stats)
     },
 
     setTribu2 (tribu2) { // set ou remplacement de la tribu2 SEULE

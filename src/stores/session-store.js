@@ -64,6 +64,7 @@ export const useSessionStore = defineStore('session', {
     nivbl: 0,
     alire: false, // Il y a des notifications à lire
     notifG: null, // notification générale courante
+    stats: { dh: 0 }, // stats générale de l'espace
 
     // message fmsg de report après filtrage
     filtreMsg: ''
@@ -144,9 +145,23 @@ export const useSessionStore = defineStore('session', {
 
     setMembreId (id) { this.membreId = id },
 
-    setEspace (espace) {
-      // SEULEMENT pour admin
-      this.espaces.set(espace.id, espace)
+    setStats (stats) { this.stats = stats},
+    
+    setEspace (espace, admin) {
+      if (admin) {
+        // SEULEMENT pour admin
+        this.espaces.set(espace.id, espace)
+      } else {
+        if (espace.notif) this.setNotifG(espace.notif)
+        this.stats = espace.stats
+      }
+    },
+
+    setNotifG (notif) { // Notification générale
+      if (notif && (!this.notifG || notif.v > this.notifG.v)) {
+        this.notifG = notif
+        this.setBlocage()
+      }
     },
 
     chgps (phrase) {
@@ -171,13 +186,6 @@ export const useSessionStore = defineStore('session', {
     setDh (dh) {
       if (dh && dh > this.dh) {
         this.dh = dh
-      }
-    },
-
-    setNotif (notif) { // Notification générale
-      if (notif && (!this.notifG || notif.v > this.notifG.v)) {
-        this.notifG = notif
-        this.setBlocage()
       }
     },
 

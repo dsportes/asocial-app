@@ -125,16 +125,14 @@
           <filtre-nom nom="tribus" prop='nomt' :idx="0"/>
           <filtre-txt nom="tribus" prop='txtt' :idx="1"/>
           <filtre-txt nom="tribus" prop='txtn' :idx="0"/>
-          <filtre-avecbl nom="tribus" :idx="1"/>
-          <filtre-notif nom="tribus" :idx="0"/>
-          <filtre-tri nom="tribus" :nb-options="7" :idx="1"/>
+          <filtre-notif nom="tribus" :idx="1"/>
+          <filtre-tri nom="tribus" :nb-options="7" :idx="0"/>
         </div>
         <div v-if="ui.page === 'tribu'" class="column justify-start">
           <filtre-nom nom="tribu2" prop='nomc' :idx="0"/>
           <filtre-avecsp nom="tribu2" :idx="1"/>
-          <filtre-avecbl nom="tribu2" :idx="0"/>
-          <filtre-notif nom="tribu2" :idx="1"/>
-          <filtre-tri nom="tribu2" :nb-options="3" :idx="0"/>
+          <filtre-notif nom="tribu2" :idx="0"/>
+          <filtre-tri nom="tribu2" :nb-options="3" :idx="1"/>
         </div>
         <div v-if="ui.page === 'people'" class="column justify-start">
           <filtre-nom nom="people" prop='nom' :idx="0"/>
@@ -306,7 +304,6 @@ import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
-import FiltreAvecbl from './components/FiltreAvecbl.vue'
 import FiltreAvecgr from './components/FiltreAvecgr.vue'
 import FiltreTribu from './components/FiltreTribu.vue'
 import FiltreAvecsp from './components/FiltreAvecsp.vue'
@@ -326,7 +323,7 @@ export default {
     PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
     PageGroupe, PageGroupes,
-    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreAvecbl, FiltreTri, FiltreNotif, FiltreAvecsp,
+    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu,
     DialogueErreur, DialogueHelp
    },

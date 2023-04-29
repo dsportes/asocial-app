@@ -431,7 +431,7 @@ export class ConnexionCompte extends OperationUI {
     if (ret.admin) {           
       session.setCompteId(0)
       if (ret.espaces) for (const e of ret.espaces) {
-        session.setEspace(row.id, await compile(r))
+        session.setEspace(await compile(e), true)
       }
       return
     }
@@ -441,8 +441,6 @@ export class ConnexionCompte extends OperationUI {
     this.rowCompta = ret.rowCompta
     this.rowEspace = ret.rowEspace
     session.setCompteId(this.rowCompta.id)
-
-    if (session.estComptable) session.mode = 2
 
     session.setAvatarId(session.compteId)
     this.compta = await compile(this.rowCompta)
@@ -557,7 +555,7 @@ export class ConnexionCompte extends OperationUI {
 
       // Rangement en store
       aSt.setCompte(this.avatar, this.compta, this.tribu, this.tribu2)
-      if (this.espace) session.setNotif(this.espace.notif)
+      if (this.espace) session.setEspace(this.espace)
 
       // En cas de blocage grave, plus de synchronisation
       if (session.nivbl === 3 && session.mode === 1) {
@@ -616,11 +614,42 @@ export class ConnexionCompte extends OperationUI {
 
       // Comptable seulement : chargement des tribus
       if (session.estComptable) {
-        const args = { token: session.authToken }
-        const ret = this.tr(await post(this, 'ChargerTribus', args))
-        if (ret.rowTribus && ret.rowTribus.length) for(const row of ret.rowTribus) {
+        this.cTribus = session.accesIdb ? await getColl('tribus') : []
+        const ltr = new Map()
+        const mvtr = []
+        this.cTribus.forEach(r => {
+          ltr.set(row.id, row)
+          mvtr[r.id] = r.v
+        })
+        if (session.accesNet) {
+          const args = { token: session.authToken, mvtr }
+          const ret = this.tr(await post(this, 'ChargerTribus', args))
+          const delids = new Set(ret.delids)
+          if (ret.rowTribus.length) for(const row of ret.rowTribus) {
+            const tribu = await compile(row)
+            ltr.delete(tribu.id)
+            aSt.setTribu(tribu, true)
+            this.buf.putIDB(row)
+          }
+          delids.forEach(id => { this.buf.supprIDB({ _nom: 'tribus', id: id })})
+        }
+        for (const [id, row] of ltr) {
           const tribu = await compile(row)
-          aSt.setTribu(tribu)
+          aSt.setTribu(tribu, true)
+          this.buf.putIDB(row)
+        }
+        aSt.statsTribus()
+        /* Set stats de l'espace par le Comptable ******************
+        args.token donne les éléments d'authentification du compte.
+        args.ns
+        args.stats : sérialisation des compteurs de stats de l'espace
+        Retour:
+        */
+        if (session.accesNet) {
+          const args = { token: session.authToken, 
+            ns: session.ns, 
+            stats: new Uint8Array(encode(session.stats)) }
+          this.tr(await post(this, 'SetStats', args))
         }
       }
 
@@ -853,7 +882,7 @@ export class AcceptationSponsoring extends OperationUI {
       aSt.setCompte(avatar, compta, tribu, tribu2)
 
       const espace = await compile(ret.rowEspace)
-      if (espace) session.setNotif(espace.notif)
+      if (espace) session.setEspace(espace)
 
       const chat = await compile(rowChat)
       aSt.setChat(chat)
@@ -1047,7 +1076,7 @@ export class GetEspace extends OperationUI {
       const args = { token: session.authToken, ns: ns || session.ns }
       const ret = this.tr(await post(this, 'GetEspace', args ))
       const espace = await compile(ret.rowEspace)
-      if (espace) session.setNotif(espace.notif)
+      if (espace) session.setEspace(espace)
       return this.finOK(espace)
     } catch (e) {
       return await this.finKO(e)
@@ -1079,7 +1108,7 @@ export class SetEspace extends OperationUI {
       }
       const ret = this.tr(await post(this, 'SetEspace', args ))
       const espace = await compile(ret.rowEspace)
-      if (espace) session.setNotif(espace.notif)
+      if (espace) session.setEspace(espace)
       return this.finOK(espace)
     } catch (e) {
       return await this.finKO(e)

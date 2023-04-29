@@ -51,6 +51,11 @@ export default {
   editlecture: 'Les mises à jour ne sont pas possibles quand le compte est "bloqué en lecture seulement"',
   alerte: 'Alerte',
 
+  // Filtre notif
+  gravite0: '(ignorer)',
+  gravite1: 'normale ou importante',
+  gravite2: 'importante',
+
   tmc0: 'Compte',
   tmc1: 'Groupe',
   tmc2: 'App.',
