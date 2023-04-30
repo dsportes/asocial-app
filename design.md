@@ -1,4 +1,6 @@
 
+BUG : création compte sponsorisé id= 101...
+PB: attribution de quotas à un compte sans voir ses volumes ? (juste ses quotas). Renvoyer à la compta ?
 TODO next :
 - sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à VERIFIER !!!!!!!!!!!!!!!
 

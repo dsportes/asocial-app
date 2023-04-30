@@ -87,8 +87,11 @@ export default {
 
   props: { 
     vols: Object
-    // {v1 v2 q1 q2} OU {a1 a2 q1 q2}
-    // Si a1 est défini : a1 (a2) représente un quota attribué sinin v1 représente un volume occupé
+    /*
+    {v1 v2 q1 q2} OU {a1 a2 q1 q2}
+    Si a1 est défini : a1 (a2) représente un quota attribué 
+    sinon v1 (v2) représente un volume occupé
+    */
   },
 
   computed: {
@@ -101,10 +104,12 @@ export default {
     q1 () { const v = this.vols; return v.q1 + ' - ' + edvol(v.q1 * UNITEV1) },
     q2 () { const v = this.vols; return v.q2 + ' - ' + edvol(v.q2 * UNITEV2) },
     pc1 () { const v = this.vols;
+      if (this.vu && this.vx) return 0
       if (v.q1 === 0) return (this.vx ? v.v1 : v.a1) === 0 ? 0 : 999
       return this.vx ? (v.v1 / (v.q1 * UNITEV1)) : (v.a1 / v.q1) 
     },
-    pc2 () { const v = this.vols; 
+    pc2 () { const v = this.vols;
+      if (this.vu && this.vx) return 0
       if (v.q2 === 0) return (this.vx ? v.v2 : v.a2) === 0 ? 0 : 999
       return this.vx ? (v.v2 / (v.q2 * UNITEV2)) : (v.a2 / v.q2) 
     },

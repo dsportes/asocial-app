@@ -651,14 +651,9 @@ export class Tribu2 extends GenDoc {
       const [nom, cle] = decode(await decrypter(this.clet, e.na))
       r.na = NomGenerique.from([nom, cle])
       r.sp = e.sp ? true : false
-      r.bl = e.bl ? true : false
+      r.q1 = e.q1
+      r.q2 = e.q2
       setNg(r.na)
-      r.q1 = e.q1 || 0
-      r.q2 = e.q2 || 0
-      if (e.blocaget) {
-        const b = await decrypter(this.clet, e.blocaget)
-        r.blocage = new Blocage(b)
-      } else r.blocage = null
       r.cv = e.cv ? decode(await decrypter(e.na.rnd, e.cv)) : null
       r.notif = e.notif ? new Notification(await decrypter(this.clet, e.notif)) : null
       this.mbtr[r.na.id] = r

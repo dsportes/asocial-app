@@ -31,7 +31,7 @@
                   icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
             </div>
 
-            <apercu-notif class="q-my-xs" :notif="c.notif" :na-cible="c.na.id" :idx="idx"/>
+            <apercu-notif class="q-my-xs" :notif="c.notif" :na-cible="c.na" :idx="idx"/>
 
           </div>
         </div>
@@ -58,7 +58,7 @@
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
         <q-card-actions>
           <q-btn :disabled="quotas.err" dense size="md" color="primary" icon="check" 
-          :label="$t('ok')" @click="validerq(quotas.c)"/>
+          :label="$t('ok')" @click="validerq"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -108,11 +108,6 @@ export default {
     vis (c) { 
       return (this.session.estComptable || this.session.estSponsor || (c.na.id === this.aSt.compteId))
     },
-    vis2 (c, cosp) {
-      if (!this.vis(c)) return false
-      if (this.ed) return true
-      return c['notif' + cosp]
-    },
     ouvrirSponsoring () { this.nvsp = true },
     fermerSponsoring () { this.nvsp = false },
     fermerFipeople () { this.fipeople = false },
@@ -132,8 +127,11 @@ export default {
         }
       this.edq = true
     },
-    validerq (c) {
+    validerq () {
+      // this.quotas.c -> elt mtbr de tribu2
+      // TODO
       console.log(JSON.stringify(this.quotas))
+      this.edq = false
     },
     async courant (c) { 
       const t = this.type(c.na)
