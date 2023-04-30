@@ -97,7 +97,7 @@ export default {
       after(async (result) => {
         if ((name === 'jailu')){
           if (session.accesNet) await new SetDhvuCompta().run()
-          ui.setPage('accueil')
+          // ui.setPage('accueil')
         }
       })
     })

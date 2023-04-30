@@ -1,20 +1,22 @@
 <template>
   <div :class="dkli(idx)">
     <stats-tribus :stats="esp.stats" :ns="esp.id"/>
-    <apercu-notif :notif="esp.notif" :idx="idx"/>
+    <apercu-notif class="q-mt-sm" :notif="esp.notif" :idx="idx" :ns="esp.id"/>
   </div>
 </template>
 
 <script>
+import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import StatsTribus from './StatsTribus.vue'
+import ApercuNotif from './ApercuNotif.vue'
 
 export default {
   name: 'ApercuEspace',
 
   props: { esp: Object, idx: Number },
 
-  components: { StatsTribus },
+  components: { StatsTribus, ApercuNotif },
 
   computed: {
   },
@@ -28,7 +30,8 @@ export default {
     }
   },
 
-  setup () {
+  setup (props) {
+    const e = toRef(props, 'esp')
     return {
       ui: stores.ui,
       session: stores.session

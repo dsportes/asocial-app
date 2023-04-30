@@ -1,4 +1,5 @@
 <template>
+<div>
   <div :class="dkli(idx)">
     <div v-if="notif" class="column q-my-sm">
       <div class="row justify-between">
@@ -13,6 +14,7 @@
       <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('ANcre')"
         dense icon="edit" @click="editer"/>
     </div>
+  </div>
 
   <q-dialog v-model="ouvert" full-height persistent>
     <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
@@ -90,6 +92,8 @@
                 :disable="!chg" :label="$t('annuler')" @click="undo"/>
               <q-btn color="warning" icon="check" dense size="md" 
                 :disable="!chg" :label="$t('valider')" @click="valider"/>
+              <q-btn color="warning" icon="check" dense size="md" 
+                :disable="ntf.dh===0" :label="$t('supprimer')" @click="valider(true)"/>
             </div>
           </div>
         </q-page>
@@ -109,7 +113,7 @@
     </q-card>
   </q-dialog>
 
-  </div>
+</div>
 </template>
 <script>
 
@@ -122,6 +126,7 @@ import ShowHtml from './ShowHtml.vue'
 import { Notification } from '../app/modele.mjs'
 import { afficherDiag, dhcool } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
+import { SetNotifG, SetNotifT, SetNotifC } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuNotif',
@@ -129,6 +134,7 @@ export default {
   props: { 
     notif: Object, // notification existante, null pour création éventuelle
     naCible: Object, // NomTribu, NomAvatar ou null pour global de la notification à créer
+    ns: Number, // id de l'espace, uniquement pour maj de notifG depuis PageAdmin 
     idx: Number
   },
 
@@ -144,10 +150,10 @@ export default {
     dhc () { return this.ntf.dh ? dhcool(this.ntf.dh) : ''},
 
     dp () { return AMJ.editDeAmj(this.ntf.jbl, true) },
-    chg () { return !this.notif || 
+    chg () { return this.ntf.texte && (!this.notif || 
       (this.notif.jbl !== this.ntf.jbl) || 
       (this.notif.nj !== this.ntf.nj) ||
-      (this.notif.texte !== this.ntf.texte)
+      (this.notif.texte !== this.ntf.texte))
     }
   },
 
@@ -328,36 +334,23 @@ export default {
 
     close () { this.ouvert = false },
 
-    async valider () {
-      switch (this.tc) {
+    async valider (suppr) {
+      const ntf = suppr === true ? null : this.ntf
+      switch (this.tC) {
         case 1: { // notifG
-          const args = { token: session.authToken,
-            ns: session.ns, 
-            notif: ntf.encode()
-          }
-          this.tr(await post(this, 'SetNotifG', args))
+          await new SetNotifG().run(this.ns, ntf)
           break
         }
         case 2: { // notif Tribu
-          const args = { token: session.authToken, 
-            attr: 'notif',
-            id: this.naCible.id, 
-            val: ntf.encode()
-          }
-          this.tr(await post(this, 'SetAttributTribu', args))
+          await new SetNotifT().run(this.naCible.id, ntf)
           break
         }
         case 3: { // notif Compte
-          const args = { token: session.authToken, 
-            hrnd: this.naCible.hrnd,
-            id: this.naCible.id, 
-            notif: ntf.encode(),
-            ntfb: ntf.jbl !== 0
-          }
-          this.tr(await post(this, 'SetNotifC', args))
+          await new SetNotifC().run(this.naCible.id, this.naCible, ntf)
           break
         }
       }
+      this.close()
     }
   },
 

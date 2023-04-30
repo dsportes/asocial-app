@@ -1,5 +1,7 @@
 <template>
   <q-page class="q-pa-xs">
+    <q-btn class="q-my-sm" dense color="primary" :label="$t('rafraichir')" @click="rafraichir"/>
+
     <div class="titre-md q-my-sm row items-center">
       <q-btn v-if="!ns" dense size="md" icon="add" class="q-mr-sm btn1"
         color="primary" @click="plusNS"/>
@@ -12,7 +14,7 @@
 
     <div v-for="(e, idx) in session.paLeFT" :key="e.id">
       <apercu-espace class="q-my-md" :esp="e" :idx="idx"/>
-      <q-seapartor class="q-my-sm" color="orange"/>
+      <q-separator class="q-my-sm" color="orange"/>
     </div>
 
   </q-page>
@@ -22,7 +24,7 @@
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ApercuEspace from '../components/ApercuEspace.vue'
-import { CreerEspace } from '../app/connexion.mjs'
+import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
 
 export default {
   name: 'PageAdmin',
@@ -33,6 +35,9 @@ export default {
   },
 
   methods: {
+    async rafraichir () {
+      await reconnexionCompte()
+    },
     plusNS () {
       const mesp = this.session.espaces
       for (let id = 10; id < 90; id++) {
@@ -55,9 +60,9 @@ export default {
   },
 
   setup () {
+    const session = stores.session
     return {
-      ui: stores.ui,
-      session: stores.session
+      session,
     }
   }
 

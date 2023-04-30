@@ -636,6 +636,7 @@ export class SetNotifT extends OperationUI {
   async run (id, notifT) {
     try {
       const session = stores.session
+      if (notifT) notifT.dh = new Date().getTime()
       const cle = getCle(id)
       const val = notifT ? await crypter(cle, notifT.encode()) : null
       const args = { token: session.authToken, id, attr: 'notif', val }
@@ -682,6 +683,7 @@ export class SetNotifC extends OperationUI {
   async run (id, na, notifC) {
     try {
       const session = stores.session
+      if (notifC) notifC.dh = new Date().getTime()
       const cle = getCle(id)
       const notif = notifC ? await crypter(cle, notifC.encode()) : null
       const args = { token: session.authToken, id, hrnd: na.hrnd, notif, 
@@ -870,10 +872,16 @@ export class SetNotifG extends OperationUI {
   async run (ns, notifG) {
     try {
       const session = stores.session
+      if (notifG) notifG.dh = new Date().getTime()
       const naComptable = NomGenerique.comptable(ns)
       const notif = !notifG ? null : await crypter(naComptable.rnd, notifG.encode())
       const args = { token: session.authToken, ns, notif}
-      this.tr(await post(this, 'SetNotifG', args))
+      const ret = this.tr(await post(this, 'SetNotifG', args))
+      if (ret.rowEspace && !session.ns) {
+        // PageAdmin : update liste espace
+        const esp = await compile(ret.rowEspace)
+        session.setEspace(esp, true)
+      }
       this.finOK()
     } catch (e) {
       await this.finKO(e)

@@ -152,15 +152,16 @@ export const useSessionStore = defineStore('session', {
         // SEULEMENT pour admin
         this.espaces.set(espace.id, espace)
       } else {
-        if (espace.notif) this.setNotifG(espace.notif)
+        if (espace.notif) {
+          if (!this.notifG || (espace.notif.v > this.notifG.v)) {
+            this.notifG = espace.notif
+            this.setBlocage()
+          }
+        } else if (this.notifG) {
+          this.notifG = null
+          this.setBlocage()
+        }
         this.stats = espace.stats
-      }
-    },
-
-    setNotifG (notif) { // Notification générale
-      if (notif && (!this.notifG || notif.v > this.notifG.v)) {
-        this.notifG = notif
-        this.setBlocage()
       }
     },
 
