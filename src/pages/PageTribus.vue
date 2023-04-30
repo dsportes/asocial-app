@@ -2,7 +2,8 @@
   <q-page class="q-pa-sm">
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <stats-tribus class="q-my-sm q-mx-xs" :stats="session.stats" :ns="session.ns"/>
+    <stats-tribus class="q-my-sm q-mx-xs" :stats="session.stats" 
+      :ns="session.ns" :profil="session.profil"/>
 
     <quotas-vols class="q-my-sm q-mx-xs" :vols="session.stats" />
 

@@ -889,6 +889,32 @@ export class SetNotifG extends OperationUI {
   }
 }
 
+/* Set t de l'espace par le Comptable ******************
+args.token donne les éléments d'authentification du compte.
+args.ns
+args.t
+Retour:
+*/
+export class SetEspaceT extends OperationUI {
+  constructor () { super($t('OPprf')) }
+
+  async run (ns, t) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns, t}
+      const ret = this.tr(await post(this, 'SetEspaceT', args))
+      if (ret.rowEspace && !session.ns) {
+        // PageAdmin : update liste espace
+        const esp = await compile(ret.rowEspace)
+        session.setEspace(esp, true)
+      }
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* Nouveau groupe *****************************************************
 args.token donne les éléments d'authentification du compte.
 args.rowGroupe : le groupe créé

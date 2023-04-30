@@ -334,10 +334,13 @@ export default {
 
   // Stats tribus
   STtit: 'Statistiques de l\'espace {0} - {1} tribu(s) - {2}',
+  STl0: 'Profil #{0}',
+  STl0b: 'Quotas V1 / V2',
   STl1: 'Somme des quotas (V1 / V2) attribués aux tribus',
   STl2: 'Somme des quotas (V1 / V2) attribués aux comptes',
   STl3: 'Nombre total de comptes / dont sponsors',
   STl4: 'Nombre total de comptes ayant une alerte (simple / bloquante)',
+  STchg: 'Changer le profil de l\èespace',
 
   // Page sponsorings - Nouveau sponsoring
   NPnouv: 'Sponsoriser un nouveau compte',
@@ -421,6 +424,7 @@ export default {
   OPcpc: 'Changer de phrase de contact',
   OPccv: 'Rafraîchir des cartes de visite',
   OPntfg: 'Attribution d\'une notification générale',
+  OPprf: 'Attribution d\'un profil à l\'espace',
   OPdhvu: 'Maj de la date-heure de "vu" d\'une compta',
 
   OPnvgr: 'Créer un nouveau groupe',

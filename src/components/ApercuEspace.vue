@@ -1,6 +1,6 @@
 <template>
   <div :class="dkli(idx)">
-    <stats-tribus :stats="esp.stats" :ns="esp.id"/>
+    <stats-tribus :stats="esp.stats" :ns="esp.id" :profil="esp.t"/>
     <apercu-notif class="q-mt-sm" :notif="esp.notif" :idx="idx" :ns="esp.id"/>
   </div>
 </template>

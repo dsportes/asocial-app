@@ -75,7 +75,6 @@ export const useConfigStore = defineStore('config', {
       this.urlserveur = cfg.urlserveur
       this.help = cfg.help
       this.phrases = cfg.phrases
-      this.rappelblocageenminutes = cfg.rappelblocageenminutes || 5
       this.quotas = cfg.quotas
       this.maxlgtextegen = cfg.maxlgtextegen || 250
       this.maxlgtextesecret = cfg.maxlgtextesecret || 5000
@@ -96,7 +95,7 @@ export const useConfigStore = defineStore('config', {
       if (!this.limitesjour.secrettemp) this.limitesjour.secrettemp = 80
       if (!this.limitesjour.sponsoring) this.limitesjour.sponsoring = 14
       if (!this.limitesjour.groupenonheb) this.limitesjour.groupenonheb = 120
-      this.raisonsblocage = cfg.raisonsblocage
+      this.profils = cfg.profils || [[10, 10], [50, 50], [250, 250], [50, 10], [250, 50]]
     },
 
     setEmojiIndex (ei) {

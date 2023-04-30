@@ -65,6 +65,7 @@ export const useSessionStore = defineStore('session', {
     alire: false, // Il y a des notifications à lire
     notifG: null, // notification générale courante
     stats: { dh: 0 }, // stats générale de l'espace
+    profil: 0,
 
     // message fmsg de report après filtrage
     filtreMsg: ''
@@ -162,6 +163,7 @@ export const useSessionStore = defineStore('session', {
           this.setBlocage()
         }
         this.stats = espace.stats
+        this.profil = espace.t
       }
     },
 
