@@ -19,19 +19,26 @@
           <q-btn class="col-auto" flat icon="navigate_next" size="md"
             :color="c.na.id === ccid ? 'warning' : 'primary'" @click="courant(c)"/>
           <div class="col q-pr-xs">
-            <apercu-compte v-if="type(c.na)===3" :elt="c" :idx="idx"/>
-            <apercu-people v-if="type(c.na)===2" :id="c.na.id" :idx="idx"/>
-            <apercu-avatar v-if="type(c.na)===1" :na="c.na" :idx="idx"/>
+            <!-- C'est LE titulaire du compte -->
+            <apercu-avatar v-if="c.na.id === session.compteId" :na="c.na" :idx="idx"/>
+            <div v-else>
+              <!-- C'est un compte connu en tant que people, chat engagé, 
+              membre d'un groupe, sponsor de la tribu du compte-->
+              <apercu-people v-if="pSt.estPeople(c.na.id)" :id="c.na.id" :idx="idx"/>
+              <!-- Sinon c'est un compte lambda, pas connu comme people ... -->
+              <apercu-compte v-else :elt="c" :idx="idx"/>
+            </div>
+
+            <apercu-notif class="q-my-xs" 
+              :notif="c.notif" :na-tribu="aSt.tribu2CP.na" :na-cible="c.na" :idx="idx"/>
 
             <div v-if="c.sp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
             <div v-if="vis(c)" class="q-mb-xs row largeur40 items-center">
               <quotas-vols :vols="c" />
               <q-btn v-if="session.estSponsor || session.estComptable" size="sm" class="q-ml-lg"
-                  icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
+                  icon="settings" :label="$t('gerer')" dense color="primary" @click="voirCompta(c)"/>
             </div>
-
-            <apercu-notif class="q-my-xs" :notif="c.notif" :na-cible="c.na" :idx="idx"/>
 
           </div>
         </div>
@@ -64,23 +71,22 @@
     </q-dialog>
 
     <!-- Affichage des compteurs de compta du compte "courant"-->
-    <q-dialog v-model="cptdial" persistent>
-      <q-card style="width: 700px; max-width: 80vw;">
+    <q-dialog v-model="cptdial" persistent full-height>
+      <q-card style="width: 80vw !important;">
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="close" @click="cptdial = false"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [ccna.nomc])}}</q-toolbar-title>
       </q-toolbar>
-      <panel-compta :c="aSt.ccCpt" style="margin:0 auto"/>
+      <panel-compta style="margin:0 auto"/>
       </q-card>
     </q-dialog>
   </q-page>
 </template>
 
 <script>
-import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { UNITEV1, UNITEV2, Compteurs } from '../app/api.mjs'
-import { edvol, hms, $t } from '../app/util.mjs'
+import { edvol } from '../app/util.mjs'
 import ApercuTribu from '../components/ApercuTribu.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
@@ -91,7 +97,7 @@ import PanelPeople from '../dialogues/PanelPeople.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { GetCompteursCompta } from '../app/operations.mjs'
+import { GetCompteursCompta, SetAttributTribu2 } from '../app/operations.mjs'
 
 export default {
   name: 'PageTribu',
@@ -118,6 +124,12 @@ export default {
       if (this.pSt.estPeople(na.id)) return 2
       return 3
     },
+    async voirCompta (c) {
+      this.ccid = c.na.id
+      this.ccna = c.na
+      await new GetCompteursCompta().run(c.na)
+      this.cptdial = true
+    },
     async editerq (c) {
       if (! await this.session.edit()) return
       this.quotas = { q1: c.q1, q2: c.q2, min1: 0, min2: 0, 
@@ -127,10 +139,9 @@ export default {
         }
       this.edq = true
     },
-    validerq () {
-      // this.quotas.c -> elt mtbr de tribu2
-      // TODO
-      console.log(JSON.stringify(this.quotas))
+    async validerq () {
+      await new SetAttributTribu2().run(this.aSt.tribuC.id, 
+        this.quotas.c.na, 'quotas', [this.quotas.q1, this.quotas.q2])
       this.edq = false
     },
     async courant (c) { 
@@ -144,8 +155,7 @@ export default {
         this.session.setPeopleId(c.na.id)
         this.fipeople = true
       } else if (t === 3) {
-        const res = await new GetCompteursCompta().run(c.na.id)
-        this.aSt.ccCpt = new Compteurs(res)
+        await new GetCompteursCompta().run(c.na)
         this.cptdial = true
       }
     },

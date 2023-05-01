@@ -1026,6 +1026,9 @@ export default {
   ANpec: 'Procédure de blocage engagée',
   ANpf: 'Une procédure de blocage sera engagée le {0} (dans {1} jour(s))',
 
+  ANdg1: 'Un compte ne peut pas ouvrir une procédure de blocage sur sa propre tribu.',
+  ANdg2: 'Un compte ne peut pas ouvrir une procédure de blocage sur son propre compte.',
+
   AN365: '0..365',
   ANed0: 'La procédure de blocage actuelle débute le {0}',
   ANed4: 'Engager une procédure de blocage',

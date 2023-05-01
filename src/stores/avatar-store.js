@@ -342,6 +342,10 @@ export const useAvatarStore = defineStore('avatar', {
       if (bl) stores.session.setBlocage()
     },
 
+    setccCpt (ccCpt) {
+      this.ccCpt = ccCpt
+    },
+
     /* set d'une tribu courante (pour le Comptable)
     ou par convention (sans paramètre) rend "courante" la tribu de la session
     */

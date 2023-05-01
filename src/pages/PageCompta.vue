@@ -1,6 +1,6 @@
 <template>
 <q-page>
-  <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto" :c="aSt.compta.compteurs"/>
+  <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto"/>
 
   <div v-if="ui.pagetab==='notif'" class="q-pa-sm">
     <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
@@ -101,7 +101,7 @@ export default {
         }
       })
     })
-
+    aSt.setccCpt(aSt.compta.compteurs)
     return {
       session,
       pSt,

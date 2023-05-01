@@ -129,6 +129,7 @@ export class NomGenerique {
   static compte(ns, nom) {
     const rnd = random(32)
     rnd[0] = ns
+    rnd[1] = 0
     return new NomAvatar(hash(rnd) % d13, nom, rnd)
   }
 
@@ -413,24 +414,22 @@ export class MdpAdmin {
   }
 }
 
-const lstfnotif = ['idSource', 'idCible', 'jbl', 'nj', 'texte', 'dh']
+const lstfnotif = ['idSource', 'jbl', 'nj', 'texte', 'dh']
 export class Notification {
 
   /* Attributs: 
-  - `source`: id de la source, du Comptable ou du sponsor, par convention 0 pour l'administrateur.
-  - `cible` : 0 pour le global, sinon id de la tribu ou du compte.
+  - `idSource`: id du Comptable ou du sponsor, par convention 0 pour l'administrateur.
   - `jbl` : jour de déclenchement de la procédure de blocage sous la forme `aaaammjj`, 0 s'il n'y a pas de procédure de blocage en cours.
   - `nj` : en cas de procédure ouverte, nombre de jours après son ouverture avant de basculer en niveau 4.
   - `texte` : texte informatif, pourquoi, que faire ...
   - `dh` : date-heure de dernière modification (informative).
   */
-  constructor (buf, idSource, idCible) {
+  constructor (buf, idSource) {
     if (buf) {
       const r = decode(buf)
       for (const f of lstfnotif) this[f] = r[f]
     } else {
       this.idSource = idSource
-      this.idCible = idCible
       this.jbl = 0
       this.nj = 0
       this.texte = ''
@@ -1083,7 +1082,7 @@ export class Sponsoring extends GenDoc {
     const session = stores.session
     const aSt = stores.avatar
     const av = aSt.avC
-    const n = NomGenerique.avatar(session.ns, nom)
+    const n = NomGenerique.compte(session.ns, nom)
     const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, nctkc, quotas}
     d.nct = [nct.nom, nct.rnd]
     const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))

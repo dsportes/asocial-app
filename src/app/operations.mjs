@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { ID, AppExc, appexc, AMJ } from './api.mjs'
+import { ID, AppExc, appexc, AMJ, Compteurs } from './api.mjs'
 import { $t, rnd6 } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
@@ -680,7 +680,7 @@ Retour:
 export class SetNotifC extends OperationUI {
   constructor () { super($t('OPntfco')) }
 
-  async run (id, na, notifC) {
+  async run (id, na, notifC) { // id de la tribu, na du compte cible, notif
     try {
       const session = stores.session
       if (notifC) notifC.dh = new Date().getTime()
@@ -688,7 +688,7 @@ export class SetNotifC extends OperationUI {
       const notif = notifC ? await crypter(cle, notifC.encode()) : null
       const args = { token: session.authToken, id, hrnd: na.hrnd, notif, 
         ntfb: notifC && notifC.jbl ? true : false }
-      this.tr(await post(this, 'SetAttributTribu2', args))
+      this.tr(await post(this, 'SetNotifC', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -716,6 +716,30 @@ export class SetAttributTribu2 extends OperationUI {
       const args = { token: session.authToken, id, hrnd: na.hrnd, attr, 
         val, exq: exq || false }
       this.tr(await post(this, 'SetAttributTribu2', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Set des quotas d'un compte *******
+args.token: éléments d'authentification du compte.
+args.idc : id du compte
+args.id : id de sa tribu
+args.hrnd: id de l'élément du compte dans mbtr
+args.q1
+args.q2
+Retour:
+*/
+export class SetQuotasCompte extends OperationUI {
+  constructor () { super($t('OPmajtr')) }
+
+  async run (id, na, q1, q2) { // id tribu, na du compte
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, idc: na.id, hrnd: na.hrnd, q1, q2 }
+      this.tr(await post(this, 'SetQuotasCompte', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -822,12 +846,16 @@ Retour:
 export class GetCompteursCompta extends OperationUI {
   constructor () { super($t('OPdhvu')) }
 
-  async run (id) {
+  async run (na) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id }
+      const aSt = stores.avatar
+      const args = { token: session.authToken, id: na.id }
       const ret = this.tr(await post(this, 'GetCompteursCompta', args))
-      return this.finOK(ret.compteurs, true)
+      const cpt = new Compteurs(ret.compteurs)
+      cpt.na = na
+      aSt.setccCpt(cpt)
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

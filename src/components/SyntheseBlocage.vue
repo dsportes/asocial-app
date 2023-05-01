@@ -18,8 +18,8 @@
     </div>
 
     <apercu-notif v-if="session.status>1" :notif="session.notifG"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" :na-cible="aSt.tribu.na"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.mbtr.notif" :na-cible="aSt.compte.na"/>
+    <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" :na-tribu="aSt.tribu.na" :na-cible="aSt.tribu.na"/>
+    <apercu-notif v-if="session.ok" :notif="aSt.mbtr.notif" :na-tribu="aSt.tribu.na" :na-cible="aSt.compte.na"/>
 
     <div style="height:2px;width:100%"/>
 

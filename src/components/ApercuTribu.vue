@@ -18,7 +18,7 @@
 
     <div class="q-ml-md titre-md">{{$t('NTnbcsp', [t.cpt.nbc, t.cpt.nbsp])}}</div>
 
-    <apercu-notif class="q-ml-md" :notif="t.notif" :na-cible="t.na" :idx="0"/>
+    <apercu-notif class="q-ml-md" :notif="t.notif" :na-tribu="t.na" :na-cible="t.na" :idx="0"/>
 
     <div class="q-ml-md q-mb-xs row largeur40 items-center">
       <quotas-vols :vols="t.cpt" />

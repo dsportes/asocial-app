@@ -70,6 +70,7 @@
             <div v-else>
               <q-radio dense v-model="choix" :val="4" :label="$t('ANed4')" />
             </div>
+            <div v-if="choixdiag" class="text-bold text-negative fs-md bg-yellow-3">{{choixdiag}}</div>
 
             <div v-if="choix >= 3" class="fs-md q-my-sm row items-end">
               <span class ="q-mr-sm">{{$t('ANdp', [edd(ntf.jbl)])}}</span>
@@ -91,7 +92,7 @@
               <q-btn flat color="primary" icon="undo" dense size="md" 
                 :disable="!chg" :label="$t('annuler')" @click="undo"/>
               <q-btn color="warning" icon="check" dense size="md" 
-                :disable="!chg" :label="$t('valider')" @click="valider"/>
+                :disable="choixdiag !== '' || !chg" :label="$t('valider')" @click="valider"/>
               <q-btn color="warning" icon="check" dense size="md" 
                 :disable="ntf.dh===0" :label="$t('supprimer')" @click="valider(true)"/>
             </div>
@@ -123,7 +124,7 @@ import NotifIcon from './NotifIcon.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
-import { Notification } from '../app/modele.mjs'
+import { Notification, getNg } from '../app/modele.mjs'
 import { afficherDiag, dhcool } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { SetNotifG, SetNotifT, SetNotifC } from '../app/operations.mjs'
@@ -133,7 +134,8 @@ export default {
 
   props: { 
     notif: Object, // notification existante, null pour création éventuelle
-    naCible: Object, // NomTribu, NomAvatar ou null pour global de la notification à créer
+    naTribu: null, // SAUF pour une notifG, tribu cible ou tribu du compte cible
+    naCible: Object, // NomTribu, NomAvatar ou null / undefined pour global de la notification à créer
     ns: Number, // id de l'espace, uniquement pour maj de notifG depuis PageAdmin 
     idx: Number
   },
@@ -145,8 +147,20 @@ export default {
     tC () { return !this.naCible ? 1 : (this.naCible.estTribu ? 2 : 3) },
     nomC () { return !this.naCible ? '' : this.naCible.nom },
 
+    // Type de l'auteur: 1:admin, 2:Comptable, 3:sponsor
+    ta () { return !this.session.ns ? 1 : (this.session.estComptable ? 2 : 3)},
+
+    // id de la tribu de l'auteur
+    idtra () { return !this.session.ns ? 0 : this.aSt.tribu.id },
+
+    moicible () {
+      if (this.ta === 1) return ''
+      if (this.tC === 2) return this.idtra === this.naTribu.id ? this.$t('ANdg1') : ''
+      return this.session.compteId === this.naCible.id ? this.$t('ANdg2') : ''
+    },
+
     // Nom de la source
-    nomS () { return !this.ntf.source ? this.$t('admin') : getNg(this.ntf.source).nomC },
+    nomS () { const na = getNg(this.ntf.idSource); return !this.ntf.idSource ? this.$t('admin') : na.nomc },
     dhc () { return this.ntf.dh ? dhcool(this.ntf.dh) : ''},
 
     dp () { return AMJ.editDeAmj(this.ntf.jbl, true) },
@@ -164,7 +178,8 @@ export default {
     choix: 0, // procédure en cours
     jbl: 0,
     np: 0,
-    nj: 0
+    nj: 0,
+    choixdiag: ''
   }},
 
   watch: {
@@ -173,6 +188,7 @@ export default {
       case 1: { // ajuster
         this.np = 0
         this.nj = this.ntf.nj
+        this.choixdiag = this.moicible
         break
       }
       case 2: { // annuler
@@ -180,19 +196,19 @@ export default {
         this.ntf.nj = 0
         this.np = 0
         this.nj = 0
+        this.choixdiag = ''
         break
       }
       case 3: { // réinit
         this.ntf.jbl = this.auj
         this.np = 0
         this.nj = this.ntf.nj
+        this.choixdiag = this.moicible
         break
       }
       case 4: { // nouvelle
         this.ntf.jbl = this.auj
         this.ntf.nj = 30
-        this.np = 0
-        this.nj = 30
         this.choix = 1
         break
       }
@@ -230,11 +246,11 @@ export default {
 
     async editer () {
       this.ro = -1
-      if (!this.session.ns) await this.editerA()
-      else if (this.session.estComptable) await this.editerC()
+      if (this.ta === 1) await this.editerA()
+      else if (this.ta === 2) await this.editerC()
       else await this.editerS()
       if (this.ro >= 0) {
-        if (this.ro === 0) this.reset()
+        if (this.ro === 0) { this.ntfx = this.ntf.clone(); this.reset() }
         this.ouvert = true
       }
     },
@@ -249,8 +265,7 @@ export default {
           await afficherDiag(this.$t('ANmx1'))
         }
       } else { // Notification générale
-        this.ntf = this.notif ? this.notif.clone() : new Notification(null, 0, 0)
-        this.ntfx = this.ntf.clone()
+        this.ntf = this.notif ? this.notif.clone() : new Notification(null, 0)
         this.ro = 0
       }
     },
@@ -258,9 +273,7 @@ export default {
     async editerC () { // Comptable
       if (!await this.session.edit(true)) return
       if (this.naCible) {
-        this.ntf = this.notif ? this.notif.clone() : 
-          new Notification(null, this.session.compteId, this.naCible.id)
-        this.ntfx = this.ntf.clone()
+        this.ntf = this.notif ? this.notif.clone() : new Notification(null, this.session.compteId)
         this.ro = 0
       } else { // Notification générale
         if (this.notif) {
@@ -291,8 +304,7 @@ export default {
           }
         } else { // création d'une notif tribu
           if (this.session.estSponsor){
-            this.ntf = new Notification(null, this.session.compteId, this.naCible.id)
-            this.ntfx = this.ntf.clone()
+            this.ntf = new Notification(null, this.session.compteId)
             this.ro = 0
           } else {
             await afficherDiag(this.$t('ANmx4')) 
@@ -315,8 +327,7 @@ export default {
           }
         } else { // création d'une notif compte
           if (this.session.estSponsor){
-            this.ntf = new Notification(null, this.session.compteId, this.naCible.id)
-            this.ntfx = this.ntf.clone()
+            this.ntf = new Notification(null, this.session.compteId)
             this.ro = 0
           } else {
             await afficherDiag(this.$t('ANmx7')) 
@@ -342,11 +353,11 @@ export default {
           break
         }
         case 2: { // notif Tribu
-          await new SetNotifT().run(this.naCible.id, ntf)
+          await new SetNotifT().run(this.naTribu.id, ntf)
           break
         }
         case 3: { // notif Compte
-          await new SetNotifC().run(this.naCible.id, this.naCible, ntf)
+          await new SetNotifC().run(this.naTribu.id, this.naCible, ntf)
           break
         }
       }
@@ -356,11 +367,13 @@ export default {
 
   setup () {
     const session = stores.session
+    const aSt = stores.avatar
     const auj = AMJ.amjUtc()
     const ntf = ref(null)
     const ntfc = ref(null)
     return {
       session,
+      aSt,
       auj,
       ntf,
       ntfc

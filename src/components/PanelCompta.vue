@@ -1,7 +1,9 @@
 <template>
   <div class="q-pa-sm full-width">
-    <div class="q-my-sm q-mx-sm">
+    <div class="q-my-sm q-mx-sm row justify-between items-center">
       <quotas-vols :vols="c" />
+      <q-btn v-if="session.estSponsor || session.estComptable" size="md" class="q-ml-sm"
+          icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq"/>
     </div>
 
     <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
@@ -89,14 +91,32 @@
       </div>
     </div>
 
+    <!-- Dialogue de mise à jour des quotas du compte -->
+    <q-dialog v-model="edq" persistent>
+      <q-card class="petitelargeur">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" color="warning" icon="close" @click="edq = false"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
+        </q-toolbar>
+        <choix-quotas class="q-mt-sm" :quotas="quotas" />
+        <q-card-actions>
+          <q-btn :disabled="quotas.err" dense size="md" color="primary" icon="check" 
+          :label="$t('ok')" @click="validerq"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </div>
 </template>
 
 <script>
-// import { toRef } from 'vue'
+import { ref } from 'vue'
 import { UNITEV1, UNITEV2, AMJ, pow } from '../app/api.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
 import QuotasVols from './QuotasVols.vue'
+import ChoixQuotas from './ChoixQuotas.vue'
+import stores from '../stores/stores.mjs'
+import { SetQuotasCompte, GetCompteursCompta } from '../app/operations.mjs'
 
 /** Compteurs ***************************
 - `j` : **date du dernier calcul enregistré** : par exemple le 17 Mai de l'année A
@@ -116,9 +136,9 @@ import QuotasVols from './QuotasVols.vue'
 export default ({
   name: 'PanelCompta',
 
-  props: { c: Object },
+  props: { },
 
-  components: { QuotasVols },
+  components: { QuotasVols, ChoixQuotas },
 
   computed: {
     edj () { return AMJ.editDeAmj(this.c.j) }
@@ -126,7 +146,9 @@ export default ({
 
   data () {
     return {
-      dhcool: dhcool
+      edq: false,
+      dhcool: dhcool,
+      quotas: null
     }
   },
 
@@ -158,13 +180,41 @@ export default ({
         l[i] = j
       }
       return l
-    }
+    },
 
+    async editerq () {
+      if (! await this.session.edit()) return
+      const tr = this.aSt.tribuC
+      this.quotas = { q1: this.c.q1, q2: this.c.q2, min1: 0, min2: 0, 
+        max1: tr.cpt.q1 - tr.cpt.a1,
+        max2: tr.cpt.q2 - tr.cpt.a2
+        }
+      this.edq = true
+    },
+    async validerq () {
+      await new SetQuotasCompte().run(this.aSt.tribuC.id, this.na, this.quotas.q1, this.quotas.q2)
+      this.edq = false
+      await new GetCompteursCompta().run(this.na)
+    },
   },
 
-  setup (props) {
-    // const cx = toRef(props, 'c')
+  setup () {
+    const aSt = stores.avatar
+    const c = ref(aSt.ccCpt)
+
+    aSt.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setccCpt') {
+          c.value = aSt.ccCpt
+        }
+      })
+    })
+
     return {
+      session: stores.session,
+      aSt,
+      na: c.value.na || aSt.compta.nap,
+      c
     }
   }
 })

@@ -72,7 +72,7 @@
       </q-header>
       <q-page-container>
         <q-card>
-          <panel-compta :c="aSt.ccCpt" style="margin:0 auto"/>
+          <panel-compta style="margin:0 auto"/>
         </q-card>
       </q-page-container>
     </q-layout>
@@ -116,7 +116,7 @@ export default {
     edv1 (v) { return edvol(v * UNITEV1) },
     edv2 (v) { return edvol(v * UNITEV2) },
     async chgTribu () { 
-      this.aSt.ccCpt = new Compteurs(await new GetCompteursCompta().run(this.na.id))
+      /* this.aSt.ccCpt = */ await new GetCompteursCompta().run(this.na)
       this.aSt.ppFiltre = ''
       this.chgTr = true
     },
@@ -124,7 +124,7 @@ export default {
       this.chgSp = true
     },
     async voirCompta () { 
-      this.aSt.ccCpt = new Compteurs(await new GetCompteursCompta().run(this.na.id))
+      /* this.aSt.ccCpt = */ await new GetCompteursCompta().run(this.na)
       this.cptdial = true
     },
     async changerSp(estSp) { // (id, na, attr, val, exq)
