@@ -747,6 +747,8 @@ export class Avatar extends GenDoc {
   get na () { return getNg(this.id) }
   get nbGroupes () { return this.lgr.size }
   get nbInvits () { return this.invits.size }
+  get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconAvatar }
+
 
   /* Remplit la map avec les membres des groupes de l'avatar/
   - clé: id du groupe
@@ -1243,6 +1245,7 @@ export class Groupe extends GenDoc {
   get nomc () { return this.na.nomc }
   get pc1 () { return Math.round(this.vols.v1 / UNITEV1 / this.vols.q1) }
   get pc2 () { return Math.round(this.vols.v2 / UNITEV2 / this.vols.q2) }
+  get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconGroupe }
 
   async compile (row) {
     this.vsh = row.vsh || 0

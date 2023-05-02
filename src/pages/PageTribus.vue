@@ -18,11 +18,15 @@
 
     <div v-if="aSt.ptLtFT.length">
       <div v-for="(tribu, idx) in aSt.ptLtFT" :key="tribu.id">
-        <div class="row items-start">
-          <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
-            :color="tribu.id === session.tribuCId ? 'warning' : 'primary'" @click="courant(tribu.id)"/>
-          <apercu-tribu class="q-my-sm" :id="tribu.id" :idx="idx" edit/>
-        </div>
+        <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)">
+          <template v-slot:header>
+            <div class="q-ml-md row full-width justify-between items-center">
+              <div class="titre-md">{{tribu.na.nom}}</div>
+              <q-btn class="q-ml-md" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(tribu.id)"/>
+            </div>
+          </template>
+          <apercu-tribu class="q-ml-lg" :id="tribu.id" :idx="idx" edit/>
+        </q-expansion-item>
       </div>
     </div>
 
@@ -63,6 +67,8 @@ export default {
   },
 
   methods: {
+    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+
     ed1 (n) { return edvol(n * UNITEV1) },
     ed2 (n) { return edvol(n * UNITEV2) },
     ouvrirnt () { 

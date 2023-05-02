@@ -21,33 +21,50 @@
 
     <q-card v-if="aSt.ptLcFT.length">
       <div v-for="(c, idx) in aSt.ptLcFT" :key="c.na.id">
-        <div :class="'q-mb-md row items-start ' + dkli(idx)">
-          <q-btn class="col-auto" flat icon="navigate_next" size="md"
-            :color="c.na.id === ccid ? 'warning' : 'primary'" @click="courant(c)"/>
-          <div class="col q-pr-xs">
-            <!-- C'est LE titulaire du compte -->
-            <apercu-avatar v-if="c.na.id === session.compteId" :na="c.na" :idx="idx"/>
-            <div v-else>
-              <!-- C'est un compte connu en tant que people, chat engagé, 
-              membre d'un groupe, sponsor de la tribu du compte-->
-              <apercu-people v-if="pSt.estPeople(c.na.id)" :id="c.na.id" :idx="idx"/>
-              <!-- Sinon c'est un compte lambda, pas connu comme people ... -->
-              <apercu-compte v-else :elt="c" :idx="idx"/>
+        <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)">
+          <template v-slot:header>
+            <div class="row full-width items-center justify-between">
+              <div class="row items-center">
+                <div>
+                  <img v-if="c.na.id === session.compteId" class="photomax" :src="aSt.compte.photo" />
+                  <span v-else>
+                    <img v-if="pSt.estPeople(c.na.id)" class="photomax" :src="pSt.photo(c.na.id)" />
+                    <img v-else class="photomax" :src="cfg.iconAvatar"/>
+                  </span>
+                </div>
+                <div v-if="c.na.id === session.compteId" class="titre-md q-ml-sm">{{c.na.nom}} [{{$t('moi')}}]</div>
+                <div v-else class="titre-md q-ml-sm">{{c.na.nomc}}</div>
+              </div>
+              <q-btn class="q-ml-md" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(c)"/>
             </div>
+          </template>
 
-            <apercu-notif class="q-my-xs" 
-              :notif="c.notif" :na-tribu="aSt.tribu2CP.na" :na-cible="c.na" :idx="idx"/>
+          <div :class="'q-ml-lg row items-start ' + dkli(idx)">
+            <div class="column">
+              <!-- C'est LE titulaire du compte -->
+              <apercu-avatar v-if="c.na.id === session.compteId" :na="c.na" :idx="idx"/>
+              <div v-else>
+                <!-- C'est un compte connu en tant que people, chat engagé, 
+                membre d'un groupe, sponsor de la tribu du compte-->
+                <apercu-people v-if="pSt.estPeople(c.na.id)" :id="c.na.id" :idx="idx"/>
+                <!-- Sinon c'est un compte lambda, pas connu comme people ... -->
+                <apercu-compte v-else :elt="c" :idx="idx"/>
+              </div>
 
-            <div v-if="c.sp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
+              <apercu-notif class="q-my-xs" 
+                :notif="c.notif" :na-tribu="aSt.tribu2CP.na" :na-cible="c.na" :idx="idx"/>
 
-            <div v-if="vis(c)" class="q-mb-xs row largeur40 items-center">
-              <quotas-vols :vols="c" />
-              <q-btn v-if="session.estSponsor || session.estComptable" size="sm" class="q-ml-lg"
-                  icon="settings" :label="$t('gerer')" dense color="primary" @click="voirCompta(c)"/>
+              <div v-if="c.sp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
+
+              <div v-if="vis(c)" class="q-mb-xs row largeur40 items-center">
+                <quotas-vols :vols="c" />
+                <q-btn v-if="session.estSponsor || session.estComptable" size="sm" class="q-ml-lg"
+                    icon="settings" :label="$t('gerer')" dense color="primary" @click="voirCompta(c)"/>
+              </div>
+
             </div>
-
           </div>
-        </div>
+        </q-expansion-item>
       </div>
     </q-card>
 
@@ -197,6 +214,7 @@ export default {
     */
 
     const session = stores.session
+    const cfg = stores.config
     const aSt = stores.avatar
     const pSt = stores.people
     const ui = stores.ui
@@ -205,6 +223,7 @@ export default {
       session,
       aSt,
       pSt,
+      cfg,
       ui
     }
   }

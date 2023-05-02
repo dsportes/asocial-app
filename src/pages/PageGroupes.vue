@@ -30,11 +30,18 @@
 
     <div v-if="gSt.pgLgFT.length">
       <div v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id">
-        <div class="row items-start">
-          <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
-            :color="e.groupe.id === session.groupeId ? 'warning' : 'primary'" @click="courant(e)"/>
-          <apercu-groupe class="col q-my-sm" :eg="e" :idx="idx" :mapmc="mapmc"/>
-        </div>
+        <q-expansion-item group="g1" switch-toggle-side :class="dkli(idx)">
+          <template v-slot:header>
+            <div class="row full-width items-center justify-between">
+              <div class="row items-center">
+                <img class="photomax" :src="e.groupe.photo" />
+                <div class="titre-md q-ml-sm">{{e.groupe.na.nomc}}</div>
+              </div>
+            </div>
+            <q-btn class="q-ml-md" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(e)"/>
+          </template>
+          <apercu-groupe class="q-ml-lg" :eg="e" :idx="idx" :mapmc="mapmc"/>
+        </q-expansion-item>
       </div>
     </div>
 
@@ -87,6 +94,8 @@ export default {
   },
 
   methods: {
+    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+
     edq1 (n) { return edvol(n * UNITEV1) },
     edq2 (n) { return edvol(n * UNITEV2) },
     ed1 (n) { return edvol(n) },

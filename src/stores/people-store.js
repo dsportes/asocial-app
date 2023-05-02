@@ -64,6 +64,14 @@ export const usePeopleStore = defineStore('people', {
       }
     },
 
+    /* Retourne la CV */
+    photo: (state) => { return (id) => {
+        const ic = stores.config.iconAvatar
+        const e = state.map.get(id)
+        return e && e.cv ? (e.cv.photo || ic) : ic
+      }
+    },
+
     estPeople: (state) => { return (id) => { 
         return state.map.has(id)
       }
