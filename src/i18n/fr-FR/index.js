@@ -429,6 +429,7 @@ export default {
 
   OPnvgr: 'Créer un nouveau groupe',
   OPcsp: 'Créer un nouveau sponsoring',
+  OPnvmb: 'Nouveau membre d\'un groupe',
 
   OPnvch: 'Créer un nouveau "chat"',
   OPmajch: 'Mettre à jour un "chat"',
@@ -812,9 +813,9 @@ export default {
   AGnheb: 'N\'est PLUS hébergé. Disparition du groupe {0}',
   AGfond: 'Fondateur.',
   AGnfond: 'Le fondateur du groupe a disparu',
-  AGsimple: 'Invitations sur demande d\'un seul animateur',
-  AGuna: 'Invitations sur unanimité des animateurs',
-  AGgerh: 'Gérer l\'hébergment du groupe {0}',
+  AGsimple: 'Invitations sur demande d\'UN SEUL animateur',
+  AGunanime: 'Invitations sur UNANIMITÉ des animateurs',
+  AGgerh: 'Gérer l\'hébergement du groupe {0}',
   AGm1: 'Vous ({0}) êtes animateur et hébergeur du groupe, vous pouvez,',
   AGm1a: 'a) soit décider de plus assurer l\'hébergement,',
   AGm1b: 'b) sot changer les quotas alloués aux secrets du groupe.',
@@ -835,7 +836,7 @@ export default {
   AGmx: 'Vous ne pouvez pas allouer des quotas supérieurs à ce qu\'il vous reste en volumes libres sur votre compte.',
   AGdisp1: 'Il vous restera {0} disponibles pour des textes de secrets personels.',
   AGdisp2: 'Il vous restera {0} disponibles pour les fichiers attachés à vos secrets personels.',
-  AGuna: 'Gérer le mode simple / unanime',
+  AGuna: 'Gérer le mode simple / unanime de {0}',
   AGu1: 'Mode "simple" : un seul des animateurs peut "inviter" un contact à être membre du groupe.',
   AGu2: 'Mode "unanime" : if faut que TOUS les animateurs "invitent" un contact à être membre du groupe pour que l\'invitation soit effective.',
   AGu3: 'Pour revenir au mode "simple", il faut que TOUS les animateurs l\'aient demandé.',
@@ -1090,5 +1091,7 @@ export default {
   PPc4: 'Q. disp. V2',
   PPnt: 'Début du nom de la future tribu',
   PPact: 'Actions sur le compte',
+  PPtit: 'Membre {0} du groupe {1}',
+  PPctc: 'Inscrire comme contact du groupe {0}',
 
 }

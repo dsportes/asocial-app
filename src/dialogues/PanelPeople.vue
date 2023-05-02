@@ -1,5 +1,5 @@
 <template>
-<q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
+<q-layout v-if="session.ok" container view="hHh lpR fFf" :class="sty" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
@@ -32,10 +32,37 @@
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
+      <div v-if="session.groupeId && !pSt.peC.groupes.has(session.groupeId)">
+        <q-btn class="q-ma-sm" dense size="md" color="primary" no-caps 
+          :label="$t('PPctc', [egr(session.groupeId).groupe.na.nomc])"
+          @click="contact" />
+        <q-separator color="orange" class="q-my-md q-mx-sm"/>
+      </div>
+
       <div class="titre-md text-italic y-mb-sm">{{$t('PPgroupes')}}</div>
+
+      <div v-for="[id, ids] in pSt.peC.groupes" :key="ids + '/' + id">
+        <div class="q-my-sm row q-gutter-sm">
+          <span class="fs-md">{{egr(id).groupe.na.nomc}} - {{$t('statutmb' + stmb(id, ids))}}</span>
+          <q-btn dense size="sm" icon-right="open_in_new" color="primary"
+            :label="$t('detail')" @click="detailgr(id, ids)"/>
+        </div>
+      </div>
 
     </q-card>
   </q-page-container>
+
+  <!-- Dialogue de détail d'un membre d'un groupe -->
+  <q-dialog v-model="infoedit" persistent full-height style="width:80vw">
+    <q-card>
+      <q-toolbar class="bg-secondary text-white">
+        <q-toolbar-title class="titre-lg full-width">{{$t('PPtit', [mbc.na.nom, egrC.groupe.na.nom])}}</q-toolbar-title>
+        <q-btn dense flat size="md" icon="close" @click="infoedit=false"/>
+      </q-toolbar>
+      <apercu-membre :eg="egrC" :mb="mbC" :mapmc="mapmc" :idx="0" people nopanel/>
+    </q-card>
+  </q-dialog>
+
 </q-layout>
 </template>
 <script>
@@ -46,11 +73,13 @@ import ApercuPeople from '../components/ApercuPeople.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
+import ApercuMembre from '../components/ApercuMembre.vue'
 import { Chat, Motscles } from '../app/modele.mjs'
+import { NouveauMembre } from '../app/operations.mjs'
 
 export default {
   name: 'PanelPeople',
-  components: { ApercuPeople, BoutonHelp, ApercuChat, BarrePeople },
+  components: { ApercuMembre, ApercuPeople, BoutonHelp, ApercuChat, BarrePeople },
 
   props: { close: Function },
 
@@ -63,17 +92,36 @@ export default {
   
   data () {
     return {
+      egrC: null,
+      mbC: null,
+      infoedit: false
     }
   },
 
   methods: {
     fermer () { if (this.close) this.close() },
+    egr (id) { return this.gSt.egr(id) },
+    stmb (id, ids) { return this.egr(id).groupe.ast[ids]},
+    detailgr (id, ids) {
+      this.egrC = gSt.egr(id)
+      this.mbC = gSt.getMembre(id, ids)
+      this.infoedit = true
+    },
+    async contact () {
+      const pe = this.pSt.peC
+      const na = pe.na
+      const eg = this.egr(this.session.groupeId)
+      const gr = eg.groupe
+      const m = this.gSt.membreDeId(eg, this.session.avatarId)
+      await new NouveauMembre().run(na, gr, m.ids, pe.cv)
+    }
   },
 
   setup (props) {
     const session = stores.session
     const pSt = stores.people
     const aSt = stores.avatar
+    const gSt = stores.groupe
 
     const mapmc = ref(Motscles.mapMC(true, 0))
 
@@ -88,6 +136,7 @@ export default {
       session,
       aSt,
       pSt,
+      gSt,
       mapmc,
       ids
     }

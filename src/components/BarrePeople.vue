@@ -87,7 +87,7 @@ import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import { edvol } from '../app/util.mjs'
 import { GetCompteursCompta, SetAttributTribu2, ChangerTribu } from '../app/operations.mjs'
-import { Compteurs, UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 
 export default {
   name: 'BarrePeople',

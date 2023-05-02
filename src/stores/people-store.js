@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { hash, u8ToB64 } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
-import { getNg } from '../app/modele.mjs'
 
 /* 
 Un "people" est un avatar :
@@ -22,7 +20,6 @@ Chaque element de la map (ayant pour clé l'id de l'avatar) :
 - sp: 0: pas compte de la tribu, 1: simple compte de la tribu, 2: sponsor de la tribu
 - cv : carte de visite de l'avatar si elle a été explicitement chargée
 - chats: Map par chats, cle id(de l'avatar) valeur [idsI, idsE].
-- sponsor (getter): true si l'avatar est sponsor de la tribu du compte
 - groupes : Map des groupes cle:idg, valeur:ids auquel le people participe
 */
 export const usePeopleStore = defineStore('people', {

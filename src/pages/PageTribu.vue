@@ -2,6 +2,12 @@
   <q-page class="q-pa-sm">
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
+    <div v-if="session.estSponsor"> <!-- Parrainer un nouveau compte -->
+      <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
+        :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring"/>
+      <bouton-help class="q-ml-sm" page="page1"/>
+    </div>
+
     <apercu-tribu class="q-py-sm" :id="session.tribuCId" :idx="0" :edit="ed"/>
 
     <q-separator color="orange" class="q-my-md"/>
@@ -47,13 +53,14 @@
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
     <q-dialog v-model="nvsp" persistent full-height>
-      <nouveau-sponsoring :close="fermerSponsoring" :tribu="aSt.tribuC"/>
+      <nouveau-sponsoring :close="fermerSponsoring" :tribu="aSt.tribuC || aSt.tribu"/>
     </q-dialog>
 
-    <!-- Fiche people détaillée -->
+    <!-- Fiche people détaillée 
     <q-dialog v-model="fipeople" persistent full-height>
       <panel-people :close="fermerFipeople"/>
     </q-dialog>
+    -->
 
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="edq" persistent>
@@ -80,6 +87,7 @@
       <panel-compta style="margin:0 auto"/>
       </q-card>
     </q-dialog>
+
   </q-page>
 </template>
 
@@ -87,13 +95,14 @@
 import stores from '../stores/stores.mjs'
 import { UNITEV1, UNITEV2, Compteurs } from '../app/api.mjs'
 import { edvol } from '../app/util.mjs'
+import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuTribu from '../components/ApercuTribu.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
 import ApercuPeople from '../components/ApercuPeople.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
-import PanelPeople from '../dialogues/PanelPeople.vue'
+// import PanelPeople from '../dialogues/PanelPeople.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols from '../components/QuotasVols.vue'
@@ -102,7 +111,7 @@ import { GetCompteursCompta, SetAttributTribu2 } from '../app/operations.mjs'
 export default {
   name: 'PageTribu',
 
-  components : { QuotasVols, PanelPeople, ApercuAvatar, ApercuPeople, PanelCompta, 
+  components : { BoutonHelp, QuotasVols, /*PanelPeople,*/ ApercuAvatar, ApercuPeople, PanelCompta, 
     ApercuTribu, ApercuCompte, NouveauSponsoring, ApercuNotif, ChoixQuotas  },
 
   computed: {
@@ -116,7 +125,7 @@ export default {
     },
     ouvrirSponsoring () { this.nvsp = true },
     fermerSponsoring () { this.nvsp = false },
-    fermerFipeople () { this.fipeople = false },
+    fermerFipeople () { this.ui.detailspeople = false },
     ed1 (v) { return edvol(v * UNITEV1) },
     ed2 (v) { return edvol(v * UNITEV2) },
     type (na) {
@@ -153,7 +162,7 @@ export default {
         this.ui.detailsavatar = true
       } else if (t === 2) {
         this.session.setPeopleId(c.na.id)
-        this.fipeople = true
+        this.ui.detailspeople = true
       } else if (t === 3) {
         await new GetCompteursCompta().run(c.na)
         this.cptdial = true

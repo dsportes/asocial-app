@@ -1078,3 +1078,42 @@ export class FinHebGroupe extends OperationUI {
     }
   }
 }
+
+/* Nouveau membre (contact) *******************************************
+args.token donne les éléments d'authentification du compte.
+args.id : id du contact
+args.idg : id du groupe
+args.im
+args.rowMembre
+- vérification que le statut ast n'existe pas
+- insertion du row membre, maj groupe
+Retour:
+- KO : si l'indice im est déjà attribué
+*/
+export class NouveauMembre extends OperationUI {
+  constructor () { super($t('OPnvmb')) }
+
+  async run (na, gr, imc, cv) {
+    try {
+      const session = stores.session
+      while (true) {
+        const ni = rnd6()
+        const im = gr.ast.length
+        const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, ni, imc, 0, cv)
+        const args = { token: session.authToken, 
+          id: na.id,
+          idg: gr.id,
+          ni,
+          im,
+          rowMembre
+        }
+        const ret = this.tr(await post(this, 'NouveauMembre', args))
+        if (!ret.KO) break
+        await sleep(500)
+      }
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

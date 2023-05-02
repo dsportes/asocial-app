@@ -20,7 +20,7 @@ export default ({
   computed: {
     mb () {
       const m = this.eg.membres.get(this.im)
-      return m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': '')
+      return !m ? '????' : (m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': ''))
     }
   },
 

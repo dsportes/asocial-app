@@ -28,6 +28,11 @@ export const useGroupeStore = defineStore('groupe', {
     egrC (state) { 
       return state.map.get(stores.session.groupeId)
     },
+
+    egr: (state) => { return (id) => { 
+        return state.map.get(id)
+      }
+    },
     
     /* Map de TOUS les groupes. 
       clé: id du groupe, 
@@ -152,7 +157,7 @@ export const useGroupeStore = defineStore('groupe', {
       const r = []
       for (const e of state.pgLm) {
         // TODO filtre des membres
-        r.push(t)
+        r.push(e)
       }
       r.sort(f0)
       return r
@@ -161,7 +166,7 @@ export const useGroupeStore = defineStore('groupe', {
     pgLm (state) {
       const t = []
       const e = state.map.get(stores.session.groupeId)
-      if (e) e.membres.forEach(m => { if (!m.estAc) t.push(e) })
+      if (e) e.membres.forEach(m => { if (!m.estAc) t.push(m) })
       return t
     },
 

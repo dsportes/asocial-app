@@ -25,7 +25,7 @@
 </template>
 <script>
 
-import { ref, toRef } from 'vue'
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuGroupe from '../components/ApercuGroupe.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
@@ -61,7 +61,7 @@ export default {
     const ui = stores.ui
 
     const mapmc = ref(Motscles.mapMC(true, 0))
-    const eg = ref(egrC)
+    const eg = ref(gSt.egrC)
     const mb = ref(gSt.membreC)
     if (eg.value && !eg.value.groupe.ast[session.membreId]) mb.value = null
     const people = ref(mb.value ? !mb.value.estAc : false)

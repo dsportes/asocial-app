@@ -1,8 +1,8 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { $t, hash, rnd6, intToB64, u8ToB64, idToSid, gzip, ungzip, ungzipT } from './util.mjs'
-import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, genKeyPair, crypterRSA, decrypterRSA } from './webcrypto.mjs'
-
+import { $t, hash, rnd6, u8ToB64, idToSid, gzip, ungzip, ungzipT } from './util.mjs'
+import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
+import { post } from './net.mjs'
 import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
 
 import { getFichierIDB, saveSessionSync } from './db.mjs'
@@ -1261,6 +1261,7 @@ export class Groupe extends GenDoc {
   }
 
   async setDisparus(setIds) { // check / maj des statuts des membres disparus
+    const session = stores.session
     for(const ids of setIds) {
       if (this.ast[ids]) {
         this.ast[ids] = 0
@@ -1353,10 +1354,12 @@ export class Membre extends GenDoc {
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
   }
 
-  static async rowNouveauMembre (nag, na, im, ni, imc, dlv) {
+  static async rowNouveauMembre (nag, na, im, ni, imc, dlv, cv) {
     const r = { id: nag.id, ids: im, v: 0, dlv, ddi: 0, dda: 0, dfa: 0, mc: new Uint8Array([]) }
     if (dlv) r.dda = new Date().getTime()
-    const x = { nom: na.nom, rnd: na.rnd, ni, imc, inv: null }
+    let vcv = 0
+    const cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
+    const x = { nom: na.nom, rnd: na.rnd, ni, imc, inv: null, vcv, cva }
     r.datag = await crypter(nag.rnd, new Uint8Array(encode(x)))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'membres', id: r.id, ids: r.ids, v: r.v, _data_ }

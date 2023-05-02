@@ -95,7 +95,7 @@ export default {
     const session = stores.session
     const aSt = stores.avatar
     const avatar = ref(aSt.avC)
-    // TODO
+
     aSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'setAvatar' && args[0] === session.avatarId) {

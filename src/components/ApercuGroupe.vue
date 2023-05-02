@@ -9,7 +9,7 @@
     <div v-else class="q-mt-xs fs-md text-italic">{{$t('AGnfond')}}</div>
 
     <div class="q-mt-xs row justify-between">
-      <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('AGuna')}}</div>
+      <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('AGunanime')}}</div>
       <div v-else class="titre-md">{{$t('AGsimple')}}</div>
       <q-btn class="q-ml-sm" size="sm" :label="$t('details')" 
         icon="edit" dense color="primary" @click="editUna"/>

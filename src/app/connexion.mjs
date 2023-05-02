@@ -202,7 +202,7 @@ export class ConnexionCompte extends OperationUI {
       this.versions = ret.versions
     } 
     
-    if (session.accesIdb) await loadVersions() // chargement des versions depuis IDB
+    await loadVersions() // chargement des versions depuis IDB
 
     return true
   }
@@ -382,7 +382,7 @@ export class ConnexionCompte extends OperationUI {
     const rows = {}
     for (const row of this.cMembres) { 
       if (row.id === id) {
-        if (row.dlv < this.auj || !groupe.ast[row.ids]) {
+        if (row.dlv && (row.dlv < this.auj || !groupe.ast[row.ids])) {
           this.buf.supprIDB(row)
           this.mbsDisparus.add(row.ids)
         } else {
@@ -401,7 +401,7 @@ export class ConnexionCompte extends OperationUI {
     }
     if (rowMembres  && rowMembres.length) {
       for (const row of rowMembres) {
-        if (row.dlv < this.auj || !groupe.ast[row.ids]) {
+        if (row.dlv && (row.dlv < this.auj || !groupe.ast[row.ids])) {
           this.buf.supprIDB(row)
           this.mbsDisparus.add(row.ids)
         } else {
@@ -561,7 +561,7 @@ export class ConnexionCompte extends OperationUI {
       if (this.espace) session.setEspace(this.espace)
 
       // En cas de blocage grave, plus de synchronisation
-      if (session.niv === 3 && session.mode === 1) {
+      if (session.niv > 2 && session.mode === 1) {
         session.mode = 2
         await afficherDiag($t('CNXdeg'))
       }
