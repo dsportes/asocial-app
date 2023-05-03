@@ -37,7 +37,12 @@ export const useUiStore = defineStore('ui', {
 
     dialoguedrc: false, // App et page accueil
 
+    dialogStack: [],
+
     choixEmoji: false,
+
+    naplus: null, // na de l'avatar proposant d'ajouter un contact au groupe egrplus
+    egrplus: null, // élément e du groupe dans lequel un contact peut-être ajouté
   }),
 
   getters: {
@@ -48,6 +53,20 @@ export const useUiStore = defineStore('ui', {
   },
 
   actions: {
+    oD (m) {
+      this.dialogStack.push(m)
+      m.value = true
+    },
+    fD () {
+      if (this.dialogStack.length) {
+        const m = this.dialogStack.pop()
+        m.value = false
+      }
+    },
+    fTD () {
+      while (this.dialogStack.length) this.fD()
+    },
+
     setEtroite (v) {
       this.etroite = v
       this.menu = false

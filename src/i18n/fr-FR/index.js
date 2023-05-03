@@ -780,7 +780,15 @@ export default {
   PGcrea: 'Création d\'un nouveau groupe',
   PGnom: 'Nom du groupe à créer: {0}',
   PGquotas: 'Quotas de volume V1 / V2 maximum pour les secrets du groupe',
-
+  PGplus1: 'Pour ajouter un contact à ce groupe,',
+  PGplus2: 'a) cliquer sur "Continuer" pour ouvrir la page des contacts,',
+  PGplus3: 'b) cliquer sur le contact à ajouter,',
+  PGplus4: 'c) sur ce contact, presser le bouton ',
+  PGplus5: '{1} propose d\'ajouter ce contact au groupe {0}',
+  PGplus: 'Ajouter un de mes contacts au groupe',
+  PGplus5b: '{1} propose d\'ajouter {2} au groupe {0}',
+  PGvg: 'Voir le groupe',
+  
   // Aperçu Membre
   AMct1: 'Inscrit comme "contact" par {0}.',
   AMct2: 'Inscrit comme "contact" par #{0} (oublié ou disparu).',

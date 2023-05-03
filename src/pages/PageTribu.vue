@@ -73,12 +73,6 @@
       <nouveau-sponsoring :close="fermerSponsoring" :tribu="aSt.tribuC || aSt.tribu"/>
     </q-dialog>
 
-    <!-- Fiche people détaillée 
-    <q-dialog v-model="fipeople" persistent full-height>
-      <panel-people :close="fermerFipeople"/>
-    </q-dialog>
-    -->
-
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="edq" persistent>
       <q-card class="petitelargeur">

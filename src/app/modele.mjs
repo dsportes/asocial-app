@@ -914,7 +914,7 @@ export class Compta extends GenDoc {
       const na = NomGenerique.from([nom, cle])
       this.mav.set(parseInt(id), na)
       setNg(na) 
-      if (na.estAvatarP) this.naprim = na
+      if (na.estCompte) this.naprim = na
     }
     this.avatarIds = new Set(this.mav.keys())
     /* On connait MAINTENANT le na du compte (donc son rnd) */
@@ -924,7 +924,7 @@ export class Compta extends GenDoc {
     try {
       b = await decrypter(session.clek, row.nctk)
     } catch (e) {
-      // Le Comptable a crypter la tribu par le rnd du compte (il ne connait pas K)
+      // Le Comptable a crypté la tribu par le rnd du compte (il ne connait pas K)
       b = await decrypter(this.naprim.rnd, row.nctk)
       ck = false
     }

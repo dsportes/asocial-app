@@ -46,10 +46,10 @@
     </div>
 
     <!-- Nouveau groupe ------------------------------------------------>
-    <q-dialog v-model="crGr" persistent>
+    <q-dialog v-model="crgr" persistent>
       <q-card class="petitelargeur shadow-8 column">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="closeGr"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PGcrea')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -58,9 +58,9 @@
           <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="okNom"/>
           <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
           <choix-quotas :quotas="quotas" />
-          <q-checkbox v-model="una" class="cb" :label="$t('AGuna')" />
+          <q-option-group :options="options" type="radio" v-model="una"/>
           <q-card-actions align="right">
-            <q-btn dense flat color="warning" :label="$t('renoncer')" v-close-popup />
+            <q-btn dense flat color="warning" :label="$t('renoncer')" @click="ui.fD" />
             <q-btn dense flat color="primary" :disable="quotas.err || !nom"
               :label="$t('creer')" v-close-popup @click="okCreation" />
           </q-card-actions>
@@ -74,7 +74,7 @@
 <script>
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { edvol } from '../app/util.mjs'
+import { edvol, $t } from '../app/util.mjs'
 import { Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
@@ -116,27 +116,38 @@ export default {
       this.quotas = { q1: 0, q2: 0, min1: 0, min2: 0, max1, max2, err: ''}
       this.nom = ''
       this.una = false
-      this.crGr = true
+      this.ovCrgr()
     },
     okNom (n) { this.nom = n },
-    closeGr () { this.crGr = false },
     async okCreation () {
       console.log(this.nom, this.quotas.q1, this.quotas.q2, this.una)
       await new NouveauGroupe().run(this.nom, this.una, this.quotas)
+      this.ui.fD()
     }
   },
 
   data () {
     return {
       quotas: null, // { q1, q2, min1, min2, max1, max2, err}
-      crGr: false,
       nom: '',
       una: false
     }
   },
 
   setup (props) {
+    const ui = stores.ui
+    const session = stores.session
+    const aSt = stores.avatar
     const fStore = stores.filtre
+    const gSt = stores.groupe
+
+    const crgr = ref(false)
+    function ovCrgr () { ui.oD(crgr) }
+
+    const options = [
+      { label: $t('AGsimple'), value: false },
+      { label: $t('AGunanime'), value: true, color: 'warning' }
+    ]
 
     const tous = toRef(props, 'tous')
     fStore.filtre.groupes.tous = tous.value || false
@@ -144,14 +155,14 @@ export default {
     const mapmc = ref(Motscles.mapMC(true, 0))
     fStore.contexte.groupes.mapmc = mapmc.value
     fStore.contexte.groupes.groupeId = 0
+    const stats = fStore.stats
 
     return {
-      ui: stores.ui,
-      session: stores.session,
-      aSt: stores.avatar,
-      stats: stores.filtre.stats,
+      ui, session, aSt, gSt,
+      crgr, ovCrgr,
+      stats,
       mapmc,
-      gSt: stores.groupe
+      options
     }
   }
 

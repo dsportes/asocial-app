@@ -32,10 +32,13 @@
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
-      <div v-if="session.groupeId && !pSt.peC.groupes.has(session.groupeId)">
-        <q-btn class="q-ma-sm" dense size="md" color="primary" no-caps 
-          :label="$t('PPctc', [egr(session.groupeId).groupe.na.nomc])"
-          @click="contact" />
+      <div v-if="ui.egrplus && !pSt.peC.groupes.has(ui.egrplus.groupe.na.id)">
+        <div class="row items-center justify-between">
+          <div class="col titre-md bg-yellow-3 text-warning text-bold text-center">
+            {{$t('PGplus5b', [ui.egrplus.groupe.na.nom, ui.naplus.nom, pSt.peC.na.nom])}}</div>
+          <q-btn class="col-auto text-center q-ml-xs" dense size="md" no-caps color="primary" icon="check"
+            :label="$t('ok')" @click="contact"/>
+        </div>
         <q-separator color="orange" class="q-my-md q-mx-sm"/>
       </div>
 
@@ -43,9 +46,11 @@
 
       <div v-for="[id, ids] in pSt.peC.groupes" :key="ids + '/' + id">
         <div class="q-my-sm row q-gutter-sm">
-          <span class="fs-md">{{egr(id).groupe.na.nomc}} - {{$t('statutmb' + stmb(id, ids))}}</span>
-          <q-btn dense size="sm" icon-right="open_in_new" color="primary"
+          <span class="fs-md col">{{egr(id).groupe.na.nomc}} - {{$t('statutmb' + stmb(id, ids))}}</span>
+          <q-btn class="col-auto btn1" dense size="sm" icon-right="open_in_new" color="primary"
             :label="$t('detail')" @click="detailgr(id, ids)"/>
+          <q-btn class="col-auto btn1" dense size="sm" icon-right="open_in_new" color="primary"
+            :label="$t('PGvg')" @click="voirgr(id, ids)"/>
         </div>
       </div>
 
@@ -56,8 +61,8 @@
   <q-dialog v-model="infoedit" persistent full-height style="width:80vw">
     <q-card>
       <q-toolbar class="bg-secondary text-white">
-        <q-toolbar-title class="titre-lg full-width">{{$t('PPtit', [mbc.na.nom, egrC.groupe.na.nom])}}</q-toolbar-title>
-        <q-btn dense flat size="md" icon="close" @click="infoedit=false"/>
+        <q-btn dense size="md" icon="close" color="warning" @click="infoedit=false"/>
+        <q-toolbar-title class="titre-lg full-width">{{$t('PPtit', [mbC.na.nom, egrC.groupe.na.nom])}}</q-toolbar-title>
       </q-toolbar>
       <apercu-membre :eg="egrC" :mb="mbC" :mapmc="mapmc" :idx="0" people nopanel/>
     </q-card>
@@ -103,16 +108,21 @@ export default {
     egr (id) { return this.gSt.egr(id) },
     stmb (id, ids) { return this.egr(id).groupe.ast[ids]},
     detailgr (id, ids) {
-      this.egrC = gSt.egr(id)
-      this.mbC = gSt.getMembre(id, ids)
+      this.egrC = this.gSt.egr(id)
+      this.mbC = this.gSt.getMembre(id, ids)
       this.infoedit = true
     },
+    voirgr (id, ids) {
+      this.egrC = this.gSt.egr(id)
+      this.mbC = this.gSt.getMembre(id, ids)
+      this.fermer()
+      this.ui.setPage('groupe', 'membres')
+    },
     async contact () {
+      const gr = this.ui.egrplus.groupe
       const pe = this.pSt.peC
       const na = pe.na
-      const eg = this.egr(this.session.groupeId)
-      const gr = eg.groupe
-      const m = this.gSt.membreDeId(eg, this.session.avatarId)
+      const m = this.gSt.membreDeId(this.ui.egrplus, this.ui.naplus.id)
       await new NouveauMembre().run(na, gr, m.ids, pe.cv)
     }
   },
@@ -122,6 +132,7 @@ export default {
     const pSt = stores.people
     const aSt = stores.avatar
     const gSt = stores.groupe
+    const ui = stores.ui
 
     const mapmc = ref(Motscles.mapMC(true, 0))
 
@@ -137,6 +148,7 @@ export default {
       aSt,
       pSt,
       gSt,
+      ui,
       mapmc,
       ids
     }
@@ -155,4 +167,6 @@ export default {
   padding: 2px !important
 .q-btn
   padding: 0 3px !important
+.btn1
+  height: 1.5rem
 </style>

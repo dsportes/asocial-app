@@ -15,6 +15,8 @@ import { openWS, closeWS } from './ws.mjs'
 
 /* garderMode : si true, garder le mode */
 export function deconnexion (garderMode) {
+  const ui = stores.ui
+  ui.fTD()
   const session = stores.session
   const config = stores.config
   const mode = session.mode

@@ -54,6 +54,7 @@ export default {
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const gSt = stores.groupe
     const fStore = stores.filtre
 
@@ -62,7 +63,7 @@ export default {
     fStore.contexte.groupes.groupeId = 0
 
     return {
-      ui: stores.ui,
+      ui,
       session,
       mapmc,
       gSt

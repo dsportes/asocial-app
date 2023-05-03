@@ -40,6 +40,9 @@
     <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
       <q-separator color="orange"/>
       <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>
+      <q-btn v-if="ast(m) >=30 && ast(m) <= 32"
+        dense size="md" no-caps color="primary" icon="add" :label="$t('PGplus')"
+        @click="dialctc(m.na)"/>
     </div>
 
     <!-- Dialogue d'édition des mots clés du groupe -->
@@ -163,11 +166,30 @@
         </q-page-container>
       </q-layout>
     </q-dialog>
+
+    <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
+    <q-dialog v-model="nvctc" persistent>
+      <q-card class="bord1">
+        <q-card-section class="column q-ma-xs q-pa-xs titre-md">
+          <div>{{$t('PGplus1')}}</div>
+          <div class="q-ml-md">{{$t('PGplus2')}}</div>
+          <div class="q-ml-md">{{$t('PGplus3')}}</div>
+          <div class="q-ml-md">{{$t('PGplus4')}}</div>
+          <div class="q-ml-lg q-px-xs text-bold bord1">
+            {{$t('PGplus5', [egrplus.groupe.na.nom, naplus.nom])}}
+          </div>
+        </q-card-section>
+        <q-card-actions vertical>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+          <q-btn flat :label="$t('continuer')" color="warning" @click="pagectc"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script>
-import { reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuMembre from './ApercuMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
@@ -215,7 +237,7 @@ export default {
     alq1 () { return !this.eg.groupe.imh || (this.eg.objv.v1 > this.eg.objv.q1) },
     alq2 () { return !this.eg.groupe.imh || (this.eg.objv.v2 > this.eg.objv.q2) },
     moi () { return getNg(this.session.avatarId).nom },
-    hbg () { return this.eg.membres.get(this.eg.groupe.imh).na.nom }
+    hbg () { return this.eg.membres.get(this.eg.groupe.imh).na.nom },
   },
 
   data () { return {
@@ -241,11 +263,30 @@ export default {
     ar2: false,
     lstVotes: [],
     cfu: false, // Choix de changement de mode non confirmé
-    mcledit: false
+    mcledit: false,
+    naplus: null,
+    egrplus: null
   }},
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+
+    ast (m) { return this.eg.groupe.ast[m.ids] },
+
+    async dialctc (na) {
+      if (!await this.session.edit()) return
+      this.naplus = na
+      this.egrplus = this.eg
+      this.ouvctc()
+    },
+
+    pagectc () {
+      this.ui.naplus = this.naplus
+      this.ui.egrplus = this.egrplus
+      this.ui.fD()
+      this.session.setGroupeId(this.egrplus.groupe.id)
+      this.ui.setPage('people')
+    },
 
     async cvchangee (res) { // CV du GROUPE !
       if (res && this.na) {
@@ -352,11 +393,16 @@ export default {
     const ui = stores.ui
     const gSt = stores.groupe
     const aSt = stores.avatar
+
+    const nvctc = ref(false)
+    function ouvctc () { ui.oD(nvctc) } 
+
     const photoDef = stores.config.iconGroupe
     const q = reactive({q1:0, q2:0, min1:0, min2:0, max1:0, max2:0, err:false })
     return {
       session,
       ui,
+      nvctc, ouvctc,
       photoDef,
       gSt,
       aSt,
@@ -373,6 +419,10 @@ export default {
   border-top: 1px solid $grey-5
 .bordb
   border-bottom: 1px solid $grey-5
+.bord1
+  border: 1px solid $grey-5
+  border-radius: 5px
+  padding: 3px
 .nom
   max-height: 1.3rem
   overflow: hidden
