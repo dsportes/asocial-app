@@ -222,7 +222,6 @@
           <bouton-help page="page1"/>
         </q-toolbar>
       </q-header>
-
       <q-page-container>
         <q-card class="q-pa-sm largeur40">
           <apercu-avatar edit :na="aSt.avC.na"/>
@@ -231,13 +230,10 @@
     </q-layout>
   </q-dialog>
 
-  <q-dialog v-model="session.opDialog" seamless position="top" full-width persistent transition-show="scale" transition-hide="scale">
+  <q-dialog v-model="opDialog" seamless position="top" full-width persistent
+    transition-show="scale" transition-hide="scale">
     <div class="q-mt-sm column items-center">
-      <transition
-        appear
-        enter-active-class="animated fadeIn"
-        leave-active-class="animated fadeOut"
-      >
+      <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
         <div v-if="session.opSpinner >= 2" 
           class="spinlargeur height-4 row items-center justify-between no-wrap text-black bg-amber-2 q-pa-sm"
           style="margin:0 auto; overflow:hidden;">
@@ -245,7 +241,8 @@
             <div class="text-bold">{{$t('MLAbrk')}}</div>
             <div class="text-bold">{{session.opEncours.nom}}</div>
           </div>
-          <div class="col-auto q-mt-sm cursor-pointer column items-center" style="position:relative" @click="cfstop()">
+          <div class="col-auto q-mt-sm cursor-pointer column items-center" style="position:relative"
+            @click="ovConfirmstopop">
             <q-spinner color="primary" size="3rem" :thickness="4"/>
             <q-badge color="negative" class="text-white stopbtn">{{session.opSpinner}}</q-badge>
           </div>
@@ -259,8 +256,8 @@
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('MLAcf', [session.opEncours ? session.opEncours.nom : '???'])}}</q-card-section>
       <q-card-actions align="right">
-        <q-btn flat :label="$t('MLAcf3')" color="warning" v-close-popup/>
-        <q-btn flat :label="$t('MLAcf4')" color="primary" v-close-popup  @click="stopop"/>
+        <q-btn flat :label="$t('MLAcf3')" color="warning" @click="MD.fD"/>
+        <q-btn flat :label="$t('MLAcf4')" color="primary" @click="stopop"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -356,8 +353,6 @@ export default {
   },
 
   data () { return {
-    hms: hms,
-    confirmstopop: false
   }},
 
   methods: {
@@ -367,13 +362,12 @@ export default {
       if (this.session.status === 3) deconnexion(); else MD.oD('dialoguedrc')
     },
 
-    cfstop () {
-      this.confirmstopop = true
-    },
     stopop () {
       const op = this.session.opEncours
       if (op && op.stop) op.stop()
+      MD.fD()
     },
+
     ouvrFiltre () { this.ui.menu = true },
     fermFiltre () { this.ui.menu = false },
 
@@ -396,9 +390,7 @@ export default {
     },
     
     deconnexion () { MD.fD(); deconnexion() },
-    async reconnexion () { MD.fD(); await reconnexionCompte() },
-
-    closeOutils () { this.outilsTests = false }
+    async reconnexion () { MD.fD(); await reconnexionCompte() }
   },
 
   setup () {
@@ -425,18 +417,23 @@ export default {
     const outilsTests = ref(false)
     function ovOutilsTests () { MD.oD(outilsTests) }
 
+    const confirmstopop = ref(false)
+    function ovConfirmstopop () { MD.oD(confirmstopop) }
+
     return {
       MD,
       session,
       config,
       ui,
+      hms,
       dialoguedrc: MD.declare('dialoguedrc', ref(false)),
       dialoguehelp: MD.declare('dialoguehelp', ref(false)),
       dialogueerreur: MD.declare('dialogueerreur', ref(false)),
       detailspeople: MD.declare('detailspeople', ref(false)),
       detailsmembre: MD.declare('detailsmembre', ref(false)),
       detailsavatar: MD.declare('detailsavatar', ref(false)),
-      outilsTests, ovOutilsTests,
+      opDialog: MD.declare('opDialog', ref(false)),
+      outilsTests, ovOutilsTests, confirmstopop, ovConfirmstopop,
       aSt,
       gSt,
       infonet,

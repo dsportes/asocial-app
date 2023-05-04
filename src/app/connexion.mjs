@@ -17,10 +17,15 @@ import { MD } from './modele.mjs'
 /* garderMode : si true, garder le mode */
 export function deconnexion (garderMode) {
   const ui = stores.ui
-  MD.fTD()
   const session = stores.session
   const config = stores.config
   const mode = session.mode
+
+  // fermeture de tous les dialogues et du menu de filtre
+  MD.fTD()
+  ui.menu = false
+  ui.aunmessage = false
+
   if (session.accesIdb) closeIDB()
   if (session.accesNet && !config.fsSync) closeWS()
   stores.reset()
