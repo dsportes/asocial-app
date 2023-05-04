@@ -118,6 +118,7 @@ import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import { GetCompteursCompta, SetAttributTribu2 } from '../app/operations.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageTribu',
@@ -136,7 +137,6 @@ export default {
     },
     ouvrirSponsoring () { this.nvsp = true },
     fermerSponsoring () { this.nvsp = false },
-    fermerFipeople () { this.ui.detailspeople = false },
     ed1 (v) { return edvol(v * UNITEV1) },
     ed2 (v) { return edvol(v * UNITEV2) },
     type (na) {
@@ -170,10 +170,10 @@ export default {
       this.ccna = c.na
       if (t === 1) {
         this.session.setAvatarId(c.na.id)
-        this.ui.detailsavatar = true
+        MD.oD('detailsavatar')
       } else if (t === 2) {
         this.session.setPeopleId(c.na.id)
-        this.ui.detailspeople = true
+        MD.oD('detailspeople')
       } else if (t === 3) {
         await new GetCompteursCompta().run(c.na)
         this.cptdial = true
@@ -183,6 +183,7 @@ export default {
 
   data () {
     return {
+      MD,
       ccid: 0, // compte "courant" dans la liste
       ccna: null,
       nvsp: false,

@@ -31,10 +31,10 @@
     </q-item-section>
   </q-item>
   <q-separator color="orange"/>
-  <q-item clickable @click="ui.detailsavatar = true" clas="row items-center">
+  <q-item clickable @click="MD('detailsavatar')" clas="row items-center">
     <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACav')}}</span>
     <q-btn class="q-ml-md text-bold" dense :label="aSt.avC.na.nomc" no-caps
-      icon-right="open_in_new" @click="ui.detailsavatar = true"/>
+      icon-right="open_in_new" @click="MD.oD('detailsavatar')"/>
   </q-item>
   <q-item clickable>
     <q-item-section class="q-ml-lg">
@@ -93,6 +93,7 @@
 
 <script>
 import stores from '../stores/stores.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageMenu',
@@ -129,6 +130,7 @@ export default {
 
   setup () {
     return {
+      MD,
       aSt: stores.avatar,
       ui: stores.ui,
       session: stores.session,

@@ -183,7 +183,7 @@ export default {
     },
     ouvrirdetails () {
       this.session.setPeopleId(this.mb.na.id)
-      this.ui.detailspeople = true
+      MD.oD('detailspeople')
     },
     async editInfo () {
       if (await this.session.edit()) this.infoedit = true

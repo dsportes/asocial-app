@@ -7,6 +7,7 @@
 
 <script>
 import stores from '../stores/stores.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default ({
   name: 'BoutonMembre',
@@ -26,7 +27,7 @@ export default ({
 
   methods: {
     detailMb (im) {
-      this.ui.detailsmembre = true
+      MD.oD('detailsmembre')
       this.session.groupeId = this.eg.groupe.id
       this.session.setMembreId(this.im)
     }
@@ -34,6 +35,7 @@ export default ({
   
   setup (props) {
     return {
+      MD,
       session: stores.session,
       ui: stores.ui
     }

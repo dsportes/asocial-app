@@ -32,6 +32,7 @@
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import CarteVisite from './CarteVisite.vue'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuGenx',
@@ -52,7 +53,7 @@ export default {
   computed: {
     photo () { return this.cv && this.cv.photo ? this.cv.photo : this.na.defIcon },
     info () { return this.cv ? (this.cv.info || '') : '' },
-    det () { return this.session.peopleId === this.na.id && this.ui.detailspeople }
+    det () { return this.session.peopleId === this.na.id && MD.val('detailspeople') }
   },
 
   data () {
@@ -75,12 +76,13 @@ export default {
     },
     ouvrirdetails () {
       this.session.setPeopleId(this.na.id)
-      this.ui.detailspeople = true
+      MD.oD('detailspeople')
     }
   },
 
   setup () {
     return {
+      MD,
       ui: stores.ui,
       session: stores.session
     }
