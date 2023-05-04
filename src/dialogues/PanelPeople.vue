@@ -2,7 +2,7 @@
 <q-layout v-if="session.ok" container view="hHh lpR fFf" :class="sty" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtit', [pSt.peC.na.nom])}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -79,14 +79,14 @@ import ApercuChat from '../components/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
-import { Chat, Motscles } from '../app/modele.mjs'
+import { MD, Chat, Motscles } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
 
 export default {
   name: 'PanelPeople',
   components: { ApercuMembre, ApercuPeople, BoutonHelp, ApercuChat, BarrePeople },
 
-  props: { close: Function },
+  props: { },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -97,6 +97,7 @@ export default {
   
   data () {
     return {
+      MD,
       egrC: null,
       mbC: null,
       infoedit: false
@@ -104,7 +105,6 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.close) this.close() },
     egr (id) { return this.gSt.egr(id) },
     stmb (id, ids) { return this.egr(id).groupe.ast[ids]},
     detailgr (id, ids) {
@@ -115,7 +115,7 @@ export default {
     voirgr (id, ids) {
       this.egrC = this.gSt.egr(id)
       this.mbC = this.gSt.getMembre(id, ids)
-      this.fermer()
+      MD.fD()
       this.ui.setPage('groupe', 'membres')
     },
     async contact () {

@@ -180,7 +180,7 @@
           </div>
         </q-card-section>
         <q-card-actions vertical>
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
           <q-btn flat :label="$t('continuer')" color="warning" @click="pagectc"/>
         </q-card-actions>
       </q-card>
@@ -201,7 +201,7 @@ import BoutonHelp from './BoutonHelp.vue'
 import QuotasVols from './QuotasVols.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 import MotsCles from './MotsCles.vue'
-import { getNg } from '../app/modele.mjs'
+import { MD, getNg } from '../app/modele.mjs'
 import { MotsclesGroupe } from '../app/operations.mjs'
 
 export default {
@@ -241,6 +241,7 @@ export default {
   },
 
   data () { return {
+    MD: MD,
     editerUna: false,
     changerQuotas: false,
     /* cas:
@@ -277,7 +278,7 @@ export default {
       if (!await this.session.edit()) return
       this.naplus = na
       this.egrplus = this.eg
-      this.ouvctc()
+      MD.oD(nvctc)
     },
 
     pagectc () {
@@ -394,15 +395,12 @@ export default {
     const gSt = stores.groupe
     const aSt = stores.avatar
 
-    const nvctc = ref(false)
-    function ouvctc () { ui.oD(nvctc) } 
-
     const photoDef = stores.config.iconGroupe
     const q = reactive({q1:0, q2:0, min1:0, min2:0, max1:0, max2:0, err:false })
     return {
       session,
       ui,
-      nvctc, ouvctc,
+      nvctc: ref(false),
       photoDef,
       gSt,
       aSt,

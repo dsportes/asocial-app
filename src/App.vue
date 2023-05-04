@@ -12,7 +12,7 @@
       </q-btn>
 
       <!-- Outils et tests -->
-      <q-btn dense size="md" icon="settings" @click="outilsTests = true">
+      <q-btn dense size="md" icon="settings" @click="ovOutilsTests">
         <q-tooltip>{{$t('MLAout')}}</q-tooltip>
       </q-btn>
 
@@ -23,7 +23,7 @@
       </q-btn>
 
       <!-- Information session : mode incognito -->
-      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito"  @click="infoSession"
+      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession"
         size="sm" square color="primary">
         <img src="~assets/incognito_blanc.svg">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
@@ -47,7 +47,7 @@
         :cible="0" @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
-        <span v-if="session.ok" class="titre-lg cursor-pointer"  @click="ouvrirav">
+        <span v-if="session.ok" class="titre-lg cursor-pointer"  @click="MD.oD('detailsavatar')">
           {{aSt.avC.na.nomc}}
         </span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
@@ -177,47 +177,47 @@
     </div>
   </q-dialog>
 
-  <q-dialog v-model="ui.dialoguedrc">
+  <q-dialog v-model="dialoguedrc" persistent>
     <q-card  class="q-ma-xs petitelargeur">
       <q-card-section>
         <div class="titre-lg">{{$t('MLAdrc')}}</div>
       </q-card-section>
       <q-card-actions vertical align="center">
         <q-btn class="w15" dense size="md" color="warning"
-          icon="logout" :label="$t('MLAdecon')" @click="deconnexion" v-close-popup/>
+          icon="logout" :label="$t('MLAdecon')" @click="deconnexion"/>
         <q-btn class="q-ma-xs w15" dense size="md" color="warning"
-          icon="logout" :label="$t('MLArecon')" @click="reconnexion" v-close-popup/>
+          icon="logout" :label="$t('MLArecon')" @click="reconnexion"/>
         <q-btn class="q-ma-xs w15" dense size="md" color="primary"
-          :label="$t('MLAcont')" v-close-popup/>
+          :label="$t('MLAcont')" @click="MD.fD()"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
 
-  <q-dialog v-if="ui.dialogueerreur" v-model="ui.dialogueerreur" persistent>
+  <q-dialog v-model="dialogueerreur" persistent>
     <dialogue-erreur/>
   </q-dialog>
 
-  <q-dialog v-if="ui.dialoguehelp" v-model="ui.dialoguehelp" full-height position="left">
+  <q-dialog v-model="dialoguehelp" full-height position="left" persistent>
     <dialogue-help/>
   </q-dialog>
 
-  <q-dialog v-if="outilsTests" v-model="outilsTests" full-height persistent>
-    <outils-tests :close="closeOutils"/>
+  <q-dialog v-model="outilsTests" full-height persistent>
+    <outils-tests/>
   </q-dialog>
 
-  <q-dialog v-model="ui.detailspeople" full-height persistent>
-    <panel-people :id="session.peopleId" :close="closepp"/>
+  <q-dialog v-model="detailspeople" full-height persistent>
+    <panel-people :id="session.peopleId"/>
   </q-dialog>
 
-  <q-dialog v-model="ui.detailsmembre" full-height persistent>
+  <q-dialog v-model="detailsmembre" full-height persistent>
     <panel-membre/>
   </q-dialog>
 
-  <q-dialog v-model="ui.detailsavatar" full-height persistent>
+  <q-dialog v-model="detailsavatar" full-height persistent>
     <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="closeav"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fd"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [aSt.avC.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -275,7 +275,7 @@ import { ref } from 'vue'
 import stores from './stores/stores.mjs'
 
 import { $t, hms } from './app/util.mjs'
-import { getNg } from './app/modele.mjs'
+import { MD, getNg } from './app/modele.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -357,7 +357,6 @@ export default {
 
   data () { return {
     hms: hms,
-    outilsTests: false,
     confirmstopop: false
   }},
 
@@ -365,7 +364,7 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
 
     discon () {
-      if (this.session.status === 3) deconnexion(); else this.ui.dialoguedrc = true
+      if (this.session.status === 3) deconnexion(); else MD.oD('dialoguedrc')
     },
 
     cfstop () {
@@ -379,10 +378,6 @@ export default {
     fermFiltre () { this.ui.menu = false },
 
     tgdark () { this.$q.dark.toggle() },
-
-    closepp () { this.ui.detailspeople = false },
-    closeav () { this.ui.detailsavatar = false },
-    ouvrirav () { this.ui.detailsavatar = true },
 
     clickNotif () {
       this.ui.setPage('compta', 'notif')
@@ -400,8 +395,8 @@ export default {
       this.ui.setPageBack()
     },
     
-    deconnexion () { deconnexion() },
-    async reconnexion () { await reconnexionCompte() },
+    deconnexion () { MD.fD(); deconnexion() },
+    async reconnexion () { MD.fD(); await reconnexionCompte() },
 
     closeOutils () { this.outilsTests = false }
   },
@@ -427,10 +422,21 @@ export default {
     const infoidb = ref(false)
     const drc = ref(false)
 
+    const outilsTests = ref(false)
+    function ovOutilsTests () { MD.oD(outilsTests) }
+
     return {
+      MD,
       session,
       config,
       ui,
+      dialoguedrc: MD.declare('dialoguedrc', ref(false)),
+      dialoguehelp: MD.declare('dialoguehelp', ref(false)),
+      dialogueerreur: MD.declare('dialogueerreur', ref(false)),
+      detailspeople: MD.declare('detailspeople', ref(false)),
+      detailsmembre: MD.declare('detailsmembre', ref(false)),
+      detailsavatar: MD.declare('detailsavatar', ref(false)),
+      outilsTests, ovOutilsTests,
       aSt,
       gSt,
       infonet,

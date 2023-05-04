@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 
 import { sleep } from '../app/util.mjs'
+import { MD } from '../app/modele.mjs'
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
@@ -18,26 +19,14 @@ export const useUiStore = defineStore('ui', {
     etroite: false,
     seuillarge: 800,
 
-    dialogueerreur: false,
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
-
-    detailspeople: false,
-
-    detailsmembre: false,
-
-    detailsavatar: false,
-    
-    dialoguehelp: false,
-    helpstack: [],
 
     messageto: null, // timeOut du message affiché
     message: null,
     aunmessage: false,
 
-    dialoguedrc: false, // App et page accueil
-
-    dialogStack: [],
+    helpstack: [],
 
     choixEmoji: false,
 
@@ -53,20 +42,6 @@ export const useUiStore = defineStore('ui', {
   },
 
   actions: {
-    oD (m) {
-      this.dialogStack.push(m)
-      m.value = true
-    },
-    fD () {
-      if (this.dialogStack.length) {
-        const m = this.dialogStack.pop()
-        m.value = false
-      }
-    },
-    fTD () {
-      while (this.dialogStack.length) this.fD()
-    },
-
     setEtroite (v) {
       this.etroite = v
       this.menu = false
@@ -107,9 +82,9 @@ export const useUiStore = defineStore('ui', {
     },
 
     async afficherExc (exc) {
-      if (this.dialogueerreur) return
+      if (MD.val('dialogueerreur')) return
       return new Promise((resolve) => {
-        this.dialogueerreur = true
+        MD.oD('dialogueerreur')
         this.dialogueerreurresolve = resolve
         this.exc = exc
       })
@@ -117,18 +92,18 @@ export const useUiStore = defineStore('ui', {
 
     resetExc () { 
       this.exc = null
-      this.dialogueerreur = false
+      MD.fD()
       this.dialogueerreurresolve = null
     },
 
-    fermerHelp () { this.dialoguehelp = false; this.helpstack.length = 0 },
+    fermerHelp () { MD.fD(); this.helpstack.length = 0 },
     pushhelp (page) {
-      if (this.helpstack.length === 0) this.dialoguehelp = true
+      if (this.helpstack.length === 0) MD.oD('dialoguehelp')
       this.helpstack.push(page)
     },
     pophelp () {
       if (this.helpstack.length === 1) {
-        this.dialoguehelp = false
+        MD.fD()
         this.helpstack.length = 0
       } else {
         this.helpstack.splice(this.helpstack.length - 1, 1)

@@ -2,7 +2,7 @@
 <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="close"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('OTtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -126,7 +126,6 @@
 
 <script>
 import { ref } from 'vue'
-import Dexie from 'dexie'
 import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
@@ -137,12 +136,12 @@ import { dhcool, $t, html, afficherDiag, sleep, edvol, b64ToU8, u8ToB64 } from '
 import { ping } from '../app/net.mjs'
 import { getCompte, vuIDB, deleteIDB } from '../app/db.mjs'
 import { PingDB } from '../app/connexion.mjs'
-import { Notification } from '../app/modele.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default ({
   name: 'OutilsTests',
 
-  props: { close: Function },
+  props: { },
 
   components: { PhraseSecrete, BoutonHelp },
 
@@ -153,7 +152,7 @@ export default ({
   data () {
     return {
       tab: 'tst',
-
+      MD: MD,
       ps: null,
 
       resultat1a: '-',

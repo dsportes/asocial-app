@@ -142,7 +142,7 @@ export default {
     const gSt = stores.groupe
 
     const crgr = ref(false)
-    function ovCrgr () { ui.oD(crgr) }
+    function ovCrgr () { MD.oD(crgr) }
 
     const options = [
       { label: $t('AGsimple'), value: false },
