@@ -28,8 +28,6 @@ export const useUiStore = defineStore('ui', {
 
     helpstack: [],
 
-    choixEmoji: false,
-
     naplus: null, // na de l'avatar proposant d'ajouter un contact au groupe egrplus
     egrplus: null, // élément e du groupe dans lequel un contact peut-être ajouté
   }),

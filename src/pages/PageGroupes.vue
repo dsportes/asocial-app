@@ -47,10 +47,10 @@
 
     <!-- Nouveau groupe ------------------------------------------------>
     <q-dialog v-model="crgr" persistent>
-      <q-card class="petitelargeur shadow-8 column">
+      <q-card class="bs petitelargeur column">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PGcrea')}}</q-toolbar-title>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg text-center">{{$t('PGcrea')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
         <div class="q-pa-xs">
@@ -75,7 +75,7 @@
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { edvol, $t } from '../app/util.mjs'
-import { Motscles } from '../app/modele.mjs'
+import { MD, Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -116,7 +116,7 @@ export default {
       this.quotas = { q1: 0, q2: 0, min1: 0, min2: 0, max1, max2, err: ''}
       this.nom = ''
       this.una = false
-      this.ovCrgr()
+      this.ovcrgr()
     },
     okNom (n) { this.nom = n },
     async okCreation () {
@@ -141,9 +141,6 @@ export default {
     const fStore = stores.filtre
     const gSt = stores.groupe
 
-    const crgr = ref(false)
-    function ovCrgr () { MD.oD(crgr) }
-
     const options = [
       { label: $t('AGsimple'), value: false },
       { label: $t('AGunanime'), value: true, color: 'warning' }
@@ -157,9 +154,12 @@ export default {
     fStore.contexte.groupes.groupeId = 0
     const stats = fStore.stats
 
+    const crgr = ref(false)
+    function ovcrgr () { MD.oD(crgr) }
+
     return {
+      MD, crgr, ovcrgr,
       ui, session, aSt, gSt,
-      crgr, ovCrgr,
       stats,
       mapmc,
       options

@@ -95,7 +95,7 @@
     <q-dialog v-model="edq" persistent>
       <q-card class="petitelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="edq = false"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
@@ -117,6 +117,7 @@ import QuotasVols from './QuotasVols.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 import stores from '../stores/stores.mjs'
 import { SetQuotasCompte, GetCompteursCompta } from '../app/operations.mjs'
+import { MD } from '../app/modele.mjs'
 
 /** Compteurs ***************************
 - `j` : **date du dernier calcul enregistré** : par exemple le 17 Mai de l'année A
@@ -146,7 +147,6 @@ export default ({
 
   data () {
     return {
-      edq: false,
       dhcool: dhcool,
       quotas: null
     }
@@ -189,11 +189,11 @@ export default ({
         max1: tr.cpt.q1 - tr.cpt.a1,
         max2: tr.cpt.q2 - tr.cpt.a2
         }
-      this.edq = true
+      this.ovedq()
     },
     async validerq () {
       await new SetQuotasCompte().run(this.aSt.tribuC.id, this.na, this.quotas.q1, this.quotas.q2)
-      this.edq = false
+      MD.fD()
       await new GetCompteursCompta().run(this.na)
     },
   },
@@ -210,7 +210,11 @@ export default ({
       })
     })
 
+    const edq = ref(false)
+    function ovedq () { MD.oD(edq) }
+
     return {
+      MD, edq, ovedq,
       session: stores.session,
       aSt,
       na: c.value.na || aSt.compta.nap,

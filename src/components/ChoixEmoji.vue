@@ -1,6 +1,6 @@
 <!-- https://github.com/serebrov/emoji-mart-vue#i18n -->
 <template>
- <q-dialog v-model="ui.choixEmoji">
+ <q-dialog v-model="choixEmoji">
   <div style="position:relative">
     <Picker :data="emojiIndex" 
       set="google" title="" emoji="question" native
@@ -22,6 +22,8 @@ import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src'
 import '../css/emoji.css'
 
 import stores from '../stores/stores.mjs'
+import { MD } from '../app/modele.mjs'
+import { ref } from 'vue'
 
 export default {
   name: 'ChoixEmoji',
@@ -53,7 +55,7 @@ export default {
         ta.focus()
         ta.selectionStart = pos
         ta.selectionEnd = pos
-        stores.ui.choixEmoji = false
+        MD.fD()
       }, 10)
     },
     showEmoji (emoji) {
@@ -91,7 +93,9 @@ export default {
       emojiIndex = new EmojiIndex(data)
       config.setEmojiIndex(emojiIndex)
     }
+
     return {
+      choixEmoji: MD.declare('choixEmoji', ref(false)),
       ui: stores.ui,
       emojiIndex,
       session

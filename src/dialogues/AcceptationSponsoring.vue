@@ -1,8 +1,9 @@
 <template>
+<div class="bs">
 <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="close"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -72,6 +73,7 @@
     </q-page>
   </q-page-container>
 </q-layout>
+</div>
 </template>
 
 <script>
@@ -83,11 +85,12 @@ import { edvol, dhcool } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { crypter } from '../app/webcrypto.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default ({
   name: 'AcceptationSponsoring',
 
-  props: { sp: Object, pc: Object, close: Function },
+  props: { sp: Object, pc: Object },
   /*
   pc : object Phrase
   sp : objet Sponsoring décodé
@@ -139,11 +142,13 @@ export default ({
       this.apsf = false
       this.isPwd = false
       this.ps = null
-      if (this.close) this.close()
+      MD.fD()
     },
     okps (ps) {
       if (ps) {
         this.ps = ps
+      } else {
+        this.accdec = 0
       }
     },
     async confirmer () {
@@ -159,8 +164,8 @@ export default ({
   },
 
   setup () {
-    // console.log('Accept Spons')
     return {
+      MD
     }
   }
 })

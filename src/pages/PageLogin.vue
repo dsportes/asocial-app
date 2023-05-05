@@ -1,11 +1,13 @@
 <template>
 <q-page class="column align-start items-center">
 
-  <q-card class="bs q-mt-md petitelargeur fs-md column justify-center">
-    <div :class="'q-mt-sm q-pb-md q-gutter-md row justify-center full-width bord' + (!session.mode ? '1' : '2')">
+  <q-card class="q-mt-lg bs petitelargeur fs-md column justify-center">
+    <div :class="'full-width bord' + (!session.mode ? '1' : '2')">
+    <div class="q-py-sm q-gutter-md row justify-center">
       <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
       <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
       <q-radio dense v-model="session.mode" :val="3" :label="$t('avion')" />
+    </div>
     </div>
 
     <div :class="'full-width q-pa-sm ' + (!session.mode ? 'disabled' : '')">
@@ -41,7 +43,7 @@
   </q-card>
 
   <q-dialog v-model="dialcp" persistent full-height>
-    <AcceptationSponsoring :sp="sp" :pc="pc" :close="fermerap" />
+    <AcceptationSponsoring :sp="sp" :pc="pc"/>
   </q-dialog>
 
 </q-page>
@@ -54,7 +56,7 @@ import stores from '../stores/stores.mjs'
 
 import { $t, afficherDiag } from '../app/util.mjs'
 import { connecterCompte } from '../app/connexion.mjs'
-import { PhraseContact, Sponsoring } from '../app/modele.mjs'
+import { MD, PhraseContact, Sponsoring } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ } from '../app/api.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
@@ -71,7 +73,6 @@ export default {
       phrase: '',
       isPwd: false,
       encours: false,
-      dialcp: false,
       phch: 0,
       datactc: null,
       coupleloc: null,
@@ -113,7 +114,7 @@ export default {
               this.raz()
               return                  
             }
-            this.dialcp = true
+            this.ovdialcp()
             this.raz()
             return
           } catch (e) {
@@ -131,10 +132,6 @@ export default {
     raz () {
       this.btncd = false
       this.phrase = ''
-    },
-    fermerap () {
-      this.dialcp = false
-      this.btncd = false
     }
   },
 
@@ -151,7 +148,11 @@ export default {
       }
     })
 
+    const dialcp = ref(false)
+    function ovdialcp () { MD.oD(dialcp) }
+
     return {
+      MD, dialcp, ovdialcp,
       session,
       config,
       razdb

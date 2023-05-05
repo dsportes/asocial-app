@@ -2,7 +2,7 @@
 <div ref="root">
   <q-card v-if="!max" :class="'column fs-md full-height overflow-hidden q-pa-xs shadow-8 ' + dlclass">
     <q-toolbar class="col-auto full-width row">
-      <q-btn class="col-auto" icon="zoom_out_map" size="md" push flat dense @click="max=true"></q-btn>
+      <q-btn class="col-auto" icon="zoom_out_map" size="md" push flat dense @click="ovmax"></q-btn>
       <q-btn :disable="!md" class="col-auto q-mr-xs" size="md" label="TEXTE" :color="md ? 'warning' : 'purple'" push flat dense @click="md=false"></q-btn>
       <q-btn :disable="md" class="col-auto q-mr-xs" size="md" label="HTML" dense flat push @click="md=true"></q-btn>
       <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="❤️" size="md"
@@ -21,7 +21,7 @@
   <q-dialog v-model="max" full-height transition-show="slide-up" transition-hide="slide-down">
     <div ref="root2" :class="'column fs-md full-height grandelargeur overflow-hidden ' + dlclass">
       <q-toolbar class="col-auto">
-        <q-btn class="col-auto" icon="zoom_in_map" size="md" dense flat push @click="max=false"></q-btn>
+        <q-btn class="col-auto" icon="zoom_in_map" size="md" dense flat push @click="MD.fD"></q-btn>
         <q-btn :disable="!md" class="col-auto q-mr-xs" size="md" label="TXT" :color="md ? 'warning' : 'purple'" push flat dense @click="md=false"></q-btn>
         <q-btn :disable="md" class="col-auto q-mr-xs" size="md" label="HTML" dense flat push @click="md=true"></q-btn>
         <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="❤️" size="md"
@@ -39,7 +39,7 @@
     </div>
   </q-dialog>
 
-  <choix-emoji v-if="ui.choixEmoji" :inp="inp" :close="emojiClose"/>
+  <choix-emoji :inp="inp" :close="emojiClose"/>
 
 </div>
 </template>
@@ -48,6 +48,7 @@ import ShowHtml from './ShowHtml.vue'
 import ChoixEmoji from './ChoixEmoji.vue'
 import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default ({
   name: 'EditeurMd',
@@ -79,23 +80,21 @@ export default ({
 
   data () {
     return {
-      inp: null,
-      emoji: false,
-      max: false
+      inp: null
     }
   },
 
   methods: {
     ouvriremojimd1 () {
       this.inp = this.root.querySelector('textarea')
-      this.ui.choixEmoji=true
+      MD.oD('choixEmoji')
     },
     ouvriremojimd2 () {
       this.inp = this.root2.querySelector('textarea')
-      this.ui.choixEmoji=true
+      MD.oD('choixEmoji')
     },
     ok () {
-      this.max = false
+      MD.fD()
       this.taille = this.tailleM ? 1 : 0
       this.md = false
       const x = this.textelocal && this.textelocal.length > this.maxlg.value ? this.textelocal.substring(0, this.maxlg.value) : this.textelocal
@@ -147,7 +146,11 @@ export default ({
     taille.value = tailleM.value ? 1 : 0
     if (modetxt.value) md.value = false
 
+    const max = ref(false)
+    function ovmax () { MD.oD(max) }
+
     return {
+      MD, max, ovmax,
       ui,
       session: stores.session,
       md,

@@ -59,7 +59,7 @@
     </template>
   </q-splitter>
 
-  <choix-emoji v-if="ui.choixEmoji" :inp="inp" :close="emojiClose"/>
+  <choix-emoji :inp="inp" :close="emojiClose"/>
 
 </q-card>
 </template>
@@ -68,7 +68,7 @@ import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixEmoji from './ChoixEmoji.vue'
 import BoutonHelp from './BoutonHelp.vue'
-import { Motscles } from '../app/modele.mjs'
+import { MD, Motscles } from '../app/modele.mjs'
 import { $t, afficherDiag } from '../app/util.mjs'
 
 export default ({
@@ -95,7 +95,7 @@ export default ({
   methods: {
     ouvriremoji () {
       this.inp = this.root.querySelector('#ta').querySelector('input')
-      this.ui.choixEmoji=true
+      MD.oD('choixEmoji')
     },
     startEdit () {
       this.motscles.debutEdition()

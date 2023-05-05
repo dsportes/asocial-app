@@ -32,12 +32,12 @@
 
     <!-- Dialogue de création d'une nouvelle tribu -->
     <q-dialog v-model="nt" persistent>
-      <q-card class="moyennelargeur">
+      <q-card class="bs moyennelargeur">
         <div class="titre-lg q-my-sm">{{$t('PTnv')}}</div>
         <nom-avatar icon-valider="check" verif tribu @ok-nom="oknom" />
         <choix-quotas :quotas="quotas" />
         <q-card-actions>
-          <q-btn flat dense color="warning" icon="close" :label="$t('renoncer')" @click="closent"/>
+          <q-btn flat dense color="warning" icon="close" :label="$t('renoncer')" @click="MD.fD"/>
           <q-btn flat dense color="primary" icon="check" :disabled="!nom || quotas.err"
             :label="$t('valider')" @click="creer"/>
         </q-card-actions>
@@ -48,6 +48,7 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuTribu from '../components/ApercuTribu.vue'
 import NomAvatar from '../components/NomAvatar.vue'
@@ -57,6 +58,7 @@ import StatsTribus from '../components/StatsTribus.vue'
 import { afficherDiag, edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouvelleTribu, GetTribu } from '../app/operations.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageChats',
@@ -74,9 +76,8 @@ export default {
     ouvrirnt () { 
       this.nom = ''
       this.quotas = { q1: 1, q2: 1, min1: 0, min2: 0, max1: 9999, max2: 9999, err: false }
-      this.nt = true
+      this.ovnt()
     },
-    closent () { this.nt = false },
     async oknom (nom) { 
       for(const tribu of this.aSt.getTribus) {
         if (tribu.na.nom === nom) {
@@ -88,7 +89,7 @@ export default {
     },
     async creer () {
       await new NouvelleTribu().run(this.nom, this.quotas.q1, this.quotas.q2)
-      this.closent()
+      MD.fD()
     },
     async courant (id) {
       const [t ,t2] = await new GetTribu().run(id, true)
@@ -100,7 +101,6 @@ export default {
   data () {
     return {
       nom: '',
-      nt: false,
       quotas: null
     }
   },
@@ -110,7 +110,11 @@ export default {
     const session = stores.session
     const stats = stores.filtre.stats
 
+    const nt = ref(false)
+    function ovnt () { MD.oD(nt)}
+
     return {
+      MD, nt, ovnt,
       ui: stores.ui,
       aSt,
       stats,

@@ -43,10 +43,10 @@
   </div>
 
   <q-dialog v-model="edprf" persistent>
-    <q-card class="moyennelargeur shadow-8">
+    <q-card class="bs moyennelargeur">
       <q-toolbar class="bg-secondary text-white">
-        <q-toolbar-title class="titre-lg full-width">{{$t('STchg')}}</q-toolbar-title>
-        <q-btn dense flat size="md" icon="close" @click="txtedit=false"/>
+        <q-btn dense color="warning" size="md" icon="close" @click="MD.fD"/>
+        <q-toolbar-title class="titre-lg full-width text-center">{{$t('STchg')}}</q-toolbar-title>
       </q-toolbar>
       <q-card-section class="q-my-md q-mx-sm">
         <div class="row bord4">
@@ -70,7 +70,7 @@
       </q-card-section>
       <q-card-actions>
         <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
-          @click="edprf=false"/>
+          @click="MD.fD"/>
         <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 
           :label="$t('valider')" :disable="prf === profil" @click="valider"/>
       </q-card-actions>
@@ -80,10 +80,12 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { SetEspaceT } from '../app/operations.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'StatsTribus',
@@ -119,17 +121,16 @@ export default {
 
     async valider () {
       new SetEspaceT().run(this.ns, this.prf)
-      this.edprf = false
+      MD.fD()
     },
     ouvchgprf () {
       this.prf = this.profil
-      this.edprf = true
+      this.ovedprf()
     }
   },
 
   data () {
     return {
-      edprf: false,
       prf: 0
     }
   },
@@ -137,7 +138,12 @@ export default {
   setup () {
     const session = stores.session
     const cfg = stores.config
+
+    const edprf = ref(false)
+    function ovedprf () { MD.oD(edprf)}
+
     return {
+      MD, edprf, ovedprf,
       session,
       cfg
     }

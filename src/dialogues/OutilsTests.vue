@@ -1,4 +1,5 @@
 <template>
+<div class="bs">
 <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -73,7 +74,7 @@
           <div v-for="it in bases" :key="it.nb" class="zone items-center fs-md zone">
             <div>
               <q-btn v-if="it.vu" class="q-mr-sm" icon="delete" size="sm" round
-                color="warning" @click="itdel=it;suppbase=true"/>
+                color="warning" @click="itdel=it;ovsuppbase()"/>
               <span class="fs-md q-mt-sm">{{it.nb}}</span>
             </div>
             <div class="q-pl-md q-mb-sm row items.center">
@@ -93,16 +94,16 @@
   </q-page-container>
 
   <q-dialog v-model="running">
-    <q-card>
+    <q-card class="bs">
       <div class="column items-center">
-        <q-spinner-hourglass persistent color="primary" size="3rem" @click="running=false"/>
+        <q-spinner-hourglass persistent color="primary" size="3rem" @click="MD.fD"/>
         <div class="fs-md font-mono q-mt-md">{{session.volumeTable}}</div>
       </div>
     </q-card>
   </q-dialog>
 
   <q-dialog v-model="suppbase">
-    <q-card>
+    <q-card class="bs">
       <q-card-section>
         <div class="titre-lg">Propriétaire: {{itdel.trig}}</div>
         <div class="fs-sm font-mono">Nom de la base: {{itdel.nb}}</div>
@@ -122,6 +123,7 @@
   </q-dialog>
 
 </q-layout>
+</div>
 </template>
 
 <script>
@@ -152,7 +154,6 @@ export default ({
   data () {
     return {
       tab: 'tst',
-      MD: MD,
       ps: null,
 
       resultat1a: '-',
@@ -162,10 +163,8 @@ export default ({
       resultat3a: '-',
       resultat3b: '-',
 
-      suppbase: false,
       itdel: null,
       edvol: edvol,
-      running: false,
 
       quotas: { q1:4, q2: 27, m1: 12, m2: 24, err: false }
     }
@@ -240,7 +239,7 @@ export default ({
     },
 
     async getVU (it) {
-      this.running = true
+      this.ovrunning()
       try {
         const [v1, v2] = await vuIDB(it.nb)
         it.v1 = v1
@@ -249,7 +248,7 @@ export default ({
       } catch (e) {
         afficherDiag(e.message)
       }
-      this.running = false
+      MD.fD()
     }
   },
 
@@ -310,8 +309,14 @@ export default ({
         console.log(e.toString())
       }
     }
+
+    const suppbase = ref(false)
+    function ovsuppbase() { MD.oD(suppbase) }
+    const running = ref(false)
+    function ovrunning () { MD.oD(running)}
     
     return {
+      MD, suppbase, ovsuppbase, running, ovrunning,
       session,
       config,
       ui,

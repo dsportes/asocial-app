@@ -5,7 +5,7 @@
       <q-btn v-if="edit" dense color="primary" icon="edit" size="sm" @click.stop="editer">
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="zoom" class="q-ml-xs" dense color="primary" icon="fullscreen" size="sm" @click.stop="fs=true">
+      <q-btn v-if="zoom" class="q-ml-xs" dense color="primary" icon="fullscreen" size="sm" @click.stop="ovfs">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
       </q-btn>
     </div>
@@ -26,7 +26,7 @@
         <q-btn v-if="edit" dense color="primary" icon="edit" size="md" @click="editer">
           <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
         </q-btn>
-        <q-btn dense color="primary" size="md" icon="close_fullscreen" v-close-popup>
+        <q-btn dense color="primary" size="md" icon="close_fullscreen" @click="MD.fD">
           <q-tooltip class="bg-white text-primary">{{$t('SHre')}}</q-tooltip>
         </q-btn>
       </q-bar>
@@ -43,10 +43,12 @@
 </div>
 </template>
 <script>
+import { ref } from 'vue'
 import SdLight from './SdLight.vue'
 import SdDark from './SdDark.vue'
 import SdLight1 from './SdLight1.vue'
 import SdDark1 from './SdDark1.vue'
+import { MD } from '../app/modele.mjs'
 
 const styb = 'min-height:2rem;overflow-y:auto;'
 
@@ -64,13 +66,21 @@ export default ({
 
   data () {
     return {
-      fs: false
     }
   },
 
   methods: {
     editer () {
       this.$emit('edit')
+    }
+  },
+
+  setup () {
+    const fs = ref(false)
+    function ovfs () { MD.oD(fs) }
+
+    return {
+      MD, fs, ovfs
     }
   }
 })

@@ -22,7 +22,7 @@
     <!-- Mémo du compte -->
     <div class="q-py-sm">
       <div class="titre-md">{{$t('CPTmemo')}}</div>
-      <show-html v-if="memo" class="q-ml-lg bord" maxh="5rem" :texte="memo" zoom
+      <show-html v-if="memo" class="q-ml-lg bord" maxh="5rem" :texte="memo" zoom edit
           @edit="memoeditAut"/>
       <div v-else class="q-ml-lg row">
         <div class="col fs-md text-italic">({{$t('CPTnomemo')}})</div>
@@ -64,8 +64,8 @@
     <q-dialog v-model="memoedit" persistent>
       <q-card class="petitelargeur shadow-8">
         <q-toolbar class="bg-secondary text-white">
-          <q-toolbar-title class="titre-lg full-width">{{$t('CPTmdc')}}</q-toolbar-title>
-          <q-btn dense flat size="md" icon="close" @click="memoedit=false"/>
+          <q-btn dense size="md" icon="close" color="warning" @click="memoedit=false"/>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTmdc')}}</q-toolbar-title>
         </q-toolbar>
         <editeur-md class="height-10"
           :texte="aSt.compte.memo || ''" editable modetxt :label-ok="$t('OK')" @ok="memook"/>

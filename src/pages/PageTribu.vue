@@ -4,7 +4,7 @@
 
     <div v-if="session.estSponsor"> <!-- Parrainer un nouveau compte -->
       <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
-        :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring"/>
+        :label="$t('P10nvp')" color="warning" dense @click="ovnvsp"/>
       <bouton-help class="q-ml-sm" page="page1"/>
     </div>
 
@@ -13,7 +13,7 @@
     <q-separator color="orange" class="q-my-md"/>
 
     <q-btn v-if="session.estComptable" class="q-mb-md" size="md" flat dense color="primary" 
-      :label="$t('PTnvc')" @click="ouvrirSponsoring"/>
+      :label="$t('PTnvc')" @click="ovnvsp"/>
 
     <div v-if="!aSt.ptLcFT.length" class="col-auto titre-lg text-italic">
       {{$t('PTcvide', [aSt.ptLc.length])}}
@@ -70,14 +70,14 @@
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
     <q-dialog v-model="nvsp" persistent full-height>
-      <nouveau-sponsoring :close="fermerSponsoring" :tribu="aSt.tribuC || aSt.tribu"/>
+      <nouveau-sponsoring :tribu="aSt.tribuC || aSt.tribu"/>
     </q-dialog>
 
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="edq" persistent>
-      <q-card class="petitelargeur">
+      <q-card class="bs petitelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="edq = false"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
@@ -90,9 +90,9 @@
 
     <!-- Affichage des compteurs de compta du compte "courant"-->
     <q-dialog v-model="cptdial" persistent full-height>
-      <q-card style="width: 80vw !important;">
+      <q-card class="bs" style="width: 80vw !important;">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="cptdial = false"/>
+        <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [ccna.nomc])}}</q-toolbar-title>
       </q-toolbar>
       <panel-compta style="margin:0 auto"/>
@@ -103,6 +103,7 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { edvol } from '../app/util.mjs'
@@ -134,8 +135,6 @@ export default {
     vis (c) { 
       return (this.session.estComptable || this.session.estSponsor || (c.na.id === this.aSt.compteId))
     },
-    ouvrirSponsoring () { this.nvsp = true },
-    fermerSponsoring () { this.nvsp = false },
     ed1 (v) { return edvol(v * UNITEV1) },
     ed2 (v) { return edvol(v * UNITEV2) },
     type (na) {
@@ -182,13 +181,9 @@ export default {
 
   data () {
     return {
-      MD,
       ccid: 0, // compte "courant" dans la liste
       ccna: null,
-      nvsp: false,
-      edq: false,
       quotas: {},
-      cptdial: false,
       cpt: null,
       fipeople: false
     }
@@ -213,7 +208,15 @@ export default {
     const pSt = stores.people
     const ui = stores.ui
     
+    const nvsp = ref(false)
+    function ovnvsp () { MD.oD(nvsp)}
+    const edq = ref(false)
+    function ovedq () { MD.od(edq)}
+    const cptdial = ref(false)
+    function ovcptdial () { MD.od(cptdial)}
+
     return {
+      MD, nvsp, ovnvsp, edq, ovedq, cptdial, ovcptdial,
       session,
       aSt,
       pSt,

@@ -1,9 +1,10 @@
 <template>
+<div class="bs">
 <q-layout container view="hHh lpR fFf" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="close"/>
-      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NPtit')}}</q-toolbar-title>
+      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-toolbar-title class="titre-lg text-center">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
   </q-header>
@@ -82,6 +83,7 @@
     </q-page>
   </q-page-container>
 </q-layout>
+</div>
 </template>
 
 <script>
@@ -90,7 +92,7 @@ import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { edvol } from '../app/util.mjs'
-import { PhraseContact, Sponsoring } from '../app/modele.mjs'
+import { MD, PhraseContact, Sponsoring } from '../app/modele.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -101,7 +103,7 @@ export default ({
 
   /* La tribu est nécessaire pour une action du Comptable
   qui lui peut choisir la tribu du sponsorisé */
-  props: { close: Function, tribu: Object },
+  props: { tribu: Object },
 
   components: { ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp },
 
@@ -195,7 +197,7 @@ export default ({
       const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, this.tribu.nctkc, this.nct, this.estSponsor, q, this.mot)
       try {
         await new AjoutSponsoring().run(row)
-        this.close()
+        MD.fD()
       } catch {}
     },
     corriger () {
@@ -224,6 +226,7 @@ export default ({
     })
 
     return {
+      MD,
       nct: tribu.value.na,
       limj,
       step1,

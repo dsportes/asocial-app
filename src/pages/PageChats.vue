@@ -6,7 +6,7 @@
       :label="$t('CVraf')" @click="rafCvs"/>
 
     <q-btn v-if="session.accesNet" class="q-ml-md q-my-sm" size="md" no-caps dense color="primary" 
-      :label="$t('CChtit')" @click="ouvrircc"/>
+      :label="$t('CChtit')" @click="ovcc"/>
 
     <div v-if="!aSt.pcLc.length" class="titre-lg text-italic">{{$t('CHnch')}}</div>
     <div v-if="aSt.pcLc.length && !aSt.pcLcF.length" class="titre-lg text-italic">
@@ -20,7 +20,7 @@
     </div>
 
     <q-dialog v-model="cc" persistent style="height:50vh">
-      <contact-chat :close="closecc"/>
+      <contact-chat/>
     </q-dialog>
 
   </q-page>
@@ -31,7 +31,7 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuChat from '../components/ApercuChat.vue'
 import ContactChat from '../dialogues/ContactChat.vue'
-import { Motscles } from '../app/modele.mjs'
+import { MD, Motscles } from '../app/modele.mjs'
 import { RafraichirCvs } from '../app/operations.mjs'
 
 export default {
@@ -43,8 +43,6 @@ export default {
   },
 
   methods: {
-    ouvrircc () { this.cc = true },
-    closecc () { this.cc = false },
     async rafCvs () {
       const [nt, nr] = await new RafraichirCvs().run(this.session.avatarId)
       stores.ui.afficherMessage(this.$t('CVraf2', [nr, nt - nr]), false)
@@ -53,7 +51,6 @@ export default {
 
   data () {
     return {
-      cc: false
     }
   },
 
@@ -66,7 +63,11 @@ export default {
     fStore.contexte.chats.mapmc = mapmc.value
     fStore.contexte.chats.groupeId = 0
 
+    const cc = ref(false)
+    function ovcc () { MD.fD(cc) }
+
     return {
+      MD, cc, ovcc,
       ui: stores.ui,
       session,
       aSt,

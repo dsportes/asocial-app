@@ -41,8 +41,8 @@
     </div>
 
     <!-- Dialogue de création d'un sponsoring -->
-    <q-dialog v-if="nvsp" v-model="nvsp" full-height persistent>
-      <nouveau-sponsoring :close="closesp" :tribu="aSt.tribu"/>
+    <q-dialog v-model="nvsp" full-height persistent>
+      <nouveau-sponsoring :tribu="aSt.tribu"/>
     </q-dialog>
 
   </q-page>
@@ -56,6 +56,7 @@ import { dhcool, edvol } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageSponsorings',
@@ -73,7 +74,6 @@ export default {
 
   data () {
     return {
-      nvsp: false,
       dhcool: dhcool
     }
   },
@@ -83,8 +83,7 @@ export default {
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
 
-    async nouveausp () { if (await this.session.edit()) this.nvsp = true },
-    closesp () { this.nvsp = false },
+    async nouveausp () { if (await this.session.edit()) this.ovnvsp() },
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     async prolonger (sp) {},
@@ -104,7 +103,11 @@ export default {
       })
     })
 
+    const nvsp = ref(false)
+    function ovnvsp () { MD.oD(nvsp) }
+
     return {
+      MD, nvsp, ovnvsp,
       avatar,
       aSt,
       session

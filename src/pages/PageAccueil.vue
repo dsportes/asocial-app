@@ -23,7 +23,7 @@
       </div>
 
       <!-- Outils et tests -->
-      <div class="btn2" @click="outilsTests = true">
+      <div class="btn2" @click="ovoutilsTests">
         <q-btn dense size="md" icon="settings"/>
         <span class="q-ml-xs">{{$t('MLAout')}}</span>
       </div>
@@ -83,20 +83,22 @@
       <page-menu/>
     </div>
 
-    <q-dialog v-if="outilsTests" v-model="outilsTests" full-height persistent>
-      <outils-tests :close="closeOutils"/>
+    <q-dialog v-model="outilsTests" full-height persistent>
+      <outils-tests/>
     </q-dialog>
 
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
 import NotifIcon from '../components/NotifIcon.vue'
 import OutilsTests from '../dialogues/OutilsTests.vue'
 import PageMenu from '../pages/PageMenu.vue'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageAccueil',
@@ -131,12 +133,15 @@ export default {
 
   data () {
     return {
-      outilsTests: false
     }
   },
 
   setup () {
+    const outilsTests = ref(false)
+    function ovoutilsTests () { MD.oD(outilsTests) }
+
     return {
+      MD, outilsTests, ovoutilsTests,
       ui: stores.ui,
       session: stores.session,
       aSt: stores.avatar,

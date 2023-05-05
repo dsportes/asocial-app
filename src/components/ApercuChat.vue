@@ -14,8 +14,8 @@
       <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
       <apercu-motscles v-if="chat" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
         :mapmc="mapmc" :edit="session.editable" :src="chat.mc || u0"/>
-      <div v-if="chat" class="row items-start">
-        <show-html class="col q-mr-sm bord" :idx="idx" zoom maxh="3rem" :texte="chat.txt"/>
+      <div v-if="chat" class="q-my-sm bord row items-start">
+        <show-html class="col q-mr-sm" :idx="idx" zoom maxh="3rem" :texte="chat.txt"/>
         <div class="col-auto self-start">
           <q-btn class="btn1" icon="edit" size="sm" color="warning" @click="editer"/>
         </div>
@@ -27,8 +27,7 @@
       <q-card class="bs moyennelargeur shadow-8">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-right">
-            <span class="q-pr-sm">{{$t('CHtxt')}}</span></q-toolbar-title>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('CHtxt')}}</q-toolbar-title>
         </q-toolbar>
         <editeur-md style="height:70vh"
           :texte="chat.txt" editable modetxt :label-ok="$t('OK')" @ok="chatok"/>

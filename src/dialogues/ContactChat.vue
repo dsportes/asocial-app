@@ -1,9 +1,10 @@
 <template>
+<div class="bs">
 <q-layout container view="hHh lpR fFf" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="close"/>
-      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CChtit')}}</q-toolbar-title>
+      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-toolbar-title class="titre-lg full-size text-center">{{$t('CChtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
   </q-header>
@@ -16,21 +17,25 @@
         @keydown.enter.prevent="ok">
         <template v-slot:append>
           <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-          <span :class="pc.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="razphrase"/></span>
+          <span :class="pc.length === 0 ? 'disabled' : ''">
+            <q-icon name="cancel" class="cursor-pointer"  @click="razphrase"/>
+          </span>
         </template>
       </q-input>
     </q-card-section>
 
-    <apercu-chat v-if="chat" class="q-my-sm" :na-e="chat.naE" :na-i="chat.naI" :ids="chat.ids" :idx="0" :mapmc="mapmc"/>
+    <apercu-chat v-if="chat" class="q-my-sm" :na-e="chat.naE" :na-i="chat.naI"
+      :ids="chat.ids" :idx="0" :mapmc="mapmc"/>
     </q-card>
   </q-page-container>
 </q-layout>
+</div>
 </template>
 
 <script>
 import { ref } from 'vue'
 import ApercuChat from '../components/ApercuChat.vue'
-import { PhraseContact, Motscles, Chat } from '../app/modele.mjs'
+import { MD, PhraseContact, Motscles, Chat } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import { afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -99,6 +104,7 @@ export default ({
     const mapmc = ref(Motscles.mapMC(true, 0))
 
     return {
+      MD,
       mapmc,
       session
     }
