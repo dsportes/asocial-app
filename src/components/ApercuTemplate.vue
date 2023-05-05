@@ -6,10 +6,10 @@
 
     <!-- Dialogue d'édition -->
     <q-dialog v-model="edit" persistent>
-      <q-card class="moyennelargeur shadow-8">
+      <q-card class="bs moyennelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-toolbar-title class="titre-lg full-width">{{$t('CHtxt')}}</q-toolbar-title>
-          <q-btn dense flat size="md" icon="close" @click="edit=false"/>
+          <q-btn dense flat size="md" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('CHtxt')}}</q-toolbar-title>
         </q-toolbar>
 
       </q-card>
@@ -21,6 +21,7 @@
 import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuTemplate',
@@ -32,7 +33,6 @@ export default {
   computed: { },
 
   data () { return {
-    edit: false,
   }},
 
   methods: {
@@ -77,7 +77,11 @@ export default {
       }
     )
 
+    const edit = ref(false)
+    function ovedit () { MD.oD(edit) }
+
     return {
+      MD, edit, ovedit,
       session,
       chat
     }

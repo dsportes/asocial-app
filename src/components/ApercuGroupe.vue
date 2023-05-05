@@ -285,7 +285,7 @@ export default {
     pagectc () {
       this.ui.naplus = this.naplus
       this.ui.egrplus = this.egrplus
-      this.ui.fD()
+      MD.fD()
       this.session.setGroupeId(this.egrplus.groupe.id)
       this.ui.setPage('people')
     },

@@ -11,7 +11,7 @@
 
   <!-- Changement de tribu -->
   <q-dialog v-model="chgTr" persistent>
-    <q-card class="moyennelargeur">
+    <q-card class="bs moyennelargeur">
       <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [na.nom, aSt.tribuC.na.nom])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqv1', [aSt.ccCpt.q1, edv1(aSt.ccCpt.q1), pc1])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqv2', [aSt.ccCpt.q2, edv2(aSt.ccCpt.q2), pc2])}}</div>
@@ -41,32 +41,33 @@
 
       <q-separator />      
       <q-card-actions align="center">
-        <q-btn dense color="primary" :label="$t('renoncer')" @click="chgTr=false"/>
+        <q-btn dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
         <q-btn dense color="warning" :label="$t('valider')" :disable="!aSt.ppSelId"
-          v-close-popup @click="changerTr()"/>
+          @click="changerTr()"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
 
   <!-- Changement de statut sponsor -->
   <q-dialog v-model="chgSp" persistent>
-    <q-card class="bg-secondary text-white petitelargeur q-pa-sm">
+    <q-card class="bs bg-secondary text-white petitelargeur q-pa-sm">
         <div v-if="aSt.mbCpt(na.id).sp" class="text-center q-my-md titre-md">{{$t('PPsp', [aSt.tribuC.na.nom])}}</div>
         <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [aSt.tribuC.na.nom])}}</div>
       <q-card-actions align="center">
-        <q-btn dense color="primary" :label="$t('renoncer')" @click="chgSp=false"/>
-        <q-btn v-if="aSt.mbCpt(na.id).sp" dense color="warning" :label="$t('PPkosp')" v-close-popup  @click="changerSp(false)"/>
-        <q-btn v-else dense color="warning" :label="$t('PPoksp')" v-close-popup  @click="changerSp(true)"/>
+        <q-btn dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
+        <q-btn v-if="aSt.mbCpt(na.id).sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
+        <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
   <q-dialog v-model="cptdial" persistent full-height>
+    <div class="bs">
     <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="cptdial = false"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [na.nomc])}}</q-toolbar-title>
         </q-toolbar>
       </q-header>
@@ -76,18 +77,21 @@
         </q-card>
       </q-page-container>
     </q-layout>
+    </div>
   </q-dialog>
 
 </div>
 </template>
 <script>
 
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 // import BoutonHelp from '../components/BoutonHelp.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import { edvol } from '../app/util.mjs'
 import { GetCompteursCompta, SetAttributTribu2, ChangerTribu } from '../app/operations.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'BarrePeople',
@@ -106,9 +110,6 @@ export default {
   
   data () {
     return {
-      chgSp: false,
-      chgTr: false,
-      cptdial: false
     }
   },
 
@@ -118,21 +119,22 @@ export default {
     async chgTribu () { 
       /* this.aSt.ccCpt = */ await new GetCompteursCompta().run(this.na)
       this.aSt.ppFiltre = ''
-      this.chgTr = true
+      this.ovchgTr()
     },
     async chgSponsor () { 
-      this.chgSp = true
+      this.ovchgSp()
     },
     async voirCompta () { 
-      /* this.aSt.ccCpt = */ await new GetCompteursCompta().run(this.na)
-      this.cptdial = true
+      await new GetCompteursCompta().run(this.na)
+      this.ovcptdial()
     },
     async changerSp(estSp) { // (id, na, attr, val, exq)
       await new SetAttributTribu2().run(this.session.tribuCId, this.na, 'sp', estSp)
-      this.chgSp = false
+      MD.fD()
     },
     selTr (x) { if (x.ok) this.aSt.ppSelId = x.id },
     async changerTr () {
+      MD.fD()
       const [t, t2] = await new ChangerTribu().run(this.na, this.aSt.ppSelId)
       this.aSt.setTribuC(t, t2)
     }
@@ -143,7 +145,15 @@ export default {
     const pSt = stores.people
     const aSt = stores.avatar
 
+    const chgSp = ref(false)
+    function ovchgSp () { MD.oD(chgSp) }
+    const chgTr = ref(false)
+    function ovchgTr () { MD.oD(chgTr) }
+    const cptdial = ref(false)
+    function ovcptdial () { MD.oD(cptdial)}
+
     return {
+      MD, chgSp, ovchgSp, chgTr, ovchgTr, cptdial, ovcptdial,
       session,
       aSt,
       pSt

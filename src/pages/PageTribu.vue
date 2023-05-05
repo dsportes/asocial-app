@@ -104,7 +104,7 @@
 
 <script>
 import stores from '../stores/stores.mjs'
-import { UNITEV1, UNITEV2, Compteurs } from '../app/api.mjs'
+import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { edvol } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuTribu from '../components/ApercuTribu.vue'
@@ -113,7 +113,6 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
 import ApercuPeople from '../components/ApercuPeople.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
-// import PanelPeople from '../dialogues/PanelPeople.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols from '../components/QuotasVols.vue'

@@ -19,9 +19,10 @@
 </template>
 
 <script>
-import { toRef } from 'vue'
+import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixMotscles from './ChoixMotscles.vue'
+import { MD } from '../app/modele.mjs'
 
 export default ({
   name: 'ApercuMotscles',
@@ -41,18 +42,17 @@ export default ({
   },
 
   data () { return {
-    mcedit: false
   }},
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async editer () {
       if (! await this.session.edit()) return
-      if (this.edit) this.mcedit = true
+      if (this.edit) this.ovmcedit()
     },
     okmc (mc) { 
       if (mc) this.$emit('ok', mc)
-      this.mcedit = false
+      MD.fD()
     },
     sty (idx) {
       if (idx < 100) return ''
@@ -70,7 +70,11 @@ export default ({
       return e && e.n ? e.n : ''
     }
     
+    const mcedit = ref(false)
+    function ovmcedit () { MD.oD(mcedit) }
+
     return {
+      MD, mcedit, ovmcedit,
       session,
       nom
     }

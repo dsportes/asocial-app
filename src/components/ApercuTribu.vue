@@ -33,9 +33,9 @@
 
     <!-- Edition du commentaire attachée à une tribu -->
     <q-dialog v-model="edcom" persistent>
-      <q-card class="petitelargeur">
+      <q-card class="bs petitelargeur">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="close"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NTcom', [t.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -46,9 +46,9 @@
 
     <!-- Dialogue de mise à jour des quotas de la tribu -->
     <q-dialog v-model="edq" persistent>
-      <q-card class="petitelargeur">
+      <q-card class="bs petitelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="edq = false"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqut')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
@@ -76,6 +76,7 @@ import { crypter } from '../app/webcrypto.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
 import QuotasVols from './QuotasVols.vue'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuTribu',
@@ -101,11 +102,9 @@ export default {
   },
 
   data () { return {
-    edcom: false,
     info: '',
     bloc: null,
-    quotas: {},
-    edq: false
+    quotas: {}
   }},
 
   methods: {
@@ -114,24 +113,23 @@ export default {
     ed2 (v) { return edvol(v * UNITEV2) },
     editer () {
       this.info = this.t.info || ''
-      this.edcom = true
+      this.ovedcom()
     },
     async valider (txt) {
       const buf = txt ? await crypter(this.session.clek, txt) : null
       await new SetInfoTribu().run(this.id, 'infok', buf)
-      this.close()
+      MD.fD()
     },
-    close () { this.edcom = false},
     editerq () {
       this.quotas = { q1: this.t.cpt.q1, q2: this.t.cpt.q2, min1: 0, min2: 0, 
         max1: 9999,
         max2: 9999
       }
-      this.edq = true
+      this.ovedq()
     },
     async validerq () {
       await new SetQuotasTribu().run(this.id, this.quotas.q1, this.quotas.q2)
-      this.edq = false
+      MD.fD()
     }
   },
 
@@ -159,7 +157,13 @@ export default {
       }
     )
 
+    const edcom = ref(false)
+    function ovedcom () { MD.oD(edcom) }
+    const edq = ref(false)
+    function ovedq () { MD.oD(edq) }
+
     return {
+      MD, edcom, ovedcom, edq, ovedq,
       session,
       t
     }

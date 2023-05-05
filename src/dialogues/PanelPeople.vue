@@ -58,11 +58,11 @@
   </q-page-container>
 
   <!-- Dialogue de détail d'un membre d'un groupe -->
-  <q-dialog v-model="infoedit" persistent full-height style="width:80vw">
-    <q-card>
+  <q-dialog v-model="infoedit" persistent full-height>
+    <q-card class="bs" style="width:80vw">
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" icon="close" color="warning" @click="infoedit=false"/>
-        <q-toolbar-title class="titre-lg full-width">{{$t('PPtit', [mbC.na.nom, egrC.groupe.na.nom])}}</q-toolbar-title>
+        <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPtit', [mbC.na.nom, egrC.groupe.na.nom])}}</q-toolbar-title>
       </q-toolbar>
       <apercu-membre :eg="egrC" :mb="mbC" :mapmc="mapmc" :idx="0" people nopanel/>
     </q-card>

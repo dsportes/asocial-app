@@ -54,10 +54,10 @@
 
     <!-- Dialogue d'édition de l'info pour un membre avatar du compte -->
     <q-dialog v-model="infoedit" persistent>
-      <q-card class="petitelargeur shadow-8">
+      <q-card class="bs petitelargeur">
         <q-toolbar class="bg-secondary text-white">
           <q-toolbar-title class="titre-lg full-width">{{$t('AMinfo')}}</q-toolbar-title>
-          <q-btn dense flat size="md" icon="close" @click="infoedit=false"/>
+          <q-btn dense flat size="md" icon="close" @click="MD.fD"/>
         </q-toolbar>
         <editeur-md class="height-10"
           :texte="mb.info || ''" editable modetxt :label-ok="$t('OK')" @ok="infook"/>
@@ -66,7 +66,7 @@
 
     <!-- Dialogue de changement de statut -->
     <q-dialog v-model="chgSt" persistent>
-      <q-card class="petitelargeur shadow-8 column">
+      <q-card class="bs petitelargeur column">
         <q-card-section>
           <div class="titre-lg q-my-sm text-center">{{mb.na.nomc}}</div>
           <div class="titre-lg q-my-sm text-center">{{$t('statutmb' + st)}}</div>
@@ -115,7 +115,7 @@
   </div>
 </template>
 <script>
-// import { toRef, ref, watch } from 'vue'
+import { ref } from 'vue'
 
 import { afficherDiag, dhcool } from 'src/app/util.mjs'
 import stores from '../stores/stores.mjs'
@@ -125,6 +125,7 @@ import ApercuGenx from './ApercuGenx.vue'
 import ShowHtml from './ShowHtml.vue'
 import EditeurMd from './EditeurMd.vue'
 import ApercuMotscles from './ApercuMotscles.vue'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuMembre',
@@ -151,8 +152,6 @@ export default {
   },
 
   data () { return {
-    infoedit: false,
-    chgSt: false,
     action: 0
   }},
 
@@ -170,15 +169,15 @@ export default {
         return
       }
       this.action = 0
-      this.chgSt = true
+      this.ovchgSt()
     },
     async actionSt () {
       console.log(this.action)
-      this.chgSt = false
+      MD.fD()
       this.action = 0
     },
     closeSt () {
-      this.chgSt = false
+      MD.fD()
       this.action = 0
     },
     ouvrirdetails () {
@@ -186,12 +185,12 @@ export default {
       MD.oD('detailspeople')
     },
     async editInfo () {
-      if (await this.session.edit()) this.infoedit = true
+      if (await this.session.edit()) this.ovinfoedit()
     },
     async infook (info) {
       // TODO enregistrer le texte de commentaires
       console.log(info)
-      this.infoedit = false
+      MD.fD()
     },
     async changeMc (mc) {
       // TODO
@@ -204,7 +203,13 @@ export default {
     const gSt = stores.groupe
     const photoDef = stores.config.iconAvatar
  
+    const infoedit = ref(false)
+    function ovinfoedit () { MD.oD(infoedit) }
+    const chgSt = ref(false)
+    function ovchgSt () { MD.oD(chgSt) }
+
     return {
+      MD, infoedit, ovinfoedit, chgSt, ovchgSt,
       session,
       gSt,
       photoDef

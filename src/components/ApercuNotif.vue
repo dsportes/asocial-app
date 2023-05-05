@@ -17,10 +17,11 @@
   </div>
 
   <q-dialog v-model="ouvert" full-height persistent>
+    <div class="bs">
     <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="close"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('alerte') + ' ' + $t('ANcible' + tC, [nomC])}}
           </q-toolbar-title>
@@ -39,7 +40,7 @@
           </div>
 
           <show-html class="q-mt-sm bord" :texte="ntf.texte" :idx="idx" maxh="5rem" 
-            :edit="ro===0" zoom @edit="txtedit=true"/>
+            :edit="ro===0" zoom @edit="ovtxtedit"/>
 
           <div class="q-mt-sm titre-md text-bold">
             <span v-if="ntf.niv<2">{{$t('ANlon' + ntf.niv)}}</span>
@@ -88,7 +89,7 @@
 
             <div class="row q-my-md q-gutter-lg">
               <q-btn flat color="primary" icon="close" dense size="md" 
-                :label="$t('renoncer')" @click="close"/>
+                :label="$t('renoncer')" @click="MD.fD"/>
               <q-btn flat color="primary" icon="undo" dense size="md" 
                 :disable="!chg" :label="$t('annuler')" @click="undo"/>
               <q-btn color="warning" icon="check" dense size="md" 
@@ -100,14 +101,15 @@
         </q-page>
       </q-page-container>
     </q-layout>
+    </div>
   </q-dialog>
 
   <!-- Dialogue d'édition du texte de l'alerte -->
   <q-dialog v-model="txtedit" persistent>
-    <q-card class="petitelargeur shadow-8">
+    <q-card class="bs petitelargeur">
       <q-toolbar class="bg-secondary text-white">
         <q-toolbar-title class="titre-lg full-width">{{$t('ANtxt')}}</q-toolbar-title>
-        <q-btn dense flat size="md" icon="close" @click="txtedit=false"/>
+        <q-btn dense flat size="md" icon="close" @click="MD.fD"/>
       </q-toolbar>
       <editeur-md class="height-10"
         :texte="ntf.texte || ''" editable modetxt :label-ok="$t('OK')" @ok="texteok"/>
@@ -124,7 +126,7 @@ import NotifIcon from './NotifIcon.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
-import { Notification, getNg } from '../app/modele.mjs'
+import { MD, Notification, getNg } from '../app/modele.mjs'
 import { afficherDiag, dhcool } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { SetNotifG, SetNotifT, SetNotifC } from '../app/operations.mjs'
@@ -172,8 +174,6 @@ export default {
   },
 
   data () { return {
-    txtedit: false,
-    ouvert: false,
     ro: 0, // raison d'être en affichage sans édition
     choix: 0, // procédure en cours
     jbl: 0,
@@ -233,7 +233,7 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
 
     edd (d) { return AMJ.editDeAmj(d, true) },
-    texteok (t) { this.ntf.texte = t; this.txtedit = false },
+    texteok (t) { this.ntf.texte = t; MD.fD() },
 
     undo () {
       this.ntf = this.ntfx ? this.ntfx.clone() : this.notif.clone()
@@ -251,7 +251,7 @@ export default {
       else await this.editerS()
       if (this.ro >= 0) {
         if (this.ro === 0) { this.ntfx = this.ntf.clone(); this.reset() }
-        this.ouvert = true
+        this.ovouvert()
       }
     },
 
@@ -343,8 +343,6 @@ export default {
       }
     },
 
-    close () { this.ouvert = false },
-
     async valider (suppr) {
       const ntf = suppr === true ? null : this.ntf
       switch (this.tC) {
@@ -361,7 +359,7 @@ export default {
           break
         }
       }
-      this.close()
+      MD.fD()
     }
   },
 
@@ -371,7 +369,14 @@ export default {
     const auj = AMJ.amjUtc()
     const ntf = ref(null)
     const ntfc = ref(null)
+
+    const ouvert = ref(false)
+    function ovouvert () { MD.oD(ouvert) }
+    const txtedit = ref(false)
+    function ovtxtedit () { MD.oD(txtedit) }
+
     return {
+      MD, ouvert, ovouvert, txtedit, ovtxtedit,
       session,
       aSt,
       auj,

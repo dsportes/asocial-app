@@ -1,11 +1,11 @@
 <template>
-<q-card class="petitelargeur shadow-8">
+<q-card class="bs petitelargeur">
   <q-toolbar class="bg-secondary text-white">
-    <q-toolbar-title class="titre-lg">{{titre}}</q-toolbar-title>
+    <q-btn class="q-mr-xs" size="md" dense color="warning" icon="close" @click="close"/>
+    <q-toolbar-title class="titre-lg text-center">{{titre}}</q-toolbar-title>
     <bouton-help page="page1" />
     <q-btn class="q-ml-xs" size="md" :disable="!modif" dense color="warning" icon="check" label="OK" @click="ok"/>
     <q-btn :disable="!modif" class="q-ml-xs" size="md" dense flat icon="undo" @click="undo"/>
-    <q-btn :disable="modif" class="q-ml-xs" size="md" dense flat icon="close" @click="close"/>
   </q-toolbar>
 
   <div class="q-pa-md row justify-start">
