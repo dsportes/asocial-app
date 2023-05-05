@@ -971,6 +971,7 @@ export default {
   NAe2: 'Caractères interdits',
   
   // Carte Visite
+  CVtit: 'Édition de la carte de visite',
   CVgph: 'Garder la photo initiale',
   CVcph: 'Changer la photo',
   CVfph: 'Choisir un fichier photo',

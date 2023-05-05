@@ -22,13 +22,13 @@
 
     <!-- Dialogue d'édition de la carte de visite -->
     <q-dialog v-model="edition" persistent>
-      <carte-visite :photo-init="photo" :info-init="info" :na="na"
-        :close="closeCV" @ok="cvok"/>
+      <carte-visite :photo-init="photo" :info-init="info" :na="na" @ok="cvok"/>
     </q-dialog>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import CarteVisite from './CarteVisite.vue'
@@ -58,7 +58,6 @@ export default {
 
   data () {
     return {
-      edition: false
     }
   },
 
@@ -66,7 +65,7 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async editerCV () { 
       if (!await this.session.edit()) return
-      this.edition = true
+      this.ovedition()
     },
     closeCV () { this.edition = false },
     async cvok (res) {
@@ -81,8 +80,11 @@ export default {
   },
 
   setup () {
+    const edition = ref(false)
+    function ovedition () { MD.oD(edition) }
+
     return {
-      MD,
+      MD, edition, ovedition,
       ui: stores.ui,
       session: stores.session
     }

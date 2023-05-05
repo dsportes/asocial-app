@@ -1,7 +1,7 @@
 <template>
 <q-page class="column align-start items-center">
 
-  <q-card class="q-mt-md petitelargeur fs-md column justify-center">
+  <q-card class="bs q-mt-md petitelargeur fs-md column justify-center">
     <div :class="'q-mt-sm q-pb-md q-gutter-md row justify-center full-width bord' + (!session.mode ? '1' : '2')">
       <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
       <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />

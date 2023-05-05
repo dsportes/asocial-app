@@ -24,10 +24,11 @@
 
     <!-- Dialogue d'édition du texte du chat -->
     <q-dialog v-model="chatedit" persistent>
-      <q-card class="moyennelargeur shadow-8">
+      <q-card class="bs moyennelargeur shadow-8">
         <q-toolbar class="bg-secondary text-white">
-          <q-toolbar-title class="titre-lg full-width">{{$t('CHtxt')}}</q-toolbar-title>
-          <q-btn dense flat size="md" icon="close" @click="chatedit=false"/>
+          <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg full-width text-right">
+            <span class="q-pr-sm">{{$t('CHtxt')}}</span></q-toolbar-title>
         </q-toolbar>
         <editeur-md style="height:70vh"
           :texte="chat.txt" editable modetxt :label-ok="$t('OK')" @ok="chatok"/>
@@ -46,7 +47,8 @@ import { dhcool, afficherDiag } from '../app/util.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import ApercuPeople from './ApercuPeople.vue'
 import { MajMotsclesChat, NouveauChat, MajChat } from '../app/operations.mjs'
-import { ID } from 'src/app/api.mjs'
+import { ID } from '../app/api.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuChat',
@@ -59,7 +61,6 @@ export default {
 
   data () { return {
     u0: new Uint8Array([]),
-    chatedit: false,
     dhcool: dhcool
   }},
 
@@ -74,7 +75,7 @@ export default {
       if (this.session.niv === 3 && !csp) {
         await afficherDiag(this.$t('CHbl'))
       }
-      this.chatedit = true
+      this.ovchatedit()
     },
 
     async chatok (txt) {
@@ -91,7 +92,7 @@ export default {
         this.chat = chat
         if (st === 2) await afficherDiag(this.$t('OPmajch2'))
       }
-      this.chatedit = false
+      MD.fD()
     },
 
     async changeMc (mc) {
@@ -140,7 +141,11 @@ export default {
       }
     )
 
+    const chatedit = ref(false)
+    function ovchatedit () { MD.oD(chatedit) }
+
     return {
+      MD, chatedit, ovchatedit,
       session,
       chat
     }

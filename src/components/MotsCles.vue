@@ -1,10 +1,10 @@
 <template>
-<q-card class="petitelargeur shadow-8">
+<q-card class="bs petitelargeur shadow-8">
   <q-toolbar class="bg-secondary text-white">
+    <q-btn class="q-mr-xs" dense size="md" color="warning"
+      icon="close" @click="cancelEdit"/>
     <q-btn v-if="!motscles.mc.st.enedition && !lecture" dense size="md" color="primary"
       icon="mode_edit" label="Editer" @click="startEdit"/>
-    <q-btn v-if="!motscles.mc.st.enedition && !lecture" class="q-ml-xs" dense size="md" color="warning"
-      icon="close" @click="cancelEdit"/>
     <q-btn v-if="motscles.mc.st.enedition && !lecture" dense size="md" color="primary"
       icon="add_circle" label="Nouveau" @click="ajoutermc"/>
     <q-btn v-if="motscles.mc.st.enedition && !lecture" dense class="q-ml-xs" size="md" color="primary"
@@ -12,7 +12,7 @@
     <q-btn v-if="motscles.mc.st.enedition && !lecture" :disable="!motscles.mc.st.modifie" dense class="q-ml-xs" size="md" color="warning"
       icon="check" label="Valider" @click="okEdit"/>
     <q-btn v-if="lecture" dense size="md" color="warning" icon="close" @click="cancelEdit"/>
-    <q-toolbar-title class="titre-md full-width">{{titre}}</q-toolbar-title>
+    <q-toolbar-title class="titre-md full-width text-right">{{titre}}</q-toolbar-title>
     <bouton-help page="page1"/>
   </q-toolbar>
 

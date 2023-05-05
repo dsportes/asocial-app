@@ -13,12 +13,12 @@
     <div v-else>
       <span class="titre-md text-italic">{{$t('FAnpc')}}</span>
       <q-btn v-if="edit && !avatar.na.estComptable" class="q-ml-sm" dense flat color="primary" size="sm"
-        :label="$t('FAdeclpc')" @click="editerpc"/>
+        :label="$t('FAdeclpc')" @click="oveditionpc"/>
     </div>
 
     <!-- Dialogue d'édition de la phrase de contact -->
     <q-dialog v-model="editionpc" persistent>
-      <q-card class="q-ma-xs moyennelargeur fs-md">
+      <q-card class="bs q-ma-xs moyennelargeur fs-md">
         <q-toolbar class="bg-secondary text-white">
           <bouton-help page="page1"/>
           <q-toolbar-title class="titre-lg q-pl-sm">{{$t('FAphc')}}</q-toolbar-title>
@@ -51,7 +51,7 @@ import { MajCv, GetAvatarPC, ChangementPC } from '../app/operations.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import { afficherDiag } from '../app/util.mjs'
-import { PhraseContact } from '../app/modele.mjs'
+import { MD, PhraseContact } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuAvatar',
@@ -65,7 +65,6 @@ export default {
 
   data () {
     return {
-      editionpc: false,
       pc: '',
       isPwd: false
     }
@@ -129,7 +128,11 @@ export default {
       }
     )
 
+    const editionpc = ref(false)
+    function oveditionpc () { MD.oD(editionpc)}
+
     return {
+      editionpc, oveditionpc,
       avatar,
       session: stores.session
     }

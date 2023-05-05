@@ -34,7 +34,7 @@
     <!-- Mots clés du groupe -->
     <div class="row items-center q-my-sm">
       <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
-      <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
+      <q-btn icon="open_in_new" size="sm" color="primary" @click="ovmcledit"/>
     </div>
 
     <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
@@ -47,16 +47,17 @@
 
     <!-- Dialogue d'édition des mots clés du groupe -->
     <q-dialog v-model="mcledit" persistent>
-      <mots-cles class="full-width" :duGroupe="eg.groupe.id" @ok="okmc" :titre="$t('AGmc')"
+      <mots-cles class="bs full-width" :duGroupe="eg.groupe.id" @ok="okmc" :titre="$t('AGmc')"
         :lecture="!eg.estAnim || !session.editable"/>
     </q-dialog>
 
     <!-- Gérer le mode simple / unanime -->
     <q-dialog v-model="editerUna" full-height persistent>
+      <div class="bs">
       <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
         <q-header elevated class="bg-secondary text-white">
           <q-toolbar>
-            <q-btn dense size="md" color="warning" icon="close" @click="closeU"/>
+            <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
             <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGuna', [eg.groupe.na.nom])}}</q-toolbar-title>
             <bouton-help page="page1"/>
           </q-toolbar>
@@ -84,7 +85,7 @@
             </div>
             <div v-if="!estAnim">
               <div class="titre-md text-center">{{$t('AGupasan')}}</div>
-              <q-btn class="q-ml-md" dense size="md" color="primary" :label="$t('jailu')" @click="closeU"/>
+              <q-btn class="q-ml-md" dense size="md" color="primary" :label="$t('jailu')" @click="MD.fD"/>
             </div>
             <div v-else class="text-center">
               <q-btn v-if="eg.groupe.msu" :label="$t('AGums')" dense size="md" 
@@ -92,21 +93,23 @@
               <q-btn v-else :label="$t('AGumu')" dense size="md" 
                 color="warning" @click="cfu = true"/>
               <div class="q-mt-md row justify-center q-gutter-md">
-                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="closeU"/>
+                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
                 <bouton-confirm :actif="cfu" :confirmer="chgU"/>
               </div>
             </div>
          </q-page>
         </q-page-container>
       </q-layout>
+      </div>
     </q-dialog>
 
     <!-- Gérer l'hébergement, changer les quotas -->
     <q-dialog v-model="changerQuotas" full-height persistent>
+      <div class="bs">
       <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
         <q-header elevated class="bg-secondary text-white">
           <q-toolbar>
-            <q-btn dense size="md" color="warning" icon="close" @click="closeQ"/>
+            <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
             <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGgerh', [eg.groupe.na.nom])}}</q-toolbar-title>
             <bouton-help page="page1"/>
           </q-toolbar>
@@ -144,7 +147,7 @@
               <div class="titre-md text-bold text-negative bg-yellow-3 text-center">{{$t('AGv1b')}}</div>
               <div class="titre-md text-bold text-negative bg-yellow-3 text-center">{{$t('AGv2b')}}</div>
               <div class="q-mt-md row justify-center q-gutter-md">
-                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="closeQ"/>
+                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
                 <bouton-confirm actif :confirmer="finHeb"/>
               </div>
             </div>
@@ -157,7 +160,7 @@
               <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar1 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp1', [rst1])}}</div>
               <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar2 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp2', [rst2])}}</div>
               <div class="row justify-center q-gutter-md">
-                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="closeQ"/>
+                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
                 <bouton-confirm v-if="!q.err && (al1 || al2)" actif :confirmer="chgQ"/>
                 <q-btn v-if="!q.err && !al1 && !al2" size="md" dense :label="$t('confirmer')" color="primary" @click="chgQ"/>
               </div>
@@ -165,11 +168,12 @@
           </q-page>
         </q-page-container>
       </q-layout>
+      </div>
     </q-dialog>
 
     <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
     <q-dialog v-model="nvctc" persistent>
-      <q-card class="bord1">
+      <q-card class="bs">
         <q-card-section class="column q-ma-xs q-pa-xs titre-md">
           <div>{{$t('PGplus1')}}</div>
           <div class="q-ml-md">{{$t('PGplus2')}}</div>
@@ -241,9 +245,6 @@ export default {
   },
 
   data () { return {
-    MD: MD,
-    editerUna: false,
-    changerQuotas: false,
     /* cas:
     1: l'avatar courant est hébergeur du groupe
     2: il y a un hébergeur (pas moi) et je suis animateur
@@ -264,7 +265,7 @@ export default {
     ar2: false,
     lstVotes: [],
     cfu: false, // Choix de changement de mode non confirmé
-    mcledit: false,
+
     naplus: null,
     egrplus: null
   }},
@@ -278,7 +279,7 @@ export default {
       if (!await this.session.edit()) return
       this.naplus = na
       this.egrplus = this.eg
-      MD.oD(nvctc)
+      this.ovnvctc()
     },
 
     pagectc () {
@@ -294,11 +295,9 @@ export default {
         await new MajCvGr().run(this.eg.groupe, res.ph, res.info)
       }
     },
-
-    async mcleditAut (res) { this.mcledit = true },
     
     async okmc (mmc) {
-      this.mcledit = false
+      MD.fD()
       if (mmc !== false) {
         await new MotsclesGroupe().run(mmc, this.eg.groupe.na)
       }
@@ -319,9 +318,8 @@ export default {
     async gererHeb () {
       this.step = 0
       this.cas = this.setCas()
-      this.changerQuotas = true
+      this.ovchangerQuotas()
     },
-    closeQ () { this.changerQuotas = false },
     gotocq () {
       this.step = 1
       const vx = this.eg.objv.vols
@@ -351,7 +349,7 @@ export default {
     async editUna () {
       if (!await this.session.edit()) return
       // this.gSt.test1(this.eg)
-      this.editerUna = true
+      this.ovediterUna()
       this.anims = this.gSt.animIds(this.eg)
       this.estAnim = this.anims.has(this.session.avatarId)
       this.lstVotes = []
@@ -366,26 +364,25 @@ export default {
         }
       }
     },
-    closeU () { this.editerUna = false },
 
     async finHeb () {
-      if (!await this.session.edit())  { this.closeQ(); return }
+      if (!await this.session.edit())  { MD.fD(); return }
       await new FinHebGroupe().run(this.eg.groupe.id)
-      this.closeQ()
+      MD.fD()
     },
 
     async chgQ () {
-      if (!await this.session.edit()) { this.closeQ(); return }
+      if (!await this.session.edit()) { MD.fD(); return }
       const t = this.cas === 1 ? 1 : (this.cas === 2 ? 3 : 2)
       const idd = t === 3 ? this.eg.groupe.idh : 0
       await new HebGroupe().run(t, this.eg.groupe.na, idd, this.q.q1, this.q.q2 )
-      this.closeQ()
+      MD.fD()
     },
 
     async chgU () {
-      if (!await this.session.edit())  { this.closeU(); return }
+      if (!await this.session.edit())  { MD.fD(); return }
       // TODO
-      this.closeU()
+      MD.fD()
     }
   },
 
@@ -397,10 +394,20 @@ export default {
 
     const photoDef = stores.config.iconGroupe
     const q = reactive({q1:0, q2:0, min1:0, min2:0, max1:0, max2:0, err:false })
+
+    const mcledit = ref(false)
+    function ovmcledit () { MD.oD(mcledit) }
+    const nvctc = ref(false)
+    function ovnvctc () { MD.oD(nvctc) }
+    const editerUna = ref(false)
+    function ovediterUna () { MD.oD(editerUna) }
+    const changerQuotas = ref(false)
+    function ovchangerQuotas () { MD.oD(changerQuotas) }
     return {
+      MD,
+      mcledit, ovmcledit, nvctc, ovnvctc, editerUna, ovediterUna, changerQuotas, ovchangerQuotas,
       session,
       ui,
-      nvctc: ref(false),
       photoDef,
       gSt,
       aSt,

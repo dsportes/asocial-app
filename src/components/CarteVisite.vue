@@ -1,9 +1,13 @@
 <template>
-  <q-card class="moyennelargeur">
+  <q-card class="bs moyennelargeur">
+    <q-toolbar class="bg-secondary text-white">
+      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CVtit')}}</q-toolbar-title>
+      <bouton-help page="page1"/>
+    </q-toolbar>
     <div class="marginauto q-pa-md">
       <span class='titre-lg'>{{na.nom}}</span>
       <span class='q-mx-md fs-md font-mono'>[{{na.id}}]</span>
-      <bouton-help page="page1"/>
     </div>
     <q-separator />
     <q-card-section class="row justify-start">
@@ -64,6 +68,7 @@ import EditeurMd from './EditeurMd.vue'
 import { readFile } from '../app/util.mjs'
 import Webcam from 'webcam-easy'
 import { Cropper } from 'vue-advanced-cropper'
+import { MD } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 
 const TPH = { height: 32, width: 32 }
@@ -74,8 +79,7 @@ export default ({
   props: {
     photoInit: String,
     infoInit: String,
-    na: Object,
-    close: Function
+    na: Object
   },
 
   components: {
@@ -103,6 +107,7 @@ export default ({
 
   data () {
     return {
+      MD,
       fileList: null,
       file: { b64: '' },
       cam: null,
@@ -116,11 +121,11 @@ export default ({
       this.undoph()
       this.md.undo()
       this.$emit('ok', false)
-      if (this.close) this.close()
+      MD.fD()
     },
     valider () {
       this.$emit('ok', !this.modif ? false : this.resultat)
-      if (this.close) this.close()
+      MD.fD()
     },
     undoph () {
       this.enedition = false

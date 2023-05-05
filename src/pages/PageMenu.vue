@@ -31,7 +31,7 @@
     </q-item-section>
   </q-item>
   <q-separator color="orange"/>
-  <q-item clickable @click="MD('detailsavatar')" clas="row items-center">
+  <q-item clickable @click="MD.oD('detailsavatar')" clas="row items-center">
     <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACav')}}</span>
     <q-btn class="q-ml-md text-bold" dense :label="aSt.avC.na.nomc" no-caps
       icon-right="open_in_new" @click="MD.oD('detailsavatar')"/>

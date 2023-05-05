@@ -178,7 +178,7 @@
   </q-dialog>
 
   <q-dialog v-model="dialoguedrc" persistent>
-    <q-card  class="q-ma-xs petitelargeur">
+    <q-card class="bs q-ma-xs petitelargeur">
       <q-card-section>
         <div class="titre-lg">{{$t('MLAdrc')}}</div>
       </q-card-section>
@@ -194,7 +194,7 @@
   </q-dialog>
 
   <q-dialog v-model="dialogueerreur" persistent>
-    <dialogue-erreur/>
+    <dialogue-erreur class="bs"/>
   </q-dialog>
 
   <q-dialog v-model="dialoguehelp" full-height position="left" persistent>
@@ -202,22 +202,22 @@
   </q-dialog>
 
   <q-dialog v-model="outilsTests" full-height persistent>
-    <outils-tests/>
+    <outils-tests class="bs"/>
   </q-dialog>
 
   <q-dialog v-model="detailspeople" full-height persistent>
-    <panel-people :id="session.peopleId"/>
+    <panel-people class="bs" :id="session.peopleId"/>
   </q-dialog>
 
   <q-dialog v-model="detailsmembre" full-height persistent>
-    <panel-membre/>
+    <panel-membre class="bs"/>
   </q-dialog>
 
   <q-dialog v-model="detailsavatar" full-height persistent>
-    <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
+    <q-layout container view="hHh lpR fFf" :class="'bs ' + dkli(0)" style="width:80vw">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fd"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [aSt.avC.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -232,7 +232,7 @@
 
   <q-dialog v-model="opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
-    <div class="q-mt-sm column items-center">
+    <div class="bs q-mt-sm column items-center">
       <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
         <div v-if="session.opSpinner >= 2" 
           class="spinlargeur height-4 row items-center justify-between no-wrap text-black bg-amber-2 q-pa-sm"
@@ -252,7 +252,7 @@
   </q-dialog>
 
   <q-dialog v-model="confirmstopop">
-    <q-card>
+    <q-card class="bs">
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('MLAcf', [session.opEncours ? session.opEncours.nom : '???'])}}</q-card-section>
       <q-card-actions align="right">
@@ -490,4 +490,5 @@ un élément qui apparaît quand le drawer est caché*/
   padding: 2px
 .q-tab
   min-height: 0 !important
+
 </style>
