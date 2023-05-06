@@ -3,7 +3,7 @@
     <div class="row q-mx-lg justify-center fs-md">
 
       <!-- Déconnexion -->
-      <div class="btn2" @click="ui.dialoguedrc = true">
+      <div class="btn2" @click="MD.oD('dialoguedrc')">
         <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" />
         <span class="q-ml-sm">{{$t('MLAdrc2')}}</span>
       </div>

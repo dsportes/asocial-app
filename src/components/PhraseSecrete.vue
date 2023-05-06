@@ -1,5 +1,5 @@
 <template>
-  <q-card-section class="shadow-8 fs-md">
+  <q-card-section class="fs-md">
     <q-checkbox v-model="vkb" color="primary" style="position:relative;left:-8px"/>
     <span class="cprim fs-lg">{{$t('PSkb')}}</span>
     <div class="titre-lg">{{$t('PSm'+phase)}}</div>

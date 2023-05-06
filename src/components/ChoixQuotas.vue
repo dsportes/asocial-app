@@ -1,5 +1,5 @@
 <template>
-  <q-card-section :class="'q-mx-sm q-pt-none shadow-8 fs-md bord' + (mv.err ? 'ko' : 'ok')">
+  <q-card-section :class="'q-mx-sm q-pt-none fs-md bord' + (mv.err ? 'ko' : 'ok')">
     <div class="row  items-center">
       <div class="col-5 titre-md">{{$t('CQt1', [ed1(mv.q1)])}}</div>
       <q-select class="col-2" v-model="q1s" :options="options" :disable="lecture" dense options-dense/>

@@ -1,5 +1,5 @@
 <template>
-  <q-card class="shadow-8 q-pa-sm">
+  <q-card class="q-pa-sm">
 
     <div class="q-mt-sm titre-lg text-bold">
       <span v-if="niv<2">{{$t('ANlon' + niv)}}</span>

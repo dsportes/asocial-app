@@ -178,10 +178,11 @@
   </q-dialog>
 
   <q-dialog v-model="dialoguedrc" persistent>
-    <q-card class="bs q-ma-xs petitelargeur">
-      <q-card-section>
-        <div class="titre-lg">{{$t('MLAdrc')}}</div>
-      </q-card-section>
+    <q-card class="bs petitelargeur">
+      <q-toolbar class="bg-secondary text-white">
+        <q-toolbar-title class="titre-lg full-width text-center">{{$t('MLAdrc')}}</q-toolbar-title>
+        <bouton-help page="page1"/>
+      </q-toolbar>
       <q-card-actions vertical align="center">
         <q-btn class="w15" dense size="md" color="warning"
           icon="logout" :label="$t('MLAdecon')" @click="deconnexion"/>

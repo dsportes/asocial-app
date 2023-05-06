@@ -24,13 +24,14 @@
 
     <!-- Dialogue d'édition du texte du chat -->
     <q-dialog v-model="chatedit" persistent>
-      <q-card class="bs moyennelargeur shadow-8">
+      <q-card class="bs moyennelargeur">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CHtxt')}}</q-toolbar-title>
+          <bouton-help page="page1"/>
         </q-toolbar>
         <editeur-md style="height:70vh"
-          :texte="chat.txt" editable modetxt :label-ok="$t('OK')" @ok="chatok"/>
+          :texte="chat ? chat.txt : ''" editable modetxt :label-ok="$t('OK')" @ok="chatok"/>
       </q-card>
     </q-dialog>
   </q-card>
@@ -45,6 +46,7 @@ import EditeurMd from './EditeurMd.vue'
 import { dhcool, afficherDiag } from '../app/util.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import ApercuPeople from './ApercuPeople.vue'
+import BoutonHelp from './BoutonHelp.vue'
 import { MajMotsclesChat, NouveauChat, MajChat } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
 import { MD } from '../app/modele.mjs'
@@ -54,7 +56,7 @@ export default {
 
   props: { naI: Object, naE: Object, ids: Number, idx: Number, mapmc: Object, affnai: Boolean },
 
-  components: { ShowHtml, EditeurMd, ApercuMotscles, ApercuPeople },
+  components: { BoutonHelp, ShowHtml, EditeurMd, ApercuMotscles, ApercuPeople },
 
   computed: { },
 

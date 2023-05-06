@@ -193,7 +193,7 @@ export default {
       MD.fD()
     },
     async changeMc (mc) {
-      // TODO
+      // TODO changer les mots clés d'un membre
       console.log(mc)
     }
   },

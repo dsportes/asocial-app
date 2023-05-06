@@ -1,5 +1,5 @@
 <template>
-  <q-card-section class="q-pt-none shadow-8 fs-md">
+  <q-card-section class="q-pt-none fs-md">
     <div class="titre-lg">{{$t('NAph' + phase)}}</div>
     <div v-if="verif">
       <div class="text-warning">{{$t('NAw1')}}</div>

@@ -381,7 +381,7 @@ export default {
 
     async chgU () {
       if (!await this.session.edit())  { MD.fD(); return }
-      // TODO
+      // TODO Gérer le mode simple / unanime
       MD.fD()
     }
   },
