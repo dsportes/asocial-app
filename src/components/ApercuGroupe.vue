@@ -37,6 +37,10 @@
       <q-btn icon="open_in_new" size="sm" color="primary" @click="ovmcledit"/>
     </div>
 
+    <div v-if="eg.groupe.nbInvits !== 0" class="fs-md text-bold text-warning">
+      {{$t('AGinvits', [eg.groupe.nbInvits])}}
+    </div>
+
     <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
       <q-separator color="orange"/>
       <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>

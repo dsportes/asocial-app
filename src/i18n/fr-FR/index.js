@@ -581,6 +581,7 @@ export default {
   FImcn: 'Mais N\'ayant PAS les mots clés ...',
   FIjours: 'Modifiés dans les N jours',
   FIavecbl: 'Tribus en cours de blocage',
+  FIinvits: 'Groupes ayant des invitations en cours',
   FIavecsp: 'Comptes "sponsor" seulement',
   FIavecgr: 'Membre d\'un groupe',
   FInotif: 'Ayant une notification ... {0}',
@@ -823,6 +824,7 @@ export default {
   PGv2a0: 'Quotas V2 déjà attribués : [{0}] soit {1}',
 
   // Aperçu groupe
+  AGinvits: '{0} invitations en cours ou à confirmer par les animateurs',
   AGheb: 'Hébergeur du groupe.',
   AGnheb: 'N\'est PLUS hébergé. Disparition du groupe {0}',
   AGfond: 'Fondateur.',

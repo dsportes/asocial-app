@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { encode } from '@msgpack/msgpack'
-import { egaliteU8 } from '../app/util.mjs'
+import { egaliteU8, difference, intersection } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 
 /* Store maître des groupes du compte courant :
@@ -146,7 +146,7 @@ export const useGroupeStore = defineStore('groupe', {
         if (f.infmb) {
           let tr = false
           for(const [,mb] of e.mbacs) {
-            if (mb.info && m.info.contains(f.infmb)) { tr = true; break }
+            if (mb.info && mb.info.indexOf(f.infmb) !== -1) { tr = true; break }
           }
           if (!tr) continue
         }
@@ -160,6 +160,7 @@ export const useGroupeStore = defineStore('groupe', {
           }
           if (!tr) continue
         }
+        if (f.invits && g.nbInvits === 0) continue
         r.push(e)
       }
       stores.filtre.stats.groupes = stt

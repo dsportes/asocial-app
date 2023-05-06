@@ -1279,6 +1279,10 @@ export class Groupe extends GenDoc {
   get pc1 () { return Math.round(this.vols.v1 / UNITEV1 / this.vols.q1) }
   get pc2 () { return Math.round(this.vols.v2 / UNITEV2 / this.vols.q2) }
   get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconGroupe }
+  get nbInvits () { let n = 0
+    this.ast.forEach(x => { if (x >= 60 && x <= 73) n++ })
+    return n
+  }
 
   async compile (row) {
     this.vsh = row.vsh || 0
@@ -1356,8 +1360,9 @@ export class Groupe extends GenDoc {
 - `dfa` : date de fin d'activité (jour de la dernière suspension)
 - `inv` : validation de la dernière invitation:
   - `null` : le membre n'a pas été invité où le mode d'invitation du groupe était _simple_ au moment de l'invitation.
-  - `[ids]` : liste des indices des animateurs ayant validé la dernière invitation.
-- `mc` : mots clés du membre à propos du groupe.
+  - `{ t, l : [ids]}` : texte du chat d'invitation (crypté par la clé du groupe)
+    et liste des indices des animateurs ayant validé l'invitation.
+  - `mc` : mots clés du membre à propos du groupe.
 - `infok` : commentaire du membre à propos du groupe crypté par la clé K du membre.
 - `datag` : données, immuables, cryptées par la clé du groupe :
   - `nom` `rnd` : nom complet de l'avatar.
@@ -1379,7 +1384,7 @@ export class Membre extends GenDoc {
     this.dda = row.dda || 0
     this.dfa = row.dfa || 0
     this.inv = row.inv || null
-    this.mc = row.mc || new Uint8Array([])
+    this.mc = row.mc && row.mc.length > 0 ? decode(row.mc) : new Uint8Array([])
     const data = decode(await decrypter(this.cleg, row.datag))
     this.na = NomGenerique.from([data.nom, data.rnd])
     this.ni = data.ni

@@ -1160,7 +1160,7 @@ export class MajMCMembre extends OperationUI {
       const args = { token: session.authToken, 
         id,
         ids,
-        mc: mc
+        mc: new Uint8Array(encode(mc))
       }
       this.tr(await post(this, 'MajMCMembre', args))
       this.finOK()
