@@ -430,6 +430,8 @@ export default {
   OPnvgr: 'Créer un nouveau groupe',
   OPcsp: 'Créer un nouveau sponsoring',
   OPnvmb: 'Nouveau membre d\'un groupe',
+  OPinfmb: 'Mise à jour de l\'information d\'un membre sur le groupe',
+  OPmcmb: 'Mise à jour des mots clés d\'un membre sur le groupe',
 
   OPnvch: 'Créer un nouveau "chat"',
   OPmajch: 'Mettre à jour un "chat"',
@@ -568,8 +570,10 @@ export default {
   MLArech: 'Recherche ...',
 
   FInom: 'Début du nom du contact',
+  FIngr: 'Début du nom du groupe',
   FInomt: 'Début du nom de la tribu',
   FInomc: 'Début du nom du compte',
+  FIinfmb: 'Texte dans les commentaires ds membres',
   FItxt: 'Texte cherché dans les chats',
   FItxtt: 'Texte cherché dans les commentaires',
   FItxtn: 'Texte cherché dans les notifications',
@@ -581,6 +585,8 @@ export default {
   FIavecgr: 'Membre d\'un groupe',
   FInotif: 'Ayant une notification ... {0}',
   FItribu: 'De ma tribu ... {0}',
+  FIsansheb: 'Groupes sans hébergement',
+  FIexcesvol: 'Groupes en excédent de volume',
   FItri: 'Tier par ...',
   TRItribus0: '(non trié)',
   TRItribus1: 'Volume V1 attribué',

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { encode } from '@msgpack/msgpack'
 import { egaliteU8 } from '../app/util.mjs'
-// import { ID } from '../app/api.mjs'
+import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 
 /* Store maître des groupes du compte courant :
 - map : des groupes dont un des avatars du compte courant est membre
@@ -129,6 +129,8 @@ export const useGroupeStore = defineStore('groupe', {
         return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) 
       }
       const f = stores.filtre.filtre.groupes
+      f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
+      f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const stt = { v1: 0, v2: 0, q1: 0, q2: 0 }
       const r = []
       for (const [, e] of state.pgLg) {
@@ -137,7 +139,27 @@ export const useGroupeStore = defineStore('groupe', {
         stt.v2 += v.v2 || 0
         stt.q1 += v.q1 || 0
         stt.q2 += v.q2 || 0
-        // TODO filtre des groupes
+        const g = e.groupe
+        if (f.ngr && !g.na.nom.startsWith(f.ngr)) continue
+        if (f.sansheb && g.dfh === 0) continue
+        if (f.excedent && ((v.q1 * UNITEV1) > v.v1) && ((v.q2 * UNITEV2) > v.v2 )) continue
+        if (f.infmb) {
+          let tr = false
+          for(const [,mb] of e.mbacs) {
+            if (mb.info && m.info.contains(f.infmb)) { tr = true; break }
+          }
+          if (!tr) continue
+        }
+        if (f.mcp || f.mcn) {
+          let tr = false
+          for(const [,mb] of e.mbacs) {
+            const s = mb.mc && mb.mc.length ? new Set(mb.mc) : new Set()
+            if (f.setp.size && difference(f.setp, s).size) continue
+            if (f.setn.size && intersection(f.setn, s).size) continue
+            tr = true       
+          }
+          if (!tr) continue
+        }
         r.push(e)
       }
       stores.filtre.stats.groupes = stt

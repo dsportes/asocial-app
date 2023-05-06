@@ -8,28 +8,22 @@ export class FsSyncSession {
 
   close () { } // PAS ASYNC !!! Déconnexion n'est async
 
+  // TODO
   /*
-  Mettre un row reçu à triter : SyncQueue.push(row)
+  Mettre un row reçu à traiter : SyncQueue.push(row)
   */
   async setCompte (id) {
-    // TODO - s'abonner à la compta
   }
   async setTribu (id) {
-    // TODO - s'abonner à la tribu
   }
   async setGroupe (id) {
-    // TODO - s'abonner au groupe
   }
   async setAvatar (id) {
-    // TODO - s'abonner à l'avatar
   }
   async unsetTribu (id) {
-    // TODO - s'abonner à la tribu
   }
   async unsetGroupe (id) {
-    // TODO - s'abonner au groupe
   }
   async unsetAvatar (id) {
-    // TODO - s'abonner au groupe
   }
 }

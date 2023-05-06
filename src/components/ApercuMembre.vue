@@ -126,6 +126,7 @@ import ShowHtml from './ShowHtml.vue'
 import EditeurMd from './EditeurMd.vue'
 import ApercuMotscles from './ApercuMotscles.vue'
 import { MD } from '../app/modele.mjs'
+import { MajMCMembre, MajInfoMembre } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuMembre',
@@ -188,13 +189,12 @@ export default {
       if (await this.session.edit()) this.ovinfoedit()
     },
     async infook (info) {
-      // TODO enregistrer le texte de commentaires
-      console.log(info)
+      await new MajInfoMembre().run(this.mb.id, this.mb.ids, info)
       MD.fD()
     },
     async changeMc (mc) {
-      // TODO changer les mots clés d'un membre
-      console.log(mc)
+      await new MajMCMembre().run(this.mb.id, this.mb.ids, mc)
+      MD.fD()
     }
   },
 

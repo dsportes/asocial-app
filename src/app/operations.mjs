@@ -1117,3 +1117,55 @@ export class NouveauMembre extends OperationUI {
     }
   }
 }
+
+/* Maj du commentaire d'un membre *******************************************
+args.token donne les éléments d'authentification du compte.
+args.id : id du groupe
+args.ids : ids du groupe
+args.infok
+Retour:
+*/
+export class MajInfoMembre extends OperationUI {
+  constructor () { super($t('OPinfmb')) }
+
+  async run (id, ids, info) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, 
+        id,
+        ids,
+        infok: await crypter(session.clek, info)
+      }
+      this.tr(await post(this, 'MajInfoMembre', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Maj des mots clés d'un membre *******************************************
+args.token donne les éléments d'authentification du compte.
+args.id : id du groupe
+args.ids : ids du groupe
+args.mc
+Retour:
+*/
+export class MajMCMembre extends OperationUI {
+  constructor () { super($t('OPmcmb')) }
+
+  async run (id, ids, mc) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, 
+        id,
+        ids,
+        mc: mc
+      }
+      this.tr(await post(this, 'MajMCMembre', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

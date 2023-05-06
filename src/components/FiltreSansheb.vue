@@ -1,14 +1,6 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli">
-    <q-input dense counter v-model="val"
-      :label="$t('FI' + prop)"
-      @keydown.enter.prevent="ok" type="text" :hint="$t('entree')">
-      <template v-slot:append>
-        <span :class="val.length === 0 ? 'disabled' : ''">
-          <q-icon name="cancel" class="cursor-pointer"  @click="val=''"/>
-        </span>
-      </template>
-    </q-input>
+    <q-checkbox v-model="val" class="cb" :label="$t('FIsansheb')" />
   </div>
 </template>
 
@@ -17,17 +9,18 @@ import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
 
 export default ({
-  name: 'FiltreNom',
+  name: 'FiltreSansheb',
 
-  props: { nom: String, prop: String, idx: Number },
+  props: { nom: String, idx: Number },
 
   data () {
-    return { }
+    return { 
+    }
   },
 
-  methods: {
-    ok () {
-      this.st.setFiltre(this.nom, this.prop, this.val)
+  watch: {
+    val (ap) {
+      this.st.setFiltre(this.nom, 'sansheb', ap === true ? true : false)
     }
   },
 
@@ -39,9 +32,8 @@ export default ({
     const st = stores.filtre
     const val = ref('')
     const nom = toRef(props, 'nom')
-    const prop = toRef(props, 'prop')
     const x = st.filtre[nom.value]
-    val.value = x && x[prop.value] ? x[prop.value] : ''
+    val.value = x && x.avecbl ? x.avecbl : false
     return {
       st,
       val
@@ -52,4 +44,7 @@ export default ({
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.cb
+  position: relative
+  left: -10px
 </style>
