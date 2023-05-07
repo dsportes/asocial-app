@@ -219,14 +219,17 @@ export const useSessionStore = defineStore('session', {
       ntfx(et2.notif)
     },
 
+    editDiag (avionSeulement) {
+      if (this.mode === 3) return $t('editavion')
+      if (avionSeulement) return ''
+      if (this.niv >= 2) return $t('editlecture')
+      return ''
+    },
+
     async edit (avionSeulement) {
-      if (this.mode === 3) {
-        await afficherDiag($t('editavion'))
-        return false
-      }
-      if (avionSeulement) return true
-      if (this.niv >= 2) {
-        await afficherDiag($t('editlecture'))
+      const d = this.editDiag(avionSeulement)
+      if (d) {
+        await afficherDiag(d)
         return false
       }
       return true

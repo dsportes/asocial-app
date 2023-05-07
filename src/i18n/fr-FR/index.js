@@ -90,6 +90,15 @@ export default {
   action3: 'Résilier son accès au groupe',
   action3b: 'Résilier son accès au groupe "ET" l\'oublier',
 
+  actionm1: 'M\'oublier définitivement',
+  actionm2: 'Accepter l\'invitation',
+  actionm3: 'Refuser l\'invitation',
+  actionm4: 'Refuser l\'invitation "ET" m\'oublier définitivement',
+  actionm5: 'M\'auto-résilier du groupe',
+  actionm6: 'M\'auto-résilier du groupe "ET" m\'oublier définitivement',
+  actionm7: 'Dégrader mon statut à "auteur"',
+  actionm8: 'Dégrader mon statut à "lecteur"',
+
   action22: 'Changer son invitation en "animateur"',
   action22b: 'Confirmer son invitation en "animateur"',
   action21: 'Changer son invitation en "auteur"',
@@ -105,7 +114,6 @@ export default {
   action52: 'L\'inviter en tant que "animateur"',
   action51: 'L\'inviter en tant que "auteur"',
   action50: 'L\'inviter en tant que "lecteur"',
-
 
   roletribu0: '(ignorer)',
   roletribu1: 'Compte de ma tribu',
@@ -809,6 +817,7 @@ export default {
   AMct2: 'Inscrit comme "contact" par #{0} (oublié ou disparu).',
   AMinfo: 'Commentaires à propos du groupe',
   AMstde: 'Statut de {0} dans {1}',
+  AMstda: 'Mon statut [{0}] dans {1}',
   AMcfa1: 'Confirmations des animateurs :',
   AMcfa2: 'Faites',
   AMcfa3: 'En attente',
