@@ -1360,9 +1360,8 @@ export class Groupe extends GenDoc {
 - `dfa` : date de fin d'activité (jour de la dernière suspension)
 - `inv` : validation de la dernière invitation:
   - `null` : le membre n'a pas été invité où le mode d'invitation du groupe était _simple_ au moment de l'invitation.
-  - `{ t, l : [ids]}` : texte du chat d'invitation (crypté par la clé du groupe)
-    et liste des indices des animateurs ayant validé l'invitation.
-  - `mc` : mots clés du membre à propos du groupe.
+  - `[ids]` : liste des indices des animateurs ayant validé l'invitation.
+- `mc` : mots clés du membre à propos du groupe.
 - `infok` : commentaire du membre à propos du groupe crypté par la clé K du membre.
 - `datag` : données, immuables, cryptées par la clé du groupe :
   - `nom` `rnd` : nom complet de l'avatar.

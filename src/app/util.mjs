@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AMJ } from './api.mjs'
+import { MD } from './modele.mjs'
 
 let pako
 
@@ -328,29 +329,12 @@ export function SidToId (s) {
   return u8ToInt(b64ToU8(s, true))
 }
 
-export async function afficherDiag (diag, ok, cancel) {
-  const $q = stores.config.$q
+export async function afficherDiag (diag) {
+  const ui = stores.ui
   return new Promise((resolve) => {
-    if (!cancel) {
-      $q.dialog({
-        dark: true,
-        html: true,
-        title: $t('UTIatt'),
-        message: diag,
-        ok: { color: 'primary', label: $t(ok || 'jailu') }
-      }).onOk(() => { resolve() })
-    } else {
-      $q.dialog({
-        dark: true,
-        html: true,
-        title: $t('UTIatt'),
-        message: diag,
-        ok: { color: 'primary', label: $t(ok) },
-        cancel: { color: 'warning', label: $t(cancel) },
-      })
-      .onOk(() => { resolve(true) })
-      .onCancel(() => { resolve(false) })
-    }
+    ui.diag = diag
+    ui.diagresolve = resolve
+    MD.oD('diag')
   })
 }
 

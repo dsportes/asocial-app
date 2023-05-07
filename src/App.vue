@@ -191,6 +191,16 @@
     </div>
   </q-dialog>
 
+  <q-dialog v-model="diag" persistent>
+    <q-card class="bs petitelargeur q-pa-sm">
+      <div class="text-center titre-lg q-my-sm">{{$t('UTIatt')}}</div>
+      <div class="fs-md text-center q-b-md" v-html="ui.diag"></div>
+      <q-btn flat dense color="primary" size="md" :label="$t('jailu')"
+          @click="MD.fD();ui.diagresolve()"/>
+    </q-card>
+  </q-dialog>
+
+
   <q-dialog v-model="dialoguedrc" persistent>
     <q-card class="bs petitelargeur">
       <q-toolbar class="bg-secondary text-white">
@@ -444,6 +454,7 @@ export default {
       config,
       ui,
       hms,
+      diag: MD.declare('diag', ref(false)),
       dialoguedrc: MD.declare('dialoguedrc', ref(false)),
       dialoguehelp: MD.declare('dialoguehelp', ref(false)),
       dialogueerreur: MD.declare('dialogueerreur', ref(false)),

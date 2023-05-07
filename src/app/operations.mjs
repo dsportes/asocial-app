@@ -1165,3 +1165,42 @@ export class MajMCMembre extends OperationUI {
     }
   }
 }
+
+/* Changement de statut d'un membre d'un groupe
+*/
+export class StatutMembre extends OperationUI {
+  constructor () { super($t('OPstmb')) }
+
+  /* 
+  gr: groupe
+  mb: membre
+  fst: futur statut
+  */
+  async run (gr, mb, fst) {
+    try {
+      const session = stores.session
+      let egrc = null // élément de lgrk dans l'avatar ida invité crypté par sa RSA
+      let fn = 0 // fonction à accomplir
+      // TODO
+      if (fn == 1) { // invitation
+        const pubE = await aSt.getPub(mb.na.id)
+        const x = [gr.na.nom, gr.na.rnd, mb.ids]
+        const ccPE = await crypterRSA(pubE, new Uint8Array(encode(x)))
+      }
+
+      const args = { token: session.authToken, 
+        id: gr.id, 
+        ids: mb.ids,
+        ida: mb.na.id,
+        ni: mb.ni,
+        egrc,
+        fn
+      }
+      // this.tr(await post(this, 'StatutMembre', args))
+      console.log('fst=' + fst)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

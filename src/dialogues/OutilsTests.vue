@@ -1,6 +1,6 @@
 <template>
-<div class="bs">
-<q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
+<div class="bs" style="width:80vw">
+<q-layout container view="hHh lpR fFf" :class="sty">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
@@ -19,9 +19,10 @@
   <q-page-container>
     <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.build])}}</div>
 
-    <q-card-section v-if="tab === 'tst'">
+    <q-card-section v-if="tab === 'tst'" class="column items-center">
       <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt1')" @click="testEcho"/>
       <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt2')" @click="testErr"/>
+      <!--q-btn class="q-ma-xs" color="primary" dense label="Diag" @click="testDiag"/-->
     </q-card-section>
 
     <q-card-section v-if="tab === 'tst'">
@@ -171,6 +172,11 @@ export default ({
   },
 
   methods: {
+    async testDiag() {
+      await afficherDiag('toto est très beau')
+      console.log('jailu')
+    },
+    
     ouvCpt () {
       this.getBases()
       this.tab='cpt'

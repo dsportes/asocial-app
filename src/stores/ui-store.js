@@ -14,7 +14,8 @@ export const useUiStore = defineStore('ui', {
     pagesB: new Set(['tribus', 'groupes', 'groupesac']),
     menu: false,
 
-    // filtre: false,
+    diag: '',
+    diagresolve: null,
 
     etroite: false,
     seuillarge: 800,

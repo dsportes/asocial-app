@@ -111,9 +111,9 @@ export default {
   action42: 'Le ré-inviter en tant que "animateur"',
   action41: 'Le ré-inviter en tant que "auteur"',
   action40: 'Le ré-inviter en tant que "lecteur"',
-  action52: 'L\'inviter en tant que "animateur"',
-  action51: 'L\'inviter en tant que "auteur"',
-  action50: 'L\'inviter en tant que "lecteur"',
+  action62: 'L\'inviter en tant que "animateur"',
+  action61: 'L\'inviter en tant que "auteur"',
+  action60: 'L\'inviter en tant que "lecteur"',
 
   roletribu0: '(ignorer)',
   roletribu1: 'Compte de ma tribu',
@@ -448,7 +448,8 @@ export default {
   OPnvmb: 'Nouveau membre d\'un groupe',
   OPinfmb: 'Mise à jour de l\'information d\'un membre sur le groupe',
   OPmcmb: 'Mise à jour des mots clés d\'un membre sur le groupe',
-
+  OPstmb: 'Changement de statut d\'un membre d\'un groupe',
+  
   OPnvch: 'Créer un nouveau "chat"',
   OPmajch: 'Mettre à jour un "chat"',
   OPmajtch: 'Mise à jour du texte d\'un chat',
@@ -829,6 +830,7 @@ export default {
   AMfond: 'Fondateur.',
   AMpasanst1: 'Vous n\'êtes pas animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre',
   AMpasanst2: 'Même en tant qu\'animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre lui-même animateur',
+  AMestheb: 'Vous êtes hébergeur du groupe, vous ne pouvez pas vous auto-résilier ou renoncer de vous-même à votre statut d\'animateur',
 
   // Quotas Vols
   PGq1: 'Quota de volume V1 (textes des secrets): [{0}] soit {1}',
