@@ -122,6 +122,25 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
+    /* NA des animateurs du groupe courant ayant voté pour inviter le membre courant */
+    animInv: (state) => {
+      const lc = []
+      const la = []
+      const session = stores.session
+      const e = state.map.get(session.groupeId)
+      if (!e) return
+      const m = e.membres.get(session.membreId)
+      const g = e.groupe
+      if (!m) return
+      const inv = m.inv || { t: '', l:[] }
+      for(let im = 1; im < g.ast.length; im++) {
+        if (g.ast[im] !== 32) continue
+        const a = e.membres.get(im)
+        if (inv.l.indexOf(im) === -1) la.push(a.na); else lc.push(a.na)
+      }
+      return [lc, la]
+    },
+
     // PageGroupes ***************************************************
     pgLgFT: (state) => {
       function f0 (x, y) {

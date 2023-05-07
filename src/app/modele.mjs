@@ -1384,7 +1384,7 @@ export class Membre extends GenDoc {
     this.dda = row.dda || 0
     this.dfa = row.dfa || 0
     this.inv = row.inv || null
-    this.mc = row.mc && row.mc.length > 0 ? decode(row.mc) : new Uint8Array([])
+    this.mc = row.mc || new Uint8Array([])
     const data = decode(await decrypter(this.cleg, row.datag))
     this.na = NomGenerique.from([data.nom, data.rnd])
     this.ni = data.ni

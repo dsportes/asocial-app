@@ -1157,11 +1157,7 @@ export class MajMCMembre extends OperationUI {
   async run (id, ids, mc) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, 
-        id,
-        ids,
-        mc: new Uint8Array(encode(mc))
-      }
+      const args = { token: session.authToken, id, ids, mc }
       this.tr(await post(this, 'MajMCMembre', args))
       this.finOK()
     } catch (e) {
