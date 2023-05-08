@@ -1262,10 +1262,11 @@ _data_:
 - `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
 - `ast` : array des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
   - 10: contact, 
-  - 20,21,22: invité en tant que lecteur / auteur / animateur, 
   - 30,31,32: **actif** (invitation acceptée) en tant que lecteur / auteur / animateur, 
   - 40: invitation refusée,
-  - 50: résilié / suspendu, 
+  - 50: résilié / suspendu,
+  - 60,61,62: invité en tant que lecteur / auteur / animateur, 
+  - 70,71,72: en cours d'invitation (pas confimée) en tant que lecteur / auteur / animateur, 
   - 0: disparu / oublié.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`. 
