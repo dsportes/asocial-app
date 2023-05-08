@@ -1167,6 +1167,24 @@ export class MajMCMembre extends OperationUI {
 }
 
 /* Changement de statut d'un membre d'un groupe
+args.token donne les éléments d'authentification du compte.
+args.id: id du groupe 
+args.ids: ids du membre cible
+args.ida: id de l'avatar du membre cible
+args.ima: ids (imdice membre) du demandeur de l'opération
+args.ni: numéro d'invitation du membre dans le groupe
+args.egr: élément du groupe dans lgrk de l'avatar invité 
+  (invitations seulement). Crypté par la clé RSA publique de l'avatar
+args.laa: 0:lecteur, 1:auteur, 2:animateur
+args.fn: fonction à appliquer
+  1 - invitation
+  2 - modification d'invitation
+  3 - acceptation d'invitation
+  4 - refus d'invitation
+  5 - modification du rôle laa (actif)
+  6 - résiliation
+  7 - oubli
+Retour: EX
 */
 export class StatutMembre extends OperationUI {
   constructor () { super($t('OPstmb')) }
@@ -1174,31 +1192,34 @@ export class StatutMembre extends OperationUI {
   /* 
   gr: groupe
   mb: membre
-  fst: futur statut
+  fn: fonction à appliquer
+  laa: lecteur, auteur, animateur
   */
-  async run (gr, mb, fst) {
+  async run (gr, mb, fn, laa) {
     try {
       const session = stores.session
-      let egrc = null // élément de lgrk dans l'avatar ida invité crypté par sa RSA
-      let fn = 0 // fonction à accomplir
-      // TODO
+      const gSt = stores.groupe
+      const mbac = gSt.membreAcGc
+      let egr = null // élément de lgrk dans l'avatar ida invité crypté par sa RSA
+
       if (fn == 1) { // invitation
         const pubE = await aSt.getPub(mb.na.id)
         const x = [gr.na.nom, gr.na.rnd, mb.ids]
-        const ccPE = await crypterRSA(pubE, new Uint8Array(encode(x)))
+        egrc = await crypterRSA(pubE, new Uint8Array(encode(x)))
       }
 
       const args = { token: session.authToken, 
         id: gr.id, 
         ids: mb.ids,
         ida: mb.na.id,
+        ima: mbac ? mbac.ids : 0,
         ni: mb.ni,
         egrc,
-        fn
+        fn,
+        laa
       }
-      // this.tr(await post(this, 'StatutMembre', args))
-      console.log('fst=' + fst)
-      this.finOK()
+      const ret = this.tr(await post(this, 'StatutMembre', args))
+      return this.finOK(ret.code || 0)
     } catch (e) {
       await this.finKO(e)
     }

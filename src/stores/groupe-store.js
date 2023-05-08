@@ -115,6 +115,24 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
+    // retourne le membre de l'avatar courant dans le groupe courant
+    membreAcGc: (state) => {
+      const session = stores.session
+      for (const [,m] of state.egrC.membres) { if (m.na.id === session.avatarId) return m }
+      return null
+    },
+
+    // nombre d'invités et d'animateurs dans le groupe courant
+    nbInvitsAnims: (state) => {
+      let ni = 0
+      let na = 0
+      state.egrC.groupe.ast.forEach(st => {
+        if (st === 32) na++
+        if (st >= 60 && st <= 62) ni++
+      })
+      return [na, ni]
+    },
+
     animIds: (state) => { return (e) => {
         const s = new Set()
         for (const [,m] of e.membres) { if (e.groupe.ast[m.ids] === 32) s.add(m.na.id) }

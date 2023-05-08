@@ -99,83 +99,87 @@
 
           <div v-if="cas===1" class="column justify-center">
             <q-btn class="q-ma-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action1')" @click="setAc(0)"/>
+              :disable="ro!==''" :label="$t('action1')" @click="setAc(7, 0)"/>
             <q-btn class="q-ma-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action60')" @click="setAc(60)"/>
+              :disable="ro!==''" :label="$t('action60')" @click="setAc(1, 0)"/>
             <q-btn class="q-ma-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action61')" @click="setAc(61)"/>
+              :disable="ro!==''" :label="$t('action61')" @click="setAc(1, 1)"/>
             <q-btn class="q-ma-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action62')" @click="setAc(62)"/>
+              :disable="ro!==''" :label="$t('action62')" @click="setAc(1, 2)"/>
           </div>
 
           <div v-if="!mb.estAc && (cas===6 || cas===7)" class="column justify-center">
             <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action2')" @click="setAc(1)"/>
+              :disable="ro!==''" :label="$t('action2')" @click="setAc(2, 9)"/>
             <q-btn class="q-my-xs text-center" no-caps dense color="warning" 
-              :disable="ro!==''" :label="$t('action2b')" @click="setAc(0)"/>
+              :disable="ro!==''" :label="$t('action2b')" @click="setAc(7, 0)"/>
             <q-btn v-if="st===61 || st===62" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action20')" @click="setAc(60)"/>
+              :disable="ro!==''" :label="$t('action20')" @click="setAc(2, 0)"/>
             <q-btn v-if="st===71 || st===72" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action20b')" @click="setAc(60)"/>
+              :disable="ro!==''" :label="$t('action20b')" @click="setAc(2, 0)"/>
             <q-btn v-if="st===60 || st===62" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action21')" @click="setAc(61)"/>
+              :disable="ro!==''" :label="$t('action21')" @click="setAc(2, 1)"/>
             <q-btn v-if="st===70 || st===72" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action21b')" @click="setAc(61)"/>
+              :disable="ro!==''" :label="$t('action21b')" @click="setAc(2, 1)"/>
             <q-btn v-if="st===60 || st===61" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action22')" @click="setAc(62)"/>
+              :disable="ro!==''" :label="$t('action22')" @click="setAc(2, 2)"/>
             <q-btn v-if="st===70 || st===71" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action22b')" @click="setAc(62)"/>
+              :disable="ro!==''" :label="$t('action22b')" @click="setAc(2, 2)"/>
           </div>
 
           <div v-if="mb.estAc && (cas===6 || cas===7)" class="column justify-center">
             <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('actionm1')" @click="setAc(0)"/>
+              :disable="ro!==''" :label="$t('actionm1')" @click="setAc(7, 0)"/>
             <q-btn class="q-my-xs text-center" no-caps dense color="warning" 
-              :disable="ro!==''" :label="$t('actionm2')" @click="setAc(39)"/>
+              :disable="ro!==''" :label="$t('actionm2')" @click="setAc(3, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('actionm3')" @click="setAc(1)"/>
+              :disable="ro!==''" :label="$t('actionm3')" @click="setAc(4, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('actionm4')" @click="setAc(0)"/>
+              :disable="ro!==''" :label="$t('actionm4')" @click="setAc(7, 0)"/>
           </div>
 
           <div v-if="!mb.estAc && cas===3" class="column justify-center">
             <q-btn class="q-my-xs text-center" no-caps dense color="warning" 
-              :disable="ro!==''" :label="$t('action3')" @click="setAc(5)"/>
+              :disable="ro!==''" :label="$t('action3')" @click="setAc(6, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action3b')" @click="setAc(0)"/>
+              :disable="ro!==''" :label="$t('action3b')" @click="setAc(7, 0)"/>
             <q-btn v-if="st===31 || st===32" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action30')" @click="setAc(30)"/>
+              :disable="ro!==''" :label="$t('action30')" @click="setAc(5, 0)"/>
             <q-btn v-if="st===30 || st===32" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action31')" @click="setAc(31)"/>
+              :disable="ro!==''" :label="$t('action31')" @click="setAc(5, 1)"/>
             <q-btn v-if="st===30 || st===31" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action32')" @click="setAc(32)"/>
+              :disable="ro!==''" :label="$t('action32')" @click="setAc(5, 2)"/>
           </div>
 
           <div v-if="mb.estAc && cas===3" class="column justify-center">
             <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('actionm5')" @click="setAc(5)"/>
+              :disable="ro!==''" :label="$t('actionm5')" @click="setAc(6, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('actionm6')" @click="setAc(0)"/>
+              :disable="ro!==''" :label="$t('actionm6')" @click="setAc(7, 0)"/>
             <q-btn v-if="st===31 || st===32" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('actionm7')" @click="setAc(31)"/>
+              :disable="ro!==''" :label="$t('actionm7')" @click="setAc(5, 1)"/>
             <q-btn v-if="st===30 || st===32" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('actionm8')" @click="setAc(30)"/>
+              :disable="ro!==''" :label="$t('actionm8')" @click="setAc(5, 0)"/>
           </div>
 
           <div v-if="!mb.estAc && (cas===4 || cas === 5)" class="column justify-center">
             <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action1')" @click="setAc(0)"/>
+              :disable="ro!==''" :label="$t('action1')" @click="setAc(7, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action40')" @click="setAc(60)"/>
+              :disable="ro!==''" :label="$t('action40')" @click="setAc(1, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action41')" @click="setAc(61)"/>
+              :disable="ro!==''" :label="$t('action41')" @click="setAc(1, 1)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action42')" @click="setAc(62)"/>
+              :disable="ro!==''" :label="$t('action42')" @click="setAc(1, 2)"/>
           </div>
 
         </q-card-section>
         <q-separator v-if="ro===''" color="orange" class="q-my-xs"/>
-        <bouton-confirm v-if="ro===''" class="maauto q-my-sm" :actif="action!==0" :confirmer="actionSt"/>
+        <div v-if="err1!==''" class="q-ma-xs q-pa-xs text-bold bg-yellow-3 text-negative">
+            {{err1}}</div>
+        <div v-if="err2!==''" class="q-ma-xs q-pa-xs text-bold bg-yellow-3 text-negative">
+            {{err2}}</div>
+        <bouton-confirm v-if="ro==='' && err1===''" class="maauto q-my-sm" :actif="action" :confirmer="actionSt"/>
       </q-card>
     </q-dialog>
   </div>
@@ -231,34 +235,65 @@ export default {
     }
   },
 
+  /*
+  1 - invitation
+  2 - modification d'invitation
+  3 - acceptation d'invitation
+  4 - refus d'invitation
+  5 - modification du rôle laa (actif)
+  6 - résiliation
+  7 - oubli
+  */
+
   data () { return {
-    action: 0
+    action: false,
+    fn: 0, // fonction à effectuer
+    laa: 0, // 0:lecteur, 1:auteur, 2:animateur
+    err1: '',
+    err2: ''
   }},
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-    setAc (n) {
-      this.action = 0
+    async setAc (fn, laa) {
+      // Contrôles fins
+      this.err1 = ''
+      this.err2 = ''
+      if (fn === 6 && this.st === 32 ) {
+        const [na, ni] = this.gSt.nbInvitsAnims
+        if (ni !== 0 && na === 1) {
+          this.err1 = $t('AMdan')
+          return
+        }
+        if (na === 1) {
+          this.err2 = $t('AMdan2')
+          return
+        }
+      }
+      this.action = true
+      this.fn = fn
+      this.laa = laa
       setTimeout(() => { this.action = n }, 200)
     },
     async changeSt () {
-      this.action = 0
+      this.action = true
       this.ovchgSt()
     },
     async actionSt () {
-      /* this.action : futur statut cible. 
-      Cas particuliers:
-      - 1 : (suppr. invitation) le statut cible sera 0 (si n'a jamais été actif) 
-            ou 50 (si a été actif)
-      - 39 : (accept. invitation) le statut sera 30 / 31 / 32 selon le statut d'invitation
-      */
-      const fst = this.action
-      this.action = 0
-      await new StatutMembre().run(this.eg.groupe, this.mb, fst)
+      this.action = false
+      this.err1 = ''
+      this.err2 = ''
+      // MD.fD() // ???
+      const code = await new StatutMembre().run(this.eg.groupe, this.mb, this.fn, this.laa)
+      if (this.code) {
+        await afficherDiag(this.$t('AMx' + code))
+      }
     },
     closeSt () {
       MD.fD()
-      this.action = 0
+      this.action = false
+      this.err1 = ''
+      this.err2 = ''
     },
     ouvrirdetails () {
       this.session.setPeopleId(this.mb.na.id)
