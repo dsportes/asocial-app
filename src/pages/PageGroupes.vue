@@ -30,7 +30,7 @@
 
     <div v-if="gSt.pgLgFT.length">
       <div v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id">
-        <q-expansion-item group="g1" switch-toggle-side :class="dkli(idx)">
+        <q-expansion-item group="g1" switch-toggle-side :class="dkli(idx)" @click="exp(e.groupe)">
           <template v-slot:header>
             <div class="row full-width items-center justify-between">
               <div class="row items-center">
@@ -104,6 +104,10 @@ export default {
     async courant (elt) {
       this.session.setGroupeId(elt.groupe.id)
       this.ui.setPage('groupe', 'groupe')
+    },
+
+    exp (g) {
+      this.session.setGroupeId(g.id)
     },
 
     async nvGr () {

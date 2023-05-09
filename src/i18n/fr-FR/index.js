@@ -630,6 +630,7 @@ export default {
   ACpourgr: 'Groupe courant {0}',
   ACmesav: 'Mon compte et mes avatars',
   ACmesgr: 'Mes groupes',
+  ACmesinv: 'Mes invitations en attente',
   ACmesctc: 'Mes contacts',
   ACmatribu: 'Ma tribu "{0}"',
   ACmacompta: 'Ma comptabilité',

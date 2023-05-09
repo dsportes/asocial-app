@@ -111,7 +111,7 @@
           <div v-if="!mb.estAc && (cas===6 || cas===7)" class="column justify-center">
             <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('action2')" @click="setAc(2, 9)"/>
-            <q-btn class="q-my-xs text-center" no-caps dense color="warning" 
+            <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('action2b')" @click="setAc(7, 0)"/>
             <q-btn v-if="st===61 || st===62" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action20')" @click="setAc(2, 0)"/>
@@ -130,7 +130,7 @@
           <div v-if="mb.estAc && (cas===6 || cas===7)" class="column justify-center">
             <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('actionm1')" @click="setAc(7, 0)"/>
-            <q-btn class="q-my-xs text-center" no-caps dense color="warning" 
+            <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('actionm2')" @click="setAc(3, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('actionm3')" @click="setAc(4, 0)"/>
@@ -139,7 +139,7 @@
           </div>
 
           <div v-if="!mb.estAc && cas===3" class="column justify-center">
-            <q-btn class="q-my-xs text-center" no-caps dense color="warning" 
+            <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('action3')" @click="setAc(6, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('action3b')" @click="setAc(7, 0)"/>
@@ -270,10 +270,10 @@ export default {
           return
         }
       }
-      this.action = true
+      this.action = false
       this.fn = fn
       this.laa = laa
-      setTimeout(() => { this.action = n }, 200)
+      setTimeout(() => { this.action = true }, 200)
     },
     async changeSt () {
       this.action = true

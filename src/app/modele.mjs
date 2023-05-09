@@ -809,10 +809,6 @@ export class Avatar extends GenDoc {
       ani.add(t.ni)
       this.lgr.delete(ni)
     }
-    for (const [ ,t] of this.invits) if (setg.has(t.ng.id)) {
-      ani.add(t.ni)
-      this.invits.delete(ni)
-    }
     return Array.from(ani)
   }
 

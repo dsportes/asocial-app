@@ -34,15 +34,11 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
     
-    /* Map de TOUS les groupes. 
-      clé: id du groupe, 
-      valeur: { groupe, membres, mbacs, secrets }
-    groupes: (state) => {
-      const m = new Map()
-      state.map.forEach(e => { const g = e.groupe; m.set(g.id, g)})
-      return m
+    nbInvits: (state) => {
+      let n = 0
+      state.invits.forEach(s => { n += s.size })
+      return n
     },
-    */
 
     // Map des groupes RESTREINTE à ceux de l'avatar courant.
     groupesAC: (state) => {
@@ -241,7 +237,7 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     setInvit (idg, ida) { // id du groupe et de l'avatar invité
-      const e = this.invits.get(ida)
+      let e = this.invits.get(ida)
       if (!e) { e = new Set(); this.invits.set(ida, e)}
       e.add(idg)
     },
@@ -369,13 +365,13 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     /* Mise jour groupée pour un groupe
-    e : { gr, lmb: [], lsc: [] }
+    e : { id, gr, lmb: [], lsc: [] }
     */
     lotMaj ({id, gr, lmb, lsc, objv}) {
       if (gr) this.setGroupe(gr)
       if (objv) this.setVols (id, objv)
       lsc.forEach(s => { this.setSecret(s) })
-      lmb.forEach(m => { this.setMembre(m) })
+      lmb.forEach(m => { this.setMembre(m) }) // traite AUSSI le cas _zombi (disparu)
     },
 
     del (id) {

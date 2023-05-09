@@ -10,6 +10,13 @@
       <q-item-label lines="1">{{$t('ACmesgr')}}</q-item-label>
     </q-item-section>
   </q-item>
+  <q-item clickable>
+    <q-item-section clickable @click="ui.setPage('groupes')">
+      <q-item-label lines="1">{{$t('ACmesinv')}}
+        <q-badge color="primary" rounded>{{nbInvits}}</q-badge>
+      </q-item-label>
+    </q-item-section>
+  </q-item>
   <q-item clickable @click="ui.setPage('people')">
     <q-item-section>
       <q-item-label lines="1">{{$t('ACmesctc')}}</q-item-label>
@@ -103,6 +110,7 @@ export default {
     nbchats () { return this.aSt.eavC.chats.size },
     nbspons () { return this.aSt.eavC.sponsorings.size },
     nbgrps () { return this.aSt.eavC.avatar.lgr.size },
+    nbInvits () { return this.gSt.nbInvits },
 
     nbgrsecs () { return '?' },
     nbmbs () { return '?' },

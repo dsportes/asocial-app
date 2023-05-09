@@ -1199,13 +1199,16 @@ export class StatutMembre extends OperationUI {
     try {
       const session = stores.session
       const gSt = stores.groupe
+      const aSt = stores.avatar
       const mbac = gSt.membreAcGc
       let egr = null // élément de lgrk dans l'avatar ida invité crypté par sa RSA
 
+      const x = [gr.na.nom, gr.na.rnd, mb.ids]
       if (fn == 1) { // invitation
         const pubE = await aSt.getPub(mb.na.id)
-        const x = [gr.na.nom, gr.na.rnd, mb.ids]
-        egrc = await crypterRSA(pubE, new Uint8Array(encode(x)))
+        egr = await crypterRSA(pubE, new Uint8Array(encode(x)))
+      } else if (fn === 3) { // acceptation
+        egr = await crypter(session.clek, new Uint8Array(encode(x)))
       }
 
       const args = { token: session.authToken, 
@@ -1214,7 +1217,7 @@ export class StatutMembre extends OperationUI {
         ida: mb.na.id,
         ima: mbac ? mbac.ids : 0,
         ni: mb.ni,
-        egrc,
+        egr,
         fn,
         laa
       }

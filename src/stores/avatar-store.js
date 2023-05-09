@@ -76,6 +76,12 @@ export const useAvatarStore = defineStore('avatar', {
       return t
     },
 
+    cloneMap: (state) => {
+      const m = new Map()
+      state.map.forEach((av, id) => { m.set(id, av) })
+      return m
+    },
+
     // liste (array) des ids des avatars DU COMPTE enregistrés
     ids: (state) => { return Array.from(state.map.keys()) },
 
@@ -527,7 +533,7 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     /* Avatars référençant un des groupes du set donné
-    - supprime les entrées correspondantes
+    - supprime les entrées correspondantes SI ELLE EXISTE
     - retourne mapIdNi : Map
       - clé : id d'un avatar
       - valeur : array des ni des groupes ciblés
@@ -538,7 +544,9 @@ export const useAvatarStore = defineStore('avatar', {
       if (setg && setg.size) {
         this.map.forEach(e => { 
           const a = e.avatar
-          // supprime les entrées des groupes dans l'avatar, retourne l'array de leur ni
+          /* supprime, QUAND ELLES EXISTENT,
+          les entrées des groupes dans l'avatar, 
+          retourne l'array de leur ni */
           const ani = a.niDeGroupes(setg)
           ani.forEach(ni => {
             let y = mapIdNi[a.id]
@@ -552,9 +560,9 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     /* Mise jour groupée pour un avatar
-    e : { av: avatar, lch: [], lsp: [], lsc: [] }
+    e : { id, av: avatar, lch: [], lsp: [], lsc: [] }
     */
-    lotMaj ({av, lch, lsp, lsc}) {
+    lotMaj ({id, av, lch, lsp, lsc}) {
       if (av) this.setAvatar(av)
       lsc.forEach(s => { this.setSecret(s) })
       lsp.forEach(s => { this.setSponsoring(s) })

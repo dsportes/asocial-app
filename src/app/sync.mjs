@@ -49,11 +49,10 @@ export class OperationWS extends Operation {
     this.grSuppr.add(id)
   }
 
-  async destectMbDisp (id, ids) {
-    const args = { token: session.authToken, id, ids }
-    this.tr(await post(this, 'DisparitionMembre', args))
-  }
-
+  /* Mise à jour / ajout d'un groupe, détectée par,
+  - chgt de sa version,
+  - changement de lgr d'un ou plusieurs avatars
+  */
   async majGr (id) { // Maj ou ajout du groupe id
     // ret.rowGroupe peut être absent
     // ret.vgroupe est TOUJOURS présent un row dont la data donne v1 v2 q1 q2
@@ -67,20 +66,10 @@ export class OperationWS extends Operation {
     this.versions.set(id, objv)
 
     const groupe = await compile(ret.rowGroupe)
-    const avgr = gSt.getGroupe(id) // groupe actuel
-
-    if (avgr && groupe && groupe._zombi) {
-      // le groupe existait et on vient de le découvrir _zombi
-      this.supprGr(id)
-      return
-    }
-  
-    if (!avgr && !groupe) return // le groupe n'existait pas et n'existe toujours pas
-
-    // le groupe existait ou existe désormais
     if (groupe) this.buf.putIDB(ret.rowGroupe) // il a changé
+    const avgr = gSt.getGroupe(id)
+    const gr = groupe || avgr // groupe mis à jour OU actuel
 
-    const gr = groupe || avgr // groupe actuel, mis à jour ou non
     const e = { id: id, gr: gr, lmb: [], lsc: [], objv: objv }
     this.grMaj.set(id, e)
     if (ret.rowSecrets) for (const x of ret.rowSecrets) {
@@ -95,27 +84,27 @@ export class OperationWS extends Operation {
         /* membre disparu par sa dlv */
         this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
         e.lmb.push({ id: gr.id, ids, _zombi: true }) 
-        if (st) await this.destectMbDisp (gr.id, ids)
+        if (st) { // il faut répercuter la disparition par dlv dans le statut du groupe
+          const args = { token: session.authToken, id: gr.id, ids }
+          await this.tr(await post(this, 'DisparitionMembre', args))
+        }
       } else {
-        if (!st) {
-          // membre détecté disparu par son statut dans son groupe
-          this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
-          e.lmb.push({ id: gr.id, ids, _zombi: true })   
-        } else {
-          // membre vraiment pas disparu
+        if (st) {
+          // membre "normal" pas disparu
           this.buf.putIDB(x)
           e.lmb.push(await compile(x))
         }
       }
     }
 
-    // Détection des membres disparus d'après leur statut
-    for(let ids = 1; ids < gr.ast.length; ids++) {
-      if (gr.ast[ids] || !avgr.ast[ids]) continue // pas disparu ou l'était déjà
+    // Détection des membres nouvellement disparus d'après leur statut
+    if (groupe) for(let ids = 1; ids < groupe.ast.length; ids++) {
+      if (groupe.ast[ids] || !avgr.ast[ids]) continue // pas disparu ou l'était déjà
       // on vient de détecter sa disparition par ast
       this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
       e.lmb.push({ id: gr.id, ids, _zombi: true })
     }
+    // TODO gérer les ajouts de groupes ici ???? !!!!
     if (vcour === 0) this.abPlus.add(id) // c'était un ajout
   }
 
@@ -125,10 +114,14 @@ export class OperationWS extends Operation {
     this.avSuppr.add(id)
   }
 
-  async majAv (id) { // Maj ou ajout de l'avatar id
+  /* Mise à jour / ajout d'un avatar, détecté par,
+  - maj de compta
+  - chgt de version de l'avatar
+  Ne gère PAS les groupes en plus ou en moins
+  */
+  async majAv (id) {
     const vcour = Versions.get(id)    
     const session = stores.session
-    const aSt = stores.avatar
     const args = { token: session.authToken, id, v: vcour.v }
     const ret = this.tr(await post(this, 'ChargerASCS', args))
 
@@ -140,7 +133,7 @@ export class OperationWS extends Operation {
       avatar = await compile(ret.rowAvatar)
       this.buf.putIDB(ret.rowAvatar)
     }
-    const e = { av: avatar, lch: [], lsp: [], lsc: [] }
+    const e = { id, av: avatar, lch: [], lsp: [], lsc: [] }
     this.avMaj.set(id, e)
     for (const x of ret.rowSecrets) {
       this.buf.putIDB(x)
@@ -155,9 +148,32 @@ export class OperationWS extends Operation {
       this.buf.putIDB(x)
       e.lsp.push(await compile(x))
     }
-    if (vcour === 0) this.abPlus.add(id) // c'était un ajout
-    const a = avatar ? avatar : aSt.getAvatar(id)
-    a.idGroupes(this.grRequis) // ajout des groupes requis
+    return avatar
+  }
+
+  /* Chgt d'un avatar détecté par sa version
+  - implique un changement possible de la liste des groupes
+  */
+  async chgAvatar (id) {
+    const aSt = stores.avatar
+    const mapav = aSt.cloneMap
+    const groupesAv = new Set()
+    mapav.forEach(av => { av.idGroupes(groupesAv) })
+
+    const avatar = await this.majAv(id)
+    if (avatar) mapav.set(avatar.id, avatar)
+
+    const groupesAp = new Set()
+    mapav.forEach(av => { av.idGroupes(groupesAp) })
+
+    this.grSuppr = difference(groupesAv, groupesAp)
+    for(const idg of this.grSuppr) this.abMoins.add(idg)
+
+    const grPlus = difference(groupesAp, groupesAv)
+    for(const idg of grPlus) {
+      this.abPlus.add(idg)
+      await this.majGr(idg)
+    }
   }
 
   init () {
@@ -165,11 +181,11 @@ export class OperationWS extends Operation {
     this.buf = new IDBbuffer() // Maj iDB en attente de commit
 
     /* Sous-collections avatars ajoutés ou mis à jour à mettre à jour en store
-    { av: avatar, lch: [], lsp: [], lsc: [] }
+    { id, av: avatar, lch: [], lsp: [], lsc: [] }
     */
     this.avMaj = new Map()
     /* Sous-collections avatars ajoutés ou mis à jour à mettre à jour en store
-    { gr: groupe, lmb: [], lsc: [] }
+    { id, gr: groupe, lmb: [], lsc: [] }
     */
     this.grMaj = new Map()
 
@@ -184,7 +200,7 @@ export class OperationWS extends Operation {
     this.abPlus = new Set() // abonnements de synchronisation ajoutés
     this.abMoins = new Set() // abonnements de synchronisation supprimés
 
-    this.grRequis = new Set() // groupes appraissant dans un des avatars du compte
+    this.grRequis = new Set() // groupes apparaissant dans un des avatars du compte
   }
 
   async final () {
@@ -194,12 +210,12 @@ export class OperationWS extends Operation {
 
     // désabonnements
     if (session.fsSync && this.abPlus.size) for (const id of this.abPlus) {
-      if (ID.estAvatarS(id)) await session.fsSync.setAvatar(id)
+      if (ID.estAvatar(id)) await session.fsSync.setAvatar(id)
       if (ID.estGroupe(id)) await session.fsSync.setGroupe(id)
       if (ID.estTribu(id)) await session.fsSync.setTribu(id)
     }
     if (session.fsSync && this.abMoins.size) for (const id of this.abMoins) {
-      if (ID.estAvatarS(id)) await session.fsSync.unsetAvatar(id)
+      if (ID.estAvatar(id)) await session.fsSync.unsetAvatar(id)
       if (ID.estGroupe(id)) await session.fsSync.unsetGroupe(id)
       if (ID.estTribu(id)) await session.fsSync.unsetTribu(id)
     }
@@ -220,7 +236,7 @@ export class OperationWS extends Operation {
 
     this.avSuppr.forEach(id => { aSt.del(id) })
     this.avMaj.forEach(e => { aSt.lotMaj(e) })
-    // Retire en store les groupes supprimés / zombis des avatars qui les référencent
+    // Retire en store les groupes supprimés dans les lgr des avatars qui les référencent encore
     const mapIdNi = aSt.avatarsDeGroupes(this.grSuppr)
 
     this.grSuppr.forEach(id => { gSt.del(id) })
