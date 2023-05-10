@@ -173,6 +173,7 @@ export class ConnexionCompte extends OperationUI {
     const dlv2 = AMJ.amjUtcDeT(tdlv2 * 86400000)
 
     this.grRequis = new Set()
+    this.grDisparus = new Set()
 
     /* map des membres des groupes auxquels participent au moins un des avatars
      - clé: id du groupe  - valeur: { idg, mbs: [ids], dlv } */
@@ -191,7 +192,10 @@ export class ConnexionCompte extends OperationUI {
       avatar.membres(mbsMap, dlv2)
     }
   
-    // Abonnements aux groupes requis
+    /* Abonnements aux groupes requis
+    et tant pis pour ceux finalement détectés zombi juste après
+    (au pire ça fera des synchronisations qui seront ignorées)
+    */
     for (const id of this.grRequis) {
       if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
     }
@@ -203,14 +207,36 @@ export class ConnexionCompte extends OperationUI {
       - versions: map pour chaque avatar / groupe de:
         { v }: pour un avatar
         { v, vols: {v1, v2, q1, q2} } : pour un groupe
+        { v, _zombi:true } pour un GROUPE _zombi (pas pour un avatar)
       */
       const args = { token: session.authToken, vcompta: this.compta.v, mbsMap, avsMap, abPlus }
       const ret = this.tr(await post(this, 'SignaturesEtVersions', args))
       if (ret.OK === false) return false
-      this.versions = ret.versions
+      /* Traitement des _zombi
+      Un avatar "disparu" est détecté largement APRES la disparition de son compta
+      Un avatar "résilié par une autre session" s'est D'ABORD manifesté
+      par retrait de sa map de compta. Or celle-ci n'a pas changé.
+      DONC on ne peut pas retrouver d'avatars disparus ici.
+      MAIS un groupe peut DISPARAITRE par l'effet du GC (sa "versions" est _zombi), 
+      BIEN AVANT que la lgr de ses membres n'aient pu être mises à jour.
+      On retourne un avis de DISPARITION pour les groupes détectés disparus
+      */
+      this.versions = {}
+      for(const idx in ret.versions) {
+        const x = ret.versions[idx]
+        if (x._zombi) {
+          const id = parseInt(idx)
+          this.grRequis.delete(id)
+          this.grDisparus.add(id)
+          this.buf.purgeGroupeIDB(id)
+        } else {
+          this.versions[idx] = x
+        }
+      }
     } 
     
-    await loadVersions() // chargement des versions depuis IDB
+    if (session.accesIdb) await loadVersions() // chargement des versions depuis IDB
+    else return Versions.reset() // Versions déjà connues en IDB, vide
 
     return true
   }
@@ -239,25 +265,8 @@ export class ConnexionCompte extends OperationUI {
       }
     }
 
-    /* Certains groupes peuvent être des groupes supprimés
-    mais que les avatars qui les référencent n'ont pas encore enlevés de leur
-    liste des groupes.
-    */
-    const zombis = new Set()
-
     /* Tous les avatars et membres sont signés avec les dlv demandées */
-    for(const id in grRows) {
-      const r = grRows[id]
-      const gr = await compile(r)
-      if (gr._zombi) {
-        zombis.add(gr.id)
-        this.buf.purgeGroupeIDB(gr.id)
-      } else {
-        this.groupesToStore.set(gr.id, gr)
-      }
-    }
-
-    return zombis
+    for(const id in grRows) this.groupesToStore.set(parseInt(id), await compile(grRows[id]))
   }
 
   /** Chargement pour un avatar de ses secrets postérieurs au plus récent ************/
@@ -543,9 +552,12 @@ export class ConnexionCompte extends OperationUI {
       this.cAvatars = session.accesIdb ? await getColl('avatars') : []
       this.avatarsToStore = new Map() // objets avatar à ranger en store
       const [avRowsModifies, avToSuppr] = await this.tousAvatars()
-      /* this.versions :  map pour chaque avatar / groupe de :
+      /* 
+      this.versions :  map pour chaque avatar / groupe de :
         { v }: pour un avatar
         { v, vols: {v1, v2, q1, q2} } : pour un groupe
+      this.grDisparus : set des ids des groupes détectés disparus par leur versions zombi
+        et pas encore répercutés dans la lgr de leurs avatars membres
       */
       
       /* Dans compta, nctk a peut-être été recrypté */
@@ -579,8 +591,9 @@ export class ConnexionCompte extends OperationUI {
       })
 
       this.cGroupes = session.accesIdb ? await getColl('groupes') : []
-      this.groupesToStore = new Map() // compilation des rows des groupes venant de IDB ou du serveur
-      const grZombis = await this.chargerGroupes()
+      this.groupesToStore = new Map() 
+      // compilation des rows des groupes venant de IDB ou du serveur
+      await this.chargerGroupes()
   
       this.BRK()
 
@@ -590,7 +603,7 @@ export class ConnexionCompte extends OperationUI {
         this.buf = new IDBbuffer()
       }
 
-      if (session.accesNet && grZombis.size) {
+      if (session.accesNet && this.grDisparus.size) {
         /* Traitement des groupes zombis 
         Les retirer (par anticipation) des avatars qui les référencent 
         mapIdNi : Map
@@ -599,7 +612,7 @@ export class ConnexionCompte extends OperationUI {
         */
         const mapIdNi = {}
         this.avatarsToStore.forEach(av => { 
-          const ani = av.niDeGroupes(grZombis)
+          const ani = av.niDeGroupes(this.grDisparus)
           if (ani.length) mapIdNi[av.id] = ani
         })
         const args = { token: session.authToken, mapIdNi }
@@ -616,7 +629,9 @@ export class ConnexionCompte extends OperationUI {
         gSt.setGroupe(gr) 
         syncitem.push('10' + gr.id, 0, 'SYgro', [gr.na.nom])
       })
-      /* Chargement en store des versions des groupes */
+      /* Chargement en store des versions des groupes
+      this.versions N'A PAS les zombis
+      */
       for(const idx in this.versions) {
         const id = parseInt(idx)
         const objv = this.versions[idx]
@@ -664,7 +679,9 @@ export class ConnexionCompte extends OperationUI {
         }
       }
 
-      // Chargement depuis IDB des Maps des secrets, chats, sponsorings, membres trouvés en IDB
+      /* Chargement depuis IDB des Maps des 
+      secrets, chats, sponsorings, membres trouvés en IDB
+      */
       this.cSecrets = session.accesIdb ? await getColl('secrets') : []
       this.cChats = session.accesIdb ? await getColl('chats') : []
       this.cSponsorings = session.accesIdb ? await getColl('sponsorings') : []

@@ -113,15 +113,13 @@ Chargement des versions des avatars et groupes
 export async function loadVersions () {
   try {
     const session = stores.session
-    if (session.accesIdb) {
-      try {
-        const r = await db.avgrversions.get('1')
-        const idb = r.data ? await decrypter(session.clek, r.data) : null
-        return Versions.load(idb)
-      } catch (e) {
-        Versions.reset()
-      } // session vide si pas lisible sur IDB
-    } else return Versions.reset()
+    try {
+      const r = await db.avgrversions.get('1')
+      const idb = r.data ? await decrypter(session.clek, r.data) : null
+      return Versions.load(idb)
+    } catch (e) {
+      Versions.reset()
+    }
   } catch (e) {
     throw EX2(e)
   }

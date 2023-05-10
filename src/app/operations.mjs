@@ -565,7 +565,9 @@ export class NouvelAvatar extends OperationUI {
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
-      const mavk = await aSt.compta.ajoutAvatarMavk(na)
+      const mapNa = new Map()
+      mapNa.set(na.id, na)
+      const mavk = await aSt.compta.majAvatarMavk(mapNa)
       const args = { token: session.authToken, rowAvatar, rowVersion, mavk }
       const ret = this.tr(await post(this, 'NouvelAvatar', args))
       this.finOK()

@@ -52,6 +52,8 @@ export class OperationWS extends Operation {
   /* Mise à jour / ajout d'un groupe, détectée par,
   - chgt de sa version,
   - changement de lgr d'un ou plusieurs avatars
+  Retourne false si le groupe a été détecté zombi
+  Gère les abonnements et purge globale de IDB si zombi
   */
   async majGr (id) { // Maj ou ajout du groupe id
     // ret.rowGroupe peut être absent
@@ -63,6 +65,11 @@ export class OperationWS extends Operation {
     const ret = this.tr(await post(this, 'ChargerGMS', args))
 
     const objv = Versions.compile(ret.vgroupe)
+    if (objv._zombi) {
+      this.supprGr(id)
+      return false
+    }
+
     this.versions.set(id, objv)
 
     const groupe = await compile(ret.rowGroupe)
@@ -104,8 +111,9 @@ export class OperationWS extends Operation {
       this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
       e.lmb.push({ id: gr.id, ids, _zombi: true })
     }
-    // TODO gérer les ajouts de groupes ici ???? !!!!
+    // On gère ici les ajouts de groupes pour abonnement
     if (vcour === 0) this.abPlus.add(id) // c'était un ajout
+    return true
   }
 
   supprAv (id) { // suppression de l'avatar id
@@ -118,6 +126,13 @@ export class OperationWS extends Operation {
   - maj de compta
   - chgt de version de l'avatar
   Ne gère PAS les groupes en plus ou en moins
+  Avatar _zombi
+  - par résiliation explicite : compta a certes été mis à jour avant
+    MAIS la synchro peut ne pas respecter cet ordre.
+    DONC on peut détecter sur ChargerASCS qu'un avatar a été résilié
+    avant qu'on l'ait su par compta
+  - PAS par résiliation du GC : celle-ci intervient bien après
+    la résiliation du compte, donc la perte du login par perte de compta.
   */
   async majAv (id) {
     const vcour = Versions.get(id)    
@@ -126,6 +141,11 @@ export class OperationWS extends Operation {
     const ret = this.tr(await post(this, 'ChargerASCS', args))
 
     const objv = Versions.compile(ret.vavatar)
+    if (objv._zombi) {
+      this.supprAv(id)
+      return false
+    }
+
     this.versions.set(id, objv)
 
     let avatar = null
@@ -156,6 +176,7 @@ export class OperationWS extends Operation {
   */
   async chgAvatar (id) {
     const aSt = stores.avatar
+
     const mapav = aSt.cloneMap
     const groupesAv = new Set()
     mapav.forEach(av => { av.idGroupes(groupesAv) })
@@ -166,14 +187,14 @@ export class OperationWS extends Operation {
     const groupesAp = new Set()
     mapav.forEach(av => { av.idGroupes(groupesAp) })
 
-    this.grSuppr = difference(groupesAv, groupesAp)
-    for(const idg of this.grSuppr) this.abMoins.add(idg)
-
     const grPlus = difference(groupesAp, groupesAv)
     for(const idg of grPlus) {
-      this.abPlus.add(idg)
-      await this.majGr(idg)
+      // On peut récupérer des _zombis dans grPlus, détectés par majGr
+      if (!await this.majGr(idg)) groupesAp.delete(idg)
     }
+
+    this.grSuppr = difference(groupesAv, groupesAp)
+    for(const idg of this.grSuppr) this.supprGr(idg)
   }
 
   init () {
@@ -199,8 +220,6 @@ export class OperationWS extends Operation {
 
     this.abPlus = new Set() // abonnements de synchronisation ajoutés
     this.abMoins = new Set() // abonnements de synchronisation supprimés
-
-    this.grRequis = new Set() // groupes apparaissant dans un des avatars du compte
   }
 
   async final () {
@@ -224,6 +243,22 @@ export class OperationWS extends Operation {
       this.tr(await post(this, 'GestionAb', args))    
     }
 
+    /* Maj de compta si ajout / suppr d'avatars non intégrés à mav
+    Il y a eu détection d'avatar zombi encore non connu de compta
+    Maj du store par anticipation
+    Maj du document sur serveur
+    */
+    const compta = this.compta || aSt.compta.clone()
+    const mapNa = new Map()
+    this.avMaj.forEach(e => { const na = getNg(e.id) ; mapNa.set(e.id, na) })
+    const ok = compta.updAvatarMavk (mapNa, this.avSuppr)
+    if (!ok) {
+      if (!this.compta) this.compta = compta
+      const mavk = compta.majAvatarMavk(mapNa, this.avSuppr)
+      const args = { token: session.authToken, mavk }
+      this.tr(await post(this, 'MajMavkAvatar', args))
+    }
+
     // commit IDB
     const x = this.versions.size === 0
     if (x) for(const [id, objv] of this.versions) Versions.set(id, objv)
@@ -236,9 +271,10 @@ export class OperationWS extends Operation {
 
     this.avSuppr.forEach(id => { aSt.del(id) })
     this.avMaj.forEach(e => { aSt.lotMaj(e) })
-    // Retire en store les groupes supprimés dans les lgr des avatars qui les référencent encore
-    const mapIdNi = aSt.avatarsDeGroupes(this.grSuppr)
 
+
+    // Retire en store les groupes supprimés dans les lgr des avatars qui les référencent encore
+    const mapIdNi = this.grSuppr.size ? aSt.avatarsDeGroupes(this.grSuppr) : null
     this.grSuppr.forEach(id => { gSt.del(id) })
     this.grMaj.forEach(e => { gSt.lotMaj(e) })
 
@@ -269,8 +305,13 @@ export class OnchangeVersion extends OperationWS {
   async run (row) {
     try {
       this.init()
+      const objv = Versions.compile(row)
       if (ID.estGroupe(row.id)) {
-        await this.majGr(row.id)
+        if (objv._zombi) {
+          this.supprGr(row.id)
+        } else {
+          await this.majGr(row.id)
+        }
       } else {
         await this.majAv(row.id)
       }

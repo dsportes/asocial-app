@@ -86,7 +86,10 @@ export class Versions {
   static toIdb () { Versions.toSave = false; return new Uint8Array(encode(Versions.map))}
 
   static compile (row) { // objv: { v, vols: {v1, v2, q1, q2} }
-    return row ? decode(row._data_) : null
+    if (!row) return null
+    const z = row.dlv && row.dlv < session.dateJourConnx
+    if (!z && row._data_) return decode(row._data_)
+    return { v: row.v, _zombi: true }
   }
 }
 
@@ -536,6 +539,7 @@ Les objets ont au moins les proriétés _nom, id, (ids), (dlv) même _zombi
 */
 export async function compile (row) {
   if (!row) return null
+  const session = stores.session
   const cl = classes[row._nom]
   if (!cl) return null
   const obj = new cl()
@@ -545,11 +549,13 @@ export async function compile (row) {
   if (row.dlv) obj.dlv = row.dlv
   if (row.dfh) obj.dfh = row.dfh
   obj.v = row.v || 0
-  if (row._data_) {
+  const z = row.dlv && row.dlv < session.dateJourConnx
+  // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
+  if (z || !row._data_) {
+    obj._zombi = true
+  } else {
     const x = decode(row._data_)
     await obj.compile(x)
-  } else {
-    obj._zombi = true
   }
   return obj
 }
@@ -928,6 +934,28 @@ export class Compta extends GenDoc {
     return 0
   }
 
+  clone () {
+    c = new Compta()
+    c.id = this.id
+    c.v = this.v
+    c.vsh = this.vsh
+    c.hps1 = this.hps1
+    c.shay = this.shay
+    c.k = this.k
+    c.dhvu = this.dhvu
+    c.mav = new Map()
+    this.mav.forEach((na, id) => { c.mav.set(id, na) })
+    c.nct = this.nct
+    c.idt = this.idt
+    c.nap = this.nap
+    c.compteurs = this.compteurs
+    if (this.naprim) c.naprim = this.naprim
+    c.avatarIds = this.avatarIds
+    if (this.nctk) c.nctk = this.nctk
+    c.pc = this.pc
+    return c
+  }
+
   async compile (row) {
     const session = stores.session
     this.k = await decrypter(session.phrase.pcb, row.kx)
@@ -985,12 +1013,30 @@ export class Compta extends GenDoc {
     this.pc = this.compteurs.pc1 < this.compteurs.pc2 ? this.compteurs.pc2 : this.compteurs.pc1
   }
 
-  async ajoutAvatarMavk (nvna) {
+  updAvatarMavk (mapNa, setSupprIds) {
+    let ok = false
+    if (mapNa && mapNa.size) mapNa.forEach((na,id) => { 
+      if (!this.mav.has(id)) { 
+        ok = true
+        this.mav.set(id, na)
+      }
+    })
+    if (setSupprIds && setSupprIds.size) setSupprIds.forEach(id => { 
+      if (this.mav.has(id)) {
+        ok = true
+        this.mav.delete(id)
+      }
+    })
+    return ok
+  }
+
+  async majAvatarMavk (mapNa, setSupprIds) {
+    // map des na à ajouter, set des id à supprimer
     const m = {}
-    for(const na of this.mav.values()) {
-      m[na.id] = [na.nom, na.rnd]
+    for(const [id, na] of this.mav) {
+      if (!setSupprIds || !setSupprIds.has(id)) m[id] = [na.nom, na.rnd]
     }
-    m[nvna.id] = [nvna.nom, nvna.rnd]
+    if (mapNa && mapNa.size) mapNa.forEach((na, id) => { m[id] = [na.nom, na.rnd]} )
     return await crypter(stores.session.clek, new Uint8Array(encode(m)))
   }
 
