@@ -1,6 +1,6 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { $t, hash, rnd6, u8ToB64, idToSid, gzip, ungzip, ungzipT } from './util.mjs'
+import { $t, hash, rnd6, u8ToB64, b64ToU8, idToSid, gzip, ungzip, ungzipT } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
@@ -910,9 +910,9 @@ export class Cv extends GenDoc {
 - `shay` : SHA du SHA de X (PBKFD de la phrase secrète). Permet de vérifier la détention de la phrase secrète complète.
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
 - `dhvu` : date-heure de dernière vue des notifications par le titualire du compte, cryptée par la clé K.
-- `mavk` : map des avatars du compte cryptée par la clé K du compte. 
-  - _clé_ : id de l'avatar.
-  - _valeur_ : `[nom clé]` : son nom complet.
+- `mavk` : map des avatars du compte. 
+  - _clé_ : id de l'avatar cryptée par la clé K du compte.
+  - _valeur_ : `[nom clé]` : son nom complet cryptée par la clé K du compte.
 - `nctk` : `[nom, clé]` de la tribu crypté par la clé K du compte.
 - `nctkc` : `[nom, clé]` de la tribu crypté par la clé K **du Comptable**: 
 - `napt`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
@@ -966,10 +966,11 @@ export class Compta extends GenDoc {
     /* `mavk` {id} `[nom, cle]` */
     const m = decode(await decrypter(session.clek, row.mavk))
     this.mav = new Map()
-    for(const id in m) {
-      const [nom, cle] = m[id]
+    for(const idk in row.mavk) {
+      const id = u8ToInt(await decrypter(session.clek, b64ToU8(idk)))
+      const [nom, cle] = decode(await decrypter(session.clek, row.mavk[idk]))
       const na = NomGenerique.from([nom, cle])
-      this.mav.set(parseInt(id), na)
+      this.mav.set(id, na)
       setNg(na) 
       if (na.estCompte) this.naprim = na
     }
@@ -1013,14 +1014,8 @@ export class Compta extends GenDoc {
     this.pc = this.compteurs.pc1 < this.compteurs.pc2 ? this.compteurs.pc2 : this.compteurs.pc1
   }
 
-  updAvatarMavk (mapNa, setSupprIds) {
+  updAvatarMavk (setSupprIds) {
     let ok = false
-    if (mapNa && mapNa.size) mapNa.forEach((na,id) => { 
-      if (!this.mav.has(id)) { 
-        ok = true
-        this.mav.set(id, na)
-      }
-    })
     if (setSupprIds && setSupprIds.size) setSupprIds.forEach(id => { 
       if (this.mav.has(id)) {
         ok = true
@@ -1030,14 +1025,24 @@ export class Compta extends GenDoc {
     return ok
   }
 
-  async majAvatarMavk (mapNa, setSupprIds) {
-    // map des na à ajouter, set des id à supprimer
-    const m = {}
-    for(const [id, na] of this.mav) {
-      if (!setSupprIds || !setSupprIds.has(id)) m[id] = [na.nom, na.rnd]
+  async lmAvatarMavk (setSupprIds) {
+    // set des id à supprimer
+    const session = stores.session
+    const lm = []
+    if (setSupprIds && setSupprIds.size) for (const id of setSupprIds) {
+      lm.push(await Compta.mavkK(id, session.clek))
     }
-    if (mapNa && mapNa.size) mapNa.forEach((na, id) => { m[id] = [na.nom, na.rnd]} )
-    return await crypter(stores.session.clek, new Uint8Array(encode(m)))
+    return lm
+  }
+
+  static async mavkKV (na, k) {
+    const kx = u8ToB64(await crypter(k, intToU8(na.id), 1))
+    const vx = await crypter(k, new Uint8Array(encode([na.nomx, na.rnd])))
+    return [kx, vx]
+  }
+
+  static async mavkK (id, k) {
+    return u8ToB64(await crypter(k, intToU8(id), 1))
   }
 
   static async row (na, nt, nctkc, q1, q2, estSponsor, phrase) { 
@@ -1062,13 +1067,13 @@ export class Compta extends GenDoc {
     r.hps1 = ph.hps1
     r.shay = ph.shay
 
-    r.nctk = await crypter(k, new Uint8Array(encode([nt.nom, nt.rnd])))
+    const nax = new Uint8Array(encode([na.nomx, na.rnd]))
+    r.nctk = await crypter(k, new Uint8Array(encode([nt.nomx, nt.rnd])))
     r.nctkc = nctkc || r.nctk
-    r.napt = await crypter(nt.rnd, new Uint8Array(encode([na.nom, na.rnd])))
+    r.napt = await crypter(nt.rnd, nax)
 
-    const m = { }
-    m[na.id] = [na.nomx, na.rnd]
-    r.mavk = await crypter(session.clek, new Uint8Array(encode(m)))
+    const [kx, vx] = Compta.mavkKV(na, k)
+    r.mavk = { kx: vx }
 
     const c = new Compteurs()
     c.setQ1(q1)

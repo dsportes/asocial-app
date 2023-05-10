@@ -5,7 +5,7 @@ import { ID, AppExc, appexc, AMJ, Compteurs } from './api.mjs'
 import { $t, rnd6 } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { GenDoc, NomGenerique, Avatar, Chat, 
+import { GenDoc, NomGenerique, Avatar, Chat, Compta,
   Groupe, Membre, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
@@ -565,10 +565,8 @@ export class NouvelAvatar extends OperationUI {
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
-      const mapNa = new Map()
-      mapNa.set(na.id, na)
-      const mavk = await aSt.compta.majAvatarMavk(mapNa)
-      const args = { token: session.authToken, rowAvatar, rowVersion, mavk }
+      const [kx, vx] = await Compta.mavkKV(na, session.clek)
+      const args = { token: session.authToken, rowAvatar, rowVersion, kx, vx }
       const ret = this.tr(await post(this, 'NouvelAvatar', args))
       this.finOK()
       return ret

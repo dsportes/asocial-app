@@ -143,7 +143,7 @@ export class OperationWS extends Operation {
     const objv = Versions.compile(ret.vavatar)
     if (objv._zombi) {
       this.supprAv(id)
-      return false
+      return [false, null]
     }
 
     this.versions.set(id, objv)
@@ -168,7 +168,7 @@ export class OperationWS extends Operation {
       this.buf.putIDB(x)
       e.lsp.push(await compile(x))
     }
-    return avatar
+    return [true, avatar]
   }
 
   /* Chgt d'un avatar détecté par sa version
@@ -181,20 +181,25 @@ export class OperationWS extends Operation {
     const groupesAv = new Set()
     mapav.forEach(av => { av.idGroupes(groupesAv) })
 
-    const avatar = await this.majAv(id)
-    if (avatar) mapav.set(avatar.id, avatar)
+    const [vivant, avatar] = await this.majAv(id)
+    if (vivant) {
+      // TODO c'est faux
+      if (avatar) mapav.set(avatar.id, avatar)
 
-    const groupesAp = new Set()
-    mapav.forEach(av => { av.idGroupes(groupesAp) })
+      const groupesAp = new Set()
+      mapav.forEach(av => { av.idGroupes(groupesAp) })
 
-    const grPlus = difference(groupesAp, groupesAv)
-    for(const idg of grPlus) {
-      // On peut récupérer des _zombis dans grPlus, détectés par majGr
-      if (!await this.majGr(idg)) groupesAp.delete(idg)
+      const grPlus = difference(groupesAp, groupesAv)
+      for(const idg of grPlus) {
+        // On peut récupérer des _zombis dans grPlus, détectés par majGr
+        if (!await this.majGr(idg)) groupesAp.delete(idg)
+      }
+
+      this.grSuppr = difference(groupesAv, groupesAp)
+      for(const idg of this.grSuppr) this.supprGr(idg)
+    } else {
+
     }
-
-    this.grSuppr = difference(groupesAv, groupesAp)
-    for(const idg of this.grSuppr) this.supprGr(idg)
   }
 
   init () {
@@ -243,25 +248,36 @@ export class OperationWS extends Operation {
       this.tr(await post(this, 'GestionAb', args))    
     }
 
-    /* Maj de compta si ajout / suppr d'avatars non intégrés à mav
+    /* Maj de compta si suppression d'avatars PAS ENCORE intégrées à mavk
     Il y a eu détection d'avatar zombi encore non connu de compta
-    Maj du store par anticipation
-    Maj du document sur serveur
+    - Maj du store par anticipation
+    - Maj du document sur serveur
     */
-    const compta = this.compta || aSt.compta.clone()
-    const mapNa = new Map()
-    this.avMaj.forEach(e => { const na = getNg(e.id) ; mapNa.set(e.id, na) })
-    const ok = compta.updAvatarMavk (mapNa, this.avSuppr)
-    if (!ok) {
-      if (!this.compta) this.compta = compta
-      const mavk = compta.majAvatarMavk(mapNa, this.avSuppr)
-      const args = { token: session.authToken, mavk }
-      this.tr(await post(this, 'MajMavkAvatar', args))
+    if (this.avSuppr.size) {
+      const compta = this.compta || aSt.compta.clone()
+      const ok = compta.updAvatarMavk (this.avSuppr)
+      if (!ok) {
+        if (!this.compta) this.compta = compta
+        const lm = compta.lmAvatarMavk(this.avSuppr)
+        const args = { token: session.authToken, lm }
+        this.tr(await post(this, 'MajMavkAvatar', args))
+      }
     }
 
     // commit IDB
-    const x = this.versions.size === 0
-    if (x) for(const [id, objv] of this.versions) Versions.set(id, objv)
+    let x = false
+    if (this.versions.size) {
+      x = true
+      for(const [id, objv] of this.versions) Versions.set(id, objv)
+    }
+    if (this.grSuppr.size) {
+      x = true
+      for(const id of this.grSuppr) Versions.del(id)
+    }
+    if (this.avSuppr.size) {
+      x = true
+      for(const id of this.avSuppr) Versions.del(id)
+    }
     this.buf.commitIDB(false, x)
 
     // Maj des stores
@@ -271,7 +287,6 @@ export class OperationWS extends Operation {
 
     this.avSuppr.forEach(id => { aSt.del(id) })
     this.avMaj.forEach(e => { aSt.lotMaj(e) })
-
 
     // Retire en store les groupes supprimés dans les lgr des avatars qui les référencent encore
     const mapIdNi = this.grSuppr.size ? aSt.avatarsDeGroupes(this.grSuppr) : null
@@ -313,7 +328,11 @@ export class OnchangeVersion extends OperationWS {
           await this.majGr(row.id)
         }
       } else {
-        await this.majAv(row.id)
+        if (objv._zombi) {
+          this.supprAv(row.id)
+        } else {
+          await this.chgAvatar(row.id)
+        }
       }
       await this.final()
     } catch (e) { 
