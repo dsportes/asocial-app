@@ -1,10 +1,10 @@
 import stores from '../stores/stores.mjs'
 import { Operation } from './operations.mjs'
 import { deconnexion } from './connexion.mjs'
-import { decode } from '@msgpack/msgpack'
-import { compile, Versions } from './modele.mjs'
+// import { decode } from '@msgpack/msgpack'
+import { compile, Versions, Compta } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'
-import { $t, difference, intersection } from './util.mjs'
+import { $t, difference } from './util.mjs'
 import { appexc, ID } from './api.mjs'
 import { post } from './net.mjs'
 
@@ -125,13 +125,14 @@ export class OperationWS extends Operation {
   /* Mise à jour / ajout d'un avatar, détecté par,
   - maj de compta
   - chgt de version de l'avatar
-  Ne gère PAS les groupes en plus ou en moins
-  Avatar _zombi
+  Remarque: ne traite pas les maj des groupes, seulement l'ajour de nouveaux
+  et la suppression de ceux non référencés suite à la maj de l'avatar
+  Avatar _zombi:
   - par résiliation explicite : compta a certes été mis à jour avant
     MAIS la synchro peut ne pas respecter cet ordre.
     DONC on peut détecter sur ChargerASCS qu'un avatar a été résilié
     avant qu'on l'ait su par compta
-  - PAS par résiliation du GC : celle-ci intervient bien après
+  - PAS par résiliation pat le GC : celle-ci intervient bien après
     la résiliation du compte, donc la perte du login par perte de compta.
   */
   async majAv (id) {
@@ -141,10 +142,7 @@ export class OperationWS extends Operation {
     const ret = this.tr(await post(this, 'ChargerASCS', args))
 
     const objv = Versions.compile(ret.vavatar)
-    if (objv._zombi) {
-      this.supprAv(id)
-      return [false, null]
-    }
+    if (objv._zombi) return [false, null]
 
     this.versions.set(id, objv)
 
@@ -174,32 +172,49 @@ export class OperationWS extends Operation {
   /* Chgt d'un avatar détecté par sa version
   - implique un changement possible de la liste des groupes
   */
-  async chgAvatar (id) {
+  async chgAvatar (objv) {
+    const id = objv.id
     const aSt = stores.avatar
 
-    const mapav = aSt.cloneMap
+    const mapav = aSt.cloneMap // état "courant" des avatars dans la fonction
     const groupesAv = new Set()
     mapav.forEach(av => { av.idGroupes(groupesAv) })
 
-    const [vivant, avatar] = await this.majAv(id)
-    if (vivant) {
-      // TODO c'est faux
-      if (avatar) mapav.set(avatar.id, avatar)
-
+    function grEnMoins() {
+      this.supprAv(id)
+      mapav.delete(id)
       const groupesAp = new Set()
       mapav.forEach(av => { av.idGroupes(groupesAp) })
-
-      const grPlus = difference(groupesAp, groupesAv)
-      for(const idg of grPlus) {
-        // On peut récupérer des _zombis dans grPlus, détectés par majGr
-        if (!await this.majGr(idg)) groupesAp.delete(idg)
-      }
-
       this.grSuppr = difference(groupesAv, groupesAp)
       for(const idg of this.grSuppr) this.supprGr(idg)
-    } else {
-
     }
+
+    if (objv._zombi) { // avatar disparu
+      // Il n'y a pas de groupes en plus, mais peut-être en moins
+      grEnMoins()
+      return
+    }
+
+    const [vivant, avatar] = await this.majAv(id)
+
+    if (!vivant) { // avatar finalement disparu
+      // Il n'y a pas de groupes en plus, mais peut-être en moins
+      grEnMoins()
+      return
+    }
+
+    if (avatar) mapav.set(avatar.id, avatar)
+    const groupesAp = new Set()
+    mapav.forEach(av => { av.idGroupes(groupesAp) })
+
+    const grPlus = difference(groupesAp, groupesAv)
+    for(const idg of grPlus) {
+      // On peut récupérer des _zombis dans grPlus, détectés par majGr
+      if (!await this.majGr(idg)) groupesAp.delete(idg)
+    }
+    // la liste des groupesAp est définitive
+    this.grSuppr = difference(groupesAv, groupesAp)
+    for(const idg of this.grSuppr) this.supprGr(idg)
   }
 
   init () {
@@ -328,11 +343,7 @@ export class OnchangeVersion extends OperationWS {
           await this.majGr(row.id)
         }
       } else {
-        if (objv._zombi) {
-          this.supprAv(row.id)
-        } else {
-          await this.chgAvatar(row.id)
-        }
+        await this.chgAvatar(objv)
       }
       await this.final()
     } catch (e) { 
@@ -344,12 +355,28 @@ export class OnchangeVersion extends OperationWS {
 export class OnchangeCompta extends OperationWS {
   constructor () { super($t('OPsync')) }
 
+  async chgTribu () {
+    const args = { token: session.authToken, 
+      id: this.compta.idt, tribu2: true, setC: true }
+    const ret = this.tr(await post(this, 'GetTribu', args))
+    this.abPlus.add(this.compta.idt)
+    this.abMoins.add(this.avCompta.idt)
+    this.buf.putIDB(ret.rowTribu)
+    this.tribu = await compile(rowTribu)
+    this.buf.putIDB(ret.rowTribu2)
+    this.tribu2 = await compile(rowTribu2)
+  }
+
   async run (row) {
     try {
       this.init()
       const session = stores.session
       const aSt = stores.avatar
       const gSt = stores.groupe
+
+      this.avCompta = aSt.compta  
+      if (row.v <= this.avCompta.v) return // sync retardée déjà traitée
+
       this.compta = await compile(row)
       /* Dans compta, nctk a peut-être été recrypté */
       if (this.compta.nctk) {
@@ -357,39 +384,63 @@ export class OnchangeCompta extends OperationWS {
         this.tr(await post(this, 'MajNctkCompta', args))
         delete this.compta.nctk
       }
-      this.avCompta = aSt.compta  
-      if (this.compta.v <= this.avCompta.v) return
-
       this.buf.putIDB(this.compta)
-      if (this.compta.idt !== this.avCompta.idt) {
-        const args = { token: session.authToken, id: this.compta.idt }
-        const ret = this.tr(await post(this, 'GetTribu', args))
-        await this.majTribu(ret.rowTribu)
-        this.abPlus.add(this.compta.idt)
-        this.abMoins.add(this.avCompta.idt)
-      }
+
+      /* on traite le changement de tribu, pas sa mise à jour
+      qui vient par la mise à jour de la tribu */
+      if (this.compta.idt !== this.avCompta.idt) await this.chgTribu()
 
       const avlav = this.avCompta.avatarIds
-      const aplav = this.compta.avatarIds
+      const groupesAv = new Set() // ids des groupes AVANT
+      avlav.forEach(id => { 
+        const a = aSt.getAvatar(id)
+        if (a) a.idGroupes(groupesAv)
+      })
+
+      const aplav1 = this.compta.avatarIds // Nouvelle liste d'avatars depuis compta
+      const aplav = new Set(aplav1) // Liste depuis compta MOINS ceux disparus
+      const avPlus = new Set()
+      const avMoinsCompta = new Set() // avatars disparus à enlever de compta
+      for (const id of difference(aplav1, avlav)) { // Avatars en plus, a priori
+        const [vivant, avatar] = await this.majAv(id)
+        if (!vivant) { 
+          aplav.delete(id)
+          avMoinsCompta.add(id) 
+        } else {
+          avPlus.add(id)
+          // this.avMaj a été rempli par la maj de l'avatar id
+        }
+      }
+      if (avMoinsCompta.size) { // Il y avait des avatars disparus dans compta
+        // Maj de compta sur le serveur
+        const lm = await Compta.lmAvatarMavk(avMoins, session.clek)
+        const args = { token: session.authToken, lm }
+        this.tr(await post(this, 'MajMavkAvatar', args))
+        // Maj par anticipation sur this.compta
+        for(const id of avMoins) this.compta.mav.delete(id)
+      }
+
       const avMoins = difference(avlav, aplav)
-      const avPlus = difference(aplav, avlav)
-
-      if (avMoins.size || avPlus.size) {
-        intersection(avlav, aplav).forEach(id => { 
-          const a = aSt.getAvatar(id)
-          if (a) a.idGroupes(this.grRequis)
-        })
-      }
       if (avMoins.size) for (const id of avMoins) this.supprAv(id)
-      if (avPlus.size) for (const id of avPlus) await this.majAv(id)
 
-      if (avMoins.size || avPlus.size) {
-        const avlgr = new Set(gSt.ids) // groupes utiles avant
-        const grMoins = difference(avlgr, this.grRequis)
-        const grPlus = difference(this.grRequis, avlgr)
-        if (grMoins.size) for (const id of grMoins) this.supprGr(id)
-        if (grPlus.size) for (const id of grPlus) await this.majGr(id)
-      }
+      const groupesAp = new Set() // ids des groupes APRES
+      aplav.forEach(id => {
+        /* on prend les groupes,
+        - soit dans l'avatar mis à jour
+        - soit dans l'avatar actuel inchangé
+        */
+        const e = this.avMaj.get(id)
+        const a = e && e.avatar ? e.avatar : aSt.getAvatar(id)
+        if (a) a.idGroupes(groupesAp)
+      })
+
+      const grPlus = difference(groupesAp, groupesAv)
+      // Ajout MAIS destruction quand c'est un _zombi
+      if (grPlus.size) for(const id of grPlus) await this.majGr(id)
+      
+      const grMoins = difference(groupesAv, groupesAp)
+      // destruction des inutiles
+      if (grMoins.size) for (const id of grMoins) this.supprGr(id)
 
       await this.final()
     } catch (e) { 
