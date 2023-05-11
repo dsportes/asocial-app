@@ -375,11 +375,7 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     del (id) {
-      const e = this.map[id]
-      if (e) {
-        e._zombi = true
-        delete this.map[id]
-      }
+      this.map.delete(id)
     }
   }
 })

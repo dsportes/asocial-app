@@ -831,7 +831,6 @@ export default {
   AMfond: 'Fondateur.',
   AMpasanst1: 'Vous n\'êtes pas animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre.',
   AMpasanst2: 'Même en tant qu\'animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre lui-même animateur.',
-  AMestheb: 'Vous êtes hébergeur du groupe, vous ne pouvez pas vous auto-résilier ou renoncer de vous-même à votre statut d\'animateur.',
   AMdan: 'Vous êtes le dernier animateur du groupe et il reste des invitations lancées. Les supprimer avant de vous auto-résilier.',
   AMdan2: 'Vous êtes le dernier animateur du groupe : voulez-vous vraiment laisser le groupe sans animateur ?',
 

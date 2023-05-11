@@ -157,9 +157,9 @@
             <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('actionm6')" @click="setAc(7, 0)"/>
             <q-btn v-if="st===31 || st===32" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('actionm7')" @click="setAc(5, 1)"/>
-            <q-btn v-if="st===30 || st===32" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('actionm8')" @click="setAc(5, 0)"/>
+            <q-btn v-if="st===32" class="q-my-xs text-center" dense color="primary" 
+              :disable="ro!==''" :label="$t('actionm7')" @click="setAc(5, 1)"/>
           </div>
 
           <div v-if="!mb.estAc && (cas===4 || cas === 5)" class="column justify-center">
@@ -225,9 +225,7 @@ export default {
     ro () { 
       if (this.mb.estAc) {
         const d = this.session.editDiag()
-        if (d) return d
-        if (this.eg.groupe.imh === this.mb.ids) return this.$t('AMestheb')
-        return ''
+        return d || ''
       }
       if (!this.eg.estAnim) return this.$t('AMpasanst1')
       if (this.st === 32) return this.$t('AMpasanst2')
@@ -257,18 +255,12 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async setAc (fn, laa) {
       // Contrôles fins
-      this.err1 = ''
-      this.err2 = ''
+      this.err1 = '' // bloquantes
+      this.err2 = '' // pas bloquantes
       if (fn === 6 && this.st === 32 ) {
         const [na, ni] = this.gSt.nbInvitsAnims
-        if (ni !== 0 && na === 1) {
-          this.err1 = $t('AMdan')
-          return
-        }
-        if (na === 1) {
-          this.err2 = $t('AMdan2')
-          return
-        }
+        // if (ni !== 0 && na === 1) { this.err2 = this.$t('AMdan'); return }
+        if (na === 1) this.err2 = this.$t('AMdan2')
       }
       this.action = false
       this.fn = fn
@@ -276,7 +268,7 @@ export default {
       setTimeout(() => { this.action = true }, 200)
     },
     async changeSt () {
-      this.action = true
+      this.action = false
       this.ovchgSt()
     },
     async actionSt () {

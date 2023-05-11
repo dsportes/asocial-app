@@ -105,14 +105,15 @@ export class OperationWS extends Operation {
     }
 
     // Détection des membres nouvellement disparus d'après leur statut
-    if (groupe) for(let ids = 1; ids < groupe.ast.length; ids++) {
-      if (groupe.ast[ids] || !avgr.ast[ids]) continue // pas disparu ou l'était déjà
-      // on vient de détecter sa disparition par ast
-      this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
-      e.lmb.push({ id: gr.id, ids, _zombi: true })
+    if (groupe && avgr) for(let ids = 1; ids < groupe.ast.length; ids++) {
+      if (avgr.ast[ids] && !groupe.ast[ids]) {
+        // existait et n'existe plus : on vient de détecter sa disparition par ast
+        this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
+        e.lmb.push({ id: gr.id, ids, _zombi: true })
+      }
     }
     // On gère ici les ajouts de groupes pour abonnement
-    if (vcour === 0) this.abPlus.add(id) // c'était un ajout
+    if (vcour.v === 0) this.abPlus.add(id) // c'était un ajout
     return true
   }
 

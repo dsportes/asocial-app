@@ -1172,6 +1172,7 @@ args.ids: ids du membre cible
 args.ida: id de l'avatar du membre cible
 args.ima: ids (imdice membre) du demandeur de l'opération
 args.ni: numéro d'invitation du membre dans le groupe
+args.idh: id du compte hébergeur
 args.egr: élément du groupe dans lgrk de l'avatar invité 
   (invitations seulement). Crypté par la clé RSA publique de l'avatar
 args.laa: 0:lecteur, 1:auteur, 2:animateur
@@ -1216,6 +1217,7 @@ export class StatutMembre extends OperationUI {
         ida: mb.na.id,
         ima: mbac ? mbac.ids : 0,
         ni: mb.ni,
+        idh: gr.idh,
         egr,
         fn,
         laa
