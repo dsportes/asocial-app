@@ -7,7 +7,7 @@ import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, Compta,
   Groupe, Membre, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
-import { decrypter, crypterRSA, genKeyPair } from './webcrypto.mjs'
+import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 
 /* Opération générique ******************************************/
@@ -538,7 +538,7 @@ export class RafraichirCvs extends OperationUI {
 args.token: éléments d'authentification du compte.
 args.rowAvatar : row du nouvel avatar
 args.rowVersion : row de le la version de l'avatar
-args.mavk: mavk de comta incluant le nouvel avatar
+args.kx args.vx: entrée dans mavk de compta pour le nouvel avatar
 Retour:
 */
 export class NouvelAvatar extends OperationUI {
@@ -547,7 +547,6 @@ export class NouvelAvatar extends OperationUI {
   async run (nom) {
     try {
       const session = stores.session
-      const aSt = stores.avatar
 
       const na = NomGenerique.avatar(session.ns, nom)
 
@@ -565,11 +564,11 @@ export class NouvelAvatar extends OperationUI {
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
-      const [kx, vx] = await Compta.mavkKV(na, session.clek)
+      const kx = await Compta.mavkK(na.id, session.clek)
+      const vx = await Compta.mavkKV(na, session.clek)
       const args = { token: session.authToken, rowAvatar, rowVersion, kx, vx }
       this.tr(await post(this, 'NouvelAvatar', args))
       this.finOK()
-      return ret
     } catch (e) {
       await this.finKO(e)
     }

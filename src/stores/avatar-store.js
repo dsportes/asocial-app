@@ -76,9 +76,9 @@ export const useAvatarStore = defineStore('avatar', {
       return t
     },
 
-    cloneMap: (state) => {
+    avatars: (state) => {
       const m = new Map()
-      state.map.forEach((av, id) => { m.set(id, av) })
+      state.map.forEach((av, id) => { m.set(id, av.avatar) })
       return m
     },
 

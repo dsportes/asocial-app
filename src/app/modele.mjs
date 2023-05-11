@@ -87,6 +87,7 @@ export class Versions {
 
   static compile (row) { // objv: { v, vols: {v1, v2, q1, q2} }
     if (!row) return null
+    const session = stores.session
     const z = row.dlv && row.dlv < session.dateJourConnx
     if (!z && row._data_) return decode(row._data_)
     return { v: row.v, _zombi: true }
@@ -963,14 +964,11 @@ export class Compta extends GenDoc {
 
     this.vsh = row.vsh || 0
 
-    /* `mavk` {id} `[nom, cle]` */
-    const m = decode(await decrypter(session.clek, row.mavk))
     this.mav = new Map()
-    for(const idk in row.mavk) {
-      const id = u8ToInt(await decrypter(session.clek, b64ToU8(idk)))
-      const [nom, cle] = decode(await decrypter(session.clek, row.mavk[idk]))
+    for(const i in row.mavk) {
+      const [nom, cle] = decode(await decrypter(session.clek, row.mavk[i]))
       const na = NomGenerique.from([nom, cle])
-      this.mav.set(id, na)
+      this.mav.set(na.id, na)
       setNg(na) 
       if (na.estCompte) this.naprim = na
     }
@@ -1036,13 +1034,11 @@ export class Compta extends GenDoc {
   }
 
   static async mavkKV (na, k) {
-    const kx = u8ToB64(await crypter(k, intToU8(na.id), 1))
-    const vx = await crypter(k, new Uint8Array(encode([na.nomx, na.rnd])))
-    return [kx, vx]
+    return await crypter(k, new Uint8Array(encode([na.nomx, na.rnd])))
   }
 
   static async mavkK (id, k) {
-    return u8ToB64(await crypter(k, intToU8(id), 1))
+    return u8ToB64(await crypter(k, '' + id, 1), true)
   }
 
   static async row (na, nt, nctkc, q1, q2, estSponsor, phrase) { 
@@ -1072,8 +1068,8 @@ export class Compta extends GenDoc {
     r.nctkc = nctkc || r.nctk
     r.napt = await crypter(nt.rnd, nax)
 
-    const [kx, vx] = Compta.mavkKV(na, k)
-    r.mavk = { kx: vx }
+    r.mavk = { }
+    r.mavk[await Compta.mavkK(na.id, k)] = await Compta.mavkKV(na, k)
 
     const c = new Compteurs()
     c.setQ1(q1)

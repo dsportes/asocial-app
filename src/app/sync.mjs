@@ -169,6 +169,15 @@ export class OperationWS extends Operation {
     return [true, avatar]
   }
 
+  grEnMoins(id, mapav, groupesAv) {
+    this.supprAv(id)
+    mapav.delete(id)
+    const groupesAp = new Set()
+    mapav.forEach(av => { av.idGroupes(groupesAp) })
+    this.grSuppr = difference(groupesAv, groupesAp)
+    for(const idg of this.grSuppr) this.supprGr(idg)
+  }
+
   /* Chgt d'un avatar détecté par sa version
   - implique un changement possible de la liste des groupes
   */
@@ -176,22 +185,15 @@ export class OperationWS extends Operation {
     const id = objv.id
     const aSt = stores.avatar
 
-    const mapav = aSt.cloneMap // état "courant" des avatars dans la fonction
+    const mapav = aSt.avatars // état "courant" des avatars dans la fonction
     const groupesAv = new Set()
-    mapav.forEach(av => { av.idGroupes(groupesAv) })
-
-    function grEnMoins() {
-      this.supprAv(id)
-      mapav.delete(id)
-      const groupesAp = new Set()
-      mapav.forEach(av => { av.idGroupes(groupesAp) })
-      this.grSuppr = difference(groupesAv, groupesAp)
-      for(const idg of this.grSuppr) this.supprGr(idg)
-    }
+    mapav.forEach(av => { 
+      av.idGroupes(groupesAv) 
+    })
 
     if (objv._zombi) { // avatar disparu
       // Il n'y a pas de groupes en plus, mais peut-être en moins
-      grEnMoins()
+      this.grEnMoins(id, mapav, groupesAv)
       return
     }
 
@@ -199,7 +201,7 @@ export class OperationWS extends Operation {
 
     if (!vivant) { // avatar finalement disparu
       // Il n'y a pas de groupes en plus, mais peut-être en moins
-      grEnMoins()
+      this.grEnMoins(id, mapav, groupesAv)
       return
     }
 
@@ -430,7 +432,7 @@ export class OnchangeCompta extends OperationWS {
         - soit dans l'avatar actuel inchangé
         */
         const e = this.avMaj.get(id)
-        const a = e && e.avatar ? e.avatar : aSt.getAvatar(id)
+        const a = e && e.av ? e.av : aSt.getAvatar(id)
         if (a) a.idGroupes(groupesAp)
       })
 

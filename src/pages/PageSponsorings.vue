@@ -86,8 +86,12 @@ export default {
     async nouveausp () { if (await this.session.edit()) this.ovnvsp() },
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
-    async prolonger (sp) {},
-    async annuler (sp) {}
+    async prolonger (sp) {
+      // TODO
+    },
+    async annuler (sp) {
+      // TODO
+    }
   },
 
   setup () {
