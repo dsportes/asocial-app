@@ -4,6 +4,7 @@ TODO :
 - prolongation / annulation d'un sponsoring
 - gérer le mode simple / unanime dans ApercuGroupe (?)
 - filtre des membres
+- traiter les autorisations pour le comptable (page menu en particulier) pour survivre à un blocage de sa tribu / voir global
 
 Roadmap:
 - secrets
