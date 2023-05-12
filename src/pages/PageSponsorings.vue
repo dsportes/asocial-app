@@ -87,10 +87,10 @@ export default {
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     async prolonger (sp) {
-      // TODO
+      // TODO : prolonger un sponsoring
     },
     async annuler (sp) {
-      // TODO
+      // TODO : annuler un sponsoring
     }
   },
 

@@ -70,7 +70,7 @@ export function appexc (e) {
   - `tr` log du total des transferts des pièces jointes dans le mois (log de trm à la fin du mois).
 */
 
-const lch1 = ['v1', 'v1m', 'v2', 'v2m', 'q1', 'q2', 'q1m', 'q2m', 'trj', 'trm']
+const lch1 = ['v1', 'v1m', 'v2', 'v2m', 'q1', 'q2', 'trj', 'trm']
 const NTRJ = 8
 
 export class Compteurs {

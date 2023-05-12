@@ -771,10 +771,9 @@ export class Tribu2 extends GenDoc {
 - `privk`: clé privée RSA cryptée par la clé K.
 - `cva` : carte de visite cryptée par la clé CV de l'avatar `{v, photo, info}`.
 - `lgrk` : map :
-  - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
-  - _valeur_ : cryptée par la clé K du compte de `[nomg, clég, im]` reçu sur une invitation.
-  - une entrée est effacée par la résiliation du membre au groupe (ce qui l'empêche de continuer à utiliser la clé du groupe).
-  - pour une invitation en attente _valeur_ est cryptée par la clé publique RSA de l'avatar
+  - _clé_ : Hash de l'id de l'avatar cryptée par la clé du groupe.
+  - _valeur_ : cryptée par la clé K du compte de `[nomg, clég, im]` reçu sur une invitation. Pour une invitation en attente de refus / acceptation _valeur_ est cryptée par la clé publique RSA de l'avatar
+  - une entrée est effacée par la résiliation du membre au groupe ou son effacement d'invitation explicite par un animateur ou l'avatar lui-même (ce qui l'empêche de continuer à utiliser la clé du groupe).
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `hpc` : hash de la phrase de contact.
 - `napc` : `[nom, clé]` de l'avatar cryptée par le PBKFD de la phrase de contact.
@@ -907,14 +906,14 @@ export class Cv extends GenDoc {
 /** Compta **********************************************************************
 - `id` : numéro du compte
 - `v` : version
-- `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte : sert d'accès au row compta à la connexion au compte.
+- `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte : sert d'accès au document `compta` à la connexion au compte.
 - `shay` : SHA du SHA de X (PBKFD de la phrase secrète). Permet de vérifier la détention de la phrase secrète complète.
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
-- `dhvu` : date-heure de dernière vue des notifications par le titualire du compte, cryptée par la clé K.
+- `dhvu` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
 - `mavk` : map des avatars du compte. 
   - _clé_ : id de l'avatar cryptée par la clé K du compte.
   - _valeur_ : `[nom clé]` : son nom complet cryptée par la clé K du compte.
-- `nctk` : `[nom, clé]` de la tribu crypté par la clé K du compte.
+- `nctk` : `[nom, clé]` de la tribu crypté par la clé K du compte, ou temporairement par la clé _CV_ du compte quand c'est le comptable qui l'a définie sur un changement de tribu.
 - `nctkc` : `[nom, clé]` de la tribu crypté par la clé K **du Comptable**: 
 - `napt`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
 - `compteurs`: compteurs sérialisés (non cryptés).
@@ -1185,21 +1184,20 @@ export class Sponsoring extends GenDoc {
 }
 
 /** Chat ************************************************************
-Un chat est une ardoise commune à deux avatars A et B:
-- pour être écrite par A :
-  - A doit connaître le `[nom, cle]` de B : membre du même groupe, sponsor de la tribu, ou par donnée de la phrase de contact de B.
-  - le chat est dédoublé, une fois sur A et une fois sur B.
-  - dans l'avatar A, le contenu est crypté par la clé de A.
-  - dans l'avatar B, le contenu est crypté par la clé de B.
-- un chat a un comportement d'ardoise : chacun _écrase_ la totalité du contenu.
-- si A essaie d'écrire à B et que B a disparu, la `dlv` est positionnée sur les deux exemplaires si elle ne l'était pas déjà.
+Un chat est éternel, une fois créé il ne disparaît qu'à la disparition des avatars en cause.
 
-**Suppression d'un chat**
-- chacun peut supprimer son chat : par exemple A supprime son chat avec B
-- côté A, la `dlv` du chat avec B est positionnée au jour courant + 365 (afin de permettre la synchronisation sur plusieurs sessions / appareils): c'est le GC quotidien qui le purgera.
-- en session comme en serveur, dès qu'il y a une `dlv`, le chat est considéré comme inexistant.
-- si B réécrit un chat à A, côté A la `dlv` du chat de B est remise à 0. Le chat _renaît_ (s'il avait été supprimé).
-
+Un chat est une ardoise commune à deux avatars I et E:
+- vis à vis d'une session :
+  - I est l'avatar _interne_,
+  - E est un avatar _externe_ connu comme _contact_.
+- pour être écrite par I :
+  - I doit connaître le `[nom, cle]` de E : membre du même groupe, compte de la tribu, chat avec un autre avatar du compte, ou obtenu en ayant fourni la phrase de contact de E.
+  - le chat est dédoublé, une fois sur I et une fois sur E.
+- un chat a une clé de cryptage `cc` propre générée à sa création (première écriture):
+  - cryptée par la clé K,
+  - ou cryptée par la clé publique de l'avatar I (par exemple) : dans ce cas la première écriture de contenu de I remplacera cette clé par celle cryptée par K.
+- un chat a un comportement d'ardoise : chaque écriture de l'un _écrase_ la totalité du contenu pour les deux. Un numéro séquentiel détecte les écritures croisées risquant d'ignorer la maj de l'un par celle de l'autre.
+- si I essaie d'écrire à E et que E a disparu, le statut `st` de I vaut 1 pour informer la session.
 **Cartes de visite**
 - à la création, puis à chaque mise à jour du texte, les cartes de visites sont remises à jour.
 - en session, une action permet de les rafraîchir sans modifier le texte et la date-heure du texte.
@@ -1303,16 +1301,17 @@ _data_:
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
 - `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
-- `ast` : array des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
+- `ast` : **array** des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
   - 10: contact, 
   - 30,31,32: **actif** (invitation acceptée) en tant que lecteur / auteur / animateur, 
   - 40: invitation refusée,
-  - 50: résilié / suspendu,
+  - 50: résilié, 
   - 60,61,62: invité en tant que lecteur / auteur / animateur, 
-  - 70,71,72: en cours d'invitation (pas confimée) en tant que lecteur / auteur / animateur, 
+  - 70,71,72: invitation à confirmer (tous les animateurs n'ont pas validé) en tant que lecteur / auteur / animateur, 
   - 0: disparu / oublié.
+- `nig` : **array** des hash de la clé du membre crypté par la clé du groupe.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
-- `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`. 
+- `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
 */
 
 export class Groupe extends GenDoc {
@@ -1399,19 +1398,22 @@ export class Groupe extends GenDoc {
 - `vcv` : version de la carte de visite du membre
 - `dlv` : date de dernière signature + 365 lors de la connexion du compte de l'avatar membre du groupe.
 
-- `ddi` : date de la dernière invitation
-- `dda` : date de début d'activité (jour de la première acceptation)
-- `dfa` : date de fin d'activité (jour de la dernière suspension)
+- `ddi` : date de la _dernière_ invitation
+- `dda` : date de début d'activité (jour de la _première_ acceptation)
+- `dfa` : date de fin d'activité (jour de la _dernière_ suspension)
 - `inv` : validation de la dernière invitation:
   - `null` : le membre n'a pas été invité où le mode d'invitation du groupe était _simple_ au moment de l'invitation.
   - `[ids]` : liste des indices des animateurs ayant validé l'invitation.
 - `mc` : mots clés du membre à propos du groupe.
 - `infok` : commentaire du membre à propos du groupe crypté par la clé K du membre.
-- `datag` : données, immuables, cryptées par la clé du groupe :
-  - `nom` `rnd` : nom complet de l'avatar.
-  - `ni` : numéro aléatoire d'invitation du membre. Permet de supprimer l'invitation et d'effacer le groupe dans son avatar (clé de `lgrk invits`).
-	- `imc` : indice du membre qui l'a inscrit en comme _contact_.
+- `nag` : `[nom, rnd]` : nom complet de l'avatar crypté par la clé du groupe :
 - `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
+- `ardg` : ardoise gérée par les animateurs crypté par la clé du groupe.
+
+**Remarque sur `ardg`**
+- commentaire inscrit facultativement par le membre ayant inscrit le contact.
+- mises à jour ensuite exclusivement par les animateurs,
+- SAUF réponse d'acceptation ou de refus par le membre, seule occasion pour lui d'écrire sur l'ardoise (s'il n'est pas animateur).
 */
 
 export class Membre extends GenDoc {
