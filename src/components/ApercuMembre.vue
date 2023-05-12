@@ -276,7 +276,15 @@ export default {
       this.err1 = ''
       this.err2 = ''
       // MD.fD() // ???
-      const code = await new StatutMembre().run(this.eg.groupe, this.mb, this.fn, this.laa)
+      /* 
+        gr: groupe
+        mb: membre
+        fn: fonction à appliquer
+        laa: lecteur, auteur, animateur
+        ard: texte de l'ardoise, false s'il n'a pas changé, '' s'il est effacé
+      */
+      // TODO : traiter l'ardoise
+      const code = await new StatutMembre().run(this.eg.groupe, this.mb, this.fn, this.laa, this.ard)
       if (this.code) {
         await afficherDiag(this.$t('AMx' + code))
       }

@@ -955,21 +955,24 @@ Retour:
 export class NouveauGroupe extends OperationUI {
   constructor () { super($t('OPnvgr')) }
 
-  async run (nom, ferme, quotas) { // quotas: [q1, q2]
+  async run (nom, unanime, quotas) { // quotas: [q1, q2]
     try {
       const session = stores.session
       const nag = NomGenerique.groupe(session.ns, nom)
-      const na = getNg(session.avatarId)
-      const rowGroupe = await Groupe.rowNouveauGroupe(nag, na, ferme)
       setNg(nag)
-      const kegr = hash(await crypter(nag.rnd, (inverse(na.rnd)), 1))
+      const na = getNg(session.avatarId)
+      const rowGroupe = await Groupe.rowNouveauGroupe(nag, na, unanime)
+      
+      const kegr = hash(await crypter(nag.rnd, inverse(na.rnd), 1))
+      const egr = await crypter(session.clek, new Uint8Array(encode([nag.nom, nag.rnd, 1])))
+
       // En UTC la division d'une date est multiple de 86400000
       const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
       const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
       const dlv = AMJ.amjUtcDeT(tdlv * 86400000)
 
       const rowMembre = await Membre.rowNouveauMembre (nag, na, 1, dlv)
-      const egr = await crypter(session.clek, new Uint8Array(encode([nag.nom, nag.rnd, 1])))
+
       const args = { token: session.authToken, rowGroupe, rowMembre, id: session.avatarId,
         quotas: [quotas.q1, quotas.q2], kegr, egr, abPlus: [nag.id]}
       this.tr(await post(this, 'NouveauGroupe', args))
@@ -1082,12 +1085,13 @@ export class FinHebGroupe extends OperationUI {
 args.token donne les éléments d'authentification du compte.
 args.id : id du contact
 args.idg : id du groupe
-args.im
+args.im: soit l'indice de l'avatar dans ast/nig s'il avait déjà participé, soit ast.length
+args.nig: hash du rnd du membre crypté par le rnd du groupe. Permet de vérifier l'absence de doublons.
 args.rowMembre
 - vérification que le statut ast n'existe pas
 - insertion du row membre, maj groupe
 Retour:
-- KO : si l'indice im est déjà attribué
+- KO : si l'indice im est déjà attribué (opérations concurrentes)
 */
 export class NouveauMembre extends OperationUI {
   constructor () { super($t('OPnvmb')) }
@@ -1096,15 +1100,18 @@ export class NouveauMembre extends OperationUI {
     try {
       const session = stores.session
       while (true) {
-        const ni = rnd6()
-        const im = gr.ast.length
+        const nig = hash(await crypter(gr.na.rnd, na.rnd, 1))
+        let im = 0
+        for(let i = 1; i < gr.ast.length; i++) { 
+          if (gr.nig[im] === nig) { im = i; break }
+        }
+        if (!im) im = gr.ast.length
+
         const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, 0, cv, ard)
         const args = { token: session.authToken, 
           id: na.id,
           idg: gr.id,
-          ni,
-          im,
-          rowMembre
+          nig, im, rowMembre
         }
         const ret = this.tr(await post(this, 'NouveauMembre', args))
         if (!ret.KO) break
@@ -1170,13 +1177,17 @@ args.token donne les éléments d'authentification du compte.
 args.id: id du groupe 
 args.ids: ids du membre cible
 args.ida: id de l'avatar du membre cible
+args.idc: id du COMPTE de ida, en cas de fin d'hébergement par résiliation / oubli
 args.ima: ids (imdice membre) du demandeur de l'opération
-args.ni: numéro d'invitation du membre dans le groupe
 args.idh: id du compte hébergeur
+args.kegr: clé du membre dans lgrk. Hash du rnd inverse de l'avatar crypté par le rnd du groupe.
 args.egr: élément du groupe dans lgrk de l'avatar invité 
   (invitations seulement). Crypté par la clé RSA publique de l'avatar
 args.laa: 0:lecteur, 1:auteur, 2:animateur
+args.ardg: ardoise du membre cryptée par la clé du groupe.
+args.dlv: pour les acceptations d'invitation
 args.fn: fonction à appliquer
+  0 - maj de l'ardoise seulement, rien d'autre ne change
   1 - invitation
   2 - modification d'invitation
   3 - acceptation d'invitation
@@ -1184,7 +1195,14 @@ args.fn: fonction à appliquer
   5 - modification du rôle laa (actif)
   6 - résiliation
   7 - oubli
-Retour: EX
+Retour: code (d'anomalie)
+1 - situation inchangée, c'était déjà l'état actuel
+2 - changement de laa impossible, membre non actif
+3 - refus d'invitation impossible, le membre n'est pas invité
+4 - acceptation d'invitation impossible, le membre n'est pas invité
+5 - modification d'invitation impossible, le membre n'est pas invité
+7 - le membre est actif, invitation impossible
+8 - le membre a disparu, opération impossible
 */
 export class StatutMembre extends OperationUI {
   constructor () { super($t('OPstmb')) }
@@ -1194,8 +1212,9 @@ export class StatutMembre extends OperationUI {
   mb: membre
   fn: fonction à appliquer
   laa: lecteur, auteur, animateur
+  ard: texte de l'ardoise, false s'il n'a pas changé, null s'il est effacé
   */
-  async run (gr, mb, fn, laa) {
+  async run (gr, mb, fn, laa, ard) {
     try {
       const session = stores.session
       const gSt = stores.groupe
@@ -1210,17 +1229,21 @@ export class StatutMembre extends OperationUI {
       } else if (fn === 3) { // acceptation
         egr = await crypter(session.clek, new Uint8Array(encode(x)))
       }
+      const kegr = hash(await crypter(nagr.rnd, inverse(namb.rnd), 1))
+      const ardg = ard === false ? false : (!ard ? null : await crypter(nagr.rnd, ard))
 
+      // En UTC la division d'une date est multiple de 86400000
+      const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
+      const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
+      const dlv = AMJ.amjUtcDeT(tdlv * 86400000) // pour acceptation d'invitation
+      
       const args = { token: session.authToken, 
         id: gr.id, 
         ids: mb.ids,
         ida: mb.na.id,
         ima: mbac ? mbac.ids : 0,
-        ni: mb.ni,
         idh: gr.idh,
-        egr,
-        fn,
-        laa
+        egr, kegr, laa, ardg, dlv, fn
       }
       const ret = this.tr(await post(this, 'StatutMembre', args))
       return this.finOK(ret.code || 0)

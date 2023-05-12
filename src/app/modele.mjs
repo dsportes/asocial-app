@@ -1442,18 +1442,15 @@ export class Membre extends GenDoc {
     this.ard = !row.ardg ? '' : await decrypter(this.cleg, row.ardg)
   }
 
-  // TODO : EN CHANTIER
   static async rowNouveauMembre (nag, na, im, dlv, cv, ard) {
-    const r = { id: nag.id, ids: im, v: 0, dlv, 
+    const r = { id: nag.id, ids: im, v: 0, dlv, vcv: cv ? cv.v : 0,
       ddi: 0, dda: 0, dfa: 0, mc: new Uint8Array([]) }
     if (dlv) r.dda = new Date().getTime()
-    let vcv = 0
-    const cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
-    const ardg = !ard ? null : await crypter(na.rnd, ard)
-    const x = { nom: na.nom, rnd: na.rnd, ni, imc, inv: null, vcv, cva }
-    r.datag = await crypter(nag.rnd, new Uint8Array(encode(x)))
+    r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
+    r.ardg = !ard ? null : await crypter(nag.rnd, ard)
+    r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
     const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'membres', id: r.id, ids: r.ids, v: r.v, _data_ }
+    return { _nom: 'membres', id: r.id, ids: r.ids, v: r.v, vcv: r.vcv, dlv: r.dlv, _data_ }
   }
 
 }

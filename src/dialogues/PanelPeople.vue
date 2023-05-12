@@ -119,11 +119,13 @@ export default {
       this.ui.setPage('groupe', 'membres')
     },
     async contact () {
+      // TODO : traiter l'ardoise
+      const ard = ''
       const gr = this.ui.egrplus.groupe
       const pe = this.pSt.peC
       const na = pe.na
       const m = this.gSt.membreDeId(this.ui.egrplus, this.ui.naplus.id)
-      await new NouveauMembre().run(na, gr, m.ids, pe.cv)
+      await new NouveauMembre().run(na, gr, m.ids, pe.cv, ard)
     }
   },
 

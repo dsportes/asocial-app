@@ -1,4 +1,17 @@
 
+TODO :
+- traiter l'ardoise d'un membre (contact / Maj statut) - ApercuMembre 
+- prolongation / annulation d'un sponsoring
+- gérer le mode simple / unanime dans ApercuGroupe (?)
+- filtre des membres
+
+Roadmap:
+- secrets
+- auto-suppression avatar
+- auto-suppression compte
+- GC
+- export espace, import espace, purge espace
+
 TODO : sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à VERIFIER !!!!!!!!!!!!!!!
 
 # Application front-end A-social
