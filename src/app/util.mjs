@@ -46,12 +46,18 @@ export function egalite (setA, setB) {
   return true
 }
 
-export function egaliteU8(a, b) {
+export function egaliteU8 (a, b) {
   if ((!a && b) || (!b && a)) return false
   if (!a && !b) return true
   if (a.length !== b.length) return false
   for(let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false
   return true
+}
+
+export function inverse (a) {
+  const b = new Uint8Array(a.length)
+  for(let i = 0; i < a.length; i++) b[a.length - 1 - i] = a[i]
+  return b
 }
 
 /* dates et heures, dlv *************************************************************/

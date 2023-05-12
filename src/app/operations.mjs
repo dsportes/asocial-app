@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { ID, AppExc, appexc, AMJ, Compteurs } from './api.mjs'
-import { $t, rnd6 } from './util.mjs'
+import { $t, rnd6, inverse } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, Compta,
@@ -948,8 +948,8 @@ args.rowGroupe : le groupe créé
 args.rowMembre : le membre
 args.id: id de l'avatar créateur
 args.quotas : [q1, q2] attribué au groupe
-args.ni: numéro d'invitation de son créateur (clé dans lgrk)
-args.avgr: élément de lgrk dans l'avatar créateur
+args.kegr: clé dans lgrk. Hash du rnd inverse de l'avatar crypté par le rnd du groupe.
+args.egr: élément de lgrk dans l'avatar créateur
 Retour:
 */
 export class NouveauGroupe extends OperationUI {
@@ -959,19 +959,19 @@ export class NouveauGroupe extends OperationUI {
     try {
       const session = stores.session
       const nag = NomGenerique.groupe(session.ns, nom)
-      const rowGroupe = await Groupe.rowNouveauGroupe(nag, ferme)
-      setNg(nag)
       const na = getNg(session.avatarId)
-      const ni = rnd6()
+      const rowGroupe = await Groupe.rowNouveauGroupe(nag, na, ferme)
+      setNg(nag)
+      const kegr = hash(await crypter(nag.rnd, (inverse(na.rnd)), 1))
       // En UTC la division d'une date est multiple de 86400000
       const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
       const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
       const dlv = AMJ.amjUtcDeT(tdlv * 86400000)
 
-      const rowMembre = await Membre.rowNouveauMembre (nag, na, 1, ni, 1, dlv)
-      const avgr = await crypter(session.clek, new Uint8Array(encode([nag.nom, nag.rnd, 1])))
+      const rowMembre = await Membre.rowNouveauMembre (nag, na, 1, dlv)
+      const egr = await crypter(session.clek, new Uint8Array(encode([nag.nom, nag.rnd, 1])))
       const args = { token: session.authToken, rowGroupe, rowMembre, id: session.avatarId,
-        quotas: [quotas.q1, quotas.q2], ni, avgr, abPlus: [nag.id]}
+        quotas: [quotas.q1, quotas.q2], kegr, egr, abPlus: [nag.id]}
       this.tr(await post(this, 'NouveauGroupe', args))
       this.finOK()
     } catch (e) {
@@ -1092,13 +1092,13 @@ Retour:
 export class NouveauMembre extends OperationUI {
   constructor () { super($t('OPnvmb')) }
 
-  async run (na, gr, imc, cv) {
+  async run (na, gr, cv, ard) {
     try {
       const session = stores.session
       while (true) {
         const ni = rnd6()
         const im = gr.ast.length
-        const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, ni, imc, 0, cv)
+        const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, 0, cv, ard)
         const args = { token: session.authToken, 
           id: na.id,
           idg: gr.id,

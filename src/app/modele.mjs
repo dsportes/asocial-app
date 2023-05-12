@@ -1309,7 +1309,7 @@ _data_:
   - 60,61,62: invité en tant que lecteur / auteur / animateur, 
   - 70,71,72: invitation à confirmer (tous les animateurs n'ont pas validé) en tant que lecteur / auteur / animateur, 
   - 0: disparu / oublié.
-- `nig` : **array** des hash de la clé du membre crypté par la clé du groupe.
+- `nig` : **array** des hash du rnd du membre crypté par le rnd du groupe.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
 */
@@ -1337,6 +1337,7 @@ export class Groupe extends GenDoc {
     this.imh = row.imh || 0
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
+    this.nig = row.nig || [0]
   }
 
   get mbHeb () { // membre hébergeur
@@ -1354,7 +1355,8 @@ export class Groupe extends GenDoc {
     }
   }
 
-  static async rowNouveauGroupe (na, unanime) {
+  static async rowNouveauGroupe (nagr, namb, unanime) {
+    const n = hash(await crypter(nagr.rnd, namb.rnd, 1))
     const r = {
       id: na.id,
       v: 0,
@@ -1363,6 +1365,7 @@ export class Groupe extends GenDoc {
       pe: 0,
       imh: 1,
       ast: new Uint8Array([0, 32]),
+      nag: [0, n],
       idhg: await crypter(na.rnd, '' + stores.session.compteId)
     }
     const _data_ = new Uint8Array(encode(r))
@@ -1430,21 +1433,23 @@ export class Membre extends GenDoc {
     this.dfa = row.dfa || 0
     this.inv = row.inv || null
     this.mc = row.mc || new Uint8Array([])
-    const data = decode(await decrypter(this.cleg, row.datag))
-    this.na = NomGenerique.from([data.nom, data.rnd])
-    this.ni = data.ni
-    this.imc = data.imc
+    const x = decode(await decrypter(this.cleg, row.nag)) // x: [nom, rnd]
+    this.na = NomGenerique.from(x)
     this.estAc = aSt.compta.avatarIds.has(this.na.id)
     if (!this.estAc) setNg(this.na)
     this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
+    this.ard = !row.ardg ? '' : await decrypter(this.cleg, row.ardg)
   }
 
-  static async rowNouveauMembre (nag, na, im, ni, imc, dlv, cv) {
-    const r = { id: nag.id, ids: im, v: 0, dlv, ddi: 0, dda: 0, dfa: 0, mc: new Uint8Array([]) }
+  // TODO : EN CHANTIER
+  static async rowNouveauMembre (nag, na, im, dlv, cv, ard) {
+    const r = { id: nag.id, ids: im, v: 0, dlv, 
+      ddi: 0, dda: 0, dfa: 0, mc: new Uint8Array([]) }
     if (dlv) r.dda = new Date().getTime()
     let vcv = 0
     const cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
+    const ardg = !ard ? null : await crypter(na.rnd, ard)
     const x = { nom: na.nom, rnd: na.rnd, ni, imc, inv: null, vcv, cva }
     r.datag = await crypter(nag.rnd, new Uint8Array(encode(x)))
     const _data_ = new Uint8Array(encode(r))
