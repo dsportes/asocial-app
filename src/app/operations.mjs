@@ -1254,11 +1254,11 @@ export class StatutMembre extends OperationUI {
       } else if (fn === 3) { // acceptation
         egr = await crypter(session.clek, new Uint8Array(encode(x)))
       }
-      const kegr = hash(await crypter(nagr.rnd, inverse(namb.rnd), 1))
-      const ardg = !ard ? null : await crypter(nagr.rnd, ard)
+      const kegr = hash(await crypter(gr.na.rnd, inverse(mb.na.rnd), 1))
+      const ardg = !ard ? null : await crypter(gr.na.rnd, ard)
 
       // En UTC la division d'une date est multiple de 86400000
-      const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
+      const tjourJ = (AMJ.tDeAmjUtc(session.dateJourConnx) / 86400000) + stores.config.limitesjour.dlv
       const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
       const dlv = AMJ.amjUtcDeT(tdlv * 86400000) // pour acceptation d'invitation
       

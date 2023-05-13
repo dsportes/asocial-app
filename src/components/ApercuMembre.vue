@@ -175,6 +175,9 @@
 
         </q-card-section>
         <q-separator v-if="ro===''" color="orange" class="q-my-xs"/>
+        <editeur-md class="full-width height-8" v-model="ardoise" :texte="eg.groupe.ard" 
+          editable modetxt/>
+
         <div v-if="err1!==''" class="q-ma-xs q-pa-xs text-bold bg-yellow-3 text-negative">
             {{err1}}</div>
         <div v-if="err2!==''" class="q-ma-xs q-pa-xs text-bold bg-yellow-3 text-negative">
@@ -248,7 +251,8 @@ export default {
     fn: 0, // fonction à effectuer
     laa: 0, // 0:lecteur, 1:auteur, 2:animateur
     err1: '',
-    err2: ''
+    err2: '',
+    ardoise: ''
   }},
 
   methods: {
@@ -281,10 +285,10 @@ export default {
         mb: membre
         fn: fonction à appliquer
         laa: lecteur, auteur, animateur
-        ard: texte de l'ardoise, false s'il n'a pas changé, '' s'il est effacé
+        ard: texte de l'ardoise, null s'il n'a pas changé
       */
-      // TODO : traiter l'ardoise
-      const code = await new StatutMembre().run(this.eg.groupe, this.mb, this.fn, this.laa, this.ard)
+      const ard = this.eg.groupe.ard === this.ardoise ? null : this.ardoise
+      const code = await new StatutMembre().run(this.eg.groupe, this.mb, this.fn, this.laa, ard)
       if (this.code) {
         await afficherDiag(this.$t('AMx' + code))
       }

@@ -1,6 +1,5 @@
 
 TODO :
-- traiter l'ardoise d'un membre (contact / Maj statut) - ApercuMembre 
 - prolongation / annulation d'un sponsoring
 - gérer le mode simple / unanime dans ApercuGroupe (?)
 - filtre des membres
