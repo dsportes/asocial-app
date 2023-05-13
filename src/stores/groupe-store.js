@@ -146,11 +146,11 @@ export const useGroupeStore = defineStore('groupe', {
       const m = e.membres.get(session.membreId)
       const g = e.groupe
       if (!m) return
-      const inv = m.inv || { t: '', l:[] }
+      const inv = m.inv || []
       for(let im = 1; im < g.ast.length; im++) {
         if (g.ast[im] !== 32) continue
         const a = e.membres.get(im)
-        if (inv.l.indexOf(im) === -1) la.push(a.na); else lc.push(a.na)
+        if (inv.indexOf(im) === -1) la.push(a.na); else lc.push(a.na)
       }
       return [lc, la]
     },

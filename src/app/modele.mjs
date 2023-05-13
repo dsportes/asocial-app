@@ -1309,7 +1309,7 @@ _data_:
   - 60,61,62: invité en tant que lecteur / auteur / animateur, 
   - 70,71,72: invitation à confirmer (tous les animateurs n'ont pas validé) en tant que lecteur / auteur / animateur, 
   - 0: disparu / oublié.
-- `nig` : **array** des hash du rnd du membre crypté par le rnd du groupe.
+- `nag` : **array** des hash du rnd du membre crypté par le rnd du groupe.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
 - `ardg` : ardoise cryptée par la clé du groupe.
@@ -1338,7 +1338,7 @@ export class Groupe extends GenDoc {
     this.imh = row.imh || 0
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
-    this.nig = row.nig || [0]
+    this.nag = row.nag || [0]
     this.ard = !row.ardg ? '' : await decrypterStr(this.cle, row.ardg)
   }
 

@@ -173,6 +173,9 @@ export default {
 }
 </script>
 
+<style lang="css">
+.q-item { padding: 8px 1px !important; }
+</style>
 <style lang="sass" scoped>
 @import '../css/app.sass'
 </style>

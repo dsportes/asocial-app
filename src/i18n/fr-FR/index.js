@@ -450,6 +450,7 @@ export default {
   OPinfmb: 'Mise à jour de l\'information d\'un membre sur le groupe',
   OPmcmb: 'Mise à jour des mots clés d\'un membre sur le groupe',
   OPstmb: 'Changement de statut d\'un membre d\'un groupe',
+  OPmsu: 'Gestion du mode simple / unanime d\'un groupe',
   
   OPnvch: 'Créer un nouveau "chat"',
   OPmajch: 'Mettre à jour un "chat"',
@@ -815,6 +816,7 @@ export default {
   PGplus5b: '{1} propose d\'ajouter {2} au groupe {0}',
   PGard: 'Ardoise du groupe : commentaires à propos de ce contact',
   PGvg: 'Voir le groupe',
+  PGmesav: 'Mes participations au groupe',
   
   // Aperçu Membre
   AMct1: 'Inscrit comme "contact" par {0}.',
@@ -865,8 +867,11 @@ export default {
   AGinvits: '{0} invitations en cours ou à confirmer par les animateurs',
   AGheb: 'Hébergeur du groupe.',
   AGnheb: 'N\'est PLUS hébergé. Disparition du groupe {0}',
-  AGfond: 'Fondateur.',
+  AGfond: 'Fondateur',
+  AGactiv: 'Dates de dernière invitation, période d\'activité',
+  AGmcgr: 'Mes mots clés qualifiant le groupe',
   AGnfond: 'Le fondateur du groupe a disparu',
+  AGhebvol: 'Quotas et volumes',
   AGsimple: 'Invitations sur demande d\'UN SEUL animateur',
   AGunanime: 'Invitations sur UNANIMITÉ des animateurs',
   AGgerh: 'Gérer l\'hébergement du groupe {0}',
@@ -900,7 +905,9 @@ export default {
   AGms: 'Mode actuel : SIMPLE',
   AGupasan: 'Vous n\'êtes pas animateur, vous ne pouvez pas agir sur ce mode.',
   AGumu: 'Passer en mode UNANIME',
-  AGums: 'Changer ma décision pour retourner au mode "SIMPLE"',
+  AGums: 'Je vote pour passer au mode "SIMPLE"',
+  AGrumu: 'Annuler les votes et rester en mode UNANIME',
+  AGrums: 'Rester au mode "SIMPLE"',
   AGmc: 'Mots clés du groupe',
 
   // Panel Membre

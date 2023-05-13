@@ -11,35 +11,37 @@
         <bouton-membre v-if="!nopanel" :eg="eg" :im="mb.ids" btn/>
       </div>
 
-      <div>
-        <span class="fs-md q-mr-md">{{$t('statutmb' + st)}}</span>
-        <q-btn dense size="sm" color="primary" icon="settings" @click="changeSt" :label="$t('AMchanger')"/>
-      </div>
-
-      <!-- Info à propos du groupe -->
-      <div v-if="!people" class="q-py-sm">
-        <div v-if="mb.info" class="titre-md">{{$t('AMinfo')}}</div>
-        <show-html v-if="mb.info" class="bord" maxh="5rem" :texte="mb.info" zoom
-          @edit="editInfo"/>
-        <div v-else class="row">
-          <div class="col fs-md text-italic">({{$t('AMnoinfo')}})</div>
-          <q-btn class="col-auto btn1" size="sm" dense icon="edit" color="primary" @click="editInfo"/>
-        </div>
-      </div>
-
-      <!-- Mots clés attachés au groupe par un avatar du compte -->
-      <div v-if="!people && mapmc"> 
-        <apercu-motscles @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
-          :mapmc="mapmc" edit :src="mb.mc || new Uint8Array([])"/>
-      </div>
-
-      <div class="fs-md">
+      <div class="titre-md q-mt-md">
         <span v-if="mb.ids === 1" class="q-mr-xs">{{$t('AMfond')}}</span>
         <span v-if="mb.idi && eg.groupe.ast[mb.idi]" class="q-mr-xs">
           {{$t('AMct1', [mbidi ? mbidi.na.nomc : '?'])}}</span>
         <span v-if="mb.idi && !eg.groupe.ast[mb.idi]" class="q-mr-xs">{{$t('AMct2', [mb.idi])}}</span>
       </div>
 
+      <div class="q-mt-md">
+        <span class="titre-md q-mr-lg">{{$t('statutmb' + st)}}</span>
+        <q-btn dense size="sm" color="primary" icon="settings" @click="changeSt" :label="$t('AMchanger')"/>
+      </div>
+
+      <!-- Info à propos du groupe -->
+      <div v-if="!people" class="q-mt-md">
+        <div v-if="mb.info" class="titre-md">{{$t('AMinfo')}}</div>
+        <show-html v-if="mb.info" class="q-ml-lg bord" maxh="5rem" :texte="mb.info" zoom
+          @edit="editInfo"/>
+        <div v-else class="row">
+          <div class="col titre-md">({{$t('AMnoinfo')}})</div>
+          <q-btn class="col-auto btn1" size="sm" dense icon="edit" color="primary" @click="editInfo"/>
+        </div>
+      </div>
+
+      <!-- Mots clés attachés au groupe par un avatar du compte -->
+      <div class="titre-md q-mt-md">{{$t('AGmcgr')}}</div>
+      <div v-if="!people && mapmc"> 
+        <apercu-motscles class="q-ml-lg" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
+          :mapmc="mapmc" edit :src="mb.mc || new Uint8Array([])"/>
+      </div>
+
+      <div class="titre-md q-mt-md">{{$t('AGactiv')}}</div>
       <div class="row titre-md text-italic">
         <div class="col-4 text-center">{{$t('AMddi')}}</div>
         <div class="col-4 text-center">{{$t('AMdda')}}</div>
@@ -83,16 +85,16 @@
 
           <div v-if="cas===7" class="q-my-md q-mx-sm">
             <div class="titre-md text-italic">{{$t('AMcfa1')}}</div>
-            <div class="q-ml-md row">
-              <div class="col-3 titre-md text-italic">{{$t('AMcf2')}}</div>
-              <div class="col-9 text-bold fs-md q-gutter-sm" 
-                v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}
+            <div class="q-ml-md row items-start">
+              <div class="col-3 titre-md text-italic">{{$t('AMcfa2')}}</div>
+              <div class="col-9 text-bold titre-md">
+                <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
               </div>
             </div>
-            <div class="q-ml-md row">
-              <div class="col-3 titre-md text-italic">{{$t('AMcf3')}}</div>
-              <div class="col-9 text-bold fs-md q-gutter-sm" 
-                v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}
+            <div class="q-ml-md row items-start">
+              <div class="col-3 titre-md text-italic">{{$t('AMcfa3')}}</div>
+              <div class="col-9 text-bold titre-md">
+                <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
               </div>
             </div>
           </div>
@@ -108,26 +110,39 @@
               :disable="ro!==''" :label="$t('action62')" @click="setAc(1, 2)"/>
           </div>
 
-          <div v-if="!mb.estAc && (cas===6 || cas===7)" class="column justify-center">
+          <div v-if="!mb.estAc && cas===6" class="column justify-center">
             <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('action2')" @click="setAc(2, 9)"/>
             <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('action2b')" @click="setAc(7, 0)"/>
-            <q-btn v-if="st===61 || st===62" class="q-my-xs text-center" dense color="primary" 
+            <q-btn v-if="!una && (st===61 || st===62)" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action20')" @click="setAc(2, 0)"/>
-            <q-btn v-if="st===71 || st===72" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action20b')" @click="setAc(2, 0)"/>
-            <q-btn v-if="st===60 || st===62" class="q-my-xs text-center" dense color="primary" 
+            <q-btn v-if="!una && (st===60 || st===62)" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action21')" @click="setAc(2, 1)"/>
-            <q-btn v-if="st===70 || st===72" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action21b')" @click="setAc(2, 1)"/>
-            <q-btn v-if="st===60 || st===61" class="q-my-xs text-center" dense color="primary" 
+            <q-btn v-if="!una && (st===60 || st===61)" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action22')" @click="setAc(2, 2)"/>
-            <q-btn v-if="st===70 || st===71" class="q-my-xs text-center" dense color="primary" 
-              :disable="ro!==''" :label="$t('action22b')" @click="setAc(2, 2)"/>
           </div>
 
-          <div v-if="mb.estAc && (cas===6 || cas===7)" class="column justify-center">
+          <div v-if="!mb.estAc && cas===7" class="column justify-center">
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('action2')" @click="setAc(2, 9)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('action2b')" @click="setAc(7, 0)"/>
+            <q-btn v-if="st===70" class="q-my-xs text-center" dense color="primary" 
+              :disable="ro!==''" :label="$t('action20b')" @click="setAc(1, 0)"/>
+            <q-btn v-if="st===71" class="q-my-xs text-center" dense color="primary" 
+              :disable="ro!==''" :label="$t('action21b')" @click="setAc(1, 1)"/>
+            <q-btn v-if="st===72" class="q-my-xs text-center" dense color="primary" 
+              :disable="ro!==''" :label="$t('action22b')" @click="setAc(1, 2)"/>
+            <q-btn v-if="st===71 || st===72" class="q-my-xs text-center" dense color="primary" 
+              :disable="ro!==''" :label="$t('action20')" @click="setAc(1, 0)"/>
+            <q-btn v-if="st===70 || st===72" class="q-my-xs text-center" dense color="primary" 
+              :disable="ro!==''" :label="$t('action21')" @click="setAc(1, 1)"/>
+            <q-btn v-if="st===70 || st===71" class="q-my-xs text-center" dense color="primary" 
+              :disable="ro!==''" :label="$t('action22')" @click="setAc(1, 2)"/>
+          </div>
+
+          <div v-if="mb.estAc && cas===6" class="column justify-center">
             <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('actionm1')" @click="setAc(7, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="warning" 
@@ -136,6 +151,11 @@
               :disable="ro!==''" :label="$t('actionm3')" @click="setAc(4, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('actionm4')" @click="setAc(7, 0)"/>
+          </div>
+
+          <div v-if="mb.estAc && cas===7" class="column justify-center">
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('actionm1')" @click="setAc(7, 0)"/>
           </div>
 
           <div v-if="!mb.estAc && cas===3" class="column justify-center">
@@ -182,7 +202,8 @@
             {{err1}}</div>
         <div v-if="err2!==''" class="q-ma-xs q-pa-xs text-bold bg-yellow-3 text-negative">
             {{err2}}</div>
-        <bouton-confirm v-if="ro==='' && err1===''" class="maauto q-my-sm" :actif="action" :confirmer="actionSt"/>
+        <bouton-confirm v-if="ro==='' && err1===''" class="maauto q-my-sm" 
+          :actif="action || (eg.groupe.ard !== ardoise)" :confirmer="actionSt"/>
       </q-card>
     </q-dialog>
   </div>
@@ -225,6 +246,7 @@ export default {
     dda () { return this.mb.dda ? dhcool(this.mb.dda) : '-' },
     dfa () { return this.mb.dfa ? dhcool(this.mb.dfa) : '-' },
     mbidi () { return this.gSt.getMembre(this.mb, this.mb.idi)},
+    una () { return this.eg.groupe.inv !== null },
     ro () { 
       if (this.mb.estAc) {
         const d = this.session.editDiag()
@@ -273,6 +295,7 @@ export default {
     },
     async changeSt () {
       this.action = false
+      this.session.setMembreId(this.mb.ids)
       this.ovchgSt()
     },
     async actionSt () {

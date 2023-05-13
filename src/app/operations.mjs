@@ -1127,7 +1127,7 @@ export class NouveauMembre extends OperationUI {
         const nig = hash(await crypter(gr.na.rnd, na.rnd, 1))
         let im = 0
         for(let i = 1; i < gr.ast.length; i++) { 
-          if (gr.nig[im] === nig) { im = i; break }
+          if (gr.nag[im] === nig) { im = i; break }
         }
         if (!im) im = gr.ast.length
 
@@ -1196,6 +1196,29 @@ export class MajMCMembre extends OperationUI {
     }
   }
 }
+
+/* Mode simple / unanime d'un groupe *******************************************
+args.token donne les éléments d'authentification du compte.
+args.id : id du groupe
+args.ids : ids du membre demandant le retour au mode simple.
+  Si 0, mode unanime.
+Retour:
+*/
+export class ModeSimple extends OperationUI {
+  constructor () { super($t('OPmcmb')) }
+
+  async run (id, ids) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, ids }
+      this.tr(await post(this, 'ModeSimple', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 
 /* Changement de statut d'un membre d'un groupe
 args.token donne les éléments d'authentification du compte.

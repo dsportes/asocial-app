@@ -23,7 +23,7 @@
       },
     -->
     <apercu-membre v-for="(m, idx) of gSt.pgLmFT" :key="idx"
-      class="q-my-sm" :mb="m" :eg="gSt.egrC" :mapmc="mapmc" people :idx="idx"/>
+      class="q-my-lg" :mb="m" :eg="gSt.egrC" :mapmc="mapmc" people :idx="idx"/>
   </div>
 
 </q-page>

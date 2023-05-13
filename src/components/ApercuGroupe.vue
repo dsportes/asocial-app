@@ -3,19 +3,20 @@
     <apercu-genx :na="eg.groupe.na" :cv="eg.groupe.cv" :idx="idx" :cvchangee="cvchangee"/>
 
     <div v-if="fond">
-      <span class="q-mt-xs fs-md q-mr-sm">{{$t('AGfond')}}</span>
+      <span class="q-mt-md titre-md q-mr-sm">{{$t('AGfond')}}</span>
       <bouton-membre :eg="eg" :im="1" />
     </div>
-    <div v-else class="q-mt-xs fs-md text-italic">{{$t('AGnfond')}}</div>
+    <div v-else class="q-mt-sm fs-md text-italic">{{$t('AGnfond')}}</div>
 
-    <div class="q-mt-xs row justify-between">
+    <div class="q-mt-md row justify-between">
       <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('AGunanime')}}</div>
       <div v-else class="titre-md">{{$t('AGsimple')}}</div>
       <q-btn class="q-ml-sm" size="sm" :label="$t('details')" 
         icon="edit" dense color="primary" @click="editUna"/>
     </div>
 
-    <div :class="'q-mt-xs q-pa-xs' + bcf">
+    <div class="titre-md q-mt-md">{{$t('AGhebvol')}}</div>
+    <div :class="'q-ml-lg q-mt-xs q-pa-xs' + bcf">
       <div class="row justify-between">
         <div v-if="!eg.groupe.dfh" class="col fs-md">
           <span class="fs-md q-mr-sm">{{$t('AGheb')}}</span>
@@ -30,26 +31,29 @@
         <!-- POUR TEST quotas-vols :vols="{ a1:1, a2:2, v1:200000, v2:70000000, q1:0, q2:3 }"/-->
       </div>
     </div>
-    <div class="q-mt-sm titre-md">{{$t('AMard')}}</div>
-    <show-html class="q-mb-sm bord bordb" maxh="5rem" :texte="eg.groupe.ard" edit
+
+    <div class="q-mt-md titre-md">{{$t('AMard')}}</div>
+    <show-html class="q-ml-lg bord bordb" maxh="5rem" :texte="eg.groupe.ard" edit
       zoom @edit="ardeditAut"/>
 
     <!-- Mots clés du groupe -->
-    <div class="row items-center q-my-sm">
+    <div class="row items-center q-mt-md">
       <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
       <q-btn icon="open_in_new" size="sm" color="primary" @click="ovmcledit"/>
     </div>
 
-    <div v-if="eg.groupe.nbInvits !== 0" class="fs-md text-bold text-warning">
+    <div v-if="eg.groupe.nbInvits !== 0" class="q-mt-md fs-md text-bold text-warning">
       {{$t('AGinvits', [eg.groupe.nbInvits])}}
     </div>
 
-    <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
-      <q-separator color="orange"/>
+    <div class="titre-lg full-width text-center text-white bg-secondary q-mt-lg q-mb-md q-pa-sm">{{$t('PGmesav')}}</div>
+
+    <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mb-md">
       <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>
-      <q-btn v-if="ast(m) >=30 && ast(m) <= 32"
+      <q-btn class="q-mt-sm" v-if="ast(m) >=30 && ast(m) <= 32"
         dense size="md" no-caps color="primary" icon="add" :label="$t('PGplus')"
         @click="dialctc(m.na)"/>
+      <q-separator class="q-mt-sm" color="orange"/>
     </div>
 
     <!-- Dialogue d'édition des mots clés du groupe -->
@@ -94,14 +98,18 @@
               <div class="titre-md text-center">{{$t('AGupasan')}}</div>
               <q-btn class="q-ml-md" dense size="md" color="primary" :label="$t('jailu')" @click="MD.fD"/>
             </div>
-            <div v-else class="text-center">
+            <div v-else class="column q-gutter-xs items-center">
               <q-btn v-if="eg.groupe.msu" :label="$t('AGums')" dense size="md" 
-                color="warning" @click="cfu = true"/>
-              <q-btn v-else :label="$t('AGumu')" dense size="md" 
-                color="warning" @click="cfu = true"/>
+                color="warning" @click="cfu = 1"/>
+              <q-btn v-if="eg.groupe.msu" :label="$t('AGrumu')" dense size="md" 
+                color="warning" @click="cfu = 2"/>
+              <!--q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
+                color="warning" @click="cfu = 2"/-->
+              <q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
+                color="warning" @click="cfu = 2"/>
               <div class="q-mt-md row justify-center q-gutter-md">
                 <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-                <bouton-confirm :actif="cfu" :confirmer="chgU"/>
+                <bouton-confirm :actif="cfu!==0" :confirmer="chgU"/>
               </div>
             </div>
          </q-page>
@@ -229,7 +237,7 @@ import MotsCles from './MotsCles.vue'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
 import { MD, getNg } from '../app/modele.mjs'
-import { MotsclesGroupe, ArdoiseGroupe } from '../app/operations.mjs'
+import { MotsclesGroupe, ArdoiseGroupe, ModeSimple } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuGroupe',
@@ -287,7 +295,7 @@ export default {
     ar1: false,
     ar2: false,
     lstVotes: [],
-    cfu: false, // Choix de changement de mode non confirmé
+    cfu: 0, // Choix de changement de mode non confirmé
 
     naplus: null,
     egrplus: null
@@ -412,7 +420,15 @@ export default {
 
     async chgU () {
       if (!await this.session.edit())  { MD.fD(); return }
-      // TODO Gérer le mode simple / unanime
+      const mb = this.gSt.membreDeId(this.eg, this.session.avatarId)
+      const una = this.eg.groupe.msu != null
+      let ids = -1
+      if (this.cfu === 1) { // passer en mode simple
+        if (una) ids = mb.ids // on est en unanime : je vote pour simple
+      } else { // passer / rester en unanime
+        ids = 0
+      }
+      if (ids !== -1) await new ModeSimple().run(this.eg.groupe.id, ids)
       MD.fD()
     }
   },
