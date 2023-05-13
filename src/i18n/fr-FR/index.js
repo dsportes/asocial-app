@@ -435,6 +435,7 @@ export default {
   OPmemo: 'Changement du memo d\'un compte',
   OPmotscles: 'Changement des mots clés d\'un compte',
   OPmotsclesgr: 'Changement des mots clés d\'un groupe',
+  OPardgr: 'Mise à jour de l\'ardoise du groupe',
   OPmcv: 'Mettre à jour une carte de visite',
   OPcps: 'Changer de phrase secrete de connexion',
   OPcpc: 'Changer de phrase de contact',
@@ -812,6 +813,7 @@ export default {
   PGplus5: '{1} propose d\'ajouter ce contact au groupe {0}',
   PGplus: 'Ajouter un de mes contacts au groupe',
   PGplus5b: '{1} propose d\'ajouter {2} au groupe {0}',
+  PGard: 'Ardoise du groupe : commentaires à propos de ce contact',
   PGvg: 'Voir le groupe',
   
   // Aperçu Membre
@@ -833,6 +835,7 @@ export default {
   AMpasanst2: 'Même en tant qu\'animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre lui-même animateur.',
   AMdan: 'Vous êtes le dernier animateur du groupe et il reste des invitations lancées. Les supprimer avant de vous auto-résilier.',
   AMdan2: 'Vous êtes le dernier animateur du groupe : voulez-vous vraiment laisser le groupe sans animateur ?',
+  AMard: 'Ardoise du groupe',
 
   AMx0: 'L\'opération n\'a rien fait : ',
   AMx1: 'le changement souhaité avait déjà été fait.',

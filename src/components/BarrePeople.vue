@@ -63,8 +63,8 @@
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
   <q-dialog v-model="cptdial" persistent full-height>
-    <div class="bs">
-    <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
+    <div class="bs"  style="width:80vw">
+    <q-layout container view="hHh lpR fFf" :class="sty">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>

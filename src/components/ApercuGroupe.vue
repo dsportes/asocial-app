@@ -30,6 +30,9 @@
         <!-- POUR TEST quotas-vols :vols="{ a1:1, a2:2, v1:200000, v2:70000000, q1:0, q2:3 }"/-->
       </div>
     </div>
+    <div class="q-mt-sm titre-md">{{$t('AMard')}}</div>
+    <show-html class="q-mb-sm bord bordb" maxh="5rem" :texte="eg.groupe.ard" edit
+      zoom @edit="ardeditAut"/>
 
     <!-- Mots clés du groupe -->
     <div class="row items-center q-my-sm">
@@ -57,8 +60,8 @@
 
     <!-- Gérer le mode simple / unanime -->
     <q-dialog v-model="editerUna" full-height persistent>
-      <div class="bs">
-      <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
+      <div class="bs" style="width:80vw">
+      <q-layout container view="hHh lpR fFf" :class="dkli(0)">
         <q-header elevated class="bg-secondary text-white">
           <q-toolbar>
             <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
@@ -109,8 +112,8 @@
 
     <!-- Gérer l'hébergement, changer les quotas -->
     <q-dialog v-model="changerQuotas" full-height persistent>
-      <div class="bs">
-      <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
+      <div class="bs"  style="width:80vw">
+      <q-layout container view="hHh lpR fFf" :class="dkli(0)">
         <q-header elevated class="bg-secondary text-white">
           <q-toolbar>
             <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
@@ -175,6 +178,20 @@
       </div>
     </q-dialog>
 
+    <!-- Dialogue d'édition de l'ardoise -->
+    <q-dialog v-model="ardedit" persistent>
+      <q-card class="bs petitelargeur">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense color="warning" size="md" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg full-width">{{$t('AMard')}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+         </q-toolbar>
+        <editeur-md class="height-10"
+          :texte="eg.groupe.ard" editable modetxt :label-ok="$t('OK')" @ok="ardok"/>
+      </q-card>
+    </q-dialog>
+
+
     <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
     <q-dialog v-model="nvctc" persistent>
       <q-card class="bs">
@@ -209,8 +226,10 @@ import BoutonHelp from './BoutonHelp.vue'
 import QuotasVols from './QuotasVols.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 import MotsCles from './MotsCles.vue'
+import EditeurMd from './EditeurMd.vue'
+import ShowHtml from './ShowHtml.vue'
 import { MD, getNg } from '../app/modele.mjs'
-import { MotsclesGroupe } from '../app/operations.mjs'
+import { MotsclesGroupe, ArdoiseGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuGroupe',
@@ -221,7 +240,7 @@ export default {
     mapmc: Object
   },
 
-  components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },
+  components: { ShowHtml, EditeurMd, MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },
 
   computed: {
     bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
@@ -305,6 +324,14 @@ export default {
       if (mmc !== false) {
         await new MotsclesGroupe().run(mmc, this.eg.groupe.na)
       }
+    },
+
+    async ardeditAut () {
+      if (await this.session.edit()) this.ovardedit()
+    },
+
+    async ardok (ard) {
+      await new ArdoiseGroupe().run(ard, this.eg.groupe.na)
     },
 
     setCas () {
@@ -407,9 +434,12 @@ export default {
     function ovediterUna () { MD.oD(editerUna) }
     const changerQuotas = ref(false)
     function ovchangerQuotas () { MD.oD(changerQuotas) }
+    const ardedit = ref(false)
+    function ovardedit () { MD.oD(ardedit) }
     return {
       MD,
-      mcledit, ovmcledit, nvctc, ovnvctc, editerUna, ovediterUna, changerQuotas, ovchangerQuotas,
+      mcledit, ovmcledit, nvctc, ovnvctc, editerUna, ovediterUna,
+      changerQuotas, ovchangerQuotas, ardedit, ovardedit,
       session,
       ui,
       photoDef,

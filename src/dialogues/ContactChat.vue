@@ -1,6 +1,6 @@
 <template>
-<div class="bs">
-<q-layout container view="hHh lpR fFf" style="width:80vw">
+<div class="bs"  style="width:80vw">
+<q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>

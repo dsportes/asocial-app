@@ -17,8 +17,8 @@
   </div>
 
   <q-dialog v-model="ouvert" full-height persistent>
-    <div class="bs">
-    <q-layout container view="hHh lpR fFf" :class="dkli(0)" style="width:80vw">
+    <div class="bs"  style="width:80vw">
+    <q-layout container view="hHh lpR fFf" :class="dkli(0)">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>

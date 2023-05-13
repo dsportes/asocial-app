@@ -1,10 +1,10 @@
 <template>
-<div class="bs">
-<q-layout container view="hHh lpR fFf" style="width:80vw">
+<div class="bs" style="width:80vw">
+<q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-      <q-toolbar-title class="titre-lg text-center">{{$t('NPtit')}}</q-toolbar-title>
+      <q-toolbar-title class="titre-lg full-width text-center">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
   </q-header>

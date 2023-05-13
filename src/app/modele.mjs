@@ -1,6 +1,6 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { $t, hash, rnd6, u8ToB64, b64ToU8, idToSid, gzip, ungzip, ungzipT } from './util.mjs'
+import { $t, hash, rnd6, u8ToB64, idToSid, gzip, ungzip, ungzipT } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
@@ -1312,6 +1312,7 @@ _data_:
 - `nig` : **array** des hash du rnd du membre crypté par le rnd du groupe.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
+- `ardg` : ardoise cryptée par la clé du groupe.
 */
 
 export class Groupe extends GenDoc {
@@ -1338,6 +1339,7 @@ export class Groupe extends GenDoc {
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
     this.nig = row.nig || [0]
+    this.ard = !row.ardg ? '' : await decrypterStr(this.cle, row.ardg)
   }
 
   get mbHeb () { // membre hébergeur
@@ -1358,7 +1360,7 @@ export class Groupe extends GenDoc {
   static async rowNouveauGroupe (nagr, namb, unanime) {
     const n = hash(await crypter(nagr.rnd, namb.rnd, 1))
     const r = {
-      id: na.id,
+      id: nagr.id,
       v: 0,
       dfh: 0,
       msu: unanime ? new Uint8Array([]) : null,
@@ -1366,7 +1368,7 @@ export class Groupe extends GenDoc {
       imh: 1,
       ast: new Uint8Array([0, 32]),
       nag: [0, n],
-      idhg: await crypter(na.rnd, '' + stores.session.compteId)
+      idhg: await crypter(nagr.rnd, '' + stores.session.compteId)
     }
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'groupes', id: r.id, v: r.v, _data_ }
@@ -1411,7 +1413,6 @@ export class Groupe extends GenDoc {
 - `infok` : commentaire du membre à propos du groupe crypté par la clé K du membre.
 - `nag` : `[nom, rnd]` : nom complet de l'avatar crypté par la clé du groupe :
 - `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
-- `ardg` : ardoise gérée par les animateurs crypté par la clé du groupe.
 
 **Remarque sur `ardg`**
 - commentaire inscrit facultativement par le membre ayant inscrit le contact.
@@ -1439,7 +1440,6 @@ export class Membre extends GenDoc {
     if (!this.estAc) setNg(this.na)
     this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
-    this.ard = !row.ardg ? '' : await decrypter(this.cleg, row.ardg)
   }
 
   static async rowNouveauMembre (nag, na, im, dlv, cv, ard) {
@@ -1447,7 +1447,6 @@ export class Membre extends GenDoc {
       ddi: 0, dda: 0, dfa: 0, mc: new Uint8Array([]) }
     if (dlv) r.dda = new Date().getTime()
     r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
-    r.ardg = !ard ? null : await crypter(nag.rnd, ard)
     r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'membres', id: r.id, ids: r.ids, v: r.v, vcv: r.vcv, dlv: r.dlv, _data_ }

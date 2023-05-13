@@ -32,14 +32,16 @@
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
-      <div v-if="ui.egrplus && !pSt.peC.groupes.has(ui.egrplus.groupe.na.id)">
-        <div class="row items-center justify-between">
-          <div class="col titre-md bg-yellow-3 text-warning text-bold text-center">
-            {{$t('PGplus5b', [ui.egrplus.groupe.na.nom, ui.naplus.nom, pSt.peC.na.nom])}}</div>
-          <q-btn class="col-auto text-center q-ml-xs" dense size="md" no-caps color="primary" icon="check"
-            :label="$t('ok')" @click="contact"/>
+      <div v-if="ui.egrplus && !pSt.peC.groupes.has(ui.egrplus.groupe.na.id)"
+        class="q-ma-md bordo column items-center">
+        <div class="full-width titre-md bg-yellow-3 text-warning text-bold text-center">
+          {{$t('PGplus5b', [ui.egrplus.groupe.na.nom, ui.naplus.nom, pSt.peC.na.nom])}}
         </div>
-        <q-separator color="orange" class="q-my-md q-mx-sm"/>
+        <div class="q-mt-sm titre-md text-center">{{$t('PGard')}}</div>
+        <editeur-md class="full-width height-8" v-model="ardoise" :texte="ui.egrplus.groupe.ard" 
+          editable modetxt/>
+        <q-btn class="text-center q-my-sm" dense size="md" no-caps color="primary" icon="check"
+          :label="$t('ok')" @click="contact"/>
       </div>
 
       <div class="titre-md text-italic y-mb-sm">{{$t('PPgroupes')}}</div>
@@ -79,12 +81,13 @@ import ApercuChat from '../components/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
+import EditeurMd from '../components/EditeurMd.vue'
 import { MD, Chat, Motscles } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
 
 export default {
   name: 'PanelPeople',
-  components: { ApercuMembre, ApercuPeople, BoutonHelp, ApercuChat, BarrePeople },
+  components: { EditeurMd, ApercuMembre, ApercuPeople, BoutonHelp, ApercuChat, BarrePeople },
 
   props: { },
 
@@ -119,13 +122,11 @@ export default {
       this.ui.setPage('groupe', 'membres')
     },
     async contact () {
-      // TODO : traiter l'ardoise
-      const ard = ''
       const gr = this.ui.egrplus.groupe
       const pe = this.pSt.peC
       const na = pe.na
-      const m = this.gSt.membreDeId(this.ui.egrplus, this.ui.naplus.id)
-      await new NouveauMembre().run(na, gr, m.ids, pe.cv, ard)
+      // const m = this.gSt.membreDeId(this.ui.egrplus, this.ui.naplus.id) // invitant ???
+      await new NouveauMembre().run(na, gr, pe.cv, this.ardoise)
     }
   },
 
@@ -135,6 +136,8 @@ export default {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const ui = stores.ui
+
+    const ardoise = ref(ui.egrplus.groupe.ard)
 
     const mapmc = ref(Motscles.mapMC(true, 0))
 
@@ -147,6 +150,7 @@ export default {
 
     return {
       session,
+      ardoise,
       aSt,
       pSt,
       gSt,
@@ -159,6 +163,9 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.bordo
+  border: 2px solid $orange
+  border-radius: 5px
 .bord1
   border: 1px solid $grey-5
 .bord2

@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { ID, AppExc, appexc, AMJ, Compteurs } from './api.mjs'
-import { $t, rnd6, inverse } from './util.mjs'
+import { $t, hash, inverse } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, Compta,
@@ -1005,6 +1005,28 @@ export class MotsclesGroupe extends OperationUI {
   }
 }
 
+/* Maj de l'ardoise du groupe *****************************************************
+args.token donne les éléments d'authentification du compte.
+args.ardg : texte de l'ardoise crypté par la clé du groupe
+args.idg : id du groupe
+Retour:
+*/
+export class ArdoiseGroupe extends OperationUI {
+  constructor () { super($t('OPardgr')) }
+
+  async run (ard, nag) {
+    try {
+      const session = stores.session
+      const ardg = await crypter(nag.rnd, ard || '')
+      const args = { token: session.authToken, ardg, idg: nag.id }
+      this.tr(await post(this, 'ArdoiseGroupe', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* Hébergement d'un groupe *****************************************************
 args.token donne les éléments d'authentification du compte.
 args.t : 1: chg quotas, 2: prise d'hébergement, 3: transfert d'hébergement
@@ -1087,6 +1109,8 @@ args.id : id du contact
 args.idg : id du groupe
 args.im: soit l'indice de l'avatar dans ast/nig s'il avait déjà participé, soit ast.length
 args.nig: hash du rnd du membre crypté par le rnd du groupe. Permet de vérifier l'absence de doublons.
+args.ardg: texte de l'ardoise du groupe crypté par la clé du groupe. 
+  Si null, le texte actuel est inchangé.
 args.rowMembre
 - vérification que le statut ast n'existe pas
 - insertion du row membre, maj groupe
@@ -1107,10 +1131,11 @@ export class NouveauMembre extends OperationUI {
         }
         if (!im) im = gr.ast.length
 
-        const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, 0, cv, ard)
+        const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, 0, cv)
         const args = { token: session.authToken, 
           id: na.id,
           idg: gr.id,
+          ardg: ard === null ? null : await crypter(gr.na.rnd, ard),
           nig, im, rowMembre
         }
         const ret = this.tr(await post(this, 'NouveauMembre', args))
@@ -1230,7 +1255,7 @@ export class StatutMembre extends OperationUI {
         egr = await crypter(session.clek, new Uint8Array(encode(x)))
       }
       const kegr = hash(await crypter(nagr.rnd, inverse(namb.rnd), 1))
-      const ardg = ard === false ? false : (!ard ? null : await crypter(nagr.rnd, ard))
+      const ardg = !ard ? null : await crypter(nagr.rnd, ard)
 
       // En UTC la division d'une date est multiple de 86400000
       const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
