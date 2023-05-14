@@ -227,7 +227,7 @@ Retour: idnapc: {id, napc}
 export class GetAvatarPC extends OperationUI {
   constructor () { super($t('OPcpc')) }
 
-  async run (p) { // p: objet PhraseContact
+  async run (p) { // p: objet Phrase
     try {
       const session = stores.session
       let res

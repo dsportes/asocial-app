@@ -12,16 +12,7 @@
   <q-page-container>
     <q-card style="height:50vh">
     <q-card-section>
-      <q-input dense v-model="pc" :label="$t('NPphl')" counter :rules="[r1]" maxlength="32"
-        :type="isPwd ? 'password' : 'text'" :hint="$t('entree')"
-        @keydown.enter.prevent="ok">
-        <template v-slot:append>
-          <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-          <span :class="pc.length === 0 ? 'disabled' : ''">
-            <q-icon name="cancel" class="cursor-pointer"  @click="razphrase"/>
-          </span>
-        </template>
-      </q-input>
+      <phrase-contact @ok="ok"/>
     </q-card-section>
 
     <apercu-chat v-if="chat" class="q-my-sm" :na-e="chat.naE" :na-i="chat.naI"
@@ -35,26 +26,25 @@
 <script>
 import { ref } from 'vue'
 import ApercuChat from '../components/ApercuChat.vue'
-import { MD, PhraseContact, Motscles, Chat } from '../app/modele.mjs'
+import { MD, Motscles, Chat } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import { afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { ReactivationChat, GetAvatarPC } from '../app/operations.mjs'
+import { GetAvatarPC } from '../app/operations.mjs'
+import PhraseContact from '../components/PhraseContact.vue'
 
 export default ({
   name: 'ContactChat',
 
   props: { close: Function },
 
-  components: { ApercuChat, BoutonHelp },
+  components: { ApercuChat, PhraseContact, BoutonHelp },
 
   computed: {
   },
 
   data () {
     return {
-      isPwd: false,
-      pc: '',
       naE: null,
       chat: null
     }
@@ -64,14 +54,11 @@ export default ({
   },
 
   methods: {
-    r1 (val) { return (val.length > 15 && val.length < 33) || this.$t('NP16') },
-    razphrase () { this.pc = '' },
-
-    async ok () {
+    async ok (p) {
       this.chat = null
       const pSt = stores.people
       const aSt = stores.avatar
-      const p = await new PhraseContact().init(this.pc)
+      // const p = await new Phrase().init(pc)
       const { cv, na } = await new GetAvatarPC().run(p)
       if (!na) {
         await afficherDiag(this.$t('CChnopc'))

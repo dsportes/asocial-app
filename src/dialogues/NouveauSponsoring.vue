@@ -15,17 +15,7 @@
         <q-step :name="1" :title="$t('NPphr')" icon="settings" :done="step > 1">
           <span class="fs-sm q-py-sm">{{$t('NPnpc')}}</span>
           <div ref="step1">
-          <q-input dense v-model="phrase" :label="$t('NPphl')" counter :rules="[r1]" maxlength="32"
-            @keydown.enter.prevent="crypterphrase" :type="isPwd ? 'password' : 'text'"
-            :hint="$t('NPpe')">
-            <template v-slot:append>
-              <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-              <span :class="phrase.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="razphrase"/></span>
-            </template>
-          </q-input>
-          </div>
-          <div v-if="encours" class="fs-md text-italic text-primary">{{$t('NPcry')}}
-            <q-spinner color="primary" size="2rem" :thickness="3" />
+            <phrase-contact @ok="crypterphrase" />
           </div>
         </q-step>
 
@@ -92,10 +82,11 @@ import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { edvol } from '../app/util.mjs'
-import { MD, PhraseContact, Sponsoring } from '../app/modele.mjs'
+import { MD, Sponsoring } from '../app/modele.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import PhraseContact from '../components/PhraseContact.vue'
 import { AjoutSponsoring } from '../app/operations.mjs'
 
 export default ({
@@ -105,7 +96,7 @@ export default ({
   qui lui peut choisir la tribu du sponsorisé */
   props: { tribu: Object },
 
-  components: { ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp },
+  components: { PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -124,8 +115,7 @@ export default ({
       npi: false,
       pc: null,
       mot: '',
-      diagmot: false,
-      encours: false
+      diagmot: false
     }
   },
 
@@ -161,21 +151,9 @@ export default ({
   methods: {
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
-    r1 (val) { return (val.length > 15 && val.length < 33) || this.$t('NP16') },
-    crypterphrase () {
-      if (!this.r1(this.phrase)) return
-      this.encours = true
-      this.pc = new PhraseContact()
-      setTimeout(async () => {
-        await this.pc.init(this.phrase)
-        this.encours = false
-        this.step = 2
-      }, 1)
-    },
-    razphrase () {
-      this.phrase = ''
-      this.pc = null
-      this.encours = false
+    crypterphrase (pc) {
+      this.pc = pc
+      this.step = 2
     },
     oknom (nom) {
       if (nom) {

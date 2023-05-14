@@ -3,16 +3,13 @@
     <q-checkbox v-model="vkb" color="primary" style="position:relative;left:-8px"/>
     <span class="cprim fs-lg">{{$t('PSkb')}}</span>
     <div class="titre-lg">{{$t('PSm'+phase)}}</div>
-    <q-input dense counter :hint="$t('PS16c')" v-model="ligne1" @focus="setKB(1)" :type="isPwd ? 'password' : 'text'" :label="$t('PSl1')">
+    <q-input dense counter :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : ''" v-model="ligne1" @focus="setKB(1)" 
+      :type="isPwd ? 'password' : 'text'" :label="$t('PSl1')">
     <template v-slot:append>
         <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-        <span :class="!ligne1 || ligne1.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="ligne1 = ''"/></span>
-    </template>
-    </q-input>
-    <q-input dense counter :hint="$t('PS16c')" v-model="ligne2" @focus="setKB(2)" :type="isPwd ? 'password' : 'text'" :label="$t('PSl2')">
-    <template v-slot:append>
-        <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-        <span :class="!ligne2 || ligne2.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer" @click="ligne2 = ''"/></span>
+        <span :class="!ligne1 || ligne1.length === 0 ? 'disabled' : ''">
+          <q-icon name="cancel" class="cursor-pointer"  @click="ligne1 = ''"/>
+        </span>
     </template>
     </q-input>
     <div>
@@ -21,12 +18,13 @@
       </div>
       <div v-else class="row justify-between items-center no-wrap">
         <div v-if="isDev">
-          <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" :key="idx" @click="selph(p)">{{idx}}</span>
+          <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
+            :key="idx" @click="selph(p)">{{idx}}</span>
         </div>
         <div>
           <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" size="md" @click="ko" />
           <q-btn color="warning" glossy :label="labelVal()" size="md" :icon-right="iconValider"
-            :disable="!ligne1 || !ligne2 || ligne1.length < 16 || ligne2.length < 16" @click="ok" />
+            :disable="!ligne1 || ligne1.length < lgph" @click="ok" />
         </div>
       </div>
     </div>
@@ -45,14 +43,13 @@ import { $t } from '../app/util.mjs'
 
 export default ({
   name: 'PhraseSecrete',
-  props: { iconValider: String, verif: Boolean, labelValider: String, initVal: Object },
+  props: { iconValider: String, verif: Boolean, labelValider: String, initVal: Object, nbc: Number },
   data () {
     return {
       phase: 0,
       encours: false,
       isPwd: false,
-      vligne1: '',
-      vligne2: ''
+      vligne1: ''
     }
   },
   watch: {
@@ -61,23 +58,20 @@ export default ({
         if (ap.charAt(0) === '*') {
           const c = ap.charAt(1)
           let s = ''
-          for (let i = 0; i < 16; i++) s += c
+          for (let i = 0; i < this.lgph; i++) s += c
           this.ligne1 = s
-          this.ligne2 = s
         }
       } else if (ap && ap.length === 3 && ap.startsWith('!')) {
         const c = ap.substring(1, 3)
         let s = ''
-        for (let i = 0; i < 8; i++) s += c
+        for (let i = 0; i < (this.lgph / 2); i++) s += c
         this.ligne1 = s
-        this.ligne2 = s
       }
     }
   },
   methods: {
     selph (p) {
-      this.ligne1 = p[0]
-      this.ligne2 = p[1]
+      this.ligne1 = p
     },
     labelVal () {
       if (!this.verif) return $t(this.labelValider || 'PSval')
@@ -89,12 +83,10 @@ export default ({
       } else {
         if (this.phase < 2) {
           this.vligne1 = this.ligne1
-          this.vligne2 = this.ligne2
           this.ligne1 = ''
-          this.ligne2 = ''
           this.phase = 2
         } else {
-          if (this.ligne1 === this.vligne1 && this.ligne2 === this.vligne2) {
+          if (this.ligne1 === this.vligne1) {
             this.okem()
           } else {
             this.raz()
@@ -107,7 +99,7 @@ export default ({
       this.encours = true
       setTimeout(async () => {
         const ps = new Phrase()
-        await ps.init(this.ligne1, this.ligne2)
+        await ps.init(this.ligne1)
         this.$emit('ok-ps', ps)
         this.raz()
       }, 300)
@@ -131,7 +123,8 @@ export default ({
     const isDev = config.dev
     const initVal = toRef(props, 'initVal')
     const ligne1 = ref('')
-    const ligne2 = ref('')
+    const nbc = toRef(props, 'nbc')
+    const lgph = ref(nbc.value || 24) 
 
     const layout = {
       default: [
@@ -156,7 +149,6 @@ export default ({
 
     onMounted(() => {
       ligne1.value = initVal.value ? initVal.value.debut : ''
-      ligne2.value = initVal.value ? initVal.value.fin : ''
       nl.value = 0
       vkb.value = false
       if (keyboard.value) {
@@ -167,7 +159,6 @@ export default ({
 
     function onChange (input) {
       if (nl.value === 1) ligne1.value = input
-      if (nl.value === 2) ligne2.value = input
     }
 
     function handleShift () {
@@ -198,7 +189,6 @@ export default ({
       }
       if (nl.value !== n) {
         if (n === 1) keyboard.value.setInput(ligne1.value)
-        if (n === 2) keyboard.value.setInput(ligne2.value)
       }
       nl.value = n
     }
@@ -216,8 +206,8 @@ export default ({
       keyboard,
       setKB,
       ligne1,
-      ligne2,
-      vkb
+      vkb,
+      lgph
     }
   }
 })

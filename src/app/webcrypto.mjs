@@ -16,7 +16,8 @@ import { ALLSALTS, SALTS } from './salts.mjs'
 const localkey = ALLSALTS.slice(32, 64)
 
 export async function pbkfd (secret) {
-  const passwordKey = await window.crypto.subtle.importKey('raw', enc.encode(secret), 'PBKDF2', false, ['deriveKey'])
+  const u8 = typeof secret === 'string' ? enc.encode(secret) : secret
+  const passwordKey = await window.crypto.subtle.importKey('raw', u8, 'PBKDF2', false, ['deriveKey'])
   const key = await window.crypto.subtle.deriveKey(
     { name: 'PBKDF2', salt: SALTS[0], iterations: 5000, hash: 'SHA-256' },
     passwordKey,

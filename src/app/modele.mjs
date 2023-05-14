@@ -413,9 +413,38 @@ export class Motscles {
 }
 
 /******************************************************
- * classes Phrase, MdpAdmin, PhraseContact
+ * classe Phrase
 ******************************************************/
+const enc = new TextEncoder()
+const idxch = [0, 2, 4, 5, 8, 9, 12, 14, 18, 19, 23, 25, 28, 30]
+
 export class Phrase {
+  async init (texte) {
+    this.phrase = texte
+    const u8 = enc.encode(texte)
+    const m = Math.floor(u8.length / 2)
+    const deb = new Uint8Array(m)
+    for (let i = 0; i < idxch.length && i < m; i++) deb[i] = u8[idxch[i]]
+    this.pcb = await pbkfd(u8)
+    this.pcbh = hash(this.pcb)
+    this.hps1 = hash(sha256(deb))
+    return this
+  }
+
+  get shax () { return sha256(this.pcb) }
+
+  get shax64 () { return u8ToB64(this.shax) }
+
+  get shay () { return sha256(this.shax) } 
+
+  // par compatibilité avec le code écrit avant fusion phrases
+  get phch () { return this.hps1 } 
+  get clex () { return this.pcb }
+
+}
+
+/*
+export class Phrase2 {
   async init (debut, fin) {
     this.pcb = await pbkfd(debut + '\n' + fin)
     this.pcbh = hash(this.pcb)
@@ -441,16 +470,7 @@ export class PhraseContact {
     return this
   }
 }
-
-export class MdpAdmin {
-  async init (mdp) {
-    this.mdp = mdp
-    this.mdpb = await pbkfd(mdp)
-    this.mdp64 = u8ToB64(this.mdpb, true)
-    this.mdph = hash(this.mdpb)
-  }
-}
-
+*/
 const lstfnotif = ['idSource', 'jbl', 'nj', 'texte', 'dh']
 export class Notification {
 
@@ -674,7 +694,6 @@ export class Tribu extends GenDoc {
     - `notif` : notification du compte (cryptée par la clé de la tribu).
     - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
 */
-
 export class Tribu2 extends GenDoc {
   get na () { return getNg(this.id) }
   get clet () { return getCle(this.id) }
@@ -724,7 +743,6 @@ export class Tribu2 extends GenDoc {
     }
     return null
   }
-
 
   static async primitiveRow (nt, q1, q2, naC) { // q1 q2 : quotas attribués au Comptable
     const naComptable = naC || stores.session.naComptable
@@ -778,7 +796,6 @@ export class Tribu2 extends GenDoc {
 - `hpc` : hash de la phrase de contact.
 - `napc` : `[nom, clé]` de l'avatar cryptée par le PBKFD de la phrase de contact.
 */
-
 export class Avatar extends GenDoc {
   get primaire () { return ID.estCompte(this.id) } // retourne true si l'objet avatar est primaire du compte
   get naprim () { return this.lav[0].na } // na de l'avatar primaire du compte
@@ -918,7 +935,6 @@ export class Cv extends GenDoc {
 - `napt`: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
 - `compteurs`: compteurs sérialisés (non cryptés).
 */
-
 export class Compta extends GenDoc {
   get stn () { return this.blocage ? this.blocage.stn : 0 }
   get clet () { return this.nct.rnd }
@@ -1103,7 +1119,6 @@ _data_
   - `quotas` : `[v1, v2]` quotas attribués par le parrain.
 - `ardx` : ardoise de bienvenue du sponsor / réponse du filleul cryptée par le PBKFD de la phrase de sponsoring
 */
-
 export class Sponsoring extends GenDoc {
 
   /* Par l'avatar sponsor */
@@ -1228,7 +1243,6 @@ _data_:
   - cv
   - cc (décryptée)
 */
-
 export class Chat extends GenDoc {
   get naI () { return getNg(this.id) }
 
@@ -1413,13 +1427,7 @@ export class Groupe extends GenDoc {
 - `infok` : commentaire du membre à propos du groupe crypté par la clé K du membre.
 - `nag` : `[nom, rnd]` : nom complet de l'avatar crypté par la clé du groupe :
 - `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
-
-**Remarque sur `ardg`**
-- commentaire inscrit facultativement par le membre ayant inscrit le contact.
-- mises à jour ensuite exclusivement par les animateurs,
-- SAUF réponse d'acceptation ou de refus par le membre, seule occasion pour lui d'écrire sur l'ardoise (s'il n'est pas animateur).
 */
-
 export class Membre extends GenDoc {
   // Du groupe
   get cleg () { return getCle(this.id) }
@@ -1485,7 +1493,6 @@ _data_:
   - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v2 d'un secret.
   - `datas` : sérialisation cryptée par la clé S du secret de : `{ nom, info, dh, type, gz, lg, sha }`.
 */
-
 export class Secret extends GenDoc {
   get cle () { return getCle(this.id) }
   get ng () { return getNg(this.id) }

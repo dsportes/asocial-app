@@ -77,6 +77,7 @@
 </template>
 
 <script>
+import { toRef } from 'vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
@@ -163,7 +164,9 @@ export default ({
     }
   },
 
-  setup () {
+  setup (props) {
+    const sp = toRef(props, 'sp')
+    const pc = toRef(props, 'pc')
     return {
       MD
     }

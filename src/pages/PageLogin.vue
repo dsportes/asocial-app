@@ -25,18 +25,7 @@
       <div class="titre-md">{{$t('LOGpar')}}</div>
       <q-btn v-if="!btncd" flat dense color="warning" icon="add_circle" :label="$t('LOGcrea')" @click="btncd = true"/>
       <div v-else class="full-width">
-        <q-input class="full-width" dense v-model="phrase" :label="$t('LOGphr')"
-          @keydown.enter.prevent="crypterphrase" :type="isPwd ? 'password' : 'text'"
-          :hint="$t('entree')">
-          <template v-slot:append>
-            <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-            <span :class="phrase.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="phrase=''"/></span>
-            <q-btn dense icon-right="send" size="sm" color="warning" :label="$t('OK')" @click="crypterphrase"/>
-          </template>
-        </q-input>
-        <div v-if="encours" class="fs-md text-italic text-primary">{{$t('cryptage')}}
-          <q-spinner color="primary" size="2rem" :thickness="3" />
-        </div>
+        <phrase-contact @ok="crypterphrase"/>
       </div>
   </q-card>
 
@@ -54,27 +43,24 @@ import stores from '../stores/stores.mjs'
 
 import { $t, afficherDiag } from '../app/util.mjs'
 import { connecterCompte } from '../app/connexion.mjs'
-import { MD, PhraseContact, Sponsoring } from '../app/modele.mjs'
+import { MD, Sponsoring } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ } from '../app/api.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
+import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../dialogues/AcceptationSponsoring.vue'
 
 export default {
   name: 'PageLogin',
 
-  components: { PhraseSecrete, AcceptationSponsoring },
+  components: { PhraseContact, PhraseSecrete, AcceptationSponsoring },
 
   data () {
     return {
       btncd: false,
-      phrase: '',
-      isPwd: false,
-      encours: false,
-      phch: 0,
       datactc: null,
       coupleloc: null,
-      /* clex: null, pph: 0, p: null */
+      pc: null
     }
   },
 
@@ -82,54 +68,48 @@ export default {
     onps (phrase) {
       connecterCompte(phrase, this.razdb)
     },
-    crypterphrase () {
-      if (!this.phrase) return
-      this.encours = true
-      setTimeout(async () => {
-        try {
-          this.pc = await new PhraseContact().init(this.phrase)
-          this.encours = false
-          /* Recherche sponsoring ******
-          args.ids : hash de la phrase de contact
-          Retour:
-          - rowSponsoring s'il existe
-          */
-          const res = await new ChercherSponsoring().run(this.pc.phch)
-          if (!res || !res.rowSponsoring) {
-            await afficherDiag(this.$t('LOGnopp'))
-            this.raz()
-            return
-          }
-          try {
-            this.sp = await Sponsoring.fromRow(res.rowSponsoring, this.pc.clex)
-            if (this.sp.dlv <  AMJ.amjUtc()) {
-              await afficherDiag(this.$t('LOGppinv'))
-              this.raz()
-              return                  
-            }
-            if (this.sp.st !== 0) {
-              await afficherDiag(this.$t('LOGsp' + this.sp.st))
-              this.raz()
-              return                  
-            }
-            this.ovdialcp()
-            this.raz()
-            return
-          } catch (e) {
-            await afficherDiag(this.$t('LOGppatt'))
-            this.raz()
-            return         
-          }
-        } catch (e) {
-          console.log(e)
+    async crypterphrase (pc) {
+      this.pc = pc
+      try {
+        /* Recherche sponsoring ******
+        args.ids : hash de la phrase de contact
+        Retour:
+        - rowSponsoring s'il existe
+        */
+        const res = await new ChercherSponsoring().run(this.pc.phch)
+        if (!res || !res.rowSponsoring) {
+          await afficherDiag(this.$t('LOGnopp'))
           this.raz()
           return
         }
-      }, 1)
+        try {
+          this.sp = await Sponsoring.fromRow(res.rowSponsoring, this.pc.clex)
+          if (this.sp.dlv <  AMJ.amjUtc()) {
+            await afficherDiag(this.$t('LOGppinv'))
+            this.raz()
+            return                  
+          }
+          if (this.sp.st !== 0) {
+            await afficherDiag(this.$t('LOGsp' + this.sp.st))
+            this.raz()
+            return                  
+          }
+          this.ovdialcp()
+          this.raz()
+          return
+        } catch (e) {
+          await afficherDiag(this.$t('LOGppatt'))
+          this.raz()
+          return         
+        }
+      } catch (e) {
+        console.log(e)
+        this.raz()
+        return
+      }
     },
     raz () {
       this.btncd = false
-      this.phrase = ''
     }
   },
 

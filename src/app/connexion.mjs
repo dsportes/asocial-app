@@ -1022,8 +1022,8 @@ export class CreerEspace extends OperationUI {
       const na = NomGenerique.comptable(ns)
       setNg(na)
 
-      let s = ''; for (let i = 0; i < 8; i++) s += ns
-      const phrase = await new Phrase().init(s, s)
+      let s = ''; for (let i = 0; i < 12; i++) s += ns
+      const phrase = await new Phrase().init(s)
 
       const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true, phrase) // set de session.clek
       const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])
@@ -1140,7 +1140,7 @@ args.notifC : si false, suppression, si null rien, sinon remplace
 args.blocage : si false, suppression, si null rien, sinon remplace
 args.t : si non 0, remplace
 Retour: rowEspace
-*/
+
 export class SetEspace extends OperationUI {
   constructor () { super($t('OPsetesp')) }
 
@@ -1163,4 +1163,4 @@ export class SetEspace extends OperationUI {
     }
   }
 }
-
+*/

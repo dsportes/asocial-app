@@ -11,9 +11,8 @@
   "portupload": 33666,
 
   "phrases" : [
-    ["leszsanglotszLONGSz", "garezauzGORILLEz"],
-    ["auzvillagezSANSz", "jaizmauvaisezREPUTATIONz"],
-    ["emilieemilieemilie", "emilieemilieemilie"]
+    "leszsanglotszLONGSzgarezauzGORILLEz",
+    "auzvillagezSANSzjaizmauvaisezREPUTATIONz"
   ],
   "nomDuComptable": "Comptable",
   "nomTribuPrimitive": "Primitive",

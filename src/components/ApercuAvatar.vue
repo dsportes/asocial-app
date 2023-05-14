@@ -51,7 +51,7 @@ import { MajCv, GetAvatarPC, ChangementPC } from '../app/operations.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import { afficherDiag } from '../app/util.mjs'
-import { MD, PhraseContact } from '../app/modele.mjs'
+import { MD, Phrase } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuAvatar',
@@ -85,7 +85,7 @@ export default {
       this.pc = this.avatar.pc || ''
     },
     async declPC () {
-      const p = await new PhraseContact().init(this.pc)
+      const p = await new Phrase().init(this.pc)
       const { id, na } = await new GetAvatarPC().run(p)
       if (id) {
         if (id === this.avatar.id && na) {
