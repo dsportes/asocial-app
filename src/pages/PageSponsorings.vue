@@ -1,16 +1,15 @@
 <template>
   <q-page>
-
-    <div v-if="session.estSponsor || estComptable"> <!-- Nouveau sponsoring -->
+    <q-card class="largeur40 maauto q-mb-lg q-pa-sm row justify-center items-center" v-if="session.estSponsor || estComptable"> 
+      <!-- Nouveau sponsoring -->
       <q-btn class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts" no-caps
         :label="$t('NPnouv')" color="warning" dense @click="nouveausp"/>
       <bouton-help class="q-ml-sm" page="page1"/>
-    </div>
+    </q-card>
 
-    <div class="titre-lg q-px-sm q-my-md">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</div>
+    <q-card class="largeur40 maauto q-pa-sm titre-lg text-center">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</q-card>
 
-    <div v-for="(sp, idx) in sponsorings" :key="sp.ids">
-      <q-separator color="orange" class="q-mt-sm"/>
+    <q-card class="largeur40 maauto q-mt-lg" v-for="(sp, idx) in sponsorings" :key="sp.ids">
       <div :class="'q-px-sm ' + dkli(idx)">
         <div :class="'titre-md text-' + clr(sp)">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
         <div class="titre-md">{{$t('NPphr')}}
@@ -33,12 +32,15 @@
         <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
         <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard" :idx="idx"/>
 
-        <div v-if="sp.st===0">
-          <q-btn class="q-mr-md" color="primary" size="sm" dense :label="$t('NPprol')" @click="prolonger(sp)"/>
-          <q-btn color="warning" size="sm" dense :label="$t('NPann')" @click="annuler(sp)"/>
+        <div v-if="sp.st===0" class="q-mt-sm row justify-center items-center">
+          <div class="titre-md text-italic q-mr-sm">{{$t('NPpro')}}</div>
+          <q-btn class="q-mr-xs" color="primary" size="md" dense :label="$t('NPpro7')" @click="prolonger(sp, 7)"/>
+          <q-btn class="q-mr-xs" color="primary" size="md" dense :label="$t('NPpro20')" @click="prolonger(sp, 20)"/>
+          <q-btn class="q-mr-lg" color="primary" size="md" dense :label="$t('NPpro30')" @click="prolonger(sp, 30)"/>
+          <q-btn color="warning" size="md" dense :label="$t('NPann')" @click="prolonger(sp, 0)"/>
         </div>
       </div>
-    </div>
+    </q-card>
 
     <!-- Dialogue de création d'un sponsoring -->
     <q-dialog v-model="nvsp" full-height persistent>
@@ -57,6 +59,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import { MD } from '../app/modele.mjs'
+import { ProlongerSponsoring } from '../app/connexion.mjs'
 
 export default {
   name: 'PageSponsorings',
@@ -86,11 +89,9 @@ export default {
     async nouveausp () { if (await this.session.edit()) this.ovnvsp() },
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
-    async prolonger (sp) {
-      // TODO : prolonger un sponsoring
-    },
-    async annuler (sp) {
-      // TODO : annuler un sponsoring
+    async prolonger (sp, nj) {
+      const ndlv = !nj ? 0 : AMJ.amjUtcPlusNbj(this.session.dateJourConnx, nj)
+      new ProlongerSponsoring().run(sp, ndlv)
     }
   },
 

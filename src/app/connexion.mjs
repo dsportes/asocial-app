@@ -977,6 +977,26 @@ export class RefusSponsoring extends OperationUI {
   }
 }
 
+/* Prologer un sponsoring
+args.id ids : identifiant du sponsoring
+args.dlv : nouvelle dlv (0 == annulation)
+*/
+export class ProlongerSponsoring extends OperationUI {
+  constructor () { super($t('OPprosp')) }
+
+  async run (sp, dlv) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id: sp.id, ids: sp.ids, dlv }
+      await post(this, 'ProlongerSponsoring', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+
 /* Création d'un nouvel espace et du comptable associé
 args.token donne les éléments d'authentification du compte.
 args.rowEspace : espace créé

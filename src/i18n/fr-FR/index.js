@@ -58,6 +58,14 @@ export default {
   gravite1: 'normale ou importante',
   gravite2: 'importante',
 
+  // Filtre stmb
+  stmb0: '(n\'importe lequel)',
+  stmb1: 'd\'animateur',
+  stmb2: 'actif',
+  stmb3: 'de simple contact',
+  stmb4: 'd\'invité confirmé ou non',
+  stmb5: 'de résilié / refus d\'invitation',
+
   tmc0: 'Compte',
   tmc1: 'Groupe',
   tmc2: 'App.',
@@ -362,6 +370,10 @@ export default {
   NPnouv: 'Sponsoriser un nouveau compte',
   NPnosp: 'Aucun sponsoring n\'est actuellement en cours ou récent',
   NPspex: 'Liste des sponsorings actuellement en cours ou récents',
+  NPpro: 'Date limite de validité dans ...',
+  NPpro7: '7 jours',
+  NPpro20: '20 jours',
+  NPpro30: '30 jours',
   NPphr: 'Phrase de sponsoring:',
   NPdlv: 'Date limite de validité:',
   // 0: en attente réponse, 1: refusé, 2: accepté, 3: détruit
@@ -592,6 +604,7 @@ export default {
   FIngr: 'Début du nom du groupe',
   FInomt: 'Début du nom de la tribu',
   FInomc: 'Début du nom du compte',
+  FInmb: 'Début du nom du membre',
   FIinfmb: 'Texte dans les commentaires ds membres',
   FItxt: 'Texte cherché dans les chats',
   FItxtt: 'Texte cherché dans les commentaires',
@@ -604,6 +617,7 @@ export default {
   FIavecsp: 'Comptes "sponsor" seulement',
   FIavecgr: 'Membre d\'un groupe',
   FInotif: 'Ayant une notification ... {0}',
+  FIstmb: 'Ayant un statut ... {0}',
   FItribu: 'De ma tribu ... {0}',
   FIsansheb: 'Groupes sans hébergement',
   FIexcesvol: 'Groupes en excédent de volume',
@@ -801,6 +815,8 @@ export default {
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
   PGvut: 'Volume total réellement utilisé',
   PGvq: 'Somme des quotas attribués',
+  PGnh: 'Plus hébergé',
+  PGinv: 'Invitation',
   PGnocv: 'Pas d\'autre information',
   PGnope: 'Le groupe n\'a aucun autre membre que les avatars du compte',
   PGnomb: 'Aucun membre (sur {0}) ne répond au critère de sélection',
@@ -816,7 +832,7 @@ export default {
   PGplus5b: '{1} propose d\'ajouter {2} au groupe {0}',
   PGard: 'Ardoise du groupe : commentaires à propos de ce contact',
   PGvg: 'Voir le groupe',
-  PGmesav: 'Mes participations au groupe',
+  PGmesav: 'Ma participation au groupe | Ma participation au groupe | Mes participations au groupe',
   
   // Aperçu Membre
   AMct1: 'Inscrit comme "contact" par {0}.',

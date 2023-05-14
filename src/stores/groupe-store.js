@@ -111,6 +111,17 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
+    nbMesInvits: (state) => { return (e) => {
+        let n = 0
+        e.groupe.ast.forEach((st, i) => {
+          if (st >= 60 && st <= 72) {
+            if (e.membres.get(i).estAc) n++
+          }
+        })
+        return n
+      }
+    },
+
     // retourne le membre de l'avatar courant dans le groupe courant
     membreAcGc: (state) => {
       const session = stores.session
@@ -119,14 +130,10 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     // nombre d'invités et d'animateurs dans le groupe courant
-    nbInvitsAnims: (state) => {
-      let ni = 0
+    nbAnims: (state) => {
       let na = 0
-      state.egrC.groupe.ast.forEach(st => {
-        if (st === 32) na++
-        if (st >= 60 && st <= 62) ni++
-      })
-      return [na, ni]
+      state.egrC.groupe.ast.forEach(st => { if (st === 32) na++ })
+      return na
     },
 
     animIds: (state) => { return (e) => {
@@ -211,9 +218,20 @@ export const useGroupeStore = defineStore('groupe', {
       function f0 (a, b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
       const f = stores.filtre.filtre.groupe
       const r = []
-      for (const e of state.pgLm) {
-        // TODO filtre des membres
-        r.push(e)
+      const ast = state.egrC.groupe.ast
+      for (const m of state.pgLm) {
+        if (f.nmb && !m.na.nom.startsWith(f.nmb)) continue
+        if (f.stmb) {
+          const st = ast[m.ids]
+          switch (f.stmb) {
+            case 1: { if (st !== 32) continue; break }
+            case 2: { if (st < 30 || st > 32) continue; break }
+            case 3: { if (st !== 10) continue; break }
+            case 4: { if (st < 60) continue; break }
+            case 5: { if (st < 40 || st > 50) continue; break }
+          }
+        }
+        r.push(m)
       }
       r.sort(f0)
       return r

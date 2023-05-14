@@ -46,7 +46,9 @@
       {{$t('AGinvits', [eg.groupe.nbInvits])}}
     </div>
 
-    <div class="titre-lg full-width text-center text-white bg-secondary q-mt-lg q-mb-md q-pa-sm">{{$t('PGmesav')}}</div>
+    <div class="titre-lg full-width text-center text-white bg-secondary q-mt-lg q-mb-md q-pa-sm">
+      {{$t('PGmesav', eg.mbacs.size)}}
+    </div>
 
     <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mb-md">
       <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>

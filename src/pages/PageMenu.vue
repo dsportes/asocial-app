@@ -71,7 +71,7 @@
       </q-item-label>
     </q-item-section>
   </q-item>
-  <q-separator color="orange"/>
+  <q-separator v-if="session.groupeId" class="q-my-xs" color="orange"/>
   <q-item v-if="session.groupeId" clickable @click="ui.setPage('groupe', 'groupe')">
     <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACgr')}}</span>
     <q-btn class="q-ml-md text-bold" dense :label="gSt.egrC.groupe.na.nomc" no-caps
@@ -84,7 +84,7 @@
       </q-item-label>
     </q-item-section>
   </q-item>
-  <q-separator color="orange"/>
+  <q-separator v-if="!session.incognito" class="q-my-xs" color="orange"/>
   <q-item v-if="!session.incognito" clickable>
     <q-item-section>
       <q-item-label lines="1">{{$t('ACficav')}}</q-item-label>

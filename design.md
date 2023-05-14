@@ -1,7 +1,5 @@
 
 TODO :
-- prolongation / annulation d'un sponsoring
-- filtre des membres
 - traiter les autorisations pour le comptable (page menu en particulier) pour survivre à un blocage de sa tribu / voir global
 
 Roadmap:

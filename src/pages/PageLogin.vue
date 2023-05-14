@@ -1,7 +1,7 @@
 <template>
 <q-page class="column align-start items-center">
 
-  <q-card class="q-mt-lg bs petitelargeur fs-md column justify-center">
+  <q-card class="q-mt-lg petitelargeur fs-md column justify-center">
     <div :class="'full-width bord' + (!session.mode ? '1' : '2')">
     <div class="q-py-sm q-gutter-md row justify-center">
       <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
@@ -9,8 +9,9 @@
       <q-radio dense v-model="session.mode" :val="3" :label="$t('avion')" />
     </div>
     </div>
+  </q-card>
 
-    <div :class="'full-width q-pa-sm ' + (!session.mode ? 'disabled' : '')">
+  <q-card v-if="session.mode" class="q-mt-lg q-pa-sm petitelargeur fs-md column justify-center">
       <phrase-secrete label-valider="LOGconn" icon-valider="send" v-on:ok-ps="onps"></phrase-secrete>
       <div :class="!session.synchro ? 'disabled' : ''">
         <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
@@ -18,11 +19,9 @@
         <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
           class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
       </div>
-    </div>
+  </q-card>
 
-    <q-separator class="q-my-md"/>
-
-    <div :class="'full-width q-pa-sm column items-start' + (!session.accesNet ? ' disabled' : '')">
+  <q-card v-if="session.accesNet" class="q-mt-lg q-pa-sm petitelargeur fs-md column justify-center">
       <div class="titre-md">{{$t('LOGpar')}}</div>
       <q-btn v-if="!btncd" flat dense color="warning" icon="add_circle" :label="$t('LOGcrea')" @click="btncd = true"/>
       <div v-else class="full-width">
@@ -39,7 +38,6 @@
           <q-spinner color="primary" size="2rem" :thickness="3" />
         </div>
       </div>
-    </div>
   </q-card>
 
   <q-dialog v-model="dialcp" persistent full-height>

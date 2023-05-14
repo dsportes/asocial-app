@@ -158,6 +158,8 @@
           <filtre-ainvits nom="groupes" attr="invits" :idx="0"/>
         </div>
         <div v-if="ui.page === 'groupe'" class="column justify-start">
+          <filtre-nom nom="groupe" prop='nmb' :idx="0"/>
+          <filtre-stmb nom="groupe" prop="stmb" :idx="1"/>
         </div>
       </div>
     </q-scroll-area>
@@ -334,6 +336,7 @@ import FiltreNotif from './components/FiltreNotif.vue'
 import FiltreSansheb from './components/FiltreSansheb.vue'
 import FiltreEnexcedent from './components/FiltreEnexcedent.vue'
 import FiltreAinvits from './components/FiltreAinvits.vue'
+import FiltreStmb from './components/FiltreStmb.vue'
 
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
@@ -349,7 +352,7 @@ export default {
     PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
     PageGroupe, PageGroupes,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
-    FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits,
+    FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp
    },
 

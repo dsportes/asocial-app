@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="row q-mx-lg justify-center fs-md">
+    <q-card class="petitelargeur maauto row justify-center fs-md q-pa-sm">
 
       <!-- Déconnexion -->
       <div class="btn2" @click="MD.oD('dialoguedrc')">
@@ -69,19 +69,19 @@
         <span class="q-ml-xs">{{$t('MLAchats')}}</span>
       </div>
 
-    </div>
+    </q-card>
 
-    <q-separator color="orange" class="q-ma-sm"/>
+    <q-card v-if="session.niv === 3" class="q-mt-lg petitelargeur maauto q-pa-sm">
+      <div class="q-px-sm titre-md text-bold text-italic text-warning cursor-pointer"
+        @click="clickNotif2">{{$t('ACbloc')}}</div>
+    </q-card>
 
-    <div v-if="session.niv === 3" class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning cursor-pointer"
-      @click="clickNotif2">{{$t('ACbloc')}}</div>
-
-    <div v-if="session.niv < 3">
-      <div v-if="session.estSponsor" 
-        class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning">
-        {{$t('ACcptspons')}}</div>      
+    <q-card v-if="session.niv < 3" class="q-mt-lg petitelargeur maauto q-pa-sm">
+      <div v-if="session.estSponsor" class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning">
+        {{$t('ACcptspons')}}
+      </div>
       <page-menu/>
-    </div>
+    </q-card>
 
     <q-dialog v-model="outilsTests" full-height persistent>
       <outils-tests/>

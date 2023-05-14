@@ -1,6 +1,8 @@
 <template>
   <q-page class="q-pa-sm">
-    <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
+  <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
+
+  <div class="largeur40 maauto">
 
     <q-btn class="q-my-sm" size="md" dense color="primary" 
       :label="$t('PGcrea')" @click="nvGr"/>
@@ -36,9 +38,17 @@
               <div class="row items-center">
                 <img class="photomax" :src="e.groupe.photo" />
                 <div class="titre-md q-ml-sm">{{e.groupe.na.nomc}}</div>
-              </div>
+                <div v-if="e.groupe.dfh" class="q-ml-md">
+                  <q-icon name="warning" size="md" color="negative"/>
+                  <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
+                </div>
+                <div v-if="gSt.nbMesInvits(e)" class="q-ml-md">
+                  <q-icon name="star" size="md" color="green-5"/>
+                  <span class="q-ml-xs q-pa-xs bg-yellow-3 text-warning">{{$t('PGinv')}}</span>
+                </div>
+               </div>
             </div>
-            <q-btn class="q-ml-md" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(e)"/>
+            <q-btn class="q-ml-md btn1" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(e)"/>
           </template>
           <apercu-groupe class="q-ml-lg" :eg="e" :idx="idx" :mapmc="mapmc"/>
         </q-expansion-item>
@@ -67,7 +77,7 @@
         </div>
       </q-card>
     </q-dialog>
-
+  </div>
   </q-page>
 </template>
 
@@ -178,4 +188,6 @@ export default {
 </style>
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.btn1
+  height: 1.5rem !important
 </style>
