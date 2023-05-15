@@ -6,7 +6,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ, ID } from './api.mjs'
-import { resetRepertoire, compile, Phrase, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, NomTribu, GenDoc, setNg, getNg, Versions } from './modele.mjs'
+import { resetRepertoire, compile, Phrase, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter, random, genKeyPair } from './webcrypto.mjs'
@@ -838,9 +838,6 @@ export class AcceptationSponsoring extends OperationUI {
       this.buf = new IDBbuffer()
       this.dh = 0
 
-      setNg(sp.nct)
-      setNg(sp.naf)
-
       session.setCompteId(sp.naf.id)
       session.setTribuId(sp.nct.id)
       session.setAvatarId(session.compteId)
@@ -1018,9 +1015,7 @@ export class CreerEspace extends OperationUI {
       const rowEspace = await Espace.nouveau(ns)
 
       const nt = NomGenerique.tribu(ns, config.nomTribuPrimitive)
-      setNg(nt)
       const na = NomGenerique.comptable(ns)
-      setNg(na)
 
       let s = ''; for (let i = 0; i < 12; i++) s += ns
       const phrase = await new Phrase().init(s)

@@ -5,7 +5,7 @@ import stores from './stores.mjs'
 import { pbkfd, sha256 } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
-import { MD, setNg, NomGenerique } from '../app/modele.mjs'
+import { MD, NomGenerique } from '../app/modele.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -129,7 +129,6 @@ export const useSessionStore = defineStore('session', {
       if (this.ns) {
         this.estComptable = ID.estComptable(id)
         this.naComptable = NomGenerique.comptable(this.ns)
-        setNg(this.naComptable)
       }
     },
 

@@ -323,11 +323,8 @@ Il est consitué :
 ##### Map statique `repertoire` de `modele.mjs`
 Fonctions d'accès
 - `resetRepertoire ()` : réinitialisation
-- `setNg (ng)` : enregistrement d'un nom générique
 - `getCle (id)` : retourne le rnd du nom générique enregistré avec cette id
 - `getNg (id)` : retourne le nom générique enregistré avec cette id
-- `getDisparu (id)` : retourne `true` si cette id a été déclarée _disparue_
-- `setDisparu (id)` : déclare cette id comme _disparue_
 
 `repertoire` a une entrée pour :
 - 1-chaque avatar du compte,

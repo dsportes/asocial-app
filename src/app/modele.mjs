@@ -96,34 +96,49 @@ export class Versions {
 
 /* Répertoire (statique) *********************************
 - `resetRepertoire ()` : réinitialisation
-- `setNg (ng)` : enregistrement d'un nom générique
 - `getCle (id)` : retourne le rnd du nom générique enregistré avec cette id
 - `getNg (id)` : retourne le nom générique enregistré avec cette id
-- `getDisparu (id)` : retourne `true` si cette id a été déclarée _disparue_
-- `setDisparu (id)` : déclare cette id comme _disparue_
 */
-const repertoire = { rep: {} }
+const repertoire = { rep: {}, idn: {} }
 
-export function resetRepertoire () { repertoire.rep = {} }
-export function setNg (ng) {
-  const id = ng.id
-  let obj = repertoire.rep[id]; if (!obj) { obj = { }; repertoire.rep[id] = obj }
-  obj.ng = ng
-  return id
+export function resetRepertoire () { repertoire.rep = {}; repertoire.idn = {}; }
+export function getCle (id) { const e = repertoire.rep[id]; return e ? e.rnd : null }
+export function getNg (id) { return repertoire.rep[id] }
+
+/***********************************************************
+Idn : ID d'une note
+************************************************************/
+export class Idn {
+  static get (id, ids) { // getter / factory
+    const k = id + '/' + ids
+    const x = repertoire.idn[k]
+    if (x) return x
+    return new Idn(k, id, ids)
+  }
+
+  constructor (k, id, ids) { // private : NE PAS UTILISER
+    this.id = id
+    this.ids = ids
+    repertoire.idn[k] = this
+  }
 }
-export function getCle (id) { const e = repertoire.rep[id]; return e ? e.ng.rnd : null }
-export function getNg (id) { const e = repertoire.rep[id]; return e ? e.ng : null }
-export function getDisparu (id) { const e = repertoire.rep[id]; return e && e.x ? true : false }
-export function setDisparu (id) { const e = repertoire.rep[id]; if (e) e.x = true }
+
 
 /***********************************************************
 NomGenerique : NomAvatar, NomGroupe, NomTribu
 ************************************************************/
 export class NomGenerique {
-  constructor (n, nom, rnd) {
-    this.id = (((rnd[0] * 10) + rnd[1]) * d13) + n
-    this.nomx = nom || ''
+  static idOf (rnd) {
+    let z = true; for (let i = 2; i < 32; i++) if(rnd[i]) { z = false; break }
+    const n = z ? 0 : (hash(rnd) % d13)
+    return (((rnd[0] * 10) + rnd[1]) * d13) + n
+  }
+
+  constructor (id, nom, rnd) {
+    this.id = id
+    this.nomx = id % d13 === 0 || !nom ? '' : nom
     this.rnd = rnd
+    repertoire.rep[id] = this
   }
 
   get ns () { return this.rnd[0] }
@@ -150,45 +165,58 @@ export class NomGenerique {
   // Factories
 
   static from([nom, rnd]) {
-    let z = true; for (let i = 2; i < 32; i++) if(rnd[i]) { z = false; break }
-    const n = z ? 0 : (hash(rnd) % d13)
-    if (rnd[1] <= 1) return new NomAvatar(n, n ? nom : '', rnd) // Peut être Comptable
-    if (rnd[1] === 2) return new NomGroupe(n, nom, rnd)
-    return new NomTribu(n, nom, rnd)
+    const id = NomGenerique.idOf(rnd)
+    const e = repertoire.rep[id]
+    if (e) return e
+    if (rnd[1] <= 1) return new NomAvatar(id, nom, rnd)
+    if (rnd[1] === 2) return new NomGroupe(id, nom, rnd)
+    return new NomTribu(id, nom, rnd)
   }
 
   static comptable(ns) {
     const rnd = new Uint8Array(32)
     rnd[0] = ns
-    return new NomAvatar(0, stores.config.nomDu, rnd)
+    return new NomAvatar(0, stores.config.nomDuComptable, rnd)
   }
 
   static compte(ns, nom) {
     const rnd = random(32)
     rnd[0] = ns
     rnd[1] = 0
-    return new NomAvatar(hash(rnd) % d13, nom, rnd)
+    const id = NomGenerique.odOf(rnd)
+    const e = repertoire.rep[id]
+    if (e) return e
+    return new NomAvatar(id, nom, rnd)
   }
 
   static avatar(ns, nom) {
     const rnd = random(32)
     rnd[0] = ns
     rnd[1] = 1
-    return new NomAvatar(hash(rnd) % d13, nom, rnd)
+    const id = NomGenerique.odOf(rnd)
+    const e = repertoire.rep[id]
+    if (e) return e
+    return new NomAvatar(id, nom, rnd)
   }
 
   static groupe(ns, nom) {
     const rnd = random(32)
     rnd[0] = ns
     rnd[1] = 2
-    return new NomGroupe(hash(rnd) % d13, nom, rnd)
+    const id = NomGenerique.odOf(rnd)
+    const e = repertoire.rep[id]
+    if (e) return e
+    return new NomGroupe(id, nom, rnd)
   }
 
   static tribu(ns, nom) {
     const rnd = random(32)
     rnd[0] = ns
     rnd[1] = 3
-    return new NomTribu(hash(rnd) % d13, nom, rnd)
+    const id = NomGenerique.odOf(rnd)
+    const e = repertoire.rep[id]
+    if (e) return e
+    return new NomTribu(id, nom, rnd)
   }
 }
 
@@ -644,7 +672,6 @@ export class Tribu extends GenDoc {
       // Le comptable peut décoder n'importe quelle tribu
       const [nom, rnd] = decode(await decrypter(session.clek, row.nctkc))
       this.naC = NomGenerique.from([nom, rnd])
-      setNg(this.naC)
       this.info = row.infok ? await decrypterStr(session.clek, row.infok) : ''
     }
     this.nctkc = row.nctkc
@@ -711,7 +738,6 @@ export class Tribu2 extends GenDoc {
       r.sp = e.sp ? true : false
       r.q1 = e.q1
       r.q2 = e.q2
-      setNg(r.na)
       r.cv = e.cv ? decode(await decrypter(e.na.rnd, e.cv)) : null
       r.notif = e.notif ? new Notification(await decrypter(this.clet, e.notif)) : null
       this.mbtr[r.na.id] = r
@@ -877,13 +903,11 @@ export class Avatar extends GenDoc {
           // c'est une invitation
           const [nom, rnd, im] = decode(await decrypterRSA(this.priv, lgrc))
           const ng = NomGenerique.from([nom, rnd])
-          setNg(ng)
           this.lgr.set(ni, { ng, im})  
           gSt.setInvit(ng.id, this.id)
         } else {
           const [nom, rnd, im] = decode(await decrypter(session.clek, lgrc))
           const ng = NomGenerique.from([nom, rnd])
-          setNg(ng)
           this.lgr.set(ni, { ng, im})  
           gSt.delInvit(ng.id, this.id)
         }
@@ -984,7 +1008,6 @@ export class Compta extends GenDoc {
       const [nom, cle] = decode(await decrypter(session.clek, row.mavk[i]))
       const na = NomGenerique.from([nom, cle])
       this.mav.set(na.id, na)
-      setNg(na) 
       if (na.estCompte) this.naprim = na
     }
     this.avatarIds = new Set(this.mav.keys())
@@ -1005,11 +1028,9 @@ export class Compta extends GenDoc {
     }
     this.nct = NomGenerique.from([nomt, rndt])
     this.idt = this.nct.id
-    setNg(this.nct)
 
     const [nomp, rndp] = decode(await decrypter(rndt, row.napt))
     this.nap = NomGenerique.from([nomp, rndp])
-    setNg(this.id, this.nap)
 
     this.hps1 = row.hps1
     this.shay = row.shay
@@ -1445,7 +1466,6 @@ export class Membre extends GenDoc {
     const x = decode(await decrypter(this.cleg, row.nag)) // x: [nom, rnd]
     this.na = NomGenerique.from(x)
     this.estAc = aSt.compta.avatarIds.has(this.na.id)
-    if (!this.estAc) setNg(this.na)
     this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
   }

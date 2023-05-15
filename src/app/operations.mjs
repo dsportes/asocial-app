@@ -6,7 +6,7 @@ import { $t, hash, inverse } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, Compta,
-  Groupe, Membre, Tribu, Tribu2, getNg, setNg, getCle, compile} from './modele.mjs'
+  Groupe, Membre, Tribu, Tribu2, getNg, getCle, compile} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 
@@ -404,8 +404,6 @@ export class NouveauChat extends OperationUI {
       const session = stores.session
       const aSt =  stores.avatar
 
-      setNg(naI)
-      setNg(naE)
       const cc = random(32)
       const pubE = await aSt.getPub(naE.id)
       const ccPE = await crypterRSA(pubE, cc)
@@ -457,8 +455,6 @@ export class MajChat extends OperationUI {
       const session = stores.session
       const aSt =  stores.avatar
 
-      setNg(naI)
-      setNg(naE)
       const ccKI = chat.ccK ? await crypter(session.clek, chat.cc) : null
       const dh = new Date().getTime()
       const contcI = await Chat.getContc(naE, dh, txt, chat.cc)
@@ -959,7 +955,6 @@ export class NouveauGroupe extends OperationUI {
     try {
       const session = stores.session
       const nag = NomGenerique.groupe(session.ns, nom)
-      setNg(nag)
       const na = getNg(session.avatarId)
       const rowGroupe = await Groupe.rowNouveauGroupe(nag, na, unanime)
       
