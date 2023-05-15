@@ -137,7 +137,7 @@ export default {
     const gSt = stores.groupe
     const ui = stores.ui
 
-    const ardoise = ref(ui.egrplus.groupe.ard)
+    const ardoise = ref(ui.egrplus ? ui.egrplus.groupe.ard : '')
 
     const mapmc = ref(Motscles.mapMC(true, 0))
 

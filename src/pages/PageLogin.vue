@@ -12,7 +12,7 @@
   </q-card>
 
   <q-card v-if="session.mode" class="q-mt-lg q-pa-sm petitelargeur fs-md column justify-center">
-      <phrase-secrete label-valider="LOGconn" icon-valider="send" v-on:ok-ps="onps"></phrase-secrete>
+      <phrase-secrete label-valider="LOGconn" icon-valider="send" @ok="onps"></phrase-secrete>
       <div :class="!session.synchro ? 'disabled' : ''">
         <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
           class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>

@@ -1,51 +1,51 @@
 <template>
-  <q-page class="column q-pl-xs q-mr-sm">
+  <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
+    <q-card class="q-my-md q-pa-xs">
+      <div class="row items-center justify-center q-py-sm q-gutter-lg">
+        <div> <!-- Changement de phrase secrète -->
+          <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
+            :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
+          <bouton-help class="q-ml-sm" page="page1"/>
+        </div>
+        <div v-if="session.estSponsor"> <!-- Parrainer un nouveau compte -->
+          <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
+            :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring"/>
+          <bouton-help class="q-ml-sm" page="page1"/>
+        </div>
+        <div> <!-- Nouvel avatar -->
+          <q-btn class="q-ml-sm" size="md" icon="add" no-caps
+            :label="$t('CPTnvav')" color="warning" dense @click="ouvrirNvav"/>
+          <bouton-help class="q-ml-sm" page="page1"/>
+        </div>
+      </div>
 
-    <div class="row items-center justify-center q-py-sm q-gutter-lg">
-      <div> <!-- Changement de phrase secrète -->
-        <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
-          :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
-        <bouton-help class="q-ml-sm" page="page1"/>
+      <!-- Mémo du compte -->
+      <div class="q-py-sm">
+        <div class="titre-md">{{$t('CPTmemo')}}</div>
+        <show-html v-if="memo" class="q-ml-lg bord" maxh="5rem" :texte="memo" zoom edit
+            @edit="memoeditAut"/>
+        <div v-else class="q-ml-lg row">
+          <div class="col fs-md text-italic">({{$t('CPTnomemo')}})</div>
+          <q-btn class="col-auto" size="sm" dense icon="edit" color="primary" 
+            @click="memoeditAut"/>
+        </div>
       </div>
-      <div v-if="session.estSponsor"> <!-- Parrainer un nouveau compte -->
-        <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
-          :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring"/>
-        <bouton-help class="q-ml-sm" page="page1"/>
-      </div>
-      <div> <!-- Nouvel avatar -->
-        <q-btn class="q-ml-sm" size="md" icon="add" no-caps
-          :label="$t('CPTnvav')" color="warning" dense @click="ouvrirNvav"/>
-        <bouton-help class="q-ml-sm" page="page1"/>
-      </div>
-    </div>
 
-    <!-- Mémo du compte -->
-    <div class="q-py-sm">
-      <div class="titre-md">{{$t('CPTmemo')}}</div>
-      <show-html v-if="memo" class="q-ml-lg bord" maxh="5rem" :texte="memo" zoom edit
-          @edit="memoeditAut"/>
-      <div v-else class="q-ml-lg row">
-        <div class="col fs-md text-italic">({{$t('CPTnomemo')}})</div>
-        <q-btn class="col-auto" size="sm" dense icon="edit" color="primary" 
-          @click="memoeditAut"/>
+      <!-- Mots clés du compte -->
+      <div class="row items-center q-my-sm">
+        <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
+        <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
       </div>
-    </div>
-
-    <!-- Mots clés du compte -->
-    <div class="row items-center q-my-sm">
-      <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
-      <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
-    </div>
+    </q-card>
 
     <!-- Avatars du compte -->
-    <div v-for="(na, idx) in aSt.compta.lstAvatarNas" :key="na.id">
-      <q-separator class="q-my-sm"/>
+    <q-card class="q-my-md q-pa-xs" v-for="(na, idx) in aSt.compta.lstAvatarNas" :key="na.id">
       <div class="row items-start">
         <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
           :color="na.id === session.avatarId ? 'warning' : 'primary'" @click="courant(na.id)"/>
         <apercu-avatar edit :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')" :na="na" :idx="idx"/>
       </div>
-    </div>
+    </q-card>
 
     <!-- Dialogue d'édition des mots clés du compte -->
     <q-dialog v-model="mcledit" persistent>
@@ -85,7 +85,7 @@
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTchps2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
-        <phrase-secrete class="q-ma-xs" v-on:ok-ps="okps" verif icon-valider="check" 
+        <phrase-secrete class="q-ma-xs" @ok="okps" verif icon-valider="check" 
             label-valider="continuer"></phrase-secrete>
         <q-card-actions>
           <q-btn dense :label="$t('renoncer')" color="primary" icon="close" @click="MD.fD"/>

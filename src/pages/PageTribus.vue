@@ -2,23 +2,22 @@
   <q-page class="q-pa-sm">
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <stats-tribus class="q-my-sm q-mx-xs" :stats="session.stats" 
-      :ns="session.ns" :profil="session.profil"/>
+    <div class="q-my-md q-pa-xs column items-center">
+      <stats-tribus :stats="session.stats" :ns="session.ns" :profil="session.profil"/>
 
-    <quotas-vols class="q-my-sm q-mx-xs" :vols="session.stats" />
+      <quotas-vols class="q-my-sm" :vols="session.stats" />
 
-    <q-separator color="orange"/>
+      <q-btn class="q-my-sm" size="md" flat dense color="primary" 
+        :label="$t('PTnv')" @click="ouvrirnt"/>
+    </div>
 
-    <q-btn class="q-my-sm" size="md" flat dense color="primary" 
-      :label="$t('PTnv')" @click="ouvrirnt"/>
-
-    <div v-if="!aSt.ptLtFT.length" class="titre-lg text-italic">
+    <div v-if="!aSt.ptLtFT.length" class="largeur40 maauto q-my-md titre-lg text-italic">
       {{$t('PTvide', [aSt.getTribus.length])}}
     </div>
 
-    <div v-if="aSt.ptLtFT.length">
+    <q-card class="largeur40 maauto" v-if="aSt.ptLtFT.length">
       <div v-for="(tribu, idx) in aSt.ptLtFT" :key="tribu.id">
-        <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)">
+        <q-expansion-item dense switch-toggle-side group="g1" :class="'q-my-xs ' + dkli(idx)">
           <template v-slot:header>
             <div class="q-ml-md row full-width justify-between items-center">
               <div class="titre-md">{{tribu.na.nom}}</div>
@@ -28,7 +27,7 @@
           <apercu-tribu class="q-ml-lg" :id="tribu.id" :idx="idx" edit/>
         </q-expansion-item>
       </div>
-    </div>
+    </q-card>
 
     <!-- Dialogue de création d'une nouvelle tribu -->
     <q-dialog v-model="nt" persistent>

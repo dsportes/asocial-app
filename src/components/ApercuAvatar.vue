@@ -18,24 +18,18 @@
 
     <!-- Dialogue d'édition de la phrase de contact -->
     <q-dialog v-model="editionpc" persistent>
-      <q-card class="bs q-ma-xs moyennelargeur fs-md">
+      <q-card class="bs q-ma-xs largeur30 fs-md">
         <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg text-center">{{$t('FAphc')}}</q-toolbar-title>
           <bouton-help page="page1"/>
-          <q-toolbar-title class="titre-lg q-pl-sm">{{$t('FAphc')}}</q-toolbar-title>
-          <q-btn dense size="md" color="warning" icon="close" @click="editionpc = false"/>
         </q-toolbar>
         <q-card-section>
-          <q-input dense v-model="pc" :label="$t('NPphl')" counter :rules="[r1]" maxlength="32"
-            :type="isPwd ? 'password' : 'text'">
-            <template v-slot:append>
-              <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-              <span :class="pc.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="razphrase"/></span>
-            </template>
-          </q-input>
+          <phrase-contact @ok="declPC" :init-val="avatar.pc || ''"/>
         </q-card-section>
         <q-card-actions vertical>
-          <q-btn v-if="avatar.pc" flat color="warning" :label="$t('FAsup')" v-close-popup @click="supprPC"/>
-          <q-btn :disable="r1(pc) !== true" flat color="primary" :label="$t('FAdpc')" v-close-popup @click="declPC"/>
+          <q-btn v-if="avatar.pc" flat color="warning" :label="$t('FAsup')" @click="supprPC"/>
+          <!--q-btn :disable="pc === null" flat color="primary" :label="$t('FAdpc')" @click="declPC"/-->
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -50,43 +44,40 @@ import stores from '../stores/stores.mjs'
 import { MajCv, GetAvatarPC, ChangementPC } from '../app/operations.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import ApercuGenx from './ApercuGenx.vue'
+import PhraseContact from './PhraseContact.vue'
 import { afficherDiag } from '../app/util.mjs'
-import { MD, Phrase } from '../app/modele.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuAvatar',
 
   props: { na: Object, idx: Number, edit: Boolean },
 
-  components: { BoutonHelp, ApercuGenx },
+  components: { PhraseContact, BoutonHelp, ApercuGenx },
 
   computed: {
   },
 
   data () {
     return {
-      pc: '',
       isPwd: false
     }
   },
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-    r1 (val) { return (val.length > 15 && val.length < 33) || this.$t('NP16') },
     async cvchangee (res) {
       if (res && this.na) {
         await new MajCv().run(this.avatar, res.ph, res.info)
       }
     },
-    razphrase () { this.pc = '' },
     async editerpc () {
       if (!await this.session.edit()) return
-      this.editionpc = true
-      this.pc = this.avatar.pc || ''
+      this.oveditionpc()
     },
-    async declPC () {
-      const p = await new Phrase().init(this.pc)
-      const { id, na } = await new GetAvatarPC().run(p)
+    async declPC (pc) {
+      if (!pc) return
+      const { id, na } = await new GetAvatarPC().run(pc)
       if (id) {
         if (id === this.avatar.id && na) {
           afficherDiag(this.$t('FAerr1')) // déjà celle de l'avatar
@@ -99,10 +90,12 @@ export default {
         afficherDiag(this.$t('FAerr3')) // trop proche d'une déjà utilisée par un autre avatar
         return
       }
-      await new ChangementPC().run(this.avatar.na, p)
+      await new ChangementPC().run(this.avatar.na, pc)
+      MD.fD()
     },
     async supprPC () {
       await new ChangementPC().run(this.avatar.na)
+      MD.fD()
     }
   },
 
@@ -132,6 +125,7 @@ export default {
     function oveditionpc () { MD.oD(editionpc)}
 
     return {
+      MD,
       editionpc, oveditionpc,
       avatar,
       session: stores.session

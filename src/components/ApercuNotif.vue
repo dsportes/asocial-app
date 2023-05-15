@@ -394,4 +394,6 @@ export default {
   padding: 2px
 .inp1
   width: 5rem
+.btn2
+  max-height: 1.3rem
 </style>

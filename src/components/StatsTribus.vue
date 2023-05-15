@@ -1,5 +1,5 @@
 <template>
-<div class="bord1">
+<div class="bord1 full-width">
   <div class="titre-lg text-center">{{$t('STtit', [ns, stats.ntr, dh])}}</div>
   <div class="row bord2">
     <div class="col-6 q-pa-xs titre-md items-center column">

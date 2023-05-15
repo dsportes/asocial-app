@@ -3,29 +3,26 @@
     <q-checkbox v-model="vkb" color="primary" style="position:relative;left:-8px"/>
     <span class="cprim fs-lg">{{$t('PSkb')}}</span>
     <div class="titre-lg">{{$t('PSm'+phase)}}</div>
-    <q-input dense counter :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : ''" v-model="ligne1" @focus="setKB(1)" 
+    <q-input dense counter
+      :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : $t('NPpe')" 
+      v-model="ligne1" @focus="setKB(1)" 
+      @keydown.enter.prevent="ok2" 
       :type="isPwd ? 'password' : 'text'" :label="$t('PSl1')">
     <template v-slot:append>
-        <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-        <span :class="!ligne1 || ligne1.length === 0 ? 'disabled' : ''">
-          <q-icon name="cancel" class="cursor-pointer"  @click="ligne1 = ''"/>
-        </span>
+      <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
+      <q-btn icon="cancel" size="md" :disable="ligne1.length === 0"  @click="ligne1 = ''"/>
+      <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
     </template>
     </q-input>
-    <div>
-      <div v-if="encours" class="t1">{{$t('cryptage')}}
-        <q-spinner color="primary" size="2rem" :thickness="3" />
+    <div class="row justify-between items-center no-wrap">
+      <div v-if="isDev">
+        <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
+          :key="idx" @click="selph(p)">{{idx}}</span>
       </div>
-      <div v-else class="row justify-between items-center no-wrap">
-        <div v-if="isDev">
-          <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
-            :key="idx" @click="selph(p)">{{idx}}</span>
-        </div>
-        <div>
-          <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" size="md" @click="ko" />
-          <q-btn color="warning" glossy :label="labelVal()" size="md" :icon-right="iconValider"
-            :disable="!ligne1 || ligne1.length < lgph" @click="ok" />
-        </div>
+      <div>
+        <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" size="md" @click="ko" />
+        <q-btn color="warning" :label="labelVal()" size="md" :icon-right="iconValider"
+          :disable="!ligne1 || ligne1.length < lgph" @click="ok" />
       </div>
     </div>
     <div class="simple-keyboard"></div>
@@ -77,6 +74,9 @@ export default ({
       if (!this.verif) return $t(this.labelValider || 'PSval')
       return this.phase < 2 ? $t('OK') : $t((this.labelValider || 'PSval'))
     },
+    ok2 () {
+      if (this.ligne1.length >= this.lgph) this.ok()
+    },
     ok () {
       if (!this.verif) {
         this.okem()
@@ -98,22 +98,21 @@ export default ({
     okem () {
       this.encours = true
       setTimeout(async () => {
-        const ps = new Phrase()
-        await ps.init(this.ligne1)
-        this.$emit('ok-ps', ps)
+        const pc = new Phrase()
+        await pc.init(this.ligne1)
+        pc.phrase = null
+        this.$emit('ok', pc)
         this.raz()
       }, 300)
     },
     ko () {
       this.raz()
-      this.$emit('ok-ps', null)
+      this.$emit('ok', null)
     },
     raz () {
       this.encours = false
       this.ligne1 = ''
-      this.ligne2 = ''
       this.vligne1 = ''
-      this.vligne2 = ''
       this.phase = 0
     }
   },

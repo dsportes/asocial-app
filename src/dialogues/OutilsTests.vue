@@ -56,7 +56,7 @@
     </q-card-section>
 
     <q-card-section v-if="tab === 'ps'">
-      <phrase-secrete v-on:ok-ps="okps" icon-valider="check" label-valider="OK"></phrase-secrete>
+      <phrase-secrete @ok="okps" icon-valider="check" label-valider="OK"></phrase-secrete>
       <div class='t1 q-mt-slg'>{{$t('OTh1')}}</div>
       <div class='t2'>{{ ps ? ps.hps1 : '?'}}</div>
       <div class='t1 q-mt-sm'>{{$t('OTcx')}}</div>

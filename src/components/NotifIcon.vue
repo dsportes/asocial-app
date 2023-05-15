@@ -3,7 +3,7 @@
   <q-menu v-if="info">
     <div class="titre-md q-pa-xs text-white bg-secondary bord">{{$t('ANlong' + niv)}}</div>
   </q-menu>
-  <span v-if="cible !== 0">{{$t('ANcourt' + niv, [$t('ANcible' + cible)])}}</span>
+  <span v-if="cible !== 0" class="titre-md" >{{$t('ANcourt' + niv, [$t('ANcible' + cible)])}}</span>
   <q-icon size="sm" style="position:relative; border-radius: 6px" :name="ico">
     <span v-if="alire" class="rond"></span>
   </q-icon>

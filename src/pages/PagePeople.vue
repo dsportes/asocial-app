@@ -1,18 +1,20 @@
 <template>
-  <q-page class="q-pa-sm">
+  <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps dense color="primary" 
-      :label="$t('CVraf')" @click="rafCvs"/>
+    <q-card v-if="session.accesNet" class="q-my-md q-pa-xs row justify-center">
+      <q-btn class="q-my-sm" size="md" no-caps dense color="primary" 
+        :label="$t('CVraf')" @click="rafCvs"/>
+    </q-card>
 
-    <div v-if="pSt.peLp && !pSt.peLpF" class="titre-lg text-italic">
+    <div v-if="pSt.peLp && !pSt.peLpF" class="q-my-md titre-lg text-italic">
       {{$t('APnb', [pSt.peLp.length])}}
     </div>
     
     <div v-if="pSt.peLpF.length">
-      <div v-for="(p, idx) in pSt.peLpF" :key="p.id">
-        <apercu-people class="q-my-sm" :id="p.na.id" :idx="idx"/>
-      </div>
+      <q-card class="q-my-md" v-for="(p, idx) in pSt.peLpF" :key="p.id">
+        <apercu-people class="q-pa-xs" :id="p.na.id" :idx="idx"/>
+      </q-card>
     </div>
   </q-page>
 </template>

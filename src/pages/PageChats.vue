@@ -1,25 +1,27 @@
 <template>
-  <q-page>
+  <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <q-btn v-if="session.accesNet" class="q-my-sm" size="md" no-caps dense color="primary" 
-      :label="$t('CVraf')" @click="rafCvs"/>
+    <q-card class="q-my-md q-pa-xs row justify-center">
+      <q-btn v-if="session.accesNet" size="md" class="q-ma-xs" no-caps dense color="primary" 
+        :label="$t('CVraf')" @click="rafCvs"/>
 
-    <q-btn v-if="session.accesNet" class="q-ml-md q-my-sm" size="md" no-caps dense color="primary" 
-      :label="$t('CChtit')" @click="ovcc"/>
+      <q-btn v-if="session.accesNet" size="md" no-caps class="q-ma-xs" dense color="primary" 
+        :label="$t('CChtit')" @click="ovcc"/>
+    </q-card>
 
-    <div v-if="!aSt.pcLc.length" class="titre-lg text-italic">{{$t('CHnch')}}</div>
-    <div v-if="aSt.pcLc.length && !aSt.pcLcF.length" class="titre-lg text-italic">
+    <div v-if="!aSt.pcLc.length" class="q-my-md titre-lg text-italic text-center">{{$t('CHnch')}}</div>
+    <div v-if="aSt.pcLc.length && !aSt.pcLcF.length" class="q-my-md titre-lg text-italic text-center">
       {{$t('CHnch2', [aSt.pcLc.length])}}
     </div>
     
     <div v-if="aSt.pcLcF.length">
-      <div v-for="(chat, idx) in aSt.pcLcF" :key="chat.ids">
-        <apercu-chat class="q-my-sm" :na-i="chat.naI" :na-e="chat.naE" :ids="chat.ids" :idx="idx" :mapmc="mapmc"/>
-      </div>
+      <q-card class="q-my-md maauto" v-for="(chat, idx) in aSt.pcLcF" :key="chat.ids">
+        <apercu-chat :na-i="chat.naI" :na-e="chat.naE" :ids="chat.ids" :idx="idx" :mapmc="mapmc"/>
+      </q-card>
     </div>
 
-    <q-dialog v-model="cc" persistent style="height:50vh">
+    <q-dialog v-model="cc" persistent>
       <contact-chat/>
     </q-dialog>
 
@@ -64,7 +66,7 @@ export default {
     fStore.contexte.chats.groupeId = 0
 
     const cc = ref(false)
-    function ovcc () { MD.fD(cc) }
+    function ovcc () { MD.oD(cc) }
 
     return {
       MD, cc, ovcc,

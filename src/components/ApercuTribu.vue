@@ -5,24 +5,24 @@
       <span class="text-bold fs-sm font-mono q-mr-sm">#{{id}}</span> 
     </div>
 
-    <div v-if="t.info" class="q-ml-md q-my-xs bord row">
+    <div v-if="t.info" class="q-ml-md q-my-xs bord row justify-between items-center">
       <show-html class="col" :idx="idx" zoom maxh="3rem" :texte="t.info"/>
-      <q-btn v-if="edit && session.estComptable" color="primary" 
+      <q-btn v-if="edit && session.estComptable" color="col-auto primary btn2 q-mr-xs" 
         class="col-auto q-ml-sm btn2" size="sm" dense icon="edit" @click="editer"/>
     </div>
-    <div v-else class="q-ml-md q-my-xs">
-      <span class="titre-sm">{{$t('PTnoinfo')}}</span>
-      <q-btn v-if="edit && session.estComptable" class="q-ml-sm" size="sm" dense
+    <div v-else class="q-ml-md q-my-xs row justify-between items-center">
+      <span class="col titre-md">{{$t('PTnoinfo')}}</span>
+      <q-btn v-if="edit && session.estComptable" class="col-auto q-ml-sm btn2 q-mr-xs" size="sm" dense
         :label="$t('PTecr')" color="primary" icon="edit" @click="editer"/>
     </div>
 
     <div class="q-ml-md titre-md">{{$t('NTnbcsp', [t.cpt.nbc, t.cpt.nbsp])}}</div>
 
-    <apercu-notif class="q-ml-md" :notif="t.notif" :na-tribu="t.na" :na-cible="t.na" :idx="0"/>
+    <apercu-notif class="q-ml-md q-mr-xs" :notif="t.notif" :na-tribu="t.na" :na-cible="t.na" :idx="idx"/>
 
-    <div class="q-ml-md q-mb-xs row largeur40 items-center">
-      <quotas-vols :vols="t.cpt" />
-      <q-btn v-if="session.estComptable" size="sm" class="q-ml-lg"
+    <div class="q-ml-md q-mb-xs row largeur40 justify-between items-center">
+      <quotas-vols class="col" :vols="t.cpt" />
+      <q-btn v-if="session.estComptable" size="sm" class="col-auto q-ml-lg btn2 q-mr-xs"
         icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq"/>
     </div>
 

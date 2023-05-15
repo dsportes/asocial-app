@@ -1,26 +1,15 @@
 <template>
-<div class="bs"  style="width:80vw">
-<q-layout container view="hHh lpR fFf">
-  <q-header elevated class="bg-secondary text-white">
-    <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-      <q-toolbar-title class="titre-lg full-size text-center">{{$t('CChtit')}}</q-toolbar-title>
-      <bouton-help page="page1"/>
-    </q-toolbar>
-  </q-header>
+<q-card class="bs largeur30">
+  <q-toolbar class="bg-secondary text-white">
+    <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+    <q-toolbar-title class="titre-lg full-size text-center">{{$t('CChtit')}}</q-toolbar-title>
+    <bouton-help page="page1"/>
+  </q-toolbar>
 
-  <q-page-container>
-    <q-card style="height:50vh">
-    <q-card-section>
-      <phrase-contact @ok="ok"/>
-    </q-card-section>
-
-    <apercu-chat v-if="chat" class="q-my-sm" :na-e="chat.naE" :na-i="chat.naI"
-      :ids="chat.ids" :idx="0" :mapmc="mapmc"/>
-    </q-card>
-  </q-page-container>
-</q-layout>
-</div>
+  <q-card-section>
+    <phrase-contact @ok="ok"/>
+  </q-card-section>
+</q-card>
 </template>
 
 <script>
@@ -30,7 +19,7 @@ import { MD, Motscles, Chat } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import { afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { GetAvatarPC } from '../app/operations.mjs'
+import { GetAvatarPC, NouveauChat } from '../app/operations.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
 
 export default ({
@@ -38,7 +27,7 @@ export default ({
 
   props: { close: Function },
 
-  components: { ApercuChat, PhraseContact, BoutonHelp },
+  components: { PhraseContact, BoutonHelp },
 
   computed: {
   },
@@ -74,8 +63,8 @@ export default ({
           return
         }
         
-        const txt = '*' + this.$st('bonjour2', [this.naE.nom])
-        const [st, chat] = await NouveauChat().run(this.naI, this.naE, txt)
+        const txt = '*' + this.$t('bonjour2', [this.naE.nom])
+        const [st, chat] = await new NouveauChat().run(this.naI, this.naE, txt)
         if (st === 0) {
           await afficherDiag(this.$t('OPnvch0'))
         } else  {
@@ -83,14 +72,17 @@ export default ({
           if (st === 2) await afficherDiag(this.$t('OPnvch2'))
         }
       }
+      MD.fD()
     }
   },
 
   setup () {
     const session = stores.session
+    const aSt = stores.avatar
     const mapmc = ref(Motscles.mapMC(true, 0))
 
     return {
+      aSt,
       MD,
       mapmc,
       session

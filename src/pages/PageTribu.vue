@@ -1,21 +1,19 @@
 <template>
-  <q-page class="q-pa-sm">
+  <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <div v-if="session.estSponsor"> <!-- Parrainer un nouveau compte -->
-      <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
+    <q-card v-if="session.estSponsor && session.accesNet" class="q-my-md q-pa-xs row justify-center">
+      <!-- Parrainer un nouveau compte -->
+      <q-btn class="q-mr-sm" size="md" icon="person_add" no-caps
         :label="$t('P10nvp')" color="warning" dense @click="ovnvsp"/>
-      <bouton-help class="q-ml-sm" page="page1"/>
-    </div>
+      <bouton-help page="page1"/>
+    </q-card>
 
-    <apercu-tribu class="q-py-sm" :id="session.tribuCId" :idx="0" :edit="ed"/>
+    <q-card class="q-my-lg">
+      <apercu-tribu class="q-py-sm" :id="session.tribuCId" :idx="0" :edit="ed"/>
+    </q-card>
 
-    <q-separator color="orange" class="q-my-md"/>
-
-    <q-btn v-if="session.estComptable" class="q-mb-md" size="md" flat dense color="primary" 
-      :label="$t('PTnvc')" @click="ovnvsp"/>
-
-    <div v-if="!aSt.ptLcFT.length" class="col-auto titre-lg text-italic">
+    <div v-if="!aSt.ptLcFT.length" class="q-my-lg text-center titre-lg text-italic">
       {{$t('PTcvide', [aSt.ptLc.length])}}
     </div>
 

@@ -1,8 +1,8 @@
 <template>
-  <q-page class="q-pa-sm">
+<q-page class="q-pa-sm column items-center">
   <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-  <div class="largeur40 maauto">
+  <q-card class="largeur40 maauto column items-center">
 
     <q-btn class="q-my-sm" size="md" dense color="primary" 
       :label="$t('PGcrea')" @click="nvGr"/>
@@ -24,13 +24,13 @@
         <div class="col-3 fs-md font-mono text-center">{{ stats.groupes.q2 + ' / ' + edq2(stats.groupes.q2)}}</div>
       </div>
     </div>
+  </q-card>
 
-    <q-separator color="orange"/>
-    <div v-if="!gSt.pgLgFT.length" class="titre-lg text-italic">
-      {{$t('PGvide', [gSt.pgLg.size])}}
-    </div>
+  <div v-if="!gSt.pgLgFT.length" class="q-my-lg largeur40 titre-lg text-italic text-center">
+    {{$t('PGvide', [gSt.pgLg.size])}}
+  </div>
 
-    <div v-if="gSt.pgLgFT.length">
+    <div class="q-my-lg petitelargeur maauto" v-if="gSt.pgLgFT.length">
       <div v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id">
         <q-expansion-item group="g1" switch-toggle-side :class="dkli(idx)" @click="exp(e.groupe)">
           <template v-slot:header>
@@ -77,8 +77,8 @@
         </div>
       </q-card>
     </q-dialog>
-  </div>
-  </q-page>
+
+</q-page>
 </template>
 
 <script>
