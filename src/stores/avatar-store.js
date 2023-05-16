@@ -110,18 +110,6 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
-    // retourne le secret ns de l'avatar id
-    getSecret: (state) => { return (id, ids) => { 
-        const e = state.map.get(id)
-        return e ? e.secrets.get(ids) : null 
-      }
-    },
-    // retourne la Map des secrets (clé ns) de l'avatar id
-    getSecrets: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.secrets : null 
-      }
-    },
     // retourne le chat ids de l'avatar id
     getChat: (state) => { return (id, ids) => { 
       const e = state.map.get(id)
@@ -154,12 +142,6 @@ export const useAvatarStore = defineStore('avatar', {
     getSponsorings: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.sponsorings : null 
-      }
-    },
-
-    // retourne le Set des pk des voisins du secret (id, ids)
-    getVoisins: (state) => { return (id, ids) => {
-        return state.voisins.get(id + '/' + ids) || new Set()
       }
     },
 
@@ -443,8 +425,7 @@ export const useAvatarStore = defineStore('avatar', {
       let e = this.map.get(avatar.id)
       if (!e) {
         e = { 
-          avatar: avatar, 
-          secrets: new Map(),
+          avatar: avatar,
           sponsorings: new Map(),
           chats: new Map(),
           grIds: new Set() // Ids des groupes dont l'avatar est membre
@@ -460,6 +441,8 @@ export const useAvatarStore = defineStore('avatar', {
         e.avatar = avatar
       }
       if (avatar.id === stores.session.compteId) this.avatarP = avatar
+      const nSt = stores.note
+      nSt.setAvatar(avatar.na)
     },
 
     setAvatarGr (id, idg) {
@@ -472,34 +455,16 @@ export const useAvatarStore = defineStore('avatar', {
       if (e) e.grIds.delete(idg)
     },
 
-    setSecret (secret) {
-      if (!secret) return
-      const e = this.map.get(secret.id)
-      if (!e) return
-      e.secrets.set(secret.ids, secret)
-      const ref = secret.refs
-      if (ref) {
-        const pk = ref[0] + '/' + ref[1]
-        let v = this.voisins.get(pk)
-        if (!v) { v = new Set(); this.voisins.set(pk, v) }
-        v.add(secret.pk)
-      }
+    setNote (note) {
+      if (!note) return
+      const nSt = stores.note
+      nSt.setNote(note)
       // TODO : gérer les ajouts / suppressions de fichiers ayant une copie locale
     },
-    delSecret (id, ids) {
-      const e = this.map.get(id)
-      if (!e) return
-      const secret = e.secrets.get(ids)
-      if (secret) {
-        e.secrets.delete(ids)
-        const ref = secret.refs
-        if (ref) {
-          const pk = ref[0] + '/' + ref[1]
-          let v = this.voisins.get(pk)
-          if (v) v.delete(secret.pk)
-          if (!v.size) this.voisins.delete(pk)
-        }
-      }
+
+    delNote (id, ids) {
+      const nSt = stores.note
+      nSt.delNote(id, ids)
     },
 
     setChat (chat) {
@@ -575,6 +540,8 @@ export const useAvatarStore = defineStore('avatar', {
         e._zombi = true
         delete this.map[id]
       }
+      const nSt = stores.note
+      nSt.delAvatar(id)
     },
 
     async getPub (id) {

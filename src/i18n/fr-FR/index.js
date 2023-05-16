@@ -52,6 +52,9 @@ export default {
   editavion: 'Les mises à jour ne sont pas possibles en mode avion.',
   editlecture: 'Les mises à jour ne sont pas possibles quand le compte est "bloqué en lecture seulement"',
   alerte: 'Alerte',
+  groupe: 'Groupe {0}',
+  groupes: 'Tous mes groupes',
+  avatar: 'Avatar {0}',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -132,7 +135,6 @@ export default {
   bloque: 'Bloqué',
   aucuncompte: 'Aucun compte',
 
-  avatar: 'Avatar',
   tribus: 'Tribu | Tribu | Tribus',
   comptable: 'Comptable',
   admin: 'Administrateur',
@@ -566,6 +568,7 @@ export default {
   Pgroupesac: 'Groupes de {0}',
   Pgroupe: 'Groupe {0}',
   Ppeople: 'Tous mes contacts',
+  Pnotes: 'Toutes mes notes',
 
   MLAbrk: 'Opération en cours',
   MLAcf: 'Voulez-vous vraiement arrêter l\'opération en cours "{0}"',
@@ -652,7 +655,7 @@ export default {
   ACmacompta: 'Ma comptabilité',
   ACmesspons: 'Mes sponsorings',
   ACmesinvits: 'Mes invitations',
-  ACmessecrets: 'Secrets récents de mes groupes',
+  ACmesnotes: 'Toutes les notes',
   ACdecnx: 'Déconnexion',
   ACmasession: 'Ma session',
   ACtribus: 'Toutes les tribus',
@@ -754,6 +757,9 @@ export default {
   PNCesp: 'Volumes utilisés',
   PNCchats: 'Chats d\'urgence',
   PNCntfTrCo: 'Notification sur la "tribu" posée par le Comptable',
+
+  PNOdep: 'Déplier',
+  PNOrep: 'Replier',
 
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',

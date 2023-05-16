@@ -1,5 +1,13 @@
 <template>
 <q-list class="titre-md" style="min-width: 200px">
+  <q-item class="q-my-md" clickable @click="ui.setPage('notes')">
+    <q-item-section>
+      <q-item-label 
+        class="titre-lg text-warning q-pa-xs bord9 text-bold text-center" 
+        lines="1">{{$t('ACmesnotes')}}</q-item-label>
+    </q-item-section>
+  </q-item>
+  <q-separator color="orange"/>
   <q-item clickable @click="ui.setPage('compte')">
     <q-item-section>
       <q-item-label lines="1">{{$t('ACmesav')}}</q-item-label>
@@ -32,23 +40,11 @@
       <q-item-label lines="1">{{$t('ACtribus')}}</q-item-label>
     </q-item-section>
   </q-item>
-  <q-item clickable>
-    <q-item-section>
-      <q-item-label lines="1">{{$t('ACmessecrets')}}</q-item-label>
-    </q-item-section>
-  </q-item>
   <q-separator color="orange"/>
   <q-item clickable @click="MD.oD('detailsavatar')" clas="row items-center">
     <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACav')}}</span>
     <q-btn class="q-ml-md text-bold" dense :label="aSt.avC.na.nomc" no-caps
       icon-right="open_in_new" @click="MD.oD('detailsavatar')"/>
-  </q-item>
-  <q-item clickable>
-    <q-item-section class="q-ml-lg">
-      <q-item-label lines="1">{{$t('ACsecrets')}}
-        <q-badge color="primary" rounded>{{nbavsecs}}</q-badge>
-      </q-item-label>
-    </q-item-section>
   </q-item>
   <q-item clickable>
     <q-item-section class="q-ml-lg" clickable @click="ui.setPage('groupesac')">
@@ -154,4 +150,7 @@ export default {
 .q-item
   min-height: 20px !important
   padding: 3px 1rem !important
+.bord9
+  border: 2px solid $grey-5
+  border-radius: 5px
 </style>

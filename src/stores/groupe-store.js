@@ -19,7 +19,6 @@ import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 export const useGroupeStore = defineStore('groupe', {
   state: () => ({
     map: new Map(),
-    voisins: new Map(),
     invits: new Map()
   }),
 
@@ -97,11 +96,6 @@ export const useGroupeStore = defineStore('groupe', {
     getSecrets: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.secrets : null 
-      }
-    },
-    // retourne le Set des pk des voisins du secret (id, ids)
-    getVoisins: (state) => { return (id, ids) => {
-        return state.voisins.get(id + '/' + ids) || new Set()
       }
     },
 
@@ -247,9 +241,6 @@ export const useGroupeStore = defineStore('groupe', {
   },
 
   actions: {
-    test1 (e) {
-      e.groupe.msu = new Uint8Array([1])
-    },
     /* Sert à pouvoir attacher un écouteur pour détecter les changements de mc */
     setMotscles (id, mc) {
     },
@@ -298,6 +289,8 @@ export const useGroupeStore = defineStore('groupe', {
         }
       }
       this.setAnimHeb(e)
+      const nSt = stores.note
+      nSt.setGroupe(groupe.na)
     },
 
     setVols (id, objv) {
@@ -351,35 +344,16 @@ export const useGroupeStore = defineStore('groupe', {
       delete m.membres(ids)
     },
 
-    setSecret (secret) {
-      if (!secret) return
-      const e = this.map.get(secret.id)
-      if (!e) return
-      e.secrets.set(secret.ids, secret)
-      const ref = secret.refs
-      if (ref) {
-        const pk = ref[0] + '/' + ref[1]
-        let v = this.voisins.get(pk)
-        if (!v) { v = new Set(); this.voisins.set(pk, v) }
-        v.add(secret.pk)
-      }
+    setNote (note) {
+      if (!note) return
+      const nSt = stores.note
+      nSt.setNote(note)
       // TODO : gérer les ajouts / suppressions de fichiers ayant une copie locale
     },
 
-    delSecret (id, ids) {
-      const e = this.map.get(id)
-      if (!e) return
-      const secret = e.secrets.get(ids)
-      if (secret) {
-        e.secrets.delete(ids)
-        const ref = secret.refs
-        if (ref) {
-          const pk = ref[0] + '/' + ref[1]
-          let v = this.voisins.get(pk)
-          if (v) v.delete(secret.pk)
-          if (!v.size) this.voisins.delete(pk)
-        }
-      }
+    delNote (id, ids) {
+      const nSt = stores.note
+      nSt.delNote(id, ids)
     },
 
     /* Mise jour groupée pour un groupe
@@ -394,6 +368,8 @@ export const useGroupeStore = defineStore('groupe', {
 
     del (id) {
       this.map.delete(id)
+      const nSt = stores.note
+      nSt.delGroupe(id)
     }
   }
 })

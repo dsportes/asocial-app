@@ -143,8 +143,8 @@ export function ungzip (arg) {
 export function splitPK(pk) {
   if (!pk) return { id: 0, id2: 0 }
   const i = pk.indexOf('/')
-  if (i === -1) return { id: parseInt(pk), id2: 0}
-  return { id: parseInt(pk.substring(0, i)), id2: parseInt(pk.substring(i + 1))}
+  if (i === -1) return { id: parseInt(pk), ids: 0}
+  return { id: parseInt(pk.substring(0, i)), ids: parseInt(pk.substring(i + 1))}
 }
 
 export function deselect (u8, idx) {
@@ -217,7 +217,8 @@ export function titre (m) {
   if (!lgtitre) lgtitre = stores.config.lgtitre
   if (m) {
     const i = m.indexOf('\n')
-    return m.substring(0, (i === -1 || i > lgtitre ? lgtitre : i))
+    const s = m.substring(0, (i === -1 || i > lgtitre ? lgtitre : i))
+    return s.replaceAll('#', '')
   }
   return ''
 }

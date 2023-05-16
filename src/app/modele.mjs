@@ -1,6 +1,6 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { $t, hash, rnd6, u8ToB64, idToSid, gzip, ungzip, ungzipT } from './util.mjs'
+import { $t, hash, rnd6, u8ToB64, idToSid, gzip, ungzip, ungzipT, titre } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
@@ -99,30 +99,11 @@ export class Versions {
 - `getCle (id)` : retourne le rnd du nom générique enregistré avec cette id
 - `getNg (id)` : retourne le nom générique enregistré avec cette id
 */
-const repertoire = { rep: {}, idn: {} }
+const repertoire = { rep: {} }
 
-export function resetRepertoire () { repertoire.rep = {}; repertoire.idn = {}; }
+export function resetRepertoire () { repertoire.rep = {} }
 export function getCle (id) { const e = repertoire.rep[id]; return e ? e.rnd : null }
 export function getNg (id) { return repertoire.rep[id] }
-
-/***********************************************************
-Idn : ID d'une note
-************************************************************/
-export class Idn {
-  static get (id, ids) { // getter / factory
-    const k = id + '/' + ids
-    const x = repertoire.idn[k]
-    if (x) return x
-    return new Idn(k, id, ids)
-  }
-
-  constructor (k, id, ids) { // private : NE PAS UTILISER
-    this.id = id
-    this.ids = ids
-    repertoire.idn[k] = this
-  }
-}
-
 
 /***********************************************************
 NomGenerique : NomAvatar, NomGroupe, NomTribu
@@ -1478,6 +1459,80 @@ export class Membre extends GenDoc {
     r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'membres', id: r.id, ids: r.ids, v: r.v, vcv: r.vcv, dlv: r.dlv, _data_ }
+  }
+
+}
+
+/* Note ***************************************************
+_data_:
+- `id` : id de l'avatar ou du groupe.
+- `ids` : identifiant relatif à son avatar.
+- `v` : sa version.
+
+- `st` :
+  - `99999999` pour un _permanent_.
+  - `aaaammjj` date limite de validité pour un _temporaire_.
+- `im` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `ids`. 
+- `p` : 0: pas protégé, 1: protégé en écriture.
+- `v1` : volume du texte
+- `v2` : volume total des fichiers attachés.
+- `mc` :
+  - secret personnel : vecteur des index de mots clés.
+  - secret de groupe : map sérialisée,
+    - _clé_ : `im` de l'auteur (0 pour les mots clés du groupe),
+    - _valeur_ : vecteur des index des mots clés attribués par le membre.
+- `txts` : crypté par la clé du secret.
+  - `d` : date-heure de dernière modification du texte.
+  - `l` : liste des auteurs pour un secret de groupe.
+  - `t` : texte gzippé ou non.
+- `mfas` : map des fichiers attachés.
+- `ref` : (id/ids) crypté par la clé du secret référençant un autre secret.
+
+**Map `mfas` des fichiers attachés dans un secret:**
+- _clé_ `idf`: identifiant du fichier en base64.
+- _valeur_ : { lg, datas }
+  - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v2 d'un secret.
+  - `datas` : sérialisation cryptée par la clé S du secret de : `{ nom, info, dh, type, gz, lg, sha }`.
+
+*/
+export class Note extends GenDoc {
+  get cle () { return getCle(this.id) }
+  get ng () { return getNg(this.id) }
+  get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
+  get pk () { return this.id + '/' + this.ids }
+
+  async compile (row) {
+    this.st = row.st || 99999999
+    this.im = row.im || 0
+    this.p = row.p || 0
+    this.v1 = row.v1 || 0
+    this.v2 = row.v2 || 0
+    this.deGroupe = this.ng.estGroupe
+    this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || new Uint8Array([]))
+    const x = decode(await decrypter(cle, row.txts))
+    this.txt = ungzip(x.t)
+    this.titre = titre(this.txt)
+    this.dh = x.d
+    this.auts = x.l ? x.l : []
+    this.ref = row.ref ? await decrypterStr(this.cle, row.ref) : null
+
+    this.mfa = new Map()
+    if (this.v2) {
+      const map = row.mfas ? decode(row.mfas) : {}
+      for (const idf in map) 
+        this.mfa.set(idf, decode(await decrypter(cle, map[idf].datas)))
+    }
+  }
+
+  initTest (id, ids, ref, texte, dh, v1, v2) {
+    this.id = id
+    this.ids = ids
+    this.ref = ref
+    this.txt = texte
+    this.titre = titre(this.txt)
+    this.dh = dh,
+    this.v1 = v1
+    this.v2 = v2
   }
 
 }

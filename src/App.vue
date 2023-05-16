@@ -99,8 +99,6 @@
         <q-tab name="groupe" :label="$t('ACtgr')" @click="ui.setPageTab('groupe')"/>
         <q-tab name="membres" :label="$t('ACtmb')" @click="ui.setPageTab('membres')"/>
       </q-tabs>
-      <q-btn class="col-auto q-px-sm" dense size="md" color="warning" 
-        icon="check" :label="$t('ACsec')" @click="ui.secrets()"/>
     </q-toolbar>
 
   </q-header>
@@ -161,6 +159,10 @@
           <filtre-nom nom="groupe" prop='nmb' :idx="0"/>
           <filtre-stmb nom="groupe" prop="stmb" :idx="1"/>
         </div>
+        <div v-if="ui.page === 'notes'" class="column justify-start">
+          <filtre-nom nom="groupe" prop='nmb' :idx="0"/>
+          <filtre-stmb nom="groupe" prop="stmb" :idx="1"/>
+        </div>
       </div>
     </q-scroll-area>
   </q-drawer>
@@ -183,6 +185,7 @@
       <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
       <page-groupes class="page" v-if="ui.page === 'groupesac'"/>
       <page-groupe class="page" v-if="ui.page === 'groupe'"/>    
+      <page-notes class="page" v-if="ui.page === 'notes'"/>    
     </transition-group>
   </q-page-container>
 
@@ -323,6 +326,7 @@ import PanelMembre from './dialogues/PanelMembre.vue'
 import ApercuAvatar from './components/ApercuAvatar.vue'
 import PageGroupes from './pages/PageGroupes.vue'
 import PageGroupe from './pages/PageGroupe.vue'
+import PageNotes from './pages/PageNotes.vue'
 
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
@@ -350,7 +354,7 @@ export default {
     BoutonHelp, BoutonLangue, OutilsTests, NotifIcon, ApercuAvatar,
     PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
-    PageGroupe, PageGroupes,
+    PageGroupe, PageGroupes, PageNotes,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp

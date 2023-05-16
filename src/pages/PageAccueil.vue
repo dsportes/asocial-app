@@ -1,7 +1,7 @@
 <template>
   <div>
-    <q-card class="petitelargeur maauto row justify-center fs-md q-pa-sm">
-
+    <q-card class="petitelargeur maauto fs-md q-pa-sm">
+      <div class="row justify-center">
       <!-- Déconnexion -->
       <div class="btn2" @click="MD.oD('dialoguedrc')">
         <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" />
@@ -68,6 +68,12 @@
         <q-btn class="q-mr-xs" dense size="md" icon="chat"/>
         <span class="q-ml-xs">{{$t('MLAchats')}}</span>
       </div>
+      </div>
+
+      <div v-if="session.estSponsor" 
+        class="q-my-md q-px-sm titre-md text-bold text-italic text-warning text-center">
+        {{$t('ACcptspons')}}
+      </div>
 
     </q-card>
 
@@ -77,9 +83,6 @@
     </q-card>
 
     <q-card v-if="session.niv < 3" class="q-mt-lg petitelargeur maauto q-pa-sm">
-      <div v-if="session.estSponsor" class="q-my-sm q-px-sm titre-md text-bold text-italic text-warning">
-        {{$t('ACcptspons')}}
-      </div>
       <page-menu/>
     </q-card>
 
