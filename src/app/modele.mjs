@@ -1486,7 +1486,8 @@ _data_:
   - `l` : liste des auteurs pour un secret de groupe.
   - `t` : texte gzippé ou non.
 - `mfas` : map des fichiers attachés.
-- `ref` : (id/ids) crypté par la clé du secret référençant un autre secret.
+- `ref` : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
+  rnom n'est défini que pour une note d'avatar référençant un note de groupe (rnom est celui du groupe)
 
 **Map `mfas` des fichiers attachés dans un secret:**
 - _clé_ `idf`: identifiant du fichier en base64.
@@ -1496,10 +1497,30 @@ _data_:
 
 */
 export class Note extends GenDoc {
+  static sort1 (a, b) {
+    const x = a.tid || (' ' + a.label)
+    const y = b.tid || (' ' + b.label)
+    return x < y ? -1 : (x === y ? 0 : 1)
+  }
+
+  static sortNodes (a,b) { 
+    if (a.key === 'groupes') return 1
+    if (b.key === 'groupes') return -1
+    return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1 )
+  }
+
+  static fake = { txt: '', dh: 0 }
+
   get cle () { return getCle(this.id) }
   get ng () { return getNg(this.id) }
   get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
   get pk () { return this.id + '/' + this.ids }
+  get pkref () { return this.ref ? this.ref[0] + '/' + this.ref[1] : ''}
+  get rnom () {  return this.ref && this.ref.length === 3 ? this.ref[2] : ''}
+  get rid () {  return this.ref ? this.ref[0] : 0 }
+  get rids () {  return this.ref ? this.ref[1] : 0 }
+  get reftop () { return this.ref ? this.pkref : ('' + this.id) }
+  get nomFake () { return (this.rnom ? (this.rnom + ' #') : '#') + idToSid(this.rids) }
 
   async compile (row) {
     this.st = row.st || 99999999
@@ -1514,8 +1535,7 @@ export class Note extends GenDoc {
     this.titre = titre(this.txt)
     this.dh = x.d
     this.auts = x.l ? x.l : []
-    this.ref = row.ref ? await decrypterStr(this.cle, row.ref) : null
-
+    this.ref = row.ref ? decode(await decrypter(this.cle, row.ref)) : null
     this.mfa = new Map()
     if (this.v2) {
       const map = row.mfas ? decode(row.mfas) : {}

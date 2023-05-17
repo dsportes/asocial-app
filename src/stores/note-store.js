@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
-import { idToSid, splitPK } from '../app/util.mjs'
-import { Note } from '../app/modele.mjs'
 import { ID } from '../app/api.mjs'
+import { Note } from '../app/modele.mjs'
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
@@ -26,6 +25,11 @@ export const useNoteStore = defineStore('note', {
       }
     ],
 
+    test: {
+      avs: {},
+      grs: {}
+    }
+
   }),
 
   getters: {
@@ -48,16 +52,16 @@ export const useNoteStore = defineStore('note', {
       const key = note.pk
       let n = this.map.get(key)
       if (n) {
-        const ancRef = n.note.ref || ('' + n.note.id) // ancienne référence (ref ou id-top-)
+        const ancRef = n.note.reftop // ancienne référence (ref ou id-top-)
         n.note = note
         n.label = note.titre
-        if (ancRef !== (note.ref || ('' + note.id))) { // n change de place dans l'arbre
+        if (ancRef !== note.reftop) { // n change de place dans l'arbre
           this.detachDuParent(n, ancRef)
           this.rattAuParent(n) // le rattacher à son parent (le nouveau)
         }
       } else {
         // le node n n'est pas dans l'arbre : le créer et l'y installer
-        const type = ID.estGroupe(note.id) ? 4 : 3
+        const type = note.estGroupe ? 4 : 3
         n = { key: key, type, label: note.titre, note: note, children: [] }
         this.map.set(key, n)
         this.rattAuParent(n) // le rattacher à son parent
@@ -85,31 +89,30 @@ export const useNoteStore = defineStore('note', {
       - si trouvé : rattacher n
       - si pas trouvé créer un fake et s'y rattacher
     */
-    rattAuParent (n) { // chercher le parent
-      const tid = '' + n.note.id
-      const p = this.map.get(n.note.ref || tid) // une note ou un top (avatar / groupe)
+    rattAuParent (n) { // chercher le parent de n
+      const p = this.map.get(n.note.reftop) // une note ou un top (avatar / groupe)
       if (p) {
         // l'ajouter à liste des children, retrier par label
         p.children.push(n)
-        p.children.sort((a,b) => { return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1)} )
+        p.children.sort(Node.sort1)
       } else {
+        const tid = '' + n.note.id // racine de n
         const t = this.map.get(tid) // top node (avatar ou groupe)
+        if (!t) return
         if (n.note.ref) { // si ref existe : créer une note fake, s'y rattacher, rattacher la fake à sa racine
           const fnode = { 
-            key: n.note.ref,
+            key: n.note.pkref,
             tid,
-            label: idToSid(splitPK(n.note.ref).ids),
-            note: { texte: '', dh: 0 },
+            label: n.note.nomFake, 
+            note: Note.fake,
             children: [n]
           }
           this.map.set(fnode.key, fnode)
-          if (t) t.children.push(fnode) // rattacher fake à sa racine, sinon perdue, avatar ou groupe lui-même disparu !!!
+          t.children.push(fnode) // rattacher fake à sa racine, sinon perdue, avatar ou groupe lui-même disparu !!!
         } else { // rattacher la note à son top node (avatar ou groupe)
-          if (t) {
-            t.children.push(n)
-            t.children.sort((a,b) => { return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1)} )
-          } // sinon perdue, avatar ou groupe lui-même disparu !!!
+          t.children.push(n)
         }
+        t.children.sort(Node.sort1)
       }
     },
 
@@ -117,26 +120,20 @@ export const useNoteStore = defineStore('note', {
       const n = this.map.get(id + '/' + ids)
       if (!n) return
       const tid = '' + n.note.id
-      const ancRef = n.ref || tid
-      /* 
-      - enlève le node n de l'arbre, 
-      - le transforme en fake
-      - l'insère à top
-      */
-      detachDuParent (n, ancRef)
-      n.tid = tid
-      n.label = idToSid(n.note.ids)
-      n.note =  { texte: '', dh: 0 }
-      const t = this.map.get(tid) // top node (avatar ou groupe)
-      if (t) t.children.push(n) // rattacher fake à sa racine, sinon perdue, avatar ou groupe lui-même disparu !!!
-    },
-
-    sortNodes () {
-      this.nodes.sort((a,b) => { 
-        if (a.key === 'groupes') return 1
-        if (b.key === 'groupes') return -1
-        return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1 )
-      })
+      const ancRef = n.reftop
+      detachDuParent (n, ancRef) // enlève le node n de l'arbre,
+      if (n.children.length) {
+        this.map.delete(n.pk)
+      } else {
+        /* S'il a des children : transformation de n en fake et inscription au top */
+        const t = this.map.get(tid) // top node (avatar ou groupe)
+        if (!t) return
+        n.tid = tid
+        n.label = n.note.nomFake
+        n.note =  Note.fake
+        t.children.push(n) // rattachement de fake à sa racine
+        t.children.sort(Node.sort1)
+      }
     },
 
     setAvatar (na) { // on ajoute un node pour l'avatar juste à la racine
@@ -147,12 +144,12 @@ export const useNoteStore = defineStore('note', {
           type: 1,
           key: tid,
           label: na.nom,
-          note: { texte: '', dh: 0 },
+          note: Note.fake,
           children: []
         }
         this.map.set(tid, node)
         this.nodes.push(node)
-        this.sortNodes()
+        this.nodes.sort(Note.sortNodes)
       }
       this.test1 (na)
     },
@@ -163,7 +160,7 @@ export const useNoteStore = defineStore('note', {
       const nch = []
       this.nodes.forEach(ch => { if (ch.key !== tid) nch.push(ch)})
       this.nodes = nch
-      this.sortNodes()
+      this.nodes.sort(Note.sortNodes)
       // TODO : c'est plus compliqué que ça. 
       // Retirer aussi TOUTES les notes de l'avatar des groupes de l'arbre
     },
@@ -176,13 +173,13 @@ export const useNoteStore = defineStore('note', {
           key: tid,
           type: 2,
           label: na.nom,
-          note: { texte: '', dh: 0 },
+          note: Note.fake,
           children: []
         }
         this.map.set(tid, node)
         const g = this.getGroupes
         g.children.push(node)
-        g.children.sort((a,b) => { return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1)} )
+        g.children.sort(Note.sort1)
       }
       this.test1(na)
     },
@@ -190,9 +187,9 @@ export const useNoteStore = defineStore('note', {
     delGroupe (id) {
       // TODO : c'est plus compliqué que ça
       /* il faut collecter toutes les notes qui ne sont pas du groupe (celles des avatars). 
-      Ce sont celle dont la ref pointe, soit le groupe, soit une note du groupe,
+      Ce sont celles dont la ref pointe, soit le groupe, soit une note du groupe,
       bref la tête d'une branche (en dessous de laquelle il n'y a plus que des nodes du même avatar).
-      Ce n'est qu'ensuite cette collection est vide que le groupe peut être détruit.
+      Ce n'est qu'ensuite que cette collection est vide que le groupe peut être détruit.
       Sinon il faut intégrer en children du groupe les notes de cette collection
       */
       const tid = '' + id
@@ -201,23 +198,24 @@ export const useNoteStore = defineStore('note', {
       const nch = []
       g.children.forEach(ch => { if (ch.key !== tid) nch.push(ch)})
       g.children = nch
-      g.children.sort((a,b) => { return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1)} )
+      g.children.sort(Note.sort1)
     },
 
     test1 (na) { // génération de notes de test
       const id = na.id
+      if (ID.estGroupe(id)) this.test.grs[id] = na; else this.test.avs[id] = na
       // (id, ids, ref, texte, dh, v1, v2)
       const n1 = new Note()
       n1.initTest(id, 101, null, '##Ma note 1', new Date().getTime(), 10, 12)
       this.setNote(n1)
       const n2 = new Note()
-      n2.initTest(id, 102, n1.id + '/' + n1.ids, 'Ma note 2 bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
+      n2.initTest(id, 102, [n1.id, n1.ids], 'Ma note 2 bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
       this.setNote(n2)
       const n3 = new Note()
-      n3.initTest(id, 103, n1.id + '/' + n1.ids, 'Ma tres belle note 3 bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
+      n3.initTest(id, 103, [n1.id, n1.ids], 'Ma tres belle note 3 bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
       this.setNote(n3)
       const n4 = new Note()
-      n4.initTest(id, 104, n2.id + '/' + n2.ids, 'Ma tres belle note 4 bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
+      n4.initTest(id, 104, [n2.id, n2.ids], 'Ma tres belle note 4 bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
       this.setNote(n4)
     }
   }
