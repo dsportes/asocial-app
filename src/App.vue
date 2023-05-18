@@ -160,8 +160,11 @@
           <filtre-stmb nom="groupe" prop="stmb" :idx="1"/>
         </div>
         <div v-if="ui.page === 'notes'" class="column justify-start">
-          <filtre-nom nom="groupe" prop='nmb' :idx="0"/>
-          <filtre-stmb nom="groupe" prop="stmb" :idx="1"/>
+          <filtre-avgr nom="notes" prop='avgr' :idx="0"/>
+          <filtre-nbj nom="notes" prop='nbj' :idx="1"/>
+          <filtre-txt nom="notes" prop='note' :idx="0"/>
+          <filtre-mc nom="notes" attr="mcp" :idx="1"/>
+          <filtre-mc nom="notes" attr="mcn" :idx="0"/>
         </div>
       </div>
     </q-scroll-area>
@@ -341,6 +344,7 @@ import FiltreSansheb from './components/FiltreSansheb.vue'
 import FiltreEnexcedent from './components/FiltreEnexcedent.vue'
 import FiltreAinvits from './components/FiltreAinvits.vue'
 import FiltreStmb from './components/FiltreStmb.vue'
+import FiltreAvgr from './components/FiltreAvgr.vue'
 
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
@@ -357,7 +361,7 @@ export default {
     PageGroupe, PageGroupes, PageNotes,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
-    DialogueErreur, DialogueHelp
+    DialogueErreur, DialogueHelp, FiltreAvgr
    },
 
   computed: {

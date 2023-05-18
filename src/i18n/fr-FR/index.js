@@ -608,6 +608,7 @@ export default {
   FInomt: 'Début du nom de la tribu',
   FInomc: 'Début du nom du compte',
   FInmb: 'Début du nom du membre',
+  FInote: 'Texte de la note contenant',
   FIinfmb: 'Texte dans les commentaires ds membres',
   FItxt: 'Texte cherché dans les chats',
   FItxtt: 'Texte cherché dans les commentaires',

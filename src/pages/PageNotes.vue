@@ -7,7 +7,7 @@
         color="primary" icon="unfold_more" @click="tree.expandAll();expandAll=true"/>
       <q-btn v-if="expandAll" class="q-my-sm" dense size="sm" :label="$t('PNOrep')" 
         color="primary" icon="unfold_less" @click="tree.collapseAll();expandAll=false"/>
-      <q-btn class="q-my-sm" dense size="sm" label="T1" 
+      <q-btn class="q-my-sm q-ml-lg" dense size="sm" label="T1" 
         color="warning" icon="check" @click="test1"/>
     </div>
 
@@ -19,6 +19,8 @@
       node-key="key"
       selected-color="primary"
       v-model:selected="selected"
+      :filter="filtre"
+      :filter-method="filtrage"
     >
       <template v-slot:default-header="prop">
         <div class="row items-center">
@@ -32,9 +34,14 @@
     <q-page-sticky position="top-left" class="box" :offset="[0,0]">
       <q-card class="q-pa-sm box2">
         <div class="titre-lg">Aperçu de la note selectionée</div>
-        <div v-if="selected" class="titre-md">{{lib(node)}}</div>
-        <show-html v-if="selected" class="titre-md largeur30 bord1" 
-          :texte="node.note.txt" zoom maxh="4rem" />
+        <div v-if="selected" class="largeur30">
+          <div class="row justify-between">
+            <div class="titre-md">{{lib(node)}}</div>
+            <div class="font-mono">{{dhcool(node.note.dh)}}</div>
+          </div>
+          <show-html v-if="selected" class="titre-md bord1" 
+            :texte="node.note.txt" zoom maxh="4rem" />
+        </div>
       </q-card>
     </q-page-sticky>
   </q-page>
@@ -43,7 +50,8 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { Note } from '../app/modele.mjs'
+import { Note, Motscles } from '../app/modele.mjs'
+import { dhcool } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 
 const icons = ['accessibility','person','group','description','article','close']
@@ -81,24 +89,43 @@ export default {
       return this.$t('groupes')
     },
     
+    filtrage (node, f) {
+      const n = node.note
+      if (!n) return true
+      if (f.note && n.txt) {
+        if (n.txt.indexOf(f.note) === -1) return false
+      }
+      if (f.lim && n.dh) {
+        if (n.dh < f.lim) return false
+      }
+      /*
+      if (filter === 'a') {
+        const id = this.nas[0].id
+        return node.key.startsWith(id+ '/')
+      }
+      return node.note.txt.indexOf(filter) !== -1
+      */
+      return true
+    },
+
     stest1 (na, g) {
       const id = na.id
       for(let i = 0; i < nbn1; i++) {
         // (id, ids, ref, texte, dh, v1, v2)
         const n1 = new Note()
         const x = i * 1000
-        n1.initTest(id, x + 1, null, '##Ma note ' + (x + 1), new Date().getTime(), 10, 12)
+        n1.initTest(id, x + 1, null, '##Ma note ' + (x + 1), this.testdh(), 10, 12)
         if (g) this.gSt.setNote(n1); else this.aSt.setNote(n1)
         for( let j = 1; j < nbn2; j++) {
           const x = (i * 1000) + (j * 10)
           const n2 = new Note()
-          n2.initTest(id, x + 2, [n1.id, n1.ids], 'Ma note ' + (x+2) + ' bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
+          n2.initTest(id, x + 2, [n1.id, n1.ids], 'Ma note ' + (x+2) + ' bla bla bla bla bla\nbla bla bla bla', this.testdh(), 8, 0)
           if (g) this.gSt.setNote(n2); else this.aSt.setNote(n2)
           const n3 = new Note()
-          n3.initTest(id, x + 3, [n1.id, n1.ids], 'Ma tres belle note ' + (x+3) + ' bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
+          n3.initTest(id, x + 3, [n1.id, n1.ids], 'Ma tres belle note ' + (x+3) + ' bla bla bla bla bla\nbla bla bla bla', this.testdh(), 8, 0)
           if (g) this.gSt.setNote(n3); else this.aSt.setNote(n3)
           const n4 = new Note()
-          n4.initTest(id, x + 4, [n2.id, n2.ids], 'Ma tres belle note ' + (x+4) + ' bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
+          n4.initTest(id, x + 4, [n2.id, n2.ids], 'Ma tres belle note ' + (x+4) + ' bla bla bla bla bla\nbla bla bla bla', this.testdh(), 8, 0)
           if (g) this.gSt.setNote(n4); else this.aSt.setNote(n4)
         }
       }
@@ -109,15 +136,15 @@ export default {
       for(const ng of this.ngs) {
         const ids = 100000 + (10 * i++)
         const n1 = new Note()
-        n1.initTest(na.id, ids + 1, [ng.id, 1, ng.nom], '', new Date().getTime(), 8, 0)
+        n1.initTest(na.id, ids + 1, [ng.id, 1, ng.nom], '', this.testdh(), 8, 0)
         n1.settxt(`Note ${n1.pk} de ${na.nom} attachée à ${n1.pkref} du groupe ${n1.rnom} `)
         this.gSt.setNote(n1)
         const n2 = new Note()
-        n2.initTest(na.id, ids + 2, [ng.id, 1, ng.nom], '', new Date().getTime(), 8, 0)
+        n2.initTest(na.id, ids + 2, [ng.id, 1, ng.nom], '', this.testdh(), 8, 0)
         n2.settxt(`Note ${n2.pk} de ${na.nom} attachée à ${n2.pkref} du groupe ${n2.rnom} `)
         this.gSt.setNote(n2)
         const n3 = new Note()
-        n3.initTest(na.id, ids + 3, [n1.id, n1.ids], '', new Date().getTime(), 8, 0)
+        n3.initTest(na.id, ids + 3, [n1.id, n1.ids], '', this.testdh(), 8, 0)
         n3.settxt(`Note ${n3.pk} de ${na.nom} attachée à ${n1.pkref} du groupe ${n1.rnom} `)
         this.gSt.setNote(n3)
       }
@@ -131,12 +158,18 @@ export default {
       this.gSt.map.forEach(m => { this.ngs.push(m.groupe.na) })
       for(const na of this.ngs) this.stest1(na, true)
       for(const na of this.nas) this.stest2(na)
+    },
+
+    testdh () {
+      const nj = Math.floor(Math.random() * 100)
+      return this.now - ( 86400000 * nj)
     }
 
   },
 
   data () {
     return {
+      filter: '',
       icons,
       colors,
       styles,
@@ -152,12 +185,36 @@ export default {
     const tree = ref(null)
     const nSt = stores.note
     const session = stores.session
-    const nodes = nSt.nodes
+    // const nodes = nSt.nodes
     const aSt = stores.avatar
     const gSt = stores.groupe
+    const fSt = stores.filtre
+    const filtre = ref(null)
+    const now = new Date().getTime()
+
+    function compileFiltre (f) {
+      f.lim = f.nbj ? new Date().getTime() - (86400000 * f.nbj) : 0
+      filtre.value = f
+    }
+
+    fSt.$onAction(({ name, args, after }) => { 
+      after(async (result) => {
+        if ((name === 'setFiltre')){
+          if (args[0] === 'notes') compileFiltre(fSt.filtre.notes)
+        }
+      })
+    })
+
+    const mapmc = ref(Motscles.mapMC(true, 0))
+    fSt.contexte.notes.mapmc = mapmc.value
+
     return {
       session, nSt, aSt, gSt,
-      tree
+      tree,
+      filtre,
+      mapmc,
+      now,
+      dhcool
     }
   }
 

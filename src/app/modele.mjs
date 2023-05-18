@@ -1544,6 +1544,15 @@ export class Note extends GenDoc {
     }
   }
 
+  /*
+  mcDe (setIds) {
+    const s = new Set()
+    if (this.deGroupe) {
+     setIds.forEach(im => )
+    }
+  }
+  */
+
   initTest (id, ids, ref, texte, dh, v1, v2) {
     this.id = id
     this.ids = ids
