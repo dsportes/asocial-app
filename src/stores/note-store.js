@@ -61,7 +61,7 @@ export const useNoteStore = defineStore('note', {
         }
       } else {
         // le node n n'est pas dans l'arbre : le créer et l'y installer
-        const type = note.estGroupe ? 4 : 3
+        const type = note.ng.estGroupe ? 4 : 3
         n = { key: key, type, label: note.titre, note: note, children: [] }
         this.map.set(key, n)
         this.rattAuParent(n) // le rattacher à son parent
@@ -100,15 +100,17 @@ export const useNoteStore = defineStore('note', {
         const t = this.map.get(tid) // top node (avatar ou groupe)
         if (!t) return
         if (n.note.ref) { // si ref existe : créer une note fake, s'y rattacher, rattacher la fake à sa racine
+          const type = n.note.rnom ? 4 : 3
           const fnode = { 
             key: n.note.pkref,
             tid,
+            type,
             label: n.note.nomFake, 
             note: Note.fake,
             children: [n]
           }
           this.map.set(fnode.key, fnode)
-          t.children.push(fnode) // rattacher fake à sa racine, sinon perdue, avatar ou groupe lui-même disparu !!!
+          t.children.push(fnode) // rattacher fake à sa racine
         } else { // rattacher la note à son top node (avatar ou groupe)
           t.children.push(n)
         }
@@ -151,7 +153,6 @@ export const useNoteStore = defineStore('note', {
         this.nodes.push(node)
         this.nodes.sort(Note.sortNodes)
       }
-      this.test1 (na)
     },
     
     delAvatar (id) {
@@ -181,7 +182,6 @@ export const useNoteStore = defineStore('note', {
         g.children.push(node)
         g.children.sort(Note.sort1)
       }
-      this.test1(na)
     },
 
     delGroupe (id) {
@@ -199,25 +199,6 @@ export const useNoteStore = defineStore('note', {
       g.children.forEach(ch => { if (ch.key !== tid) nch.push(ch)})
       g.children = nch
       g.children.sort(Note.sort1)
-    },
-
-    test1 (na) { // génération de notes de test
-      const id = na.id
-      if (ID.estGroupe(id)) this.test.grs[id] = na; else this.test.avs[id] = na
-      // (id, ids, ref, texte, dh, v1, v2)
-      const n1 = new Note()
-      n1.initTest(id, 101, null, '##Ma note 1', new Date().getTime(), 10, 12)
-      this.setNote(n1)
-      const n2 = new Note()
-      n2.initTest(id, 102, [n1.id, n1.ids], 'Ma note 2 bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
-      this.setNote(n2)
-      const n3 = new Note()
-      n3.initTest(id, 103, [n1.id, n1.ids], 'Ma tres belle note 3 bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
-      this.setNote(n3)
-      const n4 = new Note()
-      n4.initTest(id, 104, [n2.id, n2.ids], 'Ma tres belle note 4 bla bla bla bla bla\nbla bla bla bla', new Date().getTime(), 8, 0)
-      this.setNote(n4)
     }
   }
-
 })

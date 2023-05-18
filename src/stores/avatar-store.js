@@ -5,20 +5,16 @@ import { encode } from '@msgpack/msgpack'
 import { ID, E_WS, AppExc } from '../app/api.mjs'
 import { post } from '../app/net.mjs'
 
-/* Store maître du compte courant :
-Sous-collection pour chaque avatar id :
-  - secrets : getSecrets(id)
-  - chats : getChats(id)
-  - sponsorings : getSponsorings(id)
-voisins : map des voisins d'un secret
-- clé: pk du secret de tête" du voisinage
-- valeur: Set des pk des secrets référeçant cette tête de voisinage
-*/
-
 export const useAvatarStore = defineStore('avatar', {
   state: () => ({
+    /* Map des avatars du compte courant. Sous-collection pour chaque avatar id :
+      - avatar: avatar,
+      - sponsorings: new Map(),
+      - chats: new Map(),
+      - grIds: new Set() // Ids des groupes dont l'avatar est membre
+    */
     map: new Map(),
-    voisins: new Map(),
+
     motscles: null, // mots clés du compte
     avatarP: null, // avatar principal du compte courant
     comptaP: null, // compta actuelle du compte courant

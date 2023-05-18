@@ -1555,6 +1555,11 @@ export class Note extends GenDoc {
     this.v2 = v2
   }
 
+  settxt (txt) {
+    this.txt = txt
+    this.titre = titre(this.txt)
+  }
+
 }
 
 /** Secret ****************************************************
