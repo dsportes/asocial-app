@@ -112,7 +112,21 @@ export default {
       const n = node.note
       if (!n || !f) return true
       if (f.avgr) {
-        if (n.id !== f.avgr && n.rid !== f.avgr) return false
+        if (n.id !== f.avgr && !n.rid) return false
+        if (n.id !== f.avgr) {
+          let rid = n.rid
+          while (true) {
+            const p = this.nSt.map.get(rid.id + '/' + rid.ids)
+            if (!p) return false // ça ne vrait pas arriver
+            if (!p.rid) {
+              // on est au top
+              if (p.id !== f.avgr) return false
+              break
+            } else {
+              rid = p.rid
+            }
+          }
+        }
       }
       if (f.note && n.txt) {
         if (n.txt.indexOf(f.note) === -1) return false

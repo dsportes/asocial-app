@@ -2,6 +2,66 @@
 TODO :
 - traiter les autorisations pour le comptable (page menu en particulier) pour survivre à un blocage de sa tribu / voir global
 
+## L'arbre des notes
+Une note peut être :
+- top : elle est rattachée directement à son avatar ou groupe.
+- rattachée à une autre note définie par :
+  - rid : l'id de la note de rattachement,
+  - rids : l'ids de la note de rattachement,
+  - rnom : quand rid est une id de groupe, le nom de son groupe.
+
+**Règles :**
+- un note de groupe ne peut être rattachée qu'à un note du même groupe,
+- une note d'avatar peut être rattachée,
+  - soit à une note du même avatar,
+  - soit à une note de groupe.
+- donc un arbre de groupe peut contenir des notes de lui-même et d'avatars: les sous-arbres dont la tête est une note d'avatar n'ont que des notes du même avatar.
+
+### Racines _avatar_
+- des notes d'avatar ne peuvent parveni qu'après que leur avatar ait été connu.
+- les racines _avatar_ sont toujours réelles.
+
+### Racines _groupe_, réelles et zombi
+- des notes de groupes ne peuvent parvenir qu'après que son groupe ait été déclaré : leur racines _groupe_ sont téelles.
+- mais des notes d'avatars peuvent parvenir en déclarant être rattachées à un groupe qui n'est pas encore, ou ne sera plus, déclaré: leurs racines _groupe_ est **zombi**. On a fabriqué pseudo groupe dans l'arbre qui représente un groupe inconnu (temporairement ou non) de la session.
+
+### Notes _fake_
+Une note _fake_ n'a aucun contenu et a été construite pour permettre à une ou d'autres notes qui en référençaient l'id/ids de s'y rattacher. Une note _fake_ peut figurer :
+- sous une racine _avatar_ réelle,
+- sous une racine _groupe_ réelle (le groupe existe),
+- sous une racine _groupe_ **zombi**, le groupe a existé un jour (sinon la note n'aurait pas pu être créée) mais n'existe plus, du moins dans la session en cours (résiliation ...).
+
+Pour des raisons de lisibilité, un goupe _zombi_ a un _nomc_ :
+- comme il n'existe que parce qu'une note _avatar_ y est rattachée,
+- comme cette note a été créée (ou bougée) sur un groupe qui a été connu,
+- la note _avatar_ a identifié son rattachement par `id/ids/nomc` ou `nomc` est celui du groupe auquel elle s'est rattachée et qui un jour ou l'autre dans le passé a bien été un nom de groupe réel (et l'est peut-être encore dans une autre session).
+
+### Disparition d'une note
+Si cette note est référencée par d'autres notes qui s'y rattache,
+- elle est transformée en note _fake_,
+- comme toute note _fake_ elle est attachée à une racine,
+  - avatar rèelle,
+  - groupe réelle,
+  - ou groupe zombi.
+- tout le sous-arbre depuis cette note reste attachée sur la note devenue _fake_.
+
+### Déplacement d'une note
+- **note _groupe_** : elle ne peut l'être que par rattachement à une autre note, réelle ou _fake_ du **même** groupe. Tout son sous-arbre suit.
+- **note _avatar_** : elle peut être déplacée (avec son sous-arbre qui ne contient que des notes du même avatar):
+  - derrière n'importe quelle note du même avatar, réelle ou _fake_,
+  - directement sous son avatar,
+  - derrière une note de groupe, réelle ou _fake_.
+  - directement sous un groupe réel ou zombi.
+
+### Visibilité des notes par avatar / groupe
+**Avatar**
+- toutes les notes portant comme id celle de l'avatar _visible_ sont visibles.
+
+**Groupe**
+- toutes les notes portant comme id celle du groupe _visible_ sont visibles.
+- **mais aussi** toutes les notes d'avatar telles qu'en remontant à leur rattachements successifs on tombe sur la racine du groupe. Mais cette information ne figure **pas** dans la note qui ne mentionne que son rattachement juste supérieur. Il faut donc par transitivité remonter jusqu'à la racine.
+
+
 Roadmap:
 - secrets
 - auto-suppression avatar
