@@ -19,7 +19,7 @@
       node-key="key"
       selected-color="primary"
       v-model:selected="selected"
-      :filter="filtre"
+      :filter="filtreFake"
       :filter-method="filtrage"
     >
       <template v-slot:default-header="prop">
@@ -107,11 +107,12 @@ export default {
       return this.$t('groupes')
     },
     
-    filtrage (node, f) {
+    filtrage (node, filtreFake) {
+      const f = this.filtre
       const n = node.note
-      if (!n) return true
+      if (!n || !f) return true
       if (f.avgr) {
-        if (n.id !== f.avgr) return false
+        if (n.id !== f.avgr && n.rid !== f.avgr) return false
       }
       if (f.note && n.txt) {
         if (n.txt.indexOf(f.note) === -1) return false
@@ -190,7 +191,6 @@ export default {
 
   data () {
     return {
-      filter: '',
       icons,
       colors,
       styles,
@@ -211,6 +211,7 @@ export default {
     const gSt = stores.groupe
     const fSt = stores.filtre
     const filtre = ref(null)
+    const filtreFake = ref('1')
     const now = new Date().getTime()
 
     function compileFiltre (f) {
@@ -238,6 +239,7 @@ export default {
           }
         }
       }
+      filtreFake.value = (parseInt(filtreFake.value) + 1).toString()
      }
 
     fSt.$onAction(({ name, args, after }) => { 
@@ -255,7 +257,7 @@ export default {
       ID,
       session, nSt, aSt, gSt,
       tree,
-      filtre,
+      filtre, filtreFake,
       mapmc,
       now,
       dhcool

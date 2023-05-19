@@ -93,6 +93,7 @@ export const useNoteStore = defineStore('note', {
       const p = this.map.get(n.note.reftop) // une note ou un top (avatar / groupe)
       if (p) {
         // l'ajouter à liste des children, retrier par label
+        n.top = p.top
         p.children.push(n)
         p.children.sort(Node.sort1)
       } else {
@@ -124,7 +125,7 @@ export const useNoteStore = defineStore('note', {
       const tid = '' + n.note.id
       const ancRef = n.reftop
       detachDuParent (n, ancRef) // enlève le node n de l'arbre,
-      if (n.children.length) {
+      if (!n.children.length) {
         this.map.delete(n.pk)
       } else {
         /* S'il a des children : transformation de n en fake et inscription au top */
@@ -143,6 +144,7 @@ export const useNoteStore = defineStore('note', {
       const n = this.map.get(tid)
       if (!n) {
         const node = { 
+          top: na.id,
           type: 1,
           key: tid,
           label: na.nom,
@@ -171,6 +173,7 @@ export const useNoteStore = defineStore('note', {
       const n = this.map.get(tid)
       if (!n) {
         const node = { 
+          top: na.id,
           key: tid,
           type: 2,
           label: na.nom,
