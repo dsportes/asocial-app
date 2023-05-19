@@ -452,34 +452,6 @@ export class Phrase {
 
 }
 
-/*
-export class Phrase2 {
-  async init (debut, fin) {
-    this.pcb = await pbkfd(debut + '\n' + fin)
-    this.pcbh = hash(this.pcb)
-    this.hps1 = hash(await pbkfd(debut))
-    return this
-  }
-
-  get shax () { return sha256(this.pcb) }
-
-  get shax64 () { return u8ToB64(this.shax) }
-
-  get shay () { return sha256(this.shax) }  
-
-}
-
-export class PhraseContact {
-  async init (texte) {
-    this.phrase = texte
-    this.clex = await pbkfd(texte)
-    let hx = ''
-    for (let i = 0; i < texte.length; i = i + 3) { hx += texte.charAt(i); hx += texte.charAt(i+1) }
-    this.phch = hash(hx)
-    return this
-  }
-}
-*/
 const lstfnotif = ['idSource', 'jbl', 'nj', 'texte', 'dh']
 export class Notification {
 
@@ -1402,14 +1374,6 @@ export class Groupe extends GenDoc {
     return Object.keys(mc).length ? await crypter(this.cle, new Uint8Array(encode(mc))) : null
   }
 
-  /*
-  motcle (n) { // utilisé par util / Motscles
-    const s = this.mc[n]
-    if (!s) return ''
-    const i = s.indexOf('/')
-    return i === -1 ? { c: '', n: s } : { c: s.substring(0, i), n: s.substring(i + 1) }
-  }
-  */
 }
 
 /** Membre ***********************************************************
@@ -1529,7 +1493,7 @@ export class Note extends GenDoc {
     this.v1 = row.v1 || 0
     this.v2 = row.v2 || 0
     this.deGroupe = this.ng.estGroupe
-    this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || new Uint8Array([]))
+    this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : null) : (row.mc || null)
     const x = decode(await decrypter(cle, row.txts))
     this.txt = ungzip(x.t)
     this.titre = titre(this.txt)
@@ -1544,16 +1508,32 @@ export class Note extends GenDoc {
     }
   }
 
-  /*
-  mcDe (setIds) {
-    const s = new Set()
-    if (this.deGroupe) {
-     setIds.forEach(im => )
+  /* setSmc : calcul smc, le set des mots clés de la note pour le compte
+  Ce calcul est fait à la compilation de la note.
+  Toutefois, quand un compte a plus d'un avatar membre d'un groupe G,
+  quand l'un de ses avatars est résilié, il faut recalculer ce set,
+  sinon il apparaîtra des mots clés fantômes pour le compte
+  (ce qui n'est pas très grave) jusqu'à la prochaine session ou mise à jour
+  de la note
+  */
+  setSmc () {
+    if (!this.mc) { this.smc = null; return }
+    if (ID.estGroupe(this.id)) {
+      const gSt = stores.groupe
+      const g = this.mc[0]
+      const s = g ? new Set(g) : new Set()
+      const e = gSt.egr(this.id)
+      e.mbacs.forEach(m => {
+        const x = this.mc[m.ids]
+        if (x) x.forEach(mc => { s.add(mc)})
+      })
+      this.smc = s.size ? s : null
+    } else {
+      this.smc = new Set(this.mc)
     }
   }
-  */
 
-  initTest (id, ids, ref, texte, dh, v1, v2) {
+  initTest (id, ids, ref, texte, dh, v1, v2) { // pour les tests
     this.id = id
     this.ids = ids
     this.ref = ref
@@ -1562,9 +1542,22 @@ export class Note extends GenDoc {
     this.dh = dh,
     this.v1 = v1
     this.v2 = v2
+    if (ID.estGroupe(id)) {
+      switch (ids % 3) {
+        case 0: { this.smc = new Set([1, 101, 255]); break}
+        case 1: { this.smc = new Set([1, 102]); break}
+        case 0: { this.smc = new Set([255]); break}
+      }
+    } else {
+      switch (ids % 3) {
+        case 0: { this.smc = new Set([1, 255]); break}
+        case 1: { this.smc = new Set([1, 2]); break}
+        case 0: { this.smc = new Set([255]); break}
+      }
+    }
   }
 
-  settxt (txt) {
+  settxt (txt) { // pour les tests
     this.txt = txt
     this.titre = titre(this.txt)
   }

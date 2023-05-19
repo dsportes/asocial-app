@@ -55,6 +55,9 @@ export default {
   groupe: 'Groupe {0}',
   groupes: 'Tous mes groupes',
   avatar: 'Avatar {0}',
+  groupe2: 'Note du groupe {0}',
+  avatar2: 'Note de {0}',
+  avatar3: 'Note de {0} rattachée à une note de {1}',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -626,6 +629,9 @@ export default {
   FIsansheb: 'Groupes sans hébergement',
   FIexcesvol: 'Groupes en excédent de volume',
   FItri: 'Tier par ...',
+  FItavgr: '(tous avatars et groupes)',
+  FIavgrt: 'Filtrer sur Un avatar / groupe',
+
   TRItribus0: '(non trié)',
   TRItribus1: 'Volume V1 attribué',
   TRItribus2: 'Volume V2 attribué',

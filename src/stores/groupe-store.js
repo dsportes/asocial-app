@@ -51,6 +51,14 @@ export const useGroupeStore = defineStore('groupe', {
       return m
     },
     
+    /* liste des ng des groupes triée par ordre alphabétique de leur noms */
+    ngGroupes: (state) => {
+      const l = []
+      state.map.forEach(e => { l.push(e.groupe.na) })
+      l.sort((a,b) => { return a.nomc < b.nomc ? -1 : (a.nomc === b.nomc ? 0 : 1)})
+      return l
+    },
+    
     // liste (array) des ids des groupes
     // ids: (state) => { return Array.from(state.map.keys()) },
 

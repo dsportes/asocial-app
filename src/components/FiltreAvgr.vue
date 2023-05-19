@@ -1,25 +1,21 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli">
-    <q-btn no-caps flat :label="$t('FIstmb', [$t('stmb' + val)])">
-    <q-menu anchor="bottom left" self="top left">
-      <q-list style="min-width: 50px">
-        <q-item clickable v-close-popup @click="val=0">
-          <span class="fs-md text-italic">{{$t('stmb0')}}</span>
+    <div class="fs-md text-italic">{{$t('FIavgrt')}}</div>
+    <q-btn no-caps flat :label="tit" icon-right="expand_more">
+    <q-menu anchor="bottom left" self="top left" max-height="10rem" max-width="20rem">
+      <q-list class="bg-secondary text-white">
+        <q-item clickable v-close-popup @click="val=null">
+          <span class="fs-md">{{$t('FItavgr')}}</span>
         </q-item>
-        <q-item clickable v-close-popup @click="val=1">
-          <span class="fs-md text-italic">{{$t('stmb1')}}</span>
+        <q-separator/>
+        <q-item v-for="na in la" :key="na.id" clickable 
+          v-close-popup @click="val=na">
+          <span class="fs-md">{{na.nom}}</span>
         </q-item>
-        <q-item clickable v-close-popup @click="val=2">
-          <span class="fs-md text-italic">{{$t('stmb2')}}</span>
-        </q-item>
-        <q-item clickable v-close-popup @click="val=3">
-          <span class="fs-md text-italic">{{$t('stmb3')}}</span>
-        </q-item>
-        <q-item clickable v-close-popup @click="val=4">
-          <span class="fs-md text-italic">{{$t('stmb4')}}</span>
-        </q-item>
-        <q-item clickable v-close-popup @click="val=5">
-          <span class="fs-md text-italic">{{$t('stmb5')}}</span>
+        <q-separator/>
+        <q-item v-for="ng in lg" :key="ng.id" clickable 
+          v-close-popup @click="val=ng">
+          <span class="fs-md">{{ng.nomc}}</span>
         </q-item>
       </q-list>
     </q-menu>
@@ -30,6 +26,8 @@
 <script>
 import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
+import { getNg } from '../app/modele.mjs'
+import { ID } from '../app/api.mjs'
 
 export default ({
   name: 'FiltreAvgr',
@@ -45,23 +43,40 @@ export default ({
 
   watch: {
     val (ap) {
-      this.st.setFiltre(this.nom, 'stmb', ap)
+      this.fSt.setFiltre(this.nom, 'avgr', ap ? ap.id : 0)
     }
   },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') }
-  },
+    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+    tit () {
+      if (!this.val) return this.$t('FItavgr')
+      return ID.estGroupe(this.val.id) ? this.$t('groupe', [this.val.nomc]) : this.$t('avatar', [this.val.nom])
+    }
+},
 
   setup (props) {
-    const st = stores.filtre
-    const val = ref('')
+    const fSt = stores.filtre
+    const aSt = stores.avatar
+    const gSt = stores.groupe
+    const val = ref(null)
     const nom = toRef(props, 'nom')
-    const x = st.filtre[nom.value]
-    val.value = x && x.notif ? x.notif : 0
+    const x = fSt.filtre[nom.value]
+    val.value = x ? getNg(x) : null
+
+    const la = ref(aSt.naAvatars)
+    const lg = ref(gSt.ngGroupes)
+
+    function setm () {
+      la.value = aSt.naAvatars
+      lg.value = gSt.ngGroupes
+    }
+
     return {
-      st,
-      val
+      fSt,
+      val,
+      la,
+      lg
     }
   }
 })

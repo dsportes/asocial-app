@@ -78,6 +78,14 @@ export const useAvatarStore = defineStore('avatar', {
       return m
     },
 
+    /* liste des na des avatars triée par ordre alphabétique de leur noms */
+    naAvatars: (state) => {
+      const l = []
+      state.map.forEach(e => { l.push(e.avatar.na) })
+      l.sort((a,b) => { return a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)})
+      return l
+    },
+
     // liste (array) des ids des avatars DU COMPTE enregistrés
     ids: (state) => { return Array.from(state.map.keys()) },
 

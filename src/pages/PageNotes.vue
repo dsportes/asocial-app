@@ -34,13 +34,16 @@
     <q-page-sticky position="top-left" class="box" :offset="[0,0]">
       <q-card class="q-pa-sm box2">
         <div class="titre-lg">Aperçu de la note selectionée</div>
-        <div v-if="selected" class="largeur30">
+        <div v-if="selected" class="largeur40">
           <div class="row justify-between">
-            <div class="titre-md">{{lib(node)}}</div>
+            <div class="titre-md">{{lib2(node)}}</div>
             <div class="font-mono">{{dhcool(node.note.dh)}}</div>
           </div>
           <show-html v-if="selected" class="titre-md bord1" 
             :texte="node.note.txt" zoom maxh="4rem" />
+          <apercu-motscles v-if="node.note.smc" :mapmc="mapmc" 
+            :src="Array.from(node.note.smc)" du-compte
+            :du-groupe="ID.estGroupe(node.note.id) ? node.note.id : 0"/>
         </div>
       </q-card>
     </q-page-sticky>
@@ -50,9 +53,11 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { Note, Motscles } from '../app/modele.mjs'
-import { dhcool } from '../app/util.mjs'
+import { Note, Motscles, getNg } from '../app/modele.mjs'
+import { dhcool, difference, intersection } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
+import ApercuMotscles from '../components/ApercuMotscles.vue'
+import { ID } from '../app/api.mjs'
 
 const icons = ['accessibility','person','group','description','article','close']
 const colors = ['green-7','primary','orange','primary','orange','negative']
@@ -71,7 +76,7 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml },
+  components: { ShowHtml, ApercuMotscles },
 
   computed: {
   },
@@ -88,23 +93,39 @@ export default {
       if (n.type === 2) return this.$t('groupe', [n.label])
       return this.$t('groupes')
     },
+    lib2 (n) {
+      if (n.type === 1 || n.type === 2) return n.label
+      if (n.type === 3) {
+        const nomg = n.note.rnom
+        const nom = getNg(n.note.id).nom
+        return nomg ? this.$t('avatar3', [nom, nomg]) : this.$t('avatar2', [nom])
+      }
+      if (n.type === 4) {
+        const nom = getNg(n.note.id).nom
+        return this.$t('groupe2', [nom])
+      }
+      return this.$t('groupes')
+    },
     
     filtrage (node, f) {
       const n = node.note
       if (!n) return true
+      if (f.avgr) {
+        if (n.id !== f.avgr) return false
+      }
       if (f.note && n.txt) {
         if (n.txt.indexOf(f.note) === -1) return false
       }
       if (f.lim && n.dh) {
         if (n.dh < f.lim) return false
       }
-      /*
-      if (filter === 'a') {
-        const id = this.nas[0].id
-        return node.key.startsWith(id+ '/')
+      if (f.mcp) {
+        if (!n.smc) return false
+        if (difference(f.mcp, n.smc).size) return false
       }
-      return node.note.txt.indexOf(filter) !== -1
-      */
+      if (f.mcn) {
+        if (n.smc && intersection(f.mcn, n.smc).size) return false
+      }
       return true
     },
 
@@ -195,7 +216,29 @@ export default {
     function compileFiltre (f) {
       f.lim = f.nbj ? new Date().getTime() - (86400000 * f.nbj) : 0
       filtre.value = f
-    }
+
+      f.mcp = f.mcp ? new Set(f.mcp) : null
+      f.mcn = f.mcn ? new Set(f.mcn) : null
+
+      if (f.avgr) {
+        const g = ID.estGroupe(f.avgr) ? f.avgr : 0
+        mapmc.value = Motscles.mapMC(true, g)
+        fSt.contexte.notes.mapmc = mapmc.value
+        if (!g) {
+          // enlever les mots clés de groupe de f.mcp / f.mcn
+          if (f.mcp) {
+            const ns = new Set()
+            f.mcp.forEach(mc => { if (mc < 100 || mc > 200) ns.add(mc)})
+            f.mcp = ns
+          }
+          if (f.mc) {
+            const ns = new Set()
+            f.mcn.forEach(mc => { if (mc < 100 || mc > 200) ns.add(mc)})
+            f.mcn = ns
+          }
+        }
+      }
+     }
 
     fSt.$onAction(({ name, args, after }) => { 
       after(async (result) => {
@@ -209,6 +252,7 @@ export default {
     fSt.contexte.notes.mapmc = mapmc.value
 
     return {
+      ID,
       session, nSt, aSt, gSt,
       tree,
       filtre,
