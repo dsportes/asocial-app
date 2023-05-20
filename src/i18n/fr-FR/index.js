@@ -770,6 +770,7 @@ export default {
   PNOdep: 'Déplier',
   PNOrep: 'Replier',
   PNOnosel: 'Pas de note sélectionnée',
+  PNOnonote: 'Pas de note répondant au critère de sélection',
 
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',

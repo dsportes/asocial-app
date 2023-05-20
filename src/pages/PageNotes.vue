@@ -11,9 +11,13 @@
         color="warning" icon="check" @click="test1"/>
     </div>
 
-    <!-- tick-strategy="leaf" -->
-    <q-tree ref="tree" class="q-mb-xl"
-      :nodes="nSt.nodes"
+  <div v-for="rac in nSt.nodes" :key="rac.key">
+    <div class="fs-md q-pa-xs bg-secondary text-white">
+      {{lib(rac) + ' [' + (stats[rac.key] || 0) + ']'}}
+    </div>
+    <q-tree v-if="rac.children.length" ref="tree" class="q-mb-sm"
+      :nodes="rac.children"
+      no-transition
       dense
       accordion
       node-key="key"
@@ -30,6 +34,8 @@
         </div>
       </template>
     </q-tree>
+    <div v-else class="titre-md text-italic">{{$t('PNOnonote')}}</div>
+  </div>
 
     <q-page-sticky position="top-left" class="box" :offset="[0,0]">
       <q-card class="q-pa-sm box2">
@@ -119,23 +125,14 @@ export default {
     
     filtrage (node, filtreFake) {
       const f = this.filtre
+      let rac
       const n = node.note
       if (!n || !f) return true
       if (f.avgr) {
         if (n.id !== f.avgr && !n.refk) return false
-        if (n.id !== f.avgr) {
-          let refk = n.refk
-          while (true) {
-            const p = this.nSt.map.get(refk)
-            if (!p) return false // ça ne devrait pas arriver
-            if (!p.refk) {
-              // on est au top
-              if (p.id !== f.avgr) return false
-              break
-            } else {
-              refk = p.refk
-            }
-          }
+        if (n.id !== f.avgr){
+          rac = this.nSt.getRac(node)
+          if (rac.key !== f.avgr) return false
         }
       }
       if (f.note && n.txt) {
@@ -151,6 +148,8 @@ export default {
       if (f.mcn) {
         if (n.smc && intersection(f.mcn, n.smc).size) return false
       }
+      if (!rac) rac = this.nSt.getRac(node)
+      // this.count(rac.key)
       return true
     },
 
@@ -242,15 +241,22 @@ export default {
     const tree = ref(null)
     const nSt = stores.note
     const session = stores.session
-    // const nodes = nSt.nodes
+    const nodes = nSt.nodes
     const aSt = stores.avatar
     const gSt = stores.groupe
     const fSt = stores.filtre
     const filtre = ref(null)
     const filtreFake = ref('1')
+    const stats = ref({})
     const now = new Date().getTime()
 
+    function count (key) {
+      const n = stats.value[key]
+      if (!n) stats.value[key] = 1; else stats.value[key] = n + 1
+    }
+
     function compileFiltre (f) {
+      stats.value = {}
       f.lim = f.nbj ? new Date().getTime() - (86400000 * f.nbj) : 0
       filtre.value = f
 
@@ -275,7 +281,7 @@ export default {
           }
         }
       }
-      filtreFake.value = (parseInt(filtreFake.value) + 1).toString()
+      filtreFake.value = '' + (parseInt(filtreFake.value) + 1)
      }
 
     fSt.$onAction(({ name, args, after }) => { 
@@ -296,7 +302,9 @@ export default {
       filtre, filtreFake,
       mapmc,
       now,
-      dhcool
+      dhcool,
+      stats,
+      count
     }
   }
 
