@@ -58,6 +58,8 @@ export default {
   groupe2: 'Note du groupe {0}',
   avatar2: 'Note de {0}',
   avatar3: 'Note de {0} rattachée à une note de {1}',
+  groupe9: 'Note DISPARUE #{0} du groupe {1}',
+  avatar9: 'Note DISPARUE #{0} de {1}',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -767,6 +769,7 @@ export default {
 
   PNOdep: 'Déplier',
   PNOrep: 'Replier',
+  PNOnosel: 'Pas de note sélectionnée',
 
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',

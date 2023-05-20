@@ -22,7 +22,7 @@
 
   "limitesjour": { "dlv": 365, "secrettemp": 60, "sponsoring" : 14, "groupenonheb": 120 },
   "lgnom": 20,
-  "lgtitre": 50,
+  "lgtitre": 120,
   "maxlgtextegen": 250,
   "maxlgtextesecret": 5000,
   "motscles": { 

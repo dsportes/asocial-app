@@ -1461,30 +1461,33 @@ _data_:
 
 */
 export class Note extends GenDoc {
-  static sort1 (a, b) {
-    const x = a.tid || (' ' + a.label)
-    const y = b.tid || (' ' + b.label)
+  static sort1 (a, b) { // les fake à la fin
+    const x = (a.note ? '1' : '2') + a.label
+    const y = (b.note ? '1' : '2') + b.label
     return x < y ? -1 : (x === y ? 0 : 1)
   }
 
   static sortNodes (a,b) { 
-    if (a.key === 'groupes') return 1
-    if (b.key === 'groupes') return -1
-    return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1 )
+    const x = a.type + a.label
+    const y = b.type + b.label
+    return x < y ? -1 : (x === y ? 0 : 1)
   }
 
+  static estG (key) { return key.charAt(2) === '2' }
   static fake = { txt: '', dh: 0 }
 
   get cle () { return getCle(this.id) }
   get ng () { return getNg(this.id) }
   get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
-  get pk () { return this.id + '/' + this.ids }
-  get pkref () { return this.ref ? this.ref[0] + '/' + this.ref[1] : ''}
-  get rnom () {  return this.ref && this.ref.length === 3 ? this.ref[2] : ''}
+  get key () { return this.id + '/' + this.ids }
+  get rkey () { return '' + this.id }
+  get refk () { return this.ref ? this.ref[0] + '/' + this.ref[1] : ''}
+  get refrk () { return this.ref ? '' + this.ref[0] : ''}
+  get refn () {  return this.ref && this.ref.length === 3 ? this.ref[2] : ''}
   get rid () {  return this.ref ? this.ref[0] : 0 }
   get rids () {  return this.ref ? this.ref[1] : 0 }
-  get reftop () { return this.ref ? this.pkref : ('' + this.id) }
-  get nomFake () { return (this.rnom ? (this.rnom + ' #') : '#') + idToSid(this.rids) }
+  // get nomFake () { return '#' + idToSid(this.rids) }
+  get nomFake () { return '#' + this.rids }
 
   async compile (row) {
     this.st = row.st || 99999999

@@ -17,12 +17,6 @@ export const useNoteStore = defineStore('note', {
     map: new Map(), // map des nodes
 
     nodes: [
-      { 
-        type: 0,
-        key: 'groupes', 
-        label: 'Groupes', 
-        children: [ ]
-      }
     ],
 
     test: {
@@ -46,13 +40,153 @@ export const useNoteStore = defineStore('note', {
 
   },
 
+  /* 
+  note 
+    key: 'id/ids' (clé de la note)
+    rkey: 'id' (clé de sa racine)
+    refk: 'id/ids de ref' (clé de sa note de rattachement)
+    refrk: 'id de ref' (clé de la racine de sa note de rattachement)
+    refn: nom du groupe de ref (nom du groupe de sa note de rattachement)
+
+  node
+    type
+    key : 'id/ids'
+    rkey : 'id' (clé de sa racine)
+    note : absent pour une fake
+    label :
+      - réelle : titre de la note
+      - fake : #idsB64
+  type:
+    1 : racine avatar
+    2 : racine groupe
+    3 : racine groupe zombi
+    4 5 : note avatar / groupe
+    6 7 : note fake avatar / groupe
+  */
+
   actions: {
-    setNote (note) {
+    setNote (note){
+      if (!note) return
+      const key = note.key
+      let n = this.map.get(key)
+      if (!note.ref) { // note rattachée à la racine
+        if (n) { // elle existait - remplacement - fake ou pas, elle devient réelle
+          if (!n.note) n.type -= 2 // si c'était une fake, elle est réelle
+          n.note = note
+          n.label = note.titre
+        } else {
+          // création d'une note réelle à la racine
+          n = {
+            rkey: note.rkey,
+            key: key,
+            type: Note.estG(key) ? 5 : 4,
+            label: note.titre,
+            note: note,
+            children: []
+          }
+          this.map.set(key, n)
+          this.rattachRac(n)
+        }
+      } else { // note rattachée à une autre
+        if (n) { // la note existait
+          if (!n.note) { // mais c'était une fake (rattachée à SA racine)
+            const r = this.map.get(n.rkey)
+            // on la détache de SA racine
+            const a = []
+            r.children.forEach(c => { if (c.key !== n.key) a.push(c)})
+            n.children = a
+            // elle devient réelle
+            n.type -= 2
+            n.note = note
+            n.label = note.titre
+            // on la rattache à sa note de rattachement
+            this.rattachNote(n)
+          } else { // la note de rattachement existe et est réelle
+            n.note = note
+            n.label = note.titre
+          }
+        } else { // la note n'existait pas
+          n = {
+            rkey: note.rkey,
+            key: key,
+            type: Note.estG(key) ? 5 : 4,
+            label: note.titre,
+            note: note,
+            children: []
+          }
+          this.map.set(key, n)
+          this.rattachNote(n) // on la rattache à sa note de rattachement
+        }
+      }
+    },
+
+    rattachNote (n) {
+      let nr = this.map.get(n.note.refk)
+      if (nr) { // la note de rattachement existait (fake ou réelle)
+        nr.children.push(n)
+        nr.children.sort(Node.sort1)
+      } else { // la note de rattachement n'existait pas : on la créé fake
+        const key = n.note.refk
+        const rkey = n.note.refrk
+        nr = {
+          type: Note.estG(rkey) ? 7 : 6,
+          key,
+          rkey,
+          label: n.note.nomFake,
+          children: [n],
+        }
+        this.map.set(key, nr)
+        // On rattache la note de rattachement à sa racine
+        this.rattachRac(nr, n.note.refn)
+      }
+    },
+
+    rattachRac (n, refn) { // n peut être réelle ou fake (rkey donne la clé de sa racine)
+      let r = this.map.get(n.rkey) // racine
+      if (r) {
+        r.children.push(n)
+        r.children.sort(Node.sort1)
+      } else {
+        if (Note.estG(n.rkey)) { // la racine est un groupe
+          // création d'un groupe zombi et rattachement à lui
+          const r = this.setRacine(n.rkey, 3, refn)
+          r.children.push(n)
+        }
+      }
+    },
+
+    setRacine (key, type, nom) { // on ajoute un node pour l'avatar juste à la racine
+      let n = this.map.get(key)
+      if (!n) {
+        n = { 
+          type,
+          key,
+          rkey: key,
+          label: nom,
+          children: []
+        }
+        this.map.set(key, n)
+        this.nodes.push(n)
+        this.nodes.sort(Note.sortNodes)
+      }
+      return n
+    },
+
+    setAvatar (na, type) { // on ajoute un node pour l'avatar juste à la racine
+      this.setRacine('' + na.id, 1, na.nom )
+    },
+
+    setGroupe (na) { // on ajoute un node pour l'avatar juste à la racine
+      this.setRacine('' + na.id, 2, na.nomc)
+    },
+
+    /***************************************************************/
+    setNote2 (note) {
       if (!note) return
       const key = note.pk
       let n = this.map.get(key)
       if (n) {
-        const ancRef = n.note.reftop // ancienne référence (ref ou id-top-)
+        const ancRef = n.note.reftop // ancienne référence (ref ou id-top)
         n.note = note
         n.label = note.titre
         if (ancRef !== note.reftop) { // n change de place dans l'arbre
@@ -139,24 +273,6 @@ export const useNoteStore = defineStore('note', {
       }
     },
 
-    setAvatar (na) { // on ajoute un node pour l'avatar juste à la racine
-      const tid = '' + na.id
-      const n = this.map.get(tid)
-      if (!n) {
-        const node = { 
-          top: na.id,
-          type: 1,
-          key: tid,
-          label: na.nom,
-          note: Note.fake,
-          children: []
-        }
-        this.map.set(tid, node)
-        this.nodes.push(node)
-        this.nodes.sort(Note.sortNodes)
-      }
-    },
-    
     delAvatar (id) {
       const tid = '' + id
       this.map.del(tid)
@@ -166,25 +282,6 @@ export const useNoteStore = defineStore('note', {
       this.nodes.sort(Note.sortNodes)
       // TODO : c'est plus compliqué que ça. 
       // Retirer aussi TOUTES les notes de l'avatar des groupes de l'arbre
-    },
-
-    setGroupe (na) {
-      const tid = '' + na.id
-      const n = this.map.get(tid)
-      if (!n) {
-        const node = { 
-          top: na.id,
-          key: tid,
-          type: 2,
-          label: na.nom,
-          note: Note.fake,
-          children: []
-        }
-        this.map.set(tid, node)
-        const g = this.getGroupes
-        g.children.push(node)
-        g.children.sort(Note.sort1)
-      }
     },
 
     delGroupe (id) {

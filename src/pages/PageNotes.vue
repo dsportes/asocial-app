@@ -23,28 +23,30 @@
       :filter-method="filtrage"
     >
       <template v-slot:default-header="prop">
-        <div class="row items-center">
+        <div class="row items-start">
           <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
-            size="sm" class="q-mr-sm" />
-          <div :class="styles[prop.node.type]">{{lib(prop.node)}}</div>
+            size="sm" class="col-auto q-mr-sm" />
+          <div :class="'col ' + styles[prop.node.type]">{{lib(prop.node)}}</div>
         </div>
       </template>
     </q-tree>
 
     <q-page-sticky position="top-left" class="box" :offset="[0,0]">
       <q-card class="q-pa-sm box2">
-        <div class="titre-lg">Aperçu de la note selectionée</div>
         <div v-if="selected" class="largeur40">
           <div class="row justify-between">
             <div class="titre-md">{{lib2(node)}}</div>
-            <div class="font-mono">{{dhcool(node.note.dh)}}</div>
+            <div v-if="node.note" class="font-mono">{{dhcool(node.note.dh)}}</div>
           </div>
-          <show-html v-if="selected" class="titre-md bord1" 
-            :texte="node.note.txt" zoom maxh="4rem" />
-          <apercu-motscles v-if="node.note.smc" :mapmc="mapmc" 
-            :src="Array.from(node.note.smc)" du-compte
-            :du-groupe="ID.estGroupe(node.note.id) ? node.note.id : 0"/>
+          <div v-if="node.note">
+            <show-html v-if="selected" class="titre-md bord1" 
+              :texte="node.note.txt" zoom maxh="4rem" />
+            <apercu-motscles v-if="node.note.smc" :mapmc="mapmc" 
+              :src="Array.from(node.note.smc)" du-compte
+              :du-groupe="ID.estGroupe(node.note.id) ? node.note.id : 0"/>
+          </div>
         </div>
+        <div v-else class="titre-md text-italic">{{$t('PNOnosel')}}</div>
       </q-card>
     </q-page-sticky>
   </q-page>
@@ -54,23 +56,25 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { Note, Motscles, getNg } from '../app/modele.mjs'
-import { dhcool, difference, intersection } from '../app/util.mjs'
+import { dhcool, difference, intersection, splitPK } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID } from '../app/api.mjs'
 
-const icons = ['accessibility','person','group','description','article','close']
-const colors = ['green-7','primary','orange','primary','orange','negative']
-const styles = [ 
-  'titre-md text-italic', 
+const icons = ['','person','group','group','description','article','close','close']
+const colors = ['','primary','orange','negative','primary','orange','primary','orange']
+const styles = [
+  '',
   'titre-md text-bold', 
   'titre-md text-bold', 
+  'titre-md text-bold text-italic', 
   'fs-md', 
   'fs-md',
-  'font-mono fs-sm'
+  'fs-md text-italic',
+  'fs-md text-italic'
   ]
 
-const nbn1 = 10 // nombre de blocks de 4 * nbn2 messages sous la racine d'un avatar ou groupe
+const nbn1 = 50 // nombre de blocks de 4 * nbn2 messages sous la racine d'un avatar ou groupe
 const nbn2 = 9
 
 export default {
@@ -88,23 +92,29 @@ export default {
   },
   methods: {
     lib (n) {
-      if (n.type === 3 || n.type === 4) return n.label
+      if (n.type > 3) return n.label
       if (n.type === 1) return this.$t('avatar', [n.label])
-      if (n.type === 2) return this.$t('groupe', [n.label])
-      return this.$t('groupes')
+      return this.$t('groupe', [n.label])
     },
     lib2 (n) {
-      if (n.type === 1 || n.type === 2) return n.label
-      if (n.type === 3) {
-        const nomg = n.note.rnom
+      if (n.type <= 3) return n.label
+      if (n.type === 4) {
+        const nomg = n.note.refn
         const nom = getNg(n.note.id).nom
         return nomg ? this.$t('avatar3', [nom, nomg]) : this.$t('avatar2', [nom])
       }
-      if (n.type === 4) {
+      if (n.type === 5) {
         const nom = getNg(n.note.id).nom
         return this.$t('groupe2', [nom])
       }
-      return this.$t('groupes')
+      const { id, ids } = splitPK(n.key)
+      const r = nodes.map.get(''+id)
+      if (n.type === 6) { 
+        return this.$t('avatar9', [ids, r.label])
+      }
+      if (n.type === 7) {
+        return this.$t('groupe9', [ids, r.label])
+      }
     },
     
     filtrage (node, filtreFake) {
@@ -112,18 +122,18 @@ export default {
       const n = node.note
       if (!n || !f) return true
       if (f.avgr) {
-        if (n.id !== f.avgr && !n.rid) return false
+        if (n.id !== f.avgr && !n.refk) return false
         if (n.id !== f.avgr) {
-          let rid = n.rid
+          let refk = n.refk
           while (true) {
-            const p = this.nSt.map.get(rid.id + '/' + rid.ids)
-            if (!p) return false // ça ne vrait pas arriver
-            if (!p.rid) {
+            const p = this.nSt.map.get(refk)
+            if (!p) return false // ça ne devrait pas arriver
+            if (!p.refk) {
               // on est au top
               if (p.id !== f.avgr) return false
               break
             } else {
-              rid = p.rid
+              refk = p.refk
             }
           }
         }
@@ -150,18 +160,22 @@ export default {
         // (id, ids, ref, texte, dh, v1, v2)
         const n1 = new Note()
         const x = i * 1000
-        n1.initTest(id, x + 1, null, '##Ma note ' + (x + 1), this.testdh(), 10, 12)
+        n1.initTest(id, x + 1, null, '', this.testdh(), 10, 12)
+        n1.settxt('##Ma note ' + n1.key)
         if (g) this.gSt.setNote(n1); else this.aSt.setNote(n1)
         for( let j = 1; j < nbn2; j++) {
           const x = (i * 1000) + (j * 10)
           const n2 = new Note()
-          n2.initTest(id, x + 2, [n1.id, n1.ids], 'Ma note ' + (x+2) + ' bla bla bla bla bla\nbla bla bla bla', this.testdh(), 8, 0)
+          n2.initTest(id, x + 2, [n1.id, n1.ids], '', this.testdh(), 8, 0)
+          n2.settxt('Ma note ' + n2.key + ' bla bla bla bla bla\nbla bla bla bla')
           if (g) this.gSt.setNote(n2); else this.aSt.setNote(n2)
           const n3 = new Note()
-          n3.initTest(id, x + 3, [n1.id, n1.ids], 'Ma tres belle note ' + (x+3) + ' bla bla bla bla bla\nbla bla bla bla', this.testdh(), 8, 0)
+          n3.initTest(id, x + 3, [n1.id, n1.ids], '', this.testdh(), 8, 0)
+          n3.settxt('Ma tres belle note ' + n3.key + ' bla bla bla bla bla\nbla bla bla bla')
           if (g) this.gSt.setNote(n3); else this.aSt.setNote(n3)
           const n4 = new Note()
-          n4.initTest(id, x + 4, [n2.id, n2.ids], 'Ma tres belle note ' + (x+4) + ' bla bla bla bla bla\nbla bla bla bla', this.testdh(), 8, 0)
+          n4.initTest(id, x + 4, [n2.id, n2.ids], '', this.testdh(), 8, 0)
+          n4.settxt('Ma tres belle note ' + n4.key + ' bla bla bla bla bla\nbla bla bla bla')
           if (g) this.gSt.setNote(n4); else this.aSt.setNote(n4)
         }
       }
@@ -173,16 +187,24 @@ export default {
         const ids = 100000 + (10 * i++)
         const n1 = new Note()
         n1.initTest(na.id, ids + 1, [ng.id, 1, ng.nom], '', this.testdh(), 8, 0)
-        n1.settxt(`Note ${n1.pk} de ${na.nom} attachée à ${n1.pkref} du groupe ${n1.rnom} `)
+        n1.settxt(`Note ${n1.key} de ${na.nom} attachée à ${n1.rids} du groupe ${n1.refn} `)
         this.gSt.setNote(n1)
         const n2 = new Note()
         n2.initTest(na.id, ids + 2, [ng.id, 1, ng.nom], '', this.testdh(), 8, 0)
-        n2.settxt(`Note ${n2.pk} de ${na.nom} attachée à ${n2.pkref} du groupe ${n2.rnom} `)
+        n2.settxt(`Note ${n2.key} de ${na.nom} attachée à ${n2.rids} du groupe ${n2.refn} `)
         this.gSt.setNote(n2)
         const n3 = new Note()
         n3.initTest(na.id, ids + 3, [n1.id, n1.ids], '', this.testdh(), 8, 0)
-        n3.settxt(`Note ${n3.pk} de ${na.nom} attachée à ${n1.pkref} du groupe ${n1.rnom} `)
+        n3.settxt(`Note ${n3.key} de ${na.nom} attachée à ${n1.rids} du groupe ${n1.refn} `)
         this.gSt.setNote(n3)
+      }
+      // des groupes zombis
+      {
+        const gz = 1020000000000099
+        const n1 = new Note()
+        n1.initTest(na.id, 99999999, [gz, 1, 'MonZombi'], '', this.testdh(), 8, 0)
+        n1.settxt(`Note ${n1.key} de ${na.nom} attachée à ${n1.rids} du groupe ${n1.refn} `)
+        this.gSt.setNote(n1)
       }
     },
 
@@ -268,7 +290,7 @@ export default {
     fSt.contexte.notes.mapmc = mapmc.value
 
     return {
-      ID,
+      ID, splitPK,
       session, nSt, aSt, gSt,
       tree,
       filtre, filtreFake,
