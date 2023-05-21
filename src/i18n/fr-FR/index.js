@@ -63,6 +63,8 @@ export default {
   groupe9: 'Note DISPARUE #{0} du groupe {1}',
   avatar9: 'Note DISPARUE #{0} de {1}',
 
+  nolimite: '(sans limite)',
+
   // Filtre notif
   gravite0: '(ignorer)',
   gravite1: 'normale ou importante',
@@ -623,6 +625,8 @@ export default {
   FImcp: 'Ayant les mots-clés ...',
   FImcn: 'Mais N\'ayant PAS les mots clés ...',
   FIjours: 'Modifiés dans les N jours',
+  FIv1: 'Taille du texte > ...',
+  FIv2: 'Taille totale des fichiers > ...',
   FIavecbl: 'Tribus en cours de blocage',
   FIinvits: 'Groupes ayant des invitations en cours',
   FIavecsp: 'Comptes "sponsor" seulement',
@@ -773,6 +777,7 @@ export default {
   PNOrep: 'Replier',
   PNOnosel: 'Pas de note sélectionnée',
   PNOnonote: 'Pas de note répondant au critère de sélection',
+  PNOvols: 'Volume du texte: {0}, des fichiers: {1}',
 
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',

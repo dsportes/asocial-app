@@ -165,6 +165,8 @@
           <filtre-txt nom="notes" prop='note' :idx="0"/>
           <filtre-mc nom="notes" attr="mcp" :idx="1"/>
           <filtre-mc nom="notes" attr="mcn" :idx="0"/>
+          <filtre-vols nom="notes" attr="v1" :idx="1"/>
+          <filtre-vols nom="notes" attr="v2" :idx="0"/>
         </div>
       </div>
     </q-scroll-area>
@@ -345,6 +347,7 @@ import FiltreEnexcedent from './components/FiltreEnexcedent.vue'
 import FiltreAinvits from './components/FiltreAinvits.vue'
 import FiltreStmb from './components/FiltreStmb.vue'
 import FiltreAvgr from './components/FiltreAvgr.vue'
+import FiltreVols from './components/FiltreVols.vue'
 
 import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
@@ -361,7 +364,7 @@ export default {
     PageGroupe, PageGroupes, PageNotes,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
-    DialogueErreur, DialogueHelp, FiltreAvgr
+    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols
    },
 
   computed: {

@@ -1536,14 +1536,14 @@ export class Note extends GenDoc {
     }
   }
 
-  initTest (id, ids, ref, texte, dh, v1, v2) { // pour les tests
+  initTest (id, ids, ref, txt, dh, v1, v2) { // pour les tests
     this.id = id
     this.ids = ids
     this.ref = ref
-    this.txt = texte
+    this.txt = txt
     this.titre = titre(this.txt)
     this.dh = dh,
-    this.v1 = v1
+    this.v1 = txt ? txt.length : 0
     this.v2 = v2
     if (ID.estGroupe(id)) {
       switch (ids % 3) {
@@ -1563,6 +1563,7 @@ export class Note extends GenDoc {
   settxt (txt) { // pour les tests
     this.txt = txt
     this.titre = titre(this.txt)
+    this.v1 = txt ? txt.length : 0
   }
 
 }

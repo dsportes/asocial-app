@@ -44,6 +44,9 @@
             <apercu-motscles v-if="node.note.smc" :mapmc="mapmcf(node.key)" 
               :src="Array.from(node.note.smc)" du-compte
               :du-groupe="ID.estGroupe(node.note.id) ? node.note.id : 0"/>
+            <div class="q-mt-xs titre-md">
+              {{$t('PNOvols', [edvol(node.note.v1), edvol(node.note.v2)])}}
+            </div>
           </div>
         </div>
         <div v-else class="titre-md text-italic">{{$t('PNOnosel')}}</div>
@@ -56,7 +59,7 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { Note, Motscles, getNg } from '../app/modele.mjs'
-import { dhcool, difference, intersection, splitPK } from '../app/util.mjs'
+import { dhcool, difference, intersection, splitPK, edvol } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID } from '../app/api.mjs'
@@ -159,11 +162,11 @@ export default {
         n1.settxt(`Note ${n1.key} de ${na.nom} attachée à ${n1.rids} du groupe ${n1.refn} `)
         this.gSt.setNote(n1)
         const n2 = new Note()
-        n2.initTest(na.id, ids + 2, [ng.id, 1, ng.nom], '', this.testdh(), 8, 0)
+        n2.initTest(na.id, ids + 2, [ng.id, 1, ng.nom], '', this.testdh(), 8, 100000)
         n2.settxt(`Note ${n2.key} de ${na.nom} attachée à ${n2.rids} du groupe ${n2.refn} `)
         this.gSt.setNote(n2)
         const n3 = new Note()
-        n3.initTest(na.id, ids + 3, [n1.id, n1.ids], '', this.testdh(), 8, 0)
+        n3.initTest(na.id, ids + 3, [n1.id, n1.ids], '', this.testdh(), 8, 100000000)
         n3.settxt(`Note ${n3.key} de ${na.nom} attachée à ${n1.rids} du groupe ${n1.refn} `)
         this.gSt.setNote(n3)
       }
@@ -221,6 +224,8 @@ export default {
 
     function compileFiltre (fx) {
       const f = filtre.value
+      f.v1 = fx.v1 || 0
+      f.v2 = fx.v2 || 0
       f.note = fx.note
       f.lim = fx.nbj ? new Date().getTime() - (86400000 * fx.nbj) : 0
       f.mcp = fx.mcp ? new Set(fx.mcp) : null
@@ -266,12 +271,14 @@ export default {
             if (rac.key !== f.avgr) return false
           }
         }
-        if (f.note && n.txt) {
-          if (n.txt.indexOf(f.note) === -1) return false
-        }
         if (f.lim && n.dh) {
           if (n.dh < f.lim) return false
         }
+        if (f.note && n.txt) {
+          if (n.txt.indexOf(f.note) === -1) return false
+        }
+        if (f.v1 && n.v1 < f.v1) return false
+        if (f.v2 && n.v2 < f.v2) return false
         if (f.mcp) {
           if (!n.smc) return false
           if (difference(f.mcp, n.smc).size) return false
@@ -295,7 +302,7 @@ export default {
     fSt.contexte.notes.mapmc = mapmc.value
 
     return {
-      ID, splitPK, dhcool, now, filtrage,
+      ID, splitPK, dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
       tree,
       filtre, filtreFake,
