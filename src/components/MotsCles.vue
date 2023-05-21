@@ -1,5 +1,5 @@
 <template>
-<q-card class="bs petitelargeur">
+<q-card class="bs largeur30">
   <q-toolbar class="bg-secondary text-white">
     <q-btn class="q-mr-xs" dense size="md" color="warning"
       icon="close" @click="cancelEdit"/>

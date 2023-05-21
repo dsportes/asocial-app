@@ -11,12 +11,8 @@
         color="warning" icon="check" @click="test1"/>
     </div>
 
-  <div v-for="rac in nSt.nodes" :key="rac.key">
-    <div class="fs-md q-pa-xs bg-secondary text-white">
-      {{lib(rac) + ' [' + (stats[rac.key] || 0) + ']'}}
-    </div>
-    <q-tree v-if="rac.children.length" ref="tree" class="q-mb-sm"
-      :nodes="rac.children"
+    <q-tree ref="tree" class="q-mb-sm"
+      :nodes="nSt.nodes"
       no-transition
       dense
       accordion
@@ -34,8 +30,6 @@
         </div>
       </template>
     </q-tree>
-    <div v-else class="titre-md text-italic">{{$t('PNOnonote')}}</div>
-  </div>
 
     <q-page-sticky position="top-left" class="box" :offset="[0,0]">
       <q-card class="q-pa-sm box2">
@@ -47,7 +41,7 @@
           <div v-if="node.note">
             <show-html v-if="selected" class="titre-md bord1" 
               :texte="node.note.txt" zoom maxh="4rem" />
-            <apercu-motscles v-if="node.note.smc" :mapmc="mapmc" 
+            <apercu-motscles v-if="node.note.smc" :mapmc="mapmcf(node.key)" 
               :src="Array.from(node.note.smc)" du-compte
               :du-groupe="ID.estGroupe(node.note.id) ? node.note.id : 0"/>
           </div>
@@ -80,7 +74,7 @@ const styles = [
   'fs-md text-italic'
   ]
 
-const nbn1 = 50 // nombre de blocks de 4 * nbn2 messages sous la racine d'un avatar ou groupe
+const nbn1 = 100 // nombre de blocks de 4 * nbn2 messages sous la racine d'un avatar ou groupe
 const nbn2 = 9
 
 export default {
@@ -96,11 +90,12 @@ export default {
       this.node = this.nSt.getNode(ap)
     }
   },
+
   methods: {
     lib (n) {
       if (n.type > 3) return n.label
-      if (n.type === 1) return this.$t('avatar', [n.label])
-      return this.$t('groupe', [n.label])
+      if (n.type === 1) return this.$t('avatar1', [n.label, n.nf, n.nt])
+      return this.$t('groupe1', [n.label, n.nf, n.nt])
     },
     lib2 (n) {
       if (n.type <= 3) return n.label
@@ -123,34 +118,9 @@ export default {
       }
     },
     
-    filtrage (node, filtreFake) {
-      const f = this.filtre
-      let rac
-      const n = node.note
-      if (!n || !f) return true
-      if (f.avgr) {
-        if (n.id !== f.avgr && !n.refk) return false
-        if (n.id !== f.avgr){
-          rac = this.nSt.getRac(node)
-          if (rac.key !== f.avgr) return false
-        }
-      }
-      if (f.note && n.txt) {
-        if (n.txt.indexOf(f.note) === -1) return false
-      }
-      if (f.lim && n.dh) {
-        if (n.dh < f.lim) return false
-      }
-      if (f.mcp) {
-        if (!n.smc) return false
-        if (difference(f.mcp, n.smc).size) return false
-      }
-      if (f.mcn) {
-        if (n.smc && intersection(f.mcn, n.smc).size) return false
-      }
-      if (!rac) rac = this.nSt.getRac(node)
-      // this.count(rac.key)
-      return true
+    mapmcf (key) {
+      const id = parseInt(key)
+      return Motscles.mapMC(true, ID.estGroupe(id) ? id : 0)
     },
 
     stest1 (na, g) {
@@ -245,28 +215,23 @@ export default {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const fSt = stores.filtre
-    const filtre = ref(null)
+    const filtre = ref({})
     const filtreFake = ref('1')
-    const stats = ref({})
     const now = new Date().getTime()
 
-    function count (key) {
-      const n = stats.value[key]
-      if (!n) stats.value[key] = 1; else stats.value[key] = n + 1
-    }
-
-    function compileFiltre (f) {
-      stats.value = {}
-      f.lim = f.nbj ? new Date().getTime() - (86400000 * f.nbj) : 0
-      filtre.value = f
-
-      f.mcp = f.mcp ? new Set(f.mcp) : null
-      f.mcn = f.mcn ? new Set(f.mcn) : null
-
+    function compileFiltre (fx) {
+      const f = filtre.value
+      f.note = fx.note
+      f.lim = fx.nbj ? new Date().getTime() - (86400000 * fx.nbj) : 0
+      f.mcp = fx.mcp ? new Set(fx.mcp) : null
+      f.mcn = fx.mcn ? new Set(fx.mcn) : null
+      f.avgr = fx.avgr
       if (f.avgr) {
         const g = ID.estGroupe(f.avgr) ? f.avgr : 0
-        mapmc.value = Motscles.mapMC(true, g)
-        fSt.contexte.notes.mapmc = mapmc.value
+        fSt.setContexte('notes', {
+          mapmc : Motscles.mapMC(true, g),
+          groupeId : g
+        })
         if (!g) {
           // enlever les mots clés de groupe de f.mcp / f.mcn
           if (f.mcp) {
@@ -280,9 +245,43 @@ export default {
             f.mcn = ns
           }
         }
+      } else {
+        fSt.setContexte('notes', {
+          mapmc : Motscles.mapMC(true, 0),
+          groupeId : 0
+        })      
       }
       filtreFake.value = '' + (parseInt(filtreFake.value) + 1)
-     }
+      setTimeout(() => { nSt.stats(filtrage)}, 50)
+    }
+
+    function filtrage (node, filtreFake) {
+      const f = filtre.value
+      const n = node.note
+      if (n && f) {
+        if (f.avgr) {
+          if (n.id !== f.avgr && !n.refk) return false
+          if (n.id !== f.avgr){
+            const rac = nSt.getRacine(node)
+            if (rac.key !== f.avgr) return false
+          }
+        }
+        if (f.note && n.txt) {
+          if (n.txt.indexOf(f.note) === -1) return false
+        }
+        if (f.lim && n.dh) {
+          if (n.dh < f.lim) return false
+        }
+        if (f.mcp) {
+          if (!n.smc) return false
+          if (difference(f.mcp, n.smc).size) return false
+        }
+        if (f.mcn) {
+          if (n.smc && intersection(f.mcn, n.smc).size) return false
+        }
+      }
+      return true
+    }
 
     fSt.$onAction(({ name, args, after }) => { 
       after(async (result) => {
@@ -296,15 +295,11 @@ export default {
     fSt.contexte.notes.mapmc = mapmc.value
 
     return {
-      ID, splitPK,
+      ID, splitPK, dhcool, now, filtrage,
       session, nSt, aSt, gSt,
       tree,
       filtre, filtreFake,
-      mapmc,
-      now,
-      dhcool,
-      stats,
-      count
+      mapmc
     }
   }
 

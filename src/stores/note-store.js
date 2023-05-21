@@ -33,7 +33,7 @@ export const useNoteStore = defineStore('note', {
       }
     },
 
-    getRac: (state) => { return (node) => {
+    getRacine: (state) => { return (node) => {
         if (!node.note) return state.map.get(node.key)
         const n = node.note
         let refk = n.refk
@@ -72,6 +72,17 @@ export const useNoteStore = defineStore('note', {
   */
 
   actions: {
+    stats (f) { // f(node): function de filtrage
+      this.nodes.forEach(n => { n.nt = 0; n.nf = 0 })
+      this.map.forEach(n => {
+        const r = this.getRacine(n)
+        if (n.type > 3) {
+          r.nt++
+          if (f && f(n)) r.nf++
+        }
+      })
+    },
+
     setNote (note){
       if (!note) return
       const key = note.key
@@ -166,6 +177,7 @@ export const useNoteStore = defineStore('note', {
       let n = this.map.get(key)
       if (!n) {
         n = { 
+          nb: 0,
           type,
           key,
           rkey: key,
@@ -187,7 +199,6 @@ export const useNoteStore = defineStore('note', {
       this.setRacine('' + na.id, 2, na.nomc)
     },
 
-    /***************************************************************/
     delNote (id, ids) {
       // TODO
     },

@@ -39,6 +39,9 @@ export const useFiltreStore = defineStore('filtre', {
     },
     setTri (nom, val) {
       this.tri[nom] = val
+    },
+    setContexte (nom, val) {
+      this.contexte[nom] = val
     }
   }
 })

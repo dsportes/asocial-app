@@ -4,8 +4,8 @@
     <div v-if="!src.length" class="titre-md text-italic">{{$t('MCaucun')}}</div>
     <div v-else class="col row font-mono fs-sm">
       <div class="titre-md text-bold q-mr-sm">{{src.length ? $t('MCmc') : $t('MCaucun')}}</div>
-      <span v-for="idx in src" :key="idx" 
-        :class="sty(idx) + ' cmc q-mr-sm'">{{nom(idx)}}</span>
+      <span v-for="n in src" :key="n" 
+        :class="sty(n) + ' q-mr-xs q-px-xs bg-secondary text-white'">{{nom(n)}}</span>
     </div>
     <q-btn v-if="edit" class="col-auto btn1" size="sm" icon="edit" color="warning" @click="editer">
       <q-tooltip class="bg-white text-primary">{{$t('editer')}}</q-tooltip>
@@ -65,9 +65,9 @@ export default ({
     const mapMC = toRef(props, 'mapmc')
 
     function nom (idx) {
-      if (!mapMC.value) return ''
+      if (!mapMC.value) return '' + idx
       const e = mapMC.value.get(''+idx)
-      return e && e.n ? e.n : ''
+      return e && e.n ? e.n : ('' + idx)
     }
     
     const mcedit = ref(false)

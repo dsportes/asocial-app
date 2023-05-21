@@ -49,6 +49,19 @@ export default ({
     groupeId.value = ctx.groupeId || 0
     mapmc.value = ctx.mapmc
 
+    st.$onAction(({ name, args, after }) => { 
+      after(async (result) => {
+        if ((name === 'setContexte')){
+          if (args[0] === nom.value) {
+            const arg = args[1]
+            groupeId.value = arg.groupeId || 0
+            mapmc.value = arg.mapmc
+          }
+        }
+      })
+    })
+
+
     return {
       st,
       src,
