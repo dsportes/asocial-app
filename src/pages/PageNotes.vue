@@ -35,7 +35,7 @@
       <q-card class="q-pa-sm box2">
         <div v-if="selected" class="largeur40">
           <div class="row justify-between">
-            <div class="titre-md">{{lib2(node)}}</div>
+            <div class="titre-md">{{lib2}}</div>
             <div v-if="node.note" class="font-mono">{{dhcool(node.note.dh)}}</div>
           </div>
           <div v-if="node.note">
@@ -45,8 +45,11 @@
               :src="Array.from(node.note.smc)" du-compte
               :du-groupe="ID.estGroupe(node.note.id) ? node.note.id : 0"/>
             <div class="q-mt-xs titre-md">
-              {{$t('PNOvols', [edvol(node.note.v1), edvol(node.note.v2)])}}
+              <span>{{$t('PNOv1', [edvol(node.note.v1)])}}</span>
+              <span class="q-ml-sm">{{$t('PNOnf', node.note.mfa.size, {count: node.note.mfa.size})}}</span>
+              <span class="q-ml-xs">{{node.note.mfa.size ? (edvol(node.note.v2) + '.') : ''}}</span>
             </div>
+            <div class='titre-md'>{{prot + exclu + temp}}</div>
           </div>
         </div>
         <div v-else class="titre-md text-italic">{{$t('PNOnosel')}}</div>
@@ -62,7 +65,7 @@ import { Note, Motscles, getNg } from '../app/modele.mjs'
 import { dhcool, difference, intersection, splitPK, edvol } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
-import { ID } from '../app/api.mjs'
+import { ID, AMJ } from '../app/api.mjs'
 
 const icons = ['','person','group','group','description','article','close','close']
 const colors = ['','primary','orange','negative','primary','orange','primary','orange']
@@ -86,21 +89,8 @@ export default {
   components: { ShowHtml, ApercuMotscles },
 
   computed: {
-  },
-
-  watch: {
-    selected (ap, av) {
-      this.node = this.nSt.getNode(ap)
-    }
-  },
-
-  methods: {
-    lib (n) {
-      if (n.type > 3) return n.label
-      if (n.type === 1) return this.$t('avatar1', [n.label, n.nf, n.nt])
-      return this.$t('groupe1', [n.label, n.nf, n.nt])
-    },
-    lib2 (n) {
+    lib2 () {
+      const n = this.node
       if (n.type <= 3) return n.label
       if (n.type === 4) {
         const nomg = n.note.refn
@@ -119,8 +109,38 @@ export default {
       if (n.type === 7) {
         return this.$t('groupe9', [ids, r.label])
       }
+      return ''
     },
-    
+    exclu () {
+      const n = this.node.note
+      if (!n.im) return ''
+      const m = this.gSt.getMembre(n.id, n.im)
+      return !m ? '' : this.$t('PNOexclu', [m.na.nomc])
+    },
+    prot () {
+      return this.node.note.p ? this.$t('PNOprot') : ''
+    },
+    temp () {
+      const st = this.node.note.st
+      if (!st) return ''
+      const n = AMJ.diff(st, this.auj)
+      return this.$t('NPOtemp', n, { count: n })
+    }
+  },
+
+  watch: {
+    selected (ap, av) {
+      this.node = this.nSt.getNode(ap)
+    }
+  },
+
+  methods: {
+    lib (n) {
+      if (n.type > 3) return n.label
+      if (n.type === 1) return this.$t('avatar1', [n.label, n.nf, n.nt])
+      return this.$t('groupe1', [n.label, n.nf, n.nt])
+    },
+ 
     mapmcf (key) {
       const id = parseInt(key)
       return Motscles.mapMC(true, ID.estGroupe(id) ? id : 0)
@@ -128,22 +148,28 @@ export default {
 
     stest1 (na, g) {
       const id = na.id
+      const demain = AMJ.amjUtcPlusNbj(this.auj, 1)
+      const sem = AMJ.amjUtcPlusNbj(this.auj, 7)
+
       for(let i = 0; i < nbn1; i++) {
         // (id, ids, ref, texte, dh, v1, v2)
         const n1 = new Note()
         const x = i * 1000
         n1.initTest(id, x + 1, null, '', this.testdh(), 10, 12)
         n1.settxt('##Ma note ' + n1.key)
+        n1.p = 1; n1.st = this.auj
         if (g) this.gSt.setNote(n1); else this.aSt.setNote(n1)
         for( let j = 1; j < nbn2; j++) {
           const x = (i * 1000) + (j * 10)
           const n2 = new Note()
-          n2.initTest(id, x + 2, [n1.id, n1.ids], '', this.testdh(), 8, 0)
+          n2.initTest(id, x + 2, [n1.id, n1.ids], '', this.testdh(), 8, 20)
           n2.settxt('Ma note ' + n2.key + ' bla bla bla bla bla\nbla bla bla bla')
+          n2.st = demain; n2.im = g ? 1 : 0
           if (g) this.gSt.setNote(n2); else this.aSt.setNote(n2)
           const n3 = new Note()
-          n3.initTest(id, x + 3, [n1.id, n1.ids], '', this.testdh(), 8, 0)
+          n3.initTest(id, x + 3, [n1.id, n1.ids], '', this.testdh(), 8, 20000)
           n3.settxt('Ma tres belle note ' + n3.key + ' bla bla bla bla bla\nbla bla bla bla')
+          n3.st = sem
           if (g) this.gSt.setNote(n3); else this.aSt.setNote(n3)
           const n4 = new Note()
           n4.initTest(id, x + 4, [n2.id, n2.ids], '', this.testdh(), 8, 0)
@@ -227,6 +253,7 @@ export default {
       f.v1 = fx.v1 || 0
       f.v2 = fx.v2 || 0
       f.note = fx.note
+      f.temp = fx.temp
       f.lim = fx.nbj ? new Date().getTime() - (86400000 * fx.nbj) : 0
       f.mcp = fx.mcp ? new Set(fx.mcp) : null
       f.mcn = fx.mcn ? new Set(fx.mcn) : null
@@ -279,6 +306,7 @@ export default {
         }
         if (f.v1 && n.v1 < f.v1) return false
         if (f.v2 && n.v2 < f.v2) return false
+        if (f.temp && !n.st) return false
         if (f.mcp) {
           if (!n.smc) return false
           if (difference(f.mcp, n.smc).size) return false
@@ -302,11 +330,12 @@ export default {
     fSt.contexte.notes.mapmc = mapmc.value
 
     return {
-      ID, splitPK, dhcool, now, filtrage, edvol,
+      ID, AMJ, splitPK, dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
       tree,
       filtre, filtreFake,
-      mapmc
+      mapmc,
+      auj: session.dateJourConnx
     }
   }
 

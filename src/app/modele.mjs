@@ -1433,9 +1433,7 @@ _data_:
 - `ids` : identifiant relatif à son avatar.
 - `v` : sa version.
 
-- `st` :
-  - `99999999` pour un _permanent_.
-  - `aaaammjj` date limite de validité pour un _temporaire_.
+- `st`: aaaammjj date limite de validité pour un _temporaire_.
 - `im` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `ids`. 
 - `p` : 0: pas protégé, 1: protégé en écriture.
 - `v1` : volume du texte
@@ -1545,6 +1543,7 @@ export class Note extends GenDoc {
     this.dh = dh,
     this.v1 = txt ? txt.length : 0
     this.v2 = v2
+    this.mfa = { size : v2 ? (ids % 10) : 0 }
     if (ID.estGroupe(id)) {
       switch (ids % 3) {
         case 0: { this.smc = new Set([1, 101, 255]); break}

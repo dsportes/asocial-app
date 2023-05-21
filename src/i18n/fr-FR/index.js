@@ -639,6 +639,7 @@ export default {
   FItri: 'Tier par ...',
   FItavgr: '(tous avatars et groupes)',
   FIavgrt: 'Filtrer sur Un avatar / groupe',
+  FItemp: 'Notes temporaires seulement',
 
   TRItribus0: '(non trié)',
   TRItribus1: 'Volume V1 attribué',
@@ -777,7 +778,11 @@ export default {
   PNOrep: 'Replier',
   PNOnosel: 'Pas de note sélectionnée',
   PNOnonote: 'Pas de note répondant au critère de sélection',
-  PNOvols: 'Volume du texte: {0}, des fichiers: {1}',
+  PNOv1: 'Volume du texte: {0}.',
+  PNOnf: 'Aucun fichier attaché. | Un fichier attaché de | {count} fichiers occupant ',
+  PNOexclu: 'Excluivité d\'écriture à {0}. ',
+  PNOprot: 'Protégé contre l\'écriture. ',
+  NPOtemp: 'Note temporaire, disparaît aujourd\'hui. | Note temporaire, disparaît demain. | Note temporaire, disparaît dans {count} jours.',
 
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',

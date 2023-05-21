@@ -96,16 +96,6 @@ export const useGroupeStore = defineStore('groupe', {
         return a 
       }
     },
-    getSecret: (state) => { return (id, ns) => { 
-        const e = state.map.get(id)
-        return e ? e.secrets.get(ns) : null 
-      }
-    },
-    getSecrets: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.secrets : null 
-      }
-    },
 
     membreDeId: (state) => { return (e, id) => {
         for (const [,m] of e.membres) { if (m.na.id === id) return m }
