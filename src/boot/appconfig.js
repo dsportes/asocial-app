@@ -30,10 +30,11 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.debug = process.env.DEBUGGING
   cfg.dev = process.env.DEV
 
-  const p = process.env.DEV ? process.env.PORT_SERVEUR : window.location.port
-  cfg.urlwss = 'wss://' + cfg.serveur + ':' + p + '/ws/'
-  cfg.urlserveur = 'https://' + cfg.serveur + ':' + p
-  // console.log('urlserveur: ' + cfg.urlserveur + '  ---  urlwss: ' + cfg.urlwss)
+  // cfg.urlserveur = process.env.DEV ? process.env.DEV_SERVEUR : window.location.host
+  cfg.urlserveur = process.env.DEV_SERVEUR
+  const i = cfg.urlserveur.indexOf(':')
+  cfg.urlwss = 'wss' + cfg.urlserveur.substring(i) + '/ws/'
+  console.log('urlserveur: ' + cfg.urlserveur + ' --- urlwss: ' + cfg.urlwss + ' --- build: ' + cfg.build)
 
   stores.config.setConfig(cfg)
 

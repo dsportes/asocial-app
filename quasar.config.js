@@ -52,7 +52,7 @@ module.exports = configure(function (ctx) {
       devtool: 'source-map',
       env: {
         BUILD: 2211011200,
-        PORT_SERVEUR: 8443 // Pour le DEV. En prod, c'est window.location.port (celui de l'URL de l'appli)
+        DEV_SERVEUR: 'https://test.sportes.fr:8443' // Pour le DEV. En prod, c'est window.location.host (celui de l'URL de l'appli)
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
