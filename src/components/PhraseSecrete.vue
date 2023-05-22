@@ -19,6 +19,7 @@
         <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
           :key="idx" @click="selph(p)">{{idx}}</span>
       </div>
+      <div v-else></div>
       <div>
         <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" size="md" @click="ko" />
         <q-btn color="warning" :label="labelVal()" size="md" :icon-right="iconValider"
@@ -119,7 +120,7 @@ export default ({
 
   setup (props) {
     const config = stores.config
-    const isDev = config.dev
+    const isDev = !config.dev
     const initVal = toRef(props, 'initVal')
     const ligne1 = ref('')
     const nbc = toRef(props, 'nbc')
