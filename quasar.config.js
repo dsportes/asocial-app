@@ -51,6 +51,8 @@ module.exports = configure(function (ctx) {
       // to the underlying Webpack
       devtool: 'source-map',
       env: {
+        DEV: true,
+        DEBUGGING: true,
         BUILD: 2211011200,
         DEV_SERVEUR: 'https://test.sportes.fr:8443' // Pour le DEV. En prod, c'est window.location.host (celui de l'URL de l'appli)
       },

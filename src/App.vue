@@ -451,8 +451,6 @@ export default {
     const aSt = stores.avatar
     const gSt = stores.groupe
 
-    console.log($t('build', [config.build, config.debug]))
-
     const infomode = ref(false)
     const infonet = ref(false)
     const infoidb = ref(false)

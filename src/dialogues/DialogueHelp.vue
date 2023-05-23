@@ -1,5 +1,5 @@
 <template>
-  <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
+  <q-layout container view="hHh lpR fFf" :class="sty" style="width:90vw;max-width:90vw !important;">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
         <q-btn dense size="md" icon="close" color="warning" 
@@ -31,11 +31,10 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { ref, watch, computed } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-
 import stores from '../stores/stores.mjs'
+import { aidetm } from '../app/help.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
 
@@ -63,15 +62,9 @@ export default ({
     const config = stores.config
     const ui = stores.ui
 
-    const decoder = new TextDecoder('utf-8')
-
-    async function getTextPub (path) {
-      try {
-        const x = (await axios.get(path, { responseType: 'arraybuffer' })).data
-        return decoder.decode(x)
-      } catch (e) {
-        return null
-      }
+    function getText (p, lg) {
+      const e = config.aide[p]
+      return e ? e[lg] : null
     }
 
     const texte = ref('')
@@ -87,12 +80,12 @@ export default ({
         const loc = $i18n.locale.value
         let txt = ''
         if (p) {
-          txt = await getTextPub('help/' + p + '_' + loc + '.md')
+          txt = getText(p, loc)
           if (!txt && loc !== 'fr-FR') {
-            txt = await getTextPub('help/' + p + '_fr-FR.md')
+            txt = getText(p, 'fr-FR')
           }
           if (!txt) {
-            txt = await getTextPub('help/bientot_' + loc + '.md')
+            txt = getText('bientot', loc)
           }
         }
         texte.value = filtreLignes(txt)
@@ -110,8 +103,7 @@ export default ({
     }
 
     function page (p) {
-      const x = config.help
-      return x[p] || x.bientot
+      return aidetm[p] || aidetm.bientot
     }
 
     function push (p) {
@@ -139,6 +131,10 @@ export default ({
   }
 })
 </script>
+
+<style lang="css">
+.q-dialog__inner { padding: 1px !important; }
+</style>
 
 <style lang="sass" scoped>
 @import '../css/app.sass'

@@ -8,6 +8,7 @@
 </template>
 <script>
 import stores from '../stores/stores.mjs'
+import { aidetm } from '../app/help.mjs'
 
 export default ({
   name: 'BoutonHelp',
@@ -16,7 +17,7 @@ export default ({
 
   computed: {
     titre () {
-      return this.page && this.config.help[this.page] ? this.$t('HLPaide') + this.config.help[this.page].titre[this.$i18n.locale] : this.$t('HLPaidebd')
+      return this.page && aidetm[this.page] ? this.$t('HLPaide') + aidetm[this.page].titre[this.$i18n.locale] : this.$t('HLPaidebd')
     }
   },
 

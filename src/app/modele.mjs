@@ -234,7 +234,7 @@ export class Motscles {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const m = new Map()
-    let mx = stores.config.motscles
+    let mx = stores.config.motsclesLOC
     for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
     if (duCompte) {
       mx = aSt.motscles || {}

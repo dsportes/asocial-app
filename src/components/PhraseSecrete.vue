@@ -120,7 +120,7 @@ export default ({
 
   setup (props) {
     const config = stores.config
-    const isDev = !config.dev
+    const isDev = config.dev
     const initVal = toRef(props, 'initVal')
     const ligne1 = ref('')
     const nbc = toRef(props, 'nbc')
