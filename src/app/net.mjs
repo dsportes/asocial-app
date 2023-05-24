@@ -11,7 +11,7 @@ const decoder = new TextDecoder('utf-8')
 export async function ping () {
   const config = stores.config
   const ui = stores.ui
-  const u = config.urlserveur + '/ping'
+  const u = config.opsrv + 'yo'
   ui.afficherMessage('ping - ' + u)
   try {
     const r = await axios({
@@ -38,7 +38,7 @@ Retour :
 export async function get (fonction, args) {
   const cfg = stores.config
   try {
-    const u = cfg.urlserveur + '/op/' + fonction
+    const u = cfg.opsrv + fonction
     const r = await axios({
       method: 'get',
       url: u,
@@ -72,7 +72,7 @@ export async function post (op, fonction, args) {
   try {
     if (op) op.BRK()
     const data = new Uint8Array(encode(args))
-    const u = config.urlserveur + '/op/' + fonction
+    const u = config.opsrv + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
     const par = { method: 'post', url: u, data: data, headers: headers, responseType: 'arraybuffer' }
     if (op) par.cancelToken = op.cancelToken.token

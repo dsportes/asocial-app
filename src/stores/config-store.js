@@ -9,7 +9,7 @@ export const useConfigStore = defineStore('config', {
     debug: false,
     dev: false,
     
-    urlwss: '',
+    wssrv: '',
     urlserveur: '',
     fsSync: false,
 

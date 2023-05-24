@@ -14,13 +14,10 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.build = process.env.BUILD
   cfg.debug = process.env.DEBUGGING
   cfg.dev = process.env.DEV
+  cfg.opsrv = process.env.OPSRV
+  cfg.wssrv = process.env.WSSRV
   console.log('debug:' + cfg.debug + ' dev:' + cfg.dev + ' build:' + cfg.build)
-
-  // cfg.urlserveur = process.env.DEV ? process.env.DEV_SERVEUR : window.location.host
-  cfg.urlserveur = process.env.DEV_SERVEUR
-  const i = cfg.urlserveur.indexOf(':')
-  cfg.urlwss = 'wss' + cfg.urlserveur.substring(i) + '/ws/'
-  console.log('urlserveur: ' + cfg.urlserveur + ' --- urlwss: ' + cfg.urlwss)
+  console.log('opsrv: ' + cfg.opsrv + ' --- wssrv: ' + cfg.wssrv)
 
   cfg.aide = {}
   for(const p in aidetm) {

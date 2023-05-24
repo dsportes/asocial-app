@@ -54,7 +54,10 @@ module.exports = configure(function (ctx) {
         DEV: true,
         DEBUGGING: true,
         BUILD: 2211011200,
-        DEV_SERVEUR: 'https://test.sportes.fr:8443' // Pour le DEV. En prod, c'est window.location.host (celui de l'URL de l'appli)
+        // OPSRV: 'https://test.sportes.fr:8443/op/',
+        // WSSRV: 'wss://test.sportes.fr:8443/ws/' 
+        OPSRV: 'https://msi:8443/op/',
+        WSSRV: 'wss://msi:8443/ws/' 
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'

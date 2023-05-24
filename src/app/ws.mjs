@@ -56,9 +56,8 @@ export async function openWS () {
   const sessionId = session.sessionId
   return new Promise((resolve, reject) => {
     try {
-      url = config.urlwss
+      url = config.wssrv
       exc = null
-      if (debug) console.log('wss: ' + url)
       if (heartBeatTo) { clearTimeout(heartBeatTo); heartBeatTo = null }
       ws = new WebSocket(url)
       ws.onerror = (e) => {
