@@ -3,13 +3,8 @@
     <q-btn class="q-my-sm" dense color="primary" :label="$t('rafraichir')" @click="rafraichir"/>
 
     <div class="titre-md q-my-sm row items-center">
-      <q-btn v-if="!ns" dense size="md" icon="add" class="q-mr-sm btn1"
-        color="primary" @click="plusNS"/>
-      <q-btn v-if="ns" dense size="md" icon="undo" class="q-mr-sm"
-        color="primary" @click="cancelNS"/>
-      <div class="titre-md text-bold q-mr-sm">{{$t('ESne')}}</div>
-      <div class="fs-lg font-mono text-bold q-mr-sm">{{ns}}</div>
-      <bouton-confirm :actif="ns !== 0" :confirmer="creerNS"/>
+      <q-btn dense size="md" icon="add" :label="$t('ESne')" class="q-mr-sm btn1"
+        color="primary" :disable="ns" @click="plusNS"/>
     </div>
 
     <div v-for="(e, idx) in session.paLeFT" :key="e.id">
@@ -17,19 +12,37 @@
       <q-separator class="q-my-sm" color="orange"/>
     </div>
 
+    <q-dialog v-model="creationesp" persistent>
+      <q-card class="bs petitelargeur">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" icon="close" color="warning" @click="cancelNS"/>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESne2', [ns])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+        <q-card-section class="q-pa-xs">
+          <div class="titre-lg text-center q-my-md">{{$t('ESps')}}</div>
+          <phrase-secrete @ok="okps" verif icon-valider="check" :label-valider="$t('OK')"/>
+          <bouton-confirm class="q-my-lg maauto" :actif="ps !== null" :confirmer="creerNS"/>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
+import PhraseSecrete from '../components/PhraseSecrete.vue'
 import ApercuEspace from '../components/ApercuEspace.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
+import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, ApercuEspace },
+  components: { BoutonConfirm, ApercuEspace, PhraseSecrete, BoutonHelp },
 
   computed: {
   },
@@ -43,26 +56,38 @@ export default {
       for (let id = 10; id < 90; id++) {
         if (!mesp.has(id)) { this.ns = id; break }
       }
+      this.ovcreationesp()
     },
     cancelNS () {
       this.ns = 0
+      this.ps = null
+      MD.fD()
+    },
+    okps (ps) {
+      this.ps = ps
     },
     async creerNS () {
-      await new CreerEspace().run(this.ns)
+      await new CreerEspace().run(this.ns, this.ps)
       this.ns = 0
+      this.ps = null
+      MD.fD()
+      this.rafraichir()
     }
   },
 
   data () {
     return {
-      ns: 0
+      ns: 0,
+      ps: null
     }
   },
 
   setup () {
     const session = stores.session
+    const creationesp = ref(false)
+    function ovcreationesp () { MD.oD(creationesp) }
     return {
-      session,
+      session, creationesp, ovcreationesp
     }
   }
 

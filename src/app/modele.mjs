@@ -157,14 +157,16 @@ export class NomGenerique {
   static comptable(ns) {
     const rnd = new Uint8Array(32)
     rnd[0] = ns
-    return new NomAvatar(0, stores.config.nomDuComptable, rnd)
+    rnd[1] = 0
+    const id = NomGenerique.idOf(rnd)
+    return new NomAvatar(id, stores.config.nomDuComptable, rnd)
   }
 
   static compte(ns, nom) {
     const rnd = random(32)
     rnd[0] = ns
     rnd[1] = 0
-    const id = NomGenerique.odOf(rnd)
+    const id = NomGenerique.idOf(rnd)
     const e = repertoire.rep[id]
     if (e) return e
     return new NomAvatar(id, nom, rnd)
@@ -174,7 +176,7 @@ export class NomGenerique {
     const rnd = random(32)
     rnd[0] = ns
     rnd[1] = 1
-    const id = NomGenerique.odOf(rnd)
+    const id = NomGenerique.idOf(rnd)
     const e = repertoire.rep[id]
     if (e) return e
     return new NomAvatar(id, nom, rnd)
@@ -184,7 +186,7 @@ export class NomGenerique {
     const rnd = random(32)
     rnd[0] = ns
     rnd[1] = 2
-    const id = NomGenerique.odOf(rnd)
+    const id = NomGenerique.idOf(rnd)
     const e = repertoire.rep[id]
     if (e) return e
     return new NomGroupe(id, nom, rnd)
@@ -194,7 +196,7 @@ export class NomGenerique {
     const rnd = random(32)
     rnd[0] = ns
     rnd[1] = 3
-    const id = NomGenerique.odOf(rnd)
+    const id = NomGenerique.idOf(rnd)
     const e = repertoire.rep[id]
     if (e) return e
     return new NomTribu(id, nom, rnd)
@@ -633,6 +635,7 @@ export class Tribu extends GenDoc {
   }
 
   static async primitiveRow (nt, a1, a2, q1, q2) {
+    const session = stores.session
     const r = {}
     r.vsh = 0
     r.id = nt.id
@@ -640,7 +643,7 @@ export class Tribu extends GenDoc {
     r.iv = GenDoc._iv(r.id, r.v)
     const cpt = { a1, a2, q1, q2, nbc: 1, nbsp: 1, cbl: 0, nco: [0, 0], nsp: [0, 0]}
     r.cpt = new Uint8Array(encode(cpt))
-    r.nctkc = await crypter(stores.session.clek, new Uint8Array(encode([nt.nom, nt.rnd])))
+    r.nctkc = await crypter(session.clek, new Uint8Array(encode([nt.nomx, nt.rnd])))
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, _data_ }
   }
@@ -1053,8 +1056,8 @@ export class Compta extends GenDoc {
     r.shay = ph.shay
 
     const nax = new Uint8Array(encode([na.nomx, na.rnd]))
-    r.nctk = await crypter(k, new Uint8Array(encode([nt.nomx, nt.rnd])))
-    r.nctkc = nctkc || r.nctk
+    const nctk = await crypter(k, new Uint8Array(encode([nt.nomx, nt.rnd])))
+    r.nctk = nctkc || nctk
     r.napt = await crypter(nt.rnd, nax)
 
     r.mavk = { }

@@ -1006,7 +1006,7 @@ Retour: rien. Si OK le rowEspace est celui créé en session
 export class CreerEspace extends OperationUI {
   constructor () { super($t('OPcre')) }
 
-  async run (ns) {
+  async run (ns, phrase) {
     try {
       const session = stores.session
       const config = stores.config
@@ -1016,9 +1016,6 @@ export class CreerEspace extends OperationUI {
 
       const nt = NomGenerique.tribu(ns, config.nomTribuPrimitive)
       const na = NomGenerique.comptable(ns)
-
-      let s = ''; for (let i = 0; i < 12; i++) s += ns
-      const phrase = await new Phrase().init(s)
 
       const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true, phrase) // set de session.clek
       const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])

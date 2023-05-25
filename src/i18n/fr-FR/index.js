@@ -688,7 +688,9 @@ export default {
   CNXdeg: 'Le compte est bloqué. Seuls les modes "avion" et "incognito" étant admis, votre session a été mise en mode "incognito".',
 
   // PageAdmin et ApercuEspace
-  ESne: 'Nouvel espace:',
+  ESne: 'Nouvel espace',
+  ESne2: 'Espace à créer : {0}',
+  ESps: 'Phrase secrète de connexion de son comptable',
 
   // Pege people et ApercuPeople
   APtr1: 'Membre de ma tribu',
