@@ -30,7 +30,6 @@
       <div v-if="session.accesNet" class="q-ml-md">
         <q-btn dense label="Ping du serveur" color="primary" @click="pingsrv"/>
         <div>{{ resultat1a }}</div>
-        <div>{{ resultat1b }}</div>
       </div>
       <div v-else class="q-ml-md text-italic">{{$t('TP2')}}</div>
     </q-card-section>
@@ -158,7 +157,6 @@ export default ({
       ps: null,
 
       resultat1a: '-',
-      resultat1b: '-',
       resultat2a: '-',
       resultat2b: '-',
       resultat3a: '-',
@@ -203,15 +201,11 @@ export default ({
 
     async pingsrv () {
       this.resultat1a = '-'
-      this.resultat1b = '-'
       const ret = await ping()
       if (!ret.startsWith('$KO')) {
-        this.resultat1a = 'OK'
-        const d = new Date(ret)
-        this.resultat1b = dhcool(d.getTime(), true)
+        this.resultat1a = ret
       } else {
         this.resultat1a = 'KO'
-        this.resultat1b = ret.substring(4)
       }
     },
 

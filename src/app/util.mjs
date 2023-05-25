@@ -18,7 +18,10 @@ const encoder = new TextEncoder('utf-8')
 
 /* i18n : fonction $t() ********************************************/
 let fnt
-export function $t (a, b, c) { if (!fnt) fnt = useI18n().t; return fnt(a, b, c) }
+export function set$t (f) { fnt = f}
+export function $t (a, b, c) { 
+  return fnt(a, b, c)
+}
 
 export function html (exc) {
   const str = exc.code + ' - ' + 

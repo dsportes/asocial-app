@@ -11,7 +11,7 @@ const decoder = new TextDecoder('utf-8')
 export async function ping () {
   const config = stores.config
   const ui = stores.ui
-  const u = config.opsrv + 'yo'
+  const u = config.opsrv + 'yoyo'
   ui.afficherMessage('ping - ' + u)
   try {
     const r = await axios({

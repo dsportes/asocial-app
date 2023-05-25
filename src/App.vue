@@ -304,10 +304,11 @@
 <script>
 import { useQuasar } from 'quasar'
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
 
-import { $t, hms } from './app/util.mjs'
+import { set$t, $t, hms } from './app/util.mjs'
 import { MD, getNg } from './app/modele.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
@@ -438,6 +439,7 @@ export default {
   },
 
   setup () {
+    set$t(useI18n().t)
     const $q = useQuasar()
     $q.dark.set(true)
 

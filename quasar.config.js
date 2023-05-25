@@ -56,8 +56,8 @@ module.exports = configure(function (ctx) {
         BUILD: 2211011200,
         // OPSRV: 'https://test.sportes.fr:8443/op/',
         // WSSRV: 'wss://test.sportes.fr:8443/ws/' 
-        OPSRV: 'https://msi:8443/op/',
-        WSSRV: 'wss://msi:8443/ws/' 
+        OPSRV: 'https://localhost:8443/op/',
+        WSSRV: 'wss://localhost:8443/ws/' 
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'

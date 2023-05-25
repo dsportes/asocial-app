@@ -261,11 +261,11 @@ export default {
   EX6005: 'Base locale corrompue ?\nComptabilité du compte non trouvé',
 
   EX7000: 'Erreur de la requête non identifiable : {0}', // 0
-  EX7001: 'Origine non autorisée', // 1
-  EX7003: 'Opération inconnue', // 3
+  EX7001: 'Le serveur n\'accepte pas les requêtes d\'une application obtenue du site [{0}]', // 1
+  EX7003: 'Opération [{0}] inconnue du serveur', // 3
   EX7004: 'Session déconnectée', // 4
-  EX7005: 'Version d\'API incompatble', // 5
-  EX7006: 'Fichier non trouvé', // 6
+  EX7005: 'La version d\'API [{0}] gérée par le serveur est incompatble avec celle [{1}] de l\'application', // 5
+  EX7006: 'Fichier "{0}" non trouvé', // 6
 
   EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
   EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
