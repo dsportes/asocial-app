@@ -233,7 +233,7 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
 
     edd (d) { return AMJ.editDeAmj(d, true) },
-    texteok (t) { this.ntf.texte = t; MD.fD() },
+    texteok (t) { this.ntf.texte = t },
 
     undo () {
       this.ntf = this.ntfx ? this.ntfx.clone() : this.notif.clone()

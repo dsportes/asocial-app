@@ -266,6 +266,7 @@ export default {
   EX7004: 'Session déconnectée', // 4
   EX7005: 'La version d\'API [{0}] gérée par le serveur est incompatble avec celle [{1}] de l\'application', // 5
   EX7006: 'Fichier "{0}" non trouvé', // 6
+  EX7007: 'Clé d\'autorisation d\'appel de l\'API invalide (reçue: [{0}])',
 
   EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
   EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
@@ -375,7 +376,7 @@ export default {
   STl2: 'Somme des quotas (V1 / V2) attribués aux comptes',
   STl3: 'Nombre total de comptes / dont sponsors',
   STl4: 'Nombre total de comptes ayant une alerte (simple / bloquante)',
-  STchg: 'Changer le profil de l\èespace',
+  STchg: 'Changer le profil de l\'espace',
 
   // Page sponsorings - Nouveau sponsoring
   NPnouv: 'Sponsoriser un nouveau compte',

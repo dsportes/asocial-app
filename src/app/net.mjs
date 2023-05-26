@@ -71,7 +71,8 @@ export async function post (op, fonction, args) {
   const config = stores.config
   try {
     if (op) op.BRK()
-    const data = new Uint8Array(encode(args))
+    //const data = new Uint8Array(encode(args))
+    const data = new Uint8Array(encode([args, process.env.APITK]))
     const u = config.opsrv + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
     const par = { method: 'post', url: u, data: data, headers: headers, responseType: 'arraybuffer' }

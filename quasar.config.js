@@ -13,6 +13,16 @@ const ESLintPlugin = require('eslint-webpack-plugin')
 const { configure } = require('quasar/wrappers')
 const path = require('path')
 
+const JavaScriptObfuscator = require('webpack-obfuscator')
+const plugob = new JavaScriptObfuscator({
+  // debugProtection: true,
+  // debugProtectionInterval: true,
+  rotateStringArray: true
+  // renameGlobals: true,
+  // stringArrayEncoding: 'rc4',
+  // stringArrayThreshold: 1
+})
+
 module.exports = configure(function (ctx) {
   return {
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
@@ -53,7 +63,8 @@ module.exports = configure(function (ctx) {
       env: {
         DEV: true,
         DEBUGGING: true,
-        BUILD: 2211011200,
+        APITK: 'VldNo2aLLvXRm0Q', // Token d'autorisation d'usage de l'API
+        BUILD: 20230526,
         // OPSRV: 'https://test.sportes.fr:8443/op/',
         // WSSRV: 'wss://test.sportes.fr:8443/ws/' 
         OPSRV: 'https://localhost:8443/op/',
@@ -91,6 +102,8 @@ module.exports = configure(function (ctx) {
           test: /\.b64$/i,
           use: 'raw-loader'
         })
+        // Commenter la ligne ci-dessous pour ne pas obfusquer le code
+        if(!ctx.dev && !ctx.debug) { cfg.plugins.push(plugob) }
       },
       chainWebpack: chain => {
         chain.module
