@@ -275,6 +275,7 @@ export default {
   EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
   EX8007: 'Phrase de sponsoring déjà déclarée.',
   EX8008: 'Phrase de sponsoring non trouvée.',
+  EX8009: 'Ce sponsoring a déjà été accepté ou refusé ou est hors limite.',
 
   // EX8006: 'Forfait V1 insuffisant pour l\'attribution souhaitée au nouvel avatar',
   // EX8009: 'Forfait V1 insuffisant pour supporter les secrets du contact.',

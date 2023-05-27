@@ -438,7 +438,7 @@ export class Phrase {
     for (let i = 0; i < idxch.length && i < m; i++) deb[i] = u8[idxch[i]]
     this.pcb = await pbkfd(u8)
     this.pcbh = hash(this.pcb)
-    this.hps1 = hash(sha256(deb))
+    this.hps1 = hash(sha256(deb)) // TODO - prendre le PBKFD plutôt que le sha256.
     return this
   }
 

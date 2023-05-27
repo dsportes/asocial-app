@@ -1,5 +1,7 @@
 
 TODO :
+- extrait de phrase secrète : prendre le PBKD et pas le SHA.
+- serveur : n'utilise que cryterSoft : faire un SALT spécifique, envisager la quasi suppression de webcrypto.mjs
 - traiter les autorisations pour le comptable (page menu en particulier) pour survivre à un blocage de sa tribu / voir global
 
 ## L'arbre des notes
