@@ -52,14 +52,7 @@ export default ({
   },
   watch: {
     ligne1 (ap) {
-      if (ap && ap.length === 2) {
-        if (ap.charAt(0) === '*') {
-          const c = ap.charAt(1)
-          let s = ''
-          for (let i = 0; i < this.lgph; i++) s += c
-          this.ligne1 = s
-        }
-      } else if (ap && ap.length === 3 && ap.startsWith('!')) {
+      if (ap && ap.length === 3 && ap.startsWith('*')) {
         const c = ap.substring(1, 3)
         let s = ''
         for (let i = 0; i < (this.lgph / 2); i++) s += c

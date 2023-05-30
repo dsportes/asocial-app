@@ -4,7 +4,7 @@
 
     <div class="titre-md q-my-sm row items-center">
       <q-btn dense size="md" icon="add" :label="$t('ESne')" class="q-mr-sm btn1"
-        color="primary" :disable="ns" @click="plusNS"/>
+        color="primary" :disable="ns !== 0" @click="plusNS"/>
     </div>
 
     <div v-for="(e, idx) in session.paLeFT" :key="e.id">

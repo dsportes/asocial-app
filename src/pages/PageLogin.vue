@@ -43,7 +43,7 @@ import stores from '../stores/stores.mjs'
 
 import { $t, afficherDiag } from '../app/util.mjs'
 import { connecterCompte } from '../app/connexion.mjs'
-import { MD, Sponsoring } from '../app/modele.mjs'
+import { MD, Sponsoring, resetRepertoire } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ } from '../app/api.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
@@ -76,6 +76,8 @@ export default {
         Retour:
         - rowSponsoring s'il existe
         */
+        resetRepertoire()
+        stores.reset()
         const res = await new ChercherSponsoring().run(this.pc.phch)
         if (!res || !res.rowSponsoring) {
           await afficherDiag(this.$t('LOGnopp'))

@@ -838,6 +838,11 @@ export class AcceptationSponsoring extends OperationUI {
       this.buf = new IDBbuffer()
       this.dh = 0
 
+      /* Réenregistrement dans repertoire des na créé en PageLogin */
+      NomGenerique.from(sp.na.anr)
+      NomGenerique.from(sp.naf.anr)
+      NomGenerique.from(sp.nct.anr)
+
       session.setCompteId(sp.naf.id)
       session.setTribuId(sp.nct.id)
       session.setAvatarId(session.compteId)

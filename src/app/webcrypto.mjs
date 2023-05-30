@@ -7,19 +7,28 @@ import { toByteArray, fromByteArray } from './base64.mjs'
 import { AppExc, E_BRO } from './api.mjs'
 import { $t } from './util.mjs'
 
+const SALTS = new Array(256)
+
+{
+  const s = new Uint8Array([5, 255, 10, 250, 15, 245, 20, 240, 25, 235, 30, 230, 35, 225, 40, 220])
+  SALTS[0] = s
+  for (let i = 1; i < 256; i++) {
+    const x = new Uint8Array(16)
+    for (let j = 0; j < 16; j++) x[j] = (s[j] + i) % 256
+    SALTS[i] = x
+  }
+}
+
 function ab2b (ab) { return new Uint8Array(ab) }
 
 const enc = new TextEncoder()
 const dec = new TextDecoder()
 
-import { ALLSALTS, SALTS } from './salts.mjs'
-const localkey = ALLSALTS.slice(32, 64)
-
 export async function pbkfd (secret) {
   const u8 = typeof secret === 'string' ? enc.encode(secret) : secret
   const passwordKey = await window.crypto.subtle.importKey('raw', u8, 'PBKDF2', false, ['deriveKey'])
   const key = await window.crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: SALTS[0], iterations: 5000, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt : SALTS[0], iterations: 5000, hash: 'SHA-256' },
     passwordKey,
     { name: 'AES-GCM', length: 256 },
     true,
@@ -156,3 +165,38 @@ export function concat (arrays) {
   }
   return result
 }
+
+/* Cryptage Serveur *******************************/
+const CLE = new Uint8Array(32)
+{
+  const s = new Uint8Array([5, 255, 10, 250, 15, 245, 20, 240, 25, 235, 30, 230, 35, 225, 40, 220])
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 16; j++) CLE[i + j] = (s[j] + i) % 256
+  }
+}
+const IV = CLE.slice(8, 24)
+
+export async function crypterSrv (u8) {
+  try {
+    const key = await window.crypto.subtle.importKey('raw', arrayBuffer(CLE), 'aes-cbc', false, ['encrypt'])
+    return new Uint8Array(await crypto.subtle.encrypt({ name: 'aes-cbc', iv: IV }, key, arrayBuffer(u8)))
+  } catch (e) {
+    throw new AppExc(E_BRO, 7, ['', 'srv', e.toString()], e.stack)
+  }
+}
+
+export async function decrypterSrv (u8) {
+  try {
+    const key = await window.crypto.subtle.importKey('raw', arrayBuffer(CLE), 'aes-cbc', false, ['decrypt'])
+    return new Uint8Array(await crypto.subtle.decrypt({ name: 'aes-cbc', iv: IV }, key, arrayBuffer(u8)))
+  } catch (e) {
+    throw new AppExc(E_BRO, 8, ['', 'srv', e.toString()], e.stack)
+  }
+}
+
+/*
+setTimeout(async () => {
+  const x = await crypterSrv(enc.encode('toto est très très très très beau'))
+  console.log(dec.decode(await decrypterSrv(x)))
+}, 1)
+*/

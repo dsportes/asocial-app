@@ -291,48 +291,6 @@ export class ChercherSponsoring extends OperationUI {
   }
 }
 
-/* Set chats ***********************************************************
-L'un ou l'autre des chats I et E peuvent ne pas exister :
-- ils sont créés avec des mots clés vide
-Les cartes de visite des deux côtés sont mises à jour.
-
-Si I n'a pas de chat, il lui faut d'abord en obtenir le contenu éventuel connu de E
-- il doit en effet en crypter le contenu avant SetChats
-
-args.token: éléments d'authentification du compte.
-args.idI : id (côté compte)
-args.idE : id (côté de l'autre)
-args.idsI : ids du chat
-args.idsE : ids du chat
-args.contI : contenu crypté côté compte
-args.contE : contenu crypté côté autre
-Retour:
-rowChatI
-
-export class SetChats extends OperationUI {
-  constructor () { super($t('OPmajtch')) }
-
-  async run (chat, txt) {
-    try {
-      const session = stores.session
-      const dh = new Date().getTime()
-      const args = { token: session.authToken }
-      args.idI = chat.naI.id
-      args.idE = chat.naE.id
-      args.idsI = await Chat.getIds(chat.naI, chat.naE)
-      args.idsE = await Chat.getIds(chat.naE, chat.naI)
-      
-      args.contI = await Chat.getContc(chat.naI, chat.naE, dh, txt)
-      args.contE = await Chat.getContc(chat.naE, chat.naI, dh, txt)
-      const ret = this.tr(await post(this, 'SetChats', args))
-      return this.finOK(ret)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-*/
-
 /* Changer les mots clés d'un chat *********************************
 args.token: éléments d'authentification du compte.
 args.mc : u8 des mots clés

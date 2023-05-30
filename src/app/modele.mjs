@@ -133,6 +133,7 @@ export class NomGenerique {
   get nom () { return this.nomx || stores.config.nomDuComptable }
   get nomc () { return !this.nomx ? stores.config.nomDuComptable : (this.nomx + '#' + (this.id % 10000)) }
   get hrnd () { return hash(u8ToB64(this.rnd)) }
+  get anr () { return [this.nomx, this.rnd] } 
 
   get defIcon () {
     const cfg = stores.config
@@ -427,18 +428,17 @@ export class Motscles {
  * classe Phrase
 ******************************************************/
 const enc = new TextEncoder()
-const idxch = [0, 2, 4, 5, 8, 9, 12, 14, 18, 19, 23, 25, 28, 30]
+const idxch = [0, 2, 4, 5, 9, 12]
 
 export class Phrase {
   async init (texte) {
     this.phrase = texte
     const u8 = enc.encode(texte)
-    const m = Math.floor(u8.length / 2)
-    const deb = new Uint8Array(m)
-    for (let i = 0; i < idxch.length && i < m; i++) deb[i] = u8[idxch[i]]
+    const deb = new Uint8Array(idxch.length)
+    for (let i = 0; i < idxch.length; i++) deb[i] = u8[idxch[i]]
     this.pcb = await pbkfd(u8)
     this.pcbh = hash(this.pcb)
-    this.hps1 = hash(sha256(deb)) // TODO - prendre le PBKFD plutôt que le sha256.
+    this.hps1 = hash(deb)
     return this
   }
 
@@ -1036,7 +1036,7 @@ export class Compta extends GenDoc {
   static async row (na, nt, nctkc, q1, q2, estSponsor, phrase) { 
     /* création d'une compta
     Pour le comptable le paramètre nctkc est null (il est calculé). 
-    Pour les autres, c'est le nctkc pris dans la tribu exi
+    Pour les autres, c'est le nctkc pris dans la tribu
     */
     const session = stores.session
     const r = {}
@@ -1054,10 +1054,12 @@ export class Compta extends GenDoc {
     r.stp = estSponsor ? 1 : 0
     r.hps1 = ph.hps1
     r.shay = ph.shay
+    r.nctkc = nctkc
 
-    const nax = new Uint8Array(encode([na.nomx, na.rnd]))
-    const nctk = await crypter(k, new Uint8Array(encode([nt.nomx, nt.rnd])))
-    r.nctk = nctkc || nctk
+    const nax = new Uint8Array(encode(na.anr))
+    const xx = await crypter(k, new Uint8Array(encode(nt.anr)))
+    r.nctkc = nctkc ? nctkc : xx
+    r.nctk = xx
     r.napt = await crypter(nt.rnd, nax)
 
     r.mavk = { }
@@ -1153,7 +1155,7 @@ export class Sponsoring extends GenDoc {
     const av = aSt.avC
     const n = NomGenerique.compte(session.ns, nom)
     const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, nctkc, quotas}
-    d.nct = [nct.nom, nct.rnd]
+    d.nct = nct.anr
     const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))
     const ardx = await crypter(phrase.clex, ard || '')
     const pspk = await crypter(session.clek, phrase.phrase)
