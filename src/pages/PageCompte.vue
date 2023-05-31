@@ -89,7 +89,8 @@
             label-valider="continuer"></phrase-secrete>
         <q-card-actions>
           <q-btn dense :label="$t('renoncer')" color="primary" icon="close" @click="MD.fD"/>
-          <q-btn dense :disable="ps===null" :label="$t('CPTvcp')" color="warning" icon="check" @click="changerps"/>
+          <q-btn dense :disable="ps===null" :label="$t('CPTvcp')" 
+            color="warning" icon="check" @click="changerps"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -108,7 +109,7 @@ import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { crypter } from '../app/webcrypto.mjs'
-import { ChangementPS, MemoCompte, MotsclesCompte, NouvelAvatar } from '../app/operations.mjs'
+import { ChangementPS, MemoCompte, MotsclesCompte, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
@@ -146,6 +147,10 @@ export default {
     },
     okps (ps) { this.ps = ps },
     async changerps () {
+      if (await new ExistePhrase().run(this.ps.hps1, 1)) {
+        await afficherDiag(this.$t('existe'))
+        return
+      }
       await new ChangementPS().run(this.ps)
       this.ps = null
       MD.fD()

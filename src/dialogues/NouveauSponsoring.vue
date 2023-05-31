@@ -87,7 +87,7 @@ import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseContact from '../components/PhraseContact.vue'
-import { AjoutSponsoring } from '../app/operations.mjs'
+import { AjoutSponsoring, ExistePhrase } from '../app/operations.mjs'
 
 export default ({
   name: 'NouveauSponsoring',
@@ -151,7 +151,11 @@ export default ({
   methods: {
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
-    crypterphrase (pc) {
+    async crypterphrase (pc) {
+      if (await new ExistePhrase().run(pc.hps1, 2)) {
+        await afficherDiag(this.$t('existe'))
+        return
+      }
       this.pc = pc
       this.step = 2
     },

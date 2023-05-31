@@ -89,8 +89,11 @@ export async function connecterCompte (phrase, razdb) {
     session.setCompteId(x.id) // Important, requis pour lire ensuite compta ...
     session.clek = x.k
   }
-
-  await new ConnexionCompte().run()
+  try {
+    await new ConnexionCompte().run()
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 /**********************************************************************************

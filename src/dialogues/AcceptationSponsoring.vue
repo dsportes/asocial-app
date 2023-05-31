@@ -82,6 +82,7 @@ import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
+import { ExistePhrase } from '../app/operations.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -145,8 +146,12 @@ export default ({
       this.ps = null
       MD.fD()
     },
-    okps (ps) {
+    async okps (ps) {
       if (ps) {
+        if (await new ExistePhrase().run(pc.hps1, 1)) {
+          await afficherDiag(this.$t('existe'))
+          return
+        }
         this.ps = ps
       } else {
         this.accdec = 0

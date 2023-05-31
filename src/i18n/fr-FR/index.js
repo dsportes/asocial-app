@@ -62,7 +62,7 @@ export default {
   avatar3: 'Note de {0} rattachée à une note de {1}',
   groupe9: 'Note DISPARUE #{0} du groupe {1}',
   avatar9: 'Note DISPARUE #{0} de {1}',
-
+  existe: 'Changer le début de votre phrase, il est trop proche de celui d\'une phrase déjà déclarée.',
   nolimite: '(sans limite)',
 
   // Filtre notif
@@ -457,6 +457,7 @@ export default {
   OPcnx: 'Se connecter à un compte',
   OPpub: 'Obtention d\'une clé publique',
 
+  OPphex: 'Test de l\'existence d\'une phrase',
   OPmemo: 'Changement du memo d\'un compte',
   OPmotscles: 'Changement des mots clés d\'un compte',
   OPmotsclesgr: 'Changement des mots clés d\'un groupe',

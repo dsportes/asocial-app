@@ -41,7 +41,7 @@
 import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { MajCv, GetAvatarPC, ChangementPC } from '../app/operations.mjs'
+import { MajCv, GetAvatarPC, ChangementPC, ExistePhrase } from '../app/operations.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import PhraseContact from './PhraseContact.vue'
@@ -77,6 +77,10 @@ export default {
     },
     async declPC (pc) {
       if (!pc) return
+      if (await new ExistePhrase().run(pc.hps1, 3)) {
+        await afficherDiag(this.$t('existe'))
+        return
+      }
       const { id, na } = await new GetAvatarPC().run(pc)
       if (id) {
         if (id === this.avatar.id && na) {

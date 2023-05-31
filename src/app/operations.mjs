@@ -82,6 +82,31 @@ export class MemoCompte extends OperationUI {
   }
 }
 
+/* Recherche hash de phrase ******
+args.ids : hash de la phrase de contact / de connexion
+args.t :
+  - 1 : phrase de connexion(hps1 de compta)
+  - 2 : phrase de sponsoring (ids)
+  - 3 : phrase de contact (hpc d'avatar)
+Retour:
+- existe : true si le hash de la phrase existe
+*/
+export class ExistePhrase extends OperationUI {
+  constructor () { super($t('OPphex')) }
+
+  async run (hash, t) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ids: hash, t }
+      const ret = this.tr(await post(this, 'ExistePhrase', args))
+      const ex = ret.existe || false
+      return this.finOK(ex)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* Changement des mots clés d'un compte ******************************************
 */
 export class MotsclesCompte extends OperationUI {
