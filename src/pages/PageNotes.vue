@@ -26,34 +26,82 @@
         <div class="row items-start">
           <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
             size="sm" class="col-auto q-mr-sm" />
+          <q-btn v-if="choixratt" size="sm" class="q-mx-sm" icon="star"
+            color="green-5" @click.stop="choixok(prop.node)"/>
           <div :class="'col ' + styles[prop.node.type]">{{lib(prop.node)}}</div>
         </div>
       </template>
     </q-tree>
 
-    <q-page-sticky position="top-left" class="box" :offset="[0,0]">
-      <q-card class="q-pa-sm box2">
-        <div v-if="selected" class="largeur40">
+    <q-page-sticky position="top-left" :class="dkli + ' box'" :offset="[0,0]">
+      <div class="box2 column">
+        <div v-if="!selected" class="col q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
+        <div v-if="selected" class="box3 q-pa-xs col largeur40">
           <div class="row justify-between">
             <div class="titre-md">{{lib2}}</div>
-            <div v-if="node.note" class="font-mono">{{dhcool(node.note.dh)}}</div>
+            <div  v-if="node.note" class="col-auto font-mono fs-sm">
+              <span class="q-mr-sm">({{edvol(node.note.v1)}})</span>
+              <span>{{dhcool(node.note.dh)}}</span>
+            </div>
           </div>
           <div v-if="node.note">
-            <show-html v-if="selected" class="titre-md bord1" 
-              :texte="node.note.txt" zoom maxh="4rem" />
-            <apercu-motscles v-if="node.note.smc" :mapmc="mapmcf(node.key)" 
-              :src="Array.from(node.note.smc)" du-compte
-              :du-groupe="ID.estGroupe(node.note.id) ? node.note.id : 0"/>
-            <div class="q-mt-xs titre-md">
-              <span>{{$t('PNOv1', [edvol(node.note.v1)])}}</span>
-              <span class="q-ml-sm">{{$t('PNOnf', node.note.mfa.size, {count: node.note.mfa.size})}}</span>
-              <span class="q-ml-xs">{{node.note.mfa.size ? (edvol(node.note.v2) + '.') : ''}}</span>
+            <div class="q-ml-md row justify-between"> 
+              <show-html :class="dkli + ' col bord1'"
+                :texte="node.note.txt" zoom maxh="4rem" />
+              <q-btn class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
+                @click="editer"/>
             </div>
-            <div class='titre-md'>{{prot + exclu + temp}}</div>
+
+            <div class="q-mt-xs row justify-between titre-sm">  
+              <apercu-motscles class="col" v-if="node.note.smc" :mapmc="mapmcf(node.key)" 
+                :src="Array.from(node.note.smc)" du-compte
+                :du-groupe="ID.estGroupe(node.note.id) ? node.note.id : 0"/>
+              <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
+              <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="editermc"/>
+            </div>
+
+            <div class="q-mt-xs row justify-between titre-sm">  
+              <div class="col">
+                <span>{{$t('PNOnf', node.note.mfa.size, {count: node.note.mfa.size})}}</span>
+                <span class="q-ml-xs">{{node.note.mfa.size ? (edvol(node.note.v2) + '.') : ''}}</span>
+              </div>
+              <q-btn class="col-auto btn2" color="primary" size="sm" :label="$t('fichiers')" icon="open_in_new" 
+                @click="voirfic"/>
+            </div>
+
+            <div class="q-mt-xs row justify-between titre-sm">  
+              <div class="col">{{prot}}</div>
+              <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
+                @click="voirfic"/>
+            </div>
+
+            <div v-if="node.note.st" class="q-mt-xs row justify-between titre-sm">  
+              <div class="col">{{temp}}</div>
+              <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
+                @click="voirfic"/>
+            </div>
+
+            <div v-if="grp" class="q-mt-xs row justify-between titre-sm">  
+              <div class="col">{{exclu}}</div>
+              <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
+                @click="voirfic"/>
+            </div>
+
           </div>
         </div>
-        <div v-else class="titre-md text-italic">{{$t('PNOnosel')}}</div>
-      </q-card>
+
+        <div class="col-auto tb1 largeur40">
+          <div class="row justify-center q-gutter-xs">
+          <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
+            @click="voirfic"/>
+          <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
+            @click="voirfic"/>
+          <q-btn class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
+            @click="rattacher"/>
+          </div>
+        </div>
+        <q-separator color="orange" size="3px" class="q-mt-xs q-mb-md"/>
+      </div>
     </q-page-sticky>
   </q-page>
 </template>
@@ -89,6 +137,7 @@ export default {
   components: { ShowHtml, ApercuMotscles },
 
   computed: {
+    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     lib2 () {
       const n = this.node
       if (n.type <= 3) return n.label
@@ -113,18 +162,20 @@ export default {
     },
     exclu () {
       const n = this.node.note
-      if (!n.im) return ''
+      if (!n.im) return this.$t('PNOnoexclu')
       const m = this.gSt.getMembre(n.id, n.im)
       return !m ? '' : this.$t('PNOexclu', [m.na.nomc])
     },
     prot () {
-      return this.node.note.p ? this.$t('PNOprot') : ''
+      return this.node.note.p ? this.$t('PNOprot') : this.$t('PNOnoprot')
     },
     temp () {
       const st = this.node.note.st
-      if (!st) return ''
       const n = AMJ.diff(st, this.auj)
-      return this.$t('NPOtemp', n, { count: n })
+      return this.$t('PNOtemp', n, { count: n })
+    },
+    grp () {
+      return this.node.note.ng.estGroupe
     }
   },
 
@@ -146,6 +197,27 @@ export default {
       return Motscles.mapMC(true, ID.estGroupe(id) ? id : 0)
     },
 
+    editer () {
+      console.log('editer texte')
+    },
+
+    editermc () {
+      console.log('editer mc')
+    },
+
+    voirfic () {
+      console.log('voir fichiers')
+    },
+
+    rattacher () {
+      this.choixratt = true
+    },
+
+    choixok (node) {
+      this.choixratt = false
+      console.log(node.label)
+    },
+
     stest1 (na, g) {
       const id = na.id
       const demain = AMJ.amjUtcPlusNbj(this.auj, 1)
@@ -156,7 +228,7 @@ export default {
         const n1 = new Note()
         const x = i * 1000
         n1.initTest(id, x + 1, null, '', this.testdh(), 10, 12)
-        n1.settxt('##Ma note ' + n1.key)
+        n1.settxt('## Ma note ' + n1.key)
         n1.p = 1; n1.st = this.auj
         if (g) this.gSt.setNote(n1); else this.aSt.setNote(n1)
         for( let j = 1; j < nbn2; j++) {
@@ -231,6 +303,7 @@ export default {
       selected: null,
       node: null,
       expandAll: false,
+      choixratt: false,
       nas: [], // test : liste des na des avatars
       ngs: [] // test : liste des na des groupes
     }
@@ -342,8 +415,13 @@ export default {
 }
 </script>
 
+<style lang="css">
+.q-tree__arrow { font-size: 32px !important; }
+</style>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
+$hb: 18rem
 .msg
   position: absolute
   z-index: 99999
@@ -352,17 +430,25 @@ export default {
   border-radius: 5px
   border: 1px solid black
 .sep
-  margin-top: 11rem
+  margin-top: $hb
 .box
-  border-bottom: 1px solid $grey-5
   width: 100vw
-  height: 10rem
+  height: $hb
   overflow: hidden
 .box2
   width: 100vw
-  height: 10rem
+  height: $hb
+.box3
   overflow: auto
+  padding-right: 5px
 .bord1
-  border-top: 1px solid $grey-5 !important
-  border-bottom: 1px solid $grey-5 !important
+  border-top: 1px solid $grey-8 !important
+  border-bottom: 1px solid $grey-8 !important
+.btn2, .btn4
+  min-height: 1.6rem !important
+  max-height: 1.6rem !important
+.btn4
+  width: 1.6rem !important
+.tb1
+  padding-right: 5px
 </style>

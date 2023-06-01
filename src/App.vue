@@ -499,7 +499,7 @@ export default {
 }
 /* Sinon les boutons en haut à droite dans toolbar sont partiellement masqués à droite par 
 un élément qui apparaît quand le drawer est caché*/
-.q-drawer__opener { z-index: 1 !important }
+.q-drawer__opener { z-index: 0 !important }
 </style>
 
 <style lang="css">

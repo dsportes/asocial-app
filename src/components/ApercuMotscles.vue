@@ -1,9 +1,9 @@
 <template>
 <div>
   <div :class="'row justify-between ' + dkli(idx)">
-    <div v-if="!src.length" class="titre-md text-italic">{{$t('MCaucun')}}</div>
+    <div v-if="!src.length" class="text-italic">{{$t('MCaucun')}}</div>
     <div v-else class="col row font-mono fs-sm">
-      <div class="titre-md text-bold q-mr-sm">{{src.length ? $t('MCmc') : $t('MCaucun')}}</div>
+      <div class="text-bold q-mr-sm">{{src.length ? $t('MCmc') : $t('MCaucun')}}</div>
       <span v-for="n in src" :key="n" 
         :class="sty(n) + ' q-mr-xs q-px-xs bg-secondary text-white'">{{nom(n)}}</span>
     </div>

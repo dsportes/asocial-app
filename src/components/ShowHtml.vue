@@ -2,11 +2,11 @@
 <div>
   <div v-if="!fs" style="position:relative">
     <div v-if="zoom || edit" class="row btn">
-      <q-btn v-if="edit" dense color="primary" icon="edit" size="sm" @click.stop="editer">
-        <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
-      </q-btn>
-      <q-btn v-if="zoom" class="q-ml-xs" dense color="primary" icon="fullscreen" size="sm" @click.stop="ovfs">
+      <q-btn v-if="zoom" dense color="primary" icon="fullscreen" size="md" @click.stop="ovfs">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
+      </q-btn>
+      <q-btn v-if="edit" class="q-ml-xs" dense color="primary" icon="edit" size="md" @click.stop="editer">
+        <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>
     </div>
     <div :style="sty" v-if="!$q.dark.isActive">
@@ -61,7 +61,7 @@ export default ({
 
   computed: {
     idx0 () { return !this.idx || (this.idx % 2 === 0) },
-    sty () { return styb + (this.maxh ? 'max-height:' + this.maxh : '') }
+    sty () { return styb + (this.maxh ? 'height:' + this.maxh : '') }
   },
 
   data () {

@@ -24,8 +24,8 @@ const STORES = {
   sponsorings: '[id+ids]',
   groupes: 'id',
   membres: '[id+ids]',
-  secrets: '[id+ids]',
-  avsecret: '[id+ids]',
+  notes: '[id+ids]',
+  avnote: '[id+ids]',
   fetat: 'id',
   fdata: 'id',
   loctxt: 'id',
@@ -476,10 +476,10 @@ export class IDBbuffer {
     this.synchro = stores.session.synchro
     this.lmaj = [] // rows à modifier / insérer en IDB
     this.lsuppr = [] // row { _nom, id, ids } à supprimer de IDB
-    this.lav = new Set() // set des ids des avatars à purger (avec secrets, sponsorings, chats)
-    this.lgr = new Set() // set des ids des groupes à purger (avec secrets, membres)
-    this.mapSec = {} // map des secrets (cle: id/ids, valeur: secret) pour gestion des fichiers locaux
-    this.lsecsup = [] // liste des secrets temporaires à faire supprimer sur le serveur en fin de connexion
+    this.lav = new Set() // set des ids des avatars à purger (avec notes, sponsorings, chats)
+    this.lgr = new Set() // set des ids des groupes à purger (avec notes, membres)
+    this.mapSec = {} // map des notes (cle: id/ids, valeur: note) pour gestion des fichiers locaux
+    this.lsecsup = [] // liste des notes temporaires à faire supprimer sur le serveur en fin de connexion
   }
 
   putIDB (row) { if (this.synchro) this.lmaj.push(row); return row }
@@ -562,14 +562,14 @@ export async function commitRows (opBuf, setCompteClek, setVersions) {
         await db.avatars.where(id).delete()
         await db.sponsorings.where(id).delete()
         await db.chats.where(id).delete()
-        await db.secrets.where(id).delete()
+        await db.notes.where(id).delete()
       }
 
       for (const idk of idgc) {
         const id = { id: idk }
         await db.groupes.where(id).delete()
         await db.membres.where(id).delete()
-        await db.secrets.where(id).delete()
+        await db.notes.where(id).delete()
       }
     })
   } catch (e) {
@@ -590,8 +590,8 @@ idf : identifiant du fichier
   - `dhc` : date-heure de chargement.
   - `dhx` : date-heure d'échec du chargement.
   - `lg` : taille du fichier (source, son v2).
-  - `nom info` : à titre d'information (redondance de son secret).
-  - `ids ns` : id/ns de son secret.
+  - `nom info` : à titre d'information (redondance de sa note).
+  - `ids ns` : id/ns de sa note.
 
 schemas.forSchema({
   name: 'idbFetat',
@@ -631,10 +631,10 @@ export async function getFichierIDB (idf) {
   }
 }
 
-async function getAvSecrets (map) {
+async function getAvNotes (map) {
   try {
-    await db.avsecret.each(async (idb) => {
-      const x = new AvSecret().fromIdb(await decrypter(stores.session.clek, idb.data))
+    await db.avnote.each(async (idb) => {
+      const x = new AvNote().fromIdb(await decrypter(stores.session.clek, idb.data))
       map[x.pk] = x
     })
   } catch (e) {
@@ -642,20 +642,20 @@ async function getAvSecrets (map) {
   }
 }
 
-/* Commit des MAJ de fetat et avsecret */
-async function commitFic (lstAvSecrets, lstFetats) { // lst : array / set d'idfs
+/* Commit des MAJ de fetat et avnote */
+async function commitFic (lstAvNotes, lstFetats) { // lst : array / set d'idfs
   const session = stores.session
   const debug = stores.config.debug
   try {
     const x = []
     const y = []
-    for (const obj of lstAvSecrets) {
+    for (const obj of lstAvNotes) {
       const row = {}
       row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
       row.id2 = u8ToB64(await crypter(data.clek, '' + obj.id2, 1), true)
       row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
       x.push(row)
-      if (debug) console.log('IDB avsecret to ', obj.suppr ? 'DEL' : 'PUT', obj.pk)
+      if (debug) console.log('IDB avnote to ', obj.suppr ? 'DEL' : 'PUT', obj.pk)
     }
 
     for (const obj of lstFetats) {
@@ -672,9 +672,9 @@ async function commitFic (lstAvSecrets, lstFetats) { // lst : array / set d'idfs
     await db.transaction('rw', TABLES, async () => {
       for (const row of x) {
         if (row.data) {
-          await db.avsecret.put(row)
+          await db.avnote.put(row)
         } else {
-          await db.avsecret.where({ id: row.id, id2: row.id2 }).delete()
+          await db.avnote.where({ id: row.id, id2: row.id2 }).delete()
         }
       }
       for (const row of y) {
@@ -716,52 +716,52 @@ async function setFa (fetat, buf) { // buf : contenu du fichier non crypté
 Gestion des fichiers hors-ligne : fin de connexion et synchronisation
 **********************************************************************/
 
-/* Fin de synchronisation : map des secrets notifiés */
+/* Fin de synchronisation : map des notes notifiées */
 export async function gestionFichierSync (lst) {
-  const avst = stores.avsecret
+  const avst = stores.avnote
   const fest = stores.fetat
 
   const nvFa = []
   const nvAvs = []
   for (const pk in lst) {
     const s = lst[pk]
-    const avs = avst.getAvSecret(s.id, s.ns)
-    if (!avs || avs.v >= s.v) continue // pas d'avsecret associé ou déjà à jour (??)
-    const [nv, nvf] = avs.diff(s) // nouvel AvSecret compte tenu du nouveau s
+    const avs = avst.getAvNote(s.id, s.ns)
+    if (!avs || avs.v >= s.v) continue // pas d'avnote associé ou déjà à jour (??)
+    const [nv, nvf] = avs.diff(s) // nouvel AvNote compte tenu du nouveau s
     nvAvs.push(nv) // changé, au moins la version : il y a peut-être, des idfs en plus et en moins
     if (nvf) for (const x of nvf) nvFa.push(x)
   }
 
-  // Mise à jour de IDB (fetat / fdata et avsecret)
+  // Mise à jour de IDB (fetat / fdata et avnote)
   if (nvFa.length || nvAvs.length) await commitFic(nvAvs, nvFa)
 
-  // Mise en store des AvSecret créés / modifiés / supprimés
-  nvAvs.forEach(avs => { avst.setAvsecret(avs) })
+  // Mise en store des AvNote créés / modifiés / supprimés
+  nvAvs.forEach(avs => { avst.setAvnote(avs) })
 
   // Mise en db/store des fetat créés / supprimés
   fest.chargementIncremental(nvFa)
 }
 
-/* Fin de connexion en mode synchronisé : secrets, map par pk de tous les secrets existants */
-export async function gestionFichierCnx (secrets) {
+/* Fin de connexion en mode synchronisé : notes, map par pk de toutes les notes existantes */
+export async function gestionFichierCnx (notes) {
   const fetats = {}
   await getFetats(fetats)
-  const avsecrets = {}
-  await getAvSecrets(avsecrets)
+  const avnotes = {}
+  await getAvNotes(avnotes)
 
   const nvFa = [] // les fetat créés ou supprimés
-  const lavs = [] //  Tous les AvSecret (existant et conservé, ou créé, ou modifié)
-  const nvAvs = [] // Les AvSecrets créés / modifiés / supprimés
+  const lavs = [] //  Tous les AvNote (existant et conservé, ou créé, ou modifié)
+  const nvAvs = [] // Les AvNotes créés / modifiés / supprimés
   
-  /* Parcours des AvSecret existants : ils peuvent,
-  - soit être détruits : le secret correspondant n'existe plus ou n'a plus de fichiers
-  - soit être inchangés : le secret correspondant a la même version
+  /* Parcours des AvNote existants : ils peuvent,
+  - soit être détruits : la note correspondante n'existe plus ou n'a plus de fichiers
+  - soit être inchangés : la note correspondante a la même version
   - soit être "mis à jour"" : des fichiers sont à supprimer, d'autres (cités dans mnom) ont une nouvelle version
   voire le cas échéant réduits au point de disparaître.
   */
-  for (const pk in avsecrets) {
-    const avs = avsecrets[pk]
-    const s = secrets[pk]
+  for (const pk in avnotes) {
+    const avs = avnotes[pk]
+    const s = notes[pk]
     if (s && s.v === avs.v) { lavs.push(avs); continue } // inchangé
     const [nv, nvf] = avs.diff(s) // nouvel AVS compte tenu du nouveau s ou de son absence (peut-être à supprimer)
     if (!nv.suppr) lavs.push(nv) // ceux utiles seulement, pas les supprimés
@@ -775,38 +775,38 @@ export async function gestionFichierCnx (secrets) {
     if (fetat.suppr) delete fetats[fetat.idf]; else fetats[fetat.idf] = fetat
   }
 
-  // Mise à jour de IDB (fetat / fdata et avsecret)
+  // Mise à jour de IDB (fetat / fdata et avnote)
   if (nvFa.length || nvAvs.length) await commitFic(nvAvs, nvFa)
 
-  const avst = stores.avsecret
-  lavs.forEach(avs => { avst.setAvsecret(avs) })
+  const avst = stores.avnote
+  lavs.forEach(avs => { avst.setAvnote(avs) })
 
   stores.fetat.chargementInitial(fetats)
 }
 
 /*********************************************************************
-Gestion des fichiers hors-ligne : MAJ des fichiers off-line pour un secret
+Gestion des fichiers hors-ligne : MAJ des fichiers off-line pour une note
 **********************************************************************/
 
-/* Session UI : MAJ des fichiers off-line pour un secret */
-export async function gestionFichierMaj (secret, plus, idf, nom) {
-  const avst = stores.avsecret
+/* Session UI : MAJ des fichiers off-line pour une note */
+export async function gestionFichierMaj (note, plus, idf, nom) {
+  const avst = stores.avnote
   const fest = stores.fetat
 
-  const avs = avst.getAvSecret(secret.id, secret.ns) || new AvSecret().nouveau(secret)
-  const [nvAvs, nvFa] = avs.maj(secret, plus, idf, nom)
+  const avs = avst.getAvNote(note.id, note.ns) || new AvNote().nouveau(note)
+  const [nvAvs, nvFa] = avs.maj(note, plus, idf, nom)
 
-  // Mise à jour de IDB (fetat / fdata et avsecret)
+  // Mise à jour de IDB (fetat / fdata et avnote)
   if (nvFa.length || nvAvs) await commitFic(nvAvs ? [nvAvs] : [], nvFa)
 
-  // Mise en db/store de l'AvSecret créé / modifié / supprimé
-  if (nvAvs) avst.setAvsecret(nvAvs)
+  // Mise en db/store de l'AvNote créé / modifié / supprimé
+  if (nvAvs) avst.setAvnote(nvAvs)
 
   if (nvFa.length) fest.chargementIncremental(nvFa)
 }
 
 /*********************************************************************
-Gestion des fichiers hors-ligne : classes Fetat et Avsecret
+Gestion des fichiers hors-ligne : classes Fetat et Avnote
 **********************************************************************/
 
 /* classe Fetat : un fichier off-line *************************************************/
@@ -868,10 +868,10 @@ class Fetat {
     let s
     if (ID.estGroupe(ids)) {
       const gSt = stores.groupe
-      s = gSt.getSecret(this.ids, this.ns)
+      s = gSt.getNote(this.ids, this.ns)
     } else {      
       const aSt = stores.avatar
-      s = aSt.getSecret(this.ids, this.ns)
+      s = aSt.getNote(this.ids, this.ns)
     }
     if (!s) return
     const nom = s.nomDeIdf(this.id)
@@ -879,36 +879,36 @@ class Fetat {
   }
 }
 
-/* AvSecret ****************************************************
-Un objet de classe `AvSecret` existe pour chaque secret pour lequel le compte a souhaité
+/* AvNote ****************************************************
+Un objet de classe `AvNote` existe pour chaque note pour laquelle le compte a souhaité
 avoir au moins un des fichiers attachés disponible en mode avion.
 - Identifiant : `[id, ns]`
 - Propriétés :
   - `lidf` : liste des identifiants des fichiers explicitement cités par leur identifiant comme étant souhaité _hors ligne_.
   - `mnom` : une map ayant,
     - _clé_ : `nom` d'un fichier dont le compte a souhaité disposer de la _version la plus récente_ hors ligne.
-    - _valeur_ : `idf`, identifiant de cette version constaté dans l'état le plus récent du secret.
+    - _valeur_ : `idf`, identifiant de cette version constaté dans l'état le plus récent de la note.
 
 schemas.forSchema({
-  name: 'idbAvSecret',
+  name: 'idbAvNote',
   cols: ['id', 'ns', 'v', 'lidf', 'mnom']
 })
 
-Un secret off-line */
-class AvSecret {
+Une note off-line */
+class AvNote {
   constructor () { 
     this.lidf = []
     this.mnom = {}
     this.v = 0
   }
 
-  get table () { return 'avsecret' }
+  get table () { return 'avnote' }
   get id2 () { return this.ns }
   get pk () { return this.id + '/' + this.ns }
 
-  nouveau (secret) { 
-    this.id = secret.id
-    this.ns = secret.ns
+  nouveau (note) { 
+    this.id = note.id
+    this.ns = note.ns
     this.v = 0
     return this 
   }
@@ -945,9 +945,9 @@ class AvSecret {
     return nvFa
   }
 
-  /* s est la mise à jour du secret. diff retourne [nv, nvFa]:
-  - nv.suppr : si avsecret est à supprimer
-  - nv : le nouvel avsecret de même id/ns qui remplace l'ancien. Dans ce cas obj a 2 propriétés :
+  /* s est la mise à jour de la note. diff retourne [nv, nvFa]:
+  - nv.suppr : si avnote est à supprimer
+  - nv : le nouvel avnote de même id/ns qui remplace l'ancien. Dans ce cas obj a 2 propriétés :
   - nvFa : la liste des nouveaux Fetat (ou null)
     SI PAS de s : idfs à enlever (les fetat / fdata associés)
   */
@@ -955,7 +955,7 @@ class AvSecret {
     const idfs = new Set(this.lidf) // set des idf actuels
     const idfs2 = new Set() // nouvelle liste des idf
     let n = 0
-    const nv = new AvSecret().nouveau(this) // clone minimal de this
+    const nv = new AvNote().nouveau(this) // clone minimal de this
 
     if (s) {
       nv.v = s.v
@@ -968,7 +968,7 @@ class AvSecret {
         if (f) { nv.mnom[nx] = f.idf; idfs2.add(f.idf); n++ }
       }
     }
-    if (!n && !nv.lidf.length) nv.suppr = true // AvSecret à détruire (plus aucun idf n'existe dans s, s'il y a un s)
+    if (!n && !nv.lidf.length) nv.suppr = true // AvNote à détruire (plus aucun idf n'existe dans s, s'il y a un s)
 
     const nvFa = this.setNvFa(s, idfs, idfs2)
     return [nv, nvFa]
@@ -985,7 +985,7 @@ class AvSecret {
     const idfs = new Set(this.lidf) // set des idf actuels
     const idfs2 = new Set() // nouvelle liste des idf
     let n = 0
-    const nv = new AvSecret().nouveau(this) // clone minimal de this
+    const nv = new AvNote().nouveau(this) // clone minimal de this
     nv.v = s.v
 
     for (const i of this.lidf) { // reconduction de la liste précédente
@@ -1004,7 +1004,7 @@ class AvSecret {
       const f = s.dfDeNom(nom)
       if (f) { idfs2.add(f.idf); nv.mnom[nom] = f.idf; n++ }
     }
-    if (!n && !nv.lidf.length) nv.suppr = true // AvSecret à détruire (plus aucun idf n'existe dans s, s'il y a un s)
+    if (!n && !nv.lidf.length) nv.suppr = true // AvNote à détruire (plus aucun idf n'existe dans s, s'il y a un s)
 
     const nvFa = this.setNvFa(s, idfs, idfs2)
     return [nv, nvFa]

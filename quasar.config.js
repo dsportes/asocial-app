@@ -65,8 +65,10 @@ module.exports = configure(function (ctx) {
         DEBUGGING: true,
         APITK: 'VldNo2aLLvXRm0Q', // Token d'autorisation d'usage de l'API
         BUILD: 20230526,
-        OPSRV: 'https://test.sportes.fr:8443/op/',
-        WSSRV: 'wss://test.sportes.fr:8443/ws/' 
+        OPSRV: 'https://msi:8443/op/',
+        WSSRV: 'wss://msi:8443/ws/' 
+        // OPSRV: 'https://test.sportes.fr:8443/op/',
+        // WSSRV: 'wss://test.sportes.fr:8443/ws/' 
         // OPSRV: 'https://localhost:8443/op/',
         // WSSRV: 'wss://localhost:8443/ws/' 
       },

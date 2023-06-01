@@ -6,7 +6,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ, ID } from './api.mjs'
-import { resetRepertoire, compile, Phrase, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
+import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter, random, genKeyPair } from './webcrypto.mjs'
@@ -272,29 +272,29 @@ export class ConnexionCompte extends OperationUI {
     for(const id in grRows) this.groupesToStore.set(parseInt(id), await compile(grRows[id]))
   }
 
-  /** Chargement pour un avatar de ses secrets postérieurs au plus récent ************/
-  async chargerSecrets (id, vidb, vsrv, estGr) {
+  /** Chargement pour un avatar de ses notes postérieures à la plus récente ************/
+  async chargerNotes (id, vidb, vsrv, estGr) {
     const session = stores.session
     const aSt = stores.avatar
     const gSt = stores.groupe
     let n1 = 0, n2 = 0
     const rows = {}
-    for (const row of this.cSecrets) { 
+    for (const row of this.cNotes) { 
       if (row.id === id) {
         rows[row.ids] = row
         n1++
       } 
     }
 
-    let rowSecrets // array
+    let rowNotes // array
 
     if (session.accesNet && vsrv > vidb) {
       const args = { token: session.authToken, id, v: vidb }
-      const ret = this.tr(await post(this, 'ChargerSecrets', args))
-      rowSecrets = ret.rowSecrets
+      const ret = this.tr(await post(this, 'ChargerNotes', args))
+      rowNotes = ret.rowNotes
     }
-    if (rowSecrets && rowSecrets.length) {
-      for (const row of rowSecrets) {
+    if (rowNotes && rowNotes.length) {
+      for (const row of rowNotes) {
         this.buf.putIDB(row)
         rows[row.ids] = row
         n2++
@@ -302,13 +302,13 @@ export class ConnexionCompte extends OperationUI {
     }
     const auj = AMJ.amjUtc()
     for (const ids in rows) {
-      const secret = await compile(rows[ids])
+      const note = await compile(rows[ids])
       
-      if (session.accesNet && secret.st < auj) { // secret temporaire à supprimer
-        this.buf.lsecsup.push(secret)
+      if (session.accesNet && note.st < auj) { // note temporaire à supprimer
+        this.buf.lsecsup.push(note)
       } else {
-        (estGr ? gSt : aSt).setSecret(secret)
-        if (session.accesIdb) this.buf.mapSec[secret.pk] = secret // Pour gestion des fichiers
+        (estGr ? gSt : aSt).setNote(note)
+        if (session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
       }
     }
     return [n1, n2]
@@ -683,14 +683,14 @@ export class ConnexionCompte extends OperationUI {
       }
 
       /* Chargement depuis IDB des Maps des 
-      secrets, chats, sponsorings, membres trouvés en IDB
+      notes, chats, sponsorings, membres trouvés en IDB
       */
-      this.cSecrets = session.accesIdb ? await getColl('secrets') : []
+      this.cNotes = session.accesIdb ? await getColl('notes') : []
       this.cChats = session.accesIdb ? await getColl('chats') : []
       this.cSponsorings = session.accesIdb ? await getColl('sponsorings') : []
       this.cMembres = session.accesIdb ? await getColl('membres') : []
 
-      // Itération sur chaque avatar: secrets, chats, sponsorings
+      // Itération sur chaque avatar: notes, chats, sponsorings
       for (const [,e] of aSt.map) {
         const avatar = e.avatar
         const vidb = Versions.get(avatar.id).v
@@ -700,7 +700,7 @@ export class ConnexionCompte extends OperationUI {
 
         const na = getNg(avatar.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
-        const [x1, x2] = await this.chargerSecrets(avatar.id, vidb, vsrv, false)
+        const [x1, x2] = await this.chargerNotes(avatar.id, vidb, vsrv, false)
         n1 = x1
         n2 = x2
         syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
@@ -714,7 +714,7 @@ export class ConnexionCompte extends OperationUI {
         syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
       }
 
-      // Itération sur chaque groupe: secrets, membres
+      // Itération sur chaque groupe: notes, membres
       for (const [,eg] of gSt.map) {
         const groupe = eg.groupe
         const objidb = Versions.get(groupe.id)
@@ -730,7 +730,7 @@ export class ConnexionCompte extends OperationUI {
 
         const na = getNg(groupe.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
-        const [x1, x2] = await this.chargerSecrets(groupe.id, vidb, vsrv, true)
+        const [x1, x2] = await this.chargerNotes(groupe.id, vidb, vsrv, true)
         n1 = x1
         n2 = x2
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
@@ -754,12 +754,12 @@ export class ConnexionCompte extends OperationUI {
 
       /* Mises à jour éventuelles du serveur **********************************************/
       if (session.accesNet ) {
-        /* Suppression des secrets temporaires ayant dépassé leur date limite */
+        /* Suppression des notes temporaires ayant dépassé leur date limite */
         if (this.buf.lsecsup.length) {
           for (const s of this.buf.lsecsup) {
             try {
               const args = { token: session.authToken, id: s.id, ids: s.ids, idc: s.idCompta }
-              this.tr(await post(this, 'SupprSecret', args))
+              this.tr(await post(this, 'SupprNote', args))
             } catch (e) {
               console.log(e.message)
             }

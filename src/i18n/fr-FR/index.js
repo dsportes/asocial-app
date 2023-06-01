@@ -64,6 +64,7 @@ export default {
   avatar9: 'Note DISPARUE #{0} de {1}',
   existe: 'Changer le début de votre phrase, il est trop proche de celui d\'une phrase déjà déclarée.',
   nolimite: '(sans limite)',
+  fichiers: 'Fichiers',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -786,8 +787,14 @@ export default {
   PNOv1: 'Volume du texte: {0}.',
   PNOnf: 'Aucun fichier attaché. | Un fichier attaché de | {count} fichiers occupant ',
   PNOexclu: 'Excluivité d\'écriture à {0}. ',
+  PNOnoexclu: 'Pas d\'exclusivité d\'écriture.',
   PNOprot: 'Protégé contre l\'écriture. ',
-  NPOtemp: 'Note temporaire, disparaît aujourd\'hui. | Note temporaire, disparaît demain. | Note temporaire, disparaît dans {count} jours.',
+  PNOnoprot: 'Pas de protection d\'écriture',
+  PNOtemp: 'Note temporaire, disparaît aujourd\'hui. | Note temporaire, disparaît demain. | Note temporaire, disparaît dans {count} jours.',
+  PNOnmc: 'Pas de mots clés associés',
+  PNOnv: 'Nouvelle',
+  PNOsupp: 'Supprimer',
+  PNOratt: 'Rattacher',
 
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',

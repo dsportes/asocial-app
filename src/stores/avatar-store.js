@@ -533,7 +533,7 @@ export const useAvatarStore = defineStore('avatar', {
     */
     lotMaj ({id, av, lch, lsp, lsc}) {
       if (av) this.setAvatar(av)
-      lsc.forEach(s => { this.setSecret(s) })
+      lsc.forEach(s => { this.setNote(s) })
       lsp.forEach(s => { this.setSponsoring(s) })
       lch.forEach(c => { this.setChat(c) })
     },

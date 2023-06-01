@@ -53,7 +53,7 @@ Versions des sous-collections d'avatars et groupes
 - au chargement depuis IDB elle donne la version stockée en base:
   - pour un avatar : l'avatar, ses secrets, chats, sponsorings sont tous disponibles
     et consistents jusqu'à cette version v. 
-  - pour un groupe : le groupe, ses secrets, ses membres.
+  - pour un groupe : le groupe, ses notes, ses membres.
 - au chargement, pour chaque sous-collection, LA version de la sous-collection peut progresser
   suite au chargement de tous les documents de la sous-collection estampillée à une version postérieure.
 - en synchronisation, les sous-collections évoluent de même globalement.
@@ -1284,7 +1284,7 @@ export class Chat extends GenDoc {
 /** Groupe ***********************************************************************
 _data_:
 - `id` : id du groupe.
-- `v` : version, du groupe, ses secrets, ses membres. 
+- `v` : version, du groupe, ses notes, ses membres. 
 - `iv`
 - `dfh` : date de fin d'hébergement.
 
@@ -1293,7 +1293,7 @@ _data_:
 - `msu` : mode _simple_ ou _unanime_.
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
-- `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de secrets.
+- `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes.
 - `ast` : **array** des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
   - 10: contact, 
   - 30,31,32: **actif** (invitation acceptée) en tant que lecteur / auteur / animateur, 
@@ -1444,23 +1444,23 @@ _data_:
 - `v1` : volume du texte
 - `v2` : volume total des fichiers attachés.
 - `mc` :
-  - secret personnel : vecteur des index de mots clés.
-  - secret de groupe : map sérialisée,
+  - note personnelle : vecteur des index de mots clés.
+  - note de groupe : map sérialisée,
     - _clé_ : `im` de l'auteur (0 pour les mots clés du groupe),
     - _valeur_ : vecteur des index des mots clés attribués par le membre.
-- `txts` : crypté par la clé du secret.
+- `txts` : crypté par la clé de la note.
   - `d` : date-heure de dernière modification du texte.
-  - `l` : liste des auteurs pour un secret de groupe.
+  - `l` : liste des auteurs pour une note de groupe.
   - `t` : texte gzippé ou non.
 - `mfas` : map des fichiers attachés.
 - `ref` : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
   rnom n'est défini que pour une note d'avatar référençant un note de groupe (rnom est celui du groupe)
 
-**Map `mfas` des fichiers attachés dans un secret:**
+**Map `mfas` des fichiers attachés dans une note:**
 - _clé_ `idf`: identifiant du fichier en base64.
 - _valeur_ : { lg, datas }
-  - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v2 d'un secret.
-  - `datas` : sérialisation cryptée par la clé S du secret de : `{ nom, info, dh, type, gz, lg, sha }`.
+  - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v2 d'un note.
+  - `datas` : sérialisation cryptée par la clé S du note de : `{ nom, info, dh, type, gz, lg, sha }`.
 
 */
 export class Note extends GenDoc {
@@ -1934,7 +1934,7 @@ const classes = {
   comptas: Compta,
   avatars: Avatar,
   groupes: Groupe,
-  secrets: Secret,
+  notes: Note,
   sponsorings: Sponsoring,
   chats: Chat,
   membres: Membre,

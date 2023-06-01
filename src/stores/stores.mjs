@@ -10,12 +10,12 @@ import { useNoteStore } from './note-store.js'
 import { useSyncitemStore } from './syncitem-store.js'
 import { useFetatStore } from './fetat-store.js'
 import { useFiltreStore } from './filtre-store.js'
-import { useAvsecretStore } from './avsecret-store.js'
+import { useAvnoteStore } from './avnote-store.js'
 import { useTflocauxStore } from './tflocaux-store.js'
 
 // Hors de cette liste : config, session
 const listeStores = ['tribu', 'avatar', 'groupe', 'people', 
-'note', 'syncitem', 'fetat', 'avsecret', 'tflocaux', 'filtre'
+'note', 'syncitem', 'fetat', 'avnote', 'tflocaux', 'filtre'
 ]
 
 class Stores {
@@ -30,7 +30,7 @@ class Stores {
   get note() { return this.noteStore || (this.noteStore = useNoteStore()) }
   get syncitem() { return this.syncitemStore || (this.syncitemStore = useSyncitemStore()) }
   get fetat() { return this.fetatStore || (this.fetatStore = useFetatStore()) }
-  get avsecret() { return this.avsecretStore || (this.avsecretStore = useAvsecretStore()) }
+  get avnote() { return this.avnoteStore || (this.avnoteStore = useAvnoteStore()) }
   get tflocaux() { return this.tflocauxStore || (this.tflocauxStore = useTflocauxStore()) }
   get filtre() { return this.filtreStore || (this.filtreStore = useFiltreStore()) }
 
