@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import { ID } from '../app/api.mjs'
+import { AMJ } from '../app/api.mjs'
 import { Note } from '../app/modele.mjs'
+import stores from './stores.mjs'
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
@@ -19,14 +20,50 @@ export const useNoteStore = defineStore('note', {
     nodes: [
     ],
 
-    test: {
-      avs: {},
-      grs: {}
-    }
+    node: null, // node "courant"
 
+    test: { avs: {}, grs: {} }
   }),
 
   getters: {
+    // Pour le node courant
+    note: (state) => { return state.node ? state.node.note : null },
+
+    mbExclu: (state) => {
+      const n = state.note
+      if (!n || !n.im) return null
+      const gSt = stores.groupe
+      return gSt.getMembre(n.id, n.im)
+    },
+
+    nbjTemp: (state) => {
+      const n = state.note
+      if (!n || !n.st) return 0
+      const session = stores.session
+      const auj = session.dateJourConnx
+      return AMJ.diff(n.st, auj)
+    },
+
+    estGr: (state) => { 
+      return state.node && state.node.note && state.node.note.ng.estGroupe
+    },
+
+    estAv: (state) => { 
+      return state.node && state.node.note && state.node.note.ng.estAvatar
+    },
+
+    egr: (state) => {
+      if (!state.estGr) return null
+      const gSt = stores.groupe
+      return gSt.egr(state.node.note.id)
+    },
+
+    eav: (state) => {
+      if (!state.estAv) return null
+      const aSt = stores.avatar
+      return eSt.getElt(state.node.note.id)
+    },
+
     // get de l'entrée Note
     getNode: (state) => { return (id, ids) => {  // id / ids ou pk (id/ids)
         return state.map.get(ids ? (id + '/' + ids) : ('' + id))
@@ -72,6 +109,14 @@ export const useNoteStore = defineStore('note', {
   */
 
   actions: {
+    setCourant (key) {
+      this.node = this.getNode(key)
+    },
+
+    setSelected (key) { // $onAction dans PageNotes pour forcer la sélection
+      this.setCourant(key) 
+    },
+
     stats (f) { // f(node): function de filtrage
       this.nodes.forEach(n => { n.nt = 0; n.nf = 0 })
       this.map.forEach(n => {

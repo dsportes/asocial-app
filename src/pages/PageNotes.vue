@@ -39,31 +39,31 @@
         <div v-if="selected" class="box3 q-pa-xs col largeur40">
           <div class="row justify-between">
             <div class="titre-md">{{lib2}}</div>
-            <div  v-if="node.note" class="col-auto font-mono fs-sm">
-              <span class="q-mr-sm">({{edvol(node.note.v1)}})</span>
-              <span>{{dhcool(node.note.dh)}}</span>
+            <div  v-if="nSt.note" class="col-auto font-mono fs-sm">
+              <span class="q-mr-sm">({{edvol(nSt.note.v1)}})</span>
+              <span>{{dhcool(nSt.note.dh)}}</span>
             </div>
           </div>
-          <div v-if="node.note">
+          <div v-if="nSt.note">
             <div class="q-ml-md row justify-between"> 
               <show-html :class="dkli + ' col bord1'"
-                :texte="node.note.txt" zoom maxh="4rem" />
+                :texte="nSt.note.txt" zoom maxh="4rem" />
               <q-btn class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
                 @click="editer"/>
             </div>
 
             <div class="q-mt-xs row justify-between titre-sm">  
-              <apercu-motscles class="col" v-if="node.note.smc" :mapmc="mapmcf(node.key)" 
-                :src="Array.from(node.note.smc)" du-compte
-                :du-groupe="ID.estGroupe(node.note.id) ? node.note.id : 0"/>
+              <apercu-motscles class="col" v-if="nSt.note.smc" :mapmc="mapmcf(nSt.node.key)" 
+                :src="Array.from(nSt.note.smc)" du-compte
+                :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
               <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="editermc"/>
             </div>
 
             <div class="q-mt-xs row justify-between titre-sm">  
               <div class="col">
-                <span>{{$t('PNOnf', node.note.mfa.size, {count: node.note.mfa.size})}}</span>
-                <span class="q-ml-xs">{{node.note.mfa.size ? (edvol(node.note.v2) + '.') : ''}}</span>
+                <span>{{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}</span>
+                <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
               </div>
               <q-btn class="col-auto btn2" color="primary" size="sm" :label="$t('fichiers')" icon="open_in_new" 
                 @click="voirfic"/>
@@ -75,13 +75,13 @@
                 @click="voirfic"/>
             </div>
 
-            <div v-if="node.note.st" class="q-mt-xs row justify-between titre-sm">  
+            <div v-if="nSt.note.st" class="q-mt-xs row justify-between titre-sm">  
               <div class="col">{{temp}}</div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
                 @click="voirfic"/>
             </div>
 
-            <div v-if="grp" class="q-mt-xs row justify-between titre-sm">  
+            <div v-if="nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
               <div class="col">{{exclu}}</div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
                 @click="voirfic"/>
@@ -139,7 +139,7 @@ export default {
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     lib2 () {
-      const n = this.node
+      const n = this.nSt.node
       if (n.type <= 3) return n.label
       if (n.type === 4) {
         const nomg = n.note.refn
@@ -161,27 +161,21 @@ export default {
       return ''
     },
     exclu () {
-      const n = this.node.note
-      if (!n.im) return this.$t('PNOnoexclu')
-      const m = this.gSt.getMembre(n.id, n.im)
-      return !m ? '' : this.$t('PNOexclu', [m.na.nomc])
+      const m = this.nSt.exclu
+      return !m ? this.$t('PNOnoexclu') : this.$t('PNOexclu', [m.na.nomc])
     },
     prot () {
-      return this.node.note.p ? this.$t('PNOprot') : this.$t('PNOnoprot')
+      return this.nSt.note.p ? this.$t('PNOprot') : this.$t('PNOnoprot')
     },
     temp () {
-      const st = this.node.note.st
-      const n = AMJ.diff(st, this.auj)
+      const n = this.nSt.nbjTemp
       return this.$t('PNOtemp', n, { count: n })
-    },
-    grp () {
-      return this.node.note.ng.estGroupe
     }
   },
 
   watch: {
     selected (ap, av) {
-      this.node = this.nSt.getNode(ap)
+      if (!this.nSt.node || this.nSt.node.key !== ap) this.nSt.setCourant(ap)
     }
   },
 
@@ -300,8 +294,6 @@ export default {
       icons,
       colors,
       styles,
-      selected: null,
-      node: null,
       expandAll: false,
       choixratt: false,
       nas: [], // test : liste des na des avatars
@@ -314,6 +306,7 @@ export default {
     const nSt = stores.note
     const session = stores.session
     const nodes = nSt.nodes
+    const selected = ref('')
     const aSt = stores.avatar
     const gSt = stores.groupe
     const fSt = stores.filtre
@@ -399,12 +392,21 @@ export default {
       })
     })
 
+    nSt.$onAction(({ name, args, after }) => { 
+      after(async (result) => {
+        if ((name === 'setSelected')){
+          selected.value = args[0]
+        }
+      })
+    })
+
     const mapmc = ref(Motscles.mapMC(true, 0))
     fSt.contexte.notes.mapmc = mapmc.value
 
     return {
       ID, AMJ, splitPK, dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
+      selected,
       tree,
       filtre, filtreFake,
       mapmc,

@@ -10,7 +10,6 @@ import { UNITEV1, UNITEV2 } from '../app/api.mjs'
     groupe: l'objet Groupe
     membres: new Map(), // tous membres
     mbacs: new Map(), // membres avatars du compte
-    notes: new Map(),
     estAnim: false, // un des avatars du compte est animateur du groupe
     estHeb: false // un des avatars du compte est hébergeur du groupe
 - invits: pour chaque avatar, le Set des ids des groupes dont il est invité en attente

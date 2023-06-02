@@ -51,7 +51,7 @@ export class MD {
 Versions des sous-collections d'avatars et groupes
 - chaque sous collection identifiée par un id d'avatar ou de groupe a une version courante
 - au chargement depuis IDB elle donne la version stockée en base:
-  - pour un avatar : l'avatar, ses secrets, chats, sponsorings sont tous disponibles
+  - pour un avatar : l'avatar, ses notes, chats, sponsorings sont tous disponibles
     et consistents jusqu'à cette version v. 
   - pour un groupe : le groupe, ses notes, ses membres.
 - au chargement, pour chaque sous-collection, LA version de la sous-collection peut progresser

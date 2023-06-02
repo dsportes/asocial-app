@@ -79,10 +79,11 @@ export class OperationWS extends Operation {
 
     const e = { id: id, gr: gr, lmb: [], lsc: [], objv: objv }
     this.grMaj.set(id, e)
-    if (ret.rowSecrets) for (const x of ret.rowSecrets) {
+    if (ret.rowNotes) for (const x of ret.rowNotes) {
       this.buf.putIDB(x)
-      e.lsc.push(await compile(x))
-      if (session.accesIdb) this.buf.mapSec[secret.pk] = secret // Pour gestion des fichiers
+      const note = await compile(x)
+      e.lsc.push(note)
+      if (session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
     }
 
     if (ret.rowMembres) for (const x of ret.rowMembres) {
@@ -154,10 +155,11 @@ export class OperationWS extends Operation {
     }
     const e = { id, av: avatar, lch: [], lsp: [], lsc: [] }
     this.avMaj.set(id, e)
-    for (const x of ret.rowSecrets) {
+    for (const x of ret.rowNotes) {
       this.buf.putIDB(x)
-      e.lsc.push(await compile(x))
-      if (session.accesIdb) this.buf.mapSec[secret.pk] = secret // Pour gestion des fichiers
+      const note = await compile(x)
+      e.lsc.push(note)
+      if (session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
     }
     for (const x of ret.rowChats) {
       this.buf.putIDB(x)

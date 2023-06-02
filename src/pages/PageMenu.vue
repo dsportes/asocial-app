@@ -75,8 +75,7 @@
   </q-item>
   <q-item v-if="session.groupeId" clickable @click="ui.setPage('groupe', 'membres')">
     <q-item-section class="q-ml-lg">
-      <q-item-label lines="1">{{$t('ACsecrets')}}
-        <q-badge color="primary" rounded>{{nbtgrsec}}</q-badge>
+      <q-item-label lines="1">{{$t('ACnotes')}}
       </q-item-label>
     </q-item-section>
   </q-item>
@@ -102,7 +101,6 @@ export default {
   name: 'PageMenu',
 
   computed: {
-    nbavsecs () { return this.aSt.eavC.secrets.size },
     nbchats () { return this.aSt.eavC.chats.size },
     nbspons () { return this.aSt.eavC.sponsorings.size },
     nbgrps () { return this.aSt.eavC.avatar.lgr.size },
@@ -113,7 +111,6 @@ export default {
 
     nbtav () { return this.aSt.compta.mav.size },
     nbtgr () { return this.gSt.map.size },
-    nbtgrsec () { return this.gSt.egrC.secrets.size },
     nbtct () { return this.pSt.map.size },
     nbttr () { return this.aSt.nbTribus },
     nbtsp () { return 1 },

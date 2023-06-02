@@ -123,7 +123,7 @@ import { MD } from '../app/modele.mjs'
 - `j` : **date du dernier calcul enregistré** : par exemple le 17 Mai de l'année A
 - **pour le mois en cours**, celui de la date ci-dessus :
   - `q1 q2`: quotas actuels.
-  - `v1 v2 v1m v2m`: volume actuel des secrets et moyens sur le mois en cours.
+  - `v1 v2 v1m v2m`: volume actuel des notes et moyens sur le mois en cours.
   - `trj` : transferts cumulés du jour.
   - `trm` : transferts cumulés du mois.
 - `tr8` : log des volumes des transferts cumulés journaliers de pièces jointes 

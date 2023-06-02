@@ -1,14 +1,14 @@
 ### Translation not yet done. Hope your read french !
 
 # Maîtrise de la consommation des ressources et du droit d'accès des comptes
-Les ressources techniques ne sont, ni infinies, ni gratuites. L'organisation qui gère l'hébergement de l'application a besoin de pouvoir _contrôler / maîtriser_ les volumes des secrets et le cas échéant, si c'est sa politique, de redistribuer le coût d'hébergement sur les comptes, ou certains d'entre eux.
+Les ressources techniques ne sont, ni infinies, ni gratuites. L'organisation qui gère l'hébergement de l'application a besoin de pouvoir _contrôler / maîtriser_ les volumes des notes et le cas échéant, si c'est sa politique, de redistribuer le coût d'hébergement sur les comptes, ou certains d'entre eux.
 
 Par ailleurs une organisation peut souhaiter restreindre l'usage d'un compte à leurs _adhérents_ : elle doit être en mesure de supprimer l'accès à un compte si celui-ci n'en fait plus partie, ou toute autre raison comme par exemple de ne plus acquitter sa juste part des coûts d'hébergement.
 
 ## Forfaits v1 et v2 attribués aux avatars
 Pour chaque avatar deux _forfaits_ sont définis :
-- le forfait v1 du volume occupé par les textes des secrets.
-- le forfait v2 du volume occupé par les fichiers attachés aux secrets.
+- le forfait v1 du volume occupé par les textes des notes.
+- le forfait v2 du volume occupé par les fichiers attachés aux notes.
 
 #### Unités de volume pour les forfaits
 - pour v1 : 0,25 MB
@@ -28,7 +28,7 @@ Les forfaits typiques s'étagent de 1 à 255 : (coût mensuel)
 - (128) - XXL - 32 MB / 3,2GB - 11,20c
 - (255) - MAX - 64 MB / 6,4GB - 22,40c
 
-> A tout instant une augmentation des volumes effectivement occupés par les secrets **ne peut pas faire dépasser les forfaits** attribués à leurs avatars. Un forfait forcé en dessous du volume actuellement occupé impose à n'accepter que des opérations de réduction.
+> A tout instant une augmentation des volumes effectivement occupés par les notes **ne peut pas faire dépasser les forfaits** attribués à leurs avatars. Un forfait forcé en dessous du volume actuellement occupé impose à n'accepter que des opérations de réduction.
 
 > Le transfert sur le réseau des fichiers attachés (download) **est ralenti** dès qu'il s'approche ou dépasse sur les 14 derniers jours le volume v2 : la temporisation est d'autant plus forte que cet écart l'est.
 
@@ -45,7 +45,7 @@ C'est l'avatar primaire qui alloue des forfaits de volumes V1 / V2 à ses avatar
 La ligne comptable d'un avatar dispose des compteurs suivants :
 - `j` : **la date du dernier calcul enregistré** : par exemple le 17 Mai de l'année A
 - **pour le mois en cours**, celui de la date ci-dessus :
-  - `v1 v1m` volume v1 des textes des secrets : 1) moyenne depuis le début du mois, 2) actuel, 
+  - `v1 v1m` volume v1 des textes des notes : 1) moyenne depuis le début du mois, 2) actuel, 
   - `v2 v2m` volume v2 de leurs pièces jointes : 1) moyenne depuis le début du mois, 2) actuel, 
   - `trm` cumul des volumes des transferts de pièces jointes : 14 compteurs pour les 14 derniers jours.
 - **forfaits v1 et v2** `f1 f2` : les derniers appliqués.
@@ -56,10 +56,10 @@ La ligne comptable d'un avatar dispose des compteurs suivants :
   - `r3` le pourcentage du cumul des transferts des pièces jointes dans le mois par rapport au volume v2 du forfait.
 - `s1 s2` : pour un avatar primaire, total des forfaits alloués à ses avatars secondaires.
 
-### Décomptes des volumes des secrets
-**Les secrets personnels** sont décomptés sur la ligne comptable de l'avatar qui les détient.
+### Décomptes des volumes des notes
+**Les notes personnels** sont décomptés sur la ligne comptable de l'avatar qui les détient.
 
-**Les secrets d'un contact** sont décomptés sur chacune des lignes comptables des avatars ayant déclaré accéder aux secrets du contact.
+**Les notes d'un contact** sont décomptés sur chacune des lignes comptables des avatars ayant déclaré accéder aux secrets du contact.
 
 **Pour les secrets de groupe :**
 - un avatar membre du groupe est _hébergeur_ du groupe : il peut fixer deux limites v1 / v2 de volume maximal pour les secrets du groupe.
