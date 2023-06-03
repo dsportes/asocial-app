@@ -12,6 +12,7 @@ import { UNITEV1, UNITEV2 } from '../app/api.mjs'
     mbacs: new Map(), // membres avatars du compte
     estAnim: false, // un des avatars du compte est animateur du groupe
     estHeb: false // un des avatars du compte est hébergeur du groupe
+    objv: { v: 0, vols: {v1: 0, v2: 0, q1: 0, q2: 0} }
 - invits: pour chaque avatar, le Set des ids des groupes dont il est invité en attente
 */
 
@@ -271,7 +272,6 @@ export const useGroupeStore = defineStore('groupe', {
           groupe: groupe, 
           membres: new Map(), // tous membres
           mbacs: new Map(), // membres avatars du compte
-          notes: new Map(),
           estAnim: false, // un des avatars du compte est animateur du groupe
           estHeb: false, // un des avatars du compte est hébergeur du groupe
           objv: { v: 0, vols: {v1: 0, v2: 0, q1: 0, q2: 0} } //  { v, vols: {v1, v2, q1, q2} }

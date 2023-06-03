@@ -100,7 +100,6 @@ export default ({
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    dlclass () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     avParrain () { return this.session.estSponsor || this.session.estComptable }
   },
 

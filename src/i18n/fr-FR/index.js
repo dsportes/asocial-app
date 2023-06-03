@@ -794,6 +794,29 @@ export default {
   PNOsupp: 'Supprimer',
   PNOratt: 'Rattacher',
 
+  PNOnvtit0: 'Nouvelle note',
+  PNOnvtit1: 'Nouvelle note de {0}',
+  PNOnvtit2: 'Nouvelle note du groupe {0}',
+  PNOnvtit3: 'Nouvelle note de ???',
+
+  PNOer1: 'Vous n\'avez plus accès au groupe "{0}" ou il n\'existe plus : il n\'est pas possible de lui ajouter une nouvelle note.',
+  PNOer2: 'Il n\'est pas possible de rattacher une nouvelle note à une note à laquelle vous n\'avez plus accès ou qui n\'existe plus.' +
+    '<br><i>{0}</i>',
+  PNOer3: 'Il n\'est pas possible d\'ajouter une nouvelle note tant que le volume total des textes des notes excède le quota attribué au compte.',
+  PNOer4: 'Le groupe est protégé contre les mises à jour, ajouts et destruction de notes.',
+  PNOer5: 'Le groupe n\'est plus hébergé : l\'ajout de notes et leurs mises à jour en augmentation de volume sont bloquées',
+  PNOer6: 'Le volume des notes du groupe excède déjà le maximum autosisé par son compte hébergeur : l\'ajout de notes et leurs mises à jour en augmentation de volume sont bloquées',
+  PNOer7: 'Il faut être membre actif "auteur" ou "animateur" pour pouvoir ajouter de nouvelles notes ou mettre à jour celles existantes.',
+
+  PNOrav: 'Rattachée à la note de {0}',
+  PNOrgr: 'Rattachée à la note du groupe "{0}"',
+  PNOaut1: 'Note écrite par {0}',
+  PNOngr: 'Note du groupe "{0}"',
+  PNOnper: 'Note personnelle de {0}',
+  PNOdeft: 'Nouvelle note ...',
+  PNOecr: 'écrite par {0}',
+  PNOracgr: 'attachée à la racine du groupe "{0}"',
+
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',
   CChnopc: 'Aucun avatar n\'a enregistré cette phrase de contact',

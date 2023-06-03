@@ -33,6 +33,10 @@
       </template>
     </q-tree>
 
+    <q-dialog v-model="notenouvelle" persistent full-height>
+      <note-nouvelle/>
+    </q-dialog>
+
     <q-page-sticky position="top-left" :class="dkli + ' box'" :offset="[0,0]">
       <div class="box2 column">
         <div v-if="!selected" class="col q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
@@ -93,7 +97,7 @@
         <div class="col-auto tb1 largeur40">
           <div class="row justify-center q-gutter-xs">
           <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
-            @click="voirfic"/>
+            @click="nouvelle" :disable="!selected"/>
           <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
             @click="voirfic"/>
           <q-btn class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
@@ -103,17 +107,20 @@
         <q-separator color="orange" size="3px" class="q-mt-xs q-mb-md"/>
       </div>
     </q-page-sticky>
+
+
   </q-page>
 </template>
 
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { Note, Motscles, getNg } from '../app/modele.mjs'
+import { Note, Motscles, getNg, MD, afficherDiag } from '../app/modele.mjs'
 import { dhcool, difference, intersection, splitPK, edvol } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, AMJ } from '../app/api.mjs'
+import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 
 const icons = ['','person','group','group','description','article','close','close']
 const colors = ['','primary','orange','negative','primary','orange','primary','orange']
@@ -134,7 +141,7 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles },
+  components: { ShowHtml, ApercuMotscles, NoteNouvelle },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -189,6 +196,11 @@ export default {
     mapmcf (key) {
       const id = parseInt(key)
       return Motscles.mapMC(true, ID.estGroupe(id) ? id : 0)
+    },
+
+    async nouvelle () {
+      if (! await this.session.edit()) return
+      this.ovnotenouvelle()
     },
 
     editer () {
@@ -403,7 +415,11 @@ export default {
     const mapmc = ref(Motscles.mapMC(true, 0))
     fSt.contexte.notes.mapmc = mapmc.value
 
+    const notenouvelle = ref(false)
+    function ovnotenouvelle () { MD.oD(notenouvelle) }
+
     return {
+      notenouvelle, ovnotenouvelle,
       ID, AMJ, splitPK, dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
       selected,

@@ -50,6 +50,16 @@ export const useAvatarStore = defineStore('avatar', {
     /* retourne la tribu2 "courante" */
     tribu2C: (state) => { return state.tribu2CP },
     
+    exV1: (state) => {
+      const c = state.compta.compteurs
+      return c.v1 > c.q1
+    },
+
+    exV2: (state) => {
+      const c = state.compta.compteurs
+      return c.v2 > c.q2
+    },
+
     // Avatar courant
     avC (state) { 
       const e = state.map.get(stores.session.avatarId)
