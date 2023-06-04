@@ -12,6 +12,8 @@
         class="titre-lg full-width text-center">{{$t('PNOnvtit1', [avatar.na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-if="step >= 2 && groupe" 
         class="titre-lg full-width text-center">{{$t('PNOnvtit2', [groupe.na.nomc])}}</q-toolbar-title>
+      <q-btn dense size="md" color="primary" icon="check" :label="$t('valider')"
+        :disable="step !== 3" @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
     <q-toolbar v-if="groupe" inset
@@ -43,12 +45,12 @@
       </div>
       <q-separator v-if="type === 4 || type === 5" class="q-my-sm" color="orange"/>
 
-      <div v-if="er" class="column justify-center lg30 maauto q-my-lg q-mx-sm">
+      <div v-if="er" class="column justify-center lg1 maauto q-my-lg q-mx-sm">
         <div class="titre-md q-my-lg q-mx-sm">{{$t('PNOer' + er, [erd])}}</div>
         <q-btn color="primary" flat :label="$t('jailu')" @click="MD.fD"/>
       </div>
 
-      <div v-if="!er && step === 1" class="q-mt-lg q-pa-sm lg30 maauto bord2">
+      <div v-if="!er && step === 1" class="q-mt-lg q-pa-sm lg1 maauto bord2">
         <div v-if="la.length === 1" class="titre-lg">{{$t('PNOaut1', [naAut.nom])}}</div>
         <div v-else class="titre-md">
           <q-btn no-caps flat :label="$t('PNOaut1', [naAut.nom])" icon-right="expand_more">
@@ -71,9 +73,23 @@
         </div>
       </div>
 
-      <div v-if="!er && step === 3" class="q-pa-sm largeur40 ma-auto">
+      <div v-if="!er && step === 3" class="column q-pa-sm lg2 maauto">
         <editeur-md style="height:50vh" :texte="$t('PNOdeft')"
-          :lgmax="cfg.maxlgtextesecret" editable modetxt mode-value="texte"/>
+          :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
+
+        <div class="q-pa-xs row">
+          <div class="col-6 titre-md" >{{temp.value === 0 ? $t('PNOperm') : $t('PNOtemp', temp.value, { count: temp.value })}}</div>
+          <q-select class="col-6 mh titre-md" :label="$t('PNOtp')" v-model="temp" :options="options"
+            transition-show="scale" transition-hide="scale" filled
+            bg-color="secondary" color="white" />
+        </div>
+          
+        <q-toggle class="q-mt-sm titre-md dec"
+          v-model="prot" :label="$t('PNOpr')" />
+
+        <q-toggle v-if="groupe" class="q-mt-sm titre-md dec" 
+          v-model="exclu" :label="$t('PNOex')" />
+
       </div>
 
     </q-page>
@@ -85,10 +101,12 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
+import { ID } from '../app/api.mjs'
 import { MD } from '../app/modele.mjs'
-import { afficherDiag, splitPK } from '../app/util.mjs'
+import { $t, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import EditeurMd from '../components/EditeurMd.vue'
+import { NouvelleNote } from '../app/operations.mjs'
 
 export default {
   name: 'NoteNouvelle',
@@ -100,22 +118,7 @@ export default {
   },
 
   watch: {
-    step (ap) {
-      if (ap !== 2) return
-      const g = this.groupe
-      if (!g) { // note d'avatar
-        if (this.aSt.exV1) { this.er = 3; return } // excédent v1 / q1
-      } else { // note de groupe
-        if (g.pe === 1) { this.er = 4; return }
-        if (!g.imh) { this.er = 5; return }
-        const eg = this.gSt.egr(g.id)
-        if (eg.objv.vols.v1 >= eg.objv.vols.q1) { this.er = 6; return }
-        const m = this.gSt.membreDeId(eg, this.naAut.id)
-        const st = g.ast[m.ids]
-        if (st < 31 || st > 32) { this.er = 7; return }
-      }
-      this.step = 3
-    }
+    step (ap) { this.autStep(ap) }
   },
 
   methods: {
@@ -131,11 +134,39 @@ export default {
       this.groupe = this.gSt.egr(this.idp).groupe
       this.step = 2
     },
+    async valider () {
+      // console.log(this.texte, this.prot, this.temp.value, this.exclu)
+      let id = 0, idc = 0, ref = null, im = 0
+      if (this.avatar) {
+        id = this.avatar.id
+        idc = this.session.compteId
+      } else {
+        id = this.groupe.id
+        idc = this.groupe.idhg
+        im = this.mb.ids
+      }
 
+      if (this.idsp !== 0) { // note rattachée
+        let rnom = ''
+        if (ID.estGroupe(this.idp)) { // note rattachée à une note de groupe
+          const na = getNg(this.idp) // normalement le groupe "parent" est connu
+          rnom = na ? na.nomc : ''
+        }
+        ref = [this.idp, this.idsp, rnom]
+      }
+
+      await new NouvelleNote()
+        .run(id, this.texte, im, this.temp.value, this.prot, this.exclu, ref, idc)
+      MD.fD()
+    }
   },
 
   data () {
     return {
+      temp: this.options[0], //permanent ou temporaire- nbj temp
+      texte: '',
+      prot: false,
+      exclu: false
     }
   },
 
@@ -153,6 +184,7 @@ export default {
     const auteur = ref(null)
     const avatar = ref(null)
     const groupe = ref(null)
+    const mb = ref(null)
     const step = ref(0)
     const la = ref(aSt.naAvatars)
     const naAut = ref(la.value[0])
@@ -162,6 +194,33 @@ export default {
     const idsp = ref(ids)
     const grP = ref(null) // groupe de la note parente
     const avP = ref(null) // avatar de la note parente
+
+    const options = [
+      { label: $t('permanent'), value: 0 },
+      { label: $t('temp1'), value: 1 },
+      { label: $t('temp7'), value: 7 },
+      { label: $t('temp14'), value: 14 },
+      { label: $t('temp30'), value: 30 },
+      { label: $t('temp60'), value: 60 },
+      { label: $t('temp90'), value: 90 }
+    ]
+
+    function autStep (ap) {
+      if (ap !== 2) return
+      const g = groupe.value
+      if (!g) { // note d'avatar
+        if (aSt.exV1) { er.value = 3; return } // excédent v1 / q1
+      } else { // note de groupe
+        if (g.pe === 1) { er.value = 4; return }
+        if (!g.imh) { er.value = 5; return }
+        const eg = gSt.egr(g.id)
+        if (eg.objv.vols.v1 >= eg.objv.vols.q1) { er.value = 6; return }
+        mb.value = gSt.membreDeId(eg, this.naAut.id)
+        const st = g.ast[mb.value.ids]
+        if (st < 31 || st > 32) { er.value = 7; return }
+      }
+      step.value = 3
+    }
 
     switch (nSt.node.type) {
       case 1: { 
@@ -177,7 +236,11 @@ export default {
         step.value = 1
         break
       }
-      case 3: { er.value = 1; erd.value = nSt.node.label; break }
+      case 3: { 
+        er.value = 1
+        erd.value = nSt.node.label
+        break 
+      }
       case 4: { 
         type.value = 4
         auteur.value = aSt.getElt(id)
@@ -193,13 +256,20 @@ export default {
         break
       }
       case 6: 
-      case 7: { er.value = 2; erd.value = nSt.node.label; break }
+      case 7: { 
+        er.value = 2
+        erd.value = nSt.node.label
+        break
+      }
     }
 
+    autStep(step.value)
+
     return {
-      ui, session, nSt, aSt, gSt, cfg,
-      er, erd, la, naAut, type, step, idp, idsp, grP, avP, auteur, avatar, groupe,
-      MD
+      ui, session, nSt, aSt, gSt, cfg, options,
+      er, erd, la, naAut, type, step, idp, idsp, grP, avP,
+      auteur, avatar, groupe, mb,
+      MD, autStep
     }
   }
 
@@ -214,6 +284,13 @@ export default {
 .bord2
   border: 2px solid $orange
   border-radius: 5px
-.lg30
+.lg1
   width: 20rem
+.lg2
+  width: 35rem
+.dec
+  position: relative
+  left: -7px
+.mh
+  max-height: 3.2rem
 </style>

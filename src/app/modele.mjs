@@ -1479,7 +1479,9 @@ export class Note extends GenDoc {
   static estG (key) { return key.charAt(2) === '2' }
   static fake = { txt: '', dh: 0 }
 
-  get cle () { return getCle(this.id) }
+  static clen (id) { return ID.estGroupe(id) ? getCle(id) : stores.session.clek }
+
+  get cle () { return Note.clen(this.id)}
   get ng () { return getNg(this.id) }
   get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
   get key () { return this.id + '/' + this.ids }
@@ -1500,7 +1502,7 @@ export class Note extends GenDoc {
     this.v2 = row.v2 || 0
     this.deGroupe = this.ng.estGroupe
     this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : null) : (row.mc || null)
-    const x = decode(await decrypter(cle, row.txts))
+    const x = decode(await decrypter(this.cle, row.txts))
     this.txt = ungzip(x.t)
     this.titre = titre(this.txt)
     this.dh = x.d
@@ -1568,6 +1570,35 @@ export class Note extends GenDoc {
     this.txt = txt
     this.titre = titre(this.txt)
     this.v1 = txt ? txt.length : 0
+  }
+
+  static async toRowNouveau (id, txt, im, nbj, p, exclu, ref) {
+    const session = stores.session
+    const cle = Note.clen(id)
+    const r = { id, ids: rnd6(), p: p ? 1 : 0, im: exclu ? im : 0, v2 : 0, mc: null }
+    r.v1 = txt.length 
+    r.txts = await Note.toRowTxt(cle, txt, im)
+    r.ref = await Note.toRowRef(cle, ref)
+    r.st = !nbj ? 0 : AMJ.amjUtcPlusNbj(session.dateJourConnx, nbj)
+    const _data_ = encode(r)
+    return { _nom: 'notes', id, ids: r.ids, _data_ }
+  }
+
+  static async toRowTxt (cle, txt, im) {
+    const x = { d: new Date().getTime(), t: gzip(txt) }
+    if (im) {
+      const nl = [im]
+      if (this.auts) this.auts.forEach(t => { if (t !== im) nl.push(t) })
+      x.l = nl
+    }
+    return await crypter(cle, new Uint8Array(encode(x)))
+  }
+
+  static async toRowRef (cle, arg) {
+    // arg : [rid, rids, rnom || '']
+    /*`ref` : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
+    rnom n'est défini que pour une note d'avatar référençant un note de groupe (rnom est celui du groupe)*/
+    return arg ? await crypter(cle, new Uint8Array(encode(arg))) : null
   }
 
 }

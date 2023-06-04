@@ -5,7 +5,7 @@ import { ID, AppExc, appexc, AMJ, Compteurs } from './api.mjs'
 import { $t, hash, inverse } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { GenDoc, NomGenerique, Avatar, Chat, Compta,
+import { GenDoc, NomGenerique, Avatar, Chat, Compta, Note,
   Groupe, Membre, Tribu, Tribu2, getNg, getCle, compile} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
@@ -1273,6 +1273,62 @@ export class StatutMembre extends OperationUI {
       }
       const ret = this.tr(await post(this, 'StatutMembre', args))
       return this.finOK(ret.code || 0)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Nouvelle Note *************************************************
+args.token: éléments d'authentification du compte.
+args.rowNote : row de la note
+args.idc: id du compte (note avatar) ou de l'hébergeur (note groupe)
+Retour: rien
+*/
+export class NouvelleNote extends OperationUI {
+  constructor () { super($t('OPcsc')) }
+
+  /* 
+  id: groupe ou avatar
+  txt: texte de la note
+  im: indice du membre auteur
+  nbj: durée de vie si la note est temporaire, 0 pour une permanente
+  p: true si la note est protégée en écriture
+  exclu: pour un groupe true si im a demandé un e exclusivité d'auteur
+  ref: référence de la note parent [rid, rids, rnom]
+  idh: id du compte de l'auteur ou de l'hébergeur pour une note de groupe
+  */
+  async run (id, txt, im, nbj, p, exclu, ref, idc) {
+    try {
+      const session = stores.session
+
+      const rowNote = await Note.toRowNouveau(id, txt, im, nbj, p, exclu, ref)
+      const args = { token: session.authToken, rowNote : rowNote, idc }
+      this.tr(await post(this, 'NouvelleNote', args))
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Supprimer la note ******
+args.token: éléments d'authentification du compte.
+args.id ids: identifiant de la note (dont celle du groupe pour un note de groupe)
+args.idc : compta à qui imputer le volume
+  - pour une note personelle, id du compte de l'avatar
+  - pour une note de groupe : id du "compte" de l'hébergeur idhg du groupe
+Retour:
+*/
+export class SupprNote extends OperationUI {
+  constructor () { super($t('OPssc')) }
+
+  async run (id, ids, idc) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, ids, idc }
+      this.tr(await post(this, 'SupprNote', args))
+      return this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

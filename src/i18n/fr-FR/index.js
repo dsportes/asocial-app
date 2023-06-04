@@ -188,6 +188,14 @@ export default {
 
   items: 'Aucun item | Un item | {count} items',
 
+  permanent: 'note permanente',
+  temp1: 'une journée',
+  temp7: 'une semaine',
+  temp14: 'deux semaines',
+  temp30: 'un mois',
+  temp60: 'deux mois',
+  temp90: 'un trimestre',
+
   // statuts membre
   STMB0: 'contact',
   STMB1: 'invité',
@@ -789,6 +797,7 @@ export default {
   PNOprot: 'Protégé contre l\'écriture. ',
   PNOnoprot: 'Pas de protection d\'écriture',
   PNOtemp: 'Note temporaire, disparaît aujourd\'hui. | Note temporaire, disparaît demain. | Note temporaire, disparaît dans {count} jours.',
+  PNOperm: 'Note permanente',
   PNOnmc: 'Pas de mots clés associés',
   PNOnv: 'Nouvelle',
   PNOsupp: 'Supprimer',
@@ -816,6 +825,9 @@ export default {
   PNOdeft: 'Nouvelle note ...',
   PNOecr: 'écrite par {0}',
   PNOracgr: 'attachée à la racine du groupe "{0}"',
+  PNOtp: 'Durée de vie de la note',
+  PNOpr: 'Protéger la note contre l\'écriture',
+  PNOex: 'Me rendre "auteur exclusif" de la note',
 
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',
