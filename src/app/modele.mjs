@@ -1491,7 +1491,7 @@ export class Note extends GenDoc {
   get refn () {  return this.ref && this.ref.length === 3 ? this.ref[2] : ''}
   get rid () {  return this.ref ? this.ref[0] : 0 }
   get rids () {  return this.ref ? this.ref[1] : 0 }
-  // get nomFake () { return '#' + idToSid(this.rids) }
+
   get nomFake () { return '#' + this.rids }
 
   async compile (row) {

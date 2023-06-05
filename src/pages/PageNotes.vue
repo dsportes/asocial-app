@@ -37,6 +37,21 @@
       <note-nouvelle/>
     </q-dialog>
 
+    <q-dialog v-model="noteedit" persistent full-height>
+      <note-edit :auts="autsed"/>
+    </q-dialog>
+
+    <q-dialog v-model="confirmsuppr" persistent>
+      <q-card class="bs largeur30 q-pa-sm">
+        <div class="q-mt-md titre-lg text-italic">{{$t('PNOcfsuppr')}}</div>
+        <div class="q-mt-sm fs-md q-ml-md">{{nSt.note.titre}}</div>
+        <div class="q-mt-md row justify-center q-gutter-md">
+          <q-btn class="q-pa-xs" size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+          <bouton-confirm actif :confirmer="supprNote"/>
+        </div>
+      </q-card>
+    </q-dialog>
+
     <q-page-sticky position="top-left" :class="dkli + ' box'" :offset="[0,0]">
       <div class="box2 column">
         <div v-if="!selected" class="col q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
@@ -104,7 +119,7 @@
           <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
             @click="nouvelle" :disable="!selected"/>
           <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
-            @click="voirfic"/>
+            @click="supprimer" :disable="!selected || !nSt.note"/>
           <q-btn class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
             @click="rattacher"/>
           </div>
@@ -112,8 +127,6 @@
         <q-separator color="orange" size="3px" class="q-mt-xs q-mb-md"/>
       </div>
     </q-page-sticky>
-
-
   </q-page>
 </template>
 
@@ -126,6 +139,9 @@ import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, AMJ } from '../app/api.mjs'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
+import NoteEdit from '../dialogues/NoteEdit.vue'
+import BoutonConfirm from '../components/BoutonConfirm.vue'
+import { SupprNote } from '../app/operations.mjs'
 
 const icons = ['','person','group','group','description','article','close','close']
 const colors = ['','primary','orange','negative','primary','orange','primary','orange']
@@ -146,7 +162,7 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles, NoteNouvelle },
+  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, BoutonConfirm },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -212,9 +228,71 @@ export default {
       if (! await this.session.edit()) return
       this.ovnotenouvelle()
     },
+   
+    async supprimer () {
+      if (! await this.session.edit()) return
+      const er = this.erSuppr()
+      if (er) { 
+        await afficherDiag(this.$t('PNOer' + er ))
+      } else {
+        this.ovconfirmsuppr()
+      }
+    },
 
-    editer () {
-      console.log('editer texte')
+    erSuppr () {
+      if (this.nSt.node.type === 3) return 1
+      const g = this.nSt.groupe
+      if (!g) return 0
+      if (g.pe === 1) return 4
+      const sim = this.gSt.setImCompte(g.id)
+      const im = this.nSt.note.im
+      if (im && !sim.has(im)) return 8
+      let maxst = 0
+      sim.forEach(im => { 
+        const st = g.ast[im]
+        if (st > maxst) maxst = st
+      })
+      if (maxst < 31 || maxst > 32) return 7
+      return 0
+    },
+
+    async supprNote () {
+      const n = this.nSt.note
+      const g = this.nSt.groupe
+      const idc = g ? g.idh : this.session.compteId
+      await new SupprNote().run(n.id, n.ids, idc)
+      MD.fd()
+    },
+
+    async editer () {
+      if (! await this.session.edit()) return
+      const er = this.erSuppr()
+      if (er) { 
+        await afficherDiag(this.$t('PNOer' + er ))
+      } else {
+        this.ovnoteedit()
+      }
+    },
+
+    erEdit () {
+      if (this.nSt.node.type === 3) return 1
+      const g = this.nSt.groupe
+      if (!g) { this.autsed = [this.nSt.node]; return 0 }
+      if (g.pe === 1) return 4
+      const sim = this.gSt.setImCompte(g.id)
+      const im = this.nSt.note.im
+      if (im) { // l'exclu actuel est-il avc ?
+        if (sim.has(im)) { this.autsed = [this.nSt.node]; return 0 }
+        return 8
+      }
+      this.autsed = []
+      const l = this.gSt.idImCompte(g.id)
+      l.forEach(x => { 
+        const st = g.ast[x[1]]
+        if (st >= 31 && st <= 32) this.autsed.push(x[0])
+      })
+      if (!this.autsed.length) return 7
+      return 0
     },
 
     editermc () {
@@ -318,6 +396,7 @@ export default {
       styles,
       expandAll: false,
       choixratt: false,
+      autsed: [],
       nas: [], // test : liste des na des avatars
       ngs: [] // test : liste des na des groupes
     }
@@ -427,10 +506,14 @@ export default {
 
     const notenouvelle = ref(false)
     function ovnotenouvelle () { MD.oD(notenouvelle) }
+    const noteedit = ref(false)
+    function ovnoteedit () { MD.oD(noteedit) }
+    const confirmsuppr = ref(false)
+    function ovconfirmsuppr () { MD.oD(confirmsuppr)}
 
     return {
-      notenouvelle, ovnotenouvelle,
-      ID, AMJ, splitPK, dhcool, now, filtrage, edvol,
+      notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
+      ID, MD, AMJ, splitPK, dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
       selected,
       tree,

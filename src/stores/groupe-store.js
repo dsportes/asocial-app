@@ -154,6 +154,26 @@ export const useGroupeStore = defineStore('groupe', {
       return [lc, la]
     },
 
+    setImCompte: (state) => { return (id) => {
+        const s = new Set()
+        const e = state.map.get(id)
+        if (e.membres) e.membres.forEach((m) => { 
+          if (!m.estAc) s.add(m.ids)
+        })
+        return s
+      }
+    },
+
+    idImCompte: (state) => { return (id) => {
+      const s = []
+      const e = state.map.get(id)
+      if (e.membres) e.membres.forEach((m) => { 
+        if (!m.estAc) s.push([m.id, m.ids])
+      })
+      return s
+    }
+  },
+
     // PageGroupes ***************************************************
     pgLgFT: (state) => {
       function f0 (x, y) {
@@ -359,7 +379,9 @@ export const useGroupeStore = defineStore('groupe', {
     lotMaj ({id, gr, lmb, lsc, objv}) {
       if (gr) this.setGroupe(gr)
       if (objv) this.setVols (id, objv)
-      lsc.forEach(s => { this.setNote(s) })
+      lsc.forEach(s => { 
+        if (s._zombi) this.delNote(s.id, s.ids); else this.setNote(s)  
+      })
       lmb.forEach(m => { this.setMembre(m) }) // traite AUSSI le cas _zombi (disparu)
     },
 

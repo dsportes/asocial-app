@@ -6,16 +6,30 @@ import stores from './stores.mjs'
 export const useNoteStore = defineStore('note', {
   state: () => ({
     /* 
-    key: id + '/' + ids
-    value:
-      key:
-      label: titre de la note ou son ids en B64 si c'est une disparue
-      children: liste des nodes enfants
-      note: (fake pour une disparue)
-        fake : id de l'avatar / groupe pour une note disparue
-        ref: key de la note parente
+    note 
+      key: 'id/ids' (clé de la note)
+      rkey: 'id' (clé de sa racine)
+      refk: 'id/ids de ref' (clé de sa note de rattachement)
+      refrk: 'id de ref' (clé de la racine de sa note de rattachement)
+      refn: nom du groupe de ref (nom du groupe de sa note de rattachement)
+
+    node
+      type
+      key : 'id/ids'
+      rkey : 'id' (clé de sa racine)
+      note : absent pour une fake
+      label :
+        - réelle : titre de la note
+        - fake : #idsB64
+    type:
+      1 : racine avatar
+      2 : racine groupe
+      3 : racine groupe zombi
+      4 5 : note avatar / groupe
+      6 7 : note fake avatar / groupe
     */
-    map: new Map(), // map des nodes
+
+    map: new Map(), // map des nodes cle: key, value: node
 
     nodes: [
     ],
@@ -28,6 +42,11 @@ export const useNoteStore = defineStore('note', {
   getters: {
     // Pour le node courant
     note: (state) => { return state.node ? state.node.note : null },
+
+    noteP: (state) => {
+      const n = state.note
+      return n && n.ref ? state.map.get(n.refk) : null
+    },
 
     mbExclu: (state) => {
       const n = state.note
@@ -92,30 +111,6 @@ export const useNoteStore = defineStore('note', {
       }
     }
   },
-
-  /* 
-  note 
-    key: 'id/ids' (clé de la note)
-    rkey: 'id' (clé de sa racine)
-    refk: 'id/ids de ref' (clé de sa note de rattachement)
-    refrk: 'id de ref' (clé de la racine de sa note de rattachement)
-    refn: nom du groupe de ref (nom du groupe de sa note de rattachement)
-
-  node
-    type
-    key : 'id/ids'
-    rkey : 'id' (clé de sa racine)
-    note : absent pour une fake
-    label :
-      - réelle : titre de la note
-      - fake : #idsB64
-  type:
-    1 : racine avatar
-    2 : racine groupe
-    3 : racine groupe zombi
-    4 5 : note avatar / groupe
-    6 7 : note fake avatar / groupe
-  */
 
   actions: {
     setCourant (key) {
@@ -192,6 +187,41 @@ export const useNoteStore = defineStore('note', {
       }
     },
 
+    delNote (id, ids) {
+      const key = id + '/' + ids
+      const n = this.map.get(key)
+      if (!n || !n.note) return // note inexistante ou était déjà fake
+      if (n.children.length) { // a des enfants : devient fake
+        n.label = '#' + ids
+        n.note = null
+        return
+      }
+      const npkey = n.note.refk || '' + id // parent avatar / groupe ou autre note
+      const np = this.map.get(npkey)
+      this.map.delete(n.key) // note supprimée (pas d'enfant)
+
+      // parent utile ou non, à mettre à jour ou détruire
+      const a = []
+      np.children.forEach(c => { if (c.key !== key) a.push(c)})
+      np.children = a
+      if (np.children.length || np.type < 3) {
+        // racine avatar ou groupe ou pas d'enfants - parent utile
+        return
+      }
+      if (np.type === 3){
+        // avatar ou groupe zombi inutile
+        this.map.delete(np.key)
+        return
+      }
+      if (np.type <= 5) return // note parent sans enfants
+      // np : note parent fake sans enfants - on enlève la note fake
+      const nr = this.map.get(np.rkey) // node racine
+      const b = []
+      nr.children.forEach(c => { if (c.key !== np.key) b.push(c)})
+      nr.children = a
+      this.map.delete(np.key)
+    },
+
     rattachNote (n) {
       let nr = this.map.get(n.note.refk)
       if (nr) { // la note de rattachement existait (fake ou réelle)
@@ -251,10 +281,6 @@ export const useNoteStore = defineStore('note', {
 
     setGroupe (na) { // on ajoute un node pour l'avatar juste à la racine
       this.setRacine('' + na.id, 2, na.nomc)
-    },
-
-    delNote (id, ids) {
-      // TODO
     },
 
     delAvatar (id) {

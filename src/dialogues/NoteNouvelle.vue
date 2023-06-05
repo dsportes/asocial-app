@@ -216,7 +216,7 @@ export default {
         if (g.pe === 1) { er.value = 4; return }
         if (!g.imh) { er.value = 5; return }
         const eg = gSt.egr(g.id)
-        if (eg.objv.vols.v1 >= eg.objv.vols.q1 *UNITEV1) { er.value = 6; return }
+        if (eg.objv.vols.v1 >= eg.objv.vols.q1 * UNITEV1) { er.value = 6; return }
         mb.value = gSt.membreDeId(eg, this.naAut.id)
         const st = g.ast[mb.value.ids]
         if (st < 31 || st > 32) { er.value = 7; return }
