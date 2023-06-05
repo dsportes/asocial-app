@@ -38,10 +38,19 @@ export const useNoteStore = defineStore('note', {
 
     nbjTemp: (state) => {
       const n = state.note
-      if (!n || !n.st) return 0
+      if (!n || n.st === 99999999) return 0
       const session = stores.session
       const auj = session.dateJourConnx
-      return AMJ.diff(n.st, auj)
+      return AMJ.diff(auj, n.st)
+    },
+
+    mbAuteurs: (state) => {
+      const l = []
+      const n = state.note
+      if (!n || !n.auts.length) return l
+      const gSt = stores.groupe
+      n.auts.forEach(im => { l.push(gSt.getMembre(n.id, im)) })
+      return l
     },
 
     estGr: (state) => { 

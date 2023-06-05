@@ -78,7 +78,7 @@
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
 
         <div class="q-pa-xs row">
-          <div class="col-6 titre-md" >{{temp.value === 0 ? $t('PNOperm') : $t('PNOtemp', temp.value, { count: temp.value })}}</div>
+          <div class="col-6 titre-md" >{{temp.value === 99999999 ? $t('PNOperm') : $t('PNOtemp', temp.value, { count: temp.value })}}</div>
           <q-select class="col-6 mh titre-md" :label="$t('PNOtp')" v-model="temp" :options="options"
             transition-show="scale" transition-hide="scale" filled
             bg-color="secondary" color="white" />
@@ -101,8 +101,8 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { ID } from '../app/api.mjs'
-import { MD } from '../app/modele.mjs'
+import { ID, UNITEV1 } from '../app/api.mjs'
+import { MD, getNg } from '../app/modele.mjs'
 import { $t, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -142,16 +142,18 @@ export default {
         idc = this.session.compteId
       } else {
         id = this.groupe.id
-        idc = this.groupe.idhg
+        idc = this.groupe.idh
         im = this.mb.ids
       }
 
-      if (this.idsp !== 0) { // note rattachée
-        let rnom = ''
-        if (ID.estGroupe(this.idp)) { // note rattachée à une note de groupe
-          const na = getNg(this.idp) // normalement le groupe "parent" est connu
-          rnom = na ? na.nomc : ''
-        }
+      let rnom = ''
+      if (ID.estGroupe(this.idp)) { // note rattachée à une note de groupe ou un groupe
+        const na = getNg(this.idp) // normalement le groupe "parent" est connu
+        rnom = na ? na.nomc : ''
+      }
+
+      // note rattachée à une autre note OU note avatar rattachée à un groupe
+      if (this.idsp !== 0 || this.idp !== id) {
         ref = [this.idp, this.idsp, rnom]
       }
 
@@ -196,7 +198,7 @@ export default {
     const avP = ref(null) // avatar de la note parente
 
     const options = [
-      { label: $t('permanent'), value: 0 },
+      { label: $t('permanent'), value: 99999999 },
       { label: $t('temp1'), value: 1 },
       { label: $t('temp7'), value: 7 },
       { label: $t('temp14'), value: 14 },
@@ -214,7 +216,7 @@ export default {
         if (g.pe === 1) { er.value = 4; return }
         if (!g.imh) { er.value = 5; return }
         const eg = gSt.egr(g.id)
-        if (eg.objv.vols.v1 >= eg.objv.vols.q1) { er.value = 6; return }
+        if (eg.objv.vols.v1 >= eg.objv.vols.q1 *UNITEV1) { er.value = 6; return }
         mb.value = gSt.membreDeId(eg, this.naAut.id)
         const st = g.ast[mb.value.ids]
         if (st < 31 || st > 32) { er.value = 7; return }

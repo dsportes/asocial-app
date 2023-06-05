@@ -86,7 +86,12 @@
             </div>
 
             <div v-if="nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
-              <div class="col">{{exclu}}</div>
+              <div class="col">
+                <div>
+                  <span class="q-mr-sm">{{exclu}}</span>
+                  <span v-if="nSt.note.auts.length">{{$t('PNOauts', nSt.note.auts.length) + ' ' + nomAuts}}</span>
+                </div>
+              </div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
                 @click="voirfic"/>
             </div>
@@ -168,7 +173,7 @@ export default {
       return ''
     },
     exclu () {
-      const m = this.nSt.exclu
+      const m = this.nSt.mbExclu
       return !m ? this.$t('PNOnoexclu') : this.$t('PNOexclu', [m.na.nomc])
     },
     prot () {
@@ -177,6 +182,11 @@ export default {
     temp () {
       const n = this.nSt.nbjTemp
       return this.$t('PNOtemp', n, { count: n })
+    },
+    nomAuts () {
+      const ln = []
+      this.nSt.mbAuteurs.forEach(m => { ln.push(m.na.nomc)})
+      return ln.join(', ')
     }
   },
 
@@ -439,7 +449,7 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-$hb: 18rem
+$hb: 18.5rem
 .msg
   position: absolute
   z-index: 99999

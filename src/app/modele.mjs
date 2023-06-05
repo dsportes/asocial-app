@@ -1486,7 +1486,7 @@ export class Note extends GenDoc {
   get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
   get key () { return this.id + '/' + this.ids }
   get rkey () { return '' + this.id }
-  get refk () { return this.ref ? this.ref[0] + '/' + this.ref[1] : ''}
+  get refk () { return this.ref ? (this.ref[0] + (this.ref[1] ? '/' + this.ref[1] : ''))  : ''}
   get refrk () { return this.ref ? '' + this.ref[0] : ''}
   get refn () {  return this.ref && this.ref.length === 3 ? this.ref[2] : ''}
   get rid () {  return this.ref ? this.ref[0] : 0 }

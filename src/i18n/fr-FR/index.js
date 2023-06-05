@@ -802,6 +802,7 @@ export default {
   PNOnv: 'Nouvelle',
   PNOsupp: 'Supprimer',
   PNOratt: 'Rattacher',
+  PNOauts: ' Pas d\'auteur. | Auteur: | Auteurs: ',
 
   PNOnvtit0: 'Nouvelle note',
   PNOnvtit1: 'Nouvelle note de {0}',
