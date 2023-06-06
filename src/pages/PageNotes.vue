@@ -41,6 +41,10 @@
       <note-edit :ims="ims"/>
     </q-dialog>
 
+    <q-dialog v-model="notetemp" persistent full-height>
+      <note-temp/>
+    </q-dialog>
+
     <q-dialog v-model="confirmsuppr" persistent>
       <q-card class="bs largeur30 q-pa-sm">
         <div class="q-mt-md titre-lg text-italic">{{$t('PNOcfsuppr')}}</div>
@@ -94,10 +98,10 @@
                 @click="voirfic"/>
             </div>
 
-            <div v-if="nSt.note.st" class="q-mt-xs row justify-between titre-sm">  
+            <div v-if="nSt.note.st !== 99999999" class="q-mt-xs row justify-between titre-sm">  
               <div class="col">{{temp}}</div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-                @click="voirfic"/>
+                @click="edTemp"/>
             </div>
 
             <div v-if="nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
@@ -140,6 +144,7 @@ import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, AMJ } from '../app/api.mjs'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
+import NoteTemp from '../dialogues/NoteTemp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { SupprNote } from '../app/operations.mjs'
 
@@ -162,7 +167,7 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, BoutonConfirm },
+  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, BoutonConfirm },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -294,6 +299,16 @@ export default {
       })
       if (!this.ims.length) return 7
       return 0
+    },
+
+    async edTemp () {
+      if (! await this.session.edit()) return
+      const er = this.erEdit()
+      if (er) { 
+        await afficherDiag(this.$t('PNOer' + er ))
+      } else {
+        this.ovnotetemp()
+      }
     },
 
     editermc () {
@@ -513,9 +528,12 @@ export default {
     function ovnoteedit () { MD.oD(noteedit) }
     const confirmsuppr = ref(false)
     function ovconfirmsuppr () { MD.oD(confirmsuppr)}
+    const notetemp = ref(false)
+    function ovnotetemp () { MD.oD(notetemp)}
 
     return {
       notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
+      notetemp, ovnotetemp,
       ID, MD, AMJ, splitPK, dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
       selected,
@@ -530,7 +548,7 @@ export default {
 </script>
 
 <style lang="css">
-.q-tree__arrow { font-size: 32px !important; }
+.q-tree__arrow { font-size: 24px !important; }
 </style>
 
 <style lang="sass" scoped>

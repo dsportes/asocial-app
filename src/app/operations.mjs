@@ -1349,14 +1349,36 @@ Retour:
 export class MajNote extends OperationUI {
   constructor () { super($t('OPssc')) }
 
-  async run (id, ids, im, texte, prot, idc) {
+  async run (id, ids, im, auts, texte, prot, idc) {
     try {
       const session = stores.session
       const v1 = texte.length
       const cle = Note.clen(id)
-      const txts = await Note.toRowTxt(cle, texte, im)
+      const txts = await Note.toRowTxt(cle, texte, im, auts)
       const args = { token: session.authToken, id, ids, txts, v1, prot, idc }
       this.tr(await post(this, 'MajNote', args))
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Note temporaire / permanente *************************************************
+args.token: éléments d'authentification du compte.
+args.id ids: identifiant de la note
+args.st : aaaammjj ou 99999999
+Retour: rien
+*/
+export class TempNote extends OperationUI {
+  constructor () { super($t('OPssc')) }
+
+  async run (id, ids, nbj) {
+    try {
+      const session = stores.session
+      const st = nbj !== 99999999 ? AMJ.amjUtcPlusNbj(session.dateJourConnx, nbj) : 99999999
+      const args = { token: session.authToken, id, ids, st }
+      this.tr(await post(this, 'TempNote', args))
       return this.finOK()
     } catch (e) {
       await this.finKO(e)

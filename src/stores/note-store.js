@@ -60,7 +60,7 @@ export const useNoteStore = defineStore('note', {
       if (!n || n.st === 99999999) return 0
       const session = stores.session
       const auj = session.dateJourConnx
-      return AMJ.diff(auj, n.st)
+      return AMJ.diff(n.st, auj)
     },
 
     mbAuteurs: (state) => {

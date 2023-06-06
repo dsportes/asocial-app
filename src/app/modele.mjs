@@ -1584,11 +1584,11 @@ export class Note extends GenDoc {
     return { _nom: 'notes', id, ids: r.ids, _data_ }
   }
 
-  static async toRowTxt (cle, txt, im) {
+  static async toRowTxt (cle, txt, im, auts) {
     const x = { d: new Date().getTime(), t: gzip(txt) }
     if (im) {
       const nl = [im]
-      if (this.auts) this.auts.forEach(t => { if (t !== im) nl.push(t) })
+      if (auts) auts.forEach(t => { if (t !== im) nl.push(t) })
       x.l = nl
     }
     return await crypter(cle, new Uint8Array(encode(x)))

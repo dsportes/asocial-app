@@ -195,6 +195,7 @@ export default {
   temp30: 'un mois',
   temp60: 'deux mois',
   temp90: 'un trimestre',
+  tempx: '{0} jour(s)',
 
   // statuts membre
   STMB0: 'contact',
@@ -809,7 +810,9 @@ export default {
   PNOnvtit2: 'Nouvelle note du groupe {0}',
   PNOnvtit3: 'Nouvelle note de ???',
   PNOedtit1: 'Edition d\'une note de {0}',
-  PNOedtit2: 'Edition d\'une du groupe {0}',
+  PNOedtit2: 'Edition d\'une note du groupe {0}',
+  PNOtptit1: 'Note de {0}, temporaire / permanente',
+  PNOtptit2: 'Note du groupe {0}, temporaire / permanente',
 
   PNOchaut: 'Choisir l\'auteur de l\'édition',
 

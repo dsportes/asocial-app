@@ -38,9 +38,8 @@
 
       <div v-if="ims && ims.length > 1" class="q-my-sm q-mx-xs q-pa-xs row bord2">
         <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-        <q-select class="titre-md mh" :label="$t('PNOchaut')" v-model="im" :options="ims"
-          transition-show="scale" transition-hide="scale" filled
-          bg-color="secondary" color="white" />
+        <q-select class="titre-md mh" :label="$t('PNOchaut')" v-model="imx" :options="ims"
+          transition-show="scale" transition-hide="scale" />
       </div>
 
       <div v-if="er" class="titre-md text-bold text-negative bg-yellow-5 q-pa-xs q-mt-sm q-mx-xs">
@@ -50,6 +49,10 @@
         <editeur-md style="height:50vh" :texte="nSt.note.txt"
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
 
+        <div v-if="nSt.note.auts.length" class="q-mt-sm">
+          {{$t('PNOauts', nSt.note.auts.length) + ' ' + nomAuts}}
+        </div>
+     
         <q-toggle class="q-mt-sm titre-md dec"
           v-model="prot" :label="$t('PNOpr')" />
       </div>
@@ -78,10 +81,15 @@ export default {
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    nomAuts () {
+      const ln = []
+      this.nSt.mbAuteurs.forEach(m => { ln.push(m.na.nomc)})
+      return ln.join(', ')
+    }
   },
 
   watch: {
-    im (ap, av) { this.ednom = this.ims.value[ap].label }
+    imx (ap, av) { this.ednom = ap.label; this.im = ap.value }
   },
 
   methods: {
@@ -106,8 +114,9 @@ export default {
         }
       }
       const idc = this.avatar ? this.session.compteId : this.groupe.idh
+      const n = this.nSt.note
       await new MajNote()
-        .run(this.nSt.note.id, this.nSt.note.ids, this.im, this.texte, this.prot, idc)
+        .run(n.id, n.ids, this.im, n.auts, this.texte, this.prot, idc)
       MD.fD()
     }
   },
@@ -130,6 +139,7 @@ export default {
     const ims = toRef(props, 'ims')
     const im = ref(ims.value ? ims.value[0].value : 0)
     const ednom = ref(ims.value ? ims.value[0].label : '')
+    const imx = ref(ims.value ? ims.value[0] : null)
     const prot = ref(nSt.note.p ? true : false)
 
     const er = ref(0)
@@ -170,7 +180,7 @@ export default {
 
     return {
       ui, session, nSt, aSt, gSt, cfg,
-      im, ednom, avatar, groupe, type, nodeP, prot, er, avP, grP,
+      imx, im, ednom, avatar, groupe, type, nodeP, prot, er, avP, grP,
       MD, erGr
     }
   }
@@ -191,4 +201,7 @@ export default {
 .bord2
   border: 3px solid $warning
   border-radius: 5px
+.dec
+  position: relative
+  left: -7px
 </style>
