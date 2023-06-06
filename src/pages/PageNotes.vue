@@ -38,7 +38,7 @@
     </q-dialog>
 
     <q-dialog v-model="noteedit" persistent full-height>
-      <note-edit :auts="autsed"/>
+      <note-edit :ims="ims"/>
     </q-dialog>
 
     <q-dialog v-model="confirmsuppr" persistent>
@@ -133,8 +133,8 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { Note, Motscles, getNg, MD, afficherDiag } from '../app/modele.mjs'
-import { dhcool, difference, intersection, splitPK, edvol } from '../app/util.mjs'
+import { Note, Motscles, getNg, MD } from '../app/modele.mjs'
+import { dhcool, difference, intersection, splitPK, edvol, afficherDiag } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, AMJ } from '../app/api.mjs'
@@ -266,7 +266,7 @@ export default {
 
     async editer () {
       if (! await this.session.edit()) return
-      const er = this.erSuppr()
+      const er = this.erEdit()
       if (er) { 
         await afficherDiag(this.$t('PNOer' + er ))
       } else {
@@ -276,22 +276,23 @@ export default {
 
     erEdit () {
       if (this.nSt.node.type === 3) return 1
-      const g = this.nSt.groupe
-      if (!g) { this.autsed = [this.nSt.node]; return 0 }
+      const g = this.nSt.node.type === 5 ?this.nSt.egr.groupe : null
+      if (!g) return 0
+      // note de groupe
       if (g.pe === 1) return 4
-      const sim = this.gSt.setImCompte(g.id)
+      // Map par im des { nom, st } des avc membres du groupes
+      const ims = this.gSt.imNomStAvc(g.id)
       const im = this.nSt.note.im
-      if (im) { // l'exclu actuel est-il avc ?
-        if (sim.has(im)) { this.autsed = [this.nSt.node]; return 0 }
-        return 8
+      if (im) { // le membre ayant l'exclu actuel est-il avc ?
+        const e = ims.get(im)
+        if (e) { this.ims = [{ label: e.nom, value: im }]; return 0 }
+        return 8 // un autre membre a l'exclusivité, édition impossible
       }
-      this.autsed = []
-      const l = this.gSt.idImCompte(g.id)
-      l.forEach(x => { 
-        const st = g.ast[x[1]]
-        if (st >= 31 && st <= 32) this.autsed.push(x[0])
+      this.ims = []
+      ims.forEach((e, im) => { 
+        if (e.st === 31 || e.st === 32) this.ims.push({ label: e.nom, value: im})
       })
-      if (!this.autsed.length) return 7
+      if (!this.ims.length) return 7
       return 0
     },
 
@@ -396,7 +397,9 @@ export default {
       styles,
       expandAll: false,
       choixratt: false,
-      autsed: [],
+      /* pour maj d'une note de groupe 
+      [{label: e.nom, value: im}] des avc membres du groupes  */
+      ims: null, 
       nas: [], // test : liste des na des avatars
       ngs: [] // test : liste des na des groupes
     }

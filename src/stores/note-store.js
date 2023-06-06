@@ -43,7 +43,7 @@ export const useNoteStore = defineStore('note', {
     // Pour le node courant
     note: (state) => { return state.node ? state.node.note : null },
 
-    noteP: (state) => {
+    nodeP: (state) => {
       const n = state.note
       return n && n.ref ? state.map.get(n.refk) : null
     },

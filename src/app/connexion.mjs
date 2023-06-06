@@ -307,7 +307,7 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesNet && note.st < auj) { // note temporaire à supprimer
         this.buf.lsecsup.push(note)
       } else {
-        (estGr ? gSt : aSt).setNote(note)
+        if (!note._zombi) (estGr ? gSt : aSt).setNote(note)
         if (session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
       }
     }

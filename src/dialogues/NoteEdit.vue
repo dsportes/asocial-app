@@ -1,39 +1,44 @@
 <template>
-<div class="bs" style="width:80vw">
+<div :class="dkli + ' bs'" style="width:80vw">
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
       <q-toolbar-title v-if="avatar" 
-        class="titre-lg full-width text-center">{{$t('PNOnvtit1', [avatar.na.nom])}}</q-toolbar-title>
+        class="titre-lg full-width text-center">{{$t('PNOedtit1', [avatar.na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-if="groupe" 
-        class="titre-lg full-width text-center">{{$t('PNOnvtit2', [groupe.na.nomc])}}</q-toolbar-title>
+        class="titre-lg full-width text-center">{{$t('PNOedtit2', [groupe.na.nomc])}}</q-toolbar-title>
       <q-btn dense size="md" color="primary" icon="check" :label="$t('valider')"
-        :disable="!auteur" @click="valider"/>
+        @click="valider"/>
       <bouton-help page="page1"/>
+    </q-toolbar>
+    <q-toolbar v-if="groupe" inset
+      class="full-width bg-secondary text-white">
+      <q-toolbar-title class="text-italic titre-md text-center">{{$t('PNOecr', [ednom])}}</q-toolbar-title>
     </q-toolbar>
   </q-header>
 
   <q-page-container>
     <q-page class="column">
-      <div v-if="type === 4" class="q-ma-xs q-pa-xs bord1">
+      <div v-if="type === 4 && avP" class="q-ma-xs q-pa-xs bord1">
         <div class="titre-md">
-           <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
+          <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
           <span>{{$t('PNOrav', [avP.na.nom])}}</span>
         </div>
-        <div class="q-ml-sm text-italic">{{nSt.noteP.titre}}</div>
+        <div class="q-ml-sm text-italic">{{nodeP.label}}</div>
       </div>
-      <div v-if="type === 5" class="q-ma-xs q-pa-xs bord1">
+      <div v-if="type === 5 && grP" class="q-ma-xs q-pa-xs bord1">
         <div class="titre-md">
-           <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
+          <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
           <span>{{$t('PNOrgr', [grP.na.nomc])}}</span>
         </div>
-        <div class="q-ml-sm text-italic">{{nSt.noteP.titre}}</div>
+        <div class="q-ml-sm text-italic">{{nodeP.label}}</div>
       </div>
       <q-separator v-if="type === 4 || type === 5" class="q-my-sm" color="orange"/>
 
-      <div v-if="auts.length > 1" class="q-my-sm q-mx-xs q-pa-xs row bord2">
-        <q-select class="titre-md mh" :label="$t('PNOchaut')" v-model="chaut" :options="options"
+      <div v-if="ims && ims.length > 1" class="q-my-sm q-mx-xs q-pa-xs row bord2">
+        <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
+        <q-select class="titre-md mh" :label="$t('PNOchaut')" v-model="im" :options="ims"
           transition-show="scale" transition-hide="scale" filled
           bg-color="secondary" color="white" />
       </div>
@@ -58,40 +63,42 @@
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
-import { afficherDiag } from '../app/util.mjs'
+import { afficherDiag, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { MajNote } from '../app/operations.mjs'
+import EditeurMd from '../components/EditeurMd.vue'
+import { UNITEV1 } from '../app/api.mjs'
 
 export default {
   name: 'NoteEdit',
 
-  components: { BoutonHelp },
+  components: { BoutonHelp, EditeurMd },
 
-  props: { auts: Array },
+  props: { ims: Array },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
   },
 
   watch: {
-    chaut (ap) { this.auteur = ap.value }
+    im (ap, av) { this.ednom = this.ims.value[ap].label }
   },
 
   methods: {
     async valider () {
-      const dv = texte.length - this.nSt.note.txt.length
+      const dv = this.texte.length - this.nSt.note.txt.length
       if (this.er && dv > 0) {
         await afficherDiag($t('PNOw' + this.er))
         return
       }
-      if (this.type === 2 || this.type === 5) {
+      if (this.type === 5) {
         const n = this.erGr(dv)
         if (n === 6) {
           await afficherDiag($t('PNOer11'))
           return
         }
       }
-      if (this.type === 2 || this.type === 5) {
+      if (this.type === 5) {
         const c = this.aSt.compta.compteurs
         if (c.v1 + dv > c.q1 * UNITEV1) {
           await afficherDiag($t('PNOer10'))
@@ -112,66 +119,43 @@ export default {
   },
 
   setup (props) {
-    /* !!!!!!!!!!!!!!!!! im pas géré !!!!!!!!!!!!!!!!!!!!!!!*/
     const ui = stores.ui
     const session = stores.session
     const nSt = stores.note
     const aSt = stores.avatar
     const gSt = stores.groupe
+    const cfg = stores.config
 
     const type = ref(0)
-    const auteur = ref(0)
-    const chaut = ref(0)
-    const auts = toRef(props, auts)
+    const ims = toRef(props, 'ims')
+    const im = ref(ims.value ? ims.value[0].value : 0)
+    const ednom = ref(ims.value ? ims.value[0].label : '')
     const prot = ref(nSt.note.p ? true : false)
 
     const er = ref(0)
 
-    const options = []
-    auteur.value = auts.value[0]
-    if (auts.value.length > 1) {
-      auts.value.forEach(id => {
-        const na = getNg(id)
-        options.push({ label: na.nom, value: id })
-      })
-      chaut.value = options[0]
-    }
-
     const avatar = ref(null)
     const groupe = ref(null)
 
-    const { id, ids } = splitPK(nSt.node.key)
-    const idp = ref(id) // id du parent - racine si idsp = 0
-    const idsp = ref(ids)
+    const { idpa, } = splitPK(nSt.node.note.refk)
+    const idp = ref(idpa) // id du parent - racine si idsp = 0
     const grP = ref(null) // groupe de la note parente
     const avP = ref(null) // avatar de la note parente
-    const noteP = ref(nSt.noteP)
+    const nodeP = ref(idp.value ? nSt.nodeP : null)
 
     switch (nSt.node.type) {
-      case 1: {
-        type.value = 1
-        if (aSt.exV1) er.value = 1
-        avatar.value = aSt.getElt(nSt.note.id).avatar
-        break
-      }
-      case 2: {
-        type.value = 2
-        groupe.value = gSt.egr(nSt.note.id).groupe
-        er.value = erGr(0)
-        break
-      }
       case 4: {
         type.value = 4
         if (aSt.exV1) er.value = 1
         avatar.value = aSt.getElt(nSt.note.id).avatar
-        avP.value = aSt.getElt(idp.value).avatar
+        if (idp.value) avP.value = aSt.getElt(idp.value).avatar
         break
       }
       case 5: {
         type.value = 5
         groupe.value = gSt.egr(nSt.note.id).groupe
         er.value = erGr(0)
-        grP.value = gSt.egr(idp.value).groupe
+        if (idp.value) grP.value = gSt.egr(idp.value).groupe
         break
       }
     }
@@ -185,9 +169,9 @@ export default {
     }
 
     return {
-      ui, session, nSt, aSt, gSt,
-      options, auteur, avatar, groupe, type, noteP, prot, er,
-      MD
+      ui, session, nSt, aSt, gSt, cfg,
+      im, ednom, avatar, groupe, type, nodeP, prot, er, avP, grP,
+      MD, erGr
     }
   }
 

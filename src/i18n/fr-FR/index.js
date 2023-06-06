@@ -809,7 +809,7 @@ export default {
   PNOnvtit2: 'Nouvelle note du groupe {0}',
   PNOnvtit3: 'Nouvelle note de ???',
   PNOedtit1: 'Edition d\'une note de {0}',
-  PNOedtit2: 'Nouvelle d\'une du groupe {0}',
+  PNOedtit2: 'Edition d\'une du groupe {0}',
 
   PNOchaut: 'Choisir l\'auteur de l\'édition',
 
@@ -837,7 +837,7 @@ export default {
   PNOngr: 'Note du groupe "{0}"',
   PNOnper: 'Note personnelle de {0}',
   PNOdeft: 'Nouvelle note ...',
-  PNOecr: 'écrite par {0}',
+  PNOecr: 'éditeur : {0}',
   PNOracgr: 'attachée à la racine du groupe "{0}"',
   PNOtp: 'Durée de vie de la note',
   PNOpr: 'Protéger la note contre l\'écriture',

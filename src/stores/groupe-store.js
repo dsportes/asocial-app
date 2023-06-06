@@ -154,23 +154,15 @@ export const useGroupeStore = defineStore('groupe', {
       return [lc, la]
     },
 
-    setImCompte: (state) => { return (id) => {
-        const s = new Set()
-        const e = state.map.get(id)
-        if (e.membres) e.membres.forEach((m) => { 
-          if (!m.estAc) s.add(m.ids)
-        })
-        return s
-      }
-    },
-
-    idImCompte: (state) => { return (id) => {
-      const s = []
+    /* Map par im des { nom, st } des avc membres du groupes */
+    imNomStAvc: (state) => { return (id) => {
+      const r = new Map()
       const e = state.map.get(id)
+      const ast = e.groupe.ast
       if (e.membres) e.membres.forEach((m) => { 
-        if (!m.estAc) s.push([m.id, m.ids])
+        if (m.estAc) r.set(m.ids, { nom: m.na.nom, st: ast[m.ids]})
       })
-      return s
+      return r
     }
   },
 

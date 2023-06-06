@@ -1335,10 +1335,11 @@ export class SupprNote extends OperationUI {
   }
 }
 
-/* maj d'une note ******
+/* Maj d'une note ******
 args.token: éléments d'authentification du compte.
 args.id ids: identifiant de la note (dont celle du groupe pour un note de groupe)
-args.txt : nouveau texte encrypté
+args.txts : nouveau texte encrypté
+args.v1 : volume du texte de la note
 args.prot : protégé en écriture
 args.idc : compta à qui imputer le volume
   - pour une note personelle, id du compte de l'avatar
@@ -1351,9 +1352,10 @@ export class MajNote extends OperationUI {
   async run (id, ids, im, texte, prot, idc) {
     try {
       const session = stores.session
+      const v1 = texte.length
       const cle = Note.clen(id)
-      const txt = await Note.toRowTxt(cle, txt, im)
-      const args = { token: session.authToken, id, ids, txt, prot, idc }
+      const txts = await Note.toRowTxt(cle, texte, im)
+      const args = { token: session.authToken, id, ids, txts, v1, prot, idc }
       this.tr(await post(this, 'MajNote', args))
       return this.finOK()
     } catch (e) {
