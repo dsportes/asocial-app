@@ -38,7 +38,7 @@
           {{$t('PGplus5b', [ui.egrplus.groupe.na.nom, ui.naplus.nom, pSt.peC.na.nom])}}
         </div>
         <div class="q-mt-sm titre-md text-center">{{$t('PGard')}}</div>
-        <editeur-md class="full-width height-8" v-model="ardoise" :texte="ui.egrplus.groupe.ard" 
+        <editeur-md mh="10rem" v-model="ardoise" :texte="ui.egrplus.groupe.ard" 
           editable modetxt/>
         <q-btn class="text-center q-my-sm" dense size="md" no-caps color="primary" icon="check"
           :label="$t('ok')" @click="contact"/>

@@ -846,6 +846,12 @@ export default {
   PNOpr: 'Protéger la note contre l\'écriture',
   PNOex: 'Me rendre "auteur exclusif" de la note',
 
+  //EditeurMd
+  EMDqss: 'Les modifications n\'ont pas été validées. En quittant cette fenêtre vous allez les perdre.',
+  EMDjr: 'Je reste sur cette fenêtre',
+  EMDjq: 'Je quitte la fenêtre et perd mes modifications',
+  EMDph: 'Votre texte ici ...',
+  
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',
   CChnopc: 'Aucun avatar n\'a enregistré cette phrase de contact',

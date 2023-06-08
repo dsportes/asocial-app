@@ -30,7 +30,7 @@
 
         <q-step :name="3" :title="$t('NPmot')" icon="settings" :done="step > 3" >
           <div ref="step3">
-          <editeur-md :texte="mot1" v-model="mot" editable modetxt style="height:8rem"/>
+          <editeur-md :texte="mot1" v-model="mot" editable modetxt mh="10rem"/>
           </div>
           <div v-if="diagmot" class="fs-sm text-warning">{{$t('NP10s', [mot.length])}}</div>
           <q-stepper-navigation>

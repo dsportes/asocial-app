@@ -1,7 +1,7 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
     <q-card class="q-my-md q-pa-xs">
-      <div class="row items-center justify-center q-py-sm q-gutter-lg">
+      <div class="column items-center justify-center q-py-sm q-gutter-sm">
         <div> <!-- Changement de phrase secrète -->
           <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
             :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
@@ -66,15 +66,8 @@
 
     <!-- Dialogue d'édition du mémo du compte -->
     <q-dialog v-model="memoedit" persistent>
-      <q-card class="bs petitelargeur">
-        <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTmdc')}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-        <editeur-md class="height-10"
-          :texte="aSt.compte.memo || ''" editable modetxt :label-ok="$t('OK')" @ok="memook"/>
-      </q-card>
+      <editeur-md mh="10rem" :titre="$t('CPTmdc')" help="page1"
+        :texte="aSt.compte.memo || ''" editable modetxt :label-ok="$t('OK')" @ok="memook"/>
     </q-dialog>
 
     <!-- Dialogue de changement de la phrase secrète -->
@@ -222,4 +215,7 @@ export default {
   min-height: 0 !important
 .q-btn
   padding: 2px 4px !important
+.bord
+  border-top: 1px solid $grey-5
+  border-bottom: 1px solid $grey-5
 </style>

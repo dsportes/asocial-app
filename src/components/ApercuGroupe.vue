@@ -190,15 +190,8 @@
 
     <!-- Dialogue d'édition de l'ardoise -->
     <q-dialog v-model="ardedit" persistent>
-      <q-card class="bs petitelargeur">
-        <q-toolbar class="bg-secondary text-white">
-          <q-btn dense color="warning" size="md" icon="close" @click="MD.fD"/>
-          <q-toolbar-title class="titre-lg full-width">{{$t('AMard')}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-         </q-toolbar>
-        <editeur-md class="height-10"
-          :texte="eg.groupe.ard" editable modetxt :label-ok="$t('OK')" @ok="ardok"/>
-      </q-card>
+      <editeur-md mh="65mh" :titre="$t('AMard')" help="page1"
+        :texte="eg.groupe.ard" editable modetxt :label-ok="$t('OK')" @ok="ardok"/>
     </q-dialog>
 
 

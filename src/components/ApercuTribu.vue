@@ -33,15 +33,8 @@
 
     <!-- Edition du commentaire attachée à une tribu -->
     <q-dialog v-model="edcom" persistent>
-      <q-card class="bs petitelargeur">
-        <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NTcom', [t.na.nom])}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-        <editeur-md style="height:50vh" :lgmax="250" editable :texte="t.info"
+      <editeur-md mh="10rem"  :titre="$t('NTcom')" help="page1" :lgmax="250" editable :texte="t.info"
           :label-ok="$t('valider')" modetxt @ok="valider"/>
-      </q-card>
     </q-dialog>
 
     <!-- Dialogue de mise à jour des quotas de la tribu -->
@@ -73,7 +66,6 @@ import { edvol } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { SetQuotasTribu } from '../app/operations.mjs'
 import { crypter } from '../app/webcrypto.mjs'
-import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
 import QuotasVols from './QuotasVols.vue'
 import { MD } from '../app/modele.mjs'
@@ -86,7 +78,7 @@ export default {
     idx: Number, edit: Boolean
   },
 
-  components: { QuotasVols, ShowHtml, ApercuNotif, EditeurMd, BoutonHelp, ChoixQuotas },
+  components: { QuotasVols, ShowHtml, ApercuNotif, EditeurMd, ChoixQuotas },
 
   computed: { 
     q1 () { return this.ed1(this.t.cpt.q1 || 0)},

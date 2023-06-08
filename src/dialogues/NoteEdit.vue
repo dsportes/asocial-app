@@ -1,9 +1,9 @@
 <template>
-<div :class="dkli + ' bs'" style="width:80vw">
+<div :class="dkli + ' bs dp50'">
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
       <q-toolbar-title v-if="avatar" 
         class="titre-lg full-width text-center">{{$t('PNOedtit1', [avatar.na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-if="groupe" 
@@ -18,42 +18,41 @@
     </q-toolbar>
   </q-header>
 
-  <q-page-container>
-    <q-page class="column">
-      <div v-if="type === 4 && avP" class="q-ma-xs q-pa-xs bord1">
+  <q-page-container >
+    <q-page class="q-pa-xs">
+      <div v-if="type === 4 && avP" class="q-pa-xs bord1">
         <div class="titre-md">
           <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
           <span>{{$t('PNOrav', [avP.na.nom])}}</span>
         </div>
         <div class="q-ml-sm text-italic">{{nodeP.label}}</div>
       </div>
-      <div v-if="type === 5 && grP" class="q-ma-xs q-pa-xs bord1">
+      <div v-if="type === 5 && grP" class="q-pa-xs bord1">
         <div class="titre-md">
           <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
           <span>{{$t('PNOrgr', [grP.na.nomc])}}</span>
         </div>
         <div class="q-ml-sm text-italic">{{nodeP.label}}</div>
       </div>
-      <q-separator v-if="type === 4 || type === 5" class="q-my-sm" color="orange"/>
 
-      <div v-if="ims && ims.length > 1" class="q-my-sm q-mx-xs q-pa-xs row bord2">
+      <div v-if="ims && ims.length > 1" class="q-my-sm q-pa-xs row bord2">
         <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
         <q-select class="titre-md mh" :label="$t('PNOchaut')" v-model="imx" :options="ims"
           transition-show="scale" transition-hide="scale" />
       </div>
 
-      <div v-if="er" class="titre-md text-bold text-negative bg-yellow-5 q-pa-xs q-mt-sm q-mx-xs">
+      <div v-if="er" class="titre-md text-bold text-negative bg-yellow-5 q-pa-xs q-mt-sm">
         {{er}}</div>
       
-      <div class="column q-pa-sm lg2 maauto">
-        <editeur-md style="height:50vh" :texte="nSt.note.txt"
+      <div class="sp40 column">
+        <editeur-md class="col" :texte="nSt.note.txt" mh="65vh"
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
-
-        <div v-if="nSt.note.auts.length" class="q-mt-sm">
+        <q-separator color="orange" class="q-mt-sm"/>
+        <div v-if="nSt.note.auts.length" class="col-auto q-mt-sm">
           {{$t('PNOauts', nSt.note.auts.length) + ' ' + nomAuts}}
         </div>
-     
-        <q-toggle class="q-mt-sm titre-md dec"
+      
+        <q-toggle class="col-auto q-mt-sm titre-md dec"
           v-model="prot" :label="$t('PNOpr')" />
       </div>
     </q-page>
@@ -85,7 +84,9 @@ export default {
       const ln = []
       this.nSt.mbAuteurs.forEach(m => { ln.push(m.na.nomc)})
       return ln.join(', ')
-    }
+    },
+    modifie () { return this.nSt.note.txt !== this.texte ||
+      (this.prot ? 1 : 0) !== this.nSt.note.p }
   },
 
   watch: {
@@ -93,6 +94,7 @@ export default {
   },
 
   methods: {
+    fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
     async valider () {
       const dv = this.texte.length - this.nSt.note.txt.length
       if (this.er && dv > 0) {
@@ -106,7 +108,7 @@ export default {
           return
         }
       }
-      if (this.type === 5) {
+      if (this.type === 4) {
         const c = this.aSt.compta.compteurs
         if (c.v1 + dv > c.q1 * UNITEV1) {
           await afficherDiag($t('PNOer10'))
@@ -147,8 +149,8 @@ export default {
     const avatar = ref(null)
     const groupe = ref(null)
 
-    const { idpa, } = splitPK(nSt.node.note.refk)
-    const idp = ref(idpa) // id du parent - racine si idsp = 0
+    const { id, ids } = splitPK(nSt.node.note.refk)
+    const idp = ref(id) // id du parent - racine si idsp = 0
     const grP = ref(null) // groupe de la note parente
     const avP = ref(null) // avatar de la note parente
     const nodeP = ref(idp.value ? nSt.nodeP : null)
@@ -191,7 +193,7 @@ export default {
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .lg2
-  width: 35rem
+
 .mh
   max-height: 3.2rem
   width: 15rem

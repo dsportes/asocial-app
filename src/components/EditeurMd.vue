@@ -1,41 +1,55 @@
 <template>
-<div ref="root">
-  <q-card v-if="!max" :class="'column fs-md full-height overflow-hidden q-pa-xs ' + dlclass">
-    <q-toolbar class="col-auto full-width row">
-      <q-btn class="col-auto" icon="zoom_out_map" size="md" push flat dense @click="ovmax"></q-btn>
-      <q-btn :disable="!md" class="col-auto q-mr-xs" size="md" label="TEXTE" :color="md ? 'warning' : 'purple'" push flat dense @click="md=false"></q-btn>
-      <q-btn :disable="md" class="col-auto q-mr-xs" size="md" label="HTML" dense flat push @click="md=true"></q-btn>
-      <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="❤️" size="md"
-        dense flat push @click="ouvriremojimd1">
-      </q-btn>
-      <q-btn v-if="modifie" class="col-auto q-mr-xs" icon="undo" size="md" dense flat push @click="undo"></q-btn>
-      <q-btn v-if="modifie && labelOk" class="col-auto q-mr-xs" icon="check" :label="labelOk" size="md" dense flat push color="warning" @click="ok"></q-btn>
+<div ref="root" :class ="titre ? 'bs': ''">
+  <q-card v-if="!max" :class="dlclass" :style="titre ? 'width:32rem' : ''">
+    <q-toolbar v-if="titre" class="bg-secondary text-white">
+      <q-btn dense color="warning" size="md" icon="close" @click="fermer"/>
+      <q-toolbar-title class="titre-lg full-width">{{titre}}</q-toolbar-title>
+      <bouton-help v-if="help" :page="help"/>
+    </q-toolbar>
+
+<div :style="'height:' + (mh || '10rem')">
+<q-layout container view="hHh lpR fFf">
+  <q-header elevated class="bg-secondary text-white">
+    <q-toolbar class="fs-md full-width row bg-primary text-white">
+      <q-btn class="col-auto q-mr-xs" icon="zoom_out_map" size="md" push flat dense @click="ovmax"/>
+      <q-checkbox v-model="md" size="sm" dense label="HTML" />
+      <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="🙂" size="md"
+        dense flat push @click="ouvriremojimd1"/>
+      <q-btn v-if="modifie" class="col-auto q-mr-xs" icon="undo" size="md" dense flat push @click="undo"/>
+      <q-btn v-if="modifie && labelOk" class="col-auto q-mr-xs" icon="check" 
+        :label="labelOk" size="md" dense flat push @click="ok"/>
       <q-space/>
-      <div :class="'col-auto font-mono fs-md' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
+      <div :class="'col-auto font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
         {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
       </div>
     </q-toolbar>
-    <textarea v-if="!md" :class="'q-pa-xs col full-width font-mono ta ' + dlclass" v-model="textelocal" :readonly="!editable"/>
-    <div v-else class="q-pa-xs col full-width ta"><show-html :idx="idx" :texte="textelocal"/></div>
+  </q-header>
+
+  <q-page-container>
+    <q-input autogrow v-if="!md" class="q-pa-xs font-mono" v-model="textelocal"
+      :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
+    <show-html v-else class="q-pa-xs bord1" :texte="textelocal"/>
+  </q-page-container>
+</q-layout>
+</div>
   </q-card>
-  <q-dialog v-model="max" full-height transition-show="slide-up" transition-hide="slide-down">
-    <div ref="root2" :class="'column fs-md full-height grandelargeur overflow-hidden ' + dlclass">
-      <q-toolbar class="col-auto">
-        <q-btn class="col-auto" icon="zoom_in_map" size="md" dense flat push @click="MD.fD"></q-btn>
-        <q-btn :disable="!md" class="col-auto q-mr-xs" size="md" label="TXT" :color="md ? 'warning' : 'purple'" push flat dense @click="md=false"></q-btn>
-        <q-btn :disable="md" class="col-auto q-mr-xs" size="md" label="HTML" dense flat push @click="md=true"></q-btn>
-        <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="❤️" size="md"
-          dense flat push @click="ouvriremojimd2">
-        </q-btn>  
-        <q-btn v-if="modifie" class="col-auto q-mr-xs" icon="undo" size="md" dense flat push @click="undo"></q-btn>
-        <q-btn v-if="modifie && labelOk" class="col-auto q-mr-xs" icon="check" :label="labelOk" size="md" dense flat push color="warning" @click="ok"></q-btn>
+  <q-dialog v-model="max" full-height full-width transition-show="slide-up" transition-hide="slide-down">
+    <div ref="root2" :class="dlclass + ' column'">
+      <q-toolbar class="col-auto fs-md bg-primary text-white">
+        <q-btn class="col-autov q-mr-xs" icon="zoom_in_map" size="md" dense flat push @click="MD.fD"/>
+        <q-checkbox v-model="md" size="md" dense label="HTML" />
+        <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="🙂" size="md"
+          dense flat push @click="ouvriremojimd2"/>  
+        <q-btn v-if="modifie" class="col-auto q-mr-xs" icon="undo" size="md" dense flat push @click="undo"/>
+        <q-btn v-if="modifie && labelOk" class="col-auto q-mr-xs" icon="check" :label="labelOk" size="md" dense flat push @click="ok"/>
         <q-space/>
         <div :class="'col-auto font-mono fs-md' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
           {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
         </div>
       </q-toolbar>
-      <textarea v-if="!md" :class="'q-pa-xs col font-mono ta ' + dlclass" v-model="textelocal" :readonly="!editable"/>
-      <div v-else :class="'q-pa-xs col ta ' + dlclass"><show-html :idx="idx" :texte="textelocal"/></div>
+      <q-input autogrow v-if="!md" class="q-pa-xs col font-mono" v-model="textelocal" 
+        :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
+      <show-html v-else class="q-pa-xs col-auto bord1" :texte="textelocal"/>
     </div>
   </q-dialog>
 
@@ -45,6 +59,7 @@
 </template>
 <script>
 import ShowHtml from './ShowHtml.vue'
+import BoutonHelp from './BoutonHelp.vue'
 import ChoixEmoji from './ChoixEmoji.vue'
 import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
@@ -53,19 +68,23 @@ import { MD } from '../app/modele.mjs'
 export default ({
   name: 'EditeurMd',
 
-  components: { ShowHtml, ChoixEmoji },
+  components: { ShowHtml, ChoixEmoji, BoutonHelp },
 
   emits: ['update:modelValue', 'ok'],
 
   props: { 
+    titre: String,
+    help: String,
     lgmax: Number, 
     modelValue: String, 
-    texte: String, 
+    texte: String,
+    placeholder: String,
     labelOk: String, 
     editable: Boolean, 
     idx: Number, 
     modetxt: Boolean, 
-    horsSession: Boolean
+    horsSession: Boolean,
+    mh: String
   },
 
   computed: {
@@ -85,6 +104,7 @@ export default ({
   },
 
   methods: {
+    fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
     ouvriremojimd1 () {
       this.inp = this.root.querySelector('textarea')
       MD.oD('choixEmoji')
@@ -172,11 +192,14 @@ export default ({
     --category-emoji-size: 1rem;
   }
 }
+.q-field__native { padding-top: 0 !important; min-height: 1rem !important; }
+.q-field__control { min-height: 0 !important; }
 </style>
 
 <style lang="sass" scoped>
-@import '../css/input.sass'
 .q-toolbar
   padding: 0 !important
   min-height: 0 !important
+.bord1
+  border-bottom: 1px solid $grey-5
 </style>

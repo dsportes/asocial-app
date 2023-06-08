@@ -1,9 +1,9 @@
 <template>
-<div :class="dkli + ' bs'" style="width:80vw">
+<div :class="dkli + ' bs dp50'">
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
       <q-toolbar-title v-if="!step" 
         class="titre-lg full-width text-center">{{$t('PNOnvtit0')}}</q-toolbar-title>
       <q-toolbar-title v-if="step === 1" 
@@ -28,7 +28,7 @@
   </q-header>
 
   <q-page-container>
-    <q-page class="column">
+    <q-page class="q-pa-xs">
       <div v-if="type === 4" class="q-ma-xs q-pa-xs bord1">
         <div class="titre-md">
            <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
@@ -73,22 +73,30 @@
         </div>
       </div>
 
-      <div v-if="!er && step === 3" class="column q-pa-sm lg2 maauto">
-        <editeur-md style="height:50vh" :texte="$t('PNOdeft')"
+      <div v-if="!er && step === 3" class="column sp40">
+        <editeur-md mh="50vh" class="col" texte="" :placeholder="$t('PNOdeft')"
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
+        <q-separator color="orange" class="q-mt-sm"/>
 
-        <div class="q-pa-xs row">
-          <div class="col-6 titre-md" >{{temp.value === 99999999 ? $t('PNOperm') : $t('PNOtemp', temp.value, { count: temp.value })}}</div>
+        <div class="col-auto q-pa-xs row items-start">
+          <div class="col-6 titre-md" >
+            <bouton-undo :cond="temp.value!==99999999" @click="temp=options[0]"/>
+            <span>{{temp.value === 99999999 ? $t('PNOperm') : $t('PNOtemp', temp.value, { count: temp.value })}}</span>
+          </div>
           <q-select class="col-6 mh titre-md" :label="$t('PNOtp')" v-model="temp" :options="options"
             transition-show="scale" transition-hide="scale" filled
             bg-color="secondary" color="white" />
         </div>
           
-        <q-toggle class="q-mt-sm titre-md dec"
-          v-model="prot" :label="$t('PNOpr')" />
+        <div class="col-auto q-mt-sm row">
+          <bouton-undo :cond="prot===true" @click="prot=false"/>
+          <q-toggle class=" titre-md" v-model="prot" :label="$t('PNOpr')" />
+        </div>
 
-        <q-toggle v-if="groupe" class="q-mt-sm titre-md dec" 
-          v-model="exclu" :label="$t('PNOex')" />
+        <div class="col-auto q-mt-sm row">
+          <bouton-undo :cond="exclu===true" @click="exclu=false"/>
+          <q-toggle class=" titre-md" v-model="exclu" :label="$t('PNOex')" />
+        </div>
 
       </div>
 
@@ -105,16 +113,19 @@ import { ID, UNITEV1 } from '../app/api.mjs'
 import { MD, getNg } from '../app/modele.mjs'
 import { $t, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BoutonUndo from '../components/BoutonUndo.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { NouvelleNote } from '../app/operations.mjs'
 
 export default {
   name: 'NoteNouvelle',
 
-  components: { BoutonHelp, EditeurMd },
+  components: { BoutonHelp, BoutonUndo, EditeurMd },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    modifie () { return this.texte !== '' || (this.temp.value !== 99999999) ||
+      this.prot || this.exclu }
   },
 
   watch: {
@@ -134,6 +145,7 @@ export default {
       this.groupe = this.gSt.egr(this.idp).groupe
       this.step = 2
     },
+    fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
     async valider () {
       // console.log(this.texte, this.prot, this.temp.value, this.exclu)
       let id = 0, idc = 0, ref = null, im = 0

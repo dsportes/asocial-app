@@ -106,14 +106,8 @@
 
   <!-- Dialogue d'édition du texte de l'alerte -->
   <q-dialog v-model="txtedit" persistent>
-    <q-card class="bs petitelargeur">
-      <q-toolbar class="bg-secondary text-white">
-        <q-toolbar-title class="titre-lg full-width">{{$t('ANtxt')}}</q-toolbar-title>
-        <q-btn dense flat size="md" icon="close" @click="MD.fD"/>
-      </q-toolbar>
-      <editeur-md class="height-10"
+    <editeur-md mh="10rem"  :titre="$t('ANtxt')" help="page1"
         :texte="ntf.texte || ''" editable modetxt :label-ok="$t('OK')" @ok="texteok"/>
-    </q-card>
   </q-dialog>
 
 </div>

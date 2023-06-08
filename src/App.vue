@@ -211,6 +211,15 @@
     </q-card>
   </q-dialog>
 
+  <q-dialog v-model="cf" persistent>
+    <q-card class="largeur30">
+      <q-card-section class="q-my-lg titre-md">{{$t('EMDqss')}}</q-card-section>
+      <q-card-actions vertical align="right">
+        <q-btn flat :label="$t('EMDjr')" color="primary" @click="MD.fD" />
+        <q-btn flat :label="$t('EMDjq')" color="warning" @click="fermerqm" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 
   <q-dialog v-model="dialoguedrc" persistent>
     <q-card class="bs petitelargeur">
@@ -433,7 +442,10 @@ export default {
     gotoBack () {
       this.ui.setPageBack()
     },
-    
+    fermerqm () {
+      MD.fD()
+      setTimeout(() => { MD.fD() }, 50)
+    },
     deconnexion () { MD.fD(); deconnexion() },
     async reconnexion () { MD.fD(); await reconnexionCompte() }
   },
@@ -478,6 +490,7 @@ export default {
       detailsmembre: MD.declare('detailsmembre', ref(false)),
       detailsavatar: MD.declare('detailsavatar', ref(false)),
       opDialog: MD.declare('opDialog', ref(false)),
+      cf: MD.declare('cf', ref(false)),
       outilsTests, ovOutilsTests, confirmstopop, ovConfirmstopop,
       aSt,
       gSt,

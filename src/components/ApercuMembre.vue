@@ -56,15 +56,8 @@
 
     <!-- Dialogue d'édition de l'info pour un membre avatar du compte -->
     <q-dialog v-model="infoedit" persistent>
-      <q-card class="bs petitelargeur">
-        <q-toolbar class="bg-secondary text-white">
-          <q-btn dense color="warning" size="md" icon="close" @click="MD.fD"/>
-          <q-toolbar-title class="titre-lg full-width">{{$t('AMinfo')}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-         </q-toolbar>
-        <editeur-md class="height-10"
+      <editeur-md mh="10rem" :titre="$t('AMinfo')" help="page1"
           :texte="mb.info || ''" editable modetxt :label-ok="$t('OK')" @ok="infook"/>
-      </q-card>
     </q-dialog>
 
     <!-- Dialogue de changement de statut -->
@@ -195,7 +188,7 @@
 
         </q-card-section>
         <q-separator v-if="ro===''" color="orange" class="q-my-xs"/>
-        <editeur-md class="full-width height-8" v-model="ardoise" :texte="eg.groupe.ard" 
+        <editeur-md mh="10rem" v-model="ardoise" :texte="eg.groupe.ard" 
           editable modetxt/>
 
         <div v-if="err1!==''" class="q-ma-xs q-pa-xs text-bold bg-yellow-3 text-negative">
