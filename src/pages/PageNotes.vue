@@ -41,8 +41,12 @@
       <note-edit :ims="ims"/>
     </q-dialog>
 
-    <q-dialog v-model="notetemp" persistent full-height>
+    <q-dialog v-model="notetemp" persistent>
       <note-temp/>
+    </q-dialog>
+
+    <q-dialog v-model="noteprot" persistent>
+      <note-prot/>
     </q-dialog>
 
     <q-dialog v-model="confirmsuppr" persistent>
@@ -95,7 +99,7 @@
             <div class="q-mt-xs row justify-between titre-sm">  
               <div class="col">{{prot}}</div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-                @click="voirfic"/>
+                @click="proteger"/>
             </div>
 
             <div v-if="nSt.note.st !== 99999999" class="q-mt-xs row justify-between titre-sm">  
@@ -145,6 +149,7 @@ import { ID, AMJ } from '../app/api.mjs'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
 import NoteTemp from '../dialogues/NoteTemp.vue'
+import NoteProt from '../dialogues/NoteProt.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { SupprNote } from '../app/operations.mjs'
 
@@ -167,7 +172,7 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, BoutonConfirm },
+  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, NoteProt, BoutonConfirm },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -281,7 +286,7 @@ export default {
 
     erEdit () {
       if (this.nSt.node.type === 3) return 1
-      const g = this.nSt.node.type === 5 ?this.nSt.egr.groupe : null
+      const g = this.nSt.node.type === 5 ? this.nSt.egr.groupe : null
       if (!g) return 0
       // note de groupe
       if (g.pe === 1) return 4
@@ -308,6 +313,16 @@ export default {
         await afficherDiag(this.$t('PNOer' + er ))
       } else {
         this.ovnotetemp()
+      }
+    },
+
+    async proteger () {
+      if (! await this.session.edit()) return
+      const er = this.erEdit()
+      if (er) { 
+        await afficherDiag(this.$t('PNOer' + er ))
+      } else {
+        this.ovnoteprot()
       }
     },
 
@@ -530,10 +545,12 @@ export default {
     function ovconfirmsuppr () { MD.oD(confirmsuppr)}
     const notetemp = ref(false)
     function ovnotetemp () { MD.oD(notetemp)}
+    const noteprot = ref(false)
+    function ovnoteprot () { MD.oD(noteprot)}
 
     return {
       notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
-      notetemp, ovnotetemp,
+      notetemp, ovnotetemp, noteprot, ovnoteprot,
       ID, MD, AMJ, splitPK, dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
       selected,

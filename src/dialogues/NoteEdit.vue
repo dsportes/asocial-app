@@ -52,8 +52,11 @@
           {{$t('PNOauts', nSt.note.auts.length) + ' ' + nomAuts}}
         </div>
       
-        <q-toggle class="col-auto q-mt-sm titre-md dec"
-          v-model="prot" :label="$t('PNOpr')" />
+        <div class="col-auto q-mt-sm row">
+          <bouton-undo :cond="(this.prot ? 1 : 0)!==nSt.node.note.p" 
+            @click="prot=nSt.node.note.p ? true : false"/>
+          <q-toggle class="col-auto titre-md" v-model="prot" :label="$t('PNOpr')"/>
+        </div>
       </div>
     </q-page>
   </q-page-container>
@@ -67,6 +70,7 @@ import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
 import { afficherDiag, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BoutonUndo from '../components/BoutonUndo.vue'
 import { MajNote } from '../app/operations.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import { UNITEV1 } from '../app/api.mjs'
@@ -74,7 +78,7 @@ import { UNITEV1 } from '../app/api.mjs'
 export default {
   name: 'NoteEdit',
 
-  components: { BoutonHelp, EditeurMd },
+  components: { BoutonHelp, BoutonUndo, EditeurMd },
 
   props: { ims: Array },
 

@@ -1385,3 +1385,24 @@ export class TempNote extends OperationUI {
     }
   }
 }
+
+/* Protéger une note contre l'écriture *************************************************
+args.token: éléments d'authentification du compte.
+args.id ids: identifiant de la note
+args.p : 0 / 1
+Retour: rien
+*/
+export class ProtNote extends OperationUI {
+  constructor () { super($t('OPssc')) }
+
+  async run (id, ids, p) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, ids, p }
+      this.tr(await post(this, 'ProtNote', args))
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

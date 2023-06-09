@@ -212,7 +212,7 @@
   </q-dialog>
 
   <q-dialog v-model="cf" persistent>
-    <q-card class="largeur30">
+    <q-card class="bs largeur40">
       <q-card-section class="q-my-lg titre-md">{{$t('EMDqss')}}</q-card-section>
       <q-card-actions vertical align="right">
         <q-btn flat :label="$t('EMDjr')" color="primary" @click="MD.fD" />

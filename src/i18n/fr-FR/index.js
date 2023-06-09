@@ -813,6 +813,8 @@ export default {
   PNOedtit2: 'Edition d\'une note du groupe {0}',
   PNOtptit1: 'Note de {0}, temporaire / permanente',
   PNOtptit2: 'Note du groupe {0}, temporaire / permanente',
+  PNOpetit1: 'Note de {0}, protection d\'écriture',
+  PNOpetit2: 'Note du groupe {0}, protection d\'écriture',
 
   PNOchaut: 'Choisir l\'auteur de l\'édition',
 

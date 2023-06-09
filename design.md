@@ -1,6 +1,6 @@
 
 TODO :
-- Note : maj prot, mots clés, exclusivité
+- Note : mots clés, exclusivité
 - traiter les autorisations pour le comptable (page menu en particulier) pour survivre à un blocage de sa tribu / voir global
 
 ## L'arbre des notes
