@@ -133,7 +133,7 @@ export const usePeopleStore = defineStore('people', {
         const lch = []
         const lmb = []
         e.chats.forEach((val, idI) => { lch.push([idI, val[0], val[1]]) })
-        e.groupes.forEach((ids, idg) => { lch.push([idg, ids]) })
+        e.groupes.forEach((ids, idg) => { lmb.push([idg, ids]) })
         const vcv = e.cv ? e.cv.v : 0
         return { idE, vcv, lch, lmb }
       }

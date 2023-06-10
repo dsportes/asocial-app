@@ -821,7 +821,7 @@ export default {
   PNOpetit1: 'Note de {0}, protection d\'écriture',
   PNOpetit2: 'Note du groupe {0}, protection d\'écriture',
   PNOextit: 'Attribution d\'exclusivité d\'écriture d\'une note du groupe {0}',
-
+  PNOnocv: '{0} n\'a pas déclaré de carte de visite.',
   PNOchaut: 'Choisir l\'auteur de l\'édition',
   PNOexsuppr: 'Tous les auteurs et animateurs peuvent éditer la note',
 

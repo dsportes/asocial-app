@@ -38,11 +38,11 @@
     </q-dialog>
 
     <q-dialog v-model="noteedit" persistent full-height>
-      <note-exclu :ims="ims"/>
+      <note-edit :ims="ims"/>
     </q-dialog>
 
     <q-dialog v-model="noteexclu" persistent full-height>
-      <note-edit :ims="ims"/>
+      <note-exclu :ims="ims"/>
     </q-dialog>
 
     <q-dialog v-model="notetemp" persistent>
@@ -120,7 +120,7 @@
                 </div>
               </div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-                @click="exclusivite"/>
+                @click="edexclu"/>
             </div>
 
           </div>
@@ -328,11 +328,11 @@ export default {
       this.ims = this.gSt.imNaStMb(g.id)
       const im = this.nSt.note.im
       if (im) { // le membre ayant l'exclu actuel est-il avc ?
-        const e = ims.get(im)
+        const e = this.ims.get(im)
         if (e && e.avc) return 0
       }
       // un des avc est-il animateur ?
-      for(const e of ims) { 
+      for(const [,e] of this.ims) { 
         if (e.st === 32 && e.avc) return 0
       }
       return 9
@@ -578,7 +578,7 @@ export default {
     const notetemp = ref(false)
     function ovnotetemp () { MD.oD(notetemp)}
     const noteexclu = ref(false)
-    function ovnoteexclu () { MD.oD(noteprot)}
+    function ovnoteexclu () { MD.oD(noteexclu)}
     const noteprot = ref(false)
     function ovnoteprot () { MD.oD(noteprot)}
 

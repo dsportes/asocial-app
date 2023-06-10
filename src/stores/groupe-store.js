@@ -174,7 +174,7 @@ export const useGroupeStore = defineStore('groupe', {
         if (e.membres) e.membres.forEach((m) => { 
           const st = ast[m.ids]
           if (m.estAc) {
-            r.set(m.ids, { nom: m.na, st, avc:true})
+            r.set(m.ids, { na: m.na, st, avc:true})
           } else {
             if (st >= 31 && st <= 32) r.set(m.ids, { na: m.na, st, avc:false})
           }

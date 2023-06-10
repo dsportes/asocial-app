@@ -473,7 +473,6 @@ export class RafraichirCvs extends OperationUI {
   async run (id) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
     try {
       const session = stores.session
-      const id = session.avatarId
       const pSt = stores.people
       const aSt = stores.avatar
       const gSt = stores.groupe
@@ -1416,10 +1415,10 @@ Retour: rien
 export class ExcluNote extends OperationUI {
   constructor () { super($t('OPexclu')) }
 
-  async run (id, ids, p) {
+  async run (id, ids, im) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, ids, p }
+      const args = { token: session.authToken, id, ids, im }
       this.tr(await post(this, 'ExcluNote', args))
       return this.finOK()
     } catch (e) {

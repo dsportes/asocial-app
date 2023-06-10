@@ -4,8 +4,9 @@
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
-      <q-toolbar-title> 
-        class="titre-lg full-width text-center">{{$t('PNOextit', [groupe.na.nomc])}}</q-toolbar-title>
+      <q-toolbar-title class="titre-lg full-width text-center">
+        {{$t('PNOextit', [groupe.na.nomc])}}
+      </q-toolbar-title>
       <bouton-undo :cond="modifie" @click="undo"/>
       <q-btn dense size="md" color="primary" icon="check" :label="$t('valider')"
         @click="valider"/>
@@ -19,10 +20,10 @@
 
   <q-page-container >
     <q-page class="q-pa-xs">
-      <div class="titre-lg text-italic">{{$t('PNOlex')}}</div>
-      <div class="sp30 q-mt-sm scroll" style="height:60vh">
+      <div class="titre-lg text-italic text-center">{{$t('PNOlex')}}</div>
+      <div class="sp30 q-mt-sm scroll" style="height:40vh">
         <div v-for="(e, idx) in lst" :key="idx" 
-          :class="dkli(idx) + ' q-mt-xs row ' + (e.im === imap ? 'bg-yellow-5 text-bold text-black' : '')"
+          :class="dkli(idx) + ' q-mt-xs row cursor-pointer bord' + (e.im === imap ? '2' : '1')"
           @click="selmb(e)">
           <div class="col-8">{{e.nom}}</div>
           <div class="col-4">{{aa(e.st)}}</div>
@@ -44,7 +45,10 @@
 
       <q-btn :disable="!im && !imap" flat class="q-my-sm" color="warning" 
         :label="$t('PNOexsuppr')" @click="suppr"/>
-      <apercu-genx class="q-my-md" v-if="c" :na="c.na" :cv="c.cv" :est-avc="c.avc"/>
+      <apercu-genx class="q-my-md" v-if="c && c.cv" :na="c.na" :cv="c.cv" :est-avc="c.avc"/>
+      <div v-if="c && !c.cv" class="q-my-md titre-md text-italic">{{$t('PNOnocv', [c.nom])}}</div>
+      <div><q-btn class="q-my-sm" size="md" no-caps dense color="primary" 
+        :label="$t('CVraf')" @click="rafCvs"/></div>
 
     </q-page>
   </q-page-container>
@@ -56,16 +60,18 @@
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
+import { $t } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
-import { ExcluNote } from '../app/operations.mjs'
+import ApercuGenx from '../components/ApercuGenx.vue'
+import { ExcluNote, RafraichirCvs } from '../app/operations.mjs'
 
 export default {
-  name: 'NoteEdit',
+  name: 'NoteExclu',
 
-  components: { BoutonHelp, BoutonUndo },
+  components: { BoutonHelp, BoutonUndo, ApercuGenx },
 
-  props: { ims: Array },
+  props: { ims: Object },
 
   computed: {
     nomAuts () {
@@ -84,7 +90,7 @@ export default {
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
     aa (st) { return st === 32 ? $t('animateur') : $t('auteur') },
     selmb (e) {
-      e.cv = pSt.getCv(e.na.id)
+      e.cv = this.cv(e)
       this.c = e
       this.imap = e.im
     },
@@ -99,8 +105,13 @@ export default {
       this.c = null
     },
     async valider () {
+      const n = this.nSt.note
       await new ExcluNote().run(n.id, n.ids, this.imap)
       MD.fD()
+    },
+    async rafCvs () {
+      const [nt, nr] = await new RafraichirCvs().run(this.groupe.id)
+      stores.ui.afficherMessage(this.$t('CVraf2', [nr, nt - nr]), false)
     }
   },
 
@@ -114,6 +125,7 @@ export default {
     const session = stores.session
     const nSt = stores.note
     const gSt = stores.groupe
+    const aSt = stores.avatar
     const pSt = stores.people
 
     /* Map par im des { na, st, avc } des membres du groupe, avc ou auteur-animateur */
@@ -124,13 +136,17 @@ export default {
     const ednom = ref(im.value ? ims.value.get(im.value).na.nom : '')
     const groupe = ref(gSt.egr(nSt.note.id).groupe)
 
+    function cv(x) {
+      return !x.avc ? pSt.getCv(x.na.id) : aSt.getAvatar(x.na.id).cv
+    }
+
     const lst = []
     ims.value.forEach((e, ids) => {
       const x = { ...e }
       x.im = ids
       x.nom = e.avc ? $t('moi2', [ e.na.nom]) : e.na.nomc
       if (ids === im.value) {
-        x.cv = pSt.getCv(x.na.id)
+        x.cv = cv(x)
         c.value = x
       }
       lst.push(x)
@@ -145,8 +161,8 @@ export default {
     })
 
     return {
-      ui, session, nSt, aSt, gSt, cfg,
-      im, imap, ednom, groupe, lst,
+      ui, session, nSt, gSt, pSt, cv,
+      im, imap, ednom, groupe, lst, c,
       MD
     }
   }
@@ -156,18 +172,8 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.lg2
-
-.mh
-  max-height: 3.2rem
-  width: 15rem
 .bord1
-  border: 1px solid $grey-5
-  border-radius: 5px
+  border: 2px solid transparent
 .bord2
-  border: 3px solid $warning
-  border-radius: 5px
-.dec
-  position: relative
-  left: -7px
+  border: 2px solid $warning
 </style>
