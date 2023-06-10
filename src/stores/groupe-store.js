@@ -154,17 +154,34 @@ export const useGroupeStore = defineStore('groupe', {
       return [lc, la]
     },
 
-    /* Map par im des { nom, st } des avc membres du groupes */
-    imNomStAvc: (state) => { return (id) => {
-      const r = new Map()
-      const e = state.map.get(id)
-      const ast = e.groupe.ast
-      if (e.membres) e.membres.forEach((m) => { 
-        if (m.estAc) r.set(m.ids, { nom: m.na.nom, st: ast[m.ids]})
-      })
-      return r
-    }
-  },
+    /* Map par im des { na, st } des avc membres du groupe */
+    imNaStAvc: (state) => { return (id) => {
+        const r = new Map()
+        const e = state.map.get(id)
+        const ast = e.groupe.ast
+        if (e.membres) e.membres.forEach((m) => { 
+          if (m.estAc) r.set(m.ids, { nom: m.na, st: ast[m.ids]})
+        })
+        return r
+      }
+    },
+
+    /* Map par im des { na, st, avc } des membres du groupe, avc ou auteur-animateur */
+    imNaStMb: (state) => { return (id) => {
+        const r = new Map()
+        const e = state.map.get(id)
+        const ast = e.groupe.ast
+        if (e.membres) e.membres.forEach((m) => { 
+          const st = ast[m.ids]
+          if (m.estAc) {
+            r.set(m.ids, { nom: m.na, st, avc:true})
+          } else {
+            if (st >= 31 && st <= 32) r.set(m.ids, { na: m.na, st, avc:false})
+          }
+        })
+        return r
+      }
+    },
 
     // PageGroupes ***************************************************
     pgLgFT: (state) => {

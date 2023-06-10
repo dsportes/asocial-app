@@ -1393,13 +1393,34 @@ args.p : 0 / 1
 Retour: rien
 */
 export class ProtNote extends OperationUI {
-  constructor () { super($t('OPssc')) }
+  constructor () { super($t('OPprot')) }
 
   async run (id, ids, p) {
     try {
       const session = stores.session
       const args = { token: session.authToken, id, ids, p }
       this.tr(await post(this, 'ProtNote', args))
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Changer l'exclusivité d'écriture d'une note ***********************
+args.token: éléments d'authentification du compte.
+args.id ids: identifiant de la note
+args.im : 0 / im
+Retour: rien
+*/
+export class ExcluNote extends OperationUI {
+  constructor () { super($t('OPexclu')) }
+
+  async run (id, ids, p) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, ids, p }
+      this.tr(await post(this, 'ExcluNote', args))
       return this.finOK()
     } catch (e) {
       await this.finKO(e)

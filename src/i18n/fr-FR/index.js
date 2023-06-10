@@ -65,6 +65,8 @@ export default {
   existe: 'Changer le début de votre phrase, il est trop proche de celui d\'une phrase déjà déclarée.',
   nolimite: '(sans limite)',
   fichiers: 'Fichiers',
+  animateur: 'Animateur',
+  auteur: 'Auteur',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -504,6 +506,9 @@ export default {
   OPcsc: 'Créer une nouvelle note',
   OPmsc: 'Mettre à jour une note',
   OPssc: 'Supprimer une note',
+  OPprot: 'Changer la protection d\'écriture d\'une note',
+  OPexclu: 'Changer l\'exclusivité d\'écriture d\'une note',
+
   OPtfa: 'Télécharger un fichier attaché à une note',
   OPnfa: 'Attacher un nouveau fichier à une note',
   OPsfa: 'Supprimer un fichier attaché à une note',
@@ -815,8 +820,10 @@ export default {
   PNOtptit2: 'Note du groupe {0}, temporaire / permanente',
   PNOpetit1: 'Note de {0}, protection d\'écriture',
   PNOpetit2: 'Note du groupe {0}, protection d\'écriture',
+  PNOextit: 'Attribution d\'exclusivité d\'écriture d\'une note du groupe {0}',
 
   PNOchaut: 'Choisir l\'auteur de l\'édition',
+  PNOexsuppr: 'Tous les auteurs et animateurs peuvent éditer la note',
 
   PNOer1: 'Vous n\'avez plus accès au groupe "{0}" ou il n\'existe plus : il n\'est pas possible de lui ajouter une nouvelle note.',
   PNOer2: 'Il n\'est pas possible de rattacher une nouvelle note à une note à laquelle vous n\'avez plus accès ou qui n\'existe plus.' +
@@ -827,6 +834,7 @@ export default {
   PNOer6: 'Le volume des notes du groupe excède déjà le maximum autosisé par son compte hébergeur : l\'ajout de notes et leurs mises à jour en augmentation de volume sont bloquées',
   PNOer7: 'Il faut être membre actif "auteur" ou "animateur" pour pouvoir ajouter de nouvelles notes ou mettre à jour ou supprimer celles existantes.',
   PNOer8: 'La note a une exclusivité d\'écritue pour un membre : lui seul peut la mettre à jour ou la détruire.',
+  PNOer9: 'Pour changer l\'attribution de l\'exclusivité d\'écriture, il faut, soit l\'avoir soi-même, soit être animateur du groupe.',
 
   PNOer10: 'La nouvelle taille de la note ferait dépasser le quota attribué au compte.',
   PNOer11: 'La nouvelle taille de la note ferait dépasser le volume maximal attribué par le compte hébergeur du groupe aux textes des notes du groupe.',
@@ -843,10 +851,13 @@ export default {
   PNOnper: 'Note personnelle de {0}',
   PNOdeft: 'Nouvelle note ...',
   PNOecr: 'éditeur : {0}',
+  PNOexc: 'exclusivité d\'écriture actuelle attribuée à {0}',
   PNOracgr: 'attachée à la racine du groupe "{0}"',
   PNOtp: 'Durée de vie de la note',
   PNOpr: 'Protéger la note contre l\'écriture',
   PNOex: 'Me rendre "auteur exclusif" de la note',
+  PNOlex: 'Membres du groupe pouvant recevoir l\'exclusivité d\'écriture',
+
 
   //EditeurMd
   EMDqss: 'Les modifications n\'ont pas été validées. En quittant cette fenêtre vous allez les perdre.',

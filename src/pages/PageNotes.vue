@@ -38,6 +38,10 @@
     </q-dialog>
 
     <q-dialog v-model="noteedit" persistent full-height>
+      <note-exclu :ims="ims"/>
+    </q-dialog>
+
+    <q-dialog v-model="noteexclu" persistent full-height>
       <note-edit :ims="ims"/>
     </q-dialog>
 
@@ -87,7 +91,7 @@
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="editermc"/>
             </div>
 
-            <div class="q-mt-xs row justify-between titre-sm">  
+            <div v-if="nSt.note.st === 99999999" class="q-mt-xs row justify-between titre-sm">  
               <div class="col">
                 <span>{{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}</span>
                 <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
@@ -116,7 +120,7 @@
                 </div>
               </div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-                @click="voirfic"/>
+                @click="exclusivite"/>
             </div>
 
           </div>
@@ -150,6 +154,7 @@ import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
 import NoteTemp from '../dialogues/NoteTemp.vue'
 import NoteProt from '../dialogues/NoteProt.vue'
+import NoteExclu from '../dialogues/NoteExclu.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { SupprNote } from '../app/operations.mjs'
 
@@ -172,7 +177,8 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, NoteProt, BoutonConfirm },
+  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, NoteProt, 
+    NoteExclu, BoutonConfirm },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -290,8 +296,8 @@ export default {
       if (!g) return 0
       // note de groupe
       if (g.pe === 1) return 4
-      // Map par im des { nom, st } des avc membres du groupes
-      const ims = this.gSt.imNomStAvc(g.id)
+      // Map par im des { na, st } des avc membres du groupes
+      const ims = this.gSt.imNaStAvc(g.id)
       const im = this.nSt.note.im
       if (im) { // le membre ayant l'exclu actuel est-il avc ?
         const e = ims.get(im)
@@ -300,10 +306,36 @@ export default {
       }
       this.ims = []
       ims.forEach((e, im) => { 
-        if (e.st === 31 || e.st === 32) this.ims.push({ label: e.nom, value: im})
+        if (e.st === 31 || e.st === 32) this.ims.push({ label: e.na.nom, value: im})
       })
       if (!this.ims.length) return 7
       return 0
+    },
+
+    async edexclu () {
+      if (! await this.session.edit()) return
+      const er = this.erExclu()
+      if (er) { 
+        await afficherDiag(this.$t('PNOer' + er ))
+      } else {
+        this.ovnoteexclu()
+      }
+    },
+
+    erExclu () {
+      const g = this.nSt.egr.groupe
+      /* Map par im des { na, st, avc } des membres du groupe, avc ou auteur-animateur */
+      this.ims = this.gSt.imNaStMb(g.id)
+      const im = this.nSt.note.im
+      if (im) { // le membre ayant l'exclu actuel est-il avc ?
+        const e = ims.get(im)
+        if (e && e.avc) return 0
+      }
+      // un des avc est-il animateur ?
+      for(const e of ims) { 
+        if (e.st === 32 && e.avc) return 0
+      }
+      return 9
     },
 
     async edTemp () {
@@ -545,12 +577,14 @@ export default {
     function ovconfirmsuppr () { MD.oD(confirmsuppr)}
     const notetemp = ref(false)
     function ovnotetemp () { MD.oD(notetemp)}
+    const noteexclu = ref(false)
+    function ovnoteexclu () { MD.oD(noteprot)}
     const noteprot = ref(false)
     function ovnoteprot () { MD.oD(noteprot)}
 
     return {
       notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
-      notetemp, ovnotetemp, noteprot, ovnoteprot,
+      notetemp, ovnotetemp, noteprot, ovnoteprot, noteexclu, ovnoteexclu,
       ID, MD, AMJ, splitPK, dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
       selected,
