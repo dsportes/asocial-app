@@ -1,7 +1,7 @@
 <template>
 <q-card class="bs petitelargeur">
   <q-toolbar class="bg-secondary text-white">
-    <q-btn class="q-mr-xs" size="md" dense color="warning" icon="close" @click="close"/>
+    <!--q-btn class="q-mr-xs" size="md" dense color="warning" icon="close" @click="close"/-->
     <q-toolbar-title class="titre-lg text-center">{{titre}}</q-toolbar-title>
     <bouton-help page="page1" />
     <q-btn class="q-ml-xs" size="md" :disable="!modif" dense color="warning" icon="check" label="OK" @click="ok"/>
@@ -45,7 +45,7 @@ import { Motscles } from '../app/modele.mjs'
 export default ({
   name: 'ChoixMotscles',
 
-  props: { duCompte: Boolean, duGroupe: Number, src: Object, titre: String },
+  props: { duCompte: Boolean, duGroupe: Number, src: Object, titre: String, arg: Object },
 
   components: { BoutonHelp },
 
@@ -74,13 +74,20 @@ export default ({
       return t
     },
     close () {
-      this.$emit('ok', false)
+      if (this.arg)
+        this.$emit('ok', { ok: false, arg: this.arg})
+      else
+        this.$emit('ok', false)
     },
     ok () {
-      this.$emit('ok', this.srclocal)
+      if (this.arg)
+        this.$emit('ok', { ok: true, mc: this.srclocal, arg: this.arg})
+      else
+        this.$emit('ok', this.srclocal)
     },
     undo () {
       this.srclocal = cloneU8(this.srcinp)
+      this.close()
     },
     seldesel (n) {
       const idx = parseInt(n)

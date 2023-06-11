@@ -45,6 +45,10 @@
       <note-exclu :ims="ims"/>
     </q-dialog>
 
+    <q-dialog v-model="notemc" persistent full-height>
+      <note-mc :ims="ims"/>
+    </q-dialog>
+
     <q-dialog v-model="notetemp" persistent>
       <note-temp/>
     </q-dialog>
@@ -88,7 +92,7 @@
                 :src="Array.from(nSt.note.smc)" du-compte
                 :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
               <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
-              <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="editermc"/>
+              <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="edmc"/>
             </div>
 
             <div v-if="nSt.note.st === 99999999" class="q-mt-xs row justify-between titre-sm">  
@@ -155,6 +159,7 @@ import NoteEdit from '../dialogues/NoteEdit.vue'
 import NoteTemp from '../dialogues/NoteTemp.vue'
 import NoteProt from '../dialogues/NoteProt.vue'
 import NoteExclu from '../dialogues/NoteExclu.vue'
+import NoteMc from '../dialogues/NoteMc.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { SupprNote } from '../app/operations.mjs'
 
@@ -177,7 +182,7 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, NoteProt, 
+  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, NoteProt, NoteMc,
     NoteExclu, BoutonConfirm },
 
   computed: {
@@ -301,7 +306,7 @@ export default {
       const im = this.nSt.note.im
       if (im) { // le membre ayant l'exclu actuel est-il avc ?
         const e = ims.get(im)
-        if (e) { this.ims = [{ label: e.nom, value: im }]; return 0 }
+        if (e) { this.ims = [{ label: e.na.nom, value: im }]; return 0 }
         return 8 // un autre membre a l'exclusivité, édition impossible
       }
       this.ims = []
@@ -310,6 +315,14 @@ export default {
       })
       if (!this.ims.length) return 7
       return 0
+    },
+
+    async edmc () {
+      if (! await this.session.edit()) return
+      this.ims = []
+      const g = this.nSt.node.type === 5 ? this.nSt.egr.groupe : null
+      if (g) this.ims = this.gSt.imNaStAvc(g.id)
+      this.ovnotemc()
     },
 
     async edexclu () {
@@ -356,10 +369,6 @@ export default {
       } else {
         this.ovnoteprot()
       }
-    },
-
-    editermc () {
-      console.log('editer mc')
     },
 
     voirfic () {
@@ -581,10 +590,12 @@ export default {
     function ovnoteexclu () { MD.oD(noteexclu)}
     const noteprot = ref(false)
     function ovnoteprot () { MD.oD(noteprot)}
+    const notemc = ref(false)
+    function ovnotemc () { MD.oD(notemc)}
 
     return {
       notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
-      notetemp, ovnotetemp, noteprot, ovnoteprot, noteexclu, ovnoteexclu,
+      notetemp, ovnotetemp, noteprot, ovnoteprot, noteexclu, ovnoteexclu, notemc, ovnotemc,
       ID, MD, AMJ, splitPK, dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
       selected,

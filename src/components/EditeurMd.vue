@@ -192,8 +192,10 @@ export default ({
     --category-emoji-size: 1rem;
   }
 }
+/*
 .q-field__native { padding-top: 0 !important; min-height: 1rem !important; }
 .q-field__control { min-height: 0 !important; }
+*/
 </style>
 
 <style lang="sass" scoped>

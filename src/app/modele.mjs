@@ -1501,7 +1501,7 @@ export class Note extends GenDoc {
     this.v1 = row.v1 || 0
     this.v2 = row.v2 || 0
     this.deGroupe = this.ng.estGroupe
-    this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : null) : (row.mc || null)
+    this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || null)
     const x = decode(await decrypter(this.cle, row.txts))
     this.txt = ungzip(x.t)
     this.titre = titre(this.txt)

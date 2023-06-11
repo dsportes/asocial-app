@@ -821,6 +821,8 @@ export default {
   PNOpetit1: 'Note de {0}, protection d\'écriture',
   PNOpetit2: 'Note du groupe {0}, protection d\'écriture',
   PNOextit: 'Attribution d\'exclusivité d\'écriture d\'une note du groupe {0}',
+  PNOmctit1: 'Note de {0}, attribution des motsclés',
+  PNOmctit2: 'Note du groupe {0}, attribution des motsclés',
   PNOnocv: '{0} n\'a pas déclaré de carte de visite.',
   PNOchaut: 'Choisir l\'auteur de l\'édition',
   PNOexsuppr: 'Tous les auteurs et animateurs peuvent éditer la note',
@@ -857,7 +859,11 @@ export default {
   PNOpr: 'Protéger la note contre l\'écriture',
   PNOex: 'Me rendre "auteur exclusif" de la note',
   PNOlex: 'Membres du groupe pouvant recevoir l\'exclusivité d\'écriture',
-
+  PNOm1: 'Il faut être animateur pour définir les mots clés "du groupe" quand un avatar a l\'exclusivité d\'écriture.',
+  PNOm2: 'Il faut être auteur ou animateur pour définir les mots clés "du groupe".',
+  PNOmcap: 'Mots clés "personnels"',
+  PNOmcgr: 'Mots clés "du groupe"',
+  PNOmcgp: 'Mots clés personnels de {0}',
 
   //EditeurMd
   EMDqss: 'Les modifications n\'ont pas été validées. En quittant cette fenêtre vous allez les perdre.',

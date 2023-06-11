@@ -160,12 +160,20 @@ export const useGroupeStore = defineStore('groupe', {
         const e = state.map.get(id)
         const ast = e.groupe.ast
         if (e.membres) e.membres.forEach((m) => { 
-          if (m.estAc) r.set(m.ids, { nom: m.na, st: ast[m.ids]})
+          if (m.estAc) r.set(m.ids, { na: m.na, st: ast[m.ids]})
         })
         return r
       }
     },
 
+    /* Return le na du membre im du groupe id */
+    imNa: (state) => { return (id, im) => {
+        const e = state.map.get(id)
+        const mb = e.membres.get(im)
+        return mb ? m.na : null
+      }
+    },
+  
     /* Map par im des { na, st, avc } des membres du groupe, avc ou auteur-animateur */
     imNaStMb: (state) => { return (id) => {
         const r = new Map()
