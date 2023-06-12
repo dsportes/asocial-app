@@ -1,6 +1,7 @@
 
 TODO :
-- Note : mots clés, exclusivité
+- Note : rattachement
+- Note : fichiers
 - traiter les autorisations pour le comptable (page menu en particulier) pour survivre à un blocage de sa tribu / voir global
 
 ## L'arbre des notes
