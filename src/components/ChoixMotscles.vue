@@ -1,17 +1,27 @@
 <template>
 <q-card class="bs petitelargeur">
   <q-toolbar class="bg-secondary text-white">
-    <!--q-btn class="q-mr-xs" size="md" dense color="warning" icon="close" @click="close"/-->
-    <q-toolbar-title class="titre-lg text-center">{{titre}}</q-toolbar-title>
-    <bouton-help page="page1" />
-    <q-btn class="q-ml-xs" size="md" :disable="!modif" dense color="warning" icon="check" label="OK" @click="ok"/>
-    <q-btn :disable="!modif" class="q-ml-xs" size="md" dense flat icon="undo" @click="undo"/>
+    <q-btn v-if="close" class="q-mr-xs" size="md" dense color="warning" 
+      icon="close" @click="fermer"/>
+    <q-toolbar-title class="titre-lg text-center">{{titre || $t('CMCtit')}}</q-toolbar-title>
+    <bouton-help :page="help || 'page1'" />
+    <q-btn v-if="okLabel && editable" class="q-ml-xs" size="md" dense color="warning" 
+      icon="check" :label="okLabel" @click="ok"/>
+    <q-btn v-if="editable" :disable="!modif" class="q-ml-xs" size="md"
+      dense flat icon="undo" @click="undo"/>
   </q-toolbar>
 
-  <div class="q-pa-md row justify-start">
-    <div v-for="idx in srclocal" :key="idx" 
+  <div class="q-pa-xs row justify-start">
+    <div v-for="idx in courante" :key="idx" 
       class="radius q-ma-xs q-px-xs bg-yellow text-black cursor-pointer fs-md font-mono">
       <span :class="sty(idx)" @click="seldesel(idx)">{{ed(idx)}}</span>
+    </div>
+  </div>
+  <div class="q-pa-xs row justify-start">
+    <div v-for="idx in initValue" :key="idx">
+      <span v-if="!selecte(idx)" 
+        :class="sty(idx) + ' radius q-ma-xs q-px-xs cursor-pointer fs-md font-mono border barre'" 
+        @click="seldesel(idx)">{{ed(idx)}}</span>
     </div>
   </div>
   <q-splitter v-model="splitterModel" class="full-width">
@@ -45,12 +55,24 @@ import { Motscles } from '../app/modele.mjs'
 export default ({
   name: 'ChoixMotscles',
 
-  props: { duCompte: Boolean, duGroupe: Number, src: Object, titre: String, arg: Object },
+  emits: ['update:modelValue', 'ok', 'close'],
+
+  props: {
+    modelValue: Object,
+    duCompte: Boolean, 
+    duGroupe: Number, 
+    initValue: Object, // OBLIGATOIRE - voire new Uin8Array([])
+    titre: String,
+    help: String,
+    close: Boolean,
+    editable: Boolean,
+    okLabel: String
+  },
 
   components: { BoutonHelp },
 
   computed: {
-    modif () { return !egaliteU8(this.srclocal, this.srcinp) }
+    modif () { return !egaliteU8(this.courante, this.initValue) }
   },
 
   data () { return {
@@ -62,8 +84,8 @@ export default ({
       return idx <= 199 ? 'text-italic' : 'text-bold'
     },
     selecte (idx) {
-      if (!this.srclocal) return false
-      return this.srclocal.find((e) => e === idx)
+      if (!this.courante) return false
+      return this.courante.find((e) => e === idx)
     },
     aMC (idx) {
       return this.motscles.aMC(idx)
@@ -73,36 +95,30 @@ export default ({
       const t = !x ? '' : x.c + '@' + x.n
       return t
     },
-    close () {
-      if (this.arg)
-        this.$emit('ok', { ok: false, arg: this.arg})
-      else
-        this.$emit('ok', false)
+    fermer () {
+      this.$emit('close', true)
     },
     ok () {
-      if (this.arg)
-        this.$emit('ok', { ok: true, mc: this.srclocal, arg: this.arg})
-      else
-        this.$emit('ok', this.srclocal)
+      this.$emit('ok', this.courante)
     },
     undo () {
-      this.srclocal = cloneU8(this.srcinp)
-      this.close()
+      this.courante = cloneU8(this.initValue)
     },
     seldesel (n) {
+      if (!this.editable) return
       const idx = parseInt(n)
       if (this.selecte(idx)) {
-        this.srclocal = deselect(this.srclocal, idx)
+        this.courante = deselect(this.courante, idx)
       } else {
         const x = this.motscles.getMC(idx)
         if (x && x.c === $t('obs')) {
           afficherDiag($t('MCer5'))
-        } else this.srclocal = select(this.srclocal, idx)
+        } else this.courante = select(this.courante, idx)
       }
     }
   },
 
-  setup (props) {
+  setup (props, context) {
     const duCompte = toRef(props, 'duCompte')
     const duGroupe = toRef(props, 'duGroupe')
 
@@ -110,29 +126,29 @@ export default ({
     const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
     const motscles = new Motscles(mc, false, duCompte.value || false, duGroupe.value || 0)
 
-    const src = toRef(props, 'src')
-    const local = reactive({ inp: null, src: null })
-    const srclocal = toRef(local, 'src')
-    const srcinp = toRef(local, 'inp')
-
     const tab = ref('')
     tab.value = motscles.mc.lcategs[0]
-    srcinp.value = src.value ? cloneU8(src.value) : new Uint8Array([])
-    srclocal.value = cloneU8(srcinp.value)
 
-    // Discutable : la source peut changer pendant que le dialogue de sélection est en cours. Pourquoi pas */
-    watch( () => src.value, (ap, av) => {
-      if (egaliteU8(srclocal.value, srcinp.value) && !egaliteU8(srclocal.value, ap)) {
-        // srclocal n'était PAS modifié, ni égal à la nouvelle valeur : alignement sur la nouvelle valeur
-        srclocal.value = cloneU8(ap)
+    const initValue = toRef(props, 'initValue')
+    const courante = ref(initValue.value)
+
+    // La source peut changer pendant que le dialogue de sélection est en cours. */
+    watch(initValue, (ap, av) => {
+      if (egaliteU8(courante.value, av)) {
+        /* la valeur courante n'était pas modifiée, on l'aligne sur la nouvelle valeur initiale*/
+        courante.value = cloneU8(ap)
       }
-      srcinp.value = cloneU8(ap)
     })
 
+    watch(courante, (ap, av) => {
+      context.emit('update:modelValue', courante.value)
+    })
+
+    const nn = ref(2)
+
     return {
+      courante,
       motscles,
-      srcinp,
-      srclocal,
       tab,
       splitterModel: ref(33) // start at 33%
     }
@@ -154,6 +170,8 @@ export default ({
   border-radius: 3px
 .border
   border:1px solid grey
+.barre
+  text-decoration: line-through
 .q-toolbar
   padding: 2px !important
   min-height: 0 !important

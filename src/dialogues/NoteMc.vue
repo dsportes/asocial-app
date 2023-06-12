@@ -5,9 +5,11 @@
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
       <q-toolbar-title v-if="avatar" 
-        class="titre-lg full-width text-center">{{$t('PNOedtit1', [avatar.na.nom])}}</q-toolbar-title>
+        class="titre-lg full-width text-center">{{$t('PNOmctit1', [avatar.na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-if="groupe" 
-        class="titre-lg full-width text-center">{{$t('PNOedtit2', [groupe.na.nomc])}}</q-toolbar-title>
+        class="titre-lg full-width text-center">{{$t('PNOmctit2', [groupe.na.nomc])}}</q-toolbar-title>
+      <q-btn dense size="md" color="primary" icon="check" :label="$t('valider')"
+        :disable="!modif" @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
     <q-toolbar v-if="imna" inset
@@ -19,26 +21,23 @@
   <q-page-container >
     <q-page class="q-pa-xs column">
       <div v-if="avatar" class="sp30 q-my-md">
-        <choix-motscles du-compte :src="mc['0']" :titre="$t('PNOmcap')" :arg="{im:-1}" @ok="valider"/>
+        <choix-motscles v-model="mcap['0']" editable du-compte 
+          :init-value="mc['0']" :titre="$t('PNOmcap')" />
       </div>
       <div v-else class="sp30">
         <div v-if="nSt.note.auts.length" class="col-auto q-mt-sm">
           {{$t('PNOauts', nSt.note.auts.length) + ' ' + nomAuts}}
         </div>
 
-        <div v-if="msg">
-          <div class="q-mt-sm titre-md bg-yellow-5 text-black text-bold q-pa-xs">
-            {{msg}}
-          </div>
-          <apercu-motscles class="col-auto q-mt-xs" :mapmc="mapmc" :src="mc['0']" :du-groupe="groupe.id"/>
+        <div v-if="msg" class="q-mt-sm titre-md bg-yellow-5 text-black text-bold q-pa-xs">
+          {{msg}}
         </div>
-        <div v-else>
-          <choix-motscles class="col-auto q-mt-sm"
-            :du-groupe="groupe.id" :titre="$t('PNOmcgr')" :arg="{im:0}" :src="mc['0']" @ok="valider"/>
-        </div>
+        <choix-motscles class="col-auto q-mt-sm" v-model="mcap['0']" :editable="!msg"
+          :du-groupe="groupe.id" :titre="$t('PNOmcgr')" :init-value="mc['0']"/>
+        
         <div v-for="[im, x] of ims" :key="im">
-          <choix-motscles class="col-auto q-mt-md" du-compte 
-            :titre="$t('PNOmcgp', [x.na.nom])" :src="mc['' + im]" :arg="{im:im}" @ok="valider"/>
+          <choix-motscles class="col-auto q-mt-md" v-model="mcap['' + im]" editable
+            du-compte :titre="$t('PNOmcgp', [x.na.nom])" :init-value="mc['' + im]"/>
         </div>    
       </div>
     </q-page>
@@ -51,10 +50,9 @@
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD, Motscles } from '../app/modele.mjs'
-import { $t } from '../app/util.mjs'
+import { $t, egaliteU8 } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ChoixMotscles from '../components/ChoixMotscles.vue'
-import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { McNote } from '../app/operations.mjs'
 
 export default {
@@ -62,8 +60,7 @@ export default {
 
   components: { 
     BoutonHelp,
-    ApercuMotscles, // mapmc: Object, src: Object, edit: Boolean, idx: Number, duCompte: Boolean, duGroupe: Number
-    ChoixMotscles // props: { duCompte: Boolean, duGroupe: Number, src: Object, titre: String },
+    ChoixMotscles
   },
 
   props: { 
@@ -75,6 +72,10 @@ export default {
       const ln = []
       this.nSt.mbAuteurs.forEach(m => { ln.push(m.na.nomc)})
       return ln.join(', ')
+    },
+    modif () { 
+      for(const im in this.mc) { if (!egaliteU8(this.mc[''+im], this.mcap[''+im])) return true }
+      return false
     }
   },
 
@@ -85,12 +86,14 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
     aa (st) { return st === 32 ? $t('animateur') : $t('auteur') },
-    async valider ({ok, mc, arg}) {
-      if (ok) {
-        this.mc[arg.im] = mc
-        // await new McNote().run(this.note.id, this.note.ids, mc, arg.im)
+    async valider () {
+      console.log(this.mcap)
+      const chg = {}
+      for(const im in this.mc) { 
+        if (!egaliteU8(this.mc[''+im], this.mcap[''+im])) chg[im] = this.mcap[''+im]
       }
-      if (arg.im === -1) MD.fD()
+      await new McNote().run(this.note.id, this.note.ids, chg)
+      MD.fD()
     }
   },
 
@@ -115,6 +118,7 @@ export default {
     const groupe = ref(null)
     const note = ref(nSt.note)
     const mc = ref({})
+    const mcap = ref({})
     const mapmc = ref(null)
     const msg = ref('')
     const mxst = ref(0)
@@ -127,13 +131,15 @@ export default {
       avatar.value = aSt.getElt(nSt.note.id).avatar
       im.value = 0
       mc.value['0'] = note.value.mc || new Uint8Array([])
+      mcap.value['0'] = mc.value['0']
     } else {
       groupe.value = gSt.egr(nSt.note.id).groupe
       mapmc.value = ref(Motscles.mapMC(false, groupe.value.id))
       im.value = nSt.note.im
       if (im.value) { // il y a une exclusivité
-        imna.value = gSt.imNaSt(groupe.value.id, im.value)
-        if (!ims.value.has(im.value)) { // exclu n'est pas avatar du compte
+        imna.value = gSt.imNaStAvc(groupe.value.id, im.value)
+        /* Map par im des { na, st } des avc membres du groupe */
+        if (!imna.value.has(im.value)) { // exclu n'est pas avatar du compte
           if (mxst.value !== 32) // compte pas animateur : ne peut pas éditer mcg
             msg.value = $t('PNOm1')
         }
@@ -142,14 +148,16 @@ export default {
             msg.value = $t('PNOm2')
       }
       mc.value['0'] = note.value.mc['0'] || new Uint8Array([])
+      mcap.value['0'] = mc.value['0']
       ims.value.forEach((x, im) => {
         mc.value['' + im] = note.value.mc['' + im] || new Uint8Array([])
+        mcap.value['' + im] = mc.value['' + im]
       })
     }
 
     return {
       ui, session, nSt, gSt, pSt,
-      im, imna, avatar, groupe, note, msg, mapmc, mc,
+      im, imna, avatar, groupe, note, msg, mapmc, mc, mcap,
       MD
     }
   }

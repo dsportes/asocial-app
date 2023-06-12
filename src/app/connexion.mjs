@@ -728,17 +728,18 @@ export class ConnexionCompte extends OperationUI {
           gSt.setVols(groupe.id, objidb)
         }
 
-        const na = getNg(groupe.id)
-        let n1 = 0, n2 = 0, n3 = 0, n4 = 0
-        const [x1, x2] = await this.chargerNotes(groupe.id, vidb, vsrv, true)
-        n1 = x1
-        n2 = x2
-        syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
-
         this.mbsDisparus = new Set()
+        let n1 = 0, n2 = 0, n3 = 0, n4 = 0
+        const na = getNg(groupe.id)
+
         const [x3, x4] = await this.chargerMembres(groupe, vidb, vsrv)
         n3 = x3
         n4 = x4
+        syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
+
+        const [x1, x2] = await this.chargerNotes(groupe.id, vidb, vsrv, true)
+        n1 = x1
+        n2 = x2
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
 
         if (this.mbsDisparus.size) {

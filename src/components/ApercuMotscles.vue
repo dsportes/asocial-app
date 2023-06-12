@@ -12,8 +12,9 @@
     </q-btn>
   </div>
   <q-dialog v-model="mcedit" persistent>
-    <choix-motscles :src="src" :du-groupe="duGroupe" :du-compte="duCompte"
-      :titre="$t('MCchoix')" @ok="okmc"/>
+    <choix-motscles :du-groupe="duGroupe" :du-compte="duCompte"
+      :init-value="src || mcvide" editable
+      :titre="$t('MCchoix')" :ok-label="$t('ok')" @ok="okmc"/>
   </q-dialog>
 </div>
 </template>
@@ -76,6 +77,7 @@ export default ({
     return {
       MD, mcedit, ovmcedit,
       session,
+      mcvide: new Uint8Array([]),
       nom
     }
   }

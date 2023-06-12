@@ -192,10 +192,6 @@ export default ({
     --category-emoji-size: 1rem;
   }
 }
-/*
-.q-field__native { padding-top: 0 !important; min-height: 1rem !important; }
-.q-field__control { min-height: 0 !important; }
-*/
 </style>
 
 <style lang="sass" scoped>
@@ -204,4 +200,12 @@ export default ({
   min-height: 0 !important
 .bord1
   border-bottom: 1px solid $grey-5
+</style>
+
+<style lang="sass" scoped>
+::v-deep(.q-field__native)
+  padding-top: 0 !important
+  min-height: 1rem !important
+::v-deep(.q-field__control)
+  min-height: 0 !important
 </style>

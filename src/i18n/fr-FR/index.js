@@ -508,6 +508,7 @@ export default {
   OPssc: 'Supprimer une note',
   OPprot: 'Changer la protection d\'écriture d\'une note',
   OPexclu: 'Changer l\'exclusivité d\'écriture d\'une note',
+  OPmcn: 'Changer les mots clés d\'une note',
 
   OPtfa: 'Télécharger un fichier attaché à une note',
   OPnfa: 'Attacher un nouveau fichier à une note',
@@ -864,6 +865,8 @@ export default {
   PNOmcap: 'Mots clés "personnels"',
   PNOmcgr: 'Mots clés "du groupe"',
   PNOmcgp: 'Mots clés personnels de {0}',
+
+  CMCtit: 'Choix des mots clés',
 
   //EditeurMd
   EMDqss: 'Les modifications n\'ont pas été validées. En quittant cette fenêtre vous allez les perdre.',

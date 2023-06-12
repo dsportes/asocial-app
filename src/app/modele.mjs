@@ -1514,6 +1514,7 @@ export class Note extends GenDoc {
       for (const idf in map) 
         this.mfa.set(idf, decode(await decrypter(cle, map[idf].datas)))
     }
+    this.setSmc()
   }
 
   /* setSmc : calcul smc, le set des mots clés de la note pour le compte
@@ -1528,11 +1529,11 @@ export class Note extends GenDoc {
     if (!this.mc) { this.smc = null; return }
     if (ID.estGroupe(this.id)) {
       const gSt = stores.groupe
-      const g = this.mc[0]
+      const g = this.mc['0']
       const s = g ? new Set(g) : new Set()
       const e = gSt.egr(this.id)
       e.mbacs.forEach(m => {
-        const x = this.mc[m.ids]
+        const x = this.mc[''+m.ids]
         if (x) x.forEach(mc => { s.add(mc)})
       })
       this.smc = s.size ? s : null
