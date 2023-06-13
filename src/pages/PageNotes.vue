@@ -23,12 +23,14 @@
       :filter-method="filtrage"
     >
       <template v-slot:default-header="prop">
-        <div class="row items-start">
-          <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
-            size="sm" class="col-auto q-mr-sm" />
-          <q-btn v-if="choixratt" size="sm" class="q-mx-sm" icon="star"
-            color="green-5" @click.stop="choixok(prop.node)"/>
-          <div :class="'col ' + styles[prop.node.type]">{{lib(prop.node)}}</div>
+        <div @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)">
+          <div class="row items-start">
+            <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
+              size="sm" class="col-auto q-mr-sm" />
+            <q-icon v-if="prop.node.ratt" size="xs" class="q-mx-sm cursor-pointer" name="star"
+              color="green-5"/>
+            <div :class="'col ' + styles[prop.node.type]">{{lib(prop.node)}}</div>
+          </div>
         </div>
       </template>
     </q-tree>
@@ -83,11 +85,11 @@
             <div class="q-ml-md row justify-between"> 
               <show-html :class="dkli + ' col bord1'"
                 :texte="nSt.note.txt" zoom maxh="4rem" />
-              <q-btn class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
+              <q-btn :disable="rec" class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
                 @click="editer"/>
             </div>
 
-            <div class="q-mt-xs row justify-between titre-sm">  
+            <div v-if="!rec" class="q-mt-xs row justify-between titre-sm">  
               <apercu-motscles class="col" v-if="nSt.note.smc" :mapmc="mapmcf(nSt.node.key)" 
                 :src="Array.from(nSt.note.smc)" du-compte
                 :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
@@ -95,7 +97,7 @@
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="edmc"/>
             </div>
 
-            <div v-if="nSt.note.st === 99999999" class="q-mt-xs row justify-between titre-sm">  
+            <div v-if="!rec && nSt.note.st === 99999999" class="q-mt-xs row justify-between titre-sm">  
               <div class="col">
                 <span>{{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}</span>
                 <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
@@ -104,19 +106,19 @@
                 @click="voirfic"/>
             </div>
 
-            <div class="q-mt-xs row justify-between titre-sm">  
+            <div v-if="!rec" class="q-mt-xs row justify-between titre-sm">  
               <div class="col">{{prot}}</div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
                 @click="proteger"/>
             </div>
 
-            <div v-if="nSt.note.st !== 99999999" class="q-mt-xs row justify-between titre-sm">  
+            <div v-if="!rec && nSt.note.st !== 99999999" class="q-mt-xs row justify-between titre-sm">  
               <div class="col">{{temp}}</div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
                 @click="edTemp"/>
             </div>
 
-            <div v-if="nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
+            <div v-if="!rec && nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
               <div class="col">
                 <div>
                   <span class="q-mr-sm">{{exclu}}</span>
@@ -131,13 +133,20 @@
         </div>
 
         <div class="col-auto tb1 largeur40">
-          <div class="row justify-center q-gutter-xs">
-          <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
-            @click="nouvelle" :disable="!selected"/>
-          <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
-            @click="supprimer" :disable="!selected || !nSt.note"/>
-          <q-btn class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
-            @click="rattacher"/>
+          <div v-if="!rec" class="row justify-center q-gutter-xs">
+            <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
+              @click="nouvelle" :disable="!selected"/>
+            <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
+              @click="supprimer" :disable="!selected || !nSt.note"/>
+            <q-btn :disable="!selected || !nSt.note || !rattaut" 
+              class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
+              @click="rattacher"/>
+          </div>
+          <div v-else class="q-ma-sm column">
+            <div class="q-pa-xs bg-yellow-5 text-bold text-black text-italic text-center titre-md">
+              {{$t('PNOrattinfo')}}</div>
+            <q-btn v-if="rec" class="btn2 q-mt-sm" color="warning" size="md" icon="attachment" :label="$t('PNOanratt')"
+              @click="anrattacher"/>
           </div>
         </div>
         <q-separator color="orange" size="3px" class="q-mt-xs q-mb-md"/>
@@ -209,6 +218,7 @@ export default {
       }
       return ''
     },
+    rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <=5 },
     exclu () {
       const m = this.nSt.mbExclu
       return !m ? this.$t('PNOnoexclu') : this.$t('PNOexclu', [m.na.nomc])
@@ -234,6 +244,13 @@ export default {
   },
 
   methods: {
+    clicknode (n) {
+      if (this.rec) {
+        if (n.ratt) this.choixok(n)
+      } else
+        this.selected = n.key
+    },
+
     lib (n) {
       if (n.type > 3) return n.label
       if (n.type === 1) return this.$t('avatar1', [n.label, n.nf, n.nt])
@@ -375,12 +392,23 @@ export default {
       console.log('voir fichiers')
     },
 
-    rattacher () {
-      this.choixratt = true
+    async rattacher () {
+      const n = this.nSt.node.note
+      const idg = ID.estGroupe(n.id) ? n.id : 0
+      this.rec = true
+      this.nSt.resetRatt(true)
+      this.nSt.koCh(this.nSt.node)
+      this.nSt.koGrZF(idg)
+    },
+
+    anrattacher () { 
+      this.rec = false
+      this.nSt.resetRatt(false)
     },
 
     choixok (node) {
-      this.choixratt = false
+      this.rec = false
+      this.nSt.resetRatt(false)
       console.log(node.label)
     },
 
@@ -467,7 +495,7 @@ export default {
       colors,
       styles,
       expandAll: false,
-      choixratt: false,
+      rec: false,
       /* pour maj d'une note de groupe 
       [{label: e.nom, value: im}] des avc membres du groupes  */
       ims: null, 

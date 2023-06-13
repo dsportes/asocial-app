@@ -21,6 +21,7 @@ export const useNoteStore = defineStore('note', {
       label :
         - réelle : titre de la note
         - fake : #idsB64
+      children: [] nodes fils
     type:
       1 : racine avatar
       2 : racine groupe
@@ -128,6 +129,47 @@ export const useNoteStore = defineStore('note', {
         if (n.type > 3) {
           r.nt++
           if (f && f(n)) r.nf++
+        }
+      })
+    },
+
+    resetRatt (tf) {
+      this.map.forEach(n => { n.ratt = tf })
+    },
+
+    koCh (n) { // exclut le sous-arbre n 
+      n.ratt = false
+      if (n.children) for(const c of n.children) { 
+        this.koCh(c)
+      }
+    },
+
+    koChC (n, id) { // exclut le sous-arbre n pas issu de id
+      if (''+ id !== n.key) n.ratt = false
+      if (n.children) for(const c of n.children) { 
+        this.koChC(c, id)
+      }
+    },
+
+     koGrZF (idg, ida) { // exclut les sous arbres zombi et groupes/avatars autres que idg et les fakes
+      this.nodes.forEach(n => {
+        if (n.type === 3) { 
+          // exclusion inconditionnelle des sous-arbres "groupes zombis"
+          this.koCh(n)
+        } else if (idg && ((n.type === 2 && '' + idg !== n.key) || n.type === 1)) {
+          /* Si c'est une note de groupe
+          exclusion inconditionnelle des sous-arbres des autres groupes et des avatars */
+          this.koCh(n)
+        } else {
+          for(const c of n.children) {
+            if (c.type > 5) {
+              // exclusion inconditionnelle des sous-arbres fake sous la racine
+              this.koCh(n)
+            } else {
+              if (idg) this.koChC(c, idg)
+              if (ida) this.koChC(c, ida)
+            }
+          }
         }
       })
     },

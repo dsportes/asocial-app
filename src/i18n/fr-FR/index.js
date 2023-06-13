@@ -809,7 +809,9 @@ export default {
   PNOnv: 'Nouvelle',
   PNOsupp: 'Supprimer',
   PNOratt: 'Rattacher',
+  PNOanratt: 'Annuler rattachement',
   PNOauts: ' Pas d\'auteur. | Auteur: | Auteurs: ',
+  PNOrattinfo: 'Cliquer ci-dessous sur l\'icône "étoile verte" du groupe, avatar ou note à laquelle vous voulez rattacher la note courante.',
 
   PNOnvtit0: 'Nouvelle note',
   PNOnvtit1: 'Nouvelle note de {0}',
