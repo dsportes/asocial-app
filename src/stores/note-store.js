@@ -137,41 +137,71 @@ export const useNoteStore = defineStore('note', {
       this.map.forEach(n => { n.ratt = tf })
     },
 
-    koCh (n) { // exclut le sous-arbre n 
+    koSA (n) { // exclut sans condition le sous-arbre démarrant au noeud n 
       n.ratt = false
-      if (n.children) for(const c of n.children) { 
-        this.koCh(c)
+      if (n.children) for(const c of n.children) this.koSA(c)
+    },
+
+    koSAC (n, idg, ida) { 
+      /* exclut tous les sous-arbres démarrant à n 
+      dès qu'ils ne sont ni du groupe idg, ni de l'avatar ida */
+      if (n.type > 5) { // exclusion inconditionnelle des sous-arbres fake
+        this.koSA(n)
+      } else if (''+ idg === n.rkey) { 
+        // sous-arbre du groupe, on descend
+        if (n.children) for(const c of n.children) this.koSAC(c, idg, ida)
+      } else if (''+ ida !== n.rkey) {
+        // sous-arbre d'un autre avatar que ida: à exclure
+        this.koSA(n)
+      }
+      // début d'un sous-arbre de l'avatar : OK
+    },
+
+    koSAG (n, idg) { 
+      /* exclut tous les sous-arbres démarrant à n 
+      dès qu'ils ne sont pas du groupe idg */
+      if (n.type > 5) { // exclusion inconditionnelle des sous-arbres fake
+        this.koSA(n)
+      } else if (''+ idg === n.rkey) { 
+        // sous-arbre du groupe, on descend
+        if (n.children) for(const c of n.children) this.koSAG(c, idg)
+      } else {
+        // sous-arbre autre que du groupe: à exclure
+        this.koSA(n)
       }
     },
 
-    koChC (n, id) { // exclut le sous-arbre n pas issu de id
-      if (''+ id !== n.key) n.ratt = false
-      if (n.children) for(const c of n.children) { 
-        this.koChC(c, id)
-      }
-    },
-
-     koGrZF (idg, ida) { // exclut les sous arbres zombi et groupes/avatars autres que idg et les fakes
-      this.nodes.forEach(n => {
-        if (n.type === 3) { 
-          // exclusion inconditionnelle des sous-arbres "groupes zombis"
-          this.koCh(n)
-        } else if (idg && ((n.type === 2 && '' + idg !== n.key) || n.type === 1)) {
-          /* Si c'est une note de groupe
-          exclusion inconditionnelle des sous-arbres des autres groupes et des avatars */
-          this.koCh(n)
+    koAV (ida) { // exclut les sous arbres zombi et groupes/avatars autres que idg et les fakes
+      for (const n of this.nodes) { // n est une racine : types 1, 2, 3
+        const id = parseInt(n.key)
+        if (n.type === 3 || (n.type === 1 && id !== ida)) { 
+          // exclusion inconditionnelle des arbres "groupes zombis"
+          // et des arbres d'un autre avatar
+          this.koSA(n)
         } else {
-          for(const c of n.children) {
-            if (c.type > 5) {
-              // exclusion inconditionnelle des sous-arbres fake sous la racine
-              this.koCh(n)
-            } else {
-              if (idg) this.koChC(c, idg)
-              if (ida) this.koChC(c, ida)
-            }
+          if (id !== ida) {
+            // c'est une racine de groupe (les autres avatars ont été exclus ci-dessus)
+            this.koSAC(n, id, ida)
           }
         }
-      })
+      }
+    },
+
+    koGR (idg) { // exclut les sous arbres zombi et groupes/avatars autres que idg et les fakes
+      for (const n of this.nodes) { // n est une racine : types 1, 2, 3
+        const id = parseInt(n.key)
+        if (n.type === 3) { 
+          // exclusion inconditionnelle des "groupes zombis"
+          this.koSA(n)
+        } else {
+          if (id === idg) {
+            // c'est la racine du groupe idg : à explorer
+            this.koSAG(n, id)
+          } else { // racine d'un autre groupe, d'un avatars ... : à exclure
+            this.koSA(n)
+          }
+        }
+      }
     },
 
     setNote (note){

@@ -394,11 +394,14 @@ export default {
 
     async rattacher () {
       const n = this.nSt.node.note
-      const idg = ID.estGroupe(n.id) ? n.id : 0
       this.rec = true
-      this.nSt.resetRatt(true)
-      this.nSt.koCh(this.nSt.node)
-      this.nSt.koGrZF(idg)
+      this.nSt.resetRatt(true) // tous OK
+      this.nSt.koSA(this.nSt.node) // exclut le node lui-même et son sous-arbre
+      if (ID.estGroupe(n.id)) {
+        this.nSt.koGR(n.id)
+      } else {
+        this.nSt.koAV(n.id)
+      }
     },
 
     anrattacher () { 
