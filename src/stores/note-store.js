@@ -211,8 +211,15 @@ export const useNoteStore = defineStore('note', {
       if (!note.ref) { // note rattachée à la racine
         if (n) { // elle existait - remplacement - fake ou pas, elle devient réelle
           if (!n.note) n.type -= 2 // si c'était une fake, elle est réelle
+          const nrav = n.note ? n.note.refk : '' // rattachement AVANT
           n.note = note
           n.label = note.titre
+          if (nrav) {
+            // elle était attachée à une note : on la détache de celle-ci
+            this.detachNote(n, nrav)
+            // on la rattache à sa racine
+            this.rattachRac(n)
+          }
         } else {
           // création d'une note réelle à la racine
           n = {
@@ -240,9 +247,36 @@ export const useNoteStore = defineStore('note', {
             n.label = note.titre
             // on la rattache à sa note de rattachement
             this.rattachNote(n)
-          } else { // la note de rattachement existe et est réelle
+          } else { // la note existait et est réelle
+            const nrav = n.note.refk // rattachement AVANT
+            const nrap = note.refk // rattachement APRES
             n.note = note
             n.label = note.titre
+            // était-elle rattachée à une autre ?
+            if (!nrav) {
+              // n'était pas rattachée
+              if (nrap) {
+                // on la détache de sa racine
+                this.detachNote(n, n.rkey)
+                // on la rattache à sa note de rattachement
+                this.rattachNote(n)
+              }
+            } else {
+              // était rattachée
+              if (nrap) { // est toujours rattachée
+                if (nrav !== nrap) {
+                  // mais pas à la même : on la détache de l'ancienne
+                  this.detachNote(n, nrav)
+                  // on la rattache à la nouvelle
+                  this.rattachNote(n)
+                } // si elle est toujours rattachée à la même rien à faire
+              } else {
+                // n'est PLUS rattachée : on la détache de l'ancienne
+                this.detachNote(n, nrav)
+                // on la rattache à sa racine
+                this.rattachRac(n)
+              }
+            }
           }
         } else { // la note n'existait pas
           n = {
@@ -256,6 +290,18 @@ export const useNoteStore = defineStore('note', {
           this.map.set(key, n)
           this.rattachNote(n) // on la rattache à sa note de rattachement
         }
+      }
+    },
+
+    detachNote (n, nrav) {
+      const rav = this.map.get(nrav)
+      const a = []
+      rav.children.forEach(c => { if (c.key !== n.key) a.push(c)})
+      rav.children = a
+      if (a.length === 0 && rav.type > 5) {
+        // plus d'enfants et c'était une fake on la détache elle-même de sa racine
+        this.detachNote(rav, rav.rkey)
+        this.map.delete(nrav)
       }
     },
 
@@ -323,6 +369,7 @@ export const useNoteStore = defineStore('note', {
       } else {
         if (Note.estG(n.rkey)) { // la racine est un groupe
           // création d'un groupe zombi et rattachement à lui
+          const x = refn || (n.note ? n.note.refn : '???')
           const r = this.setRacine(n.rkey, 3, refn)
           r.children.push(n)
         }

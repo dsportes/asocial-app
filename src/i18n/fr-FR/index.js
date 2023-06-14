@@ -509,6 +509,7 @@ export default {
   OPprot: 'Changer la protection d\'écriture d\'une note',
   OPexclu: 'Changer l\'exclusivité d\'écriture d\'une note',
   OPmcn: 'Changer les mots clés d\'une note',
+  OPrattn: 'Rattacher une note à une autre',
 
   OPtfa: 'Télécharger un fichier attaché à une note',
   OPnfa: 'Attacher un nouveau fichier à une note',
@@ -809,6 +810,9 @@ export default {
   PNOnv: 'Nouvelle',
   PNOsupp: 'Supprimer',
   PNOratt: 'Rattacher',
+  PNOratta: 'Rattacher à:',
+  PNOratt2: 'Rattacher à une autre note',
+  PNOcfratt: 'Confirmer ce rattachement',
   PNOanratt: 'Annuler rattachement',
   PNOauts: ' Pas d\'auteur. | Auteur: | Auteurs: ',
   PNOrattinfo: 'Cliquer ci-dessous sur l\'icône "étoile verte" du groupe, avatar ou note à laquelle vous voulez rattacher la note courante.',

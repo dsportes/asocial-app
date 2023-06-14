@@ -1447,3 +1447,26 @@ export class McNote extends OperationUI {
     }
   }
 }
+
+/* Rattacher une note à une autre ou à une racine ***********************
+args.token: éléments d'authentification du compte.
+args.id ids: identifiant de la note
+args.ref : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
+Retour: rien
+*/
+export class RattNote extends OperationUI {
+  constructor () { super($t('OPrattn')) }
+
+  async run (id, ids, rid, rids, refn) {
+    try {
+      const session = stores.session
+      const cle = ID.estGroupe(id) ? getCle(id) : session.clek
+      const ref = rid === 0 ? null : await crypter(cle, new Uint8Array(encode([rid, rids, refn])))
+      const args = { token: session.authToken, id, ids, ref }
+      this.tr(await post(this, 'RattNote', args))
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

@@ -1507,7 +1507,11 @@ export class Note extends GenDoc {
     this.titre = titre(this.txt)
     this.dh = x.d
     this.auts = x.l ? x.l : []
-    this.ref = row.ref ? decode(await decrypter(this.cle, row.ref)) : null
+    try {
+      this.ref = row.ref ? decode(await decrypter(this.cle, row.ref)) : null
+    } catch (e) {
+      this.ref = null
+    }
     this.mfa = new Map()
     if (this.v2) {
       const map = row.mfas ? decode(row.mfas) : {}

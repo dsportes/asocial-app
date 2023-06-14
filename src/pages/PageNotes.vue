@@ -85,7 +85,7 @@
             <div class="q-ml-md row justify-between"> 
               <show-html :class="dkli + ' col bord1'"
                 :texte="nSt.note.txt" zoom maxh="4rem" />
-              <q-btn :disable="rec" class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
+              <q-btn :disable="rec!==0" class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
                 @click="editer"/>
             </div>
 
@@ -142,12 +142,27 @@
               class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
               @click="rattacher"/>
           </div>
-          <div v-else class="q-ma-sm column">
+
+          <div v-if="rec===1" class="q-ma-sm column">
             <div class="q-pa-xs bg-yellow-5 text-bold text-black text-italic text-center titre-md">
               {{$t('PNOrattinfo')}}</div>
-            <q-btn v-if="rec" class="btn2 q-mt-sm" color="warning" size="md" icon="attachment" :label="$t('PNOanratt')"
+            <q-btn class="btn2 q-mt-sm" color="primary" size="md" icon="close" :label="$t('PNOanratt')"
               @click="anrattacher"/>
           </div>
+
+          <div v-if="rec===2" class="q-ma-sm column">
+            <div>
+              <span class="q-pa-xs text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
+              <span class="q-pa-xs bg-yellow-5 text-bold text-black titre-md">{{noderatt.label}}</span>
+            </div>
+            <q-btn class="btn2 q-mt-sm" color="warning" size="md" icon="check" :label="$t('PNOcfratt')"
+              @click="okrattacher"/>
+            <q-btn class="btn2 q-mt-sm" color="primary" size="md" icon="attachment" :label="$t('PNOratt2')"
+              @click="rattacher"/>
+            <q-btn v-if="rec" class="btn2 q-mt-sm" color="primary" size="md" icon="close" :label="$t('PNOanratt')"
+              @click="anrattacher"/>
+          </div>
+
         </div>
         <q-separator color="orange" size="3px" class="q-mt-xs q-mb-md"/>
       </div>
@@ -170,7 +185,7 @@ import NoteProt from '../dialogues/NoteProt.vue'
 import NoteExclu from '../dialogues/NoteExclu.vue'
 import NoteMc from '../dialogues/NoteMc.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
-import { SupprNote } from '../app/operations.mjs'
+import { SupprNote, RattNote } from '../app/operations.mjs'
 
 const icons = ['','person','group','group','description','article','close','close']
 const colors = ['','primary','orange','negative','primary','orange','primary','orange']
@@ -246,7 +261,8 @@ export default {
   methods: {
     clicknode (n) {
       if (this.rec) {
-        if (n.ratt) this.choixok(n)
+        this.rec = 2
+        this.noderatt = n
       } else
         this.selected = n.key
     },
@@ -394,7 +410,8 @@ export default {
 
     async rattacher () {
       const n = this.nSt.node.note
-      this.rec = true
+      this.rec = 1
+      this.noderatt = null
       this.nSt.resetRatt(true) // tous OK
       this.nSt.koSA(this.nSt.node) // exclut le node lui-même et son sous-arbre
       if (ID.estGroupe(n.id)) {
@@ -405,14 +422,27 @@ export default {
     },
 
     anrattacher () { 
-      this.rec = false
+      this.rec = 0
+      this.noderatt = null
       this.nSt.resetRatt(false)
     },
 
-    choixok (node) {
-      this.rec = false
+    async okrattacher () {
+      const n = this.nSt.note
+      const r = this.noderatt
+      let rid = parseInt(r.key), refn = '', rids = 0
+      if (r.type < 3) {
+        // rattachement à une racine
+        if (rid === n.id) rid = 0 // c'est SA racine, donc pas rattachée
+      } else {
+        // refn n'est défini que pour une note d'avatar référençant une note de groupe (rnom est celui du groupe)
+        if (!ID.estGroupe(n.id) && ID.estGroupe(rid)) refn = r.label
+        rids = r.note.ids
+      }
+      await new RattNote().run(n.id, n.ids, rid, rids, refn)
+      this.rec = 0
+      this.noderatt = null
       this.nSt.resetRatt(false)
-      console.log(node.label)
     },
 
     stest1 (na, g) {
@@ -498,7 +528,8 @@ export default {
       colors,
       styles,
       expandAll: false,
-      rec: false,
+      rec: 0, // rattachement en cours
+      noderatt: null,
       /* pour maj d'une note de groupe 
       [{label: e.nom, value: im}] des avc membres du groupes  */
       ims: null, 
