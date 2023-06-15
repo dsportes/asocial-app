@@ -675,6 +675,7 @@ export default {
   ACaproposav: 'Information',
   ACnotes: 'Ses notes',
   ACgroupes: 'Ses groupes',
+  ACdetav: 'Détail de {0}',
   ACchats: 'Ses chats',
   ACmembres: 'Ses membres',
   ACsponsorings: 'Ses sponsorings',

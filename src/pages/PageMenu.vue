@@ -1,5 +1,5 @@
 <template>
-<q-list class="titre-md" style="min-width: 200px">
+<q-list class="titre-md" style="min-width: 300px">
   <q-item class="q-my-md" clickable @click="ui.setPage('notes')">
     <q-item-section>
       <q-item-label 
@@ -41,10 +41,18 @@
     </q-item-section>
   </q-item>
   <q-separator color="orange"/>
-  <q-item clickable @click="MD.oD('detailsavatar')" clas="row items-center">
-    <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACav')}}</span>
-    <q-btn class="q-ml-md text-bold" dense :label="aSt.avC.na.nomc" no-caps
-      icon-right="open_in_new" @click="MD.oD('detailsavatar')"/>
+
+  <q-item class="row items-center">
+    <span class="text-italic text-bold q-mr-sm">{{$t('ACav')}}</span>
+    <q-select v-model="cav" borderless dense options-dense standard filled
+        :options="options" style="max-width: 150px" behavior="menu"/>
+  </q-item>
+
+  <q-item clickable>
+    <q-item-section class="q-ml-lg" clickable @click="MD.oD('detailsavatar')">
+      <q-item-label lines="1">{{$t('ACdetav', [cav.label])}}
+      </q-item-label>
+    </q-item-section>
   </q-item>
   <q-item clickable>
     <q-item-section class="q-ml-lg" clickable @click="ui.setPage('groupesac')">
@@ -94,11 +102,14 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageMenu',
+
+  props: { menu: Boolean },
 
   computed: {
     nbchats () { return this.aSt.eavC.chats.size },
@@ -117,6 +128,12 @@ export default {
     nbtiv () { return 1 },
   },
 
+  watch: {
+    cav (ap, av) {
+      this.session.setAvatarId(ap.value)
+    }
+  },
+
   methods: {
     maTribu () { 
       this.aSt.setTribuC()
@@ -130,12 +147,44 @@ export default {
   },
 
   setup () {
+    const aSt = stores.avatar
+    const gSt = stores.groupe
+    const session = stores.session
+    const ui = stores.ui
+    const options = ref([])
+    const cav = ref(null)
+
+    function lstAv () {
+      aSt.map.forEach(e => {
+        const a = e.avatar
+        options.value.push({ label: a.na.nom, value: a.id })
+      })
+    } 
+
+    aSt.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setCompte' || name === 'setAvatar') {
+          lstAv()
+        }
+      })
+    })
+
+    session.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setAvatarId') {
+          const id = args[0]
+          options.value.forEach(x => { if (x.value === id) cav.value = x})
+        }
+      })
+    })
+
+    lstAv()
+    options.value.forEach(x => { if (x.value === session.avatarId) cav.value = x})
+
     return {
       MD,
-      aSt: stores.avatar,
-      ui: stores.ui,
-      session: stores.session,
-      gSt: stores.groupe
+      aSt, session, gSt, ui,
+      options, cav
     }
   }
 

@@ -196,8 +196,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.lg2
-
 .mh
   max-height: 3.2rem
   width: 15rem
