@@ -846,6 +846,9 @@ export default {
   PNOer8: 'La note a une exclusivité d\'écritue pour un membre : lui seul peut la mettre à jour ou la détruire.',
   PNOer9: 'Pour changer l\'attribution de l\'exclusivité d\'écriture, il faut, soit l\'avoir soi-même, soit être animateur du groupe.',
 
+  PNOro1: 'La note est protégée contre l\'écriture.',
+  PNOro2: 'Le groupe de la note est protégé contre l\'écriture.',
+
   PNOer10: 'La nouvelle taille de la note ferait dépasser le quota attribué au compte.',
   PNOer11: 'La nouvelle taille de la note ferait dépasser le volume maximal attribué par le compte hébergeur du groupe aux textes des notes du groupe.',
 

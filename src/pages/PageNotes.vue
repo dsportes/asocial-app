@@ -51,6 +51,10 @@
       <note-mc :ims="ims"/>
     </q-dialog>
 
+    <q-dialog v-model="notefichier" persistent full-height>
+      <note-fichier :ims="ims"/>
+    </q-dialog>
+
     <q-dialog v-model="notetemp" persistent>
       <note-temp/>
     </q-dialog>
@@ -184,6 +188,7 @@ import NoteTemp from '../dialogues/NoteTemp.vue'
 import NoteProt from '../dialogues/NoteProt.vue'
 import NoteExclu from '../dialogues/NoteExclu.vue'
 import NoteMc from '../dialogues/NoteMc.vue'
+import NoteFichier from '../dialogues/NoteFichier.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { SupprNote, RattNote } from '../app/operations.mjs'
 
@@ -207,7 +212,7 @@ export default {
   name: 'PageNotes',
 
   components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, NoteProt, NoteMc,
-    NoteExclu, BoutonConfirm },
+    NoteExclu, NoteFichier, BoutonConfirm },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -404,8 +409,37 @@ export default {
       }
     },
 
-    voirfic () {
-      console.log('voir fichiers')
+    async voirfic () {
+      if (! await this.session.edit()) return
+      const er = this.erFic()
+      if (er) { 
+        await afficherDiag(this.$t('PNOer' + er ))
+      } else {
+        this.ovnotefichier()
+      }
+    },
+
+    roFic () {
+      const n = this.nSt.note
+      if (n.p) return 1
+      const g = this.nSt.node.type === 5 ? this.nSt.egr.groupe : null
+      if (!g) return 0
+      // note de groupe
+      if (g.pe === 1) return 4
+      // Map par im des { na, st } des avc membres du groupes
+      const ims = this.gSt.imNaStAvc(g.id)
+      const im = this.nSt.note.im
+      if (im) { // le membre ayant l'exclu actuel est-il avc ?
+        const e = ims.get(im)
+        if (e) { this.ims = [{ label: e.na.nom, value: im }]; return 0 }
+        return 8 // un autre membre a l'exclusivité, édition impossible
+      }
+      this.ims = []
+      ims.forEach((e, im) => { 
+        if (e.st === 31 || e.st === 32) this.ims.push({ label: e.na.nom, value: im})
+      })
+      if (!this.ims.length) return 7
+      return 0
     },
 
     async rattacher () {
@@ -655,11 +689,14 @@ export default {
     function ovnoteprot () { MD.oD(noteprot)}
     const notemc = ref(false)
     function ovnotemc () { MD.oD(notemc)}
+    const notefichier = ref(false)
+    function ovnotefichier () { MD.oD(notefichier)}
 
     return {
       notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
-      notetemp, ovnotetemp, noteprot, ovnoteprot, noteexclu, ovnoteexclu, notemc, ovnotemc,
-      ID, MD, AMJ, splitPK, dhcool, now, filtrage, edvol,
+      notetemp, ovnotetemp, noteprot, ovnoteprot, noteexclu, ovnoteexclu,
+      notemc, ovnotemc, notefichier, ovnotefichier, 
+      dhcool, now, filtrage, edvol,
       session, nSt, aSt, gSt,
       selected,
       tree,
