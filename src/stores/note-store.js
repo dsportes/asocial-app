@@ -137,6 +137,11 @@ export const useNoteStore = defineStore('note', {
       this.map.forEach(n => { n.ratt = tf })
     },
 
+    koP (n) { // exclusion du node parent de la note (elle y est déjà rattachée !)
+      const np = this.map.get(n.refk ? n.refk : n.rkey)
+      np.ratt = false
+    },
+
     koSA (n) { // exclut sans condition le sous-arbre démarrant au noeud n 
       n.ratt = false
       if (n.children) for(const c of n.children) this.koSA(c)

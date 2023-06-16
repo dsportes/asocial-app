@@ -413,6 +413,7 @@ export default {
       this.rec = 1
       this.noderatt = null
       this.nSt.resetRatt(true) // tous OK
+      this.nSt.koP(n) // exclut LE node parent, vu que la note y est, par définition, déjà rattachée
       this.nSt.koSA(this.nSt.node) // exclut le node lui-même et son sous-arbre
       if (ID.estGroupe(n.id)) {
         this.nSt.koGR(n.id)
