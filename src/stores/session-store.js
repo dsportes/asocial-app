@@ -225,6 +225,12 @@ export const useSessionStore = defineStore('session', {
       return ''
     },
 
+    roSt () {
+      if (this.mode === 3) return 1
+      if (this.niv >= 2) return 2
+      return 0
+    },
+
     async edit (avionSeulement) {
       const d = this.editDiag(avionSeulement)
       if (d) {

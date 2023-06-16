@@ -52,7 +52,7 @@
     </q-dialog>
 
     <q-dialog v-model="notefichier" persistent full-height>
-      <note-fichier :ims="ims"/>
+      <note-fichier :ro="ro"/>
     </q-dialog>
 
     <q-dialog v-model="notetemp" persistent>
@@ -410,35 +410,30 @@ export default {
     },
 
     async voirfic () {
-      if (! await this.session.edit()) return
-      const er = this.erFic()
-      if (er) { 
-        await afficherDiag(this.$t('PNOer' + er ))
-      } else {
-        this.ovnotefichier()
-      }
+      this.ro = this.roFic()
+      this.ovnotefichier()
     },
 
     roFic () {
+      const ro = this.session.roSt() //1: avion, 2:session bloquée en écriture
+      if (this.ro) return ro
       const n = this.nSt.note
-      if (n.p) return 1
+      if (n.p) return 3 // note protégée contre l'écriture
       const g = this.nSt.node.type === 5 ? this.nSt.egr.groupe : null
       if (!g) return 0
       // note de groupe
-      if (g.pe === 1) return 4
+      if (g.pe === 1) return 4 // groupe protégée contre l'écriture
       // Map par im des { na, st } des avc membres du groupes
       const ims = this.gSt.imNaStAvc(g.id)
       const im = this.nSt.note.im
       if (im) { // le membre ayant l'exclu actuel est-il avc ?
         const e = ims.get(im)
         if (e) { this.ims = [{ label: e.na.nom, value: im }]; return 0 }
-        return 8 // un autre membre a l'exclusivité, édition impossible
+        return 5 // un autre membre a l'exclusivité, édition impossible
       }
-      this.ims = []
-      ims.forEach((e, im) => { 
-        if (e.st === 31 || e.st === 32) this.ims.push({ label: e.na.nom, value: im})
-      })
-      if (!this.ims.length) return 7
+      let maxst = 0
+      ims.forEach((e, im) => { if (e.st > maxst) maxst = e.st })
+      if (maxst < 31 || maxst > 32) return 6 // ni auteur ni animateur
       return 0
     },
 
@@ -567,7 +562,8 @@ export default {
       noderatt: null,
       /* pour maj d'une note de groupe 
       [{label: e.nom, value: im}] des avc membres du groupes  */
-      ims: null, 
+      ims: null,
+      ro: 0, // code de la raison pour laquelle la note est en lecture seulement
       nas: [], // test : liste des na des avatars
       ngs: [] // test : liste des na des groupes
     }
