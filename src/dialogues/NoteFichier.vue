@@ -21,10 +21,66 @@
   </q-header>
 
   <q-page-container >
-    <q-page class="q-pa-xs">
-
-    </q-page>
+    <q-page class="q-pa-xs column items-center">
+      <q-btn v-if="!cx1()" flat dense color="primary" class="q-mt-sm" size="md" icon="add"
+        label="Ajouter un fichier" @click="nomfic='';saisiefichier=true"/>
+      <div v-for="(it, idx) in state.listefic" :key="it.nom" class="full-width">
+        <div class="row">
+          <q-expansion-item :default-opened="!idx" group="fnom" class="col" switch-toggle-side
+            header-class="expansion-header-class-1 titre-md bg-secondary text-white">
+            <template v-slot:header>
+              <q-item-section>
+                <div class="row justify-between items-center">
+                  <div class="col titre-lg text-bold">{{it.n}}</div>
+                  <div class="col-auto row items-center">
+                    <div class="col fs-md q-mr-md">
+                      {{$t('PNFnbv', PNFit.l.length, { count: PNFit.l.length})}}
+                    </div>
+                  </div>
+                </div>
+              </q-item-section>
+            </template>
+            <q-card-section>
+              <div class="row items-center">
+                <toggle-btn :src="it.avn" color="warning" :args="it" @change="avnom"
+                  :lecture="!(session.synchro || (session.avion && it.avn))" 
+                  :label="$t('PNFl1')" :label-off="$t('PNFl2')"/>
+              </div>
+              <div v-for="(f, idy) in it.l" :key="f.idf" class="ma-qcard-section q-my-sm">
+                <q-separator class="q-mb-sm"/>
+                <div class="row justify-between items-center">
+                  <div class="col">
+                    <span class="text-bold q-pr-lg">{{f.info}}</span>
+                    <span class="fs-md">{{edvol(f.lg)}} - {{f.type}} - </span>
+                    <span class="font-mono fs-sm">{{f.idf}}</span>
+                  </div>
+                  <div class="col-auto font-mono fs-sm">{{dhcool(f.dh)}}</div>
+                </div>
+                <div class="row justify-between">
+                  <div class="col row items-center">
+                    <toggle-btn :src="f.av" :args="f" color="warning" @change="avidf"
+                      :lecture="!(session.synchro || (session.avion && f.av))"
+                      :label="$t('PNFl3')"
+                      :label-off="it.avn && idy === 0 ? $t('PNFl4') : $t('PNFl5')"/>
+                  </div>
+                  <div class="col-auto row justify-end q-gutter-xs">
+                    <q-btn size="sm" dense color="primary" icon="content_copy" :label="$t('PNFcop')" @click="copierFic(f)"/>
+                    <q-btn size="sm" dense color="primary" icon="open_in_new" :label="$t('PNFaff')" @click="affFic(f)"/>
+                    <q-btn size="sm" dense color="primary" icon="save" :label="$t('PNFenreg')" @click="enregFic(f)"/>
+                    <q-btn size="sm" dense color="warning" icon="delete" :label="$t('PNFsuppr')" @click="supprFic(f)"/>
+                  </div>
+                </div>
+              </div>
+            </q-card-section>
+          </q-expansion-item>
+        </div>
+      </q-page>
   </q-page-container>
+
+  <q-dialog v-model="saisiefichier">
+    <fichier-attache :secret="secret" :close="fermerfa"/>
+  </q-dialog>
+
 </q-layout>
 </div>
 </template>
@@ -101,9 +157,13 @@ export default {
     const nSt = stores.note
     const aSt = stores.avatar
     const gSt = stores.groupe
-    const cfg = stores.config
+    const avnSt = stores.avnote
 
     const ro = toRef(props, 'ro')
+    const state = reactive({
+      avn: null,
+      listefic: []
+    })
 
     const avatar = ref(null)
     const groupe = ref(null)
@@ -124,9 +184,56 @@ export default {
       return false
     }
 
+    function initState () {
+      const n = nSt.note
+      state.avn = avnSt.getAvnote(n.id, n.ids)
+      state.listefic = listefichiers(n, state.av)
+    }
+
+    function listefichiers (n, avn) {
+      const lst = []
+      const mnom = {}
+      for (const [idf, x] of n.mfa) {
+        /* mfa : Map de clé idf : { nom, info, dh, type, gz, lg, sha } */
+        const f = s.mfa.get(idf)
+        let e = mnom[f.nom]; if (!e) { e = []; mnom[f.nom] = e; lst.push(f.nom) }
+        const av = avn && (avn.lidf.indexOf(idf) !== -1) ? true : false
+        e.push({ ...f, idf, av })
+      }
+      lst.sort((a, b) => { return a < b ? -1 : (a > b ? 1 : 0) })
+      const res = []
+      lst.forEach(nom => {
+        const l = mnom[nom]
+        const avn = avn && avn.mnom[nom] ? true : false
+        l.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh > b.dh ? -1 : 0) })
+        res.push({ n, l, av: avs && avs.mnom[n], avn })
+      })
+      return res
+    }
+
+    initState()
+
+    nSt.$onAction(({ name, args, after }) => { 
+      after(async (result) => {
+        if ((name === 'setNote')){
+         const n = args[0]
+         if (n.key === nSt.note.key) initState()
+        }
+      })
+    })
+
+    avnSt.$onAction(({ name, args, after }) => { 
+      after(async (result) => {
+        if ((name === 'setAvnote')){
+         const n = args[0]
+         if (n.key === nSt.note.key) initState()
+        }
+      })
+    })
+
     return {
-      ui, session, nSt, aSt, gSt, cfg,
-      exv, avatar, groupe,
+      ui, session, nSt, aSt, gSt, avnSt,
+      exv, avatar, groupe, state,
       MD, ergrV2
     }
   }

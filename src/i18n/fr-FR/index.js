@@ -884,6 +884,17 @@ export default {
   PNOmcgr: 'Mots clés "du groupe"',
   PNOmcgp: 'Mots clés personnels de {0}',
 
+  PNFnbv: 'Pas de version | Une version | {count} versions',
+  PNFl1: 'La version la plus récente est visible en avion',
+  PNFl2: 'La version la plus récente n\'est pas FORCÉE à être visible en avion',
+  PNFl3: 'Version TOUJOURS visible en avion, même si elle n\'est pas la plus récente',
+  PNFl4: 'Version visible en avion parce que la plus récente',
+  PNFl5: 'Version non visible en avion',
+  PNFcop: 'Copier',
+  PNFaff: 'Aff.',
+  PNFenreg: 'Enreg.',
+  PNFsuppr: 'Suppr',
+
   CMCtit: 'Choix des mots clés',
 
   //EditeurMd

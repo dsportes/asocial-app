@@ -903,12 +903,12 @@ class AvNote {
   }
 
   get table () { return 'avnote' }
-  get id2 () { return this.ns }
-  get pk () { return this.id + '/' + this.ns }
+  get pk () { return this.id + '/' + this.ids }
+  get key () { return this.id + '/' + this.ids }
 
   nouveau (note) { 
     this.id = note.id
-    this.ns = note.ns
+    this.ids = note.ids
     this.v = 0
     return this 
   }

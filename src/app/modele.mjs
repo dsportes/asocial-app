@@ -1457,7 +1457,7 @@ _data_:
   rnom n'est défini que pour une note d'avatar référençant un note de groupe (rnom est celui du groupe)
 
 **Map `mfas` des fichiers attachés dans une note:**
-- _clé_ `idf`: identifiant du fichier en base64.
+- _clé_ `idf`: identifiant du fichier.
 - _valeur_ : { lg, datas }
   - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v2 d'un note.
   - `datas` : sérialisation cryptée par la clé S du note de : `{ nom, info, dh, type, gz, lg, sha }`.
@@ -1511,8 +1511,9 @@ export class Note extends GenDoc {
     this.mfa = new Map()
     if (this.v2) {
       const map = row.mfas ? decode(row.mfas) : {}
-      for (const idf in map) 
-        this.mfa.set(idf, decode(await decrypter(cle, map[idf].datas)))
+      for (const idx in map) {
+        this.mfa.set(parseInt(idf), decode(await decrypter(cle, map[idf].datas)))
+      }
     }
     this.setSmc()
   }

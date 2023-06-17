@@ -693,7 +693,7 @@ export default {
       notetemp, ovnotetemp, noteprot, ovnoteprot, noteexclu, ovnoteexclu,
       notemc, ovnotemc, notefichier, ovnotefichier, 
       dhcool, now, filtrage, edvol,
-      session, nSt, aSt, gSt,
+      ID, session, nSt, aSt, gSt,
       selected,
       tree,
       filtre, filtreFake,
