@@ -203,7 +203,7 @@
   </q-dialog>
 
   <q-dialog v-model="diag" persistent>
-    <q-card class="bs petitelargeur q-pa-sm">
+    <q-card :class="lidk + ' petitelargeur q-pa-sm'">
       <div class="text-center titre-lg q-my-sm">{{$t('UTIatt')}}</div>
       <div class="fs-md text-center q-b-md" v-html="ui.diag"></div>
       <q-btn flat dense color="primary" size="md" :label="$t('jailu')"
@@ -380,6 +380,7 @@ export default {
    },
 
   computed: {
+    lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
     tbclass () { return this.$q.dark.isActive ? ' sombre1' : ' clair1' },
     aHome () { return (this.session.status === 2 && this.ui.page !== 'accueil')
       || (!this.session.status && this.ui.page !== 'login') },

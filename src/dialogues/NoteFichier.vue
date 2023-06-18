@@ -74,6 +74,7 @@
             </q-card-section>
           </q-expansion-item>
         </div>
+      </div>
       </q-page>
   </q-page-container>
 

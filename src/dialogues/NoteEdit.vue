@@ -49,7 +49,7 @@
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
         <q-separator color="orange" class="q-mt-sm"/>
         <div v-if="nSt.note.auts.length" class="col-auto q-mt-sm">
-          {{$t('PNOauts', nSt.note.auts.length) + ' ' + nomAuts}}
+          <liste-auts/>
         </div>
       
         <div class="col-auto q-mt-sm row">
@@ -73,12 +73,13 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import { MajNote } from '../app/operations.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
+import ListeAuts from '../components/ListeAuts.vue'
 import { UNITEV1 } from '../app/api.mjs'
 
 export default {
   name: 'NoteEdit',
 
-  components: { BoutonHelp, BoutonUndo, EditeurMd },
+  components: { BoutonHelp, BoutonUndo, EditeurMd, ListeAuts },
 
   props: { ims: Array },
 

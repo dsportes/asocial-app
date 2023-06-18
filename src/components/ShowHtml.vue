@@ -9,7 +9,7 @@
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>
     </div>
-    <div :style="sty" v-if="!$q.dark.isActive">
+    <div :style="sty" v-if="dk">
       <sd-light v-if="idx0" :texte="texte"/>
       <sd-light1 v-else :texte="texte"/>
     </div>
@@ -60,7 +60,10 @@ export default ({
   props: { texte: String, idx: Number, maxh: String, zoom: Boolean, edit: Boolean },
 
   computed: {
-    idx0 () { return !this.idx || (this.idx % 2 === 0) },
+    dk () { const d = this.$q.dark.isActive 
+      return d ? (this.idx === -1 ? true : false) : (this.idx === -1 ? false : true)
+    },
+    idx0 () { return this.idx === -1 || !this.idx || (this.idx % 2 === 0) },
     sty () { return styb + (this.maxh ? 'height:' + this.maxh : '') }
   },
 

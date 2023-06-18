@@ -511,6 +511,8 @@ export default {
   OPmcn: 'Changer les mots clés d\'une note',
   OPrattn: 'Rattacher une note à une autre',
 
+  OPgetcv: 'Obtention d\'une carte de viste',
+
   OPtfa: 'Télécharger un fichier attaché à une note',
   OPnfa: 'Attacher un nouveau fichier à une note',
   OPsfa: 'Supprimer un fichier attaché à une note',

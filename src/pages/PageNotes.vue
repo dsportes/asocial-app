@@ -126,7 +126,9 @@
               <div class="col">
                 <div>
                   <span class="q-mr-sm">{{exclu}}</span>
-                  <span v-if="nSt.note.auts.length">{{$t('PNOauts', nSt.note.auts.length) + ' ' + nomAuts}}</span>
+                  <span v-if="nSt.note.auts.length">
+                    <liste-auts/>
+                  </span>
                 </div>
               </div>
               <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
@@ -190,6 +192,7 @@ import NoteExclu from '../dialogues/NoteExclu.vue'
 import NoteMc from '../dialogues/NoteMc.vue'
 import NoteFichier from '../dialogues/NoteFichier.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
+import ListeAuts from '../components/ListeAuts.vue'
 import { SupprNote, RattNote } from '../app/operations.mjs'
 
 const icons = ['','person','group','group','description','article','close','close']
@@ -212,7 +215,7 @@ export default {
   name: 'PageNotes',
 
   components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, NoteProt, NoteMc,
-    NoteExclu, NoteFichier, BoutonConfirm },
+    NoteExclu, NoteFichier, BoutonConfirm, ListeAuts },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },

@@ -26,7 +26,7 @@
       </div>
       <div v-else class="sp30">
         <div v-if="nSt.note.auts.length" class="col-auto q-mt-sm">
-          {{$t('PNOauts', nSt.note.auts.length) + ' ' + nomAuts}}
+          <liste-auts/>
         </div>
 
         <div v-if="msg" class="q-mt-sm titre-md bg-yellow-5 text-black text-bold q-pa-xs">
@@ -53,6 +53,7 @@ import { MD, Motscles } from '../app/modele.mjs'
 import { $t, egaliteU8 } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ChoixMotscles from '../components/ChoixMotscles.vue'
+import ListeAuts from '../components/ListeAuts.vue'
 import { McNote } from '../app/operations.mjs'
 
 export default {
@@ -60,7 +61,8 @@ export default {
 
   components: { 
     BoutonHelp,
-    ChoixMotscles
+    ChoixMotscles,
+    ListeAuts
   },
 
   props: { 

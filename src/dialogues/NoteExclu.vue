@@ -40,7 +40,7 @@
       -->
       <q-separator color="orange" class="q-mt-sm"/>
       <div v-if="nSt.note.auts.length" class="col-auto q-mt-sm">
-        {{$t('PNOauts', nSt.note.auts.length) + ' ' + nomAuts}}
+        <liste-auts/>
       </div>
 
       <q-btn :disable="!im && !imap" flat class="q-my-sm" color="warning" 
@@ -64,12 +64,13 @@ import { $t } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
+import ListeAuts from '../components/ListeAuts.vue'
 import { ExcluNote, RafraichirCvs } from '../app/operations.mjs'
 
 export default {
   name: 'NoteExclu',
 
-  components: { BoutonHelp, BoutonUndo, ApercuGenx },
+  components: { BoutonHelp, BoutonUndo, ApercuGenx, ListeAuts },
 
   props: { ims: Object },
 

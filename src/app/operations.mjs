@@ -1470,3 +1470,34 @@ export class RattNote extends OperationUI {
     }
   }
 }
+
+/* Charger les CVs dont les versions sont postérieures à celles détenues en session ******
+args.token: éléments d'authentification du compte.
+args.mcv : cle: id, valeur: version détenue en session (ou 0)
+Retour:
+rowCvs: liste des row Cv { _nom: 'cvs', id, _data_ }
+  _data_ : cva {v, photo, info} cryptée par la clé de son avatar
+*/
+export class ChargerCvs extends OperationUI {
+  constructor () { super($t('OPgetcv')) }
+
+  async run (id) {
+    try {
+      const session = stores.session
+      const pSt = stores.people
+      const mcv = { }
+      mcv[id] = 0
+      const args = { token: session.authToken, id, mcv }
+      const ret = this.tr(await post(this, 'ChargerCvs', args))
+      let cv = null
+      if (ret.rowCvs && ret.rowCvs.length > 0) {
+        cv = await compile(ret.rowCvs[0])
+        if (cv && cv.cv) pSt.setCv(getNg(id), cv.cv)
+      }
+      return this.finOK(cv ? cv.cv : null)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
