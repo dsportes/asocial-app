@@ -17,7 +17,7 @@ export const useAvnoteStore = defineStore('avnote', {
     getIds: (state) => { return Array.from(state.map.keys()) },
     
     getAvnote: (state) => { return (id, ids) => {
-        const e = this.map.get(id)
+        const e = state.map.get(id)
         if (!e) return null
         return e.get(ids)
       }

@@ -132,3 +132,12 @@ export async function getData (url) {
     throw new AppExc(E_SRV, 0, [e.message])
   }
 }
+
+export async function putData (url, data) {
+  try {
+    const r = await axios({ method: 'put', url, data: data })
+    return r.status === 200 ? null : 'Status:' + r.statusText
+  } catch (e) {
+    return e.toString()
+  }
+}

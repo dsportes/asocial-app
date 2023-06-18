@@ -20,10 +20,10 @@
     </q-toolbar>
   </q-header>
 
-  <q-page-container >
+  <q-page-container>
     <q-page class="q-pa-xs column items-center">
-      <q-btn v-if="!cx1()" flat dense color="primary" class="q-mt-sm" size="md" icon="add"
-        label="Ajouter un fichier" @click="nomfic='';saisiefichier=true"/>
+      <q-btn flat dense color="primary" class="q-mt-sm" size="md" icon="add"
+        label="Ajouter un fichier" @click="nomfic='';ovnouveaufichier()"/>
       <div v-for="(it, idx) in state.listefic" :key="it.nom" class="full-width">
         <div class="row">
           <q-expansion-item :default-opened="!idx" group="fnom" class="col" switch-toggle-side
@@ -78,8 +78,8 @@
       </q-page>
   </q-page-container>
 
-  <q-dialog v-model="saisiefichier">
-    <fichier-attache :secret="secret" :close="fermerfa"/>
+  <q-dialog v-model="nouveaufichier" persistent>
+    <nouveau-fichier/>
   </q-dialog>
 
 </q-layout>
@@ -87,20 +87,19 @@
 </template>
 
 <script>
-import { ref, toRef } from 'vue'
+import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
-import { afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-// import BoutonUndo from '../components/BoutonUndo.vue'
-import { MajNote } from '../app/operations.mjs'
+import NouveauFichier from '../dialogues/NouveauFichier.vue'
+import ToggleBtn from '../components/ToggleBtn.vue'
 import { UNITEV2 } from '../app/api.mjs'
 
 export default {
   name: 'NoteFichier',
 
   components: { 
-    BoutonHelp, 
+    BoutonHelp, NouveauFichier, ToggleBtn
     // BoutonUndo
   },
 
@@ -117,31 +116,7 @@ export default {
   methods: {
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
     async valider () {
-      /*
-      const dv = this.texte.length - this.nSt.note.txt.length
-      if (this.er && dv > 0) {
-        await afficherDiag($t('PNOw' + this.er))
-        return
-      }
-      if (this.type === 5) {
-        const n = this.erGr(dv)
-        if (n === 6) {
-          await afficherDiag($t('PNOer11'))
-          return
-        }
-      }
-      if (this.type === 4) {
-        const c = this.aSt.compta.compteurs
-        if (c.v1 + dv > c.q1 * UNITEV1) {
-          await afficherDiag($t('PNOer10'))
-          return
-        }
-      }
-      const idc = this.avatar ? this.session.compteId : this.groupe.idh
-      const n = this.nSt.note
-      await new MajNote()
-        .run(n.id, n.ids, this.im, n.auts, this.texte, this.prot, idc)
-      */
+
       MD.fD()
     }
   },
@@ -232,7 +207,11 @@ export default {
       })
     })
 
+    const nouveaufichier = ref(false)
+    function ovnouveaufichier () { MD.oD(nouveaufichier)}
+
     return {
+      nouveaufichier, ovnouveaufichier,
       ui, session, nSt, aSt, gSt, avnSt,
       exv, avatar, groupe, state,
       MD, ergrV2

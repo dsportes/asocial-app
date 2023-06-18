@@ -85,11 +85,6 @@ export default {
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    nomAuts () {
-      const ln = []
-      this.nSt.mbAuteurs.forEach(m => { ln.push(m.na.nomc)})
-      return ln.join(', ')
-    },
     modifie () { return this.nSt.note.txt !== this.texte ||
       (this.prot ? 1 : 0) !== this.nSt.note.p }
   },

@@ -75,11 +75,6 @@ export default {
   props: { ims: Object },
 
   computed: {
-    nomAuts () {
-      const ln = []
-      this.nSt.mbAuteurs.forEach(m => { ln.push(m.na.nomc)})
-      return ln.join(', ')
-    },
     modifie () { return this.im !== this.imap }
   },
 

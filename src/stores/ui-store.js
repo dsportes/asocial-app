@@ -30,6 +30,9 @@ export const useUiStore = defineStore('ui', {
 
     helpstack: [],
 
+    etf: 0, // étape fichier
+    ccfic: null, // copie cololler fichier
+
     naplus: null, // na de l'avatar proposant d'ajouter un contact au groupe egrplus
     egrplus: null, // élément e du groupe dans lequel un contact peut-être ajouté
   }),
@@ -113,5 +116,11 @@ export const useUiStore = defineStore('ui', {
     // Fonctions internes à une page. Appel par détection ui.$onAction
     jailu () { }, // Invoquée par App.vue, le bouton fait partie de la toolbar
   
+    copiercollerfic (fic) {
+      // fic : { nom: '', info: '', lg: 0, type: '', u8: null }
+      this.ccfic = fic
+    },
+
+    setEtf (etf) { this.etf = etf }
   }
 })

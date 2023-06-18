@@ -70,11 +70,6 @@ export default {
   },
 
   computed: {
-    nomAuts () {
-      const ln = []
-      this.nSt.mbAuteurs.forEach(m => { ln.push(m.na.nomc)})
-      return ln.join(', ')
-    },
     modif () { 
       for(const im in this.mc) { if (!egaliteU8(this.mc[''+im], this.mcap[''+im])) return true }
       return false

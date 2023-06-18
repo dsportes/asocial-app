@@ -4,11 +4,11 @@ import { encode, decode } from '@msgpack/msgpack'
 import { ID, AppExc, appexc, AMJ, Compteurs } from './api.mjs'
 import { $t, hash, inverse } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
-import { post } from './net.mjs'
+import { post, putData } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, Compta, Note,
   Groupe, Membre, Tribu, Tribu2, getNg, getCle, compile} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
-import { commitRows, IDBbuffer } from './db.mjs'
+import { commitRows, IDBbuffer, dernierFichierCharge } from './db.mjs'
 
 /* Opération générique ******************************************/
 export class Operation {
@@ -1501,3 +1501,76 @@ export class ChargerCvs extends OperationUI {
   }
 }
 
+export class NouveauFichier extends OperationUI {
+  constructor () { super($t('OPnvf')) }
+
+  setEtf (val) { store().commit('ui/majetapefichier', val) }
+
+  async run (note, fic, lidf, dv2) {
+    // lidf : liste des idf des fichiers à supprimer
+    try {
+      const id = note.id
+      const ids = note.ids
+      const session = stores.session
+      const ui = stores.ui
+      const avnSt = stores.avnote
+      const gSt = stores.groupe
+      const idh = ID.estGroupe(id) ? gSt.getGroupe(id).idh : session.compteId
+      const buf = fic.u8
+      delete fic.u8
+      const idf = fic.idf
+      delete fic.idf
+      if (session.synchro) {
+        // on garde buf pour éviter de le recharger du serveur si le nom est disponible en mode avion
+        const avn = avnSt.getAvnote(id, ids)
+        if (avn && avn.mnom[fic.nom]) {
+          dernierFichierCharge.idf = idf
+          dernierFichierCharge.data = buf
+        }
+      }
+
+      ui.setEtf(2)
+      /* Put URL ****************************************
+      args :
+      - sessionId
+      - id : id de la note
+      - idh : id de l'hébergeur pour une note groupe
+      - dv2 : variation de volume v2
+      - idf : identifiant du fichier
+      Retour: sessionId, dh
+      - url : url à passer sur le PUT de son contenu
+      Exceptions : volume en excédent
+      */
+      const args = { token: session.authToken, id, idf, dv2 }
+      const ret = this.tr(await post(this, 'PutUrl', args))
+      const url = ret.putUrl
+
+      // Transfert effectif du fichier (si pas d'exception de volume sur putUrl)
+      const er = await putData(url, buf)
+      if (er) throw new AppExc(E_WS, 5, [er])
+      ui.setEtf(3)
+
+      /* validerUpload ****************************************
+      args :
+      - sessionId
+      - id, ids : du secret
+      - idh : id de l'hébergeur pour une note groupe
+      - dv2 : variation de volume v2
+      - idf : identifiant du fichier
+      - emap : entrée (de clé idf) de la map des fichiers attachés [lg, data]
+      Retour: sessionId, dh
+      Exceptions :
+      - A_SRV, '25-Secret non trouvé'
+      - volume en excédent
+      */
+      const emap = await note.toRowMfa(fic) // [lg, x]
+      const args2 = { token: session.authToken, id, ids, idf, idh, dv2, emap, lidf }
+      this.tr(await post(this, 'ValiderUpload', args2))
+      this.setEtf(4)
+      await sleep(1000)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

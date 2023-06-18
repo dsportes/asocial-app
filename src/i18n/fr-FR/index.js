@@ -512,6 +512,7 @@ export default {
   OPrattn: 'Rattacher une note à une autre',
 
   OPgetcv: 'Obtention d\'une carte de viste',
+  OPnvf: 'Enregistrer un nouveau fichier',
 
   OPtfa: 'Télécharger un fichier attaché à une note',
   OPnfa: 'Attacher un nouveau fichier à une note',
@@ -896,6 +897,30 @@ export default {
   PNFaff: 'Aff.',
   PNFenreg: 'Enreg.',
   PNFsuppr: 'Suppr',
+
+  PNFnv: 'Nouveau fichier attaché',
+  PNFnv1: 'Sélection du fichier',
+  PNFnv2: 'Choisir un fichier dans le presse-papier',
+  PNFnv3: 'Choisir un fichier dans le presse-papier',
+  PNFnv3: 'Choisir un fichier local (50Mo max)',
+  PNFnv4: 'Attribution d\'un autre nom au fichier',
+  PNFnv5: 'ainsi que les "non imprimables CR BS FF ..." ne sont pas autorisés afin que ce nom puisse servir comme nom de fichier.',
+  PNFnv6: 'Caractères interdits',
+  PNFnv6b: 'Valeur requise',
+  PNFnv7: 'Nom du fichier',
+  PNFnv8: 'Nom court (facultatif) de sa version',
+  PNFnv9: 'Au plus 20 signes',
+  PNFnv10: 'Versions antérieures à supprimer',
+  PNFnv11: 'Aucune version antérieure attachée n\'a pour nom',
+  PNFnv12: 'Version(s) antérieure(s) attachée(s) ayant pour nom',
+  PNFnv13: '. Cocher ceux à SUPPRIMER (si le chargement s\'est bien effectué)',
+  PNFnv14: 'Volume supprimé : {0}',
+  PNFnv15: 'Suivi de l\'opération',
+  PNFnv15a: 'Opération impossible : le compte dépasserait son quota de volume de fichiers de {0} bytes.',
+  PNFnv15a: 'Opération impossible : le groupe dépasserait le volume maximum de fichiers déclaré par l\'hébergeur de {0} bytes.',
+  PNFnvs0: 'Compression éventuelle et cryptage', 
+  PNFnvs1: 'Transfert vers le serveur de fichiers',
+  PNFnvs2: 'Validation',
 
   CMCtit: 'Choix des mots clés',
 

@@ -1010,3 +1010,40 @@ class AvNote {
     return [nv, nvFa]
   }
 }
+
+const dec = new TextDecoder()
+
+function startDemon () { // TODO à reprendre
+  if (!store().state.ui.dlencours) {
+    let id = store().state.ui.chargements[0] || 0
+    store().commit('ui/majdlencours', id)
+    setTimeout(async () => {
+      while (id) {
+        const e = data.getFetat(id)
+        try {
+          let buf
+          if (dernierFichierCharge.idf === e.id) {
+            buf = dernierFichierCharge.data
+            dernierFichierCharge.data = null
+            dernierFichierCharge.idf = 0
+          } else {
+            const a = store().state.db.avatar
+            const idc = a ? a.id : data.getCompte().id
+            const args = { sessionId: data.sessionId, id: e.ids, ts: e.ns % 3, idf: e.id, idc, vt: e.lg }
+            const r = await get('m1', 'getUrl', args)
+            if (!r) throw new AppExc(E_BRO, 3, [Sid(e.id)])
+            const url = dec.decode(r)
+            buf = await getData(url)
+          }
+          await e.finChargement(buf)
+        } catch (ex) {
+          e.echecChargement(ex)
+        }
+        id = store().state.ui.chargements[0] || 0
+        store().commit('ui/majdlencours', id)
+      }
+    }, 10)
+  }
+}
+
+export const dernierFichierCharge = { idf: 0, data: null }

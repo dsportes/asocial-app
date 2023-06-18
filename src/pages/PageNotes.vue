@@ -252,11 +252,6 @@ export default {
     temp () {
       const n = this.nSt.nbjTemp
       return this.$t('PNOtemp', n, { count: n })
-    },
-    nomAuts () {
-      const ln = []
-      this.nSt.mbAuteurs.forEach(m => { ln.push(m.na.nomc)})
-      return ln.join(', ')
     }
   },
 

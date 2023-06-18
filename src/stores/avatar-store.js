@@ -60,6 +60,11 @@ export const useAvatarStore = defineStore('avatar', {
       return c.v2 > c.q2 * UNITEV2
     },
 
+    occV2: (state) => {
+      const c = state.compta.compteurs
+      return (c.q2 * UNITEV2) - c.v2
+    },
+
     // Avatar courant
     avC (state) { 
       const e = state.map.get(stores.session.avatarId)

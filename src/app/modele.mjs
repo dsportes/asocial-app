@@ -1603,6 +1603,28 @@ export class Note extends GenDoc {
     return arg ? await crypter(cle, new Uint8Array(encode(arg))) : null
   }
 
+  static async nouvFic (nom, info, lg, type, u8) {
+    // Deux propriétés ajoutées : idf, u8 (contenu du fichier gzippé crypté)
+    const fic = { nom, info, lg, type, u8 }
+    fic.idf = rnd6()
+    fic.sha = sha256(u8)
+    fic.dh = new Date().getTime()
+    fic.gz = fic.type.startsWith('text/')
+    fic.u8 = await crypter(this.cle, fic.gz ? gzipT(u8) : u8)
+    return fic
+  }
+
+  volLidf (lidf) {
+    let v = 0
+    lidf.forEach(idf => { v += this.mfa.get(idf).lg })
+    return v
+  }
+
+  async toRowMfa (fic) {
+    const x = await crypter(this.cle, new Uint8Array(encode((fic))))
+    return [fic.lg, x]
+  }
+
 }
 
 /** Secret ****************************************************
