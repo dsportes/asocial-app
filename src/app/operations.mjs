@@ -1504,8 +1504,6 @@ export class ChargerCvs extends OperationUI {
 export class NouveauFichier extends OperationUI {
   constructor () { super($t('OPnvf')) }
 
-  setEtf (val) { store().commit('ui/majetapefichier', val) }
-
   async run (note, fic, lidf, dv2) {
     // lidf : liste des idf des fichiers à supprimer
     try {
@@ -1541,7 +1539,7 @@ export class NouveauFichier extends OperationUI {
       - url : url à passer sur le PUT de son contenu
       Exceptions : volume en excédent
       */
-      const args = { token: session.authToken, id, idf, dv2 }
+      const args = { token: session.authToken, id, idh, idf, dv2 }
       const ret = this.tr(await post(this, 'PutUrl', args))
       const url = ret.putUrl
 
@@ -1566,7 +1564,7 @@ export class NouveauFichier extends OperationUI {
       const emap = await note.toRowMfa(fic) // [lg, x]
       const args2 = { token: session.authToken, id, ids, idf, idh, dv2, emap, lidf }
       this.tr(await post(this, 'ValiderUpload', args2))
-      this.setEtf(4)
+      ui.setEtf(4)
       await sleep(1000)
       this.finOK()
     } catch (e) {

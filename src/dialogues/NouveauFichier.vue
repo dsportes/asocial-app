@@ -147,7 +147,7 @@ export default {
       this.lstfic.forEach(fic => { if (fic.sel) this.lidf.push(fic.idf) })
       this.step = 4
       this.ui.etf = 0
-      const fic = await Note.nouvFic(this.nomfic, this.info || '', this.fic.lg, this.fic.type, this.fic.u8)
+      const fic = await this.nSt.note.nouvFic(this.nomfic, this.info || '', this.fic.lg, this.fic.type, this.fic.u8)
       const dv2 = fic.lg - this.nSt.note.volLidf(this.lidf)
 
       if (dv2 > 0) {

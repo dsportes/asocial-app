@@ -1511,8 +1511,9 @@ export class Note extends GenDoc {
     this.mfa = new Map()
     if (this.v2) {
       const map = row.mfas ? decode(row.mfas) : {}
-      for (const idx in map) {
-        this.mfa.set(parseInt(idf), decode(await decrypter(cle, map[idf].datas)))
+      for (const idf in map) {
+        const [lg, x] = map[idf]
+        this.mfa.set(parseInt(idf), decode(await decrypter(this.cle, x)))
       }
     }
     this.setSmc()
@@ -1603,7 +1604,7 @@ export class Note extends GenDoc {
     return arg ? await crypter(cle, new Uint8Array(encode(arg))) : null
   }
 
-  static async nouvFic (nom, info, lg, type, u8) {
+  async nouvFic (nom, info, lg, type, u8) {
     // Deux propriétés ajoutées : idf, u8 (contenu du fichier gzippé crypté)
     const fic = { nom, info, lg, type, u8 }
     fic.idf = rnd6()

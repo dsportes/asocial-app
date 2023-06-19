@@ -31,10 +31,10 @@
             <template v-slot:header>
               <q-item-section>
                 <div class="row justify-between items-center">
-                  <div class="col titre-lg text-bold">{{it.n}}</div>
+                  <div class="col titre-lg text-bold">{{it.nom}}</div>
                   <div class="col-auto row items-center">
                     <div class="col fs-md q-mr-md">
-                      {{$t('PNFnbv', PNFit.l.length, { count: PNFit.l.length})}}
+                      {{$t('PNFnbv', it.l.length, { count: it.l.length})}}
                     </div>
                   </div>
                 </div>
@@ -52,7 +52,7 @@
                   <div class="col">
                     <span class="text-bold q-pr-lg">{{f.info}}</span>
                     <span class="fs-md">{{edvol(f.lg)}} - {{f.type}} - </span>
-                    <span class="font-mono fs-sm">{{f.idf}}</span>
+                    <span class="font-mono fs-sm">#{{f.idf}}</span>
                   </div>
                   <div class="col-auto font-mono fs-sm">{{dhcool(f.dh)}}</div>
                 </div>
@@ -90,6 +90,7 @@
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
+import { edvol, dhcool } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import ToggleBtn from '../components/ToggleBtn.vue'
@@ -115,6 +116,12 @@ export default {
 
   methods: {
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
+    avidf () {
+
+    },
+    avnom () {
+
+    },
     async valider () {
 
       MD.fD()
@@ -171,7 +178,7 @@ export default {
       const mnom = {}
       for (const [idf, x] of n.mfa) {
         /* mfa : Map de clé idf : { nom, info, dh, type, gz, lg, sha } */
-        const f = s.mfa.get(idf)
+        const f = n.mfa.get(idf)
         let e = mnom[f.nom]; if (!e) { e = []; mnom[f.nom] = e; lst.push(f.nom) }
         const av = avn && (avn.lidf.indexOf(idf) !== -1) ? true : false
         e.push({ ...f, idf, av })
@@ -180,9 +187,8 @@ export default {
       const res = []
       lst.forEach(nom => {
         const l = mnom[nom]
-        const avn = avn && avn.mnom[nom] ? true : false
         l.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh > b.dh ? -1 : 0) })
-        res.push({ n, l, av: avs && avs.mnom[n], avn })
+        res.push({ nom, l, avn: avn && avn.mnom[n] ? true : false })
       })
       return res
     }
@@ -214,7 +220,7 @@ export default {
       nouveaufichier, ovnouveaufichier,
       ui, session, nSt, aSt, gSt, avnSt,
       exv, avatar, groupe, state,
-      MD, ergrV2
+      MD, ergrV2, edvol, dhcool
     }
   }
 
