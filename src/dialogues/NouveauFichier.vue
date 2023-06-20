@@ -43,7 +43,7 @@
         </q-step>
 
         <q-step :name="3" title="Versions antérieures à supprimer" icon="check" :done="step > 3">
-          <div v-if="!lidf.length" class="titre-md text-italic">{{$t('PNFnv11')}}
+          <div v-if="!lstfic.length" class="titre-md text-italic">{{$t('PNFnv11')}}
             <span class="font-mono q-mx-sm text-bold q-px-sm">{{nomfic}}</span>
           </div>
           <div v-else class="titre-md text-italic">
@@ -52,7 +52,7 @@
             <br/>
             <span>{{$t('PNFnv13')}}</span>
           </div>
-          <div v-if="!lidf.length" class="fs-md q-my-md">
+          <div v-if="lstfic.length" class="fs-md q-my-md">
             <div v-for="f in lstfic" :key="f.idf" class="row items-center">
               <q-checkbox class="col-1" v-model="f.sel" dense @click="calculvol" />
               <div class="col-5">{{f.info}}</div>
@@ -144,7 +144,9 @@ export default {
       return /[<>:"/\\|?*\x00-\x1F]/.test(val) ? this.$t('PNFnv6') : true
     },
     async valider () {
-      this.lstfic.forEach(fic => { if (fic.sel) this.lidf.push(fic.idf) })
+      this.lstfic.forEach(fic => { 
+        if (fic.sel) this.lidf.push(fic.idf)
+      })
       this.step = 4
       this.ui.etf = 0
       const fic = await this.nSt.note.nouvFic(this.nomfic, this.info || '', this.fic.lg, this.fic.type, this.fic.u8)
@@ -179,7 +181,7 @@ export default {
       this.volsupp = 0
       for (const [idf, fic] of this.nSt.note.mfa) {
         if (fic.nom === this.nomfic) {
-          this.lstfic.push({ sel: false, idf: fic.idf, info: fic.info, lg: fic.lg, dh: fic.dh })
+          this.lstfic.push({ sel: false, idf, info: fic.info, lg: fic.lg, dh: fic.dh })
         }
       }
       this.lstfic.sort((a, b) => a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1))
@@ -187,6 +189,7 @@ export default {
 
     calculvol () {
       this.volsupp = 0
+      this.lidf = []
       this.lstfic.forEach(fic => { if (fic.sel) this.volsupp += fic.lg })
     }
   },

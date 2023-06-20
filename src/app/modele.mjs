@@ -1617,7 +1617,10 @@ export class Note extends GenDoc {
 
   volLidf (lidf) {
     let v = 0
-    lidf.forEach(idf => { v += this.mfa.get(idf).lg })
+    lidf.forEach(idf => { 
+      const f = this.mfa.get(idf)
+      if (f)v += f.lg
+    })
     return v
   }
 

@@ -913,7 +913,7 @@ export default {
   PNFnv10: 'Versions antérieures à supprimer',
   PNFnv11: 'Aucune version antérieure attachée n\'a pour nom',
   PNFnv12: 'Version(s) antérieure(s) attachée(s) ayant pour nom',
-  PNFnv13: '. Cocher ceux à SUPPRIMER (si le chargement s\'est bien effectué)',
+  PNFnv13: 'Cocher ceux à SUPPRIMER. Ils ne le seront QUE si l\'enregistrement s\'est bien effectué.',
   PNFnv14: 'Volume supprimé : {0}',
   PNFnv15: 'Suivi de l\'opération',
   PNFnv15a: 'Opération impossible : le compte dépasserait son quota de volume de fichiers de {0} bytes.',

@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { ID, AppExc, appexc, AMJ, Compteurs } from './api.mjs'
-import { $t, hash, inverse } from './util.mjs'
+import { $t, hash, inverse, sleep } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, Compta, Note,
@@ -1553,19 +1553,18 @@ export class NouveauFichier extends OperationUI {
       - sessionId
       - id, ids : du secret
       - idh : id de l'hébergeur pour une note groupe
-      - dv2 : variation de volume v2
       - idf : identifiant du fichier
       - emap : entrée (de clé idf) de la map des fichiers attachés [lg, data]
-      Retour: sessionId, dh
-      Exceptions :
-      - A_SRV, '25-Secret non trouvé'
-      - volume en excédent
+      - lidf : liste des fichiers à supprimer
+      La variation de volume v2 est calculée sous contrôle transactionnel
+      en relisant mafs (dont les lg).
+      Retour: aucun
       */
       const emap = await note.toRowMfa(fic) // [lg, x]
-      const args2 = { token: session.authToken, id, ids, idf, idh, dv2, emap, lidf }
+      const args2 = { token: session.authToken, id, ids, idf, idh, emap, lidf }
       this.tr(await post(this, 'ValiderUpload', args2))
       ui.setEtf(4)
-      await sleep(1000)
+      // await sleep(1000)
       this.finOK()
     } catch (e) {
       await this.finKO(e)
