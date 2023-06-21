@@ -268,6 +268,11 @@ export function rnd6 () {
   return r
 }
 
+export function suffixe (int) {
+  const s = '0000' + int
+  return s.substring(s.length - 4, s.length)
+}
+
 /* retourne un safe integer (53 bits) hash:
 - d'un string
 - d'un u8

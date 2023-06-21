@@ -31,24 +31,25 @@
             <span class="q-my-sm q-px-sm text-negative bg-yellow text-bold">{{interdits}}</span>
             {{$t('PNFnv5')}} 
           </div>
-          <q-input dense v-model="nomfic" :label="$t('PNFnv7')" :rules="[r1, r2]"/>
+          <q-input dense v-model="nfic" :label="$t('PNFnv7')" :rules="[r1, r2]"/>
           <q-separator/>
           <div class="titre-md">{{$t('PNFnv8')}}</div>
-          <q-input dense v-model="info" :label="$t('PNFnv9')" :rules="[r1, r2]"/>
+          <q-input dense v-model="info" :label="$t('PNFnv9')" style="width:25rem"
+            :suffix="sfx" :rules="[r1, r2]"/>
           <q-stepper-navigation class="row q-gutter-md justify-end">
             <q-btn flat @click="MD.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
             <q-btn flat @click="step=1" color="primary" :label="$t('precedent')" class="q-ml-sm" />
-            <q-btn flat @click="step=3" :disable="!nomfic" color="primary" :label="$t('continuer')" class="q-ml-sm" />
+            <q-btn flat @click="step=3" :disable="!nfic" color="primary" :label="$t('continuer')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
 
         <q-step :name="3" title="Versions antérieures à supprimer" icon="check" :done="step > 3">
           <div v-if="!lstfic.length" class="titre-md text-italic">{{$t('PNFnv11')}}
-            <span class="font-mono q-mx-sm text-bold q-px-sm">{{nomfic}}</span>
+            <span class="font-mono q-mx-sm text-bold q-px-sm">{{nfic}}</span>
           </div>
           <div v-else class="titre-md text-italic">
             <span>{{$t('PNFnv12')}}</span>
-            <span class="font-mono q-mx-sm text-bold q-px-sm">{{nomfic}}</span>
+            <span class="font-mono q-mx-sm text-bold q-px-sm">{{nfic}}</span>
             <br/>
             <span>{{$t('PNFnv13')}}</span>
           </div>
@@ -85,10 +86,10 @@
 </template>
 
 <script>
-import { reactive } from 'vue'
+import { reactive, toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { afficherDiag, edvol, dhcool, readFile } from '../app/util.mjs'
-import { MD, Note } from '../app/modele.mjs'
+import { afficherDiag, edvol, dhcool, readFile, rnd6, suffixe } from '../app/util.mjs'
+import { MD } from '../app/modele.mjs'
 import { $t } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NouveauFichier } from '../app/operations.mjs'
@@ -96,21 +97,21 @@ import { NouveauFichier } from '../app/operations.mjs'
 export default {
   name: 'NouveauFichier',
 
-  props: { },
+  props: { nomfic: String },
 
   components: { BoutonHelp },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    valide () { return this.fic.lg && this.nomfic && this.r1(this.nomfic) === true && this.r1(this.info) === true }
+    valide () { return this.fic.lg && this.nfic && this.r1(this.nfic) === true && this.r1(this.info) === true }
   },
 
   watch: {
     async fileList (file) {
       if (file) {
         const { size, name, type, u8 } = await readFile(file, true)
-        this.fic.nom = name
-        this.fic.info = ''
+        this.fic.nom = this.nomfic || name
+        this.fic.info = this.nomfic ? name : ''
         this.fic.lg = size
         this.fic.type = type
         this.fic.u8 = u8
@@ -118,8 +119,15 @@ export default {
     },
     step (s) {
       if (s === 1) { this.fileList = null; this.resetFic(); return }
-      if (s === 2) { this.nomfic = this.fic.nom; this.info = this.fic.info || '' }
-      if (s === 3) { this.getLstfic() }
+      if (s === 2) { 
+        this.idf = rnd6()
+        this.nfic = this.fic.nom
+        this.sfx = '#' + suffixe(this.idf)
+        this.info = this.fic.info || ''
+      }
+      if (s === 3) {
+        this.getLstfic() 
+      }
     }
   },
 
@@ -128,7 +136,7 @@ export default {
       etapes: [this.$t('PNFnvs0'), this.$t('PNFnvs1'), this.$t('PNFnvs2')],
       step: 1,
       fileList: null,
-      nomfic: this.nom,
+      idf: 0,
       lidf: [],
       lstfic: [],
       volsupp: 0,
@@ -149,7 +157,13 @@ export default {
       })
       this.step = 4
       this.ui.etf = 0
-      const fic = await this.nSt.note.nouvFic(this.nomfic, this.info || '', this.fic.lg, this.fic.type, this.fic.u8)
+      const fic = await this.nSt.note.nouvFic(
+        this.idf, 
+        this.nfic, 
+        (this.info || '') + this.sfx,
+        this.fic.lg, 
+        this.fic.type, 
+        this.fic.u8)
       const dv2 = fic.lg - this.nSt.note.volLidf(this.lidf)
 
       if (dv2 > 0) {
@@ -194,22 +208,15 @@ export default {
     }
   },
 
-  setup () {
+  setup (props) {
     const ui = stores.ui
     const nSt = stores.note
     const aSt = stores.avatar
     const gSt = stores.groupe
     const session = stores.session
-    /*
-    const etf = computed({
-      get: () => $store.state.ui.etapefichier,
-      set: (val) => $store.commit('ui/majetapefichier', val)
-    })
-    const copiercollerfic = computed({
-      get: () => $store.state.ui.copiercollerfic,
-      set: (val) => $store.commit('ui/majcopiercollerfic', val)
-    })
-    */
+
+    const nomfic = toRef(props, 'nomfic')
+    const nfic = ref(nomfic.value)
 
     const fic = reactive({ nom: '', info: '', lg: 0, type: '', u8: null })
 
@@ -218,8 +225,8 @@ export default {
         if (name === 'copiercollerfic') {
           const ap = args[0]
           if (ap !== true && ap !== null) {
-            fic.nom = ap.nom
-            fic.info = ap.info
+            fic.nom = nomfic.value || ap.nom
+            fic.info = ap.info || ap.nom
             fic.lg = ap.lg
             fic.type = ap.type
             fic.u8 = ap.u8
@@ -233,7 +240,7 @@ export default {
     }
 
     function selFic () {
-      /*
+      /* Sélectionner dans le "presse-papier" : TODO
       $store.commit('ui/majdialogueftlocal', true)
       $store.commit('ui/majtabftlocal', 'fichiers')
       $store.commit('ui/majcopiercollerfic', true)
@@ -244,6 +251,7 @@ export default {
 
     return {
       nSt, aSt, gSt, ui, session, MD, edvol, dhcool,
+      nfic,
       fic,
       resetFic,
       selFic

@@ -23,7 +23,7 @@
   <q-page-container>
     <q-page class="q-pa-xs column items-center">
       <q-btn flat dense color="primary" class="q-mt-sm" size="md" icon="add"
-        label="Ajouter un fichier" @click="nomfic='';ovnouveaufichier()"/>
+        :label="$t('PNFnvaj')" @click="nomfic='';ovnouveaufichier()"/>
       <div v-for="(it, idx) in state.listefic" :key="it.nom" class="full-width">
         <div class="row">
           <q-expansion-item :default-opened="!idx" group="fnom" class="col" switch-toggle-side
@@ -36,6 +36,8 @@
                     <div class="col fs-md q-mr-md">
                       {{$t('PNFnbv', it.l.length, { count: it.l.length})}}
                     </div>
+                    <q-btn dense color="primary" class="q-mt-sm" size="sm" icon="add"
+                      @click="nomfic=it.nom;ovnouveaufichier()"/>
                   </div>
                 </div>
               </q-item-section>
@@ -79,7 +81,7 @@
   </q-page-container>
 
   <q-dialog v-model="nouveaufichier" persistent>
-    <nouveau-fichier/>
+    <nouveau-fichier :nomfic="nomfic"/>
   </q-dialog>
 
 </q-layout>
@@ -122,10 +124,74 @@ export default {
     avnom () {
 
     },
-    async valider () {
+    async blobde (f, b) {
+      const buf = await this.nSt.note.getFichier(f.idf)
+      if (!buf || !buf.length) return null
+      const blob = new Blob([buf], { type: f.type })
+      return b ? blob : URL.createObjectURL(blob)
+    },
 
-      MD.fD()
-    }
+    wop (url) { // L'appel direct de wndow.open ne semble pas marcher dans une fonction async. Etrange !
+      window.open(url, '_blank')
+    },
+
+    stf1 (f) { // visibilité d'un fichier
+      if (this.mode === 4) {
+        afficherdiagnostic('Les fichiers attachés au secret ne sont pas affichables en mode dégradé visio')
+        return false
+      }
+      if (this.mode === 3) {
+        const avs = this.state.avs
+        const b = avs && ((avs.lidf.indexOf(f.idf) !== -1) || (avs.mnom[f.nom] === f.idf))
+        if (!b) {
+          afficherdiagnostic('Ce fichier n\'a pas été déclaré affichable en mode avion')
+          return false
+        }
+      }
+      return true
+    },
+
+    async copierFic (f) {
+      if (!this.stf1(f)) return
+      const u8 = await this.secret.getFichier(f.idf, this.avatar.id)
+      if (!u8) {
+        afficherdiagnostic('Contenu du fichier non disponible (corrompu ? effacé ?)')
+        return
+      }
+      await new OpFLins().run(f.nom, f.info, f.type, u8)
+      this.$q.dialog({
+        dark: true,
+        title: 'Fichier copié dans le presse-papier',
+        cancel: { label: 'Ouvrir le presse-papier', flat: true, color: 'primary' },
+        ok: { color: 'primary', flat: true, label: 'OK' },
+        persistent: true
+      }).onOk(async () => {
+      }).onCancel(() => {
+        this.ouvrirpp()
+      }).onDismiss(() => {
+      })
+    },
+
+    async affFic (f) {
+      if (!this.stf1(f)) return
+      const url = await this.blobde(f)
+      if (url) {
+        setTimeout(() => { this.wop(url) }, 500)
+      } else {
+        afficherdiagnostic('Contenu du fichier non disponible (corrompu ? effacé ?)')
+      }
+    },
+
+    async enregFic (f) {
+      if (!this.stf1(f)) return
+      const blob = await this.blobde(f, true)
+      if (blob) {
+        saveAs(blob, this.secret.nomFichier(f.idf))
+      } else {
+        afficherdiagnostic('Contenu du fichier non disponible (corrompu ? effacé ?)')
+      }
+    },
+
   },
 
   data () {

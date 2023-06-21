@@ -899,6 +899,7 @@ export default {
   PNFsuppr: 'Suppr',
 
   PNFnv: 'Nouveau fichier attaché',
+  PNFnvaj: 'Ajouter un fichier',
   PNFnv1: 'Sélection du fichier',
   PNFnv2: 'Choisir un fichier dans le presse-papier',
   PNFnv3: 'Choisir un fichier dans le presse-papier',
