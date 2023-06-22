@@ -32,7 +32,7 @@ export const useGroupeStore = defineStore('groupe', {
         return state.map.get(id)
       }
     },
-    
+
     nbInvits: (state) => {
       let n = 0
       state.invits.forEach(s => { n += s.size })
@@ -154,6 +154,26 @@ export const useGroupeStore = defineStore('groupe', {
       return [lc, la]
     },
 
+    /* Retour true si un des avatars du compte a l'exclusivité */
+    excluEstAvc: (state) => { return (id) => {
+        const e = state.map.get(id)
+        if (!e) return false
+        for (const [ids, m] of e.membres) if (m.estAc) return true
+        return false
+      }
+    },
+
+    /* Retour true si un des avatars du compte peut éditer (auteur / animateur) */
+    avcAA: (state) => { return (id) => {
+        const e = state.map.get(id)
+        if (!e) return false
+        const ast = e.groupe.ast
+        for (const [ids, m] of e.membres) 
+          if (m.estAc && ast[ids] >= 31 && ast[ids] <= 32) return true
+        return false
+      }
+    },
+  
     /* Map par im des { na, st } des avc membres du groupe */
     imNaStAvc: (state) => { return (id) => {
         const r = new Map()

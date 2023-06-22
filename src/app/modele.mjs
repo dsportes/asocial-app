@@ -1657,10 +1657,17 @@ export class Note extends GenDoc {
   nomFichier (idf) {
     const f = this.mfa.get(idf)
     if (!f) return '' + idf
-    const i = f.nom.lastIndexOf('.')
+    let i = f.nom.lastIndexOf('.')
     const ext1 = i === -1 ? '' : f.nom.substring(i)
-    const ext2 = '' // TODO
-    return f.nom + '#' + f.info + '@' + idToSid(idf) + ext
+    const s1 =  i === -1 ? f.nom : f.nom.substring(0, i)
+    i = f.info.lastIndexOf('#')
+    const pfx = i === -1 ? '' : f.info.substring(i)
+    const s = i === -1 ? f.info : f.info.substring(0, i)
+    i = s.lastIndexOf('.')
+    const ext2 = i === -1 ? '' : s.substring(i)
+    const s2 =  i === -1 ? s : s.substring(0, i)
+    const n = s1 + '_' + s2 + pfx + (ext2 || ext1 || '')
+    return n
   }
 }
 

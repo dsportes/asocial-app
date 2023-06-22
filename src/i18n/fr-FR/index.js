@@ -924,6 +924,8 @@ export default {
   PNFnvs2: 'Validation',
   PNFfav: 'Ce fichier n\'a pas été déclaré affichable en mode avion',
   PNFgetEr: 'Contenu du fichier non disponible (corrompu ? effacé ?)',
+  PNFsf: 'Confirmer ou infirmer la suppression du fichier',
+
   CMCtit: 'Choix des mots clés',
 
   //EditeurMd

@@ -23,7 +23,7 @@
   <q-page-container>
     <q-page class="q-pa-xs column items-center">
       <q-btn flat dense color="primary" class="q-mt-sm" size="md" icon="add"
-        :label="$t('PNFnvaj')" @click="nomfic='';ovnouveaufichier()"/>
+        :label="$t('PNFnvaj')" @click="nouveau()"/>
       <div v-for="(it, idx) in state.listefic" :key="it.nom" class="full-width">
         <div class="row">
           <q-expansion-item :default-opened="!idx" group="fnom" class="col" switch-toggle-side
@@ -37,7 +37,7 @@
                       {{$t('PNFnbv', it.l.length, { count: it.l.length})}}
                     </div>
                     <q-btn dense color="primary" class="q-mt-sm" size="sm" icon="add"
-                      @click="nomfic=it.nom;ovnouveaufichier()"/>
+                      @click="nouveau(it.nom)"/>
                   </div>
                 </div>
               </q-item-section>
@@ -84,6 +84,20 @@
     <nouveau-fichier :nomfic="nomfic"/>
   </q-dialog>
 
+  <q-dialog v-model="supprfichier" persistent>
+    <q-card class="bs petitelargeur q-pa-sm">
+      <q-card-section class="column items-center q-my-md">
+        <div class="titre-md text-center text-italic">{{$t('PNFsf')}}</div>
+        <div class="q-mt-sm fs-md font-mono text-bold">{{f.nom}} - {{f.info}}</div>
+      </q-card-section>
+      <q-card-actions vertical align="center">
+        <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
+        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfSuppr" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+
 </q-layout>
 </div>
 </template>
@@ -104,12 +118,12 @@ export default {
 
   components: { 
     BoutonHelp, NouveauFichier, ToggleBtn
-    // BoutonUndo
   },
 
   props: { ro: Number },
 
   computed: {
+    lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     modifie () { return false }
   },
@@ -119,12 +133,54 @@ export default {
 
   methods: {
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
+
+    async nouveau (nf) {
+      if (!await this.session.edit()) return
+      const er = this.erEdit()
+      if (er) { 
+        await afficherDiag(this.$t('PNOer' + er ))
+      } else {
+        this.nomfic = nf
+        this.ovnouveaufichier()
+      }
+    },
+
+    erEdit () {
+      if (this.nSt.node.type === 3) return 1
+      const g = this.nSt.node.type === 5 ? this.nSt.egr.groupe : null
+      if (!g) return 0
+      // note de groupe
+      if (g.pe === 1) return 4
+      // le membre ayant l'exclusivité est-il avatar du compte ?
+      if (this.nSt.note.im && !this.gSt.excluEstAvc(g.id)) return 8 
+      // un des avatars du compte est auteur / animateur
+      if (!this.gSt.avcAA(g.id)) return 7
+      return 0
+    },
+
+    async supprFic (f) {
+      if (!await this.session.edit()) return
+      const er = this.erEdit()
+      if (er) { 
+        await afficherDiag(this.$t('PNOer' + er ))
+      } else {
+        this.f = f
+        this.ovsupprfichier()
+      }
+    },
+
+    async cfSuppr() {
+      // await new SupprFichier().run(this.nSt.note, f.idf)
+      MD.fD()
+    },
+
     avidf () {
 
     },
     avnom () {
 
     },
+
     async blobde (f, b) {
       const buf = await this.nSt.note.getFichier(f.idf)
       if (!buf || !buf.length) return null
@@ -145,7 +201,7 @@ export default {
     },
 
     async copierFic (f) { // TODO
-      if (!await this.stf1(f)) return
+      if (!await this.stf1(f)) return // ???
       const u8 = await this.nSt.note.getFichier(f.idf)
       if (!u8) {
         await afficherDiag(this.$t('PNFgetEr'))
@@ -180,7 +236,7 @@ export default {
       if (!await this.stf1(f)) return
       const blob = await this.blobde(f, true)
       if (blob) {
-        saveAs(blob, this.secret.nomFichier(f.idf))
+        saveAs(blob, this.nSt.note.nomFichier(f.idf))
       } else {
         await afficherDiag(this.$t('PNFgetEr'))
       }
@@ -191,6 +247,7 @@ export default {
   data () {
     return {
       texte: '',
+      f: null // fichier courant
     }
   },
 
@@ -275,9 +332,11 @@ export default {
 
     const nouveaufichier = ref(false)
     function ovnouveaufichier () { MD.oD(nouveaufichier)}
+    const supprfichier = ref(false)
+    function ovsupprfichier () { MD.oD(supprfichier)}
 
     return {
-      nouveaufichier, ovnouveaufichier,
+      nouveaufichier, ovnouveaufichier, supprfichier, ovsupprfichier,
       ui, session, nSt, aSt, gSt, avnSt,
       exv, avatar, groupe, state,
       MD, ergrV2, edvol, dhcool
