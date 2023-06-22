@@ -4,15 +4,15 @@ import { appexc } from '../app/api.mjs'
 
 export const useFetatStore = defineStore('fetat', {
   state: () => ({
-    map: new Map(), // Map des Fetat, clé id
-    queue: [], // liste ordonnée des id des fichiers à charger par ordre croissant de leur dhd
+    map: new Map(), // Map des Fetat, clé idf
+    queue: [], // liste ordonnée des idf des fichiers à charger par ordre croissant de leur dhd
     echecs: new Set(), // set des ids des chargements ayant échoué
     encours: 0, // id du fetat dont le chargement est en cours
     dernierFichierCharge: { idf: 0, data: null }
   }),
 
   getters: {
-    getFetat: (state) => { return (id) => this.map.get(id) }
+    getFetat: (state) => { return (idf) => state.map.get(idf) }
   },
 
   actions: {

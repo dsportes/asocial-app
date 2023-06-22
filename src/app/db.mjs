@@ -719,7 +719,7 @@ Gestion des fichiers hors-ligne : fin de connexion et synchronisation
 /* Fin de synchronisation : map des notes notifiées */
 export async function gestionFichierSync (lst) {
   const avst = stores.avnote
-  const fest = stores.fetat
+  const fSt = stores.fetat
 
   const nvFa = []
   const nvAvs = []
@@ -739,33 +739,33 @@ export async function gestionFichierSync (lst) {
   nvAvs.forEach(avs => { avst.setAvnote(avs) })
 
   // Mise en db/store des fetat créés / supprimés
-  fest.chargementIncremental(nvFa)
+  fSt.chargementIncremental(nvFa)
 }
 
 /* Fin de connexion en mode synchronisé : notes, map par pk de toutes les notes existantes */
 export async function gestionFichierCnx (notes) {
   const fetats = {}
-  await getFetats(fetats)
+  await getFetats(fetats) // chargement depuis IDB de tous les fetats
   const avnotes = {}
-  await getAvNotes(avnotes)
+  await getAvNotes(avnotes) // changement depuis IDB de toutes les avnotes
 
   const nvFa = [] // les fetat créés ou supprimés
-  const lavs = [] //  Tous les AvNote (existant et conservé, ou créé, ou modifié)
-  const nvAvs = [] // Les AvNotes créés / modifiés / supprimés
+  const lavn = [] //  Tous les AvNote (existant et conservé, ou créé, ou modifié)
+  const nvAvn = [] // Les AvNotes créés / modifiés / supprimés
   
-  /* Parcours des AvNote existants : ils peuvent,
+  /* Parcours des AvNote existants : elles peuvent,
   - soit être détruits : la note correspondante n'existe plus ou n'a plus de fichiers
   - soit être inchangés : la note correspondante a la même version
-  - soit être "mis à jour"" : des fichiers sont à supprimer, d'autres (cités dans mnom) ont une nouvelle version
+  - soit être "mise à jour"" : des fichiers sont à supprimer, d'autres (cités dans mnom) ont une nouvelle version
   voire le cas échéant réduits au point de disparaître.
   */
   for (const pk in avnotes) {
-    const avs = avnotes[pk]
-    const s = notes[pk]
-    if (s && s.v === avs.v) { lavs.push(avs); continue } // inchangé
-    const [nv, nvf] = avs.diff(s) // nouvel AVS compte tenu du nouveau s ou de son absence (peut-être à supprimer)
-    if (!nv.suppr) lavs.push(nv) // ceux utiles seulement, pas les supprimés
-    nvAvs.push(nv) // changé, au moins la version : il y a peut-être, des idfs en plus et en moins
+    const avn = avnotes[pk]
+    const n = notes[pk]
+    if (n && n.v === avn.v) { lavn.push(avn); continue } // inchangé
+    const [nv, nvf] = avn.diff(n) // nouvel AVN compte tenu de la nouvelle note ou de son absence (peut-être à supprimer)
+    if (!nv.suppr) lavn.push(nv) // celles utiles seulement, pas les supprimées
+    nvAvn.push(nv) // changé, au moins la version : il y a peut-être, des idfs en plus et en moins
     if (nvf) for (const x of nvf) nvFa.push(x)
   }
 
@@ -776,12 +776,13 @@ export async function gestionFichierCnx (notes) {
   }
 
   // Mise à jour de IDB (fetat / fdata et avnote)
-  if (nvFa.length || nvAvs.length) await commitFic(nvAvs, nvFa)
+  if (nvFa.length || nvAvn.length) await commitFic(nvAvn, nvFa)
 
-  const avst = stores.avnote
-  lavs.forEach(avs => { avst.setAvnote(avs) })
+  const avnSt = stores.avnote
+  lavn.forEach(avn => { avnSt.setAvnote(avn) })
 
-  stores.fetat.chargementInitial(fetats)
+  const fSt = stores.fetat
+  fSt.chargementInitial(fetats)
 }
 
 /*********************************************************************
@@ -790,26 +791,30 @@ Gestion des fichiers hors-ligne : MAJ des fichiers off-line pour une note
 
 /* Session UI : MAJ des fichiers off-line pour une note */
 export async function gestionFichierMaj (note, plus, idf, nom) {
-  const avst = stores.avnote
-  const fest = stores.fetat
+  const avnSt = stores.avnote
+  const fSt = stores.fetat
 
-  const avs = avst.getAvNote(note.id, note.ns) || new AvNote().nouveau(note)
-  const [nvAvs, nvFa] = avs.maj(note, plus, idf, nom)
+  const avn = avnSt.getAvNote(note.id, note.ns) || new AvNote().nouveau(note)
+  const [nvAvn, nvFa] = avn.maj(note, plus, idf, nom)
 
   // Mise à jour de IDB (fetat / fdata et avnote)
-  if (nvFa.length || nvAvs) await commitFic(nvAvs ? [nvAvs] : [], nvFa)
+  if (nvFa.length || nvAvn) await commitFic(nvAvn ? [nvAvn] : [], nvFa)
 
   // Mise en db/store de l'AvNote créé / modifié / supprimé
-  if (nvAvs) avst.setAvnote(nvAvs)
+  if (nvAvn) avnSt.setAvnote(nvAvn)
 
-  if (nvFa.length) fest.chargementIncremental(nvFa)
+  if (nvFa.length) fSt.chargementIncremental(nvFa)
 }
 
 /*********************************************************************
 Gestion des fichiers hors-ligne : classes Fetat et Avnote
 **********************************************************************/
 
-/* classe Fetat : un fichier off-line *************************************************/
+/* classe Fetat : un fichier off-line **********************************************
+- id: id du fichier (idf)
+- ids: id de l'avatar / groupe propriétaire (id de la note à laquelle le fichier est attaché)
+- ns: id secondaire de sa note ( la note est identifiée par ids / ns)
+***/
 class Fetat {
   get table () { return 'fetat' }
   get estCharge () { return this.dhc !== 0 }
@@ -818,16 +823,16 @@ class Fetat {
 
   nouveauSuppr (idf) { this.id = idf; this.suppr = true; return this }
 
-  nouveau (s, f) {
+  nouveau (n, f) {
     this.id = f.idf
+    this.ids = n.id
     this.dhd = new Date().getTime()
     this.dhc = 0
     this.dhx = 0
     this.lg = f.lg
     this.nom = f.nom
     this.info = f.info
-    this.ids = s.id
-    this.ns = s.ns
+    this.ns = n.ids
     this.err = ''
     return this
   }
@@ -860,22 +865,24 @@ class Fetat {
     this.dhx = 0
     this.err = ''
     await commitFic([], [this])
-    stores.fetat.retry(this.id)
+    const fSt = stores.fetat
+    fSt.retry(this.id)
   }
 
   async abandon () {
-    stores.fetat.abandon(this.id)
-    let s
-    if (ID.estGroupe(ids)) {
+    const fSt = stores.fetat
+    fSt.abandon(this.id)
+    let n
+    if (ID.estGroupe(this.ids)) {
       const gSt = stores.groupe
-      s = gSt.getNote(this.ids, this.ns)
+      n = gSt.getNote(this.ids, this.ns)
     } else {      
       const aSt = stores.avatar
-      s = aSt.getNote(this.ids, this.ns)
+      n = aSt.getNote(this.ids, this.ns)
     }
-    if (!s) return
-    const nom = s.nomDeIdf(this.id)
-    await gestionFichierMaj(s, false, this.id, nom)
+    if (!n) return
+    const nom = n.nomDeIdf(this.id)
+    await gestionFichierMaj(n, false, this.id, nom)
   }
 }
 
@@ -1010,40 +1017,3 @@ class AvNote {
     return [nv, nvFa]
   }
 }
-
-const dec = new TextDecoder()
-
-function startDemon () { // TODO à reprendre
-  if (!store().state.ui.dlencours) {
-    let id = store().state.ui.chargements[0] || 0
-    store().commit('ui/majdlencours', id)
-    setTimeout(async () => {
-      while (id) {
-        const e = data.getFetat(id)
-        try {
-          let buf
-          if (dernierFichierCharge.idf === e.id) {
-            buf = dernierFichierCharge.data
-            dernierFichierCharge.data = null
-            dernierFichierCharge.idf = 0
-          } else {
-            const a = store().state.db.avatar
-            const idc = a ? a.id : data.getCompte().id
-            const args = { sessionId: data.sessionId, id: e.ids, ts: e.ns % 3, idf: e.id, idc, vt: e.lg }
-            const r = await get('m1', 'getUrl', args)
-            if (!r) throw new AppExc(E_BRO, 3, [Sid(e.id)])
-            const url = dec.decode(r)
-            buf = await getData(url)
-          }
-          await e.finChargement(buf)
-        } catch (ex) {
-          e.echecChargement(ex)
-        }
-        id = store().state.ui.chargements[0] || 0
-        store().commit('ui/majdlencours', id)
-      }
-    }, 10)
-  }
-}
-
-export const dernierFichierCharge = { idf: 0, data: null }

@@ -92,11 +92,12 @@
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
-import { edvol, dhcool } from '../app/util.mjs'
+import { edvol, dhcool, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import ToggleBtn from '../components/ToggleBtn.vue'
 import { UNITEV2 } from '../app/api.mjs'
+import { saveAs } from 'file-saver'
 
 export default {
   name: 'NoteFichier',
@@ -131,31 +132,23 @@ export default {
       return b ? blob : URL.createObjectURL(blob)
     },
 
-    wop (url) { // L'appel direct de wndow.open ne semble pas marcher dans une fonction async. Etrange !
-      window.open(url, '_blank')
-    },
-
-    stf1 (f) { // visibilité d'un fichier
-      if (this.mode === 4) {
-        afficherdiagnostic('Les fichiers attachés au secret ne sont pas affichables en mode dégradé visio')
-        return false
-      }
-      if (this.mode === 3) {
-        const avs = this.state.avs
-        const b = avs && ((avs.lidf.indexOf(f.idf) !== -1) || (avs.mnom[f.nom] === f.idf))
+    async stf1 (f) { // visibilité d'un fichier
+      if (this.session.avion) {
+        const avn = this.state.avn
+        const b = avn && ((avn.lidf.indexOf(f.idf) !== -1) || (avn.mnom[f.nom] === f.idf))
         if (!b) {
-          afficherdiagnostic('Ce fichier n\'a pas été déclaré affichable en mode avion')
+          await afficherDiag($t('PNFfav'))
           return false
         }
       }
       return true
     },
 
-    async copierFic (f) {
-      if (!this.stf1(f)) return
-      const u8 = await this.secret.getFichier(f.idf, this.avatar.id)
+    async copierFic (f) { // TODO
+      if (!await this.stf1(f)) return
+      const u8 = await this.nSt.note.getFichier(f.idf)
       if (!u8) {
-        afficherdiagnostic('Contenu du fichier non disponible (corrompu ? effacé ?)')
+        await afficherDiag(this.$t('PNFgetEr'))
         return
       }
       await new OpFLins().run(f.nom, f.info, f.type, u8)
@@ -173,22 +166,23 @@ export default {
     },
 
     async affFic (f) {
-      if (!this.stf1(f)) return
+      if (!await this.stf1(f)) return
       const url = await this.blobde(f)
       if (url) {
-        setTimeout(() => { this.wop(url) }, 500)
+        setTimeout(() => { window.open(url, '_blank') }, 500)
+        console.log(url)
       } else {
-        afficherdiagnostic('Contenu du fichier non disponible (corrompu ? effacé ?)')
+        await afficherDiag(this.$t('PNFgetEr'))
       }
     },
 
     async enregFic (f) {
-      if (!this.stf1(f)) return
+      if (!await this.stf1(f)) return
       const blob = await this.blobde(f, true)
       if (blob) {
         saveAs(blob, this.secret.nomFichier(f.idf))
       } else {
-        afficherdiagnostic('Contenu du fichier non disponible (corrompu ? effacé ?)')
+        await afficherDiag(this.$t('PNFgetEr'))
       }
     },
 

@@ -3,8 +3,7 @@ import { defineStore } from 'pinia'
 export const useAvnoteStore = defineStore('avnote', {
   state: () => ({
     map: new Map()
-    /* Map(id) est une Map(ids)
-    Identifiant : `[id, ids]` - id d'une note
+    /* Map(id) est une Map(ids) - id d'une note
     - Propriétés :
       - `lidf` : liste des identifiants des fichiers explicitement cités par leur identifiant comme étant souhaité _hors ligne_.
       - `mnom` : une map ayant,

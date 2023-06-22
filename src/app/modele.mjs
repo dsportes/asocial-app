@@ -4,6 +4,7 @@ import { $t, hash, rnd6, u8ToB64, idToSid, gzip, ungzip, ungzipT, titre } from '
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
+import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync } from './db.mjs'
 
@@ -1628,19 +1629,23 @@ export class Note extends GenDoc {
     return [fic.lg, x]
   }
 
+  nomDeIdf (idf) {
+    const f = this.mfa.get(idf)
+    return f ? f.nom : null
+  }
+
   async getFichier (idf) {
     // Obtenu localement ou par download. Fichier décrypté ET dézippé
     // idf: id du fichier
     const fSt = stores.fetat
-    const fetat = fSt.get(idf)
+    const fetat = fSt.getFetat(idf)
     const session = stores.session
-    const idc = session.compteId
     let buf = null
     if (fetat && fetat.estCharge) {
       const b = await getFichierIDB(idf)
       buf = await decrypter(this.cle, b)
-    } else if (ida && await aut(3, true)) {
-      const b = await new DownloadFichier().run(this, idf, idc)
+    } else if (session.accesNet) {
+      const b = await new DownloadFichier().run(this, idf, session.compteId)
       if (b) buf = await decrypter(this.cle, b)
     }
     if (!buf) return null
@@ -1649,6 +1654,14 @@ export class Note extends GenDoc {
     return buf2
   }
 
+  nomFichier (idf) {
+    const f = this.mfa.get(idf)
+    if (!f) return '' + idf
+    const i = f.nom.lastIndexOf('.')
+    const ext1 = i === -1 ? '' : f.nom.substring(i)
+    const ext2 = '' // TODO
+    return f.nom + '#' + f.info + '@' + idToSid(idf) + ext
+  }
 }
 
 /** Secret ****************************************************

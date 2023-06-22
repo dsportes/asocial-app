@@ -922,7 +922,8 @@ export default {
   PNFnvs0: 'Compression éventuelle et cryptage', 
   PNFnvs1: 'Transfert vers le serveur de fichiers',
   PNFnvs2: 'Validation',
-
+  PNFfav: 'Ce fichier n\'a pas été déclaré affichable en mode avion',
+  PNFgetEr: 'Contenu du fichier non disponible (corrompu ? effacé ?)',
   CMCtit: 'Choix des mots clés',
 
   //EditeurMd

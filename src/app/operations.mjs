@@ -4,11 +4,11 @@ import { encode, decode } from '@msgpack/msgpack'
 import { ID, AppExc, appexc, AMJ, Compteurs } from './api.mjs'
 import { $t, hash, inverse, sleep } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
-import { post, putData } from './net.mjs'
+import { post, putData, getData } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, Compta, Note,
   Groupe, Membre, Tribu, Tribu2, getNg, getCle, compile} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
-import { commitRows, IDBbuffer, dernierFichierCharge } from './db.mjs'
+import { commitRows, IDBbuffer } from './db.mjs'
 
 /* Opération générique ******************************************/
 export class Operation {
@@ -1521,10 +1521,8 @@ export class NouveauFichier extends OperationUI {
       if (session.synchro) {
         // on garde buf pour éviter de le recharger du serveur si le nom est disponible en mode avion
         const avn = avnSt.getAvnote(id, ids)
-        if (avn && avn.mnom[fic.nom]) {
-          dernierFichierCharge.idf = idf
-          dernierFichierCharge.data = buf
-        }
+        if (avn && avn.mnom[fic.nom])
+          avnSt.dernierFichierCharge = { idf, data: buf }
       }
 
       ui.setEtf(2)
@@ -1571,3 +1569,34 @@ export class NouveauFichier extends OperationUI {
     }
   }
 }
+
+/******************************************************
+Download fichier / getUrl
+args :
+- sessionId
+- id : id de la note
+- idf : id du fichier
+- idc : id de l'avatar demandeur
+- vt : volume du fichier (pour compta des volumes v2 transférés)
+*/
+
+export class DownloadFichier extends OperationUI {
+  constructor () { super($t('OPtfa')) }
+
+  async run (note, idf) { 
+    try {
+      const session = stores.session
+      const vt = note.mfa.get(idf).lg
+      const idc = session.compteId
+      const args = { token: session.authToken, id: note.id, idf, idc, vt }
+      const ret =  this.tr(await post(this, 'GetUrl', args))
+      if (!ret) return null
+      const url = ret.getUrl
+      const buf = await getData(url)
+      return this.finOK(buf || null)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
