@@ -112,6 +112,7 @@ import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import ToggleBtn from '../components/ToggleBtn.vue'
 import { UNITEV2 } from '../app/api.mjs'
 import { saveAs } from 'file-saver'
+import { SupprFichier } from '../app/operations.mjs'
 
 export default {
   name: 'NoteFichier',
@@ -170,7 +171,7 @@ export default {
     },
 
     async cfSuppr() {
-      // await new SupprFichier().run(this.nSt.note, f.idf)
+      await new SupprFichier().run(this.nSt.note, this.f.idf)
       MD.fD()
     },
 

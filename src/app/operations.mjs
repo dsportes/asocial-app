@@ -1527,15 +1527,13 @@ export class NouveauFichier extends OperationUI {
 
       ui.setEtf(2)
       /* Put URL ****************************************
-      args :
-      - sessionId
-      - id : id de la note
-      - idh : id de l'hébergeur pour une note groupe
-      - dv2 : variation de volume v2
-      - idf : identifiant du fichier
-      Retour: sessionId, dh
+      args.token: éléments d'authentification du compte.
+      args.id : id de la note
+      args.idh : id de l'hébergeur pour une note groupe
+      args.dv2 : variation de volume v2
+      args.idf : identifiant du fichier
+      Retour:
       - url : url à passer sur le PUT de son contenu
-      Exceptions : volume en excédent
       */
       const args = { token: session.authToken, id, idh, idf, dv2 }
       const ret = this.tr(await post(this, 'PutUrl', args))
@@ -1547,13 +1545,12 @@ export class NouveauFichier extends OperationUI {
       ui.setEtf(3)
 
       /* validerUpload ****************************************
-      args :
-      - sessionId
-      - id, ids : du secret
-      - idh : id de l'hébergeur pour une note groupe
-      - idf : identifiant du fichier
-      - emap : entrée (de clé idf) de la map des fichiers attachés [lg, data]
-      - lidf : liste des fichiers à supprimer
+      args.token: éléments d'authentification du compte.
+      args.id, ids : de la note
+      args.idh : id de l'hébergeur pour une note groupe
+      args.idf : identifiant du fichier
+      args.emap : entrée (de clé idf) de la map des fichiers attachés [lg, data]
+      args.lidf : liste des fichiers à supprimer
       La variation de volume v2 est calculée sous contrôle transactionnel
       en relisant mafs (dont les lg).
       Retour: aucun
@@ -1572,12 +1569,13 @@ export class NouveauFichier extends OperationUI {
 
 /******************************************************
 Download fichier / getUrl
-args :
-- sessionId
-- id : id de la note
-- idf : id du fichier
-- idc : id de l'avatar demandeur
-- vt : volume du fichier (pour compta des volumes v2 transférés)
+GetUrl : retourne l'URL de get d'un fichier
+Comme c'est un GET, les arguments sont en string (et pas en number)
+args.token: éléments d'authentification du compte.
+args.id : id de la note
+args.idf : id du fichier
+args.idc : id du compte demandeur
+args.vt : volume du fichier (pour compta des volumes v2 transférés)
 */
 
 export class DownloadFichier extends OperationUI {
@@ -1600,3 +1598,26 @@ export class DownloadFichier extends OperationUI {
   }
 }
 
+/******************************************************
+args.token: éléments d'authentification du compte.
+args.id, ids : de la note
+args.idh : id de l'hébergeur pour une note groupe
+args.idf : identifiant du fichier à supprimer
+Retour: aucun
+*/
+export class SupprFichier extends OperationUI {
+  constructor () { super($t('OPsfa')) }
+
+  async run (note, idf) { 
+    try {
+      const session = stores.session
+      const gSt = stores.groupe
+      const idh = ID.estGroupe(note.id) ? gSt.getGroupe(note.id).idh : session.compteId
+      const args = { token: session.authToken, id: note.id, ids: note.ids, idf, idh }
+      this.tr(await post(this, 'SupprFichier', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
