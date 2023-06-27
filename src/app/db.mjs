@@ -652,7 +652,7 @@ async function commitFic (lstAvNotes, lstFetats) { // lst : array / set d'idfs
     for (const obj of lstAvNotes) {
       const row = {}
       row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
-      row.id2 = u8ToB64(await crypter(data.clek, '' + obj.id2, 1), true)
+      row.ids = u8ToB64(await crypter(session.clek, '' + obj.ids, 1), true)
       row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
       x.push(row)
       if (debug) console.log('IDB avnote to ', obj.suppr ? 'DEL' : 'PUT', obj.pk)
@@ -674,7 +674,7 @@ async function commitFic (lstAvNotes, lstFetats) { // lst : array / set d'idfs
         if (row.data) {
           await db.avnote.put(row)
         } else {
-          await db.avnote.where({ id: row.id, id2: row.id2 }).delete()
+          await db.avnote.where({ id: row.id, ids: row.ids }).delete()
         }
       }
       for (const row of y) {
@@ -794,7 +794,7 @@ export async function gestionFichierMaj (note, plus, idf, nom) {
   const avnSt = stores.avnote
   const fSt = stores.fetat
 
-  const avn = avnSt.getAvNote(note.id, note.ns) || new AvNote().nouveau(note)
+  const avn = avnSt.getAvnote(note.id, note.ns) || new AvNote().nouveau(note)
   const [nvAvn, nvFa] = avn.maj(note, plus, idf, nom)
 
   // Mise à jour de IDB (fetat / fdata et avnote)
@@ -847,7 +847,7 @@ class Fetat {
     return this
   }
 
-  async chargementOk(buf) {
+  async chargementOK(buf) {
     this.dhc = new Date().getTime()
     this.err = ''
     this.dhx = 0
@@ -889,7 +889,7 @@ class Fetat {
 /* AvNote ****************************************************
 Un objet de classe `AvNote` existe pour chaque note pour laquelle le compte a souhaité
 avoir au moins un des fichiers attachés disponible en mode avion.
-- Identifiant : `[id, ns]`
+- Identifiant : `[id, ids]`
 - Propriétés :
   - `lidf` : liste des identifiants des fichiers explicitement cités par leur identifiant comme étant souhaité _hors ligne_.
   - `mnom` : une map ayant,
@@ -945,7 +945,7 @@ class AvNote {
     }
     if (x2.size && s) {
       for (const idf of x2) {
-        const f = s.mfa[idf]
+        const f = s.mfa.get(idf)
         nvFa.push(new Fetat().nouveau(s, f))
       }
     }
@@ -971,8 +971,8 @@ class AvNote {
       }
       for (const nx in this.mnom) {
         idfs.add(this.mnom[nx])
-        const f = s.dfDeNom(nx)
-        if (f) { nv.mnom[nx] = f.idf; idfs2.add(f.idf); n++ }
+        const idf = s.idfDeNom(nx)
+        if (idff) { nv.mnom[nx] = idf; idfs2.add(idf); n++ }
       }
     }
     if (!n && !nv.lidf.length) nv.suppr = true // AvNote à détruire (plus aucun idf n'existe dans s, s'il y a un s)
@@ -1004,12 +1004,12 @@ class AvNote {
     for (const nx in this.mnom) {
       idfs.add(this.mnom[nx]) // complète la liste des idf (avant)
       if (nx === nom && !plus) continue // on ne reconduit pas le nom s'il est enlevé
-      const f = s.dfDeNom(nx)
-      if (f) { idfs2.add(f.idf); nv.mnom[nx] = f.idf; n++ }
+      const idf = s.idfDeNom(nx)
+      if (idf) { idfs2.add(idf); nv.mnom[nx] = idf; n++ }
     }
     if (plus && nom && !nv.mnom[nom]) {
-      const f = s.dfDeNom(nom)
-      if (f) { idfs2.add(f.idf); nv.mnom[nom] = f.idf; n++ }
+      const idf = s.idfDeNom(nom)
+      if (idf) { idfs2.add(idf); nv.mnom[nom] = idf; n++ }
     }
     if (!n && !nv.lidf.length) nv.suppr = true // AvNote à détruire (plus aucun idf n'existe dans s, s'il y a un s)
 

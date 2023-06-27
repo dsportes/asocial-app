@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import { getData } from '../app/net.mjs'
-import { appexc } from '../app/api.mjs'
+import { getData, post } from '../app/net.mjs'
+import { appexc, AppExc } from '../app/api.mjs'
+import stores from './stores.mjs'
 
 export const useFetatStore = defineStore('fetat', {
   state: () => ({
@@ -79,17 +80,16 @@ export const useFetatStore = defineStore('fetat', {
               this.dernierFichierCharge.data = null
               this.dernierFichierCharge.idf = 0
             } else {
-              /* imputation sur LA COMPTA de l'avatar courant (s'il y en a) 
-              ou sur celle de l'avatar primaire du compte. idc : id de la compta */
-              const idc = session.avatarId || session.compteId
-              const args = { sessionId: data.sessionId, id: e.ids, ts: e.ns % 3, idf: e.id, idc, vt: e.lg }
-              const r = await get('m1', 'getUrl', args)
-              if (!r) throw new AppExc(E_BRO, 3, [Sid(e.id)])
-              const url = dec.decode(r)
+              /* imputation sur LA COMPTA du compte. idc : id de la compta */
+              const idc = session.compteId
+              const args = { token: session.authToken, id: e.ids, idf: e.id, idc, vt: e.lg }
+              const ret =  await post(null, 'GetUrl', args)
+              if (!ret) throw new AppExc(E_BRO, 3, [e.id])
+              const url = ret.getUrl
               buf = await getData(url)
             }
             this.queue.splice(0, 1)
-            if (session.debug) console.log(`OK chargement : ${Sid(e.idf)} ${e.nom}#${e.info}`)
+            if (session.debug) console.log(`OK chargement : ${e.idf} ${e.nom}#${e.info}`)
             e.chargementOK(buf) // Maj IDB de fetat et fdata conjointement
           } catch (ex) {
             this.echecs.add(this.encours)

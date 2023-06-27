@@ -925,6 +925,8 @@ export default {
   PNFfav: 'Ce fichier n\'a pas été déclaré affichable en mode avion',
   PNFgetEr: 'Contenu du fichier non disponible (corrompu ? effacé ?)',
   PNFsf: 'Confirmer ou infirmer la suppression du fichier',
+  PNFav1: 'La dernière version du nom ci-dessous ne SERA PLUS automatiquement accessible en mode avion lors de l\'ajout d\'une nouvelle version.',
+  PNFav2: 'Le ci-dessous ne SERA PLUS accessible en mode avion.',
 
   CMCtit: 'Choix des mots clés',
 

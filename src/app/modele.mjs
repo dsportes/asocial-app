@@ -1514,7 +1514,9 @@ export class Note extends GenDoc {
       const map = row.mfas ? decode(row.mfas) : {}
       for (const idf in map) {
         const [lg, x] = map[idf]
-        this.mfa.set(parseInt(idf), decode(await decrypter(this.cle, x)))
+        const f = decode(await decrypter(this.cle, x))
+        f.idf = parseInt(idf)
+        this.mfa.set(f.idf, f)
       }
     }
     this.setSmc()
@@ -1669,6 +1671,17 @@ export class Note extends GenDoc {
     const n = s1 + '_' + s2 + pfx + (ext2 || ext1 || '')
     return n
   }
+
+    // fichier le plus récent portant le nom donné
+    idfDeNom (nom) {
+      let idfx = 0
+      let dh = 0
+      for (const [idf, x] of this.mfa) {
+        if (x.nom !== nom) continue
+        if (!idfx || dh < x.dh) { idfx = idf; dh = x.dh }
+      }
+      return idfx
+    }  
 }
 
 /** Secret ****************************************************

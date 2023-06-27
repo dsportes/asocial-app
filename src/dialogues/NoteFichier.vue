@@ -97,6 +97,31 @@
     </q-card>
   </q-dialog>
 
+  <q-dialog v-model="confirmav1" persistent>
+    <q-card class="bs petitelargeur q-pa-sm">
+      <q-card-section class="column items-center q-my-md">
+        <div class="titre-md text-center text-italic">{{$t('PNFav1')}}</div>
+        <div class="q-mt-sm fs-md font-mono text-bold">{{f.nom}}</div>
+      </q-card-section>
+      <q-card-actions vertical align="center">
+        <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
+        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfAvnom" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="confirmav2" persistent>
+    <q-card class="bs petitelargeur q-pa-sm">
+      <q-card-section class="column items-center q-my-md">
+        <div class="titre-md text-center text-italic">{{$t('PNFav2')}}</div>
+        <div class="q-mt-sm fs-md font-mono text-bold">{{f.nom}} - {{f.info}}</div>
+      </q-card-section>
+      <q-card-actions vertical align="center">
+        <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
+        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfAvidf" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 
 </q-layout>
 </div>
@@ -113,6 +138,7 @@ import ToggleBtn from '../components/ToggleBtn.vue'
 import { UNITEV2 } from '../app/api.mjs'
 import { saveAs } from 'file-saver'
 import { SupprFichier } from '../app/operations.mjs'
+import { gestionFichierMaj } from '../app/db.mjs'
 
 export default {
   name: 'NoteFichier',
@@ -175,11 +201,34 @@ export default {
       MD.fD()
     },
 
-    avidf () {
-
+    avidf ({val, args}) {
+      if (!val) {
+        this.f = args
+        this.ovconfirmav2()
+      } else {
+        setTimeout(async () => {
+          await gestionFichierMaj(this.nSt.note, true, args.idf, '')
+        }, 50)
+      }
     },
-    avnom () {
 
+    async cfAvidf () {
+      await gestionFichierMaj(this.nSt.note, false, this.f.idf, '')
+    },
+
+    avnom ({val, args}) {
+      if (!val) {
+        this.it = args
+        this.ovconfirmav1()
+      } else {
+        setTimeout(async () => {
+          await gestionFichierMaj(this.nSt.note, true, 0, args.nom)
+        }, 50)
+      }
+    },
+
+    async cfAvnom () {
+      await gestionFichierMaj(this.nSt.note, false, 0, this.it.nom)
     },
 
     async blobde (f, b) {
@@ -248,7 +297,8 @@ export default {
   data () {
     return {
       texte: '',
-      f: null // fichier courant
+      f: null, // fichier courant
+      it: null // item courant
     }
   },
 
@@ -288,7 +338,7 @@ export default {
     function initState () {
       const n = nSt.note
       state.avn = avnSt.getAvnote(n.id, n.ids)
-      state.listefic = listefichiers(n, state.av)
+      state.listefic = listefichiers(n, state.avn)
     }
 
     function listefichiers (n, avn) {
@@ -306,7 +356,7 @@ export default {
       lst.forEach(nom => {
         const l = mnom[nom]
         l.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh > b.dh ? -1 : 0) })
-        res.push({ nom, l, avn: avn && avn.mnom[n] ? true : false })
+        res.push({ nom, l, avn: avn && avn.mnom[nom] ? true : false })
       })
       return res
     }
@@ -335,9 +385,14 @@ export default {
     function ovnouveaufichier () { MD.oD(nouveaufichier)}
     const supprfichier = ref(false)
     function ovsupprfichier () { MD.oD(supprfichier)}
+    const confirmav1 = ref(false)
+    function ovconfirmav1 () { MD.oD(confirmav1)}
+    const confirmav2 = ref(false)
+    function ovconfirmav2 () { MD.oD(confirmav2)}
 
     return {
       nouveaufichier, ovnouveaufichier, supprfichier, ovsupprfichier,
+      confirmav1, ovconfirmav1, confirmav2, ovconfirmav2,
       ui, session, nSt, aSt, gSt, avnSt,
       exv, avatar, groupe, state,
       MD, ergrV2, edvol, dhcool
