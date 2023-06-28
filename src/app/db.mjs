@@ -725,7 +725,7 @@ export async function gestionFichierSync (lst) {
   const nvAvs = []
   for (const pk in lst) {
     const s = lst[pk]
-    const avs = avst.getAvNote(s.id, s.ns)
+    const avs = avst.getAvnote(s.id, s.ns)
     if (!avs || avs.v >= s.v) continue // pas d'avnote associé ou déjà à jour (??)
     const [nv, nvf] = avs.diff(s) // nouvel AvNote compte tenu du nouveau s
     nvAvs.push(nv) // changé, au moins la version : il y a peut-être, des idfs en plus et en moins
@@ -794,7 +794,8 @@ export async function gestionFichierMaj (note, plus, idf, nom) {
   const avnSt = stores.avnote
   const fSt = stores.fetat
 
-  const avn = avnSt.getAvnote(note.id, note.ns) || new AvNote().nouveau(note)
+  let avn = avnSt.getAvnote(note.id, note.ids)
+  if (!avn) avn = new AvNote().nouveau(note)
   const [nvAvn, nvFa] = avn.maj(note, plus, idf, nom)
 
   // Mise à jour de IDB (fetat / fdata et avnote)
@@ -872,16 +873,12 @@ class Fetat {
   async abandon () {
     const fSt = stores.fetat
     fSt.abandon(this.id)
-    let n
-    if (ID.estGroupe(this.ids)) {
-      const gSt = stores.groupe
-      n = gSt.getNote(this.ids, this.ns)
-    } else {      
-      const aSt = stores.avatar
-      n = aSt.getNote(this.ids, this.ns)
-    }
+    const nSt = stores.note
+    const node = nSt.getNode(this.ids, this.ns)
+    const n = node ? node.note : null
     if (!n) return
     const nom = n.nomDeIdf(this.id)
+    if (!nom) return
     await gestionFichierMaj(n, false, this.id, nom)
   }
 }
@@ -967,12 +964,12 @@ class AvNote {
     if (s) {
       nv.v = s.v
       for (const idf of this.lidf) {
-        if (s.mfa[idf]) { nv.lidf.push(idf); idfs2.add(idf) }
+        if (s.mfa.get(idf)) { nv.lidf.push(idf); idfs2.add(idf) }
       }
       for (const nx in this.mnom) {
         idfs.add(this.mnom[nx])
         const idf = s.idfDeNom(nx)
-        if (idff) { nv.mnom[nx] = idf; idfs2.add(idf); n++ }
+        if (idf) { nv.mnom[nx] = idf; idfs2.add(idf); n++ }
       }
     }
     if (!n && !nv.lidf.length) nv.suppr = true // AvNote à détruire (plus aucun idf n'existe dans s, s'il y a un s)
@@ -997,9 +994,9 @@ class AvNote {
 
     for (const i of this.lidf) { // reconduction de la liste précédente
       if (i === idf && !plus) continue // sauf si idf doit être enlevé
-      if (s.mfa[i]) { nv.lidf.push(i); idfs2.add(i) }
+      if (s.mfa.get(i)) { nv.lidf.push(i); idfs2.add(i) }
     }
-    if (plus && idf && !idfs2.has(idf) && s.mfa[idf]) { nv.lidf.push(idf); idfs2.add(idf) }
+    if (plus && idf && !idfs2.has(idf) && s.mfa.get(idf)) { nv.lidf.push(idf); idfs2.add(idf) }
 
     for (const nx in this.mnom) {
       idfs.add(this.mnom[nx]) // complète la liste des idf (avant)

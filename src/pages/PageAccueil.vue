@@ -30,7 +30,9 @@
 
       <!-- Information session : mode synchro -->
       <div v-if="session.synchro" class="btn2" @click="infoSession">
-        <q-btn class="q-mr-xs" dense size="md" icon="autorenew" color="primary"/>
+        <q-btn class="q-mr-xs" dense size="md" icon="autorenew" color="primary">
+          <queue-icon/>
+        </q-btn>
         <span>{{$t('MLAinfm')}}</span>
       </div>
 
@@ -44,7 +46,9 @@
 
       <!-- Information session : mode avion -->
       <div v-if="session.avion" class="btn2" @click="infoSession">
-        <q-btn class="q-mr-xs" dense size="md" icon="airplanemode_active" color="primary"/>
+        <q-btn class="q-mr-xs" dense size="md" icon="airplanemode_active" color="primary">
+          <queue-icon/>
+        </q-btn>
         <span>{{$t('MLAinfm')}}</span>
       </div>
 
@@ -99,6 +103,7 @@ import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
 import NotifIcon from '../components/NotifIcon.vue'
+import QueueIcon from '../components/QueueIcon.vue'
 import OutilsTests from '../dialogues/OutilsTests.vue'
 import PageMenu from '../pages/PageMenu.vue'
 import { MD } from '../app/modele.mjs'
@@ -106,7 +111,7 @@ import { MD } from '../app/modele.mjs'
 export default {
   name: 'PageAccueil',
 
-  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIcon, OutilsTests },
+  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIcon, QueueIcon, OutilsTests },
 
   computed: {
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },

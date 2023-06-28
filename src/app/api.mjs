@@ -51,8 +51,9 @@ export class AppExc {
   }
 }
 
-export function appexc (e) {
-  return !e ? null : (e instanceof AppExc ? e : new AppExc(E_BRO, 0, [e.message], e.stack || ''))
+export function appexc (e, n) {
+  return !e ? null : (e instanceof AppExc ? e 
+    : new AppExc(E_BRO, n || 0, [e.message || e.toString()], e.stack || ''))
 }
 
 /** Compteurs ***************************

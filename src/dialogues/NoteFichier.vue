@@ -42,13 +42,17 @@
                 </div>
               </q-item-section>
             </template>
-            <q-card-section>
-              <div class="row items-center">
-                <toggle-btn :src="it.avn" color="warning" :args="it" @change="avnom"
-                  :lecture="!(session.synchro || (session.avion && it.avn))" 
-                  :label="$t('PNFl1')" :label-off="$t('PNFl2')"/>
+            <q-card-section class="ma-qcard-section column">
+              <div v-if="it.avn" class="titre-md row items-center">
+                <div class="titre-md q-mr-sm">{{$t('PNFl1')}}</div>
+                <q-btn v-if="session.synchro || session.avion"
+                  icon="clear" size="md" dense color="negative"
+                  @click="itc=it;ovconfirmav1()"/>
               </div>
-              <div v-for="(f, idy) in it.l" :key="f.idf" class="ma-qcard-section q-my-sm">
+              <div v-if="!it.avn && (session.synchro || session.avion && it.avn)"
+                class="text-primary titre-md cursor-pointer text-bold"
+                @click="avnom(it)">{{$t('PNFl2')}}</div>
+              <div v-for="(f, idy) in it.l" :key="f.idf" class="q-my-sm">
                 <q-separator class="q-mb-sm"/>
                 <div class="row justify-between items-center">
                   <div class="col">
@@ -58,14 +62,18 @@
                   </div>
                   <div class="col-auto font-mono fs-sm">{{dhcool(f.dh)}}</div>
                 </div>
-                <div class="row justify-between">
-                  <div class="col row items-center">
-                    <toggle-btn :src="f.av" :args="f" color="warning" @change="avidf"
-                      :lecture="!(session.synchro || (session.avion && f.av))"
-                      :label="$t('PNFl3')"
-                      :label-off="it.avn && idy === 0 ? $t('PNFl4') : $t('PNFl5')"/>
+                <div class="column">
+                  <div v-if="it.avn && idy === 0" class="titre-md text-italic">{{$t('PNFl4')}}</div>
+                  <div v-if="!f.av && (session.synchro || session.avion)"
+                    class="text-primary titre-md cursor-pointer text-bold"
+                    @click="avidf(f)">{{$t('PNFl5')}}</div>
+                  <div v-if="f.av" class="titre-md row items-center">
+                    <div class="titre-md q-mr-sm">{{$t('PNFl6')}}</div>
+                    <q-btn v-if="session.synchro || session.avion"
+                      icon="clear" size="md" dense color="negative"
+                      @click="fc=f;ovconfirmav2()"/>
                   </div>
-                  <div class="col-auto row justify-end q-gutter-xs">
+                  <div class="col-auto row justify-end q-gutter-xs h13">
                     <q-btn size="sm" dense color="primary" icon="content_copy" :label="$t('PNFcop')" @click="copierFic(f)"/>
                     <q-btn size="sm" dense color="primary" icon="open_in_new" :label="$t('PNFaff')" @click="affFic(f)"/>
                     <q-btn size="sm" dense color="primary" icon="save" :label="$t('PNFenreg')" @click="enregFic(f)"/>
@@ -101,7 +109,7 @@
     <q-card class="bs petitelargeur q-pa-sm">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFav1')}}</div>
-        <div class="q-mt-sm fs-md font-mono text-bold">{{f.nom}}</div>
+        <div class="q-mt-sm fs-md font-mono text-bold">{{itc.nom}}</div>
       </q-card-section>
       <q-card-actions vertical align="center">
         <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
@@ -114,7 +122,7 @@
     <q-card class="bs petitelargeur q-pa-sm">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFav2')}}</div>
-        <div class="q-mt-sm fs-md font-mono text-bold">{{f.nom}} - {{f.info}}</div>
+        <div class="q-mt-sm fs-md font-mono text-bold">{{fc.nom}} - {{fc.info}}</div>
       </q-card-section>
       <q-card-actions vertical align="center">
         <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
@@ -134,7 +142,6 @@ import { MD } from '../app/modele.mjs'
 import { edvol, dhcool, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
-import ToggleBtn from '../components/ToggleBtn.vue'
 import { UNITEV2 } from '../app/api.mjs'
 import { saveAs } from 'file-saver'
 import { SupprFichier } from '../app/operations.mjs'
@@ -144,7 +151,7 @@ export default {
   name: 'NoteFichier',
 
   components: { 
-    BoutonHelp, NouveauFichier, ToggleBtn
+    BoutonHelp, NouveauFichier
   },
 
   props: { ro: Number },
@@ -201,34 +208,26 @@ export default {
       MD.fD()
     },
 
-    avidf ({val, args}) {
-      if (!val) {
-        this.f = args
-        this.ovconfirmav2()
-      } else {
-        setTimeout(async () => {
-          await gestionFichierMaj(this.nSt.note, true, args.idf, '')
-        }, 50)
-      }
+    avidf (f) {
+      setTimeout(async () => {
+        await gestionFichierMaj(this.nSt.note, true, f.idf, '')
+      }, 50)
     },
 
     async cfAvidf () {
-      await gestionFichierMaj(this.nSt.note, false, this.f.idf, '')
+      MD.fD()
+      await gestionFichierMaj(this.nSt.note, false, this.fc.idf, '')
     },
 
-    avnom ({val, args}) {
-      if (!val) {
-        this.it = args
-        this.ovconfirmav1()
-      } else {
-        setTimeout(async () => {
-          await gestionFichierMaj(this.nSt.note, true, 0, args.nom)
-        }, 50)
-      }
+    avnom (it) {
+      setTimeout(async () => {
+        await gestionFichierMaj(this.nSt.note, true, 0, it.nom)
+      }, 50)
     },
 
     async cfAvnom () {
-      await gestionFichierMaj(this.nSt.note, false, 0, this.it.nom)
+      MD.fD()
+      await gestionFichierMaj(this.nSt.note, false, 0, this.itc.nom)
     },
 
     async blobde (f, b) {
@@ -275,7 +274,7 @@ export default {
       if (!await this.stf1(f)) return
       const url = await this.blobde(f)
       if (url) {
-        setTimeout(() => { window.open(url, '_blank') }, 500)
+        setTimeout(() => { window.open(url, '_blank') }, 100)
         console.log(url)
       } else {
         await afficherDiag(this.$t('PNFgetEr'))
@@ -297,8 +296,8 @@ export default {
   data () {
     return {
       texte: '',
-      f: null, // fichier courant
-      it: null // item courant
+      fc: null, // fichier courant
+      itc: null // item courant
     }
   },
 
@@ -416,4 +415,6 @@ export default {
 .dec
   position: relative
   left: -7px
+.h13
+  height: 1.3rem
 </style>

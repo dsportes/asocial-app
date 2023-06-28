@@ -20,6 +20,7 @@
       <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession"
         dense size="md" icon="autorenew" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
+        <queue-icon/>
       </q-btn>
 
       <!-- Information session : mode incognito -->
@@ -33,6 +34,7 @@
       <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession"
         dense size="md" icon="airplanemode_active" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
+        <queue-icon/>
       </q-btn>
 
       <!-- Comptabilité des volumes -->
@@ -277,7 +279,7 @@
 
   <q-dialog v-model="opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
-    <div class="bs q-mt-sm column items-center">
+    <div class="q-mt-sm column items-center">
       <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
         <div v-if="session.opSpinner >= 2" 
           class="spinlargeur height-4 row items-center justify-between no-wrap text-black bg-amber-2 q-pa-sm"
@@ -324,6 +326,7 @@ import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
 import NotifIcon from './components/NotifIcon.vue'
+import QueueIcon from './components/QueueIcon.vue'
 
 import PageAdmin from './pages/PageAdmin.vue'
 import PageMenu from './pages/PageMenu.vue'
@@ -370,10 +373,10 @@ export default {
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, OutilsTests, NotifIcon, ApercuAvatar,
+    BoutonHelp, BoutonLangue, OutilsTests, NotifIcon, QueueIcon, 
+    ApercuAvatar, PageGroupe, PageGroupes, PageNotes,
     PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
-    PageGroupe, PageGroupes, PageNotes,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreTemp

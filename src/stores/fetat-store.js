@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { getData, post } from '../app/net.mjs'
-import { appexc, AppExc } from '../app/api.mjs'
+import { appexc, AppExc, E_BRO } from '../app/api.mjs'
+import { sleep } from '../app/util'
 import stores from './stores.mjs'
 
 export const useFetatStore = defineStore('fetat', {
@@ -17,17 +18,26 @@ export const useFetatStore = defineStore('fetat', {
   },
 
   actions: {
+    setQueue (push, splice) {
+      if (push) this.queue.push(push); else this.queue.splice(splice, 1)
+    },
+
+    setEchec (plus, idf) {
+      if (plus) this.echecs.add(idf); else this.echecs.delete(idf)
+    },
+
     chargementInitial (fetats) { // MAP des fetat au début de session. A charger ou non
       const chec = []
       for(const pk in fetats) {
         const fetat = fetats[pk]
         if (!fetat.suppr) {
           this.map.set(fetat.id, fetat)
-          if (fetat.enAttente) chec.push([fetat.dhd, fetat.id])
+          // if (fetat.enAttente) chec.push([fetat.dhd, fetat.id])
+          if (!fetat.estCharge) chec.push([fetat.dhd, fetat.id])
         }
       }
       chec.sort((a, b) => { return a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0) })
-      chec.forEach(x => { this.queue.push(x[1]) })
+      chec.forEach(x => { this.setQueue(x[1]) })
       this.startDemon()
     },
 
@@ -41,11 +51,11 @@ export const useFetatStore = defineStore('fetat', {
         } else {
           this.map.delete(fetat.id)
           const i = this.queue.indexOf(fetat.id)
-          if (i) this.queue.splice(i, 1)
+          if (i) this.setQueue(0, i)
         }
       }
       chec.sort((a, b) => { return a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0) })
-      chec.forEach(x => { this.queue.push(x[1]) })
+      chec.forEach(x => { this.setQueue(x[1]) })
       this.startDemon()
     },
 
@@ -54,15 +64,15 @@ export const useFetatStore = defineStore('fetat', {
       if (!e) return
       e.dhx = 0 // en fait c'est déja fait
       e.err = ''
-      this.echecs.delete(idf)
-      if (this.queue.indexOf(idf) === -1) this.queue.push(idf)
+      this.setEchec(false, idf)
+      if (this.queue.indexOf(idf) === -1) this.setQueue(idf)
       this.startDemon()
     },
 
     abandon (idf) {
-      this.echecs.delete(idf)
-      const i = this.queue.indexOf(fetat.id)
-      if (i) this.queue.splice(i, 1) // normalement c'est inutile, il ne devrait pas y être
+      this.setEchec(false, idf)
+      const i = this.queue.indexOf(idf)
+      if (i !== -1) this.setQueue(0, i) // normalement c'est inutile, il ne devrait pas y être
     },
 
     startDemon () {
@@ -87,14 +97,16 @@ export const useFetatStore = defineStore('fetat', {
               if (!ret) throw new AppExc(E_BRO, 3, [e.id])
               const url = ret.getUrl
               buf = await getData(url)
+              // await sleep(10000)
+              // throw 'Ex de test'
             }
-            this.queue.splice(0, 1)
+            this.setQueue(0, 0)
             if (session.debug) console.log(`OK chargement : ${e.idf} ${e.nom}#${e.info}`)
             e.chargementOK(buf) // Maj IDB de fetat et fdata conjointement
           } catch (ex) {
-            this.echecs.add(this.encours)
-            this.queue.splice(0, 1)
-            e.chargementKO(appexc(ex))
+            e.chargementKO(appexc(ex, 20))
+            this.setEchec(true, this.encours)
+            this.setQueue(0, 0)
           }
           this.encours = this.queue.length ? this.queue[0] : 0
         }
