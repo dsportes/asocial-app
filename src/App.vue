@@ -82,6 +82,12 @@
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </q-btn>
 
+      <!-- Presse papier -->
+      <q-btn v-if="session.ok" dense size="md" icon="content_paste"
+        @click="MD.oD('pressepapier')">
+        <q-tooltip>{{$t('MLApp')}}</q-tooltip>
+      </q-btn>
+
     </q-toolbar>
 
     <q-toolbar v-if="ui.page === 'compta'" inset 
@@ -248,6 +254,10 @@
     <dialogue-help/>
   </q-dialog>
 
+  <q-dialog v-model="pressepapier" full-height position="left" persistent>
+    <presse-papier/>
+  </q-dialog>
+
   <q-dialog v-model="outilsTests" full-height persistent>
     <outils-tests class="bs"/>
   </q-dialog>
@@ -346,6 +356,7 @@ import ApercuAvatar from './components/ApercuAvatar.vue'
 import PageGroupes from './pages/PageGroupes.vue'
 import PageGroupe from './pages/PageGroupe.vue'
 import PageNotes from './pages/PageNotes.vue'
+import PressePapier from './dialogues/PressePapier.vue'
 
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
@@ -379,7 +390,7 @@ export default {
     PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
-    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreTemp
+    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreTemp, PressePapier
    },
 
   computed: {
@@ -493,6 +504,7 @@ export default {
       detailspeople: MD.declare('detailspeople', ref(false)),
       detailsmembre: MD.declare('detailsmembre', ref(false)),
       detailsavatar: MD.declare('detailsavatar', ref(false)),
+      pressepapier: MD.declare('pressepapier', ref(false)),
       opDialog: MD.declare('opDialog', ref(false)),
       cf: MD.declare('cf', ref(false)),
       outilsTests, ovOutilsTests, confirmstopop, ovConfirmstopop,

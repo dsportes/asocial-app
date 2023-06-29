@@ -5,7 +5,7 @@ import { SessionSync } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
 import { ID, AppExc, E_DB } from './api.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
-import { Versions } from '../app/modele.mjs'
+import { Versions, NoteLocale, FichierLocal } from '../app/modele.mjs'
 
 function decodeIn (buf, cible) {
   const x = decode(buf)
@@ -157,29 +157,30 @@ export async function saveSessionSync (idb) {
   }
 }
 
-/**Text Local - TL **********************************************************************/
-export async function TLfromIDB () {
+/** Note Locale - TL **********************************************************************/
+export async function NLfromIDB () {
   const session = stores.session
-  const tflocaux = stores.tflocaux
+  const ppSt = stores.pp
   try {
     await db.loctxt.each(async (idb) => {
-      const tl = new TexteLocal().fromIdb(await decrypter(session.clek, idb.data))
-      tflocaux.setTexteLocal(tl)
+      const n = new NoteLocale().fromIdb(await decrypter(session.clek, idb.data))
+      ppSt.setNote(n)
     })
   } catch (e) {
     throw EX2(e)
   }
 }
 
-export async function TLins (txt) {
+export async function NLset (txt, id) {
   const session = stores.session
-  const tflocaux = stores.tflocaux
+  const ppSt = stores.pp
   try {
-    const tl = new TexteLocal().nouveau(txt)
-    tflocaux.setTexteLocal(tl)
+    const n = new NoteLocale().nouveau(txt)
+    if (id) n.id = id
+    ppSt.setNote(n)
     if (session.accesIdb) {
-      const buf = await crypter(session.clek, tl.toIdb)
-      const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
+      const buf = await crypter(session.clek, n.toIdb)
+      const cle = u8ToB64(await crypter(session.clek, '' + n.id, 1), true)
       await db.loctxt.put({ id: cle, data: buf })
     }
   } catch (e) {
@@ -187,30 +188,11 @@ export async function TLins (txt) {
   }
 }
 
-export async function TLupd (id, txt) {
+export async function NLdel (id) {
   const session = stores.session
-  const tflocaux = stores.tflocaux
+  const ppSt = stores.pp
   try {
-    const tl = tflocaux.getTexteLocal(id)
-    if (!tl) return
-    tl.txt = txt
-    tl.dh = new Date().getTime()
-    tflocaux.setTexteLocal(tl)
-    if (session.accesIdb) {
-      const buf = await crypter(session.clek, tl.toIdb)
-      const cle = u8ToB64(await crypter(session.clek, '' + tl.id, 1), true)
-      await db.loctxt.put({ id: cle, data: buf })
-    }
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function TLdel (id) {
-  const session = stores.session
-  const tflocaux = stores.tflocaux
-  try {
-    const tl = tflocaux.delTexteLocal(id)
+    ppSt.delNote(id)
     if (session.accesIdb) {
       const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
       await db.loctxt.where({ id: cle }).delete()
@@ -228,28 +210,28 @@ locdata: contenu d'un fichier local
 
 export async function FLfromIDB () {
   const session = stores.session
-  const tflocaux = stores.tflocaux
+  const ppSt = stores.pp
   try {
-    const map = {}
     await db.locfic.each(async (idb) => {
       const fl = new FichierLocal().fromIdb(await decrypter(session.clek, idb.data))
-      tflocaux.setFichierLocal(fl)
+      ppSt.setFichier(fl)
     })
   } catch (e) {
-    throw data.setErDB(EX2(e))
+    throw EX2(e)
   }
 }
 
-export async function FLins (nom, info, type, u8) {
+export async function FLset (nom, info, type, u8, id) {
   const session = stores.session
-  const tflocaux = stores.tflocaux
+  const ppSt = stores.pp
   try {
     const fl = new FichierLocal().nouveau(nom, info, type, u8)
-    tflocaux.setFichierLocal(fl)
-    const cle = u8ToB64(await crypter(session.clek, '' + fic.id, 1), true)
-    const buf = await crypter(session.clek, fl.gz ? gzipT(u8) : u8)
-    const data = await crypter(session.clek, fl.toIdb)
+    if (id) fl.id = id
+    ppSt.setFichier(fl)
     if (session.accesIdb) {
+      const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
+      const data = await crypter(session.clek, fl.toIdb)
+      const buf = await crypter(session.clek, fl.gz ? gzipT(u8) : u8)
       await db.transaction('rw', ['locfic', 'locdata'], async () => {
         await db.locfic.put({ id: cle, data: data })
         await db.locdata.put({ id: cle, data: buf })
@@ -263,6 +245,39 @@ export async function FLins (nom, info, type, u8) {
   }
 }
 
+/* get du CONTENU du fichier */
+export async function FLget (fl) { // get du CONTENU
+  try {
+    const session = stores.session
+    const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
+    const idb = await db.locdata.get(cle)
+    if (idb) {
+      const buf = await decrypter(session.clek, idb.data)
+      return fl.gz ? ungzip(buf) : buf
+    }
+    return null
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
+export async function FLdel (id) {
+  const session = stores.session
+  const ppSt = stores.pp
+  try {
+    if (session.accesIdb) {
+      const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
+      await data.db.transaction('rw', ['locfic', 'locdata'], async () => {
+        await db.locfic.where({ id: cle }).delete()
+        await db.locdata.where({ id: cle }).delete()
+      })
+    }
+    ppSt.delFichier(id)
+  } catch (e) {
+    throw EX2(e)
+  }
+}
+
 /* Maj d'un FichierLocal : id est obligatoire
 - si nom n'est pas false, nom est mis à jour
 - si info n'est pas false, info est mis à jour
@@ -270,7 +285,7 @@ export async function FLins (nom, info, type, u8) {
   - type est mis à jour, si non false
   - gz et sha sont recalculés
   - u8 est stocké (en store ou IDB)
-*/
+
 export async function FLupd (id, nom, info, type, u8) {
   const session = stores.session
   const tflocaux = stores.tflocaux
@@ -301,43 +316,7 @@ export async function FLupd (id, nom, info, type, u8) {
     throw EX2(e)
   }
 }
-
-/* get du CONTENU du fichier
-Si idb, lecture deouis idb
-Sinon (mode incognito) le contenu est déjà dans fl
 */
-export async function FLget (fl) { // get du CONTENU
-  const session = stores.session
-  if (!session.accesIdb) return fl.u8
-  try {
-    const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
-    const idb = await db.locdata.get(cle)
-    if (idb) {
-      const buf = await decrypter(session.clek, idb.data)
-      return fl.gz ? ungzip(buf) : buf
-    }
-    return null
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function FLdel (id) {
-  const session = stores.session
-  const tflocaux = stores.tflocaux
-  try {
-    const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
-    if (session.accesIdb) {
-      await data.db.transaction('rw', ['locfic', 'locdata'], async () => {
-        await db.locfic.where({ id: cle }).delete()
-        await db.locdata.where({ id: cle }).delete()
-      })
-    }
-    tflocaux.delFichierLocal(id)
-  } catch (e) {
-    throw data.setErDB(EX2(e))
-  }
-}
 
 /**********************************************************************
 Lecture du compte : crypté par le PBKFD de la phrase secrète. { id, k }

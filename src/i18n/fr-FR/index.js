@@ -634,6 +634,7 @@ export default {
   MLAt2g: 'Groupes',
   MLAfiltre: 'Ouvrir les paramètres du filtre',
   MLArech: 'Recherche ...',
+  MLApp: 'Presse-papier de notes et fichiers',
 
   FInom: 'Début du nom du contact',
   FIngr: 'Début du nom du groupe',
@@ -663,6 +664,17 @@ export default {
   FItavgr: '(tous avatars et groupes)',
   FIavgrt: 'Filtrer sur Un avatar / groupe',
   FItemp: 'Notes temporaires seulement',
+
+  PPnotes: 'Notes',
+  PPfic: 'Fichiers',
+  PPnno: '(aucune note dans le presse-papier)',
+  PPnfi: '(aucun fichier dans le presse-papier)',
+  PPano: 'Ajouter une note',
+  PPafi: 'Ajouter un fichier',
+  PPsuppn: 'Voulez-vous vraiment supprimer la note ci-dessous ?',
+  PPerrb: 'Contenu du fichier non disponible (corrompu ? effacé ?)',
+  PPnv1: 'Mise à jour de la note',
+  PPnv2: 'Nouvelle note',
 
   TRItribus0: '(non trié)',
   TRItribus1: 'Volume V1 attribué',

@@ -8,7 +8,7 @@ import { post } from './net.mjs'
 import { AMJ, ID } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
-  IDBbuffer, gestionFichierCnx, TLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
+  IDBbuffer, gestionFichierCnx, NLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter, random, genKeyPair } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS, closeWS } from './ws.mjs'
@@ -773,8 +773,8 @@ export class ConnexionCompte extends OperationUI {
 
       if (session.accesIdb) { 
         await gestionFichierCnx(this.buf.mapSec)
-        // Gestion des fichiers locaux et textes locaux
-        await TLfromIDB()
+        // Gestion du presse-papier, notes et fichiers locaux
+        await NLfromIDB()
         await FLfromIDB()
       }
 

@@ -1,0 +1,219 @@
+/** Secret ****************************************************
+_data_:
+- `id` : id de l'avatar ou du groupe.
+- `ids` : identifiant relatif à son avatar.
+- `v` : sa version.
+
+- `st` :
+  - `99999999` pour un _permanent_.
+  - `aaaammjj` date limite de validité pour un _temporaire_.
+- `im` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `ids`. 
+- `p` : 0: pas protégé, 1: protégé en écriture.
+- `v1` : volume du texte
+- `v2` : volume total des fichiers attachés.
+- `mc` :
+  - secret personnel : vecteur des index de mots clés.
+  - secret de groupe : map sérialisée,
+    - _clé_ : `im` de l'auteur (0 pour les mots clés du groupe),
+    - _valeur_ : vecteur des index des mots clés attribués par le membre.
+- `txts` : crypté par la clé du secret.
+  - `d` : date-heure de dernière modification du texte.
+  - `l` : liste des auteurs pour un secret de groupe.
+  - `t` : texte gzippé ou non.
+- `mfas` : map des fichiers attachés.
+- `refs` : couple `[id, ids]` crypté par la clé du secret référençant un autre secret _référence de voisinage_ qui par principe, lui, n'aura pas de `refs`.
+
+**Map `mfas` des fichiers attachés dans un secret:**
+- _clé_ `idf`: identifiant du fichier en base64.
+- _valeur_ : { lg, datas }
+  - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v2 d'un secret.
+  - `datas` : sérialisation cryptée par la clé S du secret de : `{ nom, info, dh, type, gz, lg, sha }`.
+*/
+export class Secret extends GenDoc {
+  get cle () { return getCle(this.id) }
+  get ng () { return getNg(this.id) }
+
+  async compile (row) {
+    this.st = row.st || 99999999
+    this.im = row.im || 0
+    this.p = row.p || 0
+    this.v1 = row.v1 || 0
+    this.v2 = row.v2 || 0
+    this.deGroupe = this.ng.estGroupe
+    this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || new Uint8Array([]))
+    this.txt = decode(await decrypter(cle, row.txts))
+    this.txt.t = ungzip(this.txt.t)
+    this.ref = row.refs ? decode(await decrypter(this.cle, row.refs)) : null
+
+    this.mfa = new Map()
+    if (this.v2) {
+      const map = row.mfas ? decode(row.mfas) : {}
+      for (const idf in map) 
+        this.mfa.set(idf, decode(await decrypter(cle, map[idf].datas)))
+    }
+  }
+
+  get pkref () { return !this.ref ? '' : (idToSid(this.ref[0]) + '/' + this.ref[1]) }
+  // get horsLimite () { return this.st < 0 || this.st >= 99999 ? false : dlvDepassee(this.st) }
+  get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
+  get dh () { return dhcool(this.txt.d * 1000) }
+
+  get idCompta () { 
+    if (this.deGroupe) {
+      const gSt = stores.groupe
+      return gSt.getGroupe(this.id).idh
+    } else return stores.session.compteId
+  }
+
+  /* En attente ***************************************************
+  get nomf () {
+    if (this.suppr) return 'SUPPRIMÉ@' + this.sid2
+    const i = this.txt.t.indexOf('\n')
+    const t = this.txt.t.substring(0, (i === -1 ? 16 : (i < 16 ? i : 16)))
+    return normpath(t) + '@' + this.sid2
+  }
+
+  get nomEdACG () {
+    return this.ts === 0 ? this.avatar.nomc : (this.ts === 1 ? this.couple.nomc : this.groupe.nomc)
+  }
+
+  get mcg () { return this.ts === 2 && this.mc ? this.mc[0] || new Uint8Array([]) : new Uint8Array([]) }
+
+  // Si id est celui d'un avatar accédant au secret, retourne id
+  // Sinon retourne l'un des avatars du compte accédant au secret
+  avatarAcc (id) {
+    if (this.ts === 0) {
+      return this.id === id ? id : this.id
+    }
+    if (this.ts === 1) {
+      const c = this.couple
+      return c.idI === id ? id : c.idI
+    }
+    const g = this.groupe
+    if (g.membreParId(id)) return id
+    let idr = id
+    const aSt = stores.avatar
+    aSt.compte.avatarIds().forEach(idm => {
+      if (g.membreParId(idm)) idr = idm
+    })
+    return idr
+  }
+
+  im (avid) { return this.ts === 0 ? 0 : (this.ts === 1 ? this.couple.avc + 1 : this.groupe.imDeId(avid)) }
+  membre (avid) { return this.ts === 2 ? stores.membre.get(this.groupe.id, this.im(avid)) : null }
+  mcl (avid) {
+    if (this.ts >= 1) return (this.mc ? this.mc[this.im(avid)] : new Uint8Array([])) || new Uint8Array([])
+    return this.mc || new Uint8Array([])
+  }
+
+  auteurs () {
+    const l = []
+    if (this.txt && this.txt.l) {
+      if (this.ts === 1) this.txt.l.forEach(im => { l.push(this.couple.naDeIm(im).nomc) })
+      if (this.ts === 2) this.txt.l.forEach(im => { const m = stores.membre.get(this.id, im); if (m) l.push(m.namb.nomc) })
+    }
+    return l
+  }
+
+  async toRowTxt (txt, im) {
+    const x = { d: Math.floor(new Date().getTime() / 1000), t: gzip(txt) }
+    if (this.ts) {
+      const nl = [im]
+      if (this.txt.l) this.txt.l.forEach(t => { if (t !== im) nl.push(t) })
+      x.l = new Uint8Array(nl)
+    }
+    return await crypter(this.cle, serial(x))
+  }
+
+  async toRowRef () {
+    return this.ref ? await crypter(this.cle, serial(this.ref)) : null
+  }
+
+  async toRowMfa (fic) {
+    const x = await crypter(this.cle, serial(fic))
+    return [fic.lg, x]
+  }
+  */
+
+  nouveau (id, ref) {
+    this.id = id
+    this.ids = rnd6()
+    this.v = 0
+    this.x = 0
+    this.st = 99999999
+    this.xp = 0
+    this.txt = { t: '', d: Math.floor(new Date().getTime() / 1000) }
+    this.ref = ref || null
+  }
+
+  nouveauP (id, ref) {
+    this.nouveau(id, ref)
+    this.mc = new Uint8Array([])
+    return this
+  }
+
+  nouveauG (id, ref, im) {
+    this.nouveau(id, ref)
+    this.mc = { 0: new Uint8Array([]), im: new Uint8Array([]) }
+    return this
+  }
+
+  async nouvFic (nom, info, lg, type, u8) {
+    // Deux propriétés ajoutées : idf, u8 (contenu du fichier gzippé crypté)
+    const fic = { nom, info, lg, type, u8 }
+    fic.idf = rnd6()
+    fic.sha = sha256(u8)
+    fic.dh = new Date().getTime()
+    fic.gz = fic.type.startsWith('text/')
+    fic.u8 = await crypter(this.cle, fic.gz ? gzipT(u8) : u8)
+    return fic
+  }
+
+  volLidf (lidf) {
+    let v = 0
+    lidf.forEach(idf => { v += this.mfa[idf].lg })
+    return v
+  }
+
+  // fichier le plus récent portant le nom donné
+  dfDeNom (nom) {
+    let f = null
+    for (const idf in this.mfa) {
+      const x = this.mfa[idf]
+      if (x.nom !== nom) continue
+      if (!f || f.dh < x.dh) f = x
+    }
+    return f
+  }
+
+  nomDeIdf (idf) {
+    const x = this.mfa[idf]
+    return x ? x.nom : null
+  }
+
+  async getFichier (idf, ida) {
+    // Obtenu localement ou par download. Fichier décrypté ET dézippé
+    // idf: id du fichier, ida : id de l'avatar demandeur (pour décompte du transfert)
+    const fetat = stores.fetat.get(idf)
+    let buf = null
+    if (fetat && fetat.estCharge) {
+      const b = await getFichierIDB(idf)
+      buf = await decrypter(this.cle, b)
+    } else if (ida && await aut(3, true)) {
+      const b = await new DownloadFichier().run(this, idf, ida)
+      if (b) buf = await decrypter(this.cle, b)
+    }
+    if (!buf) return null
+    const f = this.mfa[idf]
+    const buf2 = f.gz ? ungzipT(buf) : buf
+    return buf2
+  }
+
+  nomFichier (idf) {
+    const f = this.mfa[idf]
+    if (!f) return idf
+    const i = f.nom.lastIndexOf('.')
+    const ext = i === -1 ? '' : f.nom.substring(i)
+    return f.nom + '#' + f.info + '@' + idToSid(idf) + ext
+  }
+}
