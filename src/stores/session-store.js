@@ -71,6 +71,7 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
+    estBloque (state) { return state.niv >= 4 },
     estSponsor (state) { 
       const aSt = stores.avatar
       const t2 = aSt.tribu2.mbtr[state.compteId]

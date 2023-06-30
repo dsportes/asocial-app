@@ -267,7 +267,7 @@ export async function FLdel (id) {
   try {
     if (session.accesIdb) {
       const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
-      await data.db.transaction('rw', ['locfic', 'locdata'], async () => {
+      await db.transaction('rw', ['locfic', 'locdata'], async () => {
         await db.locfic.where({ id: cle }).delete()
         await db.locdata.where({ id: cle }).delete()
       })

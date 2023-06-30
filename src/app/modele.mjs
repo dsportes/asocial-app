@@ -1,6 +1,6 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { $t, hash, rnd6, u8ToB64, gzip, ungzip, ungzipT, titre } from './util.mjs'
+import { $t, hash, rnd6, u8ToB64, gzip, ungzip, ungzipT, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
@@ -1830,6 +1830,20 @@ export class FichierLocal {
     if (!session.accesIdb) return this.u8
     return await FLget(this)
   }
+
+  get titre () {
+    return this.nom + ' - ' + this.info.substring(0, 20) + (this.info.length > 20 ? ' ...' : '')
+  }
+
+  get nomFichier () {
+    let i = this.nom.lastIndexOf('.')
+    const ext1 = i === -1 ? '' : f.nom.substring(i)
+    const s1 =  i === -1 ? this.nom : this.nom.substring(0, i)
+    const pfx = '#' + suffixe(this.id)
+    const n = s1 + pfx + ext1
+    return n
+  }
+
 }
 
 const classes = {

@@ -672,6 +672,7 @@ export default {
   PPano: 'Ajouter une note',
   PPafi: 'Ajouter un fichier',
   PPsuppn: 'Voulez-vous vraiment supprimer la note ci-dessous ?',
+  PPsuppf: 'Voulez-vous vraiment supprimer le fichier ci-dessous ?',
   PPerrb: 'Contenu du fichier non disponible (corrompu ? effacé ?)',
   PPnv1: 'Mise à jour de la note',
   PPnv2: 'Nouvelle note',
@@ -945,6 +946,8 @@ export default {
   PNFsf: 'Confirmer ou infirmer la suppression du fichier',
   PNFav1: 'La dernière version du fichier de nom ci-dessous ne SERA PLUS automatiquement accessible en mode avion lors de l\'ajout d\'une nouvelle version.',
   PNFav2: 'Le fichier ci-dessous ne SERA PLUS accessible en mode avion.',
+  PNFcpp: 'Fichier copié dans le presse-papier',
+  PNFfbl: 'Le compte est bloqué, la lecture des données est impossible',
 
   CMCtit: 'Choix des mots clés',
 

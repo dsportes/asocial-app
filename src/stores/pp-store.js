@@ -7,6 +7,7 @@ export const usePpStore = defineStore('pp', {
     notes: new Map(),
     fichiers: new Map(),
     modecc: false,
+    tab: 'notes',
     ccfic: null
   }),
 
@@ -29,6 +30,8 @@ export const usePpStore = defineStore('pp', {
   },
 
   actions: {
+    setTabNotes () { this.tab = 'notes' },
+    setTabFichiers () { this.tab = 'fichiers' },
     setNote (n) {
       this.notes.set(n.id, n)
     },
@@ -44,6 +47,7 @@ export const usePpStore = defineStore('pp', {
     copiercollerfic (fic) {
       // fic : { nom: '', info: '', lg: 0, type: '', u8: null }
       this.ccfic = fic
+      this.modecc = false
     },
   }
 })

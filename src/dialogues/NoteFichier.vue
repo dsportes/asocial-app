@@ -146,6 +146,7 @@ import { UNITEV2 } from '../app/api.mjs'
 import { saveAs } from 'file-saver'
 import { SupprFichier } from '../app/operations.mjs'
 import { gestionFichierMaj } from '../app/db.mjs'
+import { FLset } from '../app/db.mjs'
 
 export default {
   name: 'NoteFichier',
@@ -238,36 +239,36 @@ export default {
     },
 
     async stf1 (f) { // visibilité d'un fichier
+      const fSt = stores.fetat
+      const fetat = fSt.getFetat(f.idf)
+      if (fetat && fetat.estCharge) return true
+      const session = stores.session
       if (this.session.avion) {
         const avn = this.state.avn
         const b = avn && ((avn.lidf.indexOf(f.idf) !== -1) || (avn.mnom[f.nom] === f.idf))
-        if (!b) {
-          await afficherDiag($t('PNFfav'))
-          return false
-        }
+        if (b) return true
+        await afficherDiag($t('PNFfav'))
+        return false
+      }
+      if (session.estBloque) {
+        await afficherDiag($t('PNFfbl'))
+        return false
       }
       return true
     },
 
-    async copierFic (f) { // TODO
-      if (!await this.stf1(f)) return // ???
+    async copierFic (f) {
+      if (!await this.stf1(f)) return
       const u8 = await this.nSt.note.getFichier(f.idf)
       if (!u8) {
         await afficherDiag(this.$t('PNFgetEr'))
         return
       }
-      await new OpFLins().run(f.nom, f.info, f.type, u8)
-      this.$q.dialog({
-        dark: true,
-        title: 'Fichier copié dans le presse-papier',
-        cancel: { label: 'Ouvrir le presse-papier', flat: true, color: 'primary' },
-        ok: { color: 'primary', flat: true, label: 'OK' },
-        persistent: true
-      }).onOk(async () => {
-      }).onCancel(() => {
-        this.ouvrirpp()
-      }).onDismiss(() => {
-      })
+      await FLset(f.nom, f.info, f.type, u8)
+      this.ui.afficherMessage(this.$t('PNFcpp'))
+      this.ppSt.modecc = false
+      this.ppSt.setTabFichiers()
+      MD.oD('pressepapier')
     },
 
     async affFic (f) {
@@ -308,6 +309,7 @@ export default {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const avnSt = stores.avnote
+    const ppSt = stores.pp
 
     const ro = toRef(props, 'ro')
     const state = reactive({
@@ -392,7 +394,7 @@ export default {
     return {
       nouveaufichier, ovnouveaufichier, supprfichier, ovsupprfichier,
       confirmav1, ovconfirmav1, confirmav2, ovconfirmav2,
-      ui, session, nSt, aSt, gSt, avnSt,
+      ui, session, nSt, aSt, gSt, avnSt, ppSt,
       exv, avatar, groupe, state,
       MD, ergrV2, edvol, dhcool
     }

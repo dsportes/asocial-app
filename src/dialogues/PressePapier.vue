@@ -7,7 +7,7 @@
         </q-btn>
         <q-toolbar-title class="titre-lg">{{$t('MLApp')}}</q-toolbar-title>
       </q-toolbar>
-      <q-tabs class="titre-md" v-model="tabft" inline-label align="center" no-caps dense>
+      <q-tabs class="titre-md" v-model="ppSt.tab" inline-label align="center" no-caps dense>
         <q-tab name="notes" :label="$t('PPnotes')" />
         <q-tab name="fichiers" :label="$t('PPfic')"/>
       </q-tabs>
@@ -15,7 +15,7 @@
 
     <q-page-container>
 
-    <div v-if="tabft==='notes'" class="q-pa-sm">
+    <div v-if="ppSt.tab==='notes'" class="q-pa-sm">
       <q-btn icon="add" dense flat color="primary" :label="$t('PPano')" @click="ajouternote"/>
       <div v-if="!ppSt.lstn.length" class="titre-lg text-italic">{{$t('PPnno')}}</div>
       <div v-else>
@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <div v-if="tabft==='fichiers'" class="q-pa-sm">
+    <div v-if="ppSt.tab==='fichiers'" class="q-pa-sm">
       <q-btn icon="add" dense flat color="primary" :label="$t('PPafi')" @click="ajouterfichier"/>
       <div v-if="!ppSt.lstf.length" class="titre-lg text-italic">{{$t('PPnfi')}}</div>
       <div v-else>
@@ -40,6 +40,7 @@
             <div class="fs-md font-mono">
               <span class="text-bold q-mr-md">{{fic.nom}}</span>
               <span>{{dhcool(fic.dh)}}</span>
+              <span class="q-ml-md fs-sm font-mono">#{{fic.id}}</span>
             </div>
             <div v-if="!ppSt.modecc" class="col-auto row q-gutter-xs">
               <q-btn dense size="sm" icon="mode_edit" color="primary" @click="editerfichier(fic)"/>
@@ -52,7 +53,7 @@
               size="sm" dense color="primary" icon="open_in_new" label="Aff." @click="affFic(fic)"/>
             <q-btn v-if="!ppSt.modecc" class="col-auto"
               size="sm" dense color="primary" icon="save" label="Enreg." @click="enregFic(fic)"/>
-            <q-btn v-if="!ppSt.modecc" class="col-auto"
+            <q-btn v-if="ppSt.modecc" class="col-auto"
               size="md" dense color="warning" icon="check" label="Sélectionner" @click="selFic(fic)"/>
             <q-space/>
             <div class="col-auto fs-md font-mono">{{fic.type}}</div>
@@ -115,8 +116,8 @@
     <q-dialog v-model="supprfic" persistent>
       <q-card class="bs petitelargeur q-pa-sm">
         <q-card-section class="column items-center q-my-md">
-          <div class="titre-md text-center text-italic">{{$t('PPsuppn')}}</div>
-          <div class="q-mt-sm fs-md font-mono text-bold">{{rec.titre}}</div>
+          <div class="titre-md text-center text-italic">{{$t('PPsuppf')}}</div>
+          <div class="q-mt-sm fs-md font-mono text-bold">{{fic.titre}}</div>
         </q-card-section>
         <q-card-actions vertical align="center">
           <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
@@ -227,7 +228,7 @@ export default ({
       this.ovsupprfic()
     },
     async cfSupprfic () {
-      await NLdel (this.fic.id)
+      await FLdel(this.fic.id)
       MD.fD()
     },
 
@@ -261,7 +262,7 @@ export default ({
     async enregFic (f) {
       const blob = await this.blobde(f, true)
       if (blob) {
-        saveAs(blob, f.nom)
+        saveAs(blob, f.nomFichier)
       } else {
         afficherDiag(this.$t('PPerrb'))
       }
@@ -274,8 +275,7 @@ export default ({
     const ppSt = stores.pp
     const cfg = stores.config
     const lgmax = cfg.maxlgtextenote
-    const tabft = ref(ppSt.modecc ? 'fichiers' : 'notes')
-
+    
     const nvnote = ref(false)
     function ovnvnote () { MD.oD(nvnote) }
     const supprnote = ref(false)
@@ -289,7 +289,7 @@ export default ({
       nvnote, ovnvnote, supprnote, ovsupprnote, nvfic, ovnvfic, supprfic, ovsupprfic,
       MD,
       session, ppSt,
-      lgmax, tabft
+      lgmax
     }
   }
 })
