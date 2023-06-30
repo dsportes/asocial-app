@@ -35,6 +35,8 @@ export const useUiStore = defineStore('ui', {
 
     naplus: null, // na de l'avatar proposant d'ajouter un contact au groupe egrplus
     egrplus: null, // élément e du groupe dans lequel un contact peut-être ajouté
+
+    dernierfichiercree: ''
   }),
 
   getters: {
@@ -116,6 +118,10 @@ export const useUiStore = defineStore('ui', {
     // Fonctions internes à une page. Appel par détection ui.$onAction
     jailu () { }, // Invoquée par App.vue, le bouton fait partie de la toolbar
 
-    setEtf (etf) { this.etf = etf }
+    setEtf (etf) { this.etf = etf },
+
+    setFichiercree (nom) {
+      this.dernierfichiercree = nom
+    }
   }
 })

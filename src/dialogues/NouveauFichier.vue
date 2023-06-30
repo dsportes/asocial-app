@@ -15,7 +15,7 @@
         <q-step :name="1" :title="$t('PNFnv1')" icon="attach_file" :done="step > 1">
           <div class="column items-center">
             <q-btn color="warning" dense :label="$t('PNFnv2')" @click="selFic"/>
-            <div class="q-my-sm q-px-xs titre-md bg-yellow-5 text-warning text-bold text-italic">OU ...</div>
+            <div class="q-my-sm q-px-xs titre-md bg-yellow-5 text-warning text-bold text-italic">{{$t('PNFnv2b')}}</div>
             <q-file class="full-width" v-model="fileList" :label="$t('PNFnv3')"
               max-file-size="50000000" max-file="1"/>
             <div v-if="fic.lg" class="font-mono fs-sm">{{fic.nom}} - {{fic.type}} - {{fic.lg}}o</div>
@@ -27,15 +27,10 @@
         </q-step>
 
         <q-step :name="2" :title="$t('PNFnv4')" icon="mode_edit" :done="step > 2">
-          <div>{{$t('PNFnv6')}} 
-            <span class="q-my-sm q-px-sm text-negative bg-yellow text-bold">{{interdits}}</span>
-            {{$t('PNFnv5')}} 
-          </div>
-          <q-input dense v-model="nfic" :label="$t('PNFnv7')" :rules="[r1, r2]"/>
-          <q-separator/>
-          <div class="titre-md">{{$t('PNFnv8')}}</div>
-          <q-input dense v-model="info" :label="$t('PNFnv9')" style="width:25rem"
-            :suffix="sfx" :rules="[r1, r2]"/>
+          <div class="q-my-sm font-mono fs-md">{{fic.type}} - {{fic.lg}}o</div>
+          <nom-generique v-model="nfic" :init-val="nfic" :label="$t('PNFnv7')" />
+          <nom-generique class="q-mt-md" v-model="info" :label="$t('PNFnv8')"
+            :suffix="sfx" :init-val="info"/>
           <q-stepper-navigation class="row q-gutter-md justify-end">
             <q-btn flat @click="MD.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
             <q-btn flat @click="step=1" color="primary" :label="$t('precedent')" class="q-ml-sm" />
@@ -93,17 +88,18 @@ import { MD } from '../app/modele.mjs'
 import { $t } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NouveauFichier } from '../app/operations.mjs'
+import NomGenerique from '../components/NomGenerique.vue'
 
 export default {
   name: 'NouveauFichier',
 
   props: { nomfic: String },
 
-  components: { BoutonHelp },
+  components: { BoutonHelp, NomGenerique },
 
   computed: {
     dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    valide () { return this.fic.lg && this.nfic && this.r1(this.nfic) === true && this.r1(this.info) === true }
+    valide () { return this.fic.lg && this.nfic }
   },
 
   watch: {
@@ -134,23 +130,16 @@ export default {
   data () {
     return {
       etapes: [this.$t('PNFnvs0'), this.$t('PNFnvs1'), this.$t('PNFnvs2')],
-      step: 1,
       fileList: null,
       idf: 0,
       lidf: [],
       lstfic: [],
       volsupp: 0,
-      info: '',
-      interdits: '< > : " / \\ | ? *'
+      info: ''
     }
   },
 
   methods: {
-    r2 (val) { return val.length !== 0 || this.$t('PNFnv6b') },
-    r1 (val) {
-      // eslint-disable-next-line no-control-regex
-      return /[<>:"/\\|?*\x00-\x1F]/.test(val) ? this.$t('PNFnv6') : true
-    },
     async valider () {
       this.lstfic.forEach(fic => { 
         if (fic.sel) this.lidf.push(fic.idf)
@@ -188,6 +177,7 @@ export default {
 
       this.ui.etf = 1
       await new NouveauFichier().run(this.nSt.note, fic, this.lidf, dv2)
+      this.ui.setFichiercree(fic.nom)
     },
 
     getLstfic () {
@@ -214,22 +204,26 @@ export default {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const session = stores.session
+    const ppSt = stores.pp
 
     const nomfic = toRef(props, 'nomfic')
     const nfic = ref(nomfic.value)
+    const step = ref(1)
 
     const fic = reactive({ nom: '', info: '', lg: 0, type: '', u8: null })
 
-    ui.$onAction(({ name, args, after }) => {
+    ppSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'copiercollerfic') {
-          const ap = args[0]
-          if (ap !== true && ap !== null) {
-            fic.nom = nomfic.value || ap.nom
-            fic.info = ap.info || ap.nom
-            fic.lg = ap.lg
-            fic.type = ap.type
-            fic.u8 = ap.u8
+          const f = args[0]
+          // f : { nom: '', info: '', lg: 0, type: '', u8: null }
+          if (f) {
+            fic.nom = f.nom
+            fic.info = f.info
+            fic.lg = f.lg
+            fic.type = f.type
+            fic.u8 = f.u8
+            step.value = 2
           }
         }
       })
@@ -240,11 +234,10 @@ export default {
     }
 
     function selFic () {
-      /* Sélectionner dans le "presse-papier" : TODO
-      $store.commit('ui/majdialogueftlocal', true)
-      $store.commit('ui/majtabftlocal', 'fichiers')
-      $store.commit('ui/majcopiercollerfic', true)
-      */
+      ppSt.modecc = true
+      ppSt.tab = 'fichiers'
+      ppSt.ccfic = null
+      MD.oD('pressepapier')
     }
 
     ui.etf = 0
@@ -253,6 +246,7 @@ export default {
       nSt, aSt, gSt, ui, session, MD, edvol, dhcool,
       nfic,
       fic,
+      step,
       resetFic,
       selFic
     }

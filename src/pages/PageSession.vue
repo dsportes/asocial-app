@@ -1,6 +1,6 @@
 <template>
-  <q-page>
-    <q-card-section>
+  <q-page class="column items-center">
+    <q-card class="dp40 q-my-sm">
       <div>
         <span class="text-italic titre-md">{{$t('ISst')}}</span>
         <span class="q-ml-md text-bold">{{st}}</span>
@@ -30,8 +30,9 @@
         </div>
       </div>
       <div v-else class="q-ml-md titre-md text-italic">{{$t('ISnc')}}</div>
-    </q-card-section>
+    </q-card>
 
+    <q-card class="dp40 q-my-sm">
     <q-expansion-item v-if="session.status" group="etc" class="col" switch-toggle-side default-opened
       header-class="expansion-header-class-1 titre-md bg-secondary text-white" :label="$t('SYtit')">
       <q-card-section>
@@ -105,6 +106,7 @@
         <q-separator class="q-my-sm"/>
       </q-card-section>
     </q-expansion-item>
+    </q-card>
 
   </q-page>
 </template>

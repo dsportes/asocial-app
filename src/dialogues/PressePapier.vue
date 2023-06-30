@@ -42,22 +42,23 @@
               <span>{{dhcool(fic.dh)}}</span>
               <span class="q-ml-md fs-sm font-mono">#{{fic.id}}</span>
             </div>
-            <div v-if="!ppSt.modecc" class="col-auto row q-gutter-xs">
-              <q-btn dense size="sm" icon="mode_edit" color="primary" @click="editerfichier(fic)"/>
-              <q-btn dense size="sm" icon="delete" color="warning" @click="supprfichier(fic)"/>
+            <div class="col-auto row">
+              <div class="col-auto fs-md font-mono">{{fic.type}}</div>
+              <div class="col-auto fs-md font-mono">{{edvol(fic.lg)}}</div>
             </div>
           </div>
-          <show-html class="bord1" :idx="idx" :texte="fic.info" maxh="4rem" zoom/>
-          <div class="row items-center justify-end q-gutter-sm">
+          <div class="q-mx-md fs-md text-italic">{{fic.info || $t('PPnoi')}}</div>
+          <div class="q-mb-lg row items-center justify-end q-gutter-sm">
             <q-btn v-if="!ppSt.modecc" class="col-auto"
               size="sm" dense color="primary" icon="open_in_new" label="Aff." @click="affFic(fic)"/>
             <q-btn v-if="!ppSt.modecc" class="col-auto"
               size="sm" dense color="primary" icon="save" label="Enreg." @click="enregFic(fic)"/>
             <q-btn v-if="ppSt.modecc" class="col-auto"
               size="md" dense color="warning" icon="check" label="Sélectionner" @click="selFic(fic)"/>
-            <q-space/>
-            <div class="col-auto fs-md font-mono">{{fic.type}}</div>
-            <div class="col-auto fs-md font-mono">{{edvol(fic.lg)}}</div>
+            <q-btn v-if="!ppSt.modecc" dense size="sm" 
+              icon="mode_edit" color="primary" @click="editerfichier(fic)"/>
+            <q-btn v-if="!ppSt.modecc" dense size="sm" 
+              icon="delete" color="warning" @click="supprfichier(fic)"/>
           </div>
         </div>
       </div>
@@ -82,15 +83,14 @@
     <q-dialog v-model="nvfic">
       <q-card class="moyennelargeur">
       <q-card-section>
-        <div class="titre-lg">{{fic.idf ? 'Mise à jour du fichier' : 'Nouveau fichier'}}</div>
-        <q-file class="full-width" v-model="fileList" label="Choisir un fichier local (50Mo max)"
+        <div class="titre-lg">{{$t(fic.id ? 'PPl1' : 'PPl2')}}</div>
+        <q-file class="full-width" v-model="fileList" :label="$t('PPl3')"
           max-file-size="50000000" max-file="1"/>
         <div v-if="fic.lg" class="font-mono fs-sm">{{fic.nom}} - {{fic.type}} - {{fic.lg}}o</div>
-        <div class="q-mt-md fs-md">Les caractères <span class="q-px-sm text-negative bg-yellow text-bold">{{interdits}}</span>
-            ainsi que les "non imprimables CR BS FF ..." ne sont pas autorisés afin que ce nom puisse servir comme nom de fichier.</div>
-        <q-input dense v-model="nomfic" label="Nom du fichier" :rules="[r1, r2]"/>
-        <div class="q-mt-md titre-md">A propos (facultatif) du fichier</div>
-        <editeur-md mh="4rem" v-model="info" :texte="fic.info" editable modetxt/>
+        <nom-generique class="q-mt-md fs-md" v-model="nomfic" :label="$t('PPndf')"
+          :init-val="fic.nom" :lgmin="4" :lgmax="32" :placeholder="$t('PPphf')"/>
+        <nom-generique class="q-mt-md fs-md" v-model="info" :label="$t('PPapf')"
+          :init-val="fic.info || ''" :lgmin="0" :lgmax="40" :placeholder="$t('PPphf')"/>
       </q-card-section>
       <q-card-actions>
         <q-btn flat color="primary" dense icon="undo" label="Renoncer" v-close-popup/>
@@ -140,11 +140,12 @@ import ShowHtml from '../components/ShowHtml.vue'
 import { readFile, dhcool, edvol, afficherDiag } from '../app/util.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import { NLset, NLdel, FLset, FLdel } from '../app/db.mjs'
+import NomGenerique from '../components/NomGenerique.vue'
 
 export default ({
   name: 'PressePapier',
 
-  components: { ShowHtml, EditeurMd },
+  components: { ShowHtml, EditeurMd, NomGenerique },
 
   data () {
     return {
@@ -171,6 +172,7 @@ export default ({
         const { size, name, type, u8 } = await readFile(file, true)
         this.fic.nom = name
         this.nomfic = name
+        this.fic.info = ''
         this.info = ''
         this.fic.lg = size
         this.fic.type = type
@@ -212,15 +214,18 @@ export default ({
     async majfic () {
       const f = this.fic
       await FLset(this.nomfic, this.info, f.type, f.u8, this.fic.id || 0)
+      MD.fD()
     },
     ajouterfichier () {
       this.fic = { id: 0, nom: '', info: '', lg: 0, type: '', u8: null }
       this.ovnvfic()
     },
-    editerfichier (fic) {
+    async editerfichier (fic) {
       this.info = fic.info
       this.nomfic = fic.nom
-      this.fic = { id: fic.id, nom: fic.nom, info: fic.info, lg: 0, type: '', u8: null }
+      const u8 = await fic.getU8()
+      this.fic = { id: fic.id, nom: fic.nom, info: fic.info, 
+        lg: fic.lg, type: fic.type, u8 }
       this.ovnvfic()
     },
     supprfichier (fic) {
@@ -240,13 +245,15 @@ export default ({
     },
 
     async selFic (fx) {
-      const u8 = await fx.u8()
-      if (u8) {
-        afficherDiag(this.$t('PPerrb'))
+      const u8 = await fx.getU8()
+      if (!u8) {
+        await afficherDiag(this.$t('PPerrb'))
+        MD.fD()
         this.ppSt.copiercollerfic(false)
       } else {
-        f.u8 = u8
-        this.ppSt.copiercollerfic(f)
+        fx.u8 = u8
+        MD.fD()
+        this.ppSt.copiercollerfic(fx)
       }
     },
 

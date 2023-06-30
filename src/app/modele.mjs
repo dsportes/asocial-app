@@ -1839,8 +1839,14 @@ export class FichierLocal {
     let i = this.nom.lastIndexOf('.')
     const ext1 = i === -1 ? '' : f.nom.substring(i)
     const s1 =  i === -1 ? this.nom : this.nom.substring(0, i)
+    let s2 = '', ext2 = ''
+    if (this.info) {
+      i = this.info.lastIndexOf('.')
+      ext2 = i === -1 ? '' : this.info.substring(i)
+      s2 =  '#' + (i === -1 ? this.info : this.info.substring(0, i))
+    }
     const pfx = '#' + suffixe(this.id)
-    const n = s1 + pfx + ext1
+    const n = s1 + s2 + pfx + (ext2 || ext1)
     return n
   }
 

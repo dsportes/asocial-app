@@ -24,9 +24,9 @@
     <q-page class="q-pa-xs column items-center">
       <q-btn flat dense color="primary" class="q-mt-sm" size="md" icon="add"
         :label="$t('PNFnvaj')" @click="nouveau()"/>
-      <div v-for="(it, idx) in state.listefic" :key="it.nom" class="full-width">
+      <div v-for="it in state.listefic" :key="it.nom" class="full-width">
         <div class="row">
-          <q-expansion-item :default-opened="!idx" group="fnom" class="col" switch-toggle-side
+          <q-expansion-item v-model="exp[it.nom]" group="nom" class="col" switch-toggle-side
             header-class="expansion-header-class-1 titre-md bg-secondary text-white">
             <template v-slot:header>
               <q-item-section>
@@ -136,7 +136,7 @@
 </template>
 
 <script>
-import { ref, toRef, reactive } from 'vue'
+import { ref, toRef, reactive, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
 import { edvol, dhcool, afficherDiag } from '../app/util.mjs'
@@ -177,6 +177,9 @@ export default {
       } else {
         this.nomfic = nf
         this.ovnouveaufichier()
+        setTimeout(() => {
+          if (nf) this.exp[nf] = true
+        }, 100)
       }
     },
 
@@ -310,6 +313,7 @@ export default {
     const gSt = stores.groupe
     const avnSt = stores.avnote
     const ppSt = stores.pp
+    const exp = reactive({})
 
     const ro = toRef(props, 'ro')
     const state = reactive({
@@ -357,6 +361,7 @@ export default {
       lst.forEach(nom => {
         const l = mnom[nom]
         l.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh > b.dh ? -1 : 0) })
+        if (exp[nom] === undefined) exp[nom] = false
         res.push({ nom, l, avn: avn && avn.mnom[nom] ? true : false })
       })
       return res
@@ -382,6 +387,20 @@ export default {
       })
     })
 
+    ui.$onAction(({ name, args, after }) => { 
+      after(async (result) => {
+        if ((name === 'setFichiercree')){
+          const nom = args[0]
+          if (nom) {
+            setTimeout(() => {
+              exp[nom] = true
+            }, 100)
+            ui.setFichiercree('')
+          }
+        }
+      })
+    })
+
     const nouveaufichier = ref(false)
     function ovnouveaufichier () { MD.oD(nouveaufichier)}
     const supprfichier = ref(false)
@@ -395,7 +414,7 @@ export default {
       nouveaufichier, ovnouveaufichier, supprfichier, ovsupprfichier,
       confirmav1, ovconfirmav1, confirmav2, ovconfirmav2,
       ui, session, nSt, aSt, gSt, avnSt, ppSt,
-      exv, avatar, groupe, state,
+      exv, avatar, groupe, state, exp,
       MD, ergrV2, edvol, dhcool
     }
   }
