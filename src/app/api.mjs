@@ -10,6 +10,13 @@ export const interdits = '< > : " / \\ | ? *'
 export const regInt = /[<>:"/\\|?*\x00-\x1F]/
 // eslint-disable-next-line no-control-regex
 export const regIntg = /[<>:"/\\|?*\x00-\x1F]/g
+// eslint-disable-next-line no-control-regex
+export const regInt2g = /[\u{0180}-\u{10FFFF}]/gu
+
+export function nomFichier (v) {
+  if (!v) return ''
+  return v.trim().replace(regIntg, '_').replace(regInt2g, '')
+}
 
 export class ID {
   static estComptable (id) { return id % d13 === 0 }

@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import { $t, hash, rnd6, u8ToB64, gzip, ungzip, ungzipT, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ } from './api.mjs'
+import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -1660,12 +1660,14 @@ export class Note extends GenDoc {
   nomFichier (idf) {
     const f = this.mfa.get(idf)
     if (!f) return '' + idf
-    let i = f.nom.lastIndexOf('.')
-    const ext1 = i === -1 ? '' : f.nom.substring(i)
-    const s1 =  i === -1 ? f.nom : f.nom.substring(0, i)
-    i = f.info.lastIndexOf('#')
-    const pfx = i === -1 ? '' : f.info.substring(i)
-    const s = i === -1 ? f.info : f.info.substring(0, i)
+    const fn = nomFichier(f.nom)
+    let i = fn.lastIndexOf('.')
+    const ext1 = i === -1 ? '' : fn.substring(i)
+    const s1 =  i === -1 ? f.nom : fn.substring(0, i)
+    const fi = nomFichier(f.info)
+    i = fi.lastIndexOf('#')
+    const pfx = i === -1 ? '' : fi.substring(i)
+    const s = i === -1 ? fi : fi.substring(0, i)
     i = s.lastIndexOf('.')
     const ext2 = i === -1 ? '' : s.substring(i)
     const s2 =  i === -1 ? s : s.substring(0, i)

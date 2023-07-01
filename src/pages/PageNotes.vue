@@ -246,7 +246,7 @@ import { Note, Motscles, getNg, MD } from '../app/modele.mjs'
 import { dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
-import { ID, AMJ, regIntg } from '../app/api.mjs'
+import { ID, AMJ, nomFichier } from '../app/api.mjs'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
 import NoteTemp from '../dialogues/NoteTemp.vue'
@@ -737,7 +737,7 @@ export default {
     })
 
     function nf (v, id, type) {
-      const s = v.trim().replace(regIntg, '_')
+      const s = nomFichier(v)
       let ext = ''
       if (type) {
         const x = mime2ext(type)
