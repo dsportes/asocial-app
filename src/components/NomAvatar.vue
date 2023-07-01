@@ -24,6 +24,7 @@
   </q-card-section>
 </template>
 <script>
+import { interdits, regInt } from '../app/api.mjs'
 
 export default {
   name: 'NomAvatar',
@@ -38,15 +39,12 @@ export default {
     return {
       phase: 0,
       nom: '',
-      interdits: '< > : " / \\ | ? *'
+      interdits: interdits
     }
   },
   methods: {
     r2 (val) { return val.length < 4 || val.length > 20 ? this.$t('NAe1') : true },
-    r1 (val) {
-      // eslint-disable-next-line no-control-regex
-      return /[<>:"/\\|?*\x00-\x1F]/.test(val) ? this.$t('NAe2') : true
-    },
+    r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true },
     ok () {
       if (this.phase < 2 || this.phase === 3) {
         this.vnom = this.nom

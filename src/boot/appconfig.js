@@ -1,6 +1,5 @@
 import { boot } from 'quasar/wrappers'
 const pako = require('pako')
-
 import { setRequiredModules } from '../app/util.mjs'
 
 import stores from '../stores/stores.mjs'

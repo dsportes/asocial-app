@@ -20,7 +20,7 @@ export const useNoteStore = defineStore('note', {
       note : absent pour une fake
       label :
         - réelle : titre de la note
-        - fake : #idsB64
+        - fake : $56789 (id en chiffres)
       children: [] nodes fils
     type:
       1 : racine avatar

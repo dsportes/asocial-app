@@ -141,6 +141,7 @@ import { readFile, dhcool, edvol, afficherDiag } from '../app/util.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import { NLset, NLdel, FLset, FLdel } from '../app/db.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
+import { interdits, regInt } from '../app/api.mjs'
 
 export default ({
   name: 'PressePapier',
@@ -157,7 +158,7 @@ export default ({
       rec: null,
       fic: { nom: '', info: '', lg: 0, type: '', u8: null },
       txt: '',
-      interdits: '< > : " / \\ | ? *'
+      interdits: interdits
     }  
   },
 
@@ -182,11 +183,8 @@ export default ({
   },
 
   methods: {
-    r2 (val) { return val.length !== 0 || 'Valeur requise' },
-    r1 (val) {
-      // eslint-disable-next-line no-control-regex
-      return /[<>:"/\\|?*\x00-\x1F]/.test(val) ? 'Caractères interdits' : true
-    },
+    r2 (val) { return val.length !== 0 || this.$t('NAe1') },
+    r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true },
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     ajouternote () {
       this.rec = null

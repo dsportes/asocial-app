@@ -1494,7 +1494,7 @@ export class Note extends GenDoc {
   get rid () {  return this.ref ? this.ref[0] : 0 }
   get rids () {  return this.ref ? this.ref[1] : 0 }
 
-  get nomFake () { return '#' + this.rids }
+  get nomFake () { return '$' + this.rids }
 
   async compile (row) {
     this.st = row.st || 99999999

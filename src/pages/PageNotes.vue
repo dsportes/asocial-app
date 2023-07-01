@@ -1,8 +1,9 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm">
-    <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
+    <q-btn class="sep q-my-sm" dense flat size="md" :label="$t('PNOdlc')" 
+      color="primary" icon="file_download" @click="dlopen"/>
 
-    <div class="sep row q-ml-xs">
+    <div class="row q-ml-xs">
       <q-btn v-if="!expandAll" class="q-my-sm" dense size="sm" :label="$t('PNOdep')" 
         color="primary" icon="unfold_more" @click="tree.expandAll();expandAll=true"/>
       <q-btn v-if="expandAll" class="q-my-sm" dense size="sm" :label="$t('PNOrep')" 
@@ -74,7 +75,68 @@
       </q-card>
     </q-dialog>
 
-    <q-page-sticky position="top-left" :class="dkli + ' box'" :offset="[0,0]">
+    <q-dialog v-model="dldialogue" persistent>
+      <q-card class="bs sp40">
+        <q-toolbar>
+          <q-btn dense size="md" color="warning" icon="close" @click="dlfin"/>
+          <q-toolbar-title class="titre-lg full-width text-center">
+            {{$t('PNOdlc')}}
+          </q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+
+        <q-card-section class="q-pa-xs" style="height:30vh;overflow-y:auto">
+          <div v-if="lstn.length" class="titre-md q-pa-xs text-center q-my-sm text-italic text-bold">
+            {{$t('PNOdlnbr', [lstn.length, dlnbntot])}}
+          </div>
+          <div v-else class="bg-yellow-5 q-pa-xs titre-md text-black text-center q-my-sm text-italic text-bold">
+            {{$t('PNOdlok', [dlnbntot])}}
+          </div>
+          <div v-for="(r, idx) in lstr" :key="r.nom" :class="'row ' + dkli(idx)">
+            <div class="col-1 fs-lg text-bold">{{r.nbn === r.nbnd ? '\u2713' : ' '}}</div>
+            <div class="col-5">{{r.nom}}</div>
+            <div class="col-1">{{pc(r.v1, r.v1d)}}</div>
+            <div class="col-1">{{r.v1 ? edvol(r.v1) : ''}}</div>
+            <div class="col-1">{{pc(r.v2, r.v2d)}}</div>
+            <div class="col-1">{{r.v2 ? edvol(r.v2) : ''}}</div>
+            <div class="col-1">{{pc(r.nbn, r.nbnd)}}</div>
+            <div class="col-1">{{r.nbn ? r.nbn : ''}}</div>
+          </div>
+        </q-card-section>
+
+        <q-separator class="q-my-sm"/>
+
+        <q-card-section class="q-pa-xs" style="height:30vh;overflow-y:auto">
+          <div v-for="(x) in lstn" :key="x.idx" :class="'row ' + dkli(x.idx)">
+            <div class="col-5">{{x.p}}</div>
+            <div class="col-5">{{x.p2}}</div>
+            <div class="col-1">{{edvol(x.n.v1)}}</div>
+            <div class="col-1">{{x.n.v2 ? edvol(x.n.v2) : '-'}}</div>
+          </div>
+        </q-card-section>
+
+        <q-card-section class="column items-center q-gutter-xs">
+          <div class="row justify-center q-gutter-xs">
+            <q-btn v-if="dlst===4" size="md" dense :label="$t('termine')" 
+              color="primary" @click="dlfin"/>
+            <q-btn v-if="dlst!==4" size="md" dense :label="$t('renoncer')" 
+              color="primary" @click="dlfin"/>
+            <q-btn v-if="dlst===2" size="md" dense :label="$t('PNOdlp')" 
+              color="warning" @click="dlpause"/>
+            <q-btn v-if="dlst===3" size="md" dense :label="$t('PNOdlr')" 
+              color="primary" icon="hourglass_top" @click="dlreprise"/>
+          </div>
+          <div v-if="dlst===1" class="row justify-center q-gutter-xs">
+            <q-btn class="q-pa-xs" size="md" dense :label="$t('PNOdlst1')" 
+              color="primary" @click="dlgo(true)"/>
+            <q-btn class="q-pa-xs" size="md" dense :label="$t('PNOdlst2')" 
+              color="primary" @click="dlgo(false)"/>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="[0,0]">
       <div class="box2 column">
         <div v-if="!selected" class="col q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
         <div v-if="selected" class="box3 q-pa-xs col largeur40">
@@ -87,7 +149,7 @@
           </div>
           <div v-if="nSt.note">
             <div class="q-ml-md row justify-between"> 
-              <show-html :class="dkli + ' col bord1'"
+              <show-html :class="dkli(0) + ' col bord1'"
                 :texte="nSt.note.txt" zoom maxh="4rem" />
               <q-btn :disable="rec!==0" class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
                 @click="editer"/>
@@ -178,12 +240,13 @@
 
 <script>
 import { ref } from 'vue'
+import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
 import { Note, Motscles, getNg, MD } from '../app/modele.mjs'
-import { dhcool, difference, intersection, splitPK, edvol, afficherDiag } from '../app/util.mjs'
+import { dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
-import { ID, AMJ } from '../app/api.mjs'
+import { ID, AMJ, regIntg } from '../app/api.mjs'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
 import NoteTemp from '../dialogues/NoteTemp.vue'
@@ -192,6 +255,7 @@ import NoteExclu from '../dialogues/NoteExclu.vue'
 import NoteMc from '../dialogues/NoteMc.vue'
 import NoteFichier from '../dialogues/NoteFichier.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import { SupprNote, RattNote } from '../app/operations.mjs'
 
@@ -215,10 +279,9 @@ export default {
   name: 'PageNotes',
 
   components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, NoteProt, NoteMc,
-    NoteExclu, NoteFichier, BoutonConfirm, ListeAuts },
+    NoteExclu, NoteFichier, BoutonConfirm, BoutonHelp, ListeAuts },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     lib2 () {
       const n = this.nSt.node
       if (n.type <= 3) return n.label
@@ -232,7 +295,7 @@ export default {
         return this.$t('groupe2', [nom])
       }
       const { id, ids } = splitPK(n.key)
-      const r = nodes.map.get(''+id)
+      const r = this.nSt.map.get(''+id)
       if (n.type === 6) { 
         return this.$t('avatar9', [ids, r.label])
       }
@@ -262,6 +325,8 @@ export default {
   },
 
   methods: {
+    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+    pc (i, j) { return !i ? '' : Math.round((j * 100) / i) + '%' },
     clicknode (n) {
       if (this.rec) {
         this.rec = 2
@@ -571,7 +636,6 @@ export default {
     const tree = ref(null)
     const nSt = stores.note
     const session = stores.session
-    const nodes = nSt.nodes
     const selected = ref('')
     const aSt = stores.avatar
     const gSt = stores.groupe
@@ -579,6 +643,12 @@ export default {
     const filtre = ref({})
     const filtreFake = ref('1')
     const now = new Date().getTime()
+
+    const lstr = ref()
+    const lstn = ref()
+    const lstrm = ref()
+    const dlst = ref(0)
+    const dlnbntot = ref(0)
 
     function compileFiltre (fx) {
       const f = filtre.value
@@ -666,6 +736,103 @@ export default {
       })
     })
 
+    function nf (v, id, type) {
+      const s = v.trim().replace(regIntg, '_')
+      let ext = ''
+      if (type) {
+        const x = mime2ext(type)
+        if (x) ext = '.' + x
+      }
+      return s + (id ? '@' + id : '') + ext
+    }
+
+    function scanNode (node, rac, path, ln) {
+      if (node.type > 5) {
+        // note "fake" - push de son path, pas de note
+        if (node.children.length) {
+          const p = path + '/' + node.label
+          for (const c of node.children) scanNode (c, rac, p, ln)
+        } 
+      } else {
+        // c'est une vraie note
+        const n = node.note
+        const p2 = nf(node.label.substring(0, 20), n.ids)
+        if (filtrage(node)) {
+          rac.v1 += n.v1
+          rac.v2 += n.v2
+          rac.nbn++
+          ln.push({ idx: ln.length, r: rac.nom, p: path, p2, n })
+        }
+        if (node.children.length) {
+          const p = path + '/' + p2
+          for (const c of node.children) scanNode (c, rac, p, ln)
+        }
+      }
+    }
+
+    function listeNotes () {
+      const lr = []
+      const ln = []
+      for (const r of nSt.nodes) {
+        const nom = nf(r.label)
+        const path = nom
+        const rac = { nom, v1: 0, v2: 0 , nbn: 0, v1d: 0, v2d: 0, nbnd: 0}
+        for (const node of r.children) scanNode (node, rac, path, ln)
+        lr.push(rac)
+      }
+      dlnbntot.value = ln.length
+      lstr.value = lr
+      lstn.value = ln
+      const m = {}
+      for (let i = 0; i < lr.length; i++)
+        m[lr[i].nom] = i
+      lstrm.value = m
+    }
+
+    function dlopen () {
+      listeNotes()
+      dlst.value = 1
+      ovdldialogue()
+    }
+
+    async function dlnote(n, avecf) { // TODO
+      console.log(n.p, n.p2)
+      await sleep(1000)
+    }
+
+    function dlgo (avecf) {
+      dlst.value = 2
+      setTimeout(async () => {
+        while (lstn.value.length !== 0) {
+          if (dlst.value !== 2) {
+            await sleep(1000)
+            continue
+          }
+          const n = lstn.value.shift()
+          await dlnote(n, avecf)
+          const ir = lstrm.value[n.r]
+          const r = lstr.value[ir]
+          r.v2d += n.n.v2
+          r.v1d += n.n.v1
+          r.nbnd++
+        }
+        dlst.value = 4
+      }, 50)
+    }
+
+    function dlpause () {
+      dlst.value = 3
+    }
+
+    function dlreprise () {
+      dlst.value = 2
+    }
+
+    function dlfin () {
+      dlst.value = 0
+      MD.fD()
+    }
+
     const mapmc = ref(Motscles.mapMC(true, 0))
     fSt.contexte.notes.mapmc = mapmc.value
 
@@ -685,16 +852,20 @@ export default {
     function ovnotemc () { MD.oD(notemc)}
     const notefichier = ref(false)
     function ovnotefichier () { MD.oD(notefichier)}
+    const dldialogue = ref(false)
+    function ovdldialogue () { MD.oD(dldialogue)}
 
     return {
       notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
       notetemp, ovnotetemp, noteprot, ovnoteprot, noteexclu, ovnoteexclu,
-      notemc, ovnotemc, notefichier, ovnotefichier, 
+      notemc, ovnotemc, notefichier, ovnotefichier, dldialogue, ovdldialogue,
       dhcool, now, filtrage, edvol,
       ID, session, nSt, aSt, gSt,
       selected,
       tree,
       filtre, filtreFake,
+      dlopen, dlfin, dlgo, dlpause, dlreprise,
+      lstr, lstn, dlnbntot, dlst,
       mapmc,
       auj: session.dateJourConnx
     }

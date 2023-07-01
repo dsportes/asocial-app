@@ -5,6 +5,12 @@ export const version = '1'
 export const d13 = 10 * 1000 * 1000 * 1000 * 1000
 export const d14 = d13 * 10
 
+export const interdits = '< > : " / \\ | ? *'
+// eslint-disable-next-line no-control-regex
+export const regInt = /[<>:"/\\|?*\x00-\x1F]/
+// eslint-disable-next-line no-control-regex
+export const regIntg = /[<>:"/\\|?*\x00-\x1F]/g
+
 export class ID {
   static estComptable (id) { return id % d13 === 0 }
 

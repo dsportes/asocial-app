@@ -22,6 +22,7 @@
 </template>
 <script>
 import { ref, toRef, watch } from 'vue'
+import { interdits, regInt } from '../app/api.mjs'
 
 export default {
   name: 'NomGenerique',
@@ -40,15 +41,12 @@ export default {
 
   data () {
     return {
-      interdits: '< > : " / \\ | ? *'
+      interdits: interdits
     }
   },
   methods: {
     r2 (val) { return val.length < this.min || val.length > this.max ? this.$t('NAe1') : true },
-    r1 (val) {
-      // eslint-disable-next-line no-control-regex
-      return /[<>:"/\\|?*\x00-\x1F]/.test(val) ? this.$t('NAe2') : true
-    }
+    r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true }
   },
 
   setup (props, context) {
