@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { AMJ } from '../app/api.mjs'
 import { Note } from '../app/modele.mjs'
 import stores from './stores.mjs'
+import { splitPK } from '../app/util.mjs'
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
@@ -18,6 +19,7 @@ export const useNoteStore = defineStore('note', {
       key : 'id/ids'
       rkey : 'id' (clé de sa racine)
       note : absent pour une fake
+      pfx : préfixe [nom] du label (ou '')
       label :
         - réelle : titre de la note
         - fake : $56789 (id en chiffres)
@@ -249,14 +251,12 @@ export const useNoteStore = defineStore('note', {
             // elle devient réelle
             n.type -= 2
             n.note = note
-            n.label = note.titre
             // on la rattache à sa note de rattachement
             this.rattachNote(n)
           } else { // la note existait et est réelle
             const nrav = n.note.refk // rattachement AVANT
             const nrap = note.refk // rattachement APRES
             n.note = note
-            n.label = note.titre
             // était-elle rattachée à une autre ?
             if (!nrav) {
               // n'était pas rattachée
@@ -288,7 +288,6 @@ export const useNoteStore = defineStore('note', {
             rkey: note.rkey,
             key: key,
             type: Note.estG(key) ? 5 : 4,
-            label: note.titre,
             note: note,
             children: []
           }
@@ -346,6 +345,7 @@ export const useNoteStore = defineStore('note', {
     },
 
     rattachNote (n) {
+      this.setLabel(n)
       let nr = this.map.get(n.note.refk)
       if (nr) { // la note de rattachement existait (fake ou réelle)
         nr.children.push(n)
@@ -357,9 +357,9 @@ export const useNoteStore = defineStore('note', {
           type: Note.estG(rkey) ? 7 : 6,
           key,
           rkey,
-          label: n.note.nomFake,
           children: [n],
         }
+        this.setLabel(nr)
         this.map.set(key, nr)
         // On rattache la note de rattachement à sa racine
         this.rattachRac(nr, n.note.refn)
@@ -367,6 +367,7 @@ export const useNoteStore = defineStore('note', {
     },
 
     rattachRac (n, refn) { // n peut être réelle ou fake (rkey donne la clé de sa racine)
+      this.setLabel(n)
       let r = this.map.get(n.rkey) // racine
       if (r) {
         r.children.push(n)
@@ -397,6 +398,29 @@ export const useNoteStore = defineStore('note', {
         this.nodes.sort(Note.sortNodes)
       }
       return n
+    },
+
+    setLabel (n) {
+      // le label dépend à qui est rattachée la note et si c'est une fake ou non
+      let pfx = '', sfx = ''
+      if (n.type === 4 && n.note.refrk) {
+        if (n.note.refrk !== n.rkey) {
+          // note avatar rattachée à une note ayant une racine différente
+          pfx = '[' + this.map.get(n.rkey).label + ']'
+        } else {
+          const nr = this.map.get(n.note.refk)
+          // note ratachée à une note ayant un préfixe : reconduction du préfixe
+          if (nr && nr.pfx) pfx = nr.pfx
+        }
+      }
+      if (n.note) { // note réelle
+        sfx = n.note.titre
+      } else { // note fake
+        const {id, ids} = splitPK(n.key)
+        sfx = '$' + ids
+      }
+      n.pfx = pfx
+      n.label = (pfx ? (pfx + ' '): '') + sfx
     },
 
     setAvatar (na, type) { // on ajoute un node pour l'avatar juste à la racine

@@ -86,8 +86,8 @@
         </q-toolbar>
 
         <q-card-section class="q-pa-xs" style="height:30vh;overflow-y:auto">
-          <div v-if="lstn.length" class="titre-md q-pa-xs text-center q-my-sm text-italic text-bold">
-            {{$t('PNOdlnbr', [lstn.length, dlnbntot])}}
+          <div v-if="dlnbnc" class="titre-md q-pa-xs text-center q-my-sm text-italic text-bold">
+            {{$t('PNOdlnbr', [dlnbnc, dlnbntot])}}
           </div>
           <div v-else class="bg-yellow-5 q-pa-xs titre-md text-black text-center q-my-sm text-italic text-bold">
             {{$t('PNOdlok', [dlnbntot])}}
@@ -106,16 +106,24 @@
 
         <q-separator class="q-my-sm"/>
 
-        <q-card-section class="q-pa-xs" style="height:30vh;overflow-y:auto">
-          <div v-for="(x) in lstn" :key="x.idx" :class="'row ' + dkli(x.idx)">
-            <div class="col-5">{{x.p}}</div>
-            <div class="col-5">{{x.p2}}</div>
-            <div class="col-1">{{edvol(x.n.v1)}}</div>
-            <div class="col-1">{{x.n.v2 ? edvol(x.n.v2) : '-'}}</div>
+        <q-card-section class="q-pa-xs height-8">
+          <div v-if="dlst!==4">
+            <div class="q-mt-md q-mb-sm titre-lg text-italic">
+              {{$t('PNOdlc' + (dlst===2 ? '2' : '1'))}}
+            </div>
+            <div class="q-ml-md q-mb-sm">
+              <span class="titre-md text-italic">{{$t('PNOdlpath')}}</span>
+              <span class="q;ml-md fs-md font-mono">{{dlnc.p}}</span>
+            </div>
+            <div class="q-ml-md fs-md">
+              {{$t('PNOdlv12', [edvol(dlnc.n.v1), edvol(dlnc.n.v2)])}}
+            </div>
           </div>
         </q-card-section>
 
-        <q-card-section class="column items-center q-gutter-xs">
+        <q-separator class="q-my-sm"/>
+
+        <q-card-section class="column items-center q-gutter-xs height-8">
           <div class="row justify-center q-gutter-xs">
             <q-btn v-if="dlst===4" size="md" dense :label="$t('termine')" 
               color="primary" @click="dlfin"/>
@@ -243,7 +251,7 @@ import { ref } from 'vue'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
 import { Note, Motscles, getNg, MD } from '../app/modele.mjs'
-import { dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
+import { $t, dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, AMJ, nomFichier } from '../app/api.mjs'
@@ -644,11 +652,13 @@ export default {
     const filtreFake = ref('1')
     const now = new Date().getTime()
 
-    const lstr = ref()
-    const lstn = ref()
-    const lstrm = ref()
-    const dlst = ref(0)
-    const dlnbntot = ref(0)
+    const lstr = ref() // liste des racines
+    const lstn = [] // liste des notes restant à télécharger
+    const lstrm = new Map() // donne l'indice d'une racine depuis son nom
+    const dlst = ref(0) // statut du dl
+    const dlnbntot = ref(0) // nombre total initial de notes à télécharger
+    const dlnbnc = ref(0) // nombre restant de notes à télécharger
+    const dlnc = ref() // note en cours de dl
 
     function compileFiltre (fx) {
       const f = filtre.value
@@ -746,53 +756,56 @@ export default {
       return s + (id ? '@' + id : '') + ext
     }
 
-    function scanNode (node, rac, path, ln) {
+    function scanNode (node, rac, path, lstn) {
       if (node.type > 5) {
         // note "fake" - push de son path, pas de note
         if (node.children.length) {
           const p = path + '/' + node.label
-          for (const c of node.children) scanNode (c, rac, p, ln)
+          for (const c of node.children) scanNode (c, rac, p, lstn)
         } 
       } else {
         // c'est une vraie note
         const n = node.note
-        const p2 = nf(node.label.substring(0, 20), n.ids)
+        const p2 = nf(node.label.substring(0, 32), n.ids)
+        const p = path + '/' + p2
         if (filtrage(node)) {
           rac.v1 += n.v1
           rac.v2 += n.v2
           rac.nbn++
-          ln.push({ idx: ln.length, r: rac.nom, p: path, p2, n })
+          lstn.push({ r: rac.nom, p, n })
         }
         if (node.children.length) {
-          const p = path + '/' + p2
-          for (const c of node.children) scanNode (c, rac, p, ln)
+          for (const c of node.children) scanNode (c, rac, p, lstn)
         }
       }
     }
 
     function listeNotes () {
       const lr = []
-      const ln = []
+      lstn.length = 0
       for (const r of nSt.nodes) {
         const nom = nf(r.label)
         const path = nom
         const rac = { nom, v1: 0, v2: 0 , nbn: 0, v1d: 0, v2d: 0, nbnd: 0}
-        for (const node of r.children) scanNode (node, rac, path, ln)
+        for (const node of r.children) scanNode (node, rac, path, lstn)
         lr.push(rac)
       }
-      dlnbntot.value = ln.length
+      dlnbntot.value = lstn.length
+      dlnbnc.value = lstn.length
       lstr.value = lr
-      lstn.value = ln
-      const m = {}
-      for (let i = 0; i < lr.length; i++)
-        m[lr[i].nom] = i
-      lstrm.value = m
+      lstrm.clear()
+      for (let i = 0; i < lr.length; i++) lstrm.set(lr[i].nom, i)
     }
 
-    function dlopen () {
+    async function dlopen () {
       listeNotes()
-      dlst.value = 1
-      ovdldialogue()
+      if (lstn.length) {
+        dlnc.value = lstn[0]
+        dlst.value = 1
+        ovdldialogue()
+      } else {
+        await afficherDiag($t('PNOdlvide'))
+      }
     }
 
     async function dlnote(n, avecf) { // TODO
@@ -803,18 +816,20 @@ export default {
     function dlgo (avecf) {
       dlst.value = 2
       setTimeout(async () => {
-        while (lstn.value.length !== 0) {
+        while (lstn.length !== 0) {
           if (dlst.value !== 2) {
             await sleep(1000)
             continue
           }
-          const n = lstn.value.shift()
+          const n = lstn[0]
+          dlnc.value = n
           await dlnote(n, avecf)
-          const ir = lstrm.value[n.r]
+          const ir = lstrm.get(n.r)
           const r = lstr.value[ir]
           r.v2d += n.n.v2
           r.v1d += n.n.v1
           r.nbnd++
+          lstn.shift()
         }
         dlst.value = 4
       }, 50)
@@ -865,7 +880,7 @@ export default {
       tree,
       filtre, filtreFake,
       dlopen, dlfin, dlgo, dlpause, dlreprise,
-      lstr, lstn, dlnbntot, dlst,
+      lstr, dlnbntot, dlnbnc, dlst, dlnc,
       mapmc,
       auj: session.dateJourConnx
     }

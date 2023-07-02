@@ -856,7 +856,11 @@ export default {
   PNOdlr: 'Reprendre le téléchargement',
   PNOdlnbr: '{0} notes restantes sur {1}',
   PNOdlok: 'Téléchargement de {0} note(s) terminé avec succès',
-
+  PNOdlvide: 'Aucune note sélectionnée, pas de téléchargement',
+  PNOdlc1: 'Prochaine note à télécharger',
+  PNOdlc2: 'Note en cours de téléchagement',
+  PNOdlv12: 'V1: {0} - V2: {1}',
+  PNOdlpath: 'Path de la note:',
   PNOnvtit0: 'Nouvelle note',
   PNOnvtit1: 'Nouvelle note de {0}',
   PNOnvtit2: 'Nouvelle note du groupe {0}',

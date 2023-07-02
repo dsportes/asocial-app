@@ -144,7 +144,7 @@ export function ungzip (arg) {
 
 /* divers *****************************************************************/
 export function splitPK(pk) {
-  if (!pk) return { id: 0, id2: 0 }
+  if (!pk) return { id: 0, ids: 0 }
   const i = pk.indexOf('/')
   if (i === -1) return { id: parseInt(pk), ids: 0}
   return { id: parseInt(pk.substring(0, i)), ids: parseInt(pk.substring(i + 1))}
@@ -182,6 +182,7 @@ export function normpath (s, dot) { return s.replace(dot ? regexdot : regex, '_'
 
 export function edvol (vol) {
   const v = vol || 0
+  if (v === 0) return '0'
   if (v < 1000) return v + 'B'
   if (v < 1000000) return (v / 1000).toPrecision(3) + 'KB'
   if (v < 1000000000) return (v / 1000000).toPrecision(3) + 'MB'
