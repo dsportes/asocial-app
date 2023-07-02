@@ -674,7 +674,7 @@ export default {
     const dlnc = ref() // note en cours de dl
     const portupload = ref()
     portupload.value = cfg.portupload
-    const dirloc = ref('../temp')
+    const dirloc = ref('./temp')
 
     const enc = new TextEncoder()
     const dec = new TextDecoder()
