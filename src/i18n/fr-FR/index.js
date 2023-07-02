@@ -69,6 +69,7 @@ export default {
   fichiers: 'Fichiers',
   animateur: 'Animateur',
   auteur: 'Auteur',
+  test: 'Test',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -230,7 +231,7 @@ export default {
   EX2003: 'Rupture de la liaison avec le serveur par le serveur ou URL mal configurée ( {0} ).',
   EX2004: 'ping / pong : pong non reçu ( {0} ).',
   EX2005: 'Erreur de transfert du fichier vers le serveur de fichier. Détail: {0}',
-  EX2006: 'Erreur de transfert du fichier vers le serveur de stockage local de fichiers. Détail: {0}',
+  EX2006: 'Erreur de transfert du fichier vers l\'application locale de stockage de fichiers. Détail: {0}',
   EX2100: 'Session interrompue. Se déconnecter et tenter de se reconnecter',
 
   EX3001: 'Ouverture de la base locale impossible.\nDétail: {0}',
@@ -879,6 +880,9 @@ export default {
   PNOnocv: '{0} n\'a pas déclaré de carte de visite.',
   PNOchaut: 'Choisir l\'auteur de l\'édition',
   PNOexsuppr: 'Tous les auteurs et animateurs peuvent éditer la note',
+  PNOdlhp: 'Port d\'écoute de l\'application de stockage local',
+  PNOdldir: 'Répertoire local dans cette application',
+  PNOdlok: 'A {0} l\'application de stockage local a répondu "OK"',
 
   PNOer1: 'Vous n\'avez plus accès au groupe "{0}" ou il n\'existe plus : il n\'est pas possible de lui ajouter une nouvelle note.',
   PNOer2: 'Il n\'est pas possible de rattacher une nouvelle note à une note à laquelle vous n\'avez plus accès ou qui n\'existe plus.' +

@@ -123,22 +123,32 @@
 
         <q-separator class="q-my-sm"/>
 
-        <q-card-section class="column items-center q-gutter-xs height-8">
-          <div class="row justify-center q-gutter-xs">
-            <q-btn v-if="dlst===4" size="md" dense :label="$t('termine')" 
-              color="primary" @click="dlfin"/>
-            <q-btn v-if="dlst!==4" size="md" dense :label="$t('renoncer')" 
-              color="primary" @click="dlfin"/>
-            <q-btn v-if="dlst===2" size="md" dense :label="$t('PNOdlp')" 
-              color="warning" @click="dlpause"/>
-            <q-btn v-if="dlst===3" size="md" dense :label="$t('PNOdlr')" 
-              color="primary" icon="hourglass_top" @click="dlreprise"/>
-          </div>
-          <div v-if="dlst===1" class="row justify-center q-gutter-xs">
-            <q-btn class="q-pa-xs" size="md" dense :label="$t('PNOdlst1')" 
-              color="primary" @click="dlgo(true)"/>
-            <q-btn class="q-pa-xs" size="md" dense :label="$t('PNOdlst2')" 
-              color="primary" @click="dlgo(false)"/>
+        <q-card-section>
+          <div class="column items-center height-8">
+            <div class="row q-mb-sm  q-gutter-sm justify-center full-width">
+              <q-input class="col" dense v-model="portupload" 
+                outlined :label="$t('PNOdlhp')"/>
+              <q-input class="col" dense v-model="dirloc" 
+                outlined :label="$t('PNOdldir')"/>
+              <q-btn color="primary" dense :label="$t('test')"
+                @click="testup"/>
+            </div>
+            <div class="row q-mb-sm full-width justify-center q-gutter-sm">
+              <q-btn v-if="dlst===4" size="md" dense :label="$t('termine')" 
+                color="primary" @click="dlfin"/>
+              <q-btn v-if="dlst!==4" size="md" dense :label="$t('renoncer')" 
+                color="primary" @click="dlfin"/>
+              <q-btn v-if="dlst===2" size="md" dense :label="$t('PNOdlp')" 
+                color="warning" @click="dlpause"/>
+              <q-btn v-if="dlst===3" size="md" dense :label="$t('PNOdlr')" 
+                color="primary" icon="hourglass_top" @click="dlreprise"/>
+            </div>
+            <div v-if="dlst===1" class="row full-width justify-center q-gutter-sm">
+              <q-btn class="q-pa-xs" size="md" dense :label="$t('PNOdlst1')" 
+                color="primary" @click="dlgo(true)"/>
+              <q-btn class="q-pa-xs" size="md" dense :label="$t('PNOdlst2')" 
+                color="primary" @click="dlgo(false)"/>
+            </div>
           </div>
         </q-card-section>
       </q-card>
@@ -251,10 +261,10 @@ import { ref } from 'vue'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
 import { Note, Motscles, getNg, MD } from '../app/modele.mjs'
-import { $t, dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
+import { $t, u8ToB64, dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
-import { ID, AMJ, nomFichier } from '../app/api.mjs'
+import { ID, AMJ, nomFichier, appexc } from '../app/api.mjs'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
 import NoteTemp from '../dialogues/NoteTemp.vue'
@@ -266,6 +276,7 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import { SupprNote, RattNote } from '../app/operations.mjs'
+import { putData, getData } from '../app/net.mjs'
 
 const icons = ['','person','group','group','description','article','close','close']
 const colors = ['','primary','orange','negative','primary','orange','primary','orange']
@@ -643,7 +654,9 @@ export default {
   setup () {
     const tree = ref(null)
     const nSt = stores.note
+    const ui = stores.ui
     const session = stores.session
+    const cfg = stores.config
     const selected = ref('')
     const aSt = stores.avatar
     const gSt = stores.groupe
@@ -659,6 +672,12 @@ export default {
     const dlnbntot = ref(0) // nombre total initial de notes à télécharger
     const dlnbnc = ref(0) // nombre restant de notes à télécharger
     const dlnc = ref() // note en cours de dl
+    const portupload = ref()
+    portupload.value = cfg.portupload
+    const dirloc = ref('../temp')
+
+    const enc = new TextEncoder()
+    const dec = new TextDecoder()
 
     function compileFiltre (fx) {
       const f = filtre.value
@@ -808,30 +827,65 @@ export default {
       }
     }
 
-    async function dlnote(n, avecf) { // TODO
-      console.log(n.p, n.p2)
-      await sleep(1000)
+    async function testup () {
+      try {
+        const u = 'http://localhost:' + portupload.value + '/ping'
+        const res = dec.decode(await getData(u))
+        afficherDiag($t('PNOdlok', [res]))
+      } catch (e) {
+        ui.afficherExc(appexc(e))
+      }
+    }
+
+    function url (u) { 
+      const d = dirloc.value + '/'
+      return 'http://localhost:' + portupload.value + '/' + u8ToB64(enc.encode(d + u), true) 
+    }
+
+    async function dlnote(n, avecf) {
+      // console.log(n.p)
+      const buf = enc.encode(n.n.txt)
+      const u = url(n.p + '/_.md')
+      const er = await putData(u, buf)
+      if (er) throw new AppExc(E_WS, 6, [er])
+      if (avecf) {
+        for (const [idf, f] of n.n.mfa) {
+          const nf = n.n.nomFichier(idf)
+          const buf = await n.n.getFichier(idf)
+          if (buf) {
+            const u = url(n.p + '/' + nf)
+            const er = await putData(u, buf)
+            if (er) throw new AppExc(E_WS, 6, [er])
+          }
+        }
+      }
+      // TODO gestion du ralentissement en cas d'excès de download
+      // await sleep(1000) 
     }
 
     function dlgo (avecf) {
       dlst.value = 2
       setTimeout(async () => {
-        while (lstn.length !== 0) {
-          if (dlst.value !== 2) {
-            await sleep(1000)
-            continue
+        try {
+          while (lstn.length !== 0) {
+            if (dlst.value !== 2) {
+              await sleep(1000)
+              continue
+            }
+            const n = lstn[0]
+            dlnc.value = n
+            await dlnote(n, avecf)
+            const ir = lstrm.get(n.r)
+            const r = lstr.value[ir]
+            r.v2d += n.n.v2
+            r.v1d += n.n.v1
+            r.nbnd++
+            lstn.shift()
           }
-          const n = lstn[0]
-          dlnc.value = n
-          await dlnote(n, avecf)
-          const ir = lstrm.get(n.r)
-          const r = lstr.value[ir]
-          r.v2d += n.n.v2
-          r.v1d += n.n.v1
-          r.nbnd++
-          lstn.shift()
+          dlst.value = 4
+        } catch (e) {
+          ui.afficherExc(appexc(e))
         }
-        dlst.value = 4
       }, 50)
     }
 
@@ -879,7 +933,7 @@ export default {
       selected,
       tree,
       filtre, filtreFake,
-      dlopen, dlfin, dlgo, dlpause, dlreprise,
+      dlopen, dlfin, dlgo, dlpause, dlreprise, portupload, dirloc, testup,
       lstr, dlnbntot, dlnbnc, dlst, dlnc,
       mapmc,
       auj: session.dateJourConnx

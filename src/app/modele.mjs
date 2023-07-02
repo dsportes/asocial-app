@@ -1,5 +1,6 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
+import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, u8ToB64, gzip, ungzip, ungzipT, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
@@ -1661,30 +1662,25 @@ export class Note extends GenDoc {
     const f = this.mfa.get(idf)
     if (!f) return '' + idf
     const fn = nomFichier(f.nom)
-    let i = fn.lastIndexOf('.')
-    const ext1 = i === -1 ? '' : fn.substring(i)
-    const s1 =  i === -1 ? f.nom : fn.substring(0, i)
     const fi = nomFichier(f.info)
-    i = fi.lastIndexOf('#')
-    const pfx = i === -1 ? '' : fi.substring(i)
-    const s = i === -1 ? fi : fi.substring(0, i)
-    i = s.lastIndexOf('.')
-    const ext2 = i === -1 ? '' : s.substring(i)
-    const s2 =  i === -1 ? s : s.substring(0, i)
-    const n = s1 + '_' + s2 + pfx + (ext2 || ext1 || '')
+    const i = fi.lastIndexOf('#')
+    const s = i == -1 ? fi : fi.substring(0, i)
+    const x = mime2ext(f.type)
+    const ext = x ? '.' + x : ''
+    const n = fn + '_' + s + '#' + f.idf + ext
     return n
   }
 
-    // fichier le plus récent portant le nom donné
-    idfDeNom (nom) {
-      let idfx = 0
-      let dh = 0
-      for (const [idf, x] of this.mfa) {
-        if (x.nom !== nom) continue
-        if (!idfx || dh < x.dh) { idfx = idf; dh = x.dh }
-      }
-      return idfx
-    }  
+  // fichier le plus récent portant le nom donné
+  idfDeNom (nom) {
+    let idfx = 0
+    let dh = 0
+    for (const [idf, x] of this.mfa) {
+      if (x.nom !== nom) continue
+      if (!idfx || dh < x.dh) { idfx = idf; dh = x.dh }
+    }
+    return idfx
+  }  
 }
 
 /**SessionSync : Dernier état de session synchronisé***************************
