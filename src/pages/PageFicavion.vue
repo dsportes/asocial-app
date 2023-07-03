@@ -11,7 +11,7 @@
         <div>{{x.f.nom}} - {{x.f.info}}</div>
         <div class="row">
           <div v-if="x.f.st" class="text-italic q-mr-sm">{{$t('FAVst' + x.f.st)}}</div>
-          <div class="q-ml-sm">{{edvol(x.f.lg)}}</div>
+          <div class="q-pl-sm">{{edvol(x.f.lg)}}</div>
         </div>
       </div>
       <div>{{x.n.label}}</div>
@@ -31,15 +31,38 @@
       </q-toolbar>
       <q-card class="q-pa-xs">
         <q-card-section class="q-pa-xs">
-          <div class="fs-md">Nom : <span  class="font-mono fs-md">{{fc.f.nom}}</span></div>
-          <div class="fs-md">Info : {{fc.f.info}}</div>
-          <div>Note : {{fc.n.label}}</div>
-          <div>De : {{fc.r}}</div>
-          <div>Taille : <span  class="font-mono fs-md">{{edvol(fc.f.lg)}}</span></div>
-          <div>Type : <span  class="font-mono fs-md">{{fc.f.type}}</span></div>
-          <div>Date-heure : <span  class="font-mono fs-md">{{dhcool(fc.f.dh)}}</span></div>
-          <div v-if="fc.f.err">Erreur : <span  class="font-mono fs-md">{{fc.f.err}}</span></div>
-          <div v-if="fc.f.st" class="text-italic q-mr-sm">{{$t('FAVst' + fc.f.st)}}</div>
+          <div class="row">
+            <div class="col-2 fs-md text-italic">{{$t('FAVl7')}}</div>
+            <div class="col-10 q-pl-sm font-mono">{{fc.f.nom}}</div>
+          </div>
+          <div class="row">
+            <div class="col-2 fs-md text-italic">{{$t('FAVl8')}}</div>
+            <div class="col-10 q-pl-sm font-mono">{{fc.f.info}}</div>
+          </div>
+          <div class="row">
+            <div class="col-2 fs-md text-italic">{{$t('FAVl1')}}</div>
+            <div class="col-10 q-pl-sm font-mono">{{fc.n.label}}</div>
+          </div>
+          <div class="row">
+            <div class="col-2 fs-md text-italic">{{$t('FAVl2')}}</div>
+            <div class="col-10 q-pl-sm font-mono">{{fc.r}}</div>
+          </div>
+          <div class="row">
+            <div class="col-2 fs-md text-italic">{{$t('FAVl3')}}</div>
+            <div class="col-10 q-pl-sm font-mono">{{edvol(fc.f.lg)}}</div>
+          </div>
+          <div class="row">
+            <div class="col-2 fs-md text-italic">{{$t('FAVl4')}}</div>
+            <div class="col-10 q-pl-sm font-mono">{{dhcool(fc.f.dh)}}</div>
+          </div>
+          <div v-if="fc.f.err" class="row">
+            <div class="col-2 fs-md text-italic">{{$t('FAVl5')}}</div>
+            <div class="col-10 q-pl-sm font-mono">{{fc.f.err}}</div>
+          </div>
+          <div v-if="fc.f.st" class="row">
+            <div class="col-2 fs-md text-italic">{{$t('FAVl6')}}</div>
+            <div class="col-10 q-pl-sm font-mono">{{$t('FAVst' + fc.f.st)}}</div>
+          </div>
         </q-card-section>
         <q-card-actions horizontal>
           <q-btn class="q-mx-xs" color="warning" icon="check" dense flat label="Voir la note" @click="voirnote"/>

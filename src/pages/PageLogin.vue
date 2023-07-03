@@ -2,12 +2,13 @@
 <q-page class="column align-start items-center">
 
   <q-card class="q-mt-lg petitelargeur fs-md column justify-center">
-    <div :class="'full-width bord' + (!session.mode ? '1' : '2')">
-    <div class="q-py-sm q-gutter-md row justify-center">
-      <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
-      <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
-      <q-radio dense v-model="session.mode" :val="3" :label="$t('avion')" />
-    </div>
+    <div :class="'full-width row items-center bord' + (!session.mode ? '1' : '2')">
+      <div class="col q-py-sm q-gutter-md row justify-center">
+        <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
+        <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
+        <q-radio dense v-model="session.mode" :val="3" :label="$t('avion')" />
+      </div>
+      <bouton-help page="page1" class="colauto"/>
     </div>
   </q-card>
 
@@ -49,11 +50,12 @@ import { AMJ } from '../app/api.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../dialogues/AcceptationSponsoring.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 
 export default {
   name: 'PageLogin',
 
-  components: { PhraseContact, PhraseSecrete, AcceptationSponsoring },
+  components: { PhraseContact, PhraseSecrete, AcceptationSponsoring, BoutonHelp },
 
   data () {
     return {
