@@ -24,6 +24,7 @@ export function deconnexion (garderMode) {
   // fermeture de tous les dialogues et du menu de filtre
   MD.fTD()
   ui.menu = false
+  ui.menug = false
   ui.aunmessage = false
 
   if (session.accesIdb) closeIDB()

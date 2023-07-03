@@ -20,6 +20,7 @@
       node-key="key"
       selected-color="primary"
       v-model:selected="selected"
+      v-model:expanded="expanded"
       :filter="filtreFake"
       :filter-method="filtrage"
     >
@@ -658,6 +659,7 @@ export default {
     const session = stores.session
     const cfg = stores.config
     const selected = ref('')
+    const expanded = ref([])
     const aSt = stores.avatar
     const gSt = stores.groupe
     const fSt = stores.filtre
@@ -905,6 +907,13 @@ export default {
     const mapmc = ref(Motscles.mapMC(true, 0))
     fSt.contexte.notes.mapmc = mapmc.value
 
+    if (nSt.presel) {
+      selected.value = nSt.presel
+      expanded.value = nSt.getAncetres(nSt.presel)
+      nSt.setCourant(nSt.presel)
+      nSt.presel = ''
+    }
+
     const notenouvelle = ref(false)
     function ovnotenouvelle () { MD.oD(notenouvelle) }
     const noteedit = ref(false)
@@ -930,7 +939,7 @@ export default {
       notemc, ovnotemc, notefichier, ovnotefichier, dldialogue, ovdldialogue,
       dhcool, now, filtrage, edvol,
       ID, session, nSt, aSt, gSt,
-      selected,
+      selected, expanded,
       tree,
       filtre, filtreFake,
       dlopen, dlfin, dlgo, dlpause, dlreprise, portupload, dirloc, testup,

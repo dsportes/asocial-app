@@ -67,6 +67,18 @@
         <span class="q-ml-xs">{{$t('MLAntf')}}</span>
       </div>
 
+      <!-- Fichiers avion -->
+      <div v-if="!session.incognito" class="btn2" @click="ficAvion">
+        <q-btn dense size="md" icon="save"/>
+        <span class="q-ml-xs">{{$t('MLAfav')}}</span>
+      </div>
+
+      <!-- Presse papier -->
+      <div class="btn2" @click="MD.oD('pressepapier')">
+        <q-btn dense size="md" icon="content_paste"/>
+        <span class="q-ml-xs">{{$t('MLApp')}}</span>
+      </div>
+
       <!-- Chats d'urgence -->
       <div class="btn2" @click="clickNotif2">
         <q-btn class="q-mr-xs" dense size="md" icon="chat"/>
@@ -136,7 +148,12 @@ export default {
 
     infoSession () { 
       this.ui.setPage('session')
+    },
+
+    ficAvion () {
+      this.ui.setPage('ficavion')
     }
+
   },
 
   data () {

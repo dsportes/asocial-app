@@ -39,7 +39,9 @@ export const useNoteStore = defineStore('note', {
 
     node: null, // node "courant"
 
-    test: { avs: {}, grs: {} }
+    test: { avs: {}, grs: {} },
+
+    presel: '' // note pre-selected avant ouverture PageNote
   }),
 
   getters: {
@@ -108,9 +110,27 @@ export const useNoteStore = defineStore('note', {
         if (!refk) return state.map.get(n.rkey)
         while (true) {        
           const p = state.map.get(refk)
-          if (!p.refk) return state.map.get(p.rkey)
-          refk = p.refk
+          if (!p.note || !p.note.refk) return state.map.get(p.rkey)
+          refk = p.note.refk
         }
+      }
+    },
+
+    getAncetres: (state) => { return (key) => {
+        const anc = []
+        const node = state.map.get(key)
+        if (!node || !node.note) return anc
+        anc.push(key)
+        let refk = node.note.refk
+        if (!refk) { anc.push(node.rkey); return anc }
+        anc.push(refk)
+        while (true) {        
+          const p = state.map.get(refk)
+          if (!p.note || !p.note.refk) { anc.push(p.rkey); return anc }
+          refk = p.note.refk
+          anc.push(refk)
+        }
+        return anc
       }
     }
   },

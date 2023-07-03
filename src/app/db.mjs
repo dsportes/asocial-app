@@ -571,10 +571,6 @@ idf : identifiant du fichier
   - `lg` : taille du fichier (source, son v2).
   - `nom info` : à titre d'information (redondance de sa note).
   - `ids ns` : id/ns de sa note.
-
-schemas.forSchema({
-  name: 'idbFetat',
-  cols: ['id', 'dhd', 'dhc', 'dhx', 'lg', 'nom', 'info', 'ids', 'ns', 'err']
 })
 
 #### Transactions
@@ -801,6 +797,13 @@ class Fetat {
   get enAttente () { return this.dhc === 0 && !this.dhx }
   get enEchec () { return this.dhc === 0 && this.dhx }
 
+  get st () {
+    if (this.enAttente) return 1
+    if (this.estCharge) return 2
+    if (this.enEchec) return 3
+    return 0
+  }
+
   nouveauSuppr (idf) { this.id = idf; this.suppr = true; return this }
 
   nouveau (n, f) {
@@ -812,6 +815,8 @@ class Fetat {
     this.lg = f.lg
     this.nom = f.nom
     this.info = f.info
+    this.type = f.type
+    this.dh = f.dh
     this.ns = n.ids
     this.err = ''
     return this

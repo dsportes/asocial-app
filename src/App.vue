@@ -66,7 +66,7 @@
     <q-toolbar inset class="full-width bg-secondary text-white">
       <bouton-help page="page1"/>
       <q-btn v-if="session.ok && session.niv !== 2" size="md" icon="menu">
-        <q-menu max-height="90vh" class="bg-secondary text-white">
+        <q-menu v-model="ui.menug" max-height="90vh" class="bg-secondary text-white">
           <page-menu menu/>
         </q-menu>
       </q-btn>
@@ -80,6 +80,12 @@
       <q-btn v-if="ui.etroite && ui.filtre" color="warning"
         dense size="md" icon="search" @click="ouvrFiltre">
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
+      </q-btn>
+
+      <!-- Fichiers avion -->
+      <q-btn v-if="session.ok" :disable="session.incognito" dense size="md" icon="save"
+        @click="pageFicavion">
+        <q-tooltip>{{$t('MLAfav')}}</q-tooltip>
       </q-btn>
 
       <!-- Presse papier -->
@@ -200,6 +206,7 @@
       <page-groupes class="page" v-if="ui.page === 'groupesac'"/>
       <page-groupe class="page" v-if="ui.page === 'groupe'"/>    
       <page-notes class="page" v-if="ui.page === 'notes'"/>    
+      <page-ficavion class="page" v-if="ui.page === 'ficavion'"/>    
     </transition-group>
   </q-page-container>
 
@@ -357,6 +364,7 @@ import PageGroupes from './pages/PageGroupes.vue'
 import PageGroupe from './pages/PageGroupe.vue'
 import PageNotes from './pages/PageNotes.vue'
 import PressePapier from './dialogues/PressePapier.vue'
+import PageFicavion from './pages/PageFicavion.vue'
 
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
@@ -385,7 +393,7 @@ export default {
 
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests, NotifIcon, QueueIcon, 
-    ApercuAvatar, PageGroupe, PageGroupes, PageNotes,
+    ApercuAvatar, PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
@@ -447,6 +455,9 @@ export default {
     },
     pageCompta () { 
       this.ui.setPage('compta', 'compta')
+    },
+    pageFicavion () { 
+      this.ui.setPage('ficavion')
     },
     infoSession () { 
       this.ui.setPage('session')

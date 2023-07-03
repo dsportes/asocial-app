@@ -87,17 +87,7 @@
       </q-item-label>
     </q-item-section>
   </q-item>
-  <q-separator v-if="!session.incognito" class="q-my-xs" color="orange"/>
-  <q-item v-if="!session.incognito" clickable>
-    <q-item-section>
-      <q-item-label lines="1">{{$t('ACficav')}}</q-item-label>
-    </q-item-section>
-  </q-item>
-  <q-item v-if="!session.incognito" clickable>
-    <q-item-section>
-      <q-item-label lines="1">{{$t('ACtfloc')}}</q-item-label>
-    </q-item-section>
-  </q-item>
+
 </q-list>
 </template>
 
@@ -136,6 +126,7 @@ export default {
 
   methods: {
     maTribu () { 
+      this.ui.menug = false
       this.aSt.setTribuC()
       this.ui.setPage('tribu')
     },

@@ -12,8 +12,9 @@ export const useUiStore = defineStore('ui', {
     pagesF: new Set(['chats', 'tribus', 'tribu', 'people', 'groupes', 
       'groupesac', 'groupe', 'notes']),
     tabF: new Set(['membres']),
-    pagesB: new Set(['tribus', 'groupes', 'groupesac', 'notes']),
+    pagesB: new Set(['tribus', 'groupes', 'groupesac', 'notes', 'ficavion']),
     menu: false,
+    menug: false,
 
     diag: '',
     diagresolve: null,
@@ -55,6 +56,7 @@ export const useUiStore = defineStore('ui', {
     },
     async setPage (p, tab) {
       this.menu = false
+      this.menug = false
       this.pageback = this.pagesB.has(this.page) ? this.page : ''
       this.page = null
       await sleep(200)

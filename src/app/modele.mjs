@@ -29,6 +29,8 @@ export class MD {
   static val (nom) { return MD.app[nom] ? MD.app[nom].value : false }
 
   static oD (m) {
+    const ui = stores.ui
+    ui.menug = false
     if (typeof m === 'string') {
       MD.dialogStack.push(MD.app[m])
       MD.app[m].value = true

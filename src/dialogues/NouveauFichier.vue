@@ -89,6 +89,7 @@ import { $t } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NouveauFichier } from '../app/operations.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
+import { UNITEV2 } from '../app/api.mjs'
 
 export default {
   name: 'NouveauFichier',
@@ -165,7 +166,7 @@ export default {
             return
           }
         } if (this.nSt.node.type === 5) {
-          const eg = this.gSt.egr(nSt.note.id)
+          const eg = this.gSt.egr(this.nSt.note.id)
           x = (eg.objv.vols.q2 * UNITEV2) - eg.objv.vols.v2 - dv2
           if (x < 0) {
             await afficherDiag($t('PNFnv15b', [-x]))

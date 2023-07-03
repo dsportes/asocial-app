@@ -56,6 +56,8 @@ export default {
     const lgmax = toRef(props, 'lgmax')
     const min = ref(lgmin.value || 0)
     const max = ref(lgmax.value || 32)
+    /* const sfx = toRef(props, 'suffix')
+    console.log('suffix=' + sfx.value) */
 
     function ok () {
       context.emit('update:modelValue', val.value)

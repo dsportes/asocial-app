@@ -603,6 +603,7 @@ export default {
   Pgroupe: 'Groupe {0}',
   Ppeople: 'Tous mes contacts',
   Pnotes: 'Toutes mes notes',
+  Pficavion: 'Fichiers visibles en avion',
 
   MLAbrk: 'Opération en cours',
   MLAcf: 'Voulez-vous vraiement arrêter l\'opération en cours "{0}"',
@@ -636,7 +637,8 @@ export default {
   MLAt2g: 'Groupes',
   MLAfiltre: 'Ouvrir les paramètres du filtre',
   MLArech: 'Recherche ...',
-  MLApp: 'Presse-papier de notes et fichiers',
+  MLApp: 'Presse-papier notes/fichiers',
+  MLAfav: 'Fichiers visibles en avion',
 
   FInom: 'Début du nom du contact',
   FIngr: 'Début du nom du groupe',
@@ -930,6 +932,12 @@ export default {
   PNOmcap: 'Mots clés "personnels"',
   PNOmcgr: 'Mots clés "du groupe"',
   PNOmcgp: 'Mots clés personnels de {0}',
+
+  FAVnone: 'Aucun fichier visible en mode avion',
+  FAVdet: 'Détail du fichier',
+  FAVst1: 'en attente',
+  FAVst2: 'chargé',
+  FAVst3: 'en erreur',
 
   PNFnbv: 'Pas de version | Une version | {count} versions',
   PNFl1: 'La version la plus récente est visible en avion',
