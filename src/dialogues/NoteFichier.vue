@@ -136,7 +136,7 @@
 </template>
 
 <script>
-import { ref, toRef, reactive, watch } from 'vue'
+import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
 import { edvol, dhcool, afficherDiag } from '../app/util.mjs'

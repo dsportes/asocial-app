@@ -763,6 +763,10 @@ export default {
   CHav: 'Il n\'est pas possible d\'éditer un chat en mode "avion"',
   CHbl: 'Quand le compte est "bloqué" il n\'est pas possible d\'éditer un chat (sauf avec le Comptable ou un sponsor de la tribu)',
   CHdisp: 'Le compte du contact a été résilié : il n\'est pas possible d\'ouvrir un nouveau chat avec lui.',
+  CHexp: 'Exporter la sélection des "chats"',
+  CHnseq: 'Numéro de séquence: {0}',
+  CHdhc: 'Dernière mise à jour: {0}',
+  CHerr: 'Incident technique lors de l\'afficage dyu résultat',
 
   SYtit: 'Chargement et synchronisation du compte',
   SYcpt: 'Compte et comptabilité',

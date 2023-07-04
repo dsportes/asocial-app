@@ -120,6 +120,17 @@ export function dhstring (t, sec) {
   return aaaammjj(d) + ' ' + hms(d, sec)
 }
 
+/* data:image/svg+xml;base64,... to binaire ************/
+export function photoToBin (t) {
+  let i = t.indexOf(',')
+  const bin = b64ToU8(t.substring(i+1))
+  i = t.indexOf(';')
+  const j = t.indexOf(':')
+  const mime = t.substring(j+1, i)
+  return [mime, bin]
+}
+
+
 /* gzip / ungzip ***************************************************/
 export function gzipT (data) { return pako.gzip(data) }
 
