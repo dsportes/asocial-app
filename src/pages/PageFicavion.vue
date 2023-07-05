@@ -105,7 +105,7 @@ export default ({
     },
 
     voirnote () {
-      this.nSt.presel = this.fc.n.key
+      this.nSt.setPreSelect(this.fc.n.key)
       this.ui.setPage('notes')
     },
 

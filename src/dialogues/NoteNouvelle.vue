@@ -93,7 +93,7 @@
           <q-toggle class=" titre-md" v-model="prot" :label="$t('PNOpr')" />
         </div>
 
-        <div class="col-auto q-mt-sm row">
+        <div v-if="groupe" class="col-auto q-mt-sm row">
           <bouton-undo :cond="exclu===true" @click="exclu=false"/>
           <q-toggle class=" titre-md" v-model="exclu" :label="$t('PNOex')" />
         </div>
@@ -139,13 +139,16 @@ export default {
       this.groupe = null
       this.step = 2
     },
+
     selGr () {
       this.auteur = this.aSt.getElt(this.naAut.id)
       this.avatar = null
       this.groupe = this.gSt.egr(this.idp).groupe
       this.step = 2
     },
+
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
+
     async valider () {
       // console.log(this.texte, this.prot, this.temp.value, this.exclu)
       let id = 0, idc = 0, ref = null, im = 0
@@ -169,8 +172,10 @@ export default {
         ref = [this.idp, this.idsp, rnom]
       }
 
-      await new NouvelleNote()
+      const key = await new NouvelleNote()
         .run(id, this.texte, im, this.temp.value, this.prot, this.exclu, ref, idc)
+
+      this.nSt.setPreSelect(key)
       MD.fD()
     }
   },
@@ -204,10 +209,17 @@ export default {
     const naAut = ref(la.value[0])
 
     const { id, ids } = splitPK(nSt.node.key)
-    const idp = ref(id) // id du parent - racine si idsp = 0
+    const idp = ref(id) // id du parent - racine si ids = 0 - GROUPE ou AVATAR
     const idsp = ref(ids)
     const grP = ref(null) // groupe de la note parente
     const avP = ref(null) // avatar de la note parente
+    if (idp.value) {
+      if (ID.estGroupe(idp.value)) {
+        grP.value = gSt.egr(idp.value).groupe
+      } else {
+        avP.value = aSt.getElt(idp.value).avatar
+      }
+    }
 
     const options = [
       { label: $t('permanent'), value: 99999999 },
@@ -246,7 +258,6 @@ export default {
       }
       case 2: { 
         type.value = 2
-        grP.value = gSt.egr(idp.value).groupe
         step.value = 1
         break
       }
@@ -259,13 +270,11 @@ export default {
         type.value = 4
         auteur.value = aSt.getElt(id)
         avatar.value = auteur.value.avatar
-        avP.value = aSt.getElt(idp.value).avatar
         step.value = 2
         break
       }
       case 5: { 
         type.value = 5
-        grP.value = gSt.egr(idp.value).groupe
         step.value = 1
         break
       }

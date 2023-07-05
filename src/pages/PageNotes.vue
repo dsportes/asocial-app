@@ -1,18 +1,7 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm">
-    <q-btn class="sep q-my-sm" dense flat size="md" :label="$t('PNOdlc')" 
-      color="primary" icon="file_download" @click="dlopen"/>
 
-    <div class="row q-ml-xs">
-      <q-btn v-if="!expandAll" class="q-my-sm" dense size="sm" :label="$t('PNOdep')" 
-        color="primary" icon="unfold_more" @click="tree.expandAll();expandAll=true"/>
-      <q-btn v-if="expandAll" class="q-my-sm" dense size="sm" :label="$t('PNOrep')" 
-        color="primary" icon="unfold_less" @click="tree.collapseAll();expandAll=false"/>
-      <q-btn class="q-my-sm q-ml-lg" dense size="sm" label="T1" 
-        color="warning" icon="check" @click="test1"/>
-    </div>
-
-    <q-tree ref="tree" class="q-mb-sm"
+    <q-tree ref="tree" class="sep q-mb-sm"
       :nodes="nSt.nodes"
       no-transition
       dense
@@ -68,7 +57,7 @@
     <q-dialog v-model="confirmsuppr" persistent>
       <q-card class="bs largeur30 q-pa-sm">
         <div class="q-mt-md titre-lg text-italic">{{$t('PNOcfsuppr')}}</div>
-        <div class="q-mt-sm fs-md q-ml-md">{{nSt.note.titre}}</div>
+        <div v-if="nSt.note" class="q-mt-sm fs-md q-ml-md">{{nSt.note.titre}}</div>
         <div class="q-mt-md row justify-center q-gutter-md">
           <q-btn class="q-pa-xs" size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
           <bouton-confirm actif :confirmer="supprNote"/>
@@ -156,102 +145,110 @@
     </q-dialog>
 
     <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="[0,0]">
-      <div class="box2 column">
-        <div v-if="!selected" class="col q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
-        <div v-if="selected" class="box3 q-pa-xs col largeur40">
-          <div class="row justify-between">
-            <div class="titre-md">{{lib2}}</div>
-            <div  v-if="nSt.note" class="col-auto font-mono fs-sm">
-              <span class="q-mr-sm">({{edvol(nSt.note.v1)}})</span>
-              <span>{{dhcool(nSt.note.dh)}}</span>
-            </div>
-          </div>
-          <div v-if="nSt.note">
-            <div class="q-ml-md row justify-between"> 
-              <show-html :class="dkli(0) + ' col bord1'"
-                :texte="nSt.note.txt" zoom maxh="4rem" />
-              <q-btn :disable="rec!==0" class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
-                @click="editer"/>
-            </div>
+      <div class="column" style="width:100vw">
+      <div class="q-pa-xs largeur40 box2">
+        <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
 
-            <div v-if="!rec" class="q-mt-xs row justify-between titre-sm">  
-              <apercu-motscles class="col" v-if="nSt.note.smc" :mapmc="mapmcf(nSt.node.key)" 
-                :src="Array.from(nSt.note.smc)" du-compte
-                :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
-              <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
-              <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="edmc"/>
-            </div>
-
-            <div v-if="!rec && nSt.note.st === 99999999" class="q-mt-xs row justify-between titre-sm">  
-              <div class="col">
-                <span>{{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}</span>
-                <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
-              </div>
-              <q-btn class="col-auto btn2" color="primary" size="sm" :label="$t('fichiers')" icon="open_in_new" 
-                @click="voirfic"/>
-            </div>
-
-            <div v-if="!rec" class="q-mt-xs row justify-between titre-sm">  
-              <div class="col">{{prot}}</div>
-              <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-                @click="proteger"/>
-            </div>
-
-            <div v-if="!rec && nSt.note.st !== 99999999" class="q-mt-xs row justify-between titre-sm">  
-              <div class="col">{{temp}}</div>
-              <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-                @click="edTemp"/>
-            </div>
-
-            <div v-if="!rec && nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
-              <div class="col">
-                <div>
-                  <span class="q-mr-sm">{{exclu}}</span>
-                  <span v-if="nSt.note.auts.length">
-                    <liste-auts/>
-                  </span>
-                </div>
-              </div>
-              <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-                @click="edexclu"/>
-            </div>
-
+        <div v-if="selected" class="row justify-between">
+          <div class="titre-md">{{lib2}}</div>
+          <div  v-if="nSt.note" class="col-auto font-mono fs-sm">
+            <span class="q-mr-sm">({{edvol(nSt.note.v1)}})</span>
+            <span>{{dhcool(nSt.note.dh)}}</span>
           </div>
         </div>
 
-        <div class="col-auto tb1 largeur40">
-          <div v-if="!rec" class="row justify-center q-gutter-xs">
-            <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
-              @click="nouvelle" :disable="!selected"/>
-            <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
-              @click="supprimer" :disable="!selected || !nSt.note"/>
-            <q-btn :disable="!selected || !nSt.note || !rattaut" 
-              class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
-              @click="rattacher"/>
-          </div>
+        <div v-if="selected && nSt.note" class="q-ml-md row justify-between"> 
+          <show-html :class="dkli(0) + ' col bord1'"
+            :texte="nSt.note.txt" zoom maxh="4rem" />
+          <q-btn :disable="rec!==0" class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
+            @click="editer"/>
+        </div>
 
-          <div v-if="rec===1" class="q-ma-sm column">
-            <div class="q-pa-xs bg-yellow-5 text-bold text-black text-italic text-center titre-md">
-              {{$t('PNOrattinfo')}}</div>
-            <q-btn class="btn2 q-mt-sm" color="primary" size="md" icon="close" :label="$t('PNOanratt')"
-              @click="anrattacher"/>
-          </div>
+        <div v-if="selected && nSt.note && !rec" class="q-mt-xs row justify-between titre-sm">  
+          <apercu-motscles class="col" v-if="nSt.note.smc" :mapmc="mapmcf(nSt.node.key)" 
+            :src="Array.from(nSt.note.smc)" du-compte
+            :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
+          <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
+          <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="edmc"/>
+        </div>
 
-          <div v-if="rec===2" class="q-ma-sm column">
+        <div v-if="selected && nSt.note && !rec && nSt.note.st === 99999999" class="q-mt-xs row justify-between titre-sm">  
+          <div class="col">
+            <span>{{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}</span>
+            <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
+          </div>
+          <q-btn class="col-auto btn2" color="primary" size="sm" :label="$t('fichiers')" icon="open_in_new" 
+            @click="voirfic"/>
+        </div>
+
+        <div v-if="selected && nSt.note && !rec" class="q-mt-xs row justify-between titre-sm">  
+          <div class="col">{{prot}}</div>
+          <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
+            @click="proteger"/>
+        </div>
+
+        <div v-if="selected && nSt.note && !rec && nSt.note.st !== 99999999" class="q-mt-xs row justify-between titre-sm">  
+          <div class="col">{{temp}}</div>
+          <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
+            @click="edTemp"/>
+        </div>
+
+        <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
+          <div class="col">
             <div>
-              <span class="q-pa-xs text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
-              <span class="q-pa-xs bg-yellow-5 text-bold text-black titre-md">{{noderatt.label}}</span>
+              <span class="q-mr-sm">{{exclu}}</span>
+              <span v-if="nSt.note.auts.length">
+                <liste-auts/>
+              </span>
             </div>
-            <q-btn class="btn2 q-mt-sm" color="warning" size="md" icon="check" :label="$t('PNOcfratt')"
-              @click="okrattacher"/>
-            <q-btn class="btn2 q-mt-sm" color="primary" size="md" icon="attachment" :label="$t('PNOratt2')"
-              @click="rattacher"/>
-            <q-btn v-if="rec" class="btn2 q-mt-sm" color="primary" size="md" icon="close" :label="$t('PNOanratt')"
-              @click="anrattacher"/>
           </div>
-
+          <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
+            @click="edexclu"/>
         </div>
-        <q-separator color="orange" size="3px" class="q-mt-xs q-mb-md"/>
+
+        <div v-if="selected && nSt.note && !rec" class="row justify-center q-gutter-xs">
+          <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
+            @click="nouvelle" :disable="!selected"/>
+          <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
+            @click="supprimer" :disable="!selected || !nSt.note"/>
+          <q-btn :disable="!selected || !nSt.note || !rattaut" 
+            class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
+            @click="rattacher"/>
+        </div>
+
+        <div v-if="selected && nSt.note && rec===1" class="q-ma-sm column">
+          <div class="q-pa-xs bg-yellow-5 text-bold text-black text-italic text-center titre-md">
+            {{$t('PNOrattinfo')}}</div>
+          <q-btn class="btn2 q-mt-sm" color="primary" size="md" icon="close" :label="$t('PNOanratt')"
+            @click="anrattacher"/>
+        </div>
+
+        <div v-if="selected && nSt.note && rec===2" class="q-ma-sm column">
+          <div>
+            <span class="q-pa-xs text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
+            <span class="q-pa-xs bg-yellow-5 text-bold text-black titre-md">{{noderatt.label}}</span>
+          </div>
+          <q-btn class="btn2 q-mt-sm" color="warning" size="md" icon="check" :label="$t('PNOcfratt')"
+            @click="okrattacher"/>
+          <q-btn class="btn2 q-mt-sm" color="primary" size="md" icon="attachment" :label="$t('PNOratt2')"
+            @click="rattacher"/>
+          <q-btn v-if="rec" class="btn2 q-mt-sm" color="primary" size="md" icon="close" :label="$t('PNOanratt')"
+            @click="anrattacher"/>
+        </div>
+
+      </div>
+            
+      <div class="bg-secondary text-white full-width">
+        <div class="row largeur40">
+          <q-btn dense flat size="md" :label="$t('PNOdlc')" icon="file_download" @click="dlopen"/>
+          <q-space/>
+          <q-btn v-if="!expandAll" class="btn2" dense size="sm" :label="$t('PNOdep')" 
+            color="primary" icon="unfold_more" @click="tree.expandAll();expandAll=true"/>
+          <q-btn v-if="expandAll" class="btn2" dense size="sm" :label="$t('PNOrep')" 
+            color="primary" icon="unfold_less" @click="tree.collapseAll();expandAll=false"/>
+          <q-btn class="q-ml-sm" dense size="sm" label="T1" @click="test1"/>
+        </div>
+      </div>
       </div>
     </q-page-sticky>
   </q-page>
@@ -288,8 +285,8 @@ const styles = [
   'titre-md text-bold text-italic', 
   'fs-md', 
   'fs-md',
-  'fs-md text-italic',
-  'fs-md text-italic'
+  'fs-md text-italic text-primary',
+  'fs-md text-italic text-orange'
   ]
 
 const nbn1 = 100 // nombre de blocks de 4 * nbn2 messages sous la racine d'un avatar ou groupe
@@ -399,11 +396,11 @@ export default {
     },
 
     async supprNote () {
+      MD.fD()
       const n = this.nSt.note
       const g = this.nSt.groupe
       const idc = g ? g.idh : this.session.compteId
       await new SupprNote().run(n.id, n.ids, idc)
-      MD.fd()
     },
 
     async editer () {
@@ -751,6 +748,15 @@ export default {
       return true
     }
 
+    function preSelect () {
+      if (nSt.presel) {
+        selected.value = nSt.presel
+        expanded.value = nSt.getAncetres(nSt.presel)
+        nSt.setCourant(nSt.presel)
+        nSt.presel = ''
+      }
+    }
+
     fSt.$onAction(({ name, args, after }) => { 
       after(async (result) => {
         if ((name === 'setFiltre')){
@@ -763,6 +769,14 @@ export default {
       after(async (result) => {
         if ((name === 'setSelected')){
           selected.value = args[0]
+        }
+      })
+    })
+
+    nSt.$onAction(({ name, args, after }) => { 
+      after(async (result) => {
+        if ((name === 'setPreSelect')){
+          preSelect()
         }
       })
     })
@@ -820,6 +834,7 @@ export default {
 
     async function dlopen () {
       listeNotes()
+      preSelect()
       if (lstn.length) {
         dlnc.value = lstn[0]
         dlst.value = 1
@@ -907,13 +922,6 @@ export default {
     const mapmc = ref(Motscles.mapMC(true, 0))
     fSt.contexte.notes.mapmc = mapmc.value
 
-    if (nSt.presel) {
-      selected.value = nSt.presel
-      expanded.value = nSt.getAncetres(nSt.presel)
-      nSt.setCourant(nSt.presel)
-      nSt.presel = ''
-    }
-
     const notenouvelle = ref(false)
     function ovnotenouvelle () { MD.oD(notenouvelle) }
     const noteedit = ref(false)
@@ -937,7 +945,7 @@ export default {
       notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
       notetemp, ovnotetemp, noteprot, ovnoteprot, noteexclu, ovnoteexclu,
       notemc, ovnotemc, notefichier, ovnotefichier, dldialogue, ovdldialogue,
-      dhcool, now, filtrage, edvol,
+      MD, dhcool, now, filtrage, edvol,
       ID, session, nSt, aSt, gSt,
       selected, expanded,
       tree,
@@ -958,7 +966,8 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-$hb: 18.5rem
+$hb: 16rem
+$hb2: 14rem
 .msg
   position: absolute
   z-index: 99999
@@ -973,11 +982,8 @@ $hb: 18.5rem
   height: $hb
   overflow: hidden
 .box2
-  width: 100vw
-  height: $hb
-.box3
   overflow: auto
-  padding-right: 5px
+  height: $hb2
 .bord1
   border-top: 1px solid $grey-8 !important
   border-bottom: 1px solid $grey-8 !important

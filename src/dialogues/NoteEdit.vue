@@ -74,7 +74,7 @@ import BoutonUndo from '../components/BoutonUndo.vue'
 import { MajNote } from '../app/operations.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ListeAuts from '../components/ListeAuts.vue'
-import { UNITEV1 } from '../app/api.mjs'
+import { ID, UNITEV1 } from '../app/api.mjs'
 
 export default {
   name: 'NoteEdit',
@@ -150,9 +150,17 @@ export default {
     const groupe = ref(null)
 
     const { id, ids } = splitPK(nSt.node.note.refk)
-    const idp = ref(id) // id du parent - racine si idsp = 0
+    const idp = ref(id) // id du parent - racine si ids = 0 - GROUPE ou AVATAR
     const grP = ref(null) // groupe de la note parente
     const avP = ref(null) // avatar de la note parente
+    if (idp.value) {
+      if (ID.estGroupe(idp.value)) {
+        grP.value = gSt.egr(idp.value).groupe
+      } else {
+        avP.value = aSt.getElt(idp.value).avatar
+      }
+    }
+
     const nodeP = ref(idp.value ? nSt.nodeP : null)
 
     switch (nSt.node.type) {
@@ -160,14 +168,12 @@ export default {
         type.value = 4
         if (aSt.exV1) er.value = 1
         avatar.value = aSt.getElt(nSt.note.id).avatar
-        if (idp.value) avP.value = aSt.getElt(idp.value).avatar
         break
       }
       case 5: {
         type.value = 5
         groupe.value = gSt.egr(nSt.note.id).groupe
         er.value = erGr(0)
-        if (idp.value) grP.value = gSt.egr(idp.value).groupe
         break
       }
     }

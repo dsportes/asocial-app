@@ -501,7 +501,8 @@ export class ConnexionCompte extends OperationUI {
         closeIDB()
         await deleteIDB(session.nombase)
         await openIDB()
-        setTrigramme(session.nombase, await getTrigramme())
+        // setTrigramme(session.nombase, await getTrigramme())
+        setTrigramme(session.nombase, this.avatar.na.nomc)
       }
       lectureSessionSyncIdb()
     }

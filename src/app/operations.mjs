@@ -1304,7 +1304,7 @@ export class NouvelleNote extends OperationUI {
       const rowNote = await Note.toRowNouveau(id, txt, im, nbj, p, exclu, ref)
       const args = { token: session.authToken, rowNote : rowNote, idc }
       this.tr(await post(this, 'NouvelleNote', args))
-      return this.finOK()
+      return this.finOK((rowNote.id + '/' + rowNote.ids))
     } catch (e) {
       await this.finKO(e)
     }

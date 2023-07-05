@@ -78,11 +78,11 @@
               <span class="fs-md q-mt-sm">{{it.nb}}</span>
             </div>
             <div class="q-pl-md q-mb-sm row items.center">
-              <div class="col-2">{{it.trig}}</div>
+              <div class="col-4">{{it.trig}}</div>
               <div class="col-3 fs-sm font-mono">{{it.hps1}}</div>
               <div v-if="it.vu" class="col-3 text-center font-mono">{{edvol(it.v1 + it.v2)}}</div>
               <div v-if="it.vu" class="col-4 text-center font-mono">{{$t('GBfi', [edvol(it.v2)])}}</div>
-              <span v-if="!it.vu" class="col-7 text-right">
+              <span v-if="!it.vu" class="col-5 text-right">
                 <q-btn :disable="running" @click.stop="getVU(it)"
                   size="md" dense color="primary" no-caps :label="$t('GBvol')"/>
               </span>

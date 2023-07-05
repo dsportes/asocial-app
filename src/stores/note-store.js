@@ -144,6 +144,10 @@ export const useNoteStore = defineStore('note', {
       this.setCourant(key) 
     },
 
+    setPreSelect (key) {
+      this.presel = key
+    },
+
     stats (f) { // f(node): function de filtrage
       this.nodes.forEach(n => { n.nt = 0; n.nf = 0 })
       this.map.forEach(n => {
@@ -240,7 +244,6 @@ export const useNoteStore = defineStore('note', {
           if (!n.note) n.type -= 2 // si c'était une fake, elle est réelle
           const nrav = n.note ? n.note.refk : '' // rattachement AVANT
           n.note = note
-          n.label = note.titre
           if (nrav) {
             // elle était attachée à une note : on la détache de celle-ci
             this.detachNote(n, nrav)
@@ -253,7 +256,6 @@ export const useNoteStore = defineStore('note', {
             rkey: note.rkey,
             key: key,
             type: Note.estG(key) ? 5 : 4,
-            label: note.titre,
             note: note,
             children: []
           }
@@ -271,12 +273,14 @@ export const useNoteStore = defineStore('note', {
             // elle devient réelle
             n.type -= 2
             n.note = note
+            n.label = note.titre
             // on la rattache à sa note de rattachement
             this.rattachNote(n)
           } else { // la note existait et est réelle
             const nrav = n.note.refk // rattachement AVANT
             const nrap = note.refk // rattachement APRES
             n.note = note
+            n.label = note.titre
             // était-elle rattachée à une autre ?
             if (!nrav) {
               // n'était pas rattachée
@@ -315,6 +319,7 @@ export const useNoteStore = defineStore('note', {
           this.rattachNote(n) // on la rattache à sa note de rattachement
         }
       }
+      this.setLabel(n)
     },
 
     detachNote (n, nrav) {
@@ -330,42 +335,69 @@ export const useNoteStore = defineStore('note', {
     },
 
     delNote (id, ids) {
+      const session = stores.session
       const key = id + '/' + ids
       const n = this.map.get(key)
       if (!n || !n.note) return // note inexistante ou était déjà fake
-      if (n.children.length) { // a des enfants : devient fake
-        n.label = '#' + ids
-        n.note = null
-        return
-      }
+
       const npkey = n.note.refk || '' + id // parent avatar / groupe ou autre note
       const np = this.map.get(npkey)
-      this.map.delete(n.key) // note supprimée (pas d'enfant)
 
-      // parent utile ou non, à mettre à jour ou détruire
+      if (!n.note.refk || !n.note.ref[1]) {
+        // était rattachée à UNE racine (la sienne ou un groupe pour un avatar) - devient fake ou supprimée
+        if (n.children.length) { // a des enfants : devient fake
+          n.note = null
+          n.type = Note.estG(n.rkey) ? 7 : 6
+          this.setLabel(n)
+        } else {
+          // note à supprimer de sa racine
+          const a = []
+          np.children.forEach(c => { if (c.key !== key) a.push(c)})
+          np.children = a
+          let cpt = false
+          if (np.type === 3) {
+            // c'est une racine groupe "zombi" : inutile ?
+            if (!np.children.length) {
+              // avatar ou groupe zombi inutile
+              this.map.delete(np.key)
+              // par convention on sépliera la racine du compte
+              cpt = true
+            }
+          }
+          this.map.delete(n.key) // note simplement supprimée (puisqu'elle n'a pas d'enfant)
+          this.setPreSelect(cpt ? '' + session.compteId : npkey) // la racine ou celle du compte s'ouvre
+        }
+        return
+      }
+
+      // La note était rattachée à une autre note
+
+      if (!n.children.length) {
+        // elle n'avait pas d'enfants
+        const a = []
+        np.children.forEach(c => { if (c.key !== key) a.push(c)})
+        np.children = a
+        this.map.delete(n.key) // note simplement supprimée (puisqu'elle n'a pas d'enfant)
+        this.setPreSelect(npkey) // son parent s'ouvrira
+        return
+      }
+
+      // note rattachée ayant des enfants : DEVIENT UNE FAKE rattachée à sa racine
+      // on l'enlève de son parent
       const a = []
       np.children.forEach(c => { if (c.key !== key) a.push(c)})
       np.children = a
-      if (np.children.length || np.type < 3) {
-        // racine avatar ou groupe ou pas d'enfants - parent utile
-        return
-      }
-      if (np.type === 3){
-        // avatar ou groupe zombi inutile
-        this.map.delete(np.key)
-        return
-      }
-      if (np.type <= 5) return // note parent sans enfants
-      // np : note parent fake sans enfants - on enlève la note fake
-      const nr = this.map.get(np.rkey) // node racine
-      const b = []
-      nr.children.forEach(c => { if (c.key !== np.key) b.push(c)})
-      nr.children = a
-      this.map.delete(np.key)
+
+      n.note = null
+      n.type = Note.estG(n.rkey) ? 7 : 6
+      // refn SI c'était une note d'avatar rattachée à une note de groupe
+      const refn = (!Note.estG(n.key) && Note.estG(np.key)) ? np.rkey : '' 
+      this.rattachRac (n, refn)
+      this.setLabel(n)
+      this.setPreSelect(n.key) // elle sera dépliée
     },
 
     rattachNote (n) {
-      this.setLabel(n)
       let nr = this.map.get(n.note.refk)
       if (nr) { // la note de rattachement existait (fake ou réelle)
         nr.children.push(n)
@@ -387,7 +419,6 @@ export const useNoteStore = defineStore('note', {
     },
 
     rattachRac (n, refn) { // n peut être réelle ou fake (rkey donne la clé de sa racine)
-      this.setLabel(n)
       let r = this.map.get(n.rkey) // racine
       if (r) {
         r.children.push(n)
@@ -438,6 +469,7 @@ export const useNoteStore = defineStore('note', {
       } else { // note fake
         const {id, ids} = splitPK(n.key)
         sfx = '$' + ids
+        if (n.pfx) pfx = n.pfx
       }
       n.pfx = pfx
       n.label = (pfx ? (pfx + ' '): '') + sfx
