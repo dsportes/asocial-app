@@ -932,7 +932,8 @@ export class AcceptationSponsoring extends OperationUI {
         try {
           await session.setNombase()
           await openIDB()
-          setTrigramme(session.nombase, await getTrigramme())
+          setTrigramme(session.nombase, this.avatar.na.nomc)
+          // setTrigramme(session.nombase, await getTrigramme())
           lectureSessionSyncIdb()
           // Finalisation en une seule fois de l'écriture du nouvel état en IDB
           this.buf.putIDB(rowCompta)

@@ -132,7 +132,21 @@ export const useNoteStore = defineStore('note', {
         }
         return anc
       }
+    },
+
+    // Retourne une map de clé racine et de valeur n nombre de notes
+    nbNotesParRacine: (state) => {
+      const m = []
+      for (const [key, node] of state.map) {
+        const {id, ids} = splitPK(key)
+        if (node.type >= 4 || node.type <= 5) {
+          let n = m[id] || 0
+          m[id] = n++
+        }
+      }
+      return m
     }
+
   },
 
   actions: {

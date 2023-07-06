@@ -1419,4 +1419,8 @@ export default {
   PPtit: 'Membre {0} du groupe {1}',
   PPctc: 'Inscrire comme contact du groupe {0}',
 
+  SAVtit: 'Suppression de l\'avatar {0}',
+  SAVtit2: 'Suppression du COMPTE {0}',
+  SAVer1: 'La suppression du compte ne peut intervenir qu\'après la suppression de ses avatars secondaires',
+
 }

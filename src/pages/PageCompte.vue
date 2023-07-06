@@ -41,8 +41,11 @@
     <!-- Avatars du compte -->
     <q-card class="q-my-md q-pa-xs" v-for="(na, idx) in aSt.compta.lstAvatarNas" :key="na.id">
       <div class="row items-start">
-        <q-btn flat icon="navigate_next" size="lg" class="col-auto q-mr-sm"
-          :color="na.id === session.avatarId ? 'warning' : 'primary'" @click="courant(na.id)"/>
+        <div class="col-auto column items-center q-mr-sm">
+          <q-btn flat icon="navigate_next" size="lg"
+            :color="na.id === session.avatarId ? 'warning' : 'primary'" @click="courant(na.id)"/>
+          <q-btn icon="delete" size="md" class="q-mt-sm" @click="delAvatar(na.id)"/>
+        </div>
         <apercu-avatar edit :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')" :na="na" :idx="idx"/>
       </div>
     </q-card>
@@ -93,6 +96,11 @@
       <nouveau-sponsoring :tribu="aSt.tribu"/>
     </q-dialog>
 
+    <!-- Dialogue de suppression d'un avatar -->
+    <q-dialog v-model="suppravatar" persistent full-height>
+      <suppr-avatar :avid="avid"/>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -111,13 +119,18 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
+import SupprAvatar from '../dialogues/SupprAvatar.vue'
 import { afficherDiag } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
+import { ID } from '../app/api.mjs'
 
 export default {
   name: 'PageCompte',
 
-  components: { NomAvatar, NouveauSponsoring, BoutonHelp, ApercuAvatar, PhraseSecrete, EditeurMd, ShowHtml, MotsCles },
+  components: { 
+    NomAvatar, NouveauSponsoring, BoutonHelp, ApercuAvatar,
+    PhraseSecrete, EditeurMd, ShowHtml, MotsCles, SupprAvatar
+  },
 
   computed: {
     memo () { return this.aSt.compte.memo }
@@ -127,7 +140,8 @@ export default {
     return {
       ps: null,
       memoed: null,
-      nomav: ''
+      nomav: '',
+      avid: 0
     }
   },
 
@@ -180,6 +194,20 @@ export default {
     },
 
     async ouvrirSponsoring () { if (await this.session.edit()) this.ovnvpar() },
+
+    async delAvatar (id) {
+      if (await this.session.edit()) {
+        if (ID.estCompte(id)) {
+          if (this.aSt.compta.lstAvatarNas.length > 1) {
+            await afficherDiag(this.$t('SAVer1'))
+            return
+          }
+          this.avid = 0
+        } else 
+          this.avid = id
+        this.ovsuppravatar()
+      }
+    }
   },
 
   setup () {
@@ -196,9 +224,12 @@ export default {
     function ovchgps () { MD.oD(chgps) }
     const nvpar = ref(false)
     function ovnvpar () { MD.oD(nvpar) }
+    const suppravatar = ref(false)
+    function ovsuppravatar () { MD.oD(suppravatar) }
 
     return {
-      MD, mcledit, ovmcledit, nvav, ovnvav, memoedit, ovmemoedit, chgps, ovchgps, nvpar, ovnvpar,
+      MD, mcledit, ovmcledit, nvav, ovnvav, memoedit, ovmemoedit, chgps, ovchgps,
+      nvpar, ovnvpar, suppravatar, ovsuppravatar,
       ui: stores.ui,
       aSt,
       session

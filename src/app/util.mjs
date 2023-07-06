@@ -375,6 +375,7 @@ export function setTrigramme (nombase, trig) {
   localStorage.setItem(nt, u8ToB64(new Uint8Array(encode(trigs)), true))
 }
 
+/*
 export function getTrigramme () {
   const $q = stores.config.$q
   return new Promise((resolve) => {
@@ -396,3 +397,4 @@ export function getTrigramme () {
     )
   })
 }
+*/
