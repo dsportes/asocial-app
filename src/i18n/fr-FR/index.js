@@ -1422,5 +1422,8 @@ export default {
   SAVtit: 'Suppression de l\'avatar {0}',
   SAVtit2: 'Suppression du COMPTE {0}',
   SAVer1: 'La suppression du compte ne peut intervenir qu\'après la suppression de ses avatars secondaires',
-
+  SAVst1: 'disparaîtra',
+  SAVst2: 'ne sera plus hébergé',
+  SAVst3: 'n\'aura plus d\'animateurs',
+  
 }

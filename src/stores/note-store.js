@@ -134,14 +134,17 @@ export const useNoteStore = defineStore('note', {
       }
     },
 
-    // Retourne une map de clé racine et de valeur n nombre de notes
-    nbNotesParRacine: (state) => {
-      const m = []
+    // Retourne une map de clé racine et de valeur { n: nombre de notes, v1, v2 }
+    statsParRacine: (state) => {
+      const m = {}
       for (const [key, node] of state.map) {
         const {id, ids} = splitPK(key)
-        if (node.type >= 4 || node.type <= 5) {
-          let n = m[id] || 0
-          m[id] = n++
+        if (node.type >= 4 && node.type <= 5) {
+          let e = m[id]; if (!e) { e = { n: 0, v1: 0, v2: 0 }; m[id] = e }
+          const n = node.note
+          e.n++
+          e.v1 += n.v1
+          e.v2 += n.v2
         }
       }
       return m

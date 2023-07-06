@@ -135,6 +135,15 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
+    actifIds: (state) => { return (e) => {
+        const s = new Set()
+        for (const [,m] of e.membres) { 
+          if (e.groupe.ast[m.ids] >= 30 && e.groupe.ast[m.ids] <= 32) s.add(m.na.id) 
+        }
+        return s
+      }
+    },
+
     /* NA des animateurs du groupe courant ayant voté pour inviter le membre courant */
     animInv: (state) => {
       const lc = []
