@@ -120,7 +120,7 @@ export default {
         this.idf = rnd6()
         this.nfic = this.fic.nom
         this.sfx = '#' + suffixe(this.idf)
-        this.info = this.fic.info || ''
+        this.info = this.fic.info || 'v1'
       }
       if (s === 3) {
         this.getLstfic() 

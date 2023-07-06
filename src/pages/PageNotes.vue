@@ -966,8 +966,8 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-$hb: 16rem
-$hb2: 14rem
+$hb: 18rem
+$hb2: 16.5rem
 .msg
   position: absolute
   z-index: 99999
