@@ -714,6 +714,15 @@ export class Tribu2 extends GenDoc {
     return r
   }
 
+  get idSponsors () { // array des na des sponsors
+    const r = new Set()
+    for (const x in this.mbtr) {
+      const e = this.mbtr[x]
+      if (e.sp) r.add(e.na.id)
+    }
+    return r
+  }
+
   get naComptes () { // array des na des membres
     const r = []
     for (const x in this.mbtr) r.push(this.mbtr[id].na)

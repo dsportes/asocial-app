@@ -144,7 +144,7 @@ export default {
       this.ccid = c.na.id
       this.ccna = c.na
       await new GetCompteursCompta().run(c.na)
-      this.cptdial = true
+      this.ovcptdial()
     },
     async editerq (c) {
       if (! await this.session.edit()) return
@@ -209,9 +209,9 @@ export default {
     const nvsp = ref(false)
     function ovnvsp () { MD.oD(nvsp)}
     const edq = ref(false)
-    function ovedq () { MD.od(edq)}
+    function ovedq () { MD.oD(edq)}
     const cptdial = ref(false)
-    function ovcptdial () { MD.od(cptdial)}
+    function ovcptdial () { MD.oD(cptdial)}
 
     return {
       MD, nvsp, ovnvsp, edq, ovedq, cptdial, ovcptdial,
