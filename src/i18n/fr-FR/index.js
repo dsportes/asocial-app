@@ -521,6 +521,7 @@ export default {
   OPtfa: 'Télécharger un fichier attaché à une note',
   OPnfa: 'Attacher un nouveau fichier à une note',
   OPsfa: 'Supprimer un fichier attaché à une note',
+  OPsav: 'Supprimer un avatar ou résilier un compte',
 
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui que vous avez saisi.',
@@ -1419,11 +1420,17 @@ export default {
   PPtit: 'Membre {0} du groupe {1}',
   PPctc: 'Inscrire comme contact du groupe {0}',
 
-  SAVtit: 'Suppression de l\'avatar {0}',
-  SAVtit2: 'Suppression du COMPTE {0}',
+  SAVtit1: 'Suppression de l\'avatar {0}',
+  SAVtit2: 'Résiliation du COMPTE {0}',
   SAVer1: 'La suppression du compte ne peut intervenir qu\'après la suppression de ses avatars secondaires',
   SAVst1: 'disparaîtra',
   SAVst2: 'ne sera plus hébergé',
   SAVst3: 'n\'aura plus d\'animateurs',
-  
+  SAVret1: 'D\'autres sessions se sont exécutées en parallèle et ont modifié les données. Vérifier ce nouvel état et confirmer à nouveau la suppression de cet avatar (ou renoncer).',
+  SAVret2: 'D\'autres sessions se sont exécutées en parallèle et ont modifié les données. Vérifier ce nouvel état et confirmer à nouveau la résiliation du compte (ou renoncer).',
+  SAVval1: 'Valider cette suppression',
+  SAVval2: 'Valider la résiliation du compte',
+  SAVcf1: 'Toutes les données seront définitivement effacées du serveur sans AUCUNE possibilité de récupération technique. Êtes-vous vraiment certain de vouloir supprimer cet avatar ?',
+  SAVcf2: 'Toutes les données seront définitivement effacées du serveur sans AUCUNE possibilité de récupération technique. Êtes-vous vraiment certain de vouloir RÈSILIER votre compte ?',
+
 }

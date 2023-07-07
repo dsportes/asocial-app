@@ -4,11 +4,15 @@
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-      <q-toolbar-title v-if="avid!==0" class="titre-lg full-width text-center">{{$t('SAVtit', [na.nom])}}</q-toolbar-title>
+      <q-toolbar-title v-if="avid!==0" class="titre-lg full-width text-center">{{$t('SAVtit1', [na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-else class="titre-lg full-width text-center text-bold bg-yellow-5 text-negative">
         {{$t('SAVtit2', [na.nom])}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
+    <div class="row justify-center items-center">
+      <div class="titre-md text-bold text-italic q-mr-md">{{$t('SAVval' + (avid !== 0 ? '1' : '2'))}}</div>
+      <bouton-confirm :actif="checksOK" :confirmer="ovconfirmsuppr"/>
+    </div>
   </q-header>
 
   <q-page-container>
@@ -16,6 +20,17 @@
 
     </q-page>
   </q-page-container>
+
+  <q-dialog v-model="confirmsuppr" persistent>
+  <q-card class="bs largeur30 q-pa-sm">
+    <div class="q-mt-md titre-lg text-italic">{{$t('SAVcf' + (avid !== 0 ? '1' : '2'))}}</div>
+    <div class="q-mt-md row justify-center q-gutter-md">
+      <q-btn class="q-pa-xs" size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+      <bouton-confirm actif :confirmer="valider"/>
+    </div>
+  </q-card>
+</q-dialog>
+
 </q-layout>
 </div>
 </template>
@@ -25,17 +40,23 @@ import { ref, toRef, reactive } from 'vue'
 import { MD, getNg } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { edvol } from '../app/util.mjs'
+import BoutonConfirm from '../components/BoutonConfirm.vue'
+import { edvol, afficherDiag, sleep } from '../app/util.mjs'
+import { AMJ } from '../app/api.mjs'
 
 export default ({
   name: 'SupprAvatar',
 
   props: { avid: Number },
 
-  components: { BoutonHelp },
+  components: { BoutonHelp, BoutonConfirm },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
+    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    checksOK () { 
+      for (const x in this.s.checks) if (!this.s.checks[x]) return false
+      return true 
+    }
   },
 
   data () {
@@ -47,10 +68,53 @@ export default ({
   },
 
   methods: {
+    setCheck (x) {
+      this.s.checks[x] = true
+    },
+
+    /* Supprimer un avatar ****************************************
+    args.token: éléments d'authentification du compte.
+    args.id : id de l'avatar
+    args.va : version de l'avatar
+    args.idc : id du compte - si égal à id, suppression du compte
+    args.idk : cet id crypté par la clé K du compte. Clé de la map mavk dans compta
+    args.chats : liste des id / ids des chats externes à traiter
+    args.spons : liste des ids des sponsorings à purger
+    args.dfh : date de fin d'hébergement des groupes
+    args.grps : liste des items groupes à traiter.
+      - idg : id du groupe
+      - vg : version du groupe
+      - im : ids du membre (correspondant à l'avatar)
+      - suppr : true si le groupe est à supprimer
+    Suppression de compte seulement
+    args.idt: id de la tribu du compte
+    args.rndc: clé du compte dans mbtr de tribu2, pour suppression de cette entrée
+    Suppression d'avatar seulement
+    args.dv1: réduction du volume v1 du compte (notes avatar et notes des groupes hébergés)
+    args.dv2
+    Retour: OK
+    - true : suprresion OK
+    - false : retry requis, les versions des groupes et/ou avatar ont chnagé
+    */
+    async valider () {
+      MD.fD() // boite de confirmation
+      await sleep(50)
+      const args = {}
+      args.dfh = AMJ.amjUtcPlusNbj(AMJ.amjUtc(), this.cfg.limitesjour.groupenonheb)
+
+      const ok = true // await new SupprAvatar.run(args)
+      if (!ok) {
+        await afficherDiag(this.$t('SAVret' + (this.avid ? '1' : '2')))
+        this.init()
+      } else {
+        MD.fD() // Dialogue de suppression
+      }
+    }
   },
 
   setup (props) {
     const session = stores.session
+    const cfg = stores.config
     const avid = toRef(props, 'avid')
     const na = ref(getNg(avid.value ? avid.value : session.compteId))
     const aSt = stores.avatar
@@ -58,6 +122,7 @@ export default ({
     const gSt = stores.groupe
 
     const s = reactive( { 
+      checks: {},
       stats: {}, // map des nbn notes, v1 v2 par avatar et groupe
       ch: [], // liste des chats
       gr: [], // liste des groupes
@@ -71,6 +136,7 @@ export default ({
 
     function init () {
       const id = na.value.id
+      s.checks = {}
       s.v1g = 0; s.v2g = 0
       s.stats = nSt.statsParRacine
       const a = s.stats[id]
@@ -118,9 +184,14 @@ export default ({
     })
 
     init()
+
+    const confirmsuppr = ref(false)
+    function ovconfirmsuppr () { MD.oD(confirmsuppr) }
+
     return {
-      session,
-      MD, edvol, aSt, na, s
+      session, cfg,
+      confirmsuppr, ovconfirmsuppr,
+      MD, edvol, aSt, na, s, init
     }
   }
 })

@@ -1621,3 +1621,42 @@ export class SupprFichier extends OperationUI {
     }
   }
 }
+
+/* Supprimer un avatar ****************************************
+args.token: éléments d'authentification du compte.
+args.id : id de l'avatar
+args.va : version de l'avatar
+args.idc : id du compte - si égal à id, suppression du compte
+args.idk : cet id crypté par la clé K du compte. Clé de la map mavk dans compta
+args.chats : liste des id / ids des chats externes à traiter
+args.spons : liste des ids des sponsorings à purger
+args.dfh : date de fin d'hébergement des groupes
+args.grps : liste des items groupes à traiter.
+  - idg : id du groupe
+  - vg : version du groupe
+  - im : ids du membre (correspondant à l'avatar)
+  - suppr : true si le groupe est à supprimer
+Suppression de compte seulement
+args.idt: id de la tribu du compte
+args.rndc: clé du compte dans mbtr de tribu2, pour suppression de cette entrée
+Suppression d'avatar seulement
+args.dv1: réduction du volume v1 du compte (notes avatar et notes des groupes hébergés)
+args.dv2
+Retour: OK
+- true : suprresion OK
+- false : retry requis, les versions des groupes et/ou avatar ont chnagé
+*/
+export class SupprAvatar extends OperationUI {
+  constructor () { super($t('OPsfa')) }
+
+  async run (args) { 
+    try {
+      const session = stores.session
+      args.token = session.authToken
+      const ret = this.tr(await post(this, 'SupprAvatar', args))
+      this.finOK(ret.OK)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
