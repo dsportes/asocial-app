@@ -83,7 +83,7 @@
           <div class="titre-md">{{$t('SAVgr3', s.gr3.length, { count: s.gr3.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr3" :key="x.gr.id">
             <span class="b1 q-mr-lg">{{x.gr.na.nomc}}</span>
-            <span>{{$t('SAVvlib2', [x.nbn])}}</span>
+            <span>{{$t('SAVvlib2', x.nbn, {count: x.nbn})}}</span>
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@
           <div class="titre-md">{{$t('SAVgr0', s.gr0.length, { count: s.gr0.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr0" :key="x.gr.id">
             <span class="b1 q-mr-lg">{{x.gr.na.nomc}}</span>
-            <span>{{$t('SAVvlib2', [x.nbn])}}</span>
+            <span>{{$t('SAVvlib2', x.nbn, {count: x.nbn})}}</span>
           </div>
         </div>
       </div>
@@ -128,12 +128,13 @@
 
 <script>
 import { ref, toRef, reactive } from 'vue'
-import { MD, getNg, Compta } from '../app/modele.mjs'
+import { MD, getNg, Compta, Versions } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { edvol, afficherDiag, sleep } from '../app/util.mjs'
 import { AMJ } from '../app/api.mjs'
+import { SupprAvatar } from '../app/operations.mjs'
 
 export default ({
   name: 'SupprAvatar',
@@ -192,7 +193,7 @@ export default ({
       await sleep(50)
       const args = {
         id: this.na.id,
-        va: this.aSt.getAvatar(this.na.id).v,
+        va: Versions.v(this.na.id),
         idc: this.session.compteId,
         idf: await Compta.mavkK(this.na.id, this.session.clek),
         dfh: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), this.cfg.limitesjour.groupenonheb)
@@ -209,11 +210,11 @@ export default ({
       args.spons = []
       this.s.sp.forEach(s => { args.spons.push(s.ids)})
       args.grps = []
-      this.s.gr0.forEach(x => { args.grps.push({ idg: x.gr.id, vg: x.gr.v, im: x.mb.ids, suppr: false })})
-      this.s.gr1.forEach(x => { args.grps.push({ idg: x.gr.id, vg: x.gr.v, im: x.mb.ids, suppr: true })})
-      this.s.gr2.forEach(x => { args.grps.push({ idg: x.gr.id, vg: x.gr.v, im: x.mb.ids, suppr: false })})
-      this.s.gr3.forEach(x => { args.grps.push({ idg: x.gr.id, vg: x.gr.v, im: x.mb.ids, suppr: false })})
-      const ok = true // await new SupprAvatar.run(args)
+      this.s.gr0.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.mb.ids, suppr: false })})
+      this.s.gr1.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.mb.ids, suppr: true })})
+      this.s.gr2.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.mb.ids, suppr: false })})
+      this.s.gr3.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.mb.ids, suppr: false })})
+      const ok = await new SupprAvatar().run(args)
       if (!ok) {
         await afficherDiag(this.$t('SAVret' + (this.avid ? '1' : '2')))
         this.init()
@@ -271,8 +272,8 @@ export default ({
         x.gr = egr.groupe
         x.mb = gSt.membreDeId(egr, id)
         if (x.gr.imh === x.mb.ids) { 
-          x.heb = true; x.v1 = egr.objv.vols.v1; x.v2 = egr.objv.vols.v2
-          s.v1g += x.v1; s.v2g += x.v2; s.nbn = s.stats[idg].n
+          x.heb = true; x.nbn = s.stats[idg].n; x.v1 = egr.objv.vols.v1; x.v2 = egr.objv.vols.v2
+          s.v1g += x.v1; s.v2g += x.v2
         }
         const y = gSt.animIds(egr); if (y.size === 1 && y.has(id)) x.dan = true
         const z = gSt.actifIds(egr); if (z.size === 1 && z.has(id)) x.dac = true
@@ -284,9 +285,9 @@ export default ({
       if (avid.value === 0) {
         const tribu2 = aSt.tribu2
         const setSp = tribu2.idSponsors
-        s.dspt = setSp.size == 1 && setSp.has(id)
+        s.dspt = setSp.size === 1 && setSp.has(id)
         s.idt = tribu2.id
-        s.checks._dspt = false
+        if (s.dspt) s.checks._dspt = false
       } else {
         s.checks._vol = false
       }

@@ -206,12 +206,12 @@
             @click="edexclu"/>
         </div>
 
-        <div v-if="selected && nSt.note && !rec" class="row justify-center q-gutter-xs">
+        <div v-if="selected && !rec" class="row justify-center q-gutter-xs">
           <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
-            @click="nouvelle" :disable="!selected"/>
+            @click="nouvelle"/>
           <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
-            @click="supprimer" :disable="!selected || !nSt.note"/>
-          <q-btn :disable="!selected || !nSt.note || !rattaut" 
+            @click="supprimer" :disable="!nSt.note"/>
+          <q-btn :disable="!nSt.note || !rattaut" 
             class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
             @click="rattacher"/>
         </div>

@@ -70,7 +70,7 @@
           <choix-quotas :quotas="quotas" />
           <q-option-group :options="options" type="radio" v-model="una"/>
           <q-card-actions align="right">
-            <q-btn dense flat color="warning" :label="$t('renoncer')" @click="ui.fD" />
+            <q-btn dense flat color="warning" :label="$t('renoncer')" @click="MD.fD" />
             <q-btn dense flat color="primary" :disable="quotas.err || !nom"
               :label="$t('creer')" v-close-popup @click="okCreation" />
           </q-card-actions>

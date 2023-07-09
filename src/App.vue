@@ -413,9 +413,9 @@ export default {
       switch (p) {
         case 'tribu' : { arg = getNg(this.session.tribuCId).nom; break }
         case 'chats' : { arg = this.aSt.avC.na.nom; break }
-        case 'sponsorings' : { arg = this.aSt.avC.na.nom; break }
-        case 'groupesac' : { arg = this.aSt.avC.na.nom; break }
-        case 'groupe' : { arg = this.gSt.egrC.groupe.na.nom; break }
+        case 'sponsorings' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
+        case 'groupesac' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
+        case 'groupe' : { arg = this.gSt.egrC ? this.gSt.egrC.groupe.na.nom : '?'; break }
       }
       return this.$t('P' + p, [arg])
     }

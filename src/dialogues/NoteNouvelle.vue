@@ -58,7 +58,7 @@
               max-width="20rem">
               <q-list class="bg-secondary text-white">
                 <q-item v-for="na in la" :key="na.id" clickable 
-                  v-close-popup @click="naAut = na">
+                  v-close-popup @click="selNa(na)">
                   <span class="fs-md">{{na.nom}}</span>
                 </q-item>
               </q-list>
@@ -133,6 +133,10 @@ export default {
   },
 
   methods: {
+    selNa (na) {
+      this.naAut = na
+    },
+
     selAv () {
       this.auteur = this.aSt.getElt(this.naAut.id)
       this.avatar = this.auteur.avatar
@@ -206,7 +210,7 @@ export default {
     const mb = ref(null)
     const step = ref(0)
     const la = ref(aSt.naAvatars)
-    const naAut = ref(la.value[0])
+    const naAut = ref(getNg(session.avatarId))
 
     const { id, ids } = splitPK(nSt.node.key)
     const idp = ref(id) // id du parent - racine si ids = 0 - GROUPE ou AVATAR
@@ -242,6 +246,7 @@ export default {
         const eg = gSt.egr(g.id)
         if (eg.objv.vols.v1 >= eg.objv.vols.q1 * UNITEV1) { er.value = 6; return }
         mb.value = gSt.membreDeId(eg, this.naAut.id)
+        if (!mb.value) { er.value = 7; return }
         const st = g.ast[mb.value.ids]
         if (st < 31 || st > 32) { er.value = 7; return }
       }

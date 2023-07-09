@@ -75,6 +75,7 @@ export class Versions {
 
   static reset () { Versions.map = {}; Versions.toSave = false; return Versions.map }
   static get (id) { return Versions.map[id] || { v: 0 } }
+  static v (id) { return (Versions.map[id] || { v: 0 }).v }
   static set (id, objv) { // objv: { v, vols: {v1, v2, q1, q2} }
     const e = Versions.map[id]
     if (!e || e.v < objv.v) {
@@ -93,9 +94,9 @@ export class Versions {
   static compile (row) { // objv: { v, vols: {v1, v2, q1, q2} }
     if (!row) return null
     const session = stores.session
-    const z = row.dlv && row.dlv < session.dateJourConnx
+    const z = row.dlv && row.dlv <= session.dateJourConnx
     if (!z && row._data_) return decode(row._data_)
-    return { v: row.v, _zombi: true }
+    return { id: row.id, v: row.v, _zombi: true }
   }
 }
 
@@ -705,6 +706,11 @@ export class Tribu2 extends GenDoc {
     }
   }
 
+  aCompte () {
+    const session = stores.session
+    return this.mbtr[session.compteId] ? true : false
+  }
+
   get naSponsors () { // array des na des sponsors
     const r = []
     for (const x in this.mbtr) {
@@ -821,13 +827,12 @@ export class Avatar extends GenDoc {
   }
 
   /* Retourne les numéros d'invitation de l'avatar pour les groupes de setg
+  et supprime leurs entrées dans lgr
   */
   niDeGroupes (setg) {
     const ani = new Set()
-    for (const [ ,t] of this.lgr) if (setg.has(t.ng.id)) {
-      ani.add(t.ni)
-      this.lgr.delete(ni)
-    }
+    for (const [ni ,t] of this.lgr) if (setg.has(t.ng.id)) ani.add(ni)
+    ani.forEach(ni => this.lgr.delete(ni))
     return Array.from(ani)
   }
 
@@ -945,7 +950,7 @@ export class Compta extends GenDoc {
   }
 
   clone () {
-    c = new Compta()
+    const c = new Compta()
     c.id = this.id
     c.v = this.v
     c.vsh = this.vsh
@@ -958,9 +963,9 @@ export class Compta extends GenDoc {
     c.nct = this.nct
     c.idt = this.idt
     c.nap = this.nap
-    c.compteurs = this.compteurs
+    c.compteurs = new Compteurs(this.compteurs.serial)
     if (this.naprim) c.naprim = this.naprim
-    c.avatarIds = this.avatarIds
+    c.avatarIds = new Set(c.mav.keys())
     if (this.nctk) c.nctk = this.nctk
     c.pc = this.pc
     return c
@@ -1026,6 +1031,7 @@ export class Compta extends GenDoc {
         this.mav.delete(id)
       }
     })
+    if (ok) this.avatarIds = new Set(this.mav.keys())
     return ok
   }
 

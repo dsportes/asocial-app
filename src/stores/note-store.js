@@ -147,6 +147,9 @@ export const useNoteStore = defineStore('note', {
           e.v2 += n.v2
         }
       }
+      for (const r of state.nodes) {
+        if (!m[r.key]) m[r.key] = { n: 0, v1: 0, v2: 0 }
+      }
       return m
     }
 

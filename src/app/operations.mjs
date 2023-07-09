@@ -1654,7 +1654,7 @@ export class SupprAvatar extends OperationUI {
       const session = stores.session
       args.token = session.authToken
       const ret = this.tr(await post(this, 'SupprAvatar', args))
-      this.finOK(ret.OK)
+      return this.finOK(ret.OK)
     } catch (e) {
       await this.finKO(e)
     }

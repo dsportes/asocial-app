@@ -47,6 +47,8 @@ export class OperationWS extends Operation {
     this.buf.purgeGroupeIDB(id)
     this.abMoins.add(id)
     this.grSuppr.add(id)
+    const session = stores.session
+    if (session.groupeId === id) session.setGroupeId(0)
   }
 
   /* Mise à jour / ajout d'un groupe, détectée par,
@@ -185,6 +187,7 @@ export class OperationWS extends Operation {
   - implique un changement possible de la liste des groupes
   */
   async chgAvatar (objv) {
+    const session = stores.session
     const id = objv.id
     const aSt = stores.avatar
 
@@ -194,19 +197,24 @@ export class OperationWS extends Operation {
       av.idGroupes(groupesAv) 
     })
 
-    if (objv._zombi) { // avatar disparu
-      // Il n'y a pas de groupes en plus, mais peut-être en moins
-      this.grEnMoins(id, mapav, groupesAv)
-      return
+    function avDisparu (self) {
+      if (objv.id === session.compteId) {
+        self.resiliation = true
+      } else {
+        if (objv.id === session.avatarId) {
+          // c'était l'avatar "courant" -> avatar principal
+          session.setAvatarId(session.compteId)
+        }
+        // Il n'y a pas de groupes en plus, mais peut-être en moins
+        self.grEnMoins(id, mapav, groupesAv)
+      }
     }
+
+    if (objv._zombi) { avDisparu(this); return } // avatar disparu
 
     const [vivant, avatar] = await this.majAv(id)
 
-    if (!vivant) { // avatar finalement disparu
-      // Il n'y a pas de groupes en plus, mais peut-être en moins
-      this.grEnMoins(id, mapav, groupesAv)
-      return
-    }
+    if (!vivant) { avDisparu(this); return } // avatar finalement disparu
 
     if (avatar) mapav.set(avatar.id, avatar)
     const groupesAp = new Set()
@@ -223,6 +231,7 @@ export class OperationWS extends Operation {
   }
 
   init () {
+    this.resiliation = false
     this.versions = new Map() // versions des sous-collections d'avatars / groupes modifiées
     this.buf = new IDBbuffer() // Maj iDB en attente de commit
 
@@ -248,6 +257,10 @@ export class OperationWS extends Operation {
   }
 
   async final () {
+    if (this.resiliation) {
+      deconnexion()
+      return
+    }
     const session = stores.session
     const aSt = stores.avatar
     const gSt = stores.groupe
@@ -276,9 +289,9 @@ export class OperationWS extends Operation {
     if (this.avSuppr.size) {
       const compta = this.compta || aSt.compta.clone()
       const ok = compta.updAvatarMavk (this.avSuppr)
-      if (!ok) {
+      if (ok) {
         if (!this.compta) this.compta = compta
-        const lm = compta.lmAvatarMavk(this.avSuppr)
+        const lm = await compta.lmAvatarMavk(this.avSuppr)
         const args = { token: session.authToken, lm }
         this.tr(await post(this, 'MajMavkAvatar', args))
       }
@@ -494,8 +507,13 @@ export class OnchangeTribu2 extends OperationWS {
       if (row.id === session.tribuId) {
         const avTr = aSt.tribu2
         if (row.v > avTr.v) {
-          this.buf.putIDB(row)
           this.tribu2 = await compile(row)
+          if (!this.tribu2.acompte) {
+            this.resiliation = true
+            deconnexion()
+            return
+          }
+          this.buf.putIDB(row)
         }
       }
 
