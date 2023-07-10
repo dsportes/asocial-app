@@ -559,7 +559,7 @@ export async function compile (row) {
   if (row.dlv) obj.dlv = row.dlv
   if (row.dfh) obj.dfh = row.dfh
   obj.v = row.v || 0
-  const z = row.dlv && row.dlv < session.dateJourConnx
+  const z = row.dlv && row.dlv <= session.dateJourConnx
   // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
   if (z || !row._data_) {
     obj._zombi = true

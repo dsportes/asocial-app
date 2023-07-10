@@ -168,8 +168,9 @@ export class OperationWS extends Operation {
       e.lch.push(await compile(x))
     }
     for (const x of ret.rowSponsorings) {
-      this.buf.putIDB(x)
-      e.lsp.push(await compile(x))
+      const sp = await compile(x)
+      if (sp._zombi) this.buf.supprIDB(x); else this.buf.putIDB(x)
+      e.lsp.push(e)
     }
     return [true, avatar]
   }

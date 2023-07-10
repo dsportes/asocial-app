@@ -551,7 +551,9 @@ export const useAvatarStore = defineStore('avatar', {
       lsc.forEach(s => { 
         if (s._zombi) this.delNote(s.id, s.ids); else this.setNote(s) 
       })
-      lsp.forEach(s => { this.setSponsoring(s) })
+      lsp.forEach(s => { 
+        if (s._zombi) this.delSponsoring(s.id, s.ids); else this.setSponsoring(s) 
+      })
       lch.forEach(c => { this.setChat(c) })
     },
 
