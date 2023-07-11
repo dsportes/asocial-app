@@ -1031,10 +1031,10 @@ Retour:
 export class HebGroupe extends OperationUI {
   constructor () { super($t('OPhebgr')) }
 
-  async run (t, nag, idd, q1, q2) {
+  async run (t, nag, imh, idd, q1, q2) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, t, q1, q2, ida: session.compteId }
+      const args = { token: session.authToken, t, imh, q1, q2, idg: nag.id, ida: session.compteId }
       if (t > 1) { // prise et transfert heb
         args.idhg = await crypter(nag.rnd, '' + session.compteId)
         if (t === 2) args.idd = idd
@@ -1655,6 +1655,20 @@ export class SupprAvatar extends OperationUI {
       args.token = session.authToken
       const ret = this.tr(await post(this, 'SupprAvatar', args))
       return this.finOK(ret.OK)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Appels GCxxx ***********************************************/
+export class GC extends OperationUI {
+  constructor () { super('GC') }
+
+  async run (nomop) { 
+    try {
+      const ret = this.tr(await post(this, nomop, {}))
+      return this.finOK(ret)
     } catch (e) {
       await this.finKO(e)
     }

@@ -509,7 +509,7 @@ export class OnchangeTribu2 extends OperationWS {
         const avTr = aSt.tribu2
         if (row.v > avTr.v) {
           this.tribu2 = await compile(row)
-          if (!this.tribu2.acompte) {
+          if (!this.tribu2.aCompte) {
             this.resiliation = true
             deconnexion()
             return

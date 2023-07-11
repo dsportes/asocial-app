@@ -1,5 +1,12 @@
 <template>
   <q-page class="q-pa-xs">
+    <div class="q-my-sm row q-gutter-sm">
+    <q-btn dense color="warning" label="GC versions dlv" @click="testGCRes"/>
+    <q-btn dense color="warning" label="GC heb" @click="testGCHeb"/>
+    </div>
+
+    <q-separator color="orange"/>
+
     <q-btn class="q-my-sm" dense color="primary" :label="$t('rafraichir')" @click="rafraichir"/>
 
     <div class="titre-md q-my-sm row items-center">
@@ -37,6 +44,7 @@ import PhraseSecrete from '../components/PhraseSecrete.vue'
 import ApercuEspace from '../components/ApercuEspace.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
+import { GC } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 
 export default {
@@ -72,6 +80,14 @@ export default {
       this.ps = null
       MD.fD()
       this.rafraichir()
+    },
+
+    async testGCRes () {
+      const ret = await new GC().run('GCRes')
+      console.log(ret.a.length)
+    },
+    async testGCHeb () {
+      await new GC().run('GCHeb')
     }
   },
 
@@ -83,6 +99,7 @@ export default {
   },
 
   setup () {
+    // TODO : gcvols à traiter 
     const session = stores.session
     const creationesp = ref(false)
     function ovcreationesp () { MD.oD(creationesp) }

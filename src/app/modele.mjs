@@ -706,7 +706,7 @@ export class Tribu2 extends GenDoc {
     }
   }
 
-  aCompte () {
+  get aCompte () {
     const session = stores.session
     return this.mbtr[session.compteId] ? true : false
   }

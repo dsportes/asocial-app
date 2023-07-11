@@ -146,9 +146,9 @@
 
             <div v-if="alq1 || alq2">
               <q-separator color="orange" class="q-my-xs"/>
-              <div v-if="alq1 && g.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq1x')}}</div>
+              <div v-if="alq1 && eg.groupe.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq1x')}}</div>
               <div v-if="alq1" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1')}}</div>
-              <div v-if="alq2 && g.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq2x')}}</div>
+              <div v-if="alq2 && eg.groupe.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq2x')}}</div>
               <div v-if="alq2" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2')}}</div>
               <q-separator color="orange" class="q-my-xs"/>
             </div>
@@ -156,8 +156,8 @@
             <div class="column justify-center">
               <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="primary" :label="$t('AGbtncq')" @click="gotocq"/>
               <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="warning" :label="$t('AGbtnfh')" @click="step = 2"/>
-              <q-btn class="q-ma-md" v-if="cas===2 || cas === 4 || cas === 6" size="md" color="primary" :label="$t('AGbtnfh')" @click="gotocq"/>
-              <q-btn class="q-ma-md" v-if="cas===3 || cas === 5" size="md" color="primary" :label="$t('jailu')" @click="gotocq"/>
+              <q-btn class="q-ma-md" v-if="cas===2 || cas === 4 || cas === 6" size="md" color="primary" :label="$t('AGbtndh')" @click="gotocq"/>
+              <q-btn class="q-ma-md" v-if="cas===3 || cas === 5" size="md" color="primary" :label="$t('jailu')" @click="MD.fD"/>
             </div>
 
             <div v-if="step === 2" class="q-ma-md">
@@ -232,7 +232,7 @@ import MotsCles from './MotsCles.vue'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
 import { MD, getNg } from '../app/modele.mjs'
-import { MotsclesGroupe, ArdoiseGroupe, ModeSimple } from '../app/operations.mjs'
+import { MotsclesGroupe, ArdoiseGroupe, ModeSimple, FinHebGroupe, HebGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuGroupe',
@@ -282,6 +282,7 @@ export default {
     cas: 0,
     anims: new Set(), // set des Ids des animateurs du groupe
     estAnim: false, // l'avatar courant est animateur du groupe
+    monMb: null, // membre de l'avatar courant dans le groupe
     step: 0,
     al1: false,
     al2: false,
@@ -341,6 +342,7 @@ export default {
       const g = this.eg.groupe
       this.anims = this.gSt.animIds(this.eg)
       this.estAnim = this.anims.has(this.session.avatarId)
+      this.monMb = this.gSt.membreDeId(this.eg, this.session.avatarId)
       if (g.imh) {
         const m = this.eg.membres.get(g.imh)
         if (m && m.na.id === this.session.avatarId) return 1
@@ -407,9 +409,11 @@ export default {
 
     async chgQ () {
       if (!await this.session.edit()) { MD.fD(); return }
-      const t = this.cas === 1 ? 1 : (this.cas === 2 ? 3 : 2)
+      const tx = [0, 1, 3, 0, 2, 0, 2]
+      const t = tx[this.cas]
       const idd = t === 3 ? this.eg.groupe.idh : 0
-      await new HebGroupe().run(t, this.eg.groupe.na, idd, this.q.q1, this.q.q2 )
+      const imh = this.monMb.ids
+      await new HebGroupe().run(t, this.eg.groupe.na, imh, idd, this.q.q1, this.q.q2 )
       MD.fD()
     },
 
