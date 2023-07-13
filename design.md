@@ -1,8 +1,5 @@
 
-TODO :
-- Note : rattachement
-- Note : fichiers
-- traiter les autorisations pour le comptable (page menu en particulier) pour survivre à un blocage de sa tribu / voir global
+TODO : traiter les autorisations pour le comptable (page menu en particulier) pour survivre à un blocage de sa tribu / voir global
 
 ## L'arbre des notes
 Une note peut être :
@@ -71,7 +68,6 @@ Roadmap:
 - GC
 - export espace, import espace, purge espace
 
-TODO : sponsoring acceptation : ATTENTION l'opération getDocSponsoringIds sur le serveur est à VERIFIER !!!!!!!!!!!!!!!
 
 # Application front-end A-social
 
