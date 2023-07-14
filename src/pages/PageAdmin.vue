@@ -1,8 +1,9 @@
 <template>
   <q-page class="q-pa-xs">
     <div class="q-my-sm row q-gutter-sm">
-    <q-btn dense color="warning" label="GC versions dlv" @click="testGCRes"/>
-    <q-btn dense color="warning" label="GC heb" @click="testGCHeb"/>
+      <q-btn dense color="warning" label="GC versions dlv" @click="testGCRes"/>
+      <q-btn dense color="warning" label="GC heb" @click="testGCHeb"/>
+      <q-btn dense color="warning" label="GC" @click="testGC"/>
     </div>
 
     <q-separator color="orange"/>
@@ -88,6 +89,9 @@ export default {
     },
     async testGCHeb () {
       await new GC().run('GCHeb')
+    },
+    async testGC () {
+      await new GC().run('GC')
     }
   },
 

@@ -4,7 +4,7 @@ import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, u8ToB64, gzip, ungzip, ungzipT, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier } from './api.mjs'
+import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -520,7 +520,7 @@ export class Notification {
       this.d4 = AMJ.amjUtcPlusNbj(this.jbl, this.nj)
       this.n4 = AMJ.diff(this.d4, auj)
       if (this.n4 === this.n3) this.n3 = 0
-      this.d5 = AMJ.amjUtcPlusNbj(this.jbl, stores.config.limitesjour.dlv)
+      this.d5 = AMJ.amjUtcPlusNbj(this.jbl, limitesjour.dlv)
       this.n5 = AMJ.diff(this.d5, auj)
       if (this.n5 === this.n4) this.n4 = 0
 

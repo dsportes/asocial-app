@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { ID, AppExc, appexc, AMJ, Compteurs } from './api.mjs'
+import { ID, AppExc, appexc, AMJ, Compteurs, limitesjour } from './api.mjs'
 import { $t, hash, inverse, sleep } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
@@ -536,7 +536,7 @@ export class NouvelAvatar extends OperationUI {
         id: na.id,
         v: 1,
         iv: GenDoc._iv(na.id, 1),
-        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), stores.config.limitesjour.dlv)
+        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.dlv)
       }
       const _data_ = new Uint8Array(encode(rowVersion))
       rowVersion._data_ = _data_
@@ -944,7 +944,7 @@ export class NouveauGroupe extends OperationUI {
       const egr = await crypter(session.clek, new Uint8Array(encode([nag.nom, nag.rnd, 1])))
 
       // En UTC la division d'une date est multiple de 86400000
-      const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
+      const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
       const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
       const dlv = AMJ.amjUtcDeT(tdlv * 86400000)
 
@@ -1070,7 +1070,7 @@ export class FinHebGroupe extends OperationUI {
       const args = { token: session.authToken, 
         id: session.compteId,
         idg,
-        dfh: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), cfg.limitesjour.groupenonheb)
+        dfh: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.groupenonheb)
       }
       this.tr(await post(this, 'FinHebGroupe', args))
       this.finOK()
@@ -1258,7 +1258,7 @@ export class StatutMembre extends OperationUI {
       const ardg = !ard ? null : await crypter(gr.na.rnd, ard)
 
       // En UTC la division d'une date est multiple de 86400000
-      const tjourJ = (AMJ.tDeAmjUtc(session.dateJourConnx) / 86400000) + stores.config.limitesjour.dlv
+      const tjourJ = (AMJ.tDeAmjUtc(session.dateJourConnx) / 86400000) + limitesjour.dlv
       const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
       const dlv = AMJ.amjUtcDeT(tdlv * 86400000) // pour acceptation d'invitation
       

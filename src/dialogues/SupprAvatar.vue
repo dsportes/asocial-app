@@ -133,7 +133,7 @@ import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { edvol, afficherDiag, sleep } from '../app/util.mjs'
-import { AMJ } from '../app/api.mjs'
+import { AMJ, limitesjour } from '../app/api.mjs'
 import { SupprAvatar } from '../app/operations.mjs'
 
 export default ({
@@ -196,7 +196,7 @@ export default ({
         va: Versions.v(this.na.id),
         idc: this.session.compteId,
         idf: await Compta.mavkK(this.na.id, this.session.clek),
-        dfh: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), this.cfg.limitesjour.groupenonheb)
+        dfh: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.groupenonheb)
       }
       if (this.avid === 0) {
         args.idt = this.s.idt

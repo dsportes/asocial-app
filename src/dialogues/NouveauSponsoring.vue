@@ -83,7 +83,7 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { edvol } from '../app/util.mjs'
 import { MD, Sponsoring } from '../app/modele.mjs'
-import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
+import { UNITEV1, UNITEV2, AMJ, limitesjour } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseContact from '../components/PhraseContact.vue'
@@ -187,7 +187,7 @@ export default ({
   },
 
   setup (props) {
-    const limj = stores.config.limitesjour.sponsoring
+    const limj = limitesjour.sponsoring
     const step1 = ref(null)
     const step2 = ref(null)
     const step3 = ref(null)

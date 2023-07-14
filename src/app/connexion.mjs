@@ -5,7 +5,7 @@ import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
-import { AMJ, ID } from './api.mjs'
+import { AMJ, ID, limitesjour } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, NLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
@@ -170,7 +170,7 @@ export class ConnexionCompte extends OperationUI {
   async groupesRequisSignatures () {
     const session = stores.session
     // En UTC la division d'une date est multiple de 86400000
-    const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + stores.config.limitesjour.dlv
+    const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
     const tdlv1 = (Math.floor(tjourJ / 10) + 1) * 10
     const tdlv2 = tdlv1 + 10
     const dlv1 = AMJ.amjUtcDeT(tdlv1 * 86400000)
@@ -861,7 +861,7 @@ export class AcceptationSponsoring extends OperationUI {
         id: sp.naf.id,
         v: 1,
         iv: GenDoc._iv(sp.naf.id, 1),
-        dlv: AMJ.amjUtcPlusNbj(this.auj, config.limitesjour.dlv)
+        dlv: AMJ.amjUtcPlusNbj(this.auj, limitesjour.dlv)
       }
       const _data_ = new Uint8Array(encode(rowVersion))
       rowVersion._data_ = _data_
@@ -1040,7 +1040,7 @@ export class CreerEspace extends OperationUI {
         id: na.id,
         v: 1,
         iv: GenDoc._iv(na.id, 1),
-        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), config.limitesjour.dlv)
+        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.dlv)
       }
       const _data_ = new Uint8Array(encode(r))
       r._data_ = _data_

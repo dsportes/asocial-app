@@ -13,6 +13,14 @@ export const regIntg = /[<>:"/\\|?*\x00-\x1F]/g
 // eslint-disable-next-line no-control-regex
 export const regInt2g = /[\u{0180}-\u{10FFFF}]/gu
 
+export const limitesjour = { 
+  dlv: 365, // résiliation automatique d'un compte non accédé
+  margedlv: 30, // marge de purge des versions des comptes non accédés
+  notetemp: 60, // durée de vie d'une note temporaire
+  sponsoring: 14, // durée de vie d'un sponsoring
+  groupenonheb: 120 // durée de vie d'un groupe non hébbergé
+}
+
 export function nomFichier (v) {
   if (!v) return ''
   return v.trim().replace(regIntg, '_').replace(regInt2g, '')

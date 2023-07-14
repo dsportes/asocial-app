@@ -42,7 +42,6 @@ export const useConfigStore = defineStore('config', {
     quotas: { '0': 0, 'XXS': 1, 'XS': 2, 'SM': 4, 'MD': 8, 'LG': 16, 'XL': 32, 'XXL': 64 },
     profils: [[10, 10], [50, 50], [250, 250], [50, 10], [250, 50]],
   
-    limitesjour: { dlv: 365, notetemp: 60, sponsoring: 14, groupenonheb: 120 },
     lgtitre: 120,
     maxlgtextegen: 250,
     maxlgtextenote: 5000,
