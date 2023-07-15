@@ -743,6 +743,21 @@ export default {
   ESne: 'Nouvel espace',
   ESne2: 'Espace à créer : {0}',
   ESps: 'Phrase secrète de connexion de son comptable',
+  ESckpt: 'Checkpoint du GC',
+  ESver: 'Version :',
+  ESjdtr: 'Jour du dernier traitement de résiliation OK:',
+  ESdex: 'Date et heure UTC de début de la dernière exécution du GC:',
+  ESec: 'Exécution non terminée (peut-être en cours)',
+  EStex: 'Tâches exécutées :',
+  ESt1: 'GCRes : Résiliation des comptes / avatars / groupes',
+  ESt2: 'GCHeb : Gestion des fins d\hébergement',
+  ESt3: 'GCPrg : Purges des données comptes / avatars / groupes résiliés',
+  ESt4: 'GCTra : Traitement des transferts de fichiers interrompus',
+  ESt5: 'GCFpu : Purges des fichiers non référencés',
+  ESt6: 'GCDlv : Purge des sposorings et des versions des avats et groupes hors limite de validité',
+  ESlog: 'Synthèses des exécutions des tâches',
+  ESretry: 'Reprise {0}',
+  
 
   // Pege people et ApercuPeople
   APtr1: 'Membre de ma tribu',

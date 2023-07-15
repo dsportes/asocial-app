@@ -1674,3 +1674,17 @@ export class GC extends OperationUI {
     }
   }
 }
+
+/* GetCheckpoint ***********************************************/
+export class GetCheckpoint extends OperationUI {
+  constructor () { super('GetCheckpoint') }
+
+  async run () { 
+    try {
+      const ret = this.tr(await post(this, 'GetCheckpoint', {}))
+      return this.finOK(ret.checkpoint)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

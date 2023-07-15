@@ -4,6 +4,7 @@
       <q-btn dense color="warning" label="GC versions dlv" @click="testGCRes"/>
       <q-btn dense color="warning" label="GC heb" @click="testGCHeb"/>
       <q-btn dense color="warning" label="GC" @click="testGC"/>
+      <q-btn dense color="warning" label="Checkpoint" @click="affCkpt"/>
     </div>
 
     <q-separator color="orange"/>
@@ -34,6 +35,62 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="checkpoint" persistent full-height>
+      <div class="bs" style="width:80vw">
+        <q-layout container view="hHh lpR fFf" :class="sty">
+          <q-header elevated class="bg-secondary text-white">
+            <q-toolbar class="bg-secondary text-white">
+              <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+              <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESckpt', [ns])}}</q-toolbar-title>
+              <bouton-help page="page1"/>
+            </q-toolbar>
+          </q-header>
+
+          <q-page-container class="q-pa-xs">
+            <div class="q-my-sm">
+              <span class="titre-md text-italic q-mr-lg">{{$t('ESver')}}</span>
+              <span class="font-mono fs-md">{{ck.v ? dhIso(ck.v) : '-'}}</span>
+            </div>
+            <div class="q-my-sm">
+              <span class="titre-md text-italic q-mr-lg">{{$t('ESjdtr')}}</span>
+              <span class="font-mono fs-md">{{ck.jdtr ? AMJ.editDeAmj(ck.jdtr) : '-'}}</span>
+            </div>
+            <div v-if="ck.dhStart" class="q-my-sm">
+              <div class="titre-md text-italic q-mr-lg">{{$t('ESdex')}}</div>
+              <div class="q-ml-md">
+                <span class="font-mono fs-md">{{dhIso(ck.dhStart)}}</span>
+                <span v-if="ck.duree" class="q-ml-md font-mono fs-md">{{duree(ck.duree)}}</span>
+                <span v-else class="q-ml-md font-mono fs-md">{{$t('ESec')}}</span>
+              </div>
+            </div>
+            <div v-if="!ck.dhStart" class="q-my-sm titre-md text-italic q-mr-lg">{{$t('ESnex')}}</div>
+
+            <div v-if="ck.dhStart">
+              <div class="q-my-sm titre-md text-italic">{{$t('EStex')}}</div>
+              <div v-for="idx in ck.nbTaches" :key="idx" class="q-ml-xl fs-md">{{$t('ESt' + idx)}}</div>
+            </div>
+
+            <div v-if="ck.log && ck.log.length" class="q-my-md titre-lg text-italic">{{$t('ESlog')}}</div>
+
+            <div v-for="(log, idx) in ck.log" :key="idx" class="q-mt-md q-ml-md">
+              <!-- nom retry start duree stats err -->
+              <div class="fs-md font-mono text-bold">
+                {{log.nom}}
+                <span v-if="log.retry" class="q-ml-md">{{$t('ESretry', [log.retry])}}</span>
+                <span class="q-ml-md">{{dhIso(log.start)}}</span>
+                <span v-if="log.duree" class="q-ml-md">{{duree(log.duree)}}</span>
+              </div>
+              <div v-if="log.stats" class="q-ml-lg fs-md font-mono">{{stat(log.stats)}}</div>
+              <div v-if="log.err" class="bord q-ml-lg fs-md font-mono height-4 overflow-auto">
+                {{log.err}}</div>
+              <q-separator color="orange" class="q-mt-sm q-mb-md"/>
+            </div>
+          </q-page-container>
+        </q-layout>
+      </div>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -45,8 +102,9 @@ import PhraseSecrete from '../components/PhraseSecrete.vue'
 import ApercuEspace from '../components/ApercuEspace.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
-import { GC } from '../app/operations.mjs'
+import { GC, GetCheckpoint } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
+import { AMJ } from '../app/api.mjs'
 
 export default {
   name: 'PageAdmin',
@@ -54,6 +112,7 @@ export default {
   components: { BoutonConfirm, ApercuEspace, PhraseSecrete, BoutonHelp },
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
   },
 
   methods: {
@@ -92,13 +151,25 @@ export default {
     },
     async testGC () {
       await new GC().run('GC')
+    },
+    async affCkpt () {
+      this.ck = await new GetCheckpoint().run()
+      this.ovcheckpoint()
+    },
+    dhIso (t) { return new Date(t).toISOString() },
+    duree (d) { return d < 1000 ? (d + 'ms') : (d / 1000).toPrecision(3) + 's'},
+    stat (s) {
+      const r = []
+      for (const f in s) { r.push(f + '=' + s[f])}
+      return r.join(', ')
     }
   },
 
   data () {
     return {
       ns: 0,
-      ps: null
+      ps: null,
+      ck: null
     }
   },
 
@@ -107,8 +178,10 @@ export default {
     const session = stores.session
     const creationesp = ref(false)
     function ovcreationesp () { MD.oD(creationesp) }
+    const checkpoint = ref(false)
+    function ovcheckpoint () { MD.oD(checkpoint) }
     return {
-      session, creationesp, ovcreationesp
+      AMJ, MD, session, creationesp, ovcreationesp, checkpoint, ovcheckpoint
     }
   }
 
@@ -119,4 +192,8 @@ export default {
 @import '../css/app.sass'
 .btn1
   max-height: 1.5rem
+.bord
+  border: 1px solid $grey-5
+  border-radius: 5px
+  padding: 3px
 </style>
