@@ -464,6 +464,7 @@ export class ConnexionCompte extends OperationUI {
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
     this.rowEspace = ret.rowEspace
+    session.setOrg(this.rowEspace.org)
     session.setCompteId(this.rowCompta.id)
 
     session.setAvatarId(session.compteId)
@@ -908,6 +909,8 @@ export class AcceptationSponsoring extends OperationUI {
       const rowTribu = ret.rowTribu
       const rowTribu2 = ret.rowTribu2
       const rowChat = ret.rowChat
+      const rowEspace = ret.rowEspace
+      session.setOrg(rowEspace.org)
 
       // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
       const avatar = await compile(rowAvatar)
@@ -917,7 +920,7 @@ export class AcceptationSponsoring extends OperationUI {
 
       aSt.setCompte(avatar, compta, tribu, tribu2)
 
-      const espace = await compile(ret.rowEspace)
+      const espace = await compile(rowEspace)
       if (espace) session.setEspace(espace)
 
       const chat = await compile(rowChat)
@@ -1005,7 +1008,6 @@ export class ProlongerSponsoring extends OperationUI {
   }
 }
 
-
 /* Création d'un nouvel espace et du comptable associé
 args.token donne les éléments d'authentification du compte.
 args.rowEspace : espace créé
@@ -1018,13 +1020,14 @@ Retour: rien. Si OK le rowEspace est celui créé en session
 export class CreerEspace extends OperationUI {
   constructor () { super($t('OPcre')) }
 
-  async run (ns, phrase) {
+  async run (ns, org, phrase) {
     try {
+      const hps1 = phrase.hps1
       const session = stores.session
       const config = stores.config
       const ac = config.allocComptable
 
-      const rowEspace = await Espace.nouveau(ns)
+      const rowEspace = await Espace.nouveau(ns, org)
 
       const nt = NomGenerique.tribu(ns, config.nomTribuPrimitive)
       const na = NomGenerique.comptable(ns)
@@ -1047,7 +1050,7 @@ export class CreerEspace extends OperationUI {
       r._nom = 'versions'
 
       const args = { token: stores.session.authToken, rowEspace, rowTribu, rowTribu2, 
-        rowCompta, rowAvatar, rowVersion: r }
+        rowCompta, rowAvatar, rowVersion: r, hps1 }
       this.tr(await post(this, 'CreerEspace', args))
       
       const espace = await compile(rowEspace)

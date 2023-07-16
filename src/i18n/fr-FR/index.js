@@ -387,7 +387,7 @@ export default {
   HLPvoir: 'Voir aussi ...',
 
   // Stats tribus
-  STtit: 'Statistiques de l\'espace {0} - {1} tribu(s) - {2}',
+  STtit: 'Statistiques de l\'espace "{0}" [{1}] - {2} tribu(s) - {3}',
   STl0: 'Profil #{0}',
   STl0b: 'Quotas V1 / V2',
   STl1: 'Somme des quotas (V1 / V2) attribués aux tribus',
@@ -741,7 +741,17 @@ export default {
 
   // PageAdmin et ApercuEspace
   ESne: 'Nouvel espace',
-  ESne2: 'Espace à créer : {0}',
+  ESne2: 'Espace à créer',
+  ESns: 'ID de l\'espace',
+  ESnsh: 'De 10 à 59',
+  ESorg: 'Organisation',
+  ESreq: 'Valeur requise',
+  ESnum: 'Numéro d\'espace non disponible',
+  ESorgh: 'De 3 à 12 minuscules / chiffres / tiret',
+  ESorg1: 'Au moins 3 signes',
+  ESorg2: 'au plus 12 signes',
+  ESorg3: 'Minuscules (a-z), chiffres (0-9) et tiret (moins)',
+  ESorg4: 'Nom d\èorganisation déjà attribué',
   ESps: 'Phrase secrète de connexion de son comptable',
   ESckpt: 'Checkpoint du GC',
   ESver: 'Version :',

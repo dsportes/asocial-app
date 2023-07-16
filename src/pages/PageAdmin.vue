@@ -25,13 +25,24 @@
       <q-card class="bs petitelargeur">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" icon="close" color="warning" @click="cancelNS"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESne2', [ns])}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESne2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
         <q-card-section class="q-pa-xs">
+          <div class="row items-center">
+            <q-input class="col-6" v-model.number="ns" type="number" style="width:6rem"
+            :label="$t('ESns')" :hint="$t('ESnsh')"/>
+            <div v-if="dns" class = "coll-6 q-ml-lg text-negative text-bold">{{dns}}</div>
+          </div>
+          <div class="row items-center">
+            <q-input class="col-6" v-model="org" style="width:12rem"
+              :label="$t('ESorg')" :hint="$t('ESorgh')"/>
+            <div v-if="dorg" class = "col-6 q-ml-lg text-negative text-bold">{{dorg}}</div>
+          </div>
           <div class="titre-lg text-center q-my-md">{{$t('ESps')}}</div>
           <phrase-secrete @ok="okps" verif icon-valider="check" :label-valider="$t('OK')"/>
-          <bouton-confirm class="q-my-lg maauto" :actif="ps !== null" :confirmer="creerNS"/>
+          <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
+            :confirmer="creerNS"/>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -106,6 +117,8 @@ import { GC, GetCheckpoint } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 import { AMJ } from '../app/api.mjs'
 
+const reg = /^([a-z0-9\-]+)$/
+
 export default {
   name: 'PageAdmin',
 
@@ -115,15 +128,36 @@ export default {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
   },
 
+  watch: {
+    ns (ap, av) {
+      if (ap < 10 || ap > 59) { this.dns = this.$t('ESnsh'); return }
+      if (this.aNS(ap)) { this.dns = this.$t('ESnum'); return }
+      this.dns = ''
+    },
+    org (ap, av) {
+      if (ap.length < 4) { this.dorg = this.$t('ESorg1'); return }
+      if (ap.length > 12) { this.dorg = this.$t('ESorg2'); return }
+      if (!ap.match(reg)) { this.dorg = this.$t('ESorg3'); return }
+      if (this.aOrg(ap)) { this.dorg = this.$t('ESorg4'); return }
+      this.dorg = ''
+    },
+  },
+
   methods: {
     async rafraichir () {
       await reconnexionCompte()
     },
-    plusNS () {
+    aNS (ns) {
       const mesp = this.session.espaces
-      for (let id = 10; id < 90; id++) {
-        if (!mesp.has(id)) { this.ns = id; break }
-      }
+      return mesp.has(ns)
+    },
+    aOrg (org) {
+      const mesp = this.session.espaces
+      for (const [ns, e] of mesp)
+        if (e.org === org) return true
+      return false
+    },
+    plusNS () {
       this.ovcreationesp()
     },
     cancelNS () {
@@ -135,7 +169,7 @@ export default {
       this.ps = ps
     },
     async creerNS () {
-      await new CreerEspace().run(this.ns, this.ps)
+      await new CreerEspace().run(this.ns, this.org, this.ps)
       this.ns = 0
       this.ps = null
       MD.fD()
@@ -168,8 +202,11 @@ export default {
   data () {
     return {
       ns: 0,
+      org: '',
       ps: null,
-      ck: null
+      ck: null,
+      dns: this.$t('ESreq'),
+      dorg: this.$t('ESreq')
     }
   },
 

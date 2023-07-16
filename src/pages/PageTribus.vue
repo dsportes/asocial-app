@@ -3,7 +3,7 @@
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
     <div class="q-my-md q-pa-xs column items-center">
-      <stats-tribus :stats="session.stats" :ns="session.ns" :profil="session.profil"/>
+      <stats-tribus :stats="session.stats" :org="session.org" :ns="session.ns" :profil="session.profil"/>
 
       <quotas-vols class="q-my-sm" :vols="session.stats" />
 

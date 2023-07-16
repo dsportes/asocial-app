@@ -573,7 +573,9 @@ export async function compile (row) {
 /** Espaces **************************************
 - `id` : de l'espace de 10 à 89.
 - `v`
+- `org`
 _data_:
+- `org` : code de l'organisation
 - `notif` : notification de l'administrateur, cryptée par la clé du Comptable.
 - `stats`: statistiques sérialisées de l'espace par le comptable 
   {'ntr', 'a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB' }
@@ -583,6 +585,7 @@ _data_:
 export class Espace extends GenDoc {
 
   async compile (row) {
+    this.org = row.org
     const aSt = stores.avatar
     // la clé est le rnd du Comptable de l'espace
     const cle = new Uint8Array(32); cle[0] = this.id
@@ -597,9 +600,9 @@ export class Espace extends GenDoc {
     aSt.lc.forEach(f => { this.stats[f] = r[f] || 0 })
   }
 
-  static async nouveau (id) {
-    const r = { id, v: 1, t: 1, notif: null, stats: new Uint8Array(encode({ dh: 0 })) }
-    return { _nom: 'espaces', id, v: 1, _data_: new Uint8Array(encode(r))}
+  static async nouveau (id, org) {
+    const r = { id, org, v: 1, t: 1, notif: null, stats: new Uint8Array(encode({ dh: 0 })) }
+    return { _nom: 'espaces', id, org, v: 1, _data_: new Uint8Array(encode(r))}
   }
 }
 

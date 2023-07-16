@@ -133,6 +133,8 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
+    setOrg (org) { this.org = org },
+
     setAvatarId (id) { this.avatarId = id},
 
     setTribuId(id) { this.tribuId = id },

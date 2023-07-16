@@ -1,6 +1,6 @@
 <template>
 <div class="bord1 full-width">
-  <div class="titre-lg text-center">{{$t('STtit', [ns, stats.ntr, dh])}}</div>
+  <div class="titre-lg text-center">{{$t('STtit', [org, ns, stats.ntr, dh])}}</div>
   <div class="row bord2">
     <div class="col-6 q-pa-xs titre-md items-center column">
       <div>
@@ -90,7 +90,7 @@ import { MD } from '../app/modele.mjs'
 export default {
   name: 'StatsTribus',
 
-  props: { stats: Object, ns: Number, profil: Number },
+  props: { stats: Object, org: String, ns: Number, profil: Number },
   /*
   - 'ntr' : nombre de tribus
   - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
