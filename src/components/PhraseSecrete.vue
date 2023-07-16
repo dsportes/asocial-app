@@ -2,17 +2,25 @@
   <q-card-section class="fs-md">
     <q-checkbox v-model="vkb" color="primary" style="position:relative;left:-8px"/>
     <span class="cprim fs-lg">{{$t('PSkb')}}</span>
+
+    <div v-if="!orgext" class="q-my-md row items-center">
+      <div class="titre-lg q-mr-md">{{$t('PSorg1')}}</div>
+      <q-input v-model="org" dense style="width:20rem"
+        :hint="$t('PSorg2')" :placeholder="$t('PSorg3')"/>
+    </div>
+
     <div class="titre-lg">{{$t('PSm'+phase)}}</div>
+
     <q-input dense counter
       :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : $t('NPpe')" 
       v-model="ligne1" @focus="setKB(1)" 
       @keydown.enter.prevent="ok2" 
-      :type="isPwd ? 'password' : 'text'" :label="$t('PSl1')">
-    <template v-slot:append>
-      <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-      <q-btn icon="cancel" size="md" :disable="ligne1.length === 0"  @click="ligne1 = ''"/>
-      <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
-    </template>
+      :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">
+      <template v-slot:append>
+        <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
+        <q-btn icon="cancel" size="md" :disable="ligne1.length === 0"  @click="ligne1 = ''"/>
+        <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+      </template>
     </q-input>
     <div class="row justify-between items-center no-wrap">
       <div v-if="isDev">
@@ -41,7 +49,14 @@ import { $t } from '../app/util.mjs'
 
 export default ({
   name: 'PhraseSecrete',
-  props: { iconValider: String, verif: Boolean, labelValider: String, initVal: Object, nbc: Number },
+  props: { 
+    iconValider: String,
+    verif: Boolean,
+    labelValider: String,
+    initVal: Object, 
+    nbc: Number,
+    orgext: String
+  },
   data () {
     return {
       phase: 0,
@@ -93,7 +108,7 @@ export default ({
       this.encours = true
       setTimeout(async () => {
         const pc = new Phrase()
-        await pc.init(this.ligne1)
+        await pc.init(this.ligne1, this.org)
         pc.phrase = null
         this.$emit('ok', pc)
         this.raz()
@@ -117,7 +132,10 @@ export default ({
     const initVal = toRef(props, 'initVal')
     const ligne1 = ref('')
     const nbc = toRef(props, 'nbc')
-    const lgph = ref(nbc.value || 24) 
+    const lgph = ref(nbc.value || 24)
+    const orgext = toRef(props, 'orgext')
+    const org = ref('')
+    if (orgext.value) org.value = orgext.value
 
     const layout = {
       default: [
@@ -195,6 +213,7 @@ export default ({
 
     return {
       config,
+      org,
       isDev: isDev,
       keyboard,
       setKB,

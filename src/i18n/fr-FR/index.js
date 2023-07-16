@@ -298,7 +298,7 @@ export default {
   // EX8009: 'Forfait V1 insuffisant pour supporter les notes du contact.',
   // EX8010: 'Forfait V2 insuffisant pour supporter les notes du contact.',
   EX8011: 'Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète',
-  EX8012: 'Une phrase secrète semblable est déjà utilisée. Changer a minima la première ligne de la phrase secrète pour ce nouveau compte',
+  EX8012: 'Une phrase secrète semblable est déjà utilisée. Changer a minima le début de la phrase secrète pour ce nouveau compte',
   EX8013: 'Réserves de volume V1 insuffisantes de la tribu pour affectation au nouveau compte',
   EX8014: 'Réserves de volume V2 insuffisantes de la tribu pour affectation au nouveau compte',
   EX8015: 'Cet avatar n\'est pas l\'hébergeur actuel du groupe',
@@ -351,7 +351,7 @@ export default {
   OTcpt: 'Comptes synchronisés',
   OTtst: 'Tests d\'accès',
   OTps: 'Phrase secrète',
-  OTh1: 'Hash de la ligne 1',
+  OTh1: 'Hash du début de la phrase',
   OTcx: 'SHA256 de la clé X (PBKFD de la phrase complète)',
   OThcx: 'Hash de la clé X',
   OTec: 'Test d\'écho - émis: [{0}] - reçu: [{1}] - délai:{2}s',
@@ -421,7 +421,7 @@ export default {
   NPtribu: 'Tribu:',
   NPtit: 'Sponsoring d\'un nouveau compte',
   NPnpc: 'Phrase à ne communiquer qu\'au titulaire du compte sponsorisé',
-  NPphl: 'Phrase libre (20 à 32c)',
+  NPphl: 'une phrase de 20 à 32c',
   NPpe: 'Presser "Entrée" à la fin de la saisie',
   NPcry: 'Cryptage en cours ...',
   NPavp: 'Nom de l\'avatar primaire du compte',
@@ -455,7 +455,7 @@ export default {
 
   OPmsg1: `La base locale du compte n'a pas été trouvée.<br>
   Aucune session synchronisée ne s'est préalablement exécutée sur ce poste avec cette phrase secrète.<br>
-  Erreur dans la saisie de la ligne 1 de la phrase ?`,
+  Erreur dans la saisie de la phrase ?`,
   OPmsg2: `La base locale est absente ou corrompue.<br>
   Code erreur: {0}<br>Se connecter en mode synchronisé ou incognito.`,
   OPmsg3: `La base locale est corrompue et ne peut pas être décryptée.<br>
@@ -561,14 +561,19 @@ export default {
   OPiter: '({0})-Petit incident, nouvel essai en cours, merci d\'attendre',
 
   PSkb: 'Clavier virtuel',
+  PSorg1: 'Organisation:',
+  PSorg2: '3 à 12 minuscules / chiffres / moins',
+  PSorg3: 'monasso-94',
   PSm0: 'Phrase secrète de connexion',
   PSm1: 'Phrase non confirmée, la re-saisir',
   PSm2: 'Confirmer la phrase secréte',
   PSnbc: 'Au moins {0} caractères',
-  PSl1: '"les sanglots longs de ..."',
-  PSl2: 'Seconde ligne de la phrase secrète',
+  PSl1: 'les sanglots longs de ...',
   PSren: 'Renoncer',
   PSval: 'Se connecter',
+  PSctc1: 'Phrase de contact',
+  PSctc2: 'Phrase de contact communiquée',
+  PSctc3: 'Le code de l\'organisation est requis',
 
   UTIatt: 'Information importante',
   UTIac1: 'Action impossible',

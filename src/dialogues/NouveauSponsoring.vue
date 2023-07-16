@@ -15,7 +15,7 @@
         <q-step :name="1" :title="$t('NPphr')" icon="settings" :done="step > 1">
           <span class="fs-sm q-py-sm">{{$t('NPnpc')}}</span>
           <div ref="step1">
-            <phrase-contact @ok="crypterphrase" />
+            <phrase-contact @ok="crypterphrase" :orgext="session.org"/>
           </div>
         </q-step>
 

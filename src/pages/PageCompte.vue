@@ -82,7 +82,7 @@
           <bouton-help page="page1"/>
         </q-toolbar>
         <phrase-secrete class="q-ma-xs" @ok="okps" verif icon-valider="check" 
-            label-valider="continuer"></phrase-secrete>
+            label-valider="continuer" :orgext="session.org"/>
         <q-card-actions>
           <q-btn dense :label="$t('renoncer')" color="primary" icon="close" @click="MD.fD"/>
           <q-btn dense :disable="ps===null" :label="$t('CPTvcp')" 

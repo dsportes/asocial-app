@@ -25,7 +25,8 @@
           <bouton-help page="page1"/>
         </q-toolbar>
         <q-card-section>
-          <phrase-contact @ok="declPC" :init-val="avatar.pc || ''"/>
+          <phrase-contact @ok="declPC" :init-val="avatar.pc || ''"
+          declaration :orgext="session.org"/>
         </q-card-section>
         <q-card-actions vertical>
           <q-btn v-if="avatar.pc" flat color="warning" :label="$t('FAsup')" @click="supprPC"/>

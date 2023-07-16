@@ -13,6 +13,7 @@ export const useSessionStore = defineStore('session', {
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
     ns: 0, // namespace de 10 à 89 : 0 pour "admin"
+    org: '', // code de l'organisation
     naComptable: null,
     dh: 0,
     /* authToken : base64 de la sérialisation de :

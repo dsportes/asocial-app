@@ -7,7 +7,7 @@
   </q-toolbar>
 
   <q-card-section>
-    <phrase-contact @ok="ok"/>
+    <phrase-contact @ok="ok" :orgext="session.org"/>
   </q-card-section>
 </q-card>
 </template>
@@ -47,7 +47,6 @@ export default ({
       this.chat = null
       const pSt = stores.people
       const aSt = stores.avatar
-      // const p = await new Phrase().init(pc)
       const { cv, na } = await new GetAvatarPC().run(p)
       if (!na) {
         await afficherDiag(this.$t('CChnopc'))

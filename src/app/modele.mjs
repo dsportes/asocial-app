@@ -434,12 +434,14 @@ export class Motscles {
  * classe Phrase
 ******************************************************/
 const enc = new TextEncoder()
-const idxch = [0, 2, 4, 5, 9, 12]
-
+// const idxch = [0, 2, 4, 5, 9, 12]
+const idxch = [0, 1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 14, 16, 17, 21, 24, 27]
 export class Phrase {
-  async init (texte) {
+  async init (texte, org) {
+    this.org = org
+    const x = org ? org.padEnd(12, '$') : '$$$$$$$$$$$$'
     this.phrase = texte
-    const u8 = enc.encode(texte)
+    const u8 = enc.encode(x + texte)
     const deb = new Uint8Array(idxch.length)
     for (let i = 0; i < idxch.length; i++) deb[i] = u8[idxch[i]]
     this.pcb = await pbkfd(u8)

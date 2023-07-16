@@ -31,16 +31,17 @@
         <q-card-section class="q-pa-xs">
           <div class="row items-center">
             <q-input class="col-6" v-model.number="ns" type="number" style="width:6rem"
-            :label="$t('ESns')" :hint="$t('ESnsh')"/>
+            :label="$t('ESns')" :hint="$t('ESnsh')" dense/>
             <div v-if="dns" class = "coll-6 q-ml-lg text-negative text-bold">{{dns}}</div>
           </div>
           <div class="row items-center">
             <q-input class="col-6" v-model="org" style="width:12rem"
-              :label="$t('ESorg')" :hint="$t('ESorgh')"/>
+              :label="$t('ESorg')" :hint="$t('ESorgh')" dense/>
             <div v-if="dorg" class = "col-6 q-ml-lg text-negative text-bold">{{dorg}}</div>
           </div>
           <div class="titre-lg text-center q-my-md">{{$t('ESps')}}</div>
-          <phrase-secrete @ok="okps" verif icon-valider="check" :label-valider="$t('OK')"/>
+          <phrase-secrete @ok="okps" :orgext="org"
+            verif icon-valider="check" :label-valider="$t('OK')"/>
           <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
             :confirmer="creerNS"/>
         </q-card-section>
