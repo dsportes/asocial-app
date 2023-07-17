@@ -170,7 +170,7 @@ export class OperationWS extends Operation {
     for (const x of ret.rowSponsorings) {
       const sp = await compile(x)
       if (sp._zombi) this.buf.supprIDB(x); else this.buf.putIDB(x)
-      e.lsp.push(e)
+      e.lsp.push(sp)
     }
     return [true, avatar]
   }

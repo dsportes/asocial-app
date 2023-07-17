@@ -88,6 +88,8 @@ export async function connecterCompte (phrase, razdb) {
       return
     }
     session.setCompteId(x.id) // Important, requis pour lire ensuite compta ...
+    session.setNs(ID.ns(x.id))
+    session.setOrg(phrase.org)
     session.clek = x.k
   }
   try {
@@ -466,6 +468,7 @@ export class ConnexionCompte extends OperationUI {
     this.rowCompta = ret.rowCompta
     this.rowEspace = ret.rowEspace
     session.setOrg(this.rowEspace.org)
+    session.setNs(ID.ns(this.rowCompta.id))
     session.setCompteId(this.rowCompta.id)
 
     session.setAvatarId(session.compteId)
@@ -515,8 +518,6 @@ export class ConnexionCompte extends OperationUI {
     const session = stores.session
     this.rowCompta = await getCompta()
     this.compta = await compile(this.rowCompta)
-    session.setCompteId(this.rowCompta.id)
-
     this.rowTribu = await getTribu(this.compta.idt)
     this.tribu = await compile(this.rowTribu)
     this.rowTribu2 = await getTribu2(this.compta.idt)
@@ -547,7 +548,7 @@ export class ConnexionCompte extends OperationUI {
         ET abonnement à compta sur le serveur
         */
         await this.getCTA()
-        if (!session.ns) { // C'est une session ADMIN
+        if (session.estAdmin) { // C'est une session ADMIN
           session.setMode(2)
           session.status = 3
           stores.ui.setPage('admin')

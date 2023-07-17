@@ -518,6 +518,8 @@ export default {
   OPmcn: 'Changer les mots clés d\'une note',
   OPrattn: 'Rattacher une note à une autre',
 
+  OPprosp: 'Prolonger / annuler un sponsoring',
+
   OPgetcv: 'Obtention d\'une carte de viste',
   OPnvf: 'Enregistrer un nouveau fichier',
 

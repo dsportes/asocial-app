@@ -603,7 +603,7 @@ export class Espace extends GenDoc {
   static async nouveau (org) {
     const session = stores.session
     const r = { id: session.ns, org, v: 1, t: 1, notif: null, stats: new Uint8Array(encode({ dh: 0 })) }
-    return { _nom: 'espaces', id, org, v: 1, _data_: new Uint8Array(encode(r))}
+    return { _nom: 'espaces', id: session.ns, org, v: 1, _data_: new Uint8Array(encode(r))}
   }
 }
 
@@ -1129,6 +1129,7 @@ export class Sponsoring extends GenDoc {
     this.psp = await decrypterStr(clek, row.pspk)
     const clex = await decrypter(clek, row.bpspk)
     this.ard = await decrypterStr(clex, row.ardx)
+    this.org = row.org
     this.descr = {}
     await Sponsoring.decrypterDescr(this.descr, clex, row.descrx)
   }
@@ -1139,6 +1140,7 @@ export class Sponsoring extends GenDoc {
   static async fromRow (row, clex) {
     const x = decode(row._data_)
     const obj = {}
+    obj.org = x.org
     obj.dlv = x.dlv
     obj.id = x.id
     obj.ids = x.ids
@@ -1180,9 +1182,10 @@ export class Sponsoring extends GenDoc {
     const ardx = await crypter(phrase.clex, ard || '')
     const pspk = await crypter(session.clek, phrase.phrase)
     const bpspk = await crypter(session.clek, phrase.clex)
+    const org = session.org
     const _data_ = new Uint8Array(encode({ 
       id: av.id,
-      org: session.org,
+      org,
       ids: phrase.phch,
       dlv,
       st: 0,
@@ -1350,7 +1353,7 @@ export class Groupe extends GenDoc {
     this.msu = row.msu || null
     this.pe = row.pe || 0
     this.ast = row.ast || new Uint8Array([0])
-    x = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
+    const x = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
     this.idh = x ? ID.long(x, session.ns) : 0
     this.imh = row.imh || 0
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
@@ -1392,7 +1395,7 @@ export class Groupe extends GenDoc {
     return { _nom: 'groupes', id: r.id, v: r.v, _data_ }
   }
 
-  async toIdhg (cle) {
+  static async toIdhg (cle) {
     return await crypter(cle, '' + ID.court(stores.session.compteId))
   }
 

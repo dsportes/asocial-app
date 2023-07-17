@@ -54,7 +54,7 @@ import { $t, afficherDiag } from '../app/util.mjs'
 import { connecterCompte } from '../app/connexion.mjs'
 import { MD, Sponsoring, resetRepertoire } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
-import { AMJ } from '../app/api.mjs'
+import { AMJ, ID } from '../app/api.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../dialogues/AcceptationSponsoring.vue'
@@ -70,7 +70,8 @@ export default {
       btncd: false,
       datactc: null,
       coupleloc: null,
-      pc: null
+      pc: null,
+      org: ''
     }
   },
 
@@ -80,6 +81,7 @@ export default {
     },
     async crypterphrase (pc) {
       this.pc = pc
+      this.org = pc.org
       try {
         /* Recherche sponsoring ******
         args.ids : hash de la phrase de contact

@@ -150,7 +150,7 @@ export default ({
     },
     async okps (ps) {
       if (ps) {
-        if (await new ExistePhrase().run(pc.hps1, 1)) {
+        if (await new ExistePhrase().run(ps.hps1, 1)) {
           await afficherDiag(this.$t('existe'))
           return
         }
