@@ -1187,6 +1187,7 @@ export class Sponsoring extends GenDoc {
     const bpspk = await crypter(session.clek, phrase.clex)
     const _data_ = new Uint8Array(encode({ 
       id: av.id,
+      org: session.org,
       ids: phrase.phch,
       dlv,
       st: 0,

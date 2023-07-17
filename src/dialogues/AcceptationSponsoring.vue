@@ -51,7 +51,8 @@
       </div>
 
       <div v-if="accdec===1 && !ps">
-        <phrase-secrete :init-val="ps" @ok="okps" verif icon-valider="check" :label-valider="$t('OK')"/>
+        <phrase-secrete :init-val="ps" @ok="okps" verif icon-valider="check" 
+          :label-valider="$t('OK')" :orgext="sp.org"/>
       </div>
       <div v-if="accdec===1 && ps">
         <div class="titre-md q-mt-sm">{{$t('NPmota')}}</div>
@@ -97,6 +98,7 @@ export default ({
   pc : object Phrase
   sp : objet Sponsoring décodé
     - id
+    - org
     - ids
     - `ard`: ardoise.
     - 'dlv': 

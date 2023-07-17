@@ -4,31 +4,39 @@
   <q-card class="q-mt-lg petitelargeur fs-md column justify-center">
     <div :class="'full-width row items-center bord' + (!session.mode ? '1' : '2')">
       <div class="col q-py-sm q-gutter-md row justify-center">
-        <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
-        <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
-        <q-radio dense v-model="session.mode" :val="3" :label="$t('avion')" />
+        <q-radio dense v-model="locmode" :val="1" :label="$t('sync')" />
+        <q-radio dense v-model="locmode" :val="2" :label="$t('incognito')" />
+        <q-radio dense v-model="locmode" :val="3" :label="$t('avion')" />
       </div>
       <bouton-help page="page1" class="colauto"/>
     </div>
   </q-card>
 
-  <q-card v-if="session.mode" class="q-mt-lg q-pa-sm petitelargeur fs-md column justify-center">
-      <phrase-secrete label-valider="LOGconn" icon-valider="send" @ok="onps"/>
-      <div :class="!session.synchro ? 'disabled' : ''">
-        <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
-          class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
-        <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
-          class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
-      </div>
-  </q-card>
-
-  <q-card v-if="session.accesNet" class="q-mt-lg q-pa-sm petitelargeur fs-md column justify-center">
-      <div v-if="!btncd" class="titre-md">{{$t('LOGpar')}}</div>
-      <q-btn v-if="!btncd" flat dense color="warning" icon="add_circle" :label="$t('LOGcrea')" @click="btncd = true"/>
-      <div v-if="btncd" class="full-width">
-        <phrase-contact @ok="crypterphrase"/>
-      </div>
-  </q-card>
+  <q-expansion-item v-if="session.mode" class="q-mt-lg petitelargeur"
+    expand-separator icon="send" :label="$t('LOGconn2')"
+    group="g1" default-opened header-class="titre-lg bg-primary text-white">
+    <div class="fs-md column justify-center">
+        <phrase-secrete label-valider="LOGconn" icon-valider="send" @ok="onps"/>
+        <div :class="!session.synchro ? 'disabled' : ''">
+          <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
+            class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
+          <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
+            class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
+        </div>
+    </div>
+  </q-expansion-item>
+  <q-separator/>
+  <q-expansion-item v-if="session.accesNet" class="petitelargeur"
+    expand-separator icon="add_circle" :label="$t('LOGconn3')"
+    group="g1" header-class="titre-lg bg-primary text-white">
+    <div class="fs-md column justify-center">
+        <div v-if="!btncd" class="titre-md">{{$t('LOGpar')}}</div>
+        <q-btn v-if="!btncd" flat dense color="warning" icon="add_circle" :label="$t('LOGcrea')" @click="btncd = true"/>
+        <div v-if="btncd" class="full-width">
+          <phrase-contact @ok="crypterphrase"/>
+        </div>
+    </div>
+  </q-expansion-item>
 
   <q-dialog v-model="dialcp" persistent full-height>
     <AcceptationSponsoring :sp="sp" :pc="pc" :org="org"/>
@@ -120,13 +128,19 @@ export default {
   setup () {
     const config = stores.config
     const session = stores.session
-
+    const locmode = ref(session.mode)
     const razdb = ref(false)
 
     watch(razdb, async (ap, av) => {
       if (ap === true && ap !== av) {
         await afficherDiag($t('LOGrazbl'))
         console.log('Raz db diag')
+      }
+    })
+
+    watch(locmode, (ap, av) => {
+      if (ap !== session.mode) {
+        session.setMode(ap)
       }
     })
 
@@ -137,7 +151,8 @@ export default {
       MD, dialcp, ovdialcp,
       session,
       config,
-      razdb
+      razdb,
+      locmode
     }
   }
 }

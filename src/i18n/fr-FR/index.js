@@ -334,6 +334,8 @@ export default {
   '<BR>Les fichiers attachés aux notes conservés sur cet appareil ne seront plus accessibles en mode avion',
 
   LOGconn: 'Se Connecter',
+  LOGconn2: 'Se Connecter à son compte',
+  LOGconn3: 'Créer votre propre compte',
   LOGpar: 'Un sponsor vous a communiqué une phrase secrète pour créer vous-même votre compte ?',
   LOGphr: 'Phrase communiquée par le sponsor',
   LOGcrea: 'Je créé mon compte ...',
@@ -564,6 +566,7 @@ export default {
   PSorg1: 'Organisation:',
   PSorg2: '3 à 12 minuscules / chiffres / moins',
   PSorg3: 'monasso-94',
+  PSmemo: 'S\'en souvenir',
   PSm0: 'Phrase secrète de connexion',
   PSm1: 'Phrase non confirmée, la re-saisir',
   PSm2: 'Confirmer la phrase secréte',

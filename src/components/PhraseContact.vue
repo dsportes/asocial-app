@@ -1,7 +1,11 @@
 <template>
 <div>
   <div v-if="!orgext" class="q-mb-sm row items-center">
-    <div class="titre-md q-mr-md">{{$t('PSorg1')}}</div>
+    <div class="column">
+      <div class="titre-lg q-mr-md">{{$t('PSorg1')}}</div>
+      <q-checkbox v-if="session.accesIdb" v-model="memoorg" dense size="sm" 
+        :label="$t('PSmemo')"/>
+    </div>
     <q-input v-model="org" dense style="width:20rem"
       :hint="$t('PSorg2')" :placeholder="$t('PSorg3')"/>
   </div>
@@ -20,7 +24,7 @@
 </template>
 <script>
 
-import { ref, toRef } from 'vue'
+import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import { Phrase } from '../app/modele.mjs'
 import { afficherDiag } from '../app/util.mjs'
@@ -61,10 +65,49 @@ export default ({
     const orgext = toRef(props, 'orgext')
     const org = ref('')
     if (orgext.value) org.value = orgext.value
+    const memoorg = ref(true)
+
+    function presetOrg () {
+      if (memoorg.value && !org.value) {
+        const x = localStorage.getItem('$asocial$org')
+        org.value = x || ''
+      }
+    }
+
+    session.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setMode') {
+          memoorg.value = session.accesIdb
+          presetOrg()
+        }
+        if (name === 'setPresetOrg') {
+          org.value = session.presetOrg
+        }
+      })
+    })
+
+    watch(() => memoorg.value, (ap, av) => {
+      const o = org.value || ''
+      if (ap) {
+        localStorage.setItem('$asocial$org', o)
+        session.setPresetOrg(o)
+      } else {
+        localStorage.removeItem('$asocial$org')
+        session.setPresetOrg('')
+      }
+    })
+
+    watch(() => org.value, (ap, av) => {
+      const o = ap || ''
+      session.setPresetOrg(o)
+      if (memoorg.value) localStorage.setItem('$asocial$org', o)
+    })
+
+    presetOrg()
 
     return {
       phrase,
-      org,
+      org, memoorg,
       session
     }
   }

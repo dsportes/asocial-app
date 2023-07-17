@@ -31,7 +31,7 @@ export function deconnexion (garderMode) {
   if (session.accesNet && !config.fsSync) closeWS()
   stores.reset()
   session.$reset()
-  if (garderMode) session.mode = mode
+  if (garderMode) session.setMode(mode)
   SyncQueue.reset()
   if (session.fsSync) session.fsSync.close()
   stores.ui.setPage('login')
@@ -547,7 +547,7 @@ export class ConnexionCompte extends OperationUI {
         */
         await this.getCTA()
         if (!session.ns) { // C'est une session ADMIN
-          session.mode = 2
+          session.setMode(2)
           session.status = 3
           stores.ui.setPage('admin')
           return this.finOK()
@@ -588,7 +588,7 @@ export class ConnexionCompte extends OperationUI {
 
       // En cas de blocage grave, plus de synchronisation
       if (session.niv > 2 && session.mode === 1) {
-        session.mode = 2
+        session.setMode(2)
         await afficherDiag($t('CNXdeg'))
       }
 
@@ -837,7 +837,6 @@ export class AcceptationSponsoring extends OperationUI {
     try {
       // LE COMPTE EST CELUI DU FILLEUL
       const session = stores.session
-      const config = stores.config
       const aSt = stores.avatar
 
       await initSession(ps)

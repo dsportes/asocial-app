@@ -14,6 +14,7 @@ export const useSessionStore = defineStore('session', {
     sessionId: '', // identifiant de session (random(6) -> base64)
     ns: 0, // namespace de 10 à 89 : 0 pour "admin"
     org: '', // code de l'organisation
+    presetOrg: '',
     naComptable: null,
     dh: 0,
     /* authToken : base64 de la sérialisation de :
@@ -134,7 +135,11 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
+    setMode (mode) { this.mode = mode },
+
     setOrg (org) { this.org = org },
+
+    setPresetOrg (org) { this.presetOrg = org},
 
     setAvatarId (id) { this.avatarId = id},
 
