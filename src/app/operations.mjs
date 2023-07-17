@@ -526,7 +526,7 @@ export class NouvelAvatar extends OperationUI {
     try {
       const session = stores.session
 
-      const na = NomGenerique.avatar(session.ns, nom)
+      const na = NomGenerique.avatar(nom)
 
       const { publicKey, privateKey } = await genKeyPair()
 
@@ -535,7 +535,6 @@ export class NouvelAvatar extends OperationUI {
       const rowVersion = {
         id: na.id,
         v: 1,
-        iv: GenDoc._iv(na.id, 1),
         dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.dlv)
       }
       const _data_ = new Uint8Array(encode(rowVersion))
@@ -564,7 +563,7 @@ export class NouvelleTribu extends OperationUI {
   async run (nom, q1, q2) {
     try {
       const session = stores.session
-      const nt = NomGenerique.tribu(session.ns, nom)
+      const nt = NomGenerique.tribu(nom)
       const rowTribu = await Tribu.nouvelleRow(nt, q1, q2)
       const rowTribu2 = await Tribu2.nouvelleRow(nt)
       const args = { token: session.authToken, rowTribu, rowTribu2 }
@@ -874,15 +873,15 @@ Retour:
 export class SetNotifG extends OperationUI {
   constructor () { super($t('OPntfg')) }
 
-  async run (ns, notifG) {
+  async run (notifG) {
     try {
       const session = stores.session
       if (notifG) notifG.dh = new Date().getTime()
-      const naComptable = NomGenerique.comptable(ns)
+      const naComptable = NomGenerique.comptable()
       const notif = !notifG ? null : await crypter(naComptable.rnd, notifG.encode())
-      const args = { token: session.authToken, ns, notif}
+      const args = { token: session.authToken, ns: session.ns, notif}
       const ret = this.tr(await post(this, 'SetNotifG', args))
-      if (ret.rowEspace && !session.ns) {
+      if (ret.rowEspace && session.estAdmin) {
         // PageAdmin : update liste espace
         const esp = await compile(ret.rowEspace)
         session.setEspace(esp, true)
@@ -926,7 +925,7 @@ args.rowGroupe : le groupe créé
 args.rowMembre : le membre
 args.id: id de l'avatar créateur
 args.quotas : [q1, q2] attribué au groupe
-args.kegr: clé dans lgrk. Hash du rnd inverse de l'avatar crypté par le rnd du groupe.
+args.kegr: clé dans lgrk. Hash du rnd inverse du groupe crypté par le rnd de l'avatar.
 args.egr: élément de lgrk dans l'avatar créateur
 Retour:
 */
@@ -936,7 +935,7 @@ export class NouveauGroupe extends OperationUI {
   async run (nom, unanime, quotas) { // quotas: [q1, q2]
     try {
       const session = stores.session
-      const nag = NomGenerique.groupe(session.ns, nom)
+      const nag = NomGenerique.groupe(nom)
       const na = getNg(session.avatarId)
       const rowGroupe = await Groupe.rowNouveauGroupe(nag, na, unanime)
       
@@ -1036,7 +1035,7 @@ export class HebGroupe extends OperationUI {
       const session = stores.session
       const args = { token: session.authToken, t, imh, q1, q2, idg: nag.id, ida: session.compteId }
       if (t > 1) { // prise et transfert heb
-        args.idhg = await crypter(nag.rnd, '' + session.compteId)
+        args.idhg = await Groupe.toIdhg(nag.rnd)
         if (t === 2) args.idd = idd
       }
       this.tr(await post(this, 'HebGroupe', args))

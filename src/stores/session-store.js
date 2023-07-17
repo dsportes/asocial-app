@@ -12,6 +12,7 @@ export const useSessionStore = defineStore('session', {
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
+    estAdmin: false,
     ns: 0, // namespace de 10 à 89 : 0 pour "admin"
     org: '', // code de l'organisation
     presetOrg: '',
@@ -129,15 +130,17 @@ export const useSessionStore = defineStore('session', {
     setCompteId (id) {
       this.ns = ID.ns(id)
       this.compteId = id
-      if (this.ns) {
+      if (!this.estAdmin) {
         this.estComptable = ID.estComptable(id)
-        this.naComptable = NomGenerique.comptable(this.ns)
+        this.naComptable = NomGenerique.comptable()
       }
     },
 
     setMode (mode) { this.mode = mode },
 
     setOrg (org) { this.org = org },
+
+    setNs (ns) { this.ns = ns; NomGenerique.ns = ns },
 
     setPresetOrg (org) { this.presetOrg = org},
 

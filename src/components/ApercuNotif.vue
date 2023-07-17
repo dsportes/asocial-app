@@ -341,7 +341,8 @@ export default {
       const ntf = suppr === true ? null : this.ntf
       switch (this.tC) {
         case 1: { // notifG
-          await new SetNotifG().run(this.ns, ntf)
+          if (this.ns) session.setNs(this.ns)
+          await new SetNotifG().run(ntf)
           break
         }
         case 2: { // notif Tribu

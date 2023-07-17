@@ -452,6 +452,7 @@ export class ConnexionCompte extends OperationUI {
     const ret = this.tr(await post(this, 'ConnexionCompte', args))
     if (ret.admin) {           
       session.setCompteId(0)
+      session.estAdmin = true
       if (ret.espaces) for (const e of ret.espaces) {
         session.setEspace(await compile(e), true)
       }
@@ -840,6 +841,8 @@ export class AcceptationSponsoring extends OperationUI {
       const aSt = stores.avatar
 
       await initSession(ps)
+      session.setNs(ID.ns(sp.id))
+      session.setOrg(sp.org)
       this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
       this.dh = 0
@@ -1019,17 +1022,17 @@ Retour: rien. Si OK le rowEspace est celui créé en session
 export class CreerEspace extends OperationUI {
   constructor () { super($t('OPcre')) }
 
-  async run (ns, org, phrase) {
+  async run (org, phrase) {
     try {
       const hps1 = phrase.hps1
       const session = stores.session
       const config = stores.config
       const ac = config.allocComptable
 
-      const rowEspace = await Espace.nouveau(ns, org)
+      const rowEspace = await Espace.nouveau(org)
 
-      const nt = NomGenerique.tribu(ns, config.nomTribuPrimitive)
-      const na = NomGenerique.comptable(ns)
+      const nt = NomGenerique.tribu(config.nomTribuPrimitive)
+      const na = NomGenerique.comptable()
 
       const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true, phrase) // set de session.clek
       const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])
@@ -1041,7 +1044,6 @@ export class CreerEspace extends OperationUI {
       const r = {
         id: na.id,
         v: 1,
-        iv: GenDoc._iv(na.id, 1),
         dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.dlv)
       }
       const _data_ = new Uint8Array(encode(r))
@@ -1138,35 +1140,3 @@ export class GetEspace extends OperationUI {
   }
 }
 
-/* Set notifications / blocage généraux *****************************************************
-args.token donne les éléments d'authentification du compte.
-args.ns
-args.notifA : si false, suppression, si null rien, sinon remplace
-args.notifC : si false, suppression, si null rien, sinon remplace
-args.blocage : si false, suppression, si null rien, sinon remplace
-args.t : si non 0, remplace
-Retour: rowEspace
-
-export class SetEspace extends OperationUI {
-  constructor () { super($t('OPsetesp')) }
-
-  async run (ntfA, ntfC, bloc, t, ns) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken,
-        ns: ns || session.ns,
-        notifA: ntfA === undefined ? null : (ntfA === false ? false : new Uint8Array(encode(ntfA))),
-        notifC: ntfC === undefined ? null : (ntfC === false ? false : new Uint8Array(encode(ntfC))),
-        blocage: bloc === undefined ? null : (bloc === false ? false : new Uint8Array(encode(bloc))),
-        t: t === undefined ? 0 : t
-      }
-      const ret = this.tr(await post(this, 'SetEspace', args ))
-      const espace = await compile(ret.rowEspace)
-      if (espace) session.setEspace(espace)
-      return this.finOK(espace)
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-*/

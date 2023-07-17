@@ -27,19 +27,28 @@ export function nomFichier (v) {
 }
 
 export class ID {
+  static court (long) {
+    if (!long) return 0
+    const x = typeof id === 'string' ? parseInt(long) : long
+    return x % d14
+  }
+
+  static long (court, ns) { 
+    const x = typeof court === 'string' ? parseInt(court) : court
+    return (ns * d14) + x
+  }
+
   static estComptable (id) { return id % d13 === 0 }
 
-  static estGroupe (id) { return Math.floor(id / d13) % 10 === 2 }
+  static estGroupe (id) { return Math.floor(id / d13) % 10 === 3 }
 
-  static estTribu (id) { return Math.floor(id / d13) % 10 === 3 }
+  static estTribu (id) { return Math.floor(id / d13) % 10 === 4 }
 
-  static estAvatar (id) { return Math.floor(id / d13) % 10 < 2 }
+  static estAvatar (id) { return Math.floor(id / d13) % 10 < 3 }
 
-  static estCompte (id) { return Math.floor(id / d13) % 10 === 0 }
+  static estCompte (id) { return Math.floor(id / d13) % 10 === 1 }
 
-  static estAvatarS (id) { return Math.floor(id / d13) % 10 === 1 }
-
-  static type (id) { return Math.floor(id / d13) % 10 }
+  static estAvatarS (id) { return Math.floor(id / d13) % 10 === 2 }
 
   static ns (id) { return Math.floor(id / d14)}
 }

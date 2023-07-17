@@ -115,10 +115,12 @@ export function getNg (id) { return repertoire.rep[id] }
 NomGenerique : NomAvatar, NomGroupe, NomTribu
 ************************************************************/
 export class NomGenerique {
+  static ns = 0
+
   static idOf (rnd) {
-    let z = true; for (let i = 2; i < 32; i++) if(rnd[i]) { z = false; break }
+    let z = true; for (let i = 1; i < 32; i++) if(rnd[i]) { z = false; break }
     const n = z ? 0 : (hash(rnd) % d13)
-    return (((rnd[0] * 10) + rnd[1]) * d13) + n
+    return (((NomGenerique.ns * 10) + rnd[0]) * d13) + n
   }
 
   constructor (id, nom, rnd) {
@@ -131,11 +133,11 @@ export class NomGenerique {
   get ns () { return this.rnd[0] }
   get type () { return this.rnd[1] }
   get estComptable () { return this.id % d13 === 0 }
-  get estGroupe () { return this.rnd[1] === 2 }
-  get estTribu () { return this.rnd[1] === 3 }
-  get estAvatar () { return this.rnd[1] < 2 }
-  get estCompte () { return this.rnd[1] === 0 }
-  get estAvatarS () { return this.rnd[1] === 1 }
+  get estGroupe () { return this.rnd[0] === 3 }
+  get estTribu () { return this.rnd[0] === 4 }
+  get estAvatar () { return this.rnd[0] < 3 }
+  get estCompte () { return this.rnd[0] === 1 }
+  get estAvatarS () { return this.rnd[0] === 2 }
   get nom () { return this.nomx || stores.config.nomDuComptable }
   get nomc () { return !this.nomx ? stores.config.nomDuComptable : (this.nomx + '#' + (this.id % 10000)) }
   get hrnd () { return hash(u8ToB64(this.rnd)) }
@@ -156,53 +158,49 @@ export class NomGenerique {
     const id = NomGenerique.idOf(rnd)
     const e = repertoire.rep[id]
     if (e) return e
-    if (rnd[1] <= 1) return new NomAvatar(id, nom, rnd)
-    if (rnd[1] === 2) return new NomGroupe(id, nom, rnd)
+    if (rnd[0] <= 2) return new NomAvatar(id, nom, rnd)
+    if (rnd[0] === 3) return new NomGroupe(id, nom, rnd)
     return new NomTribu(id, nom, rnd)
   }
 
-  static comptable(ns) {
+  // Nouveaux ...
+  static comptable() {
     const rnd = new Uint8Array(32)
-    rnd[0] = ns
-    rnd[1] = 0
+    rnd[0] = 1
     const id = NomGenerique.idOf(rnd)
     return new NomAvatar(id, stores.config.nomDuComptable, rnd)
   }
 
-  static compte(ns, nom) {
+  static compte(nom) {
     const rnd = random(32)
-    rnd[0] = ns
-    rnd[1] = 0
+    rnd[0] = 1
     const id = NomGenerique.idOf(rnd)
     const e = repertoire.rep[id]
     if (e) return e
     return new NomAvatar(id, nom, rnd)
   }
 
-  static avatar(ns, nom) {
+  static avatar(nom) {
     const rnd = random(32)
-    rnd[0] = ns
-    rnd[1] = 1
+    rnd[0] = 2
     const id = NomGenerique.idOf(rnd)
     const e = repertoire.rep[id]
     if (e) return e
     return new NomAvatar(id, nom, rnd)
   }
 
-  static groupe(ns, nom) {
+  static groupe(nom) {
     const rnd = random(32)
-    rnd[0] = ns
-    rnd[1] = 2
+    rnd[0] = 3
     const id = NomGenerique.idOf(rnd)
     const e = repertoire.rep[id]
     if (e) return e
     return new NomGroupe(id, nom, rnd)
   }
 
-  static tribu(ns, nom) {
+  static tribu(nom) {
     const rnd = random(32)
-    rnd[0] = ns
-    rnd[1] = 3
+    rnd[0] = 4
     const id = NomGenerique.idOf(rnd)
     const e = repertoire.rep[id]
     if (e) return e
@@ -210,7 +208,7 @@ export class NomGenerique {
   }
 }
 
-// NE PAS UTILISER ces constructeurs MAIS les factories de NomGenerique
+// NE PAS UTILISER les constructeurs ci-dessous MAIS les factories de NomGenerique
 export class NomAvatar extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
 export class NomGroupe extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
 export class NomTribu extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
@@ -602,8 +600,9 @@ export class Espace extends GenDoc {
     aSt.lc.forEach(f => { this.stats[f] = r[f] || 0 })
   }
 
-  static async nouveau (id, org) {
-    const r = { id, org, v: 1, t: 1, notif: null, stats: new Uint8Array(encode({ dh: 0 })) }
+  static async nouveau (org) {
+    const session = stores.session
+    const r = { id: session.ns, org, v: 1, t: 1, notif: null, stats: new Uint8Array(encode({ dh: 0 })) }
     return { _nom: 'espaces', id, org, v: 1, _data_: new Uint8Array(encode(r))}
   }
 }
@@ -796,7 +795,7 @@ export class Tribu2 extends GenDoc {
 - `privk`: clé privée RSA cryptée par la clé K.
 - `cva` : carte de visite cryptée par la clé CV de l'avatar `{v, photo, info}`.
 - `lgrk` : map :
-  - _clé_ : Hash de l'id de l'avatar cryptée par la clé du groupe.
+  - _clé_ : ni : numéro d'invitation dans le groupe. Hash du rnd inverse du groupe crypté par le rnd de l'avatar.
   - _valeur_ : cryptée par la clé K du compte de `[nomg, clég, im]` reçu sur une invitation. Pour une invitation en attente de refus / acceptation _valeur_ est cryptée par la clé publique RSA de l'avatar
   - une entrée est effacée par la résiliation du membre au groupe ou son effacement d'invitation explicite par un animateur ou l'avatar lui-même (ce qui l'empêche de continuer à utiliser la clé du groupe).
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
@@ -874,11 +873,11 @@ export class Avatar extends GenDoc {
 
     this.lgr = new Map()
     if (row.lgrk) { 
-      /* map : - _clé_ : `ni`, numéro d'invitation obtenue sur une invitation.
+      /* map : - _clé_ : `ni`, numéro d'invitation.
         - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation. */
       for (const nx in row.lgrk) {
         const ni = parseInt(nx)
-        const lgrc = row.lgrk[ni]
+        const lgrc = row.lgrk[nx]
         if (lgrc.length === 256) {
           // c'est une invitation
           const [nom, rnd, im] = decode(await decrypterRSA(this.priv, lgrc))
@@ -901,14 +900,12 @@ export class Avatar extends GenDoc {
     const r = {}
     r.id = na.id
     r.v = 1
-    r.iv = GenDoc._iv(r.id, r.v)
     r.vcv = 0
-    r.ivc = GenDoc._iv(r.id, r.vcv)
     r.privk = await crypter(stores.session.clek, privateKey)
     r.pub = publicKey
     r.lgrk = {}
     const _data_ = new Uint8Array(encode(r))
-    const row = { _nom: 'avatars', id: r.id, v: r.v, iv: r.iv, vcv: r.vcv, ivc: r.ivc, _data_ }
+    const row = { _nom: 'avatars', id: r.id, v: r.v, vcv: r.vcv, _data_ }
     return row
   }
 }
@@ -932,7 +929,7 @@ export class Cv extends GenDoc {
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
 - `dhvu` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
 - `mavk` : map des avatars du compte. 
-  - _clé_ : id de l'avatar cryptée par la clé K du compte.
+  - _clé_ : id COURT de l'avatar cryptée par la clé K du compte.
   - _valeur_ : `[nom clé]` : son nom complet cryptée par la clé K du compte.
 - `nctk` : `[nom, clé]` de la tribu crypté par la clé K du compte, ou temporairement par la clé _CV_ du compte quand c'est le comptable qui l'a définie sur un changement de tribu.
 - `nctkc` : `[nom, clé]` de la tribu crypté par la clé K **du Comptable**: 
@@ -1055,7 +1052,7 @@ export class Compta extends GenDoc {
   }
 
   static async mavkK (id, k) {
-    return u8ToB64(await crypter(k, '' + id, 1), true)
+    return u8ToB64(await crypter(k, '' + ID.court(id), 1), true)
   }
 
   static async row (na, nt, nctkc, q1, q2, estSponsor, phrase) { 
@@ -1067,9 +1064,7 @@ export class Compta extends GenDoc {
     const r = {}
     r.id = na.id
     r.v = 1
-    r.iv = GenDoc._iv(r.id, r.v)
     r.vcv = 0
-    r.ivc = GenDoc._iv(r.id, r.vcv)
     r.vsh = 0
 
     const k = random(32)
@@ -1178,7 +1173,7 @@ export class Sponsoring extends GenDoc {
     const session = stores.session
     const aSt = stores.avatar
     const av = aSt.avC
-    const n = NomGenerique.compte(session.ns, nom)
+    const n = NomGenerique.compte(nom)
     const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, nctkc, quotas}
     d.nct = nct.anr
     const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))
@@ -1224,7 +1219,8 @@ Un chat est une ardoise commune à deux avatars I et E:
 
 _data_:
 - `id`
-- `ids` : identifiant du chat relativement à son avatar, hash du cryptage de `idA/idB` par le `rnd` de A.
+- `ids` : identifiant du chat relativement à son avatar,
+    hash du cryptage de `idA-court/idB-court` par le `rnd` de A.
 - `v`
 - `vcv` : version de la carte de visite
 
@@ -1275,7 +1271,7 @@ export class Chat extends GenDoc {
   }
 
   static async getIds (naI, naE) {{
-    return hash(await crypter(naI.rnd, naI.id + '/' + naE.id, 1))
+    return hash(await crypter(naI.rnd, ID.court(naI.id) + '/' + ID.court(naE.id, 1)))
   }}
 
   /*
@@ -1314,7 +1310,7 @@ _data_:
 - `iv`
 - `dfh` : date de fin d'hébergement.
 
-- `idhg` : id du compte hébergeur crypté par la clé du groupe.
+- `idhg` : id COURT du compte hébergeur crypté par la clé du groupe.
 - `imh` : indice `im` du membre dont le compte est hébergeur.
 - `msu` : mode _simple_ ou _unanime_.
   - `null` : mode simple.
@@ -1348,12 +1344,14 @@ export class Groupe extends GenDoc {
   }
 
   async compile (row) {
+    const session = stores.session
     this.vsh = row.vsh || 0
     this.dfh = row.dfh || 0
     this.msu = row.msu || null
     this.pe = row.pe || 0
     this.ast = row.ast || new Uint8Array([0])
-    this.idh = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
+    x = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
+    this.idh = x ? ID.long(x, session.ns) : 0
     this.imh = row.imh || 0
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
@@ -1378,6 +1376,7 @@ export class Groupe extends GenDoc {
 
   static async rowNouveauGroupe (nagr, namb, unanime) {
     const n = hash(await crypter(nagr.rnd, namb.rnd, 1))
+    const idhg = await Groupe.toIdhg(nagr.rnd)
     const r = {
       id: nagr.id,
       v: 0,
@@ -1387,14 +1386,14 @@ export class Groupe extends GenDoc {
       imh: 1,
       ast: new Uint8Array([0, 32]),
       nag: [0, n],
-      idhg: await crypter(nagr.rnd, '' + stores.session.compteId)
+      idhg
     }
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'groupes', id: r.id, v: r.v, _data_ }
   }
 
-  async toIdhg (idc) {
-    return await crypter(this.cle, '' + idc)
+  async toIdhg (cle) {
+    return await crypter(cle, '' + ID.court(stores.session.compteId))
   }
 
   async toCvg (cv) {

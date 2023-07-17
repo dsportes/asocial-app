@@ -170,7 +170,8 @@ export default {
       this.ps = ps
     },
     async creerNS () {
-      await new CreerEspace().run(this.ns, this.org, this.ps)
+      this.session.setNs(this.ns)
+      await new CreerEspace().run(this.org, this.ps)
       this.ns = 0
       this.ps = null
       MD.fD()

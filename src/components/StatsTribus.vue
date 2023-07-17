@@ -68,7 +68,7 @@
           </div>
         </div>
       </q-card-section>
-      <q-card-actions>
+      <q-card-actions v-if="session.estAdmin">
         <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
           @click="MD.fD"/>
         <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 

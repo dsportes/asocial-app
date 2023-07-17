@@ -95,7 +95,10 @@ export default {
           return
         }
         try {
-          this.sp = await Sponsoring.fromRow(res.rowSponsoring, this.pc.clex)
+          const sp = res.rowSponsoring
+          const session = stores.session
+          session.setNs(ID.ns(sp.id))
+          this.sp = await Sponsoring.fromRow(sp, this.pc.clex)
           if (this.sp.dlv <  AMJ.amjUtc()) {
             await afficherDiag(this.$t('LOGppinv'))
             this.raz()
