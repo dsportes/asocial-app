@@ -130,8 +130,8 @@ export class NomGenerique {
     repertoire.rep[id] = this
   }
 
-  get ns () { return this.rnd[0] }
-  get type () { return this.rnd[1] }
+  get ns () { return NomGenerique.ns }
+  get type () { return this.rnd[0] }
   get estComptable () { return this.id % d13 === 0 }
   get estGroupe () { return this.rnd[0] === 3 }
   get estTribu () { return this.rnd[0] === 4 }
