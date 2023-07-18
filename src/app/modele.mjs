@@ -475,6 +475,7 @@ export class Notification {
       const r = decode(buf)
       for (const f of lstfnotif) this[f] = r[f]
     } else {
+      // TODO : idSource est une id courte
       this.idSource = idSource
       this.jbl = 0
       this.nj = 0
@@ -796,7 +797,8 @@ export class Tribu2 extends GenDoc {
 - `cva` : carte de visite cryptée par la clé CV de l'avatar `{v, photo, info}`.
 - `lgrk` : map :
   - _clé_ : ni : numéro d'invitation dans le groupe. Hash du rnd inverse du groupe crypté par le rnd de l'avatar.
-  - _valeur_ : cryptée par la clé K du compte de `[nomg, clég, im]` reçu sur une invitation. Pour une invitation en attente de refus / acceptation _valeur_ est cryptée par la clé publique RSA de l'avatar
+  - _valeur_ : cryptée par la clé K du compte de `[nomg, clég, im]` reçu sur une invitation. 
+    Pour une invitation en attente de refus / acceptation _valeur_ est cryptée par la clé publique RSA de l'avatar
   - une entrée est effacée par la résiliation du membre au groupe ou son effacement d'invitation explicite par un animateur ou l'avatar lui-même (ce qui l'empêche de continuer à utiliser la clé du groupe).
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `hpc` : hash de la phrase de contact.
@@ -1358,6 +1360,7 @@ export class Groupe extends GenDoc {
     this.imh = row.imh || 0
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
+    // TODO : nag : table des clé courtes.
     this.nag = row.nag || [0]
     this.ard = !row.ardg ? '' : await decrypterStr(this.cle, row.ardg)
   }
@@ -1535,6 +1538,7 @@ export class Note extends GenDoc {
     this.titre = titre(this.txt)
     this.dh = x.d
     this.auts = x.l ? x.l : []
+    // TODO : ref à une id de note COURT
     this.ref = row.ref ? decode(await decrypter(this.cle, row.ref)) : null
     this.mfa = new Map()
     if (this.v2) {

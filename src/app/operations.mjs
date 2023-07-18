@@ -1195,7 +1195,6 @@ export class ModeSimple extends OperationUI {
   }
 }
 
-
 /* Changement de statut d'un membre d'un groupe
 args.token donne les éléments d'authentification du compte.
 args.id: id du groupe 
