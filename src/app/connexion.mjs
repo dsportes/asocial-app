@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
-import { $t, getTrigramme, setTrigramme, afficherDiag, sleep } from './util.mjs'
+import { $t, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ, ID, limitesjour } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
@@ -12,7 +12,7 @@ import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2
 import { crypter, random, genKeyPair } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS, closeWS } from './ws.mjs'
-import { MD } from './modele.mjs'
+import { MD, setClet } from './modele.mjs'
 
 /* garderMode : si true, garder le mode */
 export function deconnexion (garderMode) {
@@ -568,11 +568,11 @@ export class ConnexionCompte extends OperationUI {
         et pas encore répercutés dans la lgr de leurs avatars membres
       */
       
-      /* Dans compta, nctk a peut-être été recrypté */
-      if (session.accesNet && this.compta.nctk) {
-        const args = { token: session.authToken, nctk: this.compta.nctk }
-        this.tr(await post(this, 'MajNctkCompta', args))
-        delete this.compta.nctk
+      /* Dans compta, cletK a peut-être été recrypté */
+      if (session.accesNet && this.compta.cletK) {
+        const args = { token: session.authToken, cletK: this.compta.cletK }
+        this.tr(await post(this, 'MajCletKCompta', args))
+        delete this.compta.cletK
       }
 
       if (session.accesIdb) {
@@ -1033,13 +1033,14 @@ export class CreerEspace extends OperationUI {
       const rowEspace = await Espace.nouveau(org)
       const rowSynthese = await Synthese.nouveau(ac[0], ac[1], ac[2], ac[3])
 
-      const clet = Tribu.cle()
-      const idt = setClet(clet)
+      const clet = Tribu.genCle(1)
+      const idt = Tribu.id(clet)
+      setClet(clet, idt)
 
       const na = NomGenerique.comptable()
       const rowCompta = await Compta.row(na, clet, null, ac[0], ac[1], true, phrase)
       // set de session.clek
-      const rowTribu = await Tribu.primitive(idt, ac[0], ac[1])
+      const rowTribu = await Tribu.primitive(idt, ac[0], ac[1], true)
 
       // TODO
       const { publicKey, privateKey } = await genKeyPair()

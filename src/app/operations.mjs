@@ -6,7 +6,7 @@ import { $t, hash, inverse, sleep } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, Compta, Note,
-  Groupe, Membre, Tribu, Tribu2, getNg, getCle, compile} from './modele.mjs'
+  Groupe, Membre, Tribu, Tribu2, getNg, getCle, compile, setClet} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 
@@ -555,19 +555,33 @@ export class NouvelAvatar extends OperationUI {
 /* Nouvelle tribu *********************************
 args.token: éléments d'authentification du compte.
 args.rowTribu : row de la nouvelle tribu
+args atrItem : item à insérer dans Compta en dernière position
 Retour:
+- OK : false si l'index dans rowTribu.id (poids faible) n'est pas égal à la longueur
+de Compta.atr (conflit d'attribution)
 */
 export class NouvelleTribu extends OperationUI {
   constructor () { super($t('OPnvtr')) }
 
-  async run (nom, q1, q2) {
+  async run (info, q1, q2) {
     try {
       const session = stores.session
-      const nt = NomGenerique.tribu(nom)
-      const rowTribu = await Tribu.nouvelleRow(nt, q1, q2)
-      const rowTribu2 = await Tribu2.nouvelleRow(nt)
-      const args = { token: session.authToken, rowTribu, rowTribu2 }
-      const ret = this.tr(await post(this, 'NouvelleTribu', args))
+      const aSt = stores.avatar
+      while (true) {
+        const idx = aSt.compte.atr.length
+
+        const clet = Tribu.cle(idx) // enregistre la clé
+        const idt = Tribu.id(clet)
+        setClet(clet, idt)
+        const rowTribu = await Tribu.nouvelle(idt, q1, q2)
+
+        // TODO : inscription dans Compta.atr du comptable
+        const atrItem = await Compta.atrItem(clet, info, q1, q2)
+        const args = { token: session.authToken, rowTribu, atrItem }
+        const ret = this.tr(await post(this, 'NouvelleTribu', args))
+        if (ret.OK) break
+        await sleep(2000)
+      }
       this.finOK()
       return ret
     } catch (e) {

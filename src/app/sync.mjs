@@ -397,11 +397,11 @@ export class OnchangeCompta extends OperationWS {
       if (row.v <= this.avCompta.v) return // sync retardée déjà traitée
 
       this.compta = await compile(row)
-      /* Dans compta, nctk a peut-être été recrypté */
-      if (this.compta.nctk) {
-        const args = { token: session.authToken, nctk: this.compta.nctk }
-        this.tr(await post(this, 'MajNctkCompta', args))
-        delete this.compta.nctk
+      /* Dans compta, cletK a peut-être été recryptée */
+      if (this.compta.cletK) {
+        const args = { token: session.authToken, cletK: this.compta.cletK }
+        this.tr(await post(this, 'MajCletKCompta', args))
+        delete this.compta.cletK
       }
       this.buf.putIDB(this.compta)
 

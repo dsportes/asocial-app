@@ -704,7 +704,7 @@ _data_ :
 - `compteurs`: compteurs sérialisés (non cryptés), dont `q1 q2` les quotas actuels du compte qui sont dupliqués dans son entrée de sa tribu.
 
 **Pour le Comptable seulement**
--`atr` : table des tribus cryptée par la clé K du comptable : `[clet, info, q1, q2]` crypté par la clé K du comptable.
+-`atr` : table des tribus : `{clet, info, q1, q2}` crypté par la clé K du comptable.
   - `clet` : clé de la tribu (donne aussi son id, index dans `atrx / astn`).
   - `info` : texte très court pour le seul usage du comptable.
   - `q1 q2` : quotas globaux de la tribu.
@@ -1279,9 +1279,9 @@ L'opération récupère toutes les `id` des `versions` dont la `dlv` est **post�
 
 **Une transaction pour chaque compte :**
 - son document compta :
-  - est lu pour récupérer les compteurs v1 / V2 et nctkc;
-  - un document gcvol est inséré avec ces données : son id est celle du compte.
-  - les gcvol seront traités par la prochaine ouverture de session du comptable de l'espace ce qui réaffectera les volumes v1 v2 q1 q2 à la tribu identifiée par nctkc et supprimera l'entrée du compte dans tribu2 (la clé du compte dans mbtr étant le rnd du compte récupéré par napt).
+  - est lu pour récupérer `cletX it`;
+  - un document `gcvol` est inséré avec ces données : son id est celle du compte.
+  - les gcvol seront traités par la prochaine ouverture de session du comptable de l'espace ce qui supprimera l'entrée du compte dans tribu (et de facto libèrera des quotas).
   - le document compta est purgé.
 - traitement de résiliation de son avatar
 
