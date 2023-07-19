@@ -27,15 +27,19 @@ export function nomFichier (v) {
 }
 
 export class ID {
+  /* Retourne l'id COURT depuis une id, longue ou courte, string ou number */
   static court (long) {
     if (!long) return 0
     const x = typeof id === 'string' ? parseInt(long) : long
     return x % d14
   }
 
+  /* Retourne l'id LONG depuis,
+  - un ns,
+  - une id, longue ou courte, string ou number
+  */
   static long (court, ns) { 
-    const x = typeof court === 'string' ? parseInt(court) : court
-    return (ns * d14) + x
+    return (ns * d14) + ID.court(court)
   }
 
   static estComptable (id) { return id % d13 === 0 }

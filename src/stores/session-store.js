@@ -13,7 +13,11 @@ export const useSessionStore = defineStore('session', {
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
     estAdmin: false,
-    ns: 0, // namespace de 10 à 89 : 0 pour "admin"
+
+    /* namespace de 10 à 59 
+    Pour "admin" : espace "courant", donc peut être 0
+    */
+    ns: 0, 
     org: '', // code de l'organisation
     presetOrg: '',
     naComptable: null,
@@ -30,7 +34,8 @@ export const useSessionStore = defineStore('session', {
     nombase: '',
     volumeTable: '',
 
-    espaces: new Map(), // SEULEMENT pour admin - liste des espaces
+    espaces: new Map(), // sauf pour admin il n'y en a qu'un
+    syntheses: new Map(), // sauf pour admin il n'y en a qu'un
 
     opEncours: null,
     opSpinner: 0,
@@ -66,8 +71,6 @@ export const useSessionStore = defineStore('session', {
     niv: 0,
     alire: false, // Il y a des notifications à lire
     notifG: null, // notification générale courante
-    stats: { dh: 0 }, // stats générale de l'espace
-    profil: 0,
 
     // message fmsg de report après filtrage
     filtreMsg: ''
@@ -158,11 +161,9 @@ export const useSessionStore = defineStore('session', {
 
     setStats (stats) { this.stats = stats},
 
-    setEspace (espace, admin) {
-      if (admin) {
-        // SEULEMENT pour admin
-        this.espaces.set(espace.id, espace)
-      } else {
+    setEspace (espace) {
+      this.espaces.set(espace.id, espace)
+      if (!this.estAdmin) {
         if (espace.notif) {
           if (!this.notifG || (espace.notif.v > this.notifG.v)) {
             this.notifG = espace.notif
@@ -172,9 +173,11 @@ export const useSessionStore = defineStore('session', {
           this.notifG = null
           this.setBlocage()
         }
-        this.stats = espace.stats
-        this.profil = espace.t
       }
+    },
+
+    setSynthse (synthese) {
+      this.syntheses.set(synthese.id, synthese)
     },
 
     chgps (phrase) {

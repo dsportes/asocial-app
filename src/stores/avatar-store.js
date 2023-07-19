@@ -21,6 +21,8 @@ export const useAvatarStore = defineStore('avatar', {
     tribu2P: null, // tribu2 actuelle du compte courant
     tribu2CP: null, // tribu2 "courante" pour le comptable
     maptr: new Map(), // Map des tribus, uniquement pour le Comptable
+
+    // liste des noms des champs de la statistique d'un espace
     lc: ['ntr', 'a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB'],
 
     // Filtre des tribus dans BarrePeople

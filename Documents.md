@@ -97,6 +97,9 @@ Les comptes ayant un pouvoir de **sponsor** peuvent:
     /Collection `espaces`
       Documents                   id org v (id: 10..59)
 
+    /Collection `syntheses`
+      Documents                   id v (id: 10..59)
+
     /Collection `gcvols`        
       Documents                   id
 
@@ -356,6 +359,15 @@ Un document par espace (considéré comme faisant partie de la _partition_).
 - `id` : de l'espace de 10 à 59.
 - _org_ : code identifiant à 12 caractères de son organisation.
 - _data_ : notifications et taille.
+
+## Document `syntheses`
+Un document par espace, mis à jour à chaque mise à jour d'une tribu de l'espace. Non synchronisé.
+
+_data_:
+- `id` : id de l'espace
+- `v`
+- _data_
+  - `atr` : table des synthèses des tribus de l'espace. L'indice dans cette table est l'id court de la tribu. Chaque élément est la sérialisation des compteurs de synthèse.
 
 ## Collection `gcvols`
 Il y a autant de documents que de comptes ayant été détectés disparus et dont les quotas n'ont pas encore été rendus à leur tribu par une session du Comptable.
@@ -618,9 +630,9 @@ Un compte peut donc faire l'objet de 0 à 3 notifications :
 _data_ :
 - `id` : de l'espace de 10 à 89.
 - `v`
+- `org` : code de l'organisation propriétaire
 
 - `notif` : notification de l'administrateur, cryptée par la clé du Comptable.
-- `stats`: statistiques sérialisées de l'espace par le comptable {'ntr', 'a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB'}
 - `t` : numéro de _profil_ de quotas dans la table des profils définis dans la configuration (chaque profil donne un couple de quotas q1 q2).
 
 ## Document `gcvol`
@@ -646,19 +658,32 @@ _data_:
   - `sp` : est sponsor ou non.
   - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
   - `q1 q2` : quotas attribués.
-
-En session les compteurs suivants sont calculées :
-- `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
-- `nbc` : nombre de comptes.
-- `nbsp` : nombre de sponsors.
-- `ncoS` : nombres de comptes ayant une notification simple.
-- `ncoB` : nombres de comptes ayant une notification bloquante.
+  - `v1 v2` : volumes **approximatifs** effectivement utilisés: recopiés de comptas lors de la dernière connexion du compte, s'ils ont changé de plus de N%. **Ce n'est donc pas un suivi en temps réel** qui imposerait une charge importante de mise à jour de tribu à chaque mise à jour d'un compteur de `comptas` et des charges de synchronisation conséquente.
 
 Un sponsor peut accéder à la liste des comptes de sa tribu : toutefois il n'a accès à leur carte de visite que s'il les connaît pasr ailleurs, chats au moment du sponsoring ou ultérieur par phrase de contact, appartence à un même groupe ...
 
 De même pour le comptable.
 
 L'ajout / retrait de la qualité de `sponsor` n'est effectué que par le comptable au delà du sponsoring initial par un sponsor.
+
+## Document `syntheses`
+La mise à jour de tribu est de facto peu fréquente : une _synthèse_ est recalculée à chaque mise à jour de `stn, q1, q2` ou d'un item de `act`.
+
+_data_:
+- `id` : id de l'espace
+- `v` : date-heure d'écriture
+
+- `atr` : table des synthèses des tribus de l'espace. L'indice dans cette table est l'id court de la tribu. Chaque élément est la sérialisation de:
+  - `q1 q2` : quotas de la tribu.
+  - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
+  - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
+  - `stn` : statut de la notification _tribu_
+  - `nbc` : nombre de comptes.
+  - `nbsp` : nombre de sponsors.
+  - `ncos` : nombres de comptes ayant une notification simple.
+  - `ncob` : nombres de comptes ayant une notification bloquante.
+
+atr[0] est la somme des atr[1..N].
 
 ## Document `compta`
 _data_ :
@@ -679,7 +704,7 @@ _data_ :
 - `compteurs`: compteurs sérialisés (non cryptés), dont `q1 q2` les quotas actuels du compte qui sont dupliqués dans son entrée de sa tribu.
 
 **Pour le Comptable seulement**
--`atrX` : table des tribus cryptée par la clé K du comptable : `[clet, info, q1, q2]`
+-`atr` : table des tribus cryptée par la clé K du comptable : `[clet, info, q1, q2]` crypté par la clé K du comptable.
   - `clet` : clé de la tribu (donne aussi son id, index dans `atrx / astn`).
   - `info` : texte très court pour le seul usage du comptable.
   - `q1 q2` : quotas globaux de la tribu.
@@ -691,6 +716,7 @@ La première tribu est la tribu _primitive_, celle du comptable et est indestruc
 - Le document est mis à jour à minima à chaque mise à jour d'une note (volumes dans compteurs).
 - La version de `compta` lui est spécifique (ce n'est pas la version de l'avatar principal du compte).
 - `cletX it` sont transmis par le GC dans un document `gcvols` pour notifier au Comptable, quel est le compte détecté disparu (donc de sa tribu).
+- Le fait d'accéder à `atr` permet d'obtenir la _liste des tribus existantes_ de l'espace. Le serveur peut ainsi recalculer la statistique de l'espace (agrégation des compteurs des tribus) en scannant ces tribus.
 
 ## Document `version`
 _data_ :

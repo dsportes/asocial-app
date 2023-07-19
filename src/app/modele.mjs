@@ -12,11 +12,6 @@ import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
 const decoder = new TextDecoder('utf-8')
 const encoder = new TextEncoder('utf-8')
 
-function decodeIn (buf, cible) {
-  const x = decode(buf)
-  for (const p in x) cible[p] = x[p]
-}
-
 export class MD {
   static dialogStack = []
   static app = []
@@ -105,17 +100,28 @@ export class Versions {
 - `getCle (id)` : retourne le rnd du nom générique enregistré avec cette id
 - `getNg (id)` : retourne le nom générique enregistré avec cette id
 */
-const repertoire = { rep: {} }
+const repertoire = { rep: {}, clet: {} }
 
-export function resetRepertoire () { repertoire.rep = {} }
-export function getCle (id) { const e = repertoire.rep[id]; return e ? e.rnd : null }
+export function resetRepertoire () { repertoire.rep = {}; clet = {} }
+export function getCle (id) { 
+  if (ID.estTribu(id)) return repertoire.clet[id]
+  const e = repertoire.rep[id]
+  return e ? e.rnd : null
+}
 export function getNg (id) { return repertoire.rep[id] }
+export function setClet (clet) { 
+  const id = Tribu.id(clet)
+  if (!repertoire.clet[id]) repertoire.clet[id] = clet
+  return id
+}
 
 /***********************************************************
-NomGenerique : NomAvatar, NomGroupe, NomTribu
+NomGenerique : NomAvatar, NomGroupe
 ************************************************************/
 export class NomGenerique {
   static ns = 0
+
+  static cleComptable = new Uint8Array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
   static idOf (rnd) {
     let z = true; for (let i = 1; i < 32; i++) if(rnd[i]) { z = false; break }
@@ -130,11 +136,10 @@ export class NomGenerique {
     repertoire.rep[id] = this
   }
 
-  get ns () { return NomGenerique.ns }
+  get ns () { return ID.ns(this.id) }
   get type () { return this.rnd[0] }
   get estComptable () { return this.id % d13 === 0 }
   get estGroupe () { return this.rnd[0] === 3 }
-  get estTribu () { return this.rnd[0] === 4 }
   get estAvatar () { return this.rnd[0] < 3 }
   get estCompte () { return this.rnd[0] === 1 }
   get estAvatarS () { return this.rnd[0] === 2 }
@@ -197,21 +202,11 @@ export class NomGenerique {
     if (e) return e
     return new NomGroupe(id, nom, rnd)
   }
-
-  static tribu(nom) {
-    const rnd = random(32)
-    rnd[0] = 4
-    const id = NomGenerique.idOf(rnd)
-    const e = repertoire.rep[id]
-    if (e) return e
-    return new NomTribu(id, nom, rnd)
-  }
 }
 
 // NE PAS UTILISER les constructeurs ci-dessous MAIS les factories de NomGenerique
 export class NomAvatar extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
 export class NomGroupe extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
-export class NomTribu extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
 
 /******************************************************
  * classe MotsCles
@@ -431,17 +426,16 @@ export class Motscles {
 /******************************************************
  * classe Phrase
 ******************************************************/
-const enc = new TextEncoder()
-// const idxch = [0, 2, 4, 5, 9, 12]
-const idxch = [0, 1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 14, 16, 17, 21, 24, 27]
 export class Phrase {
+  static idxch = [0, 1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 14, 16, 17, 21, 24, 27]
+
   async init (texte, org) {
     this.org = org
     const x = org ? org.padEnd(12, '$') : '$$$$$$$$$$$$'
     this.phrase = texte
-    const u8 = enc.encode(x + texte)
-    const deb = new Uint8Array(idxch.length)
-    for (let i = 0; i < idxch.length; i++) deb[i] = u8[idxch[i]]
+    const u8 = encoder.encode(x + texte)
+    const deb = new Uint8Array(Phrase.idxch.length)
+    for (let i = 0; i < Phrase.idxch.length; i++) deb[i] = u8[Phrase.idxch[i]]
     this.pcb = await pbkfd(u8)
     this.pcbh = hash(this.pcb)
     this.hps1 = hash(deb)
@@ -460,11 +454,12 @@ export class Phrase {
 
 }
 
-const lstfnotif = ['idSource', 'jbl', 'nj', 'texte', 'dh']
 export class Notification {
 
+  static lstfnotif = ['idSource', 'jbl', 'nj', 'texte', 'dh']
+
   /* Attributs: 
-  - `idSource`: id du Comptable ou du sponsor, par convention 0 pour l'administrateur.
+  - `idSource`: id court du Comptable ou du sponsor, par convention 0 pour l'administrateur.
   - `jbl` : jour de déclenchement de la procédure de blocage sous la forme `aaaammjj`, 0 s'il n'y a pas de procédure de blocage en cours.
   - `nj` : en cas de procédure ouverte, nombre de jours après son ouverture avant de basculer en niveau 4.
   - `texte` : texte informatif, pourquoi, que faire ...
@@ -473,10 +468,10 @@ export class Notification {
   constructor (buf, idSource) {
     if (buf) {
       const r = decode(buf)
-      for (const f of lstfnotif) this[f] = r[f]
+      for (const f of Notification.lstfnotif) this[f] = r[f]
     } else {
       // TODO : idSource est une id courte
-      this.idSource = idSource
+      this.idSource = ID.court(idSource)
       this.jbl = 0
       this.nj = 0
       this.texte = ''
@@ -491,7 +486,7 @@ export class Notification {
 
   encode () {
     const buf = {}
-    for (const f of lstfnotif) buf[f] = this[f]
+    for (const f of Notification.lstfnotif) buf[f] = this[f]
     return new Uint8Array(encode(buf))
   }
 
@@ -572,60 +567,112 @@ export async function compile (row) {
 }
 
 /** Espaces **************************************
+_data_ :
 - `id` : de l'espace de 10 à 89.
 - `v`
-- `org`
-_data_:
-- `org` : code de l'organisation
+- `org` : code de l'organisation propriétaire
 - `notif` : notification de l'administrateur, cryptée par la clé du Comptable.
-- `stats`: statistiques sérialisées de l'espace par le comptable 
-  {'ntr', 'a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB' }
-- `t` : taille de l'espace, de 1 à 9, fixé par l'administrateur
-  son poids relatif dans l'ensemble des espaces.
+- `t` : numéro de _profil_ de quotas dans la table des profils définis dans la configuration 
+  (chaque profil donne un couple de quotas q1 q2).
 */
 export class Espace extends GenDoc {
 
   async compile (row) {
     this.org = row.org
-    const aSt = stores.avatar
-    // la clé est le rnd du Comptable de l'espace
-    const cle = new Uint8Array(32); cle[0] = this.id
+    // la clé est la clé du Comptable de l'espace
     if (row.notif) {
-      this.notif = new Notification(await decrypter(cle, row.notif))
+      this.notif = new Notification(await decrypter(NomGenerique.cleComptable, row.notif))
       this.notif.v = this.v
     } else this.notif = null
     this.t = row.t || 0
-    this.stats = { dh: 0}
-    const r = row.stats ? decode(row.stats) : { }
-    this.stats.dh = r.dh || 0
-    aSt.lc.forEach(f => { this.stats[f] = r[f] || 0 })
   }
 
   static async nouveau (org) {
     const session = stores.session
-    const r = { id: session.ns, org, v: 1, t: 1, notif: null, stats: new Uint8Array(encode({ dh: 0 })) }
-    return { _nom: 'espaces', id: session.ns, org, v: 1, _data_: new Uint8Array(encode(r))}
+    const r = { id: session.ns, org, v: 1, t: 1, notif: null }
+    return { _nom: 'espaces', id: r.id, org: r.org, v: r.v, _data_: new Uint8Array(encode(r))}
+  }
+}
+
+/** Synthese *********************************************
+_data_:
+- `id` : id de l'espace
+- `v` : date-heure d'écriture
+- `atr` : sérialisation de la table des synthèses des tribus de l'espace. L'indice dans cette table est l'id court de la tribu. Chaque élément est la sérialisation de:
+  - `q1 q2` : quotas de la tribu.
+  - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
+  - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
+  - `stn` : statut de la notification _tribu_
+  - `nbc` : nombre de comptes.
+  - `nbsp` : nombre de sponsors.
+  - `ncos` : nombres de comptes ayant une notification simple.
+  - `ncob` : nombres de comptes ayant une notification bloquante.
+atr[0] est la somme des atr[1..N]
+*/
+export class Synthese extends GenDoc {
+  static lc = ['q1', 'q2', 'a1', 'a2', 'v1', 'v2', 'stn', 'nbc', 'nbsp', 'ncos', 'ncob']
+
+  async compile (row) {
+    this.atr = decode(row.atr)
+  }
+
+  static async nouveau (a1, a2, q1, q2) { // a: au comptable, q: à la tribu primitive
+    const session = stores.session
+    const atr = [{}, {}]
+    const r = { id: session.ns, v: new Date().getTime() }
+    Synthese.lc.forEach(f => { atr[1][f] = 0 })
+    atr[1].q1 = q1
+    atr[1].q2 = q2
+    atr[1].a1 = a1
+    atr[1].a2 = a2
+    atr[1].nbc = 1
+    atr[1].nbsp = 1
+    Synthese.lc.forEach(f => { atr[0][f] =  atr[1][f] })
+    r.atr = new Uint8Array(encode(atr))
+    return { _nom: 'syntheses', id: r.id, v: r.v, _data_: new Uint8Array(encode(r))}
   }
 }
 
 /** Tribu *********************************
-- `id` : numéro de la tribu
-- `v` : sa version
+_data_:
+- `id` : numéro d'ordre de création de la tribu.
+- `v`
 
-- `nctkc` : `[nom, rnd]` de la tribu crypté par la clé K du comptable.
-- `infok` : commentaire privé du comptable crypté par la clé K du comptable.
-- `notif` : notification comptable / sponsor à la tribu (cryptée par la clé de la tribu).
-- `cpt` : sérialisation non cryptée des compteurs suivants:
+- `cletX` : clé de la tribu cryptée par la clé K du comptable.
+- `q1 q2` : quotas totaux de la tribu.
+- `stn` : statut de la notification de tribu: _0:aucune 1:simple 2:bloquante 3:bloquée_
+- `notiftT`: notification de niveau tribu cryptée par la clé de la tribu.
+- `act` : table des comptes de la tribu. L'index `it` dans cette liste figure dans la propriété `it` du `comptas` correspondant :
+  - `idT` : id court du compte crypté par la clé de la tribu.
+  - `sp` : est sponsor ou non.
+  - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
+  - `q1 q2` : quotas attribués.
+  - `v1 v2` : volumes **approximatifs** effectivement utilisés.
+
+Calcul des compteurs totalisés :
+  - // `q1 q2` : quotas de la tribu.
   - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
-  - `q1 q2` : quotas actuels de la tribu
+  - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
+  - // `stn` : statut de la notification _tribu_
   - `nbc` : nombre de comptes.
   - `nbsp` : nombre de sponsors.
-  - `ncoS` : nombres de comptes ayant une notification simple.
-  - `ncoB` : nombres de comptes ayant une notification bloquante.
+  - `ncos` : nombres de comptes ayant une notification simple.
+  - `ncob` : nombres de comptes ayant une notification bloquante.
 */
 
 export class Tribu extends GenDoc {
-  get na () { return getNg(this.id) }
+  /* Génère une nouvelle clé de tribu */
+  static cle () { 
+    const rnd = new Uint8Array(32)
+    rnd[0] = 4
+    return rnd
+  }
+
+  /* Retourne l'id longue d'une tribu depuis sa clé et le ns courant de la session */
+  static id (cle) {
+    return (((NomGenerique.ns * 10) + 4) * d13) + (hash(cle) % d13)
+  }
+
   get clet () { return getCle(this.id) }
 
   async compile (row) {
@@ -633,30 +680,69 @@ export class Tribu extends GenDoc {
     this.vsh = row.vsh || 0
     this.id = row.id
     this.v = row.v
+    this.cletX = row.cletX
 
-    if (session.estComptable) {
-      // Le comptable peut décoder n'importe quelle tribu
-      const [nom, rnd] = decode(await decrypter(session.clek, row.nctkc))
-      this.naC = NomGenerique.from([nom, rnd])
-      this.info = row.infok ? await decrypterStr(session.clek, row.infok) : ''
+    this.q1 = row.q1 || 0
+    this.q2 = row.q2 || 0
+    this.stn = row.stn || 0
+    const c = this.clet
+    this.notif = row.notif ? new Notification(await decrypter(c, row.notiftT)) : null
+
+    this.act = []
+    if (row.act) for (let it = 0; it < row.act.length; it++) {
+      const item = row.act[it]
+      const r = { it: it }
+      if (item) {
+        r.id = ID.long(await decrypterStr(c, item.idT))
+        r.stn = item.stn || 0
+        r.sp = item.sp || 0
+        r.q1 = item.q1 || 0
+        r.q2 = item.q2 || 0
+        r.v1 = item.v1 || 0
+        r.v2 = item.v2 || 0
+      } else r.vode = true
+      this.act.push(r)
     }
-    this.nctkc = row.nctkc
-    this.notif = row.notif ? new Notification(await decrypter(this.clet, row.notif)) : null
-    this.cpt = decode(row.cpt)
+    this.a1 = 0
+    this.a2 = 0
+    this.v1 = 0
+    this.v2 = 0
+    this.nbc = 0
+    this.nbsp = 0
+    this.ncos = 0
+    this.ncob = 0
+    this.act.forEach(x => {
+      if (!x.vide) {
+        this.a1 += x.q1
+        this.a2 += x.q2
+        this.v1 += x.v1
+        this.v2 += x.v2
+        this.nbc++
+        if (x.sp) this.nbsp++
+        if (x.stn) {
+          if (x.stn === 1) this.ncos++
+          if (x.stn === 2) this.ncob++
+        }
+      }
+    })
   }
 
-  static async primitiveRow (nt, a1, a2, q1, q2) {
+  // id de la tribu, q1 , q2 
+  static async primitive (idt, q1, q2) {
+    const c = getCle(idt)
     const session = stores.session
     const r = {}
     r.vsh = 0
-    r.id = nt.id
+    r.id = idt
     r.v = 1
-    r.iv = GenDoc._iv(r.id, r.v)
-    const cpt = { a1, a2, q1, q2, nbc: 1, nbsp: 1, cbl: 0, nco: [0, 0], nsp: [0, 0]}
-    r.cpt = new Uint8Array(encode(cpt))
-    r.nctkc = await crypter(session.clek, new Uint8Array(encode([nt.nomx, nt.rnd])))
+    const item = { // inscription du comptable
+      idT: await crypter(c, '' + ID.court(NomGenerique.comptable().id)),
+      q1: q1, q2: q2,
+      a1: 0, a2: 0, sp: 0, stn: 0
+    }
+    r.act = [item]
     const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'tribus', id: r.id, v: r.v, iv: r.iv, _data_ }
+    return { _nom: 'tribus', id: r.id, v: r.v, _data_ }
   }
 
   static async nouvelleRow (nt, q1, q2) {
@@ -1057,9 +1143,9 @@ export class Compta extends GenDoc {
     return u8ToB64(await crypter(k, '' + ID.court(id), 1), true)
   }
 
-  static async row (na, nt, nctkc, q1, q2, estSponsor, phrase) { 
+  static async row (na, clet, cletX, q1, q2, estSponsor, phrase) { 
     /* création d'une compta
-    Pour le comptable le paramètre nctkc est null (il est calculé). 
+    Pour le comptable le paramètre cletX est null (il est calculé). 
     Pour les autres, c'est le nctkc pris dans la tribu
     */
     const session = stores.session
@@ -1073,16 +1159,13 @@ export class Compta extends GenDoc {
     const ph = phrase || session.phrase
     r.kx = await crypter(ph.pcb, k)
     session.clek = k
+
     r.stp = estSponsor ? 1 : 0
     r.hps1 = ph.hps1
     r.shay = ph.shay
-    r.nctkc = nctkc
-
-    const nax = new Uint8Array(encode(na.anr))
-    const xx = await crypter(k, new Uint8Array(encode(nt.anr)))
-    r.nctkc = nctkc ? nctkc : xx
-    r.nctk = xx
-    r.napt = await crypter(nt.rnd, nax)
+    
+    r.cletK = await crypter(k, '' + ID.court(clet))
+    r.cletX = ID.estComptable(na.id) ? r.cletK : cletX
 
     r.mavk = { }
     r.mavk[await Compta.mavkK(na.id, k)] = await Compta.mavkKV(na, k)
@@ -1091,9 +1174,10 @@ export class Compta extends GenDoc {
     c.setQ1(q1)
     c.setQ2(q2)
     r.compteurs = c.serial
+
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'comptas', 
-      id: r.id, v: r.v, iv: r.iv, hps1: r.hps1, _data_ }
+      id: r.id, v: r.v, hps1: r.hps1, _data_ }
   }
 
 }
@@ -1774,13 +1858,18 @@ export class SessionSync {
   }
 }
 
+/*****************************************************************/
+function decodeIn (buf, cible) {
+  const x = decode(buf)
+  for (const p in x) cible[p] = x[p]
+}
+
 /************************************************************************
 NoteLocale:
 - id: id du texte (random)
 - dh: date-heure d'enregistrement
 - txt: string MD gzippé
 */
-
 export class NoteLocale {
   constructor () {
     this.id = 0
@@ -1827,7 +1916,6 @@ locdata: contenu d'un fichier local
   - id: id du fichier local
   - data: contenu gzippé ou non crypté par la clé K
 */
-
 export class FichierLocal {
   constructor () { }
 

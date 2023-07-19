@@ -1031,14 +1031,17 @@ export class CreerEspace extends OperationUI {
       const ac = config.allocComptable
 
       const rowEspace = await Espace.nouveau(org)
+      const rowSynthese = await Synthese.nouveau(ac[0], ac[1], ac[2], ac[3])
 
-      const nt = NomGenerique.tribu(config.nomTribuPrimitive)
+      const clet = Tribu.cle()
+      const idt = setClet(clet)
+
       const na = NomGenerique.comptable()
+      const rowCompta = await Compta.row(na, clet, null, ac[0], ac[1], true, phrase)
+      // set de session.clek
+      const rowTribu = await Tribu.primitive(idt, ac[0], ac[1])
 
-      const rowCompta = await Compta.row(na, nt, null, ac[0], ac[1], true, phrase) // set de session.clek
-      const rowTribu = await Tribu.primitiveRow(nt, ac[0], ac[1], ac[2], ac[3])
-      const rowTribu2 = await Tribu2.primitiveRow(nt, ac[0], ac[1], na)
-
+      // TODO
       const { publicKey, privateKey } = await genKeyPair()
       const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)
 
@@ -1051,7 +1054,7 @@ export class CreerEspace extends OperationUI {
       r._data_ = _data_
       r._nom = 'versions'
 
-      const args = { token: stores.session.authToken, rowEspace, rowTribu, rowTribu2, 
+      const args = { token: stores.session.authToken, rowEspace, rowSyntheses, rowTribu, rowTribu2, 
         rowCompta, rowAvatar, rowVersion: r, hps1 }
       this.tr(await post(this, 'CreerEspace', args))
       
