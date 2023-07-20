@@ -12,13 +12,11 @@ function decodeIn (buf, cible) {
   for (const p in x) cible[p] = x[p]
 }
 
-// TODO IDB pas à jour
 const STORES = {
   compte: 'id',
   avgrversions: 'id',
   sessionsync: 'id',
   tribus: 'id',
-  tribu2s: 'id',
   comptas: 'id',
   avatars: 'id',
   chats: '[id+ids]',

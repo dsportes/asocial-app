@@ -175,7 +175,9 @@ export default ({
       // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) {
       const q = [this.quotas.q1, this.quotas.q2]
       const dlv = AMJ.amjUtcPlusNbj(AMJ.amjUtc(), this.limj)
-      const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, this.tribu.nctkc, this.nct, this.estSponsor, q, this.mot)
+      // (phrase, dlv, nom, cletX, clet, sp, quotas, ard)
+      const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, 
+        this.tribu.cletX, this.tribu.clet, this.estSponsor, q, this.mot)
       try {
         await new AjoutSponsoring().run(row)
         MD.fD()

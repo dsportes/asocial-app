@@ -18,12 +18,8 @@ export const useAvatarStore = defineStore('avatar', {
     motscles: null, // mots clés du compte
     avatarP: null, // avatar principal du compte courant
     comptaP: null, // compta actuelle du compte courant
-    tribu2P: null, // tribu2 actuelle du compte courant
-    tribu2CP: null, // tribu2 "courante" pour le comptable
+ 
     maptr: new Map(), // Map des tribus, uniquement pour le Comptable
-
-    // liste des noms des champs de la statistique d'un espace
-    lc: ['ntr', 'a1', 'a2', 'q1', 'q2', 'nbc', 'nbsp', 'ncoS', 'ncoB'],
 
     // Filtre des tribus dans BarrePeople
     ppFiltre: '',
@@ -43,14 +39,8 @@ export const useAvatarStore = defineStore('avatar', {
     /* retourne la tribu de l'avatar principal du compte actuellement connecté */
     tribu: (state) => { return state.maptr.get(stores.session.tribuId) },
 
-    /* retourne la tribu2 de l'avatar principal du compte actuellement connecté */
-    tribu2: (state) => { return state.tribu2P },
-
     /* retourne la tribu "courante" */
     tribuC: (state) => { return state.maptr.get(stores.session.tribuCId) },
-
-    /* retourne la tribu2 "courante" */
-    tribu2C: (state) => { return state.tribu2CP },
     
     exV1: (state) => {
       const c = state.compta.compteurs
@@ -79,14 +69,19 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     /* Array des tribus, pour le Comptable, 
-     triée par ordre alphabétique de leur nom, la Primitive en tête
-    */
+     triée par ordre alphabétique de leur info, la Primitive en tête
+    */ 
     getTribus: (state) => {
-      const t = Array.from(state.maptr.values())
+      const t = []
+      state.compte.atr.forEach(x => { 
+        if (x) t.push({id: x.id, info: x.info || ''})
+      })
       const idp = stores.session.tribuId
       t.sort((a,b) => { return (a.id === idp ? -1 : 
-        (b.id === idp ? 1: (a.na.nom < b.na.nom ? -1 : (a.na.nom === b.na.nom ? 0 : 1))) )})
-      return t
+        (b.id === idp ? 1: (a.info < b.info ? -1 : (a.info === b.info ? 0 : 1))) )})
+      const tr = []
+      t.forEach(x => { tr.push(state.maptr.get(x.id))})
+      return tr
     },
 
     avatars: (state) => {

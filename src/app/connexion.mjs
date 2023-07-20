@@ -6,7 +6,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ, ID, limitesjour } from './api.mjs'
-import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Tribu2, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
+import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, NLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter, random, genKeyPair } from './webcrypto.mjs'
@@ -443,6 +443,30 @@ export class ConnexionCompte extends OperationUI {
     return [n1, n2]
   }
 
+  // MAJ dans tribu de v1 v2 de compta (si +- 10%)
+  async MajTribuVols () { // this.compta this.tribu
+    const act = this.tribu.act[this.compta.it]
+    const cpt = this.compta.compteurs
+    let b = false
+    const dv1 = act.v1 > cpt.v1 ? act.v1 - cpt.v1 : cpt.v1 - act.v1
+    if (dv1 > (cpt.v1 / 10)) {
+      b = true
+    } else {
+      const dv2 = act.v2 > cpt.v2 ? act.v2 - cpt.v2 : cpt.v2 - act.v2
+      if (dv2 > (cpt.v2 / 10)) b = true
+    }
+    if (!b) return
+    const session = stores.session
+    const args = { 
+      token: session.authToken,
+      idt: this.tribu.id, 
+      it: this.compta.it,
+      v1: cpt.v1,
+      v2: cpt.v2
+    }
+    this.tr(await post(this, 'MajTribuVols', args))
+  }
+
   async getCTA () {
     const session = stores.session
     const aSt = stores.avatar
@@ -450,7 +474,7 @@ export class ConnexionCompte extends OperationUI {
     ET abonnement à compta sur le serveur
     */
     const args = { token: session.authToken }
-    // Connexion : récupération de rowCompta rowAvatar rowTribu fscredentials
+    // Connexion : récupération de rowCompta rowAvatar fscredentials
     const ret = this.tr(await post(this, 'ConnexionCompte', args))
     if (ret.admin) {           
       session.setCompteId(0)
@@ -458,8 +482,6 @@ export class ConnexionCompte extends OperationUI {
       if (ret.espaces) for (const e of ret.espaces) {
         session.setEspace(await compile(e), true)
       }
-      aSt.statsTribus()
-      // const stats = session.stats
       return
     }
 
@@ -480,10 +502,10 @@ export class ConnexionCompte extends OperationUI {
       const args = { token: session.authToken, id: this.compta.idt, tribu2: true, abPlus: [this.compta.idt] }
       const ret = this.tr(await post(this, 'GetTribu', args))
       this.rowTribu = ret.rowTribu
-      this.rowTribu2 = ret.rowTribu2
     }
     this.tribu = await compile(this.rowTribu)
-    this.tribu2 = await compile(this.rowTribu2)
+    await this.MajTribuVols() // MAJ tribu de v1 v2 (si +- 10%)
+
     session.setTribuId(this.tribu.id)
     if (session.fsSync) await session.fsSync.setTribu(session.tribuId)
   }
@@ -520,8 +542,6 @@ export class ConnexionCompte extends OperationUI {
     this.compta = await compile(this.rowCompta)
     this.rowTribu = await getTribu(this.compta.idt)
     this.tribu = await compile(this.rowTribu)
-    this.rowTribu2 = await getTribu2(this.compta.idt)
-    this.tribu2 = await compile(this.rowTribu2)
     session.setTribuId(this.tribu.id)
     this.rowAvatar = await getAvatarPrimaire()
     this.avatar = await compile(this.rowAvatar)
@@ -578,16 +598,15 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesIdb) {
         this.buf.putIDB(this.rowCompta)
         this.buf.putIDB(this.rowTribu)
-        this.buf.putIDB(this.rowTribu2)
         this.buf.putIDB(this.rowAvatar)
         avRowsModifies.forEach(row => { this.buf.putIDB(row) })
         avToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
       }
 
       // Rangement en store
-      aSt.setCompte(this.avatar, this.compta, this.tribu, this.tribu2)
+      aSt.setCompte(this.avatar, this.compta, this.tribu) // TODO
       if (this.espace) session.setEspace(this.espace)
-
+      
       // En cas de blocage grave, plus de synchronisation
       if (session.niv > 2 && session.mode === 1) {
         session.setMode(2)
@@ -860,6 +879,7 @@ export class AcceptationSponsoring extends OperationUI {
       const { publicKey, privateKey } = await genKeyPair()
 
       // !!! dans rowCompta: it (indice du compte dans sa tribu) N'EST PAS inscrit
+      // (na, clet, cletX, q1, q2, estSponsor, phrase)
       let rowCompta = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas[0], sp.quotas[1], sp.sp) 
       // set de session.clek
       const rowAvatar = await Avatar.primaireRow(sp.naf, publicKey, privateKey)
@@ -881,14 +901,14 @@ export class AcceptationSponsoring extends OperationUI {
       */
       const e = {
         idT: await crypter(sp.clet, '' + ID.court(sp.naf.id)),
-        sp: sp.sp,
+        nasp: sp.sp ? await crypter(sp.clet, sp.naf.anr) : null,
         stn: 0,
         q1: sp.quotas[0],
         q2: sp.quotas[1],
         v1: 0,
         v2: 0
       }
-      const act = await crypter(sp.clet, new Uint8Array(encode(e)))
+      const act = new Uint8Array(encode(e))
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
       const cc = random(32)
@@ -1038,7 +1058,7 @@ export class CreerEspace extends OperationUI {
       const na = NomGenerique.comptable()
       const rowCompta = await Compta.row(na, clet, null, ac[0], ac[1], true, phrase)
       // set de session.clek
-      const rowTribu = await Tribu.primitive(idt, ac[0], ac[1], true)
+      const rowTribu = await Tribu.nouvelle(idt, ac[0], ac[1], true)
 
       // TODO
       const { publicKey, privateKey } = await genKeyPair()

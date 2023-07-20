@@ -4,7 +4,7 @@ import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, u8ToB64, gzip, ungzip, ungzipT, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour } from './api.mjs'
+import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour, lcSynt } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -618,17 +618,17 @@ export class Synthese extends GenDoc {
 
   async compile (row) {
     this.atr = decode(row.atr)
-    Synthese.lc.forEach(f => { this.atr[0][f] = 0 })
+    lcSynt.forEach(f => { this.atr[0][f] = 0 })
     for (let i = 1; i < this.atr.length; i++) {
-      Synthese.lc.forEach(f => { this.atr[0][f] +=  this.atr[i][f] })
+      lcSynt.forEach(f => { this.atr[0][f] +=  this.atr[i][f] })
     }
   }
 
   static async nouveau (a1, a2, q1, q2) { // a: au comptable, q: à la tribu primitive
     const session = stores.session
-    const atr = [{}, {}]
+    const atr = [null, {}]
     const r = { id: session.ns, v: new Date().getTime() }
-    Synthese.lc.forEach(f => { atr[1][f] = 0 })
+    lcSynt.forEach(f => { atr[1][f] = 0 })
     atr[1].q1 = q1
     atr[1].q2 = q2
     atr[1].a1 = a1
@@ -641,6 +641,9 @@ export class Synthese extends GenDoc {
 }
 
 /** Tribu *********************************
+ * TODO : réintégrer la notif compte dans act : 
+ * un sponsor ou le comptable doit pouvoir voir la notif / la positionner
+ * pour n'importe quel compte de la tribu
 _data_:
 - `id` : numéro d'ordre de création de la tribu.
 - `v`
@@ -651,20 +654,12 @@ _data_:
 - `notiftT`: notification de niveau tribu cryptée par la clé de la tribu.
 - `act` : table des comptes de la tribu. L'index `it` dans cette liste figure dans la propriété `it` du `comptas` correspondant :
   - `idT` : id court du compte crypté par la clé de la tribu.
-  - `sp` : est sponsor ou non.
+  - `nasp` : si sponsor `[nom, cle]` crypté par la cle de la tribu.
   - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
   - `q1 q2` : quotas attribués.
   - `v1 v2` : volumes **approximatifs** effectivement utilisés.
 
-Calcul des compteurs totalisés :
-  - // `q1 q2` : quotas de la tribu.
-  - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
-  - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
-  - // `stn` : statut de la notification _tribu_
-  - `nbc` : nombre de comptes.
-  - `nbsp` : nombre de sponsors.
-  - `ncos` : nombres de comptes ayant une notification simple.
-  - `ncob` : nombres de comptes ayant une notification bloquante.
+Calcul des compteurs de Synthese dans synth
 */
 
 export class Tribu extends GenDoc {
@@ -703,45 +698,46 @@ export class Tribu extends GenDoc {
     }
     const c = this.clet
 
+    this.notif = row.notif ? new Notification(await decrypter(c, row.notiftT)) : null
+
     this.q1 = row.q1 || 0
     this.q2 = row.q2 || 0
     this.stn = row.stn || 0
-    this.notif = row.notif ? new Notification(await decrypter(c, row.notiftT)) : null
 
     this.act = []
     if (row.act) for (let it = 0; it < row.act.length; it++) {
       const item = row.act[it]
-      const r = { it: it }
+      const r = { }
       if (item) {
         r.id = ID.long(await decrypterStr(c, item.idT))
         r.stn = item.stn || 0
-        r.sp = item.sp || 0
+        r.nasp = item.na ? await decrypter(c, item.nasp) : null
         r.q1 = item.q1 || 0
         r.q2 = item.q2 || 0
         r.v1 = item.v1 || 0
         r.v2 = item.v2 || 0
-      } else r.vode = true
+      } else r.vide = true
       this.act.push(r)
     }
-    this.a1 = 0
-    this.a2 = 0
-    this.v1 = 0
-    this.v2 = 0
-    this.nbc = 0
-    this.nbsp = 0
-    this.ncos = 0
-    this.ncob = 0
+
+    this.synth = {}
+    lcSynt.forEach(f => { this.synth[f] = 0 })
+    this.synth.q1 = this.q1
+    this.synth.q2 = this.q2
+    this.synth.ntr1 = row.stn === 1 ? 1 : 0
+    this.synth.ntr2 = row.stn === 2 ? 1 : 0
+    this.synth.ntr3 = row.stn === 3 ? 1 : 0
     this.act.forEach(x => {
       if (!x.vide) {
-        this.a1 += x.q1
-        this.a2 += x.q2
-        this.v1 += x.v1
-        this.v2 += x.v2
-        this.nbc++
-        if (x.sp) this.nbsp++
+        this.synth.a1 += x.q1
+        this.synth.a2 += x.q2
+        this.synth.v1 += x.v1
+        this.synth.v2 += x.v2
+        this.synth.nbc++
+        if (x.nasp) this.synth.nbsp++
         if (x.stn) {
-          if (x.stn === 1) this.ncos++
-          if (x.stn === 2) this.ncob++
+          if (x.stn === 1) this.synth.nco1++
+          if (x.stn === 2) this.synth.nco2++
         }
       }
     })
@@ -756,10 +752,12 @@ export class Tribu extends GenDoc {
     r.v = 1
     r.act = []
     if (primitive) { // inscription du comptable comme premier compte
+      const nac = NomGenerique.comptable()
       const item = {
-        idT: await crypter(c, '' + ID.court(NomGenerique.comptable().id)),
+        idT: await crypter(c, '' + ID.court(nac.id)),
         q1: q1, q2: q2,
-        a1: 0, a2: 0, sp: 0, stn: 0
+        a1: 0, a2: 0, stn: 0,
+        nasp: await crypter(c, nac.anr)
       }
       r.act.push(item)
     }
@@ -894,6 +892,7 @@ export class Compta extends GenDoc {
       for (let i = 0; i < row.atr.length; i++) {
         if (row.atr[i]) {
           const item = decode(await decrypter(this.clek, row.atr[i]))
+          item.id = Tribu.id(item.clet)
           this.atr[i] = item
         } else this.atr[i] = null
       }

@@ -26,6 +26,8 @@ export function nomFichier (v) {
   return v.trim().replace(regIntg, '_').replace(regInt2g, '')
 }
 
+export const lcSynt = ['q1', 'q2', 'a1', 'a2', 'v1', 'v2', 'ntr1', 'ntr2', 'ntr3', 'nbc', 'nbsp', 'nco1', 'nco2']
+
 export class ID {
   /* Retourne l'id COURT depuis une id, longue ou courte, string ou number */
   static court (long) {
