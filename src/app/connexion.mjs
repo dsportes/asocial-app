@@ -828,8 +828,8 @@ export class AcceptationSponsoring extends OperationUI {
     - `na` : du sponsor P.
     - `cv` : du sponsor P.
     - `naf` : na attribué au filleul.
-    - 'nctkc' : nc tribu par clé K du comptable
-    - `nct` : de sa tribu.
+    - 'cletX' : cle de sa tribu cryptée par clé K du comptable
+    - `clet` : cle de sa tribu.
     - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
     - `quotas` : `[q1, q2]` quotas attribués par le parrain.
     ardx : reponse cryptée par la cleX du sponsoring
@@ -851,7 +851,7 @@ export class AcceptationSponsoring extends OperationUI {
       /* Réenregistrement dans repertoire des na créé en PageLogin */
       NomGenerique.from(sp.na.anr)
       NomGenerique.from(sp.naf.anr)
-      NomGenerique.from(sp.nct.anr)
+      const idt = setClet(sp.clet)
 
       session.setCompteId(sp.naf.id)
       session.setTribuId(sp.nct.id)
@@ -859,36 +859,36 @@ export class AcceptationSponsoring extends OperationUI {
 
       const { publicKey, privateKey } = await genKeyPair()
 
-      const rowCompta = await Compta.row(sp.naf, sp.nct, sp.nctkc, sp.quotas[0], sp.quotas[1], sp.sp) // set de session.clek
+      // !!! dans rowCompta: it (indice du compte dans sa tribu) N'EST PAS inscrit
+      let rowCompta = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas[0], sp.quotas[1], sp.sp) 
+      // set de session.clek
       const rowAvatar = await Avatar.primaireRow(sp.naf, publicKey, privateKey)
       const rowVersion = {
         id: sp.naf.id,
         v: 1,
-        iv: GenDoc._iv(sp.naf.id, 1),
         dlv: AMJ.amjUtcPlusNbj(this.auj, limitesjour.dlv)
       }
       const _data_ = new Uint8Array(encode(rowVersion))
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
-      /* Element de mbtr de tribu2 du nouveau compte
-      - _clé_ : (hash de la clé `rnd` du membre)
-      - _valeur_ :
-    - _valeur_ :
-      - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
-      - `sp` : si `true` / présent, c'est un sponsor.
-      - `q1 q2` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
-      - `blocage` : blocage de niveau compte, crypté par la clé de la tribu.
-      - 'gco gsp' : gravités des notifco et notifsp.
-      - `notifco` : notification du comptable au compte (cryptée par la clé de la tribu).
-      - `notifsp` : notification d'un sponsor au compte (cryptée par la clé de la tribu).
-      - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
+      /* Element de act de tribu du nouveau compte
+      - `idT` : id court du compte crypté par la clé de la tribu.
+      - `sp` : est sponsor ou non.
+      - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
+      - `q1 q2` : quotas attribués.
+      - `v1 v2` : volumes **approximatifs** effectivement utilisés
       */
-      const mbtrid = sp.naf.hrnd
-      const na = await crypter(sp.nct.rnd, new Uint8Array(encode([sp.naf.nom, sp.naf.rnd])))
-      const x = { na, q1: sp.quotas[0], q2: sp.quotas[1] }
-      if (sp.sp) x.sp = true
-      const mbtre = new Uint8Array(encode(x))
+      const e = {
+        idT: await crypter(sp.clet, '' + ID.court(sp.naf.id)),
+        sp: sp.sp,
+        stn: 0,
+        q1: sp.quotas[0],
+        q2: sp.quotas[1],
+        v1: 0,
+        v2: 0
+      }
+      const act = await crypter(sp.clet, new Uint8Array(encode(e)))
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
       const cc = random(32)
@@ -904,24 +904,23 @@ export class AcceptationSponsoring extends OperationUI {
       const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, contcE, cc, pubE, new Uint8Array([253])) 
 
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
-        rowChatI, rowChatE, ardx, idt: session.tribuId, mbtrid, mbtre, quotas: sp.quotas, abPlus: [sp.nct.id, sp.naf.id] }
+        rowChatI, rowChatE, ardx, idt, act, quotas: sp.quotas, abPlus: [idt, sp.naf.id] }
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
       if (ret.credentials) session.fscredentials = ret.credentials
 
       const rowTribu = ret.rowTribu
-      const rowTribu2 = ret.rowTribu2
       const rowChat = ret.rowChat
       const rowEspace = ret.rowEspace
+      rowCompta = ret.rowCompta
       session.setOrg(rowEspace.org)
 
       // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
+      const compta = await compile(rowCompta)
       const avatar = await compile(rowAvatar)
       const tribu = await compile(rowTribu)
-      const tribu2 = await compile(rowTribu2)
-      const compta = await compile(rowCompta)
 
-      aSt.setCompte(avatar, compta, tribu, tribu2)
+      aSt.setCompte(avatar, compta, tribu)
 
       const espace = await compile(rowEspace)
       if (espace) session.setEspace(espace)
@@ -946,7 +945,6 @@ export class AcceptationSponsoring extends OperationUI {
           this.buf.putIDB(rowAvatar)
           this.buf.putIDB(rowChatI)
           this.buf.putIDB(rowTribu)
-          this.buf.putIDB(rowTribu2)
           await this.buf.commitIDB(true, true) // MAJ compte.id / cle K et versions
           await session.sessionSync.setConnexion(this.dh)
         } catch(e) {
@@ -1055,7 +1053,7 @@ export class CreerEspace extends OperationUI {
       r._data_ = _data_
       r._nom = 'versions'
 
-      const args = { token: stores.session.authToken, rowEspace, rowSyntheses, rowTribu, rowTribu2, 
+      const args = { token: stores.session.authToken, rowEspace, rowSynthese, rowTribu, rowTribu2, 
         rowCompta, rowAvatar, rowVersion: r, hps1 }
       this.tr(await post(this, 'CreerEspace', args))
       

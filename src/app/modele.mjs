@@ -598,22 +598,30 @@ export class Espace extends GenDoc {
 _data_:
 - `id` : id de l'espace
 - `v` : date-heure d'écriture
-- `atr` : sérialisation de la table des synthèses des tribus de l'espace. L'indice dans cette table est l'id court de la tribu. Chaque élément est la sérialisation de:
+- `atr` : sérialisation de la table des synthèses des tribus de l'espace. 
+  L'indice dans cette table est l'id très court de la tribu (sans le 4 en tête). 
+  Chaque élément est la sérialisation de:
   - `q1 q2` : quotas de la tribu.
   - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
   - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
-  - `stn` : statut de la notification _tribu_
+  - `ntr1` : nombre de notifications tribu_simples
+  - `ntr2` : nombre de notifications tribu bloquantes
+  - `ntr3` : nombre de notifications tribu bloquées
   - `nbc` : nombre de comptes.
   - `nbsp` : nombre de sponsors.
-  - `ncos` : nombres de comptes ayant une notification simple.
-  - `ncob` : nombres de comptes ayant une notification bloquante.
-atr[0] est la somme des atr[1..N]
+  - `nco1` : nombres de comptes ayant une notification simple.
+  - `nco2` : nombres de comptes ayant une notification bloquante.
+atr[0] est la somme des atr[1..N] : calculé sur compile (pas stocké)
 */
 export class Synthese extends GenDoc {
-  static lc = ['q1', 'q2', 'a1', 'a2', 'v1', 'v2', 'stn', 'nbc', 'nbsp', 'ncos', 'ncob']
+  static lc = ['q1', 'q2', 'a1', 'a2', 'v1', 'v2', 'ntrs', 'ntrb', 'nbc', 'nbsp', 'ncos', 'ncob']
 
   async compile (row) {
     this.atr = decode(row.atr)
+    Synthese.lc.forEach(f => { this.atr[0][f] = 0 })
+    for (let i = 1; i < this.atr.length; i++) {
+      Synthese.lc.forEach(f => { this.atr[0][f] +=  this.atr[i][f] })
+    }
   }
 
   static async nouveau (a1, a2, q1, q2) { // a: au comptable, q: à la tribu primitive
@@ -627,7 +635,6 @@ export class Synthese extends GenDoc {
     atr[1].a2 = a2
     atr[1].nbc = 1
     atr[1].nbsp = 1
-    Synthese.lc.forEach(f => { atr[0][f] =  atr[1][f] })
     r.atr = new Uint8Array(encode(atr))
     return { _nom: 'syntheses', id: r.id, v: r.v, _data_: new Uint8Array(encode(r))}
   }
@@ -892,7 +899,6 @@ export class Compta extends GenDoc {
       }
       this.astn = row.astn
     }
-
   }
 
   updAvatarMavk (setSupprIds) {
@@ -952,6 +958,7 @@ export class Compta extends GenDoc {
     r.hps1 = ph.hps1
     r.shay = ph.shay
     
+    r.it = 1 // Pour une création d'espace, sera surchargé sur le serveur en AcceptationSponsoring
     r.cletK = await crypter(k, '' + ID.court(clet))
     r.cletX = ID.estComptable(na.id) ? r.cletK : cletX
 
@@ -964,8 +971,7 @@ export class Compta extends GenDoc {
     r.compteurs = c.serial
 
     const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'comptas', 
-      id: r.id, v: r.v, hps1: r.hps1, _data_ }
+    return { _nom: 'comptas', id: r.id, v: r.v, hps1: r.hps1, _data_ }
   }
 
 }
@@ -986,7 +992,8 @@ export class Compta extends GenDoc {
 - `lgrk` : map :
   - _clé_ : ni : numéro d'invitation dans le groupe. Hash du rnd inverse du groupe crypté par le rnd de l'avatar.
   - _valeur_ : cryptée par la clé K du compte de `[nomg, clég, im]` reçu sur une invitation. 
-    Pour une invitation en attente de refus / acceptation _valeur_ est cryptée par la clé publique RSA de l'avatar
+    Pour une invitation en attente de refus / acceptation _valeur_ est cryptée 
+    par la clé publique RSA de l'avatar
   - une entrée est effacée par la résiliation du membre au groupe ou son effacement d'invitation explicite par un animateur ou l'avatar lui-même (ce qui l'empêche de continuer à utiliser la clé du groupe).
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `hpc` : hash de la phrase de contact.
@@ -994,11 +1001,9 @@ export class Compta extends GenDoc {
 */
 export class Avatar extends GenDoc {
   get primaire () { return ID.estCompte(this.id) } // retourne true si l'objet avatar est primaire du compte
-  get naprim () { return this.lav[0].na } // na de l'avatar primaire du compte
   get apropos () { return this.nct ? ($t('tribus', 0) + ':' + this.nct.nom) : $t('comptable') }
   get na () { return getNg(this.id) }
   get nbGroupes () { return this.lgr.size }
-  get nbInvits () { return this.invits.size }
   get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconAvatar }
 
 
@@ -1063,8 +1068,9 @@ export class Avatar extends GenDoc {
 
     this.lgr = new Map()
     if (row.lgrk) { 
-      /* map : - _clé_ : `ni`, numéro d'invitation.
-        - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation. */
+      /* map : 
+      - _clé_ : `ni`, numéro d'invitation.
+      - _valeur_ : cryptée par la clé K du compte de `[nom, rnd, im]` reçu sur une invitation. */
       for (const nx in row.lgrk) {
         const ni = parseInt(nx)
         const lgrc = row.lgrk[nx]
@@ -1082,8 +1088,6 @@ export class Avatar extends GenDoc {
         }
       }
     }
-
-    return this
   }
 
   static async primaireRow (na, publicKey, privateKey) {
@@ -1128,7 +1132,7 @@ _data_
   - `na` : `[nom, cle]` de P.
   - `cv` : `{ v, photo, info }` de P.
   - `naf` : `[nom, cle]` attribué au filleul.
-  - `nct` : `[nom, cle]` de sa tribu.
+  - `clet` : clé de sa tribu.
   - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
   - `quotas` : `[v1, v2]` quotas attribués par le parrain.
 - `ardx` : ardoise de bienvenue du sponsor / réponse du filleul cryptée par le PBKFD de la phrase de sponsoring
@@ -1174,16 +1178,16 @@ export class Sponsoring extends GenDoc {
     obj.nctkc = x.nctkc
     obj.na = NomGenerique.from(x.na)
     obj.naf = NomGenerique.from(x.naf)
-    obj.nct =  NomGenerique.from(x.nct)
+    obj.clet =  x.clet
   }
 
-  static async nouveauRow (phrase, dlv, nom, nctkc, nct, sp, quotas, ard) {
+  static async nouveauRow (phrase, dlv, nom, cletX, clet, sp, quotas, ard) {
     /* 
       - 'phrase: objet phrase
       - 'dlv'
       - 'nom': nom de l'avatar du compte à créer
-      - `nct` : `[nom, cle]` de la tribu.
-      - 'nctkc' : nom complet tribu crypté par la clé K du comptable
+      - `clet` : cle de la tribu.
+      - 'cletX' : clé de la tribu crypté par la clé K du comptable
       - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
       - `quotas` : `[v1, v2]` quotas attribués par le parrain.
     */
@@ -1191,8 +1195,12 @@ export class Sponsoring extends GenDoc {
     const aSt = stores.avatar
     const av = aSt.avC
     const n = NomGenerique.compte(nom)
-    const d = { na: [av.na.nom, av.na.rnd], cv: av.cv , naf: [n.nom, n.rnd], sp, nctkc, quotas}
-    d.nct = nct.anr
+    const d = { 
+      na: [av.na.nom, av.na.rnd],
+      cv: av.cv,
+      naf: [n.nom, n.rnd],
+      sp, cletX, clet, quotas
+    }
     const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))
     const ardx = await crypter(phrase.clex, ard || '')
     const pspk = await crypter(session.clek, phrase.phrase)
@@ -1322,19 +1330,19 @@ export class Chat extends GenDoc {
 }
 
 /** Groupe ***********************************************************************
-_data_:
+__data_:
 - `id` : id du groupe.
 - `v` : version, du groupe, ses notes, ses membres. 
 - `iv`
 - `dfh` : date de fin d'hébergement.
 
-- `idhg` : id COURT du compte hébergeur crypté par la clé du groupe.
+- `idhg` : id du compte hébergeur crypté par la clé du groupe.
 - `imh` : indice `im` du membre dont le compte est hébergeur.
 - `msu` : mode _simple_ ou _unanime_.
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
 - `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes.
-- `ast` : **array** des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
+- `ast` : table des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
   - 10: contact, 
   - 30,31,32: **actif** (invitation acceptée) en tant que lecteur / auteur / animateur, 
   - 40: invitation refusée,
@@ -1342,7 +1350,7 @@ _data_:
   - 60,61,62: invité en tant que lecteur / auteur / animateur, 
   - 70,71,72: invitation à confirmer (tous les animateurs n'ont pas validé) en tant que lecteur / auteur / animateur, 
   - 0: disparu / oublié.
-- `nag` : **array** des hash du rnd du membre crypté par le rnd du groupe.
+- `nag` : table des hash de la clé du membre cryptée par la clé du groupe.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
 - `ardg` : ardoise cryptée par la clé du groupe.
@@ -1373,7 +1381,6 @@ export class Groupe extends GenDoc {
     this.imh = row.imh || 0
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
-    // TODO : nag : table des clé courtes.
     this.nag = row.nag || [0]
     this.ard = !row.ardg ? '' : await decrypterStr(this.cle, row.ardg)
   }
@@ -1551,8 +1558,9 @@ export class Note extends GenDoc {
     this.titre = titre(this.txt)
     this.dh = x.d
     this.auts = x.l ? x.l : []
-    // TODO : ref à une id de note COURT
+    // row.ref à une id de note COURT
     this.ref = row.ref ? decode(await decrypter(this.cle, row.ref)) : null
+    if (this.ref) this.ref[0] = ID.long(this.ref[0])
     this.mfa = new Map()
     if (this.v2) {
       const map = row.mfas ? decode(row.mfas) : {}
@@ -1648,7 +1656,12 @@ export class Note extends GenDoc {
     // arg : [rid, rids, rnom || '']
     /*`ref` : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
     rnom n'est défini que pour une note d'avatar référençant un note de groupe (rnom est celui du groupe)*/
-    return arg ? await crypter(cle, new Uint8Array(encode(arg))) : null
+    if (!arg) return null
+    const x = new Array(arg.length)
+    x[0] = ID.court(arg[0])
+    x[1] = arg[1]
+    if (arg.length === 2) x[2] = arg[2]
+    return await crypter(cle, new Uint8Array(encode(x)))
   }
 
   async nouvFic (idf, nom, info, lg, type, u8) {

@@ -677,13 +677,15 @@ _data_:
   - `q1 q2` : quotas de la tribu.
   - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
   - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
-  - `stn` : statut de la notification _tribu_
+  - `ntr1` : nombre de notifications tribu_simples
+  - `ntr2` : nombre de notifications tribu bloquantes
+  - `ntr3` : nombre de notifications tribu bloquées
   - `nbc` : nombre de comptes.
   - `nbsp` : nombre de sponsors.
-  - `ncos` : nombres de comptes ayant une notification simple.
-  - `ncob` : nombres de comptes ayant une notification bloquante.
+  - `nco1` : nombres de comptes ayant une notification simple.
+  - `nco2` : nombres de comptes ayant une notification bloquante.
 
-atr[0] est la somme des atr[1..N].
+atr[0] est la somme des atr[1..N]. Calculé en session, pas stocké.
 
 ## Document `compta`
 _data_ :
@@ -824,6 +826,7 @@ _data_:
 - `st` : statut. 0: en attente réponse, 1: refusé, 2: accepté, 3: détruit / annulé
 - `pspk` : phrase de sponsoring cryptée par la clé K du sponsor.
 - `bpspk` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
+- `dh`: date-heure du dernier changement d'état
 - `descr` : crypté par le PBKFD de la phrase de sponsoring
   - `na` : `[nom, cle]` de P.
   - `cv` : `{ v, photo, info }` de P.
@@ -983,7 +986,7 @@ _data_:
   - 60,61,62: invité en tant que lecteur / auteur / animateur, 
   - 70,71,72: invitation à confirmer (tous les animateurs n'ont pas validé) en tant que lecteur / auteur / animateur, 
   - 0: disparu / oublié.
-- `nag` : table des hash de l'id courte du membre crypté par la clé du groupe.
+- `nag` : table des hash de la clé du membre cryptée par la clé du groupe.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
 - `ardg` : ardoise cryptée par la clé du groupe.
