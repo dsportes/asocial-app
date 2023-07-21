@@ -189,21 +189,14 @@ export const useAvatarStore = defineStore('avatar', {
     // elt act dans tribu pour la tribu courante et le compte courant
     act: (state) => {
       const t = state.tribu
-      return t.act[state.compte.id]
+      return t.act[state.compte.it]
     },
-    
-    // elt mbtr dans tribu2 pour la tribu courante et le compte id
-    mbCpt: (state) => { return (id) => { 
-        const t2 = state.tribu2CP
-        return t2 && id ? t2.mbtr[id] : null
-      }
-    },
+
     /** PanelPeople ****************************************************/
-    // elt mbtr dans tribu2 pour la tribu courante et le people courant
-    mbPeC: (state) => {
-      const t2 = state.tribu2CP
+    // elt act dans tribu pour la tribu courante et le people courant
+    actPeC: (state) => {
       const peId = stores.session.peopleId
-      return t2 && peId ? t2.mbtr[peId] : null
+      for (const e of state.tribuC) if (e && e.id === peId) return e
     },
 
     ppTribus: (state) => {
@@ -240,7 +233,6 @@ export const useAvatarStore = defineStore('avatar', {
       const lcF = state.ptLcF
       function comp (a, b) {
         switch (f.value) {
-          case 0 : { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0) }
           case 1 : { return a.q1 < b.q1 ? 1 : (a.q1 > b.q1 ? -1 : 0) }
           case 2 : { return a.q2 < b.q2 ? 1 : (a.q2 > b.q2 ? -1 : 0) }
         }
@@ -257,7 +249,6 @@ export const useAvatarStore = defineStore('avatar', {
       if (!f) { stores.session.fmsg(state.ptLc.length); return state.getTribus }
       const r = []
       for (const c of state.ptLc) {
-        if (f.nomc && !c.na.nom.startsWith(f.nomc)) continue
         if (f.avecsp && !c.sp) continue
         if (f.notif && (!c.notif || (f.notif === 2 && c.notif.niv < 2))) continue
         r.push(c)
@@ -267,7 +258,7 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     ptLc: (state) => {
-      return Object.values(state.tribu2CP.mbtr)
+      return Object.values(state.tribuC.act)
     },
 
     // PageTribus ***************************************************    
@@ -385,20 +376,13 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
-    setTribu (tribu, nostat) { // set / remplacement de la tribu SEULE de la session
-      const session = stores.session
-      this.maptr.set(tribu.id, tribu)
-      if (session.tribuId === tribu.id && this.tribu2P && (this.tribu2P.id === tribu.id)) stores.session.setBlocage()
-      if (session.estComptable && !nostat) this.statsTribus()
-    },
-
     /* Calcul la stats des tribus (actuelle ou par anticipation avant d'enregistrer une tribu).
     SI l'argument tribu est donné,
     - inclut cette tribu, à la place de celle en store, ou en plus si elle n'y est pas
     - retourne la stats calculée, ne la stocke pas en store
     Permet une évaluation prévisionnelle AVANT maj de la tribu au serveur
     */
-    statsTribus (tribu) {
+    statsTribus (tribu) { // TODO
       /*
       - `cpt` : sérialisation non cryptée des compteurs suivants:
         - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
@@ -428,27 +412,28 @@ export const useAvatarStore = defineStore('avatar', {
       return stats
     },
 
-    setTribu2 (tribu2) { // set ou remplacement de la tribu2 SEULE
+    setTribu (tribu, nostat) { // set / remplacement de la tribu
       const session = stores.session
-      this.tribu2CP = tribu2
-      if (session.tribuId === tribu2.id) {
-        // tribu (actuelle) du compte : gestion des people
+      const c = this.compte
+      if (session.tribuId === tribu.id) {
         const pSt = stores.people
-        if (this.tribu2P) { // remplacement - enlève des people
-          for (const id in this.tribu2P.mbtr) {
-            pSt.unsetPeopleTribu(parseInt(id))
+        const nasp = new Map()
+        const spAv = new Set() // people sponsor avant
+        for (const e of this.tribu.act) 
+          if (e && e.nasp && c.estAvDuCompte(e.id)) spAv.add(e.id)
+        const spAp = new Set() // people sponsor après
+        for (const e of tribu.act)
+          if (e && e.nasp && c.estAvDuCompte(e.id)) { 
+            spAp.add(e.id)
+            nasp.set(e.id, e.nasp)
           }
-        }
-        this.tribu2P = tribu2
-        for (const id in tribu2.mbtr) {
-          const ac = this.comptaP.avatarIds.has(parseInt(id))
-          if (!ac) {
-            const e = tribu2.mbtr[id]
-            pSt.setPeopleTribu(e.na, e.cv, e.sp ? 2 : 1)
-          }
-        }
+        // enlève des people ceux qui étaient avant mais pas après
+        spAv.forEach(id => { if (!spAp.has(id)) pSt.unsetPeopleTribu(id)})
+        // ajoute aux people ceux y sont après mais n'y étaient pas avant
+        spAp.forEach(id => { if (!spAv.has(id)) pSt.setPeopleTribu(nasp.get(id)) })
       }
-      if (session.tribuId === tribu2.id && (this.tribu.id === tribu2.id)) stores.session.setBlocage()
+      this.maptr.set(tribu.id, tribu)
+      if (session.tribuId === tribu.id) stores.session.setBlocage()
     },
 
     delTribuC (id) { // delete d'une tribu quelconque pour le Comptable

@@ -32,7 +32,7 @@ export class ID {
   /* Retourne l'id COURT depuis une id, longue ou courte, string ou number */
   static court (long) {
     if (!long) return 0
-    const x = typeof id === 'string' ? parseInt(long) : long
+    const x = typeof long === 'string' ? parseInt(long) : long
     return x % d14
   }
 
@@ -48,7 +48,7 @@ export class ID {
 
   static estGroupe (id) { return Math.floor(id / d13) % 10 === 3 }
 
-  static estTribu (id) { return Math.floor(id / d13) % 10 === 4 }
+  static estTribu (id) { return Math.floor(id / d13) % 10 === 0 }
 
   static estAvatar (id) { return Math.floor(id / d13) % 10 < 3 }
 

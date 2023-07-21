@@ -19,7 +19,7 @@
 
     <apercu-notif v-if="session.status>1" :notif="session.notifG"/>
     <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" :na-tribu="aSt.tribu.na" :na-cible="aSt.tribu.na"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.mbtr.notif" :na-tribu="aSt.tribu.na" :na-cible="aSt.compte.na"/>
+    <apercu-notif v-if="session.ok" :notif="aSt.act.notif" :na-tribu="aSt.tribu.na" :na-cible="aSt.compte.na"/>
 
     <div style="height:2px;width:100%"/>
 
@@ -77,7 +77,7 @@ export default {
     function setNtf() {
       if (session.notifG) f0(session.notifG)
       if (aSt.tribu.notif) f1(aSt.tribu.notif)
-      if (aSt.mbtr.notif) f1(aSt.mbtr.notif)
+      if (aSt.act.notif) f1(aSt.act.notif)
     }
 
     session.$onAction(({ name, args, after }) => {

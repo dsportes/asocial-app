@@ -51,11 +51,11 @@
   <!-- Changement de statut sponsor -->
   <q-dialog v-model="chgSp" persistent>
     <q-card class="bs bg-secondary text-white petitelargeur q-pa-sm">
-        <div v-if="aSt.mbCpt(na.id).sp" class="text-center q-my-md titre-md">{{$t('PPsp', [aSt.tribuC.na.nom])}}</div>
-        <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [ID.court(aSt.tribuC.id)])}}</div>
+        <div v-if="ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
+        <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
       <q-card-actions align="center">
         <q-btn dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
-        <q-btn v-if="aSt.mbCpt(na.id).sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
+        <q-btn v-if="ccCpt.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
         <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
       </q-card-actions>
     </q-card>

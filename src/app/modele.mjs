@@ -667,7 +667,7 @@ export class Tribu extends GenDoc {
   /* Génère la clé de la tribu de numéro d'ordre idx (index de Compta.atr du comptable)*/
   static genCle (idx) { 
     const rnd = new Uint8Array(32)
-    rnd[0] = 4
+    rnd[0] = 0
     rnd[1] = Math.ceil(idx / 256)
     rnd[2] = idx % 256
     return rnd
@@ -676,7 +676,7 @@ export class Tribu extends GenDoc {
   /* Retourne l'id longue d'une tribu depuis sa clé et le ns courant de la session */
   static id (cle) {
     const x = (cle[1] * 256) + cle[2] // son numéro d'ordre dans Compta.atr du comptable
-    return (((NomGenerique.ns * 10) + 4) * d13) + x
+    return (NomGenerique.ns * d14) + x
   }
 
   get clet () { return getCle(this.id) }
@@ -805,6 +805,8 @@ export class Compta extends GenDoc {
     t.sort((a,b) => { return a.rnd[0] === 0 ? -1 : (b.rnd[0] === 0 ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
     return t
   }
+
+  estAvDuCompte (id) { return this.mav.has(id) }
 
   avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
     for(const na of this.mav.values()) { if (na.nom === n) return na.id }

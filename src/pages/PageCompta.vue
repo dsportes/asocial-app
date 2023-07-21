@@ -47,15 +47,7 @@ export default {
   components: { SyntheseBlocage, PanelCompta, ApercuChat },
 
   computed: {
-    c () { return this.aSt.compta.compteurs },
-    tr () { return this.aSt.tribu },
-    et2 () { return this.aSt.tribu2.mbtr[this.session.compteId] },
-    blTr () { return this.tr.blocage || null },
-    blCo () { return this.et2.blocage || null },
-    ntfTrCo () { return this.tr.notifco || null },
-    ntfTrSp () { return this.tr.notifsp || null },
-    ntfCoCo () { return this.et2.notifco || null },
-    ntfCoSp () { return this.et2.notifsp || null }
+    c () { return this.aSt.compta.compteurs }
   },
 
   data () {

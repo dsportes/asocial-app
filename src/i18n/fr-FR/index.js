@@ -71,6 +71,7 @@ export default {
   animateur: 'Animateur',
   auteur: 'Auteur',
   test: 'Test',
+  sponsor: 'Sponsor',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -1439,8 +1440,7 @@ export default {
   // PanelPeople et apercu compte
   PPchats: 'Chats',
   PPgroupes: 'Participations aux groupes',
-  PPsp: 'Sponsor de la tribu "{0}"',
-  PPco: 'Compte de la tribu "{0}"',
+  PPco: 'Compte non sponsor',
   PPcht: 'Changer de tribu',
   PPchsp: 'Changer le statut de "sponsor"',
   PPcompta: 'Voir l\'utilisation des volumes',

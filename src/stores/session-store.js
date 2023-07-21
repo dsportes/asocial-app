@@ -216,14 +216,12 @@ export const useSessionStore = defineStore('session', {
         }  
       }
       const aSt = stores.avatar
-      const tr = aSt.tribu
-      const et2 = aSt.mbtr
       const dhvu = aSt.compta.dhvu || 0
       this.niv = 0
       this.alire = false
       ntfx(this.notifG)
-      ntfx(tr.notif)
-      ntfx(et2.notif)
+      ntfx(aSt.tribu.notif)
+      ntfx(aSt.act.notif)
     },
 
     editDiag (avionSeulement) {

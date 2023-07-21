@@ -5,19 +5,18 @@ import { ID } from '../app/api.mjs'
 /* 
 Un "people" est un avatar :
 - (M) soit un membre d'un des groupes du compte qui n'est PAS avatar du compte
-- (T) soit un compte de la tribu du compte (qui n'est PAS avatar du compte)
+- (T) soit un SPONSOR de la tribu du compte
 - (C) soit l'interlocuteur d'un chat avec un avatar du compte
 Un people peut l'être à plusieurs titre:
   - N fois pour M, N fois au titre C, 1 fois au titre T
 La "carte de visite" d'un people provient :
   - de l'un membres M
-  - soit de la tribu dont le people est compte (où figure sa CV)
   - soit d'un des chats
 La plus récente est conservée. 
 Chaque element de la map (ayant pour clé l'id de l'avatar) :
 - na : nom d'avatar
 - disparu : true si le people a été détecté disparu
-- sp: 0: pas compte de la tribu, 1: simple compte de la tribu, 2: sponsor de la tribu
+- sp: 0: pas sponsor de la tribu, 1: sponsor de la tribu
 - cv : carte de visite de l'avatar si elle a été explicitement chargée
 - chats: Map par chats, cle id(de l'avatar) valeur [idsI, idsE].
 - groupes : Map des groupes cle:idg, valeur:ids auquel le people participe
@@ -155,9 +154,7 @@ export const usePeopleStore = defineStore('people', {
       })
       stores.session.fmsg(r.length)
       return r
-    },
-
-
+    }
   },
   
   actions: {
@@ -188,12 +185,12 @@ export const usePeopleStore = defineStore('people', {
       }
     },
   
-    setPeopleTribu (na, cv, sp) { // Sponsor ou simple membre de la tribu
-      const e = this.getElt(na, cv)
-      e.sp = sp
+    setPeopleTribu (na) { // Sponsor de la tribu
+      const e = this.getElt(na)
+      e.sp = 1
     },
 
-    unsetPeopleTribu (id) {
+    unsetPeopleTribu (id) { // sponsor devenu simple compte
       const e = this.map.get(id)
       if (!e) return
       e.sp = 0
