@@ -831,8 +831,7 @@ ids: ids du sponsoring
 rowChatI: chatI (interne) pour le compte en création
 rowChatE: chatE (externe) pour le sponsor - version à fixer
 ardx: ardoise du sponsoring à mettre à jour (avec statut 2 accepté)
-mbtrid : id de son élément mbtr (hash de la clé `rnd` du membre)
-mbtre: élément de la map mbtr de sa tribu
+act: élément de la map act de sa tribu
 quotas : `[v1, v2]` quotas attribués par le parrain.
 */
 
@@ -902,6 +901,7 @@ export class AcceptationSponsoring extends OperationUI {
       const e = {
         idT: await crypter(sp.clet, '' + ID.court(sp.naf.id)),
         nasp: sp.sp ? await crypter(sp.clet, sp.naf.anr) : null,
+        notif: null,
         stn: 0,
         q1: sp.quotas[0],
         q2: sp.quotas[1],

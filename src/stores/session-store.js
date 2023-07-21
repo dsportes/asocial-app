@@ -50,7 +50,6 @@ export const useSessionStore = defineStore('session', {
     clek: null,
 
     compteId: 0, // id du compte / son avatar principal
-    estComptable: false,
     tribuId: 0, // id de la tribu actuelle du compte
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
@@ -78,11 +77,8 @@ export const useSessionStore = defineStore('session', {
 
   getters: {
     estBloque (state) { return state.niv >= 4 },
-    estSponsor (state) { 
-      const aSt = stores.avatar
-      const t2 = aSt.tribu2.mbtr[state.compteId]
-      return (t2 && t2.sp) || false 
-    },
+    estSponsor (state) { return stores.avatar.compta.estSponsor },
+    estComptable (state) { return ID.estComptable(state.compteId) },
 
     editable (state) { return state.mode < 3 && state.niv < 4 },
 
@@ -133,10 +129,7 @@ export const useSessionStore = defineStore('session', {
     setCompteId (id) {
       this.ns = ID.ns(id)
       this.compteId = id
-      if (!this.estAdmin) {
-        this.estComptable = ID.estComptable(id)
-        this.naComptable = NomGenerique.comptable()
-      }
+      if (!this.estAdmin) this.naComptable = NomGenerique.comptable()
     },
 
     setMode (mode) { this.mode = mode },

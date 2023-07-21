@@ -25,13 +25,16 @@ export const useAvatarStore = defineStore('avatar', {
     ppFiltre: '',
     ppSelId: 0,
     
-    // Dernier compteurs de compta chargé
+    // Dernier compteurs de compta chargé (enrichi de clet(ou null), id, it, na(ou null))
     ccCpt: null
   }),
 
   getters: {
     /* retourne l'avatar principal du compte actuellement connecté */
     compte: (state) => { return state.avatarP },
+
+    estSponsor (state) { return state.avatarP.estSponsor },
+    estComptable (state) { return ID.estComptable(state.avatarP.id) },
 
     /* retourne la compta de l'avatar principal du compte actuellement connecté */
     compta: (state) => { return state.comptaP },
@@ -41,7 +44,7 @@ export const useAvatarStore = defineStore('avatar', {
 
     /* retourne la tribu "courante" */
     tribuC: (state) => { return state.maptr.get(stores.session.tribuCId) },
-    
+
     exV1: (state) => {
       const c = state.compta.compteurs
       return c.v1 > c.q1 * UNITEV1
@@ -106,6 +109,22 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
+    /* retourne [tribu, it, eltAct] du compte id 
+    SI il est dans la tribu du compte ou la tribu courante.
+    */
+    getTribuDeCompte: (state) => { return (id) => { 
+        for (const it of this.tribu.act) {
+          const e = this.tribu.act[it]
+          if (e && e.id === id) { return [this.tribu, it, e] }
+        }
+        if (this.tribuC) for (const it of this.tribuC.act) {
+          const e = this.tribuC.act[it]
+          if (e && e.id === id) { return [this.tribuC, it, e] }
+        }
+        return [null, 0, null]
+      }
+    },
+
     nbTribus: (state) => {
       return state.maptr.size
     },
@@ -167,10 +186,10 @@ export const useAvatarStore = defineStore('avatar', {
       return e ? e.grIds : new Set()
     },
 
-    // elt mbtr dans tribu2 pour la tribu courante et le compte courant
-    mbtr: (state) => {
-      const t2 = state.tribu2P
-      return t2.mbtr[state.compte.id]
+    // elt act dans tribu pour la tribu courante et le compte courant
+    act: (state) => {
+      const t = state.tribu
+      return t.act[state.compte.id]
     },
     
     // elt mbtr dans tribu2 pour la tribu courante et le compte id

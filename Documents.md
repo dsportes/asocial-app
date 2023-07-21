@@ -652,10 +652,11 @@ _data_:
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
 - `q1 q2` : quotas totaux de la tribu.
 - `stn` : statut de la notification de tribu: _0:aucune 1:simple 2:bloquante 3:bloquée_
-- `notiftT`: notification de niveau tribu cryptée par la clé de la tribu.
+- `notif`: notification de niveau tribu cryptée par la clé de la tribu.
 - `act` : table des comptes de la tribu. L'index `it` dans cette liste figure dans la propriété `it` du `comptas` correspondant :
   - `idT` : id court du compte crypté par la clé de la tribu.
   - `nasp` : si sponsor `[nom, cle]` crypté par la cle de la tribu.
+  - `notif`: notification de niveau compte cryptée par la clé de la tribu.
   - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
   - `q1 q2` : quotas attribués.
   - `v1 v2` : volumes **approximatifs** effectivement utilisés: recopiés de comptas lors de la dernière connexion du compte, s'ils ont changé de plus de N%. **Ce n'est donc pas un suivi en temps réel** qui imposerait une charge importante de mise à jour de tribu à chaque mise à jour d'un compteur de `comptas` et des charges de synchronisation conséquente.
@@ -696,6 +697,7 @@ _data_ :
 - `shay`, le SHA du SHA de X (PBKFD de la phrase secrète).
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
 - `dhvu` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
+- `sp` : 1: est sponsor
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
 - `cletK` : clé de la tribu cryptée par la clé K du compte : si cette clé a une longueur de 256, elle est cryptée par la clé publique RSA du compte (en cas de changement de tribu forcé par le comptable).
 - `it` : index du compte dans la table `act` de sa tribu.

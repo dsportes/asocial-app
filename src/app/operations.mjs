@@ -129,9 +129,10 @@ args.token
 args.id : id de l'avatar dont la Cv est mise à jour
 args.v: version de l'avatar incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
 args.cva: {v, photo, info} crypté par la clé de l'avatar
-SI C'EST LE COMPTE, pour dupliquer la CV
-args.idTr: id de sa tribu (où dupliquer la CV)
-args.hrnd: clé d'entrée de la map mbtr
+Retour:
+- OK : false s'il faut boucler sur la requête. 
+La version de l'avatar figure DANS cva, qu'il faut 
+recrypter si ce n'était pas la bonne.
 */
 export class MajCv extends OperationUI {
   constructor () { super($t('OPmcv')) }
@@ -141,12 +142,6 @@ export class MajCv extends OperationUI {
       const session = stores.session
       const aSt = stores.avatar
       while (true) {
-        let idTr = 0, hrnd = 0
-        const compta = aSt.compta
-        if (compta.id === avatar.id) {
-          idTr = compta.idt
-          hrnd = avatar.na.hrnd
-        }
         const v = avatar.v + 1
         const cva = await crypter(getCle(avatar.id), new Uint8Array(encode({v, photo, info})))
         const args = { token: session.authToken, id: avatar.id, v, cva, idTr, hrnd }
@@ -659,12 +654,12 @@ export class SetQuotasTribu extends OperationUI {
   }
 }
 
-/* Set notification de compte dans tribu2
+/* Set notification de compte dans tribu
 args.token: éléments d'authentification du compte.
-args.id : id de la tribu
-args.hrnd: id de l'élément du compte dans mbtr
+args.idt : id de la tribu
+args.idc: id du compte
 args.notif: notification du compte
-args.ntfb : true / false notification bloquuante
+args.stn : 0: aucune 1:simple 2:bloquante
 Retour:
 */
 export class SetNotifC extends OperationUI {
@@ -675,9 +670,9 @@ export class SetNotifC extends OperationUI {
       const session = stores.session
       if (notifC) notifC.dh = new Date().getTime()
       const cle = getCle(id)
-      const notif = notifC ? await crypter(cle, notifC.encode()) : null
-      const args = { token: session.authToken, id, hrnd: na.hrnd, notif, 
-        ntfb: notifC && notifC.jbl ? true : false }
+      const stn = !notifC ? 0 : (notifC.jbl ? 2 : 1) 
+      const notif = notif ? await crypter(cle, notif.encode()) : null
+      const args = { token: session.authToken, idt: id, idn: na.id, notif, stn }
       this.tr(await post(this, 'SetNotifC', args))
       this.finOK()
     } catch (e) {
@@ -686,26 +681,26 @@ export class SetNotifC extends OperationUI {
   }
 }
 
-/* Set d'un attribut QUI IMPACTE tribu de l'entrée d'un compte d'une tribu2 - PAS la CV *******
-  - `sp` : si `true` / présent, c'est un sponsor.
-  - quotas: `[q1, q2]` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
+/* Set sponsor dans tribu / compte
 args.token: éléments d'authentification du compte.
-args.id : id de la tribu
-args.hrnd: id de l'élément du compte dans mbtr
-args.attr: nom de l'attribut
-args.val: valeur de l'attribut
-args.exq: lever une exception en cas dépassement des quotas de la tribu
+args.idt : id de la tribu
+args.idc: id du compte
+args.nasp: na du compte crypté par la cle de la tribu
 Retour:
 */
-export class SetAttributTribu2 extends OperationUI {
+export class SetSponsor extends OperationUI {
   constructor () { super($t('OPmajtr')) }
 
-  async run (id, na, attr, val, exq) {
+  async run (id, naidc, estSp) {
     try {
+      const nac = typeof naidc === 'number' ? getNg(naidc) : naidc
+      const idc = nac ? nac.id : naidc
+
       const session = stores.session
-      const args = { token: session.authToken, id, hrnd: na.hrnd, attr, 
-        val, exq: exq || false }
-      this.tr(await post(this, 'SetAttributTribu2', args))
+      const cle = getCle(id)
+      const nasp = estSp ? await crypter(cle, new Uint8Array(encode(nac.anr))) : null
+      const args = { token: session.authToken, idt: id, idc, nasp }
+      this.tr(await post(this, 'SetSponsor', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -713,23 +708,21 @@ export class SetAttributTribu2 extends OperationUI {
   }
 }
 
-/* Set des quotas d'un compte *******
+/* Set des quotas dans tribu / compte
 args.token: éléments d'authentification du compte.
-args.idc : id du compte
-args.id : id de sa tribu
-args.hrnd: id de l'élément du compte dans mbtr
-args.q1
-args.q2
+args.idt : id de la tribu
+args.idc: id du compte
+args.q1 args.q2 : quotas
 Retour:
 */
-export class SetQuotasCompte extends OperationUI {
+export class SetQuotas extends OperationUI {
   constructor () { super($t('OPmajtr')) }
 
-  async run (id, na, q1, q2) { // id tribu, na du compte
+  async run (id, na, q1, q2) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, idc: na.id, hrnd: na.hrnd, q1, q2 }
-      this.tr(await post(this, 'SetQuotasCompte', args))
+      const args = { token: session.authToken, idt: id, idc: na.id, q1, q2 }
+      this.tr(await post(this, 'SetQuptas', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -740,66 +733,30 @@ export class SetQuotasCompte extends OperationUI {
 /* Changer un compte de tribu *********************************
 args.token: éléments d'authentification du compte.
 args.id : id du compte qui change de tribu
-args.trIdav : id de la tribu quittée
-args.trIdap : id de la tribu intégrée
-args.hrnd : clé de l'entrée du compte dans mbtr de sa tribu2
-args.mbtr : entrée mbtr dans sa nouvelle tribu
+args.idtAv : id de la tribu quittée
+args.idtAp : id de la tribu intégrée
+args.idT : id court du compte crypté par la clé de la nouvelle tribu.
+args.nasp : si sponsor `[nom, cle]` crypté par la cle de la nouvelle tribu.
+args.stn : statut de la notification 0, 1, 2
+args.notif`: notification de niveau compte cryptée par la clé de la nouvelle tribu.
+
 Sur Compta:
-args.nctk : `[nom, clé]` de la tribu crypté par la clé CV du compte.
-args.nctkc : `[nom, clé]` de la tribu crypté par la clé K **du Comptable**: 
-args.napt: `[nom, clé]` de l'avatar principal du compte crypté par la clé de la tribu.
+args.cletX : clé de la tribu cryptée par la clé K du comptable.
+args.cletK : clé de la tribu cryptée par la clé K du compte : 
+  si cette clé a une longueur de 256, elle est cryptée par la clé publique RSA du compte 
+  (en cas de changement de tribu forcé par le comptable).
 Retour:
+- rowTribu (nouvelle)
 */
 export class ChangerTribu extends OperationUI {
   constructor () { super($t('OPchtr')) }
 
-  async run (na, nvTrid) { // na du compte, 
+  async run (args) {
     try {
-      const session = stores.session
-      const aSt = stores.avatar
-      const naTrap = getNg(nvTrid)
-      const tribu2 = session.tribuCId ? aSt.tribu2C : aSt.tribu2
-
-      /*
-      - `mbtr` : map des comptes de la tribu:
-      - _clé_ : id pseudo aléatoire, hash de la clé `rnd` du compte.
-        Dans l'objet c'est l'id du compte
-      - _valeur_ :
-        - `na` : `[nom, rnd]` du membre crypté par la clé de la tribu.
-        - `sp` : si `true` / présent, c'est un sponsor.
-        - `q1 q2` : quotas du compte (redondance dans l'attribut `compteurs` de `compta`)
-        - 'ntfb' : true si la notification est bloquante
-        - `notif` : notification du compte (cryptée par la clé de la tribu).
-        - `cv` : `{v, photo, info}`, carte de visite du compte cryptée par _sa_ clé (le `rnd` ci-dessus).
-      */
-      const m = tribu2.mbtr[na.id]
-      const napt = await crypter(naTrap.rnd, new Uint8Array(encode([na.nom, na.rnd])))
-      const mnv = { 
-        na: napt,
-        sp: m.sp,
-        q1: m.q1,
-        q2: m.q2,
-        ntfb: m.ntfb,
-        cv: m.cv || null
-      }
-      mnv.notif = m.notif ? await crypter(naTrap.rnd, m.notif.encode()) : null
-      const mbtr = new Uint8Array(encode(mnv))
-
-      const trbuf = new Uint8Array(encode([naTrap.nom, naTrap.rnd]))
-      const nctk = await crypter(na.rnd, trbuf)
-      const nctkc = await crypter(session.clek, trbuf)
-
-      const args = { token: session.authToken, 
-        id: na.id,
-        trIdav: tribu2.id,
-        trIdap: nvTrid,
-        hrnd: na.hrnd, 
-        mbtr, nctk, nctkc, napt
-      }
+      args.token = session.authToken
       const ret = this.tr(await post(this, 'ChangerTribu', args))
       const t = await compile(ret.rowTribu)
-      const t2 = await compile(ret.rowTribu2)
-      return this.finOK([t, t2])
+      return this.finOK(t)
     } catch (e) {
       await this.finKO(e)
     }
@@ -827,25 +784,39 @@ export class SetDhvuCompta extends OperationUI {
   }
 }
 
-/* Get "compteurs" d'une compta *********************************
+/* Résumé d'une compta (autre que celle du compte de la session)
+Pour le comptable (tous comptes), un sponsor (comptes de sa tribu)
 args.token: éléments d'authentification du compte.
 args.id : id de la compta
 Retour:
 - compteurs : objet compteurs de cette compta
+- cletX: clé de sa tribu cryptée par la clé K du comptable
+- it : indice du compte dans sa tribu
 */
 export class GetCompteursCompta extends OperationUI {
   constructor () { super($t('OPdhvu')) }
 
-  async run (na) {
+  async run (naid) { // na ou id d'un compte
     try {
+      const na = typeof naid === 'number' ? getNg(naid) : naid
+      const id = na ? na.id : naid
+
       const session = stores.session
       const aSt = stores.avatar
-      const args = { token: session.authToken, id: na.id }
+      const args = { token: session.authToken, id }
       const ret = this.tr(await post(this, 'GetCompteursCompta', args))
       const cpt = new Compteurs(ret.compteurs)
+      cpt.it = ret.it
+      cpt.clet = !session.estComptable ? null : await decrypter(session.clek, ret.cletX)
+      if (!cpt.clet) {
+        const [t, i, e] = aSt.getTribuDeCompte(id)
+        if (t) cpt.clet = t.clet
+      }
+      cpt.id = id
+      cpt.sp = ret.sp
       cpt.na = na
       aSt.setccCpt(cpt)
-      this.finOK()
+      return this.finOK(cpt)
     } catch (e) {
       await this.finKO(e)
     }

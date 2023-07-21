@@ -116,7 +116,7 @@ import { edvol, dhcool } from '../app/util.mjs'
 import QuotasVols from './QuotasVols.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 import stores from '../stores/stores.mjs'
-import { SetQuotasCompte, GetCompteursCompta } from '../app/operations.mjs'
+import { SetQuotas, GetCompteursCompta } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 
 /** Compteurs ***************************
@@ -192,7 +192,7 @@ export default ({
       this.ovedq()
     },
     async validerq () {
-      await new SetQuotasCompte().run(this.aSt.tribuC.id, this.na, this.quotas.q1, this.quotas.q2)
+      await new SetQuotas().run(this.aSt.tribuC.id, this.na, this.quotas.q1, this.quotas.q2)
       MD.fD()
       await new GetCompteursCompta().run(this.na)
     },

@@ -115,7 +115,7 @@ import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { GetCompteursCompta, SetAttributTribu2 } from '../app/operations.mjs'
+import { GetCompteursCompta, SetQuotas } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 
 export default {
@@ -156,8 +156,8 @@ export default {
       this.edq = true
     },
     async validerq () {
-      await new SetAttributTribu2().run(this.aSt.tribuC.id, 
-        this.quotas.c.na, 'quotas', [this.quotas.q1, this.quotas.q2])
+      await new SetQuotas().run(this.aSt.tribuC.id, 
+        this.quotas.c.na, this.quotas.q1, this.quotas.q2)
       this.edq = false
     },
     async courant (c) { 

@@ -1095,6 +1095,8 @@ export default {
   PTnvc: 'Sponsoring d\'un nouveau compte',
   PTpasc: 'Il n\'est pas possible de bloquer le Comptable',
   PTcompta: 'Volumes utilisés par {0}',
+  PTspn1: 'Il n\'est pas possible de rendre sponsor un compte dont le nom est inconnu.',
+  PTspn2: 'Il n\'est pas possible de changer de tribu un compte sponsor dont le nom est inconnu.',
 
   // Page groupe(s)
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',

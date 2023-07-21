@@ -52,7 +52,7 @@
   <q-dialog v-model="chgSp" persistent>
     <q-card class="bs bg-secondary text-white petitelargeur q-pa-sm">
         <div v-if="aSt.mbCpt(na.id).sp" class="text-center q-my-md titre-md">{{$t('PPsp', [aSt.tribuC.na.nom])}}</div>
-        <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [aSt.tribuC.na.nom])}}</div>
+        <div v-else class="text-center q-my-md titre-md">{{$t('PPco', [ID.court(aSt.tribuC.id)])}}</div>
       <q-card-actions align="center">
         <q-btn dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
         <q-btn v-if="aSt.mbCpt(na.id).sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
@@ -84,25 +84,25 @@
 </template>
 <script>
 
-import { ref } from 'vue'
+import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
+import { ID } from '../app/api.mjs'
 // import BoutonHelp from '../components/BoutonHelp.vue'
 import PanelCompta from '../components/PanelCompta.vue'
-import { edvol } from '../app/util.mjs'
-import { GetCompteursCompta, SetAttributTribu2, ChangerTribu } from '../app/operations.mjs'
+import { edvol, afficherDiag } from '../app/util.mjs'
+import { GetCompteursCompta, SetSponsor, ChangerTribu } from '../app/operations.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { MD } from '../app/modele.mjs'
+import { crypter, crypterRSA } from '../app/webcrypto.mjs'
 
 export default {
   name: 'BarrePeople',
   components: { PanelCompta },
 
-  props: { na: Object },
+  props: { id: Number },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    pc1 () { return this.aSt.ccCpt.q1 ? Math.round((this.aSt.ccCpt.v1 * 100) / (this.aSt.ccCpt.q1 * UNITEV1)) : 0 },
-    pc2 () { return this.aSt.ccCpt.q2 ? Math.round((this.aSt.ccCpt.v2 * 100) / (this.aSt.ccCpt.q2 * UNITEV2)) : 0 }
   },
 
   watch: {
@@ -110,40 +110,76 @@ export default {
   
   data () {
     return {
+      pc1: 0,
+      pc2: 0
     }
   },
 
   methods: {
     edv1 (v) { return edvol(v * UNITEV1) },
     edv2 (v) { return edvol(v * UNITEV2) },
-    async chgTribu () { 
-      /* this.aSt.ccCpt = */ await new GetCompteursCompta().run(this.na)
+    async getCpt() {
+      this.ccCpt = await new GetCompteursCompta().run(this.na || this.id)
+      this.pc1 = this.ccCpt.q1 ? Math.round((this.ccCpt.v1 * 100) / (this.ccCpt.q1 * UNITEV1)) : 0,
+      this.pc2 = this.ccCpt.q2 ? Math.round((this.ccCpt.v2 * 100) / (this.ccCpt.q2 * UNITEV2)) : 0
+    },
+    async chgTribu () { // comptable
+      await this.getCpt()
+      if (!this.na && this.ccCpt.sp) { // ça ne devrait pas arriver !!!
+        await afficherDiag(this.$t('PTspn2'))
+        return
+      }
       this.aSt.ppFiltre = ''
       this.ovchgTr()
     },
-    async chgSponsor () { 
-      this.ovchgSp()
+    async chgSponsor () { // comptable
+      await this.getCpt()
+      if (!this.na && !this.ccCpt.sp) {
+        await afficherDiag(this.$t('PTspn1'))
+      } else this.ovchgSp()
     },
-    async voirCompta () { 
-      await new GetCompteursCompta().run(this.na)
+    async voirCompta () { // comptable OU sponsor
+      await this.getCpt()
       this.ovcptdial()
     },
-    async changerSp(estSp) { // (id, na, attr, val, exq)
-      await new SetAttributTribu2().run(this.session.tribuCId, this.na, 'sp', estSp)
+    async changerSp(estSp) {
+      // si estSp, le na existe, voir quelques lignes au-dessus
+      await new SetSponsor().run(this.session.tribuCId, this.na || this.id, estSp)
       MD.fD()
     },
     selTr (x) { if (x.ok) this.aSt.ppSelId = x.id },
     async changerTr () {
       MD.fD()
-      const [t, t2] = await new ChangerTribu().run(this.na, this.aSt.ppSelId)
-      this.aSt.setTribuC(t, t2)
+      const cletAv = this.ccCpt.cletAv
+      const idtAv = Tribu.id(cletAv)
+      const trAv = this.aSt.getTribu(idtAv)
+      const itAv = this.ccCpt.it
+      const notifAv = trAv.act[itAv].notif
+      const idtAp = this.aSt.ppSelId
+      const cletAp = getCle(idtAp) // le comptable qui a les clés de toutes les tribus
+      const nasp = !this.ccCpt.sp ? null : await crypter(cletAp, new Uint8Array(encode(this.na.anr)))
+      let notif = null, stn = 0
+      if (notifAv) {
+        stn = notif.jbl ? 2 : 1
+        notif = await crypter(cletAp, new Uint8Array(encode(notif)))
+      }
+      const cletX = await crypter(session.clek, cletAp)
+      const pub = await this.aSt.getPub(this.id)
+      const cletK = await crypterRSA(pub, cletAp)
+      const idT = await crypter(cletAp, '' + ID.court(this.id))
+      const args = { id: this.id, idtAv, idtAp, idT, nasp, stn, notif, cletX, cletK } 
+      const t = await new ChangerTribu().run(args)
+      this.aSt.setTribuC(t)
     }
   },
 
-  setup () {
+  setup (props) {
     const session = stores.session
     const pSt = stores.people
     const aSt = stores.avatar
+    const id = toRef(props, 'id')
+    const na = ref()
+    na.value = getNg(id.value)
 
     const chgSp = ref(false)
     function ovchgSp () { MD.oD(chgSp) }
@@ -153,10 +189,9 @@ export default {
     function ovcptdial () { MD.oD(cptdial)}
 
     return {
-      MD, chgSp, ovchgSp, chgTr, ovchgTr, cptdial, ovcptdial,
-      session,
-      aSt,
-      pSt
+      na,
+      ID, MD, chgSp, ovchgSp, chgTr, ovchgTr, cptdial, ovcptdial,
+      session, aSt, pSt
     }
   }
 }

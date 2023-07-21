@@ -651,10 +651,11 @@ _data_:
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
 - `q1 q2` : quotas totaux de la tribu.
 - `stn` : statut de la notification de tribu: _0:aucune 1:simple 2:bloquante 3:bloquée_
-- `notiftT`: notification de niveau tribu cryptée par la clé de la tribu.
+- `notif`: notification de niveau tribu cryptée par la clé de la tribu.
 - `act` : table des comptes de la tribu. L'index `it` dans cette liste figure dans la propriété `it` du `comptas` correspondant :
   - `idT` : id court du compte crypté par la clé de la tribu.
   - `nasp` : si sponsor `[nom, cle]` crypté par la cle de la tribu.
+  - `notif`: notification de niveau compte cryptée par la clé de la tribu.
   - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
   - `q1 q2` : quotas attribués.
   - `v1 v2` : volumes **approximatifs** effectivement utilisés.
@@ -698,7 +699,7 @@ export class Tribu extends GenDoc {
     }
     const c = this.clet
 
-    this.notif = row.notif ? new Notification(await decrypter(c, row.notiftT)) : null
+    this.notif = row.notif ? new Notification(await decrypter(c, row.notif)) : null
 
     this.q1 = row.q1 || 0
     this.q2 = row.q2 || 0
@@ -710,6 +711,7 @@ export class Tribu extends GenDoc {
       const r = { }
       if (item) {
         r.id = ID.long(await decrypterStr(c, item.idT))
+        r.notif = item.notif ? new Notification(await decrypter(c, item.notif)) : null
         r.stn = item.stn || 0
         r.nasp = item.na ? await decrypter(c, item.nasp) : null
         r.q1 = item.q1 || 0
@@ -774,6 +776,7 @@ export class Tribu extends GenDoc {
 - `shay`, le SHA du SHA de X (PBKFD de la phrase secrète).
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
 - `dhvu` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
+- `sp` : 1: est sponsor
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
 - `cletK` : clé de la tribu cryptée par la clé K du compte : 
   si cette clé a une longueur de 256, elle est cryptée par la clé publique RSA du compte 
@@ -794,8 +797,8 @@ export class Tribu extends GenDoc {
 - `astn` : table des statuts de notification des tribus _aucune simple bloquante_.
 */
 export class Compta extends GenDoc {
-  get stn () { return this.blocage ? this.blocage.stn : 0 }
-  get clet () { return this.nct.rnd }
+  get estSponsor () { return this.sp === 1 }
+  // get stn () { return this.blocage ? this.blocage.stn : 0 }
 
   get lstAvatarNas () { // retourne l'array des na des avatars du compte (trié ordre alpha, primaire en tête)
     const t = []; for(const na of this.mav.values()) { t.push(na) }
@@ -817,6 +820,7 @@ export class Compta extends GenDoc {
     c.shay = this.shay
     c.k = this.k
     c.dhvu = this.dhvu
+    c.sp = this.sp
     c.mav = new Map()
     this.mav.forEach((na, id) => { c.mav.set(id, na) })
     c.clet = this.clet
@@ -874,7 +878,8 @@ export class Compta extends GenDoc {
     this.hps1 = row.hps1
     this.shay = row.shay
     this.dhvu = row.dhvu ? parseInt(await decrypterStr(session.clek, row.dhvu)) : 0
-    
+    this.sp = row.sp
+
     this.compteurs = new Compteurs(row.compteurs)
     this.compteurs.pc1 = Math.round( (this.compteurs.v1 * 100) / (this.compteurs.q1 * UNITEV1))
     this.compteurs.pc2 = Math.round( (this.compteurs.v2 * 100) / (this.compteurs.q2 * UNITEV2))
@@ -953,7 +958,7 @@ export class Compta extends GenDoc {
     r.kx = await crypter(ph.pcb, k)
     session.clek = k
 
-    r.stp = estSponsor ? 1 : 0
+    r.sp = estSponsor ? 1 : 0
     r.hps1 = ph.hps1
     r.shay = ph.shay
     
