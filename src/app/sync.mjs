@@ -29,7 +29,6 @@ export class SyncQueue {
       if (row._nom === 'comptas') op = new OnchangeCompta()
       else if (row._nom === 'versions') op = new OnchangeVersion()
       else if (row._nom === 'tribus') op = new OnchangeTribu()
-      else if (row._nom === 'tribu2s') op = new OnchangeTribu2()
       else if (row._nom === 'espaces') op = new OnchangeEspace()
       if (op) await op.run(row)
       if (session.synchro) session.sessionSync.setDhSync(new Date().getTime())
@@ -251,7 +250,6 @@ export class OperationWS extends Operation {
 
     this.compta = null // compta mise à jour
     this.tribu = null  // tribu mise à jour ou ajoutée. L'id de celle supprimée est dans abMoins.
-    this.tribu2 = null
 
     this.abPlus = new Set() // abonnements de synchronisation ajoutés
     this.abMoins = new Set() // abonnements de synchronisation supprimés
@@ -317,7 +315,6 @@ export class OperationWS extends Operation {
     // Maj des stores
     if (this.compta) aSt.setCompta(this.compta)
     if (this.tribu) aSt.setTribu(this.tribu)
-    if (this.tribu2) aSt.setTribu2(this.tribu2)
 
     this.avSuppr.forEach(id => { aSt.del(id) })
     this.avMaj.forEach(e => { aSt.lotMaj(e) })
@@ -376,14 +373,12 @@ export class OnchangeCompta extends OperationWS {
 
   async chgTribu () {
     const args = { token: session.authToken, 
-      id: this.compta.idt, tribu2: true, setC: true }
+      id: this.compta.idt, setC: true }
     const ret = this.tr(await post(this, 'GetTribu', args))
     this.abPlus.add(this.compta.idt)
     this.abMoins.add(this.avCompta.idt)
     this.buf.putIDB(ret.rowTribu)
     this.tribu = await compile(rowTribu)
-    this.buf.putIDB(ret.rowTribu2)
-    this.tribu2 = await compile(rowTribu2)
   }
 
   async run (row) {
@@ -484,46 +479,17 @@ export class OnchangeTribu extends OperationWS {
         }
       } else {
         if (row.v > aSt.tribu.v) {
+          if (!this.tribu.aCompte) {
+            this.resiliation = true
+            deconnexion()
+            return
+          }
           this.buf.putIDB(row)
           this.tribu = await compile(row)
         }
       }
 
       if (this.tribu) await this.final()
-    } catch (e) { 
-      await this.finKO(e)
-    }
-  }
-}
-
-export class OnchangeTribu2 extends OperationWS {
-  constructor () { super($t('OPsync')) }
-
-  async run (row) {
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      this.init()
-
-      if (row.id === session.tribuId) {
-        const avTr = aSt.tribu2
-        if (row.v > avTr.v) {
-          this.tribu2 = await compile(row)
-          if (!this.tribu2.aCompte) {
-            this.resiliation = true
-            deconnexion()
-            return
-          }
-          this.buf.putIDB(row)
-        }
-      }
-
-      if (row.id === session.tribuCId) {
-        const avTr = aSt.tribu2C
-        if (row.v > avTr.v && !this.tribu2) this.tribu2 = await compile(row)
-      }
-
-      if (this.tribu2) await this.final()
     } catch (e) { 
       await this.finKO(e)
     }

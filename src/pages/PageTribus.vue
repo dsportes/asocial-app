@@ -91,8 +91,8 @@ export default {
       MD.fD()
     },
     async courant (id) {
-      const [t ,t2] = await new GetTribu().run(id, true)
-      this.aSt.setTribuC(t, t2)
+      const t = await new GetTribu().run(id, true)
+      this.aSt.setTribuC(t)
       this.ui.setPage('tribu')
     }
   },

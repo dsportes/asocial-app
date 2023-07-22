@@ -6,7 +6,7 @@ import { $t, hash, inverse, sleep } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
 import { GenDoc, NomGenerique, Avatar, Chat, Compta, Note,
-  Groupe, Membre, Tribu, Tribu2, getNg, getCle, compile, setClet} from './modele.mjs'
+  Groupe, Membre, Tribu, getNg, getCle, compile, setClet} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 
@@ -823,14 +823,12 @@ export class GetCompteursCompta extends OperationUI {
   }
 }
 
-/* Get Tribu et Tribu2 *********************************
+/* Get Tribu *********************************
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
-args.tribu2 : true si retourner tribu2 avec
 args.setC: déclarer la tribu courante
 Retour:
 - rowtribu: row de la tribu
-- rowTribu2
 */
 export class GetTribu extends OperationUI {
   constructor () { super($t('OPtrib')) }
@@ -838,11 +836,10 @@ export class GetTribu extends OperationUI {
   async run (id, setC) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, tribu2: true, setC: setC || false}
+      const args = { token: session.authToken, id, setC: setC || false}
       const ret = this.tr(await post(this, 'GetTribu', args))
       const tribu = await compile(ret.rowTribu)
-      const tribu2 = await compile(ret.rowTribu2)
-      return this.finOK([tribu, tribu2], true)
+      return this.finOK(tribu)
     } catch (e) {
       await this.finKO(e)
     }
@@ -1621,7 +1618,7 @@ args.grps : liste des items groupes à traiter.
   - suppr : true si le groupe est à supprimer
 Suppression de compte seulement
 args.idt: id de la tribu du compte
-args.rndc: clé du compte dans mbtr de tribu2, pour suppression de cette entrée
+args.it: indice du compte dans act de tribu, pour suppression de cette entrée
 Suppression d'avatar seulement
 args.dv1: réduction du volume v1 du compte (notes avatar et notes des groupes hébergés)
 args.dv2

@@ -7,7 +7,7 @@ import { $t, setTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ, ID, limitesjour } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
-import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, getTribu2, loadVersions, getAvatarPrimaire, getColl,
+import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, NLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
 import { crypter, random, genKeyPair } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
@@ -499,7 +499,7 @@ export class ConnexionCompte extends OperationUI {
     this.espace = await compile(this.rowEspace)
 
     {
-      const args = { token: session.authToken, id: this.compta.idt, tribu2: true, abPlus: [this.compta.idt] }
+      const args = { token: session.authToken, id: this.compta.idt, abPlus: [this.compta.idt] }
       const ret = this.tr(await post(this, 'GetTribu', args))
       this.rowTribu = ret.rowTribu
     }
@@ -674,36 +674,30 @@ export class ConnexionCompte extends OperationUI {
           ltr.set(r.id, r)
           mvtr[r.id] = r.v
         })
-        if (session.accesNet) {
+
+        {
           const args = { token: session.authToken, mvtr: mvtr }
           const ret = this.tr(await post(this, 'ChargerTribus', args))
           const delids = new Set(ret.delids)
           if (ret.rowTribus.length) for(const row of ret.rowTribus) {
             const tribu = await compile(row)
             ltr.delete(tribu.id)
-            aSt.setTribu(tribu, true)
+            aSt.setTribu(tribu)
             this.buf.putIDB(row)
           }
           delids.forEach(id => { this.buf.supprIDB({ _nom: 'tribus', id: id })})
         }
+        
         for (const [id, row] of ltr) {
           const tribu = await compile(row)
-          aSt.setTribu(tribu, true)
+          aSt.setTribu(tribu)
           this.buf.putIDB(row)
         }
-        aSt.statsTribus()
-        /* Set stats de l'espace par le Comptable ******************
-        args.token donne les éléments d'authentification du compte.
-        args.ns
-        args.stats : sérialisation des compteurs de stats de l'espace
-        Retour:
-        */
-        if (session.accesNet) {
-          const args = { token: session.authToken, 
-            ns: session.ns, 
-            stats: new Uint8Array(encode(session.stats)) }
-          this.tr(await post(this, 'SetStats', args))
-        }
+
+        const args = { token: session.authToken, ns: session.ns }
+        const ret = this.tr(await post(this, 'GetSynthese', args))
+        aSt.setSynthese(await compile(ret.rowSynthese))
+  
       }
 
       /* Chargement depuis IDB des Maps des 
@@ -1035,7 +1029,6 @@ args.rowEspace : espace créé
 args.rowAvatar, rowTribu, rowCompta du compte du comptable
 args.rowVersion: version de l'avatar (avec sa dlv) 
 args.rowTribu
-args.rowTribu2
 Retour: rien. Si OK le rowEspace est celui créé en session
 */
 export class CreerEspace extends OperationUI {
@@ -1058,9 +1051,8 @@ export class CreerEspace extends OperationUI {
       const na = NomGenerique.comptable()
       const rowCompta = await Compta.row(na, clet, null, ac[0], ac[1], true, phrase)
       // set de session.clek
-      const rowTribu = await Tribu.nouvelle(idt, ac[0], ac[1], true)
+      const rowTribu = await Tribu.nouvelle(idt, ac[2], ac[3], true, ac[0], ac[1])
 
-      // TODO
       const { publicKey, privateKey } = await genKeyPair()
       const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)
 
@@ -1073,7 +1065,7 @@ export class CreerEspace extends OperationUI {
       r._data_ = _data_
       r._nom = 'versions'
 
-      const args = { token: stores.session.authToken, rowEspace, rowSynthese, rowTribu, rowTribu2, 
+      const args = { token: stores.session.authToken, rowEspace, rowSynthese, rowTribu,
         rowCompta, rowAvatar, rowVersion: r, hps1 }
       this.tr(await post(this, 'CreerEspace', args))
       

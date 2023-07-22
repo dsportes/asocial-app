@@ -136,7 +136,7 @@ export default {
 
     aSt.$onAction(({ name, args, after }) => {
       after((result) => {
-        if ((name === 'setTribu' || name === 'setTribu2') && args[0].id === id.value) {
+        if (name === 'setTribu' && args[0].id === id.value) {
           t.value = getT()
         }
       })

@@ -143,6 +143,11 @@ export default ({
     if (orgext.value) org.value = orgext.value
     const memoorg = ref(true)
 
+    watch(() => orgext.value, (ap, av) => {
+        org.value = ap
+      }
+    )
+
     const layout = {
       default: [
         '` 1 2 3 4 5 6 7 8 9 0 \u00B0 + {bksp}',

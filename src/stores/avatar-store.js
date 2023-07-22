@@ -18,6 +18,7 @@ export const useAvatarStore = defineStore('avatar', {
     motscles: null, // mots clés du compte
     avatarP: null, // avatar principal du compte courant
     comptaP: null, // compta actuelle du compte courant
+    synthese: null, // synthese de l'espace courant (comptable seulement)
  
     maptr: new Map(), // Map des tribus, uniquement pour le Comptable
 
@@ -115,11 +116,11 @@ export const useAvatarStore = defineStore('avatar', {
     getTribuDeCompte: (state) => { return (id) => { 
         for (const it of this.tribu.act) {
           const e = this.tribu.act[it]
-          if (e && e.id === id) { return [this.tribu, it, e] }
+          if (e && !e.vide && e.id === id) { return [this.tribu, it, e] }
         }
         if (this.tribuC) for (const it of this.tribuC.act) {
           const e = this.tribuC.act[it]
-          if (e && e.id === id) { return [this.tribuC, it, e] }
+          if (e && !e.vide && e.id === id) { return [this.tribuC, it, e] }
         }
         return [null, 0, null]
       }
@@ -189,7 +190,7 @@ export const useAvatarStore = defineStore('avatar', {
     // elt act dans tribu pour la tribu courante et le compte courant
     act: (state) => {
       const t = state.tribu
-      return t.act[state.compte.it]
+      return t ? t.act[state.compta.it] : { vide: true}
     },
 
     /** PanelPeople ****************************************************/
@@ -258,7 +259,9 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     ptLc: (state) => {
-      return Object.values(state.tribuC.act)
+      const t = []
+      for (const e of state.tribuC.act) if (e && !e.vide) t.push(e)
+      return t
     },
 
     // PageTribus ***************************************************    
@@ -334,15 +337,15 @@ export const useAvatarStore = defineStore('avatar', {
   },
 
   actions: {
-    setCompte (avatar, compta, tribu, tribu2) { // avatar principal du compte connecté
+    setCompte (avatar, compta, tribu) { // avatar principal du compte connecté
       const session = stores.session
       this.avatarP = avatar
       session.setTribuId(tribu.id)
       session.setTribuCId(tribu.id)
+      this.comptaP = compta // utilisé par setTribu
       this.setTribu(tribu)
       this.setCompta(compta)
       this.setAvatar(avatar)
-      this.setTribu2(tribu2)
     },
 
     /* Sert surtout à pouvoir attacher un écouteur pour détecter les changements de mc */
@@ -363,16 +366,14 @@ export const useAvatarStore = defineStore('avatar', {
     /* set d'une tribu courante (pour le Comptable)
     ou par convention (sans paramètre) rend "courante" la tribu de la session
     */
-    setTribuC (tribu, tribu2) { 
+    setTribuC (tribu) { 
       const session = stores.session
       if (!tribu) {
         // Par convention, rend "courante" la tribu de la session
-        this.tribu2CP = this.tribu2P
         session.setTribuCId(session.tribuId)
       } else {
         session.setTribuCId(tribu.id)
         this.setTribu(tribu)
-        this.setTribu2(tribu2)
       }
     },
 
@@ -412,18 +413,22 @@ export const useAvatarStore = defineStore('avatar', {
       return stats
     },
 
-    setTribu (tribu, nostat) { // set / remplacement de la tribu
+    setSynthese (synthese) {
+      this.synthese = synthese
+    },
+
+    setTribu (tribu) { // set / remplacement de la tribu
       const session = stores.session
-      const c = this.compte
+      const c = this.compta
       if (session.tribuId === tribu.id) {
         const pSt = stores.people
         const nasp = new Map()
         const spAv = new Set() // people sponsor avant
-        for (const e of this.tribu.act) 
-          if (e && e.nasp && c.estAvDuCompte(e.id)) spAv.add(e.id)
+        if (this.tribu) for (const e of this.tribu.act) 
+          if (e && e.nasp && !c.estAvDuCompte(e.id)) spAv.add(e.id)
         const spAp = new Set() // people sponsor après
         for (const e of tribu.act)
-          if (e && e.nasp && c.estAvDuCompte(e.id)) { 
+          if (e && !e.vide && e.nasp && !c.estAvDuCompte(e.id)) { 
             spAp.add(e.id)
             nasp.set(e.id, e.nasp)
           }
@@ -433,7 +438,7 @@ export const useAvatarStore = defineStore('avatar', {
         spAp.forEach(id => { if (!spAv.has(id)) pSt.setPeopleTribu(nasp.get(id)) })
       }
       this.maptr.set(tribu.id, tribu)
-      if (session.tribuId === tribu.id) stores.session.setBlocage()
+      if (session.tribuId === tribu.id) session.setBlocage()
     },
 
     delTribuC (id) { // delete d'une tribu quelconque pour le Comptable

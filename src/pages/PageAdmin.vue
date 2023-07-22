@@ -1,8 +1,6 @@
 <template>
   <q-page class="q-pa-xs">
     <div class="q-my-sm row q-gutter-sm">
-      <q-btn dense color="warning" label="GC versions dlv" @click="testGCRes"/>
-      <q-btn dense color="warning" label="GC heb" @click="testGCHeb"/>
       <q-btn dense color="warning" label="GC" @click="testGC"/>
       <q-btn dense color="warning" label="Checkpoint" @click="affCkpt"/>
     </div>
@@ -16,9 +14,21 @@
         color="primary" :disable="ns !== 0" @click="plusNS"/>
     </div>
 
-    <div v-for="(e, idx) in session.paLeFT" :key="e.id">
-      <apercu-espace class="q-my-md" :esp="e" :idx="idx"/>
-      <q-separator class="q-my-sm" color="orange"/>
+    <div class="titre-lg text-white bg-secondary q-pa-xs full-width text-center q-my-sm">
+      {{$t('ESlo', session.paLeFT.length, { count: session.paLeFT.length})}}</div>
+    <div v-for="(esp, idx) in session.paLeFT" :key="esp.id">
+      <div :class="dkli(idx)">
+        <div class="text-bold font-mono fs-lg">
+          <span class="q-mr-md">#{{esp.id}}</span>
+          <span>{{esp.org}}</span>
+        </div>
+        <div class="q-ml-lg">
+          <span class="fs-md">{{$t('ESprf', [esp.t])}}</span>
+          <q-btn class="q-ml-lg" dense color="primary" :label="$t('changer')"
+            @click="ovchgprf1(esp)"/>
+        </div>
+        <apercu-notif class="q-mt-sm" :notif="esp.notif" :idx="idx" :ns="esp.id"/>
+      </div>
     </div>
 
     <q-dialog v-model="creationesp" persistent>
@@ -45,6 +55,37 @@
           <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
             :confirmer="creerNS"/>
         </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="edprf" persistent>
+      <q-card class="bs moyennelargeur">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense color="warning" size="md" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('STchg')}}</q-toolbar-title>
+        </q-toolbar>
+        <q-card-section class="q-my-md q-mx-sm">
+          <div class="row bord4">
+            <div class="col-2 text-center font-mono">#</div>
+            <div class="col-5 text-center font-mono">V1</div>
+            <div class="col-5 text-center font-mono">V2</div>
+          </div>
+          <div v-for="(x, idx) of cfg.profils" :key="idx" @click="prf = idx+1">
+            <div :class="'row cursor-pointer ' + dkli(idx) + brd(idx)">
+              <div class="col-2 text-center font-mono">{{idx + 1}}</div>
+              <div class="col-2 text-center font-mono">{{cfg.profils[idx][0]}}</div>
+              <div class="col-3 text-center font-mono">{{e1(cfg.profils[idx][0])}}</div>
+              <div class="col-2 text-center font-mono">{{cfg.profils[idx][1]}}</div>
+              <div class="col-3 text-center font-mono">{{e2(cfg.profils[idx][1])}}</div>
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-actions v-if="session.estAdmin">
+          <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
+            @click="MD.fD"/>
+          <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 
+            :label="$t('valider')" :disable="prf === profil" @click="valider"/>
+        </q-card-actions>
       </q-card>
     </q-dialog>
 
@@ -111,19 +152,20 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
-import ApercuEspace from '../components/ApercuEspace.vue'
+import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
-import { GC, GetCheckpoint } from '../app/operations.mjs'
+import { GC, GetCheckpoint, SetEspaceT } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
-import { AMJ } from '../app/api.mjs'
+import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { edvol } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
 
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, ApercuEspace, PhraseSecrete, BoutonHelp },
+  components: { BoutonConfirm, PhraseSecrete, ApercuNotif, BoutonHelp },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -145,6 +187,15 @@ export default {
   },
 
   methods: {
+    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+
+    e1 (v) { return edvol(v * UNITEV1) },
+    e2 (v) { return edvol(v * UNITEV2) },
+    brd (idx) { 
+      const x = this.prf === idx + 1 ? ' bord6': (this.profil === idx + 1 ? ' bord7' : ' bord5') 
+      return x 
+    },
+
     async rafraichir () {
       await reconnexionCompte()
     },
@@ -178,6 +229,17 @@ export default {
       this.rafraichir()
     },
 
+    async valider () {
+      new SetEspaceT().run(this.esp.id, this.prf)
+      MD.fD()
+    },
+    ovchgprf1 (e) {
+      this.profil = e.t
+      this.esp = e
+      this.prf = 0
+      this.ovedprf()
+    },
+
     async testGCRes () {
       const ret = await new GC().run('GCRes')
       console.log(ret.a.length)
@@ -208,19 +270,29 @@ export default {
       ps: null,
       ck: null,
       dns: this.$t('ESreq'),
-      dorg: this.$t('ESreq')
+      dorg: this.$t('ESreq'),
+      prf: 0,
+      profil: 0,
+      esp: null
     }
   },
 
   setup () {
     // TODO : gcvols à traiter 
     const session = stores.session
+    const cfg = stores.config
+
+    const edprf = ref(false)
+    function ovedprf () { MD.oD(edprf)}
     const creationesp = ref(false)
     function ovcreationesp () { MD.oD(creationesp) }
     const checkpoint = ref(false)
     function ovcheckpoint () { MD.oD(checkpoint) }
+
     return {
-      AMJ, MD, session, creationesp, ovcreationesp, checkpoint, ovcheckpoint
+      session, cfg,
+      AMJ, MD, 
+      creationesp, ovcreationesp, checkpoint, ovcheckpoint, edprf, ovedprf,
     }
   }
 
@@ -235,4 +307,10 @@ export default {
   border: 1px solid $grey-5
   border-radius: 5px
   padding: 3px
+.bord5
+  border: 2px solid transparent
+.bord6
+  border: 2px solid $warning
+.bord7
+  border: 2px solid $primary
 </style>

@@ -180,7 +180,7 @@ export default ({
       - suppr : true si le groupe est à supprimer
     Suppression de compte seulement
     args.idt: id de la tribu du compte
-    args.rndc: clé du compte dans mbtr de tribu2, pour suppression de cette entrée
+    args.it: indice du compte dans act de tribu, pour suppression de cette entrée
     Suppression d'avatar seulement
     args.dv1: réduction du volume v1 du compte (notes avatar et notes des groupes hébergés)
     args.dv2
@@ -283,10 +283,11 @@ export default ({
       })
       for (let i = 0; i < 4; i++) if (s['gr' + i].length) s.checks['_gr' + i] = false
       if (avid.value === 0) {
-        const tribu2 = aSt.tribu2
-        const setSp = tribu2.idSponsors
+        s.it = aSt.compta.it
+        s.idt = aSt.compta.idt
+        const tribu = aSt.tribu
+        const setSp = tribu.idSponsors
         s.dspt = setSp.size === 1 && setSp.has(id)
-        s.idt = tribu2.id
         if (s.dspt) s.checks._dspt = false
       } else {
         s.checks._vol = false

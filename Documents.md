@@ -1156,7 +1156,7 @@ Les `dlv` sont également fixées:
 - pour un avatar, à sa création dans son `versions`.
 - pour un membre d'un groupe, à l'acceptation de son invitation.
 
-> Les `dlv` ne sont pas _prolongées_ si le document `tribu2s` de l'avatar principal ou de sa `tribus` font l'objet d'une procédure de blocage.
+> Les `dlv` ne sont pas _prolongées_ si le document `tribus` fait l'objet d'une procédure de blocage.
 
 **Règles:** 
 - les `dlv` sont gérées par _décade_ : une `dlv` est toujours définie ou reculée à un multiple de 10 jours.
@@ -1218,7 +1218,7 @@ Lors des futures connexions sur le même compte:
 - en mode _synchronisé_ les avatars et groupes qui étaient en IDB et ne sont plus existants sont purgés de IDB.
 
 Dans les autres sessions ouvertes sur d'autres comptes, la synchronisation fait apparaître :
-- par `tribu` : un compte qui disparaît dans `tribu2` entre l'état courant et le nouvel état,
+- par `tribu` : un compte qui disparaît dans `tribu` entre l'état courant et le nouvel état,
 - par `chat` : un statut _disparu_ et une carte de visite absente,
 - par `versions` _zombi_ des groupes : détection des groupes disparus, ce qui entraîne aussi la suppression des document `membres` correspondant en mémoire (et en IDB).
 

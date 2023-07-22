@@ -144,8 +144,8 @@ export default {
   action60: 'L\'inviter en tant que "lecteur"',
 
   roletribu0: '(ignorer)',
-  roletribu1: 'Compte de ma tribu',
-  roletribu2: 'Sponsor de ma tribu',
+  roletribuC: 'Compte de ma tribu',
+  roletribuS: 'Sponsor de ma tribu',
 
   enalerte: 'En alerte',
   ensursis: 'En sursis',
@@ -710,9 +710,10 @@ export default {
   TRItribus4: 'Volume V2 restant',
   TRItribus5: 'Volume V1 total',
   TRItribus6: 'Volume V2 total',
-  TRItribu20: '(non trié)',
-  TRItribu21: 'Par quota V1 décroissant',
-  TRItribu22: 'Par quota V1 décroissant',
+
+  TRItribu0: '(non trié)',
+  TRItribu1: 'Par quota V1 décroissant',
+  TRItribu2: 'Par quota V1 décroissant',
 
   ACav: 'Relativement à l\'avatar',
   ACgr: 'Relativement au groupe',
@@ -751,11 +752,13 @@ export default {
   CNXdeg: 'Le compte est bloqué. Seuls les modes "avion" et "incognito" étant admis, votre session a été mise en mode "incognito".',
 
   // PageAdmin et ApercuEspace
-  ESne: 'Nouvel espace',
-  ESne2: 'Espace à créer',
-  ESns: 'ID de l\'espace',
+  ESne: 'Nouvelle organisation',
+  ESne2: 'Organisation à héberger',
+  ESlo: 'Aucune organisations hébergée | Une organisation hébergée | {count} organisations hébergées',
+  ESns: 'ID de l\'espace attribué',
   ESnsh: 'De 10 à 59',
   ESorg: 'Organisation',
+  ESprf: 'Profil de quotas: #{0}',
   ESreq: 'Valeur requise',
   ESnum: 'Numéro d\'espace non disponible',
   ESorgh: 'De 3 à 12 minuscules / chiffres / tiret',

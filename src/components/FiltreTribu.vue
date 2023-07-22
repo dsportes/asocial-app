@@ -7,10 +7,10 @@
           <span class="fs-md text-italic">{{$t('roletribu0')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=1">
-          <span class="fs-md text-italic">{{$t('roletribu1')}}</span>
+          <span class="fs-md text-italic">{{$t('roletribuC')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=2">
-          <span class="fs-md text-italic">{{$t('roletribu2')}}</span>
+          <span class="fs-md text-italic">{{$t('roletribuS')}}</span>
         </q-item>
       </q-list>
     </q-menu>

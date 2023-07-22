@@ -141,10 +141,10 @@
           <filtre-tri nom="tribus" :nb-options="7" :idx="0"/>
         </div>
         <div v-if="ui.page === 'tribu'" class="column justify-start">
-          <filtre-nom nom="tribu2" prop='nomc' :idx="0"/>
-          <filtre-avecsp nom="tribu2" :idx="1"/>
-          <filtre-notif nom="tribu2" :idx="0"/>
-          <filtre-tri nom="tribu2" :nb-options="3" :idx="1"/>
+          <filtre-nom nom="tribu" prop='nomc' :idx="0"/>
+          <filtre-avecsp nom="tribu" :idx="1"/>
+          <filtre-notif nom="tribu" :idx="0"/>
+          <filtre-tri nom="tribu" :nb-options="3" :idx="1"/>
         </div>
         <div v-if="ui.page === 'people'" class="column justify-start">
           <filtre-nom nom="people" prop='nom' :idx="0"/>

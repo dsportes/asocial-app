@@ -4,7 +4,7 @@ import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, u8ToB64, gzip, ungzip, ungzipT, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { ID, d13, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour, lcSynt } from './api.mjs'
+import { ID, d13, d14, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour, lcSynt } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -102,15 +102,21 @@ export class Versions {
 */
 const repertoire = { rep: {}, clet: {} }
 
-export function resetRepertoire () { repertoire.rep = {}; clet = {} }
+export function resetRepertoire () { 
+  repertoire.rep = {}
+  repertoire.clet = {} 
+}
+
 export function getCle (id) { 
   if (ID.estTribu(id)) return repertoire.clet[id]
   const e = repertoire.rep[id]
   return e ? e.rnd : null
 }
+
 export function getNg (id) { return repertoire.rep[id] }
+
 export function setClet (clet, id) { 
-  const x = ID.long(id || Tribu.id(clet))
+  const x = ID.long(id || Tribu.id(clet), NomGenerique.ns)
   if (!repertoire.clet[x]) repertoire.clet[x] = clet
   return x
 }
@@ -618,9 +624,12 @@ export class Synthese extends GenDoc {
 
   async compile (row) {
     this.atr = decode(row.atr)
-    lcSynt.forEach(f => { this.atr[0][f] = 0 })
+    const a0 = {}
+    lcSynt.forEach(f => { a0[f] = 0 })
+    this.atr[0] = a0
     for (let i = 1; i < this.atr.length; i++) {
-      lcSynt.forEach(f => { this.atr[0][f] +=  this.atr[i][f] })
+      const x = this.atr[i]
+      if (x && !x.vide) lcSynt.forEach(f => { this.atr[0][f] +=  x[f] })
     }
   }
 
@@ -666,9 +675,9 @@ Calcul des compteurs de Synthese dans synth
 export class Tribu extends GenDoc {
   /* Génère la clé de la tribu de numéro d'ordre idx (index de Compta.atr du comptable)*/
   static genCle (idx) { 
-    const rnd = new Uint8Array(32)
+    const rnd = random(32)
     rnd[0] = 0
-    rnd[1] = Math.ceil(idx / 256)
+    rnd[1] = Math.floor(idx / 256)
     rnd[2] = idx % 256
     return rnd
   }
@@ -709,11 +718,11 @@ export class Tribu extends GenDoc {
     if (row.act) for (let it = 0; it < row.act.length; it++) {
       const item = row.act[it]
       const r = { }
-      if (item) {
-        r.id = ID.long(await decrypterStr(c, item.idT))
+      if (item && !item.vide) {
+        r.id = ID.long(await decrypterStr(c, item.idT), NomGenerique.ns)
         r.notif = item.notif ? new Notification(await decrypter(c, item.notif)) : null
         r.stn = item.stn || 0
-        r.nasp = item.na ? await decrypter(c, item.nasp) : null
+        r.nasp = item.nasp ? NomGenerique.from(decode(await decrypter(c, item.nasp))) : null
         r.q1 = item.q1 || 0
         r.q2 = item.q2 || 0
         r.v1 = item.v1 || 0
@@ -745,23 +754,39 @@ export class Tribu extends GenDoc {
     })
   }
 
+  get idSponsors () {
+    const s = new Set()
+    this.act.forEach(x => { if (!x.vide && x.nasp) s.add(nasp.id) })
+    return s
+  }
+
+  get aCompte () {
+    for (const x of this.act) if (!x.vide) return true
+    return false
+  }
+
   // id de la tribu, q1 , q2 
-  static async nouvelle (idt, q1, q2, primitive) {
+  static async nouvelle (idt, q1t, q2t, primitive, q1c, q2c) {
+    const session = stores.session
     const c = getCle(idt)
     const r = {}
     r.vsh = 0
     r.id = idt
     r.v = 1
     r.act = []
+    r.q1 = q1t
+    r.q2 = q2t
+    r.stn = 0
+    r.cletX = await crypter(session.clek, c)
     if (primitive) { // inscription du comptable comme premier compte
       const nac = NomGenerique.comptable()
       const item = {
         idT: await crypter(c, '' + ID.court(nac.id)),
-        q1: q1, q2: q2,
-        a1: 0, a2: 0, stn: 0,
-        nasp: await crypter(c, nac.anr)
+        q1: q1c, q2: q2c,
+        a1: 0, a2: 0, stn: 0, v1: 0, v2: 0,
+        nasp: await crypter(c, new Uint8Array(encode(nac.anr)))
       }
-      r.act.push(item)
+      r.act = [null, item]
     }
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, _data_ }
@@ -898,7 +923,7 @@ export class Compta extends GenDoc {
       this.atr = new Array(row.atr.length)
       for (let i = 0; i < row.atr.length; i++) {
         if (row.atr[i]) {
-          const item = decode(await decrypter(this.clek, row.atr[i]))
+          const item = decode(await decrypter(session.clek, row.atr[i]))
           item.id = Tribu.id(item.clet)
           this.atr[i] = item
         } else this.atr[i] = null
@@ -965,7 +990,7 @@ export class Compta extends GenDoc {
     r.shay = ph.shay
     
     r.it = 1 // Pour une création d'espace, sera surchargé sur le serveur en AcceptationSponsoring
-    r.cletK = await crypter(k, '' + ID.court(clet))
+    r.cletK = await crypter(k, clet)
     r.cletX = ID.estComptable(na.id) ? r.cletK : cletX
 
     r.mavk = { }
@@ -975,6 +1000,12 @@ export class Compta extends GenDoc {
     c.setQ1(q1)
     c.setQ2(q2)
     r.compteurs = c.serial
+
+    if (ID.estComptable(r.id)) {
+      const x = { clet, info: '', q1, q2 }
+      r.atr = [ null, await crypter(k, new Uint8Array(encode(x)))]
+      r.astn = [0, 0]
+    }
 
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'comptas', id: r.id, v: r.v, hps1: r.hps1, _data_ }
@@ -1566,7 +1597,7 @@ export class Note extends GenDoc {
     this.auts = x.l ? x.l : []
     // row.ref à une id de note COURT
     this.ref = row.ref ? decode(await decrypter(this.cle, row.ref)) : null
-    if (this.ref) this.ref[0] = ID.long(this.ref[0])
+    if (this.ref) this.ref[0] = ID.long(this.ref[0], NomGenerique.ns)
     this.mfa = new Map()
     if (this.v2) {
       const map = row.mfas ? decode(row.mfas) : {}
@@ -1918,7 +1949,7 @@ export class FichierLocal {
 const classes = {
   espaces: Espace,
   tribus: Tribu,
-  tribu2s: Tribu2,
+  syntheses: Synthese,
   comptas: Compta,
   avatars: Avatar,
   groupes: Groupe,

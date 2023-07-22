@@ -277,46 +277,6 @@ export async function FLdel (id) {
   }
 }
 
-/* Maj d'un FichierLocal : id est obligatoire
-- si nom n'est pas false, nom est mis à jour
-- si info n'est pas false, info est mis à jour
-- si u8 n'est pas false,
-  - type est mis à jour, si non false
-  - gz et sha sont recalculés
-  - u8 est stocké (en store ou IDB)
-
-export async function FLupd (id, nom, info, type, u8) {
-  const session = stores.session
-  const tflocaux = stores.tflocaux
-  try {
-    const fl = tflocaux.getFichierLocal(id)
-    if (!fl) return
-    let buf
-    fl.dh = new Date().getTime()
-    if (nom !== false) fl.nom = nom
-    if (info !== false) fl.info = info
-    if (u8 !== false) {
-      if (type !== false) fl.type = type
-      fl.gz = type.startsWith('text/')
-      if (session.accesIdb) buf = await crypter(session.clek, fl.gz ? gzipT(u8) : u8)
-    }
-    const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
-    const data = await crypter(session.clek, fl.toIdb)
-    if (session.accesIdb) {
-      await db.transaction('rw', ['locfic', 'locdata'], async () => {
-        await db.locfic.put({ id: cle, data: data })
-        if (buf) await db.locdata.put({ id: cle, data: buf })
-      })
-    } else {
-      if (u8) fl.u8 = u8
-    }
-    return fl
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-*/
-
 /**********************************************************************
 Lecture du compte : crypté par le PBKFD de la phrase secrète. { id, k }
 - id: id du compte
@@ -360,17 +320,6 @@ export async function getTribu (idt) {
   try {
     const idk = u8ToB64(await crypter(session.clek, '' + idt, 1), true)
     const idb = await db.tribus.get(idk)
-    return decode(await decrypter(session.clek, idb.data))
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getTribu2 (idt) {
-  const session = stores.session
-  try {
-    const idk = u8ToB64(await crypter(session.clek, '' + idt, 1), true)
-    const idb = await db.tribu2s.get(idk)
     return decode(await decrypter(session.clek, idb.data))
   } catch (e) {
     throw EX2(e)
