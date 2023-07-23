@@ -550,6 +550,7 @@ export class NouvelAvatar extends OperationUI {
 /* Nouvelle tribu *********************************
 args.token: éléments d'authentification du compte.
 args.rowTribu : row de la nouvelle tribu
+args.idc: id du comptable
 args atrItem : item à insérer dans Compta en dernière position
 Retour:
 - OK : false si l'index dans rowTribu.id (poids faible) n'est pas égal à la longueur
@@ -585,34 +586,10 @@ export class NouvelleTribu extends OperationUI {
   }
 }
 
-/* Set info tribu : commentaire privé du comptable crypté par la clé K du comptable.
-args.token: éléments d'authentification du compte.
-args.id : id de la tribu
-args.attr: nom de l'attribut
-args.val: valeur de l'attribut
-Retour:
-*/
-export class SetInfoTribu extends OperationUI {
-  constructor () { super($t('OPinfotr')) }
-
-  async run (id, info) {
-    try {
-      const session = stores.session
-      const val = info ? await crypter(session.clek, info) : null
-      const args = { token: session.authToken, id, attr: 'infok', val }
-      this.tr(await post(this, 'SetAttributTribu', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* Set `notif` tribu : notification de la tribu (cryptée par la clé de la tribu).
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
-args.attr: nom de l'attribut
-args.val: valeur de l'attribut
+args.notif: notification cryptée par la clé de la tribu
 Retour:
 */
 export class SetNotifT extends OperationUI {
@@ -621,11 +598,14 @@ export class SetNotifT extends OperationUI {
   async run (id, notifT) {
     try {
       const session = stores.session
-      if (notifT) notifT.dh = new Date().getTime()
-      const cle = getCle(id)
-      const val = notifT ? await crypter(cle, notifT.encode()) : null
-      const args = { token: session.authToken, id, attr: 'notif', val }
-      this.tr(await post(this, 'SetAttributTribu', args))
+      let notif = null
+      if (notifT ) {
+        notifT.dh = new Date().getTime()
+        const cle = getCle(id)
+        notif = await crypter(cle, notifT.encode())
+      }
+      const args = { token: session.authToken, id, notif }
+      this.tr(await post(this, 'SetNotifT', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -633,20 +613,29 @@ export class SetNotifT extends OperationUI {
   }
 }
 
-/* Set des quotas d'une tribu *********************************
+/* Set des quotas OU de l'info d'une tribu *********************************
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
-args.q1 args.q2 : quotas
+args.idc: id du comptable
+args.atrItem: élément de atr {clet, info, q1, q2} cryptés par sa clé K
+args.quotas: [q1, q2] ]si changement des quotas, sinon null
 Retour:
 */
-export class SetQuotasTribu extends OperationUI {
+export class SetAtrItemComptable extends OperationUI {
   constructor () { super($t('OPqtr')) }
 
-  async run (id, q1, q2) {
+  async run (id, info, quotas) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, q1, q2 }
-      this.tr(await post(this, 'SetQuotasTribu', args))
+      const c = session.compta
+      const a = c.atr[id]
+      const atrItem = session.compta.atrItem(
+        a.clet, 
+        quotas ? a.info : info, 
+        quotas ? quotas[0] : a.q1,
+        quotas ? quotas[1] : a.q2)
+      const args = { token: session.authToken, id, idc: c.id, atrItem, quotas}
+      this.tr(await post(this, 'SetAtrItemComptable', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -656,23 +645,23 @@ export class SetQuotasTribu extends OperationUI {
 
 /* Set notification de compte dans tribu
 args.token: éléments d'authentification du compte.
-args.idt : id de la tribu
+args.id : id de la tribu
 args.idc: id du compte
-args.notif: notification du compte
+args.notif: notification du compte cryptée par la clé de la tribu
 args.stn : 0: aucune 1:simple 2:bloquante
 Retour:
 */
 export class SetNotifC extends OperationUI {
   constructor () { super($t('OPntfco')) }
 
-  async run (id, na, notifC) { // id de la tribu, na du compte cible, notif
+  async run (id, idc, notifC) { // id de la tribu, na du compte cible, notif
     try {
       const session = stores.session
       if (notifC) notifC.dh = new Date().getTime()
       const cle = getCle(id)
       const stn = !notifC ? 0 : (notifC.jbl ? 2 : 1) 
       const notif = notif ? await crypter(cle, notif.encode()) : null
-      const args = { token: session.authToken, idt: id, idn: na.id, notif, stn }
+      const args = { token: session.authToken, id, idc, notif, stn }
       this.tr(await post(this, 'SetNotifC', args))
       this.finOK()
     } catch (e) {

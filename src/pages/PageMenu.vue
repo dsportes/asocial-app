@@ -8,9 +8,17 @@
     </q-item-section>
   </q-item>
   <q-separator color="orange"/>
+
+  <q-item v-if="session.estComptable" clickable  @click="ui.setPage('tribus')">
+    <q-item-section>
+      <q-item-label lines="1">{{$t('ACtribus')}}</q-item-label>
+    </q-item-section>
+  </q-item>
+  <q-separator v-if="session.estComptable" color="orange"/>
+
   <q-item clickable @click="ui.setPage('compte')">
     <q-item-section>
-      <q-item-label lines="1">{{$t('ACmesav')}}</q-item-label>
+      <q-item-label lines="1">{{$t('ACmesav' + (session.estSponsor ? '1' : '2'))}}</q-item-label>
     </q-item-section>
   </q-item>
   <q-item clickable>
@@ -32,12 +40,7 @@
   </q-item>
   <q-item clickable  @click="maTribu()">
     <q-item-section>
-      <q-item-label lines="1">{{$t('ACmatribu', [aSt.tribu.na.nom])}}</q-item-label>
-    </q-item-section>
-  </q-item>
-  <q-item v-if="session.estComptable" clickable  @click="ui.setPage('tribus')">
-    <q-item-section>
-      <q-item-label lines="1">{{$t('ACtribus')}}</q-item-label>
+      <q-item-label lines="1">{{$t(session.estComptable ? 'ACalloc' : 'ACspons')}}</q-item-label>
     </q-item-section>
   </q-item>
   <q-separator color="orange"/>
@@ -76,6 +79,7 @@
     </q-item-section>
   </q-item>
   <q-separator v-if="session.groupeId" class="q-my-xs" color="orange"/>
+
   <q-item v-if="session.groupeId" clickable @click="ui.setPage('groupe', 'groupe')">
     <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACgr')}}</span>
     <q-btn class="q-ml-md text-bold" dense :label="gSt.egrC.groupe.na.nomc" no-caps

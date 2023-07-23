@@ -27,7 +27,7 @@
           <q-btn class="q-ml-lg" dense color="primary" :label="$t('changer')"
             @click="ovchgprf1(esp)"/>
         </div>
-        <apercu-notif class="q-mt-sm" :notif="esp.notif" :idx="idx" :ns="esp.id"/>
+        <apercu-notif class="q-mt-sm" :notif="esp.notif" :idx="idx" :nom="esp.org" :ns="esp.id"/>
       </div>
     </div>
 

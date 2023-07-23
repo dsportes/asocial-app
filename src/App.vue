@@ -49,10 +49,10 @@
         :cible="0" @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
-        <span v-if="session.ok" class="titre-lg cursor-pointer"  @click="MD.oD('detailsavatar')">
-          {{aSt.avC.na.nomc}}
-        </span>
+        <span v-if="session.ok" class="titre-lg cursor-pointer"  
+          @click="MD.oD('detailsavatar')">{{aSt.avC.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
+        <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
       </q-toolbar-title>
 
       <!-- Déconnexion -->

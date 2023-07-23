@@ -17,9 +17,12 @@
       {{$t('ANlon5') + ' ' + $t('ANle', [edd(ntf.d5), ntf.n5])}}</div>
     </div>
 
-    <apercu-notif v-if="session.status>1" :notif="session.notifG"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" :na-tribu="aSt.tribu.na" :na-cible="aSt.tribu.na"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.act.notif" :na-tribu="aSt.tribu.na" :na-cible="aSt.compte.na"/>
+    <apercu-notif v-if="session.status>1" :notif="session.notifG" 
+      :ns="session.ns" :nom="session.org"/>
+    <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" 
+      :id-tribu="aSt.tribu.id" :nom="aSt.tribu.nom"/>
+    <apercu-notif v-if="session.ok" :notif="aSt.act.notif" 
+      :id-tribu="aSt.tribu.id" :id-compte="aSt.compte.id" :nom="aSt.compte.na.nom"/>
 
     <div style="height:2px;width:100%"/>
 

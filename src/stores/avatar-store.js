@@ -43,8 +43,9 @@ export const useAvatarStore = defineStore('avatar', {
     /* retourne la tribu de l'avatar principal du compte actuellement connecté */
     tribu: (state) => { return state.maptr.get(stores.session.tribuId) },
 
-    /* retourne la tribu "courante" */
-    tribuC: (state) => { return state.maptr.get(stores.session.tribuCId) },
+    /* retourne la tribu "courante" ou à défaut celle du compte actuellement connecté */
+    tribuC: (state) => { 
+      return stores.session.tribuCId ? state.maptr.get(stores.session.tribuCId) : state.tribu },
 
     exV1: (state) => {
       const c = state.compta.compteurs

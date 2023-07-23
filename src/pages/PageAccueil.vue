@@ -85,12 +85,6 @@
         <span class="q-ml-xs">{{$t('MLAchats')}}</span>
       </div>
       </div>
-
-      <div v-if="session.estSponsor" 
-        class="q-my-md q-px-sm titre-md text-bold text-italic text-warning text-center">
-        {{$t('ACcptspons')}}
-      </div>
-
     </q-card>
 
     <q-card v-if="session.niv === 3" class="q-mt-lg petitelargeur maauto q-pa-sm">

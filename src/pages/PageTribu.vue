@@ -50,7 +50,7 @@
               </div>
 
               <apercu-notif class="q-my-xs" 
-                :notif="c.notif" :na-tribu="aSt.tribu2CP.na" :na-cible="c.na" :idx="idx"/>
+                :notif="c.notif" :id-tribu="aSt.tribuC.id" :nom="aSt.tribuC.nom" :idx="idx"/>
 
               <div v-if="c.sp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 

@@ -23,7 +23,7 @@
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
-            {{$t('alerte') + ' ' + $t('ANcible' + tC, [nomC])}}
+            {{$t('alerte') + ' ' + $t('ANcibleb' + tC, [nom])}}
           </q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -130,9 +130,10 @@ export default {
 
   props: { 
     notif: Object, // notification existante, null pour création éventuelle
-    naTribu: null, // SAUF pour une notifG, tribu cible ou tribu du compte cible
-    naCible: Object, // NomTribu, NomAvatar ou null / undefined pour global de la notification à créer
-    ns: Number, // id de l'espace, uniquement pour maj de notifG depuis PageAdmin 
+    idTribu: Number, // SAUF pour une notifG, tribu cible ou tribu du compte cible
+    idCompte: Number,
+    ns: Number, // id de l'espace
+    nom: String, // nom de l'espace, de la tribu ou du cpmpte
     idx: Number
   },
 
@@ -140,8 +141,7 @@ export default {
 
   computed: {
     // Type de cible : 1:Global, 2:Tribu, 3:Compte
-    tC () { return !this.naCible ? 1 : (this.naCible.estTribu ? 2 : 3) },
-    nomC () { return !this.naCible ? '' : this.naCible.nom },
+    tC () { return this.idCompte ? 3 : (this.ns ? 1 : 2) },
 
     // Type de l'auteur: 1:admin, 2:Comptable, 3:sponsor
     ta () { return !this.session.ns ? 1 : (this.session.estComptable ? 2 : 3)},
@@ -151,8 +151,8 @@ export default {
 
     moicible () {
       if (this.ta === 1) return ''
-      if (this.tC === 2) return this.idtra === this.naTribu.id ? this.$t('ANdg1') : ''
-      return this.session.compteId === this.naCible.id ? this.$t('ANdg2') : ''
+      if (this.tC === 2) return this.idtra === this.idTribu ? this.$t('ANdg1') : ''
+      return this.session.compteId === this.idCompte ? this.$t('ANdg2') : ''
     },
 
     // Nom de la source
@@ -346,11 +346,11 @@ export default {
           break
         }
         case 2: { // notif Tribu
-          await new SetNotifT().run(this.naTribu.id, ntf)
+          await new SetNotifT().run(this.idTribu, ntf)
           break
         }
         case 3: { // notif Compte
-          await new SetNotifC().run(this.naTribu.id, this.naCible, ntf)
+          await new SetNotifC().run(this.idTribu, this.idCompte, ntf)
           break
         }
       }

@@ -620,7 +620,6 @@ _data_:
 atr[0] est la somme des atr[1..N] : calculé sur compile (pas stocké)
 */
 export class Synthese extends GenDoc {
-  static lc = ['q1', 'q2', 'a1', 'a2', 'v1', 'v2', 'ntrs', 'ntrb', 'nbc', 'nbsp', 'ncos', 'ncob']
 
   async compile (row) {
     this.atr = decode(row.atr)
@@ -688,6 +687,16 @@ export class Tribu extends GenDoc {
     return (NomGenerique.ns * d14) + x
   }
 
+  get nom () { 
+    return this.info || '#' + this.id
+  }
+
+  get info () {
+    const aSt = stores.avatar
+    const session = stores.session
+    return !session.estComptable ? '' : aSt.compta.atr[ID.court(this.id)].info || ''
+  }
+
   get clet () { return getCle(this.id) }
 
   async compile (row) {
@@ -737,7 +746,6 @@ export class Tribu extends GenDoc {
     this.synth.q2 = this.q2
     this.synth.ntr1 = row.stn === 1 ? 1 : 0
     this.synth.ntr2 = row.stn === 2 ? 1 : 0
-    this.synth.ntr3 = row.stn === 3 ? 1 : 0
     this.act.forEach(x => {
       if (!x.vide) {
         this.synth.a1 += x.q1

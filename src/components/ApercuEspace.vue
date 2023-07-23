@@ -1,7 +1,8 @@
 <template>
   <div :class="dkli(idx)">
     <stats-tribus :stats="esp.stats" :org="esp.org" :ns="esp.id" :profil="esp.t"/>
-    <apercu-notif class="q-mt-sm" :notif="esp.notif" :idx="idx" :ns="esp.id"/>
+    <apercu-notif class="q-mt-sm" :notif="esp.notif" :nom="esp.org"
+    :idx="idx" :ns="esp.id"/>
   </div>
 </template>
 
