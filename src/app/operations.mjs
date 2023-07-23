@@ -1657,3 +1657,25 @@ export class GetCheckpoint extends OperationUI {
     }
   }
 }
+
+/* GetSynthese **********************************************
+args.token donne les éléments d'authentification du compte.
+args.ns
+Retour:
+- rowSynthse
+*/
+export class GetSynthese extends OperationUI {
+  constructor () { super('GetCheckpoint') }
+
+  async run () { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns }
+      const ret = this.tr(await post(this, 'GetSynthese', args))
+      const s = await compile(ret.rowSynthese)
+      return this.finOK(s)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

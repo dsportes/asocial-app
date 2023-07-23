@@ -612,7 +612,6 @@ _data_:
   - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
   - `ntr1` : nombre de notifications tribu_simples
   - `ntr2` : nombre de notifications tribu bloquantes
-  - `ntr3` : nombre de notifications tribu bloquées
   - `nbc` : nombre de comptes.
   - `nbsp` : nombre de sponsors.
   - `nco1` : nombres de comptes ayant une notification simple.
@@ -649,9 +648,6 @@ export class Synthese extends GenDoc {
 }
 
 /** Tribu *********************************
- * TODO : réintégrer la notif compte dans act : 
- * un sponsor ou le comptable doit pouvoir voir la notif / la positionner
- * pour n'importe quel compte de la tribu
 _data_:
 - `id` : numéro d'ordre de création de la tribu.
 - `v`

@@ -198,8 +198,8 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    fmsg (n) {
-      this.filtreMsg = hms(new Date(), true) + ' / ' + $t('items', n, { count: n })
+    fmsg (n, msg) {
+      this.filtreMsg = hms(new Date(), true) + ' / ' + (msg || $t('items', n, { count: n }))
       setTimeout(() => {
         this.filtreMsg = ''
       }, 1000)
