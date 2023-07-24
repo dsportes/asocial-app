@@ -701,7 +701,7 @@ export class Tribu extends GenDoc {
     this.id = row.id
     this.v = row.v
 
-    /* la clé de la Tribu du COMPTE est décryptée et enregistrée par Compta.comile
+    /* la clé de la Tribu du COMPTE est décryptée et enregistrée par Compta.compile
     Le comptable est le seul qui peut avoir à accéder à d'autres tribus que la sienne.
     C'est ici que se fait, pour le comptable seulement, l'enregistrement de la clé de
     n'importe quelle tribu */
@@ -756,6 +756,10 @@ export class Tribu extends GenDoc {
         }
       }
     })
+    this.synth.pca1 = !this.synth.q1 ? 0 : Math.round(this.synth.a1 * 100 / this.synth.q1) 
+    this.synth.pca2 = !this.synth.q2 ? 0 : Math.round(this.synth.a2 * 100 / this.synth.q2) 
+    this.synth.pcv1 = !this.synth.q1 ? 0 : Math.round(this.synth.v1 * 100 / this.synth.q1) 
+    this.synth.pcv2 = !this.synth.q2 ? 0 : Math.round(this.synth.v2 * 100 / this.synth.q2) 
   }
 
   get idSponsors () {

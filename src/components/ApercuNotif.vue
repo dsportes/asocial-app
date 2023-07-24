@@ -133,7 +133,7 @@ export default {
     idTribu: Number, // SAUF pour une notifG, tribu cible ou tribu du compte cible
     idCompte: Number,
     ns: Number, // id de l'espace
-    nom: String, // nom de l'espace, de la tribu ou du cpmpte
+    nom: String, // nom de l'espace, de la tribu ou du compte
     idx: Number
   },
 

@@ -1075,6 +1075,11 @@ export default {
 
   P22tit: 'Contacts de l\'avatar {0}',
 
+  // Detail Tribu
+  DTtit1: 'Total des tranches',
+  DTtit0: 'Tranche #{0} {info}',
+  DTnbncs: 'Aucune notification collective simple pour la tranche | Une notification collective simple pour la tranche | {count} notifications collectives simples pour la tranche ',
+
   // Panel Tribu
   PTvide: 'Aucune tribu (sur {0}) ne répond au critère de filtre',
   PTtit: 'Tribu {0}',

@@ -2,7 +2,7 @@
 Source principale : Synthese
 Depuis PageAdmin par l'administrateur: ns est donné par PageAdmin
 - les "tribus / tranche d'allocation de quotas" n'ont PAS de nom
-- les notifs tribu ne sont pas accessibles, seulement leurs gravité
+- les notifs tribu ne sont pas accessibles, seulement leurs gravités
 - la création d'une nouvelle tribu n'est pas possible
 - zoom impossible sur une tribu
 Depuis un Comptable: ns est celui de la session
@@ -13,17 +13,13 @@ Depuis un Comptable: ns est celui de la session
 - source secondaire de données: compta.act
 -->
 <template>
-  <q-page class="q-pa-sm">
-    <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
+  <q-page class="column q-pl-xs q-mr-sm">
+    <!--div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div-->
 
-    <div class="q-my-md q-pa-xs column items-center">
-      <stats-tribus :stats="session.stats" :org="session.org" :ns="session.ns" :profil="session.profil"/>
 
-      <quotas-vols class="q-my-sm" :vols="session.stats" />
 
       <q-btn class="q-my-sm" size="md" flat dense color="primary" 
         :label="$t('PTnv')" @click="ouvrirnt"/>
-    </div>
 
     <div v-if="!aSt.ptLtFT.length" class="largeur40 maauto q-my-md titre-lg text-italic">
       {{$t('PTvide', [aSt.getTribus.length])}}
@@ -64,6 +60,12 @@ Depuis un Comptable: ns est celui de la session
       </q-card>
     </q-dialog>
 
+    <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="[0,0]">
+      <div class="column" style="width:100vw">
+
+      </div>
+    </q-page-sticky>
+
   </q-page>
 </template>
 
@@ -72,8 +74,6 @@ import { ref, onMounted, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuTribu from '../components/ApercuTribu.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import QuotasVols from '../components/QuotasVols.vue'
-import StatsTribus from '../components/StatsTribus.vue'
 import { $t, afficherDiag, edvol } from '../app/util.mjs'
 import { ID, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouvelleTribu, GetTribu, GetSynthese } from '../app/operations.mjs'
@@ -83,8 +83,7 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-
-  components: { StatsTribus, QuotasVols, ApercuTribu, ChoixQuotas },
+  components: { ApercuTribu, ChoixQuotas },
 
   computed: {
   },
@@ -231,6 +230,7 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+$hb: 18rem
 .msg
   position: absolute
   z-index: 99999
@@ -238,4 +238,10 @@ export default {
   right: 5px
   border-radius: 5px
   border: 1px solid black
+.box
+  width: 100vw
+  height: $hb
+  overflow: hidden
+.sep
+  margin-top: $hb
 </style>
