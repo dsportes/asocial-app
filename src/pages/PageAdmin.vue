@@ -16,18 +16,28 @@
 
     <div class="titre-lg text-white bg-secondary q-pa-xs full-width text-center q-my-sm">
       {{$t('ESlo', session.paLeFT.length, { count: session.paLeFT.length})}}</div>
+
     <div v-for="(esp, idx) in session.paLeFT" :key="esp.id">
       <div :class="dkli(idx)">
-        <div class="text-bold font-mono fs-lg">
-          <span class="q-mr-md">#{{esp.id}}</span>
-          <span>{{esp.org}}</span>
+
+        <div class="row justify-between">
+          <div class="text-bold font-mono fs-lg">
+            <span class="q-mr-md">#{{esp.id}}</span>
+            <span>{{esp.org}}</span>
+          </div>
+          <q-btn dense color="primary" icon="open_in_new" :label="$t('detail')"
+            @click="pageesp(esp)"/>
         </div>
+
         <div class="q-ml-lg">
           <span class="fs-md">{{$t('ESprf', [esp.t])}}</span>
           <q-btn class="q-ml-lg" dense color="primary" :label="$t('changer')"
             @click="ovchgprf1(esp)"/>
         </div>
-        <apercu-notif class="q-mt-sm" :notif="esp.notif" :idx="idx" :nom="esp.org" :ns="esp.id"/>
+
+        <apercu-notif class="q-mt-sm" :notif="esp.notif" :idx="idx" 
+          :nom="esp.org" :ns="esp.id"/>
+
       </div>
     </div>
 
@@ -144,6 +154,23 @@
       </div>
     </q-dialog>
 
+    <q-dialog v-model="pageespace" persistent full-height>
+      <div class="bs" style="width:100vw">
+        <q-layout container view="hHh lpR fFf" :class="sty">
+          <q-header elevated class="bg-secondary text-white">
+            <q-toolbar class="bg-secondary text-white">
+              <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+              <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESckpt', [ns])}}</q-toolbar-title>
+              <bouton-help page="page1"/>
+            </q-toolbar>
+          </q-header>
+          <q-page-container class="q-pa-xs">
+            <PageEspace :ns="nsc"/>
+          </q-page-container>
+        </q-layout>
+      </div>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -240,6 +267,12 @@ export default {
       this.ovedprf()
     },
 
+    pageesp (e) {
+      this.nsc = e.id
+      this.ovpageespace()
+    },
+
+    /*
     async testGCRes () {
       const ret = await new GC().run('GCRes')
       console.log(ret.a.length)
@@ -247,6 +280,7 @@ export default {
     async testGCHeb () {
       await new GC().run('GCHeb')
     },
+    */
     async testGC () {
       await new GC().run('GC')
     },
@@ -266,6 +300,7 @@ export default {
   data () {
     return {
       ns: 0,
+      nsc: 0, // ns "courant" de PageEspca à ouvrir
       org: '',
       ps: null,
       ck: null,
@@ -288,11 +323,14 @@ export default {
     function ovcreationesp () { MD.oD(creationesp) }
     const checkpoint = ref(false)
     function ovcheckpoint () { MD.oD(checkpoint) }
+    const pageespace = ref(false)
+    function ovpageespace () { MD.oD(pageespace) }
 
     return {
       session, cfg,
       AMJ, MD, 
       creationesp, ovcreationesp, checkpoint, ovcheckpoint, edprf, ovedprf,
+      pageespace, ovpageespace
     }
   }
 

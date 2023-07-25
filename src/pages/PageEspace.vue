@@ -18,8 +18,6 @@ Depuis un Comptable: ns est celui de la session
 
 
 
-      <q-btn class="q-my-sm" size="md" flat dense color="primary" 
-        :label="$t('PTnv')" @click="ouvrirnt"/>
 
     <div v-if="!aSt.ptLtFT.length" class="largeur40 maauto q-my-md titre-lg text-italic">
       {{$t('PTvide', [aSt.getTribus.length])}}
@@ -63,6 +61,12 @@ Depuis un Comptable: ns est celui de la session
     <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="[0,0]">
       <div class="column" style="width:100vw">
 
+        <div class="row justify-center q-gutter-sm q-pa-xs text-white bg-secondary">
+          <q-btn v-if="session.estComptable" size="md" dense color="primary" 
+            :label="$t('PTnv')" @click="ouvrirnt"/>
+          <q-btn v-if="session.estComptable" size="md" dense color="primary" 
+            :label="$t('detail')" icon="open_in_new" @click="pageTribu"/>
+        </div>
       </div>
     </q-page-sticky>
 
@@ -93,6 +97,8 @@ export default {
 
     ed1 (n) { return edvol(n * UNITEV1) },
     ed2 (n) { return edvol(n * UNITEV2) },
+
+    async pageTribu () { await ui.setPage('tribu') },
 
     ouvrirnt () { 
       this.nom = ''
@@ -134,94 +140,71 @@ export default {
     - `nbsp` : nombre de sponsors.
     - `nco1` : nombres de comptes ayant une notification simple.
     - `nco2` : nombres de comptes ayant une notification bloquante.
+    Calculé localement :
+    - pca1 : pourcentage d'affectation des quotas : a1 / q1
+    - pca2
+    - pcv1 : pourcentage d'utilisation effective des quotas : v1 / q1
+    - pcv2
   atr[0] est la somme des atr[1..N] : calculé sur compile (pas stocké)
   */
   setup (props) {
     const ns = toRef(props, 'ns')
     const aSt = stores.avatar
     const session = stores.session
-    const admin = ref(session.estAdmin)
-    const synt = ref()
-    const ids = ref()
-    const alertes = ref()
-    const txq = ref(80)
-    const txv = ref(80)
-    const infoMap = ref()
+    const ui = stores.ui
+    const synth = ref() // Synthese de l'espace
 
-    async function refreshSynt () {
-      synt.value = await new GetSynthese().run(ns.value)
+    /* Pour le comptable seulement Map,
+    - cle: id (longue) de la tribu, 
+    - valeur: { info, clet }
+    */
+    const infoMap = ref() 
+
+    async function refreshSynth () {
+      synth.value = await new GetSynthese().run(ns.value)
       setAlertes()
-    }
-
-    function setAlertes () {
-      const lids = []
-      const lals = []
-      for (let i = 1; i < synt.value.atr.length; i++) {
-        const e = synt.value.atr[i]
-        if (!e || e.vide) continue
-        const id = ID.long(i, ns.value)
-        e.id = id
-        lids.push(id)
-        const nc = e.ntr2 > 0
-        const ni = e.nco2 > 0
-        const aq1 = (e.a1 * 100 / e.q1) > txq.value
-        const aq2 = (e.a2 * 100 / e.q2) > txq.value
-        const av1 = (e.v1 * 100 / e.a1) > txv.value
-        const av2 = (e.a1 * 100 / e.a2) > txv.value
-        if (nc || ni || aq1 || aq2 || av1 || av2) {
-          lals.push({id, nc, ni, aq1, aq2, av1, av2})
-        }
-      }
-      session.value.fmsg(1, $t('PTraf'))
     }
 
     function setInfoMap () {
       const m = new Map()
-      if (!admin.value) {
+      if (session.estComptable) {
         const atr = aSt.compta.atr
         for (let i = 1; i < atr.length; i++) {
           const e = atr[i]
           if (e && !e.vide)
-            m.set(ID.long(i, ns.value), {info: e.info || ('#' + i), clet: e.clet})
+            m.set(ID.long(i, ns.value), {info: e.info || '', clet: e.clet})
         }
       }
       infoMap.value = m
     }
 
-    function info (id) { return infoMap.value.get(id).info }
+    function info (id) { return session.estComptable ? infoMap.value.get(id).info : '' }
 
-    function clet (id) { return infoMap.value.get(id).clet }
+    function clet (id) { return session.estComptable ? infoMap.value.get(id).clet : null }
 
     onMounted(async () => {
-      await refreshSynt()
+      await refreshSynth()
     })
 
-    if (!admin.value) aSt.$onAction(({ name, args, after }) => {
+    if (session.estComptable) aSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'setCompta') setInfoMap()
       })
     })
 
-    watch(() => txq.value, (ap, av) => {
-        setAlertes()
-      }
-    )
-
-    watch(() => txv.value, (ap, av) => {
-        setAlertes()
-      }
-    )
-
-    refreshSynt()
+    refreshSynth()
     setInfoMap()
 
     const nt = ref(false)
     function ovnt () { MD.oD(nt)}
 
     return {
-      admin, refreshSynt, info, clet, txq, txv, synt, ids, alertes,
+      refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
+      info, // Pour une session du Comptable retourne 'info' d'une tribu
+      clet, // Pour une session du Comptable retourne 'clet' d'une tribu
+      synth, // Syntheses de l'espace
       MD, ID, nt, ovnt,
-      aSt, session
+      aSt, session, ui
     }
   }
 

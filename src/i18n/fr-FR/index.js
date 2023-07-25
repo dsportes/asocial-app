@@ -1086,7 +1086,7 @@ export default {
   PTci: 'Commentaires / information',
   PTvat: 'Volumes déjà attribués aux comptes de la tribu',
   PTres: 'Réserves restantes de volumes à attribuer',
-  PTnv: 'Nouvelle tranche d\'allocation de quotas',
+  PTnv: 'Nouvelle tranche de quotas',
   PTraf: 'Alertes recalculées',
   PTnoinfo: 'Pas de commentaires',
   PTattr: 'Attribué aux comptes',

@@ -627,8 +627,19 @@ export class Synthese extends GenDoc {
     this.atr[0] = a0
     for (let i = 1; i < this.atr.length; i++) {
       const x = this.atr[i]
-      if (x && !x.vide) lcSynt.forEach(f => { this.atr[0][f] +=  x[f] })
+      if (x && !x.vide) {
+        x.pca1 = !x.q1 ? 0 : Math.round(x.a1 * 100 / x.q1) 
+        x.pca2 = !x.q2 ? 0 : Math.round(x.a2 * 100 / x.q2) 
+        x.pcv1 = !x.q1 ? 0 : Math.round(x.v1 * 100 / x.q1) 
+        x.pcv2 = !x.q2 ? 0 : Math.round(x.v2 * 100 / x.q2)   
+        lcSynt.forEach(f => { this.atr[0][f] +=  x[f] })
+      }
     }
+    const x = this.atr[0]
+    x.pca1 = !x.q1 ? 0 : Math.round(x.a1 * 100 / x.q1) 
+    x.pca2 = !x.q2 ? 0 : Math.round(x.a2 * 100 / x.q2) 
+    x.pcv1 = !x.q1 ? 0 : Math.round(x.v1 * 100 / x.q1) 
+    x.pcv2 = !x.q2 ? 0 : Math.round(x.v2 * 100 / x.q2)   
   }
 
   static async nouveau (a1, a2, q1, q2) { // a: au comptable, q: à la tribu primitive
@@ -663,8 +674,18 @@ _data_:
   - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
   - `q1 q2` : quotas attribués.
   - `v1 v2` : volumes **approximatifs** effectivement utilisés.
+  Calculés localement :
+  - pcv1 : pourcentage d'utilisation effective de q1 : v1 / q1
+  - pcv2
 
-Calcul des compteurs de Synthese dans synth
+Calcul des compteurs de Synthese dans .synth : 
+- cet objet est exactement similaire à une ligne de Synthese.
+- plus, calculés localement :
+  - pca1 : pourcentage d'affectation des quotas : a1 / q1
+  - pca2
+  - pcv1 : pourcentage d'utilisation effective des quotas : v1 / q1
+  - pcv2
+
 */
 
 export class Tribu extends GenDoc {
@@ -732,34 +753,37 @@ export class Tribu extends GenDoc {
         r.q2 = item.q2 || 0
         r.v1 = item.v1 || 0
         r.v2 = item.v2 || 0
+
+        r.pcv1 = !r.q1 ? 0 : Math.round(r.v1 * 100 / r.q1) 
+        r.pcv2 = !r.q2 ? 0 : Math.round(r.v2 * 100 / r.q2) 
       } else r.vide = true
       this.act.push(r)
     }
 
-    this.synth = {}
-    lcSynt.forEach(f => { this.synth[f] = 0 })
-    this.synth.q1 = this.q1
-    this.synth.q2 = this.q2
-    this.synth.ntr1 = row.stn === 1 ? 1 : 0
-    this.synth.ntr2 = row.stn === 2 ? 1 : 0
+    r = {}
+    lcSynt.forEach(f => { r[f] = 0 })
+    r.q1 = this.q1
+    r.q2 = this.q2
+    r.ntr1 = row.stn === 1 ? 1 : 0
+    r.ntr2 = row.stn === 2 ? 1 : 0
     this.act.forEach(x => {
       if (!x.vide) {
-        this.synth.a1 += x.q1
-        this.synth.a2 += x.q2
-        this.synth.v1 += x.v1
-        this.synth.v2 += x.v2
-        this.synth.nbc++
-        if (x.nasp) this.synth.nbsp++
+        r.a1 += x.q1
+        r.a2 += x.q2
+        r.v1 += x.v1
+        r.v2 += x.v2
+        r.nbc++
+        if (x.nasp) r.nbsp++
         if (x.stn) {
-          if (x.stn === 1) this.synth.nco1++
-          if (x.stn === 2) this.synth.nco2++
+          if (x.stn === 1) r.nco1++
+          if (x.stn === 2) r.nco2++
         }
       }
     })
-    this.synth.pca1 = !this.synth.q1 ? 0 : Math.round(this.synth.a1 * 100 / this.synth.q1) 
-    this.synth.pca2 = !this.synth.q2 ? 0 : Math.round(this.synth.a2 * 100 / this.synth.q2) 
-    this.synth.pcv1 = !this.synth.q1 ? 0 : Math.round(this.synth.v1 * 100 / this.synth.q1) 
-    this.synth.pcv2 = !this.synth.q2 ? 0 : Math.round(this.synth.v2 * 100 / this.synth.q2) 
+    r.pca1 = !r.q1 ? 0 : Math.round(r.a1 * 100 / r.q1) 
+    r.pca2 = !r.q2 ? 0 : Math.round(r.a2 * 100 / r.q2) 
+    r.pcv1 = !r.q1 ? 0 : Math.round(r.v1 * 100 / r.q1) 
+    r.pcv2 = !r.q2 ? 0 : Math.round(r.v2 * 100 / r.q2) 
   }
 
   get idSponsors () {
