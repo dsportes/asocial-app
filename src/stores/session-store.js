@@ -91,6 +91,13 @@ export const useSessionStore = defineStore('session', {
 
     editable (state) { return state.mode < 3 && state.niv < 2 },
 
+    pow (state) {
+      if (state.estAdmin) return 1
+      if (state.estComptable) return 2
+      if (state.estSponsor) return 3
+      return 4
+    },
+
     // PageAdmin ***************************************************    
     paLeFT: (state) => {
       const x = []; state.espaces.forEach(e => { x.push(e) })

@@ -18,14 +18,13 @@ export const useFiltreStore = defineStore('filtre', {
       notes: {}
     },
     tri: {
-      tribus: 0,
-      tribu2: 0,
+      espace: 0,
+      tranche: 0,
       groupe: 0,
     },
     stats: {
       groupes: {},
-      groupe: {},
-      tribus: {}
+      groupe: {}
     }
   }),
 

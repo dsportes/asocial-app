@@ -9,7 +9,7 @@
       </div>
       <show-html class="q-mt-sm bord" :texte="notif.texte" :idx="idx" maxh="3rem" zoom/>
     </div>
-    <div v-else class="row justify-between">
+    <div v-if="!notif && (pow === 2 || pow === 3)" class="row justify-between">
       <notif-icon :niv="0" :cible="tC" info/>
       <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('ANcre')"
         dense icon="edit" @click="editer"/>
@@ -371,6 +371,7 @@ export default {
     function ovtxtedit () { MD.oD(txtedit) }
 
     return {
+      pow: session.pow,
       MD, ouvert, ovouvert, txtedit, ovtxtedit,
       session,
       aSt,

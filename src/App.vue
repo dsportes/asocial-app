@@ -136,11 +136,10 @@
         <div v-if="ui.page === 'espace'" class="column justify-start">
           <filtre-tri nom="espace" :nb-options="19" :idx="0"/>
         </div>
-        <div v-if="ui.page === 'tribu'" class="column justify-start">
+        <div v-if="ui.page === 'tranche'" class="column justify-start">
           <filtre-nom nom="tribu" prop='nomc' :idx="0"/>
-          <filtre-avecsp nom="tribu" :idx="1"/>
-          <filtre-notif nom="tribu" :idx="0"/>
-          <filtre-tri nom="tribu" :nb-options="3" :idx="1"/>
+          <filtre-notif nom="tranche" :idx="1"/>
+          <filtre-tri nom="tranche" :nb-options="3" :idx="0"/>
         </div>
         <div v-if="ui.page === 'people'" class="column justify-start">
           <filtre-nom nom="people" prop='nom' :idx="0"/>
@@ -196,7 +195,7 @@
       <page-chats class="page" v-if="ui.page === 'chats'"/>
       <page-compta class="page" v-if="ui.page === 'compta'"/>
       <page-espace class="page" v-if="ui.page === 'espace'" :ns="session.ns"/>
-      <page-tribu class="page" v-if="ui.page === 'tribu'"/>
+      <page-tranche class="page" v-if="ui.page === 'tranche'"/>
       <page-people class="page" v-if="ui.page === 'people'"/>
       <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
       <page-groupes class="page" v-if="ui.page === 'groupesac'"/>
@@ -331,9 +330,10 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
+import { ID } from './app/api.mjs'
 
-import { set$t, $t, hms } from './app/util.mjs'
-import { MD, getNg } from './app/modele.mjs'
+import { set$t, hms } from './app/util.mjs'
+import { MD } from './app/modele.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -351,7 +351,7 @@ import PageSponsorings from './pages/PageSponsorings.vue'
 import PageChats from './pages/PageChats.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageEspace from './pages/PageEspace.vue'
-import PageTribu from './pages/PageTribu.vue'
+import PageTranche from './pages/PageTranche.vue'
 import PagePeople from './pages/PagePeople.vue'
 import PanelPeople from './dialogues/PanelPeople.vue'
 import PanelMembre from './dialogues/PanelMembre.vue'
@@ -368,7 +368,7 @@ import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
 import FiltreAvecgr from './components/FiltreAvecgr.vue'
 import FiltreTribu from './components/FiltreTribu.vue'
-import FiltreAvecsp from './components/FiltreAvecsp.vue'
+// import FiltreAvecsp from './components/FiltreAvecsp.vue'
 import FiltreTri from './components/FiltreTri.vue'
 import FiltreNotif from './components/FiltreNotif.vue'
 import FiltreSansheb from './components/FiltreSansheb.vue'
@@ -391,8 +391,8 @@ export default {
     BoutonHelp, BoutonLangue, OutilsTests, NotifIcon, QueueIcon, 
     ApercuAvatar, PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageEspace, PageTribu, PagePeople, PanelPeople, PanelMembre,
-    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
+    PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
+    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreTemp, PressePapier
    },
@@ -407,8 +407,8 @@ export default {
       const p = this.ui.page
       let arg = ''
       switch (p) {
-        case 'espace' : { return this.$t('Pespace', [session.ns, session.org]) }
-        case 'tribu' : { arg = getNg(this.session.tribuCId).nom; break }
+        case 'espace' : { return this.$t('Pespace', [this.session.ns, this.session.org]) }
+        case 'tranche' : { return this.$t('Ptranche', [ID.court(this.aSt.tribuC.id), this.aSt.tribuC.info])}
         case 'chats' : { arg = this.aSt.avC.na.nom; break }
         case 'sponsorings' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
         case 'groupesac' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }

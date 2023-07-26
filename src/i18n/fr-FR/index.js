@@ -72,6 +72,7 @@ export default {
   auteur: 'Auteur',
   test: 'Test',
   sponsor: 'Sponsor',
+  total: 'Total',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -610,7 +611,7 @@ export default {
   Psponsorings: 'Sponsorings de {0}',
   Pchats: 'Chats de {0}',
   Pespace: 'Espace #{0} - {1}',
-  Ptribu: 'Tribu {0}',
+  Ptranche: 'Tranche {0} {1}',
   Pcompta: 'Notifications, blocages, volumes',
   Pgroupes: 'Tous les groupes',
   Pgroupesac: 'Groupes de {0}',
@@ -725,9 +726,9 @@ export default {
   TRIespace18: 'Nombre de comptes dédécroissant',
 
 
-  TRItribu0: '(non trié)',
-  TRItribu1: 'Par quota V1 décroissant',
-  TRItribu2: 'Par quota V1 décroissant',
+  TRItranche0: '(non trié)',
+  TRItranche1: 'Par quota V1 décroissant',
+  TRItranche2: 'Par quota V1 décroissant',
 
   ACav: 'Relativement à l\'avatar',
   ACgr: 'Relativement au groupe',
@@ -770,7 +771,7 @@ export default {
   // PageAdmin et ApercuEspace
   ESne: 'Nouvelle organisation',
   ESne2: 'Organisation à héberger',
-  ESltr: 'Liste des tranches',
+  ESltr: 'Liste des tranches de quotas',
   ESpgesp: 'Espace #{0} - {1}',
   ESlo: 'Aucune organisations hébergée | Une organisation hébergée | {count} organisations hébergées',
   ESns: 'ID de l\'espace attribué',
@@ -1094,7 +1095,11 @@ export default {
   // Detail Tribu
   DTtit1: 'Total des tranches',
   DTtit0: 'Tranche #{0} {info}',
-  DTnbncs: 'Aucune notification collective simple pour la tranche | Une notification collective simple pour la tranche | {count} notifications collectives simples pour la tranche ',
+  DTnbncs: 'Aucune notification collective SIMPLE pour la tranche | Une notification collective SIMPLE pour la tranche | {count} notifications collectives SIMPLES pour la tranche ',
+  DTnbncb: 'Aucune notification collective BLOQUANTE pour la tranche | Une notification collective BLOQUANTE pour la tranche | {count} notifications collectives BLOQUANTES pour la tranche ',
+  DTnbc: '{0} compte(s) - {1} sponsor(s)',
+  DTv1: 'Quota pour les textes des notes: [{0}] soit {1}. {2}% alloués. {3}% occupés',
+  DTv2: 'Quota pour les fichiers des notes: [{0}] soit {1}. {2}% alloués. {3}% occupés',
 
   // Panel Tribu
   PTvide: 'Aucune tribu (sur {0}) ne répond au critère de filtre',
@@ -1102,7 +1107,7 @@ export default {
   PTci: 'Commentaires / information',
   PTvat: 'Volumes déjà attribués aux comptes de la tribu',
   PTres: 'Réserves restantes de volumes à attribuer',
-  PTnv: 'Nouvelle tranche de quotas',
+  PTnv: 'Nouvelle tranche',
   PTraf: 'Alertes recalculées',
   PTnoinfo: 'Pas de commentaires',
   PTattr: 'Attribué aux comptes',

@@ -9,7 +9,7 @@
   </q-item>
   <q-separator color="orange"/>
 
-  <q-item v-if="session.estComptable" clickable  @click="ui.setPage('tribus')">
+  <q-item v-if="session.estComptable" clickable  @click="ui.setPage('espace')">
     <q-item-section>
       <q-item-label lines="1">{{$t('ACtribus')}}</q-item-label>
     </q-item-section>
@@ -40,7 +40,7 @@
   </q-item>
   <q-item clickable  @click="maTribu()">
     <q-item-section>
-      <q-item-label lines="1">{{$t(session.estComptable ? 'ACalloc' : 'ACspons')}}</q-item-label>
+      <q-item-label lines="1">{{$t(this.pow <= 3 ? 'ACalloc' : 'ACspons')}}</q-item-label>
     </q-item-section>
   </q-item>
   <q-separator color="orange"/>
@@ -132,7 +132,7 @@ export default {
     maTribu () { 
       this.ui.menug = false
       this.aSt.setTribuC()
-      this.ui.setPage('tribu')
+      this.ui.setPage('tranche')
     },
   },
 
@@ -177,6 +177,7 @@ export default {
     options.value.forEach(x => { if (x.value === session.avatarId) cav.value = x})
 
     return {
+      pow: session.pow,
       MD,
       aSt, session, gSt, ui,
       options, cav

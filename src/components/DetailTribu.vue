@@ -1,38 +1,47 @@
 <template>
-<div :class="'full-width column ' + sty" :style="'height:' + henrem + 'rem;overflow-y:hidden'">
+<div :class="'full-width ' + sty" :style="'height:' + henrem + 'rem;'">
   <div class="titre-lg text-italic text-bold q-mb-sm">
-    <div v-if="tot">{{$t('DTtit1')}}</div>
-    <div v-else>{{$t('DTtit0', [ligne.id, admin ? '' : ligne.info])}}</div>
+    <div v-if="!ligne.id">{{$t('DTtit1')}}</div>
+    <div v-else>{{$t('DTtit0', [ID.court(ligne.id), ligne.info || ''])}}</div>
   </div>
 
-  <div class="full-width column" :style="'height:' + (henrem - 2) + 'rem;overflow-y:auto'">
-    <apercu-notif v-if="estC || estSp"
+  <div :style="'height:' + (henrem - 2) + 'rem;overflow-y:auto'">
+    <apercu-notif v-if="ligne.notif"
       :notif="tribu.notif" :id-tribu="tribu.id" :idx="idx" nom=""/>
-    <div v-else>{{$t('DTnbncs', ligne.ntr1, {count: ligne.ntr1})}}</div>
+    <div v-else>
+      <div v-if="ligne.ntr1">{{$t('DTnbncs', ligne.ntr1, {count: ligne.ntr1})}}</div>
+      <div v-if="ligne.ntr2" class="text-bold bg-yellow-3 text-black">
+        {{$t('DTnbncb', ligne.ntr2, {count: ligne.ntr2})}}</div>
+    </div>
+    <div v-if="ligne.nco1">{{$t('DTnbncs', ligne.nco1, {count: ligne.nco1})}}</div>
+    <div v-if="ligne.nco2" class="text-bold bg-yellow-3 text-black">
+      {{$t('DTnbncb', ligne.nco2, {count: ligne.nco2})}}</div>
 
-    <div v-if="tot" :class="ligne.ntr2 ? 'text-bold text-warning' : ''">
-      {{$t('DTnbncb', ligne.ntr2, {count: ligne.ntr2})}}</div>
-    
-  <div>
-<div>
+    <div>{{$t('DTnbc', [ligne.nbc, ligne.nbsp])}}</div>
+    <div>{{$t('DTv1', [ligne.q1, ed1(ligne.q1), ligne.pca1, ligne.pcv1])}}</div>
+    <div>{{$t('DTv2', [ligne.q2, ed2(ligne.q2), ligne.pca2, ligne.pcv2])}}</div>
+
+  </div>
+</div>
 </template>
 
 <script>
-
-const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative']
-const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
-const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
+import stores from '../stores/stores.mjs'
+import { edvol } from '../app/util.mjs'
+import { ID, UNITEV1, UNITEV2 } from '../app/api.mjs'
+import ApercuNotif from './ApercuNotif.vue'
 
 export default ({
   name: 'DetailTribu',
   props: { 
     henrem: Number,
-    ligne: Object // ligne d'une Synthese enrichie 
+    ligne: Object // SOIT une ligne de Synthese, SOIT Tribu.synth (qui PEUT avoir un notif)
   },
 
+  components: { ApercuNotif },
+
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre ' : 'clair ' },
-    tot () { return ligne.id === 0 ? 1 : 0 },
+    sty () { return this.$q.dark.isActive ? 'sombre ' : 'clair ' }
   },
 
   data () { return {
@@ -44,34 +53,13 @@ export default ({
     ed2 (n) { return edvol(n * UNITEV2) },
   },
 
-  setup (props) {
+  setup () {
     const aSt = stores.avatar
     const session = stores.session
-    const ligne = toRef(props, 'ligne')
-    const tribu = ref(null)
-    const estC = ref(aSt.estComptable)
-    const estSp = ref(aSt.estSponsor)
-
-    async function chargtTribu () {
-      tribu.value = aSt.getTribu(ligne.value.id)
-      if (!tribu.value) tribu.value = await new GetTribu().run(ligne.value.id)
-    }
-
-    function besoinTribu () {
-      return (estC.value || estSp.value) && ligne.value.id && (ligne.value.ntr1 || ligne.value.ntr2)
-    }
-
-    if (besoinTribu()) {
-      onMounted(async () => { chargtTribu() })
-    }
-
-    watch(() => ligne.value, (ap, av) => {
-        if (besoinTribu()) chargtTribu()
-      }
-    )
+    const pow = session.pow
 
     return {
-      aSt, session, tribu, estC, estSp
+      ID, aSt, session, pow
     }
   }
 })

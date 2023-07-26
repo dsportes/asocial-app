@@ -621,25 +621,26 @@ atr[0] est la somme des atr[1..N] : calculé sur compile (pas stocké)
 export class Synthese extends GenDoc {
 
   async compile (row) {
+    const session = stores.session
     this.atr = decode(row.atr)
-    const a0 = {}
+    const a0 = { id: 0 }
     lcSynt.forEach(f => { a0[f] = 0 })
-    this.atr[0] = a0
     for (let i = 1; i < this.atr.length; i++) {
       const x = this.atr[i]
       if (x && !x.vide) {
+        x.id = ID.long(i, session.ns)
         x.pca1 = !x.q1 ? 0 : Math.round(x.a1 * 100 / x.q1) 
         x.pca2 = !x.q2 ? 0 : Math.round(x.a2 * 100 / x.q2) 
         x.pcv1 = !x.q1 ? 0 : Math.round(x.v1 * 100 / x.q1) 
         x.pcv2 = !x.q2 ? 0 : Math.round(x.v2 * 100 / x.q2)   
-        lcSynt.forEach(f => { this.atr[0][f] +=  x[f] })
+        lcSynt.forEach(f => { a0[f] +=  x[f] })
       }
     }
-    const x = this.atr[0]
-    x.pca1 = !x.q1 ? 0 : Math.round(x.a1 * 100 / x.q1) 
-    x.pca2 = !x.q2 ? 0 : Math.round(x.a2 * 100 / x.q2) 
-    x.pcv1 = !x.q1 ? 0 : Math.round(x.v1 * 100 / x.q1) 
-    x.pcv2 = !x.q2 ? 0 : Math.round(x.v2 * 100 / x.q2)   
+    a0.pca1 = !a0.q1 ? 0 : Math.round(a0.a1 * 100 / a0.q1) 
+    a0.pca2 = !a0.q2 ? 0 : Math.round(a0.a2 * 100 / a0.q2) 
+    a0.pcv1 = !a0.q1 ? 0 : Math.round(a0.v1 * 100 / a0.q1) 
+    a0.pcv2 = !a0.q2 ? 0 : Math.round(a0.v2 * 100 / a0.q2) 
+    this.atr[0] = a0 
   }
 
   static async nouveau (a1, a2, q1, q2) { // a: au comptable, q: à la tribu primitive
@@ -705,13 +706,13 @@ export class Tribu extends GenDoc {
   }
 
   get nom () { 
-    return this.info || '#' + this.id
+    return '#' + ID.court(this.id)
   }
 
   get info () {
     const aSt = stores.avatar
     const session = stores.session
-    return !session.estComptable ? '' : aSt.compta.atr[ID.court(this.id)].info || ''
+    return !session.estComptable ? '' : (aSt.compta ? aSt.compta.atr[ID.court(this.id)].info : '')
   }
 
   get clet () { return getCle(this.id) }
@@ -760,7 +761,7 @@ export class Tribu extends GenDoc {
       this.act.push(r)
     }
 
-    r = {}
+    const r = { notif: this.notif, info: this.info }
     lcSynt.forEach(f => { r[f] = 0 })
     r.q1 = this.q1
     r.q2 = this.q2
@@ -784,6 +785,7 @@ export class Tribu extends GenDoc {
     r.pca2 = !r.q2 ? 0 : Math.round(r.a2 * 100 / r.q2) 
     r.pcv1 = !r.q1 ? 0 : Math.round(r.v1 * 100 / r.q1) 
     r.pcv2 = !r.q2 ? 0 : Math.round(r.v2 * 100 / r.q2) 
+    this.synth = r
   }
 
   get idSponsors () {

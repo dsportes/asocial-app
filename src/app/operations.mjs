@@ -1684,7 +1684,7 @@ Retour:
 export class GetSynthese extends OperationUI {
   constructor () { super('GetCheckpoint') }
 
-  async run () { 
+  async run (ns) { 
     try {
       const session = stores.session
       const args = { token: session.authToken, ns }

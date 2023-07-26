@@ -155,17 +155,16 @@
     </q-dialog>
 
     <q-dialog v-model="pageespace" persistent full-height>
-      <div class="bs" style="width:100vw">
+      <div class="bs" style="width:100vw;max-width:100vw">
+        <q-toolbar class="bg-secondary text-white" style="position:fixed;z-index:2">
+          <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg full-width text-center">
+            {{$t('ESpgesp', [esp.id, esp.org])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+
         <q-layout container view="hHh lpR fFf" :class="sty">
-          <q-header elevated class="bg-secondary text-white">
-            <q-toolbar class="bg-secondary text-white">
-              <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
-              <q-toolbar-title class="titre-lg full-width text-center">
-                {{$t('ESpgesp', [esp.id, esp.org])}}</q-toolbar-title>
-              <bouton-help page="page1"/>
-            </q-toolbar>
-          </q-header>
-          <q-page-container class="q-pa-xs">
+          <q-page-container>
             <PageEspace :ns="esp.id"/>
           </q-page-container>
         </q-layout>
@@ -182,6 +181,7 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import PageEspace from '../pages/PageEspace.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
 import { GC, GetCheckpoint, SetEspaceT } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
@@ -193,7 +193,7 @@ const reg = /^([a-z0-9\-]+)$/
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, PhraseSecrete, ApercuNotif, BoutonHelp },
+  components: { BoutonConfirm, PhraseSecrete, ApercuNotif, BoutonHelp, PageEspace },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -269,6 +269,8 @@ export default {
     },
 
     pageesp (e) {
+      this.ns = e.id
+      this.session.setNs(this.ns)
       this.esp = e
       this.ovpageespace()
     },

@@ -13,39 +13,39 @@ Depuis un Comptable: ns est celui de la session
 - source secondaire de données: compta.act
 -->
 <template>
-  <q-page class="column q-pl-xs q-mr-sm">
+  <q-page class="column q-pa-xs">
     <!--div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div-->
 
-    <div class="sep"/>
+    <div :class="pow === 1 ? 'sep' : 'sep2'"/>
 
-    <div :class="dkli(idx) + ' column cursor-pointer zone' + (ligne.id === lg.id ? ' courant' : '')" 
+    <div :class="dkli(idx) + ' column cursor-pointer zone' + (ligne && (ligne.id === lg.id) ? ' courant' : '')" 
       v-for="(lg, idx) in synth" :key="lg.id" @click=lgCourante(lg)>
       <div class="full-width row"> <!-- ligne 1 -->
         <div class="col-3 fs-md">
-          <span v-if="idx===0">$t('total')</span>
-          <span v-else>#{{lg.id}}
-            <span v-if="session.estComptable" class= "q-ml-sm">{{lg.info}}</span>
+          <span v-if="!lg.id">{{$t('total')}}</span>
+          <span v-else>#{{ID.court(lg.id)}}
+            <span v-if="pow === 2" class= "q-ml-sm">{{lg.info}}</span>
           </span>
         </div>
-        <div class="col-1 font-mono text-center bl">{{lg.nbc ? lg.nbc : '-'}}</div>
-        <div class="col-1 font-mono text-center bl">{{lg.ntr1 ? lg.ntr1 : '-'}}</div>
-        <div class="col-1 font-mono text-center bl">{{lg.nco1 ? lg.nco1 : '-'}}</div>
+        <div class="col-1 font-mono text-center">{{lg.nbc ? lg.nbc : '-'}}</div>
+        <div class="col-1 font-mono text-center">{{lg.ntr1 ? lg.ntr1 : '-'}}</div>
+        <div class="col-1 font-mono text-center">{{lg.nco1 ? lg.nco1 : '-'}}</div>
         <div class="col-1 text-italic bl">V1</div>
         <div class="col-1 font-mono text-center">[{{lg.q1}}]</div>
         <div class="col-2 font-mono text-center">{{ed1(lg.q1)}}</div>
-        <div class="col-1 font-mono text-center bl">{{lg.pca1}}%</div>
+        <div class="col-1 font-mono text-center">{{lg.pca1}}%</div>
         <div class="col-1 font-mono text-center">{{lg.pcv1}}%</div>
       </div>
 
       <div class="full-width row"> <!-- ligne 2 -->
         <div class="col-3"></div>
-        <div class="col-1 font-mono text-center bl">{{lg.nbsp ? lg.nbsp : '-'}}</div>
+        <div class="col-1 font-mono text-center">{{lg.nbsp ? lg.nbsp : '-'}}</div>
         <div :class="cell(lg.ntr2)">{{lg.ntr2 ? lg.ntr2 : '-'}}</div>
         <div :class="cell(lg.nco2)">{{lg.nco2 ? lg.nco2 : '-'}}</div>
         <div class="col-1 text-italic bl">V2</div>
         <div class="col-1 font-mono text-center">[{{lg.q2}}]</div>
         <div class="col-2 font-mono text-center">{{ed2(lg.q2)}}</div>
-        <div class="col-1 font-mono text-center bl">{{lg.pca2}}%</div>
+        <div class="col-1 font-mono text-center">{{lg.pca2}}%</div>
         <div class="col-1 font-mono text-center">{{lg.pcv2}}%</div>
       </div>
     </div>
@@ -71,15 +71,18 @@ Depuis un Comptable: ns est celui de la session
       </q-card>
     </q-dialog>
 
-    <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="[0,0]">
+    <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="pow === 1 ? [0,25] : [0,0]">
       <div class="column" style="width:100vw">
-        <detail-tribu :ligne="ligne" :henrem="10"/>
+        <div style="position:relative">
+          <q-btn v-if="pow===2 && ligne && ligne.id" class="q-ml-xs" size="md" dense color="primary" 
+            style="position:absolute;top:0;right:0"
+            :label="$t('detail')" icon-right="open_in_new" @click="pageTranche"/>
+          <detail-tribu v-if="ligne" :ligne="ligne" :henrem="pow === 1 ? 8 : 10"/>
+        </div>
         <q-toolbar class="full-width bg-secondary text-white">
           <q-toolbar-title class="titre-md">{{$t('ESltr')}}</q-toolbar-title>          
-          <q-btn v-if="session.estComptable" size="md" dense color="primary" 
+          <q-btn v-if="pow===2" size="md" dense color="primary" 
             :label="$t('PTnv')" @click="ouvrirnt"/>
-          <q-btn v-if="session.estComptable" size="md" dense color="primary" 
-            :label="$t('detail')" icon="open_in_new" @click="pageTribu"/>
         </q-toolbar>
       </div>
     </q-page-sticky>
@@ -88,13 +91,13 @@ Depuis un Comptable: ns est celui de la session
 </template>
 
 <script>
-import { ref, onMounted, toRef } from 'vue'
+import { ref, onMounted, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import DetailTribu from '../components/DetailTribu.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { edvol } from '../app/util.mjs'
 import { ID, UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { NouvelleTribu, GetTribu, AboTribu, GetSynthese } from '../app/operations.mjs'
+import { NouvelleTribu, GetTribu, AboTribuC, GetSynthese } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 
 export default {
@@ -108,7 +111,7 @@ export default {
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-    cell (n) { return 'col-1 font-mono text-center bl' + (!n ? '' : ' bg-yellow-3 text-black text-bold')},
+    cell (n) { return 'col-1 font-mono text-center' + (!n ? '' : ' bg-yellow-3 text-black text-bold')},
     ed1 (n) { return edvol(n * UNITEV1) },
     ed2 (n) { return edvol(n * UNITEV2) },
 
@@ -122,27 +125,37 @@ export default {
       MD.fD()
     },
 
-    lgCourante (lg) {
-      this.ligne = lg
+    async lgCourante (lg) {
+      if (this.pow === 2 && (lg.ntr1 || lg.ntr2)) {
+        const t = await this.getTr(id)
+        this.ligne = t.synth
+      } else {
+        this.ligne = lg
+      }
     },
 
-    async pageTribu (id) { // Comptable seulement
-      if (this.session.tribuCId !== id) {
-        let t = this.aSt.getTribu(id)
-        if (!t) { 
-          t = await new GetTribu().run(id, true) // true: abonnement
-        } else {
-          if (session.fsSync) await new AboTribu().run(id)
-        }
-        this.aSt.setTribuC(t)
+    async getTr (id) {
+      if (this.pow === 1) return null
+      if (this.session.tribuCId === id) return this.aSt.tribuC
+      if (this.session.tribuId !== id) return this.aSt.tribu
+      let t = this.aSt.getTribu(id)
+      if (!t) { 
+        t = await new GetTribu().run(id, true) // true: abonnement
+      } else {
+        if (session.fsSync) await new AboTribuC().run(id)
       }
-      this.ui.setPage('tribu')
+      this.aSt.setTribuC(t)
+      return t
+    },
+
+    async pageTranche (id) { // Comptable seulement
+      await this.getTr(id)
+      this.ui.setPage('tranche')
     }
   },
 
   data () {
     return {
-      ligne: synth[0], // ligne de synthèse courante
       nom: '',
       quotas: null
     }
@@ -175,6 +188,10 @@ export default {
     const ns = toRef(props, 'ns')
     const aSt = stores.avatar
     const session = stores.session
+    const pow = session.pow
+
+    const ligne = ref(null)
+
     const fSt = stores.filtre
     const ui = stores.ui
     const synth = ref() // Synthese de l'espace
@@ -195,8 +212,6 @@ export default {
     ]
 
     function comp (x, y) {
-      if (!x.id) return -1
-      if (!y.id) return 1
       const a = x[ct.f]
       const b = x[ct.f]
       return a > b ? -ct.m : (a < b ? ct.m : 0) 
@@ -206,44 +221,34 @@ export default {
       ct.f = fx[filtre.value][0]
       ct.m = fx[filtre.value][1]
       synth.value.sort(comp)
+      // synth.value.forEach(lg => { console.log(lg.id, lg.q1)})
     }
-
-    /* Pour le comptable seulement Map,
-    - cle: id (longue) de la tribu, 
-    - valeur: { info, clet }
-    */
-    const infoMap = ref()
 
     async function refreshSynth () {
-      synth.value = await new GetSynthese().run(ns.value)
+      const s = await new GetSynthese().run(ns.value)
+      synth.value = s.atr
       trier()
     }
-
-    function setInfoMap () {
-      const m = new Map()
-      if (session.estComptable) {
-        const atr = aSt.compta.atr
-        for (let i = 1; i < atr.length; i++) {
-          const e = atr[i]
-          if (e && !e.vide)
-            m.set(ID.long(i, ns.value), {info: e.info || '', clet: e.clet})
-        }
-      }
-      infoMap.value = m
-    }
-
-    function info (id) { return session.estComptable ? infoMap.value.get(id).info : '' }
-
-    function clet (id) { return session.estComptable ? infoMap.value.get(id).clet : null }
 
     onMounted(async () => {
       await refreshSynth()
       trier()
+      if (aSt.tribuC) {
+        synth.value.forEach(s => { if (s.id === session.tribuCId) ligne.value = s })
+      } else {
+        ligne.value = synth.value[0] // ligne de synthèse courante initiale
+      }  
     })
 
-    if (session.estComptable) aSt.$onAction(({ name, args, after }) => {
+    if (pow === 2) aSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'setCompta') setInfoMap()
+        /* si la ligne courante correspond à une tribu qui vient
+        s'être chargée, on fait repointer cette ligne sur le synth de cette tribu */
+        if (name === 'setTribu' && ligne.value.id === args[0]) {
+          const t = aSt.getTribu(ligne.value.id)
+          ligne.value = t.synth
+        }
       })
     })
 
@@ -252,20 +257,15 @@ export default {
       }
     )
 
-    refreshSynth()
-    setInfoMap()
-    trier()
-
     const nt = ref(false)
     function ovnt () { MD.oD(nt)}
 
     return {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
-      info, // Pour une session du Comptable retourne 'info' d'une tribu
-      clet, // Pour une session du Comptable retourne 'clet' d'une tribu
       synth, // Syntheses de l'espace
+      ligne, // ligne courante affichée
       MD, ID, nt, ovnt,
-      aSt, session, ui
+      aSt, session, pow, ui
     }
   }
 
@@ -274,7 +274,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-$hb: 12rem
 .msg
   position: absolute
   z-index: 99999
@@ -283,5 +282,7 @@ $hb: 12rem
   border-radius: 5px
   border: 1px solid black
 .sep
-  margin-top: $hb
+  margin-top: 11rem
+.sep2
+  margin-top: 12rem
 </style>

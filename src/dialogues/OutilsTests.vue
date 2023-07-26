@@ -18,7 +18,10 @@
 
   <q-page-container>
     <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.build])}}</div>
-
+    <!--
+    <comp-test :arg="testArg" />
+    <q-btn dense color="warning" label="test" @click="testArg.val = new Date().getTime()"/>
+    -->
     <q-card-section v-if="tab === 'tst'" class="column items-center">
       <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt1')" @click="testEcho"/>
       <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt2')" @click="testErr"/>
@@ -130,6 +133,7 @@
 import { ref } from 'vue'
 import { encode, decode } from '@msgpack/msgpack'
 
+// import CompTest from './CompTest.vue'
 import stores from '../stores/stores.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -145,7 +149,7 @@ export default ({
 
   props: { },
 
-  components: { PhraseSecrete, BoutonHelp },
+  components: { PhraseSecrete, BoutonHelp /*, CompTest */ },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -153,6 +157,7 @@ export default ({
 
   data () {
     return {
+      // testArg: { val: new Date().getTime() },
       tab: 'tst',
       ps: null,
 

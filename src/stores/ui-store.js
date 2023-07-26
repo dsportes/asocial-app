@@ -9,10 +9,10 @@ export const useUiStore = defineStore('ui', {
     pageback: '',
     pagetab: '',
 
-    pagesF: new Set(['chats', 'tribus', 'tribu', 'people', 'groupes', 
+    pagesF: new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 
       'groupesac', 'groupe', 'notes']),
     tabF: new Set(['membres']),
-    pagesB: new Set(['tribus', 'groupes', 'groupesac', 'notes', 'ficavion']),
+    pagesB: new Set(['espace', 'groupes', 'groupesac', 'notes', 'ficavion']),
     menu: false,
     menug: false,
 
