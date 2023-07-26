@@ -160,12 +160,13 @@
           <q-header elevated class="bg-secondary text-white">
             <q-toolbar class="bg-secondary text-white">
               <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
-              <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESckpt', [ns])}}</q-toolbar-title>
+              <q-toolbar-title class="titre-lg full-width text-center">
+                {{$t('ESpgesp', [esp.id, esp.org])}}</q-toolbar-title>
               <bouton-help page="page1"/>
             </q-toolbar>
           </q-header>
           <q-page-container class="q-pa-xs">
-            <PageEspace :ns="nsc"/>
+            <PageEspace :ns="esp.id"/>
           </q-page-container>
         </q-layout>
       </div>
@@ -268,7 +269,7 @@ export default {
     },
 
     pageesp (e) {
-      this.nsc = e.id
+      this.esp = e
       this.ovpageespace()
     },
 

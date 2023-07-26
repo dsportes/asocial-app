@@ -133,12 +133,8 @@
           <filtre-mc nom="chats" attr="mcp" :idx="1"/>
           <filtre-mc nom="chats" attr="mcn" :idx="0"/>
         </div>
-        <div v-if="ui.page === 'tribus'" class="column justify-start">
-          <filtre-nom nom="tribus" prop='nomt' :idx="0"/>
-          <filtre-txt nom="tribus" prop='txtt' :idx="1"/>
-          <filtre-txt nom="tribus" prop='txtn' :idx="0"/>
-          <filtre-notif nom="tribus" :idx="1"/>
-          <filtre-tri nom="tribus" :nb-options="7" :idx="0"/>
+        <div v-if="ui.page === 'espace'" class="column justify-start">
+          <filtre-tri nom="espace" :nb-options="19" :idx="0"/>
         </div>
         <div v-if="ui.page === 'tribu'" class="column justify-start">
           <filtre-nom nom="tribu" prop='nomc' :idx="0"/>
@@ -199,7 +195,7 @@
       <page-sponsorings class="page" v-if="ui.page === 'sponsorings'"/>
       <page-chats class="page" v-if="ui.page === 'chats'"/>
       <page-compta class="page" v-if="ui.page === 'compta'"/>
-      <page-tribus class="page" v-if="ui.page === 'tribus'"/>
+      <page-espace class="page" v-if="ui.page === 'espace'" :ns="session.ns"/>
       <page-tribu class="page" v-if="ui.page === 'tribu'"/>
       <page-people class="page" v-if="ui.page === 'people'"/>
       <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
@@ -354,7 +350,7 @@ import PageCompte from './pages/PageCompte.vue'
 import PageSponsorings from './pages/PageSponsorings.vue'
 import PageChats from './pages/PageChats.vue'
 import PageCompta from './pages/PageCompta.vue'
-import PageTribus from './pages/PageTribus.vue'
+import PageEspace from './pages/PageEspace.vue'
 import PageTribu from './pages/PageTribu.vue'
 import PagePeople from './pages/PagePeople.vue'
 import PanelPeople from './dialogues/PanelPeople.vue'
@@ -395,7 +391,7 @@ export default {
     BoutonHelp, BoutonLangue, OutilsTests, NotifIcon, QueueIcon, 
     ApercuAvatar, PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageTribus, PageTribu, PagePeople, PanelPeople, PanelMembre,
+    PageCompta, PageEspace, PageTribu, PagePeople, PanelPeople, PanelMembre,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreAvecsp,
     FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreTemp, PressePapier
@@ -411,6 +407,7 @@ export default {
       const p = this.ui.page
       let arg = ''
       switch (p) {
+        case 'espace' : { return this.$t('Pespace', [session.ns, session.org]) }
         case 'tribu' : { arg = getNg(this.session.tribuCId).nom; break }
         case 'chats' : { arg = this.aSt.avC.na.nom; break }
         case 'sponsorings' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }

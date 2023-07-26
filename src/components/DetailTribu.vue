@@ -1,5 +1,5 @@
 <template>
-<div class="full-width column" :style="'height:' + henrem + 'rem;overflow-y:hidden'">
+<div :class="'full-width column ' + sty" :style="'height:' + henrem + 'rem;overflow-y:hidden'">
   <div class="titre-lg text-italic text-bold q-mb-sm">
     <div v-if="tot">{{$t('DTtit1')}}</div>
     <div v-else>{{$t('DTtit0', [ligne.id, admin ? '' : ligne.info])}}</div>
@@ -26,12 +26,12 @@ const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
 export default ({
   name: 'DetailTribu',
   props: { 
-    idx: Number,
     henrem: Number,
     ligne: Object // ligne d'une Synthese enrichie 
   },
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre ' : 'clair ' },
     tot () { return ligne.id === 0 ? 1 : 0 },
   },
 

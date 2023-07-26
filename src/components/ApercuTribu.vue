@@ -74,8 +74,7 @@ export default {
   name: 'ApercuTribu',
 
   props: { 
-    id: Number, // id de la tribu
-    idx: Number, edit: Boolean
+    id: Number // id de la tribu
   },
 
   components: { QuotasVols, ApercuNotif, ChoixQuotas },

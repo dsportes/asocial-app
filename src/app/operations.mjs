@@ -65,6 +65,23 @@ export class OperationUI extends Operation {
   }
 }
 
+/* Abonnement à la tribu courante ******************************************
+*/
+export class AboTribuC extends OperationUI {
+  constructor () { super($t('OPabo')) }
+
+  async run (idt) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, idt }
+      this.tr(await post(this, 'AboTribuC', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* Changement du memo d'un compte ******************************************
 */
 export class MemoCompte extends OperationUI {

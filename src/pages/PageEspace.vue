@@ -2,12 +2,12 @@
 Source principale : Synthese
 Depuis PageAdmin par l'administrateur: ns est donné par PageAdmin
 - les "tribus / tranche d'allocation de quotas" n'ont PAS de nom
-- les notifs tribu ne sont pas accessibles, seulement leurs gravités
+- dans DetailTribu les notifs tribu ne sont pas accessibles, seulement leurs gravités
 - la création d'une nouvelle tribu n'est pas possible
 - zoom impossible sur une tribu
 Depuis un Comptable: ns est celui de la session
 - les "tribus / tranche d'allocation de quotas" ont un nom / info
-- les notifs tribu sont accessibles
+- dans DetailTribu les notifs tribu sont accessibles
 - la création d'une nouvelle tribu est possible
 - zoom possible sur une tribu
 - source secondaire de données: compta.act
@@ -16,26 +16,39 @@ Depuis un Comptable: ns est celui de la session
   <q-page class="column q-pl-xs q-mr-sm">
     <!--div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div-->
 
+    <div class="sep"/>
 
-
-
-    <div v-if="!aSt.ptLtFT.length" class="largeur40 maauto q-my-md titre-lg text-italic">
-      {{$t('PTvide', [aSt.getTribus.length])}}
-    </div>
-
-    <q-card class="largeur40 maauto" v-if="aSt.ptLtFT.length">
-      <div v-for="(tribu, idx) in aSt.ptLtFT" :key="tribu.id">
-        <q-expansion-item dense switch-toggle-side group="g1" :class="'q-my-xs ' + dkli(idx)">
-          <template v-slot:header>
-            <div class="q-ml-md row full-width justify-between items-center">
-              <div class="titre-md">{{tribu.na.nom}}</div>
-              <q-btn class="q-ml-md" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(tribu.id)"/>
-            </div>
-          </template>
-          <apercu-tribu class="q-ml-lg" :id="tribu.id" :idx="idx" edit/>
-        </q-expansion-item>
+    <div :class="dkli(idx) + ' column cursor-pointer zone' + (ligne.id === lg.id ? ' courant' : '')" 
+      v-for="(lg, idx) in synth" :key="lg.id" @click=lgCourante(lg)>
+      <div class="full-width row"> <!-- ligne 1 -->
+        <div class="col-3 fs-md">
+          <span v-if="idx===0">$t('total')</span>
+          <span v-else>#{{lg.id}}
+            <span v-if="session.estComptable" class= "q-ml-sm">{{lg.info}}</span>
+          </span>
+        </div>
+        <div class="col-1 font-mono text-center bl">{{lg.nbc ? lg.nbc : '-'}}</div>
+        <div class="col-1 font-mono text-center bl">{{lg.ntr1 ? lg.ntr1 : '-'}}</div>
+        <div class="col-1 font-mono text-center bl">{{lg.nco1 ? lg.nco1 : '-'}}</div>
+        <div class="col-1 text-italic bl">V1</div>
+        <div class="col-1 font-mono text-center">[{{lg.q1}}]</div>
+        <div class="col-2 font-mono text-center">{{ed1(lg.q1)}}</div>
+        <div class="col-1 font-mono text-center bl">{{lg.pca1}}%</div>
+        <div class="col-1 font-mono text-center">{{lg.pcv1}}%</div>
       </div>
-    </q-card>
+
+      <div class="full-width row"> <!-- ligne 2 -->
+        <div class="col-3"></div>
+        <div class="col-1 font-mono text-center bl">{{lg.nbsp ? lg.nbsp : '-'}}</div>
+        <div :class="cell(lg.ntr2)">{{lg.ntr2 ? lg.ntr2 : '-'}}</div>
+        <div :class="cell(lg.nco2)">{{lg.nco2 ? lg.nco2 : '-'}}</div>
+        <div class="col-1 text-italic bl">V2</div>
+        <div class="col-1 font-mono text-center">[{{lg.q2}}]</div>
+        <div class="col-2 font-mono text-center">{{ed2(lg.q2)}}</div>
+        <div class="col-1 font-mono text-center bl">{{lg.pca2}}%</div>
+        <div class="col-1 font-mono text-center">{{lg.pcv2}}%</div>
+      </div>
+    </div>
 
     <!-- Dialogue de création d'une nouvelle tribu -->
     <q-dialog v-model="nt" persistent>
@@ -60,13 +73,14 @@ Depuis un Comptable: ns est celui de la session
 
     <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="[0,0]">
       <div class="column" style="width:100vw">
-
-        <div class="row justify-center q-gutter-sm q-pa-xs text-white bg-secondary">
+        <detail-tribu :ligne="ligne" :henrem="10"/>
+        <q-toolbar class="full-width bg-secondary text-white">
+          <q-toolbar-title class="titre-md">{{$t('ESltr')}}</q-toolbar-title>          
           <q-btn v-if="session.estComptable" size="md" dense color="primary" 
             :label="$t('PTnv')" @click="ouvrirnt"/>
           <q-btn v-if="session.estComptable" size="md" dense color="primary" 
             :label="$t('detail')" icon="open_in_new" @click="pageTribu"/>
-        </div>
+        </q-toolbar>
       </div>
     </q-page-sticky>
 
@@ -76,29 +90,27 @@ Depuis un Comptable: ns est celui de la session
 <script>
 import { ref, onMounted, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
-import ApercuTribu from '../components/ApercuTribu.vue'
+import DetailTribu from '../components/DetailTribu.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import { $t, afficherDiag, edvol } from '../app/util.mjs'
+import { edvol } from '../app/util.mjs'
 import { ID, UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { NouvelleTribu, GetTribu, GetSynthese } from '../app/operations.mjs'
+import { NouvelleTribu, GetTribu, AboTribu, GetSynthese } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { ApercuTribu, ChoixQuotas },
+  components: { DetailTribu, ChoixQuotas },
 
   computed: {
   },
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-
+    cell (n) { return 'col-1 font-mono text-center bl' + (!n ? '' : ' bg-yellow-3 text-black text-bold')},
     ed1 (n) { return edvol(n * UNITEV1) },
     ed2 (n) { return edvol(n * UNITEV2) },
-
-    async pageTribu () { await ui.setPage('tribu') },
 
     ouvrirnt () { 
       this.nom = ''
@@ -110,15 +122,27 @@ export default {
       MD.fD()
     },
 
-    async courant (id) {
-      const t = await new GetTribu().run(id, true)
-      this.aSt.setTribuC(t)
+    lgCourante (lg) {
+      this.ligne = lg
+    },
+
+    async pageTribu (id) { // Comptable seulement
+      if (this.session.tribuCId !== id) {
+        let t = this.aSt.getTribu(id)
+        if (!t) { 
+          t = await new GetTribu().run(id, true) // true: abonnement
+        } else {
+          if (session.fsSync) await new AboTribu().run(id)
+        }
+        this.aSt.setTribuC(t)
+      }
       this.ui.setPage('tribu')
     }
   },
 
   data () {
     return {
+      ligne: synth[0], // ligne de synthèse courante
       nom: '',
       quotas: null
     }
@@ -151,18 +175,48 @@ export default {
     const ns = toRef(props, 'ns')
     const aSt = stores.avatar
     const session = stores.session
+    const fSt = stores.filtre
     const ui = stores.ui
     const synth = ref() // Synthese de l'espace
+    const filtre = ref(fSt.tri.espace)
+
+    const ct = { f: 0, m: 1 }
+
+    const fx = [['id', 1], 
+      ['ntr2', 1], ['ntr2', -1],
+      ['nco2', 1], ['nco2', -1],
+      ['q1', 1], ['q1', -1],
+      ['q2', 1], ['q2', -1],
+      ['pca1', 1], ['pca1', -1],
+      ['pca2', 1], ['pca2', -1],
+      ['pcv1', 1], ['pcv1', -1],
+      ['pcv2', 1], ['pcv2', -1],
+      ['nbc', 1], ['nbc', -1]
+    ]
+
+    function comp (x, y) {
+      if (!x.id) return -1
+      if (!y.id) return 1
+      const a = x[ct.f]
+      const b = x[ct.f]
+      return a > b ? -ct.m : (a < b ? ct.m : 0) 
+    }
+
+    function trier () {
+      ct.f = fx[filtre.value][0]
+      ct.m = fx[filtre.value][1]
+      synth.value.sort(comp)
+    }
 
     /* Pour le comptable seulement Map,
     - cle: id (longue) de la tribu, 
     - valeur: { info, clet }
     */
-    const infoMap = ref() 
+    const infoMap = ref()
 
     async function refreshSynth () {
       synth.value = await new GetSynthese().run(ns.value)
-      setAlertes()
+      trier()
     }
 
     function setInfoMap () {
@@ -184,6 +238,7 @@ export default {
 
     onMounted(async () => {
       await refreshSynth()
+      trier()
     })
 
     if (session.estComptable) aSt.$onAction(({ name, args, after }) => {
@@ -192,8 +247,14 @@ export default {
       })
     })
 
+    watch(() => filtre.value, (ap, av) => {
+        trier()
+      }
+    )
+
     refreshSynth()
     setInfoMap()
+    trier()
 
     const nt = ref(false)
     function ovnt () { MD.oD(nt)}
@@ -213,7 +274,7 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-$hb: 18rem
+$hb: 12rem
 .msg
   position: absolute
   z-index: 99999
@@ -221,10 +282,6 @@ $hb: 18rem
   right: 5px
   border-radius: 5px
   border: 1px solid black
-.box
-  width: 100vw
-  height: $hb
-  overflow: hidden
 .sep
   margin-top: $hb
 </style>

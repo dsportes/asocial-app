@@ -378,42 +378,6 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
-    /* Calcul la stats des tribus (actuelle ou par anticipation avant d'enregistrer une tribu).
-    SI l'argument tribu est donné,
-    - inclut cette tribu, à la place de celle en store, ou en plus si elle n'y est pas
-    - retourne la stats calculée, ne la stocke pas en store
-    Permet une évaluation prévisionnelle AVANT maj de la tribu au serveur
-    */
-    statsTribus (tribu) { // TODO
-      /*
-      - `cpt` : sérialisation non cryptée des compteurs suivants:
-        - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
-        - `q1 q2` : quotas actuels de la tribu
-        - `nbc` : nombre de comptes.
-        - `nbsp` : nombre de sponsors.
-        - `ncoS` : nombres de comptes ayant une notification simple.
-        - `ncoB` : nombres de comptes ayant une notification bloquante.
-      */
-      const stats = { dh: new Date().getTime(), ntr: 0 }
-      this.lc.forEach(f => { stats[f] = 0 })
-      if (tribu && !this.maptr.has(tribu.id)) {
-        stats.ntr++
-        this.lc.forEach(f => { 
-          if (f !== 'ntr') stats[f] += (tribu.cpt[f] || 0)
-        })
-      }
-      for (const [,t] of this.maptr) {
-        if (!tribu || tribu.id !== t.id) {
-          stats.ntr++
-          this.lc.forEach(f => { 
-            if (f !== 'ntr') stats[f] += (t.cpt[f] || 0)
-          })
-        } 
-      }
-      if (!tribu) stores.session.setStats(stats)
-      return stats
-    },
-
     setSynthese (synthese) {
       this.synthese = synthese
     },
