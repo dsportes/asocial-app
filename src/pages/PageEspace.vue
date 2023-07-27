@@ -13,42 +13,46 @@ Depuis un Comptable: ns est celui de la session
 - source secondaire de données: compta.act
 -->
 <template>
-  <q-page class="column q-pa-xs">
+  <q-page class="column">
     <!--div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div-->
 
-    <div :class="pow === 1 ? 'sep' : 'sep2'"/>
+    <div :class="pow === 1 ? 'sep1' : 'sep2'"/>
 
-    <div :class="dkli(idx) + ' column cursor-pointer zone' + (ligne && (ligne.id === lg.id) ? ' courant' : '')" 
+    <div :class="dkli(idx) + ' q-mb-sm q-mx-xs'" 
       v-for="(lg, idx) in synth" :key="lg.id" @click=lgCourante(lg)>
-      <div class="full-width row"> <!-- ligne 1 -->
-        <div class="col-3 fs-md">
-          <span v-if="!lg.id">{{$t('total')}}</span>
-          <span v-else>#{{ID.court(lg.id)}}
-            <span v-if="pow === 2" class= "q-ml-sm">{{lg.info}}</span>
-          </span>
+      <div :class="'zone cursor-pointer' + (ligne && (ligne.id === lg.id) ? ' courant' : '')"
+        style="overflow:hidden;max-height:3rem">
+        <div class="row col-auto"> <!-- ligne 1 -->
+          <div class="col-3 fs-md">
+            <span v-if="!lg.id">{{$t('total')}}</span>
+            <span v-else>#{{ID.court(lg.id)}}
+              <span v-if="pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
+            </span>
+          </div>
+          <div class="col-1 font-mono text-center">{{lg.nbc ? lg.nbc : '-'}}</div>
+          <div class="col-1 font-mono text-center">{{lg.ntr1 ? lg.ntr1 : '-'}}</div>
+          <div class="col-1 font-mono text-center">{{lg.nco1 ? lg.nco1 : '-'}}</div>
+          <div class="col-1 text-italic bl">V1</div>
+          <div class="col-1 font-mono text-center">[{{lg.q1}}]</div>
+          <div class="col-2 font-mono text-center">{{ed1(lg.q1)}}</div>
+          <div class="col-1 font-mono text-center">{{lg.pca1}}%</div>
+          <div class="col-1 font-mono text-center">{{lg.pcv1}}%</div>
         </div>
-        <div class="col-1 font-mono text-center">{{lg.nbc ? lg.nbc : '-'}}</div>
-        <div class="col-1 font-mono text-center">{{lg.ntr1 ? lg.ntr1 : '-'}}</div>
-        <div class="col-1 font-mono text-center">{{lg.nco1 ? lg.nco1 : '-'}}</div>
-        <div class="col-1 text-italic bl">V1</div>
-        <div class="col-1 font-mono text-center">[{{lg.q1}}]</div>
-        <div class="col-2 font-mono text-center">{{ed1(lg.q1)}}</div>
-        <div class="col-1 font-mono text-center">{{lg.pca1}}%</div>
-        <div class="col-1 font-mono text-center">{{lg.pcv1}}%</div>
-      </div>
 
-      <div class="full-width row"> <!-- ligne 2 -->
-        <div class="col-3"></div>
-        <div class="col-1 font-mono text-center">{{lg.nbsp ? lg.nbsp : '-'}}</div>
-        <div :class="cell(lg.ntr2)">{{lg.ntr2 ? lg.ntr2 : '-'}}</div>
-        <div :class="cell(lg.nco2)">{{lg.nco2 ? lg.nco2 : '-'}}</div>
-        <div class="col-1 text-italic bl">V2</div>
-        <div class="col-1 font-mono text-center">[{{lg.q2}}]</div>
-        <div class="col-2 font-mono text-center">{{ed2(lg.q2)}}</div>
-        <div class="col-1 font-mono text-center">{{lg.pca2}}%</div>
-        <div class="col-1 font-mono text-center">{{lg.pcv2}}%</div>
+        <div class="row col-auto"> <!-- ligne 2 -->
+          <div class="col-3"></div>
+          <div class="col-1 font-mono text-center">{{lg.nbsp ? lg.nbsp : '-'}}</div>
+          <div :class="cell(lg.ntr2)">{{lg.ntr2 ? lg.ntr2 : '-'}}</div>
+          <div :class="cell(lg.nco2)">{{lg.nco2 ? lg.nco2 : '-'}}</div>
+          <div class="col-1 text-italic bl">V2</div>
+          <div class="col-1 font-mono text-center">[{{lg.q2}}]</div>
+          <div class="col-2 font-mono text-center">{{ed2(lg.q2)}}</div>
+          <div class="col-1 font-mono text-center">{{lg.pca2}}%</div>
+          <div class="col-1 font-mono text-center">{{lg.pcv2}}%</div>
+        </div>
       </div>
     </div>
+    <q-separator color="primary"/>
 
     <!-- Dialogue de création d'une nouvelle tribu -->
     <q-dialog v-model="nt" persistent>
@@ -56,9 +60,11 @@ Depuis un Comptable: ns est celui de la session
         <div class="titre-lg q-my-sm">{{$t('PTnv')}}</div>
         <div class="q-pa-m">
           <q-input v-model="nom" clearable :placeholder="$t('PTinfoph')">
+            <!--
             <template v-slot:append>
               <q-btn dense icon="check" :label="$t('ok')" @click="valider" color="warning"/>
             </template>
+            -->
             <template v-slot:hint>{{$t('PTinfoh')}}</template>
           </q-input>
         </div>
@@ -77,10 +83,10 @@ Depuis un Comptable: ns est celui de la session
           <q-btn v-if="pow===2 && ligne && ligne.id" class="q-ml-xs" size="md" dense color="primary" 
             style="position:absolute;top:0;right:0"
             :label="$t('detail')" icon-right="open_in_new" @click="pageTranche"/>
-          <detail-tribu v-if="ligne" :ligne="ligne" :henrem="pow === 1 ? 8 : 10"/>
+          <detail-tribu class="q-pa-xs" v-if="ligne" :ligne="ligne" :henrem="10"/>
         </div>
         <q-toolbar class="full-width bg-secondary text-white">
-          <q-toolbar-title class="titre-md">{{$t('ESltr')}}</q-toolbar-title>          
+          <q-toolbar-title class="titre-md q-ma-xs">{{$t('ESltr')}}</q-toolbar-title>          
           <q-btn v-if="pow===2" size="md" dense color="primary" 
             :label="$t('PTnv')" @click="ouvrirnt"/>
         </q-toolbar>
@@ -126,8 +132,8 @@ export default {
     },
 
     async lgCourante (lg) {
-      if (this.pow === 2 && (lg.ntr1 || lg.ntr2)) {
-        const t = await this.getTr(id)
+      if (this.pow === 2) {
+        const t = await this.getTr(lg.id)
         this.ligne = t.synth
       } else {
         this.ligne = lg
@@ -135,14 +141,13 @@ export default {
     },
 
     async getTr (id) {
-      if (this.pow === 1) return null
       if (this.session.tribuCId === id) return this.aSt.tribuC
-      if (this.session.tribuId !== id) return this.aSt.tribu
+      // if (this.session.tribuId !== id) return this.aSt.tribu
       let t = this.aSt.getTribu(id)
       if (!t) { 
         t = await new GetTribu().run(id, true) // true: abonnement
       } else {
-        if (session.fsSync) await new AboTribuC().run(id)
+        if (this.session.fsSync) await new AboTribuC().run(id)
       }
       this.aSt.setTribuC(t)
       return t
@@ -212,14 +217,17 @@ export default {
     ]
 
     function comp (x, y) {
+      if (!x.id) return -1
+      if (!y.id) return 1
       const a = x[ct.f]
-      const b = x[ct.f]
-      return a > b ? -ct.m : (a < b ? ct.m : 0) 
+      const b = y[ct.f]
+      return a > b ? ct.m : (a < b ? -ct.m : 0) 
     }
 
     function trier () {
-      ct.f = fx[filtre.value][0]
-      ct.m = fx[filtre.value][1]
+      const fv = filtre.value
+      ct.f = fx[fv][0]
+      ct.m = fx[fv][1]
       synth.value.sort(comp)
       // synth.value.forEach(lg => { console.log(lg.id, lg.q1)})
     }
@@ -227,35 +235,46 @@ export default {
     async function refreshSynth () {
       const s = await new GetSynthese().run(ns.value)
       synth.value = s.atr
-      trier()
     }
 
-    onMounted(async () => {
-      await refreshSynth()
-      trier()
+    function resetCourant () {
       if (aSt.tribuC) {
         synth.value.forEach(s => { if (s.id === session.tribuCId) ligne.value = s })
       } else {
         ligne.value = synth.value[0] // ligne de synthèse courante initiale
       }  
+    }
+
+    onMounted(async () => {
+      await refreshSynth()
+      trier()
+      resetCourant()
     })
 
     if (pow === 2) aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setCompta') setInfoMap()
+      after(async (result) => {
         /* si la ligne courante correspond à une tribu qui vient
-        s'être chargée, on fait repointer cette ligne sur le synth de cette tribu */
-        if (name === 'setTribu' && ligne.value.id === args[0]) {
-          const t = aSt.getTribu(ligne.value.id)
-          ligne.value = t.synth
+        d'être chargée, on fait repointer cette ligne sur le synth de cette tribu */
+        if (name === 'setTribu') {
+          await refreshSynth()
+          trier()
+          resetCourant()
+        }
+        if (name === 'setCompta') {
+          resetCourant()
         }
       })
     })
 
-    watch(() => filtre.value, (ap, av) => {
-        trier()
-      }
-    )
+    fSt.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setTri' && args[0] === 'espace') {
+          filtre.value = args[1].value
+          trier()
+          resetCourant()
+        }
+      })
+    })
 
     const nt = ref(false)
     function ovnt () { MD.oD(nt)}
@@ -281,8 +300,8 @@ export default {
   right: 5px
   border-radius: 5px
   border: 1px solid black
-.sep
-  margin-top: 11rem
 .sep2
-  margin-top: 12rem
+  margin-top: 13rem
+.sep1
+  margin-top: 14rem
 </style>

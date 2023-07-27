@@ -622,11 +622,13 @@ export class Synthese extends GenDoc {
 
   async compile (row) {
     const session = stores.session
-    this.atr = decode(row.atr)
+    this.atr = new Array(row.atr.length)
+
     const a0 = { id: 0 }
     lcSynt.forEach(f => { a0[f] = 0 })
-    for (let i = 1; i < this.atr.length; i++) {
-      const x = this.atr[i]
+
+    for (let i = 1; i < row.atr.length; i++) {
+      const x = decode(row.atr[i])
       if (x && !x.vide) {
         x.id = ID.long(i, session.ns)
         x.pca1 = !x.q1 ? 0 : Math.round(x.a1 * 100 / x.q1) 
@@ -635,6 +637,7 @@ export class Synthese extends GenDoc {
         x.pcv2 = !x.q2 ? 0 : Math.round(x.v2 * 100 / x.q2)   
         lcSynt.forEach(f => { a0[f] +=  x[f] })
       }
+      this.atr[i] = x
     }
     a0.pca1 = !a0.q1 ? 0 : Math.round(a0.a1 * 100 / a0.q1) 
     a0.pca2 = !a0.q2 ? 0 : Math.round(a0.a2 * 100 / a0.q2) 
@@ -645,16 +648,18 @@ export class Synthese extends GenDoc {
 
   static async nouveau (a1, a2, q1, q2) { // a: au comptable, q: à la tribu primitive
     const session = stores.session
-    const atr = [null, {}]
-    const r = { id: session.ns, v: new Date().getTime() }
-    lcSynt.forEach(f => { atr[1][f] = 0 })
-    atr[1].q1 = q1
-    atr[1].q2 = q2
-    atr[1].a1 = a1
-    atr[1].a2 = a2
-    atr[1].nbc = 1
-    atr[1].nbsp = 1
-    r.atr = new Uint8Array(encode(atr))
+    const r = { id: session.ns, v: new Date().getTime(), atr: [null, null] }
+
+    const e = {}
+    lcSynt.forEach(f => { e[f] = 0 })
+    e.q1 = q1
+    e.q2 = q2
+    e.a1 = a1
+    e.a2 = a2
+    e.nbc = 1
+    e.nbsp = 1
+
+    r.atr[1] = new Uint8Array(encode(e))
     return { _nom: 'syntheses', id: r.id, v: r.v, _data_: new Uint8Array(encode(r))}
   }
 }
@@ -761,7 +766,7 @@ export class Tribu extends GenDoc {
       this.act.push(r)
     }
 
-    const r = { notif: this.notif, info: this.info }
+    const r = { notif: this.notif, id: this.id }
     lcSynt.forEach(f => { r[f] = 0 })
     r.q1 = this.q1
     r.q2 = this.q2
@@ -870,6 +875,12 @@ export class Compta extends GenDoc {
   avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
     for(const na of this.mav.values()) { if (na.nom === n) return na.id }
     return 0
+  }
+
+  infoTr (id) { 
+    if (!this.atr) return ''
+    const a = this.atr[ID.court(id)]
+    return a && a.info ? a.info : ''
   }
 
   clone () {

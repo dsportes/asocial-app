@@ -580,23 +580,22 @@ export class NouvelleTribu extends OperationUI {
     try {
       const session = stores.session
       const aSt = stores.avatar
+      let ret
       while (true) {
-        const idx = aSt.compte.atr.length
+        const idx = aSt.compta.atr.length
 
-        const clet = Tribu.cle(idx) // enregistre la clé
+        const clet = Tribu.genCle(idx) // enregistre la clé
         const idt = Tribu.id(clet)
         setClet(clet, idt)
         const rowTribu = await Tribu.nouvelle(idt, q1, q2)
 
-        // TODO : inscription dans Compta.atr du comptable
         const atrItem = await Compta.atrItem(clet, info, q1, q2)
         const args = { token: session.authToken, rowTribu, atrItem }
-        const ret = this.tr(await post(this, 'NouvelleTribu', args))
+        ret = this.tr(await post(this, 'NouvelleTribu', args))
         if (ret.OK) break
         await sleep(2000)
       }
-      this.finOK()
-      return ret
+      this.finOK(ret)
     } catch (e) {
       await this.finKO(e)
     }
@@ -644,9 +643,10 @@ export class SetAtrItemComptable extends OperationUI {
   async run (id, info, quotas) {
     try {
       const session = stores.session
-      const c = session.compta
-      const a = c.atr[id]
-      const atrItem = session.compta.atrItem(
+      const aSt = stores.avatar
+      const c = aSt.compta
+      const a = c.atr[ID.court(id)]
+      const atrItem = await Compta.atrItem(
         a.clet, 
         quotas ? a.info : info, 
         quotas ? quotas[0] : a.q1,
