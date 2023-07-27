@@ -119,7 +119,7 @@ export default {
     edv1 (v) { return edvol(v * UNITEV1) },
     edv2 (v) { return edvol(v * UNITEV2) },
     async getCpt() {
-      this.ccCpt = await new GetCompteursCompta().run(this.na || this.id)
+      this.ccCpt = await new GetCompteursCompta().run(this.id)
       this.pc1 = this.ccCpt.q1 ? Math.round((this.ccCpt.v1 * 100) / (this.ccCpt.q1 * UNITEV1)) : 0,
       this.pc2 = this.ccCpt.q2 ? Math.round((this.ccCpt.v2 * 100) / (this.ccCpt.q2 * UNITEV2)) : 0
     },

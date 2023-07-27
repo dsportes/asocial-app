@@ -5,6 +5,13 @@ import { encode } from '@msgpack/msgpack'
 import { ID, E_WS, AppExc, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { post } from '../app/net.mjs'
 
+const fx = [['id', 1],
+['q1', 1], ['q1', -1],
+['q2', 1], ['q2', -1],
+['pcv1', 1], ['pcv1', -1],
+['pcv2', 1], ['pcv2', -1]
+]
+
 export const useAvatarStore = defineStore('avatar', {
   state: () => ({
     /* Map des avatars du compte courant. Sous-collection pour chaque avatar id :
@@ -229,17 +236,24 @@ export const useAvatarStore = defineStore('avatar', {
 
     ppSelTr: (state) => { return state.maptr.get(state.ppSelId) },
 
-    // PageTribu ***************************************************    
+    // PageTranche ***************************************************    
     ptLcFT: (state) => {
-      const f = stores.filtre.tri.tribu2
       const lcF = state.ptLcF
-      function comp (a, b) {
-        switch (f.value) {
-          case 1 : { return a.q1 < b.q1 ? 1 : (a.q1 > b.q1 ? -1 : 0) }
-          case 2 : { return a.q2 < b.q2 ? 1 : (a.q2 > b.q2 ? -1 : 0) }
-        }
-      }
+
+      const f = stores.filtre.tri.tranche
       if (!f) { stores.session.fmsg(lcF.length); return lcF }
+
+      const ctf = fx[f][0]
+      const ctm = fx[f][1]
+
+      function comp (x, y) {
+        if (x.nasp && !y.nasp) return -1
+        if (!x.nasp && y.nasp) return 1
+        const a = x[ctf]
+        const b = y[ctf]
+        return a > b ? ctm : (a < b ? -ct.m : 0) 
+      }
+
       const x = []; lcF.forEach(t => { x.push(t) })
       x.sort(comp)
       stores.session.fmsg(x.length)
@@ -247,8 +261,8 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     ptLcF: (state) => {
-      const f = stores.filtre.filtre.tribu2
-      if (!f) { stores.session.fmsg(state.ptLc.length); return state.getTribus }
+      const f = stores.filtre.filtre.tranche
+      if (!f) { stores.session.fmsg(state.ptLc.length); return state.ptLc }
       const r = []
       for (const c of state.ptLc) {
         if (f.avecsp && !c.sp) continue
@@ -260,12 +274,15 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     ptLc: (state) => {
+      const pow = stores.session.pow
       const t = []
-      for (const e of state.tribuC.act) if (e && !e.vide) t.push(e)
+      for (const e of state.tribuC.act) {
+        if (e && !e.vide && (pow < 4 || e.nasp)) t.push(e)
+      }
       return t
     },
 
-    // PageTribus ***************************************************    
+    /* PageTribus ***************************************************    
     ptLtFT: (state) => {
       const f = stores.filtre.tri.tribus
       const ltF = state.ptLtF
@@ -306,6 +323,7 @@ export const useAvatarStore = defineStore('avatar', {
       }
       return r
     },
+    */
 
     // PageChats ******************************************
     pcLc: (state) => { 

@@ -139,7 +139,8 @@
         <div v-if="ui.page === 'tranche'" class="column justify-start">
           <filtre-nom nom="tribu" prop='nomc' :idx="0"/>
           <filtre-notif nom="tranche" :idx="1"/>
-          <filtre-tri nom="tranche" :nb-options="3" :idx="0"/>
+          <filtre-avecsp nom="tranche" :idx="0"/>
+          <filtre-tri nom="tranche" :nb-options="9" :idx="1"/>
         </div>
         <div v-if="ui.page === 'people'" class="column justify-start">
           <filtre-nom nom="people" prop='nom' :idx="0"/>
@@ -283,7 +284,7 @@
       </q-header>
       <q-page-container>
         <q-card class="q-pa-sm largeur40">
-          <apercu-avatar edit :na="aSt.avC.na"/>
+          <apercu-avatar edit :idav="aSt.avC.id"/>
         </q-card>
       </q-page-container>
     </q-layout>
@@ -368,7 +369,7 @@ import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
 import FiltreAvecgr from './components/FiltreAvecgr.vue'
 import FiltreTribu from './components/FiltreTribu.vue'
-// import FiltreAvecsp from './components/FiltreAvecsp.vue'
+import FiltreAvecsp from './components/FiltreAvecsp.vue'
 import FiltreTri from './components/FiltreTri.vue'
 import FiltreNotif from './components/FiltreNotif.vue'
 import FiltreSansheb from './components/FiltreSansheb.vue'
@@ -393,7 +394,7 @@ export default {
     PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
-    FiltreAvecgr, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
+    FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreTemp, PressePapier
    },
 

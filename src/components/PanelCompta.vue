@@ -192,9 +192,9 @@ export default ({
       this.ovedq()
     },
     async validerq () {
-      await new SetQuotas().run(this.aSt.tribuC.id, this.na, this.quotas.q1, this.quotas.q2)
+      await new SetQuotas().run(this.aSt.tribuC.id, this.c.id, this.quotas.q1, this.quotas.q2)
       MD.fD()
-      await new GetCompteursCompta().run(this.na)
+      await new GetCompteursCompta().run(this.c.id)
     },
   },
 
@@ -217,7 +217,6 @@ export default ({
       MD, edq, ovedq,
       session: stores.session,
       aSt,
-      na: c.value.na || aSt.compta.nap,
       c
     }
   }

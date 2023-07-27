@@ -724,11 +724,11 @@ Retour:
 export class SetQuotas extends OperationUI {
   constructor () { super($t('OPmajtr')) }
 
-  async run (id, na, q1, q2) {
+  async run (id, idc, q1, q2) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, idt: id, idc: na.id, q1, q2 }
-      this.tr(await post(this, 'SetQuptas', args))
+      const args = { token: session.authToken, idt: id, idc, q1, q2 }
+      this.tr(await post(this, 'SetQuotas', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -802,11 +802,8 @@ Retour:
 export class GetCompteursCompta extends OperationUI {
   constructor () { super($t('OPdhvu')) }
 
-  async run (naid) { // na ou id d'un compte
+  async run (id) { // id d'un compte
     try {
-      const na = typeof naid === 'number' ? getNg(naid) : naid
-      const id = na ? na.id : naid
-
       const session = stores.session
       const aSt = stores.avatar
       const args = { token: session.authToken, id }
@@ -820,7 +817,6 @@ export class GetCompteursCompta extends OperationUI {
       }
       cpt.id = id
       cpt.sp = ret.sp
-      cpt.na = na
       aSt.setccCpt(cpt)
       return this.finOK(cpt)
     } catch (e) {

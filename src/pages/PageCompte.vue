@@ -46,7 +46,7 @@
             :color="na.id === session.avatarId ? 'warning' : 'primary'" @click="courant(na.id)"/>
           <q-btn icon="delete" size="md" class="q-mt-sm" @click="delAvatar(na.id)"/>
         </div>
-        <apercu-avatar edit :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')" :na="na" :idx="idx"/>
+        <apercu-avatar edit :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')" :idav="na.id" :idx="idx"/>
       </div>
     </q-card>
 

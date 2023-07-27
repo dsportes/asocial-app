@@ -1,6 +1,6 @@
 <template>
   <q-card :class="dkli(idx)">
-    <apercu-genx :na="na" :cv="avatar.cv" :idx="idx" est-avc :cvchangee="cvchangee"/>
+    <apercu-genx :na="avatar.na" :cv="avatar.cv" :idx="idx" est-avc :cvchangee="cvchangee"/>
 
     <div class="q-mt-sm" v-if="avatar.pc">
       <div>
@@ -52,7 +52,7 @@ import { MD } from '../app/modele.mjs'
 export default {
   name: 'ApercuAvatar',
 
-  props: { na: Object, idx: Number, edit: Boolean },
+  props: { idav: Number, idx: Number, edit: Boolean },
 
   components: { PhraseContact, BoutonHelp, ApercuGenx },
 
@@ -68,7 +68,7 @@ export default {
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async cvchangee (res) {
-      if (res && this.na) {
+      if (res) {
         await new MajCv().run(this.avatar, res.ph, res.info)
       }
     },
@@ -106,14 +106,14 @@ export default {
 
   setup (props) {
     const aSt = stores.avatar
-    const na = toRef(props, 'na')
+    const idav = toRef(props, 'idav')
 
-    function getAv() { return aSt.getAvatar(na.value.id) }
+    function getAv() { return aSt.getAvatar(idav.value) }
     const avatar = ref(getAv())
 
     aSt.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setAvatar' && args[0].id === na.value.id) {
+        if (name === 'setAvatar' && args[0].id === idav.value) {
           avatar.value = args[0]
         }
       })
@@ -121,7 +121,7 @@ export default {
 
     /* Nécessaire pour tracker le changement d'id
     Dans une liste le composant N'EST PAS rechargé quand la liste change */
-    watch(() => na.value, (ap, av) => {
+    watch(() => idav.value, (ap, av) => {
         avatar.value = getAv()
       }
     )

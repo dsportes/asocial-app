@@ -4,8 +4,7 @@ export const useFiltreStore = defineStore('filtre', {
   state: () => ({
     filtre: { 
       chats: {},
-      tribus: {},
-      tribu2: {},
+      tranche: {},
       people: {},
       groupes: { tous: true },
       groupe: {},
