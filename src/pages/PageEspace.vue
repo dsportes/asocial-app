@@ -79,6 +79,7 @@ Depuis un Comptable: ns est celui de la session
 
     <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="pow === 1 ? [0,25] : [0,0]">
       <div class="column" style="width:100vw">
+      <div class="q-pa-xs largeur40" style="overflow:auto;height:12.5rem">
         <div style="position:relative">
           <q-btn v-if="pow===2 && ligne && ligne.id" class="q-ml-xs" size="md" dense color="primary" 
             style="position:absolute;top:0;right:0"
@@ -90,6 +91,7 @@ Depuis un Comptable: ns est celui de la session
           <q-btn v-if="pow===2" size="md" dense color="primary" 
             :label="$t('PTnv')" @click="ouvrirnt"/>
         </q-toolbar>
+      </div>
       </div>
     </q-page-sticky>
 
@@ -153,8 +155,8 @@ export default {
       return t
     },
 
-    async pageTranche (id) { // Comptable seulement
-      await this.getTr(id)
+    async pageTranche () { // Comptable seulement
+      await this.getTr(this.ligne.id)
       this.ui.setPage('tranche')
     }
   },

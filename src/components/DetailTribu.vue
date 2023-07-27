@@ -1,10 +1,14 @@
 <template>
 <div :class="'full-width ' + sty" :style="'height:' + henrem + 'rem;'">
-  <div class="titre-lg text-italic text-bold q-mb-sm">
-    <div v-if="!ligne.id">{{$t('DTtit1')}}</div>
+  <div class="q-mb-sm">
+    <div v-if="!ligne.id" class="titre-lg text-italic text-bold">
+      {{$t('DTtit1')}}
+    </div>
     <div v-else>
-      <span>{{$t('DTtit0', [ID.court(ligne.id), infoC || ''])}}</span>
-      <q-btn v-if="pow === 2" class="q-ml-md btn2" size="sm" dense
+      <span class="titre-lg text-italic text-bold">
+        {{$t('DTtit0', [ID.court(ligne.id), infoC || ''])}}
+      </span>
+      <q-btn v-if="pow === 2" class="fs-md q-ml-md btn2" size="sm" dense
         color="primary" :icon="ligne.info ? 'edit' : 'add'" 
         :label="$t('info')" @click="editer"/>
     </div>
@@ -25,7 +29,7 @@
 
     <div>{{$t('DTnbc', [ligne.nbc, ligne.nbsp])}}</div>
 
-    <div class="q-mb-xs row items-center">
+    <div class="q-mb-xs row items-center justify-between">
       <quotas-vols class="col-auto" :vols="ligne" />
       <q-btn v-if="pow === 2" size="sm" class="col-auto q-ml-md btn2 q-mr-xs"
         icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq"/>
