@@ -92,7 +92,7 @@ import PanelCompta from '../components/PanelCompta.vue'
 import { edvol, afficherDiag } from '../app/util.mjs'
 import { GetCompteursCompta, SetSponsor, ChangerTribu } from '../app/operations.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { MD } from '../app/modele.mjs'
+import { MD, getNg } from '../app/modele.mjs'
 import { crypter, crypterRSA } from '../app/webcrypto.mjs'
 
 export default {

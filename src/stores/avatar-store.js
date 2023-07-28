@@ -205,7 +205,8 @@ export const useAvatarStore = defineStore('avatar', {
     // elt act dans tribu pour la tribu courante et le people courant
     actPeC: (state) => {
       const peId = stores.session.peopleId
-      for (const e of state.tribuC) if (e && e.id === peId) return e
+      for (const e of (state.tribuC || state.tribu).act) 
+        if (e && e.id === peId) return e
     },
 
     ppTribus: (state) => {

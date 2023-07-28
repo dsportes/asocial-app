@@ -140,7 +140,7 @@ export default {
 
     nomc (c) {
       if (this.type(c) === 1) return this.aSt.getAvatar(c.id).na.nom
-      if (this.type(c) === 2) return this.pSt.getNa(c.id).na.nomc
+      if (this.type(c) === 2) return this.pSt.getNa(c.id).nomc
       return '#' + c.id
     },
 

@@ -34,10 +34,8 @@
         </div>
       </div>
 
-      <div class="q-mt-md titre-md">{{$t('NPtribu')}}
-        <span class="text-bold font-mono q-px-md">{{sp.nct.nom}}</span>
-        <span v-if="sp.sp" class="text-italic q-px-md">{{$t('NPspons')}}</span>
-      </div>
+      <div v-if="sp.sp" class="titre-md">{{$t('NPspons2', [ID.court(idtr)])}}</div>
+
       <div class="titre-md">{{$t('NPquo')}} :
         <span class="font-mono q-pl-md">v1: {{ed1(sp.quotas[0])}}</span>
         <span class="font-mono q-pl-lg">v2: {{ed2(sp.quotas[1])}}</span>
@@ -85,10 +83,10 @@ import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
 import { ExistePhrase } from '../app/operations.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
-import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
+import { UNITEV1, UNITEV2, AMJ, ID } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { crypter } from '../app/webcrypto.mjs'
-import { MD } from '../app/modele.mjs'
+import { MD, Tribu } from '../app/modele.mjs'
 
 export default ({
   name: 'AcceptationSponsoring',
@@ -105,9 +103,11 @@ export default ({
     - `na` : du sponsor P.
     - `cv` : du sponsor P.
     - `naf` : na attribué au filleul.
-    - `nct` : de sa tribu.
+    - `clet` : clé de sa tribu.
+    - 'cletX' : clé de sa tribu cryptée par la clé K du comptable
     - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
-    - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+    - 'idcsp': id du COMPTE de l'avatar sponsor
+- `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
   components: { PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp },
@@ -116,10 +116,10 @@ export default ({
     photoP () { return this.sp.cv && this.sp.cv.photo ? this.sp.cv.photo : this.sp.na.defIcon },
     infoP () { return this.sp.cv && this.sp.cv.info ? this.sp.cv.info : '' },
     estpar () { return this.sp.sp },
-    nomTribu () { return this.sp.nct[0] || '' },
     textedef () { return this.$t('merci', [this.sp.na.nom + ',\n\n' + this.sp.ard]) },
     valid () { return this.sp.dlv},
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    idtr () { return Tribu.id(this.sp.clet) },
   },
 
   data () {
@@ -175,7 +175,7 @@ export default ({
     const sp = toRef(props, 'sp')
     const pc = toRef(props, 'pc')
     return {
-      MD
+      MD, ID
     }
   }
 })

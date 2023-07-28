@@ -40,6 +40,8 @@
         </q-step>
 
         <q-step :name="4" :title="$t('NPquo1')" icon="settings" :done="step > 4" >
+          <div v-if="!avParrain" class="bg-yellow-3 text-bold text-black q-pa-xs">
+            {{$t('NPattsp')}}</div>
           <choix-quotas :quotas="quotas"/>
           <div v-if="avParrain">
             <div style="margin-left:-0.8rem" class="text-primary">
@@ -195,7 +197,7 @@ export default ({
     const step3 = ref(null)
     const tribu = toRef(props, 'tribu')
     const quotas = ref(null)
-    const cpt = tribu.value.cpt
+    const cpt = tribu.value.synth
     quotas.value = { q1: 1, q2: 1, 
       max1: cpt.q1 > cpt.a1 ? cpt.q1 - cpt.a1 : 0, 
       max2: cpt.q2 > cpt.a2 ? cpt.q2 - cpt.a2 : 0,

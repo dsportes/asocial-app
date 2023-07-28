@@ -21,10 +21,7 @@
         <div class="titre-md">{{$t('NPnom')}}
           <span class="text-bold font-mono q-px-md">{{sp.descr.naf.nom}}</span>
         </div>
-        <div class="titre-md">{{$t('NPtribu')}}
-          <span class="text-bold font-mono q-px-md">{{sp.descr.nct.nom}}</span>
-          <span v-if="sp.descr.sp" class="text-italic q-px-md">{{$t('NPspons')}}</span>
-        </div>
+        <div v-if="sp.descr.sp" class="titre-md">{{$t('NPspons', [ID.court(idtr(sp))])}}</div>
         <div class="titre-md">{{$t('NPquo')}} :
           <span class="font-mono q-pl-md">v1: {{ed1(sp.descr.quotas[0])}}</span>
           <span class="font-mono q-pl-lg">v2: {{ed2(sp.descr.quotas[1])}}</span>
@@ -58,7 +55,7 @@ import { dhcool, edvol } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
-import { MD } from '../app/modele.mjs'
+import { MD, Tribu } from '../app/modele.mjs'
 import { ProlongerSponsoring } from '../app/connexion.mjs'
 
 export default {
@@ -85,7 +82,7 @@ export default {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
-
+    idtr (sp) { return Tribu.id(sp.descr.clet) },
     async nouveausp () { if (await this.session.edit()) this.ovnvsp() },
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
@@ -112,7 +109,7 @@ export default {
     function ovnvsp () { MD.oD(nvsp) }
 
     return {
-      MD, nvsp, ovnvsp,
+      ID, MD, nvsp, ovnvsp,
       avatar,
       aSt,
       session

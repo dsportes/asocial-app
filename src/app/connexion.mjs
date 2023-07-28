@@ -826,6 +826,10 @@ rowChatI: chatI (interne) pour le compte en création
 rowChatE: chatE (externe) pour le sponsor - version à fixer
 ardx: ardoise du sponsoring à mettre à jour (avec statut 2 accepté)
 act: élément de la map act de sa tribu
+SI quotas à prélever sur le COMPTE du sponsor
+  args.it : index de ce compte dans la tribu
+  args.q1 q2 : quotas attribués par le sponsor.
+
 quotas : `[v1, v2]` quotas attribués par le parrain.
 */
 
@@ -842,8 +846,7 @@ export class AcceptationSponsoring extends OperationUI {
     - `naf` : na attribué au filleul.
     - 'cletX' : cle de sa tribu cryptée par clé K du comptable
     - `clet` : cle de sa tribu.
-    - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
-    - `quotas` : `[q1, q2]` quotas attribués par le parrain.
+    - `it` : it du sonsor dans sa tribu s'il faut lui réduire ses quotas
     ardx : reponse cryptée par la cleX du sponsoring
     reponse : texte du sponsorisé
     ps: phrase secrète du nouveau compte
@@ -866,7 +869,7 @@ export class AcceptationSponsoring extends OperationUI {
       const idt = setClet(sp.clet)
 
       session.setCompteId(sp.naf.id)
-      session.setTribuId(sp.nct.id)
+      session.setTribuId(idt)
       session.setAvatarId(session.compteId)
 
       const { publicKey, privateKey } = await genKeyPair()
@@ -892,9 +895,9 @@ export class AcceptationSponsoring extends OperationUI {
       - `q1 q2` : quotas attribués.
       - `v1 v2` : volumes **approximatifs** effectivement utilisés
       */
-      const e = {
+      const act = {
         idT: await crypter(sp.clet, '' + ID.court(sp.naf.id)),
-        nasp: sp.sp ? await crypter(sp.clet, sp.naf.anr) : null,
+        nasp: sp.sp ? await crypter(sp.clet, new Uint8Array(encode(sp.naf.anr))) : null,
         notif: null,
         stn: 0,
         q1: sp.quotas[0],
@@ -902,7 +905,6 @@ export class AcceptationSponsoring extends OperationUI {
         v1: 0,
         v2: 0
       }
-      const act = new Uint8Array(encode(e))
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
       const cc = random(32)
@@ -918,7 +920,11 @@ export class AcceptationSponsoring extends OperationUI {
       const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, contcE, cc, pubE, new Uint8Array([253])) 
 
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
-        rowChatI, rowChatE, ardx, idt, act, quotas: sp.quotas, abPlus: [idt, sp.naf.id] }
+        rowChatI, rowChatE, ardx, idt, act, 
+        it: sp.it || 0, 
+        q1: sp.it ? quotas[0] : 0,
+        q2: sp.it ? quotas[1] : 0,
+        abPlus: [idt, sp.naf.id] }
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
       if (ret.credentials) session.fscredentials = ret.credentials

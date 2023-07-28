@@ -1215,7 +1215,8 @@ _data_
   - `cv` : `{ v, photo, info }` de P.
   - `naf` : `[nom, cle]` attribué au filleul.
   - `clet` : clé de sa tribu.
-  - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
+  - 'cletX' : clet cryptée par la clé K du comptable
+  - `it` : it du sponsor dans la tribu SI il faut lui retirer les quotes
   - `quotas` : `[v1, v2]` quotas attribués par le parrain.
 - `ardx` : ardoise de bienvenue du sponsor / réponse du filleul cryptée par le PBKFD de la phrase de sponsoring
 */
@@ -1255,9 +1256,10 @@ export class Sponsoring extends GenDoc {
   static async decrypterDescr (obj, clex, descrx) {
     const x = decode(await decrypter(clex, descrx))
     obj.cv = x.cv
-    obj.sp = x.sp
+    obj.sp = x.sp || false
+    obj.it = x.it || 0
     obj.quotas = x.quotas
-    obj.nctkc = x.nctkc
+    obj.cletX = x.cletX
     obj.na = NomGenerique.from(x.na)
     obj.naf = NomGenerique.from(x.naf)
     obj.clet =  x.clet
@@ -1281,7 +1283,12 @@ export class Sponsoring extends GenDoc {
       na: [av.na.nom, av.na.rnd],
       cv: av.cv,
       naf: [n.nom, n.rnd],
-      sp, cletX, clet, quotas
+      sp, cletX, clet, quotas,
+      it : 0
+    }
+    if (!session.estSponsor && !session.estComptable) {
+      const c = aSt.compta
+      d.it = c.it
     }
     const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))
     const ardx = await crypter(phrase.clex, ard || '')
