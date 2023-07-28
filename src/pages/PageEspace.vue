@@ -78,16 +78,17 @@ Depuis un Comptable: ns est celui de la session
     </q-dialog>
 
     <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="pow === 1 ? [0,25] : [0,0]">
-      <div class="column" style="width:100vw">
-      <div class="q-pa-xs largeur40" style="overflow:auto;height:12.5rem">
+      <div style="width:100vw; position:relative">
+      <div class="largeur40 br1" style="overflow:auto;height:12.5rem">
         <div style="position:relative">
           <q-btn v-if="pow===2 && ligne && ligne.id" class="q-ml-xs" size="md" dense color="primary" 
-            style="position:absolute;top:0;right:0"
+            style="position:absolute;top:0;right:2px"
             :label="$t('detail')" icon-right="open_in_new" @click="pageTranche"/>
           <detail-tribu class="q-pa-xs" v-if="ligne" :ligne="ligne" :henrem="10"/>
         </div>
-        <q-toolbar class="full-width bg-secondary text-white">
-          <q-toolbar-title class="titre-md q-ma-xs">{{$t('ESltr')}}</q-toolbar-title>          
+        <q-toolbar class="largeur40 bg-secondary text-white" 
+          style="position:absolute;bottom:0;left:0">
+          <q-toolbar-title class="titre-md">{{$t('ESltr')}}</q-toolbar-title>          
           <q-btn v-if="pow===2" size="md" dense color="primary" 
             :label="$t('PTnv')" @click="ouvrirnt"/>
         </q-toolbar>
@@ -306,4 +307,6 @@ export default {
   margin-top: 13rem
 .sep1
   margin-top: 14rem
+.br1
+  border-right: 1px solid $grey-7
 </style>

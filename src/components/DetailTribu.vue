@@ -158,5 +158,5 @@ export default ({
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .btn2
-  max-height: 1.3rem
+  max-height: 1.5rem
 </style>

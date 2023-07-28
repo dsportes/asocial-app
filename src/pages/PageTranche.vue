@@ -5,7 +5,7 @@
     <div class="sep2"/>
 
     <div v-for="(c, idx) in aSt.ptLcFT" :key="c.id">
-      <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)">
+      <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx) + ' largeur40'">
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
@@ -26,30 +26,28 @@
           </div>
         </template>
 
-        <div :class="'q-ml-lg row items-start ' + dkli(idx)">
-          <div class="column">
-            <!-- C'est LE titulaire du compte !?!?!?
-            <apercu-avatar v-if="c.id === session.compteId" :idav="c.id" :idx="idx"/>
-            -->
-            <apercu-avatar v-if="type(c)===1" :idav="c.id" :idx="idx"/>
-            <apercu-people v-if="type(c)===2" :id="c.id" :idx="idx"/>
-            <apercu-compte v-if="type(c)===3" :elt="c" :idx="idx"/>
+        <div class="q-ml-lg">
+          <!-- C'est LE titulaire du compte !?!?!?
+          <apercu-avatar v-if="c.id === session.compteId" :idav="c.id" :idx="idx"/>
+          -->
+          <apercu-avatar v-if="type(c)===1" :idav="c.id" :idx="idx"/>
+          <apercu-people v-if="type(c)===2" :id="c.id" :idx="idx"/>
+          <apercu-compte v-if="type(c)===3" :elt="c" :idx="idx"/>
 
-            <apercu-notif class="q-my-xs" 
-              :notif="c.notif" :id-tribu="aSt.tribuC.id" :nom="aSt.tribuC.nom" :idx="idx"/>
+          <apercu-notif class="q-my-xs" 
+            :notif="c.notif" :id-tribu="aSt.tribuC.id" :nom="aSt.tribuC.nom" :idx="idx"/>
 
-            <div v-if="c.sp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
+          <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
-            <div v-if="vis(c)" class="q-mb-xs row largeur40 items-center">
-              <quotas-vols :vols="c" />
-              <q-btn v-if="pow < 4" size="sm" class="q-ml-lg"
-                  icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
-            </div>
-            
-            <q-btn v-if="pow < 4" size="sm" class="q-ml-lg"
-              icon="settings" :label="$t('PTcompta')" dense color="primary" @click="voirCompta(c)"/>
-
+          <div v-if="vis(c)" class="q-mb-xs row justify-between">
+            <quotas-vols :vols="c" />
+            <q-btn v-if="pow < 4" size="sm" class="q-ml-sm btn1"
+                icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
           </div>
+          
+          <div class="text-right"> <q-btn v-if="pow < 4" size="sm"
+            icon="poll" :label="$t('PTcompta2')" dense color="primary" 
+            @click="voirCompta(c)"/></div>
         </div>
       </q-expansion-item>
     </div>
@@ -86,10 +84,11 @@
     </q-dialog>
 
     <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="pow === 1 ? [0,25] : [0,0]">
-      <div class="column" style="width:100vw">
-      <div class="q-pa-xs largeur40" style="overflow:auto;height:12.5rem">
+      <div style="width:100vw; position:relative">
+      <div class="largeur40 br1" style="overflow:auto;height:12.5rem">
         <detail-tribu class="q-pa-xs" :ligne="ligne" :henrem="10"/>
-        <q-toolbar class="full-width bg-secondary text-white">
+        <q-toolbar class="largeur40 bg-secondary text-white" 
+          style="position:absolute;bottom:0;left:0">
           <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
           <q-btn v-if="pow < 4" size="md" dense color="primary" 
             :label="$t('PTnvc')" @click="ovnvsp"/>
@@ -106,11 +105,20 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
 import DetailTribu from '../components/DetailTribu.vue'
+import ApercuNotif from '../components/ApercuNotif.vue'
+import ChoixQuotas from '../components/ChoixQuotas.vue'
+import ApercuCompte from '../components/ApercuCompte.vue'
+import ApercuPeople from '../components/ApercuPeople.vue'
+import ApercuAvatar from '../components/ApercuAvatar.vue'
+import PanelCompta from '../components/PanelCompta.vue'
+import QuotasVols from '../components/QuotasVols.vue'
+import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import { GetCompteursCompta, SetQuotas } from '../app/operations.mjs'
 
 export default {
   name: 'PageTranche',
-  components: { DetailTribu },
+  components: { DetailTribu, ApercuNotif, ChoixQuotas, ApercuCompte, ApercuPeople,
+    ApercuAvatar, PanelCompta, QuotasVols, NouveauSponsoring },
 
   props: { },
 
@@ -137,9 +145,9 @@ export default {
     },
 
     async courant (c) { 
-      const t = this.type(c)
       this.ccid = c.id
       this.ccnomc = this.nomc(c)
+      const t = this.type(c)
       if (t === 1) {
         this.session.setAvatarId(c.id)
         MD.oD('detailsavatar')
@@ -154,6 +162,7 @@ export default {
 
     async voirCompta (c) {
       this.ccid = c.id
+      this.ccnomc = this.nomc(c)
       await new GetCompteursCompta().run(c.id)
       this.ovcptdial()
     },
@@ -189,8 +198,21 @@ export default {
   setup () {
     const session = stores.session
     const aSt = stores.avatar
-    const ligne = ref(aSt.tribuC.synth)
+    const pSt = stores.people
+    const ligne = ref()
     const pow = session.pow
+
+    function resetCourant () { ligne.value = aSt.tribuC.synth }
+
+    if (pow === 2) aSt.$onAction(({ name, args, after }) => {
+      after(async (result) => {
+        if (name === 'setTribu' || name === 'setCompta') {
+          resetCourant()
+        }
+      })
+    })
+
+    resetCourant()
 
     const nvsp = ref(false)
     function ovnvsp () { MD.oD(nvsp)}
@@ -215,9 +237,13 @@ export default {
 @import '../css/app.sass'
 .sep2
   margin-top: 13rem
+.br1
+  border-right: 1px solid $grey-7
 .q-toolbar
   padding: 0 !important
   min-height: 0 !important
+.btn1
+  max-height: 1.5rem !important
 .msg
   position: absolute
   z-index: 99999

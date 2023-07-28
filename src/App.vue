@@ -274,7 +274,7 @@
   </q-dialog>
 
   <q-dialog v-model="detailsavatar" full-height persistent>
-    <q-layout container view="hHh lpR fFf" :class="'bs ' + dkli(0)" style="width:80vw">
+    <q-layout container view="hHh lpR fFf" :class="'bs ' + dkli(0)" style="width:90vw">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>

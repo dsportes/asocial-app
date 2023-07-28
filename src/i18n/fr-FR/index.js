@@ -612,7 +612,7 @@ export default {
   Psponsorings: 'Sponsorings de {0}',
   Pchats: 'Chats de {0}',
   Pespace: 'Espace #{0} - {1}',
-  Ptranche: 'Tranche {0} {1}',
+  Ptranche: 'Tranche #{0} {1}',
   Pcompta: 'Notifications, blocages, volumes',
   Pgroupes: 'Tous les groupes',
   Pgroupesac: 'Groupes de {0}',
@@ -1126,7 +1126,7 @@ export default {
   
   PTtit1: 'Sponsors',
   PTtit2: 'Sponsors et comptes',
-  PTcompta: 'Afficher la comptabilité',
+  PTcompta2: 'Usage des quotas',
   PTq1: 'Quota V1 (texte des notes)',
   PTq2: 'Quota V2 (fichiers des notes)',
   PTq12: 'Quotas V1 (textes) / V2 (fichiers)',
@@ -1138,7 +1138,7 @@ export default {
   PTinfoph: 'potes de tom',
   PTnvc: 'Nouveau Sponsoring',
   PTpasc: 'Il n\'est pas possible de bloquer le Comptable',
-  PTcompta: 'Volumes utilisés par {0}',
+  PTcompta: 'Usage des quotas {0}',
   PTspn1: 'Il n\'est pas possible de rendre sponsor un compte dont le nom est inconnu.',
   PTspn2: 'Il n\'est pas possible de changer de tribu un compte sponsor dont le nom est inconnu.',
 
