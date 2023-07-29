@@ -576,6 +576,7 @@ export class ConnexionCompte extends OperationUI {
           stores.ui.setPage('admin')
           return this.finOK()
         }
+        if (session.estComptable) session.setMode(2)
         await this.phase0Net()
       }
 
@@ -924,8 +925,8 @@ export class AcceptationSponsoring extends OperationUI {
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
         rowChatI, rowChatE, ardx, idt, act, 
         it: sp.it || 0, 
-        q1: sp.it ? quotas[0] : 0,
-        q2: sp.it ? quotas[1] : 0,
+        q1: sp.it ? sp.quotas[0] : 0,
+        q2: sp.it ? sp.quotas[1] : 0,
         abPlus: [idt, sp.naf.id] }
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
@@ -959,8 +960,8 @@ export class AcceptationSponsoring extends OperationUI {
         try {
           await session.setNombase()
           await openIDB()
-          setTrigramme(session.nombase, this.avatar.na.nomc)
-          // setTrigramme(session.nombase, await getTrigramme())
+          // setTrigramme(session.nombase, avatar.na.nomc)
+          setTrigramme(session.nombase, await getTrigramme())
           lectureSessionSyncIdb()
           // Finalisation en une seule fois de l'écriture du nouvel état en IDB
           this.buf.putIDB(rowCompta)
@@ -970,7 +971,7 @@ export class AcceptationSponsoring extends OperationUI {
           await this.buf.commitIDB(true, true) // MAJ compte.id / cle K et versions
           await session.sessionSync.setConnexion(this.dh)
         } catch(e) {
-          this.session.mode = 2
+          session.mode = 2
           await afficherDiag(this.$t('LOGnoidb'))
         }
       }

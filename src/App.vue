@@ -409,7 +409,10 @@ export default {
       let arg = ''
       switch (p) {
         case 'espace' : { return this.$t('Pespace', [this.session.ns, this.session.org]) }
-        case 'tranche' : { return this.$t('Ptranche', [ID.court(this.aSt.tribuC.id), this.aSt.tribuC.info])}
+        case 'tranche' : { 
+          if (this.session.pow > 3) return this.$t('ACspons')
+          return this.$t('Ptranche', [ID.court(this.aSt.tribuC.id), this.aSt.tribuC.info])
+        }
         case 'chats' : { arg = this.aSt.avC.na.nom; break }
         case 'sponsorings' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
         case 'groupesac' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }

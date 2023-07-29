@@ -5,13 +5,13 @@
     </div>
     <div class="col">
       <div>
-        <span class="text-bold fs-md q-mr-sm">{{elt.na.nom}}</span> 
-        <span class="text-bold fs-sm font-mono q-mr-sm">#{{elt.na.id}}</span> 
+        <span class="text-bold fs-md q-mr-sm">{{nom}}</span> 
+        <span class="text-bold fs-sm font-mono q-mr-sm">#{{elt.id}}</span> 
       </div>
       <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
         zoom maxh="3rem" :texte="info"/>
       <div v-else class="text-italic">{{$t('FAnocv')}}</div>
-      <barre-people v-if="session.estComptable || session.estSponsor" :na="elt.na"/>
+      <barre-people v-if="session.estComptable || session.estSponsor" :id="elt.id"/>
     </div>
   </div>
 </template>
@@ -30,9 +30,10 @@ export default {
   components: { ShowHtml, BarrePeople },
 
   computed: {
-    phDef() { return ID.estComptable(this.elt.na.id) ? this.config.iconSuperman : this.config.iconAvatar },
+    phDef() { return ID.estComptable(this.elt.id) ? this.config.iconSuperman : this.config.iconAvatar },
     info () { return this.elt.cv ? (this.elt.cv.info || '') : '' },
     photo () { return this.elt.cv ? (this.elt.cv.photo || this.phDef) : this.phDef },
+    nom () { return this.elt.na ? this.elt.na.nom : '' }
   },
 
   data () { return {

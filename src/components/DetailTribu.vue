@@ -6,7 +6,8 @@
     </div>
     <div v-else>
       <span class="titre-lg text-italic text-bold">
-        {{$t('DTtit0', [ID.court(ligne.id), infoC || ''])}}
+        <span v-if="pow===4">{{$t('DTtit4', [ID.court(ligne.id)])}}</span>
+        <span v-else>{{$t('DTtit0', [ID.court(ligne.id), infoC || ''])}}</span>
       </span>
       <q-btn v-if="pow === 2" class="fs-md q-ml-md btn2" size="sm" dense
         color="primary" :icon="ligne.info ? 'edit' : 'add'" 

@@ -13,7 +13,7 @@
       <apercu-people :id="session.peopleId" simple />
       <div class="row">
         <div v-if="aSt.actPeC">
-          <div v-if="aSt.actPeC.sp" class="titre-md text-bold text-warning">
+          <div v-if="aSt.actPeC.nasp" class="titre-md text-bold text-warning">
             {{$t('sponsor')}}</div>
           <div v-else class="titre-md">{{$t('PPco')}}</div>
         </div>

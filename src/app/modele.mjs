@@ -866,7 +866,7 @@ export class Compta extends GenDoc {
 
   get lstAvatarNas () { // retourne l'array des na des avatars du compte (trié ordre alpha, primaire en tête)
     const t = []; for(const na of this.mav.values()) { t.push(na) }
-    t.sort((a,b) => { return a.rnd[0] === 0 ? -1 : (b.rnd[0] === 0 ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
+    t.sort((a,b) => { return a.rnd[0] === 1 ? -1 : (b.rnd[0] === 1 ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
     return t
   }
 

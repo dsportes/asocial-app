@@ -1,15 +1,10 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
     <q-card class="q-my-md q-pa-xs">
-      <div class="column items-center justify-center q-py-sm q-gutter-sm">
+      <div class="row items-center justify-around q-py-sm">
         <div> <!-- Changement de phrase secrète -->
           <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
             :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
-          <bouton-help class="q-ml-sm" page="page1"/>
-        </div>
-        <div v-if="session.estSponsor"> <!-- Parrainer un nouveau compte -->
-          <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
-            :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring"/>
           <bouton-help class="q-ml-sm" page="page1"/>
         </div>
         <div> <!-- Nouvel avatar -->
@@ -46,7 +41,14 @@
             :color="na.id === session.avatarId ? 'warning' : 'primary'" @click="courant(na.id)"/>
           <q-btn icon="delete" size="md" class="q-mt-sm" @click="delAvatar(na.id)"/>
         </div>
-        <apercu-avatar edit :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')" :idav="na.id" :idx="idx"/>
+        <div :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')">
+          <apercu-avatar edit  :idav="na.id" :idx="idx"/>
+          <div class="row justify-center">
+            <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
+              :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring(na)"/>
+            <bouton-help class="q-ml-md" page="page1"/>
+          </div>
+        </div>
       </div>
     </q-card>
 
@@ -193,7 +195,11 @@ export default {
       }
     },
 
-    async ouvrirSponsoring () { if (await this.session.edit()) this.ovnvpar() },
+    async ouvrirSponsoring (na) { 
+      if (!await this.session.edit()) return
+      this.session.setAvatarId(na.id)
+      this.ovnvpar() 
+    },
 
     async delAvatar (id) {
       if (await this.session.edit()) {

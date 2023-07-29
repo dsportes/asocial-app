@@ -754,7 +754,7 @@ export default {
   ACinvitations: 'Invitations de ses groupes',
   ACpourav: 'Pour l\'avatar {0}',
   ACpourgr: 'Groupe courant {0}',
-  ACmesav1: 'Mon compte, mes avatars',
+  ACmesav2: 'Mon compte, mes avatars',
   ACmesav1: 'Mon compte (SPONSOR), mes avatars',
   ACmesgr: 'Mes groupes',
   ACmesinv: 'Mes invitations en attente',
@@ -1107,6 +1107,7 @@ export default {
   // Detail Tribu
   DTtit1: 'Total des tranches',
   DTtit0: 'Tranche #{0} {1}',
+  DTtit4: 'Mes quotas sont prélevés dans la tranche #{0}',
   DTnbncs: 'Aucune notification collective SIMPLE pour la tranche | Une notification collective SIMPLE pour la tranche | {count} notifications collectives SIMPLES pour la tranche ',
   DTnbncb: 'Aucune notification collective BLOQUANTE pour la tranche | Une notification collective BLOQUANTE pour la tranche | {count} notifications collectives BLOQUANTES pour la tranche ',
   DTnbc: '{0} compte(s) - {1} sponsor(s)',
