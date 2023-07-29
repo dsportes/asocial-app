@@ -1386,7 +1386,7 @@ export class Chat extends GenDoc {
   }
 
   static async getIds (naI, naE) {{
-    return hash(await crypter(naI.rnd, ID.court(naI.id) + '/' + ID.court(naE.id, 1)))
+    return hash(await crypter(naI.rnd, ID.court(naI.id) + '/' + ID.court(naE.id), 1))
   }}
 
   /*

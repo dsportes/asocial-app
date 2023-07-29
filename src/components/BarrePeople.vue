@@ -5,7 +5,7 @@
       :label="$t('PPcht')" @click="chgTribu"/>
     <q-btn v-if="session.estComptable" dense color="primary" size="sm"
       :label="$t('PPchsp')" @click="chgSponsor"/>
-    <q-btn v-if="session.estComptable || session.estSponsor" dense color="primary" size="sm"
+    <q-btn v-if="session.estComptable || (session.estSponsor && estDeMaTribu)" dense color="primary" size="sm"
       :label="$t('PPcompta')" @click="voirCompta"/>
   </div>
 
@@ -103,6 +103,10 @@ export default {
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    estDeMaTribu () {
+      const [t, it, eltAct] = this.aSt.getTribuDeCompte(this.id)
+      return t !== null
+    }
   },
 
   watch: {

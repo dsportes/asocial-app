@@ -19,7 +19,9 @@ export const useSessionStore = defineStore('session', {
     */
     ns: 0, 
     org: '', // code de l'organisation
-    presetOrg: '',
+    // presetOrgX: '',
+    memoOrg: false,
+    
     naComptable: null,
     dh: 0,
     /* authToken : base64 de la sérialisation de :
@@ -90,7 +92,9 @@ export const useSessionStore = defineStore('session', {
     ok (state) { return state.status === 2 },
 
     editable (state) { return state.mode < 3 && state.niv < 2 },
-
+    presetOrg (state) {
+      return !state.accesIdb ? '' : (localStorage.getItem('$asocial$org') || '')
+    },
     pow (state) {
       if (state.estAdmin) return 1
       if (state.estComptable) return 2
@@ -139,13 +143,42 @@ export const useSessionStore = defineStore('session', {
       if (!this.estAdmin) this.naComptable = NomGenerique.comptable()
     },
 
-    setMode (mode) { this.mode = mode },
+    setMode (mode) { 
+      this.mode = mode
+      if (this.incognito) localStorage.removeItem('$asocial$org')
+    },
 
-    setOrg (org) { this.org = org },
+    setMemoOrg (v) {
+      this.memoOrg = v
+    },
+
+    setOrg (org) { 
+      this.org = org
+      if (this.accesIdb && this.memoOrg) localStorage.setItem('$asocial$org', org)
+    },
+
+    resetOrg () { 
+      this.org = ''
+      if (this.accesIdb) localStorage.removeItem('$asocial$org')
+    },
 
     setNs (ns) { this.ns = ns; NomGenerique.ns = ns },
 
-    setPresetOrg (org) { this.presetOrg = org},
+    /*
+    setMemoOrg (x) {
+      this.memoOrg = x ? true : false
+      if (!this.memoOrg) this.setPresetOrg('')
+    },
+
+    setPresetOrg (org) { 
+      if (org) {
+        localStorage.setItem('$asocial$org', org)
+      } else {
+        localStorage.removeItem('$asocial$org')
+      }
+      this.presetOrgX = org
+    },
+    */
 
     setAvatarId (id) { this.avatarId = id},
 

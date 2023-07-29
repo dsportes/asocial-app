@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
-import { $t, setTrigramme, afficherDiag, sleep } from './util.mjs'
+import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ, ID, limitesjour } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
@@ -20,6 +20,7 @@ export function deconnexion (garderMode) {
   const session = stores.session
   const config = stores.config
   const mode = session.mode
+  const memoOrg = session.memoOrg
 
   // fermeture de tous les dialogues et du menu de filtre
   MD.fTD()
@@ -32,6 +33,7 @@ export function deconnexion (garderMode) {
   stores.reset()
   session.$reset()
   if (garderMode) session.setMode(mode)
+  session.memoOrg = memoOrg
   SyncQueue.reset()
   if (session.fsSync) session.fsSync.close()
   stores.ui.setPage('login')
@@ -528,8 +530,8 @@ export class ConnexionCompte extends OperationUI {
         closeIDB()
         await deleteIDB(session.nombase)
         await openIDB()
-        // setTrigramme(session.nombase, await getTrigramme())
-        setTrigramme(session.nombase, this.avatar.na.nomc)
+        setTrigramme(session.nombase, await getTrigramme())
+        // setTrigramme(session.nombase, this.avatar.na.nomc)
       }
       lectureSessionSyncIdb()
     }

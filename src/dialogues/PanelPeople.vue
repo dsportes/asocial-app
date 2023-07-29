@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <barre-people v-if="session.estComptable || session.estSponsor" :na="pSt.peC.na"/>
+      <barre-people v-if="session.estComptable || session.estSponsor" :id="pSt.peC.na.id"/>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
