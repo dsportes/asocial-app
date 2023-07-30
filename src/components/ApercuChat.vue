@@ -14,17 +14,25 @@
       <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
       <apercu-motscles v-if="chat" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
         :mapmc="mapmc" :edit="session.editable" :src="chat.mc || u0"/>
+      <show-html v-if="chat" class="q-my-sm bord"
+        :idx="idx" zoom edit scroll maxh="3rem" :texte="chat.txt" @edit="editer"/>
+      <!--
+        <div style="position:absolute;right:6px;top:26px">
+          <q-btn class="btn1" icon="edit" size="sm" color="warning" @click="editer"/>
+        </div>
+
       <div v-if="chat" class="q-my-sm bord row items-start">
         <show-html class="col q-mr-sm" :idx="idx" zoom maxh="3rem" :texte="chat.txt"/>
         <div class="col-auto self-start">
           <q-btn class="btn1" icon="edit" size="sm" color="warning" @click="editer"/>
         </div>
       </div>
+      -->
     </div>
 
     <!-- Dialogue d'édition du texte du chat -->
     <q-dialog v-model="chatedit" persistent>
-      <editeur-md mh="65mh" :titre="$t('CHtxt')" help="page1"
+      <editeur-md mh="20rem" :titre="$t('CHtxt')" help="page1"
         :texte="chat ? chat.txt : ''" editable modetxt :label-ok="$t('OK')" @ok="chatok"/>
     </q-dialog>
   </q-card>

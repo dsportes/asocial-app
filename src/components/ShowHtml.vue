@@ -5,7 +5,8 @@
       <q-btn v-if="zoom" dense color="primary" icon="fullscreen" size="md" @click.stop="ovfs">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="edit" class="q-ml-xs" dense color="primary" icon="edit" size="md" @click.stop="editer">
+      <q-btn v-if="edit" class="q-ml-xs" dense color="warning" 
+        icon="edit" size="md" @click.stop="editer">
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>
     </div>
@@ -50,21 +51,30 @@ import SdLight1 from './SdLight1.vue'
 import SdDark1 from './SdDark1.vue'
 import { MD } from '../app/modele.mjs'
 
-const styb = 'min-height:2rem;overflow-y:auto;'
-
 export default ({
   name: 'ShowHtml',
 
   components: { SdDark, SdLight, SdDark1, SdLight1 },
 
-  props: { texte: String, idx: Number, maxh: String, zoom: Boolean, edit: Boolean },
+  props: { 
+    texte: String, 
+    idx: Number, 
+    maxh: String, 
+    zoom: Boolean, 
+    edit: Boolean,
+    scroll: Boolean
+    },
 
   computed: {
     dk () { const d = this.$q.dark.isActive 
       return d ? (this.idx === -1 ? true : false) : (this.idx === -1 ? false : true)
     },
     idx0 () { return this.idx === -1 || !this.idx || (this.idx % 2 === 0) },
-    sty () { return styb + (this.maxh ? 'height:' + this.maxh : '') }
+    sty () { 
+      return 'min-height:2rem' + 
+        ';height:' + (this.maxh ? this.maxh + ';' : '') +
+        'overflow-y:' + (this.scroll ? 'scroll' : 'auto') 
+      }
   },
 
   data () {
@@ -92,7 +102,7 @@ export default ({
 <style lang="sass" scoped>
 .btn
   position: absolute
-  right: 0
+  right: 7px
   top: 0
 .q-bar--standard
   padding: 0 !important
