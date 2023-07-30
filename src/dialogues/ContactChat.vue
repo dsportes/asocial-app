@@ -14,7 +14,6 @@
 
 <script>
 import { ref } from 'vue'
-import ApercuChat from '../components/ApercuChat.vue'
 import { MD, Motscles, Chat } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import { afficherDiag } from '../app/util.mjs'
