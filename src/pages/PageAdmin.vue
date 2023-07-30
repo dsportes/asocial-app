@@ -1,24 +1,24 @@
 <template>
   <q-page class="q-pa-xs">
-    <div class="q-my-sm row q-gutter-sm">
-      <q-btn dense color="warning" label="GC" @click="testGC"/>
-      <q-btn dense color="warning" label="Checkpoint" @click="affCkpt"/>
+    <div class="q-my-sm row justify-around">
+      <q-btn class="btn1" dense color="warning" :label="$t('ESgc')" @click="testGC"/>
+      <q-btn class="btn1" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
     </div>
 
     <q-separator color="orange"/>
 
-    <q-btn class="q-my-sm" dense color="primary" :label="$t('rafraichir')" @click="rafraichir"/>
-
-    <div class="titre-md q-my-sm row items-center">
-      <q-btn dense size="md" icon="add" :label="$t('ESne')" class="q-mr-sm btn1"
-        color="primary" :disable="ns !== 0" @click="plusNS"/>
+    <div class="q-my-sm row justify-around">
+      <q-btn class="btn1" dense size="md" color="primary" icon="refresh"
+        :label="$t('rafraichir')" @click="rafraichir"/>
+      <q-btn class="btn1" dense size="md" color="primary" icon="add" 
+        :label="$t('ESne')" @click="plusNS"/>
     </div>
 
     <div class="titre-lg text-white bg-secondary q-pa-xs full-width text-center q-my-sm">
       {{$t('ESlo', session.paLeFT.length, { count: session.paLeFT.length})}}</div>
 
     <div v-for="(esp, idx) in session.paLeFT" :key="esp.id">
-      <div :class="dkli(idx)">
+      <div :class="dkli(idx) + ' largeur40 maauto'">
 
         <div class="row justify-between">
           <div class="text-bold font-mono fs-lg">
@@ -29,13 +29,13 @@
             @click="pageesp(esp)"/>
         </div>
 
-        <div class="q-ml-lg">
+        <div class="row justify-between q-ml-lg q-my-xs">
           <span class="fs-md">{{$t('ESprf', [esp.t])}}</span>
-          <q-btn class="q-ml-lg" dense color="primary" :label="$t('changer')"
+          <q-btn class="btn1" dense color="primary" :label="$t('changer')"
             @click="ovchgprf1(esp)"/>
         </div>
 
-        <apercu-notif class="q-mt-sm" :notif="esp.notif" :idx="idx" 
+        <apercu-notif class="q-ml-lg q-mt-sm" :notif="esp.notif" :idx="idx" 
           :nom="esp.org" :ns="esp.id"/>
 
       </div>
@@ -90,7 +90,7 @@
             </div>
           </div>
         </q-card-section>
-        <q-card-actions v-if="session.estAdmin">
+        <q-card-actions>
           <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
             @click="MD.fD"/>
           <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 

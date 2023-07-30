@@ -161,7 +161,7 @@ export class MajCv extends OperationUI {
       while (true) {
         const v = avatar.v + 1
         const cva = await crypter(getCle(avatar.id), new Uint8Array(encode({v, photo, info})))
-        const args = { token: session.authToken, id: avatar.id, v, cva, idTr, hrnd }
+        const args = { token: session.authToken, id: avatar.id, v, cva }
         const ret = this.tr(await post(this, 'MajCv', args))
         if (ret.OK) break
         await sleep(500)

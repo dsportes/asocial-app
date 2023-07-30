@@ -476,7 +476,6 @@ export class Notification {
       const r = decode(buf)
       for (const f of Notification.lstfnotif) this[f] = r[f]
     } else {
-      // TODO : idSource est une id courte
       this.idSource = ID.court(idSource)
       this.jbl = 0
       this.nj = 0

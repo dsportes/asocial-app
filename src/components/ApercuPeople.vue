@@ -20,7 +20,7 @@ import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ApercuGenx from './ApercuGenx.vue'
-import { getNg } from '../app/modele.mjs'
+import { getNg, NomGenerique } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuPeople',

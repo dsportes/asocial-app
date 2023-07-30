@@ -25,16 +25,15 @@
         </div>
     </div>
   </q-expansion-item>
+
   <q-separator/>
+
   <q-expansion-item v-if="session.accesNet" class="petitelargeur"
     expand-separator icon="add_circle" :label="$t('LOGconn3')"
     group="g1" header-class="titre-lg bg-primary text-white">
-    <div class="fs-md column justify-center">
-        <div v-if="!btncd" class="titre-md">{{$t('LOGpar')}}</div>
-        <q-btn v-if="!btncd" flat dense color="warning" icon="add_circle" :label="$t('LOGcrea')" @click="btncd = true"/>
-        <div v-if="btncd" class="full-width">
-          <phrase-contact @ok="crypterphrase"/>
-        </div>
+    <div>
+      <div class="titre-md q-my-md">{{$t('LOGpar')}}</div>
+      <phrase-contact class="full-width" @ok="crypterphrase"/>
     </div>
   </q-expansion-item>
 

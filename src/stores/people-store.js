@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { ID } from '../app/api.mjs'
+import { NomGenerique } from '../app/modele.mjs'
 
 /* 
 Un "people" est un avatar :
@@ -43,13 +44,6 @@ export const usePeopleStore = defineStore('people', {
       return t
     },
 
-    // retourne { na, cv, sp, chats: Set(), groupes: Map(idg, im)}
-    getPeople: (state) => { return (id) => {
-        const e = state.map.get(id)
-        if (!e) return null
-        return e
-      }
-    },
     getNa: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.na : null 
@@ -158,6 +152,20 @@ export const usePeopleStore = defineStore('people', {
   },
   
   actions: {
+    // retourne { na, cv, sp, chats: Set(), groupes: Map(idg, im)}
+    getPeople (id) {
+      const e = this.map.get(id)
+      if (!e) {
+        if (ID.estComptable(id)) {
+          const p = { na: NomGenerique.comptable(), chats: new Map(), groupes: new Map() }
+          this.map.set(id, p)
+          return p
+        }
+        return null
+      }
+      return e
+    },
+  
     getElt (na, cv, disp) {
       let e = this.map.get(na.id)
       if (!e) {
@@ -169,7 +177,7 @@ export const usePeopleStore = defineStore('people', {
     },
 
     delElt (id, e) {
-      if (!e.sp && !e.chats.size && !e.groupes.size) this.map.delete(id)
+      if (!ID.estComptable(id) && !e.sp && !e.chats.size && !e.groupes.size) this.map.delete(id)
     },
 
     setDisparu (na) {

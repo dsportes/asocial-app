@@ -7,11 +7,13 @@
         <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('ANplus')"
           dense icon="edit" @click="editer"/>
       </div>
-      <show-html class="q-mt-sm bord" :texte="notif.texte" :idx="idx" maxh="3rem" zoom/>
+      <show-html class="q-mt-sm bord" :texte="notif.texte" :idx="idx" 
+        maxh="3rem" zoom scroll/>
     </div>
-    <div v-if="!notif && (pow === 2 || pow === 3)" class="row justify-between">
+    <div v-if="!notif && (pow < 4)" class="row justify-between">
       <notif-icon :niv="0" :cible="tC" info/>
-      <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('ANcre')"
+      <q-btn v-if="editable" color="primary" class="q-ml-sm btn2" size="sm" 
+        :label="$t('ANcre')"
         dense icon="edit" @click="editer"/>
     </div>
   </div>
@@ -23,7 +25,7 @@
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
-            {{$t('alerte') + ' ' + $t('ANcibleb' + tC, [nom])}}
+            {{$t('alerte') + ' ' + $t('ANcible' + tC + 'b', [nom])}}
           </q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -39,7 +41,7 @@
             <div class="fs-md font-mono">{{dhc}}</div>
           </div>
 
-          <show-html class="q-mt-sm bord" :texte="ntf.texte" :idx="idx" maxh="5rem" 
+          <show-html class="q-mt-sm bord" scroll :texte="ntf.texte" :idx="idx" maxh="5rem" 
             :edit="ro===0" zoom @edit="ovtxtedit"/>
 
           <div class="q-mt-sm titre-md text-bold">
@@ -150,13 +152,17 @@ export default {
     idtra () { return !this.session.ns ? 0 : this.aSt.tribu.id },
 
     moicible () {
-      if (this.ta === 1) return ''
+      if (this.pow === 1) return ''
       if (this.tC === 2) return this.idtra === this.idTribu ? this.$t('ANdg1') : ''
       return this.session.compteId === this.idCompte ? this.$t('ANdg2') : ''
     },
 
     // Nom de la source
-    nomS () { const na = getNg(this.ntf.idSource); return !this.ntf.idSource ? this.$t('admin') : na.nomc },
+    nomS () { 
+      if (!this.ntf.idSource) return this.$t('admin')
+      const na = getNg(ID.long(this.ntf.idSource, this.session.ns))
+      return na.nomc
+    },
     dhc () { return this.ntf.dh ? dhcool(this.ntf.dh) : ''},
 
     dp () { return AMJ.editDeAmj(this.ntf.jbl, true) },
@@ -164,6 +170,12 @@ export default {
       (this.notif.jbl !== this.ntf.jbl) || 
       (this.notif.nj !== this.ntf.nj) ||
       (this.notif.texte !== this.ntf.texte))
+    },
+
+    editable () {
+      if (this.pow === 1) { return this.tC === 1 }
+      if (this.pow === 2 || this.pow === 3) { return this.tC > 1 }
+      return false
     }
   },
 
@@ -240,8 +252,8 @@ export default {
 
     async editer () {
       this.ro = -1
-      if (this.ta === 1) await this.editerA()
-      else if (this.ta === 2) await this.editerC()
+      if (this.pow === 1) await this.editerA()
+      else if (this.pow === 2) await this.editerC()
       else await this.editerS()
       if (this.ro >= 0) {
         if (this.ro === 0) { this.ntfx = this.ntf.clone(); this.reset() }
@@ -250,7 +262,7 @@ export default {
     },
 
     async editerA () { // Administrateur
-      if (this.naCible) {
+      if (this.tC > 1) {
         // notification T ou C, pas éditable par admin
         if (this.notif){ 
           this.ntf = this.notif
@@ -266,7 +278,7 @@ export default {
 
     async editerC () { // Comptable
       if (!await this.session.edit(true)) return
-      if (this.naCible) {
+      if (this.tC > 1) {
         this.ntf = this.notif ? this.notif.clone() : new Notification(null, this.session.compteId)
         this.ro = 0
       } else { // Notification générale
@@ -281,11 +293,11 @@ export default {
 
     async editerS () { // Compte standard ou sponsor de sa tribu
       if (!await this.session.edit()) return
-      if (this.naCible.estTribu) {
+      if (this.tC === 2) {
         // Notif de tribu
         if (this.notif) {
           if (this.session.estSponsor){
-            if (ID.estComptable(this.notif.idSource)) {
+            if (ID.estComptable(ID.long(this.notif.idSource, this.session.ns))) {
               this.ntf = this.notif
               this.ro = 5
             } else {
@@ -304,11 +316,11 @@ export default {
             await afficherDiag(this.$t('ANmx4')) 
           }
         }
-      } else if (this.naCible.estCompte) {
+      } else if (this.tC == 3) {
         // notif de compte
         if (this.notif) {
           if (this.session.estSponsor){
-            if (ID.estComptable(this.notif.idSource)) {
+            if (ID.estComptable(ID.long(this.notif.idSource, this.session.ns))) {
               this.ntf = this.notif
               this.ro = 6
             } else {
@@ -341,7 +353,7 @@ export default {
       const ntf = suppr === true ? null : this.ntf
       switch (this.tC) {
         case 1: { // notifG
-          if (this.ns) session.setNs(this.ns)
+          this.session.setNs(this.ns)
           await new SetNotifG().run(ntf)
           break
         }
@@ -360,6 +372,7 @@ export default {
 
   setup () {
     const session = stores.session
+    const pow = session.pow
     const aSt = stores.avatar
     const auj = AMJ.amjUtc()
     const ntf = ref(null)
@@ -371,9 +384,8 @@ export default {
     function ovtxtedit () { MD.oD(txtedit) }
 
     return {
-      pow: session.pow,
       MD, ouvert, ovouvert, txtedit, ovtxtedit,
-      session,
+      session, pow,
       aSt,
       auj,
       ntf,
