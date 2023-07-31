@@ -55,7 +55,6 @@ export default {
   editavion: 'Les mises à jour ne sont pas possibles en mode avion.',
   editlecture: 'Les mises à jour ne sont pas possibles quand le compte est "bloqué en lecture seulement"',
   alerte: 'Alerte',
-  groupes: 'Tous mes groupes',
   avatar: 'Avatar {0}',
   groupe: 'Groupe {0}',
   avatar1: 'Avatar {0} - {1} / {2} note(s)',
@@ -65,7 +64,7 @@ export default {
   avatar3: 'Note de {0} rattachée à une note de {1}',
   groupe9: 'Note DISPARUE #{0} du groupe {1}',
   avatar9: 'Note DISPARUE #{0} de {1}',
-  existe: 'Changer le début de votre phrase, il est trop proche de celui d\'une phrase déjà déclarée.',
+  existe: 'Changer le début de la phrase, il est trop proche de celui d\'une phrase déjà déclarée.',
   nolimite: '(sans limite)',
   fichiers: 'Fichiers',
   animateur: 'Animateur',
@@ -146,15 +145,15 @@ export default {
   action60: 'L\'inviter en tant que "lecteur"',
 
   roletribu0: '(ignorer)',
-  roletribuC: 'Compte de ma tribu',
-  roletribuS: 'Sponsor de ma tribu',
+  roletribuC: 'Compte de ma tranche de quotas',
+  roletribuS: 'Sponsor de ma tranche de quotas',
 
   enalerte: 'En alerte',
   ensursis: 'En sursis',
   bloque: 'Bloqué',
   aucuncompte: 'Aucun compte',
 
-  tribus: 'Tribu | Tribu | Tribus',
+  tribus: 'Tranche | Tranche | Tranches',
   comptable: 'Comptable',
   admin: 'Administrateur',
   avdisp: 'Cet avatar a disparu (compte supprimé)',
@@ -249,7 +248,7 @@ export default {
   EX4006: 'Compte anormalement sollicité, bug probable',
   EX4007: 'Echec d\'encryption. Buffer: {0} - Clé: {1} - Détail: {2}',
   EX4008: 'Echec de decryption. Buffer: {0} - Clé: {1} - Détail: {2}',
-  EX4010: 'Crypter : cle incorrecte (pas Uint8Array ou longueur != 32)',
+  EX4010: 'Crypter : clé incorrecte (pas Uint8Array ou longueur != 32)',
   EX4011: 'Crypter : buffer incorrect (pas Uint8Array)',
   EX4012: 'Décrypter : cle incorrecte (pas Uint8Array ou longueur != 32)',
   EX4013: 'Décrypter : buffer incorrect (pas Uint8Array)',
@@ -262,13 +261,13 @@ export default {
   EX4018: 'store {0} inconnu',
   EX4020: 'Erreur de téléchargement d\'un fichier',
 
-  EX5001: 'La phrase secrète a changé depuis l\'authentification du compte. Vous allez être déconnecté et vous pourrez vous reconnecter avec la nouvelle phrase secrète.',
-  EX5003: 'Avatar déjà cité dans le groupe, ne pas pas être inscrit à nouveau',
+  EX5001: 'La phrase secrète a changé depuis l\'authentification du compte. Après déconnexion, se reconnecter avec la nouvelle phrase secrète.',
+  EX5003: 'Avatar déjà cité dans le groupe, ne peut pas être inscrit à nouveau',
   EX5004: `Base locale non trouvée<br>
   - soit la phrase secrète est incorrecte,<br>
   - soit aucune session synchronisée n'a été ouverte antérieurement avec cette phrase secète,<br>
   - soit la base locale a été détruite.<br>
-  Resaisir la phrase secrète ou se connecter en mode synchronisé ou incognito.`,
+  Re-saisir la phrase secrète ou se connecter en mode synchronisé ou incognito.`,
   EX5005: `Base locale absente ou corrompue.<br>
   Code erreur: {0}<br>Se connecter en mode synchronisé ou incognito.`,
   EX5006: `Base locale corrompue.<br>Impossible d'en décrypter les données.`,
@@ -297,13 +296,10 @@ export default {
   EX8008: 'Phrase de sponsoring non trouvée.',
   EX8009: 'Ce sponsoring a déjà été accepté ou refusé ou est hors limite.',
 
-  // EX8006: 'Forfait V1 insuffisant pour l\'attribution souhaitée au nouvel avatar',
-  // EX8009: 'Forfait V1 insuffisant pour supporter les notes du contact.',
-  // EX8010: 'Forfait V2 insuffisant pour supporter les notes du contact.',
   EX8011: 'Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète',
   EX8012: 'Une phrase secrète semblable est déjà utilisée. Changer a minima le début de la phrase secrète pour ce nouveau compte',
-  EX8013: 'Réserves de volume V1 insuffisantes de la tribu pour affectation au nouveau compte',
-  EX8014: 'Réserves de volume V2 insuffisantes de la tribu pour affectation au nouveau compte',
+  EX8013: 'Réserves de volume V1 insuffisantes de la tranche de quotas pour affectation au nouveau compte',
+  EX8014: 'Réserves de volume V2 insuffisantes de la tranche de quotas pour affectation au nouveau compte',
   EX8015: 'Cet avatar n\'est pas l\'hébergeur actuel du groupe',
   EX8016: 'Groupe encore hébergé : un nouvel hébergeur ne peut se proposer que si le groupe n\'a plus de compte hébergeur',
   EX8017: 'Limite(s) de volume ({0}) insuffisante(s) pour héberger le volume actuel groupe.',
@@ -321,7 +317,7 @@ export default {
   EX8101: 'Compte non authentifié',
 
   EX9001: 'Espace non trouvé ({0})',
-  EX9002: 'Tribu non trouvée ({0})',
+  EX9002: 'Tranche de quotas non trouvée ({0})',
   EX9003: 'Compte non trouvé ({0})',
   EX9004: 'Ligne comptable non trouvée ({0})',
   EX9005: 'Chat non trouvé ({0})',
@@ -343,9 +339,8 @@ export default {
   LOGconn: 'Se Connecter',
   LOGconn2: 'Se Connecter à son compte',
   LOGconn3: 'Créer votre propre compte',
-  LOGpar: 'Un sponsor vous a communiqué le nom de votre association et  une phrase secrète pour créer vous-même votre compte ? Les saisir ci-après pour créer votre compte.',
+  LOGpar: 'Pour créer un compte, il faut qu\'un sponsor ait enregistré une phrase de reconnaissance spécifique au compte à créer. Saisir ci-après le nom de l\'organisation et cette phrase.',
   LOGphr: 'Phrase communiquée par le sponsor',
-  LOGcrea: 'Je créé mon compte ...',
   LOGcc: 'Création du compte du Comptable',
   LOGnopp: 'Phrase de sponsoring introuvable',
   LOGppinv: 'Date de validité de la phrase de sponsoring dépassée',
@@ -386,7 +381,7 @@ export default {
   GBvol: 'Calcul du Volume',
   GBfi: 'Fichiers : {0}',
   GBm1: 'Cette base ne peut PLUS être accédée : elle peut être supprimée sans conséquences.',
-  GBm2: '          Cette base peut encore être accédée par une phrase secrète: sa suppression interdira le mode "avion" pour ce compte.',
+  GBm2: 'Cette base peut encore être accédée par une phrase secrète: sa suppression interdira le mode "avion" pour ce compte.',
   
   // DialogueHelp.vue
   HLPaide: 'Page d\'aide : ',
@@ -396,10 +391,10 @@ export default {
   HLPvoir: 'Voir aussi ...',
 
   // Stats tribus
-  STtit: 'Statistiques de l\'espace "{0}" [{1}] - {2} tribu(s) - {3}',
+  STtit: 'Statistiques de l\'espace "{0}" [{1}] - {2} tranche(s) - {3}',
   STl0: 'Profil #{0}',
   STl0b: 'Quotas V1 / V2',
-  STl1: 'Somme des quotas (V1 / V2) attribués aux tribus',
+  STl1: 'Somme des quotas (V1 / V2) attribués aux tranches',
   STl2: 'Somme des quotas (V1 / V2) attribués aux comptes',
   STl3: 'Nombre total de comptes / dont sponsors',
   STl4: 'Nombre total de comptes ayant une alerte (simple / bloquante)',
@@ -422,8 +417,8 @@ export default {
   NPst3: 'Proposition annulée par l\'avatar sponsor {0}',
   NPnom: 'Nom de l\'avatar sponsorisé:',
   NPspons: 'Sponsor de la tranche de quotas #{0}',
-  NPspons2: 'Vous serez sponsor de la tranche de quotas #{0}',
-  NPsponsor: 'Votre sponsor:',
+  NPspons2: 'Ce compte sera "sponsor" de la tranche de quotas #{0}',
+  NPsponsor: 'Sponsor du compte:',
   NPacc: 'J\'accepte',
   NPdec: 'Je décline',
   NPprol: 'Prolonger',
@@ -442,7 +437,7 @@ export default {
   NPquo1: 'Quotas d\'espace V1 / V2 attribués au nouveau compte',
   NPcpa: 'Compte sponsor lui-même',
   NPcstd: 'Compte standard',
-  NPattsp: 'Vous n\'êtes pas sponsor : les quotas que vous attribuez à votre sponsorisé seront prélever SUR LES VOTRES quand il acceptera ce sponsoring.',
+  NPattsp: 'Ce compte n\'est pas sponsor : les quotas au sponsorisé seront prélevés SUR CEUX DU COMPTE à l\'acceptation de ce sponsoring.',
   NPconf: 'Confirmation',
   NPnav: 'Nom de l\'avatar',
   NPmotc: 'Mot de bienvenue',
@@ -471,11 +466,8 @@ export default {
   Code erreur: {0}<br>Se connecter en mode synchronisé ou incognito.`,
   OPmsg3: `La base locale est corrompue et ne peut pas être décryptée.<br>
   Se connecter en mode synchronisé ou incognito.`,
-  OPmsg4: 'Votre compte vient d\'être débloqué',
-  OPmsg5: 'Votre compte vient d\'être complètement bloqué',
-  OPmsg6: 'Vous allez être déconnecté et reconnecté afin de bénéficier de cette nouvelle situation.',
   OPmsg7: 'Code local à 3 lettres',
-  OPmsg8: 'Ce code -par défaut "xxx"- facilite la gestion/ suppressions des bases locales obsolètes.',
+  OPmsg8: 'Ce code -par défaut "xxx"- facilite la gestion / suppressions des bases locales obsolètes.',
 
   OPecho: 'Test d\'écho.',
   OPerreurFonc: 'Test d\'erreur fonctionnelle',
@@ -496,11 +488,11 @@ export default {
   OPccv: 'Rafraîchir des cartes de visite',
   OPntfg: 'Attribution d\'une notification générale',
   OPprf: 'Attribution d\'un profil à l\'espace',
-  OPdhvu: 'Maj de la date-heure de "vu" d\'une compta',
+  OPdhvu: 'Mise à jour de la date-heure de "vu" d\'une compta',
 
   OPnvgr: 'Créer un nouveau groupe',
   OPcsp: 'Créer un nouveau sponsoring',
-  OPnvmb: 'Nouveau membre d\'un groupe',
+  OPnvmb: 'Ajouter un nouveau membre à un groupe',
   OPinfmb: 'Mise à jour de l\'information d\'un membre sur le groupe',
   OPmcmb: 'Mise à jour des mots clés d\'un membre sur le groupe',
   OPstmb: 'Changement de statut d\'un membre d\'un groupe',
@@ -510,14 +502,14 @@ export default {
   OPmajch: 'Mettre à jour un "chat"',
   OPmajtch: 'Mise à jour du texte d\'un chat',
 
-  OPnvtr: 'Créer une nouvelle tribu',
-  OPinfotr: 'Mise à jour de l\'information d\'une tribu',
-  OPntftr: 'Mise à jour de la notification d\'une tribu',
-  OPmajtr: 'Mise à jour de l\'appartenance d\'un compte à une tribu',
+  OPnvtr: 'Créer une nouvelle tranche de quotas',
+  OPinfotr: 'Mise à jour de l\'information d\'une tranche de quotas',
+  OPntftr: 'Mise à jour de la notification d\'une tranche de quotas',
+  OPmajtr: 'Mise à jour de l\'appartenance d\'un compte à une tranche de quotas',
   OPntfco: 'Mise à jour de la notification d\'un compte',
-  OPqtr: 'Mise à jour des quotas d\'une tribu',
-  OPchtr: 'Changer un compte de tribu',
-  OPtrib: 'Obtention de la tribu',
+  OPqtr: 'Mise à jour des quotas d\'une tranche de quotas',
+  OPchtr: 'Changer un compte de tranche de quotas',
+  OPtrib: 'Obtention de la tranche de quotas',
 
   OPcsc: 'Créer une nouvelle note',
   OPmsc: 'Mettre à jour une note',
@@ -529,7 +521,7 @@ export default {
 
   OPprosp: 'Prolonger / annuler un sponsoring',
 
-  OPgetcv: 'Obtention d\'une carte de viste',
+  OPgetcv: 'Obtention d\'une carte de visite',
   OPnvf: 'Enregistrer un nouveau fichier',
   OPabo: 'Abonnement à la tranche courante',
 
@@ -539,8 +531,8 @@ export default {
   OPsav: 'Supprimer un avatar ou résilier un compte',
 
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
-  OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui que vous avez saisi.',
-  OPmajch2: 'Le "chat" a été mis à jour en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui que vous avez saisi.',
+  OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
+  OPmajch2: 'Le "chat" a été mis à jour en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
 
   OPapa: 'Accepter le sponsoring d\'un nouveau compte',
   OPdpa: 'Décliner le sponsoring d\'un nouveau compte',
@@ -552,7 +544,6 @@ export default {
   OPdbl: 'Débloquer les invitations d\'un groupe',
   OPcgr: 'Créer un groupe',
   OPmcm: 'Mettre à jour les mots clés d\'un membre d\'un groupe',
-  OParg: 'Mettre à jour l\'ardoise d\'un membre d\'un groupe',
   OPifg: 'Mettre à jour le commentaire d\'un membre à propos de son groupe',
   OPaig: 'Accepter l\'invitation à un groupe',
   OPdig: 'Décliner l\'invitation à un groupe',
@@ -607,6 +598,7 @@ export default {
   MCer5: 'Un mot clé "obsolète" ne peut pas être attribué.',
   MCchoix: 'Attribution de mots clés',
   MChint: '3 à 12 lettres, première majuscule. Vide pour \'Obsolète\'',
+
   // App.vue / MainLayout
   Pnull: '',
   Plogin: 'Connexion à un compte',
@@ -614,7 +606,7 @@ export default {
   Padmin: 'Administration technique',
   Paccueil: 'Accueil',
   Psession: 'Etat de la session ouverte',
-  Pcompte: 'Mon compte et ses avatars',
+  Pcompte: 'Ce compte et ses avatars',
   Psponsorings: 'Sponsorings de {0}',
   Pchats: 'Chats de {0}',
   Pespace: 'Espace #{0} - {1}',
@@ -623,15 +615,14 @@ export default {
   Pgroupes: 'Tous les groupes',
   Pgroupesac: 'Groupes de {0}',
   Pgroupe: 'Groupe {0}',
-  Ppeople: 'Tous mes contacts',
-  Pnotes: 'Toutes mes notes',
+  Ppeople: 'Tous les contacts',
+  Pnotes: 'Toutes les notes',
   Pficavion: 'Fichiers visibles en avion',
 
   MLAbrk: 'Opération en cours',
   MLAcf: 'Voulez-vous vraiement arrêter l\'opération en cours "{0}"',
   MLAcf3: 'Non, je la laisse se poursuivre',
   MLAcf4: 'Oui, je veux l\'interrompre (si possible)',
-  MLAtri: 'Tribu : {0}',
   MLAsfer: 'pas de compte connecté',
   MLAngr: '(pas de groupe sélectionné)',
   MLAout: 'Outils et tests techniques',
@@ -688,7 +679,7 @@ export default {
   FIexcesvol: 'Groupes en excédent de volume',
   FItri: 'Tier par ...',
   FItavgr: '(tous avatars et groupes)',
-  FIavgrt: 'Filtrer sur Un avatar / groupe',
+  FIavgrt: 'Filtrer sur UN avatar / groupe',
   FItemp: 'Notes temporaires seulement',
 
   PPnotes: 'Notes',
@@ -697,13 +688,13 @@ export default {
   PPnfi: '(aucun fichier dans le presse-papier)',
   PPano: 'Ajouter une note',
   PPafi: 'Ajouter un fichier',
-  PPsuppn: 'Voulez-vous vraiment supprimer la note ci-dessous ?',
-  PPsuppf: 'Voulez-vous vraiment supprimer le fichier ci-dessous ?',
+  PPsuppn: 'Supprimer vraiment la note ci-dessous ?',
+  PPsuppf: 'Supprimer vraiment le fichier ci-dessous ?',
   PPerrb: 'Contenu du fichier non disponible (corrompu ? effacé ?)',
   PPnv1: 'Mise à jour de la note',
   PPnv2: 'Nouvelle note',
   PPndf: 'Nom du fichier',
-  PPapf: 'Apropos du fichier (facultatif)',
+  PPapf: 'A propos du fichier (facultatif)',
   PPphf: 'monfic.jpg',
   PPl1: 'Mise à jour du fichier',
   PPl2: 'Nouveau fichier',
@@ -754,8 +745,8 @@ export default {
   ACinvitations: 'Invitations de ses groupes',
   ACpourav: 'Pour l\'avatar {0}',
   ACpourgr: 'Groupe courant {0}',
-  ACmesav2: 'Mon compte, mes avatars',
-  ACmesav1: 'Mon compte (SPONSOR), mes avatars',
+  ACmesav2: 'Ce compte, ses avatars',
+  ACmesav1: 'Ce compte (SPONSOR), ses avatars',
   ACmesgr: 'Mes groupes',
   ACmesinv: 'Mes invitations en attente',
   ACmesctc: 'Mes contacts',
@@ -771,14 +762,14 @@ export default {
   ACficav: 'Fichiers accesibles en mode avion',
   ACtfloc: 'Textes et fichiers locaux',
   ACidb: '(en mode synchronisé et avion seulement)',
-  ACinfs: 'Tribu du compte: "{0}"',
-  ACcptspons: 'Le compte est un sponsor de la tribu',
-  ACbloc: 'Le compte est "bloqué" : les seules actions possibles sont l\'échange de chats avec le Comptable et vos sponsors.',
+  ACinfs: 'Tranche de quotas du compte: "{0}"',
+  ACcptspons: 'Le compte est un sponsor',
+  ACbloc: 'Le compte est "bloqué" : les seules actions possibles sont l\'échange de chats avec le Comptable et les sponsors.',
   ACtgr: 'Détail du groupe',
   ACtmb: 'Membres',
   ACsec: 'Ses notes',
 
-  CNXdeg: 'Le compte est bloqué. Seuls les modes "avion" et "incognito" étant admis, votre session a été mise en mode "incognito".',
+  CNXdeg: 'Le compte est bloqué. Seuls les modes "avion" et "incognito" étant admis, la session a été mise en mode "incognito".',
 
   // PageAdmin et ApercuEspace
   ESgc: 'Lancer un GC',
@@ -817,11 +808,11 @@ export default {
   ESretry: 'Reprise {0}',
   
 
-  // Pege people et ApercuPeople
-  APtr1: 'Membre de ma tribu',
-  APtr2: 'Sponsor de ma tribu',
+  // Page people et ApercuPeople
+  APtr1: 'Compte de ma tranche de quotas',
+  APtr2: 'Sponsor de ma tranche de quotas',
   APch: 'Aucun chat | Chat avec :| Chats avec :',
-  APgr: 'Membre d\'aucun groupe | Membre du groupe :| Membres des groupes :',
+  APgr: 'Membre d\'aucun groupe | Membre du groupe :| Membre des groupes :',
   APnb: 'Aucun contact sur {0} ne répond au critère de recherche',
   APtit: 'Détail du contact {0}',
   APtitav: 'Détail de l\'avatar {0}',
@@ -836,7 +827,7 @@ export default {
   CHov: 'Ouvrir un chat depuis une "phrase de contact"',
   CHoch: 'Ouvrir un chat',
   CHav: 'Il n\'est pas possible d\'éditer un chat en mode "avion"',
-  CHbl: 'Quand le compte est "bloqué" il n\'est pas possible d\'éditer un chat (sauf avec le Comptable ou un sponsor de la tribu)',
+  CHbl: 'Quand le compte est "bloqué" il n\'est pas possible d\'éditer un chat (sauf avec le Comptable ou un sponsor)',
   CHdisp: 'Le compte du contact a été résilié : il n\'est pas possible d\'ouvrir un nouveau chat avec lui.',
   CHexp: 'Exporter la sélection des "chats"',
   CHnseq: 'Numéro de séquence: {0}',
@@ -854,6 +845,7 @@ export default {
   SYtex: 'Pas de téléchargement en échec | Un téléchargement en échec | {count} téléchargements en échec',
   SYren: 'Renoncer à accéder à ce fichier en mode avion',
 
+  /*
   NTng: 'Notification générale du Comptable',
   NTtr: 'Notifications à tous les comptes de la tribu (par {0})',
   NTco: 'Notification au compte (par {0})',
@@ -869,17 +861,18 @@ export default {
   NTecr: 'En écrire une',
   NTcre: 'En créer une',
   NT1: 'Notification importante',
-  NTnbcsp: '{0} compte(s) dont {1} sponsor(s)',
   NTv1: 'Volume V1 attribué / quota tribu',
   NTv2: 'Volume V2 attribué / quota tribu',
   NTvx: 'Quotas V1 / V2 (%attribués)',
   NTvxb: 'Quotas V1 / V2 (% d\'utilisation)',
   NTvx1: '{0} ({1}%)',
   NTvx2: '{0} ({1}%)',
-
   NTcom: 'Commentaires sur la tribu {0}',
   NTci: 'Un sponsor ne peut pas émettre une notification au Comptable',
   NTgl: 'Seul le Comptable peut émettre une notification globale.',
+  */
+
+  NTnbcsp: '{0} compte(s) dont {1} sponsor(s)',
 
   IBec: 'Procédures de blocage en cours',
   IB0: 'Pas de procédure de blocage ouverte',
@@ -965,8 +958,8 @@ export default {
   PNOdldir: 'Répertoire local dans cette application',
   PNOdlok: 'A {0} l\'application de stockage local a répondu "OK"',
 
-  PNOer1: 'Vous n\'avez plus accès au groupe "{0}" ou il n\'existe plus : il n\'est pas possible de lui ajouter une nouvelle note.',
-  PNOer2: 'Il n\'est pas possible de rattacher une nouvelle note à une note à laquelle vous n\'avez plus accès ou qui n\'existe plus.' +
+  PNOer1: 'Plus d\'accès au groupe "{0}" ou il n\'existe plus : il n\'est pas possible de lui ajouter une nouvelle note.',
+  PNOer2: 'Il n\'est pas possible de rattacher une nouvelle note à une note inaccessible ou qui n\'existe plus.' +
     '<br><i>{0}</i>',
   PNOer3: 'Il n\'est pas possible d\'ajouter une nouvelle note tant que le volume total des textes des notes excède le quota attribué au compte.',
   PNOer4: 'Le groupe est protégé contre les mises à jour, ajouts et destruction de notes.',
@@ -977,7 +970,7 @@ export default {
   PNOer9: 'Pour changer l\'attribution de l\'exclusivité d\'écriture, il faut, soit l\'avoir soi-même, soit être animateur du groupe.',
 
   PNOro1: 'La session est en mode "avion", aucune mise à jour possible.',
-  PNOro2: 'Le fait l\'objet d\'une "procédure de blocage", aucune mise à jour possible.',
+  PNOro2: 'La session fait l\'objet d\'une "procédure de blocage", aucune mise à jour possible.',
   PNOro3: 'La note est protégée contre l\'écriture.',
   PNOro4: 'Le groupe de la note est protégé contre l\'écriture.',
   PNOro5: 'Un autre membre du groupe a le droit exclusif de mise à jour de la note, édition impossible pour les autres.',
@@ -991,7 +984,7 @@ export default {
   PNOw1: 'Le texte de la note ne PEUT PAS AUGMENTER : le volume total des textes des notes excède le quota attribué au compte.',
   PNOw2: 'Le texte de la note ne PEUT PAS AUGMENTER : le volume des notes du groupe excède déjà le maximum autosisé par son compte hébergeur.',
   PNOw3: 'Le texte de la note ne PEUT PAS AUGMENTER : le groupe n\'a plus de membre qui l\'héberge.',
-  PNOcfsuppr: 'Voulez-vous vraiement supprimer la note suivante ? Si "oui" confirmer.',
+  PNOcfsuppr: 'Supprimer vraiement la note suivante ? Si "oui" confirmer.',
   
   PNOrav: 'Rattachée à la note de {0}',
   PNOrgr: 'Rattachée à la note du groupe "{0}"',
@@ -1073,10 +1066,10 @@ export default {
   CMCtit: 'Choix des mots clés',
 
   //EditeurMd
-  EMDqss: 'Les modifications n\'ont pas été validées. En quittant cette fenêtre vous allez les perdre.',
+  EMDqss: 'Les modifications n\'ont pas été validées. En quittant cette fenêtre elles seront perdues.',
   EMDjr: 'Je reste sur cette fenêtre',
   EMDjq: 'Je quitte la fenêtre et perd mes modifications',
-  EMDph: 'Votre texte ici ...',
+  EMDph: 'texte ici ...',
   
   // ContactChat
   CChtit: 'Joindre un avatar par sa phrase de contact',
@@ -1093,6 +1086,7 @@ export default {
 
   P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
 
+  /*
   P12tit: 'Liste des tribus',
   P12fil: 'Filtre',
   P12ntr: 'Nouvelle tribu',
@@ -1100,12 +1094,11 @@ export default {
   P12not: 'Aucune tribu ne correspond au critère de recherche',
   P12att:  '{0} {1} attribués',
   P12res:  '{0} {1} réservés',
-
   P20tit: 'Détail de l\'avatar {0}',
   P20vc: 'Voir la comptabilité de l\'avatar',
   P20rdv: 'Rendez-vous avec un avatar extérieur',
-
   P22tit: 'Contacts de l\'avatar {0}',
+  */
 
   // Detail Tribu
   DTtit1: 'Total des tranches',
@@ -1190,10 +1183,10 @@ export default {
   AMdda: 'Début d\'activité',
   AMdfa: 'Fin d\'activité',
   AMfond: 'Fondateur.',
-  AMpasanst1: 'Vous n\'êtes pas animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre.',
-  AMpasanst2: 'Même en tant qu\'animateur de ce groupe, vous ne pouvez pas changer le statut d\'un membre lui-même animateur.',
-  AMdan: 'Vous êtes le dernier animateur du groupe et il reste des invitations lancées. Les supprimer avant de vous auto-résilier.',
-  AMdan2: 'Vous êtes le dernier animateur du groupe : voulez-vous vraiment laisser le groupe sans animateur ?',
+  AMpasanst1: 'Seul un animateur de ce groupe peut changer le statut d\'un membre.',
+  AMpasanst2: 'Même un animateur de ce groupe ne peut pas changer le statut d\'un membre lui-même animateur.',
+  AMdan: 'Le dernier animateur du groupe doit supprimer les invitations lancées avant de s\'auto-résilier.',
+  AMdan2: 'Dernier animateur du groupe : laisser vraiment le groupe sans animateur ?',
   AMard: 'Ardoise du groupe',
 
   AMx0: 'L\'opération n\'a rien fait : ',
@@ -1232,14 +1225,14 @@ export default {
   AGsimple: 'Invitations sur demande d\'UN SEUL animateur',
   AGunanime: 'Invitations sur UNANIMITÉ des animateurs',
   AGgerh: 'Gérer l\'hébergement du groupe {0}',
-  AGm1: 'Vous ({0}) êtes animateur et hébergeur du groupe, vous pouvez,',
-  AGm1a: 'a) soit décider de plus assurer l\'hébergement,',
-  AGm1b: 'b) sot changer les quotas alloués aux notes du groupe.',
-  AGm2: 'Vous ({0}) n\'êtes pas hébergeur du groupe (c\'est {1}) mais vous êtes animateur et pouvez à ce titre assurer l\'hébergement.',
-  AGm3: 'Vous ({0}) n\'êtes pas hébergeur du groupe (c\'est {1}) et n\'êtes pas non plus animateur. Vous ne pouvez pas intervenir sur l\'hébergement du groupe.',
-  AGm4: 'Le groupe N\'EST PLUS hébergé et vous ({0}) êtes animateur : vous pouvez à ce titre assurer l\'hébergement.',
-  AGm5: 'Le groupe N\'EST PLUS hébergé et vous ({0}) n\'êtes pas animateur. Vous ne pas pouvez pas assurer l\'hébergement qui peut l\'être par {1}.',
-  AGm6: 'Le groupe N\'EST PLUS hébergé et N\'A PLUS d\'animateurs :vous ({0}) pouvez assurer l\'hébergement.',
+  AGm1: 'Un animateur et hébergeur du groupe peut,',
+  AGm1a: 'a) soit décider de ne plus assurer l\'hébergement,',
+  AGm1b: 'b) soit de changer les quotas alloués aux notes du groupe.',
+  AGm2: '{1} est hébergeur du groupe. En tant qu\'animateur il est possible d\'assurer l\'hébergement.',
+  AGm3: '{1} est hébergeur du groupe. Seul un animateur peut intervenir sur l\'hébergement du groupe.',
+  AGm4: 'Le groupe N\'EST PLUS hébergé. En tant qu\'animateur il est possible d\'assurer l\'hébergement.',
+  AGm5: 'Le groupe N\'EST PLUS hébergé et il faut être animateur pour assurer l\'hébergement (peut l\'être par {1}).',
+  AGm6: 'Le groupe N\'EST PLUS hébergé et N\'A PLUS d\'animateurs : tout auteur peut assurer l\'hébergement.',
   AGv1: 'La création de notes est impossible, leurs textes ne peuvent être QUE réduits.',
   AGv2: 'L\'ajout de fichiers à des notes est impossible, leurs remplacements ne peuvent être qu\'à volume inférieur.',
   AGq1x: 'Le quota Q1 pour les textes des notes est INFERIEUR au volume occupé actuellement : ',
@@ -1249,9 +1242,9 @@ export default {
   AGbtndh: 'Assurer l\'hébergement',
   AGv1b: 'La création de notes SERA impossible, leurs textes ne pourront être QUE réduits.',
   AGv2b: 'L\'ajout de fichiers à des notes SERA impossible, leurs remplacements ne pourront être qu\'à volume inférieur.',
-  AGmx: 'Vous ne pouvez pas allouer des quotas supérieurs à ce qu\'il vous reste en volumes libres sur votre compte.',
-  AGdisp1: 'Il vous restera {0} disponibles pour des textes de notes personels.',
-  AGdisp2: 'Il vous restera {0} disponibles pour les fichiers attachés à vos notes personels.',
+  AGmx: 'Impossible d\'allouer des quotas supérieurs aux volumes libres sur le compte.',
+  AGdisp1: 'Il restera {0} disponibles pour des textes de notes personels.',
+  AGdisp2: 'Il restera {0} disponibles pour les fichiers attachés aux notes personelles.',
   AGuna: 'Gérer le mode simple / unanime de {0}',
   AGu1: 'Mode "simple" : un seul des animateurs peut "inviter" un contact à être membre du groupe.',
   AGu2: 'Mode "unanime" : if faut que TOUS les animateurs "invitent" un contact à être membre du groupe pour que l\'invitation soit effective.',
@@ -1260,7 +1253,7 @@ export default {
   AGu5: 'Etat des demandes des animateurs',
   AGmu: 'Mode actuel : UNANIME',
   AGms: 'Mode actuel : SIMPLE',
-  AGupasan: 'Vous n\'êtes pas animateur, vous ne pouvez pas agir sur ce mode.',
+  AGupasan: 'Seul un animateur peut agir sur ce mode.',
   AGumu: 'Passer en mode UNANIME',
   AGums: 'Je vote pour passer au mode "SIMPLE"',
   AGrumu: 'Annuler les votes et rester en mode UNANIME',
@@ -1288,11 +1281,13 @@ export default {
   FAerr4: 'Le Comptable n\'a pas de carte de visite',
   FAerr5: 'Le Comptable n\'a pas de phrase de contact',
 
+  /*
   IR0: '',
   IR1: 'Volumes des notes contraints à baisser: blocage en cours',
   IR2: 'Lecture seulement: blocage en cours',
   IR3: 'Blocage complet en cours',
   IR4: 'Lecture seulement: mode avion',
+  */
 
   // Page (Compte) et NouvelAvatar
   CPTmemo: 'Mémo du compte',
@@ -1300,8 +1295,8 @@ export default {
   CPTchps: 'Changer la phrase secrète',
   CPTnbloc: 'Aucune procédure de blocage en cours.',
 
-  CPTaptrib: 'A propos de ma tribu {0}',
-  CPTimptrib: 'Les ressources du compte sont imputées à la tribu {0}',
+  // CPTaptrib: 'A propos de ma tribu {0}',
+  // CPTimptrib: 'Les ressources du compte sont imputées à la tribu {0}',
   CPTkwc: 'Mots clés du compte',
   CPTnvav: 'Nouvel avatar',
   CPTnvav2: 'Création d\'un nouvel avatar',
@@ -1340,7 +1335,7 @@ export default {
   CPTal2a: 'Dépassement du quota pour les fichiers attachés aux notes ({0}%).',
   CPTal2b: 'Ajouts et remplacements de fichiers attachés à un note autorisés seulement si le volume total du note est en réduction.',
 
-  CPTtitch: 'Chats avec le Comptable et les sponsors de la tribu',
+  CPTtitch: 'Chats avec le Comptable et les sponsors',
 
   // choix quotas
   CQt1: 'Quota V1 (textes): {0}',
@@ -1406,12 +1401,12 @@ export default {
   ANmx2: 'Le Comptable ne peut pas déclarer une notification globale, seul l\'Administrateur technique le peut',
   ANro3: 'Un compte, sponsor ou non, ne peut pas éditer une notification globale, seul l\'Administrateur technique le peut',
   ANmx3: 'Un compte, sponsor ou non, ne peut pas déclarer une notification globale, seul l\'Administrateur technique le peut',
-  ANro4: 'Seuls le Comptable et le(s) sponsor(s) peuvent éditer une notification collective applicable à tous les comptes partageant la même tranche d\'allocation',
-  ANmx4: 'Seuls le Comptable et le(s) sponsor(s) peuvent déclarer une notification collective applicable à tous les comptes partageant la même tranche d\'allocation',
+  ANro4: 'Seuls le Comptable et le(s) sponsor(s) peuvent éditer une notification collective applicable à tous les comptes partageant la même tranche de quotas',
+  ANmx4: 'Seuls le Comptable et le(s) sponsor(s) peuvent déclarer une notification collective applicable à tous les comptes partageant la même tranche de quotas',
   ANax5: 'Un sponsor ne peut pas éditer une notification déclarée par le Comptable',
   ANax6: 'Un sponsor ne peut pas éditer une notification déclarée par le Comptable',
-  ANro7: 'Seuls le Comptable et le(s) sponsor(s) de la tribu peuvent éditer une notification individuelle d\'un compte"',
-  ANmx7: 'Seuls le Comptable et le(s) sponsor(s) de la tribu peuvent déclarer une notification individuelle d\'un compte"',
+  ANro7: 'Seuls le Comptable et le(s) sponsor(s) peuvent éditer une notification pour un compte"',
+  ANmx7: 'Seuls le Comptable et le(s) sponsor(s) peuvent déclarer une notification pour un compte"',
 
   ANcible1: 'générale',
   ANcible2: 'collective sur la tranche de quotas',
@@ -1498,7 +1493,7 @@ export default {
   PPchats: 'Chats',
   PPgroupes: 'Participations aux groupes',
   PPco: 'Compte non sponsor',
-  PPcht: 'Changer de tribu',
+  PPcht: 'Changer de tranche de quotas',
   PPchsp: 'Changer le statut de "sponsor"',
   PPcompta: 'Voir l\'utilisation des volumes',
   PPkosp: 'Retirer la qualité de sponsor',
