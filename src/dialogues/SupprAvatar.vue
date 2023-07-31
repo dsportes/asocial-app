@@ -1,5 +1,5 @@
 <template>
-<div :class="dkli + ' bs dp50'">
+<div :class="dkli(0) + ' bs dp50'">
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -16,7 +16,7 @@
   </q-header>
 
   <q-page-container>
-    <q-page :class="dkli + ' q-pa-xs'">
+    <q-page :class="dkli(0) + ' q-pa-xs'">
 
       <div v-if="s.dspt" class="row q-my-md items-start">
         <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._dspt" :label="$t('vu')" />
@@ -132,7 +132,7 @@ import { MD, getNg, Compta, Versions } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
-import { edvol, afficherDiag, sleep } from '../app/util.mjs'
+import { edvol, afficherDiag, sleep, dkli } from '../app/util.mjs'
 import { AMJ, limitesjour } from '../app/api.mjs'
 import { SupprAvatar } from '../app/operations.mjs'
 
@@ -144,7 +144,6 @@ export default ({
   components: { BoutonHelp, BoutonConfirm },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     checksOK () { 
       for (const x in this.s.checks) if (!this.s.checks[x]) return false
       return true 
@@ -322,7 +321,7 @@ export default ({
     return {
       session, cfg,
       confirmsuppr, ovconfirmsuppr,
-      MD, edvol, aSt, na, s, init
+      MD, edvol, aSt, na, s, init, dkli
     }
   }
 })

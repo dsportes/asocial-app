@@ -10,7 +10,7 @@
   </q-header>
 
   <q-page-container>
-    <q-page :class="dkli">
+    <q-page :class="dkli(0)">
       <q-stepper v-model="step" vertical color="primary" animated>
         <q-step :name="1" :title="$t('NPphr')" icon="settings" :done="step > 1">
           <span class="fs-sm q-py-sm">{{$t('NPnpc')}}</span>
@@ -83,7 +83,7 @@ import { ref, toRef, onMounted } from 'vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
-import { edvol, afficherDiag } from '../app/util.mjs'
+import { edvol, afficherDiag, dkli } from '../app/util.mjs'
 import { MD, Sponsoring } from '../app/modele.mjs'
 import { UNITEV1, UNITEV2, AMJ, limitesjour } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
@@ -101,7 +101,6 @@ export default ({
   components: { PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     avParrain () { return this.session.estSponsor || this.session.estComptable }
   },
 
@@ -211,7 +210,7 @@ export default ({
     })
 
     return {
-      MD,
+      MD, dkli,
       nct: tribu.value.na,
       limj,
       step1,

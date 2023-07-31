@@ -1,5 +1,5 @@
 <template>
-<div :class="dkli + ' bs dp30'" style="height:10rem">
+<div :class="dkli(0) + ' bs dp30'" style="height:10rem">
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -34,6 +34,7 @@ import { MD } from '../app/modele.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import { ProtNote } from '../app/operations.mjs'
+import { dkli } from '../app/util.mjs'
 
 export default {
   name: 'NoteProt',
@@ -41,7 +42,6 @@ export default {
   components: { BoutonHelp, BoutonUndo },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     modifie () { return (this.prot ? 1 : 0) !== this.nSt.note.p }
   },
 
@@ -83,7 +83,7 @@ export default {
     return {
       ui, session, nSt, aSt, gSt,
       avatar, groupe, prot,
-      MD
+      MD, dkli
     }
   }
 

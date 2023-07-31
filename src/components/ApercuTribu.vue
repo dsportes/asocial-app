@@ -64,7 +64,7 @@ import { toRef, ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import { edvol } from '../app/util.mjs'
+import { edvol, dkli } from '../app/util.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { SetAtrItemComptable } from '../app/operations.mjs'
 import QuotasVols from './QuotasVols.vue'
@@ -99,7 +99,6 @@ export default {
   }},
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     ed1 (v) { return edvol(v * UNITEV1) },
     ed2 (v) { return edvol(v * UNITEV2) },
     editer () {
@@ -153,7 +152,7 @@ export default {
     function ovedq () { MD.oD(edq) }
 
     return {
-      MD, edcom, ovedcom, edq, ovedq,
+      MD, dkli, edcom, ovedcom, edq, ovedq,
       session, aSt,
       t
     }

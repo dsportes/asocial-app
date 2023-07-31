@@ -221,7 +221,7 @@ import { ref, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuMembre from './ApercuMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
-import { edvol, dhcool } from '../app/util.mjs'
+import { edvol, dhcool, dkli } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import BoutonMembre from './BoutonMembre.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
@@ -298,8 +298,6 @@ export default {
   }},
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-
     ast (m) { return this.eg.groupe.ast[m.ids] },
 
     async dialctc (na) {
@@ -452,7 +450,7 @@ export default {
     const ardedit = ref(false)
     function ovardedit () { MD.oD(ardedit) }
     return {
-      MD,
+      MD, dkli,
       mcledit, ovmcledit, nvctc, ovnvctc, editerUna, ovediterUna,
       changerQuotas, ovchangerQuotas, ardedit, ovardedit,
       session,

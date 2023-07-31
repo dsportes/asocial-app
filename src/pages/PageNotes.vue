@@ -275,6 +275,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import { SupprNote, RattNote } from '../app/operations.mjs'
 import { putData, getData } from '../app/net.mjs'
+import { dkli } from '../app/util.mjs'
 
 const icons = ['','person','group','group','description','article','close','close']
 const colors = ['','primary','orange','negative','primary','orange','primary','orange']
@@ -342,7 +343,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     pc (i, j) { return !i ? '' : Math.round((j * 100) / i) + '%' },
     clicknode (n) {
       if (this.rec) {
@@ -952,7 +952,7 @@ export default {
       filtre, filtreFake,
       dlopen, dlfin, dlgo, dlpause, dlreprise, portupload, dirloc, testup,
       lstr, dlnbntot, dlnbnc, dlst, dlnc,
-      mapmc,
+      mapmc, dkli,
       auj: session.dateJourConnx
     }
   }

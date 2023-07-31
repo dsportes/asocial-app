@@ -118,7 +118,7 @@ import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
 import DetailNotif from './DetailNotif.vue'
 import { MD, Notification, getNg } from '../app/modele.mjs'
-import { afficherDiag, dhcool } from '../app/util.mjs'
+import { afficherDiag, dhcool, dkli } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { SetNotifG, SetNotifT, SetNotifC } from '../app/operations.mjs'
 
@@ -239,8 +239,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-
     edd (d) { return AMJ.editDeAmj(d, true) },
     texteok (t) { this.ntf.texte = t },
 
@@ -388,7 +386,7 @@ export default {
     function ovtxtedit () { MD.oD(txtedit) }
 
     return {
-      MD, ouvert, ovouvert, txtedit, ovtxtedit,
+      MD, dkli, ouvert, ovouvert, txtedit, ovtxtedit,
       session, pow,
       aSt,
       auj,

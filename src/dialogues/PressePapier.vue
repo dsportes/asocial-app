@@ -137,7 +137,7 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
-import { readFile, dhcool, edvol, afficherDiag } from '../app/util.mjs'
+import { readFile, dhcool, edvol, afficherDiag, dkli } from '../app/util.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import { NLset, NLdel, FLset, FLdel } from '../app/db.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
@@ -185,7 +185,6 @@ export default ({
   methods: {
     r2 (val) { return val.length !== 0 || this.$t('NAe1') },
     r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true },
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     ajouternote () {
       this.rec = null
       this.txt = ''
@@ -292,7 +291,7 @@ export default ({
 
     return {
       nvnote, ovnvnote, supprnote, ovsupprnote, nvfic, ovnvfic, supprfic, ovsupprfic,
-      MD,
+      MD, dkli,
       session, ppSt,
       lgmax
     }

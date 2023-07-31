@@ -104,7 +104,7 @@ import { ref, onMounted, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import DetailTribu from '../components/DetailTribu.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import { edvol } from '../app/util.mjs'
+import { edvol, dkli } from '../app/util.mjs'
 import { ID, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouvelleTribu, GetTribu, AboTribuC, GetSynthese } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
@@ -119,7 +119,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     cell (n) { return 'col-1 font-mono text-center' + (!n ? '' : ' bg-yellow-3 text-black text-bold')},
     ed1 (n) { return edvol(n * UNITEV1) },
     ed2 (n) { return edvol(n * UNITEV2) },
@@ -287,7 +286,7 @@ export default {
       synth, // Syntheses de l'espace
       ligne, // ligne courante affichée
       MD, ID, nt, ovnt,
-      aSt, session, pow, ui
+      aSt, session, pow, ui, dkli
     }
   }
 

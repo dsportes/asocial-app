@@ -46,7 +46,7 @@ import { MajCv, GetAvatarPC, ChangementPC, ExistePhrase } from '../app/operation
 import BoutonHelp from './BoutonHelp.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import PhraseContact from './PhraseContact.vue'
-import { afficherDiag } from '../app/util.mjs'
+import { afficherDiag, dkli } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
 
 export default {
@@ -66,7 +66,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async cvchangee (res) {
       if (res) {
         await new MajCv().run(this.avatar, res.ph, res.info)
@@ -130,7 +129,7 @@ export default {
     function oveditionpc () { MD.oD(editionpc)}
 
     return {
-      MD,
+      MD, dkli,
       editionpc, oveditionpc,
       avatar,
       session: stores.session

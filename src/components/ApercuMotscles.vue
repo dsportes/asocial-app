@@ -24,6 +24,7 @@ import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixMotscles from './ChoixMotscles.vue'
 import { MD } from '../app/modele.mjs'
+import { dkli } from '../app/util.mjs'
 
 export default ({
   name: 'ApercuMotscles',
@@ -46,7 +47,6 @@ export default ({
   }},
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async editer () {
       if (! await this.session.edit()) return
       if (this.edit) this.ovmcedit()
@@ -75,7 +75,7 @@ export default ({
     function ovmcedit () { MD.oD(mcedit) }
 
     return {
-      MD, mcedit, ovmcedit,
+      MD, dkli, mcedit, ovmcedit,
       session,
       mcvide: new Uint8Array([]),
       nom

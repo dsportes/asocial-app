@@ -107,6 +107,7 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
+import { dkli } from '../app/util.mjs'
 import DetailTribu from '../components/DetailTribu.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
@@ -133,8 +134,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-
     ico (c) { return ic[c.notif.niv || 0] },
     tclr (c) { return 'text-' + txt[c.notif.niv || 0]},
     bgclr (c) { return 'bg-' + bg[c.notif.niv || 0] },
@@ -237,7 +236,7 @@ export default {
       ligne,
       MD, nvsp, ovnvsp, edq, ovedq, cptdial, ovcptdial,
       cfg: stores.config,
-      ui: stores.ui
+      ui: stores.ui, dkli
     }
   }
 

@@ -1,5 +1,5 @@
 <template>
-<div :class="dkli + ' bs dp50'">
+<div :class="dkli(0) + ' bs dp50'">
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -111,7 +111,7 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEV1 } from '../app/api.mjs'
 import { MD, getNg } from '../app/modele.mjs'
-import { $t, splitPK } from '../app/util.mjs'
+import { $t, splitPK, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -123,7 +123,6 @@ export default {
   components: { BoutonHelp, BoutonUndo, EditeurMd },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     modifie () { return this.texte !== '' || (this.temp.value !== 99999999) ||
       this.prot || this.exclu }
   },
@@ -297,7 +296,7 @@ export default {
       ui, session, nSt, aSt, gSt, cfg, options,
       er, erd, la, naAut, type, step, idp, idsp, grP, avP,
       auteur, avatar, groupe, mb,
-      MD, autStep
+      MD, autStep, dkli
     }
   }
 

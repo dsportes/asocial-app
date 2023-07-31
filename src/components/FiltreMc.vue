@@ -1,5 +1,5 @@
 <template>
-  <div :class="'q-pa-xs full-width ' + dkli">
+  <div :class="'q-pa-xs full-width ' + dkli(0)">
     <div>{{$t('FI' + attr)}}</div>
     <apercu-motscles @ok="ok" du-compte :du-groupe="groupeId"
       :mapmc="mapmc" edit :src="src" :idx="idx"/>
@@ -10,6 +10,7 @@
 import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
 import ApercuMotscles from './ApercuMotscles.vue'
+import { dkli } from '../app/util.mjs'
 
 export default ({
   name: 'FiltreMc',
@@ -23,7 +24,6 @@ export default ({
   },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') }
   },
 
   methods: {
@@ -63,7 +63,7 @@ export default ({
 
 
     return {
-      st,
+      st, dkli,
       src,
       groupeId,
       mapmc

@@ -1,5 +1,5 @@
 <template>
-  <div :class="'row ' + dkli()">
+  <div :class="'row ' + dkli(idx)">
     <div class="col-auto q-mr-sm">
       <img class="photomax" :src="photo" />
     </div>
@@ -21,6 +21,7 @@ import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import { ID } from '../app/api.mjs'
 import BarrePeople from './BarrePeople.vue'
+import { dkli } from '../app/util.mjs'
 
 export default {
   name: 'ApercuCompte',
@@ -40,7 +41,6 @@ export default {
   }},
 
   methods: {
-    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (this.idx ? 'clair' + (this.idx % 2) : 'clair0') },
   },
 
   setup (props) {
@@ -48,7 +48,8 @@ export default {
     const session = stores.session
     return {
       config,
-      session
+      session,
+      dkli
     }
   }
 }

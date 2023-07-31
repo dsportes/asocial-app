@@ -1,5 +1,5 @@
 <template>
-<div :class="dkli + ' bs dp50'">
+<div :class="dkli(0) + ' bs dp50'">
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -139,7 +139,7 @@
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
-import { edvol, dhcool, afficherDiag } from '../app/util.mjs'
+import { edvol, dhcool, afficherDiag, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import { UNITEV2 } from '../app/api.mjs'
@@ -159,7 +159,6 @@ export default {
 
   computed: {
     lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
-    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     modifie () { return false }
   },
 
@@ -415,7 +414,7 @@ export default {
       confirmav1, ovconfirmav1, confirmav2, ovconfirmav2,
       ui, session, nSt, aSt, gSt, avnSt, ppSt,
       exv, avatar, groupe, state, exp,
-      MD, ergrV2, edvol, dhcool
+      MD, dkli, ergrV2, edvol, dhcool
     }
   }
 

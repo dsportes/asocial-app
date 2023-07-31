@@ -1,5 +1,5 @@
 <template>
-  <div :class="'q-pa-xs full-width ' + dkli">
+  <div :class="'q-pa-xs full-width ' + dkli(0)">
     <q-btn no-caps flat :label="$t('FIstmb', [$t('stmb' + val)])">
     <q-menu anchor="bottom left" self="top left">
       <q-list style="min-width: 50px">
@@ -30,6 +30,7 @@
 <script>
 import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
+import { dkli } from '../app/util.mjs'
 
 export default ({
   name: 'FiltreStmb',
@@ -50,7 +51,6 @@ export default ({
   },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') }
   },
 
   setup (props) {
@@ -60,7 +60,7 @@ export default ({
     const x = st.filtre[nom.value]
     val.value = x && x.notif ? x.notif : 0
     return {
-      st,
+      st, dkli,
       val
     }
   }

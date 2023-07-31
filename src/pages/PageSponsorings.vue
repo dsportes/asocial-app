@@ -51,7 +51,7 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { AMJ, UNITEV1, UNITEV2, ID } from '../app/api.mjs'
-import { dhcool, edvol } from '../app/util.mjs'
+import { dhcool, edvol, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
@@ -79,7 +79,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
     idtr (sp) { return Tribu.id(sp.descr.clet) },
@@ -109,7 +108,7 @@ export default {
     function ovnvsp () { MD.oD(nvsp) }
 
     return {
-      ID, MD, nvsp, ovnvsp,
+      ID, MD, nvsp, ovnvsp, dkli,
       avatar,
       aSt,
       session

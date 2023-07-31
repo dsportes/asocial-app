@@ -186,7 +186,7 @@ import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
 import { GC, GetCheckpoint, SetEspaceT } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { edvol } from '../app/util.mjs'
+import { edvol, dkli } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
 
@@ -215,8 +215,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-
     e1 (v) { return edvol(v * UNITEV1) },
     e2 (v) { return edvol(v * UNITEV2) },
     brd (idx) { 
@@ -330,7 +328,7 @@ export default {
     function ovpageespace () { MD.oD(pageespace) }
 
     return {
-      session, cfg,
+      session, cfg, dkli,
       AMJ, MD, 
       creationesp, ovcreationesp, checkpoint, ovcheckpoint, edprf, ovedprf,
       pageespace, ovpageespace

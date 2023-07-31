@@ -1,5 +1,5 @@
 <template>
-  <div :class="'q-pa-xs full-width ' + dkli">
+  <div :class="'q-pa-xs full-width ' + dkli()">
     <div class="fs-md text-italic">{{$t('FIavgrt')}}</div>
     <q-btn no-caps flat :label="tit" icon-right="expand_more">
     <q-menu anchor="bottom left" self="top left" max-height="10rem" 
@@ -29,6 +29,7 @@ import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
 import { getNg } from '../app/modele.mjs'
 import { ID } from '../app/api.mjs'
+import { dkli } from '../app/util.mjs'
 
 export default ({
   name: 'FiltreAvgr',
@@ -49,7 +50,6 @@ export default ({
   },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (this.idx ? 'clair' + (this.idx % 2) : 'clair0') },
     tit () {
       if (!this.val) return this.$t('FItavgr')
       return ID.estGroupe(this.val.id) ? this.$t('groupe', [this.val.nomc]) : this.$t('avatar', [this.val.nom])
@@ -74,7 +74,7 @@ export default ({
     }
 
     return {
-      fSt,
+      fSt, dkli,
       val,
       la,
       lg

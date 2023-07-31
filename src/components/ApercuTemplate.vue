@@ -22,6 +22,7 @@ import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
+import { dkli } from '../app/util.mjs'
 
 export default {
   name: 'ApercuTemplate',
@@ -36,7 +37,6 @@ export default {
   }},
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
   },
 
   setup (props) {
@@ -81,7 +81,7 @@ export default {
     function ovedit () { MD.oD(edit) }
 
     return {
-      MD, edit, ovedit,
+      MD, dkli, edit, ovedit,
       session,
       chat
     }

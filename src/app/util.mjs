@@ -1,13 +1,20 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
+import { useQuasar } from 'quasar'
 
-import { useI18n } from 'vue-i18n'
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AMJ } from './api.mjs'
 import { MD } from './modele.mjs'
 
 let pako
+
+let $q
+
+export function dkli (idx) {
+  if (!$q) $q = useQuasar()
+  return ($q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0')) + ' '
+}
 
 export function setRequiredModules (m) { 
   pako = m.pako

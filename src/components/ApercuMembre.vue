@@ -204,7 +204,7 @@
 <script>
 import { ref } from 'vue'
 
-import { dhcool } from 'src/app/util.mjs'
+import { dhcool, dkli } from 'src/app/util.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonMembre from './BoutonMembre.vue'
@@ -271,7 +271,6 @@ export default {
   }},
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async setAc (fn, laa) {
       // Contrôles fins
       this.err1 = '' // bloquantes
@@ -342,7 +341,7 @@ export default {
     function ovchgSt () { MD.oD(chgSt) }
 
     return {
-      MD, infoedit, ovinfoedit, chgSt, ovchgSt,
+      MD, dkli, infoedit, ovinfoedit, chgSt, ovchgSt,
       session,
       gSt,
       photoDef

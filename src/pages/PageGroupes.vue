@@ -84,7 +84,7 @@
 <script>
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { edvol, $t } from '../app/util.mjs'
+import { edvol, $t, dkli } from '../app/util.mjs'
 import { MD, Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
@@ -104,8 +104,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-
     edq1 (n) { return edvol(n * UNITEV1) },
     edq2 (n) { return edvol(n * UNITEV2) },
     ed1 (n) { return edvol(n) },
@@ -173,7 +171,7 @@ export default {
 
     return {
       MD, crgr, ovcrgr,
-      ui, session, aSt, gSt,
+      ui, session, aSt, gSt, dkli,
       stats,
       mapmc,
       options

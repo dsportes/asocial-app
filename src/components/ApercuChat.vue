@@ -32,7 +32,7 @@ import { toRef, ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import EditeurMd from './EditeurMd.vue'
-import { dhcool, afficherDiag } from '../app/util.mjs'
+import { dhcool, afficherDiag, dkli } from '../app/util.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import ApercuPeople from './ApercuPeople.vue'
 import { MajMotsclesChat, NouveauChat, MajChat } from '../app/operations.mjs'
@@ -54,7 +54,6 @@ export default {
   }},
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async editer () {
       if (this.session.mode === 3) {
         await afficherDiag(this.$t('CHav'))
@@ -134,7 +133,7 @@ export default {
     function ovchatedit () { MD.oD(chatedit) }
 
     return {
-      MD, chatedit, ovchatedit,
+      MD, chatedit, ovchatedit, dkli,
       session,
       chat
     }

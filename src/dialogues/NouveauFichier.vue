@@ -1,5 +1,5 @@
 <template>
-<div :class="dkli + ' bs dp40'" style="height:70vh">
+<div :class="dkli(0) + ' bs dp40'" style="height:70vh">
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -85,7 +85,7 @@ import { reactive, toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { afficherDiag, edvol, dhcool, readFile, rnd6, suffixe } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
-import { $t } from '../app/util.mjs'
+import { $t, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NouveauFichier } from '../app/operations.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
@@ -99,7 +99,6 @@ export default {
   components: { BoutonHelp, NomGenerique },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     valide () { return this.fic.lg && this.nfic }
   },
 
@@ -244,7 +243,7 @@ export default {
     ui.etf = 0
 
     return {
-      nSt, aSt, gSt, ui, session, MD, edvol, dhcool,
+      nSt, aSt, gSt, ui, session, MD, edvol, dhcool, dkli,
       nfic,
       fic,
       step,

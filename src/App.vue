@@ -333,7 +333,7 @@ import { useI18n } from 'vue-i18n'
 import stores from './stores/stores.mjs'
 import { ID } from './app/api.mjs'
 
-import { set$t, hms } from './app/util.mjs'
+import { set$t, hms, dkli } from './app/util.mjs'
 import { MD } from './app/modele.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
@@ -434,8 +434,6 @@ export default {
   }},
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-
     discon () {
       if (this.session.status === 3) deconnexion(); else MD.oD('dialoguedrc')
     },
@@ -508,7 +506,7 @@ export default {
       session,
       config,
       ui,
-      hms,
+      hms, dkli,
       diag: MD.declare('diag', ref(false)),
       dialoguedrc: MD.declare('dialoguedrc', ref(false)),
       dialoguehelp: MD.declare('dialoguehelp', ref(false)),

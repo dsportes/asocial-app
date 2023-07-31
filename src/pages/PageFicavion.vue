@@ -81,7 +81,7 @@ import { saveAs } from 'file-saver'
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
-import { afficherDiag, edvol, dhcool } from '../app/util.mjs'
+import { afficherDiag, edvol, dhcool, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { FLset } from '../app/db.mjs'
 
@@ -97,8 +97,6 @@ export default ({
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
-
     detail (fc) {
       this.fc = fc
       this.ovdetaildial()
@@ -210,7 +208,7 @@ export default ({
 
     return {
       detaildial, ovdetaildial,
-      MD, edvol, dhcool,
+      MD, edvol, dhcool, dkli,
       nSt, fSt, session, ppSt, avnSt, ui,
       lst
     }

@@ -33,6 +33,7 @@ import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import CarteVisite from './CarteVisite.vue'
 import { MD } from '../app/modele.mjs'
+import { dkli } from '../app/util.mjs'
 
 export default {
   name: 'ApercuGenx',
@@ -62,7 +63,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     async editerCV () { 
       if (!await this.session.edit()) return
       this.ovedition()
@@ -84,7 +84,7 @@ export default {
     function ovedition () { MD.oD(edition) }
 
     return {
-      MD, edition, ovedition,
+      MD, dkli, edition, ovedition,
       ui: stores.ui,
       session: stores.session
     }

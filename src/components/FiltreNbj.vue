@@ -1,5 +1,5 @@
 <template>
-  <div :class="'q-pa-xs full-width ' + dkli">
+  <div :class="'q-pa-xs full-width ' + dkli(0)">
     <q-select v-model="val" dense options-dense :options="options" :label="$t('FIjours')" />
   </div>
 </template>
@@ -7,6 +7,7 @@
 <script>
 import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
+import { dkli } from '../app/util.mjs'
 
 export default ({
   name: 'FiltreNbj',
@@ -26,7 +27,6 @@ export default ({
   },
 
   computed: {
-    dkli () { return this.$q.dark.isActive ? (this.idx ? 'sombre' + (this.idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') }
   },
 
   setup (props) {
@@ -36,7 +36,7 @@ export default ({
     const x = st.filtre[nom.value]
     val.value = x && x.nbj ? x.nbj : 9999
     return {
-      st,
+      st, dkli,
       val
     }
   }

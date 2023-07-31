@@ -20,7 +20,8 @@ import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ApercuGenx from './ApercuGenx.vue'
-import { getNg, NomGenerique } from '../app/modele.mjs'
+import { getNg } from '../app/modele.mjs'
+import { dkli } from '../app/util.mjs'
 
 export default {
   name: 'ApercuPeople',
@@ -35,7 +36,6 @@ export default {
   }},
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
   },
 
   setup (props) {
@@ -74,7 +74,7 @@ export default {
 
     return {
       session,
-      p,
+      p, dkli,
       ui
     }
   }

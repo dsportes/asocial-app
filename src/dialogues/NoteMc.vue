@@ -50,7 +50,7 @@
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD, Motscles } from '../app/modele.mjs'
-import { $t, egaliteU8 } from '../app/util.mjs'
+import { $t, egaliteU8, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ChoixMotscles from '../components/ChoixMotscles.vue'
 import ListeAuts from '../components/ListeAuts.vue'
@@ -80,7 +80,6 @@ export default {
   },
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
     aa (st) { return st === 32 ? $t('animateur') : $t('auteur') },
     async valider () {
@@ -155,7 +154,7 @@ export default {
     return {
       ui, session, nSt, gSt, pSt,
       im, imna, avatar, groupe, note, msg, mapmc, mc, mcap,
-      MD
+      MD, dkli
     }
   }
 
