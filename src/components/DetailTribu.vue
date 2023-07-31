@@ -18,11 +18,6 @@
   <div :style="'height:' + (henrem - 2) + 'rem;overflow-y:auto'">
     <apercu-notif v-if="ligne.notif"
       :notif="ligne.notif" :id-tribu="ligne.id" :idx="0" nom=""/>
-    <div v-else>
-      <div v-if="ligne.ntr1">{{$t('DTnbncs', ligne.ntr1, {count: ligne.ntr1})}}</div>
-      <div v-if="ligne.ntr2" class="text-bold bg-yellow-3 text-black">
-        {{$t('DTnbncb', ligne.ntr2, {count: ligne.ntr2})}}</div>
-    </div>
 
     <div v-if="ligne.nco1">{{$t('DTnbncs', ligne.nco1, {count: ligne.nco1})}}</div>
     <div v-if="ligne.nco2" class="text-bold bg-yellow-3 text-black">

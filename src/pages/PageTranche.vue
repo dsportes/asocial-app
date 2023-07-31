@@ -21,6 +21,9 @@
                 <span v-if="type(c)===1" class="q-ml-sm">[{{$t('moi')}}]</span>
               </div>
 
+              <q-icon size="md" v-if="c.notif" :name="ico(c)"
+                :class="'q-ml-md ' + tclr(c) + ' ' + bgclr(c)"/>
+
             </div>
             <q-btn class="q-ml-md" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(c)"/>
           </div>
@@ -35,7 +38,7 @@
           <apercu-compte v-if="type(c)===3" :elt="c" :idx="idx"/>
 
           <apercu-notif class="q-my-xs" 
-            :notif="c.notif" :id-tribu="aSt.tribuC.id" :nom="aSt.tribuC.nom" :idx="idx"/>
+            :notif="c.notif" :id-compte="c.id" :id-tribu="ligne.id" :nom="nomc(c)" :idx="idx"/>
 
           <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
@@ -115,6 +118,10 @@ import QuotasVols from '../components/QuotasVols.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import { GetCompteursCompta, SetQuotas } from '../app/operations.mjs'
 
+const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
+const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative']
+const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
+
 export default {
   name: 'PageTranche',
   components: { DetailTribu, ApercuNotif, ChoixQuotas, ApercuCompte, ApercuPeople,
@@ -127,6 +134,10 @@ export default {
 
   methods: {
     dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
+
+    ico (c) { return ic[c.notif.niv || 0] },
+    tclr (c) { return 'text-' + txt[c.notif.niv || 0]},
+    bgclr (c) { return 'bg-' + bg[c.notif.niv || 0] },
 
     vis (c) { 
       return (this.pow < 4 || (c.id === this.aSt.compteId))

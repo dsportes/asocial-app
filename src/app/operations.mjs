@@ -677,7 +677,7 @@ export class SetNotifC extends OperationUI {
       if (notifC) notifC.dh = new Date().getTime()
       const cle = getCle(id)
       const stn = !notifC ? 0 : (notifC.jbl ? 2 : 1) 
-      const notif = notif ? await crypter(cle, notif.encode()) : null
+      const notif = notifC ? await crypter(cle, notifC.encode()) : null
       const args = { token: session.authToken, id, idc, notif, stn }
       this.tr(await post(this, 'SetNotifC', args))
       this.finOK()
