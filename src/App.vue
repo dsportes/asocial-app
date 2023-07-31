@@ -137,7 +137,7 @@
           <filtre-tri nom="espace" :nb-options="19" :idx="0"/>
         </div>
         <div v-if="ui.page === 'tranche'" class="column justify-start">
-          <filtre-nom nom="tribu" prop='nomc' :idx="0"/>
+          <filtre-nom nom="tranche" prop='nomc' :idx="0"/>
           <filtre-notif nom="tranche" :idx="1"/>
           <filtre-avecsp nom="tranche" :idx="0"/>
           <filtre-tri nom="tranche" :nb-options="9" :idx="1"/>

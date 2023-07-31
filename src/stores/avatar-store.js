@@ -4,6 +4,7 @@ import { hash, egaliteU8, difference, intersection } from '../app/util.mjs'
 import { encode } from '@msgpack/msgpack'
 import { ID, E_WS, AppExc, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { post } from '../app/net.mjs'
+import { getNg } from '../app/modele.mjs'
 
 const fx = [['id', 1],
 ['q1', 1], ['q1', -1],
@@ -266,7 +267,11 @@ export const useAvatarStore = defineStore('avatar', {
       if (!f) { stores.session.fmsg(state.ptLc.length); return state.ptLc }
       const r = []
       for (const c of state.ptLc) {
-        if (f.avecsp && !c.sp) continue
+        if (f.avecsp && !c.nasp) continue
+        if (f.nomc) {
+          const na = getNg(c.id)
+          if (!na || !na.nomc.startsWith(f.nomc)) continue
+        }
         if (f.notif && (!c.notif || (f.notif === 2 && c.notif.niv < 2))) continue
         r.push(c)
       }
