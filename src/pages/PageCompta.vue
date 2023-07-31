@@ -2,7 +2,7 @@
 <q-page>
   <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto"/>
 
-  <div v-if="ui.pagetab==='notif'" class="q-pa-sm">
+  <div v-if="ui.pagetab==='notif'" class="column q-pa-sm">
     <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
       <div class="titre-md">{{$t('CPTal1a', [c.pc1])}}</div>
       <div>{{$t('CPTal1b')}}</div>

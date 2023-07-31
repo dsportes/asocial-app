@@ -334,7 +334,7 @@ export class OperationWS extends Operation {
     if (session.accesIdb) await gestionFichierSync(this.buf.mapSec)
 
     session.setBlocage()
-    if (session.niv > 2 && !session.estComptable) deconnexion()
+    if (session.niv > 4 && !session.estComptable) deconnexion()
     session.setDh(this.dh)
   }
 
@@ -479,13 +479,13 @@ export class OnchangeTribu extends OperationWS {
         }
       } else {
         if (row.v > aSt.tribu.v) {
+          this.tribu = await compile(row)
           if (!this.tribu.aCompte) {
             this.resiliation = true
             deconnexion()
             return
           }
           this.buf.putIDB(row)
-          this.tribu = await compile(row)
         }
       }
 

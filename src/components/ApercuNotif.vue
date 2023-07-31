@@ -2,12 +2,20 @@
 <div>
   <div :class="dkli(idx)">
     <div v-if="notif" class="column q-my-sm">
-      <div class="row justify-between">
-        <notif-icon :niv="notif.niv" :cible="tC" info/>
-        <q-btn color="primary" class="q-ml-sm btn2" size="sm" :label="$t('ANplus')"
-          dense icon="edit" @click="editer"/>
-      </div>
-      <show-html class="q-mt-sm bord" :texte="notif.texte" :idx="idx" 
+      <q-expansion-item dense switch-toggle-side>
+        <template v-slot:header>
+          <q-toolbar :class="tclr + ' ' + bgclr">
+            <q-icon size="sm" :name="ico" class="q-mr-sm"/>
+            <q-toolbar-title v-if="tC !== 0" class="col titre-md">
+              {{$t('ANcourt' + notif.niv, [$t('ANcible' + tC)])}}</q-toolbar-title>
+            <q-btn color="warning" size="sm" class="btn2" :label="$t('gerer')"
+              dense icon="edit" @click.stop="editer"/>
+          </q-toolbar>
+        </template>
+        <detail-notif :ntf="notif"/>
+      </q-expansion-item>
+
+      <show-html class="q-mt-xs bord" :texte="notif.texte" :idx="idx" 
         maxh="3rem" zoom scroll/>
     </div>
     <div v-if="!notif && (pow < 4)" class="row justify-between">
@@ -44,21 +52,7 @@
           <show-html class="q-mt-sm bord" scroll :texte="ntf.texte" :idx="idx" maxh="5rem" 
             :edit="ro===0" zoom @edit="ovtxtedit"/>
 
-          <div class="q-mt-sm titre-md text-bold">
-            <span v-if="ntf.niv<2">{{$t('ANlon' + ntf.niv)}}</span>
-            <span v-if="ntf.niv===2" class="text-warning bg-yellow-3">{{$t('ANlon' + ntf.niv)}}</span>
-            <span v-if="ntf.niv>2" class="text-negative bg-yellow-5">{{$t('ANlon' + ntf.niv)}}</span>
-          </div>
-          <div v-if="ntf.niv>1 && ntf.niv<5" class="q-my-xs titre-sm text-italic">{{$t('ANlong' + ntf.niv)}}</div>
-
-          <div style="height:4rem">
-          <div v-if="ntf.n3 > 0" class="q-ml-md titre-md">
-            {{$t('ANlon3') + ' ' + $t('ANle', [edd(ntf.jbl), ntf.n3])}}</div>
-          <div v-if="ntf.n4 > 0" class="q-ml-md titre-md">
-            {{$t('ANlon4') + ' ' + $t('ANle', [edd(ntf.d4), ntf.n4])}}</div>
-          <div v-if="ntf.n5 > 0" class="q-ml-md titre-md">
-            {{$t('ANlon5') + ' ' + $t('ANle', [edd(ntf.d5), ntf.n5])}}</div>
-          </div>
+          <detail-notif :ntf="ntf"/>
 
           <div v-if="ro === 0">
             <q-separator color="orange" class="q-my-sm"/>
@@ -122,10 +116,15 @@ import NotifIcon from './NotifIcon.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
+import DetailNotif from './DetailNotif.vue'
 import { MD, Notification, getNg } from '../app/modele.mjs'
 import { afficherDiag, dhcool } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { SetNotifG, SetNotifT, SetNotifC } from '../app/operations.mjs'
+
+const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative']
+const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
+const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
 
 export default {
   name: 'ApercuNotif',
@@ -139,9 +138,13 @@ export default {
     idx: Number
   },
 
-  components: { NotifIcon, BoutonHelp, EditeurMd, ShowHtml },
+  components: { NotifIcon, BoutonHelp, EditeurMd, ShowHtml, DetailNotif },
 
   computed: {
+    ico () { return ic[this.notif.niv || 0] },
+    tclr () { return 'text-' + txt[this.notif.niv || 0]},
+    bgclr () { return 'bg-' + bg[this.notif.niv || 0] },
+
     // Type de cible : 1:Global, 2:Tribu, 3:Compte
     tC () { return this.idCompte ? 3 : (this.ns ? 1 : 2) },
 
@@ -252,6 +255,7 @@ export default {
 
     async editer () {
       this.ro = -1
+      this.choixdiag = ''
       if (this.pow === 1) await this.editerA()
       else if (this.pow === 2) await this.editerC()
       else await this.editerS()
@@ -403,5 +407,8 @@ export default {
 .inp1
   width: 5rem
 .btn2
-  max-height: 1.3rem
+  max-height: 1.5rem
+.q-toolbar
+  padding: 0 !important
+  min-height: 0 !important
 </style>

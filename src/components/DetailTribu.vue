@@ -17,7 +17,7 @@
 
   <div :style="'height:' + (henrem - 2) + 'rem;overflow-y:auto'">
     <apercu-notif v-if="ligne.notif"
-      :notif="tribu.notif" :id-tribu="tribu.id" :idx="idx" nom=""/>
+      :notif="ligne.notif" :id-tribu="ligne.id" :idx="0" nom=""/>
     <div v-else>
       <div v-if="ligne.ntr1">{{$t('DTnbncs', ligne.ntr1, {count: ligne.ntr1})}}</div>
       <div v-if="ligne.ntr2" class="text-bold bg-yellow-3 text-black">
@@ -109,7 +109,6 @@ export default ({
   }},
 
   methods: {
-    dkli (idx) { return this.$q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0') },
     ed1 (n) { return edvol(n * UNITEV1) },
     ed2 (n) { return edvol(n * UNITEV2) },
 

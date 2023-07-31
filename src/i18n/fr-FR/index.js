@@ -1429,9 +1429,10 @@ export default {
   ANlong0: 'Pas d\'alerte en cours',
   ANlong1: 'Alerte en cours, sans procédure de blocage planifiée',
   ANlong2: 'Alerte en cours, une procédure de blocage est planifiée: future interdictions de mise à jour, puis de lecture, enfin résiliation',
-  ANlong3: 'Les mises à jour sont interdites, tout reste consultable. Toutefois les "chats" avec le Comptable et vos sponsors restent possibles',
-  ANlong4: 'Rien n\'est consultable et les mises à jour sont interdites. Toutefois les "chats" avec le Comptable et vos sponsors restent possibles',
+  ANlong3: 'Les mises à jour sont interdites, tout reste consultable.',
+  ANlong4: 'Rien n\'est consultable et les mises à jour sont interdites.',
   ANlong5: 'Compte(s) résilié(s) ou en cours de résiliation.',
+  ANlong6: 'Les "chats d\'urgence" avec le Comptable et les sponsors sont toutefois ouverts.',
 
   ANlon0: 'Pas d\'alerte en cours',
   ANlon1: 'Alerte en cours, sans blocage planifié',

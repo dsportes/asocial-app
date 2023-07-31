@@ -86,13 +86,13 @@
       </div>
       </div>
     </q-card>
-
-    <q-card v-if="session.niv === 3" class="q-mt-lg petitelargeur maauto q-pa-sm">
+<!--
+    <q-card v-if="session.niv > 3" class="q-mt-lg petitelargeur maauto q-pa-sm">
       <div class="q-px-sm titre-md text-bold text-italic text-warning cursor-pointer"
         @click="clickNotif2">{{$t('ACbloc')}}</div>
     </q-card>
-
-    <q-card v-if="session.niv < 3" class="q-mt-lg petitelargeur maauto q-pa-sm">
+-->
+    <q-card class="q-mt-lg petitelargeur maauto q-pa-sm">
       <page-menu/>
     </q-card>
 

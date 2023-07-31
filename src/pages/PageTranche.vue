@@ -204,7 +204,7 @@ export default {
 
     function resetCourant () { ligne.value = aSt.tribuC.synth }
 
-    if (pow === 2) aSt.$onAction(({ name, args, after }) => {
+    if (pow > 1) aSt.$onAction(({ name, args, after }) => {
       after(async (result) => {
         if (name === 'setTribu' || name === 'setCompta') {
           resetCourant()

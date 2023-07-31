@@ -1,12 +1,12 @@
 <template>
-  <q-card class="q-pa-sm">
+  <div>
 
-    <div class="q-mt-sm titre-lg text-bold">
+    <div class="titre-lg text-bold">
       <span v-if="niv<2">{{$t('ANlon' + niv)}}</span>
       <span v-if="niv===2" class="text-warning bg-yellow-3">{{$t('ANlon' + niv)}}</span>
       <span v-if="niv>2" class="text-negative bg-yellow-5">{{$t('ANlon' + niv)}}</span>
     </div>
-    <div v-if="niv>1 && niv<5" class="q-my-xs titre-sm text-italic">{{$t('ANlong' + niv)}}</div>
+    <div v-if="niv>1 && niv<5" class="q-my-xs titre-lg text-italic">{{$t('ANlong' + niv)}}</div>
 
     <div style="height:4rem">
     <div v-if="ntf.n3 > 0" class="q-ml-md titre-md">
@@ -24,9 +24,9 @@
     <apercu-notif v-if="session.ok" :notif="aSt.act.notif" 
       :id-tribu="aSt.tribu.id" :id-compte="aSt.compte.id" :nom="aSt.compte.na.nom"/>
 
-    <div style="height:2px;width:100%"/>
+    <div style="height:2px;width:1rem"/>
 
-  </q-card>
+  </div>
 </template>
 <script>
 

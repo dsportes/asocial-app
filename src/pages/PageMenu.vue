@@ -1,5 +1,10 @@
 <template>
 <q-list class="titre-md" style="min-width: 300px">
+  <div v-if="bloc && !session.estComptable" 
+    class="q-px-sm titre-md text-bold text-italic bg-yellow-5 text-warning cursor-pointer"
+    @click="clickNotif2">{{$t('ACbloc')}}</div>
+
+  <div v-if="!bloc">
   <q-item class="q-my-md" clickable @click="ui.setPage('notes')">
     <q-item-section>
       <q-item-label 
@@ -8,6 +13,7 @@
     </q-item-section>
   </q-item>
   <q-separator color="orange"/>
+  </div>
 
   <q-item v-if="session.estComptable" clickable  @click="ui.setPage('espace')">
     <q-item-section>
@@ -16,6 +22,7 @@
   </q-item>
   <q-separator v-if="session.estComptable" color="orange"/>
 
+  <div v-if="!bloc">
   <q-item clickable @click="ui.setPage('compte')">
     <q-item-section>
       <q-item-label lines="1">{{$t('ACmesav' + (session.estSponsor ? '1' : '2'))}}</q-item-label>
@@ -91,7 +98,7 @@
       </q-item-label>
     </q-item-section>
   </q-item>
-
+  </div>
 </q-list>
 </template>
 
@@ -120,6 +127,7 @@ export default {
     nbttr () { return this.aSt.nbTribus },
     nbtsp () { return 1 },
     nbtiv () { return 1 },
+    bloc () { return this.session.niv > 3},
   },
 
   watch: {
@@ -129,6 +137,9 @@ export default {
   },
 
   methods: {
+    clickNotif2 () {
+      this.ui.setPage('compta', 'chats')
+    },
     maTribu () { 
       this.ui.menug = false
       this.aSt.setTribuC()
