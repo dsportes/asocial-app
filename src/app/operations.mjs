@@ -697,15 +697,12 @@ Retour:
 export class SetSponsor extends OperationUI {
   constructor () { super($t('OPmajtr')) }
 
-  async run (id, naidc, estSp) {
+  async run (idt, na, estSp) { // id de la tribu, na du compte, true/false sponsor
     try {
-      const nac = typeof naidc === 'number' ? getNg(naidc) : naidc
-      const idc = nac ? nac.id : naidc
-
       const session = stores.session
-      const cle = getCle(id)
-      const nasp = estSp ? await crypter(cle, new Uint8Array(encode(nac.anr))) : null
-      const args = { token: session.authToken, idt: id, idc, nasp }
+      const cle = getCle(idt)
+      const nasp = estSp ? await crypter(cle, new Uint8Array(encode(na.anr))) : null
+      const args = { token: session.authToken, idt, idc: na.id, nasp }
       this.tr(await post(this, 'SetSponsor', args))
       this.finOK()
     } catch (e) {
@@ -759,6 +756,7 @@ export class ChangerTribu extends OperationUI {
 
   async run (args) {
     try {
+      const session = stores.session
       args.token = session.authToken
       const ret = this.tr(await post(this, 'ChangerTribu', args))
       const t = await compile(ret.rowTribu)

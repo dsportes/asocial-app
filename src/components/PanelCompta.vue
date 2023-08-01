@@ -186,8 +186,8 @@ export default ({
       if (! await this.session.edit()) return
       const tr = this.aSt.tribuC
       this.quotas = { q1: this.c.q1, q2: this.c.q2, min1: 0, min2: 0, 
-        max1: tr.cpt.q1 - tr.cpt.a1,
-        max2: tr.cpt.q2 - tr.cpt.a2
+        max1: tr.synth.q1 - tr.synth.a1,
+        max2: tr.synth.q2 - tr.synth.a2
         }
       this.ovedq()
     },

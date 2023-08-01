@@ -19,6 +19,7 @@
 
               <div class="titre-md q-ml-sm">{{nomc(c)}}
                 <span v-if="type(c)===1" class="q-ml-sm">[{{$t('moi')}}]</span>
+                <span v-if="c.nasp" class="q-ml-sm">[{{$t('sponsor2')}}]</span>
               </div>
 
               <q-icon size="md" v-if="c.notif" :name="ico(c)"

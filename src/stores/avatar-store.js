@@ -210,6 +210,16 @@ export const useAvatarStore = defineStore('avatar', {
         if (e && e.id === peId) return e
     },
 
+    /*
+        ppTribusF: (state) => { 
+      const t = []
+      const f = state.ppFiltre
+      state.compta.atr.forEach(x => {
+        if (x && (!f || (x.info && x.info.contains(f))))
+          t.push({ id: x.id, clet: x.clet, info: x.info, q1: x.q1, q2: qs.q2})
+      })
+      return t
+    },
     ppTribus: (state) => {
       const y = []
       let q1 = 0, q2 = 0
@@ -237,7 +247,7 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     ppSelTr: (state) => { return state.maptr.get(state.ppSelId) },
-
+    */
     // PageTranche ***************************************************    
     ptLcFT: (state) => {
       const lcF = state.ptLcF
@@ -253,7 +263,7 @@ export const useAvatarStore = defineStore('avatar', {
         if (!x.nasp && y.nasp) return 1
         const a = x[ctf]
         const b = y[ctf]
-        return a > b ? ctm : (a < b ? -ct.m : 0) 
+        return a > b ? ctm : (a < b ? -ctm : 0) 
       }
 
       const x = []; lcF.forEach(t => { x.push(t) })
