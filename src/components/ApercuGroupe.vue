@@ -3,46 +3,48 @@
     <apercu-genx :na="eg.groupe.na" :cv="eg.groupe.cv" :idx="idx" :cvchangee="cvchangee"/>
 
     <div v-if="fond">
-      <span class="q-mt-md titre-md q-mr-sm">{{$t('AGfond')}}</span>
+      <span class="q-mt-sm titre-md q-mr-sm">{{$t('AGfond')}}</span>
       <bouton-membre :eg="eg" :im="1" />
     </div>
     <div v-else class="q-mt-sm fs-md text-italic">{{$t('AGnfond')}}</div>
 
-    <div class="q-mt-md row justify-between">
+    <div class="q-mt-sm row justify-between">
       <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('AGunanime')}}</div>
       <div v-else class="titre-md">{{$t('AGsimple')}}</div>
       <q-btn class="q-ml-sm" size="sm" :label="$t('details')" 
         icon="edit" dense color="primary" @click="editUna"/>
     </div>
 
-    <div class="titre-md q-mt-md">{{$t('AGhebvol')}}</div>
-    <div :class="'q-ml-lg q-mt-xs q-pa-xs' + bcf">
-      <div class="row justify-between">
-        <div v-if="!eg.groupe.dfh" class="col fs-md">
-          <span class="fs-md q-mr-sm">{{$t('AGheb')}}</span>
-          <bouton-membre :eg="eg" :im="eg.groupe.imh" />
+    <q-expansion-item dense class="titre-md q-mt-sm" switch-toggle-side :label="$t('AGhebvol')">
+      <div :class="'q-ml-lg q-mt-xs q-pa-xs' + bcf">
+        <div class="row justify-between">
+          <div v-if="!eg.groupe.dfh" class="col fs-md">
+            <span class="fs-md q-mr-sm">{{$t('AGheb')}}</span>
+            <bouton-membre :eg="eg" :im="eg.groupe.imh" />
+          </div>
+          <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [dfh])}}</div>
+          <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
+            icon="settings" @click="gererHeb"/>
         </div>
-        <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [dfh])}}</div>
-        <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
-          icon="settings" @click="gererHeb"/>
+        <div class="q-mt-xs">
+          <quotas-vols :vols="eg.objv.vols"/>
+          <!-- POUR TEST quotas-vols :vols="{ a1:1, a2:2, v1:200000, v2:70000000, q1:0, q2:3 }"/-->
+        </div>
       </div>
-      <div class="q-mt-xs">
-        <quotas-vols :vols="eg.objv.vols"/>
-        <!-- POUR TEST quotas-vols :vols="{ a1:1, a2:2, v1:200000, v2:70000000, q1:0, q2:3 }"/-->
-      </div>
-    </div>
+    </q-expansion-item>
 
-    <div class="q-mt-md titre-md">{{$t('AMard')}}</div>
-    <show-html class="q-ml-lg bord bordb" maxh="5rem" :texte="eg.groupe.ard" edit
-      zoom @edit="ardeditAut"/>
+    <q-expansion-item dense class="titre-md q-mt-sm" switch-toggle-side :label="$t('AMard')">
+      <show-html class="q-ml-lg bord bordb" maxh="5rem" :texte="eg.groupe.ard" edit
+        zoom @edit="ardeditAut"/>
+    </q-expansion-item>
 
     <!-- Mots clés du groupe -->
-    <div class="row items-center q-mt-md">
+    <div class="row items-center q-mt-sm">
       <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
       <q-btn icon="open_in_new" size="sm" color="primary" @click="ovmcledit"/>
     </div>
 
-    <div v-if="eg.groupe.nbInvits !== 0" class="q-mt-md fs-md text-bold text-warning">
+    <div v-if="eg.groupe.nbInvits !== 0" class="q-mt-sm fs-md text-bold text-warning">
       {{$t('AGinvits', [eg.groupe.nbInvits])}}
     </div>
 
@@ -109,8 +111,9 @@
                 color="warning" @click="cfu = 2"/-->
               <q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
                 color="warning" @click="cfu = 2"/>
-              <div class="q-mt-md row justify-center q-gutter-md">
-                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+              <div class="q-mt-md row justify-center items-center q-gutter-md">
+                <q-btn size="md" class="btn2" dense :label="$t('renoncer')" 
+                  color="primary" @click="MD.fD"/>
                 <bouton-confirm :actif="cfu!==0" :confirmer="chgU"/>
               </div>
             </div>
@@ -486,4 +489,6 @@ export default {
   width: 1.5rem !important
 .q-btn
   padding: 1px 5px !important
+.btn2
+  height: 1.5rem
 </style>

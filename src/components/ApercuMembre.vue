@@ -11,20 +11,20 @@
         <bouton-membre v-if="!nopanel" :eg="eg" :im="mb.ids" btn/>
       </div>
 
-      <div class="titre-md q-mt-md">
+      <div class="titre-md q-mt-sm">
         <span v-if="mb.ids === 1" class="q-mr-xs">{{$t('AMfond')}}</span>
         <span v-if="mb.idi && eg.groupe.ast[mb.idi]" class="q-mr-xs">
           {{$t('AMct1', [mbidi ? mbidi.na.nomc : '?'])}}</span>
         <span v-if="mb.idi && !eg.groupe.ast[mb.idi]" class="q-mr-xs">{{$t('AMct2', [mb.idi])}}</span>
       </div>
 
-      <div class="q-mt-md">
+      <div class="q-mt-sm row justify-between">
         <span class="titre-md q-mr-lg">{{$t('statutmb' + st)}}</span>
         <q-btn dense size="sm" color="primary" icon="settings" @click="changeSt" :label="$t('AMchanger')"/>
       </div>
 
       <!-- Info à propos du groupe -->
-      <div v-if="!people" class="q-mt-md">
+      <div v-if="!people" class="q-mt-sm">
         <div v-if="mb.info" class="titre-md">{{$t('AMinfo')}}</div>
         <show-html v-if="mb.info" class="q-ml-lg bord" maxh="5rem" :texte="mb.info" zoom
           @edit="editInfo"/>
@@ -35,13 +35,13 @@
       </div>
 
       <!-- Mots clés attachés au groupe par un avatar du compte -->
-      <div class="titre-md q-mt-md">{{$t('AGmcgr')}}</div>
+      <div class="titre-md q-mt-sm">{{$t('AGmcgr')}}</div>
       <div v-if="!people && mapmc"> 
         <apercu-motscles class="q-ml-lg" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
           :mapmc="mapmc" edit :src="mb.mc || new Uint8Array([])"/>
       </div>
 
-      <div class="titre-md q-mt-md">{{$t('AGactiv')}}</div>
+      <div class="titre-md q-mt-sm">{{$t('AGactiv')}}</div>
       <div class="row titre-md text-italic">
         <div class="col-4 text-center">{{$t('AMddi')}}</div>
         <div class="col-4 text-center">{{$t('AMdda')}}</div>

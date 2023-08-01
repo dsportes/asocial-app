@@ -498,6 +498,7 @@ export class ConnexionCompte extends OperationUI {
     session.setAvatarId(session.compteId)
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
+    await this.compta.compile2(this.avatar.priv)
     this.espace = await compile(this.rowEspace)
 
     {

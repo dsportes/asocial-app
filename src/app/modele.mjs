@@ -936,14 +936,21 @@ export class Compta extends GenDoc {
     
     if (row.cletK.length !== 256) {
       this.clet = await decrypter(session.clek, row.cletK)
+      this.idt = setClet(this.clet)
     } else { // CHANGEMENT DE TRIBU par le comptable
       // Le Comptable a crypté la tribu par la clé PUB du compte (il ne connait pas K)
       const avatar = aSt.getAvatar(this.id)
-      this.clet = await decrypterRSA(avatar.pub, row.cletK)
-      // pour mettre à jour le row compta sur le serveur
-      this.cletK = await crypter(session.clek, this.clet)
+      if (avatar) {
+        this.clet = await decrypterRSA(priv, row.cletK)
+        // pour mettre à jour le row compta sur le serveur
+        this.cletK = await crypter(session.clek, this.clet)
+        this.idt = setClet(this.clet)
+      } else { 
+        // CA SE FERA DANS compile2() quand l'avatar sera en store (seulement à la connexion)
+        this.rowCletK = row.cletK
+      }
     }
-    this.idt = setClet(this.clet)
+
     this.it = row.it
 
     this.hps1 = row.hps1
@@ -974,6 +981,14 @@ export class Compta extends GenDoc {
       }
       this.astn = row.astn
     }
+  }
+
+  async compile2 (priv) { // UNIQUEMENT à la connexion
+    const session = stores.session
+    this.clet = await decrypterRSA(priv, this.rowCletK)
+    // pour mettre à jour le row compta sur le serveur
+    this.cletK = await crypter(session.clek, this.clet)
+    this.idt = setClet(this.clet)
   }
 
   updAvatarMavk (setSupprIds) {
@@ -1120,6 +1135,7 @@ export class Avatar extends GenDoc {
   async compile (row) {
     const session = stores.session
     const gSt = stores.groupe
+    const aSt = stores.avatar
     this.vsh = row.vsh || 0
     this.vcv = row.vcv || 0
     this.hpc = row.hpc
