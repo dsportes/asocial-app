@@ -1619,7 +1619,7 @@ export class Note extends GenDoc {
     return x < y ? -1 : (x === y ? 0 : 1)
   }
 
-  static estG (key) { return key.charAt(2) === '2' }
+  static estG (key) { return key.charAt(2) === '3' }
   static fake = { txt: '', dh: 0 }
 
   static clen (id) { return ID.estGroupe(id) ? getCle(id) : stores.session.clek }
@@ -1729,7 +1729,7 @@ export class Note extends GenDoc {
     r.v1 = txt.length 
     r.txts = await Note.toRowTxt(cle, txt, im)
     r.ref = await Note.toRowRef(cle, ref)
-    r.st = !nbj ? 0 : AMJ.amjUtcPlusNbj(session.dateJourConnx, nbj)
+    r.st = nbj === 99999999 ? 0 : AMJ.amjUtcPlusNbj(session.dateJourConnx, nbj)
     const _data_ = encode(r)
     return { _nom: 'notes', id, ids: r.ids, _data_ }
   }
@@ -1752,7 +1752,7 @@ export class Note extends GenDoc {
     const x = new Array(arg.length)
     x[0] = ID.court(arg[0])
     x[1] = arg[1]
-    if (arg.length === 2) x[2] = arg[2]
+    if (arg.length === 3) x[2] = arg[2]
     return await crypter(cle, new Uint8Array(encode(x)))
   }
 

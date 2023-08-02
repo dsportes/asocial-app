@@ -499,7 +499,7 @@ export default {
       if (this.ro) return ro
       const n = this.nSt.note
       if (n.p) return 3 // note protégée contre l'écriture
-      const g = this.nSt.node.type === 5 ? this.nSt.egr.groupe : null
+      const g = this.nSt.node.type === 5 && this.nSt.egr ? this.nSt.egr.groupe : null
       if (!g) return 0
       // note de groupe
       if (g.pe === 1) return 4 // groupe protégée contre l'écriture

@@ -36,7 +36,7 @@
                     <div class="col fs-md q-mr-md">
                       {{$t('PNFnbv', it.l.length, { count: it.l.length})}}
                     </div>
-                    <q-btn dense color="primary" class="q-mt-sm" size="sm" icon="add"
+                    <q-btn dense color="primary" class="q-mt-sm btnp" size="md" icon="add"
                       @click="nouveau(it.nom)"/>
                   </div>
                 </div>
@@ -437,4 +437,6 @@ export default {
   left: -7px
 .h13
   height: 1.3rem
+.btnp
+  margin-top: 0 !important
 </style>
