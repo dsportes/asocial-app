@@ -196,7 +196,7 @@ export class ConnexionCompte extends OperationUI {
     for(const avatar of this.avatarsToStore.values()) {
       if (session.fsSync) await session.fsSync.setAvatar(avatar.id); else abPlus.push(avatar.id)
       avatar.idGroupes(this.grRequis)
-      avsMap[avatar.id] = { v: avatar.v, dlv: ID.estCompte(avatar.id) ? dlv1 : dlv2 }
+      avsMap[avatar.id] = { v: avatar.v, dlv: this.compta.id === avatar.id ? dlv1 : dlv2 }
       avatar.membres(mbsMap, dlv2)
     }
   
@@ -498,7 +498,7 @@ export class ConnexionCompte extends OperationUI {
     session.setAvatarId(session.compteId)
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
-    await this.compta.compile2(this.avatar.priv)
+    if (this.compta.rowCletK) await this.compta.compile2(this.avatar.priv)
     this.espace = await compile(this.rowEspace)
 
     {
@@ -548,6 +548,8 @@ export class ConnexionCompte extends OperationUI {
     session.setTribuId(this.tribu.id)
     this.rowAvatar = await getAvatarPrimaire()
     this.avatar = await compile(this.rowAvatar)
+    // ligne ci-dessous : ne devrait jamais être exécutée, superstition
+    if (this.compta.rowCletK) await this.compta.compile2(this.avatar.priv)
     session.setAvatarId(session.compteId)
   }
 

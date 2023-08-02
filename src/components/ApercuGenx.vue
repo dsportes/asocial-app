@@ -16,7 +16,7 @@
       <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
         zoom maxh="4rem" :texte="info"/>
       <div v-else class="text-italic">{{$t('FAnocv')}}</div>
-      <q-btn v-if="!na.estComptable && cvchangee" class="q-my-xs" flat size="sm" :label="$t('CVedit')" 
+      <q-btn v-if="!ID.estComptable(na.id) && cvchangee" class="q-my-xs" flat size="sm" :label="$t('CVedit')" 
         icon="edit" dense color="primary" @click="editerCV"/>
     </div>
 
@@ -34,6 +34,7 @@ import ShowHtml from './ShowHtml.vue'
 import CarteVisite from './CarteVisite.vue'
 import { MD } from '../app/modele.mjs'
 import { dkli } from '../app/util.mjs'
+import { ID } from '../app/api.mjs'
 
 export default {
   name: 'ApercuGenx',
@@ -84,7 +85,7 @@ export default {
     function ovedition () { MD.oD(edition) }
 
     return {
-      MD, dkli, edition, ovedition,
+      MD, dkli, ID, edition, ovedition,
       ui: stores.ui,
       session: stores.session
     }

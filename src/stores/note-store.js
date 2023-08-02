@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { AMJ } from '../app/api.mjs'
+import { AMJ, ID } from '../app/api.mjs'
 import { Note } from '../app/modele.mjs'
 import stores from './stores.mjs'
 import { splitPK } from '../app/util.mjs'
@@ -78,11 +78,11 @@ export const useNoteStore = defineStore('note', {
     },
 
     estGr: (state) => { 
-      return state.node && state.node.note && state.node.note.ng.estGroupe
+      return state.node && state.node.note && ID.estGroupe(state.node.note.id)
     },
 
     estAv: (state) => { 
-      return state.node && state.node.note && state.node.note.ng.estAvatar
+      return state.node && state.node.note && ID.estAvatar(state.node.note.id)
     },
 
     egr: (state) => {

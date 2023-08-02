@@ -52,10 +52,6 @@ export class ID {
 
   static estAvatar (id) { return Math.floor(id / d13) % 10 < 3 }
 
-  static estCompte (id) { return Math.floor(id / d13) % 10 === 1 }
-
-  static estAvatarS (id) { return Math.floor(id / d13) % 10 === 2 }
-
   static ns (id) { return Math.floor(id / d14)}
 }
 

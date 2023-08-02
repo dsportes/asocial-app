@@ -203,8 +203,9 @@ export default {
 
     async delAvatar (id) {
       if (await this.session.edit()) {
-        if (ID.estCompte(id)) {
-          if (this.aSt.compta.lstAvatarNas.length > 1) {
+        const lna = this.aSt.compta.lstAvatarNas
+        if (this.session.compteId === id) { // c'est le compte
+          if (lna.length > 1) { // il reste des avatars secondaires
             await afficherDiag(this.$t('SAVer1'))
             return
           }

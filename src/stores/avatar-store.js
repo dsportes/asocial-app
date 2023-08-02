@@ -445,6 +445,7 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     setAvatar (avatar) {
+      const session = stores.session
       if (!avatar) return
       let e = this.map.get(avatar.id)
       if (!e) {
@@ -455,9 +456,9 @@ export const useAvatarStore = defineStore('avatar', {
           grIds: new Set() // Ids des groupes dont l'avatar est membre
          }
         this.map.set(avatar.id, e)
-        if (ID.estCompte(avatar.id)) this.setMotscles (avatar.mc)
+        if (avatar.id === session.compteId) this.setMotscles (avatar.mc)
       } else {
-        if (ID.estCompte(avatar.id)) {
+        if (avatar.id === session.compteId) {
           const mcav = new Uint8Array(encode(e.avatar.mc || {}))
           const mcap = new Uint8Array(encode(avatar.mc || {}))
           if (!egaliteU8(mcav, mcap )) this.setMotscles(avatar.mc || {})

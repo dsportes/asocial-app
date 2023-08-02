@@ -143,12 +143,6 @@ export class NomGenerique {
   }
 
   get ns () { return ID.ns(this.id) }
-  get type () { return this.rnd[0] }
-  get estComptable () { return this.id % d13 === 0 }
-  get estGroupe () { return this.rnd[0] === 3 }
-  get estAvatar () { return this.rnd[0] < 3 }
-  get estCompte () { return this.rnd[0] === 1 }
-  get estAvatarS () { return this.rnd[0] === 2 }
   get nom () { return this.nomx || stores.config.nomDuComptable }
   get nomc () { return !this.nomx ? stores.config.nomDuComptable : (this.nomx + '#' + (this.id % 10000)) }
   get hrnd () { return hash(u8ToB64(this.rnd)) }
@@ -156,8 +150,8 @@ export class NomGenerique {
 
   get defIcon () {
     const cfg = stores.config
-    if (this.estComptable) return cfg.iconSuperman
-    if (this.estGroupe) return cfg.iconGroupe
+    if (this.id % d13 === 0) return cfg.iconSuperman
+    if (this.rnd[0] === 3) return cfg.iconGroupe
     return cfg.iconAvatar
   }
 
@@ -180,15 +174,6 @@ export class NomGenerique {
     rnd[0] = 1
     const id = NomGenerique.idOf(rnd)
     return new NomAvatar(id, stores.config.nomDuComptable, rnd)
-  }
-
-  static compte(nom) {
-    const rnd = random(32)
-    rnd[0] = 1
-    const id = NomGenerique.idOf(rnd)
-    const e = repertoire.rep[id]
-    if (e) return e
-    return new NomAvatar(id, nom, rnd)
   }
 
   static avatar(nom) {
@@ -863,9 +848,13 @@ export class Compta extends GenDoc {
   get estSponsor () { return this.sp === 1 }
   // get stn () { return this.blocage ? this.blocage.stn : 0 }
 
-  get lstAvatarNas () { // retourne l'array des na des avatars du compte (trié ordre alpha, primaire en tête)
+  /* retourne l'array des na des avatars du compte (trié ordre alpha
+    PRIMAIRE EN TETE
+  */
+  get lstAvatarNas () {
     const t = []; for(const na of this.mav.values()) { t.push(na) }
-    t.sort((a,b) => { return a.rnd[0] === 1 ? -1 : (b.rnd[0] === 1 ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
+    const idc = this.naprim.id
+    t.sort((a,b) => { return a.id === idc ? -1 : (b.id === idc ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
     return t
   }
 
@@ -930,7 +919,7 @@ export class Compta extends GenDoc {
       const [nom, cle] = decode(await decrypter(session.clek, row.mavk[i]))
       const na = NomGenerique.from([nom, cle])
       this.mav.set(na.id, na)
-      if (na.estCompte) this.naprim = na
+      if (na.id === this.id) this.naprim = na
     }
     this.avatarIds = new Set(this.mav.keys())
     
@@ -989,6 +978,7 @@ export class Compta extends GenDoc {
     // pour mettre à jour le row compta sur le serveur
     this.cletK = await crypter(session.clek, this.clet)
     this.idt = setClet(this.clet)
+    delete this.rowCletK
   }
 
   updAvatarMavk (setSupprIds) {
@@ -1096,12 +1086,9 @@ export class Compta extends GenDoc {
 - `napc` : `[nom, clé]` de l'avatar cryptée par le PBKFD de la phrase de contact.
 */
 export class Avatar extends GenDoc {
-  get primaire () { return ID.estCompte(this.id) } // retourne true si l'objet avatar est primaire du compte
-  get apropos () { return this.nct ? ($t('tribus', 0) + ':' + this.nct.nom) : $t('comptable') }
   get na () { return getNg(this.id) }
   get nbGroupes () { return this.lgr.size }
   get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconAvatar }
-
 
   /* Remplit la map avec les membres des groupes de l'avatar/
   - clé: id du groupe
@@ -1142,7 +1129,8 @@ export class Avatar extends GenDoc {
     this.napc = row.napc
     const kcv = getCle(this.id)
 
-    if (this.primaire) { // Avatar principal
+    // Avatar principal
+    if (session.compteId === this.id) {
       if (row.mck) {
         this.mc = decode(await decrypter(session.clek, row.mck))
       } else this.mc = {}
@@ -1293,7 +1281,7 @@ export class Sponsoring extends GenDoc {
     const session = stores.session
     const aSt = stores.avatar
     const av = aSt.avC
-    const n = NomGenerique.compte(nom)
+    const n = NomGenerique.avatar(nom)
     const d = { 
       na: [av.na.nom, av.na.rnd],
       cv: av.cv,
@@ -1655,7 +1643,7 @@ export class Note extends GenDoc {
     this.p = row.p || 0
     this.v1 = row.v1 || 0
     this.v2 = row.v2 || 0
-    this.deGroupe = this.ng.estGroupe
+    this.deGroupe = ID.estGroupe(this.id)
     this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || null)
     const x = decode(await decrypter(this.cle, row.txts))
     this.txt = ungzip(x.t)

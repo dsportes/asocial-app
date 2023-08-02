@@ -12,7 +12,7 @@
     </div>
     <div v-else>
       <span class="titre-md text-italic">{{$t('FAnpc')}}</span>
-      <q-btn v-if="edit && !avatar.na.estComptable" class="q-ml-sm" dense flat color="primary" size="sm"
+      <q-btn v-if="edit && !ID.estComptable(avatar.id)" class="q-ml-sm" dense flat color="primary" size="sm"
         :label="$t('FAdeclpc')" @click="oveditionpc"/>
     </div>
 
@@ -48,6 +48,7 @@ import ApercuGenx from './ApercuGenx.vue'
 import PhraseContact from './PhraseContact.vue'
 import { afficherDiag, dkli } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
+import { ID } from '../app/api.mjs'
 
 export default {
   name: 'ApercuAvatar',
@@ -129,7 +130,7 @@ export default {
     function oveditionpc () { MD.oD(editionpc)}
 
     return {
-      MD, dkli,
+      MD, dkli, ID,
       editionpc, oveditionpc,
       avatar,
       session: stores.session
