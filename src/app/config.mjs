@@ -18,8 +18,10 @@ export const config = {
     '246': { 'fr-FR': 'Visibilité/Poubelle', 'en-EN': 'Visibility/Trash' }
   },
 
-  /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
   fsSync: true,
+  fsEmulator: 8080, // 0 pour la prod
+
+  /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
   portupload: 33666,
   phrases: [
     'leszsanglotszLONGSzgarezauzGORILLEz',

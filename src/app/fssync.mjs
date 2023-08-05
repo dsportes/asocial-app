@@ -1,12 +1,11 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore, connectFirestoreEmulator, doc, getDoc } from 'firebase/firestore'
+import { getFirestore, connectFirestoreEmulator, doc, getDoc, onSnapshot } from 'firebase/firestore'
 
 import { decode } from '@msgpack/msgpack'
 
-// import stores from '../stores/stores.mjs'
+import stores from '../stores/stores.mjs'
 import { SyncQueue } from './sync.mjs'
 import { ID } from './api.mjs'
-import { toByteArray } from './base64.mjs'
 
 export class FsSyncSession {
   static app = null
@@ -19,23 +18,29 @@ export class FsSyncSession {
     this.subEspace = null
   }
 
-  async unsub (unsub) {
-  }
-
-  async sub (nom, id) {
-    return null
-  }
-
   open (firebaseConfig) {
     // Initialize Firebase
     if (!FsSyncSession.app)
       FsSyncSession.app = initializeApp(firebaseConfig)
     // Initialize Cloud Firestore and get a reference to the service
     this.fs = getFirestore(FsSyncSession.app)
-    // connectFirestoreEmulator(this.fs, '127.0.0.1', 8080)
+    const cfg = stores.config
+    if (cfg.fsEmulator)
+      connectFirestoreEmulator(this.fs, '127.0.0.1', cfg.fsEmulator)
   }
 
-  async getEspace (ns) {
+  close () { // PAS ASYNC !!! Déconnexion n'est async
+    for (const [id, u] of this.subTribu) this.unsub(u)
+    for (const [id, u] of this.subVersion) this.unsub(u)
+    this.unsub(this.subCompta)
+    this.unsub(this.subEspace)
+    this.subTribu.clear()
+    this.subVersion.clear()
+    this.subCompta = null
+    this.subEspace = null
+  }
+
+  async getEspace (ns) { // Pour tester
     try {
       const docRef = doc(this.fs, 'espaces/' + ns)
       const docSnap = await getDoc(docRef)
@@ -46,9 +51,11 @@ export class FsSyncSession {
 
         const esp = decode(row._data_) // compile simplifié
         console.log(JSON.stringify(esp))
+        this.subEspace = this.sub('espaces', ns)
+
         return esp.org
 
-      } else {
+       } else {
         console.log("No such document!")
         return '???'
       }
@@ -57,32 +64,33 @@ export class FsSyncSession {
     }
   }
 
-  close () { // PAS ASYNC !!! Déconnexion n'est async
-    for (const [id, u] of this.subTribu) this.unsub(u)
-    for (const [id, u] of this.subVersion) this.unsub(u)
-    if (this.subCompta) this.unsub(this.subCompta)
-    if (this.subEspace) this.unsub(this.subEspace)
-    this.subTribu.clear()
-    this.subVersion.clear()
-    this.subCompta = null
-    this.subEspace = null
+  async unsub (unsub) {
+    if (unsub) unsub()
+  }
+
+  async sub (nom, id) {
+    return onSnapshot(doc(this.fs, nom + '/' + id), (doc) => {
+      this.onRow(doc)
+    })
   }
 
   /*
   Mettre un row reçu à traiter : SyncQueue.push(row)
   */
-  onRow (doc) {
-    const row = doc.data()
-    // Pour rendre le row compilable
+  onRow (d) {
+    const nom = d.ref.parent.path
+    const row = d.data()
+    row._nom = nom
     if (row._data_) row._data_ = row._data_.toUint8Array()
-    // !!! MANQUE row._nom
-    row._nom = doc.ref.parent.path
-    SyncQueue.push(row)
+    // Pour tester - à la console org est modifié dans l'index, pas dans le _data_
+    console.log('onRow:', row._nom, row.id, row.org) 
+    // De vrai
+    // SyncQueue.push(row)
   }
 
   async setCompte (id) { // comptas ET espace
     this.subCompta = await this.sub('comptas', id)
-    this.subEspace = await this.sub('comptas', ID.ns(id))
+    this.subEspace = await this.sub('espaces', ID.ns(id))
   }
 
   async setTribu (id) { // tribus du compte
@@ -104,16 +112,14 @@ export class FsSyncSession {
   }
 
   async unsetTribu (id) {
-    const unsub = this.subTribu.get(id)
-    if (unsub) this.unsub(unsub)
+    this.unsub(this.subTribu.get(id))
   }
 
   async unsetGroupe (id) {
-    const unsub = this.subVersion.get(id)
-    if (unsub) this.unsub(unsub)
+    this.unsub(this.subVersion.get(id))
   }
 
   async unsetAvatar (id) {
-    await this.unsetGroupe(id)
+    this.unsub(this.subVersion.get(id))
   }
 }
