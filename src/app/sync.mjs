@@ -264,7 +264,7 @@ export class OperationWS extends Operation {
     const aSt = stores.avatar
     const gSt = stores.groupe
 
-    // désabonnements
+    // (dés)abonnements
     if (session.fsSync && this.abPlus.size) for (const id of this.abPlus) {
       if (ID.estAvatar(id)) await session.fsSync.setAvatar(id)
       if (ID.estGroupe(id)) await session.fsSync.setGroupe(id)

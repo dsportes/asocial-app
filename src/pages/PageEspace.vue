@@ -142,15 +142,34 @@ export default {
       }
     },
 
-    async getTr (id) {
-      if (this.session.tribuCId === id) return this.aSt.tribuC
-      // if (this.session.tribuId !== id) return this.aSt.tribu
+    async getTr (id) { // rend courante cette tribu
+      if (this.session.tribuCId === id) return this.aSt.tribuC // elle l'était déjà
+
       let t = this.aSt.getTribu(id)
-      if (!t) { 
+      let abot = false
+      if (!t) {
         t = await new GetTribu().run(id, true) // true: abonnement
-      } else {
-        if (this.session.fsSync) await new AboTribuC().run(id)
+        abot = true
       }
+
+      if (this.session.tribuCId && id === this.session.tribuId) {
+        // désabonnement de la tribu courante actuelle
+        // sauf si c'est la tribu du compte
+        if (this.session.fsSync) {
+          await this.session.fsSync.unsetTribu(this.session.tribuCId)
+        } else {
+          if (!abot) await new AboTribuC().run(0)
+        }
+      }
+
+      // abonnement à la nouvelle tribu courante
+      if (this.session.fsSync) {
+        await this.session.fsSync.setTribu(id)
+      } else {
+        if (!abot) await new AboTribuC().run(id)
+      }
+
+      this.session.setTribuC(id)
       this.aSt.setTribuC(t)
       return t
     },

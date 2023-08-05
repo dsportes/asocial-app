@@ -65,7 +65,11 @@ export class OperationUI extends Operation {
   }
 }
 
-/* Abonnement à la tribu courante ******************************************
+/* Abonnement / désabonnement de la tribu courante ************************
+args.token: éléments d'authentification du compte.
+args.id : id de la tribu - Si 0 désabonnement
+Retour:
+- rowtribu: row de la tribu
 */
 export class AboTribuC extends OperationUI {
   constructor () { super($t('OPabo')) }

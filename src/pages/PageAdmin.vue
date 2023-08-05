@@ -25,8 +25,12 @@
             <span class="q-mr-md">#{{esp.id}}</span>
             <span>{{esp.org}}</span>
           </div>
-          <q-btn dense color="primary" icon="open_in_new" :label="$t('detail')"
-            @click="pageesp(esp)"/>
+          <div class="row q-gutter-xs">
+            <q-btn dense color="primary" flat label="ping"
+              @click="ping(esp)"/>
+            <q-btn dense color="primary" icon="open_in_new" :label="$t('detail')"
+              @click="pageesp(esp)"/>
+          </div>
         </div>
 
         <div class="row justify-between q-ml-lg q-my-xs">
@@ -186,7 +190,7 @@ import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
 import { GC, GetCheckpoint, SetEspaceT } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { edvol, dkli } from '../app/util.mjs'
+import { edvol, dkli, afficherDiag } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
 
@@ -220,6 +224,11 @@ export default {
     brd (idx) { 
       const x = this.prf === idx + 1 ? ' bord6': (this.profil === idx + 1 ? ' bord7' : ' bord5') 
       return x 
+    },
+
+    async ping (esp) {
+      const org = await this.session.fsSync.getEspace(esp.id)
+      await afficherDiag('Ping: ' + org)
     },
 
     async rafraichir () {

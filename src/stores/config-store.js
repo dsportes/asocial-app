@@ -11,7 +11,6 @@ export const useConfigStore = defineStore('config', {
     
     wssrv: '',
     urlserveur: '',
-    fsSync: false,
 
     aide: {},
     locales: [],

@@ -214,6 +214,9 @@ export default {
       const idT = await crypter(cletAp, '' + ID.court(this.id))
       const args = { id: this.id, idtAv, idtAp, idT, nasp, stn, notif, cletX, cletK } 
       const t = await new ChangerTribu().run(args)
+      if (this.session.fsSync) {
+        await this.session.fsSync.setTribuC(t.id)
+      }
       this.aSt.setTribuC(t)
     }
   },

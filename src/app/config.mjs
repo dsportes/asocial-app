@@ -19,7 +19,7 @@ export const config = {
   },
 
   /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
-  fsSync: false,
+  fsSync: true,
   portupload: 33666,
   phrases: [
     'leszsanglotszLONGSzgarezauzGORILLEz',

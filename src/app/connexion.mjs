@@ -29,13 +29,17 @@ export function deconnexion (garderMode) {
   ui.aunmessage = false
 
   if (session.accesIdb) closeIDB()
-  if (session.accesNet && !config.fsSync) closeWS()
+  if (session.accesNet) {
+    if (config.fsSync) {
+      if (session.fsSync) session.fsSync.close()
+      session.fsSync = null
+    } else closeWS()
+  } 
   stores.reset()
   session.$reset()
   if (garderMode) session.setMode(mode)
   session.memoOrg = memoOrg
   SyncQueue.reset()
-  if (session.fsSync) session.fsSync.close()
   stores.ui.setPage('login')
 }
 
@@ -478,6 +482,11 @@ export class ConnexionCompte extends OperationUI {
     const args = { token: session.authToken }
     // Connexion : récupération de rowCompta rowAvatar fscredentials
     const ret = this.tr(await post(this, 'ConnexionCompte', args))
+
+    if (session.fsSync && ret.credentials) {
+      await session.fsSync.open(ret.credentials)
+    }
+
     if (ret.admin) {           
       session.setCompteId(0)
       session.estAdmin = true
@@ -487,13 +496,16 @@ export class ConnexionCompte extends OperationUI {
       return
     }
 
-    if (ret.credentials) session.fscredentials = ret.credentials
     this.rowAvatar = ret.rowAvatar
     this.rowCompta = ret.rowCompta
     this.rowEspace = ret.rowEspace
     session.setOrg(this.rowEspace.org)
     session.setNs(ID.ns(this.rowCompta.id))
     session.setCompteId(this.rowCompta.id)
+
+    if (session.fsSync) {
+      await session.fsSync.setCompte(session.compteId)
+    }
 
     session.setAvatarId(session.compteId)
     this.compta = await compile(this.rowCompta)
@@ -515,7 +527,6 @@ export class ConnexionCompte extends OperationUI {
 
   async phase0Net () {
     const session = stores.session
-    if (session.fsSync) await session.fsSync.setCompte(session.compteId)
 
     if (session.accesIdb && !session.nombase) await session.setNombase() // maintenant que la cle K est connue
 
@@ -933,8 +944,11 @@ export class AcceptationSponsoring extends OperationUI {
         abPlus: [idt, sp.naf.id] }
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
-      if (ret.credentials) session.fscredentials = ret.credentials
 
+      if (session.fsSync && ret.credentials) {
+        await session.fsSync.open(ret.credentials)
+      }
+  
       const rowTribu = ret.rowTribu
       const rowChat = ret.rowChat
       const rowEspace = ret.rowEspace
@@ -956,8 +970,6 @@ export class AcceptationSponsoring extends OperationUI {
 
       Versions.reset()
       Versions.set(session.compteId, { v: 1 })
-
-      if (session.fsSync) await session.fsSync.setCompte(session.compteId)
 
       if (session.synchro) {
         try {
