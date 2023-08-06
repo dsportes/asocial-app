@@ -18,7 +18,7 @@ export const config = {
     '246': { 'fr-FR': 'Visibilité/Poubelle', 'en-EN': 'Visibility/Trash' }
   },
 
-  fsSync: true,
+  fsSync: false,
   fsEmulator: 8080, // 0 pour la prod
 
   /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
