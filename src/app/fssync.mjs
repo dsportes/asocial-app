@@ -8,6 +8,7 @@ import { SyncQueue } from './sync.mjs'
 import { ID } from './api.mjs'
 
 export class FsSyncSession {
+  static initfaite = false
   static app = null
 
   constructor () { 
@@ -19,14 +20,17 @@ export class FsSyncSession {
   }
 
   open (firebaseConfig) {
+    const cfg = stores.config
     // Initialize Firebase
-    if (!FsSyncSession.app)
+    if (!FsSyncSession.initfaite)
       FsSyncSession.app = initializeApp(firebaseConfig)
+
     // Initialize Cloud Firestore and get a reference to the service
     this.fs = getFirestore(FsSyncSession.app)
-    const cfg = stores.config
-    if (cfg.fsEmulator)
+
+    if (!FsSyncSession.initfaite && cfg.fsEmulator)
       connectFirestoreEmulator(this.fs, '127.0.0.1', cfg.fsEmulator)
+    FsSyncSession.initfaite = true
   }
 
   close () { // PAS ASYNC !!! Déconnexion n'est async
@@ -83,9 +87,9 @@ export class FsSyncSession {
     row._nom = nom
     if (row._data_) row._data_ = row._data_.toUint8Array()
     // Pour tester - à la console org est modifié dans l'index, pas dans le _data_
-    console.log('onRow:', row._nom, row.id, row.org) 
+    console.log('onRow:', row._nom, row.id) 
     // De vrai
-    // SyncQueue.push(row)
+    SyncQueue.push(row)
   }
 
   async setCompte (id) { // comptas ET espace
