@@ -13,8 +13,17 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.build = process.env.BUILD
   cfg.debug = process.env.DEBUGGING
   cfg.dev = process.env.DEV
-  cfg.opsrv = process.env.OPSRV
-  cfg.wssrv = process.env.WSSRV
+  cfg.srv = process.env.SRV
+  try {
+    cfg.opsrv = process.env.OPSRV
+  } catch (e) {
+    cfg.opsrv = 'https://' + cfg.srv + '/op/'
+  }
+  try {
+    cfg.wssrv = process.env.WSSRV
+  } catch(e) {
+    cfg.wssrv = 'wss://' + cfg.srv + '/ws/'
+  }
   console.log('debug:' + cfg.debug + ' dev:' + cfg.dev + ' build:' + cfg.build)
   console.log('opsrv: ' + cfg.opsrv + ' --- wssrv: ' + cfg.wssrv)
 

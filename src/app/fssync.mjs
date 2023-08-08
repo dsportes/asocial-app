@@ -19,7 +19,7 @@ export class FsSyncSession {
     this.subEspace = null
   }
 
-  open (firebaseConfig) {
+  open (firebaseConfig, fsEmulator) {
     const cfg = stores.config
     // Initialize Firebase
     if (!FsSyncSession.initfaite)
@@ -28,8 +28,8 @@ export class FsSyncSession {
     // Initialize Cloud Firestore and get a reference to the service
     this.fs = getFirestore(FsSyncSession.app)
 
-    if (!FsSyncSession.initfaite && cfg.fsEmulator)
-      connectFirestoreEmulator(this.fs, '127.0.0.1', cfg.fsEmulator)
+    if (!FsSyncSession.initfaite && fsEmulator)
+      connectFirestoreEmulator(this.fs, '127.0.0.1', fsEmulator)
     FsSyncSession.initfaite = true
   }
 
@@ -95,6 +95,7 @@ export class FsSyncSession {
   async setCompte (id) { // comptas ET espace
     this.subCompta = await this.sub('comptas', id)
     this.subEspace = await this.sub('espaces', ID.ns(id))
+    await this.setVersion(id)
   }
 
   async setTribu (id) { // tribus du compte
@@ -104,15 +105,33 @@ export class FsSyncSession {
     }
   }
 
-  async setGroupe (id) { // versions
+  async setTribuC (id) { // tribu courante
+    const session = stores.session
+    if (session.tribuCId && (session.tribuCId !== id)) {
+      // Désabonnement de la précédente courante
+      const unsub = this.subTribu.get(id)
+      this.unsub(unsub)
+    }
+    // Abonnement à la nouvelle courante
+    if (!this.subTribu.has(id)) {
+      const unsub = await this.sub('tribus', id)
+      this.subTribu.set(id, unsub)
+    }
+  }
+
+  async setVersion (id) { // versions
     if (!this.subVersion.has(id)) {
       const unsub = await this.sub('versions', id)
       this.subVersion.set(id, unsub)
     }
   }
 
+  async setGroupe (id) { // versions
+    await this.setVersion(id)
+  }
+
   async setAvatar (id) { // versions
-    await this.setGroupe(id)
+    await this.setVersion(id)
   }
 
   async unsetTribu (id) {

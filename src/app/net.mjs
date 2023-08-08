@@ -27,6 +27,22 @@ export async function ping () {
   }
 }
 
+export async function getEstFs () {
+  const config = stores.config
+  const u = 'https://' + config.srv + '/fs'
+  try {
+    const r = await axios({
+      method: 'get',
+      url: u,
+      responseType: 'text',
+      timeout: config.debug ? 50000000 : 5000
+    })
+    return r.data === 'true' ? true : false
+  } catch (e) {
+    procEx(e)
+  }
+}
+
 /*
 Envoi une requête GET :
 - fonction : code de la fonction

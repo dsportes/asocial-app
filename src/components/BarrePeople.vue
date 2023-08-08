@@ -214,9 +214,12 @@ export default {
       const idT = await crypter(cletAp, '' + ID.court(this.id))
       const args = { id: this.id, idtAv, idtAp, idT, nasp, stn, notif, cletX, cletK } 
       const t = await new ChangerTribu().run(args)
+      /* en sql, la nouvelle tribu this.id est abonnée, de facto la précédente désabonnée
+        mais pas en fs */
       if (this.session.fsSync) {
         await this.session.fsSync.setTribuC(t.id)
       }
+      this.session.setTribuCId(t.id)
       this.aSt.setTribuC(t)
     }
   },

@@ -29,7 +29,6 @@ export const useConfigStore = defineStore('config', {
       { value: 'en-EN', label: 'English',  flag: '🇬🇧' },
       { value: 'fr-FR', label: 'Français', flag: '🇫🇷' }
     ],
-    fsSync: false,
     portupload: 33666,
     phrases: [
       'leszsanglotszLONGSzgarezauzGORILLEz',

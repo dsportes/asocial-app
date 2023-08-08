@@ -5,10 +5,10 @@ import { decode } from '@msgpack/msgpack'
 import { AppExc, E_WS, PINGTO } from './api.mjs'
 import { SyncQueue } from './sync.mjs'
 
-function dhtToString (dht) {
-  return new Date(Math.floor(dht / 1000)).toISOString() + ' (' + (dht % 1000) + ')'
-}
-
+/* Pour être plus élégant, les function suivantes auraient dû être mises
+en static d'une classe WS avec une instance créée à chaque openWS.
+Bon mais ça marche.
+*/
 
 let url, pongrecu, debug, heartBeatTo, ws, exc, job = false
 
@@ -104,12 +104,14 @@ async function onmessage (m) {
 
   const pong = !syncList.rows
   if (debug) console.log('Liste sync reçue - sessionId:' + syncList.sessionId + 
-    (!pong ? ' nb rows:' + syncList.rows.length : ' - pong: ' + dhtToString(syncList.dh)))
+    (!pong ? 
+      ' nb rows:' + syncList.rows.length :
+      ' - pong: ' + new Date(syncList.dh).toISOString()))
 
   if (pong) {
     pongrecu = true
     if (session.status > 1 && session.sessionSync) {
-      await session.sessionSync.setDhPong(Math.floor(syncList.dh / 1000))
+      await session.sessionSync.setDhPong(syncList.dh)
     }
   } else {
     syncList.rows.forEach(row => { SyncQueue.push(row) })

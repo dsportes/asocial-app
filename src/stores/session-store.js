@@ -42,12 +42,20 @@ export const useSessionStore = defineStore('session', {
     opEncours: null,
     opSpinner: 0,
 
-    sessionSync: null, // Objet de classe SessionSync traçant l'état de synchronisation d'une session sur IDB
+    /* Objet de classe SessionSync traçant l'état de synchronisation d'une session sur IDB
+    - créé par db à la lecture de l'état de synchronisation
+    - reset à la déconnexion par reset du store
+    */
+    sessionSync: null,
 
     syncEncours: false,
 
-    fscredentials: null, // pour connexion à Firestore
-    fsSync: null, // Objet de synchro pour Firestore
+    // Objet de synchro pour Firestore
+    fsSync: null,
+    /* Juste avant login, récupération du statut fs / sql du server
+    par ping /fs (retournant 'true' ou 'false') SAUF en mode avion
+    */
+    estFs: false,
 
     clek: null,
 
@@ -164,21 +172,17 @@ export const useSessionStore = defineStore('session', {
 
     setNs (ns) { this.ns = ns; NomGenerique.ns = ns },
 
-    /*
-    setMemoOrg (x) {
-      this.memoOrg = x ? true : false
-      if (!this.memoOrg) this.setPresetOrg('')
+    setSessionSync (s) {
+      this.sessionSync = s
     },
 
-    setPresetOrg (org) { 
-      if (org) {
-        localStorage.setItem('$asocial$org', org)
-      } else {
-        localStorage.removeItem('$asocial$org')
-      }
-      this.presetOrgX = org
+    setFsSync (fsSync) {
+      this.fsSync = fsSync
     },
-    */
+
+    setEstFs (estFs) {
+      this.estFs = estFs
+    },
 
     setAvatarId (id) { this.avatarId = id},
 

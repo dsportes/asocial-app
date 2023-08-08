@@ -151,25 +151,16 @@ export default {
         t = await new GetTribu().run(id, true) // true: abonnement
         abot = true
       }
-
-      if (this.session.tribuCId && id === this.session.tribuId) {
-        // désabonnement de la tribu courante actuelle
-        // sauf si c'est la tribu du compte
-        if (this.session.fsSync) {
-          await this.session.fsSync.unsetTribu(this.session.tribuCId)
-        } else {
-          if (!abot) await new AboTribuC().run(0)
-        }
-      }
-
       // abonnement à la nouvelle tribu courante
       if (this.session.fsSync) {
-        await this.session.fsSync.setTribu(id)
+        // désabonne l'actuelle courante si nécessaire et pas tribu du compte
+        await this.session.fsSync.setTribuC(id) 
       } else {
+        // ce qui désabonne de facto de la précédente (mais pas de celle du compte)
         if (!abot) await new AboTribuC().run(id)
       }
 
-      this.session.setTribuC(id)
+      this.session.setTribuCId(id)
       this.aSt.setTribuC(t)
       return t
     },

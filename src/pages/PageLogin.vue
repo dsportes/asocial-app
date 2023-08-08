@@ -58,6 +58,7 @@ import PhraseSecrete from '../components/PhraseSecrete.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../dialogues/AcceptationSponsoring.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import { getEstFs } from '../app/net.mjs'
 
 export default {
   name: 'PageLogin',
@@ -75,12 +76,22 @@ export default {
   },
 
   methods: {
-    onps (phrase) {
+    async setFs () {
+      if (this.session.accesNet) {
+        const estFs = await getEstFs()
+        this.session.setEstFs(estFs)
+      } else {
+        this.session.setEstFs(false)
+      }
+    },
+    async onps (phrase) {
+      await this.setFs()
       connecterCompte(phrase, this.razdb)
     },
     async crypterphrase (pc) {
       this.pc = pc
       this.org = pc.org
+      await this.setFs()
       try {
         /* Recherche sponsoring ******
         args.ids : hash de la phrase de contact

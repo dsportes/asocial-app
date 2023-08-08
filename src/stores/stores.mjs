@@ -13,12 +13,12 @@ import { useFiltreStore } from './filtre-store.js'
 import { useAvnoteStore } from './avnote-store.js'
 import { usePpStore } from './pp-store.js'
 
-// Hors de cette liste : config, session
-const listeStores = ['tribu', 'avatar', 'groupe', 'people', 
-'note', 'syncitem', 'fetat', 'avnote', 'pp', 'filtre'
-]
-
 class Stores {
+  static listeStores = [ // toutes SAUF config
+    'session', 'ui', 'tribu', 'avatar', 'groupe', 'people', 
+    'note', 'syncitem', 'fetat', 'avnote', 'pp', 'filtre'
+  ]
+
   get config() { return this.configStore || (this.configStore = useConfigStore()) }
   get session() { return this.sessionStore || (this.sessionStore = useSessionStore()) }
   get ui() { return this.uiStore || (this.uiStore = useUiStore()) }
@@ -34,8 +34,9 @@ class Stores {
   get pp() { return this.ppStore || (this.ppStore = usePpStore()) }
   get filtre() { return this.filtreStore || (this.filtreStore = useFiltreStore()) }
 
-  reset() {
-    for(const id of listeStores) {
+  reset(saufSession) {
+    for(const id of Stores.listeStores) {
+      if (id === 'session' && saufSession) continue
       const st = this[id]
       st.$reset()
     }

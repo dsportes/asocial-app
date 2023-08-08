@@ -65,12 +65,11 @@ module.exports = configure(function (ctx) {
         DEBUGGING: true,
         APITK: 'VldNo2aLLvXRm0Q', // Token d'autorisation d'usage de l'API
         BUILD: 20230706,
-        // OPSRV: 'https://msi:8443/op/',
-        // WSSRV: 'wss://msi:8443/ws/' 
-        OPSRV: 'https://test.sportes.fr:8443/op/',
-        WSSRV: 'wss://test.sportes.fr:8443/ws/' 
-        // OPSRV: 'https://localhost:8443/op/',
-        // WSSRV: 'wss://localhost:8443/ws/' 
+        // SRV: 'https://msi:8443/',
+        // SRV: 'https://test.sportes.fr:8443/',
+        SRV: '192.168.5.64:8443',
+        // WSSRV: 'wss://localhost.fr:8443/ws/', // calculé depuis SRV par défaut
+        // OPSRV: 'https://test.sportes.fr:8443/op/', // calculé depuis SRV par défaut
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'

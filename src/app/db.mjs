@@ -140,7 +140,7 @@ export async function lectureSessionSyncIdb () {
         console.log('Pas de sessionsync en IDB')
       } // session vide si pas lisible sur IDB
     }
-    session.sessionSync = s
+    session.setSessionSync(s)
   } catch (e) {
     throw EX2(e)
   }

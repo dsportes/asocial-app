@@ -230,6 +230,7 @@ export class OperationWS extends Operation {
     for(const idg of this.grSuppr) this.supprGr(idg)
   }
 
+  /* init ***********************************************************/
   init () {
     this.resiliation = false
     this.versions = new Map() // versions des sous-collections d'avatars / groupes modifiées
@@ -255,6 +256,7 @@ export class OperationWS extends Operation {
     this.abMoins = new Set() // abonnements de synchronisation supprimés
   }
 
+  /* final *********************************************************/
   async final () {
     if (this.resiliation) {
       deconnexion()

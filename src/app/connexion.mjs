@@ -18,7 +18,6 @@ import { MD, setClet } from './modele.mjs'
 export function deconnexion (garderMode) {
   const ui = stores.ui
   const session = stores.session
-  const config = stores.config
   const mode = session.mode
   const memoOrg = session.memoOrg
 
@@ -30,13 +29,9 @@ export function deconnexion (garderMode) {
 
   if (session.accesIdb) closeIDB()
   if (session.accesNet) {
-    if (config.fsSync) {
-      if (session.fsSync) session.fsSync.close()
-      session.fsSync = null
-    } else closeWS()
+    if (session.fsSync) session.fsSync.close(); else closeWS()
   } 
   stores.reset()
-  session.$reset()
   if (garderMode) session.setMode(mode)
   session.memoOrg = memoOrg
   SyncQueue.reset()
@@ -55,7 +50,7 @@ async function initSession (phrase) {
   const config = stores.config
   session.init(phrase)
   if (session.accesNet) {
-    if (!config.fsSync) {
+    if (!session.estFs) {
       await openWS()
       session.fsSync = null
     } else {
@@ -63,7 +58,7 @@ async function initSession (phrase) {
     }
   }
   resetRepertoire()
-  stores.reset()
+  stores.reset(true)
 }
 
 export async function connecterCompte (phrase, razdb) {
@@ -484,7 +479,7 @@ export class ConnexionCompte extends OperationUI {
     const ret = this.tr(await post(this, 'ConnexionCompte', args))
 
     if (session.fsSync && ret.credentials) {
-      await session.fsSync.open(ret.credentials)
+      await session.fsSync.open(ret.credentials, ret.emulator || 0)
     }
 
     if (ret.admin) {           
@@ -504,6 +499,9 @@ export class ConnexionCompte extends OperationUI {
     session.setCompteId(this.rowCompta.id)
 
     if (session.fsSync) {
+      /* en sql, le serveur a enregistré d'office à la connexion l'abonnement 
+      au compte et à sa tribu
+      mais en fs c'est à faire explicitement en session */
       await session.fsSync.setCompte(session.compteId)
     }
 
@@ -522,7 +520,12 @@ export class ConnexionCompte extends OperationUI {
     await this.MajTribuVols() // MAJ tribu de v1 v2 (si +- 10%)
 
     session.setTribuId(this.tribu.id)
-    if (session.fsSync) await session.fsSync.setTribu(session.tribuId)
+    if (session.fsSync) {
+      /* en sql, le serveur a enregistré d'office à la connexion l'abonnement 
+      au compte et à sa tribu
+      mais en fs c'est à faire explicitement en session */
+      await session.fsSync.setTribu(session.tribuId)
+    }
   }
 
   async phase0Net () {
@@ -946,7 +949,7 @@ export class AcceptationSponsoring extends OperationUI {
       // Retourne: credentials, rowTribu
 
       if (session.fsSync && ret.credentials) {
-        await session.fsSync.open(ret.credentials)
+        await session.fsSync.open(ret.credentials, ret.fsEmulator || 0)
       }
   
       const rowTribu = ret.rowTribu
@@ -992,8 +995,10 @@ export class AcceptationSponsoring extends OperationUI {
       }
   
       if (session.fsSync) {
+        /* sql, le serveur a enregistré d'office à la connexion l'abonnement 
+        au compte et à sa tribu
+        mais en fs c'est à faire explicitement en session */
         await session.fsSync.setCompte(session.compteId)
-        await session.fsSync.setAvatar(session.compteId)
         await session.fsSync.setTribu(session.tribuId)
       }
 
