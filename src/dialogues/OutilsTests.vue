@@ -21,18 +21,17 @@
     <!--
     <comp-test :arg="testArg" />
     <q-btn dense color="warning" label="test" @click="testArg.val = new Date().getTime()"/>
+    <q-btn class="q-ma-xs" color="primary" dense label="Diag" @click="testDiag"/>
+    <q-btn dense label="Forcer dlv / dfh" color="primary" @click="test"/>
     -->
+
     <q-card-section v-if="tab === 'tst'" class="column items-center">
       <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt1')" @click="testEcho"/>
       <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt2')" @click="testErr"/>
-      <!--q-btn class="q-ma-xs" color="primary" dense label="Diag" @click="testDiag"/-->
     </q-card-section>
 
     <q-card-section v-if="tab === 'tst'">
       <div class="titre-lg">{{$t('TPt2')}}</div>
-      <!--
-      <q-btn dense label="Forcer dlv / dfh" color="primary" @click="test"/>
-      -->
       <div v-if="session.accesNet" class="q-ml-md">
         <q-btn dense :label="$t('ping')" color="primary" @click="pingsrv"/>
         <div>{{ resultat1a }}</div>
@@ -265,9 +264,11 @@ export default ({
       - op:1 : dlv de versions id
       - op:2 : dfh de groupes id
       - op:3 : dlv de membrs id / ids
-      [3, 3236776594934708, 0, 20230809]
+      [1, 3210299393509425, 0, 20230809]
+      [2, 3236776594934708, 0, 20230809]
+      [3, 3236776594934708, 1, 20230809]
       */
-      const lop = [[3, 3236776594934708, 1, 20230809]]
+      const lop = [[1, 3210299393509425, 0, 20230809]]
       await new ForceDlv().run(lop)
     }
   },
