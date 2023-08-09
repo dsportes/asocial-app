@@ -119,10 +119,6 @@
               <span class="titre-md text-italic q-mr-lg">{{$t('ESver')}}</span>
               <span class="font-mono fs-md">{{ck.v ? dhIso(ck.v) : '-'}}</span>
             </div>
-            <div class="q-my-sm">
-              <span class="titre-md text-italic q-mr-lg">{{$t('ESjdtr')}}</span>
-              <span class="font-mono fs-md">{{ck.jdtr ? AMJ.editDeAmj(ck.jdtr) : '-'}}</span>
-            </div>
             <div v-if="ck.dhStart" class="q-my-sm">
               <div class="titre-md text-italic q-mr-lg">{{$t('ESdex')}}</div>
               <div class="q-ml-md">

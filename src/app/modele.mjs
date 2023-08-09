@@ -677,7 +677,6 @@ Calcul des compteurs de Synthese dans .synth :
   - pcv2
 
 */
-
 export class Tribu extends GenDoc {
   /* Génère la clé de la tribu de numéro d'ordre idx (index de Compta.atr du comptable)*/
   static genCle (idx) { 
@@ -813,6 +812,16 @@ export class Tribu extends GenDoc {
     }
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, _data_ }
+  }
+}
+
+/** Gcvols ******************************************/
+export class Gcvols extends GenDoc {
+  async compile (row) {
+    const session = stores.session
+    this.clet = await decrypter(session.clek, row.cletK)
+    this.idt = Tribu.id(clet)
+    this.it = row.it
   }
 }
 
@@ -2004,6 +2013,7 @@ export class FichierLocal {
 const classes = {
   espaces: Espace,
   tribus: Tribu,
+  gcvols: Gcvols,
   syntheses: Synthese,
   comptas: Compta,
   avatars: Avatar,

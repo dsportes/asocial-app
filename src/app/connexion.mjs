@@ -816,6 +816,10 @@ export class ConnexionCompte extends OperationUI {
         await FLfromIDB()
       }
 
+      if (session.estComptable) {
+        new TraitGcvols().run
+      }
+
       // enregistre l'heure du début effectif de la session
       if (session.synchro) await session.sessionSync.setConnexion(this.dh)
       console.log('Connexion compte : ' + this.compta.id)
@@ -1184,3 +1188,29 @@ export class GetEspace extends OperationUI {
   }
 }
 
+/* Traitement des gcvols **********************************************
+*/
+export class TraitGcvols extends OperationUI {
+  constructor () { super('OPgcvols') }
+
+  async run (ns) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken }
+      const ret = this.tr(await post(this, 'ListeGcvols', args))
+      const m = {}
+      if (ret.gcvols) for (const x of ret.gcvols) {
+        const y = await compile(x)
+        let e = m[y.idt]; if (!e) { e = []; m[y.idt] = e }
+        e.push(y.it)
+      }
+      {
+        const args = { token: session.authToken, m }
+        this.tr(await post(this, 'SupprComptesTribu', args))
+      }
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

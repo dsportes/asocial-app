@@ -30,8 +30,11 @@
 
     <q-card-section v-if="tab === 'tst'">
       <div class="titre-lg">{{$t('TPt2')}}</div>
+      <!--
+      <q-btn dense label="Forcer dlv / dfh" color="primary" @click="test"/>
+      -->
       <div v-if="session.accesNet" class="q-ml-md">
-        <q-btn dense label="Ping du serveur" color="primary" @click="pingsrv"/>
+        <q-btn dense :label="$t('ping')" color="primary" @click="pingsrv"/>
         <div>{{ resultat1a }}</div>
       </div>
       <div v-else class="q-ml-md text-italic">{{$t('TP2')}}</div>
@@ -40,7 +43,7 @@
     <q-card-section v-if="tab === 'tst'">
       <div class="titre-lg">{{$t('TPt3')}}</div>
       <div v-if="session.accesNet" class="q-ml-md">
-        <q-btn dense label="Ping de la base sur le serveur" color="primary" @click="pingsrvdb"/>
+        <q-btn dense :label="$t('ping')" color="primary" @click="pingsrvdb"/>
         <div>{{ resultat2a }}</div>
         <div v-html="resultat2b"/>
       </div>
@@ -50,7 +53,7 @@
     <q-card-section v-if="tab === 'tst'">
       <div class="titre-lg">{{$t('TPt4')}}</div>
       <div v-if="session.ok && session.accesNet" class="q-ml-md">
-        <q-btn dense label="Ping de la base locale" color="primary" @click="pingIDB"/>
+        <q-btn dense :label="$t('ping')" color="primary" @click="pingIDB"/>
         <div>{{ resultat3a }}</div>
         <div v-html="resultat3b"/>
       </div>
@@ -143,6 +146,7 @@ import { ping } from '../app/net.mjs'
 import { getCompte, vuIDB, deleteIDB } from '../app/db.mjs'
 import { PingDB } from '../app/connexion.mjs'
 import { MD } from '../app/modele.mjs'
+import { ForceDlv } from '../app/operations.mjs'
 
 export default ({
   name: 'OutilsTests',
@@ -254,6 +258,17 @@ export default ({
         afficherDiag(e.message)
       }
       MD.fD()
+    },
+
+    async test () {
+      /*lop : liste d'opérations [op, id, ids, date]
+      - op:1 : dlv de versions id
+      - op:2 : dfh de groupes id
+      - op:3 : dlv de membrs id / ids
+      [3, 3236776594934708, 0, 20230809]
+      */
+      const lop = [[3, 3236776594934708, 1, 20230809]]
+      await new ForceDlv().run(lop)
     }
   },
 

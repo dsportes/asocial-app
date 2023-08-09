@@ -1647,7 +1647,7 @@ export class SupprAvatar extends OperationUI {
 
 /* Appels GCxxx ***********************************************/
 export class GC extends OperationUI {
-  constructor () { super('GC') }
+  constructor () { super('OPgc') }
 
   async run (nomop) { 
     try {
@@ -1661,7 +1661,7 @@ export class GC extends OperationUI {
 
 /* GetCheckpoint ***********************************************/
 export class GetCheckpoint extends OperationUI {
-  constructor () { super('GetCheckpoint') }
+  constructor () { super('OPckpt') }
 
   async run () { 
     try {
@@ -1680,7 +1680,7 @@ Retour:
 - rowSynthse
 */
 export class GetSynthese extends OperationUI {
-  constructor () { super('GetCheckpoint') }
+  constructor () { super('OPsynth') }
 
   async run (ns) { 
     try {
@@ -1689,6 +1689,30 @@ export class GetSynthese extends OperationUI {
       const ret = this.tr(await post(this, 'GetSynthese', args))
       const s = await compile(ret.rowSynthese)
       return this.finOK(s)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* ForceDlv **********************************************
+Force des dlv / dfh pour tester.
+args.token donne les éléments d'authentification du compte.
+args.lop : liste d'opérations [op, id, ids, date]
+  - op:1 : dlv de versions id
+  - op:2 : dfh de groupes id
+  - op:3 : dlv de membrs id / ids
+Retour:
+*/
+export class ForceDlv extends OperationUI {
+  constructor () { super('OPfdlv') }
+
+  async run (lop) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, lop }
+      this.tr(await post(this, 'ForceDlv', args))
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

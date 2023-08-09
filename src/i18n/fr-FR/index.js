@@ -74,6 +74,7 @@ export default {
   sponsor2: 'sponsor',
   total: 'Total',
   info: 'Info',
+  ping: 'Ping',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -566,6 +567,12 @@ export default {
   OPlfl: 'Lire un fichier local',
   OPchgt: 'Chargement d\'un fichier pour accès en mode avion',
   OPiter: '({0})-Petit incident, nouvel essai en cours, merci d\'attendre',
+
+  OPgc: 'Garbage Collector',
+  OPckpt: 'Checkpoint du dernier GC',
+  OPsynth: 'Obtention de la synthèse de l\'espace',
+  OPgcvols: 'Traitement des comptes disparus des tribus',
+  OPfdlv: 'Test: forçage de dlv / dfh',
 
   PSkb: 'Clavier virtuel',
   PSorg1: 'Organisation:',
