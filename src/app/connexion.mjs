@@ -817,7 +817,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       if (session.estComptable) {
-        new TraitGcvols().run
+        new TraitGcvols().run()
       }
 
       // enregistre l'heure du début effectif de la session
@@ -1198,14 +1198,15 @@ export class TraitGcvols extends OperationUI {
       const session = stores.session
       const args = { token: session.authToken }
       const ret = this.tr(await post(this, 'ListeGcvols', args))
-      const m = {}
-      if (ret.gcvols) for (const x of ret.gcvols) {
-        const y = await compile(x)
-        let e = m[y.idt]; if (!e) { e = []; m[y.idt] = e }
-        e.push(y.it)
-      }
-      {
-        const args = { token: session.authToken, m }
+      const m = {}, lidc = []
+      if (ret.gcvols.length) {
+        for (const x of ret.gcvols) {
+          const y = await compile(x)
+          let e = m[y.idt]; if (!e) { e = []; m[y.idt] = e }
+          e.push(y.it)
+          lidc.push(y.id)
+        }
+        const args = { token: session.authToken, m, lidc }
         this.tr(await post(this, 'SupprComptesTribu', args))
       }
       this.finOK()

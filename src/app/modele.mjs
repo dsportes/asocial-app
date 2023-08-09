@@ -819,8 +819,8 @@ export class Tribu extends GenDoc {
 export class Gcvols extends GenDoc {
   async compile (row) {
     const session = stores.session
-    this.clet = await decrypter(session.clek, row.cletK)
-    this.idt = Tribu.id(clet)
+    this.clet = await decrypter(session.clek, row.cletX)
+    this.idt = Tribu.id(this.clet)
     this.it = row.it
   }
 }
