@@ -4,7 +4,7 @@
     <div class="column">
       <div class="titre-lg q-mr-md">{{$t('PSorg1')}}</div>
     </div>
-    <q-input v-model="org" dense style="width:20rem"
+    <q-input v-model="org" dense style="width:15rem"
       :hint="$t('PSorg2')" :placeholder="$t('PSorg3')"/>
   </div>
 
