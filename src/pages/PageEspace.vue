@@ -267,12 +267,9 @@ export default {
       after(async (result) => {
         /* si la ligne courante correspond à une tribu qui vient
         d'être chargée, on fait repointer cette ligne sur le synth de cette tribu */
-        if (name === 'setTribu') {
+        if (name === 'setTribu' || name === 'setCompta') {
           await refreshSynth()
           trier()
-          resetCourant()
-        }
-        if (name === 'setCompta') {
           resetCourant()
         }
       })

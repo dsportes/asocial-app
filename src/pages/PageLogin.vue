@@ -99,7 +99,7 @@ export default {
         - rowSponsoring s'il existe
         */
         resetRepertoire()
-        stores.reset()
+        stores.reset(true)
         const res = await new ChercherSponsoring().run(this.pc.phch)
         if (!res || !res.rowSponsoring) {
           await afficherDiag(this.$t('LOGnopp'))
