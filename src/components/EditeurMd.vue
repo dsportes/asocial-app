@@ -7,7 +7,7 @@
       <bouton-help v-if="help" :page="help"/>
     </q-toolbar>
 
-<div :style="'height:' + (mh || '10rem')">
+<div :style="'height:' + (mh || '10rem')" class="bg-grey-5">
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar class="fs-md full-width row bg-primary text-white">
@@ -25,7 +25,7 @@
     </q-toolbar>
   </q-header>
 
-  <q-page-container>
+  <q-page-container :class="dlclass">
     <q-input autogrow v-if="!md" class="q-pa-xs font-mono" v-model="textelocal"
       :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
     <show-html v-else class="q-pa-xs bord1" :texte="textelocal"/>
@@ -34,7 +34,7 @@
 </div>
   </q-card>
   <q-dialog v-model="max" full-height full-width transition-show="slide-up" transition-hide="slide-down">
-    <div ref="root2" :class="dlclass + ' column'">
+    <div ref="root2" class="column bg-grey-5">
       <q-toolbar class="col-auto fs-md bg-primary text-white">
         <q-btn class="col-autov q-mr-xs" icon="zoom_in_map" size="md" dense flat push @click="MD.fD"/>
         <q-checkbox v-model="md" size="md" dense label="HTML" />
@@ -47,9 +47,11 @@
           {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
         </div>
       </q-toolbar>
-      <q-input autogrow v-if="!md" class="q-pa-xs col font-mono" v-model="textelocal" 
+      <div class="bg-grey-5">
+      <q-input autogrow v-if="!md" :class="dlclass + ' q-pa-xs col font-mono'" v-model="textelocal" 
         :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
-      <show-html v-else class="q-pa-xs col-auto bord1" :texte="textelocal"/>
+      <show-html v-else :class="dlclass + ' q-pa-xs col-auto bord1'" :texte="textelocal"/>
+      </div>
     </div>
   </q-dialog>
 
