@@ -426,7 +426,6 @@ export default {
   NPdec: 'Je décline',
   NPprol: 'Prolonger',
   NPann: 'Annuler',
-  NPtribu: 'Tribu:',
   NPtit: 'Sponsoring d\'un nouveau compte',
   NPnpc: 'Phrase à ne communiquer qu\'au titulaire du compte sponsorisé',
   NPphl: 'une phrase de 20 à 32c',
@@ -571,7 +570,7 @@ export default {
   OPgc: 'Garbage Collector',
   OPckpt: 'Checkpoint du dernier GC',
   OPsynth: 'Obtention de la synthèse de l\'espace',
-  OPgcvols: 'Traitement des comptes disparus des tribus',
+  OPgcvols: 'Traitement des comptes disparus',
   OPfdlv: 'Test: forçage de dlv / dfh',
 
   PSkb: 'Clavier virtuel',
@@ -652,7 +651,6 @@ export default {
   MLAesp: 'Décompte de l\'espace disponible / utilisé',
   MLAt1c: 'Compte',
   MLAt1a: 'Avatars du compte',
-  MLAt1t: 'Tribus',
   MLAt2a: 'Avatar',
   MLAt2s: 'Notes',
   MLAt2c: 'Contacts',
@@ -664,7 +662,6 @@ export default {
 
   FInom: 'Début du nom du contact',
   FIngr: 'Début du nom du groupe',
-  FInomt: 'Début du nom de la tribu',
   FInomc: 'Début du nom du compte',
   FInmb: 'Début du nom du membre',
   FInote: 'Texte de la note contenant',
@@ -683,7 +680,7 @@ export default {
   FIavecgr: 'Membre d\'un groupe',
   FInotif: 'Ayant une notification ... {0}',
   FIstmb: 'Ayant un statut ... {0}',
-  FItribu: 'De ma tribu ... {0}',
+  FItribu: 'Même tranche de quotas ... {0}',
   FIsansheb: 'Groupes sans hébergement',
   FIexcesvol: 'Groupes en excédent de volume',
   FItri: 'Tier par ...',
@@ -854,33 +851,6 @@ export default {
   SYtex: 'Pas de téléchargement en échec | Un téléchargement en échec | {count} téléchargements en échec',
   SYren: 'Renoncer à accéder à ce fichier en mode avion',
 
-  /*
-  NTng: 'Notification générale du Comptable',
-  NTtr: 'Notifications à tous les comptes de la tribu (par {0})',
-  NTco: 'Notification au compte (par {0})',
-  NTtr2: 'Notifications à tous les comptes de la tribu',
-  NTco2: 'Notification pour le seul compte',
-  NTng2: 'Notification générale du Comptable',
-  NTnng: 'Pas de notification générale du Comptable',
-  NTnco: 'Pas de notification du compte par le comptable',
-  NTnsp: 'Pas de notification du compte par un sponsor',
-  NTncotr: 'Pas de notifications à tous les comptes de la tribu par le comptable',
-  NTnsptr: 'Pas de notifications à tous les comptes de la tribu par un sponsor',
-  NTunsp: 'un sponsor de la tribu',
-  NTecr: 'En écrire une',
-  NTcre: 'En créer une',
-  NT1: 'Notification importante',
-  NTv1: 'Volume V1 attribué / quota tribu',
-  NTv2: 'Volume V2 attribué / quota tribu',
-  NTvx: 'Quotas V1 / V2 (%attribués)',
-  NTvxb: 'Quotas V1 / V2 (% d\'utilisation)',
-  NTvx1: '{0} ({1}%)',
-  NTvx2: '{0} ({1}%)',
-  NTcom: 'Commentaires sur la tribu {0}',
-  NTci: 'Un sponsor ne peut pas émettre une notification au Comptable',
-  NTgl: 'Seul le Comptable peut émettre une notification globale.',
-  */
-
   NTnbcsp: '{0} compte(s) dont {1} sponsor(s)',
 
   IBec: 'Procédures de blocage en cours',
@@ -908,7 +878,6 @@ export default {
   PNCntf: 'Notifications et blocages',
   PNCesp: 'Volumes utilisés',
   PNCchats: 'Chats d\'urgence',
-  PNCntfTrCo: 'Notification sur la "tribu" posée par le Comptable',
 
   PNOdep: 'Déplier',
   PNOrep: 'Replier',
@@ -1095,20 +1064,6 @@ export default {
 
   P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
 
-  /*
-  P12tit: 'Liste des tribus',
-  P12fil: 'Filtre',
-  P12ntr: 'Nouvelle tribu',
-  P12trb: 'Tribus bloquées',
-  P12not: 'Aucune tribu ne correspond au critère de recherche',
-  P12att:  '{0} {1} attribués',
-  P12res:  '{0} {1} réservés',
-  P20tit: 'Détail de l\'avatar {0}',
-  P20vc: 'Voir la comptabilité de l\'avatar',
-  P20rdv: 'Rendez-vous avec un avatar extérieur',
-  P22tit: 'Contacts de l\'avatar {0}',
-  */
-
   // Detail Tribu
   DTtit1: 'Total des tranches',
   DTtit0: 'Tranche #{0} {1}',
@@ -1120,8 +1075,6 @@ export default {
   DTv2: 'Quota pour les fichiers des notes: [{0}] soit {1}. {2}% alloués. {3}% occupés',
 
   // Panel Tribu
-  PTvide: 'Aucune tribu (sur {0}) ne répond au critère de filtre',
-  PTtit: 'Tribu {0}',
   PTci: 'Commentaires / information',
   PTvat: 'Volumes déjà attribués aux comptes de la tribu',
   PTres: 'Réserves restantes de volumes à attribuer',
@@ -1130,11 +1083,8 @@ export default {
   PTnoinfo: 'Pas de commentaires',
   PTattr: 'Attribué aux comptes',
   PTrest: 'Restant attribuable aux comptes',
-  PTtotal: 'Total attribué aux tribus',
   PTncoS: 'Comptes ayant une alerte simple : {0}',
   PTncoB: 'Comptes ayant une alerte bloquante : {0}',
-  
-  PTcvide: 'Aucun compte de la tribu (sur {0}) ne répond au critère de filtre',
   
   PTtit1: 'Sponsors',
   PTtit2: 'Sponsors et comptes',
@@ -1152,7 +1102,7 @@ export default {
   PTpasc: 'Il n\'est pas possible de bloquer le Comptable',
   PTcompta: 'Usage des quotas {0}',
   PTspn1: 'Il n\'est pas possible de changer le statut de sponsor d\'un compte dont le nom est inconnu.',
-  PTspn2: 'Il n\'est pas possible de changer de tribu un compte dont le nom est inconnu.',
+  PTspn2: 'Il n\'est pas possible de changer de tranche de quotas un compte dont le nom est inconnu.',
 
   // Page groupe(s)
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
@@ -1304,8 +1254,6 @@ export default {
   CPTchps: 'Changer la phrase secrète',
   CPTnbloc: 'Aucune procédure de blocage en cours.',
 
-  // CPTaptrib: 'A propos de ma tribu {0}',
-  // CPTimptrib: 'Les ressources du compte sont imputées à la tribu {0}',
   CPTkwc: 'Mots clés du compte',
   CPTnvav: 'Nouvel avatar',
   CPTnvav2: 'Création d\'un nouvel avatar',
@@ -1374,7 +1322,7 @@ export default {
   NAw1: 'Ce nom NE POURRA PLUS être changé.',
   NAw2: 'et caractères non imprimables (CR TAB ...) interdits.',
   NAng: 'Nom du groupe',
-  NAnt: 'Nom / code de la tribu',
+  NAnt: 'Nom / code de la tranche',
   NAna: 'Nom de l\'avatar',
   NAph0: 'Saisir un nom', 
   NAph1: 'Saisie non confirmée, re-saisir le nom',
@@ -1468,9 +1416,7 @@ export default {
   
   ANemet: 'Alerte émise par {0}',
 
-  SBtitt: 'Blocage "tribu" par {0}',
-  SBtitc: 'Blocage "compte" par {0}',
-  SBtittc: 'Blocage "tribu" par {0} ET "compte" par {1}',
+  /*
   SBn0: 'Pas de blocage',
   SBn1: 'Alerte. ',
   SBn2: 'Lecture seulement. ',
@@ -1482,13 +1428,11 @@ export default {
   SBal: 'En alerte jusqu\'à',
   SBls: 'En lecture seule jusqu\'à',
   SBbl: 'Bloqué jusqu\'à',
-  SBtr: 'Tribu',
   SBco: 'Compte',
   SBnco: 'le Comptable',
   SBnsp: 'un sponsor',
   SBdet: 'Détail du blocage de {0}',
   SBnv: 'Nouveau blocage de {0}',
-  SBtrib: 'Sa tribu {0} a aussi un blocage',
   SBreset: 'Faire repartir la procédure aujourd\'hui',
   SBavd1: 'Avancer la date de début de blocage ...',
   SBavd2: 'de 0 à {0} jours',
@@ -1497,6 +1441,7 @@ export default {
   SBdiag: 'NJA et NJS doivent être positifs ou 0 et leur somme inférieure à 365.',
   SBdiag2: 'La date de début de la procédure peut être avancée jusqu\'à aujourd\'hui MAIS PAS PLUS.',
   SBdel: 'Supprimer ce blocage',
+  */
 
   // PanelPeople et apercu compte
   PPchats: 'Chats',
