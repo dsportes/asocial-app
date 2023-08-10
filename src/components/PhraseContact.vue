@@ -9,15 +9,21 @@
   </div>
 
   <div class="titre-md q-mr-md">{{$t('PSctc' + (declaration ? 1 : 2))}}</div>
-  <q-input dense v-model="phrase" :placeholder="$t('NPphl')" counter :rules="[r1]" maxlength="32"
-    @keydown.enter.prevent="crypterphrase" :type="isPwd ? 'password' : 'text'"
-    :hint="!phrase || !r1(phrase) ? $t('NP16') : $t('NPpe')">
-    <template v-slot:append>
-      <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-      <q-btn icon="cancel" size="md" :disable="phrase.length === 0" @click="phrase = ''"/>
-      <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
-    </template>
-  </q-input>
+  <div class="row items-center">
+    <q-input class="col" dense v-model="phrase" :placeholder="$t('NPphl')" 
+      counter :rules="[r1]" maxlength="32"
+      @keydown.enter.prevent="crypterphrase" :type="isPwd ? 'password' : 'text'"
+      :hint="!phrase || !r1(phrase) ? $t('NP16') : $t('NPpe')">
+      <template v-slot:append>
+        <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
+        <q-btn icon="cancel" size="md" :disable="phrase.length === 0" @click="phrase = ''"/>
+        <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+      </template>
+    </q-input>
+    <q-btn class="col-auto q-ml-sm btn2" color="primary" 
+      :label="$t('ok')" icon="check" @click="crypterphrase"/>
+  </div>
+
 </div>
 </template>
 <script>
@@ -75,4 +81,6 @@ export default ({
 
 <style lang="sass" scoped>
 @import '../css/input.sass'
+.btn2
+  height: 1.5rem
 </style>

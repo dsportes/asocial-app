@@ -33,11 +33,7 @@
     group="g1" header-class="titre-lg bg-primary text-white">
     <div>
       <div class="titre-md q-my-md">{{$t('LOGpar')}}</div>
-      <div class="row items-end">
-        <phrase-contact class="col" @ok="crypterphrase"/>
-        <q-btn class="col-auto q-ml-sm btn2" color="primary" 
-          :label="$t('ok')" icon="check" @click="crypterphrase"/>
-      </div>
+      <phrase-contact class="full-width" @ok="crypterphrase"/>
     </div>
   </q-expansion-item>
 
@@ -186,6 +182,4 @@ export default {
   border: 2px solid $warning !important
 .bord2
   border: 2px solid transparent !important
-.btn2
-  height: 1.5rem
 </style>

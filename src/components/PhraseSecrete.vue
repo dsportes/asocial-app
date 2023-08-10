@@ -9,7 +9,7 @@
         <q-checkbox v-if="session.accesIdb" v-model="memoOrgL" dense size="sm" 
           :label="$t('PSmemo')"/>
       </div>
-      <q-input v-model="orgL" dense style="width:20rem"
+      <q-input v-model="orgL" dense style="width:20rem" class="ph"
         :hint="$t('PSorg2')" :placeholder="$t('PSorg3')"/>
     </div>
 

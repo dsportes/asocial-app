@@ -530,6 +530,8 @@ export default {
 </script>
 
 <style lang="css">
+input:placeholder-shown { color: grey !important; font-style:italic }
+
 .animate__slideInRight {
   --animate-duration: 0.2s;
 }

@@ -177,8 +177,6 @@ export default {
 
       const key = await new NouvelleNote()
         .run(id, this.texte, im, this.temp.value, this.prot, this.exclu, ref, idc)
-
-      this.nSt.setPreSelect(key)
       MD.fD()
     }
   },

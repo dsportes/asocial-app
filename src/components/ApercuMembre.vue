@@ -104,23 +104,19 @@
           </div>
 
           <div v-if="!mb.estAc && cas===6" class="column justify-center">
-            <q-btn class="q-my-xs text-center" dense color="warning" 
+            <q-btn class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action2')" @click="setAc(2, 9)"/>
-            <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action2b')" @click="setAc(7, 0)"/>
             <q-btn v-if="!una && (st===61 || st===62)" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action20')" @click="setAc(2, 0)"/>
             <q-btn v-if="!una && (st===60 || st===62)" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action21')" @click="setAc(2, 1)"/>
             <q-btn v-if="!una && (st===60 || st===61)" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action22')" @click="setAc(2, 2)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('action2b')" @click="setAc(7, 0)"/>
           </div>
 
           <div v-if="!mb.estAc && cas===7" class="column justify-center">
-            <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action2')" @click="setAc(2, 9)"/>
-            <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action2b')" @click="setAc(7, 0)"/>
             <q-btn v-if="st===70" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action20b')" @click="setAc(1, 0)"/>
             <q-btn v-if="st===71" class="q-my-xs text-center" dense color="primary" 
@@ -133,17 +129,21 @@
               :disable="ro!==''" :label="$t('action21')" @click="setAc(1, 1)"/>
             <q-btn v-if="st===70 || st===71" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action22')" @click="setAc(1, 2)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('action2')" @click="setAc(2, 9)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('action2b')" @click="setAc(7, 0)"/>
           </div>
 
           <div v-if="mb.estAc && cas===6" class="column justify-center">
-            <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('actionm1')" @click="setAc(7, 0)"/>
-            <q-btn class="q-my-xs text-center" dense color="warning" 
+            <q-btn class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('actionm2')" @click="setAc(3, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('actionm3')" @click="setAc(4, 0)"/>
-            <q-btn class="q-my-xs text-center" dense color="primary" 
+            <q-btn class="q-my-xs text-center" dense color="warning" 
               :disable="ro!==''" :label="$t('actionm4')" @click="setAc(7, 0)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('actionm1')" @click="setAc(7, 0)"/>
           </div>
 
           <div v-if="mb.estAc && cas===7" class="column justify-center">
@@ -152,38 +152,38 @@
           </div>
 
           <div v-if="!mb.estAc && cas===3" class="column justify-center">
-            <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action3')" @click="setAc(6, 0)"/>
-            <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action3b')" @click="setAc(7, 0)"/>
             <q-btn v-if="st===31 || st===32" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action30')" @click="setAc(5, 0)"/>
             <q-btn v-if="st===30 || st===32" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action31')" @click="setAc(5, 1)"/>
             <q-btn v-if="st===30 || st===31" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action32')" @click="setAc(5, 2)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('action3')" @click="setAc(6, 0)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('action3b')" @click="setAc(7, 0)"/>
           </div>
 
           <div v-if="mb.estAc && cas===3" class="column justify-center">
-            <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('actionm5')" @click="setAc(6, 0)"/>
-            <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('actionm6')" @click="setAc(7, 0)"/>
             <q-btn v-if="st===31 || st===32" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('actionm8')" @click="setAc(5, 0)"/>
             <q-btn v-if="st===32" class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('actionm7')" @click="setAc(5, 1)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('actionm5')" @click="setAc(6, 0)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('actionm6')" @click="setAc(7, 0)"/>
           </div>
 
           <div v-if="!mb.estAc && (cas===4 || cas === 5)" class="column justify-center">
-            <q-btn class="q-my-xs text-center" dense color="warning" 
-              :disable="ro!==''" :label="$t('action1')" @click="setAc(7, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action40')" @click="setAc(1, 0)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action41')" @click="setAc(1, 1)"/>
             <q-btn class="q-my-xs text-center" dense color="primary" 
               :disable="ro!==''" :label="$t('action42')" @click="setAc(1, 2)"/>
+            <q-btn class="q-my-xs text-center" dense color="warning" 
+              :disable="ro!==''" :label="$t('action1')" @click="setAc(7, 0)"/>
           </div>
 
         </q-card-section>
@@ -305,6 +305,7 @@ export default {
       if (this.code) {
         await afficherDiag(this.$t('AMx' + code))
       }
+      this.closeSt()
     },
     closeSt () {
       MD.fD()

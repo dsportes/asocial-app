@@ -559,7 +559,9 @@ export class NouvelAvatar extends OperationUI {
 
       const kx = await Compta.mavkK(na.id, session.clek)
       const vx = await Compta.mavkKV(na, session.clek)
-      const args = { token: session.authToken, rowAvatar, rowVersion, kx, vx }
+      if (session.fsSync) await session.fsSync.setAvatar(na.id)
+      const args = { token: session.authToken, rowAvatar, 
+        rowVersion, kx, vx, abPlus: [na.id] }
       this.tr(await post(this, 'NouvelAvatar', args))
       this.finOK()
     } catch (e) {

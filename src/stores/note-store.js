@@ -42,6 +42,7 @@ export const useNoteStore = defineStore('note', {
     test: { avs: {}, grs: {} },
 
     presel: '' // note pre-selected avant ouverture PageNote
+
   }),
 
   getters: {
@@ -339,6 +340,7 @@ export const useNoteStore = defineStore('note', {
           this.rattachNote(n) // on la rattache à sa note de rattachement
         }
       }
+      this.setPreSelect(n.key)
       this.setLabel(n)
     },
 
