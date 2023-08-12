@@ -21,7 +21,7 @@ Le document checkpoint est réécrit totalement à chaque exécution du GC.
 - il ne sert qu'à l'administrateur technique pour s'informer, en cas de doutes, du bon fonctionnement du triatement GC en délivrant quelques compteurs, traces d'exécution, traces d'erreurs.
 
 ## Espaces
-Tous les autres documents comportent une colonne / attribut id dont la valeur détermine un partionnement en _espaces_ cloisonnés : dans chaque espace aucun document ne référence un document d'un autre espace.
+Tous les autres documents comportent une colonne / attribut `id` dont la valeur détermine un partionnement en _espaces_ cloisonnés : dans chaque espace aucun document ne référence un document d'un autre espace.
 
 Un espace est identifié par `ns`, **un entier de 10 à 69**. Chaque espace à ses données réparties dans les collections / tables suivantes:
 - `espaces syntheses` : un seul document / row par espace. Leur attribut `id` (clé primaire en SQL)a pour valeur le `ns` de l'espace. Path pour le ns 24 par exemple : `espaces/24` `syntheses/24`.
@@ -31,6 +31,17 @@ Un espace est identifié par `ns`, **un entier de 10 à 69**. Chaque espace à s
 Un utilitaire permet, en se basant exclusivement sur la valeur de l'attribut `id` des documents:
 - d'exporter un _espace_ d'une base (SQL ou Firestore) dans une autre en changeant éventuellement son `ns` (passant par exemple de `24` à `32`).
 - purger les données d'un _espace_ d'une base.
+
+### Code organisation attaché à un espace
+A la déclaration d'un espace sur un serveur, l'administrateur technique déclare un **code organisation**:
+- ce code ne peut plus changer.
+- le Storage de fichiers comporte un _folder_ racine portant ce code d'organisation ce qui partitionne le stockage de fichiers.
+
+> Un Storage pour une organisation peut être exporté dans un autre Storage:
+- les fichiers sont physiquement recopiés,
+- à cette occasion le code de l'organisation (la racine du Storage) peut être changé, celui de la _cible_ pouvant différer de celui de la _source_.
+
+> Les connexions aux comptes citant ce _code organisation_ c'est une donnée dure, dont le changement ne peut intervenir que dans des circonstances très exceptionnelles puisqu'elle nécessite d'informer tous les utilisateurs ... dont personne n'a la liste. Il reste à _bloquer_ l'ancien espace et à indiquer dans l'information de blocage le nouveau couple URL / code organisation pour retrouver ses données après qu'elles aient été transférées.
 
 Les données ainsi ne faisant référence qu'à des id _courtes_ sont intègres dans la base cible de l'exportation.
 
@@ -221,6 +232,19 @@ Pour un `sponsorings` l'attribu `ids` est le hash de la phrase de reconnaissance
 - l'attribut est indexé.
 - en Firestore l'index est `collection_group` afin de rendre un sponsorings accessible par index sans connaître son _parent_ le sponsor.
 
+#### `v` : version d'un document
+Tous les docuements sont _versionnés_,
+- **SAUF** `gcvols fpurges transferts` qui sont créés immuable et détruits par le premier traitement qui les lit (dont le GC). Ces documents ne sont pas synchronisés en sessions UI.
+- **singletons syntheses** : v est une estampille (date-heure) et n'a qu'un rôle informatif : ces documents ne sont pas synchronisés en sessions UI.
+- **tous les autres documents ont un version de 1..n**, incrémentée de 1 à chaque mise à jour de son document, et pour `versions` de leurs sous-collections.
+
+En session UI pour chaque document ou sous-collection d'un document, le fait de connaître sa version permet,
+- de ne demander la mise à jour que des documents plus récents de même id,
+- à réception d'un row synchronisé de ne mettre à jour l'état en mémoire que s'il est effectivement plus récent que celui détenu.
+
+#### `vcv` : version de la carte de visite
+Cet attribut est la version `v` du document au moment de la dernière mise à jour de la carte de visite. `vcv` est définie pour `avatars chats membres` seulement.
+
 #### `dlv` : **date limite de validité** 
 Ces dates sont données en jour `aaaammjj` (UTC) et apparaissent dans : 
 - (a) `versions membres`,
@@ -330,6 +354,8 @@ Une `sessionId` est tirée au sort par la session juste avant tentative de conne
 
 > **En mode SQL**, un WebSocket est ouvert et identifié par le `sessionId` qu'on retrouve sur les messages afin de s'assurer qu'un échange entre session et serveur ne concerne pas une session antérieure fermée.
 
+> **En mode Firestore**, le serveur peut s'interrompre sans interrompre la session UI: les abonnements sont gérés dans la session UI, il n'y a pas de WebSocket et le token d'authentification permet d'indentifier la session UI. En revanche le serveur du Firestore ne doit pas tomber.
+
 Toute opération porte un `token` portant lui-même le `sessionId`:
 - si le serveur retrouve dans la mémoire cache l'enregistrement de la session `sessionId` :
   - **il en obtient l'id du compte**,
@@ -344,10 +370,9 @@ Toute opération porte un `token` portant lui-même le `sessionId`:
 - `shax` : SHA de X (PBKFD de la phrase secrète complète).
 - `hps1` : hash du PBKFD du début de la phrase secrète.
 
-Le serveur recherche l'id du compte par `hps1` (index de `comptas`)
+Le serveur recherche l'`id` du compte par `hps1` (index de `comptas`)
 - vérifie que le SHA de `shax` est bien celui enregistré dans `compta` en `shay`.
-- inscrit en mémoire `sessionId` avec l'id du compte et un `ttl`.
-
+- inscrit en mémoire `sessionId` avec l'`id` du compte et un `ttl`.
 
 # Détail des documents
 
@@ -362,19 +387,19 @@ Les notifications servent à transmettre une information importante aux comptes 
 
 **Le Comptable a un degré de liberté** supérieur aux autres comptes:
 - en niveau 1 et 2 il peut: 
-  - gérer les tribus, création, gestion de quotas, gestion des comptes et de leurs quotas,
+  - gérer les tranches de quotas, création, gestion de quotas, gestion des comptes et de leurs quotas,
   - chatter avec les comptes,
   - gérer les notifications aux tribus et comptes.
 - en niveau bloqué, il ne peut plus rien faire. 
 
 On trouve des notifications aux niveaux suivants :
 - **G-niveau global** d'un espace, émise par l'Administrateur (cryptée par la clé du Comptable) à destination de **tous** les comptes.
-- **T-niveau tribu** à destination de **tous** les comptes de la tribu. Cryptée par la clé de la tribu et émise :
+- **T-niveau tranche** à destination de **tous** les comptes de la tranche. Cryptée par la clé de la tribu et émise :
   - soit par le Comptable,
-  - soit par un sponsor de la tribu : toutefois quand il existe une notification du Comptable elle ne peut pas être modifiée par un sponsor.
+  - soit par un sponsor de la tranche : toutefois quand il existe une notification du Comptable elle ne peut pas être modifiée par un sponsor.
 - **C-niveau compte** à destination d'un seul compte. Cryptée par la clé de sa tribu et émise :
   - soit par le Comptable,
-  - soit par un sponsor de la tribu : toutefois quand il existe une notification du Comptable elle ne peut pas être modifiée par un sponsor.
+  - soit par un sponsor de la tranche : toutefois quand il existe une notification du Comptable elle ne peut pas être modifiée par un sponsor.
 
 Un compte peut donc faire l'objet de 0 à 3 notifications :
 - le niveau applicable au jour J est le plus dégradé (le plus élevé).
@@ -396,139 +421,140 @@ Un compte peut donc faire l'objet de 0 à 3 notifications :
 
 > Le document `compta` a une date-heure de lecture qui indique _quand_ il a lu les notifications.
 
-## Document `espace`
+## Documents `espaces`
 _data_ :
 - `id` : de l'espace de 10 à 89.
-- `v`
-- `org` : code de l'organisation propriétaire
+- `v` : 1..N
+- `org` : code de l'organisation propriétaire.
 
 - `notif` : notification de l'administrateur, cryptée par la clé du Comptable.
 - `t` : numéro de _profil_ de quotas dans la table des profils définis dans la configuration (chaque profil donne un couple de quotas q1 q2).
 
-## Document `gcvol`
+## Documents `gcvols`
 _data_ :
 - `id` : id du compte disparu.
 
 - `cletX` : clé de la tribu cryptée par la clé K du Comptable.
-- `it` : index du compte dans cette tribu.
+- `it` : index d'enregistrement du compte dans cette tribu.
 
-Le comptable obtient l'`id` de la tribu en décryptant `cletX`, `it` lui donne l'indice du compte disparu dans la table `act` de cette tribu. Cet élément est détruit (ce qui de facto accroît les quotas attribuables).
+Un document gcvols est créé par le GC à la détection de la disparition d'un compte, son document `versions` étant _zombi_. Il accède à son document `comptas`, et y récupère `cletX it`. Après création du `gcvols`, le document `comptas`, désormais inutile, est purgé.
 
-## Document `tribu`
+Le Comptable lors de sa prochaine ouverture de session, récupère tous les gcvols et les traite :
+- il obtient l'`id` de la tribu en décryptant `cletX`, `it` lui donne l'indice du compte disparu dans la table `act` de cette tribu. 
+- l'item `act[it]` est y détruit, ce qui de facto accroît les quotas attribuables.
+- la synthèse de la tribu est mise à jour.
+
+## Documents `tribu`
 _data_:
 - `id` : numéro d'ordre de création de la tribu.
-- `v`
+- `v` : 1..N
 
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
 - `q1 q2` : quotas totaux de la tribu.
 - `stn` : statut de la notification de tribu: _0:aucune 1:simple 2:bloquante 3:bloquée_
 - `notif`: notification de niveau tribu cryptée par la clé de la tribu.
-- `act` : table des comptes de la tribu. L'index `it` dans cette liste figure dans la propriété `it` du `comptas` correspondant :
+- `act` : table des comptes de la tribu. L'index `it` dans cette table figure dans la propriété `it` du `comptas` correspondant :
   - `idT` : id court du compte crypté par la clé de la tribu.
   - `nasp` : si sponsor `[nom, cle]` crypté par la cle de la tribu.
-  - `notif`: notification de niveau compte cryptée par la clé de la tribu.
-  - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
+  - `notif`: notification de niveau compte cryptée par la clé de la tribu (null s'il n'y en a pas).
+  - `stn` : statut de la notification _du compte_: _0:aucune 1:simple 2:bloquante_
   - `q1 q2` : quotas attribués.
-  - `v1 v2` : volumes **approximatifs** effectivement utilisés: recopiés de comptas lors de la dernière connexion du compte, s'ils ont changé de plus de N%. **Ce n'est donc pas un suivi en temps réel** qui imposerait une charge importante de mise à jour de tribu à chaque mise à jour d'un compteur de `comptas` et des charges de synchronisation conséquente.
+  - `v1 v2` : volumes **approximatifs** effectivement utilisés: recopiés de `comptas` lors de la dernière connexion du compte, s'ils ont changé de plus de 10%. **Ce n'est donc pas un suivi en temps réel** qui imposerait une charge importante de mise à jour de `tribus / syntheses` à chaque mise à jour d'un compteur de `comptas` et des charges de synchronisation conséquente.
 
-Un sponsor peut accéder à la liste des comptes de sa tribu : toutefois il n'a accès à leur carte de visite que s'il les connaît pasr ailleurs, chats au moment du sponsoring ou ultérieur par phrase de contact, appartence à un même groupe ...
+Un sponsor (ou le Comptable) peut accéder à la liste des comptes de sa tranche : toutefois il n'a pas accès à leur carte de visite, sauf si l'avatar est connu par ailleurs, chats au moment du sponsoring ou ultérieur par phrase de contact, appartence à un même groupe ...
 
-De même pour le comptable.
+L'ajout / retrait de la qualité de `sponsor` n'est effectué que par le Comptable au delà du sponsoring initial par un sponsor.
 
-L'ajout / retrait de la qualité de `sponsor` n'est effectué que par le comptable au delà du sponsoring initial par un sponsor.
-
-## Document `syntheses`
+## Documents `syntheses`
 La mise à jour de tribu est de facto peu fréquente : une _synthèse_ est recalculée à chaque mise à jour de `stn, q1, q2` ou d'un item de `act`.
 
 _data_:
-- `id` : id de l'espace
-- `v` : date-heure d'écriture
+- `id` : id de l'espace.
+- `v` : date-heure d'écriture (purement informative).
 
 - `atr` : table des synthèses des tribus de l'espace. L'indice dans cette table est l'id court de la tribu. Chaque élément est la sérialisation de:
   - `q1 q2` : quotas de la tribu.
   - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
   - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
-  - `ntr1` : nombre de notifications tribu_simples
-  - `ntr2` : nombre de notifications tribu bloquantes
-  - `ntr3` : nombre de notifications tribu bloquées
+  - `ntr1` : nombre de notifications tribu_simples.
+  - `ntr2` : nombre de notifications tribu bloquantes.
+  - `ntr3` : nombre de notifications tribu bloquées.
   - `nbc` : nombre de comptes.
   - `nbsp` : nombre de sponsors.
   - `nco1` : nombres de comptes ayant une notification simple.
   - `nco2` : nombres de comptes ayant une notification bloquante.
 
-atr[0] est la somme des atr[1..N]. Calculé en session, pas stocké.
+`atr[0]` est la somme des `atr[1..N]` calculé en session, pas stocké.
 
-## Document `compta`
+## Documents `comptas`
 _data_ :
-- `id` : numéro du compte
-- `v`
+- `id` : numéro du compte, id de son avatar principal.
+- `v` 1..N.
 - `hps1` : le hash du PBKFD du début de la phrase secrète du compte.
 
-- `shay`, le SHA du SHA de X (PBKFD de la phrase secrète).
-- `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
+- `shay`, SHA du SHA de X (PBKFD de la phrase secrète).
+- `kx` : clé K du compte, cryptée par X (PBKFD de la phrase secrète courante).
 - `dhvu` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
 - `sp` : 1: est sponsor
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
-- `cletK` : clé de la tribu cryptée par la clé K du compte : si cette clé a une longueur de 256, elle est cryptée par la clé publique RSA du compte (en cas de changement de tribu forcé par le comptable).
+- `cletK` : clé de la tribu cryptée par la clé K du compte : si cette clé a une longueur de 256, elle est cryptée par la _clé publique RSA_ du compte (en cas de changement de tribu forcé par le comptable).
 - `it` : index du compte dans la table `act` de sa tribu.
-- `notifcT` : notification de niveau compte cryptée par la clé de la tribu.
 - `mavk` : map des avatars du compte. 
   - _clé_ : id court de l'avatar cryptée par la clé K du compte.
   - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
-- `compteurs`: compteurs sérialisés (non cryptés), dont `q1 q2` les quotas actuels du compte qui sont dupliqués dans son entrée de sa tribu.
+- `compteurs`: compteurs sérialisés (non cryptés), dont `q1 q2` les quotas actuels du compte qui sont dupliqués dans son entrée `act` de sa tribu.
 
 **Pour le Comptable seulement**
 -`atr` : table des tribus : `{clet, info, q1, q2}` crypté par la clé K du comptable.
-  - `clet` : clé de la tribu (donne aussi son id, index dans `atrx / astn`).
+  - `clet` : clé de la tribu (donne aussi son id, index dans `act / astn`).
   - `info` : texte très court pour le seul usage du comptable.
   - `q1 q2` : quotas globaux de la tribu.
-- `astn` : table des statuts de notification des tribus _aucune simple bloquante_.
+- `astn` : table des statuts de notification des tribus _0:aucune 1:simple 2:bloquante_.
 
-La première tribu est la tribu _primitive_, celle du comptable et est indestructible.
+La première tribu d'`id` 1 est la tribu _primitive_, celle du comptable et est indestructible.
 
 **Remarques :**  
 - Le document est mis à jour à minima à chaque mise à jour d'une note (volumes dans compteurs).
-- La version de `compta` lui est spécifique (ce n'est pas la version de l'avatar principal du compte).
+- La version de `comptas` lui est spécifique (ce n'est pas la version de l'avatar principal du compte).
 - `cletX it` sont transmis par le GC dans un document `gcvols` pour notifier au Comptable, quel est le compte détecté disparu (donc de sa tribu).
 - Le fait d'accéder à `atr` permet d'obtenir la _liste des tribus existantes_ de l'espace. Le serveur peut ainsi recalculer la statistique de l'espace (agrégation des compteurs des tribus) en scannant ces tribus.
 
-## Document `version`
+## Documents `versions`
 _data_ :
 - `id` : id d'avatar / groupe
-- `v` : plus haute version attribuée aux documents de l'avatar / groupe.
+- `v` : 1..N, plus haute version attribuée aux documents de l'avatar / groupe dont leurs sous-collections.
 - `dlv` : date de fin de vie, peut être future pour un avatar, est toujours dépassée pour un groupe. Date de purge définitive un an plus tard.
 - `{v1 q1 v2 q2}`: pour un groupe, volumes et quotas des notes.
 
-## Document `avatar`
+## Documents `avatars`
 _data_:
-- `id`, 
-- `v`,
+- `id` : id de l'avatar.
+- `v` : 1..N.
 - `vcv` : version de la carte de visite afin qu'une opération puisse détecter (sans lire le document) si la carte de visite est plus récente que celle qu'il connaît.
 - `hpc` : hash de la phrase de contact.
 
-**données n'existant que pour un avatar principal**
+**Données n'existant que pour un avatar principal**
 - `mck` : map des mots-clés du compte cryptée par la clé K -la clé est leur code 1-99- ("code": nom@catégorie).
 - `memok` : mémo personnel du compte.
 
-**données disponibles pour tous les avatars**
-- `pub` : clé publique RSA
+**Données disponibles pour tous les avatars**
+- `pub` : clé publique RSA.
 - `privk`: clé privée RSA cryptée par la clé K.
 - `cva` : carte de visite cryptée par la clé _CV_ de l'avatar `{v, photo, info}`.
 - `lgrk` : map :
-  - _clé_ : `ni` : numéro d'invitation dans le groupe. Hash du `rnd` inverse du groupe crypté par le `rnd` de l'avatar.
+  - _clé_ : `ni` : numéro d'invitation dans le groupe. Hash de la clé inversée du groupe crypté par la  clé de l'avatar.
   - _valeur_ : cryptée par la clé K du compte de `[nomg, clég, im]` reçu sur une invitation. Pour une invitation en attente de refus / acceptation _valeur_ est cryptée par la clé publique RSA de l'avatar
   - une entrée est effacée par la résiliation du membre au groupe ou son effacement d'invitation explicite par un animateur ou l'avatar lui-même (ce qui l'empêche de continuer à utiliser la clé du groupe).
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `napc` : `[nom, cle]` de l'avatar cryptée par le PBKFD de la phrase de contact.
 
 **Invitation à un groupe**  
-L'invitant connaît le `[nom, clé]` de l'invité qui est déjà dans la liste des membres en tant que pressenti. L'invitation consiste à :
+L'invitant connaît le `[nom, clé]` de l'invité qui est déjà dans la liste des membres en tant que simple contact. L'invitation consiste à :
 - inscrire un terme `[nomg, cleg, im]` dans `lgrk` de son avatar (ce qui donne la clé du groupe à l'invité, donc accès à la carte de visite du groupe) en le cryptant par la clé publique RSA l'invité,
-- l'acceptation par l'avatar transcode l'entrée de `lgrk` par la clé K.
+- l'acceptation par l'avatar transcode l'entrée de `lgrk` par sa clé K.
 
 ### Cartes de visites
-**Mise à jour: avatar et tribu**
-La création / mise à jour s'opère dans son `avatar`.
+La création / mise à jour s'opère dans le document `avatars`.
 
 **Mises à jour des cartes de visite des membres**
 - la première inscription se fait à l'ajout de l'avatar comme _contact_ du groupe.
@@ -540,8 +566,8 @@ La création / mise à jour s'opère dans son `avatar`.
 - à la mise à jour d'un chat, les cartes de visites des deux côtés sont rafraîchies (si nécessaire).
 - en session au début d'un processus de consultation des chats, la session fait rafraîchir incrémentalement les cartes de visite qui ne sont pas à jour dans les chats: un chat ayant `vcv` en index, la nécessité de mise à jour se détecte sur une lecture d'index sans lire le document correspondant.
 
-## Document `chat`
-Un chat est éternel, une fois créé il ne disparaît qu'à la disparition des avatars en cause.
+## Documents `chats`
+Un chat est ne disparaît qu'à la disparition des deux avatars en cause.
 
 Un chat est une ardoise commune à deux avatars I et E:
 - vis à vis d'une session :
@@ -556,19 +582,19 @@ Un chat est une ardoise commune à deux avatars I et E:
 - un chat a un comportement d'ardoise : chaque écriture de l'un _écrase_ la totalité du contenu pour les deux. Un numéro séquentiel détecte les écritures croisées risquant d'ignorer la mise à jour de l'un par celle de l'autre.
 - si I essaie d'écrire à E et que E a disparu, le statut `st` de I vaut 1 pour informer la session.
 
-L'id d'un chat est le couple `id, ids` (du côté de A)
+L'`id` d'un exemplaire d'un chat est le couple `id, ids`.
 
 _data_:
 - `id`: id de A,
-- `ids`: hash du cryptage de `idA_court/idB_court` par le `rnd` de A.
-- `v`
+- `ids`: hash du cryptage de `idA_court/idB_court` par la clé de A.
+- `v`: 1..N.
 - `vcv` : version de la carte de visite.
 
 - `st` : statut:
-  - 0 : le chat est vivant des 2 côtés
+  - 0 : le chat est _apriori_ vivant des 2 côtés
   - 1 : _l'autre_ a été détecté disparu : 
-- `mc` : mots clés attribués par l'avatar au chat
-- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé CV de _l'autre_.
+- `mc` : mots clés attribués par l'avatar au chat.
+- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé de _l'autre_.
 - `cc` : clé `cc` du chat cryptée par la clé K du compte de I ou par la clé publique de I.
 - `seq` : numéro de séquence de changement du texte.
 - `contc` : contenu crypté par la clé `cc` du chat.
@@ -579,33 +605,33 @@ _data_:
 ### _Contact direct_ entre A et B
 Supposons que B veuille ouvrir un chat avec A mais n'en connaît pas le nom / clé.
 
-A peut avoir communiqué à B sa _phrase de contact_ qui ne peut être enregistrée par A que si elle est, non seulement unique, mais aussi _pas trop proche_ d'une phrase de contact déjà déposée.
+A peut avoir communiqué à B sa _phrase de contact_ qui ne peut être enregistrée par A que si elle est, non seulement unique, mais aussi _pas trop proche_ d'une phrase de contact déjà déclarée.
 
 B peut écrire un chat à A à condition de fournir cette _phrase de contact_:
 - l'avatar A a mis à disposition son nom complet `[nom, cle]` crypté par le PBKFD de la phrase de contact.
 - muni de ces informations, B peut écrire un chat à A.
 - le chat comportant le `[nom cle]` de B, A est également en mesure d'écrire sur ce chat, même s'il ignorait avant le nom complet de B.
 
-## Document `sponsoring`
+## Documents `sponsorings`
 P est le parrain-sponsor, F est le filleul-sponsorisé.
 
 _data_:
 - `id` : id de l'avatar sponsor.
 - `ids` : hash de la phrase de parrainage, 
-- `v`
+- `v`: 1..N.
 - `dlv` : date limite de validité
 
-- `st` : statut. 0: en attente réponse, 1: refusé, 2: accepté, 3: détruit / annulé
+- `st` : statut. _0: en attente réponse, 1: refusé, 2: accepté, 3: détruit / annulé_
 - `pspk` : phrase de sponsoring cryptée par la clé K du sponsor.
 - `bpspk` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
-- `dh`: date-heure du dernier changement d'état
-- `descr` : crypté par le PBKFD de la phrase de sponsoring
+- `dh`: date-heure du dernier changement d'état.
+- `descr` : crypté par le PBKFD de la phrase de sponsoring:
   - `na` : `[nom, cle]` de P.
   - `cv` : `{ v, photo, info }` de P.
   - `naf` : `[nom, cle]` attribué au filleul.
   - `clet` : clé de sa tribu.
-  - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
-  - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+  - `sp` : vrai si le filleul est lui-même sponsor.
+  - `quotas` : `[v1, v2]` quotas attribués par le sponsor.
 - `ardx` : ardoise de bienvenue du sponsor / réponse du filleul cryptée par le PBKFD de la phrase de sponsoring
 
 **Remarques**
@@ -613,20 +639,20 @@ _data_:
 - Le sponsor peut annuler son `sponsoring` avant acceptation, en cas de remord son statut passe à 3.
 
 **Si le filleul refuse le sponsoring :** 
-- Il écrit dans `ard` au parrain expliquant sa raison et met le statut du `sponsoring` à 1. 
+- Il écrit dans `ardx` la raison de son refus et met le statut du `sponsorings` à 1. 
 
 **Si le filleul ne fait rien à temps :** 
-- `sponsoring` finit par être purgé par `dlv`. 
+- `sponsorings` finit par être purgé par `dlv`. 
 
-**Si le filleul accepte le parrainage :** 
-- Le filleul crée son compte / avatar principal: `naf` donne l'id de son avatar et son nom. Les infos de tribu pour le compte sont obtenu de `clet`.
-- la `compta` du filleul est créée et créditée des quotas attribués par le parrain.
+**Si le filleul accepte le sposoring :** 
+- Le filleul crée son compte / avatar principal: `naf` donne l'id de son avatar et son nom. L'identifiant de la tribu pour le compte sont obtenu de `clet`.
+- la `compta` du filleul est créée et créditée des quotas attribués par le parrain. Si le sponsor n'est pas sponsor de sa tribu, les quotas attribués au filleul lui sont déduits.
 - la `tribu` est mise à jour (quotas attribués), le filleul est mis dans la liste des comptes `act` de `tribu`.
-- un mot de remerciement est écrit par le filleul au parrain sur `ard` **ET** ceci est dédoublé dans un chat filleul / sponsor.
+- un mot de remerciement est écrit par le filleul au parrain sur `ardx` **ET** ceci est dédoublé dans un chat filleul / sponsor.
 - le statut du `sponsoring` est 2.
 
-## Document `note`
-La clé de cryptage du note `cles` est selon le cas :
+## Documents `notes`
+La clé de cryptage `cles` d'une note est selon le cas :
 - *note personnelle d'un avatar A* : la clé K de l'avatar.
 - *note d'un groupe G* : la clé du groupe G.
 
@@ -638,7 +664,7 @@ Le droit de mise à jour d'une note est contrôlé par le couple `x p` :
 Par défaut à sa création une note est _permanente_. Pour une note _temporaire_ :
 - son `st` contient la _date limite de validité_ indiquant qu'elle sera automatiquement détruite à cette échéance.
 - une note temporaire peut être prolongée, tout en restant temporaire.
-- par convention le `st` d'une note permanente est égal à `99999999`. Une note temporaire peut être rendue permanent par :
+- par convention le `st` d'une note permanente est égal à `99999999`. Une note temporaire peut être rendue permanente par :
   - l'avatar propriétaire pour une note personnelle.
   - un des animateurs du groupe pour une note de groupe.
 - **une note temporaire ne peut pas avoir de fichiers attachés**.
@@ -646,14 +672,14 @@ Par défaut à sa création une note est _permanente_. Pour une note _temporaire
 _data_:
 - `id` : id de l'avatar ou du groupe.
 - `ids` : identifiant relatif à son avatar.
-- `v` : sa version.
+- `v` : 1..N.
 
 - `st` :
   - `99999999` pour un _permanent_.
   - `aaaammjj` date limite de validité pour un _temporaire_.
 - `im` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `ids`. 
-- `p` : 0: pas protégé, 1: protégé en écriture.
-- `v1` : volume du texte
+- `p` : _0: pas protégé, 1: protégé en écriture_.
+- `v1` : volume du texte.
 - `v2` : volume total des fichiers attachés.
 - `mc` :
   - note personnelle : vecteur des index de mots clés.
@@ -665,9 +691,9 @@ _data_:
   - `l` : liste des auteurs pour une note de groupe.
   - `t` : texte gzippé ou non.
 - `mfas` : map des fichiers attachés.
-- `refs` : couple `[id_court, ids]` crypté par la clé de la note, référence de sa  note _parent_.
+- `refs` : triplet `[id_court, ids, nomp]` crypté par la clé de la note, référence de sa  note _parent_.
 
-**_Remarque :_** une note peut être explicitement supprimé. Afin de synchroniser cette forme particulière de mise à jour pendant un an (le délai maximal entre deux login), le document est conservé _zombi_ avec un _data_ absente / null. Il sera purgé avec son avatar / groupe.
+**_Remarque :_** une note peut être explicitement supprimée. Afin de synchroniser cette forme particulière de mise à jour pendant un an (le délai maximal entre deux login), le document est conservé _zombi_ avec un _data_ absente / null. Il sera purgé avec son avatar / groupe.
 
 **Mots clés `mc`:**
 - Note personnelle : `mc` est un vecteur d'index de mots clés. Les index sont ceux du compte et de l'organisation.
@@ -680,32 +706,32 @@ _data_:
 - _valeur_ : `{ nom, info, dh, type, gz, lg, sha }` crypté par la clé S de la note.
 
 **Identifiant de stockage :** `org/id_court/idf`
-- `org` : code de l'organisation (domaine ...).
+- `org` : code de l'organisation.
 - `id_court` : id _court_ de l'avatar / groupe auquel la note appartient.
 - `idf` : identifiant aléatoire du fichier.
 
 En imaginant un stockage sur file-system,
-- l'application a un répertoire racine par espace,
+- l'application a un répertoire racine par espace portant le code de l'organisation,
 - il y un répertoire par avatar / groupe ayant des notes ayant des fichiers attachés,
 - pour chacun, un fichier par fichier attaché.
 
-_Un nouveau fichier attaché_ est stocké sur support externe **avant** d'être enregistré dans son document `note`. Ceci est noté dans un document `transfert` de la sous-collection `transferts` des transferts en cours. 
-Les fichiers créés par anticipation et non validés dans une `note` comme ceux qui n'y ont pas été supprimés après validation de la note, peuvent être retrouvés par un GC qui peut s'exécuter en lisant seulement les _clés_ de la map `mafs`.
+_Un nouveau fichier attaché_ est stocké sur support externe **avant** d'être enregistré dans son document `notes`. Ceci est noté dans un document `transferts`. 
+Les fichiers créés par anticipation et non validés dans un document `notes` comme ceux qui n'y ont pas été supprimés après validation de la note, sont retrouvés par le GC.
 
 La purge d'un avatar / groupe s'accompagne de la suppression de son _répertoire_. 
 
 La suppression d'un note s'accompagne de la suppressions de N fichiers dans un seul _répertoire_.
 
-## Document `transfert`
+## Documents `transferts`
 _data_:
 - `id` : id du groupe ou de l'avatar du note.
 - `ids` : `idf` du fichier en cours de chargement.
 - `dlv` : date-limite de validité pour nettoyer les uploads en échec sans les confondre avec un en cours.
 
-## Document `groupe`
+## Documents `groupes`
 Un groupe est caractérisé par :
-- son entête : un document `groupe`.
-- la liste de ses membres : des documents `membre` de sa sous-collection `membres`.
+- son entête : un document `groupes`.
+- la liste de ses membres : des documents `membres` de sa sous-collection `membres`.
 
 L'hébergement d'un groupe est noté par :
 - `imh`: indice membre de l'avatar hébergeur. 
@@ -715,9 +741,8 @@ L'hébergement d'un groupe est noté par :
 Le compte peut mettre fin à son hébergement:
 - `dfh` indique le jour de la fin d'hébergement. Les notes ne peuvent plus être mis à jour _en croissance_ quand `dfh` existe. 
 - à `dfh`, 
-  - le GC purge le groupe.
-  - `dlv` dans le `versions` du groupe est mis à la date du jour + 365 jours.
-  - les notes et membres sont purgés.
+  - le GC met `dlv` dans le `versions` du groupe à la date du jour.
+  - les documents `groupe notes membres` sont purgés par le GC.
   - le groupe est retiré au fil des connexions et des synchronisations des maps `lgrk` des avatars qui le référencent (ce qui peut prendre jusqu'à un an).
   - le document `versions` du groupe sera purgé par le GC à `dlv` (dans 365 jours).
 
@@ -736,12 +761,11 @@ Le compte peut mettre fin à son hébergement:
 - _l'oubli_ a été explicitement demandé, soit par le membre lui-même soit par un animateur. 
 - dans les deux cas le membre est _effacé_, ni son nom, ni son identifiant, ni sa carte de visite ne sont accessibles.
 - un membre _oublié / disparu_ n'apparaît plus que par #99 où 99 était son indice. Ainsi dans un note, la liste des auteurs peut faire apparaître des membres existants (connus avec nom et carte de visite) ou des membres _disparus / oubliés_ avec juste leur indice.
-- toutefois si le membre est de nouveau contacté, il récupère son indice antérieur (pas un nouveau) mais son historique de dates d'invitation, début et fin d'activité sont réinitialisées. C'est une nouvelle vie dans le groupe mais avec la même identité, les notes écrits dans la vie antérieure mentionnent à nouveau leur auteur au lieu d'un numéro #99.
+- toutefois si le membre est de nouveau contacté, il récupère son indice antérieur (pas un nouveau) mais son historique de dates d'invitation, début et fin d'activité sont réinitialisées. C'est une nouvelle vie dans le groupe mais avec la même identité, les notes écrites dans la vie antérieure mentionnent à nouveau leur auteur au lieu d'un numéro #99.
 
 _data_:
 - `id` : id du groupe.
-- `v` : version, du groupe, ses notes, ses membres. 
-- `iv`
+- `v` :  1..N, version du groupe de ses notes et membres.
 - `dfh` : date de fin d'hébergement.
 
 - `idhg` : id du compte hébergeur crypté par la clé du groupe.
@@ -749,9 +773,9 @@ _data_:
 - `msu` : mode _simple_ ou _unanime_.
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
-- `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes.
+- `pe` : _0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes_.
 - `ast` : table des statuts des membres (dès qu'ils ont été inscrits en _contact_) :
-  - 10: contact, 
+  - 10: contact,
   - 30,31,32: **actif** (invitation acceptée) en tant que lecteur / auteur / animateur, 
   - 40: invitation refusée,
   - 50: résilié, 
@@ -759,7 +783,7 @@ _data_:
   - 70,71,72: invitation à confirmer (tous les animateurs n'ont pas validé) en tant que lecteur / auteur / animateur, 
   - 0: disparu / oublié.
 - `nag` : table des hash de la clé du membre cryptée par la clé du groupe.
-- `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
+- `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
 - `ardg` : ardoise cryptée par la clé du groupe.
 
@@ -772,17 +796,17 @@ _data_:
   - un mot de remerciement d'un nouvel invité.
   - des demandes d'explication de la part d'un invité.
 
-## Document `membre`
+## Documents `membres`
 _data_:
 - `id` : id du groupe.
 - `ids`: identifiant, indice de membre relatif à son groupe.
-- `v`
-- `vcv` : version de la carte de visite du membre
+- `v` : 1..N.
+- `vcv` : version de la carte de visite du membre.
 - `dlv` : date de dernière signature + 365 lors de la connexion du compte de l'avatar membre du groupe.
 
-- `ddi` : date de la _dernière_ invitation
-- `dda` : date de début d'activité (jour de la _première_ acceptation)
-- `dfa` : date de fin d'activité (jour de la _dernière_ suspension)
+- `ddi` : date de la _dernière_ invitation.
+- `dda` : date de début d'activité (jour de la _première_ acceptation).
+- `dfa` : date de fin d'activité (jour de la _dernière_ suspension).
 - `inv` : validation de la dernière invitation:
   - `null` : le membre n'a pas été invité où le mode d'invitation du groupe était _simple_ au moment de l'invitation.
   - `[ids]` : liste des indices des animateurs ayant validé l'invitation.
@@ -792,7 +816,7 @@ _data_:
 - `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
 
 ### Cycle de vie
-- un document `membre` existe dans tous les états SAUF 0 _disparu / oublié_.
+- un document `membres` existe dans tous les états SAUF 0 _disparu / oublié_.
 - un auteur d'un note `disparu / oublié`, apparaît avec juste un numéro (sans nom), sans pouvoir voir son membre dans le groupe.
 
 #### Transitions d'état d'un membre:
@@ -802,14 +826,14 @@ _data_:
   - demande d'oubli par un animateur -> disparu
 - de invité :
   - refus -> invitation refusée
-  - refus fort -> oubli
+  - refus avec oubli -> disparu
   - acceptation -> actif
   - retrait d'invitation par un animateur -> contact (`dfa` est 0) OU suspendu (`dfa` non 0, il a été actif)
   - disparition -> disparu
   - demande d'oubli par un animateur -> disparu
 - de actif :
   - résiliation / auto-résiliation -> résilié
-  - résiliation / auto-résiliation forte -> disparu
+  - résiliation / auto-résiliation avec oubli -> disparu
   - disparition -> disparu
 - de invitation refusée :
   - invitation -> invité
@@ -819,32 +843,32 @@ _data_:
   - invitation -> invité
   - disparition -> disparu
   - demande d'oubli par un animateur -> disparu
-- de disparu / oubli : aucune transition (`membre` a été purgé)
+- de disparu / oubli : aucune transition (le document `membres` a été purgé)
 
 **Simple contact inscrit par un membre du groupe**
 - le membre du groupe qui l'a inscrit, 
-  - lui a attribué un index (taille de `ast` du groupe) : a vérifié que, `nig` (le hash de son `rnd` crypté n'était pas déjà cité dans `nig` du groupe) et l'inscrit.
+  - lui a attribué un index (taille de `ast` du groupe) : a vérifié que, `nig` (le hash de sa clé crypté n'était pas déjà cité dans `nig` du groupe) et l'inscrit.
   - a marqué le statut _contact_ dans cet `ast`,
 - dans `membre` seuls `nag cva` sont significatifs. 
 
 **Invité suite à une invitation par un animateur**
 - invitation depuis un état _contact_  _résilié_ _refus d'invitation_
 - son statut dans `ast` passe à 60, 61, ou 62.
-- dans `membre` `nag cva ddi` sont significatifs.
+- dans `membres` `nag cva ddi` sont significatifs.
 - inscription dans `lgrk` de son avatar (crypté par sa clé RSA publique).
 - si `dda`, c'est une ré-invitation après résiliation :  dans `membre` `mc infok` peuvent être présents.
 
 **Retrait d'invitation par un animateur**
 - depuis un état _invité_,
 - retiré du `lgrk` de l'avatar du membre,
-- son statut dans `ast` passe à 
-  - _résilié_ : si `dfa` existe, c'était un ancien membre actif
+- son statut dans `ast` passe à:
+  - _résilié_ : si `dfa` existe, c'était un ancien membre actif,
   - _contact_ : `dfa` est 0, il n'a jamais été actif.
-- dans `membre` seuls `nag cva ddi` sont significatifs, possiblement `mc infok` si le membre avait été actif. 
+- dans `membres` seuls `nag cva ddi` sont significatifs, possiblement `mc infok` si le membre avait été actif. 
 
 **Actif suite à l'acceptation d'une invitation par le membre**
 - son statut dans `ast` passe à 30, 31, ou 32.
-- dans membre :
+- dans `membres` :
   - `dda` : date de première acceptation est remplie si elle ne l'était pas.
   - toutes les propriétés sont significatives.
   - la carte de visite `cva` est remplie.
@@ -861,17 +885,17 @@ _data_:
 - depuis un état _contact, invité, actif, résilié_
 - retiré du `lgrk` de l'avatar du membre,
 - actions: 
-  - refus d'invitation _forte_,
-  - résiliation ou auto-résiliation _forte_, 
+  - refus d'invitation avec oubli,
+  - résiliation ou auto-résiliation avec oubli, 
   - demande par un animateur.
-- son statut dans `ast` passe à 0. Son index ne sera **jamais** réutilisé. Son entrée dans `nig` n'est PAS remise à 0 : s'il est à nouveau contacté, il obtiendra le MEME indice.
-- son document `membre` est purgé.
+- son statut dans `ast` passe à 0. Son index ne sera jamais réutilisé par un autre avatar. Son entrée dans `nig` n'est PAS remise à 0 : s'il est à nouveau contacté, il obtiendra le MEME indice.
+- son document `membres` est purgé.
 
 **Résiliation d'un membre par un animateur ou auto résiliation**
 - depuis un état _actif_.
 - son statut passe à _résilié_ dans `ast` de son groupe.
 - le membre n'a plus le groupe dans le `lgrk` de son avatar.
-- dans son document `membre` `dfa` est positionnée à la date du jour.
+- dans son document `membres` `dfa` est positionnée à la date du jour.
 - différences avec un état _contact_: l'avatar membre a encore des mots clés, une information et retrouvera ces informations s'il est ré-invité.
 
 **Disparitions d'un membre**
@@ -881,14 +905,14 @@ _data_:
 - `j` : **date du dernier calcul enregistré** : par exemple le 17 Mai de l'année A
 - **pour le mois en cours**, celui de la date ci-dessus :
   - `q1 q2`: quotas actuels.
-  - `v1 v2 v1m v2m`: volume actuel des notes et moyens sur le mois en cours.
+  - `v1 v2 v1m v2m`: volumes actuels des notes et moyens sur le mois en cours.
   - `trj` : transferts cumulés du jour.
   - `trm` : transferts cumulés du mois.
-- `tr8` : log des volumes des transferts cumulés journaliers de pièces jointes sur les 7 derniers jours + total (en tête) sur ces 7 jours.
+- `tr8` : log() des volumes des transferts cumulés journaliers de pièces jointes sur les 7 derniers jours + total (en tête) sur ces 7 jours.
 - **pour les 12 mois antérieurs** `hist` (dans l'exemple ci-dessus Mai de A-1 à Avril de A),
   - `q1 q2` quotas q1 et q2 au dernier jour du mois.
-  - `v1 v2` log des volumes moyens du mois (log de `v1m` `v2m` ci-dessus au dernier jour du mois)
-  - `tr` log du total des transferts des pièces jointes dans le mois (log de `trm` à la fin du mois).
+  - `v1 v2` log() des volumes moyens du mois (log de `v1m` `v2m` ci-dessus au dernier jour du mois)
+  - `tr` log() du total des transferts des pièces jointes dans le mois (log de `trm` à la fin du mois).
 
 ## Mots clés, principes et gestion
 Les mots clés sont utilisés pour :
@@ -900,7 +924,7 @@ La **définition** des mots-clés (avatar et groupe) est une map :
 - _clé_ : indice du mot-clé de 1 à 255,
 - _valeur_ : texte `catégorie/label du mot-clé`.
 
-Affectés à un membre ou note, c'est un array de nombre de 1 à 255 (Uin8Array).
+Affectés à un membre ou note, c'est un array de nombres de 1 à 255 (Uin8Array).
 
 Les mots clés d'indice,
 - 1-99 : sont ceux d'un compte.
@@ -909,7 +933,7 @@ Les mots clés d'indice,
 
 # Gestion des disparitions
 
-## Signatures des avatars dans `version` et `membre`
+## Signatures des avatars dans `versions` et `membres`
 Les comptes sont censés avoir au maximum 365 jours entre 2 connexions faute de quoi ils sont considérés comme `disparus`.
 
 10 jours après la disparition d'un compte, 
@@ -933,10 +957,9 @@ Les `dlv` sont également fixées:
 > Les `dlv` ne sont pas _prolongées_ si le document `tribus` fait l'objet d'une procédure de blocage.
 
 **Règles:** 
-- les `dlv` sont gérées par _décade_ : une `dlv` est toujours définie ou reculée à un multiple de 10 jours.
-- ceci évite de multiplier des mises à jour en cas de connexions fréquentes et de faire des rapprochements entre avatars / groupes en fonction de leur dernière date-heure de connexion.
+- les `dlv` sont gérées par _décade_ : une `dlv` est toujours définie ou reculée à un multiple de 10 jours. Ceci évite de multiplier des mises à jour en cas de connexions fréquentes et de faire des rapprochements entre avatars / groupes en fonction de leur dernière date-heure de connexion.
 - si l'avatar principal a sa `dlv` repoussée le 10 mars par exemple, ses autres avatars et ses membres seront reculés au 20 mars.
-- les avatars secondaires seront en conséquence _non disparus_ pendant 10 jours alors que leur compte ne sera plus connectable :
+- les avatars secondaires seront en conséquence _non disparus_ pendant 10 jours alors que leur compte ne sera plus connectable:
   - sur un chat la carte de visite d'un avatar secondaire apparaîtra pendant 10 jours alors que le compte de _l'autre_ a déjà été détecté disparu.
   - les groupes pourront faire apparaître des membres pendant 10 jours alors que leur compte a déjà été détecté disparu.
 
@@ -944,42 +967,40 @@ Les `dlv` sont également fixées:
 #### Effectuée par le GC
 Le GC détecte la disparition d'un compte sur dépassement de la `dlv` dans le `versions` de son avatar principal :
 - il ne connaît pas la liste de ses avatars secondaires qu'il détectera _disparu_ 10 jours plus tard.
-- le GC n'a pas accès à la connaissance de la tribu d'un compte et ne peut donc pas mettre à jour `tribu`:
-  - le GC ne peut ni lire ni supprimer l'entrée du compte dans `tribu`.
-  - il écrit en conséquence un document `gcvols` avec les informations tirées du `compta` du compte disparu (`cletX` clé de la tribu cryptée par la clé K du comptable, `it` index du compte dans sa tribu).
-  - la prochaine connexion du Comptable scanne les `gcvols` et effectue la suppression de l'entrée `it` dans la tribu dont l'id est extraite de `cletK`.
+- le GC n'a pas accès à l'`id` la tribu d'un compte et ne peut donc pas mettre à jour son élément `ast[it]` dans son document `tribus`:
+  - il écrit en conséquence un document `gcvols` avec les informations tirées du document `comptas` du compte disparu (`cletX` clé de la tribu cryptée par la clé K du comptable, `it` index du compte dans sa tribu).
+  - la prochaine connexion du Comptable scanne les `gcvols` et effectue la suppression de l'entrée `it` dans la tribu dont l'id est extraite de `cletX`.
 
 La disparition d'un compte est un _supplément_ d'action par rapport à la _disparition_ d'un avatar secondaire.
 
 #### Auto-résiliation d'un compte
 Elle suppose une auto-résiliation préalable de ses avatars secondaires, puis de son avatar principal:
-- l'opération de mise à jour de `tribu` est lancée, la session ayant connaissance de l'id de la tribu et de l'entrée du compte dans `tribu.act`. Le mécanisme `gcvols` n'a pas besoin d'être mis en oeuvre.
+- l'opération de mise à jour du document `tribus` est lancée, la session ayant connaissance de l'`id` de la tribu et de l'indice `it` de l'entrée du compte dans `act` du document  `tribus`. Le mécanisme `gcvols` n'a pas besoin d'être mis en oeuvre.
 
 ### Disparition d'un avatar
 #### Sur demande explicite
 Dans la même transaction :
-- pour un avatar secondaire, le document `compta` est mis à jour par suppression de son entrée dans `mavk`.
-- pour un avatar principal, l'opération de mise à jour de `tribu` est lancée, 
-  - l'entrée du compte dans `tribu.act` est détruite,
-  - le document `compta` est purgé.
-- le document `versions` de l'avatar a sa `dlv` fixée à aujourd'hui et devient _zombi et immuable_.
+- pour un avatar secondaire, le document `comptas` est mis à jour par suppression de son entrée dans `mavk`.
+- pour un avatar principal, l'opération de mise à jour du document `tribus` est lancée, 
+  - l'entrée du compte dans `act` du documet `tribus` est détruite,
+  - le document `comptas` est purgé.
+- le document `versions` de l'avatar a sa `dlv` fixée à aujourd'hui et devient _zombi et immuable_. Ceci provoquera un peu plus tard la purge par le GC de avatars `chats notes sponsorings transferts`.
 - pour tous les chats de l'avatar:
-  - le chat E, de _l'autre_, est mis à jour : son `st` passe à _disparu_, sa `cva` passe à null.
-- purge des sponsorings de l'avatar.
+  - le chat E, de _l'autre_, est mis à jour: son `st` passe à _disparu_, sa `cva` passe à null.
 - pour tous les groupes dont l'avatar est membre:
   - purge de son document `membre`.
-  - mise à jour dans son `groupe` du statut `ast` à _disparu_.
+  - mise à jour dans son document `groupes` du statut `ast` à _disparu_.
   - si c'était l'hébergeur du groupe, mise à jour des données de fin d'hébergement.
   - si c'était le dernier membre _actif_ du groupe:
-    - dans `versions` du groupe, `dlv` fixée à aujourd'hui et devient _zombi / immuable_, ce qui permet à une synchronisation avec une autre session (ou une connexion) de détecter la disparition du groupe.
+    - dans le document `versions` du groupe, `dlv` est fixée à aujourd'hui et devient _zombi / immuable_, ce qui permet à une synchronisation avec une autre session (ou une connexion) de détecter la disparition du groupe.
 
 Dans les autres sessions ouvertes sur le même compte :
 - si c'est l'avatar principal, la session, 
-  - est notifiée par un changement de `tribus` (la disparition de `comptas` n'est pas notifiée -c'est une purge-).
-  - constate dans `tribus` la disparition de l'entrée du compte,
+  - est notifiée par un changement du document `tribus` (la disparition de `comptas` n'est pas notifiée -c'est une purge-).
+  - constate dans le document `tribus` la disparition de l'entrée du compte par compraison avec l'état connu antérieurement,
   - **la session est close** SANS mise à jour de la base IDB (les connexions en mode _avion_ restent possibles). 
 - si c'est un avatar secondaire, la session,
-  - est notifiée d'un changement de `comptas` et détecte la suppression d'un avatar.
+  - est notifiée d'un changement du document `comptas` et détecte la suppression d'un avatar.
   - en mémoire ce qui est relatif à cet avatar : si c'était l'avatar courant, l'avatar primaire devient courant.
   - supprime toutes les entrées de IDB relatives à l'avatar.
 
@@ -987,7 +1008,7 @@ Lors des futures connexions sur le même compte:
 - si le compte n'existe plus la connexion ne peut pas avoir lieu en _synchronisé ou incognito_.
 - en mode _synchronisé_ les avatars et groupes qui étaient en IDB et ne sont plus existants sont purgés de IDB.
 
-Dans les autres sessions ouvertes sur d'autres comptes, la synchronisation fait apparaître :
+Dans les autres sessions ouvertes sur d'autres comptes, la synchronisation fait apparaître:
 - par `tribus` : un compte qui disparaît dans `tribus` entre l'état courant et le nouvel état,
 - par `chats` : un statut _disparu_ et une carte de visite absente,
 - par `versions` _zombi_ des groupes : détection des groupes disparus, ce qui entraîne aussi la suppression des documents `membres` correspondant en mémoire (et en IDB).
@@ -1002,102 +1023,100 @@ Le GC détecte la disparition d'un avatar par la `dlv` dans `versions` inférieu
 ### Disparition d'un membre
 #### Résiliation ou auto résiliation d'un membre
 C'est une opération _normale_:
-- purge de son document `membre`.
-- mise à jour dans son `groupe` du statut `ast` à _disparu_.
+- purge de son document `membres`.
+- mise à jour dans son document `groupes` de son statut dans `ast` à _disparu_.
 - si c'était l'hébergeur du groupe, mise à jour des données de fin d'hébergement.
 - si c'était le dernier membre _actif_ du groupe :
-  - `dlv` à aujourd'hui dans `versions` du groupe, devient _zombi / immuable_. Ceci permet aux autres sessions de détecter la disparition du groupe.
+  - `dlv` est mise à aujourd'hui dans le document `versions` du groupe, devient _zombi / immuable_. Ceci permet aux autres sessions de détecter la disparition du groupe.
 
 #### Effectuée par le GC
 Détection par la `dlv` inférieure à aujourd'hui (état _zombi_) du `membres`.
-- suppression des `membres`,
-- mise à jour de son état dans `groupes`,
-- si c'est le dernier actif, `dlv` de `versions` du groupe mise à aujourd'hui (devient zombi / immuable).
+- suppression du document `membres`,
+- mise à jour de son état dans le document `groupes`,
+- si c'est le dernier actif, `dlv` de `versions` du groupe est mise à aujourd'hui (devient zombi / immuable).
 
 ### Chat : détection de la disparition de l'avatar E
 A la connexion d'une session les chats avec des avatars E disparus ne sont pas détectés.
 
-Lors d'une synchronisation de son chat (I), l'auto suppression de l'avatar E dans une autre session est détecté par l'état _disparu_ de E inscrit sur le chat (I).
+Lors d'une synchronisation de son chat (I), l'auto suppression de l'avatar E dans une autre session est détectée par l'état _disparu_ de E inscrit sur le chat (I).
 
 Lors de l'ouverture de la page listant les _chats_ d'un de ses avatars, 
-- la session reçoit les CV mises à jour ET les avis de disparitions des contacts E.
+- la session reçoit les cartes de visite mises à jour ET les avis de disparitions des contacts E.
 - lors de l'écriture d'un chat, la session reçoit aussi ce même avis de disparition éventuelle de l'avatar E.
 - le _contact_ E est marqué _disparu_ en mémoire (le chat I y est mis à jour ainsi qu'en IDB).
 
-> Un _contact_ peut donc apparaître "à tort" en session alors que l'avatar / compte correspondant a été résilié du fait, a) qu'il est un des comptes de la tribu de la session, b) qu'un chat est ouvert avec lui. Toutefois l'ouverture du chat ou de la page des chats, rétablit cette distorsion temporelle provisoire.
+> Un _contact_ peut donc apparaître _à tort_ en session alors que l'avatar / compte correspondant a été résilié du fait, a) qu'il est un des comptes de la tribu de la session, b) qu'un chat est ouvert avec lui. Toutefois l'ouverture du chat ou de la page des chats, rétablit cette distorsion temporelle provisoire.
 
 # Opérations GC
 ### Singleton `checkpoint` (id 1)
-Propriétés :
+_data_ :
 - `id` : 1
 - `v` : date-time de sa dernière mise à jour ou 0 s'il n'a jamais été écrit.
-- `_data_` : sérialisation de son contenu.
-  - `start` : date-heure de lancement du dernier GC
-  - `duree` : durée de son exécution en ms
-  - `nbTaches` : nombre de taches terminées avec succès (sur 6)
-  - `log` : trace des exécutions des tâches : {}
-    - `nom` : nom
-    - `retry` : numéro de retry
-    - `start` : date-heure de lancement
-    - `duree` : durée en ms
-    - `err` : si sortie en exception, son libellé
-    - `stats` : {} compteurs d'objets traités (selon la tâche)
 
-### Gestion des `versions` zombi
+- `start` : date-heure de lancement du dernier GC.
+- `duree` : durée de son exécution en ms.
+- `nbTaches` : nombre de taches terminées avec succès sur 6.
+- `log` : trace des exécutions des tâches: {}
+  - `nom` : nom.
+  - `retry` : numéro de retry.
+  - `start` : date-heure de lancement.
+  - `duree` : durée en ms.
+  - `err` : si sortie en exception, son libellé.
+  - `stats` : {} compteurs d'objets traités (selon la tâche).
+
+### Gestion des documents `versions` _zombi_
 Un document `versions` zombi a une `dlv` antérieure à aujourd'hui : il faut purger toutes les sous-collections correspondantes, plus le document `avatars` ou `groupes` correspondant.
 
-Afin d'éviter que le GC ne ré-effectue cette opérations les jours suivants alors que ces documents ont déjà été purgés, la `dlv` du documents versions est reculée d'un an, sans changer de version: le nettoyage des sous-collections ne s'effectuera donc que pour les versions ayant une `dlv` passée mais pas passée de plus d'un an.
+Afin d'éviter que le GC ne tente d'effectue à nouveau cette opération les jours suivants alors que ces documents ont déjà été purgés, la `dlv` du documents versions est reculée d'un an, sans changer de version: le nettoyage des sous-collections ne s'effectue donc que pour les versions ayant une `dlv` passée mais pas passée de plus d'un an.
 
-In fine les `versions` dont la `dlv` est passée de plus de 2 ans sont purgées.
+In fine les documents `versions` dont la `dlv` est passée de plus de 2 ans sont purgées.
 
 ### `GCHeb` : traitement des fins d'hébergement
-L'opération récupère toutes les ids des `groupes` où 
-`dfh` est inférieure ou égale au jour courant.
+L'opération récupère toutes les ids des documents `groupes` où `dfh` est inférieure ou égale au jour courant.
 
 Une transaction par groupe :
-- dans le `versions` du groupe, `dlv` est positionnée à aujord'hui (devient zombi).
+- dans le document `versions` du groupe, la `dlv` est positionnée à aujord'hui (devient zombi).
 
 ### `GCGro` : Détection des groupes orphelins et suppression des membres
-L'opération récupère toutes les id / ids des `membres` dont
-`dlv` est inférieure ou égale au jour courant.
+L'opération récupère toutes les `id / ids` des documents `membres` dont la `dlv` est inférieure ou égale au jour courant.
 
-Une transaction par `groupes` :
+Une transaction par document `groupes`:
 - mise à jour des statuts des membres perdus,
-- suppression de ces `membres`,
-- si le groupe est orphelin, suppression du groupe:
-  - la `dlv` de sa `versions` est mise à aujourd'hui (il est zombi).
+- suppression de ces documents `membres`,
+- si le groupe est orphelin (n'a plus de membres actifs), suppression du groupe:
+  - la `dlv` de son document `versions` est mise à aujourd'hui (il est zombi).
 
 ### `GCPag` : purge des avatars et des groupes
-L'opération récupère toutes les `id` des `versions` dont la `dlv` 
-est postérieure auj - 365 et antérieure ou égale à auj.
-Dans l'ordre pour chaque id:
+L'opération récupère toutes les `id` des documents `versions` dont la `dlv` est postérieure auj - 365 et antérieure ou égale à auj.
+
+Dans l'ordre pour chaque `id`:
 - par compte, une transaction de récupération du volume (si `comptas` existe encore, sinon c'est que ça a déjà été fait),
 - purge de leurs sous-collections,
 - purge de leur avatar / groupe,
 - purge de leurs fichiers,
-- set HORS TRANSACTION de la `dlv` de la `versions` à auj-800
+- HORS TRANSACTION forçage de la `dlv` du document `versions` à aujourd'hui moins 2 ans.
 
 **Une transaction pour chaque compte :**
 - son document `comptas` :
   - est lu pour récupérer `cletX it`;
-  - un document `gcvols` est inséré avec ces données : son id est celle du compte.
+  - un document `gcvols` est inséré avec ces données : son `id` est celle du compte.
   - les `gcvols` seront traités par la prochaine ouverture de session du comptable de l'espace ce qui supprimera l'entrée du compte dans tribu (et de facto libèrera des quotas).
   - le document `comptas` est purgé afin de ne pas récupérer le volume plus d'une fois.
 
 ### `GCFpu` : traitement des documents `fpurges`
-L'opération récupère tous les items d'id de fichiers depuis `fpurges` et déclenche une purge sur le Storage.
+L'opération récupère tous les items d'`id` de fichiers depuis `fpurges` et déclenche une purge sur le Storage.
 
 Les documents `fpurges` sont purgés.
 
 ### `GCTra` : traitement des transferts abandonnés
-L'opération récupère toutes les documents transferts dont les dlv sont antérieures ou égales à aujourd'hui.
+L'opération récupère toutes les documents `transferts` dont les `dlv` sont antérieures ou égales à aujourd'hui.
 
-Le fichier id / idf cité dedans est purgé du Storage des fichiers.
+Le fichier `id / idf` cité dedans est purgé du Storage des fichiers.
 
 Les documents `transferts` sont purgés.
 
 ### `GCDlv` : purge des versions / sponsorings obsolètes
-L'opération récupère toutes les versions de `dlv` antérieures à jour j - 800. Ces documents sont purgés.
+L'opération récupère tous les documents `versions` de `dlv` antérieures à jour j - 2 ans. Ces documents sont purgés.
 
 L'opération récupère toutes les documents `sponsorings` dont les `dlv` sont antérieures ou égales à aujourd'hui. Ces documents sont purgés.
 
@@ -1112,233 +1131,68 @@ En cas d'exception de l'un deux, une seule relance est faite après une attente 
 > Pour chaque opération, il y a N transactions, une par document à traiter, ce qui constitue un _checkpoint_ naturel fin.
 
 # Index
-(TODO)
 
-# PURGATOIRE
+## SQL
+`sqlite/schema.sql` donne les ordres SQL de création des tables et des index associés.
 
-## Collection `singletons`
+Rien de particulier : sont indexés les colonnes requérant un filtrage ou un accès direct par la valeur de la colonne.
 
-### Document `1` : checkpoint
-Attribut opaque _data_ : contient les informations de point de reprise du GC.
+## Firestore
+`firestore.index.json` donne le schéma des index: le désagrément est que pour tous les attributs il faut indiquer s'il y a ou non un index et de quel type, y compris pour ceux pour lesquels il n'y en a pas.
 
-## Collection `espaces`
-Un document par espace (considéré comme faisant partie de la _partition_).
+**Les règles génériques** suivantes ont été appliquées:
 
-**Document:** - `id` : entier aléatoire
-- `id` : de l'espace de 10 à 59.
-- _org_ : code identifiant à 12 caractères de son organisation.
-- _data_ : notifications et taille.
+_data_ n'est jamais indexé.
 
-## Document `syntheses`
-Un document par espace, mis à jour à chaque mise à jour d'une tribu de l'espace. Non synchronisé.
+Il n'y a pas _d'index composite_. Mais en fait dans l'esprit les attributs `id_v` et `id_vcv` calculés (pour Firestore seulement) avant création / mise à jour d'un document, sont bel et bien des pseudo index composites mais simplement déclarés comme index:
+- `id_v` est un string `id/v` où `id` est sur 16 chiffres et `v` sur 9 chiffres.
+- `id_vcv` est un string `id/vcv` où `id` est sur 16 chiffres et `vcv` sur 9 chiffres.
 
-_data_:
-- `id` : id de l'espace
-- `v`
-- _data_
-  - `atr` : table des synthèses des tribus de l'espace. L'indice dans cette table est l'id court de la tribu. Chaque élément est la sérialisation des compteurs de synthèse.
+Ces attributs apparaissent dans:
+- tous les documents _majeurs_ pour `id_v`,
+- `avatars chats membres` pour `id_vcv`.
 
-## Collection `gcvols`
-Il y a autant de documents que de comptes ayant été détectés disparus et dont les quotas n'ont pas encore été rendus à leur tribu par une session du Comptable.
+En conséquence les attributs `id v vcv` ne sont **pas** indexés dans les documents _majeurs_.
 
-C'est un avis de disparition d'un compte que seul le comptable peut décrypter et traiter pour mette à jour sa tribu : cette opération de GC des `gcvols` est effectuée à la connexion du comptable.
+`id` est indexée dans `gcvols` et `fpurges` qui n'ont pas de version `v` et dont l'`id` doit être indexée pour filtrage par l'utilitaire `export/delete`.
 
-**Document:** - `id` : entier aléatoire
-- `id` : id du compte disparu.
-- _data_ : 
-  - `cletX` : clé de la tribu cryptée par la clé K du Comptable.
-  - `it` : index du compte dans cette tribu.
+Dans les sous-collections versionnées `notes chats membres sponsorings`: `id ids v` sont indexées. Pour `sponsorings` `ids` sert de clé d'accès direct et a donc un index **collection_group**, pour les autres l'index est simple.
 
-## Collection `fpurges`
-Un document purge de fichiers à exécuter par le GC.
+Dans la sous-collection non versionnée `transferts`: `id ids` sont indexées mais pas `v` qui n'y existe pas.
 
-**Document:** - `id` : entier aléatoire
-- `id` : id aléatoire.
-- _data_ : 
-  - `idag` : id d'un groupe ou d'un avatar.
-  - `ldif` : liste des idf à supprimer dans le répertoire de l'avatar / groupe.
+`dlv` est indexée,
+- simple sur `versions`,
+- **collection_group** sur les sous-collections `chats sponsorings membres`.
 
-## Collection `tribus`
-Cette collection liste les tribus déclarées sur le réseau et les comptes dont les quotas y sont prélevés.
+Autres index:
+- `hps1` sur `comptas`: accès à la connexion par phrase secrète.
+- `hpc` sur `avatars`: accès direct par la phrase de contact.
+- `dfh` sur `groupes`: détection par le GC des groupes sans hébergement.
 
-Les comptes récupèrent à la connexion leur tribu.
+# IndexedDB dans les session UI
 
-Le comptable est le seul qui peut, de plus, accéder en cours de sa session à une seconde tribu _courante_,
+Un certain nombre de documents sont stockés en session UI dans la base locale IndexedDB et utilisés en modes _avion_ et _synchronisé_.
+- compte: 'id' vaut '1'. Une seule instance du document `comptas`, celle de la session.
+- tribus: 'id',
+- comptas: 'id',
+- avatars: 'id',
+- chats: '[id+ids]',
+- sponsorings: '[id+ids]',
+- groupes: 'id',
+- membres: '[id+ids]',
+- notes: '[id+ids]'.
 
-**Documents:** - `id` : numéro d'ordre de création de la tribu  
-Chaque document donne un descriptif de la tribu et la liste de ses parrains.
-- `id` : numéro de la tribu.
-- `v`
-- _data_ : données de la tribu, synthèse et liste des comptes.
-  - `cletX` : clé de la tribu cryptée par la clé K du comptable.
-  - `q1 q2` : quotas totaux de la tribu.
-  - `stn` : statut de la notification de tribu: _aucune simple bloquante_
-  - `notiftT`: notification de niveau tribu cryptée par la clé de la tribu.
-  - `act` : table des comptes de la tribu. L'index `it` dans cette liste figure dans la propriété `it` du `comptas` correspondant :
-    - `idT` : id court du compte crypté par la clé de la tribu.
-    - `sp` : est sponsor ou non.
-    - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
-    - `q1 q2` : quotas attribués.
+La clé _simple_ `id` en string est cryptée par la clé K du compte et encodée en base 64 URL.
 
-### Collection `comptas`
+Les deux termes de clés `id` et `ids` sont chacune en string crypté par la clé K du compte et encodée en base 64 URL.
 
-**Documents:**  - `id` : numéro du compte
-Un document par compte rattaché à sa tribu portant :
-- ses compteurs d'occupation d'espace
-- le descriptif de son alerte quand il y en a une.
+Le formar _row_ d'échange est un objet de la forme `{ _nom, id, ..., _data_ }`.
 
-**Attributs:**
-- `id` : numéro du compte
-- `v`
-- `hps1` : le hash du PBKFD du début de la phrase secrète du compte.
-- _data_ : il contient en particulier:
-  - `shay`, le SHA du SHA de X (PBKFD de la phrase secrète).
-  - `cletX` : clé de la tribu cryptée par la clé K du comptable.
-  - `cletK` : clé de la tribu cryptée par la clé K du compte : si cette clé a une longueur de 256, elle est cryptée par la clé publique RSA du compte (en cas de changement de tribu forcé par le comptable).
-  - `it` : index du compte dans la table `act` de sa tribu.
-  - `notifcT` : notification de niveau compte cryptée par la clé de la tribu.
-  - `mavk` : map des avatars du compte. 
-    - _clé_ : id court de l'avatar cryptée par la clé K du compte.
-    - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
+En IDB les _rows_ sont sérilisés et cryptés par la clé K du compte.
 
-**Pour le Comptable seulement**
-  -`atrX` : table des tribus cryptée par la clé K du comptable : `[cle, info, q1, q2]`
-    - la première tribu est la tribu _primitive_, celle du comptable et est indestructible.
-    - l'index d'une tribu dans cette table est son id.
-  - `astn` : table des statuts de notification des tribus _aucune simple bloquante_.
+Il y a donc une stricte identité entre les documents extraits de SQL / Firestore et leurs états stockés en IDB
 
-### Collection `versions`
+_**Remarque**_: en session UI, d'autres documents figurent aussi en IndexedDB pour,
+- la gestion des fichiers locaux: `avnote fetat fdata loctxt locfic locdata`
+- la mémorisation de l'état de synchronisation de la session: `avgrversions sessionsync`.
 
-**Documents:**  - `id` : numéro d'un avatar ou d'un groupe
-
-**Attributs:**
-- `id` : id d'avatar / groupe.
-- `v` : plus haute version attribuée aux documents de l'avatar / groupe.
-- `dlv` : signature de vie + 365 (aaaammjj).
-- _data_ :
-  - `v`, 
-  - `vols`: `{v1, v2, q1, q2}` pour un groupe
-
-## Collection `avatars`
-Cette collection a un document par avatar principal ou secondaire.
-
-**Documents** - `id` : id de l'avatar
-Deux variantes, l'avatar principal ayant des données supplémentaires. 
-
-**Attributs:**
-- `id` : id de l'avatar.
-- `v` : version.
-- `vcv` : version de la carte de visite.
-- `hpc` : hash de la phrase de contact.
-- _data_ : sérialisation des autres attributs.
-  - `lgrk` : map :
-    - _clé_ : `ni` : numéro d'invitation dans le groupe. Hash du `rnd` inverse du groupe crypté par le `rnd` de l'avatar.
-    - _valeur_ : cryptée par la clé K du compte de `[nomg, cleg, im]` reçu sur une invitation. Pour une invitation en attente de refus / acceptation _valeur_ est cryptée par la clé publique RSA de l'avatar.
-
-### Sous-collection `notes`
-Elle compte un document par note.
-
-**Documents** : `ids`, numéro de note dans son avatar.
-- `id` : id de son avatar.
-- `ids` : identifiant relatif à son avatar.
-- `v` : sa version.
-- _data_ : données sérialisées de le note.
-  - `mfas` : map des fichiers attachés.
-    _clé_ : `idf`, id du fichier aléatoire.
-  - `refs` : couple `[id_court, ids]` crypté par la clé de la note, référence de sa  note _parent_.
-
-Une note est _logiquement supprimée_ quand sa _data_ est absente / null (elle est _zombi_ et désormais immuable). La suppression est synchronisable par changement de la version `v` : elle est purgée lors de la purge de son avatar.
-
-### Sous-collection `transferts`
-Elle comporte un document par transfert de fichier en cours pour une note de l'avatar (ou de groupe).
-
-L'upload d'un fichier est long. Ce document permet de gérer un commit à 2 phases:
-- _phase 1_ : début de l'upload : insertion d'un document identifiant le fichier commençant à être uploadé,
-- _phase 2_ : validation du fichier par le commit du document `note` : suppression du `transferts`.
-
-**Documents:** - `ids` : `idf`, identifiant aléatoire du fichier (de facto relatif au groupe / avatar de sa note)
-
-**Attributs:**
-- `id` : id de son avatar (ou son groupe).
-- `ids` : `idf`, identifiant aléatoire du fichier (de facto relatif au groupe / avatar de sa note)
-- `dlv` : date de validité permettant de purger les fichiers uploadés (ou pas d'ailleurs) sur échec du commit entre les phases 1 et 2. Ceci permet de faire la différence entre un upload en cours et un vieil upload manqué.
-- _data_ : aucune autre propriété.
-
-### Sous-collection `sponsorings`
-Un rendez-vous est identifié par une _phrase de reconnaissance_ convenue entre les deux avatars A et B pour le sponsoring de B par A.
-
-Il y a un document par sponsoring en cours.
-
-**Documents:** - `ids`, hash de la phrase secrète de reconnaissance
-
-**Attributs:**
-- `id` : id de l'avatar ayant fixé le rendez-vous.
-- `ids` : hash de la phrase secrète de reconnaissance
-- `v`
-- `dlv` : purge automatique des sponsorings.
-- _data_ : autres propriétés sérilaisées
-  - `descr` :  données du rendez-vous cryptée par X, le PBKFD de la phrase de reconnaissance.
-    - `na` : `[nom, cle]` du sponsor.
-    - `cv` : `{ v, photo, info }` du sponsor (cryptée par sa clé `cle` ci-dessus).
-    - `naf` : `[nom, cle]` attribué au compte sponsorisé.
-    - `clet` : clé de sa tribu.
-    - `sp` : vrai si le filleul est lui-même sponsor.
-    - `quotas` : `[q1, q2]` quotas attribués par le parrain.
-
-### Sous-collection `chats`
-Elle comporte un document par chat ouvert avec un avatar (externe, pas un avatar du compte).
-
-Un chat est éternel, une fois créé il ne disparaît qu'à la disparition des avatars en cause.
-
-Un chat est dédoublé sur chacun des deux avatars partageant le chat.
-
-**Documents:** - `ids`, numéro du chat pour l'avatar
-
-**Attributs**
-- `id` : id de son avatar.
-- `ids` : identifiant du chat relativement à son avatar. hash du cryptage de `idA_court/idB_court` par le `rnd` de A.
-- `v`
-- `vcv`: version de la carte de visite.
-- _data_ : contenu du chat crypté par la clé de l'avatar. 
-  - `contc` : contenu crypté par la clé `cc` du chat.
-    - `na` : `[nom, cle]` de _l'autre_.
-    - `dh`  : date-heure de dernière mise à jour.
-    - `txt` : texte du chat.
-
-#### Avatars _externes_ E connaissant l'avatar A, chat entre avatars
-- les membres des groupes dont A est membre.
-- tout avatar C ayant ouvert un jour un chat avec A (quand qu'ils étaient membres d'un même groupe ou par récupération d'une _phrase de contact_), même si maintenant ces deux conditions ne sont plus remplies.
-
-Le Comptable est un _faux_ avatar externe puisqu'il est connu par une constante: de ce fait il peut faire l'objet d'un chat, voire d'être contacté pour invitation à un groupe.
-
-Tout _avatar externe_ E connaissant A peut lui écrire un chat qui est dédoublé avec une copie pour A et une copie pour E.
-- un chat reste vivant jusqu'à disparition d'un des deux avatars.
-
-## Collection `groupes`
-Cette collection comporte un document par groupe existant.
-
-**Documents :** - `id` : id du groupe
-- `id` : id du groupe,
-- `v`
-- `dfh` : date de fin d'hébergement. Le groupe s'auto détruit à cette date là, sauf si un compte a repris l'hébergement, `dfh` étant alors remise à 0.
-- _data_ : données du groupe.
-  - `ast` : table des statuts des membres (dès qu'ils ont été inscrits en _contact_)
-  - `nag` : table des hash de la clé courte du membre crypté par la clé du groupe.
-
-### Sous-collection `membres`
-Elle comporte un document membre par membre.
-
-**Documents:** 
-- `id` : id du groupe.
-- `ids`: indice de membre relatif à son groupe, numéro d'ordre de création, indice dans `ast`, `nag` de groupe..
-- `dlv` : date de disparition inscrite lors de la connexion du compte de l'avatar membre du groupe.
-- `v`
-- _data_ : données du membre.
-  - `nag` : `[nom, cle]` : nom et clé de l'avatar crypté par la clé du groupe.
-  - `cva` : carte de visite de l'avatar membre `{v, photo, info}` cryptée par sa clé.
-
-### Sous-collection `notes`
-Comme les `notes` d'un avatar.
-
-### Sous-collection `transferts`
-Comme les `transferts` des avatars.

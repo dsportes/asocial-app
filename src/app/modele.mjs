@@ -839,7 +839,6 @@ export class Gcvols extends GenDoc {
   si cette clé a une longueur de 256, elle est cryptée par la clé publique RSA du compte 
   (en cas de changement de tribu forcé par le comptable).
 - `it` : index du compte dans la table `act` de sa tribu.
-- `notifcT` : notification de niveau compte cryptée par la clé de la tribu.
 - `mavk` : map des avatars du compte. 
   - _clé_ : id court de l'avatar cryptée par la clé K du compte.
   - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
