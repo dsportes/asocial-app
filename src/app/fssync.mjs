@@ -74,7 +74,8 @@ export class FsSyncSession {
 
   async sub (nom, id) {
     return onSnapshot(doc(this.fs, nom + '/' + id), (doc) => {
-      this.onRow(doc)
+      if (doc.exists()) this.onRow(doc)
+      else console.log(`Doc non existant: ${doc.ref.path}`)
     })
   }
 
@@ -85,10 +86,12 @@ export class FsSyncSession {
     const nom = d.ref.parent.path
     const row = d.data()
     row._nom = nom
-    if (row._data_) row._data_ = row._data_.toUint8Array()
-    // Pour tester - à la console org est modifié dans l'index, pas dans le _data_
-    console.log('onRow:', row._nom, row.id) 
-    // De vrai
+    let z = true
+    if (row._data_) {
+      row._data_ = row._data_.toUint8Array()
+      z = false
+    }
+    console.log(`onRow: ${row._nom} ${z ? 'zombi' : ''} ${row.id}`)
     SyncQueue.push(row)
   }
 
