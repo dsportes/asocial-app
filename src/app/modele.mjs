@@ -421,8 +421,11 @@ export class Phrase {
   static idxch = [0, 1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 14, 16, 17, 21, 24, 27]
 
   async init (texte, org) {
+    const o1 = org || ''
+    const i = o1.lastIndexOf('@')
+    const o2 = i === -1 ? o1 : o1.substring(0, i)
     this.org = org
-    const x = org ? org.padEnd(12, '$') : '$$$$$$$$$$$$'
+    const x = o2.padEnd(12, '$')
     this.phrase = texte
     const u8 = encoder.encode(x + texte)
     const deb = new Uint8Array(Phrase.idxch.length)

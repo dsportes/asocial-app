@@ -206,9 +206,16 @@ export default {
       this.dns = ''
     },
     org (ap, av) {
-      if (ap.length < 4) { this.dorg = this.$t('ESorg1'); return }
-      if (ap.length > 12) { this.dorg = this.$t('ESorg2'); return }
-      if (!ap.match(reg)) { this.dorg = this.$t('ESorg3'); return }
+      const i = ap.lastIndexOf('@')
+      let org, br
+      if (i === -1) { org = ap; br = '' }
+      else { org = ap.substring(0, i); br = ap.substring(i+1) }
+      if (org.length < 4) { this.dorg = this.$t('ESorg1'); return }
+      if (org.length > 12) { this.dorg = this.$t('ESorg2'); return }
+      if (i !== -1 && br.length < 1) { this.dorg = this.$t('ESorg1b'); return }
+      if (i !== -1 && br.length > 3) { this.dorg = this.$t('ESorg2b'); return }
+      if (!org.match(reg)) { this.dorg = this.$t('ESorg3'); return }
+      if (i !== -1 && !br.match(reg)) { this.dorg = this.$t('ESorg3'); return }
       if (this.aOrg(ap)) { this.dorg = this.$t('ESorg4'); return }
       this.dorg = ''
     },
