@@ -75,7 +75,7 @@ export class FsSyncSession {
   async sub (nom, id) {
     return onSnapshot(doc(this.fs, nom + '/' + id), (doc) => {
       if (doc.exists()) this.onRow(doc)
-      else console.log(`Doc non existant: ${doc.ref.path}`)
+      // else console.log(`Doc non existant: ${doc.ref.path}`)
     })
   }
 
