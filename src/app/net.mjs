@@ -140,7 +140,11 @@ function procEx (e, op) {
 // Utilisé pour obtenir le texte depuis une URL sur le stockage de fichier
 export async function getData (url) {
   try {
-    const r = await axios({ method: 'get', url, responseType: 'arraybuffer' })
+    const r = await axios({ 
+      method: 'get', 
+      url, 
+      responseType: 'arraybuffer' 
+    })
     return new Uint8Array(r.data)
   } catch (e) {
     if (e.response && e.response.status === 404) {
@@ -153,7 +157,14 @@ export async function getData (url) {
 
 export async function putData (url, data) {
   try {
-    const r = await axios({ method: 'put', url, data: data })
+    const r = await axios({ 
+      method: 'put', 
+      url, 
+      data: data,
+      headers: { // OBLIGATOIRE pour putUrl
+        'Content-Type': 'application/octet-stream'
+      }
+    })
     return r.status === 200 ? null : 'Status:' + r.statusText
   } catch (e) {
     return e.toString()

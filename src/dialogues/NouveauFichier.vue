@@ -89,7 +89,7 @@ import { $t, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NouveauFichier } from '../app/operations.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
-import { UNITEV2 } from '../app/api.mjs'
+import { UNITEV2, isAppExc } from '../app/api.mjs'
 
 export default {
   name: 'NouveauFichier',
@@ -176,8 +176,9 @@ export default {
       }
 
       this.ui.etf = 1
-      await new NouveauFichier().run(this.nSt.note, fic, this.lidf, dv2)
-      this.ui.setFichiercree(fic.nom)
+      const res = await new NouveauFichier().run(this.nSt.note, fic, this.lidf, dv2)
+      if (!isAppExc(res))
+        this.ui.setFichiercree(fic.nom)
     },
 
     getLstfic () {

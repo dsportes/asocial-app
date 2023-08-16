@@ -1,11 +1,11 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { ID, AppExc, appexc, AMJ, Compteurs, limitesjour } from './api.mjs'
+import { ID, AppExc, appexc, E_WS, AMJ, Compteurs, limitesjour } from './api.mjs'
 import { $t, hash, inverse, sleep } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
-import { GenDoc, NomGenerique, Avatar, Chat, Compta, Note,
+import { NomGenerique, Avatar, Chat, Compta, Note,
   Groupe, Membre, Tribu, getNg, getCle, compile, setClet} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
@@ -1579,7 +1579,7 @@ export class DownloadFichier extends OperationUI {
       const buf = await getData(url)
       return this.finOK(buf || null)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }

@@ -4,7 +4,7 @@ import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, u8ToB64, gzip, ungzip, ungzipT, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { ID, d13, d14, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour, lcSynt } from './api.mjs'
+import { ID, isAppExc, d13, d14, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour, lcSynt } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -1808,7 +1808,7 @@ export class Note extends GenDoc {
       buf = await decrypter(this.cle, b)
     } else if (session.accesNet) {
       const b = await new DownloadFichier().run(this, idf, session.compteId)
-      if (b) buf = await decrypter(this.cle, b)
+      if (b && !isAppExc(b)) buf = await decrypter(this.cle, b)
     }
     if (!buf) return null
     const f = this.mfa.get(idf)
