@@ -2,7 +2,7 @@ import axios from 'axios'
 import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { AppExc, version, E_BRO, E_SRV, E_BRK } from './api.mjs'
+import { isAppExc, AppExc, version, E_BRO, E_SRV, E_BRK } from './api.mjs'
 
 const headers = { 'x-api-version': version }
 
@@ -111,7 +111,7 @@ export async function post (op, fonction, args) {
 
 function procEx (e, op) {
   // Exceptions jetées par le this.BRK au-dessus)
-  if (e instanceof AppExc && e.majeur * 1000 === E_BRK) throw e
+  if (isAppExc(e) && e.majeur * 1000 === E_BRK) throw e
   if (axios.isCancel(e)) throw new AppExc(E_BRK)
 
   const status = (e.response && e.response.status) || 0
@@ -130,8 +130,10 @@ function procEx (e, op) {
       throw new AppExc(E_BRO, 1, [op ? op.nom : '', e2.message])
     }
     throw ex
-  } else { // inattendue, pas mise en forme (500 et autres)
-    throw new AppExc(E_SRV, 0, [e.message])
+  } else { 
+    // inattendue, pas mise en forme (500 et autres)
+    const code = !status ? 100 : (status >= 500 && status <= 599 ? 101 : 0)
+    throw new AppExc(E_SRV, code, [status, e.message])
   }
 }
 

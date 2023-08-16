@@ -71,8 +71,10 @@ export const A_SRV = 9000 // Situation inattendue : assertion trappée sur le se
 
 export class AppExc {
   constructor (majeur, mineur, args, stack) {
+    this.name = 'AppExc'
     this.code = majeur + (mineur || 0)
-    if (args) this.args = args
+    if (args) { this.args = args; this.message = JSON.stringify(args) }
+    else { this.args = []; this.message = '???'}
     if (stack) this.stack = stack
   }
 
@@ -83,9 +85,15 @@ export class AppExc {
   }
 }
 
+export function isAppExc (e) {
+  return e && (typeof e === 'object') && (e.name === 'AppExc')
+}
+
 export function appexc (e, n) {
-  return !e ? null : (e instanceof AppExc ? e 
-    : new AppExc(E_BRO, n || 0, [e.message || e.toString()], e.stack || ''))
+  if (isAppExc(e)) return e
+  const m = e && e.message ? e.message : '???'
+  const s = e && e.stack ? e.stack : ''
+  return new AppExc(E_BRO, n || 0, [m], s)
 }
 
 /** Compteurs ***************************

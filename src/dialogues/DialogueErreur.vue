@@ -8,9 +8,10 @@
         <div class="titre-md" v-html="html"/>
       </q-card-section>
       <q-card-actions align="center">
-        <q-btn flat dense color="negative" :label="$t('ERdec')" @click="deconnecter"/>
+        <q-btn v-if="session.status" flat dense color="warning" :label="$t('ERdec')" @click="deconnecter"/>
         <q-btn v-if="rec" flat dense color="warning" :label="$t('ERrec')" @click="reconnecter"/>
         <q-btn v-if="cont" flat dense color="primary" :label="$t('ERcont')" @click="continuer"/>
+        <q-btn v-if="rlog" flat dense color="primary" :label="$t('ERrlog')" @click="continuer"/>
         <q-btn v-if="mod" flat dense color="primary" :label="$t('ERmod')" @click="continuer"/>
       </q-card-actions>
       <q-card-section class="q-pt-none">
@@ -39,6 +40,7 @@ export default ({
     exc () {
       return this.ui.exc || { code: 0, majeur : 0 }
     },
+    rlog () { return !this.session.status },
     rec () {
       const s = this.session
       return (!this.exc.sync && s.status > 1 && s.phrase) || this.exc.sync

@@ -242,7 +242,7 @@ export default {
   EX3001: 'Ouverture de la base locale impossible.\nDétail: {0}',
   EX3002: 'Erreur d\'accès à la base locale impossible.\nDétail: {0}',
 
-  EX4000: 'Erreur inattendue.\nDétail: {0}',
+  EX4000: 'Bug probable de l\'application.\nDétail: {0}',
   EX4001: 'Retour de la requête mal formé : parse JSON en erreur. Opération: {0}\nDétail: {1}',
   EX4002: 'Retour de la requête mal formé : désérialisation en erreur. Opération: {0}\nDétail: {1}',
   EX4003: 'Fichier {0} non accessible sur le serveur',
@@ -281,13 +281,16 @@ export default {
   EX6004: 'Base locale corrompue ?\nChat du compte non trouvé',
   EX6005: 'Base locale corrompue ?\nComptabilité du compte non trouvé',
 
-  EX7000: 'Erreur de la requête non identifiable : {0}', // 0
+  EX7000: 'Erreur de réseau ou de serveur non identifiable : HTTP:[{0}] - message:[{1}]', // 0
   EX7001: 'Le serveur n\'accepte pas les requêtes d\'une application obtenue du site [{0}]', // 1
   EX7003: 'Opération [{0}] inconnue du serveur', // 3
   EX7004: 'Session déconnectée', // 4
   EX7005: 'La version d\'API [{0}] gérée par le serveur est incompatble avec celle [{1}] de l\'application', // 5
   EX7006: 'Fichier "{0}" non trouvé', // 6
   EX7007: 'Clé d\'autorisation d\'appel de l\'API invalide (reçue: [{0}])',
+
+  EX7100: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - message:[{1}]',
+  EX7101: 'Le serveur est joignable mais a retourné une erreur technique, bref il n\'est pas opérationnel: HTTP:[{0}] - message:[{1}]',
 
   EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
   EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
@@ -457,6 +460,7 @@ export default {
   ERcont: 'Poursuivre la session quand-même',
   ERmod: 'Continuer pour modifier les données',
   ERsync: 'Rupture irrémédiable de la synchronisation des données.',
+  ERrlog: 'Reprendre la procédure de connexion',
 
   OPok: 'Succès de l\'opération {0}',
   OPko: 'Echec de l\'opération {0}',
@@ -472,6 +476,7 @@ export default {
   OPmsg8: 'Ce code -par défaut "xxx"- facilite la gestion / suppressions des bases locales obsolètes.',
 
   OPecho: 'Test d\'écho.',
+  OPestFs: 'Test l\'accès au serveur',
   OPerreurFonc: 'Test d\'erreur fonctionnelle',
   OPpingdb: 'Test de ping de la base distante',
   OPsync: 'Opération de synchronisation',

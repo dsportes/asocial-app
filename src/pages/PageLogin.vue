@@ -37,6 +37,7 @@
     </div>
   </q-expansion-item>
 
+  <!-- Dialogue d'acceptation d'un nouveau sponsoring -->
   <q-dialog v-model="dialcp" persistent full-height>
     <AcceptationSponsoring :sp="sp" :pc="pc" :org="org"/>
   </q-dialog>
@@ -50,15 +51,14 @@ import { ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { $t, afficherDiag } from '../app/util.mjs'
-import { connecterCompte } from '../app/connexion.mjs'
+import { connecterCompte, GetEstFs } from '../app/connexion.mjs'
 import { MD, Sponsoring, resetRepertoire } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
-import { AMJ, ID } from '../app/api.mjs'
+import { AMJ, ID, isAppExc } from '../app/api.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../dialogues/AcceptationSponsoring.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { getEstFs } from '../app/net.mjs'
 
 export default {
   name: 'PageLogin',
@@ -76,22 +76,19 @@ export default {
   },
 
   methods: {
+    reset () {  },
     async setFs () {
-      if (this.session.accesNet) {
-        const estFs = await getEstFs()
-        this.session.setEstFs(estFs)
-      } else {
-        this.session.setEstFs(false)
-      }
+      const ret = await new GetEstFs().run()
+      if (isAppExc(ret)) { this.raz(); return false } else return true
     },
     async onps (phrase) {
-      await this.setFs()
+      if (!await this.setFs()) return
       connecterCompte(phrase, this.razdb)
     },
     async crypterphrase (pc) {
       this.pc = pc
       this.org = pc.org
-      await this.setFs()
+      if (!await this.setFs()) return
       try {
         /* Recherche sponsoring ******
         args.ids : hash de la phrase de contact
@@ -101,7 +98,7 @@ export default {
         resetRepertoire()
         stores.reset(true)
         const res = await new ChercherSponsoring().run(this.pc.phch)
-        if (!res || !res.rowSponsoring) {
+        if (isAppExc(res) || !res || !res.rowSponsoring) {
           await afficherDiag(this.$t('LOGnopp'))
           this.raz()
           return
@@ -111,7 +108,7 @@ export default {
           const session = stores.session
           session.setNs(ID.ns(sp.id))
           this.sp = await Sponsoring.fromRow(sp, this.pc.clex)
-          if (this.sp.dlv <  AMJ.amjUtc()) {
+          if (isAppExc(this.sp) || this.sp.dlv <  AMJ.amjUtc()) {
             await afficherDiag(this.$t('LOGppinv'))
             this.raz()
             return                  
@@ -137,6 +134,8 @@ export default {
     },
     raz () {
       this.btncd = false
+      this.pc = null
+      this.org = ''
     }
   },
 

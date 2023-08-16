@@ -3,7 +3,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { SessionSync } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
-import { ID, AppExc, E_DB } from './api.mjs'
+import { isAppExc, AppExc, E_DB } from './api.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
 import { Versions, NoteLocale, FichierLocal } from '../app/modele.mjs'
 
@@ -36,11 +36,11 @@ const TABLES = []
 for (const x in STORES) TABLES.push(x)
 
 function EX1 (e) {
-  return e instanceof AppExc ? e : new AppExc(E_DB, 1, [e.message])
+  return isAppExc(e) ? e : new AppExc(E_DB, 1, [e.message])
 }
 
 function EX2 (e) {
-  return e instanceof AppExc ? e : new AppExc(E_DB, 2, [e.message])
+  return isAppExc(e) ? e : new AppExc(E_DB, 2, [e.message])
 }
 
 let db

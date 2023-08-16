@@ -4,7 +4,7 @@ import { encode } from '@msgpack/msgpack'
 import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
-import { post } from './net.mjs'
+import { post, getEstFs } from './net.mjs'
 import { AMJ, ID, limitesjour } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
@@ -833,8 +833,8 @@ export class ConnexionCompte extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
       stores.ui.setPage('login')
+      return await this.finKO(e)
     }
   }
 }
@@ -1032,7 +1032,7 @@ export class RefusSponsoring extends OperationUI {
       await post(this, 'RefusSponsoring', args)
       deconnexion(true)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1051,7 +1051,7 @@ export class ProlongerSponsoring extends OperationUI {
       await post(this, 'ProlongerSponsoring', args)
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1107,8 +1107,8 @@ export class CreerEspace extends OperationUI {
 
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
       stores.ui.setPage('login')
+      return await this.finKO(e)
     }
   }
 }
@@ -1211,7 +1211,26 @@ export class TraitGcvols extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
+    }
+  }
+}
+
+export class GetEstFs extends OperationUI {
+  constructor () { super($t('OPestFs')) }
+
+  async run () {
+    try {
+      const session = stores.session
+      if (session.accesNet) {
+        const estFs = await getEstFs()
+        session.setEstFs(estFs)
+      } else {
+        session.setEstFs(false)
+      }
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
     }
   }
 }

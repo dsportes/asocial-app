@@ -122,9 +122,9 @@ import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import SupprAvatar from '../dialogues/SupprAvatar.vue'
-import { afficherDiag } from '../app/util.mjs'
+import { afficherDiag, trapex } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
-import { ID } from '../app/api.mjs'
+import { isAppExc } from '../app/api.mjs'
 
 export default {
   name: 'PageCompte',
@@ -151,18 +151,27 @@ export default {
     async ouvrirNvav () { 
       if (await this.session.edit()) { this.ovnvav(); this.nomav = '' }
     },
-    async ouvrirchgps () { 
-      if (await this.session.edit()) { this.ovchgps(); this.ps = null }
+
+    async ouvrirchgps () {
+      try {
+        // { const x = null; x.toto } // Pour tester la récupération d'un bug
+        if (await this.session.edit()) { this.ovchgps(); this.ps = null }
+      } catch (e) { trapex(e, 1) }
     },
+
+    reset () { this.ps = null; MD.fD() },
+
     okps (ps) { this.ps = ps },
+
     async changerps () {
-      if (await new ExistePhrase().run(this.ps.hps1, 1)) {
+      const ret = await new ExistePhrase().run(this.ps.hps1, 1)
+      if (isAppExc(ret)) return this.reset()
+      if (ret) {
         await afficherDiag(this.$t('existe'))
         return
       }
       await new ChangementPS().run(this.ps)
-      this.ps = null
-      MD.fD()
+      this.reset()
     },
 
     courant (id) {
@@ -170,16 +179,19 @@ export default {
     },
 
     async oknomav (nom) {
-      if (!nom) { this.nvav = false; return }
-      if (this.aSt.compta.avatarDeNom(nom)) {
-        await afficherDiag(this.$t('CPTndc'))
-        return
-      }
+      try {
+        if (!nom) { this.nvav = false; return }
+        if (this.aSt.compta.avatarDeNom(nom)) {
+          await afficherDiag(this.$t('CPTndc'))
+          return
+        }
+      } catch (e) { trapex(e, 2) }
       MD.fD()
       await new NouvelAvatar().run(nom)
     },
 
     async memoeditAut () { if (await this.session.edit()) this.ovmemoedit() },
+
     async memook (m) {
       const memok = await crypter(this.session.clek, m)
       await new MemoCompte().run(memok)
@@ -187,6 +199,7 @@ export default {
     },
 
     async mcleditAut () { if (await this.session.edit()) this.ovmcledit() },
+
     async okmc (mmc) {
       MD.fD()
       if (mmc !== false) {

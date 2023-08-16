@@ -4,7 +4,7 @@ import { useQuasar } from 'quasar'
 
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
-import { AMJ } from './api.mjs'
+import { AMJ, appexc } from './api.mjs'
 import { MD } from './modele.mjs'
 
 let pako
@@ -34,6 +34,22 @@ export function html (exc) {
   const str = exc.code + ' - ' + 
     (!exc.args ? $t('EX' + exc.code) : $t('EX' + exc.code, exc.args))
   return str.replace(/\n/g, '<br>')
+}
+
+/* gère une exception Javascript inattendue
+- l'affiche
+- opt 1 : retourne à la page d'accueil
+- opt 2 : ferme le dialogue en cours
+- opt : fn() exécute cette fonction
+*/
+export async function trapex (e, opt) {
+  const ui = stores.ui
+  await ui.afficherExc(appexc(e))
+  stores.ui.setPage('accueil')
+  if (opt === 1) { stores.ui.setPage('accueil'); return }
+  if (opt === 2) { MD.fD(); return }
+  if (typeof opt === 'function') { opt(); return }
+  return
 }
 
 /* Sets, u8 egalité************************************************************/

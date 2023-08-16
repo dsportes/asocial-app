@@ -81,7 +81,7 @@ export class AboTribuC extends OperationUI {
       this.tr(await post(this, 'AboTribuC', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -98,7 +98,7 @@ export class MemoCompte extends OperationUI {
       this.tr(await post(this, 'MemoCompte', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -123,7 +123,7 @@ export class ExistePhrase extends OperationUI {
       const ex = ret.existe || false
       return this.finOK(ex)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -140,7 +140,7 @@ export class MotsclesCompte extends OperationUI {
       this.tr(await post(this, 'MotsclesCompte', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -172,7 +172,7 @@ export class MajCv extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -199,7 +199,7 @@ export class MajCvGr extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -224,7 +224,7 @@ export class ChangementPS extends OperationUI {
       if (session.synchro) commitRows(new IDBbuffer(), true)
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -248,7 +248,7 @@ export class ChangementPC extends OperationUI {
       this.tr(await post(this, 'ChangementPC', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -288,7 +288,7 @@ export class GetAvatarPC extends OperationUI {
       }
       return this.finOK(res)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -308,7 +308,7 @@ export class AjoutSponsoring extends OperationUI {
       this.tr(await post(this, 'AjoutSponsoring', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -327,7 +327,7 @@ export class ChercherSponsoring extends OperationUI {
       this.finOK()
       return ret
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -350,7 +350,7 @@ export class MajMotsclesChat extends OperationUI {
       this.finOK()
       return ret
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -376,7 +376,7 @@ export class SupprimerChat extends OperationUI {
       this.tr(await post(this, 'SupprimerChat', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -426,7 +426,7 @@ export class NouveauChat extends OperationUI {
       }
       return this.finOK([st, chat])
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -472,7 +472,7 @@ export class MajChat extends OperationUI {
       aSt.setChat(ch)
       return this.finOK([st, ch])
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -523,7 +523,7 @@ export class RafraichirCvs extends OperationUI {
 
       return this.finOK([nt, nr], true)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -565,7 +565,7 @@ export class NouvelAvatar extends OperationUI {
       this.tr(await post(this, 'NouvelAvatar', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -603,7 +603,7 @@ export class NouvelleTribu extends OperationUI {
       }
       this.finOK(ret)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -630,7 +630,7 @@ export class SetNotifT extends OperationUI {
       this.tr(await post(this, 'SetNotifT', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -661,7 +661,7 @@ export class SetAtrItemComptable extends OperationUI {
       this.tr(await post(this, 'SetAtrItemComptable', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -688,7 +688,7 @@ export class SetNotifC extends OperationUI {
       this.tr(await post(this, 'SetNotifC', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -712,7 +712,7 @@ export class SetSponsor extends OperationUI {
       this.tr(await post(this, 'SetSponsor', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -734,7 +734,7 @@ export class SetQuotas extends OperationUI {
       this.tr(await post(this, 'SetQuotas', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -768,7 +768,7 @@ export class ChangerTribu extends OperationUI {
       const t = await compile(ret.rowTribu)
       return this.finOK(t)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -789,7 +789,7 @@ export class SetDhvuCompta extends OperationUI {
       this.tr(await post(this, 'SetDhvuCompta', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -824,7 +824,7 @@ export class GetCompteursCompta extends OperationUI {
       aSt.setccCpt(cpt)
       return this.finOK(cpt)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -847,7 +847,7 @@ export class GetTribu extends OperationUI {
       const tribu = await compile(ret.rowTribu)
       return this.finOK(tribu)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -876,7 +876,7 @@ export class SetNotifG extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -902,7 +902,7 @@ export class SetEspaceT extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -942,7 +942,7 @@ export class NouveauGroupe extends OperationUI {
       this.tr(await post(this, 'NouveauGroupe', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -964,7 +964,7 @@ export class MotsclesGroupe extends OperationUI {
       this.tr(await post(this, 'MotsclesGroupe', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -986,7 +986,7 @@ export class ArdoiseGroupe extends OperationUI {
       this.tr(await post(this, 'ArdoiseGroupe', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1029,7 +1029,7 @@ export class HebGroupe extends OperationUI {
       this.tr(await post(this, 'HebGroupe', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1062,7 +1062,7 @@ export class FinHebGroupe extends OperationUI {
       this.tr(await post(this, 'FinHebGroupe', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1108,7 +1108,7 @@ export class NouveauMembre extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1134,7 +1134,7 @@ export class MajInfoMembre extends OperationUI {
       this.tr(await post(this, 'MajInfoMembre', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1156,7 +1156,7 @@ export class MajMCMembre extends OperationUI {
       this.tr(await post(this, 'MajMCMembre', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1178,7 +1178,7 @@ export class ModeSimple extends OperationUI {
       this.tr(await post(this, 'ModeSimple', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1259,7 +1259,7 @@ export class StatutMembre extends OperationUI {
       const ret = this.tr(await post(this, 'StatutMembre', args))
       return this.finOK(ret.code || 0)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1292,7 +1292,7 @@ export class NouvelleNote extends OperationUI {
       this.tr(await post(this, 'NouvelleNote', args))
       return this.finOK((rowNote.id + '/' + rowNote.ids))
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1315,7 +1315,7 @@ export class SupprNote extends OperationUI {
       this.tr(await post(this, 'SupprNote', args))
       return this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1344,7 +1344,7 @@ export class MajNote extends OperationUI {
       this.tr(await post(this, 'MajNote', args))
       return this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1366,7 +1366,7 @@ export class TempNote extends OperationUI {
       this.tr(await post(this, 'TempNote', args))
       return this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1387,7 +1387,7 @@ export class ProtNote extends OperationUI {
       this.tr(await post(this, 'ProtNote', args))
       return this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1408,7 +1408,7 @@ export class ExcluNote extends OperationUI {
       this.tr(await post(this, 'ExcluNote', args))
       return this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1429,7 +1429,7 @@ export class McNote extends OperationUI {
       this.tr(await post(this, 'McNote', args))
       return this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1452,7 +1452,7 @@ export class RattNote extends OperationUI {
       this.tr(await post(this, 'RattNote', args))
       return this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1482,7 +1482,7 @@ export class ChargerCvs extends OperationUI {
       }
       return this.finOK(cv ? cv.cv : null)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1548,7 +1548,7 @@ export class NouveauFichier extends OperationUI {
       // await sleep(1000)
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1579,7 +1579,7 @@ export class DownloadFichier extends OperationUI {
       const buf = await getData(url)
       return this.finOK(buf || null)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1603,7 +1603,7 @@ export class SupprFichier extends OperationUI {
       this.tr(await post(this, 'SupprFichier', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1642,7 +1642,7 @@ export class SupprAvatar extends OperationUI {
       const ret = this.tr(await post(this, 'SupprAvatar', args))
       return this.finOK(ret.OK)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1656,7 +1656,7 @@ export class GC extends OperationUI {
       const ret = this.tr(await post(this, nomop, {}))
       return this.finOK(ret)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1670,7 +1670,7 @@ export class GetCheckpoint extends OperationUI {
       const ret = this.tr(await post(this, 'GetCheckpoint', {}))
       return this.finOK(ret.checkpoint)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1692,7 +1692,7 @@ export class GetSynthese extends OperationUI {
       const s = await compile(ret.rowSynthese)
       return this.finOK(s)
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
@@ -1716,7 +1716,7 @@ export class ForceDlv extends OperationUI {
       this.tr(await post(this, 'ForceDlv', args))
       this.finOK()
     } catch (e) {
-      await this.finKO(e)
+      return await this.finKO(e)
     }
   }
 }
