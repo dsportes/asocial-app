@@ -88,10 +88,12 @@
       </q-page>
   </q-page-container>
 
+  <!-- Dialogue de création d'un nouveau fichier -->
   <q-dialog v-model="nouveaufichier" persistent>
     <nouveau-fichier :nomfic="nomfic"/>
   </q-dialog>
 
+  <!-- Confirmation de suppression -->
   <q-dialog v-model="supprfichier" persistent>
     <q-card class="bs petitelargeur q-pa-sm">
       <q-card-section class="column items-center q-my-md">
@@ -105,6 +107,7 @@
     </q-card>
   </q-dialog>
 
+  <!-- Confirmation visible en mode avion 1 -->
   <q-dialog v-model="confirmav1" persistent>
     <q-card class="bs petitelargeur q-pa-sm">
       <q-card-section class="column items-center q-my-md">
@@ -118,6 +121,7 @@
     </q-card>
   </q-dialog>
 
+  <!-- Confirmation visible en mode avion 2 -->
   <q-dialog v-model="confirmav2" persistent>
     <q-card class="bs petitelargeur q-pa-sm">
       <q-card-section class="column items-center q-my-md">
@@ -139,7 +143,7 @@
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
-import { edvol, dhcool, afficherDiag, dkli } from '../app/util.mjs'
+import { dkli, edvol, dhcool, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import { UNITEV2 } from '../app/api.mjs'
@@ -158,7 +162,7 @@ export default {
   props: { ro: Number },
 
   computed: {
-    lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
+    lidk () { return dkli(0) },
     modifie () { return false }
   },
 
@@ -176,9 +180,11 @@ export default {
       } else {
         this.nomfic = nf
         this.ovnouveaufichier()
+        /* !!!!!
         setTimeout(() => {
           if (nf) this.exp[nf] = true
         }, 100)
+        */
       }
     },
 
@@ -266,7 +272,9 @@ export default {
         await afficherDiag(this.$t('PNFgetEr'))
         return
       }
-      await FLset(f.nom, f.info, f.type, u8)
+      try {
+        await FLset(f.nom, f.info, f.type, u8) // throw AppExc
+      } catch (e) { await trapex (e, 2) } // ferme le dialogue
       this.ui.afficherMessage(this.$t('PNFcpp'))
       this.ppSt.modecc = false
       this.ppSt.setTabFichiers()
@@ -346,8 +354,11 @@ export default {
     }
 
     function listefichiers (n, avn) {
+      try {
       const lst = []
       const mnom = {}
+      let dhmax = 0
+      let nfmax = ''
       for (const [idf, x] of n.mfa) {
         /* mfa : Map de clé idf : { nom, info, dh, type, gz, lg, sha } */
         const f = n.mfa.get(idf)
@@ -359,11 +370,14 @@ export default {
       const res = []
       lst.forEach(nom => {
         const l = mnom[nom]
+        l.forEach(x => { if (x.dh > dhmax ) { dhmax = x.dh; nfmax = nom }})
         l.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh > b.dh ? -1 : 0) })
         if (exp[nom] === undefined) exp[nom] = false
         res.push({ nom, l, avn: avn && avn.mnom[nom] ? true : false })
       })
+      if (nfmax) exp[nfmax] = true
       return res
+      } catch (e) { trapex(e, 1); return []}
     }
 
     initState()
@@ -371,8 +385,17 @@ export default {
     nSt.$onAction(({ name, args, after }) => { 
       after(async (result) => {
         if ((name === 'setNote')){
-         const n = args[0]
-         if (n.key === nSt.note.key) initState()
+          const n = args[0]
+          if (n.key === nSt.note.key) initState()
+        }
+        if ((name === 'delNote')){
+          const id = args[0]
+          const ids = args[1]
+          if (id + '/' + ids === nSt.note.key) initState()
+        }
+        if ((name === 'setCourant')){
+          const key = args[0]
+          if (key !== nSt.note.key) initState()
         }
       })
     })

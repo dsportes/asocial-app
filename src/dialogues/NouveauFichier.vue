@@ -85,7 +85,7 @@ import { reactive, toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { afficherDiag, edvol, dhcool, readFile, rnd6, suffixe } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
-import { $t, dkli } from '../app/util.mjs'
+import { $t, dkli, trapex } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NouveauFichier } from '../app/operations.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
@@ -104,6 +104,7 @@ export default {
 
   watch: {
     async fileList (file) {
+      try {
       if (file) {
         const { size, name, type, u8 } = await readFile(file, true)
         this.fic.nom = this.nomfic || name
@@ -112,7 +113,9 @@ export default {
         this.fic.type = type
         this.fic.u8 = u8
       }
+      } catch (e) { trapex (e, this.resetFic)}
     },
+
     step (s) {
       if (s === 1) { this.fileList = null; this.resetFic(); return }
       if (s === 2) { 
@@ -122,7 +125,9 @@ export default {
         this.info = this.fic.info || 'v1'
       }
       if (s === 3) {
-        this.getLstfic() 
+        try {
+          this.getLstfic()
+        } catch (e) { trapex (e); this.step = 1}
       }
     }
   },
@@ -141,19 +146,21 @@ export default {
 
   methods: {
     async valider () {
+      let fic, dv2
+      try {
       this.lstfic.forEach(fic => { 
         if (fic.sel) this.lidf.push(fic.idf)
       })
       this.step = 4
       this.ui.etf = 0
-      const fic = await this.nSt.note.nouvFic(
+      fic = await this.nSt.note.nouvFic(
         this.idf, 
         this.nfic, 
         (this.info || '') + this.sfx,
         this.fic.lg, 
         this.fic.type, 
         this.fic.u8)
-      const dv2 = fic.lg - this.nSt.note.volLidf(this.lidf)
+      dv2 = fic.lg - this.nSt.note.volLidf(this.lidf)
 
       if (dv2 > 0) {
         let x = 0
@@ -174,11 +181,15 @@ export default {
           }
         }
       }
+      } catch(e) { trapex (e, 1); return }
 
       this.ui.etf = 1
       const res = await new NouveauFichier().run(this.nSt.note, fic, this.lidf, dv2)
       if (!isAppExc(res))
         this.ui.setFichiercree(fic.nom)
+      else {
+        this.step = 1
+      }
     },
 
     getLstfic () {
