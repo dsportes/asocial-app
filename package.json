@@ -7,8 +7,7 @@
   "private": true,
   "scripts": {
     "test": "quasar dev",
-    "build:pwa": "quasar build -m pwa",
-    "srvw": "srvw.bat"
+    "build:pwa": "quasar build -m pwa"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
