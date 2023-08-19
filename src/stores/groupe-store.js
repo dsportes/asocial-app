@@ -411,7 +411,6 @@ export const useGroupeStore = defineStore('groupe', {
       if (!note) return
       const nSt = stores.note
       nSt.setNote(note)
-      // TODO : gérer les ajouts / suppressions de fichiers ayant une copie locale
     },
 
     delNote (id, ids) {

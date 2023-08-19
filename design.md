@@ -1,5 +1,12 @@
+API-serveur : finir d'ajuster la liste des opérations.
 
 TODO : traiter les autorisations pour le comptable (page menu en particulier) pour survivre à un blocage de sa tribu / voir global
+
+TODO gestion du ralentissement en cas d'excès de download
+
+TODO note-store : suppression d'un groupe ou d'un avatar (impact sur l'arbre)
+
+VERIF : gestion des ajouts / suppressions de fichiers ayant une copie locale (setNote de store-groupe / avatar, PageNotes)
 
 ## L'arbre des notes
 Une note peut être :

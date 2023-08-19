@@ -876,8 +876,6 @@ export default {
           }
         }
       }
-      // TODO gestion du ralentissement en cas d'excès de download
-      // await sleep(1000) 
     }
 
     function dlgo (avecf) {

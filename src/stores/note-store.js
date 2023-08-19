@@ -506,11 +506,9 @@ export const useNoteStore = defineStore('note', {
     },
 
     delAvatar (id) {
-      // TODO
     },
 
     delGroupe (id) {
-      // TODO
     }
   }
 })

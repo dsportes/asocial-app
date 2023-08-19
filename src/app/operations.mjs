@@ -1608,7 +1608,7 @@ export class SupprFichier extends OperationUI {
   }
 }
 
-/* TODO Supprimer un avatar ****************************************
+/* Supprimer un avatar ****************************************
 args.token: éléments d'authentification du compte.
 args.id : id de l'avatar
 args.va : version de l'avatar

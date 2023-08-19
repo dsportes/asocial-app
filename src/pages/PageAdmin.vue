@@ -326,7 +326,6 @@ export default {
   },
 
   setup () {
-    // TODO : gcvols à traiter 
     const session = stores.session
     const cfg = stores.config
 

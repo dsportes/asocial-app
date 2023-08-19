@@ -624,7 +624,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       // Rangement en store
-      aSt.setCompte(this.avatar, this.compta, this.tribu) // TODO
+      aSt.setCompte(this.avatar, this.compta, this.tribu)
       if (this.espace) session.setEspace(this.espace)
       
       // En cas de blocage grave, plus de synchronisation
