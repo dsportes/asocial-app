@@ -206,7 +206,7 @@
             @click="edexclu"/>
         </div>
 
-        <div v-if="selected && !rec" class="row justify-center q-gutter-xs">
+        <div v-if="selected && !rec" class="q-my-xs row justify-center q-gutter-xs">
           <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
             @click="nouvelle"/>
           <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
@@ -966,8 +966,8 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-$hb: 18rem
-$hb2: 16.5rem
+$hb: 18.7rem
+$hb2: 17rem
 .msg
   position: absolute
   z-index: 99999

@@ -347,56 +347,6 @@ export async function getColl (nom) {
   }
 }
 
-
-/** Lecture de la collection des Cartes de Visite des contacts par chat.
-Retourne une map de clé 'id' et de valeur { id, v, photo, info }
-
-export async function getCvs () {
-  const session = stores.session
-  try {
-    const r = {}
-    await db.cvs.each(async (idb) => {
-      const idb = await decrypter(session.clek, idb.data)
-      r[idb.id] = decode(idb)
-    })
-    return r
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getCv (id) {
-  const session = stores.session
-  const idk = u8ToB64(await crypter(clek, '' + id, 1), true)
-  try {
-    return decode(await db.cvs.get({ id: idk }))
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function delCv (id) {
-  const session = stores.session
-  const idk = u8ToB64(await crypter(clek, '' + id, 1), true)
-  try {
-    return await db.cvs.delete({ id: idk })
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function putCv (cv) { // { id, v, photo, info }
-  const session = stores.session
-  const idk = u8ToB64(await crypter(clek, '' + cv.id, 1), true)
-  const rowk = await crypter(clek, new Uint8Array(encode(cv)), 1)
-  try {
-    return await db.cvs.put({ id: idk, data: rowk })
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-*/
-
 /** OpBufC : buffer des actions de mise à jour de IDB ***************************/
 export class IDBbuffer {
   constructor () {
@@ -431,6 +381,9 @@ export async function commitRows (opBuf, setCompteClek, setVersions) {
     const lidb = []
     if (opBuf.lmaj && opBuf.lmaj.length) {
       for (const row of opBuf.lmaj) {
+        if (row._nom === 'comptas') {
+          console.log(row.id)
+        }
         const idk = u8ToB64(await crypter(clek, '' + row.id, 1), true)
         const idsk = row.ids ? u8ToB64(await crypter(clek, '' + row.ids, 1), true) : null
         const rowk = await crypter(clek, new Uint8Array(encode(row)) , 1)

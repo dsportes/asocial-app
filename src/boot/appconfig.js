@@ -10,10 +10,17 @@ export default boot(async ({ app /* Vue */ }) => {
   const cfg = {}
   for(const x in config) cfg[x] = config[x]
 
+  const h = window.location.host
+
   cfg.build = process.env.BUILD
   cfg.debug = process.env.DEBUGGING
   cfg.dev = process.env.DEV
-  cfg.srv = process.env.SRV
+  try {
+    cfg.srv = process.env.SRV
+  }
+  catch (e) {
+    cfg.srv = h
+  }  
   try {
     cfg.opsrv = process.env.OPSRV
   } catch (e) {

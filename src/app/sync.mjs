@@ -400,7 +400,7 @@ export class OnchangeCompta extends OperationWS {
         this.tr(await post(this, 'MajCletKCompta', args))
         delete this.compta.cletK
       }
-      this.buf.putIDB(this.compta)
+      this.buf.putIDB(row)
 
       /* on traite le changement de tribu, pas sa mise à jour
       qui vient par la mise à jour de la tribu */

@@ -1,7 +1,9 @@
 <template>
 <q-page class="column align-start items-center">
 
-  <q-card class="q-mt-lg petitelargeur fs-md column justify-center">
+  <div class="font-mono fs-sm self-end text-italic q-ma-xs">{{config.build}}</div>
+
+  <q-card class="q-mt-sm petitelargeur fs-md column justify-center">
     <div :class="'full-width row items-center bord' + (!session.mode ? '1' : '2')">
       <div class="col q-py-sm q-gutter-md row justify-center">
         <q-radio dense v-model="locmode" :val="1" :label="$t('sync')" />

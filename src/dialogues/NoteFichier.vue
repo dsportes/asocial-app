@@ -26,7 +26,7 @@
         :label="$t('PNFnvaj')" @click="nouveau()"/>
       <div v-for="it in state.listefic" :key="it.nom" class="full-width">
         <div class="row">
-          <q-expansion-item v-model="exp[it.nom]" group="nom" class="col" switch-toggle-side
+          <q-expansion-item v-model="exp[it.nom]" class="col" switch-toggle-side
             header-class="expansion-header-class-1 titre-md bg-secondary text-white">
             <template v-slot:header>
               <q-item-section>
@@ -49,7 +49,7 @@
                   icon="clear" size="md" dense color="negative"
                   @click="itc=it;ovconfirmav1()"/>
               </div>
-              <div v-if="!it.avn && (session.synchro || session.avion && it.avn)"
+              <div v-if="!it.avn && (session.synchro || session.avion)"
                 class="text-primary titre-md cursor-pointer text-bold"
                 @click="avnom(it)">{{$t('PNFl2')}}</div>
               <div v-for="(f, idy) in it.l" :key="f.idf" class="q-my-sm">
@@ -143,14 +143,13 @@
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
-import { dkli, edvol, dhcool, afficherDiag } from '../app/util.mjs'
+import { $t, dkli, edvol, dhcool, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
-import { UNITEV2 } from '../app/api.mjs'
+import { isAppExc, UNITEV2 } from '../app/api.mjs'
 import { saveAs } from 'file-saver'
 import { SupprFichier } from '../app/operations.mjs'
-import { gestionFichierMaj } from '../app/db.mjs'
-import { FLset } from '../app/db.mjs'
+import { gestionFichierMaj, FLset } from '../app/db.mjs'
 
 export default {
   name: 'NoteFichier',
@@ -180,11 +179,6 @@ export default {
       } else {
         this.nomfic = nf
         this.ovnouveaufichier()
-        /* !!!!!
-        setTimeout(() => {
-          if (nf) this.exp[nf] = true
-        }, 100)
-        */
       }
     },
 
@@ -219,7 +213,8 @@ export default {
 
     avidf (f) {
       setTimeout(async () => {
-        await gestionFichierMaj(this.nSt.note, true, f.idf, '')
+        const err = await gestionFichierMaj(this.nSt.note, true, f.idf, '')
+        if (isAppExc(err)) MD.fd()
       }, 50)
     },
 
