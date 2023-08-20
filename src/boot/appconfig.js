@@ -17,9 +17,11 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.dev = process.env.DEV
   try {
     cfg.srv = process.env.SRV
+    console.log('SRV depuis config: ' + cfg.srv)
   }
   catch (e) {
     cfg.srv = h
+    console.log('SRV depuis location: ' + cfg.srv)
   }  
   try {
     cfg.opsrv = process.env.OPSRV
