@@ -65,7 +65,7 @@ module.exports = configure(function (ctx) {
         DEBUGGING: true,
         APITK: 'VldNo2aLLvXRm0Q', // Token d'autorisation d'usage de l'API
         BUILD: 202308201900,
-        // SRV: 'test.sportes.fr:8443',
+        SRV: 'test.sportes.fr:8443',
         // WSSRV: 'wss://localhost.fr:8443/ws/', // calculé depuis SRV par défaut
         // OPSRV: 'https://test.sportes.fr:8443/op/', // calculé depuis SRV par défaut
       },
