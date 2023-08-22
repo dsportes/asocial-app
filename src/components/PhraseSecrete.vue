@@ -133,7 +133,7 @@ export default ({
   setup (props) {
     const config = stores.config
     const session = stores.session
-    const isDev = config.dev
+    const isDev = config.DEV
     const initVal = toRef(props, 'initVal')
     const ligne1 = ref('')
     const nbc = toRef(props, 'nbc')

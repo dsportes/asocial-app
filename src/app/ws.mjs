@@ -51,7 +51,7 @@ function setExc (e) {
 export async function openWS () {
   reset()
   const config = stores.config
-  debug = config.debug
+  debug = config.DEBUG
   const session = stores.session
   const sessionId = session.sessionId
   return new Promise((resolve, reject) => {

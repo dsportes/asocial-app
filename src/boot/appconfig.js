@@ -10,30 +10,15 @@ export default boot(async ({ app /* Vue */ }) => {
   const cfg = {}
   for(const x in config) cfg[x] = config[x]
 
-  const h = window.location.host
+  console.log('debug:' + (cfg.DEBUG ? true : false) +
+    ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
 
-  cfg.build = process.env.BUILD
-  cfg.debug = process.env.DEBUGGING
-  cfg.dev = process.env.DEV
-  try {
-    cfg.srv = process.env.SRV
-    console.log('SRV depuis config: ' + cfg.srv)
-  }
-  catch (e) {
-    cfg.srv = h
-    console.log('SRV depuis location: ' + cfg.srv)
-  }  
-  try {
-    cfg.opsrv = process.env.OPSRV
-  } catch (e) {
-    cfg.opsrv = 'https://' + cfg.srv + '/op/'
-  }
-  try {
-    cfg.wssrv = process.env.WSSRV
-  } catch(e) {
-    cfg.wssrv = 'wss://' + cfg.srv + '/ws/'
-  }
-  console.log('debug:' + cfg.debug + ' dev:' + cfg.dev + ' build:' + cfg.build)
+  const h = window.location.host
+  cfg.srv = config.SRV ? config.SRV : h
+  console.log('SRV depuis ' + (config.SRV ? ' config: ': 'location: ') + cfg.srv)
+
+  cfg.opsrv = config.OPSRV ? config.OPSRV : ('https://' + cfg.srv + '/op/')
+  cfg.wssrv = config.WSSRV ? config.WSSRV : ('wss://' + cfg.srv + '/ws/')
   console.log('opsrv: ' + cfg.opsrv + ' --- wssrv: ' + cfg.wssrv)
 
   cfg.aide = {}

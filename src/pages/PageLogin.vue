@@ -1,7 +1,7 @@
 <template>
 <q-page class="column align-start items-center">
 
-  <div class="font-mono fs-sm self-end text-italic q-ma-xs">{{config.build}}</div>
+  <div class="font-mono fs-sm self-end text-italic q-ma-xs">{{config.BUILD}}</div>
 
   <q-card class="q-mt-sm petitelargeur fs-md column justify-center">
     <div :class="'full-width row items-center bord' + (!session.mode ? '1' : '2')">

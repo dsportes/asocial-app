@@ -17,7 +17,7 @@
   </q-header>
 
   <q-page-container>
-    <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.build])}}</div>
+    <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.BUILD])}}</div>
     <!--
     <comp-test :arg="testArg" />
     <q-btn dense color="warning" label="test" @click="testArg.val = new Date().getTime()"/>

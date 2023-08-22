@@ -521,7 +521,7 @@ async function getAvNotes (map) {
 /* Commit des MAJ de fetat et avnote */
 async function commitFic (lstAvNotes, lstFetats) { // lst : array / set d'idfs
   const session = stores.session
-  const debug = stores.config.debug
+  const debug = stores.config.DEBUG
   try {
     const x = []
     const y = []
@@ -579,7 +579,7 @@ async function setFa (fetat, buf) { // buf : contenu du fichier non crypté
       await db.fetat.put(row1)
       await db.fdata.put(row2)
     })
-    if (stores.config.debug) {
+    if (stores.config.DEBUG) {
       console.log('IDB fetat to PUT', fetat.id, fetat.dhc)
       console.log('IDB fdata to PUT', fetat.id)
     }

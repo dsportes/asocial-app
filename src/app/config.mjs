@@ -1,5 +1,16 @@
 export const config = {
-  /* Obligatoires */  
+  // CONFIGURATION TECHNIQUE : à adapter à chaque déploiement
+  DEV: true,
+  DEBUG: true,
+  BUILD: 202308221500,
+  // Commenter quand l'application UI est servie directement par le serveur
+  SRV: 'test.sportes.fr:8443',
+  // WSSRV: 'wss://localhost.fr:8443/ws/', // calculé depuis SRV par défaut
+  // OPSRV: 'https://test.sportes.fr:8443/op/', // calculé depuis SRV par défaut
+
+  portupload: 33666, // Ne pas changer en général
+
+  /* Configuration de profilage - obligatoires */  
   locale: 'fr-FR',
   localeOptions: [
     { value: 'en-EN', label: 'English',  flag: '🇬🇧' },
@@ -19,7 +30,7 @@ export const config = {
   },
 
   /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
-  portupload: 33666,
+  // En test pour éviter de frapper les "phrases secrètes" de test
   phrases: [
     'leszsanglotszLONGSzgarezauzGORILLEz',
     'auzvillagezSANSzjaizmauvaisezREPUTATIONz'

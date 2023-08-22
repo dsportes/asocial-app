@@ -18,7 +18,7 @@ export async function ping () {
       method: 'get',
       url: u,
       responseType: 'text',
-      timeout: config.debug ? 50000000 : 5000
+      timeout: config.DEBUG ? 50000000 : 5000
     })
     ui.afficherMessage(r.data)
     return r.data
@@ -35,7 +35,7 @@ export async function getEstFs () {
       method: 'get',
       url: u,
       responseType: 'text',
-      timeout: config.debug ? 50000000 : 5000
+      timeout: config.DEBUG ? 50000000 : 5000
     })
     return r.data === 'true' ? true : false
   } catch (e) {
