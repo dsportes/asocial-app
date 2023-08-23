@@ -28,8 +28,12 @@ export class FsSyncSession {
     // Initialize Cloud Firestore and get a reference to the service
     this.fs = getFirestore(FsSyncSession.app)
 
-    if (!FsSyncSession.initfaite && fsEmulator)
-      connectFirestoreEmulator(this.fs, '127.0.0.1', fsEmulator)
+    if (!FsSyncSession.initfaite && fsEmulator) {
+      const i = fsEmulator.indexOf(':')
+      const h = fsEmulator.substring(0, i)
+      const p = parseInt(fsEmulator.substring(i + 1))
+      connectFirestoreEmulator(this.fs, h, p)
+    }
     FsSyncSession.initfaite = true
   }
 

@@ -2,9 +2,9 @@ export const config = {
   // CONFIGURATION TECHNIQUE : à adapter à chaque déploiement
   DEV: true,
   DEBUG: true,
-  BUILD: 202308221500,
+  BUILD: 202308231545,
   // Commenter quand l'application UI est servie directement par le serveur
-  SRV: 'test.sportes.fr:8443',
+  // SRV: 'test.sportes.fr:8443',
   // WSSRV: 'wss://localhost.fr:8443/ws/', // calculé depuis SRV par défaut
   // OPSRV: 'https://test.sportes.fr:8443/op/', // calculé depuis SRV par défaut
 
