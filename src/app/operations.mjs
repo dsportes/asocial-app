@@ -635,7 +635,7 @@ export class SetNotifT extends OperationUI {
   }
 }
 
-/* Set des quotas OU de l'info d'une tribu *********************************
+/* SetAtrItemComptable : Set des quotas OU de l'info d'une tribu
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
 args.idc: id du comptable
