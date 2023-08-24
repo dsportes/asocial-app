@@ -228,8 +228,10 @@ export default {
   EX8: 'Données transmises au serveur non conformes',
   EX9: 'Donnée absente ou corrompue détectée par le browser',
 
+  // E_BRK = 1000 // Interruption volontaire de l'opération
   EX1000: 'Interruption volontaire',
 
+  // E_WS = 2000 // Toutes erreurs de réseau
   EX2000: 'Erreur à l\'ouverture de la connexion avec le serveur ( {0} ).\nDétail: {1}',
   EX2001: 'Ouverture de la connexion avec le serveur impossible ( {0} ).',
   EX2002: 'Envoi d\'un message au serveur impossible ( {0} ).\nDétail: {1}',
@@ -239,9 +241,11 @@ export default {
   EX2006: 'Erreur de transfert du fichier vers l\'application locale de stockage de fichiers. Détail: {0}',
   EX2100: 'Session interrompue. Se déconnecter et tenter de se reconnecter',
 
+  // E_DB = 3000 // Toutes erreurs d'accès à la base locale
   EX3001: 'Ouverture de la base locale impossible.\nDétail: {0}',
   EX3002: 'Erreur d\'accès à la base locale impossible.\nDétail: {0}',
 
+  // E_BRO = 4000 // Erreur inattendue trappée sur le browser
   EX4000: 'Bug probable de l\'application.\nDétail: {0}',
   EX4001: 'Retour de la requête mal formé : parse JSON en erreur. Opération: {0}\nDétail: {1}',
   EX4002: 'Retour de la requête mal formé : désérialisation en erreur. Opération: {0}\nDétail: {1}',
@@ -263,6 +267,7 @@ export default {
   EX4018: 'store {0} inconnu',
   EX4020: 'Erreur de téléchargement d\'un fichier',
 
+  // F_BRO = 5000 // Erreur fonctionnelle trappée sur le browser
   EX5001: 'La phrase secrète a changé depuis l\'authentification du compte. Après déconnexion, se reconnecter avec la nouvelle phrase secrète.',
   EX5003: 'Avatar déjà cité dans le groupe, ne peut pas être inscrit à nouveau',
   EX5004: `Base locale non trouvée<br>
@@ -275,12 +280,14 @@ export default {
   EX5006: `Base locale corrompue.<br>Impossible d'en décrypter les données.`,
   EX5007: 'Le sponsor a disparu (compte résilié)',
 
+  // A_BRO = 6000 Situation inattendue : assertion trappée par le browser
   EX6001: 'Clé RSA publique de l\'avatar non trouvée',
   EX6002: 'Base locale corrompue ?\nCompte non trouvé',
   EX6003: 'Base locale corrompue ?\nPréférences du compte non trouvé',
   EX6004: 'Base locale corrompue ?\nChat du compte non trouvé',
   EX6005: 'Base locale corrompue ?\nComptabilité du compte non trouvé',
 
+  // E_SRV = 7000 // Erreur inattendue trappée sur le serveur
   EX7000: 'Erreur de réseau ou de serveur non identifiable : HTTP:[{0}] - message:[{1}]', // 0
   EX7001: 'Le serveur n\'accepte pas les requêtes d\'une application obtenue du site [{0}]', // 1
   EX7003: 'Opération [{0}] inconnue du serveur', // 3
@@ -292,10 +299,11 @@ export default {
   EX7100: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - message:[{1}]',
   EX7101: 'Le serveur est joignable mais a retourné une erreur technique, bref il n\'est pas opérationnel: HTTP:[{0}] - message:[{1}]',
 
+  // F_SRV = 8000 // Erreur fonctionnelle trappée sur le serveur
   EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
   EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
   EX8003: 'Espace déjà créé.',
-  EX800nopc4: 'Compte Comptable déjà créé',
+  EX8004: 'Compte Comptable déjà créé',
   EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
   EX8007: 'Phrase de sponsoring déjà déclarée.',
   EX8008: 'Phrase de sponsoring non trouvée.',
@@ -321,6 +329,7 @@ export default {
   EX8067: 'Groupe sans hébergeur {0} : augmentation de volumer interdit.',
   EX8101: 'Compte non authentifié',
 
+  // A_SRV = 9000 // Situation inattendue : assertion trappée sur le serveur
   EX9001: 'Espace non trouvé ({1}) - @{0}',
   EX9002: 'Tranche de quotas non trouvée ({1}) - @{0}',
   EX9003: 'Compte non trouvé ({1}) - @{0}',
