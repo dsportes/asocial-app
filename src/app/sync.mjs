@@ -288,11 +288,15 @@ export class OperationWS extends Operation {
     - Maj du document sur serveur
     */
     if (this.avSuppr.size) {
-      const compta = this.compta || aSt.compta.clone()
-      const ok = compta.updAvatarMavk (this.avSuppr)
-      if (ok) {
-        if (!this.compta) this.compta = compta
-        const lm = await compta.lmAvatarMavk(this.avSuppr)
+      let lm
+      if (this.compta) {
+        if (this.compta.updAvatarMavk (this.avSuppr))
+          lm = await this.compta.lmAvatarMavk(this.avSuppr)
+      } else {
+        if (aSt.compta.updAvatarMavk (this.avSuppr))
+          lm = await aSt.compta.lmAvatarMavk(this.avSuppr)
+      }
+      if (lm) {
         const args = { token: session.authToken, lm }
         this.tr(await post(this, 'MajMavkAvatar', args))
       }

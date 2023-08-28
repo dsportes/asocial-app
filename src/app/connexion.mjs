@@ -171,13 +171,30 @@ export class ConnexionCompte extends OperationUI {
 
   /** tousGroupes *******************************************************/
   async groupesRequisSignatures () {
+    let procbl = false // le compte est-il en procédure de blocage
+    if (this.espace.notif && this.espace.notif.niv > 2) {
+      procbl = true
+    } else if (this.tribu) {
+      if (this.tribu.notif && this.tribu.notif.niv > 2) {
+        procbl = true
+      } else {
+        const act = this.tribu.act[this.compta.it]
+        if (act.notif && act.notif.niv > 2) {
+          procbl = true
+        }
+      }
+    } else if (this.compta.soldeC && this.compta.soldeC.solde < 0) {
+      procbl = true
+    }
+
     const session = stores.session
     // En UTC la division d'une date est multiple de 86400000
     const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
     const tdlv1 = (Math.floor(tjourJ / 10) + 1) * 10
     const tdlv2 = tdlv1 + 10
-    const dlv1 = AMJ.amjUtcDeT(tdlv1 * 86400000)
-    const dlv2 = AMJ.amjUtcDeT(tdlv2 * 86400000)
+    // pas de signatures quand une procédure de blocage est en cours
+    const dlv1 = procbl ? 0 : AMJ.amjUtcDeT(tdlv1 * 86400000)
+    const dlv2 = procbl ? 0 : AMJ.amjUtcDeT(tdlv2 * 86400000)
 
     this.grRequis = new Set()
     this.grDisparus = new Set()
@@ -511,20 +528,19 @@ export class ConnexionCompte extends OperationUI {
     if (this.compta.rowCletK) await this.compta.compile2(this.avatar.priv)
     this.espace = await compile(this.rowEspace)
 
-    {
+    if (this.compta.idt) {
       const args = { token: session.authToken, id: this.compta.idt, abPlus: [this.compta.idt] }
       const ret = this.tr(await post(this, 'GetTribu', args))
       this.rowTribu = ret.rowTribu
-    }
-    this.tribu = await compile(this.rowTribu)
-    await this.MajTribuVols() // MAJ tribu de v1 v2 (si +- 10%)
-
-    session.setTribuId(this.tribu.id)
-    if (session.fsSync) {
-      /* en sql, le serveur a enregistré d'office à la connexion l'abonnement 
-      au compte et à sa tribu
-      mais en fs c'est à faire explicitement en session */
-      await session.fsSync.setTribu(session.tribuId)
+      this.tribu = await compile(this.rowTribu)
+      await this.MajTribuVols() // MAJ tribu de v1 v2 (si +- 10%)
+      session.setTribuId(this.tribu.id)
+      if (session.fsSync) {
+        /* en sql, le serveur a enregistré d'office à la connexion l'abonnement 
+        au compte et à sa tribu
+        mais en fs c'est à faire explicitement en session */
+        await session.fsSync.setTribu(session.tribuId)
+      }
     }
   }
 
@@ -557,9 +573,11 @@ export class ConnexionCompte extends OperationUI {
     const session = stores.session
     this.rowCompta = await getCompta()
     this.compta = await compile(this.rowCompta)
-    this.rowTribu = await getTribu(this.compta.idt)
-    this.tribu = await compile(this.rowTribu)
-    session.setTribuId(this.tribu.id)
+    if (this.compta.idt) {
+      this.rowTribu = await getTribu(this.compta.idt)
+      this.tribu = await compile(this.rowTribu)
+      session.setTribuId(this.tribu.id)
+    }
     this.rowAvatar = await getAvatarPrimaire()
     this.avatar = await compile(this.rowAvatar)
     // ligne ci-dessous : ne devrait jamais être exécutée, superstition
@@ -575,6 +593,7 @@ export class ConnexionCompte extends OperationUI {
       // session synchronisée ou incognito
       const session = stores.session
       const aSt = stores.avatar
+      const gSt = stores.groupe
 
       this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
@@ -617,7 +636,7 @@ export class ConnexionCompte extends OperationUI {
 
       if (session.accesIdb) {
         this.buf.putIDB(this.rowCompta)
-        this.buf.putIDB(this.rowTribu)
+        if (this.rowTribu) this.buf.putIDB(this.rowTribu)
         this.buf.putIDB(this.rowAvatar)
         avRowsModifies.forEach(row => { this.buf.putIDB(row) })
         avToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
@@ -666,7 +685,6 @@ export class ConnexionCompte extends OperationUI {
         this.tr(await post(this, 'EnleverGroupesAvatars', args))
       }
 
-      const gSt = stores.groupe
       const syncitem = stores.syncitem 
       this.avatarsToStore.forEach(av => { 
         aSt.setAvatar(av)
@@ -791,8 +809,23 @@ export class ConnexionCompte extends OperationUI {
         }
       }
 
+      /* Tout est en store: Vérification par superstition des compteurs qv de comptas */
+      if (session.accesNet) {
+        const qv = aSt.getqv
+        const qvg = gSt.getqv; qv.v2 += qvg.v2; qv.nn += qvg.nn; qv.ng = qvg.ng
+        qv.v1 = qv.ng + qv.nc + qv.nn
+        const x = aSt.comptas.qv
+        let ok = true
+        ['ng', 'nc', 'nn', 'v1', 'v2'].forEach(f => { if (x[f] !== qv[f]()) ok = false })
+        if (!ok) {
+          aSt.comptas.aligneV(qv)
+          await new AlignerComptas().run(qv)
+          console.log('AlignerComptas !!! ' + JSON.stringify({id: x.id, qv: qv}))
+        }
+      }
+
       /* Mises à jour éventuelles du serveur **********************************************/
-      if (session.accesNet ) {
+      if (session.accesNet) {
         /* Suppression des notes temporaires ayant dépassé leur date limite */
         if (this.buf.lsecsup.length) {
           for (const s of this.buf.lsecsup) {
@@ -1228,6 +1261,46 @@ export class GetEstFs extends OperationUI {
       } else {
         session.setEstFs(false)
       }
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
+/* AlignerComptas : alignement des compteurs de comptas sur un 
+décompte précis avec connexion (si la version passée en argument est toujours la bonne).
+POST:
+- `token` : éléments d'authentification du comptable.
+- `id` : id du compte.
+- `v` : version de comptas
+- `qv` : { ng nc nn v1 v2 q1 q2 } compteurs de volume rectifiés
+- `soldeCK`: de comptas
+- `idt`: id de la tribu. null pour un compte A
+- `it`: indice du compte dans act de la tribu 
+
+Assertions sur l'existence du row `Comptas` compte et de sa `Tribus`
+*/
+export class AlignerComptas extends OperationUI {
+  constructor () { super($t('OPestFs')) }
+
+  async run (qv) {
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const c = aSt.comptas
+      qv.q1 = c.q1; qv.q2 = c.q2
+
+      const args = { 
+        token: session.authToken,
+        id: c.id,
+        c: c.v,
+        idt: c.idt,
+        it: c.it,
+        qv,
+        soldeCK: await c.getSoldeCK()
+      }
+      this.tr(await post(this, 'AlignerComptas', args))
       this.finOK()
     } catch (e) {
       return await this.finKO(e)

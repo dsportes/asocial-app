@@ -73,6 +73,7 @@ export async function crypter (cle, u8, idxIV) {
 }
 
 export async function decrypter (cle, u8) {
+  if (!u8) return null
   try {
     if (!(cle instanceof Uint8Array) || cle.length !== 32) throw new Error($t('EX4012'))
     if (!(u8 instanceof Uint8Array)) throw new Error($t('EX4013'))

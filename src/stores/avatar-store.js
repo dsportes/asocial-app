@@ -20,7 +20,8 @@ export const useAvatarStore = defineStore('avatar', {
       - sponsorings: new Map(),
       - chats: new Map(),
       - grIds: new Set() // Ids des groupes dont l'avatar est membre
-    */
+      - notes: Map des notes : clé: ids, valeur: v2
+      */
     map: new Map(),
 
     motscles: null, // mots clés du compte
@@ -55,18 +56,27 @@ export const useAvatarStore = defineStore('avatar', {
     tribuC: (state) => { 
       return stores.session.tribuCId ? state.maptr.get(stores.session.tribuCId) : state.tribu },
 
+    qv: (state) => {
+      const qv = { nc: 0, nn: 0, v2: 0 }
+      state.map.forEach((av, id) => {
+        av.notes.forEach((n, ids) => { qv.nn++; qv.v2 += n.v2})
+        av.chats.forEach((c, ids) => { if (c.ver === 1) qv.nc++ })
+      })
+      return qv
+    },
+
     exV1: (state) => {
-      const c = state.compta.compteurs
+      const c = state.compta.qv
       return c.v1 > c.q1 * UNITEV1
     },
 
     exV2: (state) => {
-      const c = state.compta.compteurs
+      const c = state.compta.qv
       return c.v2 > c.q2 * UNITEV2
     },
 
     occV2: (state) => {
-      const c = state.compta.compteurs
+      const c = state.compta.qv
       return (c.q2 * UNITEV2) - c.v2
     },
 
@@ -210,44 +220,6 @@ export const useAvatarStore = defineStore('avatar', {
         if (e && e.id === peId) return e
     },
 
-    /*
-        ppTribusF: (state) => { 
-      const t = []
-      const f = state.ppFiltre
-      state.compta.atr.forEach(x => {
-        if (x && (!f || (x.info && x.info.contains(f))))
-          t.push({ id: x.id, clet: x.clet, info: x.info, q1: x.q1, q2: qs.q2})
-      })
-      return t
-    },
-    ppTribus: (state) => {
-      const y = []
-      let q1 = 0, q2 = 0
-      if (state.ccCpt) { q1 = state.ccCpt.q1; q2 = state.ccCpt.q2 }
-      const l = state.getTribus
-      const idt = stores.session.tribuCId
-      l.forEach(x => { 
-        if (x.id !== idt) {
-          const t = x.cpt
-          const ok = ((t.q1 - t.a1) >= q1) &&  ((t.q2 - t.a2) >= q2)
-          y.push({ nom: x.naC.nom, id: x.id, q1: t.q1, q2: t.q2, r1: t.q1 - t.a1, r2: t.q2 - t.a1, ok   })
-        }
-      })
-      return y
-    },
-
-    ppTribusF: (state) => {
-      const t = []
-      const f = state.ppFiltre
-      state.ppTribus.forEach(x => { 
-        if (x.nom.startsWith(f)) t.push(x)
-      })
-      if (t.length === 1) if (t[0].ok) state.ppSelId = t[0].id
-      return t
-    },
-
-    ppSelTr: (state) => { return state.maptr.get(state.ppSelId) },
-    */
     // PageTranche ***************************************************    
     ptLcFT: (state) => {
       const lcF = state.ptLcF
@@ -298,49 +270,6 @@ export const useAvatarStore = defineStore('avatar', {
       return t
     },
 
-    /* PageTribus ***************************************************    
-    ptLtFT: (state) => {
-      const f = stores.filtre.tri.tribus
-      const ltF = state.ptLtF
-      function f0 (a, b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
-      function comp (x, y) {
-        const a = x.cpt
-        const b = y.cpt
-        switch (f.value) {
-          case 0 : { return f0(x, y) }
-          case 1 : { return a.a1 > b.a1 ? -1 : (a.a1 < b.a1 ? 1 : f0(x,y)) }
-          case 2 : { return a.a2 > b.a2 ? -1 : (a.a2 < b.a2 ? 1 : f0(x,y)) }
-          case 3 : { return a.q1 - a.a1 > b.q1 - b.a1 ? -1 : (a.q1 - a.a1 < b.q1 - b.a1 ? 1 : f0(x,y)) }
-          case 4 : { return a.q2 - a.a2 > b.q2 - b.a2 ? -1 : (a.q2 - a.a2 < b.q2 - b.a2 ? 1 : f0(x,y)) }
-          case 5 : { return a.q1 > b.q1 ? -1 : (a.q1 < b.q1 ? 1 : f0(x,y)) }
-          case 6 : {  return a.q2 > b.q2 ? -1 : (a.q2 < b.q2 ? 1 : f0(x,y)) }
-        }
-      }
-      if (!f) { stores.session.fmsg(ltF.length); return ltF }
-      const x = []; ltF.forEach(t => { x.push(t) })
-      x.sort(comp)
-      stores.session.fmsg(x.length)
-      return x
-    },
-
-    ptLtF: (state) => {
-      const f = stores.filtre.filtre.tribus
-      f.limj = f.nbj ? (new Date().getTime() - (f.nbj * 86400000)) : 0
-      f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
-      f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
-      const r = []
-      for (const t of state.getTribus) {
-        if (f.avecbl && !t.blocage) continue
-        if (f.nomt && !t.na.nom.startsWith(f.nomt)) continue
-        if (f.txtt && (!t.info || t.info.indexOf(f.txtt) === -1)) continue
-        if (f.txtn && (!t.notif || t.notif.txt.indexOf(f.txtn) === -1) ) continue
-        if (f.notif && (!t.notif || (f.notif === 2 && t.notif.niv < 2))) continue
-        r.push(t)
-      }
-      return r
-    },
-    */
-
     // PageChats ******************************************
     pcLc: (state) => { 
       return Array.from(state.map.get(stores.session.avatarId).chats.values())
@@ -375,10 +304,12 @@ export const useAvatarStore = defineStore('avatar', {
     setCompte (avatar, compta, tribu) { // avatar principal du compte connecté
       const session = stores.session
       this.avatarP = avatar
-      session.setTribuId(tribu.id)
-      session.setTribuCId(tribu.id)
+      if (tribu) {
+        session.setTribuId(tribu.id)
+        session.setTribuCId(tribu.id)
+      }
       this.comptaP = compta // utilisé par setTribu
-      this.setTribu(tribu)
+      if (tribu) this.setTribu(tribu)
       this.setCompta(compta)
       this.setAvatar(avatar)
     },
@@ -451,6 +382,7 @@ export const useAvatarStore = defineStore('avatar', {
       if (!e) {
         e = { 
           avatar: avatar,
+          notes: new Map(),
           sponsorings: new Map(),
           chats: new Map(),
           grIds: new Set() // Ids des groupes dont l'avatar est membre
@@ -482,11 +414,15 @@ export const useAvatarStore = defineStore('avatar', {
 
     setNote (note) {
       if (!note) return
+      const e = this.map.get(note.id)
+      if (e) e.notes.set(note.ids, note.v2)
       const nSt = stores.note
       nSt.setNote(note)
     },
 
     delNote (id, ids) {
+      const e = this.map.get(id)
+      if (e) e.notes.delete(ids)
       const nSt = stores.note
       nSt.delNote(id, ids)
     },

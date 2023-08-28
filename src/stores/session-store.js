@@ -32,6 +32,7 @@ export const useSessionStore = defineStore('session', {
     authToken: '',
     phrase: null,
     dateJourConnx: 0,
+    dhConnx: 0,
     lsk: '',
     nombase: '',
     volumeTable: '',
@@ -135,6 +136,7 @@ export const useSessionStore = defineStore('session', {
       this.authToken = u8ToB64(new Uint8Array(x), true)
       this.nombase = this.lsk ? localStorage.getItem(this.lsk) : ''
       this.dateJourConnx = AMJ.amjUtc()
+      this.dhConnx = new Date().getTime()
       this.status = 1
     },
 
@@ -260,12 +262,22 @@ export const useSessionStore = defineStore('session', {
         }  
       }
       const aSt = stores.avatar
-      const dhvu = aSt.compta.dhvu || 0
+      const c = aSt.comptas
+      const dhvu = c.dhvu || 0
       this.niv = 0
       this.alire = false
       ntfx(this.notifG)
-      ntfx(aSt.tribu.notif)
-      ntfx(aSt.act.notif)
+      if (c.estA && c.soldeC.solde < 0) {
+        if (this.dhConnx > dhvu) this.alire = true
+        if (c.soldeC.njn > 60) {
+          if (this.niv < 4) this.niv = 4
+        } else {
+          if (this.niv < 3) this.niv = 3
+        }
+      } else {
+        ntfx(aSt.tribu.notif)
+        ntfx(aSt.act.notif)
+      }
     },
 
     editDiag (avionSeulement) {

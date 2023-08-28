@@ -8,6 +8,7 @@ import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 - map : des groupes dont un des avatars du compte courant est membre
   Sous-collection pour chaque groupe id :
     groupe: l'objet Groupe
+    notes: Map des notes (clé:ids, valeur:v2)
     membres: new Map(), // tous membres
     mbacs: new Map(), // membres avatars du compte
     estAnim: false, // un des avatars du compte est animateur du groupe
@@ -31,6 +32,16 @@ export const useGroupeStore = defineStore('groupe', {
     egr: (state) => { return (id) => { 
         return state.map.get(id)
       }
+    },
+
+    getqv: (state) => {
+      const qv = { ng: 0, nn: 0, v2: 0 }
+      state.map.forEach((gr, id) => {
+        qv.ng++
+        if (gr.groupe.hebC)
+          gr.notes.forEach((n, ids) => { qv.nn++; qv.v2 += n.v2})
+      })
+      return qv
     },
 
     nbInvits: (state) => {
@@ -336,6 +347,7 @@ export const useGroupeStore = defineStore('groupe', {
       if (!e) {
         e = { 
           groupe: groupe, 
+          notes: new Map(),
           membres: new Map(), // tous membres
           mbacs: new Map(), // membres avatars du compte
           estAnim: false, // un des avatars du compte est animateur du groupe
@@ -409,12 +421,16 @@ export const useGroupeStore = defineStore('groupe', {
 
     setNote (note) {
       if (!note) return
+      const e = this.map.get(note.id)
+      if (e) e.notes.set(note.ids, note.v2)
       const nSt = stores.note
       nSt.setNote(note)
     },
 
     delNote (id, ids) {
       const nSt = stores.note
+      const e = this.map.get(id)
+      if (e) e.notes.delete(ids)
       nSt.delNote(id, ids)
     },
 

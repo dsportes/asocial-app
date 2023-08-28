@@ -735,20 +735,19 @@ export class Tribu extends GenDoc {
     this.act = []
     if (row.act) for (let it = 0; it < row.act.length; it++) {
       const item = row.act[it]
+      if (!item || item.vide) { this.act.push({ vide: true }); continue }
       const r = { }
-      if (item && !item.vide) {
-        r.id = ID.long(await decrypterStr(c, item.idT), NomGenerique.ns)
-        r.notif = item.notif ? new Notification(await decrypter(c, item.notif)) : null
-        r.stn = item.stn || 0
-        r.nasp = item.nasp ? NomGenerique.from(decode(await decrypter(c, item.nasp))) : null
-        r.q1 = item.q1 || 0
-        r.q2 = item.q2 || 0
-        r.v1 = item.v1 || 0
-        r.v2 = item.v2 || 0
+      r.id = ID.long(await decrypterStr(c, item.idT), NomGenerique.ns)
+      r.notif = item.notif ? new Notification(await decrypter(c, item.notif)) : null
+      r.stn = item.stn || 0
+      r.nasp = item.nasp ? NomGenerique.from(decode(await decrypter(c, item.nasp))) : null
+      r.q1 = item.q1 || 0
+      r.q2 = item.q2 || 0
+      r.v1 = item.v1 || 0
+      r.v2 = item.v2 || 0
 
-        r.pcv1 = !r.q1 ? 0 : Math.round(r.v1 * 100 / r.q1) 
-        r.pcv2 = !r.q2 ? 0 : Math.round(r.v2 * 100 / r.q2) 
-      } else r.vide = true
+      r.pcv1 = !r.q1 ? 0 : Math.round(r.v1 * 100 / r.q1) 
+      r.pcv2 = !r.q2 ? 0 : Math.round(r.v2 * 100 / r.q2) 
       this.act.push(r)
     }
 
@@ -798,7 +797,7 @@ export class Tribu extends GenDoc {
     r.vsh = 0
     r.id = idt
     r.v = 1
-    r.act = []
+    r.act = [null]
     r.q1 = q1t
     r.q2 = q2t
     r.stn = 0
@@ -811,7 +810,7 @@ export class Tribu extends GenDoc {
         a1: 0, a2: 0, stn: 0, v1: 0, v2: 0,
         nasp: await crypter(c, new Uint8Array(encode(nac.anr)))
       }
-      r.act = [null, item]
+      r.act.push(item)
     }
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'tribus', id: r.id, v: r.v, _data_ }
@@ -845,9 +844,15 @@ export class Gcvols extends GenDoc {
 - `mavk` : map des avatars du compte. 
   - _clé_ : id court de l'avatar cryptée par la clé K du compte.
   - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
-- `compteurs`: compteurs sérialisés (non cryptés), dont `q1 q2` 
-  les quotas actuels du compte qui sont dupliqués dans son entrée de sa tribu.
-
+- `qv` : `{ng nc nn q1 q2 v1 v2}`: nombre de groupes, chats, notes, valeurs courantes à jour.
+- `soldeCK` : solde du compte crypté par la clé K du compte. Pour le Comptable c'est toujours `null`. Pour les autres, c'est toujours existant pour un compte A, ou qui a été A à un moment de sa vie, et `null` pour les comptes qui n'ont toujours été que O (donc pour Comptable).
+  - `j`: date de dernier calcul.
+  - `q1 q2 v1 v2` : valeurs connues à j.
+  - `njn`: nombre de jours passés en solde négatif (à la date j).
+  - `solde`: solde en centimes (flottant).
+- `dons`: somme des dons _reçus_ (pour le Comptable _donnés_) de l'organisation en centimes.
+- `aticketK` : array des tickets de virement générés et en attente de réception d'un virement effectif.
+- `compteurs` statistique (non cryptée) d'évolution des quotas et volumes calculée d'après les valeurs `q1 q2 v1 v2`.
 **Pour le Comptable seulement**
 -`atr` : table des tribus : `{clet, info, q1, q2}` crypté par la clé K du comptable.
   - `clet` : clé de la tribu (donne aussi son id, index dans `atrx / astn`).
@@ -856,8 +861,26 @@ export class Gcvols extends GenDoc {
 - `astn` : table des statuts de notification des tribus _aucune simple bloquante_.
 */
 export class Compta extends GenDoc {
+  initSolde (m) { this.soldeC = { solde: m }}
+  debutA () {
+    const s = this.soldeC
+    s.q1 = this.qv.q1; s.q2 = this.qv.q2; s.v1 = this.qv.v1; s.v2 = this.qv.v2
+    const session = stores.session
+    s.j = session.dateJourConnx
+    s.njn = ((s.q1 * UNITEV1) < s.v1) || ((s.q2 * UNITEV2) < s.v2) ? 1 : 0
+  }
+  finA () {
+    this.recalculSolde()
+    const s = this.soldeC
+    this.soldeC = { solde: s.solde }
+  }
+  calculSolde () {
+    const s = this.soldeC
+    // TODO
+  }
+
   get estSponsor () { return this.sp === 1 }
-  // get stn () { return this.blocage ? this.blocage.stn : 0 }
+  get estA () { return !this.it }
 
   /* retourne l'array des na des avatars du compte (trié ordre alpha
     PRIMAIRE EN TETE
@@ -880,41 +903,6 @@ export class Compta extends GenDoc {
     if (!this.atr) return ''
     const a = this.atr[ID.court(id)]
     return a && a.info ? a.info : ''
-  }
-
-  clone () {
-    const c = new Compta()
-    c.id = this.id
-    c.v = this.v
-    c.vsh = this.vsh
-    c.hps1 = this.hps1
-    c.shay = this.shay
-    c.k = this.k
-    c.dhvu = this.dhvu
-    c.sp = this.sp
-    c.mav = new Map()
-    this.mav.forEach((na, id) => { c.mav.set(id, na) })
-    c.clet = this.clet
-    if (this.cletK) c.cletK = this.cletK
-    c.it = this.it
-    c.idt = this.idt
-    c.compteurs = new Compteurs(this.compteurs.serial)
-    if (this.naprim) c.naprim = this.naprim
-    c.avatarIds = new Set(c.mav.keys())
-    c.pc = this.pc
-    if (ID.estComptable(this.id)) {
-      c.atr = new Array(this.atr.length)
-      for (let i = 0; i < this.atr.length; i++) {
-        const e = this.atr[i]
-        if (e) {
-          const item = { clet: e.clet, info: e.info, q1: e.q1, q2: e.q2 }
-          c.atr[i] = item
-        } else this.atr[i] = null
-      }
-      c.astn = new Array(this.astn.length)
-      for (let i = 0; i < this.astn.length; i++) c.astn[i] = this.astn[i]
-    }
-    return c
   }
 
   async compile (row) {
@@ -958,7 +946,12 @@ export class Compta extends GenDoc {
     this.dhvu = row.dhvu ? parseInt(await decrypterStr(session.clek, row.dhvu)) : 0
     this.sp = row.sp
 
-    this.compteurs = new Compteurs(row.compteurs)
+    this.qv = row.qv
+    this.dons = row.dons
+    this.soldeC = await decrypter(session.clek, row.soldeCK)
+    this.aticket = await decrypter(session.clek, row.aticketK)
+
+    this.compteurs = new Compteurs(row.compteurs, this.qv)
     this.compteurs.pc1 = Math.round( (this.compteurs.v1 * 100) / (this.compteurs.q1 * UNITEV1))
     this.compteurs.pc2 = Math.round( (this.compteurs.v2 * 100) / (this.compteurs.q2 * UNITEV2))
     this.pc = this.compteurs.pc1 < this.compteurs.pc2 ? this.compteurs.pc2 : this.compteurs.pc1
@@ -990,6 +983,19 @@ export class Compta extends GenDoc {
     this.cletK = await crypter(session.clek, this.clet)
     this.idt = setClet(this.clet)
     delete this.rowCletK
+  }
+
+  /* Les valeurs de volume V1 / V2 doivent être réalignées avec 
+  le décompte des groupes / chats / notes */
+  aligneV (qv) {
+    this.qv.ng = qv.ng; this.qv.nc = qv.nc; this.qv.nn = qv.nn
+    this.qv.v1 = qv.v1; this.qv.v2 = qv.v2
+    this.soldeC.v1 = qv.v1; this.soldeC.v2 = qv.v2
+  }
+
+  async getSoldeCK () {
+    const session = stores.session
+    return await crypter(session.cleK, new Uint8Array(encode(this.soldeC)))
   }
 
   updAvatarMavk (setSupprIds) {
@@ -1056,10 +1062,7 @@ export class Compta extends GenDoc {
     r.mavk = { }
     r.mavk[await Compta.mavkK(na.id, k)] = await Compta.mavkKV(na, k)
 
-    const c = new Compteurs()
-    c.setQ1(q1)
-    c.setQ2(q2)
-    r.compteurs = c.serial
+    r.compteurs = new Compteurs().setqv({ q1: q1, q2: q2, v1: 0, v2: 0}).serial
 
     if (ID.estComptable(r.id)) {
       const x = { clet, info: '', q1, q2 }
@@ -1347,23 +1350,21 @@ Un chat est une ardoise commune à deux avatars I et E:
 - en session, une action permet de les rafraîchir sans modifier le texte et la date-heure du texte.
 
 _data_:
-- `id`
-- `ids` : identifiant du chat relativement à son avatar,
-    hash du cryptage de `idA-court/idB-court` par le `rnd` de A.
-- `v`
-- `vcv` : version de la carte de visite
+- `id`: id de A,
+- `ids`: hash du cryptage de `idA_court/idB_court` par la clé de A.
+- `v`: 1..N.
+- `dlv`
+- `vcv` : version de la carte de visite.
 
-- `st` : statut:
-  - 0 : le chat est vivant des 2 côtés
-  - 1 : _l'autre_ a été détecté disparu : 
-- `mc` : mots clés attribués par l'avatar au chat
-- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé CV de _l'autre_.
+- `ver` : 0:vide 1:émis 2:reçu
+- `mc` : mots clés attribués par l'avatar au chat.
+- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé de _l'autre_.
 - `cc` : clé `cc` du chat cryptée par la clé K du compte de I ou par la clé publique de I.
 - `seq` : numéro de séquence de changement du texte.
 - `contc` : contenu crypté par la clé `cc` du chat.
   - `na` : `[nom, cle]` de _l'autre_.
   - `dh`  : date-heure de dernière mise à jour.
-  - `txt` : texte du chat.
+  - `txt` : texte du chat. '' quand le compte a raccroché (ce qui ne _vide_ pas l'autre exemplaire.)
 
   Compilé:
   - seq
@@ -1380,7 +1381,7 @@ export class Chat extends GenDoc {
     const aSt = stores.avatar
     const session = stores.session
     this.vsh = row.vsh || 0
-    this.st = row.st || 0
+    this.ver = row.ver || 0
     this.mc = row.mc
     this.seq = row.seq
     if (row.cc.length === 256) {
@@ -1464,8 +1465,6 @@ export class Groupe extends GenDoc {
   get na () { return getNg(this.id) }
   get nom () { return this.na.nom }
   get nomc () { return this.na.nomc }
-  get pc1 () { return Math.round(this.vols.v1 / UNITEV1 / this.vols.q1) }
-  get pc2 () { return Math.round(this.vols.v2 / UNITEV2 / this.vols.q2) }
   get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconGroupe }
   get nbInvits () { let n = 0
     this.ast.forEach(x => { if (x >= 60 && x <= 73) n++ })
@@ -1481,6 +1480,7 @@ export class Groupe extends GenDoc {
     this.ast = row.ast || new Uint8Array([0])
     const x = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
     this.idh = x ? ID.long(x, session.ns) : 0
+    this.hebC = this.idh === session.compteId
     this.imh = row.imh || 0
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
