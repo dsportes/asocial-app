@@ -162,7 +162,8 @@ export async function NLfromIDB () {
   const ppSt = stores.pp
   try {
     await db.loctxt.each(async (idb) => {
-      const n = new NoteLocale().fromIdb(await decrypter(session.clek, idb.data))
+      const nl = new NoteLocale()
+      const n = await nl.fromIdb(await decrypter(session.clek, idb.data))
       ppSt.setNote(n)
     })
   } catch (e) {
@@ -178,7 +179,7 @@ export async function NLset (txt, id) {
     if (id) n.id = id
     ppSt.setNote(n)
     if (session.accesIdb) {
-      const buf = await crypter(session.clek, n.toIdb)
+      const buf = await crypter(session.clek, await n.toIdb())
       const cle = u8ToB64(await crypter(session.clek, '' + n.id, 1), true)
       await db.loctxt.put({ id: cle, data: buf })
     }
@@ -230,7 +231,7 @@ export async function FLset (nom, info, type, u8, id) {
     if (session.accesIdb) {
       const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
       const data = await crypter(session.clek, fl.toIdb)
-      const buf = await crypter(session.clek, fl.gz ? gzipT(u8) : u8)
+      const buf = await crypter(session.clek, fl.gz ? await gzipT(u8) : u8)
       await db.transaction('rw', ['locfic', 'locdata'], async () => {
         await db.locfic.put({ id: cle, data: data })
         await db.locdata.put({ id: cle, data: buf })
@@ -252,7 +253,7 @@ export async function FLget (fl) { // get du CONTENU
     const idb = await db.locdata.get(cle)
     if (idb) {
       const buf = await decrypter(session.clek, idb.data)
-      return fl.gz ? ungzip(buf) : buf
+      return fl.gz ? await ungzipB(buf) : buf
     }
     return null
   } catch (e) {

@@ -1657,7 +1657,7 @@ export class Note extends GenDoc {
     this.deGroupe = ID.estGroupe(this.id)
     this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || null)
     const x = decode(await decrypter(this.cle, row.txts))
-    this.txt = ungzip(x.t)
+    this.txt = await ungzipB(x.t)
     this.titre = titre(this.txt)
     this.dh = x.d
     this.auts = x.l ? x.l : []
@@ -1746,7 +1746,7 @@ export class Note extends GenDoc {
   }
 
   static async toRowTxt (cle, txt, im, auts) {
-    const x = { d: new Date().getTime(), t: gzip(txt) }
+    const x = { d: new Date().getTime(), t: await gzipB(txt) }
     if (im) {
       const nl = [im]
       if (auts) auts.forEach(t => { if (t !== im) nl.push(t) })
@@ -1773,7 +1773,7 @@ export class Note extends GenDoc {
     fic.sha = sha256(u8)
     fic.dh = new Date().getTime()
     fic.gz = fic.type.startsWith('text/')
-    fic.u8 = await crypter(this.cle, fic.gz ? gzipT(u8) : u8)
+    fic.u8 = await crypter(this.cle, fic.gz ? await gzipT(u8) : u8)
     return fic
   }
 
@@ -1812,7 +1812,7 @@ export class Note extends GenDoc {
     }
     if (!buf) return null
     const f = this.mfa.get(idf)
-    const buf2 = f.gz ? ungzipT(buf) : buf
+    const buf2 = f.gz ? await ungzipT(buf) : buf
     return buf2
   }
 
@@ -1929,15 +1929,15 @@ export class NoteLocale {
     return this
   }
 
-  fromIdb (idb) {
+  async fromIdb (idb) {
     decodeIn(idb, this)
-    this.txt = decoder.decode(ungzip(this.txt))
+    this.txt = decoder.decode(await ungzipB(this.txt))
     return this
   }
 
-  get toIdb () {
+  async toIdb () {
     const x = { ...this }
-    x.txt = gzip(encoder.encode(this.txt))
+    x.txt = await gzipB(encoder.encode(this.txt))
     return new Uint8Array(encode(x))
   }
 

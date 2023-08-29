@@ -1,23 +1,18 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { useQuasar } from 'quasar'
+import { gzip, gunzip } from 'zlib'
 
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AMJ, appexc } from './api.mjs'
 import { MD } from './modele.mjs'
 
-let pako
-
 let $q
 
 export function dkli (idx) {
   if (!$q) $q = useQuasar()
   return ($q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0')) + ' '
-}
-
-export function setRequiredModules (m) { 
-  pako = m.pako
 }
 
 const decoder = new TextDecoder('utf-8')
@@ -155,26 +150,45 @@ export function photoToBin (t) {
 
 
 /* gzip / ungzip ***************************************************/
-export function gzipT (data) { return pako.gzip(data) }
+function gz (u8) {
+  return new Promise((resolve, reject) => {
+    gzip(u8, (err, buffer) => {
+      if (err) reject(err) 
+      else resolve(new Uint8Array(buffer))
+    })
+  })
+}
 
-export function ungzipT (data) { return pako.ungzip(data) }
+function ungz (u8) {
+  return new Promise((resolve, reject) => {
+    gunzip(u8, (err, buffer) => {
+      if (err) reject(err) 
+      else resolve(new Uint8Array(buffer))
+    })
+  })
+}
 
-export function gzip (arg) {
+export async function gzipT (data) { return await gz(encoder.encode(data)) }
+
+export async function ungzipT (data) { return decoder.decode(await ungz(data)) }
+
+export async function gzipB (arg) {
   if (!arg) return null
   // t: 0:binaire, 1:texte zippé, 2:texte non zippé
   const t = typeof arg === 'string' ? (arg.length > 1024 ? 1 : 2) : 0
   let u8 = t ? encoder.encode(arg) : arg
-  if (t < 2) u8 = pako.deflate(u8)
+  if (t < 2) u8 = await gz(u8)
   return concat([new Uint8Array([t]), u8])
 }
 
-export function ungzip (arg) {
+export async function ungzipB (arg) {
   if (!arg || arg.length < 1) return null
   const t = arg[0]
   const c = arg.slice(1)
-  const res = t < 2 ? pako.inflate(c) : c
+  const res = t < 2 ? await ungz(c) : c
   return t ? decoder.decode(arrayBuffer(res)) : res
 }
+
 
 /* divers *****************************************************************/
 export function splitPK(pk) {
