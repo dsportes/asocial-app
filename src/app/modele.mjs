@@ -1092,11 +1092,11 @@ export class Compta extends GenDoc {
 - `lgrk` : map :
   - _clé_ : `ni` : _numéro d'invitation_ hash de la clé inversée du groupe crypté par la  clé de l'avatar.
   - _valeur_ : couple `[sta, ref]`
-    - `sta`: statut d'activité: 2:résilié, 3:invité, 4:ré-invité, 5:actif
+    - `str`: statut de résiliation par un animateur à traiter par le compte.
+      - 0: rien à triater, 1:retrait d'invitation, résiiation d'activité. 
     - `ref`: `[nomg, clég, im]` selon `sta`,
-      - (2): `null`
-      - (3 4): crypté par la clé publique RSA de l'avatar.
-      - (5): ré-encrypté par la clé K du compte par l'opération d'acceptation d'une invitation.
+      - crypté par la clé publique RSA de l'avatar pour une invitation.
+      - ré-encrypté par la clé K du compte par l'opération d'acceptation d'une invitation.
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `hpc` : hash de la phrase de contact.
 - `napc` : `[nom, clé]` de l'avatar cryptée par le PBKFD de la phrase de contact.
@@ -1112,24 +1112,29 @@ export class Avatar extends GenDoc {
   */
   membres (map, dlv) {
     for (const [ ,t] of this.lgr) {
+      if (!t.str) {
       const e = map[t.ng.id]
       if (!e) { map[t.ng.id] = { idg: t.ng.id, mbs: [t.im], dlv } } else e.mbs.push(t.im)
+      }
     }
   }
 
   /* Ids des groupes de l'avatar, accumulés dans le set s */
   idGroupes (s) {
     const x = s || new Set()
-    for (const [ ,t] of this.lgr) x.add(t.ng.id)
+    for (const [ ,t] of this.lgr) if (!t.str) x.add(t.ng.id)
     return x
   }
 
   /* Retourne les numéros d'invitation de l'avatar pour les groupes de setg
-  et supprime leurs entrées dans lgr
+  et supprime leurs entrées dans lgr 
+  VERIFIER s'il faut prendre les résiliés en attente
   */
   niDeGroupes (setg) {
     const ani = new Set()
-    for (const [ni ,t] of this.lgr) if (setg.has(t.ng.id)) ani.add(ni)
+    for (const [ni ,t] of this.lgr) {
+      if (!t.str && setg.has(t.ng.id)) ani.add(ni)
+    }
     ani.forEach(ni => this.lgr.delete(ni))
     return Array.from(ani)
   }
@@ -1138,7 +1143,6 @@ export class Avatar extends GenDoc {
   async compile (row) {
     const session = stores.session
     const gSt = stores.groupe
-    const aSt = stores.avatar
     this.vsh = row.vsh || 0
     this.vcv = row.vcv || 0
     this.hpc = row.hpc
@@ -1180,21 +1184,18 @@ export class Avatar extends GenDoc {
       */
       for (const nx in row.lgrk) {
         const ni = parseInt(nx)
-        const [sta, ref] = decode(row.lgrk[nx])
+        const [str, ref] = decode(row.lgrk[nx])
         let ng
-        if (!ref) {
-          this.lgr.set(ni, { sta })
-        } else if (ref.length === 256) {
+        if (ref.length === 256) {
           const [nom, rnd, im] = decode(await decrypterRSA(this.priv, ref))
           ng = NomGenerique.from([nom, rnd])
-          this.lgr.set(ni, { sta, ng, im})  
+          gSt.setInvit(ng.id, this.id)
         } else {
           const [nom, rnd, im] = decode(await decrypter(session.clek, ref))
           ng = NomGenerique.from([nom, rnd])
-          this.lgr.set(ni, { sta, ng, im})  
+          gSt.delInvit(ng.id, this.id)
         }
-        if (sta === 3 || sta === 4) gSt.setInvit(ng.id, this.id)
-        else gSt.delInvit(ng.id, this.id)
+        this.lgr.set(ni, { str, ng, im})
       }
     }
   }
@@ -1366,7 +1367,7 @@ _data_:
 - `dlv`
 - `vcv` : version de la carte de visite.
 
-- `r` : 0:raccroché, 1:en ligne
+- `rac` : 0:I et E ont raccroché, 1:I aracroché pas E, 2:E a raccroché pas I
 - `mc` : mots clés attribués par l'avatar au chat.
 - `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé de _l'autre_.
 - `cc` : clé `cc` du chat cryptée par la clé K du compte de I ou par la clé publique de I.
@@ -1457,7 +1458,7 @@ __data_:
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
 - `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes.
 - `ast` : table des statuts des membres. Deux chiffres `sta laa` (0: disparu / oublié):
-  - `sta`: statut d'activité: 1: inactif, 2:résilié, 3:invité, 4:ré-invité, 5:actif
+  - `sta`: statut d'activité: 1: contact, 2:invité, 3:actif
   - `laa`: 1:lecteur, 2:auteur, 3:animateur
 - `nag` : liste des hash de la clé du membre cryptée par la clé du groupe.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
@@ -1478,10 +1479,9 @@ export class Groupe extends GenDoc {
 
   sta (im) { const n = this.ast[im]; return !n ? 0 : Math.floor(n / 10) }
   laa (im) { const n = this.ast[im]; return !n ? 0 : n % 10 }
-  estContact (im) { return this.sta(im) === 1}
-  estResilie (im) { return this.sta(im) === 2}
-  estInvite (im) { const s = this.sta(im); return s === 3 || s === 4 }
-  estActif (im) { return this.sta(im) === 5}
+  estContact (im) { return this.sta(im) === 1 }
+  estInvite (im) { return this.sta(im) === 2 }
+  estActif (im) { return this.sta(im) === 3 }
   estAuteur (im) { return this.las(im) > 1 }
   estAnim (im) { return this.las(im) === 3 }
 
