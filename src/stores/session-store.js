@@ -24,6 +24,9 @@ export const useSessionStore = defineStore('session', {
     
     naComptable: null,
     dh: 0,
+    nl: 0, // nombres de lectures sur les POST
+    ne: 0, // nombres d'écritures sur les POST
+
     /* authToken : base64 de la sérialisation de :
     - `sessionId`
     - `shax` : SHA de X, le PBKFD de la phrase complète.
@@ -121,6 +124,8 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
+    setNlNe (nl, ne) { this.nl += nl, this.ne += ne },
+    
     init (phrase) {
       this.sessionId = intToB64(rnd6())
       if (phrase) {

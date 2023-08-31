@@ -103,7 +103,12 @@ export async function post (op, fonction, args) {
   }
   // les status HTTP non 2xx sont tombés en exception
   try {
-    return decode(buf)
+    const resp = decode(buf)
+    if (resp && (resp.nl || resp.ne)) {
+      const session = stores.session
+      session.setNlNs(resp.nl || 0, resp.ne || 0)
+    }
+    return resp
   } catch (e) { // Résultat mal formé
     throw new AppExc(E_BRO, 2, [op ? op.nom : '', e.message])
   }
