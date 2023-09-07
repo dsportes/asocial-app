@@ -2,7 +2,7 @@
 import stores from '../stores/stores.mjs'
 import { decode } from '@msgpack/msgpack'
 
-import { AppExc, E_WS, PINGTO } from './api.mjs'
+import { AppExc, E_WS, PINGTO, WSHEARTBEAT } from './api.mjs'
 import { SyncQueue } from './sync.mjs'
 
 /* Pour être plus élégant, les function suivantes auraient dû être mises
@@ -77,7 +77,7 @@ export async function openWS () {
         try {
           job = false
           ws.send(session.sessionId)
-          heartBeat(session.sessionId)
+          if (WSHEARTBEAT) heartBeat(session.sessionId)
           resolve()
         } catch (e) {
           reject(EX2(e))
@@ -131,5 +131,5 @@ function heartBeat (sid) {
       ws.send(sid) // ping
       heartBeat(sid)
     }
-  }, PINGTO * 1000 * (debug ? 1000 : 1))
+  }, PINGTO * 60000 / 2 )
 }
