@@ -448,78 +448,51 @@ export class Phrase {
 
 }
 
+/* Notification *******************************************
+De facto un objet notification est immuable: 
+en cas de _mise à jour_ il est remplacé par un autre.
+
+Il est crypté selon son type par: 
+1) la clé du Comptable, 2-3) la clé de la tribu.
+
+Une notification a les propriétés suivantes:
+- `t`: type de la notification
+  - 1 : de l'espace
+  - 2 : d'une tribu
+  - 3 : d'un compte
+  - 4 : _par convention_ le code 4 désigne le _dépassement de quotas_
+  - 5 : _par convention_ le code 5 désigne une _alerte de solde / consommation_.
+- `r`: restriction d'accès: 
+  - 0 : pas de restriction
+  - 1 : espace figé
+  - 2 : espace bloqué
+  - 3 : accès en lecture seule
+  - 4 : accès minimal
+  - 5 : actions accroissant le volume interdites.
+- `dh` : date-heure de création.
+- `texte`: texte de la notification.
+- `idSource`: id (courte en sérialisation) du sponsor ayant créé cette notification pour un type 3.
+*/
 export class Notification {
-
-  static lstfnotif = ['idSource', 'jbl', 'nj', 'texte', 'dh']
-
-  /* Attributs: 
-  - `idSource`: id court du Comptable ou du sponsor, par convention 0 pour l'administrateur.
-  - `jbl` : jour de déclenchement de la procédure de blocage sous la forme `aaaammjj`, 0 s'il n'y a pas de procédure de blocage en cours.
-  - `nj` : en cas de procédure ouverte, nombre de jours après son ouverture avant de basculer en niveau 4.
-  - `texte` : texte informatif, pourquoi, que faire ...
-  - `dh` : date-heure de dernière modification (informative).
-  */
-  constructor (buf, idSource) {
-    if (buf) {
-      const r = decode(buf)
-      for (const f of Notification.lstfnotif) this[f] = r[f]
-    } else {
-      this.idSource = ID.court(idSource)
-      this.jbl = 0
-      this.nj = 0
-      this.texte = ''
-      this.dh = 0
-    }
-    if (this.nj > 365) this.nj = 365
-    if (this.nj < 0) this.nj = 0
-    this.calcul()
+  // Factory construisant une objet Notification depuis sa sérialisation
+  static deSerial (serial) {
+    return new Notification(decode(serial))
   }
 
-  clone () { return new Notification(this.encode()) }
-
-  encode () {
-    const buf = {}
-    for (const f of Notification.lstfnotif) buf[f] = this[f]
-    return new Uint8Array(encode(buf))
+  constructor ({t, r, dh, texte, idSource}) {
+    const session = stores.session
+    this.idSource = idSource ? ID.long(idSource, session.ns) : 0
+    this.t = t
+    this.r = r || 0
+    this.texte = texte || ''
+    this.dh = dh || Date.now()
   }
 
-  /*  Calculés en fonction du jour courant:
-  - niv : niveau d'alerte
-    0: pas de blocage,
-    1: alerte simple
-    2: alerte grave (une procédure de blocage est planifiée)
-    3: lecture seule, 
-    4: ni lecture ni écriture,
-    5: résilié
-  - d3 : date d'atteinte du niveau 3
-  - n3 : nombre de jours avant d'atteindre le niveau 3
-  - d4 : date d'atteinte du niveau 2
-  - n4 : nombre de jours avant d'atteindre le niveau 4
-  - d5 : date d'atteinte du niveau 3
-  - n5 : nombre de jours avant d'atteindre le niveau 5
-  - np : nombre de jours avant que la procédure de blocage ne s'engage (niv 2 seulement)
-  */
-  calcul () {
-    try {
-      this.n3 = 0; this.n4 = 0; this.n5 = 0; this.d4 = 0; this.d5 = 0
-      if (!this.jbl) { this.niv = 1; return }
-
-      const auj = AMJ.amjUtc()
-      this.n3 = AMJ.diff(this.jbl, auj)
-      this.d4 = AMJ.amjUtcPlusNbj(this.jbl, this.nj)
-      this.n4 = AMJ.diff(this.d4, auj)
-      if (this.n4 === this.n3) this.n3 = 0
-      this.d5 = AMJ.amjUtcPlusNbj(this.jbl, limitesjour.dlv)
-      this.n5 = AMJ.diff(this.d5, auj)
-      if (this.n5 === this.n4) this.n4 = 0
-
-      if (this.n5 <= 0) { this.niv = 5; return } // date de résiliation atteinte ou dépassée
-      if (this.n4 <= 0) { this.niv = 4; return } // date de blocage ecritures atteinte ou dépassée
-      if (this.n3 <= 0) { this.niv = 3; return } // date de blocage lectures atteinte ou dépassée
-      this.niv = 2
-    } catch (e) {
-      console.log(e)
-    }
+  get serial() {
+    const x = { t: this.t, r: this.r || 0, dh: this.dh }
+    if (this.texte) x.texte = this.texte
+    if (this.idSource) x.idSource = ID.court(this.idSource)
+    return new Uint8Array(encode(x))
   }
 }
 
@@ -564,26 +537,65 @@ _data_ :
 - `id` : de l'espace de 10 à 89.
 - `v`
 - `org` : code de l'organisation propriétaire
+- `opt`: `xy` 0 10 11 20 21
+  - x : 0: l'organisation n'autorise pas les comptes A.
+  - x : 1: comptes A autorisés sous contrôle du Comptable.
+  - x : 2: comptes A autorisés sous contrôle du Comptable ou d'un sponsor.
+  - y : 0: l'accord du compte n'est pas nécessaire pour passer de O à A
+  - y : 1: l'accord du compte est requis pour passer de O à A.
 - `notif` : notification de l'administrateur, cryptée par la clé du Comptable.
 - `t` : numéro de _profil_ de quotas dans la table des profils définis dans la configuration 
-  (chaque profil donne un couple de quotas q1 q2).
+  (chaque profil donne un triplet qc q1 q2).
 */
 export class Espace extends GenDoc {
 
   async compile (row) {
     this.org = row.org
+    this.opt = row.opt || 0
+    this.t = row.t || 0
     // la clé est la clé du Comptable de l'espace
     if (row.notif) {
-      this.notif = new Notification(await decrypter(NomGenerique.cleComptable, row.notif))
-      this.notif.v = this.v
+      const ser = await decrypter(NomGenerique.cleComptable, row.notif)
+      this.notif = Notification.deSerial(ser)
     } else this.notif = null
-    this.t = row.t || 0
   }
 
   static async nouveau (org) {
     const session = stores.session
     const r = { id: session.ns, org, v: 1, t: 1, notif: null }
     return { _nom: 'espaces', id: r.id, org: r.org, v: r.v, _data_: new Uint8Array(encode(r))}
+  }
+}
+
+/** Ticket ***********************************************
+Il y a un document `tickets` par ticket de paiement reçu et pas encore _crédité ou traité_.
+_data_:
+- `id`: numéro de ticket.
+- `dh`: date-heure d'enregistrement.
+- `m`: montant.
+- `infoK`: texte facultatif du Comptable pour un ticket qu'il considère comme _à traiter_ plus tard, à vérifier, etc.
+- `cr`: 0: pas encore crédité par le compte, 1: crédité par le compte.
+*/
+export class Ticket extends GenDoc {
+  async compile (row) {
+    const session = stores.session
+    this.dh = row.dh
+    this.m = row.m
+    this.cr = row.cr || 0
+    if (row.infoK) {
+      if (session.estComptable) {
+        this.info = await decrypter(session.cleK, row.infoK)
+      } else this.info = true
+    } else this.info = false
+  }
+
+  static async nouveauRow (id, m, info) {
+    const session = stores.session
+    const r = { id, m }
+    if (info && session.estComptable)
+      r.infoK = await crypter(session.cleK, info)
+    this.dh = Date.now()
+    return { _row: 'tickets', id, _data_: new Uint8Array(encode(r)) }
   }
 }
 
@@ -594,15 +606,17 @@ _data_:
 - `atr` : sérialisation de la table des synthèses des tribus de l'espace. 
   L'indice dans cette table est l'id très court de la tribu (sans le 4 en tête). 
   Chaque élément est la sérialisation de:
-  - `q1 q2` : quotas de la tribu.
-  - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
-  - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
-  - `ntr1` : nombre de notifications tribu_simples
-  - `ntr2` : nombre de notifications tribu bloquantes
+  - `qc q1 q2` : quotas de la tribu.
+  - `ac a1 a2` : sommes des quotas attribués aux comptes de la tribu.
+  - `cj v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
+  - `ntr0` : nombre de notifications tribu sans restriction d'accès.
+  - `ntr1` : nombre de notifications tribu avec restriction d'accès _lecture seule_.
+  - `ntr2` : nombre de notifications tribu avec restriction d'accès _minimal_.
   - `nbc` : nombre de comptes.
   - `nbsp` : nombre de sponsors.
-  - `nco1` : nombres de comptes ayant une notification simple.
-  - `nco2` : nombres de comptes ayant une notification bloquante.
+  - `nco0` : nombres de comptes ayant une notification sans restriction d'accès.
+  - `nco1` : nombres de comptes ayant une notification avec restriction d'accès _lecture seule_.
+  - `nco2` : nombres de comptes ayant une notification avec restriction d'accès _minimal_.
 atr[0] est la somme des atr[1..N] : calculé sur compile (pas stocké)
 */
 export class Synthese extends GenDoc {
@@ -618,29 +632,35 @@ export class Synthese extends GenDoc {
       const x = decode(row.atr[i])
       if (x && !x.vide) {
         x.id = ID.long(i, session.ns)
+        x.pcac = !x.qc ? 0 : Math.round(x.ac * 100 / x.qc) 
         x.pca1 = !x.q1 ? 0 : Math.round(x.a1 * 100 / x.q1) 
         x.pca2 = !x.q2 ? 0 : Math.round(x.a2 * 100 / x.q2) 
+        x.pccj = !x.cj ? 0 : Math.round(x.cj * 100 / x.qc) 
         x.pcv1 = !x.q1 ? 0 : Math.round(x.v1 * 100 / x.q1) 
         x.pcv2 = !x.q2 ? 0 : Math.round(x.v2 * 100 / x.q2)   
         lcSynt.forEach(f => { a0[f] +=  x[f] })
       }
       this.atr[i] = x
     }
+    a0.pcac = !a0.qc ? 0 : Math.round(a0.ac * 100 / a0.qc) 
     a0.pca1 = !a0.q1 ? 0 : Math.round(a0.a1 * 100 / a0.q1) 
     a0.pca2 = !a0.q2 ? 0 : Math.round(a0.a2 * 100 / a0.q2) 
+    a0.pccj = !a0.cj ? 0 : Math.round(a0.cj * 100 / a0.qc) 
     a0.pcv1 = !a0.q1 ? 0 : Math.round(a0.v1 * 100 / a0.q1) 
     a0.pcv2 = !a0.q2 ? 0 : Math.round(a0.v2 * 100 / a0.q2) 
     this.atr[0] = a0 
   }
 
-  static async nouveau (a1, a2, q1, q2) { // a: au comptable, q: à la tribu primitive
+  static async nouveau (ac, a1, a2, qc, q1, q2) { // a: au comptable, q: à la tribu primitive
     const session = stores.session
-    const r = { id: session.ns, v: new Date().getTime(), atr: [null, null] }
+    const r = { id: session.ns, v: Date.now(), atr: [null, null] }
 
     const e = {}
     lcSynt.forEach(f => { e[f] = 0 })
+    e.qc = qc
     e.q1 = q1
     e.q2 = q2
+    e.ac = ac
     e.a1 = a1
     e.a2 = a2
     e.nbc = 1
@@ -657,25 +677,30 @@ _data_:
 - `v`
 
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
-- `q1 q2` : quotas totaux de la tribu.
-- `stn` : statut de la notification de tribu: _0:aucune 1:simple 2:bloquante 3:bloquée_
+- `qc q1 q2` : quotas totaux de la tribu.
+- `stn` : restriction d'accès de la notification _tribu_:
+   _0:aucune 1:lecture seule 2:minimal_
 - `notif`: notification de niveau tribu cryptée par la clé de la tribu.
 - `act` : table des comptes de la tribu. L'index `it` dans cette liste figure dans la propriété `it` du `comptas` correspondant :
   - `idT` : id court du compte crypté par la clé de la tribu.
   - `nasp` : si sponsor `[nom, cle]` crypté par la cle de la tribu.
   - `notif`: notification de niveau compte cryptée par la clé de la tribu.
-  - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
-  - `q1 q2` : quotas attribués.
-  - `v1 v2` : volumes **approximatifs** effectivement utilisés.
+- `stn` : restriction d'accès de la notification _compte_: 
+  _0:aucune 1:lecture seule 2:minimal_  
+  - `qc q1 q2` : quotas attribués.
+  - `cj v1 v2` : volumes **approximatifs** effectivement utilisés.
   Calculés localement :
+  - pccj : pourcentage d'utilisation de la consommation journalière / qc
   - pcv1 : pourcentage d'utilisation effective de q1 : v1 / q1
-  - pcv2
+  - pcv2 : pourcentage d'utilisation effective de qc : v2 / q2
 
 Calcul des compteurs de Synthese dans .synth : 
 - cet objet est exactement similaire à une ligne de Synthese.
 - plus, calculés localement :
+  - pcac : pourcentage d'affectation des quotas : ac / qc
   - pca1 : pourcentage d'affectation des quotas : a1 / q1
   - pca2
+  - pccj : pourcentage d'utilisation de la consommation journalière / qc
   - pcv1 : pourcentage d'utilisation effective des quotas : v1 / q1
   - pcv2
 
@@ -728,6 +753,7 @@ export class Tribu extends GenDoc {
 
     this.notif = row.notif ? new Notification(await decrypter(c, row.notif)) : null
 
+    this.qc = row.qc || 0
     this.q1 = row.q1 || 0
     this.q2 = row.q2 || 0
     this.stn = row.stn || 0
@@ -741,11 +767,14 @@ export class Tribu extends GenDoc {
       r.notif = item.notif ? new Notification(await decrypter(c, item.notif)) : null
       r.stn = item.stn || 0
       r.nasp = item.nasp ? NomGenerique.from(decode(await decrypter(c, item.nasp))) : null
+      r.qc = item.qc || 0
       r.q1 = item.q1 || 0
       r.q2 = item.q2 || 0
+      r.cj = item.cj || 0
       r.v1 = item.v1 || 0
       r.v2 = item.v2 || 0
 
+      r.pccj = !r.cj ? 0 : Math.round(r.cj * 100 / r.qc) 
       r.pcv1 = !r.q1 ? 0 : Math.round(r.v1 * 100 / r.q1) 
       r.pcv2 = !r.q2 ? 0 : Math.round(r.v2 * 100 / r.q2) 
       this.act.push(r)
@@ -753,26 +782,31 @@ export class Tribu extends GenDoc {
 
     const r = { notif: this.notif, id: this.id }
     lcSynt.forEach(f => { r[f] = 0 })
+    r.qc = this.qc
     r.q1 = this.q1
     r.q2 = this.q2
+    r.ntr0 = row.stn === 0 ? 1 : 0
     r.ntr1 = row.stn === 1 ? 1 : 0
     r.ntr2 = row.stn === 2 ? 1 : 0
     this.act.forEach(x => {
       if (!x.vide) {
+        r.ac += x.qc
         r.a1 += x.q1
         r.a2 += x.q2
+        r.cj += x.cj
         r.v1 += x.v1
         r.v2 += x.v2
         r.nbc++
         if (x.nasp) r.nbsp++
-        if (x.stn) {
-          if (x.stn === 1) r.nco1++
-          if (x.stn === 2) r.nco2++
-        }
+        if (x.stn === 0) r.nco0++
+        else if (x.stn === 1) r.nco1++
+        else if (x.stn === 2) r.nco2++
       }
     })
+    r.pcac = !r.qc ? 0 : Math.round(r.ac * 100 / r.qc) 
     r.pca1 = !r.q1 ? 0 : Math.round(r.a1 * 100 / r.q1) 
     r.pca2 = !r.q2 ? 0 : Math.round(r.a2 * 100 / r.q2) 
+    r.pccj = !r.qc ? 0 : Math.round(r.cj * 100 / r.qc) 
     r.pcv1 = !r.q1 ? 0 : Math.round(r.v1 * 100 / r.q1) 
     r.pcv2 = !r.q2 ? 0 : Math.round(r.v2 * 100 / r.q2) 
     this.synth = r
@@ -790,7 +824,7 @@ export class Tribu extends GenDoc {
   }
 
   // id de la tribu, q1 , q2 
-  static async nouvelle (idt, q1t, q2t, primitive, q1c, q2c) {
+  static async nouvelle (idt, qct, q1t, q2t, primitive, qcc, q1c, q2c) {
     const session = stores.session
     const c = getCle(idt)
     const r = {}
@@ -798,6 +832,7 @@ export class Tribu extends GenDoc {
     r.id = idt
     r.v = 1
     r.act = [null]
+    r.qc = qct
     r.q1 = q1t
     r.q2 = q2t
     r.stn = 0
@@ -806,8 +841,8 @@ export class Tribu extends GenDoc {
       const nac = NomGenerique.comptable()
       const item = {
         idT: await crypter(c, '' + ID.court(nac.id)),
-        q1: q1c, q2: q2c,
-        a1: 0, a2: 0, stn: 0, v1: 0, v2: 0,
+        qc: qcc, q1: q1c, q2: q2c,
+        ac: 0, a1: 0, a2: 0, stn: 0, cj: 0, v1: 0, v2: 0,
         nasp: await crypter(c, new Uint8Array(encode(nac.anr)))
       }
       r.act.push(item)
@@ -844,41 +879,22 @@ export class Gcvols extends GenDoc {
 - `mavk` : map des avatars du compte. 
   - _clé_ : id court de l'avatar cryptée par la clé K du compte.
   - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
-- `qv` : `{ng nc nn q1 q2 v1 v2}`: nombre de groupes, chats, notes, valeurs courantes à jour.
-- `soldeCK` : solde du compte crypté par la clé K du compte. Pour le Comptable c'est toujours `null`. Pour les autres, c'est toujours existant pour un compte A, ou qui a été A à un moment de sa vie, et `null` pour les comptes qui n'ont toujours été que O (donc pour Comptable).
-  - `j`: date de dernier calcul.
-  - `q1 q2 v1 v2` : valeurs connues à j.
-  - `njn`: nombre de jours passés en solde négatif (à la date j).
-  - `solde`: solde en centimes (flottant).
-- `dons`: somme des dons _reçus_ (pour le Comptable _donnés_) de l'organisation en centimes.
-- `aticketK` : array des tickets de virement générés et en attente de réception d'un virement effectif.
-- `compteurs` statistique (non cryptée) d'évolution des quotas et volumes calculée d'après les valeurs `q1 q2 v1 v2`.
+- `qv` : `{qc, q1, q2, nn, nc, ng, v2}`: quotas et nombre de groupes, chats, notes, volume fichiers. Valeurs courantes.
+- `oko` : hash du PBKFD de la phrase de confirmation d'un accord pour passage de O à A ou de A à O.
+- `credits` : pour un compte A seulement:
+  - `total`: cumul des crédits reçus depuis le début de la vie du compte.
+  - `tickets`: liste des tickets en attente d'enregistrement.
+  - crypté par la clé K sauf après une conversion de compte O ou c'est crypté par la clé publique de l'avatar principal du compte.
+- `compteurs` sérialisation non cryptée d'évolution des quotas, volumes et coûts.
 **Pour le Comptable seulement**
 -`atr` : table des tribus : `{clet, info, q1, q2}` crypté par la clé K du comptable.
   - `clet` : clé de la tribu (donne aussi son id, index dans `atrx / astn`).
   - `info` : texte très court pour le seul usage du comptable.
-  - `q1 q2` : quotas globaux de la tribu.
-- `astn` : table des statuts de notification des tribus _aucune simple bloquante_.
+  - `qc q1 q2` : quotas globaux de la tribu.
+- `astn` : table des statuts de notification des tribus:
+  _0:aucune, 1:lecture seule, 2:accès minimal_
 */
 export class Compta extends GenDoc {
-  initSolde (m) { this.soldeC = { solde: m }}
-  debutA () {
-    const s = this.soldeC
-    s.q1 = this.qv.q1; s.q2 = this.qv.q2; s.v1 = this.qv.v1; s.v2 = this.qv.v2
-    const session = stores.session
-    s.j = session.dateJourConnx
-    s.njn = ((s.q1 * UNITEV1) < s.v1) || ((s.q2 * UNITEV2) < s.v2) ? 1 : 0
-  }
-  finA () {
-    this.recalculSolde()
-    const s = this.soldeC
-    this.soldeC = { solde: s.solde }
-  }
-  calculSolde () {
-    const s = this.soldeC
-    // TODO
-  }
-
   get estSponsor () { return this.sp === 1 }
   get estA () { return !this.it }
 
@@ -929,7 +945,7 @@ export class Compta extends GenDoc {
       // Le Comptable a crypté la tribu par la clé PUB du compte (il ne connait pas K)
       const avatar = aSt.getAvatar(this.id)
       if (avatar) {
-        this.clet = await decrypterRSA(priv, row.cletK)
+        this.clet = await decrypterRSA(avatar.priv, row.cletK)
         // pour mettre à jour le row compta sur le serveur
         this.cletK = await crypter(session.clek, this.clet)
         this.idt = setClet(this.clet)
@@ -947,20 +963,23 @@ export class Compta extends GenDoc {
     this.sp = row.sp
 
     this.qv = row.qv
-    this.dons = row.dons
-    this.soldeC = await decrypter(session.clek, row.soldeCK)
-    this.aticket = await decrypter(session.clek, row.aticketK)
+    if (row.credits) {
+      if (row.credits.length !== 256) {
+        this.credits = await decrypter(session.clek, row.credits)
+      } else {const avatar = aSt.getAvatar(this.id)
+        if (avatar) {
+          this.credits = decode(await decrypterRSA(avatar.priv, row.credits))
+        } this.creditsX = row.credits // SERA FAIT DANS compile2()
+      }
+    }
 
     this.compteurs = new Compteurs(row.compteurs, this.qv)
-    this.compteurs.pc1 = Math.round( (this.compteurs.v1 * 100) / (this.compteurs.q1 * UNITEV1))
-    this.compteurs.pc2 = Math.round( (this.compteurs.v2 * 100) / (this.compteurs.q2 * UNITEV2))
-    this.pc = this.compteurs.pc1 < this.compteurs.pc2 ? this.compteurs.pc2 : this.compteurs.pc1
 
     /**Pour le Comptable seulement**
-    -`atr` : table des tribus : `{clet, info, q1, q2}` crypté par la clé K du comptable.
+    -`atr` : table des tribus : `{clet, info, qc, q1, q2}` crypté par la clé K du comptable.
       - `clet` : clé de la tribu (donne aussi son id, index dans `atrx / astn`).
       - `info` : texte très court pour le seul usage du comptable.
-      - `q1 q2` : quotas globaux de la tribu.
+      - `qc q1 q2` : quotas globaux de la tribu.
     - `astn` : table des statuts de notification des tribus _aucune simple bloquante_.
     */
     if (ID.estComptable(this.id)) {
@@ -983,19 +1002,10 @@ export class Compta extends GenDoc {
     this.cletK = await crypter(session.clek, this.clet)
     this.idt = setClet(this.clet)
     delete this.rowCletK
-  }
-
-  /* Les valeurs de volume V1 / V2 doivent être réalignées avec 
-  le décompte des groupes / chats / notes */
-  aligneV (qv) {
-    this.qv.ng = qv.ng; this.qv.nc = qv.nc; this.qv.nn = qv.nn
-    this.qv.v1 = qv.v1; this.qv.v2 = qv.v2
-    this.soldeC.v1 = qv.v1; this.soldeC.v2 = qv.v2
-  }
-
-  async getSoldeCK () {
-    const session = stores.session
-    return await crypter(session.cleK, new Uint8Array(encode(this.soldeC)))
+    if (this.creditsX) {
+      this.credits = decode(await decrypterRSA(priv, this.creditsX))
+      delete this.creditsX
+    }
   }
 
   updAvatarMavk (setSupprIds) {
@@ -1034,7 +1044,7 @@ export class Compta extends GenDoc {
     return u8ToB64(await crypter(k, '' + ID.court(id), 1), true)
   }
 
-  static async row (na, clet, cletX, q1, q2, estSponsor, phrase) { 
+  static async row (na, clet, cletX, qc, q1, q2, estSponsor, phrase) { 
     /* création d'une compta
     Pour le comptable le paramètre cletX est null (il est calculé). 
     Pour les autres, c'est le nctkc pris dans la tribu
@@ -2028,6 +2038,7 @@ export class FichierLocal {
 
 const classes = {
   espaces: Espace,
+  tickets: Ticket,
   tribus: Tribu,
   gcvols: Gcvols,
   syntheses: Synthese,
