@@ -45,8 +45,8 @@
       </div>
 
       <!-- Notifications -->
-      <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
-        :cible="0" @click="clickNotif"/>
+      <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
+        @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
         <span v-if="session.ok" class="titre-lg cursor-pointer"  
@@ -339,7 +339,7 @@ import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
-import NotifIcon from './components/NotifIcon.vue'
+import NotifIcon2 from './components/NotifIcon2.vue'
 import QueueIcon from './components/QueueIcon.vue'
 
 import PageAdmin from './pages/PageAdmin.vue'
@@ -389,7 +389,7 @@ export default {
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, OutilsTests, NotifIcon, QueueIcon, 
+    BoutonHelp, BoutonLangue, OutilsTests, NotifIcon2, QueueIcon, 
     ApercuAvatar, PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
@@ -452,9 +452,11 @@ export default {
     clickNotif () {
       this.ui.setPage('compta', 'notif')
     },
+    /*
     pageCompta () { 
       this.ui.setPage('compta', 'compta')
     },
+    */
     pageFicavion () { 
       this.ui.setPage('ficavion')
     },

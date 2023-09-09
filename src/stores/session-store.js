@@ -83,19 +83,27 @@ export const useSessionStore = defineStore('session', {
 
     /*
     Une notification a les propriétés suivantes:
-    - `nr`: restriction d'accès: 
-      - 0 : pas de restriction (0)
-      - 1 : espace figé (2)
-      - 2 : espace bloqué (4)
-      - 3 : accès en lecture seule (2)
-      - 4 : accès minimal (3)
-      - 5 : actions accroissant le volume interdites (1)
+    - `nr`: restriction d'accès: (niv)
+      - 0 : pas de restriction (1)
+      - 1 : espace figé (3)
+      - 2 : espace bloqué (5)
+      - 3 : accès en lecture seule (3)
+      - 4 : accès minimal (4)
+      - 5 : actions accroissant le volume interdites (2)
     - `dh` : date-heure de création.
     - `texte`: texte de la notification.
     - `idSource`: id du sponsor ayant créé cette notification pour un type 3.
    */
     nivx: [0, 2, 4, 2, 3, 1],
-    niv: 0, // niveau maximal de restriction: 0 1 2 3
+    /* niveau d'information / restriction: 
+    - 0 : aucune notification
+    - 1 : au moins une notification informative
+    - 2 : accroissement de volume interdit
+    - 3 : acceés en lecture seule
+    - 4 : accès minimal
+    - 5 : bloqué
+    */
+    niv: 0,
     alire: false, // Il y a des notifications à lire
 
     // message fmsg de report après filtrage
@@ -277,41 +285,57 @@ export const useSessionStore = defineStore('session', {
       this.setBlocage()
     },
 
-    setNotifQ (n) { // depassement de quotas - return true si changement
-      // TODO 
+    setNotifQ (ne) { // depassement de quotas - return true si changement
+      if (!ne) return false
+      const n = this.notifs[3]
+      if (!n || ne.dh > n.dh) {
+        this.notifs[3] = ne
+        return true
+      }
+      return false
     },
 
     setNotifS (nt, nc) { // solde négatif - return true si changement
-      // TODO 
+      if (!ne) return false
+      const n = this.notifs[4]
+      if (!n || ne.dh > n.dh) {
+        this.notifs[4] = ne
+        return true
+      }
+      return false
     },
 
     setNotifTC (nt, nc) { // notif tribu et compte (dans tribu)
-      // TODO
       let chg = false
+      if (nt) {
+        const n = this.notifs[1]
+        if (!n || ne.dh > n.dh) {
+          this.notifs[1] = ne
+          chg = true
+        }
+      }
+      if (nc) {
+        const n = this.notifs[2]
+        if (!n || ne.dh > n.dh) {
+          this.notifs[2] = ne
+          chg = true
+        }
+      }
       if (chg) this.setBlocage()
     },
 
     setBlocage () {
-      const self = this
-      function ntfx (ntf) {
-        if (ntf && ntf.dh) {
-          if (ntf.dh > dhvu) self.alire = true
-          if (this.nivx[ntf.nr] > self.niv) self.niv = this.nivx[ntf.nr]
-        }  
-      }
-
-      const aSt = stores.avatar
       const c = aSt.comptas
       const dhvu = c.dhvu || 0
       this.niv = 0
       this.alire = false
-
-      if (this.notifs[0]) ntfx(this.notifs[0])
-      if (this.notifs[1]) ntfx(aSt.tribu.notif)
-      if (this.notifs[2]) ntfx(aSt.act.notif)
-      if (this.notifs[4]) ntfx(this.notifs[4])
-      if (this.notifs[5]) ntfx(this.notifs[5])
-
+      this.notifs.forEach(ntf => {
+        if (ntf && ntf.dh) {
+          if (ntf.dh > dhvu) this.alire = true
+          const niv = !ntf.texte ? 0 : ( !ntf.nr ? 1 : this.nivx[ntf.nr])
+          if (niv > this.niv) this.niv = niv
+        }
+      })
     },
 
     editDiag (avionSeulement) {

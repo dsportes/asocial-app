@@ -63,7 +63,7 @@
 
       <!-- Notifications -->
       <div class="btn2" @click="clickNotif">
-        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv" :cible="0"/>
+        <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
         <span class="q-ml-xs">{{$t('MLAntf')}}</span>
       </div>
 
@@ -108,7 +108,7 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
-import NotifIcon from '../components/NotifIcon.vue'
+import NotifIcon2 from '../components/NotifIcon2.vue'
 import QueueIcon from '../components/QueueIcon.vue'
 import OutilsTests from '../dialogues/OutilsTests.vue'
 import PageMenu from '../pages/PageMenu.vue'
@@ -117,7 +117,7 @@ import { MD } from '../app/modele.mjs'
 export default {
   name: 'PageAccueil',
 
-  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIcon, QueueIcon, OutilsTests },
+  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon, OutilsTests },
 
   computed: {
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },

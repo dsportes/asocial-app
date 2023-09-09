@@ -973,6 +973,7 @@ export class Compta extends GenDoc {
     }
 
     this.compteurs = new Compteurs(row.compteurs, this.qv)
+    this.pc = this.compteurs.pourcents.max
 
     /**Pour le Comptable seulement**
     -`atr` : table des tribus : `{clet, info, qc, q1, q2}` crypté par la clé K du comptable.
