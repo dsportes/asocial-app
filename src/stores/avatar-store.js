@@ -278,7 +278,7 @@ export const useAvatarStore = defineStore('avatar', {
     pcLcF: (state) => {
       const f = stores.filtre.filtre.chats
       if (!f) { stores.session.fmsg(state.pcLc.length); return state.pcLc }
-      f.limj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
+      f.limj = f.nbj ? (new Date().getTime() - (f.nbj * 86400000)) : 0
       f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
@@ -320,9 +320,19 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     setCompta (compta) {
-      const bl = this.comptaP && ((this.comptaP.dhvu || 0) !== (compta.dhvu || 0))
+      const session = stores.session
+      let bl = this.comptaP && ((this.comptaP.dhvu || 0) !== (compta.dhvu || 0))
+      if (bl) session.setDhvu(compta.dhvu)
+      // TODO
+      // détection des dépassements de quota : génération de la notif
+      if (session.setNotifQ(compta.compteurs.notifQ)) bl = true
+      // détection de solde négatif / consommation excessive: génération de la notif
+      const ntf = compta.estA ? 
+        compta.compteurs.notifS(compta.credits.total)
+        : compta.compteurs.notifX
+      if (session.setNotifS(ntf)) bl = true
       this.comptaP = compta
-      if (bl) stores.session.setBlocage()
+      if (bl) session.setBlocage()
     },
 
     setccCpt (ccCpt) {
@@ -368,7 +378,15 @@ export const useAvatarStore = defineStore('avatar', {
         spAp.forEach(id => { if (!spAv.has(id)) pSt.setPeopleTribu(nasp.get(id)) })
       }
       this.maptr.set(tribu.id, tribu)
-      if (session.tribuId === tribu.id) session.setBlocage()
+      if (session.tribuId === tribu.id) {
+        const act = tribu.act[c.it] // du compte
+        session.setNotifTC(tribu.notif, act.notif)
+      }
+    },
+
+    act: (state) => {
+      const t = state.tribu
+      return t ? t.act[state.compta.it] : { vide: true}
     },
 
     delTribuC (id) { // delete d'une tribu quelconque pour le Comptable

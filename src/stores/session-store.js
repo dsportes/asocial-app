@@ -72,25 +72,37 @@ export const useSessionStore = defineStore('session', {
     tribuCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
     peopleId: 0, // people "courant"
 
-    /* blocage / notification
-    - niv : niveau d'alerte
-      0: pas de blocage,
-      1: alerte simple
-      2: alerte grave (une procédure de blocage est planifiée)
-      3: lecture seule, 
-      4: ni lecture ni écriture,
-      5: résilié
+    /* Type des notifications:
+    - 0 : de l'espace
+    - 1 : d'une tribu
+    - 2 : d'un compte
+    - 3 : dépassement de quotas
+    - 4 : alerte de solde / consommation
     */
-    niv: 0,
+    notifs: [null, null, null, null, null, null],
+
+    /*
+    Une notification a les propriétés suivantes:
+    - `nr`: restriction d'accès: 
+      - 0 : pas de restriction (0)
+      - 1 : espace figé (2)
+      - 2 : espace bloqué (4)
+      - 3 : accès en lecture seule (2)
+      - 4 : accès minimal (3)
+      - 5 : actions accroissant le volume interdites (1)
+    - `dh` : date-heure de création.
+    - `texte`: texte de la notification.
+    - `idSource`: id du sponsor ayant créé cette notification pour un type 3.
+   */
+    nivx: [0, 2, 4, 2, 3, 1],
+    niv: 0, // niveau maximal de restriction: 0 1 2 3
     alire: false, // Il y a des notifications à lire
-    notifG: null, // notification générale courante
 
     // message fmsg de report après filtrage
     filtreMsg: ''
   }),
 
   getters: {
-    estBloque (state) { return state.niv >= 4 },
     estSponsor (state) { return stores.avatar.compta.estSponsor },
     estComptable (state) { return ID.estComptable(state.compteId) },
 
@@ -208,20 +220,16 @@ export const useSessionStore = defineStore('session', {
     setEspace (espace) {
       this.espaces.set(espace.id, espace)
       if (!this.estAdmin) {
-        if (espace.notif) {
-          if (!this.notifG || (espace.notif.v > this.notifG.v)) {
-            this.notifG = espace.notif
-            this.setBlocage()
+        const ne = espace.notif
+        const n = this.notifs[0]
+        if (ne) {
+          if (!n || ne.dh > n.dh) {
+            this.setNotifE(ne)
           }
-        } else if (this.notifG) {
-          this.notifG = null
-          this.setBlocage()
+        } else if (n) {
+          this.setNotifE(null)
         }
       }
-    },
-
-    setSynthse (synthese) {
-      this.syntheses.set(synthese.id, synthese)
     },
 
     chgps (phrase) {
@@ -256,33 +264,54 @@ export const useSessionStore = defineStore('session', {
       }, 1000)
     },
 
-    /* Calcul du niveau de notification / blocage max
-    */
+    setDhvu (dhvu) {
+      this.dhvu = dhvu
+    },
+
+    setNotifE (ne) {
+      const n = this.notifs[0]
+      if (ne) {
+        if (!n || ne.dh > n.dh) this.notifs[0] = ne
+      }
+      else this.notifs[0] = { dh: (!n ? 0 : n.dh) }
+      this.setBlocage()
+    },
+
+    setNotifQ (n) { // depassement de quotas - return true si changement
+      // TODO 
+    },
+
+    setNotifS (nt, nc) { // solde négatif - return true si changement
+      // TODO 
+    },
+
+    setNotifTC (nt, nc) { // notif tribu et compte (dans tribu)
+      // TODO
+      let chg = false
+      if (chg) this.setBlocage()
+    },
+
     setBlocage () {
       const self = this
       function ntfx (ntf) {
         if (ntf && ntf.dh) {
           if (ntf.dh > dhvu) self.alire = true
-          if (ntf.niv > self.niv) self.niv = ntf.niv
+          if (this.nivx[ntf.nr] > self.niv) self.niv = this.nivx[ntf.nr]
         }  
       }
+
       const aSt = stores.avatar
       const c = aSt.comptas
       const dhvu = c.dhvu || 0
       this.niv = 0
       this.alire = false
-      ntfx(this.notifG)
-      if (c.estA && c.soldeC.solde < 0) {
-        if (this.dhConnx > dhvu) this.alire = true
-        if (c.soldeC.njn > 60) {
-          if (this.niv < 4) this.niv = 4
-        } else {
-          if (this.niv < 3) this.niv = 3
-        }
-      } else {
-        ntfx(aSt.tribu.notif)
-        ntfx(aSt.act.notif)
-      }
+
+      if (this.notifs[0]) ntfx(this.notifs[0])
+      if (this.notifs[1]) ntfx(aSt.tribu.notif)
+      if (this.notifs[2]) ntfx(aSt.act.notif)
+      if (this.notifs[4]) ntfx(this.notifs[4])
+      if (this.notifs[5]) ntfx(this.notifs[5])
+
     },
 
     editDiag (avionSeulement) {

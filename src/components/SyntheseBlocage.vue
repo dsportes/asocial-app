@@ -85,7 +85,7 @@ export default {
 
     session.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setBlocage') {
+        if (name === 'setNotif') {
           setNtf()
         }
       })

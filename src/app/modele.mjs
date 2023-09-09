@@ -453,16 +453,17 @@ De facto un objet notification est immuable:
 en cas de _mise à jour_ il est remplacé par un autre.
 
 Il est crypté selon son type par: 
-1) la clé du Comptable, 2-3) la clé de la tribu.
+0) la clé du Comptable, 1,2) la clé de la tribu.
+
+Type des notifications:
+- 0 : de l'espace
+- 1 : d'une tribu
+- 2 : d'un compte
+- 3 : dépassement de quotas
+- 4 : alerte de solde / consommation
 
 Une notification a les propriétés suivantes:
-- `t`: type de la notification
-  - 1 : de l'espace
-  - 2 : d'une tribu
-  - 3 : d'un compte
-  - 4 : _par convention_ le code 4 désigne le _dépassement de quotas_
-  - 5 : _par convention_ le code 5 désigne une _alerte de solde / consommation_.
-- `r`: restriction d'accès: 
+- `nr`: restriction d'accès: 
   - 0 : pas de restriction
   - 1 : espace figé
   - 2 : espace bloqué
@@ -471,7 +472,7 @@ Une notification a les propriétés suivantes:
   - 5 : actions accroissant le volume interdites.
 - `dh` : date-heure de création.
 - `texte`: texte de la notification.
-- `idSource`: id (courte en sérialisation) du sponsor ayant créé cette notification pour un type 3.
+- `idSource`: id du sponsor ayant créé cette notification pour un type 3.
 */
 export class Notification {
   // Factory construisant une objet Notification depuis sa sérialisation
@@ -479,17 +480,15 @@ export class Notification {
     return new Notification(decode(serial))
   }
 
-  constructor ({t, r, dh, texte, idSource}) {
-    const session = stores.session
-    this.idSource = idSource ? ID.long(idSource, session.ns) : 0
-    this.t = t
-    this.r = r || 0
+  constructor ({nr, dh, texte, idSource}) {
+    if (idSource) this.idSource = ID.long(idSource, NomGenerique.ns)
+    this.nr = nr || 0
     this.texte = texte || ''
     this.dh = dh || Date.now()
   }
 
   get serial() {
-    const x = { t: this.t, r: this.r || 0, dh: this.dh }
+    const x = { nr: this.nr || 0, dh: this.dh }
     if (this.texte) x.texte = this.texte
     if (this.idSource) x.idSource = ID.court(this.idSource)
     return new Uint8Array(encode(x))

@@ -339,8 +339,7 @@ export class OperationWS extends Operation {
 
     if (session.accesIdb) await gestionFichierSync(this.buf.mapSec)
 
-    session.setBlocage()
-    if (session.niv > 4 && !session.estComptable) deconnexion()
+    if (session.niv === 4 && !session.estComptable) deconnexion()
     session.setDh(this.dh)
   }
 
