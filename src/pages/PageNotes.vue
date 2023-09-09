@@ -662,7 +662,7 @@ export default {
     const fSt = stores.filtre
     const filtre = ref({})
     const filtreFake = ref('1')
-    const now = new Date().getTime()
+    const now = Date.now()
 
     const lstr = ref() // liste des racines
     const lstn = [] // liste des notes restant à télécharger
@@ -684,7 +684,7 @@ export default {
       f.v2 = fx.v2 || 0
       f.note = fx.note
       f.temp = fx.temp
-      f.lim = fx.nbj ? new Date().getTime() - (86400000 * fx.nbj) : 0
+      f.lim = fx.nbj ? Date.now() - (86400000 * fx.nbj) : 0
       f.mcp = fx.mcp ? new Set(fx.mcp) : null
       f.mcn = fx.mcn ? new Set(fx.mcn) : null
       f.avgr = fx.avgr

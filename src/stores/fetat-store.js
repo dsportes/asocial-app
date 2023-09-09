@@ -10,7 +10,7 @@ export const useFetatStore = defineStore('fetat', {
     /*
       this.id = f.idf
       this.ids = n.id
-      this.dhd = new Date().getTime()
+      this.dhd = Date.now()
       this.dhc = 0
       this.dhx = 0
       this.lg = f.lg

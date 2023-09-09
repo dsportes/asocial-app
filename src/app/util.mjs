@@ -150,20 +150,18 @@ export function photoToBin (t) {
 
 
 /* gzip / ungzip ***************************************************/
-function gz (u8) {
+export function gz (u8) {
   return new Promise((resolve, reject) => {
     gzip(u8, (err, buffer) => {
-      if (err) reject(err) 
-      else resolve(new Uint8Array(buffer))
+      if (err) reject(err); else resolve(new Uint8Array(buffer))
     })
   })
 }
 
-function ungz (u8) {
+export function ungz (u8) {
   return new Promise((resolve, reject) => {
     gunzip(u8, (err, buffer) => {
-      if (err) reject(err) 
-      else resolve(new Uint8Array(buffer))
+      if (err) reject(err); else resolve(new Uint8Array(buffer))
     })
   })
 }

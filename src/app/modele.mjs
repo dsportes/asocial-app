@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
-import { $t, hash, rnd6, u8ToB64, gzip, ungzip, ungzipT, titre, suffixe } from './util.mjs'
+import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gz, ungz, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { ID, isAppExc, d13, d14, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour, lcSynt } from './api.mjs'
@@ -1065,17 +1065,17 @@ export class Compta extends GenDoc {
     r.hps1 = ph.hps1
     r.shay = ph.shay
     
-    r.it = 1 // Pour une création d'espace, sera surchargé sur le serveur en AcceptationSponsoring
-    r.cletK = await crypter(k, clet)
+    r.it = clet ? 1 : 0 // Pour une création d'espace, sera surchargé sur le serveur en AcceptationSponsoring
+    r.cletK = clet ? await crypter(k, clet) : null
     r.cletX = ID.estComptable(na.id) ? r.cletK : cletX
 
     r.mavk = { }
     r.mavk[await Compta.mavkK(na.id, k)] = await Compta.mavkKV(na, k)
 
-    r.compteurs = new Compteurs().setqv({ q1: q1, q2: q2, v1: 0, v2: 0}).serial
+    r.compteurs = new Compteurs(null, { qc, q1, q2, nn: 0, nc: 0, ng: 0, v2: 0}).serial
 
     if (ID.estComptable(r.id)) {
-      const x = { clet, info: '', q1, q2 }
+      const x = { clet, info: '', qc, q1, q2 }
       r.atr = [ null, await crypter(k, new Uint8Array(encode(x)))]
       r.astn = [0, 0]
     }
@@ -1101,12 +1101,9 @@ export class Compta extends GenDoc {
 - `cva` : carte de visite cryptée par la clé CV de l'avatar `{v, photo, info}`.
 - `lgrk` : map :
   - _clé_ : `ni` : _numéro d'invitation_ hash de la clé inversée du groupe crypté par la  clé de l'avatar.
-  - _valeur_ : couple `[sta, ref]`
-    - `str`: statut de résiliation par un animateur à traiter par le compte.
-      - 0: rien à triater, 1:retrait d'invitation, résiiation d'activité. 
-    - `ref`: `[nomg, clég, im]` selon `sta`,
-      - crypté par la clé publique RSA de l'avatar pour une invitation.
-      - ré-encrypté par la clé K du compte par l'opération d'acceptation d'une invitation.
+  - _valeur_ : `[nomg, cleg, im]`,
+    - crypté par la clé publique RSA de l'avatar pour une invitation.
+    - ré-encrypté par la clé K du compte par l'opération d'acceptation d'une invitation.
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `hpc` : hash de la phrase de contact.
 - `napc` : `[nom, clé]` de l'avatar cryptée par le PBKFD de la phrase de contact.
@@ -1122,17 +1119,15 @@ export class Avatar extends GenDoc {
   */
   membres (map, dlv) {
     for (const [ ,t] of this.lgr) {
-      if (!t.str) {
       const e = map[t.ng.id]
       if (!e) { map[t.ng.id] = { idg: t.ng.id, mbs: [t.im], dlv } } else e.mbs.push(t.im)
-      }
     }
   }
 
   /* Ids des groupes de l'avatar, accumulés dans le set s */
   idGroupes (s) {
     const x = s || new Set()
-    for (const [ ,t] of this.lgr) if (!t.str) x.add(t.ng.id)
+    for (const [ ,t] of this.lgr) x.add(t.ng.id)
     return x
   }
 
@@ -1143,7 +1138,7 @@ export class Avatar extends GenDoc {
   niDeGroupes (setg) {
     const ani = new Set()
     for (const [ni ,t] of this.lgr) {
-      if (!t.str && setg.has(t.ng.id)) ani.add(ni)
+      if (setg.has(t.ng.id)) ani.add(ni)
     }
     ani.forEach(ni => this.lgr.delete(ni))
     return Array.from(ani)
@@ -1185,27 +1180,22 @@ export class Avatar extends GenDoc {
     if (row.lgrk) { 
       /* map : 
       - _clé_ : `ni`, numéro d'invitation.
-      - _valeur_ : couple `[sta, ref]`
-      - `sta`: statut d'activité: 2:résilié, 3:invité, 4:ré-invité, 5:actif
-      - `ref`: `[nomg, clég, im]` selon `sta`,
-        - (2): `null`
-        - (3 4): crypté par la clé publique RSA de l'avatar.
-        - (5): ré-encrypté par la clé K du compte par l'opération d'acceptation d'une invitation.
+      - _valeur_ : `[nomg, clég, im]`
+        - crypté par la clé publique RSA de l'avatar.
+        - ré-encrypté par la clé K du compte par l'opération d'acceptation d'une invitation.
       */
       for (const nx in row.lgrk) {
         const ni = parseInt(nx)
-        const [str, ref] = decode(row.lgrk[nx])
-        let ng
-        if (ref.length === 256) {
-          const [nom, rnd, im] = decode(await decrypterRSA(this.priv, ref))
+        if (row[nx].length === 256) {
+          const [nom, rnd, im] = decode(await decrypterRSA(this.priv, row[nx]))
           ng = NomGenerique.from([nom, rnd])
           gSt.setInvit(ng.id, this.id)
         } else {
-          const [nom, rnd, im] = decode(await decrypter(session.clek, ref))
+          const [nom, rnd, im] = decode(await decrypter(session.clek, row[nx]))
           ng = NomGenerique.from([nom, rnd])
           gSt.delInvit(ng.id, this.id)
         }
-        this.lgr.set(ni, { str, ng, im})
+        this.lgr.set(ni, { ng, im })
       }
     }
   }
@@ -1252,10 +1242,10 @@ _data_
   - `na` : `[nom, cle]` de P.
   - `cv` : `{ v, photo, info }` de P.
   - `naf` : `[nom, cle]` attribué au filleul.
-  - `clet` : clé de sa tribu.
-  - 'cletX' : clet cryptée par la clé K du comptable
-  - `it` : it du sponsor dans la tribu SI il faut lui retirer les quotes
-  - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+  - `sp` : vrai si le filleul est lui-même sponsor.
+  - `clet` : clé de sa tribu, si c'est un compte O
+  - `quotas` : `[qc, q1, q2]` quotas attribués par le sponsor.
+    - pour un compte A `[0, 1, 1]`. Un compte A n'a pas de qc et peut changer à loisir `[q1, q2]` qui sont des protections pour lui-même (et fixe le coût de l'abonnement).
 - `ardx` : ardoise de bienvenue du sponsor / réponse du filleul cryptée par le PBKFD de la phrase de sponsoring
 */
 export class Sponsoring extends GenDoc {
@@ -1297,10 +1287,10 @@ export class Sponsoring extends GenDoc {
     obj.sp = x.sp || false
     obj.it = x.it || 0
     obj.quotas = x.quotas
-    obj.cletX = x.cletX
+    obj.cletX = x.cletX || null
     obj.na = NomGenerique.from(x.na)
     obj.naf = NomGenerique.from(x.naf)
-    obj.clet =  x.clet
+    obj.clet =  x.clet || null
   }
 
   static async nouveauRow (phrase, dlv, nom, cletX, clet, sp, quotas, ard) {
@@ -1310,8 +1300,8 @@ export class Sponsoring extends GenDoc {
       - 'nom': nom de l'avatar du compte à créer
       - `clet` : cle de la tribu.
       - 'cletX' : clé de la tribu crypté par la clé K du comptable
-      - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
-      - `quotas` : `[v1, v2]` quotas attribués par le parrain.
+      - `sp` : 1 si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
+      - `quotas` : `[qc, q1, q2]` quotas attribués par le parrain.
     */
     const session = stores.session
     const aSt = stores.avatar
@@ -1321,12 +1311,14 @@ export class Sponsoring extends GenDoc {
       na: [av.na.nom, av.na.rnd],
       cv: av.cv,
       naf: [n.nom, n.rnd],
-      sp, cletX, clet, quotas,
+      sp, quotas,
+      cletX: cletX || null, 
+      clet: clet || null, 
       it : 0
     }
     if (!session.estSponsor && !session.estComptable) {
       const c = aSt.compta
-      d.it = c.it
+      d.it = c.it || 0
     }
     const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))
     const ardx = await crypter(phrase.clex, ard || '')
@@ -1339,7 +1331,7 @@ export class Sponsoring extends GenDoc {
       ids: phrase.phch,
       dlv,
       st: 0,
-      dh: new Date().getTime(),
+      dh: Date.now(),
       pspk,
       bpspk,
       descrx,
@@ -1352,24 +1344,6 @@ export class Sponsoring extends GenDoc {
 }
 
 /** Chat ************************************************************
-Un chat est éternel, une fois créé il ne disparaît qu'à la disparition des avatars en cause.
-
-Un chat est une ardoise commune à deux avatars I et E:
-- vis à vis d'une session :
-  - I est l'avatar _interne_,
-  - E est un avatar _externe_ connu comme _contact_.
-- pour être écrite par I :
-  - I doit connaître le `[nom, cle]` de E : membre du même groupe, compte de la tribu, chat avec un autre avatar du compte, ou obtenu en ayant fourni la phrase de contact de E.
-  - le chat est dédoublé, une fois sur I et une fois sur E.
-- un chat a une clé de cryptage `cc` propre générée à sa création (première écriture):
-  - cryptée par la clé K,
-  - ou cryptée par la clé publique de l'avatar I (par exemple) : dans ce cas la première écriture de contenu de I remplacera cette clé par celle cryptée par K.
-- un chat a un comportement d'ardoise : chaque écriture de l'un _écrase_ la totalité du contenu pour les deux. Un numéro séquentiel détecte les écritures croisées risquant d'ignorer la maj de l'un par celle de l'autre.
-- si I essaie d'écrire à E et que E a disparu, le statut `st` de I vaut 1 pour informer la session.
-**Cartes de visite**
-- à la création, puis à chaque mise à jour du texte, les cartes de visites sont remises à jour.
-- en session, une action permet de les rafraîchir sans modifier le texte et la date-heure du texte.
-
 _data_:
 - `id`: id de A,
 - `ids`: hash du cryptage de `idA_court/idB_court` par la clé de A.
@@ -1377,7 +1351,7 @@ _data_:
 - `dlv`
 - `vcv` : version de la carte de visite.
 
-- `rac` : 0:I et E ont raccroché, 1:I aracroché pas E, 2:E a raccroché pas I
+- `r` : 0:raccroché, 1:en ligne, 2:en ligne mais E est mort
 - `mc` : mots clés attribués par l'avatar au chat.
 - `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé de _l'autre_.
 - `cc` : clé `cc` du chat cryptée par la clé K du compte de I ou par la clé publique de I.
@@ -1437,7 +1411,7 @@ export class Chat extends GenDoc {
   static async nouveauRow (naI, naE, contc, cc, pubE, mc) {
     const ids = await Chat.getIds(naI, naE)
     const id = naI.id
-    const r = { id, ids, st: 0, seq: 1, contc } // v vcv cva sont mis par le serveur
+    const r = { id, ids, st: 0, r: 1, seq: 1, contc } // v vcv cva sont mis par le serveur
     if (mc) r.mc = mc
     if (pubE) {
       r.cc = await crypterRSA(pubE, cc)
@@ -1468,9 +1442,10 @@ __data_:
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
 - `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes.
 - `ast` : table des statuts des membres. Deux chiffres `sta laa` (0: disparu / oublié):
-  - `sta`: statut d'activité: 1: contact, 2:invité, 3:actif
+  - `sta`: statut d'activité: 1: contact, 2:invité, 3:actif, 4:résilié
   - `laa`: 1:lecteur, 2:auteur, 3:animateur
-- `nag` : liste des hash de la clé du membre cryptée par la clé du groupe.
+- `nag` : table des 'hcmg' (hash de la clé de l'avatar membre cryptée par la clé du groupe). Les index dans `nag` et `ast` correspondent.
+- `ln` : liste noire des 'hcmg' des avatars interdits de redevenir contact. 
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
 - `ardg` : ardoise cryptée par la clé du groupe.
@@ -1492,6 +1467,7 @@ export class Groupe extends GenDoc {
   estContact (im) { return this.sta(im) === 1 }
   estInvite (im) { return this.sta(im) === 2 }
   estActif (im) { return this.sta(im) === 3 }
+  estResilie (im) { return this.sta(im) === 4 }
   estAuteur (im) { return this.las(im) > 1 }
   estAnim (im) { return this.las(im) === 3 }
 
@@ -1509,6 +1485,7 @@ export class Groupe extends GenDoc {
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
     this.nag = row.nag || [0]
+    this.ln = row.ln || []
     this.ard = !row.ardg ? '' : await decrypterStr(this.cle, row.ardg)
   }
 
@@ -1539,6 +1516,7 @@ export class Groupe extends GenDoc {
       imh: 1,
       ast: new Uint8Array([0, 32]),
       nag: [0, n],
+      ln: [],
       idhg
     }
     const _data_ = new Uint8Array(encode(r))
@@ -1598,10 +1576,10 @@ export class Membre extends GenDoc {
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
   }
 
-  static async rowNouveauMembre (nag, na, im, dlv, cv, ard) {
+  static async rowNouveauMembre (nag, na, im, dlv, cv) {
     const r = { id: nag.id, ids: im, v: 0, dlv, vcv: cv ? cv.v : 0,
       ddi: 0, dda: 0, dfa: 0, mc: new Uint8Array([]) }
-    if (dlv) r.dda = new Date().getTime()
+    if (dlv) r.dda = Date.now()
     r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
     r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
     const _data_ = new Uint8Array(encode(r))
@@ -1614,12 +1592,13 @@ export class Membre extends GenDoc {
 _data_:
 - `id` : id de l'avatar ou du groupe.
 - `ids` : identifiant relatif à son avatar.
-- `v` : sa version.
+- `v` : 1..N.
 
-- `st`: aaaammjj date limite de validité pour un _temporaire_.
+- `st` :
+  - `99999999` pour un _permanent_.
+  - `aaaammjj` date limite de validité pour un _temporaire_.
 - `im` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `ids`. 
-- `p` : 0: pas protégé, 1: protégé en écriture.
-- `v1` : volume du texte
+- `p` : _0: pas protégé, 1: protégé en écriture_.
 - `v2` : volume total des fichiers attachés.
 - `mc` :
   - note personnelle : vecteur des index de mots clés.
@@ -1631,8 +1610,7 @@ _data_:
   - `l` : liste des auteurs pour une note de groupe.
   - `t` : texte gzippé ou non.
 - `mfas` : map des fichiers attachés.
-- `ref` : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
-  rnom n'est défini que pour une note d'avatar référençant un note de groupe (rnom est celui du groupe)
+- `refs` : triplet `[id_court, ids, nomp]` crypté par la clé de la note, référence de sa  note _parent_.
 
 **Map `mfas` des fichiers attachés dans une note:**
 - _clé_ `idf`: identifiant du fichier.
@@ -1676,7 +1654,6 @@ export class Note extends GenDoc {
     this.st = row.st || 99999999
     this.im = row.im || 0
     this.p = row.p || 0
-    this.v1 = row.v1 || 0
     this.v2 = row.v2 || 0
     this.deGroupe = ID.estGroupe(this.id)
     this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || null)
@@ -1685,7 +1662,7 @@ export class Note extends GenDoc {
     this.titre = titre(this.txt)
     this.dh = x.d
     this.auts = x.l ? x.l : []
-    // row.ref à une id de note COURT
+    // row.ref à une id de note COURTE
     this.ref = row.ref ? decode(await decrypter(this.cle, row.ref)) : null
     if (this.ref) this.ref[0] = ID.long(this.ref[0], NomGenerique.ns)
     this.mfa = new Map()
@@ -1726,6 +1703,7 @@ export class Note extends GenDoc {
     }
   }
 
+  /*
   initTest (id, ids, ref, txt, dh, v1, v2) { // pour les tests
     this.id = id
     this.ids = ids
@@ -1750,6 +1728,7 @@ export class Note extends GenDoc {
       }
     }
   }
+  */
 
   settxt (txt) { // pour les tests
     this.txt = txt
@@ -1761,7 +1740,6 @@ export class Note extends GenDoc {
     const session = stores.session
     const cle = Note.clen(id)
     const r = { id, ids: rnd6(), p: p ? 1 : 0, im: exclu ? im : 0, v2 : 0, mc: null }
-    r.v1 = txt.length 
     r.txts = await Note.toRowTxt(cle, txt, im)
     r.ref = await Note.toRowRef(cle, ref)
     r.st = nbj === 99999999 ? 0 : AMJ.amjUtcPlusNbj(session.dateJourConnx, nbj)
@@ -1770,7 +1748,7 @@ export class Note extends GenDoc {
   }
 
   static async toRowTxt (cle, txt, im, auts) {
-    const x = { d: new Date().getTime(), t: await gzipB(txt) }
+    const x = { d: Date.now(), t: await gzipB(txt) }
     if (im) {
       const nl = [im]
       if (auts) auts.forEach(t => { if (t !== im) nl.push(t) })
@@ -1795,9 +1773,9 @@ export class Note extends GenDoc {
     // propriétés ajoutées : u8 (contenu du fichier gzippé crypté), sha, dh gz
     const fic = { idf, nom, info, lg, type, u8 }
     fic.sha = sha256(u8)
-    fic.dh = new Date().getTime()
+    fic.dh = Date.now()
     fic.gz = fic.type.startsWith('text/')
-    fic.u8 = await crypter(this.cle, fic.gz ? await gzipT(u8) : u8)
+    fic.u8 = await crypter(this.cle, fic.gz ? await gz(u8) : u8)
     return fic
   }
 
@@ -1836,7 +1814,7 @@ export class Note extends GenDoc {
     }
     if (!buf) return null
     const f = this.mfa.get(idf)
-    const buf2 = f.gz ? await ungzipT(buf) : buf
+    const buf2 = f.gz ? await ungz(buf) : buf
     return buf2
   }
 
@@ -1949,19 +1927,19 @@ export class NoteLocale {
   nouveau (txt) {
     this.id = rnd6()
     this.txt = txt
-    this.dh = new Date().getTime()
+    this.dh = Date.now()
     return this
   }
 
   async fromIdb (idb) {
     decodeIn(idb, this)
-    this.txt = decoder.decode(await ungzipB(this.txt))
+    this.txt = await ungzipB(this.txt)
     return this
   }
 
   async toIdb () {
     const x = { ...this }
-    x.txt = await gzipB(encoder.encode(this.txt))
+    x.txt = await gzipB(this.txt)
     return new Uint8Array(encode(x))
   }
 
@@ -1992,7 +1970,7 @@ export class FichierLocal {
     this.id = rnd6()
     this.nom = nom
     this.info = info
-    this.dh = new Date().getTime()
+    this.dh = Date.now()
     this.type = type
     this.gz = type.startsWith('text/')
     this.lg = u8.length

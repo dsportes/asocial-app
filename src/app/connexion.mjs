@@ -965,7 +965,7 @@ export class AcceptationSponsoring extends OperationUI {
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
       const cc = random(32)
-      const dh = new Date().getTime()
+      const dh = Date.now()
       const contcI = await Chat.getContc(sp.na, dh, txt, cc)
       const contcE = await Chat.getContc(sp.naf, dh, txt, cc)
 

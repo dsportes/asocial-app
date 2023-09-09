@@ -31,7 +31,7 @@ export class SyncQueue {
       else if (row._nom === 'tribus') op = new OnchangeTribu()
       else if (row._nom === 'espaces') op = new OnchangeEspace()
       if (op) await op.run(row)
-      if (session.synchro) session.sessionSync.setDhSync(new Date().getTime())
+      if (session.synchro) session.sessionSync.setDhSync(Date.now())
       session.syncEncours = false
       SyncQueue.traiterQueue()
     }, 50)

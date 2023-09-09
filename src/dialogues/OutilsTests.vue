@@ -20,7 +20,7 @@
     <div class="font-mono fs-sm q-my-sm q-ml-sm">{{$t('OTbuild', [config.BUILD])}}</div>
     <!--
     <comp-test :arg="testArg" />
-    <q-btn dense color="warning" label="test" @click="testArg.val = new Date().getTime()"/>
+    <q-btn dense color="warning" label="test" @click="testArg.val = Date.now()"/>
     <q-btn class="q-ma-xs" color="primary" dense label="Diag" @click="testDiag"/>
     <q-btn dense label="Forcer dlv / dfh" color="primary" @click="test"/>
     -->
@@ -160,7 +160,7 @@ export default ({
 
   data () {
     return {
-      // testArg: { val: new Date().getTime() },
+      // testArg: { val: Date.now() },
       tab: 'tst',
       ps: null,
 

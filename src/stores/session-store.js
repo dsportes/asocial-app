@@ -141,7 +141,7 @@ export const useSessionStore = defineStore('session', {
       this.authToken = u8ToB64(new Uint8Array(x), true)
       this.nombase = this.lsk ? localStorage.getItem(this.lsk) : ''
       this.dateJourConnx = AMJ.amjUtc()
-      this.dhConnx = new Date().getTime()
+      this.dhConnx = Date.now()
       this.status = 1
     },
 

@@ -278,7 +278,7 @@ export const useAvatarStore = defineStore('avatar', {
     pcLcF: (state) => {
       const f = stores.filtre.filtre.chats
       if (!f) { stores.session.fmsg(state.pcLc.length); return state.pcLc }
-      f.limj = f.nbj ? (new Date().getTime() - (f.nbj * 86400000)) : 0
+      f.limj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
       f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []

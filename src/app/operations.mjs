@@ -344,7 +344,7 @@ export class MajMotsclesChat extends OperationUI {
   async run (id, ids, mc) {
     try {
       const session = stores.session
-      const dh = new Date().getTime()
+      const dh = Date.now()
       const args = { token: session.authToken, id, ids, mc }
       const ret = this.tr(await post(this, 'MajMotsclesChat', args))
       this.finOK()
@@ -407,7 +407,7 @@ export class NouveauChat extends OperationUI {
       const pubE = await aSt.getPub(naE.id)
       const ccPE = await crypterRSA(pubE, cc)
       const ccKI = await crypter(session.clek, cc)
-      const dh = new Date().getTime()
+      const dh = Date.now()
       const contcI = await Chat.getContc(naE, dh, txt, cc)
       const contcE = await Chat.getContc(naI, dh, txt, cc)
 
@@ -455,7 +455,7 @@ export class MajChat extends OperationUI {
       const aSt =  stores.avatar
 
       const ccKI = chat.ccK ? await crypter(session.clek, chat.cc) : null
-      const dh = new Date().getTime()
+      const dh = Date.now()
       const contcI = await Chat.getContc(naE, dh, txt, chat.cc)
       const contcE = await Chat.getContc(naI, dh, txt, chat.cc)
       const seq = chat.seq
@@ -622,7 +622,7 @@ export class SetNotifT extends OperationUI {
       const session = stores.session
       let notif = null
       if (notifT ) {
-        notifT.dh = new Date().getTime()
+        notifT.dh = Date.now()
         const cle = getCle(id)
         notif = await crypter(cle, notifT.encode())
       }
@@ -680,7 +680,7 @@ export class SetNotifC extends OperationUI {
   async run (id, idc, notifC) { // id de la tribu, na du compte cible, notif
     try {
       const session = stores.session
-      if (notifC) notifC.dh = new Date().getTime()
+      if (notifC) notifC.dh = Date.now()
       const cle = getCle(id)
       const stn = !notifC ? 0 : (notifC.jbl ? 2 : 1) 
       const notif = notifC ? await crypter(cle, notifC.encode()) : null
@@ -784,7 +784,7 @@ export class SetDhvuCompta extends OperationUI {
   async run () {
     try {
       const session = stores.session
-      const dhvu = await crypter(session.clek, '' + (new Date().getTime()))
+      const dhvu = await crypter(session.clek, '' + (Date.now()))
       const args = { token: session.authToken, dhvu }
       this.tr(await post(this, 'SetDhvuCompta', args))
       this.finOK()
@@ -864,7 +864,7 @@ export class SetNotifG extends OperationUI {
   async run (notifG) {
     try {
       const session = stores.session
-      if (notifG) notifG.dh = new Date().getTime()
+      if (notifG) notifG.dh = Date.now()
       const naComptable = NomGenerique.comptable()
       const notif = !notifG ? null : await crypter(naComptable.rnd, notifG.encode())
       const args = { token: session.authToken, ns: session.ns, notif}

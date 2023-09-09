@@ -648,7 +648,7 @@ export async function gestionFichierCnx (notes) {
 
   // Liste des fetat utiles et mise en db/store ou delete
   for (const fetat of nvFa) {
-    // fetat.dhc = new Date().getTime()
+    // fetat.dhc = Date.now()
     if (fetat.suppr) delete fetats[fetat.idf]; else fetats[fetat.idf] = fetat
   }
 
@@ -711,7 +711,7 @@ class Fetat {
   nouveau (n, f) {
     this.id = f.idf
     this.ids = n.id
-    this.dhd = new Date().getTime()
+    this.dhd = Date.now()
     this.dhc = 0
     this.dhx = 0
     this.lg = f.lg
@@ -735,14 +735,14 @@ class Fetat {
   }
 
   async chargementOK(buf) {
-    this.dhc = new Date().getTime()
+    this.dhc = Date.now()
     this.err = ''
     this.dhx = 0
     await setFa(this, buf) // Maj IDB de fetat et fdata conjointement
   }
 
   async chargementKO(exc) {
-    this.dhx = new Date().getTime()
+    this.dhx = Date.now()
     this.err = html(exc)
     await commitFic([], [this]) // Maj de IDB de fetat avant la date-heure d'échec
     stores.ui.afficherExc(exc)
