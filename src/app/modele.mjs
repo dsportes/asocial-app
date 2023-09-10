@@ -634,7 +634,7 @@ export class Synthese extends GenDoc {
         x.pcac = !x.qc ? 0 : Math.round(x.ac * 100 / x.qc) 
         x.pca1 = !x.q1 ? 0 : Math.round(x.a1 * 100 / x.q1) 
         x.pca2 = !x.q2 ? 0 : Math.round(x.a2 * 100 / x.q2) 
-        x.pccj = !x.cj ? 0 : Math.round(x.cj * 100 / x.qc) 
+        x.pcca = !x.qc ? 0 : Math.round(x.ca * 100 / x.qc) 
         x.pcv1 = !x.q1 ? 0 : Math.round(x.v1 * 100 / x.q1) 
         x.pcv2 = !x.q2 ? 0 : Math.round(x.v2 * 100 / x.q2)   
         lcSynt.forEach(f => { a0[f] +=  x[f] })
@@ -644,7 +644,7 @@ export class Synthese extends GenDoc {
     a0.pcac = !a0.qc ? 0 : Math.round(a0.ac * 100 / a0.qc) 
     a0.pca1 = !a0.q1 ? 0 : Math.round(a0.a1 * 100 / a0.q1) 
     a0.pca2 = !a0.q2 ? 0 : Math.round(a0.a2 * 100 / a0.q2) 
-    a0.pccj = !a0.cj ? 0 : Math.round(a0.cj * 100 / a0.qc) 
+    a0.pcca = !a0.qc ? 0 : Math.round(a0.ca * 100 / a0.qc) 
     a0.pcv1 = !a0.q1 ? 0 : Math.round(a0.v1 * 100 / a0.q1) 
     a0.pcv2 = !a0.q2 ? 0 : Math.round(a0.v2 * 100 / a0.q2) 
     this.atr[0] = a0 
@@ -769,11 +769,11 @@ export class Tribu extends GenDoc {
       r.qc = item.qc || 0
       r.q1 = item.q1 || 0
       r.q2 = item.q2 || 0
-      r.cj = item.cj || 0
+      r.ca = item.ca || 0
       r.v1 = item.v1 || 0
       r.v2 = item.v2 || 0
 
-      r.pccj = !r.cj ? 0 : Math.round(r.cj * 100 / r.qc) 
+      r.pcca = !r.qc ? 0 : Math.round(r.ca * 100 / r.qc) 
       r.pcv1 = !r.q1 ? 0 : Math.round(r.v1 * 100 / r.q1) 
       r.pcv2 = !r.q2 ? 0 : Math.round(r.v2 * 100 / r.q2) 
       this.act.push(r)
@@ -792,7 +792,7 @@ export class Tribu extends GenDoc {
         r.ac += x.qc
         r.a1 += x.q1
         r.a2 += x.q2
-        r.cj += x.cj
+        r.ca += x.ca
         r.v1 += x.v1
         r.v2 += x.v2
         r.nbc++
@@ -805,7 +805,7 @@ export class Tribu extends GenDoc {
     r.pcac = !r.qc ? 0 : Math.round(r.ac * 100 / r.qc) 
     r.pca1 = !r.q1 ? 0 : Math.round(r.a1 * 100 / r.q1) 
     r.pca2 = !r.q2 ? 0 : Math.round(r.a2 * 100 / r.q2) 
-    r.pccj = !r.qc ? 0 : Math.round(r.cj * 100 / r.qc) 
+    r.pcca = !r.qc ? 0 : Math.round(r.ca * 100 / r.qc) 
     r.pcv1 = !r.q1 ? 0 : Math.round(r.v1 * 100 / r.q1) 
     r.pcv2 = !r.q2 ? 0 : Math.round(r.v2 * 100 / r.q2) 
     this.synth = r
