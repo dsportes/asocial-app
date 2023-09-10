@@ -880,10 +880,11 @@ export class Gcvols extends GenDoc {
   - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
 - `qv` : `{qc, q1, q2, nn, nc, ng, v2}`: quotas et nombre de groupes, chats, notes, volume fichiers. Valeurs courantes.
 - `oko` : hash du PBKFD de la phrase de confirmation d'un accord pour passage de O à A ou de A à O.
-- `credits` : pour un compte A seulement:
+- `credits` : pour un compte A seulement crypté par la clé K:
   - `total`: cumul des crédits reçus depuis le début de la vie du compte.
   - `tickets`: liste des tickets en attente d'enregistrement.
-  - crypté par la clé K sauf après une conversion de compte O ou c'est crypté par la clé publique de l'avatar principal du compte.
+  - juste après une conversion de compte O en A, `credits` est égal à `true`, 
+  une convention pour une création vierge.
 - `compteurs` sérialisation non cryptée d'évolution des quotas, volumes et coûts.
 **Pour le Comptable seulement**
 -`atr` : table des tribus : `{clet, info, q1, q2}` crypté par la clé K du comptable.
@@ -963,12 +964,10 @@ export class Compta extends GenDoc {
 
     this.qv = row.qv
     if (row.credits) {
-      if (row.credits.length !== 256) {
-        this.credits = await decrypter(session.clek, row.credits)
-      } else {const avatar = aSt.getAvatar(this.id)
-        if (avatar) {
-          this.credits = decode(await decrypterRSA(avatar.priv, row.credits))
-        } this.creditsX = row.credits // SERA FAIT DANS compile2()
+      if (row.credits === true) {
+        this.credits = { total: 0, tickets: [] }
+      } else {
+        this.credits = await decrypter(session.clek, row.credits)        
       }
     }
 
@@ -1002,10 +1001,6 @@ export class Compta extends GenDoc {
     this.cletK = await crypter(session.clek, this.clet)
     this.idt = setClet(this.clet)
     delete this.rowCletK
-    if (this.creditsX) {
-      this.credits = decode(await decrypterRSA(priv, this.creditsX))
-      delete this.creditsX
-    }
   }
 
   updAvatarMavk (setSupprIds) {
