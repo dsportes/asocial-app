@@ -348,8 +348,9 @@ export const useSessionStore = defineStore('session', {
     },
 
     setBlocage () {
+      const aSt = stores.avatar
       const c = aSt.comptas
-      const dhvu = c.dhvu || 0
+      const dhvu = c ? (c.dhvu || 0) : 0
       this.niv = 0
       this.alire = false
       this.notifs.forEach(ntf => {

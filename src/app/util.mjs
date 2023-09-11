@@ -1,12 +1,17 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { useQuasar } from 'quasar'
-import { gzip, gunzip } from 'browserify-zlib'
 
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AMJ, appexc } from './api.mjs'
 import { MD } from './modele.mjs'
+
+let pako
+
+export function setRequiredModules (m) { 
+  pako = m.pako
+}
 
 let $q
 
@@ -150,25 +155,9 @@ export function photoToBin (t) {
 
 
 /* gzip / ungzip ***************************************************/
-export function gz (u8) {
-  return new Promise((resolve, reject) => {
-    gzip(u8, (err, buffer) => {
-      if (err) reject(err); else resolve(new Uint8Array(buffer))
-    })
-  })
-}
+export function gzipT (data) { return pako.gzip(data) }
 
-export function ungz (u8) {
-  return new Promise((resolve, reject) => {
-    gunzip(u8, (err, buffer) => {
-      if (err) reject(err); else resolve(new Uint8Array(buffer))
-    })
-  })
-}
-
-export async function gzipT (data) { return await gz(encoder.encode(data)) }
-
-export async function ungzipT (data) { return decoder.decode(await ungz(data)) }
+export function ungzipT (data) { return pako.ungzip(data) }
 
 export async function gzipB (arg) {
   if (!arg) return null
@@ -235,6 +224,24 @@ export function edvol (vol) {
   if (v < 1000000000000) return (v / 1000000000).toPrecision(3) + 'GB'
   if (v < 1000000000000000) return (v / 1000000000000).toPrecision(3) + 'TB'
   return (v / 1000000000000000).toPrecision(3) + 'PB'
+}
+
+export function mon (v, n) { // n : nombres de chiffres après les centimes
+  if (v === 0) return 0
+  if (v >= 100) return (v / 100).toFixed((n || 0) + 2).replace('.', ',') + '€'
+  return v.toFixed(n || 0).replace('.', ',') + 'c'
+}
+
+export function nbn (vol, n) { // v: nombre de notes ... n: avec décimales
+  const u = $t('notes')
+  const v = vol || 0
+  if (v === 0) return '0'
+  if (!n) {
+  if (v < 1000) return v + u
+  if (v < 1000000) return (v / 1000).toPrecision(3) + 'K ' + u
+  return (v / 1000000).toPrecision(3) + 'M ' + u
+  }
+  return vol.toFixed(n)
 }
 
 export async function readFile (file, bin) {

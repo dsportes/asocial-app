@@ -14,7 +14,7 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 const ic = ['check', 'report', 'trending_down', 'edit_off', 'lock', 'close']
 
 export default ({
-  name: 'NotifIcon',
+  name: 'NotifIcon2',
   props: { 
     /* niveau d'information / restriction: 
     - 0 : aucune notification

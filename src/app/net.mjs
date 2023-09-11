@@ -106,7 +106,7 @@ export async function post (op, fonction, args) {
     const resp = decode(buf)
     if (resp && (resp.nl || resp.ne)) {
       const session = stores.session
-      session.setNlNs(resp.nl || 0, resp.ne || 0)
+      session.setNlNe(resp.nl || 0, resp.ne || 0)
     }
     return resp
   } catch (e) { // Résultat mal formé

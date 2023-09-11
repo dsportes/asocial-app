@@ -384,11 +384,6 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
-    act: (state) => {
-      const t = state.tribu
-      return t ? t.act[state.compta.it] : { vide: true}
-    },
-
     delTribuC (id) { // delete d'une tribu quelconque pour le Comptable
        this.maptr.delete(id)
     },

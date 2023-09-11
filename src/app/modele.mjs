@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
-import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gz, ungz, titre, suffixe } from './util.mjs'
+import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { ID, isAppExc, d13, d14, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour, lcSynt } from './api.mjs'
@@ -486,6 +486,8 @@ export class Notification {
     this.texte = texte || ''
     this.dh = dh || Date.now()
   }
+
+  clone () { return Notification.deSerial(this.serial) }
 
   get serial() {
     const x = { nr: this.nr || 0, dh: this.dh }
@@ -1779,7 +1781,7 @@ export class Note extends GenDoc {
     fic.sha = sha256(u8)
     fic.dh = Date.now()
     fic.gz = fic.type.startsWith('text/')
-    fic.u8 = await crypter(this.cle, fic.gz ? await gz(u8) : u8)
+    fic.u8 = await crypter(this.cle, fic.gz ? await gzipT(u8) : u8)
     return fic
   }
 
@@ -1818,7 +1820,7 @@ export class Note extends GenDoc {
     }
     if (!buf) return null
     const f = this.mfa.get(idf)
-    const buf2 = f.gz ? await ungz(buf) : buf
+    const buf2 = f.gz ? await ungzipT(buf) : buf
     return buf2
   }
 

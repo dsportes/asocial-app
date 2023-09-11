@@ -1,0 +1,181 @@
+<template>
+<div>
+  <div :class="dkli(idx)">
+    <div v-if="notif" class="column q-my-sm">
+      <div class="row justify-between">
+        <div class="titre-md">{{$t('ANnot')}}</div>
+        <div>
+          <span class="fs-sm font-mono">{{dhcool(notif.dh)}}</span>
+          <q-btn v-if="type < 3 && editable" color="primary" class="q-ml-sm btn2" size="sm" 
+            :label="$t('editer')" dense icon="add" @click="editer"/>
+        </div>
+        <div v-if="notif.nr">
+          <span class="q-pa-xs bg-yellow3 text-negative text-bold">
+            {{$t('ANnr' + notif.nr)}}
+          </span>
+          <bouton-bulle :idtext="'nr' + notif.nr"/>
+        </div>
+      </div>
+      <show-html class="q-mt-xs bord" :texte="notif.texte" :idx="idx" 
+        maxh="3rem" zoom scroll/>
+    </div>
+    <div v-if="type < 3 && (!notif || !notif.texte)" class="row justify-between">
+      <div class="titre-md">{{$t('ANauc')}}</div>
+      <q-btn v-if="editable" color="primary" class="q-ml-sm btn2" size="sm" 
+        :label="$t('ANcre')" dense icon="add" @click="creer"/>
+    </div>
+  </div>
+
+  <q-dialog v-model="editntf" persistent>
+    <q-card class="bs moyennelargeur">
+      <q-toolbar class="bg-secondary text-white">
+        <q-btn dense color="warning" size="md" icon="close" @click="MD.fD"/>
+        <q-toolbar-title class="titre-lg full-width text-center">{{$t('ANnot')}}</q-toolbar-title>
+        <bouton-help page="page1"/>
+      </q-toolbar>
+      <q-card-section class="q-my-sm q-mx-sm column">
+
+        <div v-if="type===0">
+          <q-checkbox size="sm" v-model="restr"/>
+            <span>{{$t('ANnr1')}}<bouton-bulle idtext="nr1"/></span>
+        </div>
+        <div v-if="type===0">
+          <q-checkbox size="sm" v-model="restrb"/>
+            <span>{{$t('ANnr2')}}<bouton-bulle idtext="nr2"/></span>
+        </div>
+
+        <div v-if="type===1 || type===2" class="column">
+          <q-checkbox size="sm" v-model="restr"/>
+            <span>{{$t('ANnr3')}}<bouton-bulle idtext="nr3"/></span>
+        </div>
+        <div v-if="type===1 || type===2">
+          <q-checkbox size="sm" v-model="restrb"/>
+            <span>{{$t('ANnr4')}}<bouton-bulle idtext="nr4"/></span>
+        </div>
+
+      </q-card-section>
+      <q-card-section class="q-my-sm q-mx-sm">
+        <editeur-md mh="10rem" v-model="ntf.texte" :texte="ntf.texte" editable modetxt/>
+      </q-card-section>
+      <q-card-actions>
+        <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
+          @click="MD.fD"/>
+        <q-btn dense flat color="warning" size="md" icon="delete" :label="$t('supprimer')" 
+          :disable="!notif || !notif.texte" @click="supprimer"/>
+        <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="check" 
+          :label="$t('valider')" :disable="!ntf.texte" @click="valider"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+</div>
+</template>
+<script>
+
+import { ref, toRef } from 'vue'
+import stores from '../stores/stores.mjs'
+import BoutonHelp from './BoutonHelp.vue'
+import BoutonBulle from './BoutonBulle.vue'
+import EditeurMd from './EditeurMd.vue'
+import ShowHtml from './ShowHtml.vue'
+import { MD, Notification } from '../app/modele.mjs'
+import { dhcool, dkli } from '../app/util.mjs'
+
+export default {
+  name: 'ApercuNotif2',
+
+  props: { 
+    notif: Object, // notification existante, null pour création éventuelle
+    type: Number,
+    /* Type des notifications:
+    - 0 : de l'espace
+    - 1 : d'une tribu
+    - 2 : d'un compte
+    - 3 : dépassement de quotas
+    - 4 : alerte de solde / consommation
+    */
+    editable: Boolean,
+    idx: Number
+  },
+
+  components: { BoutonHelp, BoutonBulle, EditeurMd, ShowHtml },
+
+  watch: {
+    restr (ap) { if (ap && this.restrb) this.restrb = false },
+    restrb (ap) { if (ap && this.restr) this.restr = false }
+  },
+
+  computed: {
+  },
+
+  data () { return {
+    restr: false,
+    restrb: false,
+    ntf: null,
+    tex: ''
+  }},
+
+  methods: {
+    editer () {
+      this.ntf = notif.clone()
+      this.tex = this.ntf.texte
+      if (this.type === 0) {
+        if (this.ntf.nr === 1) { this.restr = true; this.restrb = false }
+        if (this.ntf.nr === 2) { this.restr = false; this.restrb = true }
+      } else {
+        if (this.ntf.nr === 3) { this.restr = true; this.restrb = false }
+        if (this.ntf.nr === 4) { this.restr = false; this.restrb = true }
+      }
+      this.oveditntf()
+    },
+
+    creer () {
+      this.ntf = new Notification({})
+      this.restr = false
+      this.restrb = false
+      this.oveditntf()
+    },
+
+    valider () {
+      if (this.type === 0) {
+        if (this.restr) this.ntf.nr = 1
+        if (this.restrb) this.ntf.nr = 2
+      } else {
+        if (this.restr) this.ntf.nr = 3
+        if (this.restrb) this.ntf.nr = 4
+      }
+      this.$emit('ok', this.ntf)
+      MD.fD()
+    },
+
+    supprimer () {
+      this.$emit('ok', new Notification({}))
+      MD.fD()
+    }
+  },
+  setup (props) {
+    const session = stores.session
+    const n = toRef(props, 'notif')
+
+    const editntf = ref(false)
+    function oveditntf () { MD.oD(editntf) }
+
+    return {
+      MD, dhcool, dkli, editntf, oveditntf,
+      session
+    }
+  }
+}
+</script>
+<style lang="sass" scoped>
+@import '../css/app.sass'
+.bord
+  border: 1px solid $grey-5
+  border-radius: 5px
+  padding: 2px
+.btn2
+  max-height: 1.5rem
+.q-toolbar
+  padding: 0 !important
+  min-height: 0 !important
+</style>

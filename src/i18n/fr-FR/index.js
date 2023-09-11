@@ -75,6 +75,10 @@ export default {
   total: 'Total',
   info: 'Info',
   ping: 'Ping',
+  notes: 'notes',
+  nbnotes: 'Nb notes, chats, groupes',
+  volv2: 'Volume fichiers',
+  limco: 'Limite conso.',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -805,7 +809,7 @@ export default {
   ESns: 'ID de l\'espace attribué',
   ESnsh: 'De 10 à 59',
   ESorg: 'Organisation[@branche]',
-  ESprf: 'Profil de quotas: #{0}',
+  ESprf: 'Profil: #{0}',
   ESreq: 'Valeur requise',
   ESnum: 'Numéro d\'espace non disponible',
   ESorgh: 'monorg OU monorg@br1',
@@ -1412,6 +1416,13 @@ export default {
   ANle: 'le {0} (dans {1} jour(s))',
 
   ANcre: 'En créer une',
+  ANauc: 'Pas de notification',
+  ANnot: 'Notification',
+  ANrestr: 'Restriction d\'accès',
+  ANnr1: 'Application "figée" par l\'administrateur technique: aucune mise à jour possible',
+  ANnr2: 'Application "bloquée" par l\'administrateur technique',
+  ANnr3: 'Application en lecture seulement',
+  ANnr4: 'Accès minimal très restreint à l\'application',
   ANplus: 'Plus d\'info',
   ANtxt: 'Texte de l\'alerte',
   ANpasp: 'Simple alerte, pas de procédure de blocage engagée',
@@ -1509,5 +1520,9 @@ export default {
   SAVvolg: 'dont notes des groupes détruits V1 / V2: {0} / {1}',
   SAVvolt: 'Total V1 / V2: {0} / {1}',
 
+  BULLEnr1: 'Application <span color="red">figée</span> par l\'administrateur technique: aucune mise à jour possible',
+  BULLEnr2: 'Application "bloquée" par l\'administrateur technique',
+  BULLEnr3: 'Application en lecture seulement',
+  BULLEnr4: 'Accès minimal très restreint à l\'application',
 
 }

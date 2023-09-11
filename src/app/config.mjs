@@ -4,7 +4,7 @@ export const config = {
   DEBUG: true,
   BUILD: 202308231545,
   // Commenter quand l'application UI est servie directement par le serveur
-  // SRV: 'test.sportes.fr:8443',
+  SRV: 'test.sportes.fr:8443',
   // WSSRV: 'wss://localhost.fr:8443/ws/', // calculé depuis SRV par défaut
   // OPSRV: 'https://test.sportes.fr:8443/op/', // calculé depuis SRV par défaut
 
@@ -38,7 +38,7 @@ export const config = {
   nomDuComptable: 'Comptable',
   allocComptable: [32, 32, 256, 256],
   quotas: { '0': 0, 'XXS': 1, 'XS': 2, 'SM': 4, 'MD': 8, 'LG': 16, 'XL': 32, 'XXL': 64 },
-  profils: [[10, 10], [50, 50], [250, 250], [50, 10], [250, 50]],
+  profils: [[100, 10, 10], [1000, 50, 50], [10000, 250, 250], [1000, 50, 10], [10000, 250, 50]],
   lgtitre: 120,
   maxlgtextegen: 250,
   maxlgtextesecret: 5000

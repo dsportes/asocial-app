@@ -111,7 +111,7 @@
 
 <script>
 import { ref } from 'vue'
-import { UNITEV1, UNITEV2, AMJ, pow } from '../app/api.mjs'
+import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
 import QuotasVols from './QuotasVols.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
@@ -156,7 +156,7 @@ export default ({
     ed (v) { return edvol(v) },
     ed1 (v) { return edvol(v * UNITEV1) },
     ed2 (v) { return edvol(v * UNITEV2) },
-    edp (v) { return edvol(pow(v) * UNITEV2) },
+    edp (v) { return edvol(v * UNITEV2) },
 
     // Retourne la liste des indices des 7 derniers jours (précédent le jour j)
     lst7j () {

@@ -864,11 +864,10 @@ export class SetNotifG extends OperationUI {
   async run (notifG) {
     try {
       const session = stores.session
-      if (notifG) notifG.dh = Date.now()
       const naComptable = NomGenerique.comptable()
-      const notif = !notifG ? null : await crypter(naComptable.rnd, notifG.encode())
+      const notif = await crypter(naComptable.rnd, notifG.encode())
       const args = { token: session.authToken, ns: session.ns, notif}
-      const ret = this.tr(await post(this, 'SetNotifG', args))
+    const ret = this.tr(await post(this, 'SetNotifG', args))
       if (ret.rowEspace && session.estAdmin) {
         // PageAdmin : update liste espace
         const esp = await compile(ret.rowEspace)

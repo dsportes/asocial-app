@@ -39,8 +39,8 @@
             @click="ovchgprf1(esp)"/>
         </div>
 
-        <apercu-notif class="q-ml-lg q-mt-sm" :notif="esp.notif" :idx="idx" 
-          :nom="esp.org" :ns="esp.id"/>
+        <apercu-notif2 class="q-ml-lg q-mt-sm" :notif="esp.notif" :idx="idx" 
+          editable :type="0" @ok="setNotif"/>
 
       </div>
     </div>
@@ -80,17 +80,17 @@
         </q-toolbar>
         <q-card-section class="q-my-md q-mx-sm">
           <div class="row bord4">
-            <div class="col-2 text-center font-mono">#</div>
-            <div class="col-5 text-center font-mono">V1</div>
-            <div class="col-5 text-center font-mono">V2</div>
+            <div class="col-3 text-center font-mono">#</div>
+            <div class="col-3 text-center font-mono">{{$t('limco')}}</div>
+            <div class="col-3 text-center font-mono">{{$t('nbnotes')}}</div>
+            <div class="col-3 text-center font-mono">{{$t('volv2')}}</div>
           </div>
           <div v-for="(x, idx) of cfg.profils" :key="idx" @click="prf = idx+1">
             <div :class="'row cursor-pointer ' + dkli(idx) + brd(idx)">
-              <div class="col-2 text-center font-mono">{{idx + 1}}</div>
-              <div class="col-2 text-center font-mono">{{cfg.profils[idx][0]}}</div>
-              <div class="col-3 text-center font-mono">{{e1(cfg.profils[idx][0])}}</div>
-              <div class="col-2 text-center font-mono">{{cfg.profils[idx][1]}}</div>
-              <div class="col-3 text-center font-mono">{{e2(cfg.profils[idx][1])}}</div>
+              <div class="col-3 text-center font-mono">{{idx + 1}}</div>
+              <div class="col-3 text-center font-mono">{{ev0(idx)}}</div>
+              <div class="col-3 text-center font-mono">{{ev1(idx)}}</div>
+              <div class="col-3 text-center font-mono">{{ev2(idx)}}</div>
             </div>
           </div>
         </q-card-section>
@@ -179,21 +179,22 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
-import ApercuNotif from '../components/ApercuNotif.vue'
+import ApercuNotif2 from '../components/ApercuNotif2.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
 import { GC, GetCheckpoint, SetEspaceT } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { edvol, dkli, afficherDiag } from '../app/util.mjs'
+import { edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
+import { SetNotifG } from '../app/operations.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
 
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, PhraseSecrete, ApercuNotif, BoutonHelp, PageEspace },
+  components: { BoutonConfirm, PhraseSecrete, ApercuNotif2, BoutonHelp, PageEspace },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -222,8 +223,12 @@ export default {
   },
 
   methods: {
-    e1 (v) { return edvol(v * UNITEV1) },
-    e2 (v) { return edvol(v * UNITEV2) },
+    ev0 (idx) { return mon(this.cfg.profils[idx][0]) },
+    ev1 (idx) { 
+      const n = this.cfg.profils[idx][1]
+      return '[' + n + '] ' + nbn(n * UNITEV1)
+    },
+    ev2 (idx) { return edvol(this.cfg.profils[idx][2] * UNITEV2) },
     brd (idx) { 
       const x = this.prf === idx + 1 ? ' bord6': (this.profil === idx + 1 ? ' bord7' : ' bord5') 
       return x 
@@ -266,7 +271,9 @@ export default {
       MD.fD()
       this.rafraichir()
     },
-
+    async setNotif(ntf) {
+      await new SetNotifG().run(ntf)
+    },
     async valider () {
       new SetEspaceT().run(this.esp.id, this.prf)
       MD.fD()
