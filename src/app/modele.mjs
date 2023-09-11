@@ -549,6 +549,7 @@ _data_ :
 export class Espace extends GenDoc {
 
   async compile (row) {
+    const session = stores.session
     this.org = row.org
     this.opt = row.opt || 0
     this.t = row.t || 0
@@ -557,6 +558,7 @@ export class Espace extends GenDoc {
       const ser = await decrypter(NomGenerique.cleComptable, row.notif)
       this.notif = Notification.deSerial(ser)
     } else this.notif = null
+    session.setNotifE(this.notif)
   }
 
   static async nouveau (org) {
@@ -973,6 +975,13 @@ export class Compta extends GenDoc {
 
     this.compteurs = new Compteurs(row.compteurs, this.qv)
     this.pc = this.compteurs.pourcents.max
+    let chg = session.setNotifQ(this.compteurs.notifQ)
+    if (this.estA) {
+      if (session.setNotifQ(this.compteurs.notifS(this.credits))) chg = true
+    } else {
+      if (session.setNotifQ(this.compteurs.notifX)) chg = true
+    }
+    if (chg) session.setBlocage()
 
     /**Pour le Comptable seulement**
     -`atr` : table des tribus : `{clet, info, qc, q1, q2}` crypté par la clé K du comptable.

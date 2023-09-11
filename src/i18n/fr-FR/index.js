@@ -217,6 +217,9 @@ export default {
   
   MOdis: 'DISPARU',
 
+  ECclos: 'L\'administrateur technique a fermé l\'application pour l\'organisation "{0}"',
+  ECmi: 'Message d\'information de sa part [{0}]', 
+
   // Exceptions
   EX1: 'Interruption volontaire (appui sur le bouton rouge)',
   EX2: 'Erreur d`accès au serveur, réseau indisponible ?',

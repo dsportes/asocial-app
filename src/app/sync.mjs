@@ -509,6 +509,9 @@ export class OnchangeEspace extends OperationWS {
       const session = stores.session
       const esp = await compile(row)
       session.setEspace(esp)
+      if (session.estClos) {
+        deconnexion()
+      }
     } catch (e) { 
       await this.finKO(e)
     }

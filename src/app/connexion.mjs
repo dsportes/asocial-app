@@ -30,12 +30,24 @@ export function deconnexion (garderMode) {
   if (session.accesIdb) closeIDB()
   if (session.accesNet) {
     if (session.fsSync) session.fsSync.close(); else closeWS()
-  } 
+  }
+  const espaceClos = session.estClos
+  let notifAdmin, org, ns
+  if (espaceClos) {
+    notifAdmin = session.notifs[0]
+    org = session.org
+    ns = session.ns
+  }
   stores.reset()
   if (garderMode) session.setMode(mode)
   session.memoOrg = memoOrg
+  if (espaceClos) {
+    session.notifAdmin = notifAdmin
+    session.org = org
+    session.ns = ns
+  }
   SyncQueue.reset()
-  stores.ui.setPage('login')
+  stores.ui.setPage(espaceClos ? 'clos' : 'login')
 }
 
 export async function reconnexionCompte () {
@@ -508,12 +520,14 @@ export class ConnexionCompte extends OperationUI {
       return
     }
 
-    this.rowAvatar = ret.rowAvatar
+    this.espace = await compile(ret.rowEspace)
+    if (session.estClos) return
+    session.setOrg(this.espace.org)
+    session.setNs(this.espace.id)
+
     this.rowCompta = ret.rowCompta
-    this.rowEspace = ret.rowEspace
-    session.setOrg(this.rowEspace.org)
-    session.setNs(ID.ns(this.rowCompta.id))
     session.setCompteId(this.rowCompta.id)
+    this.rowAvatar = ret.rowAvatar
 
     if (session.fsSync) {
       /* en sql, le serveur a enregistré d'office à la connexion l'abonnement 
@@ -526,7 +540,6 @@ export class ConnexionCompte extends OperationUI {
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
     if (this.compta.rowCletK) await this.compta.compile2(this.avatar.priv)
-    this.espace = await compile(this.rowEspace)
 
     if (this.compta.idt) {
       const args = { token: session.authToken, id: this.compta.idt, abPlus: [this.compta.idt] }
@@ -588,9 +601,6 @@ export class ConnexionCompte extends OperationUI {
   /** run **********************************************************/
   async run () {
     try {
-      await stores.ui.setPage('session')
-
-      // session synchronisée ou incognito
       const session = stores.session
       const aSt = stores.avatar
       const gSt = stores.groupe
@@ -600,6 +610,7 @@ export class ConnexionCompte extends OperationUI {
       this.dh = 0
 
       if (session.avion) {
+        await stores.ui.setPage('session')
         await this.phase0Avion()
       } else {
         /* Authentification et get de avatar / compta / tribu
@@ -612,6 +623,11 @@ export class ConnexionCompte extends OperationUI {
           stores.ui.setPage('admin')
           return this.finOK()
         }
+        if (session.estClos) {
+          deconnexion()
+          return this.finOK()
+        }
+        await stores.ui.setPage('session')
         if (session.estComptable) session.setMode(2)
         await this.phase0Net()
       }

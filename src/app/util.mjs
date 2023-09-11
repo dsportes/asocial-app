@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { useQuasar } from 'quasar'
-import { gzip, gunzip } from 'zlib'
+import { gzip, gunzip } from 'browserify-zlib'
 
 import { arrayBuffer, random, concat } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'

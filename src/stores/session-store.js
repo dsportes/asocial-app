@@ -80,6 +80,7 @@ export const useSessionStore = defineStore('session', {
     - 4 : alerte de solde / consommation
     */
     notifs: [null, null, null, null, null, null],
+    notifAdmin: null, // Pour gestion d'un espace clos après déconnexion
 
     /*
     Une notification a les propriétés suivantes:
@@ -123,7 +124,6 @@ export const useSessionStore = defineStore('session', {
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
 
-    editable (state) { return state.mode < 3 && state.niv < 2 },
     presetOrg (state) {
       return !state.accesIdb ? '' : (localStorage.getItem('$asocial$org') || '')
     },
@@ -132,6 +132,29 @@ export const useSessionStore = defineStore('session', {
       if (state.estComptable) return 2
       if (state.estSponsor) return 3
       return 4
+    },
+
+    // editable (state) { return state.mode < 3 && state.niv < 2 },
+    estFige (state) { const n = state.notifs[0]; return n && (n.nr === 1) },
+    estClos (state) { const n = state.notifs[0]; return n && (n.nr === 2) },
+    estLecture (state) {
+      const nt = state.notifs[1]; const nc = state.notifs[2]
+      let nr = nt ? nt.nr : 0
+      if (nc && nc.nr > nr) nr = nc.nr
+      return nr === 3
+    },
+    estMinimalTC (state) {
+      const nt = state.notifs[1]; const nc = state.notifs[2]
+      let nr = nt ? nt.nr : 0
+      if (nc && nc.nr > nr) nr = nc.nr
+      return nr === 4
+    },
+    estMinimalC (state) { const n = state.notifs[4]; return n && (n.nr === 4) },
+    estDecr (state) { const n = state.notifs[3]; return n && (n.nr === 5) },
+
+    estMinimal () { 
+      if (!state.fige) return state.estMinimalC || state.estMinimalTC
+      return state.estMinimalTC
     },
 
     // PageAdmin ***************************************************    
