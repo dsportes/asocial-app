@@ -334,7 +334,8 @@ export default {
   EX8065: 'Maximum de volume V1 pour les notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8066: 'Maximum de volume V2 pour les notes du couple dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8067: 'Groupe sans hébergeur {0} : augmentation de volumer interdit.',
-  EX8101: 'Compte non authentifié',
+  EX8101: 'Essayer de saisir à nouveau la phrase secrète.\nLe code de l\`organisation a pu aussi être mal saisi.',
+  EX8888: 'Cette phrase secrète ne correspond à aucun compte enregistré',
 
   // A_SRV = 9000 // Situation inattendue : assertion trappée sur le serveur
   EX9001: 'Espace non trouvé ({1}) - @{0}',
@@ -1523,6 +1524,12 @@ export default {
   SAVvola: 'dont notes supprimées de l\'avatar V1 / V2: {0} / {1}',
   SAVvolg: 'dont notes des groupes détruits V1 / V2: {0} / {1}',
   SAVvolt: 'Total V1 / V2: {0} / {1}',
+
+  TUtqc: 'Limite conso. annuelle',
+  TUtq1: 'Abon. nombre notes...',
+  TUtq2: 'Abon. volume fichiers',
+  TUaff: 'Affecté',
+  TUuti: 'Utilisé',
 
   BULLEnr1: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
   BULLEnr2: 'Application **bloquée** par l\'administrateur technique',

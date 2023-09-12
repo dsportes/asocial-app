@@ -611,7 +611,7 @@ _data_:
   Chaque élément est la sérialisation de:
   - `qc q1 q2` : quotas de la tribu.
   - `ac a1 a2` : sommes des quotas attribués aux comptes de la tribu.
-  - `cj v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
+  - `ca v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
   - `ntr0` : nombre de notifications tribu sans restriction d'accès.
   - `ntr1` : nombre de notifications tribu avec restriction d'accès _lecture seule_.
   - `ntr2` : nombre de notifications tribu avec restriction d'accès _minimal_.
@@ -694,7 +694,7 @@ _data_:
   - `stn` : restriction d'accès de la notification _compte_: 
     _0:aucune 1:lecture seule 2:minimal_  
   - `qc q1 q2` : quotas attribués.
-  - `cj v1 v2` : volumes **approximatifs** effectivement utilisés.
+  - `ca v1 v2` : volumes **approximatifs** effectivement utilisés.
 Calculés localement :
 - pccj : pourcentage d'utilisation de la consommation journalière / qc
 - pcv1 : pourcentage d'utilisation effective de q1 : v1 / q1
@@ -848,7 +848,7 @@ export class Tribu extends GenDoc {
       const item = {
         idT: await crypter(c, '' + ID.court(nac.id)),
         qc: qc[0], q1: qc[1], q2: qc[2],
-        ac: 0, a1: 0, a2: 0, stn: 0, cj: 0, v1: 0, v2: 0,
+        ac: 0, a1: 0, a2: 0, stn: 0, ca: 0, v1: 0, v2: 0,
         nasp: await crypter(c, new Uint8Array(encode(nac.anr)))
       }
       r.act.push(item)
@@ -1080,8 +1080,8 @@ export class Compta extends GenDoc {
 
     r.mavk = { }
     r.mavk[await Compta.mavkK(na.id, k)] = await Compta.mavkKV(na, k)
-
-    r.compteurs = new Compteurs(null, { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: 0, ng: 0, v2: 0}).serial
+    r.qv = { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: 0, ng: 0, v2: 0}
+    r.compteurs = new Compteurs(null, r.qv).serial
 
     if (ID.estComptable(r.id)) {
       const x = { clet, info: '', q }

@@ -813,21 +813,6 @@ export class ConnexionCompte extends OperationUI {
         }
       }
 
-      /* Tout est en store: Vérification par superstition des compteurs qv de comptas */
-      if (session.accesNet) {
-        const qv = aSt.getqv
-        const qvg = gSt.getqv; qv.v2 += qvg.v2; qv.nn += qvg.nn; qv.ng = qvg.ng
-        qv.v1 = qv.ng + qv.nc + qv.nn
-        const x = aSt.comptas.qv
-        let ok = true
-        ['ng', 'nc', 'nn', 'v1', 'v2'].forEach(f => { if (x[f] !== qv[f]()) ok = false })
-        if (!ok) {
-          aSt.comptas.aligneV(qv)
-          await new AlignerComptas().run(qv)
-          console.log('AlignerComptas !!! ' + JSON.stringify({id: x.id, qv: qv}))
-        }
-      }
-
       /* Mises à jour éventuelles du serveur **********************************************/
       if (session.accesNet) {
         /* Suppression des notes temporaires ayant dépassé leur date limite */
@@ -854,7 +839,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       if (session.estComptable) {
-        new TraitGcvols().run()
+        await new TraitGcvols().run()
       }
 
       // enregistre l'heure du début effectif de la session

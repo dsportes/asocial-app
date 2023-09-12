@@ -2,7 +2,8 @@
     <q-card v-if="ui.exc" class="q-ma-xs moyennelargeur">
       <q-card-section>
         <div v-if="exc.sync" class="titre-lg">{{$t('ERsync')}}</div>
-        <div class="titre-lg">{{$t('EX' + exc.majeur)}}</div>
+        <div v-if="exc.code!==8101" class="titre-lg">{{$t('EX' + exc.majeur)}}</div>
+        <div v-else class="titre-lg">{{$t('EX8888')}}</div>
       </q-card-section>
       <q-card-section>
         <div class="titre-md" v-html="html"/>

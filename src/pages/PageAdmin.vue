@@ -272,7 +272,9 @@ export default {
       this.rafraichir()
     },
     async setNotif(ntf) {
-      await new SetNotifG().run(ntf, ntf.idsource)
+      const ns = ntf.idsource
+      delete ntf.idsource
+      await new SetNotifG().run(ntf, ns)
     },
     async valider () {
       new SetEspaceT().run(this.esp.id, this.prf)

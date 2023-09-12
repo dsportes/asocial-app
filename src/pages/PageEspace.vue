@@ -20,6 +20,15 @@ Depuis un Comptable: ns est celui de la session
 
     <div :class="dkli(idx) + ' q-mb-sm q-mx-xs'" 
       v-for="(lg, idx) in synth" :key="lg.id" @click=lgCourante(lg)>
+      <div class="row q-gutter-sm">
+        <tuile-cnv type="qc" :src="lg" occupation/>
+        <tuile-cnv type="q1" :src="lg" occupation/>
+        <tuile-cnv type="q2" :src="lg" occupation/>
+      </div>
+    </div>
+
+    <div :class="dkli(idx) + ' q-mb-sm q-mx-xs'" 
+      v-for="(lg, idx) in synth" :key="lg.id" @click=lgCourante(lg)>
       <div :class="'zone cursor-pointer' + (ligne && (ligne.id === lg.id) ? ' courant' : '')"
         style="overflow:hidden;max-height:3rem">
         <div class="row col-auto"> <!-- ligne 1 -->
@@ -102,6 +111,7 @@ Depuis un Comptable: ns est celui de la session
 <script>
 import { ref, onMounted, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
+import TuileCnv from '../components/TuileCnv.vue'
 import DetailTribu from '../components/DetailTribu.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { edvol, dkli } from '../app/util.mjs'
@@ -113,7 +123,7 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { DetailTribu, ChoixQuotas },
+  components: { DetailTribu, ChoixQuotas, TuileCnv },
 
   computed: {
   },

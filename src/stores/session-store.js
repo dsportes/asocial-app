@@ -124,7 +124,7 @@ export const useSessionStore = defineStore('session', {
     ok (state) { return state.status === 2 },
 
     notifAdmin (state) { return state.notifs[0] },
-    
+
     presetOrg (state) {
       return !state.accesIdb ? '' : (localStorage.getItem('$asocial$org') || '')
     },
@@ -319,7 +319,7 @@ export const useSessionStore = defineStore('session', {
       return false
     },
 
-    setNotifS (nt, nc) { // solde négatif - return true si changement
+    setNotifS (ne) { // solde négatif - return true si changement
       if (!ne) return false
       const n = this.notifs[4]
       if (!n || ne.dh > n.dh) {
@@ -357,7 +357,7 @@ export const useSessionStore = defineStore('session', {
       this.niv = 0
       this.alire = false
       this.notifs.forEach(ntf => {
-        if (ntf && ntf.dh) {
+        if (ntf && ntf.texte) {
           if (ntf.dh > dhvu) this.alire = true
           const niv = !ntf.texte ? 0 : ( !ntf.nr ? 1 : this.nivx[ntf.nr])
           if (niv > this.niv) this.niv = niv

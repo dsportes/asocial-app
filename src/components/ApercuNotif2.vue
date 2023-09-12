@@ -1,7 +1,7 @@
 <template>
 <div>
   <div :class="dkli(idx)">
-    <div v-if="notif" class="column q-my-sm">
+    <div v-if="notif && notif.texte" class="column q-my-sm">
       <div class="row justify-between">
         <div class="titre-md">{{$t('ANnot')}}</div>
         <div>
@@ -150,7 +150,9 @@ export default {
     },
 
     supprimer () {
-      this.$emit('ok', new Notification({}))
+      const ntf = new Notification({})
+      if (this.idsource) ntf.idsource = this.idsource
+      this.$emit('ok', ntf)
       MD.fD()
     }
   },
