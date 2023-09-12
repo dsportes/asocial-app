@@ -80,7 +80,6 @@ export const useSessionStore = defineStore('session', {
     - 4 : alerte de solde / consommation
     */
     notifs: [null, null, null, null, null, null],
-    notifAdmin: null, // Pour gestion d'un espace clos après déconnexion
 
     /*
     Une notification a les propriétés suivantes:
@@ -124,6 +123,8 @@ export const useSessionStore = defineStore('session', {
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
 
+    notifAdmin (state) { return state.notifs[0] },
+    
     presetOrg (state) {
       return !state.accesIdb ? '' : (localStorage.getItem('$asocial$org') || '')
     },
@@ -348,6 +349,8 @@ export const useSessionStore = defineStore('session', {
     },
 
     setBlocage () {
+      if (this.estAdmin) return
+      const session = stores.session
       const aSt = stores.avatar
       const c = aSt.comptas
       const dhvu = c ? (c.dhvu || 0) : 0
@@ -360,6 +363,7 @@ export const useSessionStore = defineStore('session', {
           if (niv > this.niv) this.niv = niv
         }
       })
+      if (session.estClos) this.status = 0
     },
 
     editDiag (avionSeulement) {

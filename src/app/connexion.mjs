@@ -31,23 +31,11 @@ export function deconnexion (garderMode) {
   if (session.accesNet) {
     if (session.fsSync) session.fsSync.close(); else closeWS()
   }
-  const espaceClos = session.estClos
-  let notifAdmin, org, ns
-  if (espaceClos) {
-    notifAdmin = session.notifs[0]
-    org = session.org
-    ns = session.ns
-  }
   stores.reset()
   if (garderMode) session.setMode(mode)
   session.memoOrg = memoOrg
-  if (espaceClos) {
-    session.notifAdmin = notifAdmin
-    session.org = org
-    session.ns = ns
-  }
   SyncQueue.reset()
-  stores.ui.setPage(espaceClos ? 'clos' : 'login')
+  stores.ui.setPage('login')
 }
 
 export async function reconnexionCompte () {
@@ -624,7 +612,7 @@ export class ConnexionCompte extends OperationUI {
           return this.finOK()
         }
         if (session.estClos) {
-          deconnexion()
+          stores.ui.setPage('clos')
           return this.finOK()
         }
         await stores.ui.setPage('session')
@@ -1001,6 +989,13 @@ export class AcceptationSponsoring extends OperationUI {
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
 
+      const espace = await compile(ret.rowEspace)
+      session.setEspace(espace)
+      if (session.estClos) {
+        this.ui.setPage('clos')
+        this.finOK()
+      }
+
       if (session.fsSync && ret.credentials) {
         await session.fsSync.open(ret.credentials, ret.fsEmulator || 0)
       }
@@ -1017,9 +1012,6 @@ export class AcceptationSponsoring extends OperationUI {
       const tribu = await compile(rowTribu)
 
       aSt.setCompte(avatar, compta, tribu)
-
-      const espace = await compile(rowEspace)
-      if (espace) session.setEspace(espace)
 
       const chat = await compile(rowChat)
       aSt.setChat(chat)

@@ -112,7 +112,7 @@ export default ({
       this.encours = true
       setTimeout(async () => {
         const pc = new Phrase()
-        await pc.init(this.ligne1, this.session.org)
+        await pc.init(this.ligne1, this.orgext || this.session.org)
         pc.phrase = null
         this.$emit('ok', pc)
         this.raz()

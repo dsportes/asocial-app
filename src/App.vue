@@ -17,21 +17,21 @@
       </q-btn>
 
       <!-- Information session : mode synchro -->
-      <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession"
+      <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession('page1')"
         dense size="md" icon="autorenew" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
         <queue-icon/>
       </q-btn>
 
       <!-- Information session : mode incognito -->
-      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession"
+      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession('page2')"
         size="sm" square color="primary">
         <img src="~assets/incognito_blanc.svg">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-avatar>
 
       <!-- Information session : mode avion -->
-      <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession"
+      <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession('page3')"
         dense size="md" icon="airplanemode_active" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
         <queue-icon/>
@@ -45,7 +45,7 @@
       </div>
 
       <!-- Notifications -->
-      <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
+      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
         @click="clickNotif"/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
@@ -189,6 +189,7 @@
       enter-active-class="animated animate__slideInRight">
       <page-admin class="page" v-if="ui.page === 'admin'"/>
       <page-login class="page" v-if="ui.page === 'login'"/>
+      <page-clos class="page" v-if="ui.page === 'clos'"/>
       <page-session class="page" v-if="ui.page === 'session'"/>
       <page-accueil class="page" v-if="ui.page === 'accueil'"/>
       <page-compte class="page" v-if="ui.page === 'compte'"/>
@@ -345,6 +346,7 @@ import QueueIcon from './components/QueueIcon.vue'
 import PageAdmin from './pages/PageAdmin.vue'
 import PageMenu from './pages/PageMenu.vue'
 import PageLogin from './pages/PageLogin.vue'
+import PageClos from './pages/PageClos.vue'
 import PageSession from './pages/PageSession.vue'
 import PageAccueil from './pages/PageAccueil.vue'
 import PageCompte from './pages/PageCompte.vue'
@@ -391,7 +393,7 @@ export default {
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests, NotifIcon2, QueueIcon, 
     ApercuAvatar, PageGroupe, PageGroupes, PageNotes, PageFicavion,
-    PageAdmin, PageMenu, PageLogin, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
+    PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
@@ -460,8 +462,9 @@ export default {
     pageFicavion () { 
       this.ui.setPage('ficavion')
     },
-    infoSession () { 
-      this.ui.setPage('session')
+    infoSession (page) { 
+      if (this.session.status === 2) this.ui.setPage('session')
+      this.ui.pushhelp(page)
     },
     gotoAccueilLogin () {
       this.ui.setPage(this.session.status === 2 ? 'accueil' : 'login')

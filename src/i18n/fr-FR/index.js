@@ -634,6 +634,7 @@ export default {
   // App.vue / MainLayout
   Pnull: '',
   Plogin: 'Connexion à un compte',
+  Pclos: 'Application fermée',
   Plogin666: 'Création du compte du comptable',
   Padmin: 'Administration technique',
   Paccueil: 'Accueil',
@@ -1527,5 +1528,6 @@ export default {
   BULLEnr2: 'Application **bloquée** par l\'administrateur technique',
   BULLEnr3: 'Application en lecture seulement',
   BULLEnr4: 'Accès minimal très restreint à l\'application',
+  BULLEclos: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
 
 }
