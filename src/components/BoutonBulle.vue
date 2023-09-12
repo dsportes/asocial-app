@@ -5,7 +5,7 @@
         <template v-slot:avatar>
           <q-icon :name="icon || 'info'" size="sm" color="primary" />
         </template>
-        <span v-html="txt"/>
+        <sd-dark :texte="txt"/>
       </q-banner>
     </q-popup-proxy>
   </q-btn>
@@ -13,9 +13,12 @@
 <script>
 
 import { ref } from 'vue'
+import SdDark from './SdDark.vue'
 
 export default ({
   name: 'BoutonBulle',
+
+  components: { SdDark },
 
   props: { icon: String, idtext: String },
 

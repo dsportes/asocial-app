@@ -36,10 +36,11 @@ export const useConfigStore = defineStore('config', {
     ],
     nomDuComptable: 'Comptable',
     nomTribuPrimitive: 'Primitive',
-    allocComptable: [32, 32, 256, 256],
+    allocComptable: [32, 32, 32],
+    allocPrimitive: [256, 256, 256],
     quotas: { '0': 0, 'XXS': 1, 'XS': 2, 'SM': 4, 'MD': 8, 'LG': 16, 'XL': 32, 'XXL': 64 },
-    profils: [[10, 10], [50, 50], [250, 250], [50, 10], [250, 50]],
-  
+    profils: [[100, 10, 10], [1000, 50, 50], [10000, 250, 250], [1000, 50, 10], [10000, 250, 50]],
+      
     lgtitre: 120,
     maxlgtextegen: 250,
     maxlgtextenote: 5000,

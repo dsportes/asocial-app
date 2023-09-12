@@ -10,7 +10,7 @@
             :label="$t('editer')" dense icon="add" @click="editer"/>
         </div>
         <div v-if="notif.nr">
-          <span class="q-pa-xs bg-yellow3 text-negative text-bold">
+          <span class="q-pa-xs bg-yellow-3 text-negative text-bold">
             {{$t('ANnr' + notif.nr)}}
           </span>
           <bouton-bulle :idtext="'nr' + notif.nr"/>
@@ -87,6 +87,7 @@ export default {
   props: { 
     notif: Object, // notification existante, null pour création éventuelle
     type: Number,
+    idsource: Number,
     /* Type des notifications:
     - 0 : de l'espace
     - 1 : d'une tribu
@@ -111,14 +112,13 @@ export default {
   data () { return {
     restr: false,
     restrb: false,
-    ntf: null,
-    tex: ''
+    ntf: null
   }},
 
   methods: {
     editer () {
-      this.ntf = notif.clone()
-      this.tex = this.ntf.texte
+      this.ntf = this.notif.clone()
+      if (this.idsource) this.ntf.idsource = this.idsource
       if (this.type === 0) {
         if (this.ntf.nr === 1) { this.restr = true; this.restrb = false }
         if (this.ntf.nr === 2) { this.restr = false; this.restrb = true }
@@ -131,6 +131,7 @@ export default {
 
     creer () {
       this.ntf = new Notification({})
+      if (this.idsource) this.ntf.idsource = this.idsource
       this.restr = false
       this.restrb = false
       this.oveditntf()

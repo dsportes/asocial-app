@@ -350,6 +350,9 @@ export default {
   EX9012: 'Chat non trouvé ({1} / {2}) - @{0}',
   EX9013: 'Sponsoring non trouvé ({1} / {2}) - @{0}',
   EX9014: 'Version non trouvé ({1}) - @{0}',
+  EX9015: 'Ticket non trouvé ({1}) - @{0}',
+  EX9016: 'Synthese non trouvé ({1}) - @{0}',
+
 
   EX9100: 'Données d\'authentification illisibles (détail: {0})',
 
@@ -808,11 +811,11 @@ export default {
   ESlo: 'Aucune organisations hébergée | Une organisation hébergée | {count} organisations hébergées',
   ESns: 'ID de l\'espace attribué',
   ESnsh: 'De 10 à 59',
-  ESorg: 'Organisation[@branche]',
+  ESorg: 'Organisation',
   ESprf: 'Profil: #{0}',
   ESreq: 'Valeur requise',
   ESnum: 'Numéro d\'espace non disponible',
-  ESorgh: 'monorg OU monorg@br1',
+  ESorgh: 'monorg OU monorg\@br1',
   ESorg1: 'Au moins 3 signes',
   ESorg2: 'Au plus 12 signes',
   ESorg1b: 'Au moins 1 signe après @',
@@ -1520,8 +1523,8 @@ export default {
   SAVvolg: 'dont notes des groupes détruits V1 / V2: {0} / {1}',
   SAVvolt: 'Total V1 / V2: {0} / {1}',
 
-  BULLEnr1: 'Application <span color="red">figée</span> par l\'administrateur technique: aucune mise à jour possible',
-  BULLEnr2: 'Application "bloquée" par l\'administrateur technique',
+  BULLEnr1: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
+  BULLEnr2: 'Application **bloquée** par l\'administrateur technique',
   BULLEnr3: 'Application en lecture seulement',
   BULLEnr4: 'Accès minimal très restreint à l\'application',
 

@@ -36,7 +36,8 @@ export const config = {
     'auzvillagezSANSzjaizmauvaisezREPUTATIONz'
   ],
   nomDuComptable: 'Comptable',
-  allocComptable: [32, 32, 256, 256],
+  allocComptable: [32, 32, 32],
+  allocPrimitive: [256, 256, 256],
   quotas: { '0': 0, 'XXS': 1, 'XS': 2, 'SM': 4, 'MD': 8, 'LG': 16, 'XL': 32, 'XXL': 64 },
   profils: [[100, 10, 10], [1000, 50, 50], [10000, 250, 250], [1000, 50, 10], [10000, 250, 50]],
   lgtitre: 120,

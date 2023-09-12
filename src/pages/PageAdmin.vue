@@ -40,7 +40,7 @@
         </div>
 
         <apercu-notif2 class="q-ml-lg q-mt-sm" :notif="esp.notif" :idx="idx" 
-          editable :type="0" @ok="setNotif"/>
+          editable :type="0" :idsource="esp.id" @ok="setNotif"/>
 
       </div>
     </div>
@@ -56,12 +56,12 @@
           <div class="row items-center">
             <q-input class="col-6" v-model.number="ns" type="number" style="width:6rem"
             :label="$t('ESns')" :hint="$t('ESnsh')" dense/>
-            <div v-if="dns" class = "coll-6 q-ml-lg text-negative text-bold">{{dns}}</div>
+            <div v-if="dns" class = "col-6 q-ml-lg text-negative bg-yellow-3 text-bold">{{dns}}</div>
           </div>
           <div class="row items-center">
             <q-input class="col-6" v-model="org" style="width:12rem"
-              :label="$t('ESorg')" :hint="$t('ESorgh')" dense/>
-            <div v-if="dorg" class = "col-6 q-ml-lg text-negative text-bold">{{dorg}}</div>
+              :label="$t('ESorg')" hint="monorg OU monorg\@br1" dense/>
+            <div v-if="dorg" class = "col-6 q-ml-lg text-negative bg-yellow-3 text-bold">{{dorg}}</div>
           </div>
           <div class="titre-lg text-center q-my-md">{{$t('ESps')}}</div>
           <phrase-secrete @ok="okps" :orgext="org"
@@ -272,7 +272,7 @@ export default {
       this.rafraichir()
     },
     async setNotif(ntf) {
-      await new SetNotifG().run(ntf)
+      await new SetNotifG().run(ntf, ntf.idsource)
     },
     async valider () {
       new SetEspaceT().run(this.esp.id, this.prf)

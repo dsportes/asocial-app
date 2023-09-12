@@ -624,6 +624,9 @@ atr[0] est la somme des atr[1..N] : calculé sur compile (pas stocké)
 */
 export class Synthese extends GenDoc {
 
+  // lcSynt = ['qc', 'q1', 'q2', 'ac', 'a1', 'a2', 'cj', 'v1', 'v2', 
+  // 'ntr0', 'ntr1', 'ntr2', 'nbc', 'nbsp', 'nco0', 'nco1', 'nco2']
+
   async compile (row) {
     const session = stores.session
     this.atr = new Array(row.atr.length)
@@ -654,18 +657,18 @@ export class Synthese extends GenDoc {
     this.atr[0] = a0 
   }
 
-  static async nouveau (ac, a1, a2, qc, q1, q2) { // a: au comptable, q: à la tribu primitive
+  static async nouveau (aco, apr) { 
     const session = stores.session
     const r = { id: session.ns, v: Date.now(), atr: [null, null] }
 
     const e = {}
     lcSynt.forEach(f => { e[f] = 0 })
-    e.qc = qc
-    e.q1 = q1
-    e.q2 = q2
-    e.ac = ac
-    e.a1 = a1
-    e.a2 = a2
+    e.qc = apr[0]
+    e.q1 = apr[1]
+    e.q2 = apr[2]
+    e.ac = aco[0]
+    e.a1 = aco[1]
+    e.a2 = aco[2]
     e.nbc = 1
     e.nbsp = 1
 
@@ -688,14 +691,14 @@ _data_:
   - `idT` : id court du compte crypté par la clé de la tribu.
   - `nasp` : si sponsor `[nom, cle]` crypté par la cle de la tribu.
   - `notif`: notification de niveau compte cryptée par la clé de la tribu.
-- `stn` : restriction d'accès de la notification _compte_: 
-  _0:aucune 1:lecture seule 2:minimal_  
+  - `stn` : restriction d'accès de la notification _compte_: 
+    _0:aucune 1:lecture seule 2:minimal_  
   - `qc q1 q2` : quotas attribués.
   - `cj v1 v2` : volumes **approximatifs** effectivement utilisés.
-  Calculés localement :
-  - pccj : pourcentage d'utilisation de la consommation journalière / qc
-  - pcv1 : pourcentage d'utilisation effective de q1 : v1 / q1
-  - pcv2 : pourcentage d'utilisation effective de qc : v2 / q2
+Calculés localement :
+- pccj : pourcentage d'utilisation de la consommation journalière / qc
+- pcv1 : pourcentage d'utilisation effective de q1 : v1 / q1
+- pcv2 : pourcentage d'utilisation effective de qc : v2 / q2
 
 Calcul des compteurs de Synthese dans .synth : 
 - cet objet est exactement similaire à une ligne de Synthese.
@@ -827,7 +830,7 @@ export class Tribu extends GenDoc {
   }
 
   // id de la tribu, q1 , q2 
-  static async nouvelle (idt, qct, q1t, q2t, primitive, qcc, q1c, q2c) {
+  static async nouvelle (idt, qt, primitive, qc) {
     const session = stores.session
     const c = getCle(idt)
     const r = {}
@@ -835,16 +838,16 @@ export class Tribu extends GenDoc {
     r.id = idt
     r.v = 1
     r.act = [null]
-    r.qc = qct
-    r.q1 = q1t
-    r.q2 = q2t
+    r.qc = qt[0]
+    r.q1 = qt[1]
+    r.q2 = qt[2]
     r.stn = 0
     r.cletX = await crypter(session.clek, c)
     if (primitive) { // inscription du comptable comme premier compte
       const nac = NomGenerique.comptable()
       const item = {
         idT: await crypter(c, '' + ID.court(nac.id)),
-        qc: qcc, q1: q1c, q2: q2c,
+        qc: qc[0], q1: qc[1], q2: qc[2],
         ac: 0, a1: 0, a2: 0, stn: 0, cj: 0, v1: 0, v2: 0,
         nasp: await crypter(c, new Uint8Array(encode(nac.anr)))
       }
@@ -891,10 +894,10 @@ export class Gcvols extends GenDoc {
   une convention pour une création vierge.
 - `compteurs` sérialisation non cryptée d'évolution des quotas, volumes et coûts.
 **Pour le Comptable seulement**
--`atr` : table des tribus : `{clet, info, q1, q2}` crypté par la clé K du comptable.
+-`atr` : table des tribus : `{clet, info, q}` crypté par la clé K du comptable.
   - `clet` : clé de la tribu (donne aussi son id, index dans `atrx / astn`).
   - `info` : texte très court pour le seul usage du comptable.
-  - `qc q1 q2` : quotas globaux de la tribu.
+  - `q` : `[qc, q1, q2]` : quotas.
 - `astn` : table des statuts de notification des tribus:
   _0:aucune, 1:lecture seule, 2:accès minimal_
 */
@@ -1036,9 +1039,9 @@ export class Compta extends GenDoc {
     return lm
   }
 
-  static async atrItem (clet, info, q1, q2) {
+  static async atrItem (clet, info, q) {
     const session = stores.session
-    const item = {clet, info, q1, q2}
+    const item = {clet, info, q}
     return await crypter(session.clek, new Uint8Array(encode(item)))
   }
 
@@ -1050,7 +1053,7 @@ export class Compta extends GenDoc {
     return u8ToB64(await crypter(k, '' + ID.court(id), 1), true)
   }
 
-  static async row (na, clet, cletX, qc, q1, q2, estSponsor, phrase) { 
+  static async row (na, clet, cletX, q, estSponsor, phrase) { 
     /* création d'une compta
     Pour le comptable le paramètre cletX est null (il est calculé). 
     Pour les autres, c'est le nctkc pris dans la tribu
@@ -1078,10 +1081,10 @@ export class Compta extends GenDoc {
     r.mavk = { }
     r.mavk[await Compta.mavkK(na.id, k)] = await Compta.mavkKV(na, k)
 
-    r.compteurs = new Compteurs(null, { qc, q1, q2, nn: 0, nc: 0, ng: 0, v2: 0}).serial
+    r.compteurs = new Compteurs(null, { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: 0, ng: 0, v2: 0}).serial
 
     if (ID.estComptable(r.id)) {
-      const x = { clet, info: '', qc, q1, q2 }
+      const x = { clet, info: '', q }
       r.atr = [ null, await crypter(k, new Uint8Array(encode(x)))]
       r.astn = [0, 0]
     }

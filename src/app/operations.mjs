@@ -582,7 +582,7 @@ de Compta.atr (conflit d'attribution)
 export class NouvelleTribu extends OperationUI {
   constructor () { super($t('OPnvtr')) }
 
-  async run (info, q1, q2) {
+  async run (info, q) {
     try {
       const session = stores.session
       const aSt = stores.avatar
@@ -593,9 +593,9 @@ export class NouvelleTribu extends OperationUI {
         const clet = Tribu.genCle(idx) // enregistre la clé
         const idt = Tribu.id(clet)
         setClet(clet, idt)
-        const rowTribu = await Tribu.nouvelle(idt, q1, q2)
+        const rowTribu = await Tribu.nouvelle(idt, q)
 
-        const atrItem = await Compta.atrItem(clet, info, q1, q2)
+        const atrItem = await Compta.atrItem(clet, info, q)
         const args = { token: session.authToken, rowTribu, atrItem }
         ret = this.tr(await post(this, 'NouvelleTribu', args))
         if (ret.OK) break
@@ -624,7 +624,7 @@ export class SetNotifT extends OperationUI {
       if (notifT ) {
         notifT.dh = Date.now()
         const cle = getCle(id)
-        notif = await crypter(cle, notifT.encode())
+        notif = await crypter(cle, notifT.serial)
       }
       const args = { token: session.authToken, id, notif }
       this.tr(await post(this, 'SetNotifT', args))
@@ -652,11 +652,7 @@ export class SetAtrItemComptable extends OperationUI {
       const aSt = stores.avatar
       const c = aSt.compta
       const a = c.atr[ID.court(id)]
-      const atrItem = await Compta.atrItem(
-        a.clet, 
-        quotas ? a.info : info, 
-        quotas ? quotas[0] : a.q1,
-        quotas ? quotas[1] : a.q2)
+      const atrItem = await Compta.atrItem(a.clet, info ? info : a.info, quotas ? quotas : a.q)
       const args = { token: session.authToken, id, idc: c.id, atrItem, quotas}
       this.tr(await post(this, 'SetAtrItemComptable', args))
       this.finOK()
@@ -683,7 +679,7 @@ export class SetNotifC extends OperationUI {
       if (notifC) notifC.dh = Date.now()
       const cle = getCle(id)
       const stn = !notifC ? 0 : (notifC.jbl ? 2 : 1) 
-      const notif = notifC ? await crypter(cle, notifC.encode()) : null
+      const notif = notifC ? await crypter(cle, notifC.serial) : null
       const args = { token: session.authToken, id, idc, notif, stn }
       this.tr(await post(this, 'SetNotifC', args))
       this.finOK()
@@ -861,13 +857,13 @@ Retour:
 export class SetNotifG extends OperationUI {
   constructor () { super($t('OPntfg')) }
 
-  async run (notifG) {
+  async run (notifG, ns) {
     try {
       const session = stores.session
       const naComptable = NomGenerique.comptable()
-      const notif = await crypter(naComptable.rnd, notifG.encode())
-      const args = { token: session.authToken, ns: session.ns, notif}
-    const ret = this.tr(await post(this, 'SetNotifG', args))
+      const notif = await crypter(naComptable.rnd, notifG.serial)
+      const args = { token: session.authToken, ns, notif}
+      const ret = this.tr(await post(this, 'SetNotifG', args))
       if (ret.rowEspace && session.estAdmin) {
         // PageAdmin : update liste espace
         const esp = await compile(ret.rowEspace)

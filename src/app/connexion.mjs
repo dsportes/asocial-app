@@ -949,7 +949,7 @@ export class AcceptationSponsoring extends OperationUI {
 
       // !!! dans rowCompta: it (indice du compte dans sa tribu) N'EST PAS inscrit
       // (na, clet, cletX, q1, q2, estSponsor, phrase)
-      let rowCompta = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas[0], sp.quotas[1], sp.sp) 
+      let rowCompta = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp) 
       // set de session.clek
       const rowAvatar = await Avatar.primaireRow(sp.naf, publicKey, privateKey)
       const rowVersion = {
@@ -1121,19 +1121,20 @@ export class CreerEspace extends OperationUI {
       const hps1 = phrase.hps1
       const session = stores.session
       const config = stores.config
-      const ac = config.allocComptable
+      const aco = config.allocComptable
+      const apr = config.allocPrimitive
 
       const rowEspace = await Espace.nouveau(org)
-      const rowSynthese = await Synthese.nouveau(ac[0], ac[1], ac[2], ac[3])
+      const rowSynthese = await Synthese.nouveau(aco, apr)
 
       const clet = Tribu.genCle(1)
       const idt = Tribu.id(clet)
       setClet(clet, idt)
 
       const na = NomGenerique.comptable()
-      const rowCompta = await Compta.row(na, clet, null, ac[0], ac[1], true, phrase)
+      const rowCompta = await Compta.row(na, clet, null, aco, true, phrase)
       // set de session.clek
-      const rowTribu = await Tribu.nouvelle(idt, ac[2], ac[3], true, ac[0], ac[1])
+      const rowTribu = await Tribu.nouvelle(idt, apr, true, aco)
 
       const { publicKey, privateKey } = await genKeyPair()
       const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)
