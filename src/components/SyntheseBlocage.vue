@@ -8,31 +8,13 @@
     </div>
     <div v-if="niv>1 && niv<5" class="q-my-xs titre-lg text-italic">{{$t('ANlong' + niv)}}</div>
 
-    <div style="height:4rem">
-    <div v-if="ntf.n3 > 0" class="q-ml-md titre-md">
-      {{$t('ANlon3') + ' ' + $t('ANle', [edd(ntf.jbl), ntf.n3])}}</div>
-    <div v-if="ntf.n4 > 0" class="q-ml-md titre-md">
-      {{$t('ANlon4') + ' ' + $t('ANle', [edd(ntf.d4), ntf.n4])}}</div>
-    <div v-if="ntf.n5 > 0" class="q-ml-md titre-md">
-      {{$t('ANlon5') + ' ' + $t('ANle', [edd(ntf.d5), ntf.n5])}}</div>
-    </div>
-
-    <apercu-notif v-if="session.status>1" :notif="session.notifG" 
-      :ns="session.ns" :nom="session.org"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.tribu.notif" 
-      :id-tribu="aSt.tribu.id" :nom="aSt.tribu.nom"/>
-    <apercu-notif v-if="session.ok" :notif="aSt.act.notif" 
-      :id-tribu="aSt.tribu.id" :id-compte="aSt.compte.id" :nom="aSt.compte.na.nom"/>
-
-    <div style="height:2px;width:1rem"/>
-
+    <q-separator class="q-my-sm"/>
   </div>
 </template>
 <script>
 
 import { reactive } from 'vue'
 import stores from '../stores/stores.mjs'
-import ApercuNotif from './ApercuNotif.vue'
 import { AMJ } from '../app/api.mjs'
 
 export default {
@@ -40,7 +22,7 @@ export default {
 
   props: { },
 
-  components: { ApercuNotif },
+  components: { },
 
   computed: {
     niv () { return this.session.niv },

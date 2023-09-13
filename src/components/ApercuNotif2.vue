@@ -5,6 +5,9 @@
       <div class="row justify-between">
         <div class="titre-md">{{$t('ANnot')}}</div>
         <div>
+          <span v-if="nomSource" class="fs-sm text-italic q-mr-sm">
+            {{$t('de')}} [{{nomSource}}]
+          </span>
           <span class="fs-sm font-mono">{{dhcool(notif.dh)}}</span>
           <q-btn v-if="type < 3 && editable" color="primary" class="q-ml-sm btn2" size="sm" 
             :label="$t('editer')" dense icon="add" @click="editer"/>
@@ -78,7 +81,7 @@ import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
-import { MD, Notification } from '../app/modele.mjs'
+import { MD, Notification, Qui } from '../app/modele.mjs'
 import { dhcool, dkli } from '../app/util.mjs'
 
 export default {
@@ -87,7 +90,6 @@ export default {
   props: { 
     notif: Object, // notification existante, null pour création éventuelle
     type: Number,
-    idsource: Number,
     /* Type des notifications:
     - 0 : de l'espace
     - 1 : d'une tribu
@@ -95,6 +97,7 @@ export default {
     - 3 : dépassement de quotas
     - 4 : alerte de solde / consommation
     */
+    idsource: Number,
     editable: Boolean,
     idx: Number
   },
@@ -107,6 +110,12 @@ export default {
   },
 
   computed: {
+    nomSource () {
+      if (this.type > 2) return ''
+      if (this.type === 0) return this.$t('admin')
+      if (!this.idSource) return this.$t('comptable')
+      return Qui.de(idSource).nom
+    }
   },
 
   data () { return {

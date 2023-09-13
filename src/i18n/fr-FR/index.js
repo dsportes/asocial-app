@@ -18,6 +18,7 @@ export default {
   OK: 'OK',
   ok: 'OK',
   moi: 'moi',
+  de: 'de',
   moi2: '{0} [moi]',
   jailu: 'J\'ai lu',
   vu: 'vu',
@@ -162,6 +163,7 @@ export default {
   tribus: 'Tranche | Tranche | Tranches',
   comptable: 'Comptable',
   admin: 'Administrateur',
+  comptable: 'Comptable',
   avdisp: 'Cet avatar a disparu (compte supprimé)',
 
   auja: 'aujourd\'hui à {0}',
@@ -1321,6 +1323,13 @@ export default {
   CPTal2b: 'Ajouts et remplacements de fichiers attachés à un note autorisés seulement si le volume total du note est en réduction.',
 
   CPTtitch: 'Chats avec le Comptable et les sponsors',
+
+  CPTtn0: 'Notification de l\'administrateur technique de l\'application',
+  CPTtn1: 'Notification pour tous les comptes de la tranche, du Comptable ou d\'un sponsor',
+  CPTtn2: 'Notification spécifique pour le compte, du Comptable ou d\'un sponsor de la tranche',
+  CPTtn3: 'Notification automatique de surveillance de l\'abonnement (excès de volume)',
+  CPTtn4a: 'Notification automatique de surveillance du solde (crédits - coûts)',
+  CPTtn4: 'Notification automatique de surveillance de l\'excès de consommation',
 
   // choix quotas
   CQt1: 'Quota V1 (textes): {0}',

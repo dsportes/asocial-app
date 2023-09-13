@@ -2,21 +2,18 @@
 <q-page>
   <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto"/>
 
-  <div v-if="ui.pagetab==='notif'" class="column q-pa-sm">
-    <div v-if="c.pc1 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
-      <div class="titre-md">{{$t('CPTal1a', [c.pc1])}}</div>
-      <div>{{$t('CPTal1b')}}</div>
+  <div v-if="ui.pagetab==='notif'" class="largeur40 maauto q-pa-sm">
+
+    <synthese-blocage/>
+
+    <div v-for="(ntf, idx) of session.notifs" :key="idx">
+      <div v-if="ntf && ntf.texte" class="q-my-sm q-mx-xs">
+        <div class="titre-lg text-italic">
+          {{$t('CPTtn' + idx + (idx === 4 && aSt.compte.estA ? 'a' : ''))}}
+        </div>
+        <apercu-notif2 class="q-ml-sm" :type="idx" :notif="ntf"/>
+      </div>
     </div>
-
-    <div v-if="c.pc2 >= 100" class="q-my-sm q-mx-sm bg-yellow-3 text-negative text-bold q-pa-sm titre-md">
-      <div class="titre-md">{{$t('CPTal2a', [c.pc2])}}</div>
-      <div>{{$t('CPTal2b')}}</div>
-    </div>
-
-    <q-separator class="q-my-md"/>
-
-    <synthese-blocage />
-
   </div>
 
   <div v-if="ui.pagetab==='chats'">
@@ -37,6 +34,7 @@ import { ref, onMounted, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import ApercuChat from '../components/ApercuChat.vue'
+import ApercuNotif2 from '../components/ApercuNotif2.vue'
 import SyntheseBlocage from '../components/SyntheseBlocage.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
 import { getNg, Motscles, Chat } from '../app/modele.mjs'
@@ -44,7 +42,7 @@ import { getNg, Motscles, Chat } from '../app/modele.mjs'
 export default {
   name: 'PageCompta',
 
-  components: { SyntheseBlocage, PanelCompta, ApercuChat },
+  components: { SyntheseBlocage, ApercuNotif2, PanelCompta, ApercuChat },
 
   computed: {
     c () { return this.aSt.compta.compteurs }

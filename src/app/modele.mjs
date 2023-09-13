@@ -448,6 +448,66 @@ export class Phrase {
 
 }
 
+/* Qui ***************************************************
+Un objet Qui est immuable et est transient: ne pas le conserver,
+ses données t cv sp peuevent évoluer dans le temps
+- t : type: 
+  - 0 inconnu, 
+  - 1 avatar principal du compte,
+  - 2 avatar du compte,
+  - 3 contact
+- id : id
+- na : NomAvatar
+- cv : carte de visite
+- sp : true - sponsor de la tribu 
+*/
+export class Qui {
+  static de (id) {
+    const qui = new Qui(id)
+    const aSt = stores.avatar
+    const pSt = stores.people
+    const session = stores.session
+    const av = aSt.getAvatar(id)
+    if (av) {
+      qui.t = id === session.compteId ? 1 : 2
+      qui.na = av.na
+      qui.cv = av.cv
+    } else {
+    const pe = pSt.getPeople(id)
+      if (pe) {
+        qui.t = 3
+        qui.na = pe.na
+        qui.cv = pe.cv
+        if (pe.sp) qui.sp = true
+      }
+    }
+    return qui
+  }
+
+  constructor (id) {
+    this.id = id
+    this.t = 0
+  }
+
+  get estComptable () { return ID.estComptable(this.id) }
+
+  get estSponsor () { return this.sp || false }
+
+  get photo () { 
+    return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconAvatar
+  }
+
+  get nom () {
+    const me = t === 1 || t === 2 ? '[' + $t('moi') + ']' : ''
+    return this.na ? this.na.nom + me : '#' + id
+  }
+
+  get info () {
+    return this.cv && this.cv.info ? this.cv.info : this.nom
+  }
+}
+
+
 /* Notification *******************************************
 De facto un objet notification est immuable: 
 en cas de _mise à jour_ il est remplacé par un autre.
