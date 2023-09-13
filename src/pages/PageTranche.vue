@@ -1,8 +1,28 @@
 <template>
-  <q-page class="column">
+  <q-page>
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <div class="sep2"/>
+    <q-expansion-item class="q-mb-sm q-mx-xs" switch-toggle-side expand-separator dense>
+      <template v-slot:header>
+        <div class="row full-width fs-md">
+          <span>{{$t('TUtr')}} #{{ID.court(lg.id)}}</span>
+          <span v-if="pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
+        </div>
+      </template>
+
+      <div class="row q-gutter-sm">
+        <tuile-cnv type="qc" :src="lg" occupation/>
+        <tuile-cnv type="q1" :src="lg" occupation/>
+        <tuile-cnv type="q2" :src="lg" occupation/>
+        <tuile-notif :src="lg"/>
+      </div>
+    </q-expansion-item>
+
+    <q-toolbar class="bg-secondary text-white">
+      <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
+      <q-btn v-if="pow < 4" size="md" dense color="primary" 
+        :label="$t('PTnvc')" @click="ovnvsp"/>
+    </q-toolbar>
 
     <div v-for="(c, idx) in aSt.ptLcFT" :key="c.id">
       <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx) + ' largeur40'">
@@ -87,20 +107,6 @@
       </q-card>
     </q-dialog>
 
-    <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="pow === 1 ? [0,25] : [0,0]">
-      <div style="width:100vw; position:relative">
-      <div class="largeur40 br1" style="overflow:auto;height:12.5rem">
-        <detail-tribu class="q-pa-xs" :ligne="ligne" :henrem="10"/>
-        <q-toolbar class="largeur40 bg-secondary text-white" 
-          style="position:absolute;bottom:0;left:0">
-          <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
-          <q-btn v-if="pow < 4" size="md" dense color="primary" 
-            :label="$t('PTnvc')" @click="ovnvsp"/>
-        </q-toolbar>
-      </div>
-      </div>
-    </q-page-sticky>
-
   </q-page>
 </template>
 
@@ -109,7 +115,9 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
 import { dkli } from '../app/util.mjs'
-import DetailTribu from '../components/DetailTribu.vue'
+import { ID } from '../app/api.mjs'
+import TuileCnv from '../components/TuileCnv.vue'
+import TuileNotif from '../components/TuileNotif.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
@@ -126,7 +134,7 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 
 export default {
   name: 'PageTranche',
-  components: { DetailTribu, ApercuNotif, ChoixQuotas, ApercuCompte, ApercuPeople,
+  components: { TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuCompte, ApercuPeople,
     ApercuAvatar, PanelCompta, QuotasVols, NouveauSponsoring },
 
   props: { },
@@ -213,6 +221,8 @@ export default {
     const ligne = ref()
     const pow = session.pow
 
+    const lg = (aSt.tribuC || aSt.tribu).synth
+
     function resetCourant () { ligne.value = aSt.tribuC.synth }
 
     if (pow > 1) aSt.$onAction(({ name, args, after }) => {
@@ -233,9 +243,9 @@ export default {
     function ovcptdial () { MD.oD(cptdial)}
 
     return {
-      session, aSt, pSt, pow,
+      session, aSt, pSt, pow, lg,
       ligne,
-      MD, nvsp, ovnvsp, edq, ovedq, cptdial, ovcptdial,
+      ID, MD, nvsp, ovnvsp, edq, ovedq, cptdial, ovcptdial,
       cfg: stores.config,
       ui: stores.ui, dkli
     }
@@ -246,13 +256,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.sep2
-  margin-top: 13rem
-.br1
-  border-right: 1px solid $grey-7
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
 .btn1
   max-height: 1.5rem !important
 .msg

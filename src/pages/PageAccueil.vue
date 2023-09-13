@@ -52,7 +52,7 @@
         <span>{{$t('MLAinfm')}}</span>
       </div>
 
-      <!-- Comptabilité des volumes -->
+      <!-- Comptabilité des volumes 
       <div class="btn2 row items-center" @click="pageCompta">
         <div style="position:relative" :class="'q-mr-xs bg2 ' + pccl">
           <q-knob v-model="aSt.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
@@ -60,7 +60,8 @@
         </div>
         <span>{{$t('MLAvol')}}</span>
       </div>
-
+      -->
+      
       <!-- Notifications -->
       <div class="btn2" @click="clickNotif">
         <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>

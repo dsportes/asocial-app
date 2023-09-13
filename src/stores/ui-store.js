@@ -19,8 +19,10 @@ export const useUiStore = defineStore('ui', {
     diag: '',
     diagresolve: null,
 
-    etroite: false,
+    etroite: true,
     seuillarge: 900,
+    drawer: 250,
+    lgmax: 640,
 
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu

@@ -37,16 +37,17 @@
         <queue-icon/>
       </q-btn>
 
-      <!-- Comptabilité des volumes -->
+      <!-- Comptabilité des volumes
       <div v-if="session.status === 2" @click="pageCompta" style="position:relative"
         :class="'cursor-pointer q-mr-xs bg2 ' + pccl">
         <q-knob v-model="aSt.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
         <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{aSt.compta.pc + '%'}}</div>
       </div>
+      -->
 
       <!-- Notifications -->
       <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
-        @click="clickNotif"/>
+        @click="clickNotif" apptb/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
         <span v-if="session.ok" class="titre-lg cursor-pointer"  
@@ -118,7 +119,7 @@
   </q-header>
 
   <q-drawer v-if="ui.filtre" v-model="ui.menu" side="right" elevated bordered persistent
-    :width="250" :breakpoint="ui.seuillarge"
+    :width="ui.drawer" :breakpoint="ui.seuillarge" :show-if-above="!ui.etroite"
     :overlay="ui.etroite">
     <q-scroll-area :class="'fit ' + dkli(1)">
       <div>
@@ -489,7 +490,7 @@ export default {
     config.$q = $q
    
     const ui = stores.ui
-    ui.etroite = $q.screen.width < ui.seuillarge
+    if ($q.screen.width > ui.seuillarge) ui.setEtroite(false)
 
     const session = stores.session
     const aSt = stores.avatar

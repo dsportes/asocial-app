@@ -13,55 +13,88 @@ Depuis un Comptable: ns est celui de la session
 - source secondaire de données: compta.act
 -->
 <template>
-  <q-page class="column">
+  <q-page>
     <!--div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div-->
 
-    <div :class="pow === 1 ? 'sep1' : 'sep2'"/>
+    <q-btn v-if="pow===2" class="q-my-sm fs-md btn2" size="md" dense color="primary" 
+      :label="$t('PTnv')" @click="ouvrirnt"/>
+    <div v-else style="height:3rem"/>
 
-    <div :class="dkli(idx) + ' q-mb-sm q-mx-xs'" 
-      v-for="(lg, idx) in synth" :key="lg.id" @click=lgCourante(lg)>
-      <div class="row q-gutter-sm">
-        <tuile-cnv type="qc" :src="lg" occupation/>
-        <tuile-cnv type="q1" :src="lg" occupation/>
-        <tuile-cnv type="q2" :src="lg" occupation/>
-      </div>
-    </div>
-
-    <div :class="dkli(idx) + ' q-mb-sm q-mx-xs'" 
-      v-for="(lg, idx) in synth" :key="lg.id" @click=lgCourante(lg)>
-      <div :class="'zone cursor-pointer' + (ligne && (ligne.id === lg.id) ? ' courant' : '')"
-        style="overflow:hidden;max-height:3rem">
-        <div class="row col-auto"> <!-- ligne 1 -->
-          <div class="col-3 fs-md">
-            <span v-if="!lg.id">{{$t('total')}}</span>
-            <span v-else>#{{ID.court(lg.id)}}
-              <span v-if="pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
-            </span>
+    <div class="q-mx-xs" 
+      v-for="(lg, idx) in synth" :key="lg.id" @click="lgCourante(lg)">
+      <q-expansion-item switch-toggle-side expand-separator dense group="trgroup">
+        <template v-slot:header>
+          <div :class="dkli(idx) + ' row full-width'">
+            <div class="col-2 fs-md">
+              <span v-if="!lg.id">{{$t('total')}}</span>
+              <span v-else>#{{ID.court(lg.id)}}
+                <span v-if="pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
+              </span>
+            </div>
+            <div class="col-5">
+              {{$t('PEnbc', lg.nbc, { count: lg.nbc })}}, {{$t('PEsp', lg.nbsp, { count: lg.nbsp })}}
+            </div>
+            <div class="col-1 font-mono fs-sm text-center">{{lg.qc}}<br/>{{lg.pcac}}%</div>
+            <div class="col-1 font-mono fs-sm text-center">{{lg.q1}}<br/> {{lg.pca1}}%</div>
+            <div class="col-1 font-mono fs-sm text-center">{{lg.q2}}<br/> {{lg.pca2}}%</div>
+            <div class="col-2">
+              <q-icon v-if="lg.ntr0 + lg.nco0 === 0" name="info" color="primary" size="xs" />
+              <q-icon v-if="lg.ntr1 + lg.nco1 === 0" class="bg-yellow-3" name="warning_amber" color="warning" size="xs" />
+              <q-icon v-if="lg.ntr2 + lg.nco2 === 0" class="bg-yellow-5" name="lock" color="negative" size="xs" />
+            </div>
           </div>
-          <div class="col-1 font-mono text-center">{{lg.nbc ? lg.nbc : '-'}}</div>
-          <div class="col-1 font-mono text-center">{{lg.ntr1 ? lg.ntr1 : '-'}}</div>
-          <div class="col-1 font-mono text-center">{{lg.nco1 ? lg.nco1 : '-'}}</div>
-          <div class="col-1 text-italic bl">V1</div>
-          <div class="col-1 font-mono text-center">[{{lg.q1}}]</div>
-          <div class="col-2 font-mono text-center">{{ed1(lg.q1)}}</div>
-          <div class="col-1 font-mono text-center">{{lg.pca1}}%</div>
-          <div class="col-1 font-mono text-center">{{lg.pcv1}}%</div>
-        </div>
+        </template>
 
-        <div class="row col-auto"> <!-- ligne 2 -->
-          <div class="col-3"></div>
-          <div class="col-1 font-mono text-center">{{lg.nbsp ? lg.nbsp : '-'}}</div>
-          <div :class="cell(lg.ntr2)">{{lg.ntr2 ? lg.ntr2 : '-'}}</div>
-          <div :class="cell(lg.nco2)">{{lg.nco2 ? lg.nco2 : '-'}}</div>
-          <div class="col-1 text-italic bl">V2</div>
-          <div class="col-1 font-mono text-center">[{{lg.q2}}]</div>
-          <div class="col-2 font-mono text-center">{{ed2(lg.q2)}}</div>
-          <div class="col-1 font-mono text-center">{{lg.pca2}}%</div>
-          <div class="col-1 font-mono text-center">{{lg.pcv2}}%</div>
+        <div class="row q-gutter-sm">
+          <tuile-cnv type="qc" :src="lg" occupation/>
+          <tuile-cnv type="q1" :src="lg" occupation/>
+          <tuile-cnv type="q2" :src="lg" occupation/>
+          <tuile-notif :src="lg" :total="idx === 0"/>
         </div>
-      </div>
+        <div v-if="pow === 2" class="row q-mt-xs q-gutter-xs">
+          <q-btn class="fs-md btn2" size="sm" dense
+            color="primary" :icon="lg.info ? 'edit' : 'add'" 
+            :label="$t('PEedn')" @click="editer"/>
+          <q-btn size="sm" class="fs-md btn2"
+            icon="settings" :label="$t('PEabo')" dense color="primary" @click="editerq"/>
+          <q-btn v-if="lg.id" class="fs-md btn2" size="sm" dense color="primary" 
+            :label="$t('detail')" icon-right="open_in_new" @click="pageTranche"/>
+        </div>
+      </q-expansion-item>
     </div>
-    <q-separator color="primary"/>
+
+    <!-- Edition de l'info attachée à une tribu -->
+    <q-dialog v-model="edcom" persistent>
+      <q-card class="bs petitelargeur">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTinfo')}}</q-toolbar-title>
+        </q-toolbar>
+        <div class="q-pa-m">
+          <q-input v-model="info" clearable :placeholder="$t('PTinfoph')">
+            <template v-slot:append>
+              <q-btn dense icon="check" :label="$t('ok')" @click="valider" color="warning"/>
+            </template>
+            <template v-slot:hint>{{$t('PTinfoh')}}</template>
+          </q-input>
+        </div>
+      </q-card>
+    </q-dialog>
+
+    <!-- Dialogue de mise à jour des quotas de la tribu -->
+    <q-dialog v-model="edq" persistent>
+      <q-card class="bs petitelargeur">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqut')}}</q-toolbar-title>
+        </q-toolbar>
+        <choix-quotas class="q-mt-sm" :quotas="quotas" />
+        <q-card-actions>
+          <q-btn :disabled="quotas.err" dense size="md" color="primary" 
+            icon="check" :label="$t('ok')" @click="validerq"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <!-- Dialogue de création d'une nouvelle tribu -->
     <q-dialog v-model="nt" persistent>
@@ -85,34 +118,14 @@ Depuis un Comptable: ns est celui de la session
         </q-card-actions>
       </q-card>
     </q-dialog>
-
-    <q-page-sticky position="top-left" :class="dkli(0) + ' box'" :offset="pow === 1 ? [0,25] : [0,0]">
-      <div style="width:100vw; position:relative">
-      <div class="largeur40 br1" style="overflow:auto;height:12.5rem">
-        <div style="position:relative">
-          <q-btn v-if="pow===2 && ligne && ligne.id" class="q-ml-xs" size="md" dense color="primary" 
-            style="position:absolute;top:0;right:2px"
-            :label="$t('detail')" icon-right="open_in_new" @click="pageTranche"/>
-          <detail-tribu class="q-pa-xs" v-if="ligne" :ligne="ligne" :henrem="10"/>
-        </div>
-        <q-toolbar class="largeur40 bg-secondary text-white" 
-          style="position:absolute;bottom:0;left:0">
-          <q-toolbar-title class="titre-md">{{$t('ESltr')}}</q-toolbar-title>          
-          <q-btn v-if="pow===2" size="md" dense color="primary" 
-            :label="$t('PTnv')" @click="ouvrirnt"/>
-        </q-toolbar>
-      </div>
-      </div>
-    </q-page-sticky>
-
   </q-page>
 </template>
 
 <script>
-import { ref, onMounted, toRef, watch } from 'vue'
+import { ref, onMounted, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
-import DetailTribu from '../components/DetailTribu.vue'
+import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { edvol, dkli } from '../app/util.mjs'
 import { ID, UNITEV1, UNITEV2 } from '../app/api.mjs'
@@ -123,13 +136,12 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { DetailTribu, ChoixQuotas, TuileCnv },
+  components: { ChoixQuotas, TuileCnv, TuileNotif },
 
   computed: {
   },
 
   methods: {
-    cell (n) { return 'col-1 font-mono text-center' + (!n ? '' : ' bg-yellow-3 text-black text-bold')},
     ed1 (n) { return edvol(n * UNITEV1) },
     ed2 (n) { return edvol(n * UNITEV2) },
 
@@ -144,6 +156,7 @@ export default {
     },
 
     async lgCourante (lg) {
+      if (!lg.id) return
       if (this.pow === 2) {
         const t = await this.getTr(lg.id)
         this.ligne = t.synth
@@ -178,6 +191,27 @@ export default {
     async pageTranche () { // Comptable seulement
       await this.getTr(this.ligne.id)
       this.ui.setPage('tranche')
+    },
+
+    editer () {
+      this.info = this.infoC
+      this.ovedcom()
+    },
+    async valider () {
+      await new SetAtrItemComptable().run(this.ligne.id, this.info, null)
+      MD.fD()
+    },
+    editerq () {
+      this.quotas = { 
+        q1: this.ligne.q1, q2: this.ligne.q2, 
+        min1: 0, min2: 0,
+        max1: 9999, max2: 9999
+      }
+      this.ovedq()
+    },
+    async validerq () {
+      await new SetAtrItemComptable().run(this.ligne.id, null, [this.quotas.q1, this.quotas.q2])
+      MD.fD()
     }
   },
 
@@ -297,12 +331,16 @@ export default {
 
     const nt = ref(false)
     function ovnt () { MD.oD(nt)}
+    const edcom = ref(false)
+    function ovedcom () { MD.oD(edcom) }
+    const edq = ref(false)
+    function ovedq () { MD.oD(edq) }
 
     return {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
       synth, // Syntheses de l'espace
       ligne, // ligne courante affichée
-      MD, ID, nt, ovnt,
+      MD, ID, nt, ovnt, edcom, ovedcom, edq, ovedq,
       aSt, session, pow, ui, dkli
     }
   }
@@ -319,10 +357,6 @@ export default {
   right: 5px
   border-radius: 5px
   border: 1px solid black
-.sep2
-  margin-top: 13rem
-.sep1
-  margin-top: 14rem
-.br1
-  border-right: 1px solid $grey-7
+.btn2
+  max-height: 1.5rem
 </style>

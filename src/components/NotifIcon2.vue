@@ -3,7 +3,8 @@
   <q-icon size="sm" style="position:relative; border-radius: 6px" :name="ico">
     <span v-if="alire" class="rond"></span>
   </q-icon>
-  <q-tooltip class="bg-indigi text-white font-sm">{{$t('ANlong' + niv)}}</q-tooltip>
+  <q-tooltip v-if="apptb" class="bg-indigi text-white font-sm">{{$t('MLAnot')}}</q-tooltip>
+  <q-tooltip v-else class="bg-indigi text-white font-sm">{{$t('ANlong' + niv)}}</q-tooltip>
 </span>
 </template>
 
@@ -26,6 +27,7 @@ export default ({
     */
     niv: Number,
     alire: Boolean, // présence de l'indicateur à lire
+    apptb: Boolean
   },
   computed: {
     tclr () { return 'text-' + txt[this.niv || 0]},

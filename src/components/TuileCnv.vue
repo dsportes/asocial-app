@@ -75,7 +75,7 @@ export default {
   border-left: 1px solid $grey-5
   border-right: 1px solid $grey-5
   border-bottom: 1px solid $grey-5
-  height: 3.8rem
+  height: 4rem
 .w2
   width: 8rem
 .w3
