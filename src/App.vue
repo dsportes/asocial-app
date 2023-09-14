@@ -37,14 +37,6 @@
         <queue-icon/>
       </q-btn>
 
-      <!-- Comptabilité des volumes
-      <div v-if="session.status === 2" @click="pageCompta" style="position:relative"
-        :class="'cursor-pointer q-mr-xs bg2 ' + pccl">
-        <q-knob v-model="aSt.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
-        <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{aSt.compta.pc + '%'}}</div>
-      </div>
-      -->
-
       <!-- Notifications -->
       <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
         @click="clickNotif" apptb/>
@@ -101,7 +93,7 @@
       class="full-width bg-secondary text-white row justify-between">
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
         <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setPageTab('notif')"/>
-        <q-tab name="compta" :label="$t('PNCesp')" @click="ui.setPageTab('compta')"/>
+        <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setPageTab('compta')"/>
         <q-tab name="chats" :label="$t('PNCchats')" @click="ui.setPageTab('chats')"/>
       </q-tabs>
       <q-btn v-if="ui.pagetab==='notif'" class="col-auto q-px-sm" dense size="md" color="warning" 

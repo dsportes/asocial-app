@@ -244,6 +244,16 @@ export function nbn (vol, n) { // v: nombre de notes ... n: avec décimales
   return vol.toFixed(n)
 }
 
+export function edqt (qt, n) { // v: nombre de notes ... n: avec décimales
+  if (!qt) return '[0]'
+  const cfgq = stores.config.quotas
+  if (Number.isInteger(qt)) {
+    const l = cfgq[q]
+    return !l ? '[' + q +']' : '[' + q + ' ' + l +']'
+  }
+  return '[' + (qt.toFixed(n === undefined ? 2 : n)) + ']'
+}
+
 export async function readFile (file, bin) {
   return new Promise((resolve, reject) => {
     const image = { size: file.size, name: file.name }

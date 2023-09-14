@@ -196,7 +196,7 @@ export default {
   mois5: 'Mai',
   mois6: 'Juin',
   mois7: 'Juillet',
-  mois8: 'Aôut',
+  mois8: 'Août',
   mois9: 'Septembre',
   mois10: 'Octobre',
   mois11: 'Novembre',
@@ -906,7 +906,7 @@ export default {
   // page notification, blocage, compta, chats
   PNCtit: 'Etat général de la session',
   PNCntf: 'Notifications et blocages',
-  PNCesp: 'Volumes utilisés',
+  PNCabo: 'Abon. / Conso.',
   PNCchats: 'Chats d\'urgence',
 
   PNOdep: 'Déplier',
@@ -1093,6 +1093,22 @@ export default {
   P10nvp: 'Sponsoriser un nouveau compte',
 
   P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
+
+  // PageCompta
+  PCPnot: 'Aucune notification',
+  PCPabo1: 'Abonnement (V1): nombre total de notes, chats, participations aux groupes',
+  PCPabo2: 'Abonnement (V2): volume total des fichiers attachés aux notes',
+  PCPactuel: 'Actuel',
+  PCPmoy: '(moyenne)',
+  PCPnbno: 'Nombre de notes',
+  PCPnbch: 'Nombre de chats',
+  PCPnbgr: 'Nombre de groupes',
+  PCPabo: 'Abonnement',
+  PCPutil: '% d\'utilisation',
+  PCPdet: 'Détail',
+  PCPv2: 'Volume des fichiers',
+  PCPconso: 'Consommation',
+  PCPrecap: 'Récapitulatif des coûts sur les 18 derniers mois',
 
   // Detail Tribu
   DTtit1: 'Total des tranches',
@@ -1458,33 +1474,6 @@ export default {
   ANd4: '"Lectures interdites" N jours après le début. N : ',
   
   ANemet: 'Alerte émise par {0}',
-
-  /*
-  SBn0: 'Pas de blocage',
-  SBn1: 'Alerte. ',
-  SBn2: 'Lecture seulement. ',
-  SBn3: 'Compte bloqué. ',
-  SBdisp: 'Disparition du compte le {0} (dans {1} jours).',
-  SBdisp2: 'Disparition dans {0} jours.',
-  SBnj: 'Nb.j',
-  SBdp: 'Début de la procédure',
-  SBal: 'En alerte jusqu\'à',
-  SBls: 'En lecture seule jusqu\'à',
-  SBbl: 'Bloqué jusqu\'à',
-  SBco: 'Compte',
-  SBnco: 'le Comptable',
-  SBnsp: 'un sponsor',
-  SBdet: 'Détail du blocage de {0}',
-  SBnv: 'Nouveau blocage de {0}',
-  SBreset: 'Faire repartir la procédure aujourd\'hui',
-  SBavd1: 'Avancer la date de début de blocage ...',
-  SBavd2: 'de 0 à {0} jours',
-  SBnja: 'NJA : Nombre de jours en niveau "alerte"',
-  SBnjl: 'NLS : Nombre de jours en niveau "lecture seule"',
-  SBdiag: 'NJA et NJS doivent être positifs ou 0 et leur somme inférieure à 365.',
-  SBdiag2: 'La date de début de la procédure peut être avancée jusqu\'à aujourd\'hui MAIS PAS PLUS.',
-  SBdel: 'Supprimer ce blocage',
-  */
 
   // PanelPeople et apercu compte
   PPchats: 'Chats',

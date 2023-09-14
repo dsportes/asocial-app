@@ -8,6 +8,8 @@
       <sd-al :texte="$t('SB' + bl)"/>
     </div>
 
+    <div v-if="!nbNtf" class="titre-lg text-italic q-my-md">{{$t('PCPnot')}}</div>
+    
     <div v-for="(ntf, idx) of session.notifs" :key="idx">
       <div v-if="ntf && ntf.texte" class="q-my-sm q-mx-xs">
         <div class="titre-lg text-italic">
@@ -54,6 +56,11 @@ export default {
       if (this.session.estLecture) { return 'l' }
       if (this.session.estDecr) { return 'd' }
       return false
+    },
+    nbNtf () {
+      let nb = 0
+      this.session.notifs.forEach(n => { if (n && n.texte) nb++ })
+      return nb
     }
   },
 
