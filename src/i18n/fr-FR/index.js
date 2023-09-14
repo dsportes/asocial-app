@@ -1552,10 +1552,37 @@ export default {
   PEedn: 'Editer le nom',
   PEabo: 'Abonnement / limite',
 
+  SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
+- Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.
+- Au bout de 365 jours d'inactivité, le compte sera automatiquement désactivé.
+`,
+  SBfm: `### Aucune mise à jour n\'est possible et la consultation est restreinte à cette page:
+- Les _alertes et restrictions_ et _le détail de l'abonnement et de la consommation_ sont visibles.
+- Les _chats_ avec le comptable et le cas échéant les sponsors, sont visibles mais il n'est pas possible d'y répondre.
+- Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.
+- Au bout de 365 jours d'inactivité, le compte sera automatiquement désactivé.
+`,
+
+  SBm: `### La consultation est restreinte à cette page:
+- Les _alertes et restrictions_ et _le détail de l'abonnement et de la consommation_ sont visibles.
+- Les _chats_ avec le comptable et le cas échéant les sponsors, sont visibles et actifs, il est possible d'y répondre ou d'en ouvrir.
+- Les autres pages n'étant pas accessibles, aucune autre donnée n'est, ni visible, ni modifiable.
+`,
+
+  SBl: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
+`,
+
+  SBd: `### Les mises à jour augmentant _le volume des données_ sont bloquées:
+- Ajouter une note, ouvrir un nouveau chat, participer à un nouveau groupe n'est pas autorisé.
+- Tout fichier attaché à une note peut être supprimé ou remplacé par un autre de taille inférieure.
+- Il n'est pas possible d'attacher un nouveau fichier à une note.
+`,
+
   BULLEnr1: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
   BULLEnr2: 'Application **bloquée** par l\'administrateur technique',
   BULLEnr3: 'Application en lecture seulement',
   BULLEnr4: 'Accès minimal très restreint à l\'application',
   BULLEclos: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
+  
 
 }

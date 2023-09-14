@@ -94,7 +94,7 @@ export const useSessionStore = defineStore('session', {
     - `texte`: texte de la notification.
     - `idSource`: id du sponsor ayant créé cette notification pour un type 3.
    */
-    nivx: [0, 2, 4, 2, 3, 1],
+    nivx: [0, 3, 5, 3, 4, 2],
     /* niveau d'information / restriction: 
     - 0 : aucune notification
     - 1 : au moins une notification informative
@@ -153,7 +153,7 @@ export const useSessionStore = defineStore('session', {
     estMinimalC (state) { const n = state.notifs[4]; return n && (n.nr === 4) },
     estDecr (state) { const n = state.notifs[3]; return n && (n.nr === 5) },
 
-    estMinimal () { 
+    estMinimal (state) { 
       if (!state.fige) return state.estMinimalC || state.estMinimalTC
       return state.estMinimalTC
     },
@@ -298,6 +298,7 @@ export const useSessionStore = defineStore('session', {
 
     setDhvu (dhvu) {
       this.dhvu = dhvu
+      this.setBlocage()
     },
 
     setNotifE (ne) {
@@ -352,7 +353,7 @@ export const useSessionStore = defineStore('session', {
       if (this.estAdmin) return
       const session = stores.session
       const aSt = stores.avatar
-      const c = aSt.comptas
+      const c = aSt.compta
       const dhvu = c ? (c.dhvu || 0) : 0
       this.niv = 0
       this.alire = false

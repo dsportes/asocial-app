@@ -4,7 +4,9 @@
 
   <div v-if="ui.pagetab==='notif'" class="largeur40 maauto q-pa-sm">
 
-    <synthese-blocage/>
+    <div v-if="bl" class="bord q-pa-sm q-mb-xl">
+      <sd-al :texte="$t('SB' + bl)"/>
+    </div>
 
     <div v-for="(ntf, idx) of session.notifs" :key="idx">
       <div v-if="ntf && ntf.texte" class="q-my-sm q-mx-xs">
@@ -35,17 +37,24 @@ import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import ApercuNotif2 from '../components/ApercuNotif2.vue'
-import SyntheseBlocage from '../components/SyntheseBlocage.vue'
+import SdAl from '../components/SdAl.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
 import { getNg, Motscles, Chat } from '../app/modele.mjs'
 
 export default {
   name: 'PageCompta',
 
-  components: { SyntheseBlocage, ApercuNotif2, PanelCompta, ApercuChat },
+  components: { SdAl, ApercuNotif2, PanelCompta, ApercuChat },
 
   computed: {
-    c () { return this.aSt.compta.compteurs }
+    c () { return this.aSt.compta.compteurs },
+    bl () {
+      if (this.session.estFige) { return this.session.estMinimal ? 'fm' : 'f' }
+      if (this.session.estMinimal) { return 'm' }
+      if (this.session.estLecture) { return 'l' }
+      if (this.session.estDecr) { return 'd' }
+      return false
+    }
   },
 
   data () {
@@ -109,4 +118,8 @@ export default {
 @import '../css/app.sass'
 .q-btn
   padding: 0 3px !important
+.bord
+  border: 3px solid red
+  border-radius: 10px
+  background-color: rgb(239, 251, 148)
 </style>

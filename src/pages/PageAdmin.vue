@@ -272,6 +272,7 @@ export default {
       this.rafraichir()
     },
     async setNotif(ntf) {
+      ntf.dh = Date.now()
       const ns = ntf.idsource
       delete ntf.idsource
       await new SetNotifG().run(ntf, ns)
