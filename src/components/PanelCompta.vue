@@ -4,6 +4,10 @@
       header-class="titre-md text-bold bg-primary text-white"
       :label="$t('PCPsyn') + ' - ' + dhcool(c.dh)">
     <div class="largeur40 column maauto q-my-sm">
+      <div class="titre-md q-my-sm">
+        {{$t('PCPpcum' + c.debref[0], [dhcool(c.debref[1]), c.debref[2]])}}
+      </div>
+
       <div :class="dkli(1) + ' row items-center full-width'">
         <div class="col-4 text-center"></div>
         <div class="col-4 text-center">{{$t('PCPactuel')}}</div>
@@ -13,17 +17,17 @@
       </div>
       <div class="row items-center full-width">
         <div class="col-4 text-italic">{{$t('PCPabcs')}}</div>
-        <div class="col-4 font-mono text-center">{{mon(c.totalAboConso, 2)}}</div>
+        <div class="col-4 font-mono text-center">{{mon(c.cumulCouts, 2)}}</div>
         <div class="col-4 font-mono text-center">{{exM ? mon(aboM + consoM, 2) : '-'}}</div>
       </div>
       <div class="row items-center full-width">
         <div class="col-4 text-italic">{{$t('PCPabo')}}</div>
-        <div class="col-4 font-mono text-center">{{mon(c.totalAbo, 2)}}</div>
+        <div class="col-4 font-mono text-center">{{mon(c.cumulAbo, 2)}}</div>
         <div class="col-4 font-mono text-center">{{exM ? mon(aboM, 2) : '-'}}</div>
       </div>
       <div class="row items-center full-width">
         <div class="col-4 text-italic">{{$t('PCPconso')}}</div>
-        <div class="col-4 font-mono text-center">{{mon(c.totalConso, 2)}}</div>
+        <div class="col-4 font-mono text-center">{{mon(c.cumulConso, 2)}}</div>
         <div class="col-4 font-mono text-center">{{exM ? mon(consoM, 2) : '-'}}</div>
       </div>
     </div>
@@ -116,42 +120,42 @@
       </div>
       <div class="row items-center full-width bordb">
         <div class="col-4 text-italic">{{$t('PCPconso')}}</div>
-        <div class="col-2 font-mono text-center">{{mon(120, 2)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(20, 2)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(3520, 2)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(1.045, 2)}}</div>
+        <div class="col-2 font-mono text-center">{{ex(0) ? mon(conso(0), 2) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(1) ? mon(conso(1), 2) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(2) ? mon(conso(2), 2) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(3) ? mon(conso(3), 2) : '-'}}</div>
       </div>
       <div class="row items-center full-width fs-sm">
         <div class="col-4 text-right text-italic">{{$t('PCPlec')}}</div>
-        <div class="col-2 font-mono text-center">{{nbn(1500)}}</div>
-        <div class="col-2 font-mono text-center">{{nbn(1500)}}</div>
-        <div class="col-2 font-mono text-center">{{nbn(1500)}}</div>
-        <div class="col-2 font-mono text-center">{{nbn(1500)}}</div>
+        <div class="col-2 font-mono text-center">{{ex(0) ? nbn(nl(0)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(1) ? nbn(nl(1)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(2) ? nbn(nl(2)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(3) ? nbn(nl(3)) : '-'}}</div>
       </div>
       <div class="row items-center full-width fs-sm bordb">
         <div class="col-4 text-right text-italic">{{$t('PCPecr')}}</div>
-        <div class="col-2 font-mono text-center">{{nbn(600)}}</div>
-        <div class="col-2 font-mono text-center">{{nbn(600)}}</div>
-        <div class="col-2 font-mono text-center">{{nbn(600)}}</div>
-        <div class="col-2 font-mono text-center">{{nbn(600)}}</div>
+        <div class="col-2 font-mono text-center">{{ex(0) ? nbn(ne(0)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(1) ? nbn(ne(1)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(2) ? nbn(ne(2)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(3) ? nbn(ne(3)) : '-'}}</div>
       </div>
       <div class="row items-center full-width fs-sm">
         <div class="col-4 text-right text-italic">{{$t('PCPvd')}}</div>
-        <div class="col-2 font-mono text-center">{{edvol(120000)}}</div>
-        <div class="col-2 font-mono text-center">{{edvol(120000)}}</div>
-        <div class="col-2 font-mono text-center">{{edvol(120000)}}</div>
-        <div class="col-2 font-mono text-center">{{edvol(120000)}}</div>
+        <div class="col-2 font-mono text-center">{{ex(0) ? edvol(vd(0)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(1) ? edvol(vd(1)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(2) ? edvol(vd(2)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(3) ? edvol(vd(3)) : '-'}}</div>
       </div>
       <div :class="dkli(0) + ' row items-center full-width fs-sm'">
         <div class="col-4 text-right text-italic">{{$t('PCPvm')}}</div>
-        <div class="col-2 font-mono text-center">{{edvol(12000)}}</div>
-        <div class="col-2 font-mono text-center">{{edvol(12000)}}</div>
-        <div class="col-2 font-mono text-center">{{edvol(12000)}}</div>
-        <div class="col-2 font-mono text-center">{{edvol(1200)}}</div>
+        <div class="col-2 font-mono text-center">{{ex(0) ? edvol(vm(0)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(1) ? edvol(vm(1)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(2) ? edvol(vm(2)) : '-'}}</div>
+        <div class="col-2 font-mono text-center">{{ex(3) ? edvol(vm(3)) : '-'}}</div>
       </div>
 
       <div class="titre-md q-my-sm">
-        {{$t('PCPpref' + c.debref[0], [dhcool(c.debref[1])])}}
+        {{$t('PCPpref' + c.debref[0], [dhcool(c.debref[1]), c.debref[2]])}}
       </div>
 
       <div v-if="!c.estA" class="titre-md q-mt-sm">
@@ -165,15 +169,15 @@
       <div v-if="c.estA" class="column maauto q-my-sm full-width">
         <div :class="dkli(1) + ' row items-center full-width'">
           <div class="col-3 text-center">{{$t('PCPabc')}}</div>
-          <div class="col-3 text-center">{{$t('PCPdb')}}</div>
+          <div class="col-3 text-center">{{$t('PCPdb', [c.debref[2]])}}</div>
           <div class="col-3 text-center">{{$t('PCPcr')}}</div>
           <div class="col-3 text-center">{{$t('PCPsl')}}</div>
         </div>
         <div class="row items-center full-width">
-          <div class="col-3 font-mono text-center">{{mon(120, 2) + ' + ' + mon(120, 2)}}</div>
-          <div class="col-3 font-mono text-center">{{mon(20, 2)}}</div>
+          <div class="col-3 font-mono text-center">{{mon(c.cumulAbo, 2) + ' + ' + mon(c.cumulConso, 2)}}</div>
+          <div class="col-3 font-mono text-center">{{mon(c.cumulCouts, 2)}}</div>
           <div class="col-3 font-mono text-center">{{mon(cr)}}</div>
-          <div :class="'col-3 font-mono text-center ' + alsolde">{{mon(1.045, 2)}}</div>
+          <div :class="'col-3 font-mono text-center ' + alsolde">{{mon(cr - c.cumulCouts, 2)}}</div>
         </div>
 
         <div v-if="nbj > 2" class="titre-md q-my-sm">{{$t('PCPcouv', [nbj])}}</div>
@@ -192,52 +196,34 @@
     :label="$t('PCPrecap')">
     <div class="largeur40 column maauto q-mb-sm">
       <div :class="dkli(1) + ' row items-center full-width'">
-        <div class="col-2 text-center">{{libm(0)}}</div>
-        <div class="col-2 text-center">{{libm(1)}}</div>
-        <div class="col-2 text-center">{{libm(2)}}</div>
-        <div class="col-2 text-center">{{libm(3)}}</div>
-        <div class="col-2 text-center">{{libm(4)}}</div>
-        <div class="col-2 text-center">{{libm(5)}}</div>
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+          {{libm(m)}}
+        </div>
       </div>
       <div :class="dkli(0) + ' row items-center full-width'">
-        <div class="col-2 font-mono text-center">{{mon(120)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(20)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(3520)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(1.045)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(20)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(3520)}}</div>
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+          {{em(m) ? mon(c.mm[m], 2) : '-'}}
+        </div>
       </div>
-        <div :class="dkli(1) + ' row items-center full-width'">
-        <div class="col-2 text-center">{{libm(6)}}</div>
-        <div class="col-2 text-center">{{libm(7)}}</div>
-        <div class="col-2 text-center">{{libm(8)}}</div>
-        <div class="col-2 text-center">{{libm(9)}}</div>
-        <div class="col-2 text-center">{{libm(10)}}</div>
-        <div class="col-2 text-center">{{libm(11)}}</div>
+      <div v-if="em(6)" :class="dkli(1) + ' row items-center full-width'">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+          {{libm(m + 6)}}
+        </div>
       </div>
-      <div :class="dkli(0) + ' row items-center full-width'">
-        <div class="col-2 font-mono text-center">{{mon(120)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(20)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(3520)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(1.045)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(20)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(3520)}}</div>
+      <div v-if="em(6)" :class="dkli(0) + ' row items-center full-width'">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+          {{em(m + 6) ? mon(c.mm[m + 6], 2) : '-'}}
+        </div>
       </div>
-      <div :class="dkli(1) + ' row items-center full-width'">
-        <div class="col-2 text-center">{{libm(12)}}</div>
-        <div class="col-2 text-center">{{libm(13)}}</div>
-        <div class="col-2 text-center">{{libm(14)}}</div>
-        <div class="col-2 text-center">{{libm(15)}}</div>
-        <div class="col-2 text-center">{{libm(16)}}</div>
-        <div class="col-2 text-center">{{libm(17)}}</div>
+      <div v-if="em(12)" :class="dkli(1) + ' row items-center full-width'">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+          {{libm(m + 12)}}
+        </div>
       </div>
-      <div :class="dkli(0) + ' row items-center full-width'">
-        <div class="col-2 font-mono text-center">{{mon(120)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(20)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(3520)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(1.045)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(20)}}</div>
-        <div class="col-2 font-mono text-center">{{mon(3520)}}</div>
+      <div v-if="em(12)" :class="dkli(0) + ' row items-center full-width'">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+          {{em(m + 12) ? mon(c.mm[m + 12], 2) : '-'}}
+        </div>
       </div>
     </div>
   </q-expansion-item>
@@ -279,7 +265,7 @@ export default ({
     consoM () {  return this.c.vd[this.idm][Compteurs.CC] },
     cr () { 
       const x = this.aSt.compta.credits
-      return x ? x.total : 0
+      return x ? x.total : 8
     },
     nbj () { return this.c.nbj(this.cr) },
     txconso () { return Math.floor(this.c.conso2M * 100 / this.c.qv.qc )},
@@ -300,12 +286,19 @@ export default ({
   },
 
   methods: {
+    ex (m) { return this.c.vd[m][Compteurs.MS] !== 0  },
+    conso (m) { return this.c.vd[m][Compteurs.CC] },
+    nl (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.NL] },
+    ne (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.NE] },
+    vm (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.VM] },
+    vd (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.VD] },
+    em (m) { return this.c.mm[m] !== 0  }
   },
 
   setup () {
     const aSt = stores.avatar
     const c = ref(aSt.compta.compteurs)
-    c.value.qv.qc = 0
+    // c.value.qv.qc = 0
 
     function libm (idm) {
       const [ax, mx] = AMJ.am(c.value.dh)
