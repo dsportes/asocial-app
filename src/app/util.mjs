@@ -232,14 +232,13 @@ export function mon (v, n) { // n : nombres de chiffres après les centimes
   return v.toFixed(n || 0).replace('.', ',') + 'c'
 }
 
-export function nbn (vol, n) { // v: nombre de notes ... n: avec décimales
-  const u = $t('notes')
+export function nbn (vol, n, u) { // v: nombre de notes ... n: avec décimales
   const v = vol || 0
   if (v === 0) return '0'
   if (!n) {
-  if (v < 1000) return v + u
-  if (v < 1000000) return (v / 1000).toPrecision(3) + 'K ' + u
-  return (v / 1000000).toPrecision(3) + 'M ' + u
+    if (v < 1000) return v + (u || '')
+    if (v < 1000000) return (v / 1000).toPrecision(3) + 'K ' + (u || '')
+    return (v / 1000000).toPrecision(3) + 'M ' + (u || '')
   }
   return vol.toFixed(n)
 }
