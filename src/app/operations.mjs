@@ -54,14 +54,25 @@ export class OperationUI extends Operation {
   }
 
   async finKO (e) {
-    const exc = appexc(e)
     const session = stores.session
     const ui = stores.ui
-    // if (exc.code === 5001) session.phrase = null
+    const exc = appexc(e)
     session.finOp()
-    ui.afficherMessage($t('OPko', [this.nom]), true)
-    await ui.afficherExc(exc)
-    return exc
+    if (exc.code === 1001 || exc.code === 1002) {
+      const texte = exc.args[0]
+      const dh = exc.args[1]
+      const nr = exc.code % 10
+      const notif = new Notification({nr, dh, texte, idSource: 0})
+      session.setNotifE(notif)
+      if (nr === 2) {
+        await ui.setPage('clos')
+        return
+      }
+    } else {
+      ui.afficherMessage($t('OPko', [this.nom]), true)
+      await ui.afficherExc(exc)
+      return exc
+    }
   }
 }
 

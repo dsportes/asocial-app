@@ -239,6 +239,7 @@ export default {
 
   // E_BRK = 1000 // Interruption volontaire de l'opération
   EX1000: 'Interruption volontaire',
+  EX1001: 'L\'administrateur technique vient de restreindre l\'application à la lecture seulement. L\'opération ayant tenté une écriture, elle a échoué.',
 
   // E_WS = 2000 // Toutes erreurs de réseau
   EX2000: 'Erreur à l\'ouverture de la connexion avec le serveur ( {0} ).\nDétail: {1}',
@@ -478,6 +479,7 @@ export default {
   SHre: 'Réduire',
   
   ERdec: 'Se déconnecter',
+  ERfige: 'Voir les notifications',
   ERrec: 'Tenter de se reconnecter',
   ERcont: 'Poursuivre la session quand-même',
   ERmod: 'Continuer pour modifier les données',
