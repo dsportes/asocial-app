@@ -20,6 +20,7 @@ export function deconnexion (garderMode) {
   const session = stores.session
   const mode = session.mode
   const memoOrg = session.memoOrg
+  Demon.stop()
 
   // fermeture de tous les dialogues et du menu de filtre
   MD.fTD()
@@ -59,6 +60,69 @@ async function initSession (phrase) {
   }
   resetRepertoire()
   stores.reset(true)
+}
+
+export class Demon {
+  static courant = null
+  static to = null
+  
+  constructor () {
+    Demon.courant = this
+    this.majConso = true
+    if (Demon.to) { 
+      clearTimeout(Demon.to)
+      Demon.to = null
+    }
+  }
+
+  async run () {
+    const clos = await doTheJob()
+    Demon.courant = null
+    if (!clos) {
+      Demon.to = setTimeout(async () => {
+        await Demon.start()
+      }, PINGTO * 40000)
+    }
+  }
+
+  static async start () {
+    const session = stores.session
+    if (!session.accesNet) return
+    // Lancement immédiat, sauf si déjà en exécution
+    if (!Demon.courant) await new Demon().run()
+  }
+
+  static stop () {
+    // L'empêche de se relancer sans interrompre son exécution en cours
+    if (Demon.to)  { 
+      clearTimeout(Demon.to)
+      Demon.to = null
+    }
+  }
+
+  // Retourne true si l'espace est clos, pour arrêter le cycle
+  async doTheJob () {
+    const session = stores.session
+    const ntf = session.notifAdmin
+    if (ntf && ntf.nr === 2) return true
+    if (ntf && ntf.nr === 1) this.majConso = false
+
+    try {
+      let conso = null
+      if (majConso) {
+        const ca = session.razConsoAtt
+        if (ca.nl || ca.ne || ca.vd || ca.vm)
+          conso = { ...ca }
+      }
+      const args = { token: session.authToken, conso }
+      const ret = await post(this, 'EnregConso', args)
+      session.setDh(ret.dh)
+      if (ret.ok) session.razConsoAtt()
+    } catch (e) {
+      console.log('Démon KO: ' + e.toString())
+    }
+    return false
+  }
 }
 
 export async function connecterCompte (phrase, razdb) {
@@ -847,6 +911,7 @@ export class ConnexionCompte extends OperationUI {
       console.log('Connexion compte : ' + this.compta.id)
       session.status = 2
       SyncQueue.traiterQueue()
+      await Demon.start()
       await sleep(500)
       if (session.niv || session.alirentf) {
         stores.ui.setPage('compta', 'notif')
@@ -1035,6 +1100,7 @@ export class AcceptationSponsoring extends OperationUI {
       console.log('Connexion compte : ' + session.compteId)
       session.status = 2
       SyncQueue.traiterQueue()
+      await Demon.start()
       stores.ui.setPage('accueil')
       this.finOK()
     } catch (e) {
@@ -1255,46 +1321,6 @@ export class GetEstFs extends OperationUI {
       } else {
         session.setEstFs(false)
       }
-      this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* AlignerComptas : alignement des compteurs de comptas sur un 
-décompte précis avec connexion (si la version passée en argument est toujours la bonne).
-POST:
-- `token` : éléments d'authentification du comptable.
-- `id` : id du compte.
-- `v` : version de comptas
-- `qv` : { ng nc nn v1 v2 q1 q2 } compteurs de volume rectifiés
-- `soldeCK`: de comptas
-- `idt`: id de la tribu. null pour un compte A
-- `it`: indice du compte dans act de la tribu 
-
-Assertions sur l'existence du row `Comptas` compte et de sa `Tribus`
-*/
-export class AlignerComptas extends OperationUI {
-  constructor () { super($t('OPestFs')) }
-
-  async run (qv) {
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      const c = aSt.comptas
-      qv.q1 = c.q1; qv.q2 = c.q2
-
-      const args = { 
-        token: session.authToken,
-        id: c.id,
-        c: c.v,
-        idt: c.idt,
-        it: c.it,
-        qv,
-        soldeCK: await c.getSoldeCK()
-      }
-      this.tr(await post(this, 'AlignerComptas', args))
       this.finOK()
     } catch (e) {
       return await this.finKO(e)

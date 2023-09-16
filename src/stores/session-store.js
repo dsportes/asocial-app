@@ -6,6 +6,7 @@ import { pbkfd, sha256 } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { MD, NomGenerique } from '../app/modele.mjs'
+import { Demon } from '../app/config.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -24,8 +25,10 @@ export const useSessionStore = defineStore('session', {
     
     naComptable: null,
     dh: 0,
-    nl: 0, // nombres de lectures sur les POST
-    ne: 0, // nombres d'écritures sur les POST
+
+    consocumul: { nl: 0, ne: 0, vm: 0, vd: 0},
+    consoatt: { nl: 0, ne: 0, vm: 0, vd: 0},
+    // nombres de lectures, écritures, volume montant / descendant sur les POST
 
     /* authToken : base64 de la sérialisation de :
     - `sessionId`
@@ -136,8 +139,8 @@ export const useSessionStore = defineStore('session', {
     },
 
     // editable (state) { return state.mode < 3 && state.niv < 2 },
-    estFige (state) { const n = state.notifs[0]; return n && (n.nr === 1) },
-    estClos (state) { const n = state.notifs[0]; return n && (n.nr === 2) },
+    estFige (state) { const n = state.notifAdmin; return n && (n.nr === 1) },
+    estClos (state) { const n = state.notifAdmin; return n && (n.nr === 2) },
     estLecture (state) {
       const nt = state.notifs[1]; const nc = state.notifs[2]
       let nr = nt ? nt.nr : 0
@@ -168,7 +171,26 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
-    setNlNe (nl, ne) { this.nl += nl, this.ne += ne },
+    setNlNe (nl, ne) { 
+      this.consoatt.nl += nl
+      this.consoatt.ne += ne
+      this.consocumul.nl += nl
+      this.consocumul.ne += ne
+    },
+    setVm (vm) { 
+      this.consoatt.vm += vm
+      this.consoatt.vm += vm
+    },
+    setVd (vd) { 
+      this.consoatt.vd += vd
+      this.consoatt.vd += vd
+    },
+    razConsoAtt () {
+      this.consoatt.nl = 0
+      this.consoatt.ne = 0
+      this.consoatt.vd = 0
+      this.consoatt.vm = 0
+    },
     
     init (phrase) {
       this.sessionId = intToB64(rnd6())
@@ -364,7 +386,10 @@ export const useSessionStore = defineStore('session', {
           if (niv > this.niv) this.niv = niv
         }
       })
-      if (session.estClos) this.status = 0
+      if (session.estClos) {
+        Demon.stop()
+        this.status = 0
+      }
     },
 
     editDiag (avionSeulement) {
