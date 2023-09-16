@@ -528,6 +528,7 @@ export class RafraichirCvs extends OperationUI {
         const cibles = []
         for (let i = 0; i < 10 && next < toutes.length; i++, next++) cibles.push(toutes[next])
         const args = { token: session.authToken, cibles }
+        if (session.estFige) args.estFige = true
         const ret = this.tr(await post(this, 'RafraichirCvs', args))
         nr += ret.nbrech
       }

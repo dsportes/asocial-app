@@ -234,7 +234,7 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** tousGroupes *******************************************************/
-  async groupesRequisSignatures () {
+  async groupesRequisSignatures () { // TODO
     let procbl = false // le compte est-il en procédure de blocage
     if (this.espace.notif && this.espace.notif.niv > 2) {
       procbl = true
@@ -298,6 +298,7 @@ export class ConnexionCompte extends OperationUI {
         { v, _zombi:true } pour un GROUPE _zombi (pas pour un avatar)
       */
       const args = { token: session.authToken, vcompta: this.compta.v, mbsMap, avsMap, abPlus }
+      if (session.estFige) args.estFige = true
       const ret = this.tr(await post(this, 'SignaturesEtVersions', args))
       if (ret.OK === false) return false
       /* Traitement des _zombi
@@ -696,7 +697,7 @@ export class ConnexionCompte extends OperationUI {
       */
       
       /* Dans compta, cletK a peut-être été recrypté */
-      if (session.accesNet && this.compta.cletK) {
+      if (session.accesNetNf && this.compta.cletK) {
         const args = { token: session.authToken, cletK: this.compta.cletK }
         this.tr(await post(this, 'MajCletKCompta', args))
         delete this.compta.cletK
@@ -715,7 +716,7 @@ export class ConnexionCompte extends OperationUI {
       if (this.espace) session.setEspace(this.espace)
       
       // En cas de blocage grave, plus de synchronisation
-      if (session.niv > 2 && session.mode === 1) {
+      if (session.niv > 2 && session.mode === 1) { // TODO
         session.setMode(2)
         await afficherDiag($t('CNXdeg'))
       }
@@ -737,7 +738,7 @@ export class ConnexionCompte extends OperationUI {
         this.buf = new IDBbuffer()
       }
 
-      if (session.accesNet && this.grDisparus.size) {
+      if (session.accesNetNf && this.grDisparus.size) {
         /* Traitement des groupes zombis 
         Les retirer (par anticipation) des avatars qui les référencent 
         mapIdNi : Map
@@ -878,7 +879,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       /* Mises à jour éventuelles du serveur **********************************************/
-      if (session.accesNet) {
+      if (session.accesNetNf) {
         /* Suppression des notes temporaires ayant dépassé leur date limite */
         if (this.buf.lsecsup.length) {
           for (const s of this.buf.lsecsup) {

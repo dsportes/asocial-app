@@ -91,18 +91,11 @@ export default {
       }
     })
 
-    async function vuclose () {
-      if (session.accesNet) {
-        await new SetDhvuCompta().run()
-      }
-      ui.setPage('accueil')
-    }
-
     ui.$onAction(({ name, args, after }) => { 
       // Invoquée par App.vue, le bouton fait partie de la toolbar
       after(async (result) => {
         if ((name === 'jailu')){
-          if (session.accesNet) await new SetDhvuCompta().run()
+          if (session.accesNetNf) await new SetDhvuCompta().run()
           // ui.setPage('accueil')
         }
       })

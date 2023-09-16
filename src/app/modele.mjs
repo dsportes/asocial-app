@@ -1884,6 +1884,7 @@ export class Note extends GenDoc {
     if (!buf) return null
     const f = this.mfa.get(idf)
     const buf2 = f.gz ? await ungzipT(buf) : buf
+    session.setVd(buf2.length)
     return buf2
   }
 

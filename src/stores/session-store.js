@@ -123,6 +123,7 @@ export const useSessionStore = defineStore('session', {
     incognito (state) { return state.mode === 2 },
     avion (state) { return state.mode === 3 },
     accesNet (state) { return state.mode === 1 || state.mode === 2},
+    accesNetNf (state) { return state.accesNet && !satisfies.estFige },
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
 

@@ -93,7 +93,7 @@ export class OperationWS extends Operation {
         /* membre disparu par sa dlv */
         this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
         e.lmb.push({ id: gr.id, ids, _zombi: true }) 
-        if (st) { // il faut répercuter la disparition par dlv dans le statut du groupe
+        if (!session.estFige && st) { // il faut répercuter la disparition par dlv dans le statut du groupe
           const args = { token: session.authToken, id: gr.id, ids }
           await this.tr(await post(this, 'DisparitionMembre', args))
         }
@@ -296,7 +296,7 @@ export class OperationWS extends Operation {
         if (aSt.compta.updAvatarMavk (this.avSuppr))
           lm = await aSt.compta.lmAvatarMavk(this.avSuppr)
       }
-      if (lm) {
+      if (!session.estFige && lm) {
         const args = { token: session.authToken, lm }
         this.tr(await post(this, 'MajMavkAvatar', args))
       }
@@ -330,7 +330,7 @@ export class OperationWS extends Operation {
     this.grSuppr.forEach(id => { gSt.del(id) })
     this.grMaj.forEach(e => { gSt.lotMaj(e) })
 
-    if (mapIdNi) {
+    if (!session.estFige && mapIdNi) {
       /* On effectue la maj de tous les avatars concernés 
       par la suppression des groupes (entrées ni de lgr) */
       const args = { token: session.authToken, mapIdNi }
@@ -398,7 +398,7 @@ export class OnchangeCompta extends OperationWS {
 
       this.compta = await compile(row)
       /* Dans compta, cletK a peut-être été recryptée */
-      if (this.compta.cletK) {
+      if (!session.estFige&& this.compta.cletK) {
         const args = { token: session.authToken, cletK: this.compta.cletK }
         this.tr(await post(this, 'MajCletKCompta', args))
         delete this.compta.cletK
@@ -430,7 +430,7 @@ export class OnchangeCompta extends OperationWS {
           // this.avMaj a été rempli par la maj de l'avatar id
         }
       }
-      if (avMoinsCompta.size) { // Il y avait des avatars disparus dans compta
+      if (!session.estFige && avMoinsCompta.size) { // Il y avait des avatars disparus dans compta
         // Maj de compta sur le serveur
         const lm = await Compta.lmAvatarMavk(avMoins, session.clek)
         const args = { token: session.authToken, lm }

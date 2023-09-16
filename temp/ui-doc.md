@@ -1,3 +1,31 @@
+## TODO le 16 sept.
+connexion.mjs niv > 2 TODO : blocage des signatures quand le compte est minimal
+
+gérer les restrictions - fait en partie pour figé
+
+Comptable : gérer les options sur espace
+
+Créer / MAJ Tribu : q1 q2, ajouter qc
+
+Gérer compte d'une tribu : q1 q2, ajouter qc
+
+Sponsoring : compte A et qc sur compte O
+
+Vue compte estA et sponsor
+
+Vue session : conso de la ession et valorisation
+
+Décomptes des chats et groupes
+
+Résiliation avatar dnn dnc dng dv2 
+
+GC d'espace figé
+
+Révision complète groupe et actions possibles
+
+Révision chats avec raccrocher
+
+
 
 ### Page: `PageLogin`
 Page initiale de connexion et / ou de création d'un compte sponsorisé.
