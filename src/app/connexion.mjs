@@ -5,7 +5,7 @@ import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post, getEstFs } from './net.mjs'
-import { AMJ, ID, limitesjour } from './api.mjs'
+import { AMJ, ID, PINGTO, limitesjour } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import { openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, NLfromIDB, FLfromIDB, lectureSessionSyncIdb  } from './db.mjs'
@@ -76,7 +76,7 @@ export class Demon {
   }
 
   async run () {
-    const clos = await doTheJob()
+    const clos = await this.doTheJob()
     Demon.courant = null
     if (!clos) {
       Demon.to = setTimeout(async () => {
@@ -109,13 +109,13 @@ export class Demon {
 
     try {
       let conso = null
-      if (majConso) {
+      if (this.majConso) {
         const ca = session.razConsoAtt
         if (ca.nl || ca.ne || ca.vd || ca.vm)
           conso = { ...ca }
       }
       const args = { token: session.authToken, conso }
-      const ret = await post(this, 'EnregConso', args)
+      const ret = await post(null, 'EnregConso', args)
       session.setDh(ret.dh)
       if (ret.ok) session.razConsoAtt()
     } catch (e) {

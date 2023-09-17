@@ -6,7 +6,7 @@ import { pbkfd, sha256 } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { MD, NomGenerique } from '../app/modele.mjs'
-import { Demon } from '../app/config.mjs'
+import { Demon } from '../app/connexion.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -123,7 +123,7 @@ export const useSessionStore = defineStore('session', {
     incognito (state) { return state.mode === 2 },
     avion (state) { return state.mode === 3 },
     accesNet (state) { return state.mode === 1 || state.mode === 2},
-    accesNetNf (state) { return state.accesNet && !satisfies.estFige },
+    accesNetNf (state) { return state.accesNet && !state.estFige },
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
 
