@@ -495,8 +495,9 @@ export default {
     },
 
     roFic () {
-      const ro = this.session.roSt() //1: avion, 2:session bloquée en écriture
-      if (this.ro) return ro
+      let x = this.session.roSt() //1: avion, 2:session bloquée en écriture
+      if (x > 2) x = 2
+      if (this.ro) return x
       const n = this.nSt.note
       if (n.p) return 3 // note protégée contre l'écriture
       const g = this.nSt.node.type === 5 && this.nSt.egr ? this.nSt.egr.groupe : null

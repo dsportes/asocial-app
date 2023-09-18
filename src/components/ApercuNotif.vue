@@ -279,7 +279,7 @@ export default {
     },
 
     async editerC () { // Comptable
-      if (!await this.session.edit(true)) return
+      if (!await this.session.edit(true)) return // TODO reprendre seul cas de edit(true)
       if (this.tC > 1) {
         this.ntf = this.notif ? this.notif.clone() : new Notification(null, this.session.compteId)
         this.ro = 0

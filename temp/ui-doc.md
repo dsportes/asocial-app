@@ -1,6 +1,4 @@
 ## TODO le 16 sept.
-connexion.mjs niv > 2 TODO : blocage des signatures quand le compte est minimal
-
 gérer les restrictions - fait en partie pour figé
 
 Comptable : gérer les options sur espace
@@ -13,7 +11,7 @@ Sponsoring : compte A et qc sur compte O
 
 Vue compte estA et sponsor
 
-Vue session : conso de la ession et valorisation
+Vue session : conso de la session et valorisation
 
 Décomptes des chats et groupes
 

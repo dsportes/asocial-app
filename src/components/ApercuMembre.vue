@@ -242,7 +242,7 @@ export default {
     una () { return this.eg.groupe.inv !== null },
     ro () { 
       if (this.mb.estAc) {
-        const d = this.session.editDiag()
+        const d = this.session.edit(true)
         return d || ''
       }
       if (!this.eg.estAnim) return this.$t('AMpasanst1')

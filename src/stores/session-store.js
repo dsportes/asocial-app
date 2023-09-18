@@ -393,26 +393,25 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    editDiag (avionSeulement) {
-      if (this.mode === 3) return $t('editavion')
-      if (avionSeulement) return ''
-      if (this.niv >= 2) return $t('editlecture')
-      return ''
-    },
-
     roSt () {
-      if (this.mode === 3) return 1
-      if (this.niv >= 2) return 2
+      if (this.mode === 3) {
+        return 1
+      } else {
+        if (this.estFige) return 2
+        else if (this.estMinimal) return 3
+        else if (this.estLecture) return 4
+      }
       return 0
     },
 
-    async edit (avionSeulement) {
-      const d = this.editDiag(avionSeulement)
-      if (d) {
-        await afficherDiag(d)
-        return false
-      }
-      return true
+    async edit (diag) {
+      const y = ['', 'editavion', 'editfige', 'editminimal', 'editlecture']
+      const x = this.roSt
+      const d = $t(y[x])
+      if (diag) return d
+      if (!x) return true
+      await afficherDiag(d)
+      return false
     },
     
     opCount () {

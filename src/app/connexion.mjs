@@ -234,31 +234,15 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** tousGroupes *******************************************************/
-  async groupesRequisSignatures () { // TODO
-    let procbl = false // le compte est-il en procédure de blocage
-    if (this.espace.notif && this.espace.notif.niv > 2) {
-      procbl = true
-    } else if (this.tribu) {
-      if (this.tribu.notif && this.tribu.notif.niv > 2) {
-        procbl = true
-      } else {
-        const act = this.tribu.act[this.compta.it]
-        if (act.notif && act.notif.niv > 2) {
-          procbl = true
-        }
-      }
-    } else if (this.compta.soldeC && this.compta.soldeC.solde < 0) {
-      procbl = true
-    }
-
+  async groupesRequisSignatures () {
     const session = stores.session
     // En UTC la division d'une date est multiple de 86400000
     const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
     const tdlv1 = (Math.floor(tjourJ / 10) + 1) * 10
     const tdlv2 = tdlv1 + 10
     // pas de signatures quand une procédure de blocage est en cours
-    const dlv1 = procbl ? 0 : AMJ.amjUtcDeT(tdlv1 * 86400000)
-    const dlv2 = procbl ? 0 : AMJ.amjUtcDeT(tdlv2 * 86400000)
+    const dlv1 = AMJ.amjUtcDeT(tdlv1 * 86400000)
+    const dlv2 = AMJ.amjUtcDeT(tdlv2 * 86400000)
 
     this.grRequis = new Set()
     this.grDisparus = new Set()
@@ -298,7 +282,8 @@ export class ConnexionCompte extends OperationUI {
         { v, _zombi:true } pour un GROUPE _zombi (pas pour un avatar)
       */
       const args = { token: session.authToken, vcompta: this.compta.v, mbsMap, avsMap, abPlus }
-      if (session.estFige) args.estFige = true
+      // Il n'y a pas de signature si l'espace est figé OU restriction minimale
+      if (session.estFige || session.estMinimal) args.estFige = true
       const ret = this.tr(await post(this, 'SignaturesEtVersions', args))
       if (ret.OK === false) return false
       /* Traitement des _zombi
@@ -716,7 +701,7 @@ export class ConnexionCompte extends OperationUI {
       if (this.espace) session.setEspace(this.espace)
       
       // En cas de blocage grave, plus de synchronisation
-      if (session.niv > 2 && session.mode === 1) { // TODO
+      if (session.estFige || session.estMinimal) { 
         session.setMode(2)
         await afficherDiag($t('CNXdeg'))
       }
