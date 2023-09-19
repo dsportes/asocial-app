@@ -830,6 +830,7 @@ export class Tribu extends GenDoc {
       if (!item || item.vide) { this.act.push({ vide: true }); continue }
       const r = { }
       r.id = ID.long(await decrypterStr(c, item.idT), NomGenerique.ns)
+      r.it = it
       r.notif = item.notif ? new Notification(await decrypter(c, item.notif)) : null
       r.stn = item.stn || 0
       r.nasp = item.nasp ? NomGenerique.from(decode(await decrypter(c, item.nasp))) : null

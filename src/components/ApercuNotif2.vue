@@ -82,7 +82,7 @@ import BoutonBulle from './BoutonBulle.vue'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
 import { MD, Notification, Qui } from '../app/modele.mjs'
-import { dhcool, dkli } from '../app/util.mjs'
+import { dhcool, dkli, afficherDiag } from '../app/util.mjs'
 
 export default {
   name: 'ApercuNotif2',
@@ -99,7 +99,8 @@ export default {
     */
     idsource: Number,
     editable: Boolean,
-    idx: Number
+    idx: Number,
+    ctx: Object // Objet de contexte retourné dans la notification créée / éditée
   },
 
   components: { BoutonHelp, BoutonBulle, EditeurMd, ShowHtml },
@@ -113,8 +114,8 @@ export default {
     nomSource () {
       if (this.type > 2) return ''
       if (this.type === 0) return this.$t('admin')
-      if (!this.idSource) return this.$t('comptable')
-      return Qui.de(idSource).nom
+      if (!this.idsource) return this.$t('comptable')
+      return Qui.de(idsource).nom
     }
   },
 
@@ -125,9 +126,35 @@ export default {
   }},
 
   methods: {
-    editer () {
+    async quipeut () {
+      switch (this.type) {
+        case 0 : {
+          if (this.session.pow !== 1) { await afficherDiag($t('ANer1')); return false }
+          else return true
+        }
+        case 1 : {
+          if (this.session.pow !== 2 && this.session.pow !== 3) { await afficherDiag($t('ANer2')); return false }
+          else return true
+        }
+        case 2 : {
+          if (this.session.pow !== 2 && this.session.pow !== 3) { await afficherDiag($t('ANer3')); return false }
+          else return true
+        }
+        case 3 :
+        case 4 : {
+          await afficherDiag($t('ANer4')); return false
+        }
+      }
+    },
+    async editer () {
+      if (!await this.quipeut()) return
+      if (!await this.session.editpow(3)) return
       this.ntf = this.notif.clone()
-      if (this.idsource) this.ntf.idsource = this.idsource
+      if (this.idsource) this.ntf.idSource = this.idsource
+      if (this.session.pow === 3 && !this.ntf.idSource) {
+        await afficherDiag($t('ANnospon'))
+        return
+      }
       if (this.type === 0) {
         if (this.ntf.nr === 1) { this.restr = true; this.restrb = false }
         if (this.ntf.nr === 2) { this.restr = false; this.restrb = true }
@@ -138,15 +165,17 @@ export default {
       this.oveditntf()
     },
 
-    creer () {
+    async creer () {
+      if (!await this.quipeut()) return
+      if (!await this.session.editpow(3)) return
       this.ntf = new Notification({})
-      if (this.idsource) this.ntf.idsource = this.idsource
+      if (this.idsource) this.ntf.idSource = this.idsource
       this.restr = false
       this.restrb = false
       this.oveditntf()
     },
 
-    valider () {
+    async valider () {
       if (this.type === 0) {
         if (this.restr) this.ntf.nr = 1
         if (this.restrb) this.ntf.nr = 2
@@ -154,13 +183,25 @@ export default {
         if (this.restr) this.ntf.nr = 3
         if (this.restrb) this.ntf.nr = 4
       }
+      // Interdiction de se bloquer soi-même
+      if (this.type === 1 && this.session.pow === 3 && this.ntf.nr) { 
+        await afficherDiag($t('ANer5'))
+        return
+      }
+      if (this.type === 2 && (this.session.pow === 3 || this.session.pow === 2)
+        && this.ntf.nr && this.ctx && this.ctx.id === this.session.compteId) {
+          await afficherDiag($t('ANer6'))
+          return
+      }
+      if (this.ctx) this.ntf.ctx = this.ctx
       this.$emit('ok', this.ntf)
       MD.fD()
     },
 
     supprimer () {
       const ntf = new Notification({})
-      if (this.idsource) ntf.idsource = this.idsource
+      if (this.idsource) ntf.idSource = this.idsource
+      if (this.ctx) this.ntf.ctx = this.ctx
       this.$emit('ok', ntf)
       MD.fD()
     }

@@ -38,9 +38,12 @@ Depuis un Comptable: ns est celui de la session
             <div class="col-1 font-mono fs-sm text-center">{{lg.q1}}<br/> {{lg.pca1}}%</div>
             <div class="col-1 font-mono fs-sm text-center">{{lg.q2}}<br/> {{lg.pca2}}%</div>
             <div class="col-2">
-              <q-icon v-if="lg.ntr0 + lg.nco0 === 0" name="info" color="primary" size="xs" />
-              <q-icon v-if="lg.ntr1 + lg.nco1 === 0" class="bg-yellow-3" name="warning_amber" color="warning" size="xs" />
-              <q-icon v-if="lg.ntr2 + lg.nco2 === 0" class="bg-yellow-5" name="lock" color="negative" size="xs" />
+              <q-icon v-if="lg.ntr0 + lg.nco0 !== 0" name="info" color="primary" size="xs" />
+              <q-icon v-else name="check" color="grey-5" size="xs" />
+              <q-icon v-if="lg.ntr1 + lg.nco1 !== 0" class="bg-yellow-3" name="warning_amber" color="warning" size="xs" />
+              <q-icon v-else name="check" color="grey-5" size="xs" />
+              <q-icon v-if="lg.ntr2 + lg.nco2 !== 0" class="bg-yellow-5" name="lock" color="negative" size="xs" />
+              <q-icon v-else name="check" color="grey-5" size="xs" />
             </div>
           </div>
         </template>
@@ -70,7 +73,7 @@ Depuis un Comptable: ns est celui de la session
           <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTinfo')}}</q-toolbar-title>
         </q-toolbar>
-        <div class="q-pa-m">
+        <div class="q-ma-sm">
           <q-input v-model="info" clearable :placeholder="$t('PTinfoph')">
             <template v-slot:append>
               <q-btn dense icon="check" :label="$t('ok')" @click="valider" color="warning"/>
@@ -100,13 +103,8 @@ Depuis un Comptable: ns est celui de la session
     <q-dialog v-model="nt" persistent>
       <q-card class="bs moyennelargeur">
         <div class="titre-lg q-my-sm">{{$t('PTnv')}}</div>
-        <div class="q-pa-m">
+        <div class="q-pa-sm">
           <q-input v-model="nom" clearable :placeholder="$t('PTinfoph')">
-            <!--
-            <template v-slot:append>
-              <q-btn dense icon="check" :label="$t('ok')" @click="valider" color="warning"/>
-            </template>
-            -->
             <template v-slot:hint>{{$t('PTinfoh')}}</template>
           </q-input>
         </div>
@@ -127,9 +125,9 @@ import stores from '../stores/stores.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import { edvol, dkli } from '../app/util.mjs'
-import { ID, UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { NouvelleTribu, GetTribu, AboTribuC, GetSynthese } from '../app/operations.mjs'
+import { dkli } from '../app/util.mjs'
+import { ID } from '../app/api.mjs'
+import { NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 
 export default {
@@ -142,16 +140,15 @@ export default {
   },
 
   methods: {
-    ed1 (n) { return edvol(n * UNITEV1) },
-    ed2 (n) { return edvol(n * UNITEV2) },
 
-    ouvrirnt () { 
+    async ouvrirnt () { 
+      if (!await this.session.editpow(2)) return
       this.nom = ''
-      this.quotas = { q1: 1, q2: 1, min1: 0, min2: 0, max1: 9999, max2: 9999, err: false }
+      this.quotas = { q1: 1, q2: 1, qc: 1, min1: 0, min2: 0, max1: 9999, max2: 9999, minc: 1, maxc: 9999, err: false }
       this.ovnt()
     },
     async creer () {
-      await new NouvelleTribu().run(this.nom || '', this.quotas.q1, this.quotas.q2)
+      await new NouvelleTribu().run(this.nom || '', [this.quotas.qc, this.quotas.q1, this.quotas.q2])
       MD.fD()
     },
 
@@ -189,11 +186,13 @@ export default {
     },
 
     async pageTranche () { // Comptable seulement
+      if (!await this.session.editpow(2, true)) return
       await this.getTr(this.ligne.id)
       this.ui.setPage('tranche')
     },
 
-    editer () {
+    async editer () {
+      if (!await this.session.editpow(2)) return
       this.info = this.infoC
       this.ovedcom()
     },
@@ -201,16 +200,17 @@ export default {
       await new SetAtrItemComptable().run(this.ligne.id, this.info, null)
       MD.fD()
     },
-    editerq () {
+    async editerq () {
+      if (!await this.session.editpow(2)) return
       this.quotas = { 
-        q1: this.ligne.q1, q2: this.ligne.q2, 
-        min1: 0, min2: 0,
-        max1: 9999, max2: 9999
+        q1: this.ligne.q1, q2: this.ligne.q2, qc: this.ligne.qc,
+        min1: 0, min2: 0, minc: 0,
+        max1: 9999, max2: 9999, maxc: 9999
       }
       this.ovedq()
     },
     async validerq () {
-      await new SetAtrItemComptable().run(this.ligne.id, null, [this.quotas.q1, this.quotas.q2])
+      await new SetAtrItemComptable().run(this.ligne.id, null, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
       MD.fD()
     }
   },

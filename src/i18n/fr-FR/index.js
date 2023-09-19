@@ -79,9 +79,13 @@ export default {
   info: 'Info',
   ping: 'Ping',
   notes: 'notes',
-  nbnotes: 'Nb notes, chats, groupes',
+  nbnotes: 'Nb notes, chats et groupes',
+  unotes: 'notes + chats + groupes',
   volv2: 'Volume fichiers',
-  limco: 'Limite conso.',
+  limco: 'Plafond conso.',
+  powadmin: 'Seul l\'administrateur technique peut effectuer cette action',
+  powcompta: 'Seul le Comptable peut effectuer cette action',
+  powsponsor: 'Seuls le Comptable ou un sponsor de la tranche peuvent effectuer cette action',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -1170,7 +1174,7 @@ export default {
   PTq12: 'Quotas V1 (textes) / V2 (fichiers)',
   PTsp: 'Sponsor',
   PTqu: 'Ajustement des quotas du compte',
-  PTqut: 'Ajustement des quotas',
+  PTqut: 'Abonnement et plafond de consommation',
   PTinfo: 'Mise à jour de l\'information',
   PTinfoh: 'De 0 à 16 signes',
   PTinfoph: 'potes de tom',
@@ -1378,13 +1382,10 @@ export default {
   CPTtn4: 'Notification automatique de surveillance de l\'excès de consommation',
 
   // choix quotas
-  CQt1: 'Quota V1 (textes): {0}',
-  CQt2: 'Quota V2 (fichiers): {0}',
-
-  CQv1: 'V1 : Textes - {0}',
-  CQv2: 'V1 : Fichiers - {0}',
-  CQd1: 'Le quota 1 choisi excède le volume attribuable ({0})',
-  CQd2: 'Le quota 2 choisi excède le volume attribuable ({0})',
+  CQabo: 'Abonnements:',
+  CQconso: 'Consommation mensuelle plafond:',
+  CQclec: 'Coût des lectures, écritures, transferts de fichiers',
+  CQcu: 'En centimes par mois',
 
   EMOsearch1: 'Recherche',
   EMOnotfound: 'rien trouvé',
@@ -1484,6 +1485,14 @@ export default {
   ANnr2: 'Application "bloquée" par l\'administrateur technique',
   ANnr3: 'Application en lecture seulement',
   ANnr4: 'Accès minimal très restreint à l\'application',
+  ANnospon: 'La notification provient du Comptable, lui seul peut l\'éditer (pas un sponsor).',
+  ANer1: 'Seul l\'administrateur technique peut créer et éditer une notification générale pour l\'organisation.',
+  ANer2: 'Seuls le Comptable ou un sponsor peuvent créer et éditer une notification portant sur tous les comptes rattachés à cette tranche.',
+  ANer3: 'Seuls le Comptable ou un sponsor peuvent créer et éditer une notification portant sur un compte rattaché à cette tranche.',
+  ANer4: 'Les notifications de dépassement des limites de l\'abonnement et de surveillance de la consommation, sont automatiques et ne sont pas éditables.',
+  ANer5: 'Un sponsor ne peut pas déclarer une notification portant sur tous les comptes de sa tranche qui le restreindrait lui-même.',
+  ANer6: 'Le Comptable ou un sponsor ne peut pas déclarer une notification qui le restreindrait lui-même.',
+
   ANplus: 'Plus d\'info',
   ANtxt: 'Texte de l\'alerte',
   ANpasp: 'Simple alerte, pas de procédure de blocage engagée',
@@ -1554,7 +1563,7 @@ export default {
   SAVvolg: 'dont notes des groupes détruits V1 / V2: {0} / {1}',
   SAVvolt: 'Total V1 / V2: {0} / {1}',
 
-  TUtqc: 'Limite conso. annuelle',
+  TUtqc: 'Plafond conso. mensuelle',
   TUtq1: 'Abon. nombre notes...',
   TUtq2: 'Abon. volume fichiers',
   TUaff: 'Affecté',
@@ -1569,7 +1578,7 @@ export default {
   PEnbc: 'aucun compte | un compte | {count} comptes',
   PEsp: 'pas de sponsor | un sponsor | {count} sponsors',
   PEedn: 'Editer le nom',
-  PEabo: 'Abonnement / limite',
+  PEabo: 'Abon. & max conso.',
 
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.

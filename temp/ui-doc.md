@@ -1,4 +1,6 @@
 ## TODO le 16 sept.
+Revoir dans page compta les périodes de référence et cumuls etc.
+
 gérer les restrictions - fait en partie pour figé
 
 Comptable : gérer les options sur espace

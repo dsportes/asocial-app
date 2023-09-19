@@ -398,20 +398,38 @@ export const useSessionStore = defineStore('session', {
         return 1
       } else {
         if (this.estFige) return 2
-        else if (this.estMinimal) return 3
-        else if (this.estLecture) return 4
+        else if (this.pow > 2) {
+          if (this.estMinimal) return 3
+          else if (this.estLecture) return 4
+        }
       }
       return 0
     },
 
     async edit (diag) {
       const y = ['', 'editavion', 'editfige', 'editminimal', 'editlecture']
-      const x = this.roSt
-      const d = $t(y[x])
+      const x = this.roSt()
+      const d = x ? $t(y[x]) : ''
       if (diag) return d
       if (!x) return true
       await afficherDiag(d)
       return false
+    },
+
+    async editpow (p, noed) {
+      const y = ['', 'powadmin', 'powcompta', 'powsponsor']
+      if (p === 3) {
+        if (this.pow !== 3 && this.pow !== 2) {
+          await afficherDiag(p ? $t(y[p]) : '')
+          return false
+        }
+      } if (p === 1 || p === 2) {
+        if (this.pow !== p) {
+          await afficherDiag(p ? $t(y[p]) : '')
+          return false
+        }
+      }
+      return noed ? true : await this.edit()
     },
     
     opCount () {

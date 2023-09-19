@@ -594,7 +594,7 @@ de Compta.atr (conflit d'attribution)
 export class NouvelleTribu extends OperationUI {
   constructor () { super($t('OPnvtr')) }
 
-  async run (info, q) {
+  async run (info, q) { // q: [qc, q1, q2]
     try {
       const session = stores.session
       const aSt = stores.avatar

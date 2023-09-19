@@ -1,25 +1,43 @@
 <template>
   <q-card-section :class="'q-mx-sm q-pt-none fs-md bord' + (mv.err ? 'ko' : 'ok')">
-    <div class="row  items-center">
-      <div class="col-5 titre-md">{{$t('CQt1', [ed1(mv.q1)])}}</div>
+    <div class="titre-md text-italic">{{$t('CQabo')}}</div>
+    <div class="q-ml-md row  items-center">
+      <div class="col-5 titre-md mh">{{$t('nbnotes')}}</div>
       <q-select class="col-2" v-model="q1s" :options="options" :disable="lecture" dense options-dense/>
       <q-input class="col-2 q-px-sm" v-model.number="mv.q1" type="number" :disable="lecture" dense/>
       <span :class="'col-2 text-center fs-sm' + ((mv.q1 > mv.max1 || mv.q1 < mv.min1) ? ' text-warning' : '')">
         {{mv.min1 + '...' + mv.max1}}</span>
       <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo1"/>
     </div>
-    <div class="row items-center">
-      <div class="col-5 titre-md">{{$t('CQt2', [ed2(mv.q2)])}}</div>
+    <div class="q-ml-md font-mono">{{ed1(mv.q1)}} {{$t('unotes')}}</div>
+    <div class="q-ml-md q-mt-md row items-center">
+      <div class="col-5 titre-md">{{$t('volv2')}}</div>
       <q-select class="col-2" v-model="q2s" :options="options" :disable="lecture" dense options-dense/>
       <q-input class="col-2 q-px-sm" v-model.number="mv.q2" type="number" :disable="lecture" dense/>
       <span :class="'col-2 text-center fs-sm' + ((mv.q2 > mv.max2 || mv.q2 < mv.min2) ? ' text-warning' : '')">
         {{mv.min2 + '...' + mv.max2}}</span>
       <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo2"/>
     </div>
+    <div class="q-ml-md font-mono">{{ed2(mv.q2, 0, 'B')}}</div>
+
+    <q-separator color="orange" class="q-my-md"/>
+
+    <div class="titre-md text-italic">{{$t('CQconso')}}</div>
+    <div class="titre-sm text-italic">{{$t('CQclec')}}</div>
+    <div class="q-ml-md row  items-center">
+      <div class="col-5 titre-md mh">{{$t('CQcu')}}</div>
+      <q-select class="col-2" v-model="qcs" :options="options" :disable="lecture" dense options-dense/>
+      <q-input class="col-2 q-px-sm" v-model.number="mv.qc" type="number" :disable="lecture" dense/>
+      <span :class="'col-2 text-center fs-sm' + ((mv.qc > mv.maxc || mv.qc < mv.minc) ? ' text-warning' : '')">
+        {{mv.minc + '...' + mv.maxc}}</span>
+      <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undoc"/>
+    </div>
+    <div class="q-ml-md font-mono">{{edc(mv.qc)}}</div>
+
   </q-card-section>
 </template>
 <script>
-import { edvol } from '../app/util.mjs'
+import { edvol, edqt, mon } from '../app/util.mjs'
 import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import { UNITEV2, UNITEV1 } from '../app/api.mjs'
@@ -27,7 +45,7 @@ import { UNITEV2, UNITEV1 } from '../app/api.mjs'
 export default {
   name: 'ChoixQuotas',
   props: { 
-    quotas: Object, // { q1, q2, min1, min2, max1, max2, err}
+    quotas: Object, // { q1, q2, qc, min1, min2, max1, max2, minc, maxc, err}
     lecture: Boolean
   },
 
@@ -37,8 +55,9 @@ export default {
   },
 
   methods: {
-    ed1 (v) { return edvol(v * UNITEV1) },
-    ed2 (v) { return edvol(v * UNITEV2) }
+    ed1 (v) { return edqt(v * UNITEV1) },
+    ed2 (v) { return edvol(v * UNITEV2) },
+    edc (v) { return mon(v) }
   },
 
   setup (props, context) {
@@ -46,12 +65,14 @@ export default {
     const mv = toRef(props, 'quotas')
 
     function mx () { mv.value.err = 
-      (mv.value.q1 > mv.value.max1) || (mv.value.q2 > mv.value.max2) ||
-      (mv.value.q1 < mv.value.min2) || (mv.value.q2 < mv.value.min2) 
+      (mv.value.q1 < mv.value.min1) || (mv.value.q1 > mv.value.max1) ||
+      (mv.value.q2 < mv.value.min2) || (mv.value.q2 > mv.value.max2) ||
+      (mv.value.qc < mv.value.minc) || (mv.value.qc > mv.value.maxc)
     }
 
     const q1i = mv.value.q1 // valeurs initiales
     const q2i = mv.value.q2
+    const qci = mv.value.qc
     mx()
 
     function undo1 () {
@@ -61,6 +82,11 @@ export default {
 
     function undo2 () {
       mv.value.q2 = q2i
+      mx()
+    }
+
+    function undoc () {
+      mv.value.qc = qci
       mx()
     }
 
@@ -78,6 +104,7 @@ export default {
 
     const q1s = ref(code(mv.value.q1))
     const q2s = ref(code(mv.value.q2))
+    const qcs = ref(code(mv.value.qc))
 
     watch(mv.value, (ap, av) => {
       mx()
@@ -85,6 +112,8 @@ export default {
       if (q1s.value !== y1) q1s.value = y1
       const y2 = code(ap.q2)
       if (q2s.value !== y2) q2s.value = y2
+      const yc = code(ap.qc)
+      if (qcs.value !== yc) qcs.value = yc
       changer()
     })
 
@@ -98,17 +127,20 @@ export default {
       if (x && mv.value.q2 !== x) mv.value.q2 = x
     })
 
+    watch(qcs, (ap, av) => {
+      const x = lq[ap]
+      if (x && mv.value.qc !== x) mv.value.qc = x
+    })
+
     function changer () {
       if (!lecture.value) context.emit('change')
     }
 
     return {
-      undo1,
-      undo2,
+      undo1, undo2, undoc,
       options,
       mv,
-      q1s,
-      q2s
+      q1s, q2s, qcs
     }
   }
 }
@@ -124,4 +156,7 @@ export default {
   padding: 0 !important
   max-height: 1.5rem
   max-width: 1.5rem
+.mh
+  max-height: 1.2rem
+  overflow-y: hidden
 </style>

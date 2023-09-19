@@ -4,7 +4,7 @@
     <div class="bord row items-center">
       <div v-if="type==='qc'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
         <div class='font-mono fs-sm'>[{{src.qc}}]</div>
-        <div class='font-mono fs-md'>{{mon(src.qc * UNITEV0)}}</div>
+        <div class='font-mono fs-md'>{{mon(src.qc)}}</div>
       </div>
       <div v-if="type==='q1'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
         <div class='font-mono text-center fs-sm'>[{{src.q1}}]</div>
@@ -33,8 +33,8 @@
 </template>
 
 <script>
-import { toRef } from 'vue'
-import { UNITEV0, UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { toRef, ref, watch } from 'vue'
+import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { edvol, mon, nbn } from '../app/util.mjs'
 
 export default {
@@ -50,19 +50,34 @@ export default {
   },
 
   methods: {
-    caff () { return this.type === 'qc' ? this.src.pcac : (this.type === 'q1' ? this.src.pca1 : this.src.pca2 )},
-    cuti () { return this.type === 'qc' ? this.src.pcca : (this.type === 'q1' ? this.src.pcv1 : this.src.pcv2 )},
   },
 
   data () { return {
-    aff: this.caff(),
-    uti: this.cuti()
   }},
 
   setup (props) {
     const src = toRef(props, 'src')
+    const type = toRef(props, 'type')
+
+    function faff (v) {
+      return type.value === 'qc' ? v.pcac : (type.value === 'q1' ? v.pca1 : v.pca2) 
+    }
+    function futi (v) {
+      return type.value === 'qc' ? v.pcca : (type.value === 'q1' ? v.pcv1 : v.pcv2) 
+    }
+
+    const uti = ref(futi(src.value))
+    const aff = ref(faff(src.value))
+
+    watch(() => src.value, (ap, av) => {
+        uti.value = futi(ap)
+        aff.value = faff(ap)
+      }
+    )
+
     return {
-      edvol, mon, nbn, UNITEV0, UNITEV1, UNITEV2
+      uti, aff,
+      edvol, mon, nbn, UNITEV1, UNITEV2
     }
   }
 

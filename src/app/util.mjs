@@ -227,7 +227,7 @@ export function edvol (vol) {
 }
 
 export function mon (v, n) { // n : nombres de chiffres après les centimes
-  if (v === 0) return '0€'
+  if (!v) return '0€'
   if (v >= 100) return (v / 100).toFixed((n || 0) + 2).replace('.', ',') + '€'
   return v.toFixed(n || 0).replace('.', ',') + 'c'
 }
@@ -247,8 +247,8 @@ export function edqt (qt, n) { // v: nombre de notes ... n: avec décimales
   if (!qt) return '[0]'
   const cfgq = stores.config.quotas
   if (Number.isInteger(qt)) {
-    const l = cfgq[q]
-    return !l ? '[' + q +']' : '[' + q + ' ' + l +']'
+    const l = cfgq[qt]
+    return !l ? '[' + qt +']' : '[' + qt + ' ' + l +']'
   }
   return '[' + (qt.toFixed(n === undefined ? 2 : n)) + ']'
 }

@@ -58,8 +58,8 @@
           <apercu-people v-if="type(c)===2" :id="c.id" :idx="idx"/>
           <apercu-compte v-if="type(c)===3" :elt="c" :idx="idx"/>
 
-          <apercu-notif class="q-my-xs" 
-            :notif="c.notif" :id-compte="c.id" :id-tribu="ligne.id" :nom="nomc(c)" :idx="idx"/>
+          <apercu-notif2 class="q-my-xs" 
+            :notif="c.notif2" :type="2" :ctx="c" :idx="idx" @ok="chgNtf"/>
 
           <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
@@ -118,7 +118,7 @@ import { dkli } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
-import ApercuNotif from '../components/ApercuNotif.vue'
+import ApercuNotif2 from '../components/ApercuNotif2.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
 import ApercuPeople from '../components/ApercuPeople.vue'
@@ -134,7 +134,7 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 
 export default {
   name: 'PageTranche',
-  components: { TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuCompte, ApercuPeople,
+  components: { TuileCnv,TuileNotif, ApercuNotif2, ChoixQuotas, ApercuCompte, ApercuPeople,
     ApercuAvatar, PanelCompta, QuotasVols, NouveauSponsoring },
 
   props: { },
@@ -202,6 +202,13 @@ export default {
       MD.fD()
     },
 
+    async chgNtf (ntf) {
+      const idc = ntf.ctx.id
+      const it = ntf.ctx.it
+      delete ntf.ctx
+      // TODO enregistrer la notification ou sa suppression
+
+    }
 },
 
   data () {
