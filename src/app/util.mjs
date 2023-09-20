@@ -245,9 +245,8 @@ export function nbn (vol, n, u) { // v: nombre de notes ... n: avec décimales
 
 export function edqt (qt, n) { // v: nombre de notes ... n: avec décimales
   if (!qt) return '[0]'
-  const cfgq = stores.config.quotas
   if (Number.isInteger(qt)) {
-    const l = cfgq[qt]
+    const l = stores.config.getCodeQ(qt)
     return !l ? '[' + qt +']' : '[' + qt + ' ' + l +']'
   }
   return '[' + (qt.toFixed(n === undefined ? 2 : n)) + ']'

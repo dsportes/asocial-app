@@ -5,7 +5,7 @@
       :label="$t('PCPsyn') + ' - ' + dhcool(c.dh)">
     <div class="largeur40 column maauto q-my-sm">
       <div class="titre-md q-my-sm">
-        {{$t('PCPpcum' + c.debref[0], [dhcool(c.debref[1]), c.debref[2]])}}
+        {{$t('PCPpcum' + c.cumref[0], [dhcool(c.cumref[1]), c.cumref[2]])}}
       </div>
 
       <div :class="dkli(1) + ' row items-center full-width'">
@@ -154,22 +154,19 @@
         <div class="col-2 font-mono text-center">{{ex(3) ? edvol(vm(3)) : '-'}}</div>
       </div>
 
-      <div class="titre-md q-my-sm">
-        {{$t('PCPpref' + c.debref[0], [dhcool(c.debref[1]), c.debref[2]])}}
-      </div>
-
-      <div v-if="!c.estA" class="titre-md q-mt-sm">
-        <span>{{$t('PCPconso2M', [mon(c.conso2M)])}}</span>
-        <span :class="alconso + 'q-pa-md'">{{$t('PCPlim', [txconso])}}</span>
-      </div>
-      <div v-if="!c.estA" class="titre-md q-mb-sm">
-        {{$t('PCPqc', [mon(c.qv.qc)])}}
+      <div v-if="!c.estA">
+        <div class="titre-md q-my-md">
+          <div>{{$t('PCPprefc' + c.debref[0], [dhcool(c.debref[1]), mon(c.conso2B, 2)], libm(1))}}</div>
+          <div :class="alconso">{{$t('PCPcmoy', [mon(c.conso2M, 2), txconso, mon(c.qv.qc), libm(1)])}}</div>
+        </div>
       </div>
 
       <div v-if="c.estA" class="column maauto q-my-sm full-width">
-        <div :class="dkli(1) + ' row items-center full-width'">
+        <div>{{$t('PCPprefa' + c.cumref[0], [dhcool(c.cumref[1]), mon(c.cumulCouts, 2)])}}</div>
+ 
+        <div :class="dkli(1) + ' row items-center full-width q-mt-sm'">
           <div class="col-3 text-center">{{$t('PCPabc')}}</div>
-          <div class="col-3 text-center">{{$t('PCPdb', [c.debref[2]])}}</div>
+          <div class="col-3 text-center">{{$t('PCPdb')}}</div>
           <div class="col-3 text-center">{{$t('PCPcr')}}</div>
           <div class="col-3 text-center">{{$t('PCPsl')}}</div>
         </div>
@@ -268,10 +265,10 @@ export default ({
       return x ? x.total : 8
     },
     nbj () { return this.c.nbj(this.cr) },
-    txconso () { return Math.floor(this.c.conso2M * 100 / this.c.qv.qc )},
+    txconso () { return this.c.pourcents.pcc },
     alconso () {
       if (this.txconso < 80) return ''
-      return ' bg-yellow-3 text-bold ' + (this.txconso > 100 ? 'negative' : 'warning')
+      return ' bg-yellow-3 text-bold text-' + (this.txconso > 100 ? 'negative' : 'warning')
     },
     alsolde () {
       const x = ' bg-yellow-3 text-bold text-'

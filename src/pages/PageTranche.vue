@@ -68,7 +68,7 @@
           <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
           <div v-if="vis(c)" class="q-mb-xs row justify-between">
-            <quotas-vols :vols="c" />
+            <quotas-vols2 :vols="c" />
             <q-btn v-if="pow < 4" size="sm" class="q-ml-sm btn1"
                 icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
           </div>
@@ -128,7 +128,7 @@ import ApercuCompte from '../components/ApercuCompte.vue'
 import ApercuPeople from '../components/ApercuPeople.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import PanelCompta from '../components/PanelCompta.vue'
-import QuotasVols from '../components/QuotasVols.vue'
+import QuotasVols2 from '../components/QuotasVols2.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import { GetCompteursCompta, SetQuotas, SetNotifT, SetNotifC } from '../app/operations.mjs'
 
@@ -139,7 +139,7 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 export default {
   name: 'PageTranche',
   components: { TuileCnv,TuileNotif, ApercuNotif2, ChoixQuotas, ApercuCompte, ApercuPeople,
-    ApercuAvatar, PanelCompta, QuotasVols, NouveauSponsoring },
+    ApercuAvatar, PanelCompta, QuotasVols2, NouveauSponsoring },
 
   props: { },
 

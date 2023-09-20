@@ -1,13 +1,8 @@
 ## TODO le 16 sept.
-Revoir dans page compta les périodes de référence et cumuls etc.
 
 gérer les restrictions - fait en partie pour figé
 
 Comptable : gérer les options sur espace
-
-Créer / MAJ Tribu : q1 q2, ajouter qc
-
-Gérer compte d'une tribu : q1 q2, ajouter qc
 
 Sponsoring : compte A et qc sur compte O
 

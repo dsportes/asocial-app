@@ -1106,7 +1106,7 @@ export default {
   PCPnot: 'Aucune notification',
   PCPabo1: 'Abonnement: nombre de notes + chats + groupes',
   PCPabo2: 'Abonnement: volume des fichiers attachés aux notes',
-  PCPactuel: 'Actuel',
+  PCPactuel: 'Cumuls',
   PCPmoy: '(moyenne)',
   PCPnbno: 'Nombre de notes',
   PCPnbch: 'Nombre de chats',
@@ -1117,7 +1117,7 @@ export default {
   PCPv2: 'Volume des fichiers',
   PCPconso: 'Consommation',
   PCPcconso: 'Contrôle de la consommation',
-  PCPabcs: 'Total abo. + conso.',
+  PCPabcs: 'Abo. + conso.',
   PCPabc: 'Abo. Conso.',
   PCPdb: 'Débit (sur {0} j)',
   PCPcr: 'Crédit',
@@ -1128,15 +1128,19 @@ export default {
   PCPvd: 'Vol. desc. fichiers',
   PCPvm: 'Vol. montant. fichiers',
   PCPsyn: 'Synthèse',
-  PCPpcum0: 'Période de référence des "cumuls des coûts" d\'abonnement et de consommation : de la création du compte [{0}] à maintenant ({1} jours).',
-  PCPpcum1: 'Période de référence des "cumuls des coûts" d\'abonnement et de consommation : du début du mois précédent [{0}] à maintenant ({1} jours).',
-  PCPpcum2: 'Période de référence des "cumuls des coûts" d\'abonnement et de consommation : du passage en "compte autonome" [{0}] à maintenant ({1} jours).',
-  PCPpcum3: 'Période de référence des "cumuls des coûts" d\'abonnement et de consommation : du passage en "compte de l\'organistion" [{0}] à maintenant ({1} jours).',
+  PCPpcum0: 'Les "cumuls" d\'abonnement et de consommation correspondent à la période de la création du compte [{0}] à maintenant ({1} jours).',
+  PCPpcum2: 'Les "cumuls" d\'abonnement et de consommation correspondent à la période du passage en "compte autonome" [{0}] à maintenant ({1} jours).',
+  PCPpcum3: 'Les "cumuls" d\'abonnement et de consommation correspondent à la période du passage en "compte de l\'organistion" [{0}] à maintenant ({1} jours).',
 
-  PCPpref0: 'Période de référence pour le contrôle de la consommation : de la création du compte [{0}] à maintenant ({1} jours).',
-  PCPpref1: 'Période de référence pour le contrôle de la consommation : du début du mois précédent [{0}] à maintenant ({1} jours).',
-  PCPpref2: 'Période de référence pour le contrôle de la consommation : du passage en "compte autonome" [{0}] à maintenant ({1} jours).',
-  PCPpref3: 'Période de référence pour le contrôle de la consommation : du passage en "compte de l\'organistion" [{0}] à maintenant ({1} jours).',
+  PCPprefc0: 'Consommation entre la création du compte [{0}] et maintenant : {1}.',
+  PCPprefc1: 'Consommation entre début {2} [{0}] et maintenant : {1}.',
+  PCPprefc3: 'Consommation entre le passage en "compte de l\'organistion" [{0}] et maintenant : {1}.',
+
+  PCPcmoy: 'Moyenne "mensuelle" depuis début {3} : {0}, soit {1}% du plafond alloué {2}.',
+
+  PCPprefa0: 'Débit: consommation depuis la création du compte [{0}] et maintenant ({1} jours).',
+  PCPprefa2: 'Débit: consommation depuis le passage en "compte autonome" [{0}] et maintenant ({1} jours).',
+
   PCPdeca: '{1} de découvert exceptionnel autorisé. Fin de validité: {0}',
   PCPdeco: 'La limite maximale de consommation peut être exceptionnellement dépassé de {1}%. Fin de validité: {0}',
   PCPconso2M: '{0} : consommation sur la période de référence en rythme annuel.',
@@ -1182,6 +1186,11 @@ export default {
   PTcompta: 'Abonnement / consommation de {0}',
   PTspn1: 'Il n\'est pas possible de changer le statut de sponsor d\'un compte dont le nom est inconnu.',
   PTspn2: 'Il n\'est pas possible de changer de tranche de quotas un compte dont le nom est inconnu.',
+
+  // QuotasVols2
+  QVabo1: 'Abonnement (1): {0} - {1} notes+chats+groupes - ({2}% utilisé)',
+  QVabo2: 'Abonnement (2): {0} - {1} - ({2}% utilisé)',
+  QVplc: 'Plafond de consommation (rythme mensuel): {0} - {1}',
 
   // Page groupe(s)
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',

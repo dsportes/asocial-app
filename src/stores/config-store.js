@@ -56,7 +56,12 @@ export const useConfigStore = defineStore('config', {
     motsclesLOC (state) { 
       const lg = useI18n().locale.value
       return state.motsclesloc[lg]
-    }
+    },
+    getCodeQ: (state) => { return (q) => { 
+        for (const c in state.quotas) { if (state.quotas[c] === q) return c }
+        return ''
+      }
+    },
   },
 
   actions: {
