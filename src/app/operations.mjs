@@ -620,11 +620,14 @@ export class NouvelleTribu extends OperationUI {
   }
 }
 
-/* Set `notif` tribu : notification de la tribu (cryptée par la clé de la tribu).
-args.token: éléments d'authentification du compte.
-args.id : id de la tribu
-args.notif: notification cryptée par la clé de la tribu
-Retour:
+/* `SetNotifT` : notification de la tribu
+POST:
+- `token` : éléments d'authentification du compte.
+- `id` : id de la tribu
+- `notif` : notification cryptée par la clé de la tribu.
+- `stn`: statut de notif 0:simple 1 2 9:aucune notif
+
+Assertion sur l'existence du row `Tribus` de la tribu.
 */
 export class SetNotifT extends OperationUI {
   constructor () { super($t('OPntftr')) }
@@ -638,7 +641,13 @@ export class SetNotifT extends OperationUI {
         const cle = getCle(id)
         notif = await crypter(cle, notifT.serial)
       }
-      const args = { token: session.authToken, id, notif }
+      let stn = 9
+      if (notifT.texte) {
+        if (notifT.nr === 0) stn = 0
+        else if (notifT.nr === 3) stn = 1
+        else stn = 4
+      }
+      const args = { token: session.authToken, id, notif, stn }
       this.tr(await post(this, 'SetNotifT', args))
       this.finOK()
     } catch (e) {
@@ -674,23 +683,30 @@ export class SetAtrItemComptable extends OperationUI {
   }
 }
 
-/* Set notification de compte dans tribu
-args.token: éléments d'authentification du compte.
-args.id : id de la tribu
-args.idc: id du compte
-args.notif: notification du compte cryptée par la clé de la tribu
-args.stn : 0: aucune 1:simple 2:bloquante
-Retour:
+/* `SetNotifC` : notification d'un compte d'une tribu
+POST:
+- `token` : éléments d'authentification du compte.
+- `id` : id de la tribu
+- `idc` : id du compte
+- `notif` : notification du compte cryptée par la clé de la tribu
+- `stn` : 0:simple 1:lecture 2:mi,imal, 9:aucune
+
+Assertion sur l'existence du row `Tribus` de la tribu et `Comptas` du compte.
 */
 export class SetNotifC extends OperationUI {
   constructor () { super($t('OPntfco')) }
 
-  async run (id, idc, notifC) { // id de la tribu, na du compte cible, notif
+  async run (id, idc, notifC) { // id de la tribu, id du compte cible, notif
     try {
       const session = stores.session
       if (notifC) notifC.dh = Date.now()
       const cle = getCle(id)
-      const stn = !notifC ? 0 : (notifC.jbl ? 2 : 1) 
+      let stn = 9
+      if (notifC.texte) {
+        if (notifC.nr === 0) stn = 0
+        else if (notifC.nr === 3) stn = 1
+        else stn = 4
+      }
       const notif = notifC ? await crypter(cle, notifC.serial) : null
       const args = { token: session.authToken, id, idc, notif, stn }
       this.tr(await post(this, 'SetNotifC', args))
@@ -735,10 +751,10 @@ Retour:
 export class SetQuotas extends OperationUI {
   constructor () { super($t('OPmajtr')) }
 
-  async run (id, idc, q1, q2) {
+  async run (id, idc, q) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, idt: id, idc, q1, q2 }
+      const args = { token: session.authToken, idt: id, idc, q }
       this.tr(await post(this, 'SetQuotas', args))
       this.finOK()
     } catch (e) {

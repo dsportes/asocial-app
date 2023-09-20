@@ -25,13 +25,13 @@ Depuis un Comptable: ns est celui de la session
       <q-expansion-item switch-toggle-side expand-separator dense group="trgroup">
         <template v-slot:header>
           <div :class="dkli(idx) + ' row full-width'">
-            <div class="col-2 fs-md">
+            <div class="col-3 fs-md">
               <span v-if="!lg.id">{{$t('total')}}</span>
               <span v-else>#{{ID.court(lg.id)}}
                 <span v-if="pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
               </span>
             </div>
-            <div class="col-5">
+            <div class="col-4">
               {{$t('PEnbc', lg.nbc, { count: lg.nbc })}}, {{$t('PEsp', lg.nbsp, { count: lg.nbsp })}}
             </div>
             <div class="col-1 font-mono fs-sm text-center">{{lg.qc}}<br/>{{lg.pcac}}%</div>
@@ -47,21 +47,25 @@ Depuis un Comptable: ns est celui de la session
             </div>
           </div>
         </template>
-
-        <div class="row q-gutter-sm">
-          <tuile-cnv type="qc" :src="lg" occupation/>
-          <tuile-cnv type="q1" :src="lg" occupation/>
-          <tuile-cnv type="q2" :src="lg" occupation/>
-          <tuile-notif :src="lg" :total="idx === 0"/>
-        </div>
-        <div v-if="pow === 2" class="row q-mt-xs q-gutter-xs">
-          <q-btn class="fs-md btn2" size="sm" dense
-            color="primary" :icon="lg.info ? 'edit' : 'add'" 
-            :label="$t('PEedn')" @click="editer"/>
-          <q-btn size="sm" class="fs-md btn2"
-            icon="settings" :label="$t('PEabo')" dense color="primary" @click="editerq"/>
-          <q-btn v-if="lg.id" class="fs-md btn2" size="sm" dense color="primary" 
-            :label="$t('detail')" icon-right="open_in_new" @click="pageTranche"/>
+        <div class="q-ml-xl q-mb-lg">
+          <div class="row q-gutter-sm">
+            <tuile-cnv type="qc" :src="lg" occupation/>
+            <tuile-cnv type="q1" :src="lg" occupation/>
+            <tuile-cnv type="q2" :src="lg" occupation/>
+            <tuile-notif :src="lg" :total="idx === 0" occupation/>
+          </div>
+          <div v-if="idx !== 0" class="q-my-xs">
+            <apercu-notif2 :editable="session.pow < 4" :notif="notif" :type="1" @ok="chgNtfT"/>
+          </div>
+          <div v-if="pow === 2" class="row q-mt-xs q-gutter-xs">
+            <q-btn class="fs-md btn2" size="sm" dense
+              color="primary" :icon="lg.info ? 'edit' : 'add'" 
+              :label="$t('PEedn')" @click="editer"/>
+            <q-btn size="sm" class="fs-md btn2"
+              icon="settings" :label="$t('PEabo')" dense color="primary" @click="editerq"/>
+            <q-btn v-if="lg.id" class="fs-md btn2" size="sm" dense color="primary" 
+              :label="$t('detail')" icon-right="open_in_new" @click="pageTranche"/>
+          </div>
         </div>
       </q-expansion-item>
     </div>
@@ -125,6 +129,8 @@ import stores from '../stores/stores.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
+import ApercuNotif2 from '../components/ApercuNotif2.vue'
+import { SetNotifT } from '../app/operations.mjs'
 import { dkli } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 import { NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
@@ -134,7 +140,7 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { ChoixQuotas, TuileCnv, TuileNotif },
+  components: { ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif2 },
 
   computed: {
   },
@@ -157,8 +163,10 @@ export default {
       if (this.pow === 2) {
         const t = await this.getTr(lg.id)
         this.ligne = t.synth
+        this.notif = t.notif
       } else {
         this.ligne = lg
+        this.notif = null
       }
     },
 
@@ -191,6 +199,9 @@ export default {
       this.ui.setPage('tranche')
     },
 
+    async chgNtfT (ntf) {
+      await new SetNotifT().run(this.ligne.id, ntf)
+    },
     async editer () {
       if (!await this.session.editpow(2)) return
       this.info = this.infoC
@@ -252,6 +263,7 @@ export default {
     const pow = session.pow
 
     const ligne = ref(null)
+    const notif = ref(null)
 
     const fSt = stores.filtre
     const ui = stores.ui
@@ -295,7 +307,11 @@ export default {
 
     function resetCourant () {
       if (aSt.tribuC) {
-        synth.value.forEach(s => { if (s.id === session.tribuCId) ligne.value = s })
+        synth.value.forEach(s => { 
+          if (s.id === session.tribuCId) {
+            ligne.value = s
+          }
+        })
       } else {
         ligne.value = synth.value[0] // ligne de synthèse courante initiale
       }  
@@ -315,6 +331,9 @@ export default {
           await refreshSynth()
           trier()
           resetCourant()
+        }
+        if (name === 'setTribu' && args[0].id === ligne.value.id) {
+          notif.value = args[0].notif
         }
       })
     })
@@ -339,7 +358,7 @@ export default {
     return {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
       synth, // Syntheses de l'espace
-      ligne, // ligne courante affichée
+      notif, ligne, // ligne courante affichée
       MD, ID, nt, ovnt, edcom, ovedcom, edq, ovedq,
       aSt, session, pow, ui, dkli
     }
@@ -347,7 +366,9 @@ export default {
 
 }
 </script>
-
+<style lang="css">
+.q-item__section--avatar { min-width: 0 !important; }
+</style>
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .msg

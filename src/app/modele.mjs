@@ -817,12 +817,12 @@ export class Tribu extends GenDoc {
     }
     const c = this.clet
 
-    this.notif = row.notif ? new Notification(await decrypter(c, row.notif)) : null
+    this.notif = row.notif ? Notification.deSerial(await decrypter(c, row.notif)) : null
 
     this.qc = row.qc || 0
     this.q1 = row.q1 || 0
     this.q2 = row.q2 || 0
-    this.stn = row.stn || 0
+    this.stn = row.stn || 9
 
     this.act = []
     if (row.act) for (let it = 0; it < row.act.length; it++) {
@@ -831,7 +831,7 @@ export class Tribu extends GenDoc {
       const r = { }
       r.id = ID.long(await decrypterStr(c, item.idT), NomGenerique.ns)
       r.it = it
-      r.notif = item.notif ? new Notification(await decrypter(c, item.notif)) : null
+      r.notif = item.notif ? Notification.deSerial(await decrypter(c, item.notif)) : null
       r.stn = item.stn || 0
       r.nasp = item.nasp ? NomGenerique.from(decode(await decrypter(c, item.nasp))) : null
       r.qc = item.qc || 0

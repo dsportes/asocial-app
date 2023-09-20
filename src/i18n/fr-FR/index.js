@@ -1168,7 +1168,6 @@ export default {
   
   PTtit1: 'Sponsors',
   PTtit2: 'Sponsors et comptes',
-  PTcompta2: 'Usage des quotas',
   PTq1: 'Quota V1 (texte des notes)',
   PTq2: 'Quota V2 (fichiers des notes)',
   PTq12: 'Quotas V1 (textes) / V2 (fichiers)',
@@ -1180,7 +1179,7 @@ export default {
   PTinfoph: 'potes de tom',
   PTnvc: 'Nouveau Sponsoring',
   PTpasc: 'Il n\'est pas possible de bloquer le Comptable',
-  PTcompta: 'Usage des quotas {0}',
+  PTcompta: 'Abonnement / consommation de {0}',
   PTspn1: 'Il n\'est pas possible de changer le statut de sponsor d\'un compte dont le nom est inconnu.',
   PTspn2: 'Il n\'est pas possible de changer de tranche de quotas un compte dont le nom est inconnu.',
 
@@ -1568,7 +1567,8 @@ export default {
   TUtq2: 'Abon. volume fichiers',
   TUaff: 'Affecté',
   TUuti: 'Utilisé',
-  TUntf: 'Notifications ...',
+  TUntft: 'Notif. tranches',
+  TUntfc: 'Notif. comptes',
   TUsim: 'OK',
   TUlec: 'Lec.',
   TUmin: 'Min.',

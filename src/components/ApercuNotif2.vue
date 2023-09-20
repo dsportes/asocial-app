@@ -12,17 +12,17 @@
           <q-btn v-if="type < 3 && editable" color="primary" class="q-ml-sm btn2" size="sm" 
             :label="$t('editer')" dense icon="add" @click="editer"/>
         </div>
-        <div v-if="notif.nr">
+      </div>
+      <div v-if="notif.nr">
           <span class="q-pa-xs bg-yellow-3 text-negative text-bold">
             {{$t('ANnr' + notif.nr)}}
           </span>
           <bouton-bulle :idtext="'nr' + notif.nr"/>
-        </div>
       </div>
       <show-html class="q-mt-xs bord" :texte="notif.texte" :idx="idx" 
         maxh="3rem" zoom scroll/>
     </div>
-    <div v-if="type < 3 && (!notif || !notif.texte)" class="row justify-between">
+    <div v-if="type < 3 && (!notif || !notif.texte)" class="row">
       <div class="titre-md">{{$t('ANauc')}}</div>
       <q-btn v-if="editable" color="primary" class="q-ml-sm btn2" size="sm" 
         :label="$t('ANcre')" dense icon="add" @click="creer"/>
@@ -47,7 +47,7 @@
             <span>{{$t('ANnr2')}}<bouton-bulle idtext="nr2"/></span>
         </div>
 
-        <div v-if="type===1 || type===2" class="column">
+        <div v-if="type===1 || type===2">
           <q-checkbox size="sm" v-model="restr"/>
             <span>{{$t('ANnr3')}}<bouton-bulle idtext="nr3"/></span>
         </div>
@@ -176,6 +176,7 @@ export default {
     },
 
     async valider () {
+      this.ntf.nr = 0
       if (this.type === 0) {
         if (this.restr) this.ntf.nr = 1
         if (this.restrb) this.ntf.nr = 2
@@ -185,12 +186,12 @@ export default {
       }
       // Interdiction de se bloquer soi-même
       if (this.type === 1 && this.session.pow === 3 && this.ntf.nr) { 
-        await afficherDiag($t('ANer5'))
+        await afficherDiag(this.$t('ANer5'))
         return
       }
       if (this.type === 2 && (this.session.pow === 3 || this.session.pow === 2)
         && this.ntf.nr && this.ctx && this.ctx.id === this.session.compteId) {
-          await afficherDiag($t('ANer6'))
+          await afficherDiag(this.$t('ANer6'))
           return
       }
       if (this.ctx) this.ntf.ctx = this.ctx
@@ -201,7 +202,7 @@ export default {
     supprimer () {
       const ntf = new Notification({})
       if (this.idsource) ntf.idSource = this.idsource
-      if (this.ctx) this.ntf.ctx = this.ctx
+      if (this.ctx) ntf.ctx = this.ctx
       this.$emit('ok', ntf)
       MD.fD()
     }
@@ -231,4 +232,6 @@ export default {
 .q-toolbar
   padding: 0 !important
   min-height: 0 !important
+.q-item__section--avatar
+  min-width: 0 !important
 </style>

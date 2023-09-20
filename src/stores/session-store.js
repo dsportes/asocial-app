@@ -143,19 +143,29 @@ export const useSessionStore = defineStore('session', {
     estFige (state) { const n = state.notifAdmin; return n && (n.nr === 1) },
     estClos (state) { const n = state.notifAdmin; return n && (n.nr === 2) },
     estLecture (state) {
+      if (this.pow <= 2) return false
       const nt = state.notifs[1]; const nc = state.notifs[2]
       let nr = nt ? nt.nr : 0
       if (nc && nc.nr > nr) nr = nc.nr
       return nr === 3
     },
     estMinimalTC (state) {
+      if (this.pow <= 2) return false
       const nt = state.notifs[1]; const nc = state.notifs[2]
       let nr = nt ? nt.nr : 0
       if (nc && nc.nr > nr) nr = nc.nr
       return nr === 4
     },
-    estMinimalC (state) { const n = state.notifs[4]; return n && (n.nr === 4) },
-    estDecr (state) { const n = state.notifs[3]; return n && (n.nr === 5) },
+    estMinimalC (state) {
+      if (this.pow <= 2) return false
+      const n = state.notifs[4]
+      return n && (n.nr === 4) 
+    },
+    estDecr (state) { 
+      if (this.pow <= 2) return false
+      const n = state.notifs[3]
+      return n && (n.nr === 5) 
+    },
 
     estMinimal (state) { 
       if (!state.fige) return state.estMinimalC || state.estMinimalTC
@@ -357,15 +367,15 @@ export const useSessionStore = defineStore('session', {
       let chg = false
       if (nt) {
         const n = this.notifs[1]
-        if (!n || ne.dh > n.dh) {
-          this.notifs[1] = ne
+        if (!n || nt.dh > n.dh) {
+          this.notifs[1] = nt
           chg = true
         }
       }
       if (nc) {
         const n = this.notifs[2]
-        if (!n || ne.dh > n.dh) {
-          this.notifs[2] = ne
+        if (!n || nc.dh > n.dh) {
+          this.notifs[2] = nc
           chg = true
         }
       }

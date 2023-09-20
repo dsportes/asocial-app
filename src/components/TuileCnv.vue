@@ -1,7 +1,9 @@
 <template>
-  <div :class="(occupation ? 'w3' : 'w2') + ' column'">
-    <div class="bg-primary text-white text-bold titre-md text-center">{{$t('TUt' + type)}}</div>
-    <div class="bord row items-center">
+  <div :class="(occupation ? 'w3b' : 'w2b') + ' row items-start'">
+
+    <div class="titre-md text-italic col-6">{{$t('TUt' + type)}}</div>
+
+    <div class="col-6 row items-center bordr">
       <div v-if="type==='qc'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
         <div class='font-mono fs-sm'>[{{src.qc}}]</div>
         <div class='font-mono fs-md'>{{mon(src.qc)}}</div>
@@ -86,13 +88,10 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bord
-  border-left: 1px solid $grey-5
+.bordr
   border-right: 1px solid $grey-5
-  border-bottom: 1px solid $grey-5
-  height: 4rem
-.w2
-  width: 8rem
-.w3
-  width: 12rem
+.w2b
+  width: 21rem
+.w3b
+  width: 24rem
 </style>

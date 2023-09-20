@@ -2,19 +2,23 @@
   <q-page>
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <q-expansion-item class="q-mb-sm q-mx-xs" switch-toggle-side expand-separator dense>
+    <q-expansion-item class="q-mb-sm q-mx-xs" header-class="bg-secondary text-white" switch-toggle-side expand-separator dense>
       <template v-slot:header>
         <div class="row full-width fs-md">
           <span>{{$t('TUtr')}} #{{ID.court(lg.id)}}</span>
           <span v-if="pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
         </div>
       </template>
-
-      <div class="row q-gutter-sm">
-        <tuile-cnv type="qc" :src="lg" occupation/>
-        <tuile-cnv type="q1" :src="lg" occupation/>
-        <tuile-cnv type="q2" :src="lg" occupation/>
-        <tuile-notif :src="lg"/>
+      <div class="q-ml-xl q-mb-lg largeur50 maauto">
+        <div class="row justify-around">
+          <tuile-cnv type="qc" :src="lg" occupation/>
+          <tuile-cnv type="q1" :src="lg" occupation/>
+          <tuile-cnv type="q2" :src="lg" occupation/>
+          <tuile-notif :src="lg" occupation/>
+        </div>
+        <div class="q-my-xs">
+          <apercu-notif2 :editable="session.pow < 4" :notif="lg.notif" :type="1" @ok="chgNtfT"/>
+        </div>
       </div>
     </q-expansion-item>
 
@@ -24,8 +28,8 @@
         :label="$t('PTnvc')" @click="ovnvsp"/>
     </q-toolbar>
 
-    <div v-for="(c, idx) in aSt.ptLcFT" :key="c.id">
-      <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx) + ' largeur40'">
+    <div v-for="(c, idx) in aSt.ptLcFT" :key="c.id" class="largeur50 maauto">
+      <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)">
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
@@ -58,8 +62,8 @@
           <apercu-people v-if="type(c)===2" :id="c.id" :idx="idx"/>
           <apercu-compte v-if="type(c)===3" :elt="c" :idx="idx"/>
 
-          <apercu-notif2 class="q-my-xs" 
-            :notif="c.notif2" :type="2" :ctx="c" :idx="idx" @ok="chgNtf"/>
+          <apercu-notif2 class="q-my-xs" :editable="session.pow < 4"
+            :notif="c.notif" :type="2" :ctx="c" :idx="idx" @ok="chgNtf"/>
 
           <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
@@ -70,7 +74,7 @@
           </div>
           
           <div class="text-right"> <q-btn v-if="pow < 4" size="sm"
-            icon="poll" :label="$t('PTcompta2')" dense color="primary" 
+            icon="poll" :label="$t('PCPabc')" dense color="primary" 
             @click="voirCompta(c)"/></div>
         </div>
       </q-expansion-item>
@@ -126,7 +130,7 @@ import ApercuAvatar from '../components/ApercuAvatar.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
-import { GetCompteursCompta, SetQuotas } from '../app/operations.mjs'
+import { GetCompteursCompta, SetQuotas, SetNotifT, SetNotifC } from '../app/operations.mjs'
 
 const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
 const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative']
@@ -188,9 +192,10 @@ export default {
 
     async editerq (c) {
       if (! await this.session.edit()) return
-      this.quotas = { q1: c.q1, q2: c.q2, min1: 0, min2: 0, 
-        max1: this.aSt.tribuC.cpt.q1 - this.aSt.tribuC.cpt.a1,
-        max2: this.aSt.tribuC.cpt.q2 - this.aSt.tribuC.cpt.a2,
+      this.quotas = { q1: c.q1, q2: c.q2, qc: c.qc, min1: 0, min2: 0, minc: 0,
+        max1: this.aSt.tribuC.synth.q1 - this.aSt.tribuC.synth.a1 + c.q1,
+        max2: this.aSt.tribuC.synth.q2 - this.aSt.tribuC.synth.a2 + c.q2,
+        maxc: this.aSt.tribuC.synth.qc - this.aSt.tribuC.synth.ac + c.qc,
         c: c
         }
       this.ovedq()
@@ -198,16 +203,17 @@ export default {
     
     async validerq () {
       await new SetQuotas().run(this.aSt.tribuC.id, 
-        this.quotas.c.id, this.quotas.q1, this.quotas.q2)
+        this.quotas.c.id, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
       MD.fD()
     },
 
     async chgNtf (ntf) {
       const idc = ntf.ctx.id
-      const it = ntf.ctx.it
       delete ntf.ctx
-      // TODO enregistrer la notification ou sa suppression
-
+      await new SetNotifC().run (this.aSt.tribuC.id, idc, ntf)
+    },
+    async chgNtfT (ntf) {
+      await new SetNotifT().run(this.aSt.tribuC.id, ntf)
     }
 },
 
@@ -225,12 +231,13 @@ export default {
     const session = stores.session
     const aSt = stores.avatar
     const pSt = stores.people
-    const ligne = ref()
     const pow = session.pow
 
-    const lg = (aSt.tribuC || aSt.tribu).synth
+    const lg = ref(null)
 
-    function resetCourant () { ligne.value = aSt.tribuC.synth }
+    function resetCourant () { 
+      lg.value = aSt.tribuC.synth 
+    }
 
     if (pow > 1) aSt.$onAction(({ name, args, after }) => {
       after(async (result) => {
@@ -251,7 +258,6 @@ export default {
 
     return {
       session, aSt, pSt, pow, lg,
-      ligne,
       ID, MD, nvsp, ovnvsp, edq, ovedq, cptdial, ovcptdial,
       cfg: stores.config,
       ui: stores.ui, dkli
