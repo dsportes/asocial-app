@@ -114,6 +114,7 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
+    espace (state) { return state.espaces.get(state.ns) },
     estSponsor (state) { return stores.avatar.compta.estSponsor },
     estComptable (state) { return ID.estComptable(state.compteId) },
 
@@ -126,6 +127,8 @@ export const useSessionStore = defineStore('session', {
     accesNetNf (state) { return state.accesNet && !state.estFige },
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
+
+    accepteA (state) { return state.espace.opt !== 0 },
 
     notifAdmin (state) { return state.notifs[0] },
 

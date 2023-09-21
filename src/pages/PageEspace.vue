@@ -16,9 +16,19 @@ Depuis un Comptable: ns est celui de la session
   <q-page>
     <!--div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div-->
 
-    <q-btn v-if="pow===2" class="q-my-sm fs-md btn2" size="md" dense color="primary" 
-      :label="$t('PTnv')" @click="ouvrirnt"/>
-    <div v-else style="height:3rem"/>
+    <div v-if="pow===2" class="row height-3 overflow-hidden-y">
+      <q-btn class="col-auto q-my-sm fs-md btn2" size="md" dense color="primary" 
+        :label="$t('PTnv')" @click="ouvrirnt"/>
+
+      <q-select class="col q-ml-md largeur20" borderless v-model="optionA" :options="options" dense />
+      <div class="col-auto q-ml-sm column">
+        <q-btn dense size="sm" color="primary" :disable="!chgOptionA"
+          icon="undo" @click="undoOptionA"/>
+        <q-btn dense size="sm" color="warning" :disable="!chgOptionA"
+          icon="check" @click="saveOptionA"/>
+      </div>
+    </div>
+    <div v-else class="height-3"/>
 
     <div class="q-mx-xs" 
       v-for="(lg, idx) in synth" :key="lg.id" @click="lgCourante(lg)">
@@ -57,7 +67,7 @@ Depuis un Comptable: ns est celui de la session
           <div v-if="idx !== 0" class="q-my-xs">
             <apercu-notif2 :editable="session.pow < 4" :notif="notif" :type="1" @ok="chgNtfT"/>
           </div>
-          <div v-if="pow === 2" class="row q-mt-xs q-gutter-xs">
+          <div v-if="pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs">
             <q-btn class="fs-md btn2" size="sm" dense
               color="primary" :icon="lg.info ? 'edit' : 'add'" 
               :label="$t('PEedn')" @click="editer"/>
@@ -124,16 +134,16 @@ Depuis un Comptable: ns est celui de la session
 </template>
 
 <script>
-import { ref, onMounted, toRef } from 'vue'
+import { ref, onMounted, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuNotif2 from '../components/ApercuNotif2.vue'
 import { SetNotifT } from '../app/operations.mjs'
-import { dkli } from '../app/util.mjs'
+import { dkli, $t } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
-import { NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
+import { SetEspaceOptionA, NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 
 export default {
@@ -264,6 +274,13 @@ export default {
 
     const ligne = ref(null)
     const notif = ref(null)
+    const optionA = ref(null)
+    const chgOptionA = ref(false)
+    const options = [
+      { label: $t('PTopt0'), value: 0 },
+      { label: $t('PTopt1'), value: 1 },
+      { label: $t('PTopt2'), value: 2 },
+    ]
 
     const fSt = stores.filtre
     const ui = stores.ui
@@ -317,7 +334,26 @@ export default {
       }  
     }
 
+    function setOptionA (e) {
+      optionA.value = options[e.opt]
+      chgOptionA.value = false
+    }
+
+    function undoOptionA () {
+      optionA.value = options[session.espace.opt]
+    }
+
+    watch(() => optionA.value, (ap, av) => {
+        chgOptionA.value = session.espace.opt !== ap.value
+      }
+    )
+
+    async function saveOptionA () {
+      await new SetEspaceOptionA().run(optionA.value.value)
+    }
+
     onMounted(async () => {
+      setOptionA(session.espace)
       await refreshSynth()
       trier()
       resetCourant()
@@ -348,6 +384,15 @@ export default {
       })
     })
 
+    session.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setEspace') {
+          const e = args[0]
+          setOptionA(e)
+        }
+      })
+    })
+
     const nt = ref(false)
     function ovnt () { MD.oD(nt)}
     const edcom = ref(false)
@@ -360,7 +405,8 @@ export default {
       synth, // Syntheses de l'espace
       notif, ligne, // ligne courante affichée
       MD, ID, nt, ovnt, edcom, ovedcom, edq, ovedq,
-      aSt, session, pow, ui, dkli
+      aSt, session, pow, ui, dkli,
+      optionA, options, saveOptionA, undoOptionA, chgOptionA
     }
   }
 
@@ -380,4 +426,7 @@ export default {
   border: 1px solid black
 .btn2
   max-height: 1.5rem
+.bord
+  border: 1px solid $grey-5
+  border-radius: 5px
 </style>

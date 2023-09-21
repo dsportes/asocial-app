@@ -36,6 +36,7 @@ export default {
   creer: 'Créer',
   obs: '_Obsolète_',
   annuler: 'Annuler',
+  retablir: 'Rétablir',
   refuser: 'Refuser',
   fermer: 'Fermer',
   editer: 'Editer',
@@ -600,6 +601,7 @@ export default {
   OPsfl: 'Supprimer un fichier local',
   OPlfl: 'Lire un fichier local',
   OPchgt: 'Chargement d\'un fichier pour accès en mode avion',
+  OPoptionA: 'Changement de l\'option A de l\'espace',
   OPiter: '({0})-Petit incident, nouvel essai en cours, merci d\'attendre',
 
   OPgc: 'Garbage Collector',
@@ -1186,6 +1188,10 @@ export default {
   PTcompta: 'Abonnement / consommation de {0}',
   PTspn1: 'Il n\'est pas possible de changer le statut de sponsor d\'un compte dont le nom est inconnu.',
   PTspn2: 'Il n\'est pas possible de changer de tranche de quotas un compte dont le nom est inconnu.',
+
+  PTopt0: 'Pas de comptes "autonomes"',
+  PTopt1: 'Le Comptable peut rendre un compte "autonome" sans son accord',
+  PTopt2: 'Le Comptable NE peut PAS rendre un compte "autonome" sans son accord',
 
   // QuotasVols2
   QVabo1: 'Abonnement (1): {0} - {1} notes+chats+groupes - ({2}% utilisé)',

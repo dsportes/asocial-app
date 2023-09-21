@@ -1743,3 +1743,31 @@ export class ForceDlv extends OperationUI {
     }
   }
 }
+
+/*`SetEspaceOptionA` : changement de l'option A par le Comptable
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `ns` : id de l'espace notifié.
+- `optionA` : 0 1 2.
+
+Retour: rien
+
+Assertion sur l'existence du row `Espaces`.
+
+L'opération échappe au contrôle espace figé / clos.
+Elle n'écrit QUE dans espaces.
+*/
+export class SetEspaceOptionA extends OperationUI {
+  constructor () { super('OPoptionA') }
+
+  async run (optionA) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns: session.ns, optionA }
+      this.tr(await post(this, 'SetEspaceOptionA', args))
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}

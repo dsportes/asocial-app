@@ -82,7 +82,7 @@ import BoutonBulle from './BoutonBulle.vue'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
 import { MD, Notification, Qui } from '../app/modele.mjs'
-import { dhcool, dkli, afficherDiag } from '../app/util.mjs'
+import { dhcool, dkli, afficherDiag, $t } from '../app/util.mjs'
 
 export default {
   name: 'ApercuNotif2',
@@ -148,7 +148,7 @@ export default {
     },
     async editer () {
       if (!await this.quipeut()) return
-      if (!await this.session.editpow(3)) return
+      if (this.type !== 0 && !await this.session.editpow(3)) return
       this.ntf = this.notif.clone()
       if (this.idsource) this.ntf.idSource = this.idsource
       if (this.session.pow === 3 && !this.ntf.idSource) {
@@ -167,7 +167,7 @@ export default {
 
     async creer () {
       if (!await this.quipeut()) return
-      if (!await this.session.editpow(3)) return
+      if (this.type !== 0 && !await this.session.editpow(3)) return
       this.ntf = new Notification({})
       if (this.idsource) this.ntf.idSource = this.idsource
       this.restr = false

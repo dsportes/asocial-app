@@ -598,12 +598,10 @@ _data_ :
 - `id` : de l'espace de 10 à 89.
 - `v`
 - `org` : code de l'organisation propriétaire
-- `opt`: `xy` 0 10 11 20 21
-  - x : 0: l'organisation n'autorise pas les comptes A.
-  - x : 1: comptes A autorisés sous contrôle du Comptable.
-  - x : 2: comptes A autorisés sous contrôle du Comptable ou d'un sponsor.
-  - y : 0: l'accord du compte n'est pas nécessaire pour passer de O à A
-  - y : 1: l'accord du compte est requis pour passer de O à A.
+- `opt`:
+  - 0: 'Pas de comptes "autonomes"',
+  - 1: 'Le Comptable peut rendre un compte "autonome" sans son accord',
+  - 2: 'Le Comptable NE peut PAS rendre un compte "autonome" sans son accord',
 - `notif` : notification de l'administrateur, cryptée par la clé du Comptable.
 - `t` : numéro de _profil_ de quotas dans la table des profils définis dans la configuration 
   (chaque profil donne un triplet qc q1 q2).
