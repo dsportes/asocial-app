@@ -21,11 +21,16 @@
         <div class="titre-md">{{$t('NPnom')}}
           <span class="text-bold font-mono q-px-md">{{sp.descr.naf.nom}}</span>
         </div>
-        <div v-if="sp.descr.sp" class="titre-md">{{$t('NPspons', [ID.court(idtr(sp))])}}</div>
-        <div class="titre-md">{{$t('NPquo')}} :
-          <span class="font-mono q-pl-md">v1: {{ed1(sp.descr.quotas[0])}}</span>
-          <span class="font-mono q-pl-lg">v2: {{ed2(sp.descr.quotas[1])}}</span>
+
+        <div v-if="estA(sp)" class="text-warning titre-md">{{$t('compteA')}}</div>
+        <div v-else class="titre-md">{{$t('compteO')}}</div>
+
+        <div v-if="sp.descr.sp" class="titre-md text-warning">
+          {{$t('NPspons' + (estA(sp) ? 'A' : ''), [ID.court(idtr(sp))])}}
         </div>
+
+        <div class="titre-md">{{$t('NPquo')}}</div>
+        <quotasVols2 class="q-ml-md" :vols="quotas(sp)" noutil/>
         <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
         <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard" :idx="idx"/>
 
@@ -55,13 +60,14 @@ import { dhcool, edvol, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
+import QuotasVols2 from '../components/QuotasVols2.vue'
 import { MD, Tribu } from '../app/modele.mjs'
 import { ProlongerSponsoring } from '../app/connexion.mjs'
 
 export default {
   name: 'PageSponsorings',
 
-  components: { BoutonHelp, NouveauSponsoring, ShowHtml },
+  components: { BoutonHelp, NouveauSponsoring, ShowHtml, QuotasVols2 },
 
   computed: {
     sponsorings () { 
@@ -82,6 +88,8 @@ export default {
     ed1 (f) { return edvol(f * UNITEV1) },
     ed2 (f) { return edvol(f * UNITEV2) },
     idtr (sp) { return Tribu.id(sp.descr.clet) },
+    estA (sp) { return !sp.descr.clet },
+    quotas (sp) { const q = sp.descr.quotas; return { qc: q[0], q1: q[1], q2: q[2]}},
     async nouveausp () { if (await this.session.edit()) this.ovnvsp() },
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },

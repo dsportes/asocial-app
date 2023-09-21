@@ -1,7 +1,13 @@
 <template>
   <div class="titre-md">
-    <div>{{$t('QVabo1', [edqt(vols.q1), nbn(q1n), pc1])}}</div>
-    <div>{{$t('QVabo2', [edqt(vols.q2), edvol(q2v), pc2])}}</div>
+    <div v-if="noutil">
+      <div>{{$t('QVabo1s', [edqt(vols.q1), nbn(q1n)])}}</div>
+      <div>{{$t('QVabo2s', [edqt(vols.q2), edvol(q2v)])}}</div>
+    </div>
+    <div v-else>
+      <div>{{$t('QVabo1', [edqt(vols.q1), nbn(q1n), pc1])}}</div>
+      <div>{{$t('QVabo2', [edqt(vols.q2), edvol(q2v), pc2])}}</div>
+    </div>
     <div v-if="vols.qc">
       {{$t('QVplc', [edqt(vols.qc), mon(vols.qc)])}}
     </div>
@@ -16,7 +22,8 @@ export default {
   name: 'QuotasVols2',
 
   props: { 
-    vols: Object
+    noutil: Boolean, // sans % utilisation
+    vols: Object,
     /* {v1 v2 q1 q2 qc} si estA: qc == 0 */
   },
 

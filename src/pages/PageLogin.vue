@@ -70,8 +70,7 @@ export default {
   data () {
     return {
       btncd: false,
-      datactc: null,
-      coupleloc: null,
+      sp: null,
       pc: null,
       org: ''
     }
@@ -121,7 +120,6 @@ export default {
             return                  
           }
           this.ovdialcp()
-          this.raz()
           return
         } catch (e) {
           await afficherDiag(this.$t('LOGppatt'))
@@ -137,6 +135,7 @@ export default {
     raz () {
       this.btncd = false
       this.pc = null
+      this.sp = null
       this.org = ''
     }
   },

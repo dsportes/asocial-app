@@ -34,12 +34,16 @@
         </div>
       </div>
 
-      <div v-if="sp.sp" class="titre-md">{{$t('NPspons2', [ID.court(idtr)])}}</div>
+      <div v-if="estA" class="text-warning titre-md">{{$t('compteA')}}</div>
+      <div v-else class="titre-md">{{$t('compteO')}}</div>
 
-      <div class="titre-md">{{$t('NPquo')}} :
-        <span class="font-mono q-pl-md">v1: {{ed1(sp.quotas[0])}}</span>
-        <span class="font-mono q-pl-lg">v2: {{ed2(sp.quotas[1])}}</span>
+      <div v-if="sp.sp" class="titre-md text-warning">
+        {{$t('NPspons' + (estA ? 'A' : ''), [ID.court(idtr)])}}
       </div>
+
+      <div class="titre-md">{{$t('NPquo')}}</div>
+      <quotasVols2 class="q-ml-md" :vols="quotas" noutil/>
+
       <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
       <show-html class="q-mb-xs border1" zoom maxh="4rem" :texte="sp.ard"/>
 
@@ -82,8 +86,9 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
 import { ExistePhrase } from '../app/operations.mjs'
-import { edvol, dhcool } from '../app/util.mjs'
-import { UNITEV1, UNITEV2, AMJ, ID } from '../app/api.mjs'
+import QuotasVols2 from '../components/QuotasVols2.vue'
+import { dhcool } from '../app/util.mjs'
+import { AMJ, ID } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { crypter } from '../app/webcrypto.mjs'
 import { MD, Tribu } from '../app/modele.mjs'
@@ -105,14 +110,17 @@ export default ({
     - `naf` : na attribué au filleul.
     - `clet` : clé de sa tribu.
     - 'cletX' : clé de sa tribu cryptée par la clé K du comptable
+    - 'quotas' : [qc, q1, q2]
     - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
     - 'idcsp': id du COMPTE de l'avatar sponsor
 - `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
-  components: { PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp },
+  components: { PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp, QuotasVols2 },
 
   computed: {
+    estA () { return !this.sp.clet },
+    quotas () { const q = this.sp.quotas; return { qc: q[0], q1: q[1], q2: q[2]}},
     photoP () { return this.sp.cv && this.sp.cv.photo ? this.sp.cv.photo : this.sp.na.defIcon },
     infoP () { return this.sp.cv && this.sp.cv.info ? this.sp.cv.info : '' },
     estpar () { return this.sp.sp },
@@ -139,8 +147,6 @@ export default ({
   methods: {
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
-    ed1 (f) { return edvol(f * UNITEV1) },
-    ed2 (f) { return edvol(f * UNITEV2) },
     fermer () {
       this.texte = ''
       this.apsf = false

@@ -781,6 +781,7 @@ export class Tribu extends GenDoc {
 
   /* Retourne l'id longue d'une tribu depuis sa clé et le ns courant de la session */
   static id (cle) {
+    if (!cle) return 0
     const x = (cle[1] * 256) + cle[2] // son numéro d'ordre dans Compta.atr du comptable
     return (NomGenerique.ns * d14) + x
   }

@@ -912,24 +912,35 @@ export class ConnexionCompte extends OperationUI {
   }
 }
 
-/******************************************************************
-Acceptation d'un sponsoring
-args...
-token: authToken,
-rowCompta, rowAvatar, rowVersion: du compte / avatar en création
-idt: id de sa tribu
-ids: ids du sponsoring
-rowChatI: chatI (interne) pour le compte en création
-rowChatE: chatE (externe) pour le sponsor - version à fixer
-ardx: ardoise du sponsoring à mettre à jour (avec statut 2 accepté)
-act: élément de la map act de sa tribu
-SI quotas à prélever sur le COMPTE du sponsor
-  args.it : index de ce compte dans la tribu
-  args.q1 q2 : quotas attribués par le sponsor.
+/* `AcceptationSponsoring` : création du compte du _sponsorisé_
+POST:
+- `token` : éléments d'authentification du compte à créer
+- `rowCompta` : row du compte à créer.
+- `rowAvatar` : row de son avatar principal.
+- `rowVersion` : row de avatar en création.
+- `idt` : id de sa tribu. 0 SI compte A
+- `ids` : ids du sponsoring, hash de sa phrase de reconnaissance qui permet de retrouver le sponsoring.
+- `rowChatI` : row chat _interne_ pour le compte en création donnant le message de remerciement au sponsor.
+- `rowChatE` : row chat _externe_ pour le sponsor avec le même message. La version est obtenue par le serveur.
+- `ardx` : texte de l'ardoise du sponsoring à mettre à jour (avec statut 2 accepté), copie du texte du chat échangé.
+- `act`: élément de la map act de sa tribu. null SI compte A
 
-quotas : `[v1, v2]` quotas attribués par le parrain.
+Retour: rows permettant d'initialiser la session avec le nouveau compte qui se trouvera ainsi connecté.
+- `rowTribu`
+- `rowChat` : le chat _interne_, celui concernant le compte.
+- `credentials` : données d'authentification permettant à la session d'accéder au serveur de données Firestore.
+- `rowEspace` : row de l'espace, informations générales / statistiques de l'espace et présence de la notification générale éventuelle.
+
+Exceptions:
+- `F_SRV, 8` : il n'y a pas de sponsoring ayant ids comme hash de phrase de connexion.
+- `F_SRV, 9` : le sponsoring a déjà été accepté ou refusé ou est hors limite.
+
+Assertions:
+- existence du row `Tribus`,
+- existence du row `Versions` du compte sponsor.
+- existence du row `Avatars` du sponsorisé.
+- existence du row `Espaces`.
 */
-
 export class AcceptationSponsoring extends OperationUI {
   constructor () { super($t('OPapa')) }
 
@@ -942,8 +953,7 @@ export class AcceptationSponsoring extends OperationUI {
     - `cv` : du sponsor P.
     - `naf` : na attribué au filleul.
     - 'cletX' : cle de sa tribu cryptée par clé K du comptable
-    - `clet` : cle de sa tribu.
-    - `it` : it du sonsor dans sa tribu s'il faut lui réduire ses quotas
+    - `clet` : cle de sa tribu. 0 pour compte A
     ardx : reponse cryptée par la cleX du sponsoring
     reponse : texte du sponsorisé
     ps: phrase secrète du nouveau compte
@@ -963,7 +973,7 @@ export class AcceptationSponsoring extends OperationUI {
       /* Réenregistrement dans repertoire des na créé en PageLogin */
       NomGenerique.from(sp.na.anr)
       NomGenerique.from(sp.naf.anr)
-      const idt = setClet(sp.clet)
+      const idt = sp.clet ? setClet(sp.clet) : 0
 
       session.setCompteId(sp.naf.id)
       session.setTribuId(idt)
@@ -989,16 +999,19 @@ export class AcceptationSponsoring extends OperationUI {
       - `idT` : id court du compte crypté par la clé de la tribu.
       - `sp` : est sponsor ou non.
       - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
-      - `q1 q2` : quotas attribués.
-      - `v1 v2` : volumes **approximatifs** effectivement utilisés
+      - `qc q1 q2` : quotas attribués.
+      - `ca v1 v2` : volumes **approximatifs** effectivement utilisés
       */
-      const act = {
+      let act = null
+      if (sp.clet) act = {
         idT: await crypter(sp.clet, '' + ID.court(sp.naf.id)),
         nasp: sp.sp ? await crypter(sp.clet, new Uint8Array(encode(sp.naf.anr))) : null,
         notif: null,
         stn: 0,
-        q1: sp.quotas[0],
-        q2: sp.quotas[1],
+        qc: sp.quotas[0],
+        q1: sp.quotas[1],
+        q2: sp.quotas[2],
+        ca: 0,
         v1: 0,
         v2: 0
       }
@@ -1017,11 +1030,7 @@ export class AcceptationSponsoring extends OperationUI {
       const rowChatE = await Chat.nouveauRow(sp.na, sp.naf, contcE, cc, pubE, new Uint8Array([253])) 
 
       const args = { token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
-        rowChatI, rowChatE, ardx, idt, act, 
-        it: sp.it || 0, 
-        q1: sp.it ? sp.quotas[0] : 0,
-        q2: sp.it ? sp.quotas[1] : 0,
-        abPlus: [idt, sp.naf.id] }
+        rowChatI, rowChatE, ardx, idt, act, abPlus: [idt, sp.naf.id] }
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
 
@@ -1045,7 +1054,7 @@ export class AcceptationSponsoring extends OperationUI {
       // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
       const compta = await compile(rowCompta)
       const avatar = await compile(rowAvatar)
-      const tribu = await compile(rowTribu)
+      const tribu = rowTribu ? await compile(rowTribu) : null
 
       aSt.setCompte(avatar, compta, tribu)
 
@@ -1066,7 +1075,7 @@ export class AcceptationSponsoring extends OperationUI {
           this.buf.putIDB(rowCompta)
           this.buf.putIDB(rowAvatar)
           this.buf.putIDB(rowChatI)
-          this.buf.putIDB(rowTribu)
+          if (rowTribu) this.buf.putIDB(rowTribu)
           await this.buf.commitIDB(true, true) // MAJ compte.id / cle K et versions
           await session.sessionSync.setConnexion(this.dh)
         } catch(e) {
@@ -1080,7 +1089,7 @@ export class AcceptationSponsoring extends OperationUI {
         au compte et à sa tribu
         mais en fs c'est à faire explicitement en session */
         await session.fsSync.setCompte(session.compteId)
-        await session.fsSync.setTribu(session.tribuId)
+        if (rowTribu) await session.fsSync.setTribu(session.tribuId)
       }
 
       console.log('Connexion compte : ' + session.compteId)
