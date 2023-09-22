@@ -57,7 +57,7 @@
           </q-stepper-navigation>
         </q-step>
 
-        <q-step :name="4" :title="$t('NPquo1')" icon="settings" :done="step > 4" >
+        <q-step v-if="optA === 0" :name="4" :title="$t('NPquo1')" icon="settings" :done="step > 4" >
           <choix-quotas :quotas="quotas"/>
           <q-stepper-navigation>
             <q-btn flat @click="step = 3" color="primary" :label="$t('precedent')" class="q-ml-sm" />

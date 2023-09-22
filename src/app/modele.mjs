@@ -1013,21 +1013,31 @@ export class Compta extends GenDoc {
     }
     this.avatarIds = new Set(this.mav.keys())
     
-    if (row.cletK.length !== 256) {
-      this.clet = await decrypter(session.clek, row.cletK)
-      this.idt = setClet(this.clet)
-    } else { // CHANGEMENT DE TRIBU par le comptable
-      // Le Comptable a crypté la tribu par la clé PUB du compte (il ne connait pas K)
-      const avatar = aSt.getAvatar(this.id)
-      if (avatar) {
-        this.clet = await decrypterRSA(avatar.priv, row.cletK)
-        // pour mettre à jour le row compta sur le serveur
-        this.cletK = await crypter(session.clek, this.clet)
+    if (!this.estA) {
+      if (row.cletK.length !== 256) {
+        this.clet = await decrypter(session.clek, row.cletK)
         this.idt = setClet(this.clet)
-      } else { 
-        // CA SE FERA DANS compile2() quand l'avatar sera en store (seulement à la connexion)
-        this.rowCletK = row.cletK
+      } else { // CHANGEMENT DE TRIBU par le comptable
+        // Le Comptable a crypté la tribu par la clé PUB du compte (il ne connait pas K)
+        const avatar = aSt.getAvatar(this.id)
+        if (avatar) {
+          this.clet = await decrypterRSA(avatar.priv, row.cletK)
+          // pour mettre à jour le row compta sur le serveur
+          this.cletK = await crypter(session.clek, this.clet)
+          this.idt = setClet(this.clet)
+        } else { 
+          // CA SE FERA DANS compile2() quand l'avatar sera en store (seulement à la connexion)
+          this.rowCletK = row.cletK
+        }
       }
+    } else {
+      this.clet = null
+      this.cletK = null
+      this.idt = 0
+      // en cas de passage de compte O à A, le Comptable ne peut pas initialiser
+      // credits en cryptant par la clé K. Il met 'true' pour provoquer l'init ici
+      this.credits = row.credits !== true ? decode(await decrypter(session.clek, row.credits)) 
+        : { total: 2, tickets: [] }
     }
 
     this.hps1 = row.hps1
@@ -1035,19 +1045,11 @@ export class Compta extends GenDoc {
     this.dhvu = row.dhvu ? parseInt(await decrypterStr(session.clek, row.dhvu)) : 0
 
     this.qv = row.qv
-    if (row.credits) {
-      if (row.credits === true) {
-        this.credits = { total: 0, tickets: [] }
-      } else {
-        this.credits = await decrypter(session.clek, row.credits)        
-      }
-    }
-
     this.compteurs = new Compteurs(row.compteurs, this.qv)
     this.pc = this.compteurs.pourcents.max
     let chg = session.setNotifQ(this.compteurs.notifQ)
     if (this.estA) {
-      if (session.setNotifQ(this.compteurs.notifS(this.credits))) chg = true
+      if (session.setNotifQ(this.compteurs.notifS(this.credits.total))) chg = true
     } else {
       if (session.setNotifQ(this.compteurs.notifX)) chg = true
     }
@@ -1139,9 +1141,18 @@ export class Compta extends GenDoc {
     r.hps1 = ph.hps1
     r.shay = ph.shay
     
-    r.it = clet ? 1 : 0 // Pour une création d'espace, sera surchargé sur le serveur en AcceptationSponsoring
-    r.cletK = clet ? await crypter(k, clet) : null
-    r.cletX = ID.estComptable(na.id) ? r.cletK : cletX
+    if (clet) {
+      // compte O
+      r.it = 1 // 1 pour une création d'espace, sera surchargé sur le serveur en AcceptationSponsoring
+      r.cletK = await crypter(k, clet)
+      r.cletX = ID.estComptable(na.id) ? r.cletK : cletX
+    } else {
+      // compte A
+      r.it = 0
+      r.cletK = null
+      r.cletX = null
+      r.credits = await crypter(k, new Uint8Array(encode({ total: 2, tickets: [] })))
+    }
 
     r.mavk = { }
     r.mavk[await Compta.mavkK(na.id, k)] = await Compta.mavkKV(na, k)

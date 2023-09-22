@@ -52,16 +52,6 @@
         <span>{{$t('MLAinfm')}}</span>
       </div>
 
-      <!-- Comptabilité des volumes 
-      <div class="btn2 row items-center" @click="pageCompta">
-        <div style="position:relative" :class="'q-mr-xs bg2 ' + pccl">
-          <q-knob v-model="aSt.compta.pc" size="24px" :thickness="1" color="black" track-color="green-9"/>
-          <div class="bdg1 text-white bg-transparent text-center text-bold fs-xs font-mono">{{aSt.compta.pc + '%'}}</div>
-        </div>
-        <span>{{$t('MLAvol')}}</span>
-      </div>
-      -->
-      
       <!-- Notifications -->
       <div class="btn2" @click="clickNotif">
         <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
@@ -87,12 +77,6 @@
       </div>
       </div>
     </q-card>
-<!--
-    <q-card v-if="session.niv > 3" class="q-mt-lg petitelargeur maauto q-pa-sm">
-      <div class="q-px-sm titre-md text-bold text-italic text-warning cursor-pointer"
-        @click="clickNotif2">{{$t('ACbloc')}}</div>
-    </q-card>
--->
     <q-card class="q-mt-lg petitelargeur maauto q-pa-sm">
       <page-menu/>
     </q-card>

@@ -657,7 +657,7 @@ export class ConnexionCompte extends OperationUI {
         await this.getCTA()
         if (session.estAdmin) { // C'est une session ADMIN
           session.setMode(2)
-          session.status = 3
+          session.setStatus(3)
           stores.ui.setPage('admin')
           return this.finOK()
         }
@@ -701,9 +701,14 @@ export class ConnexionCompte extends OperationUI {
       if (this.espace) session.setEspace(this.espace)
       
       // En cas de blocage grave, plus de synchronisation
-      if (session.estFige || session.estMinimal) { 
-        session.setMode(2)
-        await afficherDiag($t('CNXdeg'))
+      if (session.synchro) {
+        if (session.estFige) { 
+          session.setMode(2)
+          await afficherDiag($t('CNXdeg1'))
+        } else if (session.estMinimal) { 
+          session.setMode(2)
+          await afficherDiag($t('CNXdeg2'))
+        }
       }
 
       this.avatarsToStore.forEach(av => {
@@ -895,15 +900,17 @@ export class ConnexionCompte extends OperationUI {
       // enregistre l'heure du début effectif de la session
       if (session.synchro) await session.sessionSync.setConnexion(this.dh)
       console.log('Connexion compte : ' + this.compta.id)
-      session.status = 2
-      SyncQueue.traiterQueue()
-      await Demon.start()
+      session.setStatus(2)
       await sleep(500)
-      if (session.niv || session.alirentf) {
+      if (session.alire) {
         stores.ui.setPage('compta', 'notif')
       } else {
         stores.ui.setPage('accueil')
       }
+      setTimeout(() => {
+        SyncQueue.traiterQueue()
+        Demon.start()
+      }, 50)
       this.finOK()
     } catch (e) {
       stores.ui.setPage('login')
@@ -1093,10 +1100,12 @@ export class AcceptationSponsoring extends OperationUI {
       }
 
       console.log('Connexion compte : ' + session.compteId)
-      session.status = 2
-      SyncQueue.traiterQueue()
-      await Demon.start()
+      session.setStatus(2)
       stores.ui.setPage('accueil')
+      setTimeout(() => {
+        SyncQueue.traiterQueue()
+        Demon.start()
+      }, 50)
       this.finOK()
     } catch (e) {
       return await this.finKO(e)

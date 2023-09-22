@@ -143,17 +143,18 @@ export const useSessionStore = defineStore('session', {
     },
 
     // editable (state) { return state.mode < 3 && state.niv < 2 },
+    estSansNotif (state) { return state.niv === 0 },
     estFige (state) { const n = state.notifAdmin; return n && (n.nr === 1) },
     estClos (state) { const n = state.notifAdmin; return n && (n.nr === 2) },
     estLecture (state) {
-      if (this.pow <= 2) return false
+      if (state.pow <= 2) return false
       const nt = state.notifs[1]; const nc = state.notifs[2]
       let nr = nt ? nt.nr : 0
       if (nc && nc.nr > nr) nr = nc.nr
       return nr === 3
     },
     estMinimalTC (state) {
-      if (this.pow <= 2) return false
+      if (state.pow <= 2) return false
       const nt = state.notifs[1]
       const nc = state.notifs[2]
       let nr = nt ? nt.nr : 0
@@ -161,12 +162,12 @@ export const useSessionStore = defineStore('session', {
       return nr === 4
     },
     estMinimalC (state) {
-      if (this.pow <= 2) return false
+      if (state.pow <= 2) return false
       const n = state.notifs[4]
       return n && (n.nr === 4) 
     },
     estDecr (state) { 
-      if (this.pow <= 2) return false
+      if (state.pow <= 2) return false
       const n = state.notifs[3]
       return n && (n.nr === 5) 
     },
@@ -186,6 +187,9 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
+    setStatus (s) {
+      this.status = s
+    },
     setEstSponsor (sp) {
       this.estSponsor = sp
     },
@@ -391,7 +395,6 @@ export const useSessionStore = defineStore('session', {
 
     setBlocage () {
       if (this.estAdmin) return
-      const session = stores.session
       const aSt = stores.avatar
       const c = aSt.compta
       const dhvu = c ? (c.dhvu || 0) : 0
@@ -404,7 +407,7 @@ export const useSessionStore = defineStore('session', {
           if (niv > this.niv) this.niv = niv
         }
       })
-      if (session.estClos) {
+      if (this.estClos) {
         Demon.stop()
         this.status = 0
       }

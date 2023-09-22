@@ -162,7 +162,7 @@
       </div>
 
       <div v-if="c.estA" class="column maauto q-my-sm full-width">
-        <div>{{$t('PCPprefa' + c.cumref[0], [dhcool(c.cumref[1]), mon(c.cumulCouts, 2)])}}</div>
+        <div>{{$t('PCPprefa' + c.cumref[0], [dhcool(c.cumref[1]), c.cumref[2]])}}</div>
  
         <div :class="dkli(1) + ' row items-center full-width q-mt-sm'">
           <div class="col-3 text-center">{{$t('PCPabc')}}</div>

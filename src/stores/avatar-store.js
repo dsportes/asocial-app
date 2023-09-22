@@ -43,7 +43,10 @@ export const useAvatarStore = defineStore('avatar', {
     /* retourne l'avatar principal du compte actuellement connecté */
     compte: (state) => { return state.avatarP },
 
-    estSponsor (state) { return state.comptaP.estSponsor },
+    estSponsor (state) { 
+      const c = state.comptaP
+      return c.estSponsor
+    },
     estComptable (state) { return ID.estComptable(state.comptaP.id) },
 
     /* retourne la compta de l'avatar principal du compte actuellement connecté */
@@ -323,7 +326,6 @@ export const useAvatarStore = defineStore('avatar', {
       const session = stores.session
       let bl = this.comptaP && ((this.comptaP.dhvu || 0) !== (compta.dhvu || 0))
       if (bl) session.setDhvu(compta.dhvu)
-      // TODO
       // détection des dépassements de quota : génération de la notif
       if (session.setNotifQ(compta.compteurs.notifQ)) bl = true
       // détection de solde négatif / consommation excessive: génération de la notif

@@ -812,12 +812,13 @@ export default {
   ACidb: '(en mode synchronisé et avion seulement)',
   ACinfs: 'Tranche de quotas du compte: "{0}"',
   ACcptspons: 'Le compte est un sponsor',
-  ACbloc: 'Le compte est "bloqué" : les seules actions possibles sont l\'échange de chats avec le Comptable et les sponsors.',
+  ACbloc: 'Le compte est "en accès minimal" : les seules actions possibles sont l\'échange de chats avec le Comptable et les sponsors.',
   ACtgr: 'Détail du groupe',
   ACtmb: 'Membres',
   ACsec: 'Ses notes',
 
-  CNXdeg: 'Le compte est bloqué. Seuls les modes "avion" et "incognito" étant admis, la session a été mise en mode "incognito".',
+  CNXdeg1: 'L\'application est figée pour l\'organisation. Seuls les modes "avion" et "incognito" étant admis, la session a été mise en mode "incognito".',
+  CNXdeg2: 'Le compte a été restreint à un accès minimal. Seuls les modes "avion" et "incognito" étant admis, la session a été mise en mode "incognito".',
 
   // PageAdmin et ApercuEspace
   ESgc: 'Lancer un GC',

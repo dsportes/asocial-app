@@ -55,6 +55,7 @@ export default {
 
   methods: {
     async editer () {
+      // TODO contrôle d'accès
       if (this.session.mode === 3) {
         await afficherDiag(this.$t('CHav'))
       }

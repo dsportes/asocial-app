@@ -338,8 +338,9 @@ export class OperationWS extends Operation {
     }
 
     if (session.accesIdb) await gestionFichierSync(this.buf.mapSec)
-
-    if (session.niv === 4 && !session.estComptable) deconnexion()
+    /* Pourquoi ça ???
+    if (session.estMinimal && !session.estComptable) deconnexion()
+    */
     session.setDh(this.dh)
   }
 
