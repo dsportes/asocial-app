@@ -298,7 +298,7 @@ export default {
       if (this.tC === 2) {
         // Notif de tribu
         if (this.notif) {
-          if (this.session.estSponsor){
+          if (this.aSt.estSponsor){
             if (ID.estComptable(ID.long(this.notif.idSource, this.session.ns))) {
               this.ntf = this.notif
               this.ro = 5
@@ -311,7 +311,7 @@ export default {
             this.ro = 4
           }
         } else { // création d'une notif tribu
-          if (this.session.estSponsor){
+          if (this.aSt.estSponsor){
             this.ntf = new Notification(null, this.session.compteId)
             this.ro = 0
           } else {
@@ -321,7 +321,7 @@ export default {
       } else if (this.tC == 3) {
         // notif de compte
         if (this.notif) {
-          if (this.session.estSponsor){
+          if (this.aSt.estSponsor){
             if (ID.estComptable(ID.long(this.notif.idSource, this.session.ns))) {
               this.ntf = this.notif
               this.ro = 6
@@ -334,7 +334,7 @@ export default {
             this.ro = 7
           }
         } else { // création d'une notif compte
-          if (this.session.estSponsor){
+          if (this.aSt.estSponsor){
             this.ntf = new Notification(null, this.session.compteId)
             this.ro = 0
           } else {

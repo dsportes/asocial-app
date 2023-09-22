@@ -962,9 +962,6 @@ export class Gcvols extends GenDoc {
   _0:aucune, 1:lecture seule, 2:accès minimal_
 */
 export class Compta extends GenDoc {
-  get estSponsor () { return this.sp === 1 }
-  get estA () { return !this.it }
-
   /* retourne l'array des na des avatars du compte (trié ordre alpha
     PRIMAIRE EN TETE
   */
@@ -991,6 +988,17 @@ export class Compta extends GenDoc {
   async compile (row) {
     const session = stores.session
     const aSt = stores.avatar
+    this.sp = row.sp
+    this.estSponsor = this.sp === 1
+    /*
+    Un getter dans session a un comportement erratique
+    et n'arrive pas à accéder à stores.avatar
+    !!! NE PAS CHANGER CE QUI SUIT !!!
+    */
+    session.setEstSponsor(this.estSponsor)
+    this.it = row.it
+    this.estA = this.it === 0
+
     this.k = await decrypter(session.phrase.pcb, row.kx)
     session.clek = this.k
 
@@ -1022,12 +1030,9 @@ export class Compta extends GenDoc {
       }
     }
 
-    this.it = row.it
-
     this.hps1 = row.hps1
     this.shay = row.shay
     this.dhvu = row.dhvu ? parseInt(await decrypterStr(session.clek, row.dhvu)) : 0
-    this.sp = row.sp
 
     this.qv = row.qv
     if (row.credits) {
@@ -1385,7 +1390,7 @@ export class Sponsoring extends GenDoc {
       clet: clet || null, 
       it : 0
     }
-    if (!session.estSponsor && !session.estComptable) {
+    if (!aSt.estSponsor && !session.estComptable) {
       const c = aSt.compta
       d.it = c.it || 0
     }

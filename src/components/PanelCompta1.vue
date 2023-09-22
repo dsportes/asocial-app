@@ -2,7 +2,7 @@
   <div class="q-pa-sm full-width">
     <div class="q-my-sm q-mx-sm row justify-between items-center">
       <quotas-vols :vols="c" />
-      <q-btn v-if="session.estSponsor || session.estComptable" size="md" class="q-ml-sm"
+      <q-btn v-if="aSt.estSponsor || session.estComptable" size="md" class="q-ml-sm"
           icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq"/>
     </div>
 

@@ -11,7 +11,7 @@
       <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
         zoom maxh="3rem" :texte="info"/>
       <div v-else class="text-italic">{{$t('FAnocv')}}</div>
-      <barre-people v-if="session.estComptable || session.estSponsor" :id="elt.id"/>
+      <barre-people v-if="session.estComptable || aSt.estSponsor" :id="elt.id"/>
     </div>
   </div>
 </template>
@@ -46,9 +46,11 @@ export default {
   setup (props) {
     const config = stores.config
     const session = stores.session
+    const aSt = stores.avatar
     return {
       config,
       session,
+      aSt,
       dkli
     }
   }

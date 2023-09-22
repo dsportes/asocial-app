@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
-import { pbkfd, sha256 } from '../app/webcrypto.mjs'
+import { pbkfd } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { MD, NomGenerique } from '../app/modele.mjs'
@@ -14,6 +14,7 @@ export const useSessionStore = defineStore('session', {
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
     estAdmin: false,
+    estSponsor: false,
 
     /* namespace de 10 à 59 
     Pour "admin" : espace "courant", donc peut être 0
@@ -115,7 +116,6 @@ export const useSessionStore = defineStore('session', {
 
   getters: {
     espace (state) { return state.espaces.get(state.ns) },
-    estSponsor (state) { return stores.avatar.compta.estSponsor },
     estComptable (state) { return ID.estComptable(state.compteId) },
 
     editable (state) { return state.mode < 3 && state.niv < 4 },
@@ -154,7 +154,8 @@ export const useSessionStore = defineStore('session', {
     },
     estMinimalTC (state) {
       if (this.pow <= 2) return false
-      const nt = state.notifs[1]; const nc = state.notifs[2]
+      const nt = state.notifs[1]
+      const nc = state.notifs[2]
       let nr = nt ? nt.nr : 0
       if (nc && nc.nr > nr) nr = nc.nr
       return nr === 4
@@ -185,6 +186,9 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
+    setEstSponsor (sp) {
+      this.estSponsor = sp
+    },
     setNlNe (nl, ne) { 
       this.consoatt.nl += nl
       this.consoatt.ne += ne

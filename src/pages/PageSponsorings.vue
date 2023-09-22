@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <q-card class="largeur40 maauto q-mb-lg q-pa-sm row justify-center items-center" v-if="session.estSponsor || estComptable"> 
+    <q-card class="largeur40 maauto q-mb-lg q-pa-sm row justify-center items-center" v-if="aSt.estSponsor || estComptable"> 
       <!-- Nouveau sponsoring -->
       <q-btn class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts" no-caps
         :label="$t('NPnouv')" color="warning" dense @click="nouveausp"/>

@@ -25,7 +25,7 @@
   <div v-if="!bloc">
   <q-item clickable @click="ui.setPage('compte')">
     <q-item-section>
-      <q-item-label lines="1">{{$t('ACmesav' + (session.estSponsor ? '1' : '2'))}}</q-item-label>
+      <q-item-label lines="1">{{$t('ACmesav' + (aSt.estSponsor ? '1' : '2'))}}</q-item-label>
     </q-item-section>
   </q-item>
   <q-item clickable>

@@ -43,8 +43,8 @@ export const useAvatarStore = defineStore('avatar', {
     /* retourne l'avatar principal du compte actuellement connecté */
     compte: (state) => { return state.avatarP },
 
-    estSponsor (state) { return state.avatarP.estSponsor },
-    estComptable (state) { return ID.estComptable(state.avatarP.id) },
+    estSponsor (state) { return state.comptaP.estSponsor },
+    estComptable (state) { return ID.estComptable(state.comptaP.id) },
 
     /* retourne la compta de l'avatar principal du compte actuellement connecté */
     compta: (state) => { return state.comptaP },
