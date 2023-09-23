@@ -207,7 +207,7 @@ export const useSessionStore = defineStore('session', {
       this.consoatt.vd += vd
       this.consoatt.vd += vd
     },
-    razConsoAtt () {
+    razConsoatt () {
       this.consoatt.nl = 0
       this.consoatt.ne = 0
       this.consoatt.vd = 0
@@ -443,7 +443,7 @@ export const useSessionStore = defineStore('session', {
           await afficherDiag(p ? $t(y[p]) : '')
           return false
         }
-      } if (p === 1 || p === 2) {
+      } else if (p === 1 || p === 2) {
         if (this.pow !== p) {
           await afficherDiag(p ? $t(y[p]) : '')
           return false

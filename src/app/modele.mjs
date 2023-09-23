@@ -1120,10 +1120,11 @@ export class Compta extends GenDoc {
     return u8ToB64(await crypter(k, '' + ID.court(id), 1), true)
   }
 
-  static async row (na, clet, cletX, q, estSponsor, phrase) { 
+  static async row (na, clet, cletX, q, estSponsor, phrase, nc) { 
     /* création d'une compta
     Pour le comptable le paramètre cletX est null (il est calculé). 
     Pour les autres, c'est le nctkc pris dans la tribu
+    nc : nombre de chats
     */
     const session = stores.session
     const r = {}
@@ -1133,13 +1134,12 @@ export class Compta extends GenDoc {
     r.vsh = 0
 
     const k = random(32)
-    const ph = phrase || session.phrase
-    r.kx = await crypter(ph.pcb, k)
+    r.kx = await crypter(phrase.pcb, k)
     session.clek = k
 
     r.sp = estSponsor ? 1 : 0
-    r.hps1 = ph.hps1
-    r.shay = ph.shay
+    r.hps1 = phrase.hps1
+    r.shay = phrase.shay
     
     if (clet) {
       // compte O
@@ -1156,7 +1156,7 @@ export class Compta extends GenDoc {
 
     r.mavk = { }
     r.mavk[await Compta.mavkK(na.id, k)] = await Compta.mavkKV(na, k)
-    r.qv = { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: 0, ng: 0, v2: 0}
+    r.qv = { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: nc || 0, ng: 0, v2: 0}
     r.compteurs = new Compteurs(null, r.qv).serial
 
     if (ID.estComptable(r.id)) {
@@ -1485,6 +1485,7 @@ export class Chat extends GenDoc {
   }}
 
   /*
+  rel: 0 (raccroché pour le chat E, 1 en ligne pour le chat I)
   naI, naE : na des avatars I et E
   dh : date-heure d'écriture
   txt: texte du chat
@@ -1493,10 +1494,10 @@ export class Chat extends GenDoc {
   publicKey: clé publique de I. Si null récupérée depuis son avatar
   mc: mot clés attribués
   */
-  static async nouveauRow (naI, naE, contc, cc, pubE, mc) {
+  static async nouveauRow (rel, naI, naE, contc, cc, pubE, mc) {
     const ids = await Chat.getIds(naI, naE)
     const id = naI.id
-    const r = { id, ids, st: 0, r: 1, seq: 1, contc } // v vcv cva sont mis par le serveur
+    const r = { id, ids, r: rel, seq: 1, contc } // v vcv cva sont mis par le serveur
     if (mc) r.mc = mc
     if (pubE) {
       r.cc = await crypterRSA(pubE, cc)

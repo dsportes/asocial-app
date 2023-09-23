@@ -53,6 +53,7 @@ export default {
   langue: 'Choix de la langue',
   clairfonce: 'Choix style clair / foncé',
   supprime: 'SUPPRIMÉ',
+  plus: 'Plus ...',
   details: 'Plus de détails',
   editavion: 'Les mises à jour ne sont pas possibles en mode avion.',
   editfige: 'Les mises à jour ne sont pas possibles quand l\'administrateur technique a figé l\'application en lecture seulement.',
@@ -906,10 +907,10 @@ export default {
   IB4: 'Seul le "chat" avec le Comptable est possible (consultations et mises à jour bloquées).',
 
   IStit: 'Information à propos de la session',
-  ISst: 'Statut de la session:',
-  ISst0: 'Fermée, connexion possible',
-  ISst1: 'Connexion en cours',
-  ISst2: 'Session ouverte',
+  ISst: 'Statut de la session: {0}. Mode: {1}',
+  ISst0: 'fermée, connexion possible',
+  ISst1: 'connexion en cours',
+  ISst2: 'ouverte',
   ISdcs: 'A propos de la dernière session synchronisée',
   ISsy1: 'Début de la dernière terminée',
   ISsy2: 'Fin de la dernière terminée',
@@ -917,7 +918,8 @@ export default {
   ISsy4: 'Dernière synchronisation',
   ISsy5: 'Dernier signe de vie du serveur',
   ISnc: 'Information disponible seulement après connexion en mode synchronisé ou avion',
-
+  ISconso: 'Consommation depuis le début de la session: {0}',
+  
   // page notification, blocage, compta, chats
   PNCtit: 'Etat général de la session',
   PNCntf: 'Notifications',

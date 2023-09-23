@@ -35,8 +35,7 @@
   <q-separator size="3px"/>
 
   <q-expansion-item switch-toggle-side dense group="trgroup"
-    header-class="titre-md text-bold bg-primary text-white"
-    :label="$t('PCPabo1')">
+    :header-class="hcabo1" :icon="icoabo1" :label="$t('PCPabo1')">
     <div class="largeur40 column maauto q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width text-bold text-italic'">
         <div class="col-4">{{$t('PCPdet')}}</div>
@@ -77,8 +76,7 @@
   <q-separator size="3px"/>
 
   <q-expansion-item switch-toggle-side dense group="trgroup"
-    header-class="titre-md text-bold bg-primary text-white"
-    :label="$t('PCPabo2')">
+    :header-class="hcabo2" :icon="icoabo2" :label="$t('PCPabo2')">
     <div class="largeur40 column maauto q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width text-bold text-italic'">
         <div class="col-4"/>
@@ -108,8 +106,7 @@
   <q-separator size="3px"/>
 
   <q-expansion-item switch-toggle-side dense group="trgroup"
-    header-class="titre-md text-bold bg-primary text-white"
-    :label="$t('PCPcconso')">
+    :header-class="hcconso" :icon="icoconso" :label="$t('PCPcconso')">
     <div class="largeur40 column maauto q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width'">
         <div class="col-4 text-center"></div>
@@ -245,6 +242,49 @@ export default ({
   components: { MoisM },
 
   computed: {
+    icoabo1 () {
+      if (this.abo1w) return 'report'
+      else if (this.abo1n) return 'lock'
+      else return 'check'
+    },
+    icoabo2 () {
+      if (this.abo2w) return 'report'
+      else if (this.abo2n) return 'lock'
+      else return 'check'
+    },
+    icoconso () {
+      if (this.consow) return 'report'
+      else if (this.conson) return 'lock'
+      else return 'check'
+    },
+    hcabo1 () {
+      if (this.abo1w) return 'titre-md text-bold text-white bg-warning'
+      else if (this.abo1n) return 'titre-md text-bold text-white bg-negative'
+      else return 'titre-md text-bold text-white bg-primary'
+    },
+    hcabo2 () {
+      if (this.abo2w) return 'titre-md text-bold text-white bg-warning'
+      else if (this.abo2n) return 'titre-md text-bold text-white bg-negative'
+      else return 'titre-md text-bold text-white bg-primary'
+    },
+    hcconso () {
+      if (this.consow) return 'titre-md text-bold text-white bg-warning'
+      else if (this.conson) return 'titre-md text-bold text-white bg-negative'
+      else return 'titre-md text-bold text-white bg-primary'
+    },
+    abo1w () { return this.pcutq1 > 90 && this.pcutq1 < 100 },
+    abo1n () { return this.pcutq1 > 100 },
+    abo2w () { return this.pcutq2 > 90 && this.pcutq2 < 100 },
+    abo2n () { return this.pcutq1 > 100 },
+    consow () {
+      return (this.c.estA && (this.nbj > 0 && this.nbj < 60)) ||
+        (!this.c.estA && (this.txconso > 80 && this.txconso < 100))
+    },
+    conson () {
+      return (this.c.estA && this.nbj <= 0) ||
+        (!this.c.estA && this.txconso > 100)
+    },
+
     exM () { return this.c.vd[this.idm][Compteurs.MS] !== 0 },
     q2M () { return this.c.vd[this.idm][Compteurs.Q2] * UNITEV2 },
     v2M () { return this.c.vd[this.idm][Compteurs.V2 + Compteurs.X2]},
@@ -273,7 +313,7 @@ export default ({
     alsolde () {
       const x = ' bg-yellow-3 text-bold text-'
       return this.nbj <= 0 ? x + 'negative' : (this.nbj < 60 ? x + 'warning' : '')
-    }
+    },
   },
 
   data () {

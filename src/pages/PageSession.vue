@@ -1,9 +1,28 @@
 <template>
   <q-page class="column items-center">
     <q-card class="dp40 q-my-sm">
-      <div>
-        <span class="text-italic titre-md">{{$t('ISst')}}</span>
-        <span class="q-ml-md text-bold">{{st}}</span>
+      <div class="text-italic titre-lg">{{$t('ISst', [st, mo])}}</div>
+
+      <div class="titre-md text-italic q-mt-md">{{$t('ISconso', [mon(couts[4], 4)])}}</div>
+      <div class="row items-center">
+        <div class="col-4 text-center text-italic">{{$t('PCPlec')}}</div>
+        <div class="col-4 text-center font-mono">{{session.consocumul.nl}}</div>
+        <div class="col-4 text-center font-mono">{{mon(couts[0], 4)}}</div>
+      </div>
+      <div class="row items-center">
+        <div class="col-4 text-center text-italic">{{$t('PCPecr')}}</div>
+        <div class="col-4 text-center font-mono">{{session.consocumul.ne}}</div>
+        <div class="col-4 text-center font-mono">{{mon(couts[1], 4)}}</div>
+      </div>
+      <div class="row items-center">
+        <div class="col-4 text-center text-italic">{{$t('PCPvd')}}</div>
+        <div class="col-4 text-center font-mono">{{edvol(session.consocumul.vd)}}</div>
+        <div class="col-4 text-center font-mono">{{mon(couts[2], 4)}}</div>
+      </div>
+      <div class="row items-center">
+        <div class="col-4 text-center text-italic">{{$t('PCPvm')}}</div>
+        <div class="col-4 text-center font-mono">{{edvol(session.consocumul.vm)}}</div>
+        <div class="col-4 text-center font-mono">{{mon(couts[3], 4)}}</div>
       </div>
 
       <div class="titre-md q-mt-md">{{$t('ISdcs')}}</div>
@@ -115,7 +134,8 @@
 import { reactive } from 'vue'
 import RapportSynchro from '../components/RapportSynchro.vue'
 import stores from '../stores/stores.mjs'
-import { dhcool, edvol } from '../app/util.mjs'
+import { dhcool, edvol, mon } from '../app/util.mjs'
+import { Tarif } from '../app/api.mjs'
 
 const cbl = ['green-5', 'warning', 'warning', 'negative', 'negative']
 
@@ -133,10 +153,13 @@ export default {
   components: { RapportSynchro },
 
   computed: {
+    couts () { return Tarif.evalConso(this.session.consocumul) },
     st () { 
       const n = this.session.status < 2 ? this.session.status : 2
       return this.$t('ISst' + n)
     },
+    mo () { return this.session.synchro ? this.$t('sync') : 
+      (this.session.avion ? this.$t('avion') : 'incognito')},
     cb () { return ' text-' + cbl[this.session.blocage]},
     dsync () { return this.session.sessionSync },
   },
@@ -194,7 +217,7 @@ export default {
     initq()
     inite()
     return {
-      edvol,
+      edvol, mon,
       ui: stores.ui,
       session: stores.session,
       fSt,

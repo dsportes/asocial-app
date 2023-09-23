@@ -1,14 +1,9 @@
-## TODO le 16 sept.
+## TODO le 23 sept.
+Gestion des crédits
+
+Affichage des tarifs dans PageCompta
 
 gérer les restrictions - fait en partie pour figé
-
-Comptable : gérer les options sur espace
-
-Sponsoring : compte A et qc sur compte O
-
-Vue compte estA et sponsor
-
-Vue session : conso de la session et valorisation
 
 Décomptes des chats et groupes
 
@@ -18,8 +13,7 @@ GC d'espace figé
 
 Révision complète groupe et actions possibles
 
-Révision chats avec raccrocher
-
+Révision chats avec gestion raccrocher et décompte des chats
 
 
 ### Page: `PageLogin`

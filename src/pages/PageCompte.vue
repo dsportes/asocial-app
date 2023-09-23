@@ -31,6 +31,12 @@
         <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
         <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
       </div>
+
+      <div v-if="aSt.compta.estA || aSt.compta.estSponsor" 
+        class="row q-gutter-sm q-my-sm titre-lg">
+        <span v-if="aSt.compta.estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('compteA')}}</span>
+        <span v-if="aSt.compta.estSponsor" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('sponsor')}}</span>
+      </div>
     </q-card>
 
     <!-- Avatars du compte -->
@@ -43,10 +49,22 @@
         </div>
         <div :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')">
           <apercu-avatar edit  :idav="na.id" :idx="idx"/>
-          <div class="row justify-center">
-            <q-btn class="q-ml-sm" size="md" icon="person_add" no-caps
-              :label="$t('P10nvp')" color="warning" dense @click="ouvrirSponsoring(na)"/>
-            <bouton-help class="q-ml-md" page="page1"/>
+          <div class="row q-mt-sm q-gutter-sm">
+            <q-btn class="q-ml-sm" size="md" icon="more" no-caps
+              :label="$t('plus')" color="primary" dense @click="courant(na.id, 1)">
+            </q-btn>
+            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps
+              :label="$t('ACgroupes')" color="primary" dense @click="courant(na.id, 2)">
+              <q-badge class="cl1" color="secondary" rounded>{{nbgrps(na.id)}}</q-badge>
+            </q-btn>
+            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps
+              :label="$t('ACchats')" color="primary" dense @click="courant(na.id, 3)">
+              <q-badge class="cl1" color="secondary" rounded>{{nbchats(na.id)}}</q-badge>
+            </q-btn>
+            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps
+              :label="$t('ACsponsorings')" color="primary" dense @click="courant(na.id, 4)">
+              <q-badge class="cl1" color="secondary" rounded>{{nbspons(na.id)}}</q-badge>
+            </q-btn>
           </div>
         </div>
       </div>
@@ -93,11 +111,6 @@
       </q-card>
     </q-dialog>
 
-    <!-- Dialogue de création d'un nouveau sponsoring -->
-    <q-dialog v-model="nvpar" persistent full-height>
-      <nouveau-sponsoring :tribu="aSt.tribu"/>
-    </q-dialog>
-
     <!-- Dialogue de suppression d'un avatar -->
     <q-dialog v-model="suppravatar" persistent full-height>
       <suppr-avatar :avid="avid"/>
@@ -120,7 +133,6 @@ import MotsCles from '../components/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
-import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import SupprAvatar from '../dialogues/SupprAvatar.vue'
 import { afficherDiag, trapex } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
@@ -130,7 +142,7 @@ export default {
   name: 'PageCompte',
 
   components: { 
-    NomAvatar, NouveauSponsoring, BoutonHelp, ApercuAvatar,
+    NomAvatar, BoutonHelp, ApercuAvatar,
     PhraseSecrete, EditeurMd, ShowHtml, MotsCles, SupprAvatar
   },
 
@@ -174,8 +186,17 @@ export default {
       this.reset()
     },
 
-    courant (id) {
+    nbchats (id) { return this.aSt.getElt(id).chats.size },
+    nbspons (id) { return this.aSt.getElt(id).sponsorings.size },
+    nbgrps (id) { return this.aSt.getElt(id).avatar.lgr.size },
+    courant (id, action) {
       this.session.setAvatarId(id)
+      if (action) switch (action){
+        case 1 : { MD.oD('detailsavatar'); return }
+        case 2 : { this.ui.setPage('groupesac'); return }
+        case 3 : { this.ui.setPage('chats'); return }
+        case 4 : { this.ui.setPage('sponsorings'); return }
+      }
     },
 
     async oknomav (nom) {
@@ -208,12 +229,6 @@ export default {
       }
     },
 
-    async ouvrirSponsoring (na) { 
-      if (!await this.session.edit()) return
-      this.session.setAvatarId(na.id)
-      this.ovnvpar() 
-    },
-
     async delAvatar (id) {
       if (await this.session.edit()) {
         const lna = this.aSt.compta.lstAvatarNas
@@ -242,14 +257,12 @@ export default {
     function ovmemoedit () { MD.oD(memoedit) }
     const chgps = ref(false)
     function ovchgps () { MD.oD(chgps) }
-    const nvpar = ref(false)
-    function ovnvpar () { MD.oD(nvpar) }
     const suppravatar = ref(false)
     function ovsuppravatar () { MD.oD(suppravatar) }
 
     return {
       MD, mcledit, ovmcledit, nvav, ovnvav, memoedit, ovmemoedit, chgps, ovchgps,
-      nvpar, ovnvpar, suppravatar, ovsuppravatar,
+      suppravatar, ovsuppravatar,
       ui: stores.ui,
       aSt,
       session
@@ -269,4 +282,8 @@ export default {
 .bord
   border-top: 1px solid $grey-5
   border-bottom: 1px solid $grey-5
+.cl1
+  position: relative
+  top: -10px
+  left: 5px
 </style>

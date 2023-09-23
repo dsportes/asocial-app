@@ -17,21 +17,21 @@
       </q-btn>
 
       <!-- Information session : mode synchro -->
-      <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession('page1')"
+      <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession()"
         dense size="md" icon="autorenew" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
         <queue-icon/>
       </q-btn>
 
       <!-- Information session : mode incognito -->
-      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession('page2')"
+      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession()"
         size="sm" square color="primary">
         <img src="~assets/incognito_blanc.svg">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
       </q-avatar>
 
       <!-- Information session : mode avion -->
-      <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession('page3')"
+      <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession()"
         dense size="md" icon="airplanemode_active" color="primary">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
         <queue-icon/>
@@ -455,9 +455,8 @@ export default {
     pageFicavion () { 
       this.ui.setPage('ficavion')
     },
-    infoSession (page) { 
+    infoSession () { 
       if (this.session.status === 2) this.ui.setPage('session')
-      this.ui.pushhelp(page)
     },
     gotoAccueilLogin () {
       this.ui.setPage(this.session.status === 2 ? 'accueil' : 'login')
