@@ -29,6 +29,9 @@ export default {
   renoncer: 'Renoncer',
   termine: 'Terminé',
   reessayer: 'Réessayer',
+  rechercher: "Rechercher",
+  enreg: "Enregistrer",
+  raz: 'RAZ',
   corriger: 'Corriger',
   rafraichir: 'Rafraîchir',
   confirm: 'Pour confirmer taper {0}',
@@ -1620,12 +1623,21 @@ export default {
   PEabo: 'Abon. & max conso.',
 
   // PanelCredits
-  PCRtkatt: 'Liste des tickets de crédits générés en attente',
+  PCRtkatt: 'Ticket à enregister ou à rechercher',
   PCRtkatt2: 'Liste des tickets de crédits non intégrés ou marqués à traiter',
   PCPdel: 'Ticket définitivement perdu ? Détruire ce ticket empêche de bénéficier d\'un crédit le référençant lors d\'un enregistrempent par le Comptable.',
   PCdel2: 'Oui, je détruis ce ticket',
   PCRgen: 'Générer un ticket de crédit',
   PCRref: 'Référence à joindre au paiemnet: "{0} {1}"',
+  PCRc1: 'Numéro du ticket',
+  PCRc2: 'Montant en euros',
+  PCRc3: 'Commentaire',
+  PCRc4: 'Enregistré le',
+  PCRc5: 'Crédité par le compte',
+  PCRc5n: 'Pas encore crédité',
+  PCRd1: 'Un ticket a 13 chiffres',
+  PCRd2: 'Numéro non généré par l\'application',
+  PCRd3: 'Entre 0,50€ et 100€',
 
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.
