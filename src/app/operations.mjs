@@ -1771,3 +1771,61 @@ export class SetEspaceOptionA extends OperationUI {
     }
   }
 }
+
+/* `GenererRefCredit` : création d'un nouvel espace et du comptable associé
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+
+Retour: 
+- ticket généré (entier) : ns aaaammjj nnnn c
+*/
+export class GenererRefCredit extends OperationUI {
+  constructor () { super('OPtkt') }
+
+  async run () { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const args = { token: session.authToken}
+      const ret = this.tr(await post(this, 'NouveauTicket', args))
+      const tk = ret.ticket
+
+      const compta = aSt.compta
+      const cred = decode(new Uint8Array(encode(compta.credits)))
+      cred.tickets.push(tk)
+      args.credits = await Compta.creditsK(cred)
+      this.tr(await post(this, 'MajCredits', args))
+      return this.finOK(tk)
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
+/* `DeleteRefCredit` : création d'un nouvel espace et du comptable associé
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+
+Retour: 
+- ticket généré (entier) : ns aaaammjj nnnn c
+*/
+export class DeleteRefCredit extends OperationUI {
+  constructor () { super('OPdtkt') }
+
+  async run (tk) { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const compta = aSt.compta
+      const cred = decode(new Uint8Array(encode(compta.credits)))
+      const i = cred.tickets.indexOf(tk)
+      cred.tickets.splice(i, 1)
+      const credits = await Compta.creditsK(cred)
+      const args = { token: session.authToken, credits}
+      this.tr(await post(this, 'MajCredits', args))
+      return this.finOK(tk)
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}

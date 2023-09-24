@@ -605,6 +605,10 @@ _data_ :
 - `notif` : notification de l'administrateur, cryptée par la clé du Comptable.
 - `t` : numéro de _profil_ de quotas dans la table des profils définis dans la configuration 
   (chaque profil donne un triplet qc q1 q2).
+- `dtk` : `{j, n}`
+  - `j` : aaaammjj du dernier ticket attribué,
+  - `n` : numéro d'ordre
+  - `c` : clé d'auto-contrôle
 */
 export class Espace extends GenDoc {
 
@@ -619,6 +623,13 @@ export class Espace extends GenDoc {
       this.notif = Notification.deSerial(ser)
     } else this.notif = null
     session.setNotifE(this.notif)
+    this.dtk = row.dtk ? row.dtk : { j: 0, n: 0, c: 0 }
+  }
+
+  static ticket (dtk) {
+    const session = stores.session
+    if (!dtk || !dtk.j) return 0
+    return (((((session.ns * 100000000) + dtk.j) * 100000) + dtk.n) * 10) + c
   }
 
   static async nouveau (org) {
@@ -1104,6 +1115,11 @@ export class Compta extends GenDoc {
       lm.push(await Compta.mavkK(id, session.clek))
     }
     return lm
+  }
+
+  static async creditsK (credits) {
+    const session = stores.session
+    return await crypter(session.clek, new Uint8Array(encode(credits)))
   }
 
   static async atrItem (clet, info, q) {

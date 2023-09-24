@@ -2,6 +2,8 @@
 <q-page>
   <panel-compta v-if="ui.pagetab==='compta'" style="margin:0 auto"/>
 
+  <panel-credits v-if="ui.pagetab==='credits'" style="margin:0 auto"/>
+
   <div v-if="ui.pagetab==='notif'" class="largeur40 maauto q-pa-sm">
 
     <div v-if="bl" class="bord q-pa-sm q-mb-xl">
@@ -39,6 +41,7 @@ import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import ApercuNotif2 from '../components/ApercuNotif2.vue'
+import PanelCredits from '../components/PanelCredits.vue'
 import SdAl from '../components/SdAl.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
 import { getNg, Motscles, Chat } from '../app/modele.mjs'
@@ -46,7 +49,7 @@ import { getNg, Motscles, Chat } from '../app/modele.mjs'
 export default {
   name: 'PageCompta',
 
-  components: { SdAl, ApercuNotif2, PanelCompta, ApercuChat },
+  components: { SdAl, ApercuNotif2, PanelCompta, PanelCredits, ApercuChat },
 
   computed: {
     c () { return this.aSt.compta.compteurs },

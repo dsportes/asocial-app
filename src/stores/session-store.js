@@ -426,6 +426,18 @@ export const useSessionStore = defineStore('session', {
       return 0
     },
 
+    async editUrgence () {
+      if (this.mode === 3) {
+        await afficherDiag($t('editavion'))
+        return false
+      }
+      if (this.estFige) {
+        await afficherDiag($t('editfige'))
+        return false
+      }
+      return true
+    },
+
     async edit (diag) {
       const y = ['', 'editavion', 'editfige', 'editminimal', 'editlecture']
       const x = this.roSt()

@@ -608,6 +608,8 @@ export default {
   OPchgt: 'Chargement d\'un fichier pour accès en mode avion',
   OPoptionA: 'Changement de l\'option A de l\'espace',
   OPiter: '({0})-Petit incident, nouvel essai en cours, merci d\'attendre',
+  OPtkt: 'Génération d\'un ticket de crédit',
+  OPdtkt: 'Suppression d\'un ticket de crédit',
 
   OPgc: 'Garbage Collector',
   OPckpt: 'Checkpoint du dernier GC',
@@ -662,7 +664,7 @@ export default {
   Pchats: 'Chats de {0}',
   Pespace: 'Espace #{0} - {1}',
   Ptranche: 'Tranche #{0} {1}',
-  Pcompta: 'Notifications, blocages, volumes',
+  Pcompta: 'Notifications & abonnement ...',
   Pgroupes: 'Tous les groupes',
   Pgroupesac: 'Groupes de {0}',
   Pgroupe: 'Groupe {0}',
@@ -1616,6 +1618,14 @@ export default {
   PEsp: 'pas de sponsor | un sponsor | {count} sponsors',
   PEedn: 'Editer le nom',
   PEabo: 'Abon. & max conso.',
+
+  // PanelCredits
+  PCRtkatt: 'Liste des tickets de crédits générés en attente',
+  PCRtkatt2: 'Liste des tickets de crédits non intégrés ou marqués à traiter',
+  PCPdel: 'Ticket définitivement perdu ? Détruire ce ticket empêche de bénéficier d\'un crédit le référençant lors d\'un enregistrempent par le Comptable.',
+  PCdel2: 'Oui, je détruis ce ticket',
+  PCRgen: 'Générer un ticket de crédit',
+  PCRref: 'Référence à joindre au paiemnet: "{0} {1}"',
 
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.
