@@ -13,7 +13,7 @@
     <div v-for="(ntf, idx) of session.notifs" :key="idx">
       <div v-if="ntf && ntf.texte" class="q-my-sm q-mx-xs">
         <div class="titre-lg text-italic">
-          {{$t('CPTtn' + idx + (idx === 4 && aSt.compte.estA ? 'a' : ''))}}
+          {{$t('CPTtn' + idx + (idx === 4 && aSt.compta.estA ? 'a' : ''))}}
         </div>
         <apercu-notif2 class="q-ml-sm" :type="idx" :notif="ntf"/>
       </div>

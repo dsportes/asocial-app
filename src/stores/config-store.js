@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useI18n } from 'vue-i18n'
+import { Tarif } from '../app/api.mjs'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
@@ -66,6 +67,7 @@ export const useConfigStore = defineStore('config', {
 
   actions: {
     setConfig(cfg) {
+      Tarif.tarifs = cfg.tarifs
       for(const x in cfg) this[x] = cfg[x]
     },
 

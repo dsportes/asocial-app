@@ -223,13 +223,46 @@
   </q-expansion-item>
   <q-separator size="3px"/>
 
+  <q-expansion-item switch-toggle-side dense group="trgroup"
+    header-class="titre-md text-bold bg-primary text-white"
+    :label="$t('PCPtarifs')">
+    <div class="largeur40 column maauto q-mb-sm q-pa-xs">
+      <div class="text-italic titre-md q-my-sm">{{$t('PCPcent')}}</div>
+
+      <div class="q-ml-md q-my-sm">
+        <div v-for="u in cu" :key="u" class="row fs-md full-width">
+          <div class="col-1">{{u}}</div>
+          <div class="col-11">{{$t('PCPt' + u)}}</div>
+        </div>
+      </div>
+
+      <div class="row fs-md q-mt-sm" :class="dkli(1)">
+        <div class="col-2 text-italic">{{$t('PCPaamm')}}</div>
+        <div class="col-10 row text-italic text-center">
+          <div v-for="u in cu" :key="u" class="col-2">{{u}}</div>
+        </div>
+      </div>
+
+      <div v-for="(t, ix) in tarifs" :key="t[0]" :class="dkli(ix) + ' q-my-xs'">
+        <div class="row items-center q-my-xs fs-md">
+          <div class="col-2">{{(''+t.am).substring(0,4) + '/' + (''+t.am).substring(4)}}</div>
+          <div class="col-10 row">
+            <div v-for="(i, idx) in 6" :key="i" 
+              class="col-2 font-mono text-center">
+              {{mon(t.cu[idx], 2)}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </q-expansion-item>
   </div>
 </template>
 
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { UNITEV1, UNITEV2, AMJ, Compteurs } from '../app/api.mjs'
+import { UNITEV1, UNITEV2, AMJ, Compteurs, Tarif } from '../app/api.mjs'
 import { dhcool, edqt, mon, nbn, edvol, dkli, $t } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
 import MoisM from './MoisM.vue'
@@ -343,9 +376,11 @@ export default ({
       const m = x <= 0 ? 12 + x : x
       return $t('mois' + m)
     }
+    const cu = ['AN', 'AF', 'lec', 'ecr', 'mon', 'des']
 
     return {
-      aSt, c,
+      tarifs: Tarif.tarifs,
+      aSt, c, cu,
       MD, edqt, mon, nbn, edvol, dhcool, dkli, libm, UNITEV1, UNITEV2
     }
   }

@@ -94,9 +94,12 @@
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
         <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setPageTab('notif')"/>
         <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setPageTab('compta')"/>
+        <q-tab v-if="session.estComptable || aSt.compta.estA"
+          name="credits" :label="$t('PNCcre')" @click="ui.setPageTab('credits')"/>
         <q-tab name="chats" :label="$t('PNCchats')" @click="ui.setPageTab('chats')"/>
       </q-tabs>
-      <q-btn v-if="ui.pagetab==='notif'" class="col-auto q-px-sm" dense size="md" color="warning" 
+      <q-btn v-if="ui.pagetab==='notif' && session.alire" 
+        class="col-auto q-px-sm" dense size="md" color="warning" 
         icon="check" :label="$t('jailu')" @click="ui.jailu()"/>
     </q-toolbar>
 

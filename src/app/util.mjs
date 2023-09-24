@@ -228,7 +228,7 @@ export function edvol (vol) {
 
 export function mon (v, n) { // n : nombres de chiffres après les centimes
   if (!v) return n ? '0c' : '0€'
-  if (v >= 100) return (v / 100).toFixed((n || 0) + 2).replace('.', ',') + '€'
+  if (!n && v >= 100) return (v / 100).toFixed((n || 0) + 2).replace('.', ',') + '€'
   return v.toFixed(n || 0).replace('.', ',') + 'c'
 }
 

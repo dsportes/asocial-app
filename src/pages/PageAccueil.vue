@@ -58,6 +58,25 @@
         <span class="q-ml-xs">{{$t('MLAntf')}}</span>
       </div>
 
+      <!-- Abonnement -->
+      <div class="btn2" @click="clickAbo">
+        <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <span class="q-ml-xs">{{$t('MLAabo')}}</span>
+      </div>
+
+      <!-- credits -->
+      <div v-if="session.estComptable || aSt.compta.estA"
+        class="btn2" @click="clickCred">
+        <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <span class="q-ml-xs">{{$t('MLAcred')}}</span>
+      </div>
+
+      <!-- Chats d'urgence -->
+      <div class="btn2" @click="clickChats">
+        <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <span class="q-ml-xs">{{$t('MLAchats')}}</span>
+      </div>
+
       <!-- Fichiers avion -->
       <div v-if="!session.incognito" class="btn2" @click="ficAvion">
         <q-btn dense size="md" icon="save"/>
@@ -70,11 +89,6 @@
         <span class="q-ml-xs">{{$t('MLApp')}}</span>
       </div>
 
-      <!-- Chats d'urgence -->
-      <div class="btn2" @click="clickNotif2">
-        <q-btn class="q-mr-xs" dense size="md" icon="chat"/>
-        <span class="q-ml-xs">{{$t('MLAchats')}}</span>
-      </div>
       </div>
     </q-card>
     <q-card class="q-mt-lg petitelargeur maauto q-pa-sm">
@@ -117,12 +131,16 @@ export default {
       this.ui.setPage('compta', 'notif')
     },
 
-    clickNotif2 () {
+    clickChats () {
       this.ui.setPage('compta', 'chats')
     },
 
-    pageCompta () { 
+    clickAbo () {
       this.ui.setPage('compta', 'compta')
+    },
+
+    clickCred () { 
+      this.ui.setPage('compta', 'credits')
     },
 
     infoSession () { 
