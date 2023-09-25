@@ -1,8 +1,6 @@
 ## TODO le 23 sept.
 Gestion des crédits
 
-Affichage des tarifs dans PageCompta
-
 gérer les restrictions - fait en partie pour figé
 
 Décomptes des chats et groupes
@@ -14,6 +12,10 @@ GC d'espace figé
 Révision complète groupe et actions possibles
 
 Révision chats avec gestion raccrocher et décompte des chats
+
+_Arrêtés mensuels_ (**CSV**)
+- tickets réceptionnés dans le mois.
+- une ligne par comptas d'extrait des compteurs relatifs au mois M-1 (dès qu'il est figé).
 
 
 ### Page: `PageLogin`
