@@ -639,38 +639,6 @@ export class Espace extends GenDoc {
   }
 }
 
-/** Ticket ***********************************************
-Il y a un document `tickets` par ticket de paiement reçu et pas encore _crédité ou traité_.
-_data_:
-- `id`: numéro de ticket.
-- `dh`: date-heure d'enregistrement.
-- `m`: montant.
-- `infoK`: texte facultatif du Comptable pour un ticket qu'il considère comme _à traiter_ plus tard, à vérifier, etc.
-- `cr`: 0: pas encore crédité par le compte, 1: crédité par le compte.
-*/
-export class Ticket extends GenDoc {
-  async compile (row) {
-    const session = stores.session
-    this.dh = row.dh
-    this.m = row.m
-    this.cr = row.cr || 0
-    if (row.infoK) {
-      if (session.estComptable) {
-        this.info = await decrypter(session.cleK, row.infoK)
-      } else this.info = true
-    } else this.info = false
-  }
-
-  static async nouveauRow (id, m, info) {
-    const session = stores.session
-    const r = { id, m }
-    if (info && session.estComptable)
-      r.infoK = await crypter(session.cleK, info)
-    this.dh = Date.now()
-    return { _row: 'tickets', id, _data_: new Uint8Array(encode(r)) }
-  }
-}
-
 /** Synthese *********************************************
 _data_:
 - `id` : id de l'espace
@@ -983,6 +951,12 @@ export class Compta extends GenDoc {
     return t
   }
 
+  get mtk () {
+    const m = {}
+    if (this.credits) this.credits.tickets.forEach(tk => { m[tk.ids] = tk.v })
+    return m
+  }
+
   estAvDuCompte (id) { return this.mav.has(id) }
 
   avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
@@ -1047,8 +1021,12 @@ export class Compta extends GenDoc {
       this.idt = 0
       // en cas de passage de compte O à A, le Comptable ne peut pas initialiser
       // credits en cryptant par la clé K. Il met 'true' pour provoquer l'init ici
-      this.credits = row.credits !== true ? decode(await decrypter(session.clek, row.credits)) 
+      const cr = row.credits !== true ? decode(await decrypter(session.clek, row.credits)) 
         : { total: 2, tickets: [] }
+      this.credits = { total: cr.total, tickets: [] }
+      cr.credits.tickets.forEach(tk => { 
+        if (!Ticket.estObsolete(tk)) this.credits.tickets.push(tk)
+      })
     }
 
     this.hps1 = row.hps1
@@ -1095,6 +1073,42 @@ export class Compta extends GenDoc {
     delete this.rowCletK
   }
 
+  /* Depuis la liste actuelle des tickets de compta,
+  - enlève les obsolètes,
+  - ajoute tk s'il n'y était pas, le remplace sinon
+  - retourne credits crypté par la clé K
+  */
+  async creditsSetTk (tk) {
+    const credits = { total: this.credits.total, tickets: [] }
+    let repl = false
+    this.credits.tickets.forEach(t => {
+      if (!Ticket.estObsolete(t)) {
+        if (t.ids === tk.ids) {
+          credits.tickets.push(tk)
+          repl = true
+        } else {
+          credits.tickets.push(t)
+        }
+      }
+    })
+    if (!repl && !Ticket.estObsolete(tk)) credits.tickets.push(tk)
+    const session = stores.session
+    return await crypter(session.clek, new Uint8Array(encode(credits)))
+  }
+
+  async majCredits (m) {
+    const credits = { total: this.credits.total, tickets: [] }
+    this.credits.tickets.forEach(t => {
+      if (m.has(t.ids)) {
+        credits.tickets.push(m.get(ids))
+        m.delete(ids)
+      } else if (!Ticket.estObsolete(t)) credits.tickets.push(t)
+    })
+    if (m.size) m.forEach((ids,tk) => { credits.tickets.push(tk)})
+    const session = stores.session
+    return await crypter(session.clek, new Uint8Array(encode(credits)))
+  }
+
   updAvatarMavk (setSupprIds) {
     let ok = false
     if (setSupprIds && setSupprIds.size) setSupprIds.forEach(id => { 
@@ -1115,11 +1129,6 @@ export class Compta extends GenDoc {
       lm.push(await Compta.mavkK(id, session.clek))
     }
     return lm
-  }
-
-  static async creditsK (credits) {
-    const session = stores.session
-    return await crypter(session.clek, new Uint8Array(encode(credits)))
   }
 
   static async atrItem (clet, info, q) {
@@ -1442,6 +1451,81 @@ export class Sponsoring extends GenDoc {
     const row = { _nom: 'sponsorings', id: av.id, ids: phrase.phch, dlv, _data_ }
     return row
   }
+}
+
+/** Ticket ***********************************************
+Il y a un document `tickets` par ticket de paiement généré.
+_data_:
+- `id`: id du Comptable.
+- `ids` : numéro du ticket
+- `v` : version du ticket.
+
+- `dg` : date de génération.
+- `dr`: date de réception. Si 0 le ticket est _en attente_.
+- `ma`: montant déclaré émis par le compte A.
+- `mc` : montant déclaré reçu par le Comptable.
+- `refa` : texte court (32c) facultatif du compte A à l'émission.
+- `refc` : texte court (32c) facultatif du Comptable à la réception.
+- `di`: date d'incorporation du crédit par le compte A dans son solde.
+*/
+export class Ticket extends GenDoc {
+  async compile (row) {
+    this.dg = row.dg
+    this.ma = row.ma || 0
+    this.mc = row.mc || 0
+    this.di = row.di || 0
+    this.dr = row.dr || 0
+    this.refa = row.refa || ''
+    this.refc = row.refc || ''
+  }
+
+  // dernier jour de validité d'un ticket généré
+  static dlv (tk) {
+    const [at, mt, ] = AMJ.aaaammjj(tk.dg)
+    let ax = at, mx = mt + 1
+    if (mx > 12) { ax++; mx = 1 }
+    return AMJ.amjDeAMJ(ax, mx, AMJ.djm(ax, mx))
+  }
+
+  static estObsolete (tk) {
+    return tk.dr === 0 && AMJ.amjUtc() > Ticket.dlv(tk)
+  }
+
+
+  clone () {
+    const t = new Ticket()
+    t.id = this.id; t.ids = this.ids; t.ma = this.ma; t.mc = this.mc;
+    t.refa = this.refa; t.refc = this.refc; t.di = this.di
+    return t
+  }
+
+  static nouveauRow (ids, ma, refa) {
+    const session = stores.session
+    const r = { 
+      id: ID.duComptable(session.ns),
+      ids, ma, refa: refa || 0, 
+      mc: 0, refc: 0, di: 0, dr: 0, dg: Date.now()
+    }
+    const rowTicket = { _row: 'tickets', id: r.id, ids, _data_: new Uint8Array(encode(r)) }
+    return { rowTicket, ticket: r }
+  }
+
+  async recepRow (mc, refc) {
+    const t = { }
+    t.id = this.id; t.ids = this.ids; t.ma = this.ma; t.mc = mc;
+    t.refa = this.refa; t.refc = refc; t.di = 0
+    t.dr = Date.now()
+    return { _row: 'tickets', id, ids, _data_: new Uint8Array(encode(r)) }
+  }
+
+  async incorpRow () {
+    const t = { }
+    t.id = this.id; t.ids = this.ids; t.ma = this.ma; t.mc = this.mc;
+    t.refa = this.refa; t.refc = this.refc;
+    t.di = Date.now()
+    return { _row: 'tickets', id, ids, _data_: new Uint8Array(encode(r)) }
+  }
+
 }
 
 /** Chat ************************************************************

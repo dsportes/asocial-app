@@ -2,10 +2,10 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { ID, AppExc, appexc, E_WS, AMJ, Compteurs, limitesjour } from './api.mjs'
-import { $t, hash, inverse, sleep } from './util.mjs'
+import { $t, hash, inverse, sleep, l6ToI, genTk } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
-import { NomGenerique, Avatar, Chat, Compta, Note,
+import { NomGenerique, Avatar, Chat, Compta, Note, Ticket,
   Groupe, Membre, Tribu, getNg, getCle, compile, setClet} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
@@ -1772,58 +1772,105 @@ export class SetEspaceOptionA extends OperationUI {
   }
 }
 
-/* `GenererRefCredit` : création d'un nouvel espace et du comptable associé
+/* `PlusTicket` : ajout d'un ticket à un compte A
+et ajout d'un ticket au Comptable
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
+- `credits` : credits crypté par la clé K du compte
+- `rowTicket` : nouveau row tickets pour le Comptable
 
-Retour: 
-- ticket généré (entier) : ns aaaammjj nnnn c
+Retour: rien
 */
-export class GenererRefCredit extends OperationUI {
+export class PlusTicket extends OperationUI {
   constructor () { super('OPtkt') }
 
-  async run () { 
+  async run (ma, refa) { 
     try {
       const session = stores.session
       const aSt = stores.avatar
-      const args = { token: session.authToken}
-      const ret = this.tr(await post(this, 'NouveauTicket', args))
-      const tk = ret.ticket
+
+      const [a, m, j] = AMJ.aaaammjj(AMJ.amjUtc())
+      const ids = l6ToI(genTk(a, m))
 
       const compta = aSt.compta
-      const cred = decode(new Uint8Array(encode(compta.credits)))
-      cred.tickets.push(tk)
-      args.credits = await Compta.creditsK(cred)
-      this.tr(await post(this, 'MajCredits', args))
-      return this.finOK(tk)
+      const { rowTicket, ticket } = Ticket.nouveauRow(ids, ma, refa)
+      const creditsK = await compta.creditsSetTk(ticket)
+
+      const args = { token: session.authToken, rowTicket, creditsK }
+      this.tr(await post(this, 'PlusTicket', args))
+      this.finOK()
     } catch (e) {
       return await this.finKO(e)
     }
   }
 }
 
-/* `DeleteRefCredit` : création d'un nouvel espace et du comptable associé
+
+/* `MoinsTicket` : retrait d'un ticket d'un compte A
+et retrait (zombi) du ticket du Comptable
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
+- `credits` : credits crypté par la clé K du compte
+- `ids` : ticket à enlever
 
-Retour: 
-- ticket généré (entier) : ns aaaammjj nnnn c
+Retour: rien
 */
-export class DeleteRefCredit extends OperationUI {
-  constructor () { super('OPdtkt') }
+export class MoinsTicket extends OperationUI {
+  constructor () { super('OPtkt') }
 
-  async run (tk) { 
+  async run (ma, refa) { 
     try {
       const session = stores.session
       const aSt = stores.avatar
+
+      const [a, m, j] = AMJ.aaaammjj(AMJ.amjUtc())
+      const ids = l6ToI(genTk(a, m))
+
       const compta = aSt.compta
-      const cred = decode(new Uint8Array(encode(compta.credits)))
-      const i = cred.tickets.indexOf(tk)
-      cred.tickets.splice(i, 1)
-      const credits = await Compta.creditsK(cred)
-      const args = { token: session.authToken, credits}
-      this.tr(await post(this, 'MajCredits', args))
-      return this.finOK(tk)
+      const { rowTicket, ticket } = Ticket.nouveauRow(ids, ma, refa)
+      const creditsK = await compta.creditsSetTk(ticket)
+
+      const args = { token: session.authToken, rowTicket, creditsK }
+      this.tr(await post(this, 'PlusCreditsA', args))
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
+/* `RafraichirTickets` : nouvelles versions des tickets cités
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `mtk` : map des tickets. clé: ids, valeur: version détenue en session
+
+Retour: 
+- rowTickets: liste des rows des tickets ayant changé
+*/
+export class RafraichirTickets extends OperationUI {
+  constructor () { super('OPtkt') }
+
+  async run () { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+
+      const compta = aSt.compta
+      const mtk = compta.mtk
+      const args = { token: session.authToken, mtk }
+      const ret = this.tr(await post(this, 'RafraichirTickets', args))
+      if (ret.rowTickets) {
+        const m = new Map()
+        for(const row of ret.rowTickets) {
+          const t = await compile(row)
+          m.set(t.ids, t)
+        }
+        const creditsK = await compta.majCredits(m)
+
+        const args = { token: session.authToken, creditsK }
+        this.tr(await post(this, 'MajCredits', args))
+      }
+      this.finOK()
     } catch (e) {
       return await this.finKO(e)
     }

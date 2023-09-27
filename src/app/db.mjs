@@ -20,6 +20,7 @@ const STORES = {
   comptas: 'id',
   avatars: 'id',
   chats: '[id+ids]',
+  tickets: '[id+ids]',
   sponsorings: '[id+ids]',
   groupes: 'id',
   membres: '[id+ids]',
@@ -354,7 +355,7 @@ export class IDBbuffer {
     this.synchro = stores.session.synchro
     this.lmaj = [] // rows à modifier / insérer en IDB
     this.lsuppr = [] // row { _nom, id, ids } à supprimer de IDB
-    this.lav = new Set() // set des ids des avatars à purger (avec notes, sponsorings, chats)
+    this.lav = new Set() // set des ids des avatars à purger (avec notes, sponsorings, chats, tickets)
     this.lgr = new Set() // set des ids des groupes à purger (avec notes, membres)
     this.mapSec = {} // map des notes (cle: id/ids, valeur: note) pour gestion des fichiers locaux
     this.lsecsup = [] // liste des notes temporaires à faire supprimer sur le serveur en fin de connexion
@@ -443,6 +444,7 @@ export async function commitRows (opBuf, setCompteClek, setVersions) {
         await db.avatars.where(id).delete()
         await db.sponsorings.where(id).delete()
         await db.chats.where(id).delete()
+        await db.tickets.where(id).delete()
         await db.notes.where(id).delete()
       }
 

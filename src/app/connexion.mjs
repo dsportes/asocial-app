@@ -426,6 +426,40 @@ export class ConnexionCompte extends OperationUI {
     return [n1, n2]
   }
 
+  /** Chargement pour le Comptable de ses tickets postérieurs au plus récent ************/
+  async chargerTickets(id, vidb, vsrv) {
+    const session = stores.session
+    let n1 = 0, n2 = 0
+    const rows = {}
+    for (const row of this.cTickets) {
+      if (row.id === id) {
+        rows[row.ids] = row
+        n1++
+      }
+    }
+
+    let rowTickets // array
+
+    if (session.accesNet && vsrv > vidb) {
+      const args = { token: session.authToken, id, v: vidb }
+      const ret = this.tr(await post(this, 'ChargerTickets', args))
+      rowTickets = ret.rowTickets
+    }
+    if (rowTickets && rowTickets.length) {
+      for (const row of rowTickets) {
+        this.buf.putIDB(row)
+        rows[row.ids] = row
+        n2++
+      }
+    }
+    const aSt = stores.avatar
+    for (const ids in rows) {
+      const ticket = await compile(rows[ids])
+      aSt.setTicket(ticket)
+    }
+    return [n1, n2]
+  }
+
   /** Chargement pour un avatar de ses sponsorings postérieurs au plus récent ************/
   async chargerSponsorings(id, vidb, vsrv) {
     const session = stores.session
@@ -804,10 +838,11 @@ export class ConnexionCompte extends OperationUI {
       */
       this.cNotes = session.accesIdb ? await getColl('notes') : []
       this.cChats = session.accesIdb ? await getColl('chats') : []
+      this.cTickets = session.estComptable && session.accesIdb ? await getColl('tickets') : []
       this.cSponsorings = session.accesIdb ? await getColl('sponsorings') : []
       this.cMembres = session.accesIdb ? await getColl('membres') : []
 
-      // Itération sur chaque avatar: notes, chats, sponsorings
+      // Itération sur chaque avatar: notes, chats, sponsorings, tickets
       for (const [, e] of aSt.map) {
         const avatar = e.avatar
         const vidb = Versions.get(avatar.id).v
@@ -816,19 +851,23 @@ export class ConnexionCompte extends OperationUI {
         if (vidb < vsrv) Versions.set(avatar.id, objv)
 
         const na = getNg(avatar.id)
-        let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0
+        let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0, n7 = 0, n8 = 0
         const [x1, x2] = await this.chargerNotes(avatar.id, vidb, vsrv, false)
         n1 = x1
         n2 = x2
-        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6, n7, n8])
         const [x3, x4] = await this.chargerChats(avatar.id, vidb, vsrv)
         n3 = x3
         n4 = x4
-        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6, n7, n8])
         const [x5, x6] = await this.chargerSponsorings(avatar.id, vidb, vsrv)
         n5 = x5
         n6 = x6
-        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6])
+        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6, n7, n8])
+        const [x7, x8] = session.estComptable ? await this.chargerTickets(avatar.id, vidb, vsrv) : [0, 0]
+        n7 = x7
+        n8 = x8
+        syncitem.push('05' + na.id, 1, 'SYava2', [na.nom, n1, n2, n3, n4, n5, n6, n7, n8])
       }
 
       // Itération sur chaque groupe: notes, membres

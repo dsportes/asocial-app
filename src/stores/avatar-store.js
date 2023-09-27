@@ -19,6 +19,7 @@ export const useAvatarStore = defineStore('avatar', {
       - avatar: avatar,
       - sponsorings: new Map(),
       - chats: new Map(),
+      - tickets: new Map(),
       - grIds: new Set() // Ids des groupes dont l'avatar est membre
       - notes: Map des notes : clé: ids, valeur: v2
       */
@@ -200,6 +201,18 @@ export const useAvatarStore = defineStore('avatar', {
     getSponsorings: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.sponsorings : null 
+      }
+    },
+    // retourne le ticket ids de l'avatar id
+    getTicket: (state) => { return (id, ids) => { 
+      const e = state.map.get(id)
+      return e ? e.tickets.get(ids) : null 
+    }
+    },
+    // retourne la Map des tickets (clé ids) de l'avatar id
+    getTickets: (state) => { return (id) => { 
+        const e = state.map.get(id)
+        return e ? e.tickets : null 
       }
     },
 
@@ -400,6 +413,7 @@ export const useAvatarStore = defineStore('avatar', {
           notes: new Map(),
           sponsorings: new Map(),
           chats: new Map(),
+          tickets: new Map(),
           grIds: new Set() // Ids des groupes dont l'avatar est membre
          }
         this.map.set(avatar.id, e)
@@ -460,6 +474,19 @@ export const useAvatarStore = defineStore('avatar', {
       pSt.unsetPeopleChat(id, id2)
     },
 
+    setTicket (ticket) {
+      if (!ticket) return
+      const e = this.map.get(ticket.id)
+      if (!e) return
+      e.tickets.set(ticket.ids, ticket)
+    },
+    
+    delTicket (id, ids) {
+      const e = this.map.get(id)
+      if (!e) return
+      e.tickets.delete(ids)
+    },
+
     setSponsoring (sponsoring) {
       if (!sponsoring) return
       const e = this.map.get(sponsoring.id)
@@ -511,6 +538,7 @@ export const useAvatarStore = defineStore('avatar', {
         if (s._zombi) this.delSponsoring(s.id, s.ids); else this.setSponsoring(s) 
       })
       lch.forEach(c => { this.setChat(c) })
+      ltk.forEach(t => { this.setTicket(t) })
     },
 
     del (id) {

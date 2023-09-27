@@ -346,6 +346,7 @@ export default {
   EX8021: 'Le sponsor a proposé à son sponsorisé des quotas V2 supérieurs à ceux qu\'il détient',
   EX8022: 'Le sponsor a proposé à son sponsorisé des quotas supérieurs à son volume V1 encore disponible',
   EX8023: 'Le sponsor a proposé à son sponsorisé des quotas supérieurs à son volume V2 encore disponible',
+  EX8024: 'Ce ticket ne peut plus être supprimé il a été marqué reçu et enregistré par le Comptable.',
 
   EX8055: 'Quota du compte dépassé pour le volume V1. Demande:{0} - Quota:{1}',
   EX8056: 'Quota du compte dépassé pour le volume V2. Demande:{0} - Quota:{1}',
@@ -371,7 +372,7 @@ export default {
   EX9014: 'Version non trouvé ({1}) - @{0}',
   EX9015: 'Ticket non trouvé ({1}) - @{0}',
   EX9016: 'Synthese non trouvé ({1}) - @{0}',
-
+  EX9017: 'Ticket non trouvé ({1} / {2}) - @{0}',
 
   EX9100: 'Données d\'authentification illisibles (détail: {0})',
 
@@ -896,7 +897,7 @@ export default {
   SYtit: 'Chargement et synchronisation du compte',
   SYcpt: 'Compte et comptabilité',
   SYava: 'avatar : {0}',
-  SYava2: 'avatar : {0} notes:{1}/{2} chats:{3}/{4} sponsorings:{5}/{6}',
+  SYava2: 'avatar : {0} notes:{1}/{2} chats:{3}/{4} sponsorings:{5}/{6} tickets:{7}/{8}',
   SYgro: 'groupe : {0}',
   SYgro2: 'groupe : {0} notes:{1}/{2} membres:{3}/{4}',
   SYcvs: 'cartes de visite : {0} requises, {1} mises à jour',

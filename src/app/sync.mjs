@@ -166,6 +166,10 @@ export class OperationWS extends Operation {
       this.buf.putIDB(x)
       e.lch.push(await compile(x))
     }
+    for (const x of ret.rowTickets) {
+      this.buf.putIDB(x)
+      e.ltk.push(await compile(x))
+    }
     for (const x of ret.rowSponsorings) {
       const sp = await compile(x)
       if (sp._zombi) this.buf.supprIDB(x); else this.buf.putIDB(x)
