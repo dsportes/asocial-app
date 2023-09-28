@@ -1649,6 +1649,8 @@ export default {
   TKrefx: 'Référence:',
   TKer3: 'Entre 0,50€ et 100€',
   TKrefh: 'Facultatif, de 0 à 20c',
+  TKdeb: 'Ticket commençant par ...',
+  TKdebh: '1 à 6 majuscules',
 
   TK1: 'En attente',
   TK2: 'Reçu',
@@ -1661,10 +1663,10 @@ export default {
   TKrefa: 'Référence du compte:',
   TKrefc: 'Référence du Comptable:',
   TKatt: 'Tickets en attente',
-  TK1A: 'Tickets en attente de réception et d\'enegistrement',
-  TK1T: 'Tous les tickets en ligne, en attente ou enregistrés',
-  TK2A: 'Mes tickets en attente de réception et d\'enegistrement',
-  TK2T: 'Tous mes tickets en ligne, en attente ou enregistrés',
+  TK1A: 'Tickets en attente de réception',
+  TK1T: 'Tous les tickets en ligne (en attente ou enregistrés)',
+  TK2A: 'Mes tickets en attente de réception',
+  TK2T: 'Tous mes tickets en ligne (en attente ou enregistrés)',
   
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.

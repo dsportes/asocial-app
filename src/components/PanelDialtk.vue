@@ -28,6 +28,7 @@
 <script>
 import { toRef, ref, watch } from 'vue'
 import { MD } from '../app/modele.mjs'
+import { $t } from '../app/util.mjs'
 
 export default {
   name: 'PanelDialtk',

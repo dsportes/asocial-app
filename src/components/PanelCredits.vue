@@ -9,11 +9,20 @@
 
   <q-separator color="orange" class="q-my-xs"/>
 
-  <div class="row justify-around">
+  <div class="row justify-center">
     <q-radio v-model="att" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" 
-      val="A" :label="$t('TKatt')" />
+      val="A" :label="$t('TKatt')" class="q-mr-lg"/>
     <q-radio v-model="att" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" 
       val="T" :label="$t('tous')" />
+  </div>
+
+  <div v-if="session.estComptable" class="q-mt-sm row justify-center">
+    <div class="row items-center">
+      <span class="text-italic fs-md q-mr-md">{{$t('TKdeb')}}</span>
+      <q-input class="lg2" dense v-model="deb" clearable counter maxlength="6">
+        <template v-slot:hint>{{$t('TKdebh')}}</template>
+      </q-input>
+    </div>
   </div>
 
   <div class="titre-lg text-italic text-center q-mt-sm q-mb-md">
@@ -37,7 +46,7 @@ import stores from '../stores/stores.mjs'
 import ApercuTicket from '../components/ApercuTicket.vue'
 import PanelDeta from '../components/PanelDeta.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
-import { dhcool, mon, dkli, genTk, l6ToI, afficherDiag } from '../app/util.mjs'
+import { dhcool, mon, dkli, genTk, l6ToI, iToL6, afficherDiag } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
 
 export default ({
@@ -76,6 +85,7 @@ export default ({
     const lstTk = ref([]) 
     const src = ref([]) 
     const att = ref('A')
+    const deb = ref('')
 
     const test = [
       { ids: l6ToI(genTk(2023, 9)), dg: 20230928, dr: 0, di: 0, ma: 350, mc: 0, refa: '', refc: '' },
@@ -87,8 +97,16 @@ export default ({
 
     function filtre (l) {
       const r = []
-      if (att.value === 'A') { l.forEach(tk => { if (tk.dr === 0) r.push(tk)}); return r }
-      else return l
+      if (att.value === 'A' || deb.value !== '') { 
+        const d = deb.value.toUpperCase()
+        l.forEach(tk => { 
+          const c1 = d ? iToL6(tk.ids).startsWith(d) : true
+          const c2 = (att.value === 'A' && tk.dr === 0) || att.value !== 'A'
+          if (c1 && c2) r.push(tk)
+        })
+        return r 
+      }
+      return l
     }
 
     function tri (l) {
@@ -110,6 +128,11 @@ export default ({
     }
 
     watch(() => att.value, (ap, av) => {
+        lstTk.value = tri(filtre(src.value))
+      }
+    )
+
+    watch(() => deb.value, (ap, av) => {
         lstTk.value = tri(filtre(src.value))
       }
     )
@@ -139,7 +162,7 @@ export default ({
 
     return {
       nouveautk, ovnouveautk,
-      aSt, session, lstTk, att, c,
+      aSt, session, lstTk, att, deb, c,
       MD, mon, dhcool, dkli
     }
   }
@@ -151,4 +174,6 @@ export default ({
 .bord1
   border: 1px solid $grey-5
   border-radius: 5px
+.lg2
+  width: 8rem
 </style>
