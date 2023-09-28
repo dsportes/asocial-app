@@ -38,6 +38,7 @@ export default {
   rienconf: 'Rien à confirmer',
   creer: 'Créer',
   obs: '_Obsolète_',
+  tous: 'Tous',
   annuler: 'Annuler',
   retablir: 'Rétablir',
   refuser: 'Refuser',
@@ -1137,7 +1138,7 @@ export default {
   PCPcconso: 'Contrôle de la consommation',
   PCPabcs: 'Abo. + conso.',
   PCPabc: 'Abo. Conso.',
-  PCPdb: 'Débit (sur {0} j)',
+  PCPdb: 'Débit',
   PCPcr: 'Crédit',
   PCPsl: 'Solde',
   PCPrecap: 'Récapitulatif des coûts sur les 18 derniers mois',
@@ -1624,10 +1625,6 @@ export default {
   PEabo: 'Abon. & max conso.',
 
   // PanelCredits
-  PCRtkatt: 'Ticket à enregister ou à rechercher',
-  PCRtkatt2: 'Liste des tickets de crédits non intégrés ou marqués à traiter',
-  PCPdel: 'Ticket définitivement perdu ? Détruire ce ticket empêche de bénéficier d\'un crédit le référençant lors d\'un enregistrempent par le Comptable.',
-  PCdel2: 'Oui, je détruis ce ticket',
   PCRgen: 'Générer un ticket de crédit',
   PCRref: 'Référence à joindre au paiemnet: "{0} {1}"',
   PCRc1: 'Numéro du ticket',
@@ -1641,6 +1638,18 @@ export default {
   PCRd3: 'Entre 0,50€ et 100€',
 
   // Ticket
+  TKrefp: 'Référence à joindre au paiemnet: "{0} {1}"',
+  TKdel: 'Ticket définitivement perdu ? Détruire ce ticket empêche de bénéficier d\'un crédit le référençant lors d\'un enregistrempent par le Comptable.',
+  TKdel2: 'Oui, je détruis ce ticket',
+  TKenreg: 'Enregistrer le versement',
+  TKnv: 'Générer un nouveau ticket de crédit',
+  TKrec: 'Enregistrer le paiement',
+  TKgen: 'Générer',
+  TKmnt: 'Montant:',
+  TKrefx: 'Référence:',
+  TKer3: 'Entre 0,50€ et 100€',
+  TKrefh: 'Facultatif, de 0 à 20c',
+
   TK1: 'En attente',
   TK2: 'Reçu',
   TK3: 'Incorporé',
@@ -1651,6 +1660,11 @@ export default {
   TKmr: 'reçu par le Comptable:',
   TKrefa: 'Référence du compte:',
   TKrefc: 'Référence du Comptable:',
+  TKatt: 'Tickets en attente',
+  TK1A: 'Tickets en attente de réception et d\'enegistrement',
+  TK1T: 'Tous les tickets en ligne, en attente ou enregistrés',
+  TK2A: 'Mes tickets en attente de réception et d\'enegistrement',
+  TK2T: 'Tous mes tickets en ligne, en attente ou enregistrés',
   
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.

@@ -1498,9 +1498,14 @@ export class Ticket extends GenDoc {
   }
 
   static estObsolete (tk) {
-    return tk.dr === 0 && AMJ.amjUtc() > Ticket.dlv(tk)
+    const d = Ticket.dlv(tk)
+    return tk.dr === 0 && AMJ.amjUtc() > d
   }
 
+  static estSupprimable (tk) {
+    const d = Ticket.dlv(tk)
+    return tk.dr === 0 && AMJ.amjUtc() <= d
+  }
 
   clone () {
     const t = new Ticket()

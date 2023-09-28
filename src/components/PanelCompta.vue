@@ -159,22 +159,7 @@
       </div>
 
       <div v-if="c.estA" class="column maauto q-my-sm full-width">
-        <div>{{$t('PCPprefa' + c.cumref[0], [dhcool(c.cumref[1]), c.cumref[2]])}}</div>
- 
-        <div :class="dkli(1) + ' row items-center full-width q-mt-sm'">
-          <div class="col-3 text-center">{{$t('PCPabc')}}</div>
-          <div class="col-3 text-center">{{$t('PCPdb')}}</div>
-          <div class="col-3 text-center">{{$t('PCPcr')}}</div>
-          <div class="col-3 text-center">{{$t('PCPsl')}}</div>
-        </div>
-        <div class="row items-center full-width">
-          <div class="col-3 font-mono text-center">{{mon(c.cumulAbo, 2) + ' + ' + mon(c.cumulConso, 2)}}</div>
-          <div class="col-3 font-mono text-center">{{mon(c.cumulCouts, 2)}}</div>
-          <div class="col-3 font-mono text-center">{{mon(cr)}}</div>
-          <div :class="'col-3 font-mono text-center ' + alsolde">{{mon(cr - c.cumulCouts, 2)}}</div>
-        </div>
-
-        <div v-if="nbj > 2" class="titre-md q-my-sm">{{$t('PCPcouv', [nbj])}}</div>
+        <panel-deta :c="c" :total="aSt.compta.credits.total"/>
       </div>
 
       <div v-if="c.decouvert" class="titre-md q-my-sm">
@@ -266,13 +251,14 @@ import { UNITEV1, UNITEV2, AMJ, Compteurs, Tarif } from '../app/api.mjs'
 import { dhcool, edqt, mon, nbn, edvol, dkli, $t } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
 import MoisM from './MoisM.vue'
+import PanelDeta from '../components/PanelDeta.vue'
 
 export default ({
   name: 'PanelCompta',
 
   props: { },
 
-  components: { MoisM },
+  components: { MoisM, PanelDeta },
 
   computed: {
     icoabo1 () {
@@ -333,19 +319,11 @@ export default ({
 
     aboM () { return this.c.vd[this.idm][Compteurs.CA] },
     consoM () {  return this.c.vd[this.idm][Compteurs.CC] },
-    cr () { 
-      const x = this.aSt.compta.credits
-      return x ? x.total : 8
-    },
-    nbj () { return this.c.nbj(this.cr) },
+    nbj () { return this.c.nbj(this.aSt.compta.credits.total) },
     txconso () { return this.c.pourcents.pcc },
     alconso () {
       if (this.txconso < 80) return ''
       return ' bg-yellow-3 text-bold text-' + (this.txconso > 100 ? 'negative' : 'warning')
-    },
-    alsolde () {
-      const x = ' bg-yellow-3 text-bold text-'
-      return this.nbj <= 0 ? x + 'negative' : (this.nbj < 60 ? x + 'warning' : '')
     },
   },
 
