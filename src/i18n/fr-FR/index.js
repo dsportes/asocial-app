@@ -1640,6 +1640,18 @@ export default {
   PCRd2: 'Numéro non généré par l\'application',
   PCRd3: 'Entre 0,50€ et 100€',
 
+  // Ticket
+  TK1: 'En attente',
+  TK2: 'Reçu',
+  TK3: 'Incorporé',
+  TKdg: 'Génération le: {0}',
+  TKdr: 'Réception le: {0}',
+  TKdi: 'Incorporation le: {0}',
+  TKmd: 'Montant déclaré:',
+  TKmr: 'reçu par le Comptable:',
+  TKrefa: 'Référence du compte:',
+  TKrefc: 'Référence du Comptable:',
+  
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.
 - Au bout de 365 jours d'inactivité, le compte sera automatiquement désactivé.

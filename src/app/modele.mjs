@@ -1024,7 +1024,7 @@ export class Compta extends GenDoc {
       const cr = row.credits !== true ? decode(await decrypter(session.clek, row.credits)) 
         : { total: 2, tickets: [] }
       this.credits = { total: cr.total, tickets: [] }
-      cr.credits.tickets.forEach(tk => { 
+      cr.tickets.forEach(tk => { 
         if (!Ticket.estObsolete(tk)) this.credits.tickets.push(tk)
       })
     }
@@ -1098,13 +1098,23 @@ export class Compta extends GenDoc {
 
   async majCredits (m) {
     const credits = { total: this.credits.total, tickets: [] }
+
+    function incorp (tk) {
+      m.delete(tk.ids)
+      if (!Ticket.estObsolete(tk)) {
+        if (!tk.di) {
+          tk.di = AMJ.amjUtc()
+          credits.total += tk.ma > tk.mc ? tk.mc : tk.ma
+        }
+        credits.tickets.push(tk)
+      }
+    }
+
     this.credits.tickets.forEach(t => {
-      if (m.has(t.ids)) {
-        credits.tickets.push(m.get(ids))
-        m.delete(ids)
-      } else if (!Ticket.estObsolete(t)) credits.tickets.push(t)
+      const tk = m.get(t.ids)
+      incorp(tk || t)
     })
-    if (m.size) m.forEach((ids,tk) => { credits.tickets.push(tk)})
+    if (m.size) m.forEach((ids, tk) => { incorp(tk)})
     const session = stores.session
     return await crypter(session.clek, new Uint8Array(encode(credits)))
   }

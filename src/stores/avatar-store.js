@@ -529,7 +529,7 @@ export const useAvatarStore = defineStore('avatar', {
     /* Mise jour groupée pour un avatar
     e : { id, av: avatar, lch: [], lsp: [], lsc: [] }
     */
-    lotMaj ({id, av, lch, lsp, lsc}) {
+    lotMaj ({id, av, lch, lsp, lsc, ltk}) {
       if (av) this.setAvatar(av)
       lsc.forEach(s => { 
         if (s._zombi) this.delNote(s.id, s.ids); else this.setNote(s) 

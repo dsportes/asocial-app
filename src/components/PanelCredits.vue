@@ -1,5 +1,9 @@
 <template>
   <div class="q-pa-sm full-width">
+    <div v-for="(tk, idx) in lstTk" :key="tk.ids">
+      <apercu-ticket :tk="tk" :idx="idx" />
+    </div>
+    <!--
     <div v-if="session.estComptable" class="largeur40 maauto">
       <div class="titre-lg text-italic">{{$t('PCRtkatt2')}}</div>
 
@@ -58,7 +62,7 @@
         <q-btn dense size="sm" icon="close" color="negative" @click="del(tk)"/>
       </div>
     </div>
-
+-->
   <q-dialog v-model="confirmdel">
     <q-card class="bs">
       <q-card-section class="q-pa-md fs-md text-center">
@@ -76,7 +80,8 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { dhcool, mon, dkli, $t, afficherDiag } from '../app/util.mjs'
+import ApercuTicket from '../components/ApercuTicket.vue'
+import { dhcool, mon, dkli, genTk, l6ToI, $t, afficherDiag } from '../app/util.mjs'
 import { GenererRefCredit, DeleteRefCredit } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 import { cleOK } from '../app/api.mjs'
@@ -86,7 +91,7 @@ export default ({
 
   props: { },
 
-  components: { },
+  components: { ApercuTicket },
 
   watch: {
     tki (ap, av) {
@@ -128,6 +133,7 @@ export default ({
   },
 
   methods: {
+    /*
     raz () { this.tki = 0; this.com = '', this.m = '0', this.dhe = 0, this.cr = false },
     async enreg () {
 
@@ -152,6 +158,7 @@ export default ({
       MD.fD()
       await new DeleteRefCredit().run(this.tk)
     }
+    */
   },
 
   setup () {
@@ -159,11 +166,19 @@ export default ({
     const aSt = stores.avatar
     const compta = aSt.compta
 
+    const lstTk = [
+      { ids: l6ToI(genTk(2023, 9)), dg: 20230928, dr: 0, di: 0, ma: 350, mc: 0, refa: '', refc: '' },
+      { ids: l6ToI(genTk(2023, 9)), dg: 20230927, dr: 20230928, di: 0, ma: 350, mc: 0, refa: '', refc: '' },
+      { ids: l6ToI(genTk(2023, 9)), dg: 20230926, dr: 20230927, di: 20230927, ma: 350, mc: 0, refa: '', refc: '' },
+      { ids: l6ToI(genTk(2023, 9)), dg: 20230927, dr: 20230928, di: 0, ma: 350, mc: 300, refa: '', refc: 'Erreur montant' },
+      { ids: l6ToI(genTk(2023, 9)), dg: 20230927, dr: 20230928, di: 0, ma: 500, mc: 500, refa: 'Avoir: 43RX', refc: 'OK' },
+    ]
+
     const confirmdel = ref(false)
     function ovconfirmdel () { MD.oD(confirmdel)}
 
     return {
-      aSt, session,
+      aSt, session, lstTk,
       confirmdel, ovconfirmdel,
       MD, mon, dhcool, dkli
     }

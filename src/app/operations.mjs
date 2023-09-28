@@ -1773,7 +1773,7 @@ export class SetEspaceOptionA extends OperationUI {
 }
 
 /* `PlusTicket` : ajout d'un ticket à un compte A
-et ajout d'un ticket au Comptable
+et ajout du ticket au Comptable
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
 - `credits` : credits crypté par la clé K du compte
@@ -1840,12 +1840,20 @@ export class MoinsTicket extends OperationUI {
 }
 
 /* `RafraichirTickets` : nouvelles versions des tickets cités
+et incorporation au solde le cas échéant
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
 - `mtk` : map des tickets. clé: ids, valeur: version détenue en session
 
 Retour: 
 - rowTickets: liste des rows des tickets ayant changé
+*/
+/* `MajCredits` : mise a jour du crédits d'un compte A
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `credits` : credits crypté par la clé K du compte
+
+Retour: rien
 */
 export class RafraichirTickets extends OperationUI {
   constructor () { super('OPtkt') }
@@ -1861,13 +1869,9 @@ export class RafraichirTickets extends OperationUI {
       const ret = this.tr(await post(this, 'RafraichirTickets', args))
       if (ret.rowTickets) {
         const m = new Map()
-        for(const row of ret.rowTickets) {
-          const t = await compile(row)
-          m.set(t.ids, t)
-        }
-        const creditsK = await compta.majCredits(m)
-
-        const args = { token: session.authToken, creditsK }
+        for(const row of ret.rowTickets) m.set(t.ids, await compile(row))
+        const credits = await compta.majCredits(m)
+        const args = { token: session.authToken, credits }
         this.tr(await post(this, 'MajCredits', args))
       }
       this.finOK()
@@ -1876,3 +1880,28 @@ export class RafraichirTickets extends OperationUI {
     }
   }
 }
+
+/* `ReceptionTicket` : réception d'un ticket par le Comptable
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `ids` : du ticket
+- `mc` : montant reçu
+- `refc` : référence du Comptable
+
+Retour: rien
+*/
+export class ReceptionTicket extends OperationUI {
+  constructor () { super('OPtkt') }
+
+  async run (ids, mc, refc) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ids, mc, refc }
+      this.tr(await post(this, 'ReceptionTicket', args))
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+

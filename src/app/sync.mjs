@@ -154,7 +154,7 @@ export class OperationWS extends Operation {
       avatar = await compile(ret.rowAvatar)
       this.buf.putIDB(ret.rowAvatar)
     }
-    const e = { id, av: avatar, lch: [], lsp: [], lsc: [] }
+    const e = { id, av: avatar, lch: [], lsp: [], lsc: [], ltk: [] }
     this.avMaj.set(id, e)
     for (const x of ret.rowNotes) {
       this.buf.putIDB(x)
@@ -166,7 +166,7 @@ export class OperationWS extends Operation {
       this.buf.putIDB(x)
       e.lch.push(await compile(x))
     }
-    for (const x of ret.rowTickets) {
+    if (ret.rowTickets) for (const x of ret.rowTickets) {
       this.buf.putIDB(x)
       e.ltk.push(await compile(x))
     }
