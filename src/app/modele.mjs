@@ -4,7 +4,7 @@ import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
-import { ID, isAppExc, d13, d14, Compteurs, UNITEV1, UNITEV2, AMJ, nomFichier, limitesjour, lcSynt } from './api.mjs'
+import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -953,7 +953,7 @@ export class Compta extends GenDoc {
 
   get mtk () {
     const m = {}
-    if (this.credits) this.credits.tickets.forEach(tk => { m[tk.ids] = tk.v })
+    if (this.credits) this.credits.tickets.forEach(tk => { m[tk.ids] = tk.v || 0})
     return m
   }
 
@@ -1096,13 +1096,29 @@ export class Compta extends GenDoc {
     return await crypter(session.clek, new Uint8Array(encode(credits)))
   }
 
+    /* Depuis la liste actuelle des tickets de compta,
+  - enlève les obsolètes,
+  - ajoute tk s'il n'y était pas, le remplace sinon
+  - retourne credits crypté par la clé K
+  */
+  async creditsUnsetTk (ids) {
+    const credits = { total: this.credits.total, tickets: [] }
+    this.credits.tickets.forEach(t => {
+      if (!Ticket.estObsolete(t)) {
+        if (t.ids !== ids) credits.tickets.push(t)
+      }
+    })
+    const session = stores.session
+    return await crypter(session.clek, new Uint8Array(encode(credits)))
+  }
+
   async majCredits (m) {
     const credits = { total: this.credits.total, tickets: [] }
 
     function incorp (tk) {
       m.delete(tk.ids)
       if (!Ticket.estObsolete(tk)) {
-        if (!tk.di) {
+        if (tk.dr && !tk.di) {
           tk.di = AMJ.amjUtc()
           credits.total += tk.ma > tk.mc ? tk.mc : tk.ma
         }
@@ -1519,9 +1535,9 @@ export class Ticket extends GenDoc {
     const r = { 
       id: ID.duComptable(session.ns),
       ids, ma, refa: refa || 0, 
-      mc: 0, refc: 0, di: 0, dr: 0, dg: Date.now()
+      mc: 0, refc: 0, di: 0, dr: 0, dg: AMJ.amjUtc()
     }
-    const rowTicket = { _row: 'tickets', id: r.id, ids, _data_: new Uint8Array(encode(r)) }
+    const rowTicket = { _nom: 'tickets', id: r.id, ids, _data_: new Uint8Array(encode(r)) }
     return { rowTicket, ticket: r }
   }
 

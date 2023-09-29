@@ -7,6 +7,16 @@
   <q-btn v-if="!session.estComptable" class="q-my-xs" dense color="primary" 
     icon="add" :label="$t('TKnv')" @click="nvtk"/>
 
+  <div v-if="!session.estComptable" class="q-ma-xs q-pa-xs bord1">
+    <div class="text-italic titre-md">{{$t('TKinc')}}</div>
+    <div v-if="dhinc" class="row titre-sm">
+      <span class="q-mr-sm">{{$t('TKverif', [dhcool(dhinc)])}}</span>
+      <span>{{$t('TKnbt', nbinc, { count: nbinc })}}</span>
+    </div>
+    <q-btn class="q-my-xs" flat size="sm" dense color="primary" 
+      icon="check" :label="$t('TKbtnv')" @click="rafraichirIncorp"/>
+  </div>
+
   <q-separator color="orange" class="q-my-xs"/>
 
   <div class="row justify-center">
@@ -41,13 +51,15 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuTicket from '../components/ApercuTicket.vue'
 import PanelDeta from '../components/PanelDeta.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import { dhcool, mon, dkli, genTk, l6ToI, iToL6, afficherDiag } from '../app/util.mjs'
+import { PlusTicket, RafraichirTickets } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
+import { AMJ } from '../app/api.mjs'
 
 export default ({
   name: 'PanelCredits',
@@ -71,9 +83,11 @@ export default ({
       this.ovnouveautk()
     },
     async generer ({m, ref}) {
-      console.log(m, ref)
+      const [ax, mx, j] = AMJ.aaaammjj(AMJ.amjUtc())
+      const tkx = genTk(ax, mx)
+      const ids = l6ToI(tkx)
       MD.fD()
-      const tkx = genTk(2023, 9)
+      await new PlusTicket().run(m, ref, ids)
       await afficherDiag(this.$t('TKrefp', [this.session.org, tkx]))
     }
   },
@@ -86,7 +100,10 @@ export default ({
     const src = ref([]) 
     const att = ref('A')
     const deb = ref('')
+    const dhinc = ref(0)
+    const nbinc = ref(0)
 
+    /*
     const test = [
       { ids: l6ToI(genTk(2023, 9)), dg: 20230928, dr: 0, di: 0, ma: 350, mc: 0, refa: '', refc: '' },
       { ids: l6ToI(genTk(2023, 9)), dg: 20230927, dr: 20230928, di: 0, ma: 350, mc: 0, refa: '', refc: '' },
@@ -94,6 +111,7 @@ export default ({
       { ids: l6ToI(genTk(2023, 9)), dg: 20230927, dr: 20230928, di: 0, ma: 350, mc: 300, refa: '', refc: 'Erreur montant' },
       { ids: l6ToI(genTk(2023, 9)), dg: 20230927, dr: 20230928, di: 0, ma: 500, mc: 500, refa: 'Avoir: 43RX', refc: 'OK' },
     ]
+    */
 
     function filtre (l) {
       const r = []
@@ -110,20 +128,18 @@ export default ({
     }
 
     function tri (l) {
-      if (att.value === 'A') l.sort((a, b) => { return r.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : 1) })
+      if (att.value === 'A') l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : 1) })
       else l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : -1) })
       return l
     }
 
     function load () {
-      src.value = test
-      /*
+      // src.value = test
       if (session.estComptable) {
-        src.value = Array.from(aSt.compte.tickets.values())
+        src.value = aSt.getTickets
       } else {
         src.value = aSt.compta.credits.tickets
       }
-      */
       lstTk.value = tri(filtre(src.value))
     }
 
@@ -155,15 +171,24 @@ export default ({
       })
     }
 
-    load()
+    async function rafraichirIncorp () {
+      dhinc.value = Date.now()
+      nbinc.value = await new RafraichirTickets().run()
+      load()
+    }
+
+    onMounted(async () => {
+      if (!session.estComptable) await rafraichirIncorp()
+      else load()
+    })
 
     const nouveautk = ref(false)
     function ovnouveautk () { MD.oD(nouveautk) }
 
     return {
-      nouveautk, ovnouveautk,
+      nouveautk, ovnouveautk, rafraichirIncorp, dhinc, nbinc,
       aSt, session, lstTk, att, deb, c,
-      MD, mon, dhcool, dkli
+      MD, mon, dhcool, dkli, AMJ
     }
   }
 })

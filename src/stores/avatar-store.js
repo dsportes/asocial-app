@@ -209,11 +209,10 @@ export const useAvatarStore = defineStore('avatar', {
       return e ? e.tickets.get(ids) : null 
     }
     },
-    // retourne la Map des tickets (clé ids) de l'avatar id
-    getTickets: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.tickets : null 
-      }
+    // retourne l'array des tickets de l'avatar du compte
+    getTickets: (state) => {
+        const e = state.map.get(stores.session.compteId)
+        return e ? Array.from(e.tickets.values()) : []
     },
 
     // Set des ids des groupes de l'avatar courant

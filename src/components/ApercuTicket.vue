@@ -39,7 +39,9 @@
       <q-btn v-if="!session.estComptable && Ticket.estSupprimable(tk)" class="q-mt-xs"
         dense color="warning" icon="close" :label="$t('supprimer')" @click="deltk"/>
       <q-btn v-if="session.estComptable && Ticket.estSupprimable(tk)" class="q-mt-xs"
-        dense color="warning" icon="check" :label="$t('TKenreg')" @click="recep"/>
+        dense color="warning" icon="check" :label="$t('TKenreg1')" @click="recep1"/>
+      <q-btn v-if="session.estComptable && Ticket.estSupprimable(tk)" class="q-ml-xs q-mt-xs"
+        dense color="warning" icon="check" :label="$t('TKenreg2')" @click="recep2"/>
       <q-separator class="q-mb-sm" size="3px"/>
     </div>
   </q-expansion-item>
@@ -68,6 +70,7 @@ import { mon, iToL6, dkli } from '../app/util.mjs'
 import { AMJ } from '../app/api.mjs'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import { MD, Ticket } from '../app/modele.mjs'
+import { ReceptionTicket, MoinsTicket } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuTicket',
@@ -95,16 +98,21 @@ export default {
       if (!await this.session.editUrgence()) return
       this.ovconfirmdel()
     },
-    async recep () {      
+    async recep1 () {      
+      if (!await this.session.editUrgence()) return
+      await this.reception ({ m: this.tk.ma, ref: ''})
+    },
+    async recep2 () {      
       if (!await this.session.editUrgence()) return
       this.ovreceptk()
     },
     async reception ({m, ref}) {
-      console.log(m, ref)
       MD.fD()
+      await new ReceptionTicket().run(this.tk.ids, m, ref)
     },
     async deletetk () {
       MD.fD()
+      await new MoinsTicket().run(this.tk.ids)
     }
   },
 

@@ -1641,7 +1641,8 @@ export default {
   TKrefp: 'Référence à joindre au paiemnet: "{0} {1}"',
   TKdel: 'Ticket définitivement perdu ? Détruire ce ticket empêche de bénéficier d\'un crédit le référençant lors d\'un enregistrempent par le Comptable.',
   TKdel2: 'Oui, je détruis ce ticket',
-  TKenreg: 'Enregistrer le versement',
+  TKenreg1: 'Valider tel quel',
+  TKenreg2: 'Ajuster l\'enregistrement',
   TKnv: 'Générer un nouveau ticket de crédit',
   TKrec: 'Enregistrer le paiement',
   TKgen: 'Générer',
@@ -1667,6 +1668,10 @@ export default {
   TK1T: 'Tous les tickets en ligne (en attente ou enregistrés)',
   TK2A: 'Mes tickets en attente de réception',
   TK2T: 'Tous mes tickets en ligne (en attente ou enregistrés)',
+  TKinc: 'Crédits reçus par le Comptable',
+  TKverif: 'Dernière récupération {0}.',
+  TKnbt: 'Pas de nouveau ticket incorporé | Un nouveau ticket incorporé | {count} nouveaux tickets incorporés',
+  TKbtnv: 'Vérifier s\'il y en a de nouveaux',
   
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.

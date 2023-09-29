@@ -447,9 +447,14 @@ export class ConnexionCompte extends OperationUI {
     }
     if (rowTickets && rowTickets.length) {
       for (const row of rowTickets) {
-        this.buf.putIDB(row)
-        rows[row.ids] = row
-        n2++
+        if (!row._data_) {
+          this.buf.supprIDB(row)
+          delete rows[row.ids]
+        } else {
+          this.buf.putIDB(row)
+          rows[row.ids] = row
+          n2++
+        }
       }
     }
     const aSt = stores.avatar

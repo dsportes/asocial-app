@@ -1,5 +1,5 @@
 ## TODO le 23 sept.
-Gestion des crédits
+Gestion des crédits: gérer une dlv sur tickets pour purger les tickets supprimés. Ou voir si on les considère comme archivés au bout d'un certain temps (mais retrouve-t-on sont année mois depuis ids ?). Normalement le traitement d'arrêté devrait les purger avec les autres.
 
 gérer les restrictions - fait en partie pour figé
 

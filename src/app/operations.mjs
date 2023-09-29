@@ -1784,19 +1784,16 @@ Retour: rien
 export class PlusTicket extends OperationUI {
   constructor () { super('OPtkt') }
 
-  async run (ma, refa) { 
+  async run (ma, refa, ids) { 
     try {
       const session = stores.session
       const aSt = stores.avatar
 
-      const [a, m, j] = AMJ.aaaammjj(AMJ.amjUtc())
-      const ids = l6ToI(genTk(a, m))
-
       const compta = aSt.compta
       const { rowTicket, ticket } = Ticket.nouveauRow(ids, ma, refa)
-      const creditsK = await compta.creditsSetTk(ticket)
+      const credits = await compta.creditsSetTk(ticket)
 
-      const args = { token: session.authToken, rowTicket, creditsK }
+      const args = { token: session.authToken, rowTicket, credits }
       this.tr(await post(this, 'PlusTicket', args))
       this.finOK()
     } catch (e) {
@@ -1804,7 +1801,6 @@ export class PlusTicket extends OperationUI {
     }
   }
 }
-
 
 /* `MoinsTicket` : retrait d'un ticket d'un compte A
 et retrait (zombi) du ticket du Comptable
@@ -1818,20 +1814,16 @@ Retour: rien
 export class MoinsTicket extends OperationUI {
   constructor () { super('OPtkt') }
 
-  async run (ma, refa) { 
+  async run (ids) { 
     try {
       const session = stores.session
       const aSt = stores.avatar
 
-      const [a, m, j] = AMJ.aaaammjj(AMJ.amjUtc())
-      const ids = l6ToI(genTk(a, m))
-
       const compta = aSt.compta
-      const { rowTicket, ticket } = Ticket.nouveauRow(ids, ma, refa)
-      const creditsK = await compta.creditsSetTk(ticket)
+      const credits = await compta.creditsUnsetTk(ids)
 
-      const args = { token: session.authToken, rowTicket, creditsK }
-      this.tr(await post(this, 'PlusCreditsA', args))
+      const args = { token: session.authToken, credits, ids }
+      this.tr(await post(this, 'MoinsTicket', args))
       this.finOK()
     } catch (e) {
       return await this.finKO(e)
@@ -1867,19 +1859,23 @@ export class RafraichirTickets extends OperationUI {
       const mtk = compta.mtk
       const args = { token: session.authToken, mtk }
       const ret = this.tr(await post(this, 'RafraichirTickets', args))
+      let nb = 0
       if (ret.rowTickets) {
+        nb = ret.rowTickets.length
         const m = new Map()
-        for(const row of ret.rowTickets) m.set(t.ids, await compile(row))
+        for(const row of ret.rowTickets) 
+          m.set(row.ids, await compile(row))
         const credits = await compta.majCredits(m)
         const args = { token: session.authToken, credits }
         this.tr(await post(this, 'MajCredits', args))
       }
-      this.finOK()
+      return this.finOK(nb)
     } catch (e) {
       return await this.finKO(e)
     }
   }
 }
+
 
 /* `ReceptionTicket` : réception d'un ticket par le Comptable
 POST:
