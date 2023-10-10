@@ -19,7 +19,7 @@
           </span>
           <bouton-bulle :idtext="'nr' + notif.nr"/>
       </div>
-      <show-html class="q-mt-xs bord" :texte="notif.texte" :idx="idx" 
+      <show-html class="q-mt-xs bord" :texte="texteEd" :idx="idx" 
         maxh="3rem" zoom scroll/>
     </div>
     <div v-if="type < 3 && (!notif || !notif.texte)" class="row">
@@ -111,6 +111,12 @@ export default {
   },
 
   computed: {
+    texteEd () {
+      if (this.notif.texte.startsWith('%')) {
+        return this.$t('ANrntf' + this.notif.texte.substring(1, 2))
+        return this.notif.texte
+      } else return this.notif.texte
+    },
     nomSource () {
       if (this.type > 2) return ''
       if (this.type === 0) return this.$t('admin')

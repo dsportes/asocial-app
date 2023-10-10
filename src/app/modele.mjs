@@ -1038,9 +1038,9 @@ export class Compta extends GenDoc {
     this.pc = this.compteurs.pourcents.max
     let chg = session.setNotifQ(this.compteurs.notifQ)
     if (this.estA) {
-      if (session.setNotifQ(this.compteurs.notifS(this.credits.total))) chg = true
+      if (session.setNotifS(this.compteurs.notifS(this.credits.total))) chg = true
     } else {
-      if (session.setNotifQ(this.compteurs.notifX)) chg = true
+      if (session.setNotifS(this.compteurs.notifX)) chg = true
     }
     if (chg) session.setBlocage()
 

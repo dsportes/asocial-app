@@ -2,7 +2,7 @@
   <q-expansion-item switch-toggle-side dense :class="dkli(idx) + ' full-width'" group="gr1">
     <template v-slot:header>
       <div class="row full-width items-center">
-        <div class="col-auto text-bold fs-md font-mono">{{iToL6(tk.ids)}}</div>
+        <div class="col-auto text-bold fs-md font-mono">{{idTkToL6(tk.ids)}}</div>
         <div class="col q-ml-md row items-center">
           <div class="col-8 row items-center">
             <div class="fs-md font-mono">{{aMj.j}}</div>
@@ -66,7 +66,7 @@
 
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { mon, iToL6, dkli } from '../app/util.mjs'
+import { mon, idTkToL6, dkli } from '../app/util.mjs'
 import { AMJ } from '../app/api.mjs'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import { MD, Ticket } from '../app/modele.mjs'
@@ -128,7 +128,7 @@ export default {
 
     return {
       confirmdel, ovconfirmdel, receptk, ovreceptk,
-      iToL6, mon, dkli, AMJ, MD, Ticket, session
+      idTkToL6, mon, dkli, AMJ, MD, Ticket, session
     }
   }
 }

@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { ID, AppExc, appexc, E_WS, AMJ, Compteurs, limitesjour } from './api.mjs'
-import { $t, hash, inverse, sleep, l6ToI, genTk } from './util.mjs'
+import { $t, hash, inverse, sleep} from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
 import { NomGenerique, Avatar, Chat, Compta, Note, Ticket,

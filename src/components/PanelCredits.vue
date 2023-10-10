@@ -56,7 +56,7 @@ import stores from '../stores/stores.mjs'
 import ApercuTicket from '../components/ApercuTicket.vue'
 import PanelDeta from '../components/PanelDeta.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
-import { dhcool, mon, dkli, genTk, l6ToI, iToL6, afficherDiag } from '../app/util.mjs'
+import { dhcool, mon, dkli, genIdTk, l6ToI, idTkToL6, afficherDiag } from '../app/util.mjs'
 import { PlusTicket, RafraichirTickets } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 import { AMJ } from '../app/api.mjs'
@@ -84,8 +84,8 @@ export default ({
     },
     async generer ({m, ref}) {
       const [ax, mx, j] = AMJ.aaaammjj(AMJ.amjUtc())
-      const tkx = genTk(ax, mx)
-      const ids = l6ToI(tkx)
+      const ids = genIdTk(ax, mx)
+      const tkx = idTkToL6(ids)
       MD.fD()
       await new PlusTicket().run(m, ref, ids)
       await afficherDiag(this.$t('TKrefp', [this.session.org, tkx]))
@@ -103,22 +103,12 @@ export default ({
     const dhinc = ref(0)
     const nbinc = ref(0)
 
-    /*
-    const test = [
-      { ids: l6ToI(genTk(2023, 9)), dg: 20230928, dr: 0, di: 0, ma: 350, mc: 0, refa: '', refc: '' },
-      { ids: l6ToI(genTk(2023, 9)), dg: 20230927, dr: 20230928, di: 0, ma: 350, mc: 0, refa: '', refc: '' },
-      { ids: l6ToI(genTk(2023, 9)), dg: 20230926, dr: 20230927, di: 20230927, ma: 350, mc: 0, refa: '', refc: '' },
-      { ids: l6ToI(genTk(2023, 9)), dg: 20230927, dr: 20230928, di: 0, ma: 350, mc: 300, refa: '', refc: 'Erreur montant' },
-      { ids: l6ToI(genTk(2023, 9)), dg: 20230927, dr: 20230928, di: 0, ma: 500, mc: 500, refa: 'Avoir: 43RX', refc: 'OK' },
-    ]
-    */
-
     function filtre (l) {
       const r = []
       if (att.value === 'A' || deb.value !== '') { 
         const d = deb.value.toUpperCase()
         l.forEach(tk => { 
-          const c1 = d ? iToL6(tk.ids).startsWith(d) : true
+          const c1 = d ? idTkToL6(tk.ids).startsWith(d) : true
           const c2 = (att.value === 'A' && tk.dr === 0) || att.value !== 'A'
           if (c1 && c2) r.push(tk)
         })

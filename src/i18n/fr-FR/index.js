@@ -1491,6 +1491,12 @@ export default {
   ANax6: 'Un sponsor ne peut pas éditer une notification déclarée par le Comptable',
   ANro7: 'Seuls le Comptable et le(s) sponsor(s) peuvent éditer une notification pour un compte"',
   ANmx7: 'Seuls le Comptable et le(s) sponsor(s) peuvent déclarer une notification pour un compte"',
+  ANrntfA: 'La consommation excède le plafond attribué.',
+  ANrntfB: 'La consommation dépasse 90% du plafond attribué.',
+  ANrntfC: 'Le crédit est épuisé.',
+  ANrntfD: 'Le crédit sera épuisé dans quelques jours.',
+  ANrntfE: 'Le volume occupé dépasse celui autorisé.',
+  ANrntfD: 'Le volume occupé dépasse 90% de celui autorisé.',
 
   ANcible1: 'générale',
   ANcible2: 'collective sur la tranche de quotas',
