@@ -1,7 +1,8 @@
-## TODO le 23 sept.
-Gestion des crédits: gérer une dlv sur tickets pour purger les tickets supprimés. Ou voir si on les considère comme archivés au bout d'un certain temps (mais retrouve-t-on sont année mois depuis ids ?). Normalement le traitement d'arrêté devrait les purger avec les autres.
+## TODO le 10 oct.
 
 gérer les restrictions - fait en partie pour figé
+
+Révision chats avec gestion raccrocher et décompte des chats.
 
 Décomptes des chats et groupes
 
@@ -11,10 +12,10 @@ GC d'espace figé
 
 Révision complète groupe et actions possibles
 
-Révision chats avec gestion raccrocher et décompte des chats
-
 _Arrêtés mensuels_ (**CSV**)
-- tickets réceptionnés dans le mois.
+- tickets réceptionnés dans le mois. gérer pour le Comptable le "dernier mois archivé".
+  - une ligne par ticket dont l'ids débute par le mois.
+  - une fois archivé dans un secret du Comptable, opération du serveur pour détruire tous les tickets du mois et antérieurs.
 - une ligne par comptas d'extrait des compteurs relatifs au mois M-1 (dès qu'il est figé).
 
 
