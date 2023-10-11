@@ -67,7 +67,7 @@ export default ({
   },
 
   methods: {
-    async notif () { await this.ui.setPage('compta', 'notif')},
+    async notif () { this.ui.setPage('compta', 'notif')},
     deconnecter () {
       this.ui.resetExc()
       deconnexion()

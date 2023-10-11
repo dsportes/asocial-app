@@ -25,7 +25,7 @@ export class MD {
 
   static oD (m) {
     const ui = stores.ui
-    ui.menug = false
+    ui.closeMenug()
     if (typeof m === 'string') {
       MD.dialogStack.push(MD.app[m])
       MD.app[m].value = true
@@ -1593,7 +1593,7 @@ export class Chat extends GenDoc {
     const session = stores.session
     this.vsh = row.vsh || 0
     this.r = row.r || 0
-    this.mc = row.mc
+    this.mc = row.mc || new Uint8Array()
     this.seq = row.seq
     if (row.cc.length === 256) {
       const av = aSt.getAvatar(this.id)
@@ -1606,8 +1606,8 @@ export class Chat extends GenDoc {
     const x = decode(await decrypter(this.cc, row.contc))
     this.naE = NomGenerique.from(x.na)
     this.idsE = await Chat.getIds(this.naE, this.naI)
-    this.dh = x.dh
-    this.txt = x.txt
+    this.dh = x.dh || 0
+    this.txt = x.txt || ''
     this.cv = row.cva ? decode(await decrypter(this.naE.rnd, row.cva)) : null
   }
 
@@ -1616,7 +1616,7 @@ export class Chat extends GenDoc {
   }}
 
   /*
-  rel: 0 (raccroché pour le chat E, 1 en ligne pour le chat I)
+  r: 0 (raccroché pour le chat E, 1 en ligne pour le chat I)
   naI, naE : na des avatars I et E
   dh : date-heure d'écriture
   txt: texte du chat
@@ -1625,10 +1625,10 @@ export class Chat extends GenDoc {
   publicKey: clé publique de I. Si null récupérée depuis son avatar
   mc: mot clés attribués
   */
-  static async nouveauRow (rel, naI, naE, contc, cc, pubE, mc) {
+  static async nouveauRow (rac, naI, naE, contc, cc, pubE, mc) {
     const ids = await Chat.getIds(naI, naE)
     const id = naI.id
-    const r = { id, ids, r: rel, seq: 1, contc } // v vcv cva sont mis par le serveur
+    const r = { id, ids, r: rac, seq: 1, contc } // v vcv cva sont mis par le serveur
     if (mc) r.mc = mc
     if (pubE) {
       r.cc = await crypterRSA(pubE, cc)

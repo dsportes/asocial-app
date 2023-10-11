@@ -5,24 +5,8 @@ import { MD } from '../app/modele.mjs'
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
-    page: 'login',
-    pageback: '',
-    pagetab: '',
-
-    pagesF: new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 
-      'groupesac', 'groupe', 'notes']),
-    tabF: new Set(['membres']),
-    pagesB: new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes', 'ficavion']),
-    menu: false,
-    menug: false,
-
     diag: '',
     diagresolve: null,
-
-    etroite: true,
-    seuillarge: 900,
-    drawer: 250,
-    lgmax: 640,
 
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
@@ -43,38 +27,12 @@ export const useUiStore = defineStore('ui', {
   }),
 
   getters: {
-    filtre: (state) => {
-      if (!state.pagesF.has(state.page)) return false
-      return !state.pagetab || state.tabF.has(state.pagetab)
-    }
   },
 
   actions: {
-    setEtroite (v) {
-      this.etroite = v
-      this.menu = false
-      if (!this.etroite && this.filtre) 
-        setTimeout(() => { this.menu = true }, 500)
-    },
-    async setPage (p, tab) {
-      this.menu = false
-      this.menug = false
-      this.pageback = this.pagesB.has(this.page) ? this.page : ''
-      this.page = null
-      await sleep(200)
-      this.page = p
-      this.setPageTab(tab || '')
-    },
+    async setPage (p, tab) { },
 
-    setPageTab (tab) {
-      this.pagetab = tab
-      this.menu = this.filtre && !this.etroite
-    },
-
-    async setPageBack () {
-      if (!this.pageback) return
-      await this.setPage(this.pageback)
-    },
+    closeMenug () { },
 
     afficherMessage (texte, important) {
       if (this.messageto) clearTimeout(this.messageto)

@@ -7,15 +7,16 @@
         <q-btn icon="edit" size="sm" color="warning" :label="$t('CHoch')" @click="editer"/>
       </div>
       <div v-else class="row justify-end">
-        <div v-if="affnai" class="titre-md text-italic q-mr-lg">{{$t('CHoch2', [naI.nom])}}</div>
-        <div v-else class="titre-md text-italic q-mr-lg">{{$t('CHoch3', [naE.nom])}}</div>
+        <div v-if="affnai" class="titre-md text-italic">{{$t('CHoch2', [naI.nom])}}</div>
+        <div v-else class="titre-md text-italic">{{$t('CHoch3', [naE.nom])}}</div>
+        <div class="titre-md text-italic q-mx-md">{{$t(chat.r ? 'CHel' : 'CHrac')}}</div>
         <div class="font-mono fs-md">{{dhcool(chat.dh) + ' #' + chat.seq}}</div>
       </div>
       <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
       <apercu-motscles v-if="chat" @ok="changeMc" :idx="idx" du-compte :du-groupe="0"
         :mapmc="mapmc" :edit="session.editable" :src="chat.mc || u0"/>
-      <show-html v-if="chat" class="q-my-sm bord"
-        :idx="idx" zoom edit scroll maxh="3rem" :texte="chat.txt" @edit="editer"/>
+      <show-html v-if="chat && chat.r" class="q-my-sm bord"
+        :idx="idx" zoom edit scroll maxh="4rem" :texte="chat.txt" @edit="editer"/>
     </div>
 
     <!-- Dialogue d'édition du texte du chat -->

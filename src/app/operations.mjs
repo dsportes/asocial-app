@@ -65,7 +65,7 @@ export class OperationUI extends Operation {
       const notif = new Notification({nr, dh, texte, idSource: 0})
       session.setNotifE(notif)
       if (nr === 2) {
-        await ui.setPage('clos')
+        ui.setPage('clos')
         return
       }
     } else {

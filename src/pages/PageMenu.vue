@@ -143,7 +143,6 @@ export default {
       this.ui.setPage('compta', 'chats')
     },
     maTribu () { 
-      this.ui.menug = false
       this.aSt.setTribuC()
       this.ui.setPage('tranche')
     },

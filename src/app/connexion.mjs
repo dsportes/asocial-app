@@ -26,8 +26,6 @@ export function deconnexion(garderMode) {
 
   // fermeture de tous les dialogues et du menu de filtre
   MD.fTD()
-  ui.menu = false
-  ui.menug = false
   ui.aunmessage = false
 
   if (session.accesIdb) closeIDB()
@@ -689,7 +687,7 @@ export class ConnexionCompte extends OperationUI {
       this.dh = 0
 
       if (session.avion) {
-        await stores.ui.setPage('session')
+        stores.ui.setPage('session')
         await this.phase0Avion()
       } else {
         /* Authentification et get de avatar / compta / tribu
@@ -706,7 +704,7 @@ export class ConnexionCompte extends OperationUI {
           stores.ui.setPage('clos')
           return this.finOK()
         }
-        await stores.ui.setPage('session')
+        stores.ui.setPage('session')
         if (session.estComptable) session.setMode(2)
         await this.phase0Net()
       }

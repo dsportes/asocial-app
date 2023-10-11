@@ -293,12 +293,13 @@ export const useAvatarStore = defineStore('avatar', {
     pcLcF: (state) => {
       const f = stores.filtre.filtre.chats
       if (!f) { stores.session.fmsg(state.pcLc.length); return state.pcLc }
-      f.limj = f.nbj ? (new Date().getTime() - (f.nbj * 86400000)) : 0
+      f.limj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
       f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
       for (const c of state.pcLc) {
         if (f.limj && c.dh < f.limj) break
+        if (f.chel && c.r !== 1) break
         if (f.nom && !c.naE.nom.startsWith(f.nom)) continue
         if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
         if (f.setp.size || f.setn.size) {
