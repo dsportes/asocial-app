@@ -8,6 +8,14 @@ export const useUiStore = defineStore('ui', {
     diag: '',
     diagresolve: null,
 
+    pagetab: '',
+    page: 'login',
+    pageback: '',
+    menug: false,
+    pagesF: new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 'groupesac', 'groupe', 'notes']),
+    tabF: new Set(['membres']),
+    pagesB: new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes', 'ficavion']),
+
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
 
@@ -30,9 +38,25 @@ export const useUiStore = defineStore('ui', {
   },
 
   actions: {
-    async setPage (p, tab) { },
+    aFiltre (p, t) {
+      if (!this.pagesF.has(p)) return false
+      return !t || this.tabF.has(t)
+    },
 
-    closeMenug () { },
+    setPage (p, t) {
+      this.pageback = this.pagesB.has(this.page) ? this.page : ''
+      this.page = p
+      this.menug = false
+      this.setTab(t)
+    },
+
+    setTab (tab) {
+      this.pagetab = tab
+    },
+
+    closeMenug () { 
+      this.menug = false
+    },
 
     afficherMessage (texte, important) {
       if (this.messageto) clearTimeout(this.messageto)

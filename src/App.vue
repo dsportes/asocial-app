@@ -58,15 +58,14 @@
 
     <q-toolbar inset class="full-width bg-secondary text-white">
       <bouton-help page="page1"/>
-      <!--q-btn icon="check" :color="overlay ? 'primary' : 'secondary'" size="md" @click="overlay = !overlay"/-->
       <q-btn v-if="session.ok && !session.estMinimal" size="md" icon="menu">
-        <q-menu v-model="menug" max-height="90vh" class="bg-secondary text-white">
+        <q-menu v-model="ui.menug" max-height="90vh" class="bg-secondary text-white">
           <page-menu menu/>
         </q-menu>
       </q-btn>
       <q-btn :disable="!aHome" flat icon="home" size="md" 
         :color="aHome ? 'warning' : 'grey'" dense @click="gotoAccueilLogin()"/>
-      <q-btn v-if="pageback" flat icon="arrow_back" size="md" 
+      <q-btn v-if="ui.pageback" flat icon="arrow_back" size="md" 
         dense @click="gotoBack()"/>
       <q-toolbar-title class="titre-lg text-center"><span>{{titrePage}}</span>
       </q-toolbar-title>
@@ -90,25 +89,25 @@
 
     </q-toolbar>
 
-    <q-toolbar v-if="page === 'compta'" inset 
+    <q-toolbar v-if="ui.page === 'compta'" inset 
       class="full-width bg-secondary text-white row justify-between">
-      <q-tabs  class="col titre-md" v-model="pagetab" inline-label outside-arrows mobile-arrows no-caps>
-        <q-tab name="notif" :label="$t('PNCntf')" @click="setPageTab('notif')"/>
-        <q-tab name="compta" :label="$t('PNCabo')" @click="setPageTab('compta')"/>
+      <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
+        <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setTab('notif')"/>
+        <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setTab('compta')"/>
         <q-tab v-if="session.estComptable || aSt.compta.estA"
-          name="credits" :label="$t('PNCcre')" @click="setPageTab('credits')"/>
-        <q-tab name="chats" :label="$t('PNCchats')" @click="setPageTab('chats')"/>
+          name="credits" :label="$t('PNCcre')" @click="ui.setTab('credits')"/>
+        <q-tab name="chats" :label="$t('PNCchats')" @click="ui.setTab('chats')"/>
       </q-tabs>
-      <q-btn v-if="pagetab==='notif' && session.alire" 
+      <q-btn v-if="ui.pagetab==='notif' && session.alire" 
         class="col-auto q-px-sm" dense size="md" color="warning" 
         icon="check" :label="$t('jailu')" @click="ui.jailu()"/>
     </q-toolbar>
 
-    <q-toolbar v-if="page === 'groupe'" inset 
+    <q-toolbar v-if="ui.page === 'groupe'" inset 
       class="full-width bg-secondary text-white row justify-between">
-      <q-tabs  class="col titre-md" v-model="pagetab" inline-label outside-arrows mobile-arrows no-caps>
-        <q-tab name="groupe" :label="$t('ACtgr')" @click="setPageTab('groupe')"/>
-        <q-tab name="membres" :label="$t('ACtmb')" @click="setPageTab('membres')"/>
+      <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
+        <q-tab name="groupe" :label="$t('ACtgr')" @click="ui.setTab('groupe')"/>
+        <q-tab name="membres" :label="$t('ACtmb')" @click="ui.setTab('membres')"/>
       </q-tabs>
     </q-toolbar>
 
@@ -123,7 +122,7 @@
             color="warning" size="md" dense @click="fermFiltre"/>
           <div class="titre-lg">{{$t('MLArech')}}</div>
         </div>
-        <div v-if="page === 'chats'" class="column justify-start">
+        <div v-if="ui.page === 'chats'" class="column justify-start">
           <filtre-chel nom="chats" prop='chel' :idx="0"/>
           <filtre-nbj nom="chats" prop='nbj' :idx="1"/>
           <filtre-nom nom="chats" prop='nom' :idx="0"/>
@@ -131,21 +130,21 @@
           <filtre-mc nom="chats" attr="mcp" :idx="0"/>
           <filtre-mc nom="chats" attr="mcn" :idx="1"/>
         </div>
-        <div v-if="page === 'espace'" class="column justify-start">
+        <div v-if="ui.page === 'espace'" class="column justify-start">
           <filtre-tri nom="espace" :nb-options="19" :idx="0"/>
         </div>
-        <div v-if="page === 'tranche'" class="column justify-start">
+        <div v-if="ui.page === 'tranche'" class="column justify-start">
           <filtre-nom nom="tranche" prop='nomc' :idx="0"/>
           <filtre-notif nom="tranche" :idx="1"/>
           <filtre-avecsp nom="tranche" :idx="0"/>
           <filtre-tri nom="tranche" :nb-options="9" :idx="1"/>
         </div>
-        <div v-if="page === 'people'" class="column justify-start">
+        <div v-if="ui.page === 'people'" class="column justify-start">
           <filtre-nom nom="people" prop='nom' :idx="0"/>
           <filtre-tribu nom="people" :idx="1"/>
           <filtre-avecgr nom="people" :idx="0"/>
         </div>
-        <div v-if="page === 'groupes'" class="column justify-start">
+        <div v-if="ui.page === 'groupes'" class="column justify-start">
           <filtre-nom nom="groupes" prop='ngr' :idx="0"/>
           <filtre-txt nom="groupes" prop='infmb' :idx="1"/>
           <filtre-mc nom="groupes" attr="mcp" :idx="0"/>
@@ -154,7 +153,7 @@
           <filtre-enexcedent nom="groupes" attr="excedent" :idx="1"/>
           <filtre-ainvits nom="groupes" attr="invits" :idx="0"/>
         </div>
-        <div v-if="page === 'groupesac'" class="column justify-start">
+        <div v-if="ui.page === 'groupesac'" class="column justify-start">
           <filtre-nom nom="groupes" prop='ngr' :idx="0"/>
           <filtre-txt nom="groupes" prop='infmb' :idx="1"/>
           <filtre-mc nom="groupes" attr="mcp" :idx="0"/>
@@ -163,11 +162,11 @@
           <filtre-enexcedent nom="groupes" attr="excedent" :idx="1"/>
           <filtre-ainvits nom="groupes" attr="invits" :idx="0"/>
         </div>
-        <div v-if="page === 'groupe'" class="column justify-start">
+        <div v-if="ui.page === 'groupe'" class="column justify-start">
           <filtre-nom nom="groupe" prop='nmb' :idx="0"/>
           <filtre-stmb nom="groupe" prop="stmb" :idx="1"/>
         </div>
-        <div v-if="page === 'notes'" class="column justify-start">
+        <div v-if="ui.page === 'notes'" class="column justify-start">
           <filtre-avgr nom="notes" prop='avgr' :idx="0"/>
           <filtre-nbj nom="notes" prop='nbj' :idx="1"/>
           <filtre-txt nom="notes" prop='note' :idx="0"/>
@@ -181,28 +180,29 @@
     </q-scroll-area>
   </q-drawer>
 
-<!--  style="max-width:900px !important;" -->
   <q-page-container>
     <transition-group appear
       leave-active-class="animated animate__slideOutLeft"
       enter-active-class="animated animate__slideInRight">
-      <page-admin class="page" v-if="page === 'admin'"/>
-      <page-login class="page" v-if="page === 'login'"/>
-      <page-clos class="page" v-if="page === 'clos'"/>
-      <page-session class="page" v-if="page === 'session'"/>
-      <page-accueil class="page" v-if="page === 'accueil'"/>
-      <page-compte class="page" v-if="page === 'compte'"/>
-      <page-sponsorings class="page" v-if="page === 'sponsorings'"/>
-      <page-chats class="page" v-if="page === 'chats'"/>
-      <page-compta class="page" v-if="page === 'compta'"/>
-      <page-espace class="page" v-if="page === 'espace'" :ns="session.ns"/>
-      <page-tranche class="page" v-if="page === 'tranche'"/>
-      <page-people class="page" v-if="page === 'people'"/>
-      <page-groupes tous class="page" v-if="page === 'groupes'"/>
-      <page-groupes class="page" v-if="page === 'groupesac'"/>
-      <page-groupe class="page" v-if="page === 'groupe'"/>    
-      <page-notes class="page" v-if="page === 'notes'"/>    
-      <page-ficavion class="page" v-if="page === 'ficavion'"/>    
+      <div v-if="ui.page === 'null'">
+      </div>
+      <page-admin class="page" v-if="ui.page === 'admin'"/>
+      <page-login class="page" v-if="ui.page === 'login'"/>
+      <page-clos class="page" v-if="ui.page === 'clos'"/>
+      <page-session class="page" v-if="ui.page === 'session'"/>
+      <page-accueil class="page" v-if="ui.page === 'accueil'"/>
+      <page-compte class="page" v-if="ui.page === 'compte'"/>
+      <page-sponsorings class="page" v-if="ui.page === 'sponsorings'"/>
+      <page-chats class="page" v-if="ui.page === 'chats'"/>
+      <page-compta class="page" v-if="ui.page === 'compta'"/>
+      <page-espace class="page" v-if="ui.page === 'espace'" :ns="session.ns"/>
+      <page-tranche class="page" v-if="ui.page === 'tranche'"/>
+      <page-people class="page" v-if="ui.page === 'people'"/>
+      <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
+      <page-groupes class="page" v-if="ui.page === 'groupesac'"/>
+      <page-groupe class="page" v-if="ui.page === 'groupe'"/>    
+      <page-notes class="page" v-if="ui.page === 'notes'"/>    
+      <page-ficavion class="page" v-if="ui.page === 'ficavion'"/>    
     </transition-group>
   </q-page-container>
 
@@ -327,7 +327,7 @@
 
 <script>
 import { useQuasar } from 'quasar'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
@@ -403,11 +403,11 @@ export default {
   computed: {
     lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
     tbclass () { return this.$q.dark.isActive ? ' sombre1' : ' clair1' },
-    aHome () { return (this.session.status === 2 && this.page !== 'accueil')
-      || (!this.session.status && this.page !== 'login') },
+    aHome () { return (this.session.status === 2 && this.ui.page !== 'accueil')
+      || (!this.session.status && this.ui.page !== 'login') },
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
     titrePage () {
-      const p = this.page
+      const p = this.ui.page
       let arg = ''
       switch (p) {
         case 'espace' : { return this.$t('Pespace', [this.session.ns, this.session.org]) }
@@ -422,7 +422,7 @@ export default {
       }
       return this.$t('P' + p, [arg])
     },
-    aUnFiltre () { return this.aFiltre(this.page, this.pagetab)}
+    aUnFiltre () { return this.ui.aFiltre(this.ui.page, this.ui.pagetab)}
 },
 
   // Gère le franchissement du seuil etroit / large
@@ -454,16 +454,16 @@ export default {
     tgdark () { this.$q.dark.toggle() },
 
     clickNotif () {
-      this.setPage('compta', 'notif')
+      ui.setPage('compta', 'notif')
     },
     pageFicavion () { 
-      this.setPage('ficavion')
+      ui.setPage('ficavion')
     },
     infoSession () { 
-      if (this.session.status === 2) this.setPage('session')
+      if (this.session.status === 2) ui.setPage('session')
     },
     gotoAccueilLogin () {
-      this.setPage(this.session.status === 2 ? 'accueil' : 'login')
+      ui.setPage(this.session.status === 2 ? 'accueil' : 'login')
     },
     fermerqm () {
       MD.fD()
@@ -484,21 +484,8 @@ export default {
     const ui = stores.ui
 
     const seuillarge = 900
-
-    const pagesF = new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 'groupesac', 'groupe', 'notes'])
-    const tabF = new Set(['membres'])
-    const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes', 'ficavion'])
-
     const etroite = ref($q.screen.width < seuillarge)
-    const page = ref('login')
-    const pageback = ref('')
-    const pagetab = ref('')
     const pfiltre = ref(false)
-
-    function aFiltre (p, t) {
-      if (!pagesF.has(p)) return false
-      return !t || tabF.has(t)
-    }
 
     function ouvrFiltre () { 
       setPFiltre(!pfiltre.value)
@@ -506,19 +493,6 @@ export default {
 
     function fermFiltre () { 
       setPFiltre(false)
-    }
-
-    function setPage(p, t) {
-      pageback.value = pagesB.has(page.value) ? page.value : ''
-      page.value = p
-      menug.value = false
-      setPageTab(t)
-    }
-
-    function setPageTab (t) {
-      pagetab.value = t
-      if (!aFiltre(page.value, t)) setPFiltre(false)
-      else if (!etroite.value) setPFiltre(true)
     }
 
     function setPFiltre (v) {
@@ -538,19 +512,21 @@ export default {
 
     ui.$onAction(({ name, args, after }) => {
       after((result) => {
-        if (name === 'setPage') setPage(args[0], args[1])
-        else if (name === 'closeMenug') menug.value = false
+        if (name === 'setTab') {
+          const t = args[0]
+          if (!ui.aFiltre(ui.page, t)) setPFiltre(false)
+          else if (!etroite.value) setPFiltre(true)
+        }
       })
     })
 
     function gotoBack () {
-      if (pageback.value) setPage(pageback.value)
+      if (ui.pageback) ui.setPage(ui.pageback)
     }
 
     const session = stores.session
     const aSt = stores.avatar
     const gSt = stores.groupe
-    const menug = ref(false)
     const infomode = ref(false)
     const infonet = ref(false)
     const infoidb = ref(false)
@@ -563,8 +539,8 @@ export default {
     function ovConfirmstopop () { MD.oD(confirmstopop) }
 
     return {
-      seuillarge, etroite, page, pageback, pagetab, gotoBack, setPage, setPageTab, 
-      menug, pfiltre, ouvrFiltre, fermFiltre, aFiltre, setPFiltre, redoPFiltre,
+      seuillarge, etroite, gotoBack,
+      pfiltre, ouvrFiltre, fermFiltre, setPFiltre, redoPFiltre,
       MD,
       session,
       config,

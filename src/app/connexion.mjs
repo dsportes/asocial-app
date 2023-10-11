@@ -19,6 +19,7 @@ import { MD, setClet } from './modele.mjs'
 /* garderMode : si true, garder le mode */
 export function deconnexion(garderMode) {
   const ui = stores.ui
+  // ui.setPage('null')
   const session = stores.session
   const mode = session.mode
   const memoOrg = session.memoOrg
@@ -36,7 +37,7 @@ export function deconnexion(garderMode) {
   if (garderMode) session.setMode(mode)
   session.memoOrg = memoOrg
   SyncQueue.reset()
-  stores.ui.setPage('login')
+  ui.setPage('login')
 }
 
 export async function reconnexionCompte() {
