@@ -70,7 +70,7 @@ export const usePeopleStore = defineStore('people', {
       }
     },
 
-    estSponsor: (state) => { return (id) => { // retourne 0, 1 (compte de la tribu), 2 (sponsor de la tribu)
+    estSponsor: (state) => { return (id) => { // retourne 0, 1 sponsor de la tribu
         const e = state.map.get(id)
         return e ? e.sp : 0
       }

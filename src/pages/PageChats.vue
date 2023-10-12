@@ -7,7 +7,7 @@
         :label="$t('CVraf')" @click="rafCvs"/>
 
       <q-btn v-if="session.accesNet" size="md" no-caps class="q-ma-xs" dense color="primary" 
-        :label="$t('CChtit')" @click="ovcc"/>
+        :label="$t('CChtit')" @click="ovContact"/>
     </q-card>
 
     <div v-if="!aSt.pcLc.length" class="q-my-md titre-lg text-italic text-center">{{$t('CHnch')}}</div>
@@ -59,6 +59,10 @@ export default {
     async rafCvs () {
       const [nt, nr] = await new RafraichirCvs().run(this.session.avatarId)
       stores.ui.afficherMessage(this.$t('CVraf2', [nr, nt - nr]), false)
+    },
+
+    async ovContact () {
+      if (await this.session.edit()) this.ovcc()
     },
 
     saveph (nf, u8, mime) {

@@ -366,32 +366,6 @@ export class MajMotsclesChat extends OperationUI {
   }
 }
 
-/* Supprimer un chat ******************************
-args.token: éléments d'authentification du compte.
-args.idI : id (côté compte)
-args.idE : id (côté de l'autre)
-args.idsI : ids du chat
-args.idsE : ids du chat
-Retour:
-*/
-export class SupprimerChat extends OperationUI {
-  constructor () { super($t('OPreactch')) }
-
-  async run (naI, naE) {
-    try {
-      const args = { token: stores.session.authToken }
-      args.idI = naI.id
-      args.idE = naE.id
-      args.idsI = await Chat.getIds(naI, naE)
-      args.idsE = await Chat.getIds(naE, naI) 
-      this.tr(await post(this, 'SupprimerChat', args))
-      this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
 /* Nouveau chat *********************************
 args.token: éléments d'authentification du compte.
 args.idI idsI : id du chat, côté interne
@@ -451,6 +425,7 @@ args.ccKI : clé cc cryptée par la clé K du compte de I.
 args.seq : numéro de séquence à partir duquel contc a été créé
 args.contcI : contenu du chat I crypté par la clé cc
 args.contcE : contenu du chat E crypté par la clé cc
+args.op : 1:envoyer, 2: envoyer et raccrocher, 3: raccrocher
 Retour:
 st: 
   1 : chat créé avec le contenu contc
@@ -460,15 +435,15 @@ rowChat:
 export class MajChat extends OperationUI {
   constructor () { super($t('OPmajch')) }
 
-  async run (naI, naE, txt, chat) {
+  async run (op, naI, naE, txt, chat) { // op: 1:envoyer, 2:raccrocher
     try {
       const session = stores.session
       const aSt =  stores.avatar
 
       const ccKI = chat.ccK ? await crypter(session.clek, chat.cc) : null
       const dh = Date.now()
-      const contcI = await Chat.getContc(naE, dh, txt, chat.cc)
-      const contcE = await Chat.getContc(naI, dh, txt, chat.cc)
+      const contcI = await Chat.getContc(naE, dh, op === 1 ? txt : '', chat.cc)
+      const contcE = op === 2 ? null : await Chat.getContc(naI, dh, txt, chat.cc)
       const seq = chat.seq
 
       const idI = naI.id
@@ -476,7 +451,7 @@ export class MajChat extends OperationUI {
       const idsI = await Chat.getIds(naI, naE)
       const idsE = await Chat.getIds(naE, naI)
 
-      const args = { token: session.authToken, idI, idsI, idE, idsE, ccKI, seq, contcI, contcE }
+      const args = { token: session.authToken, idI, idsI, idE, idsE, ccKI, seq, contcI, contcE, op }
       const ret = this.tr(await post(this, 'MajChat', args))
       const st = ret.st
       const ch = await compile(ret.rowChat)

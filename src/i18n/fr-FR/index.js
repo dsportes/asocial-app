@@ -580,7 +580,9 @@ export default {
 
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
-  OPmajch2: 'Le "chat" a été mis à jour en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
+  OPmajch2: 'Le "chat" a été mis à jour en parallèle dans une autre session : son contenu actuel va s\'afficher au lieu de celui saisi.',
+  OPmajch3: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" n\'existe plus.',
+  OPmajch3: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" actuel ne peut plus être changé ("raccrocher" pour le faire disparaître définitivement).',
 
   OPapa: 'Accepter le sponsoring d\'un nouveau compte',
   OPdpa: 'Décliner le sponsoring d\'un nouveau compte',
@@ -883,10 +885,12 @@ export default {
   CHnch: 'Aucun chat',
   CHnch2b: 'Pas de chat avec {0}',
   CHnch3b: 'Pas de chat avec {0}',
+  CHnch3c: '{0} a disparu',
   CHoch2: 'Chat avec {0}',
   CHoch3: 'Chat avec {0}',
   CHel: '[en ligne]',
   CHrac: '[raccroché]',
+  CHreact: 'Réactiver le chat',
   CHnch2: 'Aucun chat sur {0} ne répond au critère de recherche',
   CHov: 'Ouvrir un chat depuis une "phrase de contact"',
   CHoch: 'Ouvrir un chat',
@@ -897,6 +901,9 @@ export default {
   CHnseq: 'Numéro de séquence: {0}',
   CHdhc: 'Dernière mise à jour: {0}',
   CHerr: 'Incident technique lors de l\'afficage dyu résultat',
+  CHenv: 'Envoyer',
+  CHenvrac: 'Envoyer puis raccrocher',
+  CHrac: 'Raccrocher',
 
   SYtit: 'Chargement et synchronisation du compte',
   SYcpt: 'Compte et comptabilité',

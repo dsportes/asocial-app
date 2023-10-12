@@ -24,7 +24,7 @@ import PhraseContact from '../components/PhraseContact.vue'
 export default ({
   name: 'ContactChat',
 
-  props: { close: Function },
+  props: { },
 
   components: { PhraseContact, BoutonHelp },
 

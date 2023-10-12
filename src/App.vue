@@ -454,16 +454,16 @@ export default {
     tgdark () { this.$q.dark.toggle() },
 
     clickNotif () {
-      ui.setPage('compta', 'notif')
+      this.ui.setPage('compta', 'notif')
     },
     pageFicavion () { 
-      ui.setPage('ficavion')
+      this.ui.setPage('ficavion')
     },
     infoSession () { 
-      if (this.session.status === 2) ui.setPage('session')
+      if (this.session.status === 2) this.ui.setPage('session')
     },
     gotoAccueilLogin () {
-      ui.setPage(this.session.status === 2 ? 'accueil' : 'login')
+      this.ui.setPage(this.session.status === 2 ? 'accueil' : 'login')
     },
     fermerqm () {
       MD.fD()
