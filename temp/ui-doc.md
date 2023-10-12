@@ -2,10 +2,6 @@
 
 gérer les restrictions - fait en partie pour figé
 
-Révision chats avec gestion raccrocher et décompte des chats.
-
-Décomptes des chats et groupes
-
 Résiliation avatar dnn dnc dng dv2 
 
 GC d'espace figé
