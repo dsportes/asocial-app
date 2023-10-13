@@ -1,5 +1,9 @@
 ## TODO le 10 oct.
 
+**Lorsque le compte A va sur sa page de gestion de ses crédits,** 
+- les tickets dont il possède une version plus ancienne que celle détenue dans tickets du Comptable sont mis à jour.
+- les tickets émis un mois M toujours non réceptionnés avant la fin de M+1 sont supprimés.
+- les tickets de plus de 2 ans sont supprimés. 
 gérer les restrictions - fait en partie pour figé
 
 Résiliation avatar dnn dnc dng dv2 
