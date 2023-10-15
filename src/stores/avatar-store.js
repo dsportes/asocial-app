@@ -64,7 +64,7 @@ export const useAvatarStore = defineStore('avatar', {
       const qv = { nc: 0, nn: 0, v2: 0 }
       state.map.forEach((av, id) => {
         av.notes.forEach((n, ids) => { qv.nn++; qv.v2 += n.v2})
-        av.chats.forEach((c, ids) => { if (c.ver === 1) qv.nc++ })
+        av.chats.forEach((c, ids) => { if (c.r > 0) qv.nc++ })
       })
       return qv
     },

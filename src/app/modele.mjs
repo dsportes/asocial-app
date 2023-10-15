@@ -1646,10 +1646,9 @@ export class Chat extends GenDoc {
 }
 
 /** Groupe ***********************************************************************
-__data_:
+_data_:
 - `id` : id du groupe.
-- `v` : version, du groupe, ses notes, ses membres. 
-- `iv`
+- `v` :  1..N, version du groupe de ses notes et membres.
 - `dfh` : date de fin d'hébergement.
 
 - `idhg` : id du compte hébergeur crypté par la clé du groupe.
@@ -1657,13 +1656,13 @@ __data_:
 - `msu` : mode _simple_ ou _unanime_.
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
-- `pe` : 0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes.
+- `pe` : _0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes_.
 - `ast` : table des statuts des membres. Deux chiffres `sta laa` (0: disparu / oublié):
   - `sta`: statut d'activité: 1: contact, 2:invité, 3:actif, 4:résilié
-  - `laa`: 1:lecteur, 2:auteur, 3:animateur
-- `nag` : table des 'hcmg' (hash de la clé de l'avatar membre cryptée par la clé du groupe). Les index dans `nag` et `ast` correspondent.
-- `ln` : liste noire des 'hcmg' des avatars interdits de redevenir contact. 
-- `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe cryptée par la clé du groupe.
+  - `laa`: 1:lecteur, 2:auteur, 3:animateur.
+- `nag` : table des `hcmg` (hash de la clé de l'avatar membre cryptée par la clé du groupe). Les index dans `nag` et `ast` correspondent.
+- `ln` : liste noire des `im`. 
+- `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
 - `ardg` : ardoise cryptée par la clé du groupe.
 */
