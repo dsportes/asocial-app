@@ -169,6 +169,22 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
+    /* id d'un groupe ou avatar. Retourne [mcs, memos]
+    - mcs : union des mots clés attribués par les avatars
+    - memos : concaténation des textes des mémos attribués par les avatars
+    */
+    mcmemosDeId: (state) => { return (id) => { 
+        let mcs = new Set()
+        const memos = []
+        state.map.forEach(e => {
+          const {mc, memo} = e.avatar.mcmemosDeId(id)
+          if (mc) mc.forEach(i => {mcs.add(i)})
+          if (memo) memos.push(memo)
+        })
+        return [new Uint8Array.from(mcs), memos.join('\n\n')]
+      }
+    },
+
     // retourne le chat ids de l'avatar id
     getChat: (state) => { return (id, ids) => { 
       const e = state.map.get(id)

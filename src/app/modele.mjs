@@ -1223,54 +1223,62 @@ export class Compta extends GenDoc {
 }
 
 /** Avatar *********************************************************
-**_data_  : données n'existant que pour un avatar principal**
-- `mck` {} : map des mots-clés du compte cryptée par la clé K
+_data_:
+- `id` : id de l'avatar.
+- `v` : 1..N.
+- `vcv` : version de la carte de visite afin qu'une opération puisse détecter (sans lire le document) si la carte de visite est plus récente que celle qu'il connaît.
+- `hpc` : hash de la phrase de contact.
+
+**Données n'existant que pour un avatar principal**
+- `mck` : map des mots-clés du compte cryptée par la clé K -la clé est leur code 1-99- ("code": nom@catégorie).
 - `memok` : mémo personnel du compte.
 
-**_data_ : données disponibles pour les avatars primaires et secondaires**
-- `id`, 
-- `v`,
-- `vcv` : version de la carte de visite afin qu'une opération puisse détecter (sans lire le document) si la carte de visite est plus récente que celle qu'il connaît.
-
-- `pub` : clé publique RSA
+**Données disponibles pour tous les avatars**
+- `pub` : clé publique RSA.
 - `privk`: clé privée RSA cryptée par la clé K.
-- `cva` : carte de visite cryptée par la clé CV de l'avatar `{v, photo, info}`.
-- `lgrk` : map :
-  - _clé_ : `ni` : _numéro d'invitation_ hash de la clé inversée du groupe crypté par la  clé de l'avatar.
-  - _valeur_ : `[nomg, cleg, im]`,
-    - crypté par la clé publique RSA de l'avatar pour une invitation.
-    - ré-encrypté par la clé K du compte par l'opération d'acceptation d'une invitation.
+- `cva` : carte de visite cryptée par la clé _CV_ de l'avatar `{v, photo, info}`.
+- `invits`: maps des invitations en cours de l'avatar:
+  - _clé_: `ni`, numéro d'invitation. hash du cryptage par la clé du groupe de la clé _inversée_ de l'avatar. Ceci permet à un animateur du groupe de détruire l'entrée.
+  - _valeur_: `[nomg, cleg, im]` cryptée par la clé publique RSA de l'avatar.
+    - `nomg`: nom du groupe,
+    - `cleg`: clé du groupe,
+    - `im`: indice du membre dans la table `ast` du groupe.
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
-- `hpc` : hash de la phrase de contact.
-- `napc` : `[nom, clé]` de l'avatar cryptée par le PBKFD de la phrase de contact.
+- `napc` : `[nom, cle]` de l'avatar cryptée par le PBKFD de la phrase de contact.
+- `memos` : map des couples mc / memo à propos des contacts (avatars) et groupes:
+  - _cle_: `id` crypté par la clé K du compte,
+  - _valeur_ : `{ mc, memo }` crypté par la clé K du compte.
+    - `mc` : mots clés de l'avatar à propos du groupe.
+    - `memo` : commentaire de l'avatar à propos du groupe.
 */
 export class Avatar extends GenDoc {
   get na () { return getNg(this.id) }
-  get nbGroupes () { return this.lgr.size }
+  // get nbGroupes () { return this.lgr.size }
   get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconAvatar }
 
   /* Remplit la map avec les membres des groupes de l'avatar/
   - clé: id du groupe
   - valeur: { idg: , mbs: [ids], dlv }
-  */
   membres (map, dlv) {
     for (const [ ,t] of this.lgr) {
       const e = map[t.ng.id]
       if (!e) { map[t.ng.id] = { idg: t.ng.id, mbs: [t.im], dlv } } else e.mbs.push(t.im)
     }
   }
+  */
 
-  /* Ids des groupes de l'avatar, accumulés dans le set s */
+  /* Ids des groupes de l'avatar, accumulés dans le set s 
   idGroupes (s) {
     const x = s || new Set()
     for (const [ ,t] of this.lgr) x.add(t.ng.id)
     return x
   }
+ */
 
   /* Retourne les numéros d'invitation de l'avatar pour les groupes de setg
   et supprime leurs entrées dans lgr 
   VERIFIER s'il faut prendre les résiliés en attente
-  */
+  
   niDeGroupes (setg) {
     const ani = new Set()
     for (const [ni ,t] of this.lgr) {
@@ -1279,6 +1287,19 @@ export class Avatar extends GenDoc {
     ani.forEach(ni => this.lgr.delete(ni))
     return Array.from(ani)
   }
+  */
+
+  // retourne l'invitation pour l'avatar au groupe idg : {ni, ng, im}
+  invitDeGr (idg) {
+    let e = {} 
+    if (this.invits) for (const [ni, x] of this.invits) {
+      if (x.ng.id === idg) { e.ni = ni; e.ng = ng; e.im = im}
+    }
+    return e
+  }
+
+  // Retourne {mc, memo} à propos d'une id donnée
+  memomc (id) { return this.memos.get(id) }
 
   /** compile *********************************************************/
   async compile (row) {
@@ -1312,27 +1333,24 @@ export class Avatar extends GenDoc {
       this.cv = decode(await decrypter(kcv, row.cva))
     } else this.cv = null
 
-    this.lgr = new Map()
-    if (row.lgrk) { 
-      /* map : 
-      - _clé_ : `ni`, numéro d'invitation.
-      - _valeur_ : `[nomg, clég, im]`
-        - crypté par la clé publique RSA de l'avatar.
-        - ré-encrypté par la clé K du compte par l'opération d'acceptation d'une invitation.
-      */
-      for (const nx in row.lgrk) {
+    this.invits = new Map()
+    if (row.invits) {
+      for (const nx in row.invits) {
         const ni = parseInt(nx)
-        if (row[nx].length === 256) {
-          const [nom, rnd, im] = decode(await decrypterRSA(this.priv, row[nx]))
-          ng = NomGenerique.from([nom, rnd])
-          gSt.setInvit(ng.id, this.id)
-        } else {
-          const [nom, rnd, im] = decode(await decrypter(session.clek, row[nx]))
-          ng = NomGenerique.from([nom, rnd])
-          gSt.delInvit(ng.id, this.id)
-        }
-        this.lgr.set(ni, { ng, im })
+        const [nom, rnd, im] = decode(await decrypterRSA(this.priv, row[nx]))
+        const ng = NomGenerique.from([nom, rnd])
+        gSt.setInvit(ng.id, this.id)
+        this.invits.set(ni, { ng, im })
       }
+    }
+
+    this.memos = new Map()
+    if (row.memos) {
+      for (const x in row.memos) {
+        const id = parseInt(await decrypter(session.clek, x))
+        const e = decode(await decrypter(session.clek, row[x]))
+        this.memos.set(id, e)
+      }  
     }
   }
 
@@ -1343,7 +1361,6 @@ export class Avatar extends GenDoc {
     r.vcv = 0
     r.privk = await crypter(stores.session.clek, privateKey)
     r.pub = publicKey
-    r.lgrk = {}
     const _data_ = new Uint8Array(encode(r))
     const row = { _nom: 'avatars', id: r.id, v: r.v, vcv: r.vcv, _data_ }
     return row

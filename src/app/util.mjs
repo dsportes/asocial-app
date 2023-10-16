@@ -65,6 +65,13 @@ export function intersection (setA, setB) { // element de A aussi dans B
   return inter
 }
 
+export function union (setA, setB) { // element de A ou de B
+  const u = new Set()
+  for (const elem of setA) elem.add(elem)
+  for (const elem of setB) elem.add(elem)
+  return u
+}
+
 export function egalite (setA, setB) {
   if (setA.size !== setB.size) return false
   for (const elem of setA) if (!setB.has(elem)) return false
