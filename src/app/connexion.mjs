@@ -185,7 +185,7 @@ export class ConnexionCompte extends OperationUI {
 
       const mapv = {} // versions des avatars requis à demander au serveur
 
-      const avRequis = this.compta.avatarIds
+      const avRequis = this.compte.avatarIds
       avRequis.forEach(id => {
         if (id === this.avatar.id) {
           mapv[id] = this.avatar.v
@@ -638,7 +638,8 @@ export class ConnexionCompte extends OperationUI {
   async phase0Net() {
     const session = stores.session
 
-    if (session.accesIdb && !session.nombase) await session.setNombase() // maintenant que la cle K est connue
+    // maintenant que la cle K est connue
+    if (session.accesIdb && !session.nombase) await session.setNombase()
 
     if (session.synchro) {
       let dbok = false
@@ -655,7 +656,7 @@ export class ConnexionCompte extends OperationUI {
         setTrigramme(session.nombase, await getTrigramme())
         // setTrigramme(session.nombase, this.avatar.na.nomc)
       }
-      lectureSessionSyncIdb()
+      await lectureSessionSyncIdb()
     }
   }
 
@@ -768,7 +769,7 @@ export class ConnexionCompte extends OperationUI {
         this.buf = new IDBbuffer()
       }
 
-      if (session.accesNetNf && this.grDisparus.size) {
+      if (session.accesNetNf && this.grDisparus.size) { // TODO
         /* Traitement des groupes zombis 
         Les retirer (par anticipation) des avatars qui les référencent 
         mapIdNi : Map
@@ -1070,16 +1071,12 @@ export class AcceptationSponsoring extends OperationUI {
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
       const cc = random(32)
-      const dh = Date.now()
-      const contcI = await Chat.getContc(sp.na, dh, txt, cc)
-      const contcE = await Chat.getContc(sp.naf, dh, txt, cc)
 
       const pubE = await aSt.getPub(sp.na.id)
       if (!pubE) throw new AppExc(F_BRO, 7)
 
-      // (r, naI, naE, contc, cc, pubE, mc) - le chat I (filleul) est _en ligne_
-      const rowChatI = await Chat.nouveauRow(1, sp.naf, sp.na, contcI, cc, null, new Uint8Array([252]))
-      const rowChatE = await Chat.nouveauRow(0, sp.na, sp.naf, contcE, cc, pubE, new Uint8Array([253]))
+      // (naI, naE, txt, cc, pubE)
+      const [rowChatI, rowChatE] = await Chat.newRows(sp.naf, sp.na, txt, cc, pubE)
 
       const args = {
         token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
@@ -1226,6 +1223,7 @@ export class CreerEspace extends OperationUI {
       setClet(clet, idt)
 
       const na = NomGenerique.comptable()
+      // static async row (na, clet, cletX, q, estSponsor, phrase, nc)
       const rowCompta = await Compta.row(na, clet, null, aco, true, phrase)
       // set de session.clek
       const rowTribu = await Tribu.nouvelle(idt, apr, true, aco)

@@ -392,7 +392,7 @@ export class NouveauChat extends OperationUI {
       const pubE = await aSt.getPub(naE.id)
       const ccPE = await crypterRSA(pubE, cc)
       const ccKI = await crypter(session.clek, cc)
-      const dh = Date.now()
+      const dh = Date.now() // TODO
       const contcI = await Chat.getContc(naE, dh, txt, cc)
       const contcE = await Chat.getContc(naI, dh, txt, cc)
 
@@ -441,7 +441,7 @@ export class MajChat extends OperationUI {
       const aSt =  stores.avatar
 
       const ccKI = chat.ccK ? await crypter(session.clek, chat.cc) : null
-      const dh = Date.now()
+      const dh = Date.now() // TODO
       const contcI = await Chat.getContc(naE, dh, op === 1 ? txt : '', chat.cc)
       const contcE = op === 2 ? null : await Chat.getContc(naI, dh, txt, chat.cc)
       const seq = chat.seq
@@ -544,8 +544,8 @@ export class NouvelAvatar extends OperationUI {
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
-      const kx = await Compta.mavkK(na.id, session.clek)
-      const vx = await Compta.mavkKV(na, session.clek)
+      const kx = await Avatar.mavkK(na.id, session.clek)
+      const vx = await Avatar.mavkKV(na, session.clek)
       if (session.fsSync) await session.fsSync.setAvatar(na.id)
       const args = { token: session.authToken, rowAvatar, 
         rowVersion, kx, vx, abPlus: [na.id] }

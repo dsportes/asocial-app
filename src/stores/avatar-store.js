@@ -521,7 +521,7 @@ export const useAvatarStore = defineStore('avatar', {
       - clé : id d'un avatar
       - valeur : array des ni des groupes ciblés
     */
-    avatarsDeGroupes (setg) {
+    avatarsDeGroupes (setg) { // TODO
       const mapIdNi = {}
       let x = false
       if (setg && setg.size) {

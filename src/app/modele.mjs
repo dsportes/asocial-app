@@ -908,62 +908,42 @@ export class Gcvols extends GenDoc {
 }
 
 /** Compta **********************************************************************
-- `id` : numéro du compte
-- `v`
+_data_ :
+- `id` : numéro du compte, id de son avatar principal.
+- `v` : 1..N.
 - `hps1` : le hash du PBKFD du début de la phrase secrète du compte.
 
-- `shay`, le SHA du SHA de X (PBKFD de la phrase secrète).
-- `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète courante.
+- `shay`, SHA du SHA de X (PBKFD de la phrase secrète).
+- `kx` : clé K du compte, cryptée par X (PBKFD de la phrase secrète courante).
 - `dhvu` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
 - `sp` : 1: est sponsor
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
-- `cletK` : clé de la tribu cryptée par la clé K du compte : 
-  si cette clé a une longueur de 256, elle est cryptée par la clé publique RSA du compte 
-  (en cas de changement de tribu forcé par le comptable).
+- `cletK` : clé de la tribu cryptée par la clé K du compte : si cette clé a une longueur de 256, elle est cryptée par la _clé publique RSA_ du compte (en cas de changement de tribu forcé par le comptable).
 - `it` : index du compte dans la table `act` de sa tribu.
-- `mavk` : map des avatars du compte. 
-  - _clé_ : id court de l'avatar cryptée par la clé K du compte.
-  - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
 - `qv` : `{qc, q1, q2, nn, nc, ng, v2}`: quotas et nombre de groupes, chats, notes, volume fichiers. Valeurs courantes.
 - `oko` : hash du PBKFD de la phrase de confirmation d'un accord pour passage de O à A ou de A à O.
 - `credits` : pour un compte A seulement crypté par la clé K:
   - `total`: cumul des crédits reçus depuis le début de la vie du compte.
-  - `tickets`: liste des tickets en attente d'enregistrement.
-  - juste après une conversion de compte O en A, `credits` est égal à `true`, 
-  une convention pour une création vierge.
+  - `tickets`: liste des tickets (`{ids, v, dg, dr, ma, mc, refa, refc, di}`).
+  - juste après une conversion de compte O en A, `credits` est égal à `true`, une convention pour une création vierge.
 - `compteurs` sérialisation non cryptée d'évolution des quotas, volumes et coûts.
+
 **Pour le Comptable seulement**
--`atr` : table des tribus : `{clet, info, q}` crypté par la clé K du comptable.
-  - `clet` : clé de la tribu (donne aussi son id, index dans `atrx / astn`).
+-`atr` : table des tribus : `{clet, info, qc, q1, q2}` crypté par la clé K du comptable.
+  - `clet` : clé de la tribu (donne aussi son id, index dans `act / astn`).
   - `info` : texte très court pour le seul usage du comptable.
-  - `q` : `[qc, q1, q2]` : quotas.
-- `astn` : table des statuts de notification des tribus:
-  _0:aucune, 1:lecture seule, 2:accès minimal_
+  - `q` : `[qc, q1, q2]` : quotas globaux de la tribu.
+- `astn` : table des restriction d'accès des notifications des tribus _0:aucune, 1:lecture seule, 2:accès minimal_.
 */
 export class Compta extends GenDoc {
-  /* retourne l'array des na des avatars du compte (trié ordre alpha
-    PRIMAIRE EN TETE
-  */
-  get lstAvatarNas () {
-    const t = []; for(const na of this.mav.values()) { t.push(na) }
-    const idc = this.naprim.id
-    t.sort((a,b) => { return a.id === idc ? -1 : (b.id === idc ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
-    return t
-  }
-
+  /* Map des versions des tickets détenus pour rafraîchissement par le serveur */
   get mtk () {
     const m = {}
     if (this.credits) this.credits.tickets.forEach(tk => { m[tk.ids] = tk.v || 0})
     return m
   }
-
-  estAvDuCompte (id) { return this.mav.has(id) }
-
-  avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
-    for(const na of this.mav.values()) { if (na.nom === n) return na.id }
-    return 0
-  }
-
+  
+  // retourne le nom / info de la tribu id
   infoTr (id) { 
     if (!this.atr) return ''
     const a = this.atr[ID.court(id)]
@@ -988,15 +968,6 @@ export class Compta extends GenDoc {
     session.clek = this.k
 
     this.vsh = row.vsh || 0
-
-    this.mav = new Map()
-    for(const i in row.mavk) {
-      const [nom, cle] = decode(await decrypter(session.clek, row.mavk[i]))
-      const na = NomGenerique.from([nom, cle])
-      this.mav.set(na.id, na)
-      if (na.id === this.id) this.naprim = na
-    }
-    this.avatarIds = new Set(this.mav.keys())
     
     if (!this.estA) {
       if (row.cletK.length !== 256) {
@@ -1096,7 +1067,7 @@ export class Compta extends GenDoc {
     return await crypter(session.clek, new Uint8Array(encode(credits)))
   }
 
-    /* Depuis la liste actuelle des tickets de compta,
+  /* Depuis la liste actuelle des tickets de compta,
   - enlève les obsolètes,
   - ajoute tk s'il n'y était pas, le remplace sinon
   - retourne credits crypté par la clé K
@@ -1135,40 +1106,10 @@ export class Compta extends GenDoc {
     return await crypter(session.clek, new Uint8Array(encode(credits)))
   }
 
-  updAvatarMavk (setSupprIds) {
-    let ok = false
-    if (setSupprIds && setSupprIds.size) setSupprIds.forEach(id => { 
-      if (this.mav.has(id)) {
-        ok = true
-        this.mav.delete(id)
-      }
-    })
-    if (ok) this.avatarIds = new Set(this.mav.keys())
-    return ok
-  }
-
-  async lmAvatarMavk (setSupprIds) {
-    // set des id à supprimer
-    const session = stores.session
-    const lm = []
-    if (setSupprIds && setSupprIds.size) for (const id of setSupprIds) {
-      lm.push(await Compta.mavkK(id, session.clek))
-    }
-    return lm
-  }
-
   static async atrItem (clet, info, q) {
     const session = stores.session
     const item = {clet, info, q}
     return await crypter(session.clek, new Uint8Array(encode(item)))
-  }
-
-  static async mavkKV (na, k) {
-    return await crypter(k, new Uint8Array(encode([na.nomx, na.rnd])))
-  }
-
-  static async mavkK (id, k) {
-    return u8ToB64(await crypter(k, '' + ID.court(id), 1), true)
   }
 
   static async row (na, clet, cletX, q, estSponsor, phrase, nc) { 
@@ -1205,8 +1146,6 @@ export class Compta extends GenDoc {
       r.credits = await crypter(k, new Uint8Array(encode({ total: 2, tickets: [] })))
     }
 
-    r.mavk = { }
-    r.mavk[await Compta.mavkK(na.id, k)] = await Compta.mavkKV(na, k)
     r.qv = { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: nc || 0, ng: 0, v2: 0}
     r.compteurs = new Compteurs(null, r.qv).serial
 
@@ -1231,7 +1170,22 @@ _data_:
 
 **Données n'existant que pour un avatar principal**
 - `mck` : map des mots-clés du compte cryptée par la clé K -la clé est leur code 1-99- ("code": nom@catégorie).
-- `memok` : mémo personnel du compte.
+- `mavk` : map des avatars du compte. 
+  - _clé_ : id court de l'avatar cryptée par la clé K du compte.
+  - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
+- `mpgk` : map des participations aux groupes des avatars du compte.
+  - _clé_: `npgk`. hash du cryptage par la clé K du compte de `idg / idav`. Cette identification permet au serveur de supprimer une entrée de la map sans disposer de la clé K. `idg`: id courte du groupe, `idav`: id courte de l'avatar.
+  - _valeur_: `{nomg, cleg, im, idav}` cryptée par la clé K.
+    - `nomg`: nom du groupe,
+    - `cleg`: clé du groupe,
+    - `im`: indice du membre dans la table `ast` du groupe.
+    - `imp` : indice du premier membre du compte inscrit dans le groupe
+    - `idav` : id (court) de l'avatar.
+- `mcmemos` : map des couples `{mc, memo}` à propos des contacts (avatars) et groupes connus du compte:
+  - _cle_: `id` crypté par la clé K du compte,
+  - _valeur_ : `{ mc, memo }` crypté par la clé K du compte.
+    - `mc` : mots clés du compte à propos du groupe.
+    - `memo` : commentaire du compte à propos du groupe.
 
 **Données disponibles pour tous les avatars**
 - `pub` : clé publique RSA.
@@ -1239,41 +1193,62 @@ _data_:
 - `cva` : carte de visite cryptée par la clé _CV_ de l'avatar `{v, photo, info}`.
 - `invits`: maps des invitations en cours de l'avatar:
   - _clé_: `ni`, numéro d'invitation. hash du cryptage par la clé du groupe de la clé _inversée_ de l'avatar. Ceci permet à un animateur du groupe de détruire l'entrée.
-  - _valeur_: `[nomg, cleg, im]` cryptée par la clé publique RSA de l'avatar.
+  - _valeur_: `{nomg, cleg, im}` cryptée par la clé publique RSA de l'avatar.
     - `nomg`: nom du groupe,
     - `cleg`: clé du groupe,
     - `im`: indice du membre dans la table `ast` du groupe.
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `napc` : `[nom, cle]` de l'avatar cryptée par le PBKFD de la phrase de contact.
-- `memos` : map des couples mc / memo à propos des contacts (avatars) et groupes:
-  - _cle_: `id` crypté par la clé K du compte,
-  - _valeur_ : `{ mc, memo }` crypté par la clé K du compte.
-    - `mc` : mots clés de l'avatar à propos du groupe.
-    - `memo` : commentaire de l'avatar à propos du groupe.
 */
 export class Avatar extends GenDoc {
   get na () { return getNg(this.id) }
   // get nbGroupes () { return this.lgr.size }
   get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconAvatar }
 
+  // retourne l'array des na des avatars du compte (trié ordre alpha, PRIMAIRE EN TETE)
+  get lstAvatarNas () {
+    const t = []; for(const na of this.mav.values()) { t.push(na) }
+    const idc = this.naprim.id
+    t.sort((a,b) => { return a.id === idc ? -1 : (b.id === idc ? 1 : (a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)))})
+    return t
+  }
+
+  estAvDuCompte (id) { return this.mav.has(id) }
+
+  avatarDeNom (n) { // retourne l'id de l'avatar de nom n (ou 0)
+    for(const na of this.mav.values()) { if (na.nom === n) return na.id }
+    return 0
+  }
+  
+  /* mpg : Map
+    - clé: id du groupe
+    - valeur:
+      - nag : na du groupe
+      - avs: Map
+        - clé: id de l'avatar
+        - valeur: { im, imp }
+  */
+
   /* Remplit la map avec les membres des groupes de l'avatar/
   - clé: id du groupe
   - valeur: { idg: , mbs: [ids], dlv }
-  membres (map, dlv) {
-    for (const [ ,t] of this.lgr) {
-      const e = map[t.ng.id]
-      if (!e) { map[t.ng.id] = { idg: t.ng.id, mbs: [t.im], dlv } } else e.mbs.push(t.im)
-    }
-  }
   */
+  membres (map, dlv) {
+    this.mpg.forEach((t ,idg) => {
+      let e = map[idg]
+      if (!e) { e = { idg: idg, mbs: [], dlv }; map[idg] = e }
+      t.avs.forEach(a => { e.mbs.push(a.im) })
+    })
+  }
 
-  /* Ids des groupes de l'avatar, accumulés dans le set s 
-  idGroupes (s) {
+  /* Ids des groupes de l'avatar, accumulés dans le set s */
+  idGroupes (ida, s) {
     const x = s || new Set()
-    for (const [ ,t] of this.lgr) x.add(t.ng.id)
+    this.mpg.forEach((t ,idg) => {
+      t.avs.forEach((a, id) => { if (id === ida) x.add(idg)})
+    })
     return x
   }
- */
 
   /* Retourne les numéros d'invitation de l'avatar pour les groupes de setg
   et supprime leurs entrées dans lgr 
@@ -1299,7 +1274,7 @@ export class Avatar extends GenDoc {
   }
 
   // Retourne {mc, memo} à propos d'une id donnée
-  memomc (id) { return this.memos.get(id) }
+  mcmemo (id) { return this.mcmemos.get(id) }
 
   /** compile *********************************************************/
   async compile (row) {
@@ -1317,9 +1292,32 @@ export class Avatar extends GenDoc {
         this.mc = decode(await decrypter(session.clek, row.mck))
       } else this.mc = {}
 
-      if (row.memok) {
-        this.memo = await decrypterStr(session.clek, row.memok)
-      } else this.memo = ''
+      this.mav = new Map()
+      for(const i in row.mavk) {
+        const [nom, cle] = decode(await decrypter(session.clek, row.mavk[i]))
+        const na = NomGenerique.from([nom, cle])
+        this.mav.set(na.id, na)
+        if (na.id === this.id) this.naprim = na
+      }
+      this.avatarIds = new Set(this.mav.keys())
+  
+      this.mcmemos = new Map()
+      if (row.mcmemos) { for (const x in row.mcmemos) {
+          const id = parseInt(await decrypter(session.clek, x))
+          const e = decode(await decrypter(session.clek, row[x]))
+          this.mcmemos.set(id, e)
+        }  
+      }
+
+      this.mpg = new Map()
+      for(const i in row.mpgk) {
+        const { nomg, cleg, im, imp, idav } = decode(await decrypter(session.clek, row.mpgk[i]))
+        const nag = NomGenerique.from([nomg, cleg])
+        const ida = ID.long(idav, session.ns)
+        let e = this.mpg.get(nag.id)
+        if (!e) { e = { nag: nag, avs: new Map() }; this.mpg.set(nag.id, e) }
+        e.avs.set(ida, {im, imp})
+      }
     }
 
     this.priv = await decrypter(session.clek, row.privk)
@@ -1337,34 +1335,61 @@ export class Avatar extends GenDoc {
     if (row.invits) {
       for (const nx in row.invits) {
         const ni = parseInt(nx)
-        const [nom, rnd, im] = decode(await decrypterRSA(this.priv, row[nx]))
-        const ng = NomGenerique.from([nom, rnd])
+        const {nomg, cleg, im} = decode(await decrypterRSA(this.priv, row[nx]))
+        const ng = NomGenerique.from([nomg, cleg])
         gSt.setInvit(ng.id, this.id)
         this.invits.set(ni, { ng, im })
       }
     }
-
-    this.memos = new Map()
-    if (row.memos) {
-      for (const x in row.memos) {
-        const id = parseInt(await decrypter(session.clek, x))
-        const e = decode(await decrypter(session.clek, row[x]))
-        this.memos.set(id, e)
-      }  
-    }
   }
 
   static async primaireRow (na, publicKey, privateKey) {
+    const session = stores.session
     const r = {}
     r.id = na.id
     r.v = 1
     r.vcv = 0
-    r.privk = await crypter(stores.session.clek, privateKey)
+    r.privk = await crypter(session.clek, privateKey)
     r.pub = publicKey
+    r.mavk = {}
+    const c = hash(await crypter(session.clek, '' + ID.court(na.id)))
+    const v = await crypter(session.clek, [na.nom, na.rnd])
+    r.mavk[c] = v
     const _data_ = new Uint8Array(encode(r))
     const row = { _nom: 'avatars', id: r.id, v: r.v, vcv: r.vcv, _data_ }
     return row
   }
+
+  updAvatarMavk (setSupprIds) {
+    let ok = false
+    if (setSupprIds && setSupprIds.size) setSupprIds.forEach(id => { 
+      if (this.mav.has(id)) {
+        ok = true
+        this.mav.delete(id)
+      }
+    })
+    if (ok) this.avatarIds = new Set(this.mav.keys())
+    return ok
+  }
+
+  async lmAvatarMavk (setSupprIds) {
+    // set des id à supprimer
+    const session = stores.session
+    const lm = []
+    if (setSupprIds && setSupprIds.size) for (const id of setSupprIds) {
+      lm.push(await Avatar.mavkK(id, session.clek))
+    }
+    return lm
+  }
+
+  static async mavkKV (na, k) {
+    return await crypter(k, new Uint8Array(encode([na.nomx, na.rnd])))
+  }
+
+  static async mavkK (id, k) {
+    return u8ToB64(await crypter(k, '' + ID.court(id), 1), true)
+  }
+
 }
 
 /* Cv : n'a qu'un seul champ cva - id: de l'avatar
@@ -1577,22 +1602,23 @@ export class Ticket extends GenDoc {
 }
 
 /** Chat ************************************************************
-_data_:
+_data_ (de l'exemplaire I):
 - `id`: id de A,
-- `ids`: hash du cryptage de `idA_court/idB_court` par la clé de A.
+- `ids`: hash du cryptage de `idI_court/idE_court` par la clé de I.
 - `v`: 1..N.
-- `dlv`
-- `vcv` : version de la carte de visite.
+- `vcv` : version de la carte de visite de E.
 
-- `r` : 0:raccroché, 1:en ligne, 2:en ligne mais E est mort
-- `mc` : mots clés attribués par l'avatar au chat.
-- `cva` : `{v, photo, info}` carte de visite de _l'autre_ au moment de la création / dernière mise à jour du chat, cryptée par la clé de _l'autre_.
-- `cc` : clé `cc` du chat cryptée par la clé K du compte de I ou par la clé publique de I.
-- `seq` : numéro de séquence de changement du texte.
-- `contc` : contenu crypté par la clé `cc` du chat.
-  - `na` : `[nom, cle]` de _l'autre_.
-  - `dh`  : date-heure de dernière mise à jour.
-  - `txt` : texte du chat. '' quand le compte a raccroché (ce qui ne _vide_ pas l'autre exemplaire.)
+- `st` : deux chiffres `I E`
+  - I : 0:passif, 1:actif
+  - E : 0:passif, 1:actif, 2:disparu
+- `cva` : `{v, photo, info}` carte de visite de E au moment de la création / dernière mise à jour du chat, cryptée par la clé de E.
+- `cc` : clé `cc` du chat cryptée par la clé K du compte de I ou par la clé publique de I (quand le chat vient d'être créé par E).
+- `nacc` : `[nom, cle]` de E crypté par la clé du chat.
+- `items` : liste des items `[{a, dh, l t}]`
+  - `a` : 0:écrit par I, 1: écrit par E
+  - `dh` : date-heure d'écriture.
+  - `l` : taille du texte.
+  - `t` : texte crypté par la clé du chat (vide s'il a été supprimé).
 
   Compilé:
   - seq
@@ -1605,13 +1631,14 @@ _data_:
 export class Chat extends GenDoc {
   get naI () { return getNg(this.id) }
 
+  get stI () { return Math.floor(this.st / 10) }
+  get stE () { return this.st % 10 }
+
   async compile (row) {
     const aSt = stores.avatar
     const session = stores.session
     this.vsh = row.vsh || 0
-    this.r = row.r || 0
-    this.mc = row.mc || new Uint8Array()
-    this.seq = row.seq
+    this.st = row.st || 0
     if (row.cc.length === 256) {
       const av = aSt.getAvatar(this.id)
       this.cc = await decrypterRSA(av.priv, row.cc)
@@ -1620,12 +1647,14 @@ export class Chat extends GenDoc {
       this.cc = await decrypter(session.clek, row.cc)
       this.ccK = null
     }
-    const x = decode(await decrypter(this.cc, row.contc))
-    this.naE = NomGenerique.from(x.na)
-    this.idsE = await Chat.getIds(this.naE, this.naI)
-    this.dh = x.dh || 0
-    this.txt = x.txt || ''
+    this.naE = NomGenerique.from(decode(await decrypter(this.cc, row.nacc)))
     this.cv = row.cva ? decode(await decrypter(this.naE.rnd, row.cva)) : null
+    this.idsE = await Chat.getIds(this.naE, this.naI)
+    this.items = []
+    if (row.items) for (const it of row.items) {
+      const t = row.t ? ungzipB(await decrypter(this.cc, row.t)) : null
+      this.items.push({ a: row.a, t, dh: row.dh})
+    }
   }
 
   static async getIds (naI, naE) {{
@@ -1633,7 +1662,7 @@ export class Chat extends GenDoc {
   }}
 
   /*
-  r: 0 (raccroché pour le chat E, 1 en ligne pour le chat I)
+  st: 10 pour le chat I, 1 pour le chat E
   naI, naE : na des avatars I et E
   dh : date-heure d'écriture
   txt: texte du chat
@@ -1642,18 +1671,35 @@ export class Chat extends GenDoc {
   publicKey: clé publique de I. Si null récupérée depuis son avatar
   mc: mot clés attribués
   */
-  static async nouveauRow (rac, naI, naE, contc, cc, pubE, mc) {
-    const ids = await Chat.getIds(naI, naE)
-    const id = naI.id
-    const r = { id, ids, r: rac, seq: 1, contc } // v vcv cva sont mis par le serveur
-    if (mc) r.mc = mc
-    if (pubE) {
-      r.cc = await crypterRSA(pubE, cc)
-    } else {
-      r.cc = await crypter(stores.session.clek, cc)
-    }
-    const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'chats', id, ids, _data_}
+  static async newRows (naI, naE, txt, cc, pubE) {
+    const [itI, itE] = Chat.newItems(txt, cc)
+    const rI = { 
+      id: naI.id, 
+      ids: await Chat.getIds(naI, naE), 
+      st: 10,
+      cc: await crypter(stores.session.clek, cc),
+      nacc: await crypter(cc, encode([naE.nom, naE.rnd])),
+      items: [itI]
+    } // v vcv cva sont mis par le serveur
+    const rE = { 
+      id: naE.id, 
+      ids: await Chat.getIds(naE, naI), 
+      st: 1,
+      cc: await crypter(await crypterRSA(pubE, cc)),
+      nacc: await crypter(cc, encode([naI.nom, naI.rnd])),
+      items: [itE]
+    } // v vcv cva sont mis par le serveur
+    const I = new Uint8Array(encode(rI))
+    const E = new Uint8Array(encode(rE))
+    return [{ _nom: 'chats', id: rI.id, ids: rI.ids, _data_: I}, 
+      { _nom: 'chats', id: rE.id, ids: rE.ids, _data_: E}]
+  }
+
+  static async newItems (txt, cc) {
+    const dh = Date.now()
+    const t = txt ? await crypter(cc, await gzipB(txt)) : null
+    const l = txt ? txt.length : 0
+    return [{dh, a:0, t, l}, {dh, a:1, t, l}]
   }
 
   static async getContc (na, dh, txt, cc) {
@@ -1675,13 +1721,11 @@ _data_:
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
 - `pe` : _0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes_.
 - `ast` : table des statuts des membres. Deux chiffres `sta laa` (0: disparu / oublié):
-  - `sta`: statut d'activité: 1: contact, 2:invité, 3:actif, 4:résilié
-  - `laa`: 1:lecteur, 2:auteur, 3:animateur.
-- `nag` : table des `hcmg` (hash de la clé de l'avatar membre cryptée par la clé du groupe). Les index dans `nag` et `ast` correspondent.
-- `ln` : liste noire des `im`. 
+  - `sta`: statut d'activité: 1: contact, 2:invité, 3:ré-invité, 4:résilié, 9:actif
+  - `laa`: 1:lecteur, 2:auteur, 3:animateur (pour `sta` 2 3 4).
+- `anag` : table des `nag` (hash de la clé de l'avatar membre cryptée par la clé du groupe). Les index dans `anag` et `ast` correspondent.
 - `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe.
 - `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
-- `ardg` : ardoise cryptée par la clé du groupe.
 */
 
 export class Groupe extends GenDoc {
@@ -1697,10 +1741,14 @@ export class Groupe extends GenDoc {
 
   sta (im) { const n = this.ast[im]; return !n ? 0 : Math.floor(n / 10) }
   laa (im) { const n = this.ast[im]; return !n ? 0 : n % 10 }
+
+  estOublie (im)  { return this.sta(im) === 0 }
   estContact (im) { return this.sta(im) === 1 }
   estInvite (im) { return this.sta(im) === 2 }
-  estActif (im) { return this.sta(im) === 3 }
+  estReinvite (im) { return this.sta(im) === 3 }
   estResilie (im) { return this.sta(im) === 4 }
+  estActif (im) { return this.sta(im) === 9 }
+
   estAuteur (im) { return this.las(im) > 1 }
   estAnim (im) { return this.las(im) === 3 }
 
@@ -1717,9 +1765,7 @@ export class Groupe extends GenDoc {
     this.imh = row.imh || 0
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
-    this.nag = row.nag || [0]
-    this.ln = row.ln || []
-    this.ard = !row.ardg ? '' : await decrypterStr(this.cle, row.ardg)
+    this.anag = row.anag || [0]
   }
 
   get mbHeb () { // membre hébergeur
@@ -1738,7 +1784,7 @@ export class Groupe extends GenDoc {
   }
 
   static async rowNouveauGroupe (nagr, namb, unanime) {
-    const n = hash(await crypter(nagr.rnd, namb.rnd, 1))
+    const n = await Groupe.getNag(nagr, namb)
     const idhg = await Groupe.toIdhg(nagr.rnd)
     const r = {
       id: nagr.id,
@@ -1747,13 +1793,28 @@ export class Groupe extends GenDoc {
       msu: unanime ? new Uint8Array([]) : null,
       pe: 0,
       imh: 1,
-      ast: new Uint8Array([0, 32]),
-      nag: [0, n],
-      ln: [],
+      ast: new Uint8Array([0, 9]),
+      anag: [0, n],
       idhg
     }
     const _data_ = new Uint8Array(encode(r))
     return { _nom: 'groupes', id: r.id, v: r.v, _data_ }
+  }
+
+  static async getNag (nagr, namb) {
+    return hash(await crypter(nagr.rnd, namb.rnd, 1))
+  }
+
+  static async getNi (nagr, namb) {
+    return hash(await crypter(nagr.rnd, inverse(namb.rnd), 1))
+  }
+
+  /* npgk: numéro de participation à un groupe: 
+  hash du cryptage par la clé K du compte de `idg / idav`. 
+  Ce numéro est la clé du membre dans la map `mpgk` de l'avatar principal du compte.
+  */
+  static async getNpgk (idg, idav) {
+    return hash(await crypter(ID.court(idg) + '/' + ID.court(idav)))
   }
 
   static async toIdhg (cle) {
@@ -1771,21 +1832,18 @@ export class Groupe extends GenDoc {
 }
 
 /** Membre ***********************************************************
+_data_:
 - `id` : id du groupe.
-- `ids`: identifiant, indice de membre relatif à son groupe.
-- `v`
-- `vcv` : version de la carte de visite du membre
+- `ids`: identifiant, indice `im` de membre relatif à son groupe.
+- `v` : 
+- `vcv` : version de la carte de visite du membre.
 - `dlv` : date de dernière signature + 365 lors de la connexion du compte de l'avatar membre du groupe.
 
-- `ddi` : date de la _dernière_ invitation
-- `dda` : date de début d'activité (jour de la _première_ acceptation)
-- `dfa` : date de fin d'activité (jour de la _dernière_ suspension)
-- `inv` : validation de la dernière invitation:
-  - `null` : le membre n'a pas été invité où le mode d'invitation du groupe était _simple_ au moment de l'invitation.
-  - `[ids]` : liste des indices des animateurs ayant validé l'invitation.
-- `mc` : mots clés du membre à propos du groupe.
-- `infok` : commentaire du membre à propos du groupe crypté par la clé K du membre.
-- `nag` : `[nom, rnd]` : nom complet de l'avatar crypté par la clé du groupe :
+- `ddi` : date de la _dernière_ invitation.
+- `dda` : date de début d'activité (jour de la _première_ acceptation).
+- `dfa` : date de fin d'activité (jour de la _dernière_ suspension).
+- `inv` : dernière invitation. Liste des indices des animateurs ayant validé l'invitation.
+- `nag` : `[nom, cle]` : nom et clé de l'avatar crypté par la clé du groupe.
 - `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
 */
 export class Membre extends GenDoc {
@@ -1801,11 +1859,8 @@ export class Membre extends GenDoc {
     this.dda = row.dda || 0
     this.dfa = row.dfa || 0
     this.inv = row.inv || null
-    this.mc = row.mc || new Uint8Array([])
-    const x = decode(await decrypter(this.cleg, row.nag)) // x: [nom, rnd]
-    this.na = NomGenerique.from(x)
-    this.estAc = aSt.compta.avatarIds.has(this.na.id)
-    this.info = row.infok && this.estAc ? await decrypterStr(stores.session.clek, row.infok) : ''
+    this.nag = NomGenerique.from(decode(await decrypter(this.cleg, row.nag)))
+    this.estAc = aSt.compte.avatarIds.has(this.nag.id)
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
   }
 
