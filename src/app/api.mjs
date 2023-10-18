@@ -619,7 +619,7 @@ export class Compteurs {
     else if (max >= 90) { ntf.nr = 0; ntf.texte = '%F' }
     return ntf
   }
-
+  
   get notifX () { // consommation excessive
     const ntf = { dh: this.dh }
     if (this.qv.qc) {

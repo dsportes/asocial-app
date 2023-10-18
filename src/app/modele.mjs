@@ -777,6 +777,15 @@ export class Tribu extends GenDoc {
 
   get clet () { return getCle(this.id) }
 
+  signable (it) {
+    let x = this.stn
+    if (it) {
+      const item = this.act[it]
+      if (item && item.stn > x) x = item.stn
+    }
+    return x < 2
+  }
+
   async compile (row) {
     const session = stores.session
     this.vsh = row.vsh || 0
@@ -949,6 +958,8 @@ export class Compta extends GenDoc {
     const a = this.atr[ID.court(id)]
     return a && a.info ? a.info : ''
   }
+
+  get signable () { return this.compteurs.notifX.nr !== 4 }
 
   async compile (row) {
     const session = stores.session
@@ -1223,6 +1234,7 @@ export class Avatar extends GenDoc {
   /* mpg : Map
     - clé: id du groupe
     - valeur:
+      - npgk : clé d'accès à l'élément dans mpgk
       - nag : na du groupe
       - avs: Map
         - clé: id de l'avatar
@@ -1241,13 +1253,22 @@ export class Avatar extends GenDoc {
     })
   }
 
-  /* Ids des groupes de l'avatar, accumulés dans le set s */
-  idGroupes (ida, s) {
+  /* Ids des groupes de l'avatar ida (tous si absent), accumulés dans le set s */
+  idGroupes (s, ida) {
     const x = s || new Set()
     this.mpg.forEach((t ,idg) => {
-      t.avs.forEach((a, id) => { if (id === ida) x.add(idg)})
+      t.avs.forEach((a, id) => { if (!ida || id === ida) x.add(idg)})
     })
     return x
+  }
+
+  mbsOfGroupe (idg) { // retourne valeur: { npgk, idg, mbs: [ids] }
+    const e = this.mpg.get(idg)
+    if (e) { 
+      const mbs = []
+      e.avs.forEach(x => mbs.push(x.im))
+      return { npgk: e.npgk, idg, mbs, dlv }
+    }
   }
 
   /* Retourne les numéros d'invitation de l'avatar pour les groupes de setg
@@ -1315,7 +1336,7 @@ export class Avatar extends GenDoc {
         const nag = NomGenerique.from([nomg, cleg])
         const ida = ID.long(idav, session.ns)
         let e = this.mpg.get(nag.id)
-        if (!e) { e = { nag: nag, avs: new Map() }; this.mpg.set(nag.id, e) }
+        if (!e) { e = { npgk: parseInt(i), nag: nag, avs: new Map() }; this.mpg.set(nag.id, e) }
         e.avs.set(ida, {im, imp})
       }
     }

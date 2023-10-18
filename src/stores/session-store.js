@@ -13,7 +13,6 @@ export const useSessionStore = defineStore('session', {
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
-    estAdmin: false,
     estSponsor: false,
 
     /* namespace de 10 à 59 
@@ -97,13 +96,13 @@ export const useSessionStore = defineStore('session', {
     - `dh` : date-heure de création.
     - `texte`: texte de la notification.
     - `idSource`: id du sponsor ayant créé cette notification pour un type 3.
-   */
+    */
     nivx: [0, 3, 5, 3, 4, 2],
     /* niveau d'information / restriction: 
     - 0 : aucune notification
     - 1 : au moins une notification informative
     - 2 : accroissement de volume interdit
-    - 3 : acceés en lecture seule
+    - 3 : accés en lecture seule
     - 4 : accès minimal
     - 5 : bloqué
     */
@@ -117,6 +116,7 @@ export const useSessionStore = defineStore('session', {
   getters: {
     espace (state) { return state.espaces.get(state.ns) },
     estComptable (state) { return ID.estComptable(state.compteId) },
+    estAdmin (state) { return state.compteId === 0 },
 
     editable (state) { return state.mode < 3 && state.niv < 4 },
 

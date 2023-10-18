@@ -172,7 +172,127 @@ Opération de connexion à un compte par sa phrase secrète (synchronisé, incog
 export class ConnexionCompte extends OperationUI {
   constructor() { super($t('OPcnx')) }
 
-  /** tousAvatars *******************************************************/
+  /* Liste des avatars et groupes et signatures
+  - this.compta et this.avatar peuvent être rechargés en cas de changement de version
+  */
+  async avGrSignatures () {
+    const session = stores.session
+
+    let dlv1 = 0, dlv2 = 0
+    if (!session.estFige && this.compta.signable && 
+        (!this.compta.it || this.compta.signable(this.compta.it))) {
+      // En UTC la division d'une date est multiple de 86400000
+      const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
+      const tdlv1 = (Math.floor(tjourJ / 10) + 1) * 10
+      const tdlv2 = tdlv1 + 10
+      // pas de signatures quand une procédure de blocage est en cours
+      dlv1 = AMJ.amjUtcDeT(tdlv1 * 86400000)
+      dlv2 = AMJ.amjUtcDeT(tdlv2 * 86400000)
+    }
+    
+    while (true) {
+      const abPlus = []
+      this.versions = {}
+
+      // Traitement des avatars
+      /* map des avatars du compte 
+      - clé: id de l'avatar  - valeur: {v, dlv} } */
+      const avsMap = {}
+      this.avatarsToStore = new Map()
+      this.avToSuppr = new Set()
+      this.avRowsModifies = []
+
+      this.avRequis = this.compte.avatarIds
+      // avatars connus en IDB
+      if (session.accesIdb) for (const row of this.cAvatars) {
+        if (this.avRequis.has(row.id)) {
+          this.avatarsToStore.set(row.id, await compile(row))
+          avsMap[row.id] = { v: av.v, dlv: session.compteId === row.id ? dlv1 : dlv2 }
+        } else this.avToSuppr.add(row.id)
+      }
+      // avatars non stockés en IDB
+      for (const id of this.avRequis) {
+        if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
+        if (!this.avatarsToStore.has(id))
+          avsMap[avatar.id] = { v: 0, dlv: session.compteId === id ? dlv1 : dlv2 }
+      }
+
+      // Traitement des groupes
+      /* map des membres des groupes auxquels participent au moins un des avatars
+      - clé: id du groupe  - valeur: { idg, v, npgk, mbs: [ids], dlv } */
+      const mbsMap = {}
+      this.groupesToStore = new Map()
+      this.grToSuppr = new Set()
+      this.grRowsModifies = []
+
+      this.grRequis = this.avatar.idGroupes()
+      if (session.accesIdb) for (const row of this.cGroupes) {
+        if (this.grRequis.has(row.id)) {
+          this.groupesToStore.set(row.id, await compile(row))
+          const x = this.avatar.mbsOfGroupe(row.id); x.v = gr.v; x.dlv = dlv2
+          mbsMap[row.id] = x
+        } else this.grToSuppr.add(row.id)
+      }
+      for (const id of this.grRequis) {
+        if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
+        if (!this.groupesToStore.has(id)) {
+          const x = this.avatar.mbsOfGroupe(id); x.v = 0; x.dlv = dlv2
+          mbsMap[id] = x
+        }
+      }
+
+      if (!session.accesNet) return
+
+      const args = { 
+        token: session.authToken, 
+        vcompta: this.compta.v, vavatar: this.avatar.v, 
+        estFige: dlv1 === 0,
+        mbsMap, avsMap, abPlus 
+      }
+      const ret = this.tr(await post(this, 'avGrSignatures', args))
+      /*Retour:
+      - `OK` : true / false si le compta ou l'avatar principal a changé de version.
+      - `versions` : map pour chaque avatar / groupe :
+        - _clé_ : id du groupe ou de l'avatar.
+        - _valeur_ :
+          - `{ v }`: pour un avatar.
+          - `{ v, vols: {v1, v2, q1, q2} }` : pour un groupe.
+      - `avatars` : tows avatars ayant une nouvelle version sauf principal.
+      - `groupes`: tous groupes ayant une nouvelle version
+      - `avatar` : avatar principal. Si OK seule mpgk a pu avoir des items en moins (groupes disparus)
+      - `compta` : compta si NOT OK
+      */
+      if (ret.OK === true) {
+        if (ret.rowAvatar)
+          this.avatar = await compile(ret.rowAvatar)
+        
+        if (ret.rowAvatars && ret.rowAvatars.length) for (const row of ret.rowAvatars)
+          this.avatarsToStore.set(row.id, await compile(row))
+        
+        if (ret.rowGroupes && ret.rowGroupes.length) for (const row of ret.rowGroupes)
+          this.groupesToStore.set(row.id, await compile(row))
+
+        for (const idx in ret.versions) {
+          const x = ret.versions[idx]
+          const id = parseInt(idx)
+          if (x._zombi) {
+            this.grRequis.delete(id)
+            this.grToSuppr.add(id)
+          } else {
+            this.versions[idx] = x
+          }
+        }
+        return
+      }
+
+      // rows Compa ou Avatar modifiés, on boucle
+      this.rowCompta = ret.rowCompta
+      this.rowAvatar = ret.rowAvatar
+      await connex2()
+    }
+  }
+
+  /** tousAvatars *** OBSOLETE ****************************************************/
   async tousAvatars() {
     const session = stores.session
     const avRowsModifies = []
@@ -211,7 +331,8 @@ export class ConnexionCompte extends OperationUI {
         const ret = this.tr(await post(this, 'GetAvatars', args))
         if (!ret.OK) {
           // compta a changé : on recharge compta, tribu, avatar et on boucle
-          await this.getCTA()
+          await this.connex1()
+          await this.connex2()
           continue
         }
         if (ret.rowAvatars && ret.rowAvatars.length) {
@@ -225,7 +346,8 @@ export class ConnexionCompte extends OperationUI {
       // obtention de la liste des groupes requis et signatures
       const ok = await this.groupesRequisSignatures()
       if (!ok) {
-        await this.getCTA()
+        await this.connex1()
+        await this.connex2()
         continue
       }
       break
@@ -234,7 +356,7 @@ export class ConnexionCompte extends OperationUI {
     return [avRowsModifies, avToSuppr]
   }
 
-  /** tousGroupes *******************************************************/
+  /** tousGroupes *** OBSOLETE ****************************************************/
   async groupesRequisSignatures() {
     const session = stores.session
     // En UTC la division d'une date est multiple de 86400000
@@ -316,6 +438,7 @@ export class ConnexionCompte extends OperationUI {
     return true
   }
 
+  /*** OBSOLETE */
   async chargerGroupes() {
     const session = stores.session
     const grRows = {} // Map des rows des groupes par id du groupe
@@ -575,49 +698,63 @@ export class ConnexionCompte extends OperationUI {
     this.tr(await post(this, 'MajTribuVols', args))
   }
 
-  async getCTA() {
+  /* Authentification initiale. Définit:
+  - session.compteId : 0 si admin
+  - session.avatarId == compteId
+  Si pas admin:
+  - session.org ns
+  - session.estClos : si l'espace est clos
+  - this.espace
+  */
+  async connex1 () {
     const session = stores.session
-    const aSt = stores.avatar
-    /* Authentification et get de avatar / compta / tribu
-    ET abonnement à compta sur le serveur
-    */
+    /* Authentification et get de avatar / compta / tribu (si compte O) */
     const args = { token: session.authToken }
     // Connexion : récupération de rowCompta rowAvatar fscredentials
     const ret = this.tr(await post(this, 'ConnexionCompte', args))
 
-    if (session.fsSync && ret.credentials) {
-      await session.fsSync.open(ret.credentials, ret.emulator || 0)
-    }
-
     if (ret.admin) {
       session.setCompteId(0)
-      session.estAdmin = true
-      if (ret.espaces) for (const e of ret.espaces) {
+      if (ret.espaces) for (const e of ret.espaces)
         session.setEspace(await compile(e), true)
-      }
       return
     }
 
+    session.setCompteId(ret.rowCompta.id)
+    session.setAvatarId(session.compteId)
+    if (session.estComptable) session.setMode(2)
+
+    if (session.fsSync && ret.credentials) {
+      await session.fsSync.open(ret.credentials, ret.emulator || 0)
+      await session.fsSync.setCompte(session.compteId)
+    }
+    
     this.espace = await compile(ret.rowEspace)
     if (session.estClos) return
     session.setOrg(this.espace.org)
     session.setNs(this.espace.id)
 
     this.rowCompta = ret.rowCompta
-    session.setCompteId(this.rowCompta.id)
     this.rowAvatar = ret.rowAvatar
+  }
 
-    if (session.fsSync) {
-      /* en sql, le serveur a enregistré d'office à la connexion l'abonnement 
-      au compte et à sa tribu
-      mais en fs c'est à faire explicitement en session */
-      await session.fsSync.setCompte(session.compteId)
-    }
-
-    session.setAvatarId(session.compteId)
+  /* Compile rowCompta et rowAvatar, obtient la tribu (si compte O). Définit:
+  this.compta
+  this.avatar (l'avatar principal)
+  this.tribu : remet à niveau la stat de volume de tribu
+  */
+  async connex2 () {
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
-    if (this.compta.rowCletK) await this.compta.compile2(this.avatar.priv)
+    if (this.compta.rowCletK) {
+      await this.compta.compile2(this.avatar.priv)
+      /* Si dans compta, cletK a été recrypté */
+      if (session.accesNetNf && this.compta.cletK) {
+        const args = { token: session.authToken, cletK: this.compta.cletK }
+        this.tr(await post(this, 'MajCletKCompta', args))
+        delete this.compta.cletK
+      }
+    }
 
     if (this.compta.idt) {
       const args = { token: session.authToken, id: this.compta.idt, abPlus: [this.compta.idt] }
@@ -626,12 +763,8 @@ export class ConnexionCompte extends OperationUI {
       this.tribu = await compile(this.rowTribu)
       await this.MajTribuVols() // MAJ tribu de v1 v2 (si +- 10%)
       session.setTribuId(this.tribu.id)
-      if (session.fsSync) {
-        /* en sql, le serveur a enregistré d'office à la connexion l'abonnement 
-        au compte et à sa tribu
-        mais en fs c'est à faire explicitement en session */
+      if (session.fsSync)
         await session.fsSync.setTribu(session.tribuId)
-      }
     }
   }
 
@@ -692,11 +825,8 @@ export class ConnexionCompte extends OperationUI {
         stores.ui.setPage('session')
         await this.phase0Avion()
       } else {
-        /* Authentification et get de avatar / compta / tribu
-        ET abonnement à compta sur le serveur
-        */
-        await this.getCTA()
-        if (session.estAdmin) { // C'est une session ADMIN
+        await this.connex1()
+        if (session.estAdmin) {
           session.setMode(2)
           session.setStatus(3)
           stores.ui.setPage('admin')
@@ -707,41 +837,69 @@ export class ConnexionCompte extends OperationUI {
           return this.finOK()
         }
         stores.ui.setPage('session')
-        if (session.estComptable) session.setMode(2)
-        await this.phase0Net()
+        await this.connex2()
+        await this.phase0Net() // maintenant que la cle K est connue
       }
 
       this.cAvatars = session.accesIdb ? await getColl('avatars') : []
       this.avatarsToStore = new Map() // objets avatar à ranger en store
-      const [avRowsModifies, avToSuppr] = await this.tousAvatars()
-      /* 
-      this.versions :  map pour chaque avatar / groupe de :
+      this.cGroupes = session.accesIdb ? await getColl('groupes') : []
+      this.groupesToStore = new Map()
+      if (session.accesIdb) await loadVersions() // chargement des versions depuis IDB
+      else return Versions.reset() // Versions déjà connues en IDB, vide
+
+      /* Remplit: 
+      - this.avatarsToStore, .avToSuppr, .avRowsModifies, .avRequis
+      - this.groupesToStore, .grToSuppr, .grRowsModifies, .grRequis
+      - this.versions :  map pour chaque avatar / groupe (SANS les zombis):
         { v }: pour un avatar
         { v, vols: {v1, v2, q1, q2} } : pour un groupe
-      this.grDisparus : set des ids des groupes détectés disparus par leur versions zombi
-        et pas encore répercutés dans la lgr de leurs avatars membres
       */
-
-      /* Dans compta, cletK a peut-être été recrypté */
-      if (session.accesNetNf && this.compta.cletK) {
-        const args = { token: session.authToken, cletK: this.compta.cletK }
-        this.tr(await post(this, 'MajCletKCompta', args))
-        delete this.compta.cletK
-      }
-
+      await this.avGrSignatures()
+      
+      /* Mise à jour intermédiaire de IDB
+      Sans impact sur la cohérence.
+      Ne concerne que compta, tribu, les avatars et les comptes
+      */ 
       if (session.accesIdb) {
         this.buf.putIDB(this.rowCompta)
         if (this.rowTribu) this.buf.putIDB(this.rowTribu)
         this.buf.putIDB(this.rowAvatar)
-        avRowsModifies.forEach(row => { this.buf.putIDB(row) })
-        avToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
+        this.avRowsModifies.forEach(row => { this.buf.putIDB(row) })
+        this.avToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
+        this.grRowsModifies.forEach(row => { this.buf.putIDB(row) })
+        this.grToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
+        await this.buf.commitIDB(true)
+        this.buf = new IDBbuffer()
       }
 
+      this.BRK()
+
+      // const [avRowsModifies, avToSuppr] = await this.tousAvatars()
+
       // Rangement en store
+      const syncitem = stores.syncitem
       aSt.setCompte(this.avatar, this.compta, this.tribu)
       if (this.espace) session.setEspace(this.espace)
 
-      // En cas de blocage grave, plus de synchronisation
+      for (const av of this.avatarsToStore) {
+        if (av.id !== this.avatar.id) aSt.setAvatar(av)
+        syncitem.push('05' + av.id, 0, 'SYava', [av.na.nom])
+      }
+
+      for (const gr of this.groupesToStore) {
+        gSt.setAvatar(gr)
+        syncitem.push('10' + gr.id, 0, 'SYgro', [gr.na.nom])
+      }
+
+      // Chargement en store des versions des groupes (this.versions n'a PAS les zombis)
+      for (const idx in this.versions) {
+        const id = parseInt(idx)
+        const objv = this.versions[idx]
+        if (ID.estGroupe(id)) gSt.setVols(id, objv)
+      }
+
+      // En cas de blocage grave, plus de synchronisation (APRES mise en store compta / tribu)
       if (session.synchro) {
         if (session.estFige) {
           session.setMode(2)
@@ -750,57 +908,6 @@ export class ConnexionCompte extends OperationUI {
           session.setMode(2)
           await afficherDiag($t('CNXdeg2'))
         }
-      }
-
-      this.avatarsToStore.forEach(av => {
-        if (av.id !== this.avatar.id) aSt.setAvatar(av)
-      })
-
-      this.cGroupes = session.accesIdb ? await getColl('groupes') : []
-      this.groupesToStore = new Map()
-      // compilation des rows des groupes venant de IDB ou du serveur
-      await this.chargerGroupes()
-
-      this.BRK()
-
-      // MAJ intermédiaire de IDB : évite d'avoir des avatars / groupes obsolètes pour la suite
-      if (session.synchro) {
-        await this.buf.commitIDB(true)
-        this.buf = new IDBbuffer()
-      }
-
-      if (session.accesNetNf && this.grDisparus.size) { // TODO
-        /* Traitement des groupes zombis 
-        Les retirer (par anticipation) des avatars qui les référencent 
-        mapIdNi : Map
-          - clé : id d'un avatar
-          - valeur : array des ni des groupes ciblés
-        */
-        const mapIdNi = {}
-        this.avatarsToStore.forEach(av => {
-          const ani = av.niDeGroupes(this.grDisparus)
-          if (ani.length) mapIdNi[av.id] = ani
-        })
-        const args = { token: session.authToken, mapIdNi }
-        this.tr(await post(this, 'EnleverGroupesAvatars', args))
-      }
-
-      const syncitem = stores.syncitem
-      this.avatarsToStore.forEach(av => {
-        aSt.setAvatar(av)
-        syncitem.push('05' + av.id, 0, 'SYava', [av.na.nom])
-      })
-      this.groupesToStore.forEach(gr => {
-        gSt.setGroupe(gr)
-        syncitem.push('10' + gr.id, 0, 'SYgro', [gr.na.nom])
-      })
-      /* Chargement en store des versions des groupes
-      this.versions N'A PAS les zombis
-      */
-      for (const idx in this.versions) {
-        const id = parseInt(idx)
-        const objv = this.versions[idx]
-        if (ID.estGroupe(id)) gSt.setVols(id, objv)
       }
 
       // Comptable seulement : chargement des tribus
@@ -839,8 +946,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       /* Chargement depuis IDB des Maps des 
-      notes, chats, sponsorings, membres trouvés en IDB
-      */
+      notes, chats, tickets, sponsorings, membres trouvés en IDB */
       this.cNotes = session.accesIdb ? await getColl('notes') : []
       this.cChats = session.accesIdb ? await getColl('chats') : []
       this.cTickets = session.estComptable && session.accesIdb ? await getColl('tickets') : []
@@ -876,6 +982,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       // Itération sur chaque groupe: notes, membres
+      // TODO : gérer les groupes inactifs (sans membres et sans notes, les purger de IDB)
       for (const [, eg] of gSt.map) {
         const groupe = eg.groupe
         const objidb = Versions.get(groupe.id)
