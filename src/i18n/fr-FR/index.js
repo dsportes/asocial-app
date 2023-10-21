@@ -113,6 +113,19 @@ export default {
   tmc0: 'Compte',
   tmc1: 'Groupe',
   tmc2: 'App.',
+
+  FLAGS0: 'est actif',
+  FLAGS1: 'a une invitation en cours',
+  FLAGS2: 'a accès aux notes', 
+  FLAGS3: 'a accès aux membres',
+  FLAGS4: 'a droit d\'accès à la liste des membres',
+  FLAGS5: 'a droit d\'accès aux notes du groupe',
+  FLAGS6: 'a droit d\'écriture sur les notes',
+  FLAGS7: 'a pouvoir d\'animateur',
+  FLAGS8: 'a été actif',
+  FLAGS9: 'a eu accès aux notes',
+  FLAGS10: 'a eu accès aux membres',
+  FLAGS11: 'a pu écrire des notes',
   
   /*
   - 10: contact, 
