@@ -1238,13 +1238,13 @@ export class Avatar extends GenDoc {
       - nag : na du groupe
       - avs: Map
         - clé: id de l'avatar
-        - valeur: { im, imp }
+        - valeur: im
   */
 
   /* Remplit la map avec les membres des groupes de l'avatar/
   - clé: id du groupe
   - valeur: { idg: , mbs: [ids], dlv }
-  */
+  OBSOLETE
   membres (map, dlv) {
     this.mpg.forEach((t ,idg) => {
       let e = map[idg]
@@ -1252,6 +1252,7 @@ export class Avatar extends GenDoc {
       t.avs.forEach(a => { e.mbs.push(a.im) })
     })
   }
+  */
 
   /* Ids des groupes de l'avatar ida (tous si absent), accumulés dans le set s */
   idGroupes (s, ida) {
@@ -1261,6 +1262,9 @@ export class Avatar extends GenDoc {
     })
     return x
   }
+
+  /* map des membres des groupes auxquels participent au moins un des avatars
+    - clé: id du groupe  - valeur: { idg, v, npgk, mbs: [ids], dlv } */
 
   mbsOfGroupe (idg) { // retourne valeur: { npgk, idg, mbs: [ids] }
     const e = this.mpg.get(idg)

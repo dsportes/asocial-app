@@ -219,25 +219,37 @@ export class ConnexionCompte extends OperationUI {
 
       // Traitement des groupes
       /* map des membres des groupes auxquels participent au moins un des avatars
-      - clé: id du groupe  - valeur: { idg, v, npgk, mbs: [ids], dlv } */
-      const mbsMap = {}
+      - clé: id du groupe  
+      - valeur: { idg, v, npgk, mbs: [ids], dlv, amb, ano }
+        - amb: true si le compte a accès aux membres
+        - ano: true si le compte a accès aux notes
+      */
+      this.mbsMap = {}
       this.groupesToStore = new Map()
       this.grToSuppr = new Set()
       this.grRowsModifies = []
 
-      this.grRequis = this.avatar.idGroupes()
       if (session.accesIdb) for (const row of this.cGroupes) {
-        if (this.grRequis.has(row.id)) {
+        const empg = this.avatar.mpg.get(row.id)
+        if (empg) {
           this.groupesToStore.set(row.id, await compile(row))
-          const x = this.avatar.mbsOfGroupe(row.id); x.v = gr.v; x.dlv = dlv2
-          mbsMap[row.id] = x
+          const x = {
+            idg: row.id, v: row.v, dlv: dlv2,
+            npgk: empg.mpgk, mbs: Array.from(empg.avs.values())
+          }
+          this.mbsMap[row.id] = x
         } else this.grToSuppr.add(row.id)
       }
-      for (const id of this.grRequis) {
-        if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
-        if (!this.groupesToStore.has(id)) {
-          const x = this.avatar.mbsOfGroupe(id); x.v = 0; x.dlv = dlv2
-          mbsMap[id] = x
+      for (const empg of this.avatar.mpg) {
+        if (session.fsSync) 
+          await session.fsSync.setGroupe(empg.idg)
+        else abPlus.push(empg.idg)
+        if (!this.groupesToStore.has(empg.id)) {
+          const x = {
+            idg: empg.idg, v: 0, dlv: dlv2,
+            npgk: empg.mpgk, mbs: Array.from(empg.avs.values())
+          }
+          this.mbsMap[empg.idg] = x
         }
       }
 
@@ -247,7 +259,7 @@ export class ConnexionCompte extends OperationUI {
         token: session.authToken, 
         vcompta: this.compta.v, vavatar: this.avatar.v, 
         estFige: dlv1 === 0,
-        mbsMap, avsMap, abPlus 
+        mbsMap: this.mbsmap, avsMap, abPlus 
       }
       const ret = this.tr(await post(this, 'avGrSignatures', args))
       /*Retour:
@@ -257,14 +269,19 @@ export class ConnexionCompte extends OperationUI {
         - _valeur_ :
           - `{ v }`: pour un avatar.
           - `{ v, vols: {v1, v2, q1, q2} }` : pour un groupe.
-      - `avatars` : tows avatars ayant une nouvelle version sauf principal.
-      - `groupes`: tous groupes ayant une nouvelle version
+      - `avatars` : rows avatars ayant une nouvelle version sauf principal.
+      - `groupes`: rows groupes ayant une nouvelle version
       - `avatar` : avatar principal. Si OK seule mpgk a pu avoir des items en moins (groupes disparus)
       - `compta` : compta si NOT OK
       */
       if (ret.OK === true) {
-        if (ret.rowAvatar)
+        if (ret.rowAvatar) {
+          const grAvant = new Set(this.avatar.mpg.keys())
           this.avatar = await compile(ret.rowAvatar)
+          // On traite les groupes supprimés
+          for(const idg of grAvant)
+            if (!this.avatar.mpg.has(idg)) this.grToSuppr.add(idg)
+        }
         
         if (ret.rowAvatars && ret.rowAvatars.length) for (const row of ret.rowAvatars)
           this.avatarsToStore.set(row.id, await compile(row))
@@ -272,16 +289,9 @@ export class ConnexionCompte extends OperationUI {
         if (ret.rowGroupes && ret.rowGroupes.length) for (const row of ret.rowGroupes)
           this.groupesToStore.set(row.id, await compile(row))
 
-        for (const idx in ret.versions) {
-          const x = ret.versions[idx]
-          const id = parseInt(idx)
-          if (x._zombi) {
-            this.grRequis.delete(id)
-            this.grToSuppr.add(id)
-          } else {
-            this.versions[idx] = x
-          }
-        }
+        for (const idx in ret.versions)
+          this.versions[idx] = ret.versions[idx]
+
         return
       }
 
