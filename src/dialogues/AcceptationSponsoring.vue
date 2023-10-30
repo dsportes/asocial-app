@@ -61,7 +61,8 @@
         <editeur-md mh="10rem" v-model="texte" :texte="textedef" 
           editable modetxt hors-session/>
         <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
-        <q-btn flat @click="confirmer" color="warning" :label="$t('APAconf')" class="q-ml-sm" />
+        <q-btn flat @click="confirmer" :disable="texte.length === 0"
+          color="warning" :label="$t('APAconf')" class="q-ml-sm" />
       </div>
 
       <div v-if="accdec===2">
@@ -70,6 +71,7 @@
           editable modetxt hors-session/>
         <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
         <q-btn flat @click="refuser" color="warning"
+          :disable="texte.length === 0"
           :label="$t('APAdec2')" class="q-ml-sm" />
       </div>
 
@@ -167,7 +169,7 @@ export default ({
     },
     async confirmer () {
       const ardx = await crypter(this.pc.clex, this.texte)
-      await new AcceptationSponsoring().run(this.sp, ardx, this.texte, this.ps)
+      await new AcceptationSponsoring().run(this.sp, ardx, this.texte, sp.ard, this.ps)
       this.fermer()
     },
     async refuser () {

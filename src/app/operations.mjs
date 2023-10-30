@@ -162,7 +162,7 @@ args.id : id de l'avatar dont la Cv est mise à jour
 args.v: version de l'avatar incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
 args.cva: {v, photo, info} crypté par la clé de l'avatar
 Retour:
-- OK : false s'il faut boucler sur la requête. 
+- KO : true s'il faut boucler sur la requête. 
 La version de l'avatar figure DANS cva, qu'il faut 
 recrypter si ce n'était pas la bonne.
 */
@@ -178,7 +178,7 @@ export class MajCv extends OperationUI {
         const cva = await crypter(getCle(avatar.id), new Uint8Array(encode({v, photo, info})))
         const args = { token: session.authToken, id: avatar.id, v, cva }
         const ret = this.tr(await post(this, 'MajCv', args))
-        if (ret.OK) break
+        if (!ret.KO) break
         await sleep(500)
       }
       this.finOK()
@@ -205,7 +205,7 @@ export class MajCvGr extends OperationUI {
         const cvg = await crypter(getCle(groupe.id), new Uint8Array(encode({v, photo, info})))
         const args = { token: session.authToken, id: avatar.id, v, cvg }
         const ret = this.tr(await post(this, 'MajCvGr', args))
-        if (ret.OK) break
+        if (!ret.KO) break
         await sleep(500)
       }
       this.finOK()
@@ -343,21 +343,20 @@ export class ChercherSponsoring extends OperationUI {
   }
 }
 
-/* Changer les mots clés d'un chat *********************************
-args.token: éléments d'authentification du compte.
-args.mc : u8 des mots clés
-args.id ids : id du chat
-Retour:
-*/
-export class MajMotsclesChat extends OperationUI {
-  constructor () { super($t('OPmajtch')) }
+/* `PassifChat` : rend le chat passif, nombre de chat - 1, items vidé
+POST:
+- `token` : éléments d'authentification du compte.
+- `id ids` : id du chat
 
-  async run (id, ids, mc) {
+Assertions sur le row `Chats` et la `Versions` de l'avatar id.
+*/export class PassifChat extends OperationUI {
+  constructor () { super($t('OPpassifch')) }
+
+  async run (id, ids) {
     try {
       const session = stores.session
-      const dh = Date.now()
-      const args = { token: session.authToken, id, ids, mc }
-      const ret = this.tr(await post(this, 'MajMotsclesChat', args))
+      const args = { token: session.authToken, id, ids }
+      const ret = this.tr(await post(this, 'PassifChat', args))
       this.finOK()
       return ret
     } catch (e) {
@@ -390,23 +389,35 @@ export class NouveauChat extends OperationUI {
 
       const cc = random(32)
       const pubE = await aSt.getPub(naE.id)
-      const ccPE = await crypterRSA(pubE, cc)
-      const ccKI = await crypter(session.clek, cc)
-      const dh = Date.now() // TODO
-      const contcI = await Chat.getContc(naE, dh, txt, cc)
-      const contcE = await Chat.getContc(naI, dh, txt, cc)
 
-      const idI = naI.id
-      const idE = naE.id
-      const idsI = await Chat.getIds(naI, naE)
-      const idsE = await Chat.getIds(naE, naI)
-
-      const args = { token: session.authToken, idI, idsI, idE, idsE, ccKI, ccPE, contcI, contcE }
+      const args = { 
+        token: session.authToken, 
+        idI : naI.id,
+        idsI : await Chat.getIds(naI, naE),
+        idE : naE.id, 
+        idsE : await Chat.getIds(naE, naI), 
+        ccKI : await crypter(session.clek, cc), 
+        ccPE : await crypterRSA(pubE, cc),
+        naccI : await crypter(cc, encode([naI.nom, naI.rnd])),
+        naccE : await crypter(cc, encode([naE.nom, naE.rnd])),
+        txt1 : await Chat.getTxtCC(txt, cc),
+        lgtxt1 : txt ? txt.length : 0
+      }
       const ret = this.tr(await post(this, 'NouveauChat', args))
-      const st = ret.st
+      let st = ret.st
       let chat
       if (st !== 0) {
         chat = await compile(ret.rowChat)
+        if (st === 2) { // éxistait déjà
+          if (chat.ccK) args.ccKI = chat.ccK
+          delete args.ccPE
+          delete args.naccI
+          delete args.naccE
+          args.txt1 = await Chat.getTxtCC(txt, chat.cc)
+          const ret = this.tr(await post(this, 'MajChat', args))
+          st = ret.st
+          if (st !== 0) chat = await compile(ret.rowChat)
+        }
         aSt.setChat(chat)
       }
       return this.finOK([st, chat])
@@ -416,42 +427,42 @@ export class NouveauChat extends OperationUI {
   }
 }
 
-/* MAJ Chat **********************
-args.token: éléments d'authentification du compte.
-args.idI idsI : id du chat, côté interne
-args.idE idsE : id du chat côté externe
-args.ccKI : clé cc cryptée par la clé K du compte de I.
-  Seulement si en session la clé cc était cryptée par la clé publique
-args.seq : numéro de séquence à partir duquel contc a été créé
-args.contcI : contenu du chat I crypté par la clé cc
-args.contcE : contenu du chat E crypté par la clé cc
-args.op : 1:envoyer, 2: envoyer et raccrocher, 3: raccrocher
+/* `MajChat` : mise à jour d'un Chat
+POST:
+- `token` : éléments d'authentification du compte.
+- `idI idsI` : id du chat, côté _interne_.
+- `idE idsE` : id du chat, côté _externe_.
+- `ccKI` : clé cc du chat cryptée par la clé K du compte de I. _Seulement_ si en session la clé cc était cryptée par la clé publique de I.
+- `txt1` : texte à ajouter crypté par la clé cc du chat.
+- `lgtxt1` : longueur du texte
+- `dh` : date-heure du chat dont le texte est à annuler.
 Retour:
-st: 
-  1 : chat créé avec le contenu contc
-  2 : le chat existant a un contenu plus récent que celui sur lequel était basé contc. Retour de chatI
-rowChat:
+- `st` :
+  0 : E a disparu, chat zombi.
+  1 : chat mis à jour.
+- `rowChat` : row du chat I.
+
+Assertions sur l'existence du row `Avatars` de l'avatar I, sa `Versions`, et le cas échéant la `Versions` de l'avatar E (quand il existe).
 */
 export class MajChat extends OperationUI {
   constructor () { super($t('OPmajch')) }
 
-  async run (op, naI, naE, txt, chat) { // op: 1:envoyer, 2:raccrocher
+  async run (naI, naE, txt, dh, chat) {
     try {
       const session = stores.session
       const aSt =  stores.avatar
 
-      const ccKI = chat.ccK ? await crypter(session.clek, chat.cc) : null
-      const dh = Date.now() // TODO
-      const contcI = await Chat.getContc(naE, dh, op === 1 ? txt : '', chat.cc)
-      const contcE = op === 2 ? null : await Chat.getContc(naI, dh, txt, chat.cc)
-      const seq = chat.seq
-
-      const idI = naI.id
-      const idE = naE.id
-      const idsI = await Chat.getIds(naI, naE)
-      const idsE = await Chat.getIds(naE, naI)
-
-      const args = { token: session.authToken, idI, idsI, idE, idsE, ccKI, seq, contcI, contcE, op }
+      const args = { 
+        token: session.authToken, 
+        idI: naI.id, 
+        idsI: await Chat.getIds(naI, naE), 
+        idE: naE.id, 
+        idsE: await Chat.getIds(naE, naI), 
+        ccKI: chat.ccK ? await crypter(session.clek, chat.cc) : null, 
+        txt1: txt ? await Chat.getTxtCC(txt, chat.cc) : null,
+        lgtxt1: txt ? txt.length : 0,
+        dh: dh || 0
+      }
       const ret = this.tr(await post(this, 'MajChat', args))
       const st = ret.st
       const ch = await compile(ret.rowChat)
@@ -585,7 +596,7 @@ export class NouvelleTribu extends OperationUI {
         const atrItem = await Compta.atrItem(clet, info, q)
         const args = { token: session.authToken, rowTribu, atrItem }
         ret = this.tr(await post(this, 'NouvelleTribu', args))
-        if (ret.OK) break
+        if (!ret.KO) break
         await sleep(2000)
       }
       this.finOK(ret)
@@ -1638,7 +1649,7 @@ export class SupprAvatar extends OperationUI {
       const session = stores.session
       args.token = session.authToken
       const ret = this.tr(await post(this, 'SupprAvatar', args))
-      return this.finOK(ret.OK)
+      return this.finOK(ret.KO ? false : true)
     } catch (e) {
       return await this.finKO(e)
     }

@@ -96,6 +96,8 @@ export default {
   powadmin: 'Seul l\'administrateur technique peut effectuer cette action',
   powcompta: 'Seul le Comptable peut effectuer cette action',
   powsponsor: 'Seuls le Comptable ou un sponsor de la tranche peuvent effectuer cette action',
+  dedh: 'De {0} à {1} {2}',
+  supprime: 'supprimé',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -362,6 +364,8 @@ export default {
   EX8023: 'Le sponsor a proposé à son sponsorisé des quotas supérieurs à son volume V2 encore disponible',
   EX8024: 'Ce ticket ne peut plus être supprimé il a été marqué reçu et enregistré par le Comptable.',
 
+  EX8025: 'Le sponsor a disparu.',
+
   EX8055: 'Quota du compte dépassé pour le volume V1. Demande:{0} - Quota:{1}',
   EX8056: 'Quota du compte dépassé pour le volume V2. Demande:{0} - Quota:{1}',
   EX8065: 'Maximum de volume V1 pour les notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
@@ -561,7 +565,7 @@ export default {
   
   OPnvch: 'Créer un nouveau "chat"',
   OPmajch: 'Mettre à jour un "chat"',
-  OPmajtch: 'Mise à jour du texte d\'un chat',
+  OPpassifch: 'Rendre passif un chat',
 
   OPnvtr: 'Créer une nouvelle tranche de quotas',
   OPinfotr: 'Mise à jour de l\'information d\'une tranche de quotas',

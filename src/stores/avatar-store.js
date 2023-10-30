@@ -315,11 +315,13 @@ export const useAvatarStore = defineStore('avatar', {
       const r = []
       for (const c of state.pcLc) {
         if (f.limj && c.dh < f.limj) break
-        if (f.chel && c.r !== 1) break
+        if (f.chel && c.stI !== 1) break
         if (f.nom && !c.naE.nom.startsWith(f.nom)) continue
         if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
         if (f.setp.size || f.setn.size) {
-          const s = c.mc && c.mc.length ? new Set(c.mc) : new Set()
+          const mcmemo = this.compte.mcmemo(c.naE.id)
+          if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
+          const s = new Set(mcmemo.mc)
           if (f.setp.size && difference(f.setp, s).size) continue
           if (f.setn.size && intersection(f.setn, s).size) continue          
         }        

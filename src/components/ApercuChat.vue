@@ -9,10 +9,10 @@
       <div v-if="chat && !chat._zombi" class="row justify-end">
         <div v-if="affnai" class="titre-md text-italic">{{$t('CHoch2', [naI.nom])}}</div>
         <div v-else class="titre-md text-italic">{{$t('CHoch3', [naE.nom])}}</div>
-        <div class="titre-md text-italic q-mx-md">{{$t(chat.r ? 'CHel' : 'CHrac')}}</div>
-        <div class="font-mono fs-md">{{dhcool(chat.dh) + ' #' + chat.seq}}</div>
+        <div class="titre-md text-italic q-mx-md">{{$t(chat.st1 ? 'CHel' : 'CHrac')}}</div>
+        <div v-if="chat.dh" class="font-mono fs-md">{{dhcool(chat.dh)}}</div>
       </div>
-      <div v-if="chat && chat._zombi" class="row justify-between">
+      <div v-if="chat && chat.st2 === 2" class="row justify-between">
         <div class="titre-md text-italic q-mr-lg">{{$t('CHnch3c', [naE.nom])}}</div>
       </div>
       <apercu-people v-if="!affnai && chat && !chat._zombi" class="bordb" :id="naE.id" :idx="idx" />

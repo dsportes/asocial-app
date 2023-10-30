@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
-import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe } from './util.mjs'
+import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt } from './api.mjs'
@@ -1676,10 +1676,26 @@ export class Chat extends GenDoc {
     this.cv = row.cva ? decode(await decrypter(this.naE.rnd, row.cva)) : null
     this.idsE = await Chat.getIds(this.naE, this.naI)
     this.items = []
+    const a = []
+    const supp = $t('supprime')
+    this.tit = ''
+    this.dh = 0
     if (row.items) for (const it of row.items) {
+      if (this.dh === 0) this.dh = t.dh
       const t = row.t ? ungzipB(await decrypter(this.cc, row.t)) : null
       this.items.push({ a: row.a, t, dh: row.dh})
+      a.push($t('dedh', [a ? this.naI.nom : this.naE.nom, dhstring(row.dh)]))
+      if (!t) a.push('[' + supp + ']'); else a.push(t)
+      a.push('---')
+      if (!this.tit && !t) {
+        let i = t.indexOf('\n')
+        if (i > 50) i = 50
+        const x = t.substring(0, i)
+        if (x) this.tit = x
+      }
     }
+    this.txt = a.join('\n')
+    if (!this.tit) this.tit = '???'
   }
 
   static async getIds (naI, naE) {{
@@ -1727,9 +1743,8 @@ export class Chat extends GenDoc {
     return [{dh, a:0, t, l}, {dh, a:1, t, l}]
   }
 
-  static async getContc (na, dh, txt, cc) {
-    const x = { na: [na.nom, na.rnd], dh: dh, txt: txt }
-    return await crypter(cc, new Uint8Array(encode(x)))
+  static async getTxtCC (cc, txt) {
+    return txt ? await crypter(cc, await gzipB(txt)) : null
   }
 }
 

@@ -118,7 +118,7 @@ export class Demon {
       const args = { token: session.authToken, conso }
       const ret = await post(null, 'EnregConso', args)
       session.setDh(ret.dh)
-      if (ret.ok) session.razConsoatt()
+      if (ret.fait) session.razConsoatt()
     } catch (e) {
       console.log('Démon KO: ' + e.toString())
     }
@@ -263,7 +263,7 @@ export class ConnexionCompte extends OperationUI {
       }
       const ret = this.tr(await post(this, 'avGrSignatures', args))
       /*Retour:
-      - `OK` : true / false si le compta ou l'avatar principal a changé de version.
+      - `KO` : true si le compta ou l'avatar principal a changé de version.
       - `versions` : map pour chaque avatar / groupe :
         - _clé_ : id du groupe ou de l'avatar.
         - _valeur_ :
@@ -274,7 +274,7 @@ export class ConnexionCompte extends OperationUI {
       - `avatar` : avatar principal. Si OK seule mpgk a pu avoir des items en moins (groupes disparus)
       - `compta` : compta si NOT OK
       */
-      if (ret.OK === true) {
+      if (!ret.KO) {
         if (ret.rowAvatar) {
           const grAvant = new Set(this.avatar.mpg.keys())
           this.avatar = await compile(ret.rowAvatar)
@@ -339,7 +339,7 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesNet) {
         const args = { token: session.authToken, vcompta: this.compta.v, mapv }
         const ret = this.tr(await post(this, 'GetAvatars', args))
-        if (!ret.OK) {
+        if (ret.KO) {
           // compta a changé : on recharge compta, tribu, avatar et on boucle
           await this.connex1()
           await this.connex2()
@@ -364,88 +364,6 @@ export class ConnexionCompte extends OperationUI {
     }
 
     return [avRowsModifies, avToSuppr]
-  }
-
-  /** tousGroupes *** OBSOLETE ****************************************************/
-  async groupesRequisSignatures() {
-    const session = stores.session
-    // En UTC la division d'une date est multiple de 86400000
-    const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
-    const tdlv1 = (Math.floor(tjourJ / 10) + 1) * 10
-    const tdlv2 = tdlv1 + 10
-    // pas de signatures quand une procédure de blocage est en cours
-    const dlv1 = AMJ.amjUtcDeT(tdlv1 * 86400000)
-    const dlv2 = AMJ.amjUtcDeT(tdlv2 * 86400000)
-
-    this.grRequis = new Set()
-    this.grDisparus = new Set()
-
-    /* map des membres des groupes auxquels participent au moins un des avatars
-     - clé: id du groupe  - valeur: { idg, mbs: [ids], dlv } */
-    const mbsMap = {}
-
-    /* map des avatars du compte - clé: id de l'avatar  - valeur: {v, dlv} } */
-    const avsMap = {}
-
-    // ids des avatars et des groupes auxquels s'abonner
-    const abPlus = []
-
-    for (const avatar of this.avatarsToStore.values()) {
-      if (session.fsSync) await session.fsSync.setAvatar(avatar.id); else abPlus.push(avatar.id)
-      avatar.idGroupes(this.grRequis)
-      avsMap[avatar.id] = { v: avatar.v, dlv: this.compta.id === avatar.id ? dlv1 : dlv2 }
-      avatar.membres(mbsMap, dlv2)
-    }
-
-    /* Abonnements aux groupes requis
-    et tant pis pour ceux finalement détectés zombi juste après
-    (au pire ça fera des synchronisations qui seront ignorées)
-    */
-    for (const id of this.grRequis) {
-      if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
-    }
-
-    if (session.accesNet) {
-      /*
-      Retour:
-      - OK: true / false (un avatar a changé de version)
-      - versions: map pour chaque avatar / groupe de:
-        { v }: pour un avatar
-        { v, vols: {v1, v2, q1, q2} } : pour un groupe
-        { v, _zombi:true } pour un GROUPE _zombi (pas pour un avatar)
-      */
-      const args = { token: session.authToken, vcompta: this.compta.v, mbsMap, avsMap, abPlus }
-      // Il n'y a pas de signature si l'espace est figé OU restriction minimale
-      if (session.estFige || session.estMinimal) args.estFige = true
-      const ret = this.tr(await post(this, 'SignaturesEtVersions', args))
-      if (ret.OK === false) return false
-      /* Traitement des _zombi
-      Un avatar "disparu" est détecté largement APRES la disparition de son compta
-      Un avatar "résilié par une autre session" s'est D'ABORD manifesté
-      par retrait de sa map de compta. Or celle-ci n'a pas changé.
-      DONC on ne peut pas retrouver d'avatars disparus ici.
-      MAIS un groupe peut DISPARAITRE par l'effet du GC (sa "versions" est _zombi), 
-      BIEN AVANT que la lgr de ses membres n'aient pu être mises à jour.
-      On retourne un avis de DISPARITION pour les groupes détectés disparus
-      */
-      this.versions = {}
-      for (const idx in ret.versions) {
-        const x = ret.versions[idx]
-        if (x._zombi) {
-          const id = parseInt(idx)
-          this.grRequis.delete(id)
-          this.grDisparus.add(id)
-          this.buf.purgeGroupeIDB(id)
-        } else {
-          this.versions[idx] = x
-        }
-      }
-    }
-
-    if (session.accesIdb) await loadVersions() // chargement des versions depuis IDB
-    else return Versions.reset() // Versions déjà connues en IDB, vide
-
-    return true
   }
 
   /*** OBSOLETE */
@@ -1114,7 +1032,7 @@ Assertions:
 export class AcceptationSponsoring extends OperationUI {
   constructor() { super($t('OPapa')) }
 
-  async run(sp, ardx, txt, ps) {
+  async run(sp, ardx, txt1, txt2, ps) {
     /* sp : objet Sponsoring
     - id ids : identifiant
     - `ard`: ardoise.
@@ -1187,18 +1105,32 @@ export class AcceptationSponsoring extends OperationUI {
       }
 
       // chatI : chat pour le compte, chatE : chat pour son sponsor
+      const naI = sp.naf
+      const naE = sp.na
       const cc = random(32)
-
       const pubE = await aSt.getPub(sp.na.id)
       if (!pubE) throw new AppExc(F_BRO, 7)
 
-      // (naI, naE, txt, cc, pubE)
-      const [rowChatI, rowChatE] = await Chat.newRows(sp.naf, sp.na, txt, cc, pubE)
-
-      const args = {
-        token: stores.session.authToken, rowCompta, rowAvatar, rowVersion, ids: sp.ids,
-        rowChatI, rowChatE, ardx, idt, act, abPlus: [idt, sp.naf.id]
+      const args = { 
+        token: session.authToken, 
+        idI : naI.id,
+        idsI : await Chat.getIds(naI, naE),
+        idE : naE.id, 
+        idsE : await Chat.getIds(naE, naI), 
+        ccKI : await crypter(session.clek, cc), 
+        ccPE : await crypterRSA(pubE, cc),
+        naccI : await crypter(cc, encode([naI.nom, naI.rnd])),
+        naccE : await crypter(cc, encode([naE.nom, naE.rnd])),
+        txt1 : await Chat.getTxtCC(txt1, cc),
+        lgtxt1 : txt1.length,
+        txt2 : await Chat.getTxtCC(txt2, cc),
+        lgtxt2 : txt2.length,
+        rowCompta, rowAvatar, rowVersion,
+        ids: sp.ids,
+        ardx, idt, act, 
+        abPlus: [idt, sp.naf.id]
       }
+
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
 
