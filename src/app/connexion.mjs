@@ -172,8 +172,16 @@ Opération de connexion à un compte par sa phrase secrète (synchronisé, incog
 export class ConnexionCompte extends OperationUI {
   constructor() { super($t('OPcnx')) }
 
-  /* Liste des avatars et groupes et signatures
-  - this.compta et this.avatar peuvent être rechargés en cas de changement de version
+  /* Signe les avatars et groupes. Remplit: 
+  - this.avatarsToStore, .avToSuppr, .avRowsModifies, .avRequis
+  - this.groupesToStore, .grToSuppr, .grRowsModifies, .grRequis
+  - this.versions :  map pour chaque avatar / groupe (SANS les zombis):
+    { v }: pour un avatar
+    { v, vols: {v1, v2, q1, q2} } : pour un groupe
+  - this.mbsMap : map des membres des groupes auxquels participent au moins un des avatars
+      - clé: id du groupe  
+      - valeur: { idg, v, npgk, mbs: [ids], dlv }
+        - mbs: array des im des avatars du compte participant.
   */
   async avGrSignatures () {
     const session = stores.session
@@ -220,9 +228,7 @@ export class ConnexionCompte extends OperationUI {
       // Traitement des groupes
       /* map des membres des groupes auxquels participent au moins un des avatars
       - clé: id du groupe  
-      - valeur: { idg, v, npgk, mbs: [ids], dlv, amb, ano }
-        - amb: true si le compte a accès aux membres
-        - ano: true si le compte a accès aux notes
+      - valeur: { idg, v, npgk, mbs: [ids], dlv }
       */
       this.mbsMap = {}
       this.groupesToStore = new Map()
@@ -259,7 +265,7 @@ export class ConnexionCompte extends OperationUI {
         token: session.authToken, 
         vcompta: this.compta.v, vavatar: this.avatar.v, 
         estFige: dlv1 === 0,
-        mbsMap: this.mbsmap, avsMap, abPlus 
+        mbsMap: this.mbsMap, avsMap, abPlus 
       }
       const ret = this.tr(await post(this, 'avGrSignatures', args))
       /*Retour:
@@ -269,10 +275,12 @@ export class ConnexionCompte extends OperationUI {
         - _valeur_ :
           - `{ v }`: pour un avatar.
           - `{ v, vols: {v1, v2, q1, q2} }` : pour un groupe.
-      - `avatars` : rows avatars ayant une nouvelle version sauf principal.
-      - `groupes`: rows groupes ayant une nouvelle version
-      - `avatar` : avatar principal. Si OK seule mpgk a pu avoir des items en moins (groupes disparus)
-      - `compta` : compta si NOT OK
+      - `rowAvatars` : rows avatars ayant une nouvelle version sauf principal.
+      - `rowGroupes`: rows groupes ayant une nouvelle version
+      - `rowAvatar` : avatar principal.
+        - Si KO.
+        - Si OK seule mpgk a pu avoir des items en moins (groupes disparus)
+      - `rowCompta` : compta si KO.
       */
       if (!ret.KO) {
         if (ret.rowAvatar) {
@@ -300,99 +308,6 @@ export class ConnexionCompte extends OperationUI {
       this.rowAvatar = ret.rowAvatar
       await connex2()
     }
-  }
-
-  /** tousAvatars *** OBSOLETE ****************************************************/
-  async tousAvatars() {
-    const session = stores.session
-    const avRowsModifies = []
-    const avToSuppr = new Set()
-
-    while (true) { // boucle si la version de compta a changé
-      avRowsModifies.length = 0
-      avToSuppr.clear()
-      this.avatarsToStore.clear()
-
-      const mapv = {} // versions des avatars requis à demander au serveur
-
-      const avRequis = this.compte.avatarIds
-      avRequis.forEach(id => {
-        if (id === this.avatar.id) {
-          mapv[id] = this.avatar.v
-          this.avatarsToStore.set(id, this.avatar)
-        } else mapv[id] = 0
-      })
-
-      for (const row of this.cAvatars) {
-        if (row.id !== this.avatar.id) {
-          if (avRequis.has(row.id)) {
-            const av = await compile(row)
-            this.avatarsToStore.set(row.id, av)
-            mapv[row.id] = row.v
-          } else {
-            // avatars trouvés en IDB mais plus référencés dans l'avatar principal
-            avToSuppr.add(row.id)
-          }
-        }
-      }
-
-      if (session.accesNet) {
-        const args = { token: session.authToken, vcompta: this.compta.v, mapv }
-        const ret = this.tr(await post(this, 'GetAvatars', args))
-        if (ret.KO) {
-          // compta a changé : on recharge compta, tribu, avatar et on boucle
-          await this.connex1()
-          await this.connex2()
-          continue
-        }
-        if (ret.rowAvatars && ret.rowAvatars.length) {
-          for (const row of ret.rowAvatars) {
-            const av = await compile(row)
-            this.avatarsToStore.set(row.id, av)
-            avRowsModifies.push(row)
-          }
-        }
-      }
-      // obtention de la liste des groupes requis et signatures
-      const ok = await this.groupesRequisSignatures()
-      if (!ok) {
-        await this.connex1()
-        await this.connex2()
-        continue
-      }
-      break
-    }
-
-    return [avRowsModifies, avToSuppr]
-  }
-
-  /*** OBSOLETE */
-  async chargerGroupes() {
-    const session = stores.session
-    const grRows = {} // Map des rows des groupes par id du groupe
-    if (session.accesIdb) {
-      this.cGroupes.forEach(row => {
-        if (!this.grRequis.has(row.id))
-          this.buf.purgeGroupeIDB(row.id)
-        else grRows[row.id] = row
-      })
-    }
-
-    if (session.accesNet) {
-      if (this.grRequis.size) {
-        const mapv = {} // version détenue en session pour chaque groupe requis
-        this.grRequis.forEach(id => { const r = grRows[id]; mapv[id] = r ? r.v : 0 })
-        const args = { token: session.authToken, mapv }
-        const ret = this.tr(await post(this, 'GetGroupes', args))
-        if (ret.rowGroupes) ret.rowGroupes.forEach(row => {
-          grRows[row.id] = row
-          this.buf.putIDB(row)
-        })
-      }
-    }
-
-    /* Tous les avatars et membres sont signés avec les dlv demandées */
-    for (const id in grRows) this.groupesToStore.set(parseInt(id), await compile(grRows[id]))
   }
 
   /** Chargement pour un avatar de ses notes postérieures à la plus récente ************/
@@ -561,15 +476,14 @@ export class ConnexionCompte extends OperationUI {
     const id = groupe.id
     const session = stores.session
     let n1 = 0, n2 = 0
-    const rows = {}
+    const rows = new Map()
     for (const row of this.cMembres) {
+      n1++
       if (row.id === id) {
-        if (row.dlv && (row.dlv < this.auj || !groupe.ast[row.ids])) {
+        if (groupe.estDisparu(row.ids)) {
           this.buf.supprIDB(row)
-          this.mbsDisparus.add(row.ids)
         } else {
-          rows[row.ids] = row
-          n1++
+          rows.set(row.ids, row)
         }
       }
     }
@@ -583,22 +497,42 @@ export class ConnexionCompte extends OperationUI {
     }
     if (rowMembres && rowMembres.length) {
       for (const row of rowMembres) {
-        if (row.dlv && (row.dlv < this.auj || !groupe.ast[row.ids])) {
+        n2++
+        if (groupe.estDisparu(row.ids)) {
+          // était disparu dans son groupe
           this.buf.supprIDB(row)
-          this.mbsDisparus.add(row.ids)
+          rows.delete(row.ids)
         } else {
-          this.buf.putIDB(row)
-          rows[row.ids] = row
-          n2++
+          if (row.dlv && (row.dlv < this.auj)) {
+            /* row membres est un peu plus récent que le row groupe
+            Il est disparu dans membre => on le force disparu 
+            dans son groupe pour la cohérence du store.
+            Une synchro viendra plus tard vraiment mettre à jour le groupe */
+            groupe.setDisparu(row.ids)
+            this.buf.supprIDB(row)
+            rows.delete(row.ids) // s'il était dans IDB, il ne l'est plus
+          } else {
+            this.buf.putIDB(row)
+            rows.set(row.ids, row)
+          }
         }
       }
     }
 
     const gSt = stores.groupe
-    for (const ids in rows) {
-      const membre = await compile(rows[ids])
-      gSt.setMembre(membre)
+    // Dans rows on a peut-être des rows disparus chargés de IDB et pas mis à jour depuis
+    for (const [ids, row] of rows) {
+      n1++
+      if (row.dlv && (row.dlv < this.auj)) {
+        // row chargé de IDB et disparu
+        groupe.setDisparu(row.ids) // Pour cohérence interne groupe / membre
+        this.buf.supprIDB(row)
+      } else {
+        const membre = await compile(row)
+        gSt.setMembre(membre)
+      }
     }
+    
     return [n1, n2]
   }
 
@@ -776,12 +710,16 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesIdb) await loadVersions() // chargement des versions depuis IDB
       else return Versions.reset() // Versions déjà connues en IDB, vide
 
-      /* Remplit: 
+      /* Signe les avatars et groupes. Remplit: 
       - this.avatarsToStore, .avToSuppr, .avRowsModifies, .avRequis
       - this.groupesToStore, .grToSuppr, .grRowsModifies, .grRequis
       - this.versions :  map pour chaque avatar / groupe (SANS les zombis):
         { v }: pour un avatar
         { v, vols: {v1, v2, q1, q2} } : pour un groupe
+      - this.mbsMap : map des membres des groupes auxquels participent au moins un des avatars
+          - clé: id du groupe  
+          - valeur: { idg, v, npgk, mbs: [ids], dlv }
+            - mbs: array des im des avatars du compte participant.
       */
       await this.avGrSignatures()
       
@@ -796,14 +734,12 @@ export class ConnexionCompte extends OperationUI {
         this.avRowsModifies.forEach(row => { this.buf.putIDB(row) })
         this.avToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
         this.grRowsModifies.forEach(row => { this.buf.putIDB(row) })
-        this.grToSuppr.forEach(id => { this.buf.purgeAvatarIDB(id) })
+        this.grToSuppr.forEach(id => { this.buf.purgeGroupeIDB(id) })
         await this.buf.commitIDB(true)
         this.buf = new IDBbuffer()
       }
 
       this.BRK()
-
-      // const [avRowsModifies, avToSuppr] = await this.tousAvatars()
 
       // Rangement en store
       const syncitem = stores.syncitem
@@ -924,29 +860,32 @@ export class ConnexionCompte extends OperationUI {
           gSt.setVols(groupe.id, objidb)
         }
 
-        this.mbsDisparus = new Set()
+        const emg = this.mbsMap[groupe.id] // { idg, v, npgk, mbs: [ids], dlv }
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0
         const na = getNg(groupe.id)
 
-        const [x3, x4] = await this.chargerMembres(groupe, vidb, vsrv)
-        n3 = x3
-        n4 = x4
+        let amb = false // Un avatar membre au moins a-t-il accès aux membres ?
+        for (const im of emg.mbs)
+          if ((groupe.ast & FLAGS.AM) && (groupe.ast & FLAGS.DM)) amb = true
+        if (amb) { // Oui on recharge les membres
+          const [x3, x4] = await this.chargerMembres(groupe, vidb, vsrv)
+          n3 = x3
+          n4 = x4
+        } else // Non, on purge la base locales des membres
+          this.opBuf.purgeGroupeMbIDB(groupe.id)
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
 
-        const [x1, x2] = await this.chargerNotes(groupe.id, vidb, vsrv, true)
-        n1 = x1
-        n2 = x2
+        // Ci-avant on a pu détecter des membres disparus qui ne l'était pas encore dans groupe
+        let ano = false // Un avatar au moins a-t-il accès aux notes ?
+        for (const im of emg.mbs)
+          if ((groupe.ast & FLAGS.AN) && (groupe.ast & FLAGS.DN)) ano = true
+        if (ano) { // Oui on charge les notes
+          const [x1, x2] = await this.chargerNotes(groupe.id, vidb, vsrv, true)
+          n1 = x1
+          n2 = x2
+        } else // Non on purge les notes
+          this.opBuf.purgeGroupeNoIDB(groupe.id)
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
-
-        if (this.mbsDisparus.size) {
-          /* Sur le serveur, le GC quotidien est censé avoir mis les statuts ast[ids] à 0
-          dans le groupe du membre. 
-          Retard possible : dlv détectée sur un membre, 
-          - vérifier que son ast est à 0 (l'y forcer)
-          - le faire inscrire dans le serveur
-          */
-          groupe.setDisparus(this.mbsDisparus)
-        }
       }
 
       /* Mises à jour éventuelles du serveur **********************************************/
@@ -974,9 +913,8 @@ export class ConnexionCompte extends OperationUI {
         await FLfromIDB()
       }
 
-      if (session.estComptable) {
+      if (session.estComptable)
         await new TraitGcvols().run()
-      }
 
       // enregistre l'heure du début effectif de la session
       if (session.synchro) await session.sessionSync.setConnexion(this.dh)

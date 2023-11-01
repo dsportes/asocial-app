@@ -357,6 +357,8 @@ export class IDBbuffer {
     this.lsuppr = [] // row { _nom, id, ids } à supprimer de IDB
     this.lav = new Set() // set des ids des avatars à purger (avec notes, sponsorings, chats, tickets)
     this.lgr = new Set() // set des ids des groupes à purger (avec notes, membres)
+    this.lgrmb = new Set() // set des ids des groupes dont les membres sont à purger
+    this.lgrno = new Set() // set des ids des groupes dont les notes sont à purger
     this.mapSec = {} // map des notes (cle: id/ids, valeur: note) pour gestion des fichiers locaux
     this.lsecsup = [] // liste des notes temporaires à faire supprimer sur le serveur en fin de connexion
   }
@@ -365,6 +367,8 @@ export class IDBbuffer {
   supprIDB (row) { if (this.synchro) this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
   purgeAvatarIDB (id) { if (this.synchro) this.lav.add(id) }
   purgeGroupeIDB (id) { if (this.synchro) this.lgr.add(id) }
+  purgeGroupeMbIDB (id) { if (this.synchro) this.lgrmb.add(id) }
+  purgeGroupeNoIDB (id) { if (this.synchro) this.lgrno.add(id) }
   async commitIDB (setCompteClek, setVersions) { if (this.synchro) await commitRows(this, setCompteClek, setVersions) }
 }
 
@@ -415,6 +419,18 @@ export async function commitRows (opBuf, setCompteClek, setVersions) {
       for (const id of opBuf.lgr) idgc.push(u8ToB64(await crypter(clek, '' + id, 1), true))
     }
 
+    // set des ids des groupes dont les membres sont à purger
+    const idgcmb = []
+    if (opBuf.lgr && opBuf.lgrmb.size) {
+      for (const id of opBuf.lgr) idgcmb.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+    }
+
+    // set des ids des groupes dont les notes sont à purger
+    const idgcno = []
+    if (opBuf.lgr && opBuf.lgrno.size) {
+      for (const id of opBuf.lgr) idgcno.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+    }
+
     await db.transaction('rw', TABLES, async () => {
       if (dataCompte) {
         await db.compte.put({ id: '1', data: dataCompte })
@@ -454,6 +470,17 @@ export async function commitRows (opBuf, setCompteClek, setVersions) {
         await db.membres.where(id).delete()
         await db.notes.where(id).delete()
       }
+
+      for (const idk of idgcmb) {
+        const id = { id: idk }
+        await db.membres.where(id).delete()
+      }
+
+      for (const idk of idgcno) {
+        const id = { id: idk }
+        await db.notes.where(id).delete()
+      }
+
     })
   } catch (e) {
     throw EX2(e)

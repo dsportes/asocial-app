@@ -1774,6 +1774,7 @@ export class Groupe extends GenDoc {
   get nom () { return this.na.nom }
   get nomc () { return this.na.nomc }
   get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconGroupe }
+  /*
   get nbInvits () { let n = 0
     this.ast.forEach(x => { if (x >= 60 && x <= 73) n++ })
     return n
@@ -1791,6 +1792,16 @@ export class Groupe extends GenDoc {
 
   estAuteur (im) { return this.las(im) > 1 }
   estAnim (im) { return this.las(im) === 3 }
+  */
+
+  estDisparu (im) { return this.flags[im] && this.anag[im] <= 1 }
+
+  setDisparu (im) {
+    if (!this.estDisparu(im)) {
+      this.anag[im] = this.flags[im] & FLAGS.HA ? 1 : 0
+      this.flags[im] = 0 
+    }
+  }
 
   async compile (row) {
     const session = stores.session
@@ -1798,7 +1809,7 @@ export class Groupe extends GenDoc {
     this.dfh = row.dfh || 0
     this.msu = row.msu || null
     this.pe = row.pe || 0
-    this.ast = row.ast || new Uint8Array([0])
+    this.ast = row.ast || [0]
     const x = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
     this.idh = x ? ID.long(x, session.ns) : 0
     this.hebC = this.idh === session.compteId
@@ -1806,6 +1817,8 @@ export class Groupe extends GenDoc {
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
     this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
     this.anag = row.anag || [0]
+    this.lna = row.lna || []
+    this.lnc = row.lnc || []
   }
 
   get mbHeb () { // membre hébergeur
@@ -1896,7 +1909,8 @@ export class Membre extends GenDoc {
     const aSt = stores.avatar
     this.vsh = row.vsh || 0
     this.ddi = row.ddi || 0
-    this.dda = row.dda || 0
+    this.dpa = row.dpa || 0
+    this.ddp = row.ddp || 0
     this.dfa = row.dfa || 0
     this.inv = row.inv || null
     this.nag = NomGenerique.from(decode(await decrypter(this.cleg, row.nag)))
