@@ -407,16 +407,25 @@ export const useGroupeStore = defineStore('groupe', {
       const aSt = stores.avatar
       const e = this.map.get(id)
       if (!e) return
-      const m = e.membres.get(ids)
-      if (!m) return
-      const idp = m.na.id
-      if (m.estAc) {
-        aSt.delAvatarGr(idp, id)
-        delete m.mbacs(ids)
+      if (ids) {
+        const m = e.membres.get(ids)
+        if (!m) return
+        const idp = m.na.id
+        if (m.estAc) {
+          aSt.delAvatarGr(idp, id)
+          delete m.mbacs(ids)
+        } else {
+          pSt.unsetPeopleMembre(idp, id)
+        }
+        delete m.membres(ids)
       } else {
-        pSt.unsetPeopleMembre(idp, id)
+        e.membres.forEach((m, ids) => {
+          const idp = m.na.id
+          pSt.unsetPeopleMembre(idp, id)
+        })
+        e.mbacs.clear()
+        e.membres.clear()
       }
-      delete m.membres(ids)
     },
 
     setNote (note) {
@@ -430,17 +439,25 @@ export const useGroupeStore = defineStore('groupe', {
     delNote (id, ids) {
       const nSt = stores.note
       const e = this.map.get(id)
-      if (e) e.notes.delete(ids)
-      nSt.delNote(id, ids)
+      if (!e) return
+      if (ids) {
+        if (e) e.notes.delete(ids)
+        nSt.delNote(id, ids)
+      } else {
+        e.notes.forEach((n, ids) => {
+          nSt.delNote(id, ids)
+        })
+        e.notes.clear()
+      }
     },
 
     /* Mise jour groupée pour un groupe
-    e : { id, gr, lmb: [], lsc: [] }
+    e : { id, gr, lmb: [], lno: [] }
     */
-    lotMaj ({id, gr, lmb, lsc, objv}) {
+    lotMaj ({id, gr, lmb, lno, objv}) {
       if (gr) this.setGroupe(gr)
       if (objv) this.setVols (id, objv)
-      lsc.forEach(s => { 
+      lno.forEach(s => { 
         if (s._zombi) this.delNote(s.id, s.ids); else this.setNote(s)  
       })
       lmb.forEach(m => { this.setMembre(m) }) // traite AUSSI le cas _zombi (disparu)

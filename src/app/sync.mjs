@@ -42,336 +42,284 @@ export class SyncQueue {
 export class OperationWS extends Operation {
   constructor (nomop) { super(nomop) }
 
-  supprGr (id) { // suppression du groupe id
-    this.buf.purgeGroupeIDB(id)
-    this.abMoins.add(id)
-    this.grSuppr.add(id)
-    const session = stores.session
-    if (session.groupeId === id) session.setGroupeId(0)
-  }
-
-  /* Mise à jour / ajout d'un groupe, détectée par,
-  - chgt de sa version,
-  - changement de lgr d'un ou plusieurs avatars
-  Retourne false si le groupe a été détecté zombi
-  Gère les abonnements et purge globale de IDB si zombi
-  */
-  async majGr (id) { // Maj ou ajout du groupe id
-    // ret.rowGroupe peut être absent
-    // ret.vgroupe est TOUJOURS présent un row dont la data donne v1 v2 q1 q2
-    const vcour = Versions.get(id)
-    const session = stores.session
-    const gSt = stores.groupe
-    const args = { token: session.authToken, id, v: vcour.v }
-    const ret = this.tr(await post(this, 'ChargerGMS', args))
-
-    const objv = Versions.compile(ret.vgroupe)
-    if (objv._zombi) {
-      this.supprGr(id)
-      return false
-    }
-
-    this.versions.set(id, objv)
-
-    const groupe = await compile(ret.rowGroupe)
-    if (groupe) this.buf.putIDB(ret.rowGroupe) // il a changé
-    const avgr = gSt.getGroupe(id)
-    const gr = groupe || avgr // groupe mis à jour OU actuel
-
-    const e = { id: id, gr: gr, lmb: [], lsc: [], objv: objv }
-    this.grMaj.set(id, e)
-    if (ret.rowNotes) for (const x of ret.rowNotes) {
-      this.buf.putIDB(x)
-      const note = await compile(x)
-      e.lsc.push(note)
-      if (session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
-    }
-
-    if (ret.rowMembres) for (const x of ret.rowMembres) {
-      const st = gr.ast[x.ids] // statut du membre
-      if (x.dlv < this.auj) {
-        /* membre disparu par sa dlv */
-        this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
-        e.lmb.push({ id: gr.id, ids, _zombi: true }) 
-        if (!session.estFige && st) { // il faut répercuter la disparition par dlv dans le statut du groupe
-          const args = { token: session.authToken, id: gr.id, ids }
-          await this.tr(await post(this, 'DisparitionMembre', args))
-        }
-      } else {
-        if (st) {
-          // membre "normal" pas disparu
-          this.buf.putIDB(x)
-          e.lmb.push(await compile(x))
-        }
-      }
-    }
-
-    // Détection des membres nouvellement disparus d'après leur statut
-    if (groupe && avgr) for(let ids = 1; ids < groupe.ast.length; ids++) {
-      if (avgr.ast[ids] && !groupe.ast[ids]) {
-        // existait et n'existe plus : on vient de détecter sa disparition par ast
-        this.buf.supprIDB({ _nom: 'membres', id: gr.id, ids })
-        e.lmb.push({ id: gr.id, ids, _zombi: true })
-      }
-    }
-    // On gère ici les ajouts de groupes pour abonnement
-    if (vcour.v === 0) this.abPlus.add(id) // c'était un ajout
-    return true
-  }
-
-  supprAv (id) { // suppression de l'avatar id
-    this.buf.purgeAvatarIDB(id)
-    this.abMoins.add(id)
-    this.avSuppr.add(id)
-  }
-
-  /* Mise à jour / ajout d'un avatar, détecté par,
-  - maj de compta
-  - chgt de version de l'avatar
-  Remarque: ne traite pas les maj des groupes, seulement l'ajour de nouveaux
-  et la suppression de ceux non référencés suite à la maj de l'avatar
-  Avatar _zombi:
-  - par résiliation explicite : compta a certes été mis à jour avant
-    MAIS la synchro peut ne pas respecter cet ordre.
-    DONC on peut détecter sur ChargerASCS qu'un avatar a été résilié
-    avant qu'on l'ait su par compta
-  - PAS par résiliation pat le GC : celle-ci intervient bien après
-    la résiliation du compte, donc la perte du login par perte de compta.
-  */
-  async majAv (id) {
-    const vcour = Versions.get(id)    
-    const session = stores.session
-    const args = { token: session.authToken, id, v: vcour.v }
-    const ret = this.tr(await post(this, 'ChargerASCS', args))
-
-    const objv = Versions.compile(ret.vavatar)
-    if (objv._zombi) return [false, null]
-
-    this.versions.set(id, objv)
-
-    let avatar = null
-    if (ret.rowAvatar) {
-      avatar = await compile(ret.rowAvatar)
-      this.buf.putIDB(ret.rowAvatar)
-    }
-    const e = { id, av: avatar, lch: [], lsp: [], lsc: [], ltk: [] }
-    this.avMaj.set(id, e)
-    for (const x of ret.rowNotes) {
-      this.buf.putIDB(x)
-      const note = await compile(x)
-      e.lsc.push(note)
-      if (session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
-    }
-    for (const x of ret.rowChats) {
-      this.buf.putIDB(x)
-      e.lch.push(await compile(x))
-    }
-    if (ret.rowTickets) for (const x of ret.rowTickets) {
-      this.buf.putIDB(x)
-      e.ltk.push(await compile(x))
-    }
-    for (const x of ret.rowSponsorings) {
-      const sp = await compile(x)
-      if (sp._zombi) this.buf.supprIDB(x); else this.buf.putIDB(x)
-      e.lsp.push(sp)
-    }
-    return [true, avatar]
-  }
-
-  grEnMoins(id, mapav, groupesAv) {
-    this.supprAv(id)
-    mapav.delete(id)
-    const groupesAp = new Set()
-    mapav.forEach(av => { av.idGroupes(groupesAp) })
-    this.grSuppr = difference(groupesAv, groupesAp)
-    for(const idg of this.grSuppr) this.supprGr(idg)
-  }
-
-  /* Chgt d'un avatar détecté par sa version
-  - implique un changement possible de la liste des groupes
-  */
-  async chgAvatar (objv) {
-    const session = stores.session
-    const id = objv.id
-    const aSt = stores.avatar
-
-    const mapav = aSt.avatars // état "courant" des avatars dans la fonction
-    const groupesAv = new Set()
-    mapav.forEach(av => { 
-      av.idGroupes(groupesAv) 
-    })
-
-    function avDisparu (self) {
-      if (objv.id === session.compteId) {
-        self.resiliation = true
-      } else {
-        if (objv.id === session.avatarId) {
-          // c'était l'avatar "courant" -> avatar principal
-          session.setAvatarId(session.compteId)
-        }
-        // Il n'y a pas de groupes en plus, mais peut-être en moins
-        self.grEnMoins(id, mapav, groupesAv)
-      }
-    }
-
-    if (objv._zombi) { avDisparu(this); return } // avatar disparu
-
-    const [vivant, avatar] = await this.majAv(id)
-
-    if (!vivant) { avDisparu(this); return } // avatar finalement disparu
-
-    if (avatar) mapav.set(avatar.id, avatar)
-    const groupesAp = new Set()
-    mapav.forEach(av => { av.idGroupes(groupesAp) })
-
-    const grPlus = difference(groupesAp, groupesAv)
-    for(const idg of grPlus) {
-      // On peut récupérer des _zombis dans grPlus, détectés par majGr
-      if (!await this.majGr(idg)) groupesAp.delete(idg)
-    }
-    // la liste des groupesAp est définitive
-    this.grSuppr = difference(groupesAv, groupesAp)
-    for(const idg of this.grSuppr) this.supprGr(idg)
-  }
-
-  /* init ***********************************************************/
-  init () {
-    this.resiliation = false
-    this.versions = new Map() // versions des sous-collections d'avatars / groupes modifiées
-    this.buf = new IDBbuffer() // Maj iDB en attente de commit
-
-    /* Sous-collections avatars ajoutés ou mis à jour à mettre à jour en store
-    { id, av: avatar, lch: [], lsp: [], lsc: [] }
-    */
-    this.avMaj = new Map()
-    /* Sous-collections avatars ajoutés ou mis à jour à mettre à jour en store
-    { id, gr: groupe, lmb: [], lsc: [] }
-    */
-    this.grMaj = new Map()
-
-    // avatars et groupes supprimés
-    this.avSuppr = new Set() 
-    this.grSuppr = new Set()
-
-    this.compta = null // compta mise à jour
-    this.tribu = null  // tribu mise à jour ou ajoutée. L'id de celle supprimée est dans abMoins.
-
-    this.abPlus = new Set() // abonnements de synchronisation ajoutés
-    this.abMoins = new Set() // abonnements de synchronisation supprimés
-  }
-
-  /* final *********************************************************/
-  async final () {
-    if (this.resiliation) {
-      deconnexion()
-      return
-    }
-    const session = stores.session
-    const aSt = stores.avatar
-    const gSt = stores.groupe
-
-    // (dés)abonnements
-    if (session.fsSync && this.abPlus.size) for (const id of this.abPlus) {
-      if (ID.estAvatar(id)) await session.fsSync.setAvatar(id)
-      if (ID.estGroupe(id)) await session.fsSync.setGroupe(id)
-      if (ID.estTribu(id)) await session.fsSync.setTribu(id)
-    }
-    if (session.fsSync && this.abMoins.size) for (const id of this.abMoins) {
-      if (ID.estAvatar(id)) await session.fsSync.unsetAvatar(id)
-      if (ID.estGroupe(id)) await session.fsSync.unsetGroupe(id)
-      if (ID.estTribu(id)) await session.fsSync.unsetTribu(id)
-    }
-    if (!session.fsSync && (this.abPlus.size || this.abMoins.size)) {
-      const args = { token: session.authToken, abMoins: this.abMoins, abPlus: this.abPlus }
-      this.tr(await post(this, 'GestionAb', args))    
-    }
-
-    /* Maj de compta si suppression d'avatars PAS ENCORE intégrées à mavk
-    Il y a eu détection d'avatar zombi encore non connu de compta
-    - Maj du store par anticipation
-    - Maj du document sur serveur
-    */
-    if (this.avSuppr.size) {
-      let lm
-      if (this.compta) {
-        if (this.compta.updAvatarMavk (this.avSuppr))
-          lm = await this.compta.lmAvatarMavk(this.avSuppr)
-      } else {
-        if (aSt.compta.updAvatarMavk (this.avSuppr))
-          lm = await aSt.compta.lmAvatarMavk(this.avSuppr)
-      }
-      if (!session.estFige && lm) {
-        const args = { token: session.authToken, lm }
-        this.tr(await post(this, 'MajMavkAvatar', args))
-      }
-    }
-
-    // commit IDB
-    let x = false
-    if (this.versions.size) {
-      x = true
-      for(const [id, objv] of this.versions) Versions.set(id, objv)
-    }
-    if (this.grSuppr.size) {
-      x = true
-      for(const id of this.grSuppr) Versions.del(id)
-    }
-    if (this.avSuppr.size) {
-      x = true
-      for(const id of this.avSuppr) Versions.del(id)
-    }
-    this.buf.commitIDB(false, x)
-
-    // Maj des stores
-    if (this.compta) aSt.setCompta(this.compta)
-    if (this.tribu) aSt.setTribu(this.tribu)
-
-    this.avSuppr.forEach(id => { aSt.del(id) })
-    this.avMaj.forEach(e => { aSt.lotMaj(e) })
-
-    // Retire en store les groupes supprimés dans les lgr des avatars qui les référencent encore
-    const mapIdNi = this.grSuppr.size ? aSt.avatarsDeGroupes(this.grSuppr) : null
-    this.grSuppr.forEach(id => { gSt.del(id) })
-    this.grMaj.forEach(e => { gSt.lotMaj(e) })
-
-    if (!session.estFige && mapIdNi) {
-      /* On effectue la maj de tous les avatars concernés 
-      par la suppression des groupes (entrées ni de lgr) */
-      const args = { token: session.authToken, mapIdNi }
-      this.tr(await post(this, 'EnleverGroupesAvatars', args))  
-    }
-
-    if (session.accesIdb) await gestionFichierSync(this.buf.mapSec)
-    /* Pourquoi ça ???
-    if (session.estMinimal && !session.estComptable) deconnexion()
-    */
-    session.setDh(this.dh)
-  }
-
   async finKO (e) {
     const exc = appexc(e)
     exc.sync = true
     await stores.ui.afficherExc(exc)
   }
+
+  async gestionAb () {
+    // (dés)abonnements
+    if (this.session.fsSync && this.abPlus.size) for (const id of this.abPlus) {
+      if (ID.estAvatar(id)) await this.session.fsSync.setAvatar(id)
+      if (ID.estGroupe(id)) await this.session.fsSync.setGroupe(id)
+      if (ID.estTribu(id)) await this.session.fsSync.setTribu(id)
+    }
+    if (this.session.fsSync && this.abMoins.size) for (const id of this.abMoins) {
+      if (ID.estAvatar(id)) await this.session.fsSync.unsetAvatar(id)
+      if (ID.estGroupe(id)) await this.session.fsSync.unsetGroupe(id)
+      if (ID.estTribu(id)) await this.session.fsSync.unsetTribu(id)
+    }
+    if (!this.session.fsSync && (this.abPlus.size || this.abMoins.size)) {
+      const args = { token: this.session.authToken, abMoins: this.abMoins, abPlus: this.abPlus }
+      this.tr(await post(this, 'GestionAb', args))    
+    }
+  }
+  
 }
 
 export class OnchangeVersion extends OperationWS {
   constructor () { super($t('OPsync')) }
 
+  version (id) { return this.veCache.get(id) || Versions.get(id) }
+
+  eavMaj (id) {
+    let e = this.avMaj.get(id)
+    if (!e) { 
+      e = { id, av: null, lch: [], lsp: [], lsc: [], ltk: [] } 
+      this.avMaj.set(id, e)
+    }
+    return z
+  }
+
+  egrMaj (id) {
+    let e = this.grMaj.get(id)
+    if (!e) { 
+      const e = { id: id, gr: null, lmb: [], lsc: [], objv: null }
+      this.grMaj.set(id, e)
+    }
+    return z
+  }
+
+  // Traite les mises à jour à synchroniser présentes dans this.ret
+  async process () {
+    this.veCache = new Map() // cache des versions
+    this.grCache = new Map() // cache des groupes changés
+
+    // lotMaj ({id, av, lch, lsp, lno, ltk})
+    this.avMaj = new Map()
+
+    // lotMaj ({id, gr, lmb, lno, objv}) 
+    this.grMaj = new Map() // cache des groupes changés
+
+    if (this.rowAvatar) {
+      this.putIDB(this.rowAvatar)
+      const e = this.eavMaj(this.avatar.id)
+      e.av = this.avatar
+    }
+
+    if (this.ret.rowVersions) for (const row of this.ret.rowVersions) {
+      const version = Versions.compile(row)
+      this.veCache.set(version.id, version)
+      if (ID.estGroupe(version.id)) {
+        const e = this.egrMaj(version.id)
+        e.objv = version
+      }
+    }
+
+    if (this.ret.rowAvatars) for (const row of this.ret.rowAvatars) {
+      this.putIDB(row)
+      const av = await compile(row)
+      const e = this.eavMaj(av.id)
+      e.av = av
+    }
+
+    if (this.ret.rowGroupes) for (const row of this.ret.rowGroupes) {
+      this.buf.putIDB(row)
+      const gr = await compile(row)
+      this.grCache.set(row.id, gr)
+      const e = this.egrMaj(gr.id)
+      e.gr = gr
+    }
+
+    if (this.ret.rowNotes) for (const row of this.ret.rowNotes) {
+      this.buf.putIDB(row)
+      const note = await compile(row)
+      const e = ID.estGroupe(note.id) ? this.egrMaj(note.id) : this.eavMaj(note.id)
+      e.lno.push[note]
+      if (session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
+    }
+
+    if (this.ret.rowChats) for (const row of ret.rowChats) {
+      const chat = await compile(row)
+      this.buf.putIDB(row)
+      const e = this.eavMaj(chat.id)
+      e.lch.push(chat)
+    }
+
+    if (this.ret.rowTickets) for (const row of this.ret.rowTickets) {
+      const tk = await compile(row)
+      if (tk._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
+      const e = this.eavMaj(tk.id)
+      e.ltk.push(tk)
+    }
+    
+    if (this.ret.rowSponsorings) for (const x of this.ret.rowSponsorings) {
+      const sp = await compile(row)
+      if (sp._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
+      const e = this.eavMaj(sp.id)
+      e.lsp.push(sp)
+    }
+
+    if (this.ret.rowMembers) for (const x of this.ret.rowMembers) {
+      const mb = await compile(row)
+      if (mb._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
+      const e = this.egrMaj(mb.id)
+      e.lmb.push(mb)
+    }
+  }
+
+  diffsAvGr () {
+    // Comparaison entre avatar avant (this.avAvatar) et nouveau (this.avatar)
+    this.grIdsAp = this.avatar.idGroupes()
+    this.grMoins = difference(grIdsAv, grIdsAp)
+    this.grPlus = difference(grIdsAp, grIdsAv)
+    this.avIdsAp = this.avatar.avatarIds
+    this.avMoins = difference(avIdsAv, avIdsAp)
+    this.avPlus = difference(avIdsAp, avIdsAv)
+  }
+
+  // Charge les mises à jour à synchroniser
+  async retry () {
+    /* map du / des avatars à récupérer:
+      - clé:id, 
+      - valeur: version actuelle */
+    this.avmap = {}
+    
+    /* map du / des groupes à récupérer:
+      - clé: idg
+      - valeur: { mbs, v } */
+    this.grmap = {}
+    
+    if (this.nbRetry === 0) {
+      // la seule version changée est celle qui a déclenché le sync
+      if (!this.estGr) {
+        this.avmap[this.objv.id] = this.vact
+      } else {
+        const x = this.aSt.compte.mbsOfGroupe(this.objv.id)
+        this.grmap[this.objv.id] = { mbs: x.mbs, v: this.vact}
+      }
+    } else {
+      // toutes les versions d'avatars et de groupes ont pu changer
+      for (const avid of this.avIdsAp)
+        this.avmap[avid] = Versions.get(avid)
+      for (const grid of this.grIdsAp) {
+        const x = this.aSt.compte.mbsOfGroupe(grid)
+        this.grmap[grid] = { mbs: x.mbs, v: Versions.get(grid) }
+      }
+    }
+  
+    while (true) {
+      const args = { 
+        token: session.authToken, 
+        avv: this.avv, avmap: this.avmap, grmap: this.grmap
+      }
+      this.ret = this.tr(await post(this, 'Synchroniser', args))
+
+      if (this.ret.KO) {
+        // la version de avatar a (encore) changé
+        this.rowAvatar = this.ret.rowAvatar
+        this.avatar = await compile(this.rowAvatar)
+        this.avv = this.avatar.v
+        this.nbRetry++
+        this.diffsAvGr()
+        await this.retry()
+      } else {
+        await process()
+        break
+      }
+    }
+  }
+
   async run (row) {
     try {
-      this.init()
-      const objv = Versions.compile(row)
-      if (ID.estGroupe(row.id)) {
-        if (objv._zombi) {
-          this.supprGr(row.id)
-        } else {
-          await this.majGr(row.id)
-        }
-      } else {
-        await this.chgAvatar(objv)
+      this.session = stores.session
+      this.aSt = stores.avatar
+      this.gSt = stores.groupe
+      this.avatar = this.aSt.compte
+      this.avAvatar = this.aSt.compte
+      this.avv = Versions.get(this.aSt.compte.id)
+      this.nbRetry = 0
+
+      this.objv = Versions.compile(row)
+      this.estGr = ID.estGroupe(row.id)
+      this.vact = Versions.get(this.objv.id)
+
+      this.grIdsAv = this.avAvatar.idGroupes()
+      this.grIdsAp = this.avAvatar.idGroupes()
+      this.avIdsAv = this.avAvatar.avatarIds
+      this.avIdsAp = this.avatar.avatarIds
+  
+      this.grMoins = new Set()
+      this.grPlus = new Set()
+      this.avMoins = new Set()
+      this.avPlus = new Set()
+
+      await this.retry()
+
+      // commit IDB ***************************************
+      // Maj des versions en IDB
+      let x = false
+      if (this.veCache.size) {
+        x = true
+        for(const [id, objv] of this.veCache) Versions.set(id, objv)
       }
-      await this.final()
+      if (this.grMoins.size) {
+        x = true
+        for(const id of this.grMoins) Versions.del(id)
+      }
+      if (this.avMoins.size) {
+        x = true
+        for(const id of this.avMoins) Versions.del(id)
+      }
+
+      /* Nettoyage des membres / notes perdues sur les groupes
+      qui existaient avant et existent après
+      */
+      this.delMb = new Set()
+      this.delNo = new Set()
+      this.grIdsAp.forEach(idg => {
+        const grav = gSt.getGroupe(idg)
+        if (grav) {
+          const grap = this.grCache.get(idg)
+          if (grap) {
+            const [ambav, anoav] = this.avAvatar.ammbamo(grav)
+            const [ambap, anoap] = this.avatar.ammbamo(grap)
+            if (ambav && !ambap) {
+              this.delMb.add(idg)
+              this.buf.purgeGroupeMbIDB(idg)
+            }
+            if (anoav && !anoap) {
+              this.delNo.add(idg)
+              this.buf.purgeGroupeNoIDB(idg)
+            }
+          }
+        }
+      })
+      this.buf.commitIDB(false, x)
+      
+      // Maj des stores *********************************
+      if (this.avMoins.size) this.avMoins.forEach(id => { aSt.del(id) })
+      if (this.grMoins.size) this.grMoins.forEach(id => { gSt.del(id) })
+
+      if (this.delMb.size) this.delMb.forEach(idg => {this.gSt.delMembre(idg)})
+      if (this.delNo.size) this.delNo.forEach(idg => {this.gSt.delNote(idg)})
+
+      this.avMaj.forEach(e => { aSt.lotMaj(e) })
+      this.grMaj.forEach(e => { gSt.lotMaj(e) })
+
+      // Maj des abonnements ******************************
+      this.abPlus = new Set() // abonnements de synchronisation ajoutés
+      this.abMoins = new Set() // abonnements de synchronisation supprimés
+      if (this.avMoins.size) this.avMoins.forEach(id => {this.abMoins.add(id)})
+      if (this.grMoins.size) this.grMoins.forEach(id => {this.abMoins.add(id)})
+      if (this.avPlus.size) this.avPlus.forEach(id => {this.abPlus.add(id)})
+      if (this.grPlus.size) this.grPlus.forEach(id => {this.abPlus.add(id)})
+      await this.gestionAb ()
+ 
+      if (session.accesIdb) await gestionFichierSync(this.buf.mapSec)
+
+      session.setDh(this.dh)  
     } catch (e) { 
       await this.finKO(e)
     }
@@ -381,29 +329,22 @@ export class OnchangeVersion extends OperationWS {
 export class OnchangeCompta extends OperationWS {
   constructor () { super($t('OPsync')) }
 
-  async chgTribu () {
-    const args = { token: session.authToken, 
-      id: this.compta.idt, setC: true }
-    const ret = this.tr(await post(this, 'GetTribu', args))
-    this.abPlus.add(this.compta.idt)
-    this.abMoins.add(this.avCompta.idt)
-    this.buf.putIDB(ret.rowTribu)
-    this.tribu = await compile(rowTribu)
-  }
-
   async run (row) {
     try {
-      this.init()
+      this.buf = new IDBbuffer() // Maj iDB en attente de commit
+      this.abPlus = new Set() // abonnements de synchronisation ajoutés
+      this.abMoins = new Set() // abonnements de synchronisation supprimés
+
       const session = stores.session
       const aSt = stores.avatar
-      const gSt = stores.groupe
+      this.tribu = null
 
       this.avCompta = aSt.compta  
       if (row.v <= this.avCompta.v) return // sync retardée déjà traitée
 
       this.compta = await compile(row)
       /* Dans compta, cletK a peut-être été recryptée */
-      if (!session.estFige&& this.compta.cletK) {
+      if (!session.estFige && this.compta.cletK) {
         const args = { token: session.authToken, cletK: this.compta.cletK }
         this.tr(await post(this, 'MajCletKCompta', args))
         delete this.compta.cletK
@@ -412,61 +353,31 @@ export class OnchangeCompta extends OperationWS {
 
       /* on traite le changement de tribu, pas sa mise à jour
       qui vient par la mise à jour de la tribu */
-      if (this.compta.idt !== this.avCompta.idt) await this.chgTribu()
-
-      const avlav = this.avCompta.avatarIds
-      const groupesAv = new Set() // ids des groupes AVANT
-      avlav.forEach(id => { 
-        const a = aSt.getAvatar(id)
-        if (a) a.idGroupes(groupesAv)
-      })
-
-      const aplav1 = this.compta.avatarIds // Nouvelle liste d'avatars depuis compta
-      const aplav = new Set(aplav1) // Liste depuis compta MOINS ceux disparus
-      const avPlus = new Set()
-      const avMoinsCompta = new Set() // avatars disparus à enlever de compta
-      for (const id of difference(aplav1, avlav)) { // Avatars en plus, a priori
-        const [vivant, avatar] = await this.majAv(id)
-        if (!vivant) { 
-          aplav.delete(id)
-          avMoinsCompta.add(id) 
-        } else {
-          avPlus.add(id)
-          // this.avMaj a été rempli par la maj de l'avatar id
+      if (this.compta.idt !== this.avCompta.idt) {
+        if (this.compta.idt) { // Changement de tribu
+          const args = { token: session.authToken, 
+            id: this.compta.idt, setC: true }
+          const ret = this.tr(await post(this, 'GetTribu', args))
+          this.abPlus.add(this.compta.idt)
+          this.abMoins.add(this.avCompta.idt)
+          this.buf.putIDB(ret.rowTribu)
+          this.tribu = await compile(rowTribu)
+          await this.gestionAb()
+        } else { // plus de tribu (devient A)
+          this.abMoins.add(this.avCompta.idt)
+          this.buf.supprIDB({ _row: 'tribus', id: this.avCompta.idt })
+          this.delTribu = true
         }
       }
-      if (!session.estFige && avMoinsCompta.size) { // Il y avait des avatars disparus dans compta
-        // Maj de compta sur le serveur
-        const lm = await Compta.lmAvatarMavk(avMoins, session.clek)
-        const args = { token: session.authToken, lm }
-        this.tr(await post(this, 'MajMavkAvatar', args))
-        // Maj par anticipation sur this.compta
-        for(const id of avMoins) this.compta.mav.delete(id)
-      }
 
-      const avMoins = difference(avlav, aplav)
-      if (avMoins.size) for (const id of avMoins) this.supprAv(id)
+      this.buf.commitIDB()
 
-      const groupesAp = new Set() // ids des groupes APRES
-      aplav.forEach(id => {
-        /* on prend les groupes,
-        - soit dans l'avatar mis à jour
-        - soit dans l'avatar actuel inchangé
-        */
-        const e = this.avMaj.get(id)
-        const a = e && e.av ? e.av : aSt.getAvatar(id)
-        if (a) a.idGroupes(groupesAp)
-      })
+      // Maj des stores
+      this.aSt.setCompta(this.compta)
+      if (this.tribu) this.aSt.setTribu(this.tribu)
+      if (this.delTribu) this.aSt.setTribu(null)
 
-      const grPlus = difference(groupesAp, groupesAv)
-      // Ajout MAIS destruction quand c'est un _zombi
-      if (grPlus.size) for(const id of grPlus) await this.majGr(id)
-      
-      const grMoins = difference(groupesAv, groupesAp)
-      // destruction des inutiles
-      if (grMoins.size) for (const id of grMoins) this.supprGr(id)
-
-      await this.final()
+      session.setDh(this.dh)
     } catch (e) { 
       await this.finKO(e)
     }
@@ -478,20 +389,22 @@ export class OnchangeTribu extends OperationWS {
 
   async run (row) {
     try {
-      this.init()
+      this.buf = new IDBbuffer() // Maj iDB en attente de commit
+
       const aSt = stores.avatar
+      const session = stores.session
+      this.tribu = null
       
-      if (stores.session.estComptable) {
+      if (session.estComptable) {
         const avTr = aSt.getTribu(row.id)
         if ((!avTr || avTr.v < row.v) || (aSt.tribu.v < row.v)) {
           // tribu du compte ou de la collection à rafraîchir
           this.tribu = await compile(row)
         }
       } else {
-        if (row.v > aSt.tribu.v) {
+        if (aSt.tribu && (row.v > aSt.tribu.v)) {
           this.tribu = await compile(row)
           if (!this.tribu.aCompte) {
-            this.resiliation = true
             deconnexion()
             return
           }
@@ -499,7 +412,11 @@ export class OnchangeTribu extends OperationWS {
         }
       }
 
-      if (this.tribu) await this.final()
+      this.buf.commitIDB()
+
+      // Maj des stores
+      if (this.tribu) aSt.setTribu(this.tribu)
+      session.setDh(this.dh)
     } catch (e) { 
       await this.finKO(e)
     }

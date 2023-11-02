@@ -58,7 +58,8 @@ export const useAvatarStore = defineStore('avatar', {
 
     /* retourne la tribu "courante" ou à défaut celle du compte actuellement connecté */
     tribuC: (state) => { 
-      return stores.session.tribuCId ? state.maptr.get(stores.session.tribuCId) : state.tribu },
+      return stores.session.tribuCId ? state.maptr.get(stores.session.tribuCId) : state.tribu 
+    },
 
     qv: (state) => {
       const qv = { nc: 0, nn: 0, v2: 0 }
@@ -393,14 +394,14 @@ export const useAvatarStore = defineStore('avatar', {
     setTribu (tribu) { // set / remplacement de la tribu
       const session = stores.session
       const c = this.compta
-      if (session.tribuId === tribu.id) {
+      if (!tribu || session.tribuId === tribu.id) {
         const pSt = stores.people
         const nasp = new Map()
         const spAv = new Set() // people sponsor avant
         if (this.tribu) for (const e of this.tribu.act) 
           if (e && e.nasp && !c.estAvDuCompte(e.id)) spAv.add(e.id)
         const spAp = new Set() // people sponsor après
-        for (const e of tribu.act)
+        if (tribu) for (const e of tribu.act)
           if (e && !e.vide && e.nasp && !c.estAvDuCompte(e.id)) { 
             spAp.add(e.id)
             nasp.set(e.id, e.nasp)
@@ -410,11 +411,13 @@ export const useAvatarStore = defineStore('avatar', {
         // ajoute aux people ceux y sont après mais n'y étaient pas avant
         spAp.forEach(id => { if (!spAv.has(id)) pSt.setPeopleTribu(nasp.get(id)) })
       }
-      this.maptr.set(tribu.id, tribu)
-      if (session.tribuId === tribu.id) {
-        const act = tribu.act[c.it] // du compte
-        session.setNotifTC(tribu.notif, act.notif)
-      }
+      if (tribu) {
+        this.maptr.set(tribu.id, tribu)
+        if (session.tribuId === tribu.id) {
+          const act = tribu.act[c.it] // du compte
+          session.setNotifTC(tribu.notif, act.notif)
+        }
+      } else session.setTribuId(0)
     },
 
     delTribuC (id) { // delete d'une tribu quelconque pour le Comptable
@@ -547,9 +550,9 @@ export const useAvatarStore = defineStore('avatar', {
     /* Mise jour groupée pour un avatar
     e : { id, av: avatar, lch: [], lsp: [], lsc: [] }
     */
-    lotMaj ({id, av, lch, lsp, lsc, ltk}) {
+    lotMaj ({id, av, lch, lsp, lno, ltk}) {
       if (av) this.setAvatar(av)
-      lsc.forEach(s => { 
+      lno.forEach(s => { 
         if (s._zombi) this.delNote(s.id, s.ids); else this.setNote(s) 
       })
       lsp.forEach(s => { 
