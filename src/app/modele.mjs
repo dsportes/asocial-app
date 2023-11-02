@@ -1377,7 +1377,7 @@ export class Avatar extends GenDoc {
     r.pub = publicKey
     r.mavk = {}
     const c = hash(await crypter(session.clek, '' + ID.court(na.id)))
-    const v = await crypter(session.clek, [na.nom, na.rnd])
+    const v = await crypter(session.clek, new Uint8Array(encode([na.nom, na.rnd])))
     r.mavk[c] = v
     const _data_ = new Uint8Array(encode(r))
     const row = { _nom: 'avatars', id: r.id, v: r.v, vcv: r.vcv, _data_ }

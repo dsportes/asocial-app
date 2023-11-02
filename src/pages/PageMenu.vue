@@ -117,7 +117,9 @@ export default {
   computed: {
     nbchats () { return this.aSt.eavC.chats.size },
     nbspons () { return this.aSt.eavC.sponsorings.size },
-    nbgrps () { return this.aSt.eavC.avatar.lgr.size },
+    nbgrps () { 
+      return this.aSt.compte.idGroupes(null, this.session.avatarId).size
+    },
     nbInvits () { return this.gSt.nbInvits },
 
     nbgrsecs () { return '?' },

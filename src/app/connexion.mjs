@@ -187,8 +187,8 @@ export class ConnexionCompte extends OperationUI {
     const session = stores.session
 
     let dlv1 = 0, dlv2 = 0
-    if (!session.estFige && this.compta.signable && 
-        (!this.compta.it || this.compta.signable(this.compta.it))) {
+    if (!session.estFige && 
+      (!this.compta.it || this.compta.signable)) {
       // En UTC la division d'une date est multiple de 86400000
       const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
       const tdlv1 = (Math.floor(tjourJ / 10) + 1) * 10
@@ -210,7 +210,7 @@ export class ConnexionCompte extends OperationUI {
       this.avToSuppr = new Set()
       this.avRowsModifies = []
 
-      this.avRequis = this.compte.avatarIds
+      this.avRequis = this.avatar.avatarIds
       // avatars connus en IDB
       if (session.accesIdb) for (const row of this.cAvatars) {
         if (this.avRequis.has(row.id)) {
@@ -222,7 +222,7 @@ export class ConnexionCompte extends OperationUI {
       for (const id of this.avRequis) {
         if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
         if (!this.avatarsToStore.has(id))
-          avsMap[avatar.id] = { v: 0, dlv: session.compteId === id ? dlv1 : dlv2 }
+          avsMap[this.avatar.id] = { v: 0, dlv: session.compteId === id ? dlv1 : dlv2 }
       }
 
       // Traitement des groupes
@@ -606,6 +606,7 @@ export class ConnexionCompte extends OperationUI {
   this.tribu : remet à niveau la stat de volume de tribu
   */
   async connex2 () {
+    const session = stores.session
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
     if (this.compta.rowCletK) {
@@ -707,8 +708,10 @@ export class ConnexionCompte extends OperationUI {
       this.avatarsToStore = new Map() // objets avatar à ranger en store
       this.cGroupes = session.accesIdb ? await getColl('groupes') : []
       this.groupesToStore = new Map()
-      if (session.accesIdb) await loadVersions() // chargement des versions depuis IDB
-      else return Versions.reset() // Versions déjà connues en IDB, vide
+      if (session.accesIdb) 
+        await loadVersions() // chargement des versions depuis IDB
+      else 
+        Versions.reset() // Versions déjà connues en IDB, vide
 
       /* Signe les avatars et groupes. Remplit: 
       - this.avatarsToStore, .avToSuppr, .avRowsModifies, .avRequis

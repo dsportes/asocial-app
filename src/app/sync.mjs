@@ -211,7 +211,7 @@ export class OnchangeVersion extends OperationWS {
   
     while (true) {
       const args = { 
-        token: session.authToken, 
+        token: this.session.authToken, 
         avv: this.avv, avmap: this.avmap, grmap: this.grmap
       }
       this.ret = this.tr(await post(this, 'Synchroniser', args))
@@ -225,7 +225,7 @@ export class OnchangeVersion extends OperationWS {
         this.diffsAvGr()
         await this.retry()
       } else {
-        await process()
+        await this.process()
         break
       }
     }
@@ -233,17 +233,18 @@ export class OnchangeVersion extends OperationWS {
 
   async run (row) {
     try {
+      this.buf = new IDBbuffer()
       this.session = stores.session
       this.aSt = stores.avatar
       this.gSt = stores.groupe
       this.avatar = this.aSt.compte
       this.avAvatar = this.aSt.compte
-      this.avv = Versions.get(this.aSt.compte.id)
+      this.avv = Versions.get(this.aSt.compte.id).v
       this.nbRetry = 0
 
       this.objv = Versions.compile(row)
       this.estGr = ID.estGroupe(row.id)
-      this.vact = Versions.get(this.objv.id)
+      this.vact = Versions.get(this.objv.id).v
 
       this.grIdsAv = this.avAvatar.idGroupes()
       this.grIdsAp = this.avAvatar.idGroupes()
@@ -317,9 +318,9 @@ export class OnchangeVersion extends OperationWS {
       if (this.grPlus.size) this.grPlus.forEach(id => {this.abPlus.add(id)})
       await this.gestionAb ()
  
-      if (session.accesIdb) await gestionFichierSync(this.buf.mapSec)
+      if (this.session.accesIdb) await gestionFichierSync(this.buf.mapSec)
 
-      session.setDh(this.dh)  
+      this.session.setDh(this.dh)  
     } catch (e) { 
       await this.finKO(e)
     }
@@ -373,9 +374,9 @@ export class OnchangeCompta extends OperationWS {
       this.buf.commitIDB()
 
       // Maj des stores
-      this.aSt.setCompta(this.compta)
-      if (this.tribu) this.aSt.setTribu(this.tribu)
-      if (this.delTribu) this.aSt.setTribu(null)
+      aSt.setCompta(this.compta)
+      if (this.tribu) aSt.setTribu(this.tribu)
+      if (this.delTribu) aSt.setTribu(null)
 
       session.setDh(this.dh)
     } catch (e) { 

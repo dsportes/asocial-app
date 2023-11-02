@@ -393,16 +393,15 @@ export const useAvatarStore = defineStore('avatar', {
 
     setTribu (tribu) { // set / remplacement de la tribu
       const session = stores.session
-      const c = this.compta
       if (!tribu || session.tribuId === tribu.id) {
         const pSt = stores.people
         const nasp = new Map()
         const spAv = new Set() // people sponsor avant
         if (this.tribu) for (const e of this.tribu.act) 
-          if (e && e.nasp && !c.estAvDuCompte(e.id)) spAv.add(e.id)
+          if (e && e.nasp && !this.compte.estAvDuCompte(e.id)) spAv.add(e.id)
         const spAp = new Set() // people sponsor après
         if (tribu) for (const e of tribu.act)
-          if (e && !e.vide && e.nasp && !c.estAvDuCompte(e.id)) { 
+          if (e && !e.vide && e.nasp && !this.compte.estAvDuCompte(e.id)) { 
             spAp.add(e.id)
             nasp.set(e.id, e.nasp)
           }
@@ -414,7 +413,7 @@ export const useAvatarStore = defineStore('avatar', {
       if (tribu) {
         this.maptr.set(tribu.id, tribu)
         if (session.tribuId === tribu.id) {
-          const act = tribu.act[c.it] // du compte
+          const act = tribu.act[this.compta.it] // du compte
           session.setNotifTC(tribu.notif, act.notif)
         }
       } else session.setTribuId(0)

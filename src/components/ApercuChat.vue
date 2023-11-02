@@ -57,7 +57,7 @@ import { dhcool, afficherDiag, dkli } from '../app/util.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import ApercuPeople from './ApercuPeople.vue'
 import BoutonHelp from './BoutonHelp.vue'
-import { MajMotsclesChat, NouveauChat, MajChat } from '../app/operations.mjs'
+import { NouveauChat, MajChat } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
 import { MD } from '../app/modele.mjs'
 
@@ -110,8 +110,7 @@ export default {
     },
 
     async changeMc (mc) {
-      await new MajMotsclesChat().run(this.naI.id, this.ids, mc)
-    }
+     }
   },
 
   setup (props) {
