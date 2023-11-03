@@ -1680,14 +1680,15 @@ export class Chat extends GenDoc {
     this.tit = ''
     this.dh = 0
     if (row.items) for (const it of row.items) {
-      if (this.dh === 0) this.dh = t.dh
-      const t = row.t ? ungzipB(await decrypter(this.cc, row.t)) : null
-      this.items.push({ a: row.a, t, dh: row.dh})
-      a.push($t('dedh', [a ? this.naI.nom : this.naE.nom, dhstring(row.dh)]))
+      const t = it.txt ? ungzipB(await decrypter(this.cc, it.txt)) : null
+      if (this.dh === 0) this.dh = it.dh
+      this.items.push({ a: it.a, txt: t, dh: it.dh})
+      a.push($t('dedh', [a ? this.naI.nom : this.naE.nom, dhstring(it.dh)]))
       if (!t) a.push('[' + supp + ']'); else a.push(t)
-      a.push('---')
-      if (!this.tit && !t) {
+      a.push('\n\n')
+      if (!this.tit && t) {
         let i = t.indexOf('\n')
+        if (i === -1) i = t.length
         if (i > 50) i = 50
         const x = t.substring(0, i)
         if (x) this.tit = x
@@ -1737,13 +1738,13 @@ export class Chat extends GenDoc {
 
   static async newItems (txt, cc) {
     const dh = Date.now()
-    const t = txt ? await crypter(cc, await gzipB(txt)) : null
+    const t = txt ? await crypter(cc, gzipB(txt)) : null
     const l = txt ? txt.length : 0
-    return [{dh, a:0, t, l}, {dh, a:1, t, l}]
+    return [{dh, a:0, txt: t, l}, {dh, a:1, t, l}]
   }
 
   static async getTxtCC (cc, txt) {
-    return txt ? await crypter(cc, await gzipB(txt)) : null
+    return txt ? await crypter(cc, gzipB(txt)) : null
   }
 }
 
@@ -1999,7 +2000,7 @@ export class Note extends GenDoc {
     this.deGroupe = ID.estGroupe(this.id)
     this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || null)
     const x = decode(await decrypter(this.cle, row.txts))
-    this.txt = await ungzipB(x.t)
+    this.txt = ungzipB(x.t)
     this.titre = titre(this.txt)
     this.dh = x.d
     this.auts = x.l ? x.l : []
@@ -2089,7 +2090,7 @@ export class Note extends GenDoc {
   }
 
   static async toRowTxt (cle, txt, im, auts) {
-    const x = { d: Date.now(), t: await gzipB(txt) }
+    const x = { d: Date.now(), t: gzipB(txt) }
     if (im) {
       const nl = [im]
       if (auts) auts.forEach(t => { if (t !== im) nl.push(t) })
@@ -2275,13 +2276,13 @@ export class NoteLocale {
 
   async fromIdb (idb) {
     decodeIn(idb, this)
-    this.txt = await ungzipB(this.txt)
+    this.txt = ungzipB(this.txt)
     return this
   }
 
   async toIdb () {
     const x = { ...this }
-    x.txt = await gzipB(this.txt)
+    x.txt = gzipB(this.txt)
     return new Uint8Array(encode(x))
   }
 

@@ -166,20 +166,20 @@ export function gzipT (data) { return pako.gzip(data) }
 
 export function ungzipT (data) { return pako.ungzip(data) }
 
-export async function gzipB (arg) {
+export function gzipB (arg) {
   if (!arg) return null
   // t: 0:binaire, 1:texte zippé, 2:texte non zippé
   const t = typeof arg === 'string' ? (arg.length > 1024 ? 1 : 2) : 0
   let u8 = t ? encoder.encode(arg) : arg
-  if (t < 2) u8 = await gz(u8)
+  if (t < 2) u8 = gzipT(u8)
   return concat([new Uint8Array([t]), u8])
 }
 
-export async function ungzipB (arg) {
+export function ungzipB (arg) {
   if (!arg || arg.length < 1) return null
   const t = arg[0]
   const c = arg.slice(1)
-  const res = t < 2 ? await ungz(c) : c
+  const res = t < 2 ? ungzipT(c) : c
   return t ? decoder.decode(arrayBuffer(res)) : res
 }
 

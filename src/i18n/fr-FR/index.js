@@ -98,6 +98,8 @@ export default {
   powsponsor: 'Seuls le Comptable ou un sponsor de la tranche peuvent effectuer cette action',
   dedh: 'De {0} à {1} {2}',
   supprime: 'supprimé',
+  actif: 'actif',
+  disp: 'disparu',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -921,6 +923,7 @@ export default {
   CHenv: 'Envoyer',
   CHenvrac: 'Envoyer puis raccrocher',
   CHrac: 'Raccrocher',
+  CHnbit: '(vide) | un échange | {count} échanges',
 
   SYtit: 'Chargement et synchronisation du compte',
   SYcpt: 'Compte et comptabilité',

@@ -70,7 +70,7 @@ export default ({
     async notif () { this.ui.setPage('compta', 'notif')},
     deconnecter () {
       this.ui.resetExc()
-      deconnexion()
+      deconnexion(true)
     },
     async reconnecter () {
       this.ui.resetExc()

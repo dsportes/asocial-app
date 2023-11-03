@@ -126,7 +126,7 @@ export default ({
     photoP () { return this.sp.cv && this.sp.cv.photo ? this.sp.cv.photo : this.sp.na.defIcon },
     infoP () { return this.sp.cv && this.sp.cv.info ? this.sp.cv.info : '' },
     estpar () { return this.sp.sp },
-    textedef () { return this.$t('merci', [this.sp.na.nom + ',\n\n' + this.sp.ard]) },
+    textedef () { return this.$t('merci', [this.sp.na.nom]) },
     valid () { return this.sp.dlv},
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     idtr () { return Tribu.id(this.sp.clet) },
@@ -169,7 +169,7 @@ export default ({
     },
     async confirmer () {
       const ardx = await crypter(this.pc.clex, this.texte)
-      await new AcceptationSponsoring().run(this.sp, ardx, this.texte, sp.ard, this.ps)
+      await new AcceptationSponsoring().run(this.sp, ardx, this.texte, this.sp.ard, this.ps)
       this.fermer()
     },
     async refuser () {

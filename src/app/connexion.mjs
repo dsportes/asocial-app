@@ -11,7 +11,7 @@ import {
   openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, NLfromIDB, FLfromIDB, lectureSessionSyncIdb
 } from './db.mjs'
-import { crypter, random, genKeyPair } from './webcrypto.mjs'
+import { crypter, random, genKeyPair, crypterRSA } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS, closeWS } from './ws.mjs'
 import { MD, setClet } from './modele.mjs'
@@ -1062,9 +1062,9 @@ export class AcceptationSponsoring extends OperationUI {
         ccPE : await crypterRSA(pubE, cc),
         naccI : await crypter(cc, encode([naI.nom, naI.rnd])),
         naccE : await crypter(cc, encode([naE.nom, naE.rnd])),
-        txt1 : await Chat.getTxtCC(txt1, cc),
+        txt1 : await Chat.getTxtCC(cc, txt1),
         lgtxt1 : txt1.length,
-        txt2 : await Chat.getTxtCC(txt2, cc),
+        txt2 : await Chat.getTxtCC(cc, txt2),
         lgtxt2 : txt2.length,
         rowCompta, rowAvatar, rowVersion,
         ids: sp.ids,
