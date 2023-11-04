@@ -1308,7 +1308,6 @@ export class Avatar extends GenDoc {
     this.vcv = row.vcv || 0
     this.hpc = row.hpc
     this.napc = row.napc
-    const kcv = getCle(this.id)
 
     // Avatar principal
     if (session.compteId === this.id) {
@@ -1344,6 +1343,7 @@ export class Avatar extends GenDoc {
       }
     }
 
+    const kcv = getCle(this.id)
     this.priv = await decrypter(session.clek, row.privk)
     this.pub = row.pub
 
@@ -1687,13 +1687,7 @@ export class Chat extends GenDoc {
       a.push($t('dedh', [a ? this.naI.nom : this.naE.nom, dhstring(it.dh)]))
       if (!t) a.push('[' + supp + ']'); else a.push(t)
       a.push('\n\n')
-      if (!this.tit && t) {
-        let i = t.indexOf('\n')
-        if (i === -1) i = t.length
-        if (i > 50) i = 50
-        const x = t.substring(0, i)
-        if (x) this.tit = x
-      }
+      if (!this.tit && t) this.tit = titre(t)
     }
     this.txt = a.join('\n')
     if (!this.tit) this.tit = '???'

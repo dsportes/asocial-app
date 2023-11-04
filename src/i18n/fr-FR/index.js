@@ -1388,7 +1388,8 @@ export default {
   PMGtit3: 'Groupe {0}',
 
   // Fiche avatar
-  FAnocv: 'Pas d\'autre information',
+  FAnocv: 'Pas de carte de visite',
+  FAnoinfo: '(pas d\'autre information)',
   FAphc: 'Déclaration de la phrase de contact',
   FAsup: 'Supprimer la phrase de contact actuelle',
   FAdpc: 'Définir la phrase de contact',

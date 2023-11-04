@@ -2,6 +2,7 @@
   <div :class="dkli(idx)">
     <apercu-genx :na="p.na" :cv="p.cv" :idx="idx" detail-people />
 
+<!--
     <div v-if="p.sp" :class="'fs-md ' + (p.sp === 2 ? 'text-bold' : '')">{{$t('APtr' + p.sp)}}</div>
     <div v-if="!simple && p.avch.length" class="row items-center">
       <span class="text-italic">{{$t('APch', p.avch.length)}}</span>
@@ -11,6 +12,7 @@
       <span class="text-italic">{{$t('APgr', p.gr.length)}}</span>
       <span v-for="n in p.gr" :key="n" class="q-ml-sm q-px-xs bord">{{n}}</span>
     </div>
+-->
 
   </div>
 </template>

@@ -40,7 +40,7 @@
     </q-card>
 
     <!-- Avatars du compte -->
-    <q-card class="q-my-md q-pa-xs" v-for="(na, idx) in aSt.compta.lstAvatarNas" :key="na.id">
+    <q-card class="q-my-md q-pa-xs" v-for="(na, idx) in aSt.compte.lstAvatarNas" :key="na.id">
       <div class="row items-start">
         <div class="col-auto column items-center q-mr-sm">
           <q-btn flat icon="navigate_next" size="lg"
@@ -188,7 +188,9 @@ export default {
 
     nbchats (id) { return this.aSt.getElt(id).chats.size },
     nbspons (id) { return this.aSt.getElt(id).sponsorings.size },
-    nbgrps (id) { return this.aSt.getElt(id).avatar.lgr.size },
+    nbgrps (id) { 
+      return this.aSt.compte.idGroupes(null, id).size
+    },
     courant (id, action) {
       this.session.setAvatarId(id)
       if (action) switch (action){
@@ -231,7 +233,7 @@ export default {
 
     async delAvatar (id) {
       if (await this.session.edit()) {
-        const lna = this.aSt.compta.lstAvatarNas
+        const lna = this.aSt.compte.lstAvatarNas
         if (this.session.compteId === id) { // c'est le compte
           if (lna.length > 1) { // il reste des avatars secondaires
             await afficherDiag(this.$t('SAVer1'))

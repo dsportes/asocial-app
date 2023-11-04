@@ -1,43 +1,36 @@
 <template>
-  <div :class="'petitelargeur column ' + lidk">
-    <q-toolbar class="col-auto">
+  <q-card class="petitelargeur column">
+    <q-toolbar class="col-auto bg-primary text-white">
       <q-btn dense size="md" icon="close" @click="MD.fD"/>
-      <q-space/>
-      <q-btn v-if="!estAvc && net" dense size="md" icon="refresh" @click="refresh"/>
-      <q-btn v-if="!estAvc" dense size="md" icon="more_horiz" @click="ouvrirdetails"/>
+      <q-toolbar-title>
+        <span class="titre-lg">{{estAvc ? na.nom : na.nomc}}</span> 
+        <span v-if="estAvc" class="titre-md q-ml-md">[{{$t('moi')}}]</span>
+      </q-toolbar-title>
+      <q-btn v-if="ID.estAvatar(na.id) && !estAvc && net" dense size="md" icon="refresh" @click="refresh"/>
     </q-toolbar>
 
-    <div class="col-auto row q-pa-xs">
-      <div class="col-auto items-center q-mr-sm">
-        <img class="photomax" :src="photo" />
-      </div>
-      <div class="col column justify-center">
-        <div class="text-bold text-center">
-          <span class="titre-lg">{{estAvc ? na.nom : na.nomc}}</span> 
-          <span v-if="estAvc" class="titre-md q-ml-md">[{{$t('moi')}}]</span>
-        </div>
-        <div class="fs-sm font-mono q-mt-xs text-center">#{{na.id}}</div> 
-      </div>
+    <div class="row q-pa-xs">
+      <img class="col-auto q-mr-sm photomax" :src="photo" />
+      <show-html v-if="info" class="col" zoom scroll maxh="6rem" :texte="info"/>
+      <div v-else class="col text-italic">{{$t('FAnoinfo')}}</div>
     </div>
 
-    <show-html v-if="info" class="col q-ma-xs bord" maxh="6rem" :idx="-1" :texte="info"/>
-    <div v-else class="col q-ma-xs text-italic titre-md">{{$t('FAnocv')}}</div>
-
-  </div>
+  </q-card>
 </template>
 
 <script>
-import { ref, toRef } from 'vue'
+import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
-import { MD, getNg } from '../app/modele.mjs'
+import { MD } from '../app/modele.mjs'
 import { ChargerCvs } from '../app/operations.mjs'
+import { ID } from '../app/api.mjs'
 
 export default {
   name: 'ApercuCv',
 
   props: { 
-    id: Number
+    na: Object, cv: Object
   },
 
   components: { ShowHtml },
@@ -54,35 +47,19 @@ export default {
   },
 
   methods: {
-    ouvrirdetails () {
-      this.session.setPeopleId(this.na.id)
-      MD.oD('detailspeople')
+    async refresh () {
+      await new ChargerCvs().run(na.id)
     }
   },
 
   setup (props) {
     const aSt = stores.avatar
-    const pSt = stores.people
     const session = stores.session
-    const id = toRef(props, 'id')
-    const na = getNg(id.value)
-    const avatar = aSt.getAvatar(id.value)
-    const estAvc = avatar !== null
-    const cv = ref(null)
+    const na = toRef(props, 'na')
+    const estAvc = aSt.compte.estAvDuCompte(na.value.id)
 
-    async function refresh () {
-      const x = await new ChargerCvs().run(id.value)
-      if (x) initCv()
-    }
-
-    function initCv () {
-      cv.value = estAvc ? avatar.cv : pSt.getCv(id.value)
-    }
-
-    initCv()
-    
     return {
-      session, MD, cv, na, estAvc, refresh,
+      session, MD, ID, aSt, estAvc,
       net: session.accesNet
     }
   }

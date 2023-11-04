@@ -16,7 +16,7 @@ export default ({
 .markdown-body {
   font-family:  Calibri-Light !important;
   background-color: transparent !important;
-  color: black !important;
+  color: white !important;
   line-height: 1.2rem;
 }
 @import 'github-markdown-css/github-markdown-dark.css'

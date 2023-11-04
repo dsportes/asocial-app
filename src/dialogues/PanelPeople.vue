@@ -25,7 +25,7 @@
 
       <div class="titre-md text-italic y-mb-sm">{{$t('PPchats')}}</div>
 
-      <div v-for="(na, idx) in aSt.compta.lstAvatarNas" :key="na.id">
+      <div v-for="(na, idx) in aSt.compte.lstAvatarNas" :key="na.id">
         <apercu-chat class="q-my-md" affnai
           :na-i="na" :na-e="pSt.peC.na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
       </div>
@@ -143,7 +143,7 @@ export default {
 
     const ids = reactive({})
     onMounted(async () => {
-      for(const na of aSt.compta.lstAvatarNas) {
+      for(const na of aSt.compte.lstAvatarNas) {
         ids[na.id] = await Chat.getIds(na, pSt.peC.na)
       }
     })
