@@ -61,7 +61,7 @@ export default ({
           return
         }
         
-        const txt = '*' + this.$t('bonjour2', [this.naE.nom])
+        const txt = this.$t('bonjour2', [this.naE.nom])
         const [st, chat] = await new NouveauChat().run(this.naI, this.naE, txt)
         if (st === 0) {
           await afficherDiag(this.$t('OPnvch0'))

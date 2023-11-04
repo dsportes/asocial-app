@@ -154,14 +154,14 @@ export class OnchangeVersion extends OperationWS {
       e.ltk.push(tk)
     }
     
-    if (this.ret.rowSponsorings) for (const x of this.ret.rowSponsorings) {
+    if (this.ret.rowSponsorings) for (const row of this.ret.rowSponsorings) {
       const sp = await compile(row)
       if (sp._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
       const e = this.eavMaj(sp.id)
       e.lsp.push(sp)
     }
 
-    if (this.ret.rowMembers) for (const x of this.ret.rowMembers) {
+    if (this.ret.rowMembers) for (const row of this.ret.rowMembers) {
       const mb = await compile(row)
       if (mb._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
       const e = this.egrMaj(mb.id)

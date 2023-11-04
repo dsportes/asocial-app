@@ -400,7 +400,7 @@ export class NouveauChat extends OperationUI {
         ccPE : await crypterRSA(pubE, cc),
         naccI : await crypter(cc, encode([naI.nom, naI.rnd])),
         naccE : await crypter(cc, encode([naE.nom, naE.rnd])),
-        txt1 : await Chat.getTxtCC(txt, cc),
+        txt1 : await Chat.getTxtCC(cc, txt),
         lgtxt1 : txt ? txt.length : 0
       }
       const ret = this.tr(await post(this, 'NouveauChat', args))
