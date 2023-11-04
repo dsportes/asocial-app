@@ -1641,8 +1641,9 @@ _data_ (de l'exemplaire I):
 - `items` : liste des items `[{a, dh, l t}]`
   - `a` : 0:écrit par I, 1: écrit par E
   - `dh` : date-heure d'écriture.
+  - `dhx` : date-heure d'effacement (txt est vide).
   - `l` : taille du texte.
-  - `t` : texte crypté par la clé du chat (vide s'il a été supprimé).
+  - `txt` : texte crypté par la clé du chat (vide s'il a été supprimé).
 
   Compilé:
   - seq
@@ -1682,7 +1683,7 @@ export class Chat extends GenDoc {
     if (row.items) for (const it of row.items) {
       const t = it.txt ? ungzipB(await decrypter(this.cc, it.txt)) : null
       if (this.dh === 0) this.dh = it.dh
-      this.items.push({ a: it.a, txt: t, dh: it.dh})
+      this.items.push({ a: it.a, txt: t, dh: it.dh, dhx: it.dhx || 0})
       a.push($t('dedh', [a ? this.naI.nom : this.naE.nom, dhstring(it.dh)]))
       if (!t) a.push('[' + supp + ']'); else a.push(t)
       a.push('\n\n')

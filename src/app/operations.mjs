@@ -459,7 +459,7 @@ export class MajChat extends OperationUI {
         idE: naE.id, 
         idsE: await Chat.getIds(naE, naI), 
         ccKI: chat.ccK ? await crypter(session.clek, chat.cc) : null, 
-        txt1: txt ? await Chat.getTxtCC(txt, chat.cc) : null,
+        txt1: txt ? await Chat.getTxtCC(chat.cc, txt) : null,
         lgtxt1: txt ? txt.length : 0,
         dh: dh || 0
       }
@@ -473,7 +473,6 @@ export class MajChat extends OperationUI {
     }
   }
 }
-
 
 /* Rafraîchir les CV, quand nécessaire *********************************
 args.token: éléments d'authentification du compte.

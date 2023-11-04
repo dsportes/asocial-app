@@ -15,7 +15,7 @@ export default ({
 <style lang="css" scoped>
 .markdown-body {
   font-family:  Calibri-Light !important;
-  background-color: #3C3C3C !important;
+  background-color: transparent !important;
   color: white !important;
   line-height: 1.2rem;
 }

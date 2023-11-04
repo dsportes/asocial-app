@@ -76,10 +76,10 @@ export class OnchangeVersion extends OperationWS {
   eavMaj (id) {
     let e = this.avMaj.get(id)
     if (!e) { 
-      e = { id, av: null, lch: [], lsp: [], lsc: [], ltk: [] } 
+      e = { id, av: null, lno: [], lch: [], lsp: [], ltk: [] } 
       this.avMaj.set(id, e)
     }
-    return z
+    return e
   }
 
   egrMaj (id) {
@@ -88,7 +88,7 @@ export class OnchangeVersion extends OperationWS {
       const e = { id: id, gr: null, lmb: [], lsc: [], objv: null }
       this.grMaj.set(id, e)
     }
-    return z
+    return e
   }
 
   // Traite les mises à jour à synchroniser présentes dans this.ret
@@ -140,7 +140,7 @@ export class OnchangeVersion extends OperationWS {
       if (session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
     }
 
-    if (this.ret.rowChats) for (const row of ret.rowChats) {
+    if (this.ret.rowChats) for (const row of this.ret.rowChats) {
       const chat = await compile(row)
       this.buf.putIDB(row)
       const e = this.eavMaj(chat.id)
@@ -239,7 +239,7 @@ export class OnchangeVersion extends OperationWS {
       this.gSt = stores.groupe
       this.avatar = this.aSt.compte
       this.avAvatar = this.aSt.compte
-      this.avv = Versions.get(this.aSt.compte.id).v
+      this.avv = this.avatar.v
       this.nbRetry = 0
 
       this.objv = Versions.compile(row)
@@ -306,8 +306,10 @@ export class OnchangeVersion extends OperationWS {
       if (this.delMb.size) this.delMb.forEach(idg => {this.gSt.delMembre(idg)})
       if (this.delNo.size) this.delNo.forEach(idg => {this.gSt.delNote(idg)})
 
-      this.avMaj.forEach(e => { aSt.lotMaj(e) })
-      this.grMaj.forEach(e => { gSt.lotMaj(e) })
+      this.avMaj.forEach(e => { 
+        this.aSt.lotMaj(e) 
+      })
+      this.grMaj.forEach(e => { this.gSt.lotMaj(e) })
 
       // Maj des abonnements ******************************
       this.abPlus = new Set() // abonnements de synchronisation ajoutés

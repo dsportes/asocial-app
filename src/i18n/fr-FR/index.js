@@ -924,6 +924,15 @@ export default {
   CHenvrac: 'Envoyer puis raccrocher',
   CHrac: 'Raccrocher',
   CHnbit: '(vide) | un échange | {count} échanges',
+  CHeff: 'Effacement définitif du contenu de cet échange ?',
+  CHeffcf: 'Je confirme l\'effacement',
+  CHadd: 'Ajouter un nouvel échange au chat',
+  CHadd2: 'Ajouter un échange',
+  CHrac: 'Raccrocher le chat',
+  CHrac2: 'Tous les échanges vont être supprimés pour vous (pas pour {0}).' +
+  ' Le chat ne sera plus "actif". Si {0} écrit un échange il apparaîtra.' +
+  ' Le chat ne redeviendra "actif" qu\'à la prochaine écriture.',
+  CHeffa: '(effacé {0})',
 
   SYtit: 'Chargement et synchronisation du compte',
   SYcpt: 'Compte et comptabilité',

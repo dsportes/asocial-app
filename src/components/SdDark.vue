@@ -15,8 +15,8 @@ export default ({
 <style lang="css" scoped>
 .markdown-body {
   font-family:  Calibri-Light !important;
-  background-color: #1D1D1D !important;
-  color: #FDFDFD !important;
+  background-color: transparent !important;
+  color: black !important;
   line-height: 1.2rem;
 }
 @import 'github-markdown-css/github-markdown-dark.css'
