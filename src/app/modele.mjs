@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
-import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
+import { $t, hash, rnd6, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
 import { post } from './net.mjs'
 import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt } from './api.mjs'
@@ -244,14 +244,14 @@ export class Motscles {
   }
 
   static nom (idx, mapMC) {
-    const e = mapMC[idx]
+    const e = mapMC.get('' + idx)
     return e && e.n ? e.n : ''
   }
 
   static editU8 (u8, mapMC) {
     if (!u8 || !u8.length || !mapMC) return ''
     const l = []
-    for (let j = 0; j < u8.length; j++) { l.push(Motscles.nom(u8[j, mapMC]))}
+    for (let j = 0; j < u8.length; j++) { l.push(Motscles.nom(u8[j], mapMC))}
     return l.join(' / ')
   }
 
@@ -1274,20 +1274,6 @@ export class Avatar extends GenDoc {
     }
   }
 
-  /* Retourne les numéros d'invitation de l'avatar pour les groupes de setg
-  et supprime leurs entrées dans lgr 
-  VERIFIER s'il faut prendre les résiliés en attente
-  
-  niDeGroupes (setg) {
-    const ani = new Set()
-    for (const [ni ,t] of this.lgr) {
-      if (setg.has(t.ng.id)) ani.add(ni)
-    }
-    ani.forEach(ni => this.lgr.delete(ni))
-    return Array.from(ani)
-  }
-  */
-
   // retourne l'invitation pour l'avatar au groupe idg : {ni, ng, im}
   invitDeGr (idg) {
     let e = {} 
@@ -1326,8 +1312,8 @@ export class Avatar extends GenDoc {
   
       this.mcmemos = new Map()
       if (row.mcmemos) { for (const x in row.mcmemos) {
-          const id = parseInt(await decrypter(session.clek, x))
-          const e = decode(await decrypter(session.clek, row[x]))
+          const id = parseInt(await decrypterStr(session.clek, b64ToU8(x)))
+          const e = decode(await decrypter(session.clek, row.mcmemos[x]))
           this.mcmemos.set(id, e)
         }  
       }
@@ -1365,6 +1351,14 @@ export class Avatar extends GenDoc {
         this.invits.set(ni, { ng, im })
       }
     }
+  }
+
+  static async genMcMemo (id, mc, memo) {
+    const session = stores.session
+    const idk = u8ToB64(await crypter(session.clek, '' + id, 1))
+    const mmk = (!mc || !mc.length) && !memo ? null : 
+      await crypter(session.clek, new Uint8Array(encode({mc, memo})))
+    return [idk, mmk]
   }
 
   static async primaireRow (na, publicKey, privateKey) {

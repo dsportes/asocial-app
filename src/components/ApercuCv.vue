@@ -14,7 +14,6 @@
       <show-html v-if="info" class="col" zoom scroll maxh="6rem" :texte="info"/>
       <div v-else class="col text-italic">{{$t('FAnoinfo')}}</div>
     </div>
-
   </q-card>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div :class="'row items-start ' + dkli(idx)">
+  <div :class="'row items-start ' + (dkli(idx))">
     <div class="col-auto items-center q-mr-sm">
       <img class="photomax" :src="photo" />
     </div>
@@ -25,7 +25,7 @@
             icon="edit" dense color="warning" @click="editerCV"/>
         </div>
       </div>
-      <!-- TODO memocv -->        
+      <mc-memo :id="na.id" :idx="idx"/>        
     </div>
 
     <!-- Dialogue d'édition de la carte de visite -->
@@ -46,6 +46,7 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import CarteVisite from './CarteVisite.vue'
 import ApercuCv from './ApercuCv.vue'
+import McMemo from './McMemo.vue'
 import { MD } from '../app/modele.mjs'
 import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
@@ -64,7 +65,7 @@ export default {
     idx: Number
   },
 
-  components: { CarteVisite, ApercuCv },
+  components: { CarteVisite, ApercuCv, McMemo },
 
   computed: {
     estGr () { return ID.estGroupe(this.na.id) },
@@ -83,7 +84,6 @@ export default {
       if (!await this.session.edit()) return
       this.ovedition()
     },
-    closeCV () { this.edition = false },
     async cvok (res) {
       if (res && this.na) {
         await this.cvchangee(res)

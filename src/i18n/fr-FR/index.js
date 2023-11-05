@@ -367,6 +367,7 @@ export default {
   EX8024: 'Ce ticket ne peut plus être supprimé il a été marqué reçu et enregistré par le Comptable.',
 
   EX8025: 'Le sponsor a disparu.',
+  EX8026: 'Phrase de contact trop proche d\'une phrase existante.',
 
   EX8055: 'Quota du compte dépassé pour le volume V1. Demande:{0} - Quota:{1}',
   EX8056: 'Quota du compte dépassé pour le volume V2. Demande:{0} - Quota:{1}',
@@ -1718,6 +1719,13 @@ export default {
   TKverif: 'Dernière récupération {0}.',
   TKnbt: 'Pas de nouveau ticket incorporé | Un nouveau ticket incorporé | {count} nouveaux tickets incorporés',
   TKbtnv: 'Vérifier s\'il y en a de nouveaux',
+
+  MMCnomc: '(pas de mots clés associés)',
+  MMCnomemo: '(pas de commentaire associé)',
+  MMCcom: 'Commentaire:',
+  MMCmc: 'Mots clés:',
+  MMCap: 'Mots clés et commentaire à propos de {0}',
+  MMCnomaj: 'Mise à jour non autorisée : {0}',
   
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.

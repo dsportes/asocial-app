@@ -114,6 +114,24 @@ export class MemoCompte extends OperationUI {
   }
 }
 
+/* Changement d'un mcmemo d'un compte ******************************************
+*/
+export class McMemo extends OperationUI {
+  constructor () { super($t('OPmemo')) }
+
+  async run (id, mc, memo) {
+    try {
+      const session = stores.session
+      const [idk, mmk] = await Avatar.genMcMemo(id, mc, memo)
+      const args = { token: session.authToken, idk, mmk }
+      this.tr(await post(this, 'McMemo', args))
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
 /* Recherche hash de phrase ******
 args.ids : hash de la phrase de contact / de connexion
 args.t :

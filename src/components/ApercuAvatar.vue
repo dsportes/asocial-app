@@ -26,11 +26,10 @@
         </q-toolbar>
         <q-card-section>
           <phrase-contact @ok="declPC" :init-val="avatar.pc || ''"
-          declaration :orgext="session.org"/>
+            declaration :orgext="session.org"/>
         </q-card-section>
         <q-card-actions vertical>
           <q-btn v-if="avatar.pc" flat color="warning" :label="$t('FAsup')" @click="supprPC"/>
-          <!--q-btn :disable="pc === null" flat color="primary" :label="$t('FAdpc')" @click="declPC"/-->
         </q-card-actions>
       </q-card>
     </q-dialog>
