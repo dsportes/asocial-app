@@ -11,14 +11,14 @@ import { post } from './net.mjs'
 export class SyncQueue {
   static queue = []
 
-  static reset () { SyncQueue.queue.length = 0 }
+  static reset() { SyncQueue.queue.length = 0 }
 
-  static push (row) {
+  static push(row) {
     SyncQueue.queue.push(row)
     SyncQueue.traiterQueue()
   }
 
-  static traiterQueue () {
+  static traiterQueue() {
     const session = stores.session
     if (session.syncEncours || session.status < 2 || !SyncQueue.queue.length) return
     session.syncEncours = true
@@ -40,15 +40,15 @@ export class SyncQueue {
 
 /* OperatioWS *********************************************************************/
 export class OperationWS extends Operation {
-  constructor (nomop) { super(nomop) }
+  constructor(nomop) { super(nomop) }
 
-  async finKO (e) {
+  async finKO(e) {
     const exc = appexc(e)
     exc.sync = true
     await stores.ui.afficherExc(exc)
   }
 
-  async gestionAb () {
+  async gestionAb() {
     // (dés)abonnements
     if (this.session.fsSync && this.abPlus.size) for (const id of this.abPlus) {
       if (ID.estAvatar(id)) await this.session.fsSync.setAvatar(id)
@@ -62,29 +62,29 @@ export class OperationWS extends Operation {
     }
     if (!this.session.fsSync && (this.abPlus.size || this.abMoins.size)) {
       const args = { token: this.session.authToken, abMoins: this.abMoins, abPlus: this.abPlus }
-      this.tr(await post(this, 'GestionAb', args))    
+      this.tr(await post(this, 'GestionAb', args))
     }
   }
-  
+
 }
 
 export class OnchangeVersion extends OperationWS {
-  constructor () { super($t('OPsync')) }
+  constructor() { super($t('OPsync')) }
 
-  version (id) { return this.veCache.get(id) || Versions.get(id) }
+  version(id) { return this.veCache.get(id) || Versions.get(id) }
 
-  eavMaj (id) {
+  eavMaj(id) {
     let e = this.avMaj.get(id)
-    if (!e) { 
-      e = { id, av: null, lno: [], lch: [], lsp: [], ltk: [] } 
+    if (!e) {
+      e = { id, av: null, lno: [], lch: [], lsp: [], ltk: [] }
       this.avMaj.set(id, e)
     }
     return e
   }
 
-  egrMaj (id) {
+  egrMaj(id) {
     let e = this.grMaj.get(id)
-    if (!e) { 
+    if (!e) {
       const e = { id: id, gr: null, lmb: [], lsc: [], objv: null }
       this.grMaj.set(id, e)
     }
@@ -92,7 +92,7 @@ export class OnchangeVersion extends OperationWS {
   }
 
   // Traite les mises à jour à synchroniser présentes dans this.ret
-  async process () {
+  async process() {
     this.veCache = new Map() // cache des versions
     this.grCache = new Map() // cache des groupes changés
 
@@ -103,7 +103,7 @@ export class OnchangeVersion extends OperationWS {
     this.grMaj = new Map() // cache des groupes changés
 
     if (this.rowAvatar) {
-      this.putIDB(this.rowAvatar)
+      this.buf.putIDB(this.rowAvatar)
       const e = this.eavMaj(this.avatar.id)
       e.av = this.avatar
     }
@@ -118,7 +118,8 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowAvatars) for (const row of this.ret.rowAvatars) {
-      this.putIDB(row)
+      if (this.rowAvatar && this.rowAvatar.id === row.id) continue // Fait ci-dessus
+      this.buf.putIDB(row)
       const av = await compile(row)
       const e = this.eavMaj(av.id)
       e.av = av
@@ -153,7 +154,7 @@ export class OnchangeVersion extends OperationWS {
       const e = this.eavMaj(tk.id)
       e.ltk.push(tk)
     }
-    
+
     if (this.ret.rowSponsorings) for (const row of this.ret.rowSponsorings) {
       const sp = await compile(row)
       if (sp._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
@@ -169,69 +170,63 @@ export class OnchangeVersion extends OperationWS {
     }
   }
 
-  diffsAvGr () {
+  diffsAvGr() {
     // Comparaison entre avatar avant (this.avAvatar) et nouveau (this.avatar)
     this.grIdsAp = this.avatar.idGroupes()
-    this.grMoins = difference(grIdsAv, grIdsAp)
-    this.grPlus = difference(grIdsAp, grIdsAv)
+    this.grMoins = difference(this.grIdsAv, this.grIdsAp)
+    this.grPlus = difference(this.grIdsAp, this.grIdsAv)
     this.avIdsAp = this.avatar.avatarIds
-    this.avMoins = difference(avIdsAv, avIdsAp)
-    this.avPlus = difference(avIdsAp, avIdsAv)
+    this.avMoins = difference(this.avIdsAv, this.avIdsAp)
+    this.avPlus = difference(this.avIdsAp, this.avIdsAv)
   }
 
   // Charge les mises à jour à synchroniser
-  async retry () {
+  async retry() {
     /* map du / des avatars à récupérer:
       - clé:id, 
       - valeur: version actuelle */
     this.avmap = {}
-    
+
     /* map du / des groupes à récupérer:
       - clé: idg
       - valeur: { mbs, v } */
     this.grmap = {}
-    
-    if (this.nbRetry === 0) {
-      // la seule version changée est celle qui a déclenché le sync
-      if (!this.estGr) {
-        this.avmap[this.objv.id] = this.vact
-      } else {
-        const x = this.aSt.compte.mbsOfGroupe(this.objv.id)
-        this.grmap[this.objv.id] = { mbs: x.mbs, v: this.vact}
-      }
+
+    // la seule version changée est celle qui a déclenché le sync
+    if (!this.estGr) {
+      this.avmap[this.objv.id] = this.vact
     } else {
-      // toutes les versions d'avatars et de groupes ont pu changer
+      const x = this.aSt.compte.mbsOfGroupe(this.objv.id)
+      this.grmap[this.objv.id] = { mbs: x.mbs, v: this.vact }
+    }
+
+    while (true) {
+      const args = {
+        token: this.session.authToken,
+        avv: this.avv, avmap: this.avmap, grmap: this.grmap
+      }
+      this.ret = this.tr(await post(this, 'Synchroniser', args))
+      if (!this.ret.KO) break
+
+      // la version de avatar a (encore) changé
+      this.rowAvatar = this.ret.rowAvatar
+      this.avatar = await compile(this.rowAvatar)
+      this.avv = this.avatar.v
+      this.nbRetry++
+      this.diffsAvGr()
+      this.avmap = {}
+      this.grmap = {}
       for (const avid of this.avIdsAp)
-        this.avmap[avid] = Versions.get(avid)
+        this.avmap[avid] = Versions.get(avid).v
       for (const grid of this.grIdsAp) {
         const x = this.aSt.compte.mbsOfGroupe(grid)
         this.grmap[grid] = { mbs: x.mbs, v: Versions.get(grid) }
       }
     }
-  
-    while (true) {
-      const args = { 
-        token: this.session.authToken, 
-        avv: this.avv, avmap: this.avmap, grmap: this.grmap
-      }
-      this.ret = this.tr(await post(this, 'Synchroniser', args))
-
-      if (this.ret.KO) {
-        // la version de avatar a (encore) changé
-        this.rowAvatar = this.ret.rowAvatar
-        this.avatar = await compile(this.rowAvatar)
-        this.avv = this.avatar.v
-        this.nbRetry++
-        this.diffsAvGr()
-        await this.retry()
-      } else {
-        await this.process()
-        break
-      }
-    }
+    await this.process()
   }
 
-  async run (row) {
+  async run(row) {
     try {
       this.buf = new IDBbuffer()
       this.session = stores.session
@@ -250,7 +245,7 @@ export class OnchangeVersion extends OperationWS {
       this.grIdsAp = this.avAvatar.idGroupes()
       this.avIdsAv = this.avAvatar.avatarIds
       this.avIdsAp = this.avatar.avatarIds
-  
+
       this.grMoins = new Set()
       this.grPlus = new Set()
       this.avMoins = new Set()
@@ -263,15 +258,15 @@ export class OnchangeVersion extends OperationWS {
       let x = false
       if (this.veCache.size) {
         x = true
-        for(const [id, objv] of this.veCache) Versions.set(id, objv)
+        for (const [id, objv] of this.veCache) Versions.set(id, objv)
       }
       if (this.grMoins.size) {
         x = true
-        for(const id of this.grMoins) Versions.del(id)
+        for (const id of this.grMoins) Versions.del(id)
       }
       if (this.avMoins.size) {
         x = true
-        for(const id of this.avMoins) Versions.del(id)
+        for (const id of this.avMoins) Versions.del(id)
       }
 
       /* Nettoyage des membres / notes perdues sur les groupes
@@ -298,41 +293,39 @@ export class OnchangeVersion extends OperationWS {
         }
       })
       this.buf.commitIDB(false, x)
-      
+
       // Maj des stores *********************************
       if (this.avMoins.size) this.avMoins.forEach(id => { aSt.del(id) })
       if (this.grMoins.size) this.grMoins.forEach(id => { gSt.del(id) })
 
-      if (this.delMb.size) this.delMb.forEach(idg => {this.gSt.delMembre(idg)})
-      if (this.delNo.size) this.delNo.forEach(idg => {this.gSt.delNote(idg)})
+      if (this.delMb.size) this.delMb.forEach(idg => { this.gSt.delMembre(idg) })
+      if (this.delNo.size) this.delNo.forEach(idg => { this.gSt.delNote(idg) })
 
-      this.avMaj.forEach(e => { 
-        this.aSt.lotMaj(e) 
-      })
+      this.avMaj.forEach(e => { this.aSt.lotMaj(e) })
       this.grMaj.forEach(e => { this.gSt.lotMaj(e) })
 
       // Maj des abonnements ******************************
       this.abPlus = new Set() // abonnements de synchronisation ajoutés
       this.abMoins = new Set() // abonnements de synchronisation supprimés
-      if (this.avMoins.size) this.avMoins.forEach(id => {this.abMoins.add(id)})
-      if (this.grMoins.size) this.grMoins.forEach(id => {this.abMoins.add(id)})
-      if (this.avPlus.size) this.avPlus.forEach(id => {this.abPlus.add(id)})
-      if (this.grPlus.size) this.grPlus.forEach(id => {this.abPlus.add(id)})
-      await this.gestionAb ()
- 
+      if (this.avMoins.size) this.avMoins.forEach(id => { this.abMoins.add(id) })
+      if (this.grMoins.size) this.grMoins.forEach(id => { this.abMoins.add(id) })
+      if (this.avPlus.size) this.avPlus.forEach(id => { this.abPlus.add(id) })
+      if (this.grPlus.size) this.grPlus.forEach(id => { this.abPlus.add(id) })
+      await this.gestionAb()
+
       if (this.session.accesIdb) await gestionFichierSync(this.buf.mapSec)
 
-      this.session.setDh(this.dh)  
-    } catch (e) { 
+      this.session.setDh(this.dh)
+    } catch (e) {
       await this.finKO(e)
     }
   }
 }
 
 export class OnchangeCompta extends OperationWS {
-  constructor () { super($t('OPsync')) }
+  constructor() { super($t('OPsync')) }
 
-  async run (row) {
+  async run(row) {
     try {
       this.buf = new IDBbuffer() // Maj iDB en attente de commit
       this.abPlus = new Set() // abonnements de synchronisation ajoutés
@@ -342,7 +335,7 @@ export class OnchangeCompta extends OperationWS {
       const aSt = stores.avatar
       this.tribu = null
 
-      this.avCompta = aSt.compta  
+      this.avCompta = aSt.compta
       if (row.v <= this.avCompta.v) return // sync retardée déjà traitée
 
       this.compta = await compile(row)
@@ -358,8 +351,10 @@ export class OnchangeCompta extends OperationWS {
       qui vient par la mise à jour de la tribu */
       if (this.compta.idt !== this.avCompta.idt) {
         if (this.compta.idt) { // Changement de tribu
-          const args = { token: session.authToken, 
-            id: this.compta.idt, setC: true }
+          const args = {
+            token: session.authToken,
+            id: this.compta.idt, setC: true
+          }
           const ret = this.tr(await post(this, 'GetTribu', args))
           this.abPlus.add(this.compta.idt)
           this.abMoins.add(this.avCompta.idt)
@@ -381,23 +376,23 @@ export class OnchangeCompta extends OperationWS {
       if (this.delTribu) aSt.setTribu(null)
 
       session.setDh(this.dh)
-    } catch (e) { 
+    } catch (e) {
       await this.finKO(e)
     }
   }
 }
 
 export class OnchangeTribu extends OperationWS {
-  constructor () { super($t('OPsync')) }
+  constructor() { super($t('OPsync')) }
 
-  async run (row) {
+  async run(row) {
     try {
       this.buf = new IDBbuffer() // Maj iDB en attente de commit
 
       const aSt = stores.avatar
       const session = stores.session
       this.tribu = null
-      
+
       if (session.estComptable) {
         const avTr = aSt.getTribu(row.id)
         if ((!avTr || avTr.v < row.v) || (aSt.tribu.v < row.v)) {
@@ -420,16 +415,16 @@ export class OnchangeTribu extends OperationWS {
       // Maj des stores
       if (this.tribu) aSt.setTribu(this.tribu)
       session.setDh(this.dh)
-    } catch (e) { 
+    } catch (e) {
       await this.finKO(e)
     }
   }
 }
 
 export class OnchangeEspace extends OperationWS {
-  constructor () { super($t('OPsync')) }
+  constructor() { super($t('OPsync')) }
 
-  async run (row) {
+  async run(row) {
     try {
       const session = stores.session
       const esp = await compile(row)
@@ -438,7 +433,7 @@ export class OnchangeEspace extends OperationWS {
         const ui = stores.ui
         ui.setPage('clos')
       }
-    } catch (e) { 
+    } catch (e) {
       await this.finKO(e)
     }
   }

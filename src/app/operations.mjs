@@ -5,7 +5,7 @@ import { ID, AppExc, appexc, E_WS, AMJ, Compteurs, limitesjour } from './api.mjs
 import { $t, hash, inverse, sleep} from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
-import { NomGenerique, Avatar, Chat, Compta, Note, Ticket,
+import { Versions, NomGenerique, Avatar, Chat, Compta, Note, Ticket,
   Groupe, Membre, Tribu, getNg, getCle, compile, setClet} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
@@ -159,7 +159,7 @@ export class MotsclesCompte extends OperationUI {
 /* Maj de la carte de visite d'un avatar ******************************************
 args.token
 args.id : id de l'avatar dont la Cv est mise à jour
-args.v: version de l'avatar incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
+args.v: version de versions de l'avatar incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
 args.cva: {v, photo, info} crypté par la clé de l'avatar
 Retour:
 - KO : true s'il faut boucler sur la requête. 
@@ -172,10 +172,10 @@ export class MajCv extends OperationUI {
   async run (avatar, photo, info) {
     try {
       const session = stores.session
-      const aSt = stores.avatar
       while (true) {
-        const v = avatar.v + 1
-        const cva = await crypter(getCle(avatar.id), new Uint8Array(encode({v, photo, info})))
+        const v = Versions.get(avatar.id).v + 1
+        const cva = await crypter(getCle(avatar.id), 
+          new Uint8Array(encode({v, photo, info})))
         const args = { token: session.authToken, id: avatar.id, v, cva }
         const ret = this.tr(await post(this, 'MajCv', args))
         if (!ret.KO) break

@@ -48,7 +48,7 @@ export default {
 
   methods: {
     async refresh () {
-      await new ChargerCvs().run(na.id)
+      await new ChargerCvs().run(this.na.id)
     }
   },
 
