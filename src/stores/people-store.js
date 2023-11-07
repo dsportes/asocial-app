@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { ID } from '../app/api.mjs'
 import { NomGenerique } from '../app/modele.mjs'
+import { difference, intersection } from '../app/util.mjs'
 
 /* 
 Un "people" est un avatar :
@@ -134,13 +135,23 @@ export const usePeopleStore = defineStore('people', {
 
     // PagePeople ********************************************
     peLpF: (state) => {
+      const aSt = stores.avatar
       const f = stores.filtre.filtre.people
       if (!f) { stores.session.fmsg(state.peLp.length); return state.peLp }
+      f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
+      f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
       for (const [, p] of state.map) {
         if (f.nom && !p.na.nom.startsWith(f.nom)) continue
         if (f.roletr && (p.sp < f.roletr)) continue
         if (f.avecgr && (!p.groupes.size)) continue
+        if (f.setp.size || f.setn.size) {
+          const mcmemo = aSt.compte.mcmemo(p.na.id)
+          if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
+          const s = new Set(mcmemo.mc)
+          if (f.setp.size && difference(f.setp, s).size) continue
+          if (f.setn.size && intersection(f.setn, s).size) continue          
+        }        
         r.push(p)
       }
       r.sort((a, b) => { 

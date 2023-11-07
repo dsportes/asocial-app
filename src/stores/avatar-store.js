@@ -320,7 +320,7 @@ export const useAvatarStore = defineStore('avatar', {
         if (f.nom && !c.naE.nom.startsWith(f.nom)) continue
         if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
         if (f.setp.size || f.setn.size) {
-          const mcmemo = this.compte.mcmemo(c.naE.id)
+          const mcmemo = state.compte.mcmemo(c.naE.id)
           if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
           const s = new Set(mcmemo.mc)
           if (f.setp.size && difference(f.setp, s).size) continue

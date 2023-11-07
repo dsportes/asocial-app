@@ -14,7 +14,8 @@ export const useFiltreStore = defineStore('filtre', {
       chats: {},
       groupes: {},
       groupe: {},
-      notes: {}
+      notes: {},
+      people: {}
     },
     tri: {
       espace: 0,

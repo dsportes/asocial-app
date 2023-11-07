@@ -143,6 +143,8 @@
           <filtre-nom nom="people" prop='nom' :idx="0"/>
           <filtre-tribu nom="people" :idx="1"/>
           <filtre-avecgr nom="people" :idx="0"/>
+          <filtre-mc nom="people" attr="mcp" :idx="0"/>
+          <filtre-mc nom="people" attr="mcn" :idx="1"/>
         </div>
         <div v-if="ui.page === 'groupes'" class="column justify-start">
           <filtre-nom nom="groupes" prop='ngr' :idx="0"/>

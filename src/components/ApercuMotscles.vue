@@ -52,8 +52,8 @@ export default ({
       if (this.edit) this.ovmcedit()
     },
     okmc (mc) { 
-      if (mc) this.$emit('ok', mc)
       MD.fD()
+      if (mc) this.$emit('ok', mc)
     },
     sty (idx) {
       if (idx < 100) return ''
