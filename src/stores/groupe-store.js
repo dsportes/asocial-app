@@ -252,22 +252,14 @@ export const useGroupeStore = defineStore('groupe', {
         if (f.ngr && !g.na.nom.startsWith(f.ngr)) continue
         if (f.sansheb && g.dfh === 0) continue
         if (f.excedent && ((v.q1 * UNITEV1) > v.v1) && ((v.q2 * UNITEV2) > v.v2 )) continue
-        if (f.infmb) {
-          let tr = false
-          for(const [,mb] of e.mbacs) {
-            if (mb.info && mb.info.indexOf(f.infmb) !== -1) { tr = true; break }
-          }
-          if (!tr) continue
-        }
-        if (f.mcp || f.mcn) {
-          let tr = false
-          for(const [,mb] of e.mbacs) {
-            const s = mb.mc && mb.mc.length ? new Set(mb.mc) : new Set()
-            if (f.setp.size && difference(f.setp, s).size) continue
-            if (f.setn.size && intersection(f.setn, s).size) continue
-            tr = true       
-          }
-          if (!tr) continue
+        const mcmemo = state.compte.mcmemo(g.id)
+
+        if (f.infmb && mcmemo && mcmemo.memo && mcmemo.info.indexOf(f.infmb) === -1) continue
+        if (f.setp.size || f.setn.size) {
+          if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
+          const s = new Set(mcmemo.mc)
+          if (f.setp.size && difference(f.setp, s).size) continue
+          if (f.setn.size && intersection(f.setn, s).size) continue          
         }
         if (f.invits && g.nbInvits === 0) continue
         r.push(e)

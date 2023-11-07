@@ -939,8 +939,8 @@ args.rowGroupe : le groupe créé
 args.rowMembre : le membre
 args.id: id de l'avatar créateur
 args.quotas : [q1, q2] attribué au groupe
-args.kegr: clé dans lgrk. Hash du rnd inverse du groupe crypté par le rnd de l'avatar.
-args.egr: élément de lgrk dans l'avatar créateur
+args.npgk: clé dans mpg du compte (hash du cryptage par la clé K du compte de `idg / idav`)
+args.empgk: élément de mpg dans le compte de l'avatar créateur
 Retour:
 */
 export class NouveauGroupe extends OperationUI {
@@ -949,22 +949,39 @@ export class NouveauGroupe extends OperationUI {
   async run (nom, unanime, quotas) { // quotas: [q1, q2]
     try {
       const session = stores.session
+      const aSt = stores.avatar
       const nag = NomGenerique.groupe(nom)
       const na = getNg(session.avatarId)
+      const avatar = aSt.getAvtar(na.id)
       const rowGroupe = await Groupe.rowNouveauGroupe(nag, na, unanime)
       
-      const kegr = hash(await crypter(nag.rnd, inverse(na.rnd), 1))
-      const egr = await crypter(session.clek, new Uint8Array(encode([nag.nom, nag.rnd, 1])))
+      /*
+      - `mpgk` : map des participations aux groupes des avatars du compte.
+        - _clé_: `npgk`. hash du cryptage par la clé K du compte de `idg / idav`. Cette identification permet au serveur de supprimer une entrée de la map sans disposer de la clé K. `idg`: id courte du groupe, `idav`: id courte de l'avatar.
+        - _valeur_: `{nomg, cleg, im, idav}` cryptée par la clé K.
+          - `nomg`: nom du groupe,
+          - `cleg`: clé du groupe,
+          - `im`: indice du membre dans la table `flags / anag` du groupe.
+          - `idav` : id (court) de l'avatar.
+      */
+      const e = { nomg: nag.nom, cleg: nag.rnd, im: 1, idav: na.id }
 
       // En UTC la division d'une date est multiple de 86400000
       const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
       const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
       const dlv = AMJ.amjUtcDeT(tdlv * 86400000)
 
-      const rowMembre = await Membre.rowNouveauMembre (nag, na, 1, dlv)
+      const rowMembre = await Membre.rowNouveauMembre (nag, na, 1, dlv, avatar.cv || null)
 
-      const args = { token: session.authToken, rowGroupe, rowMembre, id: session.avatarId,
-        quotas: [quotas.q1, quotas.q2], kegr, egr, abPlus: [nag.id]}
+      const args = { 
+        token: session.authToken, 
+        rowGroupe, rowMembre, 
+        id: session.avatarId,
+        quotas: [quotas.q1, quotas.q2], 
+        npgk: Groupe.getNpgk(nag, na), 
+        empgk: await crypter(session.clek, new Uint8Array(encode(e))), 
+        abPlus: [nag.id]
+      }
       this.tr(await post(this, 'NouveauGroupe', args))
       this.finOK()
     } catch (e) {
