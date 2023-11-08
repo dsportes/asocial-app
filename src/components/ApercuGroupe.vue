@@ -1,6 +1,16 @@
 <template>
   <div :class="dkli(idx)">
+    <div style="height:3rem"/>
     <apercu-genx :na="eg.groupe.na" :cv="eg.groupe.cv" :idx="idx" :cvchangee="cvchangee"/>
+
+    <div v-if="eg.groupe.dfh" class="q-mr-sm">
+      <q-icon name="warning" size="md" color="negative"/>
+      <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
+    </div>
+    <div class="q-mr-sm">
+      <q-icon v-if="nbiv(eg)" class="q-mr-xs" name="star" size="md" color="green-5"/>
+      <span class="text-italic">{{$t('PGinv', nbiv(eg), {count: nbiv(eg)})}}</span>
+    </div>
 
     <div v-if="fond">
       <span class="q-mt-sm titre-md q-mr-sm">{{$t('AGfond')}}</span>
@@ -28,16 +38,10 @@
         </div>
         <div class="q-mt-xs">
           <quotas-vols :vols="eg.objv.vols"/>
-          <!-- POUR TEST quotas-vols :vols="{ a1:1, a2:2, v1:200000, v2:70000000, q1:0, q2:3 }"/-->
         </div>
       </div>
     </q-expansion-item>
-
-    <q-expansion-item dense class="titre-md q-mt-sm" switch-toggle-side :label="$t('AMard')">
-      <show-html class="q-ml-lg bord bordb" maxh="5rem" :texte="eg.groupe.ard" edit
-        zoom @edit="ardeditAut"/>
-    </q-expansion-item>
-
+    
     <!-- Mots clés du groupe -->
     <div class="row items-center q-mt-sm">
       <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
@@ -51,7 +55,7 @@
     <div class="titre-lg full-width text-center text-white bg-secondary q-mt-lg q-mb-md q-pa-sm">
       {{$t('PGmesav', eg.mbacs.size)}}
     </div>
-
+<!--
     <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mb-md">
       <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>
       <q-btn class="q-mt-sm" v-if="ast(m) >=30 && ast(m) <= 32"
@@ -59,7 +63,7 @@
         @click="dialctc(m.na)"/>
       <q-separator class="q-mt-sm" color="orange"/>
     </div>
-
+-->
     <!-- Dialogue d'édition des mots clés du groupe -->
     <q-dialog v-model="mcledit" persistent>
       <mots-cles class="bs full-width" :duGroupe="eg.groupe.id" @ok="okmc" :titre="$t('AGmc')"
@@ -220,7 +224,7 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuMembre from './ApercuMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
@@ -233,7 +237,6 @@ import QuotasVols from './QuotasVols.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 import MotsCles from './MotsCles.vue'
 import EditeurMd from './EditeurMd.vue'
-import ShowHtml from './ShowHtml.vue'
 import { MD, getNg } from '../app/modele.mjs'
 import { MotsclesGroupe, ArdoiseGroupe, ModeSimple, FinHebGroupe, HebGroupe } from '../app/operations.mjs'
 
@@ -246,14 +249,14 @@ export default {
     mapmc: Object
   },
 
-  components: { ShowHtml, EditeurMd, MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },
+  components: { EditeurMd, MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },
 
   computed: {
     bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
 
     dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },
     fond () {
-      if (!this.eg.groupe.ast[1]) return ''
+      if (this.eg.groupe.estDisparu(1)) return ''
       const m = this.eg.membres.get(1)
       if (!m) return ''
       return m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': '')
@@ -301,6 +304,7 @@ export default {
   }},
 
   methods: {
+    nbiv (e) { return this.gSt.nbMesInvits(e) },
     ast (m) { return this.eg.groupe.ast[m.ids] },
 
     async dialctc (na) {
@@ -433,11 +437,13 @@ export default {
     }
   },
 
-  setup () {
+  setup (props) {
     const session = stores.session
     const ui = stores.ui
     const gSt = stores.groupe
     const aSt = stores.avatar
+
+    const eg = toRef(props, 'eg')
 
     const photoDef = stores.config.iconGroupe
     const q = reactive({q1:0, q2:0, min1:0, min2:0, max1:0, max2:0, err:false })

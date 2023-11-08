@@ -69,8 +69,7 @@ export default {
     })
 
     const mapmc = ref(Motscles.mapMC(true, 0))
-    fStore.contexte.groupes.mapmc = mapmc.value
-    fStore.contexte.groupes.groupeId = 0
+    fStore.setContexte('groupes', { mapmc: mapmc.value, groupeId : 0})
 
     return {
       ui,

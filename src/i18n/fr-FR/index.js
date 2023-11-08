@@ -741,7 +741,7 @@ export default {
   FInomc: 'Début du nom du compte',
   FInmb: 'Début du nom du membre',
   FInote: 'Texte de la note contenant',
-  FIinfmb: 'Texte dans les commentaires ds membres',
+  FIinfmb: 'Texte dans les mémos attachés aux groupes',
   FItxt: 'Texte cherché dans les chats',
   FItxtt: 'Texte cherché dans les commentaires',
   FItxtn: 'Texte cherché dans les notifications',
@@ -1270,10 +1270,11 @@ export default {
 
   // Page groupe(s)
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
-  PGvut: 'Volume total réellement utilisé',
-  PGvq: 'Somme des quotas attribués',
+  PGvut: 'Réellement utilisé',
+  PGvq: 'Somme des maximum attribués',
   PGnh: 'Plus hébergé',
-  PGinv: 'Invitation',
+  PGstatsh: 'Pour les groupes hébergés',
+  PGinv: 'Pas d\'invitation en cours | Une invitation encours | {count} invitations encours',
   PGnocv: 'Pas d\'autre information',
   PGnope: 'Le groupe n\'a aucun autre membre que les avatars du compte',
   PGnomb: 'Aucun membre (sur {0}) ne répond au critère de sélection',

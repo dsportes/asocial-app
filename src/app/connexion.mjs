@@ -763,7 +763,7 @@ export class ConnexionCompte extends OperationUI {
       for (const idx in this.versions) {
         const id = parseInt(idx)
         const objv = this.versions[idx]
-        if (ID.estGroupe(id)) gSt.setVols(id, objv)
+        if (ID.estGroupe(id)) gSt.setVols(id, {v: objv.v, vols: objv.vols})
       }
 
       // En cas de blocage grave, plus de synchronisation (APRES mise en store compta / tribu)

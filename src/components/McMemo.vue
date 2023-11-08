@@ -30,7 +30,7 @@
         <q-card-section class="q-py-sm">
           <div class="titre-lg text-italic">{{$t('MMCmc')}}</div>
           <apercu-motscles @ok="changerMc" :idx="0" du-compte :du-groupe="0"
-            :mapmc="mapmc" :edit="!diag" :src="nvmc ? nvmc : mc"/>
+            :mapmc="mapmc" :edit="!diag" :src="nvmc || mc"/>
         </q-card-section>
 
         <q-card-section class="q-py-sm">
@@ -97,7 +97,7 @@ export default {
     async valider () {
       // console.log(this.txt)
       // console.log(Motscles.editU8(this.nvmc, this.mapmc))
-      await new McMemo().run(this.id, this.nvmc, this.txt)
+      await new McMemo().run(this.id, this.nvmc || this.mc, this.txt)
       MD.fD()
     }
    },

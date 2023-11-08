@@ -1266,9 +1266,8 @@ export class Avatar extends GenDoc {
   mbsOfGroupe (idg) { // retourne valeur: { npgk, idg, mbs: [ids] }
     const e = this.mpg.get(idg)
     if (e) { 
-      const mbs = []
-      e.avs.forEach(x => mbs.push(x.im))
-      return { npgk: e.npgk, idg, mbs, dlv }
+      const mbs = Array.from(e.avs.values())
+      return { npgk: e.npgk, idg, mbs }
     }
   }
 

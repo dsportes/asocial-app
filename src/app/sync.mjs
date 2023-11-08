@@ -223,7 +223,7 @@ export class OnchangeVersion extends OperationWS {
         this.avmap[avid] = Versions.get(avid).v
       for (const grid of this.grIdsAp) {
         const x = this.aSt.compte.mbsOfGroupe(grid)
-        this.grmap[grid] = { mbs: x.mbs, v: Versions.get(grid) }
+        this.grmap[grid] = { mbs: x.mbs, v: Versions.get(grid).v }
       }
     }
     await this.process()
@@ -278,7 +278,7 @@ export class OnchangeVersion extends OperationWS {
       this.delMb = new Set()
       this.delNo = new Set()
       this.grIdsAp.forEach(idg => {
-        const grav = gSt.getGroupe(idg)
+        const grav = this.gSt.getGroupe(idg)
         if (grav) {
           const grap = this.grCache.get(idg)
           if (grap) {

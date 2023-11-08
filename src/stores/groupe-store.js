@@ -245,17 +245,19 @@ export const useGroupeStore = defineStore('groupe', {
       const r = []
       for (const [, e] of state.pgLg) {
         const v = e.objv.vols
-        stt.v1 += v.v1 || 0
-        stt.v2 += v.v2 || 0
-        stt.q1 += v.q1 || 0
-        stt.q2 += v.q2 || 0
+        if (e.estHeb) {
+          stt.v1 += v.v1 || 0
+          stt.v2 += v.v2 || 0
+          stt.q1 += v.q1 || 0
+          stt.q2 += v.q2 || 0
+        }
         const g = e.groupe
         if (f.ngr && !g.na.nom.startsWith(f.ngr)) continue
         if (f.sansheb && g.dfh === 0) continue
         if (f.excedent && ((v.q1 * UNITEV1) > v.v1) && ((v.q2 * UNITEV2) > v.v2 )) continue
         const mcmemo = aSt.compte.mcmemo(g.id)
 
-        if (f.infmb && mcmemo && mcmemo.memo && mcmemo.info.indexOf(f.infmb) === -1) continue
+        if (f.infmb && mcmemo && mcmemo.memo && mcmemo.memo.indexOf(f.infmb) === -1) continue
         if (f.setp.size || f.setn.size) {
           if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
           const s = new Set(mcmemo.mc)
@@ -267,6 +269,7 @@ export const useGroupeStore = defineStore('groupe', {
       }
       stores.filtre.stats.groupes = stt
       r.sort(f0)
+      stores.session.fmsg(r.length)
       return r
     },
 

@@ -9,13 +9,13 @@
 
     <div class="petitelargeur q-my-sm">
       <div class="row">
-        <div class="col-6"></div>
-        <div class="col-3 fs-md text-italic text-center">V1</div>
-        <div class="col-3 fs-md text-italic text-center">V2</div>
+        <div class="col-6">{{$t('PGstatsh')}}</div>
+        <div class="col-3 fs-md text-italic text-center">{{$t('nbnotes')}}</div>
+        <div class="col-3 fs-md text-italic text-center">{{$t('volv2')}}</div>
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PGvut')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ed1(stats.groupes.v1)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{stats.groupes.v1}}</div>
         <div class="col-3 fs-md font-mono text-center">{{ed2(stats.groupes.v2)}}</div>
       </div>
       <div class="row">
@@ -32,26 +32,21 @@
 
     <div class="q-my-lg petitelargeur maauto" v-if="gSt.pgLgFT.length">
       <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx)">
-        <!--
-        <q-expansion-item group="g1" switch-toggle-side :class="dkli(idx)" @click="exp(e.groupe)">
-          <template v-slot:header> -->
-            <apercu-genx :na="e.groupe.na" :cv="e.groupe.cv" :idx="idx" />
-            <div class="row full-width items-center justify-between">
-              <div>
-                <div v-if="e.groupe.dfh" class="q-mr-sm">
-                  <q-icon name="warning" size="md" color="negative"/>
-                  <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
-                </div>
-                <div v-if="gSt.nbMesInvits(e)" class="q-mr-sm">
-                  <q-icon name="star" size="md" color="green-5"/>
-                  <span class="q-ml-xs q-pa-xs bg-yellow-3 text-warning">{{$t('PGinv')}}</span>
-                </div>
-              </div>
-              <q-btn class="q-ml-md btn1" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(e)"/>
+        <apercu-genx :na="e.groupe.na" :cv="e.groupe.cv" :idx="idx" />
+        <div class="row full-width items-center justify-between">
+          <div>
+            <div v-if="e.groupe.dfh" class="q-mr-sm">
+              <q-icon name="warning" size="md" color="negative"/>
+              <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
             </div>
-        <!--  </template>
-          <apercu-groupe class="q-ml-lg" :eg="e" :idx="idx" :mapmc="mapmc"/>
-        </q-expansion-item> -->
+            <div class="q-mr-sm">
+              <q-icon v-if= "nbiv(e)" class="q-mr-xs" name="star" size="md" color="green-5"/>
+              <span class="text-italic">{{$t('PGinv', nbiv(e), {count: nbiv(e)})}}</span>
+            </div>
+          </div>
+          <q-btn class="q-ml-md btn1" icon="open_in_new" :label="$t('detail')" size="md" color="primary" 
+            dense @click.stop="courant(e)"/>
+        </div>
       </q-card>
     </div>
 
@@ -104,10 +99,11 @@ export default {
   },
 
   methods: {
-    edq1 (n) { return edvol(n * UNITEV1) },
+    edq1 (n) { return n * UNITEV1 },
     edq2 (n) { return edvol(n * UNITEV2) },
-    ed1 (n) { return edvol(n) },
     ed2 (n) { return edvol(n) },
+
+    nbiv (e) { return this.gSt.nbMesInvits(e) },
 
     async courant (elt) {
       this.session.setGroupeId(elt.groupe.id)
@@ -162,8 +158,7 @@ export default {
     fStore.filtre.groupes.tous = tous.value || false
 
     const mapmc = ref(Motscles.mapMC(true, 0))
-    fStore.contexte.groupes.mapmc = mapmc.value
-    fStore.contexte.groupes.groupeId = 0
+    fStore.setContexte('groupes', { mapmc: mapmc.value, groupeId : 0})
     const stats = fStore.stats
 
     const crgr = ref(false)
