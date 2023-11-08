@@ -3,8 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
-import { post } from './net.mjs'
-import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt } from './api.mjs'
+import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -1190,7 +1189,6 @@ _data_:
     - `nomg`: nom du groupe,
     - `cleg`: clé du groupe,
     - `im`: indice du membre dans la table `ast` du groupe.
-    - `imp` : indice du premier membre du compte inscrit dans le groupe
     - `idav` : id (court) de l'avatar.
 - `mcmemos` : map des couples `{mc, memo}` à propos des contacts (avatars) et groupes connus du compte:
   - _cle_: `id` crypté par la clé K du compte,
@@ -1325,7 +1323,7 @@ export class Avatar extends GenDoc {
         const ida = ID.long(idav, session.ns)
         let e = this.mpg.get(nag.id)
         if (!e) { e = { npgk: parseInt(i), nag: nag, avs: new Map() }; this.mpg.set(nag.id, e) }
-        e.avs.set(ida, {im, imp})
+        e.avs.set(ida, im)
       }
     }
 
@@ -1773,8 +1771,8 @@ export class Groupe extends GenDoc {
   estDisparu (im)  { return !this.anag[im] || this.anag[im] === 1 }
   estInvite (im) { return this.flags[im] & FLAGS.IN }
   estActif (im) { return this.flags[im] & FLAGS.AC }
-  estAnim (im) { const f = this.flgas[im] || 0; return (f & FLAGS.AC) && (f & FLAGS.PA) }
-  estAuteur (im) { const f = this.flgas[im] || 0; 
+  estAnim (im) { const f = this.flags[im] || 0; return (f & FLAGS.AC) && (f & FLAGS.PA) }
+  estAuteur (im) { const f = this.flags[im] || 0; 
     return (f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
   estLibre (im) { return this.anag[im] } 
@@ -1799,7 +1797,7 @@ export class Groupe extends GenDoc {
     this.hebC = this.idh === session.compteId
     this.imh = row.imh || 0
     this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
-    this.cvg = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
+    this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
     this.lna = row.lna || []
     this.lnc = row.lnc || []
   }
@@ -1832,7 +1830,7 @@ export class Groupe extends GenDoc {
       msu: unanime ? [] : null,
       pe: 0,
       imh: 1,
-      flags: [0, CREATEUR],
+      flags: [0, Groupe.CREATEUR],
       anag: [0, n],
       idhg
     }
@@ -1900,9 +1898,9 @@ export class Membre extends GenDoc {
     this.ddp = row.ddp || 0
     this.dfa = row.dfa || 0
     this.inv = row.inv || null
-    this.nag = NomGenerique.from(decode(await decrypter(this.cleg, row.nag)))
-    this.estAc = aSt.compte.avatarIds.has(this.nag.id)
-    this.cv = row.cva && !this.estAc ? decode(await decrypter(this.nag.rnd, row.cva)) : null
+    this.na = NomGenerique.from(decode(await decrypter(this.cleg, row.nag)))
+    this.estAc = aSt.compte.avatarIds.has(this.na.id)
+    this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
   }
 
   static async rowNouveauMembre (nag, na, im, dlv, cv) {

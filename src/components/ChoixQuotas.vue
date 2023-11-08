@@ -1,15 +1,15 @@
 <template>
   <q-card-section :class="'q-mx-sm q-pt-none fs-md bord' + (mv.err ? 'ko' : 'ok')">
-    <div class="titre-md text-italic">{{$t('CQabo')}}</div>
+    <div v-if="!groupe" class="titre-md text-italic">{{$t('CQabo')}}</div>
     <div class="q-ml-md row  items-center">
-      <div class="col-5 titre-md mh">{{$t('nbnotes')}}</div>
+      <div class="col-5 titre-md mh">{{$t(groupe ? 'nbnotes' : 'nbnnncng')}}</div>
       <q-select class="col-2" v-model="q1s" :options="options" :disable="lecture" dense options-dense/>
       <q-input class="col-2 q-px-sm" v-model.number="mv.q1" type="number" :disable="lecture" dense/>
       <span :class="'col-2 text-center fs-sm' + ((mv.q1 > mv.max1 || mv.q1 < mv.min1) ? ' text-warning' : '')">
         {{mv.min1 + '...' + mv.max1}}</span>
       <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo1"/>
     </div>
-    <div class="q-ml-md font-mono">{{ed1(mv.q1)}} {{$t('unotes')}}</div>
+    <div class="q-ml-md font-mono">{{ed1(mv.q1)}} {{$t(groupe ? 'notes' : 'unnncng')}}</div>
     <div class="q-ml-md q-mt-md row items-center">
       <div class="col-5 titre-md">{{$t('volv2')}}</div>
       <q-select class="col-2" v-model="q2s" :options="options" :disable="lecture" dense options-dense/>
@@ -20,19 +20,21 @@
     </div>
     <div class="q-ml-md font-mono">{{ed2(mv.q2, 0, 'B')}}</div>
 
-    <q-separator color="orange" class="q-my-md"/>
+    <div v-if="!groupe">
+      <q-separator color="orange" class="q-my-md"/>
 
-    <div class="titre-md text-italic">{{$t('CQconso')}}</div>
-    <div class="titre-sm text-italic">{{$t('CQclec')}}</div>
-    <div class="q-ml-md row  items-center">
-      <div class="col-5 titre-md mh">{{$t('CQcu')}}</div>
-      <q-select class="col-2" v-model="qcs" :options="options" :disable="lecture" dense options-dense/>
-      <q-input class="col-2 q-px-sm" v-model.number="mv.qc" type="number" :disable="lecture" dense/>
-      <span :class="'col-2 text-center fs-sm' + ((mv.qc > mv.maxc || mv.qc < mv.minc) ? ' text-warning' : '')">
-        {{mv.minc + '...' + mv.maxc}}</span>
-      <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undoc"/>
+      <div class="titre-md text-italic">{{$t('CQconso')}}</div>
+      <div class="titre-sm text-italic">{{$t('CQclec')}}</div>
+      <div class="q-ml-md row  items-center">
+        <div class="col-5 titre-md mh">{{$t('CQcu')}}</div>
+        <q-select class="col-2" v-model="qcs" :options="options" :disable="lecture" dense options-dense/>
+        <q-input class="col-2 q-px-sm" v-model.number="mv.qc" type="number" :disable="lecture" dense/>
+        <span :class="'col-2 text-center fs-sm' + ((mv.qc > mv.maxc || mv.qc < mv.minc) ? ' text-warning' : '')">
+          {{mv.minc + '...' + mv.maxc}}</span>
+        <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undoc"/>
+      </div>
+      <div class="q-ml-md font-mono">{{edc(mv.qc)}}</div>
     </div>
-    <div class="q-ml-md font-mono">{{edc(mv.qc)}}</div>
 
   </q-card-section>
 </template>
@@ -46,7 +48,8 @@ export default {
   name: 'ChoixQuotas',
   props: { 
     quotas: Object, // { q1, q2, qc, min1, min2, max1, max2, minc, maxc, err}
-    lecture: Boolean
+    lecture: Boolean,
+    groupe: Boolean
   },
 
   data () {

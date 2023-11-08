@@ -197,7 +197,10 @@ export class OnchangeVersion extends OperationWS {
       this.avmap[this.objv.id] = this.vact
     } else {
       const x = this.aSt.compte.mbsOfGroupe(this.objv.id)
-      this.grmap[this.objv.id] = { mbs: x.mbs, v: this.vact }
+      if (x) // groupe déjà connu
+        this.grmap[this.objv.id] = { mbs: x.mbs, v: this.vact }
+      else // groupe venant d'être créé
+        this.grmap[this.objv.id] = { mbs: [1], v: 0 }
     }
 
     while (true) {

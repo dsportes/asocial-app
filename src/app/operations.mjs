@@ -952,7 +952,7 @@ export class NouveauGroupe extends OperationUI {
       const aSt = stores.avatar
       const nag = NomGenerique.groupe(nom)
       const na = getNg(session.avatarId)
-      const avatar = aSt.getAvtar(na.id)
+      const avatar = aSt.getAvatar(na.id)
       const rowGroupe = await Groupe.rowNouveauGroupe(nag, na, unanime)
       
       /*
@@ -967,7 +967,7 @@ export class NouveauGroupe extends OperationUI {
       const e = { nomg: nag.nom, cleg: nag.rnd, im: 1, idav: na.id }
 
       // En UTC la division d'une date est multiple de 86400000
-      const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
+      const tjourJ = (AMJ.tDeAmjUtc(AMJ.amjUtc()) / 86400000) + limitesjour.dlv
       const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
       const dlv = AMJ.amjUtcDeT(tdlv * 86400000)
 
@@ -978,7 +978,7 @@ export class NouveauGroupe extends OperationUI {
         rowGroupe, rowMembre, 
         id: session.avatarId,
         quotas: [quotas.q1, quotas.q2], 
-        npgk: Groupe.getNpgk(nag, na), 
+        npgk: await Groupe.getNpgk(nag, na), 
         empgk: await crypter(session.clek, new Uint8Array(encode(e))), 
         abPlus: [nag.id]
       }

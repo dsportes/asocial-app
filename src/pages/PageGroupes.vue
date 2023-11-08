@@ -31,28 +31,28 @@
   </div>
 
     <div class="q-my-lg petitelargeur maauto" v-if="gSt.pgLgFT.length">
-      <div v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id">
+      <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx)">
+        <!--
         <q-expansion-item group="g1" switch-toggle-side :class="dkli(idx)" @click="exp(e.groupe)">
-          <template v-slot:header>
+          <template v-slot:header> -->
+            <apercu-genx :na="e.groupe.na" :cv="e.groupe.cv" :idx="idx" />
             <div class="row full-width items-center justify-between">
-              <div class="row items-center">
-                <img class="photomax" :src="e.groupe.photo" />
-                <div class="titre-md q-ml-sm">{{e.groupe.na.nomc}}</div>
-                <div v-if="e.groupe.dfh" class="q-ml-md">
+              <div>
+                <div v-if="e.groupe.dfh" class="q-mr-sm">
                   <q-icon name="warning" size="md" color="negative"/>
                   <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
                 </div>
-                <div v-if="gSt.nbMesInvits(e)" class="q-ml-md">
+                <div v-if="gSt.nbMesInvits(e)" class="q-mr-sm">
                   <q-icon name="star" size="md" color="green-5"/>
                   <span class="q-ml-xs q-pa-xs bg-yellow-3 text-warning">{{$t('PGinv')}}</span>
                 </div>
-               </div>
+              </div>
+              <q-btn class="q-ml-md btn1" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(e)"/>
             </div>
-            <q-btn class="q-ml-md btn1" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(e)"/>
-          </template>
+        <!--  </template>
           <apercu-groupe class="q-ml-lg" :eg="e" :idx="idx" :mapmc="mapmc"/>
-        </q-expansion-item>
-      </div>
+        </q-expansion-item> -->
+      </q-card>
     </div>
 
     <!-- Nouveau groupe ------------------------------------------------>
@@ -67,7 +67,7 @@
           <div class="titre-md q-mb-xs text-center">{{$t('PGnom', [nom || '?'])}}</div>
           <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="okNom"/>
           <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
-          <choix-quotas :quotas="quotas" />
+          <choix-quotas :quotas="quotas" groupe/>
           <q-option-group :options="options" type="radio" v-model="una"/>
           <q-card-actions align="right">
             <q-btn dense flat color="warning" :label="$t('renoncer')" @click="MD.fD" />
@@ -89,7 +89,7 @@ import { MD, Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import ApercuGroupe from '../components/ApercuGroupe.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouveauGroupe } from '../app/operations.mjs'
 
@@ -98,7 +98,7 @@ export default {
 
   props: { tous: Boolean },
 
-  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGroupe },
+  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx },
 
   computed: {
   },
@@ -120,8 +120,8 @@ export default {
 
     async nvGr () {
       if (!await this.session.edit()) return
-      const cpt = this.aSt.compta.compteurs
-      let max1 = Math.floor(((cpt.q1 * UNITEV1) - cpt.v1) / UNITEV1)
+      const cpt = this.aSt.compta.compteurs.qv
+      let max1 = Math.floor(((cpt.q1 * UNITEV1) - (cpt.nn + cpt.nc + cpt.ng)) / UNITEV1)
       if (max1 < 0) max1 = 0
       let max2 = Math.floor(((cpt.q2 * UNITEV2) - cpt.v2) / UNITEV2)
       if (max2 < 0) max2 = 0

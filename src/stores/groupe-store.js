@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { encode } from '@msgpack/msgpack'
 import { egaliteU8, difference, intersection } from '../app/util.mjs'
-import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { UNITEV1, UNITEV2, FLAGS } from '../app/api.mjs'
 
 /* Store maître des groupes du compte courant :
 - map : des groupes dont un des avatars du compte courant est membre
@@ -116,8 +116,8 @@ export const useGroupeStore = defineStore('groupe', {
 
     nbMesInvits: (state) => { return (e) => {
         let n = 0
-        e.groupe.ast.forEach((st, i) => {
-          if (st >= 60 && st <= 72) {
+        e.groupe.flags.forEach((fl, i) => {
+          if (fl & FLAGS.IN) {
             if (e.membres.get(i).estAc) n++
           }
         })
@@ -233,6 +233,7 @@ export const useGroupeStore = defineStore('groupe', {
 
     // PageGroupes ***************************************************
     pgLgFT: (state) => {
+      const aSt = stores.avatar
       function f0 (x, y) {
         const a = x.groupe, b = y.groupe
         return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) 
@@ -252,7 +253,7 @@ export const useGroupeStore = defineStore('groupe', {
         if (f.ngr && !g.na.nom.startsWith(f.ngr)) continue
         if (f.sansheb && g.dfh === 0) continue
         if (f.excedent && ((v.q1 * UNITEV1) > v.v1) && ((v.q2 * UNITEV2) > v.v2 )) continue
-        const mcmemo = state.compte.mcmemo(g.id)
+        const mcmemo = aSt.compte.mcmemo(g.id)
 
         if (f.infmb && mcmemo && mcmemo.memo && mcmemo.info.indexOf(f.infmb) === -1) continue
         if (f.setp.size || f.setn.size) {
@@ -326,9 +327,10 @@ export const useGroupeStore = defineStore('groupe', {
 
     setAnimHeb (e) { // TODO
       const g = e.groupe
-      g.estAnim = false
+      e.estAnim = false
+      e.estHeb = false
       for (const [, m] of e.mbacs) {
-        if (g.ast[m.ids] === 32) e.estAnim = true
+        if (g.estAnim(m.ids)) e.estAnim = true
         if (m.ids === g.imh) e.estHeb = true
       }
     },

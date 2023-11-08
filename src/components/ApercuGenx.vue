@@ -11,7 +11,7 @@
           <span class="text-bold fs-sm font-mono q-mr-sm">#{{ids ? ids : na.id}}</span> 
         </div>
         <q-btn v-if="detailPeople && !det" dense size="sm" color="primary" icon="add"
-          :label="$t('details')" @click="ouvrirdetails"/>
+          :label="$t('details')" @click.stop="ouvrirdetails"/>
       </div>
       <div class="row justify-between items-center">
         <div>
@@ -20,9 +20,9 @@
         </div>
         <div>
           <q-btn v-if="cv" size="sm" class="q-mr-xs" 
-            icon="visibility" dense color="primary" @click="ovvisucv"/>
+            icon="visibility" dense color="primary" @click.stop="ovvisucv"/>
           <q-btn v-if="!ID.estComptable(na.id) && cvchangee" size="sm"
-            icon="edit" dense color="warning" @click="editerCV"/>
+            icon="edit" dense color="warning" @click.stop="editerCV"/>
         </div>
       </div>
       <mc-memo :id="na.id" :idx="idx"/>        

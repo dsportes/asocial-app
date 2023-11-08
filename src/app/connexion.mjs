@@ -5,7 +5,7 @@ import { OperationUI } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post, getEstFs } from './net.mjs'
-import { AMJ, ID, PINGTO, limitesjour } from './api.mjs'
+import { AMJ, ID, PINGTO, limitesjour, FLAGS } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import {
   openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
@@ -246,16 +246,16 @@ export class ConnexionCompte extends OperationUI {
           this.mbsMap[row.id] = x
         } else this.grToSuppr.add(row.id)
       }
-      for (const empg of this.avatar.mpg) {
+      for (const [idg, empg] of this.avatar.mpg) {
         if (session.fsSync) 
-          await session.fsSync.setGroupe(empg.idg)
-        else abPlus.push(empg.idg)
-        if (!this.groupesToStore.has(empg.id)) {
+          await session.fsSync.setGroupe(idg)
+        else abPlus.push(idg)
+        if (!this.groupesToStore.has(idg)) {
           const x = {
-            idg: empg.idg, v: 0, dlv: dlv2,
-            npgk: empg.mpgk, mbs: Array.from(empg.avs.values())
+            idg: idg, v: 0, dlv: dlv2,
+            npgk: empg.npgk, mbs: Array.from(empg.avs.values())
           }
-          this.mbsMap[empg.idg] = x
+          this.mbsMap[idg] = x
         }
       }
 
@@ -326,7 +326,7 @@ export class ConnexionCompte extends OperationUI {
 
     let rowNotes // array
 
-    if (session.accesNet && vsrv > vidb) {
+    if (session.accesNet && (!vidb || vsrv > vidb)) {
       const args = { token: session.authToken, id, v: vidb }
       const ret = this.tr(await post(this, 'ChargerNotes', args))
       rowNotes = ret.rowNotes
@@ -366,7 +366,7 @@ export class ConnexionCompte extends OperationUI {
 
     let rowChats // array
 
-    if (session.accesNet && vsrv > vidb) {
+    if (session.accesNet && (!vidb || vsrv > vidb)) {
       const args = { token: session.authToken, id, v: vidb }
       const ret = this.tr(await post(this, 'ChargerChats', args))
       rowChats = ret.rowChats
@@ -405,7 +405,7 @@ export class ConnexionCompte extends OperationUI {
 
     let rowTickets // array
 
-    if (session.accesNet && vsrv > vidb) {
+    if (session.accesNet && (!vidb || vsrv > vidb)) {
       const args = { token: session.authToken, id, v: vidb }
       const ret = this.tr(await post(this, 'ChargerTickets', args))
       rowTickets = ret.rowTickets
@@ -446,7 +446,7 @@ export class ConnexionCompte extends OperationUI {
 
     let rowSponsorings
 
-    if (session.accesNet && vsrv > vidb) {
+    if (session.accesNet && (!vidb || vsrv > vidb)) {
       const args = { token: session.authToken, id, v: vidb }
       const ret = this.tr(await post(this, 'ChargerSponsorings', args))
       rowSponsorings = ret.rowSponsorings
@@ -490,7 +490,7 @@ export class ConnexionCompte extends OperationUI {
 
     let rowMembres
 
-    if (session.accesNet && vidb < vsrv) {
+    if (session.accesNet && (!vidb || vidb < vsrv)) {
       const args = { token: session.authToken, id, v: vidb }
       const ret = this.tr(await post(this, 'ChargerMembres', args))
       rowMembres = ret.rowMembres
@@ -749,13 +749,13 @@ export class ConnexionCompte extends OperationUI {
       aSt.setCompte(this.avatar, this.compta, this.tribu)
       if (this.espace) session.setEspace(this.espace)
 
-      for (const av of this.avatarsToStore) {
+      for (const [,av] of this.avatarsToStore) {
         if (av.id !== this.avatar.id) aSt.setAvatar(av)
         syncitem.push('05' + av.id, 0, 'SYava', [av.na.nom])
       }
 
-      for (const gr of this.groupesToStore) {
-        gSt.setAvatar(gr)
+      for (const [,gr] of this.groupesToStore) {
+        gSt.setGroupe(gr)
         syncitem.push('10' + gr.id, 0, 'SYgro', [gr.na.nom])
       }
 
@@ -826,7 +826,7 @@ export class ConnexionCompte extends OperationUI {
         const vidb = Versions.get(avatar.id).v
         const objv = this.versions && this.versions[avatar.id] ? this.versions[avatar.id] : { v: 0 }
         const vsrv = objv.v
-        if (vidb < vsrv) Versions.set(avatar.id, objv)
+        if (vidb < vsrv) Versions.set(avatar.id, { v: objv.v })
 
         const na = getNg(avatar.id)
         let n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0, n7 = 0, n8 = 0
@@ -857,8 +857,10 @@ export class ConnexionCompte extends OperationUI {
         const objv = this.versions && this.versions[groupe.id] ? this.versions[groupe.id] :
           { v: 0, vols: { v1: 0, v2: 0, q1: 0, q2: 0 } }
         const vsrv = objv.v
-        if (vidb < vsrv) {
-          Versions.set(groupe.id, objv)
+        if (!vidb || vidb < vsrv) {
+          const vx = { v: objv.v, vols: objv.vols }
+          Versions.set(groupe.id, vx)
+          gSt.setVols(groupe.id, vx)
         } else {
           gSt.setVols(groupe.id, objidb)
         }
@@ -869,7 +871,7 @@ export class ConnexionCompte extends OperationUI {
 
         let amb = false // Un avatar membre au moins a-t-il accès aux membres ?
         for (const im of emg.mbs)
-          if ((groupe.ast & FLAGS.AM) && (groupe.ast & FLAGS.DM)) amb = true
+          if ((groupe.flags[im] & FLAGS.AM) && (groupe.flags[im] & FLAGS.DM)) amb = true
         if (amb) { // Oui on recharge les membres
           const [x3, x4] = await this.chargerMembres(groupe, vidb, vsrv)
           n3 = x3
@@ -881,7 +883,7 @@ export class ConnexionCompte extends OperationUI {
         // Ci-avant on a pu détecter des membres disparus qui ne l'était pas encore dans groupe
         let ano = false // Un avatar au moins a-t-il accès aux notes ?
         for (const im of emg.mbs)
-          if ((groupe.ast & FLAGS.AN) && (groupe.ast & FLAGS.DN)) ano = true
+          if ((groupe.flags[im] & FLAGS.AN) && (groupe.flags[im] & FLAGS.DN)) ano = true
         if (ano) { // Oui on charge les notes
           const [x1, x2] = await this.chargerNotes(groupe.id, vidb, vsrv, true)
           n1 = x1
