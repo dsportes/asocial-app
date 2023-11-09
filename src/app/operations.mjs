@@ -221,7 +221,7 @@ export class MajCvGr extends OperationUI {
       while (true) {
         const v = groupe.v + 1
         const cvg = await crypter(getCle(groupe.id), new Uint8Array(encode({v, photo, info})))
-        const args = { token: session.authToken, id: avatar.id, v, cvg }
+        const args = { token: session.authToken, id: groupe.id, v, cvg }
         const ret = this.tr(await post(this, 'MajCvGr', args))
         if (!ret.KO) break
         await sleep(500)
@@ -1017,7 +1017,7 @@ args.token donne les éléments d'authentification du compte.
 args.ardg : texte de l'ardoise crypté par la clé du groupe
 args.idg : id du groupe
 Retour:
-*/
+
 export class ArdoiseGroupe extends OperationUI {
   constructor () { super($t('OPardgr')) }
 
@@ -1033,6 +1033,7 @@ export class ArdoiseGroupe extends OperationUI {
     }
   }
 }
+*/
 
 /* Hébergement d'un groupe *****************************************************
 args.token donne les éléments d'authentification du compte.
@@ -1096,7 +1097,6 @@ export class FinHebGroupe extends OperationUI {
   async run (idg) {
     try {
       const session = stores.session
-      const cfg = stores.config
       const args = { token: session.authToken, 
         id: session.compteId,
         idg,
@@ -1114,41 +1114,44 @@ export class FinHebGroupe extends OperationUI {
 args.token donne les éléments d'authentification du compte.
 args.id : id du contact
 args.idg : id du groupe
-args.im: soit l'indice de l'avatar dans ast/nig s'il avait déjà participé, soit ast.length
-args.nig: hash du rnd du membre crypté par le rnd du groupe. Permet de vérifier l'absence de doublons.
-args.ardg: texte de l'ardoise du groupe crypté par la clé du groupe. 
-  Si null, le texte actuel est inchangé.
+args.im: soit l'indice de l'avatar dans ast/nag s'il avait déjà participé, soit ast.length
+args.nag: hash du rnd du membre crypté par le rnd du groupe. Permet de vérifier l'absence de doublons.
 args.rowMembre
-- vérification que le statut ast n'existe pas
+- vérification que le slot est libre
 - insertion du row membre, maj groupe
 Retour:
-- KO : si l'indice im est déjà attribué (opérations concurrentes)
+- KO : si l'indice im est déjà attribué
 */
 export class NouveauMembre extends OperationUI {
   constructor () { super($t('OPnvmb')) }
 
-  async run (na, gr, cv, ard) {
+  async run (na, gr, cv) {
     try {
       const session = stores.session
+      let im = 0
+      let slot = 0
+
       while (true) {
-        const nig = hash(await crypter(gr.na.rnd, na.rnd, 1))
-        let im = 0
-        for(let i = 1; i < gr.ast.length; i++) { 
-          if (gr.nag[im] === nig) { im = i; break }
+        const nag = await Groupe.getNag(gr.na, na)
+        im = 0
+        slot = 0
+        for(let i = 1; i < gr.anag.length; i++) { 
+          if (!slot && gr.estLibre(i)) slot = i
+          if (gr.anag[im] === nag) { im = i; break }
         }
-        if (!im) im = gr.ast.length
+        if (!im) im = slot || gr.anag.length
 
         const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, 0, cv)
         const args = { token: session.authToken, 
           id: na.id,
           idg: gr.id,
-          ardg: ard === null ? null : await crypter(gr.na.rnd, ard),
-          nig, im, rowMembre
+          nag, im, rowMembre
         }
         const ret = this.tr(await post(this, 'NouveauMembre', args))
         if (!ret.KO) break
         await sleep(500)
       }
+      session.setMembreId(im)
       this.finOK()
     } catch (e) {
       return await this.finKO(e)

@@ -1288,10 +1288,10 @@ export default {
   PGplus5: '{1} propose d\'ajouter ce contact au groupe {0}',
   PGplus: 'Ajouter un de mes contacts au groupe',
   PGplus5b: '{1} propose d\'ajouter {2} au groupe {0}',
-  PGard: 'Ardoise du groupe : commentaires à propos de ce contact',
   PGvg: 'Voir le groupe',
   PGmesav: 'Ma participation au groupe | Ma participation au groupe | Mes participations au groupe',
-  
+  PGanim: 'Il faut avoir le droit d\'animation pour éditer les mots clés du groupe.',
+
   // Aperçu Membre
   AMct1: 'Inscrit comme "contact" par {0}.',
   AMct2: 'Inscrit comme "contact" par #{0} (oublié ou disparu).',
@@ -1340,7 +1340,7 @@ export default {
   // Aperçu groupe
   AGinvits: '{0} invitations en cours ou à confirmer par les animateurs',
   AGheb: 'Hébergeur du groupe.',
-  AGnheb: 'N\'est PLUS hébergé. Disparition du groupe {0}',
+  AGnheb: 'N\'est PLUS hébergé. Date de disparition du groupe : {0}',
   AGfond: 'Fondateur',
   AGactiv: 'Dates de dernière invitation, période d\'activité',
   AGmcgr: 'Mes mots clés qualifiant le groupe',
@@ -1367,8 +1367,8 @@ export default {
   AGv1b: 'La création de notes SERA impossible, leurs textes ne pourront être QUE réduits.',
   AGv2b: 'L\'ajout de fichiers à des notes SERA impossible, leurs remplacements ne pourront être qu\'à volume inférieur.',
   AGmx: 'Impossible d\'allouer des quotas supérieurs aux volumes libres sur le compte.',
-  AGdisp1: 'Il restera {0} disponibles pour des textes de notes personels.',
-  AGdisp2: 'Il restera {0} disponibles pour les fichiers attachés aux notes personelles.',
+  AGdisp1: 'Il restera {0} notes / chats / groupes disponibles.',
+  AGdisp2: 'Il restera {0} disponibles pour les fichiers attachés.',
   AGuna: 'Gérer le mode simple / unanime de {0}',
   AGu1: 'Mode "simple" : un seul des animateurs peut "inviter" un contact à être membre du groupe.',
   AGu2: 'Mode "unanime" : if faut que TOUS les animateurs "invitent" un contact à être membre du groupe pour que l\'invitation soit effective.',

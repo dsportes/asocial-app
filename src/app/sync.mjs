@@ -85,7 +85,7 @@ export class OnchangeVersion extends OperationWS {
   egrMaj(id) {
     let e = this.grMaj.get(id)
     if (!e) {
-      const e = { id: id, gr: null, lmb: [], lsc: [], objv: null }
+      e = { id: id, gr: null, lmb: [], lno: [], objv: null }
       this.grMaj.set(id, e)
     }
     return e
@@ -282,8 +282,8 @@ export class OnchangeVersion extends OperationWS {
         if (grav) {
           const grap = this.grCache.get(idg)
           if (grap) {
-            const [ambav, anoav] = this.avAvatar.ammbamo(grav)
-            const [ambap, anoap] = this.avatar.ammbamo(grap)
+            const [ambav, anoav] = this.avAvatar.ambano(grav)
+            const [ambap, anoap] = this.avatar.ambano(grap)
             if (ambav && !ambap) {
               this.delMb.add(idg)
               this.buf.purgeGroupeMbIDB(idg)

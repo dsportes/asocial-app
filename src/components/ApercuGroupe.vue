@@ -1,6 +1,6 @@
 <template>
   <div :class="dkli(idx)">
-    <div style="height:3rem"/>
+    <!--div style="height:3rem"/-->
     <apercu-genx :na="eg.groupe.na" :cv="eg.groupe.cv" :idx="idx" :cvchangee="cvchangee"/>
 
     <div v-if="eg.groupe.dfh" class="q-mr-sm">
@@ -25,27 +25,25 @@
         icon="edit" dense color="primary" @click="editUna"/>
     </div>
 
-    <q-expansion-item dense class="titre-md q-mt-sm" switch-toggle-side :label="$t('AGhebvol')">
-      <div :class="'q-ml-lg q-mt-xs q-pa-xs' + bcf">
-        <div class="row justify-between">
-          <div v-if="!eg.groupe.dfh" class="col fs-md">
-            <span class="fs-md q-mr-sm">{{$t('AGheb')}}</span>
-            <bouton-membre :eg="eg" :im="eg.groupe.imh" />
-          </div>
-          <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [dfh])}}</div>
-          <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
-            icon="settings" @click="gererHeb"/>
+    <div :class="'q-mt-xs q-pa-xs' + bcf">
+      <div class="row justify-between">
+        <div v-if="!eg.groupe.dfh" class="col fs-md">
+          <span class="fs-md q-mr-sm">{{$t('AGheb')}}</span>
+          <bouton-membre :eg="eg" :im="eg.groupe.imh" />
         </div>
-        <div class="q-mt-xs">
-          <quotas-vols :vols="eg.objv.vols"/>
-        </div>
+        <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [aaaammjj(dfh)])}}</div>
+        <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
+          icon="settings" @click="gererHeb"/>
       </div>
-    </q-expansion-item>
-    
+      <div class="q-mt-xs">
+        <quotas-vols2 :vols="eg.objv.vols"/>
+      </div>
+    </div>
+
     <!-- Mots clés du groupe -->
     <div class="row items-center q-mt-sm">
       <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
-      <q-btn icon="open_in_new" size="sm" color="primary" @click="ovmcledit"/>
+      <q-btn icon="open_in_new" size="sm" color="primary" @click="autmcledit"/>
     </div>
 
     <div v-if="eg.groupe.nbInvits !== 0" class="q-mt-sm fs-md text-bold text-warning">
@@ -55,15 +53,15 @@
     <div class="titre-lg full-width text-center text-white bg-secondary q-mt-lg q-mb-md q-pa-sm">
       {{$t('PGmesav', eg.mbacs.size)}}
     </div>
-<!--
-    <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mb-md">
-      <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>
-      <q-btn class="q-mt-sm" v-if="ast(m) >=30 && ast(m) <= 32"
+
+    <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
+      <q-separator color="orange"/>
+      <!--apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/-->
+      <q-btn v-if="eg.groupe.accesMembre(m.ids)"
         dense size="md" no-caps color="primary" icon="add" :label="$t('PGplus')"
         @click="dialctc(m.na)"/>
-      <q-separator class="q-mt-sm" color="orange"/>
     </div>
--->
+
     <!-- Dialogue d'édition des mots clés du groupe -->
     <q-dialog v-model="mcledit" persistent>
       <mots-cles class="bs full-width" :duGroupe="eg.groupe.id" @ok="okmc" :titre="$t('AGmc')"
@@ -141,7 +139,7 @@
 
         <q-page-container>
           <q-page class="q-pa-xs">
-            <quotas-vols class="q-my-md" :vols="eg.objv.vols"/>
+            <quotas-vols2 class="q-my-md" :vols="eg.objv.vols"/>
             <div class="titre-md" v-if="cas===1">{{$t('AGm1', [moi])}}</div>
             <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1a')}}</div>
             <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1b')}}</div>
@@ -177,7 +175,7 @@
             </div>
 
             <div v-if="step === 1" class="q-ma-sm">
-              <choix-quotas class="q-my-sm" :quotas="q" @change="onChgQ"/>
+              <choix-quotas class="q-my-sm" :quotas="q" @change="onChgQ" groupe/>
               <div v-if="q.err" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGmx')}}</div>
               <div v-if="al1" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1b')}}</div>
               <div v-if="al2" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2b')}}</div>
@@ -194,13 +192,6 @@
       </q-layout>
       </div>
     </q-dialog>
-
-    <!-- Dialogue d'édition de l'ardoise -->
-    <q-dialog v-model="ardedit" persistent>
-      <editeur-md mh="65mh" :titre="$t('AMard')" help="page1"
-        :texte="eg.groupe.ard" editable modetxt :label-ok="$t('OK')" @ok="ardok"/>
-    </q-dialog>
-
 
     <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
     <q-dialog v-model="nvctc" persistent>
@@ -228,17 +219,16 @@ import { ref, reactive, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuMembre from './ApercuMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
-import { edvol, dhcool, dkli } from '../app/util.mjs'
+import { edvol, dhcool, dkli, afficherDiag, aaaammjj } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import BoutonMembre from './BoutonMembre.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonHelp from './BoutonHelp.vue'
-import QuotasVols from './QuotasVols.vue'
+import QuotasVols2 from './QuotasVols2.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 import MotsCles from './MotsCles.vue'
-import EditeurMd from './EditeurMd.vue'
 import { MD, getNg } from '../app/modele.mjs'
-import { MotsclesGroupe, ArdoiseGroupe, ModeSimple, FinHebGroupe, HebGroupe } from '../app/operations.mjs'
+import { MajCvGr, MotsclesGroupe, ModeSimple, FinHebGroupe, HebGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuGroupe',
@@ -249,7 +239,7 @@ export default {
     mapmc: Object
   },
 
-  components: { EditeurMd, MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols },
+  components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols2 },
 
   computed: {
     bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
@@ -263,15 +253,14 @@ export default {
     },
     q1 () { const v = this.eg.groupe.vols; return v.q1 + ' - ' + edvol(v.q1 * UNITEV1) },
     q2 () { const v = this.eg.groupe.vols; return v.q2 + ' - ' + edvol(v.q2 * UNITEV2) },
-    pc1 () { const v = this.eg.groupe.vols; return Math.round((v.v1 * 100) / (v.q1 * UNITEV1)) },
-    pc2 () { const v = this.eg.groupe.vols; return Math.round((v.v2 * 100) / (v.q2 * UNITEV2)) },
+    
     // nbv () { let n = 0; this.eg.membres.forEach(m => { if (m.vote) n++ }); return n }
     lstAn () {
       const t = []; this.anims.forEach(id => { t.push(getNg(id).nom)})
       return t.join(', ')
     },
-    alq1 () { return !this.eg.groupe.imh || (this.eg.objv.v1 > this.eg.objv.q1) },
-    alq2 () { return !this.eg.groupe.imh || (this.eg.objv.v2 > this.eg.objv.q2) },
+    alq1 () { return !this.eg.groupe.imh || (this.eg.objv.v1 > (this.eg.objv.q1 * UNITEV1)) },
+    alq2 () { return !this.eg.groupe.imh || (this.eg.objv.v2 > (this.eg.objv.q2 * UNITEV2)) },
     moi () { return getNg(this.session.avatarId).nom },
     hbg () { return this.eg.membres.get(this.eg.groupe.imh).na.nom },
   },
@@ -305,7 +294,7 @@ export default {
 
   methods: {
     nbiv (e) { return this.gSt.nbMesInvits(e) },
-    ast (m) { return this.eg.groupe.ast[m.ids] },
+    // ast (m) { return this.eg.groupe.ast[m.ids] },
 
     async dialctc (na) {
       if (!await this.session.edit()) return
@@ -323,24 +312,23 @@ export default {
     },
 
     async cvchangee (res) { // CV du GROUPE !
-      if (res && this.na) {
+      if (res && this.eg) {
         await new MajCvGr().run(this.eg.groupe, res.ph, res.info)
       }
     },
     
+    async autmcledit () {
+      if (!await this.session.edit()) return
+      if (!this.eg.estAnim) {
+        await afficherDiag(this.$t('PGanim'))
+      } else this.ovmcledit()
+    },
+
     async okmc (mmc) {
       MD.fD()
       if (mmc !== false) {
         await new MotsclesGroupe().run(mmc, this.eg.groupe.na)
       }
-    },
-
-    async ardeditAut () {
-      if (await this.session.edit()) this.ovardedit()
-    },
-
-    async ardok (ard) {
-      await new ArdoiseGroupe().run(ard, this.eg.groupe.na)
     },
 
     setCas () {
@@ -364,24 +352,24 @@ export default {
     gotocq () {
       this.step = 1
       const vx = this.eg.objv.vols
-      const cpt = this.aSt.compta.compteurs
+      const cpt = this.aSt.compta.compteurs.qv
       this.q.q1 = vx.q1 || 0
       this.q.q2 = vx.q2 || 0
       this.q.min1 = 0
       this.q.min2 = 0
-      this.q.max1 = cpt.q1 - Math.ceil(cpt.v1 / UNITEV1)
+      this.q.max1 = cpt.q1 - Math.ceil((cpt.nn + cpt.nc + cpt.ng) / UNITEV1)
       this.q.max2 = cpt.q2 - Math.ceil(cpt.v2 / UNITEV2)
       this.q.err = false
       this.onChgQ()
     },
     onChgQ () {
-      const cpt = this.aSt.compta.compteurs
+      const cpt = this.aSt.compta.compteurs.qv
       const vx = this.eg.objv.vols
       this.al1 = vx.v1 > (this.q.q1 * UNITEV1)
       this.al2 = vx.v2 > (this.q.q2 * UNITEV2)
-      const r1 = (cpt.q1 - Math.ceil(cpt.v1 / UNITEV1) - this.q.q1) * UNITEV1
+      const r1 = (cpt.q1 - Math.ceil((cpt.nn + cpt.nc + cpt.ng) / UNITEV1) - this.q.q1) * UNITEV1
       const r2 = (cpt.q2 - Math.ceil(cpt.v2 / UNITEV2) - this.q.q2) * UNITEV2
-      this.rst1 = edvol(r1 >=0 ? r1 : 0)
+      this.rst1 = r1 >=0 ? r1 : 0
       this.rst2 = edvol(r2 >=0 ? r2 : 0)
       this.ar1 = r1 < (cpt.q1 * UNITEV1 * 0.1)
       this.ar2 = r2 < (cpt.q2 * UNITEV2 * 0.1)
@@ -459,7 +447,7 @@ export default {
     const ardedit = ref(false)
     function ovardedit () { MD.oD(ardedit) }
     return {
-      MD, dkli,
+      MD, dkli, aaaammjj,
       mcledit, ovmcledit, nvctc, ovnvctc, editerUna, ovediterUna,
       changerQuotas, ovchangerQuotas, ardedit, ovardedit,
       session,

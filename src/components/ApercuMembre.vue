@@ -276,7 +276,7 @@ export default {
       this.err1 = '' // bloquantes
       this.err2 = '' // pas bloquantes
       if (fn === 6 && this.st === 32 ) {
-        if (this.gSt.nbAnims === 1) this.err2 = this.$t('AMdan2')
+        if (this.gSt.animIds(this.gSt.egrC).size === 1) this.err2 = this.$t('AMdan2')
       }
       this.action = false
       this.fn = fn

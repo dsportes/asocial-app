@@ -19,9 +19,9 @@
           <div v-else class="text-italic">{{$t('FAnocv')}}</div>
         </div>
         <div>
-          <q-btn v-if="cv" size="sm" class="q-mr-xs" 
+          <q-btn v-if="cv" size="sm" 
             icon="visibility" dense color="primary" @click.stop="ovvisucv"/>
-          <q-btn v-if="!ID.estComptable(na.id) && cvchangee" size="sm"
+          <q-btn v-if="!ID.estComptable(na.id) && cvchangee" class="q-ml-xs" size="sm"
             icon="edit" dense color="warning" @click.stop="editerCV"/>
         </div>
       </div>

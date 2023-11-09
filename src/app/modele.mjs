@@ -1243,13 +1243,13 @@ export class Avatar extends GenDoc {
   ambano (groupe) {
     const empg = groupe ? this.mpg.get(groupe.id) : null
     if (!empg) return [false, false]
-    let amo = false, amb = false
+    let ano = false, amb = false
     for (const [,im] of empg.avs) {
       const f = groupe.flags[im]
       if ((f & FLAGS.AM) && (f & FLAGS.DM)) amb = true
       if ((f & FLAGS.AN) && (f & FLAGS.DN)) ano = true
     }
-    return [amb, amo]
+    return [amb, ano]
   }
 
   /* Ids des groupes de l'avatar ida (tous si absent), accumulés dans le set s */
@@ -1774,7 +1774,11 @@ export class Groupe extends GenDoc {
   estAuteur (im) { const f = this.flags[im] || 0; 
     return (f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
-  estLibre (im) { return this.anag[im] } 
+  accesMembre (im) {
+    const f = this.flags[im] || 0;
+    return (f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM) 
+  }
+  estLibre (im) { return !this.anag[im] || this.anag[im] === 1 } 
 
   setDisparu (im) {
     if (!this.estDisparu(im)) {

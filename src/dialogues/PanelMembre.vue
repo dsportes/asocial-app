@@ -11,8 +11,10 @@
 
   <q-page-container>
     <q-card>
+      <!--
       <apercu-membre class="q-pa-sm" v-if="eg && mb"
         :eg="eg" :mb="mb" :idx="0" :mapmc="mapmc" :people="people" nopanel/>
+            -->
       <q-toolbar class="bg-secondary text-white">
         <q-toolbar-title v-if="eg" class="titre-lg text-center q-mx-sm">{{$t('PMGtit3', [eg.groupe.na.nomc])}}</q-toolbar-title>
         <q-toolbar-title v-else class="titre-lg text-center q-mx-sm">{{$t('PMGtit2')}}</q-toolbar-title>
@@ -33,7 +35,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import { MD, Motscles } from '../app/modele.mjs'
 
 export default {
-  name: 'PanelPeople',
+  name: 'PanelMembre',
   components: { ApercuGroupe, BoutonHelp, ApercuMembre },
 
   props: { },
@@ -62,7 +64,7 @@ export default {
     const mapmc = ref(Motscles.mapMC(true, 0))
     const eg = ref(gSt.egrC)
     const mb = ref(gSt.membreC)
-    if (eg.value && !eg.value.groupe.ast[session.membreId]) mb.value = null
+    if (eg.value && eg.value.groupe.estDisparu(session.membreId)) mb.value = null
     const people = ref(mb.value ? !mb.value.estAc : false)
 
     return {

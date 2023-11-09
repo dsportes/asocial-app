@@ -141,16 +141,14 @@ export const useGroupeStore = defineStore('groupe', {
 
     animIds: (state) => { return (e) => {
         const s = new Set()
-        for (const [,m] of e.membres) { if (e.groupe.ast[m.ids] === 32) s.add(m.na.id) }
+        for (const [,m] of e.membres) { if (e.groupe.estAnim(m.ids)) s.add(m.na.id) }
         return s
       }
     },
 
     actifIds: (state) => { return (e) => {
         const s = new Set()
-        for (const [,m] of e.membres) { 
-          if (e.groupe.ast[m.ids] >= 30 && e.groupe.ast[m.ids] <= 32) s.add(m.na.id) 
-        }
+        for (const [,m] of e.membres) { if (e.groupe.estActif(m.ids)) s.add(m.na.id) }
         return s
       }
     },
