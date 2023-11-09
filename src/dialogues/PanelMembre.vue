@@ -11,10 +11,8 @@
 
   <q-page-container>
     <q-card>
-      <!--
       <apercu-membre class="q-pa-sm" v-if="eg && mb"
         :eg="eg" :mb="mb" :idx="0" :mapmc="mapmc" :people="people" nopanel/>
-            -->
       <q-toolbar class="bg-secondary text-white">
         <q-toolbar-title v-if="eg" class="titre-lg text-center q-mx-sm">{{$t('PMGtit3', [eg.groupe.na.nomc])}}</q-toolbar-title>
         <q-toolbar-title v-else class="titre-lg text-center q-mx-sm">{{$t('PMGtit2')}}</q-toolbar-title>

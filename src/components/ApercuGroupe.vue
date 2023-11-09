@@ -53,13 +53,12 @@
     <div class="titre-lg full-width text-center text-white bg-secondary q-mt-lg q-mb-md q-pa-sm">
       {{$t('PGmesav', eg.mbacs.size)}}
     </div>
+    <q-btn v-if="accesMembre" @click="dialctc"
+      dense size="md" no-caps color="primary" icon="add" :label="$t('PGplus')"/>
 
     <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
       <q-separator color="orange"/>
-      <!--apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/-->
-      <q-btn v-if="eg.groupe.accesMembre(m.ids)"
-        dense size="md" no-caps color="primary" icon="add" :label="$t('PGplus')"
-        @click="dialctc(m.na)"/>
+      <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>
     </div>
 
     <!-- Dialogue d'édition des mots clés du groupe -->
@@ -201,9 +200,7 @@
           <div class="q-ml-md">{{$t('PGplus2')}}</div>
           <div class="q-ml-md">{{$t('PGplus3')}}</div>
           <div class="q-ml-md">{{$t('PGplus4')}}</div>
-          <div class="q-ml-lg q-px-xs text-bold bord1">
-            {{$t('PGplus5', [egrplus.groupe.na.nom, naplus.nom])}}
-          </div>
+          <div class="q-ml-lg q-px-xs text-bold bord1">{{$t('PGplus5', [eg.groupe.na.nom])}}</div>
         </q-card-section>
         <q-card-actions vertical>
           <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
@@ -263,6 +260,14 @@ export default {
     alq2 () { return !this.eg.groupe.imh || (this.eg.objv.v2 > (this.eg.objv.q2 * UNITEV2)) },
     moi () { return getNg(this.session.avatarId).nom },
     hbg () { return this.eg.membres.get(this.eg.groupe.imh).na.nom },
+
+    accesMembre () {
+      let am = false
+      this.eg.mbacs.forEach((m, ids) => {
+        if (this.eg.groupe.accesMembre(ids)) am = true
+      })
+      return am
+    }
   },
 
   data () { return {
@@ -286,10 +291,7 @@ export default {
     ar1: false,
     ar2: false,
     lstVotes: [],
-    cfu: 0, // Choix de changement de mode non confirmé
-
-    naplus: null,
-    egrplus: null
+    cfu: 0 // Choix de changement de mode non confirmé
   }},
 
   methods: {
@@ -298,16 +300,13 @@ export default {
 
     async dialctc (na) {
       if (!await this.session.edit()) return
-      this.naplus = na
-      this.egrplus = this.eg
       this.ovnvctc()
     },
 
     pagectc () {
-      this.ui.naplus = this.naplus
-      this.ui.egrplus = this.egrplus
+      this.session.setGroupeId(this.eg.groupe.id)
+      this.ui.egrplus = true
       MD.fD()
-      this.session.setGroupeId(this.egrplus.groupe.id)
       this.ui.setPage('people')
     },
 

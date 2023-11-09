@@ -28,8 +28,7 @@ export const useUiStore = defineStore('ui', {
     etf: 0, // étape fichier
     ccfic: null, // copie cololler fichier
 
-    naplus: null, // na de l'avatar proposant d'ajouter un contact au groupe egrplus
-    egrplus: null, // élément e du groupe dans lequel un contact peut-être ajouté
+    egrplus: false, // un contact peut-être ajouté au groupe courant
 
     dernierfichiercree: ''
   }),

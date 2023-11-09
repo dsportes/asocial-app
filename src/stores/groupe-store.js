@@ -281,17 +281,13 @@ export const useGroupeStore = defineStore('groupe', {
       function f0 (a, b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
       const f = stores.filtre.filtre.groupe
       const r = []
-      const ast = state.egrC.groupe.ast
+      const flags = state.egrC.groupe.flags
       for (const m of state.pgLm) {
         if (f.nmb && !m.na.nom.startsWith(f.nmb)) continue
         if (f.stmb) {
-          const st = ast[m.ids]
+          const fl = flags[m.ids]
           switch (f.stmb) {
-            case 1: { if (st !== 32) continue; break }
-            case 2: { if (st < 30 || st > 32) continue; break }
-            case 3: { if (st !== 10) continue; break }
-            case 4: { if (st < 60) continue; break }
-            case 5: { if (st < 40 || st > 50) continue; break }
+
           }
         }
         r.push(m)

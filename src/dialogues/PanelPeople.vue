@@ -32,10 +32,10 @@
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
-      <div v-if="ui.egrplus && !pSt.peC.groupes.has(ui.egrplus.groupe.na.id)"
+      <div v-if="ui.egrplus && !pSt.peC.groupes.has(gSt.egrC.na.id)"
         class="q-ma-md bordo column items-center">
         <div class="full-width titre-md bg-yellow-3 text-warning text-bold text-center">
-          {{$t('PGplus5b', [ui.egrplus.groupe.na.nom, ui.naplus.nom, pSt.peC.na.nom])}}
+          {{$t('PGplus5b', [gSt.egrC.na.nom, pSt.peC.na.nom])}}
         </div>
         <q-btn class="text-center q-my-sm" dense size="md" no-caps color="primary" icon="check"
           :label="$t('ok')" @click="contact"/>
@@ -118,11 +118,12 @@ export default {
       this.ui.setPage('groupe', 'membres')
     },
     async contact () {
-      const gr = this.ui.egrplus.groupe
+      const gr = this.gSt.egrC.groupe
       const pe = this.pSt.peC
-      const na = pe.na
+      this.ui.egrplus = false
       MD.fD()
-      await new NouveauMembre().run(na, gr, pe.cv)
+      const im = await new NouveauMembre().run(pe.na, gr, pe.cv)
+      this.session.setMembreId(im)
       this.ui.setPage('groupe', 'membres')
     }
   },

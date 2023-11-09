@@ -1151,8 +1151,7 @@ export class NouveauMembre extends OperationUI {
         if (!ret.KO) break
         await sleep(500)
       }
-      session.setMembreId(im)
-      this.finOK()
+      this.finOK(im)
     } catch (e) {
       return await this.finKO(e)
     }
