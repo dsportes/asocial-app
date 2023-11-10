@@ -22,13 +22,51 @@
     </template>
 
     <div>
-      <div style="position:relative">
+      <div class="q-ml-lg" style="position:relative">
         <div v-if="dac===0" class="text-italic">{{$t('AMdac0')}}</div>
         <div v-if="dac>1" class="text-italic">{{$t('AMdacd', xd(d))}}</div>
-        <div v-if="dam===0" class="text-italic">{{$t('AMdam0')}}</div>
-        <div v-if="dam===1" class="text-italic">{{$t('AMdam1')}}</div>
-        <div v-if="dam>1" class="text-italic">{{$t('AMdamd', xd(d))}}</div>
-        <div class="text-italic">{{$t('AMacno', dn)}}</div>
+
+        <div v-if="stm <= 1" class="text-italic">
+          <span v-if="damh===0">{{$t('AMdam0')}}</span>
+          <span v-if="damh>1">{{$t('AMdamd', [xd(damh)])}}</span>
+        </div>
+        <div v-if="stm <= 1" class="text-italic">{{$t('AMacnoh' + (dnh ? '' : '0'), dnh)}}</div>
+        <div v-if="stm <= 1" class="text-italic">
+          <span v-if="!mb.ddi">{{$t('AMinv0')}}</span>
+          <span v-else>{{$t('AMinvd', [xd(mb.ddi)])}}</span>
+        </div>
+        <div v-if="stm === 1" class="text-italic">
+          <span>{{$t('AMinvit')}}</span>
+          <span v-if="fl & FLAGS.PA" class="q-ml-sm">- {{$t('AMinvan')}}</span>
+          <span v-if="fl & FLAGS.DM" class="q-ml-sm">- {{$t('AMinvam')}}</span>
+          <span v-if="(fl & FLAGS.DN) && !(fl & FLAGS.DE)" class="q-ml-sm">- {{$t('AMinvln')}}</span>
+          <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
+        </div>
+
+        <div v-if="stm === 2 || stm === 3" class="text-italic">
+          <span v-if="dam===0">{{$t('AMdam0')}}</span>
+          <span v-if="dam===1">{{$t('AMdam1')}}</span>
+          <span v-if="dam>1">{{$t('AMdamd', [xd(dam)])}}</span>
+          <span v-if="ambna" class="q-ml-sm">
+            <span>{{$t('AMacmb')}}</span>
+            <q-btn size="sm" dense :label="$t('activer')" color="primary" @click="activeramb"/>
+          </span>
+          <span v-else class="q-ml-sm">
+            <q-btn size="sm" dense :label="$t('desactiver')" color="warning" @click="desactiveramb"/>
+          </span>
+        </div>
+
+        <div v-if="stm === 2 || stm === 3" class="text-italic">
+          <span>{{$t('AMacno', dn)}}</span>
+          <span v-if="anona" class="q-ml-sm">
+            <span>{{$t('AMacno' + anona)}}</span>
+            <q-btn size="sm" dense :label="$t('activer')" color="primary" @click="activerano"/>
+          </span>
+          <span v-else class="q-ml-sm">
+            <q-btn size="sm" dense :label="$t('desactiver')" color="warning" @click="desactiverano"/>
+          </span>
+        </div>
+
         <bouton-bulle2 v-if="fl" :texte="edit(fl, $t, '\n\n')" :label="$t('details')"
           class="btnb"/>
       </div>
@@ -70,6 +108,12 @@ export default {
 
     ano () { return this.eg.groupe.accesNote(this.mb.ids) },
 
+    // accès aux notes autorisé MAIS NON activé
+    anona () { return this.eg.groupe.accesNoteNA(this.mb.ids) },
+
+    // accès aux membres autorisé MAIS NON activé
+    ambna () { return this.eg.groupe.accesMembreNA(this.mb.ids) },
+
     fl () { return this.eg.groupe.flags[this.mb.ids] },
 
     dn () {
@@ -78,8 +122,24 @@ export default {
       const an = this.eg.groupe.accesNote(this.mb.ids)
       if (an === 1) return [$t('oui'), $t('non')]
       if (an === 2) return [$t('oui'), $t('oui')]
-      return [dl ? $t('avant', [this.xd(dl)]) : $t('jamais'),
-        de ? $t('avant', [this.xd(de)]) : $t('jamais') ]
+      return [dl ? $t('pasdepuis', [this.xd(dl)]) : $t('jamais'),
+        de ? $t('pasdepuis', [this.xd(de)]) : $t('jamais') ]
+    },
+
+    dnh () {
+      const dl = this.mb.dln || 0
+      const de = this.mb.dln || 0
+      const an = this.eg.groupe.accesNoteH(this.mb.ids)
+      if (an === 0) return 0
+      return [dl ? $t('pasdepuis', [this.xd(dl)]) : $t('jamais'),
+        de ? $t('pasdepuis', [this.xd(de)]) : $t('jamais') ]
+    },
+
+    damh () {
+      const d = this.mb.dam || 0
+      const am = this.eg.groupe.accesMembreH(this.mb.ids)
+      if (am) return 1
+      return d ? d : 0
     },
 
     dam () {
@@ -106,7 +166,7 @@ export default {
       if (!this.eg.estAnim) return this.$t('AMpasanst1')
       if (this.st === 32) return this.$t('AMpasanst2')
       return ''
-    }
+    },
   },
 
   /*
@@ -176,7 +236,11 @@ export default {
     ouvrirdetails () {
       this.session.setPeopleId(this.mb.na.id)
       MD.oD('detailspeople')
-    }
+    },
+    activernano () { },
+    desactivernano () { },
+    activeramb () { },
+    desactiveramb () { },
   },
 
   setup (props) {
@@ -196,6 +260,9 @@ export default {
   }
 }
 </script>
+<style lang="css">
+.q-item__section--side { padding-right: 5px !important; }
+</style>
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .bord

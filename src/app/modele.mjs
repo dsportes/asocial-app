@@ -1779,11 +1779,29 @@ export class Groupe extends GenDoc {
   estHeb (im) { return this.estActif(im) && im === this.imh }
   accesMembre (im) {
     const f = this.flags[im] || 0;
-    return (f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM) 
+    return (f & FLAGS.AC) && (f & FLAGS.HA) && (f & FLAGS.DM) 
+  }
+  accesMembreH (im) { // accès aux membres historique
+    const f = this.flags[im] || 0;
+    return !(f & FLAGS.AC) && (f & FLAGS.HA) && (f & FLAGS.HM) 
+  }
+  accesNoteH (im) { // acces aux notes historique
+    const f = this.flags[im] || 0;
+    if (!(f & FLAGS.AC) && (f & FLAGS.HA) && (f & FLAGS.HN)) return f & FLAGS.HE ? 2 : 1
+    return 0
+  }
+  accesMembreNA (im) { // accès aux membres NON activé
+    const f = this.flags[im] || 0;
+    return (f & FLAGS.AC) && !(f & FLAGS.AM) && (f & FLAGS.DM) ? 1 : 0
   }
   accesNote (im) {
     const f = this.flags[im] || 0;
     if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN)) return f & FLAGS.DE ? 2 : 1
+    return 0
+  }
+  accesNoteNA (im) { // acces aux notes NON activé
+    const f = this.flags[im] || 0;
+    if ((f & FLAGS.AC) && !(f & FLAGS.AN) && (f & FLAGS.DN)) return f & FLAGS.DE ? 2 : 1
     return 0
   }
   estLibre (im) { return !this.anag[im] || this.anag[im] === 1 } 
@@ -1935,6 +1953,7 @@ export class Membre extends GenDoc {
     const aSt = stores.avatar
     this.vsh = row.vsh || 0
     this.dac = row.dac || 0
+    this.ddi = row.ddi || 0
     this.dln = row.dln || 0
     this.den = row.den || 0
     this.dam = row.dam || 0
@@ -1946,7 +1965,7 @@ export class Membre extends GenDoc {
 
   static async rowNouveauMembre (nag, na, im, dlv, cv) {
     const r = { id: nag.id, ids: im, v: 0, dlv, vcv: cv ? cv.v : 0,
-      ddi: 0, dln: 0, den: 0, dam: 0 }
+      ddi: 0, dac: 0, dln: 0, den: 0, dam: 0 }
     r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
     r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
     const _data_ = new Uint8Array(encode(r))
