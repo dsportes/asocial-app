@@ -1125,33 +1125,17 @@ Retour:
 export class NouveauMembre extends OperationUI {
   constructor () { super($t('OPnvmb')) }
 
-  async run (na, gr, cv) {
+  async run (gr, im, na, cv) {
     try {
       const session = stores.session
-      let im = 0
-      let slot = 0
-
-      while (true) {
-        const nag = await Groupe.getNag(gr.na, na)
-        im = 0
-        slot = 0
-        for(let i = 1; i < gr.anag.length; i++) { 
-          if (!slot && gr.estLibre(i)) slot = i
-          if (gr.anag[im] === nag) { im = i; break }
-        }
-        if (!im) im = slot || gr.anag.length
-
-        const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, 0, cv)
-        const args = { token: session.authToken, 
-          id: na.id,
-          idg: gr.id,
-          nag, im, rowMembre
-        }
-        const ret = this.tr(await post(this, 'NouveauMembre', args))
-        if (!ret.KO) break
-        await sleep(500)
+      const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, 0, cv)
+      const args = { token: session.authToken, 
+        id: na.id,
+        idg: gr.id,
+        nag, im, rowMembre
       }
-      this.finOK(im)
+      const ret = this.tr(await post(this, 'NouveauMembre', args))
+      this.finOK(!ret.KO)
     } catch (e) {
       return await this.finKO(e)
     }

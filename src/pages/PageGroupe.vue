@@ -7,23 +7,15 @@
 
   <!-- Tab "membres" -------------------------------------------------->
   <div v-if="ui.pagetab==='membres' && gSt.egrC" class="q-pa-sm largeur40 maauto">
-    <div v-if="!gSt.pgLm.length" class="titre-lg text-italic">
-      {{$t('PGnope')}}</div>
-    <div v-if="gSt.pgLm.length && !gSt.pgLmFT.length" class="titre-lg text-italic">
-      {{$t('PGnomb', [gSt.pgLm.length])}}</div>
-
-    <!--
-      props: { 
-        mb: Object,
-        eg: Object,
-        mapmc: Object,
-        idx: Number, 
-        people: Boolean,
-        nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
-      },
-    -->
-    <apercu-membre v-for="(m, idx) of gSt.pgLmFT" :key="idx"
-      class="q-my-lg" :mb="m" :eg="gSt.egrC" :mapmc="mapmc" people :idx="idx"/>
+    <div v-if="amb">
+      <div v-if="!gSt.pgLm.length" class="titre-lg text-italic">
+        {{$t('PGnope')}}</div>
+      <div v-if="gSt.pgLm.length && !gSt.pgLmFT.length" class="titre-lg text-italic">
+        {{$t('PGnomb', [gSt.pgLm.length])}}</div>
+      <apercu-membre v-for="(m, idx) of gSt.pgLmFT" :key="idx"
+        class="q-my-lg" :mb="m" :eg="gSt.egrC" :mapmc="mapmc" people :idx="idx"/>
+    </div>
+    <div v-else class="titre-lg text-italic">{{$t('PGnoamb')}}</div>
   </div>
 
 </q-page>
@@ -42,6 +34,7 @@ export default {
   components: { ApercuMembre, ApercuGroupe },
 
   computed: {
+    amb () { return this.gSt.ambano[0] }
   },
 
   methods: {

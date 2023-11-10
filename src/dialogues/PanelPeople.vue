@@ -80,6 +80,7 @@ import BarrePeople from '../components/BarrePeople.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
 import { MD, Chat, Motscles } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
+import { afficherDiag } from '../app/util.mjs'
 
 export default {
   name: 'PanelPeople',
@@ -105,26 +106,45 @@ export default {
 
   methods: {
     egr (id) { return this.gSt.egr(id) },
+
     stmb (id, ids) { return this.egr(id).groupe.ast[ids]},
+
     detailgr (id, ids) {
       this.egrC = this.gSt.egr(id)
       this.mbC = this.gSt.getMembre(id, ids)
       this.infoedit = true
     },
+
     voirgr (id, ids) {
       this.egrC = this.gSt.egr(id)
       this.mbC = this.gSt.getMembre(id, ids)
       MD.fD()
       this.ui.setPage('groupe', 'membres')
     },
+
     async contact () {
-      const gr = this.gSt.egrC.groupe
-      const pe = this.pSt.peC
-      this.ui.egrplus = false
-      MD.fD()
-      const im = await new NouveauMembre().run(pe.na, gr, pe.cv)
-      this.session.setMembreId(im)
-      this.ui.setPage('groupe', 'membres')
+      while (true) {
+        const [amb, ano] = this.gSt.ambano
+        if (!amb) { // ça ne devrait pas se produire ici
+          await this.afficherDiag(this.$t('PPamb'))
+          return
+        }
+        const gr = this.gSt.egrC.groupe // groupe courant d'où vient la proposition d'inscription en contact
+        const pe = this.pSt.peC // people courant
+        const [nouveau, slot] = await gr.slot(pe.na)
+        if (!nouveau) { // ça ne devrait pas se produire ici
+          await this.afficherDiag(this.$t('PPctc'))
+          return
+        }
+        this.ui.egrplus = false
+        if (await new NouveauMembre().run(gr, slot, pe.na, pe.cv)) {
+          this.session.setMembreId(slot)
+          MD.fD()
+          this.ui.setPage('groupe', 'membres')
+          return
+        }
+        await sleep(500)
+      }
     }
   },
 

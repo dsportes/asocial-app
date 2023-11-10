@@ -28,7 +28,7 @@ export const usePeopleStore = defineStore('people', {
     map: new Map()
   }),
 
-  getters: {
+  getters: { // entrée du people courant
     peC: (state) => { 
       const id = stores.session.peopleId
       return state.map.get(id)

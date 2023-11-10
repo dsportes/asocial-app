@@ -1,52 +1,51 @@
 <template>
-  <div>
-    <!--div :class="dkli(idx)"-->
-      <q-expansion-item switch-toggle-side expand-separator dense group="trgroup">
-        <template v-slot:header>
-          <apercu-genx v-if="people" :na="mb.na" :cv="mb.cv" :ids="mb.ids" :idx="idx" detail-people/>
-          <div v-else class="row justify-between">
-            <div>
-              <span class="titre-lg text-bold text-primary">{{$t('moi2', [mb.na.nom])}}</span>
-              <span class="q-ml-lg font-mono fs-sm">{{'#' + mb.na.id}}</span>
-            </div>
-            <bouton-membre v-if="!nopanel" :eg="eg" :im="mb.ids" btn/>
+  <q-expansion-item v-if="mb" :class="dkli(idx)"
+    switch-toggle-side expand-separator dense group="trgroup">
+    <template v-slot:header>
+      <div class="column">
+        <apercu-genx v-if="people" :na="mb.na" :cv="mb.cv" :ids="mb.ids" :idx="idx" detail-people/>
+        <div v-else class="row justify-between">
+          <div>
+            <span class="titre-lg text-bold text-primary">{{$t('moi2', [mb.na.nom])}}</span>
+            <span class="q-ml-lg font-mono fs-sm">{{'#' + mb.na.id}}</span>
           </div>
-        </template>
-
+          <bouton-membre v-if="!nopanel" :eg="eg" :im="mb.ids" btn/>
+        </div>
         <div>
-          <div v-if="mb.ids === 1" class="titre-md q-mt-sm">{{$t('AMfond')}}</div>
-
-          <div v-for="f of flagListe(fl)" :key="f">
-            <span>{{$t('FLAGS' + f)}}</span>
-          </div>
-
-          <div class="q-mt-sm row titre-md text-italic">
-            <div class="col-3 text-center">{{$t('AMddi')}}</div>
-            <div class="col-3 text-center">{{$t('AMdpa')}}</div>
-            <div class="col-3 text-center">{{$t('AMdfa')}}</div>
-            <div class="col-3 text-center">{{$t('AMddp')}}</div>
-          </div>
-          <div class="row fs-md font-mono">
-            <div class="col-3 text-center">{{xd(mb.ddi)}}</div>
-            <div class="col-3 text-center">{{xd(mb.dpa)}}</div>
-            <div class="col-3 text-center">{{xd(mb.dfa)}}</div>
-            <div class="col-3 text-center">{{xd(mb.ddp)}}</div>
-          </div>
+          <span class="titre-md text-bold">{{$t('AMm' + stm)}}</span>
+          <span v-if="eg.groupe.estHeb(mb.ids)" class="q-ml-sm titre-md text-bold text-warning">{{$t('AMmh')}}</span>
+          <span v-if="mb.ids === 1" class="q-ml-sm titre-md text-bold text-warning">{{$t('AMmf')}}</span>
+          <span v-if="eg.groupe.accesMembre(mb.ids)" class="q-ml-sm titre-md">- {{$t('AMmm')}}</span>
+          <span v-if="ano !== 0" class="q-ml-sm titre-md">- {{$t('AMn' + ano)}}</span>
+        </div>
       </div>
-      </q-expansion-item>
+    </template>
 
-  </div>
+    <div>
+      <div style="position:relative">
+        <div v-if="dac===0" class="text-italic">{{$t('AMdac0')}}</div>
+        <div v-if="dac>1" class="text-italic">{{$t('AMdacd', xd(d))}}</div>
+        <div v-if="dam===0" class="text-italic">{{$t('AMdam0')}}</div>
+        <div v-if="dam===1" class="text-italic">{{$t('AMdam1')}}</div>
+        <div v-if="dam>1" class="text-italic">{{$t('AMdamd', xd(d))}}</div>
+        <div class="text-italic">{{$t('AMacno', dn)}}</div>
+        <bouton-bulle2 v-if="fl" :texte="edit(fl, $t, '\n\n')" :label="$t('details')"
+          class="btnb"/>
+      </div>
+    </div>
+  </q-expansion-item>
 </template>
 <script>
 import { ref, toRef } from 'vue'
 
-import { dkli } from 'src/app/util.mjs'
-import { AMJ, flagListe } from '../app/api.mjs'
+import { dkli, $t } from 'src/app/util.mjs'
+import { AMJ, edit } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonMembre from './BoutonMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
+import BoutonBulle2 from './BoutonBulle2.vue'
 import { MD } from '../app/modele.mjs'
 import { StatutMembre } from '../app/operations.mjs'
 
@@ -62,11 +61,43 @@ export default {
     nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
   },
 
-  components: { BoutonHelp, BoutonConfirm, ApercuGenx, BoutonMembre },
+  components: { BoutonHelp, BoutonConfirm, ApercuGenx, BoutonMembre, BoutonBulle2 },
 
   computed: {
+    amb () { return this.gSt.ambano[0] },
+
+    stm () { return this.eg.groupe.statutMajeur(this.mb.ids) },
+
+    ano () { return this.eg.groupe.accesNote(this.mb.ids) },
+
     fl () { return this.eg.groupe.flags[this.mb.ids] },
+
+    dn () {
+      const dl = this.mb.dln || 0
+      const de = this.mb.dln || 0
+      const an = this.eg.groupe.accesNote(this.mb.ids)
+      if (an === 1) return [$t('oui'), $t('non')]
+      if (an === 2) return [$t('oui'), $t('oui')]
+      return [dl ? $t('avant', [this.xd(dl)]) : $t('jamais'),
+        de ? $t('avant', [this.xd(de)]) : $t('jamais') ]
+    },
+
+    dam () {
+      const d = this.mb.dam || 0
+      const am = this.eg.groupe.accesMembre(this.mb.ids)
+      if (am) return 1
+      return d ? d : 0
+    },
+
+    dac () {
+      const d = this.mb.dac || 0
+      const ac = this.eg.groupe.estActif(this.mb.ids)
+      if (ac) return 1
+      return d
+    },
+
     una () { return this.eg.groupe.inv !== null },
+
     ro () { 
       if (this.mb.estAc) {
         const d = this.session.edit(true)
@@ -152,13 +183,13 @@ export default {
     const session = stores.session
     const gSt = stores.groupe
 
-    const mb = toRef(props, 'mb')
+    // const mb = toRef(props, 'mb')
  
     const chgSt = ref(false)
     function ovchgSt () { MD.oD(chgSt) }
 
     return {
-      MD, dkli, flagListe, chgSt, ovchgSt,
+      MD, dkli, edit, chgSt, ovchgSt,
       session,
       gSt
     }
@@ -180,4 +211,8 @@ export default {
 .btn1
   padding: 1px !important
   width: 1.5rem !important
+.btnb
+  position: absolute
+  top: 0
+  right: 0
 </style>

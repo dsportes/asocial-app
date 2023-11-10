@@ -29,6 +29,11 @@ export const useGroupeStore = defineStore('groupe', {
       return state.map.get(stores.session.groupeId)
     },
 
+    // Retourne [amb, ano] : les avatars du compte ont ou non accès aux membres / notes
+    ambano (state) {
+      return state.egrC ? stores.avatar.compte.ambano(state.egrC.groupe) : [false, false]
+    },
+
     egr: (state) => { return (id) => { 
         return state.map.get(id)
       }

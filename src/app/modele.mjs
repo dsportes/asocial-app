@@ -1245,9 +1245,11 @@ export class Avatar extends GenDoc {
     if (!empg) return [false, false]
     let ano = false, amb = false
     for (const [,im] of empg.avs) {
-      const f = groupe.flags[im]
-      if ((f & FLAGS.AM) && (f & FLAGS.DM)) amb = true
-      if ((f & FLAGS.AN) && (f & FLAGS.DN)) ano = true
+      if (groupe.anag[im] > 1) {
+        const f = groupe.flags[im]
+        if ((f & FLAGS.AM) && (f & FLAGS.DM)) amb = true
+        if ((f & FLAGS.AN) && (f & FLAGS.DN)) ano = true
+      }
     }
     return [amb, ano]
   }
@@ -1774,17 +1776,53 @@ export class Groupe extends GenDoc {
   estAuteur (im) { const f = this.flags[im] || 0; 
     return (f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
+  estHeb (im) { return this.estActif(im) && im === this.imh }
   accesMembre (im) {
     const f = this.flags[im] || 0;
     return (f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM) 
   }
+  accesNote (im) {
+    const f = this.flags[im] || 0;
+    if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN)) return f & FLAGS.DE ? 2 : 1
+    return 0
+  }
   estLibre (im) { return !this.anag[im] || this.anag[im] === 1 } 
+
+  statutMajeur (im) { 
+    /* 
+      AMm0: 'Contact',
+      AMm1: 'Contact invité',
+      AMm2: 'Membre actif',
+      AMm3: 'Membre animateur',
+      AMm4: 'DISPARU',
+    */
+    if (this.estDisparu(im)) return 4
+    if (this.estAnim(im)) return 3
+    if (this.estActif(im)) return 2
+    if (this.estInvite(im)) return 1
+    return 0
+  }
 
   setDisparu (im) {
     if (!this.estDisparu(im)) {
       this.anag[im] = this.flags[im] & FLAGS.HA ? 1 : 0
       this.flags[im] = 0 
     }
+  }
+
+  /* Retourne [nv, im]
+  - nv: true si l'avatar n'est pas déjà membre du groupe
+  - im: im actuel de l'avatar ou du slot qu'il peut occuper
+  */
+  async slot (na) {
+    const nag = await Groupe.getNag(this.na, na)
+    let im = 0
+    let slot = 0
+    for(let i = 1; i < this.anag.length; i++) { 
+      if (!slot && gr.estLibre(i)) slot = i
+      if (gr.anag[im] === nag) { im = i; break }
+    }
+    return !im ? [true, slot || gr.anag.length] : [false, im]
   }
 
   async compile (row) {
@@ -1896,10 +1934,10 @@ export class Membre extends GenDoc {
   async compile (row) {
     const aSt = stores.avatar
     this.vsh = row.vsh || 0
-    this.ddi = row.ddi || 0
-    this.dpa = row.dpa || 0
-    this.ddp = row.ddp || 0
-    this.dfa = row.dfa || 0
+    this.dac = row.dac || 0
+    this.dln = row.dln || 0
+    this.den = row.den || 0
+    this.dam = row.dam || 0
     this.inv = row.inv || null
     this.na = NomGenerique.from(decode(await decrypter(this.cleg, row.nag)))
     this.estAc = aSt.compte.avatarIds.has(this.na.id)
@@ -1908,8 +1946,7 @@ export class Membre extends GenDoc {
 
   static async rowNouveauMembre (nag, na, im, dlv, cv) {
     const r = { id: nag.id, ids: im, v: 0, dlv, vcv: cv ? cv.v : 0,
-      ddi: 0, dda: 0, dpa: 0, dfa: 0 }
-    if (dlv) r.dpa = AMJ.amjUtc()
+      ddi: 0, dln: 0, den: 0, dam: 0 }
     r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
     r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
     const _data_ = new Uint8Array(encode(r))
