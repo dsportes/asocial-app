@@ -135,7 +135,7 @@ import { ref, toRef } from 'vue'
 import { dkli, $t } from 'src/app/util.mjs'
 import { AMJ, edit } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
-import BoutonConfirm from './BoutonConfirm.vue'
+// import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonMembre from './BoutonMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
@@ -155,7 +155,7 @@ export default {
     nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
   },
 
-  components: { BoutonHelp, BoutonConfirm, ApercuGenx, BoutonMembre, BoutonBulle2 },
+  components: { BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2 },
 
   computed: {
     amb () { return this.gSt.ambano[0] },
