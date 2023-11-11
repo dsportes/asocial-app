@@ -151,6 +151,17 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
+    animAvcIms: (state) => { return (e) => {
+        const s = []
+        for (const [im, m] of e.mbacs) { 
+          if (e.groupe.estAnim(im)) {
+            s.push({ label: m.na.nom, value: im })
+          }
+        }
+        return s
+      }
+    },
+
     actifIds: (state) => { return (e) => {
         const s = new Set()
         for (const [,m] of e.membres) { if (e.groupe.estActif(m.ids)) s.add(m.na.id) }

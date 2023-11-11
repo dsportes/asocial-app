@@ -26,7 +26,7 @@
         <div v-if="dac===0" class="text-italic">{{$t('AMdac0')}}</div>
         <div v-if="dac>1" class="text-italic">{{$t('AMdacd', xd(d))}}</div>
 
-        <div v-if="stm===0 && mb.flagsiv">
+        <div v-if="stm===0 && eg.groupe.msu !== null && mb.flagsiv">
           <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
           <div class="fs-md q-ml-md">
             <span class="text-italic">{{$t('AMinvvp')}}</span>
@@ -98,7 +98,20 @@
           </q-toolbar>
         </q-header>
 
+        <q-card-section v-if="stm===0 && eg.groupe.msu !== null && mb.flagsiv">
+          <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
+          <div class="fs-md q-ml-md">
+            <span class="text-italic">{{$t('AMinvvp')}}</span>
+            <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
+          </div>
+          <div class="fs-md q-ml-md">
+            <span class="text-italic">{{$t('AMinvvc')}}</span>
+            <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
+          </div>
+        </q-card-section>
+
         <q-card-section class="column q-ma-xs q-pa-xs titre-md">
+          <q-select class="q-mb-md" v-model="invpar" :options="options" :label="$t('AMinvpar')" />
           <q-checkbox v-model="inv.pa" :label="$t('FLAGS7')" />
           <q-checkbox v-model="inv.dm" :label="$t('FLAGS3')" />
           <q-checkbox v-model="inv.dn" :label="$t('FLAGS5')" />
@@ -106,7 +119,10 @@
         </q-card-section>
         <q-card-actions vertical>
           <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-          <q-btn flat :label="$t('valider')" color="warning" @click="inviter"/>
+          <q-btn v-if="!eg.groupe.msu" flat :label="$t('AMinviter')" color="primary" @click="inviter(1)"/>
+          <q-btn v-if="!eg.groupe.msu" flat :label="$t('AMdelinv')" color="warning" @click="inviter(2)"/>
+          <q-btn v-if="eg.groupe.msu" :label="$t('AMvpour')" color="primary" @click="inviter(3)"/>
+          <q-btn v-if="eg.groupe.msu" :label="$t('AMvcontre')" color="warning" @click="inviter(4)"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -125,7 +141,7 @@ import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle2 from './BoutonBulle2.vue'
 import { MD } from '../app/modele.mjs'
-import { StatutMembre } from '../app/operations.mjs'
+import { StatutMembre, InvitationGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuMembre',
@@ -209,14 +225,6 @@ export default {
       return ed.join(', ')
     },
 
-    votes () {
-      const [vp, vc] = this.gSt.animInv // listes des NA
-      const lp = [], lc = []
-      vp.forEach(na => {lp.push(na.nomc) })
-      vc.forEach(na => {lc.push(na.nomc) })
-      return [lp.join(', '), lc.join(', ')]
-    },
-
     una () { return this.eg.groupe.inv !== null },
 
     ro () { 
@@ -242,6 +250,8 @@ export default {
 
   data () { return {
     inv: null,
+    invpar: null,
+    options: null,
 
     action: false,
     fn: 0, // fonction à effectuer
@@ -269,12 +279,25 @@ export default {
         afficherDiag($t('AMlnoire'))
         return
       }
-      this.inv = { pa: false, dm: false, dn: false, de: false } 
+      this.options = this.gSt.animAvcIms(this.eg)
+      this.invpar = this.options[0]
+      const fl = this.mb.flagsiv || 0
+      this.inv = { 
+        pa: (fl & FLAGS.PA) === 0,
+        dm: (fl & FLAGS.DM) === 0,
+        dn: (fl & FLAGS.DN) === 0,
+        de: (fl & FLAGS.DE) === 0
+      } 
       this.ovinvit()
     },
 
-    async inviter () {
-
+    async inviter (op) { //1:inviter 2:suppr invit 3:pour 4:contre
+      let nvinv = 0
+      if (this.inv.pa) nvinv |= FLAGS.PA
+      if (this.inv.dm) nvinv |= FLAGS.DM
+      if (this.inv.de) nvinv |= FLAGS.DE | FLAGS.DN
+      else if (this.inv.dn) nvinv |= FLAGS.DN
+      await new InvitationGroupe().run(op, this.eg.groupe, this.mb, this.invpar.value, nvinv)
     },
 
     // PURGATOIRE

@@ -1336,6 +1336,11 @@ export default {
   AMinvev: 'Invitation en cours de vote: {0}',
   AMinvvp: 'Ont voté pour:',
   AMinvvc: 'N\'ont pas voté:',
+  AMinvpar: 'Invité par ...',
+  AMvpour: 'Je vote pour',
+  AMvcontre: 'Je vote contre',
+  AMinviter: 'Inviter',
+  AMdelinv: 'Supprimer l\'invitation',
 
   AMfond: 'Fondateur.',
   AMpasanst1: 'Seul un animateur de ce groupe peut changer le statut d\'un membre.',
