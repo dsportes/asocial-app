@@ -158,7 +158,10 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
-    /* NA des animateurs du groupe courant ayant voté pour inviter le membre courant */
+    /* NA des animateurs du groupe courant ayant voté 
+    - pour inviter le membre courant 
+    - contre (en fait pas encore voté)
+    */
     animInv: (state) => {
       const lc = []
       const la = []
@@ -169,10 +172,11 @@ export const useGroupeStore = defineStore('groupe', {
       const g = e.groupe
       if (!m) return
       const inv = m.inv || []
-      for(let im = 1; im < g.ast.length; im++) {
-        if (g.ast[im] !== 32) continue
+      for(let im = 1; im < g.flags.length; im++) {
+        if (g.flags[im] & FLAGS.PA) {
         const a = e.membres.get(im)
         if (inv.indexOf(im) === -1) la.push(a.na); else lc.push(a.na)
+        }
       }
       return [lc, la]
     },

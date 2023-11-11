@@ -1771,6 +1771,8 @@ export class Groupe extends GenDoc {
   estContact (im) { return this.anag[im] && this.anag[im] > 1 && !(this.flags[im] & FLAGS.AC) }
   estDisparu (im)  { return !this.anag[im] || this.anag[im] === 1 }
   estInvite (im) { return this.flags[im] & FLAGS.IN }
+  estInvitable (im) { const f = this.flags[im] || 0;
+    return !(f & FLAGS.AC) && !(f & FLAGS.IN) }
   estActif (im) { return this.flags[im] & FLAGS.AC }
   estAnim (im) { const f = this.flags[im] || 0; return (f & FLAGS.AC) && (f & FLAGS.PA) }
   estAuteur (im) { const f = this.flags[im] || 0; 
@@ -1820,6 +1822,8 @@ export class Groupe extends GenDoc {
     if (this.estInvite(im)) return 1
     return 0
   }
+
+  enListeNoire (nag) { return (this.lna.indexOf(nag) !== -1) || (this.lnc.indexOf(nag) !== -1)}
 
   setDisparu (im) {
     if (!this.estDisparu(im)) {
@@ -1957,8 +1961,10 @@ export class Membre extends GenDoc {
     this.dln = row.dln || 0
     this.den = row.den || 0
     this.dam = row.dam || 0
+    this.flagsiv = row.flagsiv || 0
     this.inv = row.inv || null
     this.na = NomGenerique.from(decode(await decrypter(this.cleg, row.nag)))
+    this.nag = await getNag (this.ng, this.na) 
     this.estAc = aSt.compte.avatarIds.has(this.na.id)
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
   }

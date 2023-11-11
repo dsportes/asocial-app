@@ -1212,6 +1212,33 @@ export class ModeSimple extends OperationUI {
   }
 }
 
+export class InvitationGroupe extends OperationUI {
+  constructor () { super($t('OPstmb')) }
+
+  /* 
+  gr: groupe
+  mb: membre
+  fn: fonction à appliquer
+  laa: lecteur, auteur, animateur
+  ard: texte de l'ardoise, false s'il n'a pas changé, null s'il est effacé
+  */
+  async run (gr, mb, flags) { // inv = { pa: false, dm: false, dn: false, de: false } 
+    try {
+      const args = { token: session.authToken, 
+        id: gr.id, 
+        ids: mb.ids,
+        idm: mb.na.id,
+        flags,
+        ni: 0
+      }
+      const ret = this.tr(await post(this, 'InvitationGroupe', args))
+      return this.finOK(ret.code || 0)
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
 /* Changement de statut d'un membre d'un groupe
 args.token donne les éléments d'authentification du compte.
 args.id: id du groupe 

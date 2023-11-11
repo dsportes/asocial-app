@@ -26,6 +26,18 @@
         <div v-if="dac===0" class="text-italic">{{$t('AMdac0')}}</div>
         <div v-if="dac>1" class="text-italic">{{$t('AMdacd', xd(d))}}</div>
 
+        <div v-if="stm===0 && mb.flagsiv">
+          <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
+          <div class="fs-md q-ml-md">
+            <span class="text-italic">{{$t('AMinvvp')}}</span>
+            <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
+          </div>
+          <div class="fs-md q-ml-md">
+            <span class="text-italic">{{$t('AMinvvc')}}</span>
+            <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
+          </div>
+        </div>
+
         <div v-if="stm <= 1" class="text-italic">
           <span v-if="damh===0">{{$t('AMdam0')}}</span>
           <span v-if="damh>1">{{$t('AMdamd', [xd(damh)])}}</span>
@@ -70,7 +82,35 @@
         <bouton-bulle2 v-if="fl" :texte="edit(fl, $t, '\n\n')" :label="$t('details')"
           class="btnb"/>
       </div>
+      <div class="row q-gutter-sm">
+        <q-btn v-if="eg.estAnim && invitable" :label="$t('AMinvitbtn')" icon="add" dense size="sm" align="sm"
+          @click="ouvririnvit"/>
+      </div>
     </div>
+
+    <q-dialog v-model="invit" persistent>
+      <q-card class="bs">
+        <q-header elevated class="bg-secondary text-white">
+          <q-toolbar>
+            <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AMinvtit', [mb.na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
+            <bouton-help page="page1"/>
+          </q-toolbar>
+        </q-header>
+
+        <q-card-section class="column q-ma-xs q-pa-xs titre-md">
+          <q-checkbox v-model="inv.pa" :label="$t('FLAGS7')" />
+          <q-checkbox v-model="inv.dm" :label="$t('FLAGS3')" />
+          <q-checkbox v-model="inv.dn" :label="$t('FLAGS5')" />
+          <q-checkbox v-if="inno" v-model="inv.de" :label="$t('FLAGS6')" />
+        </q-card-section>
+        <q-card-actions vertical>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+          <q-btn flat :label="$t('valider')" color="warning" @click="inviter"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-expansion-item>
 </template>
 <script>
@@ -156,6 +196,27 @@ export default {
       return d
     },
 
+    invitable () { return this.eg.groupe.estActif(this.mb.ids) },
+
+    edFlagsiv () { 
+      const f = this.mb.flagsiv
+      if (!f) return ''
+      const ed = []
+      if (f & FLAGS.PA) ed.push(this.$t('AMinvpa'))
+      if (f & FLAGS.DM) ed.push(this.$t('AMinvdm'))
+      if (f & FLAGS.PE) ed.push(this.$t('AMinvpe'))
+      else if (f & FLAGS.DN) ed.push(this.$t('AMinvdn'))
+      return ed.join(', ')
+    },
+
+    votes () {
+      const [vp, vc] = this.gSt.animInv // listes des NA
+      const lp = [], lc = []
+      vp.forEach(na => {lp.push(na.nomc) })
+      vc.forEach(na => {lc.push(na.nomc) })
+      return [lp.join(', '), lc.join(', ')]
+    },
+
     una () { return this.eg.groupe.inv !== null },
 
     ro () { 
@@ -180,6 +241,8 @@ export default {
   */
 
   data () { return {
+    inv: null,
+
     action: false,
     fn: 0, // fonction à effectuer
     laa: 0, // 0:lecteur, 1:auteur, 2:animateur
@@ -191,6 +254,30 @@ export default {
   methods: {
     xd (d) { return !d ? '-' : AMJ.editDeAmj(d, true) },
 
+    ouvrirdetails () {
+      this.session.setPeopleId(this.mb.na.id)
+      MD.oD('detailspeople')
+    },
+    activernano () { },
+    desactivernano () { },
+    activeramb () { },
+    desactiveramb () { },
+
+    async ouvririnvit () {
+      if (!await this.session.edit()) return
+      if (this.eg.groupe.enListeNoire(this.mb.nag)) {
+        afficherDiag($t('AMlnoire'))
+        return
+      }
+      this.inv = { pa: false, dm: false, dn: false, de: false } 
+      this.ovinvit()
+    },
+
+    async inviter () {
+
+    },
+
+    // PURGATOIRE
     async setAc (fn, laa) {
       // Contrôles fins
       this.err1 = '' // bloquantes
@@ -232,15 +319,7 @@ export default {
       this.action = false
       this.err1 = ''
       this.err2 = ''
-    },
-    ouvrirdetails () {
-      this.session.setPeopleId(this.mb.na.id)
-      MD.oD('detailspeople')
-    },
-    activernano () { },
-    desactivernano () { },
-    activeramb () { },
-    desactiveramb () { },
+    }
   },
 
   setup (props) {
@@ -251,9 +330,11 @@ export default {
  
     const chgSt = ref(false)
     function ovchgSt () { MD.oD(chgSt) }
+    const invit = ref(false)
+    function ovinvit () { MD.oD(invit) }
 
     return {
-      MD, dkli, edit, chgSt, ovchgSt,
+      MD, dkli, edit, chgSt, ovchgSt, invit, ovinvit,
       session,
       gSt
     }
