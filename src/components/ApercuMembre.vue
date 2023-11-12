@@ -23,36 +23,56 @@
 
     <div>
       <div class="q-ml-lg" style="position:relative">
-        <div v-if="dac===0" class="text-italic">{{$t('AMdac0')}}</div>
-        <div v-if="dac>1" class="text-italic">{{$t('AMdacd', xd(d))}}</div>
+        <div v-if="dac === 0" class="text-italic">{{$t('AMdac0')}}</div>
+        <div v-if="dac > 1" class="text-italic">{{$t('AMdacd', xd(d))}}</div>
 
-        <div v-if="stm===0 && eg.groupe.msu !== null && mb.flagsiv">
-          <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
-          <div class="fs-md q-ml-md">
-            <span class="text-italic">{{$t('AMinvvp')}}</span>
-            <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
+        <div v-if="stm <= 1">
+          <div class="text-italic">
+            <span v-if="damh===0">{{$t('AMdam0')}}</span>
+            <span v-if="damh>1">{{$t('AMdamd', [xd(damh)])}}</span>
           </div>
-          <div class="fs-md q-ml-md">
-            <span class="text-italic">{{$t('AMinvvc')}}</span>
-            <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
+          <div class="text-italic">{{$t('AMacnoh' + (dnh ? '' : '0'), dnh)}}</div>
+          <div class="text-italic">
+            <span v-if="!mb.ddi">{{$t('AMinv0')}}</span>
+            <span v-else>{{$t('AMinvd', [xd(mb.ddi)])}}</span>
           </div>
-        </div>
+          <div v-if="enLNC" class="text-bold">{{$t('AMlnc')}}</div>
+          <div v-if="enLNA" class="text-bold">{{$t('AMlna')}}</div>
+          <div v-if="!enLNA && !enLNC">
+            <div v-if="stm === 1" class="text-italic">
+              <span>{{$t('AMinvit')}}</span>
+              <span v-if="fl & FLAGS.PA" class="q-ml-sm">- {{$t('AMinvan')}}</span>
+              <span v-if="fl & FLAGS.DM" class="q-ml-sm">- {{$t('AMinvam')}}</span>
+              <span v-if="(fl & FLAGS.DN) && !(fl & FLAGS.DE)" class="q-ml-sm">- {{$t('AMinvln')}}</span>
+              <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
+            </div>
 
-        <div v-if="stm <= 1" class="text-italic">
-          <span v-if="damh===0">{{$t('AMdam0')}}</span>
-          <span v-if="damh>1">{{$t('AMdamd', [xd(damh)])}}</span>
-        </div>
-        <div v-if="stm <= 1" class="text-italic">{{$t('AMacnoh' + (dnh ? '' : '0'), dnh)}}</div>
-        <div v-if="stm <= 1" class="text-italic">
-          <span v-if="!mb.ddi">{{$t('AMinv0')}}</span>
-          <span v-else>{{$t('AMinvd', [xd(mb.ddi)])}}</span>
-        </div>
-        <div v-if="stm === 1" class="text-italic">
-          <span>{{$t('AMinvit')}}</span>
-          <span v-if="fl & FLAGS.PA" class="q-ml-sm">- {{$t('AMinvan')}}</span>
-          <span v-if="fl & FLAGS.DM" class="q-ml-sm">- {{$t('AMinvam')}}</span>
-          <span v-if="(fl & FLAGS.DN) && !(fl & FLAGS.DE)" class="q-ml-sm">- {{$t('AMinvln')}}</span>
-          <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
+            <q-btn v-if="stm===0 && eg.groupe.msu === null" icon="add" dense size="sm" align="sm" color="primary"
+              :label="$t('AMinvitbtn1')" @click="ouvririnvit(1)"/>
+
+            <q-btn v-if="stm===1 && eg.groupe.msu === null" icon="edit" dense size="sm" align="sm" color="primary"
+              :label="$t('AMinvitbtn2')" @click="ouvririnvit(2)"/>
+            <q-btn v-if="stm===1 && eg.groupe.msu === null" class="q-ml-sm" icon="delete" dense size="sm" align="sm" color="primary"
+              :label="$t('AMinvitbtn3')" @click="ouvririnvit(3)"/>
+
+            <div v-if="eg.groupe.msu !== null && mb.flagsiv">
+              <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
+              <div class="fs-md q-ml-md">
+                <span class="text-italic">{{$t('AMinvvp')}}</span>
+                <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
+              </div>
+              <div class="fs-md q-ml-md">
+                <span class="text-italic">{{$t('AMinvvc')}}</span>
+                <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
+              </div>
+            </div>
+
+            <q-btn v-if="stm===0 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" align="sm" color="primary"
+              :label="$t('AMinvitbtn4')" @click="ouvririnvit(4)"/>
+
+            <q-btn v-if="stm===1 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" align="sm" color="primary"
+              :label="$t('AMinvitbtn3')" @click="ouvririnvit(6)"/>
+          </div>
         </div>
 
         <div v-if="stm === 2 || stm === 3" class="text-italic">
@@ -98,7 +118,7 @@
           </q-toolbar>
         </q-header>
 
-        <q-card-section v-if="stm===0 && eg.groupe.msu !== null && mb.flagsiv">
+        <q-card-section v-if="cas > 3">
           <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
           <div class="fs-md q-ml-md">
             <span class="text-italic">{{$t('AMinvvp')}}</span>
@@ -111,18 +131,32 @@
         </q-card-section>
 
         <q-card-section class="column q-ma-xs q-pa-xs titre-md">
-          <q-select class="q-mb-md" v-model="invpar" :options="options" :label="$t('AMinvpar')" />
-          <q-checkbox v-model="inv.pa" :label="$t('FLAGS7')" />
-          <q-checkbox v-model="inv.dm" :label="$t('FLAGS3')" />
-          <q-checkbox v-model="inv.dn" :label="$t('FLAGS5')" />
-          <q-checkbox v-if="inno" v-model="inv.de" :label="$t('FLAGS6')" />
+          <div class="row">
+            <q-select class="q-mb-md" v-model="invpar" :options="options" :label="$t('AMinvpar')" />
+            <span v-if="cas === 4 && gst.animInv[0].indexOf(invpar) !== -1"
+              class= "q-ml-md text-bold text-warning bg-yellow-3">{{$t('AMdejav')}}</span>
+          </div>
+          <q-checkbox :disable="!drupd" v-model="ipa" :label="$t('FLAGS7')" />
+          <q-checkbox :disable="!drupd" v-model="idm" :label="$t('FLAGS3')" />
+          <q-checkbox :disable="!drupd" v-model="idn" :label="$t('FLAGS5')" />
+          <q-checkbox :disable="!drupd" v-if="idn" v-model="ide" :label="$t('FLAGS6')" />
+          <div v-if="drupd" class="q-mt-sm height-3">
+            <div v-if="cas === 2 && mb.flagsiv === nvflags">{{$t('AMnochg')}}</div>
+            <div v-if="cas === 4 && mb.flagsiv !== nvflags"
+              class= "text-bold text-warning bg-yellow-3">{{$t('AMchg')}}</div>
+          </div>
         </q-card-section>
         <q-card-actions vertical>
           <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-          <q-btn v-if="!eg.groupe.msu" flat :label="$t('AMinviter')" color="primary" @click="inviter(1)"/>
-          <q-btn v-if="!eg.groupe.msu" flat :label="$t('AMdelinv')" color="warning" @click="inviter(2)"/>
-          <q-btn v-if="eg.groupe.msu" :label="$t('AMvpour')" color="primary" @click="inviter(3)"/>
-          <q-btn v-if="eg.groupe.msu" :label="$t('AMvcontre')" color="warning" @click="inviter(4)"/>
+          <q-btn v-if="cas === 1" flat :label="$t('AMinviter')" color="primary" @click="inviter(1)"/>
+          <q-btn v-if="cas === 2" :disable="mb.flagsiv === nvflags"
+            flat :label="$t('AMmodinv')" color="primary" @click="inviter(2)"/>
+          <q-btn v-if="cas === 3" flat :label="$t('AMdelinv')" color="warning" @click="inviter(3)"/>
+          <q-btn v-if="cas === 4" :label="$t('AMvpour')" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
+            :disable="gst.animInv[0].indexOf(invpar) !== -1 && mb.flagsiv === nvflags" @click="inviter(4)"/>
+          <q-btn v-if="cas === 4" :label="$t('AMvcontre')" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
+            :disable="gst.animInv[1].indexOf(invpar) !== -1" @click="inviter(5)"/>
+          <q-btn v-if="cas === 6" flat :label="$t('AMdelinv')" color="warning" @click="inviter(6)"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -171,6 +205,9 @@ export default {
     ambna () { return this.eg.groupe.accesMembreNA(this.mb.ids) },
 
     fl () { return this.eg.groupe.flags[this.mb.ids] },
+    
+    enLNA () { return this.eg.groupe.enLNA(this.mb.ids) },
+    enLNC () { return this.eg.groupe.enLNC(this.mb.ids) },
 
     dn () {
       const dl = this.mb.dln || 0
@@ -212,7 +249,7 @@ export default {
       return d
     },
 
-    invitable () { return this.eg.groupe.estActif(this.mb.ids) },
+    invitable () { return this.eg.groupe.estInvitable(this.mb.ids) },
 
     edFlagsiv () { 
       const f = this.mb.flagsiv
@@ -227,38 +264,28 @@ export default {
 
     una () { return this.eg.groupe.inv !== null },
 
-    ro () { 
-      if (this.mb.estAc) {
-        const d = this.session.edit(true)
-        return d || ''
-      }
-      if (!this.eg.estAnim) return this.$t('AMpasanst1')
-      if (this.st === 32) return this.$t('AMpasanst2')
-      return ''
+    nvflags () {
+      let n = 0
+      if (this.ipa) n |= FLAGS.PA
+      if (this.idm) n |= FLAGS.DM
+      if (this.ide) n |= FLAGS.DE | FLAGS.DN
+      else if (this.idn) n |= FLAGS.DN
+      return n
     },
+
+    drupd () { return this.cas < 3 || this.cas === 4 && this.cas === 5 },
+    
   },
 
-  /*
-  1 - invitation
-  2 - modification d'invitation
-  3 - acceptation d'invitation
-  4 - refus d'invitation
-  5 - modification du rôle laa (actif)
-  6 - résiliation
-  7 - oubli
-  */
-
   data () { return {
-    inv: null,
+    /* 
+    1: invit std, 2: modif invit std, 3: suppr invit std, 
+    4: vote pour, 5: vote contre, 6: suppr invit una 
+    */
+    cas: 0,
+    ipa: false, idm: false, idn: false, ide: false,
     invpar: null,
-    options: null,
-
-    action: false,
-    fn: 0, // fonction à effectuer
-    laa: 0, // 0:lecteur, 1:auteur, 2:animateur
-    err1: '',
-    err2: '',
-    ardoise: ''
+    options: null
   }},
 
   methods: {
@@ -273,31 +300,30 @@ export default {
     activeramb () { },
     desactiveramb () { },
 
-    async ouvririnvit () {
+    async ouvririnvit (cas) {
       if (!await this.session.edit()) return
-      if (this.eg.groupe.enListeNoire(this.mb.nag)) {
+      if (this.enLAN || this.enLNC) {
         afficherDiag($t('AMlnoire'))
         return
       }
+      this.cas = cas
+      const fl = this.mb.flagsiv || 0
+      this.ipa = (fl & FLAGS.PA) === 0
+      this.idm = (fl & FLAGS.DM) === 0
+      this.idn = (fl & FLAGS.DN) === 0
+      this.ide = (fl & FLAGS.DE) === 0
       this.options = this.gSt.animAvcIms(this.eg)
       this.invpar = this.options[0]
-      const fl = this.mb.flagsiv || 0
-      this.inv = { 
-        pa: (fl & FLAGS.PA) === 0,
-        dm: (fl & FLAGS.DM) === 0,
-        dn: (fl & FLAGS.DN) === 0,
-        de: (fl & FLAGS.DE) === 0
-      } 
       this.ovinvit()
     },
 
-    async inviter (op) { //1:inviter 2:suppr invit 3:pour 4:contre
-      let nvinv = 0
-      if (this.inv.pa) nvinv |= FLAGS.PA
-      if (this.inv.dm) nvinv |= FLAGS.DM
-      if (this.inv.de) nvinv |= FLAGS.DE | FLAGS.DN
-      else if (this.inv.dn) nvinv |= FLAGS.DN
-      await new InvitationGroupe().run(op, this.eg.groupe, this.mb, this.invpar.value, nvinv)
+    async inviter (cas) { 
+      /* 
+      1: invit std, 2: modif invit std, 3: suppr invit std, 
+      4: vote pour, 5: vote contre, 6: suppr invit una 
+      */
+      await new InvitationGroupe().run(cas, this.eg.groupe, this.mb, this.invpar.value, this.nvflags)
+      MD.fD()
     },
 
     // PURGATOIRE

@@ -1212,19 +1212,53 @@ export class ModeSimple extends OperationUI {
   }
 }
 
+/* Nouveau membre (contact) *******************************************
+args.token donne les éléments d'authentification du compte.
+args.op : opération demandée: 
+  1: invit std, 2: modif invit std, 3: suppr invit std, 
+  4: vote pour, 5: vote contre, 6: suppr invit una 
+args.idg : id du groupe
+args.ids: indice du membre invité
+args.idm: id de l'avatar du membre invité
+args.im: indice de l'animateur invitant
+args.flags: flags PA DM DN DE de l'invité
+args.ni: numéro d'invitation pour l'avatar invité, clé dans la map invits
+args.invit: élément dans la map invits {nomg, cleg, im}` cryptée par la clé publique RSA de l'avatar.
+Retour:
+*/
+
 export class InvitationGroupe extends OperationUI {
   constructor () { super($t('OPstmb')) }
 
-  async run (op, gr, mb, im, flags) { //op 1:inviter 2:suppr invit 3:pour 4:contre
+  async run (op, gr, mb, im, flags) { 
+      /* op:
+      1: invit std, 2: modif invit std, 3: suppr invit std, 
+      4: vote pour, 5: vote contre, 6: suppr invit una 
+
+      - `invits`: maps des invitations en cours de l'avatar:
+      - _clé_: `ni`, numéro d'invitation. hash du cryptage par la clé du groupe de la clé _inversée_ de l'avatar. Ceci permet à un animateur du groupe de détruire l'entrée.
+      - _valeur_: `{nomg, cleg, im}` cryptée par la clé publique RSA de l'avatar.
+        - `nomg`: nom du groupe,
+        - `cleg`: clé du groupe,
+        - `im`: indice du membre dans la table `flags / anag` du groupe.
+      */
     try {
+      const session = stores.session
+      const aSt = stores.avatar
+
+      const x = { nomg: gr.na.nom, cleg: gr.na.rnd, im }
+      const pub = await aSt.getPub(mb.na.id)
+      const invit = await crypterRSA(pub, new Uint8Array(encode(x)))
+
       const args = { token: session.authToken, 
         op,
-        id: gr.id, 
+        idg: gr.id, 
         ids: mb.ids,
         idm: mb.na.id,
         im,
         flags,
-        ni: await Groupe.getNi(gr.na, mb.na)
+        ni: await Groupe.getNi(gr.na, mb.na),
+        invit
       }
       const ret = this.tr(await post(this, 'InvitationGroupe', args))
       return this.finOK(ret.code || 0)

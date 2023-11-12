@@ -1205,7 +1205,7 @@ _data_:
   - _valeur_: `{nomg, cleg, im}` cryptée par la clé publique RSA de l'avatar.
     - `nomg`: nom du groupe,
     - `cleg`: clé du groupe,
-    - `im`: indice du membre dans la table `ast` du groupe.
+    - `im`: indice du membre dans la table `flags / anag` du groupe.
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `napc` : `[nom, cle]` de l'avatar cryptée par le PBKFD de la phrase de contact.
 */
@@ -1771,13 +1771,15 @@ export class Groupe extends GenDoc {
   estContact (im) { return this.anag[im] && this.anag[im] > 1 && !(this.flags[im] & FLAGS.AC) }
   estDisparu (im)  { return !this.anag[im] || this.anag[im] === 1 }
   estInvite (im) { return this.flags[im] & FLAGS.IN }
-  estInvitable (im) { const f = this.flags[im] || 0;
-    return !(f & FLAGS.AC) && !(f & FLAGS.IN) }
   estActif (im) { return this.flags[im] & FLAGS.AC }
   estAnim (im) { const f = this.flags[im] || 0; return (f & FLAGS.AC) && (f & FLAGS.PA) }
   estAuteur (im) { const f = this.flags[im] || 0; 
     return (f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
+  estInvitable (im) { const f = this.flags[im] || 0; 
+    return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !this.enLNA && !this.enLNC 
+  }
+
   estHeb (im) { return this.estActif(im) && im === this.imh }
   accesMembre (im) {
     const f = this.flags[im] || 0;
@@ -1823,7 +1825,10 @@ export class Groupe extends GenDoc {
     return 0
   }
 
-  enListeNoire (nag) { return (this.lna.indexOf(nag) !== -1) || (this.lnc.indexOf(nag) !== -1)}
+  // mis dans la liste noire par un animateur
+  enLNA (nag) { return (this.lna.indexOf(nag) !== -1)}
+  // mis dans la liste noire par le compte lui-même
+  enLNC (nag) { return (this.lnc.indexOf(nag) !== -1)}
 
   setDisparu (im) {
     if (!this.estDisparu(im)) {
