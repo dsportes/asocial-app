@@ -47,12 +47,12 @@
               <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
             </div>
 
-            <q-btn v-if="stm===0 && eg.groupe.msu === null" icon="add" dense size="sm" align="sm" color="primary"
+            <q-btn v-if="stm===0 && eg.groupe.msu === null" icon="add" dense size="sm" color="primary"
               :label="$t('AMinvitbtn1')" @click="ouvririnvit(1)"/>
 
-            <q-btn v-if="stm===1 && eg.groupe.msu === null" icon="edit" dense size="sm" align="sm" color="primary"
+            <q-btn v-if="stm===1 && eg.groupe.msu === null" icon="edit" dense size="sm" color="primary"
               :label="$t('AMinvitbtn2')" @click="ouvririnvit(2)"/>
-            <q-btn v-if="stm===1 && eg.groupe.msu === null" class="q-ml-sm" icon="delete" dense size="sm" align="sm" color="primary"
+            <q-btn v-if="stm===1 && eg.groupe.msu === null" class="q-ml-sm" icon="delete" dense size="sm" color="primary"
               :label="$t('AMinvitbtn3')" @click="ouvririnvit(3)"/>
 
             <div v-if="eg.groupe.msu !== null && mb.flagsiv">
@@ -67,10 +67,10 @@
               </div>
             </div>
 
-            <q-btn v-if="stm===0 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" align="sm" color="primary"
+            <q-btn v-if="stm===0 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
               :label="$t('AMinvitbtn4')" @click="ouvririnvit(4)"/>
 
-            <q-btn v-if="stm===1 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" align="sm" color="primary"
+            <q-btn v-if="stm===1 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
               :label="$t('AMinvitbtn3')" @click="ouvririnvit(6)"/>
           </div>
         </div>
@@ -103,20 +103,18 @@
           class="btnb"/>
       </div>
       <div class="row q-gutter-sm">
-        <q-btn v-if="eg.estAnim && invitable" :label="$t('AMinvitbtn')" icon="add" dense size="sm" align="sm"
+        <q-btn v-if="eg.estAnim && invitable" :label="$t('AMinvitbtn')" icon="add" dense size="sm"
           @click="ouvririnvit"/>
       </div>
     </div>
 
     <q-dialog v-model="invit" persistent>
-      <q-card class="bs">
-        <q-header elevated class="bg-secondary text-white">
-          <q-toolbar>
-            <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AMinvtit', [mb.na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
-            <bouton-help page="page1"/>
-          </q-toolbar>
-        </q-header>
+      <q-card class="bs moyennelargeur">
+        <q-toolbar class="bg-secondary text-white">>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AMinvtit', [mb.na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
 
         <q-card-section v-if="cas > 3">
           <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
@@ -132,8 +130,8 @@
 
         <q-card-section class="column q-ma-xs q-pa-xs titre-md">
           <div class="row">
-            <q-select class="q-mb-md" v-model="invpar" :options="options" :label="$t('AMinvpar')" />
-            <span v-if="cas === 4 && gst.animInv[0].indexOf(invpar) !== -1"
+            <q-select class="q-mb-md lgsel" v-model="invpar" :options="options" :label="$t('AMinvpar')" />
+            <span v-if="cas === 4 && gst.animInv[0].indexOf(invpar.value) !== -1"
               class= "q-ml-md text-bold text-warning bg-yellow-3">{{$t('AMdejav')}}</span>
           </div>
           <q-checkbox :disable="!drupd" v-model="ipa" :label="$t('FLAGS7')" />
@@ -167,7 +165,7 @@
 import { ref, toRef } from 'vue'
 
 import { dkli, $t } from 'src/app/util.mjs'
-import { AMJ, edit } from '../app/api.mjs'
+import { AMJ, edit, FLAGS } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 // import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonMembre from './BoutonMembre.vue'
@@ -295,23 +293,23 @@ export default {
       this.session.setPeopleId(this.mb.na.id)
       MD.oD('detailspeople')
     },
-    activernano () { },
-    desactivernano () { },
+    activerano () { },
+    desactiverano () { },
     activeramb () { },
     desactiveramb () { },
 
     async ouvririnvit (cas) {
       if (!await this.session.edit()) return
-      if (this.enLAN || this.enLNC) {
+      if (this.enLNA || this.enLNC) {
         afficherDiag($t('AMlnoire'))
         return
       }
       this.cas = cas
-      const fl = this.mb.flagsiv || 0
-      this.ipa = (fl & FLAGS.PA) === 0
-      this.idm = (fl & FLAGS.DM) === 0
-      this.idn = (fl & FLAGS.DN) === 0
-      this.ide = (fl & FLAGS.DE) === 0
+      const fl = this.mb.flagsiv || this.fl
+      this.ipa = (fl & FLAGS.PA) !== 0
+      this.idm = (fl & FLAGS.DM) !== 0
+      this.idn = (fl & FLAGS.DN) !== 0
+      this.ide = (fl & FLAGS.DE) !== 0
       this.options = this.gSt.animAvcIms(this.eg)
       this.invpar = this.options[0]
       this.ovinvit()
@@ -383,7 +381,7 @@ export default {
     function ovinvit () { MD.oD(invit) }
 
     return {
-      MD, dkli, edit, chgSt, ovchgSt, invit, ovinvit,
+      MD, FLAGS, dkli, edit, chgSt, ovchgSt, invit, ovinvit,
       session,
       gSt
     }
@@ -395,19 +393,11 @@ export default {
 </style>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bord
-  border-top: 1px solid $grey-5
-.bordb
-  border-bottom: 1px solid $grey-5
-.nom
-  max-height: 1.3rem
-  overflow: hidden
+.lgsel
+  width: 10rem
 .q-toolbar
   padding: 0 !important
   min-height: 0 !important
-.btn1
-  padding: 1px !important
-  width: 1.5rem !important
 .btnb
   position: absolute
   top: 0

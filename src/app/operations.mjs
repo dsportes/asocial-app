@@ -1230,7 +1230,7 @@ Retour:
 export class InvitationGroupe extends OperationUI {
   constructor () { super($t('OPstmb')) }
 
-  async run (op, gr, mb, im, flags) { 
+  async run (op, gr, mb, invpar, flags) { 
       /* op:
       1: invit std, 2: modif invit std, 3: suppr invit std, 
       4: vote pour, 5: vote contre, 6: suppr invit una 
@@ -1246,7 +1246,7 @@ export class InvitationGroupe extends OperationUI {
       const session = stores.session
       const aSt = stores.avatar
 
-      const x = { nomg: gr.na.nom, cleg: gr.na.rnd, im }
+      const x = { nomg: gr.na.nom, cleg: gr.na.rnd, im: mb.ids }
       const pub = await aSt.getPub(mb.na.id)
       const invit = await crypterRSA(pub, new Uint8Array(encode(x)))
 
@@ -1255,7 +1255,7 @@ export class InvitationGroupe extends OperationUI {
         idg: gr.id, 
         ids: mb.ids,
         idm: mb.na.id,
-        im,
+        im: invpar,
         flags,
         ni: await Groupe.getNi(gr.na, mb.na),
         invit
