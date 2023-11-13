@@ -1951,6 +1951,7 @@ _data_:
 - `inv` : dernière invitation. Liste des indices des animateurs ayant validé l'invitation.
 - `nag` : `[nom, cle]` : nom et clé de l'avatar crypté par la clé du groupe.
 - `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
+- `ardg` : ardoise entre les animateurs et le membre, cryptée par la clé du groupe.
 */
 export class Membre extends GenDoc {
   // Du groupe
@@ -1972,7 +1973,8 @@ export class Membre extends GenDoc {
     this.nag = await Groupe.getNag (this.ng, this.na) 
     this.estAc = aSt.compte.avatarIds.has(this.na.id)
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
-  }
+    this.ard = row.ardg ? await decrypterStr(this.ng.rnd, row.ardg) : ''
+  } 
 
   static async rowNouveauMembre (nag, na, im, dlv, cv) {
     const r = { id: nag.id, ids: im, v: 0, dlv, vcv: cv ? cv.v : 0,

@@ -162,7 +162,7 @@ export class OnchangeVersion extends OperationWS {
       e.lsp.push(sp)
     }
 
-    if (this.ret.rowMembers) for (const row of this.ret.rowMembers) {
+    if (this.ret.rowMembres) for (const row of this.ret.rowMembres) {
       const mb = await compile(row)
       if (mb._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
       const e = this.egrMaj(mb.id)

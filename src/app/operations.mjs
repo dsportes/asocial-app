@@ -1012,28 +1012,28 @@ export class MotsclesGroupe extends OperationUI {
   }
 }
 
-/* Maj de l'ardoise du groupe *****************************************************
+/* Maj de l'ardoise d'un membre *****************************************************
 args.token donne les éléments d'authentification du compte.
 args.ardg : texte de l'ardoise crypté par la clé du groupe
 args.idg : id du groupe
+args.ids : im du membre
 Retour:
-
-export class ArdoiseGroupe extends OperationUI {
+*/
+export class ArdoiseMembre extends OperationUI {
   constructor () { super($t('OPardgr')) }
 
-  async run (ard, nag) {
+  async run (ard, idg, ids) {
     try {
       const session = stores.session
-      const ardg = await crypter(nag.rnd, ard || '')
-      const args = { token: session.authToken, ardg, idg: nag.id }
-      this.tr(await post(this, 'ArdoiseGroupe', args))
+      const ardg = await crypter(getNg(idg).rnd, ard || '')
+      const args = { token: session.authToken, ardg, idg, ids }
+      this.tr(await post(this, 'ArdoiseMembre', args))
       this.finOK()
     } catch (e) {
       return await this.finKO(e)
     }
   }
 }
-*/
 
 /* Hébergement d'un groupe *****************************************************
 args.token donne les éléments d'authentification du compte.
@@ -1230,7 +1230,7 @@ Retour:
 export class InvitationGroupe extends OperationUI {
   constructor () { super($t('OPstmb')) }
 
-  async run (op, gr, mb, invpar, flags) { 
+  async run (op, gr, mb, invpar, flags, ard) { 
       /* op:
       1: invit std, 2: modif invit std, 3: suppr invit std, 
       4: vote pour, 5: vote contre, 6: suppr invit una 
@@ -1249,7 +1249,7 @@ export class InvitationGroupe extends OperationUI {
       const x = { nomg: gr.na.nom, cleg: gr.na.rnd, im: mb.ids }
       const pub = await aSt.getPub(mb.na.id)
       const invit = await crypterRSA(pub, new Uint8Array(encode(x)))
-
+      const ardg = await crypter(gr.na.rnd, ard || '')
       const args = { token: session.authToken, 
         op,
         idg: gr.id, 
@@ -1258,7 +1258,8 @@ export class InvitationGroupe extends OperationUI {
         im: invpar,
         flags,
         ni: await Groupe.getNi(gr.na, mb.na),
-        invit
+        invit,
+        ardg
       }
       const ret = this.tr(await post(this, 'InvitationGroupe', args))
       return this.finOK(ret.code || 0)

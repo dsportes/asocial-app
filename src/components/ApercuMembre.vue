@@ -22,6 +22,10 @@
     </template>
 
     <div>
+      <div class="q-ml-lg" v-if="eg.estAnim || aSt.compte.estAvDuCompte(mb.na.id)">
+        <ardoise-anim :mb="mb"/>
+      </div>
+
       <div class="q-ml-lg" style="position:relative">
         <div v-if="dac === 0" class="text-italic">{{$t('AMdac0')}}</div>
         <div v-if="dac > 1" class="text-italic">{{$t('AMdacd', xd(d))}}</div>
@@ -108,9 +112,10 @@
       </div>
     </div>
 
+    <!-- Dialogue d'invitation -->
     <q-dialog v-model="invit" persistent>
       <q-card class="bs moyennelargeur">
-        <q-toolbar class="bg-secondary text-white">>
+        <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AMinvtit', [mb.na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
@@ -144,6 +149,11 @@
               class= "text-bold text-warning bg-yellow-3">{{$t('AMchg')}}</div>
           </div>
         </q-card-section>
+        <q-card-section>
+          <div class="titre-md text-italic">{{$t('AMbienv')}}</div>
+          <editeur-md class="bord" :lgmax="1000" v-model="ard" :texte="mb.ard || ''" modetxt mh="5rem"
+            editable/>
+        </q-card-section>
         <q-card-actions vertical>
           <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
           <q-btn v-if="cas === 1" flat :label="$t('AMinviter')" color="primary" @click="inviter(1)"/>
@@ -172,6 +182,8 @@ import BoutonMembre from './BoutonMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle2 from './BoutonBulle2.vue'
+import ArdoiseAnim from './ArdoiseAnim.vue'
+import EditeurMd from './EditeurMd.vue'
 import { MD } from '../app/modele.mjs'
 import { StatutMembre, InvitationGroupe } from '../app/operations.mjs'
 
@@ -187,7 +199,7 @@ export default {
     nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
   },
 
-  components: { BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2 },
+  components: { BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, ArdoiseAnim, EditeurMd },
 
   computed: {
     amb () { return this.gSt.ambano[0] },
@@ -283,7 +295,8 @@ export default {
     cas: 0,
     ipa: false, idm: false, idn: false, ide: false,
     invpar: null,
-    options: null
+    options: null,
+    ard: ''
   }},
 
   methods: {
@@ -312,6 +325,7 @@ export default {
       this.ide = (fl & FLAGS.DE) !== 0
       this.options = this.gSt.animAvcIms(this.eg)
       this.invpar = this.options[0]
+      this.ard = this.mb.ard || ''
       this.ovinvit()
     },
 
@@ -320,7 +334,7 @@ export default {
       1: invit std, 2: modif invit std, 3: suppr invit std, 
       4: vote pour, 5: vote contre, 6: suppr invit una 
       */
-      await new InvitationGroupe().run(cas, this.eg.groupe, this.mb, this.invpar.value, this.nvflags)
+      await new InvitationGroupe().run(cas, this.eg.groupe, this.mb, this.invpar.value, this.nvflags, this.ard)
       MD.fD()
     },
 

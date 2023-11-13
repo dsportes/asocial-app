@@ -1357,6 +1357,9 @@ export default {
   AMdejav: 'A déjà voté "pour"',
   AMlna: 'Ne peut plus être invité, un animateur l\'a mis en liste noire.',
   AMlnc: 'Ne peut plus être invité, le compte s\'est lui-même mis en liste noire.',
+  AMardtit: 'Ardoise de {0} pour échange avec le(s) animateur(s)',
+  AMardtit2: 'Ardoise d\'échange avec le(s) animateur(s)',
+  AMbienv: 'Mot de bienvenue sur l\'ardoise',
 
   AMfond: 'Fondateur.',
   AMpasanst1: 'Seul un animateur de ce groupe peut changer le statut d\'un membre.',
