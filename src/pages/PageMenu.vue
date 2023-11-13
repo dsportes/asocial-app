@@ -120,7 +120,7 @@ export default {
     nbgrps () { 
       return this.aSt.compte.idGroupes(null, this.session.avatarId).size
     },
-    nbInvits () { return this.gSt.nbInvits },
+    nbInvits () { return this.gSt.invits.size },
 
     nbgrsecs () { return '?' },
     nbmbs () { return '?' },

@@ -1012,6 +1012,30 @@ export class MotsclesGroupe extends OperationUI {
   }
 }
 
+/* Fiche invitation *******************************************
+args.token donne les éléments d'authentification du compte.
+args.idg : id du groupe
+args.ids: indice du membre invité
+Retour:
+- rowMembre : avec un champ supplémentaire ext : { flags, cvg, invs: map }
+  invs : clé: im, valeur: { cva, nag }
+*/
+export class InvitationFiche extends OperationUI {
+  constructor () { super($t('OPardgr')) }
+
+  async run (idg, ids) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, idg, ids }
+      const ret = this.tr(await post(this, 'InvitationFiche', args))
+      const mb = await compile(ret.rowMembre)
+      return this.finOK(mb)
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
 /* Maj de l'ardoise d'un membre *****************************************************
 args.token donne les éléments d'authentification du compte.
 args.ardg : texte de l'ardoise crypté par la clé du groupe
@@ -1212,7 +1236,7 @@ export class ModeSimple extends OperationUI {
   }
 }
 
-/* Nouveau membre (contact) *******************************************
+/* Invitation à un groupe *******************************************
 args.token donne les éléments d'authentification du compte.
 args.op : opération demandée: 
   1: invit std, 2: modif invit std, 3: suppr invit std, 
@@ -1226,7 +1250,6 @@ args.ni: numéro d'invitation pour l'avatar invité, clé dans la map invits
 args.invit: élément dans la map invits {nomg, cleg, im}` cryptée par la clé publique RSA de l'avatar.
 Retour:
 */
-
 export class InvitationGroupe extends OperationUI {
   constructor () { super($t('OPstmb')) }
 
@@ -1266,6 +1289,14 @@ export class InvitationGroupe extends OperationUI {
     } catch (e) {
       return await this.finKO(e)
     }
+  }
+}
+
+export class AcceptInvitation extends OperationUI {
+  constructor () { super($t('OPstmb')) }
+
+  async run (cas, na, ng, im, ard, iam, ian, ni) {
+    return true
   }
 }
 

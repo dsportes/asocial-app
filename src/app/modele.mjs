@@ -1344,9 +1344,9 @@ export class Avatar extends GenDoc {
     if (row.invits) {
       for (const nx in row.invits) {
         const ni = parseInt(nx)
-        const {nomg, cleg, im} = decode(await decrypterRSA(this.priv, row[nx]))
+        const {nomg, cleg, im} = decode(await decrypterRSA(this.priv, row.invits[nx]))
         const ng = NomGenerique.from([nomg, cleg])
-        gSt.setInvit(ng.id, this.id)
+        gSt.setInvit(ng, this.na, im)
         this.invits.set(ni, { ng, im })
       }
     }
@@ -1952,6 +1952,11 @@ _data_:
 - `nag` : `[nom, cle]` : nom et clé de l'avatar crypté par la clé du groupe.
 - `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
 - `ardg` : ardoise entre les animateurs et le membre, cryptée par la clé du groupe.
+
+**Extension pour une fiche Invitation **
+- ext : { flags, invs: map }
+  invs : clé: im, valeur: { cva, nag }
+
 */
 export class Membre extends GenDoc {
   // Du groupe
@@ -1974,6 +1979,18 @@ export class Membre extends GenDoc {
     this.estAc = aSt.compte.avatarIds.has(this.na.id)
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
     this.ard = row.ardg ? await decrypterStr(this.ng.rnd, row.ardg) : ''
+
+    if (row.ext) {
+      this.ext = { flags: row.ext.flags, invs: new Map() }
+      this.ext.cvg = row.ext.cvg ? decode(await decrypter(this.ng.rnd, row.ext.cvg)) : null
+      for (const imx in row.ext.invs) {
+        const im = parseInt(imx)
+        const x = row.ext.invs[imx]
+        const na = NomGenerique.from(decode(await decrypter(this.ng.rnd, x.nag)))
+        const cv = x.cva ? decode(await decrypter(na.rnd, x.cva)) : null
+        this.ext.invs.set(im, { na, cv })
+      }
+    }
   } 
 
   static async rowNouveauMembre (nag, na, im, dlv, cv) {

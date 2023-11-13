@@ -26,52 +26,54 @@
     </div>
   </q-card>
 
+  <invitations-encours/>
+
   <div v-if="!gSt.pgLgFT.length" class="q-my-lg largeur40 titre-lg text-italic text-center">
     {{$t('PGvide', [gSt.pgLg.size])}}
   </div>
 
-    <div class="q-my-lg petitelargeur maauto" v-if="gSt.pgLgFT.length">
-      <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx)">
-        <apercu-genx :na="e.groupe.na" :cv="e.groupe.cv" :idx="idx" />
-        <div class="row full-width items-center justify-between">
-          <div>
-            <div v-if="e.groupe.dfh" class="q-mr-sm">
-              <q-icon name="warning" size="md" color="negative"/>
-              <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
-            </div>
-            <div class="q-mr-sm">
-              <q-icon v-if= "nbiv(e)" class="q-mr-xs" name="star" size="md" color="green-5"/>
-              <span class="text-italic">{{$t('PGinv', nbiv(e), {count: nbiv(e)})}}</span>
-            </div>
+  <div class="q-my-lg petitelargeur maauto" v-if="gSt.pgLgFT.length">
+    <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx)">
+      <apercu-genx :na="e.groupe.na" :cv="e.groupe.cv" :idx="idx" />
+      <div class="row full-width items-center justify-between">
+        <div>
+          <div v-if="e.groupe.dfh" class="q-mr-sm">
+            <q-icon name="warning" size="md" color="negative"/>
+            <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
           </div>
-          <q-btn class="q-ml-md btn1" icon="open_in_new" :label="$t('detail')" size="md" color="primary" 
-            dense @click.stop="courant(e)"/>
+          <div class="q-mr-sm">
+            <q-icon v-if= "nbiv(e)" class="q-mr-xs" name="star" size="md" color="green-5"/>
+            <span class="text-italic">{{$t('PGinv', nbiv(e), {count: nbiv(e)})}}</span>
+          </div>
         </div>
-      </q-card>
-    </div>
+        <q-btn class="q-ml-md btn1" icon="open_in_new" :label="$t('detail')" size="md" color="primary" 
+          dense @click.stop="courant(e)"/>
+      </div>
+    </q-card>
+  </div>
 
-    <!-- Nouveau groupe ------------------------------------------------>
-    <q-dialog v-model="crgr" persistent>
-      <q-card class="bs petitelargeur column">
-        <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-          <q-toolbar-title class="titre-lg text-center">{{$t('PGcrea')}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-        <div class="q-pa-xs">
-          <div class="titre-md q-mb-xs text-center">{{$t('PGnom', [nom || '?'])}}</div>
-          <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="okNom"/>
-          <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
-          <choix-quotas :quotas="quotas" groupe/>
-          <q-option-group :options="options" type="radio" v-model="una"/>
-          <q-card-actions align="right">
-            <q-btn dense flat color="warning" :label="$t('renoncer')" @click="MD.fD" />
-            <q-btn dense flat color="primary" :disable="quotas.err || !nom"
-              :label="$t('creer')" v-close-popup @click="okCreation" />
-          </q-card-actions>
-        </div>
-      </q-card>
-    </q-dialog>
+  <!-- Nouveau groupe ------------------------------------------------>
+  <q-dialog v-model="crgr" persistent>
+    <q-card class="bs petitelargeur column">
+      <q-toolbar class="bg-secondary text-white">
+        <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+        <q-toolbar-title class="titre-lg text-center">{{$t('PGcrea')}}</q-toolbar-title>
+        <bouton-help page="page1"/>
+      </q-toolbar>
+      <div class="q-pa-xs">
+        <div class="titre-md q-mb-xs text-center">{{$t('PGnom', [nom || '?'])}}</div>
+        <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="okNom"/>
+        <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
+        <choix-quotas :quotas="quotas" groupe/>
+        <q-option-group :options="options" type="radio" v-model="una"/>
+        <q-card-actions align="right">
+          <q-btn dense flat color="warning" :label="$t('renoncer')" @click="MD.fD" />
+          <q-btn dense flat color="primary" :disable="quotas.err || !nom"
+            :label="$t('creer')" v-close-popup @click="okCreation" />
+        </q-card-actions>
+      </div>
+    </q-card>
+  </q-dialog>
 
 </q-page>
 </template>
@@ -85,6 +87,7 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
+import InvitationsEncours from '../components/InvitationsEncours.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouveauGroupe } from '../app/operations.mjs'
 
@@ -93,7 +96,7 @@ export default {
 
   props: { tous: Boolean },
 
-  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx },
+  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, InvitationsEncours },
 
   computed: {
   },

@@ -1389,6 +1389,16 @@ export default {
   AMx7: 'inviter un membre déjà actif n\'est pas possible.',
   AMx8: 'le membre a disparu.',
 
+  ICtit: 'Invitation en attente de réponse',
+  ICtit2: 'Invitation de {0} au groupe {1}',
+  ICinvpar: 'Invité par ...',
+  ICflags: 'Droits attribués: {0}',
+  ICcfl: 'Confirmer (ou non) le ou les accès proposés',
+  ICrem: 'Remerciement ou explication du refus',
+  ICacc: 'J\'accepte l\'invitation', 
+  ICdec: 'Je décline l\'invitation', 
+  ICln: 'Je décline et ne veux plus jamais être invité', 
+
   // Quotas Vols
   PGq1: 'Quota de volume V1 (textes des notes): [{0}] soit {1}',
   PGq10: 'AUCUN quota de volume V1 (textes des notes)',
