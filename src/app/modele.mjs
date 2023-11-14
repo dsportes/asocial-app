@@ -1230,23 +1230,19 @@ export class Avatar extends GenDoc {
   }
   
   /* mpg : Map
-    - clé: id du groupe
-    - valeur:
-      - npgk : clé d'accès à l'élément dans mpgk
-      - nag : na du groupe
-      - avs: Map
-        - clé: id de l'avatar
-        - valeur: im
+  - _clé_: `npgk`. hash du cryptage par la clé K du compte de `idg / idav`. Cette identification permet au serveur de supprimer une entrée de la map sans disposer de la clé K. `idg`: id courte du groupe, `idav`: id courte de l'avatar.
+  - _valeur_: `{ng, im, idav}`
+    - `ng`: nom complet du groupe,
+    - `im`: indice du membre dans la table `ast` du groupe.
+    - `id` : id de l'avatar.
   */
 
   // Retourne [amb, amo] - un avatar au moins accède aux membres / notes du groupe
   ambano (groupe) {
-    const empg = groupe ? this.mpg.get(groupe.id) : null
-    if (!empg) return [false, false]
     let ano = false, amb = false
-    for (const [,im] of empg.avs) {
-      if (groupe.anag[im] > 1) {
-        const f = groupe.flags[im]
+    for (const [c, e] of this.mpg) {
+      if (groupe.anag[e.im] > 1) {
+        const f = groupe.flags[e.im]
         if ((f & FLAGS.AM) && (f & FLAGS.DM)) amb = true
         if ((f & FLAGS.AN) && (f & FLAGS.DN)) ano = true
       }
@@ -1257,29 +1253,25 @@ export class Avatar extends GenDoc {
   /* Ids des groupes de l'avatar ida (tous si absent), accumulés dans le set s */
   idGroupes (s, ida) {
     const x = s || new Set()
-    this.mpg.forEach((t ,idg) => {
-      t.avs.forEach((a, id) => { if (!ida || id === ida) x.add(idg)})
+    this.mpg.forEach(e => {
+      if (!ida || e.id === ida) x.add(e.ng.id)
     })
     return x
   }
 
-  /* map des membres des groupes auxquels participent au moins un des avatars
-    - clé: id du groupe  - valeur: { idg, v, npgk, mbs: [ids], dlv } */
-  mbsOfGroupe (idg) { // retourne valeur: { npgk, idg, mbs: [ids] }
-    const e = this.mpg.get(idg)
-    if (e) { 
-      const mbs = Array.from(e.avs.values())
-      return { npgk: e.npgk, idg, mbs }
-    }
-  }
-
-  // retourne l'invitation pour l'avatar au groupe idg : {ni, ng, im}
-  invitDeGr (idg) {
-    let e = {} 
-    if (this.invits) for (const [ni, x] of this.invits) {
-      if (x.ng.id === idg) { e.ni = ni; e.ng = ng; e.im = im}
-    }
-    return e
+  /* ims des avatars du compte dans mpg ou les invits des avatars*/
+  imsGroupe (idg) { // set des im pour le groupe idg
+    const s = new Set()
+    this.mpg.forEach(e => {
+      if (e.ng.id === idg) s.add(e.im)
+    })
+    const aSt = stores.avatar
+    aSt.map.forEach(e => {
+      if (e.avatar.invits) e.avatar.invits.forEach(x => { // { ng, im, id }
+        if (x.ng.id === idg) s.add(x.im)
+      })
+    })
+    return s
   }
 
   // Retourne {mc, memo} à propos d'une id donnée
@@ -1319,12 +1311,10 @@ export class Avatar extends GenDoc {
 
       this.mpg = new Map()
       for(const i in row.mpgk) {
-        const { nomg, cleg, im, imp, idav } = decode(await decrypter(session.clek, row.mpgk[i]))
-        const nag = NomGenerique.from([nomg, cleg])
-        const ida = ID.long(idav, session.ns)
-        let e = this.mpg.get(nag.id)
-        if (!e) { e = { npgk: parseInt(i), nag: nag, avs: new Map() }; this.mpg.set(nag.id, e) }
-        e.avs.set(ida, im)
+        const { nomg, cleg, im, idav } = decode(await decrypter(session.clek, row.mpgk[i]))
+        const ng = NomGenerique.from([nomg, cleg])
+        const id = ID.long(idav, session.ns)
+        this.mpg.set(parseInt(i), { ng, im, id })
       }
     }
 
@@ -1347,9 +1337,15 @@ export class Avatar extends GenDoc {
         const {nomg, cleg, im} = decode(await decrypterRSA(this.priv, row.invits[nx]))
         const ng = NomGenerique.from([nomg, cleg])
         gSt.setInvit(ng, this.na, im)
-        this.invits.set(ni, { ng, im })
+        this.invits.set(ni, { ng, im, id: this.id })
       }
     }
+  }
+
+  async getEpgk (ni) { // {nomg, cleg, im, idav (court)} cryptée par la clé K.
+    const e = this.invits.get(ni)
+    const x = { nomg: e.ng.nom, cleg: e.ng.rnd, im: e.im, idav: ID.court(e.id)}
+    return await crypter(stores.session.clek, new Uint8Array(encode(x)))
   }
 
   static async genMcMemo (id, mc, memo) {
@@ -1969,9 +1965,14 @@ export class Membre extends GenDoc {
     this.vsh = row.vsh || 0
     this.dac = row.dac || 0
     this.ddi = row.ddi || 0
+    this.dac = row.dac || 0
+    this.fac = row.fac || 0
     this.dln = row.dln || 0
+    this.fln = row.fln || 0
     this.den = row.den || 0
+    this.fen = row.fen || 0    
     this.dam = row.dam || 0
+    this.fam = row.fam || 0
     this.flagsiv = row.flagsiv || 0
     this.inv = row.inv || null
     this.na = NomGenerique.from(decode(await decrypter(this.cleg, row.nag)))
@@ -1994,8 +1995,9 @@ export class Membre extends GenDoc {
   } 
 
   static async rowNouveauMembre (nag, na, im, dlv, cv) {
+    const a = AMJ.amjUtc()
     const r = { id: nag.id, ids: im, v: 0, dlv, vcv: cv ? cv.v : 0,
-      ddi: 0, dac: 0, dln: 0, den: 0, dam: 0 }
+      ddi: 0, dac: a, fac: 0, dln: a, fln: 0, den: a, fen: 0, dam: a, fam: 0 }
     r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
     r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
     const _data_ = new Uint8Array(encode(r))

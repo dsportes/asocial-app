@@ -246,15 +246,18 @@ export class ConnexionCompte extends OperationUI {
           this.mbsMap[row.id] = x
         } else this.grToSuppr.add(row.id)
       }
-      for (const [idg, empg] of this.avatar.mpg) {
+      for (const [npgk, empg] of this.avatar.mpg) {
+        const idg = empg.ng.id
         if (session.fsSync) 
           await session.fsSync.setGroupe(idg)
         else abPlus.push(idg)
         if (!this.groupesToStore.has(idg)) {
-          const x = {
+          let x = this.mbsMap[idg]
+          if (!x) x = {
             idg: idg, v: 0, dlv: dlv2,
-            npgk: empg.npgk, mbs: Array.from(empg.avs.values())
+            npgk: npgk, mbs: []
           }
+          x.mbs.push(empg.im)
           this.mbsMap[idg] = x
         }
       }

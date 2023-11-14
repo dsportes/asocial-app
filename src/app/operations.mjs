@@ -1292,11 +1292,46 @@ export class InvitationGroupe extends OperationUI {
   }
 }
 
+/* Acceptation invitation *******************************************
+args.token donne les éléments d'authentification du compte.
+args.idg : id du groupe
+args.ids: indice du membre invité
+args.id: id de l'avatar invité
+args.nag: nag du membre (pour liste noire)
+args.ni: numéro d'invitation (pour maj avatar)
+args.npgk: cle de l'entrée dans mpgk du compte (pour maj mpgk)
+args.epgk: entrée dans mpgk du compte
+args.cas: 1: acceptation, 2: refus, 3: refus et oubli, 4: refus et liste noire
+args.iam: true si accès membre
+args.ian: true si accès note
+args.ardg: ardoise du membre cryptée par la clé du groupe
+Retour:
+*/
 export class AcceptInvitation extends OperationUI {
   constructor () { super($t('OPstmb')) }
 
-  async run (cas, na, ng, im, ard, iam, ian, ni) {
-    return true
+  async run (cas, na, ng, im, ard, iam, ian) {
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const av = aSt.getAvatar(na.id)
+      const ni = await Groupe.getNi(ng, na)
+      const epgk = await av.getEpgk(ni)
+
+      const args = { token: session.authToken, 
+        idg: ng.id, 
+        ids: im,
+        id: na.id,
+        nag: await Groupe.getNag(ng, na),
+        npgk: await Groupe.getNpgk(ng.id, na.id),
+        cas, iam, ian, ni, epgk,
+        ardg: await crypter(ng.rnd, ard)
+      }
+      this.tr(await post(this, 'AcceptInvitation', args))
+      return this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
   }
 }
 

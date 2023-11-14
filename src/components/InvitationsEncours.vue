@@ -39,11 +39,15 @@
       <div class="column justify-center items-center q-gutter-xs">
         <q-btn dense flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
         <div class="row justify-center q-gutter-sm">
-        <q-btn dense :label="$t('ICacc')" color="primary" @click="ok(1)"/>
-        <q-btn dense :label="$t('ICdec')" color="warning" @click="ok(2)"/>
+          <q-btn dense :label="$t('ICacc')" color="primary" @click="ok(1)"/>
+          <q-btn dense :label="$t('ICdec')" color="warning" @click="cfln = true"/>
         </div>
-        <q-btn dense flat :label="$t('ICln')" color="warning" @click="cfln = true"/>
-        <bouton-confirm v-if="cfln" :actif="cfln" :confirmer="ko"/>
+        <div v-if="cfln" class="column justify-left">
+          <span><q-radio v-model="decl" :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="inv2"/></span>
+          <span><q-radio v-model="decl" :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="inv3"/></span>
+          <span><q-radio v-model="decl" :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="inv4"/></span>
+          <bouton-confirm :actif="cfln" :confirmer="ko"/>
+        </div>
       </div>
 
     </q-card>
@@ -58,6 +62,7 @@ import EditeurMd from './EditeurMd.vue'
 import { MD } from '../app/modele.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
+import BoutonBulle from './BoutonBulle.vue'
 import { InvitationFiche, AcceptInvitation } from '../app/operations.mjs'
 import ApercuGenx from './ApercuGenx.vue'
 import { FLAGS } from '../app/api.mjs'
@@ -65,7 +70,7 @@ import { FLAGS } from '../app/api.mjs'
 export default ({
   name: 'InvitationsEncours',
 
-  components: { EditeurMd, BoutonHelp, ApercuGenx, BoutonConfirm },
+  components: { EditeurMd, BoutonHelp, ApercuGenx, BoutonConfirm, BoutonBulle },
 
   props: { },
 
@@ -89,7 +94,8 @@ export default ({
     ian: false,
     aed: '',
     fl: 0,
-    cfln: false
+    cfln: false,
+    decl: 0
   }},
 
   methods: {
@@ -103,15 +109,16 @@ export default ({
       if (this.fl & FLAGS.DN) this.ian = true
       this.ln = false
       this.cfln = false
+      this.decl = 2
       this.ovinvit()
     },
 
-    async ko () { await this.ok(3) },
+    async ko () { await this.ok(this.decl) },
 
     async ok (cas) {
       MD.fD()
-      await new AcceptInvitation().
-        run(cas, this.mb.na, this.inv.ng, this.inv.im, this.ard, this.iam, this.ian)
+      await new AcceptInvitation(). // (cas, na, ng, im, ard, iam, ian)
+        run(cas, this.mb.na, this.inv.ng, this.mb.ids, this.ard, this.iam, this.ian)
     }
   },
   

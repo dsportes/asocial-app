@@ -196,9 +196,13 @@ export class OnchangeVersion extends OperationWS {
     if (!this.estGr) {
       this.avmap[this.objv.id] = this.vact
     } else {
-      const x = this.aSt.compte.mbsOfGroupe(this.objv.id)
-      if (x) // groupe déjà connu
-        this.grmap[this.objv.id] = { mbs: x.mbs, v: this.vact }
+      /* deux cas:
+      - le groupe était connu dans compte et/ou dans les invits: y chercher les im
+      - le groupe est justement celui en création: inconnu de compte, ids est 1
+      */
+      const s = this.aSt.compte.imsGroupe(this.objv.id)
+      if (s.size) // groupe déjà connu (actif ou invité)
+        this.grmap[this.objv.id] = { mbs: Array.from(s), v: this.vact }
       else // groupe venant d'être créé
         this.grmap[this.objv.id] = { mbs: [1], v: 0 }
     }
@@ -222,8 +226,8 @@ export class OnchangeVersion extends OperationWS {
       for (const avid of this.avIdsAp)
         this.avmap[avid] = Versions.get(avid).v
       for (const grid of this.grIdsAp) {
-        const x = this.aSt.compte.mbsOfGroupe(grid)
-        this.grmap[grid] = { mbs: x.mbs, v: Versions.get(grid).v }
+        const s = this.aSt.compte.imsGroupe(grid)
+        this.grmap[grid] = { mbs: Array.from(s), v: Versions.get(grid).v }
       }
     }
     await this.process()

@@ -26,20 +26,35 @@
         <ardoise-anim :mb="mb"/>
       </div>
 
-      <div class="q-ml-lg" style="position:relative">
-        <div v-if="dac === 0" class="text-italic">{{$t('AMdac0')}}</div>
-        <div v-if="dac > 1" class="text-italic">{{$t('AMdacd', xd(d))}}</div>
+      <div class="q-ml-lg q-mt-sm row justify-between">
+        <div class="titre-md">{{$t('AMhist')}}</div>
+        <bouton-bulle2 v-if="fl" :texte="edit(fl, $t, '\n\n')" :label="$t('details')"/>
+      </div>
+
+      <div class="mlx">
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMactif')}}</div>
+          <div class="col-6">{{edd([mb.dac, mb.fac])}}</div>
+        </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMmembres')}}</div>
+          <div class="col-5">{{edd([mb.dam, mb.fam])}}</div>
+        </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMlecture')}}</div>
+          <div class="col-6">{{edd([mb.dln, mb.fln])}}</div>
+        </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMecriture')}}</div>
+          <div class="col-6">{{edd([mb.den, mb.fen])}}</div>
+        </div>
+        <div v-if="!mb.ddi" class="text-italic">{{$t('AMinv0')}}</div>
+        <div v-else class="row">
+          <div class="text-italic col-6">{{$t('AMinvd')}}</div>
+          <div class="col-6">{{xd(mb.ddi)}}</div>
+        </div>
 
         <div v-if="stm <= 1">
-          <div class="text-italic">
-            <span v-if="damh===0">{{$t('AMdam0')}}</span>
-            <span v-if="damh>1">{{$t('AMdamd', [xd(damh)])}}</span>
-          </div>
-          <div class="text-italic">{{$t('AMacnoh' + (dnh ? '' : '0'), dnh)}}</div>
-          <div class="text-italic">
-            <span v-if="!mb.ddi">{{$t('AMinv0')}}</span>
-            <span v-else>{{$t('AMinvd', [xd(mb.ddi)])}}</span>
-          </div>
           <div v-if="enLNC" class="text-bold">{{$t('AMlnc')}}</div>
           <div v-if="enLNA" class="text-bold">{{$t('AMlna')}}</div>
           <div v-if="!enLNA && !enLNC">
@@ -79,32 +94,22 @@
           </div>
         </div>
 
-        <div v-if="stm === 2 || stm === 3" class="text-italic">
-          <span v-if="dam===0">{{$t('AMdam0')}}</span>
-          <span v-if="dam===1">{{$t('AMdam1')}}</span>
-          <span v-if="dam>1">{{$t('AMdamd', [xd(dam)])}}</span>
-          <span v-if="ambna" class="q-ml-sm">
+        <div v-if="stm === 2 || stm === 3" class="text-italic column">
+          <span v-if="ambna">
             <span>{{$t('AMacmb')}}</span>
-            <q-btn size="sm" dense :label="$t('activer')" color="primary" @click="activeramb"/>
+            <q-btn size="sm" dense :label="$t('AMbtnaam')" color="primary" @click="activeramb"/>
           </span>
-          <span v-else class="q-ml-sm">
-            <q-btn size="sm" dense :label="$t('desactiver')" color="warning" @click="desactiveramb"/>
+          <span v-else>
+            <q-btn size="sm" dense :label="$t('AMbtndam')" color="warning" @click="desactiveramb"/>
           </span>
-        </div>
-
-        <div v-if="stm === 2 || stm === 3" class="text-italic">
-          <span>{{$t('AMacno', dn)}}</span>
-          <span v-if="anona" class="q-ml-sm">
+          <span v-if="anona">
             <span>{{$t('AMacno' + anona)}}</span>
-            <q-btn size="sm" dense :label="$t('activer')" color="primary" @click="activerano"/>
+            <q-btn size="sm" dense :label="$t('AMbtnano')" color="primary" @click="activerano"/>
           </span>
-          <span v-else class="q-ml-sm">
-            <q-btn size="sm" dense :label="$t('desactiver')" color="warning" @click="desactiverano"/>
+          <span v-else>
+            <q-btn size="sm" dense :label="$t('AMbtndao')" color="warning" @click="desactiverano"/>
           </span>
         </div>
-
-        <bouton-bulle2 v-if="fl" :texte="edit(fl, $t, '\n\n')" :label="$t('details')"
-          class="btnb"/>
       </div>
       <div class="row q-gutter-sm">
         <q-btn v-if="eg.estAnim && invitable" :label="$t('AMinvitbtn')" icon="add" dense size="sm"
@@ -219,46 +224,6 @@ export default {
     enLNA () { return this.eg.groupe.enLNA(this.mb.ids) },
     enLNC () { return this.eg.groupe.enLNC(this.mb.ids) },
 
-    dn () {
-      const dl = this.mb.dln || 0
-      const de = this.mb.dln || 0
-      const an = this.eg.groupe.accesNote(this.mb.ids)
-      if (an === 1) return [$t('oui'), $t('non')]
-      if (an === 2) return [$t('oui'), $t('oui')]
-      return [dl ? $t('pasdepuis', [this.xd(dl)]) : $t('jamais'),
-        de ? $t('pasdepuis', [this.xd(de)]) : $t('jamais') ]
-    },
-
-    dnh () {
-      const dl = this.mb.dln || 0
-      const de = this.mb.dln || 0
-      const an = this.eg.groupe.accesNoteH(this.mb.ids)
-      if (an === 0) return 0
-      return [dl ? $t('pasdepuis', [this.xd(dl)]) : $t('jamais'),
-        de ? $t('pasdepuis', [this.xd(de)]) : $t('jamais') ]
-    },
-
-    damh () {
-      const d = this.mb.dam || 0
-      const am = this.eg.groupe.accesMembreH(this.mb.ids)
-      if (am) return 1
-      return d ? d : 0
-    },
-
-    dam () {
-      const d = this.mb.dam || 0
-      const am = this.eg.groupe.accesMembre(this.mb.ids)
-      if (am) return 1
-      return d ? d : 0
-    },
-
-    dac () {
-      const d = this.mb.dac || 0
-      const ac = this.eg.groupe.estActif(this.mb.ids)
-      if (ac) return 1
-      return d
-    },
-
     invitable () { return this.eg.groupe.estInvitable(this.mb.ids) },
 
     edFlagsiv () { 
@@ -300,6 +265,12 @@ export default {
   }},
 
   methods: {
+    edd (ad) {
+      if (!ad[0] && !ad[1]) return this.$t('jamais')
+      if (!ad[0] && ad[1]) return this.$t('avant', [AMJ.editDeAmj(ad[1], true)])
+      if (ad[0] && !ad[1]) return this.$t('depuis', [AMJ.editDeAmj(ad[0], true)])
+      if (ad[0] && ad[1]) return this.$t('entre', [AMJ.editDeAmj(ad[0], true), AMJ.editDeAmj(ad[1], true)])
+    },
     xd (d) { return !d ? '-' : AMJ.editDeAmj(d, true) },
 
     ouvrirdetails () {
@@ -386,6 +357,7 @@ export default {
   setup (props) {
     const session = stores.session
     const gSt = stores.groupe
+    const aSt = stores.avatar
 
     // const mb = toRef(props, 'mb')
  
@@ -397,7 +369,7 @@ export default {
     return {
       MD, FLAGS, dkli, edit, chgSt, ovchgSt, invit, ovinvit,
       session,
-      gSt
+      gSt, aSt
     }
   }
 }
@@ -412,8 +384,6 @@ export default {
 .q-toolbar
   padding: 0 !important
   min-height: 0 !important
-.btnb
-  position: absolute
-  top: 0
-  right: 0
+.mlx
+  margin-left: 2rem
 </style>

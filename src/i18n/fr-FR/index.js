@@ -16,6 +16,9 @@ export default {
   oui: 'oui',
   non: 'non',
   jamais: 'jamais',
+  depuis: 'depuis {0}',
+  avant: 'avant {0}',
+  entre: 'entre {0} et {1}',
   OK: 'OK',
   ok: 'OK',
   moi: 'moi',
@@ -125,15 +128,15 @@ export default {
 
   FLAGS0: 'est actif',
   FLAGS1: 'a une invitation en cours',
-  FLAGS2: 'a accès aux notes', 
-  FLAGS3: 'a accès aux membres',
+  FLAGS2: 'a activé l\'accès aux notes', 
+  FLAGS3: 'a activé l\'accès aux membres',
   FLAGS4: 'a droit d\'accès à la liste des membres',
   FLAGS5: 'a droit d\'accès aux notes du groupe',
   FLAGS6: 'a droit d\'écriture sur les notes',
   FLAGS7: 'a pouvoir d\'animateur',
   FLAGS8: 'a été actif',
-  FLAGS9: 'a eu accès aux notes',
-  FLAGS10: 'a eu accès aux membres',
+  FLAGS9: 'a pu lire les notes',
+  FLAGS10: 'a pu accéder aux membres',
   FLAGS11: 'a pu écrire des notes',
   
   /*
@@ -250,14 +253,6 @@ export default {
   temp60: 'deux mois',
   temp90: 'un trimestre',
   tempx: '{0} jour(s)',
-
-  // statuts membre
-  STMB0: 'contact',
-  STMB1: 'invité',
-  STMB2: 'actif',
-  STMB3: 'invitation refusée',
-  STMB4: 'résilié',
-  STMB5: 'disparu',
   
   MOdis: 'DISPARU',
 
@@ -379,6 +374,7 @@ export default {
   EX8030: 'Le contact n\'est pas / plus invité (pas d\'invitation à supprimer).',
   EX8031: 'Le contact est déjà invité: il n\'est plus temps de voter (mais il est encore temps de supprimer l\'invitation).',
   EX8032: 'Le contact a déjà accepté son invitation, impossible de revenir dessus dans le cadre d\'une invitation.',
+  EX8033: 'Ce contact n\'est pas invité.',
 
   EX8055: 'Quota du compte dépassé pour le volume V1. Demande:{0} - Quota:{1}',
   EX8056: 'Quota du compte dépassé pour le volume V2. Demande:{0} - Quota:{1}',
@@ -1314,19 +1310,25 @@ export default {
   AMcfa3: 'En attente',
   AMnoinfo: 'Pas de commentaires à propos du groupe',
   AMchanger: 'Changer...',
-  AMdac0: 'N\'a jamais été actif.',
-  AMdacd: 'N\'a été actif depuis {0}.',
-  AMacno: 'Accès aux notes - en lecture: {0} - en écriture: {1}.',
+
+  AMactif: 'En état actif:',
+  AMmembres: 'Accès aux membres:',
+  AMlecture: 'Accès en lecture aux notes:',
+  AMecriture: 'Accès en écriture aux notes:',
+  AMinv0: 'N\'a jamais été invité.',
+  AMinvd: 'Date de dernière invitation:',
+  AMhist: 'Historique résumé',
   AMacno1: 'Droit de lecture NON activé.',
   AMacno2: 'Droit d\'écriture NON activé.',
   AMacmb: 'Le droit N\'A PAS été activé.',
-  AMdam0: 'N\'a jamais eu accès aux membres.',
+
+  AMbtnaam: 'Activer l\'accès aux membres',
+  AMbtndam: 'Désactiver l\'accès aux membres',
+  AMbtnano: 'Activer l\'accès aux notes',
+  AMbtndao: 'Désactiver l\'accès aux notes',
+
   AMdam1: 'Accès aux membres.',
   AMdamd: 'Plus d\'accès aux membres depuis {0}.',
-  AMacnoh: 'A eu accès aux notes - en lecture: {0} - en écriture: {1}.',
-  AMacnoh0: 'N\'a jamais eu accès aux notes.',
-  AMinv0: 'N\'a jamais été invité.',
-  AMinvd: 'Dernière invitation le {0}.',
   AMinvit: 'Invitation en attente avec droits:',
   AMinvan: 'd\'animation',
   AMinvam: 'd\'accès aux membres',
@@ -1396,8 +1398,10 @@ export default {
   ICcfl: 'Confirmer (ou non) le ou les accès proposés',
   ICrem: 'Remerciement ou explication du refus',
   ICacc: 'J\'accepte l\'invitation', 
-  ICdec: 'Je décline l\'invitation', 
-  ICln: 'Je décline et ne veux plus jamais être invité', 
+  ICdec: 'Je décline l\'invitation ...', 
+  ICd2: 'me conserver comme contact',
+  ICd3: 'm\'oublier dans ce groupe',
+  ICd4: 'm\'oublier DÉFINITIVEMENT dans ce groupe',
 
   // Quotas Vols
   PGq1: 'Quota de volume V1 (textes des notes): [{0}] soit {1}',
@@ -1840,5 +1844,18 @@ export default {
   BULLEnr4: 'Accès minimal très restreint à l\'application',
   BULLEclos: 'Application figée par l\'administrateur technique: aucune mise à jour possible',
   
+  BULLEinv2: `Décliner l\'invitation et rester en tant que "contact" du groupe:
+- je pourrai être ré-invité plus tard à des conditions éventuellemnt différentes, 
+- je reste connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé`,
+
+  BULLEinv3: `Décliner l\'invitation MAIS M'OUBLIER:
+- je ne serai plus inscrit comme "contact" du groupe:
+- je serai inconnu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur,
+- toutefois, quelqu'un pourrait me réinscrie un jour dans le groupe: cette nouvelle existence dans le groupe ne pourra pas être corrélée avec mon passage antérieur dans le groupe, je n'y aurai pas le même numéro d'auteur.`,
+
+  BULLEinv4: `Décliner l\'invitation MAIS M'OUBLIER DÉFINITIVEMENT:
+- je ne serai plus inscrit comme "contact" du groupe:
+- je serai inconnu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur,
+- je serai inscrit en liste noire, personne ne pourra plus m'ajouter comme contact de ce groupe.`,
 
 }
