@@ -270,7 +270,8 @@ export const useGroupeStore = defineStore('groupe', {
     pgLg: (state) => {
       const f = stores.filtre.filtre.groupes
       if (f.tous) return state.map
-      const s = stores.aSt.compte.idGroupes(stores.session.avatarId)
+      const aSt = stores.avatar
+      const s = aSt.compte.idGroupes(stores.session.avatarId)
       const m = new Map()
       s.forEach(idg => { m.set(idg, state.map.get(idg))})
       return m

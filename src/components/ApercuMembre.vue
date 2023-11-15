@@ -70,12 +70,15 @@
               <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
             </div>
 
-            <q-btn v-if="mb && stm===0 && eg.groupe.msu === null" icon="add" dense size="sm" color="primary"
+            <q-btn v-if="mb && stm===0 && eg.groupe.msu === null && eg.estAnim && invitable" 
+              icon="add" dense size="sm" color="primary"
               :label="$t('AMinvitbtn1')" @click="ouvririnvit(1)"/>
 
-            <q-btn v-if="mb && stm===1 && eg.groupe.msu === null" icon="edit" dense size="sm" color="primary"
+            <q-btn v-if="mb && stm===1 && eg.groupe.msu === null && eg.estAnim" 
+              icon="edit" dense size="sm" color="primary"
               :label="$t('AMinvitbtn2')" @click="ouvririnvit(2)"/>
-            <q-btn v-if="mb && stm===1 && eg.groupe.msu === null" class="q-ml-sm" icon="delete" dense size="sm" color="primary"
+            <q-btn v-if="mb && stm===1 && eg.groupe.msu === null && eg.estAnim" 
+              class="q-ml-sm" icon="delete" dense size="sm" color="primary"
               :label="$t('AMinvitbtn3')" @click="ouvririnvit(3)"/>
 
             <div v-if="mb && eg.groupe.msu !== null && mb.flagsiv">
@@ -98,28 +101,72 @@
           </div>
         </div>
 
-        <div v-if="stm === 2 || stm === 3" class="text-italic column">
-          <span v-if="ambna">
-            <span>{{$t('AMacmb')}}</span>
-            <q-btn size="sm" dense :label="$t('AMbtnaam')" color="primary" @click="activeramb"/>
-          </span>
-          <span v-else>
-            <q-btn size="sm" dense :label="$t('AMbtndam')" color="warning" @click="desactiveramb"/>
-          </span>
-          <span v-if="anona">
-            <span>{{$t('AMacno' + anona)}}</span>
-            <q-btn size="sm" dense :label="$t('AMbtnano')" color="primary" @click="activerano"/>
-          </span>
-          <span v-else>
-            <q-btn size="sm" dense :label="$t('AMbtndao')" color="warning" @click="desactiverano"/>
-          </span>
+        <div>
+          <q-btn v-if="stm === 2 || stm === 3" @click="ouvcfg"
+            :label="$t('AMcfbtn')" icon="settings" dense size="mg" color="primary"/>
         </div>
       </div>
-      <div class="row q-gutter-sm">
-        <q-btn v-if="mb && eg.estAnim && invitable" :label="$t('AMinvitbtn')" icon="add" dense size="sm"
-          @click="ouvririnvit"/>
-      </div>
     </div>
+
+    <!-- Dialogue de configuration -->
+    <q-dialog v-model="config" persistent>
+      <q-card class="bs moyennelargeur" style="min-height:20rem">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-md text-center q-mx-sm">{{$t('AMcftit', [na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+        <q-toolbar inset class="bg-secondary text-white row justify-between">
+          <q-tabs  class="col titre-md" v-model="cfgtab" inline-label outside-arrows mobile-arrows no-caps>
+            <q-tab name="droits" :label="$t('AMcftb1')" @click="ui.setTab('groupe')"/>
+            <q-tab name="resil" :disable="!moi && !eg.estAnim" :label="$t('AMcftb2')"/>
+          </q-tabs>
+        </q-toolbar>
+
+        <div v-if="cfgtab==='droits'" class="q-pa-xs">
+          <div class="row titre-md text-italic">
+            <div class="col-9">{{$t('AMdrt1')}}</div>
+            <div class="col-3">{{$t('AMdrt2')}}</div>
+          </div>
+          <div class="row"> 
+            <q-checkbox class="col-9 text-center" :disable="drro" v-model="dra" :label="$t('AMdra')" />
+            <!--q-checkbox class="col-3 text-center" disable v-model="dra"/-->
+          </div>
+          <div class="row"> 
+            <q-checkbox class="col-9 text-center" :disable="drro" v-model="drm" :label="$t('AMdrm')" />
+            <q-checkbox class="col-3 text-center" v-model="adrm"/>
+          </div>
+          <div class="row"> 
+            <q-checkbox class="col-9 text-center" :disable="drro" v-model="drl" :label="$t('AMdrl')" />
+            <q-checkbox class="col-3 text-center" v-model="adrl"/>
+          </div>
+          <div class="row"> 
+            <q-checkbox class="col-9 text-center" :disable="drro" v-model="dre" :label="$t('AMdre')" />
+            <!--q-checkbox class="col-3 text-center" disable v-model="adrl"/-->
+          </div>
+
+          <q-card-actions>
+            <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+            <q-btn :disable="!chgdr" flat :label="$t('valider')" color="primary" @click="changerdr"/>
+          </q-card-actions>
+        </div>
+
+        <div v-if="cfgtab==='resil'" class="q-pa-xs">
+          <div v-if="moi">
+            <div class="titre-md text-italic">{{$t('AMcftit2')}}</div>
+            <div class="column q-my-sm">
+              <span><q-radio v-model="decl" :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="inv2"/></span>
+              <span><q-radio v-model="decl" :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="inv3"/></span>
+              <span><q-radio v-model="decl" :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="inv4"/></span>
+            </div>
+            <div class="row justify-center q-gutter-lg">
+              <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+              <bouton-confirm :actif="cfln" :confirmer="ko"/>
+            </div>
+          </div>
+        </div>
+      </q-card>
+    </q-dialog>
 
     <!-- Dialogue d'invitation -->
     <q-dialog v-model="invit" persistent>
@@ -186,7 +233,7 @@ import { ref, toRef } from 'vue'
 import { dkli, $t } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
-// import BoutonConfirm from './BoutonConfirm.vue'
+import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonMembre from './BoutonMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
@@ -194,7 +241,7 @@ import BoutonBulle2 from './BoutonBulle2.vue'
 import ArdoiseAnim from './ArdoiseAnim.vue'
 import EditeurMd from './EditeurMd.vue'
 import { MD, getNg } from '../app/modele.mjs'
-import { StatutMembre, InvitationGroupe } from '../app/operations.mjs'
+import { InvitationGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuMembre',
@@ -210,7 +257,7 @@ export default {
     nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
   },
 
-  components: { BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, ArdoiseAnim, EditeurMd },
+  components: { BoutonConfirm, BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, ArdoiseAnim, EditeurMd },
 
   computed: {
     amb () { return this.gSt.ambano[0] },
@@ -254,8 +301,52 @@ export default {
       return n
     },
 
+    nvflags2 () {
+      let n = 0
+      if (this.dra) n |= FLAGS.PA
+      if (this.drm) n |= FLAGS.DM
+      if (this.drl) n |= FLAGS.DN
+      if (this.dre) n |= FLAGS.DE | FLAGS.DN
+      if (this.adrm) n |= FLAGS.AM
+      if (this.adrl) n |= FLAGS.AN
+      return n
+    },
+
     drupd () { return this.cas < 3 || this.cas === 4 && this.cas === 5 },
-    
+
+    /* droits de modification des droits
+    - être animateur (un des avc est animateur)
+    - ET la cible n'est pas animateur OU la cible est un avc (c'est moi)
+    */
+    drro () { 
+      return !(this.eg.estAnim && (!this.eg.groupe.estAnim(this.im) || this.moi))
+    },
+
+    moi () { return this.aSt.compte.estAvDuCompte(this.idav) },
+
+    chgdr () { return this.flags2av !== this.nvflags2 },
+
+    cfln () { return this.decl !== 0 }
+  },
+
+  watch: {
+    drm (v) {
+      if (v) this.adrm = (this.fl & FLAGS.AM) !== 0
+      else this.adrm = false
+    },
+    drl (v) {
+      if (v) this.adrl = (this.fl & FLAGS.AN) !== 0
+      else { this.adrl = false; this.dre = false }
+    },
+    dre (v) {
+      if (v) this.drl = true
+    },
+    adrm (v) {
+      if (v && !this.drm) this.adrm = false
+    },
+    adrl (v) {
+      if (v && !this.drl) this.adrl = false
+    }
   },
 
   data () { return {
@@ -267,7 +358,11 @@ export default {
     ipa: false, idm: false, idn: false, ide: false,
     invpar: null,
     options: null,
-    ard: ''
+    ard: '',
+    cfgtab: 'droits',
+    dra:0, drm: 0, drl:0, dre: 0, adrm: 0, adrl: 0,
+    flags2av: 0,
+    decl: 0,
   }},
 
   methods: {
@@ -283,10 +378,6 @@ export default {
       this.session.setPeopleId(this.idav)
       MD.oD('detailspeople')
     },
-    activerano () { },
-    desactiverano () { },
-    activeramb () { },
-    desactiveramb () { },
 
     async ouvririnvit (cas) {
       if (!await this.session.edit()) return
@@ -319,49 +410,26 @@ export default {
       MD.fD()
     },
 
-    // PURGATOIRE
-    async setAc (fn, laa) {
-      // Contrôles fins
-      this.err1 = '' // bloquantes
-      this.err2 = '' // pas bloquantes
-      if (fn === 6 && this.st === 32 ) {
-        if (this.gSt.animIds(this.gSt.egrC).size === 1) this.err2 = this.$t('AMdan2')
-      }
-      this.action = false
-      this.fn = fn
-      this.laa = laa
-      setTimeout(() => { this.action = true }, 200)
+    async ouvcfg () {
+      if (!await this.session.edit()) return
+      this.dra = (this.fl & FLAGS.PA) !== 0
+      this.drm = (this.fl & FLAGS.DM) !== 0
+      this.drl = (this.fl & FLAGS.DN) !== 0
+      this.dre = (this.fl & FLAGS.DE) !== 0
+      this.adrm = (this.fl & FLAGS.AM) !== 0
+      this.adrl = (this.fl & FLAGS.AN) !== 0
+      this.flags2av = this.nvflags2
+      this.ovconfig()
     },
-    async changeSt () {
-      this.action = false
-      this.session.setMembreId(this.im)
-      this.ovchgSt()
+
+    async changerdr () {
+      console.log(this.flags2av, this.nvflags2)
     },
-    async actionSt () {
-      this.action = false
-      this.err1 = ''
-      this.err2 = ''
-      // MD.fD() // ???
-      /* 
-        gr: groupe
-        mb: membre
-        fn: fonction à appliquer
-        laa: lecteur, auteur, animateur
-        ard: texte de l'ardoise, null s'il n'a pas changé
-      */
-      const ard = this.eg.groupe.ard === this.ardoise ? null : this.ardoise
-      const code = await new StatutMembre().run(this.eg.groupe, this.mb, this.fn, this.laa, ard)
-      if (this.code) {
-        await afficherDiag(this.$t('AMx' + code))
-      }
-      this.closeSt()
-    },
-    closeSt () {
-      MD.fD()
-      this.action = false
-      this.err1 = ''
-      this.err2 = ''
+
+    ko () {
+      console.log(this.decl)
     }
+
   },
 
   setup (props) {
@@ -378,9 +446,11 @@ export default {
     function ovchgSt () { MD.oD(chgSt) }
     const invit = ref(false)
     function ovinvit () { MD.oD(invit) }
+    const config = ref(false)
+    function ovconfig () { MD.oD(config) }
 
     return {
-      MD, FLAGS, dkli, edit, chgSt, ovchgSt, invit, ovinvit,
+      MD, FLAGS, dkli, edit, chgSt, ovchgSt, invit, ovinvit, config, ovconfig,
       session, gSt, aSt,
       na, cv
     }
@@ -399,4 +469,6 @@ export default {
   min-height: 0 !important
 .mlx
   margin-left: 2rem
+.q-tab
+  min-height: 0 !important
 </style>

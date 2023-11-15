@@ -1365,6 +1365,12 @@ export default {
   AMardtit2: 'Ardoise d\'échange avec le(s) animateur(s)',
   AMbienv: 'Mot de bienvenue sur l\'ardoise',
 
+  AMcftit: 'Configuration de {0} dans le groue {1}',
+  AMcftb1: 'Droits',
+  AMcftb2: 'Fin d\'activité',
+  AMcfbtn: 'Configurer',
+  AMcftit2: 'Retour en simple contact et / ou oubli',
+
   AMfond: 'Fondateur.',
   AMpasanst1: 'Seul un animateur de ce groupe peut changer le statut d\'un membre.',
   AMpasanst2: 'Même un animateur de ce groupe ne peut pas changer le statut d\'un membre lui-même animateur.',
@@ -1382,6 +1388,13 @@ export default {
   AMmm: 'A accès aux membres',
   AMn1: 'A accès aux notes (en lecture)',
   AMn2: 'A accès aux notes',
+
+  AMdra: 'droits d\'animation',
+  AMdrm: 'droits d\'accès aux membres',
+  AMdrl: 'droits de lecture des notes',
+  AMdre: 'droits d\'écriture de notes',
+  AMdrt1: 'Droits attribués par l\'animateur',
+  AMdrt2: 'activés',
 
   AMx0: 'L\'opération n\'a rien fait : ',
   AMx1: 'le changement souhaité avait déjà été fait.',
@@ -1711,6 +1724,8 @@ export default {
   PPctc: 'Inscrire comme contact du groupe {0}',
   PPamb: 'Inscription comme contact impossible, le compte n\'a pas accès aux membres de ce groupe.',
   PPctc: 'Inscription comme contact impossible, cet avatar estt déjà membre du groupe',
+  PPlna: 'Cet avatar a été mis en liste noire du groupe par un animateur. Il n\'est plus possible de l\'inscrire comme contact.',
+  PPlnc: 'Cet avatar s\'est inscrit lui-même en liste noire du groupe. Il n\'est plus possible de l\'inscrire comme contact.',
 
   SAVtit1: 'Suppression de l\'avatar {0}',
   SAVtit2: 'Résiliation du COMPTE {0}',

@@ -131,6 +131,15 @@ export default {
         }
         const gr = this.gSt.egrC.groupe // groupe courant d'où vient la proposition d'inscription en contact
         const pe = this.pSt.peC // people courant
+        const nag = await Groupe.getNag(gr.na, pe.na)
+        if (gr.enLNA(nag)) {
+          await this.afficherDiag(this.$t('PPlna'))
+          return
+        }
+        if (gr.enLNC(nag)) {
+          await this.afficherDiag(this.$t('PPlnc'))
+          return
+        }
         const [nouveau, slot] = await gr.slot(pe.na)
         if (!nouveau) { // ça ne devrait pas se produire ici
           await this.afficherDiag(this.$t('PPctc'))
