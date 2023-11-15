@@ -10,7 +10,6 @@ import { UNITEV1, UNITEV2, FLAGS } from '../app/api.mjs'
     groupe: l'objet Groupe
     notes: Map des notes (clé:ids, valeur:v2)
     membres: new Map(), // tous membres
-    mbacs: new Map(), // membres avatars du compte
     estAnim: false, // un des avatars du compte est animateur du groupe
     estHeb: false // un des avatars du compte est hébergeur du groupe
     objv: { v: 0, vols: {v1: 0, v2: 0, q1: 0, q2: 0} }
@@ -53,18 +52,6 @@ export const useGroupeStore = defineStore('groupe', {
       let n = 0
       state.invits.forEach(s => { n += s.size })
       return n
-    },
-
-    // Map des groupes RESTREINTE à ceux de l'avatar courant.
-    groupesAC: (state) => {
-      const aSt = stores.avatar
-      const m = new Map()
-      const grIds = aSt.getGrIds
-      grIds.forEach(idg => {
-        const e = state.map.get(idg)
-        if (e) m.set(idg, e)
-      })
-      return m
     },
     
     /* liste des ng des groupes triée par ordre alphabétique de leur noms */
@@ -147,17 +134,6 @@ export const useGroupeStore = defineStore('groupe', {
     animIds: (state) => { return (e) => {
         const s = new Set()
         for (const [,m] of e.membres) { if (e.groupe.estAnim(m.ids)) s.add(m.na.id) }
-        return s
-      }
-    },
-
-    animAvcIms: (state) => { return (e) => {
-        const s = []
-        for (const [im, m] of e.mbacs) { 
-          if (e.groupe.estAnim(im)) {
-            s.push({ label: m.na.nom, value: im })
-          }
-        }
         return s
       }
     },
@@ -293,7 +269,11 @@ export const useGroupeStore = defineStore('groupe', {
 
     pgLg: (state) => {
       const f = stores.filtre.filtre.groupes
-      return f.tous ? state.map : state.groupesAC
+      if (f.tous) return state.map
+      const s = stores.aSt.compte.idGroupes(stores.session.avatarId)
+      const m = new Map()
+      s.forEach(idg => { m.set(idg, state.map.get(idg))})
+      return m
     },
 
     // PageGroupe - membres people ***************************************************
@@ -305,10 +285,8 @@ export const useGroupeStore = defineStore('groupe', {
       for (const m of state.pgLm) {
         if (f.nmb && !m.na.nom.startsWith(f.nmb)) continue
         if (f.stmb) {
-          const fl = flags[m.ids]
-          switch (f.stmb) {
-
-          }
+          const stm = state.egrC.groupe.statutMajeur(m.ids)
+          if (stm + 1 !== f.stmb) continue
         }
         r.push(m)
       }
@@ -339,26 +317,16 @@ export const useGroupeStore = defineStore('groupe', {
       if (!e) return
       e.delete(idg)
     },
-
-    setAnimHeb (e) { // TODO
-      const g = e.groupe
-      e.estAnim = false
-      e.estHeb = false
-      for (const [, m] of e.mbacs) {
-        if (g.estAnim(m.ids)) e.estAnim = true
-        if (m.ids === g.imh) e.estHeb = true
-      }
-    },
     
     setGroupe (groupe) {
       if (!groupe) return
+      const aSt = stores.avatar
       let e = this.map.get(groupe.id)
       if (!e) {
         e = { 
           groupe: groupe, 
           notes: new Map(),
           membres: new Map(), // tous membres
-          mbacs: new Map(), // membres avatars du compte
           estAnim: false, // un des avatars du compte est animateur du groupe
           estHeb: false, // un des avatars du compte est hébergeur du groupe
           objv: { v: 0, vols: {v1: 0, v2: 0, q1: 0, q2: 0} } //  { v, vols: {v1, v2, q1, q2} }
@@ -372,7 +340,13 @@ export const useGroupeStore = defineStore('groupe', {
           e.groupe = groupe
         }
       }
-      this.setAnimHeb(e)
+      e.estAnim = false
+      e.estHeb = false
+      const ims = aSt.compte.imsGroupe(groupe.id, true)
+      for (const im of ims) {
+        if (groupe.estAnim(im)) e.estAnim = true
+        if (im === groupe.imh) e.estHeb = true
+      }
       const nSt = stores.note
       nSt.setGroupe(groupe.na)
     },
@@ -399,16 +373,11 @@ export const useGroupeStore = defineStore('groupe', {
       } else {
         e.membres.set(membre.ids, membre)
         const na = membre.na
-        if (membre.estAc) {
-          // un des avatars du compte: enreg dans son avatar
-          aSt.setAvatarGr(na.id, membre.id)
-          e.mbacs.set(membre.ids, membre)
-        } else {
+        if (!membre.estAc) {
           // ajoute ou remplace le people, met à jour sa cv le cas échéant
           pSt.setPeopleMembre(na, membre.id, membre.ids, membre.cv)
         }
       }
-      this.setAnimHeb(e)
     },
 
     delMembre (id, ids) {
@@ -420,19 +389,13 @@ export const useGroupeStore = defineStore('groupe', {
         const m = e.membres.get(ids)
         if (!m) return
         const idp = m.na.id
-        if (m.estAc) {
-          aSt.delAvatarGr(idp, id)
-          delete m.mbacs(ids)
-        } else {
-          pSt.unsetPeopleMembre(idp, id)
-        }
+        if (!m.estAc) pSt.unsetPeopleMembre(idp, id)
         delete m.membres(ids)
       } else {
         e.membres.forEach((m, ids) => {
           const idp = m.na.id
           pSt.unsetPeopleMembre(idp, id)
         })
-        e.mbacs.clear()
         e.membres.clear()
       }
     },

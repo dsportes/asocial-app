@@ -1251,20 +1251,27 @@ export class Avatar extends GenDoc {
   }
 
   /* Ids des groupes de l'avatar ida (tous si absent), accumulés dans le set s */
-  idGroupes (s, ida) {
-    const x = s || new Set()
-    this.mpg.forEach(e => {
-      if (!ida || e.id === ida) x.add(e.ng.id)
-    })
+  idGroupes (ida) {
+    const x = new Set()
+    this.mpg.forEach(e => { if (!ida || e.id === ida) x.add(e.ng.id) })
     return x
   }
 
-  /* ims des avatars du compte dans mpg ou les invits des avatars*/
-  imsGroupe (idg) { // set des im pour le groupe idg
+  /* im de l'avatar ida dans le groupe idg */
+  imGA (idg, ida) {
+    for (const [ ,e]  of this.mpg){
+      if (e.ng.id === idg && e.id === ida) return e.im
+    }
+    return 0
+  }
+
+  /* ims des avatars du compte dans mpg ou les invits des avatars (sauf noinv*/
+  imsGroupe (idg, noinv) { // set des im pour le groupe idg
     const s = new Set()
     this.mpg.forEach(e => {
       if (e.ng.id === idg) s.add(e.im)
     })
+    if (noinv) return s
     const aSt = stores.avatar
     aSt.map.forEach(e => {
       if (e.avatar.invits) e.avatar.invits.forEach(x => { // { ng, im, id }
@@ -1274,6 +1281,15 @@ export class Avatar extends GenDoc {
     return s
   }
 
+  /* Map(ida, im) des avatars participant à idg*/
+  imIdGroupe (idg) { // set des im pour le groupe idg
+    const m = new Map()
+    this.mpg.forEach(e => {
+      if (e.ng.id === idg) m.set(e.id, e.im)
+    })
+    return m
+  }
+  
   // Retourne {mc, memo} à propos d'une id donnée
   mcmemo (id) { return this.mcmemos.get(id) }
 
@@ -1781,14 +1797,25 @@ export class Groupe extends GenDoc {
     const f = this.flags[im] || 0;
     return (f & FLAGS.AC) && (f & FLAGS.HA) && (f & FLAGS.DM) 
   }
-  accesMembreH (im) { // accès aux membres historique
+  actifH (im) { // 0:jamais, 1:oui, 2:l'a été, ne l'est plus
     const f = this.flags[im] || 0;
-    return !(f & FLAGS.AC) && (f & FLAGS.HA) && (f & FLAGS.HM) 
+    if (f & FLAGS.AC) return 1
+    return f & FLAGS.HA ? 2 : 0
   }
-  accesNoteH (im) { // acces aux notes historique
+  accesMembreH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
     const f = this.flags[im] || 0;
-    if (!(f & FLAGS.AC) && (f & FLAGS.HA) && (f & FLAGS.HN)) return f & FLAGS.HE ? 2 : 1
-    return 0
+    if ((f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM)) return 1
+    return f & FLAGS.HM ? 2 : 0
+  }
+  accesLecNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
+    const f = this.flags[im] || 0;
+    if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN)) return 1
+    return f & FLAGS.HN ? 2 : 0
+  }
+  accesEcrNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
+    const f = this.flags[im] || 0;
+    if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DE)) return 1
+    return f & FLAGS.HE ? 2 : 0
   }
   accesMembreNA (im) { // accès aux membres NON activé
     const f = this.flags[im] || 0;
@@ -1996,7 +2023,7 @@ export class Membre extends GenDoc {
 
   static async rowNouveauMembre (nag, na, im, dlv, cv) {
     const a = AMJ.amjUtc()
-    const r = { id: nag.id, ids: im, v: 0, dlv, vcv: cv ? cv.v : 0,
+    const r = { id: nag.id, ids: im, v: 0, dlv: AMJ.max, vcv: cv ? cv.v : 0,
       ddi: 0, dac: a, fac: 0, dln: a, fln: 0, den: a, fen: 0, dam: a, fam: 0 }
     r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
     r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
@@ -2093,7 +2120,7 @@ export class Note extends GenDoc {
         this.mfa.set(f.idf, f)
       }
     }
-    this.setSmc()
+    // this.setSmc()
   }
 
   /* setSmc : calcul smc, le set des mots clés de la note pour le compte
@@ -2104,22 +2131,6 @@ export class Note extends GenDoc {
   (ce qui n'est pas très grave) jusqu'à la prochaine session ou mise à jour
   de la note
   */
-  setSmc () {
-    if (!this.mc) { this.smc = null; return }
-    if (ID.estGroupe(this.id)) {
-      const gSt = stores.groupe
-      const g = this.mc['0']
-      const s = g ? new Set(g) : new Set()
-      const e = gSt.egr(this.id)
-      e.mbacs.forEach(m => {
-        const x = this.mc[''+m.ids]
-        if (x) x.forEach(mc => { s.add(mc)})
-      })
-      this.smc = s.size ? s : null
-    } else {
-      this.smc = new Set(this.mc)
-    }
-  }
 
   /*
   initTest (id, ids, ref, txt, dh, v1, v2) { // pour les tests

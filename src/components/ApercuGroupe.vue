@@ -51,14 +51,16 @@
     </div>
 
     <div class="titre-lg full-width text-center text-white bg-secondary q-mt-lg q-mb-md q-pa-sm">
-      {{$t('PGmesav', eg.mbacs.size)}}
+      {{$t('PGmesav', imIdGroupe.size)}}
     </div>
     <q-btn v-if="accesMembre" @click="dialctc"
       dense size="md" no-caps color="primary" icon="add" :label="$t('PGplus')"/>
 
-    <div v-for="[,m] in eg.mbacs" :key="m.na.id" class="q-mt-sm">
+    <div v-for="[id, im] in imIdGroupe" :key="im" class="q-mt-sm">
       <q-separator color="orange"/>
-      <apercu-membre :mb="m" :eg="eg" :idx="idx" :mapmc="mapmc"/>
+       <!-- <div>{{im + ' / ' +id}}</div>
+        mb peut être absent (pas accès aux membres) -->
+      <apercu-membre :mb="mb(im)" :im="im" :idav="id" :eg="eg" :idx="idx" :mapmc="mapmc"/>
     </div>
 
     <!-- Dialogue d'édition des mots clés du groupe -->
@@ -263,11 +265,15 @@ export default {
 
     accesMembre () {
       let am = false
-      this.eg.mbacs.forEach((m, ids) => {
-        if (this.eg.groupe.accesMembre(ids)) am = true
+      const x = Array.from(this.imIdGroupe.values())
+      if (x.length) x.forEach(im => { 
+        if (this.eg.groupe.accesMembre(im)) am = true 
       })
       return am
-    }
+    },
+
+    // Map (idav, im) dans le groupe idg
+    imIdGroupe () { return this.aSt.compte.imIdGroupe(this.eg.groupe.id) }
   },
 
   data () { return {
@@ -295,6 +301,8 @@ export default {
   }},
 
   methods: {
+    mb (im) { return this.eg.membres.get(im)},
+
     nbiv (e) { return this.gSt.nbMesInvits(e) },
     // ast (m) { return this.eg.groupe.ast[m.ids] },
 

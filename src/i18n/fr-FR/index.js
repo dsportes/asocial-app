@@ -116,11 +116,10 @@ export default {
 
   // Filtre stmb
   stmb0: '(n\'importe lequel)',
-  stmb1: 'd\'animateur',
-  stmb2: 'actif',
-  stmb3: 'de simple contact',
-  stmb4: 'd\'invité confirmé ou non',
-  stmb5: 'de résilié / refus d\'invitation',
+  stmb4: 'animateur',
+  stmb3: 'actif',
+  stmb1: 'contact',
+  stmb2: 'invité',
 
   tmc0: 'Compte',
   tmc1: 'Groupe',
@@ -1321,6 +1320,9 @@ export default {
   AMacno1: 'Droit de lecture NON activé.',
   AMacno2: 'Droit d\'écriture NON activé.',
   AMacmb: 'Le droit N\'A PAS été activé.',
+
+  etre: 'non | oui | l\'a été, ne l\'est plus',
+  avoir: 'non | oui | l\'a eu, ne l\'a plus',
 
   AMbtnaam: 'Activer l\'accès aux membres',
   AMbtndam: 'Désactiver l\'accès aux membres',

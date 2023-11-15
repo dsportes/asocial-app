@@ -252,7 +252,7 @@ export default ({
       idt: 0
     } )
 
-    function init () {
+    function init () { // TODO dans les listes de groupes s.gr0 ... s.gr3, les éléments x.mb sont remplacés par x.im
       const id = na.value.id
       s.checks = { _notes: false, _chats: false }
       s.v1g = 0; s.v2g = 0
@@ -265,12 +265,12 @@ export default ({
       for (const sp of Array.from(e.sponsorings.values()))
         if (sp.st === 0) s.sp.push(sp)
       if (s.sp.length) s.checks._spons = false
-      e.grIds.forEach(idg => {
+      aSt.compte.idGroupes(id).forEach(idg => {
         const egr = gSt.egr(idg)
         const x = {}
         x.gr = egr.groupe
-        x.mb = gSt.membreDeId(egr, id)
-        if (x.gr.imh === x.mb.ids) { 
+        x.im = aSt.compte.imGA(idg, id)
+        if (x.gr.imh === x.im) { 
           x.heb = true; x.nbn = s.stats[idg].n; x.v1 = egr.objv.vols.v1; x.v2 = egr.objv.vols.v2
           s.v1g += x.v1; s.v2g += x.v2
         }

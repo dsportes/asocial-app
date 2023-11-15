@@ -13,7 +13,7 @@
       <div v-if="gSt.pgLm.length && !gSt.pgLmFT.length" class="titre-lg text-italic">
         {{$t('PGnomb', [gSt.pgLm.length])}}</div>
       <apercu-membre v-for="(m, idx) of gSt.pgLmFT" :key="idx"
-        class="q-my-lg" :mb="m" :eg="gSt.egrC" :mapmc="mapmc" people :idx="idx"/>
+        class="q-my-lg" :mb="m" :im="m.ids" :idav="m.na.id" :eg="gSt.egrC" :mapmc="mapmc" people :idx="idx"/>
     </div>
     <div v-else class="titre-lg text-italic">{{$t('PGnoamb')}}</div>
   </div>

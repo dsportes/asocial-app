@@ -18,9 +18,6 @@
         <q-item clickable v-close-popup @click="val=4">
           <span class="fs-md text-italic">{{$t('stmb4')}}</span>
         </q-item>
-        <q-item clickable v-close-popup @click="val=5">
-          <span class="fs-md text-italic">{{$t('stmb5')}}</span>
-        </q-item>
       </q-list>
     </q-menu>
     </q-btn>

@@ -189,7 +189,7 @@ export default {
     nbchats (id) { return this.aSt.getElt(id).chats.size },
     nbspons (id) { return this.aSt.getElt(id).sponsorings.size },
     nbgrps (id) { 
-      return this.aSt.compte.idGroupes(null, id).size
+      return this.aSt.compte.idGroupes(id).size
     },
     courant (id, action) {
       this.session.setAvatarId(id)

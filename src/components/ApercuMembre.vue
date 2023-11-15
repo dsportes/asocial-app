@@ -1,28 +1,28 @@
 <template>
-  <q-expansion-item v-if="mb" :class="dkli(idx)"
+  <q-expansion-item :class="dkli(idx)"
     switch-toggle-side expand-separator dense group="trgroup">
     <template v-slot:header>
       <div class="column">
-        <apercu-genx v-if="people" :na="mb.na" :cv="mb.cv" :ids="mb.ids" :idx="idx" detail-people/>
+        <apercu-genx v-if="people" :na="na" :cv="cv" :ids="im" :idx="idx" detail-people/>
         <div v-else class="row justify-between">
           <div>
-            <span class="titre-lg text-bold text-primary">{{$t('moi2', [mb.na.nom])}}</span>
-            <span class="q-ml-lg font-mono fs-sm">{{'#' + mb.na.id}}</span>
+            <span class="titre-lg text-bold text-primary">{{$t('moi2', [na.nom])}}</span>
+            <span class="q-ml-lg font-mono fs-sm">{{'#' + idav}}</span>
           </div>
-          <bouton-membre v-if="!nopanel" :eg="eg" :im="mb.ids" btn/>
+          <bouton-membre v-if="!nopanel" :eg="eg" :im="im" btn/>
         </div>
         <div>
           <span class="titre-md text-bold">{{$t('AMm' + stm)}}</span>
-          <span v-if="eg.groupe.estHeb(mb.ids)" class="q-ml-sm titre-md text-bold text-warning">{{$t('AMmh')}}</span>
-          <span v-if="mb.ids === 1" class="q-ml-sm titre-md text-bold text-warning">{{$t('AMmf')}}</span>
-          <span v-if="eg.groupe.accesMembre(mb.ids)" class="q-ml-sm titre-md">- {{$t('AMmm')}}</span>
+          <span v-if="eg.groupe.estHeb(im)" class="q-ml-sm titre-md text-bold text-warning">{{$t('AMmh')}}</span>
+          <span v-if="im === 1" class="q-ml-sm titre-md text-bold text-warning">{{$t('AMmf')}}</span>
+          <span v-if="eg.groupe.accesMembre(im)" class="q-ml-sm titre-md">- {{$t('AMmm')}}</span>
           <span v-if="ano !== 0" class="q-ml-sm titre-md">- {{$t('AMn' + ano)}}</span>
         </div>
       </div>
     </template>
 
     <div>
-      <div class="q-ml-lg" v-if="eg.estAnim || aSt.compte.estAvDuCompte(mb.na.id)">
+      <div class="q-ml-lg" v-if="mb && (eg.estAnim || aSt.compte.estAvDuCompte(idav))">
         <ardoise-anim :mb="mb"/>
       </div>
 
@@ -34,22 +34,26 @@
       <div class="mlx">
         <div class="row">
           <div class="text-italic col-6">{{$t('AMactif')}}</div>
-          <div class="col-6">{{edd([mb.dac, mb.fac])}}</div>
+          <div v-if="mb" class="col-6">{{edd([mb.dac, mb.fac])}}</div>
+          <div v-else class="col-6">{{$t('etre', eg.groupe.actifH(im))}}</div>
         </div>
         <div class="row">
           <div class="text-italic col-6">{{$t('AMmembres')}}</div>
-          <div class="col-5">{{edd([mb.dam, mb.fam])}}</div>
+          <div v-if="mb" class="col-6">{{edd([mb.dam, mb.fam])}}</div>
+          <div v-else class="col-6">{{$t('etre', eg.groupe.accesMembreH(im))}}</div>
         </div>
         <div class="row">
           <div class="text-italic col-6">{{$t('AMlecture')}}</div>
-          <div class="col-6">{{edd([mb.dln, mb.fln])}}</div>
+          <div v-if="mb" class="col-6">{{edd([mb.dln, mb.fln])}}</div>
+          <div v-else class="col-6">{{$t('etre', eg.groupe.accesLecNoteH(im))}}</div>
         </div>
         <div class="row">
           <div class="text-italic col-6">{{$t('AMecriture')}}</div>
-          <div class="col-6">{{edd([mb.den, mb.fen])}}</div>
+          <div v-if="mb" class="col-6">{{edd([mb.den, mb.fen])}}</div>
+          <div v-else class="col-6">{{$t('etre', eg.groupe.accesEcrNoteH(im))}}</div>
         </div>
-        <div v-if="!mb.ddi" class="text-italic">{{$t('AMinv0')}}</div>
-        <div v-else class="row">
+        <div v-if="mb && !mb.ddi" class="text-italic">{{$t('AMinv0')}}</div>
+        <div v-if="mb && mb.ddi" class="row">
           <div class="text-italic col-6">{{$t('AMinvd')}}</div>
           <div class="col-6">{{xd(mb.ddi)}}</div>
         </div>
@@ -66,15 +70,15 @@
               <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
             </div>
 
-            <q-btn v-if="stm===0 && eg.groupe.msu === null" icon="add" dense size="sm" color="primary"
+            <q-btn v-if="mb && stm===0 && eg.groupe.msu === null" icon="add" dense size="sm" color="primary"
               :label="$t('AMinvitbtn1')" @click="ouvririnvit(1)"/>
 
-            <q-btn v-if="stm===1 && eg.groupe.msu === null" icon="edit" dense size="sm" color="primary"
+            <q-btn v-if="mb && stm===1 && eg.groupe.msu === null" icon="edit" dense size="sm" color="primary"
               :label="$t('AMinvitbtn2')" @click="ouvririnvit(2)"/>
-            <q-btn v-if="stm===1 && eg.groupe.msu === null" class="q-ml-sm" icon="delete" dense size="sm" color="primary"
+            <q-btn v-if="mb && stm===1 && eg.groupe.msu === null" class="q-ml-sm" icon="delete" dense size="sm" color="primary"
               :label="$t('AMinvitbtn3')" @click="ouvririnvit(3)"/>
 
-            <div v-if="eg.groupe.msu !== null && mb.flagsiv">
+            <div v-if="mb && eg.groupe.msu !== null && mb.flagsiv">
               <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
               <div class="fs-md q-ml-md">
                 <span class="text-italic">{{$t('AMinvvp')}}</span>
@@ -86,10 +90,10 @@
               </div>
             </div>
 
-            <q-btn v-if="stm===0 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
+            <q-btn v-if="mb && stm===0 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
               :label="$t('AMinvitbtn4')" @click="ouvririnvit(4)"/>
 
-            <q-btn v-if="stm===1 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
+            <q-btn v-if="mb && stm===1 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
               :label="$t('AMinvitbtn3')" @click="ouvririnvit(6)"/>
           </div>
         </div>
@@ -112,7 +116,7 @@
         </div>
       </div>
       <div class="row q-gutter-sm">
-        <q-btn v-if="eg.estAnim && invitable" :label="$t('AMinvitbtn')" icon="add" dense size="sm"
+        <q-btn v-if="mb && eg.estAnim && invitable" :label="$t('AMinvitbtn')" icon="add" dense size="sm"
           @click="ouvririnvit"/>
       </div>
     </div>
@@ -122,7 +126,7 @@
       <q-card class="bs moyennelargeur">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AMinvtit', [mb.na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AMinvtit', [na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
 
@@ -189,14 +193,16 @@ import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle2 from './BoutonBulle2.vue'
 import ArdoiseAnim from './ArdoiseAnim.vue'
 import EditeurMd from './EditeurMd.vue'
-import { MD } from '../app/modele.mjs'
+import { MD, getNg } from '../app/modele.mjs'
 import { StatutMembre, InvitationGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuMembre',
 
   props: { 
-    mb: Object,
+    mb: Object, // ABSENT pour un avatar du compte
+    idav: Number, // id de l'avatar membre
+    im: Number,
     eg: Object,
     mapmc: Object,
     idx: Number, 
@@ -209,22 +215,22 @@ export default {
   computed: {
     amb () { return this.gSt.ambano[0] },
 
-    stm () { return this.eg.groupe.statutMajeur(this.mb.ids) },
+    stm () { return this.eg.groupe.statutMajeur(this.im) },
 
-    ano () { return this.eg.groupe.accesNote(this.mb.ids) },
+    ano () { return this.eg.groupe.accesNote(this.im) },
 
     // accès aux notes autorisé MAIS NON activé
-    anona () { return this.eg.groupe.accesNoteNA(this.mb.ids) },
+    anona () { return this.eg.groupe.accesNoteNA(this.im) },
 
     // accès aux membres autorisé MAIS NON activé
-    ambna () { return this.eg.groupe.accesMembreNA(this.mb.ids) },
+    ambna () { return this.eg.groupe.accesMembreNA(this.im) },
 
-    fl () { return this.eg.groupe.flags[this.mb.ids] },
+    fl () { return this.eg.groupe.flags[this.im] },
     
-    enLNA () { return this.eg.groupe.enLNA(this.mb.ids) },
-    enLNC () { return this.eg.groupe.enLNC(this.mb.ids) },
+    enLNA () { return this.eg.groupe.enLNA(this.im) },
+    enLNC () { return this.eg.groupe.enLNC(this.im) },
 
-    invitable () { return this.eg.groupe.estInvitable(this.mb.ids) },
+    invitable () { return this.eg.groupe.estInvitable(this.im) },
 
     edFlagsiv () { 
       const f = this.mb.flagsiv
@@ -274,7 +280,7 @@ export default {
     xd (d) { return !d ? '-' : AMJ.editDeAmj(d, true) },
 
     ouvrirdetails () {
-      this.session.setPeopleId(this.mb.na.id)
+      this.session.setPeopleId(this.idav)
       MD.oD('detailspeople')
     },
     activerano () { },
@@ -294,7 +300,11 @@ export default {
       this.idm = (fl & FLAGS.DM) !== 0
       this.idn = (fl & FLAGS.DN) !== 0
       this.ide = (fl & FLAGS.DE) !== 0
-      this.options = this.gSt.animAvcIms(this.eg)
+      this.options = []
+      this.aSt.compte.lstAvatarNas.forEach(na => {
+        const im = this.aSt.compte.imGA(this.eg.id, na.id)
+        if (this.eg.groupe.estAnim(im)) this.options.push({ label: na.nom, value: im })
+      })
       this.invpar = this.options[0]
       this.ard = this.mb.ard || ''
       this.ovinvit()
@@ -324,7 +334,7 @@ export default {
     },
     async changeSt () {
       this.action = false
-      this.session.setMembreId(this.mb.ids)
+      this.session.setMembreId(this.im)
       this.ovchgSt()
     },
     async actionSt () {
@@ -359,7 +369,10 @@ export default {
     const gSt = stores.groupe
     const aSt = stores.avatar
 
-    // const mb = toRef(props, 'mb')
+    const mb = toRef(props, 'mb')
+    const idav = toRef(props, 'idav')
+    const na = ref(mb.value ? mb.value.na : getNg(idav.value))
+    const cv = ref(mb.value ? mb.value.cv : aSt.getAvatar(idav.value).cv)
  
     const chgSt = ref(false)
     function ovchgSt () { MD.oD(chgSt) }
@@ -368,8 +381,8 @@ export default {
 
     return {
       MD, FLAGS, dkli, edit, chgSt, ovchgSt, invit, ovinvit,
-      session,
-      gSt, aSt
+      session, gSt, aSt,
+      na, cv
     }
   }
 }

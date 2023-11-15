@@ -20,7 +20,7 @@ export const useAvatarStore = defineStore('avatar', {
       - sponsorings: new Map(),
       - chats: new Map(),
       - tickets: new Map(),
-      - grIds: new Set() // Ids des groupes dont l'avatar est membre
+      - // Ids des groupes dont l'avatar est membre: aSt.compte.idGroupes(id)
       - notes: Map des notes : clé: ids, valeur: v2
       */
     map: new Map(),
@@ -232,12 +232,6 @@ export const useAvatarStore = defineStore('avatar', {
         return e ? Array.from(e.tickets.values()) : []
     },
 
-    // Set des ids des groupes de l'avatar courant
-    getGrIds: (state) => {
-      const e = state.map.get(stores.session.avatarId)
-      return e ? e.grIds : new Set()
-    },
-
     // elt act dans tribu pour la tribu courante et le compte courant
     act: (state) => {
       const t = state.tribu
@@ -433,8 +427,7 @@ export const useAvatarStore = defineStore('avatar', {
           notes: new Map(),
           sponsorings: new Map(),
           chats: new Map(),
-          tickets: new Map(),
-          grIds: new Set() // Ids des groupes dont l'avatar est membre
+          tickets: new Map()
          }
         this.map.set(avatar.id, e)
         if (avatar.id === session.compteId) this.setMotscles (avatar.mc)
@@ -449,16 +442,6 @@ export const useAvatarStore = defineStore('avatar', {
       if (avatar.id === stores.session.compteId) this.avatarP = avatar
       const nSt = stores.note
       nSt.setAvatar(avatar.na)
-    },
-
-    setAvatarGr (id, idg) {
-      const e = this.map.get(id)
-      if (e) e.grIds.add(idg)
-    },
-
-    delAvatarGr (id, idg) {
-      const e = this.map.get(id)
-      if (e) e.grIds.delete(idg)
     },
 
     setNote (note) {
