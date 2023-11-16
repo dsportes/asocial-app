@@ -835,7 +835,7 @@ export default {
   ACmesav2: 'Ce compte, ses avatars',
   ACmesav1: 'Ce compte (SPONSOR), ses avatars',
   ACmesgr: 'Tous les groupes',
-  ACmesinv: 'Toutes les invitations en attente',
+  ACmesinv: 'Invitations en attente',
   ACmesctc: 'Tous les contacts',
   ACspons: 'Mes sponsors',
   ACalloc: 'Comptes sponsors et sponsorisés',
@@ -1370,6 +1370,11 @@ export default {
   AMcftb2: 'Fin d\'activité',
   AMcfbtn: 'Configurer',
   AMcftit2: 'Retour en simple contact et / ou oubli',
+  AMcftit3: '"Oublier" un contact',
+
+  AMcfer1: 'Ce membre est "actif", un animateur ne peut pas "l\'oublier" contre son gré. Demander au membre de redevenir contact.',
+  AMcfer2: 'Ce membre est "invité", un animateur ne peut pas "l\'oublier" dans cet état. Supprimer préalablement son invitation.',
+  AMcfer3: 'ATTENTION: vous êtes le DERNIER ANIMATEUR dans ce groupe.',
 
   AMfond: 'Fondateur.',
   AMpasanst1: 'Seul un animateur de ce groupe peut changer le statut d\'un membre.',
@@ -1417,6 +1422,8 @@ export default {
   ICd2: 'me conserver comme contact',
   ICd3: 'm\'oublier dans ce groupe',
   ICd4: 'm\'oublier DÉFINITIVEMENT dans ce groupe',
+  ICd5: 'm\'oublier dans ce groupe',
+  ICd6: 'm\'oublier DÉFINITIVEMENT dans ce groupe',
 
   // Quotas Vols
   PGq1: 'Quota de volume V1 (textes des notes): [{0}] soit {1}',
@@ -1866,13 +1873,38 @@ export default {
 - je reste connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé`,
 
   BULLEinv3: `Décliner l\'invitation MAIS M'OUBLIER:
-- je ne serai plus inscrit comme "contact" du groupe:
-- je serai inconnu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur,
+- je ne serai plus inscrit comme "contact" du groupe.
+- je serai inconnu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur.
 - toutefois, quelqu'un pourrait me réinscrie un jour dans le groupe: cette nouvelle existence dans le groupe ne pourra pas être corrélée avec mon passage antérieur dans le groupe, je n'y aurai pas le même numéro d'auteur.`,
 
   BULLEinv4: `Décliner l\'invitation MAIS M'OUBLIER DÉFINITIVEMENT:
-- je ne serai plus inscrit comme "contact" du groupe:
-- je serai inconnu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur,
+- je ne serai plus inscrit comme "contact" du groupe.
+- je serai inconnu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur.
+- je serai inscrit en liste noire, personne ne pourra plus m'ajouter comme contact de ce groupe.`,
+
+  BULLEoubla1: `OUBLIER un contact:
+- il ne sera plus inscrit comme "contact" du groupe:
+- il sera inconnu dans le groupe, en particulier vis à vis des notes qu'il aurait pu écrire dans le passé et dans lesquelles il n'apparaîtra plus comme auteur,
+- toutefois, quelqu'un pourrait le réinscrie un jour dans le groupe: cette nouvelle existence dans le groupe ne pourra pas être corrélée avec son passage antérieur dans le groupe, il n'y aura pas le même numéro d'auteur.`,
+
+  BULLEoubla2: `OUBLIER DÉFINITIVEMENT un contact:
+- il ne sera plus inscrit comme "contact" du groupe:
+- il sera inconnu dans le groupe, en particulier vis à vis des notes qu'il aurait pu écrire dans le passé et dans lesquelles il n'apparaîtra plus comme auteur,
+- il sera inscrit en liste noire, personne ne pourra plus l'ajouter comme contact de ce groupe.`,
+
+  BULLEoublc1: `Ne plus être "actif" mais rester connu dans le groupe en tant que "contact":
+- le groupe n'apparaîtra plus dans la liste de mes groupes.
+- je reste inscrit comme "contact" du groupe et pourrai être ré-invité plus tard à des conditions éventuellemnt différentes, 
+- je reste connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé`,
+
+  BULLEoublc2: `Ne plus être "actif" ET M'OUBLIER:
+- le groupe n'apparaîtra plus dans la liste de mes groupes.
+- je ne serai plus connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur.
+- toutefois, quelqu'un pourrait me réinscrie un jour dans le groupe: cette nouvelle existence dans le groupe ne pourra pas être corrélée avec mon passage antérieur dans le groupe, je n'y aurai pas le même numéro d'auteur.`,
+
+  BULLEoublc3: `Décliner l\'invitation MAIS M'OUBLIER DÉFINITIVEMENT:
+- le groupe n'apparaîtra plus dans la liste de mes groupes.
+- je ne serai plus connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur.
 - je serai inscrit en liste noire, personne ne pourra plus m'ajouter comme contact de ce groupe.`,
 
 }

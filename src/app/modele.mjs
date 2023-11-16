@@ -1776,7 +1776,18 @@ export class Groupe extends GenDoc {
   get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconGroupe }
   
   get nbInvits () { let n = 0
-    this.flags.forEach(x => { if (x & FLAGS.IN) n++ })
+    for (let im = 1; im < this.flags.length; im++) { 
+      const f = this.flags[im]
+      if (f & FLAGS.IN) n++ 
+    }
+    return n
+  }
+
+  get nbAnims () { let n = 0
+    for (let im = 1; im < this.flags.length; im++) { 
+      const f = this.flags[im]
+      if ((f & FLAGS.PA) && (f & FLAGS.AC)) n++ 
+    }
     return n
   }
 
@@ -1796,6 +1807,16 @@ export class Groupe extends GenDoc {
   accesMembre (im) {
     const f = this.flags[im] || 0;
     return (f & FLAGS.AC) && (f & FLAGS.HA) && (f & FLAGS.DM) 
+  }
+  aUnAccesMembre (s) { // Set des im
+    let b = false
+    s.forEach(im => { if (this.accesMembre(im)) b = true})
+    return b
+  }
+  aUnAccesNote (s) { // Set des im
+    let b = false
+    s.forEach(im => { if (this.accesNote(im)) b = true})
+    return b
   }
   actifH (im) { // 0:jamais, 1:oui, 2:l'a été, ne l'est plus
     const f = this.flags[im] || 0;

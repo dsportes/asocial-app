@@ -1166,47 +1166,21 @@ export class NouveauMembre extends OperationUI {
   }
 }
 
-/* Maj du commentaire d'un membre *******************************************
+/* Maj des droits d'un membre *******************************************
 args.token donne les éléments d'authentification du compte.
-args.id : id du groupe
-args.ids : ids du groupe
-args.infok
+args.idg : id du groupe
+args.ids : ids du membre
+args.nvflags : nouveau flags. Peuvent changer PA DM DN DE AM AN
 Retour:
 */
-export class MajInfoMembre extends OperationUI {
+export class MajDroitsMembre extends OperationUI {
   constructor () { super($t('OPinfmb')) }
 
-  async run (id, ids, info) {
+  async run (idg, ids, nvflags) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, 
-        id,
-        ids,
-        infok: await crypter(session.clek, info)
-      }
-      this.tr(await post(this, 'MajInfoMembre', args))
-      this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* Maj des mots clés d'un membre *******************************************
-args.token donne les éléments d'authentification du compte.
-args.id : id du groupe
-args.ids : ids du groupe
-args.mc
-Retour:
-*/
-export class MajMCMembre extends OperationUI {
-  constructor () { super($t('OPmcmb')) }
-
-  async run (id, ids, mc) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, id, ids, mc }
-      this.tr(await post(this, 'MajMCMembre', args))
+      const args = { token: session.authToken, idg, ids, nvflags }
+      this.tr(await post(this, 'MajDroitsMembre', args))
       this.finOK()
     } catch (e) {
       return await this.finKO(e)

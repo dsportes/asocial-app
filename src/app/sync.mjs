@@ -201,9 +201,16 @@ export class OnchangeVersion extends OperationWS {
       - le groupe est justement celui en création: inconnu de compte, ids est 1
       */
       const s = this.aSt.compte.imsGroupe(this.objv.id)
-      if (s.size) // groupe déjà connu (actif ou invité)
-        this.grmap[this.objv.id] = { mbs: Array.from(s), v: this.vact }
-      else // groupe venant d'être créé
+      if (s.size) { // groupe déjà connu (actif ou invité)
+        const e = this.gSt.egr(this.objv.id)
+        // si c'était une invit, e.groupe n'existe pas
+        this.grmap[this.objv.id] = { 
+          mbs: Array.from(s), 
+          v: this.vact, 
+          mb: e ? e.groupe.aUnAccesMembre(s) : false,
+          no: e ? e.groupe.aUnAccesNote(s) : false
+        }
+      } else // groupe venant d'être créé
         this.grmap[this.objv.id] = { mbs: [1], v: 0 }
     }
 
@@ -227,7 +234,13 @@ export class OnchangeVersion extends OperationWS {
         this.avmap[avid] = Versions.get(avid).v
       for (const grid of this.grIdsAp) {
         const s = this.aSt.compte.imsGroupe(grid)
-        this.grmap[grid] = { mbs: Array.from(s), v: Versions.get(grid).v }
+        const e = this.gSt.egr(grid)
+        this.grmap[grid] = { 
+          mbs: Array.from(s), 
+          v: Versions.get(grid).v,
+          mb: e ? e.groupe.aUnAccesMembre(s) : false,
+          no: e ? e.groupe.aUnAccesNote(s) : false
+        }
       }
     }
     await this.process()

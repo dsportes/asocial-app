@@ -108,11 +108,13 @@ export const useGroupeStore = defineStore('groupe', {
 
     nbMesInvits: (state) => { return (e) => {
         let n = 0
-        e.groupe.flags.forEach((fl, i) => {
+        const fx = e.groupe.flags
+        for(let i = 1; i < fx.length; i++) {
+          const fl = fx[i]
           if (fl & FLAGS.IN) {
             if (e.membres.get(i).estAc) n++
           }
-        })
+        }
         return n
       }
     },

@@ -32,13 +32,13 @@
     </q-item>
     <q-item clickable>
       <q-item-section clickable @click="ui.setPage('groupes')">
-        <q-item-label lines="1">{{$t('ACmesgr')}}</q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item clickable>
-      <q-item-section clickable @click="ui.setPage('groupes')">
-        <q-item-label lines="1">{{$t('ACmesinv')}}
-          <q-badge color="primary" rounded>{{nbInvits}}</q-badge>
+        <q-item-label>
+          <span>{{$t('ACmesgr')}}
+            <q-badge color="primary" rounded>{{nbgrpsT}}</q-badge>
+          </span>
+          <span class="q-ml-sm">{{$t('ACmesinv')}}
+            <q-badge color="primary" rounded>{{nbInvits}}</q-badge>
+          </span>
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -119,6 +119,9 @@ export default {
     nbspons () { return this.aSt.eavC.sponsorings.size },
     nbgrps () { 
       return this.aSt.compte.idGroupes(this.session.avatarId).size
+    },
+    nbgrpsT () { 
+      return this.aSt.compte.idGroupes().size
     },
     nbInvits () { return this.gSt.invits.size },
 

@@ -132,6 +132,7 @@
             <q-checkbox class="col-9 text-center" :disable="drro" v-model="dra" :label="$t('AMdra')" />
             <!--q-checkbox class="col-3 text-center" disable v-model="dra"/-->
           </div>
+          <div v-if="dernierAnim" class="bg-yellow-5 text-warning text-bold">{{$t('AMcfer3')}}</div>
           <div class="row"> 
             <q-checkbox class="col-9 text-center" :disable="drro" v-model="drm" :label="$t('AMdrm')" />
             <q-checkbox class="col-3 text-center" v-model="adrm"/>
@@ -155,13 +156,31 @@
           <div v-if="moi">
             <div class="titre-md text-italic">{{$t('AMcftit2')}}</div>
             <div class="column q-my-sm">
-              <span><q-radio v-model="decl" :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="inv2"/></span>
-              <span><q-radio v-model="decl" :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="inv3"/></span>
-              <span><q-radio v-model="decl" :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="inv4"/></span>
+              <span><q-radio v-model="decl" :val="1" :label="$t('ICd2')"/><bouton-bulle idtext="oublc1"/></span>
+              <span><q-radio v-model="decl" :val="2" :label="$t('ICd3')" /><bouton-bulle idtext="oublc2"/></span>
+              <span><q-radio v-model="decl" :val="3" :label="$t('ICd4')" /><bouton-bulle idtext="oublc3"/></span>
             </div>
             <div class="row justify-center q-gutter-lg">
               <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
               <bouton-confirm :actif="cfln" :confirmer="ko"/>
+            </div>
+          </div>
+          <div v-else>
+            <div class="titre-md text-italic">{{$t('AMcftit3')}}</div>
+            <div v-if="(fl & FLAGS.AC) || (fl & FLAGS.IN)" 
+              class="q-ma-sm bg-yellow-5 text-bold text-warning">
+              <div v-if="(fl & FLAGS.AC)">{{$t('AMcfer1')}}</div>
+              <div v-if="(fl & FLAGS.IN)">{{$t('AMcfer2')}}</div>
+            </div>
+            <div v-else>
+              <div class="column q-my-sm">
+                <span><q-radio v-model="decl" :val="4" :label="$t('ICd5')"/><bouton-bulle idtext="oubla1"/></span>
+                <span><q-radio v-model="decl" :val="5" :label="$t('ICd6')" /><bouton-bulle idtext="oubla2"/></span>
+              </div>
+              <div class="row justify-center q-gutter-lg">
+                <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+                <bouton-confirm :actif="cfln" :confirmer="ko"/>
+              </div>
             </div>
           </div>
         </div>
@@ -238,10 +257,11 @@ import BoutonMembre from './BoutonMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle2 from './BoutonBulle2.vue'
+import BoutonBulle from './BoutonBulle.vue'
 import ArdoiseAnim from './ArdoiseAnim.vue'
 import EditeurMd from './EditeurMd.vue'
 import { MD, getNg } from '../app/modele.mjs'
-import { InvitationGroupe } from '../app/operations.mjs'
+import { MajDroitsMembre, InvitationGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuMembre',
@@ -257,7 +277,7 @@ export default {
     nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
   },
 
-  components: { BoutonConfirm, BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, ArdoiseAnim, EditeurMd },
+  components: { BoutonConfirm, BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, BoutonBulle, ArdoiseAnim, EditeurMd },
 
   computed: {
     amb () { return this.gSt.ambano[0] },
@@ -326,7 +346,10 @@ export default {
 
     chgdr () { return this.flags2av !== this.nvflags2 },
 
-    cfln () { return this.decl !== 0 }
+    cfln () { return this.decl !== 0 },
+
+    dernierAnim () { const g = this.eg.groupe
+      return this.moi && g.nbAnims <= 1 && this.dra === false }
   },
 
   watch: {
@@ -423,7 +446,8 @@ export default {
     },
 
     async changerdr () {
-      console.log(this.flags2av, this.nvflags2)
+      await new MajDroitsMembre().run(this.eg.groupe.id, this.im, this.nvflags2)
+      MD.fD()
     },
 
     ko () {

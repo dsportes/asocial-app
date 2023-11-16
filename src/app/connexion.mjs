@@ -880,7 +880,7 @@ export class ConnexionCompte extends OperationUI {
           n3 = x3
           n4 = x4
         } else // Non, on purge la base locales des membres
-          this.opBuf.purgeGroupeMbIDB(groupe.id)
+          this.buf.purgeGroupeMbIDB(groupe.id)
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
 
         // Ci-avant on a pu détecter des membres disparus qui ne l'était pas encore dans groupe
@@ -892,7 +892,7 @@ export class ConnexionCompte extends OperationUI {
           n1 = x1
           n2 = x2
         } else // Non on purge les notes
-          this.opBuf.purgeGroupeNoIDB(groupe.id)
+          this.buf.purgeGroupeNoIDB(groupe.id)
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
       }
 
