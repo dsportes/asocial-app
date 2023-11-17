@@ -261,7 +261,7 @@ import BoutonBulle from './BoutonBulle.vue'
 import ArdoiseAnim from './ArdoiseAnim.vue'
 import EditeurMd from './EditeurMd.vue'
 import { MD, getNg } from '../app/modele.mjs'
-import { MajDroitsMembre, InvitationGroupe } from '../app/operations.mjs'
+import { OublierMembre, MajDroitsMembre, InvitationGroupe } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuMembre',
@@ -450,8 +450,9 @@ export default {
       MD.fD()
     },
 
-    ko () {
-      console.log(this.decl)
+    async ko () {
+      await new OublierMembre().run(this.eg.groupe.na, this.na, this.im, this.decl)
+      MD.fD()
     }
 
   },

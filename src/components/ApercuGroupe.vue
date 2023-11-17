@@ -1,5 +1,8 @@
 <template>
-  <div :class="dkli(idx)">
+<div>
+  <div v-if="!eg || !eg.objv || !eg.objv.vols" class="titre-lg text-italic q-ma-md">{{$t('PGdisp')}}</div>
+
+  <div v-else :class="dkli(idx)">
     <!--div style="height:3rem"/-->
     <apercu-genx :na="eg.groupe.na" :cv="eg.groupe.cv" :idx="idx" :cvchangee="cvchangee"/>
 
@@ -62,155 +65,156 @@
         mb peut être absent (pas accès aux membres) -->
       <apercu-membre :mb="mb(im)" :im="im" :idav="id" :eg="eg" :idx="idx" :mapmc="mapmc"/>
     </div>
-
-    <!-- Dialogue d'édition des mots clés du groupe -->
-    <q-dialog v-model="mcledit" persistent>
-      <mots-cles class="bs full-width" :duGroupe="eg.groupe.id" @ok="okmc" :titre="$t('AGmc')"
-        :lecture="!eg.estAnim || !session.editable"/>
-    </q-dialog>
-
-    <!-- Gérer le mode simple / unanime -->
-    <q-dialog v-model="editerUna" full-height persistent>
-      <div class="bs" style="width:80vw">
-      <q-layout container view="hHh lpR fFf" :class="dkli(0)">
-        <q-header elevated class="bg-secondary text-white">
-          <q-toolbar>
-            <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGuna', [eg.groupe.na.nom])}}</q-toolbar-title>
-            <bouton-help page="page1"/>
-          </q-toolbar>
-        </q-header>
-
-        <q-page-container>
-          <q-page class="q-pa-sm">
-            <div class="titre-lg text-center text-bold q-my-sm" v-if="eg.groupe.msu===null">{{$t('AGms')}}</div>
-            <div class="titre-lg text-center text-bold q-my-sm" v-else>{{$t('AGmu')}}</div>
-            <div class="titre-md q-my-sm">{{$t('AGu1')}}</div>
-            <div class="titre-md q-my-sm">{{$t('AGu2')}}</div>
-            <div class="titre-md q-my-sm" v-if="eg.groupe.msu">{{$t('AGu3')}}</div>
-            <div class="titre-md q-my-sm" v-else>{{$t('AGu4')}}</div>
-            <div v-if="eg.groupe.msu">
-              <div class="largeur30 maauto column items-center">
-                <q-separator class="q-my-sm full-width" color="orange"/>
-                <div class="titre-md text-italic" >{{$t('AGu5')}}</div>
-                <div v-for="(v, idx) in lstVotes" :key="idx" :class="'row ' + dkli(idx)">
-                  <div class="col-8 fs-md">{{v.nom}}</div>
-                  <div class="col-2"></div>
-                  <div class="col-2 fs-md">{{$t(v.oui ? 'oui' : 'non')}}</div>
-                </div>
-                <q-separator class="q-my-sm full-width" color="orange"/>
-              </div>
-            </div>
-            <div v-if="!estAnim">
-              <div class="titre-md text-center">{{$t('AGupasan')}}</div>
-              <q-btn class="q-ml-md" dense size="md" color="primary" :label="$t('jailu')" @click="MD.fD"/>
-            </div>
-            <div v-else class="column q-gutter-xs items-center">
-              <q-btn v-if="eg.groupe.msu" :label="$t('AGums')" dense size="md" 
-                color="warning" @click="cfu = 1"/>
-              <q-btn v-if="eg.groupe.msu" :label="$t('AGrumu')" dense size="md" 
-                color="warning" @click="cfu = 2"/>
-              <!--q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
-                color="warning" @click="cfu = 2"/-->
-              <q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
-                color="warning" @click="cfu = 2"/>
-              <div class="q-mt-md row justify-center items-center q-gutter-md">
-                <q-btn size="md" class="btn2" dense :label="$t('renoncer')" 
-                  color="primary" @click="MD.fD"/>
-                <bouton-confirm :actif="cfu!==0" :confirmer="chgU"/>
-              </div>
-            </div>
-         </q-page>
-        </q-page-container>
-      </q-layout>
-      </div>
-    </q-dialog>
-
-    <!-- Gérer l'hébergement, changer les quotas -->
-    <q-dialog v-model="changerQuotas" full-height persistent>
-      <div class="bs"  style="width:80vw">
-      <q-layout container view="hHh lpR fFf" :class="dkli(0)">
-        <q-header elevated class="bg-secondary text-white">
-          <q-toolbar>
-            <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGgerh', [eg.groupe.na.nom])}}</q-toolbar-title>
-            <bouton-help page="page1"/>
-          </q-toolbar>
-        </q-header>
-
-        <q-page-container>
-          <q-page class="q-pa-xs">
-            <quotas-vols2 class="q-my-md" :vols="eg.objv.vols"/>
-            <div class="titre-md" v-if="cas===1">{{$t('AGm1', [moi])}}</div>
-            <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1a')}}</div>
-            <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1b')}}</div>
-            <div class="titre-md" v-if="cas===2">{{$t('AGm2', [moi, hbg])}}</div>
-            <div class="titre-md" v-if="cas===3">{{$t('AGm3', [moi, hbg])}}</div>
-            <div class="titre-md" v-if="cas===4">{{$t('AGm4', [moi])}}</div>
-            <div class="titre-md" v-if="cas===5">{{$t('AGm5', [moi, lstAn])}}</div>
-            <div class="titre-md" v-if="cas===6">{{$t('AGm6', [moi])}}</div>
-
-            <div v-if="alq1 || alq2">
-              <q-separator color="orange" class="q-my-xs"/>
-              <div v-if="alq1 && eg.groupe.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq1x')}}</div>
-              <div v-if="alq1" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1')}}</div>
-              <div v-if="alq2 && eg.groupe.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq2x')}}</div>
-              <div v-if="alq2" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2')}}</div>
-              <q-separator color="orange" class="q-my-xs"/>
-            </div>
-
-            <div class="column justify-center">
-              <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="primary" :label="$t('AGbtncq')" @click="gotocq"/>
-              <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="warning" :label="$t('AGbtnfh')" @click="step = 2"/>
-              <q-btn class="q-ma-md" v-if="cas===2 || cas === 4 || cas === 6" size="md" color="primary" :label="$t('AGbtndh')" @click="gotocq"/>
-              <q-btn class="q-ma-md" v-if="cas===3 || cas === 5" size="md" color="primary" :label="$t('jailu')" @click="MD.fD"/>
-            </div>
-
-            <div v-if="step === 2" class="q-ma-md">
-              <div class="titre-md text-bold text-negative bg-yellow-3 text-center">{{$t('AGv1b')}}</div>
-              <div class="titre-md text-bold text-negative bg-yellow-3 text-center">{{$t('AGv2b')}}</div>
-              <div class="q-mt-md row justify-center q-gutter-md">
-                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-                <bouton-confirm actif :confirmer="finHeb"/>
-              </div>
-            </div>
-
-            <div v-if="step === 1" class="q-ma-sm">
-              <choix-quotas class="q-my-sm" :quotas="q" @change="onChgQ" groupe/>
-              <div v-if="q.err" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGmx')}}</div>
-              <div v-if="al1" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1b')}}</div>
-              <div v-if="al2" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2b')}}</div>
-              <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar1 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp1', [rst1])}}</div>
-              <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar2 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp2', [rst2])}}</div>
-              <div class="row justify-center q-gutter-md">
-                <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-                <bouton-confirm v-if="!q.err && (al1 || al2)" actif :confirmer="chgQ"/>
-                <q-btn v-if="!q.err && !al1 && !al2" size="md" dense :label="$t('confirmer')" color="primary" @click="chgQ"/>
-              </div>
-            </div>
-          </q-page>
-        </q-page-container>
-      </q-layout>
-      </div>
-    </q-dialog>
-
-    <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
-    <q-dialog v-model="nvctc" persistent>
-      <q-card class="bs">
-        <q-card-section class="column q-ma-xs q-pa-xs titre-md">
-          <div>{{$t('PGplus1')}}</div>
-          <div class="q-ml-md">{{$t('PGplus2')}}</div>
-          <div class="q-ml-md">{{$t('PGplus3')}}</div>
-          <div class="q-ml-md">{{$t('PGplus4')}}</div>
-          <div class="q-ml-lg q-px-xs text-bold bord1">{{$t('PGplus5', [eg.groupe.na.nom])}}</div>
-        </q-card-section>
-        <q-card-actions vertical>
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-          <q-btn flat :label="$t('continuer')" color="warning" @click="pagectc"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </div>
+
+  <!-- Dialogue d'édition des mots clés du groupe -->
+  <q-dialog v-model="mcledit" persistent>
+    <mots-cles class="bs full-width" :duGroupe="eg.groupe.id" @ok="okmc" :titre="$t('AGmc')"
+      :lecture="!eg.estAnim || !session.editable"/>
+  </q-dialog>
+
+  <!-- Gérer le mode simple / unanime -->
+  <q-dialog v-model="editerUna" full-height persistent>
+    <div class="bs" style="width:80vw">
+    <q-layout container view="hHh lpR fFf" :class="dkli(0)">
+      <q-header elevated class="bg-secondary text-white">
+        <q-toolbar>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGuna', [eg.groupe.na.nom])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+      </q-header>
+
+      <q-page-container>
+        <q-page class="q-pa-sm">
+          <div class="titre-lg text-center text-bold q-my-sm" v-if="eg.groupe.msu===null">{{$t('AGms')}}</div>
+          <div class="titre-lg text-center text-bold q-my-sm" v-else>{{$t('AGmu')}}</div>
+          <div class="titre-md q-my-sm">{{$t('AGu1')}}</div>
+          <div class="titre-md q-my-sm">{{$t('AGu2')}}</div>
+          <div class="titre-md q-my-sm" v-if="eg.groupe.msu">{{$t('AGu3')}}</div>
+          <div class="titre-md q-my-sm" v-else>{{$t('AGu4')}}</div>
+          <div v-if="eg.groupe.msu">
+            <div class="largeur30 maauto column items-center">
+              <q-separator class="q-my-sm full-width" color="orange"/>
+              <div class="titre-md text-italic" >{{$t('AGu5')}}</div>
+              <div v-for="(v, idx) in lstVotes" :key="idx" :class="'row ' + dkli(idx)">
+                <div class="col-8 fs-md">{{v.nom}}</div>
+                <div class="col-2"></div>
+                <div class="col-2 fs-md">{{$t(v.oui ? 'oui' : 'non')}}</div>
+              </div>
+              <q-separator class="q-my-sm full-width" color="orange"/>
+            </div>
+          </div>
+          <div v-if="!estAnim">
+            <div class="titre-md text-center">{{$t('AGupasan')}}</div>
+            <q-btn class="q-ml-md" dense size="md" color="primary" :label="$t('jailu')" @click="MD.fD"/>
+          </div>
+          <div v-else class="column q-gutter-xs items-center">
+            <q-btn v-if="eg.groupe.msu" :label="$t('AGums')" dense size="md" 
+              color="warning" @click="cfu = 1"/>
+            <q-btn v-if="eg.groupe.msu" :label="$t('AGrumu')" dense size="md" 
+              color="warning" @click="cfu = 2"/>
+            <!--q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
+              color="warning" @click="cfu = 2"/-->
+            <q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
+              color="warning" @click="cfu = 2"/>
+            <div class="q-mt-md row justify-center items-center q-gutter-md">
+              <q-btn size="md" class="btn2" dense :label="$t('renoncer')" 
+                color="primary" @click="MD.fD"/>
+              <bouton-confirm :actif="cfu!==0" :confirmer="chgU"/>
+            </div>
+          </div>
+        </q-page>
+      </q-page-container>
+    </q-layout>
+    </div>
+  </q-dialog>
+
+  <!-- Gérer l'hébergement, changer les quotas -->
+  <q-dialog v-model="changerQuotas" full-height persistent>
+    <div class="bs"  style="width:80vw">
+    <q-layout container view="hHh lpR fFf" :class="dkli(0)">
+      <q-header elevated class="bg-secondary text-white">
+        <q-toolbar>
+          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGgerh', [eg.groupe.na.nom])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+      </q-header>
+
+      <q-page-container>
+        <q-page class="q-pa-xs">
+          <quotas-vols2 class="q-my-md" :vols="eg.objv.vols"/>
+          <div class="titre-md" v-if="cas===1">{{$t('AGm1', [moi])}}</div>
+          <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1a')}}</div>
+          <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1b')}}</div>
+          <div class="titre-md" v-if="cas===2">{{$t('AGm2', [moi, hbg])}}</div>
+          <div class="titre-md" v-if="cas===3">{{$t('AGm3', [moi, hbg])}}</div>
+          <div class="titre-md" v-if="cas===4">{{$t('AGm4', [moi])}}</div>
+          <div class="titre-md" v-if="cas===5">{{$t('AGm5', [moi, lstAn])}}</div>
+          <div class="titre-md" v-if="cas===6">{{$t('AGm6', [moi])}}</div>
+
+          <div v-if="alq1 || alq2">
+            <q-separator color="orange" class="q-my-xs"/>
+            <div v-if="alq1 && eg.groupe.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq1x')}}</div>
+            <div v-if="alq1" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1')}}</div>
+            <div v-if="alq2 && eg.groupe.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq2x')}}</div>
+            <div v-if="alq2" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2')}}</div>
+            <q-separator color="orange" class="q-my-xs"/>
+          </div>
+
+          <div class="column justify-center">
+            <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="primary" :label="$t('AGbtncq')" @click="gotocq"/>
+            <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="warning" :label="$t('AGbtnfh')" @click="step = 2"/>
+            <q-btn class="q-ma-md" v-if="cas===2 || cas === 4 || cas === 6" size="md" color="primary" :label="$t('AGbtndh')" @click="gotocq"/>
+            <q-btn class="q-ma-md" v-if="cas===3 || cas === 5" size="md" color="primary" :label="$t('jailu')" @click="MD.fD"/>
+          </div>
+
+          <div v-if="step === 2" class="q-ma-md">
+            <div class="titre-md text-bold text-negative bg-yellow-3 text-center">{{$t('AGv1b')}}</div>
+            <div class="titre-md text-bold text-negative bg-yellow-3 text-center">{{$t('AGv2b')}}</div>
+            <div class="q-mt-md row justify-center q-gutter-md">
+              <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+              <bouton-confirm actif :confirmer="finHeb"/>
+            </div>
+          </div>
+
+          <div v-if="step === 1" class="q-ma-sm">
+            <choix-quotas class="q-my-sm" :quotas="q" @change="onChgQ" groupe/>
+            <div v-if="q.err" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGmx')}}</div>
+            <div v-if="al1" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1b')}}</div>
+            <div v-if="al2" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2b')}}</div>
+            <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar1 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp1', [rst1])}}</div>
+            <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar2 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp2', [rst2])}}</div>
+            <div class="row justify-center q-gutter-md">
+              <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+              <bouton-confirm v-if="!q.err && (al1 || al2)" actif :confirmer="chgQ"/>
+              <q-btn v-if="!q.err && !al1 && !al2" size="md" dense :label="$t('confirmer')" color="primary" @click="chgQ"/>
+            </div>
+          </div>
+        </q-page>
+      </q-page-container>
+    </q-layout>
+    </div>
+  </q-dialog>
+
+  <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
+  <q-dialog v-model="nvctc" persistent>
+    <q-card class="bs">
+      <q-card-section class="column q-ma-xs q-pa-xs titre-md">
+        <div>{{$t('PGplus1')}}</div>
+        <div class="q-ml-md">{{$t('PGplus2')}}</div>
+        <div class="q-ml-md">{{$t('PGplus3')}}</div>
+        <div class="q-ml-md">{{$t('PGplus4')}}</div>
+        <div class="q-ml-lg q-px-xs text-bold bord1">{{$t('PGplus5', [eg.groupe.na.nom])}}</div>
+      </q-card-section>
+      <q-card-actions vertical>
+        <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+        <q-btn flat :label="$t('continuer')" color="warning" @click="pagectc"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+</div>
 </template>
 
 <script>

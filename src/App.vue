@@ -420,7 +420,7 @@ export default {
         case 'chats' : { arg = this.aSt.avC.na.nom; break }
         case 'sponsorings' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
         case 'groupesac' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
-        case 'groupe' : { arg = this.gSt.egrC ? this.gSt.egrC.groupe.na.nom : '?'; break }
+        case 'groupe' : { arg = this.gSt.egrC ? this.gSt.egrC.groupe.na.nom : this.$t('disparu'); break }
       }
       return this.$t('P' + p, [arg])
     },

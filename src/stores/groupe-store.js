@@ -25,7 +25,8 @@ export const useGroupeStore = defineStore('groupe', {
   getters: {
     // groupe courant
     egrC (state) { 
-      return state.map.get(stores.session.groupeId)
+      const id = stores.session.groupeId
+      return state.map.get(id)
     },
 
     // Retourne [amb, ano] : les avatars du compte ont ou non accès aux membres / notes

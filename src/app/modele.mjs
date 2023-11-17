@@ -1890,10 +1890,10 @@ export class Groupe extends GenDoc {
     let im = 0
     let slot = 0
     for(let i = 1; i < this.anag.length; i++) { 
-      if (!slot && gr.estLibre(i)) slot = i
-      if (gr.anag[im] === nag) { im = i; break }
+      if (!slot && this.estLibre(i)) slot = i
+      if (this.anag[im] === nag) { im = i; break }
     }
-    return !im ? [true, slot || gr.anag.length] : [false, im]
+    return !im ? [true, slot || this.anag.length] : [false, im]
   }
 
   async compile (row) {
@@ -1964,7 +1964,7 @@ export class Groupe extends GenDoc {
   */
   static async getNpgk (idg, idav) {
     const session = stores.session
-    return hash(await crypter(session.clek, ID.court(idg) + '/' + ID.court(idav)))
+    return hash(await crypter(session.clek, ID.court(idg) + '/' + ID.court(idav), 1))
   }
 
   static async toIdhg (cle) {

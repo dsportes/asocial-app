@@ -32,10 +32,10 @@
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
-      <div v-if="ui.egrplus && !pSt.peC.groupes.has(gSt.egrC.na.id)"
+      <div v-if="ui.egrplus && !pSt.peC.groupes.has(gSt.egrC.groupe.na.id)"
         class="q-ma-md bordo column items-center">
         <div class="full-width titre-md bg-yellow-3 text-warning text-bold text-center">
-          {{$t('PGplus5b', [gSt.egrC.na.nom, pSt.peC.na.nom])}}
+          {{$t('PGplus5b', [gSt.egrC.groupe.na.nom, pSt.peC.na.nom])}}
         </div>
         <q-btn class="text-center q-my-sm" dense size="md" no-caps color="primary" icon="check"
           :label="$t('ok')" @click="contact"/>
@@ -78,7 +78,7 @@ import ApercuChat from '../components/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
-import { MD, Chat, Motscles } from '../app/modele.mjs'
+import { MD, Chat, Motscles, Groupe } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
 import { afficherDiag } from '../app/util.mjs'
 
@@ -126,23 +126,23 @@ export default {
       while (true) {
         const [amb, ano] = this.gSt.ambano
         if (!amb) { // ça ne devrait pas se produire ici
-          await this.afficherDiag(this.$t('PPamb'))
+          await afficherDiag(this.$t('PPamb'))
           return
         }
         const gr = this.gSt.egrC.groupe // groupe courant d'où vient la proposition d'inscription en contact
         const pe = this.pSt.peC // people courant
         const nag = await Groupe.getNag(gr.na, pe.na)
         if (gr.enLNA(nag)) {
-          await this.afficherDiag(this.$t('PPlna'))
+          await afficherDiag(this.$t('PPlna'))
           return
         }
         if (gr.enLNC(nag)) {
-          await this.afficherDiag(this.$t('PPlnc'))
+          await afficherDiag(this.$t('PPlnc'))
           return
         }
         const [nouveau, slot] = await gr.slot(pe.na)
         if (!nouveau) { // ça ne devrait pas se produire ici
-          await this.afficherDiag(this.$t('PPctc'))
+          await afficherDiag(this.$t('PPctc'))
           return
         }
         this.ui.egrplus = false

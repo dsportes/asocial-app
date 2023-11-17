@@ -1153,6 +1153,7 @@ export class NouveauMembre extends OperationUI {
     try {
       const session = stores.session
       const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, 0, cv)
+      const nag = await Groupe.getNag(gr.na, na)
       const args = { token: session.authToken, 
         id: na.id,
         idg: gr.id,
@@ -1181,6 +1182,35 @@ export class MajDroitsMembre extends OperationUI {
       const session = stores.session
       const args = { token: session.authToken, idg, ids, nvflags }
       this.tr(await post(this, 'MajDroitsMembre', args))
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
+/* Oublier un membre *******************************************
+args.token donne les éléments d'authentification du compte.
+args.idg : id du groupe
+args.ids : ids du membre
+args.npgk : entrée dans la table mpg
+args.cas : 
+  - 1 : (moi) retour en simple contact
+  - 2 : (moi) m'oublier
+  - 3 : (moi) m'oublier définitivement
+  - 4 : oublier le membre (qui est simple contact pas invité)
+  - 5 : oublier définitivement le membre
+Retour:
+*/
+export class OublierMembre extends OperationUI {
+  constructor () { super($t('OPinfmb')) }
+
+  async run (ng, na, ids, cas) {
+    try {
+      const session = stores.session
+      const npgk = await Groupe.getNpgk(ng, na)
+      const args = { token: session.authToken, idg: ng.id, npgk, ids, cas }
+      this.tr(await post(this, 'OublierMembre', args))
       this.finOK()
     } catch (e) {
       return await this.finKO(e)
@@ -1301,89 +1331,8 @@ export class AcceptInvitation extends OperationUI {
         cas, iam, ian, ni, epgk,
         ardg: await crypter(ng.rnd, ard)
       }
-      this.tr(await post(this, 'AcceptInvitation', args))
-      return this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* Changement de statut d'un membre d'un groupe
-args.token donne les éléments d'authentification du compte.
-args.id: id du groupe 
-args.ids: ids du membre cible
-args.ida: id de l'avatar du membre cible
-args.idc: id du COMPTE de ida, en cas de fin d'hébergement par résiliation / oubli
-args.ima: ids (imdice membre) du demandeur de l'opération
-args.idh: id du compte hébergeur
-args.kegr: clé du membre dans lgrk. Hash du rnd inverse de l'avatar crypté par le rnd du groupe.
-args.egr: élément du groupe dans lgrk de l'avatar invité 
-  (invitations seulement). Crypté par la clé RSA publique de l'avatar
-args.laa: 0:lecteur, 1:auteur, 2:animateur
-args.ardg: ardoise du membre cryptée par la clé du groupe.
-args.dlv: pour les acceptations d'invitation
-args.fn: fonction à appliquer
-  0 - maj de l'ardoise seulement, rien d'autre ne change
-  1 - invitation
-  2 - modification d'invitation
-  3 - acceptation d'invitation
-  4 - refus d'invitation
-  5 - modification du rôle laa (actif)
-  6 - résiliation
-  7 - oubli
-Retour: code (d'anomalie)
-1 - situation inchangée, c'était déjà l'état actuel
-2 - changement de laa impossible, membre non actif
-3 - refus d'invitation impossible, le membre n'est pas invité
-4 - acceptation d'invitation impossible, le membre n'est pas invité
-5 - modification d'invitation impossible, le membre n'est pas invité
-7 - le membre est actif, invitation impossible
-8 - le membre a disparu, opération impossible
-*/
-export class StatutMembre extends OperationUI {
-  constructor () { super($t('OPstmb')) }
-
-  /* 
-  gr: groupe
-  mb: membre
-  fn: fonction à appliquer
-  laa: lecteur, auteur, animateur
-  ard: texte de l'ardoise, false s'il n'a pas changé, null s'il est effacé
-  */
-  async run (gr, mb, fn, laa, ard) {
-    try {
-      const session = stores.session
-      const gSt = stores.groupe
-      const aSt = stores.avatar
-      const mbac = gSt.membreAcGc
-      let egr = null // élément de lgrk dans l'avatar ida invité crypté par sa RSA
-
-      const x = [gr.na.nom, gr.na.rnd, mb.ids]
-      if (fn == 1) { // invitation
-        const pubE = await aSt.getPub(mb.na.id)
-        egr = await crypterRSA(pubE, new Uint8Array(encode(x)))
-      } else if (fn === 3) { // acceptation
-        egr = await crypter(session.clek, new Uint8Array(encode(x)))
-      }
-      const kegr = hash(await crypter(gr.na.rnd, inverse(mb.na.rnd), 1))
-      const ardg = !ard ? null : await crypter(gr.na.rnd, ard)
-
-      // En UTC la division d'une date est multiple de 86400000
-      const tjourJ = (AMJ.tDeAmjUtc(session.dateJourConnx) / 86400000) + limitesjour.dlv
-      const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
-      const dlv = AMJ.amjUtcDeT(tdlv * 86400000) // pour acceptation d'invitation
-      
-      const args = { token: session.authToken, 
-        id: gr.id, 
-        ids: mb.ids,
-        ida: mb.na.id,
-        ima: mbac ? mbac.ids : 0,
-        idh: gr.idh,
-        egr, kegr, laa, ardg, dlv, fn
-      }
-      const ret = this.tr(await post(this, 'StatutMembre', args))
-      return this.finOK(ret.code || 0)
+      const ret = this.tr(await post(this, 'AcceptInvitation', args))
+      return this.finOK(ret.disparu)
     } catch (e) {
       return await this.finKO(e)
     }

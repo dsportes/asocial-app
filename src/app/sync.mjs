@@ -110,10 +110,16 @@ export class OnchangeVersion extends OperationWS {
 
     if (this.ret.rowVersions) for (const row of this.ret.rowVersions) {
       const version = Versions.compile(row)
-      this.veCache.set(version.id, version)
       if (ID.estGroupe(version.id)) {
-        const e = this.egrMaj(version.id)
-        e.objv = version
+        if (version._zombi) {
+          this.grMoins.add(version.id)
+        } else {
+          this.veCache.set(version.id, version)
+          const e = this.egrMaj(version.id)
+          e.objv = version
+        }
+      } else {
+        this.veCache.set(version.id, version)
       }
     }
 
@@ -126,6 +132,7 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowGroupes) for (const row of this.ret.rowGroupes) {
+      if (this.grMoins.has(row.id)) continue
       this.buf.putIDB(row)
       const gr = await compile(row)
       this.grCache.set(row.id, gr)
@@ -315,8 +322,8 @@ export class OnchangeVersion extends OperationWS {
       this.buf.commitIDB(false, x)
 
       // Maj des stores *********************************
-      if (this.avMoins.size) this.avMoins.forEach(id => { aSt.del(id) })
-      if (this.grMoins.size) this.grMoins.forEach(id => { gSt.del(id) })
+      if (this.avMoins.size) this.avMoins.forEach(id => { this.aSt.del(id) })
+      if (this.grMoins.size) this.grMoins.forEach(id => { this.gSt.del(id) })
 
       if (this.delMb.size) this.delMb.forEach(idg => { this.gSt.delMembre(idg) })
       if (this.delNo.size) this.delNo.forEach(idg => { this.gSt.delNote(idg) })

@@ -108,6 +108,7 @@ export default {
   pasdepuis: 'pas depuis {0}',
   activer: 'Activer',
   desactiver: 'Désactiver',
+  disparu: 'disparu',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -1274,6 +1275,7 @@ export default {
   QVplc: 'Plafond de consommation (rythme mensuel): {0} - {1}',
 
   // Page groupe(s)
+  PGdisp: 'Groupe disparu',
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
   PGvut: 'Réellement utilisé',
   PGvq: 'Somme des maximum attribués',
@@ -1364,6 +1366,7 @@ export default {
   AMardtit: 'Ardoise de {0} pour échange avec le(s) animateur(s)',
   AMardtit2: 'Ardoise d\'échange avec le(s) animateur(s)',
   AMbienv: 'Mot de bienvenue sur l\'ardoise',
+  AMdisp: 'Ce groupe a disparu depuis le moment où l\'invitation a été lancée.',
 
   AMcftit: 'Configuration de {0} dans le groue {1}',
   AMcftb1: 'Droits',
@@ -1422,8 +1425,8 @@ export default {
   ICd2: 'me conserver comme contact',
   ICd3: 'm\'oublier dans ce groupe',
   ICd4: 'm\'oublier DÉFINITIVEMENT dans ce groupe',
-  ICd5: 'm\'oublier dans ce groupe',
-  ICd6: 'm\'oublier DÉFINITIVEMENT dans ce groupe',
+  ICd5: 'oublier dans ce groupe',
+  ICd6: 'oublier DÉFINITIVEMENT dans ce groupe',
 
   // Quotas Vols
   PGq1: 'Quota de volume V1 (textes des notes): [{0}] soit {1}',

@@ -117,8 +117,11 @@ export default ({
 
     async ok (cas) {
       MD.fD()
-      await new AcceptInvitation(). // (cas, na, ng, im, ard, iam, ian)
+      const disp = await new AcceptInvitation(). // (cas, na, ng, im, ard, iam, ian)
         run(cas, this.mb.na, this.inv.ng, this.mb.ids, this.ard, this.iam, this.ian)
+      if (disp) {
+        await afficherDiag(this.$t('AMdisp'))
+      }
     }
   },
   
