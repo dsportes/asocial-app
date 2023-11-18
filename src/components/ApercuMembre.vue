@@ -28,7 +28,7 @@
 
       <div class="q-ml-lg q-mt-sm row justify-between">
         <div class="titre-md">{{$t('AMhist')}}</div>
-        <bouton-bulle2 v-if="fl" :texte="edit(fl, $t, '\n\n')" :label="$t('details')"/>
+        <bouton-bulle2 :texte="edit(fl, $t, '\n\n')" :label="$t('details')"/>
       </div>
 
       <div class="mlx">
@@ -128,6 +128,7 @@
             <div class="col-9">{{$t('AMdrt1')}}</div>
             <div class="col-3">{{$t('AMdrt2')}}</div>
           </div>
+          <div v-if="drro" class="q-ma-sm bg-yellow-5 text-bold text-warning">{{$t('AMcfer4')}}</div>
           <div class="row"> 
             <q-checkbox class="col-9 text-center" :disable="drro" v-model="dra" :label="$t('AMdra')" />
             <!--q-checkbox class="col-3 text-center" disable v-model="dra"/-->
@@ -135,11 +136,11 @@
           <div v-if="dernierAnim" class="bg-yellow-5 text-warning text-bold">{{$t('AMcfer3')}}</div>
           <div class="row"> 
             <q-checkbox class="col-9 text-center" :disable="drro" v-model="drm" :label="$t('AMdrm')" />
-            <q-checkbox class="col-3 text-center" v-model="adrm"/>
+            <q-checkbox class="col-3 text-center" :disable="!moi" v-model="adrm"/>
           </div>
           <div class="row"> 
             <q-checkbox class="col-9 text-center" :disable="drro" v-model="drl" :label="$t('AMdrl')" />
-            <q-checkbox class="col-3 text-center" v-model="adrl"/>
+            <q-checkbox class="col-3 text-center" :disable="!moi" v-model="adrl"/>
           </div>
           <div class="row"> 
             <q-checkbox class="col-9 text-center" :disable="drro" v-model="dre" :label="$t('AMdre')" />
@@ -416,9 +417,13 @@ export default {
       this.ide = (fl & FLAGS.DE) !== 0
       this.options = []
       this.aSt.compte.lstAvatarNas.forEach(na => {
-        const im = this.aSt.compte.imGA(this.eg.id, na.id)
+        const im = this.aSt.compte.imGA(this.eg.groupe.id, na.id)
         if (this.eg.groupe.estAnim(im)) this.options.push({ label: na.nom, value: im })
       })
+      if (!this.options.length) {
+        afficherDiag(this.$t('AMinvitAnim'))
+        return
+      }
       this.invpar = this.options[0]
       this.ard = this.mb.ard || ''
       this.ovinvit()
@@ -466,6 +471,9 @@ export default {
     const idav = toRef(props, 'idav')
     const na = ref(mb.value ? mb.value.na : getNg(idav.value))
     const cv = ref(mb.value ? mb.value.cv : aSt.getAvatar(idav.value).cv)
+    const im = toRef(props, 'im')
+    const eg = toRef(props, 'eg')
+    console.log(edit(eg.value.groupe.flags[im.value]))
  
     const chgSt = ref(false)
     function ovchgSt () { MD.oD(chgSt) }

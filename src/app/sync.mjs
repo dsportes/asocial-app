@@ -114,9 +114,11 @@ export class OnchangeVersion extends OperationWS {
         if (version._zombi) {
           this.grMoins.add(version.id)
         } else {
-          this.veCache.set(version.id, version)
-          const e = this.egrMaj(version.id)
-          e.objv = version
+          if (this.grIdsAp.has(version.id)) {
+            this.veCache.set(version.id, version)
+            const e = this.egrMaj(version.id)
+            e.objv = version
+          }
         }
       } else {
         this.veCache.set(version.id, version)
@@ -132,7 +134,7 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowGroupes) for (const row of this.ret.rowGroupes) {
-      if (this.grMoins.has(row.id)) continue
+      if (!this.grIdsAp.has(row.id)) continue
       this.buf.putIDB(row)
       const gr = await compile(row)
       this.grCache.set(row.id, gr)
@@ -141,6 +143,7 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowNotes) for (const row of this.ret.rowNotes) {
+      if (ID.estGroupe(row.id) && !this.grIdsAp.has(row.id)) continue
       this.buf.putIDB(row)
       const note = await compile(row)
       const e = ID.estGroupe(note.id) ? this.egrMaj(note.id) : this.eavMaj(note.id)
@@ -170,6 +173,7 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowMembres) for (const row of this.ret.rowMembres) {
+      if (!this.grIdsAp.has(row.id)) continue
       const mb = await compile(row)
       if (mb._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
       const e = this.egrMaj(mb.id)
@@ -227,7 +231,10 @@ export class OnchangeVersion extends OperationWS {
         avv: this.avv, avmap: this.avmap, grmap: this.grmap
       }
       this.ret = this.tr(await post(this, 'Synchroniser', args))
-      if (!this.ret.KO) break
+      if (!this.ret.KO) {
+        this.grIdsAp = this.grIdsAv
+        break
+      }
 
       // la version de avatar a (encore) changé
       this.rowAvatar = this.ret.rowAvatar
@@ -330,6 +337,14 @@ export class OnchangeVersion extends OperationWS {
 
       this.avMaj.forEach(e => { this.aSt.lotMaj(e) })
       this.grMaj.forEach(e => { this.gSt.lotMaj(e) })
+
+      // gestion des "courants"
+      if (this.avMoins.has(this.session.avatarId))
+        this.session.setAvatarId(0)
+      if (this.grMoins.has(this.session.groupeId)) {
+        this.session.setGroupeId(0)
+        this.session.setMembreId(0)
+      }
 
       // Maj des abonnements ******************************
       this.abPlus = new Set() // abonnements de synchronisation ajoutés

@@ -1160,7 +1160,7 @@ export class NouveauMembre extends OperationUI {
         nag, im, rowMembre
       }
       const ret = this.tr(await post(this, 'NouveauMembre', args))
-      this.finOK(!ret.KO)
+      return this.finOK(!ret.KO)
     } catch (e) {
       return await this.finKO(e)
     }
@@ -1208,7 +1208,7 @@ export class OublierMembre extends OperationUI {
   async run (ng, na, ids, cas) {
     try {
       const session = stores.session
-      const npgk = await Groupe.getNpgk(ng, na)
+      const npgk = await Groupe.getNpgk(ng.id, na.id)
       const args = { token: session.authToken, idg: ng.id, npgk, ids, cas }
       this.tr(await post(this, 'OublierMembre', args))
       this.finOK()

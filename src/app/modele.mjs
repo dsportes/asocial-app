@@ -1800,7 +1800,7 @@ export class Groupe extends GenDoc {
     return (f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
   estInvitable (im) { const f = this.flags[im] || 0; 
-    return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !this.enLNA && !this.enLNC 
+    return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !this.enLNA(im) && !this.enLNC(im)
   }
 
   estHeb (im) { return this.estActif(im) && im === this.imh }
@@ -1870,9 +1870,9 @@ export class Groupe extends GenDoc {
   }
 
   // mis dans la liste noire par un animateur
-  enLNA (nag) { return (this.lna.indexOf(nag) !== -1)}
+  enLNA (im, nag) { const x = im ? this.anag[im] : nag; return (this.lna.indexOf(x) !== -1)}
   // mis dans la liste noire par le compte lui-même
-  enLNC (nag) { return (this.lnc.indexOf(nag) !== -1)}
+  enLNC (im, nag) { const x = im ? this.anag[im] : nag; return (this.lnc.indexOf(x) !== -1)}
 
   setDisparu (im) {
     if (!this.estDisparu(im)) {
@@ -1891,7 +1891,7 @@ export class Groupe extends GenDoc {
     let slot = 0
     for(let i = 1; i < this.anag.length; i++) { 
       if (!slot && this.estLibre(i)) slot = i
-      if (this.anag[im] === nag) { im = i; break }
+      if (this.anag[i] === nag) { im = i; break }
     }
     return !im ? [true, slot || this.anag.length] : [false, im]
   }
@@ -2043,9 +2043,8 @@ export class Membre extends GenDoc {
   } 
 
   static async rowNouveauMembre (nag, na, im, dlv, cv) {
-    const a = AMJ.amjUtc()
     const r = { id: nag.id, ids: im, v: 0, dlv: AMJ.max, vcv: cv ? cv.v : 0,
-      ddi: 0, dac: a, fac: 0, dln: a, fln: 0, den: a, fen: 0, dam: a, fam: 0 }
+      ddi: 0, dac: 0, fac: 0, dln: 0, fln: 0, den: 0, fen: 0, dam: 0, fam: 0 }
     r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
     r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
     const _data_ = new Uint8Array(encode(r))

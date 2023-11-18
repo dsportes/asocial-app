@@ -43,13 +43,13 @@
 
       <div class="titre-md text-italic y-mb-sm">{{$t('PPgroupes')}}</div>
 
-      <div v-for="[id, ids] in pSt.peC.groupes" :key="ids + '/' + id">
+      <div v-for="[idg, ids] in pSt.peC.groupes" :key="ids + '/' + idg">
         <div class="q-my-sm row q-gutter-sm">
-          <span class="fs-md col">{{egr(id).groupe.na.nomc}} - {{$t('statutmb' + stmb(id, ids))}}</span>
+          <span class="fs-md col">{{egr(idg).groupe.na.nomc}} - {{$t('AMm' + stmb(idg, ids))}}</span>
           <q-btn class="col-auto btn1" dense size="sm" icon-right="open_in_new" color="primary"
-            :label="$t('detail')" @click="detailgr(id, ids)"/>
+            :label="$t('detail')" @click="voirgr(idg, ids, true)"/>
           <q-btn class="col-auto btn1" dense size="sm" icon-right="open_in_new" color="primary"
-            :label="$t('PGvg')" @click="voirgr(id, ids)"/>
+            :label="$t('PGvg')" @click="voirgr(idg, ids)"/>
         </div>
       </div>
 
@@ -60,10 +60,10 @@
   <q-dialog v-model="infoedit" persistent full-height>
     <q-card class="bs" style="width:80vw">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" icon="close" color="warning" @click="infoedit=false"/>
-        <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPtit', [mbC.na.nom, egrC.groupe.na.nom])}}</q-toolbar-title>
+        <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+        <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPtit', [mbC.na.nom, gSt.egrC.groupe.na.nom])}}</q-toolbar-title>
       </q-toolbar>
-      <apercu-membre :eg="egrC" :mb="mbC" :mapmc="mapmc" :idx="0" people nopanel/>
+      <apercu-membre :eg="gSt.egrC" :mb="mbC" :idav="pSt.peC.na.id" :im="mbC.ids" :mapmc="mapmc" :idx="0" people nopanel/>
     </q-card>
   </q-dialog>
 
@@ -80,7 +80,7 @@ import BarrePeople from '../components/BarrePeople.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
 import { MD, Chat, Motscles, Groupe } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
-import { afficherDiag } from '../app/util.mjs'
+import { afficherDiag, sleep } from '../app/util.mjs'
 
 export default {
   name: 'PanelPeople',
@@ -100,24 +100,23 @@ export default {
       MD,
       egrC: null,
       mbC: null,
-      infoedit: false
     }
   },
 
   methods: {
-    egr (id) { return this.gSt.egr(id) },
+    egr (idg) { return this.gSt.egr(idg) },
 
-    stmb (id, ids) { return this.egr(id).groupe.ast[ids]},
+    stmb (idg, ids) { return this.egr(idg).groupe.statutMajeur(ids)},
 
-    detailgr (id, ids) {
+    voirgr (id, ids, opt) {
+      this.session.setGroupeId(id)
+      this.session.setMembreId(ids)
       this.egrC = this.gSt.egr(id)
       this.mbC = this.gSt.getMembre(id, ids)
-      this.infoedit = true
-    },
-
-    voirgr (id, ids) {
-      this.egrC = this.gSt.egr(id)
-      this.mbC = this.gSt.getMembre(id, ids)
+      if (opt) {
+        this.ovinfoedit()
+        return
+      }
       MD.fD()
       this.ui.setPage('groupe', 'membres')
     },
@@ -132,11 +131,11 @@ export default {
         const gr = this.gSt.egrC.groupe // groupe courant d'où vient la proposition d'inscription en contact
         const pe = this.pSt.peC // people courant
         const nag = await Groupe.getNag(gr.na, pe.na)
-        if (gr.enLNA(nag)) {
+        if (gr.enLNA(0, nag)) {
           await afficherDiag(this.$t('PPlna'))
           return
         }
-        if (gr.enLNC(nag)) {
+        if (gr.enLNC(0, nag)) {
           await afficherDiag(this.$t('PPlnc'))
           return
         }
@@ -173,6 +172,9 @@ export default {
       }
     })
 
+    const infoedit = ref(false)
+    function ovinfoedit () { MD.oD(infoedit) }
+
     return {
       session,
       aSt,
@@ -180,7 +182,8 @@ export default {
       gSt,
       ui,
       mapmc,
-      ids
+      ids,
+      infoedit, ovinfoedit
     }
   }
 }
