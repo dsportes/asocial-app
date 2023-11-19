@@ -68,10 +68,31 @@ export class OperationWS extends Operation {
 
 }
 
+/*
+Paradoxalement on se fiche complètement de savoir quelle version de quel groupe
+ou avatar a décleché ce trigger : quelque chose a changé, on va chercher quoi.
+La liste des groupes et avatars se trouven dans aSt.compte (la version actuelle du compte).
+Les versions actuellement détenues en session sont dans Versions.
+Pour chaque groupe détenu, s'il détient ou non les membres et notes
+figure dans le store dans gSt.egr(grid)
+Premier appel optimiste:
+- on demande tout ce qui a changé sur les avatars et groupes détenus
+- mais on donne la version du cimpte sur laquelle cette liste a été obtenue.
+Retour OK: la liste n'a pas changé, on traite les mises à jout.
+Retour KO:
+- le compte a changé, ses listes d'avatars et de groupes ont pu changé
+- le retour ne donne pas la liste des mises à jour.
+- on recalcule la nouvelle liste des avatars et groupes depuis le nouveau compte
+reçu et les versions détenues.
+- on refait l'appel des mises à jour en fonction de ces nouvelles listes.
+- et on espère que cette fois-ci, la version du compte n'a pas changé,
+sinon on reboucle.
+
+Enfin on traite les mises à jour reçues, les groupes et avatars supprimés
+et les groupes dont les membres / notes ne sont plus utiles.
+*/
 export class OnchangeVersion extends OperationWS {
   constructor() { super($t('OPsync')) }
-
-  version(id) { return this.veCache.get(id) || Versions.get(id) }
 
   eavMaj(id) {
     let e = this.avMaj.get(id)
@@ -93,31 +114,25 @@ export class OnchangeVersion extends OperationWS {
 
   // Traite les mises à jour à synchroniser présentes dans this.ret
   async process() {
-    this.veCache = new Map() // cache des versions
-    this.grCache = new Map() // cache des groupes changés
-
-    // lotMaj ({id, av, lch, lsp, lno, ltk})
-    this.avMaj = new Map()
-
-    // lotMaj ({id, gr, lmb, lno, objv}) 
-    this.grMaj = new Map() // cache des groupes changés
-
-    if (this.rowAvatar) {
-      this.buf.putIDB(this.rowAvatar)
-      const e = this.eavMaj(this.avatar.id)
-      e.av = this.avatar
+    if (this.rowCompte) {
+      // enregistrement de la nouvelle version du compte (si elle a changé)
+      this.buf.putIDB(this.rowCompte)
+      const e = this.eavMaj(this.compte.id)
+      e.av = this.compte
     }
 
     if (this.ret.rowVersions) for (const row of this.ret.rowVersions) {
       const version = Versions.compile(row)
       if (ID.estGroupe(version.id)) {
         if (version._zombi) {
+          // normalement il devrait déjà être dans les grMoins
+          // ça doit avoir été détecté dans le compte
           this.grMoins.add(version.id)
         } else {
           if (this.grIdsAp.has(version.id)) {
             this.veCache.set(version.id, version)
             const e = this.egrMaj(version.id)
-            e.objv = version
+            e.objv = version // pour les volumes
           }
         }
       } else {
@@ -126,7 +141,8 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowAvatars) for (const row of this.ret.rowAvatars) {
-      if (this.rowAvatar && this.rowAvatar.id === row.id) continue // Fait ci-dessus
+      // on ignore l'avatar principal qui est passé précédemment dans "compte"
+      if (this.rowAvatar && this.rowAvatar.id === row.id) continue
       this.buf.putIDB(row)
       const av = await compile(row)
       const e = this.eavMaj(av.id)
@@ -143,7 +159,11 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowNotes) for (const row of this.ret.rowNotes) {
-      if (ID.estGroupe(row.id) && !this.grIdsAp.has(row.id)) continue
+      if (ID.estGroupe(row.id)) {
+        if (!this.grIdsAp.has(row.id)) continue
+      } else {
+        if (!this.avIdsAp.has(row.id)) continue
+      }
       this.buf.putIDB(row)
       const note = await compile(row)
       const e = ID.estGroupe(note.id) ? this.egrMaj(note.id) : this.eavMaj(note.id)
@@ -152,6 +172,7 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowChats) for (const row of this.ret.rowChats) {
+      if (!this.avIdsAp.has(row.id)) continue
       const chat = await compile(row)
       this.buf.putIDB(row)
       const e = this.eavMaj(chat.id)
@@ -159,6 +180,7 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowTickets) for (const row of this.ret.rowTickets) {
+      if (!this.avIdsAp.has(row.id)) continue
       const tk = await compile(row)
       if (tk._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
       const e = this.eavMaj(tk.id)
@@ -166,6 +188,7 @@ export class OnchangeVersion extends OperationWS {
     }
 
     if (this.ret.rowSponsorings) for (const row of this.ret.rowSponsorings) {
+      if (!this.avIdsAp.has(row.id)) continue
       const sp = await compile(row)
       if (sp._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
       const e = this.eavMaj(sp.id)
@@ -181,111 +204,123 @@ export class OnchangeVersion extends OperationWS {
     }
   }
 
-  diffsAvGr() {
-    // Comparaison entre avatar avant (this.avAvatar) et nouveau (this.avatar)
-    this.grIdsAp = this.avatar.idGroupes()
-    this.grMoins = difference(this.grIdsAv, this.grIdsAp)
-    this.grPlus = difference(this.grIdsAp, this.grIdsAv)
-    this.avIdsAp = this.avatar.avatarIds
-    this.avMoins = difference(this.avIdsAv, this.avIdsAp)
-    this.avPlus = difference(this.avIdsAp, this.avIdsAv)
+  buildGrMap (compte) {
+    const grIds = new Set()
+    const grmap = {}
+    compte.mpg.forEach(e => { grIds.add(e.ng.id) })
+    for(const grid of grIds) {
+      const e = this.gSt.egr(grid)
+      const s = new Set()
+      compte.mpg.forEach(x => { if (x.ng.id === grid) s.add(x.im) })
+      const vg = Versions.get(grid)
+      grmap[grid] = { 
+        mbs: Array.from(s), 
+        v: vg ? vg. v : 0,
+        mb: e ? e.groupe.aUnAccesMembre(s) : false,
+        no: e ? e.groupe.aUnAccesNote(s) : false
+      }
+    }
+    return [grIds, grmap]
   }
 
-  // Charge les mises à jour à synchroniser
-  async retry() {
-    /* map du / des avatars à récupérer:
-      - clé:id, 
-      - valeur: version actuelle */
-    this.avmap = {}
-
-    /* map du / des groupes à récupérer:
-      - clé: idg
-      - valeur: { mbs, v } */
-    this.grmap = {}
-
-    // la seule version changée est celle qui a déclenché le sync
-    if (!this.estGr) {
-      this.avmap[this.objv.id] = this.vact
-    } else {
-      /* deux cas:
-      - le groupe était connu dans compte et/ou dans les invits: y chercher les im
-      - le groupe est justement celui en création: inconnu de compte, ids est 1
-      */
-      const s = this.aSt.compte.imsGroupe(this.objv.id)
-      if (s.size) { // groupe déjà connu (actif ou invité)
-        const e = this.gSt.egr(this.objv.id)
-        // si c'était une invit, e.groupe n'existe pas
-        this.grmap[this.objv.id] = { 
-          mbs: Array.from(s), 
-          v: this.vact, 
-          mb: e ? e.groupe.aUnAccesMembre(s) : false,
-          no: e ? e.groupe.aUnAccesNote(s) : false
-        }
-      } else // groupe venant d'être créé
-        this.grmap[this.objv.id] = { mbs: [1], v: 0 }
+  buildAvMap (compte) {
+    const avIds = compte.avatarIds
+    const avmap = {}
+    for (const avid of avIds) {
+      const va = Versions.get(avid)
+      avmap[avid] = va ? va.v : 0
     }
+    return [avIds, avmap]
+  }
 
+  async retry() {
+    // Charge les mises à jour à synchroniser
+    this.compte = this.aSt.compte
+    this.rowAvatar = null
+
+    /* map du / des avatars à récupérer:
+      - clé: id de l'avatar, 
+      - valeur: version actuelle */
+    const [avIds, avmap] = this.buildAvMap(this.compte)
+    this.avmap = avmap
+    this.avIdsAv = avIds
+    this.avIdsAp = avIds
+  
+    /* map du / des groupes à récupérer:
+      - clé: id du groupe
+      - valeur: { 
+        - mbs: liste des ids des avatars du compte accédant, 
+        - v : version actuelle du groupe
+        - mb: au moins un avatar a un accès aux membres (les membres sont chargés)
+        - no: au moins un avatar a un accès aux notes (les notes sont chargées)
+      } 
+    */
+    const [grIds, grmap] = this.buildGrMap(this.compte)
+    this.grmap = grmap
+    this.grIdsAv = grIds
+    this.grIdsAp = grIds
+
+    this.nbretry = 0
     while (true) {
       const args = {
         token: this.session.authToken,
-        avv: this.avv, avmap: this.avmap, grmap: this.grmap
+        avv: this.compte.v, 
+        avmap: this.avmap, 
+        grmap: this.grmap
       }
       this.ret = this.tr(await post(this, 'Synchroniser', args))
-      if (!this.ret.KO) {
-        this.grIdsAp = this.grIdsAv
+      if (this.ret.KO) {
+        /* la version du compte avatar a (encore ?) changé
+        il faut recommencer mais avec de nouvelles listes
+        d'avatars et de groupes à aller chercher
+        */
+        this.rowCompte = this.ret.rowAvatar
+        this.compte = await compile(this.rowCompte)
+        const [avIds, avmap] = this.buildAvMap(this.compte)
+        this.avmap = avmap
+        this.avIdsAp = avIds
+        const [grIds, grmap] = this.buildGrMap(this.compte)
+        this.grmap = grmap
+        this.grIdsAp = grIds
+        this.nbRetry++
+      } else {
         break
       }
-
-      // la version de avatar a (encore) changé
-      this.rowAvatar = this.ret.rowAvatar
-      this.avatar = await compile(this.rowAvatar)
-      this.avv = this.avatar.v
-      this.nbRetry++
-      this.diffsAvGr()
-      this.avmap = {}
-      this.grmap = {}
-      for (const avid of this.avIdsAp)
-        this.avmap[avid] = Versions.get(avid).v
-      for (const grid of this.grIdsAp) {
-        const s = this.aSt.compte.imsGroupe(grid)
-        const e = this.gSt.egr(grid)
-        this.grmap[grid] = { 
-          mbs: Array.from(s), 
-          v: Versions.get(grid).v,
-          mb: e ? e.groupe.aUnAccesMembre(s) : false,
-          no: e ? e.groupe.aUnAccesNote(s) : false
-        }
-      }
     }
-    await this.process()
   }
 
   async run(row) {
     try {
+      /* Le row versions reçu a-t-il de facto déjà été pris en 
+      compte lors d'un traitement antérieur d'un autre row versions 
+      déclenché par la même transaction ?
+      */
+      const v = Versions.get(row.id)
+      if (v && v.v >= row.v) 
+        return
+
       this.buf = new IDBbuffer()
       this.session = stores.session
       this.aSt = stores.avatar
       this.gSt = stores.groupe
-      this.avatar = this.aSt.compte
-      this.avAvatar = this.aSt.compte
-      this.avv = this.avatar.v
-      this.nbRetry = 0
-
-      this.objv = Versions.compile(row)
-      this.estGr = ID.estGroupe(row.id)
-      this.vact = Versions.get(this.objv.id).v
-
-      this.grIdsAv = this.avAvatar.idGroupes()
-      this.grIdsAp = this.avAvatar.idGroupes()
-      this.avIdsAv = this.avAvatar.avatarIds
-      this.avIdsAp = this.avatar.avatarIds
-
-      this.grMoins = new Set()
-      this.grPlus = new Set()
-      this.avMoins = new Set()
-      this.avPlus = new Set()
 
       await this.retry()
+
+      // Comparaison entre avatar avant (this.avAvatar) et nouveau (this.avatar)
+      this.grMoins = difference(this.grIdsAv, this.grIdsAp)
+      this.grPlus = difference(this.grIdsAp, this.grIdsAv)
+      this.avMoins = difference(this.avIdsAv, this.avIdsAp)
+      this.avPlus = difference(this.avIdsAp, this.avIdsAv)
+      // cache des versions changées pour mise à jour finale
+      this.veCache = new Map()
+      // cache des groupes changés : pour purge des membres / notes inutiles
+      this.grCache = new Map() 
+      // lotMaj ({id, av, lch, lsp, lno, ltk})
+      this.avMaj = new Map()
+      // lotMaj ({id, gr, lmb, lno, objv}) 
+      this.grMaj = new Map() // cache des groupes changés
+
+      await this.process()
 
       // commit IDB ***************************************
       // Maj des versions en IDB
@@ -313,8 +348,8 @@ export class OnchangeVersion extends OperationWS {
         if (grav) {
           const grap = this.grCache.get(idg)
           if (grap) {
-            const [ambav, anoav] = this.avAvatar.ambano(grav)
-            const [ambap, anoap] = this.avatar.ambano(grap)
+            const [ambav, anoav] = this.aSt.compte.ambano(grav)
+            const [ambap, anoap] = this.compte.ambano(grap)
             if (ambav && !ambap) {
               this.delMb.add(idg)
               this.buf.purgeGroupeMbIDB(idg)
@@ -353,7 +388,8 @@ export class OnchangeVersion extends OperationWS {
       if (this.grMoins.size) this.grMoins.forEach(id => { this.abMoins.add(id) })
       if (this.avPlus.size) this.avPlus.forEach(id => { this.abPlus.add(id) })
       if (this.grPlus.size) this.grPlus.forEach(id => { this.abPlus.add(id) })
-      await this.gestionAb()
+      if (this.abPlus.size || this.abMoins.size)
+        await this.gestionAb()
 
       if (this.session.accesIdb) await gestionFichierSync(this.buf.mapSec)
 

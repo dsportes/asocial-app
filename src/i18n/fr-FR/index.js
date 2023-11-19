@@ -1335,7 +1335,7 @@ export default {
   AMdan2: 'Dernier animateur du groupe : laisser vraiment le groupe sans animateur ?',
   AMard: 'Ardoise du groupe',
 
-  AMm0: 'Contact',
+  AMm0: 'Contact (pas invité)',
   AMm1: 'Contact invité',
   AMm2: 'Membre actif',
   AMm3: 'Membre animateur',
