@@ -1265,24 +1265,21 @@ export class Avatar extends GenDoc {
     return 0
   }
 
-  /* ims des avatars du compte dans mpg ou les invits des avatars (sauf noinv)*/
-  imsGroupe (idg, noinv) { // set des im pour le groupe idg
-    const s = new Set()
-    this.mpg.forEach(e => {
-      if (e.ng.id === idg) s.add(e.im)
-    })
-    if (noinv) return s
+  /* Map(ida, im) des avatars du compte dans mpg ou les invits des avatars (sauf noinv)*/
+  imIdGroupe (idg) { // set des im pour le groupe idg
+    const m = new Map()
+    this.mpg.forEach(e => { if (e.ng.id === idg) m.set(e.id, e.im) })
     const aSt = stores.avatar
     aSt.map.forEach(e => {
       if (e.avatar.invits) e.avatar.invits.forEach(x => { // { ng, im, id }
-        if (x.ng.id === idg) s.add(x.im)
+        if (x.ng.id === idg) m.set(x.id, x.im)
       })
     })
-    return s
+    return m
   }
 
-  /* Map(ida, im) des avatars du compte participant à idg*/
-  imIdGroupe (idg) { // set des im pour le groupe idg
+  /* Map(ida, im) des avatars du compte participant à idg d'après membres*/
+  imIdGroupeMB (idg) { // set des im pour le groupe idg
     const m = new Map()
     const gSt = stores.groupe
     const mm = gSt.getMembres(idg)

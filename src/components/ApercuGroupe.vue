@@ -279,16 +279,15 @@ export default {
     hbg () { return this.eg.membres.get(this.eg.groupe.imh).na.nom },
 
     accesMembre () {
-      let am = false
-      const x = Array.from(this.imIdGroupe.values())
-      if (x.length) x.forEach(im => { 
-        if (this.eg.groupe.accesMembre(im)) am = true 
-      })
-      return am
+      const m = this.aSt.compte.imIdGroupe(this.eg.groupe.id)
+      for (const [id, im] of m) if (this.eg.groupe.accesMembre(im)) return true 
+      return false
     },
 
     // Map (idav, im) dans le groupe idg
     imIdGroupe () { 
+      if (this.accesMembre)
+        return this.aSt.compte.imIdGroupeMB(this.eg.groupe.id) 
       return this.aSt.compte.imIdGroupe(this.eg.groupe.id) 
     }
   },
@@ -446,8 +445,8 @@ export default {
       this.lstVotes = []
       const g = this.eg.groupe
       if (g.msu) {
-        for (let ids = 1; ids < g.ast.length; ids++) {
-          if (g.ast[ids] === 32) {
+        for (let ids = 1; ids < g.flags.length; ids++) {
+          if (g.estAnim(ids)) {
             const oui = g.msu.indexOf(ids) !== -1
             const nom = this.eg.membres.get(ids).na.nom
             this.lstVotes.push({ nom, oui })

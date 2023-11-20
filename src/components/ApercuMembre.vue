@@ -1,5 +1,5 @@
 <template>
-  <q-expansion-item :class="dkli(idx)"
+  <q-expansion-item :class="dkli(idx)" v-model="qexp"
     switch-toggle-side expand-separator dense group="trgroup">
     <template v-slot:header>
       <div class="column full-width">
@@ -220,7 +220,7 @@
         <q-card-section class="column q-ma-xs q-pa-xs titre-md">
           <div class="row">
             <q-select class="q-mb-md lgsel" v-model="invpar" :options="options" :label="$t('AMinvpar')" />
-            <span v-if="cas === 4 && gst.animInv[0].indexOf(invpar.value) !== -1"
+            <span v-if="cas === 4 && gSt.animInv[0].indexOf(invpar.value) !== -1"
               class= "q-ml-md text-bold text-warning bg-yellow-3">{{$t('AMdejav')}}</span>
           </div>
           <q-checkbox :disable="!drupd" v-model="ipa" :label="$t('FLAGS7')" />
@@ -245,9 +245,9 @@
             flat :label="$t('AMmodinv')" color="primary" @click="inviter(2)"/>
           <q-btn v-if="cas === 3" flat :label="$t('AMdelinv')" color="warning" @click="inviter(3)"/>
           <q-btn v-if="cas === 4" :label="$t('AMvpour')" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
-            :disable="gst.animInv[0].indexOf(invpar) !== -1 && mb.flagsiv === nvflags" @click="inviter(4)"/>
+            :disable="gSt.animInv[0].indexOf(invpar) !== -1 && mb.flagsiv === nvflags" @click="inviter(4)"/>
           <q-btn v-if="cas === 4" :label="$t('AMvcontre')" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
-            :disable="gst.animInv[1].indexOf(invpar) !== -1" @click="inviter(5)"/>
+            :disable="gSt.animInv[1].indexOf(invpar) !== -1" @click="inviter(5)"/>
           <q-btn v-if="cas === 6" flat :label="$t('AMdelinv')" color="warning" @click="inviter(6)"/>
         </q-card-actions>
       </q-card>
@@ -342,7 +342,7 @@ export default {
       return n
     },
 
-    drupd () { return this.cas < 3 || this.cas === 4 && this.cas === 5 },
+    drupd () { return this.cas < 3 || this.cas === 4 || this.cas === 5 },
 
     /* droits de modification des droits
     - être animateur (un des avc est animateur)
@@ -379,10 +379,14 @@ export default {
     },
     adrl (v) {
       if (v && !this.drl) this.adrl = false
+    },
+    qexp (v) {
+      if (v) this.session.setMembreId(this.im)
     }
   },
 
   data () { return {
+    qexp: false,
     /* 
     1: invit std, 2: modif invit std, 3: suppr invit std, 
     4: vote pour, 5: vote contre, 6: suppr invit una 
@@ -442,6 +446,7 @@ export default {
       }
       this.invpar = this.options[0]
       this.ard = this.mb.ard || ''
+      this.session.setMembreId(this.im)
       this.ovinvit()
     },
 

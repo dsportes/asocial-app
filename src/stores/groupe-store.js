@@ -155,7 +155,7 @@ export const useGroupeStore = defineStore('groupe', {
       if (!e) return
       const m = e.membres.get(session.membreId)
       const g = e.groupe
-      if (!m) return
+      if (!m) return [lc, la]
       const inv = m.inv || []
       for(let im = 1; im < g.flags.length; im++) {
         if (g.flags[im] & FLAGS.PA) {
@@ -341,8 +341,8 @@ export const useGroupeStore = defineStore('groupe', {
       }
       e.estAnim = false
       e.estHeb = false
-      const ims = aSt.compte.imsGroupe(groupe.id, true)
-      for (const im of ims) {
+      const m = aSt.compte.imIdGroupe(groupe.id)
+      for (const [id, im] of m) {
         if (groupe.estAnim(im)) e.estAnim = true
         if (im === groupe.imh) e.estHeb = true
       }
