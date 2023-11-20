@@ -521,7 +521,7 @@ export default {
   OPmsu: 'Gestion du mode simple / unanime d\'un groupe',
   
   OPnvch: 'Créer un nouveau "chat"',
-  OPmajch: 'Mettre à jour un "chat"',
+  OPnvav: 'Créer un nouvel avatar',
   OPpassifch: 'Rendre passif un chat',
 
   OPnvtr: 'Créer une nouvelle tranche de quotas',
@@ -1269,6 +1269,7 @@ export default {
   AMacno1: 'Droit de lecture NON activé.',
   AMacno2: 'Droit d\'écriture NON activé.',
   AMacmb: 'Le droit N\'A PAS été activé.',
+  AMaccinv: 'Accepter / refuser l\'invitation',
 
   etre: 'non | oui | l\'a été, ne l\'est plus',
   avoir: 'non | oui | l\'a eu, ne l\'a plus',
@@ -1438,6 +1439,9 @@ export default {
   AGrumu: 'Annuler les votes et rester en mode UNANIME',
   AGrums: 'Rester au mode "SIMPLE"',
   AGmc: 'Mots clés du groupe',
+  AGmoi1: 'Inscrire un de mes avatars comme "contact"',
+  AGmoi2: 'Choisir...',
+  AGmoi3: 'Valider {0}',
 
   // Panel Membre
   PMGtit: 'Membre {0}',

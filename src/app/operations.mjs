@@ -233,7 +233,6 @@ export class MajCvGr extends OperationUI {
   }
 }
 
-
 /** Changement de phrase secrete ****************************************************
 args.token: éléments d'authentification du compte.
 args.hps1: dans compta, `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte.
@@ -551,7 +550,7 @@ args.kx args.vx: entrée dans mavk de compta pour le nouvel avatar
 Retour:
 */
 export class NouvelAvatar extends OperationUI {
-  constructor () { super($t('OPmajtch')) }
+  constructor () { super($t('OPnvav')) }
 
   async run (nom) {
     try {
@@ -572,8 +571,8 @@ export class NouvelAvatar extends OperationUI {
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
 
-      const kx = await Avatar.mavkK(na.id, session.clek)
-      const vx = await Avatar.mavkKV(na, session.clek)
+      const kx = await Avatar.mavkK(na.id)
+      const vx = await Avatar.mavkKV(na)
       if (session.fsSync) await session.fsSync.setAvatar(na.id)
       const args = { token: session.authToken, rowAvatar, 
         rowVersion, kx, vx, abPlus: [na.id] }

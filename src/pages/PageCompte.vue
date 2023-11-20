@@ -176,6 +176,7 @@ export default {
     okps (ps) { this.ps = ps },
 
     async changerps () {
+      MD.fD()
       const ret = await new ExistePhrase().run(this.ps.hps1, 1)
       if (isAppExc(ret)) return this.reset()
       if (ret) {
@@ -202,13 +203,11 @@ export default {
     },
 
     async oknomav (nom) {
-      try {
-        if (!nom) { this.nvav = false; return }
-        if (this.aSt.compta.avatarDeNom(nom)) {
-          await afficherDiag(this.$t('CPTndc'))
-          return
-        }
-      } catch (e) { trapex(e, 2) }
+      if (!nom) { this.nvav = false; return }
+      if (this.aSt.compte.avatarDeNom(nom)) {
+        await afficherDiag(this.$t('CPTndc'))
+        return
+      }
       MD.fD()
       await new NouvelAvatar().run(nom)
     },

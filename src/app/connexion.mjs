@@ -222,7 +222,7 @@ export class ConnexionCompte extends OperationUI {
       for (const id of this.avRequis) {
         if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
         if (!this.avatarsToStore.has(id))
-          avsMap[this.avatar.id] = { v: 0, dlv: session.compteId === id ? dlv1 : dlv2 }
+          avsMap[id] = { v: 0, dlv: session.compteId === id ? dlv1 : dlv2 }
       }
 
       // Traitement des groupes

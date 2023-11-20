@@ -82,11 +82,6 @@ export const useGroupeStore = defineStore('groupe', {
       return e ? e.membres.get(session.membreId) : null 
     },
 
-    getMbac: (state) => { return (idg, im) => { 
-        const e = state.map.get(idg)
-        return e ? e.mbac.get(im) : null 
-      }
-    },
     getMembres: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.membres : null 

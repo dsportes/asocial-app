@@ -1265,7 +1265,7 @@ export class Avatar extends GenDoc {
     return 0
   }
 
-  /* ims des avatars du compte dans mpg ou les invits des avatars (sauf noinv*/
+  /* ims des avatars du compte dans mpg ou les invits des avatars (sauf noinv)*/
   imsGroupe (idg, noinv) { // set des im pour le groupe idg
     const s = new Set()
     this.mpg.forEach(e => {
@@ -1281,11 +1281,13 @@ export class Avatar extends GenDoc {
     return s
   }
 
-  /* Map(ida, im) des avatars participant à idg*/
+  /* Map(ida, im) des avatars du compte participant à idg*/
   imIdGroupe (idg) { // set des im pour le groupe idg
     const m = new Map()
-    this.mpg.forEach(e => {
-      if (e.ng.id === idg) m.set(e.id, e.im)
+    const gSt = stores.groupe
+    const mm = gSt.getMembres(idg)
+    if (mm) mm.forEach(e => {
+      if (this.avatarIds.has(e.na.id)) m.set(e.na.id, e.ids)
     })
     return m
   }
@@ -1372,7 +1374,7 @@ export class Avatar extends GenDoc {
     return [idk, mmk]
   }
 
-  static async primaireRow (na, publicKey, privateKey) {
+  static async primaireRow (na, publicKey, privateKey, second) {
     const session = stores.session
     const r = {}
     r.id = na.id
@@ -1380,43 +1382,23 @@ export class Avatar extends GenDoc {
     r.vcv = 0
     r.privk = await crypter(session.clek, privateKey)
     r.pub = publicKey
-    r.mavk = {}
-    const c = hash(await crypter(session.clek, '' + ID.court(na.id)))
-    const v = await crypter(session.clek, new Uint8Array(encode([na.nom, na.rnd])))
-    r.mavk[c] = v
+    if (!second) {
+      r.mavk = {}
+      const c = await Avatar.mavkK(na.id)
+      const v = await Avatar.mavkKV(na)
+      r.mavk[c] = v
+    }
     const _data_ = new Uint8Array(encode(r))
     const row = { _nom: 'avatars', id: r.id, v: r.v, vcv: r.vcv, _data_ }
     return row
   }
 
-  updAvatarMavk (setSupprIds) {
-    let ok = false
-    if (setSupprIds && setSupprIds.size) setSupprIds.forEach(id => { 
-      if (this.mav.has(id)) {
-        ok = true
-        this.mav.delete(id)
-      }
-    })
-    if (ok) this.avatarIds = new Set(this.mav.keys())
-    return ok
+  static async mavkKV (na) {
+    return await crypter(stores.session.clek, new Uint8Array(encode([na.nomx, na.rnd])))
   }
 
-  async lmAvatarMavk (setSupprIds) {
-    // set des id à supprimer
-    const session = stores.session
-    const lm = []
-    if (setSupprIds && setSupprIds.size) for (const id of setSupprIds) {
-      lm.push(await Avatar.mavkK(id, session.clek))
-    }
-    return lm
-  }
-
-  static async mavkKV (na, k) {
-    return await crypter(k, new Uint8Array(encode([na.nomx, na.rnd])))
-  }
-
-  static async mavkK (id, k) {
-    return u8ToB64(await crypter(k, '' + ID.court(id), 1), true)
+  static async mavkK (id) {
+    return hash(await crypter(stores.session.clek, '' + ID.court(id), 1))
   }
 
 }

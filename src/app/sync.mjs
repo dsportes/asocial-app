@@ -142,7 +142,7 @@ export class OnchangeVersion extends OperationWS {
 
     if (this.ret.rowAvatars) for (const row of this.ret.rowAvatars) {
       // on ignore l'avatar principal qui est passé précédemment dans "compte"
-      if (this.rowAvatar && this.rowAvatar.id === row.id) continue
+      if (this.rowCompte && this.rowCompte.id === row.id) continue
       this.buf.putIDB(row)
       const av = await compile(row)
       const e = this.eavMaj(av.id)

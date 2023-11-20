@@ -59,7 +59,7 @@
     <q-btn v-if="accesMembre" @click="dialctc"
       dense size="md" no-caps color="primary" icon="add" :label="$t('PGplus')"/>
 
-    <div v-for="[id, im] in imIdGroupe" :key="im" class="q-mt-sm">
+    <div v-for="[id, im] of imIdGroupe" :key="im" class="q-mt-sm">
       <q-separator color="orange"/>
        <!-- <div>{{im + ' / ' +id}}</div>
         mb peut être absent (pas accès aux membres) -->
@@ -201,6 +201,15 @@
   <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
   <q-dialog v-model="nvctc" persistent>
     <q-card class="bs">
+      <q-card-section v-if="options.length">
+        <div class="titre-md text-italic">{{$t('AGmoi1')}}</div>
+        <div class="row justify-around items-center q-my-sm">
+          <q-select class="q-mb-md lgsel" v-model="moic" :options="options" :label="$t('AGmoi2')" />
+          <q-btn color="primary" dense icon="check" :label="$t('AGmoi3')" class="btn2"
+            @click="okctcmoi"/>
+        </div>
+      </q-card-section>
+
       <q-card-section class="column q-ma-xs q-pa-xs titre-md">
         <div>{{$t('PGplus1')}}</div>
         <div class="q-ml-md">{{$t('PGplus2')}}</div>
@@ -208,12 +217,14 @@
         <div class="q-ml-md">{{$t('PGplus4')}}</div>
         <div class="q-ml-lg q-px-xs text-bold bord1">{{$t('PGplus5', [eg.groupe.na.nom])}}</div>
       </q-card-section>
+
       <q-card-actions vertical>
         <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
         <q-btn flat :label="$t('continuer')" color="warning" @click="pagectc"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
+
 </div>
 </template>
 
@@ -230,8 +241,8 @@ import BoutonHelp from './BoutonHelp.vue'
 import QuotasVols2 from './QuotasVols2.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 import MotsCles from './MotsCles.vue'
-import { MD, getNg } from '../app/modele.mjs'
-import { MajCvGr, MotsclesGroupe, ModeSimple, FinHebGroupe, HebGroupe } from '../app/operations.mjs'
+import { MD, getNg, Groupe } from '../app/modele.mjs'
+import { MajCvGr, MotsclesGroupe, ModeSimple, FinHebGroupe, HebGroupe, NouveauMembre } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuGroupe',
@@ -277,7 +288,9 @@ export default {
     },
 
     // Map (idav, im) dans le groupe idg
-    imIdGroupe () { return this.aSt.compte.imIdGroupe(this.eg.groupe.id) }
+    imIdGroupe () { 
+      return this.aSt.compte.imIdGroupe(this.eg.groupe.id) 
+    }
   },
 
   data () { return {
@@ -290,6 +303,7 @@ export default {
     6: pas d'hébergeur, avatar courant pas animateur, et il n'y pas d'animateur
     */
     cas: 0,
+    imc: 0,
     anims: new Set(), // set des Ids des animateurs du groupe
     estAnim: false, // l'avatar courant est animateur du groupe
     monMb: null, // membre de l'avatar courant dans le groupe
@@ -301,6 +315,8 @@ export default {
     ar1: false,
     ar2: false,
     lstVotes: [],
+    options: [],
+    moic: null,
     cfu: 0 // Choix de changement de mode non confirmé
   }},
 
@@ -312,6 +328,13 @@ export default {
 
     async dialctc (na) {
       if (!await this.session.edit()) return
+      this.options.length = 0
+      const mois = this.aSt.compte.lstAvatarNas
+      for (const nam of mois) {
+        const m = this.gSt.membreDeId(this.eg, nam.id)
+        if (!m) this.options.push({ value: nam.id, label: nam.nom, na: nam })
+      }
+      if (this.options.length) this.moic = this.options[0]
       this.ovnvctc()
     },
 
@@ -320,6 +343,34 @@ export default {
       this.ui.egrplus = true
       MD.fD()
       this.ui.setPage('people')
+    },
+
+    async okctcmoi () {
+      while (true) {
+        const nax = this.moic.na
+        const gr = this.eg.groupe
+        const nag = await Groupe.getNag(gr.na, nax)
+        if (gr.enLNA(0, nag)) {
+          await afficherDiag(this.$t('PPlna'))
+          return
+        }
+        if (gr.enLNC(0, nag)) {
+          await afficherDiag(this.$t('PPlnc'))
+          return
+        }
+        const [nouveau, slot] = await gr.slot(nax)
+        if (!nouveau) { // ça ne devrait pas se produire ici
+          await afficherDiag(this.$t('PPctc'))
+          return
+        }
+        const cv = this.aSt.getAvatar(nax.id).cv
+        if (await new NouveauMembre().run(gr, slot, nax, cv)) {
+          this.session.setMembreId(slot)
+          MD.fD()
+          return
+        }
+        await sleep(500)
+      }
     },
 
     async cvchangee (res) { // CV du GROUPE !
@@ -457,6 +508,7 @@ export default {
     function ovchangerQuotas () { MD.oD(changerQuotas) }
     const ardedit = ref(false)
     function ovardedit () { MD.oD(ardedit) }
+
     return {
       MD, dkli, aaaammjj,
       mcledit, ovmcledit, nvctc, ovnvctc, editerUna, ovediterUna,
@@ -496,4 +548,6 @@ export default {
   padding: 1px 5px !important
 .btn2
   height: 1.5rem
+.lgsel
+  width: 10rem
 </style>

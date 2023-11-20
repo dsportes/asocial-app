@@ -2,9 +2,9 @@
   <q-expansion-item :class="dkli(idx)"
     switch-toggle-side expand-separator dense group="trgroup">
     <template v-slot:header>
-      <div class="column">
+      <div class="column full-width">
         <apercu-genx v-if="people" :na="na" :cv="cv" :ids="im" :idx="idx" detail-people/>
-        <div v-else class="row justify-between">
+        <div v-else class="row justify-between full-width">
           <div>
             <span class="titre-lg text-bold text-primary">{{$t('moi2', [na.nom])}}</span>
             <span class="q-ml-lg font-mono fs-sm">{{'#' + idav}}</span>
@@ -28,7 +28,7 @@
 
       <div class="q-ml-lg q-mt-sm row justify-between">
         <div class="titre-md">{{$t('AMhist')}}</div>
-        <bouton-bulle2 :texte="edit(fl, $t, '\n\n')" :label="$t('details')"/>
+        <bouton-bulle2 :texte="edit(fl, $t, '\n')" :label="$t('details')"/>
       </div>
 
       <div class="mlx">
@@ -98,6 +98,10 @@
 
             <q-btn v-if="mb && stm===1 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
               :label="$t('AMinvitbtn3')" @click="ouvririnvit(6)"/>
+
+            <q-btn v-if="mb && stm===1 && moi" size="sm" icon="check" class="q-ml-sm"
+              dense :label="$t('AMaccinv')" color="primary" @click="accinviter(im)"/>
+
           </div>
         </div>
 
@@ -107,6 +111,10 @@
         </div>
       </div>
     </div>
+
+    <q-dialog v-model="accinvit" full-height persistent>
+      <invitation-acceptation :idg="eg.groupe.id" :im="imc"/>
+    </q-dialog>
 
     <!-- Dialogue de configuration -->
     <q-dialog v-model="config" persistent>
@@ -261,6 +269,7 @@ import BoutonBulle2 from './BoutonBulle2.vue'
 import BoutonBulle from './BoutonBulle.vue'
 import ArdoiseAnim from './ArdoiseAnim.vue'
 import EditeurMd from './EditeurMd.vue'
+import InvitationAcceptation from './InvitationAcceptation.vue'
 import { MD, getNg } from '../app/modele.mjs'
 import { OublierMembre, MajDroitsMembre, InvitationGroupe } from '../app/operations.mjs'
 
@@ -278,7 +287,7 @@ export default {
     nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
   },
 
-  components: { BoutonConfirm, BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, BoutonBulle, ArdoiseAnim, EditeurMd },
+  components: { InvitationAcceptation, BoutonConfirm, BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, BoutonBulle, ArdoiseAnim, EditeurMd },
 
   computed: {
     amb () { return this.gSt.ambano[0] },
@@ -387,6 +396,7 @@ export default {
     dra:0, drm: 0, drl:0, dre: 0, adrm: 0, adrl: 0,
     flags2av: 0,
     decl: 0,
+    imc: 0
   }},
 
   methods: {
@@ -397,6 +407,12 @@ export default {
       if (ad[0] && ad[1]) return this.$t('entre', [AMJ.editDeAmj(ad[0], true), AMJ.editDeAmj(ad[1], true)])
     },
     xd (d) { return !d ? '-' : AMJ.editDeAmj(d, true) },
+
+    async accinviter (im) {
+      if (!await this.session.edit()) return
+      this.imc = im
+      this.ovaccinvit()
+    },
 
     ouvrirdetails () {
       this.session.setPeopleId(this.idav)
@@ -473,7 +489,7 @@ export default {
     const cv = ref(mb.value ? mb.value.cv : aSt.getAvatar(idav.value).cv)
     const im = toRef(props, 'im')
     const eg = toRef(props, 'eg')
-    console.log(edit(eg.value.groupe.flags[im.value]))
+    // console.log(edit(eg.value.groupe.flags[im.value]))
  
     const chgSt = ref(false)
     function ovchgSt () { MD.oD(chgSt) }
@@ -481,9 +497,12 @@ export default {
     function ovinvit () { MD.oD(invit) }
     const config = ref(false)
     function ovconfig () { MD.oD(config) }
+    const accinvit = ref(false)
+    function ovaccinvit () { MD.oD(accinvit) }
 
     return {
-      MD, FLAGS, dkli, edit, chgSt, ovchgSt, invit, ovinvit, config, ovconfig,
+      MD, FLAGS, dkli, edit, chgSt, ovchgSt, invit, ovinvit, 
+      config, ovconfig, ovaccinvit, accinvit,
       session, gSt, aSt,
       na, cv
     }
