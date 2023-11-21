@@ -1180,6 +1180,7 @@ _data_:
 
 **Données n'existant que pour un avatar principal**
 - `mck` : map des mots-clés du compte cryptée par la clé K -la clé est leur code 1-99- ("code": nom@catégorie).
+- `memok` : mémo personnel du compte crypté par la clé K
 - `mavk` : map des avatars du compte. 
   - _clé_ : id court de l'avatar cryptée par la clé K du compte.
   - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
@@ -1306,6 +1307,9 @@ export class Avatar extends GenDoc {
       if (row.mck) {
         this.mc = decode(await decrypter(session.clek, row.mck))
       } else this.mc = {}
+      if (row.memok) {
+        this.memo = await decrypterStr(session.clek, row.memok)
+      } else this.memo = ''
 
       this.mav = new Map()
       for(const i in row.mavk) {
