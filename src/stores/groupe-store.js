@@ -280,16 +280,26 @@ export const useGroupeStore = defineStore('groupe', {
       function f0 (a, b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
       const f = stores.filtre.filtre.groupe
       const r = []
-      const flags = state.egrC.groupe.flags
+      const g = state.egrC.groupe
       for (const m of state.pgLm) {
         if (f.nmb && !m.na.nom.startsWith(f.nmb)) continue
         if (f.stmb) {
-          const stm = state.egrC.groupe.statutMajeur(m.ids)
+          const stm = g.statutMajeur(m.ids)
           if (stm + 1 !== f.stmb) continue
+        }
+        if (f.ambno) {
+          const mb = g.accesMembre(m.ids)
+          const no = g.accesNote(m.ids)
+          if (f.ambno === 1 && !(mb && !no)) continue
+          if (f.ambno === 2 && !(no && !mb)) continue
+          if (f.ambno === 3 && !(mb && no)) continue
+          if (f.ambno === 4 && !(!mb && !no)) continue
+          if (f.ambno === 5 && g.accesEcrNoteH(m.ids) !== 1) continue
         }
         r.push(m)
       }
       r.sort(f0)
+      stores.session.fmsg(r.length)
       return r
     },
 

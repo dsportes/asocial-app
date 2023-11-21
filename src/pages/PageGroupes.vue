@@ -186,4 +186,11 @@ export default {
 @import '../css/app.sass'
 .btn1
   height: 1.5rem !important
+.msg
+  position: absolute
+  z-index: 99999
+  top: -20px
+  right: 5px
+  border-radius: 5px
+  border: 1px solid black
 </style>

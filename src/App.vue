@@ -167,6 +167,7 @@
         <div v-if="ui.page === 'groupe'" class="column justify-start">
           <filtre-nom nom="groupe" prop='nmb' :idx="0"/>
           <filtre-stmb nom="groupe" prop="stmb" :idx="1"/>
+          <filtre-ambno nom="groupe" prop="ambno" :idx="0"/>
         </div>
         <div v-if="ui.page === 'notes'" class="column justify-start">
           <filtre-avgr nom="notes" prop='avgr' :idx="0"/>
@@ -380,6 +381,7 @@ import FiltreSansheb from './components/FiltreSansheb.vue'
 import FiltreEnexcedent from './components/FiltreEnexcedent.vue'
 import FiltreAinvits from './components/FiltreAinvits.vue'
 import FiltreStmb from './components/FiltreStmb.vue'
+import FiltreAmbno from './components/FiltreAmbno.vue'
 import FiltreAvgr from './components/FiltreAvgr.vue'
 import FiltreVols from './components/FiltreVols.vue'
 import FiltreTemp from './components/FiltreTemp.vue'
@@ -399,7 +401,7 @@ export default {
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreChel,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
-    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreTemp, PressePapier
+    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreTemp, FiltreAmbno, PressePapier
    },
 
   computed: {

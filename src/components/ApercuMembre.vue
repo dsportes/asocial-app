@@ -436,9 +436,11 @@ export default {
       this.idn = (fl & FLAGS.DN) !== 0
       this.ide = (fl & FLAGS.DE) !== 0
       this.options = []
+      const g = this.eg.groupe
       this.aSt.compte.lstAvatarNas.forEach(na => {
         const im = this.aSt.compte.imGA(this.eg.groupe.id, na.id)
-        if (this.eg.groupe.estAnim(im)) this.options.push({ label: na.nom, value: im })
+        if (g.estAnim(im) && g.accesMembre(im)) 
+          this.options.push({ label: na.nom, value: im })
       })
       if (!this.options.length) {
         afficherDiag(this.$t('AMinvitAnim'))

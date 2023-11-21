@@ -1,5 +1,7 @@
 <template>
 <q-page>
+  <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
+
   <!-- Tab "groupe" -------------------------------------------------->
   <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm largeur40 maauto">
     <apercu-groupe class="q-my-sm" :eg="gSt.egrC" :idx="0" :mapmc="mapmc"/>
@@ -12,8 +14,9 @@
         {{$t('PGnope')}}</div>
       <div v-if="gSt.pgLm.length && !gSt.pgLmFT.length" class="titre-lg text-italic">
         {{$t('PGnomb', [gSt.pgLm.length])}}</div>
-      <apercu-membre v-for="(m, idx) of gSt.pgLmFT" :key="idx"
-        class="q-my-lg" :mb="m" :im="m.ids" :idav="m.na.id" :eg="gSt.egrC" :mapmc="mapmc" people :idx="idx"/>
+      <apercu-membre v-for="(m, idx) of gSt.pgLmFT" :key="m.na.id"
+        class="q-my-lg" :mb="m" :im="m.ids" :idav="m.na.id" :eg="gSt.egrC"
+        :mapmc="mapmc" people :idx="idx"/>
     </div>
     <div v-else class="titre-lg text-italic">{{$t('PGnoamb')}}</div>
   </div>
@@ -77,4 +80,11 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.msg
+  position: absolute
+  z-index: 99999
+  top: -20px
+  right: 5px
+  border-radius: 5px
+  border: 1px solid black
 </style>

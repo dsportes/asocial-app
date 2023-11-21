@@ -1,22 +1,25 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli(idx)">
-    <q-btn no-caps flat :label="$t('FIstmb', [$t('stmb' + val)])">
+    <q-btn no-caps flat><div>{{$t('FIambno')}}<br>{{$t('ambno' + val)}}</div>
     <q-menu anchor="bottom left" self="top left">
       <q-list style="min-width: 50px">
         <q-item clickable v-close-popup @click="val=0">
-          <span class="fs-md text-italic">{{$t('stmb0')}}</span>
+          <span class="fs-md text-italic">{{$t('ambno0')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=1">
-          <span class="fs-md text-italic">{{$t('stmb1')}}</span>
+          <span class="fs-md text-italic">{{$t('ambno1')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=2">
-          <span class="fs-md text-italic">{{$t('stmb2')}}</span>
+          <span class="fs-md text-italic">{{$t('ambno2')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=3">
-          <span class="fs-md text-italic">{{$t('stmb3')}}</span>
+          <span class="fs-md text-italic">{{$t('ambno3')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=4">
-          <span class="fs-md text-italic">{{$t('stmb4')}}</span>
+          <span class="fs-md text-italic">{{$t('ambno4')}}</span>
+        </q-item>
+        <q-item clickable v-close-popup @click="val=5">
+          <span class="fs-md text-italic">{{$t('ambno5')}}</span>
         </q-item>
       </q-list>
     </q-menu>
@@ -30,7 +33,7 @@ import { ref, toRef } from 'vue'
 import { dkli } from '../app/util.mjs'
 
 export default ({
-  name: 'FiltreStmb',
+  name: 'FiltreAmbno',
 
   props: { nom: String, idx: Number },
 
@@ -43,7 +46,7 @@ export default ({
 
   watch: {
     val (ap) {
-      this.st.setFiltre(this.nom, 'stmb', ap)
+      this.st.setFiltre(this.nom, 'ambno', ap)
     }
   },
 

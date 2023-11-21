@@ -122,6 +122,14 @@ export default {
   stmb1: 'contact',
   stmb2: 'invité',
 
+  // Filtre ambno
+  ambno0: '(indifférent)',
+  ambno1: 'aux membres seulement',
+  ambno2: 'aux notes seulement',
+  ambno3: 'aux membres et aux notes',
+  ambno4: 'ni aux membres ni aux notes',
+  ambno5: 'aux notes en écriture',
+  
   tmc0: 'Compte',
   tmc1: 'Groupe',
   tmc2: 'App.',
@@ -710,6 +718,7 @@ export default {
   FIavecgr: 'Membre d\'un groupe',
   FInotif: 'Ayant une notification ... {0}',
   FIstmb: 'Ayant un statut ... {0}',
+  FIambno: 'Accès aux notes / membres...',
   FItribu: 'Même tranche de quotas ... {0}',
   FIsansheb: 'Groupes sans hébergement',
   FIexcesvol: 'Groupes en excédent de volume',
@@ -1292,7 +1301,7 @@ export default {
   AMinvitbtn2: 'Modifier l\'invitation',
   AMinvitbtn3: 'Supprimer l\'invitation',
   AMinvitbtn4: 'Voter l\'invitation de ce contact',
-  AMinvitanim: 'Seul un animateur peut inviter un contact.',
+  AMinvitanim: 'Seul un animateur AYANT accès aux membres peut inviter un contact.',
   AMinvpa: 'animation',
   AMinvdm: 'accès aux membres',
   AMinvdn: 'lecture des notes',

@@ -1785,7 +1785,7 @@ export class Groupe extends GenDoc {
   estHeb (im) { return this.estActif(im) && im === this.imh }
   accesMembre (im) {
     const f = this.flags[im] || 0;
-    return (f & FLAGS.AC) && (f & FLAGS.HA) && (f & FLAGS.DM) 
+    return (f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM) 
   }
   aUnAccesMembre (s) { // Set des im
     let b = false
