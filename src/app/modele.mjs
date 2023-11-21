@@ -1238,6 +1238,13 @@ export class Avatar extends GenDoc {
     - `id` : id de l'avatar.
   */
 
+  naDeIdgIm (idg, im) {
+    for (const [npgk, e] of this.mpg) {
+      if (e.ng.id === idg && e.im === im) return getNg(e.id)
+    }
+    return null
+  }
+
   // Retourne [amb, amo] - un avatar au moins accède aux membres / notes du groupe
   ambano (groupe) {
     let ano = false, amb = false
@@ -1267,7 +1274,7 @@ export class Avatar extends GenDoc {
   }
 
   /* Map(ida, im) des avatars du compte dans mpg ou les invits des avatars (sauf noinv)*/
-  imIdGroupe (idg) { // set des im pour le groupe idg
+  imIdGroupe (idg) { // map (cle:id val:im) pour le groupe idg
     const m = new Map()
     this.mpg.forEach(e => { if (e.ng.id === idg) m.set(e.id, e.im) })
     const aSt = stores.avatar

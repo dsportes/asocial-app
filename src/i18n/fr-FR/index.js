@@ -1452,6 +1452,11 @@ export default {
   AGmoi2: 'Choisir...',
   AGmoi3: 'Valider {0}',
 
+  AGhko1: 'Le groupe n\'a pas d\'hébergeur, mais je ne peux pas l\'être n\'étant pas actif dans le groupe.',
+  AGhko2: 'Le groupe a un hébergeur "animateur": je ne peux pas le remplacer.',
+  AGhko3: 'Le groupe a un hébergeur "non animateur", n\'étant pas moi-même "animateur", je ne peux pas le remplacer.',
+  AGhko4: 'Le groupe a hébergeur "non animateur", mais je ne peux pas le remplacer n\'étant pas actif dans le groupe.',
+
   // Panel Membre
   PMGtit: 'Membre {0}',
   PMGtit1: 'Membre disparu',

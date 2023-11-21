@@ -17,7 +17,7 @@
 
     <div v-if="fond">
       <span class="q-mt-sm titre-md q-mr-sm">{{$t('AGfond')}}</span>
-      <bouton-membre :eg="eg" :im="1" />
+      <bouton-membre :eg="eg" :im="1" lab btn/>
     </div>
     <div v-else class="q-mt-sm fs-md text-italic">{{$t('AGnfond')}}</div>
 
@@ -32,7 +32,7 @@
       <div class="row justify-between">
         <div v-if="!eg.groupe.dfh" class="col fs-md">
           <span class="fs-md q-mr-sm">{{$t('AGheb')}}</span>
-          <bouton-membre :eg="eg" :im="eg.groupe.imh" />
+          <bouton-membre :eg="eg" :im="eg.groupe.imh" lab btn/>
         </div>
         <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [aaaammjj(dfh)])}}</div>
         <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
@@ -61,8 +61,7 @@
 
     <div v-for="[id, im] of imIdGroupe" :key="im" class="q-mt-sm">
       <q-separator color="orange"/>
-       <!-- <div>{{im + ' / ' +id}}</div>
-        mb peut être absent (pas accès aux membres) -->
+       <!-- mb peut être absent (pas accès aux membres) -->
       <apercu-membre :mb="mb(im)" :im="im" :idav="id" :eg="eg" :idx="idx" :mapmc="mapmc"/>
     </div>
   </div>
@@ -392,7 +391,62 @@ export default {
       }
     },
 
-    setCas () {
+    async setCas () {
+      const session = stores.session
+      const g = this.eg.groupe
+      const c = this.aSt.compte
+
+      // na de l'avatar hébergeur quand je peux le connaître
+      this.naHeb = c.naDeIdgIm(g.id, g.idh)
+
+      /* Liste des (autres) avatars du compte pouvant être hébergeur
+        - options : [{ label, value, na, im}] - mes avatars pouvant être hébergeur
+        - nvheb : nouvel hébergeur pré-sélectionné
+      */
+      this.options = []
+      for (const [id, im] of c.imIdGroupe(g.id)) {
+        if (im === g.imh) continue // celui actuel
+        if (!g.estActif(im)) continue
+        const na = getNg(id)
+        this.options.push({ label: na.nom, value: id, na: na, im: im})
+        this.nvHeb = this.options[0]
+      }
+
+      if (!g.idh) {
+        /* Cas 1 : il n'y a pas d'hébergeur. */
+        if (this.options.length === 0) {
+          await afficherDiag($t('AGhko1'))
+          return 0
+        }
+        // Je peux prendre l'hébergement
+        return 1
+      }
+
+      if (g.idh === session.compteId) {
+        /* Cas 2 : je suis hébergeur
+        - si options.length = 0 - Je suis le seul candidat
+        */
+        return 2
+      }
+
+      /* cas 3 : il y a un hébergeur mais ce n'est pas moi */
+      if (this.options.length === 0) {
+        await afficherDiag($t('AGhko4'))
+        return 0
+      }
+      if (g.estAnim(g.imh)) {
+        await afficherDiag($t('AGhko2'))
+        return 0
+      }
+      if (!this.eg.estAnim) {
+        await afficherDiag($t('AGhko3'))
+        return 0
+      }
+      /* cas 3 je peux remplacer l'animateur actuel */
+      return 3
+    },
+
+    setCas1 () {
       const g = this.eg.groupe
       this.anims = this.gSt.animIds(this.eg)
       this.estAnim = this.anims.has(this.session.avatarId)

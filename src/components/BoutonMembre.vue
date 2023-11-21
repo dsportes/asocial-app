@@ -1,8 +1,9 @@
 <template>
-  <q-btn v-if="btn" class="btn1" dense size="md" icon="open_in_new" color="primary" 
+  <q-btn v-if="btn && !lab" class="btn1" dense size="md" icon="open_in_new" color="primary" 
     @click="detailMb"/>
-  <q-btn v-else class="btn2" dense size="md" no-caps icon-right="open_in_new" 
+  <q-btn v-if="btn && lab" class="btn2" dense size="md" no-caps icon-right="open_in_new" 
     :label="mb" @click="detailMb"/>
+  <span v-if="lab && !btn">{{mb}}</span>
 </template>
 
 <script>
@@ -15,18 +16,24 @@ export default ({
   props: { 
     eg: Object, // Objet entrée groupe
     im: Number,  // indice du membre
-    btn: Boolean // n'afficher que le bouton (sans le nom)
+    lab: Boolean, // afficher le label (nom)
+    btn: Boolean // afficher un bouton
   },
 
   computed: {
     mb () {
+      const an = this.eg.groupe.estAnim(this.im)
       const m = this.eg.membres.get(this.im)
-      return !m ? '????' : (m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': ''))
+      const na1 = m ? m.na : null
+      const na2 = this.aSt.compte.naDeIdgIm(this.eg.groupe.id, this.im)
+      const na = na1 || na2
+      const x = !na ? ('#' + this.im) : (na.nomc + (na2 ? ' [' + this.$t('moi') + ']': ''))
+      return  x + (an ? ' - ' + this.$t('animateur') : '')
     }
   },
 
   methods: {
-    detailMb (im) {
+    detailMb () {
       MD.oD('detailsmembre')
       this.session.groupeId = this.eg.groupe.id
       this.session.setMembreId(this.im)
@@ -34,10 +41,12 @@ export default ({
   },
   
   setup (props) {
+    const aSt = stores.avatar
+    const session = stores.session
+    const ui = stores.ui
     return {
       MD,
-      session: stores.session,
-      ui: stores.ui
+      session, aSt, ui
     }
   } 
 })
