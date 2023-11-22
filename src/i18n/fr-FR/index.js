@@ -1414,6 +1414,15 @@ export default {
   AGsimple: 'Invitations sur demande d\'UN SEUL animateur',
   AGunanime: 'Invitations sur UNANIMITÉ des animateurs',
   AGgerh: 'Gérer l\'hébergement du groupe {0}',
+
+  AGcas1: 'Il n\'y a pas d\'hébergeur pour ce groupe: disparition prévue le {0}.',
+  AGcas2: 'Vous êtes hébergeur de ce groupe',
+  AGcas3: 'Il y a un hébergeur mais ce n\'est pas un avatar de votre compte.',
+  AGhko1: 'Le groupe n\'a pas d\'hébergeur, mais je ne peux pas l\'être n\'étant pas actif dans le groupe.',
+  AGhko2: 'Le groupe a un hébergeur "animateur": je ne peux pas le remplacer.',
+  AGhko3: 'Le groupe a un hébergeur "non animateur", n\'étant pas moi-même "animateur", je ne peux pas le remplacer.',
+  AGhko4: 'Le groupe a hébergeur "non animateur", mais je ne peux pas le remplacer n\'étant pas actif dans le groupe.',
+
   AGm1: 'Un animateur et hébergeur du groupe peut,',
   AGm1a: 'a) soit décider de ne plus assurer l\'hébergement,',
   AGm1b: 'b) soit de changer les quotas alloués aux notes du groupe.',
@@ -1451,11 +1460,6 @@ export default {
   AGmoi1: 'Inscrire un de mes avatars comme "contact"',
   AGmoi2: 'Choisir...',
   AGmoi3: 'Valider {0}',
-
-  AGhko1: 'Le groupe n\'a pas d\'hébergeur, mais je ne peux pas l\'être n\'étant pas actif dans le groupe.',
-  AGhko2: 'Le groupe a un hébergeur "animateur": je ne peux pas le remplacer.',
-  AGhko3: 'Le groupe a un hébergeur "non animateur", n\'étant pas moi-même "animateur", je ne peux pas le remplacer.',
-  AGhko4: 'Le groupe a hébergeur "non animateur", mais je ne peux pas le remplacer n\'étant pas actif dans le groupe.',
 
   // Panel Membre
   PMGtit: 'Membre {0}',

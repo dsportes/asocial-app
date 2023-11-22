@@ -143,6 +143,24 @@
 
       <q-page-container>
         <q-page class="q-pa-xs">
+          <div class="titre-lg text-center q-ma-sm">
+            <span v-if="cas===1">{{$t('AGcas1', [aaaammjj(dfh)])}}</span>
+            <span v-if="cas===2">{{$t('AGcas2')}}</span>
+            <span v-if="cas===3">{{$t('AGcas3')}}</span>
+          </div>
+          <bouton-membre v-if="cas > 1" :eg="eg" :im="eg.groupe.imh" lab />
+
+          <div v-if="hko" class="q-ma-sm q-pa-sm text-bold text-warning bg-yellow-3">
+            {{$t('AGhko' + hko)}}
+          </div>
+
+          <q-card v-else>
+            <q-card-section v-if="cas===1">
+
+            </q-card-section>
+
+          </q-card>
+
           <quotas-vols2 class="q-my-md" :vols="eg.objv.vols"/>
           <div class="titre-md" v-if="cas===1">{{$t('AGm1', [moi])}}</div>
           <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1a')}}</div>
@@ -292,15 +310,15 @@ export default {
   },
 
   data () { return {
-    /* cas:
-    1: l'avatar courant est hébergeur du groupe
-    2: il y a un hébergeur (pas moi) et je suis animateur
-    3: il y a un hébergeur (pas moi) et je ne suis pas animateur
-    4: pas d'hébergeur et l'avatar courant est animateur
-    5: pas d'hébergeur, avatar courant pas animateur, et il y a des animateurs
-    6: pas d'hébergeur, avatar courant pas animateur, et il n'y pas d'animateur
-    */
+    /* Cas 
+    - 1 : il n'y a pas d'hébergeur.
+    - 2 : je suis hébergeur
+    - 3 : il y a un hébergeur mais ce n'est pas moi */
     cas: 0,
+    hko: 0, // erreur sur dialogue d'hébergement
+    options: [], // [{ label, value, na, im}] - mes avatars pouvant être hébergeur
+    nvheb: null, // nouvel hébergeur pré-sélectionné
+
     imc: 0,
     anims: new Set(), // set des Ids des animateurs du groupe
     estAnim: false, // l'avatar courant est animateur du groupe
@@ -313,7 +331,6 @@ export default {
     ar1: false,
     ar2: false,
     lstVotes: [],
-    options: [],
     moic: null,
     cfu: 0 // Choix de changement de mode non confirmé
   }},
@@ -396,8 +413,8 @@ export default {
       const g = this.eg.groupe
       const c = this.aSt.compte
 
-      // na de l'avatar hébergeur quand je peux le connaître
-      this.naHeb = c.naDeIdgIm(g.id, g.idh)
+      this.hko = 0
+      this.cas = 0
 
       /* Liste des (autres) avatars du compte pouvant être hébergeur
         - options : [{ label, value, na, im}] - mes avatars pouvant être hébergeur
@@ -414,38 +431,29 @@ export default {
 
       if (!g.idh) {
         /* Cas 1 : il n'y a pas d'hébergeur. */
-        if (this.options.length === 0) {
-          await afficherDiag($t('AGhko1'))
-          return 0
-        }
+        this.cas = 1
+        if (this.options.length === 0) this.hko = 1
         // Je peux prendre l'hébergement
-        return 1
+        return
       }
 
       if (g.idh === session.compteId) {
+        this.cas = 2
         /* Cas 2 : je suis hébergeur
-        - si options.length = 0 - Je suis le seul candidat
+        - si options.length = 0 Je ne peux pas envisager un transfert sur un autre de mes avatars
         */
-        return 2
+        return
       }
 
       /* cas 3 : il y a un hébergeur mais ce n'est pas moi */
-      if (this.options.length === 0) {
-        await afficherDiag($t('AGhko4'))
-        return 0
-      }
-      if (g.estAnim(g.imh)) {
-        await afficherDiag($t('AGhko2'))
-        return 0
-      }
-      if (!this.eg.estAnim) {
-        await afficherDiag($t('AGhko3'))
-        return 0
-      }
-      /* cas 3 je peux remplacer l'animateur actuel */
-      return 3
+      this.cas = 3
+      if (this.options.length === 0) { this.hko = 4; return }
+      if (g.estAnim(g.imh)) { this.hko = 2; return }
+      if (!this.eg.estAnim) this.hko = 3
+      /* je peux remplacer l'animateur actuel */
     },
 
+    /*
     setCas1 () {
       const g = this.eg.groupe
       this.anims = this.gSt.animIds(this.eg)
@@ -459,6 +467,7 @@ export default {
         return this.estAnim ? 4 : (this.anims.size ? 5 : 6)
       }
     },
+    */
     async gererHeb () {
       this.step = 0
       this.cas = this.setCas()
