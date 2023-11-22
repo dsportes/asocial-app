@@ -122,12 +122,12 @@ export default {
 
     watch(q1s, (ap, av) => {
       const x = lq[ap]
-      if (x && mv.value.q1 !== x) mv.value.q1 = x
+      if (x !== undefined && mv.value.q1 !== x) mv.value.q1 = x
     })
 
     watch(q2s, (ap, av) => {
       const x = lq[ap]
-      if (x && mv.value.q2 !== x) mv.value.q2 = x
+      if (x !== undefined && mv.value.q2 !== x) mv.value.q2 = x
     })
 
     watch(qcs, (ap, av) => {

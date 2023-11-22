@@ -36,7 +36,7 @@
         </div>
         <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [aaaammjj(dfh)])}}</div>
         <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
-          icon="settings" @click="gererHeb"/>
+          icon="settings" @click="gererh"/>
       </div>
       <div class="q-mt-xs">
         <quotas-vols2 :vols="eg.objv.vols"/>
@@ -130,7 +130,7 @@
   </q-dialog>
 
   <!-- Gérer l'hébergement, changer les quotas -->
-  <q-dialog v-model="changerQuotas" full-height persistent>
+  <q-dialog v-model="gererheb" full-height persistent>
     <div class="bs"  style="width:80vw">
     <q-layout container view="hHh lpR fFf" :class="dkli(0)">
       <q-header elevated class="bg-secondary text-white">
@@ -155,12 +155,52 @@
           </div>
 
           <q-card v-else>
-            <q-card-section v-if="cas===1">
+            <q-separator color="orange" class="q-mt-md"/>
+            <div class="titre-lg q-my-sm text-italic">{{$t('AGselac')}}</div>
+            <div class="column q-ml-md">
+              <q-radio v-if="cas===1"  v-model="action" :val="1" :label="$t('AGac1')" />
+              <q-radio v-if="cas===2"  v-model="action" :val="4" :label="$t('AGac4')" />
+              <q-radio v-if="cas===2 && options.length > 0"  v-model="action" :val="3" :label="$t('AGac3')" />
+              <q-radio v-if="cas===2"  v-model="action" :val="2" :label="$t('AGac2')" />
+              <q-radio v-if="cas===3"  v-model="action" :val="5" :label="$t('AGac5')" />
+            </div>
 
-            </q-card-section>
+            <div v-if="(action===1 || action===3 || action===5) && options.length > 1" class="row items-center">
+              <div class="titre-md q-mt-sm text-italic q-mr-md">{{$t('AGselav')}}</div>
+              <q-select class="lgsel" v-model="nvheb" :options="options"/>
+            </div>
+
+            <div v-if="action !==0 && action !==2">
+              <choix-quotas class="q-my-sm" :quotas="q" @change="onChgQ" groupe/>
+              <div v-if="q.err" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGmx')}}</div>
+              <div v-else>
+                <div v-if="alq1 || alq2">
+                  <q-separator color="orange" class="q-my-xs"/>
+                  <div v-if="alq1 && eg.groupe.imh" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGq1x')}}</div>
+                  <div v-if="alq1" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1')}}</div>
+                  <div v-if="alq2 && eg.groupe.imh" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGq2x')}}</div>
+                  <div v-if="alq2" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2')}}</div>
+                  <q-separator color="orange" class="q-my-xs"/>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="action!==0 && action!==2">
+              <div v-if="al1" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1b')}}</div>
+              <div v-if="al2" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2b')}}</div>
+              <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar1 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp1', [rst1])}}</div>
+              <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar2 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp2', [rst2])}}</div>
+            </div>
+
+            <div class="row justify-center q-gutter-md">
+              <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+              <bouton-confirm v-if="action === 2 || (action !== 0 && !q.err && !al1 && !al2)" 
+                actif :confirmer="chgQ"/>
+            </div>
 
           </q-card>
 
+          <!--
           <quotas-vols2 class="q-my-md" :vols="eg.objv.vols"/>
           <div class="titre-md" v-if="cas===1">{{$t('AGm1', [moi])}}</div>
           <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1a')}}</div>
@@ -197,7 +237,7 @@
           </div>
 
           <div v-if="step === 1" class="q-ma-sm">
-            <choix-quotas class="q-my-sm" :quotas="q" @change="onChgQ" groupe/>
+
             <div v-if="q.err" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGmx')}}</div>
             <div v-if="al1" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1b')}}</div>
             <div v-if="al2" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2b')}}</div>
@@ -209,6 +249,7 @@
               <q-btn v-if="!q.err && !al1 && !al2" size="md" dense :label="$t('confirmer')" color="primary" @click="chgQ"/>
             </div>
           </div>
+          -->
         </q-page>
       </q-page-container>
     </q-layout>
@@ -317,19 +358,22 @@ export default {
     cas: 0,
     hko: 0, // erreur sur dialogue d'hébergement
     options: [], // [{ label, value, na, im}] - mes avatars pouvant être hébergeur
+    actions: [], // les 5 actions possibles
+    action: 0,
     nvheb: null, // nouvel hébergeur pré-sélectionné
 
-    imc: 0,
-    anims: new Set(), // set des Ids des animateurs du groupe
-    estAnim: false, // l'avatar courant est animateur du groupe
-    monMb: null, // membre de l'avatar courant dans le groupe
-    step: 0,
     al1: false,
     al2: false,
     rst1: 'OB',
     rst2: 'OB',
     ar1: false,
     ar2: false,
+
+    imc: 0,
+    anims: new Set(), // set des Ids des animateurs du groupe
+    estAnim: false, // l'avatar courant est animateur du groupe
+    monMb: null, // membre de l'avatar courant dans le groupe
+    step: 0,
     lstVotes: [],
     moic: null,
     cfu: 0 // Choix de changement de mode non confirmé
@@ -413,8 +457,11 @@ export default {
       const g = this.eg.groupe
       const c = this.aSt.compte
 
+      this.actions = []
+      this.action = 0
       this.hko = 0
       this.cas = 0
+      this.nvheb = 0
 
       /* Liste des (autres) avatars du compte pouvant être hébergeur
         - options : [{ label, value, na, im}] - mes avatars pouvant être hébergeur
@@ -468,13 +515,9 @@ export default {
       }
     },
     */
-    async gererHeb () {
-      this.step = 0
-      this.cas = this.setCas()
-      this.ovchangerQuotas()
-    },
-    gotocq () {
-      this.step = 1
+    async gererh () {
+      if (!await this.session.edit()) return
+      this.setCas()
       const vx = this.eg.objv.vols
       const cpt = this.aSt.compta.compteurs.qv
       this.q.q1 = vx.q1 || 0
@@ -485,6 +528,7 @@ export default {
       this.q.max2 = cpt.q2 - Math.ceil(cpt.v2 / UNITEV2)
       this.q.err = false
       this.onChgQ()
+      this.ovgererheb()
     },
     onChgQ () {
       const cpt = this.aSt.compta.compteurs.qv
@@ -525,12 +569,15 @@ export default {
     },
 
     async chgQ () {
+      console.log('HebGroupe')
+      /*
       if (!await this.session.edit()) { MD.fD(); return }
       const tx = [0, 1, 3, 0, 2, 0, 2]
       const t = tx[this.cas]
       const idd = t === 3 ? this.eg.groupe.idh : 0
       const imh = this.monMb.ids
       await new HebGroupe().run(t, this.eg.groupe.na, imh, idd, this.q.q1, this.q.q2 )
+      */
       MD.fD()
     },
 
@@ -566,15 +613,15 @@ export default {
     function ovnvctc () { MD.oD(nvctc) }
     const editerUna = ref(false)
     function ovediterUna () { MD.oD(editerUna) }
-    const changerQuotas = ref(false)
-    function ovchangerQuotas () { MD.oD(changerQuotas) }
+    const gererheb = ref(false)
+    function ovgererheb () { MD.oD(gererheb) }
     const ardedit = ref(false)
     function ovardedit () { MD.oD(ardedit) }
 
     return {
       MD, dkli, aaaammjj,
       mcledit, ovmcledit, nvctc, ovnvctc, editerUna, ovediterUna,
-      changerQuotas, ovchangerQuotas, ardedit, ovardedit,
+      gererheb, ovgererheb, ardedit, ovardedit,
       session,
       ui,
       photoDef,
