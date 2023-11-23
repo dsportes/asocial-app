@@ -150,7 +150,9 @@
         <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
 
         <div v-if="selected" class="row justify-between">
-          <div class="titre-md">{{lib2}}</div>
+          <div class="titre-md">{{lib2}}
+            <span v-if="nSt.node && nSt.node.note" class="q-ml-xs font-mono fs-sm">#{{nSt.node.note.shIds}}</span>
+          </div>
           <div  v-if="nSt.note" class="col-auto font-mono fs-sm">
             <span class="q-mr-sm">({{edvol(nSt.note.v1)}})</span>
             <span>{{dhcool(nSt.note.dh)}}</span>
@@ -681,7 +683,6 @@ export default {
 
     function compileFiltre (fx) {
       const f = filtre.value
-      f.v1 = fx.v1 || 0
       f.v2 = fx.v2 || 0
       f.note = fx.note
       f.temp = fx.temp
@@ -735,7 +736,6 @@ export default {
         if (f.note && n.txt) {
           if (n.txt.indexOf(f.note) === -1) return false
         }
-        if (f.v1 && n.v1 < f.v1) return false
         if (f.v2 && n.v2 < f.v2) return false
         if (f.temp && !n.st) return false
         if (f.mcp) {
@@ -917,6 +917,8 @@ export default {
       dlst.value = 0
       MD.fD()
     }
+
+    compileFiltre(fSt.filtre.notes)
 
     const mapmc = ref(Motscles.mapMC(true, 0))
     fSt.contexte.notes.mapmc = mapmc.value

@@ -18,8 +18,25 @@
     </q-toolbar>
   </q-header>
 
-  <q-page-container >
+  <q-page-container>
     <q-page class="q-pa-xs column">
+      <div v-if="avatar" class="sp30 q-my-md">
+        <choix-motscles v-model="mcap['0']" editable du-compte 
+          :init-value="mc['0']" :titre="$t('PNOmcap')" />
+      </div>
+      <div v-else class="sp30 q-my-md">
+        <div v-if="msg" class="q-mt-sm titre-md bg-yellow-5 text-black text-bold q-pa-xs">
+          {{msg}}
+        </div>
+        <choix-motscles class="col-auto q-mt-sm" v-model="mc0ap" :editable="!msg"
+          :du-groupe="groupe.id" :titre="$t('PNOmcgr')" :init-value="mc0"/>
+        
+        <div v-for="[im, x] of ims" :key="im">
+          <choix-motscles class="col-auto q-mt-md" v-model="mcap['' + im]" editable
+            du-compte :titre="$t('PNOmcgp', [x.na.nom])" :init-value="mc['' + im]"/>
+        </div>    
+      </div>
+      <!--
       <div v-if="avatar" class="sp30 q-my-md">
         <choix-motscles v-model="mcap['0']" editable du-compte 
           :init-value="mc['0']" :titre="$t('PNOmcap')" />
@@ -40,6 +57,7 @@
             du-compte :titre="$t('PNOmcgp', [x.na.nom])" :init-value="mc['' + im]"/>
         </div>    
       </div>
+      -->
     </q-page>
   </q-page-container>
 </q-layout>
@@ -81,7 +99,9 @@ export default {
 
   methods: {
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
+
     aa (st) { return st === 32 ? $t('animateur') : $t('auteur') },
+
     async valider () {
       console.log(this.mcap)
       const chg = {}
@@ -106,49 +126,51 @@ export default {
     const aSt = stores.avatar
     const pSt = stores.people
 
-    /* Map par im des { na, st } des avc membres du groupe */
-    const ims = toRef(props, 'ims')
-    const im = ref(null)
-    const imna = ref(null)
     const avatar = ref(null)
     const groupe = ref(null)
     const note = ref(nSt.note)
-    const mc = ref({})
-    const mcap = ref({})
+    const mc = ref()
+    const mcap = ref()
+    const mc0 = ref()
+    const mc0ap = ref()
     const mapmc = ref(null)
-    const msg = ref('')
-    const mxst = ref(0)
-    ims.value.forEach((x, im) => {
-      const {na, st} = x
-      if (st >= 31 && st <= 32 && st > mxst.value) mxst.value = st
-    })
+    const msg1 = ref('')
+    const msg2 = ref('')
 
     if (nSt.node.type === 4) {
       avatar.value = aSt.getElt(nSt.note.id).avatar
       im.value = 0
-      mc.value['0'] = note.value.mc || new Uint8Array([])
-      mcap.value['0'] = mc.value['0']
+      mc.value = note.value.mc
+      mcap.value = mc.value
     } else {
-      groupe.value = gSt.egr(nSt.note.id).groupe
+      const egr = gSt.egr(nSt.note.id)
+      groupe.value = egr.groupe
       mapmc.value = ref(Motscles.mapMC(false, groupe.value.id))
-      im.value = nSt.note.im
-      if (im.value) { // il y a une exclusivité
-        imna.value = gSt.imNaStAvc(groupe.value.id, im.value)
-        /* Map par im des { na, st } des avc membres du groupe */
-        if (!imna.value.has(im.value)) { // exclu n'est pas avatar du compte
-          if (mxst.value !== 32) // compte pas animateur : ne peut pas éditer mcg
-            msg.value = $t('PNOm1')
+
+      /* mots clés du groupe éditables: 
+      - soit être animateur
+      - soit avoir l'exclusivité
+      - soit être auteur quand le compte n'a pas d'exclusité
+      */
+      if (!egr.estAnim) {
+        const na = groupe.value.excluDuCompte(nSt.note.im)
+        if (!na) {
+          // if (groupe.value.avcAuteurs().size)
         }
-      } else {
-        if (mxst.value < 31) // compte ni auteur ni animateur : ne peut pas éditer mcg
-            msg.value = $t('PNOm2')
+        
       }
-      mc.value['0'] = note.value.mc['0'] || new Uint8Array([])
-      mcap.value['0'] = mc.value['0']
-      ims.value.forEach((x, im) => {
-        mc.value['' + im] = note.value.mc['' + im] || new Uint8Array([])
-        mcap.value['' + im] = mc.value['' + im]
-      })
+      if (nSt.note.im) { // il y a une exclusivité
+        // na de l'avatar DU COMPTE ayant l'exclusivité
+        const na = groupe.value.excluDuCompte(nSt.note.im)
+        if (!na && !egr.estAnim) msg.value = $t('PNOm1')
+      } else {
+        const s = groupe.value.avcAuteurs()
+        if (!s.size && !egr.estAnim) msg.value = $t('PNOm2')
+      }
+      mc0.value = note.value.mc0
+      mc0ap.value = mc0.value
+      mc.value = note.value.mc
+      mcap.value = mc.value
     }
 
     return {

@@ -37,7 +37,6 @@ export default ({
     const attr = toRef(props, 'attr')
 
     const vols = {
-      v1: [50, 4000],
       v2: [1000000, 10000000, 100000000, 1000000000]
     }
     const options = ref([])

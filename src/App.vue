@@ -175,9 +175,8 @@
           <filtre-txt nom="notes" prop='note' :idx="0"/>
           <filtre-mc nom="notes" attr="mcp" :idx="1"/>
           <filtre-mc nom="notes" attr="mcn" :idx="0"/>
-          <filtre-vols nom="notes" attr="v1" :idx="1"/>
-          <filtre-vols nom="notes" attr="v2" :idx="0"/>
-          <filtre-temp nom="notes" :idx="1"/>
+          <filtre-vols nom="notes" attr="v2" :idx="1"/>
+          <filtre-temp nom="notes" :idx="0"/>
         </div>
       </div>
     </q-scroll-area>

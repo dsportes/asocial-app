@@ -1003,7 +1003,7 @@ export default {
   PNOer4: 'Le groupe est protégé contre les mises à jour, ajouts et destruction de notes.',
   PNOer5: 'Le groupe n\'a plus de membre qui l\'héberge : l\'ajout de notes et leurs mises à jour en augmentation de volume sont bloquées',
   PNOer6: 'Le volume des notes du groupe excède déjà le maximum autosisé par son compte hébergeur : l\'ajout de notes et leurs mises à jour en augmentation de volume sont bloquées',
-  PNOer7: 'Il faut être membre actif "auteur" ou "animateur" pour pouvoir ajouter de nouvelles notes ou mettre à jour ou supprimer celles existantes.',
+  PNOer7: 'Il faut être membre actif avec accès en écriture aux notes pour pouvoir ajouter de nouvelles notes ou mettre à jour ou supprimer celles existantes.',
   PNOer8: 'La note a une exclusivité d\'écritue pour un membre : lui seul peut la mettre à jour ou la détruire.',
   PNOer9: 'Pour changer l\'attribution de l\'exclusivité d\'écriture, il faut, soit l\'avoir soi-même, soit être animateur du groupe.',
 

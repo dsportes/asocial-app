@@ -143,7 +143,8 @@ export class NomGenerique {
 
   get ns () { return ID.ns(this.id) }
   get nom () { return this.nomx || stores.config.nomDuComptable }
-  get nomc () { return !this.nomx ? stores.config.nomDuComptable : (this.nomx + '#' + (this.id % 10000)) }
+  get nomc () { return !this.nomx ? stores.config.nomDuComptable : 
+    (this.nomx + '#' + ('' + (this.id % 10000)).padStart(4, '0')) }
   get hrnd () { return hash(u8ToB64(this.rnd)) }
   get anr () { return [this.nomx, this.rnd] } 
 
@@ -1287,7 +1288,7 @@ export class Avatar extends GenDoc {
   }
 
   /* Map(ida, im) des avatars du compte participant à idg d'après membres*/
-  imIdGroupeMB (idg) { // set des im pour le groupe idg
+  imIdGroupeMB (idg) {
     const m = new Map()
     const gSt = stores.groupe
     const mm = gSt.getMembres(idg)
@@ -1295,6 +1296,12 @@ export class Avatar extends GenDoc {
       if (this.avatarIds.has(e.na.id)) m.set(e.na.id, e.ids)
     })
     return m
+  }
+
+  imGroupe (idg) {
+    const s = new Set()
+    this.mpg.forEach(e => { if (e.ng.id === idg) s.add(e.im) })
+    return s
   }
   
   // Retourne {mc, memo} à propos d'une id donnée
@@ -1886,6 +1893,13 @@ export class Groupe extends GenDoc {
     return !im ? [true, slot || this.anag.length] : [false, im]
   }
 
+  avcAuteurs () {
+    const aSt = session.avatar
+    const s = new Set()
+    aSt.compte.imGroupe(this.id).forEach(im => { if (this.estAuteur(im)) s.add(im)})
+    return s
+  }
+
   async compile (row) {
     const session = stores.session
     this.vsh = row.vsh || 0
@@ -2058,7 +2072,7 @@ _data_:
 - `mc` :
   - note personnelle : vecteur des index de mots clés.
   - note de groupe : map sérialisée,
-    - _clé_ : `im` de l'auteur (0 pour les mots clés du groupe),
+    - _clé_ : `hgc` du compte l'auteur (1 pour les mots clés du groupe),
     - _valeur_ : vecteur des index des mots clés attribués par le membre.
 - `txts` : crypté par la clé de la note.
   - `d` : date-heure de dernière modification du texte.
@@ -2103,15 +2117,30 @@ export class Note extends GenDoc {
   get rid () {  return this.ref ? this.ref[0] : 0 }
   get rids () {  return this.ref ? this.ref[1] : 0 }
 
+  get shIds () { return ('' + (this.ids % 1000)).padStart(3, '0')}
+
   get nomFake () { return '$' + this.rids }
 
   async compile (row) {
+    const session = stores.session
     this.st = row.st || 99999999
     this.im = row.im || 0
     this.p = row.p || 0
     this.v2 = row.v2 || 0
     this.deGroupe = ID.estGroupe(this.id)
+    if (this.deGroupe) {
+      this.hgc = hash(await crypter(session.clek, '' + this.id, 1))
+      const mx = row.mc ? decode(row.mc) : {}
+      this.mc0 = mx['0'] || new Uint8Array([])
+      this.smc = new Set(this.mc0)
+      this.mc = mx[this.hgc] || new Uint8Array([])
+      this.mc.forEach(x => {this.smc.add(x)})
+    } else {
+      this.mc = row.mc || new Uint8Array([])
+      this.smc = this.mc ? new Set(this.mc) : new Set()
+    }
     this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || null)
+    this.hgc = !this.deGroupe ? 0 : hash(await crypter(session.clek, '' + this.id, 1))
     const x = decode(await decrypter(this.cle, row.txts))
     this.txt = ungzipB(x.t)
     this.titre = titre(this.txt)
@@ -2130,17 +2159,12 @@ export class Note extends GenDoc {
         this.mfa.set(f.idf, f)
       }
     }
-    // this.setSmc()
   }
 
-  /* setSmc : calcul smc, le set des mots clés de la note pour le compte
-  Ce calcul est fait à la compilation de la note.
-  Toutefois, quand un compte a plus d'un avatar membre d'un groupe G,
-  quand l'un de ses avatars est résilié, il faut recalculer ce set,
-  sinon il apparaîtra des mots clés fantômes pour le compte
-  (ce qui n'est pas très grave) jusqu'à la prochaine session ou mise à jour
-  de la note
-  */
+  excluDuCompte (im) {
+    const aSt = stores.avatar
+    return aSt.compte.naDeIdgIm(im)
+  }
 
   /*
   initTest (id, ids, ref, txt, dh, v1, v2) { // pour les tests
@@ -2167,13 +2191,13 @@ export class Note extends GenDoc {
       }
     }
   }
-  */
 
   settxt (txt) { // pour les tests
     this.txt = txt
     this.titre = titre(this.txt)
     this.v1 = txt ? txt.length : 0
   }
+  */
 
   static async toRowNouveau (id, txt, im, nbj, p, exclu, ref) {
     const session = stores.session

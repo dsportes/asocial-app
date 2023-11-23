@@ -244,8 +244,7 @@ export default {
         if (eg.objv.vols.v1 >= eg.objv.vols.q1 * UNITEV1) { er.value = 6; return }
         mb.value = gSt.membreDeId(eg, this.naAut.id)
         if (!mb.value) { er.value = 7; return }
-        const st = g.ast[mb.value.ids]
-        if (st < 31 || st > 32) { er.value = 7; return }
+        if (!g.estAuteur(mb.value.ids)) { er.value = 7; return }
       }
       step.value = 3
     }
