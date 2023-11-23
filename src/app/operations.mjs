@@ -1060,72 +1060,63 @@ export class ArdoiseMembre extends OperationUI {
 
 /* Hébergement d'un groupe *****************************************************
 args.token donne les éléments d'authentification du compte.
-args.t : 1: chg quotas, 2: prise d'hébergement, 3: transfert d'hébergement
-args.idd : (3) id du compte de départ en cas de transfert
-args.ida : id du compte (d'arrivée en cas de prise / transfert)
+args.action : 1 à 5
 args.idg : id du groupe
-args.idhg : (2, 3) id du compte d'arrivée en cas de transfert CRYPTE par la clé du groupe
-args.q1, q2 :
-1-Cas changement de quotas :
-- les volumes et quotas sur compta a sont inchangés
-- sur la version du groupe, q1 et q2 sont mis à jour
-2-Prise hébergement
-- les volumes v1 et v2 sont pris sur le groupe
+args.idd : (3) id du compte de départ en cas de transfert
+args.idhg : id du compte d'arrivée en cas de transfert CRYPTE par la clé du groupe
+args.imh : im du nouvel hébergeur
+args.q1, q2 : nouveau quotas
+args.dfh: date de fin d'hébergement
+args.action :
+  AGac1: 'Je prends l\'hébergement à mon compte',
+  AGac2: 'Je cesse d\'héberger ce groupe',
+  AGac3: 'Je reprends l\'hébergement de ce groupe par un autre de mes avatars',
+  AGac4: 'Je met à jour les quotas maximum attribués au groupe',
+  AGac5: 'Je reprends l\'hébergement à mon compte, je suis animateur et l\hébergeur actuel ne l\'est pas',
+
+Prise hébergement (1)
+- les volumes v1 et v2 sont lus sur la version du groupe
 - les volumes (pas les quotas) sont augmentés sur compta a
 - sur la version du groupe, q1 et q2 sont mis à jour
-- sur le groupe, idhg est mis à jour
-3-Cas de transfert :
-- les volumes v1 et v2 sont pris sur le groupe
+- sur le groupe, idhg / imh mis à jour
+Fin d'hébergement (2):
+- les volumes v1 et v2 sont lus sur la version du groupe
+- les volumes (pas les quotas) sont diminués sur la compta du compte
+- sur le groupe :
+  - dfh : date du jour + N jours
+  - idhg, imh : 0
+Transfert dans le même compte (3):
+- sur le groupe, imh est mis à jour
+- sur la version du groupe, q1 et q2 sont mis à jour
+Changement de quotas (4):
+- les volumes et quotas sur compta a sont inchangés
+- sur la version du groupe, q1 et q2 sont mis à jour
+Transfert (5):
+- les volumes v1 et v2 sont lus sur la version du groupe
 - les volumes (pas les quotas) sont diminués sur compta d
 - les volumes (pas les quotas) sont augmentés sur compta a
 - sur la version du groupe, q1 et q2 sont mis à jour
-- sur le groupe, idhg est mis à jour
+- sur le groupe, idhg / imh mis à jour
 Retour:
 */
 export class HebGroupe extends OperationUI {
   constructor () { super($t('OPhebgr')) }
 
-  async run (t, nag, imh, idd, q1, q2) {
+  async run (action, groupe, imh, q1, q2) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, t, imh, q1, q2, idg: nag.id, ida: session.compteId }
-      if (t > 1) { // prise et transfert heb
-        args.idhg = await Groupe.toIdhg(nag.rnd)
-        if (t === 2) args.idd = idd
+      const dfh = action !== 2 ? 0 : AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.groupenonheb)
+      const args = { 
+        token: session.authToken, 
+        action, 
+        imh, 
+        q1, q2, 
+        idg: groupe.id, 
+        idhg: await Groupe.toIdhg(groupe.na.rnd),
+        idd: groupe.idh,
+        dfh
       }
       this.tr(await post(this, 'HebGroupe', args))
-      this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* Fin d'ébergement d'un groupe *****************************************************
-args.token donne les éléments d'authentification du compte.
-args.id : id du compte
-args.idg : id du groupe
-args.dfh : date de fin d'hébergement
-Traitement :
-- les volumes v1 et v2 sont pris sur le groupe
-- les volumes (pas les quotas) sont diminués sur la compta du compte
-- sur le groupe :
-  - dfh : date du jour + N jours
-  - idhg, imh : 0
-Retour:
-*/
-export class FinHebGroupe extends OperationUI {
-  constructor () { super($t('OPfhebgr')) }
-
-  async run (idg) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, 
-        id: session.compteId,
-        idg,
-        dfh: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.groupenonheb)
-      }
-      this.tr(await post(this, 'FinHebGroupe', args))
       this.finOK()
     } catch (e) {
       return await this.finKO(e)

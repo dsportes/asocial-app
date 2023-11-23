@@ -165,9 +165,9 @@
               <q-radio v-if="cas===3"  v-model="action" :val="5" :label="$t('AGac5')" />
             </div>
 
-            <div v-if="(action===1 || action===3 || action===5) && options.length > 1" class="row items-center">
+            <div v-if="(action===1 || action===3 || action===5) && options.length > 0" class="row items-center">
               <div class="titre-md q-mt-sm text-italic q-mr-md">{{$t('AGselav')}}</div>
-              <q-select class="lgsel" v-model="nvheb" :options="options"/>
+              <q-select class="lgsel" v-model="nvHeb" :options="options"/>
             </div>
 
             <div v-if="action !==0 && action !==2">
@@ -300,7 +300,7 @@ import QuotasVols2 from './QuotasVols2.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 import MotsCles from './MotsCles.vue'
 import { MD, getNg, Groupe } from '../app/modele.mjs'
-import { MajCvGr, MotsclesGroupe, ModeSimple, FinHebGroupe, HebGroupe, NouveauMembre } from '../app/operations.mjs'
+import { MajCvGr, MotsclesGroupe, ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuGroupe',
@@ -360,7 +360,7 @@ export default {
     options: [], // [{ label, value, na, im}] - mes avatars pouvant être hébergeur
     actions: [], // les 5 actions possibles
     action: 0,
-    nvheb: null, // nouvel hébergeur pré-sélectionné
+    nvHeb: null, // nouvel hébergeur pré-sélectionné
 
     al1: false,
     al2: false,
@@ -461,11 +461,11 @@ export default {
       this.action = 0
       this.hko = 0
       this.cas = 0
-      this.nvheb = 0
+      this.nvHeb = null
 
       /* Liste des (autres) avatars du compte pouvant être hébergeur
         - options : [{ label, value, na, im}] - mes avatars pouvant être hébergeur
-        - nvheb : nouvel hébergeur pré-sélectionné
+        - nvHeb : nouvel hébergeur pré-sélectionné
       */
       this.options = []
       for (const [id, im] of c.imIdGroupe(g.id)) {
@@ -473,8 +473,8 @@ export default {
         if (!g.estActif(im)) continue
         const na = getNg(id)
         this.options.push({ label: na.nom, value: id, na: na, im: im})
-        this.nvHeb = this.options[0]
       }
+      if (this.options.length) this.nvHeb = this.options[0]
 
       if (!g.idh) {
         /* Cas 1 : il n'y a pas d'hébergeur. */
@@ -500,21 +500,6 @@ export default {
       /* je peux remplacer l'animateur actuel */
     },
 
-    /*
-    setCas1 () {
-      const g = this.eg.groupe
-      this.anims = this.gSt.animIds(this.eg)
-      this.estAnim = this.anims.has(this.session.avatarId)
-      this.monMb = this.gSt.membreDeId(this.eg, this.session.avatarId)
-      if (g.imh) {
-        const m = this.eg.membres.get(g.imh)
-        if (m && m.na.id === this.session.avatarId) return 1
-        return this.estAnim ? 2 : 3
-      } else {
-        return this.estAnim ? 4 : (this.anims.size ? 5 : 6)
-      }
-    },
-    */
     async gererh () {
       if (!await this.session.edit()) return
       this.setCas()
@@ -543,6 +528,15 @@ export default {
       this.ar2 = r2 < (cpt.q2 * UNITEV2 * 0.1)
     },
 
+    async chgQ () {
+      if (!await this.session.edit()) { MD.fD(); return }
+      // action, groupe, imh, q1, q2
+      const imh = this.nvHeb ? this.nvHeb.im : 0
+      await new HebGroupe().run(this.action, this.eg.groupe, imh, this.q.q1, this.q.q2 )
+      MD.fD()
+    },
+
+
     async editUna () {
       if (!await this.session.edit()) return
       // this.gSt.test1(this.eg)
@@ -560,25 +554,6 @@ export default {
           }
         }
       }
-    },
-
-    async finHeb () {
-      if (!await this.session.edit())  { MD.fD(); return }
-      await new FinHebGroupe().run(this.eg.groupe.id)
-      MD.fD()
-    },
-
-    async chgQ () {
-      console.log('HebGroupe')
-      /*
-      if (!await this.session.edit()) { MD.fD(); return }
-      const tx = [0, 1, 3, 0, 2, 0, 2]
-      const t = tx[this.cas]
-      const idd = t === 3 ? this.eg.groupe.idh : 0
-      const imh = this.monMb.ids
-      await new HebGroupe().run(t, this.eg.groupe.na, imh, idd, this.q.q1, this.q.q2 )
-      */
-      MD.fD()
     },
 
     async chgU () {
