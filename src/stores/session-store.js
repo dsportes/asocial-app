@@ -177,6 +177,25 @@ export const useSessionStore = defineStore('session', {
       return state.estMinimalTC
     },
 
+    roSt (state) {
+      if (state.mode === 3) {
+        return 1
+      } else {
+        if (state.estFige) return 2
+        else if (state.pow > 2) {
+          if (state.estMinimal) return 3
+          else if (state.estLecture) return 4
+        }
+      }
+      return 0
+    },
+
+    editDiag (state) {
+      const y = ['', 'editavion', 'editfige', 'editminimal', 'editlecture']
+      const x = state.roSt
+      return x ? $t(y[x]) : ''
+    },
+
     // PageAdmin ***************************************************    
     paLeFT: (state) => {
       const x = []; state.espaces.forEach(e => { x.push(e) })
@@ -413,19 +432,6 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    roSt () {
-      if (this.mode === 3) {
-        return 1
-      } else {
-        if (this.estFige) return 2
-        else if (this.pow > 2) {
-          if (this.estMinimal) return 3
-          else if (this.estLecture) return 4
-        }
-      }
-      return 0
-    },
-
     async editUrgence () {
       if (this.mode === 3) {
         await afficherDiag($t('editavion'))
@@ -438,12 +444,9 @@ export const useSessionStore = defineStore('session', {
       return true
     },
 
-    async edit (diag) {
-      const y = ['', 'editavion', 'editfige', 'editminimal', 'editlecture']
-      const x = this.roSt()
-      const d = x ? $t(y[x]) : ''
-      if (diag) return d
-      if (!x) return true
+    async edit () {
+      const d = this.editDiag
+      if (!d) return true
       await afficherDiag(d)
       return false
     },

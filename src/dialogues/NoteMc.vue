@@ -12,52 +12,31 @@
         :disable="!modif" @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="imna" inset
-      class="full-width bg-secondary text-white">
-      <q-toolbar-title class="text-italic titre-md text-center">{{$t('PNOexc', [imna.nomc])}}</q-toolbar-title>
+    <q-toolbar v-if="session.editDiag" inset class="full-width bg-secondary text-white">
+      <div class='q-ma-sm q-pa-sm text-center text-bold titre-md bg-yellow-5 text-warning'>
+        {{session.editDiag}}
+      </div>
+    </q-toolbar>
+    <q-toolbar v-if="nomex" inset class="full-width bg-secondary text-white">
+      <q-toolbar-title class="text-italic titre-md text-center">{{$t('PNOexc', [nomex])}}</q-toolbar-title>
     </q-toolbar>
   </q-header>
 
   <q-page-container>
-    <q-page class="q-pa-xs column">
-      <div v-if="avatar" class="sp30 q-my-md">
-        <choix-motscles v-model="mcap['0']" editable du-compte 
-          :init-value="mc['0']" :titre="$t('PNOmcap')" />
-      </div>
-      <div v-else class="sp30 q-my-md">
-        <div v-if="msg" class="q-mt-sm titre-md bg-yellow-5 text-black text-bold q-pa-xs">
-          {{msg}}
-        </div>
-        <choix-motscles class="col-auto q-mt-sm" v-model="mc0ap" :editable="!msg"
-          :du-groupe="groupe.id" :titre="$t('PNOmcgr')" :init-value="mc0"/>
-        
-        <div v-for="[im, x] of ims" :key="im">
-          <choix-motscles class="col-auto q-mt-md" v-model="mcap['' + im]" editable
-            du-compte :titre="$t('PNOmcgp', [x.na.nom])" :init-value="mc['' + im]"/>
-        </div>    
-      </div>
-      <!--
-      <div v-if="avatar" class="sp30 q-my-md">
-        <choix-motscles v-model="mcap['0']" editable du-compte 
-          :init-value="mc['0']" :titre="$t('PNOmcap')" />
-      </div>
-      <div v-else class="sp30">
-        <div v-if="nSt.note.auts.length" class="col-auto q-mt-sm">
-          <liste-auts/>
-        </div>
+    <q-page class="sp30 q-pa-xs column">
+      <liste-auts/>
 
-        <div v-if="msg" class="q-mt-sm titre-md bg-yellow-5 text-black text-bold q-pa-xs">
-          {{msg}}
-        </div>
-        <choix-motscles class="col-auto q-mt-sm" v-model="mcap['0']" :editable="!msg"
-          :du-groupe="groupe.id" :titre="$t('PNOmcgr')" :init-value="mc['0']"/>
-        
-        <div v-for="[im, x] of ims" :key="im">
-          <choix-motscles class="col-auto q-mt-md" v-model="mcap['' + im]" editable
-            du-compte :titre="$t('PNOmcgp', [x.na.nom])" :init-value="mc['' + im]"/>
-        </div>    
+      <div v-if="avatar" class="q-my-md">
+        <choix-motscles v-model="mcap" :editable="!session.editDiag" :init-value="mc"
+          du-compte :titre="$t('PNOmcap')" />
       </div>
-      -->
+      <div v-else class="q-my-md">
+        <choix-motscles v-model="mcap" :editable="!session.editDiag" :init-value="mc"
+          du-compte :du-groupe="groupe.id" :titre="$t('PNOmcgp')"/>   
+        <div v-if="msg" class="q-mt-sm titre-md bg-yellow-5 text-negative text-bold q-pa-xs">{{msg}}</div>
+        <choix-motscles v-else class="q-mt-sm" v-model="mc0ap" :editable="!session.editDiag"
+          :du-groupe="groupe.id" :titre="$t('PNOmcgr')" :init-value="mc0"/>
+      </div>
     </q-page>
   </q-page-container>
 </q-layout>
@@ -65,9 +44,9 @@
 </template>
 
 <script>
-import { ref, toRef } from 'vue'
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD, Motscles } from '../app/modele.mjs'
+import { MD } from '../app/modele.mjs'
 import { $t, egaliteU8, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ChoixMotscles from '../components/ChoixMotscles.vue'
@@ -77,20 +56,20 @@ import { McNote } from '../app/operations.mjs'
 export default {
   name: 'NoteMc',
 
-  components: { 
-    BoutonHelp,
-    ChoixMotscles,
-    ListeAuts
-  },
+  components: { BoutonHelp, ChoixMotscles, ListeAuts },
 
-  props: { 
-    ims: Object /* Map par im des { na, st } des avc membres du groupe */
-  },
+  props: { },
 
   computed: {
     modif () { 
-      for(const im in this.mc) { if (!egaliteU8(this.mc[''+im], this.mcap[''+im])) return true }
+      if (!egaliteU8(this.mc, this.mcap)) return true
+      if (this.mc0 && !egaliteU8(this.mc0, this.mc0ap)) return true
       return false
+    },
+    nomex () { 
+      if (!this.note.im) return ''
+      const m = this.gSt.getMembre(this.note.id, this.note.im)
+      return m ? m.na.nomc : '#' + this.note.im
     }
   },
 
@@ -98,17 +77,12 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
-
-    aa (st) { return st === 32 ? $t('animateur') : $t('auteur') },
+    fermer () { if (this.modif) MD.oD('cf'); else MD.fD() },
 
     async valider () {
-      console.log(this.mcap)
-      const chg = {}
-      for(const im in this.mc) { 
-        if (!egaliteU8(this.mc[''+im], this.mcap[''+im])) chg[im] = this.mcap[''+im]
-      }
-      await new McNote().run(this.note.id, this.note.ids, chg)
+      const mc = !egaliteU8(this.mc, this.mcap) ? this.mcap : null
+      const mc0 = this.mc0 && !egaliteU8(this.mc0, this.mc0ap) ? this.mc0ap : null
+      await new McNote().run(this.note, mc, mc0)
       MD.fD()
     }
   },
@@ -118,64 +92,52 @@ export default {
     }
   },
 
-  setup (props) {
-    const ui = stores.ui
+  setup () {
     const session = stores.session
     const nSt = stores.note
     const gSt = stores.groupe
     const aSt = stores.avatar
-    const pSt = stores.people
 
     const avatar = ref(null)
     const groupe = ref(null)
     const note = ref(nSt.note)
-    const mc = ref()
-    const mcap = ref()
-    const mc0 = ref()
-    const mc0ap = ref()
-    const mapmc = ref(null)
-    const msg1 = ref('')
-    const msg2 = ref('')
+    const mc = ref(note.value.mc)
+    const mcap = ref(null)
+    const mc0 = ref(null)
+    const mc0ap = ref(null)
+    const msg = ref('')
+
+    mcap.value = mc.value
 
     if (nSt.node.type === 4) {
-      avatar.value = aSt.getElt(nSt.note.id).avatar
-      im.value = 0
-      mc.value = note.value.mc
-      mcap.value = mc.value
+      avatar.value = aSt.getElt(note.value.id).avatar
     } else {
-      const egr = gSt.egr(nSt.note.id)
+      const egr = gSt.egr(note.value.id)
       groupe.value = egr.groupe
-      mapmc.value = ref(Motscles.mapMC(false, groupe.value.id))
-
-      /* mots clés du groupe éditables: 
-      - soit être animateur
-      - soit avoir l'exclusivité
-      - soit être auteur quand le compte n'a pas d'exclusité
-      */
-      if (!egr.estAnim) {
-        const na = groupe.value.excluDuCompte(nSt.note.im)
-        if (!na) {
-          // if (groupe.value.avcAuteurs().size)
-        }
-        
-      }
-      if (nSt.note.im) { // il y a une exclusivité
-        // na de l'avatar DU COMPTE ayant l'exclusivité
-        const na = groupe.value.excluDuCompte(nSt.note.im)
-        if (!na && !egr.estAnim) msg.value = $t('PNOm1')
-      } else {
-        const s = groupe.value.avcAuteurs()
-        if (!s.size && !egr.estAnim) msg.value = $t('PNOm2')
-      }
       mc0.value = note.value.mc0
       mc0ap.value = mc0.value
-      mc.value = note.value.mc
-      mcap.value = mc.value
+
+      /* mots clés du groupe éditables par le compte: 
+      - soit le compte est animateur
+      - soit quand il y a une exclusité, un des avatars du compte a l'exclusivité
+      - soit quand il n'y pas d'exclusité, un des avatars du compte est auteur
+      */
+      if (!egr.estAnim) {
+        if (note.value.im) { // il y a une exclusivité
+          // na de l'avatar DU COMPTE ayant l'exclusivité
+          const na = aSt.compte.naDeIdgIm(note.value.id, note.value.im)
+          if (!na) msg.value = $t('PNOm1')
+        } else {
+          // set des im des avatars du compte ayant droit d'écriture
+          const s = groupe.value.avcAuteurs()
+          if (!s.size) msg.value = $t('PNOm2')
+        }
+      }
     }
 
     return {
-      ui, session, nSt, gSt, pSt,
-      im, imna, avatar, groupe, note, msg, mapmc, mc, mcap,
+      session, nSt, gSt,
+      avatar, groupe, note, msg, mc, mcap, mc0, mc0ap,
       MD, dkli
     }
   }

@@ -1481,16 +1481,21 @@ export class ExcluNote extends OperationUI {
 /* Changer les mots clés d'une note ***********************
 args.token: éléments d'authentification du compte.
 args.id ids: identifiant de la note
-args.chg: Map de clé im et de value motsclés (Uint8Array)
+args.hgc: si mc perso d'une note de groupe, id dans la map mc
+args.mc: mots clés perso
+args.mc0: mots clés du groupe
 Retour: rien
 */
 export class McNote extends OperationUI {
   constructor () { super($t('OPmcn')) }
 
-  async run (id, ids, chg) {
+  async run (note, mc, mc0) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, ids, chg }
+      const args = { 
+        token: session.authToken, 
+        id: note.id, ids: note.ids, hgc: note.hgc, 
+        mc, mc0 }
       this.tr(await post(this, 'McNote', args))
       return this.finOK()
     } catch (e) {

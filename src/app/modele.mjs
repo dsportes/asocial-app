@@ -2139,8 +2139,6 @@ export class Note extends GenDoc {
       this.mc = row.mc || new Uint8Array([])
       this.smc = this.mc ? new Set(this.mc) : new Set()
     }
-    this.mc = this.deGroupe ? (row.mc ? decode(row.mc) : {}) : (row.mc || null)
-    this.hgc = !this.deGroupe ? 0 : hash(await crypter(session.clek, '' + this.id, 1))
     const x = decode(await decrypter(this.cle, row.txts))
     this.txt = ungzipB(x.t)
     this.titre = titre(this.txt)

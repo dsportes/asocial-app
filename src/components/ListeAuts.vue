@@ -1,13 +1,15 @@
 <template>
-  <div class='row q-gutter-xs titre-md'>
-    <div>{{$t('PNOauts', nSt.note.auts.length)}}</div>
-    <div v-for="m in nSt.mbAuteurs" :key="m.na.id"
-      class="bord cursor-pointer q-px-xs" @click="openCv(m.na.id)">
-      {{m.na.nomc}}
+  <div v-if="nb" class='row q-gutter-xs titre-md'>
+    <div>{{$t('PNOauts', nb)}}</div>
+    <div v-for="im in nSt.note.auts" :key="im">
+      <span class="bord cursor-pointer q-px-xs">
+        <span v-if="na(im)" class="cursor-pointer" @click="openCv(im)">{{na(im).nomc}}</span>
+        <span v-else>#{{im}}</span>
+      </span>
     </div>
 
     <q-dialog v-model="opencv" persistent>
-      <apercu-cv :id="id"/>
+      <apercu-cv :na="nax"/>
     </q-dialog>
   </div>
 </template>
@@ -25,28 +27,39 @@ export default {
 
   components: { ApercuCv },
 
-  computed: {  },
+  computed: {
+    nb () { return this.nSt.note.auts.length }
+   },
 
   data () {
     return {
-      id: 0
+      nax: null
     }
   },
 
   methods: {
-    openCv (id) {
-      this.id = id
+    na (im) {
+      const na = this.aSt.compte.naDeIdgIm(this.nSt.note.id, this.nSt.note.im)
+      if (na) return na
+      const m = this.gSt.getMembre(this.nSt.note.id, im)
+      return m ? m.na : null
+    },
+    openCv (im) {
+      this.nax = this.na(im)
       this.ovopencv()
     }
   },
 
   setup () {
     const nSt = stores.note
+    const gSt = stores.groupe
+    const aSt = stores.avatar
+
     const opencv = ref(false)
     function ovopencv () { MD.oD(opencv) }
 
     return {
-      opencv, ovopencv, MD, nSt
+      opencv, ovopencv, MD, nSt, gSt, aSt
     }
   }
 }

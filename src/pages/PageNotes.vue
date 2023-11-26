@@ -171,7 +171,7 @@
             :src="Array.from(nSt.note.smc)" du-compte
             :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
           <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
-          <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="edmc"/>
+          <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="ovnotemc"/>
         </div>
 
         <div v-if="selected && nSt.note && !rec && nSt.note.st === 99999999" class="q-mt-xs row justify-between titre-sm">  
@@ -435,14 +435,6 @@ export default {
       })
       if (!this.ims.length) return 7
       return 0
-    },
-
-    async edmc () {
-      if (! await this.session.edit()) return
-      this.ims = []
-      const g = this.nSt.node.type === 5 ? this.nSt.egr.groupe : null
-      if (g) this.ims = this.gSt.imNaStAvc(g.id)
-      this.ovnotemc()
     },
 
     async edexclu () {
