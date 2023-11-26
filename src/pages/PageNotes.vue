@@ -166,6 +166,8 @@
             @click="editer"/>
         </div>
 
+        <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
+
         <div v-if="selected && nSt.note && !rec" class="q-mt-xs row justify-between titre-sm">  
           <apercu-motscles class="col" v-if="nSt.note.smc" :mapmc="mapmcf(nSt.node.key)" 
             :src="Array.from(nSt.note.smc)" du-compte
@@ -196,16 +198,10 @@
         </div>
 
         <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
-          <div class="col">
-            <div>
-              <span class="q-mr-sm">{{exclu}}</span>
-              <span v-if="nSt.note.auts.length">
-                <liste-auts/>
-              </span>
-            </div>
-          </div>
+          <div v-if="nSt.mbExclu">{{$t('PNOexclu', [nSt.mbExclu.nom])}}</div>
+          <div v-else>{{$t('PNOnoexclu')}}</div>
           <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-            @click="edexclu"/>
+            @click="ovnoteexclu"/>
         </div>
 
         <div v-if="selected && !rec" class="q-my-xs row justify-center q-gutter-xs">
@@ -325,9 +321,17 @@ export default {
       return ''
     },
     rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <=5 },
-    exclu () {
+    exclu1 () {
       const m = this.nSt.mbExclu
       return !m ? this.$t('PNOnoexclu') : this.$t('PNOexclu', [m.na.nomc])
+    },
+    exclu () {
+      const n = this.nSt.note
+      if (!n || !n.im) return null
+      const na = this.aSt.compte(n.id, n.im)
+      if (na) return { avc: true, nom: na.nom }
+      const m = this.gSt.getMembre(n.id, n.im)
+      return { avc: false, nom: m ? m.na.nomc : '#' + n.im }
     },
     prot () {
       return this.nSt.note.p ? this.$t('PNOprot') : this.$t('PNOnoprot')
@@ -335,6 +339,11 @@ export default {
     temp () {
       const n = this.nSt.nbjTemp
       return this.$t('PNOtemp', n, { count: n })
+    },
+    nomex () { 
+      if (!this.note.im) return ''
+      const m = this.gSt.getMembre(this.note.id, this.note.im)
+      return m ? m.na.nomc : '#' + this.note.im
     }
   },
 
@@ -435,32 +444,6 @@ export default {
       })
       if (!this.ims.length) return 7
       return 0
-    },
-
-    async edexclu () {
-      if (! await this.session.edit()) return
-      const er = this.erExclu()
-      if (er) { 
-        await afficherDiag(this.$t('PNOer' + er ))
-      } else {
-        this.ovnoteexclu()
-      }
-    },
-
-    erExclu () {
-      const g = this.nSt.egr.groupe
-      /* Map par im des { na, st, avc } des membres du groupe, avc ou auteur-animateur */
-      this.ims = this.gSt.imNaStMb(g.id)
-      const im = this.nSt.note.im
-      if (im) { // le membre ayant l'exclu actuel est-il avc ?
-        const e = this.ims.get(im)
-        if (e && e.avc) return 0
-      }
-      // un des avc est-il animateur ?
-      for(const [,e] of this.ims) { 
-        if (e.st === 32 && e.avc) return 0
-      }
-      return 9
     },
 
     async edTemp () {

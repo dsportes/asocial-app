@@ -12,43 +12,59 @@
         @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="ednom" inset
-      class="full-width bg-secondary text-white">
-      <q-toolbar-title class="text-italic titre-md text-center">{{$t('PNOexc', [ednom])}}</q-toolbar-title>
+    <q-toolbar v-if="session.editDiag" inset class="full-width bg-secondary text-white">
+      <div class='q-ma-sm q-pa-sm text-center text-bold titre-md bg-yellow-5 text-warning'>
+        {{session.editDiag}}
+      </div>
+    </q-toolbar>
+    <q-toolbar v-if="nSt.mbExclu" inset class="full-width bg-secondary text-white">
+      <q-toolbar-title class="text-italic titre-md text-center">
+        {{$t('PNOexclu' + (nSt.mbExclu.avc ? 1 : 2), [nSt.mbExclu.nom])}}
+        </q-toolbar-title>
     </q-toolbar>
   </q-header>
 
   <q-page-container >
     <q-page class="q-pa-xs">
-      <div class="titre-lg text-italic text-center">{{$t('PNOlex')}}</div>
-      <div class="sp30 q-mt-sm scroll" style="height:40vh">
-        <div v-for="(e, idx) in lst" :key="idx" 
-          :class="dkli(idx) + ' q-mt-xs row cursor-pointer bord' + (e.im === imap ? '2' : '1')"
-          @click="selmb(e)">
-          <div class="col-8">{{e.nom}}</div>
-          <div class="col-4">{{aa(e.st)}}</div>
-        </div>
-      </div>
-      <!--   props: { 
-      na: Object, // na de la persone (people, avatar) ou du groupe 
-      ids: Number, // pour un "membre" ids (indice) du membre à afficher
-      cv: Object, // carte de visite
-      estAvc: Boolean, // true si c'est un avatar du compte
-      cvchangee: Function, // fonction d'enregistrement de la CV quand elle a été éditée
-      detailPeople: Boolean, // bouton d'affichage du détail du people
-      idx: Number
-      -->
-      <q-separator color="orange" class="q-mt-sm"/>
-      <div v-if="nSt.note.auts.length" class="col-auto q-mt-sm">
-        <liste-auts/>
+      <liste-auts class="q-my-sm"/>
+
+      <div v-if="nSt.mbExclu && nSt.mbExclu.avc">
+        <q-btn dense size="sm" color="primary" icon="close" :label="$t('PNOperdre')"
+          @click="perdre"/>
       </div>
 
-      <q-btn :disable="!im && !imap" flat class="q-my-sm" color="warning" 
-        :label="$t('PNOexsuppr')" @click="suppr"/>
-      <apercu-genx class="q-my-md" v-if="c && c.cv" :na="c.na" :cv="c.cv" :est-avc="c.avc"/>
-      <div v-if="c && !c.cv" class="q-my-md titre-md text-italic">{{$t('PNOnocv', [c.nom])}}</div>
-      <div><q-btn class="q-my-sm" size="md" no-caps dense color="primary" 
-        :label="$t('CVraf')" @click="rafCvs"/></div>
+      <div v-if="!amb" class="q-my-md q-pa-xs text-bold text-negative bg-yellow-5">
+        {{$t('PNOamb')}}</div>
+
+      <div v-else>
+        <div class="titre-lg text-italic text-center">{{$t('PNOlex')}}</div>
+        <div class="sp30 q-mt-sm scroll" style="height:40vh">
+          <div v-for="(e, idx) in lst" :key="idx" 
+            :class="dkli(idx) + ' q-mt-xs row cursor-pointer bord' + (e.im === imap ? '2' : '1')"
+            @click="selmb(e)">
+            <div class="col-8">{{e.nom}}</div>
+            <div class="col-4">{{aa(e.st)}}</div>
+          </div>
+        </div>
+
+        <q-separator color="orange" class="q-mt-sm"/>
+
+        <!--   props: { 
+        na: Object, // na de la persone (people, avatar) ou du groupe 
+        ids: Number, // pour un "membre" ids (indice) du membre à afficher
+        cv: Object, // carte de visite
+        estAvc: Boolean, // true si c'est un avatar du compte
+        cvchangee: Function, // fonction d'enregistrement de la CV quand elle a été éditée
+        detailPeople: Boolean, // bouton d'affichage du détail du people
+        idx: Number
+        -->
+        <q-btn :disable="!im && !imap" flat class="q-my-sm" color="warning" 
+          :label="$t('PNOexsuppr')" @click="suppr"/>
+        <apercu-genx class="q-my-md" v-if="c && c.cv" :na="c.na" :cv="c.cv" :est-avc="c.avc"/>
+        <div v-if="c && !c.cv" class="q-my-md titre-md text-italic">{{$t('PNOnocv', [c.nom])}}</div>
+        <div><q-btn class="q-my-sm" size="md" no-caps dense color="primary" 
+          :label="$t('CVraf')" @click="rafCvs"/></div>
+      </div>
 
     </q-page>
   </q-page-container>
@@ -75,7 +91,8 @@ export default {
   props: { ims: Object },
 
   computed: {
-    modifie () { return this.im !== this.imap }
+    modifie () { return this.im !== this.imap },
+    amb () { return this.gSt.ambano[0] }
   },
 
   watch: {
@@ -107,6 +124,9 @@ export default {
     async rafCvs () {
       const [nt, nr] = await new RafraichirCvs().run(this.groupe.id)
       stores.ui.afficherMessage(this.$t('CVraf2', [nr, nt - nr]), false)
+    },
+    async perdre () {
+
     }
   },
 
@@ -123,6 +143,9 @@ export default {
     const aSt = stores.avatar
     const pSt = stores.people
 
+    // SI un des vatars de mon compte a l'exclusité
+    const monna = ref(aSt.compte.naDeIdgIm(nSt.id, nSt.ids))
+
     /* Map par im des { na, st, avc } des membres du groupe, avc ou auteur-animateur */
     const ims = toRef(props, 'ims')
     const im = ref(nSt.note.im)
@@ -136,6 +159,7 @@ export default {
     }
 
     const lst = []
+
     ims.value.forEach((e, ids) => {
       const x = { ...e }
       x.im = ids
@@ -156,7 +180,7 @@ export default {
     })
 
     return {
-      ui, session, nSt, gSt, pSt, cv,
+      ui, session, nSt, gSt, pSt, cv, monna,
       im, imap, ednom, groupe, lst, c,
       MD, dkli
     }

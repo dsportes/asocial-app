@@ -54,11 +54,16 @@ export const useNoteStore = defineStore('note', {
       return n && n.ref ? state.map.get(n.refk) : null
     },
 
+    // retourne { avc: true/false, nom } ou null si pas exclu
     mbExclu: (state) => {
       const n = state.note
       if (!n || !n.im) return null
+      const aSt = stores.avatar
+      const na = aSt.compte(n.id, n.im)
+      if (na) return { avc: true, nom: na.nom }
       const gSt = stores.groupe
-      return gSt.getMembre(n.id, n.im)
+      const m = gSt.getMembre(n.id, n.im)
+      return { avc: false, nom: m ? m.na.nomc : '#' + n.im }
     },
 
     nbjTemp: (state) => {

@@ -17,8 +17,10 @@
         {{session.editDiag}}
       </div>
     </q-toolbar>
-    <q-toolbar v-if="nomex" inset class="full-width bg-secondary text-white">
-      <q-toolbar-title class="text-italic titre-md text-center">{{$t('PNOexc', [nomex])}}</q-toolbar-title>
+    <q-toolbar v-if="nSt.mbExclu" inset class="full-width bg-secondary text-white">
+      <q-toolbar-title class="text-italic titre-md text-center">
+        {{$t('PNOexclu' + (nSt.mbExclu.avc ? 1 : 2), [nSt.mbExclu.nom])}}
+        </q-toolbar-title>
     </q-toolbar>
   </q-header>
 

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="nb" class='row q-gutter-xs titre-md'>
+  <div v-if="nb" class='row q-gutter-xs titre-sm'>
     <div>{{$t('PNOauts', nb)}}</div>
     <div v-for="im in nSt.note.auts" :key="im">
       <span class="bord cursor-pointer q-px-xs">

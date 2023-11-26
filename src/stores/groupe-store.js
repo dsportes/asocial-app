@@ -310,6 +310,14 @@ export const useGroupeStore = defineStore('groupe', {
       return t
     },
 
+    // Note Exclu : liste des membres aptes à recevoir l'exclusivité
+    nexLm (state) {
+      const t = []
+      state.grC.membres.forEach(m => {
+
+      })
+    }
+
   },
 
   actions: {
