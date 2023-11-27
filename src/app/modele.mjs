@@ -1238,7 +1238,6 @@ export class Avatar extends GenDoc {
     - `im`: indice du membre dans la table `ast` du groupe.
     - `id` : id de l'avatar.
   */
-
   naDeIdgIm (idg, im) {
     for (const [npgk, e] of this.mpg) {
       if (e.ng.id === idg && e.im === im) return getNg(e.id)

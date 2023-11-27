@@ -34,6 +34,12 @@ export const useGroupeStore = defineStore('groupe', {
       return state.egrC ? stores.avatar.compte.ambano(state.egrC.groupe) : [false, false]
     },
 
+    amb: (state) => { return (id) => { 
+        const e = state.map.get(id)
+        return e ? stores.avatar.compte.ambano(e.groupe)[0] : false
+      }
+    },
+
     egr: (state) => { return (id) => { 
         return state.map.get(id)
       }
@@ -308,19 +314,21 @@ export const useGroupeStore = defineStore('groupe', {
       const e = state.map.get(stores.session.groupeId)
       if (e) e.membres.forEach(m => { if (!m.estAc) t.push(m) })
       return t
-    },
-
-    // Note Exclu : liste des membres aptes à recevoir l'exclusivité
-    nexLm (state) {
-      const t = []
-      state.grC.membres.forEach(m => {
-
-      })
     }
-
   },
 
   actions: {
+    // Note Exclu : liste des membres aptes à recevoir l'exclusivité
+    nexLm (idg) {
+      const t = []
+      const e = this.egr(idg)
+      const g = e.groupe
+      e.membres.forEach(m => {
+        if (g.estAuteur(m.ids)) { t.push({im: m.ids, na: m.na})}
+      })
+      return t
+    },
+    
     /* Sert à pouvoir attacher un écouteur pour détecter les changements de mc */
     setMotscles (id, mc) {
     },

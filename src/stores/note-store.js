@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { AMJ, ID } from '../app/api.mjs'
 import { Note } from '../app/modele.mjs'
 import stores from './stores.mjs'
-import { splitPK } from '../app/util.mjs'
+import { splitPK, $t } from '../app/util.mjs'
 
 export const useNoteStore = defineStore('note', {
   state: () => ({
@@ -54,16 +54,24 @@ export const useNoteStore = defineStore('note', {
       return n && n.ref ? state.map.get(n.refk) : null
     },
 
-    // retourne { avc: true/false, nom } ou null si pas exclu
+    // retourne { avc: true/false, nom } ou null s'il n'y a pas d'exclusivité
     mbExclu: (state) => {
       const n = state.note
+      let x
       if (!n || !n.im) return null
       const aSt = stores.avatar
-      const na = aSt.compte(n.id, n.im)
-      if (na) return { avc: true, nom: na.nom }
-      const gSt = stores.groupe
-      const m = gSt.getMembre(n.id, n.im)
-      return { avc: false, nom: m ? m.na.nomc : '#' + n.im }
+      let na = aSt.compte.naDeIdgIm(n.id, n.im)
+      if (na) {
+        x = { avc: true, na: na, nom: $t('moi2', [na.nom]), im: n.im }
+      } else {
+        const gSt = stores.groupe
+        const m = gSt.getMembre(n.id, n.im)
+        if (m) {
+          na = m.na
+          x = { avc: false, im: n.im, na: na, nom: m.na.nomc }
+        } else x = { avc: false, im: n.im, nom: '#' + n.im }
+      }
+      return x
     },
 
     nbjTemp: (state) => {
