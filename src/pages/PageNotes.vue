@@ -31,23 +31,19 @@
     </q-dialog>
 
     <q-dialog v-model="noteedit" persistent full-height>
-      <note-edit :ims="ims"/>
+      <note-edit/>
     </q-dialog>
 
     <q-dialog v-model="noteexclu" persistent full-height>
-      <note-exclu :ims="ims"/>
+      <note-exclu/>
     </q-dialog>
 
     <q-dialog v-model="notemc" persistent full-height>
-      <note-mc :ims="ims"/>
+      <note-mc/>
     </q-dialog>
 
     <q-dialog v-model="notefichier" persistent full-height>
       <note-fichier :ro="ro"/>
-    </q-dialog>
-
-    <q-dialog v-model="notetemp" persistent>
-      <note-temp/>
     </q-dialog>
 
     <q-dialog v-model="noteprot" persistent>
@@ -163,7 +159,7 @@
           <show-html :class="dkli(0) + ' col bord1'"
             :texte="nSt.note.txt" zoom maxh="4rem" />
           <q-btn :disable="rec!==0" class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
-            @click="editer"/>
+            @click="ovnoteedit"/>
         </div>
 
         <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
@@ -176,7 +172,7 @@
           <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="ovnotemc"/>
         </div>
 
-        <div v-if="selected && nSt.note && !rec && nSt.note.st === 99999999" class="q-mt-xs row justify-between titre-sm">  
+        <div v-if="selected && nSt.note && !rec" class="q-mt-xs row justify-between titre-sm">  
           <div class="col">
             <span>{{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}</span>
             <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
@@ -189,12 +185,6 @@
           <div class="col">{{prot}}</div>
           <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
             @click="proteger"/>
-        </div>
-
-        <div v-if="selected && nSt.note && !rec && nSt.note.st !== 99999999" class="q-mt-xs row justify-between titre-sm">  
-          <div class="col">{{temp}}</div>
-          <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-            @click="edTemp"/>
         </div>
 
         <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
@@ -263,7 +253,6 @@ import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, AMJ, nomFichier, appexc } from '../app/api.mjs'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
-import NoteTemp from '../dialogues/NoteTemp.vue'
 import NoteProt from '../dialogues/NoteProt.vue'
 import NoteExclu from '../dialogues/NoteExclu.vue'
 import NoteMc from '../dialogues/NoteMc.vue'
@@ -294,7 +283,7 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteTemp, NoteProt, NoteMc,
+  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteProt, NoteMc,
     NoteExclu, NoteFichier, BoutonConfirm, BoutonHelp, ListeAuts },
 
   computed: {
@@ -414,48 +403,6 @@ export default {
       await new SupprNote().run(n.id, n.ids, idc)
     },
 
-    async editer () {
-      if (! await this.session.edit()) return
-      const er = this.erEdit()
-      if (er) { 
-        await afficherDiag(this.$t('PNOer' + er ))
-      } else {
-        this.ovnoteedit()
-      }
-    },
-
-    erEdit () {
-      if (this.nSt.node.type === 3) return 1
-      const g = this.nSt.node.type === 5 ? this.nSt.egr.groupe : null
-      if (!g) return 0
-      // note de groupe
-      if (g.pe === 1) return 4
-      // Map par im des { na, st } des avc membres du groupes
-      const ims = this.gSt.imNaStAvc(g.id)
-      const im = this.nSt.note.im
-      if (im) { // le membre ayant l'exclu actuel est-il avc ?
-        const e = ims.get(im)
-        if (e) { this.ims = [{ label: e.na.nom, value: im }]; return 0 }
-        return 8 // un autre membre a l'exclusivité, édition impossible
-      }
-      this.ims = []
-      ims.forEach((e, im) => { 
-        if (e.st === 31 || e.st === 32) this.ims.push({ label: e.na.nom, value: im})
-      })
-      if (!this.ims.length) return 7
-      return 0
-    },
-
-    async edTemp () {
-      if (! await this.session.edit()) return
-      const er = this.erEdit()
-      if (er) { 
-        await afficherDiag(this.$t('PNOer' + er ))
-      } else {
-        this.ovnotetemp()
-      }
-    },
-
     async proteger () {
       if (! await this.session.edit()) return
       const er = this.erEdit()
@@ -482,7 +429,7 @@ export default {
       // note de groupe
       if (g.pe === 1) return 4 // groupe protégée contre l'écriture
       // Map par im des { na, st } des avc membres du groupes
-      const ims = this.gSt.imNaStAvc(g.id)
+      // !!!!!!!!!!!!!!!!!! const ims = this.gSt.imNaStAvc(g.id)
       const im = this.nSt.note.im
       if (im) { // le membre ayant l'exclu actuel est-il avc ?
         const e = ims.get(im)
@@ -618,9 +565,6 @@ export default {
       expandAll: false,
       rec: 0, // rattachement en cours
       noderatt: null,
-      /* pour maj d'une note de groupe 
-      [{label: e.nom, value: im}] des avc membres du groupes  */
-      ims: null,
       ro: 0, // code de la raison pour laquelle la note est en lecture seulement
       nas: [], // test : liste des na des avatars
       ngs: [] // test : liste des na des groupes
@@ -904,8 +848,6 @@ export default {
     function ovnoteedit () { MD.oD(noteedit) }
     const confirmsuppr = ref(false)
     function ovconfirmsuppr () { MD.oD(confirmsuppr)}
-    const notetemp = ref(false)
-    function ovnotetemp () { MD.oD(notetemp)}
     const noteexclu = ref(false)
     function ovnoteexclu () { MD.oD(noteexclu)}
     const noteprot = ref(false)
@@ -919,7 +861,7 @@ export default {
 
     return {
       notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
-      notetemp, ovnotetemp, noteprot, ovnoteprot, noteexclu, ovnoteexclu,
+      noteprot, ovnoteprot, noteexclu, ovnoteexclu,
       notemc, ovnotemc, notefichier, ovnotefichier, dldialogue, ovdldialogue,
       MD, dhcool, now, filtrage, edvol,
       ID, session, nSt, aSt, gSt,

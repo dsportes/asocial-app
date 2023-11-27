@@ -16,12 +16,10 @@
         :disable="step !== 3" @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="groupe" inset
-      class="full-width bg-secondary text-white">
+    <q-toolbar v-if="groupe" inset class="full-width bg-secondary text-white">
       <q-toolbar-title class="text-italic titre-md text-center">{{$t('PNOecr', [naAut.nom])}}</q-toolbar-title>
     </q-toolbar>
-    <q-toolbar v-if="avatar && type === 2" inset
-      class="full-width bg-secondary text-white">
+    <q-toolbar v-if="avatar && type === 2" inset class="full-width bg-secondary text-white">
       <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
       <q-toolbar-title class="text-italic text-bold titre-md">{{$t('PNOracgr', [grP.na.nomc])}}</q-toolbar-title>
     </q-toolbar>
@@ -51,24 +49,12 @@
       </div>
 
       <div v-if="!er && step === 1" class="q-mt-lg q-pa-sm lg1 maauto bord2">
-        <div v-if="la.length === 1" class="titre-lg">{{$t('PNOaut1', [naAut.nom])}}</div>
-        <div v-else class="titre-md">
-          <q-btn no-caps flat :label="$t('PNOaut1', [naAut.nom])" icon-right="expand_more">
-            <q-menu anchor="bottom left" self="top left" max-height="10rem" 
-              max-width="20rem">
-              <q-list class="bg-secondary text-white">
-                <q-item v-for="na in la" :key="na.id" clickable 
-                  v-close-popup @click="selNa(na)">
-                  <span class="fs-md">{{na.nom}}</span>
-                </q-item>
-              </q-list>
-            </q-menu>
-          </q-btn>
-        </div>
+        <note-ecritepar @ok="selNa"/>
         <div class="q-my-sm column q-gutter-xs">
           <q-btn icon="check" no-caps :label="$t('PNOngr', [grP.na.nomc])"
-            @click="selGr" color="primary"/>
-          <q-btn icon="check" no-caps :label="$t('PNOnper', [naAut.nom])"
+            :disable="!grOK" :color="!grOK? 'grey-5' : 'primary'"
+            @click="selGr"/>
+          <q-btn icon="check" no-caps :label="$t('PNOnper', [naAut ? naAut.nom : '???'])"
             @click="selAv" color="primary"/>
         </div>
       </div>
@@ -78,16 +64,6 @@
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
         <q-separator color="orange" class="q-mt-sm"/>
 
-        <div class="col-auto q-pa-xs row items-start">
-          <div class="col-6 titre-md" >
-            <bouton-undo :cond="temp.value!==99999999" @click="temp=options[0]"/>
-            <span>{{temp.value === 99999999 ? $t('PNOperm') : $t('PNOtemp', temp.value, { count: temp.value })}}</span>
-          </div>
-          <q-select class="col-6 mh titre-md" :label="$t('PNOtp')" v-model="temp" :options="options"
-            transition-show="scale" transition-hide="scale" filled
-            bg-color="secondary" color="white" />
-        </div>
-          
         <div class="col-auto q-mt-sm row">
           <bouton-undo :cond="prot===true" @click="prot=false"/>
           <q-toggle class=" titre-md" v-model="prot" :label="$t('PNOpr')" />
@@ -111,20 +87,20 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEV1 } from '../app/api.mjs'
 import { MD, getNg } from '../app/modele.mjs'
-import { $t, splitPK, dkli } from '../app/util.mjs'
+import { splitPK, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { NouvelleNote } from '../app/operations.mjs'
+import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
 
 export default {
   name: 'NoteNouvelle',
 
-  components: { BoutonHelp, BoutonUndo, EditeurMd },
+  components: { BoutonHelp, BoutonUndo, EditeurMd, NoteEcritepar },
 
   computed: {
-    modifie () { return this.texte !== '' || (this.temp.value !== 99999999) ||
-      this.prot || this.exclu }
+    modifie () { return this.texte !== '' || this.exclu }
   },
 
   watch: {
@@ -134,6 +110,7 @@ export default {
   methods: {
     selNa (na) {
       this.naAut = na
+      this.grAut(na.id)
     },
 
     selAv () {
@@ -176,17 +153,16 @@ export default {
       }
 
       const key = await new NouvelleNote()
-        .run(id, this.texte, im, this.temp.value, this.prot, this.exclu, ref, idc)
+        .run(id, this.texte, im, this.prot, this.exclu, ref, idc)
       MD.fD()
     }
   },
 
   data () {
     return {
-      temp: this.options[0], //permanent ou temporaire- nbj temp
       texte: '',
-      prot: false,
-      exclu: false
+      exclu: false,
+      prot: false
     }
   },
 
@@ -206,8 +182,6 @@ export default {
     const groupe = ref(null)
     const mb = ref(null)
     const step = ref(0)
-    const la = ref(aSt.naAvatars)
-    const naAut = ref(getNg(session.avatarId))
 
     const { id, ids } = splitPK(nSt.node.key)
     const idp = ref(id) // id du parent - racine si ids = 0 - GROUPE ou AVATAR
@@ -222,15 +196,17 @@ export default {
       }
     }
 
-    const options = [
-      { label: $t('permanent'), value: 99999999 },
-      { label: $t('temp1'), value: 1 },
-      { label: $t('temp7'), value: 7 },
-      { label: $t('temp14'), value: 14 },
-      { label: $t('temp30'), value: 30 },
-      { label: $t('temp60'), value: 60 },
-      { label: $t('temp90'), value: 90 }
-    ]
+    const naAut = ref()
+    const grOK = ref(false)
+    const rack = parseInt(nSt.node.rkey)
+    const grRac = ref(ID.estGroupe(rack) ? gSt.egr(rack).groupe : null) 
+
+    function grAut (ida) {
+      const g = grRac.value
+      if (!g) { grOK.value = false; return }
+      const img = aSt.compte.imGA(g.id, ida)
+      grOK.value = g.estAuteur(img)
+    }
 
     function autStep (ap) {
       if (ap !== 2) return
@@ -238,13 +214,15 @@ export default {
       if (!g) { // note d'avatar
         if (aSt.exV1) { er.value = 3; return } // excédent v1 / q1
       } else { // note de groupe
-        if (g.pe === 1) { er.value = 4; return }
+        grAut(naAut.value.id)
         if (!g.imh) { er.value = 5; return }
         const eg = gSt.egr(g.id)
         if (eg.objv.vols.v1 >= eg.objv.vols.q1 * UNITEV1) { er.value = 6; return }
+        /*
         mb.value = gSt.membreDeId(eg, this.naAut.id)
         if (!mb.value) { er.value = 7; return }
         if (!g.estAuteur(mb.value.ids)) { er.value = 7; return }
+        */
       }
       step.value = 3
     }
@@ -290,8 +268,8 @@ export default {
     autStep(step.value)
 
     return {
-      ui, session, nSt, aSt, gSt, cfg, options,
-      er, erd, la, naAut, type, step, idp, idsp, grP, avP,
+      ui, session, nSt, aSt, gSt, cfg,
+      er, erd, naAut, type, step, idp, idsp, grP, avP, grRac, grOK, grAut,
       auteur, avatar, groupe, mb,
       MD, autStep, dkli
     }

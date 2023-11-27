@@ -32,7 +32,6 @@
       </div>
       <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
 
-
       <div v-if="!amb" class="q-my-md q-pa-xs text-bold text-negative bg-yellow-5">
         {{$t('PNOamb')}}</div>
 

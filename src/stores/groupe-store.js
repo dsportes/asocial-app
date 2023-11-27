@@ -192,7 +192,7 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
   
-    /* Map par im des { na, st } des avc membres du groupe */
+    /* Map par im des { na, st } des avc membres du groupe 
     imNaStAvc: (state) => { return (id) => {
         const r = new Map()
         const e = state.map.get(id)
@@ -203,6 +203,7 @@ export const useGroupeStore = defineStore('groupe', {
         return r
       }
     },
+    */
 
     /* Return le na du membre im du groupe id */
     imNa: (state) => { return (id, im) => {

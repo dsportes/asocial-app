@@ -1342,17 +1342,15 @@ export class NouvelleNote extends OperationUI {
   id: groupe ou avatar
   txt: texte de la note
   im: indice du membre auteur
-  nbj: durée de vie si la note est temporaire, 0 pour une permanente
-  p: true si la note est protégée en écriture
   exclu: pour un groupe true si im a demandé un e exclusivité d'auteur
   ref: référence de la note parent [rid, rids, rnom]
   idh: id du compte de l'auteur ou de l'hébergeur pour une note de groupe
   */
-  async run (id, txt, im, nbj, p, exclu, ref, idc) {
+  async run (id, txt, im, p, exclu, ref, idc) {
     try {
       const session = stores.session
 
-      const rowNote = await Note.toRowNouveau(id, txt, im, nbj, p, exclu, ref)
+      const rowNote = await Note.toRowNouveau(id, txt, im, p, exclu, ref)
       const args = { token: session.authToken, rowNote : rowNote, idc }
       this.tr(await post(this, 'NouvelleNote', args))
       return this.finOK((rowNote.id + '/' + rowNote.ids))
@@ -1389,7 +1387,6 @@ export class SupprNote extends OperationUI {
 args.token: éléments d'authentification du compte.
 args.id ids: identifiant de la note (dont celle du groupe pour un note de groupe)
 args.txts : nouveau texte encrypté
-args.v1 : volume du texte de la note
 args.prot : protégé en écriture
 args.idc : compta à qui imputer le volume
   - pour une note personelle, id du compte de l'avatar
@@ -1402,10 +1399,9 @@ export class MajNote extends OperationUI {
   async run (id, ids, im, auts, texte, prot, idc) {
     try {
       const session = stores.session
-      const v1 = texte.length
       const cle = Note.clen(id)
       const txts = await Note.toRowTxt(cle, texte, im, auts)
-      const args = { token: session.authToken, id, ids, txts, v1, prot, idc }
+      const args = { token: session.authToken, id, ids, txts, prot, idc }
       this.tr(await post(this, 'MajNote', args))
       return this.finOK()
     } catch (e) {

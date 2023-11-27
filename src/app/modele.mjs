@@ -2062,9 +2062,6 @@ _data_:
 - `ids` : identifiant relatif à son avatar.
 - `v` : 1..N.
 
-- `st` :
-  - `99999999` pour un _permanent_.
-  - `aaaammjj` date limite de validité pour un _temporaire_.
 - `im` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `ids`. 
 - `p` : _0: pas protégé, 1: protégé en écriture_.
 - `v2` : volume total des fichiers attachés.
@@ -2107,7 +2104,6 @@ export class Note extends GenDoc {
 
   get cle () { return Note.clen(this.id)}
   get ng () { return getNg(this.id) }
-  get nbj () { return this.st <= 0 || this.st === 99999999 ? 0 : AMJ.diff(this.st, AMJ.amjUtc()) }
   get key () { return this.id + '/' + this.ids }
   get rkey () { return '' + this.id }
   get refk () { return this.ref ? (this.ref[0] + (this.ref[1] ? '/' + this.ref[1] : ''))  : ''}
@@ -2122,7 +2118,6 @@ export class Note extends GenDoc {
 
   async compile (row) {
     const session = stores.session
-    this.st = row.st || 99999999
     this.im = row.im || 0
     this.p = row.p || 0
     this.v2 = row.v2 || 0
@@ -2158,11 +2153,6 @@ export class Note extends GenDoc {
     }
   }
 
-  excluDuCompte (im) {
-    const aSt = stores.avatar
-    return aSt.compte.naDeIdgIm(im)
-  }
-
   /*
   initTest (id, ids, ref, txt, dh, v1, v2) { // pour les tests
     this.id = id
@@ -2196,13 +2186,12 @@ export class Note extends GenDoc {
   }
   */
 
-  static async toRowNouveau (id, txt, im, nbj, p, exclu, ref) {
+  static async toRowNouveau (id, txt, im, p, exclu, ref) {
     const session = stores.session
     const cle = Note.clen(id)
     const r = { id, ids: rnd6(), p: p ? 1 : 0, im: exclu ? im : 0, v2 : 0, mc: null }
     r.txts = await Note.toRowTxt(cle, txt, im)
     r.ref = await Note.toRowRef(cle, ref)
-    r.st = nbj === 99999999 ? 0 : AMJ.amjUtcPlusNbj(session.dateJourConnx, nbj)
     const _data_ = encode(r)
     return { _nom: 'notes', id, ids: r.ids, _data_ }
   }

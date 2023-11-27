@@ -1000,11 +1000,10 @@ export default {
   PNOer2: 'Il n\'est pas possible de rattacher une nouvelle note à une note inaccessible ou qui n\'existe plus.' +
     '<br><i>{0}</i>',
   PNOer3: 'Il n\'est pas possible d\'ajouter une nouvelle note tant que le volume total des textes des notes excède le quota attribué au compte.',
-  PNOer4: 'Le groupe est protégé contre les mises à jour, ajouts et destruction de notes.',
   PNOer5: 'Le groupe n\'a plus de membre qui l\'héberge : l\'ajout de notes et leurs mises à jour en augmentation de volume sont bloquées',
   PNOer6: 'Le volume des notes du groupe excède déjà le maximum autosisé par son compte hébergeur : l\'ajout de notes et leurs mises à jour en augmentation de volume sont bloquées',
   PNOer7: 'Il faut être membre actif avec accès en écriture aux notes pour pouvoir ajouter de nouvelles notes ou mettre à jour ou supprimer celles existantes.',
-  PNOer8: 'La note a une exclusivité d\'écritue pour un membre : lui seul peut la mettre à jour ou la détruire.',
+  PNOer8: 'La note a une exclusivité d\'écriture pour un membre : seuls un animateur ou ce membre peuvent la mettre à jour ou la détruire.',
   PNOer9: 'Pour changer l\'attribution de l\'exclusivité d\'écriture, il faut, soit l\'avoir soi-même, soit être animateur du groupe.',
 
   PNOro1: 'La session est en mode "avion", aucune mise à jour possible.',
@@ -1034,9 +1033,10 @@ export default {
   PNOexc: 'exclusivité d\'écriture actuelle attribuée à {0}',
   PNOext1: 'Aucune exclusivité d\'écriture attribuée actuellement.',
   PNOext2: 'Exclusivité d\'écriture attribuée actuellement:',
+  PNOexb1: 'Je m\'attribue l\'exclusivité d\'écriture sur cette note.',
   PNOexaut: 'Pour transmettre une exclusivité d\'écriture il faut, soit l\'avoir soi-même, soit être animateur.',
   PNOracgr: 'attachée à la racine du groupe "{0}"',
-  PNOtp: 'Durée de vie de la note',
+
   PNOpr: 'Protéger la note contre l\'écriture',
   PNOexclu1: 'Mon avatar {0} a l\'exclusité d\'écriture de cette note.',
   PNOexclu2: 'L\'avatar {0} a l\'exclusité d\'écriture de cette note.',
