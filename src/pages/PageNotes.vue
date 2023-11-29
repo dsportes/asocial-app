@@ -50,15 +50,8 @@
       <note-prot/>
     </q-dialog>
 
-    <q-dialog v-model="confirmsuppr" persistent>
-      <q-card class="bs largeur30 q-pa-sm">
-        <div class="q-mt-md titre-lg text-italic">{{$t('PNOcfsuppr')}}</div>
-        <div v-if="nSt.note" class="q-mt-sm fs-md q-ml-md">{{nSt.note.titre}}</div>
-        <div class="q-mt-md row justify-center q-gutter-md">
-          <q-btn class="q-pa-xs" size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-          <bouton-confirm actif :confirmer="supprNote"/>
-        </div>
-      </q-card>
+    <q-dialog v-model="confirme" persistent>
+      <note-confirme :op="op"/>
     </q-dialog>
 
     <q-dialog v-model="dldialogue" persistent>
@@ -158,7 +151,8 @@
         <div v-if="selected && nSt.note" class="q-ml-md row justify-between"> 
           <show-html :class="dkli(0) + ' col bord1'"
             :texte="nSt.note.txt" zoom maxh="4rem" />
-          <q-btn :disable="rec!==0" class="col-auto q-ml-xs btn4" color="primary" size="sm" icon="edit" 
+          <q-btn :disable="rec!==0 || (nSt.note.p===1)" class="col-auto q-ml-xs btn4" 
+            :color="nSt.note.p ? 'grey-5' : 'primary'" size="sm" icon="edit" 
             @click="ovnoteedit"/>
         </div>
 
@@ -181,12 +175,6 @@
             @click="voirfic"/>
         </div>
 
-        <div v-if="selected && nSt.note && !rec" class="q-mt-xs row justify-between titre-sm">  
-          <div class="col">{{prot}}</div>
-          <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-            @click="proteger"/>
-        </div>
-
         <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
           <div v-if="nSt.mbExclu">{{$t('PNOexclu', [nSt.mbExclu.nom])}}</div>
           <div v-else>{{$t('PNOnoexclu')}}</div>
@@ -197,8 +185,14 @@
         <div v-if="selected && !rec" class="q-my-xs row justify-center q-gutter-xs">
           <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
             @click="nouvelle"/>
+          <q-btn v-if="nSt.note && !nSt.note.p" class="btn2" color="primary" size="md" icon="edit_off" :label="$t('PNOarch')"
+            @click="op='arch';ovconfirme()"/>
+          <q-btn v-if="nSt.note && nSt.note.p" class="btn2" color="primary" size="md" icon="edit" :label="$t('PNOreact')"
+            @click="op='react';ovconfirme()"/>
           <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
-            @click="supprimer" :disable="!nSt.note"/>
+            @click="op='suppr';ovconfirme()" :disable="!nSt.note"/>
+          <q-btn class="btn2" color="primary" size="md" icon="edit" :label="$t('PNOsupp')"
+            @click="op='arch';ovconfirme()" :disable="!nSt.note"/>
           <q-btn :disable="!nSt.note || !rattaut" 
             class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
             @click="rattacher"/>
@@ -251,16 +245,16 @@ import { $t, u8ToB64, dhcool, difference, intersection, splitPK, edvol, afficher
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, AMJ, nomFichier, appexc } from '../app/api.mjs'
+import NoteConfirme from '../dialogues/NoteConfirme.vue'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
 import NoteProt from '../dialogues/NoteProt.vue'
 import NoteExclu from '../dialogues/NoteExclu.vue'
 import NoteMc from '../dialogues/NoteMc.vue'
 import NoteFichier from '../dialogues/NoteFichier.vue'
-import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ListeAuts from '../components/ListeAuts.vue'
-import { SupprNote, RattNote } from '../app/operations.mjs'
+import { RattNote } from '../app/operations.mjs'
 import { putData, getData } from '../app/net.mjs'
 import { dkli } from '../app/util.mjs'
 
@@ -284,7 +278,7 @@ export default {
   name: 'PageNotes',
 
   components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteProt, NoteMc,
-    NoteExclu, NoteFichier, BoutonConfirm, BoutonHelp, ListeAuts },
+    NoteExclu, NoteFichier, NoteConfirme, BoutonHelp, ListeAuts },
 
   computed: {
     lib2 () {
@@ -396,11 +390,13 @@ export default {
     },
 
     async supprNote () {
+      /*
       MD.fD()
       const n = this.nSt.note
       const g = this.nSt.groupe
       const idc = g ? g.idh : this.session.compteId
       await new SupprNote().run(n.id, n.ids, idc)
+      */
     },
 
     async proteger () {
@@ -559,6 +555,7 @@ export default {
 
   data () {
     return {
+      op: '',
       icons,
       colors,
       styles,
@@ -846,8 +843,8 @@ export default {
     function ovnotenouvelle () { MD.oD(notenouvelle) }
     const noteedit = ref(false)
     function ovnoteedit () { MD.oD(noteedit) }
-    const confirmsuppr = ref(false)
-    function ovconfirmsuppr () { MD.oD(confirmsuppr)}
+    const confirme = ref(false)
+    function ovconfirme () { MD.oD(confirme)}
     const noteexclu = ref(false)
     function ovnoteexclu () { MD.oD(noteexclu)}
     const noteprot = ref(false)
@@ -860,7 +857,7 @@ export default {
     function ovdldialogue () { MD.oD(dldialogue)}
 
     return {
-      notenouvelle, ovnotenouvelle, confirmsuppr, ovconfirmsuppr, noteedit, ovnoteedit,
+      notenouvelle, ovnotenouvelle, confirme, ovconfirme, noteedit, ovnoteedit,
       noteprot, ovnoteprot, noteexclu, ovnoteexclu,
       notemc, ovnotemc, notefichier, ovnotefichier, dldialogue, ovdldialogue,
       MD, dhcool, now, filtrage, edvol,

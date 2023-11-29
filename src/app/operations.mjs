@@ -1360,22 +1360,33 @@ export class NouvelleNote extends OperationUI {
   }
 }
 
-/* Supprimer la note ******
+/* Opérations diverses sur une note ******
 args.token: éléments d'authentification du compte.
+op: 'suppr', 'arch', 'react'
 args.id ids: identifiant de la note (dont celle du groupe pour un note de groupe)
 args.idc : compta à qui imputer le volume
   - pour une note personelle, id du compte de l'avatar
-  - pour une note de groupe : id du "compte" de l'hébergeur idhg du groupe
+  - pour une note de groupe : id du "compte" de l'hébergeur du groupe
 Retour:
 */
-export class SupprNote extends OperationUI {
+export class NoteOpx extends OperationUI {
   constructor () { super($t('OPssc')) }
 
-  async run (id, ids, idc) {
+  async run (op) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, ids, idc }
-      this.tr(await post(this, 'SupprNote', args))
+      const nSt = stores.note
+    const n = nSt.note
+      const args = { token: session.authToken, id: n.id, ids: n.ids }
+      if (op === 'suppr') {
+        const egr = nSt.egr
+        const idh = egr && egr.groupe.idh ? egr.groupe.idh : 0
+        args.idc = idh || session.compteId
+        this.tr(await post(this, 'SupprNote', args))
+      } else {
+        args.p = op === 'arch' ? 1 : 0
+        this.tr(await post(this, 'ProtNote', args))
+      }
       return this.finOK()
     } catch (e) {
       return await this.finKO(e)
@@ -1401,30 +1412,8 @@ export class MajNote extends OperationUI {
       const session = stores.session
       const cle = Note.clen(id)
       const txts = await Note.toRowTxt(cle, texte, im, auts)
-      const args = { token: session.authToken, id, ids, txts, prot, idc }
+      const args = { token: session.authToken, id, ids, txts}
       this.tr(await post(this, 'MajNote', args))
-      return this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* Note temporaire / permanente *************************************************
-args.token: éléments d'authentification du compte.
-args.id ids: identifiant de la note
-args.st : aaaammjj ou 99999999
-Retour: rien
-*/
-export class TempNote extends OperationUI {
-  constructor () { super($t('OPssc')) }
-
-  async run (id, ids, nbj) {
-    try {
-      const session = stores.session
-      const st = nbj !== 99999999 ? AMJ.amjUtcPlusNbj(session.dateJourConnx, nbj) : 99999999
-      const args = { token: session.authToken, id, ids, st }
-      this.tr(await post(this, 'TempNote', args))
       return this.finOK()
     } catch (e) {
       return await this.finKO(e)

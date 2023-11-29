@@ -953,6 +953,8 @@ export default {
   PNOperm: 'Note permanente',
   PNOnmc: 'Pas de mots clés associés',
   PNOnv: 'Nouvelle',
+  PNOarch: 'Archiver',
+  PNOreact: 'Réactiver',
   PNOsupp: 'Supprimer',
   PNOratt: 'Rattacher',
   PNOratta: 'Rattacher à:',
@@ -1050,6 +1052,13 @@ export default {
   PNOmcap: 'Mots clés "personnels"',
   PNOmcgr: 'Mots clés "du groupe"',
   PNOmcgp: 'Mots clés personnels',
+
+  NCFm0: 'Droits insuffisants pour exécuter cette opération', 
+  NCFm1: 'C\'est une note de groupe: au moins un des avatars du compte doit avoir le droit d\'écriture sur les notes du groupe.',
+  NCFm2: 'Cette note de groupe a une exclusivité d\'écriture pour {0} qui n\'est pas un des avatars du compte. Pour cette opération, il faudrait que un de vos avatars ait pouvoir d\'animateur.',
+  NCFsuppr: 'Confirmation de la suppression de la note',
+  NCFarch: 'Confirmation de l\'archivage de la note',
+  NCFreact: 'Confirmation de la réactivation de la note',
 
   FAVnone: 'Aucun fichier visible en mode avion',
   FAVdet: 'Détail du fichier',

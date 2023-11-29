@@ -1755,7 +1755,6 @@ _data_:
 - `msu` : mode _simple_ ou _unanime_.
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
-- `pe` : _0-en écriture, 1-protégé contre la mise à jour, création, suppression de notes_.
 - `flags` : table des flags des membres (12 bits sur un entier).
 - `anag` : table des nag des membres.
 - `lna` : liste noire _animateurs_ des `nag` des avatars à ne pas inviter / ré-inviter.
@@ -1893,7 +1892,7 @@ export class Groupe extends GenDoc {
   }
 
   avcAuteurs () {
-    const aSt = session.avatar
+    const aSt = stores.avatar
     const s = new Set()
     aSt.compte.imGroupe(this.id).forEach(im => { if (this.estAuteur(im)) s.add(im)})
     return s
@@ -1904,7 +1903,6 @@ export class Groupe extends GenDoc {
     this.vsh = row.vsh || 0
     this.dfh = row.dfh || 0
     this.msu = row.msu || null
-    this.pe = row.pe || 0
     this.flags = row.flags || [0]
     this.anag = row.anag || [0]
     const x = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0

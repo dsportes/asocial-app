@@ -119,11 +119,9 @@ export default {
           return
         }
       }
-      const idc = this.avatar ? this.session.compteId : this.groupe.idh
       const n = this.nSt.note
       const im = this.avatar ? 0 : this.aSt.compte.imGA(this.groupe.id, this.naAut.id)
-      await new MajNote()
-        .run(n.id, n.ids, im, n.auts, this.texte, this.prot, idc)
+      await new MajNote().run(n.id, n.ids, im, n.auts, this.texte)
       MD.fD()
     }
   },
