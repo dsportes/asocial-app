@@ -23,6 +23,11 @@
       <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
       <q-toolbar-title class="text-italic text-bold titre-md">{{$t('PNOracgr', [grP.na.nomc])}}</q-toolbar-title>
     </q-toolbar>
+    <q-toolbar v-if="session.editDiag" inset class="full-width bg-secondary text-white">
+      <div class='q-ma-sm q-pa-sm text-center text-bold titre-md bg-yellow-5 text-warning'>
+        {{session.editDiag}}
+      </div>
+    </q-toolbar>
   </q-header>
 
   <q-page-container>

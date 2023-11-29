@@ -962,6 +962,7 @@ export default {
   PNOcfratt: 'Confirmer ce rattachement',
   PNOanratt: 'Annuler rattachement',
   PNOauts: ' Pas d\'auteur. | Auteur: | Auteurs: ',
+  PNOauts2: 'Votre compte est le seul éditeur',
   PNOrattinfo: 'Cliquer ci-dessous sur l\'icône "étoile verte" du groupe, avatar ou note à laquelle vous voulez rattacher la note courante.',
 
   PNOdlc: 'Télécharger les notes affichées',
@@ -974,8 +975,8 @@ export default {
   PNOdlvide: 'Aucune note sélectionnée, pas de téléchargement',
   PNOdlc1: 'Prochaine note à télécharger',
   PNOdlc2: 'Note en cours de téléchagement',
-  PNOdlv12: 'V1: {0} - V2: {1}',
-  PNOdlpath: 'Path de la note:',
+  PNOdlv12: 'Volume fichiers:',
+  PNOdlpath: 'Path:',
   PNOnvtit0: 'Nouvelle note',
   PNOnvtit1: 'Nouvelle note de {0}',
   PNOnvtit2: 'Nouvelle note du groupe {0}',
@@ -1010,10 +1011,9 @@ export default {
 
   PNOro1: 'La session est en mode "avion", aucune mise à jour possible.',
   PNOro2: 'La session fait l\'objet d\'une "procédure de blocage", aucune mise à jour possible.',
-  PNOro3: 'La note est protégée contre l\'écriture.',
-  PNOro4: 'Le groupe de la note est protégé contre l\'écriture.',
+  PNOro3: 'La note est "archivée", aucune écriture n\'est autorisée.',
+  PNOro4: 'Aucun des avatars du compte n\'a de droit d\'écriture sur les notes du groupe.',
   PNOro5: 'Un autre membre du groupe a le droit exclusif de mise à jour de la note, édition impossible pour les autres.',
-  PNOro6: 'Il faut être "auteur" ou "animateur" du groupe pour pouvoir mettre à jour une note du groupe.',
   PNOexv21: 'Le volume des fichiers des notes du compte excède le quota autorisé: seules les mises à jour réduisant la taille des fichiers sont autorisées',
   PNOexv22: 'Le volume des fichiers des notes excède la limite fixée par l\'hébergeur du groupe: seules les mises à jour réduisant la taille des fichiers sont autorisées',
 
@@ -1044,7 +1044,7 @@ export default {
   PNOexclu2: 'L\'avatar {0} a l\'exclusité d\'écriture de cette note.',
   PNOperdre1: 'Perdre mon exclusivité sans la transmettre',
   PNOperdre2: 'Retirer cette exclusivité sans la transmettre',
-  PNOamb: 'Pour gérer / transmettre l\'exclusivité d\'écriture sur la note, il faut avoir accès aux membres du groupe (ce qui n\'est pas le cas).',
+  PNOamb: 'Gérer / transmettre l\'exclusivité d\'écriture sur la note, SANS avoir accès aux membres du groupe, restreint les possibilités.',
   PNOex: 'Choisir pour "auteur exclusif"',
   PNOlex: 'Membres du groupe pouvant recevoir l\'exclusivité d\'écriture',
   PNOm1: 'La note a une exclusivité d\'écriture: pour pouvoir en définir les mots clés "groupe", il faut avoir cette exclusivité ou être animateur.',
@@ -1906,5 +1906,10 @@ export default {
 - le groupe n'apparaîtra plus dans la liste de mes groupes.
 - je ne serai plus connu dans le groupe, en particulier vis à vis des notes que j'aurais pu écrire dans le passé et dans lesquelles je n'apparaîtrai plus comme auteur.
 - je serai inscrit en liste noire, personne ne pourra plus m'ajouter comme contact de ce groupe.`,
+
+  BULLEexclu: `Pour attribuer l\'exclusivité d\'écriture d\'une note, un compte doit:
+- soit avoir soi-même l\'excluvité,
+- soit avoir un pouvoir d\'animateur,
+- soit, quand aucune exclusivité n\'est attribuée, avoir été le seul compte à écrire dans cette note.`
 
 }

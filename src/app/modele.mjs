@@ -1286,6 +1286,12 @@ export class Avatar extends GenDoc {
     return m
   }
 
+  imNaGroupe (idg) { // Map (cle:im val:na) des avc participants au groupe idg
+    const m = new Map()
+    this.mpg.forEach(e => { if (e.ng.id === idg) m.set(e.im, this.mav.get(e.id)) })
+    return m
+  }
+
   /* Map(ida, im) des avatars du compte participant à idg d'après membres*/
   imIdGroupeMB (idg) {
     const m = new Map()

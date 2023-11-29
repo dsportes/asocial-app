@@ -43,11 +43,7 @@
     </q-dialog>
 
     <q-dialog v-model="notefichier" persistent full-height>
-      <note-fichier :ro="ro"/>
-    </q-dialog>
-
-    <q-dialog v-model="noteprot" persistent>
-      <note-prot/>
+      <note-fichier/>
     </q-dialog>
 
     <q-dialog v-model="confirme" persistent>
@@ -55,7 +51,7 @@
     </q-dialog>
 
     <q-dialog v-model="dldialogue" persistent>
-      <q-card class="bs sp40">
+      <q-card class="bs sp40" style="padding:0">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="dlfin"/>
           <q-toolbar-title class="titre-lg full-width text-center">
@@ -74,12 +70,10 @@
           <div v-for="(r, idx) in lstr" :key="r.nom" :class="'row ' + dkli(idx)">
             <div class="col-1 fs-lg text-bold">{{r.nbn === r.nbnd ? '\u2713' : ' '}}</div>
             <div class="col-5">{{r.nom}}</div>
-            <div class="col-1">{{pc(r.v1, r.v1d)}}</div>
-            <div class="col-1">{{r.v1 ? edvol(r.v1) : ''}}</div>
-            <div class="col-1">{{pc(r.v2, r.v2d)}}</div>
-            <div class="col-1">{{r.v2 ? edvol(r.v2) : ''}}</div>
             <div class="col-1">{{pc(r.nbn, r.nbnd)}}</div>
             <div class="col-1">{{r.nbn ? r.nbn : ''}}</div>
+            <div class="col-2">{{pc(r.v2, r.v2d)}}</div>
+            <div class="col-2">{{r.v2 ? edvol(r.v2) : ''}}</div>
           </div>
         </q-card-section>
 
@@ -92,10 +86,9 @@
             </div>
             <div class="q-ml-md q-mb-sm">
               <span class="titre-md text-italic">{{$t('PNOdlpath')}}</span>
-              <span class="q;ml-md fs-md font-mono">{{dlnc.p}}</span>
-            </div>
-            <div class="q-ml-md fs-md">
-              {{$t('PNOdlv12', [edvol(dlnc.n.v1), edvol(dlnc.n.v2)])}}
+              <span class="q-ml-xs fs-md font-mono">{{dlnc.p}}</span>
+              <span class="q-ml-md titre-md text-italic">{{$t('PNOdlv12')}}</span>
+              <span class="q-ml-xs fs-md font-mono">{{edvol(dlnc.n.v2)}}</span>
             </div>
           </div>
         </q-card-section>
@@ -172,7 +165,7 @@
             <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
           </div>
           <q-btn class="col-auto btn2" color="primary" size="sm" :label="$t('fichiers')" icon="open_in_new" 
-            @click="voirfic"/>
+            @click="ovnotefichier"/>
         </div>
 
         <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
@@ -184,15 +177,13 @@
 
         <div v-if="selected && !rec" class="q-my-xs row justify-center q-gutter-xs">
           <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
-            @click="nouvelle"/>
+            @click="ovnotenouvelle"/>
           <q-btn v-if="nSt.note && !nSt.note.p" class="btn2" color="primary" size="md" icon="edit_off" :label="$t('PNOarch')"
             @click="op='arch';ovconfirme()"/>
           <q-btn v-if="nSt.note && nSt.note.p" class="btn2" color="primary" size="md" icon="edit" :label="$t('PNOreact')"
             @click="op='react';ovconfirme()"/>
           <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
             @click="op='suppr';ovconfirme()" :disable="!nSt.note"/>
-          <q-btn class="btn2" color="primary" size="md" icon="edit" :label="$t('PNOsupp')"
-            @click="op='arch';ovconfirme()" :disable="!nSt.note"/>
           <q-btn :disable="!nSt.note || !rattaut" 
             class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
             @click="rattacher"/>
@@ -228,7 +219,7 @@
             color="primary" icon="unfold_more" @click="tree.expandAll();expandAll=true"/>
           <q-btn v-if="expandAll" class="btn2" dense size="sm" :label="$t('PNOrep')" 
             color="primary" icon="unfold_less" @click="tree.collapseAll();expandAll=false"/>
-          <q-btn class="q-ml-sm" dense size="sm" label="T1" @click="test1"/>
+          <!--q-btn class="q-ml-sm" dense size="sm" label="T1" @click="test1"/-->
         </div>
       </div>
       </div>
@@ -240,15 +231,14 @@
 import { ref } from 'vue'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
-import { Note, Motscles, getNg, MD } from '../app/modele.mjs'
+import { Motscles, getNg, MD } from '../app/modele.mjs'
 import { $t, u8ToB64, dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
-import { ID, AMJ, nomFichier, appexc } from '../app/api.mjs'
+import { ID, nomFichier, appexc } from '../app/api.mjs'
 import NoteConfirme from '../dialogues/NoteConfirme.vue'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
-import NoteProt from '../dialogues/NoteProt.vue'
 import NoteExclu from '../dialogues/NoteExclu.vue'
 import NoteMc from '../dialogues/NoteMc.vue'
 import NoteFichier from '../dialogues/NoteFichier.vue'
@@ -277,7 +267,7 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteProt, NoteMc,
+  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteMc,
     NoteExclu, NoteFichier, NoteConfirme, BoutonHelp, ListeAuts },
 
   computed: {
@@ -303,31 +293,7 @@ export default {
       }
       return ''
     },
-    rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <=5 },
-    exclu1 () {
-      const m = this.nSt.mbExclu
-      return !m ? this.$t('PNOnoexclu') : this.$t('PNOexclu', [m.na.nomc])
-    },
-    exclu () {
-      const n = this.nSt.note
-      if (!n || !n.im) return null
-      const na = this.aSt.compte(n.id, n.im)
-      if (na) return { avc: true, nom: na.nom }
-      const m = this.gSt.getMembre(n.id, n.im)
-      return { avc: false, nom: m ? m.na.nomc : '#' + n.im }
-    },
-    prot () {
-      return this.nSt.note.p ? this.$t('PNOprot') : this.$t('PNOnoprot')
-    },
-    temp () {
-      const n = this.nSt.nbjTemp
-      return this.$t('PNOtemp', n, { count: n })
-    },
-    nomex () { 
-      if (!this.note.im) return ''
-      const m = this.gSt.getMembre(this.note.id, this.note.im)
-      return m ? m.na.nomc : '#' + this.note.im
-    }
+    rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <= 5 }
   },
 
   watch: {
@@ -336,8 +302,23 @@ export default {
     }
   },
 
+  data () {
+    return {
+      op: '', // suppr arch react
+      icons,
+      colors,
+      styles,
+      expandAll: false,
+      rec: 0, // rattachement en cours
+      noderatt: null,
+      // nas: [], // test : liste des na des avatars
+      // ngs: [] // test : liste des na des groupes
+    }
+  },
+
   methods: {
     pc (i, j) { return !i ? '' : Math.round((j * 100) / i) + '%' },
+
     clicknode (n) {
       if (this.rec) {
         this.rec = 2
@@ -357,88 +338,8 @@ export default {
       return Motscles.mapMC(true, ID.estGroupe(id) ? id : 0)
     },
 
-    async nouvelle () {
-      if (! await this.session.edit()) return
-      this.ovnotenouvelle()
-    },
-   
-    async supprimer () {
-      if (! await this.session.edit()) return
-      const er = this.erSuppr()
-      if (er) { 
-        await afficherDiag(this.$t('PNOer' + er ))
-      } else {
-        this.ovconfirmsuppr()
-      }
-    },
-
-    erSuppr () {
-      if (this.nSt.node.type === 3) return 1
-      const g = this.nSt.groupe
-      if (!g) return 0
-      if (g.pe === 1) return 4
-      const sim = this.gSt.setImCompte(g.id)
-      const im = this.nSt.note.im
-      if (im && !sim.has(im)) return 8
-      let maxst = 0
-      sim.forEach(im => { 
-        const st = g.ast[im]
-        if (st > maxst) maxst = st
-      })
-      if (maxst < 31 || maxst > 32) return 7
-      return 0
-    },
-
-    async supprNote () {
-      /*
-      MD.fD()
-      const n = this.nSt.note
-      const g = this.nSt.groupe
-      const idc = g ? g.idh : this.session.compteId
-      await new SupprNote().run(n.id, n.ids, idc)
-      */
-    },
-
-    async proteger () {
-      if (! await this.session.edit()) return
-      const er = this.erEdit()
-      if (er) { 
-        await afficherDiag(this.$t('PNOer' + er ))
-      } else {
-        this.ovnoteprot()
-      }
-    },
-
-    async voirfic () {
-      this.ro = this.roFic()
-      this.ovnotefichier()
-    },
-
-    roFic () {
-      let x = this.session.roSt() //1: avion, 2:session bloquée en écriture
-      if (x > 2) x = 2
-      if (this.ro) return x
-      const n = this.nSt.note
-      if (n.p) return 3 // note protégée contre l'écriture
-      const g = this.nSt.node.type === 5 && this.nSt.egr ? this.nSt.egr.groupe : null
-      if (!g) return 0
-      // note de groupe
-      if (g.pe === 1) return 4 // groupe protégée contre l'écriture
-      // Map par im des { na, st } des avc membres du groupes
-      // !!!!!!!!!!!!!!!!!! const ims = this.gSt.imNaStAvc(g.id)
-      const im = this.nSt.note.im
-      if (im) { // le membre ayant l'exclu actuel est-il avc ?
-        const e = ims.get(im)
-        if (e) { this.ims = [{ label: e.na.nom, value: im }]; return 0 }
-        return 5 // un autre membre a l'exclusivité, édition impossible
-      }
-      let maxst = 0
-      ims.forEach((e, im) => { if (e.st > maxst) maxst = e.st })
-      if (maxst < 31 || maxst > 32) return 6 // ni auteur ni animateur
-      return 0
-    },
-
     async rattacher () {
+      if (!await this.session.edit()) return
       const n = this.nSt.node.note
       this.rec = 1
       this.noderatt = null
@@ -474,8 +375,9 @@ export default {
       this.rec = 0
       this.noderatt = null
       this.nSt.resetRatt(false)
-    },
+    }
 
+    /*
     stest1 (na, g) {
       const id = na.id
       const demain = AMJ.amjUtcPlusNbj(this.auj, 1)
@@ -549,23 +451,9 @@ export default {
     testdh () {
       const nj = Math.floor(Math.random() * 100)
       return this.now - ( 86400000 * nj)
-    }
+    },
+    */
 
-  },
-
-  data () {
-    return {
-      op: '',
-      icons,
-      colors,
-      styles,
-      expandAll: false,
-      rec: 0, // rattachement en cours
-      noderatt: null,
-      ro: 0, // code de la raison pour laquelle la note est en lecture seulement
-      nas: [], // test : liste des na des avatars
-      ngs: [] // test : liste des na des groupes
-    }
   },
 
   setup () {
@@ -721,7 +609,6 @@ export default {
         const p2 = nf(node.label.substring(0, 32), n.ids)
         const p = path + '/' + p2
         if (filtrage(node)) {
-          rac.v1 += n.v1
           rac.v2 += n.v2
           rac.nbn++
           lstn.push({ r: rac.nom, p, n })
@@ -738,8 +625,8 @@ export default {
       for (const r of nSt.nodes) {
         const nom = nf(r.label)
         const path = nom
-        const rac = { nom, v1: 0, v2: 0 , nbn: 0, v1d: 0, v2d: 0, nbnd: 0}
-        for (const node of r.children) scanNode (node, rac, path, lstn)
+        const rac = { nom, v2: 0, v2d: 0, nbn: 0, v1d: 0, nbnd: 0}
+        for (const node of r.children) scanNode(node, rac, path, lstn)
         lr.push(rac)
       }
       dlnbntot.value = lstn.length
@@ -810,7 +697,6 @@ export default {
             const ir = lstrm.get(n.r)
             const r = lstr.value[ir]
             r.v2d += n.n.v2
-            r.v1d += n.n.v1
             r.nbnd++
             lstn.shift()
           }
@@ -843,14 +729,12 @@ export default {
     function ovnotenouvelle () { MD.oD(notenouvelle) }
     const noteedit = ref(false)
     function ovnoteedit () { MD.oD(noteedit) }
-    const confirme = ref(false)
-    function ovconfirme () { MD.oD(confirme)}
     const noteexclu = ref(false)
     function ovnoteexclu () { MD.oD(noteexclu)}
-    const noteprot = ref(false)
-    function ovnoteprot () { MD.oD(noteprot)}
     const notemc = ref(false)
     function ovnotemc () { MD.oD(notemc)}
+    const confirme = ref(false)
+    function ovconfirme () { MD.oD(confirme)}
     const notefichier = ref(false)
     function ovnotefichier () { MD.oD(notefichier)}
     const dldialogue = ref(false)
@@ -858,8 +742,8 @@ export default {
 
     return {
       notenouvelle, ovnotenouvelle, confirme, ovconfirme, noteedit, ovnoteedit,
-      noteprot, ovnoteprot, noteexclu, ovnoteexclu,
-      notemc, ovnotemc, notefichier, ovnotefichier, dldialogue, ovdldialogue,
+      noteexclu, ovnoteexclu, notemc, ovnotemc, notefichier, ovnotefichier, 
+      dldialogue, ovdldialogue,
       MD, dhcool, now, filtrage, edvol,
       ID, session, nSt, aSt, gSt,
       selected, expanded,

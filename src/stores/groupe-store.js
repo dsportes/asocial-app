@@ -319,14 +319,26 @@ export const useGroupeStore = defineStore('groupe', {
   },
 
   actions: {
-    // Note Exclu : liste des membres aptes à recevoir l'exclusivité
+    /* Note Exclu : liste des {im, na} des membres aptes à recevoir l'exclusivité
+    - pour les avatars du compte, le na est pris dans le compte
+    - pour les autres,, pris dans membres, S'IL Y EN A UN
+    */
     nexLm (idg) {
       const t = []
       const e = this.egr(idg)
       const g = e.groupe
-      e.membres.forEach(m => {
-        if (g.estAuteur(m.ids)) { t.push({im: m.ids, na: m.na})}
-      })
+      const aSt = stores.avatar
+      const mavc = aSt.compte.imNaGroupe(idg)
+      for(let im = 1; im < g.flags.length; im++) {
+        if (g.estAuteur(im)) {
+          let na = mavc.get(im) 
+          let avc = na ? true : false
+          if (!na) {
+            const x = e.membres.get(im)
+            if (x) na = x.na}
+          if (na) t.push({im, na, avc})
+        }
+      }
       return t
     },
     

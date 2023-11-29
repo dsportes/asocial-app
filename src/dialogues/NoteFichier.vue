@@ -158,7 +158,7 @@ export default {
     BoutonHelp, NouveauFichier
   },
 
-  props: { ro: Number },
+  props: { },
 
   computed: {
     lidk () { return dkli(0) },
@@ -317,7 +317,24 @@ export default {
     const ppSt = stores.pp
     const exp = reactive({})
 
-    const ro = toRef(props, 'ro')
+    function roFic () {
+      const n = nSt.note
+      let x = session.roSt() //1: avion, 2:session bloquée en écriture
+      if (x > 2) x = 2
+      if (x) return x
+      if (n.p) return 3 // note archivée
+      const g = nSt.node.type === 5 && nSt.egr ? nSt.egr.groupe : null
+      if (g) {
+        // note de groupe
+        const s = g.avcAuteurs()
+        if (!s.size) return 6 // pas auteur 
+        const xav = nSt.mbExclu
+        if (xav && !xav.avc) return 5 // un autre membre a l'exclusivité
+      }
+      return 0
+    }
+    const ro = ref(roFic())
+    
     const state = reactive({
       avn: null,
       listefic: []
@@ -431,7 +448,7 @@ export default {
       nouveaufichier, ovnouveaufichier, supprfichier, ovsupprfichier,
       confirmav1, ovconfirmav1, confirmav2, ovconfirmav2,
       ui, session, nSt, aSt, gSt, avnSt, ppSt,
-      exv, avatar, groupe, state, exp,
+      exv, avatar, groupe, state, exp, ro,
       MD, dkli, ergrV2, edvol, dhcool
     }
   }

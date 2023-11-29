@@ -24,9 +24,6 @@ export default ({
   props: { icon: String, label: String, texte: String },
 
   computed: {
-    txt () {
-      return this.idtext ? this.$t('BULLE' + this.idtext) : '???'
-    }
   },
 
   methods: {

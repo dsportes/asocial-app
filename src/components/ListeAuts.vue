@@ -7,6 +7,9 @@
         <span v-else>#{{im}}</span>
       </span>
     </div>
+    <div v-if="autAvc" class="titre-md text-bold text-italic text-warning">
+      {{$t('PNOauts2')}}
+    </div>
 
     <q-dialog v-model="opencv" persistent>
       <apercu-cv :na="nax"/>
@@ -54,12 +57,18 @@ export default {
     const nSt = stores.note
     const gSt = stores.groupe
     const aSt = stores.avatar
+    const autAvc = ref(false)
+    
+    const ims = aSt.compte.imGroupe(nSt.note.id) // im des avatars du compte participant au groupe
+    let b = false
+    nSt.note.auts.forEach(im => { if (!ims.has(im)) b = false})
+    autAvc.value = b
 
     const opencv = ref(false)
     function ovopencv () { MD.oD(opencv) }
 
     return {
-      opencv, ovopencv, MD, nSt, gSt, aSt
+      opencv, ovopencv, MD, nSt, gSt, aSt, autAvc
     }
   }
 }
