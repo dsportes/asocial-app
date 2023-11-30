@@ -977,10 +977,10 @@ export default {
   PNOdlc2: 'Note en cours de téléchagement',
   PNOdlv12: 'Volume fichiers:',
   PNOdlpath: 'Path:',
-  PNOnvtit0: 'Nouvelle note',
+
   PNOnvtit1: 'Nouvelle note de {0}',
   PNOnvtit2: 'Nouvelle note du groupe {0}',
-  PNOnvtit3: 'Nouvelle note de ???',
+
   PNOedtit1: 'Edition d\'une note de {0}',
   PNOedtit2: 'Edition d\'une note du groupe {0}',
   PNOfictit1: 'Fichiers attachés à une note de {0}',
@@ -1005,15 +1005,9 @@ export default {
   PNOecrko1: 'N\'est pas autorisé à l\'écriture de notes dans le groupe',
   PNOecrko2: 'N\'a pas l\'exclusivité d\'écriture sur cette note',
 
-  PNOer1: 'Plus d\'accès au groupe "{0}" ou il n\'existe plus : il n\'est pas possible de lui ajouter une nouvelle note.',
-  PNOer2: 'Il n\'est pas possible de rattacher une nouvelle note à une note inaccessible ou qui n\'existe plus.' +
-    '<br><i>{0}</i>',
-  PNOer3: 'Il n\'est pas possible d\'ajouter une nouvelle note tant que le volume total des textes des notes excède le quota attribué au compte.',
-  PNOer5: 'Le groupe n\'a plus de membre qui l\'héberge : l\'ajout de notes et leurs mises à jour en augmentation de volume sont bloquées',
-  PNOer6: 'Le volume des notes du groupe excède déjà le maximum autosisé par son compte hébergeur : l\'ajout de notes et leurs mises à jour en augmentation de volume sont bloquées',
-  PNOer7: 'Il faut être membre actif avec accès en écriture aux notes pour pouvoir ajouter de nouvelles notes ou mettre à jour ou supprimer celles existantes.',
-  PNOer8: 'La note a une exclusivité d\'écriture pour un membre : seuls un animateur ou ce membre peuvent la mettre à jour ou la détruire.',
-  PNOer9: 'Pour changer l\'attribution de l\'exclusivité d\'écriture, il faut, soit l\'avoir soi-même, soit être animateur du groupe.',
+  PNOer1: 'Il n\'est pas possible d\'ajouter une nouvelle note tant que le nombre total des notes, chats, participations aux groupes, excède le quota attribué au compte.',
+  PNOer2: 'Le nombre de notes du groupe excède le maximum autosisé par son compte hébergeur : l\'ajout de notes est bloquée.',
+  PNOer3: 'Le groupe n\'a plus de compte hébergeur: l\'ajout de notes est bloqué.',
 
   PNOro1: 'La session est en mode "avion", aucune mise à jour possible.',
   PNOro2: 'La session fait l\'objet d\'une "procédure de blocage", aucune mise à jour possible.',
@@ -1065,6 +1059,8 @@ export default {
   NCFsuppr: 'Confirmation de la suppression de la note',
   NCFarch: 'Confirmation de l\'archivage de la note',
   NCFreact: 'Confirmation de la réactivation de la note',
+
+  NPLnote: 'Note {0}',
 
   FAVnone: 'Aucun fichier visible en mode avion',
   FAVdet: 'Détail du fichier',

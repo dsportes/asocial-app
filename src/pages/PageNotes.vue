@@ -26,10 +26,6 @@
       </template>
     </q-tree>
 
-    <q-dialog v-model="notenouvelle" persistent full-height>
-      <note-nouvelle/>
-    </q-dialog>
-
     <q-dialog v-model="noteedit" persistent full-height>
       <note-edit/>
     </q-dialog>
@@ -135,8 +131,8 @@
           <div class="titre-md">{{lib2}}
             <span v-if="nSt.node && nSt.node.note" class="q-ml-xs font-mono fs-sm">#{{nSt.node.note.shIds}}</span>
           </div>
-          <div  v-if="nSt.note" class="col-auto font-mono fs-sm">
-            <span class="q-mr-sm">({{edvol(nSt.note.v1)}})</span>
+          <div v-if="nSt.note" class="col-auto font-mono fs-sm">
+            <span class="q-mr-sm">({{edvol(nSt.note.txt.length)}})</span>
             <span>{{dhcool(nSt.note.dh)}}</span>
           </div>
         </div>
@@ -177,17 +173,17 @@
             @click="ovnoteexclu"/>
         </div>
 
-        <div v-if="selected && !rec" class="q-my-xs row justify-center q-gutter-xs">
-          <q-btn class="btn2" color="primary" size="md" icon="add" :label="$t('PNOnv')"
-            @click="ovnotenouvelle"/>
+        <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs">
+          <note-plus/>
           <q-btn v-if="nSt.note && !nSt.note.p" class="btn2" color="primary" size="md" icon="edit_off" :label="$t('PNOarch')"
             @click="op='arch';ovconfirme()"/>
           <q-btn v-if="nSt.note && nSt.note.p" class="btn2" color="primary" size="md" icon="edit" :label="$t('PNOreact')"
             @click="op='react';ovconfirme()"/>
-          <q-btn class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
-            @click="op='suppr';ovconfirme()" :disable="!nSt.note"/>
-          <q-btn :disable="!nSt.note || !rattaut" 
-            class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" :label="$t('PNOratt')"
+          <q-btn v-if="nSt.note" class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
+            @click="op='suppr';ovconfirme()"/>
+          <q-btn v-if="rattaut" 
+            class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" 
+            :label="$t('PNOratt')"
             @click="rattacher"/>
         </div>
 
@@ -239,13 +235,13 @@ import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, nomFichier, appexc } from '../app/api.mjs'
 import NoteConfirme from '../dialogues/NoteConfirme.vue'
-import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 import NoteEdit from '../dialogues/NoteEdit.vue'
 import NoteExclu from '../dialogues/NoteExclu.vue'
 import NoteMc from '../dialogues/NoteMc.vue'
 import NoteFichier from '../dialogues/NoteFichier.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ListeAuts from '../components/ListeAuts.vue'
+import NotePlus from '../dialogues/NotePlus.vue'
 import { RattNote } from '../app/operations.mjs'
 import { putData, getData } from '../app/net.mjs'
 import { dkli } from '../app/util.mjs'
@@ -269,7 +265,7 @@ const nbn2 = 9
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles, NoteNouvelle, NoteEdit, NoteMc,
+  components: { ShowHtml, ApercuMotscles, NoteEdit, NoteMc, NotePlus,
     NoteExclu, NoteFichier, NoteConfirme, BoutonHelp, ListeAuts },
 
   computed: {
@@ -735,8 +731,6 @@ export default {
     const mapmc = ref(Motscles.mapMC(true, 0))
     fSt.contexte.notes.mapmc = mapmc.value
 
-    const notenouvelle = ref(false)
-    function ovnotenouvelle () { MD.oD(notenouvelle) }
     const noteedit = ref(false)
     function ovnoteedit () { MD.oD(noteedit) }
     const noteexclu = ref(false)
@@ -751,7 +745,7 @@ export default {
     function ovdldialogue () { MD.oD(dldialogue)}
 
     return {
-      notenouvelle, ovnotenouvelle, confirme, ovconfirme, noteedit, ovnoteedit,
+      confirme, ovconfirme, noteedit, ovnoteedit,
       noteexclu, ovnoteexclu, notemc, ovnotemc, notefichier, ovnotefichier, 
       dldialogue, ovdldialogue,
       MD, dhcool, now, filtrage, edvol,

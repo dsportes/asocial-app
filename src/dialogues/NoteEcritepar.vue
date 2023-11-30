@@ -55,7 +55,7 @@ export default {
     const naAut = ref()
 
     function init () {
-      const auts = nSt.note.auts
+      const auts = nSt.note ? nSt.note.auts || [] : []
       const l = []
       // Map (cle:im val:na) des avc participants au groupe idg
       for (const [im, na] of aSt.compte.imNaGroupe(g.value.id)) { 

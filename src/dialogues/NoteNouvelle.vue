@@ -4,24 +4,13 @@
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
-      <q-toolbar-title v-if="!step" 
-        class="titre-lg full-width text-center">{{$t('PNOnvtit0')}}</q-toolbar-title>
-      <q-toolbar-title v-if="step === 1" 
-        class="titre-lg full-width text-center">{{$t('PNOnvtit3')}}</q-toolbar-title>
-      <q-toolbar-title v-if="step >= 2 && avatar" 
+      <q-toolbar-title v-if="!estgr" 
         class="titre-lg full-width text-center">{{$t('PNOnvtit1', [avatar.na.nom])}}</q-toolbar-title>
-      <q-toolbar-title v-if="step >= 2 && groupe" 
+      <q-toolbar-title v-if="estgr" 
         class="titre-lg full-width text-center">{{$t('PNOnvtit2', [groupe.na.nomc])}}</q-toolbar-title>
       <q-btn dense size="md" color="primary" icon="check" :label="$t('valider')"
-        :disable="step !== 3" @click="valider"/>
+        :disable="err || session.editDiag || (estgr && !naAut)" @click="valider"/>
       <bouton-help page="page1"/>
-    </q-toolbar>
-    <q-toolbar v-if="groupe" inset class="full-width bg-secondary text-white">
-      <q-toolbar-title class="text-italic titre-md text-center">{{$t('PNOecr', [naAut.nom])}}</q-toolbar-title>
-    </q-toolbar>
-    <q-toolbar v-if="avatar && type === 2" inset class="full-width bg-secondary text-white">
-      <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-      <q-toolbar-title class="text-italic text-bold titre-md">{{$t('PNOracgr', [grP.na.nomc])}}</q-toolbar-title>
     </q-toolbar>
     <q-toolbar v-if="session.editDiag" inset class="full-width bg-secondary text-white">
       <div class='q-ma-sm q-pa-sm text-center text-bold titre-md bg-yellow-5 text-warning'>
@@ -32,49 +21,40 @@
 
   <q-page-container>
     <q-page class="q-pa-xs">
-      <div v-if="type === 4" class="q-ma-xs q-pa-xs bord1">
+
+      <div v-if="avP" class="q-ma-xs q-pa-xs bord1">
         <div class="titre-md">
-           <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
+          <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
           <span>{{$t('PNOrav', [avP.na.nom])}}</span>
         </div>
         <div class="q-ml-sm text-italic">{{nSt.node.label}}</div>
       </div>
-      <div v-if="type === 5" class="q-ma-xs q-pa-xs bord1">
+
+      <div v-if="grP" class="q-ma-xs q-pa-xs bord1">
         <div class="titre-md">
-           <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
+          <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
           <span>{{$t('PNOrgr', [grP.na.nomc])}}</span>
         </div>
         <div class="q-ml-sm text-italic">{{nSt.node.label}}</div>
       </div>
-      <q-separator v-if="type === 4 || type === 5" class="q-my-sm" color="orange"/>
 
-      <div v-if="er" class="column justify-center lg1 maauto q-my-lg q-mx-sm">
-        <div class="titre-md q-my-lg q-mx-sm">{{$t('PNOer' + er, [erd])}}</div>
-        <q-btn color="primary" flat :label="$t('jailu')" @click="MD.fD"/>
+      <div v-if="!estgr && nSt.node.type === 2" class="q-ma-xs q-pa-xs bord1 titre-md">
+          <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
+          <span>{{$t('PNOracgr', [nSt.node.label])}}</span>
       </div>
 
-      <div v-if="!er && step === 1" class="q-mt-lg q-pa-sm lg1 maauto bord2">
-        <note-ecritepar @ok="selNa"/>
-        <div class="q-my-sm column q-gutter-xs">
-          <q-btn icon="check" no-caps :label="$t('PNOngr', [grP.na.nomc])"
-            :disable="!grOK" :color="!grOK? 'grey-5' : 'primary'"
-            @click="selGr"/>
-          <q-btn icon="check" no-caps :label="$t('PNOnper', [naAut ? naAut.nom : '???'])"
-            @click="selAv" color="primary"/>
-        </div>
+      <div v-if="err" class="titre-md q-my-sm q-pa-xs bg-yellow-5 text-bold text-italic">
+        {{$t('PNOer' + err)}}
       </div>
 
-      <div v-if="!er && step === 3" class="column sp40">
+      <note-ecritepar v-if="estgr" :groupe="groupe" @ok="selNa"/>
+
+      <div v-if="!err && !session.editDiag && (!estgr || (estgr && naAut))" class="column sp40">
         <editeur-md mh="50vh" class="col" texte="" :placeholder="$t('PNOdeft')"
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
         <q-separator color="orange" class="q-mt-sm"/>
 
-        <div class="col-auto q-mt-sm row">
-          <bouton-undo :cond="prot===true" @click="prot=false"/>
-          <q-toggle class=" titre-md" v-model="prot" :label="$t('PNOpr')" />
-        </div>
-
-        <div v-if="groupe" class="col-auto q-mt-sm row">
+        <div v-if="estgr" class="col-auto q-mt-sm row">
           <bouton-undo :cond="exclu===true" @click="exclu=false"/>
           <q-toggle class=" titre-md" v-model="exclu" :label="$t('PNOex')" />
         </div>
@@ -88,11 +68,11 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEV1 } from '../app/api.mjs'
 import { MD, getNg } from '../app/modele.mjs'
-import { splitPK, dkli } from '../app/util.mjs'
+import { dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -104,40 +84,27 @@ export default {
 
   components: { BoutonHelp, BoutonUndo, EditeurMd, NoteEcritepar },
 
+  props: {
+    estgr: Boolean, // note de groupe à créer
+    groupe: Object, // si estgr, le groupe
+    avatar: Object, // si !estgr, l'avatar
+    notep: Object // si sous-note, la note parent
+  },
+
   computed: {
     modifie () { return this.texte !== '' || this.exclu }
   },
 
   watch: {
-    step (ap) { this.autStep(ap) }
   },
 
   methods: {
-    selNa (na) {
-      this.naAut = na
-      this.grAut(na.id)
-    },
-
-    selAv () {
-      this.auteur = this.aSt.getElt(this.naAut.id)
-      this.avatar = this.auteur.avatar
-      this.groupe = null
-      this.step = 2
-    },
-
-    selGr () {
-      this.auteur = this.aSt.getElt(this.naAut.id)
-      this.avatar = null
-      this.groupe = this.gSt.egr(this.idp).groupe
-      this.step = 2
-    },
-
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
 
     async valider () {
       // console.log(this.texte, this.prot, this.temp.value, this.exclu)
       let id = 0, idc = 0, ref = null, im = 0
-      if (this.avatar) {
+      if (!this.estgr) {
         id = this.avatar.id
         idc = this.session.compteId
       } else {
@@ -157,8 +124,7 @@ export default {
         ref = [this.idp, this.idsp, rnom]
       }
 
-      const key = await new NouvelleNote()
-        .run(id, this.texte, im, this.prot, this.exclu, ref, idc)
+      const key = await new NouvelleNote().run(id, this.texte, im, this.exclu, ref, idc)
       MD.fD()
     }
   },
@@ -166,12 +132,11 @@ export default {
   data () {
     return {
       texte: '',
-      exclu: false,
-      prot: false
+      exclu: false
     }
   },
 
-  setup () {
+  setup (props) {
     const ui = stores.ui
     const session = stores.session
     const nSt = stores.note
@@ -179,18 +144,12 @@ export default {
     const gSt = stores.groupe
     const cfg = stores.config
 
-    const er = ref(0)
-    const erd = ref('')
-    const type = ref(0)
-    const auteur = ref(null)
-    const avatar = ref(null)
-    const groupe = ref(null)
-    const mb = ref(null)
-    const step = ref(0)
+    const estgr = toRef(props, 'estgr')
+    const avatar = toRef(props, 'avatar')
+    const groupe = toRef(props, 'groupe')
+    const notep = toRef(props, 'notep')
 
-    const { id, ids } = splitPK(nSt.node.key)
-    const idp = ref(id) // id du parent - racine si ids = 0 - GROUPE ou AVATAR
-    const idsp = ref(ids)
+    const idp = ref(notep.value ? notep.value.id : 0) // id du parent 
     const grP = ref(null) // groupe de la note parente
     const avP = ref(null) // avatar de la note parente
     if (idp.value) {
@@ -200,83 +159,39 @@ export default {
         avP.value = aSt.getElt(idp.value).avatar
       }
     }
+    const idsp = ref(notep.value ? notep.value.ids : 0)
+
+    const err = ref(0)
 
     const naAut = ref()
-    const grOK = ref(false)
+    function selNa (na) {
+      naAut.value = na
+    }
+
+    /*
     const rack = parseInt(nSt.node.rkey)
     const grRac = ref(ID.estGroupe(rack) ? gSt.egr(rack).groupe : null) 
+    */
 
-    function grAut (ida) {
-      const g = grRac.value
-      if (!g) { grOK.value = false; return }
-      const img = aSt.compte.imGA(g.id, ida)
-      grOK.value = g.estAuteur(img)
-    }
-
-    function autStep (ap) {
-      if (ap !== 2) return
-      const g = groupe.value
-      if (!g) { // note d'avatar
-        if (aSt.exV1) { er.value = 3; return } // excédent v1 / q1
-      } else { // note de groupe
-        grAut(naAut.value.id)
-        if (!g.imh) { er.value = 5; return }
-        const eg = gSt.egr(g.id)
-        if (eg.objv.vols.v1 >= eg.objv.vols.q1 * UNITEV1) { er.value = 6; return }
-        /*
-        mb.value = gSt.membreDeId(eg, this.naAut.id)
-        if (!mb.value) { er.value = 7; return }
-        if (!g.estAuteur(mb.value.ids)) { er.value = 7; return }
-        */
-      }
-      step.value = 3
-    }
-
-    switch (nSt.node.type) {
-      case 1: { 
-        type.value = 1
-        auteur.value = aSt.getElt(id)
-        avatar.value = auteur.value.avatar
-        step.value = 2
-        break
-      }
-      case 2: { 
-        type.value = 2
-        step.value = 1
-        break
-      }
-      case 3: { 
-        er.value = 1
-        erd.value = nSt.node.label
-        break 
-      }
-      case 4: { 
-        type.value = 4
-        auteur.value = aSt.getElt(id)
-        avatar.value = auteur.value.avatar
-        step.value = 2
-        break
-      }
-      case 5: { 
-        type.value = 5
-        step.value = 1
-        break
-      }
-      case 6: 
-      case 7: { 
-        er.value = 2
-        erd.value = nSt.node.label
-        break
+    function setErr () {
+      if (!estgr.value) {
+        if (aSt.exV1) err.value = 1 // excédent nn + nc + ng / q1
+      } else {
+        if (!groupe.value.imh) err.value = 3
+        else {
+          const eg = gSt.egr(groupe.value.id)
+          // Excède le max attribué du groupe
+          if (eg.objv.vols.v1 >= eg.objv.vols.q1 * UNITEV1) err.value = 2
+        }
       }
     }
 
-    autStep(step.value)
+    setErr()
 
     return {
       ui, session, nSt, aSt, gSt, cfg,
-      er, erd, naAut, type, step, idp, idsp, grP, avP, grRac, grOK, grAut,
-      auteur, avatar, groupe, mb,
-      MD, autStep, dkli
+      err, naAut, selNa, idp, idsp, grP, avP,
+      MD, dkli
     }
   }
 

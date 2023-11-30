@@ -72,7 +72,7 @@ export const useAvatarStore = defineStore('avatar', {
 
     exV1: (state) => {
       const c = state.compta.qv
-      return c.v1 > c.q1 * UNITEV1
+      return c.nn + c.nc + c.ng > c.q1 * UNITEV1
     },
 
     exV2: (state) => {
