@@ -8,8 +8,6 @@
         class="titre-lg full-width text-center">{{$t('PNOmctit1', [avatar.na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-if="groupe" 
         class="titre-lg full-width text-center">{{$t('PNOmctit2', [groupe.na.nomc])}}</q-toolbar-title>
-      <q-btn dense size="md" color="primary" icon="check" :label="$t('valider')"
-        :disable="!modif" @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
     <q-toolbar v-if="session.editDiag" inset class="full-width bg-secondary text-white">
@@ -17,28 +15,52 @@
         {{session.editDiag}}
       </div>
     </q-toolbar>
-    <q-toolbar v-if="nSt.mbExclu" inset class="full-width bg-secondary text-white">
-      <q-toolbar-title class="text-italic titre-md text-center">
-        {{$t('PNOexclu' + (nSt.mbExclu.avc ? 1 : 2), [nSt.mbExclu.nom])}}
-        </q-toolbar-title>
-    </q-toolbar>
   </q-header>
 
   <q-page-container>
     <q-page class="sp30 q-pa-xs column">
-      <liste-auts/>
+      <liste-auts class="q-my-sm"/>
 
       <div v-if="avatar" class="q-my-md">
+        <div class="q-mb-sm titre-md text-bold text-italic text-center">{{$t('PNOmcp')}}</div>
         <choix-motscles v-model="mcap" :editable="!session.editDiag" :init-value="mc"
           du-compte :titre="$t('PNOmcap')" />
       </div>
       <div v-else class="q-my-md">
+        <div class="q-mb-sm titre-md text-bold text-italic text-center">{{$t('PNOmcp')}}</div>
         <choix-motscles v-model="mcap" :editable="!session.editDiag" :init-value="mc"
-          du-compte :du-groupe="groupe.id" :titre="$t('PNOmcgp')"/>   
-        <div v-if="msg" class="q-mt-sm titre-md bg-yellow-5 text-negative text-bold q-pa-xs">{{msg}}</div>
-        <choix-motscles v-else class="q-mt-sm" v-model="mc0ap" :editable="!session.editDiag"
-          :du-groupe="groupe.id" :titre="$t('PNOmcgr')" :init-value="mc0"/>
+          du-compte :du-groupe="groupe.id" :titre="$t('PNOmcgp')"/> 
+
+        <q-separator color="orange" class="q-my-md"/>
+
+        <div class="q-mb-sm titre-md text-bold text-italic text-center">
+          {{$t('PNOmcg')}}
+          <bouton-bulle idtext="mcgr"/>
+        </div>
+
+        <div class="sp30"> <!-- Bloc exclu -->
+        <div v-if="xav">
+          <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
+          <apercu-genx v-if="xav.na" class="q-my-md" 
+            :na="xav.na" :ids="xav.im" :cv="cv(xav)" :estAvc="xav.avc"/>
+          <div v-else class="titre-md text-bold">{{xav.nom}}</div>
+        </div>
+        <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
       </div>
+  
+      <div v-if="msg" class="q-mt-sm titre-md bg-yellow-5 text-negative text-bold q-pa-xs">{{msg}}</div>
+      
+      <choix-motscles v-else class="q-mt-sm" v-model="mc0ap" 
+        :editable="!session.editDiag && !msg"
+        :du-groupe="groupe.id" :titre="$t('PNOmcgr')" :init-value="mc0"/>
+      </div>
+
+      <div class="row items-center justify-around">
+        <q-btn size="md" dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
+        <q-btn v-if="!session.editDiag" size="md" dense color="warning" 
+          :disable="!modif" :label="$t('valider')" @click="valider"/>
+      </div>
+
     </q-page>
   </q-page-container>
 </q-layout>
@@ -53,12 +75,14 @@ import { $t, egaliteU8, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ChoixMotscles from '../components/ChoixMotscles.vue'
 import ListeAuts from '../components/ListeAuts.vue'
+import BoutonBulle from '../components/BoutonBulle.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
 import { McNote } from '../app/operations.mjs'
 
 export default {
   name: 'NoteMc',
 
-  components: { BoutonHelp, ChoixMotscles, ListeAuts },
+  components: { BoutonHelp, BoutonBulle, ApercuGenx, ChoixMotscles, ListeAuts },
 
   props: { },
 
@@ -67,11 +91,6 @@ export default {
       if (!egaliteU8(this.mc, this.mcap)) return true
       if (this.mc0 && !egaliteU8(this.mc0, this.mc0ap)) return true
       return false
-    },
-    nomex () { 
-      if (!this.note.im) return ''
-      const m = this.gSt.getMembre(this.note.id, this.note.im)
-      return m ? m.na.nomc : '#' + this.note.im
     }
   },
 
@@ -99,6 +118,7 @@ export default {
     const nSt = stores.note
     const gSt = stores.groupe
     const aSt = stores.avatar
+    const pSt = stores.people
 
     const avatar = ref(null)
     const groupe = ref(null)
@@ -108,6 +128,7 @@ export default {
     const mc0 = ref(null)
     const mc0ap = ref(null)
     const msg = ref('')
+    const xav = ref()
 
     mcap.value = mc.value
 
@@ -118,11 +139,12 @@ export default {
       groupe.value = egr.groupe
       mc0.value = note.value.mc0
       mc0ap.value = mc0.value
+      xav.value = nSt.mbExclu // retourne { avc: true/false, nom } ou null s'il n'y a pas d'exclusivité
 
-      /* mots clés du groupe éditables par le compte: 
-      - soit le compte est animateur
-      - soit quand il y a une exclusité, un des avatars du compte a l'exclusivité
-      - soit quand il n'y pas d'exclusité, un des avatars du compte est auteur
+      /* BULLEmcgr: `Pour attribuer des mots-clés "du groupe" à une note de groupe, un compte doit:
+      - soit avoir lui-même l\'excluvité d\'écriture sur la note,
+      - soit avoir un pouvoir d\'animateur dans le groupe,
+      - soit, quand aucune exclusivité n\'est attribuée, avoir un droit d\'écriture des notes du groupe.`
       */
       if (!egr.estAnim) {
         if (note.value.im) { // il y a une exclusivité
@@ -137,10 +159,14 @@ export default {
       }
     }
 
+    function cv(x) {
+      return !x.avc ? pSt.getCv(x.na.id) : aSt.getAvatar(x.na.id).cv
+    }
+
     return {
       session, nSt, gSt,
-      avatar, groupe, note, msg, mc, mcap, mc0, mc0ap,
-      MD, dkli
+      avatar, groupe, note, msg, mc, mcap, mc0, mc0ap, xav,
+      MD, dkli, cv
     }
   }
 

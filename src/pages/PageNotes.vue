@@ -161,7 +161,9 @@
 
         <div v-if="selected && nSt.note && !rec" class="q-mt-xs row justify-between titre-sm">  
           <div class="col">
-            <span>{{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}</span>
+            <span :class="!nSt.note.mfa.size ? 'text-italic': ''">
+              {{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}
+            </span>
             <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
           </div>
           <q-btn class="col-auto btn2" color="primary" size="sm" :label="$t('fichiers')" icon="open_in_new" 
@@ -170,7 +172,7 @@
 
         <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
           <div v-if="nSt.mbExclu">{{$t('PNOexclu', [nSt.mbExclu.nom])}}</div>
-          <div v-else>{{$t('PNOnoexclu')}}</div>
+          <div v-else class="text-italic">{{$t('PNOnoexclu')}}</div>
           <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
             @click="ovnoteexclu"/>
         </div>

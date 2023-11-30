@@ -992,6 +992,8 @@ export default {
   PNOextit: 'Attribution d\'exclusivité d\'écriture d\'une note du groupe {0}',
   PNOmctit1: 'Note de {0}, attribution des motsclés',
   PNOmctit2: 'Note du groupe {0}, attribution des motsclés',
+  PNOmcp: 'Mots clés personnels, visibles seulzment par moi-même.',
+  PNOmcg: 'Mots clés "du groupe", visibles de tous les membres du groupe.',
   PNOnocv: '{0} n\'a pas déclaré de carte de visite.',
   PNOchaut: 'Choisir l\'auteur de l\'édition',
   PNOexsuppr: 'Tous les auteurs et animateurs peuvent éditer la note',
@@ -1908,8 +1910,13 @@ export default {
 - je serai inscrit en liste noire, personne ne pourra plus m'ajouter comme contact de ce groupe.`,
 
   BULLEexclu: `Pour attribuer l\'exclusivité d\'écriture d\'une note, un compte doit:
-- soit avoir soi-même l\'excluvité,
-- soit avoir un pouvoir d\'animateur,
-- soit, quand aucune exclusivité n\'est attribuée, avoir été le seul compte à écrire dans cette note.`
+- soit avoir lui-même l\'excluvité d\'écriture sur la note,
+- soit avoir un pouvoir d\'animateur dans le groupe,
+- soit, quand aucune exclusivité n\'est attribuée, avoir été le seul compte à écrire dans cette note.`,
+
+  BULLEmcgr: `Pour attribuer des mots-clés "du groupe" à une note de groupe, un compte doit:
+- soit avoir lui-même l\'excluvité d\'écriture sur la note,
+- soit avoir un pouvoir d\'animateur dans le groupe,
+- soit, quand aucune exclusivité n\'est attribuée, avoir un droit d\'écriture des notes du groupe.`
 
 }

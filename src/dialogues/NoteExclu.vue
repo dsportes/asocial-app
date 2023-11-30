@@ -54,7 +54,7 @@
 
       <div class="row items-center justify-around">
         <q-btn size="md" dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
-        <q-btn size="md" dense color="warning" :disable="!xap"
+        <q-btn v-if="!session.editDiag" size="md" dense color="warning" :disable="!xap"
           :label="$t('PNOex')" @click="valider"/>
       </div>
 
