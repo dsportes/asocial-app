@@ -32,7 +32,7 @@ export default {
 
   computed: {
     nb () { return this.nSt.note.auts.length }
-   },
+  },
 
   data () {
     return {
@@ -42,7 +42,7 @@ export default {
 
   methods: {
     na (im) {
-      const na = this.aSt.compte.naDeIdgIm(this.nSt.note.id, this.nSt.note.im)
+      const na = this.aSt.compte.naDeIdgIm(this.nSt.note.id, im)
       if (na) return na
       const m = this.gSt.getMembre(this.nSt.note.id, im)
       return m ? m.na : null
@@ -61,7 +61,7 @@ export default {
     
     const ims = aSt.compte.imGroupe(nSt.note.id) // im des avatars du compte participant au groupe
     let b = false
-    nSt.note.auts.forEach(im => { if (!ims.has(im)) b = false})
+    nSt.note.auts.forEach(im => { if (ims.has(im)) b = true})
     autAvc.value = b
 
     const opencv = ref(false)

@@ -144,9 +144,9 @@
         <div v-if="selected && nSt.note" class="q-ml-md row justify-between"> 
           <show-html :class="dkli(0) + ' col bord1'"
             :texte="nSt.note.txt" zoom maxh="4rem" />
-          <q-btn :disable="rec!==0 || (nSt.note.p===1)" class="col-auto q-ml-xs btn4" 
+          <q-btn :disable="rec!==0" class="col-auto q-ml-xs btn4" 
             :color="nSt.note.p ? 'grey-5' : 'primary'" size="sm" icon="edit" 
-            @click="ovnoteedit"/>
+            @click="noteedit1"/>
         </div>
 
         <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
@@ -338,6 +338,14 @@ export default {
     mapmcf (key) {
       const id = parseInt(key)
       return Motscles.mapMC(true, ID.estGroupe(id) ? id : 0)
+    },
+
+    async noteedit1 () {
+      if (this.nSt.note.p) {
+        await afficherDiag($t('PNOarchivee'))
+        return
+      }
+      this.ovnoteedit()
     },
 
     async rattacher () {

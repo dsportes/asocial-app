@@ -1001,6 +1001,10 @@ export default {
   PNOdldir: 'Répertoire local dans cette application',
   PNOdlok: 'A {0} l\'application de stockage local a répondu "OK"',
 
+  PNOarchivee: ' La note est "archivée", elle ne peut plus être modifiée. Elle peut toutefois être "réactivée" et redevenir éditable.',
+  PNOecrko1: 'N\'est pas autorisé à l\'écriture de notes dans le groupe',
+  PNOecrko2: 'N\'a pas l\'exclusivité d\'écriture sur cette note',
+
   PNOer1: 'Plus d\'accès au groupe "{0}" ou il n\'existe plus : il n\'est pas possible de lui ajouter une nouvelle note.',
   PNOer2: 'Il n\'est pas possible de rattacher une nouvelle note à une note inaccessible ou qui n\'existe plus.' +
     '<br><i>{0}</i>',
