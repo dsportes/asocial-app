@@ -1344,13 +1344,13 @@ export class NouvelleNote extends OperationUI {
   im: indice du membre auteur
   exclu: pour un groupe true si im a demandé un e exclusivité d'auteur
   ref: référence de la note parent [rid, rids, rnom]
-  idh: id du compte de l'auteur ou de l'hébergeur pour une note de groupe
+  idc: id du compte de l'auteur ou de l'hébergeur pour une note de groupe
   */
-  async run (id, txt, im, p, exclu, ref, idc) {
+  async run (id, txt, im, exclu, ref, idc) {
     try {
       const session = stores.session
 
-      const rowNote = await Note.toRowNouveau(id, txt, im, p, exclu, ref)
+      const rowNote = await Note.toRowNouveau(id, txt, im, exclu, ref)
       const args = { token: session.authToken, rowNote : rowNote, idc }
       this.tr(await post(this, 'NouvelleNote', args))
       return this.finOK((rowNote.id + '/' + rowNote.ids))

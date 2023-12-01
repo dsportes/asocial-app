@@ -72,7 +72,7 @@ import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEV1 } from '../app/api.mjs'
 import { MD, getNg } from '../app/modele.mjs'
-import { dkli } from '../app/util.mjs'
+import { dkli, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -102,26 +102,36 @@ export default {
     fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
 
     async valider () {
-      // console.log(this.texte, this.prot, this.temp.value, this.exclu)
-      let id = 0, idc = 0, ref = null, im = 0
+      let id = 0, idc = 0, ref = null, im = 0, rnom = ''
       if (!this.estgr) {
         id = this.avatar.id
         idc = this.session.compteId
       } else {
         id = this.groupe.id
         idc = this.groupe.idh
-        im = this.mb.ids
+        im = this.aSt.compte.imGA(id, naAut.id)
       }
 
-      let rnom = ''
-      if (ID.estGroupe(this.idp)) { // note rattachée à une note de groupe ou un groupe
-        const na = getNg(this.idp) // normalement le groupe "parent" est connu
-        rnom = na ? na.nomc : ''
-      }
-
-      // note rattachée à une autre note OU note avatar rattachée à un groupe
-      if (this.idsp !== 0 || this.idp !== id) {
-        ref = [this.idp, this.idsp, rnom]
+      /* note rattachée à une autre note OU note avatar rattachée à une racine de groupe
+        `ref` : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
+        rnom n'est défini que pour une note d'avatar référençant un note de groupe
+        (rnom est celui du groupe)
+      */
+      if (!this.estgr) { // Note avatar
+      const nd = this.nSt.node
+        if (nd.type === 2) { // rattachée à une racine de groupe
+          const x = splitPK(nd.key)
+          ref = [x.id, x.ids, nd.label]
+        } else if (this.idp && this.idp) { // rattachée à une note d'un groupe ou de l'avatar
+          let rnom = ''
+          if (ID.estGroupe(this.idp)) { // d'un groupe
+            const na = getNg(this.idp) // normalement le groupe "parent" est connu
+            if (na) rnom = na.nomc
+          }
+          ref = [this.idp, this.idsp, rnom]
+        }
+      } else if (this.idp) { // Note de groupe rattachée
+        ref = [this.idp, this.idsp, '']
       }
 
       const key = await new NouvelleNote().run(id, this.texte, im, this.exclu, ref, idc)
@@ -150,6 +160,7 @@ export default {
     const notep = toRef(props, 'notep')
 
     const idp = ref(notep.value ? notep.value.id : 0) // id du parent 
+    const idsp = ref(notep.value ? notep.value.ids : 0) // ids du parent 
     const grP = ref(null) // groupe de la note parente
     const avP = ref(null) // avatar de la note parente
     if (idp.value) {
@@ -159,7 +170,6 @@ export default {
         avP.value = aSt.getElt(idp.value).avatar
       }
     }
-    const idsp = ref(notep.value ? notep.value.ids : 0)
 
     const err = ref(0)
 

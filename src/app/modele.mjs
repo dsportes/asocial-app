@@ -2190,10 +2190,10 @@ export class Note extends GenDoc {
   }
   */
 
-  static async toRowNouveau (id, txt, im, p, exclu, ref) {
+  static async toRowNouveau (id, txt, im, exclu, ref) {
     const session = stores.session
     const cle = Note.clen(id)
-    const r = { id, ids: rnd6(), p: p ? 1 : 0, im: exclu ? im : 0, v2 : 0, mc: null }
+    const r = { id, ids: rnd6(), im: exclu ? im : 0, v2 : 0, mc: null }
     r.txts = await Note.toRowTxt(cle, txt, im)
     r.ref = await Note.toRowRef(cle, ref)
     const _data_ = encode(r)
