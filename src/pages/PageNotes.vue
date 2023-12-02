@@ -474,8 +474,13 @@ export default {
     const gSt = stores.groupe
     const fSt = stores.filtre
     const filtre = ref({})
-    const filtreFake = ref('1')
+    let dff = '1'
+    const filtreFake = ref(dff)
+
     const now = Date.now()
+
+    const nx = new Map()
+    let nb = 0
 
     const lstr = ref() // liste des racines
     const lstn = [] // liste des notes restant à télécharger
@@ -525,38 +530,60 @@ export default {
           groupeId : 0
         })      
       }
-      filtreFake.value = '' + (parseInt(filtreFake.value) + 1)
-      setTimeout(() => { nSt.stats(filtrage)}, 50)
+      const y = '' + (parseInt(filtreFake.value) + 1)
+      filtreFake.value = y
+      setTimeout(() => { nSt.stats(monf)}, 50)
     }
 
-    function filtrage (node, filtreFake) {
+    function monf (n) {
       const f = filtre.value
-      const n = node.note
-      if (n && f) {
-        if (f.avgr) {
-          if (n.id !== f.avgr && !n.refk) return false
-          if (n.id !== f.avgr){
-            const rac = nSt.getRacine(node)
-            if (rac.key !== f.avgr) return false
-          }
-        }
-        if (f.lim && n.dh) {
-          if (n.dh < f.lim) return false
-        }
-        if (f.note && n.txt) {
-          if (n.txt.indexOf(f.note) === -1) return false
-        }
-        if (f.v2 && n.v2 < f.v2) return false
-        if (f.temp && !n.st) return false
-        if (f.mcp) {
-          if (!n.smc) return false
-          if (difference(f.mcp, n.smc).size) return false
-        }
-        if (f.mcn) {
-          if (n.smc && intersection(f.mcn, n.smc).size) return false
+      if (f.avgr) {
+        if (n.id !== f.avgr && !n.refk) return false
+        if (n.id !== f.avgr){
+          const rac = nSt.getRacine(node)
+          if (rac.key !== f.avgr) return false
         }
       }
+      if (f.lim && n.dh) {
+        if (n.dh < f.lim) return false
+      }
+      if (f.note && n.txt) {
+        if (n.txt.indexOf(f.note) === -1) return false
+      }
+      if (f.v2 && n.v2 < f.v2) return false
+      if (f.mcp) {
+        if (!n.smc) return false
+        if (difference(f.mcp, n.smc).size) return false
+      }
+      if (f.mcn) {
+        if (n.smc && intersection(f.mcn, n.smc).size) return false
+      }
       return true
+    }
+
+    function filtrage (node) {
+      const ff = filtreFake.value
+      if (ff !== dff) {
+        nx.clear()
+        dff = ff
+      }
+      let r = true
+      const n = node.note
+      if (n) {
+        const tf = nx.get(node.key)
+        if (tf) {
+          tf.nb++
+          console.log('deja vu:', tf.nb, node.key, node.rkey, n.refk)
+          nx.set(node.key, tf)
+          /* if (tf.nb > 10) 
+            console.log('???') */
+          return tf.r
+        } else {
+          r = monf(n)
+          nx.set(node.key, { nb: 1, r })
+        }
+      }
+      return r
     }
 
     function preSelect () {
@@ -580,6 +607,15 @@ export default {
       after(async (result) => {
         if ((name === 'setSelected')){
           selected.value = args[0]
+        }
+      })
+    })
+
+    nSt.$onAction(({ name, args, after }) => { 
+      after(async (result) => {
+        if ((name === 'setNote')){
+          const n = args[0]
+          nx.delete(n.key)
         }
       })
     })

@@ -94,7 +94,10 @@ import { UNITEV2, isAppExc } from '../app/api.mjs'
 export default {
   name: 'NouveauFichier',
 
-  props: { nomfic: String },
+  props: { 
+    nomfic: String, 
+    na: Object  // pour un groupe, avatar "auteur"
+  },
 
   components: { BoutonHelp, NomGenerique },
 
@@ -122,7 +125,7 @@ export default {
         this.idf = rnd6()
         this.nfic = this.fic.nom
         this.sfx = '#' + suffixe(this.idf)
-        this.info = this.fic.info || 'v1'
+        this.info = this.fic.info || 'version-1'
       }
       if (s === 3) {
         try {
@@ -184,7 +187,8 @@ export default {
       } catch(e) { trapex (e, 1); return }
 
       this.ui.etf = 1
-      const res = await new NouveauFichier().run(this.nSt.note, fic, this.lidf, dv2)
+      const aut = !this.na ? 0 : this.aSt.compte.imGA(this.nSt.note.id, this.na.id)
+      const res = await new NouveauFichier().run(this.nSt.note, aut, fic, this.lidf, dv2)
       if (!isAppExc(res))
         this.ui.setFichiercree(fic.nom)
       else {

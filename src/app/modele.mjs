@@ -2076,7 +2076,6 @@ _data_:
     - _valeur_ : vecteur des index des mots clés attribués par le membre.
 - `txts` : crypté par la clé de la note.
   - `d` : date-heure de dernière modification du texte.
-  - `l` : liste des auteurs pour une note de groupe.
   - `t` : texte gzippé ou non.
 - `mfas` : map des fichiers attachés.
 - `refs` : triplet `[id_court, ids, nomp]` crypté par la clé de la note, référence de sa  note _parent_.
@@ -2141,7 +2140,7 @@ export class Note extends GenDoc {
     this.txt = ungzipB(x.t)
     this.titre = titre(this.txt)
     this.dh = x.d
-    this.auts = x.l ? x.l : []
+    this.auts = row.auts || []
     // row.ref à une id de note COURTE
     this.ref = row.ref ? decode(await decrypter(this.cle, row.ref)) : null
     if (this.ref) this.ref[0] = ID.long(this.ref[0], NomGenerique.ns)
@@ -2194,7 +2193,8 @@ export class Note extends GenDoc {
     const session = stores.session
     const cle = Note.clen(id)
     const r = { id, ids: rnd6(), im: exclu ? im : 0, v2 : 0, mc: null }
-    r.txts = await Note.toRowTxt(cle, txt, im)
+    r.txts = await Note.toRowTxt(cle, txt)
+    if (im) r.auts = [im]
     r.ref = await Note.toRowRef(cle, ref)
     const _data_ = encode(r)
     return { _nom: 'notes', id, ids: r.ids, _data_ }
@@ -2202,11 +2202,6 @@ export class Note extends GenDoc {
 
   static async toRowTxt (cle, txt, im, auts) {
     const x = { d: Date.now(), t: gzipB(txt) }
-    if (im) {
-      const nl = [im]
-      if (auts) auts.forEach(t => { if (t !== im) nl.push(t) })
-      x.l = nl
-    }
     return await crypter(cle, new Uint8Array(encode(x)))
   }
 

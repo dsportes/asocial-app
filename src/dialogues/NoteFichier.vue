@@ -14,16 +14,22 @@
       class="full-width bg-yellow-5 text-black titre-md text-bold">
       <div class="row justify-center">
         <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-        <span>{{$t('PNOro' + ro)}}</span>
-        <span>{{$t('PNOexv2' + exv)}}</span>
+        <span v-if="ro">{{$t('PNOro' + ro)}}</span>
+        <span v-if="exv">{{$t('PNOexv2' + exv)}}</span>
       </div>
     </q-toolbar>
   </q-header>
 
   <q-page-container>
     <q-page class="q-pa-xs column items-center">
-      <q-btn flat dense color="primary" class="q-mt-sm" size="md" icon="add"
-        :label="$t('PNFnvaj')" @click="nouveau()"/>
+      <div class="full-width row justify-between items-center">
+        <note-ecritepar v-if="nSt.node.type === 5" :groupe="groupe" :note="nSt.note" @ok="selNa" fic="a"/>
+
+        <q-btn :disable="nSt.node.type === 5 && !naAut" 
+          dense color="primary" class="q-mt-sm" size="md" icon="add"
+          :label="$t('PNFnvaj')" @click="nouveau()"/>
+      </div>
+
       <div v-for="it in state.listefic" :key="it.nom" class="full-width">
         <div class="row">
           <q-expansion-item v-model="exp[it.nom]" class="col" switch-toggle-side
@@ -90,7 +96,7 @@
 
   <!-- Dialogue de création d'un nouveau fichier -->
   <q-dialog v-model="nouveaufichier" persistent>
-    <nouveau-fichier :nomfic="nomfic"/>
+    <nouveau-fichier :nomfic="nomfic" :na="naAut"/>
   </q-dialog>
 
   <!-- Confirmation de suppression -->
@@ -146,6 +152,7 @@ import { MD } from '../app/modele.mjs'
 import { $t, dkli, edvol, dhcool, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
+import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
 import { isAppExc, UNITEV2 } from '../app/api.mjs'
 import { saveAs } from 'file-saver'
 import { SupprFichier } from '../app/operations.mjs'
@@ -155,7 +162,7 @@ export default {
   name: 'NoteFichier',
 
   components: { 
-    BoutonHelp, NouveauFichier
+    BoutonHelp, NouveauFichier, NoteEcritepar
   },
 
   props: { },
@@ -173,41 +180,19 @@ export default {
 
     async nouveau (nf) {
       if (!await this.session.edit()) return
-      const er = this.erEdit()
-      if (er) { 
-        await afficherDiag(this.$t('PNOer' + er ))
-      } else {
-        this.nomfic = nf
-        this.ovnouveaufichier()
-      }
-    },
-
-    erEdit () {
-      if (this.nSt.node.type === 3) return 1
-      const g = this.nSt.node.type === 5 ? this.nSt.egr.groupe : null
-      if (!g) return 0
-      // note de groupe
-      if (g.pe === 1) return 4
-      // le membre ayant l'exclusivité est-il avatar du compte ?
-      if (this.nSt.note.im && !this.gSt.excluEstAvc(g.id)) return 8 
-      // un des avatars du compte est auteur / animateur
-      if (!this.gSt.avcAA(g.id)) return 7
-      return 0
+      this.nomfic = nf
+      this.ovnouveaufichier()
     },
 
     async supprFic (f) {
       if (!await this.session.edit()) return
-      const er = this.erEdit()
-      if (er) { 
-        await afficherDiag(this.$t('PNOer' + er ))
-      } else {
-        this.f = f
-        this.ovsupprfichier()
-      }
+      this.f = f
+      this.ovsupprfichier()
     },
 
     async cfSuppr() {
-      await new SupprFichier().run(this.nSt.note, this.f.idf)
+      const aut = !this.naAut ? 0 : this.aSt.compte.imGA(this.nSt.note.id, this.naAut.id)
+      await new SupprFichier().run(this.nSt.note, this.f.idf, aut)
       MD.fD()
     },
 
@@ -297,11 +282,16 @@ export default {
       }
     },
 
+    selNa (na) { 
+      this.naAut = na
+    }
+
   },
 
   data () {
     return {
       texte: '',
+      naAut: null,
       fc: null, // fichier courant
       itc: null // item courant
     }
@@ -317,22 +307,28 @@ export default {
     const ppSt = stores.pp
     const exp = reactive({})
 
-    function roFic () {
+    function roFic () { 
+      /* Retourne 
+      1: avion 2:figée 3:minimal 4:lecture
+      5: note archivée
+      6: exclu (pour un autre compte), 
+      7: pas auteur
+      */
       const n = nSt.note
-      let x = session.roSt() //1: avion, 2:session bloquée en écriture
-      if (x > 2) x = 2
+      let x = session.roSt // 1:avion 2:figée 3:minimal 4:lecture
       if (x) return x
-      if (n.p) return 3 // note archivée
+      if (n.p) return 5 // note archivée
       const g = nSt.node.type === 5 && nSt.egr ? nSt.egr.groupe : null
       if (g) {
         // note de groupe
         const s = g.avcAuteurs()
-        if (!s.size) return 6 // pas auteur 
+        if (!s.size) return 7 // pas auteur 
         const xav = nSt.mbExclu
-        if (xav && !xav.avc) return 5 // un autre membre a l'exclusivité
+        if (xav && !xav.avc) return 6 // un autre membre a l'exclusivité
       }
       return 0
     }
+
     const ro = ref(roFic())
     
     const state = reactive({
@@ -349,14 +345,13 @@ export default {
       avatar.value = aSt.getElt(nSt.note.id).avatar
     } else if (nSt.node.type === 5) {
       groupe.value = gSt.egr(nSt.note.id).groupe
-      if (ro.value === 0 && ergrV2()) exv.value = 2
+      if (ro.value === 0 && ergrV2(0)) exv.value = 2
     }
 
     function ergrV2 (dv) {
       const g = groupe.value
       const eg = gSt.egr(g.id)
-      if (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV2) return true
-      return false
+      return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV2)
     }
 
     function initState () {

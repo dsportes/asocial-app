@@ -39,8 +39,8 @@
       </div>
 
       <div v-if="!estgr && nSt.node.type === 2" class="q-ma-xs q-pa-xs bord1 titre-md">
-          <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-          <span>{{$t('PNOracgr', [nSt.node.label])}}</span>
+        <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
+        <span>{{$t('PNOracgr', [nSt.node.label])}}</span>
       </div>
 
       <div v-if="err" class="titre-md q-my-sm q-pa-xs bg-yellow-5 text-bold text-italic">
@@ -109,7 +109,7 @@ export default {
       } else {
         id = this.groupe.id
         idc = this.groupe.idh
-        im = this.aSt.compte.imGA(id, naAut.id)
+        im = this.aSt.compte.imGA(id, this.naAut.id)
       }
 
       /* note rattachée à une autre note OU note avatar rattachée à une racine de groupe

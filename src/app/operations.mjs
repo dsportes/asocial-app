@@ -1398,21 +1398,18 @@ export class NoteOpx extends OperationUI {
 args.token: éléments d'authentification du compte.
 args.id ids: identifiant de la note (dont celle du groupe pour un note de groupe)
 args.txts : nouveau texte encrypté
-args.prot : protégé en écriture
-args.idc : compta à qui imputer le volume
-  - pour une note personelle, id du compte de l'avatar
-  - pour une note de groupe : id du "compte" de l'hébergeur idhg du groupe
+args.im : auteur de la note pour un groupe
 Retour:
 */
 export class MajNote extends OperationUI {
   constructor () { super($t('OPssc')) }
 
-  async run (id, ids, im, auts, texte, prot, idc) {
+  async run (id, ids, aut, texte) {
     try {
       const session = stores.session
       const cle = Note.clen(id)
-      const txts = await Note.toRowTxt(cle, texte, im, auts)
-      const args = { token: session.authToken, id, ids, txts}
+      const txts = await Note.toRowTxt(cle, texte)
+      const args = { token: session.authToken, id, ids, txts, aut}
       this.tr(await post(this, 'MajNote', args))
       return this.finOK()
     } catch (e) {
@@ -1545,7 +1542,7 @@ export class ChargerCvs extends OperationUI {
 export class NouveauFichier extends OperationUI {
   constructor () { super($t('OPnvf')) }
 
-  async run (note, fic, lidf, dv2) {
+  async run (note, aut, fic, lidf, dv2) {
     // lidf : liste des idf des fichiers à supprimer
     try {
       const id = note.id
@@ -1589,6 +1586,7 @@ export class NouveauFichier extends OperationUI {
       args.token: éléments d'authentification du compte.
       args.id, ids : de la note
       args.idh : id de l'hébergeur pour une note groupe
+      args.aut: im de l'auteur (pour une note de groupe)
       args.idf : identifiant du fichier
       args.emap : entrée (de clé idf) de la map des fichiers attachés [lg, data]
       args.lidf : liste des fichiers à supprimer
@@ -1597,7 +1595,7 @@ export class NouveauFichier extends OperationUI {
       Retour: aucun
       */
       const emap = await note.toRowMfa(fic) // [lg, x]
-      const args2 = { token: session.authToken, id, ids, idf, idh, emap, lidf }
+      const args2 = { token: session.authToken, id, ids, idf, idh, emap, lidf, aut }
       this.tr(await post(this, 'ValiderUpload', args2))
       ui.setEtf(4)
       // await sleep(1000)
@@ -1644,17 +1642,18 @@ args.token: éléments d'authentification du compte.
 args.id, ids : de la note
 args.idh : id de l'hébergeur pour une note groupe
 args.idf : identifiant du fichier à supprimer
+args.aut: im de l'auteur (pour une note de groupe)
 Retour: aucun
 */
 export class SupprFichier extends OperationUI {
   constructor () { super($t('OPsfa')) }
 
-  async run (note, idf) { 
+  async run (note, idf, aut) { 
     try {
       const session = stores.session
       const gSt = stores.groupe
       const idh = ID.estGroupe(note.id) ? gSt.getGroupe(note.id).idh : session.compteId
-      const args = { token: session.authToken, id: note.id, ids: note.ids, idf, idh }
+      const args = { token: session.authToken, id: note.id, ids: note.ids, idf, idh, aut }
       this.tr(await post(this, 'SupprFichier', args))
       this.finOK()
     } catch (e) {

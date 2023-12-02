@@ -95,8 +95,8 @@ export default {
 
     async valider () {
       const n = this.nSt.note
-      const im = this.avatar ? 0 : this.aSt.compte.imGA(this.groupe.id, this.naAut.id)
-      await new MajNote().run(n.id, n.ids, im, n.auts, this.texte)
+      const aut = this.avatar ? 0 : this.aSt.compte.imGA(this.groupe.id, this.naAut.id)
+      await new MajNote().run(n.id, n.ids, aut, this.texte)
       MD.fD()
     }
   },
@@ -112,6 +112,7 @@ export default {
     const nSt = stores.note
     const aSt = stores.avatar
     const gSt = stores.groupe
+    const pSt = stores.people
     const cfg = stores.config
 
     const type = ref(0)

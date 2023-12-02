@@ -1,23 +1,21 @@
 <template>
   <div class="titre-md">
-    <q-btn no-caps flat :label="$t('PNOaut1', [naAut ? naAut.nom : '???'])" icon-right="expand_more">
-      <q-menu anchor="bottom left" self="top left" max-height="10rem" 
-        max-width="30rem">
-        <q-list class="bg-secondary text-white q-py-xs">
-          <q-item v-for="e in la" :key="e.na.id" 
-            :clickable="!e.ko"
-            v-close-popup @click="selNa(e.na)"
-            class="row items-start w20 q-pa-xs">
-              <div class="fs-md col-4">{{e.na.nom}}</div>
-              <div class="col-8 titre-md">
-                <span v-if="!e.ko">{{$t('ok')}}</span>
-                <span v-else class="text-warning bg-yellow-5 q-pa-xs fs-sm text-bold">
-                  {{$t('PNOecrko' + e.ko)}}</span>
-              </div>
-          </q-item>
-        </q-list>
-      </q-menu>
-    </q-btn>
+    <q-btn-dropdown no-caps dense :color="naAut ? 'primary' : 'warning'"
+      :label="naAut ? $t('PNOaut1' + (fic || ''), [naAut.nom]) : $t('PNOaut2')" 
+      content-style="width:25rem!important">
+      <q-list class="bg-secondary text-white q-py-xs">
+        <q-item v-for="e in la" :key="e.na.id" 
+          :clickable="!e.ko"
+          v-close-popup @click="selNa(e.na)"
+          class="row items-start full-width">
+            <div class="fs-md col-4">{{e.na.nom}}</div>
+            <div class="col-8 titre-md" 
+              :class="e.ko ? 'text-warning bg-yellow-5 fs-sm text-bold' : ''">
+              {{!e.ko ? $t('ok') : $t('PNOecrko' + e.ko)}}
+            </div>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
   </div>
 </template>
 
@@ -32,7 +30,8 @@ export default {
 
   props: { 
     groupe: Object, // groupe de la note (édition ET nouvelle)
-    note: Object // Pour édition d'une note existante seulement
+    note: Object, // Pour édition d'une note existante seulement
+    fic: String // a/m Modif de label pour "ajout" / "modif" de fichier
   },
 
   computed: { },
@@ -57,6 +56,7 @@ export default {
     function init () {
       const auts = nSt.note ? nSt.note.auts || [] : []
       const l = []
+      let ok = false
       // Map (cle:im val:na) des avc participants au groupe idg
       for (const [im, na] of aSt.compte.imNaGroupe(g.value.id)) { 
         let i = auts.indexOf(im)
@@ -67,12 +67,13 @@ export default {
           x.ko = 1
         } else {
           if ((n.value && n.value.im) && (n.value.im !== im)) x.ko = 2
+          else ok = true
         }
         l.push(x)
       }
       l.sort((a,b) => { return a.ko ? (b.ko ? 0 : 1) : (!b.ko ? (a.i < b.i ? -1 : 1) : 1)})
       la.value = l
-      if (l.length && !l[0].ko) selNa(l[0].na)
+      selNa(ok ? l[0].na : null)
     }
 
     function selNa(na) {
@@ -92,6 +93,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.w20
-  width: 30rem
+.w25
+  min-width: 25rem !important
 </style>
