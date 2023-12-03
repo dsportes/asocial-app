@@ -188,7 +188,8 @@ export const useNoteStore = defineStore('note', {
         const r = this.getRacine(n)
         if (n.type > 3) {
           r.nt++
-          if (f && f(n)) r.nf++
+          if (f && f(n.note)) 
+            r.nf++
         }
       })
     },
@@ -353,7 +354,7 @@ export const useNoteStore = defineStore('note', {
           this.rattachNote(n) // on la rattache à sa note de rattachement
         }
       }
-      this.setPreSelect(n.key)
+      // this.setPreSelect(n.key)
       this.setLabel(n)
     },
 

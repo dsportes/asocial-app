@@ -124,8 +124,8 @@ export const useFetatStore = defineStore('fetat', {
               // throw 'Ex de test'
             }
             this.setQueue(0, 0)
-            if (session.debug) console.log(`OK chargement : ${e.idf} ${e.nom}#${e.info}`)
-            e.chargementOK(buf) // Maj IDB de fetat et fdata conjointement
+            if (stores.config.DEBUG) console.log(`OK chargement : ${e.idf} ${e.nom}#${e.info}`)
+            await e.chargementOK(buf) // Maj IDB de fetat et fdata conjointement
           } catch (ex) {
             e.chargementKO(appexc(ex, 20))
             this.setEchec(true, this.encours)

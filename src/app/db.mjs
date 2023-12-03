@@ -629,10 +629,10 @@ export async function gestionFichierSync (lst) {
   const nvFa = []
   const nvAvs = []
   for (const pk in lst) {
-    const s = lst[pk]
-    const avs = avst.getAvnote(s.id, s.ns)
-    if (!avs || avs.v >= s.v) continue // pas d'avnote associé ou déjà à jour (??)
-    const [nv, nvf] = avs.diff(s) // nouvel AvNote compte tenu du nouveau s
+    const n = lst[pk]
+    const avs = avst.getAvnote(n.id, n.ids)
+    if (!avs || avs.v >= n.v) continue // pas d'avnote associé ou déjà à jour (??)
+    const [nv, nvf] = avs.diff(n) // nouvel AvNote compte tenu de la nouvelle note
     nvAvs.push(nv) // changé, au moins la version : il y a peut-être, des idfs en plus et en moins
     if (nvf) for (const x of nvf) nvFa.push(x)
   }

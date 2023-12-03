@@ -164,8 +164,8 @@ export class OnchangeVersion extends OperationWS {
       } else {
         if (!this.avIdsAp.has(row.id)) continue
       }
-      this.buf.putIDB(row)
       const note = await compile(row)
+      if (note._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
       const e = ID.estGroupe(note.id) ? this.egrMaj(note.id) : this.eavMaj(note.id)
       e.lno.push(note)
       if (this.session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
