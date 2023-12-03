@@ -278,7 +278,10 @@ export const useGroupeStore = defineStore('groupe', {
       const aSt = stores.avatar
       const s = aSt.compte.idGroupes(stores.session.avatarId)
       const m = new Map()
-      s.forEach(idg => { m.set(idg, state.map.get(idg))})
+      s.forEach(idg => {
+        const e = state.map.get(idg)
+        m.set(idg, e)
+      })
       return m
     },
 

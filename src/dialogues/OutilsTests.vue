@@ -325,7 +325,7 @@ export default ({
         }
         const buf = u8ToB64(new Uint8Array(encode(trigs)), true)
         localStorage.setItem(pfx + 'trigrammes', buf)
-        console.log('RAZ db ' + nombase + ' trig:' + it.trig)
+        console.log('RAZ db ' + it.nb + ' trig:' + it.trig)
       } catch (e) {
         console.log(e.toString())
       }

@@ -215,7 +215,7 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesIdb) for (const row of this.cAvatars) {
         if (this.avRequis.has(row.id)) {
           this.avatarsToStore.set(row.id, await compile(row))
-          avsMap[row.id] = { v: av.v, dlv: session.compteId === row.id ? dlv1 : dlv2 }
+          avsMap[row.id] = { v: this.avatar.v, dlv: session.compteId === row.id ? dlv1 : dlv2 }
         } else this.avToSuppr.add(row.id)
       }
       // avatars non stockés en IDB
@@ -234,18 +234,34 @@ export class ConnexionCompte extends OperationUI {
       this.groupesToStore = new Map()
       this.grToSuppr = new Set()
       this.grRowsModifies = []
+      const mgx = this.avatar.mgkParIdg
 
       if (session.accesIdb) for (const row of this.cGroupes) {
-        const empg = this.avatar.mpg.get(row.id)
+        const empg = mgx.get(row.id)
         if (empg) {
           this.groupesToStore.set(row.id, await compile(row))
-          const x = {
-            idg: row.id, v: row.v, dlv: dlv2,
-            npgk: empg.mpgk, mbs: Array.from(empg.avs.values())
+          const x = { idg: row.id, v: row.v, dlv: dlv2,
+            npgk: Array.from(empg.npgks.values()), mbs: Array.from(empg.ims.values())
           }
           this.mbsMap[row.id] = x
         } else this.grToSuppr.add(row.id)
       }
+
+      for(const [idg, empg] of mgx) {
+        if (session.fsSync) 
+          await session.fsSync.setGroupe(idg)
+        if (!this.groupesToStore.has(idg)) {
+          let x = this.mbsMap[idg]
+          if (!x) {
+            x = { idg: idg, v: 0, dlv: dlv2,
+              npgk: Array.from(empg.npgks.values()), mbs: Array.from(empg.ims.values())
+            }
+          }
+          this.mbsMap[idg] = x
+        }
+      }
+
+      /*
       for (const [npgk, empg] of this.avatar.mpg) {
         const idg = empg.ng.id
         if (session.fsSync) 
@@ -255,12 +271,14 @@ export class ConnexionCompte extends OperationUI {
           let x = this.mbsMap[idg]
           if (!x) x = {
             idg: idg, v: 0, dlv: dlv2,
-            npgk: npgk, mbs: []
+            npgks: [], mbs: []
           }
+          x.npgks.push(npgk)
           x.mbs.push(empg.im)
           this.mbsMap[idg] = x
         }
       }
+      */
 
       if (!session.accesNet) return
 
@@ -294,11 +312,15 @@ export class ConnexionCompte extends OperationUI {
             if (!this.avatar.mpg.has(idg)) this.grToSuppr.add(idg)
         }
         
-        if (ret.rowAvatars && ret.rowAvatars.length) for (const row of ret.rowAvatars)
+        if (ret.rowAvatars && ret.rowAvatars.length) for (const row of ret.rowAvatars){
+          this.avRowsModifies.push(row)
           this.avatarsToStore.set(row.id, await compile(row))
+        }
         
-        if (ret.rowGroupes && ret.rowGroupes.length) for (const row of ret.rowGroupes)
+        if (ret.rowGroupes && ret.rowGroupes.length) for (const row of ret.rowGroupes) {
+          this.grRowsModifies.push(row)
           this.groupesToStore.set(row.id, await compile(row))
+        }
 
         for (const idx in ret.versions)
           this.versions[idx] = ret.versions[idx]

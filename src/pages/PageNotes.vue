@@ -573,7 +573,7 @@ export default {
         const tf = nx.get(node.key)
         if (tf) {
           tf.nb++
-          console.log('deja vu:', tf.nb, node.key, node.rkey, n.refk)
+          // console.log('deja vu:', tf.nb, node.key, node.rkey, n.refk)
           nx.set(node.key, tf)
           /* if (tf.nb > 10) 
             console.log('???') */

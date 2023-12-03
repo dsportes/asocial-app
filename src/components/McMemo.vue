@@ -23,7 +23,7 @@
           <q-toolbar-title>{{$t('MMCap', [nom])}}</q-toolbar-title>
         </q-toolbar>
 
-        <div v-if='diag' class='q-ma-sm bg-yellow-5 text-warning text-bold'>
+        <div v-if="diag" class='q-ma-sm bg-yellow-5 text-warning text-bold'>
           {{$t('MMCnomaj', [diag])}}
         </div>
 
@@ -43,7 +43,7 @@
           <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
             @click="MD.fD"/>
           <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 
-            :label="$t('valider')" @click="valider"/>
+            :label="$t('valider')" :diable="diag" @click="valider"/>
         </q-card-actions>
 
       </q-card>
@@ -86,7 +86,7 @@ export default {
 
   methods: {
     async zoom () { 
-      this.diag = await this.session.edit(true)
+      this.diag = await this.session.editDiag
       this.nvmc = null
       this.txt = this.memo
       this.ovedition()

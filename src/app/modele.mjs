@@ -1190,7 +1190,7 @@ _data_:
   - _valeur_: `{nomg, cleg, im, idav}` cryptée par la clé K.
     - `nomg`: nom du groupe,
     - `cleg`: clé du groupe,
-    - `im`: indice du membre dans la table `ast` du groupe.
+    - `im`: indice du membre dans la table `flags/anag` du groupe.
     - `idav` : id (court) de l'avatar.
 - `mcmemos` : map des couples `{mc, memo}` à propos des contacts (avatars) et groupes connus du compte:
   - _cle_: `id` crypté par la clé K du compte,
@@ -1378,6 +1378,18 @@ export class Avatar extends GenDoc {
         this.invits.set(ni, { ng, im, id: this.id })
       }
     }
+  }
+
+  get mgkParIdg () {
+    const m = new Map()
+    for (const [npgk, empg] of this.mpg) {
+      const idg = empg.ng.id
+      let x = m.get(idg)
+      if (!x) { x = { npgks: new Set(), ims: new Set() }; m.set(idg, x) }
+      x.npgks.add(npgk)
+      x.ims.add(empg.im)
+    }
+    return m
   }
 
   async getEpgk (ni) { // {nomg, cleg, im, idav (court)} cryptée par la clé K.
