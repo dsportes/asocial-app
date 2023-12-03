@@ -65,9 +65,9 @@
           </div>
         </q-card-section>
         <q-card-actions horizontal>
-          <q-btn class="q-mx-xs" color="warning" icon="check" dense flat label="Voir la note" @click="voirnote"/>
-          <q-btn class="q-mx-xs" color="primary" icon="open_in_new" dense flat label="Afficher" @click="affFic"/>
-          <q-btn class="q-mx-xs" color="primary" icon="save_alt" dense flat label="Sauvegarder" @click="enregFic"/>
+          <q-btn class="q-mx-xs" color="warning" icon="check" dense flat :label="$t('FAVb1')" @click="voirnote"/>
+          <q-btn class="q-mx-xs" color="primary" icon="open_in_new" dense flat :label="$t('FAVb2')" @click="affFic"/>
+          <q-btn class="q-mx-xs" color="primary" icon="save_alt" dense flat :label="$t('FAVb3')" @click="enregFic"/>
         </q-card-actions>
       </q-card>
     </div>

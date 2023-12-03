@@ -764,6 +764,8 @@ export default {
 
     compileFiltre(fSt.filtre.notes)
 
+    preSelect()
+
     const mapmc = ref(Motscles.mapMC(true, 0))
     fSt.contexte.notes.mapmc = mapmc.value
 

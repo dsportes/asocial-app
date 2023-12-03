@@ -53,7 +53,7 @@
                 <div class="titre-md q-mr-sm">{{$t('PNFl1')}}</div>
                 <q-btn v-if="session.synchro || session.avion"
                   icon="clear" size="md" dense color="negative"
-                  @click="itc=it;ovconfirmav1()"/>
+                  @click="this.itc = it; ovconfirmav1()"/>
               </div>
               <div v-if="!it.avn && (session.synchro || session.avion)"
                 class="text-primary titre-md cursor-pointer text-bold"
@@ -196,7 +196,11 @@ export default {
       MD.fD()
     },
 
-    avidf (f) {
+    async avidf (f) {
+      if (this.session.avion) {
+        await afficherDiag(this.$t('PNFav3'))
+        return
+      }
       setTimeout(async () => {
         const err = await gestionFichierMaj(this.nSt.note, true, f.idf, '')
         if (isAppExc(err)) MD.fd()
@@ -208,7 +212,11 @@ export default {
       await gestionFichierMaj(this.nSt.note, false, this.fc.idf, '')
     },
 
-    avnom (it) {
+    async avnom (it) {
+      if (this.session.avion) {
+        await afficherDiag(this.$t('PNFav3'))
+        return
+      }
       setTimeout(async () => {
         await gestionFichierMaj(this.nSt.note, true, 0, it.nom)
       }, 50)

@@ -366,11 +366,8 @@ export class ConnexionCompte extends OperationUI {
     const auj = AMJ.amjUtc()
     for (const ids in rows) {
       const note = await compile(rows[ids])
-
-      if (session.accesNet && note.st < auj) { // note temporaire à supprimer
-        this.buf.lsecsup.push(note)
-      } else {
-        if (!note._zombi) (estGr ? gSt : aSt).setNote(note)
+      if (!note._zombi) {
+        (estGr ? gSt : aSt).setNote(note)
         if (session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
       }
     }
@@ -916,21 +913,6 @@ export class ConnexionCompte extends OperationUI {
         } else // Non on purge les notes
           this.buf.purgeGroupeNoIDB(groupe.id)
         syncitem.push('10' + na.id, 1, 'SYgro2', [na.nom, n1, n2, n3, n4])
-      }
-
-      /* Mises à jour éventuelles du serveur **********************************************/
-      if (session.accesNetNf) {
-        /* Suppression des notes temporaires ayant dépassé leur date limite */
-        if (this.buf.lsecsup.length) {
-          for (const s of this.buf.lsecsup) {
-            try {
-              const args = { token: session.authToken, id: s.id, ids: s.ids, idc: s.idCompta }
-              this.tr(await post(this, 'SupprNote', args))
-            } catch (e) {
-              console.log(e.message)
-            }
-          }
-        }
       }
 
       // Finalisation en une seule fois de l'écriture du nouvel état en IDB

@@ -360,7 +360,6 @@ export class IDBbuffer {
     this.lgrmb = new Set() // set des ids des groupes dont les membres sont à purger
     this.lgrno = new Set() // set des ids des groupes dont les notes sont à purger
     this.mapSec = {} // map des notes (cle: id/ids, valeur: note) pour gestion des fichiers locaux
-    this.lsecsup = [] // liste des notes temporaires à faire supprimer sur le serveur en fin de connexion
   }
 
   putIDB (row) { if (this.synchro) this.lmaj.push(row); return row }

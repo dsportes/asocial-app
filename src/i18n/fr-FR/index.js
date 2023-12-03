@@ -1080,6 +1080,9 @@ export default {
   FAVl6: 'Statut',
   FAVl7: 'Nom',
   FAVl8: 'Version',
+  FAVb1: 'Voir la note',
+  FAVb2: 'Afficher',
+  FAVb3: 'Sauvegarder',
 
   PNFnbv: 'Pas de version | Une version | {count} versions',
   PNFl1: 'La version la plus récente est visible en avion',
@@ -1122,6 +1125,7 @@ export default {
   PNFsf: 'Confirmer ou infirmer la suppression du fichier',
   PNFav1: 'La dernière version du fichier de nom ci-dessous ne SERA PLUS automatiquement accessible en mode avion lors de l\'ajout d\'une nouvelle version.',
   PNFav2: 'Le fichier ci-dessous ne SERA PLUS accessible en mode avion.',
+  PNFav3: 'Pour déclarer un fichier accessible en mode avion, il faut être en mode "synchronisé".',
   PNFcpp: 'Fichier copié dans le presse-papier',
   PNFfbl: 'Le compte est bloqué, la lecture des données est impossible',
 
