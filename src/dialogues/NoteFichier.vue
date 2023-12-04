@@ -64,9 +64,9 @@
                   <div class="col">
                     <span class="text-bold q-pr-lg">{{f.info}}</span>
                     <span class="fs-md">{{edvol(f.lg)}} - {{f.type}} - </span>
-                    <span class="font-mono fs-sm">#{{f.idf}}</span>
+                    <span class="font-mono fs-sm">#{{suffixe(f.idf)}}</span>
                   </div>
-                  <div class="col-auto font-mono fs-sm">{{dhcool(f.dh)}}</div>
+                  <div class="col-auto font-mono fs-sm">{{dhcool(f.dh, true)}}</div>
                 </div>
                 <div class="column">
                   <div v-if="it.avn && idy === 0" class="titre-md text-italic">{{$t('PNFl4')}}</div>
@@ -149,7 +149,7 @@
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
-import { $t, dkli, edvol, dhcool, afficherDiag } from '../app/util.mjs'
+import { $t, dkli, edvol, dhcool, afficherDiag, suffixe } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
@@ -452,7 +452,7 @@ export default {
       confirmav1, ovconfirmav1, confirmav2, ovconfirmav2,
       ui, session, nSt, aSt, gSt, avnSt, ppSt,
       exv, avatar, groupe, state, exp, ro,
-      MD, dkli, ergrV2, edvol, dhcool
+      MD, dkli, ergrV2, edvol, dhcool, suffixe
     }
   }
 
