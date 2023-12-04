@@ -18,80 +18,101 @@
         <span v-if="exv">{{$t('PNOexv2' + exv)}}</span>
       </div>
     </q-toolbar>
+    <div class="full-width row justify-between items-center">
+      <note-ecritepar v-if="nSt.node.type === 5" 
+        :groupe="groupe" :note="nSt.note" @ok="selNa" fic="a"/>
+      <q-btn :disable="nSt.node.type === 5 && !naAut" 
+        dense color="primary" class="q-mt-sm" size="md" icon="add"
+        :label="$t('PNFnvaj')" @click="nouveau()"/>
+    </div>
   </q-header>
 
   <q-page-container>
     <q-page class="q-pa-xs column items-center">
-      <div class="full-width row justify-between items-center">
-        <note-ecritepar v-if="nSt.node.type === 5" :groupe="groupe" :note="nSt.note" @ok="selNa" fic="a"/>
-
-        <q-btn :disable="nSt.node.type === 5 && !naAut" 
-          dense color="primary" class="q-mt-sm" size="md" icon="add"
-          :label="$t('PNFnvaj')" @click="nouveau()"/>
-      </div>
 
       <div v-for="it in state.listefic" :key="it.nom" class="full-width">
-        <div class="row">
-          <q-expansion-item v-model="exp[it.nom]" class="col" switch-toggle-side
-            header-class="expansion-header-class-1 titre-md bg-secondary text-white">
-            <template v-slot:header>
-              <q-item-section>
-                <div class="row justify-between items-center">
-                  <div class="col titre-lg text-bold">{{it.nom}}</div>
-                  <div class="col-auto row items-center">
-                    <div class="col fs-md q-mr-md">
-                      {{$t('PNFnbv', it.l.length, { count: it.l.length})}}
-                    </div>
-                    <q-btn dense color="primary" class="q-mt-sm btnp" size="md" icon="add"
-                      @click="nouveau(it.nom)"/>
-                  </div>
-                </div>
-              </q-item-section>
-            </template>
-            <q-card-section class="ma-qcard-section column">
-              <div v-if="it.avn" class="titre-md row items-center">
-                <div class="titre-md q-mr-sm">{{$t('PNFl1')}}</div>
-                <q-btn v-if="session.synchro || session.avion"
-                  icon="clear" size="md" dense color="negative"
-                  @click="this.itc = it; ovconfirmav1()"/>
-              </div>
-              <div v-if="!it.avn && (session.synchro || session.avion)"
-                class="text-primary titre-md cursor-pointer text-bold"
-                @click="avnom(it)">{{$t('PNFl2')}}</div>
-              <div v-for="(f, idy) in it.l" :key="f.idf" class="q-my-sm">
-                <q-separator class="q-mb-sm"/>
-                <div class="row justify-between items-center">
-                  <div class="col">
-                    <span class="text-bold q-pr-lg">{{f.info}}</span>
-                    <span class="fs-md">{{edvol(f.lg)}} - {{f.type}} - </span>
-                    <span class="font-mono fs-sm">#{{suffixe(f.idf)}}</span>
-                  </div>
-                  <div class="col-auto font-mono fs-sm">{{dhcool(f.dh, true)}}</div>
-                </div>
-                <div class="column">
-                  <div v-if="it.avn && idy === 0" class="titre-md text-italic">{{$t('PNFl4')}}</div>
-                  <div v-if="!f.av && (session.synchro || session.avion)"
-                    class="text-primary titre-md cursor-pointer text-bold"
-                    @click="avidf(f)">{{$t('PNFl5')}}</div>
-                  <div v-if="f.av" class="titre-md row items-center">
-                    <div class="titre-md q-mr-sm">{{$t('PNFl6')}}</div>
-                    <q-btn v-if="session.synchro || session.avion"
-                      icon="clear" size="md" dense color="negative"
-                      @click="fc=f;ovconfirmav2()"/>
-                  </div>
-                  <div class="col-auto row justify-end q-gutter-xs h13">
-                    <q-btn size="sm" dense color="primary" icon="content_copy" :label="$t('PNFcop')" @click="copierFic(f)"/>
-                    <q-btn size="sm" dense color="primary" icon="open_in_new" :label="$t('PNFaff')" @click="affFic(f)"/>
-                    <q-btn size="sm" dense color="primary" icon="save" :label="$t('PNFenreg')" @click="enregFic(f)"/>
-                    <q-btn size="sm" dense color="warning" icon="delete" :label="$t('PNFsuppr')" @click="supprFic(f)"/>
-                  </div>
-                </div>
-              </div>
-            </q-card-section>
-          </q-expansion-item>
+
+        <div class="row items-center">
+          <div class="col-4 fs-lg font-mono text-bold">{{it.nom}}</div>
+          <q-toggle class="col-6 titre-sm" v-model="state.noms[it.nom]"
+            checked-icon="airplanemode_active"
+            :color="state.noms[it.nom] ? 'green': 'grey'"
+            :label="$t('PNFavion1')"
+            unchecked-icon="airplanemode_inactive"
+            @click="av1Chg(it)"
+            :disable="!(session.synchro || session.avion)"
+          />
+          <q-btn class="col-2" dense color="primary" size="sm" icon="add"
+            :label="$t('PNFversion')" @click="nouveau(it.nom)"/>
         </div>
+
+        <div v-for="(f, idy) in it.l" :key="f.idf" :class="dkli(idy) + 'q-my-sm q-ml-lg'">
+          <div class="row items-start">
+            <div class="col-3 font-mono info">{{f.info || '-'}}</div>
+            <div class="col row justify-between">
+              <div class="fs-sm">
+                <span class="q-mr-sm">#{{suffixe(f.idf)}}</span>
+                <span class="q-mr-sm">{{f.type}}</span>
+                <span>{{edvol(f.lg)}}</span>
+              </div>
+              <div class="font-mono fs-sm q-mr-sm">{{dhcool(f.dh, true)}}</div>
+            </div>
+
+            <div class="col-auto">
+              <q-btn dense size="md" rounded
+                :icon="(it.avn && idy === 0) || state.idfs[f.idf] ? 'airplanemode_active' : 'airplanemode_inactive'" 
+                :color="(it.avn && idy === 0) || state.idfs[f.idf] ? 'green': 'grey'">
+                <q-menu anchor="bottom left" self="top left" max-height="10rem" 
+                  max-width="25rem">
+                  <q-list class="q-py-xs bord1 bg-secondary text-white">
+                    <q-item v-if="it.avn && idy === 0" 
+                      class="titre-md text-italic" clickable v-close-popup>
+                      {{$t('PNFl4')}}
+                    </q-item>
+                    <q-item clickable v-close-popup>
+                      <q-toggle class="titre-md" v-model="state.idfs[f.idf]" v-close-popup
+                        checked-icon="airplanemode_active"
+                        :color="state.idfs[f.idf] ? 'green': 'grey'"
+                        :label="$t('PNFl7')"
+                        unchecked-icon="airplanemode_inactive"
+                        @click="av2Chg(f)"
+                        :disable="!(session.synchro || session.avion)"
+                      />
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
+
+            <q-btn class="q-ml-xs" dense size="md" rounded
+              icon="more_vert" color="primary">
+              <q-menu anchor="bottom left" self="top left" max-height="10rem" 
+                max-width="20rem">
+                <q-list class="q-py-xs bord1 bg-black text-white">
+                  <q-item clickable v-close-popup  @click="copierFic(f)">
+                    <q-item-section avatar><q-icon color="primary" name="content_copy" /></q-item-section>
+                    <q-item-section>{{$t('PNFcop')}}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup  @click="affFic(f)">
+                    <q-item-section avatar><q-icon color="primary" name="open_in_new" /></q-item-section>
+                    <q-item-section>{{$t('PNFaff')}}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup  @click="enregFic(f)">
+                    <q-item-section avatar><q-icon color="primary" name="save" /></q-item-section>
+                    <q-item-section>{{$t('PNFenreg')}}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup  @click="supprFic(f)">
+                    <q-item-section avatar><q-icon color="warning" name="delete" /></q-item-section>
+                    <q-item-section>{{$t('PNFsuppr')}}</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
+            </div>
+          </div>
+        </div>
+        <q-separator color="orange" size="2px" class="q-mb-sm"/>
       </div>
-      </q-page>
+    </q-page>
   </q-page-container>
 
   <!-- Dialogue de création d'un nouveau fichier -->
@@ -121,8 +142,8 @@
         <div class="q-mt-sm fs-md font-mono text-bold">{{itc.nom}}</div>
       </q-card-section>
       <q-card-actions vertical align="center">
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
-        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfAvnom" />
+        <q-btn flat :label="$t('renoncer')" color="primary" @click="cfAvnom(false)" />
+        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfAvnom(true)" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -135,8 +156,8 @@
         <div class="q-mt-sm fs-md font-mono text-bold">{{fc.nom}} - {{fc.info}}</div>
       </q-card-section>
       <q-card-actions vertical align="center">
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
-        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfAvidf" />
+        <q-btn flat :label="$t('renoncer')" color="primary" @click="cfAvidf(false)" />
+        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfAvidf(true)" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -149,7 +170,7 @@
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { MD } from '../app/modele.mjs'
-import { $t, dkli, edvol, dhcool, afficherDiag, suffixe } from '../app/util.mjs'
+import { $t, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
@@ -207,24 +228,48 @@ export default {
       }, 50)
     },
 
-    async cfAvidf () {
-      MD.fD()
-      await gestionFichierMaj(this.nSt.note, false, this.fc.idf, '')
-    },
-
-    async avnom (it) {
+    async av1Chg (it) {
+      const v = this.state.noms[it.nom]
       if (this.session.avion) {
+        this.state.noms[it.nom] = !v
         await afficherDiag(this.$t('PNFav3'))
         return
       }
-      setTimeout(async () => {
+      if (v) {
         await gestionFichierMaj(this.nSt.note, true, 0, it.nom)
-      }, 50)
+      } else {
+        this.itc = it
+        this.ovconfirmav1()
+      }
     },
 
-    async cfAvnom () {
+    async cfAvnom (cf) {
       MD.fD()
-      await gestionFichierMaj(this.nSt.note, false, 0, this.itc.nom)
+      if (cf)
+        await gestionFichierMaj(this.nSt.note, false, 0, this.itc.nom)
+      else this.state.noms[this.itc.nom] = false
+    },
+
+    async av2Chg (f) {
+      const v = this.state.idfs[f.idf]
+      if (this.session.avion) {
+        this.state.idfs[f.idf] = !v
+        await afficherDiag(this.$t('PNFav3'))
+        return
+      }
+      if (v) {
+        await gestionFichierMaj(this.nSt.note, true, f.idf, '')
+      } else {
+        this.fc = f
+        this.ovconfirmav2()
+      }
+    },
+
+    async cfAvidf (cf) {
+      MD.fD()
+      if (cf)
+        await gestionFichierMaj(this.nSt.note, false, this.fc.idf, '')
+      else this.state.idfs[this.fc.idf] = false
     },
 
     async blobde (f, b) {
@@ -341,7 +386,9 @@ export default {
     
     const state = reactive({
       avn: null,
-      listefic: []
+      listefic: [],
+      noms: {},
+      idfs: {}
     })
 
     const avatar = ref(null)
@@ -370,6 +417,8 @@ export default {
 
     function listefichiers (n, avn) {
       try {
+      state.noms = {}
+      state.idfs = {}
       const lst = []
       const mnom = {}
       let dhmax = 0
@@ -377,8 +426,15 @@ export default {
       for (const [idf, x] of n.mfa) {
         /* mfa : Map de clé idf : { nom, info, dh, type, gz, lg, sha } */
         const f = n.mfa.get(idf)
-        let e = mnom[f.nom]; if (!e) { e = []; mnom[f.nom] = e; lst.push(f.nom) }
+        let e = mnom[f.nom]; 
+        if (!e) { 
+          state.noms[f.nom] = avn && avn.mnom[f.nom] ? true : false
+          e = []
+          mnom[f.nom] = e
+          lst.push(f.nom) 
+        }
         const av = avn && (avn.lidf.indexOf(idf) !== -1) ? true : false
+        state.idfs[idf] = av
         e.push({ ...f, idf, av })
       }
       lst.sort((a, b) => { return a < b ? -1 : (a > b ? 1 : 0) })
@@ -477,4 +533,11 @@ export default {
   height: 1.3rem
 .btnp
   margin-top: 0 !important
+.btn
+  min-height: 1.6rem !important
+  max-height: 1.6rem !important
+  min-width: 1.6ren
+.info
+  max-height: 1.6rem !important
+  overflow-y: hidden
 </style>

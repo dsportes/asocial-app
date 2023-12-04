@@ -30,7 +30,7 @@
           <div class="q-my-sm font-mono fs-md">{{fic.type}} - {{fic.lg}}o</div>
           <nom-generique v-model="nfic" :init-val="nfic" :label="$t('PNFnv7')" />
           <nom-generique class="q-mt-md" v-model="info" :label="$t('PNFnv8')"
-            :suffix="sfx" :init-val="info"/>
+            :init-val="info"/>
           <q-stepper-navigation class="row q-gutter-md justify-end">
             <q-btn flat @click="MD.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
             <q-btn flat @click="step=1" color="primary" :label="$t('precedent')" class="q-ml-sm" />
@@ -51,7 +51,7 @@
           <div v-if="lstfic.length" class="fs-md q-my-md">
             <div v-for="f in lstfic" :key="f.idf" class="row items-center">
               <q-checkbox class="col-1" v-model="f.sel" dense @click="calculvol" />
-              <div class="col-5">{{f.info}}</div>
+              <div class="col-5">{{f.info || dhstring(f.dh)}}</div>
               <div class="col-2 font-mono">{{edvol(f.lg)}}</div>
               <div class="col-4 font-mono">{{dhcool(f.dh)}}</div>
             </div>
@@ -85,7 +85,7 @@ import { reactive, toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { afficherDiag, edvol, dhcool, readFile, rnd6, suffixe } from '../app/util.mjs'
 import { MD } from '../app/modele.mjs'
-import { $t, dkli, trapex } from '../app/util.mjs'
+import { $t, dkli, trapex, dhstring } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NouveauFichier } from '../app/operations.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
@@ -110,8 +110,10 @@ export default {
       try {
       if (file) {
         const { size, name, type, u8 } = await readFile(file, true)
-        this.fic.nom = this.nomfic || name
-        this.fic.info = this.nomfic ? name : ''
+        const i = name.lastIndexOf('.')
+        const n = i == -1 ? name : name.substring(0, i - 1)
+        this.fic.nom = this.nomfic || n
+        this.fic.info = ''
         this.fic.lg = size
         this.fic.type = type
         this.fic.u8 = u8
@@ -125,7 +127,7 @@ export default {
         this.idf = rnd6()
         this.nfic = this.fic.nom
         this.sfx = '#' + suffixe(this.idf)
-        this.info = this.fic.info || 'version-1'
+        this.info = this.fic.info
       }
       if (s === 3) {
         try {
@@ -159,7 +161,7 @@ export default {
       fic = await this.nSt.note.nouvFic(
         this.idf, 
         this.nfic, 
-        (this.info || '') + this.sfx,
+        this.info || '',
         this.fic.lg, 
         this.fic.type, 
         this.fic.u8)
@@ -259,7 +261,7 @@ export default {
     ui.etf = 0
 
     return {
-      nSt, aSt, gSt, ui, session, MD, edvol, dhcool, dkli,
+      nSt, aSt, gSt, ui, session, MD, edvol, dhcool, dkli, dhstring,
       nfic,
       fic,
       step,
