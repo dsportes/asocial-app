@@ -539,5 +539,5 @@ export default {
   min-width: 1.6ren
 .info
   max-height: 1.6rem !important
-  overflow-y: hidden
+  overflow: hidden
 </style>

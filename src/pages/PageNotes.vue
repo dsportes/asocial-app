@@ -17,7 +17,11 @@
         <div @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)">
           <div class="row items-start">
             <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
-              size="sm" class="col-auto q-mr-sm" />
+              size="sm" class="col-auto q-mr-sm">
+              <q-badge v-if="nbf(prop.node)" color="orange" rounded>
+                <q-icon name="attachment" color="black" class="q-ml-xs" />
+              </q-badge>
+            </q-icon>
             <q-icon v-if="prop.node.ratt" size="xs" class="q-mx-sm cursor-pointer" name="star"
               color="green-5"/>
             <div :class="'col ' + styles[prop.node.type]">{{lib(prop.node)}}</div>
@@ -315,6 +319,10 @@ export default {
   },
 
   methods: {
+    nbf(node) {
+      const n = node.note
+      return n && n.mfa ? n.mfa.size : 0
+    },
     pc (i, j) { return !i ? '' : Math.round((j * 100) / i) + '%' },
 
     clicknode (n) {
