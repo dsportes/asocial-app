@@ -2521,5 +2521,6 @@ const classes = {
   sponsorings: Sponsoring,
   chats: Chat,
   membres: Membre,
+  chatgrs: Chatgr,
   cvs: Cv
 }

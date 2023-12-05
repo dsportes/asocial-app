@@ -33,7 +33,7 @@
   </div>
 
   <div class="q-my-lg petitelargeur maauto" v-if="gSt.pgLgFT.length">
-    <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx)">
+    <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-sm'">
       <apercu-genx :na="e.groupe.na" :cv="e.groupe.cv" :idx="idx" />
       <div class="row full-width items-center justify-between">
         <div>
@@ -46,8 +46,11 @@
             <span class="text-italic">{{$t('PGinv', nbiv(e), {count: nbiv(e)})}}</span>
           </div>
         </div>
-        <q-btn class="q-ml-md btn1" icon="open_in_new" :label="$t('detail')" size="md" color="primary" 
-          dense @click.stop="courant(e)"/>
+        <div class="row justify-end">
+          <q-btn class="q-ml-md btn1" icon="chat" :label="$t('PGchat')" 
+            size="md" color="primary" dense @click.stop="chat(e)"/>
+          <q-btn class="q-ml-md btn1" icon="open_in_new" :label="$t('detail')" 
+            size="md" color="primary" dense @click.stop="courant(e)"/>
       </div>
     </q-card>
   </div>
@@ -75,19 +78,24 @@
     </q-card>
   </q-dialog>
 
+  <q-dialog v-model="chat" persistent full-height>
+    <apercu-chatgr/>
+  </q-dialog>
+
 </q-page>
 </template>
 
 <script>
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { edvol, $t, dkli } from '../app/util.mjs'
+import { edvol, $t, dkli, afficherDiag } from '../app/util.mjs'
 import { MD, Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import InvitationsEncours from '../components/InvitationsEncours.vue'
+import ApercuChatgr from '../components/ApercuChartgr.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouveauGroupe } from '../app/operations.mjs'
 
@@ -96,7 +104,7 @@ export default {
 
   props: { tous: Boolean },
 
-  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, InvitationsEncours },
+  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, InvitationsEncours, ApercuChatgr },
 
   computed: {
   },
@@ -111,6 +119,12 @@ export default {
     async courant (elt) {
       this.session.setGroupeId(elt.groupe.id)
       this.ui.setPage('groupe', 'groupe')
+    },
+
+    async chat (elt) {
+      this.session.setGroupeId(elt.groupe.id)
+      
+      this.ovchatgr()
     },
 
     exp (g) {
@@ -166,9 +180,11 @@ export default {
 
     const crgr = ref(false)
     function ovcrgr () { MD.oD(crgr) }
+    const chatgr = ref(false)
+    function ovchatgr () { MD.oD(chatgr) }
 
     return {
-      MD, crgr, ovcrgr,
+      MD, crgr, ovcrgr, chatgr, ovchatgr,
       ui, session, aSt, gSt, dkli,
       stats,
       mapmc,

@@ -15,15 +15,14 @@
     >
       <template v-slot:default-header="prop">
         <div @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)">
-          <div class="row items-start">
-            <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
-              size="sm" class="col-auto q-mr-sm">
-              <q-badge v-if="nbf(prop.node)" color="orange" rounded>
-                <q-icon name="attachment" color="black" class="q-ml-xs" />
-              </q-badge>
-            </q-icon>
-            <q-icon v-if="prop.node.ratt" size="xs" class="q-mx-sm cursor-pointer" name="star"
+          <div class="row items-center">
+            <q-icon v-if="prop.node.ratt" size="xs" class="col-auto q-mr-xs cursor-pointer" name="star"
               color="green-5"/>
+            <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
+              size="sm" class="col-auto q-mr-xs"/>
+            <q-icon v-if="nbf(prop.node)" name="attachment" class="col-auto q-mr" color="orange" size="sm"/>
+            <q-badge v-if="nbf(prop.node)" class="col-auto q-mr-xs" color="orange" rounded 
+              :label="nbf(prop.node)" text-color="black"/>
             <div :class="'col ' + styles[prop.node.type]">{{lib(prop.node)}}</div>
           </div>
         </div>

@@ -899,6 +899,9 @@ export default {
   ' Le chat ne redeviendra "actif" qu\'à la prochaine écriture.',
   CHeffa: '(effacé {0})',
 
+  CHGtit: 'Chat du groupe {0}',
+  CHGadd: 'Item',
+
   SYtit: 'Chargement et synchronisation du compte',
   SYcpt: 'Compte et comptabilité',
   SYava: 'avatar : {0}',
@@ -1287,7 +1290,7 @@ export default {
   PGvg: 'Voir le groupe',
   PGmesav: 'Ma participation au groupe | Ma participation au groupe | Mes participations au groupe',
   PGanim: 'Il faut avoir le droit d\'animation pour éditer les mots clés du groupe.',
-
+  PGchat: 'Ouvrir le chat',
   // Aperçu Membre
   AMct1: 'Inscrit comme "contact" par {0}.',
   AMct2: 'Inscrit comme "contact" par #{0} (oublié ou disparu).',

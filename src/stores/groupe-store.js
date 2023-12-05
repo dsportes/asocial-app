@@ -30,6 +30,12 @@ export const useGroupeStore = defineStore('groupe', {
       return state.map.get(id)
     },
 
+    // chat du groupe courant
+    chatgr (state) {
+      const id = stores.session.groupeId
+      return state.map.get(id).chatgr
+    },
+
     // Retourne [amb, ano] : les avatars du compte ont ou non accès aux membres / notes
     ambano (state) {
       return state.egrC ? stores.avatar.compte.ambano(state.egrC.groupe) : [false, false]

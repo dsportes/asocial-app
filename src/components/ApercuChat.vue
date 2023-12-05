@@ -26,14 +26,14 @@
           </q-toolbar>
           <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
           <div class="q-pa-xs row justify-around">
-            <q-btn :label="$t('CHadd2')" icion="add" color="primary" @click="editer"/>
-            <q-btn :label="$t('CHrac')" icion="phone_disabled" color="primary" @click="raccrocher"/>
+            <q-btn :label="$t('CHadd2')" class="btn" icon="add" color="primary" @click="editer"/>
+            <q-btn :label="$t('CHrac')" class="btn" icon="phone_disabled" color="primary" @click="raccrocher"/>
           </div>
         </q-header>
 
         <q-page-container>
           <q-card class="q-pa-sm">
-            <div v-for="(it, n) in chat.items" :key="n">
+            <div v-for="it in chat.items" :key="it.dh + '/' + it.a">
               <q-chat-message :sent="it.a===0" 
                 :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
                 text-color="white"
@@ -257,4 +257,7 @@ export default {
 .btn1
   padding: 0 !important
   width: 1.5rem !important
+.btn
+  min-height: 1.5rem !important
+  max-height: 1.5rem !important
 </style>
