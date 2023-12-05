@@ -24,6 +24,7 @@ const STORES = {
   sponsorings: '[id+ids]',
   groupes: 'id',
   membres: '[id+ids]',
+  chatgrs: '[id+ids]',
   notes: '[id+ids]',
   avnote: '[id+ids]',
   fetat: 'id',
@@ -467,12 +468,14 @@ export async function commitRows (opBuf, setCompteClek, setVersions) {
         const id = { id: idk }
         await db.groupes.where(id).delete()
         await db.membres.where(id).delete()
+        await db.chatgrs.where(id).delete()
         await db.notes.where(id).delete()
       }
 
       for (const idk of idgcmb) {
         const id = { id: idk }
         await db.membres.where(id).delete()
+        await db.chatgrs.where(id).delete()
       }
 
       for (const idk of idgcno) {

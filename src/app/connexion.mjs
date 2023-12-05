@@ -494,11 +494,13 @@ export class ConnexionCompte extends OperationUI {
   }
 
   /** Chargement pour un groupe de ses membres postérieurs au plus récent ************/
-  async chargerMembres(groupe, vidb, vsrv) {
+  async chargerMembresChatgrs(groupe, vidb, vsrv) {
     const id = groupe.id
     const session = stores.session
     let n1 = 0, n2 = 0
     const rows = new Map()
+
+    let rowCh = null
     for (const row of this.cMembres) {
       n1++
       if (row.id === id) {
@@ -509,13 +511,21 @@ export class ConnexionCompte extends OperationUI {
         }
       }
     }
+    for (const row of this.cChatgrs) {
+      if (row.id === id) rowCh = row
+    }
+
 
     let rowMembres
 
     if (session.accesNet && (!vidb || vidb < vsrv)) {
       const args = { token: session.authToken, id, v: vidb }
-      const ret = this.tr(await post(this, 'ChargerMembres', args))
+      const ret = this.tr(await post(this, 'ChargerMembresChatgrs', args))
       rowMembres = ret.rowMembres
+      if (ret.rowChatgr) {
+        rowCh = ret.rowChatgr
+        this.buf.putIDB(rowCh)
+      }
     }
     if (rowMembres && rowMembres.length) {
       for (const row of rowMembres) {
@@ -553,6 +563,11 @@ export class ConnexionCompte extends OperationUI {
         const membre = await compile(row)
         gSt.setMembre(membre)
       }
+    }
+    
+    if (rowCh) {
+      const chatgr = await compile(rowCh)
+      gSt.setChatgr(chatgr)
     }
     
     return [n1, n2]
@@ -841,6 +856,7 @@ export class ConnexionCompte extends OperationUI {
       this.cTickets = session.estComptable && session.accesIdb ? await getColl('tickets') : []
       this.cSponsorings = session.accesIdb ? await getColl('sponsorings') : []
       this.cMembres = session.accesIdb ? await getColl('membres') : []
+      this.cChatgrs = session.accesIdb ? await getColl('chatgrs') : []
 
       // Itération sur chaque avatar: notes, chats, sponsorings, tickets
       for (const [, e] of aSt.map) {
@@ -871,7 +887,7 @@ export class ConnexionCompte extends OperationUI {
       }
 
       // Itération sur chaque groupe: notes, membres
-      // TODO : gérer les groupes inactifs (sans membres et sans notes, les purger de IDB)
+      // TODO ??? : gérer les groupes inactifs (sans membres et sans notes, les purger de IDB)
       for (const [, eg] of gSt.map) {
         const groupe = eg.groupe
         const objidb = Versions.get(groupe.id)
@@ -894,8 +910,8 @@ export class ConnexionCompte extends OperationUI {
         let amb = false // Un avatar membre au moins a-t-il accès aux membres ?
         for (const im of emg.mbs)
           if ((groupe.flags[im] & FLAGS.AM) && (groupe.flags[im] & FLAGS.DM)) amb = true
-        if (amb) { // Oui on recharge les membres
-          const [x3, x4] = await this.chargerMembres(groupe, vidb, vsrv)
+        if (amb) { // Oui on recharge les membres et Chatgrs
+          const [x3, x4] = await this.chargerMembresChatgrs(groupe, vidb, vsrv)
           n3 = x3
           n4 = x4
         } else // Non, on purge la base locales des membres

@@ -8,6 +8,7 @@ import { UNITEV1, UNITEV2, FLAGS } from '../app/api.mjs'
 - map : des groupes dont un des avatars du compte courant est membre
   Sous-collection pour chaque groupe id :
     groupe: l'objet Groupe
+    chatgr: l'objet chatgr du groupe
     notes: Map des notes (clé:ids, valeur:v2)
     membres: new Map(), // tous membres
     estAnim: false, // un des avatars du compte est animateur du groupe
@@ -464,6 +465,12 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
+    setChatgr (chatgr) {
+      if (!chatgr) return
+      const e = this.map.get(chatgr.id)
+      if (e) e.chatgr = chatgr
+    },
+
     /* Mise jour groupée pour un groupe
     e : { id, gr, lmb: [], lno: [] }
     */
@@ -474,6 +481,7 @@ export const useGroupeStore = defineStore('groupe', {
         if (s._zombi) this.delNote(s.id, s.ids); else this.setNote(s)  
       })
       lmb.forEach(m => { this.setMembre(m) }) // traite AUSSI le cas _zombi (disparu)
+      lch.forEach(c => { this.setChatgr(c) })
     },
 
     del (id) {

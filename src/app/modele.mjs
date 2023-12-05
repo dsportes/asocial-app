@@ -2072,6 +2072,39 @@ export class Membre extends GenDoc {
 
 }
 
+/** Chatgr ***********************************************************
+_data_:
+- `id` : id du groupe
+- `ids` : `1`
+- `v` : sa version.
+
+- `items` : liste ordonnée des items de chat `{im, dh, lg, textg}`
+  - `im` : indice membre de l'auteur,
+  - `dh` : date-heure d'enregistrement de l'item,
+  - `dhx` : date-heure d'effacement de l'item,
+  - `l` : longueur du texte en clair de l'item. 0 correspond à un item effacé.
+  - `t` : texte crypté par la clé du groupe.
+*/
+export class Chatgr extends GenDoc {
+  // Du groupe
+  get cleg () { return getCle(this.id) }
+  get ng () { return getNg(this.id) } // nom complet du groupe
+
+  async compile (row) {
+    this.items = []
+    if (row.items) for (const item of row.items) {
+      const i = { im: item.im, dh: item.dh, l: item.l, t: '', dhx: item.dhx}
+      if (!item.dhx) i.t = await decrypter(this.cleg, ungzipB(item.t))
+      this.items.push(i)
+    }
+  }
+
+  static async getItem (cleg, im, txt) {
+    const t = txt && txt.length ? await crypter(cleg, gzipB(txt)) : null
+    return { im: im, lg: txt ? txt.length || 0 : 0, t, dh: Date.now() }
+  }
+}
+
 /* Note ***************************************************
 _data_:
 - `id` : id de l'avatar ou du groupe.

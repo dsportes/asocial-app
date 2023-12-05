@@ -106,7 +106,7 @@ export class OnchangeVersion extends OperationWS {
   egrMaj(id) {
     let e = this.grMaj.get(id)
     if (!e) {
-      e = { id: id, gr: null, lmb: [], lno: [], objv: null }
+      e = { id: id, gr: null, lmb: [], lno: [], lch: [], objv: null }
       this.grMaj.set(id, e)
     }
     return e
@@ -201,6 +201,14 @@ export class OnchangeVersion extends OperationWS {
       if (mb._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
       const e = this.egrMaj(mb.id)
       e.lmb.push(mb)
+    }
+
+    if (this.ret.rowChatgrs) for (const row of this.ret.rowChatgrs) {
+      if (!this.grIdsAp.has(row.id)) continue
+      const ch = await compile(row)
+      this.buf.putIDB(row)
+      const e = this.egrMaj(ch.id)
+      e.lch.push(ch)
     }
   }
 

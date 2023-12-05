@@ -2,11 +2,11 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { ID, AppExc, appexc, E_WS, AMJ, Compteurs, limitesjour } from './api.mjs'
-import { $t, hash, inverse, sleep} from './util.mjs'
+import { $t, sleep} from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
 import { Versions, NomGenerique, Avatar, Chat, Compta, Note, Ticket,
-  Groupe, Membre, Tribu, getNg, getCle, compile, setClet} from './modele.mjs'
+  Groupe, Membre, Tribu, Chatgr, getNg, getCle, compile, setClet} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 
@@ -1230,6 +1230,35 @@ export class ModeSimple extends OperationUI {
   }
 }
 
+/* ItemChatgr : ajout / effacement d'un item *************************************************
+args.token: éléments d'authentification du compte.
+args.chatit : row de la note
+args.idg: id du groupe
+args.im args.dh : pour une suppression
+Retour: rien
+*/
+export class ItemChatgr extends OperationUI {
+  constructor () { super($t('OPstmb')) }
+
+  async run (idg, im, txt, dh) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, idg, idg }
+      if (!dh) {
+        const ng = getNg(idg)
+        args.chatit = await Chatgr.getItem(ng.rnd, im, txt || '')
+      } else {
+        args.im = im
+        args.dh = dh
+      }
+      this.tr(await post(this, 'ItemChatgr', args))
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
 /* Invitation à un groupe *******************************************
 args.token donne les éléments d'authentification du compte.
 args.op : opération demandée: 
@@ -1242,6 +1271,7 @@ args.im: indice de l'animateur invitant
 args.flags: flags PA DM DN DE de l'invité
 args.ni: numéro d'invitation pour l'avatar invité, clé dans la map invits
 args.invit: élément dans la map invits {nomg, cleg, im}` cryptée par la clé publique RSA de l'avatar.
+args.chatit: ardoise de l'invité mise en format item de chat de groupe (ou null si pas d'ardoise)
 Retour:
 */
 export class InvitationGroupe extends OperationUI {
@@ -1267,6 +1297,7 @@ export class InvitationGroupe extends OperationUI {
       const pub = await aSt.getPub(mb.na.id)
       const invit = await crypterRSA(pub, new Uint8Array(encode(x)))
       const ardg = await crypter(gr.na.rnd, ard || '')
+      const chatit = ard ? await Chatgr.getItem(gr.na.rnd, mb.ids, ard) : null
       const args = { token: session.authToken, 
         op,
         idg: gr.id, 
@@ -1276,7 +1307,8 @@ export class InvitationGroupe extends OperationUI {
         flags,
         ni: await Groupe.getNi(gr.na, mb.na),
         invit,
-        ardg
+        ardg,
+        chatit
       }
       const ret = this.tr(await post(this, 'InvitationGroupe', args))
       return this.finOK(ret.code || 0)
@@ -1299,6 +1331,7 @@ args.cas: 1: acceptation, 2: refus, 3: refus et oubli, 4: refus et liste noire
 args.iam: true si accès membre
 args.ian: true si accès note
 args.ardg: ardoise du membre cryptée par la clé du groupe
+args.chatit: item de chat (copie de l'ardoise)
 Retour:
 */
 export class AcceptInvitation extends OperationUI {
@@ -1311,6 +1344,7 @@ export class AcceptInvitation extends OperationUI {
       const av = aSt.getAvatar(na.id)
       const ni = await Groupe.getNi(ng, na)
       const epgk = await av.getEpgk(ni)
+      const chatit = ard ? await Chatgr(ng.rnd, im, ard) : null
 
       const args = { token: session.authToken, 
         idg: ng.id, 
@@ -1319,7 +1353,8 @@ export class AcceptInvitation extends OperationUI {
         nag: await Groupe.getNag(ng, na),
         npgk: await Groupe.getNpgk(ng.id, na.id),
         cas, iam, ian, ni, epgk,
-        ardg: await crypter(ng.rnd, ard)
+        ardg: await crypter(ng.rnd, ard),
+        chatit
       }
       const ret = this.tr(await post(this, 'AcceptInvitation', args))
       return this.finOK(ret.disparu)
