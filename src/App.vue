@@ -123,12 +123,11 @@
           <div class="titre-lg">{{$t('MLArech')}}</div>
         </div>
         <div v-if="ui.page === 'chats'" class="column justify-start">
-          <filtre-chel nom="chats" prop='chel' :idx="0"/>
-          <filtre-nbj nom="chats" prop='nbj' :idx="1"/>
-          <filtre-nom nom="chats" prop='nom' :idx="0"/>
-          <filtre-txt nom="chats" prop='txt' :idx="1"/>
-          <filtre-mc nom="chats" attr="mcp" :idx="0"/>
-          <filtre-mc nom="chats" attr="mcn" :idx="1"/>
+          <filtre-nbj nom="chats" prop='nbj' :idx="0"/>
+          <filtre-nom nom="chats" prop='nom' :idx="1"/>
+          <filtre-txt nom="chats" prop='txt' :idx="0"/>
+          <filtre-mc nom="chats" attr="mcp" :idx="1"/>
+          <filtre-mc nom="chats" attr="mcn" :idx="0"/>
         </div>
         <div v-if="ui.page === 'espace'" class="column justify-start">
           <filtre-tri nom="espace" :nb-options="19" :idx="0"/>
@@ -370,7 +369,6 @@ import FiltreTxt from './components/FiltreTxt.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
 import FiltreAvecgr from './components/FiltreAvecgr.vue'
-import FiltreChel from './components/FiltreChel.vue'
 import FiltreTribu from './components/FiltreTribu.vue'
 import FiltreAvecsp from './components/FiltreAvecsp.vue'
 import FiltreTri from './components/FiltreTri.vue'
@@ -396,7 +394,7 @@ export default {
     ApercuAvatar, PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
-    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif, FiltreChel,
+    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, PressePapier
    },
@@ -416,7 +414,6 @@ export default {
           if (this.session.pow > 3) return this.$t('ACspons')
           return this.$t('Ptranche', [ID.court(this.aSt.tribuC.id), this.aSt.tribuC.info])
         }
-        case 'chats' : { arg = this.aSt.avC.na.nom; break }
         case 'sponsorings' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
         case 'groupesac' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
         case 'groupe' : { arg = this.gSt.egrC ? this.gSt.egrC.groupe.na.nom : this.$t('disparu'); break }

@@ -1703,9 +1703,10 @@ export class Chat extends GenDoc {
       const t = it.txt ? ungzipB(await decrypter(this.cc, it.txt)) : null
       if (this.dh === 0) this.dh = it.dh
       this.items.push({ a: it.a, txt: t, dh: it.dh, dhx: it.dhx || 0})
-      a.push($t('dedh', [a ? this.naI.nom : this.naE.nom, dhstring(it.dh)]))
-      if (!t) a.push('[' + supp + ']'); else a.push(t)
-      a.push('\n\n')
+      a.push('_**' + $t('dedh', [it.a ? this.naI.nom : this.naE.nom, dhstring(it.dh)]) + '**_')
+      if (it.dhx) a.push('\n' + $t('supprime', [dhstring(it.dhx)]) + '\n')
+      else a.push('\n' + t + '\n')
+      a.push('\n')
       if (!this.tit && t) this.tit = titre(t)
     }
     this.txt = a.join('\n')
@@ -2091,12 +2092,27 @@ export class Chatgr extends GenDoc {
   get ng () { return getNg(this.id) } // nom complet du groupe
 
   async compile (row) {
+    const gSt = stores.groupe
     this.items = []
+    const a = []
+    this.tit = ''
+    this.dh = 0
+    const mbs = gSt.egr(this.id)
     if (row.items) for (const item of row.items) {
       const i = { im: item.im, dh: item.dh, l: item.l, t: '', dhx: item.dhx}
-      if (!item.dhx) i.t = await decrypter(this.cleg, ungzipB(item.t))
+      if (!item.dhx) {
+        i.t = ungzipB(await decrypter(this.cleg, item.t))
+        if (!this.tit && i.t) this.tit = titre(i.t)
+      }
+      if (this.dh === 0) this.dh = i.dh
+      const mb = mbs ? mbs.membres.get(i.im) : null
+      a.push('_**' + $t('dedh', [mb ? mb.na.nomc : '#' + i.im, dhstring(i.dh)]) + '**_')
+      if (i.dhx) a.push('\n' + $t('supprime', [dhstring(i.dhx)]) + '\n')
+      else a.push('\n' + i.t + '\n')
       this.items.push(i)
     }
+    this.txt = a.join('\n')
+    if (!this.tit) this.tit = '???'
   }
 
   static async getItem (cleg, im, txt) {

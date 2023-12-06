@@ -174,8 +174,8 @@ export default {
     const err = ref(0)
 
     const naAut = ref()
-    function selNa (na) {
-      naAut.value = na
+    function selNa (elt) {
+      naAut.value = elt.na
     }
 
     /*

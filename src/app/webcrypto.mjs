@@ -61,10 +61,14 @@ export async function crypter (cle, u8, idxIV) {
     if (!(u8 instanceof Uint8Array)) throw new Error($t('EX4011'))
     const n = !idxIV ? Number(random(1)) : idxIV
     const iv = SALTS[n]
-    const x0 = new Uint8Array(1).fill(n)
+    // const x0 = new Uint8Array(1).fill(n)
     const key = await window.crypto.subtle.importKey('raw', arrayBuffer(cle), 'aes-cbc', false, ['encrypt'])
-    const buf = await crypto.subtle.encrypt({ name: 'aes-cbc', iv: iv }, key, arrayBuffer(u8))
-    return ab2b(concat([x0, new Uint8Array(buf)]))
+    const buf = new Uint8Array(await crypto.subtle.encrypt({ name: 'aes-cbc', iv: iv }, key, arrayBuffer(u8)))
+    const res = new Uint8Array(buf.length + 1)
+    res.set(buf, 1)
+    res.set([n], 0)
+    return res
+    // return ab2b(concat([x0, new Uint8Array(buf)]))
   } catch (e) {
     const x1 = JSON.stringify(u8.slice(0, 4))
     const x2 = JSON.stringify(cle.slice(0, 4))
@@ -153,7 +157,7 @@ export async function decrypterRSA (clepriv, u8) {
     throw new AppExc(E_BRO, 20, [x1, x2, e.toString()], e.stack)
   }
 }
-
+/*
 export function concat (arrays) {
   // sum of individual array lengths
   const totalLength = arrays.reduce((acc, value) => acc + value.length, 0)
@@ -166,6 +170,7 @@ export function concat (arrays) {
   }
   return result
 }
+*/
 
 /* Cryptage Serveur *******************************/
 const CLE = new Uint8Array(32)

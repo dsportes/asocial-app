@@ -250,6 +250,7 @@ export class ConnexionCompte extends OperationUI {
       for(const [idg, empg] of mgx) {
         if (session.fsSync) 
           await session.fsSync.setGroupe(idg)
+        else abPlus.push(idg)
         if (!this.groupesToStore.has(idg)) {
           let x = this.mbsMap[idg]
           if (!x) {

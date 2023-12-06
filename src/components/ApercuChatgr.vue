@@ -3,20 +3,25 @@
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
         <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHGtit', [nag.nom])}}</q-toolbar-title>
-        <q-btn :label="$t('CHGadd')" class="btn" icon="add" color="primary" @click="editer"/>
+        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHGtit', [groupe.na.nomc])}}</q-toolbar-title>
         <bouton-help page="page1"/>
+      </q-toolbar>
+      <q-toolbar inset>
+        <note-ecritepar :groupe="groupe" optmb @ok="selAut"/>
+        <q-space/>
+        <q-btn :label="$t('CHGadd')" class="btn" icon="add" color="primary"
+          :disable="!naAut" @click="editer"/>
       </q-toolbar>
     </q-header>
 
     <q-page-container>
       <q-card class="q-pa-sm">
-        <div v-for="it in gSt.chatgr.items" :key="it.dh + '/' + it.im">
-          <q-chat-message :sent="imNa(it.im)" 
+        <div v-for="it in items" :key="it.dh + '/' + it.im">
+          <q-chat-message :sent="imNa(it.im) !== undefined" 
             :bg-color="imNa(it.im) ? 'primary' : 'secondary'" 
             text-color="white"
             :stamp="dhcool(it.dh)">
-            <sd-dark1 v-if="!it.dhx" :texte="it.txt"/>
+            <sd-dark1 v-if="!it.dhx" :texte="it.t"/>
             <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
@@ -70,6 +75,7 @@ import SdDark1 from './SdDark1.vue'
 import EditeurMd from './EditeurMd.vue'
 import { dhcool, dkli } from '../app/util.mjs'
 import BoutonHelp from './BoutonHelp.vue'
+import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
 import { ItemChatgr } from '../app/operations.mjs'
 import { MD } from '../app/modele.mjs'
 
@@ -78,13 +84,15 @@ export default {
 
   props: { },
 
-  components: { SdDark1, EditeurMd, BoutonHelp },
+  components: { SdDark1, EditeurMd, BoutonHelp, NoteEcritepar },
 
   computed: { 
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     egr () { return this.gSt.egrC },
     // Map: cle:im, val:na de l'avc
-    imNa () { return this.aSt.compte.imNaGroupe(this.egr.groupe.id) }
+    imNa1 () { return this.aSt.compte.imNaGroupe(this.egr.groupe.id) },
+    groupe () { return this.egr.groupe },
+    items () { return this.gSt.chatgr && this.gSt.chatgr.items ? this.gSt.chatgr.items : []}
   },
 
   data () { return {
@@ -96,6 +104,8 @@ export default {
   methods: {
     membre (im) { return this.egr.membres.get(im) },
 
+    imNa (im) { return this.imNa1.get(im)},
+
     async effacer (im, dh) {
       if (!await this.session.edit()) return
       this.im = im
@@ -104,14 +114,14 @@ export default {
     },
 
     async effop () {
-      await new ItemChatgr().run(this.im, this.dh, null)
+      await new ItemChatgr().run(this.groupe.id, this.im, this.dh, null)
       this.im = 0
       this.dh = 0
       MD.fD()
     },
 
     async addop () {
-      await new ItemChatgr().run(0, 0, this.txt)
+      await new ItemChatgr().run(this.groupe.id, this.imAut, 0, this.txt)
       this.txt = ''
       MD.fD()
     },
@@ -127,6 +137,13 @@ export default {
     const session = stores.session
     const gSt = stores.groupe
     const aSt = stores.avatar
+    const naAut = ref()
+    const imAut = ref()
+
+    function selAut(elt) {
+      naAut.value = elt.na
+      imAut.value = elt.im
+    }
 
     const chatedit = ref(false)
     function ovchatedit () { MD.oD(chatedit) }
@@ -134,7 +151,7 @@ export default {
     function ovconfirmeff () { MD.oD(confirmeff) }
 
     return {
-      MD, chatedit, ovchatedit, confirmeff, ovconfirmeff,
+      MD, chatedit, ovchatedit, confirmeff, ovconfirmeff, selAut, naAut, imAut,
       dkli, dhcool,
       session, gSt, aSt
     }

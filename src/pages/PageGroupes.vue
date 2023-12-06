@@ -47,10 +47,11 @@
           </div>
         </div>
         <div class="row justify-end">
-          <q-btn class="q-ml-md btn1" icon="chat" :label="$t('PGchat')" 
-            size="md" color="primary" dense @click.stop="chat(e)"/>
-          <q-btn class="q-ml-md btn1" icon="open_in_new" :label="$t('detail')" 
-            size="md" color="primary" dense @click.stop="courant(e)"/>
+          <q-btn class="q-ml-md btn1" size="sm" icon="chat" :label="$t('PGchat')" 
+            color="primary" dense @click.stop="chat(e)"/>
+          <q-btn class="q-ml-md btn1" size="sm" icon="open_in_new" :label="$t('detail')" 
+            color="primary" dense @click.stop="courant(e)"/>
+        </div>
       </div>
     </q-card>
   </div>
@@ -70,7 +71,8 @@
         <choix-quotas :quotas="quotas" groupe/>
         <q-option-group :options="options" type="radio" v-model="una"/>
         <q-card-actions align="right">
-          <q-btn dense flat color="warning" :label="$t('renoncer')" @click="MD.fD" />
+          <q-btn dense flat color="warning" 
+            :label="$t('renoncer')" @click="MD.fD" />
           <q-btn dense flat color="primary" :disable="quotas.err || !nom"
             :label="$t('creer')" v-close-popup @click="okCreation" />
         </q-card-actions>
@@ -78,7 +80,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="chat" persistent full-height>
+  <q-dialog v-model="chatgr" persistent full-height>
     <apercu-chatgr/>
   </q-dialog>
 
@@ -88,14 +90,14 @@
 <script>
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { edvol, $t, dkli, afficherDiag } from '../app/util.mjs'
+import { edvol, $t, dkli } from '../app/util.mjs'
 import { MD, Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import InvitationsEncours from '../components/InvitationsEncours.vue'
-import ApercuChatgr from '../components/ApercuChartgr.vue'
+import ApercuChatgr from '../components/ApercuChatgr.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouveauGroupe } from '../app/operations.mjs'
 
@@ -123,7 +125,6 @@ export default {
 
     async chat (elt) {
       this.session.setGroupeId(elt.groupe.id)
-      
       this.ovchatgr()
     },
 

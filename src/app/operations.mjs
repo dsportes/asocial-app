@@ -1240,10 +1240,10 @@ Retour: rien
 export class ItemChatgr extends OperationUI {
   constructor () { super($t('OPstmb')) }
 
-  async run (idg, im, txt, dh) { 
+  async run (idg, im, dh, txt) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, idg, idg }
+      const args = { token: session.authToken, idg }
       if (!dh) {
         const ng = getNg(idg)
         args.chatit = await Chatgr.getItem(ng.rnd, im, txt || '')

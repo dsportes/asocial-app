@@ -335,8 +335,8 @@ export default {
       }
     },
 
-    selNa (na) { 
-      this.naAut = na
+    selNa (elt) { 
+      this.naAut = elt.na
     }
 
   },

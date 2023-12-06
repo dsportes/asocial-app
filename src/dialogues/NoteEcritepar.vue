@@ -1,12 +1,12 @@
 <template>
   <div class="titre-md">
     <q-btn-dropdown no-caps dense :color="naAut ? 'primary' : 'warning'"
-      :label="naAut ? $t('PNOaut1' + (fic || ''), [naAut.nom]) : $t('PNOaut2')" 
+      :label="naAut ? $t('PNOaut1' + (fic || ''), [naAut.na.nom]) : $t('PNOaut2')" 
       content-style="width:25rem!important">
       <q-list class="bg-secondary text-white q-py-xs">
         <q-item v-for="e in la" :key="e.na.id" 
           :clickable="!e.ko"
-          v-close-popup @click="selNa(e.na)"
+          v-close-popup @click="selAut(e)"
           class="row items-start full-width">
             <div class="fs-md col-4">{{e.na.nom}}</div>
             <div class="col-8 titre-md" 
@@ -31,7 +31,8 @@ export default {
   props: { 
     groupe: Object, // groupe de la note (édition ET nouvelle)
     note: Object, // Pour édition d'une note existante seulement
-    fic: String // a/m Modif de label pour "ajout" / "modif" de fichier
+    fic: String, // a/m Modif de label pour "ajout" / "modif" de fichier
+    optmb: Boolean // ne liste que les avc ayant droit d'accès aux membres du groupe
   },
 
   computed: { },
@@ -52,6 +53,7 @@ export default {
     const n = toRef(props, 'note')
     const xav = ref()
     const naAut = ref()
+    const optmb = toRef(props, 'optmb')
 
     function init () {
       const auts = nSt.note ? nSt.note.auts || [] : []
@@ -61,30 +63,35 @@ export default {
       for (const [im, na] of aSt.compte.imNaGroupe(g.value.id)) { 
         let i = auts.indexOf(im)
         i = i === -1 ? 99999 : i
-        const x = { na, i, ko: 0 }
-        const a = g.value.estAuteur(im)
-        if (!a) {
-          x.ko = 1
+        const x = { na, i, ko: 0, im }
+        if (optmb.value) {
+          const m = g.value.accesMembre(im)
+          if (!m) x.ko = 3; else ok = true
         } else {
-          if ((n.value && n.value.im) && (n.value.im !== im)) x.ko = 2
-          else ok = true
+          const a = g.value.estAuteur(im)
+          if (!a) {
+            x.ko = 1
+          } else {
+            if ((n.value && n.value.im) && (n.value.im !== im)) x.ko = 2
+            else ok = true
+          }
         }
         l.push(x)
       }
       l.sort((a,b) => { return a.ko ? (b.ko ? 0 : 1) : (!b.ko ? (a.i < b.i ? -1 : 1) : 1)})
       la.value = l
-      selNa(ok ? l[0].na : null)
+      selAut(ok ? l[0] : null)
     }
 
-    function selNa(na) {
-      naAut.value = na
-      context.emit('ok', na)
+    function selAut(elt) {
+      naAut.value = elt
+      context.emit('ok', elt)
     }
 
     init ()
 
     return {
-      aSt, selNa, la, xav, naAut
+      aSt,selAut, la, xav, naAut
     }
   }
 

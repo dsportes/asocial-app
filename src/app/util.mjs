@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { useQuasar } from 'quasar'
 
-import { arrayBuffer, random, concat } from './webcrypto.mjs'
+import { arrayBuffer, random } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AMJ, appexc } from './api.mjs'
 import { MD } from './modele.mjs'
@@ -172,7 +172,10 @@ export function gzipB (arg) {
   const t = typeof arg === 'string' ? (arg.length > 1024 ? 1 : 2) : 0
   let u8 = t ? encoder.encode(arg) : arg
   if (t < 2) u8 = gzipT(u8)
-  return concat([new Uint8Array([t]), u8])
+  const res = new Uint8Array(u8.length + 1)
+  res.set(u8, 1)
+  res.set([t], 0)
+  return res
 }
 
 export function ungzipB (arg) {

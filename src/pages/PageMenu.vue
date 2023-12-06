@@ -47,6 +47,13 @@
         <q-item-label lines="1">{{$t('ACmesctc')}}</q-item-label>
       </q-item-section>
     </q-item>
+    <q-item clickable @click="ui.setPage('chats')">
+      <q-item-section>
+        <q-item-label lines="1">{{$t('ACchats')}}
+          <q-badge color="primary" rounded>{{nbchats}}</q-badge>
+        </q-item-label>
+      </q-item-section>
+    </q-item>
     <q-item v-if="!aSt.compta.estA" clickable  @click="maTribu()">
       <q-item-section>
         <q-item-label lines="1">{{$t(pow <= 3 ? 'ACalloc' : 'ACspons')}}</q-item-label>
@@ -70,13 +77,6 @@
       <q-item-section class="q-ml-lg" clickable @click="ui.setPage('groupesac')">
         <q-item-label lines="1">{{$t('ACgroupes')}}
           <q-badge color="primary" rounded>{{nbgrps}}</q-badge>
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item clickable @click="ui.setPage('chats')">
-      <q-item-section class="q-ml-lg">
-        <q-item-label lines="1">{{$t('ACchats')}}
-          <q-badge color="primary" rounded>{{nbchats}}</q-badge>
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -115,7 +115,7 @@ export default {
   props: { menu: Boolean },
 
   computed: {
-    nbchats () { return this.aSt.eavC.chats.size },
+    nbchats () { return this.aSt.nbchats + this.gSt.nbchats },
     nbspons () { return this.aSt.eavC.sponsorings.size },
     nbgrps () { 
       return this.aSt.compte.idGroupes(this.session.avatarId).size
