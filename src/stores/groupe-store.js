@@ -388,8 +388,12 @@ export const useGroupeStore = defineStore('groupe', {
     setMotscles (id, mc) {
     },
 
-    setInvit (ng, na, im) { // na du groupe et de l'avatar invité
-      this.invits.set(ng.id + '/' + na.id, {ng, na, im})
+    setInvit (ng, na, im, ivpar, dh) { // na du groupe et de l'avatar invité
+      this.invits.set(ng.id + '/' + na.id, {ng, na, im, ivpar, dh})
+    },
+
+    getInvit (idg, ida) { // na du groupe et de l'avatar invité
+      return this.invits.get(idg + '/' + ida)
     },
 
     delInvit (idg, ida) { // id du groupe et de l'avatar invité

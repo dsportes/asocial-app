@@ -6,11 +6,10 @@
     <bouton-help page="page1"/>
   </q-toolbar>
   <q-card-section>
-    <apercu-genx :na="mb.ng" :cv="mb.ext.cvg"/>
-
+    <apercu-genx :na="mb.ng"/>
     <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICinvpar')}}</div>
-    <div class="q-ma-sm" v-for="[im, x] in mb.ext.invs" :key="im">
-      <apercu-genx :na="x.na" :cv="x.cv" people/>
+    <div class="q-ma-sm" v-for="[im, na] in mb.ext.invs" :key="im">
+      <apercu-genx :na="na" people/>
       <q-separator color="orange"/>
     </div>
 
@@ -20,7 +19,7 @@
     <q-checkbox v-if="fl & FLAGS.DN" v-model="ian" :label="$t('FLAGS2')" />
 
     <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICrem')}}</div>
-    <editeur-md :lgmax="1000" v-model="ard" :texte="mb.ard || ''" modetxt mh="8rem"
+    <editeur-md :lgmax="1000" v-model="chattxt" :texte="mb.ext.chattxt || ''" modetxt mh="8rem"
       editable />
   </q-card-section>
           
@@ -58,7 +57,11 @@ export default ({
 
   components: { EditeurMd, BoutonHelp, ApercuGenx, BoutonConfirm, BoutonBulle },
 
-  props: { idg: Number, im: Number },
+  props: { 
+    idg: Number, // id du groupe
+    im: Number, // im de l'invité
+    na: Object
+  },
 
   computed: {
     edFlags () { 
@@ -81,8 +84,8 @@ export default ({
 
     async ok (cas) {
       MD.fD()
-      const disp = await new AcceptInvitation(). // (cas, na, ng, im, ard, iam, ian)
-        run(cas, this.mb.na, this.mb.ng, this.mb.ids, this.ard, this.iam, this.ian)
+      const disp = await new AcceptInvitation(). // (cas, na, ng, im, chattxt, iam, ian)
+        run(cas, this.mb.na, this.mb.ng, this.mb.ids, this.chattxt, this.iam, this.ian)
       if (disp) {
         await afficherDiag(this.$t('AMdisp'))
       }
@@ -95,8 +98,9 @@ export default ({
 
     const idg = toRef(props, 'idg')
     const im = toRef(props, 'im')
+    const na = toRef(props, 'na')
     const mb = ref()
-    const ard = ref()
+    const chattxt = ref()
     const fl = ref()
     const ln = ref(false)
     const cfln = ref(false)
@@ -105,15 +109,15 @@ export default ({
     const ian = ref(false)
 
     onMounted(async () => {
-      mb.value = await new InvitationFiche().run(idg.value, im.value)
-      ard.value = mb.value.ard
+      mb.value = await new InvitationFiche().run(idg.value, im.value, na.value)
+      chattxt.value = mb.value.ext.chattxt || ''
       fl.value = mb.value.ext.flags
       if (fl.value & FLAGS.DM) iam.value = true
       if (fl.value & FLAGS.DN) ian.value = true
     })
 
     return {
-      session, gSt, FLAGS, MD, mb, ard, fl, ln, cfln, decl, iam, ian
+      session, gSt, FLAGS, MD, mb, chattxt, fl, ln, cfln, decl, iam, ian
     }
   } 
 })

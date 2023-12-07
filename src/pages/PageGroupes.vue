@@ -144,7 +144,9 @@ export default {
       this.una = false
       this.ovcrgr()
     },
+
     okNom (n) { this.nom = n },
+    
     async okCreation () {
       console.log(this.nom, this.quotas.q1, this.quotas.q2, this.una)
       await new NouveauGroupe().run(this.nom, this.una, this.quotas)

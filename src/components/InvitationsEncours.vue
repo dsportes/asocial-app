@@ -11,7 +11,7 @@
 
   <!-- Acceptation de l'invitation -->
   <q-dialog v-model="accinvit" full-height persistent>
-    <invitation-acceptation :idg="inv.ng.id" :im="inv.ni"/>
+    <invitation-acceptation :idg="inv.ng.id" :im="inv.im" :na="inv.na"/>
   </q-dialog>
 </div>
 </template>
@@ -49,6 +49,7 @@ export default ({
     const session = stores.session
     const gSt = stores.groupe
 
+    const invits = gSt.invits
     const accinvit = ref(false)
     function ovaccinvit () { MD.oD(accinvit) }
     return {

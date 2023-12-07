@@ -200,56 +200,6 @@
 
           </q-card>
 
-          <!--
-          <quotas-vols2 class="q-my-md" :vols="eg.objv.vols"/>
-          <div class="titre-md" v-if="cas===1">{{$t('AGm1', [moi])}}</div>
-          <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1a')}}</div>
-          <div class="titre-md q-ml-md" v-if="cas===1">{{$t('AGm1b')}}</div>
-          <div class="titre-md" v-if="cas===2">{{$t('AGm2', [moi, hbg])}}</div>
-          <div class="titre-md" v-if="cas===3">{{$t('AGm3', [moi, hbg])}}</div>
-          <div class="titre-md" v-if="cas===4">{{$t('AGm4', [moi])}}</div>
-          <div class="titre-md" v-if="cas===5">{{$t('AGm5', [moi, lstAn])}}</div>
-          <div class="titre-md" v-if="cas===6">{{$t('AGm6', [moi])}}</div>
-
-          <div v-if="alq1 || alq2">
-            <q-separator color="orange" class="q-my-xs"/>
-            <div v-if="alq1 && eg.groupe.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq1x')}}</div>
-            <div v-if="alq1" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1')}}</div>
-            <div v-if="alq2 && eg.groupe.imh" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGq2x')}}</div>
-            <div v-if="alq2" class="titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2')}}</div>
-            <q-separator color="orange" class="q-my-xs"/>
-          </div>
-
-          <div class="column justify-center">
-            <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="primary" :label="$t('AGbtncq')" @click="gotocq"/>
-            <q-btn class="q-ma-md" v-if="cas===1" size="md" dense color="warning" :label="$t('AGbtnfh')" @click="step = 2"/>
-            <q-btn class="q-ma-md" v-if="cas===2 || cas === 4 || cas === 6" size="md" color="primary" :label="$t('AGbtndh')" @click="gotocq"/>
-            <q-btn class="q-ma-md" v-if="cas===3 || cas === 5" size="md" color="primary" :label="$t('jailu')" @click="MD.fD"/>
-          </div>
-
-          <div v-if="step === 2" class="q-ma-md">
-            <div class="titre-md text-bold text-negative bg-yellow-3 text-center">{{$t('AGv1b')}}</div>
-            <div class="titre-md text-bold text-negative bg-yellow-3 text-center">{{$t('AGv2b')}}</div>
-            <div class="q-mt-md row justify-center q-gutter-md">
-              <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-              <bouton-confirm actif :confirmer="finHeb"/>
-            </div>
-          </div>
-
-          <div v-if="step === 1" class="q-ma-sm">
-
-            <div v-if="q.err" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGmx')}}</div>
-            <div v-if="al1" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1b')}}</div>
-            <div v-if="al2" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2b')}}</div>
-            <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar1 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp1', [rst1])}}</div>
-            <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar2 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp2', [rst2])}}</div>
-            <div class="row justify-center q-gutter-md">
-              <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-              <bouton-confirm v-if="!q.err && (al1 || al2)" actif :confirmer="chgQ"/>
-              <q-btn v-if="!q.err && !al1 && !al2" size="md" dense :label="$t('confirmer')" color="primary" @click="chgQ"/>
-            </div>
-          </div>
-          -->
         </q-page>
       </q-page-container>
     </q-layout>
@@ -380,7 +330,10 @@ export default {
   }},
 
   methods: {
-    mb (im) { return this.eg.membres.get(im)},
+    mb (im) { 
+      const r = this.eg.membres.get(im)
+      return r
+    },
 
     nbiv (e) { return this.gSt.nbMesInvits(e) },
     // ast (m) { return this.eg.groupe.ast[m.ids] },

@@ -964,21 +964,17 @@ export class NouveauGroupe extends OperationUI {
           - `idav` : id (court) de l'avatar.
       */
       const e = { nomg: nag.nom, cleg: nag.rnd, im: 1, idav: na.id }
+      const npgk = await Groupe.getNpgk(nag, na)
+      const empgk = await crypter(session.clek, new Uint8Array(encode(e))) 
 
-      // En UTC la division d'une date est multiple de 86400000
-      const tjourJ = (AMJ.tDeAmjUtc(AMJ.amjUtc()) / 86400000) + limitesjour.dlv
-      const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
-      const dlv = AMJ.amjUtcDeT(tdlv * 86400000)
-
-      const rowMembre = await Membre.rowNouveauMembre (nag, na, 1, dlv, avatar.cv || null)
+      const rowMembre = await Membre.rowNouveauMembre (nag, na, 1, avatar.cv || null, true)
 
       const args = { 
         token: session.authToken, 
         rowGroupe, rowMembre, 
         id: session.avatarId,
         quotas: [quotas.q1, quotas.q2], 
-        npgk: await Groupe.getNpgk(nag, na), 
-        empgk: await crypter(session.clek, new Uint8Array(encode(e))), 
+        npgk, empgk, 
         abPlus: [nag.id]
       }
       this.tr(await post(this, 'NouveauGroupe', args))
@@ -1015,43 +1011,29 @@ export class MotsclesGroupe extends OperationUI {
 args.token donne les éléments d'authentification du compte.
 args.idg : id du groupe
 args.ids: indice du membre invité
+args.ivpar : indice du membre invitant
+args.dh: date-heure de l'item de chat d'invitation
 Retour:
-- rowMembre : avec un champ supplémentaire ext : { flags, cvg, invs: map }
+- rowMembre : avec un champ supplémentaire ext : { flags, cvg, invs: map, chatg }
+  chatg: texte du chat crypté par la clé du groupe
   invs : clé: im, valeur: { cva, nag }
 */
 export class InvitationFiche extends OperationUI {
   constructor () { super($t('OPardgr')) }
 
-  async run (idg, ids) {
+  async run (idg, ids, na) {
     try {
       const session = stores.session
+      const gSt = stores.groupe
+      const invit = gSt.getInvit(idg, na.id)
       const args = { token: session.authToken, idg, ids }
+      if (invit) {
+        args.ivpar = invit.ivpar
+        args.dh = invit.dh
+      }
       const ret = this.tr(await post(this, 'InvitationFiche', args))
       const mb = await compile(ret.rowMembre)
       return this.finOK(mb)
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* Maj de l'ardoise d'un membre *****************************************************
-args.token donne les éléments d'authentification du compte.
-args.ardg : texte de l'ardoise crypté par la clé du groupe
-args.idg : id du groupe
-args.ids : im du membre
-Retour:
-*/
-export class ArdoiseMembre extends OperationUI {
-  constructor () { super($t('OPardgr')) }
-
-  async run (ard, idg, ids) {
-    try {
-      const session = stores.session
-      const ardg = await crypter(getNg(idg).rnd, ard || '')
-      const args = { token: session.authToken, ardg, idg, ids }
-      this.tr(await post(this, 'ArdoiseMembre', args))
-      this.finOK()
     } catch (e) {
       return await this.finKO(e)
     }
@@ -1142,7 +1124,7 @@ export class NouveauMembre extends OperationUI {
   async run (gr, im, na, cv) {
     try {
       const session = stores.session
-      const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, 0, cv)
+      const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, cv, false)
       const nag = await Groupe.getNag(gr.na, na)
       const args = { token: session.authToken, 
         id: na.id,
@@ -1270,14 +1252,14 @@ args.idm: id de l'avatar du membre invité
 args.im: indice de l'animateur invitant
 args.flags: flags PA DM DN DE de l'invité
 args.ni: numéro d'invitation pour l'avatar invité, clé dans la map invits
-args.invit: élément dans la map invits {nomg, cleg, im}` cryptée par la clé publique RSA de l'avatar.
-args.chatit: ardoise de l'invité mise en format item de chat de groupe (ou null si pas d'ardoise)
+args.invit: élément dans la map invits {nomg, cleg, im, ivpar, dh}` cryptée par la clé publique RSA de l'avatar.
+args.chatit: item de chat du groupe (mot de bienvenue)
 Retour:
 */
 export class InvitationGroupe extends OperationUI {
   constructor () { super($t('OPstmb')) }
 
-  async run (op, gr, mb, invpar, flags, ard) { 
+  async run (op, gr, mb, ivpar, flags, ard) { 
       /* op:
       1: invit std, 2: modif invit std, 3: suppr invit std, 
       4: vote pour, 5: vote contre, 6: suppr invit una 
@@ -1287,23 +1269,26 @@ export class InvitationGroupe extends OperationUI {
       - _valeur_: `{nomg, cleg, im}` cryptée par la clé publique RSA de l'avatar.
         - `nomg`: nom du groupe,
         - `cleg`: clé du groupe,
-        - `im`: indice du membre dans la table `flags / anag` du groupe.
+        - `im`: indice du membre invité dans la table `flags / anag` du groupe.
+        - `ivpar` : indice du membre invitant
+        - `dh` : date-heure d'invitation (et de l'item du chat correspondant)
       */
     try {
       const session = stores.session
       const aSt = stores.avatar
 
-      const x = { nomg: gr.na.nom, cleg: gr.na.rnd, im: mb.ids }
+      const dh = Date.now()
+      const x = { nomg: gr.na.nom, cleg: gr.na.rnd, im: mb.ids, ivpar, dh }
       const pub = await aSt.getPub(mb.na.id)
       const invit = await crypterRSA(pub, new Uint8Array(encode(x)))
       const ardg = await crypter(gr.na.rnd, ard || '')
-      const chatit = ard ? await Chatgr.getItem(gr.na.rnd, mb.ids, ard) : null
+      const chatit = ard ? await Chatgr.getItem(gr.na.rnd, ivpar, ard, dh) : null
       const args = { token: session.authToken, 
         op,
         idg: gr.id, 
         ids: mb.ids,
         idm: mb.na.id,
-        im: invpar,
+        im: ivpar,
         flags,
         ni: await Groupe.getNi(gr.na, mb.na),
         invit,
@@ -1337,14 +1322,14 @@ Retour:
 export class AcceptInvitation extends OperationUI {
   constructor () { super($t('OPstmb')) }
 
-  async run (cas, na, ng, im, ard, iam, ian) {
+  async run (cas, na, ng, im, chattxt, iam, ian) {
     try {
       const session = stores.session
       const aSt = stores.avatar
       const av = aSt.getAvatar(na.id)
       const ni = await Groupe.getNi(ng, na)
       const epgk = await av.getEpgk(ni)
-      const chatit = ard ? await Chatgr(ng.rnd, im, ard) : null
+      const chatit = chattxt ? await Chatgr.getItem(ng.rnd, im, chattxt) : null
 
       const args = { token: session.authToken, 
         idg: ng.id, 
@@ -1353,7 +1338,6 @@ export class AcceptInvitation extends OperationUI {
         nag: await Groupe.getNag(ng, na),
         npgk: await Groupe.getNpgk(ng.id, na.id),
         cas, iam, ian, ni, epgk,
-        ardg: await crypter(ng.rnd, ard),
         chatit
       }
       const ret = this.tr(await post(this, 'AcceptInvitation', args))

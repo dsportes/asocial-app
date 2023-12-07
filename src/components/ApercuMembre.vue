@@ -22,10 +22,6 @@
     </template>
 
     <div>
-      <div class="q-ml-lg" v-if="mb && (eg.estAnim || aSt.compte.estAvDuCompte(idav))">
-        <ardoise-anim :mb="mb"/>
-      </div>
-
       <div class="q-ml-lg q-mt-sm row justify-between">
         <div class="titre-md">{{$t('AMhist')}}</div>
         <bouton-bulle2 :texte="edit(fl, $t, '\n')" :label="$t('details')"/>
@@ -267,7 +263,6 @@ import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle2 from './BoutonBulle2.vue'
 import BoutonBulle from './BoutonBulle.vue'
-import ArdoiseAnim from './ArdoiseAnim.vue'
 import EditeurMd from './EditeurMd.vue'
 import InvitationAcceptation from './InvitationAcceptation.vue'
 import { MD, getNg } from '../app/modele.mjs'
@@ -287,7 +282,7 @@ export default {
     nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
   },
 
-  components: { InvitationAcceptation, BoutonConfirm, BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, BoutonBulle, ArdoiseAnim, EditeurMd },
+  components: { InvitationAcceptation, BoutonConfirm, BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, BoutonBulle, EditeurMd },
 
   computed: {
     amb () { return this.gSt.ambano[0] },
@@ -405,11 +400,15 @@ export default {
 
   methods: {
     edd (ad) {
-      if (!ad[0] && !ad[1]) return this.$t('jamais')
-      if (!ad[0] && ad[1]) return this.$t('avant', [AMJ.editDeAmj(ad[1], true)])
-      if (ad[0] && !ad[1]) return this.$t('depuis', [AMJ.editDeAmj(ad[0], true)])
-      if (ad[0] && ad[1]) return this.$t('entre', [AMJ.editDeAmj(ad[0], true), AMJ.editDeAmj(ad[1], true)])
+      let r
+      if (!ad[0] && !ad[1]) r = this.$t('jamais')
+      else if (!ad[0] && ad[1]) r = this.$t('avant', [AMJ.editDeAmj(ad[1], true)])
+      else if (ad[0] && !ad[1]) r = this.$t('depuis', [AMJ.editDeAmj(ad[0], true)])
+      else if (ad[0] && ad[1]) r = this.$t('entre', [AMJ.editDeAmj(ad[0], true), AMJ.editDeAmj(ad[1], true)])
+      // console.log(r)
+      return r
     },
+
     xd (d) { return !d ? '-' : AMJ.editDeAmj(d, true) },
 
     async accinviter (im) {

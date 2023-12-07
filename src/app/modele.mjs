@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, inverse, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
-import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS } from './api.mjs'
+import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS, limitesjour } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -1372,10 +1372,10 @@ export class Avatar extends GenDoc {
     if (row.invits) {
       for (const nx in row.invits) {
         const ni = parseInt(nx)
-        const {nomg, cleg, im} = decode(await decrypterRSA(this.priv, row.invits[nx]))
+        const {nomg, cleg, im, ivpar, dh} = decode(await decrypterRSA(this.priv, row.invits[nx]))
         const ng = NomGenerique.from([nomg, cleg])
-        gSt.setInvit(ng, this.na, im)
-        this.invits.set(ni, { ng, im, id: this.id })
+        gSt.setInvit(ng, this.na, im, ivpar, dh)
+        this.invits.set(ni, { ng, im, id: this.id, ivpar, dh })
       }
     }
   }
@@ -1938,18 +1938,6 @@ export class Groupe extends GenDoc {
     const gSt = stores.groupe
     return  this.dfh ? null : gSt.getMembre(this.id, this.imh)
   }
-  /*
-  async setDisparus(setIds) { // check / maj des statuts des membres disparus
-    const session = stores.session
-    for(const ids of setIds) {
-      if (this.ast[ids]) {
-        this.ast[ids] = 0
-        const args = { token: session.authToken, id: this.id, ids }
-        this.tr(await post(this, 'DisparitionMembre', args))
-      }
-    }
-  }
-  */
 
   static CREATEUR = FLAGS.AC | FLAGS.AN | FLAGS.AM | FLAGS.DM | FLAGS.DN | FLAGS.DE | FLAGS.PA | FLAGS.HA  | FLAGS.HN | FLAGS.HM | FLAGS.HE
   static async rowNouveauGroupe (nagr, namb, unanime) {
@@ -2018,9 +2006,8 @@ _data_:
 - `ardg` : ardoise entre les animateurs et le membre, cryptée par la clé du groupe.
 
 **Extension pour une fiche Invitation **
-- ext : { flags, invs: map }
+- ext : { flags, invs: map, chatg }
   invs : clé: im, valeur: { cva, nag }
-
 */
 export class Membre extends GenDoc {
   // Du groupe
@@ -2047,24 +2034,40 @@ export class Membre extends GenDoc {
     this.nag = await Groupe.getNag (this.ng, this.na) 
     this.estAc = aSt.compte.avatarIds.has(this.na.id)
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
-    this.ard = row.ardg ? await decrypterStr(this.ng.rnd, row.ardg) : ''
 
     if (row.ext) {
+      const pSt = stores.people
       this.ext = { flags: row.ext.flags, invs: new Map() }
+      if (row.ext.chatg)
+        this.ext.chattxt = ungzipB(await decrypter(this.cleg, row.ext.chatg))
       this.ext.cvg = row.ext.cvg ? decode(await decrypter(this.ng.rnd, row.ext.cvg)) : null
       for (const imx in row.ext.invs) {
         const im = parseInt(imx)
         const x = row.ext.invs[imx]
         const na = NomGenerique.from(decode(await decrypter(this.ng.rnd, x.nag)))
         const cv = x.cva ? decode(await decrypter(na.rnd, x.cva)) : null
-        this.ext.invs.set(im, { na, cv })
+        this.ext.invs.set(im, na)
+        if (!aSt.compte.mav.has(na.id)) pSt.setCv(na, cv) // c'est un people
       }
     }
   } 
 
-  static async rowNouveauMembre (nag, na, im, dlv, cv) {
-    const r = { id: nag.id, ids: im, v: 0, dlv: AMJ.max, vcv: cv ? cv.v : 0,
+  static async rowNouveauMembre (nag, na, im, cv, nvgr) {
+    const r = { id: nag.id, ids: im, v: 0, dlv: 0, vcv: cv ? cv.v : 0,
       ddi: 0, dac: 0, fac: 0, dln: 0, fln: 0, den: 0, fen: 0, dam: 0, fam: 0 }
+    if (nvgr) {
+      // En UTC la division d'une date est multiple de 86400000
+      const auj = AMJ.amjUtc()
+      const tjourJ = (AMJ.tDeAmjUtc(AMJ.amjUtc()) / 86400000) + limitesjour.dlv
+      const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
+      r.dlv = AMJ.amjUtcDeT(tdlv * 86400000)
+      r.dac = auj
+      r.dam = auj
+      r.dln = auj
+      r.den = auj
+    } else {
+      r.dlv = AMJ.max
+    }
     r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
     r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
     const _data_ = new Uint8Array(encode(r))
@@ -2115,9 +2118,9 @@ export class Chatgr extends GenDoc {
     if (!this.tit) this.tit = '???'
   }
 
-  static async getItem (cleg, im, txt) {
+  static async getItem (cleg, im, txt, dh) {
     const t = txt && txt.length ? await crypter(cleg, gzipB(txt)) : null
-    return { im: im, lg: txt ? txt.length || 0 : 0, t, dh: Date.now() }
+    return { im: im, lg: txt ? txt.length || 0 : 0, t, dh: dh || Date.now() }
   }
 }
 
