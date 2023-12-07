@@ -42,8 +42,7 @@
         @click="clickNotif" apptb/>
 
       <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
-        <span v-if="session.ok" class="titre-lg cursor-pointer"  
-          @click="MD.oD('detailsavatar')">{{aSt.avC.na.nomc}}</span>
+        <span v-if="session.ok" class="titre-lg">{{aSt.avC.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
         <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
       </q-toolbar-title>
@@ -273,23 +272,6 @@
     <panel-membre class="bs"/>
   </q-dialog>
 
-  <q-dialog v-model="detailsavatar" full-height persistent>
-    <q-layout container view="hHh lpR fFf" :class="'bs ' + dkli(0)" style="width:90vw">
-      <q-header elevated class="bg-secondary text-white">
-        <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtitav', [aSt.avC.na.nom])}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-      </q-header>
-      <q-page-container>
-        <q-card class="q-pa-sm largeur40">
-          <apercu-avatar edit :idav="aSt.avC.id"/>
-        </q-card>
-      </q-page-container>
-    </q-layout>
-  </q-dialog>
-
   <q-dialog v-model="opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
     <div class="q-mt-sm column items-center">
@@ -357,7 +339,6 @@ import PageTranche from './pages/PageTranche.vue'
 import PagePeople from './pages/PagePeople.vue'
 import PanelPeople from './dialogues/PanelPeople.vue'
 import PanelMembre from './dialogues/PanelMembre.vue'
-import ApercuAvatar from './components/ApercuAvatar.vue'
 import PageGroupes from './pages/PageGroupes.vue'
 import PageGroupe from './pages/PageGroupe.vue'
 import PageNotes from './pages/PageNotes.vue'
@@ -391,7 +372,7 @@ export default {
 
   components: { 
     BoutonHelp, BoutonLangue, OutilsTests, NotifIcon2, QueueIcon, 
-    ApercuAvatar, PageGroupe, PageGroupes, PageNotes, PageFicavion,
+    PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
@@ -550,7 +531,6 @@ export default {
       dialogueerreur: MD.declare('dialogueerreur', ref(false)),
       detailspeople: MD.declare('detailspeople', ref(false)),
       detailsmembre: MD.declare('detailsmembre', ref(false)),
-      detailsavatar: MD.declare('detailsavatar', ref(false)),
       pressepapier: MD.declare('pressepapier', ref(false)),
       opDialog: MD.declare('opDialog', ref(false)),
       cf: MD.declare('cf', ref(false)),
