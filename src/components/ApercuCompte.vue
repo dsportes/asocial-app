@@ -1,24 +1,13 @@
 <template>
-  <div :class="'row ' + dkli(idx)">
-    <div class="col-auto q-mr-sm">
-      <img class="photomax" :src="photo" />
-    </div>
-    <div class="col">
-      <div>
-        <span class="text-bold fs-md q-mr-sm">{{nom}}</span> 
-        <span class="text-bold fs-sm font-mono q-mr-sm">#{{elt.id}}</span> 
-      </div>
-      <show-html v-if="info" class="q-my-xs bord" :idx="idx" 
-        zoom maxh="3rem" :texte="info"/>
-      <div v-else class="text-italic">{{$t('FAnocv')}}</div>
-      <barre-people v-if="session.estComptable || aSt.estSponsor" :id="elt.id"/>
-    </div>
+  <div :class="dkli(idx)">
+    <apercu-genx :id="elt.id" :idx="idx"/>
+    <barre-people v-if="session.estComptable || aSt.estSponsor" :id="elt.id"/>
   </div>
 </template>
 <script>
 
 import stores from '../stores/stores.mjs'
-import ShowHtml from './ShowHtml.vue'
+import ApercuGenx from './ApercuGenx.vue'
 import { ID } from '../app/api.mjs'
 import BarrePeople from './BarrePeople.vue'
 import { dkli } from '../app/util.mjs'
@@ -28,7 +17,7 @@ export default {
 
   props: { elt: Object, idx: Number },
 
-  components: { ShowHtml, BarrePeople },
+  components: { BarrePeople, ApercuGenx },
 
   computed: {
     phDef() { return ID.estComptable(this.elt.id) ? this.config.iconSuperman : this.config.iconAvatar },

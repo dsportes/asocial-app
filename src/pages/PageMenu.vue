@@ -68,12 +68,6 @@
     </q-item>
 
     <q-item clickable>
-      <q-item-section class="q-ml-lg" clickable @click="MD.oD('detailsavatar')">
-        <q-item-label lines="1">{{$t('ACdetav', [cav.label])}}
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item clickable>
       <q-item-section class="q-ml-lg" clickable @click="ui.setPage('groupesac')">
         <q-item-label lines="1">{{$t('ACgroupes')}}
           <q-badge color="primary" rounded>{{nbgrps}}</q-badge>

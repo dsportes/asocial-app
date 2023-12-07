@@ -10,7 +10,7 @@
 
   <q-page-container>
     <q-card class="q-pa-sm">
-      <apercu-people :id="session.peopleId" simple />
+      <apercu-genx :id="session.peopleId" />
       <div class="row">
         <div v-if="aSt.actPeC">
           <div v-if="aSt.actPeC.nasp" class="titre-md text-bold text-warning">
@@ -73,7 +73,7 @@
 
 import { ref, onMounted, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
-import ApercuPeople from '../components/ApercuPeople.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
@@ -84,7 +84,7 @@ import { afficherDiag, sleep } from '../app/util.mjs'
 
 export default {
   name: 'PanelPeople',
-  components: { ApercuMembre, ApercuPeople, BoutonHelp, ApercuChat, BarrePeople },
+  components: { ApercuMembre, ApercuGenx, BoutonHelp, ApercuChat, BarrePeople },
 
   props: { },
 

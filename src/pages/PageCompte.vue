@@ -1,7 +1,6 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
-    <q-card class="q-my-md q-pa-xs">
-      <div class="row items-center justify-around q-py-sm">
+      <div class="row items-center justify-around q-py-xs">
         <div> <!-- Changement de phrase secrète -->
           <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
             :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
@@ -14,20 +13,8 @@
         </div>
       </div>
 
-      <!-- Mémo du compte -->
-      <div class="q-py-sm">
-        <div class="titre-md">{{$t('CPTmemo')}}</div>
-        <show-html v-if="memo" class="q-ml-lg bord" maxh="5rem" :texte="memo" zoom edit
-            @edit="memoeditAut"/>
-        <div v-else class="q-ml-lg row">
-          <div class="col fs-md text-italic">({{$t('CPTnomemo')}})</div>
-          <q-btn class="col-auto" size="sm" dense icon="edit" color="primary" 
-            @click="memoeditAut"/>
-        </div>
-      </div>
-
       <!-- Mots clés du compte -->
-      <div class="row items-center q-my-sm">
+      <div class="row items-center q-my-xs">
         <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
         <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
       </div>
@@ -37,7 +24,6 @@
         <span v-if="aSt.compta.estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('compteA')}}</span>
         <span v-if="aSt.compta.estSponsor" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('sponsor')}}</span>
       </div>
-    </q-card>
 
     <!-- Avatars du compte -->
     <q-card class="q-my-md q-pa-xs" v-for="(na, idx) in aSt.compte.lstAvatarNas" :key="na.id">
@@ -50,9 +36,6 @@
         <div :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')">
           <apercu-avatar edit  :idav="na.id" :idx="idx"/>
           <div class="row q-mt-sm q-gutter-sm">
-            <q-btn class="q-ml-sm" size="md" icon="more" no-caps
-              :label="$t('plus')" color="primary" dense @click="courant(na.id, 1)">
-            </q-btn>
             <q-btn class="q-ml-sm" size="md" icon="chat" no-caps
               :label="$t('ACgroupes')" color="primary" dense @click="courant(na.id, 2)">
               <q-badge class="cl1" color="secondary" rounded>{{nbgrps(na.id)}}</q-badge>
@@ -87,12 +70,6 @@
       </q-card>
     </q-dialog>
 
-    <!-- Dialogue d'édition du mémo du compte -->
-    <q-dialog v-model="memoedit" persistent>
-      <editeur-md mh="10rem" :titre="$t('CPTmdc')" help="page1"
-        :texte="aSt.compte.memo || ''" editable modetxt :label-ok="$t('OK')" @ok="memook"/>
-    </q-dialog>
-
     <!-- Dialogue de changement de la phrase secrète -->
     <q-dialog v-model="chgps" persistent>
       <q-card class="bs petitelargeur">
@@ -125,10 +102,8 @@ import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { crypter } from '../app/webcrypto.mjs'
-import { ChangementPS, MemoCompte, MotsclesCompte, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
+import { ChangementPS, MotsclesCompte, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
-import EditeurMd from '../components/EditeurMd.vue'
-import ShowHtml from '../components/ShowHtml.vue'
 import MotsCles from '../components/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
@@ -143,7 +118,7 @@ export default {
 
   components: { 
     NomAvatar, BoutonHelp, ApercuAvatar,
-    PhraseSecrete, EditeurMd, ShowHtml, MotsCles, SupprAvatar
+    PhraseSecrete, MotsCles, SupprAvatar
   },
 
   computed: {
@@ -195,7 +170,6 @@ export default {
     courant (id, action) {
       this.session.setAvatarId(id)
       if (action) switch (action){
-        case 1 : { MD.oD('detailsavatar'); return }
         case 2 : { this.ui.setPage('groupesac'); return }
         case 3 : { this.ui.setPage('chats'); return }
         case 4 : { this.ui.setPage('sponsorings'); return }
@@ -210,14 +184,6 @@ export default {
       }
       MD.fD()
       await new NouvelAvatar().run(nom)
-    },
-
-    async memoeditAut () { if (await this.session.edit()) this.ovmemoedit() },
-
-    async memook (m) {
-      const memok = await crypter(this.session.clek, m)
-      await new MemoCompte().run(memok)
-      MD.fD()
     },
 
     async mcleditAut () { if (await this.session.edit()) this.ovmcledit() },
@@ -254,15 +220,13 @@ export default {
     function ovmcledit () { MD.oD(mcledit) }
     const nvav = ref(false)
     function ovnvav () { MD.oD(nvav) }
-    const memoedit = ref(false)
-    function ovmemoedit () { MD.oD(memoedit) }
     const chgps = ref(false)
     function ovchgps () { MD.oD(chgps) }
     const suppravatar = ref(false)
     function ovsuppravatar () { MD.oD(suppravatar) }
 
     return {
-      MD, mcledit, ovmcledit, nvav, ovnvav, memoedit, ovmemoedit, chgps, ovchgps,
+      MD, mcledit, ovmcledit, nvav, ovnvav, chgps, ovchgps,
       suppravatar, ovsuppravatar,
       ui: stores.ui,
       aSt,

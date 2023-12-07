@@ -6,10 +6,10 @@
     <bouton-help page="page1"/>
   </q-toolbar>
   <q-card-section>
-    <apercu-genx :na="mb.ng"/>
+    <apercu-genx :id="mb.id"/>
     <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICinvpar')}}</div>
     <div class="q-ma-sm" v-for="[im, na] in mb.ext.invs" :key="im">
-      <apercu-genx :na="na" people/>
+      <apercu-genx :id="na.id"/>
       <q-separator color="orange"/>
     </div>
 

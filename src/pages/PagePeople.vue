@@ -13,7 +13,7 @@
     
     <div v-if="pSt.peLpF.length">
       <q-card class="q-my-md" v-for="(p, idx) in pSt.peLpF" :key="p.id">
-        <apercu-people class="q-pa-xs" :id="p.na.id" :idx="idx"/>
+        <apercu-genx class="q-pa-xs" :id="p.na.id" :idx="idx"/>
       </q-card>
     </div>
   </q-page>
@@ -22,14 +22,14 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import ApercuPeople from '../components/ApercuPeople.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
 import { RafraichirCvs } from '../app/operations.mjs'
 import { Motscles } from '../app/modele.mjs'
 
 export default {
   name: 'PagePeople',
 
-  components: { ApercuPeople },
+  components: { ApercuGenx },
 
   computed: {
   },

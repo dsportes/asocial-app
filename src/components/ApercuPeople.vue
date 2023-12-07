@@ -1,6 +1,6 @@
 <template>
   <div :class="dkli(idx)">
-    <apercu-genx :na="p.na" :cv="p.cv" :idx="idx" detail-people />
+    <apercu-genx :id="p.na.id" :idx="idx"/>
 
 <!--
     <div v-if="p.sp" :class="'fs-md ' + (p.sp === 2 ? 'text-bold' : '')">{{$t('APtr' + p.sp)}}</div>

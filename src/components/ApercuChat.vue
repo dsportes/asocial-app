@@ -1,7 +1,7 @@
 <template>
   <q-card v-if="chat">
     <div :class="'column q-px-sm ' + dkli(idx)">
-      <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
+      <apercu-genx v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
       <div class="q-mt-xs row justify-between items-center">
         <div class="text-italic fs-md">
           <span v-if="chat.stI===1" class="q-mr-sm">{{$t('actif')}}</span>
@@ -24,7 +24,7 @@
             <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [naE.nom])}}</q-toolbar-title>
             <bouton-help page="page1"/>
           </q-toolbar>
-          <apercu-people v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
+          <apercu-genx v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
           <div class="q-pa-xs row justify-around">
             <q-btn :label="$t('CHadd2')" class="btn" icon="add" color="primary" @click="editer"/>
             <q-btn :label="$t('CHrac')" class="btn" icon="phone_disabled" color="primary" @click="raccrocher"/>
@@ -105,7 +105,7 @@ import stores from '../stores/stores.mjs'
 import SdDark1 from './SdDark1.vue'
 import EditeurMd from './EditeurMd.vue'
 import { dhcool, dkli } from '../app/util.mjs'
-import ApercuPeople from './ApercuPeople.vue'
+import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import { MajChat, PassifChat } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
@@ -116,7 +116,7 @@ export default {
 
   props: { naI: Object, naE: Object, ids: Number, idx: Number, mapmc: Object, affnai: Boolean },
 
-  components: { SdDark1, EditeurMd, ApercuPeople, BoutonHelp },
+  components: { SdDark1, EditeurMd, ApercuGenx, BoutonHelp },
 
   computed: { 
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },

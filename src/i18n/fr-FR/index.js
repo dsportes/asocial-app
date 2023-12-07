@@ -63,6 +63,7 @@ export default {
   supprime: 'SUPPRIMÉ',
   plus: 'Plus ...',
   plus2: 'Plus',
+  page: 'Page',
   details: 'Plus de détails',
   editavion: 'Les mises à jour ne sont pas possibles en mode avion.',
   editfige: 'Les mises à jour ne sont pas possibles quand l\'administrateur technique a figé l\'application en lecture seulement.',
@@ -110,6 +111,7 @@ export default {
   activer: 'Activer',
   desactiver: 'Désactiver',
   disparu: 'disparu',
+  cv: 'Carte de visite',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -1516,6 +1518,8 @@ export default {
   // Fiche avatar
   FAnocv: 'Pas de carte de visite',
   FAnoinfo: '(pas d\'autre information)',
+  FAcvgr: 'La carte de visite d\'un groupe ne peut être modifiée que si le compte a au moins un avatar ayant pouvoir d\'animateur sur le groupe.',
+
   FAphc: 'Déclaration de la phrase de contact',
   FAsup: 'Supprimer la phrase de contact actuelle',
   FAdpc: 'Définir la phrase de contact',

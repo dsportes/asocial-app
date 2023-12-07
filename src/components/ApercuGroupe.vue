@@ -4,7 +4,7 @@
 
   <div v-else :class="dkli(idx)">
     <!--div style="height:3rem"/-->
-    <apercu-genx :na="eg.groupe.na" :cv="eg.groupe.cv" :idx="idx" :cvchangee="cvchangee"/>
+    <apercu-genx :id="eg.groupe.id" :idx="idx"/>
 
     <div v-if="eg.groupe.dfh" class="q-mr-sm">
       <q-icon name="warning" size="md" color="negative"/>
@@ -385,12 +385,6 @@ export default {
       }
     },
 
-    async cvchangee (res) { // CV du GROUPE !
-      if (res && this.eg) {
-        await new MajCvGr().run(this.eg.groupe, res.ph, res.info)
-      }
-    },
-    
     async autmcledit () {
       if (!await this.session.edit()) return
       if (!this.eg.estAnim) {

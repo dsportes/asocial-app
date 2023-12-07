@@ -3,7 +3,7 @@
     switch-toggle-side expand-separator dense group="trgroup">
     <template v-slot:header>
       <div class="column full-width">
-        <apercu-genx v-if="people" :na="na" :cv="cv" :ids="im" :idx="idx" detail-people/>
+        <apercu-genx v-if="people" :id="na.id" :im="im" :idx="idx"/>
         <div v-else class="row justify-between full-width">
           <div>
             <span class="titre-lg text-bold text-primary">{{$t('moi2', [na.nom])}}</span>

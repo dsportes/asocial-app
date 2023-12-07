@@ -55,11 +55,7 @@
         </template>
 
         <div class="q-ml-lg">
-          <!-- C'est LE titulaire du compte !?!?!?
-          <apercu-avatar v-if="c.id === session.compteId" :idav="c.id" :idx="idx"/>
-          -->
-          <apercu-avatar v-if="type(c)===1" :idav="c.id" :idx="idx"/>
-          <apercu-people v-if="type(c)===2" :id="c.id" :idx="idx"/>
+          <apercu-genx v-if="type(c)===2 || type(c)===1" :id="c.id" :idx="idx"/>
           <apercu-compte v-if="type(c)===3" :elt="c" :idx="idx"/>
 
           <apercu-notif2 class="q-my-xs" :editable="session.pow < 4"
@@ -125,7 +121,7 @@ import TuileNotif from '../components/TuileNotif.vue'
 import ApercuNotif2 from '../components/ApercuNotif2.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
-import ApercuPeople from '../components/ApercuPeople.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols2 from '../components/QuotasVols2.vue'
@@ -138,8 +134,8 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 
 export default {
   name: 'PageTranche',
-  components: { TuileCnv,TuileNotif, ApercuNotif2, ChoixQuotas, ApercuCompte, ApercuPeople,
-    ApercuAvatar, PanelCompta, QuotasVols2, NouveauSponsoring },
+  components: { TuileCnv,TuileNotif, ApercuNotif2, ChoixQuotas, ApercuCompte, ApercuGenx,
+    PanelCompta, QuotasVols2, NouveauSponsoring },
 
   props: { },
 
@@ -171,10 +167,7 @@ export default {
       this.ccid = c.id
       this.ccnomc = this.nomc(c)
       const t = this.type(c)
-      if (t === 1) {
-        this.session.setAvatarId(c.id)
-        MD.oD('detailsavatar')
-      } else if (t === 2) {
+      if (t === 2) {
         this.session.setPeopleId(c.id)
         MD.oD('detailspeople')
       } else if (t === 3) {

@@ -1,6 +1,6 @@
 <template>
   <q-card :class="dkli(idx)">
-    <apercu-genx :na="avatar.na" :cv="avatar.cv" :idx="idx" est-avc :cvchangee="cvchangee"/>
+    <apercu-genx :id="avatar.id" :idx="idx"/>
 
     <div class="q-mt-sm" v-if="avatar.pc">
       <div>
@@ -66,11 +66,6 @@ export default {
   },
 
   methods: {
-    async cvchangee (res) {
-      if (res) {
-        await new MajCv().run(this.avatar, res.ph, res.info)
-      }
-    },
     async editerpc () {
       if (!await this.session.edit()) return
       this.oveditionpc()

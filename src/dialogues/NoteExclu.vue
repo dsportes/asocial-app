@@ -24,7 +24,7 @@
         <div v-if="xav">
           <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
           <apercu-genx v-if="xav.na" class="q-my-md" 
-            :na="xav.na" :ids="xav.im" :cv="cv(xav)" :estAvc="xav.avc"/>
+            :id="xav.na.id" :im="xav.im"/>
           <div v-else class="titre-md text-bold">{{xav.nom}}</div>
           <q-btn v-if="xav.avc" dense size="sm" color="primary" icon="close" 
             :label="$t('PNOperdre1')" @click="perdre"/>
@@ -67,7 +67,7 @@
       detailPeople: Boolean, // bouton d'affichage du détail du people
       idx: Number
       -->
-      <apercu-genx v-if="xap" class="q-my-md" :na="xap.na" :ids="xap.im" :cv="xap.cv" :estAvc="xap.avc"/>
+      <apercu-genx v-if="xap" class="q-my-md" :id="xap.na.id" :im="xap.im"/>
 
     </q-page>
   </q-page-container>

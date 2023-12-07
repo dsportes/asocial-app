@@ -42,7 +42,7 @@
         <div v-if="xav">
           <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
           <apercu-genx v-if="xav.na" class="q-my-md" 
-            :na="xav.na" :ids="xav.im" :cv="cv(xav)" :estAvc="xav.avc"/>
+            :id="xav.na" :im="xav.im"/>
           <div v-else class="titre-md text-bold">{{xav.nom}}</div>
         </div>
         <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>

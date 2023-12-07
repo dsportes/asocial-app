@@ -34,7 +34,7 @@
 
   <div class="q-my-lg petitelargeur maauto" v-if="gSt.pgLgFT.length">
     <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-sm'">
-      <apercu-genx :na="e.groupe.na" :cv="e.groupe.cv" :idx="idx" />
+      <apercu-genx :id="e.groupe.id" :idx="idx" />
       <div class="row full-width items-center justify-between">
         <div>
           <div v-if="e.groupe.dfh" class="q-mr-sm">

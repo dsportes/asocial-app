@@ -20,7 +20,7 @@
       <q-card class="q-my-md maauto" v-for="(chat, idx) in fusion" :key="chat.id + '/' + chat.ids">
         <q-card v-if="ID.estGroupe(chat.id)">
           <div :class="'column q-px-sm ' + dkli(idx)">
-            <apercu-genx class="bordb" :na="getNg(chat.id)" :idx="idx" :cv="cv(chat.id)"/>
+            <apercu-genx class="bordb" :id="chat.id" :idx="idx"/>
             <div class="q-mt-xs row justify-between items-center">
               <div class="text-italic fs-md">
                 <span class="q-mr-sm">{{$t('CHnbit', chat.items.length, {count:chat.items.length} )}}</span>
