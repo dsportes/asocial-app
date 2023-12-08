@@ -47,7 +47,7 @@
         <q-item-label lines="1">{{$t('ACmesctc')}}</q-item-label>
       </q-item-section>
     </q-item>
-    <q-item clickable @click="ui.setPage('chats')">
+    <q-item clickable @click="tousChats">
       <q-item-section>
         <q-item-label lines="1">{{$t('ACchats')}}
           <q-badge color="primary" rounded>{{nbchats}}</q-badge>
@@ -71,6 +71,13 @@
       <q-item-section class="q-ml-lg" clickable @click="ui.setPage('groupesac')">
         <q-item-label lines="1">{{$t('ACgroupes')}}
           <q-badge color="primary" rounded>{{nbgrps}}</q-badge>
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item clickable class="q-ml-lg" @click="chatsAv">
+      <q-item-section>
+        <q-item-label lines="1">{{$t('ACchats')}}
+          <q-badge color="primary" rounded>{{nbchatsAv}}</q-badge>
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -110,6 +117,7 @@ export default {
 
   computed: {
     nbchats () { return this.aSt.nbchats + this.gSt.nbchats },
+    nbchatsAv () { return this.aSt.eavC.chats.size },
     nbspons () { return this.aSt.eavC.sponsorings.size },
     nbgrps () { 
       return this.aSt.compte.idGroupes(this.session.avatarId).size
@@ -145,6 +153,14 @@ export default {
       this.aSt.setTribuC()
       this.ui.setPage('tranche')
     },
+    chatsAv () {
+      this.fSt.filtre.chats.tous = false
+      this.ui.setPage('chats')
+    },
+    tousChats () {
+      this.fSt.filtre.chats.tous = true
+      this.ui.setPage('chats')
+    }
   },
 
   data () {
@@ -155,6 +171,7 @@ export default {
   setup () {
     const aSt = stores.avatar
     const gSt = stores.groupe
+    const fSt = stores.filtre
     const session = stores.session
     const ui = stores.ui
     const options = ref([])
@@ -190,7 +207,7 @@ export default {
     return {
       pow: session.pow,
       MD,
-      aSt, session, gSt, ui,
+      aSt, session, gSt, ui, fSt,
       options, cav
     }
   }

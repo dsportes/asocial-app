@@ -1,18 +1,21 @@
 <template>
   <q-card v-if="chat">
-    <div :class="'column q-px-sm ' + dkli(idx)">
-      <apercu-genx v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
-      <div class="q-mt-xs row justify-between items-center">
-        <div class="text-italic fs-md">
-          <span v-if="chat.stI===1" class="q-mr-sm">{{$t('actif')}}</span>
-          <span class="q-mr-sm">{{$t('CHnbit', chat.items.length, {count:chat.items.length} )}}</span>
-        </div>
-        <div>
-          <span class="text-italic font-mono q-mr-sm">{{dhcool(chat.dh)}}</span>
-          <q-btn color="primary" icon="open_in_new" @click="ovouvrir"/>
-        </div>
+    <div :class="'column ' + dkli(idx)">
+      <div class="row justify-between">
+        <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHde', [naI.nom])}}</div>
+        <q-btn color="warning" icon="open_in_new" @click="ovouvrir"/>
       </div>
-      <div class="fs-md">{{chat.tit}}</div>
+      <div class="q-mx-sm">
+        <apercu-genx class="bordb" :id="naE.id" :idx="idx" />
+        <div class="q-mt-xs row justify-between items-center">
+          <div class="text-italic fs-md">
+            <span v-if="chat.stI===1" class="q-mr-sm">{{$t('actif')}}</span>
+            <span class="q-mr-sm">{{$t('CHnbit', chat.items.length, {count:chat.items.length} )}}</span>
+          </div>
+          <div v-if="chat.items.length" class="text-italic font-mono q-mr-sm">{{dhcool(chat.dh)}}</div>
+        </div>
+        <div v-if="chat.items.length" class="fs-md">{{chat.tit}}</div>
+      </div>
     </div>
 
     <!-- Dialogue d'édition du texte du chat -->
@@ -21,10 +24,10 @@
         <q-header elevated class="bg-secondary text-white">
           <q-toolbar>
             <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
-            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [naE.nom])}}</q-toolbar-title>
+            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [naI.nom, naE.nom])}}</q-toolbar-title>
             <bouton-help page="page1"/>
           </q-toolbar>
-          <apercu-genx v-if="!affnai" class="bordb" :id="naE.id" :idx="idx" />
+          <apercu-genx class="bordb" :id="naE.id" :idx="idx" />
           <div class="q-pa-xs row justify-around">
             <q-btn :label="$t('CHadd2')" class="btn" icon="add" color="primary" @click="editer"/>
             <q-btn :label="$t('CHrac')" class="btn" icon="phone_disabled" color="primary" @click="raccrocher"/>
@@ -114,7 +117,7 @@ import { MD } from '../app/modele.mjs'
 export default {
   name: 'ApercuChat',
 
-  props: { naI: Object, naE: Object, ids: Number, idx: Number, mapmc: Object, affnai: Boolean },
+  props: { naI: Object, naE: Object, ids: Number, idx: Number, mapmc: Object },
 
   components: { SdDark1, EditeurMd, ApercuGenx, BoutonHelp },
 

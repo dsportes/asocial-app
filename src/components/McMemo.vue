@@ -1,19 +1,41 @@
 <template>
-  <div>
-    <div :class="dkli(idx) + ' row justify-between'">
-      <div class="column">
-        <div v-if="memolg">
-          <span class="q-mr-xs text-italic">{{$t('MMCcom')}}</span>
-          <span>{{memolg}}</span>
+  <div ref="root">
+    <div :class="dkli(idx)">
+      <div v-if="large" class="row full-width">
+        <div class="col-6 text-italic fs-sm z1">
+          <span v-if="memolg">{{memolg}}</span>
+          <span v-else>{{$t('MMCnomemo')}}</span>
         </div>
-        <div v-else class="q-mr-xs text-italic">{{$t('MMCnomemo')}}</div>
-        <div v-if="mclg">
-          <span class="q-mr-xs text-italic">{{$t('MMCmc')}}</span>
-          <span>{{mclg}}</span>
+        <div class="col">
+          <div v-if="mclg.length" class="row q-gutter-xs fs-sm font-mono z1">
+            <div class="text-warning text-bold q-mr-xs">{{mclg.length}}</div>
+            <div v-for="mc in mclg" :key="mc" 
+              class="bg-yellow-2 text-bold text-black">
+              {{mc}}
+            </div>
+          </div>
+          <div v-else class="text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
         </div>
-        <div v-else class="q-mr-xs text-italic">{{$t('MMCnomc')}}</div>
+        <q-btn class="col-auto text-right btn" size="sm" color="primary" icon="edit" @click="zoom"/>
       </div>
-      <q-btn class="q-ml-sm btn" size="sm" color="primary" icon="edit" @click="zoom"/>
+
+      <div v-else class="column full-width">
+        <div class="text-italic fs-sm z1">
+          <span v-if="memolg">{{memolg}}</span>
+          <span v-else>{{$t('MMCnomemo')}}</span>
+        </div>
+        <div class="row">
+          <div v-if="mclg.length" class="col row q-gutter-xs fs-sm font-mono z1">
+            <div class="text-warning text-bold q-mr-xs">{{mclg.length}}</div>
+            <div v-for="mc in mclg" :key="mc" 
+              class="bg-yellow-2 text-bold text-black">
+              {{mc}}
+            </div>
+          </div>
+          <div v-else class="col text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
+          <q-btn class="col-auto text-right btn" size="sm" color="primary" icon="edit" @click="zoom"/>
+        </div>
+      </div>
     </div>
 
     <q-dialog v-model="edition">
@@ -22,10 +44,9 @@
           <q-btn dense size="md" icon="close" @click="MD.fD"/>
           <q-toolbar-title>{{$t('MMCap', [nom])}}</q-toolbar-title>
         </q-toolbar>
-
-        <div v-if="diag" class='q-ma-sm bg-yellow-5 text-warning text-bold'>
+        <q-toolbar inset v-if="diag" class='q-ma-sm bg-yellow-5 text-warning text-bold'>
           {{$t('MMCnomaj', [diag])}}
-        </div>
+        </q-toolbar>
 
         <q-card-section class="q-py-sm">
           <div class="titre-lg text-italic">{{$t('MMCmc')}}</div>
@@ -43,7 +64,7 @@
           <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
             @click="MD.fD"/>
           <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 
-            :label="$t('valider')" :diable="diag" @click="valider"/>
+            :label="$t('valider')" @click="valider"/>
         </q-card-actions>
 
       </q-card>
@@ -52,7 +73,7 @@
 </template>
 <script>
 
-import { toRef, ref, watch } from 'vue'
+import { toRef, ref, watch, onMounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { Motscles, getNg, MD } from '../app/modele.mjs'
@@ -60,6 +81,8 @@ import ApercuMotscles from './ApercuMotscles.vue'
 import EditeurMd from './EditeurMd.vue'
 import { dkli, titre } from '../app/util.mjs'
 import { McMemo } from '../app/operations.mjs'
+
+const LARGE = 500
 
 export default {
   name: 'McMemo',
@@ -72,7 +95,7 @@ export default {
     nom () { return getNg(this.id).nom },
     mc () { return this.mcmemo && this.mcmemo.mc ? this.mcmemo.mc : new Uint8Array([])},
     mclg () { return this.mcmemo && this.mcmemo.mc ?
-      Motscles.editU8(this.mcmemo.mc, this.mapmc) : ''
+      Motscles.editU8(this.mcmemo.mc, this.mapmc) : []
     },
     memo () { return this.mcmemo && this.mcmemo.memo ? this.mcmemo.memo : '' },
     memolg () { return titre(this.memo) },
@@ -83,6 +106,16 @@ export default {
     nvmc: null,
     txt: '',
   }},
+
+  watch: {
+    "$q.screen.width"() {
+      const l = this.root.offsetWidth > LARGE
+      if (l !== this.large) {
+        this.large = l
+        // console.log(this.large)
+      }
+    }
+  },
 
   methods: {
     async zoom () { 
@@ -107,6 +140,8 @@ export default {
     const aSt = stores.avatar
     const id = toRef(props, 'id')
     const mapmc = ref(Motscles.mapMC(true, 0))
+    const root = ref(null)
+    const large = ref(false)
 
     const mcmemo = ref(null)
     
@@ -131,11 +166,16 @@ export default {
 
     getmm()
 
+    onMounted(() => {
+      large.value = root.value.offsetWidth > LARGE
+      // console.log(large.value)
+    })
+
     const edition = ref(false)
     function ovedition () { MD.oD(edition) }
 
     return {
-      session,
+      session, root, large,
       mcmemo, dkli, MD, titre, mapmc, edition, ovedition
     }
   }
@@ -144,6 +184,13 @@ export default {
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .btn
-  height: 1.1rem !important
+  min-height: 1.1rem !important
   max-height: 1.1rem !important
+  min-width: 1.1rem !important
+  max-width: 1.1rem !important
+.z1
+  max-height: 1.2rem
+  overflow: hidden
+  text-overflow: ellipsis
+  white-space: nowrap
 </style>

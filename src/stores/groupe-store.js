@@ -335,10 +335,11 @@ export const useGroupeStore = defineStore('groupe', {
 
     tousChats: (state) => {
       const f = stores.filtre.filtre.chats
+      const r = []
+      if (!f.tous) return r
       f.limj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
       f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
-      const r = []
       for (const [,elt] of state.map) {
         const c = elt.chatgr
         const na = elt.groupe.na

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
+  <q-page class="column q-pl-xs q-mr-sm largeur50 maauto">
       <div class="row items-center justify-around q-py-xs">
         <div> <!-- Changement de phrase secrète -->
           <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
@@ -41,7 +41,7 @@
               <q-badge class="cl1" color="secondary" rounded>{{nbgrps(na.id)}}</q-badge>
             </q-btn>
             <q-btn class="q-ml-sm" size="md" icon="chat" no-caps
-              :label="$t('ACchats')" color="primary" dense @click="courant(na.id, 3)">
+              :label="$t('ACseschats')" color="primary" dense @click="courant(na.id, 3)">
               <q-badge class="cl1" color="secondary" rounded>{{nbchats(na.id)}}</q-badge>
             </q-btn>
             <q-btn class="q-ml-sm" size="md" icon="chat" no-caps
@@ -171,7 +171,11 @@ export default {
       this.session.setAvatarId(id)
       if (action) switch (action){
         case 2 : { this.ui.setPage('groupesac'); return }
-        case 3 : { this.ui.setPage('chats'); return }
+        case 3 : { 
+          this.fSt.filtre.chats.tous = false
+          this.ui.setPage('chats')
+          return 
+        }
         case 4 : { this.ui.setPage('sponsorings'); return }
       }
     },
@@ -215,6 +219,7 @@ export default {
   setup () {
     const session = stores.session
     const aSt = stores.avatar
+    const fSt = stores.filtre
 
     const mcledit = ref(false)
     function ovmcledit () { MD.oD(mcledit) }
@@ -229,7 +234,7 @@ export default {
       MD, mcledit, ovmcledit, nvav, ovnvav, chgps, ovchgps,
       suppravatar, ovsuppravatar,
       ui: stores.ui,
-      aSt,
+      aSt, fSt,
       session
     }
   }

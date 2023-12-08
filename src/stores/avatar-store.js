@@ -297,36 +297,6 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     // PageChats ******************************************
-    pcLc: (state) => { 
-      return Array.from(state.map.get(stores.session.avatarId).chats.values())
-    },
-
-    pcLcF: (state) => {
-      const f = stores.filtre.filtre.chats
-      if (!f) { stores.session.fmsg(state.pcLc.length); return state.pcLc }
-      f.limj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
-      f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
-      f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
-      const r = []
-      for (const c of state.pcLc) {
-        if (f.limj && c.dh < f.limj) break
-        if (f.chel && c.stI !== 1) break
-        if (f.nom && !c.naE.nom.startsWith(f.nom)) continue
-        if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
-        if (f.setp.size || f.setn.size) {
-          const mcmemo = state.compte.mcmemo(c.naE.id)
-          if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
-          const s = new Set(mcmemo.mc)
-          if (f.setp.size && difference(f.setp, s).size) continue
-          if (f.setn.size && intersection(f.setn, s).size) continue          
-        }        
-        r.push(c)
-      }
-      r.sort((a, b) => { return a.dh > b.dh ? -1 : (a.dh === b.dh ? 0 : 1) })
-      stores.session.fmsg(r.length)
-      return r
-    },
-
     nbchats: (state) => {
       let n = 0
       for (const [,elt] of state.map) if (elt.chats) n += elt.chats.size
@@ -334,12 +304,14 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     tousChats: (state) => {
+      const session = stores.session
       const f = stores.filtre.filtre.chats
       f.limj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
       f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
       for (const [,elt] of state.map) {
+        if (!f.tous && session.avatarId !== elt.avatar.id) continue
         for (const [,c] of elt.chats) {
           if (f.limj && c.dh < f.limj) continue
           if (f.nom && !c.naE.nom.startsWith(f.nom)) continue

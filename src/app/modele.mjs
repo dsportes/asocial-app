@@ -248,11 +248,11 @@ export class Motscles {
     return e && e.n ? e.n : ''
   }
 
-  static editU8 (u8, mapMC) {
+  static editU8 (u8, mapMC, sep) {
     if (!u8 || !u8.length || !mapMC) return ''
     const l = []
     for (let j = 0; j < u8.length; j++) { l.push(Motscles.nom(u8[j], mapMC))}
-    return l.join(' / ')
+    return !sep ? l : l.join(sep)
   }
 
   /* Objet Motscles
@@ -1701,7 +1701,7 @@ export class Chat extends GenDoc {
     this.dh = 0
     if (row.items) for (const it of row.items) {
       const t = it.txt ? ungzipB(await decrypter(this.cc, it.txt)) : null
-      if (this.dh === 0) this.dh = it.dh
+      if (this.dh === 0) this.dh = it.dhx ? it.dhx : it.dh
       this.items.push({ a: it.a, txt: t, dh: it.dh, dhx: it.dhx || 0})
       a.push('_**' + $t('dedh', [it.a ? this.naI.nom : this.naE.nom, dhstring(it.dh)]) + '**_')
       if (it.dhx) a.push('\n' + $t('supprime', [dhstring(it.dhx)]) + '\n')
@@ -2107,7 +2107,7 @@ export class Chatgr extends GenDoc {
         i.t = ungzipB(await decrypter(this.cleg, item.t))
         if (!this.tit && i.t) this.tit = titre(i.t)
       }
-      if (this.dh === 0) this.dh = i.dh
+      if (this.dh === 0) this.dh = i.dhx ? i.dhx : i.dh
       const mb = mbs ? mbs.membres.get(i.im) : null
       a.push('_**' + $t('dedh', [mb ? mb.na.nomc : '#' + i.im, dhstring(i.dh)]) + '**_')
       if (i.dhx) a.push('\n' + $t('supprime', [dhstring(i.dhx)]) + '\n')

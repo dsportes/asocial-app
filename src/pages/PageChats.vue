@@ -14,23 +14,27 @@
       {{$t('CHnch2', fusion.length, {count: fusion.length}) + ' ' + $t('CHnchtot', [aSt.nbchats + gSt.nbchats])}}
     </div>
 
-    <q-btn class="q-my-sm" flat color="primary" :label="$t('CHexp')" @click="exp" />
+    <div class="q-my-sm row justify-center items-center g-gutter-md">
+      <q-btn dense color="primary" :label="$t('CHexp')" @click="exp" />
+      <q-checkbox v-model="optb64" :label="$t('CHopt')" />
+    </div>
     
     <div v-if="fusion.length">
       <q-card class="q-my-md maauto" v-for="(chat, idx) in fusion" :key="chat.id + '/' + chat.ids">
         <q-card v-if="ID.estGroupe(chat.id)">
+          <div class="row justify-between">
+            <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHgr')}}</div>
+            <q-btn color="warning" icon="open_in_new" @click="ouvrirChatgr(chat)"/>
+          </div>
           <div :class="'column q-px-sm ' + dkli(idx)">
             <apercu-genx class="bordb" :id="chat.id" :idx="idx"/>
             <div class="q-mt-xs row justify-between items-center">
               <div class="text-italic fs-md">
                 <span class="q-mr-sm">{{$t('CHnbit', chat.items.length, {count:chat.items.length} )}}</span>
               </div>
-              <div>
-                <span class="text-italic font-mono q-mr-sm">{{dhcool(chat.dh)}}</span>
-                <q-btn color="primary" icon="open_in_new" @click="ouvrirChatgr(chat)"/>
-              </div>
+              <div v-if="chat.items.length" class="text-italic font-mono q-mr-sm">{{dhcool(chat.dh)}}</div>
             </div>
-            <div class="fs-md">{{chat.tit}}</div>
+            <div v-if="chat.items.length" class="fs-md">{{chat.tit}}</div>
           </div>
         </q-card>
 
@@ -108,15 +112,21 @@ export default {
       const res = []
       let nb = 1
       for (const c of this.fusion) {
-        const na = getNg(c.id)
-        res.push('# ' + na.nomc + '\n\n')
+        if (ID.estGroupe(c.id)) {
+          res.push('## ' + this.$t('CHoch2', [c.ng.nomc]) + '\n\n')
+        } else {
+          res.push('## ' + this.$t('CHoch3', [c.naI.nom, c.naE.nomc]) + '\n\n')
+        }
         if (c.cv) {
           if (c.cv.photo) {
             const [mime, bin] = photoToBin(c.cv.photo)
-            const nf = encodeURI(expPfx + '_' + (nb++) + '.' + mime2ext(mime))
-            this.saveph(nf, bin, mime)
-            res.push('\n' + img1 + nf + img2 + '\n\n')
-            // res.push('\n\n![Image en base64](' + c.cv.photo + ')\n\n')
+            if (!this.optb64) {
+              const nf = encodeURI(expPfx + '_' + (nb++) + '.' + mime2ext(mime))
+              this.saveph(nf, bin, mime)
+              res.push('\n' + img1 + nf + img2 + '\n\n')
+            } else {
+              res.push('\n\n![Image en base64](' + c.cv.photo + ')\n\n')
+            }
           }
           if (c.cv.info) res.push(c.cv.info + '\n')
         }
@@ -137,6 +147,7 @@ export default {
 
   data () {
     return {
+      optb64: false
     }
   },
 

@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 export const useFiltreStore = defineStore('filtre', {
   state: () => ({
     filtre: { 
-      chats: {},
+      chats: { tous: true },
       tranche: {},
       people: {},
       groupes: { tous: true },

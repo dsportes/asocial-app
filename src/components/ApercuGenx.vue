@@ -3,7 +3,7 @@
   <div class="q-pa-xs row items-start">
     <div class="col-auto items-center q-mr-sm column">
       <img class="photomax" :src="photo" />
-      <q-btn size="sm" class="q-mt-sm" icon="zoom_in" dense color="primary" @click.stop="ovvisucv"/>
+      <q-btn size="sm" icon="zoom_in" dense color="primary" @click.stop="ovvisucv"/>
     </div>
     <div class="col">
       <div class="row">
