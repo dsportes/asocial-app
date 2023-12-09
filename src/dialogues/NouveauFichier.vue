@@ -1,6 +1,6 @@
 <template>
-<div :class="dkli(0) + ' bs dp40'" style="height:70vh">
-<q-layout container view="hHh lpR fFf">
+<q-dialog v-model="ui.d.NFouvrir" persistent>
+<q-layout container view="hHh lpR fFf" :class="dkli(0) + ' bs dp40'" style="height:70vh">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -77,7 +77,7 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</div>
+</q-dialog>
 </template>
 
 <script>

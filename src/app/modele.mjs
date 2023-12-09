@@ -11,41 +11,6 @@ import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
 const decoder = new TextDecoder('utf-8')
 const encoder = new TextEncoder('utf-8')
 
-export class MD {
-  static dialogStack = []
-  static app = []
-
-  static declare (nom, ref) { // Déclaration d'un modèle de App.vue PARTAGÉ
-    MD.app[nom] = ref
-    return ref
-  }
-
-  static val (nom) { return MD.app[nom] ? MD.app[nom].value : false }
-
-  static oD (m) {
-    const ui = stores.ui
-    ui.closeMenug()
-    if (typeof m === 'string') {
-      MD.dialogStack.push(MD.app[m])
-      MD.app[m].value = true
-    } else {
-      MD.dialogStack.push(m)
-      m.value = true  
-    }
-  }
-
-  static fD () {
-    if (MD.dialogStack.length) {
-      const m = MD.dialogStack.pop()
-      if (m) m.value = false
-    }
-  }
-  
-  static fTD () {
-    while (MD.dialogStack.length) MD.fD()
-  }
-}
-
 /* Versions (statique) ***********************************
 Versions des sous-collections d'avatars et groupes
 - chaque sous collection identifiée par un id d'avatar ou de groupe a une version courante

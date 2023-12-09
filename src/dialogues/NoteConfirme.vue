@@ -1,7 +1,8 @@
 <template>
+<q-dialog v-model="ui.d.NC" persistent>
 <q-card class="bs sp40">
   <q-toolbar class="bg-secondary text-white">
-    <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+    <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
     <q-toolbar-title class="titre-lg full-width text-center">
       {{$t('NCF' + op)}}
     </q-toolbar-title>
@@ -18,11 +19,12 @@
   </div>
 
   <div class="q-my-md row justify-center items-center q-gutter-md">
-    <q-btn class="q-pa-xs btn" size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+    <q-btn class="q-pa-xs btn" size="md" dense :label="$t('renoncer')" color="primary" @click="ui.fD"/>
     <bouton-confirm v-if="!session.dialog && !msg" actif :confirmer="noteopx"/>
   </div>
 
 </q-card>
+</q-dialog>
 </template>
 
 <script>
@@ -31,7 +33,6 @@ import stores from '../stores/stores.mjs'
 import { $t } from '../app/util.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { MD } from '../app/modele.mjs'
 import { NoteOpx } from '../app/operations.mjs'
 
 export default {
@@ -47,7 +48,7 @@ export default {
 
   methods: { 
     async noteopx () {
-      MD.fD()
+      this.ui.fD()
       await new NoteOpx().run(this.op)
     }
   },
@@ -59,6 +60,7 @@ export default {
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const nSt = stores.note
     const msg = ref('')
@@ -84,7 +86,7 @@ export default {
     }
 
     return {
-      session, aSt, nSt, MD, msg
+      session, aSt, nSt, ui, msg
     }
   }
 

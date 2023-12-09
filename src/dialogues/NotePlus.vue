@@ -20,9 +20,8 @@
   <q-btn v-if="bgr === 1" dense class="q-mr-xs btn" no-caps :label="$t('NPLnote', [groupe.na.nom])" 
     icon="control_point" color="orange" @click="okgr"/>
 
-  <q-dialog v-model="notenouvelle" persistent full-height>
-    <note-nouvelle :estgr="estgr" :groupe="groupe" :avatar="avatar" :notep="notep"/>
-  </q-dialog>
+  <note-nouvelle v-if="ui.d.NNnotenouvelle" :estgr="estgr" :groupe="groupe" :avatar="avatar" :notep="notep"/>
+
 </span>
 </template>
 
@@ -31,7 +30,6 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { $t, splitPK } from '../app/util.mjs'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
-import { MD } from '../app/modele.mjs'
 
 // const colors = ['','primary','orange','negative','primary','orange','primary','orange']
 
@@ -54,6 +52,7 @@ export default {
   },
 
   setup () {
+    const ui = stores.ui
     const aSt = stores.avatar
     const nSt = stores.note
     const gSt = stores.groupe
@@ -122,28 +121,25 @@ export default {
 
     function okav () {
       estgr.value = false
-      ovnotenouvelle()
+      this.ui.oD('NNnotenouvelle')
     }
 
     function okgr () {
       estgr.value = true
-      ovnotenouvelle()
+      this.ui.oD('NNnotenouvelle')
     }
 
     function selNa (na) {
       avatar.value = aSt.getElt(na.id).avatar
       avSel.value = na
       estgr.value = false
-      ovnotenouvelle()
+      this.ui.oD('NNnotenouvelle')
     }
 
     init()
 
-    const notenouvelle = ref(false)
-    function ovnotenouvelle () { MD.oD(notenouvelle) }
-
     return {
-      notenouvelle, selNa, okav, okgr, 
+      ui, selNa, okav, okgr, 
       bav, bgr, avSel, lna, avatar, groupe, notep, estgr
     }
   }

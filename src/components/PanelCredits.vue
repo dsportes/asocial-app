@@ -43,9 +43,7 @@
     <apercu-ticket :tk="tk" :idx="idx"/>
   </div>
 
-  <q-dialog v-model="nouveautk">
-    <panel-dialtk :min="50" :init="0" titre="TKnv" @ok="generer"/>
-  </q-dialog>
+  <panel-dialtk v-if="ui.d.PDdialtk" :min="50" :init="0" titre="TKnv" @ok="generer"/>
 
   </div>
 </template>
@@ -58,7 +56,6 @@ import PanelDeta from '../components/PanelDeta.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import { dhcool, mon, dkli, genIdTk, l6ToI, idTkToL6, afficherDiag } from '../app/util.mjs'
 import { PlusTicket, RafraichirTickets } from '../app/operations.mjs'
-import { MD } from '../app/modele.mjs'
 import { AMJ } from '../app/api.mjs'
 
 export default ({
@@ -80,13 +77,13 @@ export default ({
     async nvtk () {
       if (!await this.session.editUrgence()) return
       this.mx = '0'
-      this.ovnouveautk()
+      this.ui.oD('PDdialtk')
     },
     async generer ({m, ref}) {
       const [ax, mx, j] = AMJ.aaaammjj(AMJ.amjUtc())
       const ids = genIdTk(ax, mx)
       const tkx = idTkToL6(ids)
-      MD.fD()
+      this.ui.fD()
       await new PlusTicket().run(m, ref, ids)
       await afficherDiag(this.$t('TKrefp', [this.session.org, tkx]))
     }
@@ -94,6 +91,7 @@ export default ({
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const c = ref(session.estComptable ? null : aSt.compta.compteurs)
     const lstTk = ref([]) 
@@ -172,13 +170,10 @@ export default ({
       else load()
     })
 
-    const nouveautk = ref(false)
-    function ovnouveautk () { MD.oD(nouveautk) }
-
     return {
-      nouveautk, ovnouveautk, rafraichirIncorp, dhinc, nbinc,
-      aSt, session, lstTk, att, deb, c,
-      MD, mon, dhcool, dkli, AMJ
+      rafraichirIncorp, dhinc, nbinc,
+      aSt, session, ui, lstTk, att, deb, c,
+      mon, dhcool, dkli, AMJ
     }
   }
 })

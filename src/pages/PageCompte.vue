@@ -54,13 +54,13 @@
     </q-card>
 
     <!-- Dialogue d'édition des mots clés du compte -->
-    <mots-cles v-if="ui.d.mcledit"/>
+    <mots-cles v-if="ui.d.MCmcledit"/>
 
     <!-- Dialogue de création d'un nouvel avatar -->
-    <q-dialog v-model="nvav" persistent>
+    <q-dialog v-model="ui.d.PCnvav" persistent>
       <q-card class="bs moyennelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+          <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTnvav2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -69,17 +69,17 @@
     </q-dialog>
 
     <!-- Dialogue de changement de la phrase secrète -->
-    <q-dialog v-model="chgps" persistent>
+    <q-dialog v-model="ui.d.PCchgps" persistent>
       <q-card class="bs petitelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+          <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTchps2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
         <phrase-secrete class="q-ma-xs" @ok="okps" verif icon-valider="check" 
             label-valider="continuer" :orgext="session.org"/>
         <q-card-actions>
-          <q-btn dense :label="$t('renoncer')" color="primary" icon="close" @click="MD.fD"/>
+          <q-btn dense :label="$t('renoncer')" color="primary" icon="close" @click="ui.fD"/>
           <q-btn dense :disable="ps===null" :label="$t('CPTvcp')" 
             color="warning" icon="check" @click="changerps"/>
         </q-card-actions>
@@ -87,9 +87,7 @@
     </q-dialog>
 
     <!-- Dialogue de suppression d'un avatar -->
-    <q-dialog v-model="suppravatar" persistent full-height>
-      <suppr-avatar :avid="avid"/>
-    </q-dialog>
+    <suppr-avatar v-if="ui.d.SAsuppravatar" :avid="avid"/>
 
   </q-page>
 </template>
@@ -108,7 +106,6 @@ import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import SupprAvatar from '../dialogues/SupprAvatar.vue'
 import { afficherDiag, trapex } from '../app/util.mjs'
-import { MD } from '../app/modele.mjs'
 import { isAppExc } from '../app/api.mjs'
 
 export default {
@@ -134,22 +131,22 @@ export default {
 
   methods: {
     async ouvrirNvav () { 
-      if (await this.session.edit()) { this.ovnvav(); this.nomav = '' }
+      if (await this.session.edit()) { this.ui.oD('PCnvav'); this.nomav = '' }
     },
 
     async ouvrirchgps () {
       try {
         // { const x = null; x.toto } // Pour tester la récupération d'un bug
-        if (await this.session.edit()) { this.ovchgps(); this.ps = null }
+        if (await this.session.edit()) { this.ui.oD('PCchgps'); this.ps = null }
       } catch (e) { trapex(e, 1) }
     },
 
-    reset () { this.ps = null; MD.fD() },
+    reset () { this.ps = null; this.ui.fD() },
 
     okps (ps) { this.ps = ps },
 
     async changerps () {
-      MD.fD()
+      this.ui.fD()
       const ret = await new ExistePhrase().run(this.ps.hps1, 1)
       if (isAppExc(ret)) return this.reset()
       if (ret) {
@@ -179,16 +176,16 @@ export default {
     },
 
     async oknomav (nom) {
-      if (!nom) { this.nvav = false; return }
+      if (!nom) { this.ui.fD(); return }
       if (this.aSt.compte.avatarDeNom(nom)) {
         await afficherDiag(this.$t('CPTndc'))
         return
       }
-      MD.fD()
+      this.ui.fD()
       await new NouvelAvatar().run(nom)
     },
 
-    async mcleditAut () { if (await this.session.edit()) this.ui.oD('mcledit') },
+    async mcleditAut () { if (await this.session.edit()) this.ui.oD('MCmcledit') },
 
     async okmc (mmc) {
       if (mmc !== false) {
@@ -208,29 +205,19 @@ export default {
           this.avid = 0
         } else 
           this.avid = id
-        this.ovsuppravatar()
+        this.ui.oD('SAsuppravatar')
       }
     }
   },
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const fSt = stores.filtre
 
-    const nvav = ref(false)
-    function ovnvav () { MD.oD(nvav) }
-    const chgps = ref(false)
-    function ovchgps () { MD.oD(chgps) }
-    const suppravatar = ref(false)
-    function ovsuppravatar () { MD.oD(suppravatar) }
-
     return {
-      MD, nvav, ovnvav, chgps, ovchgps,
-      suppravatar, ovsuppravatar,
-      ui: stores.ui,
-      aSt, fSt,
-      session
+      ui, aSt, fSt, session
     }
   }
 

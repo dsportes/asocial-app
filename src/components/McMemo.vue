@@ -38,10 +38,10 @@
       </div>
     </div>
 
-    <q-dialog v-model="edition">
+    <q-dialog v-model="ui.d.MMedition">
       <q-card class="bs moyennelargeur column">
         <q-toolbar class="col-auto bg-primary text-white">
-          <q-btn dense size="md" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" icon="close" @click="ui.fD"/>
           <q-toolbar-title>{{$t('MMCap', [nom])}}</q-toolbar-title>
         </q-toolbar>
         <q-toolbar inset v-if="diag" class='q-ma-sm bg-yellow-5 text-warning text-bold'>
@@ -62,7 +62,7 @@
 
         <q-card-actions v-if="!diag">
           <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
-            @click="MD.fD"/>
+            @click="ui.fD"/>
           <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 
             :label="$t('valider')" @click="valider"/>
         </q-card-actions>
@@ -76,7 +76,7 @@
 import { toRef, ref, watch, onMounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { Motscles, getNg, MD } from '../app/modele.mjs'
+import { Motscles, getNg } from '../app/modele.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import EditeurMd from './EditeurMd.vue'
 import { dkli, titre } from '../app/util.mjs'
@@ -122,7 +122,7 @@ export default {
       this.diag = await this.session.editDiag
       this.nvmc = null
       this.txt = this.memo
-      this.ovedition()
+      this.ui.oD('MMedition')
     },
     changerMc (nvmc) {
       this.nvmc = nvmc
@@ -131,12 +131,13 @@ export default {
       // console.log(this.txt)
       // console.log(Motscles.editU8(this.nvmc, this.mapmc))
       await new McMemo().run(this.id, this.nvmc || this.mc, this.txt)
-      MD.fD()
+      this.ui.fD()
     }
    },
 
   setup (props) {
     const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const id = toRef(props, 'id')
     const mapmc = ref(Motscles.mapMC(true, 0))
@@ -171,12 +172,9 @@ export default {
       // console.log(large.value)
     })
 
-    const edition = ref(false)
-    function ovedition () { MD.oD(edition) }
-
     return {
-      session, root, large,
-      mcmemo, dkli, MD, titre, mapmc, edition, ovedition
+      session, ui, root, large,
+      mcmemo, dkli, titre, mapmc
     }
   }
 }

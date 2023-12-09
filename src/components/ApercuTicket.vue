@@ -46,16 +46,14 @@
     </div>
   </q-expansion-item>
 
-  <q-dialog v-model="receptk">
-    <panel-dialtk :min="5" :init="tk.ma" titre="TKrec" @ok="reception"/>
-  </q-dialog>
+  <panel-dialtk v-if="ui.d.PDdialtk" :min="5" :init="tk.ma" titre="TKrec" @ok="reception"/>
 
-  <q-dialog v-model="confirmdel">
+  <q-dialog v-model="ui.d.ATconfirmdel">
     <q-card class="bs">
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('TKdel')}}</q-card-section>
       <q-card-actions align="right">
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+        <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
         <q-btn flat :label="$t('TKdel2')" color="warning" @click="deletetk"/>
       </q-card-actions>
     </q-card>
@@ -69,7 +67,7 @@ import stores from '../stores/stores.mjs'
 import { mon, idTkToL6, dkli } from '../app/util.mjs'
 import { AMJ } from '../app/api.mjs'
 import PanelDialtk from '../components/PanelDialtk.vue'
-import { MD, Ticket } from '../app/modele.mjs'
+import { Ticket } from '../app/modele.mjs'
 import { ReceptionTicket, MoinsTicket } from '../app/operations.mjs'
 
 export default {
@@ -96,7 +94,7 @@ export default {
   methods: {
     async deltk () {
       if (!await this.session.editUrgence()) return
-      this.ovconfirmdel()
+      this.ui.oD('ATconfirmdel')
     },
     async recep1 () {      
       if (!await this.session.editUrgence()) return
@@ -104,31 +102,25 @@ export default {
     },
     async recep2 () {      
       if (!await this.session.editUrgence()) return
-      this.ovreceptk()
+      this.ui.oD('PDdialtk')
     },
     async reception ({m, ref}) {
-      MD.fD()
+      this.ui.fD()
       await new ReceptionTicket().run(this.tk.ids, m, ref)
     },
     async deletetk () {
-      MD.fD()
+      this.ui.fD()
       await new MoinsTicket().run(this.tk.ids)
     }
   },
 
   setup (props) {
     const session = stores.session
-    const t = toRef(props, 'tk')
-
-    const receptk = ref(false)
-    function ovreceptk () { MD.oD(receptk) }
-
-    const confirmdel = ref(false)
-    function ovconfirmdel () { MD.oD(confirmdel)}
+    const ui = stores.ui
+    // const t = toRef(props, 'tk')
 
     return {
-      confirmdel, ovconfirmdel, receptk, ovreceptk,
-      idTkToL6, mon, dkli, AMJ, MD, Ticket, session
+      idTkToL6, mon, dkli, AMJ, Ticket, session, ui
     }
   }
 }

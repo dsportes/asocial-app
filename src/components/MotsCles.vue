@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.mcledit" persistent>
+<q-dialog v-model="ui.d.MCmcledit" persistent>
 <q-card class="bs sp30">
   <q-toolbar class="bg-secondary text-white">
     <q-btn class="q-mr-xs" dense size="md" color="warning"
@@ -74,7 +74,7 @@ import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixEmoji from './ChoixEmoji.vue'
 import BoutonHelp from './BoutonHelp.vue'
-import { MD, Motscles, getNg } from '../app/modele.mjs'
+import { Motscles, getNg } from '../app/modele.mjs'
 import { $t, afficherDiag } from '../app/util.mjs'
 import { MotsclesGroupe, MotsclesCompte } from '../app/operations.mjs'
 

@@ -1,9 +1,9 @@
 <template>
-<div :class="dkli(0) + ' bs dp50'">
-<q-layout container view="hHh lpR fFf">
+<q-dialog v-model="ui.d.SAsuppravatar" persistent full-height>
+<q-layout container view="hHh lpR fFf" :class="dkli(0) + ' bs dp50'">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title v-if="avid!==0" class="titre-lg full-width text-center">{{$t('SAVtit1', [na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-else class="titre-lg full-width text-center text-bold bg-yellow-5 text-negative">
         {{$t('SAVtit2', [na.nom])}}</q-toolbar-title>
@@ -11,7 +11,7 @@
     </q-toolbar>
     <div class="row justify-center items-center">
       <div class="titre-md text-bold text-italic q-mr-md">{{$t('SAVval' + (avid !== 0 ? '1' : '2'))}}</div>
-      <bouton-confirm :actif="checksOK" :confirmer="ovconfirmsuppr"/>
+      <bouton-confirm :actif="checksOK" :confirmer="ui.oD('SAconfirmsuppr')"/>
     </div>
   </q-header>
 
@@ -112,23 +112,23 @@
     </q-page>
   </q-page-container>
 
-  <q-dialog v-model="confirmsuppr" persistent>
-  <q-card class="bs largeur30 q-pa-sm">
-    <div class="q-mt-md titre-lg text-italic">{{$t('SAVcf' + (avid !== 0 ? '1' : '2'))}}</div>
-    <div class="q-mt-md row justify-center q-gutter-md">
-      <q-btn class="q-pa-xs" size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
-      <bouton-confirm actif :confirmer="valider"/>
-    </div>
-  </q-card>
-</q-dialog>
+  <q-dialog v-model="ui.d.SAconfirmsuppr" persistent>
+    <q-card class="bs largeur30 q-pa-sm">
+      <div class="q-mt-md titre-lg text-italic">{{$t('SAVcf' + (avid !== 0 ? '1' : '2'))}}</div>
+      <div class="q-mt-md row justify-center q-gutter-md">
+        <q-btn class="q-pa-xs" size="md" dense :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+        <bouton-confirm actif :confirmer="valider"/>
+      </div>
+    </q-card>
+  </q-dialog>
 
 </q-layout>
-</div>
+</q-dialog>
 </template>
 
 <script>
 import { ref, toRef, reactive } from 'vue'
-import { MD, getNg, Compta, Versions } from '../app/modele.mjs'
+import { getNg, Compta, Versions } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
@@ -188,7 +188,7 @@ export default ({
     - false : retry requis, les versions des groupes et/ou avatar ont chnagé
     */
     async valider () {
-      MD.fD() // boite de confirmation
+      this.ui.fD() // boite de confirmation
       await sleep(50)
       const args = {
         id: this.na.id,
@@ -218,13 +218,14 @@ export default ({
         await afficherDiag(this.$t('SAVret' + (this.avid ? '1' : '2')))
         this.init()
       } else {
-        MD.fD() // Dialogue de suppression
+        this.ui.fD() // Dialogue de suppression
       }
     }
   },
 
   setup (props) {
     const session = stores.session
+    const ui = stores.ui
     const cfg = stores.config
     const avid = toRef(props, 'avid')
     const na = ref(getNg(avid.value ? avid.value : session.compteId))
@@ -315,13 +316,10 @@ export default ({
 
     init()
 
-    const confirmsuppr = ref(false)
-    function ovconfirmsuppr () { MD.oD(confirmsuppr) }
-
     return {
-      session, cfg,
+      session, ui, cfg,
       confirmsuppr, ovconfirmsuppr,
-      MD, edvol, aSt, na, s, init, dkli
+      edvol, aSt, na, s, init, dkli
     }
   }
 })

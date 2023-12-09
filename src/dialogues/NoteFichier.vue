@@ -1,6 +1,6 @@
 <template>
-<div :class="dkli(0) + ' bs dp50'">
-<q-layout container view="hHh lpR fFf">
+<q-dialog v-model="ui.d.NF" persistent full-height>
+<q-layout container view="hHh lpR fFf" :class="dkli(0) + ' bs dp50'">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
@@ -116,26 +116,24 @@
   </q-page-container>
 
   <!-- Dialogue de création d'un nouveau fichier -->
-  <q-dialog v-model="nouveaufichier" persistent>
-    <nouveau-fichier :nomfic="nomfic" :na="naAut"/>
-  </q-dialog>
+  <nouveau-fichier v-if="ui.d.NFouvrir" :nomfic="nomfic" :na="naAut"/>
 
   <!-- Confirmation de suppression -->
-  <q-dialog v-model="supprfichier" persistent>
+  <q-dialog v-model="ui.d.supprfichier" persistent>
     <q-card class="bs petitelargeur q-pa-sm">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFsf')}}</div>
         <div class="q-mt-sm fs-md font-mono text-bold">{{f.nom}} - {{f.info}}</div>
       </q-card-section>
       <q-card-actions vertical align="center">
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
+        <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD" />
         <q-btn flat :label="$t('confirmer')" color="warning" @click="cfSuppr" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 
   <!-- Confirmation visible en mode avion 1 -->
-  <q-dialog v-model="confirmav1" persistent>
+  <q-dialog v-model="ui.d.confirmav1" persistent>
     <q-card class="bs petitelargeur q-pa-sm">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFav1')}}</div>
@@ -149,7 +147,7 @@
   </q-dialog>
 
   <!-- Confirmation visible en mode avion 2 -->
-  <q-dialog v-model="confirmav2" persistent>
+  <q-dialog v-model="ui.d.confirmav2" persistent>
     <q-card class="bs petitelargeur q-pa-sm">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFav2')}}</div>
@@ -163,13 +161,12 @@
   </q-dialog>
 
 </q-layout>
-</div>
+</q-dialog>
 </template>
 
 <script>
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 import { $t, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
@@ -197,24 +194,24 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else MD.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
     async nouveau (nf) {
       if (!await this.session.edit()) return
       this.nomfic = nf
-      this.ovnouveaufichier()
+      this.ui.oD('NFouvrir')
     },
 
     async supprFic (f) {
       if (!await this.session.edit()) return
       this.f = f
-      this.ovsupprfichier()
+      this.ui.oD('NFsupprfichier')
     },
 
     async cfSuppr() {
       const aut = !this.naAut ? 0 : this.aSt.compte.imGA(this.nSt.note.id, this.naAut.id)
       await new SupprFichier().run(this.nSt.note, this.f.idf, aut)
-      MD.fD()
+      this.ui.fD()
     },
 
     async avidf (f) {
@@ -224,7 +221,7 @@ export default {
       }
       setTimeout(async () => {
         const err = await gestionFichierMaj(this.nSt.note, true, f.idf, '')
-        if (isAppExc(err)) MD.fd()
+        if (isAppExc(err)) this.ui.fD()
       }, 50)
     },
 
@@ -239,12 +236,12 @@ export default {
         await gestionFichierMaj(this.nSt.note, true, 0, it.nom)
       } else {
         this.itc = it
-        this.ovconfirmav1()
+        this.ui.oD('NFconfirmav1')
       }
     },
 
     async cfAvnom (cf) {
-      MD.fD()
+      this.ui.fD()
       if (cf)
         await gestionFichierMaj(this.nSt.note, false, 0, this.itc.nom)
       else this.state.noms[this.itc.nom] = false
@@ -261,12 +258,12 @@ export default {
         await gestionFichierMaj(this.nSt.note, true, f.idf, '')
       } else {
         this.fc = f
-        this.ovconfirmav2()
+        this.ui.oD('NFconfirmav2')
       }
     },
 
     async cfAvidf (cf) {
-      MD.fD()
+      this.ui.fD()
       if (cf)
         await gestionFichierMaj(this.nSt.note, false, this.fc.idf, '')
       else this.state.idfs[this.fc.idf] = false
@@ -494,21 +491,10 @@ export default {
       })
     })
 
-    const nouveaufichier = ref(false)
-    function ovnouveaufichier () { MD.oD(nouveaufichier)}
-    const supprfichier = ref(false)
-    function ovsupprfichier () { MD.oD(supprfichier)}
-    const confirmav1 = ref(false)
-    function ovconfirmav1 () { MD.oD(confirmav1)}
-    const confirmav2 = ref(false)
-    function ovconfirmav2 () { MD.oD(confirmav2)}
-
     return {
-      nouveaufichier, ovnouveaufichier, supprfichier, ovsupprfichier,
-      confirmav1, ovconfirmav1, confirmav2, ovconfirmav2,
       ui, session, nSt, aSt, gSt, avnSt, ppSt,
       exv, avatar, groupe, state, exp, ro,
-      MD, dkli, ergrV2, edvol, dhcool, suffixe
+      dkli, ergrV2, edvol, dhcool, suffixe
     }
   }
 

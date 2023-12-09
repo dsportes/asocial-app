@@ -1,6 +1,6 @@
 <template>
 <div ref="root" :class ="titre ? 'bs': ''">
-  <q-card v-if="!max" :class="dlclass" :style="titre ? 'width:32rem' : ''">
+  <q-card v-if="!ui.d.EMmax" :class="dlclass" :style="titre ? 'width:32rem' : ''">
     <q-toolbar v-if="titre" class="bg-secondary text-white">
       <q-btn dense color="warning" size="md" icon="close" @click="fermer"/>
       <q-toolbar-title class="titre-lg full-width">{{titre}}</q-toolbar-title>
@@ -11,7 +11,7 @@
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar class="fs-md full-width row bg-primary text-white">
-      <q-btn class="col-auto q-mr-xs" icon="zoom_out_map" size="md" push flat dense @click="ovmax"/>
+      <q-btn class="col-auto q-mr-xs" icon="zoom_out_map" size="md" push flat dense @click="ui.oD('EMmax')"/>
       <q-checkbox v-model="md" size="sm" dense label="HTML" />
       <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="🙂" size="md"
         dense flat push @click="ouvriremojimd1"/>
@@ -33,10 +33,10 @@
 </q-layout>
 </div>
   </q-card>
-  <q-dialog v-model="max" full-height full-width transition-show="slide-up" transition-hide="slide-down">
+  <q-dialog v-model="ui.d.EMmax" full-height full-width transition-show="slide-up" transition-hide="slide-down">
     <div ref="root2" class="column dlx">
       <q-toolbar class="col-auto fs-md bg-primary text-white">
-        <q-btn class="col-autov q-mr-xs" icon="zoom_in_map" size="md" dense flat push @click="MD.fD"/>
+        <q-btn class="col-autov q-mr-xs" icon="zoom_in_map" size="md" dense flat push @click="ui.fD"/>
         <q-checkbox v-model="md" size="md" dense label="HTML" />
         <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="🙂" size="md"
           dense flat push @click="ouvriremojimd2"/>  
@@ -65,7 +65,6 @@ import BoutonHelp from './BoutonHelp.vue'
 import ChoixEmoji from './ChoixEmoji.vue'
 import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 
 export default ({
   name: 'EditeurMd',
@@ -106,7 +105,7 @@ export default ({
   },
 
   methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else MD.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
     ouvriremojimd1 () {
       this.inp = this.root.querySelector('textarea')
       this.ui.oD('choixEmoji')
@@ -116,7 +115,7 @@ export default ({
       this.ui.oD('choixEmoji')
     },
     ok () {
-      MD.fD()
+      this.ui.fD()
       this.taille = this.tailleM ? 1 : 0
       this.md = false
       const x = this.textelocal && this.textelocal.length > this.maxlg.value ? this.textelocal.substring(0, this.maxlg.value) : this.textelocal
@@ -168,11 +167,7 @@ export default ({
     taille.value = tailleM.value ? 1 : 0
     if (modetxt.value) md.value = false
 
-    const max = ref(false)
-    function ovmax () { MD.oD(max) }
-
     return {
-      MD, max, ovmax,
       ui,
       session: stores.session,
       md,

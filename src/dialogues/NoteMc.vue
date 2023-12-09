@@ -1,6 +1,6 @@
 <template>
-<div :class="dkli(0) + ' bs dp50'">
-<q-layout container view="hHh lpR fFf">
+<q-dialog v-model="ui.d.NM" persistent full-height>
+<q-layout container view="hHh lpR fFf" :class="dkli(0) + ' bs dp50'">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
@@ -56,7 +56,7 @@
       </div>
 
       <div class="row items-center justify-around">
-        <q-btn size="md" dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
+        <q-btn size="md" dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
         <q-btn v-if="!session.editDiag" size="md" dense color="warning" 
           :disable="!modif" :label="$t('valider')" @click="valider"/>
       </div>
@@ -64,13 +64,12 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</div>
+</q-dialog>
 </template>
 
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 import { $t, egaliteU8, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ChoixMotscles from '../components/ChoixMotscles.vue'
@@ -98,13 +97,13 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modif) this.ui.oD('confirmFerm'); else MD.fD() },
+    fermer () { if (this.modif) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
     async valider () {
       const mc = !egaliteU8(this.mc, this.mcap) ? this.mcap : null
       const mc0 = this.mc0 && !egaliteU8(this.mc0, this.mc0ap) ? this.mc0ap : null
       await new McNote().run(this.note, mc, mc0)
-      MD.fD()
+      this.ui.fD()
     }
   },
 
@@ -167,7 +166,7 @@ export default {
     return {
       session, nSt, gSt, ui,
       avatar, groupe, note, msg, mc, mcap, mc0, mc0ap, xav,
-      MD, dkli, cv
+      dkli, cv
     }
   }
 

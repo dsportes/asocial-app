@@ -1,7 +1,8 @@
 <template>
+<q-dialog v-model="ui.d.CCouvrir" persistent>
 <q-card class="bs largeur30">
   <q-toolbar class="bg-secondary text-white">
-    <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+    <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
     <q-toolbar-title class="titre-lg full-size text-center">{{$t('CChtit')}}</q-toolbar-title>
     <bouton-help page="page1"/>
   </q-toolbar>
@@ -10,11 +11,12 @@
     <phrase-contact @ok="ok" :orgext="session.org"/>
   </q-card-section>
 </q-card>
+</q-dialog>
 </template>
 
 <script>
 import { ref } from 'vue'
-import { MD, Motscles, Chat } from '../app/modele.mjs'
+import { Motscles, Chat } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import { afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -70,20 +72,19 @@ export default ({
           if (st === 2) await afficherDiag(this.$t('OPnvch2'))
         }
       }
-      MD.fD()
+      this.ui.fD()
     }
   },
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const mapmc = ref(Motscles.mapMC(true, 0))
 
     return {
-      aSt,
-      MD,
-      mapmc,
-      session
+      aSt, ui, session,
+      mapmc
     }
   }
 })

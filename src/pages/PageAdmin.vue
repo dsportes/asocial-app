@@ -45,7 +45,7 @@
       </div>
     </div>
 
-    <q-dialog v-model="creationesp" persistent>
+    <q-dialog v-model="ui.d.PAcreationesp" persistent>
       <q-card class="bs petitelargeur">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" icon="close" color="warning" @click="cancelNS"/>
@@ -72,10 +72,10 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="edprf" persistent>
+    <q-dialog v-model="ui.d.PAedprf" persistent>
       <q-card class="bs moyennelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense color="warning" size="md" icon="close" @click="MD.fD"/>
+          <q-btn dense color="warning" size="md" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('STchg')}}</q-toolbar-title>
         </q-toolbar>
         <q-card-section class="q-my-md q-mx-sm">
@@ -96,19 +96,19 @@
         </q-card-section>
         <q-card-actions>
           <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
-            @click="MD.fD"/>
+            @click="ui.fD"/>
           <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 
             :label="$t('valider')" :disable="prf === profil" @click="valider"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="checkpoint" persistent full-height>
+    <q-dialog v-model="ui.d.PAcheckpoint" persistent full-height>
       <div class="bs" style="width:80vw">
         <q-layout container view="hHh lpR fFf" :class="sty">
           <q-header elevated class="bg-secondary text-white">
             <q-toolbar class="bg-secondary text-white">
-              <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+              <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
               <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESckpt', [ns])}}</q-toolbar-title>
               <bouton-help page="page1"/>
             </q-toolbar>
@@ -154,10 +154,10 @@
       </div>
     </q-dialog>
 
-    <q-dialog v-model="pageespace" persistent full-height>
+    <q-dialog v-model="ui.d.PApageespace" persistent full-height>
       <div class="bs" style="width:100vw;max-width:100vw">
         <q-toolbar class="bg-secondary text-white" style="position:fixed;z-index:2">
-          <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+          <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">
             {{$t('ESpgesp', [esp.id, esp.org])}}</q-toolbar-title>
           <bouton-help page="page1"/>
@@ -175,7 +175,6 @@
 </template>
 
 <script>
-import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
@@ -184,7 +183,6 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
 import { GC, GetCheckpoint, SetEspaceT } from '../app/operations.mjs'
-import { MD } from '../app/modele.mjs'
 import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 import { SetNotifG } from '../app/operations.mjs'
@@ -253,12 +251,12 @@ export default {
       return false
     },
     plusNS () {
-      this.ovcreationesp()
+      this.ui.oD('PAcreationesp')
     },
     cancelNS () {
       this.ns = 0
       this.ps = null
-      MD.fD()
+      this.ui.fD()
     },
     okps (ps) {
       this.ps = ps
@@ -268,7 +266,7 @@ export default {
       await new CreerEspace().run(this.org, this.ps)
       this.ns = 0
       this.ps = null
-      MD.fD()
+      this.ui.fD()
       this.rafraichir()
     },
     async setNotif(ntf) {
@@ -279,20 +277,20 @@ export default {
     },
     async valider () {
       new SetEspaceT().run(this.esp.id, this.prf)
-      MD.fD()
+      this.ui.fD()
     },
     ovchgprf1 (e) {
       this.profil = e.t
       this.esp = e
       this.prf = 0
-      this.ovedprf()
+      this.ui.oD('PAedprf')
     },
 
     pageesp (e) {
       this.ns = e.id
       this.session.setNs(this.ns)
       this.esp = e
-      this.ovpageespace()
+      this.ui.oD('PApageespace')
     },
 
     /*
@@ -309,7 +307,7 @@ export default {
     },
     async affCkpt () {
       this.ck = await new GetCheckpoint().run()
-      this.ovcheckpoint()
+      this.ui.oD('PAcheckpoint')
     },
     dhIso (t) { return new Date(t).toISOString() },
     duree (d) { return d < 1000 ? (d + 'ms') : (d / 1000).toPrecision(3) + 's'},
@@ -337,20 +335,12 @@ export default {
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const cfg = stores.config
 
-    const edprf = ref(false)
-    function ovedprf () { MD.oD(edprf)}
-    const creationesp = ref(false)
-    function ovcreationesp () { MD.oD(creationesp) }
-    const checkpoint = ref(false)
-    function ovcheckpoint () { MD.oD(checkpoint) }
-    const pageespace = ref(false)
-    function ovpageespace () { MD.oD(pageespace) }
-
     return {
-      session, cfg, dkli,
-      AMJ, MD, 
+      session, ui, cfg, dkli,
+      AMJ,
       creationesp, ovcreationesp, checkpoint, ovcheckpoint, edprf, ovedprf,
       pageespace, ovpageespace
     }

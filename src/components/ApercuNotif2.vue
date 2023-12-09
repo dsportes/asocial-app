@@ -32,7 +32,7 @@
   <q-dialog v-model="editntf" persistent>
     <q-card class="bs moyennelargeur">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense color="warning" size="md" icon="close" @click="MD.fD"/>
+        <q-btn dense color="warning" size="md" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg full-width text-center">{{$t('ANnot')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
@@ -62,7 +62,7 @@
       </q-card-section>
       <q-card-actions>
         <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
-          @click="MD.fD"/>
+          @click="ui.fD"/>
         <q-btn dense flat color="warning" size="md" icon="delete" :label="$t('supprimer')" 
           :disable="!notif || !notif.texte" @click="supprimer"/>
         <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="check" 
@@ -81,7 +81,7 @@ import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
 import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
-import { MD, Notification, Qui } from '../app/modele.mjs'
+import { Notification, Qui } from '../app/modele.mjs'
 import { dhcool, dkli, afficherDiag, $t } from '../app/util.mjs'
 
 export default {
@@ -178,7 +178,7 @@ export default {
       if (this.idsource) this.ntf.idSource = this.idsource
       this.restr = false
       this.restrb = false
-      this.oveditntf()
+      this.ui.oD('ANeditntf')
     },
 
     async valider () {
@@ -202,7 +202,7 @@ export default {
       }
       if (this.ctx) this.ntf.ctx = this.ctx
       this.$emit('ok', this.ntf)
-      MD.fD()
+      this.ui.fD()
     },
 
     supprimer () {
@@ -210,19 +210,17 @@ export default {
       if (this.idsource) ntf.idSource = this.idsource
       if (this.ctx) ntf.ctx = this.ctx
       this.$emit('ok', ntf)
-      MD.fD()
+      this.ui.fD()
     }
   },
   setup (props) {
     const session = stores.session
-    const n = toRef(props, 'notif')
-
-    const editntf = ref(false)
-    function oveditntf () { MD.oD(editntf) }
+    const ui = stores.ui
+    // const n = toRef(props, 'notif')
 
     return {
-      MD, dhcool, dkli, editntf, oveditntf,
-      session
+      dhcool, dkli,
+      session, ui
     }
   }
 }

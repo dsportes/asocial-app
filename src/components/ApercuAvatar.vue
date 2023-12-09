@@ -17,10 +17,10 @@
     </div>
 
     <!-- Dialogue d'édition de la phrase de contact -->
-    <q-dialog v-model="editionpc" persistent>
+    <q-dialog v-model="ui.d.AAeditionpc" persistent>
       <q-card class="bs q-ma-xs largeur30 fs-md">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center">{{$t('FAphc')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -41,12 +41,11 @@
 import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { MajCv, GetAvatarPC, ChangementPC, ExistePhrase } from '../app/operations.mjs'
+import { GetAvatarPC, ChangementPC, ExistePhrase } from '../app/operations.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import PhraseContact from './PhraseContact.vue'
 import { afficherDiag, dkli } from '../app/util.mjs'
-import { MD } from '../app/modele.mjs'
 import { ID } from '../app/api.mjs'
 
 export default {
@@ -68,7 +67,7 @@ export default {
   methods: {
     async editerpc () {
       if (!await this.session.edit()) return
-      this.oveditionpc()
+      this.ui.oD('AAeditionpc')
     },
     async declPC (pc) {
       if (!pc) return
@@ -90,15 +89,17 @@ export default {
         return
       }
       await new ChangementPC().run(this.avatar.na, pc)
-      MD.fD()
+      this.ui.fD()
     },
     async supprPC () {
       await new ChangementPC().run(this.avatar.na)
-      MD.fD()
+      this.ui.fD()
     }
   },
 
   setup (props) {
+    const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const idav = toRef(props, 'idav')
 
@@ -120,14 +121,10 @@ export default {
       }
     )
 
-    const editionpc = ref(false)
-    function oveditionpc () { MD.oD(editionpc)}
-
     return {
-      MD, dkli, ID,
-      editionpc, oveditionpc,
-      avatar,
-      session: stores.session
+      dkli, ID,
+      session, ui,
+      avatar
     }
   }
 }

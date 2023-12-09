@@ -1,8 +1,9 @@
 <template>
+<q-dialog v-model="ui.d.ACGouvrir" full-height persistent>
   <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
-        <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHGtit', [groupe.na.nomc])}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
@@ -36,35 +37,36 @@
     </q-page-container>
 
     <!-- Confirmation d'effacement d'un échange -->
-    <q-dialog v-model="confirmeff">
+    <q-dialog v-model="ui.d.ACGconfirmeff">
       <q-card class="bs">
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHeff')}}
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
           <q-btn flat :label="$t('CHeffcf')" color="warning" @click="effop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
 
     <!-- Dialogue d'ajout d'un item au chat -->
-    <q-dialog v-model="chatedit">
+    <q-dialog v-model="ui.d.ACGchatedit">
       <q-card>
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
           <q-btn flat :label="$t('valider')" color="warning" @click="addop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
 
 </q-layout>
+</q-dialog>
 </template>
 <script>
 
@@ -77,7 +79,6 @@ import { dhcool, dkli } from '../app/util.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
 import { ItemChatgr } from '../app/operations.mjs'
-import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuChat',
@@ -110,31 +111,32 @@ export default {
       if (!await this.session.edit()) return
       this.im = im
       this.dh = dh
-      this.ovconfirmeff()
+      this.ui.oD('ACGconfirmeff')
     },
 
     async effop () {
       await new ItemChatgr().run(this.groupe.id, this.im, this.dh, null)
       this.im = 0
       this.dh = 0
-      MD.fD()
+      this.ui.fD()
     },
 
     async addop () {
       await new ItemChatgr().run(this.groupe.id, this.imAut, 0, this.txt)
       this.txt = ''
-      MD.fD()
+      this.ui.fD()
     },
 
     async editer () {
       if (!await this.session.edit()) return
       this.txt = ''
-      this.ovchatedit()
+      this.ui.oD('ACGchatedit')
     }
   },
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const gSt = stores.groupe
     const aSt = stores.avatar
     const naAut = ref()
@@ -145,15 +147,10 @@ export default {
       imAut.value = elt.im
     }
 
-    const chatedit = ref(false)
-    function ovchatedit () { MD.oD(chatedit) }
-    const confirmeff = ref(false)
-    function ovconfirmeff () { MD.oD(confirmeff) }
-
     return {
-      MD, chatedit, ovchatedit, confirmeff, ovconfirmeff, selAut, naAut, imAut,
+      selAut, naAut, imAut,
       dkli, dhcool,
-      session, gSt, aSt
+      session, ui, gSt, aSt
     }
   }
 }

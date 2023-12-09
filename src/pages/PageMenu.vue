@@ -108,7 +108,6 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageMenu',
@@ -206,7 +205,6 @@ export default {
 
     return {
       pow: session.pow,
-      MD,
       aSt, session, gSt, ui, fSt,
       options, cav
     }

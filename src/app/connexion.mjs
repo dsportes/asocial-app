@@ -14,7 +14,7 @@ import {
 import { crypter, random, genKeyPair, crypterRSA } from './webcrypto.mjs'
 import { FsSyncSession } from './fssync.mjs'
 import { openWS, closeWS } from './ws.mjs'
-import { MD, setClet } from './modele.mjs'
+import { setClet } from './modele.mjs'
 
 /* garderMode : si true, garder le mode */
 export function deconnexion(garderMode) {
@@ -24,10 +24,6 @@ export function deconnexion(garderMode) {
   const mode = session.mode
   const memoOrg = session.memoOrg
   Demon.stop()
-
-  // fermeture de tous les dialogues et du menu de filtre
-  // MD.fTD()
-  // ui.aunmessage = false
 
   if (session.accesIdb) closeIDB()
   if (session.accesNet) {

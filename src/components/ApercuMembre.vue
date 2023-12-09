@@ -108,9 +108,7 @@
       </div>
     </div>
 
-    <q-dialog v-model="accinvit" full-height persistent>
-      <invitation-acceptation :idg="eg.groupe.id" :im="imc"/>
-    </q-dialog>
+    <invitation-acceptation v-if="ui.d.IAaccinvit" :idg="eg.groupe.id" :im="imc"/>
 
     <!-- Dialogue de configuration -->
     <q-dialog v-model="ui.d.AMconfig" persistent>
@@ -414,7 +412,7 @@ export default {
     async accinviter (im) {
       if (!await this.session.edit()) return
       this.imc = im
-      this.ui.oD('AMaccinvit')
+      this.ui.oD('IAaccinvit')
     },
 
     ouvrirdetails () {
@@ -448,7 +446,7 @@ export default {
       this.invpar = this.options[0]
       this.ard = this.mb.ard || ''
       this.session.setMembreId(this.im)
-      this.ui.oD('AMovinvit')
+      this.ui.oD('AMinvit')
     },
 
     async inviter (cas) { 

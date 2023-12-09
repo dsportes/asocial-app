@@ -11,7 +11,7 @@
       <q-tooltip class="bg-white text-primary">{{$t('editer')}}</q-tooltip>
     </q-btn>
   </div>
-  <q-dialog v-model="mcedit" persistent>
+  <q-dialog v-model="ui.d.AMmcedit" persistent>
     <choix-motscles :du-groupe="duGroupe" :du-compte="duCompte"
       :init-value="src || mcvide" editable
       :titre="$t('MCchoix')" :ok-label="$t('ok')" @ok="okmc"/>
@@ -23,7 +23,6 @@
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixMotscles from './ChoixMotscles.vue'
-import { MD } from '../app/modele.mjs'
 import { dkli } from '../app/util.mjs'
 
 export default ({
@@ -49,10 +48,10 @@ export default ({
   methods: {
     async editer () {
       if (! await this.session.edit()) return
-      if (this.edit) this.ovmcedit()
+      if (this.edit) this.ui.oD('ACmcedit')
     },
     okmc (mc) { 
-      MD.fD()
+      this.ui.fD()
       if (mc) this.$emit('ok', mc)
     },
     sty (idx) {
@@ -63,6 +62,7 @@ export default ({
 
   setup (props) {
     const session = stores.session
+    const ui = stores.ui
     const mapMC = toRef(props, 'mapmc')
 
     function nom (idx) {
@@ -70,13 +70,10 @@ export default ({
       const e = mapMC.value.get(''+idx)
       return e && e.n ? e.n : ('' + idx)
     }
-    
-    const mcedit = ref(false)
-    function ovmcedit () { MD.oD(mcedit) }
 
     return {
-      MD, dkli, mcedit, ovmcedit,
-      session,
+      dkli,
+      session, ui,
       mcvide: new Uint8Array([]),
       nom
     }

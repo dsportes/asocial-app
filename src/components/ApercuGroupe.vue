@@ -67,15 +67,15 @@
   </div>
 
   <!-- Dialogue d'édition des mots clés du groupe -->
-  <mots-cles v-if="ui.d.mcledit" :idg="eg.groupe.id"/>
+  <mots-cles v-if="ui.d.MCmcledit" :idg="eg.groupe.id"/>
 
   <!-- Gérer le mode simple / unanime -->
-  <q-dialog v-model="editerUna" full-height persistent>
+  <q-dialog v-model="ui.d.editerUna" full-height persistent>
     <div class="bs" style="width:80vw">
     <q-layout container view="hHh lpR fFf" :class="dkli(0)">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGuna', [eg.groupe.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -103,7 +103,7 @@
           </div>
           <div v-if="!estAnim">
             <div class="titre-md text-center">{{$t('AGupasan')}}</div>
-            <q-btn class="q-ml-md" dense size="md" color="primary" :label="$t('jailu')" @click="MD.fD"/>
+            <q-btn class="q-ml-md" dense size="md" color="primary" :label="$t('jailu')" @click="ui.fD"/>
           </div>
           <div v-else class="column q-gutter-xs items-center">
             <q-btn v-if="eg.groupe.msu" :label="$t('AGums')" dense size="md" 
@@ -116,7 +116,7 @@
               color="warning" @click="cfu = 2"/>
             <div class="q-mt-md row justify-center items-center q-gutter-md">
               <q-btn size="md" class="btn2" dense :label="$t('renoncer')" 
-                color="primary" @click="MD.fD"/>
+                color="primary" @click="ui.fD"/>
               <bouton-confirm :actif="cfu!==0" :confirmer="chgU"/>
             </div>
           </div>
@@ -132,7 +132,7 @@
     <q-layout container view="hHh lpR fFf" :class="dkli(0)">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGgerh', [eg.groupe.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -190,7 +190,7 @@
             </div>
 
             <div class="row justify-center q-gutter-md">
-              <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+              <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="ui.fD"/>
               <bouton-confirm v-if="action === 2 || (action !== 0 && !q.err && !al1 && !al2)" 
                 actif :confirmer="chgQ"/>
             </div>
@@ -204,7 +204,7 @@
   </q-dialog>
 
   <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
-  <q-dialog v-model="nvctc" persistent>
+  <q-dialog v-model="ui.d.AGnvctc" persistent>
     <q-card class="bs">
       <q-card-section v-if="options.length">
         <div class="titre-md text-italic">{{$t('AGmoi1')}}</div>
@@ -224,7 +224,7 @@
       </q-card-section>
 
       <q-card-actions vertical>
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+        <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
         <q-btn flat :label="$t('continuer')" color="warning" @click="pagectc"/>
       </q-card-actions>
     </q-card>
@@ -246,8 +246,8 @@ import BoutonHelp from './BoutonHelp.vue'
 import QuotasVols2 from './QuotasVols2.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 import MotsCles from './MotsCles.vue'
-import { MD, getNg, Groupe } from '../app/modele.mjs'
-import { MajCvGr, MotsclesGroupe, ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
+import { getNg, Groupe } from '../app/modele.mjs'
+import { ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
 
 export default {
   name: 'ApercuGroupe',
@@ -344,13 +344,13 @@ export default {
         if (!m) this.options.push({ value: nam.id, label: nam.nom, na: nam })
       }
       if (this.options.length) this.moic = this.options[0]
-      this.ovnvctc()
+      this.ui.oD('AGnvctc')
     },
 
     pagectc () {
       this.session.setGroupeId(this.eg.groupe.id)
       this.ui.egrplus = true
-      MD.fD()
+      this.ui.fD()
       this.ui.setPage('people')
     },
 
@@ -375,7 +375,7 @@ export default {
         const cv = this.aSt.getAvatar(nax.id).cv
         if (await new NouveauMembre().run(gr, slot, nax, cv)) {
           this.session.setMembreId(slot)
-          MD.fD()
+          this.ui.fD()
           return
         }
         await sleep(500)
@@ -443,7 +443,7 @@ export default {
       this.q.max2 = cpt.q2 - Math.ceil(cpt.v2 / UNITEV2)
       this.q.err = false
       this.onChgQ()
-      this.ovgererheb()
+      this.ui.oD('AGgererheb')
     },
     onChgQ () {
       const cpt = this.aSt.compta.compteurs.qv
@@ -459,18 +459,18 @@ export default {
     },
 
     async chgQ () {
-      if (!await this.session.edit()) { MD.fD(); return }
+      if (!await this.session.edit()) { this.ui.fD(); return }
       // action, groupe, imh, q1, q2
       const imh = this.nvHeb ? this.nvHeb.im : 0
       await new HebGroupe().run(this.action, this.eg.groupe, imh, this.q.q1, this.q.q2 )
-      MD.fD()
+      this.ui.fD()
     },
 
 
     async editUna () {
       if (!await this.session.edit()) return
       // this.gSt.test1(this.eg)
-      this.ovediterUna()
+      this.ui.oD('AGediterUna')
       this.anims = this.gSt.animIds(this.eg)
       this.estAnim = this.anims.has(this.session.avatarId)
       this.lstVotes = []
@@ -487,7 +487,7 @@ export default {
     },
 
     async chgU () {
-      if (!await this.session.edit())  { MD.fD(); return }
+      if (!await this.session.edit())  { this.ui.fD(); return }
       const mb = this.gSt.membreDeId(this.eg, this.session.avatarId)
       const una = this.eg.groupe.msu != null
       let ids = -1
@@ -497,7 +497,7 @@ export default {
         ids = 0
       }
       if (ids !== -1) await new ModeSimple().run(this.eg.groupe.id, ids)
-      MD.fD()
+      this.ui.fD()
     }
   },
 
@@ -507,26 +507,14 @@ export default {
     const gSt = stores.groupe
     const aSt = stores.avatar
 
-    const eg = toRef(props, 'eg')
+    //const eg = toRef(props, 'eg')
 
     const photoDef = stores.config.iconGroupe
     const q = reactive({q1:0, q2:0, min1:0, min2:0, max1:0, max2:0, err:false })
 
-    const nvctc = ref(false)
-    function ovnvctc () { MD.oD(nvctc) }
-    const editerUna = ref(false)
-    function ovediterUna () { MD.oD(editerUna) }
-    const gererheb = ref(false)
-    function ovgererheb () { MD.oD(gererheb) }
-    const ardedit = ref(false)
-    function ovardedit () { MD.oD(ardedit) }
-
     return {
-      MD, dkli, aaaammjj,
-      nvctc, ovnvctc, editerUna, ovediterUna,
-      gererheb, ovgererheb, ardedit, ovardedit,
-      session,
-      ui,
+      dkli, aaaammjj,
+      session, ui,
       photoDef,
       gSt,
       aSt,

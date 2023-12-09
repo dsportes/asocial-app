@@ -1,8 +1,5 @@
 import { defineStore } from 'pinia';
 
-import { sleep } from '../app/util.mjs'
-import { MD } from '../app/modele.mjs'
-
 export const useUiStore = defineStore('ui', {
   state: () => ({
     diag: '',
@@ -36,7 +33,6 @@ export const useUiStore = defineStore('ui', {
     dialogStack: [],
 
     d: {
-      mcledit: false,
       choixEmoji: false,
       diag: false, // App
       confirmFerm: false,
@@ -47,16 +43,16 @@ export const useUiStore = defineStore('ui', {
       detailspeople: false,
       confirmstopop: false,
       opDialog: false,
+      MCmcledit: false, // MotsCles
       PPnvnote: false, // PressePapier
       PPsupprnote: false,
       PPnvfic: false,
       PPsupprdic: false,
       PAoutilsTests: false, // PageAccueil
       FAdetaildial: false, // PageFicavion
-      AGvisucv: false, // AppercuGenx
-      AMconfig: false, // AppercuMembre
+      AGvisucv: false, // ApercuGenx
+      AMconfig: false, // ApercuMembre
       AMinvit: false,
-      AMaccinvit: false,
       PPinfoedit: false, // PanelPeople
       NSnvsp: false, // NouveauSponsoring
       PTedq: false, // PageTranche
@@ -67,6 +63,54 @@ export const useUiStore = defineStore('ui', {
       BPcptdial: false,
       OTsuppbase: false, // OutilsTests
       OTrunning: false,
+      AAeditionpc: false, // ApercuAvatar
+      ACchatedit: false, // ApercuChat
+      ACouvrir: false,
+      ACconfirmeff: false,
+      ACconfirmrac: false,
+      ACGchatedit: false, // ApercuChatgr
+      ACGouvrir: false,
+      ACGconfirmeff: false,
+      CVedition: false, // CarteVisite
+      AGnvctc: false, // ApercuGroupe
+      AGediterUna: false,
+      AGgererheb: false,
+      AMmcedit: false, // ApercuMotscles
+      ANeditntf: false, // ApercuNotif
+      ATreceptk: false, // ApercuTicket
+      ATconfirmdel: false,
+      EMmax: false, // EditeurMd
+      IAaccinvit: false, // InvitationAcceptation
+      ACVouvrir: false, // ApercuCv
+      MMedition: false, // McMemo
+      PCnouveautk: false, // PanelCredits
+      PDdialtk: false, // PanelDialtk
+      SHfs: false, // ShowHtml
+      NFouvrir: false, // NouveauFichier
+      NTsupprfichier: false, // NoteFichier
+      NTconfirmav1: false,
+      NTconfirmav2: false,
+      NNnotenouvelle: false, // NoteNouvelle
+      SAsuppravatar: false, // SupprAvatar
+      SAconfirmsuppr: false,
+      PCnvav: false, // PageCompte
+      PCchgps: false,
+      PAedprf: false, // PageAdmin
+      PAcreationesp: false,
+      PAcheckpoint: false,
+      PApageespace: false,
+      CCouvrir: false, // ContactChat
+      PGcrgr: false, // PageGroupes
+      PEnt: false, // PageEspace
+      PEedcom: false,
+      PEedq: false,
+      ASaccsp: false, // AcceptationSponsoring
+      NE: false, // NoteEdit
+      NX: false, // NoteExclu
+      NM: false, // NoteMc
+      NF: false, // NoteFichier
+      NC: false, // NoteConfirme
+      PNdl: false, // PageNotes
 
     }
 

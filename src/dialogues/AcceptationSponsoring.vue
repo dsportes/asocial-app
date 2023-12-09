@@ -1,9 +1,9 @@
 <template>
-<div class="bs" style="width:80vw">
-<q-layout container view="hHh lpR fFf" :class="sty">
+<q-dialog v-model="ui.d.ASaccsp" persistent full-height>
+<q-layout container view="hHh lpR fFf" :class="sty + ' bs'" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -78,7 +78,7 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</div>
+</q-dialog>
 </template>
 
 <script>
@@ -93,7 +93,7 @@ import { dhcool } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { crypter } from '../app/webcrypto.mjs'
-import { MD, Tribu } from '../app/modele.mjs'
+import { Tribu } from '../app/modele.mjs'
 
 export default ({
   name: 'AcceptationSponsoring',
@@ -154,7 +154,7 @@ export default ({
       this.apsf = false
       this.isPwd = false
       this.ps = null
-      MD.fD()
+      this.ui.fD()
     },
     async okps (ps) {
       if (ps) {
@@ -180,10 +180,11 @@ export default ({
   },
 
   setup (props) {
-    const sp = toRef(props, 'sp')
-    const pc = toRef(props, 'pc')
+    const ui = stores.ui
+    // const sp = toRef(props, 'sp')
+    // const pc = toRef(props, 'pc')
     return {
-      MD, ID
+      ui, ID
     }
   }
 })

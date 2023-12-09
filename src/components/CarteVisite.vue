@@ -1,7 +1,8 @@
 <template>
+<q-dialog v-model="ui.d.CVedition" persistent>
   <q-card class="bs moyennelargeur">
     <q-toolbar class="bg-secondary text-white">
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CVtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -59,6 +60,7 @@
       <q-btn :disable="!modif" flat icon="check" :label="$t('valider')" color="warning" @click="valider" />
     </q-card-actions>
   </q-card>
+</q-dialog>
 </template>
 <script>
 
@@ -68,7 +70,6 @@ import EditeurMd from './EditeurMd.vue'
 import { readFile } from '../app/util.mjs'
 import Webcam from 'webcam-easy'
 import { Cropper } from 'vue-advanced-cropper'
-import { MD } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 
 const TPH = { height: 32, width: 32 }
@@ -107,7 +108,6 @@ export default ({
 
   data () {
     return {
-      MD,
       fileList: null,
       file: { b64: '' },
       cam: null,
@@ -121,11 +121,11 @@ export default ({
       this.undoph()
       this.md.undo()
       this.$emit('ok', false)
-      MD.fD()
+      this.ui.fD()
     },
     valider () {
       this.$emit('ok', !this.modif ? false : this.resultat)
-      MD.fD()
+      this.ui.fD()
     },
     undoph () {
       this.enedition = false
@@ -170,6 +170,7 @@ export default ({
   },
 
   setup (props) {
+    const ui = stores.ui
     const phdef = stores.config.iconavatar
     const clic = stores.config.cliccamera
 
@@ -219,6 +220,7 @@ export default ({
     init()
 
     return {
+      ui,
       phdef,
       clic,
       nom,

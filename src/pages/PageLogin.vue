@@ -40,9 +40,7 @@
   </q-expansion-item>
 
   <!-- Dialogue d'acceptation d'un nouveau sponsoring -->
-  <q-dialog v-model="dialcp" persistent full-height>
-    <AcceptationSponsoring :sp="sp" :pc="pc" :org="org"/>
-  </q-dialog>
+  <acceptation-sponsoring v-if="ui.d.ASaccsp" :sp="sp" :pc="pc" :org="org"/>
 
 </q-page>
 </template>
@@ -54,7 +52,7 @@ import stores from '../stores/stores.mjs'
 
 import { $t, afficherDiag } from '../app/util.mjs'
 import { connecterCompte, GetEstFs } from '../app/connexion.mjs'
-import { MD, Sponsoring, resetRepertoire } from '../app/modele.mjs'
+import { Sponsoring, resetRepertoire } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ, ID, isAppExc } from '../app/api.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
@@ -119,7 +117,7 @@ export default {
             this.raz()
             return                  
           }
-          this.ovdialcp()
+          this.ui.oD('ASaccsp')
           return
         } catch (e) {
           await afficherDiag(this.$t('LOGppatt'))
@@ -143,6 +141,7 @@ export default {
   setup () {
     const config = stores.config
     const session = stores.session
+    const ui = stores.ui
     const locmode = ref(session.mode)
     const razdb = ref(false)
 
@@ -159,12 +158,8 @@ export default {
       }
     })
 
-    const dialcp = ref(false)
-    function ovdialcp () { MD.oD(dialcp) }
-
     return {
-      MD, dialcp, ovdialcp,
-      session,
+      session, ui,
       config,
       razdb,
       locmode

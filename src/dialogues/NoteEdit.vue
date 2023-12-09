@@ -1,6 +1,6 @@
 <template>
-<div :class="dkli(0) + ' bs dp50'" style="padding:0">
-<q-layout container view="hHh lpR fFf">
+<q-dialog v-model="ui.d.NE" persistent full-height>
+<q-layout container view="hHh lpR fFf" :class="dkli(0) + ' bs dp50'" style="padding:0">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
@@ -63,13 +63,12 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</div>
+</q-dialog>
 </template>
 
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 import { splitPK, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { MajNote } from '../app/operations.mjs'
@@ -91,13 +90,13 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else MD.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
     async valider () {
       const n = this.nSt.note
       const aut = this.avatar ? 0 : this.aSt.compte.imGA(this.groupe.id, this.naAut.id)
       await new MajNote().run(n.id, n.ids, aut, this.texte)
-      MD.fD()
+      this.ui.fD()
     }
   },
 
@@ -161,7 +160,7 @@ export default {
     return {
       session, nSt, aSt, gSt, ui, cfg, naAut, selNa,
       avatar, groupe, type, nodeP, avP, grP, xav,
-      MD, dkli, cv
+      dkli, cv
     }
   }
 

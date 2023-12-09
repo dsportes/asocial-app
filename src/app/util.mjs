@@ -5,7 +5,6 @@ import { useQuasar } from 'quasar'
 import { arrayBuffer, random } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AMJ, appexc } from './api.mjs'
-import { MD } from './modele.mjs'
 
 let pako
 
@@ -45,9 +44,9 @@ export function html (exc) {
 export async function trapex (e, opt) {
   const ui = stores.ui
   await ui.afficherExc(appexc(e))
-  stores.ui.setPage('accueil')
-  if (opt === 1) { stores.ui.setPage('accueil'); return }
-  if (opt === 2) { MD.fD(); return }
+  ui.setPage('accueil')
+  if (opt === 1) { ui.setPage('accueil'); return }
+  if (opt === 2) { ui.fD(); return }
   if (typeof opt === 'function') { opt(); return }
   return
 }

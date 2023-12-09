@@ -29,27 +29,13 @@
       </template>
     </q-tree>
 
-    <q-dialog v-model="noteedit" persistent full-height>
-      <note-edit/>
-    </q-dialog>
+    <note-edit v-if="ui.d.NE"/>
+    <note-exclu v-if="ui.d.NX"/>
+    <note-mc v-if="ui.d.NM"/>
+    <note-fichier v-if="ui.d.NF"/>
+    <note-confirme v-if="ui.d.NC" :op="op"/>
 
-    <q-dialog v-model="noteexclu" persistent full-height>
-      <note-exclu/>
-    </q-dialog>
-
-    <q-dialog v-model="notemc" persistent full-height>
-      <note-mc/>
-    </q-dialog>
-
-    <q-dialog v-model="notefichier" persistent full-height>
-      <note-fichier/>
-    </q-dialog>
-
-    <q-dialog v-model="confirme" persistent>
-      <note-confirme :op="op"/>
-    </q-dialog>
-
-    <q-dialog v-model="dldialogue" persistent>
+    <q-dialog v-model="ui.d.PNdl" persistent>
       <q-card class="bs sp40">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="dlfin"/>
@@ -155,7 +141,7 @@
             :src="Array.from(nSt.note.smc)" du-compte
             :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
           <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
-          <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="ovnotemc"/>
+          <q-btn class="col-auto btn4" color="primary" size="sm" icon="edit" @click="ui.oD('NM')"/>
         </div>
 
         <div v-if="selected && nSt.note && !rec" class="q-mt-xs row justify-between titre-sm">  
@@ -166,24 +152,24 @@
             <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
           </div>
           <q-btn class="col-auto btn2" color="primary" size="sm" :label="$t('fichiers')" icon="open_in_new" 
-            @click="ovnotefichier"/>
+            @click="ui.oD('NF')"/>
         </div>
 
         <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs row justify-between titre-sm">  
           <div v-if="nSt.mbExclu">{{$t('PNOexclu', [nSt.mbExclu.nom])}}</div>
           <div v-else class="text-italic">{{$t('PNOnoexclu')}}</div>
           <q-btn class="col-auto btn4" color="primary" size="sm" icon="settings" 
-            @click="ovnoteexclu"/>
+            @click="ui.oD('NX')"/>
         </div>
 
         <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs">
           <note-plus/>
           <q-btn v-if="nSt.note && !nSt.note.p" class="btn2" color="primary" size="md" icon="edit_off" :label="$t('PNOarch')"
-            @click="op='arch';ovconfirme()"/>
+            @click="op='arch';ui.oD('NC')"/>
           <q-btn v-if="nSt.note && nSt.note.p" class="btn2" color="primary" size="md" icon="edit" :label="$t('PNOreact')"
-            @click="op='react';ovconfirme()"/>
+            @click="op='react';ui.oD('NC')"/>
           <q-btn v-if="nSt.note" class="btn2" color="warning" size="md" icon="delete" :label="$t('PNOsupp')"
-            @click="op='suppr';ovconfirme()"/>
+            @click="op='suppr';ui.oD('NC')"/>
           <q-btn v-if="rattaut" 
             class="btn2 q-ml-xs" color="primary" size="md" icon="attachment" 
             :label="$t('PNOratt')"
@@ -232,7 +218,7 @@
 import { ref } from 'vue'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
-import { Motscles, getNg, MD } from '../app/modele.mjs'
+import { Motscles, getNg } from '../app/modele.mjs'
 import { $t, u8ToB64, dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
@@ -348,7 +334,7 @@ export default {
         await afficherDiag($t('PNOarchivee'))
         return
       }
-      this.ovnoteedit()
+      this.ui.oD('NE')
     },
 
     async rattacher () {
@@ -691,7 +677,7 @@ export default {
       if (lstn.length) {
         dlnc.value = lstn[0]
         dlst.value = 1
-        ovdldialogue()
+        this.ui.oD('PNdl')
       } else {
         await afficherDiag($t('PNOdlvide'))
       }
@@ -766,7 +752,7 @@ export default {
 
     function dlfin () {
       dlst.value = 0
-      MD.fD()
+      this.ui.fD()
     }
 
     compileFiltre(fSt.filtre.notes)
@@ -776,25 +762,9 @@ export default {
     const mapmc = ref(Motscles.mapMC(true, 0))
     fSt.contexte.notes.mapmc = mapmc.value
 
-    const noteedit = ref(false)
-    function ovnoteedit () { MD.oD(noteedit) }
-    const noteexclu = ref(false)
-    function ovnoteexclu () { MD.oD(noteexclu)}
-    const notemc = ref(false)
-    function ovnotemc () { MD.oD(notemc)}
-    const confirme = ref(false)
-    function ovconfirme () { MD.oD(confirme)}
-    const notefichier = ref(false)
-    function ovnotefichier () { MD.oD(notefichier)}
-    const dldialogue = ref(false)
-    function ovdldialogue () { MD.oD(dldialogue)}
-
     return {
-      confirme, ovconfirme, noteedit, ovnoteedit,
-      noteexclu, ovnoteexclu, notemc, ovnotemc, notefichier, ovnotefichier, 
-      dldialogue, ovdldialogue,
-      MD, dhcool, now, filtrage, edvol,
-      ID, session, nSt, aSt, gSt,
+      dhcool, now, filtrage, edvol,
+      ID, session, ui, nSt, aSt, gSt,
       selected, expanded,
       tree,
       filtre, filtreFake,

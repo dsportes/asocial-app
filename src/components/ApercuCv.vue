@@ -1,7 +1,8 @@
 <template>
+<q-dialog v-model="ui.d.ACVouvrir" persistent>
   <q-card class="petitelargeur column bs minh">
     <q-toolbar class="col-auto bg-secondary text-white">
-      <q-btn dense size="md" color="primary" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="primary" icon="close" @click="ui.fD"/>
       <q-toolbar-title>
         <span class="titre-lg">{{estAvc ? na.nom : na.nomc}}</span> 
         <span v-if="estAvc" class="titre-md q-ml-md">[{{$t('moi')}}]</span>
@@ -9,7 +10,7 @@
       <q-btn v-if="!estGroupe && !estAvc && net" dense size="md" 
         color="primary" icon="refresh" @click="refresh"/>
       <q-btn v-if="estAvc || (estGroupe && !diag)" dense size="md" icon="edit" color="primary"
-        :label="$t('editer')" @click="ovedition"/>
+        :label="$t('editer')" @click="ui.oD('CVedition')"/>
     </q-toolbar>
     <q-toolbar inset v-if="estAvc && diag" class="bg-yellow-5 text-bold text-black titre-md">
       {{diag}}
@@ -22,9 +23,7 @@
     </div>
 
     <!-- Dialogue d'édition de la carte de visite -->
-    <q-dialog v-model="edition" persistent>
-      <carte-visite :photo-init="photo" :info-init="info" :na="na" @ok="cvok"/>
-    </q-dialog>
+    <carte-visite v-model="ui.d.CVedition" :photo-init="photo" :info-init="info" :na="na"/>
 
   </q-card>
 </template>
@@ -34,7 +33,6 @@ import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ShowHtml from './ShowHtml.vue'
 import CarteVisite from './CarteVisite.vue'
-import { MD } from '../app/modele.mjs'
 import { ChargerCvs, MajCv, MajCvGr } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
 import { $t } from '../app/util.mjs'
@@ -79,6 +77,7 @@ export default {
 
   setup (props) {
     const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const gSt = stores.groupe
     const pSt = stores.people
@@ -142,12 +141,9 @@ export default {
       }
     }
 
-    const edition = ref(false)
-    function ovedition () { MD.oD(edition)}
-
     return {
-      session, MD, ID, aSt, estAvc, estGroupe, na, cv, agp, diag,
-      net: session.accesNet, edition, ovedition
+      session, ui, ID, aSt, estAvc, estGroupe, na, cv, agp, diag,
+      net: session.accesNet
     }
   }
 }

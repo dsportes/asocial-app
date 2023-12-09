@@ -19,7 +19,7 @@
 
     </q-card-section>
     <q-card-actions align="right">
-      <q-btn :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+      <q-btn :label="$t('renoncer')" color="primary" @click="ui.fD"/>
       <q-btn :label="$t('TKgen')" color="warning" :disable="diag !== ''" @click="generer"/>
     </q-card-actions>
   </q-card>
@@ -27,7 +27,6 @@
 
 <script>
 import { toRef, ref, watch } from 'vue'
-import { MD } from '../app/modele.mjs'
 import { $t } from '../app/util.mjs'
 
 export default {
@@ -52,6 +51,7 @@ export default {
   },
 
   setup (props) {
+    const ui = stores.ui
     const init = toRef(props, 'init')
     const min = toRef(props, 'min')
     const mx = ref(('' + init.value) || '0')
@@ -71,8 +71,9 @@ export default {
     )
 
     check(mx.value)
+    
     return {
-      MD, mx, m, diag, refx
+      ui, mx, m, diag, refx
     }
   }
 

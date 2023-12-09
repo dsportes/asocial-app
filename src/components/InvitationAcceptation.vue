@@ -1,7 +1,8 @@
 <template>
+<q-dialog v-model="ui.d.IAaccinvit" full-height persistent>
 <q-card v-if="mb" class="bs" style="width:80vw">
   <q-toolbar class="bg-secondary text-white">
-    <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+    <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
     <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('ICtit2', [mb.na.nom, mb.ng.nom])}}</q-toolbar-title>
     <bouton-help page="page1"/>
   </q-toolbar>
@@ -24,7 +25,7 @@
   </q-card-section>
           
   <div class="column justify-center items-center q-gutter-xs">
-    <q-btn dense flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+    <q-btn dense flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
     <div class="row justify-center q-gutter-sm">
       <q-btn dense :label="$t('ICacc')" color="primary" @click="ok(1)"/>
       <q-btn dense :label="$t('ICdec')" color="warning" @click="cfln = true"/>
@@ -38,13 +39,13 @@
   </div>
 
 </q-card>
+</q-dialog>
 </template>
 <script>
 
 import { ref, toRef, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import EditeurMd from './EditeurMd.vue'
-import { MD } from '../app/modele.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonBulle from './BoutonBulle.vue'
@@ -83,7 +84,7 @@ export default ({
     async ko () { await this.ok(this.decl) },
 
     async ok (cas) {
-      MD.fD()
+      this.ui.fD()
       const disp = await new AcceptInvitation(). // (cas, na, ng, im, chattxt, iam, ian)
         run(cas, this.mb.na, this.mb.ng, this.mb.ids, this.chattxt, this.iam, this.ian)
       if (disp) {
@@ -94,6 +95,7 @@ export default ({
   
   setup (props) {
     const session = stores.session
+    const ui = stores.ui
     const gSt = stores.groupe
 
     const idg = toRef(props, 'idg')
@@ -117,7 +119,7 @@ export default ({
     })
 
     return {
-      session, gSt, FLAGS, MD, mb, chattxt, fl, ln, cfln, decl, iam, ian
+      session, ui, gSt, FLAGS, mb, chattxt, fl, ln, cfln, decl, iam, ian
     }
   } 
 })

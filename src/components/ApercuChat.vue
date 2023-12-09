@@ -3,7 +3,7 @@
     <div :class="'column ' + dkli(idx)">
       <div class="row justify-between">
         <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHde', [naI.nom])}}</div>
-        <q-btn color="warning" icon="open_in_new" @click="ovouvrir"/>
+        <q-btn color="warning" icon="open_in_new" @click="ui.oD('ACouvrir')"/>
       </div>
       <div class="q-mx-sm">
         <apercu-genx class="bordb" :id="naE.id" :idx="idx" />
@@ -19,11 +19,11 @@
     </div>
 
     <!-- Dialogue d'édition du texte du chat -->
-    <q-dialog v-model="ouvrir" full-height persistent>
+    <q-dialog v-model="ui.d.ACouvrir" full-height persistent>
       <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
         <q-header elevated class="bg-secondary text-white">
           <q-toolbar>
-            <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+            <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
             <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [naI.nom, naE.nom])}}</q-toolbar-title>
             <bouton-help page="page1"/>
           </q-toolbar>
@@ -57,13 +57,13 @@
     </q-dialog>
 
     <!-- Confirmation d'effacement d'un échange -->
-    <q-dialog v-model="confirmeff">
+    <q-dialog v-model="ui.d.confirmeff">
       <q-card class="bs">
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHeff')}}
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
           <q-btn flat :label="$t('CHeffcf')" color="warning" @click="effop"/>
         </q-card-actions>
       </q-card>
@@ -76,23 +76,23 @@
           {{$t('CHrac2', [naE.nom])}}
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
           <q-btn flat :label="$t('CHrac')" color="warning" @click="passifop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
 
     <!-- Dialogue d'ajout d'un item au chat -->
-    <q-dialog v-model="chatedit">
+    <q-dialog v-model="ui.d.chatedit">
       <q-card>
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
           <q-btn flat :label="$t('valider')" color="warning" @click="addop"/>
         </q-card-actions>
       </q-card>
@@ -112,7 +112,6 @@ import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import { MajChat, PassifChat } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
-import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'ApercuChat',
@@ -141,25 +140,25 @@ export default {
         if (!await this.session.edit()) return
       }
       this.txt = this.chat ? this.chat.txt : ''
-      this.ovconfirmeff()
+      this.ui.oD('ACconfirmeff')
       this.dheff = dh
     },
 
     async effop () {
       await new MajChat().run(this.naI, this.naE, null, this.dheff, this.chat)
       this.dheff = 0
-      MD.fD()
+      this.ui.fD()
     },
 
     async addop () {
       await new MajChat().run(this.naI, this.naE, this.txt, 0, this.chat)
       this.txt = ''
-      MD.fD()
+      this.ui.fD()
     },
 
     async passifop () {
       await new PassifChat().run(this.naI.id, this.chat.ids)
-      MD.fD()
+      this.ui.fD()
     },
 
     async editer () {
@@ -169,7 +168,7 @@ export default {
         if (!await this.session.edit()) return
       }
       this.txt = this.chat ? this.chat.txt : ''
-      this.ovchatedit()
+      this.ui.oD('ACchatedit')
     },
 
     async raccrocher () {
@@ -179,12 +178,13 @@ export default {
         if (!await this.session.edit()) return
       }
       this.txt = this.chat ? this.chat.txt : ''
-      this.ovconfirmrac()
+      this.ui.oD('ACconfirmrac')
     }
   },
 
   setup (props) {
     const session = stores.session
+    const ui = stores.ui
     const pSt = stores.people
     const aSt = stores.avatar
     const naI = toRef(props, 'naI')
@@ -225,21 +225,9 @@ export default {
       }
     )
 
-    const chatedit = ref(false)
-    function ovchatedit () { MD.oD(chatedit) }
-    const ouvrir = ref(false)
-    function ovouvrir () { MD.oD(ouvrir) }
-    const confirmeff = ref(false)
-    function ovconfirmeff () { MD.oD(confirmeff) }
-    const confirmrac = ref(false)
-    function ovconfirmrac () { MD.oD(confirmrac) }
-
-
     return {
-      MD, chatedit, ovchatedit, ouvrir, ovouvrir, confirmeff, ovconfirmeff,
-      confirmrac, ovconfirmrac,
       dkli, dhcool,
-      session, pSt,
+      session, pSt, ui,
       chat
     }
   }

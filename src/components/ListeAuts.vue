@@ -11,9 +11,8 @@
       {{$t('PNOauts2')}}
     </div>
 
-    <q-dialog v-model="opencv" persistent>
-      <apercu-cv :na="nax"/>
-    </q-dialog>
+    <apercu-cv v-if="ui.d.ACVouvrir" :na="nax"/>
+
   </div>
 </template>
 
@@ -21,7 +20,6 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuCv from '../components/ApercuCv.vue'
-import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'ListeAuts',
@@ -49,11 +47,12 @@ export default {
     },
     openCv (im) {
       this.nax = this.na(im)
-      this.ovopencv()
+      this.ui.oD('ACVouvrir')
     }
   },
 
   setup () {
+    const ui = stores.ui
     const nSt = stores.note
     const gSt = stores.groupe
     const aSt = stores.avatar
@@ -64,11 +63,8 @@ export default {
     nSt.note.auts.forEach(im => { if (ims.has(im)) b = true})
     autAvc.value = b
 
-    const opencv = ref(false)
-    function ovopencv () { MD.oD(opencv) }
-
     return {
-      opencv, ovopencv, MD, nSt, gSt, aSt, autAvc
+      ui, nSt, gSt, aSt, autAvc
     }
   }
 }

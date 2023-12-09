@@ -57,10 +57,10 @@
   </div>
 
   <!-- Nouveau groupe ------------------------------------------------>
-  <q-dialog v-model="crgr" persistent>
+  <q-dialog v-model="ui.d.PGcrgr" persistent>
     <q-card class="bs petitelargeur column">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('PGcrea')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
@@ -72,7 +72,7 @@
         <q-option-group :options="options" type="radio" v-model="una"/>
         <q-card-actions align="right">
           <q-btn dense flat color="warning" 
-            :label="$t('renoncer')" @click="MD.fD" />
+            :label="$t('renoncer')" @click="ui.fD" />
           <q-btn dense flat color="primary" :disable="quotas.err || !nom"
             :label="$t('creer')" v-close-popup @click="okCreation" />
         </q-card-actions>
@@ -80,9 +80,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="chatgr" persistent full-height>
-    <apercu-chatgr/>
-  </q-dialog>
+  <apercu-chatgr v-if="ui.d.ACGouvrir"/>
 
 </q-page>
 </template>
@@ -91,7 +89,7 @@
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { edvol, $t, dkli } from '../app/util.mjs'
-import { MD, Motscles } from '../app/modele.mjs'
+import { Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -125,7 +123,7 @@ export default {
 
     async chat (elt) {
       this.session.setGroupeId(elt.groupe.id)
-      this.ovchatgr()
+      this.ui.oD('ACGouvrir')
     },
 
     exp (g) {
@@ -142,7 +140,7 @@ export default {
       this.quotas = { q1: 0, q2: 0, min1: 0, min2: 0, max1, max2, err: ''}
       this.nom = ''
       this.una = false
-      this.ovcrgr()
+      this.ui.oD('PGcrgr')
     },
 
     okNom (n) { this.nom = n },
@@ -150,7 +148,7 @@ export default {
     async okCreation () {
       console.log(this.nom, this.quotas.q1, this.quotas.q2, this.una)
       await new NouveauGroupe().run(this.nom, this.una, this.quotas)
-      MD.fD()
+      this.ui.fD()
     }
   },
 
@@ -181,13 +179,7 @@ export default {
     fStore.setContexte('groupes', { mapmc: mapmc.value, groupeId : 0})
     const stats = fStore.stats
 
-    const crgr = ref(false)
-    function ovcrgr () { MD.oD(crgr) }
-    const chatgr = ref(false)
-    function ovchatgr () { MD.oD(chatgr) }
-
     return {
-      MD, crgr, ovcrgr, chatgr, ovchatgr,
       ui, session, aSt, gSt, dkli,
       stats,
       mapmc,

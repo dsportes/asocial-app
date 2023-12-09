@@ -249,7 +249,6 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { UNITEV1, UNITEV2, AMJ, Compteurs, Tarif } from '../app/api.mjs'
 import { dhcool, edqt, mon, nbn, edvol, dkli, $t } from '../app/util.mjs'
-import { MD } from '../app/modele.mjs'
 import MoisM from './MoisM.vue'
 import PanelDeta from '../components/PanelDeta.vue'
 
@@ -359,7 +358,7 @@ export default ({
     return {
       tarifs: Tarif.tarifs,
       aSt, c, cu,
-      MD, edqt, mon, nbn, edvol, dhcool, dkli, libm, UNITEV1, UNITEV2
+      edqt, mon, nbn, edvol, dhcool, dkli, libm, UNITEV1, UNITEV2
     }
   }
 })

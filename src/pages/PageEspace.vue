@@ -81,10 +81,10 @@ Depuis un Comptable: ns est celui de la session
     </div>
 
     <!-- Edition de l'info attachée à une tribu -->
-    <q-dialog v-model="edcom" persistent>
+    <q-dialog v-model="ui.d.PEedcom" persistent>
       <q-card class="bs petitelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTinfo')}}</q-toolbar-title>
         </q-toolbar>
         <div class="q-ma-sm">
@@ -99,10 +99,10 @@ Depuis un Comptable: ns est celui de la session
     </q-dialog>
 
     <!-- Dialogue de mise à jour des quotas de la tribu -->
-    <q-dialog v-model="edq" persistent>
+    <q-dialog v-model="ui.d.PEedq" persistent>
       <q-card class="bs petitelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqut')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
@@ -114,7 +114,7 @@ Depuis un Comptable: ns est celui de la session
     </q-dialog>
 
     <!-- Dialogue de création d'une nouvelle tribu -->
-    <q-dialog v-model="nt" persistent>
+    <q-dialog v-model="ui.d.PEnt" persistent>
       <q-card class="bs moyennelargeur">
         <div class="titre-lg q-my-sm">{{$t('PTnv')}}</div>
         <div class="q-pa-sm">
@@ -124,7 +124,7 @@ Depuis un Comptable: ns est celui de la session
         </div>
         <choix-quotas :quotas="quotas" />
         <q-card-actions>
-          <q-btn flat dense color="warning" icon="close" :label="$t('renoncer')" @click="MD.fD"/>
+          <q-btn flat dense color="warning" icon="close" :label="$t('renoncer')" @click="ui.fD"/>
           <q-btn flat dense color="primary" icon="check" :disabled="!nom || quotas.err"
             :label="$t('valider')" @click="creer"/>
         </q-card-actions>
@@ -144,7 +144,6 @@ import { SetNotifT } from '../app/operations.mjs'
 import { dkli, $t } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 import { SetEspaceOptionA, NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
-import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageEspace',
@@ -161,11 +160,11 @@ export default {
       if (!await this.session.editpow(2)) return
       this.nom = ''
       this.quotas = { q1: 1, q2: 1, qc: 1, min1: 0, min2: 0, max1: 9999, max2: 9999, minc: 1, maxc: 9999, err: false }
-      this.ovnt()
+      this.ui.oD('PEnt')
     },
     async creer () {
       await new NouvelleTribu().run(this.nom || '', [this.quotas.qc, this.quotas.q1, this.quotas.q2])
-      MD.fD()
+      this.ui.fD()
     },
 
     async lgCourante (lg) {
@@ -215,11 +214,11 @@ export default {
     async editer () {
       if (!await this.session.editpow(2)) return
       this.info = this.infoC
-      this.ovedcom()
+      this.ui.oD('PEedcom')
     },
     async valider () {
       await new SetAtrItemComptable().run(this.ligne.id, this.info, null)
-      MD.fD()
+      this.ui.fD()
     },
     async editerq () {
       if (!await this.session.editpow(2)) return
@@ -228,11 +227,11 @@ export default {
         min1: 0, min2: 0, minc: 0,
         max1: 9999, max2: 9999, maxc: 9999
       }
-      this.ovedq()
+      this.ui.oD('PEedq')
     },
     async validerq () {
       await new SetAtrItemComptable().run(this.ligne.id, null, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
-      MD.fD()
+      this.ui.fD()
     }
   },
 
@@ -393,18 +392,11 @@ export default {
       })
     })
 
-    const nt = ref(false)
-    function ovnt () { MD.oD(nt)}
-    const edcom = ref(false)
-    function ovedcom () { MD.oD(edcom) }
-    const edq = ref(false)
-    function ovedq () { MD.oD(edq) }
-
     return {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
       synth, // Syntheses de l'espace
       notif, ligne, // ligne courante affichée
-      MD, ID, nt, ovnt, edcom, ovedcom, edq, ovedq,
+      ID, nt, ovnt, edcom, ovedcom, edq, ovedq,
       aSt, session, pow, ui, dkli,
       optionA, options, saveOptionA, undoOptionA, chgOptionA
     }

@@ -2,7 +2,7 @@
 <div>
   <div v-if="!fs" style="position:relative">
     <div v-if="zoom || edit" class="row btn">
-      <q-btn v-if="zoom" dense color="primary" icon="fullscreen" size="md" @click.stop="ovfs">
+      <q-btn v-if="zoom" dense color="primary" icon="fullscreen" size="md" @click.stop="ui.oD('SHfs')">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
       </q-btn>
       <q-btn v-if="edit" class="q-ml-xs" dense color="warning" 
@@ -27,7 +27,7 @@
         <q-btn v-if="edit" dense color="primary" icon="edit" size="md" @click="editer">
           <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
         </q-btn>
-        <q-btn dense color="primary" size="md" icon="close_fullscreen" @click="MD.fD">
+        <q-btn dense color="primary" size="md" icon="close_fullscreen" @click="ui.fD">
           <q-tooltip class="bg-white text-primary">{{$t('SHre')}}</q-tooltip>
         </q-btn>
       </q-bar>
@@ -49,7 +49,6 @@ import SdLight from './SdLight.vue'
 import SdDark from './SdDark.vue'
 import SdLight1 from './SdLight1.vue'
 import SdDark1 from './SdDark1.vue'
-import { MD } from '../app/modele.mjs'
 
 export default ({
   name: 'ShowHtml',
@@ -89,11 +88,10 @@ export default ({
   },
 
   setup () {
-    const fs = ref(false)
-    function ovfs () { MD.oD(fs) }
+    const ui = stores.ui
 
     return {
-      MD, fs, ovfs
+      ui
     }
   }
 })

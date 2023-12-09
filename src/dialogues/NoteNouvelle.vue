@@ -1,6 +1,6 @@
 <template>
-<div :class="dkli(0) + ' bs dp50'">
-<q-layout container view="hHh lpR fFf">
+<q-dialog v-model="ui.d.NNnotenouvelle" persistent full-height>
+<q-layout container view="hHh lpR fFf" :class="dkli(0) + ' bs dp50'">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
@@ -64,14 +64,14 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</div>
+</q-dialog>
 </template>
 
 <script>
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEV1 } from '../app/api.mjs'
-import { MD, getNg } from '../app/modele.mjs'
+import { getNg } from '../app/modele.mjs'
 import { dkli, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
@@ -99,7 +99,7 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else MD.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
     async valider () {
       let id = 0, idc = 0, ref = null, im = 0, rnom = ''
@@ -135,7 +135,7 @@ export default {
       }
 
       const key = await new NouvelleNote().run(id, this.texte, im, this.exclu, ref, idc)
-      MD.fD()
+      this.ui.fD()
     }
   },
 
@@ -201,7 +201,7 @@ export default {
     return {
       ui, session, nSt, aSt, gSt, cfg,
       err, naAut, selNa, idp, idsp, grP, avP,
-      MD, dkli
+      dkli
     }
   }
 

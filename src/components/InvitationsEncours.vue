@@ -10,16 +10,13 @@
   </div>
 
   <!-- Acceptation de l'invitation -->
-  <q-dialog v-model="accinvit" full-height persistent>
-    <invitation-acceptation :idg="inv.ng.id" :im="inv.im" :na="inv.na"/>
-  </q-dialog>
+  <invitation-acceptation v-if="ui.d.IAaccinvit" :idg="inv.ng.id" :im="inv.im" :na="inv.na"/>
+
 </div>
 </template>
 <script>
 
-import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 import { FLAGS } from '../app/api.mjs'
 import InvitationAcceptation from './InvitationAcceptation.vue'
 
@@ -41,19 +38,17 @@ export default ({
     async ouvaccinv (inv) {
       if (!await this.session.edit()) return
       this.inv = inv
-      this.ovaccinvit()
+      this.ui.oD('IAaccinvit')
     }
   },
   
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const gSt = stores.groupe
 
-    const invits = gSt.invits
-    const accinvit = ref(false)
-    function ovaccinvit () { MD.oD(accinvit) }
     return {
-      session, gSt, FLAGS, MD, accinvit, ovaccinvit
+      session, ui, gSt, FLAGS
     }
   } 
 })

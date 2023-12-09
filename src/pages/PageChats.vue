@@ -43,13 +43,8 @@
       </q-card>
     </div>
 
-    <q-dialog v-model="ouvrir" full-height persistent>
-      <apercu-chatgr/>
-    </q-dialog>
-
-    <q-dialog v-model="cc" persistent>
-      <contact-chat/>
-    </q-dialog>
+    <apercu-chatgr v-if="ui.d.ACGouvrir"/>
+    <contact-chat v-if="ui.d.CCouvrir"/>
 
   </q-page>
 </template>
@@ -63,7 +58,7 @@ import ApercuChat from '../components/ApercuChat.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuChatgr from '../components/ApercuChatgr.vue'
 import ContactChat from '../dialogues/ContactChat.vue'
-import { MD, Motscles, getNg } from '../app/modele.mjs'
+import { Motscles, getNg } from '../app/modele.mjs'
 import { RafraichirCvs } from '../app/operations.mjs'
 import { dhstring, afficherDiag, photoToBin, dkli, dhcool } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
@@ -90,7 +85,7 @@ export default {
 
     ouvrirChatgr (c) {
       this.session.setGroupeId(c.id)
-      this.ovouvrir()
+      this.ui.oD('ACGouvrir')
     },
 
     async rafCvs () {
@@ -99,7 +94,7 @@ export default {
     },
 
     async ovContact () {
-      if (await this.session.edit()) this.ovcc()
+      if (await this.session.edit()) this.ui.oD('CCouvrir')
     },
 
     saveph (nf, u8, mime) {
@@ -152,6 +147,7 @@ export default {
   },
 
   setup () {
+    const ui = stores.ui
     const aSt = stores.avatar
     const gSt = stores.groupe
     const session = stores.session
@@ -190,16 +186,8 @@ export default {
       })
     })
 
-    const cc = ref(false)
-    function ovcc () { MD.oD(cc) }
-    const ouvrir = ref(false)
-    function ovouvrir () { MD.oD(ouvrir) }
-
     return {
-      MD, cc, ovcc, ouvrir, ovouvrir,
-      ui: stores.ui,
-      session,
-      aSt, gSt, ID, dkli, fusion, getNg, dhcool,
+      session, ui, aSt, gSt, ID, dkli, fusion, getNg, dhcool,
       mapmc
     }
   }

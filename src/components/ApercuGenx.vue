@@ -3,7 +3,7 @@
   <div class="q-pa-xs row items-start">
     <div class="col-auto items-center q-mr-sm column">
       <img class="photomax" :src="photo" />
-      <q-btn size="sm" icon="zoom_in" dense color="primary" @click.stop="ovvisucv"/>
+      <q-btn size="sm" icon="zoom_in" dense color="primary" @click.stop="ui.oD('ACVouvrir')"/>
     </div>
     <div class="col">
       <div class="row">
@@ -24,9 +24,7 @@
   <q-separator color="orange" size="1px"/>
 
   <!-- Dialogue d'affichage de la carte de visite -->
-  <q-dialog v-model="visucv" persistent>
-    <apercu-cv :id="id"/>
-  </q-dialog>
+  <apercu-cv v-if="ui.d.ACVouvrir" :id="id"/>
 
 </div>
 </template>

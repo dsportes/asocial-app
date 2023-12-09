@@ -1,9 +1,9 @@
 <template>
-<div :class="dkli(0) + ' bs dp50'">
-<q-layout container view="hHh lpR fFf">
+<q-dialog v-model="ui.d.NX" persistent full-height>
+<q-layout container view="hHh lpR fFf" :class="dkli(0) + ' bs dp50'">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t('PNOextit', [groupe.na.nomc])}}
       </q-toolbar-title>
@@ -53,32 +53,22 @@
       <q-separator color="orange" class="q-my-sm"/>
 
       <div class="row items-center justify-around">
-        <q-btn size="md" dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
+        <q-btn size="md" dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
         <q-btn v-if="!session.editDiag" size="md" dense color="warning" :disable="!xap"
           :label="$t('PNOex')" @click="valider"/>
       </div>
 
-      <!--   props: { 
-      na: Object, // na de la persone (people, avatar) ou du groupe 
-      ids: Number, // pour un "membre" ids (indice) du membre à afficher
-      cv: Object, // carte de visite
-      estAvc: Boolean, // true si c'est un avatar du compte
-      cvchangee: Function, // fonction d'enregistrement de la CV quand elle a été éditée
-      detailPeople: Boolean, // bouton d'affichage du détail du people
-      idx: Number
-      -->
       <apercu-genx v-if="xap" class="q-my-md" :id="xap.na.id" :im="xap.im"/>
 
     </q-page>
   </q-page-container>
 </q-layout>
-</div>
+</q-dialog>
 </template>
 
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 import { $t, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -121,6 +111,7 @@ export default {
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const nSt = stores.note
     const gSt = stores.groupe
     const aSt = stores.avatar
@@ -191,9 +182,9 @@ export default {
     init()
 
     return {
-      session, nSt, gSt, pSt, aSt, cv, idg,
+      session, ui, nSt, gSt, pSt, aSt, cv, idg,
       groupe, lst, xav, xap, anim, autAvc, amb,
-      MD, dkli
+      dkli
     }
   }
 
