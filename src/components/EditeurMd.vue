@@ -106,14 +106,14 @@ export default ({
   },
 
   methods: {
-    fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else MD.fD() },
     ouvriremojimd1 () {
       this.inp = this.root.querySelector('textarea')
-      MD.oD('choixEmoji')
+      this.ui.oD('choixEmoji')
     },
     ouvriremojimd2 () {
       this.inp = this.root2.querySelector('textarea')
-      MD.oD('choixEmoji')
+      this.ui.oD('choixEmoji')
     },
     ok () {
       MD.fD()

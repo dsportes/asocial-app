@@ -447,7 +447,7 @@ export async function afficherDiag (diag) {
   return new Promise((resolve) => {
     ui.diag = diag
     ui.diagresolve = resolve
-    MD.oD('diag')
+    ui.oD('diag')
   })
 }
 

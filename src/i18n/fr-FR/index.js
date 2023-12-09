@@ -1513,6 +1513,8 @@ export default {
   AGmoi2: 'Choisir...',
   AGmoi3: 'Valider {0}',
 
+  MCgr: 'Mots clés du groupe {0}',
+  MCc: 'Mots clés du compte',
   // Panel Membre
   PMGtit: 'Membre {0}',
   PMGtit1: 'Membre disparu',

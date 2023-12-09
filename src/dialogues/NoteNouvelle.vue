@@ -99,7 +99,7 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else MD.fD() },
 
     async valider () {
       let id = 0, idc = 0, ref = null, im = 0, rnom = ''

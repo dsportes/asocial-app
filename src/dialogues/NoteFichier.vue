@@ -197,7 +197,7 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else MD.fD() },
 
     async nouveau (nf) {
       if (!await this.session.edit()) return

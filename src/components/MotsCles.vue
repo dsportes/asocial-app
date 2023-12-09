@@ -1,20 +1,25 @@
 <template>
-<q-card class="bs largeur30">
+<q-dialog v-model="ui.d.mcledit" persistent>
+<q-card class="bs sp30">
   <q-toolbar class="bg-secondary text-white">
     <q-btn class="q-mr-xs" dense size="md" color="warning"
       icon="close" @click="cancelEdit"/>
-    <q-btn v-if="!motscles.mc.st.enedition && !lecture" dense size="md" color="primary"
+    <q-btn v-if="!motscles.mc.st.enedition && !diag" dense size="md" color="primary"
       icon="mode_edit" label="Editer" @click="startEdit"/>
-    <q-btn v-if="motscles.mc.st.enedition && !lecture" dense size="md" color="primary"
+    <q-btn v-if="motscles.mc.st.enedition && !diag" dense size="md" color="primary"
       icon="add_circle" label="Nouveau" @click="ajoutermc"/>
-    <q-btn v-if="motscles.mc.st.enedition && !lecture" dense class="q-ml-xs" size="md" color="primary"
+    <q-btn v-if="motscles.mc.st.enedition && !diag" dense class="q-ml-xs" size="md" color="primary"
       icon="undo" label="Annuler" @click="cancelEdit"/>
-    <q-btn v-if="motscles.mc.st.enedition && !lecture" :disable="!motscles.mc.st.modifie" dense class="q-ml-xs" size="md" color="warning"
+    <q-btn v-if="motscles.mc.st.enedition && !diag" 
+      :disable="!motscles.mc.st.modifie" dense class="q-ml-xs" size="md" color="warning"
       icon="check" label="Valider" @click="okEdit"/>
-    <q-btn v-if="lecture" dense size="md" color="warning" icon="close" @click="cancelEdit"/>
-    <q-toolbar-title class="titre-lg full-width text-center">{{titre}}</q-toolbar-title>
+    <!--q-btn v-if="!diag" dense size="md" color="warning" icon="close" @click="cancelEdit"/-->
+    <q-toolbar-title class="titre-lg full-width text-center">
+      {{idg ? $t('MCgr', [getNg(idg).nomc]) : $t('MCc')}}
+    </q-toolbar-title>
     <bouton-help page="page1"/>
   </q-toolbar>
+  <q-toolbar inset v-if="diag" class="titre-md text-bold text-negative bg-yellow-5">{{diag}}</q-toolbar>
 
   <div ref="root">
     <div v-if="ajouter" class="column border1 q-ma-xs q-pa-sm full-width">
@@ -62,19 +67,21 @@
   <choix-emoji :inp="inp" :close="emojiClose"/>
 
 </q-card>
+</q-dialog>
 </template>
 <script>
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixEmoji from './ChoixEmoji.vue'
 import BoutonHelp from './BoutonHelp.vue'
-import { MD, Motscles } from '../app/modele.mjs'
+import { MD, Motscles, getNg } from '../app/modele.mjs'
 import { $t, afficherDiag } from '../app/util.mjs'
+import { MotsclesGroupe, MotsclesCompte } from '../app/operations.mjs'
 
 export default ({
   name: 'MotsCles',
 
-  props: { duGroupe: Number, lecture: Boolean, titre: String }, // duGroupe = 0, édite les mots clés du compte
+  props: { idg: Number }, // si idg = 0, édite les mots clés du compte
 
   components: { BoutonHelp, ChoixEmoji },
 
@@ -95,13 +102,13 @@ export default ({
   methods: {
     ouvriremoji () {
       this.inp = this.root.querySelector('#ta').querySelector('input')
-      MD.oD('choixEmoji')
+      this.ui.oD('choixEmoji')
     },
     startEdit () {
       this.motscles.debutEdition()
     },
     cancelEdit () {
-      this.$emit('ok', false)
+      this.ui.fD()
     },
     ajoutermc () {
       this.idx = 0
@@ -148,19 +155,36 @@ export default ({
     emojiClose () {
       this.nom = this.inp.value
     },
-    okEdit () {
+    async okEdit () {
       const mmc = this.motscles.finEdition()
-      this.$emit('ok', mmc)
+      if (this.idg) {
+        await new MotsclesGroupe().run(mmc, this.eg.groupe.na)
+      } else {
+        await new MotsclesCompte().run(mmc)
+      }
+      this.ui.fD()
     }
   },
 
   setup (props) {
     const session = stores.session
-    const duGroupe = toRef(props, 'duGroupe')
     const ui = stores.ui
+    const gSt = stores.groupe
+
+    const idg = toRef(props, 'idg')
+    const estAnim = ref()
+    const eg = ref()
+  
+    if (idg.value) {
+      eg.value = gSt.egr(idg.value)
+      estAnim.value = eg.value && eg.value.estAnim
+    }
+
+    const diag = ref(session.editDiag)
+    if (!diag.value && idg.value && !estAnim.value) diag.value = $t('PGanim')
 
     const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
-    const motscles = new Motscles(mc, true, duGroupe.value ? false : true, duGroupe.value || 0)
+    const motscles = new Motscles(mc, true, idg.value ? false : true, idg.value || 0)
 
     const root = ref(null)
     const tab = ref('')
@@ -175,9 +199,11 @@ export default ({
       obs: $t('obs'),
       motscles,
       session,
+      getNg,
       ui,
       root,
       tab,
+      diag, eg,
       splitterModel: ref(33) // start at 33%
     }
   }

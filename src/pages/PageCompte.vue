@@ -54,9 +54,7 @@
     </q-card>
 
     <!-- Dialogue d'édition des mots clés du compte -->
-    <q-dialog v-model="mcledit" persistent>
-      <mots-cles class="full-width" :duGroupe="0" @ok="okmc" :titre="$t('CPTkwc')"/>
-    </q-dialog>
+    <mots-cles v-if="ui.d.mcledit"/>
 
     <!-- Dialogue de création d'un nouvel avatar -->
     <q-dialog v-model="nvav" persistent>
@@ -190,10 +188,9 @@ export default {
       await new NouvelAvatar().run(nom)
     },
 
-    async mcleditAut () { if (await this.session.edit()) this.ovmcledit() },
+    async mcleditAut () { if (await this.session.edit()) this.ui.oD('mcledit') },
 
     async okmc (mmc) {
-      MD.fD()
       if (mmc !== false) {
         const mck = await crypter(this.session.clek, new Uint8Array(encode(mmc)))
         await new MotsclesCompte().run(mck)
@@ -221,8 +218,6 @@ export default {
     const aSt = stores.avatar
     const fSt = stores.filtre
 
-    const mcledit = ref(false)
-    function ovmcledit () { MD.oD(mcledit) }
     const nvav = ref(false)
     function ovnvav () { MD.oD(nvav) }
     const chgps = ref(false)
@@ -231,7 +226,7 @@ export default {
     function ovsuppravatar () { MD.oD(suppravatar) }
 
     return {
-      MD, mcledit, ovmcledit, nvav, ovnvav, chgps, ovchgps,
+      MD, nvav, ovnvav, chgps, ovchgps,
       suppravatar, ovsuppravatar,
       ui: stores.ui,
       aSt, fSt,

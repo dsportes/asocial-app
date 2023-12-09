@@ -26,8 +26,8 @@ export function deconnexion(garderMode) {
   Demon.stop()
 
   // fermeture de tous les dialogues et du menu de filtre
-  MD.fTD()
-  ui.aunmessage = false
+  // MD.fTD()
+  // ui.aunmessage = false
 
   if (session.accesIdb) closeIDB()
   if (session.accesNet) {

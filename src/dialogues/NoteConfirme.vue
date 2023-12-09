@@ -1,5 +1,5 @@
 <template>
-<q-card class="bs sp40" style="padding:0">
+<q-card class="bs sp40">
   <q-toolbar class="bg-secondary text-white">
     <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
     <q-toolbar-title class="titre-lg full-width text-center">

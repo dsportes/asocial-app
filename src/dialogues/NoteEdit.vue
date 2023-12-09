@@ -91,7 +91,7 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) MD.oD('cf'); else MD.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else MD.fD() },
 
     async valider () {
       const n = this.nSt.note
@@ -114,6 +114,7 @@ export default {
     const gSt = stores.groupe
     const pSt = stores.people
     const cfg = stores.config
+    const ui = stores.ui
 
     const type = ref(0)
 
@@ -158,7 +159,7 @@ export default {
     }
 
     return {
-      session, nSt, aSt, gSt, cfg, naAut, selNa,
+      session, nSt, aSt, gSt, ui, cfg, naAut, selNa,
       avatar, groupe, type, nodeP, avP, grP, xav,
       MD, dkli, cv
     }

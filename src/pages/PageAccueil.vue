@@ -3,7 +3,7 @@
     <q-card class="petitelargeur maauto fs-md q-pa-sm">
       <div class="row justify-center">
       <!-- Déconnexion -->
-      <div class="btn2" @click="MD.oD('dialoguedrc')">
+      <div class="btn2" @click="ui.oD('dialoguedrc')">
         <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" />
         <span class="q-ml-sm">{{$t('MLAdrc2')}}</span>
       </div>

@@ -212,16 +212,16 @@
     </div>
   </q-dialog>
 
-  <q-dialog v-model="diag" persistent>
+  <q-dialog v-model="ui.d.diag" persistent>
     <q-card :class="lidk + ' petitelargeur q-pa-sm'">
       <div class="text-center titre-lg q-my-sm">{{$t('UTIatt')}}</div>
       <div class="fs-md text-center q-b-md" v-html="ui.diag"></div>
       <q-btn flat dense color="primary" size="md" :label="$t('jailu')"
-          @click="MD.fD();ui.diagresolve()"/>
+        @click="ui.fD(); ui.diagresolve()"/>
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="cf" persistent>
+  <q-dialog v-model="ui.d.confirmFerm" persistent>
     <q-card :class="lidk + ' petitelargeur q-pa-sm'">
       <q-card-section class="q-my-lg titre-md">{{$t('EMDqss')}}</q-card-section>
       <q-card-actions vertical align="right">
@@ -231,7 +231,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="dialoguedrc" persistent>
+  <q-dialog v-model="ui.d.dialoguedrc" persistent>
     <q-card class="bs petitelargeur">
       <q-toolbar class="bg-secondary text-white">
         <q-toolbar-title class="titre-lg full-width text-center">{{$t('MLAdrc')}}</q-toolbar-title>
@@ -248,9 +248,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="dialogueerreur" persistent>
-    <dialogue-erreur class="bs"/>
-  </q-dialog>
+  <dialogue-erreur v-if="ui.d.dialogueerreur"/>
 
   <q-dialog v-model="dialoguehelp" full-height position="left" persistent>
     <dialogue-help/>
@@ -421,7 +419,7 @@ export default {
 
   methods: {
     discon () {
-      if (this.session.status === 3) deconnexion(); else MD.oD('dialoguedrc')
+      if (this.session.status === 3) deconnexion(); else this.ui.oD('dialoguedrc')
     },
 
     stopop () {
@@ -525,15 +523,11 @@ export default {
       config,
       ui,
       hms, dkli,
-      diag: MD.declare('diag', ref(false)),
-      dialoguedrc: MD.declare('dialoguedrc', ref(false)),
       dialoguehelp: MD.declare('dialoguehelp', ref(false)),
-      dialogueerreur: MD.declare('dialogueerreur', ref(false)),
       detailspeople: MD.declare('detailspeople', ref(false)),
       detailsmembre: MD.declare('detailsmembre', ref(false)),
       pressepapier: MD.declare('pressepapier', ref(false)),
       opDialog: MD.declare('opDialog', ref(false)),
-      cf: MD.declare('cf', ref(false)),
       outilsTests, ovOutilsTests, confirmstopop, ovConfirmstopop,
       aSt,
       gSt,

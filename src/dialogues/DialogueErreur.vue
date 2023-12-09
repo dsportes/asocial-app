@@ -1,5 +1,6 @@
 <template>
-    <q-card v-if="ui.exc" class="q-ma-xs moyennelargeur">
+  <q-dialog v-model="ui.d.dialogueerreur" persistent>
+    <q-card v-if="ui.exc" class="bs q-pa-xs moyennelargeur">
       <q-card-section>
         <div v-if="exc.sync" class="titre-lg">{{$t('ERsync')}}</div>
         <div v-if="exc.code!==8101" class="titre-lg">
@@ -25,6 +26,7 @@
         </div>
       </q-card-section>
     </q-card>
+  </q-dialog>
 </template>
 
 <script>

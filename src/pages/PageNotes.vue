@@ -50,7 +50,7 @@
     </q-dialog>
 
     <q-dialog v-model="dldialogue" persistent>
-      <q-card class="bs sp40" style="padding:0">
+      <q-card class="bs sp40">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="dlfin"/>
           <q-toolbar-title class="titre-lg full-width text-center">

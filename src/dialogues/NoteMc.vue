@@ -98,7 +98,7 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modif) MD.oD('cf'); else MD.fD() },
+    fermer () { if (this.modif) this.ui.oD('confirmFerm'); else MD.fD() },
 
     async valider () {
       const mc = !egaliteU8(this.mc, this.mcap) ? this.mcap : null
@@ -119,6 +119,7 @@ export default {
     const gSt = stores.groupe
     const aSt = stores.avatar
     const pSt = stores.people
+    const ui = stores.ui
 
     const avatar = ref(null)
     const groupe = ref(null)
@@ -164,7 +165,7 @@ export default {
     }
 
     return {
-      session, nSt, gSt,
+      session, nSt, gSt, ui,
       avatar, groupe, note, msg, mc, mcap, mc0, mc0ap, xav,
       MD, dkli, cv
     }

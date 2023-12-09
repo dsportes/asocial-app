@@ -30,13 +30,35 @@ export const useUiStore = defineStore('ui', {
 
     egrplus: false, // un contact peut-être ajouté au groupe courant
 
-    dernierfichiercree: ''
+    dernierfichiercree: '',
+
+    // gestion des dialogues
+    dialogStack: [],
+
+    d: {
+      diag: false,
+      mcledit: false,
+      choixEmoji: false,
+      confirmFerm: false,
+      dialogueerreur: false,
+    }
+
   }),
 
   getters: {
   },
 
   actions: {
+    fD () {
+      const d = this.dialogStack.pop()
+      if (d) this.d[d] = false
+    },
+
+    oD (d) {
+      this.dialogStack.push(d)
+      this.d[d] = true
+    },
+
     aFiltre (p, t) {
       if (!this.pagesF.has(p)) return false
       return !t || this.tabF.has(t)
@@ -72,9 +94,9 @@ export const useUiStore = defineStore('ui', {
     },
 
     async afficherExc (exc) {
-      if (MD.val('dialogueerreur')) return
+      if (this.dialogStack.indexOf('dialogueerreur') !== -1) return
       return new Promise((resolve) => {
-        MD.oD('dialogueerreur')
+        this.oD('dialogueerreur')
         this.dialogueerreurresolve = resolve
         this.exc = exc
       })
@@ -82,7 +104,7 @@ export const useUiStore = defineStore('ui', {
 
     resetExc () { 
       this.exc = null
-      MD.fD()
+      this.fD()
       this.dialogueerreurresolve = null
     },
 

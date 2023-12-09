@@ -162,9 +162,10 @@ export class ExistePhrase extends OperationUI {
 export class MotsclesCompte extends OperationUI {
   constructor () { super($t('OPmotscles')) }
 
-  async run (mck) {
+  async run (mmc) {
     try {
       const session = stores.session
+      const mck = await crypter(session.clek, new Uint8Array(encode(mmc)))
       const args = { token: session.authToken, mck }
       this.tr(await post(this, 'MotsclesCompte', args))
       this.finOK()

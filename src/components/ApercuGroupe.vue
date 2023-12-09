@@ -46,7 +46,7 @@
     <!-- Mots clés du groupe -->
     <div class="row items-center q-mt-sm">
       <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
-      <q-btn icon="open_in_new" size="sm" color="primary" @click="autmcledit"/>
+      <q-btn icon="open_in_new" size="sm" color="primary" @click="ui.oD('mcledit')"/>
     </div>
 
     <div v-if="eg.groupe.nbInvits !== 0" class="q-mt-sm fs-md text-bold text-warning">
@@ -67,10 +67,7 @@
   </div>
 
   <!-- Dialogue d'édition des mots clés du groupe -->
-  <q-dialog v-model="mcledit" persistent>
-    <mots-cles class="bs full-width" :duGroupe="eg.groupe.id" @ok="okmc" :titre="$t('AGmc')"
-      :lecture="!eg.estAnim || !session.editable"/>
-  </q-dialog>
+  <mots-cles v-if="ui.d.mcledit" :idg="eg.groupe.id"/>
 
   <!-- Gérer le mode simple / unanime -->
   <q-dialog v-model="editerUna" full-height persistent>
@@ -385,20 +382,6 @@ export default {
       }
     },
 
-    async autmcledit () {
-      if (!await this.session.edit()) return
-      if (!this.eg.estAnim) {
-        await afficherDiag(this.$t('PGanim'))
-      } else this.ovmcledit()
-    },
-
-    async okmc (mmc) {
-      MD.fD()
-      if (mmc !== false) {
-        await new MotsclesGroupe().run(mmc, this.eg.groupe.na)
-      }
-    },
-
     async setCas () {
       const session = stores.session
       const g = this.eg.groupe
@@ -529,8 +512,6 @@ export default {
     const photoDef = stores.config.iconGroupe
     const q = reactive({q1:0, q2:0, min1:0, min2:0, max1:0, max2:0, err:false })
 
-    const mcledit = ref(false)
-    function ovmcledit () { MD.oD(mcledit) }
     const nvctc = ref(false)
     function ovnvctc () { MD.oD(nvctc) }
     const editerUna = ref(false)
@@ -542,7 +523,7 @@ export default {
 
     return {
       MD, dkli, aaaammjj,
-      mcledit, ovmcledit, nvctc, ovnvctc, editerUna, ovediterUna,
+      nvctc, ovnvctc, editerUna, ovediterUna,
       gererheb, ovgererheb, ardedit, ovardedit,
       session,
       ui,
