@@ -36,11 +36,38 @@ export const useUiStore = defineStore('ui', {
     dialogStack: [],
 
     d: {
-      diag: false,
       mcledit: false,
       choixEmoji: false,
+      diag: false, // App
       confirmFerm: false,
       dialogueerreur: false,
+      dialoguehelp: false,
+      pressepapier: false,
+      dialoguedrc: false,
+      detailspeople: false,
+      confirmstopop: false,
+      opDialog: false,
+      PPnvnote: false, // PressePapier
+      PPsupprnote: false,
+      PPnvfic: false,
+      PPsupprdic: false,
+      PAoutilsTests: false, // PageAccueil
+      FAdetaildial: false, // PageFicavion
+      AGvisucv: false, // AppercuGenx
+      AMconfig: false, // AppercuMembre
+      AMinvit: false,
+      AMaccinvit: false,
+      PPinfoedit: false, // PanelPeople
+      NSnvsp: false, // NouveauSponsoring
+      PTedq: false, // PageTranche
+      PTcptdial: false,
+      PMdetailsmembre: false, // PanelMembre
+      BPchgTr: false, // BarrePeople
+      BPchgSp: false,
+      BPcptdial: false,
+      OTsuppbase: false, // OutilsTests
+      OTrunning: false,
+
     }
 
   }),
@@ -57,6 +84,10 @@ export const useUiStore = defineStore('ui', {
     oD (d) {
       this.dialogStack.push(d)
       this.d[d] = true
+    },
+
+    estOuvert (d) {
+      return this.dialogStack.indexOf(d) !== -1
     },
 
     aFiltre (p, t) {
@@ -94,7 +125,7 @@ export const useUiStore = defineStore('ui', {
     },
 
     async afficherExc (exc) {
-      if (this.dialogStack.indexOf('dialogueerreur') !== -1) return
+      if (this.estOuvert('dialogueerreur')) return
       return new Promise((resolve) => {
         this.oD('dialogueerreur')
         this.dialogueerreurresolve = resolve
@@ -108,14 +139,14 @@ export const useUiStore = defineStore('ui', {
       this.dialogueerreurresolve = null
     },
 
-    fermerHelp () { MD.fD(); this.helpstack.length = 0 },
+    fermerHelp () { this.fD(); this.helpstack.length = 0 },
     pushhelp (page) {
-      if (this.helpstack.length === 0) MD.oD('dialoguehelp')
+      if (this.helpstack.length === 0) this.oD('dialoguehelp')
       this.helpstack.push(page)
     },
     pophelp () {
       if (this.helpstack.length === 1) {
-        MD.fD()
+        this.fD()
         this.helpstack.length = 0
       } else {
         this.helpstack.splice(this.helpstack.length - 1, 1)

@@ -1,4 +1,5 @@
 <template>
+<q-dialog v-model="ui.d.dialoguehelp" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="sty" style="width:90vw;max-width:90vw !important;">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
@@ -28,6 +29,7 @@
     </q-footer>
 
   </q-layout>
+</q-dialog>
 </template>
 
 <script>

@@ -5,7 +5,7 @@ import stores from './stores.mjs'
 import { pbkfd } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
-import { MD, NomGenerique } from '../app/modele.mjs'
+import { NomGenerique } from '../app/modele.mjs'
 import { Demon } from '../app/connexion.mjs'
 
 export const useSessionStore = defineStore('session', {
@@ -477,17 +477,19 @@ export const useSessionStore = defineStore('session', {
     },
 
     startOp (op) {
+      const ui = stores.ui
       this.opEncours = op
       this.opSpinner = 0
-      MD.oD('opDialog')
+      ui.oD('opDialog')
       this.opCount()
     },
 
     finOp () {
+      const ui = stores.ui
       if (this.opTimer) clearTimeout(this.opTimer)
       this.opEncours = null
       this.opSpinner = 0
-      MD.fD()
+      ui.fD()
     }
   }
 })

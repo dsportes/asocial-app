@@ -1,9 +1,9 @@
 <template>
-<div class="bs" style="width:80vw">
-<q-layout container view="hHh lpR fFf">
+<q-dialog v-model="ui.d.NVnvsp" persistent full-height>
+<q-layout container view="hHh lpR fFf" class="bs" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -86,7 +86,7 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</div>
+</q-dialog>
 </template>
 
 <script>
@@ -95,7 +95,7 @@ import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { edvol, afficherDiag, dkli, $t } from '../app/util.mjs'
-import { MD, Sponsoring } from '../app/modele.mjs'
+import { Sponsoring } from '../app/modele.mjs'
 import { UNITEV1, UNITEV2, AMJ, limitesjour } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -198,7 +198,7 @@ export default ({
         this.estSponsor, q, this.mot)
       try {
         await new AjoutSponsoring().run(row)
-        MD.fD()
+        this.ui.fD()
       } catch {}
     },
     corriger () {
@@ -207,6 +207,7 @@ export default ({
   },
 
   setup (props) {
+    const ui = stores.ui
     const limj = limitesjour.sponsoring
     const step1 = ref(null)
     const step2 = ref(null)
@@ -237,7 +238,7 @@ export default ({
     })
 
     return {
-      MD, dkli,
+      ui, dkli,
       nct: tribu.value.na,
       limj,
       step,
@@ -246,8 +247,7 @@ export default ({
       step3,
       optionsOA, optA, optionsSP, optSP,
       session: stores.session,
-      quotas,
-      ui: stores.ui
+      quotas
     }
   }
 })

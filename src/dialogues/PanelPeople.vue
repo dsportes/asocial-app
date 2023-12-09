@@ -1,8 +1,9 @@
 <template>
+<q-dialog v-model="ui.d.detailspeople" full-height persistent>
 <q-layout v-if="session.ok" container view="hHh lpR fFf" :class="sty" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtit', [pSt.peC.na.nom])}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -57,10 +58,10 @@
   </q-page-container>
 
   <!-- Dialogue de détail d'un membre d'un groupe -->
-  <q-dialog v-model="infoedit" persistent full-height>
+  <q-dialog v-model="ui.d.PPinfoedit" persistent full-height>
     <q-card class="bs" style="width:80vw">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" icon="close" color="warning" @click="MD.fD"/>
+        <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPtit', [mbC.na.nom, gSt.egrC.groupe.na.nom])}}</q-toolbar-title>
       </q-toolbar>
       <apercu-membre :eg="gSt.egrC" :mb="mbC" :idav="pSt.peC.na.id" :im="mbC.ids" :mapmc="mapmc" :idx="0" people nopanel/>
@@ -68,6 +69,7 @@
   </q-dialog>
 
 </q-layout>
+</q-dialog>
 </template>
 <script>
 
@@ -78,7 +80,7 @@ import ApercuChat from '../components/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
-import { MD, Chat, Motscles, Groupe } from '../app/modele.mjs'
+import { Chat, Motscles, Groupe } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
 import { afficherDiag, sleep } from '../app/util.mjs'
 
@@ -97,7 +99,6 @@ export default {
   
   data () {
     return {
-      MD,
       egrC: null,
       mbC: null,
     }
@@ -114,10 +115,10 @@ export default {
       this.egrC = this.gSt.egr(id)
       this.mbC = this.gSt.getMembre(id, ids)
       if (opt) {
-        this.ovinfoedit()
+        this.ui.oD('PPinfoedit')
         return
       }
-      MD.fD()
+      this.ui.fD()
       this.ui.setPage('groupe', 'membres')
     },
 
@@ -147,7 +148,7 @@ export default {
         this.ui.egrplus = false
         if (await new NouveauMembre().run(gr, slot, pe.na, pe.cv)) {
           this.session.setMembreId(slot)
-          MD.fD()
+          this.fD()
           this.ui.setPage('groupe', 'membres')
           return
         }
@@ -172,18 +173,9 @@ export default {
       }
     })
 
-    const infoedit = ref(false)
-    function ovinfoedit () { MD.oD(infoedit) }
-
     return {
-      session,
-      aSt,
-      pSt,
-      gSt,
-      ui,
-      mapmc,
-      ids,
-      infoedit, ovinfoedit
+      session, aSt, pSt, gSt, ui,
+      mapmc, ids
     }
   }
 }

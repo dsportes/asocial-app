@@ -1,10 +1,9 @@
 <template>
+<q-dialog v-model="ui.d.pressepapier" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="sty" style="width:90vw;max-width:90vw !important;">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
-        <q-btn dense size="md" icon="close" color="warning" 
-          @click="MD.fD">
-        </q-btn>
+        <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg">{{$t('MLApp')}}</q-toolbar-title>
       </q-toolbar>
       <q-tabs class="titre-md" v-model="ppSt.tab" inline-label align="center" no-caps dense>
@@ -66,21 +65,21 @@
 
     <div class="filler"/>
 
-    <q-dialog v-model="nvnote">
+    <q-dialog v-model="ui.d.PPnvnote">
       <q-card class="moyennelargeur">
       <q-card-section>
         <div class="titre-lg">{{$t(rec ? 'PPnv1' : 'PPnv2')}}</div>
         <editeur-md mh="16rem" v-model="txt" :texte="rec ? rec.txt : ''" editable modetxt :lgmax="lgmax"/>
       </q-card-section>
       <q-card-actions>
-        <q-btn flat color="primary" dense icon="undo" :label="$t('renoncer')" @click="MD.fD"/>
+        <q-btn flat color="primary" dense icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
         <q-btn flat color="warning" dense icon="chck" :label="$t('valider')"
           :disable="!txt || (rec && txt === rec.txt)" @click="majnote"/>
       </q-card-actions>
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="nvfic">
+    <q-dialog v-model="ui.d.PPnvfic">
       <q-card class="moyennelargeur">
       <q-card-section>
         <div class="titre-lg">{{$t(fic.id ? 'PPl1' : 'PPl2')}}</div>
@@ -100,27 +99,27 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="supprnote" persistent>
+    <q-dialog v-model="ui.d.PPsupprnote" persistent>
       <q-card class="bs petitelargeur q-pa-sm">
         <q-card-section class="column items-center q-my-md">
           <div class="titre-md text-center text-italic">{{$t('PPsuppn')}}</div>
           <div class="q-mt-sm fs-md font-mono text-bold">{{rec.titre}}</div>
         </q-card-section>
         <q-card-actions vertical align="center">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD" />
           <q-btn flat :label="$t('confirmer')" color="warning" @click="cfSupprnote" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="supprfic" persistent>
+    <q-dialog v-model="ui.d.PPsupprfic" persistent>
       <q-card class="bs petitelargeur q-pa-sm">
         <q-card-section class="column items-center q-my-md">
           <div class="titre-md text-center text-italic">{{$t('PPsuppf')}}</div>
           <div class="q-mt-sm fs-md font-mono text-bold">{{fic.titre}}</div>
         </q-card-section>
         <q-card-actions vertical align="center">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD" />
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD" />
           <q-btn flat :label="$t('confirmer')" color="warning" @click="cfSupprfic" />
         </q-card-actions>
       </q-card>
@@ -129,13 +128,12 @@
     </q-page-container>
 
   </q-layout>
+</q-dialog>
 </template>
 
 <script>
 import { saveAs } from 'file-saver'
-import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import { readFile, dhcool, edvol, afficherDiag, dkli } from '../app/util.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -188,34 +186,34 @@ export default ({
     ajouternote () {
       this.rec = null
       this.txt = ''
-      this.ovnvnote()
+      this.ui.oD('PPnvnote')
     },
     editernote (rec) {
       this.rec = rec
       this.txt = ''
-      this.ovnvnote()
+      this.ui.oD('PPnvnote')
     },
     supprn (rec) {
       this.rec = rec
-      this.ovsupprnote()
+      this.ui.oD('PPsupprnote')
     },
     async cfsupprnote () {
       await NLdel(this.rec.id)
-      MD.fD()
+      this.ui.fD()
     },
     async majnote () {
       await NLset(this.txt, this.rec ? this.rec.id : 0)
-      MD.fD()
+      this.ui.fD()
     },
 
     async majfic () {
       const f = this.fic
       await FLset(this.nomfic, this.info, f.type, f.u8, this.fic.id || 0)
-      MD.fD()
+      this.ui.fD()
     },
     ajouterfichier () {
       this.fic = { id: 0, nom: '', info: '', lg: 0, type: '', u8: null }
-      this.ovnvfic()
+      this.ui.oD('PPnvfic')
     },
     async editerfichier (fic) {
       this.info = fic.info
@@ -223,15 +221,15 @@ export default ({
       const u8 = await fic.getU8()
       this.fic = { id: fic.id, nom: fic.nom, info: fic.info, 
         lg: fic.lg, type: fic.type, u8 }
-      this.ovnvfic()
+      this.ui.oD('PPnvfic')
     },
     supprfichier (fic) {
       this.fic = fic
-      this.ovsupprfic()
+      this.ui.oD('PPsupprfic')
     },
     async cfSupprfic () {
       await FLdel(this.fic.id)
-      MD.fD()
+      this.ui.fD()
     },
 
     async blobde (f, b) {
@@ -245,11 +243,11 @@ export default ({
       const u8 = await fx.getU8()
       if (!u8) {
         await afficherDiag(this.$t('PPerrb'))
-        MD.fD()
+        this.ui.fD()
         this.ppSt.copiercollerfic(false)
       } else {
         fx.u8 = u8
-        MD.fD()
+        this.ui.fD()
         this.ppSt.copiercollerfic(fx)
       }
     },
@@ -276,23 +274,14 @@ export default ({
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const ppSt = stores.pp
     const cfg = stores.config
     const lgmax = cfg.maxlgtextenote
-    
-    const nvnote = ref(false)
-    function ovnvnote () { MD.oD(nvnote) }
-    const supprnote = ref(false)
-    function ovsupprnote () { MD.oD(supprnote) }
-    const nvfic = ref(false)
-    function ovnvfic () { MD.oD(nvfic) }
-    const supprfic = ref(false)
-    function ovsupprfic () { MD.oD(supprfic) }
 
     return {
-      nvnote, ovnvnote, supprnote, ovsupprnote, nvfic, ovnvfic, supprfic, ovsupprfic,
-      MD, dkli,
-      session, ppSt,
+      dkli,
+      session, ppSt, ui,
       lgmax
     }
   }

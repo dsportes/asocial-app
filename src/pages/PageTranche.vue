@@ -25,7 +25,7 @@
     <q-toolbar class="bg-secondary text-white">
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
       <q-btn v-if="pow < 4" size="md" dense color="primary" 
-        :label="$t('PTnvc')" @click="ovnvsp"/>
+        :label="$t('PTnvc')" @click="ui.oD('NSnvsp')"/>
     </q-toolbar>
 
     <div v-for="(c, idx) in aSt.ptLcFT" :key="c.id" class="largeur50 maauto">
@@ -77,15 +77,13 @@
     </div>
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
-    <q-dialog v-model="nvsp" persistent full-height>
-      <nouveau-sponsoring :tribu="aSt.tribuC || aSt.tribu"/>
-    </q-dialog>
+    <nouveau-sponsoring v-if="ui.d.NSnvsp" :tribu="aSt.tribuC || aSt.tribu"/>
     
     <!-- Dialogue de mise à jour des quotas du compte -->
-    <q-dialog v-model="edq" persistent>
+    <q-dialog v-model="ui.d.PTedq" persistent>
       <q-card class="bs petitelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
@@ -97,10 +95,10 @@
     </q-dialog>
 
     <!-- Affichage des compteurs de compta du compte "courant"-->
-    <q-dialog v-model="cptdial" persistent full-height>
+    <q-dialog v-model="ui.d.PTcptdial" persistent full-height>
       <q-card class="bs" style="width: 80vw !important;">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [ccnomc])}}</q-toolbar-title>
       </q-toolbar>
       <panel-compta style="margin:0 auto"/>
@@ -113,7 +111,6 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 import { dkli } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
@@ -122,7 +119,6 @@ import ApercuNotif2 from '../components/ApercuNotif2.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuCompte from '../components/ApercuCompte.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import ApercuAvatar from '../components/ApercuAvatar.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols2 from '../components/QuotasVols2.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
@@ -169,10 +165,10 @@ export default {
       const t = this.type(c)
       if (t === 2) {
         this.session.setPeopleId(c.id)
-        MD.oD('detailspeople')
+        this.ui.oD('detailspeople')
       } else if (t === 3) {
         await new GetCompteursCompta().run(c.id)
-        this.ovcptdial()
+        this.ui.oD('PTcptdial')
       }
     },
 
@@ -180,7 +176,7 @@ export default {
       this.ccid = c.id
       this.ccnomc = this.nomc(c)
       await new GetCompteursCompta().run(c.id)
-      this.ovcptdial()
+      this.ui.oD('PTcptdial')
     },
 
     async editerq (c) {
@@ -191,13 +187,13 @@ export default {
         maxc: this.aSt.tribuC.synth.qc - this.aSt.tribuC.synth.ac + c.qc,
         c: c
         }
-      this.ovedq()
+      this.ui.oD('PTedq')
     },
     
     async validerq () {
       await new SetQuotas().run(this.aSt.tribuC.id, 
         this.quotas.c.id, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
-      MD.fD()
+      this.ui.fD()
     },
 
     async chgNtf (ntf) {
@@ -222,6 +218,7 @@ export default {
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const pSt = stores.people
     const pow = session.pow
@@ -242,18 +239,11 @@ export default {
 
     resetCourant()
 
-    const nvsp = ref(false)
-    function ovnvsp () { MD.oD(nvsp)}
-    const edq = ref(false)
-    function ovedq () { MD.oD(edq)}
-    const cptdial = ref(false)
-    function ovcptdial () { MD.oD(cptdial)}
-
     return {
-      session, aSt, pSt, pow, lg,
-      ID, MD, nvsp, ovnvsp, edq, ovedq, cptdial, ovcptdial,
+      session, aSt, pSt, ui, pow, lg,
+      ID, cptdial, ovcptdial,
       cfg: stores.config,
-      ui: stores.ui, dkli
+      dkli
     }
   }
 

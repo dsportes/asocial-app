@@ -36,7 +36,7 @@ import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuCv from './ApercuCv.vue'
 import McMemo from './McMemo.vue'
-import { MD, getNg } from '../app/modele.mjs'
+import { getNg } from '../app/modele.mjs'
 import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
@@ -55,7 +55,7 @@ export default {
     estGr () { return ID.estGroupe(this.na.id) },
     photo () { return this.cv && this.cv.photo ? this.cv.photo : this.na.defIcon },
     info () { return this.cv ? (this.cv.info || '') : '' },
-    det () { return this.session.peopleId === this.id && MD.val('detailspeople') }
+    det () { return this.session.peopleId === this.id && this.ui.estOuvert('detailspeople') }
   },
 
   data () {
@@ -66,7 +66,7 @@ export default {
   methods: {
     ouvrirdetails () {
       this.session.setPeopleId(this.id)
-      MD.oD('detailspeople')
+      this.ui.oD('detailspeople')
     }
   },
 
@@ -75,6 +75,7 @@ export default {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const pSt = stores.people
+    const ui = stores.ui
 
     const agp = ref() // un avatar, un groupe ou un people
 
@@ -132,12 +133,8 @@ export default {
       }
     }
 
-    const visucv = ref(false)
-    function ovvisucv () { MD.oD(visucv) }
-
     return {
-      MD, dkli, titre, ID, visucv, ovvisucv, agp, na, cv, estAvc, estGroupe,
-      session
+      dkli, titre, ID, agp, na, cv, estAvc, estGroupe, session, ui
     }
   }
 }

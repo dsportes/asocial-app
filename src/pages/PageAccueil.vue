@@ -23,7 +23,7 @@
       </div>
 
       <!-- Outils et tests -->
-      <div class="btn2" @click="ovoutilsTests">
+      <div class="btn2" @click="ui.oD('outilsTests')">
         <q-btn dense size="md" icon="settings"/>
         <span class="q-ml-xs">{{$t('MLAout')}}</span>
       </div>
@@ -84,21 +84,19 @@
       </div>
 
       <!-- Presse papier -->
-      <div class="btn2" @click="MD.oD('pressepapier')">
+      <div class="btn2" @click="ui.oD('pressepapier')">
         <q-btn dense size="md" icon="content_paste"/>
         <span class="q-ml-xs">{{$t('MLApp')}}</span>
       </div>
 
       </div>
     </q-card>
+
     <q-card class="q-mt-lg petitelargeur maauto q-pa-sm">
       <page-menu/>
     </q-card>
 
-    <q-dialog v-model="outilsTests" full-height persistent>
-      <outils-tests/>
-    </q-dialog>
-
+    <outils-tests v-if="ui.d.PAoutilsTests"/>
   </div>
 </template>
 
@@ -111,7 +109,6 @@ import NotifIcon2 from '../components/NotifIcon2.vue'
 import QueueIcon from '../components/QueueIcon.vue'
 import OutilsTests from '../dialogues/OutilsTests.vue'
 import PageMenu from '../pages/PageMenu.vue'
-import { MD } from '../app/modele.mjs'
 
 export default {
   name: 'PageAccueil',
@@ -159,11 +156,8 @@ export default {
   },
 
   setup () {
-    const outilsTests = ref(false)
-    function ovoutilsTests () { MD.oD(outilsTests) }
 
     return {
-      MD, outilsTests, ovoutilsTests,
       ui: stores.ui,
       session: stores.session,
       aSt: stores.avatar,

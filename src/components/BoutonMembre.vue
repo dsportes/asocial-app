@@ -4,14 +4,18 @@
   <q-btn v-if="btn && lab" class="btn2" dense size="md" no-caps icon-right="open_in_new" 
     :label="mb" @click="detailMb"/>
   <span v-if="lab && !btn">{{mb}}</span>
+
+  <panel-membre v-if="ui.d.PMdetailsmembre"/>
 </template>
 
 <script>
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
+import PanelMembre from '../dialogues/PanelMembre.vue'
 
 export default ({
   name: 'BoutonMembre',
+
+  components: { PanelMembre },
 
   props: { 
     eg: Object, // Objet entrée groupe
@@ -34,7 +38,7 @@ export default ({
 
   methods: {
     detailMb () {
-      MD.oD('detailsmembre')
+      this.ui.oD('PMdetailsmembre')
       this.session.groupeId = this.eg.groupe.id
       this.session.setMembreId(this.im)
     }
@@ -45,7 +49,6 @@ export default ({
     const session = stores.session
     const ui = stores.ui
     return {
-      MD,
       session, aSt, ui
     }
   } 

@@ -10,7 +10,7 @@
   </div>
 
   <!-- Changement de tribu -->
-  <q-dialog v-model="chgTr" persistent>
+  <q-dialog v-model="ui.d.BPchgTr" persistent>
     <q-card class="bs moyennelargeur">
       <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [na.nom, ID.court(aSt.tribuC.id)])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqv1', [aSt.ccCpt.q1, edv1(aSt.ccCpt.q1), pc1])}}</div>
@@ -45,7 +45,7 @@
 
       <q-separator />      
       <q-card-actions align="center">
-        <q-btn dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
+        <q-btn dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
         <q-btn dense color="warning" :label="$t('valider')" 
           :disable="!selx || !selx.ok1 || !selx.ok2"
           @click="changerTr()"/>
@@ -54,12 +54,12 @@
   </q-dialog>
 
   <!-- Changement de statut sponsor -->
-  <q-dialog v-model="chgSp" persistent>
+  <q-dialog v-model="ui.d.chgSp" persistent>
     <q-card class="bs bg-secondary text-white petitelargeur q-pa-sm">
         <div v-if="ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
         <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
       <q-card-actions align="center">
-        <q-btn dense color="primary" :label="$t('renoncer')" @click="MD.fD"/>
+        <q-btn dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
         <q-btn v-if="ccCpt.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
         <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
       </q-card-actions>
@@ -67,12 +67,12 @@
   </q-dialog>
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
-  <q-dialog v-model="cptdial" persistent full-height>
+  <q-dialog v-model="ui.d.cptdial" persistent full-height>
     <div class="bs"  style="width:80vw">
     <q-layout container view="hHh lpR fFf" :class="sty">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('PTcompta', [na ? na.nomc : ('#' + id)])}}</q-toolbar-title>
         </q-toolbar>
@@ -98,7 +98,7 @@ import PanelCompta from '../components/PanelCompta.vue'
 import { edvol, afficherDiag } from '../app/util.mjs'
 import { GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese } from '../app/operations.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { MD, getNg, getCle, Tribu } from '../app/modele.mjs'
+import { getNg, getCle, Tribu } from '../app/modele.mjs'
 import { crypter, crypterRSA } from '../app/webcrypto.mjs'
 
 export default {
@@ -142,7 +142,7 @@ export default {
 
     async voirCompta () { // comptable OU sponsor
       await this.getCpt()
-      this.ovcptdial()
+      this.ui.oD('BPcptdial')
     },
 
     async chgSponsor () { // comptable
@@ -151,13 +151,13 @@ export default {
         await afficherDiag(this.$t('PTspn1'))
         return
       }
-      this.ovchgSp()
+      this.ui.oD('BPchgSp')
     },
 
     async changerSp(estSp) {
       // si estSp, le na existe, voir quelques lignes au-dessus
       await new SetSponsor().run(this.session.tribuCId, this.na || this.id, estSp)
-      MD.fD()
+      this.ui.fD()
     },
 
     filtrer () {
@@ -190,11 +190,11 @@ export default {
       this.atr = await new GetSynthese().run(this.session.ns)
       this.filtre = ''
       this.filtrer()
-      this.ovchgTr()
+      this.ui.oD('BPchgTr')
     },
 
     async changerTr () {
-      MD.fD()
+      this.ui.fD()
       const cletAv = this.ccCpt.clet
       const idtAv = Tribu.id(cletAv)
       const trAv = this.aSt.getTribu(idtAv)
@@ -226,22 +226,16 @@ export default {
 
   setup (props) {
     const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const id = toRef(props, 'id')
     const na = ref()
     na.value = getNg(id.value)
 
-    const chgSp = ref(false)
-    function ovchgSp () { MD.oD(chgSp) }
-    const chgTr = ref(false)
-    function ovchgTr () { MD.oD(chgTr) }
-    const cptdial = ref(false)
-    function ovcptdial () { MD.oD(cptdial)}
-
     return {
       na,
-      ID, MD, chgSp, ovchgSp, chgTr, ovchgTr, cptdial, ovcptdial,
-      session, aSt
+      ID,
+      session, aSt, ui
     }
   }
 }

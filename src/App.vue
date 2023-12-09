@@ -82,7 +82,7 @@
 
       <!-- Presse papier -->
       <q-btn v-if="session.ok" dense size="md" icon="content_paste"
-        @click="MD.oD('pressepapier')">
+        @click="ui.oD('pressepapier')">
         <q-tooltip>{{$t('MLApp')}}</q-tooltip>
       </q-btn>
 
@@ -225,7 +225,7 @@
     <q-card :class="lidk + ' petitelargeur q-pa-sm'">
       <q-card-section class="q-my-lg titre-md">{{$t('EMDqss')}}</q-card-section>
       <q-card-actions vertical align="right">
-        <q-btn flat :label="$t('EMDjr')" color="primary" @click="MD.fD" />
+        <q-btn flat :label="$t('EMDjr')" color="primary" @click="ui.fD" />
         <q-btn flat :label="$t('EMDjq')" color="warning" @click="fermerqm" />
       </q-card-actions>
     </q-card>
@@ -243,34 +243,17 @@
         <q-btn class="q-ma-xs w15" dense size="md" color="warning"
           icon="logout" :label="$t('MLArecon')" @click="reconnexion"/>
         <q-btn class="q-ma-xs w15" dense size="md" color="primary"
-          :label="$t('MLAcont')" @click="MD.fD()"/>
+          :label="$t('MLAcont')" @click="ui.fD"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
 
   <dialogue-erreur v-if="ui.d.dialogueerreur"/>
+  <dialogue-help v-if="ui.d.dialoguehelp"/>
+  <presse-papier v-if="ui.d.pressepapier"/>
+  <panel-people/>
 
-  <q-dialog v-model="dialoguehelp" full-height position="left" persistent>
-    <dialogue-help/>
-  </q-dialog>
-
-  <q-dialog v-model="pressepapier" full-height position="left" persistent>
-    <presse-papier/>
-  </q-dialog>
-
-  <q-dialog v-model="outilsTests" full-height persistent>
-    <outils-tests class="bs"/>
-  </q-dialog>
-
-  <q-dialog v-model="detailspeople" full-height persistent>
-    <panel-people class="bs" :id="session.peopleId"/>
-  </q-dialog>
-
-  <q-dialog v-model="detailsmembre" full-height persistent>
-    <panel-membre class="bs"/>
-  </q-dialog>
-
-  <q-dialog v-model="opDialog" seamless position="top" full-width persistent
+  <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
     <div class="q-mt-sm column items-center">
       <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
@@ -282,7 +265,7 @@
             <div class="text-bold">{{session.opEncours.nom}}</div>
           </div>
           <div class="col-auto q-mt-sm cursor-pointer column items-center" style="position:relative"
-            @click="ovConfirmstopop">
+            @click="ui.oD('confirmstopop')">
             <q-spinner color="primary" size="3rem" :thickness="4"/>
             <q-badge color="negative" class="text-white stopbtn">{{session.opSpinner}}</q-badge>
           </div>
@@ -291,12 +274,12 @@
     </div>
   </q-dialog>
 
-  <q-dialog v-model="confirmstopop">
+  <q-dialog v-model="ui.d.confirmstopop">
     <q-card class="bs">
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('MLAcf', [session.opEncours ? session.opEncours.nom : '???'])}}</q-card-section>
       <q-card-actions align="right">
-        <q-btn flat :label="$t('MLAcf3')" color="warning" @click="MD.fD"/>
+        <q-btn flat :label="$t('MLAcf3')" color="warning" @click="ui.fD"/>
         <q-btn flat :label="$t('MLAcf4')" color="primary" @click="stopop"/>
       </q-card-actions>
     </q-card>
@@ -314,7 +297,6 @@ import stores from './stores/stores.mjs'
 import { ID } from './app/api.mjs'
 
 import { set$t, hms, dkli } from './app/util.mjs'
-import { MD } from './app/modele.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -336,7 +318,6 @@ import PageEspace from './pages/PageEspace.vue'
 import PageTranche from './pages/PageTranche.vue'
 import PagePeople from './pages/PagePeople.vue'
 import PanelPeople from './dialogues/PanelPeople.vue'
-import PanelMembre from './dialogues/PanelMembre.vue'
 import PageGroupes from './pages/PageGroupes.vue'
 import PageGroupe from './pages/PageGroupe.vue'
 import PageNotes from './pages/PageNotes.vue'
@@ -360,7 +341,6 @@ import FiltreAmbno from './components/FiltreAmbno.vue'
 import FiltreAvgr from './components/FiltreAvgr.vue'
 import FiltreVols from './components/FiltreVols.vue'
 
-import OutilsTests from './dialogues/OutilsTests.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
 import DialogueHelp from './dialogues/DialogueHelp.vue'
 
@@ -369,10 +349,10 @@ export default {
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, OutilsTests, NotifIcon2, QueueIcon, 
+    BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon, 
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
+    PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, PressePapier
@@ -425,7 +405,7 @@ export default {
     stopop () {
       const op = this.session.opEncours
       if (op && op.stop) op.stop()
-      MD.fD()
+      this.ui.fD()
     },
 
     tgdark () { this.$q.dark.toggle() },
@@ -443,11 +423,11 @@ export default {
       this.ui.setPage(this.session.status === 2 ? 'accueil' : 'login')
     },
     fermerqm () {
-      MD.fD()
-      setTimeout(() => { MD.fD() }, 50)
+      this.ui.fD()
+      setTimeout(() => { this.ui.fD() }, 50)
     },
-    deconnexion () { MD.fD(); deconnexion() },
-    async reconnexion () { MD.fD(); await reconnexionCompte() }
+    deconnexion () { this.ui.fD(); deconnexion() },
+    async reconnexion () { this.ui.fD(); await reconnexionCompte() }
   },
 
   setup () {
@@ -458,6 +438,9 @@ export default {
     const config = stores.config
     config.$q = $q
    
+    const session = stores.session
+    const aSt = stores.avatar
+    const gSt = stores.groupe
     const ui = stores.ui
 
     const seuillarge = 900
@@ -501,40 +484,16 @@ export default {
       if (ui.pageback) ui.setPage(ui.pageback)
     }
 
-    const session = stores.session
-    const aSt = stores.avatar
-    const gSt = stores.groupe
     const infomode = ref(false)
     const infonet = ref(false)
     const infoidb = ref(false)
-    const drc = ref(false)
-
-    const outilsTests = ref(false)
-    function ovOutilsTests () { MD.oD(outilsTests) }
-
-    const confirmstopop = ref(false)
-    function ovConfirmstopop () { MD.oD(confirmstopop) }
 
     return {
+      session, config, ui, aSt, gSt,
       seuillarge, etroite, gotoBack,
       pfiltre, ouvrFiltre, fermFiltre, setPFiltre, redoPFiltre,
-      MD,
-      session,
-      config,
-      ui,
       hms, dkli,
-      dialoguehelp: MD.declare('dialoguehelp', ref(false)),
-      detailspeople: MD.declare('detailspeople', ref(false)),
-      detailsmembre: MD.declare('detailsmembre', ref(false)),
-      pressepapier: MD.declare('pressepapier', ref(false)),
-      opDialog: MD.declare('opDialog', ref(false)),
-      outilsTests, ovOutilsTests, confirmstopop, ovConfirmstopop,
-      aSt,
-      gSt,
-      infonet,
-      infoidb,
-      infomode,
-      drc
+      infonet, infoidb, infomode
     }
   }
 }

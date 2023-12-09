@@ -1,8 +1,9 @@
 <template>
+<q-dialog v-model="ui.d.PMdetailsmembre" full-height persistent>
 <q-layout container view="hHh lpR fFf" :class="sty + bcf" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title v-if="mb" class="titre-lg text-center q-mx-sm">{{$t('PMGtit', [mb.na.nomc, eg.groupe.na.nomc])}}</q-toolbar-title>
       <q-toolbar-title v-else class="titre-lg text-center q-mx-sm">{{$t('PMGtit1')}}</q-toolbar-title>
       <bouton-help page="page1"/>
@@ -22,6 +23,7 @@
   </q-page-container>
 
 </q-layout>
+</q-dialog>
 </template>
 <script>
 
@@ -30,7 +32,7 @@ import stores from '../stores/stores.mjs'
 import ApercuGroupe from '../components/ApercuGroupe.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { MD, Motscles } from '../app/modele.mjs'
+import { Motscles } from '../app/modele.mjs'
 
 export default {
   name: 'PanelMembre',
@@ -89,7 +91,6 @@ export default {
     init()
     
     return {
-      MD,
       ui,
       mapmc,
       eg,

@@ -45,9 +45,7 @@
     </q-card>
 
     <!-- Dialogue de création d'un sponsoring -->
-    <q-dialog v-model="nvsp" full-height persistent>
-      <nouveau-sponsoring :tribu="aSt.tribu"/>
-    </q-dialog>
+    <nouveau-sponsoring v-if="ui.d.NSnvsp" :tribu="aSt.tribu"/>
 
   </q-page>
 </template>
@@ -61,7 +59,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import QuotasVols2 from '../components/QuotasVols2.vue'
-import { MD, Tribu } from '../app/modele.mjs'
+import { Tribu } from '../app/modele.mjs'
 import { ProlongerSponsoring } from '../app/connexion.mjs'
 
 export default {
@@ -90,7 +88,7 @@ export default {
     idtr (sp) { return Tribu.id(sp.descr.clet) },
     estA (sp) { return !sp.descr.clet },
     quotas (sp) { const q = sp.descr.quotas; return { qc: q[0], q1: q[1], q2: q[2]}},
-    async nouveausp () { if (await this.session.edit()) this.ovnvsp() },
+    async nouveausp () { if (await this.session.edit()) this.ui.oD('NVnvsp') },
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     async prolonger (sp, nj) {
@@ -101,6 +99,7 @@ export default {
 
   setup () {
     const session = stores.session
+    const ui = stores.ui
     const aSt = stores.avatar
     const avatar = ref(aSt.avC)
 
@@ -112,14 +111,10 @@ export default {
       })
     })
 
-    const nvsp = ref(false)
-    function ovnvsp () { MD.oD(nvsp) }
-
     return {
-      ID, MD, nvsp, ovnvsp, dkli,
+      ID, dkli,
       avatar,
-      aSt,
-      session
+      aSt, session, ui
     }
   }
 

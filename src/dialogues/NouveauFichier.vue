@@ -3,7 +3,7 @@
 <q-layout container view="hHh lpR fFf">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('PNFnv')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -21,7 +21,7 @@
             <div v-if="fic.lg" class="font-mono fs-sm">{{fic.nom}} - {{fic.type}} - {{fic.lg}}o</div>
           </div>
           <q-stepper-navigation class="row q-gutter-md justify-end">
-            <q-btn flat @click="MD.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
+            <q-btn flat @click="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
             <q-btn flat @click="step=2" :disable="!fic.lg" color="primary" :label="$t('continuer')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
@@ -32,7 +32,7 @@
           <nom-generique class="q-mt-md" v-model="info" :label="$t('PNFnv8')"
             :init-val="info"/>
           <q-stepper-navigation class="row q-gutter-md justify-end">
-            <q-btn flat @click="MD.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
+            <q-btn flat @click="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
             <q-btn flat @click="step=1" color="primary" :label="$t('precedent')" class="q-ml-sm" />
             <q-btn flat @click="step=3" :disable="!nfic" color="primary" :label="$t('continuer')" class="q-ml-sm" />
           </q-stepper-navigation>
@@ -58,7 +58,7 @@
             <div class="q-mt-md texte-italic">{{$t('PNFnv14', [edvol(volsupp)])}}</div>
           </div>
           <q-stepper-navigation class="row q-gutter-md justify-end">
-            <q-btn flat @click="MD.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
+            <q-btn flat @click="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
             <q-btn flat @click="step=2" color="primary" :label="$t('precedent')" class="q-ml-sm" />
             <q-btn :disable="!valide || ui.etf!==0" flat icon="check" :label="$t('valider')" color="warning" @click="valider" />
           </q-stepper-navigation>
@@ -70,7 +70,7 @@
             <div class="col-11">{{item}}</div>
           </div>
           <q-stepper-navigation>
-            <q-btn flat @click="MD.fD" color="primary" label="Vu" class="q-ml-sm" />
+            <q-btn flat @click="ui.fD" color="primary" label="Vu" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
       </q-stepper>
@@ -84,7 +84,6 @@
 import { reactive, toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { afficherDiag, edvol, dhcool, readFile, rnd6, suffixe } from '../app/util.mjs'
-import { MD } from '../app/modele.mjs'
 import { $t, dkli, trapex, dhstring } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NouveauFichier } from '../app/operations.mjs'
@@ -173,7 +172,7 @@ export default {
           x = this.aSt.occV2 - dv2
           if (x < 0) {
             await afficherDiag($t('PNFnv15a', [-x]))
-            MD.fD()
+            this.ui.fD()
             return
           }
         } if (this.nSt.node.type === 5) {
@@ -181,7 +180,7 @@ export default {
           x = (eg.objv.vols.q2 * UNITEV2) - eg.objv.vols.v2 - dv2
           if (x < 0) {
             await afficherDiag($t('PNFnv15b', [-x]))
-            MD.fD()
+            this.ui.fD()
             return
           }
         }
@@ -255,13 +254,13 @@ export default {
       ppSt.modecc = true
       ppSt.tab = 'fichiers'
       ppSt.ccfic = null
-      MD.oD('pressepapier')
+      this.ui.oD('pressepapier')
     }
 
     ui.etf = 0
 
     return {
-      nSt, aSt, gSt, ui, session, MD, edvol, dhcool, dkli, dhstring,
+      nSt, aSt, gSt, ui, session, edvol, dhcool, dkli, dhstring,
       nfic,
       fic,
       step,

@@ -113,10 +113,10 @@
     </q-dialog>
 
     <!-- Dialogue de configuration -->
-    <q-dialog v-model="config" persistent>
+    <q-dialog v-model="ui.d.AMconfig" persistent>
       <q-card class="bs moyennelargeur" style="min-height:20rem">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-md text-center q-mx-sm">{{$t('AMcftit', [na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -152,7 +152,7 @@
           </div>
 
           <q-card-actions>
-            <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+            <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
             <q-btn :disable="!chgdr" flat :label="$t('valider')" color="primary" @click="changerdr"/>
           </q-card-actions>
         </div>
@@ -166,7 +166,7 @@
               <span><q-radio v-model="decl" :val="3" :label="$t('ICd4')" /><bouton-bulle idtext="oublc3"/></span>
             </div>
             <div class="row justify-center q-gutter-lg">
-              <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+              <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
               <bouton-confirm :actif="cfln" :confirmer="ko"/>
             </div>
           </div>
@@ -183,7 +183,7 @@
                 <span><q-radio v-model="decl" :val="5" :label="$t('ICd6')" /><bouton-bulle idtext="oubla2"/></span>
               </div>
               <div class="row justify-center q-gutter-lg">
-                <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+                <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
                 <bouton-confirm :actif="cfln" :confirmer="ko"/>
               </div>
             </div>
@@ -193,10 +193,10 @@
     </q-dialog>
 
     <!-- Dialogue d'invitation -->
-    <q-dialog v-model="invit" persistent>
+    <q-dialog v-model="ui.d.AMinvit" persistent>
       <q-card class="bs moyennelargeur">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AMinvtit', [na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -235,7 +235,7 @@
             editable/>
         </q-card-section>
         <q-card-actions vertical>
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="MD.fD"/>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
           <q-btn v-if="cas === 1" flat :label="$t('AMinviter')" color="primary" @click="inviter(1)"/>
           <q-btn v-if="cas === 2" :disable="mb.flagsiv === nvflags"
             flat :label="$t('AMmodinv')" color="primary" @click="inviter(2)"/>
@@ -265,7 +265,7 @@ import BoutonBulle2 from './BoutonBulle2.vue'
 import BoutonBulle from './BoutonBulle.vue'
 import EditeurMd from './EditeurMd.vue'
 import InvitationAcceptation from './InvitationAcceptation.vue'
-import { MD, getNg } from '../app/modele.mjs'
+import { getNg } from '../app/modele.mjs'
 import { OublierMembre, MajDroitsMembre, InvitationGroupe } from '../app/operations.mjs'
 
 export default {
@@ -414,12 +414,12 @@ export default {
     async accinviter (im) {
       if (!await this.session.edit()) return
       this.imc = im
-      this.ovaccinvit()
+      this.ui.oD('AMaccinvit')
     },
 
     ouvrirdetails () {
       this.session.setPeopleId(this.idav)
-      MD.oD('detailspeople')
+      this.ui.oD('detailspeople')
     },
 
     async ouvririnvit (cas) {
@@ -448,7 +448,7 @@ export default {
       this.invpar = this.options[0]
       this.ard = this.mb.ard || ''
       this.session.setMembreId(this.im)
-      this.ovinvit()
+      this.ui.oD('AMovinvit')
     },
 
     async inviter (cas) { 
@@ -457,7 +457,7 @@ export default {
       4: vote pour, 5: vote contre, 6: suppr invit una 
       */
       await new InvitationGroupe().run(cas, this.eg.groupe, this.mb, this.invpar.value, this.nvflags, this.ard)
-      MD.fD()
+      this.ui.fD()
     },
 
     async ouvcfg () {
@@ -469,23 +469,24 @@ export default {
       this.adrm = (this.fl & FLAGS.AM) !== 0
       this.adrl = (this.fl & FLAGS.AN) !== 0
       this.flags2av = this.nvflags2
-      this.ovconfig()
+      this.ui.oD('AMconfig')
     },
 
     async changerdr () {
       await new MajDroitsMembre().run(this.eg.groupe.id, this.im, this.nvflags2)
-      MD.fD()
+      this.ui.fD()
     },
 
     async ko () {
       await new OublierMembre().run(this.eg.groupe.na, this.na, this.im, this.decl)
-      MD.fD()
+      this.ui.fD()
     }
 
   },
 
   setup (props) {
     const session = stores.session
+    const ui = stores.ui
     const gSt = stores.groupe
     const aSt = stores.avatar
 
@@ -493,23 +494,13 @@ export default {
     const idav = toRef(props, 'idav')
     const na = ref(mb.value ? mb.value.na : getNg(idav.value))
     const cv = ref(mb.value ? mb.value.cv : aSt.getAvatar(idav.value).cv)
-    const im = toRef(props, 'im')
-    const eg = toRef(props, 'eg')
+    // const im = toRef(props, 'im')
+    // const eg = toRef(props, 'eg')
     // console.log(edit(eg.value.groupe.flags[im.value]))
- 
-    const chgSt = ref(false)
-    function ovchgSt () { MD.oD(chgSt) }
-    const invit = ref(false)
-    function ovinvit () { MD.oD(invit) }
-    const config = ref(false)
-    function ovconfig () { MD.oD(config) }
-    const accinvit = ref(false)
-    function ovaccinvit () { MD.oD(accinvit) }
 
     return {
-      MD, FLAGS, dkli, edit, chgSt, ovchgSt, invit, ovinvit, 
-      config, ovconfig, ovaccinvit, accinvit,
-      session, gSt, aSt,
+      FLAGS, dkli, edit,
+      session, gSt, aSt, ui,
       na, cv
     }
   }

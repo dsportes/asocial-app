@@ -311,7 +311,7 @@ export default {
       this.ui.afficherMessage(this.$t('PNFcpp'))
       this.ppSt.modecc = false
       this.ppSt.setTabFichiers()
-      MD.oD('pressepapier')
+      this.ui.oD('pressepapier')
     },
 
     async affFic (f) {

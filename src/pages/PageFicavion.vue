@@ -22,10 +22,10 @@
 
   <div class="filler"/>
 
-  <q-dialog v-model="detaildial">
+  <q-dialog v-model="ui.d.FAdetaildial">
     <div class="bs petitelargeur column">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="MD.fD"/>
+        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('FAVdet')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
@@ -80,7 +80,6 @@
 import { saveAs } from 'file-saver'
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { MD } from '../app/modele.mjs'
 import { afficherDiag, edvol, dhcool, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { FLset } from '../app/db.mjs'
@@ -99,7 +98,7 @@ export default ({
   methods: {
     detail (fc) {
       this.fc = fc
-      this.ovdetaildial()
+      this.ui.oD('FAdetaildial')
     },
 
     voirnote () {
@@ -141,7 +140,7 @@ export default ({
       this.ui.afficherMessage(this.$t('PNFcpp'))
       this.ppSt.modecc = false
       this.ppSt.setTabFichiers()
-      MD.oD('pressepapier')
+      this.ui.oD('pressepapier')
     },
 
     async affFic () {
@@ -203,12 +202,8 @@ export default ({
 
     init1()
 
-    const detaildial = ref(false)
-    function ovdetaildial () { MD.oD(detaildial) }
-
     return {
-      detaildial, ovdetaildial,
-      MD, edvol, dhcool, dkli,
+      edvol, dhcool, dkli,
       nSt, fSt, session, ppSt, avnSt, ui,
       lst
     }
