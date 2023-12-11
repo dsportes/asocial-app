@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.PMdetailsmembre" full-height persistent>
+<q-dialog v-model="ui.d.PMdetailsmembre" persistent>
 <q-layout container view="hHh lpR fFf" :class="sty + bcf" style="width:80vw">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -12,13 +12,9 @@
 
   <q-page-container>
     <q-card>
-      <apercu-membre class="q-pa-sm" v-if="eg && mb"
-        :eg="eg" :mb="mb" :idx="0" :mapmc="mapmc" :people="people" nopanel/>
-      <q-toolbar class="bg-secondary text-white">
-        <q-toolbar-title v-if="eg" class="titre-lg text-center q-mx-sm">{{$t('PMGtit3', [eg.groupe.na.nomc])}}</q-toolbar-title>
-        <q-toolbar-title v-else class="titre-lg text-center q-mx-sm">{{$t('PMGtit2')}}</q-toolbar-title>
-      </q-toolbar>
-      <apercu-genx class="q-pa-sm" v-if="eg" :id="eg.groupe.id"/>
+      <apercu-genx class="q-pa-sm q-mb-sm" v-if="eg" :id="eg.groupe.id"/>
+      <apercu-membre v-if="eg && mb" :im="session.membreId"
+        :eg="eg" :mb="mb" :idx="0" :mapmc="mapmc" :people="people" ouvert/>
     </q-card>
   </q-page-container>
 
@@ -96,7 +92,7 @@ export default {
     init()
     
     return {
-      ui,
+      ui, session,
       mapmc,
       eg,
       mb,

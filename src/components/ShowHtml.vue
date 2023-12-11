@@ -1,6 +1,6 @@
 <template>
 <div>
-  <div v-if="!fs" style="position:relative">
+  <div v-if="!ui.d.SHfs" style="position:relative">
     <div v-if="zoom || edit" class="row btn">
       <q-btn v-if="zoom" dense color="primary" icon="fullscreen" size="md" @click.stop="ui.oD('SHfs')">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
@@ -20,7 +20,7 @@
     </div>
   </div>
 
-  <q-dialog v-model="fs" persistent maximized transition-show="slide-up" transition-hide="slide-down">
+  <q-dialog v-model="ui.d.SHfs" persistent maximized transition-show="slide-up" transition-hide="slide-down">
     <q-card>
       <q-bar>
         <q-space />
@@ -44,6 +44,8 @@
 </div>
 </template>
 <script>
+
+import stores from '../stores/stores.mjs'
 
 import SdLight from './SdLight.vue'
 import SdDark from './SdDark.vue'

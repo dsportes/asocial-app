@@ -57,7 +57,7 @@
     </q-dialog>
 
     <!-- Confirmation d'effacement d'un échange -->
-    <q-dialog v-model="ui.d.confirmeff">
+    <q-dialog v-model="ui.d.ACconfirmeff">
       <q-card class="bs">
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHeff')}}
@@ -70,7 +70,7 @@
     </q-dialog>
 
     <!-- Confirmation du raccrocher -->
-    <q-dialog v-model="confirmrac">
+    <q-dialog v-model="ui.d.ACconfirmrac">
       <q-card class="bs">
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHrac2', [naE.nom])}}
@@ -83,7 +83,7 @@
     </q-dialog>
 
     <!-- Dialogue d'ajout d'un item au chat -->
-    <q-dialog v-model="ui.d.chatedit">
+    <q-dialog v-model="ui.d.ACchatedit">
       <q-card>
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>

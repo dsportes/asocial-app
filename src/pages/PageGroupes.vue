@@ -49,7 +49,7 @@
         <div class="row justify-end">
           <q-btn class="q-ml-md btn1" size="sm" icon="chat" :label="$t('PGchat')" 
             color="primary" dense @click.stop="chat(e)"/>
-          <q-btn class="q-ml-md btn1" size="sm" icon="open_in_new" :label="$t('detail')" 
+          <q-btn class="q-ml-md btn1" size="sm" icon="open_in_new" :label="$t('page')" 
             color="primary" dense @click.stop="courant(e)"/>
         </div>
       </div>

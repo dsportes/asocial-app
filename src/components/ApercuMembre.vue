@@ -274,7 +274,8 @@ export default {
     eg: Object,
     mapmc: Object,
     idx: Number, 
-    people: Boolean
+    people: Boolean,
+    ouvert: Boolean
   },
 
   components: { InvitationAcceptation, BoutonConfirm, BoutonHelp, ApercuGenx, BoutonBulle2, BoutonBulle, EditeurMd },
@@ -376,7 +377,6 @@ export default {
   },
 
   data () { return {
-    qexp: false,
     /* 
     1: invit std, 2: modif invit std, 3: suppr invit std, 
     4: vote pour, 5: vote contre, 6: suppr invit una 
@@ -489,12 +489,16 @@ export default {
     const idav = toRef(props, 'idav')
     const na = ref(mb.value ? mb.value.na : getNg(idav.value))
     const cv = ref(mb.value ? mb.value.cv : aSt.getAvatar(idav.value).cv)
+
+    const ouvert = toRef(props, 'ouvert')
+    const qexp = ref(ouvert.value || false)
+
     // const im = toRef(props, 'im')
     // const eg = toRef(props, 'eg')
     // console.log(edit(eg.value.groupe.flags[im.value]))
 
     return {
-      FLAGS, dkli, edit,
+      FLAGS, dkli, edit, qexp,
       session, gSt, aSt, ui,
       na, cv
     }

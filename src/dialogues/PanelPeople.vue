@@ -48,25 +48,12 @@
         <div class="q-my-sm row q-gutter-sm">
           <span class="fs-md col">{{egr(idg).groupe.na.nomc}} - {{$t('AMm' + stmb(idg, ids))}}</span>
           <q-btn class="col-auto btn1" dense size="sm" icon-right="open_in_new" color="primary"
-            :label="$t('detail')" @click="voirgr(idg, ids, true)"/>
-          <q-btn class="col-auto btn1" dense size="sm" icon-right="open_in_new" color="primary"
             :label="$t('PGvg')" @click="voirgr(idg, ids)"/>
         </div>
       </div>
 
     </q-card>
   </q-page-container>
-
-  <!-- Dialogue de détail d'un membre d'un groupe -->
-  <q-dialog v-model="ui.d.PPinfoedit" persistent full-height>
-    <q-card class="bs" style="width:80vw">
-      <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
-        <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPtit', [mbC.na.nom, gSt.egrC.groupe.na.nom])}}</q-toolbar-title>
-      </q-toolbar>
-      <apercu-membre :eg="gSt.egrC" :mb="mbC" :idav="pSt.peC.na.id" :im="mbC.ids" :mapmc="mapmc" :idx="0" people nopanel/>
-    </q-card>
-  </q-dialog>
 
 </q-layout>
 </q-dialog>
@@ -79,14 +66,13 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
-import ApercuMembre from '../components/ApercuMembre.vue'
 import { Chat, Motscles, Groupe } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
 import { afficherDiag, sleep } from '../app/util.mjs'
 
 export default {
   name: 'PanelPeople',
-  components: { ApercuMembre, ApercuGenx, BoutonHelp, ApercuChat, BarrePeople },
+  components: { ApercuGenx, BoutonHelp, ApercuChat, BarrePeople },
 
   props: { },
 
@@ -109,16 +95,11 @@ export default {
 
     stmb (idg, ids) { return this.egr(idg).groupe.statutMajeur(ids)},
 
-    voirgr (id, ids, opt) {
+    voirgr (id, ids) {
       this.session.setGroupeId(id)
       this.session.setMembreId(ids)
       this.egrC = this.gSt.egr(id)
       this.mbC = this.gSt.getMembre(id, ids)
-      if (opt) {
-        this.ui.oD('PPinfoedit')
-        return
-      }
-      this.ui.fD()
       this.ui.setPage('groupe', 'membres')
     },
 

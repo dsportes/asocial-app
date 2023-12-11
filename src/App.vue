@@ -252,6 +252,7 @@
   <dialogue-help v-if="ui.d.dialoguehelp"/>
   <presse-papier v-if="ui.d.pressepapier"/>
   <panel-people v-if="ui.d.detailspeople"/>
+  <panel-membre v-if="ui.d.PMdetailsmembre"/>
   <outils-tests v-if="ui.d.PAoutilsTests"/>
 
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
@@ -350,12 +351,15 @@ import PageChats from './pages/PageChats.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageNotes from './pages/PageNotes.vue'
 import PageTranche from './pages/PageTranche.vue'
+import PanelPeople from './dialogues/PanelPeople.vue'
 
 // Niveau 8
-import PanelPeople from './dialogues/PanelPeople.vue'
 import PageGroupes from './pages/PageGroupes.vue'
 
-// Niveau 12
+// Niveau 9
+import PanelMembre from './dialogues/PanelMembre.vue'
+
+// Niveau 10
 import PageGroupe from './pages/PageGroupe.vue'
 
 export default {
@@ -366,7 +370,7 @@ export default {
     BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon, OutilsTests,
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople,
+    PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
     FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, PressePapier

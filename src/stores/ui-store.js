@@ -53,7 +53,6 @@ export const useUiStore = defineStore('ui', {
       AGvisucv: false, // ApercuGenx
       AMconfig: false, // ApercuMembre
       AMinvit: false,
-      PPinfoedit: false, // PanelPeople
       NSnvsp: false, // NouveauSponsoring
       PTedq: false, // PageTranche
       PTcptdial: false,
@@ -134,12 +133,18 @@ export const useUiStore = defineStore('ui', {
       return this.dialogStack.indexOf(d) !== -1
     },
 
+    resetD () {
+      this.dialogStack.forEach(d => { this.d[d] = false})
+      this.dialogStack.length = 0
+    },
+
     aFiltre (p, t) {
       if (!this.pagesF.has(p)) return false
       return !t || this.tabF.has(t)
     },
 
     setPage (p, t) {
+      this.resetD()
       this.pageback = this.pagesB.has(this.page) ? this.page : ''
       this.page = p
       this.menug = false

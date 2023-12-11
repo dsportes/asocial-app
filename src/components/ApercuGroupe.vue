@@ -16,7 +16,7 @@
 
     <div v-if="fond">
       <span class="q-mt-sm titre-md q-mr-sm">{{$t('AGfond')}}</span>
-      <bouton-membre :eg="eg" :im="1" lab btn/>
+      <bouton-membre :eg="eg" :im="1" btn/>
     </div>
     <div v-else class="q-mt-sm fs-md text-italic">{{$t('AGnfond')}}</div>
 
@@ -31,7 +31,7 @@
       <div class="row justify-between">
         <div v-if="!eg.groupe.dfh" class="col fs-md">
           <span class="fs-md q-mr-sm">{{$t('AGheb')}}</span>
-          <bouton-membre :eg="eg" :im="eg.groupe.imh" lab btn/>
+          <bouton-membre :eg="eg" :im="eg.groupe.imh" btn/>
         </div>
         <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [aaaammjj(dfh)])}}</div>
         <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
@@ -43,7 +43,7 @@
     <!-- Mots clés du groupe -->
     <div class="row items-center q-mt-sm">
       <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
-      <q-btn icon="open_in_new" size="sm" color="primary" @click="ui.oD('mcledit')"/>
+      <q-btn icon="open_in_new" size="sm" color="primary" @click="ui.oD('MCmcledit')"/>
     </div>
 
     <div v-if="eg.groupe.nbInvits !== 0" class="q-mt-sm fs-md text-bold text-warning">
@@ -142,7 +142,7 @@
             <span v-if="cas===2">{{$t('AGcas2')}}</span>
             <span v-if="cas===3">{{$t('AGcas3')}}</span>
           </div>
-          <bouton-membre v-if="cas > 1" :eg="eg" :im="eg.groupe.imh" lab />
+          <bouton-membre v-if="cas > 1" :eg="eg" :im="eg.groupe.imh"/>
 
           <div v-if="hko" class="q-ma-sm q-pa-sm text-bold text-warning bg-yellow-3">
             {{$t('AGhko' + hko)}}
