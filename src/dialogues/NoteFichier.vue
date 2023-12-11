@@ -165,7 +165,7 @@
 </template>
 
 <script>
-import { ref, toRef, reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { $t, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'

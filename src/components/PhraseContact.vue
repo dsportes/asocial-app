@@ -28,7 +28,7 @@
 </template>
 <script>
 
-import { ref, toRef, watch } from 'vue'
+import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { Phrase } from '../app/modele.mjs'
 import { afficherDiag } from '../app/util.mjs'

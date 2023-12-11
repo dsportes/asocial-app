@@ -5,7 +5,7 @@
 </template>
 <script>
 
-import { toRef, ref } from 'vue'
+import { ref } from 'vue'
 import { random } from '../app/webcrypto.mjs'
 
 export default ({

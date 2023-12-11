@@ -3,7 +3,6 @@
   <div v-if="!eg || !eg.objv || !eg.objv.vols" class="titre-lg text-italic q-ma-md">{{$t('PGdisp')}}</div>
 
   <div v-else :class="dkli(idx)">
-    <!--div style="height:3rem"/-->
     <apercu-genx :id="eg.groupe.id" :idx="idx"/>
 
     <div v-if="eg.groupe.dfh" class="q-mr-sm">
@@ -28,7 +27,7 @@
         icon="edit" dense color="primary" @click="editUna"/>
     </div>
 
-    <div :class="'q-mt-xs q-pa-xs' + bcf">
+    <div :class="'q-mt-xs q-pa-xs ' + bcf">
       <div class="row justify-between">
         <div v-if="!eg.groupe.dfh" class="col fs-md">
           <span class="fs-md q-mr-sm">{{$t('AGheb')}}</span>
@@ -36,11 +35,9 @@
         </div>
         <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [aaaammjj(dfh)])}}</div>
         <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
-          icon="settings" @click="gererh"/>
+          icon="settings" @click="gererheb"/>
       </div>
-      <div class="q-mt-xs">
-        <quotas-vols2 :vols="eg.objv.vols"/>
-      </div>
+      <quotas-vols2 class="q-mt-xs" :vols="eg.objv.vols"/>
     </div>
 
     <!-- Mots clés du groupe -->
@@ -70,7 +67,7 @@
   <mots-cles v-if="ui.d.MCmcledit" :idg="eg.groupe.id"/>
 
   <!-- Gérer le mode simple / unanime -->
-  <q-dialog v-model="ui.d.editerUna" full-height persistent>
+  <q-dialog v-model="ui.d.AGediterUna" full-height persistent>
     <div class="bs" style="width:80vw">
     <q-layout container view="hHh lpR fFf" :class="dkli(0)">
       <q-header elevated class="bg-secondary text-white">
@@ -127,7 +124,7 @@
   </q-dialog>
 
   <!-- Gérer l'hébergement, changer les quotas -->
-  <q-dialog v-model="gererheb" full-height persistent>
+  <q-dialog v-model="ui.d.AGgererheb" full-height persistent>
     <div class="bs"  style="width:80vw">
     <q-layout container view="hHh lpR fFf" :class="dkli(0)">
       <q-header elevated class="bg-secondary text-white">
@@ -234,20 +231,28 @@
 </template>
 
 <script>
-import { ref, reactive, toRef } from 'vue'
+import { reactive } from 'vue'
 import stores from '../stores/stores.mjs'
-import ApercuMembre from './ApercuMembre.vue'
-import ApercuGenx from './ApercuGenx.vue'
+import { getNg, Groupe } from '../app/modele.mjs'
+import { ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
 import { edvol, dhcool, dkli, afficherDiag, aaaammjj } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
+
+// Niveau 1
 import BoutonMembre from './BoutonMembre.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import QuotasVols2 from './QuotasVols2.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
+
+// Niveau 2
 import MotsCles from './MotsCles.vue'
-import { getNg, Groupe } from '../app/modele.mjs'
-import { ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
+
+// Niveau 5
+import ApercuGenx from './ApercuGenx.vue'
+
+// Niveau 7
+import ApercuMembre from './ApercuMembre.vue'
 
 export default {
   name: 'ApercuGroupe',
@@ -258,7 +263,9 @@ export default {
     mapmc: Object
   },
 
-  components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols2 },
+  components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, 
+  ApercuGenx, 
+  BoutonMembre, QuotasVols2 },
 
   computed: {
     bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
@@ -430,7 +437,7 @@ export default {
       /* je peux remplacer l'animateur actuel */
     },
 
-    async gererh () {
+    async gererheb () {
       if (!await this.session.edit()) return
       this.setCas()
       const vx = this.eg.objv.vols
@@ -465,7 +472,6 @@ export default {
       await new HebGroupe().run(this.action, this.eg.groupe, imh, this.q.q1, this.q.q2 )
       this.ui.fD()
     },
-
 
     async editUna () {
       if (!await this.session.edit()) return

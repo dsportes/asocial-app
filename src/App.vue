@@ -12,7 +12,7 @@
       </q-btn>
 
       <!-- Outils et tests -->
-      <q-btn dense size="md" icon="settings" @click="ovOutilsTests">
+      <q-btn dense size="md" icon="settings" @click="ui.oD('PAoutilsTests')">
         <q-tooltip>{{$t('MLAout')}}</q-tooltip>
       </q-btn>
 
@@ -251,7 +251,8 @@
   <dialogue-erreur v-if="ui.d.dialogueerreur"/>
   <dialogue-help v-if="ui.d.dialoguehelp"/>
   <presse-papier v-if="ui.d.pressepapier"/>
-  <panel-people/>
+  <panel-people v-if="ui.d.detailspeople"/>
+  <outils-tests v-if="ui.d.PAoutilsTests"/>
 
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
@@ -295,7 +296,6 @@ import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
 import { ID } from './app/api.mjs'
-
 import { set$t, hms, dkli } from './app/util.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
@@ -303,27 +303,6 @@ import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
 import NotifIcon2 from './components/NotifIcon2.vue'
 import QueueIcon from './components/QueueIcon.vue'
-
-import PageAdmin from './pages/PageAdmin.vue'
-import PageMenu from './pages/PageMenu.vue'
-import PageLogin from './pages/PageLogin.vue'
-import PageClos from './pages/PageClos.vue'
-import PageSession from './pages/PageSession.vue'
-import PageAccueil from './pages/PageAccueil.vue'
-import PageCompte from './pages/PageCompte.vue'
-import PageSponsorings from './pages/PageSponsorings.vue'
-import PageChats from './pages/PageChats.vue'
-import PageCompta from './pages/PageCompta.vue'
-import PageEspace from './pages/PageEspace.vue'
-import PageTranche from './pages/PageTranche.vue'
-import PagePeople from './pages/PagePeople.vue'
-import PanelPeople from './dialogues/PanelPeople.vue'
-import PageGroupes from './pages/PageGroupes.vue'
-import PageGroupe from './pages/PageGroupe.vue'
-import PageNotes from './pages/PageNotes.vue'
-import PressePapier from './dialogues/PressePapier.vue'
-import PageFicavion from './pages/PageFicavion.vue'
-
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'
 import FiltreMc from './components/FiltreMc.vue'
@@ -340,16 +319,51 @@ import FiltreStmb from './components/FiltreStmb.vue'
 import FiltreAmbno from './components/FiltreAmbno.vue'
 import FiltreAvgr from './components/FiltreAvgr.vue'
 import FiltreVols from './components/FiltreVols.vue'
-
 import DialogueErreur from './dialogues/DialogueErreur.vue'
+import PageMenu from './pages/PageMenu.vue'
+
+// niveau 2
+import PageSession from './pages/PageSession.vue'
+import PageFicavion from './pages/PageFicavion.vue'
+import OutilsTests from './dialogues/OutilsTests.vue'
+
+// Niveau 3
 import DialogueHelp from './dialogues/DialogueHelp.vue'
+import PageClos from './pages/PageClos.vue'
+import PageAccueil from './pages/PageAccueil.vue'
+import PressePapier from './dialogues/PressePapier.vue'
+
+// Niveau 4
+import PageSponsorings from './pages/PageSponsorings.vue'
+import PageEspace from './pages/PageEspace.vue'
+
+// Niveau 5
+import PageLogin from './pages/PageLogin.vue'
+
+// Niveau 6
+import PageAdmin from './pages/PageAdmin.vue'
+import PagePeople from './pages/PagePeople.vue'
+
+// Niveau 7
+import PageCompte from './pages/PageCompte.vue'
+import PageChats from './pages/PageChats.vue'
+import PageCompta from './pages/PageCompta.vue'
+import PageNotes from './pages/PageNotes.vue'
+import PageTranche from './pages/PageTranche.vue'
+
+// Niveau 8
+import PanelPeople from './dialogues/PanelPeople.vue'
+import PageGroupes from './pages/PageGroupes.vue'
+
+// Niveau 12
+import PageGroupe from './pages/PageGroupe.vue'
 
 export default {
   displayName: 'App',
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon, 
+    BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon, OutilsTests,
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople,

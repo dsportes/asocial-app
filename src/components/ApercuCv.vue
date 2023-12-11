@@ -26,6 +26,7 @@
     <carte-visite v-model="ui.d.CVedition" :photo-init="photo" :info-init="info" :na="na"/>
 
   </q-card>
+</q-dialog>
 </template>
 
 <script>

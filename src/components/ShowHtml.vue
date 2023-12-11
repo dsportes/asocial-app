@@ -44,7 +44,7 @@
 </div>
 </template>
 <script>
-import { ref } from 'vue'
+
 import SdLight from './SdLight.vue'
 import SdDark from './SdDark.vue'
 import SdLight1 from './SdLight1.vue'

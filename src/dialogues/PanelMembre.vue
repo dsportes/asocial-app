@@ -18,7 +18,7 @@
         <q-toolbar-title v-if="eg" class="titre-lg text-center q-mx-sm">{{$t('PMGtit3', [eg.groupe.na.nomc])}}</q-toolbar-title>
         <q-toolbar-title v-else class="titre-lg text-center q-mx-sm">{{$t('PMGtit2')}}</q-toolbar-title>
       </q-toolbar>
-      <apercu-groupe class="q-pa-sm" v-if="eg" :eg="eg" :idx="0" :mapmc="mapmc" />
+      <apercu-genx class="q-pa-sm" v-if="eg" :id="eg.groupe.id"/>
     </q-card>
   </q-page-container>
 
@@ -29,14 +29,19 @@
 
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import ApercuGroupe from '../components/ApercuGroupe.vue'
-import ApercuMembre from '../components/ApercuMembre.vue'
-import BoutonHelp from '../components/BoutonHelp.vue'
 import { Motscles } from '../app/modele.mjs'
+
+import BoutonHelp from '../components/BoutonHelp.vue'
+
+// Niveau 5
+import ApercuGenx from '../components/ApercuGenx.vue'
+
+// Niveau 7
+import ApercuMembre from '../components/ApercuMembre.vue'
 
 export default {
   name: 'PanelMembre',
-  components: { ApercuGroupe, BoutonHelp, ApercuMembre },
+  components: { BoutonHelp, ApercuGenx, ApercuMembre },
 
   props: { },
 

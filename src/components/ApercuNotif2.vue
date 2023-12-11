@@ -75,7 +75,6 @@
 </template>
 <script>
 
-import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'

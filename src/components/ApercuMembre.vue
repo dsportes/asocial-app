@@ -9,7 +9,6 @@
             <span class="titre-lg text-bold text-primary">{{$t('moi2', [na.nom])}}</span>
             <span class="q-ml-lg font-mono fs-sm">{{'#' + idav}}</span>
           </div>
-          <bouton-membre v-if="!nopanel" :eg="eg" :im="im" btn/>
         </div>
         <div>
           <span class="titre-md text-bold">{{$t('AMm' + stm)}}</span>
@@ -256,7 +255,6 @@ import { dkli, $t } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from './BoutonConfirm.vue'
-import BoutonMembre from './BoutonMembre.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle2 from './BoutonBulle2.vue'
@@ -276,11 +274,10 @@ export default {
     eg: Object,
     mapmc: Object,
     idx: Number, 
-    people: Boolean,
-    nopanel: Boolean // Ne pas mettre le bouton menant à PanelMembre
+    people: Boolean
   },
 
-  components: { InvitationAcceptation, BoutonConfirm, BoutonHelp, ApercuGenx, BoutonMembre, BoutonBulle2, BoutonBulle, EditeurMd },
+  components: { InvitationAcceptation, BoutonConfirm, BoutonHelp, ApercuGenx, BoutonBulle2, BoutonBulle, EditeurMd },
 
   computed: {
     amb () { return this.gSt.ambano[0] },

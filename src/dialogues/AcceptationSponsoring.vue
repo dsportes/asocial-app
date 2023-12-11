@@ -82,7 +82,6 @@
 </template>
 
 <script>
-import { toRef } from 'vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'

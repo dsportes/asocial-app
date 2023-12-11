@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { ref, toRef } from 'vue'
+import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixMotscles from './ChoixMotscles.vue'
 import { dkli } from '../app/util.mjs'

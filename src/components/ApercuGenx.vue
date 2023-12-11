@@ -32,11 +32,13 @@
 <script>
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
-import ApercuCv from './ApercuCv.vue'
-import McMemo from './McMemo.vue'
 import { getNg } from '../app/modele.mjs'
 import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
+
+// Niveau 4
+import ApercuCv from './ApercuCv.vue'
+import McMemo from './McMemo.vue'
 
 export default {
   name: 'ApercuGenx',

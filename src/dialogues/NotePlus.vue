@@ -28,7 +28,7 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { $t, splitPK } from '../app/util.mjs'
+import { splitPK } from '../app/util.mjs'
 import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
 
 // const colors = ['','primary','orange','negative','primary','orange','primary','orange']
