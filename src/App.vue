@@ -122,11 +122,12 @@
           <div class="titre-lg">{{$t('MLArech')}}</div>
         </div>
         <div v-if="ui.page === 'chats'" class="column justify-start">
-          <filtre-nbj nom="chats" prop='nbj' :idx="0"/>
-          <filtre-nom nom="chats" prop='nom' :idx="1"/>
-          <filtre-txt nom="chats" prop='txt' :idx="0"/>
-          <filtre-mc nom="chats" attr="mcp" :idx="1"/>
-          <filtre-mc nom="chats" attr="mcn" :idx="0"/>
+          <filtre-rac nom="chats" prop='rac' :idx="0"/>
+          <filtre-nbj nom="chats" prop='nbj' :idx="1"/>
+          <filtre-nom nom="chats" prop='nom' :idx="0"/>
+          <filtre-txt nom="chats" prop='txt' :idx="1"/>
+          <filtre-mc nom="chats" attr="mcp" :idx="0"/>
+          <filtre-mc nom="chats" attr="mcn" :idx="1"/>
         </div>
         <div v-if="ui.page === 'espace'" class="column justify-start">
           <filtre-tri nom="espace" :nb-options="19" :idx="0"/>
@@ -320,6 +321,7 @@ import FiltreStmb from './components/FiltreStmb.vue'
 import FiltreAmbno from './components/FiltreAmbno.vue'
 import FiltreAvgr from './components/FiltreAvgr.vue'
 import FiltreVols from './components/FiltreVols.vue'
+import FiltreRac from './components/FiltreRac.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
 import PageMenu from './pages/PageMenu.vue'
 
@@ -371,7 +373,7 @@ export default {
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
-    FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
+    FiltreRac, FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, PressePapier
    },

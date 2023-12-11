@@ -344,6 +344,7 @@ export const useGroupeStore = defineStore('groupe', {
         const c = elt.chatgr
         const na = elt.groupe.na
         if (c) {
+          if (f.rac === 2) continue
           if (f.limj && c.dh < f.limj) continue
           if (f.nom && !na.nom.startsWith(f.nom)) continue
           if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue

@@ -1664,7 +1664,7 @@ export class Chat extends GenDoc {
     const supp = $t('supprime')
     this.tit = ''
     this.dh = 0
-    if (row.items) for (const it of row.items) {
+    if (row.items && this.stI) for (const it of row.items) {
       const t = it.txt ? ungzipB(await decrypter(this.cc, it.txt)) : null
       if (this.dh === 0) this.dh = it.dhx ? it.dhx : it.dh
       this.items.push({ a: it.a, txt: t, dh: it.dh, dhx: it.dhx || 0})

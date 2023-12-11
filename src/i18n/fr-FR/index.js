@@ -107,6 +107,7 @@ export default {
   supprime: '_[supprimé à {0}]_',
   actif: 'actif',
   disp: 'disparu',
+  raccroche: 'raccroché',
   pasdepuis: 'pas depuis {0}',
   activer: 'Activer',
   desactiver: 'Désactiver',
@@ -132,6 +133,11 @@ export default {
   ambno3: 'aux membres et aux notes',
   ambno4: 'ni aux membres ni aux notes',
   ambno5: 'aux notes en écriture',
+
+  // Filtre Rac
+  rac0: '(tous, actifs et raccrochés)',
+  rac1: 'Chats actifs seulement',
+  rac2: 'Chats raccrochés seulement',
   
   tmc0: 'Compte',
   tmc1: 'Groupe',
@@ -563,11 +569,9 @@ export default {
   OPsfa: 'Supprimer un fichier attaché à une note',
   OPsav: 'Supprimer un avatar ou résilier un compte',
 
+  OPmajch: 'Mise à jour du "chat".',
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
-  OPmajch2: 'Le "chat" a été mis à jour en parallèle dans une autre session : son contenu actuel va s\'afficher au lieu de celui saisi.',
-  OPmajch3: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" n\'existe plus.',
-  OPmajch3: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" actuel ne peut plus être changé ("raccrocher" pour le faire disparaître définitivement).',
 
   OPapa: 'Accepter le sponsoring d\'un nouveau compte',
   OPdpa: 'Décliner le sponsoring d\'un nouveau compte',
@@ -722,6 +726,7 @@ export default {
   FInotif: 'Ayant une notification ... {0}',
   FIstmb: 'Ayant un statut ... {0}',
   FIambno: 'Accès aux notes / membres...',
+  FIrac: 'Chats actifs / raccrochés...',
   FItribu: 'Même tranche de quotas ... {0}',
   FIsansheb: 'Groupes sans hébergement',
   FIexcesvol: 'Groupes en excédent de volume',
@@ -878,7 +883,9 @@ export default {
   CHde: 'Entre {0} et ...',
   CHgr: 'Dans le groupe ...',
   CHel: '[en ligne]',
-  CHrac: '[raccroché]',
+  CHraccroche: '[raccroché]',
+  CHraccroche2: '[{0} a raccroché]',
+  CHavdisp: '[l\'interlocuteur a disparu]',
   CHreact: 'Réactiver le chat',
   CHnch2: 'Aucun chat ne répond au critère de recherche | Un chat répond au critère de recherche | {count} chats répondent au critère de recherche',
   CHnchtot: ' sur {0}.',
@@ -905,6 +912,7 @@ export default {
   ' Le chat ne sera plus "actif". Si {0} écrit un échange il apparaîtra.' +
   ' Le chat ne redeviendra "actif" qu\'à la prochaine écriture.',
   CHeffa: '(effacé {0})',
+  CHdisp: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" avec lui n\'existe plus.',
 
   CHGtit: 'Chat du groupe {0}',
   CHGadd: 'Item',

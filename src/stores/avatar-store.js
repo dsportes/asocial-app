@@ -313,6 +313,10 @@ export const useAvatarStore = defineStore('avatar', {
       for (const [,elt] of state.map) {
         if (!f.tous && session.avatarId !== elt.avatar.id) continue
         for (const [,c] of elt.chats) {
+          if (f.rac) {
+            if (f.rac === 1 && stI !== 1) continue
+            if (f.rac === 2 && stI !== 0) continue
+          }
           if (f.limj && c.dh < f.limj) continue
           if (f.nom && !c.naE.nom.startsWith(f.nom)) continue
           if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue

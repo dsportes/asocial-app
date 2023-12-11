@@ -1,60 +1,38 @@
 <template>
-  <q-card v-if="chat">
-    <div :class="'column ' + dkli(idx)">
-      <div class="row justify-between">
-        <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHde', [naI.nom])}}</div>
-        <q-btn color="warning" icon="open_in_new" @click="ui.oD('ACouvrir')"/>
+<q-dialog v-model="ui.d.ACouvrir" full-height persistent>
+  <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
+    <q-header elevated class="bg-secondary text-white">
+      <q-toolbar>
+        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [naI.nom, naE.nom])}}</q-toolbar-title>
+        <bouton-help page="page1"/>
+      </q-toolbar>
+      <apercu-genx class="bordb" :id="naE.id" :idx="idx" />
+      <div class="q-pa-xs row justify-around">
+        <q-btn :label="$t('CHadd2')" class="btn" icon="add" color="primary" @click="editer"/>
+        <q-btn :label="$t('CHrac')" class="btn" icon="phone_disabled" color="primary" @click="raccrocher"/>
       </div>
-      <div class="q-mx-sm">
-        <apercu-genx class="bordb" :id="naE.id" :idx="idx" />
-        <div class="q-mt-xs row justify-between items-center">
-          <div class="text-italic fs-md">
-            <span v-if="chat.stI===1" class="q-mr-sm">{{$t('actif')}}</span>
-            <span class="q-mr-sm">{{$t('CHnbit', chat.items.length, {count:chat.items.length} )}}</span>
-          </div>
-          <div v-if="chat.items.length" class="text-italic font-mono q-mr-sm">{{dhcool(chat.dh)}}</div>
+    </q-header>
+
+    <q-page-container>
+      <q-card class="q-pa-sm">
+        <div v-for="it in chat.items" :key="it.dh + '/' + it.a">
+          <q-chat-message :sent="it.a===0" 
+            :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
+            text-color="white"
+            :stamp="dhcool(it.dh)">
+            <sd-dark1 v-if="!it.dhx" :texte="it.txt"/>
+            <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
+            <template v-slot:name>
+              <div class="full-width row justify-between items-center">
+                <span>{{it.a===0 ? $t('moi') : naE.nom}}</span>
+                <q-btn v-if="it.a===0 && !it.dfx" size="sm" icon="clear" color="warning" @click="effacer(it.dh)"/>
+              </div>
+            </template>
+          </q-chat-message>
         </div>
-        <div v-if="chat.items.length" class="fs-md">{{chat.tit}}</div>
-      </div>
-    </div>
-
-    <!-- Dialogue d'édition du texte du chat -->
-    <q-dialog v-model="ui.d.ACouvrir" full-height persistent>
-      <q-layout container view="hHh lpR fFf" :class="sty" style="width:80vw">
-        <q-header elevated class="bg-secondary text-white">
-          <q-toolbar>
-            <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
-            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [naI.nom, naE.nom])}}</q-toolbar-title>
-            <bouton-help page="page1"/>
-          </q-toolbar>
-          <apercu-genx class="bordb" :id="naE.id" :idx="idx" />
-          <div class="q-pa-xs row justify-around">
-            <q-btn :label="$t('CHadd2')" class="btn" icon="add" color="primary" @click="editer"/>
-            <q-btn :label="$t('CHrac')" class="btn" icon="phone_disabled" color="primary" @click="raccrocher"/>
-          </div>
-        </q-header>
-
-        <q-page-container>
-          <q-card class="q-pa-sm">
-            <div v-for="it in chat.items" :key="it.dh + '/' + it.a">
-              <q-chat-message :sent="it.a===0" 
-                :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
-                text-color="white"
-                :stamp="dhcool(it.dh)">
-                <sd-dark1 v-if="!it.dhx" :texte="it.txt"/>
-                <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
-                <template v-slot:name>
-                  <div class="full-width row justify-between items-center">
-                    <span>{{it.a===0 ? $t('moi') : naE.nom}}</span>
-                    <q-btn v-if="it.a===0 && !it.dfx" size="sm" icon="clear" color="warning" @click="effacer(it.dh)"/>
-                  </div>
-                </template>
-              </q-chat-message>
-            </div>
-          </q-card>
-        </q-page-container>
-      </q-layout>
-    </q-dialog>
+      </q-card>
+    </q-page-container>
 
     <!-- Confirmation d'effacement d'un échange -->
     <q-dialog v-model="ui.d.ACconfirmeff">
@@ -98,7 +76,8 @@
       </q-card>
     </q-dialog>
 
-  </q-card>
+  </q-layout>
+</q-dialog>
 </template>
 <script>
 
@@ -107,7 +86,7 @@ import { toRef, ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import SdDark1 from './SdDark1.vue'
 import EditeurMd from './EditeurMd.vue'
-import { dhcool, dkli } from '../app/util.mjs'
+import { dhcool, dkli, afficherDiag } from '../app/util.mjs'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import { MajChat, PassifChat } from '../app/operations.mjs'
@@ -145,19 +124,22 @@ export default {
     },
 
     async effop () {
-      await new MajChat().run(this.naI, this.naE, null, this.dheff, this.chat)
+      const disp = await new MajChat().run(this.naI, this.naE, null, this.dheff, this.chat)
+      if (disp) { await afficherDiag(this.$t('CHdisp')) }
       this.dheff = 0
       this.ui.fD()
     },
 
     async addop () {
-      await new MajChat().run(this.naI, this.naE, this.txt, 0, this.chat)
+      const disp = await new MajChat().run(this.naI, this.naE, this.txt, 0, this.chat)
+      if (disp) { await afficherDiag(this.$t('CHdisp')) }
       this.txt = ''
       this.ui.fD()
     },
 
     async passifop () {
-      await new PassifChat().run(this.naI.id, this.chat.ids)
+      const disp = await new PassifChat().run(this.naI.id, this.chat.ids)
+      if (disp) { await afficherDiag(this.$t('CHdisp')) }
       this.ui.fD()
     },
 

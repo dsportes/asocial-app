@@ -375,7 +375,8 @@ Assertions sur le row `Chats` et la `Versions` de l'avatar id.
       const session = stores.session
       const args = { token: session.authToken, id, ids }
       const ret = this.tr(await post(this, 'PassifChat', args))
-      this.finOK()
+      const disp = ret.disp
+      this.finOK(disp)
       return ret
     } catch (e) {
       return await this.finKO(e)
@@ -482,10 +483,10 @@ export class MajChat extends OperationUI {
         dh: dh || 0
       }
       const ret = this.tr(await post(this, 'MajChat', args))
-      const st = ret.st
+      const disp = ret.disp
       const ch = await compile(ret.rowChat)
       aSt.setChat(ch)
-      return this.finOK([st, ch])
+      return this.finOK(disp)
     } catch (e) {
       return await this.finKO(e)
     }
