@@ -138,7 +138,7 @@ export default {
     },
 
     async passifop () {
-      const disp = await new PassifChat().run(this.naI.id, this.chat.ids)
+      const disp = await new PassifChat().run(this.chat)
       if (disp) { await afficherDiag(this.$t('CHdisp')) }
       this.ui.fD()
     },

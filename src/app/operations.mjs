@@ -370,14 +370,19 @@ Assertions sur le row `Chats` et la `Versions` de l'avatar id.
 */export class PassifChat extends OperationUI {
   constructor () { super($t('OPpassifch')) }
 
-  async run (id, ids) {
+  async run (chat) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, ids }
+      const args = { 
+        token: session.authToken, 
+        idI: chat.naI.id, 
+        idsI: await Chat.getIds(chat.naI, chat.naE),
+        idE: chat.naE.id,
+        idsE: await Chat.getIds(chat.naE, chat.naI)
+      }
       const ret = this.tr(await post(this, 'PassifChat', args))
       const disp = ret.disp
-      this.finOK(disp)
-      return ret
+      return this.finOK(disp)
     } catch (e) {
       return await this.finKO(e)
     }
@@ -391,12 +396,17 @@ args.idE idsE : id du chat côté externe
 args.ccKI : clé cc cryptée par la clé K du compte de I
 args.ccPE ! clé cc cryptée par la clé publique de l'avatar E
 args.contc : contenu du chat crypté par la clé cc
+args.naccI: na de I crypté par la clé du chat
+args.naccE: na de I crypté par la clé du chat
+args.txt1: texte crypté par la clé cc
+args.lgtxt1: lg du texte
 Retour:
-st: 
-  0 : E a disparu
-  1 : chat créé avec le contenu contc
-  2 : le chat était déjà créé, retour de chatI avec le contenu qui existait
-rowChat: chat I créé (sauf st = 0)
+- `st` : 
+  0 : E a disparu. rowChat absent
+  1 : chat créé avec l'item txt1. rowChat a le chat I créé avec le texte txt1.
+  2 : le chat était déjà créé: rowChat est le chat I SANS le texte txt1.
+- `rowChat` : row du chat I.
+
 */
 export class NouveauChat extends OperationUI {
   constructor () { super($t('OPnvch')) }
