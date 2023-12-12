@@ -25,11 +25,36 @@
   <div v-if="ui.pagetab==='chats'">
     <div class="titre-lg text-italic text-center q-my-md">{{$t('CPTtitch')}}</div>
 
-    <div v-for="(na, idx) in pSt.naSponsors" :key="idx">
-      <apercu-chat class="q-my-sm"
-        :na-i="naCpt" :na-e="na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
-    </div>
+    <q-card v-for="(chat, idx) in chats" :key="chat.ids">
+      <div :class="'q-my-sm q-px-sm ' + dkli(idx)">
+        <apercu-genx nodet :id="chat.naE.id" :idx="idx" />
+        <div v-if="!chat.fake">
+          <div class="q-mt-xs row justify-between items-center">
+            <div class="text-italic fs-md">
+              <span v-if="chat.stI===1" class="q-mr-sm">{{$t('actif')}}</span>
+              <span v-else class="q-mr-sm text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</span>
+              <span v-if="chat.stE===0" class="q-mr-sm text-warning text-bold bg-yellow-5">
+                {{$t('CHraccroche2', [chat.naE.nom])}}</span>
+              <span v-if="chat.stE===2" class="q-mr-sm text-warning text-bold bg-yellow-5">{{$t('CHavdisp')}}</span>
+              <span class="q-mr-sm">{{$t('CHnbit', chat.items.length, {count:chat.items.length} )}}</span>
+            </div>
+            <div v-if="chat.items.length" class="text-italic font-mono q-mr-sm">{{dhcool(chat.dh)}}</div>
+          </div>
+          <div v-if="chat.items.length" class="fs-md">{{chat.tit}}</div>
+        </div>
+        <div v-else>
+          <div class="text-italic titre-md">{{$t('CHnotit')}}</div>
+        </div>
+        <q-btn color="primary" dense icon="open_in_new" 
+          :label="$t(chat.fake ? 'CHbtncr' : 'CHbtnov')"
+          @click="ouvrirChat(chat)"/>
+      </div>
+    </q-card>
   </div>
+
+  <apercu-chat v-if="ui.d.ACouvrir"
+    :naI="chatc.naI" :naE="chatc.naE" :ids="chatc.ids" :mapmc="mapmc"/>
+
 </q-page>
 </template>
 
@@ -39,17 +64,19 @@ import { ref, onMounted, reactive } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuChat from '../components/ApercuChat.vue'
 import ApercuNotif2 from '../components/ApercuNotif2.vue'
 import PanelCredits from '../components/PanelCredits.vue'
 import SdAl from '../components/SdAl.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
 import { getNg, Motscles, Chat } from '../app/modele.mjs'
+import { dkli, dhcool } from '../app/util.mjs'
 
 export default {
   name: 'PageCompta',
 
-  components: { SdAl, ApercuNotif2, PanelCompta, PanelCredits, ApercuChat },
+  components: { SdAl, ApercuGenx, ApercuNotif2, PanelCompta, PanelCredits, ApercuChat },
 
   computed: {
     c () { return this.aSt.compta.compteurs },
@@ -73,6 +100,10 @@ export default {
   },
 
   methods: {
+    ouvrirChat (c) {
+      this.chatc = c
+      this.ui.oD('ACouvrir')
+    },
   },
 
   setup () {
@@ -84,14 +115,27 @@ export default {
     const naCpt = getNg(session.compteId)
     const mapmc = ref(Motscles.mapMC(true, 0))
 
-    const ids = reactive({})
-    onMounted(async () => {
-      ids[session.naComptable.id] = await Chat.getIds(naCpt, session.naComptable)
+    const chats = reactive([])
+
+    async function getChats () {
+      chats.length = 0
       for(const na of pSt.naSponsors) {
-        if (na.id !== session.compteId) {
-          ids[na.id] = await Chat.getIds(naCpt, na)
-        }
+        const ids = await Chat.getIds(naCpt, na)
+        const c = aSt.getChat(session.compteId, ids)
+        chats.push(c ? c : { id: session.compteId, ids: ids, naE: na, naI: naCpt, fake: true })
       }
+    }
+
+    onMounted(async () => {
+      await getChats()
+    })
+
+    aSt.$onAction(({ name, args, after }) => { 
+      after(async (result) => {
+        if ((name === 'setChat')){
+          await getChats()
+        }
+      })
     })
 
     ui.$onAction(({ name, args, after }) => { 
@@ -103,14 +147,14 @@ export default {
         }
       })
     })
+
     aSt.setccCpt(aSt.compta.compteurs)
+
     return {
-      session,
-      pSt,
-      ui,
-      aSt,
+      session, pSt, ui, aSt,
+      dkli, dhcool,
       naCpt,
-      ids,
+      chats,
       mapmc
     }
   }

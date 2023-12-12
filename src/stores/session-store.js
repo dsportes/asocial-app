@@ -260,7 +260,7 @@ export const useSessionStore = defineStore('session', {
 
     // pour tracking des changements sur $onAction
     setCompteId (id) {
-      this.ns = ID.ns(id)
+      this.setNs(ID.ns(id))
       this.compteId = id
       if (!this.estAdmin) this.naComptable = NomGenerique.comptable()
     },

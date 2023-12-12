@@ -29,7 +29,7 @@
     </div>
   </div>
 
-  <q-dialog v-model="editntf" persistent>
+  <q-dialog v-model="ui.d.ANeditntf" persistent>
     <q-card class="bs moyennelargeur">
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense color="warning" size="md" icon="close" @click="ui.fD"/>
@@ -167,7 +167,7 @@ export default {
         if (this.ntf.nr === 3) { this.restr = true; this.restrb = false }
         if (this.ntf.nr === 4) { this.restr = false; this.restrb = true }
       }
-      this.oveditntf()
+      this.ui.oD('ANeditntf')
     },
 
     async creer () {

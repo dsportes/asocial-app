@@ -3,7 +3,8 @@
   <div class="q-pa-xs row items-start">
     <div class="col-auto items-center q-mr-sm column">
       <img class="photomax" :src="photo" />
-      <q-btn size="sm" icon="zoom_in" dense color="primary" @click.stop="ui.oD('ACVouvrir')"/>
+      <q-btn v-if="!ID.estComptable(id)"
+        size="sm" icon="zoom_in" dense color="primary" @click.stop="ui.oD('ACVouvrir')"/>
     </div>
     <div class="col">
       <div class="row">
@@ -13,7 +14,7 @@
           <span class="fs-sm font-mono q-mr-sm">
             {{'#' + id + (im ? ' ['+ im + ']': '')}}</span> 
         </div>
-        <q-btn class="col-auto" v-if="!estAvc && !estGroupe && !det" 
+        <q-btn class="col-auto" v-if="!estAvc && !estGroupe && !det && !nodet" 
           dense size="md" color="primary" icon="open_in_new"
           :label="$t('page')" @click.stop="ouvrirdetails"/>
       </div>
@@ -46,7 +47,8 @@ export default {
   props: { 
     id: Number,
     im: Number,
-    idx: Number
+    idx: Number,
+    nodet: Boolean
   },
 
   components: { ApercuCv, McMemo },

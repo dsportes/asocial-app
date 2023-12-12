@@ -873,6 +873,9 @@ export default {
   APtit: 'Détail du contact {0}',
   APtitav: 'Détail de l\'avatar {0}',
 
+  CHnotit: 'Ce chat n\'a jamais été créé. Il peut l\'être maintenant.',
+  CHbtncr: 'Créer le chat',
+  CHbtnov: 'Ouvrir le chat',
   CHtxt: 'Texte du chat',
   CHnch: 'Aucun chat',
   CHnch2b: 'Pas de chat avec {0}',

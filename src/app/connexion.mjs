@@ -150,7 +150,6 @@ export async function connecterCompte(phrase, razdb) {
       return
     }
     session.setCompteId(x.id) // Important, requis pour lire ensuite compta ...
-    session.setNs(ID.ns(x.id))
     session.setOrg(phrase.org)
     session.clek = x.k
   }
@@ -628,7 +627,6 @@ export class ConnexionCompte extends OperationUI {
     this.espace = await compile(ret.rowEspace)
     if (session.estClos) return
     session.setOrg(this.espace.org)
-    session.setNs(this.espace.id)
 
     this.rowCompta = ret.rowCompta
     this.rowAvatar = ret.rowAvatar

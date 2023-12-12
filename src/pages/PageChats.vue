@@ -27,7 +27,7 @@
             <q-btn color="warning" icon="open_in_new" @click="ouvrirChatgr(chat)"/>
           </div>
           <div :class="'column q-px-sm ' + dkli(idx)">
-            <apercu-genx class="bordb" :id="chat.id" :idx="idx"/>
+            <apercu-genx :id="chat.id" :idx="idx"/>
             <div class="q-mt-xs row justify-between items-center">
               <div class="text-italic fs-md">
                 <span class="q-mr-sm">{{$t('CHnbit', chat.items.length, {count:chat.items.length} )}}</span>

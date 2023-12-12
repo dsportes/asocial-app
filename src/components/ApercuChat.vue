@@ -15,7 +15,7 @@
     </q-header>
 
     <q-page-container>
-      <q-card class="q-pa-sm">
+      <q-card v-if="chat" class="q-pa-sm">
         <div v-for="it in chat.items" :key="it.dh + '/' + it.a">
           <q-chat-message :sent="it.a===0" 
             :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
@@ -31,6 +31,12 @@
             </template>
           </q-chat-message>
         </div>
+      </q-card>
+
+      <q-card v-else>
+        <div class="titre-md text-italic text-bold">{{$t('CHnotit')}}</div>
+        <q-btn class="maauto q-mt-md" :label="$t('CHbtncr')" size="md" color="primary" icon="add"
+          @click="creerchat"/>
       </q-card>
     </q-page-container>
 
@@ -89,7 +95,7 @@ import EditeurMd from './EditeurMd.vue'
 import { dhcool, dkli, afficherDiag } from '../app/util.mjs'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonHelp from './BoutonHelp.vue'
-import { MajChat, PassifChat } from '../app/operations.mjs'
+import { MajChat, PassifChat, NouveauChat } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
 
 export default {
@@ -112,6 +118,15 @@ export default {
   }},
 
   methods: {
+    async creerchat () {
+      if (this.estSp) {
+        if (!await this.session.editUrgence()) return
+      } else {
+        if (!await this.session.edit()) return
+      }
+      this.ui.oD('ACchatedit')
+    },
+
     async effacer (dh) {
       if (this.estSp) {
         if (!await this.session.editUrgence()) return
@@ -131,8 +146,18 @@ export default {
     },
 
     async addop () {
-      const disp = await new MajChat().run(this.naI, this.naE, this.txt, 0, this.chat)
-      if (disp) { await afficherDiag(this.$t('CHdisp')) }
+      if (this.chat) {
+        const disp = await new MajChat().run(this.naI, this.naE, this.txt, 0, this.chat)
+        if (disp) { await afficherDiag(this.$t('CHdisp')) }
+      } else { 
+        const [st, chat] = await new NouveauChat().run(this.naI, this.naE, this.txt)
+        if (st === 0) {
+          await afficherDiag(this.$t('OPnvch0'))
+        } else  {
+          this.chat = chat
+          if (st === 2) await afficherDiag(this.$t('OPnvch2'))
+        }
+      }
       this.txt = ''
       this.ui.fD()
     },
