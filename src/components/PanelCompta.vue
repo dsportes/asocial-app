@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-sm full-width">
+  <div class="q-pa-sm dp40">
     <q-expansion-item switch-toggle-side default-opened dense
       header-class="titre-md text-bold bg-primary text-white"
       :label="$t('PCPsyn') + ' - ' + dhcool(c.dh)">

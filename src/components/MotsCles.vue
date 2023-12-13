@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.MCmcledit" persistent>
-<q-card class="bs sp30">
+<q-card class="bs dp30">
   <q-toolbar class="bg-secondary text-white">
     <q-btn class="q-mr-xs" dense size="md" color="warning"
       icon="close" @click="cancelEdit"/>

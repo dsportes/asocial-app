@@ -162,6 +162,7 @@ export default {
       if (blob) {
         const nf = encodeURI(expPfx + '_chats.md')
         saveAs(blob, nf)
+        await afficherDiag(this.$t('CHexpok'))
       } else {
         await afficherDiag(this.$t('CHerr'))
       }

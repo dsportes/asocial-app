@@ -23,7 +23,7 @@
       </div>
 
       <!-- Outils et tests -->
-      <div class="btn2" @click="ui.oD('outilsTests')">
+      <div class="btn2" @click="ui.oD('PAoutilsTests')">
         <q-btn dense size="md" icon="settings"/>
         <span class="q-ml-xs">{{$t('MLAout')}}</span>
       </div>

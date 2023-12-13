@@ -241,7 +241,7 @@ export default {
 
     return {
       session, aSt, pSt, ui, pow, lg,
-      ID, cptdial, ovcptdial,
+      ID,
       cfg: stores.config,
       dkli
     }

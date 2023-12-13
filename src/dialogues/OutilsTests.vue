@@ -1,6 +1,6 @@
 <template>
-<q-dialog v-model="ui.d.PAoutilsTests" full-height persistent>
-  <q-layout container view="hHh lpR fFf" :class="'bs sp30 ' + sty">
+<q-dialog v-model="ui.d.PAoutilsTests" full-height persistent position="left">
+  <q-layout container view="hHh lpR fFf" :class="sty + ' d30'">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
         <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>

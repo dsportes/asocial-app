@@ -1,5 +1,5 @@
 <template>
-  <q-page class="column q-pl-xs q-mr-sm largeur50 maauto">
+  <q-page class="column q-pa-xs sp50">
       <div class="row items-center justify-around q-py-xs">
         <div> <!-- Changement de phrase secrète -->
           <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps

@@ -67,10 +67,9 @@
   <mots-cles v-if="ui.d.MCmcledit" :idg="eg.groupe.id"/>
 
   <!-- Gérer le mode simple / unanime -->
-  <q-dialog v-model="ui.d.AGediterUna" full-height persistent>
-    <div class="bs" style="width:80vw">
-    <q-layout container view="hHh lpR fFf" :class="dkli(0)">
-      <q-header elevated class="bg-secondary text-white">
+  <q-dialog v-model="ui.d.AGediterUna" full-height position="left" persistent>
+    <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
+      <q-header elevated class="bg-primary text-white">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGuna', [eg.groupe.na.nom])}}</q-toolbar-title>
@@ -120,13 +119,11 @@
         </q-page>
       </q-page-container>
     </q-layout>
-    </div>
   </q-dialog>
 
   <!-- Gérer l'hébergement, changer les quotas -->
-  <q-dialog v-model="ui.d.AGgererheb" full-height persistent>
-    <div class="bs"  style="width:80vw">
-    <q-layout container view="hHh lpR fFf" :class="dkli(0)">
+  <q-dialog v-model="ui.d.AGgererheb" full-height persistent position="left">
+    <q-layout container view="hHh lpR fFf" :class="sty + ' d40 bs'">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -197,7 +194,6 @@
         </q-page>
       </q-page-container>
     </q-layout>
-    </div>
   </q-dialog>
 
   <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
@@ -268,6 +264,7 @@ export default {
   BoutonMembre, QuotasVols2 },
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
 
     dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },

@@ -22,8 +22,8 @@
     </div>
   </div>
 
-  <div v-if="ui.pagetab==='chats'">
-    <div class="titre-lg text-italic text-center q-my-md">{{$t('CPTtitch')}}</div>
+  <div v-if="ui.pagetab==='chats'" class="q-pa-xs sp40">
+    <div class="titre-lg text-italic text-center q-py-md">{{$t('CPTtitch')}}</div>
 
     <q-card v-for="(chat, idx) in chats" :key="chat.ids">
       <div :class="'q-my-sm q-px-sm ' + dkli(idx)">

@@ -251,7 +251,7 @@
 <script>
 import { ref, toRef } from 'vue'
 
-import { dkli, $t } from 'src/app/util.mjs'
+import { dkli, $t, afficherDiag } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from './BoutonConfirm.vue'
@@ -437,7 +437,7 @@ export default {
           this.options.push({ label: na.nom, value: im })
       })
       if (!this.options.length) {
-        afficherDiag(this.$t('AMinvitAnim'))
+        afficherDiag(this.$t('AMinvitanim'))
         return
       }
       this.invpar = this.options[0]

@@ -39,9 +39,9 @@
     </div>
 
     <q-dialog v-model="ui.d.MMedition">
-      <q-card class="bs moyennelargeur column">
-        <q-toolbar class="col-auto bg-primary text-white">
-          <q-btn dense size="md" icon="close" @click="ui.fD"/>
+      <q-card class="bs dp40">
+        <q-toolbar class="col-auto bg-secondary text-white">
+          <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
           <q-toolbar-title>{{$t('MMCap', [nom])}}</q-toolbar-title>
         </q-toolbar>
         <q-toolbar inset v-if="diag" class='q-ma-sm bg-yellow-5 text-warning text-bold'>

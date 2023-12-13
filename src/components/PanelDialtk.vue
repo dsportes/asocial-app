@@ -27,6 +27,7 @@
 
 <script>
 import { toRef, ref, watch } from 'vue'
+import stores from '../stores/stores.mjs'
 import { $t } from '../app/util.mjs'
 
 export default {
