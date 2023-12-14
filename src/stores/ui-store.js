@@ -23,7 +23,9 @@ export const useUiStore = defineStore('ui', {
     helpstack: [],
 
     etf: 0, // étape fichier
-    ccfic: null, // copie cololler fichier
+    ccfic: null, // copier coller fichier
+
+    notifc: null, // notification courante en cours d'édition
 
     egrplus: false, // un contact peut-être ajouté au groupe courant
 
@@ -75,7 +77,7 @@ export const useUiStore = defineStore('ui', {
       AGediterUna: false,
       AGgererheb: false,
       AMmcedit: false, // ApercuMotscles
-      ANeditntf: false, // ApercuNotif
+      DNdialoguenotif: false, // DialogueNotif
       ATreceptk: false, // ApercuTicket
       ATconfirmdel: false,
       EMmax: false, // EditeurMd

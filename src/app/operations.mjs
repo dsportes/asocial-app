@@ -646,20 +646,16 @@ Assertion sur l'existence du row `Tribus` de la tribu.
 export class SetNotifT extends OperationUI {
   constructor () { super($t('OPntftr')) }
 
-  async run (id, notifT) {
+  async run (notifT, id) {
     try {
       const session = stores.session
+      let stn = 9
       let notif = null
       if (notifT ) {
         notifT.dh = Date.now()
         const cle = getCle(id)
         notif = await crypter(cle, notifT.serial)
-      }
-      let stn = 9
-      if (notifT.texte) {
-        if (notifT.nr === 0) stn = 0
-        else if (notifT.nr === 3) stn = 1
-        else stn = 4
+        if (notifT.texte) stn = notifT.stn
       }
       const args = { token: session.authToken, id, notif, stn }
       this.tr(await post(this, 'SetNotifT', args))
@@ -710,16 +706,15 @@ Assertion sur l'existence du row `Tribus` de la tribu et `Comptas` du compte.
 export class SetNotifC extends OperationUI {
   constructor () { super($t('OPntfco')) }
 
-  async run (id, idc, notifC) { // id de la tribu, id du compte cible, notif
+  async run (notifC, id, idc) { // id de la tribu, id du compte cible, notif
     try {
       const session = stores.session
-      if (notifC) notifC.dh = Date.now()
       const cle = getCle(id)
       let stn = 9
-      if (notifC.texte) {
-        if (notifC.nr === 0) stn = 0
-        else if (notifC.nr === 3) stn = 1
-        else stn = 4
+      if (notifC) {
+        notifC.idSource = session.estComptable ? 0 : session.compteId
+        notifC.dh = Date.now()
+        if (notifC.texte) stn = notifC.stn
       }
       const notif = notifC ? await crypter(cle, notifC.serial) : null
       const args = { token: session.authToken, id, idc, notif, stn }
@@ -739,7 +734,7 @@ args.nasp: na du compte crypté par la cle de la tribu
 Retour:
 */
 export class SetSponsor extends OperationUI {
-  constructor () { super($t('OPmajtr')) }
+  constructor () { super($t('OPsptr')) }
 
   async run (idt, na, estSp) { // id de la tribu, na du compte, true/false sponsor
     try {

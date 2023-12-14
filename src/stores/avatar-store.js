@@ -37,7 +37,7 @@ export const useAvatarStore = defineStore('avatar', {
     ppSelId: 0,
     
     // Dernier compteurs de compta chargé (enrichi de clet(ou null), id, it, na(ou null))
-    ccCpt: null
+    ccCpt: { id: 0 }
   }),
 
   getters: {

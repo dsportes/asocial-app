@@ -17,7 +17,8 @@
           <tuile-notif :src="lg" occupation/>
         </div>
         <div class="q-my-xs">
-          <apercu-notif2 :editable="session.pow < 4" :notif="lg.notif" :type="1" @ok="chgNtfT"/>
+          <apercu-notif2 :editable="session.pow < 4" :notif="lg.notif" :type="1"
+            :ctx="{ idt: aSt.tribuC.id }"/>
         </div>
       </div>
     </q-expansion-item>
@@ -50,16 +51,18 @@
                 :class="'q-ml-md ' + tclr(c) + ' ' + bgclr(c)"/>
 
             </div>
-            <q-btn class="q-ml-md" icon="open_in_new" size="md" color="primary" dense @click.stop="courant(c)"/>
+            <q-btn v-if="type(c)===2" class="q-ml-md" icon="open_in_new" size="md" color="primary" dense
+              @click.stop="voirpage(c)"/>
           </div>
         </template>
 
         <div class="q-ml-lg">
           <apercu-genx v-if="type(c)===2 || type(c)===1" :id="c.id" :idx="idx"/>
-          <apercu-compte v-if="type(c)===3" :elt="c" :idx="idx"/>
+          <div v-else class="titre-md">#{{c.id}}</div>
+          <barre-people v-if="session.estComptable || aSt.estSponsor" :id="c.id"/>
 
           <apercu-notif2 class="q-my-xs" :editable="session.pow < 4"
-            :notif="c.notif" :type="2" :ctx="c" :idx="idx" @ok="chgNtf"/>
+            :notif="c.notif" :type="2" :idx="idx" :ctx="{ idt: aSt.tribuC.id, idc: c.id }"/>
 
           <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
@@ -69,9 +72,6 @@
                 icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
           </div>
           
-          <div class="text-right"> <q-btn v-if="pow < 4" size="sm"
-            icon="poll" :label="$t('PCPabc')" dense color="primary" 
-            @click="voirCompta(c)"/></div>
         </div>
       </q-expansion-item>
     </div>
@@ -117,11 +117,11 @@ import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ApercuNotif2 from '../components/ApercuNotif2.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import ApercuCompte from '../components/ApercuCompte.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols2 from '../components/QuotasVols2.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
+import BarrePeople from '../components/BarrePeople.vue'
 import { GetCompteursCompta, SetQuotas, SetNotifT, SetNotifC } from '../app/operations.mjs'
 
 const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
@@ -130,8 +130,8 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 
 export default {
   name: 'PageTranche',
-  components: { TuileCnv,TuileNotif, ApercuNotif2, ChoixQuotas, ApercuCompte, ApercuGenx,
-    PanelCompta, QuotasVols2, NouveauSponsoring },
+  components: { TuileCnv,TuileNotif, ApercuNotif2, ChoixQuotas, ApercuGenx,
+    PanelCompta, QuotasVols2, NouveauSponsoring, BarrePeople },
 
   props: { },
 
@@ -159,24 +159,9 @@ export default {
       return '#' + c.id
     },
 
-    async courant (c) { 
-      this.ccid = c.id
-      this.ccnomc = this.nomc(c)
-      const t = this.type(c)
-      if (t === 2) {
-        this.session.setPeopleId(c.id)
-        this.ui.oD('detailspeople')
-      } else if (t === 3) {
-        await new GetCompteursCompta().run(c.id)
-        this.ui.oD('PTcptdial')
-      }
-    },
-
-    async voirCompta (c) {
-      this.ccid = c.id
-      this.ccnomc = this.nomc(c)
-      await new GetCompteursCompta().run(c.id)
-      this.ui.oD('PTcptdial')
+    async voirpage (c) { 
+      this.session.setPeopleId(c.id)
+      this.ui.oD('detailspeople')
     },
 
     async editerq (c) {

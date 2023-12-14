@@ -65,7 +65,8 @@ Depuis un Comptable: ns est celui de la session
             <tuile-notif :src="lg" :total="idx === 0" occupation/>
           </div>
           <div v-if="idx !== 0" class="q-my-xs">
-            <apercu-notif2 :editable="session.pow < 4" :notif="notif" :type="1" @ok="chgNtfT"/>
+            <apercu-notif2 :editable="session.pow < 4" :notif="notif" :type="1" 
+              :ctx="{ idt: lg.id }"/>
           </div>
           <div v-if="pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs">
             <q-btn class="fs-md btn2" size="sm" dense
@@ -396,7 +397,7 @@ export default {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
       synth, // Syntheses de l'espace
       notif, ligne, // ligne courante affichée
-      ID, nt, ovnt, edcom, ovedcom, edq, ovedq,
+      ID,
       aSt, session, pow, ui, dkli,
       optionA, options, saveOptionA, undoOptionA, chgOptionA
     }

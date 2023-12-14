@@ -13,11 +13,11 @@
     <div v-else>
       <span class="titre-md text-italic">{{$t('FAnpc')}}</span>
       <q-btn v-if="edit && !ID.estComptable(avatar.id)" class="q-ml-sm" dense flat color="primary" size="sm"
-        :label="$t('FAdeclpc')" @click="oveditionpc"/>
+        :label="$t('FAdeclpc')" @click="editerpc"/>
     </div>
 
     <!-- Dialogue d'édition de la phrase de contact -->
-    <q-dialog v-model="ui.d.AAeditionpc" persistent>
+    <q-dialog v-if="session.avatarId===avatar.id" v-model="ui.d.AAeditionpc" persistent>
       <q-card class="bs q-ma-xs largeur30 fs-md">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -67,8 +67,10 @@ export default {
   methods: {
     async editerpc () {
       if (!await this.session.edit()) return
+      this.session.setAvatarId(this.avatar.id)
       this.ui.oD('AAeditionpc')
     },
+    
     async declPC (pc) {
       if (!pc) return
       if (await new ExistePhrase().run(pc.hps1, 3)) {
@@ -91,6 +93,7 @@ export default {
       await new ChangementPC().run(this.avatar.na, pc)
       this.ui.fD()
     },
+
     async supprPC () {
       await new ChangementPC().run(this.avatar.na)
       this.ui.fD()

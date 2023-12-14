@@ -1,29 +1,29 @@
 <template>
   <q-page class="column q-pa-xs sp50">
-      <div class="row items-center justify-around q-py-xs">
-        <div> <!-- Changement de phrase secrète -->
-          <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
-            :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
-          <bouton-help class="q-ml-sm" page="page1"/>
-        </div>
-        <div> <!-- Nouvel avatar -->
-          <q-btn class="q-ml-sm" size="md" icon="add" no-caps
-            :label="$t('CPTnvav')" color="warning" dense @click="ouvrirNvav"/>
-          <bouton-help class="q-ml-sm" page="page1"/>
-        </div>
+    <div class="row items-center justify-around q-py-xs">
+      <div> <!-- Changement de phrase secrète -->
+        <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
+          :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
+        <bouton-help class="q-ml-sm" page="page1"/>
       </div>
+      <div> <!-- Nouvel avatar -->
+        <q-btn class="q-ml-sm" size="md" icon="add" no-caps
+          :label="$t('CPTnvav')" color="warning" dense @click="ouvrirNvav"/>
+        <bouton-help class="q-ml-sm" page="page1"/>
+      </div>
+    </div>
 
-      <!-- Mots clés du compte -->
-      <div class="row items-center q-my-xs">
-        <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
-        <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
-      </div>
+    <!-- Mots clés du compte -->
+    <div class="row items-center q-my-xs">
+      <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
+      <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
+    </div>
 
-      <div v-if="aSt.compta.estA || aSt.compta.estSponsor" 
-        class="row q-gutter-sm q-my-sm titre-lg">
-        <span v-if="aSt.compta.estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('compteA')}}</span>
-        <span v-if="aSt.compta.estSponsor" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('sponsor')}}</span>
-      </div>
+    <div v-if="aSt.compta.estA || aSt.compta.estSponsor" 
+      class="row q-gutter-sm q-my-sm titre-lg">
+      <span v-if="aSt.compta.estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('compteA')}}</span>
+      <span v-if="aSt.compta.estSponsor" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('sponsor')}}</span>
+    </div>
 
     <!-- Avatars du compte -->
     <q-card class="q-my-md q-pa-xs" v-for="(na, idx) in aSt.compte.lstAvatarNas" :key="na.id">

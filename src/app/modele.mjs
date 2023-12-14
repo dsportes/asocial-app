@@ -514,6 +514,13 @@ export class Notification {
 
   clone () { return Notification.deSerial(this.serial) }
 
+  get stn () { // pour les notif T et C seulement pour G le concept n'existe pas)
+    if (!this.texte) return 0
+    if (this.nr === 0) return 0
+    if (this.nr === 3) return 1
+    return 4
+  }
+
   get serial() {
     const x = { nr: this.nr || 0, dh: this.dh }
     if (this.texte) x.texte = this.texte

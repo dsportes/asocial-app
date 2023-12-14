@@ -255,6 +255,7 @@
   <panel-people v-if="ui.d.detailspeople"/>
   <panel-membre v-if="ui.d.PMdetailsmembre"/>
   <outils-tests v-if="ui.d.PAoutilsTests"/>
+  <dialogue-notif v-if="ui.d.DNdialoguenotif"/>
 
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
@@ -364,6 +365,7 @@ import PanelMembre from './dialogues/PanelMembre.vue'
 // Niveau 10
 import PageGroupe from './pages/PageGroupe.vue'
 
+import DialogueNotif from './dialogues/DialogueNotif.vue'
 export default {
   displayName: 'App',
   name: 'App',
@@ -375,7 +377,7 @@ export default {
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
     FiltreRac, FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
-    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, PressePapier
+    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, PressePapier, DialogueNotif
    },
 
   computed: {

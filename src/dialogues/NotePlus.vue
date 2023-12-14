@@ -121,19 +121,19 @@ export default {
 
     function okav () {
       estgr.value = false
-      this.ui.oD('NNnotenouvelle')
+      ui.oD('NNnotenouvelle')
     }
 
     function okgr () {
       estgr.value = true
-      this.ui.oD('NNnotenouvelle')
+      ui.oD('NNnotenouvelle')
     }
 
     function selNa (na) {
       avatar.value = aSt.getElt(na.id).avatar
       avSel.value = na
       estgr.value = false
-      this.ui.oD('NNnotenouvelle')
+      ui.oD('NNnotenouvelle')
     }
 
     init()

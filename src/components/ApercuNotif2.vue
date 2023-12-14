@@ -28,57 +28,12 @@
         :label="$t('ANcre')" dense icon="add" @click="creer"/>
     </div>
   </div>
-
-  <q-dialog v-model="ui.d.ANeditntf" persistent>
-    <q-card class="bs moyennelargeur">
-      <q-toolbar class="bg-secondary text-white">
-        <q-btn dense color="warning" size="md" icon="close" @click="ui.fD"/>
-        <q-toolbar-title class="titre-lg full-width text-center">{{$t('ANnot')}}</q-toolbar-title>
-        <bouton-help page="page1"/>
-      </q-toolbar>
-      <q-card-section class="q-my-sm q-mx-sm column">
-
-        <div v-if="type===0">
-          <q-checkbox size="sm" v-model="restr"/>
-            <span>{{$t('ANnr1')}}<bouton-bulle idtext="nr1"/></span>
-        </div>
-        <div v-if="type===0">
-          <q-checkbox size="sm" v-model="restrb"/>
-            <span>{{$t('ANnr2')}}<bouton-bulle idtext="nr2"/></span>
-        </div>
-
-        <div v-if="type===1 || type===2">
-          <q-checkbox size="sm" v-model="restr"/>
-            <span>{{$t('ANnr3')}}<bouton-bulle idtext="nr3"/></span>
-        </div>
-        <div v-if="type===1 || type===2">
-          <q-checkbox size="sm" v-model="restrb"/>
-            <span>{{$t('ANnr4')}}<bouton-bulle idtext="nr4"/></span>
-        </div>
-
-      </q-card-section>
-      <q-card-section class="q-my-sm q-mx-sm">
-        <editeur-md mh="10rem" v-model="ntf.texte" :texte="ntf.texte" editable modetxt/>
-      </q-card-section>
-      <q-card-actions>
-        <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
-          @click="ui.fD"/>
-        <q-btn dense flat color="warning" size="md" icon="delete" :label="$t('supprimer')" 
-          :disable="!notif || !notif.texte" @click="supprimer"/>
-        <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="check" 
-          :label="$t('valider')" :disable="!ntf.texte" @click="valider"/>
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
-
 </div>
 </template>
 <script>
 
 import stores from '../stores/stores.mjs'
-import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
-import EditeurMd from './EditeurMd.vue'
 import ShowHtml from './ShowHtml.vue'
 import { Notification, Qui } from '../app/modele.mjs'
 import { dhcool, dkli, afficherDiag, $t } from '../app/util.mjs'
@@ -98,11 +53,11 @@ export default {
     */
     idsource: Number,
     editable: Boolean,
-    idx: Number,
-    ctx: Object // Objet de contexte retourné dans la notification créée / éditée
+    ctx: Object, // id de l'espace, ou de la tranche, ou de la tranche et du compte ...
+    idx: Number
   },
 
-  components: { BoutonHelp, BoutonBulle, EditeurMd, ShowHtml },
+  components: { BoutonBulle, ShowHtml },
 
   watch: {
     restr (ap) { if (ap && this.restrb) this.restrb = false },
@@ -125,9 +80,6 @@ export default {
   },
 
   data () { return {
-    restr: false,
-    restrb: false,
-    ntf: null
   }},
 
   methods: {
@@ -154,62 +106,31 @@ export default {
     async editer () {
       if (!await this.quipeut()) return
       if (this.type !== 0 && !await this.session.editpow(3)) return
-      this.ntf = this.notif.clone()
-      if (this.idsource) this.ntf.idSource = this.idsource
-      if (this.session.pow === 3 && !this.ntf.idSource) {
+      const ntf = this.notif.clone()
+      if (this.idsource) ntf.idSource = this.idsource
+      if (this.session.pow === 3 && !ntf.idSource) {
         await afficherDiag($t('ANnospon'))
         return
       }
+      let restr, restrb
       if (this.type === 0) {
-        if (this.ntf.nr === 1) { this.restr = true; this.restrb = false }
-        if (this.ntf.nr === 2) { this.restr = false; this.restrb = true }
+        if (ntf.nr === 1) { restr = true; restrb = false }
+        if (ntf.nr === 2) { restr = false; restrb = true }
       } else {
-        if (this.ntf.nr === 3) { this.restr = true; this.restrb = false }
-        if (this.ntf.nr === 4) { this.restr = false; this.restrb = true }
+        if (ntf.nr === 3) { restr = true; restrb = false }
+        if (ntf.nr === 4) { restr = false; restrb = true }
       }
-      this.ui.oD('ANeditntf')
+      this.ui.notifc = { type: this.type, ntf, restr, restrb, ctx: this.ctx }
+      this.ui.oD('DNdialoguenotif')
     },
 
     async creer () {
       if (!await this.quipeut()) return
       if (this.type !== 0 && !await this.session.editpow(3)) return
-      this.ntf = new Notification({})
-      if (this.idsource) this.ntf.idSource = this.idsource
-      this.restr = false
-      this.restrb = false
-      this.ui.oD('ANeditntf')
-    },
-
-    async valider () {
-      this.ntf.nr = 0
-      if (this.type === 0) {
-        if (this.restr) this.ntf.nr = 1
-        if (this.restrb) this.ntf.nr = 2
-      } else {
-        if (this.restr) this.ntf.nr = 3
-        if (this.restrb) this.ntf.nr = 4
-      }
-      // Interdiction de se bloquer soi-même
-      if (this.type === 1 && this.session.pow === 3 && this.ntf.nr) { 
-        await afficherDiag(this.$t('ANer5'))
-        return
-      }
-      if (this.type === 2 && (this.session.pow === 3 || this.session.pow === 2)
-        && this.ntf.nr && this.ctx && this.ctx.id === this.session.compteId) {
-          await afficherDiag(this.$t('ANer6'))
-          return
-      }
-      if (this.ctx) this.ntf.ctx = this.ctx
-      this.$emit('ok', this.ntf)
-      this.ui.fD()
-    },
-
-    supprimer () {
       const ntf = new Notification({})
       if (this.idsource) ntf.idSource = this.idsource
-      if (this.ctx) ntf.ctx = this.ctx
-      this.$emit('ok', ntf)
-      this.ui.fD()
+      this.ui.notifc = { type: this.type, ntf, restr: false, restrb: false, ctx: this.ctx }
+      this.ui.oD('DNdialoguenotif')
     }
   },
   setup (props) {

@@ -10,7 +10,7 @@
   </div>
 
   <!-- Changement de tribu -->
-  <q-dialog v-model="ui.d.BPchgTr" persistent>
+  <q-dialog v-if="aSt.ccCpt.id === id" v-model="ui.d.BPchgTr" persistent>
     <q-card class="bs moyennelargeur">
       <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [na.nom, ID.court(aSt.tribuC.id)])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqv1', [aSt.ccCpt.q1, edv1(aSt.ccCpt.q1), pc1])}}</div>
@@ -54,22 +54,21 @@
   </q-dialog>
 
   <!-- Changement de statut sponsor -->
-  <q-dialog v-model="ui.d.chgSp" persistent>
+  <q-dialog v-if="aSt.ccCpt.id === id" v-model="ui.d.BPchgSp" persistent>
     <q-card class="bs bg-secondary text-white petitelargeur q-pa-sm">
-        <div v-if="ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
-        <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
+      <div v-if="aSt.ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
+      <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
       <q-card-actions align="center">
         <q-btn dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn v-if="ccCpt.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
+        <q-btn v-if="aSt.ccCpt.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
         <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
-  <q-dialog v-model="ui.d.cptdial" persistent full-height>
-    <div class="bs"  style="width:80vw">
-    <q-layout container view="hHh lpR fFf" :class="sty">
+  <q-dialog v-if="aSt.ccCpt.id === id" v-model="ui.d.BPcptdial" full-height position="left" persistent>
+    <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -83,7 +82,6 @@
         </q-card>
       </q-page-container>
     </q-layout>
-    </div>
   </q-dialog>
 
 </div>
@@ -91,6 +89,7 @@
 <script>
 
 import { ref, toRef } from 'vue'
+import { encode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { ID } from '../app/api.mjs'
 // import BoutonHelp from '../components/BoutonHelp.vue'
@@ -116,7 +115,7 @@ export default {
   },
 
   watch: {
-    filtre (ap, av) { this.filter() }
+    filtre (ap, av) { this.filtrer() }
   },
   
   data () {
@@ -135,9 +134,10 @@ export default {
     edv2 (v) { return edvol(v * UNITEV2) },
 
     async getCpt() {
-      this.ccCpt = await new GetCompteursCompta().run(this.id)
-      this.pc1 = this.ccCpt.q1 ? Math.round((this.ccCpt.v1 * 100) / (this.ccCpt.q1 * UNITEV1)) : 0,
-      this.pc2 = this.ccCpt.q2 ? Math.round((this.ccCpt.v2 * 100) / (this.ccCpt.q2 * UNITEV2)) : 0
+      await new GetCompteursCompta().run(this.id)
+      const x = this.aSt.ccCpt
+      this.pc1 = x.q1 ? Math.round((x.v1 * 100) / (x.q1 * UNITEV1)) : 0,
+      this.pc2 = x.q2 ? Math.round((x.v2 * 100) / (x.q2 * UNITEV2)) : 0
     },
 
     async voirCompta () { // comptable OU sponsor
@@ -147,6 +147,10 @@ export default {
 
     async chgSponsor () { // comptable
       await this.getCpt()
+      if (ID.estComptable(this.id)) {
+        await afficherDiag(this.$t('PTspn1c'))
+        return
+      }
       if (!this.na) { 
         await afficherDiag(this.$t('PTspn1'))
         return
@@ -169,13 +173,13 @@ export default {
           const y = { 
             id: x.id,
             info: x.info ? x.info : ('#' + ID.court(x.id)), 
-            q1: x.q1, 
-            q2: x.q2,
-            d1: x.q1 - (e ? e.a1 : 0),
-            d2: x.q2 - (e ? e.a2 : 0)
+            q1: x.q[1], 
+            q2: x.q[2],
+            d1: x.q[1] - (e ? e.a1 : 0),
+            d2: x.q[2] - (e ? e.a2 : 0)
           }
-          y.ok1 = this.ccCpt.q1 <= y.d1
-          y.ok2 = this.ccCpt.q2 <= y.d2
+          y.ok1 = this.aSt.ccCpt.qv.q1 <= y.d1
+          y.ok2 = this.aSt.ccCpt.qv.q2 <= y.d2
           this.lstTr.push(y)
         }
       })
@@ -183,6 +187,10 @@ export default {
 
     async chgTribu () { // comptable
       await this.getCpt()
+        if (ID.estComptable(this.id)) {
+          await afficherDiag(this.$t('PTspn2c'))
+          return
+      }
       if (!this.na) { 
         await afficherDiag(this.$t('PTspn2'))
         return
@@ -195,18 +203,18 @@ export default {
 
     async changerTr () {
       this.ui.fD()
-      const cletAv = this.ccCpt.clet
+      const cletAv = this.aSt.ccCpt.clet
       const idtAv = Tribu.id(cletAv)
       const trAv = this.aSt.getTribu(idtAv)
-      const itAv = this.ccCpt.it
+      const itAv = this.aSt.ccCpt.it
       const notifAv = trAv.act[itAv].notif
       const idtAp = this.selx.id
       const cletAp = getCle(idtAp) // le comptable qui a les clés de toutes les tribus
-      const nasp = !this.ccCpt.sp ? null : await crypter(cletAp, new Uint8Array(encode(this.na.anr)))
+      const nasp = !this.aSt.ccCpt.sp ? null : await crypter(cletAp, new Uint8Array(encode(this.na.anr)))
       let notif = null, stn = 0
       if (notifAv) {
-        stn = notif.jbl ? 2 : 1
-        notif = await crypter(cletAp, new Uint8Array(encode(notif)))
+        stn = notifAv.stn
+        notif = await crypter(cletAp, notifAv.serial)
       }
       const cletX = await crypter(this.session.clek, cletAp)
       const pub = await this.aSt.getPub(this.id)

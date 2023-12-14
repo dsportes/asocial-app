@@ -43,7 +43,10 @@ export default ({
     }
   },
   methods: {
-    r1 (val) { return (val.length > 19 && val.length < 33) || this.$t('NP16') },
+    r1 (val) { 
+      const x = (val.length > 19 && val.length < 33) || this.$t('NP16') 
+      return x
+    },
 
     async crypterphrase () {
       if (!this.r1(this.phrase)) return

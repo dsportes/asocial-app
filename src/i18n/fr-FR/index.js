@@ -545,6 +545,7 @@ export default {
   OPinfotr: 'Mise à jour de l\'information d\'une tranche de quotas',
   OPntftr: 'Mise à jour de la notification d\'une tranche de quotas',
   OPmajtr: 'Mise à jour de l\'appartenance d\'un compte à une tranche de quotas',
+  OPsptr: 'Changer le statut de sponsor d\'une tranche de quotas d\'un compte.',
   OPntfco: 'Mise à jour de la notification d\'un compte',
   OPqtr: 'Mise à jour des quotas d\'une tranche de quotas',
   OPchtr: 'Changer un compte de tranche de quotas',
@@ -1273,6 +1274,8 @@ export default {
   PTcompta: 'Abonnement / consommation de {0}',
   PTspn1: 'Il n\'est pas possible de changer le statut de sponsor d\'un compte dont le nom est inconnu.',
   PTspn2: 'Il n\'est pas possible de changer de tranche de quotas un compte dont le nom est inconnu.',
+  PTspn1c: 'Il n\'est pas possible de changer le statut de sponsor du Comptable.',
+  PTspn2c: 'Il n\'est pas possible de changer le Comptable de tranche de quotas.',
 
   PTopt0: 'Pas de comptes "autonomes"',
   PTopt1: 'Le Comptable peut rendre un compte "autonome" sans son accord',

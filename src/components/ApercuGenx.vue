@@ -1,5 +1,5 @@
 <template>
-<div :class="(dkli(idx))">
+<div :class="dkli(idx)">
   <div class="q-pa-xs row items-start">
     <div class="col-auto items-center q-mr-sm column">
       <img class="photomax" :src="photo" />

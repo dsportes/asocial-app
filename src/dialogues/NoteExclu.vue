@@ -1,6 +1,6 @@
 <template>
-<q-dialog v-model="ui.d.NX" persistent full-height>
-<q-layout container view="hHh lpR fFf" :class="dkli(0) + ' bs dp50'">
+<q-dialog v-model="ui.d.NX" full-height position="left" persistent>
+  <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -84,6 +84,7 @@ export default {
   props: { },
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
   },
 
   watch: {

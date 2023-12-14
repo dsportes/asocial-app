@@ -40,7 +40,7 @@
         </div>
 
         <apercu-notif2 class="q-ml-lg q-mt-sm" :notif="esp.notif" :idx="idx" 
-          editable :type="0" :idsource="esp.id" @ok="setNotif"/>
+          editable :type="0" :idsource="esp.id" :ctx="{ ns: esp.id }"/>
 
       </div>
     </div>
@@ -269,12 +269,7 @@ export default {
       this.ui.fD()
       this.rafraichir()
     },
-    async setNotif(ntf) {
-      ntf.dh = Date.now()
-      const ns = ntf.idsource
-      delete ntf.idsource
-      await new SetNotifG().run(ntf, ns)
-    },
+
     async valider () {
       new SetEspaceT().run(this.esp.id, this.prf)
       this.ui.fD()
