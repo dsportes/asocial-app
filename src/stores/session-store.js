@@ -14,6 +14,7 @@ export const useSessionStore = defineStore('session', {
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
     estSponsor: false,
+    compteKO: false,
 
     /* namespace de 10 à 59 
     Pour "admin" : espace "courant", donc peut être 0

@@ -194,18 +194,17 @@ export default {
     },
 
     async delAvatar (id) {
-      if (await this.session.edit()) {
-        const lna = this.aSt.compte.lstAvatarNas
-        if (this.session.compteId === id) { // c'est le compte
-          if (lna.length > 1) { // il reste des avatars secondaires
-            await afficherDiag(this.$t('SAVer1'))
-            return
-          }
-          this.avid = 0
-        } else 
-          this.avid = id
-        this.ui.oD('SAsuppravatar')
-      }
+      if (!await this.session.edit()) return
+      const lna = this.aSt.compte.lstAvatarNas
+      if (this.session.compteId === id) { // c'est le compte
+        if (lna.length > 1) { // il reste des avatars secondaires
+          await afficherDiag(this.$t('SAVer1'))
+          return
+        }
+        this.avid = 0
+      } else 
+        this.avid = id
+      this.ui.oD('SAsuppravatar')
     }
   },
 
@@ -214,6 +213,16 @@ export default {
     const ui = stores.ui
     const aSt = stores.avatar
     const fSt = stores.filtre
+
+    /*
+    aSt.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setAvatar' || name === 'setCompte' || name === 'del') {
+          // ???
+        }
+      })
+    })
+    */
 
     return {
       ui, aSt, fSt, session

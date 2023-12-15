@@ -565,6 +565,12 @@ export async function compile (row) {
   return obj
 }
 
+export function estZombi (row) {
+  const z = row.dlv && row.dlv <= stores.session.dateJourConnx
+  // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
+  return z || !row._data_
+}
+
 /** Espaces **************************************
 _data_ :
 - `id` : de l'espace de 10 à 89.
@@ -840,7 +846,7 @@ export class Tribu extends GenDoc {
 
   get idSponsors () {
     const s = new Set()
-    this.act.forEach(x => { if (!x.vide && x.nasp) s.add(nasp.id) })
+    this.act.forEach(x => { if (!x.vide && x.nasp) s.add(x.nasp.id) })
     return s
   }
 

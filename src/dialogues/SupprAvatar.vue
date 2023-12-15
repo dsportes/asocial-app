@@ -11,7 +11,7 @@
     </q-toolbar>
     <div class="row justify-center items-center">
       <div class="titre-md text-bold text-italic q-mr-md">{{$t('SAVval' + (avid !== 0 ? '1' : '2'))}}</div>
-      <bouton-confirm :actif="checksOK" :confirmer="ui.oD('SAconfirmsuppr')"/>
+      <bouton-confirm :actif="checksOK" :confirmer="cftop"/>
     </div>
   </q-header>
 
@@ -26,8 +26,8 @@
       <div class="row q-my-md items-start">
         <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._notes" :label="$t('vu')" />
         <div class="col">
-          <div class="titre-md">{{$t('SAVnotes', s.nbn, { count: s.nbn })}}</div>
-          <div v-if="s.nbn" class="q-my-sm q-ml-md">{{$t('SAVvlib', [edvol(s.v1n), edvol(s.v2n)])}}</div>
+          <div class="titre-md">{{$t('SAVnotes', nbn, { count: nbn })}}</div>
+          <div v-if="nbn" class="q-my-sm q-ml-md">{{$t('SAVvlib', [edvol(v2n)])}}</div>
         </div>
       </div>
 
@@ -46,8 +46,8 @@
         <div class="col">
           <div class="titre-md">{{$t('SAVspons', s.sp.length, { count: s.sp.length })}}</div>
           <div class="q-ml-md">
-            <span v-for="s in s.sp" :key="s.ids" class="q-my-sm q-mr-sm b1">
-              {{s.descr.naf.nomc}}
+            <span v-for="x in s.sp" :key="x.ids" class="q-my-sm q-mr-sm b1">
+              {{x.descr.naf.nomc}}
             </span>
           </div>
         </div>
@@ -59,8 +59,8 @@
           <div class="titre-md">{{$t('SAVgr1', s.gr1.length, { count: s.gr1.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr1" :key="x.gr.id">
             <span class="b1 q-mr-lg">{{x.gr.na.nomc}}</span>
-            <span>{{$t('SAVvlib1', x.nbn, {count: x.nbn})}}</span>
-            <span class="q-ml-sm">{{$t('SAVvlib', [edvol(x.v1), edvol(x.v2)])}}</span>
+            <span>{{$t('SAVvlib1', x.nn, {count: x.nn})}}</span>
+            <span class="q-ml-sm">{{$t('SAVvlib', [edvol(x.v2)])}}</span>
           </div>
         </div>
       </div>
@@ -71,8 +71,8 @@
           <div class="titre-md">{{$t('SAVgr2', s.gr2.length, { count: s.gr2.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr2" :key="x.gr.id">
             <span class="b1 q-mr-lg">{{x.gr.na.nomc}}</span>
-            <span>{{$t('SAVvlib2', x.nbn, {count: x.nbn})}}</span>
-            <span class="q-ml-sm">{{$t('SAVvlib', [edvol(x.v1), edvol(x.v2)])}}</span>
+            <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
+            <span class="q-ml-sm">{{$t('SAVvlib3m', [edvol(x.v2)])}}</span>
           </div>
         </div>
       </div>
@@ -83,7 +83,7 @@
           <div class="titre-md">{{$t('SAVgr3', s.gr3.length, { count: s.gr3.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr3" :key="x.gr.id">
             <span class="b1 q-mr-lg">{{x.gr.na.nomc}}</span>
-            <span>{{$t('SAVvlib2', x.nbn, {count: x.nbn})}}</span>
+            <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
           </div>
         </div>
       </div>
@@ -94,7 +94,7 @@
           <div class="titre-md">{{$t('SAVgr0', s.gr0.length, { count: s.gr0.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr0" :key="x.gr.id">
             <span class="b1 q-mr-lg">{{x.gr.na.nomc}}</span>
-            <span>{{$t('SAVvlib2', x.nbn, {count: x.nbn})}}</span>
+            <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
           </div>
         </div>
       </div>
@@ -102,10 +102,12 @@
       <div v-if="avid !== 0" class="row q-my-md items-start">
         <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._vol" :label="$t('vu')" />
         <div class="col">
-          <div class="titre-md">{{$t('SAVvol')}}</div>        
-          <div class="q-ml-md q-my-sm">{{$t('SAVvolt', [edvol(s.v1n + s.v1g), edvol(s.v2n + s.v2g)])}}</div>
-          <div class="q-ml-lg q-my-sm">{{$t('SAVvola', [edvol(s.v1n), edvol(s.v2n)])}}</div>
-          <div class="q-ml-lg q-my-sm">{{$t('SAVvolg', [edvol(s.v1g), edvol(s.v2g)])}}</div>
+          <div v-if="s.nna + s.nng" class="titre-md">{{$t('SAVvol')}}</div>        
+          <div v-if="s.nna" class="q-ml-lg q-my-sm">{{$t('SAVvola', [s.nna, edvol(s.v2a)])}}</div>
+          <div v-if="s.nng" lass="q-ml-lg q-my-sm">{{$t('SAVvolg', [s.nng, edvol(s.v2g)])}}</div>
+          <div class="titre-md">{{$t('SAVabo')}}</div>        
+          <div class="q-ml-md q-my-sm">{{$t('SAVabo1', [s.nna + s.nng, s.ch.length, s.ng])}}</div>
+          <div v-if="s.v2a" class="q-ml-md q-my-sm">{{$t('SAVabo2', [edvol(s.v2a)])}}</div>
         </div>
       </div>
 
@@ -116,7 +118,8 @@
     <q-card class="bs largeur30 q-pa-sm">
       <div class="q-mt-md titre-lg text-italic">{{$t('SAVcf' + (avid !== 0 ? '1' : '2'))}}</div>
       <div class="q-mt-md row justify-center q-gutter-md">
-        <q-btn class="q-pa-xs" size="md" dense :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+        <q-btn class="q-pa-xs" size="md" dense :label="$t('renoncer')" 
+          color="primary" @click="ui.fD"/>
         <bouton-confirm actif :confirmer="valider"/>
       </div>
     </q-card>
@@ -128,7 +131,7 @@
 
 <script>
 import { ref, toRef, reactive } from 'vue'
-import { getNg, Compta, Versions } from '../app/modele.mjs'
+import { getNg, Avatar, Versions } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
@@ -148,7 +151,9 @@ export default ({
     checksOK () { 
       for (const x in this.s.checks) if (!this.s.checks[x]) return false
       return true 
-    }
+    },
+    nbn () { return this.s.nna + this.s.nng },
+    v2n () { return this.s.v2a + this.s.v2g }
   },
 
   data () {
@@ -160,6 +165,10 @@ export default ({
   },
 
   methods: {
+    cftop () {
+      this.ui.oD('SAconfirmsuppr')
+      // console.log(this.ui.d.SAconfirmsuppr)
+    },
     setCheck (x) {
       this.s.checks[x] = true
     },
@@ -168,8 +177,9 @@ export default ({
     args.token: éléments d'authentification du compte.
     args.id : id de l'avatar
     args.va : version de l'avatar
+    args.vap: version de l'avatar principal
     args.idc : id du compte - si égal à id, suppression du compte
-    args.idk : cet id crypté par la clé K du compte. Clé de la map mavk dans compta
+    args.idk : cet id court crypté par la clé K du compte. Clé de la map mavk dans compta
     args.chats : liste des id / ids des chats externes à traiter
     args.spons : liste des ids des sponsorings à purger
     args.dfh : date de fin d'hébergement des groupes
@@ -182,11 +192,11 @@ export default ({
     args.idt: id de la tribu du compte
     args.it: indice du compte dans act de tribu, pour suppression de cette entrée
     Suppression d'avatar seulement
-    args.dv1: réduction du volume v1 du compte (notes avatar et notes des groupes hébergés)
+    args.dnn, dnc, dng: réduction du nombre de notes, chats, groupes
     args.dv2
     Retour: OK
-    - true : suprresion OK
-    - false : retry requis, les versions des groupes et/ou avatar ont chnagé
+    - true : suppresion OK
+    - false : retry requis, les versions des groupes et/ou avatar ont chagé
     */
     async valider () {
       this.ui.fD() // boite de confirmation
@@ -194,26 +204,28 @@ export default ({
       const args = {
         id: this.na.id,
         va: Versions.v(this.na.id),
+        vap: Versions.v(this.session.compteId),
         idc: this.session.compteId,
-        idf: await Compta.mavkK(this.na.id, this.session.clek),
+        idk: await Avatar.mavkK(this.na.id),
         dfh: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.groupenonheb)
       }
       if (this.avid === 0) {
         args.idt = this.s.idt
-        args.rndc = getNg(this.session.compteId).hrnd
       } else {
-        args.dv1 = this.s.v1n + this.s.v1g
-        args.dv2 = this.s.v2n + this.s.v2g
+        args.dnn = this.s.nna + this.s.nng
+        args.dnc = this.s.ch.length
+        args.dng = this.s.ng
+        args.dv2 = this.s.v2a + this.s.v2g
       }
       args.chats = []
       this.s.ch.forEach(c => { args.chats.push([c.id, c.ids])})
       args.spons = []
       this.s.sp.forEach(s => { args.spons.push(s.ids)})
       args.grps = []
-      this.s.gr0.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.mb.ids, suppr: false })})
-      this.s.gr1.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.mb.ids, suppr: true })})
-      this.s.gr2.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.mb.ids, suppr: false })})
-      this.s.gr3.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.mb.ids, suppr: false })})
+      this.s.gr0.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.im, suppr: false })})
+      this.s.gr1.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.im, suppr: true })})
+      this.s.gr2.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.im, suppr: false })})
+      this.s.gr3.forEach(x => { args.grps.push({ idg: x.gr.id, vg: Versions.v(x.gr.id), im: x.im, suppr: false })})
       const ok = await new SupprAvatar().run(args)
       if (!ok) {
         await afficherDiag(this.$t('SAVret' + (this.avid ? '1' : '2')))
@@ -237,39 +249,43 @@ export default ({
     const s = reactive( { 
       checks: {},
       stats: {}, // map des nbn notes, v1 v2 par avatar et groupe
-      ch: [], // liste des chats
       /* gri : { 
         heb, dan, dac : est hébergeur, dernier actif, dernier animateur
         nnh, v2h : si hébergeur, nombre de notes et volume des fichiers hébergés
-        nn, v2 : nombre de notes et volume des fichiers hébergés
+        nn, v2 : nombre de notes et volume des fichiers
         gr, im : groupe, indice membre  
       }
       */
+      ng: 0, // nombres de groupes accédés
       gr1: [], // liste des groupes où l'avatar est le dernier actif
       gr2: [], // liste des groupes dont l'avatar est hébergeur (mais pas dernier actif)
       gr3: [], // liste des groupes dont l'avatar est le dernier animateur (mais pas hébergeur ni le dernier actif)
       gr0: [], // liste des autres groupes ou l'avatar apparaît
+
       sp: [], // liste des sponsorings
+      ch: [], // liste des chats
+
       nng: 0, // nombre total de notes des groupes hébérgés
       v2g: 0, // v2 total des fichiers des notes des groupes hébérgés
-      nn: 0, // nombre total des chats notes groupes de l'avatar
-      nc: 0,
-      ng: 0,
-      v2n: 0, // v2 total des fichiers des notes de l'avatar
+
+      nna: 0, // nombre total des notes de l'avatar
+      v2a: 0, // v2 total des fichiers des notes de l'avatar
+
       // résiliation compte
       dspt: false, // dernier sponsor de sa tribu
       hrnd: 0,
-      idt: 0
+      idt: 0, // id de la tribu
+      it: 0 // indice du compte dans sa tribu
     } )
 
     function init () { // TODO dans les listes de groupes s.gr0 ... s.gr3, les éléments x.mb sont remplacés par x.im
       const id = na.value.id
       s.checks = { _notes: false, _chats: false }
-      s.nng = 0; s.v2g = 0
+      s.nng = 0; s.v2g = 0; s.ng = 0
       s.stats = nSt.statsParRacine
 
       const a = s.stats[id]
-      s.nn = a.nn; s.v2n = a.v2
+      s.nna = a.nn; s.v2a = a.v2
 
       const e = aSt.getElt(id)
       s.ch = Array.from(e.chats.values())
@@ -279,6 +295,7 @@ export default ({
       if (s.sp.length) s.checks._spons = false
 
       aSt.compte.idGroupes(id).forEach(idg => {
+        s.ng++
         const egr = gSt.egr(idg)
         const x = {}
         x.gr = egr.groupe
@@ -314,10 +331,11 @@ export default ({
       if (avid.value === 0) {
         s.it = aSt.compta.it
         s.idt = aSt.compta.idt
-        const tribu = s.it ? aSt.tribu : null
-        const setSp = tribu.idSponsors
-        s.dspt = setSp.size === 1 && setSp.has(id)
-        if (s.dspt) s.checks._dspt = false
+        if (s.it) {
+          const setSp = aSt.tribu.idSponsors
+          s.dspt = setSp.size === 1 && setSp.has(id)
+          if (s.dspt) s.checks._dspt = false
+        } 
       } else {
         s.checks._vol = false
       }
@@ -345,6 +363,7 @@ export default ({
 
     init()
 
+    // console.log(ui.d.SAconfirmsuppr)
     return {
       session, ui, cfg,
       edvol, aSt, na, s, init, dkli

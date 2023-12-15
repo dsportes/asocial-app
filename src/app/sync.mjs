@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { Operation } from './operations.mjs'
 import { deconnexion } from './connexion.mjs'
 // import { decode } from '@msgpack/msgpack'
-import { compile, Versions, Compta } from './modele.mjs'
+import { compile, Versions, estZombi } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'
 import { $t, difference } from './util.mjs'
 import { appexc, ID } from './api.mjs'
@@ -313,6 +313,14 @@ export class OnchangeVersion extends OperationWS {
       this.gSt = stores.groupe
 
       await this.retry()
+
+      if (this.ret.rowVersions) for (const row of this.ret.rowVersions) {
+        if (row.id === this.session.compteId && estZombi(row)) {
+          stores.ui.compteKO = true
+          stores.ui.setPage('clos')
+          return
+        }
+      }
 
       // Comparaison entre avatar avant (this.avAvatar) et nouveau (this.avatar)
       this.grMoins = difference(this.grIdsAv, this.grIdsAp)
