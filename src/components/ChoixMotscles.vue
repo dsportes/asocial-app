@@ -1,5 +1,5 @@
 <template>
-<q-card class="bs petitelargeur">
+<q-card class="bs dp30">
   <q-toolbar class="bg-secondary text-white">
     <q-btn v-if="close" class="q-mr-xs" size="md" dense color="warning" 
       icon="close" @click="fermer"/>

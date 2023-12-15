@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.CCouvrir" persistent>
-<q-card class="bs largeur30">
+  <q-card :class="sty + ' bs dp40'">
   <q-toolbar class="bg-secondary text-white">
     <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
     <q-toolbar-title class="titre-lg full-size text-center">{{$t('CChtit')}}</q-toolbar-title>
@@ -31,6 +31,7 @@ export default ({
   components: { PhraseContact, BoutonHelp },
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
   },
 
   data () {

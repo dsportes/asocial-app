@@ -93,7 +93,6 @@
 </template>
 
 <script>
-import { ref } from 'vue'
 import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'

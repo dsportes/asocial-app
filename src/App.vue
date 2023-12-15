@@ -336,6 +336,7 @@ import DialogueHelp from './dialogues/DialogueHelp.vue'
 import PageClos from './pages/PageClos.vue'
 import PageAccueil from './pages/PageAccueil.vue'
 import PressePapier from './dialogues/PressePapier.vue'
+import DialogueNotif from './dialogues/DialogueNotif.vue'
 
 // Niveau 4
 import PageSponsorings from './pages/PageSponsorings.vue'
@@ -365,7 +366,6 @@ import PanelMembre from './dialogues/PanelMembre.vue'
 // Niveau 10
 import PageGroupe from './pages/PageGroupe.vue'
 
-import DialogueNotif from './dialogues/DialogueNotif.vue'
 export default {
   displayName: 'App',
   name: 'App',

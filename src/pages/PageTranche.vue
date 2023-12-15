@@ -122,7 +122,7 @@ import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols2 from '../components/QuotasVols2.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
-import { GetCompteursCompta, SetQuotas, SetNotifT, SetNotifC } from '../app/operations.mjs'
+import { SetQuotas, SetNotifT, SetNotifC } from '../app/operations.mjs'
 
 const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
 const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative']

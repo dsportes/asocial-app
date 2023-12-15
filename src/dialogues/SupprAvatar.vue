@@ -1,6 +1,6 @@
 <template>
-<q-dialog v-model="ui.d.SAsuppravatar" persistent full-height>
-<q-layout container view="hHh lpR fFf" :class="dkli(0) + ' bs dp50'">
+<q-dialog v-model="ui.d.SAsuppravatar" full-height position="left" persistent>
+<q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -133,7 +133,7 @@ import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { edvol, afficherDiag, sleep, dkli } from '../app/util.mjs'
-import { AMJ, limitesjour } from '../app/api.mjs'
+import { AMJ, limitesjour, FLAGS } from '../app/api.mjs'
 import { SupprAvatar } from '../app/operations.mjs'
 
 export default ({
@@ -144,6 +144,7 @@ export default ({
   components: { BoutonHelp, BoutonConfirm },
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     checksOK () { 
       for (const x in this.s.checks) if (!this.s.checks[x]) return false
       return true 
@@ -237,16 +238,24 @@ export default ({
       checks: {},
       stats: {}, // map des nbn notes, v1 v2 par avatar et groupe
       ch: [], // liste des chats
-      gr0: [], // liste des groupes
-      gr1: [], // liste des groupes
-      gr2: [], // liste des groupes
-      gr3: [], // liste des groupes
+      /* gri : { 
+        heb, dan, dac : est hébergeur, dernier actif, dernier animateur
+        nnh, v2h : si hébergeur, nombre de notes et volume des fichiers hébergés
+        nn, v2 : nombre de notes et volume des fichiers hébergés
+        gr, im : groupe, indice membre  
+      }
+      */
+      gr1: [], // liste des groupes où l'avatar est le dernier actif
+      gr2: [], // liste des groupes dont l'avatar est hébergeur (mais pas dernier actif)
+      gr3: [], // liste des groupes dont l'avatar est le dernier animateur (mais pas hébergeur ni le dernier actif)
+      gr0: [], // liste des autres groupes ou l'avatar apparaît
       sp: [], // liste des sponsorings
-      v1g: 0, // v1 total des groupes hébérgés
-      v2g: 0, // v2 total des groupes hébérgés
-      v1n: 0, // v1 total des notes de l'avatar
-      v2n: 0, // v2 total des notes de l'avatar
-      nbn: 0,  // nbre total des notes de l'avatar
+      nng: 0, // nombre total de notes des groupes hébérgés
+      v2g: 0, // v2 total des fichiers des notes des groupes hébérgés
+      nn: 0, // nombre total des chats notes groupes de l'avatar
+      nc: 0,
+      ng: 0,
+      v2n: 0, // v2 total des fichiers des notes de l'avatar
       // résiliation compte
       dspt: false, // dernier sponsor de sa tribu
       hrnd: 0,
@@ -256,36 +265,56 @@ export default ({
     function init () { // TODO dans les listes de groupes s.gr0 ... s.gr3, les éléments x.mb sont remplacés par x.im
       const id = na.value.id
       s.checks = { _notes: false, _chats: false }
-      s.v1g = 0; s.v2g = 0
+      s.nng = 0; s.v2g = 0
       s.stats = nSt.statsParRacine
+
       const a = s.stats[id]
-      s.v1n = a.v1; s.v2n = a.v2; s.nbn = a.n
+      s.nn = a.nn; s.v2n = a.v2
+
       const e = aSt.getElt(id)
       s.ch = Array.from(e.chats.values())
+
       s.sp = []
-      for (const sp of Array.from(e.sponsorings.values()))
-        if (sp.st === 0) s.sp.push(sp)
+      e.sponsorings.forEach(sp => { if (sp.st === 0) s.sp.push(sp) })
       if (s.sp.length) s.checks._spons = false
+
       aSt.compte.idGroupes(id).forEach(idg => {
         const egr = gSt.egr(idg)
         const x = {}
         x.gr = egr.groupe
         x.im = aSt.compte.imGA(idg, id)
+        x.nn = egr.objv.vols.v1
+        x.v2 = egr.objv.vols.v2
         if (x.gr.imh === x.im) { 
-          x.heb = true; x.nbn = s.stats[idg].n; x.v1 = egr.objv.vols.v1; x.v2 = egr.objv.vols.v2
-          s.v1g += x.v1; s.v2g += x.v2
+          x.heb = true
+          x.nnh = x.nn
+          x.v2h = x.v2
+          s.nng += x.nn
+          s.v2g += x.v2
+        } else {
+          x.nnh = 0
+          x.v2h = 0
         }
-        const y = gSt.animIds(egr); if (y.size === 1 && y.has(id)) x.dan = true
-        const z = gSt.actifIds(egr); if (z.size === 1 && z.has(id)) x.dac = true
-        x.nbn = s.stats[idg].n
+        
+        let nan = 0, nac = 0, estAn = false, estAc = false
+        for (let i = 1; i < x.gr.flags.length; i++) {
+          const f = x.gr.flags[i]
+          if (f & FLAGS.AN) { nan++; if (i == x.im) estAn = true }
+          if (f & FLAGS.AC) { nac++; if (i == x.im) estAc = true }
+        }
+        x.dan = nan === 1 && estAn
+        x.dac = nac === 1 && estAc
+
         x.st = x.dac ? 1 : (x.heb ? 2 : (x.dan ? 3 : 0))
         s['gr' + x.st].push(x)
       })
+
       for (let i = 0; i < 4; i++) if (s['gr' + i].length) s.checks['_gr' + i] = false
+
       if (avid.value === 0) {
         s.it = aSt.compta.it
         s.idt = aSt.compta.idt
-        const tribu = aSt.tribu
+        const tribu = s.it ? aSt.tribu : null
         const setSp = tribu.idSponsors
         s.dspt = setSp.size === 1 && setSp.has(id)
         if (s.dspt) s.checks._dspt = false
@@ -318,7 +347,6 @@ export default ({
 
     return {
       session, ui, cfg,
-      confirmsuppr, ovconfirmsuppr,
       edvol, aSt, na, s, init, dkli
     }
   }

@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="ui.d.dialogueerreur" persistent>
-    <q-card v-if="ui.exc" class="bs q-pa-xs moyennelargeur">
+    <q-card v-if="ui.exc" :class="sty + ' bs dp30'">
       <q-card-section>
         <div v-if="exc.sync" class="titre-lg">{{$t('ERsync')}}</div>
         <div v-if="exc.code!==8101" class="titre-lg">
@@ -42,6 +42,7 @@ export default ({
   name: 'DialogueErreur',
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     html () { return html(this.exc) },
     exc () {
       return this.ui.exc || { code: 0, majeur : 0 }

@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.NC" persistent>
-<q-card class="bs sp40">
+<q-card :class="sty + ' bs dp30'">
   <q-toolbar class="bg-secondary text-white">
     <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
     <q-toolbar-title class="titre-lg full-width text-center">
@@ -44,7 +44,9 @@ export default {
     op: String // suppr arch react
   },
 
-  computed: { },
+  computed: { 
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+  },
 
   methods: { 
     async noteopx () {

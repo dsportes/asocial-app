@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.dialoguehelp" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="sty" style="width:90vw;max-width:90vw !important;">
+  <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
         <q-btn dense size="md" icon="close" color="warning" 

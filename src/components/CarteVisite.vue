@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.CVedition" persistent>
-  <q-card class="bs moyennelargeur">
+  <q-card :class="sty + ' bs dp40'">
     <q-toolbar class="bg-secondary text-white">
       <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CVtit')}}</q-toolbar-title>
@@ -88,6 +88,7 @@ export default ({
   },
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     taillephoto () { return TPH },
     modif () {
       return this.resultat.info !== this.infoInit || this.modifph

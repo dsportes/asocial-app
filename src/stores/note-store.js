@@ -154,15 +154,13 @@ export const useNoteStore = defineStore('note', {
       for (const [key, node] of state.map) {
         const {id, ids} = splitPK(key)
         if (node.type >= 4 && node.type <= 5) {
-          let e = m[id]; if (!e) { e = { n: 0, v1: 0, v2: 0 }; m[id] = e }
-          const n = node.note
-          e.n++
-          e.v1 += n.v1
-          e.v2 += n.v2
+          let e = m[id]; if (!e) { e = { nn: 0, v2: 0 }; m[id] = e }
+          e.nn++
+          e.v2 += node.note.v2
         }
       }
       for (const r of state.nodes) {
-        if (!m[r.key]) m[r.key] = { n: 0, v1: 0, v2: 0 }
+        if (!m[r.key]) m[r.key] = { nn: 0, v2: 0 }
       }
       return m
     }

@@ -64,6 +64,7 @@ export default {
   },
 
   computed: {
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
   },
 
   data () { return {
