@@ -4,25 +4,6 @@
     <q-toolbar>
       <bouton-help page="page1"/>
 
-      <bouton-langue style="position:relative;top:2px;"/>
-
-      <!-- Dark ou clair -->
-      <q-btn dense size="md" icon="contrast" @click="tgdark">
-        <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
-      </q-btn>
-
-      <!-- Outils et tests -->
-      <q-btn dense size="md" icon="settings" @click="ui.oD('PAoutilsTests')">
-        <q-tooltip>{{$t('MLAout')}}</q-tooltip>
-      </q-btn>
-
-      <!-- Information session : mode synchro -->
-      <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession()"
-        dense size="md" icon="autorenew" color="primary">
-        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-        <queue-icon/>
-      </q-btn>
-
       <!-- Information session : mode incognito -->
       <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession()"
         size="sm" square color="primary">
@@ -41,7 +22,7 @@
       <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
         @click="clickNotif" apptb/>
 
-      <q-toolbar-title class="titre-md text-right cursor-pointer q-mx-xs">
+      <q-toolbar-title class="titre-md text-right q-mx-xs">
         <span v-if="session.ok" class="titre-lg">{{aSt.avC.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
         <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
@@ -111,6 +92,34 @@
     </q-toolbar>
 
   </q-header>
+
+  <q-footer style="overflow:hidden">
+    <q-toolbar style="position:relative">
+      <bouton-langue style="position:relative;top:2px;"/>
+
+      <!-- Dark ou clair -->
+      <q-btn dense size="md" icon="contrast" @click="tgdark">
+        <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
+      </q-btn>
+
+      <!-- Outils et tests -->
+      <q-btn dense size="md" icon="settings" @click="ui.oD('PAoutilsTests')">
+        <q-tooltip>{{$t('MLAout')}}</q-tooltip>
+      </q-btn>
+
+      <!-- Information session : mode synchro -->
+      <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession()"
+        dense size="md" icon="autorenew" color="primary">
+        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
+        <queue-icon/>
+      </q-btn>
+
+      <div v-if="ui.message" @click="ui.effacermessage" style="z-index:1000"
+        :class="'fs-md font-mono text-right q-mx-xs cursor-pointer ' + (ui.message.important ? 'bg-yellow-5 text-negative' : '')">
+        {{ ui.message.texte }}
+      </div>
+    </q-toolbar>
+  </q-footer>
 
   <q-drawer v-model="pfiltre" side="right" elevated bordered persistent
     :width="250" :breakpoint="seuillarge" :overlay="etroite">
@@ -206,13 +215,14 @@
     </transition-group>
   </q-page-container>
 
+<!--
   <q-dialog v-model="ui.aunmessage" seamless position="bottom">
     <div :class="'q-pa-sm cursor-pointer ' + (ui.message.important ? 'msgimp' : 'text-white bg-grey-9')"  
       @click="ui.effacermessage">
       {{ ui.message.texte }}
     </div>
   </q-dialog>
-
+-->
   <q-dialog v-model="ui.d.diag" persistent>
     <q-card :class="lidk + ' petitelargeur q-pa-sm'">
       <div class="text-center titre-lg q-my-sm">{{$t('UTIatt')}}</div>

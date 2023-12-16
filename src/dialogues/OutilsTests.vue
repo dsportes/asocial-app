@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.PAoutilsTests" full-height persistent position="left">
-  <q-layout container view="hHh lpR fFf" :class="sty + ' d30'">
+  <q-layout container view="hHh lpR fFf" :class="styp('sm')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
         <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -110,7 +110,7 @@ import stores from '../stores/stores.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { EchoTexte, ErreurFonc } from '../app/connexion.mjs'
-import { dhcool, $t, html, afficherDiag, sleep, edvol, b64ToU8, u8ToB64 } from '../app/util.mjs'
+import { styp, dhcool, $t, html, afficherDiag, edvol, b64ToU8, u8ToB64 } from '../app/util.mjs'
 import { ping } from '../app/net.mjs'
 import { getCompte, vuIDB, deleteIDB } from '../app/db.mjs'
 import { PingDB } from '../app/connexion.mjs'
@@ -124,7 +124,6 @@ export default ({
   components: { PhraseSecrete, BoutonHelp /*, CompTest */ },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
   },
 
   data () {
@@ -301,7 +300,7 @@ export default ({
     }
     
     return {
-      session, config, ui,
+      styp, session, config, ui,
       bases,
       nbbases,
       getBases,

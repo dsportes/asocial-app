@@ -15,6 +15,9 @@
       "dialogues/*": [
         "src/dialogues/*"
       ],
+      "panels/*": [
+        "src/panels/*"
+      ],
       "pages/*": [
         "src/pages/*"
       ],

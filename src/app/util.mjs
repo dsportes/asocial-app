@@ -19,6 +19,11 @@ export function dkli (idx) {
   return ($q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0')) + ' '
 }
 
+export function styp (sz) { 
+  if (!$q) $q = useQuasar()
+  return ($q.dark.isActive ? 'sombre bsf pw' : 'clair bsc pw') + (sz || 'md')
+}
+
 const decoder = new TextDecoder('utf-8')
 const encoder = new TextEncoder('utf-8')
 

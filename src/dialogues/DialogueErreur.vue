@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="ui.d.dialogueerreur" persistent>
-    <q-card v-if="ui.exc" :class="sty + ' bs dp30'">
+    <q-card v-if="ui.exc" :class="styp('sm')">
       <q-card-section>
         <div v-if="exc.sync" class="titre-lg">{{$t('ERsync')}}</div>
         <div v-if="exc.code!==8101" class="titre-lg">
@@ -33,7 +33,7 @@
 import stores from '../stores/stores.mjs'
 
 import { reconnexionCompte, deconnexion } from '../app/connexion.mjs'
-import { html } from '../app/util.mjs'
+import { styp, html } from '../app/util.mjs'
 
 const lcont = new Set([1, 4, 6, 7])
 const lmod = new Set([5, 8])
@@ -42,7 +42,6 @@ export default ({
   name: 'DialogueErreur',
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     html () { return html(this.exc) },
     exc () {
       return this.ui.exc || { code: 0, majeur : 0 }
@@ -89,7 +88,8 @@ export default ({
   setup () {
     return {
       ui:  stores.ui,
-      session: stores.session
+      session: stores.session,
+      styp
     }
   }
 })

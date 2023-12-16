@@ -96,7 +96,6 @@
       <page-menu/>
     </q-card>
 
-    <outils-tests v-if="ui.d.PAoutilsTests"/>
   </div>
 </template>
 
@@ -107,13 +106,12 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
 import NotifIcon2 from '../components/NotifIcon2.vue'
 import QueueIcon from '../components/QueueIcon.vue'
-import OutilsTests from '../dialogues/OutilsTests.vue'
 import PageMenu from '../pages/PageMenu.vue'
 
 export default {
   name: 'PageAccueil',
 
-  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon, OutilsTests },
+  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon },
 
   computed: {
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
