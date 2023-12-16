@@ -26,18 +26,19 @@
         <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
       </template>
     </q-input>
-    <div class="row justify-between items-center no-wrap">
-      <div v-if="isDev">
+    <div class="row justify-between items-center">
+      <div v-if="isDev" class="row">
         <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
           :key="idx" @click="selph(p)">{{idx}}</span>
       </div>
       <div v-else></div>
       <div>
-        <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" size="md" @click="ko" />
+        <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" 
+          size="md" @click="ko" padding="xs md"/>
         <q-btn color="warning" :label="labelVal()" size="md" :icon-right="iconValider"
-          :disable="!ligne1 || ligne1.length < lgph" @click="ok" />
+          padding="xs md" :disable="!ligne1 || ligne1.length < lgph" @click="ok" />
       </div>
-    </div>
+      </div>
     <div class="simple-keyboard"></div>
   </q-card-section>
 </template>
@@ -49,7 +50,7 @@ import { toRef, ref, watch, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { Phrase } from '../app/modele.mjs'
-import { $t } from '../app/util.mjs'
+import { $t, sleep } from '../app/util.mjs'
 
 export default ({
   name: 'PhraseSecrete',
@@ -114,6 +115,7 @@ export default ({
         const pc = new Phrase()
         await pc.init(this.ligne1, this.orgext || this.session.org)
         pc.phrase = null
+        // await sleep(5000)
         this.$emit('ok', pc)
         this.raz()
       }, 300)

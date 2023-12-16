@@ -2,10 +2,11 @@
 <div>
   <div v-if="!ui.d.SHfs" style="position:relative">
     <div v-if="zoom || edit" class="row btn">
-      <q-btn v-if="zoom" dense color="primary" icon="fullscreen" size="md" @click.stop="ui.oD('SHfs')">
+      <q-btn v-if="zoom" dense color="primary" icon="fullscreen" size="md" padding="none"
+        @click.stop="ui.oD('SHfs')">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="edit" class="q-ml-xs" dense color="warning" 
+      <q-btn v-if="edit" class="q-ml-xs" dense color="warning" padding="none"
         icon="edit" size="md" @click.stop="editer">
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>

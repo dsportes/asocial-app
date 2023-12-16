@@ -1,59 +1,27 @@
 <template>
 <q-layout view="hHh LPR lfr">
   <q-header elevated>
-    <q-toolbar>
+    <q-toolbar class="full-width">
+
       <bouton-help page="page1"/>
-
-      <!-- Information session : mode incognito -->
-      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession()"
-        size="sm" square color="primary">
-        <img src="~assets/incognito_blanc.svg">
-        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-      </q-avatar>
-
-      <!-- Information session : mode avion -->
-      <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession()"
-        dense size="md" icon="airplanemode_active" color="primary">
-        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-        <queue-icon/>
-      </q-btn>
 
       <!-- Notifications -->
       <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
         @click="clickNotif" apptb/>
 
-      <q-toolbar-title class="titre-md text-right q-mx-xs">
-        <span v-if="session.ok" class="titre-lg">{{aSt.avC.na.nomc}}</span>
-        <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
-        <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
-      </q-toolbar-title>
-
-      <!-- Déconnexion -->
-      <q-btn v-if="session.status > 1" dense size="md" color="warning" icon="logout"
-        @click="discon">
-        <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
-        <span class="fs-sm font-mono">{{hms(session.dh)}}</span>
-      </q-btn>
-    </q-toolbar>
-
-    <q-toolbar inset class="full-width bg-secondary text-white">
-      <bouton-help page="page1"/>
       <q-btn v-if="session.ok && !session.estMinimal" size="md" icon="menu">
         <q-menu v-model="ui.menug" max-height="90vh" class="bg-secondary text-white">
           <page-menu menu/>
         </q-menu>
       </q-btn>
+
       <q-btn :disable="!aHome" flat icon="home" size="md" 
         :color="aHome ? 'warning' : 'grey'" dense @click="gotoAccueilLogin()"/>
       <q-btn v-if="ui.pageback" flat icon="arrow_back" size="md" 
         dense @click="gotoBack()"/>
+
       <q-toolbar-title class="titre-lg text-center"><span>{{titrePage}}</span>
       </q-toolbar-title>
-
-      <q-btn v-if="aUnFiltre" color="warning"
-        dense size="md" icon="search" @click="ouvrFiltre">
-        <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
-      </q-btn>
 
       <!-- Fichiers avion -->
       <q-btn v-if="session.ok" :disable="session.incognito" dense size="md" icon="save"
@@ -65,6 +33,11 @@
       <q-btn v-if="session.ok" dense size="md" icon="content_paste"
         @click="ui.oD('pressepapier')">
         <q-tooltip>{{$t('MLApp')}}</q-tooltip>
+      </q-btn>
+
+      <q-btn v-if="session.ok && aUnFiltre" color="warning"
+        dense size="md" icon="search" @click="ouvrFiltre">
+        <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </q-btn>
 
     </q-toolbar>
@@ -94,7 +67,9 @@
   </q-header>
 
   <q-footer style="overflow:hidden">
-    <q-toolbar style="position:relative">
+    <q-toolbar class="sombre">
+      <bouton-help page="page1"/>
+
       <bouton-langue style="position:relative;top:2px;"/>
 
       <!-- Dark ou clair -->
@@ -109,15 +84,38 @@
 
       <!-- Information session : mode synchro -->
       <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession()"
-        dense size="md" icon="autorenew" color="primary">
+        dense size="md" icon="autorenew">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
         <queue-icon/>
       </q-btn>
 
-      <div v-if="ui.message" @click="ui.effacermessage" style="z-index:1000"
-        :class="'fs-md font-mono text-right q-mx-xs cursor-pointer ' + (ui.message.important ? 'bg-yellow-5 text-negative' : '')">
-        {{ ui.message.texte }}
-      </div>
+      <!-- Information session : mode incognito -->
+      <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession()"
+        size="sm" square>
+        <img src="~assets/incognito_blanc.svg">
+        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
+      </q-avatar>
+
+      <!-- Information session : mode avion -->
+      <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession()"
+        dense size="md" icon="airplanemode_active">
+        <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
+        <queue-icon/>
+      </q-btn>
+
+      <q-toolbar-title class="titre-md text-right q-mx-xs">
+        <span v-if="session.ok" class="titre-lg">{{aSt.avC.na.nomc}}</span>
+        <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
+        <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
+      </q-toolbar-title>
+
+      <!-- Déconnexion -->
+      <q-btn v-if="session.status > 1" dense size="md" color="warning" icon="logout"
+        @click="discon">
+        <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
+        <span class="fs-sm font-mono">{{hms(session.dh)}}</span>
+      </q-btn>
+
     </q-toolbar>
   </q-footer>
 
@@ -215,14 +213,15 @@
     </transition-group>
   </q-page-container>
 
-<!--
   <q-dialog v-model="ui.aunmessage" seamless position="bottom">
-    <div :class="'q-pa-sm cursor-pointer ' + (ui.message.important ? 'msgimp' : 'text-white bg-grey-9')"  
-      @click="ui.effacermessage">
-      {{ ui.message.texte }}
+    <div style="min-width:100vw !important; position: relative">
+      <div :class="'msg sombre1 q-pa-sm cursor-pointer text-center titre-sm text-bold ' + (ui.message.important ? 'bg-yellow-5 text-negative' : '')"  
+        @click="ui.effacermessage">
+        {{ ui.message.texte }}
+      </div>
     </div>
   </q-dialog>
--->
+
   <q-dialog v-model="ui.d.diag" persistent>
     <q-card :class="lidk + ' petitelargeur q-pa-sm'">
       <div class="text-center titre-lg q-my-sm">{{$t('UTIatt')}}</div>
@@ -578,5 +577,7 @@ un élément qui apparaît quand le drawer est caché*/
   padding: 2px
 .q-tab
   min-height: 0 !important
-
+.msg
+  height:1.9rem
+  overflow: hidden
 </style>

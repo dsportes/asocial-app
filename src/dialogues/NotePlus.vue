@@ -1,7 +1,7 @@
 <template>
 <span>
-  <q-btn v-if="bav === 2" dense class="q-mr-xs btn" no-caps :label="$t('NPLnote', [avSel.nom])" 
-    icon="control_point" color="primary"
+  <q-btn v-if="bav === 2" dense class="q-mr-xs" no-caps :label="$t('NPLnote', [avSel.nom])" 
+    icon="control_point" color="primary" padding="xs" size="sm"
     icon-right="expand_more">
     <q-menu anchor="bottom left" self="top left" max-height="10rem" 
       max-width="10rem">
@@ -14,11 +14,11 @@
     </q-menu>
   </q-btn>
 
-  <q-btn v-if="bav === 1" dense class="q-mr-xs btn" no-caps :label="$t('NPLnote', [avatar.na.nom])" 
-    icon="control_point" color="primary" @click="okav"/>
+  <q-btn v-if="bav === 1" dense class="q-mr-xs" no-caps :label="$t('NPLnote', [avatar.na.nom])" 
+    icon="control_point" color="primary" @click="okav" padding="xs" size="sm"/>
 
-  <q-btn v-if="bgr === 1" dense class="q-mr-xs btn" no-caps :label="$t('NPLnote', [groupe.na.nom])" 
-    icon="control_point" color="orange" @click="okgr"/>
+  <q-btn v-if="bgr === 1" dense class="q-mr-xs" no-caps :label="$t('NPLnote', [groupe.na.nom])" 
+    icon="control_point" color="orange" @click="okgr" padding="xs" size="sm"/>
 
   <note-nouvelle v-if="ui.d.NNnotenouvelle" :estgr="estgr" :groupe="groupe" :avatar="avatar" :notep="notep"/>
 

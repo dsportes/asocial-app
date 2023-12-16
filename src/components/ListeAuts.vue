@@ -11,7 +11,7 @@
       {{$t('PNOauts2')}}
     </div>
 
-    <apercu-cv v-if="ui.d.ACVouvrir" :na="nax"/>
+    <apercu-cv v-if="ui.d.ACVouvrir" :id="nax.id"/>
 
   </div>
 </template>

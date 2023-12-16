@@ -18,13 +18,13 @@
     expand-separator icon="send" :label="$t('LOGconn2')"
     group="g1" default-opened header-class="titre-lg bg-primary text-white">
     <div class="fs-md column justify-center">
-        <phrase-secrete label-valider="LOGconn" icon-valider="send" @ok="onps"/>
-        <div :class="!session.synchro ? 'disabled' : ''">
-          <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
-            class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
-          <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
-            class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
-        </div>
+      <phrase-secrete label-valider="LOGconn" icon-valider="send" @ok="onps"/>
+      <div :class="!session.synchro ? 'disabled' : ''">
+        <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
+          class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
+        <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
+          class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
+      </div>
     </div>
   </q-expansion-item>
 

@@ -21,7 +21,12 @@ export function dkli (idx) {
 
 export function styp (sz) { 
   if (!$q) $q = useQuasar()
-  return ($q.dark.isActive ? 'sombre bsf pw' : 'clair bsc pw') + (sz || 'md')
+  return ($q.dark.isActive ? 'sombre bsf pw' : 'clair bsc pw') + (sz || 'md') + ' '
+}
+
+export function sty () { 
+  if (!$q) $q = useQuasar()
+  return $q.dark.isActive ? 'sombre ' : 'clair '
 }
 
 const decoder = new TextDecoder('utf-8')

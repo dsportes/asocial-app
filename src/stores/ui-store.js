@@ -160,27 +160,13 @@ export const useUiStore = defineStore('ui', {
     closeMenug () { 
       this.menug = false
     },
-    /*
+    
     afficherMessage (texte, important) {
       if (this.messageto) clearTimeout(this.messageto)
       this.message = { texte, important: important || false }
       this.aunmessage = true
       this.messageto = setTimeout(() => { 
         this.effacermessage()
-      }, important ? 10000 : 5000)
-    },
-
-    effacermessage () {
-      this.message = null
-      this.aunmessage = false
-    },
-    */
-    afficherMessage (texte, important) {
-      if (this.messageto) clearTimeout(this.messageto)
-      this.message = { texte, important: important || false }
-      this.aunmessage = true
-      this.messageto = setTimeout(() => { 
-        // this.effacermessage()
       }, important ? 10000 : 5000)
     },
 

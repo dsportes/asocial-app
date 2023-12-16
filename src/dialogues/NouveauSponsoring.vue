@@ -268,11 +268,6 @@ export default ({
 <style lang="sass">
 .bordt
   border-top: 1px solid $grey-5
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
-.q-btn
-  padding: 0 !important
 .q-stepper--vertical
   padding: 4px !important
 .q-stepper--bordered
