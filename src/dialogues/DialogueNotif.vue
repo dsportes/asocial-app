@@ -126,9 +126,6 @@ export default {
   padding: 2px
 .btn2
   max-height: 1.5rem
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
 .q-item__section--avatar
   min-width: 0 !important
 </style>

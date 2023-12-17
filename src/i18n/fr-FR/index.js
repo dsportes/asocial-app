@@ -1759,6 +1759,7 @@ export default {
   PPchats: 'Chats',
   PPgroupes: 'Participations aux groupes',
   PPco: 'Compte non sponsor',
+  PPpaschat: 'chat pas encore initialisé',
   PPcht: 'Changer de tranche de quotas',
   PPchsp: 'Changer le statut de "sponsor"',
   PPcompta: 'Voir l\'utilisation des volumes',
@@ -1884,6 +1885,8 @@ export default {
   MMCmc: 'Mots clés:',
   MMCap: 'Mots clés et commentaire à propos de {0}',
   MMCnomaj: 'Mise à jour non autorisée : {0}',
+  MCChint: '3 à 12 lettres, émoji conseillé en tête',
+  MCCph: 'Par exemple: Ecologie',
   
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.

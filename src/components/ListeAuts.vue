@@ -11,22 +11,19 @@
       {{$t('PNOauts2')}}
     </div>
 
-    <apercu-cv v-if="ui.d.ACVouvrir" :id="nax.id"/>
-
   </div>
 </template>
 
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import ApercuCv from '../components/ApercuCv.vue'
 
 export default {
   name: 'ListeAuts',
 
   props: { },
 
-  components: { ApercuCv },
+  components: { },
 
   computed: {
     nb () { return this.nSt.note.auts.length }
@@ -34,7 +31,6 @@ export default {
 
   data () {
     return {
-      nax: null
     }
   },
 
@@ -46,7 +42,7 @@ export default {
       return m ? m.na : null
     },
     openCv (im) {
-      this.nax = this.na(im)
+      this.ui.cveditionId = this.na(im).id
       this.ui.oD('ACVouvrir')
     }
   },

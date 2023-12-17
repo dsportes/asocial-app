@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.CVedition" persistent>
-  <q-card :class="sty + ' bs dp40'">
+  <q-card :class="styp('md')">
     <q-toolbar class="bg-secondary text-white">
       <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CVtit')}}</q-toolbar-title>
@@ -62,15 +62,17 @@
   </q-card>
 </q-dialog>
 </template>
-<script>
 
-import { ref, watch, toRef, reactive } from 'vue'
-import BoutonHelp from './BoutonHelp.vue'
-import EditeurMd from './EditeurMd.vue'
-import { readFile } from '../app/util.mjs'
+<script>
 import Webcam from 'webcam-easy'
 import { Cropper } from 'vue-advanced-cropper'
+
+import { ref, watch, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
+import { styp, readFile } from '../app/util.mjs'
+
+import BoutonHelp from '../components/BoutonHelp.vue'
+import EditeurMd from '../components/EditeurMd.vue'
 
 const TPH = { height: 32, width: 32 }
 
@@ -221,11 +223,10 @@ export default ({
     init()
 
     return {
-      ui,
+      ui, styp,
       phdef,
       clic,
       nom,
-      // sid,
       md,
       webcam,
       canvas,

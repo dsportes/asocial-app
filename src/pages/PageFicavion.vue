@@ -216,9 +216,6 @@ export default ({
 @import '../css/input.sass'
 .filler
   height: 2rem
-.q-toolbar
-  padding: 0px !important
-  min-height: 0 !important
 .q-card > div
   box-shadow: inherit !important
 </style>

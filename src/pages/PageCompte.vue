@@ -1,5 +1,5 @@
 <template>
-  <q-page class="column q-pa-xs sp50">
+  <q-page class="column q-pa-xs splg">
     <div class="row items-center justify-around q-py-xs">
       <div> <!-- Changement de phrase secrète -->
         <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
@@ -11,12 +11,10 @@
           :label="$t('CPTnvav')" color="warning" dense @click="ouvrirNvav"/>
         <bouton-help class="q-ml-sm" page="page1"/>
       </div>
-    </div>
-
-    <!-- Mots clés du compte -->
-    <div class="row items-center q-my-xs">
-      <div class="titre-md q-mr-md">{{$t('CPTkwc')}}</div>
-      <q-btn icon="open_in_new" size="sm" color="primary" @click="mcleditAut"/>
+      <!-- mots clés du compte -->
+      <q-btn icon="open_in_new" size="md" color="primary" padding="xs xs"
+        :label="$t('CPTkwc')" no-caps
+        @click="mcleditAut"/>
     </div>
 
     <div v-if="aSt.compta.estA || aSt.compta.estSponsor" 
@@ -36,15 +34,15 @@
         <div :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')">
           <apercu-avatar edit  :idav="na.id" :idx="idx"/>
           <div class="row q-mt-sm q-gutter-sm">
-            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps
+            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps padding="xs xs"
               :label="$t('ACgroupes')" color="primary" dense @click="courant(na.id, 2)">
               <q-badge class="cl1" color="secondary" rounded>{{nbgrps(na.id)}}</q-badge>
             </q-btn>
-            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps
+            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps padding="xs xs"
               :label="$t('ACseschats')" color="primary" dense @click="courant(na.id, 3)">
               <q-badge class="cl1" color="secondary" rounded>{{nbchats(na.id)}}</q-badge>
             </q-btn>
-            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps
+            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps padding="xs xs"
               :label="$t('ACsponsorings')" color="primary" dense @click="courant(na.id, 4)">
               <q-badge class="cl1" color="secondary" rounded>{{nbspons(na.id)}}</q-badge>
             </q-btn>
@@ -58,7 +56,7 @@
 
     <!-- Dialogue de création d'un nouvel avatar -->
     <q-dialog v-model="ui.d.PCnvav" persistent>
-      <q-card class="bs moyennelargeur">
+      <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTnvav2')}}</q-toolbar-title>
@@ -70,7 +68,7 @@
 
     <!-- Dialogue de changement de la phrase secrète -->
     <q-dialog v-model="ui.d.PCchgps" persistent>
-      <q-card class="bs petitelargeur">
+      <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTchps2')}}</q-toolbar-title>
@@ -79,9 +77,9 @@
         <phrase-secrete class="q-ma-xs" @ok="okps" verif icon-valider="check" 
             label-valider="continuer" :orgext="session.org"/>
         <q-card-actions>
-          <q-btn dense :label="$t('renoncer')" color="primary" icon="close" @click="ui.fD"/>
+          <q-btn flat dense :label="$t('renoncer')" color="primary" icon="close" @click="ui.fD"/>
           <q-btn dense :disable="ps===null" :label="$t('CPTvcp')" 
-            color="warning" icon="check" @click="changerps"/>
+            color="warning" icon="check" padding="xs xs" @click="changerps"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -99,12 +97,12 @@ import stores from '../stores/stores.mjs'
 import { crypter } from '../app/webcrypto.mjs'
 import { ChangementPS, MotsclesCompte, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
-import MotsCles from '../components/MotsCles.vue'
+import MotsCles from '../dialogues/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
-import SupprAvatar from '../dialogues/SupprAvatar.vue'
-import { afficherDiag, trapex } from '../app/util.mjs'
+import SupprAvatar from '../panels/SupprAvatar.vue'
+import { styp, afficherDiag, trapex } from '../app/util.mjs'
 import { isAppExc } from '../app/api.mjs'
 
 export default {
@@ -225,7 +223,7 @@ export default {
     */
 
     return {
-      ui, aSt, fSt, session
+      ui, aSt, fSt, session, styp
     }
   }
 
@@ -234,9 +232,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
 .q-btn
   padding: 2px 4px !important
 .bord

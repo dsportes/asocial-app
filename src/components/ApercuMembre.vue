@@ -512,9 +512,6 @@ export default {
 @import '../css/app.sass'
 .lgsel
   width: 10rem
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
 .mlx
   margin-left: 2rem
 .q-tab

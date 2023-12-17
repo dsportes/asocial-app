@@ -1,9 +1,9 @@
 <template>
 <q-dialog v-model="ui.d.SAsuppravatar" full-height position="left" persistent>
-<q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
+<q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+      <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
       <q-toolbar-title v-if="avid!==0" class="titre-lg full-width text-center">{{$t('SAVtit1', [na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-else class="titre-lg full-width text-center text-bold bg-yellow-5 text-negative">
         {{$t('SAVtit2', [na.nom])}}</q-toolbar-title>
@@ -135,7 +135,7 @@ import { getNg, Avatar, Versions } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
-import { edvol, afficherDiag, sleep, dkli } from '../app/util.mjs'
+import { styp, edvol, afficherDiag, sleep, dkli } from '../app/util.mjs'
 import { AMJ, limitesjour, FLAGS } from '../app/api.mjs'
 import { SupprAvatar } from '../app/operations.mjs'
 
@@ -366,7 +366,7 @@ export default ({
     // console.log(ui.d.SAconfirmsuppr)
     return {
       session, ui, cfg,
-      edvol, aSt, na, s, init, dkli
+      styp, edvol, aSt, na, s, init, dkli
     }
   }
 })
@@ -374,9 +374,6 @@ export default ({
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
 .q-btn
   padding: 0 !important
 .cb

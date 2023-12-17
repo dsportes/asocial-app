@@ -1,16 +1,17 @@
 <template>
 <q-dialog v-model="ui.d.ACVouvrir" persistent>
-  <q-card class="petitelargeur column bs minh">
+  <q-card :class="styp('sm') + 'column minh'">
     <q-toolbar class="col-auto bg-secondary text-white">
       <q-btn dense size="md" color="primary" icon="close" @click="ui.fD"/>
       <q-toolbar-title>
         <span class="titre-lg">{{estAvc ? na.nom : na.nomc}}</span> 
         <span v-if="estAvc" class="titre-md q-ml-md">[{{$t('moi')}}]</span>
       </q-toolbar-title>
-      <q-btn v-if="!estGroupe && !estAvc && net" dense size="md" 
+      <q-btn v-if="!estGroupe && !estAvc && net" dense size="md" padding="none" round
         color="primary" icon="refresh" @click="refresh"/>
-      <q-btn v-if="estAvc || (estGroupe && !diag)" dense size="md" icon="edit" color="primary"
-        :label="$t('editer')" @click="ui.oD('CVedition')"/>
+      <q-btn v-if="(estAvc || estGroupe) && !diag" dense size="md" 
+        icon="edit" color="primary"
+        :label="$t('editer')" @click="ovcved"/>
     </q-toolbar>
     <q-toolbar inset v-if="estAvc && diag" class="bg-yellow-5 text-bold text-black titre-md">
       {{diag}}
@@ -23,26 +24,28 @@
     </div>
 
     <!-- Dialogue d'édition de la carte de visite -->
-    <carte-visite v-model="ui.d.CVedition" :photo-init="photo" :info-init="info" :na="na"/>
+    <carte-visite v-model="ui.d.CVedition" 
+      :photo-init="photo" :info-init="info" :na="na"/>
 
   </q-card>
 </q-dialog>
 </template>
 
 <script>
-import { ref, toRef } from 'vue'
+import { ref } from 'vue'
+
 import stores from '../stores/stores.mjs'
-import ShowHtml from './ShowHtml.vue'
-import CarteVisite from './CarteVisite.vue'
 import { ChargerCvs, MajCv, MajCvGr } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
-import { $t } from '../app/util.mjs'
+import { styp, $t } from '../app/util.mjs'
+
+import ShowHtml from '../components/ShowHtml.vue'
+import CarteVisite from '../dialogues/CarteVisite.vue'
 
 export default {
   name: 'ApercuCv',
 
-  props: { 
-    id: Number
+  props: {
   },
 
   components: { ShowHtml, CarteVisite },
@@ -59,6 +62,11 @@ export default {
   },
 
   methods: {
+    ovcved () {
+      this.ui.cveditionId = this.id
+      this.ui.oD('CVedition')
+    },
+
     async refresh () {
       const x = await new ChargerCvs().run(this.id)
       if (x) cv = x
@@ -76,7 +84,7 @@ export default {
 
   },
 
-  setup (props) {
+  setup () {
     const session = stores.session
     const ui = stores.ui
     const aSt = stores.avatar
@@ -85,7 +93,7 @@ export default {
 
     const agp = ref() // un avatar, un groupe ou un people
 
-    const id = toRef(props, 'id')
+    const id = ref(ui.cveditionId)
     const na = ref()
     const cv = ref()
 
@@ -143,7 +151,7 @@ export default {
     }
 
     return {
-      session, ui, ID, aSt, estAvc, estGroupe, na, cv, agp, diag,
+      styp, session, ui, ID, aSt, estAvc, estGroupe, id, na, cv, agp, diag,
       net: session.accesNet
     }
   }
@@ -151,10 +159,6 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bord
-  border-top: 1px solid $grey-5
-.q-btn
-  padding: 1px !important
 .minh
   min-height:20rem
 </style>

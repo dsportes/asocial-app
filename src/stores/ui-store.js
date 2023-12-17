@@ -20,6 +20,9 @@ export const useUiStore = defineStore('ui', {
     message: null,
     aunmessage: false,
 
+    mcmemoId: 0, // id du McMemo en édition
+    cveditionId: 0, // id de l'avatar / groupe dont la CV est en édition
+
     helpstack: [],
 
     etf: 0, // étape fichier

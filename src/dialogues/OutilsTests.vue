@@ -314,9 +314,7 @@ export default ({
 @import '../css/app.sass'
 .q-card__section
   padding: 5px
-.q-toolbar
-  min-height: 0 !important
-  padding: 0 !important
+
 .t1
   font-style: italic
   color: $primary

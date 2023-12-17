@@ -18,11 +18,13 @@
     </q-input>
     <div v-if="labelValider" class="row justify-between items-center no-wrap">
       <q-btn flat dense color="primary" icon="close" :label="$t('renoncer')" @click="ko" />
-      <q-btn v-if="phase < 3" color="warning" glossy :label="labelValider" size="md" :icon-right="iconValider"
-      :disable="r1(nom) !== true || r2(nom) !== true" @click="ok" />
+      <q-btn v-if="phase < 3" color="warning" :label="labelValider" 
+        size="md" :icon="iconValider" padding="xs xs"
+        :disable="r1(nom) !== true || r2(nom) !== true" @click="ok" />
     </div>
   </q-card-section>
 </template>
+
 <script>
 import { interdits, regInt } from '../app/api.mjs'
 

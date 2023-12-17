@@ -1,5 +1,5 @@
 <template>
-<q-layout view="hHh LPR lfr">
+<q-layout view="hHh lpR fFf">
   <q-header elevated>
     <q-toolbar class="full-width">
 
@@ -66,8 +66,8 @@
 
   </q-header>
 
-  <q-footer style="overflow:hidden">
-    <q-toolbar class="sombre">
+  <q-footer>
+    <q-toolbar class="sombre overflow-hidden">
       <bouton-help page="page1"/>
 
       <bouton-langue style="position:relative;top:2px;"/>
@@ -265,6 +265,7 @@
   <panel-membre v-if="ui.d.PMdetailsmembre"/>
   <outils-tests v-if="ui.d.PAoutilsTests"/>
   <dialogue-notif v-if="ui.d.DNdialoguenotif"/>
+  <apercu-cv v-if="ui.d.ACVouvrir"/>
 
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
@@ -350,6 +351,7 @@ import DialogueNotif from './dialogues/DialogueNotif.vue'
 // Niveau 4
 import PageSponsorings from './pages/PageSponsorings.vue'
 import PageEspace from './pages/PageEspace.vue'
+import ApercuCv from './dialogues/ApercuCv.vue'
 
 // Niveau 5
 import PageLogin from './pages/PageLogin.vue'
@@ -386,7 +388,8 @@ export default {
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
     FiltreRac, FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
-    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, PressePapier, DialogueNotif
+    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
+    PressePapier, DialogueNotif, ApercuCv
    },
 
   computed: {
@@ -556,25 +559,6 @@ un élément qui apparaît quand le drawer est caché*/
 .spinlargeur
   width: 15rem
   max-width: 95vw
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
-.q-btn
-  padding: 0 2px !important
-.q-item
-  min-height: 0 !important
-.msgimp
-  background-color: $grey-2
-  color: $negative
-  font-weight: bold
-  border: 2px solid $negative
-.bdg1
-  position: absolute
-  top: 6px
-  width: 24px
-.bg2
-  border-radius: 5px
-  padding: 2px
 .q-tab
   min-height: 0 !important
 .msg

@@ -3,8 +3,9 @@
   <div class="q-pa-xs row items-start">
     <div class="col-auto items-center q-mr-sm column">
       <img class="photomax" :src="photo" />
-      <q-btn v-if="!ID.estComptable(id)"
-        size="sm" icon="zoom_in" dense color="primary" @click.stop="ui.oD('ACVouvrir')"/>
+      <q-btn v-if="!ID.estComptable(id)" class="q-mt-xs"
+        size="md" icon="zoom_in" dense color="primary" padding="none" round
+        @click.stop="ovcv"/>
     </div>
     <div class="col">
       <div class="row">
@@ -14,7 +15,7 @@
           <span class="fs-sm font-mono q-mr-sm">
             {{'#' + id + (im ? ' ['+ im + ']': '')}}</span> 
         </div>
-        <q-btn class="col-auto" v-if="!estAvc && !estGroupe && !det && !nodet" 
+        <q-btn class="col-auto" v-if="!estAvc && !estGroupe && !det" 
           dense size="md" color="primary" icon="open_in_new"
           :label="$t('page')" @click.stop="ouvrirdetails"/>
       </div>
@@ -23,9 +24,6 @@
     </div>
   </div>
   <q-separator color="orange" size="1px"/>
-
-  <!-- Dialogue d'affichage de la carte de visite -->
-  <apercu-cv v-if="ui.d.ACVouvrir" :id="id"/>
 
 </div>
 </template>
@@ -38,7 +36,6 @@ import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
 // Niveau 4
-import ApercuCv from './ApercuCv.vue'
 import McMemo from './McMemo.vue'
 
 export default {
@@ -47,11 +44,10 @@ export default {
   props: { 
     id: Number,
     im: Number,
-    idx: Number,
-    nodet: Boolean
+    idx: Number
   },
 
-  components: { ApercuCv, McMemo },
+  components: { McMemo },
 
   computed: {
     estGr () { return ID.estGroupe(this.na.id) },
@@ -66,6 +62,10 @@ export default {
   },
 
   methods: {
+    ovcv () {
+      this.ui.cveditionId = this.id 
+      this.ui.oD('ACVouvrir')
+    },
     ouvrirdetails () {
       this.session.setPeopleId(this.id)
       this.ui.oD('detailspeople')

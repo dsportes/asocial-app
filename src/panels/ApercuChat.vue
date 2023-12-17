@@ -1,17 +1,18 @@
 <template>
 <q-dialog v-model="ui.d.ACouvrir" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
-    <div style="height:5rem;background:color:transparent"/>
-    <q-header elevated class="bg-secondary text-white">
-      <q-toolbar>
-        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+    <q-header elevated>
+      <q-toolbar class="bg-secondary text-white">
+        <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [naI.nom, naE.nom])}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
       <apercu-genx class="bordb" :id="naE.id" :idx="idx" />
-      <div class="q-pa-xs row justify-around">
-        <q-btn :label="$t('CHadd2')" class="btn" icon="add" color="primary" @click="editer"/>
-        <q-btn :label="$t('CHrac')" class="btn" icon="phone_disabled" color="primary" @click="raccrocher"/>
+      <div :class="sty() + 'q-pa-xs row justify-around'">
+        <q-btn :label="$t('CHadd2')" icon="add" 
+          padding="none xs" color="primary" @click="editer"/>
+        <q-btn :label="$t('CHrac')" icon="phone_disabled" 
+          padding="none xs" color="primary" @click="raccrocher"/>
       </div>
     </q-header>
 
@@ -27,7 +28,8 @@
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
                 <span>{{it.a===0 ? $t('moi') : naE.nom}}</span>
-                <q-btn v-if="it.a===0 && !it.dfx" size="sm" icon="clear" color="warning" @click="effacer(it.dh)"/>
+                <q-btn v-if="it.a===0 && !it.dfx" size="sm" padding="none" round
+                  icon="clear" color="warning" @click="effacer(it.dh)"/>
               </div>
             </template>
           </q-chat-message>
@@ -43,7 +45,7 @@
 
     <!-- Confirmation d'effacement d'un échange -->
     <q-dialog v-model="ui.d.ACconfirmeff">
-      <q-card class="bs">
+      <q-card :class="styp('sm')">
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHeff')}}
         </q-card-section>
@@ -56,7 +58,7 @@
 
     <!-- Confirmation du raccrocher -->
     <q-dialog v-model="ui.d.ACconfirmrac">
-      <q-card class="bs">
+      <q-card :class="styp('sm')">
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHrac2', [naE.nom])}}
         </q-card-section>
@@ -69,8 +71,8 @@
 
     <!-- Dialogue d'ajout d'un item au chat -->
     <q-dialog v-model="ui.d.ACchatedit">
-      <q-card>
-        <q-toolbar>
+      <q-card :class="styp('sm')">
+        <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd')}}</q-toolbar-title>
           <bouton-help page="page1"/>
@@ -91,23 +93,28 @@
 import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import SdDark1 from './SdDark1.vue'
-import EditeurMd from './EditeurMd.vue'
-import { dhcool, dkli, afficherDiag } from '../app/util.mjs'
-import ApercuGenx from './ApercuGenx.vue'
-import BoutonHelp from './BoutonHelp.vue'
+import SdDark1 from '../components/SdDark1.vue'
+import EditeurMd from '../components/EditeurMd.vue'
+import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
+import ApercuGenx from '../components/ApercuGenx.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 import { MajChat, PassifChat, NouveauChat } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
 
 export default {
   name: 'ApercuChat',
 
-  props: { naI: Object, naE: Object, ids: Number, idx: Number, mapmc: Object },
+  props: { 
+    naI: Object, 
+    naE: Object, 
+    ids: Number, 
+    idx: Number, 
+    mapmc: Object 
+  },
 
   components: { SdDark1, EditeurMd, ApercuGenx, BoutonHelp },
 
-  computed: { 
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+  computed: {
     estSp () {
       const id = this.naE.id
       return ID.estComptable(id) || this.pSt.estSponsor(id)
@@ -234,7 +241,7 @@ export default {
     )
 
     return {
-      dkli, dhcool,
+      styp, sty, dkli, dhcool,
       session, pSt, ui,
       chat
     }
@@ -243,20 +250,6 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bord
-  border-top: 1px solid $grey-5
 .bordb
   border-bottom: 1px solid $grey-5
-.nom
-  max-height: 1.3rem
-  overflow: hidden
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
-.btn1
-  padding: 0 !important
-  width: 1.5rem !important
-.btn
-  min-height: 1.5rem !important
-  max-height: 1.5rem !important
 </style>

@@ -94,7 +94,4 @@ export default ({
 <style lang="sass" scoped>
 @import '../css/app.sass'
 @import '../css/input.sass'
-.q-toolbar
-  min-height: 0 !important
-  padding: 0 !important
 </style>

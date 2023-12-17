@@ -1,22 +1,21 @@
 <template>
 <q-dialog v-model="ui.d.MCmcledit" persistent>
-<q-card class="bs dp30">
+<q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
     <q-btn class="q-mr-xs" dense size="md" color="warning"
-      icon="close" @click="cancelEdit"/>
+      icon="close" @click="ui.fD"/>
     <q-btn v-if="!motscles.mc.st.enedition && !diag" dense size="md" color="primary"
-      icon="mode_edit" label="Editer" @click="startEdit"/>
-    <q-btn v-if="motscles.mc.st.enedition && !diag" dense size="md" color="primary"
-      icon="add_circle" label="Nouveau" @click="ajoutermc"/>
-    <q-btn v-if="motscles.mc.st.enedition && !diag" dense class="q-ml-xs" size="md" color="primary"
-      icon="undo" label="Annuler" @click="cancelEdit"/>
-    <q-btn v-if="motscles.mc.st.enedition && !diag" 
-      :disable="!motscles.mc.st.modifie" dense class="q-ml-xs" size="md" color="warning"
-      icon="check" label="Valider" @click="okEdit"/>
-    <!--q-btn v-if="!diag" dense size="md" color="warning" icon="close" @click="cancelEdit"/-->
+      icon="mode_edit" pading="xs xs" round @click="startEdit"/>
     <q-toolbar-title class="titre-lg full-width text-center">
       {{idg ? $t('MCgr', [getNg(idg).nomc]) : $t('MCc')}}
     </q-toolbar-title>
+    <q-btn v-if="motscles.mc.st.enedition && !diag" dense size="md" color="primary"
+      icon="add_circle" pading="xs xs" round @click="ajoutermc"/>
+    <!--q-btn v-if="motscles.mc.st.enedition && !diag" dense class="q-ml-xs" size="md" color="primary"
+      icon="undo" pading="xs xs" round @click="undo"/-->
+    <q-btn v-if="motscles.mc.st.enedition && !diag" 
+      :disable="!motscles.mc.st.modifie" dense class="q-ml-xs" size="md" color="warning"
+      icon="check" :label="$t('valider')" @click="okEdit"/>
     <bouton-help page="page1"/>
   </q-toolbar>
   <q-toolbar inset v-if="diag" class="titre-md text-bold text-negative bg-yellow-5">{{diag}}</q-toolbar>
@@ -24,15 +23,16 @@
   <div ref="root">
     <div v-if="ajouter" class="column border1 q-ma-xs q-pa-sm full-width">
       <div class="row justify-start q-gutter-xs">
-        <q-btn size="sm" icon="close" dense color="primary" label="Renoncer" @click="undo"></q-btn>
-        <q-btn class="q-ml-md" size="sm" icon="check" dense color="warning" label="OK" @click="ok"></q-btn>
+        <q-btn size="sm" icon="close" dense color="primary" :label="$t('renoncer')" @click="undo"></q-btn>
+        <q-btn class="q-ml-md" size="sm" icon="check" dense color="warning" :label="$t('ok')" @click="ok"></q-btn>
       </div>
       <q-input class="inp" v-model="categ" label="Catégorie" counter placeholder="Par exemple: Sections">
         <template v-slot:hint>{{$t('MChint')}}</template>
       </q-input>
       <div id="ta">
-        <q-input class="inp" v-model="nom" label="Nom" counter maxlength="12" placeholder="Par exemple: Ecologie">
-          <template v-slot:hint>3 à 12 lettres, émoji conseillé en tête</template>
+        <q-input class="inp" v-model="nom" label="Nom" counter maxlength="12" 
+          :placeholder="$t('MCCph')">
+          <template v-slot:hint>{{$t('MCChint')}}</template>
           <template v-slot:append>
             <q-btn label="❤️" size="md" dense @click="ouvriremoji"/>
           </template>
@@ -55,8 +55,10 @@
             <span class="fs-sm font-mono q-px-xs">[{{item[1]}}]</span>
             <span class="fs-sm q-px-xs text-italic">{{$t('tmc' + Math.floor(item[1] / 100))}}</span>
             <span v-if="motscles.mc.st.enedition && ((item[1] < 200 && item[1] >= 100 && motscles.gr) || (item[1] < 100 && !motscles.gr))">
-              <q-btn icon="mode_edit" size="sm" color="primary" dense @click="edit(categ, item[0], item[1])"></q-btn>
-              <q-btn class="q-ml-sm" v-if="categ === obs" icon="close" color="warning" size="sm" dense @click="suppr(categ, item[1])"></q-btn>
+              <q-btn icon="mode_edit" size="sm" color="primary" padding="none" round
+                dense @click="edit(categ, item[0], item[1])"></q-btn>
+              <q-btn class="q-ml-sm" v-if="categ === obs" icon="close" padding="none" round
+                color="warning" size="sm" dense @click="suppr(categ, item[1])"></q-btn>
             </span>
           </div>
         </q-tab-panel>
@@ -72,10 +74,10 @@
 <script>
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
-import ChoixEmoji from './ChoixEmoji.vue'
-import BoutonHelp from './BoutonHelp.vue'
+import ChoixEmoji from '../components/ChoixEmoji.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 import { Motscles, getNg } from '../app/modele.mjs'
-import { $t, afficherDiag } from '../app/util.mjs'
+import { styp, $t, afficherDiag } from '../app/util.mjs'
 import { MotsclesGroupe, MotsclesCompte } from '../app/operations.mjs'
 
 export default ({
@@ -197,6 +199,7 @@ export default ({
     */
     return {
       obs: $t('obs'),
+      styp,
       motscles,
       session,
       getNg,
@@ -218,11 +221,6 @@ export default ({
 .inp
   width: 80%
   max-width: 20rem
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
-.q-btn
-  padding: 0 !important
 .border1
   border-radius: 5px
   border: 1px solid $grey-5

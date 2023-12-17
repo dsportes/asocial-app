@@ -242,7 +242,7 @@ import QuotasVols2 from './QuotasVols2.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 
 // Niveau 2
-import MotsCles from './MotsCles.vue'
+import MotsCles from '../dialogues/MotsCles.vue'
 
 // Niveau 5
 import ApercuGenx from './ApercuGenx.vue'
@@ -541,9 +541,7 @@ export default {
 .nom
   max-height: 1.3rem
   overflow: hidden
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
+
 .btn1
   padding: 1px !important
   width: 1.5rem !important

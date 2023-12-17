@@ -142,9 +142,6 @@ export default ({
 @import '../css/app.sass'
 .filler
   height: 2rem
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
 .vlst
   max-height: 5rem
   overflow-y: auto

@@ -136,9 +136,6 @@ export default {
 @import '../css/app.sass'
 .bord
   border-top: 1px solid $grey-5
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
 .q-btn
   padding: 0 !important
 </style>

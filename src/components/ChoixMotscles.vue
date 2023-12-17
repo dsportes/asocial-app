@@ -1,14 +1,13 @@
 <template>
-<q-card class="bs dp30">
+<q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
-    <q-btn v-if="close" class="q-mr-xs" size="md" dense color="warning" 
-      icon="close" @click="fermer"/>
+    <q-btn class="q-mr-xs" size="md" dense color="warning" icon="close" @click="ui.fD"/>
     <q-toolbar-title class="titre-lg text-center">{{titre || $t('CMCtit')}}</q-toolbar-title>
     <bouton-help :page="help || 'page1'" />
-    <q-btn v-if="okLabel && editable" class="q-ml-xs" size="md" dense color="warning" 
-      icon="check" :label="okLabel" @click="ok"/>
     <q-btn v-if="editable" :disable="!modif" class="q-ml-xs" size="md"
       dense flat icon="undo" @click="undo"/>
+    <q-btn v-if="editable" class="q-ml-xs" size="md" dense color="warning" 
+      icon="check" :label="$t('ok')" @click="ok"/>
   </q-toolbar>
 
   <div class="q-pa-xs row justify-start">
@@ -46,10 +45,12 @@
   </q-splitter>
 </q-card>
 </template>
+
 <script>
 import { toRef, ref, watch, reactive } from 'vue'
+import stores from '../stores/stores.mjs'
 import BoutonHelp from './BoutonHelp.vue'
-import { egaliteU8, select, deselect, cloneU8, $t, afficherDiag } from '../app/util.mjs'
+import { styp, egaliteU8, select, deselect, cloneU8, $t, afficherDiag } from '../app/util.mjs'
 import { Motscles } from '../app/modele.mjs'
 
 export default ({
@@ -64,9 +65,7 @@ export default ({
     initValue: Object, // OBLIGATOIRE - voire new Uin8Array([])
     titre: String,
     help: String,
-    close: Boolean,
-    editable: Boolean,
-    okLabel: String
+    editable: Boolean
   },
 
   components: { BoutonHelp },
@@ -95,11 +94,9 @@ export default ({
       const t = !x ? '' : x.c + '@' + x.n
       return t
     },
-    fermer () {
-      this.$emit('close', true)
-    },
     ok () {
       this.$emit('ok', this.courante)
+      this.ui.fD()
     },
     undo () {
       this.courante = cloneU8(this.initValue)
@@ -119,6 +116,7 @@ export default ({
   },
 
   setup (props, context) {
+    const ui = stores.ui
     const duCompte = toRef(props, 'duCompte')
     const duGroupe = toRef(props, 'duGroupe')
 
@@ -147,6 +145,7 @@ export default ({
     const nn = ref(2)
 
     return {
+      styp, ui,
       courante,
       motscles,
       tab,
@@ -172,7 +171,4 @@ export default ({
   border:1px solid grey
 .barre
   text-decoration: line-through
-.q-toolbar
-  padding: 2px !important
-  min-height: 0 !important
 </style>

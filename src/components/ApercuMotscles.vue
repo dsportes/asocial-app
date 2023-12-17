@@ -7,14 +7,15 @@
       <span v-for="n in src" :key="n" 
         :class="sty(n) + ' q-mr-xs q-px-xs bg-secondary text-white'">{{nom(n)}}</span>
     </div>
-    <q-btn v-if="edit" class="col-auto btn1" size="sm" icon="edit" color="warning" @click="editer">
+    <q-btn v-if="edit" class="col-auto" size="md" padding="none" round
+      icon="edit" color="warning" @click="editer">
       <q-tooltip class="bg-white text-primary">{{$t('editer')}}</q-tooltip>
     </q-btn>
   </div>
   <q-dialog v-model="ui.d.AMmcedit" persistent>
     <choix-motscles :du-groupe="duGroupe" :du-compte="duCompte"
       :init-value="src || mcvide" editable
-      :titre="$t('MCchoix')" :ok-label="$t('ok')" @ok="okmc"/>
+      :titre="$t('MCchoix')" @ok="okmc"/>
   </q-dialog>
 </div>
 </template>
@@ -48,10 +49,9 @@ export default ({
   methods: {
     async editer () {
       if (! await this.session.edit()) return
-      if (this.edit) this.ui.oD('ACmcedit')
+      if (this.edit) this.ui.oD('AMmcedit')
     },
     okmc (mc) { 
-      this.ui.fD()
       if (mc) this.$emit('ok', mc)
     },
     sty (idx) {
@@ -83,9 +83,6 @@ export default ({
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.btn1
-  padding: 0 !important
-  width: 1.5rem !important
 .cmc
   border-radius: 3px
   border: 1px solid $warning

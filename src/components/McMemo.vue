@@ -1,22 +1,22 @@
 <template>
   <div ref="root">
     <div :class="dkli(idx)">
-      <div v-if="large" class="row full-width">
+      <div v-if="large" class="row full-width items-center">
         <div class="col-6 text-italic fs-sm z1">
           <span v-if="memolg">{{memolg}}</span>
           <span v-else>{{$t('MMCnomemo')}}</span>
         </div>
         <div class="col">
-          <div v-if="mclg.length" class="row q-gutter-xs fs-sm font-mono z1">
+          <div v-if="mclg.length" class="row q-gutter-xs fs-sm font-mono z1 items-center">
             <div class="text-warning text-bold q-mr-xs">{{mclg.length}}</div>
-            <div v-for="mc in mclg" :key="mc" 
-              class="bg-yellow-2 text-bold text-black">
+            <div v-for="mc in mclg" :key="mc" class="bg-yellow-2 text-bold text-black">
               {{mc}}
             </div>
           </div>
           <div v-else class="text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
         </div>
-        <q-btn class="col-auto text-right btn" size="sm" color="primary" icon="edit" @click="zoom"/>
+        <q-btn class="col-auto text-right" size="md" color="primary" padding="none" round
+          icon="edit" @click="zoom"/>
       </div>
 
       <div v-else class="column full-width">
@@ -24,7 +24,7 @@
           <span v-if="memolg">{{memolg}}</span>
           <span v-else>{{$t('MMCnomemo')}}</span>
         </div>
-        <div class="row">
+        <div class="row items-center">
           <div v-if="mclg.length" class="col row q-gutter-xs fs-sm font-mono z1">
             <div class="text-warning text-bold q-mr-xs">{{mclg.length}}</div>
             <div v-for="mc in mclg" :key="mc" 
@@ -33,13 +33,14 @@
             </div>
           </div>
           <div v-else class="col text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
-          <q-btn class="col-auto text-right btn" size="sm" color="primary" icon="edit" @click="zoom"/>
+          <q-btn class="col-auto text-right" size="md" color="primary" padding="none" round
+            icon="edit" @click="zoom"/>
         </div>
       </div>
     </div>
 
-    <q-dialog v-model="ui.d.MMedition">
-      <q-card class="bs dp40">
+    <q-dialog v-if="ui.mcmemoId === id" v-model="ui.d.MMedition">
+      <q-card :class="styp('md')">
         <q-toolbar class="col-auto bg-secondary text-white">
           <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
           <q-toolbar-title>{{$t('MMCap', [nom])}}</q-toolbar-title>
@@ -79,7 +80,7 @@ import stores from '../stores/stores.mjs'
 import { Motscles, getNg } from '../app/modele.mjs'
 import ApercuMotscles from './ApercuMotscles.vue'
 import EditeurMd from './EditeurMd.vue'
-import { dkli, titre } from '../app/util.mjs'
+import { styp, dkli, titre } from '../app/util.mjs'
 import { McMemo } from '../app/operations.mjs'
 
 const LARGE = 500
@@ -122,6 +123,8 @@ export default {
       this.diag = await this.session.editDiag
       this.nvmc = null
       this.txt = this.memo
+      this.ui.mcmemoId = this.id
+      console.log(this.ui.mcmemoId)
       this.ui.oD('MMedition')
     },
     changerMc (nvmc) {
@@ -144,6 +147,7 @@ export default {
     const root = ref(null)
     const large = ref(false)
 
+    // console.log("setup McMemo ", id.value, ui.mcmemoId)
     const mcmemo = ref(null)
     
     function getmm () {
@@ -173,7 +177,7 @@ export default {
     })
 
     return {
-      session, ui, root, large,
+      styp, session, ui, root, large,
       mcmemo, dkli, titre, mapmc
     }
   }

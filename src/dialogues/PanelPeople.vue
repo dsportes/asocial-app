@@ -1,9 +1,9 @@
 <template>
 <q-dialog v-model="ui.d.detailspeople" full-height position="left" persistent>
-<q-layout v-if="session.ok" container view="hHh lpR fFf" :class="sty + ' d40'">
+<q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+      <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('APtit', [pSt.peC.na.nom])}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -26,9 +26,11 @@
 
       <div class="titre-md text-italic y-mb-sm">{{$t('PPchats')}}</div>
 
-      <div v-for="(na, idx) in aSt.compte.lstAvatarNas" :key="na.id">
-        <apercu-chat class="q-my-md" affnai
-          :na-i="na" :na-e="pSt.peC.na" :ids="ids[na.id]" :idx="idx" :mapmc="mapmc"/>
+      <div class="q-ml-lg" v-for="(na) in aSt.compte.lstAvatarNas" :key="na.id">
+        <q-btn class="q-my-xs" :label="na.nom" icon="open_in_new" padding="xs sm"
+          no-caps outline @click="opench(na)"/>
+        <span v-if="!aSt.getChat(na.id, ids[na.id])" class="q-ml-md text-italic">
+          {{$t('PPpaschat')}}</span>
       </div>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
@@ -53,6 +55,9 @@
       </div>
 
     </q-card>
+
+    <apercu-chat v-if="ui.d.ACouvrir" :na-i="naC" :na-e="pSt.peC.na" :ids="ids[naC.id]" :mapmc="mapmc"/>
+
   </q-page-container>
 
 </q-layout>
@@ -63,12 +68,12 @@
 import { ref, onMounted, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import ApercuChat from '../components/ApercuChat.vue'
+import ApercuChat from '../panels/ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import { Chat, Motscles, Groupe } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
-import { afficherDiag, sleep } from '../app/util.mjs'
+import { styp, afficherDiag, sleep } from '../app/util.mjs'
 
 export default {
   name: 'PanelPeople',
@@ -87,6 +92,7 @@ export default {
     return {
       egrC: null,
       mbC: null,
+      naC: null
     }
   },
 
@@ -94,6 +100,11 @@ export default {
     egr (idg) { return this.gSt.egr(idg) },
 
     stmb (idg, ids) { return this.egr(idg).groupe.statutMajeur(ids)},
+
+    opench (na) {
+      this.naC = na
+      this.ui.oD("ACouvrir")
+    },
 
     voirgr (id, ids) {
       this.session.setGroupeId(id)
@@ -155,7 +166,7 @@ export default {
     })
 
     return {
-      session, aSt, pSt, gSt, ui,
+      styp, session, aSt, pSt, gSt, ui,
       mapmc, ids
     }
   }

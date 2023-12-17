@@ -95,7 +95,7 @@ import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import InvitationsEncours from '../components/InvitationsEncours.vue'
-import ApercuChatgr from '../components/ApercuChatgr.vue'
+import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouveauGroupe } from '../app/operations.mjs'
 

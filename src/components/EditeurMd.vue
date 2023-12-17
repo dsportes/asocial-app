@@ -195,9 +195,6 @@ export default ({
 .dlx
   background-color: rgba(127,127,127,0.2) !important
   padding: 4px
-.q-toolbar
-  padding: 0 !important
-  min-height: 0 !important
 .bord1
   border-bottom: 1px solid $grey-5
 </style>

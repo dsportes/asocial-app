@@ -1,24 +1,26 @@
 <template>
-  <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
+  <q-page class="column q-pl-xs q-mr-sm spmd">
     <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
-    <q-card class="q-my-md q-pa-xs row justify-center">
-      <q-btn v-if="session.accesNet" size="md" class="q-ma-xs" no-caps dense color="primary" 
+    <div class="q-my-xs q-pa-xs row justify-around">
+      <q-btn v-if="session.accesNet" size="md" padding="xs xs" 
+        no-caps dense color="primary" 
         :label="$t('CVraf')" @click="rafCvs"/>
 
-      <q-btn v-if="session.accesNet" size="md" no-caps class="q-ma-xs" dense color="primary" 
+      <q-btn v-if="session.accesNet" size="md" no-caps 
+        dense color="primary" padding="xs xs"
         :label="$t('CChtit')" @click="ovContact"/>
-    </q-card>
+    </div>
 
-    <div class="q-my-md titre-lg text-italic text-center">
+    <div class="row justify-center items-center g-gutter-md">
+      <q-btn dense color="primary" padding="xs xs" :label="$t('CHexp')" @click="exp" />
+      <q-checkbox v-model="optb64" :label="$t('CHopt')" />
+    </div>
+
+    <div class="q-mt-xs titre-md text-italic text-center">
       {{$t('CHnch2', fusion.length, {count: fusion.length}) + ' ' + $t('CHnchtot', [aSt.nbchats + gSt.nbchats])}}
     </div>
 
-    <div class="q-my-sm row justify-center items-center g-gutter-md">
-      <q-btn dense color="primary" :label="$t('CHexp')" @click="exp" />
-      <q-checkbox v-model="optb64" :label="$t('CHopt')" />
-    </div>
-    
     <div v-if="fusion.length">
       <div class="q-my-md maauto" v-for="(chat, idx) in fusion" :key="chat.id + '/' + chat.ids">
         <q-card v-if="ID.estGroupe(chat.id)">
@@ -77,9 +79,9 @@ import { ref } from 'vue'
 import { saveAs } from 'file-saver'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
-import ApercuChat from '../components/ApercuChat.vue'
+import ApercuChat from '../panels/ApercuChat.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import ApercuChatgr from '../components/ApercuChatgr.vue'
+import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import ContactChat from '../dialogues/ContactChat.vue'
 import { Motscles, getNg } from '../app/modele.mjs'
 import { RafraichirCvs } from '../app/operations.mjs'

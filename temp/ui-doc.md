@@ -72,3 +72,122 @@ Invoqué par NoteFichier.
 
 Opération: NouveauFichier.
 
+## Panels
+
+### ApercuChat (6)
+Affiche les échanges d'un chat.
+
+Import: EditeurMd, ApercuGenx
+
+## Components
+
+Les mots clés sont attachés:
+- à des contacts ou des groupes connus du compte par McMemo,
+- à des notes par NoteMc.
+
+Ils sont affichés par ApercuMotscles qui permet d'éditer le choix par ChoixMotscles.
+
+### ApercuMotscles (3)
+Liste les mots clés sur une ligne. 
+- ouverture du choix des mots clés sur bouton d'édition.
+
+Import: ChoixMotscles
+
+### McMemo (4)
+Attache des mots clés et un mémo à n'importe quel avatar-people, ou groupe dont l'id est connu.
+
+Plusieurs components ApercuMotscles peuevent être apparents simultannément à l'écran. Toutefois on ne peut éditer qu'un seul ChoixMotscles à la fois : le dialogiue interne MMedition ne doit en conséquence n'est ouvert qu'une seule fois à un instant donné. C'est la propriété `ui.mcmemoId` qui prévient l'ouverture de plusieurs MMedition.
+
+Import: EditeurMd, ApercuMotscles
+
+**Dialogue interne:**
+- MMedition : gère un ApercuMotscles et un EditeurMd pour afficher / éditer les mots clés et le commentaire à attacher au contact ou groupe.
+
+### ChoixMotscles (1)
+Permet de sélectionner une liste de mots clés à attacher à un contact / groupe ou une note.
+
+### ApercuGenx (5)
+Présente un aperçu d'un avatar du compte, d'un contact ou d'un groupe.
+- ouvre le panel détail d'un contact si ce n'est ni un avatar du compte, ni un groupe. Toutefois si un détail de contact est déjà ouvert, le bouton ne s'affiche pas afin d'éviter des ouvertures multiples.
+- ouvre le dialogue ApercuCv sur le bouton zoom.
+
+Import: McMemo
+
+### ApercuAvatar (6)
+Affiche les données d'un avatar du compte.
+- importé **uniquement* depuis PageCompte.
+- édition de la pharse de contact.
+- importé **uniquement** depuis PageCompte.
+
+Ce component peut être visible plusieurs fois simultannément (autant qu'un compte a d'avatars).
+
+Import: PhraseContact, ApercuGenx
+
+Dialogue:
+- AAeditionpc: édition de la phrase de contact. Afin de n'avoir qu'une seule instance ouverte à un instant donné, le dialogue n'opère **que** sur l'avatar courant.
+
+### NomAvatar (1)
+Saisie d'un nom d'avatar avec contrôle de syntaxe.
+
+## Dialogues
+
+### ApercuCv (4)
+Affiche une carte de visite d'un avatar, contact ou groupe:
+- pour un contact, le bouton refresh recharge la carte de visite depuis le serveur.
+- pour un avatar ou un groupe, le bouton d'édition permet de l'éditer. Pour un groupe, il faut que compte en soit animateur.
+
+Import: ShowHtml, CarteVisite
+
+### CarteVisite (3)
+Dialogue d'édition d'une carte de visite, sa photo et son information.
+- est importé **uniquement** depuis ApercuCv (la photo et l'information y étant présente).
+- sauvegarde les cartes de visite (avatar et groupe).
+
+Import: EditeurMd
+
+### ApercuChatgr (3)
+Affiche le chat d'un groupe.
+- ajout d'items et supression d'items.
+
+Import: EditeurMd, NoteEcritepar
+
+### ApercuChat (3)
+Affiche le chat d'un avatar du compte avec un contact.
+- ajout d'items et supression d'items.
+- raccrocher le chat/
+
+Import: EditeurMd, NoteEcritepar
+
+### MotsCles (2)
+Edite les mots clés, soit d'un compte, soit d'un groupe.
+
+N'est importé **que** par PageCompte et ApercuGroupe (une seule édition à un instant donné).
+
+Import: ChoixEmoji
+
+### SupprAvatar (2)
+Panel de suppression d'un avatar.
+- affiche les conséquences en termes de pertes de secrets, de groupes et de chats avec les volumes associés récupérés.
+- importé **uniquement* par PageCompte.
+
+## Pages
+
+### PageCompte
+Affiche les avatars du compte et les opérations du compte:
+- création d'un nouvel avatar,
+- édition des mots clés du compte,
+- changement de la phrase secrète.
+
+Import: NomAvatar, ApercuAvatar, PhraseSecrete, MotsCles, SupprAvatar
+
+Dialogues:
+- PCnvav: nouvel avatar
+- PCchgps: changement de la phrase secrète
+
+### PageChats
+Affiche la liste des chats des contacts et des groupes.
+- si le filtre filtre.filtre.chats.tous est false, les stores avatar et groupe ne délivrent que ceux de l'avatar courant positionné sur la page d'accueil.
+- exporte les chats sélectionnés dans un fichier MarkDown.
+
+Import: ApercuChat, ContactChat, ApercuChatgr, ApercuGenx
+
