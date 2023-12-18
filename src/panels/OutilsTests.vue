@@ -1,17 +1,17 @@
 <template>
-<q-dialog v-model="ui.d.PAoutilsTests" full-height persistent position="left">
-  <q-layout container view="hHh lpR fFf" :class="styp('sm')">
+<q-dialog v-model="ui.d.PAoutilsTests" full-height position="left" persistent>
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
-        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+        <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('OTtit')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
       <q-toolbar inset>
         <q-tabs v-model="tab" inline-label outside-arrows mobile-arrows no-caps class="full-width">
-          <q-tab name="tst" :label="$t('OTtst')" @click="tab='tst'"/>
-          <q-tab name="cpt" :label="$t('OTcpt')" @click="ouvCpt()"/>
-          <q-tab name="ps" :label="$t('OTps')" @click="tab='ps'"/>
+          <q-tab name="tst" class="titre-md" :label="$t('OTtst')" @click="tab='tst'"/>
+          <q-tab name="cpt" class="titre-md" :label="$t('OTcpt')" @click="ouvCpt()"/>
+          <q-tab name="ps" class="titre-md" :label="$t('OTps')" @click="tab='ps'"/>
         </q-tabs>
       </q-toolbar>
     </q-header>
@@ -26,14 +26,16 @@
       -->
 
       <q-card-section v-if="tab === 'tst'" class="column items-center">
-        <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt1')" @click="testEcho"/>
-        <q-btn class="q-ma-xs" color="primary" dense :label="$t('OTt2')" @click="testErr"/>
+        <q-btn class="q-ma-xs" color="primary" dense padding="xs xs"
+          :label="$t('OTt1')" @click="testEcho"/>
+        <q-btn class="q-ma-xs" color="primary" dense padding="xs xs"
+          :label="$t('OTt2')" @click="testErr"/>
       </q-card-section>
 
       <q-card-section v-if="tab === 'tst'">
         <div class="titre-lg">{{$t('TPt2')}}</div>
         <div v-if="session.accesNet" class="q-ml-md">
-          <q-btn dense :label="$t('ping')" color="primary" @click="pingsrv"/>
+          <q-btn dense :label="$t('ping')" color="primary" padding="xs xs" @click="pingsrv"/>
           <div>{{ resultat1a }}</div>
         </div>
         <div v-else class="q-ml-md text-italic">{{$t('TP2')}}</div>
@@ -42,7 +44,7 @@
       <q-card-section v-if="tab === 'tst'">
         <div class="titre-lg">{{$t('TPt3')}}</div>
         <div v-if="session.accesNet" class="q-ml-md">
-          <q-btn dense :label="$t('ping')" color="primary" @click="pingsrvdb"/>
+          <q-btn dense :label="$t('ping')" color="primary" padding="xs xs" @click="pingsrvdb"/>
           <div>{{ resultat2a }}</div>
           <div v-html="resultat2b"/>
         </div>
@@ -52,7 +54,7 @@
       <q-card-section v-if="tab === 'tst'">
         <div class="titre-lg">{{$t('TPt4')}}</div>
         <div v-if="session.ok && session.accesNet" class="q-ml-md">
-          <q-btn dense :label="$t('ping')" color="primary" @click="pingIDB"/>
+          <q-btn dense :label="$t('ping')" color="primary" padding="xs xs" @click="pingIDB"/>
           <div>{{ resultat3a }}</div>
           <div v-html="resultat3b"/>
         </div>
@@ -60,7 +62,7 @@
       </q-card-section>
 
       <q-card-section v-if="tab === 'ps'">
-        <phrase-secrete @ok="okps" icon-valider="check" label-valider="OK"></phrase-secrete>
+        <phrase-secrete @ok="okps" icon-valider="check" label-valider="test"></phrase-secrete>
         <div class='t1 q-mt-slg'>{{$t('OTh1')}}</div>
         <div class='t2'>{{ ps ? ps.hps1 : '?'}}</div>
         <div class='t1 q-mt-sm'>{{$t('OTcx')}}</div>
@@ -77,25 +79,62 @@
           <div v-else>
             <div class="titre-md text-italic text-warning">{{$t('GBcl')}}</div>
             <div v-for="it in bases" :key="it.nb" class="zone items-center fs-md zone">
-              <div>
-                <q-btn v-if="it.vu" class="q-mr-sm" icon="delete" size="sm" round
-                  color="warning" @click="itdel=it; ui.oD('OTsuppbase')"/>
-                <span class="fs-md q-mt-sm">{{it.nb}}</span>
+              <div class="row">
+                <div class="col fs-md">{{it.nb}}</div>
+                <q-btn v-if="it.vu" class="col-auto self-start q-mr-sm" icon="delete" 
+                  size="md" round
+                  color="warning" padding="none" @click="itdel=it; ui.oD('OTsuppbase')"/>
               </div>
-              <div class="q-pl-md q-mb-sm row items.center">
-                <div class="col-4">{{it.trig}}</div>
+              <div v-if="it.vu" class="q-pl-md q-mb-sm row items.center">
+                <div class="col-1">{{it.trig}}</div>
                 <div class="col-3 fs-sm font-mono">{{it.hps1}}</div>
-                <div v-if="it.vu" class="col-3 text-center font-mono">{{edvol(it.v1 + it.v2)}}</div>
-                <div v-if="it.vu" class="col-4 text-center font-mono">{{$t('GBfi', [edvol(it.v2)])}}</div>
-                <span v-if="!it.vu" class="col-5 text-right">
+                <div class="col-4 text-center font-mono">{{edvol(it.v1 + it.v2)}}</div>
+                <div class="col-4 text-center font-mono">{{$t('GBfi', [edvol(it.v2)])}}</div>
+              </div>
+              <div v-else class="q-pl-md q-mb-sm row items.center">
+                <div class="col-1">{{it.trig}}</div>
+                <div class="col-3 fs-sm font-mono">{{it.hps1}}</div>
+                <span v-if="!it.vu" class="col-8 text-right">
                   <q-btn :disable="ui.d.OTrunning" @click.stop="getVU(it)"
-                    size="md" dense color="primary" no-caps :label="$t('GBvol')"/>
+                    size="md" dense color="primary" no-caps padding="xs" :label="$t('GBvol')"/>
                 </span>
               </div>
+
             </div>
           </div>
         </div>
-      </q-card-section>
+    </q-card-section>
+
+    <q-dialog v-model="ui.d.OTrunning">
+      <q-card :class="styp('sm')">
+        <div class="column items-center">
+          <q-spinner-hourglass persistent color="primary" size="3rem" @click="ui.fD"/>
+          <div class="fs-md font-mono q-my-md">{{session.volumeTable}}</div>
+        </div>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="ui.d.OTsuppbase">
+      <q-card :class="styp('sm') + 'q-pa-sm'">
+        <q-card-section>
+          <div class="titre-md text-center q-my-sm">{{$t('GBprop', [itdel.trig])}}</div>
+          <div class="titre-md text-center q-mt-sm">{{$t('GBnomb')}}</div>
+          <div class="text-center fs-sm font-mono q-mb-sm">{{itdel.nb}}</div>
+          <div v-if="!itdel.hps1" class="titre-md text-bold bg-yellow-5 text-negative">
+            {{$t('GBm1')}}
+          </div>
+          <div v-else class="titre-md text-bold text-warning">
+            {{$t('GBm2')}}
+          </div>
+        </q-card-section>
+        <q-card-actions>
+          <q-btn dense :label="$t('GBcb')" color="primary" @click="ui.fD"/>
+          <q-btn dense :label="$t('GBsb')" icon="delete" color="warning"
+            @click="delIDB(itdel)"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     </q-page-container>
   </q-layout>
 </q-dialog>
@@ -282,6 +321,7 @@ export default ({
 
     async function delIDB (it) {
       try {
+        this.ui.fD()
         deleteIDB(it.nb)
         localStorage.removeItem(pfx + it.hps1)
         delete bases[it.nb]

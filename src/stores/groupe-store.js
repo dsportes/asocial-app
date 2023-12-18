@@ -275,7 +275,7 @@ export const useGroupeStore = defineStore('groupe', {
       }
       stores.filtre.stats.groupes = stt
       r.sort(f0)
-      stores.session.fmsg(r.length)
+      stores.ui.fmsg(r.length)
       return r
     },
 
@@ -316,7 +316,7 @@ export const useGroupeStore = defineStore('groupe', {
         r.push(m)
       }
       r.sort(f0)
-      stores.session.fmsg(r.length)
+      stores.ui.fmsg(r.length)
       return r
     },
 

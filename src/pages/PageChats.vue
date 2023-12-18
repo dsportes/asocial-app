@@ -1,6 +1,5 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm spmd">
-    <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
 
     <div class="q-my-xs q-pa-xs row justify-around">
       <q-btn v-if="session.accesNet" size="md" padding="xs xs" 
@@ -194,7 +193,7 @@ export default {
       aSt.tousChats.forEach(c => { r.push(c)})
       gSt.tousChats.forEach(c => { r.push(c)})
       r.sort((a, b) => { return a.dh > b.dh ? -1 : (a.dh === b.dh ? 0 : 1) })
-      session.fmsg(r.length)
+      ui.fmsg(r.length)
       fusion.value = r
     }
 

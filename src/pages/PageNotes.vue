@@ -112,8 +112,8 @@
     </q-dialog>
 
     <q-page-sticky expand position="top">
-      <div :class="sty + ' q-pa-xs box full-width position-relative'">
-        <div class="box2">
+      <!--div :class="sty + ' q-pa-xs box full-width position-relative'"-->
+        <div :class="sty() + ' box2 full-width'">
           <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
 
           <div v-if="selected" class="row justify-between">
@@ -126,40 +126,43 @@
             </div>
           </div>
 
-          <div v-if="selected && nSt.note" class="q-ml-md relative-position"> 
-            <show-html class="bord1 q-mr-lg" :texte="nSt.note.txt" zoom maxh="4rem" />
-            <q-btn :disable="rec!==0" class="absolute-top-right" round dense size="sm" icon="edit" 
+          <div v-if="selected && nSt.note" class="q-ml-md row"> 
+            <show-html class="col bord1 q-mr-lg" :texte="nSt.note.txt" zoom maxh="4rem" />
+            <q-btn :disable="rec!==0" class="col-auto self-start" 
+              round dense size="md" icon="edit" padding="none"
               :color="nSt.note.p ? 'grey-5' : 'primary'" 
               @click="noteedit1"/>
           </div>
 
           <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
 
-          <div v-if="selected && nSt.note && !rec" class="q-mt-xs q-mb-sm relative-position">  
-            <apercu-motscles class="q-mr-lg titre-sm" v-if="nSt.note.smc" :mapmc="mapmcf(nSt.node.key)" 
+          <div v-if="selected && nSt.note && !rec" class="q-mt-xs q-mb-sm row">  
+            <apercu-motscles class="col q-mr-lg titre-sm" v-if="nSt.note.smc" :mapmc="mapmcf(nSt.node.key)" 
               :src="Array.from(nSt.note.smc)" du-compte
               :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
-            <div v-else class="text-italic">{{$t('PNOnmc')}}</div>
-            <q-btn color="primary" class="absolute-top-right" round dense size="sm" icon="edit" 
+            <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
+            <q-btn color="primary" class="col-auto self-start" 
+              round dense size="md" icon="edit" padding="none"
               @click="ui.oD('NM')"/>
           </div>
 
-          <div v-if="selected && nSt.note && !rec" class="q-mt-xs q-mb-sm relative-position">  
-            <div class="titre-sm mrst">
+          <div v-if="selected && nSt.note && !rec" class="q-mt-xs q-mb-sm row">  
+            <div class="col titre-sm">
               <span :class="!nSt.note.mfa.size ? 'text-italic': ''">
                 {{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}
               </span>
               <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
             </div>
-            <q-btn class="absolute-top-right" dense size="sm" color="primary" 
-              :label="$t('fichiers')" icon="open_in_new" padding="xs sm"
+            <q-btn class="col-auto self-start" dense size="sm" color="primary" 
+              :label="$t('fichiers')" icon="open_in_new" padding="xs xs"
               @click="ui.oD('NF')"/>
           </div>
 
-          <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs q-mb-sm relative-position">  
-            <div v-if="nSt.mbExclu" class="titre-sm">{{$t('PNOexclu', [nSt.mbExclu.nom])}}</div>
-            <div v-else class="text-italic titre-sm">{{$t('PNOnoexclu')}}</div>
-            <q-btn color="primary" class="absolute-top-right" round dense size="sm" icon="settings" 
+          <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs q-mb-sm row">  
+            <div v-if="nSt.mbExclu" class="col titre-sm">{{$t('PNOexclu', [nSt.mbExclu.nom])}}</div>
+            <div v-else class="col text-italic titre-sm">{{$t('PNOnoexclu')}}</div>
+            <q-btn color="primary" class="col-auto self-start" round dense size="md" 
+              icon="settings" padding="none"
               @click="ui.oD('NX')"/>
           </div>
 
@@ -175,28 +178,30 @@
               :label="$t('PNOratt')" @click="rattacher" padding="xs" size="sm"/>
           </div>
 
-          <div v-if="selected && nSt.note && rec===1" class="q-ma-sm column">
+          <div v-if="selected && nSt.note && rec===1" class="q-ma-sm">
             <div class="q-pa-xs bg-yellow-5 text-bold text-black text-italic text-center titre-md">
               {{$t('PNOrattinfo')}}</div>
-            <q-btn class="btn2 q-mt-sm" color="primary" size="md" icon="close" :label="$t('PNOanratt')"
-              @click="anrattacher"/>
+            <q-btn class="btn2 q-mt-sm" color="primary" size="md" icon="close" padding="xs"
+              :label="$t('PNOanratt')" @click="anrattacher"/>
           </div>
 
-          <div v-if="selected && nSt.note && rec===2" class="q-ma-sm column">
+          <div v-if="selected && nSt.note && rec===2" class="q-ma-sm">
             <div>
               <span class="q-pa-xs text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
               <span class="q-pa-xs bg-yellow-5 text-bold text-black titre-md">{{noderatt.label}}</span>
             </div>
-            <q-btn class="btn2 q-mt-sm" color="warning" size="md" icon="check" :label="$t('PNOcfratt')"
-              @click="okrattacher"/>
-            <q-btn class="btn2 q-mt-sm" color="primary" size="md" icon="attachment" :label="$t('PNOratt2')"
-              @click="rattacher"/>
-            <q-btn v-if="rec" class="btn2 q-mt-sm" color="primary" size="md" icon="close" :label="$t('PNOanratt')"
-              @click="anrattacher"/>
+            <div class="q-mt-sm row q-gutter-xs">
+              <q-btn color="warning" size="md" icon="check" padding="xs"
+                :label="$t('PNOcfratt')"  @click="okrattacher"/>
+              <q-btn color="primary" size="md" icon="attachment" padding="xs"
+                :label="$t('PNOratt2')" @click="rattacher"/>
+              <q-btn v-if="rec" color="primary" size="md" icon="close" padding="xs"
+                :label="$t('PNOanratt')" @click="anrattacher"/>
+            </div>
           </div>
         </div>
             
-        <div class="row full-width bg-secondary text-white absolute-bottom">
+        <div class="row full-width bg-secondary text-white">
           <q-btn dense flat size="md" :label="$t('PNOdlc')" icon="file_download" @click="dlopen"/>
           <q-space/>
           <q-btn v-if="!expandAll" class="btn2" dense size="sm" :label="$t('PNOdep')" 
@@ -205,7 +210,6 @@
             color="primary" icon="unfold_less" @click="tree.collapseAll();expandAll=false"/>
           <!--q-btn class="q-ml-sm" dense size="sm" label="T1" @click="test1"/-->
         </div>
-      </div>
     </q-page-sticky>
   </q-page>
 </template>
@@ -791,15 +795,10 @@ $hb2: 17rem
   border: 1px solid black
 .sep
   margin-top: $hb
-.box
-  overflow-y: hidden
-  height: $hb
 .box2
   overflow-y: auto
   height: $hb2
 .bord1
   border-top: 1px solid $grey-8 !important
   border-bottom: 1px solid $grey-8 !important
-.mrst
-  margin-right: 10rem
 </style>

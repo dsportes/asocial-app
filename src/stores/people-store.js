@@ -137,7 +137,7 @@ export const usePeopleStore = defineStore('people', {
     peLpF: (state) => {
       const aSt = stores.avatar
       const f = stores.filtre.filtre.people
-      if (!f) { stores.session.fmsg(state.peLp.length); return state.peLp }
+      if (!f) { stores.ui.fmsg(state.peLp.length); return state.peLp }
       f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
@@ -157,7 +157,7 @@ export const usePeopleStore = defineStore('people', {
       r.sort((a, b) => { 
         return (ID.estComptable(a.na.id) || a.na.nom < b.na.nom) ? -1 : (a.na.nom > b.na.nom ? 1 : 0)
       })
-      stores.session.fmsg(r.length)
+      stores.ui.fmsg(r.length)
       return r
     }
   },

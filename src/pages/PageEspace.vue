@@ -14,8 +14,6 @@ Depuis un Comptable: ns est celui de la session
 -->
 <template>
   <q-page>
-    <!--div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div-->
-
     <div v-if="pow===2" class="row height-3 overflow-hidden-y">
       <q-btn class="col-auto q-my-sm fs-md btn2" size="md" dense color="primary" 
         :label="$t('PTnv')" @click="ouvrirnt"/>

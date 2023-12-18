@@ -327,7 +327,7 @@ export class ConnexionCompte extends OperationUI {
       // rows Compa ou Avatar modifiés, on boucle
       this.rowCompta = ret.rowCompta
       this.rowAvatar = ret.rowAvatar
-      await connex2()
+      await this.connex2()
     }
   }
 

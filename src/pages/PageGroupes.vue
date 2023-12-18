@@ -1,7 +1,5 @@
 <template>
 <q-page class="q-pa-sm column items-center">
-  <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
-
   <q-card class="largeur40 maauto column items-center">
 
     <q-btn class="q-my-sm" size="md" dense color="primary" 

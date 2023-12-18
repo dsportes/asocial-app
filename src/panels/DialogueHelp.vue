@@ -1,13 +1,13 @@
 <template>
 <q-dialog v-model="ui.d.dialoguehelp" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
+  <q-layout container view="hHh lpR fFf" :class="styp('lg')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
-        <q-btn dense size="md" icon="close" color="warning" 
+        <q-btn dense size="md" icon="chevron_left" color="warning" 
           v-close-popup @click="ui.fermerHelp">
           <q-tooltip class="bg-white text-primary">{{$t('HLPfermer')}}</q-tooltip>
         </q-btn>
-        <q-btn v-if="!stackvide" class="q-ml-xs" dense size="md" icon="chevron_left" @click="back">
+        <q-btn v-if="!stackvide" class="q-ml-xs" dense size="md" icon="arrow_back" @click="back">
           <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
         </q-btn>
         <q-toolbar-title class="titre-lg">{{titre(pagec())}}</q-toolbar-title>
@@ -37,6 +37,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import stores from '../stores/stores.mjs'
 import { aidetm } from '../app/help.mjs'
+import { styp } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
 
@@ -128,7 +129,8 @@ export default ({
       push,
       back,
       session,
-      ui
+      ui,
+      styp
     }
   }
 })

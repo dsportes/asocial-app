@@ -1,7 +1,5 @@
 <template>
   <q-page>
-    <div v-if="session.filtreMsg" class="msg q-pa-xs fs-sm text-bold font-mono bg-yellow text-warning">{{session.filtreMsg}}</div>
-
     <q-expansion-item class="q-mb-sm q-mx-xs" header-class="bg-secondary text-white" switch-toggle-side expand-separator dense>
       <template v-slot:header>
         <div class="row full-width fs-md">

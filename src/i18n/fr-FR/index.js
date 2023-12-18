@@ -114,6 +114,7 @@ export default {
   disparu: 'disparu',
   cv: 'Carte de visite',
   compteKO: 'Le compte #{0} nommé "{1}" vient d\'être supprimé. Se connecter à un autre compte.',
+  test: 'Test',
 
   // Filtre notif
   gravite0: '(ignorer)',
@@ -420,7 +421,11 @@ export default {
   GBfi: 'Fichiers : {0}',
   GBm1: 'Cette base ne peut PLUS être accédée : elle peut être supprimée sans conséquences.',
   GBm2: 'Cette base peut encore être accédée par une phrase secrète: sa suppression interdira le mode "avion" pour ce compte.',
-  
+  GBcb: 'Je conserve la base',
+  GBsb: 'Je supprime la base',
+  GBprop: 'Propriétaire: {0}',
+  GBnomb: 'Nom de la base:',
+
   // DialogueHelp.vue
   HLPaide: 'Page d\'aide : ',
   HLPaidebd: 'Page d\'aide bientôt disponible',

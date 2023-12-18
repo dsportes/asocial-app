@@ -1,4 +1,5 @@
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
+import { $t, hms } from '../app/util.mjs'
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
@@ -170,7 +171,7 @@ export const useUiStore = defineStore('ui', {
       this.aunmessage = true
       this.messageto = setTimeout(() => { 
         this.effacermessage()
-      }, important ? 10000 : 5000)
+      }, important ? 10000 : 2000)
     },
 
     effacermessage () {
@@ -214,6 +215,11 @@ export const useUiStore = defineStore('ui', {
 
     setFichiercree (nom) {
       this.dernierfichiercree = nom
+    },
+
+    fmsg (n, msg) {
+      const filtreMsg = hms(new Date(), true) + ' / ' + (msg || $t('items', n, { count: n }))
+      this.afficherMessage(filtreMsg)
     }
   }
 })

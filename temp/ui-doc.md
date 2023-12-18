@@ -19,67 +19,12 @@ _Arrêtés mensuels_ (**CSV**)
 - une ligne par comptas d'extrait des compteurs relatifs au mois M-1 (dès qu'il est figé).
 
 
-### Page: `PageLogin`
-Page initiale de connexion et / ou de création d'un compte sponsorisé.
-
-Opérations: connecterCompte, GetEstFs
-
-Dialogues: 
-- Dialogue d'acceptation d'un nouveau sponsoring: AcceptationSponsoring
-
-Composants: PhraseContact, PhraseSecrete,
-
-### Page: `PageCompte`
-Page affichant l'état du compte et ses avatars.
-
-Opérations: ChangementPS, MemoCompte, MotsclesCompte, NouvelAvatar, ExistePhrase
-
-Dialogues:
-- Dialogue de création d'un nouveau sponsoring : NouveauSponsoring
-- Dialogue de suppression d'un avatar: SupprAvatar
-- Dialogue de changement de la phrase secrète
-- Dialogue d'édition des mots clés du compte
-- Dialogue de création d'un nouvel avatar
-- Dialogue d'édition du mémo du compte
-- Dialogue de changement de la phrase secrète
-
-Composants: NomAvatar, ApercuAvatar,
-    PhraseSecrete, EditeurMd, ShowHtml, MotsCles
-
-### Dialogue pleine hauteur / large: `NoteFichier`
-Dialogue présentant en accordéon les fichiers de la  note courante avec la possibilité de créer un nouveau fichier ou d'en supprimer.
-
-Invoqué par PageNotes.
-
-Opération: SupprFichier
-
-Dialogues:
-- Dialogue de création d'un nouveau fichier: NouveauFichier
-- Confirmation de suppression
-- Confirmation visible en mode avion 1
-- Confirmation visible en mode avion 2
-
-### Dialogue grande hauteur / moyenne: `NouveauFichier`
-Dialogue en 4 étapes de création d'un nouveau fichier ou d'une nouvelle version d'un fichier existant.
-- (1) acquisition du fichier :
-  - soit par sélection dans le presse-papier: le fichier sélectionné revient par l'écoute de l'invocation de l'action `copiercollerfic` du store `pp` une fois éffectuée par le dialogue `PressePapier` (hébergé par `App.vue`).
-  - soit un fichier local du poste.
-- (2) acquisition / correction du nom.
-- (3) présentation de la liste des versions existantes avec possibilité de choisir celles à supprimer.
-- (4) suivi de l'exécution de l'opération qui peut être longue avec ses 3 phases et clôture finale `Vu`.
-
-Invoqué par NoteFichier.
-
-Opération: NouveauFichier.
-
-## Panels
-
-### ApercuChat (6)
-Affiche les échanges d'un chat.
-
-Import: EditeurMd, ApercuGenx
-
 ## Components
+
+### Les boutons
+Ils n'importent aucune autre vue et sont des "span" destinés à figurer au milieu de textes.
+- **BoutonHelp**: ouvre une page d'aide.
+- **BoutonLangue**: affiche la langue courante et permet de la changer.
 
 Les mots clés sont attachés:
 - à des contacts ou des groupes connus du compte par McMemo,
@@ -145,6 +90,23 @@ Dialogue d'édition d'une carte de visite, sa photo et son information.
 
 Import: EditeurMd
 
+### MotsCles (2)
+Edite les mots clés, soit d'un compte, soit d'un groupe.
+
+N'est importé **que** par PageCompte et ApercuGroupe (une seule édition à un instant donné).
+
+Import: ChoixEmoji
+
+## Panels
+
+### DialogueHelp (3)
+Affiche les pages d'aide.
+- la table des matières, le titre de chaque page, les pages à trouver en bas de chaque page d'aide, sont configurés dans `src/app/help.mjs`
+- chaque page d'aide est un fichier par langue dans `src/assets/help`
+- les images dans ces pages sont dans `public/help`
+- ce dialogue est ouvert / géré par `ui-store pushhelp pophelp fermerhelp`.
+- l'ouverture est déclencher par BoutenHelp.
+
 ### ApercuChatgr (3)
 Affiche le chat d'un groupe.
 - ajout d'items et supression d'items.
@@ -158,17 +120,27 @@ Affiche le chat d'un avatar du compte avec un contact.
 
 Import: EditeurMd, NoteEcritepar
 
-### MotsCles (2)
-Edite les mots clés, soit d'un compte, soit d'un groupe.
-
-N'est importé **que** par PageCompte et ApercuGroupe (une seule édition à un instant donné).
-
-Import: ChoixEmoji
-
 ### SupprAvatar (2)
 Panel de suppression d'un avatar.
 - affiche les conséquences en termes de pertes de secrets, de groupes et de chats avec les volumes associés récupérés.
 - importé **uniquement* par PageCompte.
+
+### OutilsTests (2)
+Trois onglets:
+- **Tests d'accés**: tests d'accès au serveur, ping des bases locales et distantes.
+- OTrunning:
+  - présente la liste des bases synchronisées.
+  - sur demande calcul de leur volume (théorique pour le volume V1).
+  - propose la suppression de la base.
+- **Phrase secrète**: test d'une phrase avec affichage des différents cryptages / encodages associés.
+
+Invoqué par un bouton de la page d'accueil / App.vue
+
+Import: PhraseSecrete
+
+Dialogues:
+- OTrunning: affiche la progression du calcul de la taille de la base.
+- ORsupprbase: dialogue de confirmation de la suppression.
 
 ## Pages
 

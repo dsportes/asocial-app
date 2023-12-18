@@ -214,11 +214,9 @@
   </q-page-container>
 
   <q-dialog v-model="ui.aunmessage" seamless position="bottom">
-    <div style="min-width:100vw !important; position: relative">
-      <div :class="'msg sombre1 q-pa-sm cursor-pointer text-center titre-sm text-bold ' + (ui.message.important ? 'bg-yellow-5 text-negative' : '')"  
-        @click="ui.effacermessage">
-        {{ ui.message.texte }}
-      </div>
+    <div :class="'msg q-pa-sm cursor-pointer text-center titre-sm text-bold bg-yellow-5 ' + (ui.message.important ? 'text-negative' : 'text-black')"  
+      @click="ui.effacermessage">
+      {{ ui.message.texte }}
     </div>
   </q-dialog>
 
@@ -339,10 +337,10 @@ import PageMenu from './pages/PageMenu.vue'
 // niveau 2
 import PageSession from './pages/PageSession.vue'
 import PageFicavion from './pages/PageFicavion.vue'
-import OutilsTests from './dialogues/OutilsTests.vue'
+import OutilsTests from './panels/OutilsTests.vue'
 
 // Niveau 3
-import DialogueHelp from './dialogues/DialogueHelp.vue'
+import DialogueHelp from './panels/DialogueHelp.vue'
 import PageClos from './pages/PageClos.vue'
 import PageAccueil from './pages/PageAccueil.vue'
 import PressePapier from './dialogues/PressePapier.vue'
@@ -562,6 +560,7 @@ un élément qui apparaît quand le drawer est caché*/
 .q-tab
   min-height: 0 !important
 .msg
+  min-width:100vw !important
   height:1.9rem
   overflow: hidden
 </style>

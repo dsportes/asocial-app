@@ -110,8 +110,6 @@ export const useSessionStore = defineStore('session', {
     niv: 0,
     alire: false, // Il y a des notifications à lire
 
-    // message fmsg de report après filtrage
-    filtreMsg: ''
   }),
 
   getters: {
@@ -351,13 +349,6 @@ export const useSessionStore = defineStore('session', {
       if (dh && dh > this.dh) {
         this.dh = dh
       }
-    },
-
-    fmsg (n, msg) {
-      this.filtreMsg = hms(new Date(), true) + ' / ' + (msg || $t('items', n, { count: n }))
-      setTimeout(() => {
-        this.filtreMsg = ''
-      }, 1000)
     },
 
     setDhvu (dhvu) {

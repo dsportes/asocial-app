@@ -251,7 +251,7 @@ export const useAvatarStore = defineStore('avatar', {
       const lcF = state.ptLcF
 
       const f = stores.filtre.tri.tranche
-      if (!f) { stores.session.fmsg(lcF.length); return lcF }
+      if (!f) { stores.ui.fmsg(lcF.length); return lcF }
 
       const ctf = fx[f][0]
       const ctm = fx[f][1]
@@ -266,13 +266,13 @@ export const useAvatarStore = defineStore('avatar', {
 
       const x = []; lcF.forEach(t => { x.push(t) })
       x.sort(comp)
-      stores.session.fmsg(x.length)
+      stores.ui.fmsg(x.length)
       return x
     },
 
     ptLcF: (state) => {
       const f = stores.filtre.filtre.tranche
-      if (!f) { stores.session.fmsg(state.ptLc.length); return state.ptLc }
+      if (!f) { stores.ui.fmsg(state.ptLc.length); return state.ptLc }
       const r = []
       for (const c of state.ptLc) {
         if (f.avecsp && !c.nasp) continue
@@ -283,7 +283,7 @@ export const useAvatarStore = defineStore('avatar', {
         if (f.notif && (!c.notif || (f.notif === 2 && c.notif.niv < 2))) continue
         r.push(c)
       }
-      stores.session.fmsg(r.length)
+      stores.ui.fmsg(r.length)
       return r
     },
 
