@@ -8,9 +8,21 @@
       <!-- Notifications -->
       <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
         @click="clickNotif" apptb/>
+      <!--
+      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" alire :niv="1" 
+        @click="clickNotif" apptb/>
+      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :niv="2" 
+        @click="clickNotif" apptb/>
+      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" alire :niv="3" 
+        @click="clickNotif" apptb/>
+      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :niv="4" 
+        @click="clickNotif" apptb/>
+      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :niv="5" 
+        @click="clickNotif" apptb/>
+      -->
 
-      <q-btn v-if="session.ok && !session.estMinimal" size="md" icon="menu">
-        <q-menu v-model="ui.menug" max-height="90vh" class="bg-secondary text-white">
+      <q-btn v-if="session.ok && !session.estMinimal" size="md" icon="menu" padding="none">
+        <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
           <page-menu menu/>
         </q-menu>
       </q-btn>
@@ -312,7 +324,7 @@ import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
-import NotifIcon2 from './components/NotifIcon2.vue'
+import NotifIcon2 from './components/NotifIcon.vue'
 import QueueIcon from './components/QueueIcon.vue'
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreTxt from './components/FiltreTxt.vue'

@@ -1,16 +1,16 @@
 <template>
   <q-page class="q-pa-xs">
     <div class="q-my-sm row justify-around">
-      <q-btn class="btn1" dense color="warning" :label="$t('ESgc')" @click="testGC"/>
-      <q-btn class="btn1" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
+      <q-btn padding="xs" dense color="warning" :label="$t('ESgc')" @click="testGC"/>
+      <q-btn padding="xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
     </div>
 
     <q-separator color="orange"/>
 
     <div class="q-my-sm row justify-around">
-      <q-btn class="btn1" dense size="md" color="primary" icon="refresh"
+      <q-btn dense size="md" color="primary" icon="refresh" padding="xs"
         :label="$t('rafraichir')" @click="rafraichir"/>
-      <q-btn class="btn1" dense size="md" color="primary" icon="add" 
+      <q-btn dense size="md" color="primary" icon="add" padding="xs"
         :label="$t('ESne')" @click="plusNS"/>
     </div>
 
@@ -35,7 +35,7 @@
 
         <div class="row justify-between q-ml-lg q-my-xs">
           <span class="fs-md">{{$t('ESprf', [esp.t])}}</span>
-          <q-btn class="btn1" dense color="primary" :label="$t('changer')"
+          <q-btn dense color="primary" :label="$t('changer')" padding="xs"
             @click="ovchgprf1(esp)"/>
         </div>
 
@@ -178,14 +178,13 @@
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
-import ApercuNotif2 from '../components/ApercuNotif2.vue'
+import ApercuNotif2 from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
 import { GC, GetCheckpoint, SetEspaceT } from '../app/operations.mjs'
 import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
-import { SetNotifG } from '../app/operations.mjs'
+import { $t, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
 
@@ -233,8 +232,12 @@ export default {
     },
 
     async ping (esp) {
-      const org = await this.session.fsSync.getEspace(esp.id)
-      await afficherDiag('Ping: ' + org)
+      if (this.session.fsSync) {
+        const org = await this.session.fsSync.getEspace(esp.id)
+        await afficherDiag('Ping: ' + org)
+      } else {
+        await afficherDiag(this.$t('ESping'))
+      }
     },
 
     async rafraichir () {
@@ -335,9 +338,7 @@ export default {
 
     return {
       session, ui, cfg, dkli,
-      AMJ,
-      creationesp, ovcreationesp, checkpoint, ovcheckpoint, edprf, ovedprf,
-      pageespace, ovpageespace
+      AMJ
     }
   }
 
@@ -346,8 +347,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.btn1
-  max-height: 1.5rem
 .bord
   border: 1px solid $grey-5
   border-radius: 5px

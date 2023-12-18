@@ -687,7 +687,7 @@ export default {
   MLAabo: 'Abonnement / Conso.',
   MLAcred: 'Gestions des crédits',
   MLAbloc: 'Blocage du compte',
-  MLAchats: 'Chats Comptable & sponsors',
+  MLAchats: 'Chats d\'urgence',
   MLActc: 'Contacts',
   MLAfic: 'Fichiers-avion',
   MLAchat: 'Chat-Comptable',
@@ -869,7 +869,7 @@ export default {
   ESt6: 'GCDlv : Purge des sposorings et des versions des avats et groupes hors limite de validité',
   ESlog: 'Synthèses des exécutions des tâches',
   ESretry: 'Reprise {0}',
-  
+  ESping: 'Test disponible seulement en mode Firestore (pas SQL)'.
 
   // Page people et ApercuPeople
   APtr1: 'Compte de ma tranche de quotas',

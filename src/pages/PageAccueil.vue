@@ -30,7 +30,7 @@
 
       <!-- Information session : mode synchro -->
       <div v-if="session.synchro" class="btn2" @click="infoSession">
-        <q-btn class="q-mr-xs" dense size="md" icon="autorenew" color="primary">
+        <q-btn class="q-mr-xs" dense size="md" icon="autorenew">
           <queue-icon/>
         </q-btn>
         <span>{{$t('MLAinfm')}}</span>
@@ -104,7 +104,7 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
-import NotifIcon2 from '../components/NotifIcon2.vue'
+import NotifIcon2 from '../components/NotifIcon.vue'
 import QueueIcon from '../components/QueueIcon.vue'
 import PageMenu from '../pages/PageMenu.vue'
 

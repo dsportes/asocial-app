@@ -9,9 +9,9 @@
       </q-toolbar>
       <q-toolbar inset>
         <q-tabs v-model="tab" inline-label outside-arrows mobile-arrows no-caps class="full-width">
-          <q-tab name="tst" class="titre-md" :label="$t('OTtst')" @click="tab='tst'"/>
-          <q-tab name="cpt" class="titre-md" :label="$t('OTcpt')" @click="ouvCpt()"/>
-          <q-tab name="ps" class="titre-md" :label="$t('OTps')" @click="tab='ps'"/>
+          <q-tab name="tst" class="titre-md text-bold" :label="$t('OTtst')" @click="tab='tst'"/>
+          <q-tab name="cpt" class="titre-md text-bold" :label="$t('OTcpt')" @click="ouvCpt()"/>
+          <q-tab name="ps" class="titre-md text-bold" :label="$t('OTps')" @click="tab='ps'"/>
         </q-tabs>
       </q-toolbar>
     </q-header>

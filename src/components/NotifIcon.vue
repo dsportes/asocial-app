@@ -1,6 +1,6 @@
 <template>
 <span :class="tclr + ' ' + bgclr + ' cursor-pointer'">
-  <q-icon size="sm" style="position:relative; border-radius: 6px" :name="ico">
+  <q-icon size="28px" class="relative-position" :name="ico">
     <span v-if="alire" class="rond"></span>
   </q-icon>
   <q-tooltip v-if="apptb" class="bg-indigi text-white font-sm">{{$t('MLAnot')}}</q-tooltip>
@@ -11,7 +11,8 @@
 <script>
 
 const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative']
-const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
+const bg = ['none', 'none', 'yellow-1', 'yellow-3', 'yellow-5',  'yellow-7']
+// const bg = ['none', 'none', 'none', 'none', 'none',  'none']
 const ic = ['check', 'report', 'trending_down', 'edit_off', 'lock', 'close']
 
 export default ({

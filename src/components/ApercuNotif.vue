@@ -9,7 +9,8 @@
             {{$t('de')}} [{{nomSource}}]
           </span>
           <span class="fs-sm font-mono">{{dhcool(notif.dh)}}</span>
-          <q-btn v-if="type < 3 && editable" color="primary" class="q-ml-sm btn2" size="sm" 
+          <q-btn v-if="type < 3 && editable" color="primary" 
+            class="q-ml-sm" size="md" padding="xs"
             :label="$t('editer')" dense icon="add" @click="editer"/>
         </div>
       </div>
@@ -24,7 +25,8 @@
     </div>
     <div v-if="type < 3 && (!notif || !notif.texte)" class="row">
       <div class="titre-md">{{$t('ANauc')}}</div>
-      <q-btn v-if="editable" color="primary" class="q-ml-sm btn2" size="sm" 
+      <q-btn v-if="editable" class="q-ml-sm col-auto self-start" 
+        color="primary" padding="xs" size="md" 
         :label="$t('ANcre')" dense icon="add" @click="creer"/>
     </div>
   </div>

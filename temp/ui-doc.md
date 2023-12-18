@@ -25,6 +25,7 @@ _Arrêtés mensuels_ (**CSV**)
 Ils n'importent aucune autre vue et sont des "span" destinés à figurer au milieu de textes.
 - **BoutonHelp**: ouvre une page d'aide.
 - **BoutonLangue**: affiche la langue courante et permet de la changer.
+- **NotifIcon**: affiche le statut de notification de restriction et ouvre PageCompta. 
 
 Les mots clés sont attachés:
 - à des contacts ou des groupes connus du compte par McMemo,
@@ -163,3 +164,20 @@ Affiche la liste des chats des contacts et des groupes.
 
 Import: ApercuChat, ContactChat, ApercuChatgr, ApercuGenx
 
+### PageCompta (7)
+Quatre onglets donnant l'état de la comptabilité et des blocages.
+- **Notifications**: liste des notifications en cours (avec leurs blocages éventuels).
+- **Comptabilité**: abonnement et consommation (PanelCompta).
+- **Crédits**: pour les comptes autonomes seulement (PanelCredits).
+- **Chats**: chats d'urgence avec le Comptable et les sponsors.
+
+Import: SdAl, ApercuGenx, ApercuNotif2, PanelCompta, PanelCredits, ApercuChat
+
+### PageSession (2)
+Page qui s'affiche pendant l'initilisation de la session, après login et avant la page d'accueil.
+- **Etat général** de la session.
+- **RapportSynchro**: son contenu est dynamique lors du chargement de la session, puis fixe après (synthèse du chargement initial).
+- **Téléchargements en cours**: zone passive d'affichage sans action. En fin d'intialisation d'une session, les chargements des fichiers accessibles en mode avion et qui ne sont pas disponibles dans la base locale, sont chargés en tâche de fond. Cet zone liste les téléchargements restant à effectuer.
+- **Téléchargements en échec**: erreurs survenues dans ces téléchargements. Actions possibles sur chaque fichier en échec: _ré-essai abandon_.
+
+Import: RapportSynchro
