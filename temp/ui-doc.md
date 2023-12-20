@@ -75,6 +75,8 @@ Dialogue:
 ### NomAvatar (1)
 Saisie d'un nom d'avatar avec contrôle de syntaxe.
 
+### ApercuNotif ()
+
 ## Dialogues
 
 ### ApercuCv (4)
@@ -171,7 +173,7 @@ Quatre onglets donnant l'état de la comptabilité et des blocages.
 - **Crédits**: pour les comptes autonomes seulement (PanelCredits).
 - **Chats**: chats d'urgence avec le Comptable et les sponsors.
 
-Import: SdAl, ApercuGenx, ApercuNotif2, PanelCompta, PanelCredits, ApercuChat
+Import: SdAl, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits, ApercuChat
 
 ### PageSession (2)
 Page qui s'affiche pendant l'initilisation de la session, après login et avant la page d'accueil.
@@ -181,3 +183,24 @@ Page qui s'affiche pendant l'initilisation de la session, après login et avant 
 - **Téléchargements en échec**: erreurs survenues dans ces téléchargements. Actions possibles sur chaque fichier en échec: _ré-essai abandon_.
 
 Import: RapportSynchro
+
+### PageEspace (4)
+Affiche le découpage de l'espace en tranches:
+- pour le Comptable, création de tribu et ajustement des paramètres de l'espace pour les transferts de compte O / A.
+
+La page est également invoquée dans un dialogue interne de PageAdmin pour affichage des tranches (mais sans droit d'agir).
+
+Import: ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif
+
+## PageAdmin (5)
+C'est LA page de l'administrateur technique.
+- 2 boutons techniques: lancer un GC, afficher le dernier rapport de GC.
+- un boutons fonctionnel: créer une organisation.
+- un bouton de rafraîchissement.
+
+Liste les organisations existantes:
+- affichage du détail de leurs tranches sur bouton.
+- changement de profil.
+- création / gestion de la notification sur l'espace.
+
+Import: PhraseSecrete, ApercuNotif, PageEspace

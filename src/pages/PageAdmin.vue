@@ -1,67 +1,69 @@
 <template>
   <q-page class="q-pa-xs">
-    <div class="q-my-sm row justify-around">
-      <q-btn padding="xs" dense color="warning" :label="$t('ESgc')" @click="testGC"/>
-      <q-btn padding="xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
-    </div>
+    <div class="row justify-between">
+      <div class="row q-gutter-xs justify-start">
+        <q-btn padding="xs" dense color="warning" :label="$t('ESgc')" @click="testGC"/>
+        <q-btn padding="xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
+      </div>
 
-    <q-separator color="orange"/>
-
-    <div class="q-my-sm row justify-around">
-      <q-btn dense size="md" color="primary" icon="refresh" padding="xs"
-        :label="$t('rafraichir')" @click="rafraichir"/>
-      <q-btn dense size="md" color="primary" icon="add" padding="xs"
-        :label="$t('ESne')" @click="plusNS"/>
+      <div class="row q-gutter-xs justify-end">
+        <q-btn dense size="md" color="primary" icon="refresh" padding="xs"
+          :label="$t('rafraichir')" @click="rafraichir"/>
+        <q-btn dense size="md" color="primary" icon="add" padding="xs"
+          :label="$t('ESne')" @click="plusNS"/>
+      </div>
     </div>
 
     <div class="titre-lg text-white bg-secondary q-pa-xs full-width text-center q-my-sm">
       {{$t('ESlo', session.paLeFT.length, { count: session.paLeFT.length})}}</div>
 
-    <div v-for="(esp, idx) in session.paLeFT" :key="esp.id">
-      <div :class="dkli(idx) + ' largeur40 maauto'">
+    <div class="spmd">
+      <div v-for="(esp, idx) in session.paLeFT" :key="esp.id">
+        <div :class="dkli(idx)">
 
-        <div class="row justify-between">
-          <div class="text-bold font-mono fs-lg">
-            <span class="q-mr-md">#{{esp.id}}</span>
-            <span>{{esp.org}}</span>
+          <div class="row justify-between">
+            <div class="text-bold font-mono fs-lg">
+              <span class="q-mr-md">#{{esp.id}}</span>
+              <span>{{esp.org}}</span>
+            </div>
+            <div class="row q-gutter-xs">
+              <q-btn dense color="primary" flat label="ping"
+                @click="ping(esp)"/>
+              <q-btn dense color="primary" icon="open_in_new" :label="$t('detail')"
+                @click="pageesp(esp)"/>
+            </div>
           </div>
-          <div class="row q-gutter-xs">
-            <q-btn dense color="primary" flat label="ping"
-              @click="ping(esp)"/>
-            <q-btn dense color="primary" icon="open_in_new" :label="$t('detail')"
-              @click="pageesp(esp)"/>
+
+          <div class="row justify-between q-ml-lg q-my-xs">
+            <span class="fs-md">{{$t('ESprf', [esp.t])}}</span>
+            <q-btn dense color="primary" :label="$t('changer')" padding="xs"
+              @click="ovchgprf1(esp)"/>
           </div>
+
+          <apercu-notif class="q-ml-lg q-mt-sm" :notif="esp.notif" :idx="idx" 
+            editable :type="0" :idsource="esp.id" :ctx="{ ns: esp.id }"/>
+
         </div>
-
-        <div class="row justify-between q-ml-lg q-my-xs">
-          <span class="fs-md">{{$t('ESprf', [esp.t])}}</span>
-          <q-btn dense color="primary" :label="$t('changer')" padding="xs"
-            @click="ovchgprf1(esp)"/>
-        </div>
-
-        <apercu-notif2 class="q-ml-lg q-mt-sm" :notif="esp.notif" :idx="idx" 
-          editable :type="0" :idsource="esp.id" :ctx="{ ns: esp.id }"/>
-
       </div>
     </div>
 
     <q-dialog v-model="ui.d.PAcreationesp" persistent>
-      <q-card class="bs petitelargeur">
+      <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" icon="close" color="warning" @click="cancelNS"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESne2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
         <q-card-section class="q-pa-xs">
-          <div class="row items-center">
-            <q-input class="col-6" v-model.number="ns" type="number" style="width:6rem"
+          <div class="row items-center full-width">
+            <q-input class="col-6 q-pr-md" v-model.number="ns" type="number"
             :label="$t('ESns')" :hint="$t('ESnsh')" dense/>
-            <div v-if="dns" class = "col-6 q-ml-lg text-negative bg-yellow-3 text-bold">{{dns}}</div>
+            <div v-if="dns" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dns}}</div>
           </div>
-          <div class="row items-center">
-            <q-input class="col-6" v-model="org" style="width:12rem"
+          <div class="row items-center full-width">
+            <q-input class="col-6  q-pr-md" v-model="org"
               :label="$t('ESorg')" hint="monorg OU monorg\@br1" dense/>
-            <div v-if="dorg" class = "col-6 q-ml-lg text-negative bg-yellow-3 text-bold">{{dorg}}</div>
+            <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
           </div>
           <div class="titre-lg text-center q-my-md">{{$t('ESps')}}</div>
           <phrase-secrete @ok="okps" :orgext="org"
@@ -73,7 +75,7 @@
     </q-dialog>
 
     <q-dialog v-model="ui.d.PAedprf" persistent>
-      <q-card class="bs moyennelargeur">
+      <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense color="warning" size="md" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('STchg')}}</q-toolbar-title>
@@ -96,79 +98,78 @@
         </q-card-section>
         <q-card-actions>
           <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
-            @click="ui.fD"/>
+            @click="ui.fD" padding="xs"/>
           <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 
-            :label="$t('valider')" :disable="prf === profil" @click="valider"/>
+            :label="$t('valider')" padding="xs" :disable="prf === profil" @click="valider"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.PAcheckpoint" persistent full-height>
-      <div class="bs" style="width:80vw">
-        <q-layout container view="hHh lpR fFf" :class="sty">
-          <q-header elevated class="bg-secondary text-white">
-            <q-toolbar class="bg-secondary text-white">
-              <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
-              <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESckpt', [ns])}}</q-toolbar-title>
-              <bouton-help page="page1"/>
-            </q-toolbar>
-          </q-header>
+    <q-dialog v-model="ui.d.PAcheckpoint" full-height position="left" persistent>
+      <q-layout container view="hHh lpR fFf" :class="styp('md')">
+        <q-header elevated>
+          <q-toolbar>
+            <q-btn dense size="md" icon="chevron_left" color="warning" @click="ui.fD"/>
+            <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESckpt', [ns])}}</q-toolbar-title>
+            <bouton-help page="page1"/>
+          </q-toolbar>
+        </q-header>
 
-          <q-page-container class="q-pa-xs">
-            <div class="q-my-sm">
-              <span class="titre-md text-italic q-mr-lg">{{$t('ESver')}}</span>
-              <span class="font-mono fs-md">{{ck.v ? dhIso(ck.v) : '-'}}</span>
+        <q-page-container class="q-pa-xs">
+          <div class="q-my-sm">
+            <span class="titre-md text-italic q-mr-lg">{{$t('ESver')}}</span>
+            <span class="font-mono fs-md">{{ck.v ? dhIso(ck.v) : '-'}}</span>
+          </div>
+          <div v-if="ck.dhStart" class="q-my-sm">
+            <div class="titre-md text-italic q-mr-lg">{{$t('ESdex')}}</div>
+            <div class="q-ml-md">
+              <span class="font-mono fs-md">{{dhIso(ck.dhStart)}}</span>
+              <span v-if="ck.duree" class="q-ml-md font-mono fs-md">{{duree(ck.duree)}}</span>
+              <span v-else class="q-ml-md font-mono fs-md">{{$t('ESec')}}</span>
             </div>
-            <div v-if="ck.dhStart" class="q-my-sm">
-              <div class="titre-md text-italic q-mr-lg">{{$t('ESdex')}}</div>
-              <div class="q-ml-md">
-                <span class="font-mono fs-md">{{dhIso(ck.dhStart)}}</span>
-                <span v-if="ck.duree" class="q-ml-md font-mono fs-md">{{duree(ck.duree)}}</span>
-                <span v-else class="q-ml-md font-mono fs-md">{{$t('ESec')}}</span>
-              </div>
-            </div>
-            <div v-if="!ck.dhStart" class="q-my-sm titre-md text-italic q-mr-lg">{{$t('ESnex')}}</div>
+          </div>
+          <div v-if="!ck.dhStart" class="q-my-sm titre-md text-italic q-mr-lg">{{$t('ESnex')}}</div>
 
-            <div v-if="ck.dhStart">
-              <div class="q-my-sm titre-md text-italic">{{$t('EStex')}}</div>
-              <div v-for="idx in ck.nbTaches" :key="idx" class="q-ml-xl fs-md">{{$t('ESt' + idx)}}</div>
-            </div>
+          <div v-if="ck.dhStart">
+            <div class="q-my-sm titre-md text-italic">{{$t('EStex')}}</div>
+            <div v-for="idx in ck.nbTaches" :key="idx" class="q-ml-xl fs-md">{{$t('ESt' + idx)}}</div>
+          </div>
 
-            <div v-if="ck.log && ck.log.length" class="q-my-md titre-lg text-italic">{{$t('ESlog')}}</div>
+          <div v-if="ck.log && ck.log.length" class="q-my-md titre-lg text-italic">{{$t('ESlog')}}</div>
 
-            <div v-for="(log, idx) in ck.log" :key="idx" class="q-mt-md q-ml-md">
-              <!-- nom retry start duree stats err -->
-              <div class="fs-md font-mono text-bold">
-                {{log.nom}}
-                <span v-if="log.retry" class="q-ml-md">{{$t('ESretry', [log.retry])}}</span>
-                <span class="q-ml-md">{{dhIso(log.start)}}</span>
-                <span v-if="log.duree" class="q-ml-md">{{duree(log.duree)}}</span>
-              </div>
-              <div v-if="log.stats" class="q-ml-lg fs-md font-mono">{{stat(log.stats)}}</div>
-              <div v-if="log.err" class="bord q-ml-lg fs-md font-mono height-4 overflow-auto">
-                {{log.err}}</div>
-              <q-separator color="orange" class="q-mt-sm q-mb-md"/>
+          <div v-for="(log, idx) in ck.log" :key="idx" class="q-mt-md q-ml-md">
+            <!-- nom retry start duree stats err -->
+            <div class="fs-md font-mono text-bold">
+              {{log.nom}}
+              <span v-if="log.retry" class="q-ml-md">{{$t('ESretry', [log.retry])}}</span>
+              <span class="q-ml-md">{{dhIso(log.start)}}</span>
+              <span v-if="log.duree" class="q-ml-md">{{duree(log.duree)}}</span>
             </div>
-          </q-page-container>
-        </q-layout>
-      </div>
+            <div v-if="log.stats" class="q-ml-lg fs-md font-mono">{{stat(log.stats)}}</div>
+            <div v-if="log.err" class="bord q-ml-lg fs-md font-mono height-4 overflow-auto">
+              {{log.err}}</div>
+            <q-separator color="orange" class="q-mt-sm q-mb-md"/>
+          </div>
+        </q-page-container>
+      </q-layout>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.PApageespace" persistent full-height>
-      <div class="bs" style="width:100vw;max-width:100vw">
-        <q-toolbar class="bg-secondary text-white" style="position:fixed;z-index:2">
-          <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">
-            {{$t('ESpgesp', [esp.id, esp.org])}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
+    <q-dialog v-model="ui.d.PApageespace" full-height position="left" persistent>
+      <q-layout container view="hHh lpR fFf" :class="styp('md')">
+        <q-header elevated>
+          <q-toolbar>
+            <q-btn dense size="md" icon="chevron_left" color="warning" @click="ui.fD"/>
+            <q-toolbar-title class="titre-lg full-width text-center">
+              {{$t('ESpgesp', [esp.id, esp.org])}}</q-toolbar-title>
+            <bouton-help page="page1"/>
+          </q-toolbar>
+        </q-header>
 
-        <q-layout container view="hHh lpR fFf" :class="sty">
-          <q-page-container>
-            <PageEspace :ns="esp.id"/>
-          </q-page-container>
-        </q-layout>
-      </div>
+        <q-page-container>
+          <PageEspace :ns="esp.id"/>
+        </q-page-container>
+
+      </q-layout>
     </q-dialog>
 
   </q-page>
@@ -178,20 +179,20 @@
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
-import ApercuNotif2 from '../components/ApercuNotif.vue'
+import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
 import { GC, GetCheckpoint, SetEspaceT } from '../app/operations.mjs'
 import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
-import { $t, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
+import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
 
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, PhraseSecrete, ApercuNotif2, BoutonHelp, PageEspace },
+  components: { BoutonConfirm, PhraseSecrete, ApercuNotif, BoutonHelp, PageEspace },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -337,7 +338,7 @@ export default {
     const cfg = stores.config
 
     return {
-      session, ui, cfg, dkli,
+      session, ui, cfg, dkli, styp,
       AMJ
     }
   }

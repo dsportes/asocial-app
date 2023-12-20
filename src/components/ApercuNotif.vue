@@ -41,7 +41,7 @@ import { Notification, Qui } from '../app/modele.mjs'
 import { dhcool, dkli, afficherDiag, $t } from '../app/util.mjs'
 
 export default {
-  name: 'ApercuNotif2',
+  name: 'ApercuNotif',
 
   props: { 
     notif: Object, // notification existante, null pour création éventuelle

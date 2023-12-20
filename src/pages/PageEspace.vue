@@ -14,19 +14,21 @@ Depuis un Comptable: ns est celui de la session
 -->
 <template>
   <q-page>
-    <div v-if="pow===2" class="row height-3 overflow-hidden-y">
-      <q-btn class="col-auto q-my-sm fs-md btn2" size="md" dense color="primary" 
-        :label="$t('PTnv')" @click="ouvrirnt"/>
+    <div v-if="pow===2" class="column">
+      <div class="row q-my-sm">
+        <q-btn class="col-auto self-start" size="md" padding="xs" dense color="primary" 
+          :label="$t('PTnv')" @click="ouvrirnt"/>
 
-      <q-select class="col q-ml-md largeur20" borderless v-model="optionA" :options="options" dense />
-      <div class="col-auto q-ml-sm column">
-        <q-btn dense size="sm" color="primary" :disable="!chgOptionA"
-          icon="undo" @click="undoOptionA"/>
-        <q-btn dense size="sm" color="warning" :disable="!chgOptionA"
-          icon="check" @click="saveOptionA"/>
+        <q-select class="col q-ml-md self-start" borderless v-model="optionA" :options="options" dense />
+        <div class="col-auto q-mx-sm q-gutter-xs column self-start">
+          <q-btn dense size="md" color="primary" padding="none" round :disable="!chgOptionA"
+            icon="undo" @click="undoOptionA"/>
+          <q-btn dense size="md" color="warning" padding="none" round :disable="!chgOptionA"
+            icon="check" @click="saveOptionA"/>
+        </div>
       </div>
+      <q-separator color="orange" class="q-my-sm"/>
     </div>
-    <div v-else class="height-3"/>
 
     <div class="q-mx-xs" 
       v-for="(lg, idx) in synth" :key="lg.id" @click="lgCourante(lg)">
@@ -63,7 +65,7 @@ Depuis un Comptable: ns est celui de la session
             <tuile-notif :src="lg" :total="idx === 0" occupation/>
           </div>
           <div v-if="idx !== 0" class="q-my-xs">
-            <apercu-notif2 :editable="session.pow < 4" :notif="notif" :type="1" 
+            <apercu-notif :editable="session.pow > 1 && session.pow < 4" :notif="notif" :type="1" 
               :ctx="{ idt: lg.id }"/>
           </div>
           <div v-if="pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs">
@@ -81,7 +83,7 @@ Depuis un Comptable: ns est celui de la session
 
     <!-- Edition de l'info attachée à une tribu -->
     <q-dialog v-model="ui.d.PEedcom" persistent>
-      <q-card class="bs petitelargeur">
+      <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTinfo')}}</q-toolbar-title>
@@ -89,7 +91,7 @@ Depuis un Comptable: ns est celui de la session
         <div class="q-ma-sm">
           <q-input v-model="info" clearable :placeholder="$t('PTinfoph')">
             <template v-slot:append>
-              <q-btn dense icon="check" :label="$t('ok')" @click="valider" color="warning"/>
+              <q-btn dense icon="check" padding="xs" :label="$t('ok')" @click="valider" color="warning"/>
             </template>
             <template v-slot:hint>{{$t('PTinfoh')}}</template>
           </q-input>
@@ -99,14 +101,14 @@ Depuis un Comptable: ns est celui de la session
 
     <!-- Dialogue de mise à jour des quotas de la tribu -->
     <q-dialog v-model="ui.d.PEedq" persistent>
-      <q-card class="bs petitelargeur">
+      <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqut')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
         <q-card-actions>
-          <q-btn :disabled="quotas.err" dense size="md" color="primary" 
+          <q-btn :disabled="quotas.err" dense size="md" padding="xs" color="primary" 
             icon="check" :label="$t('ok')" @click="validerq"/>
         </q-card-actions>
       </q-card>
@@ -114,7 +116,7 @@ Depuis un Comptable: ns est celui de la session
 
     <!-- Dialogue de création d'une nouvelle tribu -->
     <q-dialog v-model="ui.d.PEnt" persistent>
-      <q-card class="bs moyennelargeur">
+      <q-card :class="stype('sm')">
         <div class="titre-lg q-my-sm">{{$t('PTnv')}}</div>
         <div class="q-pa-sm">
           <q-input v-model="nom" clearable :placeholder="$t('PTinfoph')">
@@ -125,7 +127,7 @@ Depuis un Comptable: ns est celui de la session
         <q-card-actions>
           <q-btn flat dense color="warning" icon="close" :label="$t('renoncer')" @click="ui.fD"/>
           <q-btn flat dense color="primary" icon="check" :disabled="!nom || quotas.err"
-            :label="$t('valider')" @click="creer"/>
+            :label="$t('valider')" padding="xs" @click="creer"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -138,7 +140,7 @@ import stores from '../stores/stores.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import ApercuNotif2 from '../components/ApercuNotif.vue'
+import ApercuNotif from '../components/ApercuNotif.vue'
 import { SetNotifT } from '../app/operations.mjs'
 import { dkli, $t } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
@@ -148,7 +150,7 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif2 },
+  components: { ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
 
   computed: {
   },

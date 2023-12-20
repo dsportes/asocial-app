@@ -1,6 +1,7 @@
 <template>
   <q-page>
-    <q-expansion-item class="q-mb-sm q-mx-xs" header-class="bg-secondary text-white" switch-toggle-side expand-separator dense>
+    <q-expansion-item class="q-mb-sm q-mx-xs" header-class="bg-secondary text-white" 
+      switch-toggle-side expand-separator dense>
       <template v-slot:header>
         <div class="row full-width fs-md">
           <span>{{$t('TUtr')}} #{{ID.court(lg.id)}}</span>
@@ -15,7 +16,7 @@
           <tuile-notif :src="lg" occupation/>
         </div>
         <div class="q-my-xs">
-          <apercu-notif2 :editable="session.pow < 4" :notif="lg.notif" :type="1"
+          <apercu-notif :editable="session.pow < 4" :notif="lg.notif" :type="1"
             :ctx="{ idt: aSt.tribuC.id }"/>
         </div>
       </div>
@@ -27,7 +28,7 @@
         :label="$t('PTnvc')" @click="ui.oD('NSnvsp')"/>
     </q-toolbar>
 
-    <div v-for="(c, idx) in aSt.ptLcFT" :key="c.id" class="largeur50 maauto">
+    <div v-for="(c, idx) in aSt.ptLcFT" :key="c.id" class="spmd">
       <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)">
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
@@ -59,7 +60,7 @@
           <div v-else class="titre-md">#{{c.id}}</div>
           <barre-people v-if="session.estComptable || aSt.estSponsor" :id="c.id"/>
 
-          <apercu-notif2 class="q-my-xs" :editable="session.pow < 4"
+          <apercu-notif class="q-my-xs" :editable="session.pow < 4"
             :notif="c.notif" :type="2" :idx="idx" :ctx="{ idt: aSt.tribuC.id, idc: c.id }"/>
 
           <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
@@ -113,7 +114,7 @@ import { dkli } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
-import ApercuNotif2 from '../components/ApercuNotif.vue'
+import ApercuNotif from '../components/ApercuNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import PanelCompta from '../components/PanelCompta.vue'
@@ -128,7 +129,7 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 
 export default {
   name: 'PageTranche',
-  components: { TuileCnv,TuileNotif, ApercuNotif2, ChoixQuotas, ApercuGenx,
+  components: { TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuGenx,
     PanelCompta, QuotasVols2, NouveauSponsoring, BarrePeople },
 
   props: { },

@@ -272,7 +272,7 @@ export const useAvatarStore = defineStore('avatar', {
 
     ptLcF: (state) => {
       const f = stores.filtre.filtre.tranche
-      if (!f) { stores.ui.fmsg(state.ptLc.length); return state.ptLc }
+      if (!f) return state.ptLc
       const r = []
       for (const c of state.ptLc) {
         if (f.avecsp && !c.nasp) continue
@@ -283,7 +283,6 @@ export const useAvatarStore = defineStore('avatar', {
         if (f.notif && (!c.notif || (f.notif === 2 && c.notif.niv < 2))) continue
         r.push(c)
       }
-      stores.ui.fmsg(r.length)
       return r
     },
 
