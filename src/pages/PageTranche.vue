@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <q-expansion-item class="q-mb-sm q-mx-xs" header-class="bg-secondary text-white" 
+    <q-expansion-item class="q-mb-md" header-class="bg-primary text-white" 
       switch-toggle-side expand-separator dense>
       <template v-slot:header>
         <div class="row full-width fs-md">
@@ -80,7 +80,7 @@
     
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="ui.d.PTedq" persistent>
-      <q-card class="bs petitelargeur">
+      <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
@@ -94,14 +94,18 @@
     </q-dialog>
 
     <!-- Affichage des compteurs de compta du compte "courant"-->
-    <q-dialog v-model="ui.d.PTcptdial" persistent full-height>
-      <q-card class="bs" style="width: 80vw !important;">
-      <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [ccnomc])}}</q-toolbar-title>
-      </q-toolbar>
-      <panel-compta style="margin:0 auto"/>
-      </q-card>
+    <q-dialog v-model="ui.d.PTcptdial" full-height position="left" persistent>
+      <q-layout container view="hHh lpR fFf" :class="styp('md')">
+        <q-header elevated>
+          <q-toolbar class="bg-secondary text-white">
+            <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [ccnomc])}}</q-toolbar-title>
+          </q-toolbar>
+        </q-header>
+        <q-page-container>
+          <panel-compta style="margin:0 auto"/>
+        </q-page-container>
+      </q-layout>
     </q-dialog>
 
   </q-page>
@@ -122,6 +126,7 @@ import QuotasVols2 from '../components/QuotasVols2.vue'
 import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import { SetQuotas, SetNotifT, SetNotifC } from '../app/operations.mjs'
+import { styp } from '../app/util.mjs'
 
 const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
 const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative']
@@ -227,7 +232,7 @@ export default {
       session, aSt, pSt, ui, pow, lg,
       ID,
       cfg: stores.config,
-      dkli
+      dkli, styp
     }
   }
 

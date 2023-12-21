@@ -204,3 +204,6 @@ Liste les organisations existantes:
 - création / gestion de la notification sur l'espace.
 
 Import: PhraseSecrete, ApercuNotif, PageEspace
+
+
+En chantier PageTranche BarrePeople DialogueNotif
