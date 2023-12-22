@@ -1,9 +1,9 @@
 <template>
-<q-dialog v-model="ui.d.NVnvsp" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
+<q-dialog v-model="ui.d.NSnvsp" full-height position="left" persistent>
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+      <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -72,7 +72,7 @@
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div v-if="optA === 0">
             <div class="titre-md">{{$t('compteO')}}</div>
-            <quotasVols2 class="q-ml-md" :vols="quotas" noutil/>
+            <quotasVols class="q-ml-md" :vols="quotas" noutil/>
           </div>
           <div v-else class="text-warning titre-md">{{$t('compteA')}}</div>
           <div v-if="estSponsor" class="text-warning titre-md">{{$t('NPcp')}}</div>
@@ -94,13 +94,13 @@ import { ref, toRef, onMounted } from 'vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
-import { edvol, afficherDiag, dkli, $t } from '../app/util.mjs'
+import { styp, edvol, afficherDiag, dkli, $t } from '../app/util.mjs'
 import { Sponsoring } from '../app/modele.mjs'
 import { UNITEV1, UNITEV2, AMJ, limitesjour } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseContact from '../components/PhraseContact.vue'
-import QuotasVols2 from '../components/QuotasVols2.vue'
+import QuotasVols from '../components/QuotasVols.vue'
 import { AjoutSponsoring, ExistePhrase } from '../app/operations.mjs'
 
 export default ({
@@ -110,7 +110,7 @@ export default ({
   qui lui peut choisir la tribu du sponsorisé */
   props: { tribu: Object },
 
-  components: { PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp, QuotasVols2 },
+  components: { PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp, QuotasVols },
 
   computed: {
     estSponsor () { return this.optSP === 1 },
@@ -238,7 +238,7 @@ export default ({
     })
 
     return {
-      ui, dkli,
+      ui, dkli, styp,
       nct: tribu.value.na,
       limj,
       step,

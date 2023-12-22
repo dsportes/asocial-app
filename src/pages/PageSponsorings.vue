@@ -30,7 +30,7 @@
         </div>
 
         <div class="titre-md">{{$t('NPquo')}}</div>
-        <quotasVols2 class="q-ml-md" :vols="quotas(sp)" noutil/>
+        <quotas-vols class="q-ml-md" :vols="quotas(sp)" noutil/>
         <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
         <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard" :idx="idx"/>
 
@@ -57,15 +57,15 @@ import { AMJ, UNITEV1, UNITEV2, ID } from '../app/api.mjs'
 import { dhcool, edvol, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
-import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
-import QuotasVols2 from '../components/QuotasVols2.vue'
+import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
+import QuotasVols from '../components/QuotasVols.vue'
 import { Tribu } from '../app/modele.mjs'
 import { ProlongerSponsoring } from '../app/connexion.mjs'
 
 export default {
   name: 'PageSponsorings',
 
-  components: { BoutonHelp, NouveauSponsoring, ShowHtml, QuotasVols2 },
+  components: { BoutonHelp, NouveauSponsoring, ShowHtml, QuotasVols },
 
   computed: {
     sponsorings () { 

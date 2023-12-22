@@ -42,7 +42,7 @@
       </div>
 
       <div class="titre-md">{{$t('NPquo')}}</div>
-      <quotasVols2 class="q-ml-md" :vols="quotas" noutil/>
+      <quotas-vols class="q-ml-md" :vols="quotas" noutil/>
 
       <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
       <show-html class="q-mb-xs border1" zoom maxh="4rem" :texte="sp.ard"/>
@@ -87,7 +87,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
 import { ExistePhrase } from '../app/operations.mjs'
-import QuotasVols2 from '../components/QuotasVols2.vue'
+import QuotasVols from '../components/QuotasVols.vue'
 import { dhcool } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -117,7 +117,7 @@ export default ({
 - `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
-  components: { PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp, QuotasVols2 },
+  components: { PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp, QuotasVols },
 
   computed: {
     estA () { return !this.sp.clet },

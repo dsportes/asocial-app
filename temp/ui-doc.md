@@ -75,7 +75,20 @@ Dialogue:
 ### NomAvatar (1)
 Saisie d'un nom d'avatar avec contrôle de syntaxe.
 
-### ApercuNotif ()
+### BarrePeople (3)
+Affiche trois boutons ouvrant les dialogues / panels associés:
+- changement de tranche d'un compte O,
+- changement de statuts sponsor d'un compte,
+- affiche des compteurs d'abonnements / consommation.
+
+BarrePeople est importé par PanelPeople et PageTrance.
+
+Import: PanelCompta
+
+### ApercuNotif (3)
+Affiche une notification. Un bouton ouvre le dialogue DaliogueNotif d'édition d'une notification.
+
+Import: ShowHtml
 
 ## Dialogues
 
@@ -205,5 +218,19 @@ Liste les organisations existantes:
 
 Import: PhraseSecrete, ApercuNotif, PageEspace
 
+### PageTranche (6)
+Affiche en tête la tranche courante,
+- celle du compte
+- pour le comptable celle courante sélectionnée depuis la PageEspace.
+- pour le comptable ouvre le panel NouveauSponsoring pour sponsoriser un compte dans n'importe quelle tranche.
 
-En chantier PageTranche BarrePeople DialogueNotif
+Affiche en dessous les sponsors et pour le Comptable les autres comptes de la tranche.
+
+Import: TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuGenx, PanelCompta, QuotasVols, NouveauSponsoring, BarrePeople
+
+Dialogues: 
+- PTcptdial : affichage des compteurs comptables du compte sélectionné
+- PTedq: mise à jour des quotas du compte sélectionné
+
+## En chantier
+DialogueNotif NouveauSponsoring ApercuGroupe

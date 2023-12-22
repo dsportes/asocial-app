@@ -66,7 +66,7 @@
           <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
           <div v-if="vis(c)" class="q-mb-xs row justify-between">
-            <quotas-vols2 :vols="c" />
+            <quotas-vols :vols="c" />
             <q-btn v-if="pow < 4" size="sm" class="q-ml-sm btn1"
                 icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
           </div>
@@ -98,7 +98,7 @@
       <q-layout container view="hHh lpR fFf" :class="styp('md')">
         <q-header elevated>
           <q-toolbar class="bg-secondary text-white">
-            <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+            <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
             <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [ccnomc])}}</q-toolbar-title>
           </q-toolbar>
         </q-header>
@@ -122,8 +122,8 @@ import ApercuNotif from '../components/ApercuNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import PanelCompta from '../components/PanelCompta.vue'
-import QuotasVols2 from '../components/QuotasVols2.vue'
-import NouveauSponsoring from '../dialogues/NouveauSponsoring.vue'
+import QuotasVols from '../components/QuotasVols.vue'
+import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import { SetQuotas, SetNotifT, SetNotifC } from '../app/operations.mjs'
 import { styp } from '../app/util.mjs'
@@ -135,7 +135,7 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 export default {
   name: 'PageTranche',
   components: { TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuGenx,
-    PanelCompta, QuotasVols2, NouveauSponsoring, BarrePeople },
+    PanelCompta, QuotasVols, NouveauSponsoring, BarrePeople },
 
   props: { },
 

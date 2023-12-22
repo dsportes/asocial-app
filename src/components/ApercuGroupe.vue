@@ -37,7 +37,7 @@
         <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
           icon="settings" @click="gererheb"/>
       </div>
-      <quotas-vols2 class="q-mt-xs" :vols="eg.objv.vols"/>
+      <quotas-vols class="q-mt-xs" :vols="eg.objv.vols"/>
     </div>
 
     <!-- Mots clés du groupe -->
@@ -238,7 +238,7 @@ import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 import BoutonMembre from './BoutonMembre.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonHelp from './BoutonHelp.vue'
-import QuotasVols2 from './QuotasVols2.vue'
+import QuotasVols from './QuotasVols.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 
 // Niveau 2
@@ -260,8 +260,7 @@ export default {
   },
 
   components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, 
-  ApercuGenx, 
-  BoutonMembre, QuotasVols2 },
+  ApercuGenx, BoutonMembre, QuotasVols },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },

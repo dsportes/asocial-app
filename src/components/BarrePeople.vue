@@ -1,17 +1,18 @@
 <template>
 <div>
-  <div class="row justify-center q-gutter-sm q-my-xs">
-    <q-btn v-if="session.estComptable" dense color="primary" size="sm"
+  <div class="row justify-center q-gutter-sm q-my-sm">
+    <q-btn v-if="session.estComptable" dense color="primary" size="sm" padding="xs"
       :label="$t('PPcht')" @click="chgTribu"/>
-    <q-btn v-if="session.estComptable" dense color="primary" size="sm"
+    <q-btn v-if="session.estComptable" dense color="primary" size="sm" padding="xs"
       :label="$t('PPchsp')" @click="chgSponsor"/>
-    <q-btn v-if="session.estComptable || (aSt.estSponsor && estDeMaTribu)" dense color="primary" size="sm"
+    <q-btn v-if="session.estComptable || (aSt.estSponsor && estDeMaTribu)" 
+      dense color="primary" size="sm" padding="xs"
       :label="$t('PPcompta')" @click="voirCompta"/>
   </div>
 
   <!-- Changement de tribu -->
   <q-dialog v-if="aSt.ccCpt.id === id" v-model="ui.d.BPchgTr" persistent>
-    <q-card class="bs moyennelargeur">
+    <q-card :class="styp('sm')">
       <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [na.nom, ID.court(aSt.tribuC.id)])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqv1', [aSt.ccCpt.q1, edv1(aSt.ccCpt.q1), pc1])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqv2', [aSt.ccCpt.q2, edv2(aSt.ccCpt.q2), pc2])}}</div>
@@ -54,24 +55,26 @@
   </q-dialog>
 
   <!-- Changement de statut sponsor -->
-  <q-dialog v-if="aSt.ccCpt.id === id" v-model="ui.d.BPchgSp" persistent>
-    <q-card class="bs bg-secondary text-white petitelargeur q-pa-sm">
-      <div v-if="aSt.ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
-      <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
-      <q-card-actions align="center">
-        <q-btn dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn v-if="aSt.ccCpt.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
-        <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
-      </q-card-actions>
-    </q-card>
+  <q-dialog v-model="ui.d.BPchgSp" full-height position="left" persistent>
+    <q-layout container view="hHh lpR fFf" :class="styp('md')">
+      <q-card class="bs bg-secondary text-white q-pa-sm">
+        <div v-if="aSt.ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
+        <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
+        <q-card-actions align="center">
+          <q-btn dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn v-if="aSt.ccCpt.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
+          <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
+        </q-card-actions>
+      </q-card>
+    </q-layout>
   </q-dialog>
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
   <q-dialog v-if="aSt.ccCpt.id === id" v-model="ui.d.BPcptdial" full-height position="left" persistent>
-    <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
+    <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+          <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
             {{$t('PTcompta', [na ? na.nomc : ('#' + id)])}}</q-toolbar-title>
         </q-toolbar>
@@ -92,9 +95,8 @@ import { ref, toRef } from 'vue'
 import { encode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { ID } from '../app/api.mjs'
-// import BoutonHelp from '../components/BoutonHelp.vue'
 import PanelCompta from '../components/PanelCompta.vue'
-import { edvol, afficherDiag } from '../app/util.mjs'
+import { styp, edvol, afficherDiag } from '../app/util.mjs'
 import { GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese } from '../app/operations.mjs'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { getNg, getCle, Tribu } from '../app/modele.mjs'
@@ -243,7 +245,7 @@ export default {
     return {
       na,
       ID,
-      session, aSt, ui
+      styp, session, aSt, ui
     }
   }
 }

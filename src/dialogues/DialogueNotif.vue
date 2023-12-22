@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.DNdialoguenotif" persistent>
-  <q-card :class="sty + ' bs dp40'">
+  <q-card :class="styp('md')">
     <q-toolbar class="bg-secondary text-white">
       <q-btn dense color="warning" size="md" icon="close" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('ANnot')}}</q-toolbar-title>
@@ -48,7 +48,7 @@ import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonBulle from '../components/BoutonBulle.vue'
 import EditeurMd from '../components/EditeurMd.vue'
-import { dhcool, afficherDiag } from '../app/util.mjs'
+import { styp, dhcool, afficherDiag } from '../app/util.mjs'
 import { SetNotifG, SetNotifT, SetNotifC } from '../app/operations.mjs'
 
 export default {
@@ -112,7 +112,7 @@ export default {
     const ctx = ref(ui.notifc.ctx)
 
     return {
-      dhcool, ntf, restr, restrb, type, ctx,
+      styp, dhcool, ntf, restr, restrb, type, ctx,
       session, ui
     }
   }
