@@ -633,7 +633,6 @@ export default {
   PSren: 'Renoncer',
   PSval: 'Se connecter',
   PSctc1: 'Phrase de contact',
-  PSctc2: 'Phrase de contact communiquée',
   PSctc3: 'Le code de l\'organisation est requis',
 
   UTIatt: 'Information importante',

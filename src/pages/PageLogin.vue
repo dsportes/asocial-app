@@ -14,10 +14,10 @@
     </div>
   </q-card>
 
-  <q-expansion-item v-if="session.mode" class="q-mt-lg petitelargeur"
-    expand-separator icon="send" :label="$t('LOGconn2')"
+  <q-expansion-item v-if="session.mode" class="q-my-lg spsm"
+    icon="send" :label="$t('LOGconn2')"
     group="g1" default-opened header-class="titre-lg bg-primary text-white">
-    <div class="fs-md column justify-center">
+    <div class="fs-md column justify-center q-px-sm">
       <phrase-secrete label-valider="LOGconn" icon-valider="send" @ok="onps"/>
       <div :class="!session.synchro ? 'disabled' : ''">
         <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
@@ -28,12 +28,10 @@
     </div>
   </q-expansion-item>
 
-  <q-separator/>
-
-  <q-expansion-item v-if="session.accesNet" class="petitelargeur"
-    expand-separator icon="add_circle" :label="$t('LOGconn3')"
+  <q-expansion-item v-if="session.accesNet" class="q-my-lg spsm"
+    icon="add_circle" :label="$t('LOGconn3')"
     group="g1" header-class="titre-lg bg-primary text-white">
-    <div>
+    <div class="q-px-sm">
       <div class="titre-md q-my-md">{{$t('LOGpar')}}</div>
       <phrase-contact class="full-width" @ok="crypterphrase"/>
     </div>

@@ -113,6 +113,12 @@ N'est importé **que** par PageCompte et ApercuGroupe (une seule édition à un 
 
 Import: ChoixEmoji
 
+### DialogueNotif (3)
+Affichage / saisie d'une notification, texte et niveau.
+- enregistrement / suppression selon que la notification est générale, tranche de quoas ou compte.
+
+Import: EditeurMd
+
 ## Panels
 
 ### DialogueHelp (3)
@@ -171,6 +177,12 @@ Import: NomAvatar, ApercuAvatar, PhraseSecrete, MotsCles, SupprAvatar
 Dialogues:
 - PCnvav: nouvel avatar
 - PCchgps: changement de la phrase secrète
+
+### NouveauSponsoring (3)
+Panel de saisie d'un sponsoring par un compte lui-même sponsor.
+- importé par PageSponsorings et PageTranche.
+
+Import: PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, QuotasVols
 
 ### PageChats
 Affiche la liste des chats des contacts et des groupes.
@@ -233,4 +245,4 @@ Dialogues:
 - PTedq: mise à jour des quotas du compte sélectionné
 
 ## En chantier
-DialogueNotif NouveauSponsoring ApercuGroupe
+ApercuGroupe

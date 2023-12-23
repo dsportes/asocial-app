@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import { toRef, ref } from 'vue'
 import { interdits, regInt } from '../app/api.mjs'
 
 export default {
@@ -35,12 +36,12 @@ export default {
     verif: Boolean,
     groupe: Boolean,
     tribu: Boolean,
-    labelValider: String
+    labelValider: String,
+    initVal: String
   },
   data () {
     return {
       phase: 0,
-      nom: '',
       interdits: interdits
     }
   },
@@ -79,7 +80,12 @@ export default {
     }
   },
 
-  setup () {
+  setup (props) {
+    const vi = toRef(props, 'initVal')
+    const nom = ref(vi.value || '')
+    return {
+      nom
+    }
   }
 }
 </script>

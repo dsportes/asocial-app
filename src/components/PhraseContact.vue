@@ -8,20 +8,24 @@
       :hint="$t('PSorg2')" :placeholder="$t('PSorg3')"/>
   </div>
 
-  <div class="titre-md q-mr-md">{{$t('PSctc' + (declaration ? 1 : 2))}}</div>
+  <div v-if="declaration" class="titre-md q-mr-md">{{$t('PSctc1')}}</div>
   <div class="row items-center">
     <q-input class="col" dense v-model="phrase" :placeholder="$t('NPphl')" 
       counter :rules="[r1]" maxlength="32"
       @keydown.enter.prevent="crypterphrase" :type="isPwd ? 'password' : 'text'"
       :hint="!phrase || !r1(phrase) ? $t('NP16') : $t('NPpe')">
       <template v-slot:append>
-        <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-        <q-btn icon="cancel" size="md" :disable="phrase.length === 0" @click="phrase = ''"/>
-        <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+        <span class="row q-gutter-xs">
+          <q-btn :icon="isPwd ? 'visibility_off' : 'visibility'" 
+            @click="isPwd = !isPwd" size="sm" padding="none" round/>
+          <q-btn icon="cancel" size="sm" padding="none" round 
+            :disable="phrase.length === 0" @click="phrase = ''"/>
+          <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+        </span>
       </template>
     </q-input>
-    <q-btn class="col-auto q-ml-sm btn2" color="primary" 
-      :label="$t('ok')" icon="check" @click="crypterphrase"/>
+    <q-btn class="col-auto q-ml-xs" color="primary" dense padding="none" round
+      icon="check" v-if="r1(phrase) === true" @click="crypterphrase"/>
   </div>
 
 </div>
@@ -49,7 +53,7 @@ export default ({
     },
 
     async crypterphrase () {
-      if (!this.r1(this.phrase)) return
+      if (this.r1(this.phrase) !== true) return
       if (!this.org) {
         await afficherDiag(this.$t('PSctc3'))
         return
@@ -84,6 +88,4 @@ export default ({
 
 <style lang="sass" scoped>
 @import '../css/input.sass'
-.btn2
-  height: 1.5rem
 </style>

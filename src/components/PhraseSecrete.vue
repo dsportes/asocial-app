@@ -26,7 +26,7 @@
         <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
       </template>
     </q-input>
-    <div class="row justify-between items-center">
+    <div class="row justify-between items-center q-my-md">
       <div v-if="isDev" class="row">
         <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
           :key="idx" @click="selph(p)">{{idx}}</span>

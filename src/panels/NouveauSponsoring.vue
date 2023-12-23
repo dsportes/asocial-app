@@ -14,34 +14,40 @@
       <q-stepper v-model="step" vertical color="primary" animated>
         <q-step :name="0" :title="$t('NPprof')" icon="settings" :done="step > 0">
           <div v-if="session.accepteA" class="q-my-sm">
-            <q-option-group :options="optionsOA" type="radio" dense v-model="optA" />
+            <q-option-group :options="optionsOA" type="radio" v-model="optA" />
           </div>
           <div class="bordt q-my-sm">
-            <q-option-group :options="optionsSP" type="radio" dense v-model="optSP" />
+            <q-option-group :options="optionsSP" type="radio" v-model="optSP" />
           </div>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 1" color="primary"
-              :label="$t('suivant')" class="q-ml-sm" />
+            <q-btn flat @click="step = 1" color="primary" padding="none" dense size="md"
+              :label="$t('suivant')"/>
           </q-stepper-navigation>
         </q-step>
 
         <q-step :name="1" :title="$t('NPphr')" icon="settings" :done="step > 1">
-          <span class="fs-sm q-py-sm">{{$t('NPnpc')}}</span>
+          <span class="titre-sm q-py-sm">{{$t('NPnpc')}}</span>
           <div ref="step1">
-            <phrase-contact @ok="crypterphrase" :orgext="session.org"/>
+            <phrase-contact @ok="crypterphrase" :orgext="session.org" 
+              :init-val="pc && pc.phrase ? pc.phrase : ''"/>
           </div>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 0" color="primary"
-              :label="$t('precedent')" class="q-ml-sm" />
+            <q-btn flat @click="step = 0" color="primary" padding="none" dense size="md"
+              :label="$t('precedent')" />
+            <q-btn flat @click="step = 2" color="primary" padding="none" dense size="md"
+              :label="$t('suivant')" :disable="!pc || !pc.phrase"
+              class="q-ml-sm"/>
           </q-stepper-navigation>
         </q-step>
 
-        <q-step :name="2" :title="$t('NPavp')" icon="settings" :done="step > 3" >
+        <q-step :name="2" :title="$t('NPavp')" icon="settings" :done="step > 2" >
           <div ref="step2">
-            <nom-avatar class="q-ma-xs" v-on:ok-nom="oknom" verif icon-valider="check" :label-valider="$t('suivant')"></nom-avatar>
+            <nom-avatar class="q-ma-xs" v-on:ok-nom="oknom" verif :init-val="nom || ''"
+              icon-valider="check" :label-valider="$t('suivant')"></nom-avatar>
           </div>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 1" color="primary" :label="$t('precedent')" class="q-ml-sm" />
+            <q-btn flat @click="step = 1" color="primary" padding="none" dense size="md"
+            :label="$t('precedent')"/>
           </q-stepper-navigation>
         </q-step>
 
@@ -51,8 +57,10 @@
           </div>
           <div v-if="diagmot" class="fs-sm text-warning">{{$t('NP10s', [mot.length])}}</div>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 2" color="primary" :label="$t('precedent')" class="q-ml-sm" />
-            <q-btn flat @click="okmot" color="primary" :label="$t('suivant')" 
+            <q-btn flat @click="step = 2" color="primary" padding="none" dense size="md"
+              :label="$t('precedent')"/>
+            <q-btn flat @click="okmot" color="primary" padding="none" dense size="md"
+              :label="$t('suivant')" 
               :disable="mot.length<10" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
@@ -60,9 +68,11 @@
         <q-step v-if="optA === 0" :name="4" :title="$t('NPquo1')" icon="settings" :done="step > 4" >
           <choix-quotas :quotas="quotas"/>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 3" color="primary" :label="$t('precedent')" class="q-ml-sm" />
+            <q-btn flat @click="step = 3" color="primary" padding="none" dense size="md"
+              :label="$t('precedent')" />
             <q-btn flat @click="step = 5" :disable="quotas.err"
-              color="primary" :label="$t('suivant')" class="q-ml-sm" />
+              color="primary" padding="none" dense size="md"
+              :label="$t('suivant')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
 
@@ -76,9 +86,11 @@
           </div>
           <div v-else class="text-warning titre-md">{{$t('compteA')}}</div>
           <div v-if="estSponsor" class="text-warning titre-md">{{$t('NPcp')}}</div>
-          <q-stepper-navigation>
-            <q-btn flat @click="corriger" color="primary" :label="$t('corriger')" class="q-ml-sm" />
-            <q-btn @click="confirmer" color="warning" :label="$t('confirmer')" icon="check" class="q-ml-sm" />
+          <q-stepper-navigation class="row items-center q-gutter-sm q-mt-md">
+            <q-btn flat @click="corriger" color="primary" padding="xs" dense size="md"
+              :label="$t('corriger')"/>
+            <q-btn @click="confirmer" color="warning" padding="xs" dense size="md"
+              :label="$t('confirmer')" icon="check" />
           </q-stepper-navigation>
         </q-step>
 
@@ -121,7 +133,6 @@ export default ({
       isPwd: false,
       max: [],
       nom: '',
-      phrase: '',
       npi: false,
       pc: null,
       mot: '',
@@ -135,8 +146,8 @@ export default ({
     },
     step (ap) {
       if (ap === 0) {
-        this.optA = this.optionsOA[0].value
-        this.optSP = this.optionsSP[0].value
+        this.optA = this.optA || this.optionsOA[0].value
+        this.optSP = this.optSP || this.optionsSP[0].value
         return
       }
       if (ap === 1) {
@@ -177,7 +188,7 @@ export default ({
     oknom (nom) {
       if (nom) {
         this.nom = nom
-        this.mot1 = this.$t('NPbj', [this.nom])
+        this.mot1 = this.mot || this.$t('NPbj', [this.nom])
         this.step = 3
       }
     },
@@ -202,7 +213,7 @@ export default ({
       } catch {}
     },
     corriger () {
-      this.step = this.optA === 0 ? 4 : 5
+      this.step = this.optA === 0 ? 4 : 3
     }
   },
 
@@ -250,6 +261,10 @@ export default ({
       quotas
     }
   }
+  /*
+  .q-stepper--vertical
+    padding: 8px 0px !important
+  */
 })
 </script>
 
@@ -268,14 +283,12 @@ export default ({
 <style lang="sass">
 .bordt
   border-top: 1px solid $grey-5
-.q-stepper--vertical
-  padding: 4px !important
 .q-stepper--bordered
   border: none
 .q-stepper__tab
-  padding: 2px 0 !important
+  padding: 10px 0 !important
 .q-stepper__step-inner
   padding: 0px 2px 2px 18px !important
 .q-stepper__nav
-  padding: 0 !important
+  padding: 5px 0 !important
 </style>
