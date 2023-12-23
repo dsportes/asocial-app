@@ -1,9 +1,9 @@
 <template>
 <q-dialog v-model="ui.d.ASaccsp" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
-  <q-header elevated class="bg-secondary text-white">
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+  <q-header elevated class="bg-primary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+      <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -47,15 +47,18 @@
       <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
       <show-html class="q-mb-xs border1" zoom maxh="4rem" :texte="sp.ard"/>
 
-      <div class="q-my-sm q-gutter-md row justify-center full-width">
-        <q-radio dense v-model="accdec" :val="1" :label="$t('NPacc')" />
-        <q-radio dense v-model="accdec" :val="2" :label="$t('NPdec')" />
+      <q-separator color="orange" class="q-my-md"/>
+      <div class="q-gutter-md row justify-center full-width">
+        <q-radio dense v-model="accdec" color="primay" class="text-primary"
+          :val="1" :label="$t('NPacc')" />
+        <q-radio dense v-model="accdec" color="warning" class="text-warning"
+          :val="2" :label="$t('NPdec')" />
       </div>
+      <q-separator color="orange" class="q-my-md"/>
 
-      <div v-if="accdec===1 && !ps">
-        <phrase-secrete :init-val="ps" @ok="okps" verif icon-valider="check" 
-          :label-valider="$t('OK')" :orgext="sp.org"/>
-      </div>
+      <phrase-secrete v-if="ui.psdans==='spons'" :init-val="ps" @ok="okps" verif icon-valider="check" 
+        :label-valider="$t('OK')" :orgext="sp.org"/>
+
       <div v-if="accdec===1 && ps">
         <div class="titre-md q-mt-sm">{{$t('NPmota')}}</div>
         <editeur-md mh="10rem" v-model="texte" :texte="textedef" 
@@ -69,8 +72,9 @@
         <div class="titre-md q-mt-sm">{{$t('NPmotd')}}</div>
         <editeur-md mh="10rem" v-model="texte" :texte="textedef"
           editable modetxt hors-session/>
-        <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
-        <q-btn flat @click="refuser" color="warning"
+        <q-btn flat @click="fermer" color="primary" padding="xs" dense size="md"
+          :label="$t('renoncer')" class="q-ml-sm" />
+        <q-btn flat @click="refuser" color="warning" padding="xs" dense size="md"
           :disable="texte.length === 0"
           :label="$t('APAdec2')" class="q-ml-sm" />
       </div>
@@ -82,13 +86,14 @@
 </template>
 
 <script>
+import stores from '../stores/stores.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
 import { ExistePhrase } from '../app/operations.mjs'
 import QuotasVols from '../components/QuotasVols.vue'
-import { dhcool } from '../app/util.mjs'
+import { styp, dhcool } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { crypter } from '../app/webcrypto.mjs'
@@ -99,7 +104,7 @@ export default ({
 
   props: { sp: Object, pc: Object },
   /*
-  pc : object Phrase
+  pc : objet Phrase
   sp : objet Sponsoring décodé
     - id
     - org
@@ -145,6 +150,15 @@ export default ({
     }
   },
 
+  watch: {
+    accdec (ap, av) {
+      if (ap === 1 && !this.ps) {
+        this.ui.psdans = 'spons'
+        this.ui.oD('PSouvrir')
+      }
+    }
+  },
+
   methods: {
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
@@ -183,7 +197,7 @@ export default ({
     // const sp = toRef(props, 'sp')
     // const pc = toRef(props, 'pc')
     return {
-      ui, ID
+      ui, ID, styp
     }
   }
 })
@@ -192,5 +206,6 @@ export default ({
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .border1
-  border: 1px solid grey
+  border-top: 1px solid $grey-5
+  border-bottom: 1px solid $grey-5
 </style>

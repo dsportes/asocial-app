@@ -90,6 +90,23 @@ Affiche une notification. Un bouton ouvre le dialogue DaliogueNotif d'édition d
 
 Import: ShowHtml
 
+### PhraseSecrete (1)
+Saisie contrôlée d'une phrase secrète.
+
+### PhraseContact (1)
+Saisie contrôlée d'une phrase de contact.
+
+### ShowHtml (2)
+Ce composant affiche sur quelques lignes un texte en syntaxe MD. 
+- un bouton permet de zoomer en plein écran le texte et de revenir à la forme résumé.
+- un bouton d'édition est disponible sur option et se limite à émettre un évenement `edit`.
+
+Import: SdDark, SdLight, SdDark1, SdLight1
+
+### QuotasVols (1)
+Affiche l'abonnement en nombre de noye + chat + groupes et de volume de fichier, ainsi que sur option le pourcentage d'utilisation de ces abonnments.
+- affiche aussi le quota de consommation (en monétaire) fixé.
+
 ## Dialogues
 
 ### ApercuCv (4)
@@ -164,7 +181,25 @@ Dialogues:
 - OTrunning: affiche la progression du calcul de la taille de la base.
 - ORsupprbase: dialogue de confirmation de la suppression.
 
+### NouveauSponsoring (3)
+Panel de saisie d'un sponsoring par un compte lui-même sponsor.
+- importé par PageSponsorings et PageTranche.
+
+Import: PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, QuotasVols
+
+### AcceptationSponsoring (4)
+Saisie de l'acceptation d'un sponsoring, in fine création du compte (si acceptation).
+- saisie du nom,
+- saisie du mot de remerciement.
+
+Import: PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp, QuotasVols
+
 ## Pages
+
+### PageLogin (5)
+Login pour un compte déjà enregistré ou auto-création d'un compte depuis une phrase de sponsoring déclarée par un sponsor.
+
+Import: PhraseContact, PhraseSecrete, AcceptationSponsoring
 
 ### PageCompte
 Affiche les avatars du compte et les opérations du compte:
@@ -177,12 +212,6 @@ Import: NomAvatar, ApercuAvatar, PhraseSecrete, MotsCles, SupprAvatar
 Dialogues:
 - PCnvav: nouvel avatar
 - PCchgps: changement de la phrase secrète
-
-### NouveauSponsoring (3)
-Panel de saisie d'un sponsoring par un compte lui-même sponsor.
-- importé par PageSponsorings et PageTranche.
-
-Import: PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, QuotasVols
 
 ### PageChats
 Affiche la liste des chats des contacts et des groupes.
@@ -243,6 +272,14 @@ Import: TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuGenx, PanelCompta, 
 Dialogues: 
 - PTcptdial : affichage des compteurs comptables du compte sélectionné
 - PTedq: mise à jour des quotas du compte sélectionné
+
+### PageSponsorings (4)
+Bouton pour créer un nouveau sponsoring.
+
+Liste les sponsorings actuellement en cours ou récents:
+- boutons de prolongation des sponsorings en cours et d'annulation.
+
+Import: NouveauSponsoring, ShowHtml, QuotasVols
 
 ## En chantier
 ApercuGroupe

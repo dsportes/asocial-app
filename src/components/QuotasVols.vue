@@ -1,15 +1,18 @@
 <template>
-  <div class="titre-md">
-    <div v-if="noutil">
-      <div>{{$t('QVabo1s', [edqt(vols.q1), nbn(q1n)])}}</div>
-      <div>{{$t('QVabo2s', [edqt(vols.q2), edvol(q2v)])}}</div>
+  <div>
+    <div class="row items-center">
+      <span class="text-italic titre-md">{{$t('QVab1')}}</span>
+      <span class="q-ml-md fs-md font-mono text-bold">{{'[' + vols.q1 + '] ' + nbn(q1n)}}</span>
+      <span v-if="!noutil" class="fs-md font-mono text-italic q-ml-md">{{$t('QVut', [pc1])}}</span>
     </div>
-    <div v-else>
-      <div>{{$t('QVabo1', [edqt(vols.q1), nbn(q1n), pc1])}}</div>
-      <div>{{$t('QVabo2', [edqt(vols.q2), edvol(q2v), pc2])}}</div>
+    <div class="row items-center">
+      <span class="text-italic titre-md">{{$t('QVab2')}}</span>
+      <span class="q-ml-md fs-md font-mono text-bold">{{'[' + vols.q2 + '] ' + edvol(q2v)}}</span>
+      <span v-if="!noutil" class="fs-md text-italic font-mono q-ml-md">{{$t('QVut', [pc2])}}</span>
     </div>
-    <div v-if="vols.qc">
-      {{$t('QVplc', [edqt(vols.qc), mon(vols.qc)])}}
+    <div v-if="vols.qc" class="row items-center">
+      <span class="text-italic titre-md">{{$t('QVplc')}}</span>
+      <span class="q-ml-md fs-md font-mono text-bold">{{'[' + vols.qc + '] ' + mon(vols.qc)}}</span>
     </div>
   </div>
 </template>

@@ -2,11 +2,11 @@
 <div>
   <div v-if="!ui.d.SHfs" style="position:relative">
     <div v-if="zoom || edit" class="row btn">
-      <q-btn v-if="zoom" dense color="primary" icon="fullscreen" size="md" padding="none"
+      <q-btn v-if="zoom" dense color="primary" icon="fullscreen" round size="md" padding="none"
         @click.stop="ui.oD('SHfs')">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="edit" class="q-ml-xs" dense color="warning" padding="none"
+      <q-btn v-if="edit" class="q-ml-xs" dense color="warning" padding="none" round
         icon="edit" size="md" @click.stop="editer">
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>
@@ -25,10 +25,10 @@
     <q-card>
       <q-bar>
         <q-space />
-        <q-btn v-if="edit" dense color="primary" icon="edit" size="md" @click="editer">
+        <q-btn v-if="edit" dense padding="none" round color="primary" icon="edit" size="md" @click="editer">
           <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
         </q-btn>
-        <q-btn dense color="primary" size="md" icon="close_fullscreen" @click="ui.fD">
+        <q-btn dense padding="none" round color="primary" size="md" icon="close_fullscreen" @click="ui.fD">
           <q-tooltip class="bg-white text-primary">{{$t('SHre')}}</q-tooltip>
         </q-btn>
       </q-bar>

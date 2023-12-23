@@ -1,47 +1,67 @@
 <template>
-  <q-card-section class="fs-md">
-    <q-checkbox v-model="vkb" color="primary" style="position:relative;left:-8px"/>
-    <span class="cprim fs-lg">{{$t('PSkb')}}</span>
+<q-dialog v-model="ui.d.PSouvrir" persistent>
+  <q-card :class="styp('sm')">
+    <q-toolbar class="bg-secondary text-white">
+      <q-btn dense size="md" color="warning" icon="close" @click="ko"/>
+      <q-toolbar-title class="titre-lg">
+        {{$t('PSm' + phase)}}
+      </q-toolbar-title>
+    </q-toolbar>
 
-    <div v-if="!orgext" class="q-my-md row items-center">
-      <div class="column">
-        <div class="titre-lg q-mr-md">{{$t('PSorg1')}}</div>
-        <q-checkbox v-if="session.accesIdb" v-model="memoOrgL" dense size="sm" 
-          :label="$t('PSmemo')"/>
-      </div>
-      <q-input v-model="orgL" dense style="width:20rem" class="ph"
-        :hint="$t('PSorg2')" :placeholder="$t('PSorg3')"/>
-    </div>
+    <q-card-section class="fs-md">
+      <q-checkbox v-model="vkb" color="primary" style="position:relative;left:-8px"/>
+      <span class="cprim fs-lg">{{$t('PSkb')}}</span>
 
-    <div class="titre-lg">{{$t('PSm'+phase)}}</div>
+      <div v-if="!orgext" class="q-my-md row items-center">
+        <div class="column">
+          <div class="titre-lg q-mr-md">{{$t('PSorg1')}}</div>
+          <q-checkbox v-if="session.accesIdb" v-model="memoOrgL" dense size="sm" 
+            :label="$t('PSmemo')"/>
+        </div>
+        <q-input v-model="orgL" dense style="width:20rem" class="ph"
+          :hint="$t('PSorg2')" :placeholder="$t('PSorg3')"/>
+      </div>
 
-    <q-input dense counter
-      :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : $t('NPpe')" 
-      v-model="ligne1" @focus="setKB(1)" 
-      @keydown.enter.prevent="ok2" 
-      :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">
-      <template v-slot:append>
-        <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-        <q-btn icon="cancel" size="md" :disable="ligne1.length === 0"  @click="ligne1 = ''"/>
-        <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
-      </template>
-    </q-input>
-    <div class="row justify-between items-center q-my-md">
-      <div v-if="isDev" class="row">
-        <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
-          :key="idx" @click="selph(p)">{{idx}}</span>
+      <q-input dense counter
+        :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : $t('NPpe')" 
+        v-model="ligne1" @focus="setKB(1)" 
+        @keydown.enter.prevent="ok2" 
+        :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">
+        <template v-slot:append>
+          <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
+          <q-btn icon="cancel" size="md" :disable="ligne1.length === 0"  @click="ligne1 = ''"/>
+          <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
+        </template>
+      </q-input>
+
+      <div class="row justify-between items-center q-my-md">
+        <div v-if="isDev" class="row">
+          <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
+            :key="idx" @click="selph(p)">{{idx}}</span>
+        </div>
+        <div v-else></div>
+        <div>
+          <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" 
+            size="md" @click="ko" padding="xs md"/>
+          <q-btn color="warning" :label="labelVal()" size="md" :icon-right="iconValider"
+            padding="xs md" :disable="!ligne1 || ligne1.length < lgph" @click="ok" />
+        </div>
       </div>
-      <div v-else></div>
-      <div>
-        <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" 
-          size="md" @click="ko" padding="xs md"/>
-        <q-btn color="warning" :label="labelVal()" size="md" :icon-right="iconValider"
-          padding="xs md" :disable="!ligne1 || ligne1.length < lgph" @click="ok" />
+
+      <div v-if="razdb && session.synchro" class="fs-md column justify-center q-px-sm">
+        <q-checkbox v-if="$q.dark.isActive" v-model="razdbx" dense size="xs" color="grey-8"
+          class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
+        <q-checkbox v-else v-model="razdbx" dense size="xs" color="grey-5"
+          class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
       </div>
-      </div>
-    <div class="simple-keyboard"></div>
-  </q-card-section>
+
+      <div class="simple-keyboard"></div>
+    
+    </q-card-section>
+  </q-card>
+</q-dialog>
 </template>
+
 <script>
 import Keyboard from 'simple-keyboard'
 import 'simple-keyboard/build/css/index.css'
@@ -50,7 +70,7 @@ import { toRef, ref, watch, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { Phrase } from '../app/modele.mjs'
-import { $t, sleep } from '../app/util.mjs'
+import { $t, styp, afficherDiag } from '../app/util.mjs'
 
 export default ({
   name: 'PhraseSecrete',
@@ -60,11 +80,13 @@ export default ({
     labelValider: String,
     initVal: Object, 
     nbc: Number,
-    orgext: String
+    orgext: String,
+    razdb: Boolean
   },
   data () {
     return {
       phase: 0,
+      razdbx: false,
       encours: false,
       isPwd: false,
       vligne1: ''
@@ -78,8 +100,16 @@ export default ({
         for (let i = 0; i < (this.lgph / 2); i++) s += c
         this.ligne1 = s
       }
+    },
+    razdbx (ap, av) {
+      if (ap === true && ap !== av) {
+        this.ui.razdb = ap
+        afficherDiag($t('LOGrazbl'))
+        console.log('Raz db diag')
+      }
     }
   },
+
   methods: {
     selph (p) {
       this.ligne1 = p
@@ -118,11 +148,13 @@ export default ({
         // await sleep(5000)
         this.$emit('ok', pc)
         this.raz()
+        this.ui.fD()
       }, 300)
     },
     ko () {
       this.raz()
       this.$emit('ok', null)
+      this.ui.fD()
     },
     raz () {
       this.encours = false
@@ -133,6 +165,7 @@ export default ({
   },
 
   setup (props) {
+    const ui = stores.ui
     const config = stores.config
     const session = stores.session
     const isDev = config.DEV
@@ -236,7 +269,7 @@ export default ({
     })
 
     return {
-      config, session,
+      ui, config, session, styp,
       orgL,
       memoOrgL,
       isDev: isDev,

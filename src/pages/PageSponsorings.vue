@@ -1,15 +1,16 @@
 <template>
   <q-page>
-    <q-card class="largeur40 maauto q-mb-lg q-pa-sm row justify-center items-center" v-if="aSt.estSponsor || estComptable"> 
+    <q-card class="dpmd q-mb-lg q-pa-sm row justify-center items-center" v-if="aSt.estSponsor || estComptable"> 
       <!-- Nouveau sponsoring -->
       <q-btn class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts" no-caps
-        :label="$t('NPnouv')" color="warning" dense @click="nouveausp"/>
+        :label="$t('NPnouv')" color="warning" dense
+        padding="xs" @click="nouveausp"/>
       <bouton-help class="q-ml-sm" page="page1"/>
     </q-card>
 
-    <q-card class="largeur40 maauto q-pa-sm titre-lg text-center">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</q-card>
+    <q-card class="dpmd q-pa-sm titre-lg text-center">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</q-card>
 
-    <q-card class="largeur40 maauto q-mt-lg" v-for="(sp, idx) in sponsorings" :key="sp.ids">
+    <q-card class="dpmd q-my-md" v-for="(sp, idx) in sponsorings" :key="sp.ids">
       <div :class="'q-px-sm ' + dkli(idx)">
         <div :class="'titre-md text-' + clr(sp)">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
         <div class="titre-md">{{$t('NPphr')}}
@@ -34,12 +35,18 @@
         <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
         <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard" :idx="idx"/>
 
-        <div v-if="sp.st===0" class="q-mt-sm row justify-center items-center">
+        <div v-if="sp.st===0" class="q-my-sm row justify-center items-center q-gutter-sm">
           <div class="titre-md text-italic q-mr-sm">{{$t('NPpro')}}</div>
-          <q-btn class="q-mr-xs" color="primary" size="md" dense :label="$t('NPpro7')" @click="prolonger(sp, 7)"/>
-          <q-btn class="q-mr-xs" color="primary" size="md" dense :label="$t('NPpro20')" @click="prolonger(sp, 20)"/>
-          <q-btn class="q-mr-lg" color="primary" size="md" dense :label="$t('NPpro30')" @click="prolonger(sp, 30)"/>
-          <q-btn color="warning" size="md" dense :label="$t('NPann')" @click="prolonger(sp, 0)"/>
+          <q-btn class="q-mr-xs" color="primary" size="md" dense padding="xs"
+            :label="$t('NPpro7')" @click="prolonger(sp, 7)"/>
+          <q-btn class="q-mr-xs" color="primary" size="md" dense padding="xs"
+            :label="$t('NPpro20')" @click="prolonger(sp, 20)"/>
+          <q-btn class="q-mr-lg" color="primary" size="md" dense padding="xs"
+            :label="$t('NPpro30')" @click="prolonger(sp, 30)"/>
+        </div>
+        <div class="text-center">
+          <q-btn v-if="sp.st===0" class="q-my-md" color="warning" size="md" dense padding="xs"
+            :label="$t('NPann')" @click="prolonger(sp, 0)"/>
         </div>
       </div>
     </q-card>
@@ -88,7 +95,9 @@ export default {
     idtr (sp) { return Tribu.id(sp.descr.clet) },
     estA (sp) { return !sp.descr.clet },
     quotas (sp) { const q = sp.descr.quotas; return { qc: q[0], q1: q[1], q2: q[2]}},
-    async nouveausp () { if (await this.session.edit()) this.ui.oD('NVnvsp') },
+    async nouveausp () { 
+      if (await this.session.edit()) this.ui.oD('NSnvsp') 
+    },
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     async prolonger (sp, nj) {
@@ -125,4 +134,5 @@ export default {
 @import '../css/app.sass'
 .bord
   border-top: 1px solid $grey-5
+  border-bottom: 1px solid $grey-5
 </style>

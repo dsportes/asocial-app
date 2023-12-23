@@ -1286,12 +1286,16 @@ export default {
   PTopt1: 'Le Comptable peut rendre un compte "autonome" sans son accord',
   PTopt2: 'Le Comptable NE peut PAS rendre un compte "autonome" sans son accord',
 
-  // QuotasVols2
+  // QuotasVols
+  QVab1: 'Nombre de notes+chats+groupes:',
+  QVut: '({0}% utilisé)',
+  QVab2: 'Volume des fichiers:',
+
   QVabo1: 'Abonnement (1): {0} - {1} notes+chats+groupes - ({2}% utilisé)',
   QVabo2: 'Abonnement (2): {0} - {1} - ({2}% utilisé)',
   QVabo1s: 'Abonnement (1): {0} - {1} notes+chats+groupes',
   QVabo2s: 'Abonnement (2): {0} - {1}',
-  QVplc: 'Plafond de consommation (rythme mensuel): {0} - {1}',
+  QVplc: 'Plafond de consommation (rythme mensuel):',
 
   // Page groupe(s)
   PGdisp: 'Groupe disparu',

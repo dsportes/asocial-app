@@ -14,21 +14,12 @@
     </div>
   </q-card>
 
-  <q-expansion-item v-if="session.mode" class="q-my-lg spsm"
+  <q-expansion-item v-if="session.mode" @click="ouvrirPS" class="q-mt-sm spsm"
     icon="send" :label="$t('LOGconn2')"
     group="g1" default-opened header-class="titre-lg bg-primary text-white">
-    <div class="fs-md column justify-center q-px-sm">
-      <phrase-secrete label-valider="LOGconn" icon-valider="send" @ok="onps"/>
-      <div :class="!session.synchro ? 'disabled' : ''">
-        <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
-          class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
-        <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
-          class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
-      </div>
-    </div>
   </q-expansion-item>
 
-  <q-expansion-item v-if="session.accesNet" class="q-my-lg spsm"
+  <q-expansion-item v-if="session.accesNet" class="q-mt-xs spsm"
     icon="add_circle" :label="$t('LOGconn3')"
     group="g1" header-class="titre-lg bg-primary text-white">
     <div class="q-px-sm">
@@ -36,6 +27,8 @@
       <phrase-contact class="full-width" @ok="crypterphrase"/>
     </div>
   </q-expansion-item>
+
+  <phrase-secrete v-if="ui.psdans==='login'" label-valider="LOGconn" icon-valider="send" razdb @ok="onps"/>
 
   <!-- Dialogue d'acceptation d'un nouveau sponsoring -->
   <acceptation-sponsoring v-if="ui.d.ASaccsp" :sp="sp" :pc="pc" :org="org"/>
@@ -55,7 +48,7 @@ import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ, ID, isAppExc } from '../app/api.mjs'
 import PhraseSecrete from '../components/PhraseSecrete.vue'
 import PhraseContact from '../components/PhraseContact.vue'
-import AcceptationSponsoring from '../dialogues/AcceptationSponsoring.vue'
+import AcceptationSponsoring from '../panels/AcceptationSponsoring.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 
 export default {
@@ -72,7 +65,14 @@ export default {
     }
   },
 
+  watch: {
+  },
+
   methods: {
+    ouvrirPS (ap) {
+      this.ui.psdans = 'login'
+      this.ui.oD('PSouvrir')
+    },
     reset () {  },
     async setFs () {
       const ret = await new GetEstFs().run()
@@ -80,7 +80,7 @@ export default {
     },
     async onps (phrase) {
       if (!await this.setFs()) return
-      connecterCompte(phrase, this.razdb)
+      connecterCompte(phrase, this.ui.razdb)
     },
     async crypterphrase (pc) {
       this.pc = pc
@@ -141,14 +141,15 @@ export default {
     const session = stores.session
     const ui = stores.ui
     const locmode = ref(session.mode)
-    const razdb = ref(false)
 
+    /*
     watch(razdb, async (ap, av) => {
       if (ap === true && ap !== av) {
         await afficherDiag($t('LOGrazbl'))
         console.log('Raz db diag')
       }
     })
+    */
 
     watch(locmode, (ap, av) => {
       if (ap !== session.mode) {
@@ -159,7 +160,6 @@ export default {
     return {
       session, ui,
       config,
-      razdb,
       locmode
     }
   }

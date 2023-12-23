@@ -65,10 +65,11 @@
 
           <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
-          <div v-if="vis(c)" class="q-mb-xs row justify-between">
-            <quotas-vols :vols="c" />
-            <q-btn v-if="pow < 4" size="sm" class="q-ml-sm btn1"
-                icon="settings" :label="$t('gerer')" dense color="primary" @click="editerq(c)"/>
+          <div v-if="vis(c)" class="q-my-sm row">
+            <quotas-vols class="col" :vols="c" />
+            <q-btn v-if="pow < 4" size="md" class="col-auto q-ml-sm self-start"
+                icon="settings"
+                dense padding="none" round color="primary" @click="editerq(c)"/>
           </div>
           
         </div>
