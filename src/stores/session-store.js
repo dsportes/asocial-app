@@ -21,8 +21,6 @@ export const useSessionStore = defineStore('session', {
     */
     ns: 0, 
     org: '', // code de l'organisation
-    // presetOrgX: '',
-    memoOrg: false,
     
     naComptable: null,
     dh: 0,
@@ -131,9 +129,6 @@ export const useSessionStore = defineStore('session', {
 
     notifAdmin (state) { return state.notifs[0] },
 
-    presetOrg (state) {
-      return !state.accesIdb ? '' : (localStorage.getItem('$asocial$org') || '')
-    },
     pow (state) {
       if (state.estAdmin) return 1
       if (state.estComptable) return 2
@@ -266,21 +261,14 @@ export const useSessionStore = defineStore('session', {
 
     setMode (mode) { 
       this.mode = mode
-      if (this.incognito) localStorage.removeItem('$asocial$org')
-    },
-
-    setMemoOrg (v) {
-      this.memoOrg = v
     },
 
     setOrg (org) { 
       this.org = org
-      if (this.accesIdb && this.memoOrg) localStorage.setItem('$asocial$org', org)
     },
 
     resetOrg () { 
       this.org = ''
-      if (this.accesIdb) localStorage.removeItem('$asocial$org')
     },
 
     setNs (ns) { this.ns = ns; NomGenerique.ns = ns },

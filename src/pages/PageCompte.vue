@@ -1,6 +1,6 @@
 <template>
   <q-page class="column q-pa-xs splg">
-    <div class="row items-center justify-around q-py-xs">
+    <div class="column items-center justify-center q-gutter-xs">
       <div> <!-- Changement de phrase secrète -->
         <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
           :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
@@ -68,19 +68,14 @@
 
     <!-- Dialogue de changement de la phrase secrète -->
     <q-dialog v-model="ui.d.PCchgps" persistent>
-      <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTchps2')}}</q-toolbar-title>
+      <q-card :class="styp('sm') + 'column items-center'">
+        <div class="row q-my-md q-gutter-md justify-center items-center">
+          <q-btn dense :label="$t('renoncer')" color="primary" icon="close" @click="ui.fD"/>
           <bouton-help page="page1"/>
-        </q-toolbar>
-        <phrase-secrete class="q-ma-xs" @ok="okps" verif icon-valider="check" 
-            label-valider="continuer" :orgext="session.org"/>
-        <q-card-actions>
-          <q-btn flat dense :label="$t('renoncer')" color="primary" icon="close" @click="ui.fD"/>
-          <q-btn dense :disable="ps===null" :label="$t('CPTvcp')" 
-            color="warning" icon="check" padding="xs xs" @click="changerps"/>
-        </q-card-actions>
+        </div>
+        <q-btn :label="$t('CPTchps2')" dense size="md" padding="xs" color="primary"
+          no-caps class="titre-lg" @click="saisiePS" />
+        <bouton-confirm class="q-my-md" :actif="ps !== null" :confirmer="changerps"/>
       </q-card>
     </q-dialog>
 
@@ -96,12 +91,12 @@ import { encode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { crypter } from '../app/webcrypto.mjs'
 import { ChangementPS, MotsclesCompte, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
-import PhraseSecrete from '../components/PhraseSecrete.vue'
 import MotsCles from '../dialogues/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import SupprAvatar from '../panels/SupprAvatar.vue'
+import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { styp, afficherDiag, trapex } from '../app/util.mjs'
 import { isAppExc } from '../app/api.mjs'
 
@@ -109,8 +104,7 @@ export default {
   name: 'PageCompte',
 
   components: { 
-    NomAvatar, BoutonHelp, ApercuAvatar,
-    PhraseSecrete, MotsCles, SupprAvatar
+    NomAvatar, BoutonHelp, ApercuAvatar, MotsCles, SupprAvatar, BoutonConfirm
   },
 
   computed: {
@@ -138,9 +132,22 @@ export default {
       } catch (e) { trapex(e, 1) }
     },
 
+    saisiePS () {
+      this.ui.ps = { 
+        orgext: this.session.org,
+        verif: true,
+        labelValider: 'ok',
+        ok: this.okps
+      }
+      this.ui.oD('PSouvrir')
+    },
+
     reset () { this.ps = null; this.ui.fD() },
 
-    okps (ps) { this.ps = ps },
+    okps (ps) { 
+      if (this.ps) this.ps.phrase = null
+      this.ps = ps 
+    },
 
     async changerps () {
       this.ui.fD()

@@ -13,6 +13,8 @@ export default boot(async ({ app /* Vue */ }) => {
   console.log('debug:' + (cfg.DEBUG ? true : false) +
     ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
 
+  cfg.search = window.location.search.replace('?', '')
+
   const h = window.location.host
   cfg.srv = config.SRV ? config.SRV : h
   console.log('SRV depuis ' + (config.SRV ? ' config: ': 'location: ') + cfg.srv)

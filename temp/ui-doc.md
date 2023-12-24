@@ -90,9 +90,6 @@ Affiche une notification. Un bouton ouvre le dialogue DaliogueNotif d'édition d
 
 Import: ShowHtml
 
-### PhraseSecrete (1)
-Saisie contrôlée d'une phrase secrète.
-
 ### PhraseContact (1)
 Saisie contrôlée d'une phrase de contact.
 
@@ -108,6 +105,9 @@ Affiche l'abonnement en nombre de noye + chat + groupes et de volume de fichier,
 - affiche aussi le quota de consommation (en monétaire) fixé.
 
 ## Dialogues
+
+### PhraseSecrete (1)
+Saisie contrôlée d'une phrase secrète.
 
 ### ApercuCv (4)
 Affiche une carte de visite d'un avatar, contact ou groupe:

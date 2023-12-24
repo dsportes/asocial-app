@@ -276,6 +276,8 @@
   <outils-tests v-if="ui.d.PAoutilsTests"/>
   <dialogue-notif v-if="ui.d.DNdialoguenotif"/>
   <apercu-cv v-if="ui.d.ACVouvrir"/>
+  <phrase-secrete v-if="ui.d.PSouvrir"/>
+
 
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
@@ -345,6 +347,7 @@ import FiltreVols from './components/FiltreVols.vue'
 import FiltreRac from './components/FiltreRac.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
 import PageMenu from './pages/PageMenu.vue'
+import PhraseSecrete from './components/PhraseSecrete.vue'
 
 // niveau 2
 import PageSession from './pages/PageSession.vue'
@@ -399,7 +402,7 @@ export default {
     FiltreRac, FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
-    PressePapier, DialogueNotif, ApercuCv
+    PressePapier, DialogueNotif, ApercuCv, PhraseSecrete
    },
 
   computed: {

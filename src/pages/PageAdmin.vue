@@ -1,12 +1,12 @@
 <template>
   <q-page class="q-pa-xs">
-    <div class="row justify-between">
-      <div class="row q-gutter-xs justify-start">
+    <div class="column">
+      <div class="row q-gutter-xs justify-center">
         <q-btn padding="xs" dense color="warning" :label="$t('ESgc')" @click="testGC"/>
         <q-btn padding="xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
       </div>
 
-      <div class="row q-gutter-xs justify-end">
+      <div class="q-mt-sm row q-gutter-xs justify-center">
         <q-btn dense size="md" color="primary" icon="refresh" padding="xs"
           :label="$t('rafraichir')" @click="rafraichir"/>
         <q-btn dense size="md" color="primary" icon="add" padding="xs"
@@ -19,7 +19,7 @@
 
     <div class="spmd">
       <div v-for="(esp, idx) in session.paLeFT" :key="esp.id">
-        <div :class="dkli(idx)">
+        <div :class="dkli(idx) + 'q-my-sm'">
 
           <div class="row justify-between">
             <div class="text-bold font-mono fs-lg">
@@ -65,11 +65,13 @@
               :label="$t('ESorg')" hint="monorg OU monorg\@br1" dense/>
             <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
           </div>
-          <div class="titre-lg text-center q-my-md">{{$t('ESps')}}</div>
-          <phrase-secrete @ok="okps" :orgext="org"
-            verif icon-valider="check" :label-valider="$t('OK')"/>
-          <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
-            :confirmer="creerNS"/>
+          <div class="column justify-center q-mt-md">
+            <q-btn :label="$t('ESps')" dense size="md" padding="xs" color="primary"
+              no-caps class="titre-lg" @click="saisiePS" 
+              :disable="!org"/>
+            <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
+              :confirmer="creerNS"/>
+          </div>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -178,7 +180,6 @@
 <script>
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
-import PhraseSecrete from '../components/PhraseSecrete.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
@@ -192,7 +193,7 @@ const reg = /^([a-z0-9\-]+)$/
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, PhraseSecrete, ApercuNotif, BoutonHelp, PageEspace },
+  components: { BoutonConfirm, ApercuNotif, BoutonHelp, PageEspace },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -232,6 +233,16 @@ export default {
       return x 
     },
 
+    saisiePS () {
+      this.ui.ps = { 
+        orgext: this.org,
+        verif: true,
+        labelValider: 'ok',
+        ok: this.okps
+      }
+      this.ui.oD('PSouvrir')
+    },
+
     async ping (esp) {
       if (this.session.fsSync) {
         const org = await this.session.fsSync.getEspace(esp.id)
@@ -263,6 +274,7 @@ export default {
       this.ui.fD()
     },
     okps (ps) {
+      if (ps) ps.phrase = null
       this.ps = ps
     },
     async creerNS () {

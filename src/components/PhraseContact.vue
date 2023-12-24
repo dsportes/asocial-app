@@ -71,11 +71,14 @@ export default ({
 
   setup (props) {
     const session = stores.session
+    const config = stores.config
     const init = toRef(props, 'initVal')
     const phrase = ref(init.value || '')
     const orgext = toRef(props, 'orgext')
     const org = ref('')
-    if (orgext.value) org.value = orgext.value
+    if (orgext.value) {
+      org.value = orgext.value
+    } else if (config.search) org.value = config.search
 
     return {
       phrase,

@@ -56,9 +56,6 @@
       </div>
       <q-separator color="orange" class="q-my-md"/>
 
-      <phrase-secrete v-if="ui.psdans==='spons'" :init-val="ps" @ok="okps" verif icon-valider="check" 
-        :label-valider="$t('OK')" :orgext="sp.org"/>
-
       <div v-if="accdec===1 && ps">
         <div class="titre-md q-mt-sm">{{$t('NPmota')}}</div>
         <editeur-md mh="10rem" v-model="texte" :texte="textedef" 
@@ -87,7 +84,6 @@
 
 <script>
 import stores from '../stores/stores.mjs'
-import PhraseSecrete from '../components/PhraseSecrete.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
@@ -122,7 +118,7 @@ export default ({
 - `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
-  components: { PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp, QuotasVols },
+  components: { EditeurMd, ShowHtml, BoutonHelp, QuotasVols },
 
   computed: {
     estA () { return !this.sp.clet },
@@ -153,7 +149,13 @@ export default ({
   watch: {
     accdec (ap, av) {
       if (ap === 1 && !this.ps) {
-        this.ui.psdans = 'spons'
+        this.ui.ps = {
+          labelValider: 'ok',
+          verif: true,
+          orgext: this.sp.org,
+          ok: this.okps,
+          initVal: this.ps ? this.ps.phrase : ''
+        }
         this.ui.oD('PSouvrir')
       }
     }

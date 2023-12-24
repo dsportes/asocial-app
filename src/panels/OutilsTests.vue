@@ -62,7 +62,10 @@
       </q-card-section>
 
       <q-card-section v-if="tab === 'ps'">
-        <phrase-secrete @ok="okps" icon-valider="check" label-valider="test"></phrase-secrete>
+        <div class="row justify-center q-my-sm">
+          <q-btn class="titre-md" @click="saisirPS"
+            :label="$t('OTps')" color="primary" size="md" dense padding="xs"/>
+        </div>
         <div class='t1 q-mt-slg'>{{$t('OTh1')}}</div>
         <div class='t2'>{{ ps ? ps.hps1 : '?'}}</div>
         <div class='t1 q-mt-sm'>{{$t('OTcx')}}</div>
@@ -146,7 +149,6 @@ import { encode, decode } from '@msgpack/msgpack'
 
 // import CompTest from './CompTest.vue'
 import stores from '../stores/stores.mjs'
-import PhraseSecrete from '../components/PhraseSecrete.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { EchoTexte, ErreurFonc } from '../app/connexion.mjs'
 import { styp, dhcool, $t, html, afficherDiag, edvol, b64ToU8, u8ToB64 } from '../app/util.mjs'
@@ -160,7 +162,7 @@ export default ({
 
   props: { },
 
-  components: { PhraseSecrete, BoutonHelp /*, CompTest */ },
+  components: { BoutonHelp /*, CompTest */ },
 
   computed: {
   },
@@ -185,6 +187,14 @@ export default ({
   },
 
   methods: {
+    saisirPS () {
+      this.ui.ps = {
+        ok: this.okps,
+        labelValider: 'test'
+      }
+      this.ui.oD('PSouvrir')
+    },
+
     async testDiag() {
       await afficherDiag('toto est très beau')
       console.log('jailu')
@@ -196,6 +206,7 @@ export default ({
     },
 
     okps (ps) {
+      if (ps) ps.phrase = null
       this.ps = ps
     },
 

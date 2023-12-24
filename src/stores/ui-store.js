@@ -35,8 +35,7 @@ export const useUiStore = defineStore('ui', {
 
     dernierfichiercree: '',
 
-    razdb: false, // RAZ db au login
-    psdans: '', // contrôle d'ouverture du dialogue PhraseSecrete
+    ps: null, // objet props du dialogue PhraseSecrete
 
     // gestion des dialogues
     dialogStack: [],

@@ -28,8 +28,6 @@
     </div>
   </q-expansion-item>
 
-  <phrase-secrete v-if="ui.psdans==='login'" label-valider="LOGconn" icon-valider="send" razdb @ok="onps"/>
-
   <!-- Dialogue d'acceptation d'un nouveau sponsoring -->
   <acceptation-sponsoring v-if="ui.d.ASaccsp" :sp="sp" :pc="pc" :org="org"/>
 
@@ -41,12 +39,11 @@ import { ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
-import { $t, afficherDiag } from '../app/util.mjs'
+import { afficherDiag } from '../app/util.mjs'
 import { connecterCompte, GetEstFs } from '../app/connexion.mjs'
 import { Sponsoring, resetRepertoire } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ, ID, isAppExc } from '../app/api.mjs'
-import PhraseSecrete from '../components/PhraseSecrete.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../panels/AcceptationSponsoring.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -54,7 +51,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 export default {
   name: 'PageLogin',
 
-  components: { PhraseContact, PhraseSecrete, AcceptationSponsoring, BoutonHelp },
+  components: { PhraseContact, AcceptationSponsoring, BoutonHelp },
 
   data () {
     return {
@@ -69,8 +66,13 @@ export default {
   },
 
   methods: {
-    ouvrirPS (ap) {
-      this.ui.psdans = 'login'
+    ouvrirPS () {
+      this.ui.ps = { 
+        login: true, 
+        labelValider: "LOGconn", 
+        iconValider: "send",
+        ok: this.onps
+        }
       this.ui.oD('PSouvrir')
     },
     reset () {  },
@@ -79,6 +81,7 @@ export default {
       if (isAppExc(ret)) { this.raz(); return false } else return true
     },
     async onps (phrase) {
+      if (phrase) phrase.phrase = null
       if (!await this.setFs()) return
       connecterCompte(phrase, this.ui.razdb)
     },

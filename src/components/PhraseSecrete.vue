@@ -1,5 +1,6 @@
 <template>
-<q-dialog v-model="ui.d.PSouvrir" persistent>
+<q-dialog v-model="ui.d.PSouvrir" persistent position="top"
+  transition-show="slide-down" transition-hide="fade">
   <q-card :class="styp('sm')">
     <q-toolbar class="bg-secondary text-white">
       <q-btn dense size="md" color="warning" icon="close" @click="ko"/>
@@ -12,27 +13,29 @@
       <q-checkbox v-model="vkb" color="primary" style="position:relative;left:-8px"/>
       <span class="cprim fs-lg">{{$t('PSkb')}}</span>
 
-      <div v-if="!orgext" class="q-my-md row items-center">
-        <div class="column">
-          <div class="titre-lg q-mr-md">{{$t('PSorg1')}}</div>
-          <q-checkbox v-if="session.accesIdb" v-model="memoOrgL" dense size="sm" 
-            :label="$t('PSmemo')"/>
-        </div>
-        <q-input v-model="orgL" dense style="width:20rem" class="ph"
+      <div v-if="!orgext" class="q-my-md">
+        <div class="titre-lg">{{$t('PSorg1')}}</div>
+        <q-input v-model="orgL" dense class="ph"
           :hint="$t('PSorg2')" :placeholder="$t('PSorg3')"/>
       </div>
 
-      <q-input dense counter
+      <q-input v-if="!keyboard.v" dense counter
         :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : $t('NPpe')" 
-        v-model="ligne1" @focus="setKB(1)" 
+        v-model="ligne1" 
         @keydown.enter.prevent="ok2" 
         :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">
         <template v-slot:append>
           <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-          <q-btn icon="cancel" size="md" :disable="ligne1.length === 0"  @click="ligne1 = ''"/>
+          <q-btn icon="cancel" size="md" :disable="ligne1.length === 0"  
+            @click="forceInput('')"/>
           <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
         </template>
       </q-input>
+      <div v-else class="row items-center">
+        <div class="col q-mr-sm font-mono text-bold fs-md height-2 bord">{{ligne1}}</div>
+        <q-btn class="col-auto" icon="cancel" size="md" :disable="ligne1.length === 0"  
+          @click="forceInput('')"/>
+      </div>
 
       <div class="row justify-between items-center q-my-md">
         <div v-if="isDev" class="row">
@@ -48,78 +51,72 @@
         </div>
       </div>
 
-      <div v-if="razdb && session.synchro" class="fs-md column justify-center q-px-sm">
-        <q-checkbox v-if="$q.dark.isActive" v-model="razdbx" dense size="xs" color="grey-8"
+      <div v-if="login && session.synchro" class="fs-md column justify-center q-px-sm">
+        <q-checkbox v-if="$q.dark.isActive" v-model="razdb" dense size="xs" color="grey-8"
           class="bg1 text-italic text-grey-8 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
-        <q-checkbox v-else v-model="razdbx" dense size="xs" color="grey-5"
+        <q-checkbox v-else v-model="razdb" dense size="xs" color="grey-5"
           class="bg1 text-italic text-grey-7 q-ml-sm q-mb-sm" :label="$t('LOGreinit')"/>
       </div>
-
-      <div class="simple-keyboard"></div>
     
     </q-card-section>
   </q-card>
+  <div class="simple-keyboard"></div>
 </q-dialog>
 </template>
 
 <script>
 import Keyboard from 'simple-keyboard'
 import 'simple-keyboard/build/css/index.css'
-import { toRef, ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
 import { Phrase } from '../app/modele.mjs'
 import { $t, styp, afficherDiag } from '../app/util.mjs'
 
+const lgph = 24
+
 export default ({
   name: 'PhraseSecrete',
-  props: { 
-    iconValider: String,
-    verif: Boolean,
-    labelValider: String,
-    initVal: Object, 
-    nbc: Number,
-    orgext: String,
-    razdb: Boolean
+
+  props: {
   },
+
   data () {
     return {
       phase: 0,
-      razdbx: false,
+      razdb: false,
       encours: false,
       isPwd: false,
       vligne1: ''
     }
   },
+
   watch: {
     ligne1 (ap) {
       if (ap && ap.length === 3 && ap.startsWith('*')) {
         const c = ap.substring(1, 3)
         let s = ''
-        for (let i = 0; i < (this.lgph / 2); i++) s += c
-        this.ligne1 = s
+        for (let i = 0; i < (lgph / 2); i++) s += c
+        this.forceInput(s)
       }
     },
-    razdbx (ap, av) {
-      if (ap === true && ap !== av) {
-        this.ui.razdb = ap
-        afficherDiag($t('LOGrazbl'))
-        console.log('Raz db diag')
-      }
+    async razdb (ap) {
+      if (ap === true) await afficherDiag($t('LOGrazbl'))
+      this.ui.razdb = ap
     }
   },
 
   methods: {
     selph (p) {
-      this.ligne1 = p
+      this.forceInput(p)
     },
     labelVal () {
       if (!this.verif) return $t(this.labelValider || 'PSval')
       return this.phase < 2 ? $t('OK') : $t((this.labelValider || 'PSval'))
     },
     ok2 () {
-      if (this.ligne1.length >= this.lgph) this.ok()
+      if (this.ligne1.length >= lgph) this.ok()
     },
     ok () {
       if (!this.verif) {
@@ -127,7 +124,7 @@ export default ({
       } else {
         if (this.phase < 2) {
           this.vligne1 = this.ligne1
-          this.ligne1 = ''
+          this.forceInput('')
           this.phase = 2
         } else {
           if (this.ligne1 === this.vligne1) {
@@ -143,17 +140,17 @@ export default ({
       this.encours = true
       setTimeout(async () => {
         const pc = new Phrase()
-        await pc.init(this.ligne1, this.orgext || this.session.org)
-        pc.phrase = null
+        await pc.init(this.ligne1, this.orgL)
         // await sleep(5000)
-        this.$emit('ok', pc)
+        if (this.login) this.session.setOrg(this.orgL)
+        this.ui.ps.ok(pc)
         this.raz()
         this.ui.fD()
       }, 300)
     },
     ko () {
       this.raz()
-      this.$emit('ok', null)
+      this.ui.ps.ok(null)
       this.ui.fD()
     },
     raz () {
@@ -169,30 +166,39 @@ export default ({
     const config = stores.config
     const session = stores.session
     const isDev = config.DEV
-    const initVal = toRef(props, 'initVal')
+
+    const iconValider = ref(ui.ps.iconValider || 'check')
+    const verif = ref(ui.ps.verif || false) // vérifier par double saisie
+    const labelValider = ref(ui.ps.labelValider || '')
+    // Vient de login: proposer le raz de la base locale ET enregistrer org
+    const login = ref(ui.ps.login || false)
+    const orgext = ref(ui.ps.orgext || '') // le code de l'organisation a été saisi en dehors de ce dialogue
+    const initVal = ref(ui.ps.initVal || '') // valeur initiale de la phrase (AcceptationSponsoring)
+
+    const orgL = ref()
     const ligne1 = ref('')
-    const nbc = toRef(props, 'nbc')
-    const lgph = ref(nbc.value || 24)
-    const orgext = toRef(props, 'orgext')
-    session.setOrg(orgext.value || session.presetOrg)
-    
-    const orgL = ref(session.org)
-    const memoOrgL = ref(session.memoOrg)
 
-    watch(() => memoOrgL.value, (ap, av) => {
-        session.setMemoOrg(ap)
-        if (ap) {
-          session.setOrg(orgL.value)
-        } else {
-          session.resetOrg()
-          orgL.value = ''
-        }
+    if (orgext.value) { // PageAdmin AcceptationSponsoring PageCompte
+      if (orgext.value !== session.org) {
+        /* l'organisation a été saisie préalablement: 
+        - PageAdmin: juste avant dans le dialogue
+        - AcceptationSponsoring: saisie pour accéder à la phrase de sponsoring et au sponsoring
+        */
+        session.setOrg(orgext.value)
       }
-    )
+      // Dans le cas de PageCompte, changement de PS, orgext EST déjà session.org
+      orgL.value = orgext.value
+    } else { // PageLogin OutilsTests
+      orgL.value = session.org || config.search || ''
+    }
 
+    if (initVal.value) ligne1.value = initVal.value
+    
+    /*
     watch(() => orgL.value, (ap, av) => {
       if (ap) session.setOrg(ap); else session.resetOrg()
     })
+    */
 
     const layout = {
       default: [
@@ -211,28 +217,27 @@ export default ({
       ]
     }
 
-    const keyboard = ref(null)
-    const nl = ref(0)
+    const keyboard = { v: null }
     const vkb = ref(false)
 
     onMounted(() => {
-      ligne1.value = initVal.value ? initVal.value.debut : ''
-      nl.value = 0
+      ligne1.value = ''
       vkb.value = false
-      if (keyboard.value) {
-        keyboard.value.destroy()
-        keyboard.value = null
+      if (keyboard.v) {
+        keyboard.v.destroy()
+        keyboard.v = null
       }
     })
 
     function onChange (input) {
-      if (nl.value === 1) ligne1.value = input
+      ligne1.value = input
+      // console.log(ligne1.value)
     }
 
     function handleShift () {
       const currentLayout = keyboard.value.options.layoutName
       const shiftToggle = currentLayout === 'default' ? 'shift' : 'default'
-      keyboard.value.setOptions({
+      keyboard.v.setOptions({
         layoutName: shiftToggle
       })
     }
@@ -240,44 +245,45 @@ export default ({
     function onKeyPress (button) {
       if (button === '{shift}' || button === '{lock}') handleShift()
       if (button === '{enter}') {
-        keyboard.value.destroy()
-        nl.value = 0
+        if (keyboard.v) keyboard.v.destroy()
+        keyboard.v = null
       }
     }
 
-    function setKB (n) {
-      if (!vkb.value) return
-      if (!nl.value) {
-        keyboard.value = new Keyboard({
-          onChange: input => onChange(input),
-          onKeyPress: button => onKeyPress(button),
-          layout: layout,
-          theme: 'hg-theme-default'
-        })
-      }
-      if (nl.value !== n) {
-        if (n === 1) keyboard.value.setInput(ligne1.value)
-      }
-      nl.value = n
+    function setKB () {
+      if (!vkb.value || keyboard.v) return
+      keyboard.v = new Keyboard({
+        onChange: input => onChange(input),
+        onKeyPress: button => onKeyPress(button),
+        layout: layout,
+        theme: 'hg-theme-default'
+      })
+      const s = ligne1.value
+      keyboard.v.setInput(s)
+    }
+
+    function forceInput (inp) {
+      ligne1.value = inp
+      if (keyboard.v) 
+        keyboard.v.setInput(inp)
     }
 
     watch(() => vkb.value, (ap, av) => {
-      if (!ap && keyboard.value) {
-        keyboard.value.destroy()
-        nl.value = 0
+      if (!ap && keyboard.v) {
+        keyboard.v.destroy()
+        keyboard.v = null
       }
+      if (ap) setKB()
     })
 
     return {
       ui, config, session, styp,
-      orgL,
-      memoOrgL,
+      iconValider, labelValider, orgext, login, verif,
+      orgL, ligne1, lgph,
       isDev: isDev,
-      keyboard,
-      setKB,
-      ligne1,
-      vkb,
-      lgph
+      setKB, keyboard,
+      forceInput,
+      vkb
     }
   }
 })
@@ -297,4 +303,8 @@ export default ({
 .hg-theme-default
   color: black !important
   font-family:'Roboto Mono'
+.ph
+  width: 20rem
+.bord
+  border: 1px solid $yellow-5
 </style>
