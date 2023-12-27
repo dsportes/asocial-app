@@ -1390,10 +1390,10 @@ export default {
   AMlnc: 'Ne peut plus être invité, le compte s\'est lui-même mis en liste noire.',
   AMardtit: 'Ardoise de {0} pour échange avec le(s) animateur(s)',
   AMardtit2: 'Ardoise d\'échange avec le(s) animateur(s)',
-  AMbienv: 'Mot de bienvenue sur l\'ardoise',
+  AMbienv: 'Mot de bienvenue sur lchat du groupe',
   AMdisp: 'Ce groupe a disparu depuis le moment où l\'invitation a été lancée.',
 
-  AMcftit: 'Configuration de {0} dans le groue {1}',
+  AMcftit: '{0} dans le groupe {1}',
   AMcftb1: 'Droits',
   AMcftb2: 'Fin d\'activité',
   AMcfbtn: 'Configurer',

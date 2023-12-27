@@ -23,7 +23,7 @@
     <div class="q-mt-sm row justify-between">
       <div v-if="eg.groupe.msu" class="titre-md text-bold text-warning">{{$t('AGunanime')}}</div>
       <div v-else class="titre-md">{{$t('AGsimple')}}</div>
-      <q-btn class="q-ml-sm" size="sm" :label="$t('details')" 
+      <q-btn class="col-auto q-ml-sm self-start" size="sm" :label="$t('details')" padding="xs"
         icon="edit" dense color="primary" @click="editUna"/>
     </div>
 
@@ -34,8 +34,8 @@
           <bouton-membre :eg="eg" :im="eg.groupe.imh" btn/>
         </div>
         <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [aaaammjj(dfh)])}}</div>
-        <q-btn class="col-auto" dense size="sm" color="primary" :label="$t('gerer')"
-          icon="settings" @click="gererheb"/>
+        <q-btn class="col-auto q-ml-sm self-start" dense size="sm" color="primary" padding="xs"
+          :label="$t('gerer')" icon="settings" @click="gererheb"/>
       </div>
       <quotas-vols class="q-mt-xs" :vols="eg.objv.vols"/>
     </div>
@@ -68,10 +68,10 @@
 
   <!-- Gérer le mode simple / unanime -->
   <q-dialog v-model="ui.d.AGediterUna" full-height position="left" persistent>
-    <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-primary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+          <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGuna', [eg.groupe.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -86,32 +86,33 @@
           <div class="titre-md q-my-sm" v-if="eg.groupe.msu">{{$t('AGu3')}}</div>
           <div class="titre-md q-my-sm" v-else>{{$t('AGu4')}}</div>
           <div v-if="eg.groupe.msu">
-            <div class="largeur30 maauto column items-center">
-              <q-separator class="q-my-sm full-width" color="orange"/>
+            <div class="spsm column items-center">
+              <q-separator class="q-mt-md q-mb-sm full-width" color="orange"/>
               <div class="titre-md text-italic" >{{$t('AGu5')}}</div>
               <div v-for="(v, idx) in lstVotes" :key="idx" :class="'row ' + dkli(idx)">
                 <div class="col-8 fs-md">{{v.nom}}</div>
                 <div class="col-2"></div>
                 <div class="col-2 fs-md">{{$t(v.oui ? 'oui' : 'non')}}</div>
               </div>
-              <q-separator class="q-my-sm full-width" color="orange"/>
+              <q-separator class="q-mb-md q-mt-sm full-width" color="orange"/>
             </div>
           </div>
-          <div v-if="!estAnim">
+          <div v-if="!estAnim" class="row items-center q-gutter-sm">
             <div class="titre-md text-center">{{$t('AGupasan')}}</div>
-            <q-btn class="q-ml-md" dense size="md" color="primary" :label="$t('jailu')" @click="ui.fD"/>
+            <q-btn class="self-start" dense size="md" color="primary" padding="xs"
+              :label="$t('jailu')" @click="ui.fD"/>
           </div>
           <div v-else class="column q-gutter-xs items-center">
-            <q-btn v-if="eg.groupe.msu" :label="$t('AGums')" dense size="md" 
+            <q-btn v-if="eg.groupe.msu" :label="$t('AGums')" dense size="md" padding="xs"
               color="warning" @click="cfu = 1"/>
-            <q-btn v-if="eg.groupe.msu" :label="$t('AGrumu')" dense size="md" 
+            <q-btn v-if="eg.groupe.msu" :label="$t('AGrumu')" dense size="md"  padding="xs"
               color="warning" @click="cfu = 2"/>
             <!--q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
               color="warning" @click="cfu = 2"/-->
-            <q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md" 
+            <q-btn v-if="!eg.groupe.msu" :label="$t('AGumu')" dense size="md"  padding="xs"
               color="warning" @click="cfu = 2"/>
             <div class="q-mt-md row justify-center items-center q-gutter-md">
-              <q-btn size="md" class="btn2" dense :label="$t('renoncer')" 
+              <q-btn size="md" class="self-start" dense :label="$t('renoncer')"  padding="xs" 
                 color="primary" @click="ui.fD"/>
               <bouton-confirm :actif="cfu!==0" :confirmer="chgU"/>
             </div>
@@ -122,11 +123,11 @@
   </q-dialog>
 
   <!-- Gérer l'hébergement, changer les quotas -->
-  <q-dialog v-model="ui.d.AGgererheb" full-height persistent position="left">
-    <q-layout container view="hHh lpR fFf" :class="sty + ' d40 bs'">
+  <q-dialog v-model="ui.d.AGgererheb" full-height position="left" persistent>
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+          <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AGgerh', [eg.groupe.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -183,8 +184,9 @@
               <div :class="'q-pa-xs titre-md q-ma-sm ' + (ar2 ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp2', [rst2])}}</div>
             </div>
 
-            <div class="row justify-center q-gutter-md">
-              <q-btn size="md" dense :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+            <div class="q-mt-md row justify-center items-center q-gutter-md">
+              <q-btn size="md" class="self-start" dense :label="$t('renoncer')"  padding="xs" 
+                color="primary" @click="ui.fD"/>
               <bouton-confirm v-if="action === 2 || (action !== 0 && !q.err && !al1 && !al2)" 
                 actif :confirmer="chgQ"/>
             </div>
@@ -198,13 +200,13 @@
 
   <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
   <q-dialog v-model="ui.d.AGnvctc" persistent>
-    <q-card class="bs">
+    <q-card :class="styp('sm')">
       <q-card-section v-if="options.length">
         <div class="titre-md text-italic">{{$t('AGmoi1')}}</div>
         <div class="row justify-around items-center q-my-sm">
           <q-select class="q-mb-md lgsel" v-model="moic" :options="options" :label="$t('AGmoi2')" />
-          <q-btn color="primary" dense icon="check" :label="$t('AGmoi3')" class="btn2"
-            @click="okctcmoi"/>
+          <q-btn color="primary" dense icon="check" :label="$t('AGmoi3')" 
+            padding="xs" @click="okctcmoi"/>
         </div>
       </q-card-section>
 
@@ -231,7 +233,7 @@ import { reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { getNg, Groupe } from '../app/modele.mjs'
 import { ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
-import { edvol, dhcool, dkli, afficherDiag, aaaammjj } from '../app/util.mjs'
+import { styp, edvol, dhcool, dkli, afficherDiag, aaaammjj } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 
 // Niveau 1
@@ -499,6 +501,7 @@ export default {
         ids = 0
       }
       if (ids !== -1) await new ModeSimple().run(this.eg.groupe.id, ids)
+      this.cfu = 0
       this.ui.fD()
     }
   },
@@ -515,7 +518,7 @@ export default {
     const q = reactive({q1:0, q2:0, min1:0, min2:0, max1:0, max2:0, err:false })
 
     return {
-      dkli, aaaammjj,
+      styp, dkli, aaaammjj,
       session, ui,
       photoDef,
       gSt,
@@ -527,27 +530,10 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.borda
-  border: 1px solid $grey-5
-.bord
-  border-top: 1px solid $grey-5
-.bordb
-  border-bottom: 1px solid $grey-5
 .bord1
   border: 1px solid $grey-5
   border-radius: 5px
   padding: 3px
-.nom
-  max-height: 1.3rem
-  overflow: hidden
-
-.btn1
-  padding: 1px !important
-  width: 1.5rem !important
-.q-btn
-  padding: 1px 5px !important
-.btn2
-  height: 1.5rem
 .lgsel
   width: 10rem
 </style>

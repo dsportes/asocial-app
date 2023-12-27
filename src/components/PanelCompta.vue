@@ -173,34 +173,34 @@
   <q-expansion-item switch-toggle-side dense group="trgroup"
     header-class="titre-md text-bold bg-primary text-white"
     :label="$t('PCPrecap')">
-    <div class="largeur40 column maauto q-mb-sm">
+    <div class="sp40 column q-mb-sm">
       <div :class="dkli(1) + ' row items-center full-width'">
-        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center text-italic text-orange">
           {{libm(m)}}
         </div>
       </div>
       <div :class="dkli(0) + ' row items-center full-width'">
-        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center font-mono q-mb-sm">
           {{em(m) ? mon(c.mm[m], 2) : '-'}}
         </div>
       </div>
       <div v-if="em(6)" :class="dkli(1) + ' row items-center full-width'">
-        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center text-italic text-orange">
           {{libm(m + 6)}}
         </div>
       </div>
       <div v-if="em(6)" :class="dkli(0) + ' row items-center full-width'">
-        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center font-mono q-mb-sm">
           {{em(m + 6) ? mon(c.mm[m + 6], 2) : '-'}}
         </div>
       </div>
       <div v-if="em(12)" :class="dkli(1) + ' row items-center full-width'">
-        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center text-italic text-orange">
           {{libm(m + 12)}}
         </div>
       </div>
       <div v-if="em(12)" :class="dkli(0) + ' row items-center full-width'">
-        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center">
+        <div v-for="(n, m) in 6" :key="n" class="col-2 text-center font-mono q-mb-sm">
           {{em(m + 12) ? mon(c.mm[m + 12], 2) : '-'}}
         </div>
       </div>
@@ -222,8 +222,8 @@
       </div>
 
       <div class="row fs-md q-mt-sm" :class="dkli(1)">
-        <div class="col-2 text-italic">{{$t('PCPaamm')}}</div>
-        <div class="col-10 row text-italic text-center">
+        <div class="col-2 text-italic text-bold text-orange">{{$t('PCPaamm')}}</div>
+        <div class="col-10 row text-italic text-center text-bold text-orange">
           <div v-for="u in cu" :key="u" class="col-2">{{u}}</div>
         </div>
       </div>

@@ -140,7 +140,7 @@ export default {
         this.ui.egrplus = false
         if (await new NouveauMembre().run(gr, slot, pe.na, pe.cv)) {
           this.session.setMembreId(slot)
-          this.fD()
+          this.ui.fD()
           this.ui.setPage('groupe', 'membres')
           return
         }

@@ -104,10 +104,74 @@ Import: SdDark, SdLight, SdDark1, SdLight1
 Affiche l'abonnement en nombre de noye + chat + groupes et de volume de fichier, ainsi que sur option le pourcentage d'utilisation de ces abonnments.
 - affiche aussi le quota de consommation (en monétaire) fixé.
 
+### PanelCompta (2)
+Affiche les informations d'abonnement et de consommation d'un compte.
+- importé par BarrePeople à propos d'un contact,
+- importé pat PanelCompta pour les données du compte.
+
+- **Synthèse**: "cumuls" d'abonnement et de consommation correspondant à la période de la création du compte [2023-11-17 17:09] à maintenant (9 jours).
+- **Abonnement: nombre de notes + chats + groupes**
+- **Abonnement: volume des fichiers attachés aux notes**
+- **Contrôle de la consommation**
+- **Récapitulatif des coûts sur les 18 derniers mois**
+- **Tarifs**
+
+Import: MoisM, PanelDeta
+
+### MoisM (1)
+Micro-component de commodité de PanelCompta affichant un bouton affichant 4 mois successifs.
+
+### PanelDeta (1)
+Micro-component de commodité de PanelCompta et PanelCredits affichant des compteurs.
+
+### ApercuGroupe (8)
+Données d'entête d'un groupe:
+- carte de visite, commentaires du compte et mots clés associés par le compte,
+- fondateur,
+- mode d'invitation,
+- hébergement,
+- mots clés définis au niveau du groupe.
+
+Import: MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, ApercuGenx, BoutonMembre, QuotasVols
+
+Dialogues:
+- MCmcledit: édition des mots clés du groupe
+- AGediterUna: gestion du mode simple / unanime
+- AGgererheb: gestion de l'hébergement et des quotas
+- AGnvctc: ouverture de la page des contacts pour ajouter un contact au groupe
+
+### ApercuMembre (7)
+Afiche une expansion pour un membre d'un groupe:
+- repliée: son aperçu de contact et une ligne d'information sur son statut majeur dans le groupe (fondateur, hébergeur, statut).
+- dépliée: ces flags et ses date-heures de changement d'état et un bouton pour changer cet état.
+
+**Le composant est multi-instantié, un par avatar participant et un par contact membre.** 
+- ses dialogues internes étant pilotés par la même variable modèle (`stores.ui.d.AMinvit / stores.ui.d.AMconfig`), ils doivent être contraints à ne s'ouvrir que pour le seul membre **courant**.
+- la propriété `im` transmise sur le tag effectue cette garde: les dialogues ne s'ouvrent **que** quand ils concernet le membre courant `session.membreId`.
+
+Import: InvitationAcceptation, BoutonConfirm, ApercuGenx, BoutonBulle2, BoutonBulle, EditeurMd
+
+Dialogues:
+- AMinvit: invitation d'un contact.
+- AMconfig: configuration des flags du membre.
+
+
 ## Dialogues
 
 ### PhraseSecrete (1)
-Saisie contrôlée d'une phrase secrète.
+Saisie contrôlée d'une phrase secrète et d'une organisation (sur option), avec ou sans vérification par double frappe.
+
+Ce composant héberge *simple-keyboard* qui affiche et gère un clavier virtuel pour la saisie de la phrase. Il utilise pour s'afficher un `<div>` de classe "simple-keyboard" ce qui pose problème en cas d'instantiation en plusieurs exemplaires.
+- Ceci a conduit a avoir une seule instance du dialogue hénergée dans App et commandée par la variable sorres.ui.d.PSouvrir
+- les propritées d'instantiation sont dans stores.ui.ps, dont ok qui est la fonction de callback à la validation de la saisie.
+le dialogue est positionné au *top* afin de laisser la place au clavier virtuel de s'afficher au dessous quand il est sollicité.
+
+PhraseSecrete est ouverte pat :
+- PageLogin: saisie de la pharse de connexion.
+- AcceptationSponsoring: donnée de la phrase par le filleul juste avant sa connexion.
+- PageCompte: changement de phrase secrète.
+- PageCompta: saisie de la phrase secrète du Comptable à la création d'un espace.
+- OutilsTests: pour tester la saisie d'une phrase secrète et la récupération de ses cryptages.
 
 ### ApercuCv (4)
 Affiche une carte de visite d'un avatar, contact ou groupe:
@@ -164,7 +228,7 @@ Panel de suppression d'un avatar.
 - affiche les conséquences en termes de pertes de secrets, de groupes et de chats avec les volumes associés récupérés.
 - importé **uniquement* par PageCompte.
 
-### OutilsTests (2)
+### OutilsTests (1)
 Trois onglets:
 - **Tests d'accés**: tests d'accès au serveur, ping des bases locales et distantes.
 - OTrunning:
@@ -174,8 +238,6 @@ Trois onglets:
 - **Phrase secrète**: test d'une phrase avec affichage des différents cryptages / encodages associés.
 
 Invoqué par un bouton de la page d'accueil / App.vue
-
-Import: PhraseSecrete
 
 Dialogues:
 - OTrunning: affiche la progression du calcul de la taille de la base.
@@ -192,14 +254,14 @@ Saisie de l'acceptation d'un sponsoring, in fine création du compte (si accepta
 - saisie du nom,
 - saisie du mot de remerciement.
 
-Import: PhraseSecrete, EditeurMd, ShowHtml, BoutonHelp, QuotasVols
+Import: EditeurMd, ShowHtml, BoutonHelp, QuotasVols
 
 ## Pages
 
 ### PageLogin (5)
 Login pour un compte déjà enregistré ou auto-création d'un compte depuis une phrase de sponsoring déclarée par un sponsor.
 
-Import: PhraseContact, PhraseSecrete, AcceptationSponsoring
+Import: PhraseContact, AcceptationSponsoring
 
 ### PageCompte
 Affiche les avatars du compte et les opérations du compte:
@@ -207,7 +269,7 @@ Affiche les avatars du compte et les opérations du compte:
 - édition des mots clés du compte,
 - changement de la phrase secrète.
 
-Import: NomAvatar, ApercuAvatar, PhraseSecrete, MotsCles, SupprAvatar
+Import: NomAvatar, ApercuAvatar, MotsCles, SupprAvatar
 
 Dialogues:
 - PCnvav: nouvel avatar
@@ -257,7 +319,7 @@ Liste les organisations existantes:
 - changement de profil.
 - création / gestion de la notification sur l'espace.
 
-Import: PhraseSecrete, ApercuNotif, PageEspace
+Import: ApercuNotif, PageEspace
 
 ### PageTranche (6)
 Affiche en tête la tranche courante,
@@ -274,12 +336,41 @@ Dialogues:
 - PTedq: mise à jour des quotas du compte sélectionné
 
 ### PageSponsorings (4)
-Bouton pour créer un nouveau sponsoring.
-
 Liste les sponsorings actuellement en cours ou récents:
 - boutons de prolongation des sponsorings en cours et d'annulation.
 
+Bouton général pour créer un nouveau sponsoring.
+
 Import: NouveauSponsoring, ShowHtml, QuotasVols
 
+### PageGroupes (8)
+Liste les groupes accédés par le compte, dans lesquels il est actif.
+- synthèse des volumes occupés par les groupes hébergés,
+- bouton de création d'un nouveau groupe,
+- une carte par groupe avec :
+  - un bouton pour ouvrir le chat du groupe,
+  - un bouton pour accéder à la page du groupe.
+
+Import: ChoixQuotas, NomAvatar, ApercuGenx, InvitationsEncours, ApercuChatgr
+
+Dialogue:
+- PGcrgr: création d'un groupe.
+
+### PageGroupe (10)
+Affiche les détails d'un groupe:
+- onglet **Détail du groupe**: entête et participations des avatars du compte au groupe.
+  - bouton d'ajout d'un contact comme contact du groupe.
+- onglet **Membres**: liste des contacts membres du groupes si le compte a accès aux membres.
+
+Import: ApercuMembre, ApercuGroupe
+
 ## En chantier
-ApercuGroupe
+
+## Bugs / vérifications
+ApercuMembre 
+- Possibilité d'effacer un contact d'un groupe (quand il n'a jamais été actif). Configurer à revoir.
+
+InvitationAcceptation
+- réentrance ?
+- utilise membre ? acceptation sans accès membre ?
+

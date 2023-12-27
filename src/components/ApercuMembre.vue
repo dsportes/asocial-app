@@ -95,23 +95,23 @@
               :label="$t('AMinvitbtn3')" @click="ouvririnvit(6)"/>
 
             <q-btn v-if="mb && stm===1 && moi" size="sm" icon="check" class="q-ml-sm"
-              dense :label="$t('AMaccinv')" color="primary" @click="accinviter(im)"/>
+              dense :label="$t('AMaccinv')" color="primary" @click="accinviter"/>
 
           </div>
         </div>
 
         <div>
-          <q-btn v-if="stm === 2 || stm === 3" @click="ouvcfg"
+          <q-btn v-if="stm === 0 || stm === 2 || stm === 3" @click="ouvcfg"
             :label="$t('AMcfbtn')" icon="settings" dense size="mg" color="primary"/>
         </div>
       </div>
     </div>
 
-    <invitation-acceptation v-if="ui.d.IAaccinvit" :idg="eg.groupe.id" :im="imc"/>
+    <invitation-acceptation v-if="ui.d.IAaccinvit && im === session.membreId" :idg="eg.groupe.id" :im="im"/>
 
     <!-- Dialogue de configuration -->
-    <q-dialog v-model="ui.d.AMconfig" persistent>
-      <q-card class="bs moyennelargeur" style="min-height:20rem">
+    <q-dialog v-if="im === session.membreId" v-model="ui.d.AMconfig" persistent>
+      <q-card :class="styp('sm')" style="min-height:20rem">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-md text-center q-mx-sm">{{$t('AMcftit', [na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
@@ -190,8 +190,8 @@
     </q-dialog>
 
     <!-- Dialogue d'invitation -->
-    <q-dialog v-model="ui.d.AMinvit" persistent>
-      <q-card class="bs moyennelargeur">
+    <q-dialog v-if="im === session.membreId" v-model="ui.d.AMinvit" persistent>
+      <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AMinvtit', [na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
@@ -216,10 +216,10 @@
             <span v-if="cas === 4 && gSt.animInv[0].indexOf(invpar.value) !== -1"
               class= "q-ml-md text-bold text-warning bg-yellow-3">{{$t('AMdejav')}}</span>
           </div>
-          <q-checkbox :disable="!drupd" v-model="ipa" :label="$t('FLAGS7')" />
-          <q-checkbox :disable="!drupd" v-model="idm" :label="$t('FLAGS3')" />
-          <q-checkbox :disable="!drupd" v-model="idn" :label="$t('FLAGS5')" />
-          <q-checkbox :disable="!drupd" v-if="idn" v-model="ide" :label="$t('FLAGS6')" />
+          <q-checkbox dense :disable="!drupd" v-model="ipa" :label="$t('FLAGS7')" />
+          <q-checkbox dense :disable="!drupd" v-model="idm" :label="$t('FLAGS6')" />
+          <q-checkbox dense :disable="!drupd" v-model="idn" :label="$t('FLAGS5')" />
+          <q-checkbox dense :disable="!drupd" v-if="idn" v-model="ide" :label="$t('FLAGS6')" />
           <div v-if="drupd" class="q-mt-sm height-3">
             <div v-if="cas === 2 && mb.flagsiv === nvflags">{{$t('AMnochg')}}</div>
             <div v-if="cas === 4 && mb.flagsiv !== nvflags"
@@ -228,20 +228,22 @@
         </q-card-section>
         <q-card-section>
           <div class="titre-md text-italic">{{$t('AMbienv')}}</div>
-          <editeur-md class="bord" :lgmax="1000" v-model="ard" :texte="mb.ard || ''" modetxt mh="5rem"
-            editable/>
+          <editeur-md class="bord" :lgmax="1000" v-model="ard" :texte="mb.ard || ''" 
+            modetxt mh="8rem"  editable/>
         </q-card-section>
-        <q-card-actions vertical>
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-          <q-btn v-if="cas === 1" flat :label="$t('AMinviter')" color="primary" @click="inviter(1)"/>
+        <q-card-actions class="column justify-center q-gutter-xs">
+          <q-btn flat padding="xs" :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+          <q-btn v-if="cas === 1" flat padding="xs" :label="$t('AMinviter')" 
+            color="primary" @click="inviter(1)"/>
           <q-btn v-if="cas === 2" :disable="mb.flagsiv === nvflags"
-            flat :label="$t('AMmodinv')" color="primary" @click="inviter(2)"/>
-          <q-btn v-if="cas === 3" flat :label="$t('AMdelinv')" color="warning" @click="inviter(3)"/>
-          <q-btn v-if="cas === 4" :label="$t('AMvpour')" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
+            flat padding="xs" :label="$t('AMmodinv')" color="primary" @click="inviter(2)"/>
+          <q-btn v-if="cas === 3" flat padding="xs" :label="$t('AMdelinv')" 
+            color="warning" @click="inviter(3)"/>
+          <q-btn v-if="cas === 4" :label="$t('AMvpour')" padding="xs" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
             :disable="gSt.animInv[0].indexOf(invpar) !== -1 && mb.flagsiv === nvflags" @click="inviter(4)"/>
-          <q-btn v-if="cas === 4" :label="$t('AMvcontre')" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
+          <q-btn v-if="cas === 4" :label="$t('AMvcontre')"  padding="xs" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
             :disable="gSt.animInv[1].indexOf(invpar) !== -1" @click="inviter(5)"/>
-          <q-btn v-if="cas === 6" flat :label="$t('AMdelinv')" color="warning" @click="inviter(6)"/>
+          <q-btn v-if="cas === 6" flat :label="$t('AMdelinv')" padding="xs" color="warning" @click="inviter(6)"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -251,7 +253,7 @@
 <script>
 import { ref, toRef } from 'vue'
 
-import { dkli, $t, afficherDiag } from 'src/app/util.mjs'
+import { styp, dkli, $t, afficherDiag } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from './BoutonConfirm.vue'
@@ -387,10 +389,9 @@ export default {
     options: null,
     ard: '',
     cfgtab: 'droits',
-    dra:0, drm: 0, drl:0, dre: 0, adrm: 0, adrl: 0,
+    dra: false, drm: false, drl: false, dre: false, adrm: false, adrl: false,
     flags2av: 0,
-    decl: 0,
-    imc: 0
+    decl: 0
   }},
 
   methods: {
@@ -406,9 +407,8 @@ export default {
 
     xd (d) { return !d ? '-' : AMJ.editDeAmj(d, true) },
 
-    async accinviter (im) {
+    async accinviter () {
       if (!await this.session.edit()) return
-      this.imc = im
       this.ui.oD('IAaccinvit')
     },
 
@@ -498,7 +498,7 @@ export default {
     // console.log(edit(eg.value.groupe.flags[im.value]))
 
     return {
-      FLAGS, dkli, edit, qexp,
+      FLAGS, dkli, styp, edit, qexp,
       session, gSt, aSt, ui,
       na, cv
     }

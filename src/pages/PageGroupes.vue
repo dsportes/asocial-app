@@ -1,11 +1,11 @@
 <template>
 <q-page class="q-pa-sm column items-center">
-  <q-card class="largeur40 maauto column items-center">
+  <q-card class="dpmd column items-center">
 
-    <q-btn class="q-my-sm" size="md" dense color="primary" 
+    <q-btn class="q-my-sm" size="md" dense color="primary" padding="xs"
       :label="$t('PGcrea')" @click="nvGr"/>
 
-    <div class="petitelargeur q-my-sm">
+    <div class="q-my-sm full-width">
       <div class="row">
         <div class="col-6">{{$t('PGstatsh')}}</div>
         <div class="col-3 fs-md text-italic text-center">{{$t('nbnotes')}}</div>
@@ -18,20 +18,20 @@
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PGvq')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ stats.groupes.q1 + ' / ' + edq1(stats.groupes.q1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ stats.groupes.q2 + ' / ' + edq2(stats.groupes.q2)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ '[' + stats.groupes.q1 + '] / ' + edq1(stats.groupes.q1)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ '[' + stats.groupes.q2 + '] / ' + edq2(stats.groupes.q2)}}</div>
       </div>
     </div>
   </q-card>
 
   <invitations-encours/>
 
-  <div v-if="!gSt.pgLgFT.length" class="q-my-lg largeur40 titre-lg text-italic text-center">
+  <div v-if="!gSt.pgLgFT.length" class="q-my-lg titre-lg text-italic text-center">
     {{$t('PGvide', [gSt.pgLg.size])}}
   </div>
 
-  <div class="q-my-lg petitelargeur maauto" v-if="gSt.pgLgFT.length">
-    <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-sm'">
+  <div class="q-my-lg dpmd" v-if="gSt.pgLgFT.length">
+    <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-md'">
       <apercu-genx :id="e.groupe.id" :idx="idx" />
       <div class="row full-width items-center justify-between">
         <div>
@@ -45,10 +45,10 @@
           </div>
         </div>
         <div class="row justify-end">
-          <q-btn class="q-ml-md btn1" size="sm" icon="chat" :label="$t('PGchat')" 
-            color="primary" dense @click.stop="chat(e)"/>
-          <q-btn class="q-ml-md btn1" size="sm" icon="open_in_new" :label="$t('page')" 
-            color="primary" dense @click.stop="courant(e)"/>
+          <q-btn class="q-ml-md" size="sm" icon="chat" :label="$t('PGchat')" 
+            color="primary" dense padding="xs" @click.stop="chat(e)"/>
+          <q-btn class="q-ml-md" size="sm" icon="open_in_new" :label="$t('page')" 
+            color="primary" dense padding="xs" @click.stop="courant(e)"/>
         </div>
       </div>
     </q-card>
@@ -56,7 +56,7 @@
 
   <!-- Nouveau groupe ------------------------------------------------>
   <q-dialog v-model="ui.d.PGcrgr" persistent>
-    <q-card class="bs petitelargeur column">
+    <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('PGcrea')}}</q-toolbar-title>
@@ -69,9 +69,9 @@
         <choix-quotas :quotas="quotas" groupe/>
         <q-option-group :options="options" type="radio" v-model="una"/>
         <q-card-actions align="right">
-          <q-btn dense flat color="warning" 
+          <q-btn dense flat color="warning" padding="xs"
             :label="$t('renoncer')" @click="ui.fD" />
-          <q-btn dense flat color="primary" :disable="quotas.err || !nom"
+          <q-btn dense flat color="primary" :disable="quotas.err || !nom" padding="xs"
             :label="$t('creer')" v-close-popup @click="okCreation" />
         </q-card-actions>
       </div>
@@ -86,7 +86,7 @@
 <script>
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { edvol, $t, dkli } from '../app/util.mjs'
+import { edvol, $t, dkli, styp } from '../app/util.mjs'
 import { Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
@@ -178,7 +178,7 @@ export default {
     const stats = fStore.stats
 
     return {
-      ui, session, aSt, gSt, dkli,
+      ui, session, aSt, gSt, dkli, styp,
       stats,
       mapmc,
       options
@@ -188,18 +188,6 @@ export default {
 }
 </script>
 
-<style lang="css">
-.q-item { padding: 8px 1px !important; }
-</style>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.btn1
-  height: 1.5rem !important
-.msg
-  position: absolute
-  z-index: 99999
-  top: -20px
-  right: 5px
-  border-radius: 5px
-  border: 1px solid black
 </style>

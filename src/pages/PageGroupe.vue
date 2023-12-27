@@ -1,12 +1,12 @@
 <template>
 <q-page>
   <!-- Tab "groupe" -------------------------------------------------->
-  <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm largeur40 maauto">
+  <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm spmd">
     <apercu-groupe class="q-my-sm" :eg="gSt.egrC" :idx="0" :mapmc="mapmc"/>
   </div>
 
   <!-- Tab "membres" -------------------------------------------------->
-  <div v-if="ui.pagetab==='membres' && gSt.egrC" class="q-pa-sm largeur40 maauto">
+  <div v-if="ui.pagetab==='membres' && gSt.egrC" class="q-pa-sm spmd">
     <div v-if="amb">
       <div v-if="!gSt.pgLm.length" class="titre-lg text-italic">
         {{$t('PGnope')}}</div>
@@ -78,11 +78,4 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.msg
-  position: absolute
-  z-index: 99999
-  top: -20px
-  right: 5px
-  border-radius: 5px
-  border: 1px solid black
 </style>
