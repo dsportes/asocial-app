@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <q-dialog v-if="ui.mcmemoId === id" v-model="ui.d.MMedition">
+    <q-dialog v-model="ui.d.MMedition[idc]">
       <q-card :class="styp('md')">
         <q-toolbar class="col-auto bg-secondary text-white">
           <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
@@ -51,7 +51,7 @@
 
         <q-card-section class="q-py-sm">
           <div class="titre-lg text-italic">{{$t('MMCmc')}}</div>
-          <apercu-motscles @ok="changerMc" :idx="0" du-compte :du-groupe="0"
+          <apercu-motscles :ok="changerMc" :idx="0" du-compte :du-groupe="0"
             :mapmc="mapmc" :edit="!diag" :src="nvmc || mc"/>
         </q-card-section>
 
@@ -123,9 +123,7 @@ export default {
       this.diag = await this.session.editDiag
       this.nvmc = null
       this.txt = this.memo
-      this.ui.mcmemoId = this.id
-      console.log(this.ui.mcmemoId)
-      this.ui.oD('MMedition')
+      this.ui.oD('MMedition', this.idc)
     },
     changerMc (nvmc) {
       this.nvmc = nvmc
@@ -143,11 +141,11 @@ export default {
     const ui = stores.ui
     const aSt = stores.avatar
     const id = toRef(props, 'id')
+    const idc = ref(ui.getIdc())
     const mapmc = ref(Motscles.mapMC(true, 0))
     const root = ref(null)
     const large = ref(false)
 
-    // console.log("setup McMemo ", id.value, ui.mcmemoId)
     const mcmemo = ref(null)
     
     function getmm () {
@@ -177,7 +175,7 @@ export default {
     })
 
     return {
-      styp, session, ui, root, large,
+      styp, session, ui, root, large, idc,
       mcmemo, dkli, titre, mapmc
     }
   }

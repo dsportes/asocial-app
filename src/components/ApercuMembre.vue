@@ -87,7 +87,7 @@
                 <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
               </div>
             </div>
-
+AG
             <q-btn v-if="mb && stm===0 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
               :label="$t('AMinvitbtn4')" @click="ouvririnvit(4)"/>
 
@@ -110,7 +110,7 @@
     <invitation-acceptation v-if="ui.d.IAaccinvit && im === session.membreId" :idg="eg.groupe.id" :im="im"/>
 
     <!-- Dialogue de configuration -->
-    <q-dialog v-if="im === session.membreId" v-model="ui.d.AMconfig" persistent>
+    <q-dialog v-model="ui.d.AMconfig[idc]" persistent>
       <q-card :class="styp('sm')" style="min-height:20rem">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -190,7 +190,7 @@
     </q-dialog>
 
     <!-- Dialogue d'invitation -->
-    <q-dialog v-if="im === session.membreId" v-model="ui.d.AMinvit" persistent>
+    <q-dialog v-model="ui.d.AMinvit[idc]" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -443,7 +443,7 @@ export default {
       this.invpar = this.options[0]
       this.ard = this.mb.ard || ''
       this.session.setMembreId(this.im)
-      this.ui.oD('AMinvit')
+      this.ui.oD('AMinvit', this.idc)
     },
 
     async inviter (cas) { 
@@ -464,7 +464,7 @@ export default {
       this.adrm = (this.fl & FLAGS.AM) !== 0
       this.adrl = (this.fl & FLAGS.AN) !== 0
       this.flags2av = this.nvflags2
-      this.ui.oD('AMconfig')
+      this.ui.oD('AMconfig', this.idc)
     },
 
     async changerdr () {

@@ -11,7 +11,7 @@
   </div>
 
   <!-- Changement de tribu -->
-  <q-dialog v-if="aSt.ccCpt.id === id" v-model="ui.d.BPchgTr" persistent>
+  <q-dialog v-model="ui.d.BPchgTr[idc]" persistent>
     <q-card :class="styp('sm')">
       <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [na.nom, ID.court(aSt.tribuC.id)])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqv1', [aSt.ccCpt.q1, edv1(aSt.ccCpt.q1), pc1])}}</div>
@@ -55,22 +55,20 @@
   </q-dialog>
 
   <!-- Changement de statut sponsor -->
-  <q-dialog v-model="ui.d.BPchgSp" full-height position="left" persistent>
-    <q-layout container view="hHh lpR fFf" :class="styp('md')">
-      <q-card class="bs bg-secondary text-white q-pa-sm">
-        <div v-if="aSt.ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
-        <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
-        <q-card-actions align="center">
-          <q-btn dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn v-if="aSt.ccCpt.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
-          <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
-        </q-card-actions>
-      </q-card>
-    </q-layout>
+  <q-dialog v-model="ui.d.BPchgSp[idc]" persistent>
+    <q-card :class="styp('md') + 'q-pa-sm'">
+      <div v-if="aSt.ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
+      <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
+      <q-card-actions align="center">
+        <q-btn dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn v-if="aSt.ccCpt.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
+        <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
+      </q-card-actions>
+    </q-card>
   </q-dialog>
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
-  <q-dialog v-if="aSt.ccCpt.id === id" v-model="ui.d.BPcptdial" full-height position="left" persistent>
+  <q-dialog v-model="ui.d.BPcptdial[idc]" full-height position="left" persistent>
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
@@ -144,7 +142,7 @@ export default {
 
     async voirCompta () { // comptable OU sponsor
       await this.getCpt()
-      this.ui.oD('BPcptdial')
+      this.ui.oD('BPcptdial', this.idc)
     },
 
     async chgSponsor () { // comptable
@@ -157,12 +155,14 @@ export default {
         await afficherDiag(this.$t('PTspn1'))
         return
       }
-      this.ui.oD('BPchgSp')
+      this.ui.oD('BPchgSp', this.idc)
     },
 
     async changerSp(estSp) {
+      const cletAv = this.aSt.ccCpt.clet
+      const idtAv = Tribu.id(cletAv)
       // si estSp, le na existe, voir quelques lignes au-dessus
-      await new SetSponsor().run(this.session.tribuCId, this.na || this.id, estSp)
+      await new SetSponsor().run(idtAv, this.na || this.id, estSp)
       this.ui.fD()
     },
 
@@ -200,7 +200,7 @@ export default {
       this.atr = await new GetSynthese().run(this.session.ns)
       this.filtre = ''
       this.filtrer()
-      this.ui.oD('BPchgTr')
+      this.ui.oD('BPchgTr', this.idc)
     },
 
     async changerTr () {
@@ -237,6 +237,7 @@ export default {
   setup (props) {
     const session = stores.session
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
     const aSt = stores.avatar
     const id = toRef(props, 'id')
     const na = ref()
@@ -245,7 +246,7 @@ export default {
     return {
       na,
       ID,
-      styp, session, aSt, ui
+      styp, session, aSt, ui, idc
     }
   }
 }

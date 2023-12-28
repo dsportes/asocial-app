@@ -1,9 +1,9 @@
 <template>
 <div>
-  <div v-if="!ui.d.SHfs" style="position:relative">
+  <div v-if="!ui.d.SHfs[idc]" style="position:relative">
     <div v-if="zoom || edit" class="row btn">
       <q-btn v-if="zoom" dense color="primary" icon="fullscreen" round size="md" padding="none"
-        @click.stop="ui.oD('SHfs')">
+        @click.stop="ui.oD('SHfs', idc)">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
       </q-btn>
       <q-btn v-if="edit" class="q-ml-xs" dense color="warning" padding="none" round
@@ -11,17 +11,18 @@
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>
     </div>
-    <div :style="sty" v-if="dk">
+    <div :style="styx" v-if="dk">
       <sd-light v-if="idx0" :texte="texte"/>
       <sd-light1 v-else :texte="texte"/>
     </div>
-    <div :style="sty" v-else>
+    <div :style="styx" v-else>
       <sd-dark v-if="idx0" :texte="texte"/>
       <sd-dark1 v-else :texte="texte"/>
     </div>
   </div>
 
-  <q-dialog v-model="ui.d.SHfs" persistent maximized transition-show="slide-up" transition-hide="slide-down">
+  <q-dialog v-model="ui.d.SHfs[idc]" persistent maximized 
+    transition-show="slide-up" transition-hide="slide-down">
     <q-card>
       <q-bar>
         <q-space />
@@ -32,7 +33,7 @@
           <q-tooltip class="bg-white text-primary">{{$t('SHre')}}</q-tooltip>
         </q-btn>
       </q-bar>
-      <q-card-section style="max-height: 100vh" class="scroll">
+      <q-card-section style="max-height: 100vh" :class="sty() + 'scroll'">
         <div v-if="!$q.dark.isActive">
           <sd-light :texte="texte"/>
         </div>
@@ -46,7 +47,9 @@
 </template>
 <script>
 
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
+import { sty } from '../app/util.mjs'
 
 import SdLight from './SdLight.vue'
 import SdDark from './SdDark.vue'
@@ -72,7 +75,7 @@ export default ({
       return d ? (this.idx === -1 ? true : false) : (this.idx === -1 ? false : true)
     },
     idx0 () { return this.idx === -1 || !this.idx || (this.idx % 2 === 0) },
-    sty () { 
+    styx () { 
       return 'min-height:2rem' + 
         ';height:' + (this.maxh ? this.maxh + ';' : '') +
         'overflow-y:' + (this.scroll ? 'scroll' : 'auto') 
@@ -92,9 +95,10 @@ export default ({
 
   setup () {
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
 
     return {
-      ui
+      ui, idc, sty
     }
   }
 })

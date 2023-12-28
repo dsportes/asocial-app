@@ -41,9 +41,10 @@
     </div>
 
     <!-- Mots clés du groupe -->
-    <div class="row items-center q-mt-sm">
+    <div class="row items-center q-mt-sm justify-between">
       <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
-      <q-btn icon="open_in_new" size="sm" color="primary" @click="ui.oD('MCmcledit')"/>
+      <q-btn class="self-start" icon="edit" size="md" color="primary" round padding="none"
+        @click="ui.oD('MCmcledit')"/>
     </div>
 
     <div v-if="eg.groupe.nbInvits !== 0" class="q-mt-sm fs-md text-bold text-warning">
@@ -67,7 +68,7 @@
   <mots-cles v-if="ui.d.MCmcledit" :idg="eg.groupe.id"/>
 
   <!-- Gérer le mode simple / unanime -->
-  <q-dialog v-model="ui.d.AGediterUna" full-height position="left" persistent>
+  <q-dialog v-model="ui.d.AGediterUna[idc]" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-primary text-white">
         <q-toolbar>
@@ -123,7 +124,7 @@
   </q-dialog>
 
   <!-- Gérer l'hébergement, changer les quotas -->
-  <q-dialog v-model="ui.d.AGgererheb" full-height position="left" persistent>
+  <q-dialog v-model="ui.d.AGgererheb[idc]" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
@@ -199,7 +200,7 @@
   </q-dialog>
 
   <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
-  <q-dialog v-model="ui.d.AGnvctc" persistent>
+  <q-dialog v-model="ui.d.AGnvctc[idc]" persistent>
     <q-card :class="styp('sm')">
       <q-card-section v-if="options.length">
         <div class="titre-md text-italic">{{$t('AGmoi1')}}</div>
@@ -229,7 +230,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { getNg, Groupe } from '../app/modele.mjs'
 import { ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
@@ -349,7 +350,7 @@ export default {
         if (!m) this.options.push({ value: nam.id, label: nam.nom, na: nam })
       }
       if (this.options.length) this.moic = this.options[0]
-      this.ui.oD('AGnvctc')
+      this.ui.oD('AGnvctc', this.idc)
     },
 
     pagectc () {
@@ -448,7 +449,7 @@ export default {
       this.q.max2 = cpt.q2 - Math.ceil(cpt.v2 / UNITEV2)
       this.q.err = false
       this.onChgQ()
-      this.ui.oD('AGgererheb')
+      this.ui.oD('AGgererheb', this.idc)
     },
     onChgQ () {
       const cpt = this.aSt.compta.compteurs.qv
@@ -474,7 +475,7 @@ export default {
     async editUna () {
       if (!await this.session.edit()) return
       // this.gSt.test1(this.eg)
-      this.ui.oD('AGediterUna')
+      this.ui.oD('AGediterUna', this.idc)
       this.anims = this.gSt.animIds(this.eg)
       this.estAnim = this.anims.has(this.session.avatarId)
       this.lstVotes = []
@@ -509,6 +510,7 @@ export default {
   setup (props) {
     const session = stores.session
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
     const gSt = stores.groupe
     const aSt = stores.avatar
 
@@ -519,7 +521,7 @@ export default {
 
     return {
       styp, dkli, aaaammjj,
-      session, ui,
+      session, ui, idc,
       photoDef,
       gSt,
       aSt,

@@ -731,17 +731,21 @@ args.token: éléments d'authentification du compte.
 args.idt : id de la tribu
 args.idc: id du compte
 args.nasp: na du compte crypté par la cle de la tribu
+args.estSp: true si sponsor
 Retour:
 */
 export class SetSponsor extends OperationUI {
   constructor () { super($t('OPsptr')) }
 
-  async run (idt, na, estSp) { // id de la tribu, na du compte, true/false sponsor
+  async run (idt, na, estSp) { // na du compte, true/false sponsor
     try {
       const session = stores.session
-      const cle = getCle(idt)
-      const nasp = estSp ? await crypter(cle, new Uint8Array(encode(na.anr))) : null
-      const args = { token: session.authToken, idt, idc: na.id, nasp }
+      let nasp = null
+      if (idt && estSp) {
+        const cle = getCle(idt)
+        nasp = await crypter(cle, new Uint8Array(encode(na.anr)))
+      }
+      const args = { token: session.authToken, idt, idc: na.id, nasp, estSp }
       this.tr(await post(this, 'SetSponsor', args))
       this.finOK()
     } catch (e) {

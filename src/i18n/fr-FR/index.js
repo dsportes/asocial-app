@@ -8,6 +8,7 @@ export default {
   sync: 'Synchronisé',
   incognito: 'Incognito',
   avion: 'Avion',
+  enmode: '... en mode {0}',
 
   asc: 'tri asc.',
   desc: 'tri desc.',
@@ -35,6 +36,7 @@ export default {
   reessayer: 'Réessayer',
   rechercher: "Rechercher",
   enreg: "Enregistrer",
+  zoomer: 'Voir en détail',
   raz: 'RAZ',
   corriger: 'Corriger',
   rafraichir: 'Rafraîchir',
@@ -376,8 +378,8 @@ export default {
   '<BR>Les fichiers attachés aux notes conservés sur cet appareil ne seront plus accessibles en mode avion',
 
   LOGconn: 'Se Connecter',
-  LOGconn2: 'Se Connecter à son compte',
-  LOGconn3: 'Créer votre propre compte',
+  LOGconn2: 'Se Connecter à son compte en mode ...',
+  LOGconn3: 'Créer votre propre compte ...',
   LOGpar: 'Pour créer un compte, il faut qu\'un sponsor ait enregistré une phrase de reconnaissance spécifique au compte à créer. Saisir ci-après le nom de l\'organisation et cette phrase.',
   LOGphr: 'Phrase communiquée par le sponsor',
   LOGcc: 'Création du compte du Comptable',
@@ -650,7 +652,7 @@ export default {
   MCer3: 'Ce nom est actuellement attribué au mot clé #{0}, catégorie [{1}]',
   MCer4: 'Impossible d\'ajouter un mot clé, maximum atteint',
   MCer5: 'Un mot clé "obsolète" ne peut pas être attribué.',
-  MCchoix: 'Attribution de mots clés',
+  MCchoix: 'Mots clés attribués',
   MChint: '3 à 12 lettres, première majuscule. Vide pour \'Obsolète\'',
 
   // App.vue / MainLayout
@@ -1021,7 +1023,7 @@ export default {
   PNOextit: 'Attribution d\'exclusivité d\'écriture d\'une note du groupe {0}',
   PNOmctit1: 'Note de {0}, attribution des motsclés',
   PNOmctit2: 'Note du groupe {0}, attribution des motsclés',
-  PNOmcp: 'Mots clés personnels, visibles seulzment par moi-même.',
+  PNOmcp: 'Mots clés personnels, visibles seulement par moi-même.',
   PNOmcg: 'Mots clés "du groupe", visibles de tous les membres du groupe.',
   PNOnocv: '{0} n\'a pas déclaré de carte de visite.',
   PNOchaut: 'Choisir l\'auteur de l\'édition',

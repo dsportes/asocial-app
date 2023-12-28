@@ -17,7 +17,7 @@
     </div>
 
     <!-- Dialogue d'édition de la phrase de contact -->
-    <q-dialog v-if="session.avatarId===avatar.id" v-model="ui.d.AAeditionpc" persistent>
+    <q-dialog v-model="ui.d.AAeditionpc[idc]" persistent>
       <q-card class="bs q-ma-xs largeur30 fs-md">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -68,7 +68,7 @@ export default {
     async editerpc () {
       if (!await this.session.edit()) return
       this.session.setAvatarId(this.avatar.id)
-      this.ui.oD('AAeditionpc')
+      this.ui.oD('AAeditionpc', this.idc)
     },
     
     async declPC (pc) {
@@ -104,6 +104,7 @@ export default {
     const session = stores.session
     const ui = stores.ui
     const aSt = stores.avatar
+    const idc = ref(ui.getIdc())
     const idav = toRef(props, 'idav')
 
     function getAv() { return aSt.getAvatar(idav.value) }
@@ -125,7 +126,7 @@ export default {
     )
 
     return {
-      dkli, ID,
+      dkli, ID, idc,
       session, ui,
       avatar
     }

@@ -138,7 +138,7 @@
 
           <div v-if="selected && nSt.note && !rec" class="q-mt-xs q-mb-sm row">  
             <apercu-motscles class="col q-mr-lg titre-sm" v-if="nSt.note.smc" :mapmc="mapmcf(nSt.node.key)" 
-              :src="Array.from(nSt.note.smc)" du-compte
+              :src="Array.from(nSt.note.smc)" du-compte nozoom
               :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
             <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
             <q-btn color="primary" class="col-auto self-start" 

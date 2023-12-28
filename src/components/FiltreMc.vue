@@ -1,7 +1,7 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli(0)">
     <div>{{$t('FI' + attr)}}</div>
-    <apercu-motscles @ok="ok" du-compte :du-groupe="groupeId"
+    <apercu-motscles :ok="ok" du-compte :du-groupe="groupeId"
       :mapmc="mapmc" edit :src="src" :idx="idx"/>
   </div>
 </template>

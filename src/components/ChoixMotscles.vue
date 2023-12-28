@@ -2,19 +2,23 @@
 <q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
     <q-btn class="q-mr-xs" size="md" dense color="warning" icon="close" @click="ui.fD"/>
-    <q-toolbar-title class="titre-lg text-center">{{titre || $t('CMCtit')}}</q-toolbar-title>
+    <q-toolbar-title class="titre-lg text-center">{{titre}}</q-toolbar-title>
     <bouton-help :page="help || 'page1'" />
     <q-btn v-if="editable" :disable="!modif" class="q-ml-xs" size="md"
       dense flat icon="undo" @click="undo"/>
-    <q-btn v-if="editable" class="q-ml-xs" size="md" dense color="warning" 
-      icon="check" :label="$t('ok')" @click="ok"/>
+    <q-btn v-if="editable && ok" class="q-ml-xs" size="md" dense color="warning" 
+      icon="check" :label="$t('ok')" @click="okmc"/>
   </q-toolbar>
+  <q-toolbar v-if="diag" inset class="bg-yellow-5 text-black text-bold fs-md">{{diag}}</q-toolbar>
 
   <div class="q-pa-xs row justify-start">
-    <div v-for="idx in courante" :key="idx" 
-      class="radius q-ma-xs q-px-xs bg-yellow text-black cursor-pointer fs-md font-mono">
-      <span :class="sty(idx)" @click="seldesel(idx)">{{ed(idx)}}</span>
+    <div v-if="courante.length">
+      <div v-for="idx in courante" :key="idx" 
+        class="radius q-ma-xs q-px-xs bg-yellow text-black cursor-pointer fs-md font-mono">
+        <span :class="sty(idx)" @click="seldesel(idx)">{{ed(idx)}}</span>
+      </div>
     </div>
+    <div v-else class="text-italic fs-md">{{$t('MCaucun')}}</div>
   </div>
   <div class="q-pa-xs row justify-start">
     <div v-for="idx in initValue" :key="idx">
@@ -65,7 +69,8 @@ export default ({
     initValue: Object, // OBLIGATOIRE - voire new Uin8Array([])
     titre: String,
     help: String,
-    editable: Boolean
+    editable: Boolean,
+    ok: Function
   },
 
   components: { BoutonHelp },
@@ -94,15 +99,17 @@ export default ({
       const t = !x ? '' : x.c + '@' + x.n
       return t
     },
-    ok () {
-      this.$emit('ok', this.courante)
-      this.ui.fD()
+    okmc () {
+      if (this.editable && !this.diag && this.ok) {
+        this.ok(this.courante)
+        this.ui.fD()
+      }
     },
     undo () {
       this.courante = cloneU8(this.initValue)
     },
     seldesel (n) {
-      if (!this.editable) return
+      if (!this.editable || this.diag) return
       const idx = parseInt(n)
       if (this.selecte(idx)) {
         this.courante = deselect(this.courante, idx)
@@ -116,9 +123,12 @@ export default ({
   },
 
   setup (props, context) {
+    const session = stores.session
     const ui = stores.ui
     const duCompte = toRef(props, 'duCompte')
     const duGroupe = toRef(props, 'duGroupe')
+
+    const diag = ref(session.editDiag)
 
     // Objet motscles en sélection : immutable
     const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
@@ -145,7 +155,7 @@ export default ({
     const nn = ref(2)
 
     return {
-      styp, ui,
+      styp, ui, session, diag,
       courante,
       motscles,
       tab,

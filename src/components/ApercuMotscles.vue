@@ -11,17 +11,21 @@
       icon="edit" color="warning" @click="editer">
       <q-tooltip class="bg-white text-primary">{{$t('editer')}}</q-tooltip>
     </q-btn>
+    <q-btn v-if="!edit && !nozoom" class="col-auto" size="md" padding="none" round
+      icon="zoom_in" color="primary" @click="editer">
+      <q-tooltip class="bg-white text-primary">{{$t('zoomer')}}</q-tooltip>
+    </q-btn>
   </div>
-  <q-dialog v-model="ui.d.AMmcedit" persistent>
+  <q-dialog v-model="ui.d.AMmcedit[idc]" persistent>
     <choix-motscles :du-groupe="duGroupe" :du-compte="duCompte"
-      :init-value="src || mcvide" editable
-      :titre="$t('MCchoix')" @ok="okmc"/>
+      :init-value="src || mcvide" :editable="edit"
+      :titre="$t('MCchoix')" :ok="okmc"/>
   </q-dialog>
 </div>
 </template>
 
 <script>
-import { toRef } from 'vue'
+import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixMotscles from './ChoixMotscles.vue'
 import { dkli } from '../app/util.mjs'
@@ -32,10 +36,12 @@ export default ({
   props: { 
     mapmc: Object, 
     src: Object, 
-    edit: Boolean, 
+    edit: Boolean,
+    nozoom: Boolean,
     idx: Number, 
     duCompte: Boolean, 
-    duGroupe: Number
+    duGroupe: Number,
+    ok: Function
   },
 
   components: { ChoixMotscles },
@@ -48,11 +54,10 @@ export default ({
 
   methods: {
     async editer () {
-      if (! await this.session.edit()) return
-      if (this.edit) this.ui.oD('AMmcedit')
+      this.ui.oD('AMmcedit', this.idc)
     },
     okmc (mc) { 
-      if (mc) this.$emit('ok', mc)
+      if (this.ok) this.ok(mc)
     },
     sty (idx) {
       if (idx < 100) return ''
@@ -63,6 +68,7 @@ export default ({
   setup (props) {
     const session = stores.session
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
     const mapMC = toRef(props, 'mapmc')
 
     function nom (idx) {
@@ -72,7 +78,7 @@ export default ({
     }
 
     return {
-      dkli,
+      dkli, idc,
       session, ui,
       mcvide: new Uint8Array([]),
       nom

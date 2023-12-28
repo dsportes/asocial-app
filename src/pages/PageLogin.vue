@@ -3,28 +3,46 @@
 
   <div class="font-mono fs-sm self-end text-italic q-ma-xs">{{config.BUILD}}</div>
 
-  <q-card class="q-mt-sm petitelargeur fs-md column justify-center">
-    <div :class="'full-width row items-center bord' + (!session.mode ? '1' : '2')">
+  <q-expansion-item class="q-mt-xl spsm" group="g1" default-opened>
+    <template v-slot:header>
+      <div class="full-width titre-lg row justify-between bord1">
+        <div>{{$t('LOGconn2')}}</div>
+        <bouton-help page="page1" class="col-auto"/>
+      </div>
+    </template>
+    <div class="row justify-center q-gutter-sm q-mt-sm">
+      <q-btn class="titre-lg" icon="autorenew" 
+        dense padding="xs" size="md" no-caps color="primary" right-icon="send"
+        :label="$t('sync')" @click="ouvrirPS(1)"/>
+      <q-btn class="titre-lg" 
+        dense padding="xs"  size="md" no-caps color="primary" right-icon="send"
+        @click="ouvrirPS(2)">
+        <div class="row items-center q-gutter-sm">
+          <q-icon size="sm"><img src="~assets/incognito_blanc.svg"/></q-icon>
+          <div>{{$t('incognito')}}</div>
+        </div>
+      </q-btn>
+      <q-btn class="titre-lg" icon="airplanemode_active" 
+        dense padding="xs" size="md" no-caps color="primary"  right-icon="send"
+        :label="$t('avion')" @click="ouvrirPS(3)"/>
+    </div>
+  </q-expansion-item>
+
+  <q-expansion-item class="q-mt-xl spsm" group="g1">
+    <template v-slot:header>
+      <div class="full-width titre-lg row justify-between bord1">
+        <div>{{$t('LOGconn3')}}</div>
+        <bouton-help page="page1" class="col-auto"/>
+      </div>
+    </template>
+
+    <div class="q-px-sm">
+      <div class="titre-md q-my-md">{{$t('LOGpar')}}</div>
       <div class="col q-py-sm q-gutter-md row justify-center">
         <q-radio dense v-model="locmode" :val="1" :label="$t('sync')" />
         <q-radio dense v-model="locmode" :val="2" :label="$t('incognito')" />
-        <q-radio dense v-model="locmode" :val="3" :label="$t('avion')" />
       </div>
-      <bouton-help page="page1" class="colauto"/>
-    </div>
-  </q-card>
-
-  <q-expansion-item v-if="session.mode" @click="ouvrirPS" class="q-mt-sm spsm"
-    icon="send" :label="$t('LOGconn2')"
-    group="g1" default-opened header-class="titre-lg bg-primary text-white">
-  </q-expansion-item>
-
-  <q-expansion-item v-if="session.accesNet" class="q-mt-xs spsm"
-    icon="add_circle" :label="$t('LOGconn3')"
-    group="g1" header-class="titre-lg bg-primary text-white">
-    <div class="q-px-sm">
-      <div class="titre-md q-my-md">{{$t('LOGpar')}}</div>
-      <phrase-contact class="full-width" @ok="crypterphrase"/>
+      <phrase-contact :class="(!locmode ? 'disabled' : '') + ' full-width'" @ok="crypterphrase"/>
     </div>
   </q-expansion-item>
 
@@ -66,7 +84,8 @@ export default {
   },
 
   methods: {
-    ouvrirPS () {
+    ouvrirPS (mode) {
+      this.session.setMode(mode)
       this.ui.ps = { 
         login: true, 
         labelValider: "LOGconn", 
@@ -171,11 +190,9 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.q-card__section
-  padding: 0 !important
 .bord1
-  border-radius: 6px
-  border: 2px solid $warning !important
-.bord2
-  border: 2px solid transparent !important
+  border-bottom: 1px solid $orange
+.disabled
+  pointer-events: none
+  opacity: 0.4
 </style>

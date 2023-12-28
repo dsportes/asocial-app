@@ -21,7 +21,6 @@ export const useUiStore = defineStore('ui', {
     message: null,
     aunmessage: false,
 
-    mcmemoId: 0, // id du McMemo en édition
     cveditionId: 0, // id de l'avatar / groupe dont la CV est en édition
 
     helpstack: [],
@@ -36,6 +35,8 @@ export const useUiStore = defineStore('ui', {
     dernierfichiercree: '',
 
     ps: null, // objet props du dialogue PhraseSecrete
+
+    idc: 1,
 
     // gestion des dialogues
     dialogStack: [],
@@ -60,18 +61,18 @@ export const useUiStore = defineStore('ui', {
       PAoutilsTests: false, // PageAccueil
       FAdetaildial: false, // PageFicavion
       AGvisucv: false, // ApercuGenx
-      AMconfig: false, // ApercuMembre
-      AMinvit: false,
+      AMconfig: {}, // ApercuMembre
+      AMinvit: {},
       NSnvsp: false, // NouveauSponsoring
       PTedq: false, // PageTranche
       PTcptdial: false,
       PMdetailsmembre: false, // PanelMembre
-      BPchgTr: false, // BarrePeople
-      BPchgSp: false,
-      BPcptdial: false,
+      BPchgTr: {}, // BarrePeople
+      BPchgSp: {},
+      BPcptdial: {},
       OTsuppbase: false, // OutilsTests
       OTrunning: false,
-      AAeditionpc: false, // ApercuAvatar
+      AAeditionpc: {}, // ApercuAvatar
       ACchatedit: false, // ApercuChat
       ACouvrir: false,
       ACconfirmeff: false,
@@ -80,20 +81,20 @@ export const useUiStore = defineStore('ui', {
       ACGouvrir: false,
       ACGconfirmeff: false,
       CVedition: false, // CarteVisite
-      AGnvctc: false, // ApercuGroupe
-      AGediterUna: false,
-      AGgererheb: false,
-      AMmcedit: false, // ApercuMotscles
+      AGnvctc: {}, // ApercuGroupe
+      AGediterUna: {},
+      AGgererheb: {},
+      AMmcedit: {}, // ApercuMotscles
       DNdialoguenotif: false, // DialogueNotif
       ATreceptk: false, // ApercuTicket
       ATconfirmdel: false,
-      EMmax: false, // EditeurMd
+      EMmax: {}, // EditeurMd
       IAaccinvit: false, // InvitationAcceptation
       ACVouvrir: false, // ApercuCv
-      MMedition: false, // McMemo
+      MMedition: {}, // McMemo
       PCnouveautk: false, // PanelCredits
       PDdialtk: false, // PanelDialtk
-      SHfs: false, // ShowHtml
+      SHfs: {}, // ShowHtml
       NFouvrir: false, // NouveauFichier
       NTsupprfichier: false, // NoteFichier
       NTconfirmav1: false,
@@ -128,22 +129,39 @@ export const useUiStore = defineStore('ui', {
   },
 
   actions: {
+    getIdc () {
+      return this.idc++
+    },
     fD () {
-      const d = this.dialogStack.pop()
-      if (d) this.d[d] = false
+      const e = this.dialogStack.pop()
+      if (e) {
+        if (e[1] !== 0)
+          delete this.d[e[0]][e[1]]
+        else
+          this.d[e[0]] = false
+      }
     },
 
-    oD (d) {
-      this.dialogStack.push(d)
-      this.d[d] = true
+    oD (n, idc) {
+      const ix = idc || 0
+      this.dialogStack.push([n, ix])
+      if (typeof this.d[n] === 'object') this.d[n][ix] = true
+      else this.d[n] = true
     },
 
-    estOuvert (d) {
-      return this.dialogStack.indexOf(d) !== -1
+    estOuvert (n) {
+      for (let i = 0; i < this.dialogStack.length; i++) {
+        const e = this.dialogStack[i]
+        if (e[0] === n) return true
+      }
+      return false
     },
 
     resetD () {
-      this.dialogStack.forEach(d => { this.d[d] = false})
+      this.dialogStack.forEach(n => { 
+        if (typeof this.d[n] === 'object') this.d[n] = {}
+        else this.d[n] = false
+      })
       this.dialogStack.length = 0
     },
 

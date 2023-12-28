@@ -20,7 +20,10 @@ _Arrêtés mensuels_ (**CSV**)
 
 
 ## Components
-
+Les _components_, en général, peuvent avoir et souvent ont, plusieurs instances affichées à l'écran. Quand un component a un dialogue interne:
+- une variable `idc` (id du component) est déclarée au `setup()` (numérotation croissante de `stores.ui.idc`). Chaque _instance_ du component reçoit donc une identification absolue unique: `const idc = ref(ui.getIdc())`.
+- un dialogue interne `DXxx` est piloté par la variable modèle de `stores.ui.d.DXxx[idc]` où `idc` est le **numéro d'instance** du component. Cette variable dans stores.ui.d est déclarée comme un objet: ainsi chaque instance de dialogue interne a _une_ variable modèle de contrôle pour _chaque_ instance.
+ 
 ### Les boutons
 Ils n'importent aucune autre vue et sont des "span" destinés à figurer au milieu de textes.
 - **BoutonHelp**: ouvre une page d'aide.
@@ -39,15 +42,16 @@ Liste les mots clés sur une ligne.
 
 Import: ChoixMotscles
 
+Dialogue:
+- AMmcedit: édition / zoom des mots clés
+
 ### McMemo (4)
 Attache des mots clés et un mémo à n'importe quel avatar-people, ou groupe dont l'id est connu.
 
-Plusieurs components ApercuMotscles peuevent être apparents simultannément à l'écran. Toutefois on ne peut éditer qu'un seul ChoixMotscles à la fois : le dialogiue interne MMedition ne doit en conséquence n'est ouvert qu'une seule fois à un instant donné. C'est la propriété `ui.mcmemoId` qui prévient l'ouverture de plusieurs MMedition.
-
 Import: EditeurMd, ApercuMotscles
 
-**Dialogue interne:**
-- MMedition : gère un ApercuMotscles et un EditeurMd pour afficher / éditer les mots clés et le commentaire à attacher au contact ou groupe.
+Dialogue:
+- MMedition: gère un ApercuMotscles et un EditeurMd pour afficher / éditer les mots clés et le commentaire à attacher au contact ou groupe.
 
 ### ChoixMotscles (1)
 Permet de sélectionner une liste de mots clés à attacher à un contact / groupe ou une note.
@@ -70,7 +74,7 @@ Ce component peut être visible plusieurs fois simultannément (autant qu'un com
 Import: PhraseContact, ApercuGenx
 
 Dialogue:
-- AAeditionpc: édition de la phrase de contact. Afin de n'avoir qu'une seule instance ouverte à un instant donné, le dialogue n'opère **que** sur l'avatar courant.
+- AAeditionpc: édition de la phrase de contact.
 
 ### NomAvatar (1)
 Saisie d'un nom d'avatar avec contrôle de syntaxe.
@@ -81,9 +85,14 @@ Affiche trois boutons ouvrant les dialogues / panels associés:
 - changement de statuts sponsor d'un compte,
 - affiche des compteurs d'abonnements / consommation.
 
-BarrePeople est importé par PanelPeople et PageTrance.
+BarrePeople est importé par PanelPeople et PageTranche.
 
 Import: PanelCompta
+
+Dialogues:
+- BPchgSp: changement de statut sponsor.
+- BPcptdial: affichage des compteurs de compta du compte "courant".
+- BPchgTr: changement de tranche.
 
 ### ApercuNotif (3)
 Affiche une notification. Un bouton ouvre le dialogue DaliogueNotif d'édition d'une notification.
@@ -99,6 +108,9 @@ Ce composant affiche sur quelques lignes un texte en syntaxe MD.
 - un bouton d'édition est disponible sur option et se limite à émettre un évenement `edit`.
 
 Import: SdDark, SdLight, SdDark1, SdLight1
+
+Dialogue:
+- SHfs: vue en plein écran.
 
 ### QuotasVols (1)
 Affiche l'abonnement en nombre de noye + chat + groupes et de volume de fichier, ainsi que sur option le pourcentage d'utilisation de ces abonnments.
@@ -143,18 +155,13 @@ Dialogues:
 ### ApercuMembre (7)
 Afiche une expansion pour un membre d'un groupe:
 - repliée: son aperçu de contact et une ligne d'information sur son statut majeur dans le groupe (fondateur, hébergeur, statut).
-- dépliée: ces flags et ses date-heures de changement d'état et un bouton pour changer cet état.
-
-**Le composant est multi-instantié, un par avatar participant et un par contact membre.** 
-- ses dialogues internes étant pilotés par la même variable modèle (`stores.ui.d.AMinvit / stores.ui.d.AMconfig`), ils doivent être contraints à ne s'ouvrir que pour le seul membre **courant**.
-- la propriété `im` transmise sur le tag effectue cette garde: les dialogues ne s'ouvrent **que** quand ils concernet le membre courant `session.membreId`.
+- dépliée: ses flags et ses date-heures de changement d'état et un bouton pour changer cet état.
 
 Import: InvitationAcceptation, BoutonConfirm, ApercuGenx, BoutonBulle2, BoutonBulle, EditeurMd
 
 Dialogues:
 - AMinvit: invitation d'un contact.
 - AMconfig: configuration des flags du membre.
-
 
 ## Dialogues
 
