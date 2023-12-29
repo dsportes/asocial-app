@@ -298,8 +298,8 @@ export const useGroupeStore = defineStore('groupe', {
       return m
     },
 
-    // PageGroupe - membres people ***************************************************
-    pgLmFT: (state) => {
+    /* PageGroupe - membres people ***************************************************
+    pgLmFT1: (state) => {
       function f0 (a, b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
       const f = stores.filtre.filtre.groupe
       const r = []
@@ -325,13 +325,52 @@ export const useGroupeStore = defineStore('groupe', {
       stores.ui.fmsg(r.length)
       return r
     },
+    */
 
+    pgLmFT: (state) => {
+      function f0 (a, b) { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0) }
+      const f = stores.filtre.filtre.groupe
+      const aSt = stores.avatar
+      let n = 0
+      const r = []
+      const eg = state.egrC
+      const g = eg.groupe
+      const imNaAvc = aSt.compte.imNaGroupe(g.id) // Map (cle:im val:na) des avc participants au groupe idg
+      for (let im = 1; im < g.flags.length; im++) {
+        if (imNaAvc.has(im)) continue
+        const nag = g.anag[im]
+        if (nag <= 1) continue
+        const stm = g.statutMajeur(im)
+        const m = eg.membres.get(im)
+        const na = m.na
+        const nom = m.na.nom
+        n++
+        if (f.nmb && !m.na.nom.startsWith(f.nmb)) continue
+        if (f.stmb && stm + 1 !== f.stmb) continue
+        if (f.ambno) {
+          const mb = g.accesMembre(im)
+          const no = g.accesNote(im)
+          if (f.ambno === 1 && !(mb && !no)) continue
+          if (f.ambno === 2 && !(no && !mb)) continue
+          if (f.ambno === 3 && !(mb && no)) continue
+          if (f.ambno === 4 && !(!mb && !no)) continue
+          if (f.ambno === 5 && g.accesEcrNoteH(im) !== 1) continue
+        } 
+        r.push({m, im, nom, na})
+      }
+      r.sort(f0)
+      stores.ui.fmsg(r.length)
+      return [r, n]
+    },
+
+    /*
     pgLm (state) {
       const t = []
       const e = state.map.get(stores.session.groupeId)
       if (e) e.membres.forEach(m => { if (!m.estAc) t.push(m) })
       return t
     },
+    */ 
 
     nbchats: (state) => {
       let n = 0

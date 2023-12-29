@@ -8,12 +8,12 @@
   <!-- Tab "membres" -------------------------------------------------->
   <div v-if="ui.pagetab==='membres' && gSt.egrC" class="q-pa-sm spmd">
     <div v-if="amb">
-      <div v-if="!gSt.pgLm.length" class="titre-lg text-italic">
+      <div v-if="!nb" class="titre-lg text-italic">
         {{$t('PGnope')}}</div>
-      <div v-if="gSt.pgLm.length && !gSt.pgLmFT.length" class="titre-lg text-italic">
-        {{$t('PGnomb', [gSt.pgLm.length])}}</div>
-      <apercu-membre v-for="(m, idx) of gSt.pgLmFT" :key="m.na.id"
-        class="q-my-lg" :mb="m" :im="m.ids" :idav="m.na.id" :eg="gSt.egrC"
+      <div v-if="nb && !lst.length" class="titre-lg text-italic">
+        {{$t('PGnomb', [nb])}}</div>
+      <apercu-membre v-for="(e, idx) of lst" :key="e.im"
+        class="q-my-lg" :mb="e.m" :im="e.im" :na="e.na" :eg="gSt.egrC"
         :mapmc="mapmc" people :idx="idx"/>
     </div>
     <div v-else class="titre-lg text-italic">{{$t('PGnoamb')}}</div>
@@ -35,7 +35,9 @@ export default {
   components: { ApercuMembre, ApercuGroupe },
 
   computed: {
-    amb () { return this.gSt.ambano[0] }
+    amb () { return this.gSt.ambano[0] },
+    lst () { return this.gSt.pgLmFT[0] },
+    nb () { return this.gSt.pgLmFT[1] }
   },
 
   methods: {

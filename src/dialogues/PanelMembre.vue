@@ -13,7 +13,7 @@
   <q-page-container>
     <q-card>
       <apercu-genx class="q-pa-sm q-mb-sm" v-if="eg" :id="eg.groupe.id"/>
-      <apercu-membre v-if="eg && mb" :im="session.membreId"
+      <apercu-membre v-if="eg && mb" :im="session.membreId" :na="mb.na"
         :eg="eg" :mb="mb" :idx="0" :mapmc="mapmc" :people="people" ouvert/>
     </q-card>
   </q-page-container>

@@ -125,10 +125,11 @@ export default {
 
   // Filtre stmb
   stmb0: '(n\'importe lequel)',
-  stmb4: 'animateur',
-  stmb3: 'actif',
   stmb1: 'contact',
   stmb2: 'invité',
+  stmb3: 'actif',
+  stmb4: 'animateur',
+  stmb5: 'DISPARU',
 
   // Filtre ambno
   ambno0: '(indifférent)',

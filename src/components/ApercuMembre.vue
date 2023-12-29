@@ -4,11 +4,12 @@
     switch-toggle-side expand-separator dense group="trgroup">
     <template v-slot:header>
       <div class="column full-width">
-        <apercu-genx v-if="people" :id="na.id" :im="im" :idx="idx"/>
-        <div v-else class="row justify-between full-width">
+        <apercu-genx v-if="people && na" :id="na.id" :im="im" :idx="idx"/>
+        <div v-if="people && !na" class="titre-lg text-bold text-secondary">{{'#' + im}}</div>
+        <div v-if="!people" class="row justify-between full-width">
           <div>
             <span class="titre-lg text-bold text-primary">{{$t('moi2', [na.nom])}}</span>
-            <span class="q-ml-lg font-mono fs-sm">{{'#' + idav}}</span>
+            <span class="q-ml-lg font-mono fs-sm">{{'#' + na.id}}</span>
           </div>
         </div>
         <div>
@@ -20,6 +21,14 @@
         </div>
       </div>
     </template>
+
+    <!-- Statut majeur : stm
+      0: 'Contact',
+      1: 'Contact invité',
+      2: 'Membre actif',
+      3: 'Membre animateur',
+      4: 'DISPARU',
+    -->
 
     <div>
       <div v-if="stm < 4" class="q-ml-lg q-mt-sm row justify-between">
@@ -56,35 +65,23 @@
           </div>
         </div>
 
-        <!-- Statut majeur : stm
-          0: 'Contact',
-          1: 'Contact invité',
-          2: 'Membre actif',
-          3: 'Membre animateur',
-          4: 'DISPARU',
-        -->
+        <div v-if="stm === 1" class="text-italic">
+          <span>{{$t('AMinvit')}}</span>
+          <span v-if="fl & FLAGS.PA" class="q-ml-sm">- {{$t('AMinvan')}}</span>
+          <span v-if="fl & FLAGS.DM" class="q-ml-sm">- {{$t('AMinvam')}}</span>
+          <span v-if="(fl & FLAGS.DN) && !(fl & FLAGS.DE)" class="q-ml-sm">- {{$t('AMinvln')}}</span>
+          <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
+        </div>
 
-        <div v-if="enLNC" class="text-bold">{{$t('AMlnc')}}</div>
-        <div v-if="enLNA" class="text-bold">{{$t('AMlna')}}</div>
-        <div v-if="!enLNA && !enLNC">
-          <div v-if="stm === 1" class="text-italic">
-            <span>{{$t('AMinvit')}}</span>
-            <span v-if="fl & FLAGS.PA" class="q-ml-sm">- {{$t('AMinvan')}}</span>
-            <span v-if="fl & FLAGS.DM" class="q-ml-sm">- {{$t('AMinvam')}}</span>
-            <span v-if="(fl & FLAGS.DN) && !(fl & FLAGS.DE)" class="q-ml-sm">- {{$t('AMinvln')}}</span>
-            <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
+        <div v-if="stm <= 1 && mb && eg.groupe.msu !== null && mb.flagsiv">
+          <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
+          <div class="fs-md q-ml-md">
+            <span class="text-italic">{{$t('AMinvvp')}}</span>
+            <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
           </div>
-
-          <div v-if="stm <= 1 && mb && eg.groupe.msu !== null && mb.flagsiv">
-            <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
-            <div class="fs-md q-ml-md">
-              <span class="text-italic">{{$t('AMinvvp')}}</span>
-              <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
-            </div>
-            <div class="fs-md q-ml-md">
-              <span class="text-italic">{{$t('AMinvvc')}}</span>
-              <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
-            </div>
+          <div class="fs-md q-ml-md">
+            <span class="text-italic">{{$t('AMinvvc')}}</span>
+            <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
           </div>
         </div>
       </div>
@@ -292,7 +289,7 @@ export default {
 
   props: { 
     mb: Object, // ABSENT pour un avatar du compte
-    idav: Number, // id de l'avatar membre
+    na: Object, // id de l'avatar membre
     im: Number,
     eg: Object,
     mapmc: Object,
@@ -317,9 +314,6 @@ export default {
     ambna () { return this.eg.groupe.accesMembreNA(this.im) },
 
     fl () { return this.eg.groupe.flags[this.im] },
-    
-    enLNA () { return this.eg.groupe.enLNA(this.im) },
-    enLNC () { return this.eg.groupe.enLNC(this.im) },
 
     invitable () { return this.eg.groupe.estInvitable(this.im) },
 
@@ -440,10 +434,6 @@ export default {
 
     async ouvririnvit (cas) {
       if (!await this.session.edit()) return
-      if (this.enLNA || this.enLNC) {
-        afficherDiag($t('AMlnoire'))
-        return
-      }
       this.cas = cas
       const fl = this.mb.flagsiv || this.fl
       this.ipa = (fl & FLAGS.PA) !== 0
@@ -508,21 +498,16 @@ export default {
     const aSt = stores.avatar
 
     const mb = toRef(props, 'mb')
-    const idav = toRef(props, 'idav')
-    const na = ref(mb.value ? mb.value.na : getNg(idav.value))
-    const cv = ref(mb.value ? mb.value.cv : aSt.getAvatar(idav.value).cv)
+    const na = toRef(props, 'na')
+    const cv = ref(mb.value ? mb.value.cv : (na.value ? aSt.getAvatar(na.value.id).cv : null))
 
     const ouvert = toRef(props, 'ouvert')
     const qexp = ref(ouvert.value || false)
 
-    // const im = toRef(props, 'im')
-    // const eg = toRef(props, 'eg')
-    // console.log(edit(eg.value.groupe.flags[im.value]))
-
     return {
       FLAGS, dkli, styp, edit, qexp,
       session, gSt, aSt, ui, idc,
-      na, cv
+      cv
     }
   }
 }

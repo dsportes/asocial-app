@@ -10,7 +10,7 @@
         <bouton-help page="page1" class="col-auto"/>
       </div>
     </template>
-    <div class="row justify-center q-gutter-sm q-mt-sm">
+    <div class="row justify-center q-gutter-sm q-mt-sm q-mr-xl">
       <q-btn class="titre-lg" icon="autorenew" 
         dense padding="xs" size="md" no-caps color="primary" right-icon="send"
         :label="$t('sync')" @click="ouvrirPS(1)"/>

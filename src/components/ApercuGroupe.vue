@@ -57,15 +57,15 @@
     </div>
 
     <div class="titre-lg full-width text-center text-white bg-secondary q-mt-lg q-mb-md q-pa-sm">
-      {{$t('PGmesav', imIdGroupe.size)}}
+      {{$t('PGmesav', imNaGroupe.size)}}
     </div>
     <q-btn v-if="accesMembre" @click="dialctc"
       dense size="md" no-caps color="primary" icon="add" :label="$t('PGplus')"/>
 
-    <div v-for="[id, im] of imIdGroupe" :key="im" class="q-mt-sm">
+    <div v-for="[im, na] of imNaGroupe" :key="im" class="q-mt-sm">
       <q-separator color="orange"/>
        <!-- mb peut être absent (pas accès aux membres) -->
-      <apercu-membre :mb="mb(im)" :im="im" :idav="id" :eg="eg" :idx="idx" :mapmc="mapmc"/>
+      <apercu-membre :mb="mb(im)" :im="im" :na="na" :eg="eg" :idx="idx" :mapmc="mapmc"/>
     </div>
   </div>
 
@@ -304,11 +304,13 @@ export default {
       return false
     },
 
-    // Map (idav, im) dans le groupe idg
-    imIdGroupe () { 
+    imNaGroupe () { // Map cle:im valeur: na 
+      let m
       if (this.accesMembre)
-        return this.aSt.compte.imIdGroupeMB(this.eg.groupe.id) 
-      return this.aSt.compte.imIdGroupe(this.eg.groupe.id) 
+        m = this.aSt.compte.imNaGroupeMB(this.eg.groupe.id) 
+      else 
+        m = this.aSt.compte.imNaGroupe(this.eg.groupe.id, true)
+      return m
     }
   },
 
