@@ -1,4 +1,5 @@
 <template>
+<div>
   <q-expansion-item :class="dkli(idx)" v-model="qexp"
     switch-toggle-side expand-separator dense group="trgroup">
     <template v-slot:header>
@@ -21,234 +22,254 @@
     </template>
 
     <div>
-      <div class="q-ml-lg q-mt-sm row justify-between">
+      <div v-if="stm < 4" class="q-ml-lg q-mt-sm row justify-between">
         <div class="titre-md">{{$t('AMhist')}}</div>
         <bouton-bulle2 :texte="edit(fl, $t, '\n')" :label="$t('details')"/>
       </div>
 
       <div class="mlx">
-        <div class="row">
-          <div class="text-italic col-6">{{$t('AMactif')}}</div>
-          <div v-if="mb" class="col-6">{{edd([mb.dac, mb.fac])}}</div>
-          <div v-else class="col-6">{{$t('etre', eg.groupe.actifH(im))}}</div>
-        </div>
-        <div class="row">
-          <div class="text-italic col-6">{{$t('AMmembres')}}</div>
-          <div v-if="mb" class="col-6">{{edd([mb.dam, mb.fam])}}</div>
-          <div v-else class="col-6">{{$t('etre', eg.groupe.accesMembreH(im))}}</div>
-        </div>
-        <div class="row">
-          <div class="text-italic col-6">{{$t('AMlecture')}}</div>
-          <div v-if="mb" class="col-6">{{edd([mb.dln, mb.fln])}}</div>
-          <div v-else class="col-6">{{$t('etre', eg.groupe.accesLecNoteH(im))}}</div>
-        </div>
-        <div class="row">
-          <div class="text-italic col-6">{{$t('AMecriture')}}</div>
-          <div v-if="mb" class="col-6">{{edd([mb.den, mb.fen])}}</div>
-          <div v-else class="col-6">{{$t('etre', eg.groupe.accesEcrNoteH(im))}}</div>
-        </div>
-        <div v-if="mb && !mb.ddi" class="text-italic">{{$t('AMinv0')}}</div>
-        <div v-if="mb && mb.ddi" class="row">
-          <div class="text-italic col-6">{{$t('AMinvd')}}</div>
-          <div class="col-6">{{xd(mb.ddi)}}</div>
-        </div>
-
-        <div v-if="stm <= 1">
-          <div v-if="enLNC" class="text-bold">{{$t('AMlnc')}}</div>
-          <div v-if="enLNA" class="text-bold">{{$t('AMlna')}}</div>
-          <div v-if="!enLNA && !enLNC">
-            <div v-if="stm === 1" class="text-italic">
-              <span>{{$t('AMinvit')}}</span>
-              <span v-if="fl & FLAGS.PA" class="q-ml-sm">- {{$t('AMinvan')}}</span>
-              <span v-if="fl & FLAGS.DM" class="q-ml-sm">- {{$t('AMinvam')}}</span>
-              <span v-if="(fl & FLAGS.DN) && !(fl & FLAGS.DE)" class="q-ml-sm">- {{$t('AMinvln')}}</span>
-              <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
-            </div>
-
-            <q-btn v-if="mb && stm===0 && eg.groupe.msu === null && eg.estAnim && invitable" 
-              icon="add" dense size="sm" color="primary"
-              :label="$t('AMinvitbtn1')" @click="ouvririnvit(1)"/>
-
-            <q-btn v-if="mb && stm===1 && eg.groupe.msu === null && eg.estAnim" 
-              icon="edit" dense size="sm" color="primary"
-              :label="$t('AMinvitbtn2')" @click="ouvririnvit(2)"/>
-            <q-btn v-if="mb && stm===1 && eg.groupe.msu === null && eg.estAnim" 
-              class="q-ml-sm" icon="delete" dense size="sm" color="primary"
-              :label="$t('AMinvitbtn3')" @click="ouvririnvit(3)"/>
-
-            <div v-if="mb && eg.groupe.msu !== null && mb.flagsiv">
-              <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
-              <div class="fs-md q-ml-md">
-                <span class="text-italic">{{$t('AMinvvp')}}</span>
-                <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
-              </div>
-              <div class="fs-md q-ml-md">
-                <span class="text-italic">{{$t('AMinvvc')}}</span>
-                <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
-              </div>
-            </div>
-AG
-            <q-btn v-if="mb && stm===0 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
-              :label="$t('AMinvitbtn4')" @click="ouvririnvit(4)"/>
-
-            <q-btn v-if="mb && stm===1 && eg.groupe.msu !== null" icon="how_to_vote" dense size="sm" color="primary"
-              :label="$t('AMinvitbtn3')" @click="ouvririnvit(6)"/>
-
-            <q-btn v-if="mb && stm===1 && moi" size="sm" icon="check" class="q-ml-sm"
-              dense :label="$t('AMaccinv')" color="primary" @click="accinviter"/>
-
+        <div v-if="stm < 4">
+          <div class="row">
+            <div class="text-italic col-6">{{$t('AMactif')}}</div>
+            <div v-if="mb" class="col-6">{{edd([mb.dac, mb.fac])}}</div>
+            <div v-else class="col-6">{{$t('etre', eg.groupe.actifH(im))}}</div>
+          </div>
+          <div class="row">
+            <div class="text-italic col-6">{{$t('AMmembres')}}</div>
+            <div v-if="mb" class="col-6">{{edd([mb.dam, mb.fam])}}</div>
+            <div v-else class="col-6">{{$t('etre', eg.groupe.accesMembreH(im))}}</div>
+          </div>
+          <div class="row">
+            <div class="text-italic col-6">{{$t('AMlecture')}}</div>
+            <div v-if="mb" class="col-6">{{edd([mb.dln, mb.fln])}}</div>
+            <div v-else class="col-6">{{$t('etre', eg.groupe.accesLecNoteH(im))}}</div>
+          </div>
+          <div class="row">
+            <div class="text-italic col-6">{{$t('AMecriture')}}</div>
+            <div v-if="mb" class="col-6">{{edd([mb.den, mb.fen])}}</div>
+            <div v-else class="col-6">{{$t('etre', eg.groupe.accesEcrNoteH(im))}}</div>
+          </div>
+          <div v-if="mb && !mb.ddi" class="text-italic">{{$t('AMinv0')}}</div>
+          <div v-if="mb && mb.ddi" class="row">
+            <div class="text-italic col-6">{{$t('AMinvd')}}</div>
+            <div class="col-6">{{xd(mb.ddi)}}</div>
           </div>
         </div>
 
-        <div>
-          <q-btn v-if="stm === 0 || stm === 2 || stm === 3" @click="ouvcfg"
-            :label="$t('AMcfbtn')" icon="settings" dense size="mg" color="primary"/>
+        <!-- Statut majeur : stm
+          0: 'Contact',
+          1: 'Contact invité',
+          2: 'Membre actif',
+          3: 'Membre animateur',
+          4: 'DISPARU',
+        -->
+
+        <div v-if="enLNC" class="text-bold">{{$t('AMlnc')}}</div>
+        <div v-if="enLNA" class="text-bold">{{$t('AMlna')}}</div>
+        <div v-if="!enLNA && !enLNC">
+          <div v-if="stm === 1" class="text-italic">
+            <span>{{$t('AMinvit')}}</span>
+            <span v-if="fl & FLAGS.PA" class="q-ml-sm">- {{$t('AMinvan')}}</span>
+            <span v-if="fl & FLAGS.DM" class="q-ml-sm">- {{$t('AMinvam')}}</span>
+            <span v-if="(fl & FLAGS.DN) && !(fl & FLAGS.DE)" class="q-ml-sm">- {{$t('AMinvln')}}</span>
+            <span v-if="fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
+          </div>
+
+          <div v-if="stm <= 1 && mb && eg.groupe.msu !== null && mb.flagsiv">
+            <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
+            <div class="fs-md q-ml-md">
+              <span class="text-italic">{{$t('AMinvvp')}}</span>
+              <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
+            </div>
+            <div class="fs-md q-ml-md">
+              <span class="text-italic">{{$t('AMinvvc')}}</span>
+              <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
+            </div>
+          </div>
         </div>
       </div>
+
+      <div class="q-ml-lg q-mt-sm row q-gutter-xs">
+        <q-btn v-if="mb && stm===0 && eg.groupe.msu === null && eg.estAnim && invitable" 
+          icon="add" dense size="md" color="primary" padding="xs"
+          :label="$t('AMinvitbtn1')" @click="ouvririnvit(1)"/>
+
+        <q-btn v-if="mb && stm===1 && eg.groupe.msu === null && eg.estAnim" 
+          icon="edit" dense size="md" color="primary" padding="xs"
+          :label="$t('AMinvitbtn2')" @click="ouvririnvit(2)"/>
+
+        <q-btn v-if="mb && stm===1 && eg.groupe.msu === null && eg.estAnim" 
+          icon="delete" dense size="md" color="warning" padding="xs"
+          :label="$t('AMinvitbtn3')" @click="ouvririnvit(3)"/>
+
+        <q-btn v-if="stm===0 && mb && eg.groupe.msu !== null" 
+          icon="how_to_vote" dense size="md" color="primary" padding="xs"
+          :label="$t('AMinvitbtn4')" @click="ouvririnvit(4)"/>
+
+        <q-btn v-if="stm===1 && mb && eg.groupe.msu !== null" 
+          icon="how_to_vote" dense size="md" color="primary" padding="xs"
+          :label="$t('AMinvitbtn3')" @click="ouvririnvit(6)"/>
+
+        <q-btn v-if="stm===1 && mb && moi" 
+          icon="check" dense size="md" color="primary" padding="xs"
+          :label="$t('AMaccinv')" @click="accinviter"/>
+
+        <q-btn v-if="stm === 0 || stm === 2 || stm === 3"
+          icon="settings" dense size="md" color="primary" padding="xs"
+          :label="$t('AMcfbtn')" @click="ouvcfg"/>
+      </div>
+
     </div>
+  </q-expansion-item>
 
-    <invitation-acceptation v-if="ui.d.IAaccinvit && im === session.membreId" :idg="eg.groupe.id" :im="im"/>
+  <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
+    <invitation-acceptation :idg="eg.groupe.id" :im="im" :na="na"/>
+  </q-dialog>
 
-    <!-- Dialogue de configuration -->
-    <q-dialog v-model="ui.d.AMconfig[idc]" persistent>
-      <q-card :class="styp('sm')" style="min-height:20rem">
-        <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
-          <q-toolbar-title class="titre-md text-center q-mx-sm">{{$t('AMcftit', [na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
-          <bouton-help page="page1"/>
-        </q-toolbar>
-        <q-toolbar inset class="bg-secondary text-white row justify-between">
-          <q-tabs  class="col titre-md" v-model="cfgtab" inline-label outside-arrows mobile-arrows no-caps>
-            <q-tab name="droits" :label="$t('AMcftb1')" @click="ui.setTab('groupe')"/>
-            <q-tab name="resil" :disable="!moi && !eg.estAnim" :label="$t('AMcftb2')"/>
-          </q-tabs>
-        </q-toolbar>
+  <!-- Dialogue de configuration -->
+  <q-dialog v-model="ui.d.AMconfig[idc]" persistent>
+    <q-card :class="styp('sm')" style="min-height:20rem">
+      <q-toolbar class="bg-secondary text-white">
+        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+        <q-toolbar-title class="titre-md text-center q-mx-sm">{{$t('AMcftit', [na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
+        <bouton-help page="page1"/>
+      </q-toolbar>
+      <q-toolbar inset class="bg-secondary text-white row justify-between">
+        <q-tabs  class="col titre-md" v-model="cfgtab" inline-label outside-arrows mobile-arrows no-caps>
+          <q-tab name="droits" :label="$t('AMcftb1')" @click="ui.setTab('groupe')"/>
+          <q-tab name="resil" :disable="!moi && !eg.estAnim" :label="$t('AMcftb2')"/>
+        </q-tabs>
+      </q-toolbar>
 
-        <div v-if="cfgtab==='droits'" class="q-pa-xs">
-          <div class="row titre-md text-italic">
-            <div class="col-9">{{$t('AMdrt1')}}</div>
-            <div class="col-3">{{$t('AMdrt2')}}</div>
-          </div>
-          <div v-if="drro" class="q-ma-sm bg-yellow-5 text-bold text-warning">{{$t('AMcfer4')}}</div>
-          <div class="row"> 
-            <q-checkbox class="col-9 text-center" :disable="drro" v-model="dra" :label="$t('AMdra')" />
-            <!--q-checkbox class="col-3 text-center" disable v-model="dra"/-->
-          </div>
-          <div v-if="dernierAnim" class="bg-yellow-5 text-warning text-bold">{{$t('AMcfer3')}}</div>
-          <div class="row"> 
-            <q-checkbox class="col-9 text-center" :disable="drro" v-model="drm" :label="$t('AMdrm')" />
-            <q-checkbox class="col-3 text-center" :disable="!moi" v-model="adrm"/>
-          </div>
-          <div class="row"> 
-            <q-checkbox class="col-9 text-center" :disable="drro" v-model="drl" :label="$t('AMdrl')" />
-            <q-checkbox class="col-3 text-center" :disable="!moi" v-model="adrl"/>
-          </div>
-          <div class="row"> 
-            <q-checkbox class="col-9 text-center" :disable="drro" v-model="dre" :label="$t('AMdre')" />
-            <!--q-checkbox class="col-3 text-center" disable v-model="adrl"/-->
-          </div>
-
-          <q-card-actions>
-            <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-            <q-btn :disable="!chgdr" flat :label="$t('valider')" color="primary" @click="changerdr"/>
-          </q-card-actions>
+      <div v-if="cfgtab==='droits'" class="q-pa-xs">
+        <div class="row titre-md text-italic">
+          <div class="col-9">{{$t('AMdrt1')}}</div>
+          <div class="col-3">{{$t('AMdrt2')}}</div>
+        </div>
+        <div v-if="drro" class="q-ma-sm bg-yellow-5 text-bold text-warning">{{$t('AMcfer4')}}</div>
+        <div class="row"> 
+          <q-checkbox class="col-9 text-center" :disable="drro" v-model="dra" :label="$t('AMdra')" />
+          <!--q-checkbox class="col-3 text-center" disable v-model="dra"/-->
+        </div>
+        <div v-if="dernierAnim" class="bg-yellow-5 text-warning text-bold">{{$t('AMcfer3')}}</div>
+        <div class="row"> 
+          <q-checkbox class="col-9 text-center" :disable="drro" v-model="drm" :label="$t('AMdrm')" />
+          <q-checkbox class="col-3 text-center" :disable="!moi" v-model="adrm"/>
+        </div>
+        <div class="row"> 
+          <q-checkbox class="col-9 text-center" :disable="drro" v-model="drl" :label="$t('AMdrl')" />
+          <q-checkbox class="col-3 text-center" :disable="!moi" v-model="adrl"/>
+        </div>
+        <div class="row"> 
+          <q-checkbox class="col-9 text-center" :disable="drro" v-model="dre" :label="$t('AMdre')" />
+          <!--q-checkbox class="col-3 text-center" disable v-model="adrl"/-->
         </div>
 
-        <div v-if="cfgtab==='resil'" class="q-pa-xs">
-          <div v-if="moi">
-            <div class="titre-md text-italic">{{$t('AMcftit2')}}</div>
+        <q-card-actions>
+          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+          <q-btn :disable="!chgdr" flat :label="$t('valider')" color="primary" @click="changerdr"/>
+        </q-card-actions>
+      </div>
+
+      <div v-if="cfgtab==='resil'" class="q-pa-xs">
+        <div v-if="moi">
+          <div class="titre-md text-italic">{{$t('AMcftit2')}}</div>
+          <div class="column q-my-sm">
+            <span><q-radio v-model="decl" :val="1" :label="$t('ICd2')"/><bouton-bulle idtext="oublc1"/></span>
+            <span><q-radio v-model="decl" :val="2" :label="$t('ICd3')" /><bouton-bulle idtext="oublc2"/></span>
+            <span><q-radio v-model="decl" :val="3" :label="$t('ICd4')" /><bouton-bulle idtext="oublc3"/></span>
+          </div>
+          <div class="row justify-center q-gutter-lg">
+            <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+            <bouton-confirm :actif="cfln" :confirmer="ko"/>
+          </div>
+        </div>
+        <div v-else>
+          <div class="titre-md text-italic">{{$t('AMcftit3')}}</div>
+          <div v-if="(fl & FLAGS.AC) || (fl & FLAGS.IN)" 
+            class="q-ma-sm bg-yellow-5 text-bold text-warning">
+            <div v-if="(fl & FLAGS.AC)">{{$t('AMcfer1')}}</div>
+            <div v-if="(fl & FLAGS.IN)">{{$t('AMcfer2')}}</div>
+          </div>
+          <div v-else>
             <div class="column q-my-sm">
-              <span><q-radio v-model="decl" :val="1" :label="$t('ICd2')"/><bouton-bulle idtext="oublc1"/></span>
-              <span><q-radio v-model="decl" :val="2" :label="$t('ICd3')" /><bouton-bulle idtext="oublc2"/></span>
-              <span><q-radio v-model="decl" :val="3" :label="$t('ICd4')" /><bouton-bulle idtext="oublc3"/></span>
+              <span><q-radio v-model="decl" :val="4" :label="$t('ICd5')"/><bouton-bulle idtext="oubla1"/></span>
+              <span><q-radio v-model="decl" :val="5" :label="$t('ICd6')" /><bouton-bulle idtext="oubla2"/></span>
             </div>
             <div class="row justify-center q-gutter-lg">
               <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
               <bouton-confirm :actif="cfln" :confirmer="ko"/>
             </div>
           </div>
-          <div v-else>
-            <div class="titre-md text-italic">{{$t('AMcftit3')}}</div>
-            <div v-if="(fl & FLAGS.AC) || (fl & FLAGS.IN)" 
-              class="q-ma-sm bg-yellow-5 text-bold text-warning">
-              <div v-if="(fl & FLAGS.AC)">{{$t('AMcfer1')}}</div>
-              <div v-if="(fl & FLAGS.IN)">{{$t('AMcfer2')}}</div>
-            </div>
-            <div v-else>
-              <div class="column q-my-sm">
-                <span><q-radio v-model="decl" :val="4" :label="$t('ICd5')"/><bouton-bulle idtext="oubla1"/></span>
-                <span><q-radio v-model="decl" :val="5" :label="$t('ICd6')" /><bouton-bulle idtext="oubla2"/></span>
-              </div>
-              <div class="row justify-center q-gutter-lg">
-                <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-                <bouton-confirm :actif="cfln" :confirmer="ko"/>
-              </div>
-            </div>
-          </div>
         </div>
-      </q-card>
-    </q-dialog>
+      </div>
+    </q-card>
+  </q-dialog>
 
-    <!-- Dialogue d'invitation -->
-    <q-dialog v-model="ui.d.AMinvit[idc]" persistent>
-      <q-card :class="styp('md')">
+  <!-- Dialogue d'invitation -->
+  <q-dialog v-model="ui.d.AMinvit[idc]" persistent full-height position="left">
+    <q-layout container view="hHh lpR fFf" :class="styp('md')">
+      <q-header elevated>
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+          <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('AMinvtit', [na.nom, eg.groupe.na.nom])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
+      </q-header>
 
-        <q-card-section v-if="cas > 3">
-          <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
-          <div class="fs-md q-ml-md">
-            <span class="text-italic">{{$t('AMinvvp')}}</span>
-            <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
-          </div>
-          <div class="fs-md q-ml-md">
-            <span class="text-italic">{{$t('AMinvvc')}}</span>
-            <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
-          </div>
-        </q-card-section>
+      <q-page-container>
+      <q-card-section v-if="cas > 3">
+        <div class="titre-md">{{$t('AMinvev', [edFlagsiv])}}</div>
+        <div class="fs-md q-ml-md">
+          <span class="text-italic">{{$t('AMinvvp')}}</span>
+          <span class="q-ml-sm" v-for="l of gSt.animInv[0]" :key="l.id">{{l.nomc}}</span>
+        </div>
+        <div class="fs-md q-ml-md">
+          <span class="text-italic">{{$t('AMinvvc')}}</span>
+          <span class="q-ml-sm" v-for="l of gSt.animInv[1]" :key="l.id">{{l.nomc}}</span>
+        </div>
+      </q-card-section>
 
-        <q-card-section class="column q-ma-xs q-pa-xs titre-md">
-          <div class="row">
-            <q-select class="q-mb-md lgsel" v-model="invpar" :options="options" :label="$t('AMinvpar')" />
-            <span v-if="cas === 4 && gSt.animInv[0].indexOf(invpar.value) !== -1"
-              class= "q-ml-md text-bold text-warning bg-yellow-3">{{$t('AMdejav')}}</span>
-          </div>
-          <q-checkbox dense :disable="!drupd" v-model="ipa" :label="$t('FLAGS7')" />
-          <q-checkbox dense :disable="!drupd" v-model="idm" :label="$t('FLAGS6')" />
-          <q-checkbox dense :disable="!drupd" v-model="idn" :label="$t('FLAGS5')" />
-          <q-checkbox dense :disable="!drupd" v-if="idn" v-model="ide" :label="$t('FLAGS6')" />
-          <div v-if="drupd" class="q-mt-sm height-3">
-            <div v-if="cas === 2 && mb.flagsiv === nvflags">{{$t('AMnochg')}}</div>
-            <div v-if="cas === 4 && mb.flagsiv !== nvflags"
-              class= "text-bold text-warning bg-yellow-3">{{$t('AMchg')}}</div>
-          </div>
-        </q-card-section>
-        <q-card-section>
-          <div class="titre-md text-italic">{{$t('AMbienv')}}</div>
-          <editeur-md class="bord" :lgmax="1000" v-model="ard" :texte="mb.ard || ''" 
-            modetxt mh="8rem"  editable/>
-        </q-card-section>
-        <q-card-actions class="column justify-center q-gutter-xs">
-          <q-btn flat padding="xs" :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-          <q-btn v-if="cas === 1" flat padding="xs" :label="$t('AMinviter')" 
-            color="primary" @click="inviter(1)"/>
-          <q-btn v-if="cas === 2" :disable="mb.flagsiv === nvflags"
-            flat padding="xs" :label="$t('AMmodinv')" color="primary" @click="inviter(2)"/>
-          <q-btn v-if="cas === 3" flat padding="xs" :label="$t('AMdelinv')" 
-            color="warning" @click="inviter(3)"/>
-          <q-btn v-if="cas === 4" :label="$t('AMvpour')" padding="xs" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
-            :disable="gSt.animInv[0].indexOf(invpar) !== -1 && mb.flagsiv === nvflags" @click="inviter(4)"/>
-          <q-btn v-if="cas === 4" :label="$t('AMvcontre')"  padding="xs" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
-            :disable="gSt.animInv[1].indexOf(invpar) !== -1" @click="inviter(5)"/>
-          <q-btn v-if="cas === 6" flat :label="$t('AMdelinv')" padding="xs" color="warning" @click="inviter(6)"/>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+      <q-card-section class="column q-ma-xs q-pa-xs titre-md">
+        <div class="row">
+          <q-select class="q-mb-md lgsel" v-model="invpar" :options="options" :label="$t('AMinvpar')" />
+          <span v-if="cas === 4 && gSt.animInv[0].indexOf(invpar.value) !== -1"
+            class= "q-ml-md text-bold text-warning bg-yellow-3">{{$t('AMdejav')}}</span>
+        </div>
+        <q-checkbox dense :disable="!drupd" v-model="ipa" :label="$t('FLAGS7')" />
+        <q-checkbox dense :disable="!drupd" v-model="idm" :label="$t('FLAGS4')" />
+        <q-checkbox dense :disable="!drupd" v-model="idn" :label="$t('FLAGS5')" />
+        <q-checkbox dense :disable="!drupd" v-if="idn" v-model="ide" :label="$t('FLAGS6')" />
+        <div v-if="drupd" class="q-mt-sm height-3">
+          <div v-if="cas === 2 && mb.flagsiv === nvflags">{{$t('AMnochg')}}</div>
+          <div v-if="cas === 4 && mb.flagsiv !== nvflags"
+            class= "text-bold text-warning bg-yellow-3">{{$t('AMchg')}}</div>
+        </div>
+      </q-card-section>
+      <q-card-section>
+        <div class="titre-md text-italic">{{$t('AMbienv')}}</div>
+        <editeur-md class="bord" :lgmax="1000" v-model="ard" :texte="mb.ard || ''" 
+          modetxt mh="8rem"  editable/>
+      </q-card-section>
+      <q-card-actions class="justify-center q-gutter-xs">
+        <q-btn flat padding="xs" :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+        <q-btn v-if="cas === 1" padding="xs" :label="$t('AMinviter')" 
+          color="primary" @click="inviter(1)"/>
+        <q-btn v-if="cas === 2" :disable="mb.flagsiv === nvflags"
+          padding="xs" :label="$t('AMmodinv')" color="primary" @click="inviter(2)"/>
+        <q-btn v-if="cas === 3" padding="xs" :label="$t('AMdelinv')" 
+          color="warning" @click="inviter(3)"/>
+        <q-btn v-if="cas === 4" :label="$t('AMvpour')" padding="xs" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
+          :disable="gSt.animInv[0].indexOf(invpar) !== -1 && mb.flagsiv === nvflags" @click="inviter(4)"/>
+        <q-btn v-if="cas === 4" :label="$t('AMvcontre')"  padding="xs" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
+          :disable="gSt.animInv[1].indexOf(invpar) !== -1" @click="inviter(5)"/>
+        <q-btn v-if="cas === 6" :label="$t('AMdelinv')" padding="xs" color="warning" @click="inviter(6)"/>
+      </q-card-actions>
+      </q-page-container>
+    </q-layout>
+  </q-dialog>
 
-  </q-expansion-item>
+</div>
 </template>
 <script>
 import { ref, toRef } from 'vue'
@@ -409,7 +430,7 @@ export default {
 
     async accinviter () {
       if (!await this.session.edit()) return
-      this.ui.oD('IAaccinvit')
+      this.ui.oD('IAaccinvit', this.idc)
     },
 
     ouvrirdetails () {
@@ -482,6 +503,7 @@ export default {
   setup (props) {
     const session = stores.session
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
     const gSt = stores.groupe
     const aSt = stores.avatar
 
@@ -499,21 +521,19 @@ export default {
 
     return {
       FLAGS, dkli, styp, edit, qexp,
-      session, gSt, aSt, ui,
+      session, gSt, aSt, ui, idc,
       na, cv
     }
   }
 }
 </script>
-<style lang="css">
-.q-item__section--side { padding-right: 5px !important; }
-</style>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .lgsel
   width: 10rem
 .mlx
-  margin-left: 2rem
+  margin-left: 3rem
 .q-tab
   min-height: 0 !important
 </style>

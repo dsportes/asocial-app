@@ -14,7 +14,13 @@ import { UNITEV1, UNITEV2, FLAGS } from '../app/api.mjs'
     estAnim: false, // un des avatars du compte est animateur du groupe
     estHeb: false // un des avatars du compte est hébergeur du groupe
     objv: { v: 0, vols: {v1: 0, v2: 0, q1: 0, q2: 0} }
-- invits: pour chaque avatar, le Set des ids des groupes dont il est invité en attente
+- invits: map des invitations en attente.
+  - clé : id du groupe + '/' + id de l'avatar invité
+  - valeur: {ng, na, im, ivpar, dh}
+    - ng : du groupe
+    - na : de l'avatar invité
+    - ivpar : indice im de l'invitant,
+    - dh : date-heure
 */
 
 export const useGroupeStore = defineStore('groupe', {
@@ -392,6 +398,12 @@ export const useGroupeStore = defineStore('groupe', {
 
     setInvit (ng, na, im, ivpar, dh) { // na du groupe et de l'avatar invité
       this.invits.set(ng.id + '/' + na.id, {ng, na, im, ivpar, dh})
+    },
+
+    clearInvits (id) {
+      for (let [cle, val] of this.invits) {
+        if (val.na.id === id) this.invits.delete(cle)
+      }
     },
 
     getInvit (idg, ida) { // na du groupe et de l'avatar invité

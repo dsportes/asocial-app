@@ -1,6 +1,6 @@
 <template>
 <q-page class="q-pa-sm column items-center">
-  <q-card class="dpmd column items-center">
+  <q-card class="spmd column items-center">
 
     <q-btn class="q-my-sm" size="md" dense color="primary" padding="xs"
       :label="$t('PGcrea')" @click="nvGr"/>
@@ -24,13 +24,24 @@
     </div>
   </q-card>
 
-  <invitations-encours/>
+  <q-card v-if="session.accesNet" class="spsm q-my-lg">
+    <div class="full-width titre-md text-italic bg-primary text-white q-mt-md text-center">
+      {{$t('ICtit', gSt.invits.size, {count: gSt.invits.size})}}
+    </div>
+    <div v-for="([k, inv], idx) of gSt.invits" :key="k">
+      <div :class="dkli(idx) + 'q-mx-xs row invs cursor-pointer items-center'" @click="ouvaccinv(inv)">
+        <q-icon class="col-1" size="md" name="zoom_in"/>
+        <div class="col-5">{{inv.na.nom}}</div>
+        <div class="col-6">{{inv.ng.nom}}</div>
+      </div>
+    </div>
+  </q-card>
 
   <div v-if="!gSt.pgLgFT.length" class="q-my-lg titre-lg text-italic text-center">
     {{$t('PGvide', [gSt.pgLg.size])}}
   </div>
 
-  <div class="q-my-lg dpmd" v-if="gSt.pgLgFT.length">
+  <div class="spmd" v-if="gSt.pgLgFT.length">
     <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-md'">
       <apercu-genx :id="e.groupe.id" :idx="idx" />
       <div class="row full-width items-center justify-between">
@@ -53,6 +64,11 @@
       </div>
     </q-card>
   </div>
+
+  <!-- Acceptation de l'invitation -->
+  <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
+    <invitation-acceptation :idg="inv.ng.id" :im="inv.im" :na="inv.na"/>
+  </q-dialog>
 
   <!-- Nouveau groupe ------------------------------------------------>
   <q-dialog v-model="ui.d.PGcrgr" persistent>
@@ -92,8 +108,8 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import InvitationsEncours from '../components/InvitationsEncours.vue'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
+import InvitationAcceptation from '../components/InvitationAcceptation.vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { NouveauGroupe } from '../app/operations.mjs'
 
@@ -102,7 +118,7 @@ export default {
 
   props: { tous: Boolean },
 
-  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, InvitationsEncours, ApercuChatgr },
+  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, ApercuChatgr, InvitationAcceptation },
 
   computed: {
   },
@@ -113,6 +129,12 @@ export default {
     ed2 (n) { return edvol(n) },
 
     nbiv (e) { return this.gSt.nbMesInvits(e) },
+
+    async ouvaccinv (inv) {
+      if (!await this.session.edit()) return
+      this.inv = inv
+      this.ui.oD('IAaccinvit', this.idc)
+    },
 
     async courant (elt) {
       this.session.setGroupeId(elt.groupe.id)
@@ -154,12 +176,14 @@ export default {
     return {
       quotas: null, // { q1, q2, min1, min2, max1, max2, err}
       nom: '',
-      una: false
+      una: false,
+      inv: null // invitation courante
     }
   },
 
   setup (props) {
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
     const session = stores.session
     const aSt = stores.avatar
     const fStore = stores.filtre
@@ -178,7 +202,7 @@ export default {
     const stats = fStore.stats
 
     return {
-      ui, session, aSt, gSt, dkli, styp,
+      ui, session, aSt, gSt, dkli, styp, idc,
       stats,
       mapmc,
       options
@@ -190,4 +214,7 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.invs:hover
+  background-color: $secondary !important
+  color: white !important
 </style>

@@ -89,7 +89,7 @@ export const useUiStore = defineStore('ui', {
       ATreceptk: false, // ApercuTicket
       ATconfirmdel: false,
       EMmax: {}, // EditeurMd
-      IAaccinvit: false, // InvitationAcceptation
+      IAaccinvit: {}, // InvitationAcceptation
       ACVouvrir: false, // ApercuCv
       MMedition: {}, // McMemo
       PCnouveautk: false, // PanelCredits

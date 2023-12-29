@@ -1301,6 +1301,7 @@ export default {
 
   // Page groupe(s)
   PGdisp: 'Groupe disparu',
+  PGnoinvit: 'Pas d\'invitation en attente de décision.',
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
   PGvut: 'Réellement utilisé',
   PGvq: 'Somme des maximum attribués',
@@ -1374,7 +1375,7 @@ export default {
   AMinvpa: 'animation',
   AMinvdm: 'accès aux membres',
   AMinvdn: 'lecture des notes',
-  AMinvde: 'accès aux notes',
+  AMinvde: 'écriture des notes',
   AMinvev: 'Invitation en cours: {0}',
   AMinvvp: 'Ont voté pour:',
   AMinvvc: 'N\'ont pas voté:',
@@ -1392,7 +1393,7 @@ export default {
   AMlnc: 'Ne peut plus être invité, le compte s\'est lui-même mis en liste noire.',
   AMardtit: 'Ardoise de {0} pour échange avec le(s) animateur(s)',
   AMardtit2: 'Ardoise d\'échange avec le(s) animateur(s)',
-  AMbienv: 'Mot de bienvenue sur lchat du groupe',
+  AMbienv: 'Mot de bienvenue sur le chat du groupe',
   AMdisp: 'Ce groupe a disparu depuis le moment où l\'invitation a été lancée.',
 
   AMcftit: '{0} dans le groupe {1}',
@@ -1442,7 +1443,7 @@ export default {
   AMx7: 'inviter un membre déjà actif n\'est pas possible.',
   AMx8: 'le membre a disparu.',
 
-  ICtit: 'Invitation en attente de réponse',
+  ICtit: 'Pas d\'invitation en attente de décision.| Une invitation en attente de décision. | {count} invitations en attente de décision',
   ICtit2: 'Invitation de {0} au groupe {1}',
   ICinvpar: 'Invité par ...',
   ICflags: 'Droits attribués: {0}',

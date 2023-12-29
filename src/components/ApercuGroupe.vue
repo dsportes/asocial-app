@@ -14,6 +14,11 @@
       <span class="text-italic">{{$t('PGinv', nbiv(eg), {count: nbiv(eg)})}}</span>
     </div>
 
+    <div class="q-mt-sm row justify-end">
+      <q-btn size="sm" icon="chat" :label="$t('PGchat')" 
+        color="primary" dense padding="xs" @click="this.ui.oD('ACGouvrir')"/>
+    </div>
+
     <div v-if="fond">
       <span class="q-mt-sm titre-md q-mr-sm">{{$t('AGfond')}}</span>
       <bouton-membre :eg="eg" :im="1" btn/>
@@ -63,6 +68,8 @@
       <apercu-membre :mb="mb(im)" :im="im" :idav="id" :eg="eg" :idx="idx" :mapmc="mapmc"/>
     </div>
   </div>
+
+  <apercu-chatgr v-if="ui.d.ACGouvrir"/>
 
   <!-- Dialogue d'édition des mots clés du groupe -->
   <mots-cles v-if="ui.d.MCmcledit" :idg="eg.groupe.id"/>
@@ -253,6 +260,8 @@ import ApercuGenx from './ApercuGenx.vue'
 // Niveau 7
 import ApercuMembre from './ApercuMembre.vue'
 
+import ApercuChatgr from '../panels/ApercuChatgr.vue'
+
 export default {
   name: 'ApercuGroupe',
 
@@ -263,7 +272,7 @@ export default {
   },
 
   components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, 
-  ApercuGenx, BoutonMembre, QuotasVols },
+  ApercuGenx, BoutonMembre, QuotasVols, ApercuChatgr },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },

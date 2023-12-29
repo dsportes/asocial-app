@@ -347,7 +347,7 @@ import FiltreVols from './components/FiltreVols.vue'
 import FiltreRac from './components/FiltreRac.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
 import PageMenu from './pages/PageMenu.vue'
-import PhraseSecrete from './components/PhraseSecrete.vue'
+import PhraseSecrete from './dialogues/PhraseSecrete.vue'
 
 // niveau 2
 import PageSession from './pages/PageSession.vue'

@@ -1182,10 +1182,12 @@ _data_:
 - `cva` : carte de visite cryptée par la clé _CV_ de l'avatar `{v, photo, info}`.
 - `invits`: maps des invitations en cours de l'avatar:
   - _clé_: `ni`, numéro d'invitation. hash du cryptage par la clé du groupe de la clé _inversée_ de l'avatar. Ceci permet à un animateur du groupe de détruire l'entrée.
-  - _valeur_: `{nomg, cleg, im}` cryptée par la clé publique RSA de l'avatar.
+  - _valeur_: `{nomg, cleg, im, ivpar, dh}` cryptée par la clé publique RSA de l'avatar.
     - `nomg`: nom du groupe,
     - `cleg`: clé du groupe,
     - `im`: indice du membre dans la table `flags / anag` du groupe.
+    - `ivpar`: indice im de l'invitant
+    - `dh`: date-heure d'invitation
 - `pck` : PBKFD de la phrase de contact cryptée par la clé K.
 - `napc` : `[nom, cle]` de l'avatar cryptée par le PBKFD de la phrase de contact.
 */
@@ -1347,6 +1349,7 @@ export class Avatar extends GenDoc {
     } else this.cv = null
 
     this.invits = new Map()
+    gSt.clearInvits(this.na.id)
     if (row.invits) {
       for (const nx in row.invits) {
         const ni = parseInt(nx)

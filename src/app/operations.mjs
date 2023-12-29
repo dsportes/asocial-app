@@ -1292,7 +1292,6 @@ export class InvitationGroupe extends OperationUI {
       const x = { nomg: gr.na.nom, cleg: gr.na.rnd, im: mb.ids, ivpar, dh }
       const pub = await aSt.getPub(mb.na.id)
       const invit = await crypterRSA(pub, new Uint8Array(encode(x)))
-      const ardg = await crypter(gr.na.rnd, ard || '')
       const chatit = ard ? await Chatgr.getItem(gr.na.rnd, ivpar, ard, dh) : null
       const args = { token: session.authToken, 
         op,
@@ -1303,7 +1302,6 @@ export class InvitationGroupe extends OperationUI {
         flags,
         ni: await Groupe.getNi(gr.na, mb.na),
         invit,
-        ardg,
         chatit
       }
       const ret = this.tr(await post(this, 'InvitationGroupe', args))

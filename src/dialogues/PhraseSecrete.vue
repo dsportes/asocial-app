@@ -1,7 +1,7 @@
 <template>
 <q-dialog v-model="ui.d.PSouvrir" persistent position="top"
   transition-show="slide-down" transition-hide="fade">
-  <q-card :class="styp('sm')">
+  <q-card :class="styp('sm')" style="position:relative; top:2.5rem">
     <q-toolbar class="bg-secondary text-white">
       <q-btn dense size="md" color="warning" icon="close" @click="ko"/>
       <q-toolbar-title class="titre-lg">
@@ -25,16 +25,15 @@
         @keydown.enter.prevent="ok2" 
         :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">
         <template v-slot:append>
-          <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd"/>
-          <q-btn icon="cancel" size="md" :disable="ligne1.length === 0"  
-            @click="forceInput('')"/>
+          <q-btn :icon="isPwd ? 'visibility_off' : 'visibility'" size="md" padding="none" round @click="isPwd = !isPwd"/>
+          <q-btn icon="cancel" size="md" padding="none" round :disable="ligne1.length === 0" @click="forceInput('')"/>
           <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
         </template>
       </q-input>
       <div v-else class="row items-center">
-        <div class="col q-mr-sm font-mono text-bold fs-md height-2 bord">{{ligne1}}</div>
-        <q-btn class="col-auto" icon="cancel" size="md" :disable="ligne1.length === 0"  
-          @click="forceInput('')"/>
+        <div class="col q-mr-sm font-mono text-bold fs-md height-2 bord">{{secligne1}}</div>
+        <q-btn class="col-auto" :icon="isPwd ? 'visibility_off' : 'visibility'" size="md" padding="none" round @click="isPwd = !isPwd"/>
+        <q-btn icon="cancel" size="md" padding="none" round :disable="ligne1.length === 0" @click="forceInput('')"/>
       </div>
 
       <div class="row justify-between items-center q-my-md">
@@ -60,7 +59,7 @@
     
     </q-card-section>
   </q-card>
-  <div class="simple-keyboard"></div>
+  <div class="simple-keyboard" style="position:relative; top:2.5rem; width:30rem;"></div>
 </q-dialog>
 </template>
 
@@ -80,6 +79,10 @@ export default ({
   name: 'PhraseSecrete',
 
   props: {
+  },
+
+  computed: {
+    secligne1 () { return this.isPwd ? ''.padStart(this.ligne1.length, '*') : this.ligne1 }
   },
 
   data () {
