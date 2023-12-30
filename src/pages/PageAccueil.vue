@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-card class="petitelargeur maauto fs-md q-pa-sm">
+    <q-card class="spsm fs-md q-pa-sm">
       <div class="row justify-center">
       <!-- Déconnexion -->
       <div class="btn2" @click="ui.oD('dialoguedrc')">
@@ -92,26 +92,25 @@
       </div>
     </q-card>
 
-    <q-card class="q-mt-lg petitelargeur maauto q-pa-sm">
-      <page-menu/>
+    <q-card class="q-mt-lg spsm q-pa-sm">
+      <menu-accueil/>
     </q-card>
 
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
 import NotifIcon2 from '../components/NotifIcon.vue'
 import QueueIcon from '../components/QueueIcon.vue'
-import PageMenu from '../components/MenuAccueil.vue'
+import MenuAccueil from '../components/MenuAccueil.vue'
 
 export default {
   name: 'PageAccueil',
 
-  components: { PageMenu, BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon },
+  components: { MenuAccueil, BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon },
 
   computed: {
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },

@@ -1,6 +1,6 @@
 <template>
   <q-page class="column align-start items-center">
-    <q-card v-if="!ui.compteKO" class="q-mt-lg petitelargeur column justify-center">
+    <q-card v-if="!ui.compteKO" class="q-mt-lg spsm column justify-center">
       <div class="text-center">
         <span class="titre-xl">{{$t('ECclos', [session.org])}}</span>
         <bouton-bulle class="q-mr-md fs-md" icon="report_problem" idtext="clos"/>
@@ -10,7 +10,7 @@
       <q-btn class="q-mt-lg text-center" flat :label="$t('jailu')" @click="deconn"/>
     </q-card>
 
-    <q-card v-else class="q-mt-lg petitelargeur column justify-center">
+    <q-card v-else class="q-mt-lg spsm column justify-center">
       <div class="text-center titre-xl titre-italic">
         {{$t('compteKO', [cpt.na.id, cpt.na.nom])}}
       </div>

@@ -309,7 +309,14 @@ Login pour un compte déjà enregistré ou auto-création d'un compte depuis une
 
 Import: PhraseContact, AcceptationSponsoring
 
-### PageCompte
+### PageAccueil (3)
+Affiche:
+- un bloc avec tous les accès aux pages s'ouvrant par des icônes de App.
+- un second bloc qui est le menu d'accueil accessible depuis la App.
+
+Import: MenuAccueil, BoutonLangue, NotifIcon2, QueueIcon 
+
+### PageCompte (7)
 Affiche les avatars du compte et les opérations du compte:
 - création d'un nouvel avatar,
 - édition des mots clés du compte,
@@ -321,12 +328,20 @@ Dialogues:
 - PCnvav: nouvel avatar
 - PCchgps: changement de la phrase secrète
 
-### PageChats
+### PageChats (7)
 Affiche la liste des chats des contacts et des groupes.
 - si le filtre filtre.filtre.chats.tous est false, les stores avatar et groupe ne délivrent que ceux de l'avatar courant positionné sur la page d'accueil.
 - exporte les chats sélectionnés dans un fichier MarkDown.
 
 Import: ApercuChat, ContactChat, ApercuChatgr, ApercuGenx
+
+### PageClos (3)
+Page ouverte sur clôture immédiate de la session:
+- blocage intégral par l'administrateur technique,
+- compte résilié par une autre session ou celle courante,
+- ressort toujours par la déconnexion inconditionnelle.
+
+Import: BoutonBulle, ShowHtml
 
 ### PageCompta (7)
 Quatre onglets donnant l'état de la comptabilité et des blocages.
@@ -417,6 +432,14 @@ Affiche tous les contacts connus avec une courte fiche pour chacun (pouvant ouvr
 Import: ApercuGenx
 
 ## En chantier
+- EditeurMd
+- PageFicavion
+- PageNotes NoteEdit NoteExclu NotePlus NoteMc NoteFichier NouveauFichier NoteConfirme
+- ListeAuts
+- PressePapier
+- PanelCredits
+- ContactChat
+- ApercuTicket
 
 ## Bugs / vérifications
 

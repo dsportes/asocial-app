@@ -1,6 +1,7 @@
 <template>
   <q-page>
-    <q-card class="dpmd q-mb-lg q-pa-sm row justify-center items-center" v-if="aSt.estSponsor || estComptable"> 
+    <q-card class="spmd q-mb-lg q-pa-sm row justify-center items-center" 
+      v-if="aSt.estSponsor || estComptable"> 
       <!-- Nouveau sponsoring -->
       <q-btn class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts" no-caps
         :label="$t('NPnouv')" color="warning" dense
@@ -8,9 +9,9 @@
       <bouton-help class="q-ml-sm" page="page1"/>
     </q-card>
 
-    <q-card class="dpmd q-pa-sm titre-lg text-center">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</q-card>
+    <q-card class="spmd q-pa-sm titre-lg text-center">{{sponsorings.length ? $t('NPspex') : $t('NPnosp')}}</q-card>
 
-    <q-card class="dpmd q-my-md" v-for="(sp, idx) in sponsorings" :key="sp.ids">
+    <q-card class="spmd q-my-md" v-for="(sp, idx) in sponsorings" :key="sp.ids">
       <div :class="'q-px-sm ' + dkli(idx)">
         <div :class="'titre-md text-' + clr(sp)">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
         <div class="titre-md">{{$t('NPphr')}}
