@@ -63,9 +63,11 @@
       dense size="md" no-caps color="primary" icon="add" :label="$t('PGplus')"/>
 
     <div v-for="[im, na] of imNaGroupe" :key="im" class="q-mt-sm">
-      <q-separator color="orange"/>
-       <!-- mb peut être absent (pas accès aux membres) -->
-      <apercu-membre :mb="mb(im)" :im="im" :na="na" :eg="eg" :idx="idx" :mapmc="mapmc"/>
+      <div v-if="!disparu(im)">
+        <q-separator color="orange"/>
+        <!-- mb peut être absent (pas accès aux membres) -->
+        <apercu-membre :mb="mb(im)" :im="im" :na="na" :eg="eg" :idx="idx" :mapmc="mapmc"/>
+      </div>
     </div>
   </div>
 
@@ -209,26 +211,37 @@
   <!-- Dialogue d'ouverture de la page des contacts pour ajouter un contact -->
   <q-dialog v-model="ui.d.AGnvctc[idc]" persistent>
     <q-card :class="styp('sm')">
-      <q-card-section v-if="options.length">
-        <div class="titre-md text-italic">{{$t('AGmoi1')}}</div>
-        <div class="row justify-around items-center q-my-sm">
-          <q-select class="q-mb-md lgsel" v-model="moic" :options="options" :label="$t('AGmoi2')" />
-          <q-btn color="primary" dense icon="check" :label="$t('AGmoi3')" 
-            padding="xs" @click="okctcmoi"/>
+      <q-card-section>
+        <div class="titre-md text-italic q-my-sm">{{$t('AGmoi1')}}</div>
+        <div v-for="(e, idx) of lctc" :key="e.na.id"
+          :class="'row q-ml-lg q-my-xs ' + dkli(idx) + (!e.info ? 'cursor-pointer text-bold' : '')"
+          @click="nax = !e.info ? e.na : null">
+          <div class="col-4">{{e.na.nom}}</div>
+          <div :class="'col-8 ' + (e.info ? 'text-black bg-yellow-5 text-italic' : '')">{{e.info}}</div>
         </div>
+        <q-card-actions align="right">
+          <q-btn flat padding="xs" dense size="md" :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+          <q-btn :disable="!nax" class="q-ml-sm" padding="xs" dense size="md" 
+            :label="$t('AGmoi2', [nax ? nax.nom : '?'])" color="primary" 
+            @click="okctcmoi"/>
+        </q-card-actions>
       </q-card-section>
+
+      <q-separator color="orange" class="q-my-md"/>
 
       <q-card-section class="column q-ma-xs q-pa-xs titre-md">
         <div>{{$t('PGplus1')}}</div>
         <div class="q-ml-md">{{$t('PGplus2')}}</div>
         <div class="q-ml-md">{{$t('PGplus3')}}</div>
-        <div class="q-ml-md">{{$t('PGplus4')}}</div>
-        <div class="q-ml-lg q-px-xs text-bold bord1">{{$t('PGplus5', [eg.groupe.na.nom])}}</div>
+        <div class="q-ml-md">{{$t('PGplus4')}}
+          <span class="q-ml-sm q-px-xs text-bold bord1">{{$t('ajouter')}}</span>
+        </div>
       </q-card-section>
 
-      <q-card-actions vertical>
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-        <q-btn flat :label="$t('continuer')" color="warning" @click="pagectc"/>
+      <q-card-actions align="right">
+        <q-btn flat padding="xs" dense size="md" :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+        <q-btn class="q-ml-sm" padding="xs" dense size="md" 
+          :label="$t('continuer')" color="primary" @click="pagectc"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -241,7 +254,7 @@ import { ref, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { getNg, Groupe } from '../app/modele.mjs'
 import { ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
-import { styp, edvol, dhcool, dkli, afficherDiag, aaaammjj } from '../app/util.mjs'
+import { styp, edvol, dhcool, dkli, aaaammjj } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
 
 // Niveau 1
@@ -326,6 +339,9 @@ export default {
     action: 0,
     nvHeb: null, // nouvel hébergeur pré-sélectionné
 
+    lctc: [], // [{ na, info }] avatars du compte / au groupe
+    nax: null, // avatar du compte à ajouter comme contact
+
     al1: false,
     al2: false,
     rst1: 'OB',
@@ -349,53 +365,50 @@ export default {
       return r
     },
 
-    nbiv (e) { return this.gSt.nbMesInvits(e) },
-    // ast (m) { return this.eg.groupe.ast[m.ids] },
+    disparu (im) {
+      return this.eg.groupe.estDisparu(im)
+    },
 
-    async dialctc (na) {
+    nbiv (e) { return this.gSt.nbMesInvits(e) },
+
+    async dialctc () {
       if (!await this.session.edit()) return
-      this.options.length = 0
+      this.lctc = []
+      this.nax = null
       const mois = this.aSt.compte.lstAvatarNas
-      for (const nam of mois) {
-        const m = this.gSt.membreDeId(this.eg, nam.id)
-        if (!m) this.options.push({ value: nam.id, label: nam.nom, na: nam })
+      const m = this.aSt.compte.imIdGroupe(this.session.groupeId)
+      const gr = this.eg.groupe
+      for (const na of mois) {
+        const im = m.get(na.id) || 0
+        let info = ''
+        if (im) info = this.$t('AMm' + gr.statutMajeur(im))
+        else {
+          const nag = await Groupe.getNag(gr.na, na)
+          if (gr.enLNA(im, nag)) info = this.$t('PPctc3')
+          else if (gr.enLNC(im, nag)) info = this.$t('PPctc4')
+        }
+        this.lctc.push({ na, info })
       }
-      if (this.options.length) this.moic = this.options[0]
       this.ui.oD('AGnvctc', this.idc)
     },
 
     pagectc () {
       this.session.setGroupeId(this.eg.groupe.id)
       this.ui.egrplus = true
-      this.ui.fD()
       this.ui.setPage('people')
     },
 
     async okctcmoi () {
       while (true) {
-        const nax = this.moic.na
         const gr = this.eg.groupe
-        const nag = await Groupe.getNag(gr.na, nax)
-        if (gr.enLNA(0, nag)) {
-          await afficherDiag(this.$t('PPlna'))
-          return
-        }
-        if (gr.enLNC(0, nag)) {
-          await afficherDiag(this.$t('PPlnc'))
-          return
-        }
-        const [nouveau, slot] = await gr.slot(nax)
-        if (!nouveau) { // ça ne devrait pas se produire ici
-          await afficherDiag(this.$t('PPctc'))
-          return
-        }
-        const cv = this.aSt.getAvatar(nax.id).cv
-        if (await new NouveauMembre().run(gr, slot, nax, cv)) {
+        const [nouveau, slot] = await gr.slot(this.nax)
+        const cv = this.aSt.getAvatar(this.nax.id).cv
+        if (await new NouveauMembre().run(gr, slot, this.nax, cv)) {
           this.session.setMembreId(slot)
           this.ui.fD()
           return
         }
-        await sleep(500)
+        await sleep(1000)
       }
     },
 

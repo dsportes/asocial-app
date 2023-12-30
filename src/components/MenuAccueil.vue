@@ -110,7 +110,7 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 
 export default {
-  name: 'PageMenu',
+  name: 'MenuAccueil',
 
   props: { menu: Boolean },
 

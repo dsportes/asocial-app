@@ -1,7 +1,7 @@
 <template>
-  <q-btn v-if="btn" class="btn2" dense size="md" no-caps icon-right="open_in_new" 
-    :label="mb" @click="detailMb"/>
-  <span v-else>{{mb}}</span>
+  <span>{{mb}}</span>
+  <q-btn v-if="btn" class="q-ml-lg" dense round padding="none" size="md" icon="open_in_new" 
+    color="primary" @click="detailMb"/>
 </template>
 
 <script>
@@ -50,9 +50,4 @@ export default ({
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.btn1
-  padding: 1px !important
-.btn2
-  padding: 0 2px !important
-  border-bottom: 1px solid $primary
 </style>

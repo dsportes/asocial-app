@@ -1,5 +1,5 @@
 <template>
-  <q-page class="column q-pl-xs q-mr-sm largeur40 maauto">
+  <q-page class="column q-pl-xs q-mr-sm spmd">
     <q-card v-if="session.accesNet" class="q-my-md q-pa-xs row justify-center">
       <q-btn class="q-my-sm" size="md" no-caps dense color="primary" 
         :label="$t('CVraf')" @click="rafCvs"/>

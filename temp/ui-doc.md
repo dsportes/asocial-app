@@ -29,12 +29,16 @@ Ils n'importent aucune autre vue et sont des "span" destinés à figurer au mili
 - **BoutonHelp**: ouvre une page d'aide.
 - **BoutonLangue**: affiche la langue courante et permet de la changer.
 - **NotifIcon**: affiche le statut de notification de restriction et ouvre PageCompta. 
+- **BoutonMembre**: affiche le libelleé d'un membre, son statut majeur et optionnellment un bouton ouvrant un PanelMembre qui le détaille. N'est importé que dans ApercuGroupe.
 
 Les mots clés sont attachés:
 - à des contacts ou des groupes connus du compte par McMemo,
 - à des notes par NoteMc.
 
 Ils sont affichés par ApercuMotscles qui permet d'éditer le choix par ChoixMotscles.
+
+### MenuAccueil (1)
+Affiche le menu principal aussi inclus dans la page d'accueil.
 
 ### ApercuMotscles (3)
 Liste les mots clés sur une ligne. 
@@ -155,13 +159,29 @@ Dialogues:
 ### ApercuMembre (7)
 Afiche une expansion pour un membre d'un groupe:
 - repliée: son aperçu de contact et une ligne d'information sur son statut majeur dans le groupe (fondateur, hébergeur, statut).
-- dépliée: ses flags et ses date-heures de changement d'état et un bouton pour changer cet état.
+- dépliée: ses flags et ses date-heures de changement d'état et des boutons pour changer cet état (invitation, configurer, oublier).
 
 Import: InvitationAcceptation, BoutonConfirm, ApercuGenx, BoutonBulle2, BoutonBulle, EditeurMd
 
 Dialogues:
 - AMinvit: invitation d'un contact.
 - AMconfig: configuration des flags du membre.
+- AMoubli: oubli d'un contact jamais invité, ni actif.
+
+### InvitationAcceptation (6)
+Formulaire d'acceptation / refus d'une invitation:
+- flags d'accès,
+- message de remerciement.
+
+Une fiche d'information à propos de l'invitation est obtenue du serveur et contient en particulier les données à propos du ou des invitants.
+- on peut accepter une invitation SANS avoir accès aux membres du groupes;
+- c'est la fiche invitation qui ramène le row membre correspondant spécifique, sans que la session n'ait eu besoin d'avoir accès aux membres du groupe.
+
+Est invoqué comme dialogue par:
+- ApercuMembre: pour les invitations des avatars du compte.
+- PageGroupes: pour toutes les invitations en attente inscrites dans les avatars du compte.
+
+Import: EditeurMd, ApercuGenx, BoutonConfirm, BoutonBulle
 
 ## Dialogues
 
@@ -223,12 +243,12 @@ Affiche le chat d'un groupe.
 
 Import: EditeurMd, NoteEcritepar
 
-### ApercuChat (3)
+### ApercuChat (6)
 Affiche le chat d'un avatar du compte avec un contact.
 - ajout d'items et supression d'items.
 - raccrocher le chat/
 
-Import: EditeurMd, NoteEcritepar
+Import: SdDark1, EditeurMd, ApercuGenx
 
 ### SupprAvatar (2)
 Panel de suppression d'un avatar.
@@ -262,6 +282,25 @@ Saisie de l'acceptation d'un sponsoring, in fine création du compte (si accepta
 - saisie du mot de remerciement.
 
 Import: EditeurMd, ShowHtml, BoutonHelp, QuotasVols
+
+## PanelPeople (7)
+Affiche tout ce qu'on sait à propos d'un contact:
+- sa carte de visite et son commentaire / mots clés du compte à son propos.
+- la liste des chats auquel il participe, ouvert ou non.
+- la liste des groupes (dont le compte a accès aux membres) dont il est membre et son statut.
+
+Si le panel a été ouvert pour ajouter le contact comme membre du groupe courant, un cadre donne le statut de faisabilité de cet ajout et un bouton l'ajoute.
+
+Import: ApercuGenx, ApercuMembre
+
+### PanelMembre (8)
+Affiche en panel,
+- l'aperçu du contact / avatar membre,
+- l'aperçu membre qui donne le détail de son rôle dans le groupe.
+
+N'est ouvert que par un BoutonMembre (depuis ApercuGroupe seulement donc). Est hébergé dans App pour éviter des instantiations multiples.
+
+Import: ApercuGenx, ApercuMembre
 
 ## Pages
 
@@ -367,17 +406,18 @@ Dialogue:
 Affiche les détails d'un groupe:
 - onglet **Détail du groupe**: entête et participations des avatars du compte au groupe.
   - bouton d'ajout d'un contact comme contact du groupe.
-- onglet **Membres**: liste des contacts membres du groupes si le compte a accès aux membres.
+- onglet **Membres**: liste des contacts membres du groupe si le compte a accès aux membres.
 
 Import: ApercuMembre, ApercuGroupe
+
+### PagePeople (6)
+Affiche tous les contacts connus avec une courte fiche pour chacun (pouvant ouvrir sur le détail du contact).
+- un bouton rafraîchit les cartes de viste qui en ont besoin.
+
+Import: ApercuGenx
 
 ## En chantier
 
 ## Bugs / vérifications
-ApercuMembre 
-- Possibilité d'effacer un contact d'un groupe (quand il n'a jamais été actif). Configurer à revoir.
 
-InvitationAcceptation
-- réentrance ?
-- utilise membre ? acceptation sans accès membre ?
 

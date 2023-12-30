@@ -1807,6 +1807,9 @@ export class Groupe extends GenDoc {
   estInvitable (im) { const f = this.flags[im] || 0; 
     return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !this.enLNA(im) && !this.enLNC(im)
   }
+  estOubliable (im) { const f = this.flags[im] || 0; 
+    return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !(f & FLAGS.HA)
+  }
 
   estHeb (im) { return this.estActif(im) && im === this.imh }
   accesMembre (im) {

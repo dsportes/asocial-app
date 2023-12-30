@@ -62,6 +62,7 @@ export const useUiStore = defineStore('ui', {
       FAdetaildial: false, // PageFicavion
       AGvisucv: false, // ApercuGenx
       AMconfig: {}, // ApercuMembre
+      AMoubli: {},
       AMinvit: {},
       NSnvsp: false, // NouveauSponsoring
       PTedq: false, // PageTranche
@@ -158,9 +159,11 @@ export const useUiStore = defineStore('ui', {
     },
 
     resetD () {
-      this.dialogStack.forEach(n => { 
-        if (typeof this.d[n] === 'object') this.d[n] = {}
-        else this.d[n] = false
+      this.dialogStack.forEach(e => { 
+        if (e[1] !== 0)
+          delete this.d[e[0]][e[1]]
+        else
+          this.d[e[0]] = false
       })
       this.dialogStack.length = 0
     },

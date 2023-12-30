@@ -1,9 +1,9 @@
 <template>
-<q-dialog v-model="ui.d.PMdetailsmembre" persistent>
-<q-layout container view="hHh lpR fFf" :class="sty + bcf" style="width:80vw">
+<q-dialog v-model="ui.d.PMdetailsmembre" full-height position="left" persistent>
+<q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+      <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
       <q-toolbar-title v-if="mb" class="titre-lg text-center q-mx-sm">{{$t('PMGtit', [mb.na.nomc, eg.groupe.na.nomc])}}</q-toolbar-title>
       <q-toolbar-title v-else class="titre-lg text-center q-mx-sm">{{$t('PMGtit1')}}</q-toolbar-title>
       <bouton-help page="page1"/>
@@ -26,6 +26,7 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { Motscles } from '../app/modele.mjs'
+import { styp } from '../app/util.mjs'
 
 import BoutonHelp from '../components/BoutonHelp.vue'
 
@@ -92,7 +93,7 @@ export default {
     init()
     
     return {
-      ui, session,
+      ui, session, styp,
       mapmc,
       eg,
       mb,

@@ -111,9 +111,13 @@
           icon="check" dense size="md" color="primary" padding="xs"
           :label="$t('AMaccinv')" @click="accinviter"/>
 
-        <q-btn v-if="stm === 0 || stm === 2 || stm === 3"
+        <q-btn v-if="stm === 2 || stm === 3"
           icon="settings" dense size="md" color="primary" padding="xs"
           :label="$t('AMcfbtn')" @click="ouvcfg"/>
+
+        <q-btn v-if="oubliable" 
+          icon="close" dense size="md" color="warning" padding="xs"
+          :label="$t('AMoubtn')" @click="ouvoubli"/>
       </div>
 
     </div>
@@ -121,6 +125,25 @@
 
   <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
     <invitation-acceptation :idg="eg.groupe.id" :im="im" :na="na"/>
+  </q-dialog>
+
+  <!-- Dialogue d'oubli d'un simple contact -->
+  <q-dialog v-model="ui.d.AMoubli[idc]" persistent>
+    <q-card :class="styp('sm')">
+      <q-card-section class="q-pa-sm q-my-md">
+        <div class="q-my-sm titre-lg">{{$t('AMoubli1', [na.nom])}}</div>
+        <div class="q-ml-md q-my-xs titre-md">{{$t('AMoubli2')}}</div>
+        <div class="q-ml-md q-my-xs titre-md">{{$t('AMoubli3')}}</div>
+      </q-card-section>
+      <q-card-actions align="right" class="q-my-sm q-gutter-sm">
+        <q-btn flat size="md" padding="xs" color="primary"
+          :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn size="md" padding="xs" color="primary"
+          :label="$t('AMoubs')" @click="decl=4; ko()"/>
+        <q-btn size="md" padding="xs" color="warning"
+          :label="$t('AMoubd')" @click="decl=5; ko()"/>
+      </q-card-actions>
+    </q-card>
   </q-dialog>
 
   <!-- Dialogue de configuration -->
@@ -271,7 +294,7 @@
 <script>
 import { ref, toRef } from 'vue'
 
-import { styp, dkli, $t, afficherDiag } from 'src/app/util.mjs'
+import { styp, dkli, afficherDiag } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from './BoutonConfirm.vue'
@@ -281,7 +304,6 @@ import BoutonBulle2 from './BoutonBulle2.vue'
 import BoutonBulle from './BoutonBulle.vue'
 import EditeurMd from './EditeurMd.vue'
 import InvitationAcceptation from './InvitationAcceptation.vue'
-import { getNg } from '../app/modele.mjs'
 import { OublierMembre, MajDroitsMembre, InvitationGroupe } from '../app/operations.mjs'
 
 export default {
@@ -301,6 +323,8 @@ export default {
   components: { InvitationAcceptation, BoutonConfirm, BoutonHelp, ApercuGenx, BoutonBulle2, BoutonBulle, EditeurMd },
 
   computed: {
+    oubliable () { return this.eg.groupe.estOubliable(this.im)},
+
     amb () { return this.gSt.ambano[0] },
 
     stm () { return this.eg.groupe.statutMajeur(this.im) },
@@ -360,7 +384,7 @@ export default {
       return !(this.eg.estAnim && (!this.eg.groupe.estAnim(this.im) || this.moi))
     },
 
-    moi () { return this.aSt.compte.estAvDuCompte(this.idav) },
+    moi () { return this.aSt.compte.estAvDuCompte(this.na.id) },
 
     chgdr () { return this.flags2av !== this.nvflags2 },
 
@@ -428,7 +452,7 @@ export default {
     },
 
     ouvrirdetails () {
-      this.session.setPeopleId(this.idav)
+      this.session.setPeopleId(this.na.id)
       this.ui.oD('detailspeople')
     },
 
@@ -464,6 +488,11 @@ export default {
       */
       await new InvitationGroupe().run(cas, this.eg.groupe, this.mb, this.invpar.value, this.nvflags, this.ard)
       this.ui.fD()
+    },
+
+    async ouvoubli () {
+      if (!await this.session.edit()) return
+      this.ui.oD('AMoubli', this.idc)
     },
 
     async ouvcfg () {

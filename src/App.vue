@@ -346,7 +346,7 @@ import FiltreAvgr from './components/FiltreAvgr.vue'
 import FiltreVols from './components/FiltreVols.vue'
 import FiltreRac from './components/FiltreRac.vue'
 import DialogueErreur from './dialogues/DialogueErreur.vue'
-import PageMenu from './pages/PageMenu.vue'
+import PageMenu from './components/MenuAccueil.vue'
 import PhraseSecrete from './dialogues/PhraseSecrete.vue'
 
 // niveau 2
@@ -379,13 +379,13 @@ import PageChats from './pages/PageChats.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageNotes from './pages/PageNotes.vue'
 import PageTranche from './pages/PageTranche.vue'
-import PanelPeople from './dialogues/PanelPeople.vue'
+import PanelPeople from './panels/PanelPeople.vue'
 
 // Niveau 8
 import PageGroupes from './pages/PageGroupes.vue'
 
 // Niveau 9
-import PanelMembre from './dialogues/PanelMembre.vue'
+import PanelMembre from './panels/PanelMembre.vue'
 
 // Niveau 10
 import PageGroupe from './pages/PageGroupe.vue'

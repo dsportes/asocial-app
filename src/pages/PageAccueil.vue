@@ -106,7 +106,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
 import NotifIcon2 from '../components/NotifIcon.vue'
 import QueueIcon from '../components/QueueIcon.vue'
-import PageMenu from '../pages/PageMenu.vue'
+import PageMenu from '../components/MenuAccueil.vue'
 
 export default {
   name: 'PageAccueil',

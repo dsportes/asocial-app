@@ -35,28 +35,35 @@
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
-      <div v-if="ui.egrplus && !pSt.peC.groupes.has(gSt.egrC.groupe.na.id)"
-        class="q-ma-md bordo column items-center">
-        <div class="full-width titre-md bg-yellow-3 text-warning text-bold text-center">
-          {{$t('PGplus5b', [gSt.egrC.groupe.na.nom, pSt.peC.na.nom])}}
+      <q-card-section v-if="ui.egrplus" class="bord q-ma-sm q-pa-xs">
+        <div class="titre-lg text-italic text-center q-ma-sm">
+          {{$t('PPctc', [gSt.egrC.groupe.na.nom, pSt.peC.na.nom])}}
         </div>
-        <q-btn class="text-center q-my-sm" dense size="md" no-caps color="primary" icon="check"
-          :label="$t('ok')" @click="contact"/>
-      </div>
+        <div v-if="diag !== 0"
+          class="q-ma-md q-pa-xs titre-md bg-yellow-3 text-warning text-bold text-center">
+          {{$t('PPctc' + diag)}}
+        </div>
+        <div v-else class="row justify-center q-my-sm">
+          <q-btn dense size="md" color="primary" padding="xs"
+            icon="add" :label="$t('ajouter')" @click="contact"/>
+        </div>
+      </q-card-section>
 
       <div class="titre-md text-italic y-mb-sm">{{$t('PPgroupes')}}</div>
 
       <div v-for="[idg, ids] in pSt.peC.groupes" :key="ids + '/' + idg">
         <div class="q-my-sm row q-gutter-sm">
           <span class="fs-md col">{{egr(idg).groupe.na.nomc}} - {{$t('AMm' + stmb(idg, ids))}}</span>
-          <q-btn class="col-auto btn1" dense size="sm" icon-right="open_in_new" color="primary"
+          <q-btn class="col-auto" dense padding="xs" size="sm" 
+            icon-right="open_in_new" color="primary"
             :label="$t('PGvg')" @click="voirgr(idg, ids)"/>
         </div>
       </div>
 
     </q-card>
 
-    <apercu-chat v-if="ui.d.ACouvrir" :na-i="naC" :na-e="pSt.peC.na" :ids="ids[naC.id]" :mapmc="mapmc"/>
+    <apercu-chat v-if="ui.d.ACouvrir" :na-i="naC" :na-e="pSt.peC.na" 
+      :ids="ids[naC.id]" :mapmc="mapmc"/>
 
   </q-page-container>
 
@@ -68,12 +75,12 @@
 import { ref, onMounted, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import ApercuChat from '../panels/ApercuChat.vue'
+import ApercuChat from './ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import { Chat, Motscles, Groupe } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
-import { styp, afficherDiag, sleep } from '../app/util.mjs'
+import { styp, sleep } from '../app/util.mjs'
 
 export default {
   name: 'PanelPeople',
@@ -90,8 +97,6 @@ export default {
   
   data () {
     return {
-      egrC: null,
-      mbC: null,
       naC: null
     }
   },
@@ -109,42 +114,22 @@ export default {
     voirgr (id, ids) {
       this.session.setGroupeId(id)
       this.session.setMembreId(ids)
-      this.egrC = this.gSt.egr(id)
-      this.mbC = this.gSt.getMembre(id, ids)
       this.ui.setPage('groupe', 'membres')
     },
 
     async contact () {
       while (true) {
-        const [amb, ano] = this.gSt.ambano
-        if (!amb) { // ça ne devrait pas se produire ici
-          await afficherDiag(this.$t('PPamb'))
-          return
-        }
+        if (await this.diagctct()) return // Anomalie nouvelle
         const gr = this.gSt.egrC.groupe // groupe courant d'où vient la proposition d'inscription en contact
         const pe = this.pSt.peC // people courant
-        const nag = await Groupe.getNag(gr.na, pe.na)
-        if (gr.enLNA(0, nag)) {
-          await afficherDiag(this.$t('PPlna'))
-          return
-        }
-        if (gr.enLNC(0, nag)) {
-          await afficherDiag(this.$t('PPlnc'))
-          return
-        }
         const [nouveau, slot] = await gr.slot(pe.na)
-        if (!nouveau) { // ça ne devrait pas se produire ici
-          await afficherDiag(this.$t('PPctc'))
-          return
-        }
-        this.ui.egrplus = false
         if (await new NouveauMembre().run(gr, slot, pe.na, pe.cv)) {
           this.session.setMembreId(slot)
-          this.ui.fD()
           this.ui.setPage('groupe', 'membres')
+          this.ui.egrplus = false
           return
         }
-        await sleep(500)
+        await sleep(1000)
       }
     }
   },
@@ -155,18 +140,33 @@ export default {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const ui = stores.ui
+    const diag = ref(0)
 
     const mapmc = ref(Motscles.mapMC(true, 0))
 
     const ids = reactive({})
+
+    async function diagctct () {
+      if (pSt.peC.groupes.has(gSt.egrC.groupe.na.id)) { diag.value = 2; return }
+      const gr = gSt.egrC.groupe // groupe courant d'où vient la proposition d'inscription en contact
+      const pe = pSt.peC // people courant
+      const nag = await Groupe.getNag(gr.na, pe.na)
+      if (gr.enLNA(0, nag)) { diag.value = 3; return }
+      if (gr.enLNC(0, nag)) { diag.value = 4; return }
+      const [amb, ano] = gSt.ambano
+      if (!amb) { diag.value = 1; return } // ça ne devrait pas se produire ici
+      diag.value = 0
+    }
+
     onMounted(async () => {
       for(const na of aSt.compte.lstAvatarNas) {
         ids[na.id] = await Chat.getIds(na, pSt.peC.na)
       }
+      if (ui.egrplus) await diagctct()
     })
 
     return {
-      styp, session, aSt, pSt, gSt, ui,
+      styp, session, aSt, pSt, gSt, ui, diag, diagctct,
       mapmc, ids
     }
   }
@@ -174,19 +174,9 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bordo
-  border: 2px solid $orange
-  border-radius: 5px
-.bord1
-  border: 1px solid $grey-5
-.bord2
-  background: $yellow-3
-  color: black
-  font-weight: bold
+.bord
+  border: 2px double $orange
+  border-radius: 10px !important
 .q-card__section
   padding: 2px !important
-.q-btn
-  padding: 0 3px !important
-.btn1
-  height: 1.5rem
 </style>
