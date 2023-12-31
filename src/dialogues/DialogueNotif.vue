@@ -30,12 +30,12 @@
     <q-card-section class="q-my-sm q-mx-sm">
       <editeur-md mh="10rem" v-model="ntf.texte" :texte="ntf.texte" editable modetxt/>
     </q-card-section>
-    <q-card-actions>
-      <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
-        @click="ui.fD"/>
-      <q-btn dense flat color="warning" size="md" icon="delete" :label="$t('supprimer')" 
-        :disable="!ntf || !ntf.texte" @click="valider(true)"/>
-      <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="check" 
+    <q-card-actions align="right">
+      <q-btn flat color="primary" size="md" padding="xs" dense icon="undo" 
+        :label="$t('renoncer')" @click="ui.fD"/>
+      <q-btn dense size="md" padding="xs" color="warning" icon="delete" 
+        :label="$t('supprimer')" :disable="!ntf || !ntf.texte" @click="valider(true)"/>
+      <q-btn class="q-ml-md" size="md" padding="xs" color="warning" icon="check" 
         :label="$t('valider')" :disable="!ntf.texte" @click="valider(false)"/>
     </q-card-actions>
   </q-card>

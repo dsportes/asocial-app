@@ -23,7 +23,7 @@
   <div class="filler"/>
 
   <q-dialog v-model="ui.d.FAdetaildial">
-    <div class="bs petitelargeur column">
+    <div :class="styp('md')">
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('FAVdet')}}</q-toolbar-title>
@@ -64,10 +64,13 @@
             <div class="col-10 q-pl-sm font-mono">{{$t('FAVst' + fc.f.st)}}</div>
           </div>
         </q-card-section>
-        <q-card-actions horizontal>
-          <q-btn class="q-mx-xs" color="warning" icon="check" dense flat :label="$t('FAVb1')" @click="voirnote"/>
-          <q-btn class="q-mx-xs" color="primary" icon="open_in_new" dense flat :label="$t('FAVb2')" @click="affFic"/>
-          <q-btn class="q-mx-xs" color="primary" icon="save_alt" dense flat :label="$t('FAVb3')" @click="enregFic"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn color="primary" icon="check" dense padding="xs" size="md" 
+            :label="$t('FAVb1')" @click="voirnote"/>
+          <q-btn color="primary" dense padding="xs" size="md" icon="open_in_new"
+            :label="$t('FAVb2')" @click="affFic"/>
+          <q-btn color="primary" dense padding="xs" size="md" icon="save_alt" 
+            :label="$t('FAVb3')" @click="enregFic"/>
         </q-card-actions>
       </q-card>
     </div>
@@ -80,7 +83,7 @@
 import { saveAs } from 'file-saver'
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { afficherDiag, edvol, dhcool, dkli } from '../app/util.mjs'
+import { afficherDiag, edvol, dhcool, dkli, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { FLset } from '../app/db.mjs'
 
@@ -204,7 +207,7 @@ export default ({
 
     return {
       edvol, dhcool, dkli,
-      nSt, fSt, session, ppSt, avnSt, ui,
+      nSt, fSt, session, ppSt, avnSt, ui, styp,
       lst
     }
   }

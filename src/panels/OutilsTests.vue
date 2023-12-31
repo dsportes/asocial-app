@@ -130,10 +130,11 @@
             {{$t('GBm2')}}
           </div>
         </q-card-section>
-        <q-card-actions>
-          <q-btn dense :label="$t('GBcb')" color="primary" @click="ui.fD"/>
-          <q-btn dense :label="$t('GBsb')" icon="delete" color="warning"
-            @click="delIDB(itdel)"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
+            :label="$t('GBcb')" @click="ui.fD"/>
+          <q-btn dense size="md" padding="xs" color="warning" icon="delete"
+            :label="$t('GBsb')" @click="delIDB(itdel)"/>
         </q-card-actions>
       </q-card>
     </q-dialog>

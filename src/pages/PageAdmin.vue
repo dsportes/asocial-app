@@ -98,11 +98,11 @@
             </div>
           </div>
         </q-card-section>
-        <q-card-actions>
-          <q-btn dense flat color="primary" size="md" icon="close" :label="$t('renoncer')" 
-            @click="ui.fD" padding="xs"/>
-          <q-btn class="q-ml-md" dense flat color="warning" size="md" icon="chek" 
-            :label="$t('valider')" padding="xs" :disable="prf === profil" @click="valider"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat dense color="primary" size="md" padding="xs" icon="undo" 
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn dense color="warning" size="md" padding="xs" icon="check" 
+            :label="$t('valider')" :disable="prf === profil" @click="valider"/>
         </q-card-actions>
       </q-card>
     </q-dialog>

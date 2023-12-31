@@ -46,15 +46,19 @@
     </div>
   </q-expansion-item>
 
-  <panel-dialtk v-if="ui.d.PDdialtk" :min="5" :init="tk.ma" titre="TKrec" @ok="reception"/>
+  <q-dialog v-model="ui.d.ATdialtk[idc]" persistent>
+    <panel-dialtk :min="5" :init="tk.ma" titre="TKrec" @ok="reception"/>
+  </q-dialog>
 
-  <q-dialog v-model="ui.d.ATconfirmdel">
-    <q-card class="bs">
+  <q-dialog v-model="ui.d.ATconfirmdel[idc]">
+    <q-card :class="styp('sm')">
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('TKdel')}}</q-card-section>
-      <q-card-actions align="right">
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-        <q-btn flat :label="$t('TKdel2')" color="warning" @click="deletetk"/>
+      <q-card-actions align="right" class="q-gutter-sm">
+        <q-btn flat dense padding="xs" size="md" color="primary" icon="undo"
+          :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn dense padding="xs" size="md" color="warning" icon="delete" 
+          :label="$t('TKdel2')" @click="deletetk"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -62,8 +66,9 @@
 </template>
 <script>
 
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { mon, idTkToL6, dkli } from '../app/util.mjs'
+import { mon, idTkToL6, dkli, styp } from '../app/util.mjs'
 import { AMJ } from '../app/api.mjs'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import { Ticket } from '../app/modele.mjs'
@@ -93,7 +98,7 @@ export default {
   methods: {
     async deltk () {
       if (!await this.session.editUrgence()) return
-      this.ui.oD('ATconfirmdel')
+      this.ui.oD('ATconfirmdel', this.idc)
     },
     async recep1 () {      
       if (!await this.session.editUrgence()) return
@@ -101,7 +106,7 @@ export default {
     },
     async recep2 () {      
       if (!await this.session.editUrgence()) return
-      this.ui.oD('PDdialtk')
+      this.ui.oD('ATdialtk', this.idc)
     },
     async reception ({m, ref}) {
       this.ui.fD()
@@ -116,10 +121,11 @@ export default {
   setup (props) {
     const session = stores.session
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
     // const t = toRef(props, 'tk')
 
     return {
-      idTkToL6, mon, dkli, AMJ, Ticket, session, ui
+      idTkToL6, mon, dkli, AMJ, Ticket, session, ui, idc, styp
     }
   }
 }

@@ -18,18 +18,19 @@
 
     <!-- Dialogue d'édition de la phrase de contact -->
     <q-dialog v-model="ui.d.AAeditionpc[idc]" persistent>
-      <q-card class="bs q-ma-xs largeur30 fs-md">
+      <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center">{{$t('FAphc')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
-        <q-card-section>
+        <q-card-section class="q-pa-xs">
           <phrase-contact @ok="declPC" :init-val="avatar.pc || ''"
             declaration :orgext="session.org"/>
         </q-card-section>
-        <q-card-actions vertical>
-          <q-btn v-if="avatar.pc" flat color="warning" :label="$t('FAsup')" @click="supprPC"/>
+        <q-card-actions align="right">
+          <q-btn v-if="avatar.pc" :label="$t('FAsup')" @click="supprPC"
+            flat color="warning" dense size="md" padding="xs" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -45,7 +46,7 @@ import { GetAvatarPC, ChangementPC, ExistePhrase } from '../app/operations.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import PhraseContact from './PhraseContact.vue'
-import { afficherDiag, dkli } from '../app/util.mjs'
+import { afficherDiag, dkli, styp } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
 export default {
@@ -126,7 +127,7 @@ export default {
     )
 
     return {
-      dkli, ID, idc,
+      dkli, ID, idc, styp,
       session, ui,
       avatar
     }

@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.NX" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -69,7 +69,7 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { $t, dkli } from '../app/util.mjs'
+import { $t, dkli, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ListeAuts from '../components/ListeAuts.vue'
@@ -185,7 +185,7 @@ export default {
     return {
       session, ui, nSt, gSt, pSt, aSt, cv, idg,
       groupe, lst, xav, xap, anim, autAvc, amb,
-      dkli
+      dkli, styp
     }
   }
 

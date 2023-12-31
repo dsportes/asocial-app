@@ -1,9 +1,9 @@
 <template>
-  <div class="q-pa-smmd">
+<div class="spmd q-pa-sm">
     <q-expansion-item switch-toggle-side default-opened dense
       header-class="titre-md text-bold bg-primary text-white"
       :label="$t('PCPsyn') + ' - ' + dhcool(c.dh)">
-    <div class="largeur40 column maauto q-my-sm">
+    <div class="spmd column q-my-sm">
       <div class="titre-md q-my-sm">
         {{$t('PCPpcum' + c.cumref[0], [dhcool(c.cumref[1]), c.cumref[2]])}}
       </div>
@@ -36,7 +36,7 @@
 
   <q-expansion-item switch-toggle-side dense group="trgroup"
     :header-class="hcabo1" :icon="icoabo1" :label="$t('PCPabo1')">
-    <div class="largeur40 column maauto q-my-sm">
+    <div class="spmd column q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width text-bold text-italic'">
         <div class="col-4">{{$t('PCPdet')}}</div>
         <div class="col-4 font-mono text-center">{{$t('PCPactuel')}}</div>
@@ -77,7 +77,7 @@
 
   <q-expansion-item switch-toggle-side dense group="trgroup"
     :header-class="hcabo2" :icon="icoabo2" :label="$t('PCPabo2')">
-    <div class="largeur40 column maauto q-my-sm">
+    <div class="spmd column q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width text-bold text-italic'">
         <div class="col-4"/>
         <div class="col-4 font-mono text-center">{{$t('PCPactuel')}}</div>
@@ -107,7 +107,7 @@
 
   <q-expansion-item switch-toggle-side dense group="trgroup"
     :header-class="hcconso" :icon="icoconso" :label="$t('PCPcconso')">
-    <div class="largeur40 column maauto q-my-sm">
+    <div class="spmd column q-my-sm">
       <div :class="dkli(1) + ' row items-center full-width'">
         <div class="col-4 text-center"></div>
         <div class="col-2 text-center">{{libm(0)}}</div>
@@ -158,7 +158,7 @@
         </div>
       </div>
 
-      <div v-if="c.estA" class="column maauto q-my-sm full-width">
+      <div v-if="c.estA" class="column q-my-sm full-width">
         <panel-deta :c="c" :total="aSt.compta.credits.total"/>
       </div>
 
@@ -211,7 +211,7 @@
   <q-expansion-item switch-toggle-side dense group="trgroup"
     header-class="titre-md text-bold bg-primary text-white"
     :label="$t('PCPtarifs')">
-    <div class="largeur40 column maauto q-mb-sm q-pa-xs">
+    <div class="spmd column q-mb-sm q-pa-xs">
       <div class="text-italic titre-md q-my-sm">{{$t('PCPcent')}}</div>
 
       <div class="q-ml-md q-my-sm">
@@ -241,7 +241,7 @@
       </div>
     </div>
   </q-expansion-item>
-  </div>
+</div>
 </template>
 
 <script>

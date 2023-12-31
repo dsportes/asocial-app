@@ -135,12 +135,12 @@
         <div class="q-ml-md q-my-xs titre-md">{{$t('AMoubli2')}}</div>
         <div class="q-ml-md q-my-xs titre-md">{{$t('AMoubli3')}}</div>
       </q-card-section>
-      <q-card-actions align="right" class="q-my-sm q-gutter-sm">
-        <q-btn flat size="md" padding="xs" color="primary"
+      <q-card-actions align="right" class="q-my-md q-gutter-sm">
+        <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
           :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn size="md" padding="xs" color="primary"
+        <q-btn dense size="md" padding="xs" color="primary" icon="check"
           :label="$t('AMoubs')" @click="decl=4; ko()"/>
-        <q-btn size="md" padding="xs" color="warning"
+        <q-btn dense size="md" padding="xs" color="warning" icon="check"
           :label="$t('AMoubd')" @click="decl=5; ko()"/>
       </q-card-actions>
     </q-card>
@@ -185,9 +185,11 @@
           <!--q-checkbox class="col-3 text-center" disable v-model="adrl"/-->
         </div>
 
-        <q-card-actions>
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-          <q-btn :disable="!chgdr" flat :label="$t('valider')" color="primary" @click="changerdr"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat dense color="primary" padding="xs" icon="undo"
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn dense color="primary" padding="xs" icon="check"
+            :disable="!chgdr" flat :label="$t('valider')" @click="changerdr"/>
         </q-card-actions>
       </div>
 
@@ -271,19 +273,24 @@
         <editeur-md class="bord" :lgmax="1000" v-model="ard" :texte="mb.ard || ''" 
           modetxt mh="8rem"  editable/>
       </q-card-section>
-      <q-card-actions class="justify-center q-gutter-xs">
-        <q-btn flat padding="xs" :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-        <q-btn v-if="cas === 1" padding="xs" :label="$t('AMinviter')" 
-          color="primary" @click="inviter(1)"/>
+      <q-card-actions align="right" class="q-gutter-xs">
+        <q-btn flat padding="xs" dense size="md" color="primary" icon="undo"
+          :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn v-if="cas === 1" padding="xs" dense size="md" color="primary" icon="check"
+          :label="$t('AMinviter')" @click="inviter(1)"/>
         <q-btn v-if="cas === 2" :disable="mb.flagsiv === nvflags"
-          padding="xs" :label="$t('AMmodinv')" color="primary" @click="inviter(2)"/>
-        <q-btn v-if="cas === 3" padding="xs" :label="$t('AMdelinv')" 
-          color="warning" @click="inviter(3)"/>
-        <q-btn v-if="cas === 4" :label="$t('AMvpour')" padding="xs" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
+          padding="xs" dense size="md" color="primary" icon="check"
+          :label="$t('AMmodinv')" @click="inviter(2)"/>
+        <q-btn v-if="cas === 3" padding="xs" dense size="md" color="primary" icon="check"
+          :label="$t('AMdelinv')" @click="inviter(3)"/>
+        <q-btn v-if="cas === 4" padding="xs" dense size="md" icon="check"
+          :label="$t('AMvpour')" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
           :disable="gSt.animInv[0].indexOf(invpar) !== -1 && mb.flagsiv === nvflags" @click="inviter(4)"/>
-        <q-btn v-if="cas === 4" :label="$t('AMvcontre')"  padding="xs" :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
+        <q-btn v-if="cas === 4" padding="xs" dense size="md" icon="check"
+          :label="$t('AMvcontre')"  :color="mb.flagsiv === nvflags ? 'primary' : 'warning'" 
           :disable="gSt.animInv[1].indexOf(invpar) !== -1" @click="inviter(5)"/>
-        <q-btn v-if="cas === 6" :label="$t('AMdelinv')" padding="xs" color="warning" @click="inviter(6)"/>
+        <q-btn v-if="cas === 6" padding="xs" dense size="md" icon="check" color="primary"
+          :label="$t('AMdelinv')" @click="inviter(6)"/>
       </q-card-actions>
       </q-page-container>
     </q-layout>

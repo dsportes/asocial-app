@@ -11,13 +11,19 @@
       <q-card-section>
         <div class="titre-md" v-html="html"/>
       </q-card-section>
-      <q-card-actions align="center">
-        <q-btn v-if="session.status" flat dense color="warning" :label="$t('ERdec')" @click="deconnecter"/>
-        <q-btn v-if="fige" flat dense color="warning" :label="$t('ERfige')" @click="gotonotif"/>
-        <q-btn v-if="rec" flat dense color="warning" :label="$t('ERrec')" @click="reconnecter"/>
-        <q-btn v-if="!fige && cont" flat dense color="primary" :label="$t('ERcont')" @click="continuer"/>
-        <q-btn v-if="!fige && rlog" flat dense color="primary" :label="$t('ERrlog')" @click="continuer"/>
-        <q-btn v-if="!fige && mod" flat dense color="primary" :label="$t('ERmod')" @click="continuer"/>
+      <q-card-actions vertical align="right" class="q-gutter-sm">
+        <q-btn v-if="session.status" dense size="md" padding="xs" color="warning" icon="logout" 
+          :label="$t('ERdec')" @click="deconnecter"/>
+        <q-btn v-if="fige" dense size="md" padding="xs" color="primary" icon="notifications"
+          :label="$t('ERfige')" @click="gotonotif"/>
+        <q-btn v-if="rec" dense size="md" padding="xs" color="warning" icon="refresh" 
+          :label="$t('ERrec')" @click="reconnecter"/>
+        <q-btn v-if="!fige && cont" dense size="md" padding="xs" color="primary" icon="arrow_forward" 
+          :label="$t('ERcont')" @click="continuer"/>
+        <q-btn v-if="!fige && rlog" dense size="md" padding="xs" color="primary" icon="arrow_forward" 
+          :label="$t('ERrlog')" @click="continuer"/>
+        <q-btn v-if="!fige && mod" dense size="md" padding="xs" color="primary" icon="arrow_forward" 
+          :label="$t('ERmod')" @click="continuer"/>
       </q-card-actions>
       <q-card-section class="q-pt-none">
         <div v-if="exc.stack">

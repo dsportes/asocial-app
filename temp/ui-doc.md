@@ -49,6 +49,18 @@ Import: ChoixMotscles
 Dialogue:
 - AMmcedit: édition / zoom des mots clés
 
+### EditeurMd (3)
+Editeur de texte en syntaxe MD, visible soit en HTML soit en texte pur.
+- zoom en plein écran possible,
+- insertion d'emoicones,
+- undo,
+- le texte a une valeur initiale (pour permettre le undo) et un v-model pour la valeur courante.
+
+Import: ShowHtml, ChoixEmoji
+
+Dialogue:
+- EMmax: vue en plein écran
+
 ### McMemo (4)
 Attache des mots clés et un mémo à n'importe quel avatar-people, ou groupe dont l'id est connu.
 
@@ -183,6 +195,9 @@ Est invoqué comme dialogue par:
 
 Import: EditeurMd, ApercuGenx, BoutonConfirm, BoutonBulle
 
+### ListeAuts (1)
+Affiche en ligne la liste des auteurs d'une note avec leur nom ou leur indice memebre et ouvre leur carte de visite sur click.
+
 ## Dialogues
 
 ### PhraseSecrete (1)
@@ -226,6 +241,26 @@ Affichage / saisie d'une notification, texte et niveau.
 - enregistrement / suppression selon que la notification est générale, tranche de quoas ou compte.
 
 Import: EditeurMd
+
+### ContactChat (2)
+Dialogue de saisie de la phrase de contact d'un avatar, puis création, éventuelle, d'un nouveau chat avec lui.
+
+Import: PhraseContact
+
+### PanelCredits (3)
+C'est l'onglet "crédits" de PageCompta:
+- affiche les tickets en cours,
+- rafraîchit leur incorporation,
+- bouton de génération d'un nouveau ticket.
+
+Import: ApercuTicket, PanelDeta, PanelDialtk
+
+### ApercuTicket (2)
+Affiche un ticket,
+- plié: donnée synthétique,
+- déplié: son détail et les actions possibles.
+
+Import: PanelDialtk
 
 ## Panels
 
@@ -301,6 +336,15 @@ Affiche en panel,
 N'est ouvert que par un BoutonMembre (depuis ApercuGroupe seulement donc). Est hébergé dans App pour éviter des instantiations multiples.
 
 Import: ApercuGenx, ApercuMembre
+
+### PressePapier (3)
+Affiche en panel dans deux onglets,
+- les notes gardées en presse-papier,
+  - ajout, édition, suppression
+- les fichiers gardés en presse-papier
+  - ajout, remplacement, suppression, affichage, enregistrement, copie.
+
+Import: ShowHtml, EditeurMd, NomGenerique
 
 ## Pages
 
@@ -432,15 +476,14 @@ Affiche tous les contacts connus avec une courte fiche pour chacun (pouvant ouvr
 Import: ApercuGenx
 
 ## En chantier
-- EditeurMd
 - PageFicavion
 - PageNotes NoteEdit NoteExclu NotePlus NoteMc NoteFichier NouveauFichier NoteConfirme
-- ListeAuts
-- PressePapier
-- PanelCredits
-- ContactChat
-- ApercuTicket
 
 ## Bugs / vérifications
+- GC à réviser
 
-
+# Features à développer
+- pour un compte sponsor A, attribuer le pouvoir de sponsor à un autre compte A ??? Sauf si tous les comptes A sont sponsors ?
+  - prélever une somme lors du sponsoring d'un compte A (sauf Comptable)
+- transformation A <-> O
+- transfert monétaire entre comptes A

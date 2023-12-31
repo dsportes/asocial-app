@@ -45,11 +45,11 @@
       </q-card-section>
 
       <q-separator />      
-      <q-card-actions align="center">
-        <q-btn dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn dense color="warning" :label="$t('valider')" 
-          :disable="!selx || !selx.ok1 || !selx.ok2"
-          @click="changerTr()"/>
+      <q-card-actions align="right" class="q-gutter-sm">
+        <q-btn flat dense padding="xs" size="md" color="primary" icon="undo"
+          :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn dense padding="xs" size="md" icon="check" color="warning" 
+          :label="$t('valider')" :disable="!selx || !selx.ok1 || !selx.ok2" @click="changerTr()"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -59,10 +59,15 @@
     <q-card :class="styp('md') + 'q-pa-sm'">
       <div v-if="aSt.ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
       <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
-      <q-card-actions align="center">
-        <q-btn dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn v-if="aSt.ccCpt.sp" dense color="warning" :label="$t('PPkosp')" @click="changerSp(false)"/>
-        <q-btn v-else dense color="warning" :label="$t('PPoksp')" @click="changerSp(true)"/>
+      <q-card-actions align="right" class="q-gutter-sm">
+        <q-btn flat dense padding="xs" size="md" color="primary" icon="undo"
+          :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn dense padding="xs" size="md" icon="check" color="warning" 
+          :label="$t('valider')" :disable="!selx || !selx.ok1 || !selx.ok2" @click="changerTr()"/>
+        <q-btn v-if="aSt.ccCpt.sp" dense padding="xs" size="md" icon="check" color="warning"
+          :label="$t('PPkosp')" @click="changerSp(false)"/>
+        <q-btn v-else dense padding="xs" size="md" icon="check" color="warning"
+          :label="$t('PPoksp')" @click="changerSp(true)"/>
       </q-card-actions>
     </q-card>
   </q-dialog>

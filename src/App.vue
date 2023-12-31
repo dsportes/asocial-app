@@ -21,34 +21,39 @@
         @click="clickNotif" apptb/>
       -->
 
-      <q-btn v-if="session.ok && !session.estMinimal" size="md" icon="menu" padding="none">
+      <q-btn v-if="session.ok && !session.estMinimal" 
+        dense size="md" icon="menu" round padding="none">
         <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
           <page-menu menu/>
         </q-menu>
       </q-btn>
 
-      <q-btn :disable="!aHome" flat icon="home" size="md" 
-        :color="aHome ? 'warning' : 'grey'" dense @click="gotoAccueilLogin()"/>
-      <q-btn v-if="ui.pageback" flat icon="arrow_back" size="md" 
-        dense @click="gotoBack()"/>
+      <q-btn :disable="!aHome" flat icon="home" dense size="md" padding="none"
+        :color="aHome ? 'warning' : 'grey'" @click="gotoAccueilLogin()"/>
+
+      <q-btn v-if="ui.pageback" icon="arrow_back" dense size="md" round padding="none"
+        @click="gotoBack()"/>
 
       <q-toolbar-title class="titre-lg text-center"><span>{{titrePage}}</span>
       </q-toolbar-title>
 
       <!-- Fichiers avion -->
-      <q-btn v-if="session.ok" :disable="session.incognito" dense size="md" icon="save"
+      <q-btn v-if="session.ok" :disable="session.incognito" 
+        dense size="md" icon="save" round padding="none"
         @click="pageFicavion">
         <q-tooltip>{{$t('MLAfav')}}</q-tooltip>
       </q-btn>
 
       <!-- Presse papier -->
-      <q-btn v-if="session.ok" dense size="md" icon="content_paste"
+      <q-btn v-if="session.ok" dense size="md" 
+        icon="content_paste" round padding="none"
         @click="ui.oD('pressepapier')">
         <q-tooltip>{{$t('MLApp')}}</q-tooltip>
       </q-btn>
 
-      <q-btn v-if="session.ok && aUnFiltre" color="warning"
-        dense size="md" icon="search" @click="ouvrFiltre">
+      <q-btn v-if="session.ok && aUnFiltre" 
+        color="warning" round padding="none" dense size="md" icon="search" 
+        @click="ouvrFiltre">
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </q-btn>
 
@@ -63,9 +68,9 @@
           name="credits" :label="$t('PNCcre')" @click="ui.setTab('credits')"/>
         <q-tab name="chats" :label="$t('PNCchats')" @click="ui.setTab('chats')"/>
       </q-tabs>
-      <q-btn v-if="ui.pagetab==='notif' && session.alire" 
-        class="col-auto q-px-sm" dense size="md" color="warning" 
-        icon="check" :label="$t('jailu')" @click="ui.jailu()"/>
+      <q-btn v-if="ui.pagetab==='notif' && session.alire" class="col-auto q-px-sm" 
+        dense size="md" color="warning" padding="xs" icon="check" 
+        :label="$t('jailu')" @click="ui.jailu()"/>
     </q-toolbar>
 
     <q-toolbar v-if="ui.page === 'groupe'" inset 
@@ -85,18 +90,21 @@
       <bouton-langue style="position:relative;top:2px;"/>
 
       <!-- Dark ou clair -->
-      <q-btn dense size="md" icon="contrast" @click="tgdark">
+      <q-btn dense size="md" icon="contrast" padding="none" round 
+        @click="tgdark">
         <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
       </q-btn>
 
       <!-- Outils et tests -->
-      <q-btn dense size="md" icon="settings" @click="ui.oD('PAoutilsTests')">
+      <q-btn dense size="md" icon="settings" padding="none" round 
+        @click="ui.oD('PAoutilsTests')">
         <q-tooltip>{{$t('MLAout')}}</q-tooltip>
       </q-btn>
 
       <!-- Information session : mode synchro -->
-      <q-btn class="q-mr-xs" v-if="session.synchro" @click="infoSession()"
-        dense size="md" icon="autorenew">
+      <q-btn class="q-mr-xs" v-if="session.synchro"
+        dense size="md" icon="autorenew" padding="none" round 
+        @click="infoSession()">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
         <queue-icon/>
       </q-btn>
@@ -110,7 +118,7 @@
 
       <!-- Information session : mode avion -->
       <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession()"
-        dense size="md" icon="airplanemode_active">
+        dense size="md" icon="airplanemode_active" padding="none" round>
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
         <queue-icon/>
       </q-btn>
@@ -122,7 +130,8 @@
       </q-toolbar-title>
 
       <!-- Déconnexion -->
-      <q-btn v-if="session.status > 1" dense size="md" color="warning" icon="logout"
+      <q-btn v-if="session.status > 1" 
+        dense size="md" color="warning" icon="logout" padding="none" 
         @click="discon">
         <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
         <span class="fs-sm font-mono">{{hms(session.dh)}}</span>
@@ -233,36 +242,40 @@
   </q-dialog>
 
   <q-dialog v-model="ui.d.diag" persistent>
-    <q-card :class="lidk + ' petitelargeur q-pa-sm'">
+    <q-card :class="lidk + ' spsm q-pa-sm'">
       <div class="text-center titre-lg q-my-sm">{{$t('UTIatt')}}</div>
       <div class="fs-md text-center q-b-md" v-html="ui.diag"></div>
-      <q-btn flat dense color="primary" size="md" :label="$t('jailu')"
-        @click="ui.fD(); ui.diagresolve()"/>
+      <div class="row q-my-md justify-end"> 
+        <q-btn flat dense color="primary" size="md" padding="xs" icon="check"
+          :label="$t('jailu')" @click="ui.fD(); ui.diagresolve()"/>
+      </div>
     </q-card>
   </q-dialog>
 
   <q-dialog v-model="ui.d.confirmFerm" persistent>
-    <q-card :class="lidk + ' petitelargeur q-pa-sm'">
+    <q-card :class="styp('sm') + 'q-pa-sm'">
       <q-card-section class="q-my-lg titre-md">{{$t('EMDqss')}}</q-card-section>
       <q-card-actions vertical align="right">
-        <q-btn flat :label="$t('EMDjr')" color="primary" @click="ui.fD" />
-        <q-btn flat :label="$t('EMDjq')" color="warning" @click="fermerqm" />
+        <q-btn flat dense size="md" padding="xs" color="primary" 
+          :label="$t('EMDjr')" @click="ui.fD" />
+        <q-btn dense size="md" padding="xs" color="warning"  
+          :label="$t('EMDjq')" @click="fermerqm" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 
   <q-dialog v-model="ui.d.dialoguedrc" persistent>
-    <q-card class="bs petitelargeur">
+    <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
         <q-toolbar-title class="titre-lg full-width text-center">{{$t('MLAdrc')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <q-card-actions vertical align="center">
-        <q-btn class="w15" dense size="md" color="warning"
+      <q-card-actions vertical align="center" class="q-gutter-sm">
+        <q-btn dense size="md" padding="xs" color="warning"
           icon="logout" :label="$t('MLAdecon')" @click="deconnexion"/>
-        <q-btn class="q-ma-xs w15" dense size="md" color="warning"
+        <q-btn dense size="md" padding="xs" color="warning"
           icon="logout" :label="$t('MLArecon')" @click="reconnexion"/>
-        <q-btn class="q-ma-xs w15" dense size="md" color="primary"
+        <q-btn dense size="md" padding="xs" color="primary"
           :label="$t('MLAcont')" @click="ui.fD"/>
       </q-card-actions>
     </q-card>
@@ -301,12 +314,14 @@
   </q-dialog>
 
   <q-dialog v-model="ui.d.confirmstopop">
-    <q-card class="bs">
+    <q-card :class="styp('sm')">
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('MLAcf', [session.opEncours ? session.opEncours.nom : '???'])}}</q-card-section>
-      <q-card-actions align="right">
-        <q-btn flat :label="$t('MLAcf3')" color="warning" @click="ui.fD"/>
-        <q-btn flat :label="$t('MLAcf4')" color="primary" @click="stopop"/>
+      <q-card-actions vertical align="right" class="q-gutter-sm">
+        <q-btn flat dense size="md" padding="xs" color="primary"
+          :label="$t('MLAcf3')" @click="ui.fD"/>
+        <q-btn dense size="md" padding="xs" color="warning"
+          :label="$t('MLAcf4')" @click="stopop"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -321,7 +336,7 @@ import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
 import { ID } from './app/api.mjs'
-import { set$t, hms, dkli } from './app/util.mjs'
+import { set$t, hms, dkli, styp } from './app/util.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -358,7 +373,7 @@ import OutilsTests from './panels/OutilsTests.vue'
 import DialogueHelp from './panels/DialogueHelp.vue'
 import PageClos from './pages/PageClos.vue'
 import PageAccueil from './pages/PageAccueil.vue'
-import PressePapier from './dialogues/PressePapier.vue'
+import PressePapier from './panels/PressePapier.vue'
 import DialogueNotif from './dialogues/DialogueNotif.vue'
 
 // Niveau 4
@@ -407,10 +422,8 @@ export default {
 
   computed: {
     lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
-    tbclass () { return this.$q.dark.isActive ? ' sombre1' : ' clair1' },
     aHome () { return (this.session.status === 2 && this.ui.page !== 'accueil')
       || (!this.session.status && this.ui.page !== 'login') },
-    pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
     titrePage () {
       const p = this.ui.page
       let arg = ''
@@ -427,7 +440,7 @@ export default {
       return this.$t('P' + p, [arg])
     },
     aUnFiltre () { return this.ui.aFiltre(this.ui.page, this.ui.pagetab)}
-},
+  },
 
   // Gère le franchissement du seuil etroit / large
   watch: {
@@ -536,7 +549,7 @@ export default {
     const infoidb = ref(false)
 
     return {
-      session, config, ui, aSt, gSt,
+      session, config, ui, aSt, gSt, styp,
       seuillarge, etroite, gotoBack,
       pfiltre, ouvrFiltre, fermFiltre, setPFiltre, redoPFiltre,
       hms, dkli,

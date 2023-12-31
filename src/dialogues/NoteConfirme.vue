@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.NC" persistent>
-<q-card :class="sty + ' bs dp30'">
+<q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
     <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
     <q-toolbar-title class="titre-lg full-width text-center">
@@ -30,7 +30,7 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { $t } from '../app/util.mjs'
+import { $t, styp } from '../app/util.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NoteOpx } from '../app/operations.mjs'
@@ -88,7 +88,7 @@ export default {
     }
 
     return {
-      session, aSt, nSt, ui, msg
+      session, aSt, nSt, ui, msg, styp
     }
   }
 

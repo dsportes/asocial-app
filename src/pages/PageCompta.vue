@@ -1,10 +1,10 @@
 <template>
 <q-page>
-  <panel-compta v-if="ui.pagetab==='compta'" class="spmd maauto q-pa-sm"/>
+  <panel-compta v-if="ui.pagetab==='compta'" class="spmd q-pa-sm"/>
 
-  <panel-credits v-if="ui.pagetab==='credits'" class="spmd maauto q-pa-sm"/>
+  <panel-credits v-if="ui.pagetab==='credits'"/>
 
-  <div v-if="ui.pagetab==='notif'" class="spmd maauto q-pa-sm">
+  <div v-if="ui.pagetab==='notif'" class="spmd q-pa-sm">
 
     <div v-if="bl" class="bord q-pa-sm q-mb-xl">
       <sd-al :texte="$t('SB' + bl)"/>
@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <div v-if="ui.pagetab==='chats'" class="spmd maauto q-pa-sm">
+  <div v-if="ui.pagetab==='chats'" class="spmd q-pa-sm">
     <div class="titre-lg text-italic text-center q-py-md">{{$t('CPTtitch')}}</div>
 
     <q-card v-for="(chat, idx) in chats" :key="chat.ids">

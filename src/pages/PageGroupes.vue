@@ -84,11 +84,11 @@
         <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
         <choix-quotas :quotas="quotas" groupe/>
         <q-option-group :options="options" type="radio" v-model="una"/>
-        <q-card-actions align="right">
-          <q-btn dense flat color="warning" padding="xs"
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat dense padding="xs" color="primary" icon="undo"
             :label="$t('renoncer')" @click="ui.fD" />
-          <q-btn dense flat color="primary" :disable="quotas.err || !nom" padding="xs"
-            :label="$t('creer')" v-close-popup @click="okCreation" />
+          <q-btn dense padding="xs" color="warning" icon="add" 
+            :disable="quotas.err || !nom" :label="$t('creer')" @click="okCreation" />
         </q-card-actions>
       </div>
     </q-card>

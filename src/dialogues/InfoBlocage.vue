@@ -1,5 +1,5 @@
 <template>
-  <q-card class="moyennelargeur fs-md">
+  <q-card class="spmd">
     <q-card-section class="row justify-between">
       <div class="titre-lg">{{$t('IBec')}}</div>
       <q-btn dense :label="$t('jailu')" color="warning" @click="session.fermerInfoBlocage()" />

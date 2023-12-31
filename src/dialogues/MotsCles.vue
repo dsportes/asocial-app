@@ -224,4 +224,6 @@ export default ({
 .border1
   border-radius: 5px
   border: 1px solid $grey-5
+.height-16
+  height: 16rem
 </style>

@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.NFouvrir" persistent>
-<q-layout container view="hHh lpR fFf" :class="sty + ' bs dp40'" style="height:70vh">
+<q-layout container view="hHh lpR fFf" :class="styp('md')" style="height:70vh">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -84,7 +84,7 @@
 import { reactive, toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { afficherDiag, edvol, dhcool, readFile, rnd6, suffixe } from '../app/util.mjs'
-import { $t, dkli, trapex, dhstring } from '../app/util.mjs'
+import { $t, styp, dkli, trapex, dhstring } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { NouveauFichier } from '../app/operations.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
@@ -261,7 +261,7 @@ export default {
     ui.etf = 0
 
     return {
-      nSt, aSt, gSt, ui, session, edvol, dhcool, dkli, dhstring,
+      nSt, aSt, gSt, ui, session, edvol, dhcool, dkli, dhstring, styp,
       nfic,
       fic,
       step,

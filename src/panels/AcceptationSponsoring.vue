@@ -58,8 +58,7 @@
 
       <div v-if="accdec===1 && ps">
         <div class="titre-md q-mt-sm">{{$t('NPmota')}}</div>
-        <editeur-md mh="10rem" v-model="texte" :texte="textedef" 
-          editable modetxt hors-session/>
+        <editeur-md mh="10rem" v-model="texte" :texte="textedef" editable modetxt/>
         <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
         <q-btn flat @click="confirmer" :disable="texte.length === 0"
           color="warning" :label="$t('APAconf')" class="q-ml-sm" />
@@ -67,8 +66,7 @@
 
       <div v-if="accdec===2">
         <div class="titre-md q-mt-sm">{{$t('NPmotd')}}</div>
-        <editeur-md mh="10rem" v-model="texte" :texte="textedef"
-          editable modetxt hors-session/>
+        <editeur-md mh="10rem" v-model="texte" :texte="textedef" editable modetxt/>
         <q-btn flat @click="fermer" color="primary" padding="xs" dense size="md"
           :label="$t('renoncer')" class="q-ml-sm" />
         <q-btn flat @click="refuser" color="warning" padding="xs" dense size="md"

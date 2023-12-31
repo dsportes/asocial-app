@@ -8,7 +8,7 @@
           <span v-if="pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
         </div>
       </template>
-      <div class="q-ml-xl q-mb-lg largeur50 maauto">
+      <div class="q-ml-xl q-mb-lg splg">
         <div class="row justify-around">
           <tuile-cnv type="qc" :src="lg" occupation/>
           <tuile-cnv type="q1" :src="lg" occupation/>
@@ -83,13 +83,15 @@
     <q-dialog v-model="ui.d.PTedq" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+          <q-btn dense size="md" color="warning" padding="xs" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
-        <q-card-actions>
-          <q-btn :disabled="quotas.err" dense size="md" color="primary" icon="check" 
-          :label="$t('ok')" @click="validerq"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat dense size="md" color="primary" padding="xs" icon="undo" 
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn dense size="md" color="primary" padding="xs" icon="check" 
+            :disable="quotas.err" :label="$t('ok')" @click="validerq"/>
         </q-card-actions>
       </q-card>
     </q-dialog>

@@ -1,26 +1,28 @@
 <template>
 <div ref="root">
-  <q-card v-if="!ui.d.EMmax[idc]" :class="dlclass">
+  <q-card v-if="!ui.d.EMmax[idc]" :class="dkli(idx)">
     <div :style="'height:' + (mh || '10rem')" class="dlx">
       <q-layout container view="hHh lpR fFf">
-        <q-header elevated class="bg-secondary text-white">
-          <q-toolbar class="fs-md full-width row bg-primary text-white">
-            <q-btn class="col-auto q-mr-xs" icon="zoom_out_map" size="md" 
-              push flat dense @click="ui.oD('EMmax', idc)"/>
-            <q-checkbox v-model="md" size="sm" dense label="HTML" />
-            <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="🙂" size="md"
-              dense flat push @click="ouvriremojimd1"/>
-            <q-btn v-if="modifie" class="col-auto q-mr-xs" icon="undo" size="md" dense flat push @click="undo"/>
-            <q-btn v-if="modifie && labelOk" class="col-auto q-mr-xs" icon="check" 
-              :label="labelOk" size="md" dense flat push @click="ok"/>
+        <q-header elevated>
+          <q-toolbar class="fs-md full-width bg-secondary text-white">
+            <q-btn class="q-mr-xs" @click="ui.oD('EMmax', idc)"
+              icon="zoom_out_map" size="md" padding="none" round dense/>
+            <q-checkbox v-model="md" size="lg" dense color="white"
+              unchecked-icon="text_fields" checked-icon="text_format">
+              <q-tooltip class="fs-md">{{$t('texte')}}</q-tooltip>
+            </q-checkbox>
+            <q-btn v-if="editable" :disable="md" class="q-mr-xs" @click="ouvriremojimd1"
+              icon="insert_emoticon" size="md" padding="none" round dense/>
+            <q-btn v-if="modifie" class="q-mr-xs" @click="undo"
+              icon="undo" size="md" padding="none" round dense/>
             <q-space/>
-            <div :class="'col-auto font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
+            <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
               {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
             </div>
           </q-toolbar>
         </q-header>
 
-        <q-page-container :class="dlclass">
+        <q-page-container :class="dkli(idx)">
           <q-input autogrow v-if="!md" class="q-pa-xs font-mono" v-model="textelocal"
             :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
           <show-html v-else class="q-pa-xs bord1" :texte="textelocal"/>
@@ -32,23 +34,30 @@
   <q-dialog v-model="ui.d.EMmax[idc]" full-height full-width 
     transition-show="slide-up" transition-hide="slide-down">
     <div ref="root2" :class="sty() + 'column'">
-      <q-toolbar class="col-auto fs-md bg-primary text-white">
-        <q-btn class="col-autov q-mr-xs" icon="zoom_in_map" size="md" dense flat push @click="ui.fD"/>
-        <q-checkbox v-model="md" size="md" dense label="HTML" />
-        <q-btn v-if="editable" :disable="md" class="col-auto q-mr-xs" label="🙂" size="md"
-          dense flat push @click="ouvriremojimd2"/>  
-        <q-btn v-if="modifie" class="col-auto q-mr-xs" icon="undo" size="md" dense flat push @click="undo"/>
-        <q-btn v-if="modifie && labelOk" class="col-auto q-mr-xs" icon="check" :label="labelOk" size="md" dense flat push @click="ok"/>
-        <q-space/>
-        <div :class="'col-auto font-mono fs-md' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
-          {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
-        </div>
-      </q-toolbar>
-      <div class="dlx">
-      <q-input autogrow v-if="!md" :class="dlclass + ' q-pa-xs col font-mono'" v-model="textelocal" 
-        :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
-      <show-html v-else :class="dlclass + ' q-pa-xs col-auto bord1'" :texte="textelocal"/>
-      </div>
+      <q-header elevated>
+        <q-toolbar class="fs-md full-width bg-secondary text-white">
+          <q-btn class="q-mr-xs" @click="ui.fD"
+            icon="zoom_in_map" size="md" padding="none" round dense/>
+          <q-checkbox v-model="md" size="lg" dense color="white"
+            unchecked-icon="text_fields" checked-icon="text_format">
+            <q-tooltip class="fs-md">{{$t('texte')}}</q-tooltip>
+          </q-checkbox>
+          <q-btn v-if="editable" :disable="md" class="q-mr-xs" @click="ouvriremojimd2"
+            icon="insert_emoticon" size="md" padding="none" round dense/>
+          <q-btn v-if="modifie" class="q-mr-xs" @click="undo"
+            icon="undo" size="md" padding="none" round dense/>
+          <q-space/>
+          <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
+            {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
+          </div>
+        </q-toolbar>
+      </q-header>
+
+      <q-page-container class="dlx">
+        <q-input autogrow v-if="!md" :class="dkli(idx) + ' q-pa-xs col font-mono'" v-model="textelocal" 
+          :readonly="!editable" :placeholder="textelocal==='' ? (placeholder || $t('EMDph')) : ''"/>
+        <show-html v-else :class="dkli(idx) + ' q-pa-xs col-auto bord1'" :texte="textelocal"/>
+      </q-page-container>
     </div>
   </q-dialog>
 
@@ -60,7 +69,7 @@
 <script>
 import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
-import { sty } from '../app/util.mjs'
+import { sty, dkli } from '../app/util.mjs'
 
 import ShowHtml from './ShowHtml.vue'
 import ChoixEmoji from './ChoixEmoji.vue'
@@ -70,7 +79,7 @@ export default ({
 
   components: { ShowHtml, ChoixEmoji },
 
-  emits: ['update:modelValue', 'ok'],
+  emits: ['update:modelValue'],
 
   props: { 
     help: String,
@@ -78,19 +87,13 @@ export default ({
     modelValue: String, 
     texte: String,
     placeholder: String,
-    labelOk: String, 
     editable: Boolean, 
     idx: Number, 
-    modetxt: Boolean, 
-    horsSession: Boolean,
+    modetxt: Boolean,
     mh: String
   },
 
   computed: {
-    dlclass () { 
-      if (this.$q.dark.isActive) return this.idx ? ' sombre' + (this.idx % 2) : ' sombre0'
-      return this.idx ? ' clair' + (this.idx % 2) : ' clair0'
-    },
     modifie () {
       return this.textelocal !== this.texteinp
     }
@@ -103,7 +106,6 @@ export default ({
   },
 
   methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
     ouvriremojimd1 () {
       this.inp = this.root.querySelector('textarea')
       this.ui.oD('choixEmoji')
@@ -111,13 +113,6 @@ export default ({
     ouvriremojimd2 () {
       this.inp = this.root2.querySelector('textarea')
       this.ui.oD('choixEmoji')
-    },
-    ok () {
-      this.ui.fD()
-      this.taille = this.tailleM ? 1 : 0
-      this.md = false
-      const x = this.textelocal && this.textelocal.length > this.maxlg.value ? this.textelocal.substring(0, this.maxlg.value) : this.textelocal
-      this.$emit('ok', x)
     },
     undo () {
       this.textelocal = this.texteinp
@@ -167,7 +162,7 @@ export default ({
     if (modetxt.value) md.value = false
 
     return {
-      ui, idc, sty,
+      ui, idc, sty, dkli,
       session: stores.session,
       md,
       root,

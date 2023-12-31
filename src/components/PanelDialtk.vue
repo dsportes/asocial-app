@@ -1,5 +1,5 @@
 <template>
-  <q-card class="dp30 bs">
+  <q-card :class="styp('sm')">
     <q-card-section>
       <div class="q-pa-md titre-lg text-center">{{$t(titre)}}</div>
 
@@ -18,9 +18,11 @@
       </div>
 
     </q-card-section>
-    <q-card-actions align="right">
-      <q-btn :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-      <q-btn :label="$t('TKgen')" color="warning" :disable="diag !== ''" @click="generer"/>
+    <q-card-actions align="right" class="q-gutter-sm">
+      <q-btn flat dense padding="xs" size="md" color="primary" icon="undo"
+        :label="$t('renoncer')" @click="ui.fD"/>
+      <q-btn dense padding="xs" size="md" color="warning" icon="check"
+        :label="$t('TKgen')" :disable="diag !== ''" @click="generer"/>
     </q-card-actions>
   </q-card>
 </template>
@@ -28,7 +30,7 @@
 <script>
 import { toRef, ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
-import { $t } from '../app/util.mjs'
+import { $t, styp } from '../app/util.mjs'
 
 export default {
   name: 'PanelDialtk',
@@ -74,7 +76,7 @@ export default {
     check(mx.value)
     
     return {
-      ui, mx, m, diag, refx
+      ui, styp, mx, m, diag, refx
     }
   }
 

@@ -54,10 +54,13 @@
         editable modetxt mh="10rem"></editeur-md>
     </q-card-section>
     <q-separator />
-    <q-card-actions align="right">
-      <q-btn size="md" v-if="!modif" flat dense icon="close" :label="$t('fermer')" @click="undogen" />
-      <q-btn v-else flat icon="undo" :label="$t('annuler')" @click="undogen" />
-      <q-btn :disable="!modif" flat icon="check" :label="$t('valider')" color="warning" @click="valider" />
+    <q-card-actions align="right" class="q-gutter-sm">
+      <q-btn v-if="!modif" flat dense size="md" padding="xs" icon="undo" color="primary"
+        :label="$t('fermer')" @click="undogen" />
+      <q-btn v-else flat dense size="md" padding="xs" icon="undo" color="primary"
+        :label="$t('annuler')" @click="undogen" />
+      <q-btn :disable="!modif" dense size="md" padding="xs" icon="check" color="primary"
+        :label="$t('valider')" @click="valider" />
     </q-card-actions>
   </q-card>
 </q-dialog>

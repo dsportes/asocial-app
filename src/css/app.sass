@@ -100,9 +100,6 @@
   font-family: Calibri-Light
   src: url(~assets/fonts/Calibri-Light.woff)
 
-.font-cf
-  font-family: Comfortaa
-
 .font-mono
   font-family: 'Roboto Mono'
 
@@ -119,8 +116,7 @@
   font-size:  1.1rem
 .fs-xl
   font-size:  1.3rem
-.fs-xxl
-  font-size:  1.7rem
+
 .titre
   font-family: Comfortaa
 .titre-xs
@@ -138,57 +134,6 @@
 .titre-xl
   font-family: Comfortaa
   font-size:  1.3rem
-.titre-xxl
-  font-family: Comfortaa
-  font-size:  1.7rem
-
-.petitelargeur
-  width: 32rem
-  max-width: 95vw
-
-.moyennelargeur
-  width: 40rem
-  max-width: 95vw
-
-.d30
-  width: 32rem
-  max-width: 95vw
-
-.d40
-  width: 40rem
-  max-width: 95vw
-
-.d50
-  width: 50rem
-  max-width: 95vw
-
-.largeur50
-  max-width: 50rem
-
-.largeur40
-  max-width: 40rem
-
-.largeur30
-  max-width: 30rem
-
-.largeur20
-  max-width: 20rem
-
-.grandelargeur
-  width: 200rem
-  max-width: 95vw
-
-.dp50 /* dialogue principal sur 50rem max */
-  width: 100%
-  max-width: 50rem
-
-.dp40 /* dialogue principal sur 40rem max */
-  width: 100%
-  max-width: 40rem
-
-.dp30 /* dialogue principal sur 30rem max */
-  width: 100%
-  max-width: 30rem
 
 .sp50 /* sous-page centrée de 50rem max */
   margin-left: auto !important
@@ -234,9 +179,6 @@
 .bordfonce
   border: 1px solid #37474F
 
-.w15
-  width: 20rem
-
 .height-2
   height: 2rem
 
@@ -246,30 +188,8 @@
 .height-4
   height: 4rem
 
-.height-6
-  height: 6rem
-
 .height-8
   height: 8rem
-
-.height-10
-  height: 10rem
-
-.height-12
-  height: 12rem
-
-.height-16
-  height: 16rem
-
-.overflow-y-auto
-  overflow-y: auto
-
-.bs
-  box-shadow: 0 0 3px 2px #FFE082BB !important
-  border: none !important
-
-$body-font-size   : 0.9rem !default
-$body-line-height : 1.1rem !default
 
 .zone
   border-left: 4px solid transparent
@@ -285,27 +205,6 @@ $tph: 32px
   border-radius: $tphradius !important
   width: $tph
   height: $tph
-
-.expansion-header-class-1
-  padding: 2px !important
-  min-height: 1.6rem !important
-
-/* Works on Firefox */
-*
-  scrollbar-width: thin
-  scrollbar-color: blue orange
-
-/* Works on Chrome, Edge, and Safari */
-*::-webkit-scrollbar
-  width: 6px
-
-*::-webkit-scrollbar-track
-  background: orange
-
-*::-webkit-scrollbar-thumb
-  background-color: blue
-  border-radius: 20px
-  border: 1px solid orange
 
 .bsc
   box-shadow: 5px -5px 5px 0px rgba(0,0,0,0.75) !important
@@ -343,6 +242,32 @@ $tph: 32px
   width: 100%
   max-width: 30rem
 
+/* surcharges de quasar */
 .q-toolbar
   padding: 0 !important
   min-height: 0 !important
+
+.expansion-header-class-1
+  padding: 2px !important
+  min-height: 1.6rem !important
+
+$body-font-size   : 0.9rem !default
+$body-line-height : 1.1rem !default
+
+/* Barre de scroll */
+/* Works on Firefox */
+*
+  scrollbar-width: thin
+  scrollbar-color: blue orange
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar
+  width: 6px
+
+*::-webkit-scrollbar-track
+  background: orange
+
+*::-webkit-scrollbar-thumb
+  background-color: blue
+  border-radius: 20px
+  border: 1px solid orange

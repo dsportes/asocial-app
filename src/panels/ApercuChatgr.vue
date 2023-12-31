@@ -43,9 +43,11 @@
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHeff')}}
         </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-          <q-btn flat :label="$t('CHeffcf')" color="warning" @click="effop"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn dense size="md" padding="xs" color="warning" icon="clear"
+            :label="$t('CHeffcf')" @click="effop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -59,9 +61,11 @@
           <bouton-help page="page1"/>
         </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
-        <q-card-actions align="right">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-          <q-btn flat :label="$t('valider')" color="warning" @click="addop"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn dense size="md" padding="xs" color="primary" icon="add"
+            :label="$t('valider')" @click="addop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>

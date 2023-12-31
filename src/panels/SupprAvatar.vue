@@ -115,7 +115,7 @@
   </q-page-container>
 
   <q-dialog v-model="ui.d.SAconfirmsuppr" persistent>
-    <q-card class="bs largeur30 q-pa-sm">
+    <q-card :class="styp('sm') + 'q-pa-sm'">
       <div class="q-mt-md titre-lg text-italic">{{$t('SAVcf' + (avid !== 0 ? '1' : '2'))}}</div>
       <div class="q-mt-md row justify-center q-gutter-md">
         <q-btn class="q-pa-xs" size="md" dense :label="$t('renoncer')" 

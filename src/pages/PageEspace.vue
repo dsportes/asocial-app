@@ -107,9 +107,9 @@ Depuis un Comptable: ns est celui de la session
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqut')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
-        <q-card-actions>
-          <q-btn :disabled="quotas.err" dense size="md" padding="xs" color="primary" 
-            icon="check" :label="$t('ok')" @click="validerq"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn :disable="quotas.err" dense size="md" padding="xs" color="primary" icon="check" 
+            :label="$t('ok')" @click="validerq"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -124,10 +124,11 @@ Depuis un Comptable: ns est celui de la session
           </q-input>
         </div>
         <choix-quotas :quotas="quotas" />
-        <q-card-actions>
-          <q-btn flat dense color="warning" icon="close" :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn flat dense color="primary" icon="check" :disabled="!nom || quotas.err"
-            :label="$t('valider')" padding="xs" @click="creer"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat dense color="primary" padding="xs" size="md" icon="undo" 
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn dense color="warning" padding="xs" size="md" icon="check" 
+            :disable="!nom || quotas.err" :label="$t('valider')" @click="creer"/>
         </q-card-actions>
       </q-card>
     </q-dialog>

@@ -1,9 +1,9 @@
 <template>
 <q-dialog v-model="ui.d.pressepapier" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="sty" style="width:90vw;max-width:90vw !important;">
+<q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
-        <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
+        <q-btn dense size="md" icon="chevron_left" color="warning" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg">{{$t('MLApp')}}</q-toolbar-title>
       </q-toolbar>
       <q-tabs class="titre-md" v-model="ppSt.tab" inline-label align="center" no-caps dense>
@@ -23,7 +23,7 @@
             <div class="fs-md font-mono">{{dhcool(rec.dh)}}
               <span class="q-ml-md fs-sm font-mono">#{{rec.id}}</span>
             </div>
-            <q-btn dense size="sm" icon="delete" color="warning" @click="supprn(rec)"/>
+            <q-btn dense size="md" round paddind="none" icon="delete" color="warning" @click="supprn(rec)"/>
           </div>
           <show-html class="bord1" :idx="idx" :texte="rec.txt" maxh="4rem" zoom edit @edit="editernote(rec)"/>
         </div>
@@ -48,16 +48,16 @@
           </div>
           <div class="q-mx-md fs-md text-italic">{{fic.info || $t('PPnoi')}}</div>
           <div class="q-mb-lg row items-center justify-end q-gutter-sm">
-            <q-btn v-if="!ppSt.modecc" class="col-auto"
-              size="sm" dense color="primary" icon="open_in_new" label="Aff." @click="affFic(fic)"/>
-            <q-btn v-if="!ppSt.modecc" class="col-auto"
-              size="sm" dense color="primary" icon="save" label="Enreg." @click="enregFic(fic)"/>
-            <q-btn v-if="ppSt.modecc" class="col-auto"
-              size="md" dense color="warning" icon="check" label="Sélectionner" @click="selFic(fic)"/>
-            <q-btn v-if="!ppSt.modecc" dense size="sm" 
-              icon="mode_edit" color="primary" @click="editerfichier(fic)"/>
-            <q-btn v-if="!ppSt.modecc" dense size="sm" 
-              icon="delete" color="warning" @click="supprfichier(fic)"/>
+            <q-btn v-if="!ppSt.modecc" class="col-auto" :label="$t('afficher')" @click="affFic(fic)"
+              size="sm" dense color="primary" padding="none" icon="open_in_new"/>
+            <q-btn v-if="!ppSt.modecc" class="col-auto" :label="$t('enreg')" @click="enregFic(fic)"
+              size="sm" dense color="primary" padding="none" icon="save"/>
+            <q-btn v-if="ppSt.modecc" class="col-auto" :label="$t('copier')" @click="selFic(fic)"
+              size="sm" dense color="primary" padding="none" icon="copy"/>
+            <q-btn v-if="!ppSt.modecc" @click="editerfichier(fic)"
+              dense size="md" padding="none" round icon="mode_edit" color="primary"/>
+            <q-btn v-if="!ppSt.modecc" @click="supprfichier(fic)"
+              dense size="md" padding="none" round icon="delete" color="warning"/>
           </div>
         </div>
       </div>
@@ -66,21 +66,22 @@
     <div class="filler"/>
 
     <q-dialog v-model="ui.d.PPnvnote">
-      <q-card class="moyennelargeur">
-      <q-card-section>
-        <div class="titre-lg">{{$t(rec ? 'PPnv1' : 'PPnv2')}}</div>
-        <editeur-md mh="16rem" v-model="txt" :texte="rec ? rec.txt : ''" editable modetxt :lgmax="lgmax"/>
-      </q-card-section>
-      <q-card-actions>
-        <q-btn flat color="primary" dense icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn flat color="warning" dense icon="chck" :label="$t('valider')"
-          :disable="!txt || (rec && txt === rec.txt)" @click="majnote"/>
-      </q-card-actions>
+      <q-card :class="styp('md')">
+        <q-card-section>
+          <div class="titre-lg">{{$t(rec ? 'PPnv1' : 'PPnv2')}}</div>
+          <editeur-md mh="16rem" v-model="txt" :texte="rec ? rec.txt : ''" editable modetxt :lgmax="lgmax"/>
+        </q-card-section>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat color="primary" dense padding="xs" size="md" icon="undo" 
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn color="primary" dense padding="xs" size="md" icon="check"
+            :label="$t('valider')" :disable="!txt || (rec && txt === rec.txt)" @click="majnote"/>
+        </q-card-actions>
       </q-card>
     </q-dialog>
 
     <q-dialog v-model="ui.d.PPnvfic">
-      <q-card class="moyennelargeur">
+      <q-card :class="styp('md')">
       <q-card-section>
         <div class="titre-lg">{{$t(fic.id ? 'PPl1' : 'PPl2')}}</div>
         <q-file class="full-width" v-model="fileList" :label="$t('PPl3')"
@@ -91,36 +92,41 @@
         <nom-generique class="q-mt-md fs-md" v-model="info" :label="$t('PPapf')"
           :init-val="fic.info || ''" :lgmin="0" :lgmax="40" :placeholder="$t('PPphf')"/>
       </q-card-section>
-      <q-card-actions>
-        <q-btn flat color="primary" dense icon="undo" label="Renoncer" v-close-popup/>
-        <q-btn flat color="warning" dense icon="chck" label="Valider"
-          :disable="!valide" @click="majfic"/>
+      <q-card-actions align="right" class="q-gutter-sm">
+        <q-btn flat color="primary" dense icon="undo" padding="xs" size="md"
+          :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn color="primary" dense icon="check" padding="xs" size="md"
+          :label="$t('valider')" :disable="!valide" @click="majfic"/>
       </q-card-actions>
       </q-card>
     </q-dialog>
 
     <q-dialog v-model="ui.d.PPsupprnote" persistent>
-      <q-card class="bs petitelargeur q-pa-sm">
+      <q-card :class="styp('sm')">
         <q-card-section class="column items-center q-my-md">
           <div class="titre-md text-center text-italic">{{$t('PPsuppn')}}</div>
           <div class="q-mt-sm fs-md font-mono text-bold">{{rec.titre}}</div>
         </q-card-section>
-        <q-card-actions vertical align="center">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD" />
-          <q-btn flat :label="$t('confirmer')" color="warning" @click="cfSupprnote" />
+        <q-card-actions align="right"  class="q-gutter-sm">
+          <q-btn flat color="primary" dense icon="undo" size="md" padding="xs" 
+            :label="$t('renoncer')"  @click="ui.fD"/>
+          <q-btn color="warning" dense size="md" icon="delete" padding="xs"
+            :label="$t('confirmer')" @click="cfSupprnote" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
     <q-dialog v-model="ui.d.PPsupprfic" persistent>
-      <q-card class="bs petitelargeur q-pa-sm">
+      <q-card :class="styp('sm')">
         <q-card-section class="column items-center q-my-md">
           <div class="titre-md text-center text-italic">{{$t('PPsuppf')}}</div>
           <div class="q-mt-sm fs-md font-mono text-bold">{{fic.titre}}</div>
         </q-card-section>
-        <q-card-actions vertical align="center">
-          <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD" />
-          <q-btn flat :label="$t('confirmer')" color="warning" @click="cfSupprfic" />
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat color="primary" dense icon="undo" size="md" padding="xs"
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn color="warning" dense size="md" icon="delete" padding="xs" 
+            :label="$t('confirmer')" @click="cfSupprfic" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -135,7 +141,7 @@
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
-import { readFile, dhcool, edvol, afficherDiag, dkli } from '../app/util.mjs'
+import { readFile, dhcool, edvol, afficherDiag, dkli, styp } from '../app/util.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import { NLset, NLdel, FLset, FLdel } from '../app/db.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
@@ -197,7 +203,7 @@ export default ({
       this.rec = rec
       this.ui.oD('PPsupprnote')
     },
-    async cfsupprnote () {
+    async cfSupprnote () {
       await NLdel(this.rec.id)
       this.ui.fD()
     },
@@ -280,7 +286,7 @@ export default ({
     const lgmax = cfg.maxlgtextenote
 
     return {
-      dkli,
+      dkli, styp,
       session, ppSt, ui,
       lgmax
     }

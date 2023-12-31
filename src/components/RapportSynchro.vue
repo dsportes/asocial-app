@@ -1,5 +1,5 @@
 <template>
-  <q-card class="q-pa-xs fs-md largeur40">
+  <q-card class="q-pa-xs fs-md spmd">
     <q-toolbar class="bg-secondary text-white">
       <q-toolbar-title class="titre-md q-ml-sm">{{$t('SYtit')}}</q-toolbar-title>
       <q-btn v-if="close" dense size="md" color="warning" icon="close" 

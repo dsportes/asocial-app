@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.NF" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
@@ -120,42 +120,48 @@
 
   <!-- Confirmation de suppression -->
   <q-dialog v-model="ui.d.supprfichier" persistent>
-    <q-card class="bs petitelargeur q-pa-sm">
+    <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFsf')}}</div>
         <div class="q-mt-sm fs-md font-mono text-bold">{{f.nom}} - {{f.info}}</div>
       </q-card-section>
-      <q-card-actions vertical align="center">
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="ui.fD" />
-        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfSuppr" />
+      <q-card-actions align="right" class="q-gutter-sm">
+        <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
+          :label="$t('renoncer')" @click="ui.fD" />
+        <q-btn dense size="md" padding="xs" color="warning" icon="delete"
+          :label="$t('confirmer')" @click="cfSuppr" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 
   <!-- Confirmation visible en mode avion 1 -->
   <q-dialog v-model="ui.d.confirmav1" persistent>
-    <q-card class="bs petitelargeur q-pa-sm">
+    <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFav1')}}</div>
         <div class="q-mt-sm fs-md font-mono text-bold">{{itc.nom}}</div>
       </q-card-section>
-      <q-card-actions vertical align="center">
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="cfAvnom(false)" />
-        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfAvnom(true)" />
+      <q-card-actions align="right" class="q-gutter-sm">
+        <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
+          :label="$t('renoncer')" @click="cfAvnom(false)" />
+        <q-btn dense size="md" padding="xs" color="warning" icon="delete"
+          :label="$t('confirmer')" @click="cfAvnom(true)" />
       </q-card-actions>
     </q-card>
   </q-dialog>
 
   <!-- Confirmation visible en mode avion 2 -->
   <q-dialog v-model="ui.d.confirmav2" persistent>
-    <q-card class="bs petitelargeur q-pa-sm">
+    <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFav2')}}</div>
         <div class="q-mt-sm fs-md font-mono text-bold">{{fc.nom}} - {{fc.info}}</div>
       </q-card-section>
-      <q-card-actions vertical align="center">
-        <q-btn flat :label="$t('renoncer')" color="primary" @click="cfAvidf(false)" />
-        <q-btn flat :label="$t('confirmer')" color="warning" @click="cfAvidf(true)" />
+      <q-card-actions align="right" class="q-gutter-sm">
+        <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
+          :label="$t('renoncer')" @click="cfAvidf(false)" />
+        <q-btn dense size="md" padding="xs" color="warning" icon="delete"
+          :label="$t('confirmer')" @click="cfAvidf(true)" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -167,7 +173,7 @@
 <script>
 import { ref, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
-import { $t, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } from '../app/util.mjs'
+import { $t, styp, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
@@ -493,7 +499,7 @@ export default {
     })
 
     return {
-      ui, session, nSt, aSt, gSt, avnSt, ppSt,
+      ui, styp, session, nSt, aSt, gSt, avnSt, ppSt,
       exv, avatar, groupe, state, exp, ro,
       dkli, ergrV2, edvol, dhcool, suffixe
     }

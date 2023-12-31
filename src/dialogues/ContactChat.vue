@@ -1,8 +1,8 @@
 <template>
 <q-dialog v-model="ui.d.CCouvrir" persistent>
-  <q-card :class="sty + ' bs dp40'">
+  <q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
-    <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+    <q-btn dense size="md" color="warning" padding="none" icon="close" @click="ui.fD"/>
     <q-toolbar-title class="titre-lg full-size text-center">{{$t('CChtit')}}</q-toolbar-title>
     <bouton-help page="page1"/>
   </q-toolbar>
@@ -18,7 +18,7 @@
 import { ref } from 'vue'
 import { Motscles, Chat } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
-import { afficherDiag } from '../app/util.mjs'
+import { afficherDiag, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { GetAvatarPC, NouveauChat } from '../app/operations.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
@@ -31,7 +31,6 @@ export default ({
   components: { PhraseContact, BoutonHelp },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
   },
 
   data () {
@@ -84,7 +83,7 @@ export default ({
     const mapmc = ref(Motscles.mapMC(true, 0))
 
     return {
-      aSt, ui, session,
+      aSt, ui, session, styp,
       mapmc
     }
   }

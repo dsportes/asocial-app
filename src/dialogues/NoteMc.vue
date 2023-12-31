@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.NM" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="sty + ' d40'">
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
@@ -69,7 +69,7 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { $t, egaliteU8, dkli } from '../app/util.mjs'
+import { $t, egaliteU8, dkli, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ChoixMotscles from '../components/ChoixMotscles.vue'
 import ListeAuts from '../components/ListeAuts.vue'
@@ -166,7 +166,7 @@ export default {
     return {
       session, nSt, gSt, ui,
       avatar, groupe, note, msg, mc, mcap, mc0, mc0ap, xav,
-      dkli, cv
+      dkli, cv, styp
     }
   }
 

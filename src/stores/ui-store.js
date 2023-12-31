@@ -87,14 +87,14 @@ export const useUiStore = defineStore('ui', {
       AGgererheb: {},
       AMmcedit: {}, // ApercuMotscles
       DNdialoguenotif: false, // DialogueNotif
-      ATreceptk: false, // ApercuTicket
-      ATconfirmdel: false,
+      ATconfirmdel: {}, // ApercuTicket
+      ATdialtk: {},
       EMmax: {}, // EditeurMd
       IAaccinvit: {}, // InvitationAcceptation
       ACVouvrir: false, // ApercuCv
       MMedition: {}, // McMemo
       PCnouveautk: false, // PanelCredits
-      PDdialtk: false, // PanelDialtk
+      PCdialtk: {}, // PanelCredits
       SHfs: {}, // ShowHtml
       NFouvrir: false, // NouveauFichier
       NTsupprfichier: false, // NoteFichier

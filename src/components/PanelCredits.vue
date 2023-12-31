@@ -1,10 +1,10 @@
 <template>
-  <div class="q-pa-sm largeur40 maauto">
+<div class="spmd q-pa-sm">
 
   <panel-deta v-if="!session.estComptable" :c="c" :total="aSt.compta.credits.total"
     class="q-ma-xs q-pa-xs bord1"/>
 
-  <q-btn v-if="!session.estComptable" class="q-my-xs" dense color="primary" 
+  <q-btn v-if="!session.estComptable" class="q-my-xs" dense color="primary" padding="xs"
     icon="add" :label="$t('TKnv')" @click="nvtk"/>
 
   <div v-if="!session.estComptable" class="q-ma-xs q-pa-xs bord1">
@@ -13,7 +13,7 @@
       <span class="q-mr-sm">{{$t('TKverif', [dhcool(dhinc)])}}</span>
       <span>{{$t('TKnbt', nbinc, { count: nbinc })}}</span>
     </div>
-    <q-btn class="q-my-xs" flat size="sm" dense color="primary" 
+    <q-btn class="q-my-xs" flat size="sm" dense color="primary" padding="xs"
       icon="check" :label="$t('TKbtnv')" @click="rafraichirIncorp"/>
   </div>
 
@@ -43,7 +43,9 @@
     <apercu-ticket :tk="tk" :idx="idx"/>
   </div>
 
-  <panel-dialtk v-if="ui.d.PDdialtk" :min="50" :init="0" titre="TKnv" @ok="generer"/>
+  <q-dialog v-model="ui.d.PCdialtk[idc]" persistent>
+    <panel-dialtk :min="50" :init="0" titre="TKnv" @ok="generer"/>
+  </q-dialog>
 
   </div>
 </template>
@@ -54,7 +56,7 @@ import stores from '../stores/stores.mjs'
 import ApercuTicket from '../components/ApercuTicket.vue'
 import PanelDeta from '../components/PanelDeta.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
-import { dhcool, mon, dkli, genIdTk, l6ToI, idTkToL6, afficherDiag } from '../app/util.mjs'
+import { dhcool, mon, dkli, genIdTk, styp, idTkToL6, afficherDiag } from '../app/util.mjs'
 import { PlusTicket, RafraichirTickets } from '../app/operations.mjs'
 import { AMJ } from '../app/api.mjs'
 
@@ -77,7 +79,7 @@ export default ({
     async nvtk () {
       if (!await this.session.editUrgence()) return
       this.mx = '0'
-      this.ui.oD('PDdialtk')
+      this.ui.oD('PCdialtk', this.idc)
     },
     async generer ({m, ref}) {
       const [ax, mx, j] = AMJ.aaaammjj(AMJ.amjUtc())
@@ -92,6 +94,7 @@ export default ({
   setup () {
     const session = stores.session
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
     const aSt = stores.avatar
     const c = ref(session.estComptable ? null : aSt.compta.compteurs)
     const lstTk = ref([]) 
@@ -172,7 +175,7 @@ export default ({
 
     return {
       rafraichirIncorp, dhinc, nbinc,
-      aSt, session, ui, lstTk, att, deb, c,
+      aSt, session, ui, styp, idc, lstTk, att, deb, c,
       mon, dhcool, dkli, AMJ
     }
   }

@@ -219,10 +219,11 @@
           <div class="col-4">{{e.na.nom}}</div>
           <div :class="'col-8 ' + (e.info ? 'text-black bg-yellow-5 text-italic' : '')">{{e.info}}</div>
         </div>
-        <q-card-actions align="right">
-          <q-btn flat padding="xs" dense size="md" :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-          <q-btn :disable="!nax" class="q-ml-sm" padding="xs" dense size="md" 
-            :label="$t('AGmoi2', [nax ? nax.nom : '?'])" color="primary" 
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat padding="xs" dense size="md" color="primary" icon="undo"
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn :disable="!nax" :label="$t('AGmoi2', [nax ? nax.nom : '?'])" 
+            padding="xs" dense size="md" color="primary" icon="check"
             @click="okctcmoi"/>
         </q-card-actions>
       </q-card-section>
@@ -238,10 +239,11 @@
         </div>
       </q-card-section>
 
-      <q-card-actions align="right">
-        <q-btn flat padding="xs" dense size="md" :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-        <q-btn class="q-ml-sm" padding="xs" dense size="md" 
-          :label="$t('continuer')" color="primary" @click="pagectc"/>
+      <q-card-actions align="right" class="q-gutter-sm">
+        <q-btn flat padding="xs" dense size="md" color="primary" icon="undo"
+          :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn padding="xs" dense size="md" color="primary" icon="check"
+          :label="$t('continuer')" @click="pagectc"/>
       </q-card-actions>
     </q-card>
   </q-dialog>

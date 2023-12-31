@@ -2506,7 +2506,7 @@ export class FichierLocal {
 
   get nomFichier () {
     let i = this.nom.lastIndexOf('.')
-    const ext1 = i === -1 ? '' : f.nom.substring(i)
+    const ext1 = i === -1 ? '' : this.nom.substring(i)
     const s1 =  i === -1 ? this.nom : this.nom.substring(0, i)
     let s2 = '', ext2 = ''
     if (this.info) {
