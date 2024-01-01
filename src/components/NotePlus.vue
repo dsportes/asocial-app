@@ -1,7 +1,7 @@
 <template>
 <span>
   <q-btn v-if="bav === 2" dense class="q-mr-xs" no-caps :label="$t('NPLnote', [avSel.nom])" 
-    icon="control_point" color="primary" padding="xs" size="sm"
+    icon="control_point" color="primary" size="md" padding="none"
     icon-right="expand_more">
     <q-menu anchor="bottom left" self="top left" max-height="10rem" 
       max-width="10rem">
@@ -15,10 +15,10 @@
   </q-btn>
 
   <q-btn v-if="bav === 1" dense class="q-mr-xs" no-caps :label="$t('NPLnote', [avatar.na.nom])" 
-    icon="control_point" color="primary" @click="okav" padding="xs" size="sm"/>
+    icon="add" color="primary" @click="okav" padding="none" size="md"/>
 
   <q-btn v-if="bgr === 1" dense class="q-mr-xs" no-caps :label="$t('NPLnote', [groupe.na.nom])" 
-    icon="control_point" color="orange" @click="okgr" padding="xs" size="sm"/>
+    icon="add" color="orange" @click="okgr" padding="none" size="md"/>
 
   <note-nouvelle v-if="ui.d.NNnotenouvelle" :estgr="estgr" :groupe="groupe" :avatar="avatar" :notep="notep"/>
 
@@ -29,7 +29,7 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { splitPK } from '../app/util.mjs'
-import NoteNouvelle from '../dialogues/NoteNouvelle.vue'
+import NoteNouvelle from '../panels/NoteNouvelle.vue'
 
 // const colors = ['','primary','orange','negative','primary','orange','primary','orange']
 

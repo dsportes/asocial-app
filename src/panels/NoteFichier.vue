@@ -3,7 +3,7 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
+      <q-btn dense size="md" color="warning" icon="chevron_left" padding="xs" @click="fermer"/>
       <q-toolbar-title v-if="avatar" 
         class="titre-lg full-width text-center">{{$t('PNOfictit1', [avatar.na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-if="groupe" 
@@ -22,7 +22,7 @@
       <note-ecritepar v-if="nSt.node.type === 5" 
         :groupe="groupe" :note="nSt.note" @ok="selNa" fic="a"/>
       <q-btn :disable="nSt.node.type === 5 && !naAut" 
-        dense color="primary" class="q-mt-sm" size="md" icon="add"
+        dense color="primary" class="q-mt-sm" size="md" padding="xs" icon="add"
         :label="$t('PNFnvaj')" @click="nouveau()"/>
     </div>
   </q-header>
@@ -59,12 +59,12 @@
             </div>
 
             <div class="col-auto">
-              <q-btn dense size="md" rounded
+              <q-btn dense size="md" round padding="none"
                 :icon="(it.avn && idy === 0) || state.idfs[f.idf] ? 'airplanemode_active' : 'airplanemode_inactive'" 
                 :color="(it.avn && idy === 0) || state.idfs[f.idf] ? 'green': 'grey'">
                 <q-menu anchor="bottom left" self="top left" max-height="10rem" 
                   max-width="25rem">
-                  <q-list class="q-py-xs bord1 bg-secondary text-white">
+                  <q-list class="q-py-xs bord1 bg-black text-white">
                     <q-item v-if="it.avn && idy === 0" 
                       class="titre-md text-italic" clickable v-close-popup>
                       {{$t('PNFl4')}}
@@ -83,8 +83,7 @@
                 </q-menu>
               </q-btn>
 
-            <q-btn class="q-ml-xs" dense size="md" rounded
-              icon="more_vert" color="primary">
+            <q-btn class="q-ml-xs" dense size="md" round padding="none" icon="more_vert" color="primary">
               <q-menu anchor="bottom left" self="top left" max-height="10rem" 
                 max-width="20rem">
                 <q-list class="q-py-xs bord1 bg-black text-white">
@@ -119,7 +118,7 @@
   <nouveau-fichier v-if="ui.d.NFouvrir" :nomfic="nomfic" :na="naAut"/>
 
   <!-- Confirmation de suppression -->
-  <q-dialog v-model="ui.d.supprfichier" persistent>
+  <q-dialog v-model="ui.d.NFsupprfichier" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFsf')}}</div>
@@ -134,8 +133,8 @@
     </q-card>
   </q-dialog>
 
-  <!-- Confirmation visible en mode avion 1 -->
-  <q-dialog v-model="ui.d.confirmav1" persistent>
+  <!-- Confirmation visible en mode avion par nom -->
+  <q-dialog v-model="ui.d.NFconfirmav1" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFav1')}}</div>
@@ -150,8 +149,8 @@
     </q-card>
   </q-dialog>
 
-  <!-- Confirmation visible en mode avion 2 -->
-  <q-dialog v-model="ui.d.confirmav2" persistent>
+  <!-- Confirmation visible en mode avion par version -->
+  <q-dialog v-model="ui.d.NFconfirmav2" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFav2')}}</div>
@@ -176,7 +175,7 @@ import stores from '../stores/stores.mjs'
 import { $t, styp, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
-import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
+import NoteEcritepar from '../components/NoteEcritepar.vue'
 import { isAppExc, UNITEV2 } from '../app/api.mjs'
 import { saveAs } from 'file-saver'
 import { SupprFichier } from '../app/operations.mjs'
@@ -185,9 +184,7 @@ import { gestionFichierMaj, FLset } from '../app/db.mjs'
 export default {
   name: 'NoteFichier',
 
-  components: { 
-    BoutonHelp, NouveauFichier, NoteEcritepar
-  },
+  components: { BoutonHelp, NouveauFichier, NoteEcritepar },
 
   props: { },
 

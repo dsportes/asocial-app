@@ -2125,7 +2125,7 @@ _data_:
 - `v` : 1..N.
 
 - `im` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `ids`. 
-- `p` : _0: pas protégé, 1: protégé en écriture_.
+// - `p` : _0: pas protégé, 1: protégé en écriture_.
 - `v2` : volume total des fichiers attachés.
 - `mc` :
   - note personnelle : vecteur des index de mots clés.
@@ -2180,7 +2180,7 @@ export class Note extends GenDoc {
   async compile (row) {
     const session = stores.session
     this.im = row.im || 0
-    this.p = row.p || 0
+    // this.p = row.p || 0
     this.v2 = row.v2 || 0
     this.deGroupe = ID.estGroupe(this.id)
     if (this.deGroupe) {
@@ -2258,7 +2258,7 @@ export class Note extends GenDoc {
     return { _nom: 'notes', id, ids: r.ids, _data_ }
   }
 
-  static async toRowTxt (cle, txt, im, auts) {
+  static async toRowTxt (cle, txt) {
     const x = { d: Date.now(), t: gzipB(txt) }
     return await crypter(cle, new Uint8Array(encode(x)))
   }

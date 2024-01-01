@@ -7,19 +7,32 @@
       <span v-for="n in src" :key="n" 
         :class="sty(n) + ' q-mr-xs q-px-xs bg-secondary text-white'">{{nom(n)}}</span>
     </div>
-    <q-btn v-if="edit" class="col-auto" size="md" padding="none" round
-      icon="edit" color="warning" @click="editer">
+    <q-btn v-if="edit" class="col-auto" 
+      size="md" padding="none" round icon="edit" color="warning" 
+      @click="editer">
       <q-tooltip class="bg-white text-primary">{{$t('editer')}}</q-tooltip>
     </q-btn>
-    <q-btn v-if="!edit && !nozoom" class="col-auto" size="md" padding="none" round
-      icon="zoom_in" color="primary" @click="editer">
+    <q-btn v-if="!edit && !nozoom" class="col-auto" 
+      size="md" padding="none" round icon="zoom_in" color="primary" 
+      @click="editer">
       <q-tooltip class="bg-white text-primary">{{$t('zoomer')}}</q-tooltip>
     </q-btn>
   </div>
+
   <q-dialog v-model="ui.d.AMmcedit[idc]" persistent>
-    <choix-motscles :du-groupe="duGroupe" :du-compte="duCompte"
-      :init-value="src || mcvide" :editable="edit"
-      :titre="$t('MCchoix')" :ok="okmc"/>
+    <q-card :class="styp('sm')">
+      <q-toolbar class="bg-secondary text-white">
+        <q-btn class="q-mr-xs" size="md" dense color="warning" icon="close" @click="ui.fD"/>
+        <q-toolbar-title class="titre-lg text-center">{{$t('MCtit')}}</q-toolbar-title>
+      </q-toolbar>
+      <q-toolbar v-if="diag" inset class="bg-yellow-5 text-black text-bold fs-md">{{diag}}</q-toolbar>
+
+      <div class="q-pa-sm">
+        <choix-motscles :du-groupe="duGroupe" :du-compte="duCompte"
+          :init-value="src || mcvide" :editable="edit"
+          :titre="$t('MCchoix')" :ok="okmc"/>
+      </div>
+    </q-card>
   </q-dialog>
 </div>
 </template>
@@ -28,7 +41,7 @@
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import ChoixMotscles from './ChoixMotscles.vue'
-import { dkli } from '../app/util.mjs'
+import { dkli, styp } from '../app/util.mjs'
 
 export default ({
   name: 'ApercuMotscles',
@@ -57,6 +70,7 @@ export default ({
       this.ui.oD('AMmcedit', this.idc)
     },
     okmc (mc) { 
+      this.ui.fD()
       if (this.ok) this.ok(mc)
     },
     sty (idx) {
@@ -70,6 +84,7 @@ export default ({
     const ui = stores.ui
     const idc = ref(ui.getIdc())
     const mapMC = toRef(props, 'mapmc')
+    const diag = ref(session.editDiag)
 
     function nom (idx) {
       if (!mapMC.value) return '' + idx
@@ -78,7 +93,7 @@ export default ({
     }
 
     return {
-      dkli, idc,
+      dkli, styp, idc, diag,
       session, ui,
       mcvide: new Uint8Array([]),
       nom

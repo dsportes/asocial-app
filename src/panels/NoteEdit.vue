@@ -3,12 +3,12 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
+      <q-btn dense size="md" color="warning" icon="chevron_left" padding="xs" @click="fermer"/>
       <q-toolbar-title v-if="avatar" 
         class="titre-lg full-width text-center">{{$t('PNOedtit1', [avatar.na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-if="groupe" 
         class="titre-lg full-width text-center">{{$t('PNOedtit2', [groupe.na.nomc])}}</q-toolbar-title>
-      <q-btn dense size="md" color="primary" icon="check" :label="$t('valider')"
+      <q-btn dense size="md" color="primary" icon="check" padding="xs" :label="$t('valider')"
         :disable="(groupe && !naAut) || session.editDiag || !modifie"  @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -22,7 +22,7 @@
   <q-page-container >
     <q-page class="q-pa-xs">
 
-      <div v-if="groupe" class="sp40">
+      <div v-if="groupe">
         <liste-auts class="q-my-sm"/>
 
         <note-ecritepar :groupe="groupe" :note="nSt.note" @ok="selNa"/>
@@ -45,7 +45,7 @@
 
       </div>
 
-      <div v-else class="sp40">
+      <div v-else>
         <div v-if="avP" class="q-pa-xs bord1">
           <div class="titre-md">
             <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
@@ -74,7 +74,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import { MajNote } from '../app/operations.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ListeAuts from '../components/ListeAuts.vue'
-import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
+import NoteEcritepar from '../components/NoteEcritepar.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import { ID } from '../app/api.mjs'
 

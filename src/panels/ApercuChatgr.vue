@@ -82,7 +82,7 @@ import SdDark1 from '../components/SdDark1.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, dhcool, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
+import NoteEcritepar from '../components/NoteEcritepar.vue'
 import { ItemChatgr } from '../app/operations.mjs'
 
 export default {

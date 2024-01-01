@@ -198,6 +198,18 @@ Import: EditeurMd, ApercuGenx, BoutonConfirm, BoutonBulle
 ### ListeAuts (1)
 Affiche en ligne la liste des auteurs d'une note avec leur nom ou leur indice memebre et ouvre leur carte de visite sur click.
 
+### NotePlus (6)
+Apparaît soit comme un bouton menu, soit comme un bouton proposant l'ajout d'une note selon l'auteur sélectionné.
+
+N'est importé que par PageNotes.
+
+Import: NoteNouvelle
+
+### NoteEcritepar (1)
+Bouton dropdown proposant des auteurs possibles:
+- pour une note de groupe en création, en édition, pour un fichier,
+- pour un item de chat de groupe, l'auteur de l'item
+
 ## Dialogues
 
 ### PhraseSecrete (1)
@@ -261,6 +273,20 @@ Affiche un ticket,
 - déplié: son détail et les actions possibles.
 
 Import: PanelDialtk
+
+### NoteConfirme (2)
+Dialogue de confirmation d'une action sur une note:
+- ne s'applique qu'à la suppression d'une note.
+- vérifie l'autorisation d'écriture, dont l'exclusivité d'accès pour une note de groupe.
+
+Import: BoutonConfirm
+
+### NouveauFichier (2)
+Dialogue d'acquisition d'un nouveau fichier, local ou depuis le presse-papier, pour une note.
+- permet de changer son nom,
+- liste les versions antérieures de même nom devant être purgées.
+
+Import: NomGenerique
 
 ## Panels
 
@@ -345,6 +371,42 @@ Affiche en panel dans deux onglets,
   - ajout, remplacement, suppression, affichage, enregistrement, copie.
 
 Import: ShowHtml, EditeurMd, NomGenerique
+
+### NoteNouvelle (4)
+Créé une nouvelle note avec le texte saisi:
+- pour un groupe l'auteur de la note est à choisir.
+
+Le rattachement de la note a été défini dans la PageNotes selon l'endroit d'où la nouvelle note a été demandée.
+
+Import: BoutonUndo, EditeurMd, NoteEcritepar
+
+### NoteEdit (6)
+Affiche le texte d'une note pour édition:
+- pour une note de groupe permet de choisir l'auteur.
+
+Import: EditeurMd, ListeAuts, NoteEcritepar, ApercuGenx
+
+### NoteExclu (6)
+Gère l'affichage, l'attribution et le retrait d'exclusivité d'écriture d'une note de groupe à un des membres du groupe.
+
+Import: BoutonBulle, ApercuGenx, ListeAuts
+
+### NoteFichier (3)
+Affiche les fichiers attachés à une note:
+- gère leur affichage, téléchargement local, suppression.
+- gère la gestion en visibilité en mode avion, soirt d'une version spécifique, soit de la version la plus récente.
+
+Import: NouveauFichier, NoteEcritepar
+
+Dialogue:
+- NFsupprfichier: confirmation de suppression de fichier
+- NFconfirmav1: confirmation visible en mode avion par nom
+- NFconfirmav2: confirmation visible en mode avion par version
+
+### NoteMC (6)
+Affiche et attribue les mots clés d'une note, personnelle et du groupe.
+
+Import: BoutonBulle, ApercuGenx, ChoixMotscles, ListeAuts
 
 ## Pages
 
@@ -475,9 +537,24 @@ Affiche tous les contacts connus avec une courte fiche pour chacun (pouvant ouvr
 
 Import: ApercuGenx
 
+### PageNotes (7)
+Affiche l'arbre des notes avec pour racines les avatars et les groupes:
+- en tête affiche le détail de la note courante, avec les actions qu'elle peut subir.
+- la barre séparatrice petmet de lancer le chragment local des notes sléctionnées et le plier / déplier global de l'arbre.
+- en bas l'arbre des notes selon leur rattachemnt.
+
+Import: ShowHtml, ApercuMotscles, NoteEdit, NoteMc, NotePlus, NoteExclu, NoteFichier, NoteConfirme, ListeAuts
+
+Diaalogue:
+- PNdl: dialogue gérant le chargement des notes en local.
+
+### PageFicavion (2)
+Affiche la liste des fichiers visible en mode avion et pour chacun,
+- permet de l'afficher et de l'enregistrer localement,
+- de voir la note à laquelle il est attaché.
+
 ## En chantier
-- PageFicavion
-- PageNotes NoteEdit NoteExclu NotePlus NoteMc NoteFichier NouveauFichier NoteConfirme
+Filtres et composants simples de niveau 1.
 
 ## Bugs / vérifications
 - GC à réviser
@@ -487,3 +564,4 @@ Import: ApercuGenx
   - prélever une somme lors du sponsoring d'un compte A (sauf Comptable)
 - transformation A <-> O
 - transfert monétaire entre comptes A
+- concept plus général d'action à effet différé à la prochaine connexion du compte

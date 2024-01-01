@@ -97,9 +97,9 @@ export const useUiStore = defineStore('ui', {
       PCdialtk: {}, // PanelCredits
       SHfs: {}, // ShowHtml
       NFouvrir: false, // NouveauFichier
-      NTsupprfichier: false, // NoteFichier
-      NTconfirmav1: false,
-      NTconfirmav2: false,
+      NFsupprfichier: false, // NoteFichier
+      NFconfirmav1: false,
+      NFconfirmav2: false,
       NNnotenouvelle: false, // NoteNouvelle
       SAsuppravatar: false, // SupprAvatar
       SAconfirmsuppr: false,

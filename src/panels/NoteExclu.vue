@@ -3,7 +3,7 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+      <q-btn dense size="md" color="warning" padding="xs" icon="chevron_left" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t('PNOextit', [groupe.na.nomc])}}
       </q-toolbar-title>
@@ -20,15 +20,17 @@
     <q-page class="q-pa-xs">
       <liste-auts class="q-my-sm"/>
 
-      <div class="sp30"> <!-- Bloc "perdre" -->
+      <div class="spsm"> <!-- Bloc "perdre" -->
         <div v-if="xav">
           <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
           <apercu-genx v-if="xav.na" class="q-my-md" 
             :id="xav.na.id" :im="xav.im"/>
           <div v-else class="titre-md text-bold">{{xav.nom}}</div>
-          <q-btn v-if="xav.avc" dense size="sm" color="primary" icon="close" 
+          <q-btn v-if="xav.avc" 
+            dense size="md" color="primary" icon="close" padding="xs"
             :label="$t('PNOperdre1')" @click="perdre"/>
-          <q-btn v-if="!xav.avc && anim" dense size="sm" color="primary" icon="close" 
+          <q-btn v-if="!xav.avc && anim" 
+            dense size="md" color="primary" icon="close" padding="xs"
             :label="$t('PNOperdre2')" @click="perdre"/>
         </div>
         <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
@@ -41,7 +43,8 @@
         {{$t('PNOlex')}}
         <bouton-bulle idtext="exclu"/>
       </div>
-      <div class="sp30 q-mt-sm scroll" style="max-height:40vh">
+
+      <div class="spsm q-mt-sm scroll" style="max-height:40vh">
         <div v-for="(e, idx) in lst" :key="idx" 
           :class="dkli(idx) + ' q-mt-xs row cursor-pointer bord' + (xap && (e.im === xap.im) ? '2' : '1')"
           @click="selmb(e)">
@@ -52,9 +55,11 @@
 
       <q-separator color="orange" class="q-my-sm"/>
 
-      <div class="row items-center justify-around">
-        <q-btn size="md" dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn v-if="!session.editDiag" size="md" dense color="warning" :disable="!xap"
+      <div class="row justify-end q-gutter-sm">
+        <q-btn flat size="md" dense color="primary" padding="xs" icon="undo"
+          :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn v-if="!session.editDiag" :disable="!xap"
+          padding="xs" size="md" dense color="warning" icon="check"
           :label="$t('PNOex')" @click="valider"/>
       </div>
 
@@ -83,12 +88,9 @@ export default {
 
   props: { },
 
-  computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-  },
+  computed: { },
 
-  watch: {
-  },
+  watch: {  },
 
   methods: {
     selmb (e) {

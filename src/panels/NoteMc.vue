@@ -1,13 +1,13 @@
 <template>
 <q-dialog v-model="ui.d.NM" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+<q-layout container view="hHh lpR fFf" :class="styp('sm')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
-      <q-toolbar-title v-if="avatar" 
-        class="titre-lg full-width text-center">{{$t('PNOmctit1', [avatar.na.nom])}}</q-toolbar-title>
-      <q-toolbar-title v-if="groupe" 
-        class="titre-lg full-width text-center">{{$t('PNOmctit2', [groupe.na.nomc])}}</q-toolbar-title>
+      <q-btn dense size="md" color="warning" icon="chevron_left" padding="xs" @click="fermer"/>
+      <q-toolbar-title class="titre-lg full-width text-center">{{$t('PNOmctit')}}</q-toolbar-title>
+      <q-btn v-if="!session.editDiag" 
+        size="md" dense color="primary" padding="xs" icon="check"
+        :disable="!modif" :label="$t('valider')" @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
     <q-toolbar v-if="session.editDiag" inset class="full-width bg-secondary text-white">
@@ -18,10 +18,22 @@
   </q-header>
 
   <q-page-container>
-    <q-page class="sp30 q-pa-xs column">
+    <q-page class="q-pa-xs">
+      <div class="column">
+        <div v-if="avatar" class="titre-md text-italic">
+          {{$t('PNOmctit1', [avatar.na.nom])}}
+        </div>
+        <div v-if="groupe" class="titre-md text-italic">
+          {{$t('PNOmctit2', [groupe.na.nomc])}}
+        </div>
+        <div class="fs-md q-ml-lg">{{note.titre}}</div>
+      </div>
+
+      <q-separator color="orange" class="q-my-md"/>
+
       <liste-auts class="q-my-sm"/>
 
-      <div v-if="avatar" class="q-my-md">
+      <div v-if="avatar" class="q-my-md maauto">
         <div class="q-mb-sm titre-md text-bold text-italic text-center">{{$t('PNOmcp')}}</div>
         <choix-motscles v-model="mcap" :editable="!session.editDiag" :init-value="mc"
           du-compte :titre="$t('PNOmcap')" />
@@ -52,12 +64,6 @@
       <choix-motscles v-else class="q-mt-sm" v-model="mc0ap" 
         :editable="!session.editDiag && !msg"
         :du-groupe="groupe.id" :titre="$t('PNOmcgr')" :init-value="mc0"/>
-      </div>
-
-      <div class="row items-center justify-around">
-        <q-btn size="md" dense color="primary" :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn v-if="!session.editDiag" size="md" dense color="warning" 
-          :disable="!modif" :label="$t('valider')" @click="valider"/>
       </div>
 
     </q-page>

@@ -3,12 +3,12 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="fermer"/>
+      <q-btn dense size="md" padding="xs" color="warning" icon="chevron_left" @click="fermer"/>
       <q-toolbar-title v-if="!estgr" 
         class="titre-lg full-width text-center">{{$t('PNOnvtit1', [avatar.na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-if="estgr" 
         class="titre-lg full-width text-center">{{$t('PNOnvtit2', [groupe.na.nomc])}}</q-toolbar-title>
-      <q-btn dense size="md" color="primary" icon="check" :label="$t('valider')"
+      <q-btn dense size="md" color="primary" icon="check" padding="xs" :label="$t('valider')"
         :disable="err || session.editDiag || (estgr && !naAut)" @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -72,12 +72,12 @@ import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEV1 } from '../app/api.mjs'
 import { getNg } from '../app/modele.mjs'
-import { dkli, splitPK } from '../app/util.mjs'
+import { dkli, styp, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { NouvelleNote } from '../app/operations.mjs'
-import NoteEcritepar from '../dialogues/NoteEcritepar.vue'
+import NoteEcritepar from '../components/NoteEcritepar.vue'
 
 export default {
   name: 'NoteNouvelle',
@@ -202,7 +202,7 @@ export default {
     return {
       ui, session, nSt, aSt, gSt, cfg,
       err, naAut, selNa, idp, idsp, grP, avP,
-      dkli
+      dkli, styp
     }
   }
 

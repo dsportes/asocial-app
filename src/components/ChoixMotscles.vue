@@ -1,16 +1,14 @@
 <template>
-<q-card :class="styp('sm')">
-  <q-toolbar class="bg-secondary text-white">
-    <q-btn class="q-mr-xs" size="md" dense color="warning" icon="close" @click="ui.fD"/>
-    <q-toolbar-title class="titre-lg text-center">{{titre}}</q-toolbar-title>
-    <bouton-help :page="help || 'page1'" />
-    <q-btn v-if="editable" :disable="!modif" class="q-ml-xs" size="md"
-      dense flat icon="undo" @click="undo"/>
-    <q-btn v-if="editable && ok" class="q-ml-xs" size="md" dense color="warning" 
-      icon="check" :label="$t('ok')" @click="okmc"/>
-  </q-toolbar>
-  <q-toolbar v-if="diag" inset class="bg-yellow-5 text-black text-bold fs-md">{{diag}}</q-toolbar>
-
+<div class="border q-pa-xs relative-position">
+  <div class="absolute-top-right row">
+    <bouton-help page="page1"/>
+    <q-btn v-if="editable" :disable="!modif" class="self-start"
+      size="md" dense padding="none" round color="primary" icon="undo"
+      @click="undo"/>
+    <q-btn v-if="editable && ok" :disable="!modif" class="self-start"
+      size="md" dense color="warning" padding="none" round icon="check"
+      @click="okmc()"/>
+  </div>
   <div class="q-pa-xs row justify-start">
     <div v-if="courante.length">
       <div v-for="idx in courante" :key="idx" 
@@ -47,20 +45,20 @@
       </q-tab-panels>
     </template>
   </q-splitter>
-</q-card>
+</div>
 </template>
 
 <script>
 import { toRef, ref, watch, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
-import BoutonHelp from './BoutonHelp.vue'
 import { styp, egaliteU8, select, deselect, cloneU8, $t, afficherDiag } from '../app/util.mjs'
 import { Motscles } from '../app/modele.mjs'
+import BoutonHelp from './BoutonHelp.vue'
 
 export default ({
   name: 'ChoixMotscles',
 
-  emits: ['update:modelValue', 'ok', 'close'],
+  emits: ['update:modelValue'],
 
   props: {
     modelValue: Object,
@@ -100,10 +98,8 @@ export default ({
       return t
     },
     okmc () {
-      if (this.editable && !this.diag && this.ok) {
+      if (this.editable && !this.diag && this.ok) 
         this.ok(this.courante)
-        this.ui.fD()
-      }
     },
     undo () {
       this.courante = cloneU8(this.initValue)
@@ -167,6 +163,10 @@ export default ({
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.btntop
+  position: absolute
+  top: 0
+  right: 0
 .idx
   font-size: 0.7rem
 .nom
@@ -178,7 +178,7 @@ export default ({
 .radius
   border-radius: 3px
 .border
-  border:1px solid grey
+  border:1px solid $grey-5
 .barre
   text-decoration: line-through
 </style>

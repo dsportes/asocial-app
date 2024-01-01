@@ -8,14 +8,17 @@
     @click="detail(x)">
     <q-card class="q-mx-xs">
       <div class="row justify-between items-center fs-md font-mono">
-        <div>{{x.f.nom}} - {{x.f.info}}</div>
+        <div>
+          <q-icon name="zoom_in" size="md" color="primary" class="q-mr-sm"/>
+          <span>{{x.f.nom}} - {{x.f.info}}</span>
+        </div>
         <div class="row">
           <div v-if="x.f.st" class="text-italic q-mr-sm">{{$t('FAVst' + x.f.st)}}</div>
           <div class="q-pl-sm">{{edvol(x.f.lg)}}</div>
         </div>
       </div>
-      <div>{{x.n.label}}</div>
-      <div>{{x.r}}</div>
+      <div class="q-ml-lg">{{x.n.label}}</div>
+      <div class="q-ml-lg">{{x.r}}</div>
     </q-card>
     <q-separator class="q-my-xs"/>
   </div>
@@ -25,7 +28,7 @@
   <q-dialog v-model="ui.d.FAdetaildial">
     <div :class="styp('md')">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+        <q-btn dense size="md" color="warning" padding="xs" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('FAVdet')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>

@@ -3,14 +3,14 @@
 <q-layout container view="hHh lpR fFf" :class="styp('md')" style="height:70vh">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+      <q-btn dense size="md" color="warning" icon="close" padding="xs" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('PNFnv')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
   </q-header>
 
   <q-page-container >
-    <q-page class="q-pa-xs column">
+    <q-page class="q-pa-xs">
       <q-stepper v-model="step" vertical color="primary" animated>
         <q-step :name="1" :title="$t('PNFnv1')" icon="attach_file" :done="step > 1">
           <div class="column items-center">
@@ -255,7 +255,7 @@ export default {
       ppSt.modecc = true
       ppSt.tab = 'fichiers'
       ppSt.ccfic = null
-      this.ui.oD('pressepapier')
+      ui.oD('pressepapier')
     }
 
     ui.etf = 0
