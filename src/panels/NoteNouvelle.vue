@@ -49,7 +49,7 @@
 
       <note-ecritepar v-if="estgr" :groupe="groupe" @ok="selNa"/>
 
-      <div v-if="!err && !session.editDiag && (!estgr || (estgr && naAut))" class="column sp40">
+      <div v-if="!err && !session.editDiag && (!estgr || (estgr && naAut))" class="column spmd">
         <editeur-md mh="50vh" class="col" texte="" :placeholder="$t('PNOdeft')"
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
         <q-separator color="orange" class="q-mt-sm"/>

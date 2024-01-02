@@ -2,11 +2,11 @@
   <q-btn class="q-mx-xs" size="sm" text-color="grey-5" 
     :icon="icon || 'info'" :label="label">
     <q-popup-proxy ref="qpp">
-      <q-banner class="bord" @click="hide">
+      <q-banner class="bord bordgris" @click="hide">
         <template v-slot:avatar>
           <q-icon :name="icon || 'info'" size="sm" color="primary" />
         </template>
-        <sd-dl :texte="texte"/>
+        <sd-nb :texte="texte"/>
       </q-banner>
     </q-popup-proxy>
   </q-btn>
@@ -14,12 +14,12 @@
 <script>
 
 import { ref } from 'vue'
-import SdDl from './SdDl.vue'
+import SdNb from './SdNb.vue'
 
 export default ({
   name: 'BoutonBulle2',
 
-  components: { SdDl },
+  components: { SdNb },
 
   props: { icon: String, label: String, texte: String },
 
@@ -43,7 +43,6 @@ export default ({
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .bord
-  border: 1px solid $grey-5
   border-radius: 5px
   padding: 3px !important
 </style>

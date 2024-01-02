@@ -7,7 +7,7 @@
   <div v-if="ui.pagetab==='notif'" class="spmd q-pa-sm">
 
     <div v-if="bl" class="bord q-pa-sm q-mb-xl">
-      <sd-al :texte="$t('SB' + bl)"/>
+      <sd-rouge :texte="$t('SB' + bl)"/>
     </div>
 
     <div v-if="!nbNtf" class="titre-lg text-italic q-my-md">{{$t('PCPnot')}}</div>
@@ -68,7 +68,7 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuChat from '../panels/ApercuChat.vue'
 import ApercuNotif2 from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
-import SdAl from '../components/SdAl.vue'
+import SdRouge from '../components/SdRouge.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
 import { getNg, Motscles, Chat } from '../app/modele.mjs'
 import { dkli, dhcool } from '../app/util.mjs'
@@ -76,7 +76,7 @@ import { dkli, dhcool } from '../app/util.mjs'
 export default {
   name: 'PageCompta',
 
-  components: { SdAl, ApercuGenx, ApercuNotif2, PanelCompta, PanelCredits, ApercuChat },
+  components: { SdRouge, ApercuGenx, ApercuNotif2, PanelCompta, PanelCredits, ApercuChat },
 
   computed: {
     c () { return this.aSt.compta.compteurs },

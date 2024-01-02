@@ -50,7 +50,7 @@
           <bouton-bulle idtext="mcgr"/>
         </div>
 
-        <div class="sp30"> <!-- Bloc exclu -->
+        <div class="spsm"> <!-- Bloc exclu -->
         <div v-if="xav">
           <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
           <apercu-genx v-if="xav.na" class="q-my-md" :id="xav.na.id" :im="xav.im"/>

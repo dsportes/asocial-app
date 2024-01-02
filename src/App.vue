@@ -153,7 +153,7 @@
           <filtre-rac nom="chats" prop='rac' :idx="0"/>
           <filtre-nbj nom="chats" prop='nbj' :idx="1"/>
           <filtre-nom nom="chats" prop='nom' :idx="0"/>
-          <filtre-txt nom="chats" prop='txt' :idx="1"/>
+          <filtre-nom nom="chats" prop='txt' :idx="1"/>
           <filtre-mc nom="chats" attr="mcp" :idx="0"/>
           <filtre-mc nom="chats" attr="mcn" :idx="1"/>
         </div>
@@ -170,12 +170,12 @@
           <filtre-nom nom="people" prop='nom' :idx="0"/>
           <filtre-tribu nom="people" :idx="1"/>
           <filtre-avecgr nom="people" :idx="0"/>
-          <filtre-mc nom="people" attr="mcp" :idx="0"/>
-          <filtre-mc nom="people" attr="mcn" :idx="1"/>
+          <filtre-mc nom="people" attr="mcp" :idx="1"/>
+          <filtre-mc nom="people" attr="mcn" :idx="0"/>
         </div>
         <div v-if="ui.page === 'groupes'" class="column justify-start">
           <filtre-nom nom="groupes" prop='ngr' :idx="0"/>
-          <filtre-txt nom="groupes" prop='infmb' :idx="1"/>
+          <filtre-nom nom="groupes" prop='infmb' :idx="1"/>
           <filtre-mc nom="groupes" attr="mcp" :idx="0"/>
           <filtre-mc nom="groupes" attr="mcn" :idx="1"/>
           <filtre-sansheb nom="groupes" attr="sansheb" :idx="0"/>
@@ -184,7 +184,7 @@
         </div>
         <div v-if="ui.page === 'groupesac'" class="column justify-start">
           <filtre-nom nom="groupes" prop='ngr' :idx="0"/>
-          <filtre-txt nom="groupes" prop='infmb' :idx="1"/>
+          <filtre-nom nom="groupes" prop='infmb' :idx="1"/>
           <filtre-mc nom="groupes" attr="mcp" :idx="0"/>
           <filtre-mc nom="groupes" attr="mcn" :idx="1"/>
           <filtre-sansheb nom="groupes" attr="sansheb" :idx="0"/>
@@ -199,7 +199,7 @@
         <div v-if="ui.page === 'notes'" class="column justify-start">
           <filtre-avgr nom="notes" prop='avgr' :idx="0"/>
           <filtre-nbj nom="notes" prop='nbj' :idx="1"/>
-          <filtre-txt nom="notes" prop='note' :idx="0"/>
+          <filtre-nom nom="notes" prop='note' :idx="0"/>
           <filtre-mc nom="notes" attr="mcp" :idx="1"/>
           <filtre-mc nom="notes" attr="mcn" :idx="0"/>
           <filtre-vols nom="notes" attr="v2" :idx="1"/>
@@ -233,14 +233,16 @@
       <page-ficavion class="page" v-if="ui.page === 'ficavion'"/>    
     </transition-group>
   </q-page-container>
-
-  <q-dialog v-model="ui.aunmessage" seamless position="bottom">
+  
+  <!-- ui.d.aunmessag : Gestion d'un message s'affichant en bas -->
+  <q-dialog v-model="ui.d.aunmessage" seamless position="bottom">
     <div :class="'msg q-pa-sm cursor-pointer text-center titre-sm text-bold bg-yellow-5 ' + (ui.message.important ? 'text-negative' : 'text-black')"  
       @click="ui.effacermessage">
       {{ ui.message.texte }}
     </div>
   </q-dialog>
 
+  <!-- ui.d.diag : Affiche d'un message demandant confirmation 'j'ai lu' -->
   <q-dialog v-model="ui.d.diag" persistent>
     <q-card :class="lidk + ' spsm q-pa-sm'">
       <div class="text-center titre-lg q-my-sm">{{$t('UTIatt')}}</div>
@@ -252,6 +254,7 @@
     </q-card>
   </q-dialog>
 
+  <!-- ui.d.confirmFerm : demande de confirmation d'une fermeture de dialogue avec perte de saisie -->
   <q-dialog v-model="ui.d.confirmFerm" persistent>
     <q-card :class="styp('sm') + 'q-pa-sm'">
       <q-card-section class="q-my-lg titre-md">{{$t('EMDqss')}}</q-card-section>
@@ -264,6 +267,7 @@
     </q-card>
   </q-dialog>
 
+  <!-- ui.d.dialoguedrc : choix de déconnexion. Déconnexion, reconnexion, continuer -->
   <q-dialog v-model="ui.d.dialoguedrc" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
@@ -344,7 +348,6 @@ import BoutonLangue from './components/BoutonLangue.vue'
 import NotifIcon2 from './components/NotifIcon.vue'
 import QueueIcon from './components/QueueIcon.vue'
 import FiltreNom from './components/FiltreNom.vue'
-import FiltreTxt from './components/FiltreTxt.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
 import FiltreAvecgr from './components/FiltreAvecgr.vue'
@@ -414,7 +417,7 @@ export default {
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
-    FiltreRac, FiltreNom, FiltreTxt, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
+    FiltreRac, FiltreNom, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
     PressePapier, DialogueNotif, ApercuCv, PhraseSecrete

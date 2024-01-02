@@ -22,7 +22,7 @@
             :bg-color="imNa(it.im) ? 'primary' : 'secondary'" 
             text-color="white"
             :stamp="dhcool(it.dh)">
-            <sd-dark1 v-if="!it.dhx" :texte="it.t"/>
+            <sd-blanc v-if="!it.dhx" :texte="it.t"/>
             <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
@@ -78,7 +78,7 @@
 import { ref } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import SdDark1 from '../components/SdDark1.vue'
+import SdBlanc from '../components/SdBlanc.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, dhcool, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -90,7 +90,7 @@ export default {
 
   props: { },
 
-  components: { SdDark1, EditeurMd, BoutonHelp, NoteEcritepar },
+  components: { SdBlanc, EditeurMd, BoutonHelp, NoteEcritepar },
 
   computed: { 
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },

@@ -173,7 +173,7 @@
   <q-expansion-item switch-toggle-side dense group="trgroup"
     header-class="titre-md text-bold bg-primary text-white"
     :label="$t('PCPrecap')">
-    <div class="sp40 column q-mb-sm">
+    <div class="spmd column q-mb-sm">
       <div :class="dkli(1) + ' row items-center full-width'">
         <div v-for="(n, m) in 6" :key="n" class="col-2 text-center text-italic text-orange">
           {{libm(m)}}

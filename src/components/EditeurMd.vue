@@ -72,7 +72,7 @@ import stores from '../stores/stores.mjs'
 import { sty, dkli } from '../app/util.mjs'
 
 import ShowHtml from './ShowHtml.vue'
-import ChoixEmoji from './ChoixEmoji.vue'
+import ChoixEmoji from '../dialogues/ChoixEmoji.vue'
 
 export default ({
   name: 'EditeurMd',

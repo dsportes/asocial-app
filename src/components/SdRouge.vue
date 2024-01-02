@@ -4,7 +4,7 @@
 <script>
 import { VueShowdown } from 'vue-showdown'
 export default ({
-  name: 'SdDark',
+  name: 'SdRouge',
 
   components: { VueShowdown },
 
@@ -16,8 +16,9 @@ export default ({
 .markdown-body {
   font-family:  Calibri-Light !important;
   background-color: transparent !important;
-  color: white !important;
+  color: red !important;
   line-height: 1.2rem;
+  font-size: 1.2rem !important;
 }
 @import 'github-markdown-css/github-markdown-dark.css'
 </style>

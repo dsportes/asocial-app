@@ -4,7 +4,9 @@
       :label="$t('FI' + prop)"
       @keydown.enter.prevent="ok" type="text" :hint="$t('entree')">
       <template v-slot:append>
-        <span :class="val.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="val=''"/></span>
+        <span :class="val.length === 0 ? 'disabled' : ''">
+          <q-icon name="cancel" class="cursor-pointer"  @click="val=''"/>
+        </span>
       </template>
     </q-input>
   </div>

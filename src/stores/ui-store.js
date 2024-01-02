@@ -19,7 +19,6 @@ export const useUiStore = defineStore('ui', {
 
     messageto: null, // timeOut du message affiché
     message: null,
-    aunmessage: false,
 
     cveditionId: 0, // id de l'avatar / groupe dont la CV est en édition
 
@@ -42,6 +41,7 @@ export const useUiStore = defineStore('ui', {
     dialogStack: [],
 
     d: {
+      aunmessage: false,
       PSouvrir: false,
       choixEmoji: false,
       diag: false, // App
@@ -192,7 +192,7 @@ export const useUiStore = defineStore('ui', {
     afficherMessage (texte, important) {
       if (this.messageto) clearTimeout(this.messageto)
       this.message = { texte, important: important || false }
-      this.aunmessage = true
+      this.d.aunmessage = true
       this.messageto = setTimeout(() => { 
         this.effacermessage()
       }, important ? 10000 : 2000)
@@ -200,7 +200,7 @@ export const useUiStore = defineStore('ui', {
 
     effacermessage () {
       this.message = null
-      this.aunmessage = false
+      this.d.aunmessage = false
     },
 
     async afficherExc (exc) {

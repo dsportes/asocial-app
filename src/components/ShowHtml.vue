@@ -11,14 +11,7 @@
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>
     </div>
-    <div :style="styx" v-if="dk">
-      <sd-light v-if="idx0" :texte="texte"/>
-      <sd-light1 v-else :texte="texte"/>
-    </div>
-    <div :style="styx" v-else>
-      <sd-dark v-if="idx0" :texte="texte"/>
-      <sd-dark1 v-else :texte="texte"/>
-    </div>
+    <sd-nb :style="styx" :texte="texte" :idx="idx"/>
   </div>
 
   <q-dialog v-model="ui.d.SHfs[idc]" persistent maximized 
@@ -34,12 +27,7 @@
         </q-btn>
       </q-bar>
       <q-card-section style="max-height: 100vh" :class="sty() + 'scroll'">
-        <div v-if="!$q.dark.isActive">
-          <sd-light :texte="texte"/>
-        </div>
-        <div v-else>
-          <sd-dark :texte="texte"/>
-        </div>
+        <sd-nb :style="styx" :texte="texte"/>
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -47,19 +35,16 @@
 </template>
 <script>
 
-import { ref } from 'vue'
+import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { sty } from '../app/util.mjs'
 
-import SdLight from './SdLight.vue'
-import SdDark from './SdDark.vue'
-import SdLight1 from './SdLight1.vue'
-import SdDark1 from './SdDark1.vue'
+import SdNb from './SdNb.vue'
 
 export default ({
   name: 'ShowHtml',
 
-  components: { SdDark, SdLight, SdDark1, SdLight1 },
+  components: { SdNb },
 
   props: { 
     texte: String, 
@@ -79,7 +64,7 @@ export default ({
       return 'min-height:2rem' + 
         ';height:' + (this.maxh ? this.maxh + ';' : '') +
         'overflow-y:' + (this.scroll ? 'scroll' : 'auto') 
-      }
+    }
   },
 
   data () {
@@ -93,9 +78,10 @@ export default ({
     }
   },
 
-  setup () {
+  setup (props) {
     const ui = stores.ui
     const idc = ref(ui.getIdc())
+    const t = toRef(props, 'texte')
 
     return {
       ui, idc, sty

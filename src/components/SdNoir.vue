@@ -4,7 +4,7 @@
 <script>
 import { VueShowdown } from 'vue-showdown'
 export default ({
-  name: 'SdLight',
+  name: 'SdNoir',
 
   components: { VueShowdown },
 

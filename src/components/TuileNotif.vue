@@ -2,7 +2,7 @@
   <div :class="(occupation ? 'w3b' : 'w2b') + ' row items-start'">
     <div class="col-3 titre-md text-italic">{{$t('TUntft')}}</div>
 
-    <div class="col-3 column bordr">
+    <div class="col-3 column bordgris">
       <div class="row full-width">
         <div class="col-4 text-italic text-center fs-sm">{{$t('TUsim')}}</div>
         <div class="col-4 text-italic text-center fs-sm">{{$t('TUlec')}}</div>
@@ -17,7 +17,7 @@
 
     <div class="q-pl-sm col-3 titre-md text-italic">{{$t('TUntfc')}}</div>
 
-    <div class="col-3 column bordr">
+    <div class="col-3 column bordgris">
       <div class="row full-width">
         <div class="col-4 text-italic text-center fs-sm">{{$t('TUsim')}}</div>
         <div class="col-4 text-italic text-center fs-sm">{{$t('TUlec')}}</div>
@@ -66,8 +66,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bordr
-  border-right: 1px solid $grey-5
 .w2b
   width: 21rem
 .w3b

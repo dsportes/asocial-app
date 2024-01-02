@@ -23,7 +23,7 @@
             :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
             text-color="white"
             :stamp="dhcool(it.dh)">
-            <sd-dark1 v-if="!it.dhx" :texte="it.txt"/>
+            <sd-blanc v-if="!it.dhx" :texte="it.txt"/>
             <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
@@ -99,7 +99,7 @@
 import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import SdDark1 from '../components/SdDark1.vue'
+import SdBlanc from '../components/SdBlanc.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -118,7 +118,7 @@ export default {
     mapmc: Object 
   },
 
-  components: { SdDark1, EditeurMd, ApercuGenx, BoutonHelp },
+  components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp },
 
   computed: {
     estSp () {

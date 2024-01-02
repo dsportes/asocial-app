@@ -3,7 +3,7 @@
 
     <div class="titre-md text-italic col-6">{{$t('TUt' + type)}}</div>
 
-    <div class="col-6 row items-center bordr">
+    <div class="col-6 row items-center bordgris">
       <div v-if="type==='qc'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
         <div class='font-mono fs-sm'>[{{src.qc}}]</div>
         <div class='font-mono fs-md'>{{mon(src.qc)}}</div>
@@ -88,8 +88,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bordr
-  border-right: 1px solid $grey-5
 .w2b
   width: 21rem
 .w3b

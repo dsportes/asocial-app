@@ -74,7 +74,7 @@
 <script>
 import { ref, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
-import ChoixEmoji from '../components/ChoixEmoji.vue'
+import ChoixEmoji from './ChoixEmoji.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { Motscles, getNg } from '../app/modele.mjs'
 import { styp, $t, afficherDiag } from '../app/util.mjs'

@@ -1,28 +1,166 @@
-## TODO le 10 oct.
+# Application UI
+Une première partie décrit la structure visuelle de l'application en App et pages, panels / dailogues / components.
 
-**Lorsque le compte A va sur sa page de gestion de ses crédits,** 
-- les tickets dont il possède une version plus ancienne que celle détenue dans tickets du Comptable sont mis à jour.
-- les tickets émis un mois M toujours non réceptionnés avant la fin de M+1 sont supprimés.
-- les tickets de plus de 2 ans sont supprimés. 
-gérer les restrictions - fait en partie pour figé
+La seconde partie décrit les données qui sont affichées, le _modèle_ et les données le cas échéant persistentes localement.
 
-Résiliation avatar dnn dnc dng dv2 
+La trosième partie décrit les opérations de connexion, synchronisation et les autres opérations d'échanges avec le serveur.
 
-GC d'espace figé
+# Structure visuelle
+**App** est LE layout unique décrivant LA page de l'application. Elle est constituée des éléments suivants:
+- **headaer**
+  - _boutons à gauche_: aide, notifications, menu, accueil.
+  - _titre de la page courante_. Le cas échant une seconde barre affiche les onglets pour les pages ayant des onglets.
+  - _boutons à droite_: fichiers visibles en avion, presse-papier, ouverture du drawer de recherche.
+- **footer**:
+  - _boutons à gauche_: aide, langue, mode clair / foncé, outils, statut de la session,
+  - _information du compte_ connecté et son organisation,
+  - _bouton de déconnexion_.
+- **drawer de filtre à droite** affichant les filtres de recherche pour les pages en ayant. 
+  - il s'affiche par appui sur le bouton de recherche (tout en haut à droite).
+  - quand la page est assez large, le drawer de filtre reste affiché à côté de la page principale, sinon sur la page principale qui en est partiellement recouverte.
+- **container de la page principale**: 
+  - il contient à un instant donné une des pages listées dans la section "Pages". 
+  - celles-ci sont formées par un tag `<q-page>` qui s'intègre dans le tag `<q-page-container>` de App.
 
-Révision complète groupe et actions possibles
+**App inclut quelques dialogues singletons** afin d'éviter leurs inclusions trop multiples:
+- ces dialogues n'ont pas de propriétés, c'est le contexte courant qui fixe ce qu'ils doivent afficher.
+- chaque dialogue dans App est gardée par un `v-if` de la variable modèle qui l'ouvre.
+- `DialogueErreur DialogueHelp PressePapier PanelPeople PanelMembre OutilsTests DialogueNotif ApercuCv PhraseSecrete`
 
-_Arrêtés mensuels_ (**CSV**)
-- tickets réceptionnés dans le mois. gérer pour le Comptable le "dernier mois archivé".
-  - une ligne par ticket dont l'ids débute par le mois.
-  - une fois archivé dans un secret du Comptable, opération du serveur pour détruire tous les tickets du mois et antérieurs.
-- une ligne par comptas d'extrait des compteurs relatifs au mois M-1 (dès qu'il est figé).
+**App a quelques dialogues internes simples:**
+- _ui.d.aunmessage_ : Gestion d'un message s'affichant en bas
+- _ui.d.diag_ : Affiche d'un message demandant confirmation 'j'ai lu'
+- _ui.d.confirmFerm_ : demande de confirmation d'une fermeture de dialogue avec perte de saisie
+- _ui.d.dialoguedrc_ : choix de déconnexion. Déconnexion, reconnexion, continuer
 
+La logique embarquée est sommaire:
+- détection du changement de largeur de la page pour gérer correctement l'ouverture du drawer de filtre;
+- gestion du titre des pages;
+- affichage de l'onglet pour les pages ayant un onglet.
+
+### Pages, panels, dialogues, components
+Chaque page au sens ci-dessus peut importer des panels, dialogues, components.
+
+#### Panels
+Ce sont dialogues qui s'affichent sur la gauche en pleine hauteur avec une largeur qui peut être `'sm md lg'`.
+- ils se ferment par appui sur le chevron gauche en haut à gauche.
+
+#### Dialogues
+Ce sont des dialogues qui s'affichent sur une partie de la page avec une largeur `'sm md lg'` et pas en pleine hauteur.
+- ils se ferment par appui sur la croix en haut à gauche.
+
+#### Components
+Ils sont simplment incrustés dans le flow d'affichage de la page / panel / dailogue qui les importent.
+
+#### Maîtrise des cycles d'importation
+Un tel cycle est une faute de conception que Webpack détecte (il ne sait pas comment faire) mais n'indique malheureusement pas clairement.
+
+Pour chaque composant un numéro de couche est géré:
+- les composants n'important rien ont pour numéro de couche 1.
+- tous composants a pour numéro de couche le plus des numéros de couche des composants importés + 1.
+- la feuille Excem Dépendances.xls en tien attachement ce qui ermet de s'assurer qu'un cycle n'a pas fortuitement été introduit dans la conception.
+
+## Styles clairs et foncés
+Le style global peut être clair ou foncé selon la variable de Quasar `$q.dark.isActive`
+
+Quand il y a des listes à afficher, il est souhaiatble d'afficher une ligne sur deux avec un fond légérement différent, donc avec un style dépendant de l'index `idx` de l'item dans la liste qui le contient. D'où les classes suivantes:
+- `sombre sombre0`: fond très sombre, fonte blanche pour les idx pairs (ou absents).
+- `sombre1`: fond un peu moins sombre, fonte blanche pour les idx impairs.
+- `clair clair0`: fond très clair, fonte noire pour les idx pairs (ou absents).
+- `clair1`: fond un peu moins clair, fonte noire pour les idx impairs.
+
+Dans util.js les fonctions suivantes fixent dynamiquement le fond à appliquer selon que le mode sombre est activé ou non et l'index idx éventuel:
+- `dkli (idx)` : fond _dark_ ou _light_ selon idx
+- `sty ()` : fond _dark_ ou _light_
+- `styp (size)` : pour un dialogue, fond _dark_ ou _light_, largeur fixée par size (`'sm' 'md' 'lg'`) et ombre claire ou foncée.
+
+### L'affichage MarkDown par VueShowdown
+Le component VueShowdown affiche le contenu d'un texte MD dans un `<div>`. 
+
+Sa classe de style principal `markdown-body` porte un nom **fixe** de manière assez contraignante (ne supporte pas un nom de class dynamique). Ceci oblige à un avoir un component distinct pour chaque style désiré:
+- `SdBlanc [texte]`: la fonte du texte est blanche (pour des fonds foncés).
+- `SdNoir [texte]`: la fonte du texte est noire (pour des fonds clairs).
+- `SdRouge [texte]`: la fonte du texte est rouge (pour des fonds clairs ou foncés).
+
+Dans ces components le fond N'EST PAS fixé, il est transparent, et suivra celui de l'environnement. Mais celui de la fonte doit l'être, d'où le component suivant:
+- `SdNb [texte idx]`: il choisit entre SdBlanc et SdNoir selon, a) que le mode Quasar _dark_ est actif ou non, b) que idx passé en propriété est absent ou pair ou impair.
+
+> Remarque: de facto seul SdNb est utilisé dans les autres éléments. Et encore car l'affichage d'un MD s'effectue quasiment tout le temps par le component ShowHtml qui englobe SdNb. Toutefois il existe des cas ponctuels d'utilisation de SdBlanc et SdRouge.
+
+### Les mots clés
+Les mots clés sont attachés:
+- à des contacts ou des groupes connus du compte par **McMemo**,
+- à des notes par **NoteMc**.
+
+Ils sont affichés par **ApercuMotscles** qui permet d'éditer le choix par **ChoixMotscles**.
+
+### Gestion des dialogues
+Les objectifs de cette gestion sont:
+- de gérer une pile des dialogiues ouverts et en conséquence de pouvoir les fermer sans avoir à se rappeler de leur empilement éventuel,
+- pouvoir fermer tous les dialogiues ouverts à l'occasion d'une déconnexion.
+
+On distingue les dialogues,
+- **singletons**: une seule instance à un instant donné.
+  - leur variable modèle de contrôle est un **booléen** `stores.ui.d.DLxxx`
+  - ils s'ouvrent par `stores.ui.oD('DLxxx')`
+- **dialogues internes de components** pouvant avoir plusieurs instances à un instant donné:
+  - leur variable modèle de contrôle est un `{}` `stores.ui.d.DLxxx`
+  - ils s'ouvrent par `stores.ui.oD('DLxxx', this.idc)`
+
+Dans les deux cas ils se ferment par `stores.ui.fD()`
+
+#### Dialogues internes des components
+Les _components_ peuvent avoir et en général ont, plusieurs instances affichées à l'écran à un instant donné. 
+
+Quand un component a un dialogue interne:
+- une variable `idc` (id du component) est déclarée au `setup()` (numérotation croissante de `stores.ui.idc`). Chaque _instance_ du component reçoit une identification absolue unique: `const idc = ref(ui.getIdc())`.
+- un dialogue interne `DXxx` est piloté par la variable modèle de `stores.ui.d.DXxx[idc]` où `idc` est le **numéro d'instance** du component. Cette variable dans `stores.ui.d` est déclarée comme un objet: ainsi chaque instance de dialogue interne a _une_ variable modèle de contrôle pour _chaque_ instance.
 
 ## Components
-Les _components_, en général, peuvent avoir et souvent ont, plusieurs instances affichées à l'écran. Quand un component a un dialogue interne:
-- une variable `idc` (id du component) est déclarée au `setup()` (numérotation croissante de `stores.ui.idc`). Chaque _instance_ du component reçoit donc une identification absolue unique: `const idc = ref(ui.getIdc())`.
-- un dialogue interne `DXxx` est piloté par la variable modèle de `stores.ui.d.DXxx[idc]` où `idc` est le **numéro d'instance** du component. Cette variable dans stores.ui.d est déclarée comme un objet: ainsi chaque instance de dialogue interne a _une_ variable modèle de contrôle pour _chaque_ instance.
+
+### Les filtres
+La page principale App a un drawze à droite réservé à afficher les filtres de sélection propres à chaque page et permettant de restreindre la liste des éléments à afficher dans la page (par exemple les notes).
+
+Chaque filtre est un component simple de saisie d'une seule donnée: la valeur filtrée étant stockée en store.
+
+- **FiltreNom**: saisie d'un texte filtrant le début d'un nom ou un texte .contenu dans un string.
+- **FiltreMc**: liste de mots clés (qui peuvent être soit requis, soit interdits).
+- **FiltreNbj**: saise d'un nombre jours 1, 7, 30, 90, 9999.
+- **FiltreAvecgr**: case à cocher 'Membre d\'un groupe' pour filtre des contacts.
+- **FiltreTribu**: menu de sélection de:
+  - '(ignorer)',
+  - 'Compte de ma tranche de quotas',
+  - 'Sponsor de ma tranche de quotas',
+- **FiltreAvecsp**: case à cocher 'Comptes "sponsor" seulement'.
+- **FiltreNotif**: menu de sélection de la gravité d'une notification:
+  - '(ignorer)',
+  - 'normale ou importante',
+  - 'importante'
+- **FiltreRac**: menu de sélection d'unstatut de chat:  
+  - '(tous, actifs et raccrochés)',
+  - 'Chats actifs seulement',
+  - 'Chats raccrochés seulement'
+- **FiltreSansheb**: case à cocher 'Groupes sans hébergement'.
+- **FiltreEnexcedent**: case à cocher 'Groupes en excédent de volume'.
+- **FiltreAinvits**: case à cocher 'Groupes ayant des invitations en cours'.
+- **FiltreStmb**: menu de sélection du statut majeur d'un membre.
+  - '(n\'importe lequel)',
+  - 'contact',
+  - 'invité',
+  - 'actif',
+  - 'animateur',
+  - 'DISPARU',
+- **FiltreAmbno**: filtre des membres d'un groupe selon leurs drots d'accès:
+  - '(indifférent)',
+  - 'aux membres seulement',
+  - 'aux notes seulement',
+  - 'aux membres et aux notes',
+  - 'ni aux membres ni aux notes',
+  - 'aux notes en écriture'
+- **FiltreVols**: menu permettant de sélectionner un volume de fichiers d'une note 1Mo, 19Mo, 100,Mo 1Go
+- **FiltreTri**: sélectionne un crtière de tri dans une des deux listes TRIespace et TRItranche définies au dictionnaire. 
+  - sur tranche: stores.avatar.ptLcFT tri selon l'une des 9 propriétés des tranches listées en tête de stores.avatar.
+  - sur espace: PageEspace effectue un tri selon 17 propriétés des synthèses.
  
 ### Les boutons
 Ils n'importent aucune autre vue et sont des "span" destinés à figurer au milieu de textes.
@@ -30,12 +168,20 @@ Ils n'importent aucune autre vue et sont des "span" destinés à figurer au mili
 - **BoutonLangue**: affiche la langue courante et permet de la changer.
 - **NotifIcon**: affiche le statut de notification de restriction et ouvre PageCompta. 
 - **BoutonMembre**: affiche le libelleé d'un membre, son statut majeur et optionnellment un bouton ouvrant un PanelMembre qui le détaille. N'est importé que dans ApercuGroupe.
+- **BoutonBulle** (3): affiche en bulle sur clic, un texte MD figurant dans le dictionnaire des traductions.
+- **BoutonBulle2** (3): affiche en bulle sur clic, un texte MD qui a été composé dynamiquement en respectant les traductions.
+- **BoutonUndo**: affiche une icône undo, disable ou non selon la condition passée en propriété.
+- **BoutonConfirm**: active la foncion de confirmation quand l'utilisateur a frappé le code aléatoire de 1 à 255 qui lui est proposé.
+- **QueueIcon**: petit rond de couleur au-dessus d'une icöne pour marquer l'existence d'une queue de fichiers en téléchargement.
 
-Les mots clés sont attachés:
-- à des contacts ou des groupes connus du compte par McMemo,
-- à des notes par NoteMc.
+### ChoixQuotas (1)
+Saisie des quotas d'abonnement / consommation à affecter à une tranche, un compte, un groupe.
 
-Ils sont affichés par ApercuMotscles qui permet d'éditer le choix par ChoixMotscles.
+### TuileCnv (1)
+Affiche dans une tranche ou un espace le taux d'occupation.
+
+### TuileNotif (1)
+Affiche dans une tranche ou un espace les notifications.
 
 ### MenuAccueil (1)
 Affiche le menu principal aussi inclus dans la page d'accueil.
@@ -210,7 +356,21 @@ Bouton dropdown proposant des auteurs possibles:
 - pour une note de groupe en création, en édition, pour un fichier,
 - pour un item de chat de groupe, l'auteur de l'item
 
+### PanelDialtk (1)
+Affiche un ticket de paiement dans laperçu d'un ticket et le panel credits.
+
+### NomGenerique (1)
+Saisie d'un nom, de fichier ...
+
 ## Dialogues
+
+### DialogueErreur (1)
+Affiche une exception AppExc et gère les options de sortie selon sa nature (déconnexion, continuation ...).
+
+### ChoixEmoji (1)
+Dialogue de saisie des émojis à insérer dans un input / textarea.
+- se ferme à la fin de la saisie.
+- singleton, du fait de son inclusion soit dans EditeurMd soit dans Motscles qui n'ont qu'une seule instance en édition à un instant donné (toujours inclus dans des dialogues).
 
 ### PhraseSecrete (1)
 Saisie contrôlée d'une phrase secrète et d'une organisation (sur option), avec ou sans vérification par double frappe.
@@ -553,11 +713,20 @@ Affiche la liste des fichiers visible en mode avion et pour chacun,
 - permet de l'afficher et de l'enregistrer localement,
 - de voir la note à laquelle il est attaché.
 
-## En chantier
-Filtres et composants simples de niveau 1.
+# Données en mémoire _modèle_ et persistantes localement IDB
+
+# Opétrations, connexions, synchronisation et autres
+
+# En chantier
 
 ## Bugs / vérifications
 - GC à réviser
+
+_Arrêtés mensuels_ (**CSV**)
+- tickets réceptionnés dans le mois. gérer pour le Comptable le "dernier mois archivé".
+  - une ligne par ticket dont l'ids débute par le mois.
+  - une fois archivé dans un secret du Comptable, opération du serveur pour détruire tous les tickets du mois et antérieurs.
+- une ligne par comptas d'extrait des compteurs relatifs au mois M-1 (dès qu'il est figé).
 
 # Features à développer
 - pour un compte sponsor A, attribuer le pouvoir de sponsor à un autre compte A ??? Sauf si tous les comptes A sont sponsors ?
