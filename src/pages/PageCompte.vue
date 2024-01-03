@@ -1,6 +1,6 @@
 <template>
   <q-page class="column q-pa-xs splg">
-    <div class="column items-center justify-center q-gutter-xs">
+    <div class="row q-my-sm items-center justify-center q-gutter-sm">
       <div> <!-- Changement de phrase secrète -->
         <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
           :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
@@ -17,10 +17,13 @@
         @click="mcleditAut"/>
     </div>
 
-    <div v-if="aSt.compta.estA || aSt.compta.estSponsor" 
-      class="row q-gutter-sm q-my-sm titre-lg">
-      <span v-if="aSt.compta.estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('compteA')}}</span>
-      <span v-if="aSt.compta.estSponsor" class="q-pa-xs text-warning bg-yellow-3 text-bold">{{$t('sponsor')}}</span>
+    <div class="row justify-center">
+    <span v-if="aSt.compta.estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">
+      {{$t('compteA')}}
+    </span>
+    <span v-if="aSt.compta.estSponsor" class="q-pa-xs text-warning bg-yellow-3 text-bold">
+      {{$t('NPspons', [ID.court(session.tribuId)])}}
+    </span>
     </div>
 
     <!-- Avatars du compte -->
@@ -98,7 +101,7 @@ import NomAvatar from '../components/NomAvatar.vue'
 import SupprAvatar from '../panels/SupprAvatar.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { styp, afficherDiag, trapex } from '../app/util.mjs'
-import { isAppExc } from '../app/api.mjs'
+import { isAppExc, ID } from '../app/api.mjs'
 
 export default {
   name: 'PageCompte',
@@ -230,7 +233,7 @@ export default {
     */
 
     return {
-      ui, aSt, fSt, session, styp
+      ui, aSt, fSt, session, styp, ID
     }
   }
 

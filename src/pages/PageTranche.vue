@@ -16,15 +16,15 @@
           <tuile-notif :src="lg" occupation/>
         </div>
         <div class="q-my-xs">
-          <apercu-notif :editable="session.pow < 4" :notif="lg.notif" :type="1"
-            :ctx="{ idt: aSt.tribuC.id }"/>
+          <apercu-notif editable :notif="lg.notif" :type="1" :ctx="{ idt: aSt.tribuC.id }"/>
         </div>
       </div>
     </q-expansion-item>
 
     <q-toolbar class="bg-secondary text-white">
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
-      <q-btn v-if="pow < 4" size="md" dense color="primary" 
+      <q-btn v-if="session.estSponsor || session.estComptable"
+        size="md" dense color="primary" 
         :label="$t('PTnvc')" @click="ui.oD('NSnvsp')"/>
     </q-toolbar>
 
@@ -60,7 +60,7 @@
           <div v-else class="titre-md">#{{c.id}}</div>
           <barre-people v-if="session.estComptable || aSt.estSponsor" :id="c.id"/>
 
-          <apercu-notif class="q-my-xs" :editable="session.pow < 4"
+          <apercu-notif class="q-my-xs" editable
             :notif="c.notif" :type="2" :idx="idx" :ctx="{ idt: aSt.tribuC.id, idc: c.id }"/>
 
           <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>

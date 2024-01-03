@@ -472,7 +472,6 @@ export class Qui {
   }
 }
 
-
 /* Notification *******************************************
 De facto un objet notification est immuable: 
 en cas de _mise à jour_ il est remplacé par un autre.
@@ -942,16 +941,17 @@ export class Compta extends GenDoc {
   async compile (row) {
     const session = stores.session
     const aSt = stores.avatar
-    this.sp = row.sp
-    this.estSponsor = this.sp === 1
     /*
     Un getter dans session a un comportement erratique
     et n'arrive pas à accéder à stores.avatar
     !!! NE PAS CHANGER CE QUI SUIT !!!
     */
-    session.setEstSponsor(this.estSponsor)
-    this.it = row.it
+    this.it = row.it || 0
+    this.sp = this.it !== 0 ? row.sp : 0
+    this.estSponsor = this.sp === 1
     this.estA = this.it === 0
+    session.setEstSponsor(this.estSponsor)
+    session.setEstAutonome(this.estA)
 
     this.k = await decrypter(session.phrase.pcb, row.kx)
     session.clek = this.k
@@ -1033,6 +1033,13 @@ export class Compta extends GenDoc {
     delete this.rowCletK
   }
 
+  async creditsDon (don) {
+    const session = stores.session
+    const credits = { ...this.credits }
+    credits.total -= don
+    return await crypter(session.clek, new Uint8Array(encode(credits)))
+  }
+
   /* Depuis la liste actuelle des tickets de compta,
   - enlève les obsolètes,
   - ajoute tk s'il n'y était pas, le remplace sinon
@@ -1101,7 +1108,7 @@ export class Compta extends GenDoc {
     return await crypter(session.clek, new Uint8Array(encode(item)))
   }
 
-  static async row (na, clet, cletX, q, estSponsor, phrase, nc) { 
+  static async row (na, clet, cletX, q, estSponsor, phrase, nc, don) { 
     /* création d'une compta
     Pour le comptable le paramètre cletX est null (il est calculé). 
     Pour les autres, c'est le nctkc pris dans la tribu
@@ -1132,7 +1139,7 @@ export class Compta extends GenDoc {
       r.it = 0
       r.cletK = null
       r.cletX = null
-      r.credits = await crypter(k, new Uint8Array(encode({ total: 2, tickets: [] })))
+      r.credits = await crypter(k, new Uint8Array(encode({ total: don || 2, tickets: [] })))
     }
 
     r.qv = { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: nc || 0, ng: 0, v2: 0}
@@ -1503,9 +1510,10 @@ export class Sponsoring extends GenDoc {
     obj.na = NomGenerique.from(x.na)
     obj.naf = NomGenerique.from(x.naf)
     obj.clet =  x.clet || null
+    obj.don = x.don || 0
   }
 
-  static async nouveauRow (phrase, dlv, nom, cletX, clet, sp, quotas, ard) {
+  static async nouveauRow (phrase, dlv, nom, cletX, clet, sp, quotas, ard, don) {
     /* 
       - 'phrase: objet phrase
       - 'dlv'
@@ -1526,7 +1534,8 @@ export class Sponsoring extends GenDoc {
       sp, quotas,
       cletX: cletX || null, 
       clet: clet || null, 
-      it : 0
+      it : 0,
+      don,
     }
     if (!aSt.estSponsor && !session.estComptable) {
       const c = aSt.compta

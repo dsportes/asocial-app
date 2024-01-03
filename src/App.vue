@@ -291,7 +291,6 @@
   <panel-people v-if="ui.d.detailspeople"/>
   <panel-membre v-if="ui.d.PMdetailsmembre"/>
   <outils-tests v-if="ui.d.PAoutilsTests"/>
-  <dialogue-notif v-if="ui.d.DNdialoguenotif"/>
   <apercu-cv v-if="ui.d.ACVouvrir"/>
   <phrase-secrete v-if="ui.d.PSouvrir"/>
 
@@ -377,7 +376,6 @@ import DialogueHelp from './panels/DialogueHelp.vue'
 import PageClos from './pages/PageClos.vue'
 import PageAccueil from './pages/PageAccueil.vue'
 import PressePapier from './panels/PressePapier.vue'
-import DialogueNotif from './dialogues/DialogueNotif.vue'
 
 // Niveau 4
 import PageSponsorings from './pages/PageSponsorings.vue'
@@ -420,7 +418,7 @@ export default {
     FiltreRac, FiltreNom, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
-    PressePapier, DialogueNotif, ApercuCv, PhraseSecrete
+    PressePapier, ApercuCv, PhraseSecrete
    },
 
   computed: {

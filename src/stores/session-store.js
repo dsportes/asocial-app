@@ -14,6 +14,7 @@ export const useSessionStore = defineStore('session', {
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
     estSponsor: false,
+    estAutonome: false,
     compteKO: false,
 
     /* namespace de 10 à 59 
@@ -205,6 +206,9 @@ export const useSessionStore = defineStore('session', {
     },
     setEstSponsor (sp) {
       this.estSponsor = sp
+    },
+    setEstAutonome (a) {
+      this.estAutonome = a
     },
     setNlNe (nl, ne) { 
       this.consoatt.nl += nl

@@ -85,10 +85,10 @@ Retour:
 export class AboTribuC extends OperationUI {
   constructor () { super($t('OPabo')) }
 
-  async run (idt) {
+  async run (id) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, idt }
+      const args = { token: session.authToken, id }
       this.tr(await post(this, 'AboTribuC', args))
       this.finOK()
     } catch (e) {
@@ -325,15 +325,18 @@ export class GetAvatarPC extends OperationUI {
 /** Ajout Sponsoring ****************************************************
 args.token: éléments d'authentification du compte.
 args.rowSponsoring : row Sponsoring, sans la version
+args.credits: nouveau credits du compte si non null
 Retour:
 */
 export class AjoutSponsoring extends OperationUI {
   constructor () { super($t('OPcsp')) }
 
-  async run (row) {
+  async run (row, don) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, rowSponsoring: row }
+      const aSt = stores.avatar
+      const credits = don ? await aSt.compta.creditsDon(don) : null
+      const args = { token: session.authToken, rowSponsoring: row, credits }
       this.tr(await post(this, 'AjoutSponsoring', args))
       this.finOK()
     } catch (e) {
@@ -646,18 +649,18 @@ Assertion sur l'existence du row `Tribus` de la tribu.
 export class SetNotifT extends OperationUI {
   constructor () { super($t('OPntftr')) }
 
-  async run (notifT, id) {
+  async run (notifT, idt) {
     try {
       const session = stores.session
       let stn = 9
       let notif = null
       if (notifT ) {
         notifT.dh = Date.now()
-        const cle = getCle(id)
+        const cle = getCle(idt)
         notif = await crypter(cle, notifT.serial)
         if (notifT.texte) stn = notifT.stn
       }
-      const args = { token: session.authToken, id, notif, stn }
+      const args = { token: session.authToken, id: idt, notif, stn }
       this.tr(await post(this, 'SetNotifT', args))
       this.finOK()
     } catch (e) {
@@ -902,6 +905,8 @@ export class SetNotifG extends OperationUI {
     try {
       const session = stores.session
       const naComptable = NomGenerique.comptable()
+      if (!notifG) notifG = new Notification({})
+      else notifG.dh = Date.now()
       const notif = await crypter(naComptable.rnd, notifG.serial)
       const args = { token: session.authToken, ns, notif}
       const ret = this.tr(await post(this, 'SetNotifG', args))

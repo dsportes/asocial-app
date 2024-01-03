@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <q-card class="spmd q-mb-lg q-pa-sm row justify-center items-center" 
-      v-if="aSt.estSponsor || estComptable"> 
+      v-if="session.estSponsor || session.estComptable || (session.estAutonome && session.espace.opt > 0)"> 
       <!-- Nouveau sponsoring -->
       <q-btn class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts" no-caps
         :label="$t('NPnouv')" color="warning" dense

@@ -993,11 +993,12 @@ Assertions:
 export class AcceptationSponsoring extends OperationUI {
   constructor() { super($t('OPapa')) }
 
-  async run(sp, ardx, txt1, txt2, ps) {
+  async run(sp, ardx, txt1, txt2, ps, don) {
     /* sp : objet Sponsoring
     - id ids : identifiant
     - `ard`: ardoise.
     - 'dlv': 
+    - 'sp': est sponsor
     - `na` : du sponsor P.
     - `cv` : du sponsor P.
     - `naf` : na attribué au filleul.
@@ -1032,7 +1033,7 @@ export class AcceptationSponsoring extends OperationUI {
 
       // !!! dans rowCompta: it (indice du compte dans sa tribu) N'EST PAS inscrit
       // (na, clet, cletX, q1, q2, estSponsor, phrase, nc) - le filleul a 1 chat en ligne
-      let rowCompta = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp, ps, 1)
+      let rowCompta = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp, ps, 1, don)
       // set de session.clek
       const rowAvatar = await Avatar.primaireRow(sp.naf, publicKey, privateKey)
       const rowVersion = {
@@ -1088,7 +1089,7 @@ export class AcceptationSponsoring extends OperationUI {
         lgtxt2 : txt2.length,
         rowCompta, rowAvatar, rowVersion,
         ids: sp.ids,
-        ardx, idt, act, 
+        ardx, idt, act,
         abPlus: [idt, sp.naf.id]
       }
 

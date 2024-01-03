@@ -2,22 +2,33 @@
   <div>
     <div class="row items-center">
       <span class="text-italic titre-md">{{$t('QVab1')}}</span>
-      <span class="q-ml-md fs-md font-mono text-bold">{{'[' + vols.q1 + '] ' + nbn(q1n)}}</span>
-      <span v-if="!noutil" class="fs-md font-mono text-italic q-ml-md">{{$t('QVut', [pc1])}}</span>
+      <span class="q-ml-md fs-md font-mono text-bold">
+        {{'[' + vols.q1 + '] ' + nbn(q1n)}}
+      </span>
+      <span v-if="!noutil && q1n" class="fs-md font-mono text-italic q-ml-md">
+        {{ $t('QVut', [pc1]) }}
+      </span>
     </div>
     <div class="row items-center">
       <span class="text-italic titre-md">{{$t('QVab2')}}</span>
-      <span class="q-ml-md fs-md font-mono text-bold">{{'[' + vols.q2 + '] ' + edvol(q2v)}}</span>
-      <span v-if="!noutil" class="fs-md text-italic font-mono q-ml-md">{{$t('QVut', [pc2])}}</span>
+      <span class="q-ml-md fs-md font-mono text-bold">
+        {{'[' + vols.q2 + '] ' + edvol(q2v)}}
+      </span>
+      <span v-if="!noutil && q2v" class="fs-md text-italic font-mono q-ml-md">
+        {{$t('QVut', [pc2])}}
+      </span>
     </div>
     <div v-if="vols.qc" class="row items-center">
       <span class="text-italic titre-md">{{$t('QVplc')}}</span>
-      <span class="q-ml-md fs-md font-mono text-bold">{{'[' + vols.qc + '] ' + mon(vols.qc)}}</span>
+      <span class="q-ml-md fs-md font-mono text-bold">
+        {{'[' + vols.qc + '] ' + mon(vols.qc)}}
+      </span>
     </div>
   </div>
 </template>
 
 <script>
+import { toRef } from 'vue'
 import { UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { edvol, edqt, nbn, mon } from '../app/util.mjs'
 
@@ -46,6 +57,7 @@ export default {
   },
 
   setup (props) {
+    const vols = toRef(props, 'vols')
     return {
       edvol, edqt, nbn, mon
     }

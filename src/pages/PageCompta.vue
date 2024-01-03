@@ -17,7 +17,7 @@
         <div class="titre-lg text-italic">
           {{$t('CPTtn' + idx + (idx === 4 && aSt.compta.estA ? 'a' : ''))}}
         </div>
-        <apercu-notif2 class="q-ml-sm" :type="idx" :notif="ntf"/>
+        <apercu-notif class="q-ml-sm" :type="idx" :notif="ntf"/>
       </div>
     </div>
   </div>
@@ -66,7 +66,7 @@ import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuChat from '../panels/ApercuChat.vue'
-import ApercuNotif2 from '../components/ApercuNotif.vue'
+import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
 import SdRouge from '../components/SdRouge.vue'
 import { SetDhvuCompta } from '../app/operations.mjs'
@@ -76,7 +76,7 @@ import { dkli, dhcool } from '../app/util.mjs'
 export default {
   name: 'PageCompta',
 
-  components: { SdRouge, ApercuGenx, ApercuNotif2, PanelCompta, PanelCredits, ApercuChat },
+  components: { SdRouge, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits, ApercuChat },
 
   computed: {
     c () { return this.aSt.compta.compteurs },

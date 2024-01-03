@@ -34,11 +34,15 @@
         </div>
       </div>
 
-      <div v-if="estA" class="text-warning titre-md">{{$t('compteA')}}</div>
-      <div v-else class="titre-md">{{$t('compteO')}}</div>
-
-      <div v-if="sp.sp" class="titre-md text-warning">
-        {{$t('NPspons' + (estA ? 'A' : ''), [ID.court(idtr)])}}
+      <div v-if="estA" class="text-warning titre-md text-bold">
+        <span>{{$t('compteA')}}</span>
+        <span v-if="sp.don" class="q-ml-sm">{{$t('NPdon', [sp.don])}}</span>
+      </div>
+      <div v-else> 
+        <div v-if="sp.sp" class="titre-md text-warning">
+          {{$t('NPspons', [ID.court(idtr)])}}
+        </div>
+        <span v-else class="titre-md">{{$t('compteO')}}</span>
       </div>
 
       <div class="titre-md">{{$t('NPquo')}}</div>
@@ -113,6 +117,7 @@ export default ({
     - 'quotas' : [qc, q1, q2]
     - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
     - 'idcsp': id du COMPTE de l'avatar sponsor
+    - 'don': don attribué par un sponsor A
 - `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
@@ -182,7 +187,7 @@ export default ({
     },
     async confirmer () {
       const ardx = await crypter(this.pc.clex, this.texte)
-      await new AcceptationSponsoring().run(this.sp, ardx, this.texte, this.sp.ard, this.ps)
+      await new AcceptationSponsoring().run(this.sp, ardx, this.texte, this.sp.ard, this.ps, this.sp.don)
       this.fermer()
     },
     async refuser () {

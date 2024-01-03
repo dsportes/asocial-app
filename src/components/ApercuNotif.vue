@@ -26,17 +26,23 @@
     <div v-if="type < 3 && (!notif || !notif.texte)" class="row">
       <div class="titre-md">{{$t('ANauc')}}</div>
       <q-btn v-if="editable" class="q-ml-sm col-auto self-start" 
-        color="primary" padding="xs" size="md" 
+        color="primary" padding="xs" size="sm" 
         :label="$t('ANcre')" dense icon="add" @click="creer"/>
     </div>
   </div>
+
+  <q-dialog v-model="ui.d.DNdialoguenotif[idc]" persistent>
+    <dialogue-notif :type="type" :ntf="ntf" :restr="restr" :restrb="restrb"
+      :ns="ns" :idt="idt" :idc="idcpt"/>
+  </q-dialog>
 </div>
 </template>
 <script>
-
+import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonBulle from './BoutonBulle.vue'
 import ShowHtml from './ShowHtml.vue'
+import DialogueNotif from './DialogueNotif.vue'
 import { Notification, Qui } from '../app/modele.mjs'
 import { dhcool, dkli, afficherDiag, $t } from '../app/util.mjs'
 
@@ -59,7 +65,7 @@ export default {
     idx: Number
   },
 
-  components: { BoutonBulle, ShowHtml },
+  components: { BoutonBulle, ShowHtml, DialogueNotif },
 
   watch: {
     restr (ap) { if (ap && this.restrb) this.restrb = false },
@@ -70,7 +76,6 @@ export default {
     texteEd () {
       if (this.notif.texte.startsWith('%')) {
         return this.$t('ANrntf' + this.notif.texte.substring(1, 2))
-        return this.notif.texte
       } else return this.notif.texte
     },
     nomSource () {
@@ -82,67 +87,84 @@ export default {
   },
 
   data () { return {
+    restr: false,
+    restrb: false,
+    ntf: null
   }},
 
   methods: {
-    async quipeut () {
-      switch (this.type) {
-        case 0 : {
-          if (this.session.pow !== 1) { await afficherDiag($t('ANer1')); return false }
-          else return true
-        }
-        case 1 : {
-          if (this.session.pow !== 2 && this.session.pow !== 3) { await afficherDiag($t('ANer2')); return false }
-          else return true
-        }
-        case 2 : {
-          if (this.session.pow !== 2 && this.session.pow !== 3) { await afficherDiag($t('ANer3')); return false }
-          else return true
-        }
-        case 3 :
-        case 4 : {
-          await afficherDiag($t('ANer4')); return false
-        }
-      }
-    },
     async editer () {
-      if (!await this.quipeut()) return
-      if (this.type !== 0 && !await this.session.editpow(3)) return
-      const ntf = this.notif.clone()
+      if (this.diag) { await afficherDiag($t('ANer' + this.diag)); return }
+      this.ntf = this.notif.clone()
       if (this.idsource) ntf.idSource = this.idsource
-      if (this.session.pow === 3 && !ntf.idSource) {
+      if (this.session.pow === 3 && !this.ntf.idSource) {
         await afficherDiag($t('ANnospon'))
         return
       }
-      let restr, restrb
       if (this.type === 0) {
-        if (ntf.nr === 1) { restr = true; restrb = false }
-        if (ntf.nr === 2) { restr = false; restrb = true }
+        if (this.ntf.nr === 1) { this.restr = true; this.restrb = false }
+        if (this.ntf.nr === 2) { this.restr = false; this.restrb = true }
       } else {
-        if (ntf.nr === 3) { restr = true; restrb = false }
-        if (ntf.nr === 4) { restr = false; restrb = true }
+        if (this.ntf.nr === 3) { this.restr = true; this.restrb = false }
+        if (this.ntf.nr === 4) { this.restr = false; this.restrb = true }
       }
-      this.ui.notifc = { type: this.type, ntf, restr, restrb, ctx: this.ctx }
-      this.ui.oD('DNdialoguenotif')
+      // this.ui.notifc = { type: this.type, ntf, restr, restrb, ns: this.ns, idt: this.idt, idc: this.idc }
+      this.ui.oD('DNdialoguenotif', this.idc)
     },
 
     async creer () {
-      if (!await this.quipeut()) return
-      if (this.type !== 0 && !await this.session.editpow(3)) return
-      const ntf = new Notification({})
+      if (this.diag) { await afficherDiag($t('ANer' + this.diag)); return }
+      this.ntf = new Notification({})
       if (this.idsource) ntf.idSource = this.idsource
-      this.ui.notifc = { type: this.type, ntf, restr: false, restrb: false, ctx: this.ctx }
-      this.ui.oD('DNdialoguenotif')
+      // this.ui.notifc = { type: this.type, ntf, restr: false, restrb: false, ns: this.ns, idt: this.idt, idc: this.idc }
+      this.ui.oD('DNdialoguenotif', this.idc)
     }
   },
+
   setup (props) {
     const session = stores.session
+    const pSt = stores.people
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
+    const type = toRef(props, 'type')
+    const ctx = toRef(props, 'ctx')
     // const n = toRef(props, 'notif')
+    const ns = ref(0)
+    const idt = ref(0)
+    const idcpt = ref(0)
+    const editable = toRef(props, 'editable')
+
+    function setDiag () {
+      switch (type.value) {
+        case 0 : {
+          if (session.pow !== 1) return 1
+          ns.value = ctx.value.ns
+          break
+        }
+        case 1 : {
+          if (session.pow !== 2 && session.pow !== 3) return 2
+          idt.value = ctx.value.idt
+          break
+        }
+        case 2 : {
+          if (session.pow !== 2 && session.pow !== 3) return 3
+          idt.value = ctx.value.idt
+          idcpt.value = ctx.value.idc
+          // un sponsor ne peut pas éditer la notif d'un autre sponsor
+          if (pSt.estSponsor(idc.value)) return 5
+          break
+        }
+        case 3 :
+        case 4 : return 4 // on ne devrait jamais arriver là
+      }
+      return 0
+    }
+
+    const diag = ref(editable.value ? setDiag() : 0)
 
     return {
-      dhcool, dkli,
-      session, ui
+      dhcool, dkli, diag, ns, idt, idcpt,
+      session, ui, idc
     }
   }
 }

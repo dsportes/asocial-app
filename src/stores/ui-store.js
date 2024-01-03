@@ -86,7 +86,7 @@ export const useUiStore = defineStore('ui', {
       AGediterUna: {},
       AGgererheb: {},
       AMmcedit: {}, // ApercuMotscles
-      DNdialoguenotif: false, // DialogueNotif
+      DNdialoguenotif: {}, // DialogueNotif
       ATconfirmdel: {}, // ApercuTicket
       ATdialtk: {},
       EMmax: {}, // EditeurMd
