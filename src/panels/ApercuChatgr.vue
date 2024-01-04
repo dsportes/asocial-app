@@ -53,9 +53,9 @@
     </q-dialog>
 
     <!-- Dialogue d'ajout d'un item au chat -->
-    <q-dialog v-model="ui.d.ACGchatedit">
+    <q-dialog v-model="ui.d.ACGchatedit" persistent>
       <q-card :class="styp()">
-        <q-toolbar>
+        <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd')}}</q-toolbar-title>
           <bouton-help page="page1"/>

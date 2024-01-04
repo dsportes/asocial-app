@@ -65,7 +65,7 @@
 
     <div class="filler"/>
 
-    <q-dialog v-model="ui.d.PPnvnote">
+    <q-dialog v-model="ui.d.PPnvnote" persistent>
       <q-card :class="styp('md')">
         <q-card-section>
           <div class="titre-lg">{{$t(rec ? 'PPnv1' : 'PPnv2')}}</div>
@@ -80,7 +80,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.PPnvfic">
+    <q-dialog v-model="ui.d.PPnvfic" persistent>
       <q-card :class="styp('md')">
       <q-card-section>
         <div class="titre-lg">{{$t(fic.id ? 'PPl1' : 'PPl2')}}</div>

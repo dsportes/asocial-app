@@ -97,7 +97,7 @@ export const useSessionStore = defineStore('session', {
     - `texte`: texte de la notification.
     - `idSource`: id du sponsor ayant créé cette notification pour un type 3.
     */
-    nivx: [0, 3, 5, 3, 4, 2],
+    nivx: [1, 3, 5, 3, 4, 2],
     /* niveau d'information / restriction: 
     - 0 : aucune notification
     - 1 : au moins une notification informative
@@ -406,6 +406,7 @@ export const useSessionStore = defineStore('session', {
       this.notifs.forEach(ntf => {
         if (ntf && ntf.texte) {
           if (ntf.dh > dhvu) this.alire = true
+          // nivx: [1, 3, 5, 3, 4, 2],
           const niv = !ntf.texte ? 0 : ( !ntf.nr ? 1 : this.nivx[ntf.nr])
           if (niv > this.niv) this.niv = niv
         }

@@ -280,7 +280,15 @@ export const useAvatarStore = defineStore('avatar', {
           const na = getNg(c.id)
           if (!na || !na.nomc.startsWith(f.nomc)) continue
         }
-        if (f.notif && (!c.notif || (f.notif === 2 && c.notif.niv < 2))) continue
+        /*   // Filtre notif
+        gravite0: '(ignorer)',
+        gravite1: 'normale ou importante', // notif existe
+        gravite2: 'importante' // notif avec restriction
+        0:simple 1:lecture 2:accès minimal, 9:aucune
+        */
+        const stn = !c.notif ? 9 : c.notif.stn
+        if (f.notif && stn === 9) continue
+        if (f.notif === 2 && stn ===0) continue
         r.push(c)
       }
       return r
@@ -397,7 +405,7 @@ export const useAvatarStore = defineStore('avatar', {
         const nasp = new Map()
         const spAv = new Set() // people sponsor avant
         if (this.tribu) for (const e of this.tribu.act) 
-          if (e && e.nasp && !this.compte.estAvDuCompte(e.id)) spAv.add(e.id)
+          if (e && !e.vide && e.nasp && !this.compte.estAvDuCompte(e.id)) spAv.add(e.id)
         const spAp = new Set() // people sponsor après
         if (tribu) for (const e of tribu.act)
           if (e && !e.vide && e.nasp && !this.compte.estAvDuCompte(e.id)) { 

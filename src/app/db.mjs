@@ -1,11 +1,10 @@
 import Dexie from 'dexie'
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { SessionSync } from './modele.mjs'
+import { SessionSync, Versions, NoteLocale, FichierLocal } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
 import { isAppExc, AppExc, E_DB } from './api.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
-import { Versions, NoteLocale, FichierLocal } from '../app/modele.mjs'
 
 function decodeIn (buf, cible) {
   const x = decode(buf)

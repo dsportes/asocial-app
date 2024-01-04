@@ -1645,7 +1645,7 @@ export default {
 
   CPTtn0: 'Notification de l\'administrateur technique de l\'application',
   CPTtn1: 'Notification pour tous les comptes de la tranche, du Comptable ou d\'un sponsor',
-  CPTtn2: 'Notification spécifique pour le compte, du Comptable ou d\'un sponsor de la tranche',
+  CPTtn2: 'Notification spécifique au compte (émise par le Comptable ou un sponsor de la tranche)',
   CPTtn3: 'Notification automatique de surveillance de l\'abonnement (excès de volume)',
   CPTtn4a: 'Notification automatique de surveillance du solde (crédits - coûts)',
   CPTtn4: 'Notification automatique de surveillance de l\'excès de consommation',

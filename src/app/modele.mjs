@@ -513,11 +513,11 @@ export class Notification {
 
   clone () { return Notification.deSerial(this.serial) }
 
-  get stn () { // pour les notif T et C seulement pour G le concept n'existe pas)
-    if (!this.texte) return 0
-    if (this.nr === 0) return 0
-    if (this.nr === 3) return 1
-    return 4
+  /* pour les notif T et C seulement (pour G le concept n'existe pas)
+  0:simple 1:lecture 2:accès minimal, 9:aucune */
+  get stn () {
+    if (!this.texte) return 9
+    return this.nr === 0 ? 0 : (this.nr === 3 ? 1 : 2)
   }
 
   get serial() {

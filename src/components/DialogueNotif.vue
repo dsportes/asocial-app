@@ -8,7 +8,7 @@
     <q-card-section class="q-my-sm q-mx-sm column">
 
       <div v-if="type===0">
-        <q-checkbox size="sm" v-model="loc"/>
+        <q-checkbox size="sm" v-model="restrloc"/>
           <span>{{$t('ANnr1')}}<bouton-bulle idtext="nr1"/></span>
       </div>
       <div v-if="type===0">
@@ -121,8 +121,10 @@ export default {
     const ui = stores.ui
     const x = toRef(props, 'ntf')
     const n = ref(x.value.clone())
-    const restrloc = toRef(props, 'restr')
-    const restrbloc = toRef(props, 'restrb')
+    const r1 = toRef(props, 'restr')
+    const restrloc = ref(r1.value)
+    const r2 = toRef(props, 'restrb')
+    const restrbloc = ref(r2.value)
 
     return {
       styp, dhcool, n, restrloc, restrbloc,

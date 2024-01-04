@@ -110,7 +110,7 @@
     <q-dialog v-model="ui.d.PAcheckpoint" full-height position="left" persistent>
       <q-layout container view="hHh lpR fFf" :class="styp('md')">
         <q-header elevated>
-          <q-toolbar>
+          <q-toolbar class="bg-secondary text-white">
             <q-btn dense size="md" icon="chevron_left" color="warning" @click="ui.fD"/>
             <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESckpt', [ns])}}</q-toolbar-title>
             <bouton-help page="page1"/>
@@ -159,7 +159,7 @@
     <q-dialog v-model="ui.d.PApageespace" full-height position="left" persistent>
       <q-layout container view="hHh lpR fFf" :class="styp('md')">
         <q-header elevated>
-          <q-toolbar>
+          <q-toolbar class="bg-secondary text-white">
             <q-btn dense size="md" icon="chevron_left" color="warning" @click="ui.fD"/>
             <q-toolbar-title class="titre-lg full-width text-center">
               {{$t('ESpgesp', [esp.id, esp.org])}}</q-toolbar-title>

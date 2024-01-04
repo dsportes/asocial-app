@@ -256,10 +256,13 @@ Dialogues:
 - BPcptdial: affichage des compteurs de compta du compte "courant".
 - BPchgTr: changement de tranche.
 
-### ApercuNotif (3)
+### ApercuNotif (5)
 Affiche une notification. Un bouton ouvre le dialogue DaliogueNotif d'édition d'une notification.
 
-Import: ShowHtml
+Import: BoutonBulle, ShowHtml, DialogueNotif
+
+Dialogue:
+- DNdialoguenotif: dialogue-notif
 
 ### PhraseContact (1)
 Saisie contrôlée d'une phrase de contact.
@@ -362,6 +365,12 @@ Affiche un ticket de paiement dans laperçu d'un ticket et le panel credits.
 ### NomGenerique (1)
 Saisie d'un nom, de fichier ...
 
+### DialogueNotif (4)
+Affichage / saisie d'une notification, texte et niveau.
+- enregistrement / suppression selon que la notification est générale, tranche de quoas ou compte.
+
+Import: EditeurMd, BoutonBulle
+
 ## Dialogues
 
 ### DialogueErreur (1)
@@ -407,12 +416,6 @@ Edite les mots clés, soit d'un compte, soit d'un groupe.
 N'est importé **que** par PageCompte et ApercuGroupe (une seule édition à un instant donné).
 
 Import: ChoixEmoji
-
-### DialogueNotif (3)
-Affichage / saisie d'une notification, texte et niveau.
-- enregistrement / suppression selon que la notification est générale, tranche de quoas ou compte.
-
-Import: EditeurMd
 
 ### ContactChat (2)
 Dialogue de saisie de la phrase de contact d'un avatar, puis création, éventuelle, d'un nouveau chat avec lui.

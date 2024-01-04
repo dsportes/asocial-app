@@ -5,7 +5,7 @@ import { ID, AppExc, appexc, E_WS, AMJ, Compteurs, limitesjour } from './api.mjs
 import { $t, sleep} from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
-import { Versions, NomGenerique, Avatar, Chat, Compta, Note, Ticket,
+import { Versions, NomGenerique, Avatar, Chat, Compta, Note, Ticket, Notification,
   Groupe, Membre, Tribu, Chatgr, getNg, getCle, compile, setClet} from './modele.mjs'
 import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
@@ -637,6 +637,36 @@ export class NouvelleTribu extends OperationUI {
   }
 }
 
+/* Set notification générale *****************************************************
+args.token donne les éléments d'authentification du compte.
+args.ns
+args.notif
+Retour:
+*/
+export class SetNotifG extends OperationUI {
+  constructor () { super($t('OPntfg')) }
+
+  async run (notifG, ns) {
+    try {
+      const session = stores.session
+      const naComptable = NomGenerique.comptable()
+      if (!notifG) notifG = new Notification({})
+      else notifG.dh = Date.now()
+      const notif = await crypter(naComptable.rnd, notifG.serial)
+      const args = { token: session.authToken, ns, notif}
+      const ret = this.tr(await post(this, 'SetNotifG', args))
+      if (ret.rowEspace && session.estAdmin) {
+        // PageAdmin : update liste espace
+        const esp = await compile(ret.rowEspace)
+        session.setEspace(esp, true)
+      }
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
 /* `SetNotifT` : notification de la tribu
 POST:
 - `token` : éléments d'authentification du compte.
@@ -652,16 +682,43 @@ export class SetNotifT extends OperationUI {
   async run (notifT, idt) {
     try {
       const session = stores.session
-      let stn = 9
-      let notif = null
-      if (notifT ) {
-        notifT.dh = Date.now()
-        const cle = getCle(idt)
-        notif = await crypter(cle, notifT.serial)
-        if (notifT.texte) stn = notifT.stn
-      }
+      if (!notifT) notifT = new Notification({})
+      else notifT.dh = Date.now()
+      const stn = notifT.stn
+      const cle = getCle(idt)
+      const notif = await crypter(cle, notifT.serial)
       const args = { token: session.authToken, id: idt, notif, stn }
       this.tr(await post(this, 'SetNotifT', args))
+      this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
+/* `SetNotifC` : notification d'un compte d'une tribu
+POST:
+- `token` : éléments d'authentification du compte.
+- `id` : id de la tribu
+- `idc` : id du compte
+- `notif` : notification du compte cryptée par la clé de la tribu
+- `stn` : 0:simple 1:lecture 2:mi,imal, 9:aucune
+
+Assertion sur l'existence du row `Tribus` de la tribu et `Comptas` du compte.
+*/
+export class SetNotifC extends OperationUI {
+  constructor () { super($t('OPntfco')) }
+
+  async run (notifC, idt, idc) { // id de la tribu, id du compte cible, notif
+    try {
+      const session = stores.session
+      if (!notifC) notifC = new Notification({})
+      else notifC.dh = Date.now()
+      const stn = notifC.stn
+      const cle = getCle(idt)
+      const notif = await crypter(cle, notifC.serial)
+      const args = { token: session.authToken, id: idt, idc, notif, stn }
+      this.tr(await post(this, 'SetNotifC', args))
       this.finOK()
     } catch (e) {
       return await this.finKO(e)
@@ -689,39 +746,6 @@ export class SetAtrItemComptable extends OperationUI {
       const atrItem = await Compta.atrItem(a.clet, info ? info : a.info, quotas ? quotas : a.q)
       const args = { token: session.authToken, id, idc: c.id, atrItem, quotas}
       this.tr(await post(this, 'SetAtrItemComptable', args))
-      this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* `SetNotifC` : notification d'un compte d'une tribu
-POST:
-- `token` : éléments d'authentification du compte.
-- `id` : id de la tribu
-- `idc` : id du compte
-- `notif` : notification du compte cryptée par la clé de la tribu
-- `stn` : 0:simple 1:lecture 2:mi,imal, 9:aucune
-
-Assertion sur l'existence du row `Tribus` de la tribu et `Comptas` du compte.
-*/
-export class SetNotifC extends OperationUI {
-  constructor () { super($t('OPntfco')) }
-
-  async run (notifC, id, idc) { // id de la tribu, id du compte cible, notif
-    try {
-      const session = stores.session
-      const cle = getCle(id)
-      let stn = 9
-      if (notifC) {
-        notifC.idSource = session.estComptable ? 0 : session.compteId
-        notifC.dh = Date.now()
-        if (notifC.texte) stn = notifC.stn
-      }
-      const notif = notifC ? await crypter(cle, notifC.serial) : null
-      const args = { token: session.authToken, id, idc, notif, stn }
-      this.tr(await post(this, 'SetNotifC', args))
       this.finOK()
     } catch (e) {
       return await this.finKO(e)
@@ -886,36 +910,6 @@ export class GetTribu extends OperationUI {
       const ret = this.tr(await post(this, 'GetTribu', args))
       const tribu = await compile(ret.rowTribu)
       return this.finOK(tribu)
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* Set notification générale *****************************************************
-args.token donne les éléments d'authentification du compte.
-args.ns
-args.notif
-Retour:
-*/
-export class SetNotifG extends OperationUI {
-  constructor () { super($t('OPntfg')) }
-
-  async run (notifG, ns) {
-    try {
-      const session = stores.session
-      const naComptable = NomGenerique.comptable()
-      if (!notifG) notifG = new Notification({})
-      else notifG.dh = Date.now()
-      const notif = await crypter(naComptable.rnd, notifG.serial)
-      const args = { token: session.authToken, ns, notif}
-      const ret = this.tr(await post(this, 'SetNotifG', args))
-      if (ret.rowEspace && session.estAdmin) {
-        // PageAdmin : update liste espace
-        const esp = await compile(ret.rowEspace)
-        session.setEspace(esp, true)
-      }
-      this.finOK()
     } catch (e) {
       return await this.finKO(e)
     }

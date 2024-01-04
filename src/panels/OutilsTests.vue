@@ -108,7 +108,7 @@
         </div>
     </q-card-section>
 
-    <q-dialog v-model="ui.d.OTrunning">
+    <q-dialog v-model="ui.d.OTrunning" persistent>
       <q-card :class="styp('sm')">
         <div class="column items-center">
           <q-spinner-hourglass persistent color="primary" size="3rem" @click="ui.fD"/>
@@ -117,7 +117,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.OTsuppbase">
+    <q-dialog v-model="ui.d.OTsuppbase" persistent>
       <q-card :class="styp('sm') + 'q-pa-sm'">
         <q-card-section>
           <div class="titre-md text-center q-my-sm">{{$t('GBprop', [itdel.trig])}}</div>
