@@ -66,7 +66,8 @@
       </div>
     </div>
 
-    <apercu-chat v-if="ui.d.ACouvrir" :naI="chatc.naI" :naE="chatc.naE" :ids="chatc.ids" :mapmc="mapmc"/>
+    <apercu-chat v-if="ui.d.ACouvrir" :naI="chatc.naI" :naE="chatc.naE" 
+      :ids="chatc.ids" :mapmc="mapmc"/>
     <apercu-chatgr v-if="ui.d.ACGouvrir"/>
     <contact-chat v-if="ui.d.CCouvrir"/>
 
@@ -99,6 +100,16 @@ export default {
   components: { ApercuChat, ContactChat, ApercuChatgr, ApercuGenx },
 
   computed: {
+    fusion () {
+      const f = this.fStore.filtre.chats // afin d'être sensible au changement de filtre
+      const r = []
+      this.aSt.tousChats.forEach(c => { r.push(c)})
+      this.gSt.tousChats.forEach(c => { r.push(c)})
+      r.sort((a, b) => { return a.dh > b.dh ? -1 : (a.dh === b.dh ? 0 : 1) })
+      this.ui.fmsg(r.length)
+      // console.log(Date.now())
+      return r
+    }
   },
 
   methods: {
@@ -183,42 +194,12 @@ export default {
     const gSt = stores.groupe
     const session = stores.session
     const fStore = stores.filtre
-    const fusion = ref()
-
     const mapmc = ref(Motscles.mapMC(true, 0))
     fStore.setContexte('chats', { mapmc: mapmc.value, groupeId : 0})
 
-    function init () {
-      const r = []
-      aSt.tousChats.forEach(c => { r.push(c)})
-      gSt.tousChats.forEach(c => { r.push(c)})
-      r.sort((a, b) => { return a.dh > b.dh ? -1 : (a.dh === b.dh ? 0 : 1) })
-      ui.fmsg(r.length)
-      fusion.value = r
-    }
-
-    init()
-
-    fStore.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setFiltre') init()
-      })
-    })
-
-    aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setChat' || name === 'delChat') init()
-      })
-    })
-
-    gSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setChatgr' || name === 'del') init()
-      })
-    })
-
     return {
-      session, ui, aSt, gSt, ID, dkli, fusion, getNg, dhcool,
+      session, ui, aSt, gSt, fStore, 
+      ID, dkli, dhcool,
       mapmc
     }
   }
@@ -228,11 +209,4 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.msg
-  position: absolute
-  z-index: 99999
-  top: -20px
-  right: 5px
-  border-radius: 5px
-  border: 1px solid black
 </style>

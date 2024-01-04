@@ -83,9 +83,9 @@
         </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="md" color="primary" icon="undo"
+          <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
             :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="md" color="primary" icon="add"
+          <q-btn dense size="md" padding="xs" color="primary" icon="add"
             :label="$t('valider')"  @click="addop"/>
         </q-card-actions>
       </q-card>

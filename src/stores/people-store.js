@@ -160,6 +160,7 @@ export const usePeopleStore = defineStore('people', {
       stores.ui.fmsg(r.length)
       return r
     }
+
   },
   
   actions: {

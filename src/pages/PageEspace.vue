@@ -315,7 +315,6 @@ export default {
       ct.f = fx[fv][0]
       ct.m = fx[fv][1]
       synth.value.sort(comp)
-      // synth.value.forEach(lg => { console.log(lg.id, lg.q1)})
     }
 
     async function refreshSynth () {

@@ -25,7 +25,7 @@ La trosième partie décrit les opérations de connexion, synchronisation et les
 **App inclut quelques dialogues singletons** afin d'éviter leurs inclusions trop multiples:
 - ces dialogues n'ont pas de propriétés, c'est le contexte courant qui fixe ce qu'ils doivent afficher.
 - chaque dialogue dans App est gardée par un `v-if` de la variable modèle qui l'ouvre.
-- `DialogueErreur DialogueHelp PressePapier PanelPeople PanelMembre OutilsTests DialogueNotif ApercuCv PhraseSecrete`
+- `DialogueErreur DialogueHelp PressePapier PanelPeople PanelMembre OutilsTests ApercuCv PhraseSecrete`
 
 **App a quelques dialogues internes simples:**
 - _ui.d.aunmessage_ : Gestion d'un message s'affichant en bas
@@ -33,13 +33,13 @@ La trosième partie décrit les opérations de connexion, synchronisation et les
 - _ui.d.confirmFerm_ : demande de confirmation d'une fermeture de dialogue avec perte de saisie
 - _ui.d.dialoguedrc_ : choix de déconnexion. Déconnexion, reconnexion, continuer
 
-La logique embarquée est sommaire:
-- détection du changement de largeur de la page pour gérer correctement l'ouverture du drawer de filtre;
-- gestion du titre des pages;
-- affichage de l'onglet pour les pages ayant un onglet.
+La logique embarquée se limite à:
+- détecter le changement de largeur de la page pour faire gérer correctement l'ouverture du drawer de filtre dans stores.ui,
+- gérer le titre des pages,
+- se débrancher vers les pages demandée.
 
 ### Pages, panels, dialogues, components
-Chaque page au sens ci-dessus peut importer des panels, dialogues, components.
+Chaque page au sens ci-dessus peut importer des _panels, dialogues, components_.
 
 #### Panels
 Ce sont dialogues qui s'affichent sur la gauche en pleine hauteur avec une largeur qui peut être `'sm md lg'`.

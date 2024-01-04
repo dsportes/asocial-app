@@ -29,9 +29,7 @@
 </template>
 
 <script>
-import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
-import { getNg } from '../app/modele.mjs'
 import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
@@ -42,15 +40,26 @@ export default {
   name: 'ApercuGenx',
 
   props: { 
-    id: Number,
-    im: Number,
+    id: Number, // id du groupe, avatar du compte ou contact
+    im: Number, // si c'est un membre d'un groupe, son im pour l'afficher
     idx: Number
   },
 
   components: { McMemo },
 
   computed: {
-    estGr () { return ID.estGroupe(this.na.id) },
+    estGroupe () { return ID.estGroupe(this.id) },
+    estAvc () { return this.estGroupe ? false : this.aSt.compte.estAvDuCompte(this.id) },
+    eg () { return this.estGroupe ? this.gSt.egr(this.id) : null },
+    agp () { 
+      if (this.estGroupe) return this.eg.groupe
+      if (this.estAvc) return this.aSt.getAvatar(this.id)
+      return this.pSt.getPeople(this.id)
+    },
+    estAnim () { return this.estGroupe ? this.eg.estAnim : false },
+    na () { return this.agp.na },
+    cv () { return this.agp.cv },
+    
     photo () { return this.cv && this.cv.photo ? this.cv.photo : this.na.defIcon },
     info () { return this.cv ? (this.cv.info || '') : '' },
     det () { return this.session.peopleId === this.id && this.ui.estOuvert('detailspeople') }
@@ -72,71 +81,14 @@ export default {
     }
   },
 
-  setup (props) {
-    const session = stores.session
-    const aSt = stores.avatar
-    const gSt = stores.groupe
-    const pSt = stores.people
-    const ui = stores.ui
-
-    const agp = ref() // un avatar, un groupe ou un people
-
-    const id = toRef(props, 'id')
-    const na = ref(getNg(id))
-    const cv = ref()
-
-    const estGroupe = ID.estGroupe(id.value)
-    const estAvc = ref(false)
-    const estAnim = ref(false)
-
-    function initGr () {
-      const eg = gSt.egr(id.value)
-      estAnim.value = eg.estAnim
-      agp.value = eg.groupe
-      na.value = agp.value.na
-      cv.value = agp.value.cv
-    }
-
-    function initAv() {
-      agp.value = aSt.getAvatar(id.value)
-      na.value = agp.value.na
-      cv.value = agp.value.cv
-    }
-
-    function initPe() {
-      agp.value = pSt.getPeople(id.value)
-      na.value = agp.value.na
-      cv.value = agp.value.cv
-    }
-
-    if (estGroupe) {
-      initGr()
-      gSt.$onAction(({ name, args, after }) => {
-        after((result) => {
-          if (name === 'setGroupe' && args[0].id === id.value) initGr()
-        })
-      })
-    } else {
-      estAvc.value = aSt.compte.estAvDuCompte(id.value)
-      if (estAvc.value){
-        initAv()
-        aSt.$onAction(({ name, args, after }) => {
-          after((result) => {
-            if (name === 'setAvatar' && args[0].id === id.value) initAv()
-          })
-        })
-      } else {
-        initPe()
-        pSt.$onAction(({ name, args, after }) => {
-          after((result) => {
-            if (name === 'setPeople' && args[0].id === id.value) initPe()
-          })
-        })
-      }
-    }
-
+  setup () {
     return {
-      dkli, titre, ID, agp, na, cv, estAvc, estGroupe, session, ui
+      dkli, titre, ID, 
+      aSt: stores.avatar, 
+      gSt: stores.groupe, 
+      pSt: stores.people, 
+      session: stores.session, 
+      ui: stores.ui
     }
   }
 }

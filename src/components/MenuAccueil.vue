@@ -56,7 +56,7 @@
     </q-item>
     <q-item v-if="!aSt.compta.estA" clickable  @click="maTribu()">
       <q-item-section>
-        <q-item-label lines="1">{{$t(pow <= 3 ? 'ACalloc' : 'ACspons')}}</q-item-label>
+        <q-item-label lines="1">{{$t(session.pow <= 3 ? 'ACalloc' : 'ACspons')}}</q-item-label>
       </q-item-section>
     </q-item>
     <q-separator color="orange"/>
@@ -64,7 +64,7 @@
     <q-item class="row items-center">
       <span class="text-italic text-bold q-mr-sm">{{$t('ACav')}}</span>
       <q-select v-model="cav" borderless dense options-dense standard filled
-          :options="options" style="max-width: 150px" behavior="menu"/>
+        :options="options" style="max-width: 150px" behavior="menu"/>
     </q-item>
 
     <q-item clickable>
@@ -106,7 +106,6 @@
 </template>
 
 <script>
-import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 
 export default {
@@ -115,6 +114,15 @@ export default {
   props: { menu: Boolean },
 
   computed: {
+    options () {
+      const l = []
+      this.aSt.map.forEach(e => { 
+        const a = e.avatar
+        l.push({ label: a.na.nom, value: a.id }) 
+      })
+      return l
+    },
+
     nbchats () { return this.aSt.nbchats + this.gSt.nbchats },
     nbchatsAv () { return this.aSt.eavC.chats.size },
     nbspons () { return this.aSt.eavC.sponsorings.size },
@@ -139,9 +147,7 @@ export default {
   },
 
   watch: {
-    cav (ap, av) {
-      this.session.setAvatarId(ap.value)
-    }
+    cav (ap) { this.session.setAvatarId(ap.value) }
   },
 
   methods: {
@@ -164,49 +170,17 @@ export default {
 
   data () {
     return {
+      cav: { label: this.aSt.compte.na.nom, value: this.aSt.compte.na.id }
     }
   },
 
   setup () {
-    const aSt = stores.avatar
-    const gSt = stores.groupe
-    const fSt = stores.filtre
-    const session = stores.session
-    const ui = stores.ui
-    const options = ref([])
-    const cav = ref(null)
-
-    function lstAv () {
-      aSt.map.forEach(e => {
-        const a = e.avatar
-        options.value.push({ label: a.na.nom, value: a.id })
-      })
-    } 
-
-    aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setCompte' || name === 'setAvatar') {
-          lstAv()
-        }
-      })
-    })
-
-    session.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setAvatarId') {
-          const id = args[0]
-          options.value.forEach(x => { if (x.value === id) cav.value = x})
-        }
-      })
-    })
-
-    lstAv()
-    options.value.forEach(x => { if (x.value === session.avatarId) cav.value = x})
-
     return {
-      pow: session.pow,
-      aSt, session, gSt, ui, fSt,
-      options, cav
+      aSt: stores.avatar,
+      session: stores.session, 
+      gSt: stores.groupe, 
+      ui: stores.ui, 
+      fSt: stores.filtre
     }
   }
 

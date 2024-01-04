@@ -6,18 +6,18 @@
       <bouton-help page="page1"/>
 
       <!-- Notifications -->
-      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
         @click="clickNotif" apptb/>
-      <!--
-      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" alire :niv="1" 
+      <!-- Test du look des icones de notification
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="1" 
         @click="clickNotif" apptb/>
-      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :niv="2" 
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="2" 
         @click="clickNotif" apptb/>
-      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" alire :niv="3" 
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="3" 
         @click="clickNotif" apptb/>
-      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :niv="4" 
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="4" 
         @click="clickNotif" apptb/>
-      <notif-icon2 v-if="session.status === 2" class="q-ml-xs" :niv="5" 
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="5" 
         @click="clickNotif" apptb/>
       -->
 
@@ -32,7 +32,7 @@
         :color="aHome ? 'warning' : 'grey'" @click="gotoAccueilLogin()"/>
 
       <q-btn v-if="ui.pageback" icon="arrow_back" dense size="md" round padding="none"
-        @click="gotoBack()"/>
+        @click="ui.gotoBack()"/>
 
       <q-toolbar-title class="titre-lg text-center"><span>{{titrePage}}</span>
       </q-toolbar-title>
@@ -51,9 +51,9 @@
         <q-tooltip>{{$t('MLApp')}}</q-tooltip>
       </q-btn>
 
-      <q-btn v-if="session.ok && aUnFiltre" 
+      <q-btn v-if="session.ok && ui.aUnFiltre" 
         color="warning" round padding="none" dense size="md" icon="search" 
-        @click="ouvrFiltre">
+        @click="ui.ouvrFiltre">
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </q-btn>
 
@@ -91,7 +91,7 @@
 
       <!-- Dark ou clair -->
       <q-btn dense size="md" icon="contrast" padding="none" round 
-        @click="tgdark">
+        @click="$q.dark.toggle()">
         <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
       </q-btn>
 
@@ -140,13 +140,13 @@
     </q-toolbar>
   </q-footer>
 
-  <q-drawer v-model="pfiltre" side="right" elevated bordered persistent
-    :width="250" :breakpoint="seuillarge" :overlay="etroite">
+  <q-drawer v-model="ui.pfiltre" side="right" elevated bordered persistent
+    :width="250" :breakpoint="ui.seuillarge" :overlay="ui.etroite">
     <q-scroll-area :class="'fit ' + dkli(1)">
       <div>
         <div class="row justify-bettween q-mb-md">
           <q-btn class="q-mr-sm" icon="chevron_right" 
-            color="warning" size="md" dense @click="fermFiltre"/>
+            color="warning" size="md" dense @click="ui.fermFiltre"/>
           <div class="titre-lg">{{$t('MLArech')}}</div>
         </div>
         <div v-if="ui.page === 'chats'" class="column justify-start">
@@ -334,7 +334,6 @@
 
 <script>
 import { useQuasar } from 'quasar'
-import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
@@ -344,7 +343,7 @@ import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
-import NotifIcon2 from './components/NotifIcon.vue'
+import NotifIcon from './components/NotifIcon.vue'
 import QueueIcon from './components/QueueIcon.vue'
 import FiltreNom from './components/FiltreNom.vue'
 import FiltreMc from './components/FiltreMc.vue'
@@ -411,7 +410,7 @@ export default {
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon, OutilsTests,
+    BoutonHelp, BoutonLangue, NotifIcon, QueueIcon, OutilsTests,
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
@@ -423,8 +422,10 @@ export default {
 
   computed: {
     lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
+
     aHome () { return (this.session.status === 2 && this.ui.page !== 'accueil')
       || (!this.session.status && this.ui.page !== 'login') },
+
     titrePage () {
       const p = this.ui.page
       let arg = ''
@@ -439,19 +440,13 @@ export default {
         case 'groupe' : { arg = this.gSt.egrC ? this.gSt.egrC.groupe.na.nom : this.$t('disparu'); break }
       }
       return this.$t('P' + p, [arg])
-    },
-    aUnFiltre () { return this.ui.aFiltre(this.ui.page, this.ui.pagetab)}
+    }
   },
 
   // Gère le franchissement du seuil etroit / large
   watch: {
     "$q.screen.width"() {
-      const w = this.$q.screen.width
-      const et = w < this.seuillarge
-      if (et === this.etroite) return
-      this.etroite = et
-      if (!this.aUnFiltre) this.setPFiltre(false)
-      else this.redoPFiltre()
+      this.ui.setScreenWidth(this.$q.screen.width)
     }
   },
 
@@ -459,17 +454,18 @@ export default {
   }},
 
   methods: {
+    // deconnexion () { this.ui.fD(); deconnexion() },
     discon () {
-      if (this.session.status === 3) deconnexion(); else this.ui.oD('dialoguedrc')
+      if (this.session.status === 3) deconnexion()
+      else this.ui.oD('dialoguedrc')
     },
+    async reconnexion () { this.ui.fD(); await reconnexionCompte() },
 
     stopop () {
       const op = this.session.opEncours
       if (op && op.stop) op.stop()
       this.ui.fD()
     },
-
-    tgdark () { this.$q.dark.toggle() },
 
     clickNotif () {
       this.ui.setPage('compta', 'notif')
@@ -486,75 +482,23 @@ export default {
     fermerqm () {
       this.ui.fD()
       setTimeout(() => { this.ui.fD() }, 50)
-    },
-    deconnexion () { this.ui.fD(); deconnexion() },
-    async reconnexion () { this.ui.fD(); await reconnexionCompte() }
+    }
   },
 
   setup () {
     set$t(useI18n().t)
     const $q = useQuasar()
+    stores.config.$q = $q
     $q.dark.set(true)
 
-    const config = stores.config
-    config.$q = $q
-   
     const session = stores.session
     const aSt = stores.avatar
     const gSt = stores.groupe
     const ui = stores.ui
-
-    const seuillarge = 900
-    const etroite = ref($q.screen.width < seuillarge)
-    const pfiltre = ref(false)
-
-    function ouvrFiltre () { 
-      setPFiltre(!pfiltre.value)
-    }
-
-    function fermFiltre () { 
-      setPFiltre(false)
-    }
-
-    function setPFiltre (v) {
-      setTimeout(() => {
-        pfiltre.value = v
-      }, 200)
-    }
-
-    function redoPFiltre () {
-      setTimeout(() => {
-        pfiltre.value = false
-          setTimeout(() => {
-            pfiltre.value = true
-          }, 200)
-      }, 200)
-    }
-
-    ui.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setTab') {
-          const t = args[0]
-          if (!ui.aFiltre(ui.page, t)) setPFiltre(false)
-          else if (!etroite.value) setPFiltre(true)
-        }
-      })
-    })
-
-    function gotoBack () {
-      if (ui.pageback) ui.setPage(ui.pageback)
-    }
-
-    const infomode = ref(false)
-    const infonet = ref(false)
-    const infoidb = ref(false)
+    ui.setScreenWidth($q.screen.width)
 
     return {
-      session, config, ui, aSt, gSt, styp,
-      seuillarge, etroite, gotoBack,
-      pfiltre, ouvrFiltre, fermFiltre, setPFiltre, redoPFiltre,
-      hms, dkli,
-      infonet, infoidb, infomode
+      session, ui, aSt, gSt, styp, dkli, hms, deconnexion
     }
   }
 }

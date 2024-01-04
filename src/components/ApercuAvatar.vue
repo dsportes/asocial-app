@@ -39,7 +39,7 @@
 </template>
 <script>
 
-import { toRef, ref, watch } from 'vue'
+import { ref } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { GetAvatarPC, ChangementPC, ExistePhrase } from '../app/operations.mjs'
@@ -57,6 +57,7 @@ export default {
   components: { PhraseContact, BoutonHelp, ApercuGenx },
 
   computed: {
+    avatar () { return this.aSt.getAvatar(this.idav)}
   },
 
   data () {
@@ -106,30 +107,10 @@ export default {
     const ui = stores.ui
     const aSt = stores.avatar
     const idc = ref(ui.getIdc())
-    const idav = toRef(props, 'idav')
-
-    function getAv() { return aSt.getAvatar(idav.value) }
-    const avatar = ref(getAv())
-
-    aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setAvatar' && args[0].id === idav.value) {
-          avatar.value = args[0]
-        }
-      })
-    })
-
-    /* Nécessaire pour tracker le changement d'id
-    Dans une liste le composant N'EST PAS rechargé quand la liste change */
-    watch(() => idav.value, (ap, av) => {
-        avatar.value = getAv()
-      }
-    )
 
     return {
       dkli, ID, idc, styp,
-      session, ui,
-      avatar
+      session, ui, aSt
     }
   }
 }

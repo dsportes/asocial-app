@@ -95,6 +95,21 @@ export default ({
 
   components: { BoutonHelp },
 
+  computed: {
+    lst () {
+      const l = []
+      for (const [pk, f] of this.fSt.map) {
+        const n = this.nSt.getNode(f.ids, f.ns)
+        const r = this.nSt.getNode(n.rkey).label
+        l.push({f, n, r})
+      }
+      l.sort((a, b) => {
+        return a.f.lg > b.f.lg ? -1 : (a.f.lg < b.f.lg ? 1 : 0)
+      })
+      return l
+    }
+  },
+
   data () {
     return {
       fc: null // fichier courant
@@ -179,39 +194,10 @@ export default ({
     const ppSt = stores.pp
     const ui = stores.ui
 
-    const lst = ref()
-
-    function init1 () {
-      const l = []
-      for (const [pk, f] of fSt.map) {
-        const n = nSt.getNode(f.ids, f.ns)
-        const r = nSt.getNode(n.rkey).label
-        l.push({f, n, r})
-      }
-      l.sort((a, b) => {
-        return a.f.lg > b.f.lg ? -1 : (a.f.lg < b.f.lg ? 1 : 0)
-      })
-      lst.value = l
-    }
-
-    fSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setAny') init1()
-      })
-    })
-
-    nSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setNote' || name === 'delNote') init1()
-      })
-    })
-
-    init1()
-
     return {
-      edvol, dhcool, dkli,
-      nSt, fSt, session, ppSt, avnSt, ui, styp,
-      lst
+      edvol, dhcool, dkli, styp,
+      nSt, fSt, session, ppSt, avnSt, ui
+      // lst
     }
   }
 })

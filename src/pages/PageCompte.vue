@@ -222,16 +222,6 @@ export default {
     const aSt = stores.avatar
     const fSt = stores.filtre
 
-    /*
-    aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setAvatar' || name === 'setCompte' || name === 'del') {
-          // ???
-        }
-      })
-    })
-    */
-
     return {
       ui, aSt, fSt, session, styp, ID
     }

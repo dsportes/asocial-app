@@ -115,6 +115,12 @@ export default {
     const naCpt = getNg(session.compteId)
     const mapmc = ref(Motscles.mapMC(true, 0))
 
+    /* le calcul des chats d'urgence n'existent pas nécessite un await
+    D'où l'obligation de l'effectuer onMounted
+    et son recalcul en cas de changement d'un chat.
+    On pourrait optimiser en filtrant sur les ids des chats utiles
+    mais c'est rare.
+    */
     const chats = reactive([])
 
     async function getChats () {
@@ -143,7 +149,6 @@ export default {
       after(async (result) => {
         if ((name === 'jailu')){
           if (session.accesNetNf) await new SetDhvuCompta().run()
-          // ui.setPage('accueil')
         }
       })
     })

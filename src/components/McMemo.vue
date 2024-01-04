@@ -64,7 +64,7 @@
         <q-card-actions v-if="!diag" align="right" class="q-gutter-sm">
           <q-btn flat dense padding="xs" color="primary" size="md" icon="undo" 
             :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn class="q-ml-md" dense padding="xs" color="primary" size="md" icon="chek" 
+          <q-btn class="q-ml-md" dense padding="xs" color="primary" size="md" icon="check" 
             :label="$t('valider')" @click="valider"/>
         </q-card-actions>
 
@@ -74,7 +74,7 @@
 </template>
 <script>
 
-import { toRef, ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { Motscles, getNg } from '../app/modele.mjs'
@@ -93,13 +93,15 @@ export default {
   components: { ApercuMotscles, EditeurMd },
 
   computed: { 
+    mapmc () { return Motscles.mapMC(true, 0) },
+    mcmemo () { return this.aSt.compte.mcmemo(this.id) },
+    memo () { return this.mcmemo && this.mcmemo.memo ? this.mcmemo.memo : '' },
+    memolg () { return titre(this.memo) },
     nom () { return getNg(this.id).nom },
     mc () { return this.mcmemo && this.mcmemo.mc ? this.mcmemo.mc : new Uint8Array([])},
     mclg () { return this.mcmemo && this.mcmemo.mc ?
       Motscles.editU8(this.mcmemo.mc, this.mapmc) : []
     },
-    memo () { return this.mcmemo && this.mcmemo.memo ? this.mcmemo.memo : '' },
-    memolg () { return titre(this.memo) },
   },
 
   data () { return {
@@ -111,10 +113,7 @@ export default {
   watch: {
     "$q.screen.width"() {
       const l = this.root.offsetWidth > LARGE
-      if (l !== this.large) {
-        this.large = l
-        // console.log(this.large)
-      }
+      if (l !== this.large) this.large = l
     }
   },
 
@@ -140,43 +139,18 @@ export default {
     const session = stores.session
     const ui = stores.ui
     const aSt = stores.avatar
-    const id = toRef(props, 'id')
     const idc = ref(ui.getIdc())
-    const mapmc = ref(Motscles.mapMC(true, 0))
+
     const root = ref(null)
     const large = ref(false)
-
-    const mcmemo = ref(null)
-    
-    function getmm () {
-      mcmemo.value = aSt.compte.mcmemo(id.value)
-    }
-
-    /* Nécessaire pour tracker le changement d'id
-    Dans une liste le composant N'EST PAS rechargé quand la liste change */
-    watch(() => id.value, (ap, av) => {
-        getmm()
-      }
-    )
-
-    aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setAvatar' && args[0].id === session.compteId) {
-          getmm()
-        }
-      })
-    })
-
-    getmm()
-
     onMounted(() => {
       large.value = root.value.offsetWidth > LARGE
-      // console.log(large.value)
     })
 
     return {
-      styp, session, ui, root, large, idc,
-      mcmemo, dkli, titre, mapmc
+      session, ui, idc, aSt, 
+      root, large,
+      dkli, styp,
     }
   }
 }

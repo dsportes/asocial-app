@@ -1,18 +1,24 @@
 import { defineStore } from 'pinia'
 import { $t, hms } from '../app/util.mjs'
 
+const seuillarge = 900
+const pagesF = new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 'groupesac', 'groupe', 'notes'])
+const tabF = new Set(['membres'])
+const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes', 'ficavion'])
+
 export const useUiStore = defineStore('ui', {
   state: () => ({
     diag: '',
     diagresolve: null,
 
+    etroite: false,
+    screenWidth: 0,
+
     pagetab: '',
     page: 'login',
     pageback: '',
     menug: false,
-    pagesF: new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 'groupesac', 'groupe', 'notes']),
-    tabF: new Set(['membres']),
-    pagesB: new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes', 'ficavion']),
+    pfiltre: false,
 
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
@@ -127,12 +133,33 @@ export const useUiStore = defineStore('ui', {
   }),
 
   getters: {
+    aUnFiltre (state) { 
+      if (!pagesF.has(state.page)) return false
+      return !state.pagetab || tabF.has(state.pagetab)
+    }
   },
 
   actions: {
+    setScreenWidth (w) {
+      const et = w < seuillarge
+      if (this.screenWidth === 0) {
+        this.screenWidth = w
+        this.etroite = et
+      } else {
+        if (et !== this.etroite) {
+          this.etroite = et
+          if (!this.aUnFiltre) 
+            this.setPFiltre(false)
+          else 
+            this.redoPFiltre()
+        }
+      }
+    },
+
     getIdc () {
       return this.idc++
     },
+
     fD () {
       const e = this.dialogStack.pop()
       if (e) {
@@ -168,14 +195,38 @@ export const useUiStore = defineStore('ui', {
       this.dialogStack.length = 0
     },
 
+    /*
     aFiltre (p, t) {
       if (!this.pagesF.has(p)) return false
       return !t || this.tabF.has(t)
     },
+    */
+    ouvrFiltre () { 
+      this.setPFiltre(!this.pfiltre)
+    },
+
+    fermFiltre () { 
+      this.setPFiltre(false)
+    },
+
+    setPFiltre (v) {
+      setTimeout(() => {
+        this.pfiltre = v
+      }, 200)
+    },
+
+    redoPFiltre () {
+      setTimeout(() => {
+        this.pfiltre = false
+          setTimeout(() => {
+            this.pfiltre = true
+          }, 200)
+      }, 200)
+    },
 
     setPage (p, t) {
       this.resetD()
-      this.pageback = this.pagesB.has(this.page) ? this.page : ''
+      this.pageback = pagesB.has(this.page) ? this.page : ''
       this.page = p
       this.menug = false
       this.setTab(t)
@@ -183,6 +234,10 @@ export const useUiStore = defineStore('ui', {
 
     setTab (tab) {
       this.pagetab = tab
+    },
+
+    gotoBack () {
+      if (this.pageback) this.setPage(this.pageback)
     },
 
     closeMenug () { 

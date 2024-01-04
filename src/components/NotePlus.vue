@@ -26,12 +26,10 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { splitPK } from '../app/util.mjs'
 import NoteNouvelle from '../panels/NoteNouvelle.vue'
-
-// const colors = ['','primary','orange','negative','primary','orange','primary','orange']
 
 export default {
   name: 'NotePlus',
@@ -41,13 +39,46 @@ export default {
   props: {
   },
 
-  computed: { },
+  computed: { 
+    /* node.type
+    1 : racine avatar - bav = 1 // Av fixé, bgr = 0
+    2 : racine groupe - bav = 2 // Av par select, bgr = 1 // Gr fixé
+    3 : racine groupe zombi
+    4 5 : note avatar / groupe 4) bav = 1 // Av fixé, bgr = 0, 5) bav = 2 // Av par select
+      bgr = 1 // Gr fixé
+    6 7 : note fake avatar / groupe
+    */
+    notep () { return this.nSt.node.note },
+    lna () { return this.aSt.compte.lstAvatarNas },
+    bav () { return [0, 1, 2, 0, 1, 2][this.nSt.node.type]},
+    bgr () { return [0, 0, 1, 0, 0, 1][this.nSt.node.type]}
+  },
 
   methods: { 
+    okav () {
+      this.estgr = false
+      this.ui.oD('NNnotenouvelle')
+    },
+
+    okgr () {
+      this.estgr = true
+      this.ui.oD('NNnotenouvelle')
+    },
+
+    selNa (na) {
+      this.avatar = this.aSt.getElt(na.id).avatar
+      this.avSel = na
+      this.estgr = false
+      this.ui.oD('NNnotenouvelle')
+    }
   },
 
   data () {
     return {
+      avatar: this.nSt.node.type === 1 || this.nSt.node.type === 4 ? this.aSt.getElt(this.id).avatar : null,
+      groupe: this.nSt.node.type === 2 || this.nSt.node.type === 5 ? this.gSt.egr(this.id).groupe : null,
+      avSel: this.nSt.node.type === 2 || this.nSt.node.type === 5 ? this.aSt.compte.lstAvatarNas[0] : 0,
+      estgr: false
     }
   },
 
@@ -56,91 +87,10 @@ export default {
     const aSt = stores.avatar
     const nSt = stores.note
     const gSt = stores.groupe
-    const bav = ref(0)
-    const bgr = ref(0)
-    const avatar = ref()
-    const groupe = ref()
-    const notep = ref()
-    const estgr = ref(false)
-
-    const avSel = ref()
-    const lna = ref()
-
-    function init() {
-      const node = nSt.node
-      const { id, ids } = splitPK(nSt.node.key)
-      notep.value = nSt.node.note
-      lna.value = aSt.compte.lstAvatarNas
-
-      switch (node.type) {
-      /*      
-      1 : racine avatar
-      2 : racine groupe
-      3 : racine groupe zombi
-      4 5 : note avatar / groupe
-      6 7 : note fake avatar / groupe
-      */
-      case 1: {
-        bav.value = 1 // Av fixé
-        bgr.value = 0
-        avatar.value = aSt.getElt(id).avatar
-        groupe.value = null
-        break
-      }
-      case 2: {
-        bav.value = 2 // Av par select
-        bgr.value = 1 // Gr fixé
-        avSel.value = lna.value[0]
-        groupe.value = gSt.egr(id).groupe
-        break
-      }
-      case 4: {
-        bav.value = 1 // Av fixé
-        bgr.value = 0
-        avatar.value = aSt.getElt(id).avatar
-        groupe.value = null
-        break
-      }
-      case 5: {
-        bav.value = 2 // Av par select
-        bgr.value = 1 // Gr fixé
-        avSel.value = lna.value[0]
-        groupe.value = gSt.egr(id).groupe
-        break
-      }
-      }
-    }
-
-    nSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setCourant') {
-          init()
-        }
-      })
-    })
-
-    function okav () {
-      estgr.value = false
-      ui.oD('NNnotenouvelle')
-    }
-
-    function okgr () {
-      estgr.value = true
-      ui.oD('NNnotenouvelle')
-    }
-
-    function selNa (na) {
-      avatar.value = aSt.getElt(na.id).avatar
-      avSel.value = na
-      estgr.value = false
-      ui.oD('NNnotenouvelle')
-    }
-
-    init()
+    const { id, ids } = splitPK(nSt.node.key)
 
     return {
-      ui, selNa, okav, okgr, 
-      bav, bgr, avSel, lna, avatar, groupe, notep, estgr
+      ui, aSt, gSt, nSt, id
     }
   }
 

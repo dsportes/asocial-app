@@ -2,18 +2,19 @@
 <q-dialog v-model="ui.d.ACVouvrir" persistent>
   <q-card :class="styp('sm') + 'column minh'">
     <q-toolbar class="col-auto bg-secondary text-white">
-      <q-btn dense size="md" color="primary" icon="close" @click="ui.fD"/>
-      <q-toolbar-title>
+      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+      <q-toolbar-title> 
+        <!--span>{{estAvc}} - {{estGroupe}} - {{diag.substring(0, 4)}}</span-->
         <span class="titre-lg">{{estAvc ? na.nom : na.nomc}}</span> 
         <span v-if="estAvc" class="titre-md q-ml-md">[{{$t('moi')}}]</span>
       </q-toolbar-title>
       <q-btn v-if="!estGroupe && !estAvc && net" dense size="md" padding="none" round
         color="primary" icon="refresh" @click="refresh"/>
-      <q-btn v-if="(estAvc || estGroupe) && !diag" dense size="md" 
+      <q-btn v-if="(estAvc || estGroupe) && diag === ''" dense size="md" 
         icon="edit" color="primary"
         :label="$t('editer')" @click="ovcved"/>
     </q-toolbar>
-    <q-toolbar inset v-if="estAvc && diag" class="bg-yellow-5 text-bold text-black titre-md">
+    <q-toolbar inset v-if="diag !== ''" class="bg-yellow-5 text-bold text-black titre-md">
       {{diag}}
     </q-toolbar>
 
@@ -24,7 +25,7 @@
     </div>
 
     <!-- Dialogue d'édition de la carte de visite -->
-    <carte-visite v-model="ui.d.CVedition" 
+    <carte-visite v-model="ui.d.CVedition" @ok="cvok"
       :photo-init="photo" :info-init="info" :na="na"/>
 
   </q-card>
@@ -32,12 +33,10 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-
 import stores from '../stores/stores.mjs'
 import { ChargerCvs, MajCv, MajCvGr } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
-import { styp, $t } from '../app/util.mjs'
+import { styp } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
 import CarteVisite from '../dialogues/CarteVisite.vue'
@@ -52,6 +51,35 @@ export default {
 
   computed: {
     lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
+
+    estGroupe () { return ID.estGroupe(this.id) },
+    estAvc () { return this.estGroupe ? false : this.aSt.compte.estAvDuCompte(this.id) },
+    eg () { return this.estGroupe ? this.gSt.egr(this.id) : null },
+    agp () { 
+      if (this.estGroupe) return this.eg.groupe
+      if (this.estAvc) return this.aSt.getAvatar(this.id)
+      return this.pSt.getPeople(this.id)
+    },
+    estAnim () { 
+      if (this.estGroupe) {
+        const x = this.eg
+        const a = x.estAnim
+        return a
+      } 
+      return false 
+    },
+    na () { return this.agp.na },
+    cv () { return this.agp.cv },
+    diag () {
+      if (this.session.editDiag) return this.session.editDiag
+      if (!this.estGroupe) return ''
+      const x = this.estAnim 
+      if (!x) 
+        return this.$t('FAcvgr') 
+      else 
+        return ''
+    },
+
     photo () { return this.cv && this.cv.photo ? this.cv.photo : this.na.defIcon },
     info () { return this.cv ? (this.cv.info || '') : '' }
   },
@@ -90,68 +118,10 @@ export default {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const pSt = stores.people
-
-    const agp = ref() // un avatar, un groupe ou un people
-
-    const id = ref(ui.cveditionId)
-    const na = ref()
-    const cv = ref()
-
-    const estGroupe = ID.estGroupe(id.value)
-    const estAvc = ref(false)
-    const estAnim = ref(false)
-
-    const diag =ref(session.editDiag)
-
-    function initGr () {
-      const eg = gSt.egr(id.value)
-      estAnim.value = eg.estAnim
-      agp.value = eg.groupe
-      na.value = agp.value.na
-      cv.value = agp.value.cv
-      if (!diag.value && !estAnim.value) diag.value = $t('FAcvgr')
-    }
-
-    function initAv() {
-      agp.value = aSt.getAvatar(id.value)
-      na.value = agp.value.na
-      cv.value = agp.value.cv
-    }
-
-    function initPe() {
-      agp.value = pSt.getPeople(id.value)
-      na.value = agp.value.na
-      cv.value = agp.value.cv
-    }
-
-    if (estGroupe) {
-      initGr()
-      gSt.$onAction(({ name, args, after }) => {
-        after((result) => {
-          if (name === 'setGroupe' && args[0].id === id.value) initGr()
-        })
-      })
-    } else {
-      estAvc.value = aSt.compte.estAvDuCompte(id.value)
-      if (estAvc.value){
-        initAv()
-        aSt.$onAction(({ name, args, after }) => {
-          after((result) => {
-            if (name === 'setAvatar' && args[0].id === id.value) initAv()
-          })
-        })
-      } else {
-        initPe()
-        pSt.$onAction(({ name, args, after }) => {
-          after((result) => {
-            if (name === 'setPeople' && args[0].id === id.value) initPe()
-          })
-        })
-      }
-    }
-
+    const id = ui.cveditionId
+    
     return {
-      styp, session, ui, ID, aSt, estAvc, estGroupe, id, na, cv, agp, diag,
+      styp, session, ui, ID, aSt, gSt, pSt, id,
       net: session.accesNet
     }
   }

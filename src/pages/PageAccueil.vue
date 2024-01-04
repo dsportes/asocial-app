@@ -54,26 +54,26 @@
 
       <!-- Notifications -->
       <div class="btn2" @click="clickNotif">
-        <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
         <span class="q-ml-xs">{{$t('MLAntf')}}</span>
       </div>
 
       <!-- Abonnement -->
       <div class="btn2" @click="clickAbo">
-        <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
         <span class="q-ml-xs">{{$t('MLAabo')}}</span>
       </div>
 
       <!-- credits -->
       <div v-if="session.estComptable || aSt.compta.estA"
         class="btn2" @click="clickCred">
-        <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
         <span class="q-ml-xs">{{$t('MLAcred')}}</span>
       </div>
 
       <!-- Chats d'urgence -->
       <div class="btn2" @click="clickChats">
-        <notif-icon2 class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
         <span class="q-ml-xs">{{$t('MLAchats')}}</span>
       </div>
 
@@ -103,14 +103,14 @@
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
-import NotifIcon2 from '../components/NotifIcon.vue'
+import NotifIcon from '../components/NotifIcon.vue'
 import QueueIcon from '../components/QueueIcon.vue'
 import MenuAccueil from '../components/MenuAccueil.vue'
 
 export default {
   name: 'PageAccueil',
 
-  components: { MenuAccueil, BoutonHelp, BoutonLangue, NotifIcon2, QueueIcon },
+  components: { MenuAccueil, BoutonHelp, BoutonLangue, NotifIcon, QueueIcon },
 
   computed: {
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
