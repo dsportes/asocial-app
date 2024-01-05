@@ -70,7 +70,7 @@
       </q-tabs>
       <q-btn v-if="ui.pagetab==='notif' && session.alire" class="col-auto q-px-sm" 
         dense size="md" color="warning" padding="xs" icon="check" 
-        :label="$t('jailu')" @click="ui.jailu()"/>
+        :label="$t('jailu')" @click="jailu"/>
     </q-toolbar>
 
     <q-toolbar v-if="ui.page === 'groupe'" inset 
@@ -340,6 +340,7 @@ import stores from './stores/stores.mjs'
 import { ID } from './app/api.mjs'
 import { set$t, hms, dkli, styp } from './app/util.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
+import { SetDhvuCompta } from './app/operations.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
@@ -482,6 +483,9 @@ export default {
     fermerqm () {
       this.ui.fD()
       setTimeout(() => { this.ui.fD() }, 50)
+    },
+    async jailu () {
+      if (this.session.accesNetNf) await new SetDhvuCompta().run()
     }
   },
 

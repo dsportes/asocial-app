@@ -37,11 +37,14 @@ export const usePeopleStore = defineStore('people', {
     // Array des ids des people
     peopleIds: (state) => { return Array.from(state.map.keys()) },
 
-    naSponsors: (state) => { // Y compris celui du Comptable (sauf pour le comptable)
+    nasUrgence: (state) => { // Y compris celui du Comptable (sauf pour le comptable)
       const session = stores.session
       const t = []
       if (!session.estComptable) t.push(session.naComptable)
-      state.map.forEach(e => { if (e.sp === 2) t.push(e.na) })
+      if (!session.estAutonome)
+        state.map.forEach(e => { 
+          if (e.sp && !ID.estComptable(e.na.id)) t.push(e.na) 
+        })
       return t
     },
 

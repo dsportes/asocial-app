@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.ACouvrir" full-height position="left" persistent>
+<q-dialog v-model="ui.d.ACouvrir[idc]" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated>
       <q-toolbar class="bg-secondary text-white">
@@ -99,23 +99,25 @@
 import { toRef, ref, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import SdBlanc from '../components/SdBlanc.vue'
-import EditeurMd from '../components/EditeurMd.vue'
+
 import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
-import ApercuGenx from '../components/ApercuGenx.vue'
-import BoutonHelp from '../components/BoutonHelp.vue'
+import { Motscles } from '../app/modele.mjs'
 import { MajChat, PassifChat, NouveauChat } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
+
+import SdBlanc from '../components/SdBlanc.vue'
+import EditeurMd from '../components/EditeurMd.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 
 export default {
   name: 'ApercuChat',
 
   props: { 
     naI: Object, 
-    naE: Object, 
-    ids: Number, 
-    idx: Number, 
-    mapmc: Object 
+    naE: Object,
+    chatx: Object,
+    idc: Number
   },
 
   components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp },
@@ -208,47 +210,12 @@ export default {
     const ui = stores.ui
     const pSt = stores.people
     const aSt = stores.avatar
-    const naI = toRef(props, 'naI')
-    const naE = toRef(props, 'naE')
-    const ids = toRef(props, 'ids')
-
-    function getC () { return aSt.getChat(naI.value.id, ids.value) }
-
-    const chat = ref(getC())
-
-    aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if ((name === 'setChat' && args[0].id === naI.value.id && args[0].ids === ids.value) ||
-          (name === 'delChat' && args[0] === naI.value.id && args[1] === ids.value)){
-          chat.value = getC()
-        }
-      })
-    })
-
-    /* Nécessaire pour tracker le changement d'id
-    Dans une liste le composant N'EST PAS rechargé quand la liste change */
-    watch(() => naI.value, (ap, av) => {
-        chat.value = getC()
-      }
-    )
-
-    /* Nécessaire pour tracker le changement d'id
-    Dans une liste le composant N'EST PAS rechargé quand la liste change */
-    watch(() => naE.value, (ap, av) => {
-        chat.value = getC()
-      }
-    )
-
-    /* Nécessaire pour tracker le changement d'ids
-    Dans une liste le composant N'EST PAS rechargé quand la liste change */
-    watch(() => ids.value, (ap, av) => {
-        chat.value = getC()
-      }
-    )
+    const chat = toRef(props, 'chatx')
 
     return {
       styp, sty, dkli, dhcool,
-      session, pSt, ui,
+      session, pSt, ui, aSt,
+      mapmc: Motscles.mapMC(true, 0),
       chat
     }
   }

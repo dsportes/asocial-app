@@ -1791,7 +1791,7 @@ export default {
   ANemet: 'Alerte émise par {0}',
 
   // PanelPeople et apercu compte
-  PPchats: 'Chats',
+  PPchats: 'Chats avec ...',
   PPgroupes: 'Participations aux groupes',
   PPco: 'Compte non sponsor',
   PPpaschat: 'chat pas encore initialisé',

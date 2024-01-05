@@ -96,6 +96,14 @@ export const useAvatarStore = defineStore('avatar', {
       return state.map.get(stores.session.avatarId)
     },
 
+    chatDeAvec: (state) => { return (de, avec) => { 
+      const e = state.map.get(de)
+      if (e) for (const [ids, c] of e.chats) {
+        if (c.naE.id === avec) return c
+      }
+      return null
+    }},
+
     /* Array des tribus, pour le Comptable, 
      triée par ordre alphabétique de leur info, la Primitive en tête
     */ 

@@ -81,11 +81,11 @@ export const useUiStore = defineStore('ui', {
       OTrunning: false,
       AAeditionpc: {}, // ApercuAvatar
       ACchatedit: false, // ApercuChat
-      ACouvrir: false,
+      ACouvrir: {},
       ACconfirmeff: false,
       ACconfirmrac: false,
       ACGchatedit: false, // ApercuChatgr
-      ACGouvrir: false,
+      ACGouvrir: {},
       ACGconfirmeff: false,
       CVedition: false, // CarteVisite
       AGnvctc: {}, // ApercuGroupe
@@ -127,7 +127,6 @@ export const useUiStore = defineStore('ui', {
       NF: false, // NoteFichier
       NC: false, // NoteConfirme
       PNdl: false, // PageNotes
-
     }
 
   }),
@@ -195,12 +194,6 @@ export const useUiStore = defineStore('ui', {
       this.dialogStack.length = 0
     },
 
-    /*
-    aFiltre (p, t) {
-      if (!this.pagesF.has(p)) return false
-      return !t || this.tabF.has(t)
-    },
-    */
     ouvrFiltre () { 
       this.setPFiltre(!this.pfiltre)
     },

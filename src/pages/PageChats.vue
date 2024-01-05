@@ -25,17 +25,10 @@
         <q-card v-if="ID.estGroupe(chat.id)">
           <div class="row justify-between">
             <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHgr')}}</div>
-            <q-btn color="warning" icon="open_in_new" @click="ouvrirChatgr(chat)"/>
           </div>
           <div :class="'column q-px-sm ' + dkli(idx)">
             <apercu-genx :id="chat.id" :idx="idx"/>
-            <div class="q-mt-xs row justify-between items-center">
-              <div class="text-italic fs-md">
-                <span class="q-mr-sm">{{$t('CHnbit', chat.items.length, {count:chat.items.length} )}}</span>
-              </div>
-              <div v-if="chat.items.length" class="text-italic font-mono q-mr-sm">{{dhcool(chat.dh)}}</div>
-            </div>
-            <div v-if="chat.items.length" class="fs-md">{{chat.tit}}</div>
+            <micro-chatgr :chat="chat"/>
           </div>
         </q-card>
 
@@ -43,22 +36,10 @@
           <div :class="'column ' + dkli(idx)">
             <div class="row justify-between">
               <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHde', [chat.naI.nom])}}</div>
-              <q-btn color="warning" icon="open_in_new" @click="ouvrirChat(chat)"/>
             </div>
             <div class="q-mx-sm">
               <apercu-genx class="bordb" :id="chat.naE.id" :idx="idx" />
-              <div class="q-mt-xs row justify-between items-center">
-                <div class="text-italic fs-md">
-                  <span v-if="chat.stI===1" class="q-mr-sm">{{$t('actif')}}</span>
-                  <span v-else class="q-mr-sm text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</span>
-                  <span v-if="chat.stE===0" class="q-mr-sm text-warning text-bold bg-yellow-5">
-                    {{$t('CHraccroche2', [chat.naE.nom])}}</span>
-                  <span v-if="chat.stE===2" class="q-mr-sm text-warning text-bold bg-yellow-5">{{$t('CHavdisp')}}</span>
-                  <span class="q-mr-sm">{{$t('CHnbit', chat.items.length, {count:chat.items.length} )}}</span>
-                </div>
-                <div v-if="chat.items.length" class="text-italic font-mono q-mr-sm">{{dhcool(chat.dh)}}</div>
-              </div>
-              <div v-if="chat.items.length" class="fs-md">{{chat.tit}}</div>
+              <micro-chat :chat="chat"/>
             </div>
           </div>
         </q-card>
@@ -66,9 +47,6 @@
       </div>
     </div>
 
-    <apercu-chat v-if="ui.d.ACouvrir" :naI="chatc.naI" :naE="chatc.naE" 
-      :ids="chatc.ids" :mapmc="mapmc"/>
-    <apercu-chatgr v-if="ui.d.ACGouvrir"/>
     <contact-chat v-if="ui.d.CCouvrir"/>
 
   </q-page>
@@ -79,9 +57,9 @@ import { ref } from 'vue'
 import { saveAs } from 'file-saver'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
-import ApercuChat from '../panels/ApercuChat.vue'
+import MicroChat from '../components/MicroChat.vue'
+import MicroChatgr from '../components/MicroChatgr.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import ContactChat from '../dialogues/ContactChat.vue'
 import { Motscles, getNg } from '../app/modele.mjs'
 import { RafraichirCvs } from '../app/operations.mjs'
@@ -97,7 +75,7 @@ const encoder = new TextEncoder('utf-8')
 export default {
   name: 'PageChats',
 
-  components: { ApercuChat, ContactChat, ApercuChatgr, ApercuGenx },
+  components: { MicroChat, MicroChatgr, ContactChat, ApercuGenx },
 
   computed: {
     fusion () {
@@ -116,16 +94,6 @@ export default {
     cv (id) { 
       const g = this.gSt.getGroupe(id)
       return g ? g.cv : null
-    },
-
-    ouvrirChatgr (c) {
-      this.session.setGroupeId(c.id)
-      this.ui.oD('ACGouvrir')
-    },
-
-    ouvrirChat (c) {
-      this.chatc = c
-      this.ui.oD('ACouvrir')
     },
 
     async rafCvs () {
@@ -190,6 +158,7 @@ export default {
 
   setup () {
     const ui = stores.ui
+    const idc = ref(ui.getIdc())
     const aSt = stores.avatar
     const gSt = stores.groupe
     const session = stores.session
@@ -198,7 +167,7 @@ export default {
     fStore.setContexte('chats', { mapmc: mapmc.value, groupeId : 0})
 
     return {
-      session, ui, aSt, gSt, fStore, 
+      session, ui, idc, aSt, gSt, fStore, 
       ID, dkli, dhcool,
       mapmc
     }

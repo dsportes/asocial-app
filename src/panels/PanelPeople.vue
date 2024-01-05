@@ -27,10 +27,8 @@
       <div class="titre-md text-italic y-mb-sm">{{$t('PPchats')}}</div>
 
       <div class="q-ml-lg" v-for="(na) in aSt.compte.lstAvatarNas" :key="na.id">
-        <q-btn class="q-my-xs" :label="na.nom" icon="open_in_new" padding="xs sm"
-          no-caps outline @click="opench(na)"/>
-        <span v-if="!aSt.getChat(na.id, ids[na.id])" class="q-ml-md text-italic">
-          {{$t('PPpaschat')}}</span>
+        <div class="titre-md text-bold">{{na.nom}}</div>
+        <micro-chat class="q-ml-md" :na-e="pSt.peC.na" :na-i="na"/>
       </div>
 
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
@@ -61,10 +59,7 @@
       </div>
 
     </q-card>
-
-    <apercu-chat v-if="ui.d.ACouvrir" :na-i="naC" :na-e="pSt.peC.na" 
-      :ids="ids[naC.id]" :mapmc="mapmc"/>
-
+  
   </q-page-container>
 
 </q-layout>
@@ -78,13 +73,14 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuChat from './ApercuChat.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BarrePeople from '../components/BarrePeople.vue'
+import MicroChat from '../components/MicroChat.vue'
 import { Chat, Motscles, Groupe } from '../app/modele.mjs'
 import { NouveauMembre } from '../app/operations.mjs'
 import { styp, sleep } from '../app/util.mjs'
 
 export default {
   name: 'PanelPeople',
-  components: { ApercuGenx, BoutonHelp, ApercuChat, BarrePeople },
+  components: { ApercuGenx, BoutonHelp, BarrePeople, MicroChat },
 
   props: { },
 
@@ -97,7 +93,6 @@ export default {
   
   data () {
     return {
-      naC: null
     }
   },
 
@@ -105,11 +100,6 @@ export default {
     egr (idg) { return this.gSt.egr(idg) },
 
     stmb (idg, ids) { return this.egr(idg).groupe.statutMajeur(ids)},
-
-    opench (na) {
-      this.naC = na
-      this.ui.oD("ACouvrir")
-    },
 
     voirgr (id, ids) {
       this.session.setGroupeId(id)
@@ -140,11 +130,17 @@ export default {
     const aSt = stores.avatar
     const gSt = stores.groupe
     const ui = stores.ui
+
+    /* Le contact peut avoir été ouvert pour être inscrit comme contact du groupe
+    courant, ce que le panel sait par la variable ui.egrplus
+    On estime ici si ce choix est possible ou non:
+    - le nag du contact dans le groupe courant est nécessaire pour savoir
+    si ce contact est ou non en liste noire du groupe.
+    - le calcul du nag est async (c'est un cryptage).
+    En conséquence ce calcul de diagnostic intervient de manière async
+    dans le onMounted.
+    */
     const diag = ref(0)
-
-    const mapmc = ref(Motscles.mapMC(true, 0))
-
-    const ids = reactive({})
 
     async function diagctct () {
       if (pSt.peC.groupes.has(gSt.egrC.groupe.na.id)) { diag.value = 2; return }
@@ -158,16 +154,13 @@ export default {
       diag.value = 0
     }
 
-    onMounted(async () => {
-      for(const na of aSt.compte.lstAvatarNas) {
-        ids[na.id] = await Chat.getIds(na, pSt.peC.na)
-      }
-      if (ui.egrplus) await diagctct()
+    if (ui.egrplus) onMounted(async () => {
+       await diagctct()
     })
+    /*********************************************************/
 
     return {
-      styp, session, aSt, pSt, gSt, ui, diag, diagctct,
-      mapmc, ids
+      styp, session, aSt, pSt, gSt, ui, diag, diagctct
     }
   }
 }

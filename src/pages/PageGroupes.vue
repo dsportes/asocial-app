@@ -94,7 +94,7 @@
     </q-card>
   </q-dialog>
 
-  <apercu-chatgr v-if="ui.d.ACGouvrir"/>
+  <apercu-chatgr v-if="ui.d.ACGouvrir[idc]" :idc="idc"/>
 
 </q-page>
 </template>
@@ -103,7 +103,6 @@
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { edvol, $t, dkli, styp } from '../app/util.mjs'
-import { Motscles } from '../app/modele.mjs'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -143,7 +142,7 @@ export default {
 
     async chat (elt) {
       this.session.setGroupeId(elt.groupe.id)
-      this.ui.oD('ACGouvrir')
+      this.ui.oD('ACGouvrir', this.idc)
     },
 
     exp (g) {
@@ -187,6 +186,7 @@ export default {
     const session = stores.session
     const aSt = stores.avatar
     const fStore = stores.filtre
+    const stats = fStore.stats
     const gSt = stores.groupe
 
     const options = [
@@ -197,14 +197,9 @@ export default {
     const tous = toRef(props, 'tous')
     fStore.filtre.groupes.tous = tous.value || false
 
-    const mapmc = ref(Motscles.mapMC(true, 0))
-    fStore.setContexte('groupes', { mapmc: mapmc.value, groupeId : 0})
-    const stats = fStore.stats
-
     return {
       ui, session, aSt, gSt, dkli, styp, idc,
       stats,
-      mapmc,
       options
     }
   }

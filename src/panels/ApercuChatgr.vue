@@ -1,10 +1,12 @@
 <template>
-<q-dialog v-model="ui.d.ACGouvrir" full-height position="left" persistent>
+<q-dialog v-model="ui.d.ACGouvrir[idc]" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
         <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHGtit', [groupe.na.nomc])}}</q-toolbar-title>
+        <q-toolbar-title class="titre-lg text-center q-mx-sm">
+          {{$t('CHGtit', [gSt.egrC.groupe.na.nomc])}}
+        </q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
       <q-toolbar inset>
@@ -88,7 +90,7 @@ import { ItemChatgr } from '../app/operations.mjs'
 export default {
   name: 'ApercuChat',
 
-  props: { },
+  props: {idc: Number },
 
   components: { SdBlanc, EditeurMd, BoutonHelp, NoteEcritepar },
 
