@@ -14,7 +14,7 @@
     <q-card>
       <apercu-genx class="q-pa-sm q-mb-sm" v-if="eg" :id="eg.groupe.id"/>
       <apercu-membre v-if="eg && mb" :im="session.membreId" :na="mb.na"
-        :eg="eg" :mb="mb" :idx="0" :mapmc="mapmc" :people="people" ouvert/>
+        :eg="eg" :mb="mb" :idx="0" :people="people" ouvert/>
     </q-card>
   </q-page-container>
 
@@ -45,6 +45,10 @@ export default {
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre ' : 'clair ' },
     bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
+    eg () { return this.gSt.egrC },
+    amb () { return this.gSt.ambano[0] },
+    mb () { return this.eg && this.amb ? this.gSt.membreC : null },
+    people () { return this.mb ? !this.mb.estAc : false }
   },
 
   watch: {
@@ -59,45 +63,11 @@ export default {
   },
 
   setup () {
-    const gSt = stores.groupe
-    const aSt = stores.avatar
-    const session = stores.session
-    const ui = stores.ui
-
-    const mapmc = ref()
-    const eg = ref()
-    const amb = ref()
-    const mb = ref()
-    const people = ref()
-
-    function init () {
-      mapmc.value = Motscles.mapMC(true, 0)
-      eg.value = gSt.egrC
-      amb.value = gSt.ambano[0]
-      mb.value = eg.value && amb.value ?  gSt.membreC : null
-      people.value = mb.value ? !mb.value.estAc : false
-    }
-
-    session.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setGroupeId' || name === 'setMembreId') init()
-      })
-    })
-
-    aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setCompte') init()
-      })
-    })
-
-    init()
-    
     return {
-      ui, session, styp,
-      mapmc,
-      eg,
-      mb,
-      people
+      ui: stores.ui,
+      session: stores.session, 
+      gSt: stores.groupe,
+      styp
     }
   }
 }

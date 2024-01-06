@@ -230,6 +230,7 @@ export default {
 
     const fic = reactive({ nom: '', info: '', lg: 0, type: '', u8: null })
 
+    /* Détection du retour du copier / coller */
     ppSt.$onAction(({ name, args, after }) => {
       after((result) => {
         if (name === 'copiercollerfic') {

@@ -22,7 +22,6 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import { RafraichirCvs } from '../app/operations.mjs'
-import { Motscles } from '../app/modele.mjs'
 
 export default {
   name: 'PagePeople',
@@ -45,17 +44,10 @@ export default {
   },
 
   setup () {
-    const pSt = stores.people
-    const session = stores.session
-    const fStore = stores.filtre
-
-    const mapmc = ref(Motscles.mapMC(true, 0))
-    fStore.setContexte('people', { mapmc: mapmc.value, groupeId : 0})
-
     return {
       ui: stores.ui,
-      session,
-      pSt
+      session: stores.session,
+      pSt: stores.people
     }
   }
 

@@ -15,8 +15,6 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-import { Motscles, Chat } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import { afficherDiag, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -80,11 +78,9 @@ export default ({
     const session = stores.session
     const ui = stores.ui
     const aSt = stores.avatar
-    const mapmc = ref(Motscles.mapMC(true, 0))
 
     return {
-      aSt, ui, session, styp,
-      mapmc
+      aSt, ui, session, styp
     }
   }
 })

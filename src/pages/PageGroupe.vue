@@ -2,7 +2,7 @@
 <q-page>
   <!-- Tab "groupe" -------------------------------------------------->
   <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm spmd">
-    <apercu-groupe class="q-my-sm" :eg="gSt.egrC" :idx="0" :mapmc="mapmc"/>
+    <apercu-groupe class="q-my-sm" :eg="gSt.egrC" :idx="0"/>
   </div>
 
   <!-- Tab "membres" -------------------------------------------------->
@@ -14,7 +14,7 @@
         {{$t('PGnomb', [nb])}}</div>
       <apercu-membre v-for="(e, idx) of lst" :key="e.im"
         class="q-my-lg" :mb="e.m" :im="e.im" :na="e.na" :eg="gSt.egrC"
-        :mapmc="mapmc" people :idx="idx"/>
+        people :idx="idx"/>
     </div>
     <div v-else class="titre-lg text-italic">{{$t('PGnoamb')}}</div>
   </div>
@@ -23,11 +23,9 @@
 </template>
 
 <script>
-import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuMembre from '../components/ApercuMembre.vue'
 import ApercuGroupe from '../components/ApercuGroupe.vue'
-import { Motscles } from '../app/modele.mjs'
 
 export default {
   name: 'PageGroupe',
@@ -49,29 +47,10 @@ export default {
   },
 
   setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const gSt = stores.groupe
-    const fStore = stores.filtre
-
-    const grIdAv = stores.session.groupeId // Id du groupe courant A L'ENTREE dans la page
-
-    session.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setGroupeId') {
-          if (args !== grIdAv) ui.setPage('groupes')
-        }
-      })
-    })
-
-    const mapmc = ref(Motscles.mapMC(true, 0))
-    fStore.setContexte('groupes', { mapmc: mapmc.value, groupeId : 0})
-
     return {
-      ui,
-      session,
-      mapmc,
-      gSt
+      ui: stores.ui,
+      session: stores.session,
+      gSt: stores.groupe
     }
   }
 

@@ -51,8 +51,11 @@
 
         <q-card-section class="q-py-sm">
           <div class="titre-lg text-italic">{{$t('MMCmc')}}</div>
-          <apercu-motscles :ok="changerMc" :idx="0" du-compte :du-groupe="0"
-            :mapmc="mapmc" :edit="!diag" :src="nvmc || mc"/>
+          <apercu-motscles 
+            :ok="changerMc" 
+            :idx="0"
+            :edit="!session.diag"
+            :src="nvmc || mc"/>
         </q-card-section>
 
         <q-card-section class="q-py-sm">
@@ -93,7 +96,7 @@ export default {
   components: { ApercuMotscles, EditeurMd },
 
   computed: { 
-    mapmc () { return Motscles.mapMC(true, 0) },
+    mapmc () { return this.aSt.mapMC },
     mcmemo () { return this.aSt.compte.mcmemo(this.id) },
     memo () { return this.mcmemo && this.mcmemo.memo ? this.mcmemo.memo : '' },
     memolg () { return titre(this.memo) },

@@ -62,8 +62,7 @@ export default ({
 
   props: {
     modelValue: Object,
-    duCompte: Boolean, 
-    duGroupe: Number, 
+    duGroupe: Boolean, 
     initValue: Object, // OBLIGATOIRE - voire new Uin8Array([])
     titre: String,
     help: String,
@@ -121,14 +120,13 @@ export default ({
   setup (props, context) {
     const session = stores.session
     const ui = stores.ui
-    const duCompte = toRef(props, 'duCompte')
     const duGroupe = toRef(props, 'duGroupe')
 
     const diag = ref(session.editDiag)
 
     // Objet motscles en sélection : immutable
     const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
-    const motscles = new Motscles(mc, false, duCompte.value || false, duGroupe.value || 0)
+    const motscles = new Motscles(mc, false, true, duGroupe.value ? true : false)
 
     const tab = ref('')
     tab.value = motscles.mc.lcategs[0]

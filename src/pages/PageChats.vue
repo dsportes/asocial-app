@@ -163,13 +163,10 @@ export default {
     const gSt = stores.groupe
     const session = stores.session
     const fStore = stores.filtre
-    const mapmc = ref(Motscles.mapMC(true, 0))
-    fStore.setContexte('chats', { mapmc: mapmc.value, groupeId : 0})
 
     return {
       session, ui, idc, aSt, gSt, fStore, 
-      ID, dkli, dhcool,
-      mapmc
+      ID, dkli, dhcool
     }
   }
 

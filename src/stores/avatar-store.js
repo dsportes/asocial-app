@@ -4,7 +4,7 @@ import { hash, egaliteU8, difference, intersection } from '../app/util.mjs'
 import { encode } from '@msgpack/msgpack'
 import { ID, E_WS, AppExc, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { post } from '../app/net.mjs'
-import { getNg } from '../app/modele.mjs'
+import { getNg, Motscles } from '../app/modele.mjs'
 
 const fx = [['id', 1],
 ['q1', 1], ['q1', -1],
@@ -103,6 +103,50 @@ export const useAvatarStore = defineStore('avatar', {
       }
       return null
     }},
+
+    /* Construit une Map idx:{c, n} fusionnée depuis,
+    celle de la configuration et celle du compte */
+    mapMC (state) {
+      const m = new Map()
+      let mx = stores.config.motsclesLOC
+      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
+      mx = state.motscles || {}
+      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
+      return m
+    },
+
+    /* Construit une Map idx:{c, n} fusionnée depuis,
+    celle de la configuration, celle du compte et celle du groupe courant*/
+    mapMCGr (state) {
+      const m = new Map()
+      let mx = stores.config.motsclesLOC
+      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
+      mx = state.motscles || {}
+      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
+      if (stores.session.groupeId) {
+        mx = stores.groupe.egrC.groupe.motscles || {}
+        for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
+      }
+      return m
+    },
+
+    /* Construit une Map idx:{c, n} fusionnée depuis celle du compte */
+    mapMCC (state) {
+      const m = new Map()
+      const mx = state.motscles || {}
+      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
+      return m
+    },
+
+    /* Construit une Map idx:{c, n} fusionnée depuis celle du groupe courant*/
+    mapMCG (state) {
+      const m = new Map()
+      if (stores.session.groupeId) {
+        const mx = stores.groupe.egrC.groupe.mc || {}
+        for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
+      }
+      return m
+    },
 
     /* Array des tribus, pour le Comptable, 
      triée par ordre alphabétique de leur info, la Primitive en tête
@@ -364,7 +408,7 @@ export const useAvatarStore = defineStore('avatar', {
       this.setAvatar(avatar)
     },
 
-    /* Sert surtout à pouvoir attacher un écouteur pour détecter les changements de mc */
+    /* Evite de faire recalculer mapMC tant que les mots clés du compte n'ont pas changé */
     setMotscles (mc) {
       this.motscles = mc
     },

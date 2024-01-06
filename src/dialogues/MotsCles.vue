@@ -7,7 +7,7 @@
     <q-btn v-if="!motscles.mc.st.enedition && !diag" dense size="md" color="primary"
       icon="mode_edit" pading="xs xs" round @click="startEdit"/>
     <q-toolbar-title class="titre-lg full-width text-center">
-      {{idg ? $t('MCgr', [getNg(idg).nomc]) : $t('MCc')}}
+      {{duGroupe ? $t('MCgr', [gSt.egrC.groupe.na.nomc]) : $t('MCc')}}
     </q-toolbar-title>
     <q-btn v-if="motscles.mc.st.enedition && !diag" dense size="md" color="primary"
       icon="add_circle" pading="xs xs" round @click="ajoutermc"/>
@@ -83,7 +83,7 @@ import { MotsclesGroupe, MotsclesCompte } from '../app/operations.mjs'
 export default ({
   name: 'MotsCles',
 
-  props: { idg: Number }, // si idg = 0, édite les mots clés du compte
+  props: { duGroupe: Boolean }, // édite les mots clés du compte OU duGroupe
 
   components: { BoutonHelp, ChoixEmoji },
 
@@ -159,8 +159,8 @@ export default ({
     },
     async okEdit () {
       const mmc = this.motscles.finEdition()
-      if (this.idg) {
-        await new MotsclesGroupe().run(mmc, this.eg.groupe.na)
+      if (this.duGroupe) {
+        await new MotsclesGroupe().run(mmc, this.gSt.egrC.groupe.na)
       } else {
         await new MotsclesCompte().run(mmc)
       }
@@ -173,20 +173,16 @@ export default ({
     const ui = stores.ui
     const gSt = stores.groupe
 
-    const idg = toRef(props, 'idg')
-    const estAnim = ref()
-    const eg = ref()
-  
-    if (idg.value) {
-      eg.value = gSt.egr(idg.value)
-      estAnim.value = eg.value && eg.value.estAnim
-    }
+    const duGroupe = toRef(props, 'duGroupe')
+    const estAnim = ref(duGroupe.value && gSt.egrC.estAnim)
 
     const diag = ref(session.editDiag)
-    if (!diag.value && idg.value && !estAnim.value) diag.value = $t('PGanim')
+    if (!diag.value && duGroupe.value && !estAnim.value) diag.value = $t('PGanim')
 
     const mc = reactive({ categs: new Map(), lcategs: [], st: { enedition: false, modifie: false } })
-    const motscles = new Motscles(mc, true, idg.value ? false : true, idg.value || 0)
+    const motscles = new Motscles(mc, true, 
+      duGroupe.value ? false : true, 
+      duGroupe.value ? true : false)
 
     const root = ref(null)
     const tab = ref('')
@@ -201,12 +197,11 @@ export default ({
       obs: $t('obs'),
       styp,
       motscles,
-      session,
+      session, ui, gSt,
       getNg,
-      ui,
       root,
       tab,
-      diag, eg,
+      diag,
       splitterModel: ref(33) // start at 33%
     }
   }

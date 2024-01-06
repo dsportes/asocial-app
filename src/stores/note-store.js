@@ -49,6 +49,20 @@ export const useNoteStore = defineStore('note', {
     // Pour le node courant
     note: (state) => { return state.node ? state.node.note : null },
 
+    // Si le node courant est un groupe
+    estGroupe (state) {
+      const t = state.node ? state.node.type : 0
+      return t === 2 || t === 5 || t === 7
+    },
+
+    // id du node courant
+    idC (state) {
+      const t = state.node ? state.node.type : 0
+      if (!t) return 0
+      if (t < 4) return parseInt(state.node.key)
+      return state.node.note ? state.node.note.id : 0
+    },
+
     nodeP: (state) => {
       const n = state.note
       return n && n.ref ? state.map.get(n.refk) : null

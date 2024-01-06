@@ -321,7 +321,6 @@ export default {
     na: Object, // id de l'avatar membre
     im: Number,
     eg: Object,
-    mapmc: Object,
     idx: Number, 
     people: Boolean,
     ouvert: Boolean
@@ -541,9 +540,9 @@ export default {
     const qexp = ref(ouvert.value || false)
 
     return {
-      FLAGS, dkli, styp, edit, qexp,
-      session, gSt, aSt, ui, idc,
-      cv
+      FLAGS, dkli, styp, edit, 
+      qexp, cv,
+      session, gSt, aSt, ui, idc
     }
   }
 }

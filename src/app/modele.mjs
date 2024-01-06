@@ -183,31 +183,6 @@ export class Motscles {
     if (!s) return s ? Motscles.cn(s) : { c: '', n: '' }
   }
 
-  /* Construit une Map idx:{c, n} fusionnée depuis,
-  - celle de la configuration
-  - celle du compte (true / false)
-  - celle du groupe d'id donné (0 su aucun)
-  */
-  static mapMC (duCompte, duGroupe) {
-    const aSt = stores.avatar
-    const gSt = stores.groupe
-    const m = new Map()
-    let mx = stores.config.motsclesLOC
-    for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-    if (duCompte) {
-      mx = aSt.motscles || {}
-      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-    }
-    if (duGroupe) {
-      const g = gSt.getGroupe(duGroupe)
-      if (g) {
-        mx = g.mc || null
-        if (mx) for (const i in mx) { m.set(i, Motscles.cn(mx[i]))}
-      }
-    }
-    return m
-  }
-
   static nom (idx, mapMC) {
     const e = mapMC.get('' + idx)
     return e && e.n ? e.n : ''
@@ -225,7 +200,8 @@ export class Motscles {
   - edit: true mode édition, false mode sélection
   - duCompte: true, mots clés du compte
   - duGroupe: id mots clés du groupe id
-  Si edit c'est cpt OU gr. En sélection ça peut être cpt et gr
+  Si edit, c'est ceux de cpt OU ceux de gr
+  Si pas edit, c'est, les génériques, ceix de cpt ET ceux gr ou non
   Les mots clés de la configuration sont chargés mais NON modifiables
 
   En sélection, l'objet est immutable.
@@ -235,17 +211,21 @@ export class Motscles {
   - finEdition : retourne la map "source" modifiée
   */
   constructor (mc, edit, duCompte, duGroupe) { // mc : objet editeur / selecteur de UI
+    const aSt = stores.avatar
     this.edit = edit
-    this.cpt = duCompte ? true : false
-    this.gr = duGroupe || 0
     this.mc = mc
     this.localIdx = {} // map de clé idx. valeur: nom/categ
     this.localNom = {} // map de clé nom. valeur: [idx, categ]
-    this.premier = this.cpt ? 1 : 100
-    this.dernier = this.cpt ? 99 : 199
+    this.premier = edit ? (duCompte ? 1 : 100) : 1
+    this.dernier = edit ? (duCompte ? 99 : 199) : 255
     this.mc.categs.clear() // Map: clé: nom catégorie, valeur: [[nom, idx] ...] (mots clés ayant cette catégorie)
     this.mc.lcategs.length = 0 // Liste des catégories existantes
-    const mapAll = Motscles.mapMC(this.cpt, this.gr)
+    let mapAll
+    if (edit) {
+      mapAll = duGroupe ? aSt.mapMCG : aSt.mapMCC
+    } else {
+      mapAll = duGroupe ? aSt.mapMCGr : aSt.mapMC
+    }
     const obs = $t('obs')
     this.mapAll = new Map()
     mapAll.forEach((value, key) => {

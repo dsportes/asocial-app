@@ -66,7 +66,7 @@
       <div v-if="!disparu(im)">
         <q-separator color="orange"/>
         <!-- mb peut être absent (pas accès aux membres) -->
-        <apercu-membre :mb="mb(im)" :im="im" :na="na" :eg="eg" :idx="idx" :mapmc="mapmc"/>
+        <apercu-membre :mb="mb(im)" :im="im" :na="na" :eg="eg" :idx="idx"/>
       </div>
     </div>
   </div>
@@ -74,7 +74,7 @@
   <apercu-chatgr v-if="ui.d.ACGouvrir"/>
 
   <!-- Dialogue d'édition des mots clés du groupe -->
-  <mots-cles v-if="ui.d.MCmcledit" :idg="eg.groupe.id"/>
+  <mots-cles v-if="ui.d.MCmcledit" duGroupe/>
 
   <!-- Gérer le mode simple / unanime -->
   <q-dialog v-model="ui.d.AGediterUna[idc]" full-height position="left" persistent>
@@ -282,8 +282,7 @@ export default {
 
   props: { 
     eg: Object,
-    idx: Number,
-    mapmc: Object
+    idx: Number
   },
 
   components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, 
@@ -539,8 +538,6 @@ export default {
     const idc = ref(ui.getIdc())
     const gSt = stores.groupe
     const aSt = stores.avatar
-
-    //const eg = toRef(props, 'eg')
 
     const photoDef = stores.config.iconGroupe
     const q = reactive({q1:0, q2:0, min1:0, min2:0, max1:0, max2:0, err:false })

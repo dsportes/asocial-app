@@ -152,10 +152,10 @@
         <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
 
         <div v-if="selected && nSt.note && !rec" class="q-mt-xs q-mb-sm row">  
-          <apercu-motscles class="col q-mr-lg titre-sm" v-if="nSt.note.smc" :mapmc="mapmcf(nSt.node.key)" 
-            :src="Array.from(nSt.note.smc)" du-compte nozoom
-            :du-groupe="ID.estGroupe(nSt.note.id) ? nSt.note.id : 0"/>
-          <div v-else class="col text-italic">{{$t('PNOnmc')}}</div>
+          <apercu-motscles class="q-mr-sm"
+            :du-groupe="nSt.estGroupe"
+            :src="Array.from(nSt.note.smc)" 
+            nozoom/>
           <q-btn color="primary" class="col-auto self-start" 
             round dense size="md" icon="edit" padding="none"
             @click="ui.oD('NM')"/>
@@ -186,6 +186,7 @@
         </div>
 
         <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs justify-end items-center">
+          <!--span>{{nSt.node.key}}</span-->
           <note-plus/>
           <!--
           <q-btn v-if="nSt.note && !nSt.note.p" 
@@ -310,7 +311,14 @@ export default {
 
   watch: {
     selected (ap, av) {
-      if (!this.nSt.node || this.nSt.node.key !== ap) this.nSt.setCourant(ap)
+      if (!this.nSt.node || this.nSt.node.key !== ap) {
+        this.nSt.setCourant(ap)
+        if (this.nSt.estGroupe) {
+          const idC = this.nSt.idC
+          const session = stores.session
+          if (session.groupeId !== idC) session.setGroupeId(idC)
+        }
+      }
     }
   },
 
@@ -349,11 +357,12 @@ export default {
       return this.$t('groupe1', [n.label, n.nf, n.nt])
     },
  
+    /*
     mapmcf (key) {
       const id = parseInt(key)
       return Motscles.mapMC(true, ID.estGroupe(id) ? id : 0)
     },
-
+    */
     async noteedit1 () {
       if (this.nSt.note.p) {
         await afficherDiag($t('PNOarchivee'))
@@ -526,31 +535,6 @@ export default {
       f.mcp = fx.mcp ? new Set(fx.mcp) : null
       f.mcn = fx.mcn ? new Set(fx.mcn) : null
       f.avgr = fx.avgr
-      if (f.avgr) {
-        const g = ID.estGroupe(f.avgr) ? f.avgr : 0
-        fSt.setContexte('notes', {
-          mapmc : Motscles.mapMC(true, g),
-          groupeId : g
-        })
-        if (!g) {
-          // enlever les mots clés de groupe de f.mcp / f.mcn
-          if (f.mcp) {
-            const ns = new Set()
-            f.mcp.forEach(mc => { if (mc < 100 || mc > 200) ns.add(mc)})
-            f.mcp = ns
-          }
-          if (f.mc) {
-            const ns = new Set()
-            f.mcn.forEach(mc => { if (mc < 100 || mc > 200) ns.add(mc)})
-            f.mcn = ns
-          }
-        }
-      } else {
-        fSt.setContexte('notes', {
-          mapmc : Motscles.mapMC(true, 0),
-          groupeId : 0
-        })      
-      }
       const y = '' + (parseInt(filtreFake.value) + 1)
       filtreFake.value = y
       setTimeout(() => { nSt.stats(monf)}, 50)
@@ -558,27 +542,12 @@ export default {
 
     function monf (n) {
       const f = filtre.value
-      if (f.avgr) {
-        if (n.id !== f.avgr && !n.refk) return false
-        if (n.id !== f.avgr){
-          const rac = nSt.getRacine(node)
-          if (rac.key !== f.avgr) return false
-        }
-      }
-      if (f.lim && n.dh) {
-        if (n.dh < f.lim) return false
-      }
-      if (f.note && n.txt) {
-        if (n.txt.indexOf(f.note) === -1) return false
-      }
+      if (f.avgr && n.id !== f.avgr) return false
+      if (f.lim && n.dh && n.dh < f.lim) return false
+      if (f.note && n.txt && n.txt.indexOf(f.note) === -1) return false
       if (f.v2 && n.v2 < f.v2) return false
-      if (f.mcp) {
-        if (!n.smc) return false
-        if (difference(f.mcp, n.smc).size) return false
-      }
-      if (f.mcn) {
-        if (n.smc && intersection(f.mcn, n.smc).size) return false
-      }
+      if (f.mcp && n.smc && difference(f.mcp, n.smc).size) return false
+      if (f.mcn && n.smc && intersection(f.mcn, n.smc).size) return false
       return true
     }
 
@@ -594,10 +563,7 @@ export default {
         const tf = nx.get(node.key)
         if (tf) {
           tf.nb++
-          // console.log('deja vu:', tf.nb, node.key, node.rkey, n.refk)
           nx.set(node.key, tf)
-          /* if (tf.nb > 10) 
-            console.log('???') */
           return tf.r
         } else {
           r = monf(n)
@@ -797,8 +763,8 @@ export default {
 
     preSelect()
 
-    const mapmc = ref(Motscles.mapMC(true, 0))
-    fSt.contexte.notes.mapmc = mapmc.value
+    //const mapmc = ref(Motscles.mapMC(true, 0))
+    //fSt.contexte.notes.mapmc = mapmc.value
 
     return {
       dhcool, now, filtrage, edvol,
@@ -808,7 +774,7 @@ export default {
       filtre, filtreFake,
       dlopen, dlfin, dlgo, dlpause, dlreprise, portupload, dirloc, testup,
       lstr, dlnbntot, dlnbnc, dlst, dlnc, dlnbn, dlnbf, dlv2f,
-      mapmc, dkli, sty, styp,
+      dkli, sty, styp,
       auj: session.dateJourConnx
     }
   }

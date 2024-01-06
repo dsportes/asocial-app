@@ -44,8 +44,10 @@ export default ({
   },
 
   watch: {
-    val (ap) {
-      this.fSt.setFiltre(this.nom, 'avgr', ap ? ap.id : 0)
+    val (na) {
+      this.fSt.setFiltre(this.nom, 'avgr', na ? na.id : 0)
+      const b = na && ID.estGroupe(na.id)
+      if (!this.fSt.mcgroupe === b) this.fSt.setMcgroupe(b)
     }
   },
 

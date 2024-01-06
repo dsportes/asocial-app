@@ -1,8 +1,11 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli(0)">
     <div>{{$t('FI' + attr)}}</div>
-    <apercu-motscles :ok="ok" du-compte :du-groupe="groupeId"
-      :mapmc="mapmc" edit :src="src" :idx="idx"/>
+    <apercu-motscles :ok="ok" 
+      :du-groupe="st.mcgroupe" 
+      edit 
+      :src="src" 
+      :idx="idx"/>
   </div>
 </template>
 
@@ -34,6 +37,7 @@ export default ({
   },
 
   setup (props) {
+    const aSt = stores.avatar
     const st = stores.filtre
     const u0 = new Uint8Array([])
     const src = ref()
@@ -41,31 +45,9 @@ export default ({
     const attr = toRef(props, 'attr')
     const x = st.filtre[nom.value]
     src.value = x && x[attr.value] ? x[attr.value] : u0
-    
-    const groupeId = ref(0)
-    const mapmc = ref(null)
-
-    const ctx = st.contexte[nom.value]
-    groupeId.value = ctx.groupeId || 0
-    mapmc.value = ctx.mapmc
-
-    st.$onAction(({ name, args, after }) => { 
-      after(async (result) => {
-        if ((name === 'setContexte')){
-          if (args[0] === nom.value) {
-            const arg = args[1]
-            groupeId.value = arg.groupeId || 0
-            mapmc.value = arg.mapmc
-          }
-        }
-      })
-    })
 
     return {
-      st, dkli,
-      src,
-      groupeId,
-      mapmc
+      st, aSt, dkli, src
     }
   }
 })

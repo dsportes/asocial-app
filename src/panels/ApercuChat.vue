@@ -7,7 +7,7 @@
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [naI.nom, naE.nom])}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <apercu-genx class="bordb" :id="naE.id" :idx="idx" />
+      <apercu-genx class="bordb" :id="naE.id" :idx="0" />
       <div :class="sty() + 'q-pa-xs row justify-around'">
         <q-btn :label="$t('CHadd2')" icon="add" 
           padding="none xs" color="primary" @click="editer"/>
@@ -206,17 +206,13 @@ export default {
   },
 
   setup (props) {
-    const session = stores.session
-    const ui = stores.ui
-    const pSt = stores.people
-    const aSt = stores.avatar
-    const chat = toRef(props, 'chatx')
-
     return {
       styp, sty, dkli, dhcool,
-      session, pSt, ui, aSt,
-      mapmc: Motscles.mapMC(true, 0),
-      chat
+      session: stores.session,
+      pSt: stores.people, 
+      ui: stores.ui,
+      aSt: stores.avatar,
+      chat: toRef(props, 'chatx')
     }
   }
 }

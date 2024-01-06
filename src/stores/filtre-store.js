@@ -10,13 +10,7 @@ export const useFiltreStore = defineStore('filtre', {
       groupe: {},
       notes: {}
     },
-    contexte : {
-      chats: {},
-      groupes: {},
-      groupe: {},
-      notes: {},
-      people: {}
-    },
+    mcgroupe: false,
     tri: {
       espace: 0,
       tranche: 0,
@@ -39,8 +33,8 @@ export const useFiltreStore = defineStore('filtre', {
     setTri (nom, val) {
       this.tri[nom] = val
     },
-    setContexte (nom, val) {
-      this.contexte[nom] = val
+    setMcgroupe (val) {
+      this.Mcgroupe = val
     }
   }
 })

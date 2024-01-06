@@ -25,12 +25,17 @@
         <q-btn class="q-mr-xs" size="md" dense color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('MCtit')}}</q-toolbar-title>
       </q-toolbar>
-      <q-toolbar v-if="diag" inset class="bg-yellow-5 text-black text-bold fs-md">{{diag}}</q-toolbar>
+      <q-toolbar v-if="session.editDiag" inset class="bg-yellow-5 text-black text-bold fs-md">
+        {{session.editDiag}}
+      </q-toolbar>
 
       <div class="q-pa-sm">
-        <choix-motscles :du-groupe="duGroupe" :du-compte="duCompte"
-          :init-value="src || mcvide" :editable="edit"
-          :titre="$t('MCchoix')" :ok="okmc"/>
+        <choix-motscles 
+          :du-groupe="duGroupe"
+          :init-value="src || new Uint8Array([])" 
+          :editable="edit"
+          :titre="$t('MCchoix')" 
+          :ok="okmc"/>
       </div>
     </q-card>
   </q-dialog>
@@ -47,19 +52,18 @@ export default ({
   name: 'ApercuMotscles',
 
   props: { 
-    mapmc: Object, 
     src: Object, 
     edit: Boolean,
     nozoom: Boolean,
     idx: Number, 
-    duCompte: Boolean, 
-    duGroupe: Number,
+    duGroupe: Boolean,
     ok: Function
   },
 
   components: { ChoixMotscles },
 
   computed: {
+    mapMc () { return this.duGroupe ? this.aSt.mapMCGr : this.aSt.mapMC }
   },
 
   data () { return {
@@ -76,27 +80,22 @@ export default ({
     sty (idx) {
       if (idx < 100) return ''
       return idx <= 199 ? 'text-italic' : 'text-bold'
+    },
+    nom (idx) {
+      const e = this.mapMc.get('' + idx)
+      return e && e.n ? e.n : ('' + idx)
     }
   },
 
   setup (props) {
     const session = stores.session
+    const aSt = stores.avatar
     const ui = stores.ui
     const idc = ref(ui.getIdc())
-    const mapMC = toRef(props, 'mapmc')
-    const diag = ref(session.editDiag)
-
-    function nom (idx) {
-      if (!mapMC.value) return '' + idx
-      const e = mapMC.value.get(''+idx)
-      return e && e.n ? e.n : ('' + idx)
-    }
 
     return {
-      dkli, styp, idc, diag,
-      session, ui,
-      mcvide: new Uint8Array([]),
-      nom
+      dkli, styp,
+      session, ui, idc, aSt
     }
   }
 })

@@ -36,12 +36,12 @@
       <div v-if="avatar" class="q-my-md maauto">
         <div class="q-mb-sm titre-md text-bold text-italic text-center">{{$t('PNOmcp')}}</div>
         <choix-motscles v-model="mcap" :editable="!session.editDiag" :init-value="mc"
-          du-compte :titre="$t('PNOmcap')" />
+          :titre="$t('PNOmcap')" />
       </div>
       <div v-else class="q-my-md">
         <div class="q-mb-sm titre-md text-bold text-italic text-center">{{$t('PNOmcp')}}</div>
         <choix-motscles v-model="mcap" :editable="!session.editDiag" :init-value="mc"
-          du-compte :du-groupe="groupe.id" :titre="$t('PNOmcgp')"/> 
+          :du-groupe="groupe.id" :titre="$t('PNOmcgp')"/> 
 
         <q-separator color="orange" class="q-my-md"/>
 
