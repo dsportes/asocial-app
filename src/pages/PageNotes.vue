@@ -186,15 +186,8 @@
         </div>
 
         <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs justify-end items-center">
-          <!--span>{{nSt.node.key}}</span-->
+          <!--x-test :k1="nSt.node.key"/-->
           <note-plus/>
-          <!--
-          <q-btn v-if="nSt.note && !nSt.note.p" 
-            color="primary" icon="edit_off" padding="xs" size="sm"
-            :label="$t('PNOarch')" @click="op='arch';ui.oD('NC')"/>
-          <q-btn v-if="nSt.note && nSt.note.p" color="primary" icon="edit" :label="$t('PNOreact')"
-            @click="op='react';ui.oD('NC')" padding="xs" size="sm"/>
-          -->
           <q-btn v-if="nSt.note" color="warning" icon="delete" padding="none" size="md" dense
             :label="$t('PNOsupp')" @click="op='suppr';ui.oD('NC')"/>
           <q-btn v-if="rattaut" color="primary" icon="account_tree" padding="none" size="md" dense
@@ -244,8 +237,7 @@
 import { ref } from 'vue'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
-import { Motscles, getNg } from '../app/modele.mjs'
-import { $t, u8ToB64, dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
+import { dkli, sty, styp, $t, u8ToB64, dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, nomFichier, appexc, AppExc } from '../app/api.mjs'
@@ -257,9 +249,10 @@ import NoteFichier from '../panels/NoteFichier.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NotePlus from '../components/NotePlus.vue'
+// import XTest from '../components/XTest.vue'
 import { RattNote } from '../app/operations.mjs'
 import { putData, getData } from '../app/net.mjs'
-import { dkli, sty, styp } from '../app/util.mjs'
+import { getNg } from '../app/modele.mjs'
 
 const icons = ['','person','group','group','description','article','close','close']
 const colors = ['','primary','orange','negative','primary','orange','primary','orange']

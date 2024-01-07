@@ -32,13 +32,13 @@
 </template>
 
 <script>
-
+//import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { splitPK } from '../app/util.mjs'
 import NoteNouvelle from '../panels/NoteNouvelle.vue'
 
 export default ({
-  name: 'NotePlus',
+  name: 'XTest',
 
   props: { k1: String },
 
@@ -72,11 +72,15 @@ export default ({
   },
   
   setup () {
+    const nSt = stores.note
+    // const k2 = ref(nSt.node.key) // KO: n'est pas réévalué quand nSt.node change
     return {
       aSt: stores.avatar,
       gSt: stores.groupe,
       nSt: stores.note,
       ui: stores.ui
+      // idc: stores.ui.getIdc(),
+      // k2
     }
   } 
 })
