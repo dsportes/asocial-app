@@ -14,7 +14,7 @@ Depuis un Comptable: ns est celui de la session
 -->
 <template>
   <q-page>
-    <div v-if="pow===2" class="column">
+    <div v-if="session.pow===2" class="column">
       <div class="row q-my-sm">
         <q-btn class="col-auto self-start" size="md" padding="xs" dense color="primary" 
           :label="$t('PTnv')" @click="ouvrirnt"/>
@@ -38,7 +38,7 @@ Depuis un Comptable: ns est celui de la session
             <div class="col-3 fs-md">
               <span v-if="!lg.id">{{$t('total')}}</span>
               <span v-else>#{{ID.court(lg.id)}}
-                <span v-if="pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
+                <span v-if="session.pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
               </span>
             </div>
             <div class="col-4">
@@ -147,6 +147,18 @@ import { dkli, $t } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 import { SetEspaceOptionA, NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
 
+const fx = [['id', 1], 
+  ['ntr2', 1], ['ntr2', -1],
+  ['nco2', 1], ['nco2', -1],
+  ['q1', 1], ['q1', -1],
+  ['q2', 1], ['q2', -1],
+  ['pca1', 1], ['pca1', -1],
+  ['pca2', 1], ['pca2', -1],
+  ['pcv1', 1], ['pcv1', -1],
+  ['pcv2', 1], ['pcv2', -1],
+  ['nbc', 1], ['nbc', -1]
+]
+
 export default {
   name: 'PageEspace',
 
@@ -154,6 +166,38 @@ export default {
   components: { ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
 
   computed: {
+    synth () {
+      const l = this.aSt.synthese.atr
+      const fv = this.fSt.tri.espace
+      const f = fv ? fv.value : 0
+      const ct = { f: fx[f][0], m: fx[f][1] }
+      l.sort((x, y) => {
+        if (!x.id) return -1
+        if (!y.id) return 1
+        const a = x[ct.f]
+        const b = y[ct.f]
+        return a > b ? ct.m : (a < b ? -ct.m : 0) 
+      })
+      return l
+    }
+  },
+
+  watch: {
+    synth (l) {
+      if (this.aSt.tribuC) {
+        l.forEach(s => { 
+          if (s.id === this.session.tribuCId) {
+            this.ligne = s
+          }
+        })
+      } else {
+        this.ligne = l[0] // ligne de synthèse courante initiale
+      }
+    },
+    optionA (ap, av) {
+      this.chgOptionA = this.session.espace.opt !== ap.value
+    }
+
   },
 
   methods: {
@@ -234,13 +278,28 @@ export default {
     async validerq () {
       await new SetAtrItemComptable().run(this.ligne.id, null, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
       this.ui.fD()
+    },
+
+    setOptionA (e) {
+      this.optionA = options[e.opt]
+      this.chgOptionA = false
+    },
+
+    undoOptionA () {
+      this.optionA = options[this.session.espace.opt]
+    },
+
+    async saveOptionA () {
+      await new SetEspaceOptionA().run(optionA.value.value)
     }
+
   },
 
   data () {
     return {
       nom: '',
-      quotas: null
+      quotas: null,
+      chgOptionA: false
     }
   },
 
@@ -269,117 +328,38 @@ export default {
   */
   setup (props) {
     const ns = toRef(props, 'ns')
+    const ui = stores.ui
     const aSt = stores.avatar
+    const fSt = stores.filtre
     const session = stores.session
-    const pow = session.pow
 
-    const ligne = ref(null)
-    const notif = ref(null)
-    const optionA = ref(null)
-    const chgOptionA = ref(false)
     const options = [
       { label: $t('PTopt0'), value: 0 },
       { label: $t('PTopt1'), value: 1 },
       { label: $t('PTopt2'), value: 2 },
     ]
 
-    const fSt = stores.filtre
-    const ui = stores.ui
-    const synth = ref() // Synthese de l'espace
-    const filtre = ref(fSt.tri.espace)
-
-    const ct = { f: 0, m: 1 }
-
-    const fx = [['id', 1], 
-      ['ntr2', 1], ['ntr2', -1],
-      ['nco2', 1], ['nco2', -1],
-      ['q1', 1], ['q1', -1],
-      ['q2', 1], ['q2', -1],
-      ['pca1', 1], ['pca1', -1],
-      ['pca2', 1], ['pca2', -1],
-      ['pcv1', 1], ['pcv1', -1],
-      ['pcv2', 1], ['pcv2', -1],
-      ['nbc', 1], ['nbc', -1]
-    ]
-
-    function comp (x, y) {
-      if (!x.id) return -1
-      if (!y.id) return 1
-      const a = x[ct.f]
-      const b = y[ct.f]
-      return a > b ? ct.m : (a < b ? -ct.m : 0) 
-    }
-
-    function trier () {
-      const fv = filtre.value
-      ct.f = fx[fv][0]
-      ct.m = fx[fv][1]
-      synth.value.sort(comp)
-    }
+    const ligne = ref(null)
+    const notif = ref(null)
+    const optionA = ref(options[session.espace.opt])
 
     async function refreshSynth () {
-      const s = await new GetSynthese().run(ns.value)
-      synth.value = s.atr
-    }
-
-    function resetCourant () {
-      if (aSt.tribuC) {
-        synth.value.forEach(s => { 
-          if (s.id === session.tribuCId) {
-            ligne.value = s
-          }
-        })
-      } else {
-        ligne.value = synth.value[0] // ligne de synthèse courante initiale
-      }  
-    }
-
-    function setOptionA (e) {
-      optionA.value = options[e.opt]
-      chgOptionA.value = false
-    }
-
-    function undoOptionA () {
-      optionA.value = options[session.espace.opt]
-    }
-
-    watch(() => optionA.value, (ap, av) => {
-        chgOptionA.value = session.espace.opt !== ap.value
-      }
-    )
-
-    async function saveOptionA () {
-      await new SetEspaceOptionA().run(optionA.value.value)
+      await new GetSynthese().run(ns.value)
     }
 
     onMounted(async () => {
-      setOptionA(session.espace)
       await refreshSynth()
-      trier()
-      resetCourant()
     })
 
-    if (pow === 2) aSt.$onAction(({ name, args, after }) => {
+    if (session.pow === 2) aSt.$onAction(({ name, args, after }) => {
       after(async (result) => {
         /* si la ligne courante correspond à une tribu qui vient
         d'être chargée, on fait repointer cette ligne sur le synth de cette tribu */
         if (name === 'setTribu' || name === 'setCompta') {
           await refreshSynth()
-          trier()
-          resetCourant()
         }
         if (name === 'setTribu' && args[0].id === ligne.value.id) {
           notif.value = args[0].notif
-        }
-      })
-    })
-
-    fSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setTri' && args[0] === 'espace') {
-          filtre.value = args[1].value
-          trier()
-          resetCourant()
         }
       })
     })
@@ -388,18 +368,17 @@ export default {
       after((result) => {
         if (name === 'setEspace') {
           const e = args[0]
-          setOptionA(e)
+          optionA.value = e
         }
       })
     })
 
     return {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
-      synth, // Syntheses de l'espace
-      notif, ligne, // ligne courante affichée
+      optionA, notif, ligne, // ligne courante affichée
       ID,
-      aSt, session, pow, ui, dkli,
-      optionA, options, saveOptionA, undoOptionA, chgOptionA
+      aSt, fSt, session, ui, dkli,
+      options
     }
   }
 

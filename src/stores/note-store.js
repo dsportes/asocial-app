@@ -88,6 +88,42 @@ export const useNoteStore = defineStore('note', {
       return x
     },
 
+    /* Pour une note de groupe, liste des {im, na, nom} des membres 
+    aptes à recevoir l'exclusivité, sauf celui actuel */
+    lstImNa (state) { 
+      const lx = []
+      const id = state.note.id
+      const gSt = stores.groupe
+      const aSt = stores.avatar
+      const anim = gSt.egr(id).estAnim
+      const xav = state.mbExclu // retourne { avc: true/false, nom } ou null s'il n'y a pas d'exclusivité
+
+      let autAvc = true
+      const ims = aSt.compte.imGroupe(id) 
+      state.note.auts.forEach(im => { if (!ims.has(im)) autAvc = false })
+  
+      const l = gSt.nexLm(state.note.id) // liste des membres "auteurs" aptes à recevoir l'exclusivité
+      l.forEach(e => {
+        if (e.im !== state.note.im) { // sauf celui actuel
+          if (anim // je suis animateur
+            || (xav && xav.avc) // j'ai l'exclusité
+            || (!xav && e.avc && autAvc) // personne n'a l'exclusivité, c'est un de mes avatars ET je suis seul auteur de la note
+            ) {
+              const x = { ...e }
+              x.nom = x.avc ? $t('moi2', [x.na.nom]) : x.na.nomc
+              lx.push(x)
+            }
+        }
+      })
+      lx.sort((a,b) => {
+        if (a.avc && b.avc) return (a.nom < b.nom ? -1 : 1)
+        if (a.avc) return -1
+        if (b.avc) return 1
+        return (a.nom < b.nom ? -1 : (a.nom === b.nom ? 1 : 0))
+      })
+      return lx
+    },
+    
     nbjTemp: (state) => {
       const n = state.note
       if (!n || n.st === 99999999) return 0
@@ -184,10 +220,6 @@ export const useNoteStore = defineStore('note', {
   actions: {
     setCourant (key) {
       this.node = this.getNode(key)
-    },
-
-    setSelected (key) { // $onAction dans PageNotes pour forcer la sélection
-      this.setCourant(key) 
     },
 
     setPreSelect (key) {

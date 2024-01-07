@@ -31,7 +31,24 @@ export const useFetatStore = defineStore('fetat', {
   }),
 
   getters: {
-    getFetat: (state) => { return (idf) => state.map.get(idf) }
+    getFetat: (state) => { return (idf) => state.map.get(idf) },
+    lstQueue: (state) => {
+      const l = []
+      for (const idf of state.queue) {
+        const e = { ...state.map.get(idf) }
+        e.courant = e.id === state.encours
+        l.push(e)
+      }
+      return l
+    },
+    lstEchecs: (state) => {
+      const l = []
+      for (const idf of state.echecs) {
+        const e = { ...state.map.get(idf) }
+        l.push(e)
+      }
+      return l
+    }
   },
 
   actions: {

@@ -256,7 +256,6 @@ export const useSessionStore = defineStore('session', {
       localStorage.setItem(this.lsk, this.nombase)
     },
 
-    // pour tracking des changements sur $onAction
     setCompteId (id) {
       this.setNs(ID.ns(id))
       this.compteId = id

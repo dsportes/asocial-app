@@ -395,7 +395,7 @@ export class Phrase {
 
 /* Qui ***************************************************
 Un objet Qui est immuable et est transient: ne pas le conserver,
-ses données t cv sp peuevent évoluer dans le temps
+ses données t cv sp peuvent évoluer dans le temps
 - t : type: 
   - 0 inconnu, 
   - 1 avatar principal du compte,

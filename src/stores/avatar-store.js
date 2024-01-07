@@ -28,7 +28,7 @@ export const useAvatarStore = defineStore('avatar', {
     motscles: null, // mots clés du compte
     avatarP: null, // avatar principal du compte courant
     comptaP: null, // compta actuelle du compte courant
-    synthese: null, // synthese de l'espace courant (comptable seulement)
+    synthese: {atr: []}, // synthese de l'espace courant (comptable seulement)
  
     maptr: new Map(), // Map des tribus, uniquement pour le Comptable
 

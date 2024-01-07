@@ -1767,10 +1767,12 @@ export class GetSynthese extends OperationUI {
 
   async run (ns) { 
     try {
+      const aSt = stores.avatar
       const session = stores.session
       const args = { token: session.authToken, ns }
       const ret = this.tr(await post(this, 'GetSynthese', args))
       const s = await compile(ret.rowSynthese)
+      aSt.setSynthese(s)
       return this.finOK(s)
     } catch (e) {
       return await this.finKO(e)

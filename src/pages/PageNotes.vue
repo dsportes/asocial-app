@@ -181,7 +181,7 @@
           <q-btn color="primary" class="col-auto self-start" 
             round dense size="md" icon="person" padding="none"
             @click="ui.oD('NX')">
-            <q-tooltip>{{$t('PNOexclu')}}</q-tooltip>
+            <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
           </q-btn>
         </div>
 
@@ -579,14 +579,6 @@ export default {
       after(async (result) => {
         if ((name === 'setFiltre')){
           if (args[0] === 'notes') compileFiltre(fSt.filtre.notes)
-        }
-      })
-    })
-
-    nSt.$onAction(({ name, args, after }) => { 
-      after(async (result) => {
-        if ((name === 'setSelected')){
-          selected.value = args[0]
         }
       })
     })

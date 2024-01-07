@@ -5,7 +5,7 @@
       <template v-slot:header>
         <div class="row full-width fs-md">
           <span>{{$t('TUtr')}} #{{ID.court(lg.id)}}</span>
-          <span v-if="pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
+          <span v-if="session.pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
         </div>
       </template>
       <div class="q-ml-xl q-mb-lg splg">
@@ -22,7 +22,7 @@
     </q-expansion-item>
 
     <q-toolbar class="bg-secondary text-white">
-      <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
+      <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (session.pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
       <q-btn v-if="session.estSponsor || session.estComptable"
         size="md" dense color="primary" 
         :label="$t('PTnvc')" @click="ui.oD('NSnvsp')"/>
@@ -67,7 +67,7 @@
 
           <div v-if="vis(c)" class="q-my-sm row">
             <quotas-vols class="col" :vols="c" />
-            <q-btn v-if="pow < 4" size="md" class="col-auto q-ml-sm self-start"
+            <q-btn v-if="session.pow < 4" size="md" class="col-auto q-ml-sm self-start"
                 icon="settings"
                 dense padding="none" round color="primary" @click="editerq(c)"/>
           </div>
@@ -143,6 +143,7 @@ export default {
   props: { },
 
   computed: {
+    lg () { return this.aSt.tribuC.synth }
   },
 
   methods: {
@@ -151,7 +152,7 @@ export default {
     bgclr (c) { return 'bg-' + bg[c.notif.niv || 0] },
 
     vis (c) { 
-      return (this.pow < 4 || (c.id === this.aSt.compteId))
+      return (this.session.pow < 4 || (c.id === this.aSt.compteId))
     },
 
     type (c) {
@@ -209,33 +210,13 @@ export default {
   },
 
   setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const aSt = stores.avatar
-    const pSt = stores.people
-    const pow = session.pow
-
-    const lg = ref(null)
-
-    function resetCourant () { 
-      lg.value = aSt.tribuC.synth 
-    }
-
-    if (pow > 1) aSt.$onAction(({ name, args, after }) => {
-      after(async (result) => {
-        if (name === 'setTribu' || name === 'setCompta') {
-          resetCourant()
-        }
-      })
-    })
-
-    resetCourant()
-
-    return {
-      session, aSt, pSt, ui, pow, lg,
-      ID,
+     return {
+      session: stores.session, 
+      aSt: stores.avatar, 
+      pSt: stores.people, 
+      ui: stores.ui,
       cfg: stores.config,
-      dkli, styp
+      ID, dkli, styp
     }
   }
 
@@ -244,13 +225,4 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.btn1
-  max-height: 1.5rem !important
-.msg
-  position: absolute
-  z-index: 99999
-  top: -20px
-  right: 5px
-  border-radius: 5px
-  border: 1px solid black
 </style>

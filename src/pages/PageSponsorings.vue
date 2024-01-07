@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { AMJ, UNITEV1, UNITEV2, ID } from '../app/api.mjs'
 import { dhcool, edvol, dkli } from '../app/util.mjs'
@@ -77,11 +77,11 @@ export default {
 
   computed: {
     sponsorings () { 
-      const r = Array.from(this.aSt.getSponsorings(this.avatar.id).values()) || []
+      const r = Array.from(this.aSt.getSponsorings(this.aSt.avC.id).values()) || []
       r.sort((a,b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)} )
       return r
     },
-    estComptable () { return ID.estComptable(this.avatar.id) }
+    estComptable () { return ID.estComptable(this.aSt.avC.id) }
   },
 
   data () {
@@ -108,23 +108,11 @@ export default {
   },
 
   setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const aSt = stores.avatar
-    const avatar = ref(aSt.avC)
-
-    aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setAvatar' && args[0] === session.avatarId) {
-          avatar.value = aSt.getAvatar(session.avatarId)
-        }
-      })
-    })
-
     return {
       ID, dkli,
-      avatar,
-      aSt, session, ui
+      aSt: stores.avatar, 
+      session: stores.session, 
+      ui: stores.ui
     }
   }
 

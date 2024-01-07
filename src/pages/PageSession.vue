@@ -70,7 +70,7 @@
           </div>
         </q-item-section>
       </template>
-      <q-card-section v-for="f in s.la" :key="f.id" class="ma-qcard-section">
+      <q-card-section v-for="f in fSt.lstQueue" :key="f.id" class="ma-qcard-section">
         <div class="row justify-between items-center">
           <div class="col">
             <span class="font-mono fs-md">{{f.id}}</span>
@@ -95,7 +95,7 @@
           </div>
         </q-item-section>
       </template>
-      <q-card-section v-for="f in s.le" :key="f.id" class="ma-qcard-section">
+      <q-card-section v-for="f in fSt.lstEchecs" :key="f.id" class="ma-qcard-section">
         <div class="row justify-between items-center">
           <div class="col">
             <span class="font-mono fs-md">{{f.id}}</span>
@@ -131,7 +131,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue'
+
 import RapportSynchro from '../components/RapportSynchro.vue'
 import stores from '../stores/stores.mjs'
 import { dhcool, edvol, mon } from '../app/util.mjs'
@@ -161,7 +161,7 @@ export default {
     mo () { return this.session.synchro ? this.$t('sync') : 
       (this.session.avion ? this.$t('avion') : 'incognito')},
     cb () { return ' text-' + cbl[this.session.blocage]},
-    dsync () { return this.session.sessionSync },
+    dsync () { return this.session.sessionSync }
   },
 
   methods: {
@@ -182,46 +182,11 @@ export default {
   },
 
   setup () {
-    const fSt = stores.fetat
-    const s = reactive({ la: [], le: [] })
-
-    function initq () {
-      s.la = []
-      for (const idf of fSt.queue) {
-        const e = { ...fSt.getFetat(idf) }
-        e.courant = e.id === fSt.encours
-        s.la.push(e)
-      }
-    }
-
-    function inite () {
-      s.le = []
-      for (const idf of fSt.echecs) {
-        const e = { ...fSt.getFetat(idf) }
-        s.le.push(e)
-      }
-    }
-
-    fSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setQueue') initq()
-      })
-    })
-
-    fSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setEchec') inite()
-      })
-    })
-
-    initq()
-    inite()
     return {
       edvol, mon,
       ui: stores.ui,
       session: stores.session,
-      fSt,
-      s
+      fSt: stores.fetat
     }
   }
 }

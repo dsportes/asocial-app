@@ -68,6 +68,29 @@ export default ({
   components: { ApercuTicket, PanelDeta, PanelDialtk },
 
   computed: {
+    c () { return this.session.estComptable ? null : this.aSt.compta.compteurs },
+
+    lstTk () {
+      function filtre (l, att, deb) {
+        const r = []
+        if (att === 'A' || deb !== '') { 
+          const d = deb.toUpperCase()
+          l.forEach(tk => { 
+            const c1 = d ? idTkToL6(tk.ids).startsWith(d) : true
+            const c2 = (att === 'A' && tk.dr === 0) || att !== 'A'
+            if (c1 && c2) r.push(tk)
+          })
+          return r 
+        }
+        return l
+      }
+
+      const src = this.session.estComptable ? this.aSt.getTickets : this.aSt.compta.credits.tickets
+      const l = filtre(src, this.att, this.deb)
+      if (this.att === 'A') l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : 1) })
+      else l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : -1) })
+      return l
+    }
   },
 
   data () {
@@ -92,91 +115,27 @@ export default ({
   },
 
   setup () {
-    const session = stores.session
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
-    const aSt = stores.avatar
-    const c = ref(session.estComptable ? null : aSt.compta.compteurs)
-    const lstTk = ref([]) 
-    const src = ref([]) 
-    const att = ref('A')
-    const deb = ref('')
+    const session = stores.session
     const dhinc = ref(0)
     const nbinc = ref(0)
-
-    function filtre (l) {
-      const r = []
-      if (att.value === 'A' || deb.value !== '') { 
-        const d = deb.value.toUpperCase()
-        l.forEach(tk => { 
-          const c1 = d ? idTkToL6(tk.ids).startsWith(d) : true
-          const c2 = (att.value === 'A' && tk.dr === 0) || att.value !== 'A'
-          if (c1 && c2) r.push(tk)
-        })
-        return r 
-      }
-      return l
-    }
-
-    function tri (l) {
-      if (att.value === 'A') l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : 1) })
-      else l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : -1) })
-      return l
-    }
-
-    function load () {
-      // src.value = test
-      if (session.estComptable) {
-        src.value = aSt.getTickets
-      } else {
-        src.value = aSt.compta.credits.tickets
-      }
-      lstTk.value = tri(filtre(src.value))
-    }
-
-    watch(() => att.value, (ap, av) => {
-        lstTk.value = tri(filtre(src.value))
-      }
-    )
-
-    watch(() => deb.value, (ap, av) => {
-        lstTk.value = tri(filtre(src.value))
-      }
-    )
-     
-    if (session.estComptable) {
-      aSt.$onAction(({ name, args, after }) => {
-        after((result) => {
-          if (name === 'setTicket' || name === 'delTicket'){
-            load()
-          }
-        })
-      })
-    } else {
-      aSt.$onAction(({ name, args, after }) => {
-        after((result) => {
-          if (name === 'setCompta'){
-            load()
-          }
-        })
-      })
-    }
 
     async function rafraichirIncorp () {
       dhinc.value = Date.now()
       nbinc.value = await new RafraichirTickets().run()
-      load()
     }
 
     onMounted(async () => {
       if (!session.estComptable) await rafraichirIncorp()
-      else load()
     })
 
     return {
-      rafraichirIncorp, dhinc, nbinc,
-      aSt, session, ui, styp, idc, lstTk, att, deb, c,
-      mon, dhcool, dkli, AMJ
+      rafraichirIncorp, styp, mon, dhcool, dkli, AMJ,
+      dhinc, nbinc,
+      att: ref('A'), 
+      deb: ref(''),
+      aSt: stores.avatar,  
+      session, ui, idc: ui.getIdc()
     }
   }
 })

@@ -985,7 +985,8 @@ export default {
   PNOnonote: 'Pas de note répondant au critère de sélection',
   PNOv1: 'Volume du texte: {0}.',
   PNOnf: 'Aucun fichier attaché. | Un fichier attaché de | {count} fichiers occupant ',
-  PNOexclu: '{0} a l\'excluivité d\'écriture. ',
+  PNOexclu: '{0} a l\'exclusivité d\'écriture. ',
+  PNOexclu3: 'Exclusivité d\'écriture',
   PNOnoexclu: 'Pas d\'exclusivité d\'écriture.',
   PNOprot: 'Protégé contre l\'écriture. ',
   PNOnoprot: 'Pas de protection d\'écriture',
@@ -1005,7 +1006,6 @@ export default {
   PNOauts2: 'Votre compte est le seul éditeur',
   PNOrattinfo: 'Cliquer ci-dessous sur l\'icône "étoile verte" du groupe, avatar ou note à laquelle vous voulez rattacher la note courante.',
   PNOattach: 'Fichiers attachés',
-  PNOexclu: 'Exclusivité d\'écriture',
 
   PNOdlc: 'Téléchargement des notes affichées',
   PNOdlst1: 'GO ! notes et leurs fichiers',

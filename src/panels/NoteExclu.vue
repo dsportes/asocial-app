@@ -74,7 +74,7 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { $t, dkli, styp } from '../app/util.mjs'
+import { dkli, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ListeAuts from '../components/ListeAuts.vue'
@@ -88,11 +88,24 @@ export default {
 
   props: { },
 
-  computed: { },
+  computed: { 
+    egr () { return this.gSt.egr(this.nSt.note.id) },
+    groupe () { return this.egr.groupe },
+    amb () { return this.aSt.compte.ambano(this.groupe)[0] },
+    anim () { return this.egr.estAnim },
+    xav () { return this.nSt.mbExclu },
+
+    /* Pour une note de groupe, liste des {im, na, nom} des membres 
+    aptes à recevoir l'exclusivité, sauf celui actuel */
+    lst () { return this.nSt.lstImNa }
+  },
 
   watch: {  },
 
   methods: {
+    cv (x) {
+      return !x.avc ? this.pSt.getCv(x.na.id) : this.aSt.getAvatar(x.na.id).cv
+    },
     selmb (e) {
       e.cv = this.cv(e)
       this.xap = e
@@ -100,93 +113,29 @@ export default {
     async valider () {
       const n = this.nSt.note
       await new ExcluNote().run(n.id, n.ids, this.xap.im)
+      this.xap = null
     },
     async perdre () {
       const n = this.nSt.note
       await new ExcluNote().run(n.id, n.ids, 0)
+      this.xap = null
     }
   },
 
   data () {
     return {
+      xap: null // sélection pour prendre l'exclusivité
     }
   },
 
   setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const nSt = stores.note
-    const gSt = stores.groupe
-    const aSt = stores.avatar
-    const pSt = stores.people
-    const idg = nSt.note.id
-
-    function cv(x) {
-      return !x.avc ? pSt.getCv(x.na.id) : aSt.getAvatar(x.na.id).cv
-    }
-
-    const xav = ref() // exclu actuel
-    const xap = ref() // exclu futur
-    const amb = ref(false)
-    const anim = ref(false) // le compte a un avatar animateur
-    const autAvc = ref(false) // la note n'a au comme auteur QUE des avatars du compte
-    const groupe = ref()
-
-    const lst = ref([])
-
-    function init() {
-      const idg = nSt.note.id
-      const egr = gSt.egr(idg)
-      const cpt = aSt.compte
-      groupe.value = egr.groupe
-      amb.value = cpt.ambano(groupe.value)[0]
-      anim.value = egr.estAnim
-
-      const ims = aSt.compte.imGroupe(idg) // im des avatars du compte participant au groupe
-      let b = true
-      nSt.note.auts.forEach(im => { if (!ims.has(im)) b = false})
-      autAvc.value = b
-
-      xap.value = null
-      xav.value = nSt.mbExclu // retourne { avc: true/false, nom } ou null s'il n'y a pas d'exclusivité
-
-      // {im: m.ids, na: m.na }
-      const lx = []
-      const l = gSt.nexLm(idg) // liste des membres "auteurs" aptes à recevoir l'exclusivité
-      l.forEach(e => {
-        if (e.im !== nSt.note.im) { // sauf celui actuel
-          if (anim.value // je suis animateur
-            || (xav.value && xav.value.avc) // j'ai l'exclusité
-            || (!xav.value && e.avc && autAvc.value) // personne n'a l'exclusivité, c'est un de mes avatars ET je suis seul auteur de la note
-            ) {
-              const x = { ...e }
-              x.nom = x.avc ? $t('moi2', [x.na.nom]) : x.na.nomc
-              lx.push(x)
-            }
-        }
-      })
-      lx.sort((a,b) => {
-        if (a.avc && b.avc) return (a.nom < b.nom ? -1 : 1)
-        if (a.avc) return -1
-        if (b.avc) return 1
-        return (a.nom < b.nom ? -1 : (a.nom === b.nom ? 1 : 0))
-      })
-      lst.value = lx
-    }
-
-    nSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setNote' && args[0].id === idg) {
-          init()
-        }
-      })
-    })
-
-    init()
-
     return {
-      session, ui, nSt, gSt, pSt, aSt, cv, idg,
-      groupe, lst, xav, xap, anim, autAvc, amb,
+      session: stores.session,
+      ui: stores.ui, 
+      nSt: stores.note, 
+      gSt: stores.groupe, 
+      pSt: stores.people,
+      aSt: stores.avatar,
       dkli, styp
     }
   }
