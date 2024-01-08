@@ -21,9 +21,11 @@ Depuis un Comptable: ns est celui de la session
 
         <q-select class="col q-ml-md self-start" borderless v-model="optionA" :options="options" dense />
         <div class="col-auto q-mx-sm q-gutter-xs column self-start">
-          <q-btn dense size="md" color="primary" padding="none" round :disable="!chgOptionA"
+          <q-btn dense size="md" color="primary" padding="none" round 
+            :disable="!chgOptionA"
             icon="undo" @click="undoOptionA"/>
-          <q-btn dense size="md" color="warning" padding="none" round :disable="!chgOptionA"
+          <q-btn dense size="md" color="warning" padding="none" round 
+            :disable="!chgOptionA"
             icon="check" @click="saveOptionA"/>
         </div>
       </div>
@@ -57,7 +59,7 @@ Depuis un Comptable: ns est celui de la session
             </div>
           </div>
         </template>
-        <div class="q-ml-xl q-mb-lg">
+        <div :class="dkli(idx) + 'q-ml-xl q-mb-lg'">
           <div class="row q-gutter-sm">
             <tuile-cnv type="qc" :src="lg" occupation/>
             <tuile-cnv type="q1" :src="lg" occupation/>
@@ -66,9 +68,9 @@ Depuis un Comptable: ns est celui de la session
           </div>
           <div v-if="idx !== 0" class="q-my-xs">
             <apercu-notif :editable="session.pow > 1 && session.pow < 4" :notif="notif" :type="1" 
-              :ctx="{ idt: lg.id }"/>
+              :ctx="{ idt: lg.id }" :idx="idx"/>
           </div>
-          <div v-if="pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs">
+          <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs">
             <q-btn class="fs-md btn2" size="sm" dense
               color="primary" :icon="lg.info ? 'edit' : 'add'" 
               :label="$t('PEedn')" @click="editer"/>
@@ -136,14 +138,14 @@ Depuis un Comptable: ns est celui de la session
 </template>
 
 <script>
-import { ref, onMounted, toRef, watch } from 'vue'
+import { onMounted, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import { SetNotifT } from '../app/operations.mjs'
-import { dkli, $t } from '../app/util.mjs'
+import { dkli, styp, $t } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 import { SetEspaceOptionA, NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
 
@@ -179,25 +181,28 @@ export default {
         return a > b ? ct.m : (a < b ? -ct.m : 0) 
       })
       return l
-    }
+    },
+    notif () { return this.session.pow === 2 ? this.aSt.tribuC.notif : null },
+    optesp () { return this.session.espace ? this.session.espace.opt : 0 },
+    chgOptionA () { return this.session.espace.opt !== this.optionA.value },
+    tribuv () { const t = this.aSt.tribuC; return t ? [t.id, t.v] : [0, 0] }
   },
 
   watch: {
-    synth (l) {
-      if (this.aSt.tribuC) {
-        l.forEach(s => { 
-          if (s.id === this.session.tribuCId) {
-            this.ligne = s
-          }
-        })
-      } else {
+    synth (l) { // repositionnement de la ligne courante sur la nouvelle valeur
+      if (this.aSt.tribuC)
+        l.forEach(s => { if (s.id === this.session.tribuCId) { this.ligne = s } })
+      else
         this.ligne = l[0] // ligne de synthèse courante initiale
-      }
     },
-    optionA (ap, av) {
-      this.chgOptionA = this.session.espace.opt !== ap.value
-    }
 
+    optesp (ap) { // refixe la valeur courante de l'option A quand elle a changé dans espace
+      this.optionA = this.options[ap]
+    },
+
+    async tribuv (ap) {
+      await this.refreshSynth()
+    }
   },
 
   methods: {
@@ -215,13 +220,11 @@ export default {
 
     async lgCourante (lg) {
       if (!lg.id) return
-      if (this.pow === 2) {
+      if (this.session.pow === 2) {
         const t = await this.getTr(lg.id)
         this.ligne = t.synth
-        this.notif = t.notif
       } else {
         this.ligne = lg
-        this.notif = null
       }
     },
 
@@ -280,17 +283,12 @@ export default {
       this.ui.fD()
     },
 
-    setOptionA (e) {
-      this.optionA = options[e.opt]
-      this.chgOptionA = false
-    },
+    setOptionA (e) { this.optionA = options[e.opt] },
 
-    undoOptionA () {
-      this.optionA = options[this.session.espace.opt]
-    },
+    undoOptionA () { this.optionA = options[this.session.espace.opt] },
 
     async saveOptionA () {
-      await new SetEspaceOptionA().run(optionA.value.value)
+      await new SetEspaceOptionA().run(this.optionA.value)
     }
 
   },
@@ -299,7 +297,8 @@ export default {
     return {
       nom: '',
       quotas: null,
-      chgOptionA: false
+      ligne: null,
+      optionA: this.options[this.session.espace.opt]
     }
   },
 
@@ -339,10 +338,6 @@ export default {
       { label: $t('PTopt2'), value: 2 },
     ]
 
-    const ligne = ref(null)
-    const notif = ref(null)
-    const optionA = ref(options[session.espace.opt])
-
     async function refreshSynth () {
       await new GetSynthese().run(ns.value)
     }
@@ -351,34 +346,10 @@ export default {
       await refreshSynth()
     })
 
-    if (session.pow === 2) aSt.$onAction(({ name, args, after }) => {
-      after(async (result) => {
-        /* si la ligne courante correspond à une tribu qui vient
-        d'être chargée, on fait repointer cette ligne sur le synth de cette tribu */
-        if (name === 'setTribu' || name === 'setCompta') {
-          await refreshSynth()
-        }
-        if (name === 'setTribu' && args[0].id === ligne.value.id) {
-          notif.value = args[0].notif
-        }
-      })
-    })
-
-    session.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setEspace') {
-          const e = args[0]
-          optionA.value = e
-        }
-      })
-    })
-
     return {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
-      optionA, notif, ligne, // ligne courante affichée
-      ID,
-      aSt, fSt, session, ui, dkli,
-      options
+      ID, dkli, styp, options,
+      aSt, fSt, session, ui
     }
   }
 
