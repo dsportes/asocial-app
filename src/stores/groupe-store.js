@@ -3,6 +3,7 @@ import stores from './stores.mjs'
 import { encode } from '@msgpack/msgpack'
 import { egaliteU8, difference, intersection } from '../app/util.mjs'
 import { UNITEV1, UNITEV2, FLAGS } from '../app/api.mjs'
+import { Versions } from '../app/modele.mjs'
 
 /* Store maître des groupes du compte courant :
 - map : des groupes dont un des avatars du compte courant est membre
@@ -34,6 +35,12 @@ export const useGroupeStore = defineStore('groupe', {
     egrC (state) { 
       const id = stores.session.groupeId
       return state.map.get(id)
+    },
+
+    exV2 (state) {
+      const e = state.map.get(stores.session.groupeId)
+      if (!e) return false
+      return e.vols.q2 * UNITEV2 < e.vols.v2
     },
 
     // chat du groupe courant

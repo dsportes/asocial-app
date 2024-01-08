@@ -81,7 +81,6 @@
 </template>
 
 <script>
-import { reactive, toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { afficherDiag, edvol, dhcool, readFile, rnd6, suffixe } from '../app/util.mjs'
 import { $t, styp, dkli, trapex, dhstring } from '../app/util.mjs'
@@ -102,7 +101,8 @@ export default {
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    valide () { return this.fic.lg && this.nfic }
+    valide () { return this.fic.lg && this.nfic },
+    ccFic () { return  [this.ppSt.modecc, this.ppSt.ccfic] }
   },
 
   watch: {
@@ -130,15 +130,30 @@ export default {
         this.info = this.fic.info
       }
       if (s === 3) {
+        this.ui.setEtf(0)
         try {
           this.getLstfic()
         } catch (e) { trapex (e); this.step = 1}
+      }
+    },
+
+    ccFic ([modecc, f], av) {
+      if (!modecc) { // fichier copié
+        this.fic.nom = f.nom
+        this.fic.info = f.info
+        this.fic.lg = f.lg
+        this.fic.type = f.type
+        this.fic.u8 = f.u8
+        this.step = 2
       }
     }
   },
 
   data () {
     return {
+      nfic: this.nomfic || '',
+      fic: { nom: '', info: '', lg: 0, type: '', u8: null },
+      step: 1,
       etapes: [this.$t('PNFnvs0'), this.$t('PNFnvs1'), this.$t('PNFnvs2')],
       fileList: null,
       idf: 0,
@@ -157,7 +172,7 @@ export default {
         if (fic.sel) this.lidf.push(fic.idf)
       })
       this.step = 4
-      this.ui.etf = 0
+      this.ui.setEtf(0)
       fic = await this.nSt.note.nouvFic(
         this.idf, 
         this.nfic, 
@@ -213,61 +228,30 @@ export default {
       this.volsupp = 0
       this.lidf = []
       this.lstfic.forEach(fic => { if (fic.sel) this.volsupp += fic.lg })
+    },
+
+    resetFic () { 
+      this.fic.nom = ''; this.fic.info = ''; this.fic.lg = 0; this.fic.type = ''; this.fic.u8 = null
+    },
+
+    selFic () {
+      this.ppSt.modecc = true
+      this.ppSt.tab = 'fichiers'
+      this.ppSt.ccfic = null
+      this.ui.oD('pressepapier')
     }
+
   },
 
-  setup (props) {
-    const ui = stores.ui
-    const nSt = stores.note
-    const aSt = stores.avatar
-    const gSt = stores.groupe
-    const session = stores.session
-    const ppSt = stores.pp
-
-    const nomfic = toRef(props, 'nomfic')
-    const nfic = ref(nomfic.value)
-    const step = ref(1)
-
-    const fic = reactive({ nom: '', info: '', lg: 0, type: '', u8: null })
-
-    /* Détection du retour du copier / coller */
-    ppSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'copiercollerfic') {
-          const f = args[0]
-          // f : { nom: '', info: '', lg: 0, type: '', u8: null }
-          if (f) {
-            fic.nom = f.nom
-            fic.info = f.info
-            fic.lg = f.lg
-            fic.type = f.type
-            fic.u8 = f.u8
-            step.value = 2
-          }
-        }
-      })
-    })
-
-    function resetFic () { 
-      fic.nom = ''; fic.info = ''; fic.lg = 0; fic.type = ''; fic.u8 = null
-    }
-
-    function selFic () {
-      ppSt.modecc = true
-      ppSt.tab = 'fichiers'
-      ppSt.ccfic = null
-      ui.oD('pressepapier')
-    }
-
-    ui.etf = 0
-
+  setup () {
     return {
-      nSt, aSt, gSt, ui, session, edvol, dhcool, dkli, dhstring, styp,
-      nfic,
-      fic,
-      step,
-      resetFic,
-      selFic
+      nSt: stores.note,
+      aSt: stores.avatar, 
+      gSt: stores.groupe, 
+      ui: stores.ui,
+      session: stores.session,
+      ppSt: stores.pp, 
+      edvol, dhcool, dkli, dhstring, styp
     }
   }
 }

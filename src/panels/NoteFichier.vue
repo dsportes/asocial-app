@@ -10,7 +10,7 @@
         class="titre-lg full-width text-center">{{$t('PNOfictit2', [groupe.na.nomc])}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="ro!==0 || exv!==0" inset
+    <q-toolbar v-if="ro !==0 || exv" inset
       class="full-width bg-yellow-5 text-black titre-md text-bold">
       <div class="row justify-center">
         <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
@@ -39,7 +39,7 @@
             :color="state.noms[it.nom] ? 'green': 'grey'"
             :label="$t('PNFavion1')"
             unchecked-icon="airplanemode_inactive"
-            @click="av1Chg(it)"
+            @click.stop="av1Chg(it)"
             :disable="!(session.synchro || session.avion)"
           />
           <q-btn class="col-2" dense color="primary" size="sm" icon="add"
@@ -75,7 +75,7 @@
                         :color="state.idfs[f.idf] ? 'green': 'grey'"
                         :label="$t('PNFl7')"
                         unchecked-icon="airplanemode_inactive"
-                        @click="av2Chg(f)"
+                        @click.stop="av2Chg(f)"
                         :disable="!(session.synchro || session.avion)"
                       />
                     </q-item>
@@ -170,9 +170,8 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
-import { $t, styp, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } from '../app/util.mjs'
+import { $t, styp, sty, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
@@ -189,9 +188,72 @@ export default {
   props: { },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    lidk () { return dkli(0) },
-    modifie () { return false }
+    modifie () { return false },
+    id () { return this.nSt.note.id },
+    avn () { 
+      const n = this.nSt.note
+      return this.avnSt.getAvnote(n.id, n.ids)
+    },
+    estGr () { return this.nSt.node.type === 5 },
+    groupe () { return this.estGr ? this.gSt.egr(this.id).groupe : null },
+    avatar () { return !this.estGr ? this.aSt.getElt(this.id).avatar : null },
+    exv () { if (this.ro) return 0 
+      if (!this.estGr) return this.aSt.exV2
+      const eg = this.gSt.egr(this.id)
+      return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV2)
+    },
+
+    ro () { 
+      /* Retourne 
+      1: avion 2:figée 3:minimal 4:lecture
+      5: note archivée (inutilisé)
+      6: exclu (pour un autre compte), 
+      7: pas auteur
+      */
+      const x = this.session.roSt // 1:avion 2:figée 3:minimal 4:lecture
+      if (x) return x
+      // const n = this.nSt.note; if (n.p) return 5 // note archivée
+      if (!this.estGr) return 0
+      if (this.groupe) {
+        const s = this.groupe.avcAuteurs()
+        if (!s.size) return 7 // pas auteur 
+        const xav = this.nSt.mbExclu
+        if (xav && !xav.avc) return 6 // un autre membre a l'exclusivité
+      }
+      return 0
+    },
+
+    state () {
+      try {
+        const state = { noms: {}, idfs: {}, listefic: [], avn: this.avn }
+        const avn = state.avn
+        const lst = []
+        const mnom = {}
+        for (const [idf, f] of this.nSt.note.mfa) {
+          /* mfa : Map de clé idf : { nom, info, dh, type, gz, lg, sha } */
+          let e = mnom[f.nom]; 
+          if (!e) { 
+            state.noms[f.nom] = avn && avn.mnom[f.nom] ? true : false
+            e = []
+            mnom[f.nom] = e
+            lst.push(f.nom) 
+          }
+          const av = avn && (avn.lidf.indexOf(idf) !== -1) ? true : false
+          state.idfs[idf] = av
+          e.push({ ...f, idf, av })
+        }
+        lst.sort((a, b) => { return a < b ? -1 : (a > b ? 1 : 0) })
+        lst.forEach(nom => {
+          const l = mnom[nom]
+          l.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh > b.dh ? -1 : 0) })
+          state.listefic.push({ nom, l, avn: avn && avn.mnom[nom] ? true : false })
+        })
+        return state
+      } catch (e) { 
+        trapex(e, 1)
+        return { noms: {}, idfs: {}, listefic: [], avn: this.avn }
+      }
+    }
   },
 
   watch: {
@@ -230,9 +292,10 @@ export default {
     },
 
     async av1Chg (it) {
+      if (this.session.incognito) return
       const v = this.state.noms[it.nom]
       if (this.session.avion) {
-        this.state.noms[it.nom] = !v
+        // this.state.noms[it.nom] = !v
         await afficherDiag(this.$t('PNFav3'))
         return
       }
@@ -252,9 +315,10 @@ export default {
     },
 
     async av2Chg (f) {
+      if (this.session.incognito) return
       const v = this.state.idfs[f.idf]
       if (this.session.avion) {
-        this.state.idfs[f.idf] = !v
+        // this.state.idfs[f.idf] = !v
         await afficherDiag(this.$t('PNFav3'))
         return
       }
@@ -338,6 +402,11 @@ export default {
 
     selNa (elt) { 
       this.naAut = elt.na
+    },
+
+    ergrV2 (dv) {
+      const eg = this.gSt.egr(this.id)
+      return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV2)
     }
 
   },
@@ -351,154 +420,16 @@ export default {
     }
   },
 
-  setup (props) {
-    const ui = stores.ui
-    const session = stores.session
-    const nSt = stores.note
-    const aSt = stores.avatar
-    const gSt = stores.groupe
-    const avnSt = stores.avnote
-    const ppSt = stores.pp
-    const exp = reactive({})
-
-    function roFic () { 
-      /* Retourne 
-      1: avion 2:figée 3:minimal 4:lecture
-      5: note archivée
-      6: exclu (pour un autre compte), 
-      7: pas auteur
-      */
-      const n = nSt.note
-      let x = session.roSt // 1:avion 2:figée 3:minimal 4:lecture
-      if (x) return x
-      if (n.p) return 5 // note archivée
-      const g = nSt.node.type === 5 && nSt.egr ? nSt.egr.groupe : null
-      if (g) {
-        // note de groupe
-        const s = g.avcAuteurs()
-        if (!s.size) return 7 // pas auteur 
-        const xav = nSt.mbExclu
-        if (xav && !xav.avc) return 6 // un autre membre a l'exclusivité
-      }
-      return 0
-    }
-
-    const ro = ref(roFic())
-    
-    const state = reactive({
-      avn: null,
-      listefic: [],
-      noms: {},
-      idfs: {}
-    })
-
-    const avatar = ref(null)
-    const groupe = ref(null)
-    const exv = ref(0)
-
-    if (nSt.node.type === 4) {
-      if (ro.value === 0 && aSt.exV2) exv.value = 1
-      avatar.value = aSt.getElt(nSt.note.id).avatar
-    } else if (nSt.node.type === 5) {
-      groupe.value = gSt.egr(nSt.note.id).groupe
-      if (ro.value === 0 && ergrV2(0)) exv.value = 2
-    }
-
-    function ergrV2 (dv) {
-      const g = groupe.value
-      const eg = gSt.egr(g.id)
-      return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV2)
-    }
-
-    function initState () {
-      const n = nSt.note
-      state.avn = avnSt.getAvnote(n.id, n.ids)
-      state.listefic = listefichiers(n, state.avn)
-    }
-
-    function listefichiers (n, avn) {
-      try {
-      state.noms = {}
-      state.idfs = {}
-      const lst = []
-      const mnom = {}
-      let dhmax = 0
-      let nfmax = ''
-      for (const [idf, x] of n.mfa) {
-        /* mfa : Map de clé idf : { nom, info, dh, type, gz, lg, sha } */
-        const f = n.mfa.get(idf)
-        let e = mnom[f.nom]; 
-        if (!e) { 
-          state.noms[f.nom] = avn && avn.mnom[f.nom] ? true : false
-          e = []
-          mnom[f.nom] = e
-          lst.push(f.nom) 
-        }
-        const av = avn && (avn.lidf.indexOf(idf) !== -1) ? true : false
-        state.idfs[idf] = av
-        e.push({ ...f, idf, av })
-      }
-      lst.sort((a, b) => { return a < b ? -1 : (a > b ? 1 : 0) })
-      const res = []
-      lst.forEach(nom => {
-        const l = mnom[nom]
-        l.forEach(x => { if (x.dh > dhmax ) { dhmax = x.dh; nfmax = nom }})
-        l.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh > b.dh ? -1 : 0) })
-        if (exp[nom] === undefined) exp[nom] = false
-        res.push({ nom, l, avn: avn && avn.mnom[nom] ? true : false })
-      })
-      if (nfmax) exp[nfmax] = true
-      return res
-      } catch (e) { trapex(e, 1); return []}
-    }
-
-    initState()
-
-    nSt.$onAction(({ name, args, after }) => { 
-      after(async (result) => {
-        if ((name === 'setNote')){
-          const n = args[0]
-          if (n.key === nSt.note.key) initState()
-        }
-        if ((name === 'delNote')){
-          const id = args[0]
-          const ids = args[1]
-          if (id + '/' + ids === nSt.note.key) initState()
-        }
-        if ((name === 'setCourant')){
-          const key = args[0]
-          if (key !== nSt.note.key) initState()
-        }
-      })
-    })
-
-    avnSt.$onAction(({ name, args, after }) => { 
-      after(async (result) => {
-        if ((name === 'setAvnote')){
-         const n = args[0]
-         if (n.key === nSt.note.key) initState()
-        }
-      })
-    })
-
-    ui.$onAction(({ name, args, after }) => { 
-      after(async (result) => {
-        if ((name === 'setFichiercree')){
-          const nom = args[0]
-          if (nom) {
-            setTimeout(() => {
-              exp[nom] = true
-            }, 100)
-            ui.setFichiercree('')
-          }
-        }
-      })
-    })
-
-    return {
-      ui, styp, session, nSt, aSt, gSt, avnSt, ppSt,
-      exv, avatar, groupe, state, exp, ro,
-      dkli, ergrV2, edvol, dhcool, suffixe
+  setup () {
+     return {
+      ui: stores.ui, 
+      session: stores.session,
+      nSt: stores.note, 
+      aSt: stores.avatar, 
+      gSt: stores.groupe, 
+      avnSt: stores.avnote, 
+      ppSt: stores.pp,
+      styp, sty, dkli, edvol, dhcool, suffixe
     }
   }
 
@@ -507,26 +438,9 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.mh
-  max-height: 3.2rem
-  width: 15rem
 .bord1
   border: 1px solid $grey-5
   border-radius: 5px
-.bord2
-  border: 3px solid $warning
-  border-radius: 5px
-.dec
-  position: relative
-  left: -7px
-.h13
-  height: 1.3rem
-.btnp
-  margin-top: 0 !important
-.btn
-  min-height: 1.6rem !important
-  max-height: 1.6rem !important
-  min-width: 1.6ren
 .info
   max-height: 1.6rem !important
   overflow: hidden
