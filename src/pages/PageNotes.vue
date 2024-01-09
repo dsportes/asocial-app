@@ -10,8 +10,8 @@
       selected-color="primary"
       v-model:selected="selected"
       v-model:expanded="expanded"
-      :filter="filtreFake"
-      :filter-method="filtrage"
+      :filter="nSt.filtre.v"
+      :filter-method="nSt.filtrage"
     >
       <template v-slot:default-header="prop">
         <div @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)">
@@ -219,13 +219,14 @@
         </div>
       </div>
           
-      <div class="row full-width bg-secondary text-white">
-        <q-btn flat dense size="md" icon="file_download" padding="none"
+      <div class="row full-width bg-secondary text-white items-center">
+        <q-btn class="q-mr-sm" flat dense size="md" icon="file_download" padding="none"
           :label="$t('PNOdlc')" @click="dlopen"/>
-        <q-space/>
-        <q-btn v-if="!expandAll" dense size="sm" color="primary" icon="unfold_more" padding="none"
+        <q-btn v-if="!expandAll" 
+          dense size="sm" color="primary" icon="unfold_more" padding="none"
           :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
-        <q-btn v-if="expandAll" dense size="sm" color="primary" icon="unfold_less" padding="none"
+        <q-btn v-if="expandAll" 
+          dense size="sm" color="primary" icon="unfold_less" padding="none"
           :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
         <!--q-btn class="q-ml-sm" dense size="sm" label="T1" @click="test1"/-->
       </div>
@@ -267,8 +268,8 @@ const styles = [
   'fs-md text-italic text-orange'
   ]
 
-const nbn1 = 100 // nombre de blocks de 4 * nbn2 messages sous la racine d'un avatar ou groupe
-const nbn2 = 9
+const enc = new TextEncoder()
+const dec = new TextDecoder()
 
 export default {
   name: 'PageNotes',
@@ -277,6 +278,8 @@ export default {
     NoteExclu, NoteFichier, NoteConfirme, BoutonHelp, ListeAuts },
 
   computed: {
+    presel () {  return this.nSt.presel },
+
     lib2 () {
       const n = this.nSt.node
       if (n.type <= 3) return n.label
@@ -299,10 +302,20 @@ export default {
       }
       return ''
     },
+
     rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <= 5 }
   },
 
   watch: {
+    presel (ap) {
+      if (ap) {
+        this.selected = ap
+        this.expanded = this.nSt.getAncetres(ap)
+        // this.nSt.setCourant(ap)
+        this.nSt.preSelect('')
+      }
+    },
+
     selected (ap, av) {
       if (!this.nSt.node || this.nSt.node.key !== ap) {
         this.nSt.setCourant(ap)
@@ -317,15 +330,25 @@ export default {
 
   data () {
     return {
+      selected: '',
+      expanded: [],
+
       op: '', // suppr arch react
-      icons,
-      colors,
-      styles,
       expandAll: false,
       rec: 0, // rattachement en cours
       noderatt: null,
-      // nas: [], // test : liste des na des avatars
-      // ngs: [] // test : liste des na des groupes
+      lstn: [], // liste des notes restant à télécharger
+      dlnbntot: 0, // nombre total initial de notes à télécharger
+      dlnbnc: 0, // nombre restant de notes à télécharger
+      lstr: [], // liste des racines
+      lstrm: new Map(), // donne l'indice d'une racine depuis son nom
+      dlst: 0, // statut du dl
+      dlnc: null, // note en cours de dl
+      dlnbn: 0,
+      dlnbf: 0,
+      dlv2f: 0,
+      portupload: this.cfg.portupload,
+      dirloc: './temp'
     }
   },
 
@@ -345,17 +368,13 @@ export default {
     },
 
     lib (n) {
-      if (n.type > 3) return n.label
-      if (n.type === 1) return this.$t('avatar1', [n.label, n.nf, n.nt])
-      return this.$t('groupe1', [n.label, n.nf, n.nt])
+      const nfnt = this.nSt.nfnt[n.key] || { nf: 0, nt:0 }
+      if (n.type > 3)
+        return (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') + n.label
+      if (n.type === 1) return this.$t('avatar1', [n.label, nfnt.nf, nfnt.nt])
+      return this.$t('groupe1', [n.label, nfnt.nf, nfnt.nt])
     },
  
-    /*
-    mapmcf (key) {
-      const id = parseInt(key)
-      return Motscles.mapMC(true, ID.estGroupe(id) ? id : 0)
-    },
-    */
     async noteedit1 () {
       if (this.nSt.note.p) {
         await afficherDiag($t('PNOarchivee'))
@@ -364,6 +383,7 @@ export default {
       this.ui.oD('NE')
     },
 
+    // Rattachement d'une note *********************************************
     async rattacher () {
       if (!await this.session.edit()) return
       const n = this.nSt.node.note
@@ -401,13 +421,162 @@ export default {
       this.rec = 0
       this.noderatt = null
       this.nSt.resetRatt(false)
+    },
+
+    // Download de la sélection des notes **************************************
+    nf (v, id, type) {
+      const s = nomFichier(v)
+      let ext = ''
+      if (type) {
+        const x = mime2ext(type)
+        if (x) ext = '.' + x
+      }
+      return s + (id ? '@' + id : '') + ext
+    },
+
+    scanNode (node, rac, path, lstn) {
+      if (node.type > 5) {
+        // note "fake" - push de son path, pas de note
+        if (node.children.length) {
+          const p = path + '/' + node.label
+          for (const c of node.children) scanNode (c, rac, p, lstn)
+        } 
+      } else {
+        // c'est une vraie note
+        const n = node.note
+        const p2 = this.nf(node.label.substring(0, 32), n.ids)
+        const p = path + '/' + p2
+        if (this.nSt.filtrage(node)) {
+          rac.v2 += n.v2
+          rac.nbn++
+          lstn.push({ r: rac.nom, p, n })
+        }
+        if (node.children.length) {
+          for (const c of node.children) this.scanNode (c, rac, p, lstn)
+        }
+      }
+    },
+
+    listeNotes () {
+      const lr = []
+      this.lstn.length = 0
+      for (const r of this.nSt.nodes) {
+        const nom = this.nf(r.label)
+        const path = nom
+        const rac = { nom, v2: 0, v2d: 0, nbn: 0, v1d: 0, nbnd: 0}
+        for (const node of r.children) this.scanNode(node, rac, path, this.lstn)
+        lr.push(rac)
+      }
+      this.dlnbntot = this.lstn.length
+      this.dlnbnc = this.lstn.length
+      this.lstr = lr
+      this.lstrm.clear()
+      for (let i = 0; i < lr.length; i++) this.lstrm.set(lr[i].nom, i)
+    },
+
+    async dlopen () {
+      this.listeNotes()
+      // preSelect()
+      if (this.lstn.length) {
+        this.dlnc = this.lstn[0]
+        this.dlst = 1
+        this.ui.oD('PNdl')
+      } else {
+        await afficherDiag($t('PNOdlvide'))
+      }
+    },
+
+    async testup () {
+      const u = 'http://localhost:' + this.portupload + '/ping'
+      try {
+        const res = dec.decode(await getData(u))
+        afficherDiag($t('PNOdltok', [u, res]))
+      } catch (e) {
+        const x = appexc(e)
+        afficherDiag($t('PNOdltko', [u, x.message]))
+      }
+    },
+
+    url (u) { 
+      const d = this.dirloc + '/'
+      return 'http://localhost:' + this.portupload + '/' + u8ToB64(enc.encode(d + u), true) 
+    },
+
+    async dlnote(n, avecf) {
+      // console.log(n.p)
+      this.dlnbn++
+      const buf = enc.encode(n.n.txt)
+      const u = this.url(n.p + '/_.md')
+      const er = await putData(u, buf)
+      if (er) throw new AppExc(E_WS, 6, [er])
+      if (avecf) {
+        for (const [idf, f] of n.n.mfa) {
+          const nf = n.n.nomFichier(idf)
+          const buf = await n.n.getFichier(idf)
+          if (buf) {
+            const u = this.url(n.p + '/' + nf)
+            const er = await putData(u, buf)
+            if (er) throw new AppExc(E_WS, 6, [er])
+            else {
+              this.dlnbf++
+              this.dlv2f += buf.length
+            }
+          }
+        }
+      }
+    },
+
+    dlgo (avecf) {
+      this.dlst = 2
+      this.dlnbn = 0
+      this.dlnbf = 0
+      this.dlv2f = 0
+
+      setTimeout(async () => {
+        try {
+          while (this.lstn.length !== 0) {
+            if (this.dlst !== 2) {
+              await sleep(1000)
+              continue
+            }
+            const n = this.lstn[0]
+            this.dlnc = n
+            await this.dlnote(n, avecf)
+            const ir = this.lstrm.get(n.r)
+            const r = this.lstr[ir]
+            r.v2d += n.n.v2
+            r.nbnd++
+            this.lstn.shift()
+          }
+          this.dlst = 4
+        } catch (e) {
+          this.ui.afficherExc(appexc(e))
+        }
+      }, 50)
+    },
+
+    dlpause () {
+      this.dlst = 3
+    },
+
+    dlreprise () {
+      this.dlst = 2
+    },
+
+    dlfin () {
+      this.dlst = 0
+      this.ui.fD()
     }
 
     /*
     stest1 (na, g) {
+      const nbn1 = 100 // nombre de blocks de 4 * nbn2 messages sous la racine d'un avatar ou groupe
+      const nbn2 = 9
+      const auj = this.session.dateJourConnx
+
       const id = na.id
-      const demain = AMJ.amjUtcPlusNbj(this.auj, 1)
-      const sem = AMJ.amjUtcPlusNbj(this.auj, 7)
+      const demain = AMJ.amjUtcPlusNbj(auj, 1)
+      const sem = AMJ.amjUtcPlusNbj(auj, 7)
 
       for(let i = 0; i < nbn1; i++) {
         // (id, ids, ref, texte, dh, v1, v2)
@@ -415,7 +584,7 @@ export default {
         const x = i * 1000
         n1.initTest(id, x + 1, null, '', this.testdh(), 10, 12)
         n1.settxt('## Ma note ' + n1.key)
-        n1.p = 1; n1.st = this.auj
+        n1.p = 1; n1.st = auj
         if (g) this.gSt.setNote(n1); else this.aSt.setNote(n1)
         for( let j = 1; j < nbn2; j++) {
           const x = (i * 1000) + (j * 10)
@@ -483,284 +652,19 @@ export default {
   },
 
   setup () {
-    const tree = ref(null)
     const nSt = stores.note
-    const ui = stores.ui
-    const session = stores.session
-    const cfg = stores.config
-    const selected = ref('')
-    const expanded = ref([])
-    const aSt = stores.avatar
-    const gSt = stores.groupe
-    const fSt = stores.filtre
-    const filtre = ref({})
-    let dff = '1'
-    const filtreFake = ref(dff)
 
-    const now = Date.now()
-
-    const nx = new Map()
-    let nb = 0
-
-    const lstr = ref() // liste des racines
-    const lstn = [] // liste des notes restant à télécharger
-    const lstrm = new Map() // donne l'indice d'une racine depuis son nom
-    const dlst = ref(0) // statut du dl
-    const dlnbntot = ref(0) // nombre total initial de notes à télécharger
-    const dlnbnc = ref(0) // nombre restant de notes à télécharger
-    const dlnc = ref() // note en cours de dl
-    const dlnbn = ref(0)
-    const dlnbf = ref(0)
-    const dlv2f = ref(0)
-    const portupload = ref()
-    portupload.value = cfg.portupload
-    const dirloc = ref('./temp')
-
-    const enc = new TextEncoder()
-    const dec = new TextDecoder()
-
-    function compileFiltre (fx) {
-      const f = filtre.value
-      f.v2 = fx.v2 || 0
-      f.note = fx.note
-      f.temp = fx.temp
-      f.lim = fx.nbj ? Date.now() - (86400000 * fx.nbj) : 0
-      f.mcp = fx.mcp ? new Set(fx.mcp) : null
-      f.mcn = fx.mcn ? new Set(fx.mcn) : null
-      f.avgr = fx.avgr
-      const y = '' + (parseInt(filtreFake.value) + 1)
-      filtreFake.value = y
-      setTimeout(() => { nSt.stats(monf)}, 50)
-    }
-
-    function monf (n) {
-      const f = filtre.value
-      if (f.avgr && n.id !== f.avgr) return false
-      if (f.lim && n.dh && n.dh < f.lim) return false
-      if (f.note && n.txt && n.txt.indexOf(f.note) === -1) return false
-      if (f.v2 && n.v2 < f.v2) return false
-      if (f.mcp && n.smc && difference(f.mcp, n.smc).size) return false
-      if (f.mcn && n.smc && intersection(f.mcn, n.smc).size) return false
-      return true
-    }
-
-    function filtrage (node) {
-      const ff = filtreFake.value
-      if (ff !== dff) {
-        nx.clear()
-        dff = ff
-      }
-      let r = true
-      const n = node.note
-      if (n) {
-        const tf = nx.get(node.key)
-        if (tf) {
-          tf.nb++
-          nx.set(node.key, tf)
-          return tf.r
-        } else {
-          r = monf(n)
-          nx.set(node.key, { nb: 1, r })
-        }
-      }
-      return r
-    }
-
-    function preSelect () {
-      if (nSt.presel) {
-        selected.value = nSt.presel
-        expanded.value = nSt.getAncetres(nSt.presel)
-        nSt.setCourant(nSt.presel)
-        nSt.presel = ''
-      }
-    }
-
-    fSt.$onAction(({ name, args, after }) => { 
-      after(async (result) => {
-        if ((name === 'setFiltre')){
-          if (args[0] === 'notes') compileFiltre(fSt.filtre.notes)
-        }
-      })
-    })
-
-    nSt.$onAction(({ name, args, after }) => { 
-      after(async (result) => {
-        if ((name === 'setNote')){
-          const n = args[0]
-          nx.delete(n.key)
-        }
-      })
-    })
-
-    nSt.$onAction(({ name, args, after }) => { 
-      after(async (result) => {
-        if ((name === 'setPreSelect')){
-          preSelect()
-        }
-      })
-    })
-
-    function nf (v, id, type) {
-      const s = nomFichier(v)
-      let ext = ''
-      if (type) {
-        const x = mime2ext(type)
-        if (x) ext = '.' + x
-      }
-      return s + (id ? '@' + id : '') + ext
-    }
-
-    function scanNode (node, rac, path, lstn) {
-      if (node.type > 5) {
-        // note "fake" - push de son path, pas de note
-        if (node.children.length) {
-          const p = path + '/' + node.label
-          for (const c of node.children) scanNode (c, rac, p, lstn)
-        } 
-      } else {
-        // c'est une vraie note
-        const n = node.note
-        const p2 = nf(node.label.substring(0, 32), n.ids)
-        const p = path + '/' + p2
-        if (filtrage(node)) {
-          rac.v2 += n.v2
-          rac.nbn++
-          lstn.push({ r: rac.nom, p, n })
-        }
-        if (node.children.length) {
-          for (const c of node.children) scanNode (c, rac, p, lstn)
-        }
-      }
-    }
-
-    function listeNotes () {
-      const lr = []
-      lstn.length = 0
-      for (const r of nSt.nodes) {
-        const nom = nf(r.label)
-        const path = nom
-        const rac = { nom, v2: 0, v2d: 0, nbn: 0, v1d: 0, nbnd: 0}
-        for (const node of r.children) scanNode(node, rac, path, lstn)
-        lr.push(rac)
-      }
-      dlnbntot.value = lstn.length
-      dlnbnc.value = lstn.length
-      lstr.value = lr
-      lstrm.clear()
-      for (let i = 0; i < lr.length; i++) lstrm.set(lr[i].nom, i)
-    }
-
-    async function dlopen () {
-      listeNotes()
-      preSelect()
-      if (lstn.length) {
-        dlnc.value = lstn[0]
-        dlst.value = 1
-        ui.oD('PNdl')
-      } else {
-        await afficherDiag($t('PNOdlvide'))
-      }
-    }
-
-    async function testup () {
-      const u = 'http://localhost:' + portupload.value + '/ping'
-      try {
-        const res = dec.decode(await getData(u))
-        afficherDiag($t('PNOdltok', [u, res]))
-      } catch (e) {
-        const x = appexc(e)
-        afficherDiag($t('PNOdltko', [u, x.message]))
-      }
-    }
-
-    function url (u) { 
-      const d = dirloc.value + '/'
-      return 'http://localhost:' + portupload.value + '/' + u8ToB64(enc.encode(d + u), true) 
-    }
-
-    async function dlnote(n, avecf) {
-      // console.log(n.p)
-      dlnbn.value++
-      const buf = enc.encode(n.n.txt)
-      const u = url(n.p + '/_.md')
-      const er = await putData(u, buf)
-      if (er) throw new AppExc(E_WS, 6, [er])
-      if (avecf) {
-        for (const [idf, f] of n.n.mfa) {
-          const nf = n.n.nomFichier(idf)
-          const buf = await n.n.getFichier(idf)
-          if (buf) {
-            const u = url(n.p + '/' + nf)
-            const er = await putData(u, buf)
-            if (er) throw new AppExc(E_WS, 6, [er])
-            else {
-              dlnbf.value++
-              dlv2f.value += buf.length
-            }
-          }
-        }
-      }
-    }
-
-    function dlgo (avecf) {
-      dlst.value = 2
-      dlnbn.value = 0
-      dlnbf.value = 0
-      dlv2f.value = 0
-
-      setTimeout(async () => {
-        try {
-          while (lstn.length !== 0) {
-            if (dlst.value !== 2) {
-              await sleep(1000)
-              continue
-            }
-            const n = lstn[0]
-            dlnc.value = n
-            await dlnote(n, avecf)
-            const ir = lstrm.get(n.r)
-            const r = lstr.value[ir]
-            r.v2d += n.n.v2
-            r.nbnd++
-            lstn.shift()
-          }
-          dlst.value = 4
-        } catch (e) {
-          ui.afficherExc(appexc(e))
-        }
-      }, 50)
-    }
-
-    function dlpause () {
-      dlst.value = 3
-    }
-
-    function dlreprise () {
-      dlst.value = 2
-    }
-
-    function dlfin () {
-      dlst.value = 0
-      ui.fD()
-    }
-
-    compileFiltre(fSt.filtre.notes)
-
-    preSelect()
-
-    //const mapmc = ref(Motscles.mapMC(true, 0))
-    //fSt.contexte.notes.mapmc = mapmc.value
+    nSt.calculNfnt()
 
     return {
-      dhcool, now, filtrage, edvol,
-      ID, session, ui, nSt, aSt, gSt,
-      selected, expanded,
-      tree,
-      filtre, filtreFake,
-      dlopen, dlfin, dlgo, dlpause, dlreprise, portupload, dirloc, testup,
-      lstr, dlnbntot, dlnbnc, dlst, dlnc, dlnbn, dlnbf, dlv2f,
-      dkli, sty, styp,
-      auj: session.dateJourConnx
+      tree: ref(null),
+      session: stores.session, 
+      ui: stores.ui, 
+      aSt: stores.avatar, 
+      gSt: stores.groupe, 
+      cfg: stores.config,
+      nSt,
+      dhcool, edvol, dkli, sty, styp, ID, icons, colors, styles
     }
   }
 

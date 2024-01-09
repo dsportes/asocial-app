@@ -567,33 +567,6 @@ export const useAvatarStore = defineStore('avatar', {
       e.sponsorings.delete(ids)
     },
 
-    /* Avatars référençant un des groupes du set donné
-    - supprime les entrées correspondantes SI ELLE EXISTE
-    - retourne mapIdNi : Map
-      - clé : id d'un avatar
-      - valeur : array des ni des groupes ciblés
-    */
-    avatarsDeGroupes (setg) { // TODO
-      const mapIdNi = {}
-      let x = false
-      if (setg && setg.size) {
-        this.map.forEach(e => { 
-          const a = e.avatar
-          /* supprime, QUAND ELLES EXISTENT,
-          les entrées des groupes dans l'avatar, 
-          retourne l'array de leur ni */
-          const ani = a.niDeGroupes(setg)
-          ani.forEach(ni => {
-            let y = mapIdNi[a.id]
-            if (!y) { y = []; mapIdNi[a.id] = y }
-            y.push(ni)
-            x = true
-          })
-        })
-      }
-      return x ? mapIdNi : null
-    },
-
     /* Mise jour groupée pour un avatar
     e : { id, av: avatar, lch: [], lsp: [], lsc: [] }
     */

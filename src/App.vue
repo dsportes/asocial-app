@@ -294,7 +294,6 @@
   <apercu-cv v-if="ui.d.ACVouvrir"/>
   <phrase-secrete v-if="ui.d.PSouvrir"/>
 
-
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
     <div class="q-mt-sm column items-center">
@@ -495,14 +494,23 @@ export default {
     stores.config.$q = $q
     $q.dark.set(true)
 
-    const session = stores.session
-    const aSt = stores.avatar
-    const gSt = stores.groupe
     const ui = stores.ui
     ui.setScreenWidth($q.screen.width)
 
+    /* Template de onAction ************************************************
+    ui.$onAction(({ name, args, after }) => {
+      after((result) => {
+        if (name === 'setPage') console.log('Ouverture page: ' + args[0])
+      })
+    })
+    */
+
     return {
-      session, ui, aSt, gSt, styp, dkli, hms, deconnexion
+      session: stores.session,
+      aSt: stores.avatar, 
+      gSt: stores.groupe, 
+      ui, 
+      styp, dkli, hms, deconnexion
     }
   }
 }

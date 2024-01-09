@@ -19,12 +19,12 @@
     <q-page :class="dkli(0) + ' q-pa-xs'">
 
       <div v-if="s.dspt" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._dspt" :label="$t('vu')" />
+        <q-checkbox class="col-auto cb" size="sm" v-model="checks._dspt" :label="$t('vu')" />
         <div class="col titre-md">{{$t('SAVdspt')}}</div>
       </div>
 
       <div class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._notes" :label="$t('vu')" />
+        <q-checkbox class="col-auto cb" size="sm" v-model="checks._notes" :label="$t('vu')" />
         <div class="col">
           <div class="titre-md">{{$t('SAVnotes', nbn, { count: nbn })}}</div>
           <div v-if="nbn" class="q-my-sm q-ml-md">{{$t('SAVvlib', [edvol(v2n)])}}</div>
@@ -32,7 +32,7 @@
       </div>
 
       <div class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" v-model="s.checks._chats" :label="$t('vu')" />
+        <q-checkbox class="col-auto cb" v-model="checks._chats" :label="$t('vu')" />
         <div class="col">
           <div class="titre-md">{{$t('SAVchats', s.ch.length, { count: s.ch.length })}}</div>
           <div v-if="s.ch.length" class="q-ml-md">
@@ -42,7 +42,7 @@
       </div>
 
       <div v-if="s.sp.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" v-model="s.checks._spons" :label="$t('vu')" />
+        <q-checkbox class="col-auto cb" v-model="checks._spons" :label="$t('vu')" />
         <div class="col">
           <div class="titre-md">{{$t('SAVspons', s.sp.length, { count: s.sp.length })}}</div>
           <div class="q-ml-md">
@@ -54,7 +54,7 @@
       </div>
 
       <div v-if="s.gr1.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._gr1" :label="$t('vu')" />
+        <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr1" :label="$t('vu')" />
         <div class="col column">
           <div class="titre-md">{{$t('SAVgr1', s.gr1.length, { count: s.gr1.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr1" :key="x.gr.id">
@@ -66,7 +66,7 @@
       </div>
 
       <div v-if="s.gr2.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._gr2" :label="$t('vu')" />
+        <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr2" :label="$t('vu')" />
         <div class="col column">
           <div class="titre-md">{{$t('SAVgr2', s.gr2.length, { count: s.gr2.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr2" :key="x.gr.id">
@@ -78,7 +78,7 @@
       </div>
 
       <div v-if="s.gr3.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._gr3" :label="$t('vu')" />
+        <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr3" :label="$t('vu')" />
         <div class="col column">
           <div class="titre-md">{{$t('SAVgr3', s.gr3.length, { count: s.gr3.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr3" :key="x.gr.id">
@@ -89,7 +89,7 @@
       </div>
 
       <div v-if="s.gr0.length" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._gr0" :label="$t('vu')" />
+        <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr0" :label="$t('vu')" />
         <div class="col column">
           <div class="titre-md">{{$t('SAVgr0', s.gr0.length, { count: s.gr0.length })}}</div>
           <div class="q-ml-md q-my-sm" v-for="x in s.gr0" :key="x.gr.id">
@@ -100,7 +100,7 @@
       </div>
 
       <div v-if="avid !== 0" class="row q-my-md items-start">
-        <q-checkbox class="col-auto cb" size="sm" v-model="s.checks._vol" :label="$t('vu')" />
+        <q-checkbox class="col-auto cb" size="sm" v-model="checks._vol" :label="$t('vu')" />
         <div class="col">
           <div v-if="s.nna + s.nng" class="titre-md">{{$t('SAVvol')}}</div>        
           <div v-if="s.nna" class="q-ml-lg q-my-sm">{{$t('SAVvola', [s.nna, edvol(s.v2a)])}}</div>
@@ -130,7 +130,7 @@
 </template>
 
 <script>
-import { ref, toRef, reactive } from 'vue'
+// import { ref, toRef, reactive } from 'vue'
 import { getNg, Avatar, Versions } from '../app/modele.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -147,30 +147,146 @@ export default ({
   components: { BoutonHelp, BoutonConfirm },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    na () { return getNg(this.avid || this.session.compteId) },
+
     checksOK () { 
-      for (const x in this.s.checks) if (!this.s.checks[x]) return false
+      for (const x in this.s.checks) 
+        if (this.s.checks[x] && !this.checks[x]) return false
       return true 
     },
+
     nbn () { return this.s.nna + this.s.nng },
-    v2n () { return this.s.v2a + this.s.v2g }
+
+    v2n () { return this.s.v2a + this.s.v2g },
+
+    s () { // TODO dans les listes de groupes s.gr0 ... s.gr3, les éléments x.mb sont remplacés par x.im
+      const s = {
+        touches: {},
+        checks: { 
+          _notes: true, _chats: true, _spons: false, _dspt: false, _vols: false,
+          _gr0: false, _gr1: false, _gr2: false, _gr3: false, _gr4: false 
+        },
+        stats: {}, // map des nbn notes, v1 v2 par avatar et groupe
+        /* gri : { 
+          heb, dan, dac : est hébergeur, dernier actif, dernier animateur
+          nnh, v2h : si hébergeur, nombre de notes et volume des fichiers hébergés
+          nn, v2 : nombre de notes et volume des fichiers
+          gr, im : groupe, indice membre  
+        }
+        */
+        ng: 0, // nombres de groupes accédés
+        gr1: [], // liste des groupes où l'avatar est le dernier actif
+        gr2: [], // liste des groupes dont l'avatar est hébergeur (mais pas dernier actif)
+        gr3: [], // liste des groupes dont l'avatar est le dernier animateur (mais pas hébergeur ni le dernier actif)
+        gr0: [], // liste des autres groupes ou l'avatar apparaît
+
+        sp: [], // liste des sponsorings
+        ch: [], // liste des chats
+
+        nng: 0, // nombre total de notes des groupes hébérgés
+        v2g: 0, // v2 total des fichiers des notes des groupes hébérgés
+
+        nna: 0, // nombre total des notes de l'avatar
+        v2a: 0, // v2 total des fichiers des notes de l'avatar
+
+        // résiliation compte
+        dspt: false, // dernier sponsor de sa tribu
+        hrnd: 0,
+        idt: 0, // id de la tribu
+        it: 0 // indice du compte dans sa tribu
+      }
+
+      const id = this.na.id
+      s.nng = 0; s.v2g = 0; s.ng = 0
+      s.stats = this.nSt.statsParRacine
+
+      const a = s.stats[id]
+      s.nna = a.nn; s.v2a = a.v2
+
+      const e = this.aSt.getElt(id)
+      s.touches[id] = e.avatar
+      e.chats.forEach(c => {
+        s.touches[c.id + '/' + c.ids] = c
+        s.ch.push(c)
+      })
+      s.ch = Array.from(e.chats.values())
+
+      s.sp = []
+      e.sponsorings.forEach(sp => { 
+        if (sp.st === 0) {
+          s.touches[sp.id + '/' + sp.ids] = sp
+          s.sp.push(sp) 
+        }
+      })
+      if (s.sp.length) s.checks._spons = true
+
+      this.aSt.compte.idGroupes(id).forEach(idg => {
+        s.ng++
+        const egr = this.gSt.egr(idg)
+        const x = {}
+        x.gr = egr.groupe
+        x.im = this.aSt.compte.imGA(idg, id)
+        x.nn = egr.objv.vols.v1
+        x.v2 = egr.objv.vols.v2
+        if (x.gr.imh === x.im) { 
+          x.heb = true
+          x.nnh = x.nn
+          x.v2h = x.v2
+          s.nng += x.nn
+          s.v2g += x.v2
+        } else {
+          x.nnh = 0
+          x.v2h = 0
+        }
+        
+        let nan = 0, nac = 0, estAn = false, estAc = false
+        for (let i = 1; i < x.gr.flags.length; i++) {
+          const f = x.gr.flags[i]
+          if (f & FLAGS.AN) { nan++; if (i == x.im) estAn = true }
+          if (f & FLAGS.AC) { nac++; if (i == x.im) estAc = true }
+        }
+        x.dan = nan === 1 && estAn
+        x.dac = nac === 1 && estAc
+
+        x.st = x.dac ? 1 : (x.heb ? 2 : (x.dan ? 3 : 0))
+        s['gr' + x.st].push(x)
+      })
+
+      for (let i = 0; i < 4; i++) if (s['gr' + i].length) s.checks['_gr' + i] = true
+
+      if (this.avid === 0) {
+        s.it = this.aSt.compta.it
+        s.idt = this.aSt.compta.idt
+        if (s.it) {
+          const setSp = this.aSt.tribu.idSponsors
+          s.dspt = setSp.size === 1 && setSp.has(id)
+          if (s.dspt) s.checks._dspt = true
+        } 
+      } else {
+        s.checks._vol = true
+      }
+      return s
+    }
   },
 
   data () {
     return {
+      checks: { 
+        _notes: false, _chats: false, _spons: false, _dspt: false, _vol: false,
+        _gr0: false, _gr1: false, _gr2: false, _gr3: false, _gr4: false 
+      }
     }
   },
 
   watch: {
+    s () {
+      for (const x in this.checks) this.checks[x] = false 
+    }
   },
 
   methods: {
     cftop () {
       this.ui.oD('SAconfirmsuppr')
-      // console.log(this.ui.d.SAconfirmsuppr)
-    },
-    setCheck (x) {
-      this.s.checks[x] = true
     },
 
     /* Supprimer un avatar ****************************************
@@ -236,137 +352,14 @@ export default ({
     }
   },
 
-  setup (props) {
-    const session = stores.session
-    const ui = stores.ui
-    const cfg = stores.config
-    const avid = toRef(props, 'avid')
-    const na = ref(getNg(avid.value ? avid.value : session.compteId))
-    const aSt = stores.avatar
-    const nSt = stores.note
-    const gSt = stores.groupe
-
-    const s = reactive( { 
-      checks: {},
-      stats: {}, // map des nbn notes, v1 v2 par avatar et groupe
-      /* gri : { 
-        heb, dan, dac : est hébergeur, dernier actif, dernier animateur
-        nnh, v2h : si hébergeur, nombre de notes et volume des fichiers hébergés
-        nn, v2 : nombre de notes et volume des fichiers
-        gr, im : groupe, indice membre  
-      }
-      */
-      ng: 0, // nombres de groupes accédés
-      gr1: [], // liste des groupes où l'avatar est le dernier actif
-      gr2: [], // liste des groupes dont l'avatar est hébergeur (mais pas dernier actif)
-      gr3: [], // liste des groupes dont l'avatar est le dernier animateur (mais pas hébergeur ni le dernier actif)
-      gr0: [], // liste des autres groupes ou l'avatar apparaît
-
-      sp: [], // liste des sponsorings
-      ch: [], // liste des chats
-
-      nng: 0, // nombre total de notes des groupes hébérgés
-      v2g: 0, // v2 total des fichiers des notes des groupes hébérgés
-
-      nna: 0, // nombre total des notes de l'avatar
-      v2a: 0, // v2 total des fichiers des notes de l'avatar
-
-      // résiliation compte
-      dspt: false, // dernier sponsor de sa tribu
-      hrnd: 0,
-      idt: 0, // id de la tribu
-      it: 0 // indice du compte dans sa tribu
-    } )
-
-    function init () { // TODO dans les listes de groupes s.gr0 ... s.gr3, les éléments x.mb sont remplacés par x.im
-      const id = na.value.id
-      s.checks = { _notes: false, _chats: false }
-      s.nng = 0; s.v2g = 0; s.ng = 0
-      s.stats = nSt.statsParRacine
-
-      const a = s.stats[id]
-      s.nna = a.nn; s.v2a = a.v2
-
-      const e = aSt.getElt(id)
-      s.ch = Array.from(e.chats.values())
-
-      s.sp = []
-      e.sponsorings.forEach(sp => { if (sp.st === 0) s.sp.push(sp) })
-      if (s.sp.length) s.checks._spons = false
-
-      aSt.compte.idGroupes(id).forEach(idg => {
-        s.ng++
-        const egr = gSt.egr(idg)
-        const x = {}
-        x.gr = egr.groupe
-        x.im = aSt.compte.imGA(idg, id)
-        x.nn = egr.objv.vols.v1
-        x.v2 = egr.objv.vols.v2
-        if (x.gr.imh === x.im) { 
-          x.heb = true
-          x.nnh = x.nn
-          x.v2h = x.v2
-          s.nng += x.nn
-          s.v2g += x.v2
-        } else {
-          x.nnh = 0
-          x.v2h = 0
-        }
-        
-        let nan = 0, nac = 0, estAn = false, estAc = false
-        for (let i = 1; i < x.gr.flags.length; i++) {
-          const f = x.gr.flags[i]
-          if (f & FLAGS.AN) { nan++; if (i == x.im) estAn = true }
-          if (f & FLAGS.AC) { nac++; if (i == x.im) estAc = true }
-        }
-        x.dan = nan === 1 && estAn
-        x.dac = nac === 1 && estAc
-
-        x.st = x.dac ? 1 : (x.heb ? 2 : (x.dan ? 3 : 0))
-        s['gr' + x.st].push(x)
-      })
-
-      for (let i = 0; i < 4; i++) if (s['gr' + i].length) s.checks['_gr' + i] = false
-
-      if (avid.value === 0) {
-        s.it = aSt.compta.it
-        s.idt = aSt.compta.idt
-        if (s.it) {
-          const setSp = aSt.tribu.idSponsors
-          s.dspt = setSp.size === 1 && setSp.has(id)
-          if (s.dspt) s.checks._dspt = false
-        } 
-      } else {
-        s.checks._vol = false
-      }
-    }
-
-    nSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setNote' || name === 'delNote') init()
-      })
-    })
-
-    const names1 = new Set(['setCompte', 'setAvatar', 'setChat', 'setSponsoring', 'del'])
-    aSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (names1.has(name)) init()
-      })
-    })
-
-    const names2 = new Set(['setGroupe', 'setMembre', 'delGroupe', 'delMembre'])
-    gSt.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (names2.has(name)) init()
-      })
-    })
-
-    init()
-
-    // console.log(ui.d.SAconfirmsuppr)
+  setup () {
     return {
-      session, ui, cfg,
-      styp, edvol, aSt, na, s, init, dkli
+      session: stores.session,
+      ui: stores.ui,
+      aSt: stores.avatar,
+      nSt: stores.note,
+      gSt: stores.groupe,
+      styp, edvol, dkli
     }
   }
 })

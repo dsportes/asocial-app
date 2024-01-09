@@ -41,7 +41,24 @@ export const useNoteStore = defineStore('note', {
 
     test: { avs: {}, grs: {} },
 
-    presel: '' // note pre-selected avant ouverture PageNote
+    presel: '', // note pre-selected avant ouverture PageNote
+
+    filtre: { v: '0' }, // paramètres du filtre courant
+
+    /* nfnt est une map claculée par calculNfnt() ayant pour clé une node.key:
+    - les racines ont une entrée dans nfnt,
+    - les notes ont une entrée dans nfnt.
+    La valeur { nf, nt } donne le nombre de notes dans le sous-arbre en dessous,
+    - nt: total,
+    - nf: satisfaisant au filtre courant.
+    nfnt est (re)calculé:
+    - à l'instantiation de PageNotes,
+    - quand la page courante est PageNotes:
+      - quand les arguments de filtre changent,
+      - quand une note change: setNote delNote
+      - à la création / suppression d'une racine.
+    */
+    nfnt: {}
 
   }),
 
@@ -190,7 +207,7 @@ export const useNoteStore = defineStore('note', {
         anc.push(refk)
         while (true) {        
           const p = state.map.get(refk)
-          if (!p.note || !p.note.refk) { anc.push(p.rkey); return anc }
+          if (!p.note || !p.note.refk) { anc.push(p.rkey); break }
           refk = p.note.refk
           anc.push(refk)
         }
@@ -218,6 +235,44 @@ export const useNoteStore = defineStore('note', {
   },
 
   actions: {
+    calculNfnt () {
+      const m = {}
+      const ui = stores.ui
+      if (ui.page === 'notes') {
+        this.nodes.forEach(n => m[n.key] = { nf: 0, nt: 0 })
+        this.map.forEach(node => {
+          const ok = this.filtrage(node)
+          const anc = this.getAncetres(node.key)
+          for(let i = 1; i < anc.length; i++){
+            // on ne prend pas la note elle-m^me, seulement ses ancêtres
+            const k = anc[i]
+            let e = m[k]; if (!e) { e = { nf: 0, nt: 0 }; m[k] = e }
+            e.nt++; if (ok) e.nf++  
+          }
+        })
+      }
+      this.nfnt = m
+    },
+
+    filtrage (node, arg) {
+      const n = node.note
+      if (!n) return true
+      const f = this.filtre
+      if (f.v === '0') return true
+      if (f.avgr && n.id !== f.avgr) return false
+      if (f.lim && n.dh && n.dh < f.lim) return false
+      if (f.note && n.txt && n.txt.indexOf(f.note) === -1) return false
+      if (f.v2 && n.v2 < f.v2) return false
+      if (f.mcp && n.smc && difference(f.mcp, n.smc).size) return false
+      if (f.mcn && n.smc && intersection(f.mcn, n.smc).size) return false
+      return true
+    },
+
+    setFiltre (f) {
+      this.filtre = f
+      this.calculNfnt()
+    },
+
     setCourant (key) {
       this.node = this.getNode(key)
     },
@@ -400,6 +455,7 @@ export const useNoteStore = defineStore('note', {
       }
       // this.setPreSelect(n.key)
       this.setLabel(n)
+      this.calculNfnt()
     },
 
     detachNote (n, nrav) {
@@ -447,6 +503,7 @@ export const useNoteStore = defineStore('note', {
           this.map.delete(n.key) // note simplement supprimée (puisqu'elle n'a pas d'enfant)
           this.setPreSelect(cpt ? '' + session.compteId : npkey) // la racine ou celle du compte s'ouvre
         }
+        this.calculNfnt()
         return
       }
 
@@ -459,6 +516,7 @@ export const useNoteStore = defineStore('note', {
         np.children = a
         this.map.delete(n.key) // note simplement supprimée (puisqu'elle n'a pas d'enfant)
         this.setPreSelect(npkey) // son parent s'ouvrira
+        this.calculNfnt()
         return
       }
 
@@ -475,6 +533,7 @@ export const useNoteStore = defineStore('note', {
       this.rattachRac (n, refn)
       this.setLabel(n)
       this.setPreSelect(n.key) // elle sera dépliée
+      this.calculNfnt()
     },
 
     rattachNote (n) {
@@ -527,6 +586,7 @@ export const useNoteStore = defineStore('note', {
         this.map.set(key, n)
         this.nodes.push(n)
         this.nodes.sort(Note.sortNodes)
+        this.calculNfnt()
       }
       return n
     },
@@ -563,10 +623,12 @@ export const useNoteStore = defineStore('note', {
       this.setRacine('' + na.id, 2, na.nomc)
     },
 
-    delAvatar (id) {
+    delAvatar (id) { // TODO
+      this.calculNfnt()
     },
 
-    delGroupe (id) {
+    delGroupe (id) {  // TODO
+      this.calculNfnt()
     }
   }
 })
