@@ -246,9 +246,9 @@ export function edvol (vol) {
 }
 
 export function mon (v, n) { // n : nombres de chiffres après les centimes
-  if (!v) return n ? '0c' : '0€'
-  if (!n && v >= 100) return (v / 100).toFixed((n || 0) + 2).replace('.', ',') + '€'
-  return v.toFixed(n || 0).replace('.', ',') + 'c'
+  if (!v) return '0c'
+  if (!n) return Math.round(v) + 'c'
+  return v.toFixed(n).replace('.', ',') + 'c'
 }
 
 export function nbn (vol, n, u) { // v: nombre de notes ... n: avec décimales

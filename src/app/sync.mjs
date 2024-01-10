@@ -1,5 +1,5 @@
 import stores from '../stores/stores.mjs'
-import { Operation } from './operations.mjs'
+import { Operation, RafraichirDons } from './operations.mjs'
 import { deconnexion } from './connexion.mjs'
 // import { decode } from '@msgpack/msgpack'
 import { compile, Versions, estZombi } from './modele.mjs'
@@ -430,6 +430,7 @@ export class OnchangeCompta extends OperationWS {
       this.tribu = null
 
       this.avCompta = aSt.compta
+      // console.log('OnChangeCompta', row.v, row._data_.length)
       if (row.v <= this.avCompta.v) return // sync retardée déjà traitée
 
       this.compta = await compile(row)
@@ -468,6 +469,9 @@ export class OnchangeCompta extends OperationWS {
       aSt.setCompta(this.compta)
       if (this.tribu) aSt.setTribu(this.tribu)
       if (this.delTribu) aSt.setTribu(null)
+
+      // MAJ des dons éventuellement en attente
+      if (this.compta.dons) await new RafraichirDons().run()
 
       session.setDh(this.dh)
     } catch (e) {

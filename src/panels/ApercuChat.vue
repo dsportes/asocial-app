@@ -8,11 +8,15 @@
         <bouton-help page="page1"/>
       </q-toolbar>
       <apercu-genx class="bordb" :id="naE.id" :idx="0" />
-      <div :class="sty() + 'q-pa-xs row justify-around'">
-        <q-btn :label="$t('CHadd2')" icon="add" 
-          padding="none xs" color="primary" @click="editer"/>
-        <q-btn :label="$t('CHrac')" icon="phone_disabled" 
-          padding="none xs" color="primary" @click="raccrocher"/>
+      <div :class="sty() + 'q-pa-xs row justify-around items-center'">
+        <div class="row q-gutter-xs items-center">
+          <q-btn :label="$t('CHadd2')" @click="editer(false)" 
+            padding="xs" color="primary" icon="add" dense size="md"/>
+          <q-btn v-if="estA" @click="editer(true)" 
+            round padding="xs" color="secondary" icon="savings" dense size="md"/>
+        </div>
+        <q-btn :label="$t('CHrac')" @click="raccrocher"
+          padding="xs" color="primary" icon="phone_disabled" dense size="md"/>
       </div>
     </q-header>
 
@@ -81,6 +85,12 @@
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
+        <q-toolbar v-if="avecDon" inset class="bg-secondary text-white">
+          <q-toolbar-title class="row justify-center items-center q-gutter-md">
+            <div class="titre-md text-bold">{{$t('CHmdon')}}</div>
+            <q-select :options="cfg.dons2" v-model="mdon" dense color="white"/>
+          </q-toolbar-title>
+        </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right" class="q-gutter-sm">
           <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
@@ -96,13 +106,12 @@
 </template>
 <script>
 
-import { toRef, ref, watch } from 'vue'
+import { toRef } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
 import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
-import { Motscles } from '../app/modele.mjs'
-import { MajChat, PassifChat, NouveauChat } from '../app/operations.mjs'
+import { MajChat, PassifChat, NouveauChat, EstAutonome } from '../app/operations.mjs'
 import { ID } from '../app/api.mjs'
 
 import SdBlanc from '../components/SdBlanc.vue'
@@ -123,6 +132,7 @@ export default {
   components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp },
 
   computed: {
+    estA () { return this.aSt.compta.estA },
     estSp () {
       const id = this.naE.id
       return ID.estComptable(id) || this.pSt.estSponsor(id)
@@ -130,7 +140,9 @@ export default {
   },
 
   data () { return {
-    txt: ''
+    txt: '',
+    avecDon: false,
+    mdon: this.cfg.dons2[0]
   }},
 
   methods: {
@@ -162,8 +174,15 @@ export default {
     },
 
     async addop () {
+      const compta = this.aSt.compta
+      if (this.mdon && (this.mdon * 100 > compta.credits.total)) {
+        await afficherDiag(this.$t('CHcred', [compta.credits.total, this.mdon * 100]))
+        return
+      }
       if (this.chat) {
-        const disp = await new MajChat().run(this.naI, this.naE, this.txt, 0, this.chat)
+        const don = this.avecDon ? this.mdon * 100 : 0
+        const txt = (this.avecDon ? (this.$t('CHdonde', [this.mdon]) + '\n') : '') + this.txt
+        const disp = await new MajChat().run(this.naI, this.naE, txt, 0, this.chat, don)
         if (disp) { await afficherDiag(this.$t('CHdisp')) }
       } else { 
         const [st, chat] = await new NouveauChat().run(this.naI, this.naE, this.txt)
@@ -184,13 +203,21 @@ export default {
       this.ui.fD()
     },
 
-    async editer () {
+    async editer (avecDon) {
       if (this.estSp) {
         if (!await this.session.editUrgence()) return
       } else {
         if (!await this.session.edit()) return
       }
+      if (avecDon) {
+        const estA = await new EstAutonome().run(this.chat.naE.id)
+        if (!estA) {
+          await afficherDiag(this.$t('CHauto'))
+          return
+        }
+      }
       this.txt = this.chat ? this.chat.txt : ''
+      this.avecDon = avecDon
       this.ui.oD('ACchatedit')
     },
 
@@ -208,6 +235,7 @@ export default {
   setup (props) {
     return {
       styp, sty, dkli, dhcool,
+      cfg: stores.config,
       session: stores.session,
       pSt: stores.people, 
       ui: stores.ui,

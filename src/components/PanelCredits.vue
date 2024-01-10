@@ -51,7 +51,6 @@
 </template>
 
 <script>
-import { ref, watch, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuTicket from '../components/ApercuTicket.vue'
 import PanelDeta from '../components/PanelDeta.vue'
@@ -95,6 +94,10 @@ export default ({
 
   data () {
     return {
+      dhinc: 0,
+      nbinc: 0,
+      att: 'A', 
+      deb: ''
     }
   },
 
@@ -111,31 +114,21 @@ export default ({
       this.ui.fD()
       await new PlusTicket().run(m, ref, ids)
       await afficherDiag(this.$t('TKrefp', [this.session.org, tkx]))
+    },
+    async rafraichirIncorp () {
+      dhinc.value = Date.now()
+      nbinc.value = await new RafraichirTickets().run()
     }
   },
 
   setup () {
     const ui = stores.ui
-    const session = stores.session
-    const dhinc = ref(0)
-    const nbinc = ref(0)
-
-    async function rafraichirIncorp () {
-      dhinc.value = Date.now()
-      nbinc.value = await new RafraichirTickets().run()
-    }
-
-    onMounted(async () => {
-      if (!session.estComptable) await rafraichirIncorp()
-    })
-
     return {
-      rafraichirIncorp, styp, mon, dhcool, dkli, AMJ,
-      dhinc, nbinc,
-      att: ref('A'), 
-      deb: ref(''),
+      styp, mon, dhcool, dkli, AMJ,
+      session: stores.session,
       aSt: stores.avatar,  
-      session, ui, idc: ui.getIdc()
+      ui, 
+      idc: ui.getIdc()
     }
   }
 })

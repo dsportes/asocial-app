@@ -198,7 +198,7 @@ export class MajCv extends OperationUI {
         const args = { token: session.authToken, id: avatar.id, v, cva }
         const ret = this.tr(await post(this, 'MajCv', args))
         if (!ret.KO) break
-        await sleep(500)
+        await sleep(1000)
       }
       this.finOK()
     } catch (e) {
@@ -225,7 +225,7 @@ export class MajCvGr extends OperationUI {
         const args = { token: session.authToken, id: groupe.id, v, cvg }
         const ret = this.tr(await post(this, 'MajCvGr', args))
         if (!ret.KO) break
-        await sleep(500)
+        await sleep(1000)
       }
       this.finOK()
     } catch (e) {
@@ -323,10 +323,14 @@ export class GetAvatarPC extends OperationUI {
 }
 
 /** Ajout Sponsoring ****************************************************
-args.token: éléments d'authentification du compte.
-args.rowSponsoring : row Sponsoring, sans la version
-args.credits: nouveau credits du compte si non null
+POST:
+- `token` : éléments d'authentification du comptable / compte sponsor de sa tribu.
+- `rowSponsoring` : row Sponsoring, SANS la version (qui est calculée par le serveur).
+- `credits`: nouveau credits du compte si non null
+- `v`: version de compta si credits
+
 Retour:
+- KO: true - si régression de version de compta
 */
 export class AjoutSponsoring extends OperationUI {
   constructor () { super($t('OPcsp')) }
@@ -335,9 +339,14 @@ export class AjoutSponsoring extends OperationUI {
     try {
       const session = stores.session
       const aSt = stores.avatar
-      const credits = don ? await aSt.compta.creditsDon(don) : null
-      const args = { token: session.authToken, rowSponsoring: row, credits }
-      this.tr(await post(this, 'AjoutSponsoring', args))
+      while (true) {
+        const compta = aSt.compta
+        const credits = don ? await aSt.compta.debitDon(don) : null
+        const args = { token: session.authToken, rowSponsoring: row, credits, v: compta.v }
+        const ret = this.tr(await post(this, 'AjoutSponsoring', args))
+        if (!ret.KO) break
+        await sleep(1000)
+      }
       this.finOK()
     } catch (e) {
       return await this.finKO(e)
@@ -468,7 +477,14 @@ POST:
 - `txt1` : texte à ajouter crypté par la clé cc du chat.
 - `lgtxt1` : longueur du texte
 - `dh` : date-heure du chat dont le texte est à annuler.
+
+Si don:
+- `dbDon`: nouveau credits de compta du compte incorporant le don
+- `crDon`: don crypté par RSA du bénéficiaire idE à ajouter dans son compta.dons
+- `v`: version de compta du compte
+
 Retour:
+- `KO`: true si régression de version de compta du compte
 - `st` :
   0 : E a disparu, chat zombi.
   1 : chat mis à jour.
@@ -479,23 +495,35 @@ Assertions sur l'existence du row `Avatars` de l'avatar I, sa `Versions`, et le 
 export class MajChat extends OperationUI {
   constructor () { super($t('OPmajch')) }
 
-  async run (naI, naE, txt, dh, chat) {
+  async run (naI, naE, txt, dh, chat, don) {
     try {
       const session = stores.session
       const aSt =  stores.avatar
-
-      const args = { 
-        token: session.authToken, 
-        idI: naI.id, 
-        idsI: await Chat.getIds(naI, naE), 
-        idE: naE.id, 
-        idsE: await Chat.getIds(naE, naI), 
-        ccKI: chat.ccK ? await crypter(session.clek, chat.cc) : null, 
-        txt1: txt ? await Chat.getTxtCC(chat.cc, txt) : null,
-        lgtxt1: txt ? txt.length : 0,
-        dh: dh || 0
+      let ret
+      while (true) {
+        const args = { 
+          token: session.authToken, 
+          idI: naI.id, 
+          idsI: await Chat.getIds(naI, naE), 
+          idE: naE.id, 
+          idsE: await Chat.getIds(naE, naI), 
+          ccKI: chat.ccK ? await crypter(session.clek, chat.cc) : null, 
+          txt1: txt ? await Chat.getTxtCC(chat.cc, txt) : null,
+          lgtxt1: txt ? txt.length : 0,
+          dh: dh || 0
+        }
+        if (don) {
+          const compta = aSt.compta
+          args.credits = await compta.debitDon(don)
+          const pubE = await aSt.getPub(args.idE)
+          const ec = encode(don)
+          args.crDon = await crypterRSA(pubE, ec)
+          args.v = compta.v
+        }
+        ret = this.tr(await post(this, 'MajChat', args))
+        if (!ret.KO) break
+        await sleep(1000)
       }
-      const ret = this.tr(await post(this, 'MajChat', args))
       const disp = ret.disp
       const ch = await compile(ret.rowChat)
       aSt.setChat(ch)
@@ -628,7 +656,7 @@ export class NouvelleTribu extends OperationUI {
         const args = { token: session.authToken, rowTribu, atrItem }
         ret = this.tr(await post(this, 'NouvelleTribu', args))
         if (!ret.KO) break
-        await sleep(2000)
+        await sleep(1000)
       }
       this.finOK(ret)
     } catch (e) {
@@ -1849,12 +1877,16 @@ export class PlusTicket extends OperationUI {
       const session = stores.session
       const aSt = stores.avatar
 
-      const compta = aSt.compta
-      const { rowTicket, ticket } = Ticket.nouveauRow(ids, ma, refa)
-      const credits = await compta.creditsSetTk(ticket)
+      while (true) {
+        const compta = aSt.compta
+        const { rowTicket, ticket } = Ticket.nouveauRow(ids, ma, refa)
+        const credits = await compta.creditsSetTk(ticket)
 
-      const args = { token: session.authToken, rowTicket, credits }
-      this.tr(await post(this, 'PlusTicket', args))
+        const args = { token: session.authToken, rowTicket, credits, v: compta.v }
+        const ret = this.tr(await post(this, 'PlusTicket', args))
+        if (!ret.KO) break
+        await sleep(1000)
+      }
       this.finOK()
     } catch (e) {
       return await this.finKO(e)
@@ -1879,11 +1911,15 @@ export class MoinsTicket extends OperationUI {
       const session = stores.session
       const aSt = stores.avatar
 
-      const compta = aSt.compta
-      const credits = await compta.creditsUnsetTk(ids)
+      while (true) {
+        const compta = aSt.compta
+        const credits = await compta.creditsUnsetTk(ids)
 
-      const args = { token: session.authToken, credits, ids }
-      this.tr(await post(this, 'MoinsTicket', args))
+        const args = { token: session.authToken, credits, ids }
+        const ret = this.tr(await post(this, 'MoinsTicket', args))
+        if (!ret.KO) break
+        await sleep(1000)
+      }
       this.finOK()
     } catch (e) {
       return await this.finKO(e)
@@ -1904,6 +1940,7 @@ Retour:
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
 - `credits` : credits crypté par la clé K du compte
+- `dhdons`: array des dh des dons incorporés
 
 Retour: rien
 */
@@ -1914,20 +1951,27 @@ export class RafraichirTickets extends OperationUI {
     try {
       const session = stores.session
       const aSt = stores.avatar
-
-      const compta = aSt.compta
-      const mtk = compta.mtk
-      const args = { token: session.authToken, mtk }
-      const ret = this.tr(await post(this, 'RafraichirTickets', args))
       let nb = 0
-      if (ret.rowTickets) {
-        nb = ret.rowTickets.length
-        const m = new Map()
-        for(const row of ret.rowTickets) 
-          m.set(row.ids, await compile(row))
+
+      while (true) {
+        const compta = aSt.compta
+        const mtk = compta.mtk
+        const args1 = { token: session.authToken, mtk }
+        const ret1 = this.tr(await post(this, 'RafraichirTickets', args1))
+        nb = 0
+        let m = null
+        if (ret1.rowTickets) {
+          nb = ret1.rowTickets.length
+          const m = new Map()
+          for(const row of ret.rowTickets) 
+            m.set(row.ids, await compile(row))
+        }
         const credits = await compta.majCredits(m)
-        const args = { token: session.authToken, credits }
-        this.tr(await post(this, 'MajCredits', args))
+        if (!credits) break
+        const args2 = { token: session.authToken, credits, v: compta.v }
+        const ret2 = this.tr(await post(this, 'MajCredits', args2))
+        if (!ret2.KO) break
+        await sleep(1000)
       }
       return this.finOK(nb)
     } catch (e) {
@@ -1936,6 +1980,56 @@ export class RafraichirTickets extends OperationUI {
   }
 }
 
+/* Recalcul du crédit si de nouveaux dons sont apparaus
+et n'ont pas encore été intégrés (compta.dons !== null)
+*/
+export class RafraichirDons extends OperationUI {
+  constructor () { super('OPtkt') }
+
+  async run () { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      while (true) {
+        const compta = aSt.compta
+        if (!compta.dons) break
+        const credits = await compta.majCredits()
+        if (!credits) break
+        const args2 = { token: session.authToken, credits, v: compta.v }
+        const ret2 = this.tr(await post(this, 'MajCredits', args2))
+        if (!ret2.KO) break
+        await sleep(1000)
+      }
+      return this.finOK()
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
+
+/* `EstAutonome` : indique si l'avatar donné en argument est 
+l'avatar principal d'un compte autonome
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `id` : id de l'avatar
+
+Retour: 
+- `estA`: true si avatar principal d'un compte autonome
+*/
+export class EstAutonome extends OperationUI {
+  constructor () { super('OPtkt') }
+
+  async run (id) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id }
+      const ret = this.tr(await post(this, 'EstAutonome', args))
+      return this.finOK(ret.estA)
+    } catch (e) {
+      return await this.finKO(e)
+    }
+  }
+}
 
 /* `ReceptionTicket` : réception d'un ticket par le Comptable
 POST:

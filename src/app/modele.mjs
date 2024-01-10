@@ -892,6 +892,7 @@ _data_ :
   - `total`: cumul des crédits reçus depuis le début de la vie du compte.
   - `tickets`: liste des tickets (`{ids, v, dg, dr, ma, mc, refa, refc, di}`).
   - juste après une conversion de compte O en A, `credits` est égal à `true`, une convention pour une création vierge.
+- `dons`: liste des montants des dons en attente d'incorporation cryptés par la clé publique du compte.
 - `compteurs` sérialisation non cryptée d'évolution des quotas, volumes et coûts.
 
 **Pour le Comptable seulement**
@@ -938,13 +939,13 @@ export class Compta extends GenDoc {
 
     this.vsh = row.vsh || 0
     
+    const avatar = aSt.getAvatar(this.id)
     if (!this.estA) {
       if (row.cletK.length !== 256) {
         this.clet = await decrypter(session.clek, row.cletK)
         this.idt = setClet(this.clet)
       } else { // CHANGEMENT DE TRIBU par le comptable
         // Le Comptable a crypté la tribu par la clé PUB du compte (il ne connait pas K)
-        const avatar = aSt.getAvatar(this.id)
         if (avatar) {
           this.clet = await decrypterRSA(avatar.priv, row.cletK)
           // pour mettre à jour le row compta sur le serveur
@@ -967,6 +968,18 @@ export class Compta extends GenDoc {
       cr.tickets.forEach(tk => { 
         if (!Ticket.estObsolete(tk)) this.credits.tickets.push(tk)
       })
+      if (row.dons) {
+        if (avatar) {
+          this.dons = []
+          for(const x of row.dons) {
+            const m = decode(await decrypterRSA(avatar.priv, x))
+            this.dons.push(m)
+          }
+        } else {
+          // En connexion avatar (et son pub) pas encore connu. Ca se fera dans compile2
+          this.donsX = row.dons
+        }
+      } else this.dons = null
     }
 
     this.hps1 = row.hps1
@@ -1006,18 +1019,32 @@ export class Compta extends GenDoc {
 
   async compile2 (priv) { // UNIQUEMENT à la connexion
     const session = stores.session
-    this.clet = await decrypterRSA(priv, this.rowCletK)
-    // pour mettre à jour le row compta sur le serveur
-    this.cletK = await crypter(session.clek, this.clet)
-    this.idt = setClet(this.clet)
-    delete this.rowCletK
+    if (this.rowCletK) {
+      this.clet = await decrypterRSA(priv, this.rowCletK)
+      // pour mettre à jour le row compta sur le serveur
+      this.cletK = await crypter(session.clek, this.clet)
+      this.idt = setClet(this.clet)
+      delete this.rowCletK
+    }
+
+    if (this.donsX) {
+      this.dons = []
+      for(const x of this.donsX) {
+        const m = decode(await decrypterRSA(priv, x))
+        this.dons.push(m)
+      }
+      delete this.donsX
+    }
   }
 
-  async creditsDon (don) {
+  async debitDon (don) {
     const session = stores.session
     const credits = { ...this.credits }
+    credits.bla = '*******************************************************************'
     credits.total -= don
-    return await crypter(session.clek, new Uint8Array(encode(credits)))
+    const r = await crypter(session.clek, new Uint8Array(encode(credits)))
+    const x = decode(await decrypter(session.clek, r))
+    return r
   }
 
   /* Depuis la liste actuelle des tickets de compta,
@@ -1059,12 +1086,32 @@ export class Compta extends GenDoc {
     return await crypter(session.clek, new Uint8Array(encode(credits)))
   }
 
+  /* Incorporation des tickets et des dons en attente au credits,
+  - des tickets mis à jour reçus dans m (s'il y en a)
+  - des montants des dons en attente (s'il y en a)
+  Retourne credits crypté par la clé K, ou null si inchangé
+
+  Ticket:
+  - `id`: id du Comptable.
+  - `ids` : numéro du ticket
+  - `v` : version du ticket.
+
+  - `dg` : date de génération.
+  - `dr`: date de réception. Si 0 le ticket est _en attente_.
+  - `ma`: montant déclaré émis par le compte A.
+  - `mc` : montant déclaré reçu par le Comptable.
+  - `refa` : texte court (32c) facultatif du compte A à l'émission.
+  - `refc` : texte court (32c) facultatif du Comptable à la réception.
+  - `di`: date d'incorporation du crédit par le compte A dans son solde.
+  */
   async majCredits (m) {
     const credits = { total: this.credits.total, tickets: [] }
+    let maj = false
 
     function incorp (tk) {
-      m.delete(tk.ids)
+      if (m) m.delete(tk.ids)
       if (!Ticket.estObsolete(tk)) {
+        maj = true
         if (tk.dr && !tk.di) {
           tk.di = AMJ.amjUtc()
           credits.total += tk.ma > tk.mc ? tk.mc : tk.ma
@@ -1074,12 +1121,33 @@ export class Compta extends GenDoc {
     }
 
     this.credits.tickets.forEach(t => {
-      const tk = m.get(t.ids)
-      incorp(tk || t)
+      /* report des tickets actuels:
+      - éventeullemnt mis à jor
+      - si pas obsolète
+      - en incorporant éventuellement leur montant dans le solde
+      */
+      const tk = m ? m.get(t.ids) : null
+      if (tk) { // rafraichi par m
+        incorp(tk)
+      } else {
+        if (Ticket.estObsolete(t)) maj = true
+        else credits.tickets.push(t)
+      }
     })
-    if (m.size) m.forEach((ids, tk) => { incorp(tk)})
+    if (m && m.size) m.forEach((ids, tk) => { 
+      incorp(tk)
+    })
+
+    if (this.dons) {
+      this.dons.forEach(mc => { 
+        credits.total += mc 
+      })
+      maj = true
+    }
+
     const session = stores.session
-    return await crypter(session.clek, new Uint8Array(encode(credits)))
+    return maj ? 
+      await crypter(session.clek, new Uint8Array(encode(credits))) : null
   }
 
   static async atrItem (clet, info, q) {

@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode } from '@msgpack/msgpack'
 
-import { OperationUI } from './operations.mjs'
+import { OperationUI, RafraichirTickets } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post, getEstFs } from './net.mjs'
@@ -641,7 +641,7 @@ export class ConnexionCompte extends OperationUI {
     const session = stores.session
     this.compta = await compile(this.rowCompta)
     this.avatar = await compile(this.rowAvatar)
-    if (this.compta.rowCletK) {
+    if (this.compta.rowCletK || this.compta.donsX) {
       await this.compta.compile2(this.avatar.priv)
       /* Si dans compta, cletK a été recrypté */
       if (session.accesNetNf && this.compta.cletK) {
@@ -701,7 +701,8 @@ export class ConnexionCompte extends OperationUI {
     this.rowAvatar = await getAvatarPrimaire()
     this.avatar = await compile(this.rowAvatar)
     // ligne ci-dessous : ne devrait jamais être exécutée, superstition
-    if (this.compta.rowCletK) await this.compta.compile2(this.avatar.priv)
+    if (this.compta.rowCletK || this.compta.donX)
+      await this.compta.compile2(this.avatar.priv)
     session.setAvatarId(session.compteId)
   }
 
@@ -938,6 +939,9 @@ export class ConnexionCompte extends OperationUI {
 
       if (session.estComptable)
         await new TraitGcvols().run()
+
+      if (aSt.compta.estA)
+        await new RafraichirTickets().run()
 
       // enregistre l'heure du début effectif de la session
       if (session.synchro) await session.sessionSync.setConnexion(this.dh)
