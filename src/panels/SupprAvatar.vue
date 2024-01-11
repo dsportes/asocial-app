@@ -159,7 +159,7 @@ export default ({
 
     v2n () { return this.s.v2a + this.s.v2g },
 
-    s () { // TODO dans les listes de groupes s.gr0 ... s.gr3, les éléments x.mb sont remplacés par x.im
+    s () { 
       const s = {
         touches: {},
         checks: { 

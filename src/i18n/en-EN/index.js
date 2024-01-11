@@ -3,5 +3,8 @@
 
 export default {
   titreGeneral: 'Pinia test page',
-  reseau: 'Net : {0}'
+  reseau: 'Net : {0}',
+
+  MLAbrk: 'Operation in progress',
+  OP_EchoTexte: 'Simple echo test',
 }

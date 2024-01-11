@@ -164,8 +164,10 @@ export async function connecterCompte(phrase, razdb) {
 Opération de connexion à un compte par sa phrase secrète (synchronisé, incognito, avion)
 **********************************************************************************/
 
+/* OP_ConnexionCompte: 'Connexion à un compte'
+*/
 export class ConnexionCompte extends OperationUI {
-  constructor() { super($t('OPcnx')) }
+  constructor() { super($t('ConnexionCompte')) }
 
   /* Signe les avatars et groupes. Remplit: 
   - this.avatarsToStore, .avToSuppr, .avRowsModifies, .avRequis
@@ -960,12 +962,12 @@ export class ConnexionCompte extends OperationUI {
       this.finOK()
     } catch (e) {
       stores.ui.setPage('login')
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `AcceptationSponsoring` : création du compte du _sponsorisé_
+/*   OP_AcceptationSponsoring: 'Acceptation d\'un sponsoring et création d\'un nouveau compte'
 POST:
 - `token` : éléments d'authentification du compte à créer
 - `rowCompta` : row du compte à créer.
@@ -995,7 +997,7 @@ Assertions:
 - existence du row `Espaces`.
 */
 export class AcceptationSponsoring extends OperationUI {
-  constructor() { super($t('OPapa')) }
+  constructor() { super($t('AcceptationSponsoring')) }
 
   async run(sp, ardx, txt1, txt2, ps, don) {
     /* sp : objet Sponsoring
@@ -1167,17 +1169,17 @@ export class AcceptationSponsoring extends OperationUI {
       }, 50)
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Refus d'un sponsoring *************************************************
+/* OP_RefusSponsoring: 'Rejet d\'une proposition de sponsoring'**
 args.id ids : identifiant du sponsoring
 args.arx : réponse du filleul
 */
 export class RefusSponsoring extends OperationUI {
-  constructor() { super($t('OPdpa')) }
+  constructor() { super($t('RefusSponsoring')) }
 
   async run(sp, ardx) { // ids du sponsoring
     try {
@@ -1187,17 +1189,17 @@ export class RefusSponsoring extends OperationUI {
       await post(this, 'RefusSponsoring', args)
       deconnexion(true)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Prologer un sponsoring
+/* OP_ProlongerSponsoring: 'Prolongation / annulation d\'un sponsoring'
 args.id ids : identifiant du sponsoring
 args.dlv : nouvelle dlv (0 == annulation)
 */
 export class ProlongerSponsoring extends OperationUI {
-  constructor() { super($t('OPprosp')) }
+  constructor() { super($t('ProlongerSponsoring')) }
 
   async run(sp, dlv) {
     try {
@@ -1206,12 +1208,12 @@ export class ProlongerSponsoring extends OperationUI {
       await post(this, 'ProlongerSponsoring', args)
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Création d'un nouvel espace et du comptable associé
+/* OP_CreerEspace: 'Création d\'un nouvel espace et de son comptable'
 args.token donne les éléments d'authentification du compte.
 args.rowEspace : espace créé
 args.rowAvatar, rowTribu, rowCompta du compte du comptable
@@ -1220,7 +1222,7 @@ args.rowTribu
 Retour: rien. Si OK le rowEspace est celui créé en session
 */
 export class CreerEspace extends OperationUI {
-  constructor() { super($t('OPcre')) }
+  constructor() { super($t('CreerEspace')) }
 
   async run(org, phrase) {
     try {
@@ -1267,14 +1269,14 @@ export class CreerEspace extends OperationUI {
       this.finOK()
     } catch (e) {
       stores.ui.setPage('login')
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
 /** Opérations de type "ping" non authentifiées du tout */
 
-/** Echo du texte envoyé ***************************************
+/** OP_EchoTexte: 'Lancement d\'un test d\'écho' ***********
 args.token donne les éléments d'authentification du compte.
 args.to : délai en secondes avant retour de la réponse
 args.texte : texte à renvoyer en écho
@@ -1282,36 +1284,39 @@ Retour:
 - echo : texte d'entrée retourné
 */
 export class EchoTexte extends OperationUI {
-  constructor() { super($t('OPecho')) }
+  constructor() { super($t('EchoTexte')) }
 
   async run(texte, to) {
     try {
-      const ret = this.tr(await post(this, 'EchoTexte', { to, texte }))
-      console.log('Echo : ' + ret.echo)
+      // while (await this.retry()) {
+        const ret = this.tr(await post(this, 'EchoTexte', { to: to, texte }))
+        console.log('Echo : ' + ret.echo)
+      // }
       return this.finOK(ret.echo)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
 /* ErreurFonc *******************************************/
 export class ErreurFonc extends OperationUI {
-  constructor() { super($t('OPerreurFonc')) }
+  constructor() { super($t('ErreurFonc')) }
 
   async run(texte, to) {
     try {
       this.tr(await post(this, 'ErreurFonc', { to, texte }))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* PingDB *******************************************/
+/* OP_PingDB: '"Ping" de la base distante' *********
+*/
 export class PingDB extends OperationUI {
-  constructor() { super($t('OPpingdb')) }
+  constructor() { super($t('PingDB')) }
 
   async run() {
     try {
@@ -1319,62 +1324,13 @@ export class PingDB extends OperationUI {
       this.finOK()
       return ret
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Get de l'espace du compte de la session *****************************************************
-args.token donne les éléments d'authentification du compte.
-args.ns
-Retour:
-- rowEspace
+/* OP_GetEstFs: 'Détermination du mode du serveur (Filestore ou SQL)'
 */
-export class GetEspace extends OperationUI {
-  constructor() { super($t('OPsetesp')) }
-
-  async run(ns) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, ns: ns || session.ns }
-      const ret = this.tr(await post(this, 'GetEspace', args))
-      const espace = await compile(ret.rowEspace)
-      if (espace) session.setEspace(espace)
-      return this.finOK(espace)
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* Traitement des gcvols **********************************************
-*/
-export class TraitGcvols extends OperationUI {
-  constructor() { super('OPgcvols') }
-
-  async run(ns) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken }
-      const ret = this.tr(await post(this, 'ListeGcvols', args))
-      const m = {}, lidc = []
-      if (ret.gcvols.length) {
-        for (const x of ret.gcvols) {
-          const y = await compile(x)
-          let e = m[y.idt]; if (!e) { e = []; m[y.idt] = e }
-          e.push(y.it)
-          lidc.push(y.id)
-        }
-        const args = { token: session.authToken, m, lidc }
-        this.tr(await post(this, 'SupprComptesTribu', args))
-      }
-      this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
 export class GetEstFs extends OperationUI {
   constructor() { super($t('OPestFs')) }
 

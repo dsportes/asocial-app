@@ -592,6 +592,7 @@ export const useAvatarStore = defineStore('avatar', {
       nSt.delAvatar(id)
     },
 
+    /* Pseudo opération : GetPub */
     async getPub (id) {
       try {
         const args = { token: stores.session.authToken, id }

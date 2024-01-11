@@ -200,8 +200,8 @@ export class Motscles {
   - edit: true mode édition, false mode sélection
   - duCompte: true, mots clés du compte
   - duGroupe: id mots clés du groupe id
-  Si edit, c'est ceux de cpt OU ceux de gr
-  Si pas edit, c'est, les génériques, ceix de cpt ET ceux gr ou non
+  Si edit: ceux de cpt OU ceux de gr
+  Si pas edit: les génériques, ceux de cpt ET ceux gr OU NON (selon duGroupe)
   Les mots clés de la configuration sont chargés mais NON modifiables
 
   En sélection, l'objet est immutable.
@@ -222,6 +222,7 @@ export class Motscles {
     this.mc.lcategs.length = 0 // Liste des catégories existantes
     let mapAll
     if (edit) {
+      this.gr = duGroupe
       mapAll = duGroupe ? aSt.mapMCG : aSt.mapMCC
     } else {
       mapAll = duGroupe ? aSt.mapMCGr : aSt.mapMC
@@ -338,7 +339,7 @@ export class Motscles {
     if (idx && !nc) { this.supprMC(idx); return false }
     const [categ, nom] = this.split(nc)
     const x = this.localNom[nom]
-    if (x && x[0] !== idx) return $t('MCer3', [x[0], x[1]])
+    if (x && x[0] !== '' + idx) return $t('MCer3', [x[0], x[1]])
     if (idx) {
       const ancnc = this.localIdx[idx]
       const [anccateg, ancnom] = this.split(ancnc)

@@ -188,11 +188,7 @@ export default ({
     const tab = ref('')
     const l = motscles.mc.lcategs
     if (l.length) tab.value = motscles.mc.lcategs[0]
-    /*
-    watch(() => motscles.value, (ap, av) => {
-      tab.value = motscles.value.mc.lcategs[0]
-    })
-    */
+
     return {
       obs: $t('obs'),
       styp,

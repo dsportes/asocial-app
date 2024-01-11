@@ -222,8 +222,12 @@ export default ({
     async testEcho () {
       const texte = this.$t('OTt1')
       const to = 1
-      const r = await new EchoTexte().run(texte, to)
-      afficherDiag(this.$t('OTec', [texte, r, to]))
+      // try { // Si on veut traiter ce qui se passe après avoir "continuer quand-même"
+        const r = await new EchoTexte().run(texte, to)
+        await afficherDiag(this.$t('OTec', [texte, r, to]))
+      // } catch (e) {
+        // console.log(e.toString())
+      // }
     },
 
     async pingsrv () {

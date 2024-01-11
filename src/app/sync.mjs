@@ -68,7 +68,7 @@ export class OperationWS extends Operation {
 
 }
 
-/*
+/* OP_OnchangeVersion: 'Opération de synchronisation (changement de version)'
 Paradoxalement on se fiche complètement de savoir quelle version de quel groupe
 ou avatar a décleché ce trigger : quelque chose a changé, on va chercher quoi.
 La liste des groupes et avatars se trouven dans aSt.compte (la version actuelle du compte).
@@ -92,7 +92,7 @@ Enfin on traite les mises à jour reçues, les groupes et avatars supprimés
 et les groupes dont les membres / notes ne sont plus utiles.
 */
 export class OnchangeVersion extends OperationWS {
-  constructor() { super($t('OPsync')) }
+  constructor() { super($t('OnchangeVersion')) }
 
   eavMaj(id) {
     let e = this.avMaj.get(id)
@@ -416,6 +416,8 @@ export class OnchangeVersion extends OperationWS {
   }
 }
 
+/* OP_OnchangeCompta: 'Opération de synchronisation (changement de compta)'
+*/
 export class OnchangeCompta extends OperationWS {
   constructor() { super($t('OPsync')) }
 
@@ -480,8 +482,10 @@ export class OnchangeCompta extends OperationWS {
   }
 }
 
+/* OP_OnchangeTribu: 'Opération de synchronisation (changement de tranche)'
+*/
 export class OnchangeTribu extends OperationWS {
-  constructor() { super($t('OPsync')) }
+  constructor() { super($t('OnchangeTribu')) }
 
   async run(row) {
     try {
@@ -520,7 +524,7 @@ export class OnchangeTribu extends OperationWS {
 }
 
 export class OnchangeEspace extends OperationWS {
-  constructor() { super($t('OPsync')) }
+  constructor() { super($t('OPsOnchangeEspaceync')) }
 
   async run(row) {
     try {

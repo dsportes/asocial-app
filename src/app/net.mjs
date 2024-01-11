@@ -110,7 +110,7 @@ export async function post (op, fonction, args) {
     }
     return resp
   } catch (e) { // Résultat mal formé
-    throw new AppExc(E_BRO, 2, [op ? op.nom : '', e.message])
+    throw new AppExc(E_BRO, 2, [op ? op.label: '', e.message])
   }
 }
 

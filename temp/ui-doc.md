@@ -722,8 +722,9 @@ Affiche la liste des fichiers visible en mode avion et pour chacun,
 
 # En chantier
 
-## Bugs / vérifications
+### A développer / revisiter
 - GC à réviser
+- permutation de mode autonome / organisation d'un compte
 
 _Arrêtés mensuels_ (**CSV**)
 - tickets réceptionnés dans le mois. gérer pour le Comptable le "dernier mois archivé".
@@ -731,9 +732,11 @@ _Arrêtés mensuels_ (**CSV**)
   - une fois archivé dans un secret du Comptable, opération du serveur pour détruire tous les tickets du mois et antérieurs.
 - une ligne par comptas d'extrait des compteurs relatifs au mois M-1 (dès qu'il est figé).
 
-# Features à développer
-- pour un compte sponsor A, attribuer le pouvoir de sponsor à un autre compte A ??? Sauf si tous les comptes A sont sponsors ?
-  - prélever une somme lors du sponsoring d'un compte A (sauf Comptable)
-- transformation A <-> O
-- transfert monétaire entre comptes A
-- concept plus général d'action à effet différé à la prochaine connexion du compte
+### Features à développer
+_Arrêtés mensuels des Tickets_ (**CSV**)
+- tickets réceptionnés dans le mois pour le Comptable (gestion des archives mensuelles).
+  - une ligne par ticket dont l'ids débute par le mois.
+  - une fois archivé dans un secret du Comptable, appel d'opération du serveur pour détruire tous les tickets du mois et antérieurs.
+
+_Photos périodiques / sur demande_ des abonnements / consommation des comptes
+- une ligne par comptas d'un extrait des compteurs relatifs au mois M-1 (dès qu'il est figé).

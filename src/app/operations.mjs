@@ -1,7 +1,7 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { ID, AppExc, appexc, E_WS, AMJ, Compteurs, limitesjour } from './api.mjs'
+import { ID, AppExc, appexc, E_WS, E_BRK, E_BRO, AMJ, Compteurs, limitesjour } from './api.mjs'
 import { $t, sleep} from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
@@ -13,6 +13,8 @@ import { commitRows, IDBbuffer } from './db.mjs'
 /* Opération générique ******************************************/
 export class Operation {
   constructor (nomop) { this.nom = nomop }
+
+  get label () { return $t('OP_' + this.nom) }
 
   BRK () { }
 
@@ -30,6 +32,14 @@ export class OperationUI extends Operation {
     stores.session.startOp(this)
     this.cancelToken = null
     this.break = false
+    this.nbretry = 0
+  }
+
+  async retry () {
+    if (this.nbretry++ > 5) 
+      throw new AppExc(E_BRO, 21, [this.label])
+    if (this.retry > 1) await sleep((this.retry * 300))
+    return true
   }
 
   BRK () { 
@@ -71,19 +81,19 @@ export class OperationUI extends Operation {
     } else {
       ui.afficherMessage($t('OPko', [this.nom]), true)
       await ui.afficherExc(exc)
-      return exc
+      throw(exc)
     }
   }
 }
 
-/* Abonnement / désabonnement de la tribu courante ************************
+/* Abonnement / désabonnement à la tranche courante ************************
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu - Si 0 désabonnement
 Retour:
 - rowtribu: row de la tribu
 */
 export class AboTribuC extends OperationUI {
-  constructor () { super($t('OPabo')) }
+  constructor () { super($t('AboTribuC')) }
 
   async run (id) {
     try {
@@ -92,32 +102,15 @@ export class AboTribuC extends OperationUI {
       this.tr(await post(this, 'AboTribuC', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Changement du memo d'un compte ******************************************
-*/
-export class MemoCompte extends OperationUI {
-  constructor () { super($t('OPmemo')) }
-
-  async run (memok) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, memok }
-      this.tr(await post(this, 'MemoCompte', args))
-      this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* Changement d'un mcmemo d'un compte ******************************************
+/* Changement des mots clés et mémo attachés à un contact ou groupe ********************************
 */
 export class McMemo extends OperationUI {
-  constructor () { super($t('OPmemo')) }
+  constructor () { super($t('McMemo')) }
 
   async run (id, mc, memo) {
     try {
@@ -127,12 +120,12 @@ export class McMemo extends OperationUI {
       this.tr(await post(this, 'McMemo', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Recherche hash de phrase ******
+/* Test d\'existence d\'une phrase de connexion / contact / sponsoring ******
 args.ids : hash de la phrase de contact / de connexion
 args.t :
   - 1 : phrase de connexion(hps1 de compta)
@@ -142,7 +135,7 @@ Retour:
 - existe : true si le hash de la phrase existe
 */
 export class ExistePhrase extends OperationUI {
-  constructor () { super($t('OPphex')) }
+  constructor () { super($t('ExistePhrase')) }
 
   async run (hash, t) {
     try {
@@ -152,15 +145,15 @@ export class ExistePhrase extends OperationUI {
       const ex = ret.existe || false
       return this.finOK(ex)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Changement des mots clés d'un compte ******************************************
+/* Changement des mots clés d\'un compte  ************************
 */
 export class MotsclesCompte extends OperationUI {
-  constructor () { super($t('OPmotscles')) }
+  constructor () { super($t('MotsclesCompte')) }
 
   async run (mmc) {
     try {
@@ -170,12 +163,12 @@ export class MotsclesCompte extends OperationUI {
       this.tr(await post(this, 'MotsclesCompte', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Maj de la carte de visite d'un avatar ******************************************
+/* Mise à jour de la carte de visite d\'un avatar ******************************************
 args.token
 args.id : id de l'avatar dont la Cv est mise à jour
 args.v: version de versions de l'avatar incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
@@ -186,62 +179,60 @@ La version de l'avatar figure DANS cva, qu'il faut
 recrypter si ce n'était pas la bonne.
 */
 export class MajCv extends OperationUI {
-  constructor () { super($t('OPmcv')) }
+  constructor () { super($t('MajCv')) }
 
   async run (avatar, photo, info) {
     try {
       const session = stores.session
-      while (true) {
+      while (await this.retry()) {
         const v = Versions.get(avatar.id).v + 1
         const cva = await crypter(getCle(avatar.id), 
           new Uint8Array(encode({v, photo, info})))
         const args = { token: session.authToken, id: avatar.id, v, cva }
         const ret = this.tr(await post(this, 'MajCv', args))
         if (!ret.KO) break
-        await sleep(1000)
       }
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Maj de la carte de visite d'un groupe ******************************************
+/* Mise à jour de la carte de visite d\'un groupe ******************************************
 args.token: éléments d'authentification du compte.
 args.id : id du groupe dont la Cv est mise à jour
 args.v: version du groupe incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
 args.cvg: {v, photo, info} crypté par la clé du groupe
 */
 export class MajCvGr extends OperationUI {
-  constructor () { super($t('OPmcv')) }
+  constructor () { super($t('MajCvGr')) }
 
   async run (groupe, photo, info) {
     try {
       const session = stores.session
-      while (true) {
+      while (await this.retry()) {
         const v = groupe.v + 1
         const cvg = await crypter(getCle(groupe.id), new Uint8Array(encode({v, photo, info})))
         const args = { token: session.authToken, id: groupe.id, v, cvg }
         const ret = this.tr(await post(this, 'MajCvGr', args))
         if (!ret.KO) break
-        await sleep(1000)
       }
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/** Changement de phrase secrete ****************************************************
+/** Changement de la phrase secrete de connexion du compte ********************
 args.token: éléments d'authentification du compte.
 args.hps1: dans compta, `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte.
 args.shay: SHA du SHA de X (PBKFD de la phrase secrète).
 args.kx: clé K cryptée par la phrase secrète
 */
 export class ChangementPS extends OperationUI {
-  constructor () { super($t('OPcps')) }
+  constructor () { super($t('ChangementPS')) }
 
   async run (ps) {
     try {
@@ -253,12 +244,12 @@ export class ChangementPS extends OperationUI {
       if (session.synchro) commitRows(new IDBbuffer(), true)
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/** Changement de phrase sz contact ****************************************************
+/** Changement de la phrase de contact d\'un avatar *************************
 args.token: éléments d'authentification du compte.
 args.id: de l'avatar
 args.hpc: hash de la phrase de contact (SUPPRESSION si null)
@@ -266,7 +257,7 @@ args.napc: na de l'avatar crypté par le PBKFD de la phrase
 args.pck: phrase de contact cryptée par la clé K du compte
 */
 export class ChangementPC extends OperationUI {
-  constructor () { super($t('OPcpc')) }
+  constructor () { super($t('ChangementPC')) }
 
   async run (na, p) {
     try {
@@ -277,12 +268,12 @@ export class ChangementPC extends OperationUI {
       this.tr(await post(this, 'ChangementPC', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/** Récupération de l'avatar ayant une phrase de contact donnée *******
+/** Récupération d\'un avatar par sa phrase de contact *******
 args.token: éléments d'authentification du compte.
 args.hpc: hash de la phrase de contact
 Retour: idnapc : {id, napc}
@@ -295,7 +286,7 @@ Retour: idnapc: {id, napc}
   par le PBKFD de cette phrase OU null si non décryptable
 */
 export class GetAvatarPC extends OperationUI {
-  constructor () { super($t('OPcpc')) }
+  constructor () { super($t('GetAvatarPC')) }
 
   async run (p) { // p: objet Phrase
     try {
@@ -317,12 +308,12 @@ export class GetAvatarPC extends OperationUI {
       }
       return this.finOK(res)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/** Ajout Sponsoring ****************************************************
+/** Création d\'un sponsoring ****************************************************
 POST:
 - `token` : éléments d'authentification du comptable / compte sponsor de sa tribu.
 - `rowSponsoring` : row Sponsoring, SANS la version (qui est calculée par le serveur).
@@ -333,23 +324,22 @@ Retour:
 - KO: true - si régression de version de compta
 */
 export class AjoutSponsoring extends OperationUI {
-  constructor () { super($t('OPcsp')) }
+  constructor () { super($t('AjoutSponsoring')) }
 
   async run (row, don) {
     try {
       const session = stores.session
       const aSt = stores.avatar
-      while (true) {
+      while (await this.retry()) {
         const compta = aSt.compta
         const credits = don ? await aSt.compta.debitDon(don) : null
         const args = { token: session.authToken, rowSponsoring: row, credits, v: compta.v }
         const ret = this.tr(await post(this, 'AjoutSponsoring', args))
         if (!ret.KO) break
-        await sleep(1000)
       }
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
@@ -360,27 +350,28 @@ args.rowSponsoring : row Sponsoring, sans la version
 Retour:
 */
 export class ChercherSponsoring extends OperationUI {
-  constructor () { super($t('OPcsp')) }
+  constructor () { super($t('ChercherSponsoring')) }
 
   async run (ids) {
     try {
       const ret = this.tr(await post(this, 'ChercherSponsoring', { ids }))
-      this.finOK()
-      return ret
+      return this.finOK(ret)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `PassifChat` : rend le chat passif, nombre de chat - 1, items vidé
+/* Mise en état "passif" d\'un chat
+Nombre de chat - 1, items vidé
 POST:
 - `token` : éléments d'authentification du compte.
 - `id ids` : id du chat
 
 Assertions sur le row `Chats` et la `Versions` de l'avatar id.
-*/export class PassifChat extends OperationUI {
-  constructor () { super($t('OPpassifch')) }
+*/
+export class PassifChat extends OperationUI {
+  constructor () { super($t('PassifChat')) }
 
   async run (chat) {
     try {
@@ -396,7 +387,7 @@ Assertions sur le row `Chats` et la `Versions` de l'avatar id.
       const disp = ret.disp
       return this.finOK(disp)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
@@ -421,7 +412,7 @@ Retour:
 
 */
 export class NouveauChat extends OperationUI {
-  constructor () { super($t('OPnvch')) }
+  constructor () { super($t('NouveauChat')) }
 
   async run (naI, naE, txt) {
     try {
@@ -463,12 +454,12 @@ export class NouveauChat extends OperationUI {
       }
       return this.finOK([st, chat])
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `MajChat` : mise à jour d'un Chat
+/* Mise à jour d\'un "chat"
 POST:
 - `token` : éléments d'authentification du compte.
 - `idI idsI` : id du chat, côté _interne_.
@@ -493,14 +484,14 @@ Retour:
 Assertions sur l'existence du row `Avatars` de l'avatar I, sa `Versions`, et le cas échéant la `Versions` de l'avatar E (quand il existe).
 */
 export class MajChat extends OperationUI {
-  constructor () { super($t('OPmajch')) }
+  constructor () { super($t('MajChat')) }
 
   async run (naI, naE, txt, dh, chat, don) {
     try {
       const session = stores.session
       const aSt =  stores.avatar
       let ret
-      while (true) {
+      while (await this.retry()) {
         const args = { 
           token: session.authToken, 
           idI: naI.id, 
@@ -522,25 +513,24 @@ export class MajChat extends OperationUI {
         }
         ret = this.tr(await post(this, 'MajChat', args))
         if (!ret.KO) break
-        await sleep(1000)
       }
       const disp = ret.disp
       const ch = await compile(ret.rowChat)
       aSt.setChat(ch)
       return this.finOK(disp)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Rafraîchir les CV, quand nécessaire *********************************
+/* OP_RafraichirCvs: 'Rafraîchissement des cartes de visite' ***************************
 args.token: éléments d'authentification du compte.
 args.cibles : array de  { idE, vcv, lch: [[idI, idsI, idsE] ...], lmb: [[idg, im] ...] }
 Retour: les chats et membres de la cible sont mis à jour
 */
 export class RafraichirCvs extends OperationUI {
-  constructor () { super($t('OPccv')) }
+  constructor () { super($t('RafraichirCvs')) }
 
   async run (id) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
     try {
@@ -580,12 +570,12 @@ export class RafraichirCvs extends OperationUI {
 
       return this.finOK([nt, nr], true)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Nouvel avatar *********************************
+/*OP_NouvelAvatar: 'Création d\'un nouvel avatar du compte' **********************
 args.token: éléments d'authentification du compte.
 args.rowAvatar : row du nouvel avatar
 args.rowVersion : row de le la version de l'avatar
@@ -593,7 +583,7 @@ args.kx args.vx: entrée dans mavk de compta pour le nouvel avatar
 Retour:
 */
 export class NouvelAvatar extends OperationUI {
-  constructor () { super($t('OPnvav')) }
+  constructor () { super($t('NouvelAvatar')) }
 
   async run (nom) {
     try {
@@ -622,12 +612,12 @@ export class NouvelAvatar extends OperationUI {
       this.tr(await post(this, 'NouvelAvatar', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Nouvelle tribu *********************************
+/* OP_NouvelleTribu: 'Création d\'une nouvelle tranche de quotas' *******
 args.token: éléments d'authentification du compte.
 args.rowTribu : row de la nouvelle tribu
 args.idc: id du comptable
@@ -637,14 +627,14 @@ Retour:
 de Compta.atr (conflit d'attribution)
 */
 export class NouvelleTribu extends OperationUI {
-  constructor () { super($t('OPnvtr')) }
+  constructor () { super($t('NouvelleTribu')) }
 
   async run (info, q) { // q: [qc, q1, q2]
     try {
       const session = stores.session
       const aSt = stores.avatar
       let ret
-      while (true) {
+      while (await this.retry()) {
         const idx = aSt.compta.atr.length
 
         const clet = Tribu.genCle(idx) // enregistre la clé
@@ -656,23 +646,22 @@ export class NouvelleTribu extends OperationUI {
         const args = { token: session.authToken, rowTribu, atrItem }
         ret = this.tr(await post(this, 'NouvelleTribu', args))
         if (!ret.KO) break
-        await sleep(1000)
       }
       this.finOK(ret)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Set notification générale *****************************************************
+/* OP_SetNotifGg: 'Inscription d\'une notification générale' ***********************
 args.token donne les éléments d'authentification du compte.
 args.ns
 args.notif
 Retour:
 */
 export class SetNotifG extends OperationUI {
-  constructor () { super($t('OPntfg')) }
+  constructor () { super($t('SetNotifG')) }
 
   async run (notifG, ns) {
     try {
@@ -690,12 +679,12 @@ export class SetNotifG extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `SetNotifT` : notification de la tribu
+/* OP_SetNotifT: 'Inscription / mise à jour de la notification d\'une tranche de quotas'
 POST:
 - `token` : éléments d'authentification du compte.
 - `id` : id de la tribu
@@ -705,7 +694,7 @@ POST:
 Assertion sur l'existence du row `Tribus` de la tribu.
 */
 export class SetNotifT extends OperationUI {
-  constructor () { super($t('OPntftr')) }
+  constructor () { super($t('SetNotifT')) }
 
   async run (notifT, idt) {
     try {
@@ -719,12 +708,12 @@ export class SetNotifT extends OperationUI {
       this.tr(await post(this, 'SetNotifT', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `SetNotifC` : notification d'un compte d'une tribu
+/* OP_SetNotifC: 'Inscription / mise à jour de la notification d\'un compte'
 POST:
 - `token` : éléments d'authentification du compte.
 - `id` : id de la tribu
@@ -735,7 +724,7 @@ POST:
 Assertion sur l'existence du row `Tribus` de la tribu et `Comptas` du compte.
 */
 export class SetNotifC extends OperationUI {
-  constructor () { super($t('OPntfco')) }
+  constructor () { super($t('SetNotifC')) }
 
   async run (notifC, idt, idc) { // id de la tribu, id du compte cible, notif
     try {
@@ -749,12 +738,12 @@ export class SetNotifC extends OperationUI {
       this.tr(await post(this, 'SetNotifC', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* SetAtrItemComptable : Set des quotas OU de l'info d'une tribu
+/*   OP_SetAtrItemComptable: 'Mise à jour des quotas d\'une tranche de quotas'
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
 args.idc: id du comptable
@@ -763,7 +752,7 @@ args.quotas: [q1, q2] ]si changement des quotas, sinon null
 Retour:
 */
 export class SetAtrItemComptable extends OperationUI {
-  constructor () { super($t('OPqtr')) }
+  constructor () { super($t('SetAtrItemComptable')) }
 
   async run (id, info, quotas) {
     try {
@@ -776,12 +765,12 @@ export class SetAtrItemComptable extends OperationUI {
       this.tr(await post(this, 'SetAtrItemComptable', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Set sponsor dans tribu / compte
+/* OP_SetSponsor: 'Changement pour un compte de son statut de sponsor de sa tranche de quotas'
 args.token: éléments d'authentification du compte.
 args.idt : id de la tribu
 args.idc: id du compte
@@ -790,7 +779,7 @@ args.estSp: true si sponsor
 Retour:
 */
 export class SetSponsor extends OperationUI {
-  constructor () { super($t('OPsptr')) }
+  constructor () { super($t('SetSponsor')) }
 
   async run (idt, na, estSp) { // na du compte, true/false sponsor
     try {
@@ -804,12 +793,12 @@ export class SetSponsor extends OperationUI {
       this.tr(await post(this, 'SetSponsor', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Set des quotas dans tribu / compte
+/*   OP_SetQuotas: 'Fixation des quotas dùn compte dans sa tranche de quotas'
 args.token: éléments d'authentification du compte.
 args.idt : id de la tribu
 args.idc: id du compte
@@ -817,7 +806,7 @@ args.q1 args.q2 : quotas
 Retour:
 */
 export class SetQuotas extends OperationUI {
-  constructor () { super($t('OPmajtr')) }
+  constructor () { super($t('SetQuotas')) }
 
   async run (id, idc, q) {
     try {
@@ -826,12 +815,12 @@ export class SetQuotas extends OperationUI {
       this.tr(await post(this, 'SetQuotas', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Changer un compte de tribu *********************************
+/*  OP_ChangerTribu: 'Transfert d\'un compte dans une autre tranche de quotas' ************
 args.token: éléments d'authentification du compte.
 args.id : id du compte qui change de tribu
 args.idtAv : id de la tribu quittée
@@ -850,7 +839,7 @@ Retour:
 - rowTribu (nouvelle)
 */
 export class ChangerTribu extends OperationUI {
-  constructor () { super($t('OPchtr')) }
+  constructor () { super($t('ChangerTribu')) }
 
   async run (args) {
     try {
@@ -860,12 +849,12 @@ export class ChangerTribu extends OperationUI {
       const t = await compile(ret.rowTribu)
       return this.finOK(t)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Set du dhvu d'une compta *********************************
+/* OP_SetDhvuCompta: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte'
 args.token: éléments d'authentification du compte.
 args.dhvu : dhvu cryptée par la clé K
 Retour:
@@ -881,12 +870,13 @@ export class SetDhvuCompta extends OperationUI {
       this.tr(await post(this, 'SetDhvuCompta', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Résumé d'une compta (autre que celle du compte de la session)
+/* OP_GetCompteursCompta: 'Obtention des compteurs d\'abonnement / consomation d\'un compte'
+(autre que celle du compte de la session)
 Pour le comptable (tous comptes), un sponsor (comptes de sa tribu)
 args.token: éléments d'authentification du compte.
 args.id : id de la compta
@@ -896,7 +886,7 @@ Retour:
 - it : indice du compte dans sa tribu
 */
 export class GetCompteursCompta extends OperationUI {
-  constructor () { super($t('OPdhvu')) }
+  constructor () { super($t('GetCompteursCompta')) }
 
   async run (id) { // id d'un compte
     try {
@@ -916,12 +906,12 @@ export class GetCompteursCompta extends OperationUI {
       aSt.setccCpt(cpt)
       return this.finOK(cpt)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Get Tribu *********************************
+/* OP_GetTribu: 'Obtention d\'une tranche de quotas' ************
 args.token: éléments d'authentification du compte.
 args.id : id de la tribu
 args.setC: déclarer la tribu courante
@@ -929,7 +919,7 @@ Retour:
 - rowtribu: row de la tribu
 */
 export class GetTribu extends OperationUI {
-  constructor () { super($t('OPtrib')) }
+  constructor () { super($t('GetTribu')) }
 
   async run (id, setC) {
     try {
@@ -939,19 +929,19 @@ export class GetTribu extends OperationUI {
       const tribu = await compile(ret.rowTribu)
       return this.finOK(tribu)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Set t de l'espace par le Comptable ******************
+/* OP_SetEspaceT: 'Attribution d\'un profil à l\'espace' ******************
 args.token donne les éléments d'authentification du compte.
 args.ns
 args.t
 Retour:
 */
 export class SetEspaceT extends OperationUI {
-  constructor () { super($t('OPprf')) }
+  constructor () { super($t('SetEspaceT')) }
 
   async run (ns, t) {
     try {
@@ -965,12 +955,12 @@ export class SetEspaceT extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Nouveau groupe *****************************************************
+/* OP_NouveauGroupe: 'Création d\'un nouveau groupe' ********
 args.token donne les éléments d'authentification du compte.
 args.rowGroupe : le groupe créé
 args.rowMembre : le membre
@@ -981,7 +971,7 @@ args.empgk: élément de mpg dans le compte de l'avatar créateur
 Retour:
 */
 export class NouveauGroupe extends OperationUI {
-  constructor () { super($t('OPnvgr')) }
+  constructor () { super($t('NouveauGroupe')) }
 
   async run (nom, unanime, quotas) { // quotas: [q1, q2]
     try {
@@ -1018,7 +1008,7 @@ export class NouveauGroupe extends OperationUI {
       this.tr(await post(this, 'NouveauGroupe', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
@@ -1030,7 +1020,7 @@ args.idg : id du groupe
 Retour:
 */
 export class MotsclesGroupe extends OperationUI {
-  constructor () { super($t('OPmotsclesgr')) }
+  constructor () { super($t('MotsclesGroupe')) }
 
   async run (mmc, nag) {
     try {
@@ -1045,7 +1035,7 @@ export class MotsclesGroupe extends OperationUI {
   }
 }
 
-/* Fiche invitation *******************************************
+/* OP_InvitationFiche: 'Récupération des informations d\'invitation à un groupe' ******
 args.token donne les éléments d'authentification du compte.
 args.idg : id du groupe
 args.ids: indice du membre invité
@@ -1057,7 +1047,7 @@ Retour:
   invs : clé: im, valeur: { cva, nag }
 */
 export class InvitationFiche extends OperationUI {
-  constructor () { super($t('OPardgr')) }
+  constructor () { super($t('InvitationFiche')) }
 
   async run (idg, ids, na) {
     try {
@@ -1073,12 +1063,12 @@ export class InvitationFiche extends OperationUI {
       const mb = await compile(ret.rowMembre)
       return this.finOK(mb)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Hébergement d'un groupe *****************************************************
+/* OP_HebGroupe: 'Gestion / transfert d\'hébergement d\'un groupe' **********
 args.token donne les éléments d'authentification du compte.
 args.action : 1 à 5
 args.idg : id du groupe
@@ -1120,7 +1110,7 @@ Transfert (5):
 Retour:
 */
 export class HebGroupe extends OperationUI {
-  constructor () { super($t('OPhebgr')) }
+  constructor () { super($t('HebGroupe')) }
 
   async run (action, groupe, imh, q1, q2) {
     try {
@@ -1139,7 +1129,7 @@ export class HebGroupe extends OperationUI {
       this.tr(await post(this, 'HebGroupe', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
@@ -1157,7 +1147,7 @@ Retour:
 - KO : si l'indice im est déjà attribué
 */
 export class NouveauMembre extends OperationUI {
-  constructor () { super($t('OPnvmb')) }
+  constructor () { super($t('NouveauMembre')) }
 
   async run (gr, im, na, cv) {
     try {
@@ -1172,12 +1162,12 @@ export class NouveauMembre extends OperationUI {
       const ret = this.tr(await post(this, 'NouveauMembre', args))
       return this.finOK(!ret.KO)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Maj des droits d'un membre *******************************************
+/* OP_MajDroitsMembre: 'Mise à jour des droits d\'un membre sur un groupe' *******
 args.token donne les éléments d'authentification du compte.
 args.idg : id du groupe
 args.ids : ids du membre
@@ -1185,7 +1175,7 @@ args.nvflags : nouveau flags. Peuvent changer PA DM DN DE AM AN
 Retour:
 */
 export class MajDroitsMembre extends OperationUI {
-  constructor () { super($t('OPinfmb')) }
+  constructor () { super($t('MajDroitsMembre')) }
 
   async run (idg, ids, nvflags) {
     try {
@@ -1194,12 +1184,12 @@ export class MajDroitsMembre extends OperationUI {
       this.tr(await post(this, 'MajDroitsMembre', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Oublier un membre *******************************************
+/* OP_OublierMembre: 'Oubli d\'un membre d\'un groupe' **************
 args.token donne les éléments d'authentification du compte.
 args.idg : id du groupe
 args.ids : ids du membre
@@ -1213,7 +1203,7 @@ args.cas :
 Retour:
 */
 export class OublierMembre extends OperationUI {
-  constructor () { super($t('OPinfmb')) }
+  constructor () { super($t('OublierMembre')) }
 
   async run (ng, na, ids, cas) {
     try {
@@ -1223,12 +1213,12 @@ export class OublierMembre extends OperationUI {
       this.tr(await post(this, 'OublierMembre', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Mode simple / unanime d'un groupe *******************************************
+/* OP_ModeSimple: 'Demande de retour au mode simple d\'invitation à un groupe' **********
 args.token donne les éléments d'authentification du compte.
 args.id : id du groupe
 args.ids : ids du membre demandant le retour au mode simple.
@@ -1236,7 +1226,7 @@ args.ids : ids du membre demandant le retour au mode simple.
 Retour:
 */
 export class ModeSimple extends OperationUI {
-  constructor () { super($t('OPmcmb')) }
+  constructor () { super($t('ModeSimple')) }
 
   async run (id, ids) {
     try {
@@ -1245,12 +1235,12 @@ export class ModeSimple extends OperationUI {
       this.tr(await post(this, 'ModeSimple', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* ItemChatgr : ajout / effacement d'un item *************************************************
+/* OP_ItemChatgr: 'Ajout d\'un item de dialogue à un "chat" de groupe' *************************
 args.token: éléments d'authentification du compte.
 args.chatit : row de la note
 args.idg: id du groupe
@@ -1258,7 +1248,7 @@ args.im args.dh : pour une suppression
 Retour: rien
 */
 export class ItemChatgr extends OperationUI {
-  constructor () { super($t('OPstmb')) }
+  constructor () { super($t('ItemChatgr')) }
 
   async run (idg, im, dh, txt) { 
     try {
@@ -1274,12 +1264,12 @@ export class ItemChatgr extends OperationUI {
       this.tr(await post(this, 'ItemChatgr', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Invitation à un groupe *******************************************
+/* OP_InvitationGroupe: 'Invitation à un groupe' **********
 args.token donne les éléments d'authentification du compte.
 args.op : opération demandée: 
   1: invit std, 2: modif invit std, 3: suppr invit std, 
@@ -1295,7 +1285,7 @@ args.chatit: item de chat du groupe (mot de bienvenue)
 Retour:
 */
 export class InvitationGroupe extends OperationUI {
-  constructor () { super($t('OPstmb')) }
+  constructor () { super($t('InvitationGroupe')) }
 
   async run (op, gr, mb, ivpar, flags, ard) { 
       /* op:
@@ -1334,12 +1324,12 @@ export class InvitationGroupe extends OperationUI {
       const ret = this.tr(await post(this, 'InvitationGroupe', args))
       return this.finOK(ret.code || 0)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Acceptation invitation *******************************************
+/* OP_AcceptInvitation: 'Acceptation d\'une invitation à un groupe' *************
 args.token donne les éléments d'authentification du compte.
 args.idg : id du groupe
 args.ids: indice du membre invité
@@ -1356,7 +1346,7 @@ args.chatit: item de chat (copie de l'ardoise)
 Retour:
 */
 export class AcceptInvitation extends OperationUI {
-  constructor () { super($t('OPstmb')) }
+  constructor () { super($t('AcceptInvitation')) }
 
   async run (cas, na, ng, im, chattxt, iam, ian) {
     try {
@@ -1379,19 +1369,19 @@ export class AcceptInvitation extends OperationUI {
       const ret = this.tr(await post(this, 'AcceptInvitation', args))
       return this.finOK(ret.disparu)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Nouvelle Note *************************************************
+/* OP_NouvelleNote: 'Création d\'une nouvelle note' ***************
 args.token: éléments d'authentification du compte.
 args.rowNote : row de la note
 args.idc: id du compte (note avatar) ou de l'hébergeur (note groupe)
 Retour: rien
 */
 export class NouvelleNote extends OperationUI {
-  constructor () { super($t('OPcsc')) }
+  constructor () { super($t('NouvelleNote')) }
 
   /* 
   id: groupe ou avatar
@@ -1410,14 +1400,14 @@ export class NouvelleNote extends OperationUI {
       this.tr(await post(this, 'NouvelleNote', args))
       return this.finOK((rowNote.id + '/' + rowNote.ids))
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Opérations diverses sur une note ******
+/* OP_NoteOpx: 'Suppression d\'une note'  ******
 args.token: éléments d'authentification du compte.
-op: 'suppr', 'arch', 'react'
+op: 'suppr'
 args.id ids: identifiant de la note (dont celle du groupe pour un note de groupe)
 args.idc : compta à qui imputer le volume
   - pour une note personelle, id du compte de l'avatar
@@ -1425,7 +1415,7 @@ args.idc : compta à qui imputer le volume
 Retour:
 */
 export class NoteOpx extends OperationUI {
-  constructor () { super($t('OPssc')) }
+  constructor () { super($t('NoteOpx')) }
 
   async run (op) {
     try {
@@ -1444,12 +1434,12 @@ export class NoteOpx extends OperationUI {
       }
       return this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Maj d'une note ******
+/* OP_MajNote: 'Mise à jour du texte d\'une note' ******
 args.token: éléments d'authentification du compte.
 args.id ids: identifiant de la note (dont celle du groupe pour un note de groupe)
 args.txts : nouveau texte encrypté
@@ -1457,7 +1447,7 @@ args.im : auteur de la note pour un groupe
 Retour:
 */
 export class MajNote extends OperationUI {
-  constructor () { super($t('OPssc')) }
+  constructor () { super($t('MajNote')) }
 
   async run (id, ids, aut, texte) {
     try {
@@ -1468,40 +1458,19 @@ export class MajNote extends OperationUI {
       this.tr(await post(this, 'MajNote', args))
       return this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Protéger une note contre l'écriture *************************************************
-args.token: éléments d'authentification du compte.
-args.id ids: identifiant de la note
-args.p : 0 / 1
-Retour: rien
-*/
-export class ProtNote extends OperationUI {
-  constructor () { super($t('OPprot')) }
-
-  async run (id, ids, p) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, id, ids, p }
-      this.tr(await post(this, 'ProtNote', args))
-      return this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
-    }
-  }
-}
-
-/* Changer l'exclusivité d'écriture d'une note ***********************
+/* OP_ExcluNote: 'Changement de l\'attribution de l\'exclusivité d\'écriture d\'une note'
 args.token: éléments d'authentification du compte.
 args.id ids: identifiant de la note
 args.im : 0 / im
 Retour: rien
 */
 export class ExcluNote extends OperationUI {
-  constructor () { super($t('OPexclu')) }
+  constructor () { super($t('ExcluNote')) }
 
   async run (id, ids, im) {
     try {
@@ -1510,12 +1479,12 @@ export class ExcluNote extends OperationUI {
       this.tr(await post(this, 'ExcluNote', args))
       return this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Changer les mots clés d'une note ***********************
+/* OP_McNote: 'Changement des mots clés attachés à une note par un compte' ******
 args.token: éléments d'authentification du compte.
 args.id ids: identifiant de la note
 args.hgc: si mc perso d'une note de groupe, id dans la map mc
@@ -1524,7 +1493,7 @@ args.mc0: mots clés du groupe
 Retour: rien
 */
 export class McNote extends OperationUI {
-  constructor () { super($t('OPmcn')) }
+  constructor () { super($t('McNote')) }
 
   async run (note, mc, mc0) {
     try {
@@ -1536,19 +1505,19 @@ export class McNote extends OperationUI {
       this.tr(await post(this, 'McNote', args))
       return this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Rattacher une note à une autre ou à une racine ***********************
+/* OP_RattNote: 'Gestion du rattachement d\'une note à une autre' ********
 args.token: éléments d'authentification du compte.
 args.id ids: identifiant de la note
 args.ref : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
 Retour: rien
 */
 export class RattNote extends OperationUI {
-  constructor () { super($t('OPrattn')) }
+  constructor () { super($t('RattNote')) }
 
   async run (id, ids, rid, rids, refn) {
     try {
@@ -1559,12 +1528,12 @@ export class RattNote extends OperationUI {
       this.tr(await post(this, 'RattNote', args))
       return this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Charger les CVs dont les versions sont postérieures à celles détenues en session ******
+/* OP_ChargerCvs: 'Chargement des cartes de visite plus récentes que celles détenues en session'
 args.token: éléments d'authentification du compte.
 args.mcv : cle: id, valeur: version détenue en session (ou 0)
 Retour:
@@ -1572,7 +1541,7 @@ rowCvs: liste des row Cv { _nom: 'cvs', id, _data_ }
   _data_ : cva {v, photo, info} cryptée par la clé de son avatar
 */
 export class ChargerCvs extends OperationUI {
-  constructor () { super($t('OPgetcv')) }
+  constructor () { super($t('ChargerCvs')) }
 
   async run (id) {
     try {
@@ -1589,13 +1558,15 @@ export class ChargerCvs extends OperationUI {
       }
       return this.finOK(cv ? cv.cv : null)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
+/* OP_NouveauFichier: 'Enregistrement d\'un nouveau fichier attaché à une note'
+*/
 export class NouveauFichier extends OperationUI {
-  constructor () { super($t('OPnvf')) }
+  constructor () { super($t('NouveauFichier')) }
 
   async run (note, aut, fic, lidf, dv2) {
     // lidf : liste des idf des fichiers à supprimer
@@ -1656,12 +1627,12 @@ export class NouveauFichier extends OperationUI {
       // await sleep(1000)
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/******************************************************
+/* OP_DownloadFichier: 'Téléchargement d\'un fichier attaché à une note'
 Download fichier / getUrl
 GetUrl : retourne l'URL de get d'un fichier
 Comme c'est un GET, les arguments sont en string (et pas en number)
@@ -1673,7 +1644,7 @@ args.vt : volume du fichier (pour compta des volumes v2 transférés)
 */
 
 export class DownloadFichier extends OperationUI {
-  constructor () { super($t('OPtfa')) }
+  constructor () { super($t('DownloadFichier')) }
 
   async run (note, idf) { 
     try {
@@ -1687,13 +1658,12 @@ export class DownloadFichier extends OperationUI {
       const buf = await getData(url)
       return this.finOK(buf || null)
     } catch (e) {
-      await this.finKO(e)
+      this.finKO(e)
     }
   }
 }
 
-/******************************************************
-args.token: éléments d'authentification du compte.
+/* OP_SupprFichier: 'Suppression d\'un fichier attaché à une note'
 args.id, ids : de la note
 args.idh : id de l'hébergeur pour une note groupe
 args.idf : identifiant du fichier à supprimer
@@ -1701,7 +1671,7 @@ args.aut: im de l'auteur (pour une note de groupe)
 Retour: aucun
 */
 export class SupprFichier extends OperationUI {
-  constructor () { super($t('OPsfa')) }
+  constructor () { super($t('SupprFichier')) }
 
   async run (note, idf, aut) { 
     try {
@@ -1712,12 +1682,12 @@ export class SupprFichier extends OperationUI {
       this.tr(await post(this, 'SupprFichier', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Supprimer un avatar ****************************************
+/* OP_SupprAvatar: 'Suppression d\'un avatar du compte' **********
 args.token: éléments d'authentification du compte.
 args.id : id de l'avatar
 args.va : version de l'avatar
@@ -1742,7 +1712,7 @@ Retour: OK
 - false : retry requis, les versions des groupes et/ou avatar ont chnagé
 */
 export class SupprAvatar extends OperationUI {
-  constructor () { super($t('OPsfa')) }
+  constructor () { super($t('SupprAvatar')) }
 
   async run (args) { 
     try {
@@ -1751,47 +1721,48 @@ export class SupprAvatar extends OperationUI {
       const ret = this.tr(await post(this, 'SupprAvatar', args))
       return this.finOK(ret.KO ? false : true)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Appels GCxxx ***********************************************/
+/* OP_GC: 'Déclenchement du nettoyage quotidien' *******/
 export class GC extends OperationUI {
-  constructor () { super('OPgc') }
+  constructor () { super('GC') }
 
   async run (nomop) { 
     try {
       const ret = this.tr(await post(this, nomop, {}))
       return this.finOK(ret)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* GetCheckpoint ***********************************************/
+/* OP_GetCheckpoint: 'Obtention du rapport d\'exécution du dernier traitement de nettoyage quotidien'
+*/
 export class GetCheckpoint extends OperationUI {
-  constructor () { super('OPckpt') }
+  constructor () { super('GetCheckpoint') }
 
   async run () { 
     try {
       const ret = this.tr(await post(this, 'GetCheckpoint', {}))
       return this.finOK(ret.checkpoint)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* GetSynthese **********************************************
+/* OP_GetSynthese: 'Obtention de la synthèse de l\'espace' *********
 args.token donne les éléments d'authentification du compte.
 args.ns
 Retour:
 - rowSynthse
 */
 export class GetSynthese extends OperationUI {
-  constructor () { super('OPsynth') }
+  constructor () { super('GetSynthese') }
 
   async run (ns) { 
     try {
@@ -1803,7 +1774,7 @@ export class GetSynthese extends OperationUI {
       aSt.setSynthese(s)
       return this.finOK(s)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
@@ -1818,7 +1789,7 @@ args.lop : liste d'opérations [op, id, ids, date]
 Retour:
 */
 export class ForceDlv extends OperationUI {
-  constructor () { super('OPfdlv') }
+  constructor () { super('ForceDlv') }
 
   async run (lop) { 
     try {
@@ -1827,12 +1798,12 @@ export class ForceDlv extends OperationUI {
       this.tr(await post(this, 'ForceDlv', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/*`SetEspaceOptionA` : changement de l'option A par le Comptable
+/* OP_SetEspaceOptionA: 'Changement de l\'option A de l\'espace'
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
 - `ns` : id de l'espace notifié.
@@ -1846,7 +1817,7 @@ L'opération échappe au contrôle espace figé / clos.
 Elle n'écrit QUE dans espaces.
 */
 export class SetEspaceOptionA extends OperationUI {
-  constructor () { super('OPoptionA') }
+  constructor () { super('SetEspaceOptionA') }
 
   async run (optionA) { 
     try {
@@ -1855,12 +1826,12 @@ export class SetEspaceOptionA extends OperationUI {
       this.tr(await post(this, 'SetEspaceOptionA', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `PlusTicket` : ajout d'un ticket à un compte A
+/* OP_PlusTicket: 'Génération d\'un ticket de crédit'
 et ajout du ticket au Comptable
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
@@ -1870,14 +1841,14 @@ POST:
 Retour: rien
 */
 export class PlusTicket extends OperationUI {
-  constructor () { super('OPtkt') }
+  constructor () { super('PlusTicket') }
 
   async run (ma, refa, ids) { 
     try {
       const session = stores.session
       const aSt = stores.avatar
 
-      while (true) {
+      while (await this.retry()) {
         const compta = aSt.compta
         const { rowTicket, ticket } = Ticket.nouveauRow(ids, ma, refa)
         const credits = await compta.creditsSetTk(ticket)
@@ -1885,16 +1856,15 @@ export class PlusTicket extends OperationUI {
         const args = { token: session.authToken, rowTicket, credits, v: compta.v }
         const ret = this.tr(await post(this, 'PlusTicket', args))
         if (!ret.KO) break
-        await sleep(1000)
       }
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `MoinsTicket` : retrait d'un ticket d'un compte A
+/* OP_MoinsTicket: 'Suppression d\'un ticket de crédit'
 et retrait (zombi) du ticket du Comptable
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
@@ -1904,30 +1874,29 @@ POST:
 Retour: rien
 */
 export class MoinsTicket extends OperationUI {
-  constructor () { super('OPtkt') }
+  constructor () { super('MoinsTicket') }
 
   async run (ids) { 
     try {
       const session = stores.session
       const aSt = stores.avatar
 
-      while (true) {
+      while (await this.retry()) {
         const compta = aSt.compta
         const credits = await compta.creditsUnsetTk(ids)
 
         const args = { token: session.authToken, credits, ids }
         const ret = this.tr(await post(this, 'MoinsTicket', args))
         if (!ret.KO) break
-        await sleep(1000)
       }
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `RafraichirTickets` : nouvelles versions des tickets cités
+/* OP_RafraichirTickets: 'Obtention des nouveaux tickets réceptionnés par le Comptable'
 et incorporation au solde le cas échéant
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
@@ -1945,7 +1914,7 @@ POST:
 Retour: rien
 */
 export class RafraichirTickets extends OperationUI {
-  constructor () { super('OPtkt') }
+  constructor () { super('RafraichirTickets') }
 
   async run () { 
     try {
@@ -1953,7 +1922,7 @@ export class RafraichirTickets extends OperationUI {
       const aSt = stores.avatar
       let nb = 0
 
-      while (true) {
+      while (await this.retry()) {
         const compta = aSt.compta
         const mtk = compta.mtk
         const args1 = { token: session.authToken, mtk }
@@ -1971,26 +1940,25 @@ export class RafraichirTickets extends OperationUI {
         const args2 = { token: session.authToken, credits, v: compta.v }
         const ret2 = this.tr(await post(this, 'MajCredits', args2))
         if (!ret2.KO) break
-        await sleep(1000)
       }
       return this.finOK(nb)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* Recalcul du crédit si de nouveaux dons sont apparaus
+/* OP_RafraichirDons: 'Recalcul du solde du compte après réception de nouveaux dons'
 et n'ont pas encore été intégrés (compta.dons !== null)
 */
 export class RafraichirDons extends OperationUI {
-  constructor () { super('OPtkt') }
+  constructor () { super('RafraichirDons') }
 
   async run () { 
     try {
       const session = stores.session
       const aSt = stores.avatar
-      while (true) {
+      while (await this.retry()) {
         const compta = aSt.compta
         if (!compta.dons) break
         const credits = await compta.majCredits()
@@ -1998,16 +1966,16 @@ export class RafraichirDons extends OperationUI {
         const args2 = { token: session.authToken, credits, v: compta.v }
         const ret2 = this.tr(await post(this, 'MajCredits', args2))
         if (!ret2.KO) break
-        await sleep(1000)
       }
       return this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `EstAutonome` : indique si l'avatar donné en argument est 
+/* OP_EstAutonome: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome'
+indique si l'avatar donné en argument est 
 l'avatar principal d'un compte autonome
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
@@ -2017,7 +1985,7 @@ Retour:
 - `estA`: true si avatar principal d'un compte autonome
 */
 export class EstAutonome extends OperationUI {
-  constructor () { super('OPtkt') }
+  constructor () { super('EstAutonome') }
 
   async run (id) { 
     try {
@@ -2026,12 +1994,12 @@ export class EstAutonome extends OperationUI {
       const ret = this.tr(await post(this, 'EstAutonome', args))
       return this.finOK(ret.estA)
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }
 
-/* `ReceptionTicket` : réception d'un ticket par le Comptable
+/* OP_ReceptionTicket: 'Réception d\'un ticket par le Comptable'
 POST:
 - `token` : jeton d'authentification du compte de **l'administrateur**
 - `ids` : du ticket
@@ -2041,7 +2009,7 @@ POST:
 Retour: rien
 */
 export class ReceptionTicket extends OperationUI {
-  constructor () { super('OPtkt') }
+  constructor () { super('ReceptionTicket') }
 
   async run (ids, mc, refc) { 
     try {
@@ -2050,7 +2018,7 @@ export class ReceptionTicket extends OperationUI {
       this.tr(await post(this, 'ReceptionTicket', args))
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }

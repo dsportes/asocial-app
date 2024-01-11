@@ -303,7 +303,7 @@
           style="margin:0 auto; overflow:hidden;">
           <div class="col column items-center">
             <div class="text-bold">{{$t('MLAbrk')}}</div>
-            <div class="text-bold">{{session.opEncours.nom}}</div>
+            <div class="text-bold">{{session.opEncours.label}}</div>
           </div>
           <div class="col-auto q-mt-sm cursor-pointer column items-center" style="position:relative"
             @click="ui.oD('confirmstopop')">
@@ -318,7 +318,7 @@
   <q-dialog v-model="ui.d.confirmstopop">
     <q-card :class="styp('sm')">
       <q-card-section class="q-pa-md fs-md text-center">
-        {{$t('MLAcf', [session.opEncours ? session.opEncours.nom : '???'])}}</q-card-section>
+        {{$t('MLAcf', [session.opEncours ? session.opEncours.label : '???'])}}</q-card-section>
       <q-card-actions vertical align="right" class="q-gutter-sm">
         <q-btn flat dense size="md" padding="xs" color="primary"
           :label="$t('MLAcf3')" @click="ui.fD"/>
