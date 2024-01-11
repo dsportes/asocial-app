@@ -594,6 +594,7 @@ export default {
   OP_EchoTexte: 'Lancement d\'un test d\'écho',
   OP_ErreurFonc: 'Simulation d\'une erreur fonctionnelle',
   OP_PingDB: '"Ping" de la base distante',
+  OP_TraitGcvols: 'Récupération des quotas libérés par les comptes disparus',
   OP_GetEstFs: 'Détermination du mode du serveur (Filestore ou SQL)',
 
   OP_OnchangeVersion: 'Opération de synchronisation (changement de version)',

@@ -1329,6 +1329,34 @@ export class PingDB extends OperationUI {
   }
 }
 
+/* OP_TraitGcvols: 'Récupération des quotas libérés par les comptes disparus' *******
+*/
+export class TraitGcvols extends OperationUI {
+  constructor () { super('TraitGcvols') }
+
+  async run (ns) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken }
+      const ret = this.tr(await post(this, 'ListeGcvols', args))
+      const m = {}, lidc = []
+      if (ret.gcvols.length) {
+        for (const x of ret.gcvols) {
+          const y = await compile(x)
+          let e = m[y.idt]; if (!e) { e = []; m[y.idt] = e }
+          e.push(y.it)
+          lidc.push(y.id)
+        }
+        const args = { token: session.authToken, m, lidc }
+        this.tr(await post(this, 'SupprComptesTribu', args))
+      }
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* OP_GetEstFs: 'Détermination du mode du serveur (Filestore ou SQL)'
 */
 export class GetEstFs extends OperationUI {
