@@ -167,7 +167,7 @@ Opération de connexion à un compte par sa phrase secrète (synchronisé, incog
 /* OP_ConnexionCompte: 'Connexion à un compte'
 */
 export class ConnexionCompte extends OperationUI {
-  constructor() { super($t('ConnexionCompte')) }
+  constructor() { super('ConnexionCompte') }
 
   /* Signe les avatars et groupes. Remplit: 
   - this.avatarsToStore, .avToSuppr, .avRowsModifies, .avRequis
@@ -997,7 +997,7 @@ Assertions:
 - existence du row `Espaces`.
 */
 export class AcceptationSponsoring extends OperationUI {
-  constructor() { super($t('AcceptationSponsoring')) }
+  constructor() { super('AcceptationSponsoring') }
 
   async run(sp, ardx, txt1, txt2, ps, don) {
     /* sp : objet Sponsoring
@@ -1179,7 +1179,7 @@ args.id ids : identifiant du sponsoring
 args.arx : réponse du filleul
 */
 export class RefusSponsoring extends OperationUI {
-  constructor() { super($t('RefusSponsoring')) }
+  constructor() { super('RefusSponsoring') }
 
   async run(sp, ardx) { // ids du sponsoring
     try {
@@ -1199,7 +1199,7 @@ args.id ids : identifiant du sponsoring
 args.dlv : nouvelle dlv (0 == annulation)
 */
 export class ProlongerSponsoring extends OperationUI {
-  constructor() { super($t('ProlongerSponsoring')) }
+  constructor() { super('ProlongerSponsoring') }
 
   async run(sp, dlv) {
     try {
@@ -1222,7 +1222,7 @@ args.rowTribu
 Retour: rien. Si OK le rowEspace est celui créé en session
 */
 export class CreerEspace extends OperationUI {
-  constructor() { super($t('CreerEspace')) }
+  constructor() { super('CreerEspace') }
 
   async run(org, phrase) {
     try {
@@ -1284,7 +1284,7 @@ Retour:
 - echo : texte d'entrée retourné
 */
 export class EchoTexte extends OperationUI {
-  constructor() { super($t('EchoTexte')) }
+  constructor() { super('EchoTexte') }
 
   async run(texte, to) {
     try {
@@ -1301,7 +1301,7 @@ export class EchoTexte extends OperationUI {
 
 /* ErreurFonc *******************************************/
 export class ErreurFonc extends OperationUI {
-  constructor() { super($t('ErreurFonc')) }
+  constructor() { super('ErreurFonc') }
 
   async run(texte, to) {
     try {
@@ -1316,7 +1316,7 @@ export class ErreurFonc extends OperationUI {
 /* OP_PingDB: '"Ping" de la base distante' *********
 */
 export class PingDB extends OperationUI {
-  constructor() { super($t('PingDB')) }
+  constructor() { super('PingDB') }
 
   async run() {
     try {
@@ -1360,7 +1360,7 @@ export class TraitGcvols extends OperationUI {
 /* OP_GetEstFs: 'Détermination du mode du serveur (Filestore ou SQL)'
 */
 export class GetEstFs extends OperationUI {
-  constructor() { super($t('OPestFs')) }
+  constructor() { super('GetEstFs') }
 
   async run() {
     try {
@@ -1373,7 +1373,7 @@ export class GetEstFs extends OperationUI {
       }
       this.finOK()
     } catch (e) {
-      return await this.finKO(e)
+      await this.finKO(e)
     }
   }
 }

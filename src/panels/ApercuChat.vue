@@ -88,7 +88,9 @@
         <q-toolbar v-if="avecDon" inset class="bg-secondary text-white">
           <q-toolbar-title class="row justify-center items-center q-gutter-md">
             <div class="titre-md text-bold">{{$t('CHmdon')}}</div>
-            <q-select :options="cfg.dons2" v-model="mdon" dense color="white"/>
+            <q-select :options="cfg.dons2" size="md" v-model="mdon" dense color="white"/>
+            <q-checkbox class="titre-md text-bold" size="md" dense 
+              left-label v-model="dconf" :label="$t('CHcdon')" />
           </q-toolbar-title>
         </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
@@ -140,6 +142,7 @@ export default {
   },
 
   data () { return {
+    dconf: false,
     txt: '',
     avecDon: false,
     mdon: this.cfg.dons2[0]
@@ -181,7 +184,7 @@ export default {
       }
       if (this.chat) {
         const don = this.avecDon ? this.mdon * 100 : 0
-        const txt = (this.avecDon ? (this.$t('CHdonde', [this.mdon]) + '\n') : '') + this.txt
+        const txt = (this.avecDon && !this.dconf ? (this.$t('CHdonde', [this.mdon]) + '\n') : '') + this.txt
         const disp = await new MajChat().run(this.naI, this.naE, txt, 0, this.chat, don)
         if (disp) { await afficherDiag(this.$t('CHdisp')) }
       } else { 
@@ -210,6 +213,7 @@ export default {
         if (!await this.session.edit()) return
       }
       if (avecDon) {
+        this.dconf = false
         const estA = await new EstAutonome().run(this.chat.naE.id)
         if (!estA) {
           await afficherDiag(this.$t('CHauto'))

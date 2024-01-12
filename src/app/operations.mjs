@@ -14,7 +14,10 @@ import { commitRows, IDBbuffer } from './db.mjs'
 export class Operation {
   constructor (nomop) { this.nom = nomop }
 
-  get label () { return $t('OP_' + this.nom) }
+  get label () { 
+    console.log('label', 'OP_' + this.nom)
+    return $t('OP_' + this.nom) 
+  }
 
   BRK () { }
 
@@ -93,7 +96,7 @@ Retour:
 - rowtribu: row de la tribu
 */
 export class AboTribuC extends OperationUI {
-  constructor () { super($t('AboTribuC')) }
+  constructor () { super('AboTribuC') }
 
   async run (id) {
     try {
@@ -110,7 +113,7 @@ export class AboTribuC extends OperationUI {
 /* Changement des mots clés et mémo attachés à un contact ou groupe ********************************
 */
 export class McMemo extends OperationUI {
-  constructor () { super($t('McMemo')) }
+  constructor () { super('McMemo') }
 
   async run (id, mc, memo) {
     try {
@@ -135,7 +138,7 @@ Retour:
 - existe : true si le hash de la phrase existe
 */
 export class ExistePhrase extends OperationUI {
-  constructor () { super($t('ExistePhrase')) }
+  constructor () { super('ExistePhrase') }
 
   async run (hash, t) {
     try {
@@ -153,7 +156,7 @@ export class ExistePhrase extends OperationUI {
 /* Changement des mots clés d\'un compte  ************************
 */
 export class MotsclesCompte extends OperationUI {
-  constructor () { super($t('MotsclesCompte')) }
+  constructor () { super('MotsclesCompte') }
 
   async run (mmc) {
     try {
@@ -179,7 +182,7 @@ La version de l'avatar figure DANS cva, qu'il faut
 recrypter si ce n'était pas la bonne.
 */
 export class MajCv extends OperationUI {
-  constructor () { super($t('MajCv')) }
+  constructor () { super('MajCv') }
 
   async run (avatar, photo, info) {
     try {
@@ -206,7 +209,7 @@ args.v: version du groupe incluse dans la Cv. Si elle a changé sur le serveur, 
 args.cvg: {v, photo, info} crypté par la clé du groupe
 */
 export class MajCvGr extends OperationUI {
-  constructor () { super($t('MajCvGr')) }
+  constructor () { super('MajCvGr') }
 
   async run (groupe, photo, info) {
     try {
@@ -232,7 +235,7 @@ args.shay: SHA du SHA de X (PBKFD de la phrase secrète).
 args.kx: clé K cryptée par la phrase secrète
 */
 export class ChangementPS extends OperationUI {
-  constructor () { super($t('ChangementPS')) }
+  constructor () { super('ChangementPS') }
 
   async run (ps) {
     try {
@@ -257,7 +260,7 @@ args.napc: na de l'avatar crypté par le PBKFD de la phrase
 args.pck: phrase de contact cryptée par la clé K du compte
 */
 export class ChangementPC extends OperationUI {
-  constructor () { super($t('ChangementPC')) }
+  constructor () { super('ChangementPC') }
 
   async run (na, p) {
     try {
@@ -286,7 +289,7 @@ Retour: idnapc: {id, napc}
   par le PBKFD de cette phrase OU null si non décryptable
 */
 export class GetAvatarPC extends OperationUI {
-  constructor () { super($t('GetAvatarPC')) }
+  constructor () { super('GetAvatarPC') }
 
   async run (p) { // p: objet Phrase
     try {
@@ -324,7 +327,7 @@ Retour:
 - KO: true - si régression de version de compta
 */
 export class AjoutSponsoring extends OperationUI {
-  constructor () { super($t('AjoutSponsoring')) }
+  constructor () { super('AjoutSponsoring') }
 
   async run (row, don) {
     try {
@@ -350,7 +353,7 @@ args.rowSponsoring : row Sponsoring, sans la version
 Retour:
 */
 export class ChercherSponsoring extends OperationUI {
-  constructor () { super($t('ChercherSponsoring')) }
+  constructor () { super('ChercherSponsoring') }
 
   async run (ids) {
     try {
@@ -371,7 +374,7 @@ POST:
 Assertions sur le row `Chats` et la `Versions` de l'avatar id.
 */
 export class PassifChat extends OperationUI {
-  constructor () { super($t('PassifChat')) }
+  constructor () { super('PassifChat') }
 
   async run (chat) {
     try {
@@ -412,7 +415,7 @@ Retour:
 
 */
 export class NouveauChat extends OperationUI {
-  constructor () { super($t('NouveauChat')) }
+  constructor () { super('NouveauChat') }
 
   async run (naI, naE, txt) {
     try {
@@ -484,7 +487,7 @@ Retour:
 Assertions sur l'existence du row `Avatars` de l'avatar I, sa `Versions`, et le cas échéant la `Versions` de l'avatar E (quand il existe).
 */
 export class MajChat extends OperationUI {
-  constructor () { super($t('MajChat')) }
+  constructor () { super('MajChat') }
 
   async run (naI, naE, txt, dh, chat, don) {
     try {
@@ -530,7 +533,7 @@ args.cibles : array de  { idE, vcv, lch: [[idI, idsI, idsE] ...], lmb: [[idg, im
 Retour: les chats et membres de la cible sont mis à jour
 */
 export class RafraichirCvs extends OperationUI {
-  constructor () { super($t('RafraichirCvs')) }
+  constructor () { super('RafraichirCvs') }
 
   async run (id) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
     try {
@@ -583,7 +586,7 @@ args.kx args.vx: entrée dans mavk de compta pour le nouvel avatar
 Retour:
 */
 export class NouvelAvatar extends OperationUI {
-  constructor () { super($t('NouvelAvatar')) }
+  constructor () { super('NouvelAvatar') }
 
   async run (nom) {
     try {
@@ -627,7 +630,7 @@ Retour:
 de Compta.atr (conflit d'attribution)
 */
 export class NouvelleTribu extends OperationUI {
-  constructor () { super($t('NouvelleTribu')) }
+  constructor () { super('NouvelleTribu') }
 
   async run (info, q) { // q: [qc, q1, q2]
     try {
@@ -661,7 +664,7 @@ args.notif
 Retour:
 */
 export class SetNotifG extends OperationUI {
-  constructor () { super($t('SetNotifG')) }
+  constructor () { super('SetNotifG') }
 
   async run (notifG, ns) {
     try {
@@ -694,7 +697,7 @@ POST:
 Assertion sur l'existence du row `Tribus` de la tribu.
 */
 export class SetNotifT extends OperationUI {
-  constructor () { super($t('SetNotifT')) }
+  constructor () { super('SetNotifT') }
 
   async run (notifT, idt) {
     try {
@@ -724,7 +727,7 @@ POST:
 Assertion sur l'existence du row `Tribus` de la tribu et `Comptas` du compte.
 */
 export class SetNotifC extends OperationUI {
-  constructor () { super($t('SetNotifC')) }
+  constructor () { super('SetNotifC') }
 
   async run (notifC, idt, idc) { // id de la tribu, id du compte cible, notif
     try {
@@ -752,7 +755,7 @@ args.quotas: [q1, q2] ]si changement des quotas, sinon null
 Retour:
 */
 export class SetAtrItemComptable extends OperationUI {
-  constructor () { super($t('SetAtrItemComptable')) }
+  constructor () { super('SetAtrItemComptable') }
 
   async run (id, info, quotas) {
     try {
@@ -779,7 +782,7 @@ args.estSp: true si sponsor
 Retour:
 */
 export class SetSponsor extends OperationUI {
-  constructor () { super($t('SetSponsor')) }
+  constructor () { super('SetSponsor') }
 
   async run (idt, na, estSp) { // na du compte, true/false sponsor
     try {
@@ -806,7 +809,7 @@ args.q1 args.q2 : quotas
 Retour:
 */
 export class SetQuotas extends OperationUI {
-  constructor () { super($t('SetQuotas')) }
+  constructor () { super('SetQuotas') }
 
   async run (id, idc, q) {
     try {
@@ -839,7 +842,7 @@ Retour:
 - rowTribu (nouvelle)
 */
 export class ChangerTribu extends OperationUI {
-  constructor () { super($t('ChangerTribu')) }
+  constructor () { super('ChangerTribu') }
 
   async run (args) {
     try {
@@ -860,7 +863,7 @@ args.dhvu : dhvu cryptée par la clé K
 Retour:
 */
 export class SetDhvuCompta extends OperationUI {
-  constructor () { super($t('OPdhvu')) }
+  constructor () { super('OPdhvu') }
 
   async run () {
     try {
@@ -886,7 +889,7 @@ Retour:
 - it : indice du compte dans sa tribu
 */
 export class GetCompteursCompta extends OperationUI {
-  constructor () { super($t('GetCompteursCompta')) }
+  constructor () { super('GetCompteursCompta') }
 
   async run (id) { // id d'un compte
     try {
@@ -919,7 +922,7 @@ Retour:
 - rowtribu: row de la tribu
 */
 export class GetTribu extends OperationUI {
-  constructor () { super($t('GetTribu')) }
+  constructor () { super('GetTribu') }
 
   async run (id, setC) {
     try {
@@ -941,7 +944,7 @@ args.t
 Retour:
 */
 export class SetEspaceT extends OperationUI {
-  constructor () { super($t('SetEspaceT')) }
+  constructor () { super('SetEspaceT') }
 
   async run (ns, t) {
     try {
@@ -971,7 +974,7 @@ args.empgk: élément de mpg dans le compte de l'avatar créateur
 Retour:
 */
 export class NouveauGroupe extends OperationUI {
-  constructor () { super($t('NouveauGroupe')) }
+  constructor () { super('NouveauGroupe') }
 
   async run (nom, unanime, quotas) { // quotas: [q1, q2]
     try {
@@ -1020,7 +1023,7 @@ args.idg : id du groupe
 Retour:
 */
 export class MotsclesGroupe extends OperationUI {
-  constructor () { super($t('MotsclesGroupe')) }
+  constructor () { super('MotsclesGroupe') }
 
   async run (mmc, nag) {
     try {
@@ -1047,7 +1050,7 @@ Retour:
   invs : clé: im, valeur: { cva, nag }
 */
 export class InvitationFiche extends OperationUI {
-  constructor () { super($t('InvitationFiche')) }
+  constructor () { super('InvitationFiche') }
 
   async run (idg, ids, na) {
     try {
@@ -1110,7 +1113,7 @@ Transfert (5):
 Retour:
 */
 export class HebGroupe extends OperationUI {
-  constructor () { super($t('HebGroupe')) }
+  constructor () { super('HebGroupe') }
 
   async run (action, groupe, imh, q1, q2) {
     try {
@@ -1147,7 +1150,7 @@ Retour:
 - KO : si l'indice im est déjà attribué
 */
 export class NouveauMembre extends OperationUI {
-  constructor () { super($t('NouveauMembre')) }
+  constructor () { super('NouveauMembre') }
 
   async run (gr, im, na, cv) {
     try {
@@ -1175,7 +1178,7 @@ args.nvflags : nouveau flags. Peuvent changer PA DM DN DE AM AN
 Retour:
 */
 export class MajDroitsMembre extends OperationUI {
-  constructor () { super($t('MajDroitsMembre')) }
+  constructor () { super('MajDroitsMembre') }
 
   async run (idg, ids, nvflags) {
     try {
@@ -1203,7 +1206,7 @@ args.cas :
 Retour:
 */
 export class OublierMembre extends OperationUI {
-  constructor () { super($t('OublierMembre')) }
+  constructor () { super('OublierMembre') }
 
   async run (ng, na, ids, cas) {
     try {
@@ -1226,7 +1229,7 @@ args.ids : ids du membre demandant le retour au mode simple.
 Retour:
 */
 export class ModeSimple extends OperationUI {
-  constructor () { super($t('ModeSimple')) }
+  constructor () { super('ModeSimple') }
 
   async run (id, ids) {
     try {
@@ -1248,7 +1251,7 @@ args.im args.dh : pour une suppression
 Retour: rien
 */
 export class ItemChatgr extends OperationUI {
-  constructor () { super($t('ItemChatgr')) }
+  constructor () { super('ItemChatgr') }
 
   async run (idg, im, dh, txt) { 
     try {
@@ -1285,7 +1288,7 @@ args.chatit: item de chat du groupe (mot de bienvenue)
 Retour:
 */
 export class InvitationGroupe extends OperationUI {
-  constructor () { super($t('InvitationGroupe')) }
+  constructor () { super('InvitationGroupe') }
 
   async run (op, gr, mb, ivpar, flags, ard) { 
       /* op:
@@ -1346,7 +1349,7 @@ args.chatit: item de chat (copie de l'ardoise)
 Retour:
 */
 export class AcceptInvitation extends OperationUI {
-  constructor () { super($t('AcceptInvitation')) }
+  constructor () { super('AcceptInvitation') }
 
   async run (cas, na, ng, im, chattxt, iam, ian) {
     try {
@@ -1381,7 +1384,7 @@ args.idc: id du compte (note avatar) ou de l'hébergeur (note groupe)
 Retour: rien
 */
 export class NouvelleNote extends OperationUI {
-  constructor () { super($t('NouvelleNote')) }
+  constructor () { super('NouvelleNote') }
 
   /* 
   id: groupe ou avatar
@@ -1415,7 +1418,7 @@ args.idc : compta à qui imputer le volume
 Retour:
 */
 export class NoteOpx extends OperationUI {
-  constructor () { super($t('NoteOpx')) }
+  constructor () { super('NoteOpx') }
 
   async run (op) {
     try {
@@ -1447,7 +1450,7 @@ args.im : auteur de la note pour un groupe
 Retour:
 */
 export class MajNote extends OperationUI {
-  constructor () { super($t('MajNote')) }
+  constructor () { super('MajNote') }
 
   async run (id, ids, aut, texte) {
     try {
@@ -1470,7 +1473,7 @@ args.im : 0 / im
 Retour: rien
 */
 export class ExcluNote extends OperationUI {
-  constructor () { super($t('ExcluNote')) }
+  constructor () { super('ExcluNote') }
 
   async run (id, ids, im) {
     try {
@@ -1493,7 +1496,7 @@ args.mc0: mots clés du groupe
 Retour: rien
 */
 export class McNote extends OperationUI {
-  constructor () { super($t('McNote')) }
+  constructor () { super('McNote') }
 
   async run (note, mc, mc0) {
     try {
@@ -1517,7 +1520,7 @@ args.ref : [rid, rids, rnom] crypté par la clé de la note. Référence d'une a
 Retour: rien
 */
 export class RattNote extends OperationUI {
-  constructor () { super($t('RattNote')) }
+  constructor () { super('RattNote') }
 
   async run (id, ids, rid, rids, refn) {
     try {
@@ -1541,7 +1544,7 @@ rowCvs: liste des row Cv { _nom: 'cvs', id, _data_ }
   _data_ : cva {v, photo, info} cryptée par la clé de son avatar
 */
 export class ChargerCvs extends OperationUI {
-  constructor () { super($t('ChargerCvs')) }
+  constructor () { super('ChargerCvs') }
 
   async run (id) {
     try {
@@ -1566,7 +1569,7 @@ export class ChargerCvs extends OperationUI {
 /* OP_NouveauFichier: 'Enregistrement d\'un nouveau fichier attaché à une note'
 */
 export class NouveauFichier extends OperationUI {
-  constructor () { super($t('NouveauFichier')) }
+  constructor () { super('NouveauFichier') }
 
   async run (note, aut, fic, lidf, dv2) {
     // lidf : liste des idf des fichiers à supprimer
@@ -1644,7 +1647,7 @@ args.vt : volume du fichier (pour compta des volumes v2 transférés)
 */
 
 export class DownloadFichier extends OperationUI {
-  constructor () { super($t('DownloadFichier')) }
+  constructor () { super('DownloadFichier') }
 
   async run (note, idf) { 
     try {
@@ -1671,7 +1674,7 @@ args.aut: im de l'auteur (pour une note de groupe)
 Retour: aucun
 */
 export class SupprFichier extends OperationUI {
-  constructor () { super($t('SupprFichier')) }
+  constructor () { super('SupprFichier') }
 
   async run (note, idf, aut) { 
     try {
@@ -1712,7 +1715,7 @@ Retour: OK
 - false : retry requis, les versions des groupes et/ou avatar ont chnagé
 */
 export class SupprAvatar extends OperationUI {
-  constructor () { super($t('SupprAvatar')) }
+  constructor () { super('SupprAvatar') }
 
   async run (args) { 
     try {

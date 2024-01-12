@@ -912,6 +912,7 @@ export default {
   CHdisp: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" avec lui n\'existe plus.',
   CHauto: 'L\'avatar n\'est l\'avatar principal d\'un compte autonome. Lui faire un don n\'est pas possible.',
   CHmdon: 'Montant du don (en €)',
+  CHcdon: 'confidentiel',
   CHdonde: '### Don de {0}€',
   CHcred: 'Le solde du compte ({0}c) est insuffisant pour couvrir le montant du don ({1}c).',
 

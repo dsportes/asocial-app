@@ -92,7 +92,7 @@ Enfin on traite les mises à jour reçues, les groupes et avatars supprimés
 et les groupes dont les membres / notes ne sont plus utiles.
 */
 export class OnchangeVersion extends OperationWS {
-  constructor() { super($t('OnchangeVersion')) }
+  constructor() { super('OnchangeVersion') }
 
   eavMaj(id) {
     let e = this.avMaj.get(id)
@@ -419,7 +419,7 @@ export class OnchangeVersion extends OperationWS {
 /* OP_OnchangeCompta: 'Opération de synchronisation (changement de compta)'
 */
 export class OnchangeCompta extends OperationWS {
-  constructor() { super($t('OPsync')) }
+  constructor() { super('OnchangeCompta') }
 
   async run(row) {
     try {
@@ -485,7 +485,7 @@ export class OnchangeCompta extends OperationWS {
 /* OP_OnchangeTribu: 'Opération de synchronisation (changement de tranche)'
 */
 export class OnchangeTribu extends OperationWS {
-  constructor() { super($t('OnchangeTribu')) }
+  constructor() { super('OnchangeTribu') }
 
   async run(row) {
     try {
@@ -524,7 +524,7 @@ export class OnchangeTribu extends OperationWS {
 }
 
 export class OnchangeEspace extends OperationWS {
-  constructor() { super($t('OPsOnchangeEspaceync')) }
+  constructor() { super('OPsOnchangeEspaceync') }
 
   async run(row) {
     try {
