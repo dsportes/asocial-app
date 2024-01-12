@@ -259,25 +259,6 @@ export class ConnexionCompte extends OperationUI {
         }
       }
 
-      /*
-      for (const [npgk, empg] of this.avatar.mpg) {
-        const idg = empg.ng.id
-        if (session.fsSync) 
-          await session.fsSync.setGroupe(idg)
-        else abPlus.push(idg)
-        if (!this.groupesToStore.has(idg)) {
-          let x = this.mbsMap[idg]
-          if (!x) x = {
-            idg: idg, v: 0, dlv: dlv2,
-            npgks: [], mbs: []
-          }
-          x.npgks.push(npgk)
-          x.mbs.push(empg.im)
-          this.mbsMap[idg] = x
-        }
-      }
-      */
-
       if (!session.accesNet) return
 
       const args = { 
@@ -999,7 +980,7 @@ Assertions:
 export class AcceptationSponsoring extends OperationUI {
   constructor() { super('AcceptationSponsoring') }
 
-  async run(sp, ardx, txt1, txt2, ps, don) {
+  async run(sp, ardx, txt1, txt2, ps, don, dconf) {
     /* sp : objet Sponsoring
     - id ids : identifiant
     - `ard`: ardoise.
@@ -1010,9 +991,14 @@ export class AcceptationSponsoring extends OperationUI {
     - `naf` : na attribué au filleul.
     - 'cletX' : cle de sa tribu cryptée par clé K du comptable
     - `clet` : cle de sa tribu. 0 pour compte A
-    ardx : reponse cryptée par la cleX du sponsoring
-    reponse : texte du sponsorisé
-    ps: phrase secrète du nouveau compte
+    - 'don' : don du sponsor
+    - 'dconf' : confidentialité requise par le sponsor
+    ardx : texte du sponsorisé crypté par la cleX du sponsoring
+    txt1 : texte du sponsor
+    txt2 : texte du sponsorisé
+    ps : phrase secrète du nouveau compte
+    don : montant du don
+    dconf: si true le sponsorisé refuse le chat
     */
     try {
       // LE COMPTE EST CELUI DU FILLEUL
@@ -1034,6 +1020,8 @@ export class AcceptationSponsoring extends OperationUI {
       session.setCompteId(sp.naf.id)
       session.setTribuId(idt)
       session.setAvatarId(session.compteId)
+
+      const aChat = sp.clet || (!sp.clet && !sp.dconf && !dconf)
 
       const { publicKey, privateKey } = await genKeyPair()
 
@@ -1079,8 +1067,20 @@ export class AcceptationSponsoring extends OperationUI {
       const pubE = await aSt.getPub(sp.na.id)
       if (!pubE) throw new AppExc(F_BRO, 7)
 
-      const args = { 
+      const args = !aChat ? {
         token: session.authToken, 
+        rowCompta, rowAvatar, rowVersion,
+        ids: sp.ids,
+        ardx, idt, act,
+        abPlus: [idt, sp.naf.id],
+        idI: 0
+      } : { 
+        token: session.authToken, 
+        rowCompta, rowAvatar, rowVersion,
+        ids: sp.ids,
+        ardx, idt, act,
+        abPlus: [idt, sp.naf.id],
+
         idI : naI.id,
         idsI : await Chat.getIds(naI, naE),
         idE : naE.id, 
@@ -1092,11 +1092,7 @@ export class AcceptationSponsoring extends OperationUI {
         txt1 : await Chat.getTxtCC(cc, txt1),
         lgtxt1 : txt1.length,
         txt2 : await Chat.getTxtCC(cc, txt2),
-        lgtxt2 : txt2.length,
-        rowCompta, rowAvatar, rowVersion,
-        ids: sp.ids,
-        ardx, idt, act,
-        abPlus: [idt, sp.naf.id]
+        lgtxt2 : txt2.length
       }
 
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
@@ -1126,8 +1122,10 @@ export class AcceptationSponsoring extends OperationUI {
 
       aSt.setCompte(avatar, compta, tribu)
 
-      const chat = await compile(rowChat)
-      aSt.setChat(chat)
+      if (rowChat) {
+        const chat = await compile(rowChat)
+        aSt.setChat(chat)
+      }
 
       Versions.reset()
       Versions.set(session.compteId, { v: 1 })

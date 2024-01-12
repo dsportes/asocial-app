@@ -237,11 +237,13 @@ export const useSessionStore = defineStore('session', {
         this.phrase = phrase
         this.lsk = '$asocial$-' + phrase.hps1
       }
-      const token = {
-        sessionId: this.sessionId,
-        shax: phrase ? phrase.shax : null,
-        hps1: phrase ? phrase.hps1 : null
+      const token = { sessionId: this.sessionId }
+      if (phrase.org === 'admin') token.shax = phrase ? phrase.shax : null
+      else {
+        token.hps1 = phrase ? phrase.hps1 : null
+        token.hpsc = phrase ? phrase.hpsc : null
       }
+      
       const x = new Uint8Array(encode(token))
       this.authToken = u8ToB64(new Uint8Array(x), true)
       this.nombase = this.lsk ? localStorage.getItem(this.lsk) : ''

@@ -230,8 +230,8 @@ export class MajCvGr extends OperationUI {
 
 /** Changement de la phrase secrete de connexion du compte ********************
 args.token: éléments d'authentification du compte.
-args.hps1: dans compta, `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète du compte.
-args.shay: SHA du SHA de X (PBKFD de la phrase secrète).
+args.hps1: hash du PBKFD de la phrase secrète réduite du compte.
+args.hpsc: hash du PBKFD de la phrase secrète complète.
 args.kx: clé K cryptée par la phrase secrète
 */
 export class ChangementPS extends OperationUI {
@@ -241,7 +241,7 @@ export class ChangementPS extends OperationUI {
     try {
       const session = stores.session
       const kx = await crypter(ps.pcb, session.clek)
-      const args = { token: session.authToken, hps1: ps.hps1, shay: ps.shay, kx }
+      const args = { token: session.authToken, hps1: ps.hps1, hpsc: ps.hpsc, kx }
       this.tr(await post(this, 'ChangementPS', args))
       session.chgps(ps)
       if (session.synchro) commitRows(new IDBbuffer(), true)
@@ -266,8 +266,8 @@ export class ChangementPC extends OperationUI {
     try {
       const session = stores.session
       const pck = p ? await crypter(session.clek, p.phrase) : null
-      const napc = p ? await crypter(p.clex, new Uint8Array(encode([na.nom, na.rnd]))) : null
-      const args = { token: session.authToken, id: na.id, hpc: p ? p.phch : null, napc, pck }
+      const napc = p ? await crypter(p.pcb, new Uint8Array(encode([na.nom, na.rnd]))) : null
+      const args = { token: session.authToken, id: na.id, hpc: p ? p.hps1 : 0, napc, pck }
       this.tr(await post(this, 'ChangementPC', args))
       this.finOK()
     } catch (e) {
@@ -295,12 +295,12 @@ export class GetAvatarPC extends OperationUI {
     try {
       const session = stores.session
       let res
-      const args = { token: session.authToken, hpc: p.phch }
+      const args = { token: session.authToken, hpc: p.hps1 }
       const ret = this.tr(await post(this, 'GetAvatarPC', args))
       if (ret.cvnapc) {
         try {
           const { cv, napc } = ret.cvnapc
-          const x = decode(await decrypter(p.clex, napc))
+          const x = decode(await decrypter(p.pcb, napc))
           const na = NomGenerique.from(x)
           res = { cv, na }
         } catch (e) {
@@ -1934,8 +1934,8 @@ export class RafraichirTickets extends OperationUI {
         let m = null
         if (ret1.rowTickets) {
           nb = ret1.rowTickets.length
-          const m = new Map()
-          for(const row of ret.rowTickets) 
+          m = new Map()
+          for(const row of ret1.rowTickets) 
             m.set(row.ids, await compile(row))
         }
         const credits = await compta.majCredits(m)

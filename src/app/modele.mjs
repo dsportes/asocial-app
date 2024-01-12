@@ -364,7 +364,7 @@ export class Motscles {
  * classe Phrase
 ******************************************************/
 export class Phrase {
-  static idxch = [0, 1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 14, 16, 17, 21, 24, 27]
+  static idxch = [0, 1, 4, 7, 10, 13, 16, 19, 22, 24]
 
   async init (texte, org) {
     const o1 = org || ''
@@ -374,23 +374,33 @@ export class Phrase {
     const x = o2.padEnd(12, '$')
     this.phrase = texte
     const u8 = encoder.encode(x + texte)
+    this.pcb = await pbkfd(u8)
+    this.hpsc = hash(this.pcb)
+
+    /*
     const deb = new Uint8Array(Phrase.idxch.length)
     for (let i = 0; i < Phrase.idxch.length; i++) deb[i] = u8[Phrase.idxch[i]]
-    this.pcb = await pbkfd(u8)
-    this.pcbh = hash(this.pcb)
     this.hps1 = hash(deb)
+    */
+
+    const u8b = Uint8Array.from(u8)
+    Phrase.idxch.forEach(i => { u8b[i + 12] = 0 })
+    const pr = await pbkfd(u8b)
+    this.hps1 = hash(pr)
     return this
   }
 
-  get shax () { return sha256(this.pcb) }
-
+  // Pour affichage dans OutilsTests
+  get shax () { return sha256(this.pcb) } 
   get shax64 () { return u8ToB64(this.shax) }
 
+  /*
   get shay () { return sha256(this.shax) } 
 
   // par compatibilité avec le code écrit avant fusion phrases
   get phch () { return this.hps1 } 
   get clex () { return this.pcb }
+  */
 
 }
 
@@ -880,8 +890,8 @@ _data_ :
 - `v` : 1..N.
 - `hps1` : le hash du PBKFD du début de la phrase secrète du compte.
 
-- `shay`, SHA du SHA de X (PBKFD de la phrase secrète).
-- `kx` : clé K du compte, cryptée par X (PBKFD de la phrase secrète courante).
+- `hpsc`: hash du PBKFD de la phrase secrète complète.
+- `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète complète.
 - `dhvu` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
 - `sp` : 1: est sponsor
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
@@ -921,6 +931,7 @@ export class Compta extends GenDoc {
   get signable () { return this.compteurs.notifX.nr !== 4 }
 
   async compile (row) {
+    this.vsh = row.vsh || 0
     const session = stores.session
     const aSt = stores.avatar
     /*
@@ -938,8 +949,6 @@ export class Compta extends GenDoc {
     this.k = await decrypter(session.phrase.pcb, row.kx)
     session.clek = this.k
 
-    this.vsh = row.vsh || 0
-    
     const avatar = aSt.getAvatar(this.id)
     if (!this.estA) {
       if (row.cletK.length !== 256) {
@@ -984,7 +993,7 @@ export class Compta extends GenDoc {
     }
 
     this.hps1 = row.hps1
-    this.shay = row.shay
+    this.hpsc = row.hpsc
     this.dhvu = row.dhvu ? parseInt(await decrypterStr(session.clek, row.dhvu)) : 0
 
     this.qv = row.qv
@@ -1162,8 +1171,10 @@ export class Compta extends GenDoc {
     Pour le comptable le paramètre cletX est null (il est calculé). 
     Pour les autres, c'est le nctkc pris dans la tribu
     nc : nombre de chats
+    don: montant du don
     */
     const session = stores.session
+    const cfg = stores.config
     const r = {}
     r.id = na.id
     r.v = 1
@@ -1176,7 +1187,7 @@ export class Compta extends GenDoc {
 
     r.sp = estSponsor ? 1 : 0
     r.hps1 = phrase.hps1
-    r.shay = phrase.shay
+    r.hpsc = phrase.hpsc
     
     if (clet) {
       // compte O
@@ -1188,7 +1199,8 @@ export class Compta extends GenDoc {
       r.it = 0
       r.cletK = null
       r.cletX = null
-      r.credits = await crypter(k, new Uint8Array(encode({ total: don || 2, tickets: [] })))
+      const cr = { total: don || cfg.donorg, tickets: [] }
+      r.credits = await crypter(k, new Uint8Array(encode(cr)))
     }
 
     r.qv = { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: nc || 0, ng: 0, v2: 0}
@@ -1514,6 +1526,8 @@ _data_
   - `clet` : clé de sa tribu, si c'est un compte O
   - `quotas` : `[qc, q1, q2]` quotas attribués par le sponsor.
     - pour un compte A `[0, 1, 1]`. Un compte A n'a pas de qc et peut changer à loisir `[q1, q2]` qui sont des protections pour lui-même (et fixe le coût de l'abonnement).
+  - `don` : pour un compte autonome, montant du don
+  - `dconf` : le sponsor a demandé à rester confidentiel
 - `ardx` : ardoise de bienvenue du sponsor / réponse du filleul cryptée par le PBKFD de la phrase de sponsoring
 */
 export class Sponsoring extends GenDoc {
@@ -1560,17 +1574,21 @@ export class Sponsoring extends GenDoc {
     obj.naf = NomGenerique.from(x.naf)
     obj.clet =  x.clet || null
     obj.don = x.don || 0
+    obj.dconf = x.dconf || false
   }
 
-  static async nouveauRow (phrase, dlv, nom, cletX, clet, sp, quotas, ard, don) {
+  static async nouveauRow (phrase, dlv, nom, cletX, clet, sp, quotas, ard, don, dconf) {
     /* 
       - 'phrase: objet phrase
       - 'dlv'
       - 'nom': nom de l'avatar du compte à créer
-      - `clet` : cle de la tribu.
       - 'cletX' : clé de la tribu crypté par la clé K du comptable
-      - `sp` : 1 si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
-      - `quotas` : `[qc, q1, q2]` quotas attribués par le parrain.
+      - `clet` : cle de la tribu.
+      - `sp` : 1 si le filleul est lui-même sponsor 
+      - `quotas` : `[qc, q1, q2]` quotas attribués par le parrain
+      - `ard`: mot de bienvenue
+      - `don`: montant du don
+      - `dconf`: don confidentiel
     */
     const session = stores.session
     const aSt = stores.avatar
@@ -1585,20 +1603,21 @@ export class Sponsoring extends GenDoc {
       clet: clet || null, 
       it : 0,
       don,
+      dconf
     }
     if (!aSt.estSponsor && !session.estComptable) {
       const c = aSt.compta
       d.it = c.it || 0
     }
-    const descrx = await crypter(phrase.clex, new Uint8Array(encode(d)))
-    const ardx = await crypter(phrase.clex, ard || '')
+    const descrx = await crypter(phrase.pcb, new Uint8Array(encode(d)))
+    const ardx = await crypter(phrase.pcb, ard || '')
     const pspk = await crypter(session.clek, phrase.phrase)
-    const bpspk = await crypter(session.clek, phrase.clex)
+    const bpspk = await crypter(session.clek, phrase.pcb)
     const org = session.org
     const _data_ = new Uint8Array(encode({ 
       id: av.id,
       org,
-      ids: phrase.phch,
+      ids: phrase.hps1,
       dlv,
       st: 0,
       dh: Date.now(),
@@ -1608,7 +1627,7 @@ export class Sponsoring extends GenDoc {
       ardx,
       vsh: 0
     }))
-    const row = { _nom: 'sponsorings', id: av.id, ids: phrase.phch, dlv, _data_ }
+    const row = { _nom: 'sponsorings', id: av.id, ids: phrase.hps1, dlv, _data_ }
     return row
   }
 }
@@ -1748,7 +1767,7 @@ export class Chat extends GenDoc {
     const supp = $t('supprime')
     this.tit = ''
     this.dh = 0
-    if (row.items && this.stI) for (const it of row.items) {
+    if (row.items) for (const it of row.items) {
       const t = it.txt ? ungzipB(await decrypter(this.cc, it.txt)) : null
       if (this.dh === 0) this.dh = it.dhx ? it.dhx : it.dh
       this.items.push({ a: it.a, txt: t, dh: it.dh, dhx: it.dhx || 0})

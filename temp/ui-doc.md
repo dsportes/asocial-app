@@ -723,11 +723,7 @@ Affiche la liste des fichiers visible en mode avion et pour chacun,
 # En chantier
 
 ### A développer / revisiter
-- sponsoring anonyme ou non pour compte A
-- phrase de contact: mal calculée et mal stockée (cryptage de texte au lieu de PBKFD ...)
-- hps1 est mal calculé: c'est le hash d'un extrait de la phrase compléte au lieu d'être le hash du PBKFD de cet extrait.
 - blocage des accroissements de volume: vérifier le blocage
-- mettre une attente sur une connexion en échec pour phrase inconnue
 - GC à réviser
 - permutation de mode autonome / organisation d'un compte
 

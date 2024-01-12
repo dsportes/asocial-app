@@ -1,4 +1,4 @@
-<template>
+<template> 
   <q-page>
     <q-card class="spmd q-mb-lg q-pa-sm row justify-center items-center" 
       v-if="session.estSponsor || session.estComptable || (session.estAutonome && session.espace.opt > 0)"> 
@@ -24,7 +24,11 @@
           <span class="text-bold font-mono q-px-md">{{sp.descr.naf.nom}}</span>
         </div>
 
-        <div v-if="estA(sp)" class="text-warning titre-md">{{$t('compteA')}}</div>
+        <div v-if="estA(sp)" class="row q-gutter-sm titre-md">
+          <div class="text-warning">{{$t('compteA')}}</div>
+          <div>{{$t('don', [sp.descr.don])}}</div>
+          <div v-if="sp.descr.dconf">{{$t('conf')}}</div>
+        </div>
         <div v-else class="titre-md">{{$t('compteO')}}</div>
 
         <div v-if="sp.descr.sp" class="titre-md text-warning">

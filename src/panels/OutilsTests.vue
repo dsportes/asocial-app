@@ -71,7 +71,7 @@
         <div class='t1 q-mt-sm'>{{$t('OTcx')}}</div>
         <div class='t2'>{{ ps ? ps.shax64 : '?' }}</div>
         <div class='t1 q-mt-sm'>{{$t('OThcx')}}</div>
-        <div class='t2'>{{ ps ? ps.pcbh : '?' }}</div>
+        <div class='t2'>{{ ps ? ps.hpsc : '?' }}</div>
       </q-card-section>
 
       <q-card-section v-if="tab === 'cpt'">

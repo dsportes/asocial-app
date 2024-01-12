@@ -11,9 +11,9 @@
   <div v-if="declaration" class="titre-md q-mr-md">{{$t('PSctc1')}}</div>
   <div class="row items-center">
     <q-input class="col" dense v-model="phrase" :placeholder="$t('NPphl')" 
-      counter :rules="[r1]" maxlength="32"
+      counter :rules="[r1]"
       @keydown.enter.prevent="crypterphrase" :type="isPwd ? 'password' : 'text'"
-      :hint="!phrase || !r1(phrase) ? $t('NP16') : $t('NPpe')">
+      :hint="phrase && r1(phrase) ? $t('NPpe') : $t('NP16', [min])">
       <template v-slot:append>
         <span class="row q-gutter-xs">
           <q-btn :icon="isPwd ? 'visibility_off' : 'visibility'" 
@@ -37,9 +37,15 @@ import stores from '../stores/stores.mjs'
 import { Phrase } from '../app/modele.mjs'
 import { afficherDiag } from '../app/util.mjs'
 
+const min = 24
+
 export default ({
   name: 'PhraseContact',
-  props: { initVal: String, orgext: String, declaration: Boolean },
+  props: { 
+    initVal: String, 
+    orgext: String, 
+    declaration: Boolean 
+  },
   data () {
     return {
       isPwd: false,
@@ -47,10 +53,7 @@ export default ({
     }
   },
   methods: {
-    r1 (val) { 
-      const x = (val.length > 19 && val.length < 33) || this.$t('NP16') 
-      return x
-    },
+    r1 (val) { return val.length >= min || this.$t('NP16', [min]) },
 
     async crypterphrase () {
       if (this.r1(this.phrase) !== true) return
@@ -83,7 +86,7 @@ export default ({
     return {
       phrase,
       org,
-      session
+      session, min
     }
   }
 })

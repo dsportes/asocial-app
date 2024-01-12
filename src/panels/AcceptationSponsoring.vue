@@ -37,6 +37,7 @@
       <div v-if="estA" class="text-warning titre-md text-bold">
         <span>{{$t('compteA')}}</span>
         <span v-if="sp.don" class="q-ml-sm">{{$t('NPdon', [sp.don])}}</span>
+        <span v-if="sp.dconf" class="q-ml-sm">{{$t('conf')}}</span>
       </div>
       <div v-else> 
         <div v-if="sp.sp" class="titre-md text-warning">
@@ -61,6 +62,11 @@
       <q-separator color="orange" class="q-my-md"/>
 
       <div v-if="accdec===1 && ps">
+        <div v-if="estA">
+          <div v-if="sp.dconf" class="text-bold titre-md">{{$t('APAcf1')}}</div>
+          <q-checkbox v-else class="titre-md text-bold" size="md" dense 
+              left-label v-model="dconf" :label="$t('APAcf2')" />
+        </div>
         <div class="titre-md q-mt-sm">{{$t('NPmota')}}</div>
         <editeur-md mh="10rem" v-model="texte" :texte="textedef" editable modetxt/>
         <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
@@ -118,6 +124,7 @@ export default ({
     - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
     - 'idcsp': id du COMPTE de l'avatar sponsor
     - 'don': don attribué par un sponsor A
+    - 'dconf': don confidentiel demandé par le sponsor
 - `quotas` : `[v1, v2]` quotas attribués par le parrain.
   */
 
@@ -145,7 +152,8 @@ export default ({
       apsf: false,
       texte: '',
       npi: false,
-      dhcool: dhcool
+      dhcool: dhcool,
+      dconf: false
     }
   },
 
@@ -186,12 +194,13 @@ export default ({
       }
     },
     async confirmer () {
-      const ardx = await crypter(this.pc.clex, this.texte)
-      await new AcceptationSponsoring().run(this.sp, ardx, this.texte, this.sp.ard, this.ps, this.sp.don)
+      const ardx = await crypter(this.pc.pcb, this.texte)
+      await new AcceptationSponsoring()
+        .run(this.sp, ardx, this.texte, this.sp.ard, this.ps, this.sp.don, this.dconf)
       this.fermer()
     },
     async refuser () {
-      const ardx = await crypter(this.pc.clex, this.texte)
+      const ardx = await crypter(this.pc.pcb, this.texte)
       await new RefusSponsoring().run(this.sp, ardx)
       this.fermer()
     }

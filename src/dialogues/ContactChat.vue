@@ -8,7 +8,7 @@
   </q-toolbar>
 
   <q-card-section>
-    <phrase-contact @ok="ok" :orgext="session.org"/>
+    <phrase-contact @ok="ok" :orgext="session.org" declaration/>
   </q-card-section>
 </q-card>
 </q-dialog>
@@ -16,6 +16,7 @@
 
 <script>
 import stores from '../stores/stores.mjs'
+import { Chat } from '../app/modele.mjs'
 import { afficherDiag, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { GetAvatarPC, NouveauChat } from '../app/operations.mjs'

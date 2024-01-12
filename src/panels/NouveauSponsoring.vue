@@ -16,6 +16,10 @@
           <div class="q-my-sm">
             <q-option-group :options="optionsOSA" type="radio" dense v-model="optOSA" />
           </div>
+          <div v-if="optOSA === 2">
+            <q-checkbox class="titre-md text-bold" size="md" dense 
+              left-label v-model="dconf" :label="$t('CHcdon')" />
+          </div>
           <q-stepper-navigation>
             <q-btn flat @click="step = 2" :label="$t('suivant')"
               color="primary" padding="none" dense size="md"/>
@@ -41,9 +45,9 @@
           <q-stepper-navigation>
             <q-btn :label="$t('precedent')" @click="step = estA ? 1 : 0"
               flat  color="primary" padding="none" dense size="md"/>
-            <q-btn flat @click="step = 3" color="primary" padding="none" dense size="md"
+            <!--q-btn flat @click="step = 3" color="primary" padding="none" dense size="md"
               :label="$t('suivant')" :disable="!pc || !pc.phrase"
-              class="q-ml-sm"/>
+              class="q-ml-sm"/-->
           </q-stepper-navigation>
         </q-step>
 
@@ -94,6 +98,7 @@
           <div v-else class="text-warning titre-md">
             <span>{{$t('compteA')}}</span>
             <span v-if="don" class="q-ml-sm">{{$t('NPdon2', [don])}}</span>
+            <span v-if="dconf" class="q-ml-sm">{{$t('conf')}}</span>
           </div>
           <q-stepper-navigation class="row items-center q-gutter-sm q-mt-md">
             <q-btn flat @click="step = this.estAutonome ? 4 : 5" color="primary" padding="xs" dense size="md"
@@ -147,6 +152,7 @@ export default ({
       pc: null,
       mot: '',
       don: 0,
+      dconf: false,
       diagmot: false
     }
   },
@@ -190,7 +196,7 @@ export default ({
         return
       }
       this.pc = pc
-      this.step = 2
+      this.step = 3
     },
     async setDon () {
       const credits = this.aSt.compta.credits
@@ -223,7 +229,7 @@ export default ({
       const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, 
         this.estAutonome ? null : this.tribu.cletX, 
         this.estAutonome ? null : this.tribu.clet, 
-        this.estSponsor, q, this.mot, this.don)
+        this.estSponsor, q, this.mot, this.don, this.dconf)
       try {
         await new AjoutSponsoring().run(row, this.don)
         this.ui.fD()

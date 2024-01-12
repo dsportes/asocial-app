@@ -15,8 +15,11 @@
           <q-btn v-if="estA" @click="editer(true)" 
             round padding="xs" color="secondary" icon="savings" dense size="md"/>
         </div>
-        <q-btn :label="$t('CHrac')" @click="raccrocher"
+        <q-btn v-if="chat && chat.stI" :label="$t('CHrac')" @click="raccrocher"
           padding="xs" color="primary" icon="phone_disabled" dense size="md"/>
+        <div v-if="chat && !chat.stI" class="text-warning text-bold titre-md text-italic">
+          {{$t('CHraccroche')}}
+        </div>
       </div>
     </q-header>
 

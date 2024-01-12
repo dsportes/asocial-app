@@ -116,7 +116,7 @@ export default {
         */
         resetRepertoire()
         stores.reset(true)
-        const res = await new ChercherSponsoring().run(this.pc.phch)
+        const res = await new ChercherSponsoring().run(this.pc.hps1)
         if (isAppExc(res) || !res || !res.rowSponsoring) {
           await afficherDiag(this.$t('LOGnopp'))
           this.raz()
@@ -126,7 +126,7 @@ export default {
           const sp = res.rowSponsoring
           const session = stores.session
           session.setNs(ID.ns(sp.id))
-          this.sp = await Sponsoring.fromRow(sp, this.pc.clex)
+          this.sp = await Sponsoring.fromRow(sp, this.pc.pcb)
           if (isAppExc(this.sp) || this.sp.dlv <  AMJ.amjUtc()) {
             await afficherDiag(this.$t('LOGppinv'))
             this.raz()

@@ -10,8 +10,9 @@
     </div>
     <q-input dense counter v-model="nom"
       :label="groupe ? $t('NAng') : (tribu ? $t('NAnt') : $t('NAna'))"
-      :rules="[r1,r2]" maxlength="32"
-      @keydown.enter.prevent="ok" type="text" :hint="$t('entree')">
+      :rules="[r1,r2]"
+      @keydown.enter.prevent="ok" type="text" 
+      :hint="nom && r1(nom) && r2(nom) ? $t('NPpe') : $t('NAe1', [min, max])">
       <template v-slot:append>
         <span :class="nom.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="nom=''"/></span>
       </template>
@@ -28,6 +29,9 @@
 <script>
 import { toRef, ref } from 'vue'
 import { interdits, regInt } from '../app/api.mjs'
+
+const min = 6
+const max = 24
 
 export default {
   name: 'NomAvatar',
@@ -46,7 +50,7 @@ export default {
     }
   },
   methods: {
-    r2 (val) { return val.length < 4 || val.length > 20 ? this.$t('NAe1') : true },
+    r2 (val) { return val.length < min || val.length > max ? this.$t('NAe1', [min, max]) : true },
     r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true },
     ok () {
       if (this.phase < 2 || this.phase === 3) {
@@ -84,7 +88,7 @@ export default {
     const vi = toRef(props, 'initVal')
     const nom = ref(vi.value || '')
     return {
-      nom
+      nom, min, max
     }
   }
 }

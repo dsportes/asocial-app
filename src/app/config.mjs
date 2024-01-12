@@ -36,8 +36,9 @@ export const config = {
     'auzvillagezSANSzjaizmauvaisezREPUTATIONz'
   ],
   nomDuComptable: 'Comptable',
-  dons: [50, 100, 200],
-  dons2: [1, 5, 10, 20, 50],
+  donorg: 2, // don par défaut à un compte A par création depuis un compte O
+  dons: [50, 100, 200], // choix des dons d'un compte A au sponsotring d'un autre compte A
+  dons2: [1, 5, 10, 20, 50], // choix des dons pour les dons directs pat chat
   allocComptable: [32, 32, 32],
   allocPrimitive: [256, 256, 256],
   quotas: { '0': 0, 'XXS': 1, 'XS': 2, 'SM': 4, 'MD': 8, 'LG': 16, 'XL': 32, 'XXL': 64 },

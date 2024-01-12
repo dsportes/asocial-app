@@ -296,7 +296,7 @@
 
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
-    <div class="q-mt-sm column items-center">
+    <div class="q-mt-sm column items-center" style="width:20rem">
       <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
         <div v-if="session.opSpinner >= 2" 
           class="spinlargeur height-4 row items-center justify-between no-wrap text-black bg-amber-2 q-pa-sm"
