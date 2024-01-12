@@ -723,6 +723,7 @@ Affiche la liste des fichiers visible en mode avion et pour chacun,
 # En chantier
 
 ### A développer / revisiter
+- pour la doc (Documents.md) vérifier et écrire les conditions de **Prise d'hébergement**.
 - blocage des accroissements de volume: vérifier le blocage
 - GC à réviser
 - permutation de mode autonome / organisation d'un compte
