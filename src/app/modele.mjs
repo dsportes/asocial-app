@@ -1227,7 +1227,6 @@ _data_:
 
 **Données n'existant que pour un avatar principal**
 - `mck` : map des mots-clés du compte cryptée par la clé K -la clé est leur code 1-99- ("code": nom@catégorie).
-- `memok` : mémo personnel du compte crypté par la clé K
 - `mavk` : map des avatars du compte. 
   - _clé_ : id court de l'avatar cryptée par la clé K du compte.
   - _valeur_ : couple `[nom clé]` de l'avatar crypté par la clé K du compte.
@@ -1767,8 +1766,14 @@ export class Chat extends GenDoc {
     const supp = $t('supprime')
     this.tit = ''
     this.dh = 0
+    let t1r = false
+    this.yo = false
     if (row.items) for (const it of row.items) {
       const t = it.txt ? ungzipB(await decrypter(this.cc, it.txt)) : null
+      if (!t1r && it.a === 1) {
+        if (t === '**YO**') this.yo = true
+        t1r = true
+      }
       if (this.dh === 0) this.dh = it.dhx ? it.dhx : it.dh
       this.items.push({ a: it.a, txt: t, dh: it.dh, dhx: it.dhx || 0})
       a.push('_**' + $t('dedh', [it.a ? this.naI.nom : this.naE.nom, dhstring(it.dh)]) + '**_')

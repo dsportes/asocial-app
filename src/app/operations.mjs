@@ -1995,7 +1995,7 @@ export class EstAutonome extends OperationUI {
       const session = stores.session
       const args = { token: session.authToken, id }
       const ret = this.tr(await post(this, 'EstAutonome', args))
-      return this.finOK(ret.estA)
+      return this.finOK(ret.st)
     } catch (e) {
       await this.finKO(e)
     }

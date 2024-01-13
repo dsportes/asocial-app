@@ -1,6 +1,6 @@
 <template>
 <div>
-  <div class="row justify-center q-gutter-sm q-my-sm">
+  <div class="row justify-center q-gutter-sm q-my-sm items-center">
     <q-btn v-if="session.estComptable" dense color="primary" size="sm" padding="xs"
       :label="$t('PPcht')" @click="chgTribu"/>
     <q-btn v-if="session.estComptable" dense color="primary" size="sm" padding="xs"
@@ -8,7 +8,60 @@
     <q-btn v-if="session.estComptable || (aSt.estSponsor && estDeMaTribu)" 
       dense color="primary" size="sm" padding="xs"
       :label="$t('PPcompta')" @click="voirCompta"/>
+    <q-btn dense color="warning" size="md" padding="none" round icon="change_history"
+      class="justify-start" @click="muter">
+      <q-tooltip>{{$t('PPmut')}}</q-tooltip>
+    </q-btn>
   </div>
+
+  <!-- Mutation de type de compte -->
+  <q-dialog v-model="ui.d.BPmut[idc]" persistent>
+    <q-card :class="styp('md')">
+      <q-toolbar class="bg-secondary text-white">
+        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+        <q-toolbar-title class="titre-lg text-center q-mx-sm">
+          {{$t('PPmut') + ' ' + opt}}
+        </q-toolbar-title>
+        <bouton-help page="page1"/>
+      </q-toolbar>
+
+      <div class="q-pa-xs column q-gutter-sm">
+        <div class="titre-lg text-bold">{{$t('PPmut' + (st === 1 ? 'A' : 'O'))}}</div>
+        <div v-if="yo" class="titre-md">{{$t('PPmutok')}}</div>
+        <div v-if="!yo" :class="'titre-md ' + (yoreq ? 'bg-yellow-5 text-bold text-black' : '')">
+          {{$t('PPmutko')}}
+        </div>
+        <div v-if="opt === 1 && st===2 && !yo" class="titre-md text-bold">{{$t('PPmutf')}}</div>
+      </div>
+
+      <micro-chat class="q-pa-xs q-my-md" 
+        :chat="chat" :na-i="naI" :na-e="naE"/>
+
+      <q-separator color="orange"/>
+      
+      <div v-if="st === 1" class="q-pa-xs q-mt-sm">
+        <choix-quotas :quotas="quotas"/>
+        <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
+          {{$t('PPquot')}}
+        </div>
+        <q-separator class="q-mt-sm" color="orange"/>
+      </div>
+
+      <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
+        <q-btn dense color="primary" size="md" padding="xs" icon="undo" 
+          :label="$t('renoncer')" @click="ui.fD"/>
+        <q-btn v-if="st===2" 
+          :disable="!yo && yoreq"
+          dense color="warning" size="md" padding="xs" icon="change_history" 
+          :label="$t('PPmutA2')" @click="cf=true"/>
+        <q-btn v-else 
+          :disable="(!yo && yoreq) || quotas.err"
+          dense color="warning" size="md" padding="xs" icon="change_history" 
+          :label="$t('PPmutO2')" @click="cf=true"/>
+        <bouton-confirm :actif="cf" :confirmer="mut"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 
   <!-- Changement de tribu -->
   <q-dialog v-model="ui.d.BPchgTr[idc]" persistent>
@@ -97,17 +150,20 @@
 import { ref, toRef } from 'vue'
 import { encode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
-import { ID } from '../app/api.mjs'
+import { ID, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
+import BoutonConfirm from '../components/BoutonConfirm.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
+import MicroChat from '../components/MicroChat.vue'
+import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
-import { GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese } from '../app/operations.mjs'
-import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese, EstAutonome } from '../app/operations.mjs'
 import { getNg, getCle, Tribu } from '../app/modele.mjs'
 import { crypter, crypterRSA } from '../app/webcrypto.mjs'
 
 export default {
   name: 'BarrePeople',
-  components: { PanelCompta },
+  components: { PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
 
   props: { id: Number },
 
@@ -116,7 +172,15 @@ export default {
     estDeMaTribu () {
       const [t, it, eltAct] = this.aSt.getTribuDeCompte(this.id)
       return t !== null
-    }
+    },
+    naI () { return this.aSt.compte.na },
+    naE () { return getNg(this.id) },
+    yo () { return this.chat && this.chat.yo },
+    yoreq () { return (this.opt === 2 && this.st === 2) || this.st === 1 },
+    opt () { return this.session.espace.opt },
+    chat () { return this.aSt.getChatIdIE(this.session.compteId, this.id) },
+    cpt () { return this.aSt.ccCpt },
+    synth () { return this.aSt.tribu.synth }
   },
 
   watch: {
@@ -130,13 +194,48 @@ export default {
       lstTr: [],
       atr: [],
       pc1: 0,
-      pc2: 0
+      pc2: 0,
+      st: 0, // 0: contact pas compte principal, 1: contact A, 2: contact O
+      cf: false,
+      quotas: {} // { q1, q2, qc, min1, min2, max1, max2, minc, maxc, err}
     }
   },
 
   methods: {
     edv1 (v) { return edvol(v * UNITEV1) },
     edv2 (v) { return edvol(v * UNITEV2) },
+
+    async muter () {
+      if (!await this.session.edit()) return
+      this.st = await new EstAutonome().run(this.id)
+      if (this.st === 0) {
+        await afficherDiag(this.$t('PPmut1'))
+        return
+      }
+      if (this.st === 1) {
+        await new GetCompteursCompta().run(this.id)
+        const c = this.cpt.qv
+        const s = this.synth
+        this.quotas = {
+          q1: c.q1,
+          q2: c.q2,
+          qc: c.qc,
+          min1: Math.ceil((c.nc + c.ng + c.nn) / UNITEV1),
+          min2: Math.ceil(c.v2 / UNITEV2),
+          minc: 0,
+          max1: s.q1 - s.a1,
+          max2: s.q2 - s.a2,
+          maxc: s.qc - s.ac
+        }
+      }
+      this.cf = false
+      this.ui.oD('BPmut', this.idc)
+    },
+
+    async mut () {
+      console.log('muter')
+      this.ui.fD()
+    },
 
     async getCpt() {
       await new GetCompteursCompta().run(this.id)
@@ -151,6 +250,7 @@ export default {
     },
 
     async chgSponsor () { // comptable
+      if (!await this.session.edit()) return
       await this.getCpt()
       if (ID.estComptable(this.id)) {
         await afficherDiag(this.$t('PTspn1c'))
@@ -193,6 +293,7 @@ export default {
     },
 
     async chgTribu () { // comptable
+      if (!await this.session.edit()) return
       await this.getCpt()
         if (ID.estComptable(this.id)) {
           await afficherDiag(this.$t('PTspn2c'))
@@ -264,8 +365,4 @@ export default {
   background: $yellow-3
   color: black
   font-weight: bold
-.q-card__section
-  padding: 2px !important
-.q-btn
-  padding: 0 3px !important
 </style>

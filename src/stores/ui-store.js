@@ -77,6 +77,7 @@ export const useUiStore = defineStore('ui', {
       BPchgTr: {}, // BarrePeople
       BPchgSp: {},
       BPcptdial: {},
+      BPmut: {},
       OTsuppbase: false, // OutilsTests
       OTrunning: false,
       AAeditionpc: {}, // ApercuAvatar

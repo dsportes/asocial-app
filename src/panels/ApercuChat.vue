@@ -181,7 +181,7 @@ export default {
 
     async addop () {
       const compta = this.aSt.compta
-      if (this.mdon && (this.mdon * 100 > compta.credits.total)) {
+      if (this.avecDon && this.mdon && (this.mdon * 100 > compta.credits.total)) {
         await afficherDiag(this.$t('CHcred', [compta.credits.total, this.mdon * 100]))
         return
       }
@@ -217,8 +217,8 @@ export default {
       }
       if (avecDon) {
         this.dconf = false
-        const estA = await new EstAutonome().run(this.chat.naE.id)
-        if (!estA) {
+        const st = await new EstAutonome().run(this.chat.naE.id)
+        if (st !== 1) {
           await afficherDiag(this.$t('CHauto'))
           return
         }

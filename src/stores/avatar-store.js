@@ -260,6 +260,14 @@ export const useAvatarStore = defineStore('avatar', {
         return a
       }
     },
+    getChatIdIE: (state) => {  return (idI, idE) => { 
+        const e = state.map.get(idI)
+        if (e) for (const [ids, chat] of e.chats) { 
+          if (chat.naE.id === idE) return chat
+        }
+        return null
+      }
+    },
     // retourne le sponsoring d'id ids de l'avatar id
     getSponsoring: (state) => { return (id, ids) => { 
       const e = state.map.get(id)

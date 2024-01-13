@@ -1,5 +1,5 @@
 <template>
-  <q-input style="width:14rem" :class="'bord' + (actif ? 2 : 1)"
+  <q-input style="width:14rem" :class="'bord999' + (actif ? 2 : 1)"
     dense outlined standout="bg-warning text-white" :disable="!actif" v-model="text" 
     :label="actif ? $t('confirm', [code]) : $t('rienconf')" />  
 </template>
@@ -49,9 +49,9 @@ export default ({
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.bord1
+.bord9991
   border: 4px solid transparent
-.bord2
+.bord9992
   border: 4px solid $warning
   border-radius: 5px
 </style>
