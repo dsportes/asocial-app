@@ -5,6 +5,7 @@ export const version = '1'
 
 export const WSHEARTBEAT = false
 export const PINGTO = 5 // en minutes : session auto close après PINGTO minutes d'inactivité
+export const PINGTO2 = 4 // en minutes : rafraîchissement des compteurs de consommation
 
 export const MSPARJOUR = 86400 * 1000
 export const MSPARAN = 365 * MSPARJOUR

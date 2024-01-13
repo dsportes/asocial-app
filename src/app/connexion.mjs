@@ -78,7 +78,7 @@ export class Demon {
     if (!clos) {
       Demon.to = setTimeout(async () => {
         await Demon.start()
-      }, PINGTO * 40000)
+      }, PINGTO2 * 60000)
     }
   }
 
@@ -108,15 +108,16 @@ export class Demon {
       let conso = null
       if (this.majConso) {
         const ca = session.consoatt
-        if (ca.nl || ca.ne || ca.vd || ca.vm)
-          conso = { ...ca }
+        if (ca.nl || ca.ne || ca.vd || ca.vm) conso = { ...ca }
       }
+      if (!conso && (Date.now() - session.dhConso < 1800000)) return false
       const args = { token: session.authToken, conso }
       const ret = await post(null, 'EnregConso', args)
-      session.setDh(ret.dh)
+      session.setDhConso(ret.dh)
       if (ret.fait) session.razConsoatt()
     } catch (e) {
       console.log('Démon KO: ' + e.toString())
+      if (e.code === 1002) return true // espace clos par l'administrateur
     }
     return false
   }

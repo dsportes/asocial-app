@@ -248,6 +248,7 @@ export default {
   // E_BRK = 1000 // Interruption volontaire de l'opération
   EX1000: 'Interruption volontaire',
   EX1001: 'L\'administrateur technique vient de restreindre l\'application à la lecture seulement. L\'opération ayant tenté une écriture, elle a échoué.',
+  EX1002: 'L\'administrateur technique vient de fermer l\'application.',
 
   // E_WS = 2000 // Toutes erreurs de réseau
   EX2000: 'Erreur à l\'ouverture de la connexion avec le serveur ( {0} ).\nDétail: {1}',
