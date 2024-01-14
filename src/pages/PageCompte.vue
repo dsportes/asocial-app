@@ -15,13 +15,18 @@
       <q-btn icon="open_in_new" size="md" color="primary" padding="xs xs"
         :label="$t('CPTkwc')" no-caps
         @click="mcleditAut"/>
+      <!-- maj quotas du compte -->
+      <q-btn v-if="estSponsor || estA"
+        icon="settings" size="md" color="primary" padding="xs xs"
+        :label="$t('CPTedq')" no-caps
+        @click="editerq"/>
     </div>
 
     <div class="row justify-center">
-    <span v-if="aSt.compta.estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">
+    <span v-if="estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">
       {{$t('compteA')}}
     </span>
-    <span v-if="aSt.compta.estSponsor" class="q-pa-xs text-warning bg-yellow-3 text-bold">
+    <span v-if="estSponsor" class="q-pa-xs text-warning bg-yellow-3 text-bold">
       {{$t('NPspons', [ID.court(session.tribuId)])}}
     </span>
     </div>
@@ -85,6 +90,23 @@
     <!-- Dialogue de suppression d'un avatar -->
     <suppr-avatar v-if="ui.d.SAsuppravatar" :avid="avid"/>
 
+    <!-- Dialogue de mise à jour des quotas du compte -->
+    <q-dialog v-model="ui.d.PTedq" persistent>
+      <q-card :class="styp('sm')">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" color="warning" padding="xs" icon="close" @click="ui.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
+        </q-toolbar>
+        <choix-quotas class="q-mt-sm" :quotas="quotas" :groupe="estA"/>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn flat dense size="md" color="primary" padding="xs" icon="undo" 
+            :label="$t('renoncer')" @click="ui.fD"/>
+          <q-btn dense size="md" color="primary" padding="xs" icon="check" 
+            :disable="quotas.err" :label="$t('ok')" @click="validerq"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-page>
 </template>
 
@@ -93,13 +115,14 @@ import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { crypter } from '../app/webcrypto.mjs'
-import { ChangementPS, MotsclesCompte, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
+import { SetQuotas, ChangementPS, MotsclesCompte, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
 import MotsCles from '../dialogues/MotsCles.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import SupprAvatar from '../panels/SupprAvatar.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
+import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { styp, afficherDiag, trapex } from '../app/util.mjs'
 import { isAppExc, ID } from '../app/api.mjs'
 
@@ -107,11 +130,13 @@ export default {
   name: 'PageCompte',
 
   components: { 
-    NomAvatar, BoutonHelp, ApercuAvatar, MotsCles, SupprAvatar, BoutonConfirm
+    ChoixQuotas, NomAvatar, BoutonHelp, ApercuAvatar, MotsCles, SupprAvatar, BoutonConfirm
   },
 
   computed: {
-    memo () { return this.aSt.compte.memo }
+    memo () { return this.aSt.compte.memo },
+    estA () { return this.aSt.compta.estA },
+    estSponsor () { return this.aSt.compta.estSponsor }
   },
 
   data () {
@@ -119,7 +144,8 @@ export default {
       ps: null,
       memoed: null,
       nomav: '',
-      avid: 0
+      avid: 0,
+      quotas: null
     }
   },
 
@@ -193,6 +219,32 @@ export default {
     },
 
     async mcleditAut () { if (await this.session.edit()) this.ui.oD('MCmcledit') },
+
+    async editerq () {
+      if (! await this.session.edit()) return
+      const c = this.aSt.compta.qv
+      if (this.estA) {
+        this.quotas = { q1: c.q1, q2: c.q2, qc: c.qc, min1: 0, min2: 0, minc: 0,
+          max1: 256,
+          max2: 256,
+          maxc: 256
+        }
+      } else {
+        const s = this.aSt.tribu.synth
+        this.quotas = { q1: c.q1, q2: c.q2, qc: c.qc, min1: 0, min2: 0, minc: 0,
+          max1: s.q1 - s.a1 + c.q1,
+          max2: s.q2 - s.a2 + c.q2,
+          maxc: s.qc - s.ac + c.qc
+        }
+      }
+      this.ui.oD('PTedq')
+    },
+    
+    async validerq () {
+      await new SetQuotas().run(this.estA ? 0 : this.aSt.tribu.id, 
+        this.aSt.compta.id, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
+      this.ui.fD()
+    },
 
     async okmc (mmc) {
       if (mmc !== false) {

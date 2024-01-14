@@ -5,7 +5,7 @@ import { OperationUI, RafraichirTickets } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post, getEstFs } from './net.mjs'
-import { AMJ, ID, PINGTO, limitesjour, FLAGS } from './api.mjs'
+import { AMJ, ID, PINGTO2, limitesjour, FLAGS } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import {
   openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,

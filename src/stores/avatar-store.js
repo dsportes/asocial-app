@@ -190,11 +190,11 @@ export const useAvatarStore = defineStore('avatar', {
     SI il est dans la tribu du compte ou la tribu courante.
     */
     getTribuDeCompte: (state) => { return (id) => { 
-        if (state.tribu) for (const it of state.tribu.act) {
+        if (state.tribu) for (let it = 1; it < state.tribu.act.length; it++) {
           const e = state.tribu.act[it]
           if (e && !e.vide && e.id === id) { return [state.tribu, it, e] }
         }
-        if (state.tribuC) for (const it of state.tribuC.act) {
+        if (state.tribuC) for (let it = 1; it < state.tribu.act.length; it++) {
           const e = state.tribuC.act[it]
           if (e && !e.vide && e.id === id) { return [state.tribuC, it, e] }
         }

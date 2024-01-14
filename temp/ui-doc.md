@@ -725,14 +725,7 @@ Affiche la liste des fichiers visible en mode avion et pour chacun,
 ### A développer / revisiter
 - pour la doc (Documents.md) vérifier et écrire les conditions de **Prise d'hébergement**.
 - blocage des accroissements de volume: vérifier le blocage
-- GC à réviser
-- permutation de mode autonome / organisation d'un compte
-
-_Arrêtés mensuels_ (**CSV**)
-- tickets réceptionnés dans le mois. gérer pour le Comptable le "dernier mois archivé".
-  - une ligne par ticket dont l'ids débute par le mois.
-  - une fois archivé dans un secret du Comptable, opération du serveur pour détruire tous les tickets du mois et antérieurs.
-- une ligne par comptas d'extrait des compteurs relatifs au mois M-1 (dès qu'il est figé).
+- GC à réviser: Tickets Chatgrs à prendre en compte
 
 ### Features à développer
 _Arrêtés mensuels des Tickets_ (**CSV**)

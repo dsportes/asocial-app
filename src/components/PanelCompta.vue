@@ -47,7 +47,8 @@
       </div>
       <div :class="dkli(0) + ' row items-center full-width'">
         <div class="col-4">{{$t('PCPabo')}}</div>
-        <div class="col-4 font-mono text-center">{{c.qv.q1}}</div>
+        <div class="col-4 font-mono text-center bg-secondary text-white text-bold">
+          {{(c.qv.q1 * UNITEV1) + ' [' + c.qv.q1 + ']'}}</div>
         <div class="col-4 font-mono text-center">{{exM ? q1M : '-'}}</div>
       </div>
       <div :class="dkli(1) + ' row items-center full-width'">
@@ -88,7 +89,8 @@
       </div>
       <div :class="dkli(0) + ' row items-center full-width'">
         <div class="col-4">{{$t('PCPabo')}}</div>
-        <div class="col-4 font-mono text-center">{{edvol(c.qv.q2 * UNITEV2)}}</div>
+        <div class="col-4 font-mono text-center bg-secondary text-white text-bold">
+          {{edvol(c.qv.q2 * UNITEV2) + ' [' + c.qv.q2 + ']'}}</div>
         <div class="col-4 font-mono text-center">{{exM ? edvol(q2M) : '-'}}</div>
       </div>
       <div :class="dkli(1) + ' row items-center full-width'">
@@ -151,19 +153,20 @@
         <div class="col-2 font-mono text-center">{{ex(3) ? edvol(vm(3)) : '-'}}</div>
       </div>
 
-      <div v-if="!c.estA">
+      <div v-if="!estA">
         <div class="titre-md q-my-md">
+          <div class="q-pa-xs bg-secondary text-white text-bold">{{$t('PCPplaf', [mon(c.qv.qc)])}}</div>
           <div>{{$t('PCPprefc' + c.debref[0], [dhcool(c.debref[1]), mon(c.conso2B, 2)], libm(1))}}</div>
           <div :class="alconso">{{$t('PCPcmoy', [mon(c.conso2M, 2), txconso, mon(c.qv.qc), libm(1)])}}</div>
         </div>
       </div>
 
-      <div v-if="c.estA" class="column q-my-sm full-width">
+      <div v-if="estA" class="column q-my-sm full-width">
         <panel-deta :c="c" :total="aSt.compta.credits.total"/>
       </div>
 
       <div v-if="c.decouvert" class="titre-md q-my-sm">
-        <div v-if="c.estA">{{$t('PCPdeca', [dhcool(c.decouvert[1]), mon(c.dec)])}}</div>
+        <div v-if="estA">{{$t('PCPdeca', [dhcool(c.decouvert[1]), mon(c.dec)])}}</div>
         <div v-else>{{$t('PCPdeco', [dhcool(c.decouvert[1]), c.dec])}}</div>
       </div>
     </div>
@@ -260,6 +263,7 @@ export default ({
   components: { MoisM, PanelDeta },
 
   computed: {
+    estA () { return this.aSt.compta.estA },
     icoabo1 () {
       if (this.abo1w) return 'report'
       else if (this.abo1n) return 'lock'
@@ -295,12 +299,12 @@ export default ({
     abo2w () { return this.pcutq2 > 90 && this.pcutq2 < 100 },
     abo2n () { return this.pcutq1 > 100 },
     consow () {
-      return (this.c.estA && (this.nbj > 0 && this.nbj < 60)) ||
-        (!this.c.estA && (this.txconso > 80 && this.txconso < 100))
+      return (this.estA && (this.nbj > 0 && this.nbj < 60)) ||
+        (!this.estA && (this.txconso > 80 && this.txconso < 100))
     },
     conson () {
-      return (this.c.estA && this.nbj <= 0) ||
-        (!this.c.estA && this.txconso > 100)
+      return (this.estA && this.nbj <= 0) ||
+        (!this.estA && this.txconso > 100)
     },
 
     exM () { return this.c.vd[this.idm][Compteurs.MS] !== 0 },

@@ -845,6 +845,10 @@ export class Tribu extends GenDoc {
     return false
   }
 
+  static async getIdT (clet, id) {
+    return await crypter(clet, '' + ID.court(id))
+  }
+
   // id de la tribu, q1 , q2 
   static async nouvelle (idt, qt, primitive, qc) {
     const session = stores.session
@@ -862,7 +866,7 @@ export class Tribu extends GenDoc {
     if (primitive) { // inscription du comptable comme premier compte
       const nac = NomGenerique.comptable()
       const item = {
-        idT: await crypter(c, '' + ID.court(nac.id)),
+        idT: await Tribu.getIdT(c, nac.id),
         qc: qc[0], q1: qc[1], q2: qc[2],
         ac: 0, a1: 0, a2: 0, stn: 0, ca: 0, v1: 0, v2: 0,
         nasp: await crypter(c, new Uint8Array(encode(nac.anr)))
@@ -951,6 +955,7 @@ export class Compta extends GenDoc {
 
     const avatar = aSt.getAvatar(this.id)
     if (!this.estA) {
+      this.cletX = row.cletX
       if (row.cletK.length !== 256) {
         this.clet = await decrypter(session.clek, row.cletK)
         this.idt = setClet(this.clet)
@@ -970,12 +975,13 @@ export class Compta extends GenDoc {
       this.clet = null
       this.cletK = null
       this.idt = 0
+      
       // en cas de passage de compte O à A, le Comptable ne peut pas initialiser
       // credits en cryptant par la clé K. Il met 'true' pour provoquer l'init ici
-      const cr = row.credits !== true ? decode(await decrypter(session.clek, row.credits)) 
-        : { total: 2, tickets: [] }
-      this.credits = { total: cr.total, tickets: [] }
-      cr.tickets.forEach(tk => { 
+      this.toSave = row.credits === true
+      const cr = this.toSave ? null : decode(await decrypter(session.clek, row.credits)) 
+      this.credits = { total: cr ? cr.total : 2, tickets: [] }
+      if (cr) cr.tickets.forEach(tk => { 
         if (!Ticket.estObsolete(tk)) this.credits.tickets.push(tk)
       })
       if (row.dons) {
@@ -1116,7 +1122,7 @@ export class Compta extends GenDoc {
   */
   async majCredits (m) {
     const credits = { total: this.credits.total, tickets: [] }
-    let maj = false
+    let maj = this.toSave || false
 
     function incorp (tk) {
       if (m) m.delete(tk.ids)

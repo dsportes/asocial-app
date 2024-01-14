@@ -50,8 +50,10 @@
                 :class="'q-ml-md ' + tclr(c) + ' ' + bgclr(c)"/>
 
             </div>
+            <!--
             <q-btn v-if="type(c)===2" class="q-ml-md" icon="open_in_new" size="md" color="primary" dense
               @click.stop="voirpage(c)"/>
+              -->
           </div>
         </template>
 

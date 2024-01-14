@@ -462,7 +462,7 @@ export class NouveauChat extends OperationUI {
   }
 }
 
-/* Mise à jour d\'un "chat"
+/*   OP_MajChat: 'Mise à jour d\'un "chat".'
 POST:
 - `token` : éléments d'authentification du compte.
 - `idI idsI` : id du chat, côté _interne_.
@@ -521,6 +521,58 @@ export class MajChat extends OperationUI {
       const ch = await compile(ret.rowChat)
       aSt.setChat(ch)
       return this.finOK(disp)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_MuterCompte: 'Mutation dy type d\'un compte'
+POST:
+- `token` : éléments d'authentification du compte.
+- 'id': id du compte à muter
+- 'st': type actuel: 1: A, 2: 0
+- `idI idsI` : id du chat, côté _interne_.
+- `idE idsE` : id du chat, côté _externe_.
+- `txt1` : texte à ajouter crypté par la clé cc du chat.
+- `lgtxt1` : longueur du texte
+
+Si st === 1:
+- `quotas`: {qc, q2, q1}
+- `trib`: { 
+  idT: id courte du compte crypté par la clé de la tribu,
+  idt: id de la tribu, 
+  cletX: cle de la tribu cryptée par la clé K du comptable,
+  cletK: cle de la tribu cryptée par la clé K du compte ou sa clé RSA.
+}
+
+Retour:
+*/
+export class MuterCompte extends OperationUI {
+  constructor () { super('MuterCompte') }
+
+  async run (id, st, chat, txt, quotas, trib) {
+    try {
+      const session = stores.session
+      const naI = chat.naI
+      const naE = chat.naE
+
+      const args = { 
+        token: session.authToken,
+        id,
+        st,
+        idI: naI.id, 
+        idsI: await Chat.getIds(naI, naE), 
+        idE: naE.id, 
+        idsE: await Chat.getIds(naE, naI), 
+        txt1: await Chat.getTxtCC(chat.cc, txt),
+        lgtxt1: txt.length
+      }
+      if (st === 1) args.quotas = quotas
+      args.trib = trib
+      
+      this.tr(await post(this, 'MuterCompte', args))
+      return this.finOK()
     } catch (e) {
       await this.finKO(e)
     }
@@ -801,7 +853,7 @@ export class SetSponsor extends OperationUI {
   }
 }
 
-/*   OP_SetQuotas: 'Fixation des quotas dùn compte dans sa tranche de quotas'
+/* OP_SetQuotas: 'Fixation des quotas dùn compte dans sa tranche de quotas'
 args.token: éléments d'authentification du compte.
 args.idt : id de la tribu
 args.idc: id du compte

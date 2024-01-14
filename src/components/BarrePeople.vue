@@ -36,16 +36,32 @@
 
       <micro-chat class="q-pa-xs q-my-md" 
         :chat="chat" :na-i="naI" :na-e="naE"/>
-
-      <q-separator color="orange"/>
       
-      <div v-if="st === 1" class="q-pa-xs q-mt-sm">
-        <choix-quotas :quotas="quotas"/>
-        <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
-          {{$t('PPquot')}}
+      <q-expansion-item v-if="st === 1" class="q-mt-sm" v-model="verif1"
+        :label="$t('PPmutv')" icon="warning"
+        header-class="bg-secondary text-white text-bold titre-md"
+        switch-toggle-side expand-separator dense group="trgroup">
+        <div class="q-pa-xs">
+          <choix-quotas :quotas="quotas"/>
+          <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
+            {{$t('PPquot')}}
+          </div>
         </div>
-        <q-separator class="q-mt-sm" color="orange"/>
-      </div>
+      </q-expansion-item>
+
+      <q-expansion-item class="q-my-sm"
+        :label="$t('PPmutm')" icon="edit"
+        header-class="bg-secondary text-white text-bold titre-md"
+        switch-toggle-side expand-separator dense group="trgroup">
+        <editeur-md class="q-pa-xs q-mt-sm"
+          v-model="texte" :lgmax="250" modetxt editable mh="6rem"
+          :texte="txtdef"/>
+      </q-expansion-item>
+
+      <div v-if="st === 1 && (!verifd || quotas.err)" class="bg-yellow-5 text-black titre-md text-italic">
+        {{$t('PPmutv')}}</div>
+      <div v-if="!yo && yoreq" class="bg-yellow-5 text-black titre-md text-italic">
+        {{$t('PPmutreq')}}</div>
 
       <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
         <q-btn dense color="primary" size="md" padding="xs" icon="undo" 
@@ -55,7 +71,7 @@
           dense color="warning" size="md" padding="xs" icon="change_history" 
           :label="$t('PPmutA2')" @click="cf=true"/>
         <q-btn v-else 
-          :disable="(!yo && yoreq) || quotas.err"
+          :disable="(!yo && yoreq) || quotas.err || !verifd"
           dense color="warning" size="md" padding="xs" icon="change_history" 
           :label="$t('PPmutO2')" @click="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mut"/>
@@ -156,14 +172,16 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import MicroChat from '../components/MicroChat.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
+import EditeurMd from '../components/EditeurMd.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
-import { GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese, EstAutonome } from '../app/operations.mjs'
+import { MuterCompte, GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese, EstAutonome } from '../app/operations.mjs'
 import { getNg, getCle, Tribu } from '../app/modele.mjs'
 import { crypter, crypterRSA } from '../app/webcrypto.mjs'
 
 export default {
   name: 'BarrePeople',
-  components: { PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
+
+  components: { EditeurMd, PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
 
   props: { id: Number },
 
@@ -180,15 +198,20 @@ export default {
     opt () { return this.session.espace.opt },
     chat () { return this.aSt.getChatIdIE(this.session.compteId, this.id) },
     cpt () { return this.aSt.ccCpt },
-    synth () { return this.aSt.tribu.synth }
+    synth () { return this.aSt.tribu.synth },
+    txtdef () { return this.$t('PPmsg' + (this.st === 1 ? 'o' : 'a'))}
   },
 
   watch: {
-    filtre (ap, av) { this.filtrer() }
+    filtre (ap, av) { this.filtrer() },
+    verif1 (ap) { if (ap) this.verifd = true }
   },
   
   data () {
     return {
+      verif1: false,
+      verifd: false,
+      texte: '',
       selx: null,
       filtre: '',
       lstTr: [],
@@ -207,6 +230,10 @@ export default {
 
     async muter () {
       if (!await this.session.edit()) return
+      if (!this.chat) {
+        await afficherDiag(this.$t('PPchatreq'))
+        return
+      }
       this.st = await new EstAutonome().run(this.id)
       if (this.st === 0) {
         await afficherDiag(this.$t('PPmut1'))
@@ -229,11 +256,27 @@ export default {
         }
       }
       this.cf = false
+      this.verif1 = false
+      this.verifd = false
       this.ui.oD('BPmut', this.idc)
     },
 
     async mut () {
-      console.log('muter')
+      const c = this.aSt.compta
+      const pub = await this.aSt.getPub(this.id)
+      const trib = { idt: c.idt }
+      if (this.st === 1) {
+        trib.idT = await Tribu.getIdT(c.clet, this.id)
+        trib.cletX = c.cletX
+        trib.cletK = await crypterRSA(pub, c.clet)
+      }
+      const quotas = this.st === 2 ? null : {
+        q1: this.quotas.q1,
+        q2: this.quotas.q2,
+        qc: this.quotas.qc
+      }
+      await new MuterCompte()
+        .run(this.id, this.st, this.chat, this.texte || this.txtdef, quotas, trib)
       this.ui.fD()
     },
 

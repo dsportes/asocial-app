@@ -603,6 +603,7 @@ export default {
   OP_OnchangeCompta: 'Opération de synchronisation (changement de compta)',
   OP_OnchangeTribu: 'Opération de synchronisation (changement de tranche)',
   OP_OnchangeEspace: 'Opération de synchronisation (changement de espace)',
+  OP_MuterCompte: 'Mutation dy type d\'un compte',
 
   OP_GetPub: 'Obtention d\'une clé publique',
 
@@ -1222,6 +1223,7 @@ export default {
   PCPprefc3: 'Consommation entre le passage en "compte de l\'organistion" [{0}] et maintenant : {1}.',
 
   PCPcmoy: 'Moyenne "mensuelle" depuis début {3} : {0}, soit {1}% du plafond alloué {2}.',
+  PCPplaf: 'Plafond alloué: {0}',
 
   PCPprefa0: 'Débit: consommation depuis la création du compte [{0}] et maintenant ({1} jours).',
   PCPprefa2: 'Débit: consommation depuis le passage en "compte autonome" [{0}] et maintenant ({1} jours).',
@@ -1587,6 +1589,7 @@ export default {
   CPTnbloc: 'Aucune procédure de blocage en cours.',
 
   CPTkwc: 'Mots clés du compte',
+  CPTedq: 'Quotas du compte',
   CPTnvav: 'Nouvel avatar',
   CPTnvav2: 'Création d\'un nouvel avatar',
   CPTchq: 'Quotas attribués',
@@ -1783,15 +1786,21 @@ export default {
   PPcht: 'Changer de tranche de quotas',
   PPchsp: 'Changer le statut de "sponsor"',
   PPcompta: 'Voir l\'utilisation des volumes',
+  PPchatreq: 'Un "chat" avec le compte doit avoir été établi avant d\'envisager un changement de type du compte.',
   PPmut: 'Changer le type du compte',
   PPmut1: 'Cet avatar n\'est pas l\'avatar principal de son compte: impossible d\'envisager de changer son type.',
   PPmutA: 'Le compte {0} est de type "AUTONOME"',
   PPmutA2: 'Le passer en "AUTONOME"',
   PPmutO: 'Le compte {0} est de type "COMPTE DE L\'ORGANISATION"',
   PPmutO2: 'Le passer en "COMPTE DE L\'ORGANISATION"',
+  PPmsgo: 'Votre compte est désormais de type "COMPTE DE L\'ORGANISATION"',
+  PPmsga: 'Votre compte est désormais de type "AUTONOME"',
+  PPmutreq: 'L\'accord du compte "YO" est requis',
   PPmutok: 'Il a donné son accord pour changer de type.',
   PPmutko: 'Il n\'a pas (encore ?) donné son accord pour changer de type.',
   PPmutf: 'Mais l\'organisation autorise de changer son type en "AUTONOME" sans son autorisation explicite.',
+  PPmutv: 'Vérifier soigneusement les quotas à attribuer',
+  PPmutm: 'Message informatif à écrire sur le "chat"',
   PPkosp: 'Retirer au compte la qualité de sponsor',
   PPoksp: 'Conférer au compte la qualité de sponsor',
   PPchgtr: 'Départ de {0} de sa tranche #{1}',
