@@ -5,6 +5,25 @@ import { setRequiredModules } from '../app/util.mjs'
 import stores from '../stores/stores.mjs'
 import { aidetm } from '../app/help.mjs'
 import { config } from '../app/config.mjs'
+import { fromByteArray } from '../app/base64.mjs'
+
+
+const encoder = new TextEncoder('utf-8')
+
+export function getImgUrl (name) {
+  try {
+    if (name.endsWith('.svg')) {
+      const x = require('../assets/images/' + name.replace('.svg', '.txt')).default
+      if (!x) return require('../assets/defaut.png')
+      return 'data:image/svg+xml;base64,' + fromByteArray(encoder.encode(x))
+    }
+    const x = require('../assets/images/' + name)
+    if (x) return x
+    return require('../assets/defaut.png')
+  } catch (e) { 
+    return require('../assets/defaut.png')
+  }
+}
 
 export default boot(async ({ app /* Vue */ }) => {
   const cfg = {}
@@ -60,4 +79,6 @@ export default boot(async ({ app /* Vue */ }) => {
   stores.config.setConfig(cfg)
 
   setRequiredModules({ pako: pako })
+  // const b64 = getImgUrl('logo.svg')
+  // console.log('started')
 })

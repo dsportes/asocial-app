@@ -33,7 +33,8 @@
       <div v-else class="row items-center">
         <div class="col q-mr-sm font-mono text-bold fs-md height-2 bord">{{secligne1}}</div>
         <q-btn class="col-auto" :icon="isPwd ? 'visibility_off' : 'visibility'" size="md" padding="none" round @click="isPwd = !isPwd"/>
-        <q-btn icon="cancel" size="md" padding="none" round :disable="ligne1.length === 0" @click="forceInput('')"/>
+        <q-btn icon="cancel" size="md" padding="none" round 
+          :disable="ligne1.length === 0" @click="forceInput('')"/>
       </div>
 
       <div class="row justify-between items-center q-my-md">
@@ -46,7 +47,9 @@
           <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" 
             size="md" @click="ko" padding="xs md"/>
           <q-btn color="warning" :label="labelVal()" size="md" :icon-right="iconValider"
-            padding="xs md" :disable="!ligne1 || ligne1.length < lgph" @click="ok" />
+            padding="xs md" 
+            :disable="!ligne1 || ligne1.length < lgph || !orgL" 
+            @click="ok" />
         </div>
       </div>
 

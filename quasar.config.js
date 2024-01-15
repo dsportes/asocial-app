@@ -97,6 +97,10 @@ module.exports = configure(function (ctx) {
           test: /\.b64$/i,
           use: 'raw-loader'
         })
+        cfg.module.rules.push({
+          test: /\.txt$/i,
+          use: 'raw-loader'
+        })
         // Commenter la ligne ci-dessous pour ne pas obfusquer le code
         if(!ctx.dev && !ctx.debug) { cfg.plugins.push(plugob) }
       },
@@ -203,6 +207,7 @@ module.exports = configure(function (ctx) {
             sizes: '128x128',
             type: 'image/png'
           },
+          /*
           {
             src: 'icons/icon-192x192.png',
             sizes: '192x192',
@@ -223,6 +228,7 @@ module.exports = configure(function (ctx) {
             sizes: '512x512',
             type: 'image/png'
           }
+          */
         ]
       }
     },
@@ -266,8 +272,6 @@ module.exports = configure(function (ctx) {
         chain.plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: [ 'js' ] }])
       },
-      
-
       
       chainWebpackPreload (chain) {
         chain.plugin('eslint-webpack-plugin')

@@ -35,6 +35,7 @@
 <script>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { getImgUrl } from '../boot/appconfig.js'
 import stores from '../stores/stores.mjs'
 import { aidetm } from '../app/help.mjs'
 import { styp } from '../app/util.mjs'
@@ -97,8 +98,31 @@ export default ({
 
     function filtreLignes (t) {
       const x = t.split('\n'), r = []
-      x.forEach(l => { if (!l.startsWith('@@')) r.push(l) })
+      for (const l of x) { 
+        if (l.startsWith('@@')) continue
+        r.push(remplaceImg(l))
+      }
       return r.join('\n')
+    }
+
+    function remplaceImg (l) {
+      const lx = []
+      let i = 0, j = 0
+      while (true){ 
+        i = l.indexOf('<img src="', j)
+        if (i === -1) {
+          if (j === 0) return l
+          lx.push(l.substring(j))
+          break
+        } else {
+          if (j !== i) lx.push(l.substring(j, i))
+          j = l.indexOf('"', i + 10)
+          const n = l.substring(i + 10, j)
+          const u = getImgUrl(n)
+          lx.push('<img src="' + u)
+        }
+      }
+      return lx.join('')
     }
 
     function titre (p) {
