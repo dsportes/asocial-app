@@ -23,6 +23,8 @@
       <q-btn dense color="warning" label="test" @click="testArg.val = Date.now()"/>
       <q-btn class="q-ma-xs" color="primary" dense label="Diag" @click="testDiag"/>
       <q-btn dense label="Forcer dlv / dfh" color="primary" @click="test"/>
+      <q-btn dense padding="xs" size="md" label="TestRSA" color="primary" 
+        @click="testRSA2"/>
       -->
 
       <q-card-section v-if="tab === 'tst'" class="column items-center">
@@ -156,7 +158,11 @@ import { styp, dhcool, $t, html, afficherDiag, edvol, b64ToU8, u8ToB64 } from '.
 import { ping } from '../app/net.mjs'
 import { getCompte, vuIDB, deleteIDB } from '../app/db.mjs'
 import { PingDB } from '../app/connexion.mjs'
-import { ForceDlv } from '../app/operations.mjs'
+import { ForceDlv, TestRSA, CrypterRaw } from '../app/operations.mjs'
+import { decrypterRSA, random } from '../app/webcrypto.mjs'
+
+const encoder = new TextEncoder()
+const decoder = new TextDecoder()
 
 export default ({
   name: 'OutilsTests',
@@ -293,11 +299,39 @@ export default ({
       */
       const lop = [[1, 3210299393509425, 0, 20230809]]
       await new ForceDlv().run(lop)
+    },
+
+    async testRSA () {
+      const aes = random(32)
+      const IV = new Uint8Array([5, 255, 10, 250, 15, 245, 20, 240, 25, 235, 30, 230, 35, 225, 40, 220])
+      const arg = { aes, iv: IV, gz: false }
+
+      // const data = encoder.encode('toto est tres beau')
+      const data = encode(arg)
+
+      const ec = await new TestRSA().run(this.session.compteId, data)
+      const priv = this.aSt.compte.priv
+      const r = await decrypterRSA(priv, ec)
+      // const t = decoder.decode(r)
+      const t = decode(r)
+      console.log(JSON.stringify(t))
+    },
+
+    async testRSA2 () {
+      const x = []
+      for(let i = 0; i < 100; i++) x.push('toto est tres beau')
+      const inp = x.join('\n')
+      const data = encoder.encode(inp)
+      const ec = await new CrypterRaw().run(this.session.compteId, data, true)
+      const out = decoder.decode(ec)
+      console.log(inp === out)
     }
+
   },
 
   setup () {
     const session = stores.session
+    const aSt = stores.avatar
     const config = stores.config
     const ui = stores.ui
     const bases = {}
@@ -356,7 +390,7 @@ export default ({
     }
     
     return {
-      styp, session, config, ui,
+      styp, session, config, ui, aSt,
       bases,
       nbbases,
       getBases,

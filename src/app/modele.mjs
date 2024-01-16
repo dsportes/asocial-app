@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, inverse, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
-import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA } from './webcrypto.mjs'
+import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA, abToPem } from './webcrypto.mjs'
 import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS, limitesjour } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
@@ -1422,6 +1422,8 @@ export class Avatar extends GenDoc {
     const kcv = getCle(this.id)
     this.priv = await decrypter(session.clek, row.privk)
     this.pub = row.pub
+    // const pem = abToPem(this.pub, 'PUBLIC')
+    // console.log(pem)
 
     if (row.pck) { // phrase de contact cryptée par la clé K.
       this.pc = await decrypterStr(session.clek, row.pck)

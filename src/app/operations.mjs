@@ -7,7 +7,7 @@ import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
 import { Versions, NomGenerique, Avatar, Chat, Compta, Note, Ticket, Notification,
   Groupe, Membre, Tribu, Chatgr, getNg, getCle, compile, setClet} from './modele.mjs'
-import { decrypter, crypterRSA, genKeyPair, random } from './webcrypto.mjs'
+import { decrypter, crypterRSA, genKeyPair, random, decrypterRaw } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 
 /* Opération générique ******************************************/
@@ -2078,3 +2078,53 @@ export class ReceptionTicket extends OperationUI {
   }
 }
 
+/* OP_TestRSA: 'Test encryption RSA'
+args.token
+args.id
+args.data
+Retour:
+- data: args.data crypré RSA par la clé publique de l'avatar
+*/
+export class TestRSA extends OperationUI {
+  constructor () { super('TestRSA') }
+
+  async run (id, data) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, data }
+      const ret = this.tr(await post(this, 'TestRSA', args))
+      return this.finOK(ret.data)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_CrypterRaw: 'Test d\'encryptage serveur d\'un buffer long',
+Le serveur créé un binaire dont,
+- les 256 premiers bytes crypte en RSA, la clé AES, IV et l'indicateur gz
+- les suivants sont le texte du buffer long crypté par la clé AES générée.
+args.token
+args.id
+args.data
+args.gz
+Retour:
+- data: "fichier" binaire auto-décryptable en ayant la clé privée RSA
+*/
+export class CrypterRaw extends OperationUI {
+  constructor () { super('CrypterRaw') }
+
+  async run (id, data, gz) { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const args = { token: session.authToken, id, data, gz }
+      const ret = this.tr(await post(this, 'CrypterRaw', args))
+      const priv = aSt.getAvatar(id).priv
+      const res = await decrypterRaw(priv, ret.data, gz)
+      return this.finOK(res)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

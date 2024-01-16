@@ -286,6 +286,7 @@ export default {
   EX4018: 'store {0} inconnu',
   EX4020: 'Erreur de téléchargement d\'un fichier',
   EX4021: 'Bug probable de \'opération "{0}" après plusieurs tentatives aynat échoué.',
+  EX4022: 'Fichier brut impossible à décrypter: {0}',
 
   // F_BRO = 5000 // Erreur fonctionnelle trappée sur le browser
   EX5001: 'La phrase secrète a changé depuis l\'authentification du compte. Après déconnexion, se reconnecter avec la nouvelle phrase secrète.',
@@ -315,6 +316,7 @@ export default {
   EX7005: 'La version d\'API [{0}] gérée par le serveur est incompatble avec celle [{1}] de l\'application', // 5
   EX7006: 'Fichier "{0}" non trouvé', // 6
   EX7007: 'Clé d\'autorisation d\'appel de l\'API invalide (reçue: [{0}])',
+  EX7008: 'Erreur technique de cryptage RSA: {0}',
 
   EX7100: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - message:[{1}]',
   EX7101: 'Le serveur est joignable mais a retourné une erreur technique, bref il n\'est pas opérationnel: HTTP:[{0}] - message:[{1}]',
@@ -606,6 +608,9 @@ export default {
   OP_MuterCompte: 'Mutation dy type d\'un compte',
 
   OP_GetPub: 'Obtention d\'une clé publique',
+
+  OP_TestRSA: 'Test encryption RSA',
+  OP_CrypterRaw: 'Test d\'encryptage serveur d\'un buffer long',
 
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',

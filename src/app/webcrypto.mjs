@@ -5,7 +5,8 @@ IMPLEMENTATION de webcrypto.js EN UTILISANT Web Cryptography API (sans Node)
 import { sha256 as jssha256 } from 'js-sha256'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AppExc, E_BRO } from './api.mjs'
-import { $t } from './util.mjs'
+import { $t, ungzipT } from './util.mjs'
+import { encode, decode } from '@msgpack/msgpack'
 
 const SALTS = new Array(256)
 
@@ -97,7 +98,7 @@ export async function decrypterStr (cle, buffer) {
   return dec.decode(arrayBuffer(buf))
 }
 
-function abToPem (ab, pubpriv) { // ArrayBuffer
+export function abToPem (ab, pubpriv) { // ArrayBuffer
   const s = fromByteArray(new Uint8Array(ab))
   let i = 0
   const a = ['-----BEGIN ' + pubpriv + ' KEY-----']
@@ -109,7 +110,7 @@ function abToPem (ab, pubpriv) { // ArrayBuffer
   return a.join('\n')
 }
 
-function keyToU8 (pem, pubpriv) {
+export function keyToU8 (pem, pubpriv) {
   const d = '-----BEGIN ' + pubpriv + ' KEY-----'
   const f = '-----END ' + pubpriv + ' KEY-----'
   const s = pem.substring(d.length, pem.length - f.length)
@@ -143,8 +144,8 @@ export async function crypterRSA (clepub, u8) {
 }
 
 export async function decrypterRSA (clepriv, u8) {
+  const k = typeof clepriv === 'string' ? keyToU8(clepriv, 'PRIVATE') : clepriv
   try {
-    const k = typeof clepriv === 'string' ? keyToU8(clepriv, 'PRIVATE') : clepriv
     if (!(k instanceof Uint8Array)) throw new Error($t('EX4016'))
     if (!(u8 instanceof Uint8Array)) throw new Error($t('EX4017'))
       // !!! SHA-1 pour que Node puisse decrypter !!!
@@ -206,3 +207,23 @@ setTimeout(async () => {
   console.log(dec.decode(await decrypterSrv(x)))
 }, 1)
 */
+
+/* Retourne le contenu binaire décrypté d'un buffer long crypté par la clé RSA publique
+*/
+export async function decrypterRaw (clepriv, u8) {
+  if (!u8) return null
+  try {
+    const p1 = u8.slice(0, 256)
+    const p2 = u8.slice(256)
+    const b3 = await decrypterRSA(clepriv, p1)
+    const z = decode(b3)
+    const key = await window.crypto.subtle.importKey('raw', arrayBuffer(z.aes), 'aes-cbc', false, ['decrypt'])
+    const r = !p2 || !p2.length ? new Uint8Array(0) :
+      await crypto.subtle.decrypt({ name: 'aes-cbc', iv: z.iv }, key, p2)
+    const bf = new ab2b(r)
+    if (!z.gz || !bf.length) return bf
+    return ungzipT(bf)
+  } catch (e) {
+    throw new AppExc(E_BRO, 22, [e.toString()], e.stack)
+  }
+}
