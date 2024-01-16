@@ -5,23 +5,31 @@ import { setRequiredModules } from '../app/util.mjs'
 import stores from '../stores/stores.mjs'
 import { aidetm } from '../app/help.mjs'
 import { config } from '../app/config.mjs'
-import { fromByteArray } from '../app/base64.mjs'
 
-
-const encoder = new TextEncoder('utf-8')
+// import { fromByteArray } from '../app/base64.mjs'
+// const encoder = new TextEncoder('utf-8')
 
 export function getImgUrl (name) {
   try {
     if (name.endsWith('.svg')) {
-      const x = require('../assets/images/' + name.replace('.svg', '.txt')).default
-      if (!x) return require('../assets/defaut.png')
+      /* 
+      Pour un .svg le require retourne un texte [bla bla ="data:image ..."]
+      Pourquoi ? alors qu'avec un txt on a son texte 
+      */
+      const n = name // .replace('.svg', '.txt')
+      const x = require('../assets/help/' + n)
+      if (!x) return require('../assets/help/defaut.png')
+      const i = x.indexOf('data:image')
+      return x.substring(i, x.length - 1)
+      /* pour un txt, il faut le convertir en base64
       return 'data:image/svg+xml;base64,' + fromByteArray(encoder.encode(x))
+      */
     }
-    const x = require('../assets/images/' + name)
+    const x = require('../assets/help/' + name)
     if (x) return x
-    return require('../assets/defaut.png')
+    return require('../assets/help/defaut.png')
   } catch (e) { 
-    return require('../assets/defaut.png')
+    return require('../assets/help/defaut.png')
   }
 }
 
@@ -48,7 +56,8 @@ export default boot(async ({ app /* Vue */ }) => {
     const x = {}
     for(const lg in e.titre) {
       try {
-        x[lg] = require('../assets/help/' + p + '_' + lg + '.md').default
+        const y = require('../assets/help/' + p + '_' + lg + '.md')
+        x[lg] = y
       } catch (e) { }
     }
     cfg.aide[p] = x
@@ -71,7 +80,7 @@ export default boot(async ({ app /* Vue */ }) => {
   })
 
   cfg.logo = require('../assets/logo.png')
-  cfg.cliccamera = require('../assets/cliccamera.b64').default
+  cfg.cliccamera = require('../assets/cliccamera.b64')
   cfg.iconAvatar = require('../assets/avatar.jpg')
   cfg.iconGroupe = require('../assets/groupe.jpg')
   cfg.iconSuperman = require('../assets/superman.jpg')
@@ -79,6 +88,4 @@ export default boot(async ({ app /* Vue */ }) => {
   stores.config.setConfig(cfg)
 
   setRequiredModules({ pako: pako })
-  // const b64 = getImgUrl('logo.svg')
-  // console.log('started')
 })

@@ -89,18 +89,16 @@ module.exports = configure(function (ctx) {
         ignored: '**/node_modules',
       },
       extendWebpack (cfg) {
-        cfg.module.rules.push({
-          test: /\.md$/i,
-          use: 'raw-loader'
-        })
-        cfg.module.rules.push({
-          test: /\.b64$/i,
-          use: 'raw-loader'
-        })
-        cfg.module.rules.push({
-          test: /\.txt$/i,
-          use: 'raw-loader'
-        })
+        // cfg.module.rules.push({ test: /\.md$/i, use: 'raw-loader' })
+        // cfg.module.rules.push({ test: /\.b64$/i, use: 'raw-loader' })
+        // cfg.module.rules.push({ test: /\.txt$/i, use: 'raw-loader' })
+        // cfg.module.rules.push({ test: /\.svg$/, loader: 'raw-loader' })
+
+        cfg.module.rules.push({ test: /\.md$/i, type: 'asset/source' })
+        cfg.module.rules.push({ test: /\.b64$/i, type: 'asset/source' })
+        cfg.module.rules.push({ test: /\.txt$/i, type: 'asset/source' })
+        cfg.module.rules.push({ test: /\.svg$/i, type: 'asset/source' })
+
         // Commenter la ligne ci-dessous pour ne pas obfusquer le code
         if(!ctx.dev && !ctx.debug) { cfg.plugins.push(plugob) }
       },

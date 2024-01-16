@@ -26,7 +26,6 @@
     "pako": "^2.1.0",
     "pinia": "^2.0.11",
     "quasar": "^2.6.0",
-    "raw-loader": "^4.0.2",
     "simple-keyboard": "^3.4.181",
     "vue": "^3.0.0",
     "vue-advanced-cropper": "^2.8.6",

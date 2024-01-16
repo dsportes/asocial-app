@@ -1,5 +1,5 @@
-## Page 2
-Texte de la page 2
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
    width="200"
@@ -59,15 +59,3 @@ Texte de la page 2
          y="36.901085">Bof</tspan></text>
   </g>
 </svg>
-
-SVG dans img
-
-<img src="dessin.svg" width="64" height="64" style="background-color:white">
-
-PNG dans un img
-
-<img src="logo.png" width="96" height="96" style="background-color:white">
-
-Chargé depuis svg
-
-<img src="logo.svg" width="96" height="96" style="background-color:white">
