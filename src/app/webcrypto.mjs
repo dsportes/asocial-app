@@ -6,7 +6,6 @@ import { sha256 as jssha256 } from 'js-sha256'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AppExc, E_BRO } from './api.mjs'
 import { $t, ungzipT } from './util.mjs'
-import { encode, decode } from '@msgpack/msgpack'
 
 const SALTS = new Array(256)
 
@@ -158,6 +157,7 @@ export async function decrypterRSA (clepriv, u8) {
     throw new AppExc(E_BRO, 20, [x1, x2, e.toString()], e.stack)
   }
 }
+
 /*
 export function concat (arrays) {
   // sum of individual array lengths
@@ -173,7 +173,7 @@ export function concat (arrays) {
 }
 */
 
-/* Cryptage Serveur *******************************/
+/* Cryptage Serveur *******************************
 const CLE = new Uint8Array(32)
 {
   const s = new Uint8Array([5, 255, 10, 250, 15, 245, 20, 240, 25, 235, 30, 230, 35, 225, 40, 220])
@@ -201,7 +201,6 @@ export async function decrypterSrv (u8) {
   }
 }
 
-/*
 setTimeout(async () => {
   const x = await crypterSrv(enc.encode('toto est très très très très beau'))
   console.log(dec.decode(await decrypterSrv(x)))
@@ -209,19 +208,27 @@ setTimeout(async () => {
 */
 
 /* Retourne le contenu binaire décrypté d'un buffer long crypté par la clé RSA publique
+Interprète un binaire dont,
+- les 256 premiers bytes sont cryptés par la clé publique RSA: aes, iv, gz (0 /1)
+  - 32 bytes - aes: clé AES unique générée, 
+  - 16 bytes - iv: vecteur IV utilisé,
+  - 1 byte - gz: 1 si gzippé, 0 sinon
+- les suivants sont le texte de data, gzippé ou non, crypté par la clé AES générée.
 */
 export async function decrypterRaw (clepriv, u8) {
   if (!u8) return null
   try {
     const p1 = u8.slice(0, 256)
     const p2 = u8.slice(256)
-    const b3 = await decrypterRSA(clepriv, p1)
-    const z = decode(b3)
-    const key = await window.crypto.subtle.importKey('raw', arrayBuffer(z.aes), 'aes-cbc', false, ['decrypt'])
+    const b3 = new Uint8Array(await decrypterRSA(clepriv, p1))
+    const aes = b3.slice(0, 32)
+    const iv = b3.slice(32, 48)
+    const gz = b3.slice(48, 49)[0]
+    const key = await window.crypto.subtle.importKey('raw', arrayBuffer(aes), 'aes-cbc', false, ['decrypt'])
     const r = !p2 || !p2.length ? new Uint8Array(0) :
-      await crypto.subtle.decrypt({ name: 'aes-cbc', iv: z.iv }, key, p2)
+      await crypto.subtle.decrypt({ name: 'aes-cbc', iv: iv }, key, p2)
     const bf = new ab2b(r)
-    if (!z.gz || !bf.length) return bf
+    if (!gz || !bf.length) return bf
     return ungzipT(bf)
   } catch (e) {
     throw new AppExc(E_BRO, 22, [e.toString()], e.stack)
