@@ -8,7 +8,6 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js
 
-
 const ESLintPlugin = require('eslint-webpack-plugin')
 const { configure } = require('quasar/wrappers')
 const path = require('path')
@@ -61,6 +60,7 @@ module.exports = configure(function (ctx) {
       // to the underlying Webpack
       devtool: 'source-map',
       env: {
+        BUILD: '202401171412',
         APITK: 'VldNo2aLLvXRm0Q' // Token d'autorisation d'usage de l'API
       },
 
@@ -95,9 +95,18 @@ module.exports = configure(function (ctx) {
         // cfg.module.rules.push({ test: /\.svg$/, loader: 'raw-loader' })
 
         cfg.module.rules.push({ test: /\.md$/i, type: 'asset/source' })
-        cfg.module.rules.push({ test: /\.b64$/i, type: 'asset/source' })
         cfg.module.rules.push({ test: /\.txt$/i, type: 'asset/source' })
-        cfg.module.rules.push({ test: /\.svg$/i, type: 'asset/source' })
+        cfg.module.rules.push({ 
+          test: /\.svg$/i, 
+          type: 'asset/inline',
+          generator: {
+            dataUrl(content) {
+              // élimination de 'module export = "' en tête du contenu
+              const x = content.toString()
+              return x.substring(x.indexOf('data:image'), x.length - 1)
+            }
+          }
+        })
 
         // Commenter la ligne ci-dessous pour ne pas obfusquer le code
         if(!ctx.dev && !ctx.debug) { cfg.plugins.push(plugob) }

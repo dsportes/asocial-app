@@ -3,39 +3,34 @@ const pako = require('pako')
 import { setRequiredModules } from '../app/util.mjs'
 
 import stores from '../stores/stores.mjs'
-import { aidetm } from '../app/help.mjs'
+import { init } from '../app/help.mjs'
 import { config } from '../app/config.mjs'
-
-// import { fromByteArray } from '../app/base64.mjs'
-// const encoder = new TextEncoder('utf-8')
 
 export function getImgUrl (name) {
   try {
-    if (name.endsWith('.svg')) {
-      /* 
-      Pour un .svg le require retourne un texte [bla bla ="data:image ..."]
-      Pourquoi ? alors qu'avec un txt on a son texte 
-      */
-      const n = name // .replace('.svg', '.txt')
-      const x = require('../assets/help/' + n)
-      if (!x) return require('../assets/help/defaut.png')
-      const i = x.indexOf('data:image')
-      return x.substring(i, x.length - 1)
-      /* pour un txt, il faut le convertir en base64
-      return 'data:image/svg+xml;base64,' + fromByteArray(encoder.encode(x))
-      */
-    }
     const x = require('../assets/help/' + name)
-    if (x) return x
-    return require('../assets/help/defaut.png')
+    return x ? x : require('../assets/help/defaut.png')
   } catch (e) { 
     return require('../assets/help/defaut.png')
+  }
+}
+
+export function getMd (page, lang) {
+  try {
+    const x = require('../assets/help/' + page + '_' + lang + '.md')
+    if (x) return x
+    return require('../assets/help/bientot_' + lang + '.md')
+  } catch (e) { 
+    return require('../assets/help/bientot_' + lang + '.md')
   }
 }
 
 export default boot(async ({ app /* Vue */ }) => {
   const cfg = {}
   for(const x in config) cfg[x] = config[x]
+
+  const b = process.env.BUILD
+  if (b) cfg.BUILD = b
 
   console.log('debug:' + (cfg.DEBUG ? true : false) +
     ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
@@ -50,21 +45,18 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.wssrv = config.WSSRV ? config.WSSRV : ('wss://' + cfg.srv + '/ws/')
   console.log('opsrv: ' + cfg.opsrv + ' --- wssrv: ' + cfg.wssrv)
 
+  /*
   cfg.aide = {}
   for(const p in aidetm) {
-    const e = aidetm[p]
     const x = {}
-    for(const lg in e.titre) {
-      try {
-        const y = require('../assets/help/' + p + '_' + lg + '.md')
-        x[lg] = y
-      } catch (e) { }
-    }
+    for(const lg in aidetm[p].titre) x[lg] = getMd(p, lg)
     cfg.aide[p] = x
   }
+  */
   
   cfg.locales = []
   cfg.localeOptions.forEach(t => {cfg.locales.push(t.value)})
+  cfg.locales.forEach(lg => { init(lg) })
 
   const mc = cfg['motscles']
   cfg.motsclesloc = {}
@@ -80,7 +72,8 @@ export default boot(async ({ app /* Vue */ }) => {
   })
 
   cfg.logo = require('../assets/logo.png')
-  cfg.cliccamera = require('../assets/cliccamera.b64')
+  cfg.logoSvg = require('../assets/logo.svg')
+  cfg.cliccamera = require('../assets/cliccamera.txt')
   cfg.iconAvatar = require('../assets/avatar.jpg')
   cfg.iconGroupe = require('../assets/groupe.jpg')
   cfg.iconSuperman = require('../assets/superman.jpg')

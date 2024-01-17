@@ -10,57 +10,24 @@
         <q-btn v-if="!stackvide" class="q-ml-xs" dense size="md" icon="arrow_back" @click="back">
           <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
         </q-btn>
-        <q-toolbar-title class="titre-lg">{{tp}}</q-toolbar-title>
+        <q-toolbar-title class="titre-lg">{{titre(pagec())}}</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
     <q-page-container>
-      <q-splitter horizontal v-model="splitterModel" :limits="[20, 80]" 
-        style="height: 90vh">
-
-        <template v-slot:before>
-          <div class="q-pa-md">
-            <q-tree
-              dense
-              :nodes="arbre"
-              node-key="id"
-              v-model:selected="selected"
-              v-model:expanded="expanded"
-              no-connectors
-            >
-            <template v-slot:default-header="prop">
-              <div v-if="prop.node.type === 1" class="row items-center">
-                <q-icon name="library_books" color="orange" size="24px" class="q-mr-sm" />
-                <div class="text-bold titre-md titre-italic">{{ prop.node.label }}</div>
-              </div>
-              <div v-if="prop.node.type === 2" class="row items-center">
-                <q-icon name="menu_book" color="orange" size="24px" class="q-mr-sm" />
-                <div class="text-bold titre-md titre-italic">{{ prop.node.label }}</div>
-              </div>
-              <div v-if="prop.node.type === 3" class="row items-center">
-                <q-icon name="note" color="primary" size="24px" class="q-mr-sm" />
-                <div :class="'titre-md ' + (prop.node.id === selected ? 'q-px-xs bg-yellow-5 text-black text-bold' : '') ">
-                  {{ prop.node.label }}</div>
-              </div>
-              <div v-if="prop.node.type === 4" class="row items-center">
-                <q-icon name="chevron_right" size="16px" class="q-mr-sm" />
-                <div class="titre-sm text-italic">{{ prop.node.label }}</div>
-              </div>
-            </template>
-            </q-tree>
-          </div>
-        </template>
-
-        <template v-slot:separator>
-          <q-avatar color="primary" text-color="white" size="24px" icon="drag_indicator" />
-        </template>
-
-        <template v-slot:after>
-          <show-html class="q-ma-sm" :texte="'Page : ' + selected"/>
-        </template>
-
-      </q-splitter>
+      <show-html class="q-ma-sm" :texte="texte"/>
+      <div class="filler"/>
     </q-page-container>
+
+    <q-footer elevated class="primary text-white">
+      <div class="titre-lg text-italic">{{$t('HLPvoir')}}</div>
+      <div class="vlst">
+        <div v-for="(p, idx) in page(pagec()).voir" :key="idx">
+          <div @click="push(p)" class="titre-md cursor-pointer q-ml-md">{{titre(p)}}</div>
+        </div>
+      </div>
+    </q-footer>
+
   </q-layout>
 </q-dialog>
 </template>
@@ -70,7 +37,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getImgUrl } from '../boot/appconfig.js'
 import stores from '../stores/stores.mjs'
-import { arbres, titre, parents } from '../app/help.mjs'
+import { aidetm } from '../app/help.mjs'
 import { styp } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
@@ -85,18 +52,9 @@ export default ({
     }
   },
 
-  watch: {
-    selected (ap) {
-      this.expanded = parents(ap)
-      console.log(ap)
-    }
-  },
-
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    stackvide () { return this.ui.helpstack.length <= 1 },
-    arbre () { return arbres[this.$i18n.locale] },
-    tp () { return titre(this.$i18n.locale, this.selected) }
+    stackvide () { return this.ui.helpstack.length <= 1 }
   },
 
   methods: {
@@ -107,10 +65,6 @@ export default ({
     const session = stores.session
     const config = stores.config
     const ui = stores.ui
-  
-    const splitterModel = ref(50)
-    const selected = ref(ui.helpstack[0])
-    const expanded = ref(parents(ui.helpstack[0]))
 
     function getText (p, lg) {
       const e = config.aide[p]
@@ -144,7 +98,10 @@ export default ({
 
     function filtreLignes (t) {
       const x = t.split('\n'), r = []
-      for (const l of x) r.push(remplaceImg(l))
+      for (const l of x) { 
+        if (l.startsWith('@@')) continue
+        r.push(remplaceImg(l))
+      }
       return r.join('\n')
     }
 
@@ -173,7 +130,7 @@ export default ({
     }
 
     function page (p) {
-      // return aidetm[p] || aidetm.bientot
+      return aidetm[p] || aidetm.bientot
     }
 
     function push (p) {
@@ -186,11 +143,9 @@ export default ({
       afficher()
     }
 
-
-    // afficher()
+    afficher()
 
     return {
-      splitterModel, selected, expanded,
       texte,
       titre,
       page,

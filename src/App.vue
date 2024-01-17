@@ -2,7 +2,19 @@
 <q-layout view="hHh lpR fFf">
   <q-header elevated>
     <q-toolbar class="full-width">
-
+      <!-- 
+      ça marche (en utilisant le préchargement dans config)
+      <img :src="session.ok && session.estComptable ? config.iconSuperman : config.logoSvg" 
+        height="32" width="32"/>
+      Mais ça, ça ne marche pas pour SVG en direct dans une expression
+      <img :src="session.ok && session.estComptable ? '~assets/superman.jpg' : '~assets/logo.svg'" 
+        height="32" width="32"/>
+      -->
+      <img v-if="session.ok && session.estComptable" src="~assets/superman.jpg" 
+        height="28" width="28" class="q-pa-none"/>
+      <img v-else src="~assets/logo.svg" 
+        height="28" width="28"  class="q-pa-none"/>
+      
       <bouton-help page="page1"/>
 
       <!-- Notifications -->
@@ -508,7 +520,8 @@ export default {
     return {
       session: stores.session,
       aSt: stores.avatar, 
-      gSt: stores.groupe, 
+      gSt: stores.groupe,
+      config: stores.config,
       ui, 
       styp, dkli, hms, deconnexion
     }

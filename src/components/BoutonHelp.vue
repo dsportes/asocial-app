@@ -1,14 +1,15 @@
 <template>
 <span @click="ouvrir">
   <q-btn icon="help" dense :size="size || 'md'">
-    <q-tooltip class="bg-white text-primary">{{titre}}</q-tooltip>
+    <q-tooltip class="bg-white text-primary">{{tp || $t('HLPaidebd')}}</q-tooltip>
   </q-btn>
   <span v-if="label" class="q-ml-sm">{{label}}</span>
+  <audio ref="sound" :src="config.cliccamera" preload = "auto"></audio>
 </span>
 </template>
 <script>
 import stores from '../stores/stores.mjs'
-import { aidetm } from '../app/help.mjs'
+import { titre } from '../app/help.mjs'
 
 export default ({
   name: 'BoutonHelp',
@@ -16,14 +17,15 @@ export default ({
   props: { size: String, page: String, label: String },
 
   computed: {
-    titre () {
-      return this.page && aidetm[this.page] ? this.$t('HLPaide') + aidetm[this.page].titre[this.$i18n.locale] : this.$t('HLPaidebd')
-    }
+    tp () { return titre(this.$i18n.locale, this.page) }
   },
 
   methods: {
     ouvrir () {
-      if (this.page) this.ui.pushhelp(this.page)
+      const p = this.page && this.tp ? this.page : 'bientot'
+      const s = this.$refs['sound']
+      if (s) s.play()
+      this.ui.pushhelp(p)
     }
   },
   
