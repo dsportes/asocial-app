@@ -157,7 +157,8 @@ export default ({
       const txt = getMd(id, $i18n.locale.value)
       const x = txt.split('\n')
       const r = []
-      for (const l of x) r.push(remplaceImg(l))
+      for (const l of x) 
+        if (!l.startsWith('@@')) r.push(remplaceImg(l))
       texte.value = r.join('\n')
     }
 
