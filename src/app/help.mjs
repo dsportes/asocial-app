@@ -48,22 +48,23 @@ const sections = [
   }
 ]
 
-export const arbres = {
-}
+const chapitres = { }
 
-const chapitres = {
-}
+export const arbres = { }
 
 export function parents (p) {
   const a = [p]
-  const e1 = pages[p]
-  if (e1) {
-    const e2 = chapitres[e1.sub]
-    if (e2) {
-      a.push(e2.id)
-      const e3 = chapitres[e2.section]
-      if (e3) a.push(e3.id)
-    }
+  let e1, e2, e3
+  if (!p.startsWith('s')) {
+    e1 = pages[p] // c'est une page
+    e2 = e1 ? chapitres[e1.sub] : null
+  } else {
+    e2 = chapitres[p] // c'est une section ou sous-section
+  }
+  if (e2) {
+    a.push(e2.id)
+    e3 = chapitres[e2.section]
+    if (e3) a.push(e3.id)
   }
   return a
 }

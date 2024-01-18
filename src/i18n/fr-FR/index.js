@@ -444,7 +444,7 @@ export default {
   HLPaidebd: 'Page d\'aide bientôt disponible',
   HLPfermer: 'Fermer l\'aide',
   HLPprec: 'Page d\'aide précédente',
-  HLPvoir: 'Voir aussi ...',
+  HLPfiltre: 'Filtre sur les titres',
 
   // Stats tribus
   STtit: 'Statistiques de l\'espace "{0}" [{1}] - {2} tranche(s) - {3}',

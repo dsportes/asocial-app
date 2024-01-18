@@ -4,47 +4,67 @@
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
         <q-btn dense size="md" icon="chevron_left" color="warning" 
-          v-close-popup @click="ui.fermerHelp">
+          @click="ui.fermerHelp">
           <q-tooltip class="bg-white text-primary">{{$t('HLPfermer')}}</q-tooltip>
         </q-btn>
-        <q-btn v-if="!stackvide" class="q-ml-xs" dense size="md" icon="arrow_back" @click="back">
+        <q-btn v-if="!stackvide" class="q-ml-xs" 
+          dense size="md" icon="arrow_back" @click="back">
           <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
         </q-btn>
         <q-toolbar-title class="titre-lg">{{tp}}</q-toolbar-title>
       </q-toolbar>
     </q-header>
 
+    <q-footer>
+      <q-toolbar class="bg-black text-white">
+      <q-input ref="filterRef" dense v-model="filter" :label="$t('HLPfiltre')">
+        <template v-slot:append>
+          <q-icon v-if="filter !== ''" name="clear" class="cursor-pointer" @click="resetFilter" />
+        </template>
+      </q-input>
+      <q-space />
+      <q-btn v-if="!expandAll" 
+        dense size="sm" color="primary" icon="unfold_more" padding="none"
+        :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
+      <q-btn v-if="expandAll" 
+        dense size="sm" color="primary" icon="unfold_less" padding="none"
+        :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
+      </q-toolbar>
+    </q-footer>
+
     <q-page-container>
       <q-splitter horizontal v-model="splitterModel" :limits="[20, 80]" 
-        style="height: 90vh">
+        style="height: 85vh">
 
-        <template v-slot:before>
-          <div class="q-pa-md">
-            <q-tree
+        <template v-slot:after>
+          <div class="q-pa-xs">
+            <q-tree ref="tree"
               dense
               :nodes="arbre"
               node-key="id"
+              :filter="filter"
               v-model:selected="selected"
               v-model:expanded="expanded"
               no-connectors
             >
             <template v-slot:default-header="prop">
-              <div v-if="prop.node.type === 1" class="row items-center">
-                <q-icon name="library_books" color="orange" size="24px" class="q-mr-sm" />
-                <div class="text-bold titre-md titre-italic">{{ prop.node.label }}</div>
-              </div>
-              <div v-if="prop.node.type === 2" class="row items-center">
-                <q-icon name="menu_book" color="orange" size="24px" class="q-mr-sm" />
-                <div class="text-bold titre-md titre-italic">{{ prop.node.label }}</div>
-              </div>
-              <div v-if="prop.node.type === 3" class="row items-center">
-                <q-icon name="note" color="primary" size="24px" class="q-mr-sm" />
-                <div :class="'titre-md ' + (prop.node.id === selected ? 'q-px-xs bg-yellow-5 text-black text-bold' : '') ">
-                  {{ prop.node.label }}</div>
-              </div>
-              <div v-if="prop.node.type === 4" class="row items-center">
-                <q-icon name="chevron_right" size="16px" class="q-mr-sm" />
-                <div class="titre-sm text-italic">{{ prop.node.label }}</div>
+              <div @click.stop="clic($event, prop.node)" :title="prop.node.id">
+                <div v-if="prop.node.type === 1" class="row items-center">
+                  <q-icon name="library_books" color="orange" size="24px" class="q-mr-sm" />
+                  <div :class="'text-bold text-italic' + cl(prop.node.id)">{{ prop.node.label }}</div>
+                </div>
+                <div v-if="prop.node.type === 2" class="row items-center">
+                  <q-icon name="menu_book" color="orange" size="24px" class="q-mr-sm" />
+                  <div :class="'text-bold text-italic' + cl(prop.node.id)">{{ prop.node.label }}</div>
+                </div>
+                <div v-if="prop.node.type === 3" class="row items-center">
+                  <q-icon name="note" color="primary" size="24px" class="q-mr-sm" />
+                  <div :class="'text-bold' + cl(prop.node.id)">{{ prop.node.label }}</div>
+                </div>
+                <div v-if="prop.node.type === 4" class="row items-center">
+                  <q-icon name="chevron_right" size="16px" class="q-mr-sm" />
+                  <div class="titre-sm text-italic">{{ prop.node.label }}</div>
+                </div>
               </div>
             </template>
             </q-tree>
@@ -55,8 +75,8 @@
           <q-avatar color="primary" text-color="white" size="24px" icon="drag_indicator" />
         </template>
 
-        <template v-slot:after>
-          <show-html class="q-ma-sm" :texte="'Page : ' + selected"/>
+        <template v-slot:before>
+          <show-html class="q-ma-sm" :texte="texte"/>
         </template>
 
       </q-splitter>
@@ -68,7 +88,7 @@
 <script>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { getImgUrl } from '../boot/appconfig.js'
+import { getImgUrl, getMd } from '../boot/appconfig.js'
 import stores from '../stores/stores.mjs'
 import { arbres, titre, parents } from '../app/help.mjs'
 import { styp } from '../app/util.mjs'
@@ -82,70 +102,63 @@ export default ({
 
   data () {
     return {
+      expandAll: false
     }
   },
 
   watch: {
     selected (ap) {
       this.expanded = parents(ap)
-      console.log(ap)
     }
   },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     stackvide () { return this.ui.helpstack.length <= 1 },
     arbre () { return arbres[this.$i18n.locale] },
-    tp () { return titre(this.$i18n.locale, this.selected) }
+    tp () { return titre(this.$i18n.locale, this.selected) },
+    courante () { return this.ui.helpstack[this.ui.helpstack.length - 1] }
   },
 
   methods: {
+    cl (id) { return ' titre-md ' + (id === this.selected ? 'q-px-xs bg-yellow-5 text-black text-bold' : '') },
+    clic (e, n) {
+      // const t = e.target
+      const i = n.id.indexOf('/')
+      const p = i === -1 ? n.id : n.id.substring(i + 1)
+      if (p === this.courante) return
+      this.ui.pushhelp(p)
+      this.selected = p
+      this.setTexte(p)
+    },
+    back () {
+      this.ui.pophelp()
+      this.selected = this.courante
+      this.setTexte(p)
+    }
   },
 
   setup () {
     const $i18n = useI18n()
-    const session = stores.session
-    const config = stores.config
     const ui = stores.ui
   
     const splitterModel = ref(50)
     const selected = ref(ui.helpstack[0])
     const expanded = ref(parents(ui.helpstack[0]))
+    const texte = ref()
+    const filter = ref('')
+    const filterRef = ref(null)
 
-    function getText (p, lg) {
-      const e = config.aide[p]
-      return e ? e[lg] : null
+    function resetFilter () {
+      filter.value = ''
+      filterRef.value.focus()
     }
 
-    const texte = ref('')
-
-    function pagec () {
-      return ui.helpstack.length ? ui.helpstack[ui.helpstack.length - 1] : null
-    }
-
-    function afficher () {
-      const p = pagec()
-      if (!p) return
-      setTimeout(async () => {
-        const loc = $i18n.locale.value
-        let txt = ''
-        if (p) {
-          txt = getText(p, loc)
-          if (!txt && loc !== 'fr-FR') {
-            txt = getText(p, 'fr-FR')
-          }
-          if (!txt) {
-            txt = getText('bientot', loc)
-          }
-        }
-        texte.value = filtreLignes(txt)
-      }, 5)
-    }
-
-    function filtreLignes (t) {
-      const x = t.split('\n'), r = []
+    function setTexte (id) {
+      const txt = getMd(id, $i18n.locale.value)
+      const x = txt.split('\n')
+      const r = []
       for (const l of x) r.push(remplaceImg(l))
-      return r.join('\n')
+      texte.value = r.join('\n')
     }
 
     function remplaceImg (l) {
@@ -168,52 +181,26 @@ export default ({
       return lx.join('')
     }
 
-    function titre (p) {
-      return page(p).titre[$i18n.locale.value]
-    }
-
-    function page (p) {
-      // return aidetm[p] || aidetm.bientot
-    }
-
-    function push (p) {
-      ui.pushhelp(p)
-      afficher()
-    }
-
-    function back () {
-      ui.pophelp()
-      afficher()
-    }
-
-
-    // afficher()
+    setTexte(selected.value)
 
     return {
+      ui, styp,
       splitterModel, selected, expanded,
-      texte,
-      titre,
-      page,
-      pagec,
-      push,
-      back,
-      session,
-      ui,
-      styp
+      setTexte, texte,
+      resetFilter, filterRef, filter,
+      tree: ref(null)
     }
   }
 })
 </script>
 
-<style lang="css">
-.q-dialog__inner { padding: 1px !important; }
-</style>
-
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.filler
-  height: 2rem
-.vlst
-  max-height: 5rem
-  overflow-y: auto
+.f1
+  position: absolute
+  top: 0
+  right: 0
+  width: 8rem
+  z-index: 2
+  border: 2px solid $yellow-5
 </style>

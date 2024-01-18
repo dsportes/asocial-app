@@ -17,7 +17,9 @@ export function getImgUrl (name) {
 
 export function getMd (page, lang) {
   try {
-    const x = require('../assets/help/' + page + '_' + lang + '.md')
+    let x = require('../assets/help/' + page + '_' + lang + '.md')
+    if (x) return x
+    if (lang !== 'fr-FR') x = require('../assets/help/' + page + '_fr-FR.md')
     if (x) return x
     return require('../assets/help/bientot_' + lang + '.md')
   } catch (e) { 

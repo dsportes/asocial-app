@@ -15,7 +15,7 @@
       <img v-else src="~assets/logo.svg" 
         height="28" width="28"  class="q-pa-none"/>
       
-      <bouton-help page="page1"/>
+      <bouton-help page="s1"/>
 
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
