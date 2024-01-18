@@ -1,5 +1,6 @@
 import { boot } from 'quasar/wrappers'
 const pako = require('pako')
+
 import { setRequiredModules } from '../app/util.mjs'
 
 import stores from '../stores/stores.mjs'
@@ -47,15 +48,6 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.wssrv = config.WSSRV ? config.WSSRV : ('wss://' + cfg.srv + '/ws/')
   console.log('opsrv: ' + cfg.opsrv + ' --- wssrv: ' + cfg.wssrv)
 
-  /*
-  cfg.aide = {}
-  for(const p in aidetm) {
-    const x = {}
-    for(const lg in aidetm[p].titre) x[lg] = getMd(p, lg)
-    cfg.aide[p] = x
-  }
-  */
-  
   cfg.locales = []
   cfg.localeOptions.forEach(t => {cfg.locales.push(t.value)})
   cfg.locales.forEach(lg => { init(lg) })
@@ -74,11 +66,21 @@ export default boot(async ({ app /* Vue */ }) => {
   })
 
   cfg.logo = require('../assets/logo.png')
-  cfg.logoSvg = require('../assets/logo.svg')
-  cfg.cliccamera = require('../assets/cliccamera.txt')
   cfg.iconAvatar = require('../assets/avatar.jpg')
   cfg.iconGroupe = require('../assets/groupe.jpg')
   cfg.iconSuperman = require('../assets/superman.jpg')
+
+  cfg.logoSvg = require('../assets/logo.svg') // Taitement spécial Webpack (quasar.config.js)
+
+  /* N'importe quel binaire en .bin peut être chargé en dataURL:
+  - son MIME est 'application/octet-stream'
+  - pour le rendre utilisable il faut lui donner son 'vrai' type
+  Ici cliccamera est un pur .mp3
+  */
+  cfg.cliccamera = require('../assets/cliccamera.bin')
+    .replace('application/octet-stream', 'audio/mpeg')
+  cfg.beep = require('../assets/beep.bin')
+    .replace('application/octet-stream', 'audio/mpeg')
 
   stores.config.setConfig(cfg)
 

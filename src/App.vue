@@ -344,12 +344,14 @@
 </template>
 
 <script>
+import { onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
 import { ID } from './app/api.mjs'
-import { set$t, hms, dkli, styp } from './app/util.mjs'
+
+import { set$t, hms, dkli, styp, beep } from './app/util.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
 import { SetDhvuCompta } from './app/operations.mjs'
 
@@ -516,6 +518,10 @@ export default {
       })
     })
     */
+
+    onMounted(async () => {
+      await beep()
+    })
 
     return {
       session: stores.session,

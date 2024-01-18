@@ -149,7 +149,8 @@ export default ({
     },
     startCam () {
       if (!this.cam) {
-        this.cam = new Webcam(this.webcam, 'user', this.canvas, this.sound)
+        this.cam = new Webcam(this.webcam, 'user', this.canvas, 
+          this.config.silence ? null : this.sound)
       }
       this.cam.start()
       this.camOn = true
@@ -177,6 +178,7 @@ export default ({
 
   setup (props) {
     const ui = stores.ui
+    const config = stores.config
     const phdef = stores.config.iconavatar
     const clic = stores.config.cliccamera
 
@@ -226,7 +228,7 @@ export default ({
     init()
 
     return {
-      ui, styp,
+      ui, styp, config,
       phdef,
       clic,
       nom,

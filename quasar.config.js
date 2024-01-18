@@ -107,6 +107,7 @@ module.exports = configure(function (ctx) {
             }
           }
         })
+        cfg.module.rules.push({ test: /\.bin$/i, type: 'asset/inline' })
 
         // Commenter la ligne ci-dessous pour ne pas obfusquer le code
         if(!ctx.dev && !ctx.debug) { cfg.plugins.push(plugob) }

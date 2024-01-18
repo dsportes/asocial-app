@@ -24,10 +24,10 @@
       </q-input>
       <q-space />
       <q-btn v-if="!expandAll" 
-        dense size="sm" color="primary" icon="unfold_more" padding="none"
+        dense size="md" color="primary" icon="unfold_more" padding="none"
         :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
       <q-btn v-if="expandAll" 
-        dense size="sm" color="primary" icon="unfold_less" padding="none"
+        dense size="md" color="primary" icon="unfold_less" padding="none"
         :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
       </q-toolbar>
     </q-footer>

@@ -16,6 +16,9 @@ export const config = {
     { value: 'en-EN', label: 'English',  flag: '🇬🇧' },
     { value: 'fr-FR', label: 'Français', flag: '🇫🇷' }
   ],
+
+  silence: true,
+  
   motscles: { 
     '255': { 'fr-FR': 'Statut/Nouveau', 'en-EN': 'Status/New' },
     '254': { 'fr-FR': 'Visibilité/Liste noire', 'en-EN': 'Visibility/Black List' },

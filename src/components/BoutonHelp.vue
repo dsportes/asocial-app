@@ -4,7 +4,6 @@
     <q-tooltip class="bg-white text-primary">{{tp || $t('HLPaidebd')}}</q-tooltip>
   </q-btn>
   <span v-if="label" class="q-ml-sm">{{label}}</span>
-  <audio ref="sound" :src="config.cliccamera" preload = "auto"></audio>
 </span>
 </template>
 <script>
@@ -21,18 +20,14 @@ export default ({
   },
 
   methods: {
-    ouvrir () {
+    async ouvrir () {
       const p = this.page && this.tp ? this.page : 'bientot'
-      const s = this.$refs['sound']
-      if (s) s.play()
       this.ui.pushhelp(p)
-    }
+    },
   },
   
   setup () {
     return {
-      config: stores.config,
-      session: stores.session,
       ui: stores.ui
     }
   } 

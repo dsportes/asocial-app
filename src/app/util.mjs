@@ -8,6 +8,8 @@ import { AMJ, appexc } from './api.mjs'
 
 let pako
 
+const audioContext = new AudioContext()
+
 export function setRequiredModules (m) { 
   pako = m.pako
 }
@@ -31,6 +33,19 @@ export function sty () {
 
 const decoder = new TextDecoder('utf-8')
 const encoder = new TextEncoder('utf-8')
+
+export async function beep() {
+  const config = stores.config
+  if (config.silence) return
+  const b64 = config.beep.substring(config.beep.indexOf(',') + 1)
+  const beep = toByteArray(b64)
+
+  const b = await audioContext.decodeAudioData(beep.buffer) // (arrayBuffer)
+  const source = audioContext.createBufferSource() // creates a sound source
+  source.buffer = b                  // tell the source which sound to play
+  source.connect(audioContext.destination)       // connect the source to the context's destination (the speakers)
+  source.start()                          // play the source now
+}
 
 /* i18n : fonction $t() ********************************************/
 let fnt
