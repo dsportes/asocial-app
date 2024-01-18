@@ -48,6 +48,8 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.wssrv = config.WSSRV ? config.WSSRV : ('wss://' + cfg.srv + '/ws/')
   console.log('opsrv: ' + cfg.opsrv + ' --- wssrv: ' + cfg.wssrv)
 
+  console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
+
   cfg.locales = []
   cfg.localeOptions.forEach(t => {cfg.locales.push(t.value)})
   cfg.locales.forEach(lg => { init(lg) })

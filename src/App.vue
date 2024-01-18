@@ -11,9 +11,9 @@
         height="32" width="32"/>
       -->
       <img v-if="session.ok && session.estComptable" src="~assets/superman.jpg" 
-        height="28" width="28" class="q-pa-none"/>
+        height="28" width="28" class="q-pa-none" @click="reload"/>
       <img v-else src="~assets/logo.svg" 
-        height="28" width="28"  class="q-pa-none"/>
+        height="28" width="28"  class="q-pa-none" @click="reload"/>
       
       <bouton-help page="s1"/>
 
@@ -474,6 +474,8 @@ export default {
       else this.ui.oD('dialoguedrc')
     },
     async reconnexion () { this.ui.fD(); await reconnexionCompte() },
+
+    reload () { location.reload(true) },
 
     stopop () {
       const op = this.session.opEncours

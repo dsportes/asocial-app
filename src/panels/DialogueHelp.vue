@@ -133,7 +133,7 @@ export default ({
     back () {
       this.ui.pophelp()
       this.selected = this.courante
-      this.setTexte(p)
+      this.setTexte(this.selected)
     }
   },
 

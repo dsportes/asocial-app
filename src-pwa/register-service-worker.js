@@ -1,5 +1,7 @@
 import { register } from 'register-service-worker'
 
+import stores from '../src/stores/stores.mjs'
+
 // The ready(), registered(), cached(), updatefound() and updated()
 // events passes a ServiceWorkerRegistration instance in their arguments.
 // ServiceWorkerRegistration: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
@@ -24,11 +26,21 @@ register(process.env.SERVICE_WORKER_FILE, {
   },
 
   updatefound (/* registration */) {
-    // console.log('New content is downloading.')
+    console.log('New content is downloading.')
+    try {
+      stores.session.setSWevent('updatefound')
+    } catch (e) {
+      console.log('swev 1', e.toString())
+    }
   },
 
   updated (/* registration */) {
-    // console.log('New content is available; please refresh.')
+    console.log('New content is available; please refresh.')
+    try {
+      stores.session.setSWevent('updated')
+    } catch (e) {
+      console.log('swev 2', e.toString())
+    }
   },
 
   offline () {

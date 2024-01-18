@@ -60,7 +60,7 @@ module.exports = configure(function (ctx) {
       // to the underlying Webpack
       devtool: 'source-map',
       env: {
-        BUILD: '202401171412',
+        BUILD: '202401181851',
         APITK: 'VldNo2aLLvXRm0Q' // Token d'autorisation d'usage de l'API
       },
 
@@ -178,7 +178,6 @@ module.exports = configure(function (ctx) {
           .use(ESLintPlugin, [{ extensions: [ 'js' ] }])
       },
       
-
       middlewares: [
         ctx.prod ? 'compression' : '',
         'render' // keep this as last one
@@ -211,7 +210,7 @@ module.exports = configure(function (ctx) {
         theme_color: '#027be3',
         icons: [
           {
-            src: 'icons/icon-128x128.png',
+            src: 'icons/favicon-128x128.png',
             sizes: '128x128',
             type: 'image/png'
           },
@@ -271,7 +270,7 @@ module.exports = configure(function (ctx) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'testpinia'
+        appId: 'asocial'
       },
 
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
