@@ -10,7 +10,9 @@ import { Demon } from '../app/connexion.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
-    swev: null,
+    swev1: false,
+    swev2: false,
+
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
     sessionId: '', // identifiant de session (random(6) -> base64)
@@ -203,9 +205,10 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
-    setSWevent (eventName) {
-      this.swev = [Date.now(), eventName]
-      console.log('SWev reçu : ' + eventName)
+    setSwev (n) {
+      console.log('SW event reçu : ' + n)
+      if (n === 1) this.swev1 = true
+      else if (n === 2) this.swev2 = true
     },
     setStatus (s) {
       this.status = s

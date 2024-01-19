@@ -28,7 +28,7 @@ register(process.env.SERVICE_WORKER_FILE, {
   updatefound (/* registration */) {
     console.log('New content is downloading.')
     try {
-      stores.session.setSWevent('updatefound')
+      stores.session.setSwev(1)
     } catch (e) {
       console.log('swev 1', e.toString())
     }
@@ -37,7 +37,7 @@ register(process.env.SERVICE_WORKER_FILE, {
   updated (/* registration */) {
     console.log('New content is available; please refresh.')
     try {
-      stores.session.setSWevent('updated')
+      stores.session.setSwev(2)
     } catch (e) {
       console.log('swev 2', e.toString())
     }

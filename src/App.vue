@@ -46,7 +46,16 @@
       <q-btn v-if="ui.pageback" icon="arrow_back" dense size="md" round padding="none"
         @click="ui.gotoBack()"/>
 
-      <q-toolbar-title class="titre-lg text-center"><span>{{titrePage}}</span>
+      <q-toolbar-title>
+        <div style="position:relative">
+          <div class="titre-lg text-right full-width">{{titrePage}}</div>
+          <div v-if="session.swev2" @click="ui.oD('reload')" 
+            style="position:absolute;top:-4px;left:0"
+            class="row cursor-pointer items-center bg-negative q-px-xs">
+            <div class="titre-md text-bold text-white q-mr-sm">{{$t('RLnvver')}}</div>
+            <q-icon name="system_update" size="md" color="white"/>
+          </div>
+        </div>
       </q-toolbar-title>
 
       <!-- Fichiers avion -->
@@ -245,7 +254,7 @@
       <page-ficavion class="page" v-if="ui.page === 'ficavion'"/>    
     </transition-group>
   </q-page-container>
-  
+
   <!-- ui.d.aunmessag : Gestion d'un message s'affichant en bas -->
   <q-dialog v-model="ui.d.aunmessage" seamless position="bottom">
     <div :class="'msg q-pa-sm cursor-pointer text-center titre-sm text-bold bg-yellow-5 ' + (ui.message.important ? 'text-negative' : 'text-black')"  
@@ -276,6 +285,48 @@
         <q-btn dense size="md" padding="xs" color="warning"  
           :label="$t('EMDjq')" @click="fermerqm" />
       </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <!-- ui.d.reload : information / option d'instllation d'une nouvelle version -->
+  <q-dialog v-model="ui.d.reload" persistent>
+    <q-card :class="styp('sm') + ' q-pa-sm'">
+      <q-btn size="md" padding="xs" color="primary" dense icon="close"
+        :label="$t('plustard')" @click="ui.fD"/>
+      <div class="titre-lg text-center text-warning q-my-md">{{$t('RLnvver2')}}</div>
+      <div class="titre-md q-mb-sm">{{$t('RLtit1')}}</div>
+      <div class="titre-md q-mb-sm">{{$t('RLtit2')}}</div>
+
+      <div class="row no-wrap items-start justify-between q-mb-sm">
+        <div class="titre-md">{{$t('RLtit3')}}</div>
+        <bouton-bulle idtext="rl0"/>
+      </div>
+
+      <div class="row no-wrap items-start justify-between q-mb-sm">
+        <div class="row">
+          <div class="titre-md text-bold text-primary q-pr-sm lg1">{{$t('RLopt', ['1'])}}</div>
+          <div class="col-auto">
+            <span class="titre-md q-pr-sm">{{$t('RLopt1')}}</span>
+            <q-btn size="md" padding="none" icon="system_update" dense color="primary"
+              :label="$t('RLinstal')" @click="reload"/>
+          </div>
+        </div>
+        <bouton-bulle idtext="rl1"/>
+      </div>
+
+      <div class="row no-wrap items-start justify-between q-mb-sm">
+        <div class="row">
+          <div class="titre-md text-bold text-primary q-pr-sm lg1">{{$t('RLopt', ['2'])}}</div>
+          <div class="titre-md">{{$t('RLopt2')}}</div>
+        </div>
+        <bouton-bulle class="text-right" idtext="rl2"/>
+      </div>
+
+      <div class="row no-wrap items-start q-mb-sm">
+        <div class="titre-md text-bold text-primary q-pr-sm lg1">{{$t('RLopt', ['3'])}}</div>
+        <div class="titre-md">{{$t('RLopt3')}}</div>
+      </div>
+
     </q-card>
   </q-dialog>
 
@@ -357,6 +408,7 @@ import { SetDhvuCompta } from './app/operations.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
+import BoutonBulle from './components/BoutonBulle.vue'
 import NotifIcon from './components/NotifIcon.vue'
 import QueueIcon from './components/QueueIcon.vue'
 import FiltreNom from './components/FiltreNom.vue'
@@ -424,7 +476,7 @@ export default {
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonLangue, NotifIcon, QueueIcon, OutilsTests,
+    BoutonHelp, BoutonBulle, BoutonLangue, NotifIcon, QueueIcon, OutilsTests,
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
@@ -569,4 +621,6 @@ un élément qui apparaît quand le drawer est caché*/
   min-width:100vw !important
   height:1.9rem
   overflow: hidden
+.lg1
+  min-width: 6rem
 </style>

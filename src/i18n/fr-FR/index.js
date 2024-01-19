@@ -121,6 +121,7 @@ export default {
   desactiver: 'Désactiver',
   disparu: 'disparu',
   cv: 'Carte de visite',
+  plustard: 'Plus Tard',
   compteKO: 'Le compte #{0} nommé "{1}" vient d\'être supprimé. Se connecter à un autre compte.',
   test: 'Test',
 
@@ -400,6 +401,18 @@ export default {
   LOGsp1: 'Sponsoring dèjà refusé',
   LOGsp2: 'Sponsoring dèjà accepté',
   LOGsp3: 'Sponsoring annulé par le sponsor',
+
+  // App.vue reload
+  RLnvver: 'Nouvelle version disponible',
+  RLnvver2: 'Une nouvelle version a été téléchargée et est prête à être installée',
+  RLtit1: 'Il est important d\'en bénéficier le plus tôt possible en raison d\'éventuels correctifs d\erreurs qu\'ele peut inclure.',
+  RLtit2: 'L\'installation initialise une nouvelle session et le besoin de se connecter à nouveau.', 
+  RLtit3: 'Fermer la ou les autres fenêtres / onglets où l\'application s\'exécute.',
+  RLopt: 'Option {0} :',
+  RLopt1: 'presser le bouton ',
+  RLopt2: 'presser CONTROL+F5',
+  RLopt3: 'fermer la fenêtre / onglet puis appeler à nouveau l\'aplication dans une nouvelle fenêtre / onglet.',
+  RLinstal: 'Installer',
 
   // OutilsTests.vue
   OTtit: 'Outils et tests',
@@ -2012,6 +2025,19 @@ export default {
   BULLEmcgr: `Pour attribuer des mots-clés "du groupe" à une note de groupe, un compte doit:
 - soit avoir lui-même l\'excluvité d\'écriture sur la note,
 - soit avoir un pouvoir d\'animateur dans le groupe,
-- soit, quand aucune exclusivité n\'est attribuée, avoir un droit d\'écriture des notes du groupe.`
+- soit, quand aucune exclusivité n\'est attribuée, avoir un droit d\'écriture des notes du groupe.`,
+
+  BULLErl1: `Mais ça ne marche pas avec tous les navigateurs.
+- si l'installation n'a pas eu lieu, utiliser l'option 2 ou l'option 3.
+`,
+
+  BULLErl2: `En général c'est efficace, mais sur smartphone il n'y a ni touche CONTROL, ni touche de fonction F5
+`,
+
+  BULLErl0: `Si l'application s'exécute dans plus d'une fenêtre du navigateur (ce qui est licite bien que peu usuel) le changement de version ne peut pas avoir lieu, même pour une nouvelle fenêtre. 
+ 
+Fermer TOUTES les fenêtres / onglets où s'exécute l'application.
+`,
+
 
 }

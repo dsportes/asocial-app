@@ -47,6 +47,7 @@ export const useUiStore = defineStore('ui', {
     dialogStack: [],
 
     d: {
+      reload: false, // App: reload
       aunmessage: false,
       PSouvrir: false,
       choixEmoji: false,

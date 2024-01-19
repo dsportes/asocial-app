@@ -1,5 +1,5 @@
 <template>
-  <q-btn class="q-mx-xs" size="sm" text-color="grey-5" icon="info">
+  <q-btn padding="none" size="md" text-color="grey-5" icon="info">
     <q-popup-proxy ref="qpp">
       <q-banner class="bord bordgris" @click="hide">
         <template v-slot:avatar>
