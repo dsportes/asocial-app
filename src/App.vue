@@ -297,10 +297,12 @@
       <div class="titre-md q-mb-sm">{{$t('RLtit1')}}</div>
       <div class="titre-md q-mb-sm">{{$t('RLtit2')}}</div>
 
+      <!--
       <div class="row no-wrap items-start justify-between q-mb-sm">
         <div class="titre-md">{{$t('RLtit3')}}</div>
         <bouton-bulle idtext="rl0"/>
       </div>
+      -->
 
       <div class="row no-wrap items-start justify-between q-mb-sm">
         <div class="row">
