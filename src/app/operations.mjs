@@ -15,7 +15,7 @@ export class Operation {
   constructor (nomop) { this.nom = nomop }
 
   get label () { 
-    console.log('label', 'OP_' + this.nom)
+    // console.log('label', 'OP_' + this.nom)
     return $t('OP_' + this.nom) 
   }
 
@@ -2110,18 +2110,19 @@ args.data
 args.gz
 Retour:
 - data: "fichier" binaire auto-décryptable en ayant la clé privée RSA
+OU la clé du site
 */
 export class CrypterRaw extends OperationUI {
   constructor () { super('CrypterRaw') }
 
-  async run (id, data, gz) { 
+  async run (id, data, gz, clesite) { 
     try {
       const session = stores.session
       const aSt = stores.avatar
       const args = { token: session.authToken, id, data, gz }
       const ret = this.tr(await post(this, 'CrypterRaw', args))
-      const priv = aSt.getAvatar(id).priv
-      const res = await decrypterRaw(priv, ret.data, gz)
+      const priv = clesite ? null : aSt.getAvatar(id).priv
+      const res = await decrypterRaw(priv, clesite, ret.data, gz)
       return this.finOK(res)
     } catch (e) {
       await this.finKO(e)

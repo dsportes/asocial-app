@@ -322,7 +322,8 @@ export default ({
       for(let i = 0; i < 100; i++) x.push('toto est tres beau')
       const inp = x.join('\n')
       const data = encoder.encode(inp)
-      const ec = await new CrypterRaw().run(this.session.compteId, data, true)
+      const clesite = this.ps ? this.ps.shax : null
+      const ec = await new CrypterRaw().run(this.session.compteId, data, true, clesite)
       const out = decoder.decode(ec)
       console.log(inp === out)
     }

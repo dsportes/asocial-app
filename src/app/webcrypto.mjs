@@ -207,28 +207,58 @@ setTimeout(async () => {
 }, 1)
 */
 
-/* Retourne le contenu binaire décrypté d'un buffer long crypté par la clé RSA publique
-Interprète un binaire dont,
-- les 256 premiers bytes sont cryptés par la clé publique RSA: aes, iv, gz (0 /1)
-  - 32 bytes - aes: clé AES unique générée, 
-  - 16 bytes - iv: vecteur IV utilisé,
-  - 1 byte - gz: 1 si gzippé, 0 sinon
-- les suivants sont le texte de data, gzippé ou non, crypté par la clé AES générée.
+/* Retourne le contenu binaire décrypté d'un buffer long.
+
+Cryptage générique d'un binaire lisible par connaissance,
+- soit de la clé privée RSA de l'avatar
+- soit de la clé du site avec comme IV les 16 premiers bytes de celle-ci.
+
+- pub: clé publique RSA (en binaire)
+- data: contenu binaire
+- gz: true s'il faut compresser avant cryptage
+
+Le binaire retourné a plusieurs parties:
+- soit X le descriptif du cryptage:
+  - 32 bytes: la clé AES générée
+  - 16 bytes: l'IV utilisé
+  - 1 byte: 1 si gz
+- soit p3 le cryptage de X par la clé du site avec comme IV les 16 premiers bytes de celle-ci.
+
+- tranche p1: 256 bytes - cryptage RSA de X
+- tranche p2: 1 byte - longueur de p3
+- tranche p3:
+- tranche p4: texte de data, gzippé ou non, crypté par la clé AES générée.
+
+SI clepriv est donnée, le décryptage emploie la clé privée pour obtenir X depuis p1
+SINON c'est la clé du site qui est employée pour obtenir X depuis p3
 */
-export async function decrypterRaw (clepriv, u8) {
+export async function decrypterRaw (clepriv, clesite, u8) {
   if (!u8) return null
   try {
     const p1 = u8.slice(0, 256)
-    const p2 = u8.slice(256)
-    const b3 = new Uint8Array(await decrypterRSA(clepriv, p1))
+    const p2 = new Uint8Array(u8.slice(256, 257))[0]
+    const p3 = u8.slice(257, 257 + p2)
+    const p4 = u8.slice(257 + p2)
+
+    if (!p4 || !p4.length) return new Uint8Array(0)
+
+    let b3
+    if (clepriv) {
+      b3 = new Uint8Array(await decrypterRSA(clepriv, p1))
+    } else {
+      const ivx = clesite.slice(0, 16)
+      const kx = await window.crypto.subtle.importKey('raw', arrayBuffer(clesite), 'aes-cbc', false, ['decrypt'])
+      b3 = await crypto.subtle.decrypt({ name: 'aes-cbc', iv: ivx }, kx, p3)
+    }
+
     const aes = b3.slice(0, 32)
     const iv = b3.slice(32, 48)
-    const gz = b3.slice(48, 49)[0]
-    const key = await window.crypto.subtle.importKey('raw', arrayBuffer(aes), 'aes-cbc', false, ['decrypt'])
-    const r = !p2 || !p2.length ? new Uint8Array(0) :
-      await crypto.subtle.decrypt({ name: 'aes-cbc', iv: iv }, key, p2)
+    const gz = new Uint8Array(b3.slice(48, 49))[0]
+
+    const key = await window.crypto.subtle.importKey('raw', aes, 'aes-cbc', false, ['decrypt'])
+    const r = await crypto.subtle.decrypt({ name: 'aes-cbc', iv: iv }, key, p4)
     const bf = new ab2b(r)
-    if (!gz || !bf.length) return bf
+    if (!gz) return bf
     return ungzipT(bf)
   } catch (e) {
     throw new AppExc(E_BRO, 22, [e.toString()], e.stack)

@@ -1,7 +1,7 @@
 <template>
   <q-page class="column q-pl-xs">
 
-    <q-tree ref="tree" class="sep q-mb-sm"
+    <q-tree ref="tree" :class="sty() + 'sep q-mb-sm splg'"
       :nodes="nSt.nodes"
       no-transition
       dense
@@ -127,7 +127,7 @@
       </q-card>
     </q-dialog>
 
-    <q-page-sticky expand position="top">
+    <q-page-sticky expand position="top" class="splg">
       <div :class="sty() + ' box2 full-width q-pa-xs'">
         <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
 
