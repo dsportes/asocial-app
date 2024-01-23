@@ -111,7 +111,7 @@ export default {
       if (file) {
         const { size, name, type, u8 } = await readFile(file, true)
         const i = name.lastIndexOf('.')
-        const n = i == -1 ? name : name.substring(0, i - 1)
+        const n = i == -1 ? name : name.substring(0, i)
         this.fic.nom = this.nomfic || n
         this.fic.info = ''
         this.fic.lg = size
