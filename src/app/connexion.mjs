@@ -5,7 +5,7 @@ import { OperationUI, RafraichirTickets } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post, getEstFs } from './net.mjs'
-import { AMJ, ID, PINGTO2, limitesjour, FLAGS } from './api.mjs'
+import { AMJ, ID, PINGTO2, limitesjour, FLAGS, d14 } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
 import {
   openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
@@ -1028,7 +1028,7 @@ export class AcceptationSponsoring extends OperationUI {
 
       // !!! dans rowCompta: it (indice du compte dans sa tribu) N'EST PAS inscrit
       // (na, clet, cletX, q1, q2, estSponsor, phrase, nc) - le filleul a 1 chat en ligne
-      let rowCompta = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp, ps, 1, don)
+      let rowCompta = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp, session.ns, ps, 1, don)
       // set de session.clek
       const rowAvatar = await Avatar.primaireRow(sp.naf, publicKey, privateKey)
       const rowVersion = {
@@ -1223,9 +1223,9 @@ Retour: rien. Si OK le rowEspace est celui créé en session
 export class CreerEspace extends OperationUI {
   constructor() { super('CreerEspace') }
 
-  async run(org, phrase) {
+  async run(org, phrase, ns) {
     try {
-      const hps1 = phrase.hps1
+      const hps1 = (ns * d14) + phrase.hps1
       const session = stores.session
       const config = stores.config
       const aco = config.allocComptable
@@ -1240,7 +1240,7 @@ export class CreerEspace extends OperationUI {
 
       const na = NomGenerique.comptable()
       // static async row (na, clet, cletX, q, estSponsor, phrase, nc)
-      const rowCompta = await Compta.row(na, clet, null, aco, true, phrase)
+      const rowCompta = await Compta.row(na, clet, null, aco, true, ns, phrase)
       // set de session.clek
       const rowTribu = await Tribu.nouvelle(idt, apr, true, aco)
 

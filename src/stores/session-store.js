@@ -247,11 +247,12 @@ export const useSessionStore = defineStore('session', {
         this.lsk = '$asocial$-' + phrase.hps1
       }
       const token = { sessionId: this.sessionId }
-      if (phrase.org === 'admin') token.shax = phrase ? phrase.shax : null
+      if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
         token.hps1 = phrase ? phrase.hps1 : null
         token.hpsc = phrase ? phrase.hpsc : null
       }
+      token.org = this.org
       
       const x = new Uint8Array(encode(token))
       this.authToken = u8ToB64(new Uint8Array(x), true)

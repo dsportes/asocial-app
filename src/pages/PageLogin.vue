@@ -116,7 +116,7 @@ export default {
         */
         resetRepertoire()
         stores.reset(true)
-        const res = await new ChercherSponsoring().run(this.pc.hps1)
+        const res = await new ChercherSponsoring().run(this.org, this.pc.hps1)
         if (isAppExc(res) || !res || !res.rowSponsoring) {
           await afficherDiag(this.$t('LOGnopp'))
           this.raz()

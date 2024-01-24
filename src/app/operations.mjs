@@ -140,10 +140,10 @@ Retour:
 export class ExistePhrase extends OperationUI {
   constructor () { super('ExistePhrase') }
 
-  async run (hash, t) {
+  async run (hps1, t) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, ids: hash, t }
+      const args = { token: session.authToken, hps1: hps1, t }
       const ret = this.tr(await post(this, 'ExistePhrase', args))
       const ex = ret.existe || false
       return this.finOK(ex)
@@ -240,8 +240,9 @@ export class ChangementPS extends OperationUI {
   async run (ps) {
     try {
       const session = stores.session
+      const hps1 = (session.ns * d14) + ps.hps1
       const kx = await crypter(ps.pcb, session.clek)
-      const args = { token: session.authToken, hps1: ps.hps1, hpsc: ps.hpsc, kx }
+      const args = { token: session.authToken, hps1: hps1, hpsc: ps.hpsc, kx }
       this.tr(await post(this, 'ChangementPS', args))
       session.chgps(ps)
       if (session.synchro) commitRows(new IDBbuffer(), true)
@@ -267,7 +268,8 @@ export class ChangementPC extends OperationUI {
       const session = stores.session
       const pck = p ? await crypter(session.clek, p.phrase) : null
       const napc = p ? await crypter(p.pcb, new Uint8Array(encode([na.nom, na.rnd]))) : null
-      const args = { token: session.authToken, id: na.id, hpc: p ? p.hps1 : 0, napc, pck }
+      const hpc = p ? ((session.ns * d14) + p.hps1) : 0
+      const args = { token: session.authToken, id: na.id, hpc, napc, pck }
       this.tr(await post(this, 'ChangementPC', args))
       this.finOK()
     } catch (e) {
@@ -295,7 +297,8 @@ export class GetAvatarPC extends OperationUI {
     try {
       const session = stores.session
       let res
-      const args = { token: session.authToken, hpc: p.hps1 }
+      const hpc = (session.ns * d14) + p.hps1
+      const args = { token: session.authToken, hpc }
       const ret = this.tr(await post(this, 'GetAvatarPC', args))
       if (ret.cvnapc) {
         try {
@@ -355,9 +358,9 @@ Retour:
 export class ChercherSponsoring extends OperationUI {
   constructor () { super('ChercherSponsoring') }
 
-  async run (ids) {
+  async run (org, hps1) {
     try {
-      const ret = this.tr(await post(this, 'ChercherSponsoring', { ids }))
+      const ret = this.tr(await post(this, 'ChercherSponsoring', { org, hps1 }))
       return this.finOK(ret)
     } catch (e) {
       await this.finKO(e)

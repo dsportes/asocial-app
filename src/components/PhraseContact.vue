@@ -62,11 +62,12 @@ export default ({
         return
       }
       this.encours = true
-      const org = this.session.org
+      // const org = this.session.org
       this.pc = new Phrase()
       setTimeout(async () => {
-        await this.pc.init(this.phrase, this.org)
+        await this.pc.init(this.phrase)
         this.encours = false
+        this.pc.org = this.org
         this.$emit('ok', this.pc)
       }, 1)
     }

@@ -366,41 +366,21 @@ export class Motscles {
 export class Phrase {
   static idxch = [0, 1, 4, 7, 10, 13, 16, 19, 22, 24]
 
-  async init (texte, org) {
-    const o1 = org || ''
-    const i = o1.lastIndexOf('@')
-    const o2 = i === -1 ? o1 : o1.substring(0, i)
-    this.org = org
-    const x = o2.padEnd(12, '$')
+  async init (texte) {
     this.phrase = texte
-    const u8 = encoder.encode(x + texte)
+    const u8 = encoder.encode(texte)
     this.pcb = await pbkfd(u8)
-    this.hpsc = hash(this.pcb)
-
-    /*
-    const deb = new Uint8Array(Phrase.idxch.length)
-    for (let i = 0; i < Phrase.idxch.length; i++) deb[i] = u8[Phrase.idxch[i]]
-    this.hps1 = hash(deb)
-    */
-
+    this.hpsc = (hash(this.pcb) % d14)
     const u8b = Uint8Array.from(u8)
     Phrase.idxch.forEach(i => { u8b[i + 12] = 0 })
     const pr = await pbkfd(u8b)
-    this.hps1 = hash(pr)
+    this.hps1 = (hash(pr) % d14)
     return this
   }
 
   // Pour affichage dans OutilsTests
   get shax () { return sha256(this.pcb) } 
   get shax64 () { return u8ToB64(this.shax) }
-
-  /*
-  get shay () { return sha256(this.shax) } 
-
-  // par compatibilité avec le code écrit avant fusion phrases
-  get phch () { return this.hps1 } 
-  get clex () { return this.pcb }
-  */
 
 }
 
@@ -1172,7 +1152,7 @@ export class Compta extends GenDoc {
     return await crypter(session.clek, new Uint8Array(encode(item)))
   }
 
-  static async row (na, clet, cletX, q, estSponsor, phrase, nc, don) { 
+  static async row (na, clet, cletX, q, estSponsor, ns, phrase, nc, don) { 
     /* création d'une compta
     Pour le comptable le paramètre cletX est null (il est calculé). 
     Pour les autres, c'est le nctkc pris dans la tribu
@@ -1192,7 +1172,7 @@ export class Compta extends GenDoc {
     session.clek = k
 
     r.sp = estSponsor ? 1 : 0
-    r.hps1 = phrase.hps1
+    r.hps1 = (ns * d14) + phrase.hps1
     r.hpsc = phrase.hpsc
     
     if (clet) {
@@ -1621,10 +1601,11 @@ export class Sponsoring extends GenDoc {
     const pspk = await crypter(session.clek, phrase.phrase)
     const bpspk = await crypter(session.clek, phrase.pcb)
     const org = session.org
+    const ids = (session.ns * d14) + phrase.hps1
     const _data_ = new Uint8Array(encode({ 
       id: av.id,
       org,
-      ids: phrase.hps1,
+      ids,
       dlv,
       st: 0,
       dh: Date.now(),
@@ -1634,7 +1615,7 @@ export class Sponsoring extends GenDoc {
       ardx,
       vsh: 0
     }))
-    const row = { _nom: 'sponsorings', id: av.id, ids: phrase.hps1, dlv, _data_ }
+    const row = { _nom: 'sponsorings', id: av.id, ids, dlv, _data_ }
     return row
   }
 }

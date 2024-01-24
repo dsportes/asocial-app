@@ -146,7 +146,7 @@ export default ({
       this.encours = true
       setTimeout(async () => {
         const pc = new Phrase()
-        await pc.init(this.ligne1, this.orgL)
+        await pc.init(this.ligne1)
         // await sleep(5000)
         if (this.login) this.session.setOrg(this.orgL)
         this.ui.ps.ok(pc)

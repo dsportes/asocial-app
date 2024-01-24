@@ -279,7 +279,7 @@ export default {
     },
     async creerNS () {
       this.session.setNs(this.ns)
-      await new CreerEspace().run(this.org, this.ps)
+      await new CreerEspace().run(this.org, this.ps, this.ns)
       this.ns = 0
       this.ps = null
       this.ui.fD()

@@ -98,7 +98,7 @@ import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
 import { ExistePhrase } from '../app/operations.mjs'
 import QuotasVols from '../components/QuotasVols.vue'
 import { styp, dhcool } from '../app/util.mjs'
-import { AMJ, ID } from '../app/api.mjs'
+import { AMJ, ID, d14 } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { crypter } from '../app/webcrypto.mjs'
 import { Tribu } from '../app/modele.mjs'
@@ -184,7 +184,9 @@ export default ({
     },
     async okps (ps) {
       if (ps) {
-        if (await new ExistePhrase().run(ps.hps1, 1)) {
+        const ns = ID.ns(this.sp.id)
+        const hps1 = (ns * d14) + ps.hps1
+        if (await new ExistePhrase().run(hps1, 1)) {
           await afficherDiag(this.$t('existe'))
           return
         }
