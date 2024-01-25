@@ -47,7 +47,7 @@ import BoutonHelp from './BoutonHelp.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import PhraseContact from './PhraseContact.vue'
 import { afficherDiag, dkli, styp } from '../app/util.mjs'
-import { ID } from '../app/api.mjs'
+import { ID, d14 } from '../app/api.mjs'
 
 export default {
   name: 'ApercuAvatar',

@@ -453,7 +453,7 @@ export const useNoteStore = defineStore('note', {
           this.rattachNote(n) // on la rattache à sa note de rattachement
         }
       }
-      // this.setPreSelect(n.key)
+      this.setPreSelect(n.key)
       this.setLabel(n)
       this.calculNfnt()
     },

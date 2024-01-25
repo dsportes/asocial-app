@@ -62,7 +62,7 @@
           </div>
           <div class="row items-center full-width">
             <q-input class="col-6  q-pr-md" v-model="org"
-              :label="$t('ESorg')" hint="monorg OU monorg\@br1" dense/>
+              :label="$t('ESorg')" hint="monorg" dense/>
             <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
           </div>
           <div class="column justify-center q-mt-md">
@@ -206,16 +206,9 @@ export default {
       this.dns = ''
     },
     org (ap, av) {
-      const i = ap.lastIndexOf('@')
-      let org, br
-      if (i === -1) { org = ap; br = '' }
-      else { org = ap.substring(0, i); br = ap.substring(i+1) }
       if (org.length < 4) { this.dorg = this.$t('ESorg1'); return }
-      if (org.length > 12) { this.dorg = this.$t('ESorg2'); return }
-      if (i !== -1 && br.length < 1) { this.dorg = this.$t('ESorg1b'); return }
-      if (i !== -1 && br.length > 3) { this.dorg = this.$t('ESorg2b'); return }
-      if (!org.match(reg)) { this.dorg = this.$t('ESorg3'); return }
-      if (i !== -1 && !br.match(reg)) { this.dorg = this.$t('ESorg3'); return }
+      if (org.length > 8) { this.dorg = this.$t('ESorg2'); return }
+      if (!op.match(reg)) { this.dorg = this.$t('ESorg3'); return }
       if (this.aOrg(ap)) { this.dorg = this.$t('ESorg4'); return }
       this.dorg = ''
     },
