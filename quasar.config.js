@@ -60,7 +60,7 @@ module.exports = configure(function (ctx) {
       // to the underlying Webpack
       devtool: 'source-map',
       env: {
-        BUILD: 17,
+        BUILD: 18,
         APITK: 'VldNo2aLLvXRm0Q' // Token d'autorisation d'usage de l'API
       },
 
