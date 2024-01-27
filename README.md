@@ -1,5 +1,5 @@
 # A-social Network
 
-Nouvelle application front-end pour accéder aux boîtes de secrets.
+Application front-end UI de **asocial**.
 
-Même serveur `dsportes/boitessrv` que pour l'application front-end antérieure `dsportes/boites`.
+Voir asocial-doc/README.md
