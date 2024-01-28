@@ -564,6 +564,7 @@ export class Espace extends GenDoc {
     const session = stores.session
     this.org = row.org
     this.opt = row.opt || 0
+    this.moisStat = row.moisStat || 0
     this.t = row.t || 0
     // la clé est la clé du Comptable de l'espace
     if (row.notif) {

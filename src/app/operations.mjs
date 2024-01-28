@@ -1700,7 +1700,6 @@ args.idf : id du fichier
 args.idc : id du compte demandeur
 args.vt : volume du fichier (pour compta des volumes v2 transférés)
 */
-
 export class DownloadFichier extends OperationUI {
   constructor () { super('DownloadFichier') }
 
@@ -1720,6 +1719,69 @@ export class DownloadFichier extends OperationUI {
     }
   }
 }
+
+/* OP_DownloadStatC: 'Téléchargement d\'un fichier statistique comptable mensuel'
+ComptaStat (org, mr)
+args.token: éléments d'authentification du compte.
+args.org
+args.mr : mois relatif 1 2 ou 3
+*/
+export class DownloadStatC extends OperationUI {
+  constructor () { super('DownloadStatC') }
+
+  async run (org, mr) { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const args = { token: session.authToken, org, mr }
+      const ret =  this.tr(await post(this, 'ComptaStat', args))
+      let buf = null
+      try { buf = await getData(ret.getUrl) } catch (e) {}
+      // let blobUrl = null
+      let blob = null
+      if (buf) {
+        buf = await decrypterRaw (aSt.compte.priv, null, buf)
+        blob = new Blob([buf], { type: 'text/csv' })
+      }
+      return this.finOK({ blob, creation: ret.creation || false, mois: ret.mois })
+    } catch (e) {
+      this.finKO(e)
+    }
+  }
+}
+
+/* OP_DownloadStatC2: 'Téléchargement d\'un fichier statistique comptable mensuel déjà calculé'
+*/
+export class DownloadStatC2 extends OperationUI {
+  constructor () { super('DownloadStatC2') }
+
+  async run (ns, mois) { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const args = { token: session.authToken, ns, mois }
+      const ret =  this.tr(await post(this, 'GetUrlStat', args))
+      let appKey = null
+      let priv = null
+      let buf = null
+      try { buf = await getData(ret.getUrl) } catch (e) {}
+      let blob = null
+      if (buf) {
+        if (session.estAdmin) {
+          appKey = ret.appKey
+        } else {
+          priv = aSt.compte.priv
+        }
+        buf = await decrypterRaw (priv, appKey, buf)
+        blob = new Blob([buf], { type: 'text/csv' })
+      }
+      return this.finOK(blob)
+    } catch (e) {
+      this.finKO(e)
+    }
+  }
+}
+
 
 /* OP_SupprFichier: 'Suppression d\'un fichier attaché à une note'
 args.id, ids : de la note

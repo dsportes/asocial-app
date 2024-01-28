@@ -29,8 +29,22 @@ Depuis un Comptable: ns est celui de la session
             icon="check" @click="saveOptionA"/>
         </div>
       </div>
-      <q-separator color="orange" class="q-my-sm"/>
     </div>
+    <div class="titre-md">{{$t('PEstm')}}</div>
+    <div class="row justify-between items-center">
+      <div class="row q-gutter-sm">
+        <q-btn dense color="warning" padding="none xs" size="md" label="M" @click="dlstat(0)"/>
+        <q-btn dense color="primary" padding="none xs" size="md" label="M-1" @click="dlstat(1)"/>
+        <q-btn dense color="primary" padding="none xs" size="md" label="M-2" @click="dlstat(2)"/>
+        <q-btn dense color="primary" padding="none xs" size="md" label="M-3" @click="dlstat(3)"/>
+      </div>
+        <q-input class="w10" v-model="mois" :label="$t('ESmois')" :hint="$t('ESmois2')" dense clearable>
+          <template v-slot:append>
+            <q-icon name="download" @click="dlstat2" class="cursor-pointer" color="warning"/>
+          </template>
+        </q-input>
+    </div>
+    <q-separator color="orange" class="q-my-sm"/>
 
     <div class="q-mx-xs" 
       v-for="(lg, idx) in synth" :key="lg.id" @click="lgCourante(lg)">
@@ -71,12 +85,12 @@ Depuis un Comptable: ns est celui de la session
               :ctx="{ idt: lg.id }" :idx="idx"/>
           </div>
           <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs">
-            <q-btn class="fs-md btn2" size="sm" dense
+            <q-btn class="fs-md" size="sm" dense padding="xs"
               color="primary" :icon="lg.info ? 'edit' : 'add'" 
               :label="$t('PEedn')" @click="editer"/>
-            <q-btn size="sm" class="fs-md btn2"
+            <q-btn size="sm" class="fs-md" padding="xs"
               icon="settings" :label="$t('PEabo')" dense color="primary" @click="editerq"/>
-            <q-btn v-if="lg.id" class="fs-md btn2" size="sm" dense color="primary" 
+            <q-btn v-if="lg.id" class="fs-md" size="sm" dense color="primary" padding="xs"
               :label="$t('detail')" icon-right="open_in_new" @click="pageTranche"/>
           </div>
         </div>
@@ -139,15 +153,16 @@ Depuis un Comptable: ns est celui de la session
 
 <script>
 import { onMounted, toRef } from 'vue'
+import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import { SetNotifT } from '../app/operations.mjs'
-import { dkli, styp, $t } from '../app/util.mjs'
+import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
-import { SetEspaceOptionA, NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
+import { DownloadStatC, DownloadStatC2, SetEspaceOptionA, NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
 
 const fx = [['id', 1], 
   ['ntr2', 1], ['ntr2', -1],
@@ -185,7 +200,8 @@ export default {
     notif () { return this.session.pow === 2 ? this.aSt.tribuC.notif : null },
     optesp () { return this.session.espace ? this.session.espace.opt : 0 },
     chgOptionA () { return this.session.espace.opt !== this.optionA.value },
-    tribuv () { const t = this.aSt.tribuC; return t ? [t.id, t.v] : [0, 0] }
+    tribuv () { const t = this.aSt.tribuC; return t ? [t.id, t.v] : [0, 0] },
+    espace () { return this.session.espaces.get(this.ns)}
   },
 
   watch: {
@@ -201,11 +217,33 @@ export default {
     },
 
     async tribuv (ap) {
-      await this.refreshSynth()
+      if (this.session.status > 2)
+        await this.refreshSynth()
     }
   },
 
   methods: {
+    async dlstat (mr) {
+      const { blob, creation, mois } = await new DownloadStatC().run(this.espace.org, mr)
+      const nf = this.espace.org + '-C_' + mois
+      if (blob) {
+        saveAs(blob, nf)
+        await afficherDiag($t('PEsd', [nf]))
+      } else {
+        await afficherDiag($t('PEnd'))
+      }
+    },
+
+    async dlstat2 () {
+      const blob = await new DownloadStatC2().run(this.ns, parseInt(this.mois))
+      const nf = this.espace.org + '-C_' + this.mois
+      if (blob) {
+        saveAs(blob, nf)
+        await afficherDiag($t('PEsd', [nf]))
+      } else {
+        await afficherDiag($t('PEnd'))
+      }
+    },
 
     async ouvrirnt () { 
       if (!await this.session.editpow(2)) return
@@ -295,6 +333,7 @@ export default {
 
   data () {
     return {
+      mois: Math.floor(this.session.dateJourConnx / 100),
       nom: '',
       quotas: null,
       ligne: null,
@@ -360,16 +399,6 @@ export default {
 </style>
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.msg
-  position: absolute
-  z-index: 99999
-  top: -20px
-  right: 5px
-  border-radius: 5px
-  border: 1px solid black
-.btn2
-  max-height: 1.5rem
-.bord
-  border: 1px solid $grey-5
-  border-radius: 5px
+.w10
+  width: 10rem
 </style>

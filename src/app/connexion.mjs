@@ -22,7 +22,7 @@ export function deconnexion(garderMode) {
   // ui.setPage('null')
   const session = stores.session
   const mode = session.mode
-  const memoOrg = session.memoOrg
+  const org = session.org
   Demon.stop()
 
   if (session.accesIdb) closeIDB()
@@ -31,7 +31,7 @@ export function deconnexion(garderMode) {
   }
   stores.reset()
   if (garderMode) session.setMode(mode)
-  session.memoOrg = memoOrg
+  session.org = org
   SyncQueue.reset()
   ui.setPage('login')
 }

@@ -244,7 +244,7 @@ export default {
   EX6: 'Donnée absente ou corrompue détectée par le browser',
   EX7: 'Erreur inattendue survenue dans le traitement sur le serveur',
   EX8: 'Données transmises au serveur non conformes',
-  EX9: 'Donnée absente ou corrompue détectée par le browser',
+  EX9: 'Donnée absente ou corrompue détectée par le serveur',
 
   // E_BRK = 1000 // Interruption volontaire de l'opération
   EX1000: 'Interruption volontaire',
@@ -331,6 +331,7 @@ export default {
   EX8007: 'Phrase de sponsoring déjà déclarée.',
   EX8008: 'Phrase de sponsoring non trouvée.',
   EX8009: 'Ce sponsoring a déjà été accepté ou refusé ou est hors limite.',
+  EX8010: 'Opération réservée à l\'administrateur technique du site.',
 
   EX8011: 'Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète',
   EX8012: 'Une phrase secrète semblable est déjà utilisée. Changer a minima le début de la phrase secrète pour ce nouveau compte',
@@ -381,6 +382,7 @@ export default {
   EX9015: 'Ticket non trouvé ({1}) - @{0}',
   EX9016: 'Synthese non trouvé ({1}) - @{0}',
   EX9017: 'Ticket non trouvé ({1} / {2}) - @{0}',
+  EX9018: 'Organisation {0} non trouvée',
 
   EX9100: 'Données d\'authentification illisibles (détail: {0})',
 
@@ -624,6 +626,9 @@ export default {
 
   OP_TestRSA: 'Test encryption RSA',
   OP_CrypterRaw: 'Test d\'encryptage serveur d\'un buffer long',
+  OP_ComptaStat : 'Enregistre en storage la statistique de comptabilité',
+  OP_DownloadStatC: 'Téléchargement d\'un fichier statistique comptable mensuel',
+  OP_DownloadStatC2: 'Téléchargement d\'un fichier statistique comptable mensuel déjà calculé',
 
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
@@ -842,6 +847,8 @@ export default {
 
   // PageAdmin et ApercuEspace
   ESgc: 'Lancer un GC',
+  ESgcstc: 'Lancer un GCstc',
+  ESdms: 'Dernière stat: {0}',
   ESck: 'Afficher le dernier checkpoint',
   ESne: 'Nouvelle organisation',
   ESne2: 'Organisation à héberger',
@@ -851,6 +858,8 @@ export default {
   ESlo: 'Aucune organisations hébergée | Une organisation hébergée | {count} organisations hébergées',
   ESns: 'ID de l\'espace attribué',
   ESnsh: 'De 10 à 59',
+  ESmois2: '202405',
+  ESmois: 'Mois: AAAAMM',
   ESorg: 'Organisation',
   ESprf: 'Profil: #{0}',
   ESreq: 'Valeur requise',
@@ -1887,6 +1896,9 @@ export default {
   PEsp: 'pas de sponsor | un sponsor | {count} sponsors',
   PEedn: 'Editer le nom',
   PEabo: 'Abon. & max conso.',
+  PEstm: 'Téléchargement du fichier CSV statistique d\'abonnement / consommation d\'un mois ...',
+  PEnd: 'Statistique non disponiible',
+  PEsd: 'Statistique téléchargée sous le nom [{0}]',
 
   // PanelCredits
   PCRgen: 'Générer un ticket de crédit',

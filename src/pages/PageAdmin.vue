@@ -4,6 +4,7 @@
       <div class="row q-gutter-xs justify-center">
         <q-btn padding="xs" dense color="warning" :label="$t('ESgc')" @click="testGC"/>
         <q-btn padding="xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
+        <q-btn padding="xs" dense color="warning" :label="$t('ESgcstc')" @click="testGCstc"/>
       </div>
 
       <div class="q-mt-sm row q-gutter-xs justify-center">
@@ -25,6 +26,7 @@
             <div class="text-bold font-mono fs-lg">
               <span class="q-mr-md">#{{esp.id}}</span>
               <span>{{esp.org}}</span>
+              <span v-if="esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
             </div>
             <div class="row q-gutter-xs">
               <q-btn dense color="primary" flat label="ping"
@@ -306,6 +308,11 @@ export default {
       await new GC().run('GCHeb')
     },
     */
+    async testGCstc () {
+      const ret = await new GC().run('GCstc')
+      console.log(ret.stats.nbstc)
+    },
+
     async testGC () {
       await new GC().run('GC')
     },
