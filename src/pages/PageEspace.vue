@@ -224,24 +224,24 @@ export default {
 
   methods: {
     async dlstat (mr) {
-      const { blob, creation, mois } = await new DownloadStatC().run(this.espace.org, mr)
+      const { err, blob, creation, mois } = await new DownloadStatC().run(this.espace.org, mr)
       const nf = this.espace.org + '-C_' + mois
-      if (blob) {
+      if (!err) {
         saveAs(blob, nf)
         await afficherDiag($t('PEsd', [nf]))
       } else {
-        await afficherDiag($t('PEnd'))
+        await afficherDiag($t('PEnd' + err))
       }
     },
 
     async dlstat2 () {
-      const blob = await new DownloadStatC2().run(this.ns, parseInt(this.mois))
+      const { err, blob } = await new DownloadStatC2().run(this.ns, parseInt(this.mois))
       const nf = this.espace.org + '-C_' + this.mois
-      if (blob) {
+      if (!err) {
         saveAs(blob, nf)
         await afficherDiag($t('PEsd', [nf]))
       } else {
-        await afficherDiag($t('PEnd'))
+        await afficherDiag($t('PEnd') + err)
       }
     },
 

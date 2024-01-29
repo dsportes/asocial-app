@@ -514,7 +514,10 @@ export default {
   // Gère le franchissement du seuil etroit / large
   watch: {
     "$q.screen.width"() {
-      this.ui.setScreenWidth(this.$q.screen.width)
+      this.ui.setScreenWH(this.$q.screen.width, this.$q.screen.height)
+    },
+    "$q.screen.height"() {
+      this.ui.setScreenWH(this.$q.screen.width, this.$q.screen.height)
     }
   },
 
@@ -565,7 +568,7 @@ export default {
     $q.dark.set(true)
 
     const ui = stores.ui
-    ui.setScreenWidth($q.screen.width)
+    ui.setScreenWH($q.screen.width, $q.screen.height)
 
     /* Template de onAction ************************************************
     ui.$onAction(({ name, args, after }) => {

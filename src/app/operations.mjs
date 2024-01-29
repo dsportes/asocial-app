@@ -1736,13 +1736,17 @@ export class DownloadStatC extends OperationUI {
       const args = { token: session.authToken, org, mr }
       const ret =  this.tr(await post(this, 'ComptaStat', args))
       let buf = null
-      try { buf = await getData(ret.getUrl) } catch (e) {}
-      // let blobUrl = null
-      let blob = null
-      if (buf) {
-        buf = await decrypterRaw (aSt.compte.priv, null, buf)
-        blob = new Blob([buf], { type: 'text/csv' })
+      try { 
+        buf = await getData(ret.getUrl) 
+      } catch (e) { 
+        return this.finOK({ err: 1 })
       }
+      try {
+        buf = await decrypterRaw (aSt.compte.priv, null, buf)
+      } catch (e) { 
+        return this.finOK({ err: 2 })
+      }
+      const blob = new Blob([buf], { type: 'text/csv' })
       return this.finOK({ blob, creation: ret.creation || false, mois: ret.mois })
     } catch (e) {
       this.finKO(e)
@@ -1764,18 +1768,23 @@ export class DownloadStatC2 extends OperationUI {
       let appKey = null
       let priv = null
       let buf = null
-      try { buf = await getData(ret.getUrl) } catch (e) {}
-      let blob = null
-      if (buf) {
-        if (session.estAdmin) {
-          appKey = ret.appKey
-        } else {
-          priv = aSt.compte.priv
-        }
-        buf = await decrypterRaw (priv, appKey, buf)
-        blob = new Blob([buf], { type: 'text/csv' })
+      try { 
+        buf = await getData(ret.getUrl) 
+      } catch (e) { 
+        return this.finOK({ err: 1 })
       }
-      return this.finOK(blob)
+      if (session.estAdmin) {
+        appKey = ret.appKey
+      } else {
+        priv = aSt.compte.priv
+      }
+      try {
+        buf = await decrypterRaw (priv, appKey, buf)
+      } catch (e) { 
+        return this.finOK({ err: 2 })
+      }
+      const blob = new Blob([buf], { type: 'text/csv' })
+      return this.finOK({ blob })
     } catch (e) {
       this.finKO(e)
     }

@@ -1,6 +1,6 @@
 <template>
 <q-dialog v-model="ui.d.dialoguehelp" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('lg')">
+  <q-layout container view="hHh lpR fFf" :class="styp('xl')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
         <q-btn dense size="md" icon="chevron_left" color="warning" 
@@ -33,7 +33,8 @@
     </q-footer>
 
     <q-page-container>
-      <q-splitter horizontal v-model="splitterModel" :limits="[20, 80]" 
+      <q-splitter :vertical="!ui.portrait" :horizontal="ui.portrait" 
+        v-model="splitterModel" :limits="[20, 80]" 
         style="height: 85vh">
 
         <template v-slot:after>

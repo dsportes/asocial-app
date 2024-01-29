@@ -1897,7 +1897,8 @@ export default {
   PEedn: 'Editer le nom',
   PEabo: 'Abon. & max conso.',
   PEstm: 'Téléchargement du fichier CSV statistique d\'abonnement / consommation d\'un mois ...',
-  PEnd: 'Statistique non disponiible',
+  PEnd1: 'Statistique non trouvée',
+  PEnd2: 'La statistique ne peut pas $etre décryptée: a) soit elle est destinée à un autre compte, b) soit elle est ancienne et la clé fixée par l\'administateur du site a été changée.',
   PEsd: 'Statistique téléchargée sous le nom [{0}]',
 
   // PanelCredits

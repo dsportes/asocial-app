@@ -13,6 +13,8 @@ export const useUiStore = defineStore('ui', {
 
     etroite: false,
     screenWidth: 0,
+    screenHeight: 0,
+    portrait: false,
 
     pagetab: '',
     page: 'login',
@@ -142,7 +144,9 @@ export const useUiStore = defineStore('ui', {
   },
 
   actions: {
-    setScreenWidth (w) {
+    setScreenWH (w, h) {
+      this.portrait = w < h
+      this.screenHeight = h
       const et = w < seuillarge
       if (this.screenWidth === 0) {
         this.screenWidth = w
