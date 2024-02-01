@@ -30,10 +30,6 @@
                   <q-icon name="note" color="primary" size="24px" class="q-mr-sm" />
                   <div :class="'text-bold' + cl(prop.node.id)">{{ prop.node.label }}</div>
                 </div>
-                <div v-if="prop.node.type === 4" class="row items-center">
-                  <q-icon name="chevron_right" size="16px" class="q-mr-sm" />
-                  <div class="titre-sm text-italic">{{ prop.node.label }}</div>
-                </div>
               </div>
             </template>
             </q-tree>
@@ -46,7 +42,26 @@
 
         <template v-slot:before>
           <div class="q-pa-xs" :style="'margin-top:2.5rem;' + (!ui.portrait ? 'margin-bottom:2.5rem' : '')">
-            <show-html class="q-ma-sm" :texte="texte"/>
+            <show-html v-if="intro" class="q-mx-sm q-mb-md" :texte="intro"/>
+            <q-expansion-item v-for="c in chaps" :key="c.t" 
+              group="somegroup" expand-separator>
+              <template v-slot:header>
+                <div class="full-width row justify-between items-center bg-primary text-white">
+                  <div class="text-bold titre-md">{{c.t}}</div>
+                  <q-btn v-if="c.m.length" color="secondary" icon="menu" padding="none" size="md" rounded>
+                    <q-menu>
+                      <q-list v-for="m in c.m" :key="m.value" 
+                        style="min-width:30rem" class="bg-secondary text-white">
+                        <q-item clickable v-close-popup @click.stop="goto(m.value)">
+                          <q-item-section class="titre-md text-italic">{{m.label}}</q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
+                </div>
+              </template>
+              <show-html class="q-mx-sm q-mb-md" :texte="c.tx"/>
+            </q-expansion-item>
           </div>
         </template>
 
@@ -126,12 +141,17 @@ export default ({
       if (p === this.courante) return
       this.ui.pushhelp(p)
       this.selected = p
-      this.setTexte(p)
+      this.setChaps(p)
+    },
+    goto (p) {
+      this.ui.pushhelp(p)
+      this.selected = p
+      this.setChaps(p)
     },
     back () {
       this.ui.pophelp()
       this.selected = this.courante
-      this.setTexte(this.selected)
+      this.setChaps(this.selected)
     }
   },
 
@@ -142,7 +162,8 @@ export default ({
     const splitterModel = ref(50)
     const selected = ref(ui.helpstack[0])
     const expanded = ref(parents(ui.helpstack[0]))
-    const texte = ref()
+    const intro = ref()
+    const chaps = ref()
     const filter = ref('')
     const filterRef = ref(null)
 
@@ -151,13 +172,35 @@ export default ({
       filterRef.value.focus()
     }
 
-    function setTexte (id) {
-      const txt = getMd(id, $i18n.locale.value)
-      const x = txt.split('\n')
-      const r = []
-      for (const l of x) 
-        if (!l.startsWith('@@')) r.push(remplaceImg(l))
-      texte.value = r.join('\n')
+    function setChaps (id) {
+      const x = getMd(id, $i18n.locale.value).split('\n')
+      intro.value = ''
+      chaps.value = []
+      let t = '', tx = [], m = []
+      for (const l of x) {
+        if (l.startsWith('# ')) {
+          // clôture du chapitre précédent s'il y en a un, sinon de l'intro
+          if (t) { /*tx.push('\n');*/ chaps.value.push({t, tx: tx.join('\n'), m}) }
+          else if (tx.length) { /*tx.push('\n');*/ intro.value = tx.join('\n') }
+          // Init du nouveau chapitre
+          tx.length = 0
+          t = l.substring(2)
+          m = []
+        } else {
+          if (l.startsWith('@@')) {
+            if (!t) continue // pas de menu dans l'intro
+            const i = l.indexOf('[')
+            if (i === -1 || i < 3) continue
+            const j = l.indexOf(']', i)
+            if (j === -1 || j === i + 1) continue
+            m.push({ label: l.substring(2, i), value: l.substring(i + 1, j) })
+          } else {
+            tx.push(remplaceImg(l))
+          }
+        }
+      }
+      if (!t && tx.length) { /*tx.push('\n');*/ intro.value = tx.join('\n') }
+      if (t) { /*tx.push('\n'); */ chaps.value.push({t, tx: tx.join('\n'), m}) }
     }
 
     function remplaceImg (l) {
@@ -180,12 +223,12 @@ export default ({
       return lx.join('')
     }
 
-    setTexte(selected.value)
+    setChaps(selected.value)
 
     return {
       ui, sty, styp,
       splitterModel, selected, expanded,
-      setTexte, texte,
+      setChaps, intro, chaps,
       resetFilter, filterRef, filter,
       tree: ref(null)
     }

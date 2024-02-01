@@ -31,6 +31,10 @@ Il finalise la création de son compte en déclarant sa **propre phrase secrète
 
 > _Revers de cette sécurité_ : si la personne titulaire d'un compte oublie sa **phrase secrète de connexion**, elle est ramenée à l'impuissance du pirate. Son compte s'autodétruira dans un délai d'un an et toutes ses données et notes disparaîtront.
 
+@@ En savoir plus sur la connexion [page2](./page2_fr-FR.md)
+
+@@ En savoir plus sur la création d'un compte [page3](./page3_fr-FR.md)
+
 # Avatars principal et secondaires d'un compte
 En créant son compte, le titulaire a créé son **avatar principal**. Un avatar,
 - est identifié par un _numéro_ à 16 chiffres (dont 13 aléatoires) immuable.

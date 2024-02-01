@@ -25,4 +25,6 @@ export default ({
 <style lang="sass">
 .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5
   font-family: Comfortaa
+h4
+  font-size: 0.6em !important
 </style>

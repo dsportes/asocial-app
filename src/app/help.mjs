@@ -4,32 +4,28 @@ const pages = {
     titre: { 
       'en-EN': 'Presentation',
       'fr-FR': 'Présentation'
-    },
-    voir: ['page2', 'page3'] 
+    }
   },
 
   page2: { sub: 's1a', pos: 20,
     titre: {
       'en-EN': 'Page with a SVG', 
       'fr-FR': 'Page avec un SVG'
-    }, 
-    voir: ['page1', 'page3']
+    }
   },
 
   page3: { sub: 's1b', pos: 10,
     titre: { 
       'en-EN': 'Title of page 3',
       'fr-FR': 'Titre de la page 3'
-    },
-    voir: ['page9'] 
+    } 
   },
 
   page9: { 
     titre: { 
       'en-EN': 'No page',
       'fr-FR': 'Y\'en a pas'
-    }, 
-    voir: [] 
+    } 
   }
 }
 
@@ -115,15 +111,6 @@ export function init (lg) {
     const sub = subs.get(p.sub)
     if (sub) {
       sub.children.push(e)
-      if (p.voir) p.voir.forEach(vpage => {
-        const vp = pages[vpage]
-        if (vp)
-          e.children.push({ 
-          id: vp.sub + '/' + vpage, page: vpage + '_' + lg, 
-          label: tit(lg, vp) || '???', 
-          type: 4
-        })
-      })
     }
   }
 
