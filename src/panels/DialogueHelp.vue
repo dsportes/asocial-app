@@ -1,44 +1,12 @@
 <template>
-<q-dialog v-model="ui.d.dialoguehelp" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('xl')">
-    <q-header elevated class="bg-secondary text-white">
-      <q-toolbar>
-        <q-btn dense size="md" icon="chevron_left" color="warning" 
-          @click="ui.fermerHelp">
-          <q-tooltip class="bg-white text-primary">{{$t('HLPfermer')}}</q-tooltip>
-        </q-btn>
-        <q-btn v-if="!stackvide" class="q-ml-xs" 
-          dense size="md" icon="arrow_back" @click="back">
-          <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
-        </q-btn>
-        <q-toolbar-title class="titre-lg">{{tp}}</q-toolbar-title>
-      </q-toolbar>
-    </q-header>
-
-    <q-footer>
-      <q-toolbar class="bg-black text-white">
-      <q-input ref="filterRef" dense v-model="filter" :label="$t('HLPfiltre')">
-        <template v-slot:append>
-          <q-icon v-if="filter !== ''" name="clear" class="cursor-pointer" @click="resetFilter" />
-        </template>
-      </q-input>
-      <q-space />
-      <q-btn v-if="!expandAll" 
-        dense size="md" color="primary" icon="unfold_more" padding="none"
-        :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
-      <q-btn v-if="expandAll" 
-        dense size="md" color="primary" icon="unfold_less" padding="none"
-        :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
-      </q-toolbar>
-    </q-footer>
-
-    <q-page-container>
+<q-dialog v-model="ui.d.dialoguehelp" full-height position="left" persistent >
+<div style="position:relative;height:100vh" :class="styp('xl')">
       <q-splitter :vertical="!ui.portrait" :horizontal="ui.portrait" 
         v-model="splitterModel" :limits="[20, 80]" 
-        style="height: 85vh">
+        style="height: 100vh">
 
         <template v-slot:after>
-          <div class="q-pa-xs">
+          <div class="q-pa-xs" :style="'margin-bottom:2.5rem;' + (!ui.portrait ? 'margin-top:2.5rem' : '')">
             <q-tree ref="tree"
               dense
               :nodes="arbre"
@@ -77,12 +45,41 @@
         </template>
 
         <template v-slot:before>
-          <show-html class="q-ma-sm" :texte="texte"/>
+          <div class="q-pa-xs" :style="'margin-top:2.5rem;' + (!ui.portrait ? 'margin-bottom:2.5rem' : '')">
+            <show-html class="q-ma-sm" :texte="texte"/>
+          </div>
         </template>
 
       </q-splitter>
-    </q-page-container>
-  </q-layout>
+
+    <q-toolbar class="bg-secondary text-white tb">
+      <q-btn dense size="md" icon="chevron_left" color="warning" 
+        @click="ui.fermerHelp">
+        <q-tooltip class="bg-white text-primary">{{$t('HLPfermer')}}</q-tooltip>
+      </q-btn>
+      <q-btn v-if="!stackvide" class="q-ml-xs" 
+        dense size="md" icon="arrow_back" @click="back">
+        <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
+      </q-btn>
+      <q-toolbar-title class="titre-lg">{{tp}}</q-toolbar-title>
+    </q-toolbar>
+
+    <q-toolbar class="bg-black text-white bb">
+      <q-input ref="filterRef" dense v-model="filter" :label="$t('HLPfiltre')">
+        <template v-slot:append>
+          <q-icon v-if="filter !== ''" name="clear" class="cursor-pointer" @click="resetFilter" />
+        </template>
+      </q-input>
+      <q-space />
+      <q-btn v-if="!expandAll" 
+        dense size="md" color="primary" icon="unfold_more" padding="none"
+        :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
+      <q-btn v-if="expandAll" 
+        dense size="md" color="primary" icon="unfold_less" padding="none"
+        :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
+    </q-toolbar>
+
+</div>
 </q-dialog>
 </template>
 
@@ -92,7 +89,7 @@ import { useI18n } from 'vue-i18n'
 import { getImgUrl, getMd } from '../boot/appconfig.js'
 import stores from '../stores/stores.mjs'
 import { arbres, titre, parents } from '../app/help.mjs'
-import { styp } from '../app/util.mjs'
+import { styp, sty } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
 
@@ -186,7 +183,7 @@ export default ({
     setTexte(selected.value)
 
     return {
-      ui, styp,
+      ui, sty, styp,
       splitterModel, selected, expanded,
       setTexte, texte,
       resetFilter, filterRef, filter,
@@ -198,11 +195,14 @@ export default ({
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.f1
+.tb
   position: absolute
   top: 0
-  right: 0
-  width: 8rem
-  z-index: 2
-  border: 2px solid $yellow-5
+  left: 0
+.bb
+  position: absolute
+  bottom: 0
+  left: 0
+.filler
+  height: 3rem
 </style>

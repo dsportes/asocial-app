@@ -294,10 +294,6 @@ export default ({
 })
 </script>
 
-<style lang="css">
-.q-dialog__inner { padding: 1px !important; }
-</style>
-
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .filler

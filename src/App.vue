@@ -609,6 +609,10 @@ un élément qui apparaît quand le drawer est caché*/
 </style>
 
 <style lang="css">
+.q-dialog__inner { padding: 0cm !important; }
+</style>
+
+<style lang="css">
 @import 'animate.css'
 </style>
 
