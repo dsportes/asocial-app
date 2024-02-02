@@ -1,4 +1,4 @@
-/*const pages = {
+const pages = {
 
   page1: { sub: 's1a', pos: 10,
     titre: { 
@@ -45,34 +45,26 @@ const sections = [
 ]
 
 const chapitres = { }
-*/
 
-import { useI18n } from 'vue-i18n'
+export const arbres = { }
 
-export const arbres = { } // un q-tree par langue
-
-const pages = new Map() // Key: nom page, value: nom de sa section
-
-export function initHelp (lg, plan) {
-  const $t = useI18n().t
-  const a = []
-  plan.forEach(s => {
-    const ch = []
-    s.lp.forEach(p => {
-      pages.set(p, s.id)
-      ch.push({ id: p, label: $t('A_' + p), children: [], type: 2 })
-    })
-    a.push({ id: s.id, label: $t('A_' + s.id), children: ch, type: 1 })
-  })
-  arbres[lg] = a
+export function parents (p) {
+  const a = [p]
+  let e1, e2, e3
+  if (!p.startsWith('s')) {
+    e1 = pages[p] // c'est une page
+    e2 = e1 ? chapitres[e1.sub] : null
+  } else {
+    e2 = chapitres[p] // c'est une section ou sous-section
+  }
+  if (e2) {
+    a.push(e2.id)
+    e3 = chapitres[e2.section]
+    if (e3) a.push(e3.id)
+  }
+  return a
 }
 
-export function parents (n) { // nom d'une page ou section
-  const s = pages.get(n)
-  return s ? [s, n] : [n]
-}
-
-/*
 export function titre (lg, p) {
   const e = p.startsWith('s') ? chapitres[p] : pages[p]
   return e ? tit(lg, e) : null
@@ -82,8 +74,7 @@ function tit (lg, e) {
   return e.titre[lg] || e.titre['fr-FR']
 }
 
-export function init (lg, plan) {
-
+export function init (lg) {
   const subs = new Map()
   const tm = []
   sections.forEach(sec => {
@@ -129,4 +120,3 @@ export function init (lg, plan) {
 
   arbres[lg] = tm
 }
-*/

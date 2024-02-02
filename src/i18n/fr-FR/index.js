@@ -457,6 +457,7 @@ export default {
   // DialogueHelp.vue
   HLPaide: 'Page d\'aide : ',
   HLPaidebd: 'Page d\'aide bientôt disponible',
+  HLPaidebd2: 'Cette page d\'aide n\'est pas encore disponible mais devrait l\'être bientôt.',
   HLPfermer: 'Fermer l\'aide',
   HLPprec: 'Page d\'aide précédente',
   HLPfiltre: 'Filtre sur les titres',
@@ -2052,5 +2053,13 @@ export default {
 Fermer TOUTES les fenêtres / onglets où s'exécute l'application.
 `,
 
+  A_pa: 'Les principes de l\'application',
+  A_av: 'A propos des vues, interprétation et saisie',
+  A_faq: 'Comment faire pour, questions et réponses',
+  A_dev: 'Développer, héberger et déployer l\'application',
+
+  A_page1: 'Présentation générale',
+  A_page2: 'Page avec un SVG',
+  A_page3: 'Titre de la page 2',
 
 }

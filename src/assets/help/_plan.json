@@ -1,0 +1,6 @@
+[
+  { "id": "pa", "lp": ["page1", "page2"] },
+  { "id": "av", "lp": []},
+  { "id": "faq", "lp": ["page3"]},
+  { "id": "dev", "lp": []}
+]

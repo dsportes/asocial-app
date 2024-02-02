@@ -17,18 +17,14 @@
               no-connectors
             >
             <template v-slot:default-header="prop">
-              <div @click.stop="clic($event, prop.node)" :title="prop.node.id">
+              <div @click.stop="goto(prop.node.id)">
                 <div v-if="prop.node.type === 1" class="row items-center">
                   <q-icon name="library_books" color="orange" size="24px" class="q-mr-sm" />
                   <div :class="'text-bold text-italic' + cl(prop.node.id)">{{ prop.node.label }}</div>
                 </div>
                 <div v-if="prop.node.type === 2" class="row items-center">
-                  <q-icon name="menu_book" color="orange" size="24px" class="q-mr-sm" />
-                  <div :class="'text-bold text-italic' + cl(prop.node.id)">{{ prop.node.label }}</div>
-                </div>
-                <div v-if="prop.node.type === 3" class="row items-center">
                   <q-icon name="note" color="primary" size="24px" class="q-mr-sm" />
-                  <div :class="'text-bold' + cl(prop.node.id)">{{ prop.node.label }}</div>
+                  <div :class="cl(prop.node.id)">{{ prop.node.label }}</div>
                 </div>
               </div>
             </template>
@@ -76,7 +72,7 @@
         dense size="md" icon="arrow_back" @click="back">
         <q-tooltip class="bg-white text-primary">{{$t('HLPprec')}}</q-tooltip>
       </q-btn>
-      <q-toolbar-title class="titre-lg">{{tp}}</q-toolbar-title>
+      <q-toolbar-title class="titre-lg">{{$t('A_' + this.selected)}}</q-toolbar-title>
     </q-toolbar>
 
     <q-toolbar class="bg-black text-white bb">
@@ -103,8 +99,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getImgUrl, getMd } from '../boot/appconfig.js'
 import stores from '../stores/stores.mjs'
-import { arbres, titre, parents } from '../app/help.mjs'
-import { styp, sty } from '../app/util.mjs'
+import { styp, sty, $t } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
 
@@ -121,32 +116,23 @@ export default ({
 
   watch: {
     selected (ap) {
-      this.expanded = parents(ap)
+      this.expanded = this.parents(ap)
     }
   },
 
   computed: {
     stackvide () { return this.ui.helpstack.length <= 1 },
-    arbre () { return arbres[this.$i18n.locale] },
-    tp () { return titre(this.$i18n.locale, this.selected) },
     courante () { return this.ui.helpstack[this.ui.helpstack.length - 1] }
   },
 
   methods: {
     cl (id) { return ' titre-md ' + (id === this.selected ? 'q-px-xs bg-yellow-5 text-black text-bold' : '') },
-    clic (e, n) {
-      // const t = e.target
-      const i = n.id.indexOf('/')
-      const p = i === -1 ? n.id : n.id.substring(i + 1)
-      if (p === this.courante) return
-      this.ui.pushhelp(p)
-      this.selected = p
-      this.setChaps(p)
-    },
     goto (p) {
-      this.ui.pushhelp(p)
-      this.selected = p
-      this.setChaps(p)
+      if (p !== this.courante) {
+        this.ui.pushhelp(p)
+        this.selected = p
+        this.setChaps(p)
+      }
     },
     back () {
       this.ui.pophelp()
@@ -158,7 +144,26 @@ export default ({
   setup () {
     const $i18n = useI18n()
     const ui = stores.ui
+
+    const config = stores.config
+    const plan = config.planHelp
+    const arbre = []
+    const pages = new Map() // Key: nom page, value: nom de sa section
+
+    plan.forEach(s => {
+      const ch = []
+      s.lp.forEach(p => {
+        pages.set(p, s.id)
+        ch.push({ id: p, label: $t('A_' + p), children: [], type: 2 })
+      })
+      arbre.push({ id: s.id, label: $t('A_' + s.id), children: ch, type: 1 })
+    })
   
+    function parents (n) { // nom d'une page ou section
+      const s = pages.get(n)
+      return s ? [s, n] : [n]
+    }
+
     const splitterModel = ref(50)
     const selected = ref(ui.helpstack[0])
     const expanded = ref(parents(ui.helpstack[0]))
@@ -227,6 +232,7 @@ export default ({
 
     return {
       ui, sty, styp,
+      arbre, parents,
       splitterModel, selected, expanded,
       setChaps, intro, chaps,
       resetFilter, filterRef, filter,

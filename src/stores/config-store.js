@@ -17,6 +17,8 @@ export const useConfigStore = defineStore('config', {
     locales: [],
     motsclesloc: {},
 
+    pagesHelp: new Set(),
+
     logo: '',
     cliccamera: '',
     iconAvatar: '',
@@ -69,6 +71,12 @@ export const useConfigStore = defineStore('config', {
     setConfig(cfg) {
       Tarif.tarifs = cfg.tarifs
       for(const x in cfg) this[x] = cfg[x]
+
+      cfg.planHelp.forEach(s => {
+        s.lp.forEach(p => { this.pagesHelp.add(p) })
+        this.pagesHelp.add(s.id) 
+      })
+  
     },
 
     setEmojiIndex (ei) {

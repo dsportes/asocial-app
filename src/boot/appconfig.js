@@ -4,7 +4,7 @@ const pako = require('pako')
 import { setRequiredModules } from '../app/util.mjs'
 
 import stores from '../stores/stores.mjs'
-import { init } from '../app/help.mjs'
+import { initHelp } from '../app/help.mjs'
 import { config } from '../app/config.mjs'
 
 export function getImgUrl (name) {
@@ -52,7 +52,6 @@ export default boot(async ({ app /* Vue */ }) => {
 
   cfg.locales = []
   cfg.localeOptions.forEach(t => {cfg.locales.push(t.value)})
-  cfg.locales.forEach(lg => { init(lg) })
 
   const mc = cfg['motscles']
   cfg.motsclesloc = {}
@@ -83,6 +82,8 @@ export default boot(async ({ app /* Vue */ }) => {
     .replace('application/octet-stream', 'audio/mpeg')
   cfg.beep = require('../assets/beep.bin')
     .replace('application/octet-stream', 'audio/mpeg')
+
+  cfg.planHelp = require('../assets/help/_plan.json')
 
   stores.config.setConfig(cfg)
 
