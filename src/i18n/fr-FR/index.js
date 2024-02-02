@@ -2053,13 +2053,17 @@ export default {
 Fermer TOUTES les fenêtres / onglets où s'exécute l'application.
 `,
 
-  A_pa: 'Les principes de l\'application',
-  A_av: 'A propos des vues, interprétation et saisie',
+  A_pa: 'L\'application "a-social"',
+  A_av: 'Les vues, interprétation et saisie',
   A_faq: 'Comment faire pour, questions et réponses',
   A_dev: 'Développer, héberger et déployer l\'application',
 
-  A_page1: 'Présentation générale',
+  A_presentation: 'Présentation générale',
+  A_coutshebergement: 'Maîtrise des coûts d\'hébergement de l\'application',
   A_page2: 'Page avec un SVG',
   A_page3: 'Titre de la page 2',
+
+  A_comptes: 'Information détaillée à propos de la gestion des comptes',
+  A_crypto: 'L\'usage de la cryptographie dans a-social',
 
 }

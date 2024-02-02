@@ -4,7 +4,6 @@ const pako = require('pako')
 import { setRequiredModules } from '../app/util.mjs'
 
 import stores from '../stores/stores.mjs'
-import { initHelp } from '../app/help.mjs'
 import { config } from '../app/config.mjs'
 
 export function getImgUrl (name) {
