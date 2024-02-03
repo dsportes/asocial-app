@@ -864,6 +864,7 @@ export default {
   ESmoiser1: 'Date mal formée: attendu entre 202301 et 209912.',
   ESmoiser2: 'Aucune statistique n\'est enregistrée après fin M-2 [{0}]. Les tickets peuvent encore évoluer: accéder à la liste vivante.',
   ESmoiser3: 'Cette statistique n\'a pas encore été enregistrée. La dernière est celle de {0}.',
+  ESmoiser4: 'Cette statistique n\'existe qu\'à partir du 3ième mois d\'existence. Création de l\'espace: {0}.',
   ESorg: 'Organisation',
   ESprf: 'Profil: #{0}',
   ESreq: 'Valeur requise',

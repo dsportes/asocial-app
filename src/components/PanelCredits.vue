@@ -1,10 +1,13 @@
 <template>
 <div class="spmd q-pa-sm">
+  <!-- <q-btn dense color="warning" padding="none xs" size="md" no-caps
+    label="Test-Stat-T" @click="dlstat"/> Test de génération du CSV Tickets -->
+
   <div v-if="session.estComptable" class="row justify-start items-center">
-    <div class="titre-md">{{$t('PEsttk')}}</div>
+    <div class="titre-md q-mr-md">{{$t('PEsttk')}}</div>
     <q-input class="w10" v-model="mois" :label="$t('ESmois')" :hint="$t('ESmois2')" dense clearable>
       <template v-slot:append>
-        <q-icon name="download" @click="dlstat" class="cursor-pointer" color="warning"/>
+        <q-icon name="download" @click="dlstat2" class="cursor-pointer" color="warning"/>
       </template>
     </q-input>
   </div>
@@ -59,12 +62,13 @@
 </template>
 
 <script>
+import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import ApercuTicket from '../components/ApercuTicket.vue'
 import PanelDeta from '../components/PanelDeta.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import { dhcool, mon, dkli, genIdTk, styp, afficherDiag } from '../app/util.mjs'
-import { PlusTicket, RafraichirTickets } from '../app/operations.mjs'
+import { PlusTicket, RafraichirTickets, TicketsStat, DownloadStatC2 } from '../app/operations.mjs'
 import { AMJ, idTkToL6 } from '../app/api.mjs'
 
 export default ({
@@ -111,7 +115,19 @@ export default ({
   },
 
   methods: {
-    async dlstat () {
+    async dlstat () { // Pour tester  la création de la stats
+      const { err, blob, creation, mois } = await new TicketsStat().run()
+      const nf = this.session.espace.org + '-T_' + mois
+      if (!err) {
+        saveAs(blob, nf)
+        await afficherDiag($t('PEsd', [nf]))
+      } else {
+        await afficherDiag($t('PEnd' + err))
+      }
+    },
+
+    async dlstat2 () {
+      const esp = this.session.espace
       const am = parseInt(this.mois)
       const aa = Math.floor(am / 100)
       const mm = am % 100
@@ -120,17 +136,21 @@ export default ({
         return
       }
       const lim = Math.floor(AMJ.djMoisN(AMJ.amjUtc(), -2) / 100)
+      if (lim < Math.floor(esp.dcreation / 100)) {
+        await afficherDiag(this.$t('ESmoiser4', [esp.dcreation]));
+        return
+      }
       if (am > lim) {
         await afficherDiag(this.$t('ESmoiser2', [lim]));
         return
       }
-      const mesp = this.session.espace.moisStatT
+      const mesp = esp.moisStatT
       if (am > mesp) {
         await afficherDiag(this.$t('ESmoiser3', [mesp]));
         return
       }
-      const { err, blob } = await new DownloadStatC2().run(this.ns, am, 'T')
-      const nf = this.espace.org + '-T_' + am
+      const { err, blob } = await new DownloadStatC2().run(this.session.ns, am, 'T')
+      const nf = this.session.org + '-T_' + am
       if (!err) {
         saveAs(blob, nf)
         await afficherDiag($t('PEsd', [nf]))
@@ -178,4 +198,6 @@ export default ({
   border-radius: 5px
 .lg2
   width: 8rem
+.w10
+  width: 10rem
 </style>

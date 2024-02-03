@@ -1720,6 +1720,39 @@ export class DownloadFichier extends OperationUI {
   }
 }
 
+/* OP_TicketsStat: 'Enregistre en storage la liste des tickets de M-3 désormais invariables'
+args.token: éléments d'authentification du compte.
+args.org
+*/
+export class TicketsStat extends OperationUI {
+  constructor () { super('TicketStat') }
+
+  async run () { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const args = { token: session.authToken, org: session.org }
+      const ret =  this.tr(await post(this, 'TicketsStat', args))
+      let buf = null
+      try { 
+        buf = await getData(ret.getUrl) 
+      } catch (e) { 
+        return this.finOK({ err: 1 })
+      }
+      try {
+        buf = await decrypterRaw (aSt.compte.priv, null, buf)
+      } catch (e) { 
+        return this.finOK({ err: 2 })
+      }
+      const blob = new Blob([buf], { type: 'text/csv' })
+      return this.finOK({ blob, creation: ret.creation || false, mois: ret.mois })
+    } catch (e) {
+      this.finKO(e)
+    }
+  }
+}
+
+
 /* OP_DownloadStatC: 'Téléchargement d\'un fichier statistique comptable mensuel'
 ComptaStat (org, mr)
 args.token: éléments d'authentification du compte.
@@ -1759,7 +1792,7 @@ export class DownloadStatC extends OperationUI {
 export class DownloadStatC2 extends OperationUI {
   constructor () { super('DownloadStatC2') }
 
-  async run (ns, mois, cs ) { 
+  async run (ns, mois, cs) { 
     try {
       const session = stores.session
       const aSt = stores.avatar
