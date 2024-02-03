@@ -10,10 +10,11 @@
 
 <script>
 
-const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative']
+const txt = ['green-5', 'green-5', 'orange-9', 'negative', 'negative', 'negative']
 const bg = ['none', 'none', 'yellow-1', 'yellow-3', 'yellow-5',  'yellow-7']
 // const bg = ['none', 'none', 'none', 'none', 'none',  'none']
-const ic = ['check', 'report', 'trending_down', 'edit_off', 'lock', 'close']
+const ic = ['circle', 'report', 'trending_down', 'edit_off', 'lock', 'close']
+// const ic = ['check', 'report', 'trending_down', 'edit_off', 'lock', 'close']
 
 export default ({
   name: 'NotifIcon2',

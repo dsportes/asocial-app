@@ -1759,11 +1759,11 @@ export class DownloadStatC extends OperationUI {
 export class DownloadStatC2 extends OperationUI {
   constructor () { super('DownloadStatC2') }
 
-  async run (ns, mois) { 
+  async run (ns, mois, cs ) { 
     try {
       const session = stores.session
       const aSt = stores.avatar
-      const args = { token: session.authToken, ns, mois }
+      const args = { token: session.authToken, ns, mois, cs }
       const ret =  this.tr(await post(this, 'GetUrlStat', args))
       let appKey = null
       let priv = null

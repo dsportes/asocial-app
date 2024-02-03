@@ -1,5 +1,13 @@
 <template>
 <div class="spmd q-pa-sm">
+  <div v-if="session.estComptable" class="row justify-start items-center">
+    <div class="titre-md">{{$t('PEsttk')}}</div>
+    <q-input class="w10" v-model="mois" :label="$t('ESmois')" :hint="$t('ESmois2')" dense clearable>
+      <template v-slot:append>
+        <q-icon name="download" @click="dlstat" class="cursor-pointer" color="warning"/>
+      </template>
+    </q-input>
+  </div>
 
   <panel-deta v-if="!session.estComptable" :c="c" :total="aSt.compta.credits.total"
     class="q-ma-xs q-pa-xs bord1"/>
@@ -55,9 +63,9 @@ import stores from '../stores/stores.mjs'
 import ApercuTicket from '../components/ApercuTicket.vue'
 import PanelDeta from '../components/PanelDeta.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
-import { dhcool, mon, dkli, genIdTk, styp, idTkToL6, afficherDiag } from '../app/util.mjs'
+import { dhcool, mon, dkli, genIdTk, styp, afficherDiag } from '../app/util.mjs'
 import { PlusTicket, RafraichirTickets } from '../app/operations.mjs'
-import { AMJ } from '../app/api.mjs'
+import { AMJ, idTkToL6 } from '../app/api.mjs'
 
 export default ({
   name: 'PanelCredits',
@@ -97,11 +105,40 @@ export default ({
       dhinc: 0,
       nbinc: 0,
       att: 'A', 
-      deb: ''
+      deb: '',
+      mois: 202312,
     }
   },
 
   methods: {
+    async dlstat () {
+      const am = parseInt(this.mois)
+      const aa = Math.floor(am / 100)
+      const mm = am % 100
+      if (aa < 2023 || aa > 2099 || mm < 1 || mm > 12) {
+        await afficherDiag(this.$t('ESmoiser1'));
+        return
+      }
+      const lim = Math.floor(AMJ.djMoisN(AMJ.amjUtc(), -2) / 100)
+      if (am > lim) {
+        await afficherDiag(this.$t('ESmoiser2', [lim]));
+        return
+      }
+      const mesp = this.session.espace.moisStatT
+      if (am > mesp) {
+        await afficherDiag(this.$t('ESmoiser3', [mesp]));
+        return
+      }
+      const { err, blob } = await new DownloadStatC2().run(this.ns, am, 'T')
+      const nf = this.espace.org + '-T_' + am
+      if (!err) {
+        saveAs(blob, nf)
+        await afficherDiag($t('PEsd', [nf]))
+      } else {
+        await afficherDiag($t('PEnd') + err)
+      }
+    },
+
     async nvtk () {
       if (!await this.session.editUrgence()) return
       this.mx = '0'

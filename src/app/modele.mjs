@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, inverse, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA, abToPem } from './webcrypto.mjs'
-import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS, limitesjour } from './api.mjs'
+import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS, limitesjour, djMoisN } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -553,10 +553,6 @@ _data_ :
 - `notif` : notification de l'administrateur, cryptée par la clé du Comptable.
 - `t` : numéro de _profil_ de quotas dans la table des profils définis dans la configuration 
   (chaque profil donne un triplet qc q1 q2).
-- `dtk` : `{j, n}`
-  - `j` : aaaammjj du dernier ticket attribué,
-  - `n` : numéro d'ordre
-  - `c` : clé d'auto-contrôle
 */
 export class Espace extends GenDoc {
 
@@ -564,7 +560,9 @@ export class Espace extends GenDoc {
     const session = stores.session
     this.org = row.org
     this.opt = row.opt || 0
+    this.dcreation = row.dcreation || 0
     this.moisStat = row.moisStat || 0
+    this.moisStatT = row.moisStatT || 0
     this.t = row.t || 0
     // la clé est la clé du Comptable de l'espace
     if (row.notif) {
@@ -572,18 +570,20 @@ export class Espace extends GenDoc {
       this.notif = Notification.deSerial(ser)
     } else this.notif = null
     session.setNotifE(this.notif)
-    this.dtk = row.dtk ? row.dtk : { j: 0, n: 0, c: 0 }
-  }
-
-  static ticket (dtk) {
-    const session = stores.session
-    if (!dtk || !dtk.j) return 0
-    return (((((session.ns * 100000000) + dtk.j) * 100000) + dtk.n) * 10) + c
   }
 
   static async nouveau (org) {
     const session = stores.session
-    const r = { id: session.ns, org, v: 1, t: 1, notif: null }
+    const r = { 
+      id: session.ns, 
+      org, 
+      v: 1, 
+      t: 1, 
+      notif: null, 
+      dcreation: AMJ.amjUtc(),
+      moisStat: 0,
+      moisStatT: 0
+    }
     return { _nom: 'espaces', id: r.id, org: r.org, v: r.v, _data_: new Uint8Array(encode(r))}
   }
 }
@@ -1647,22 +1647,12 @@ export class Ticket extends GenDoc {
     this.refc = row.refc || ''
   }
 
-  // dernier jour de validité d'un ticket généré
-  static dlv (tk) {
-    const [at, mt, ] = AMJ.aaaammjj(tk.dg)
-    let ax = at, mx = mt + 1
-    if (mx > 12) { ax++; mx = 1 }
-    return AMJ.amjDeAMJ(ax, mx, AMJ.djm(ax, mx))
-  }
-
+  /* Un ticket est obsolète SSI,
+  a) il est encore en attente (n'a pas été reçu)
+  b) ET que sa génération a plus de 2 mois
+  */
   static estObsolete (tk) {
-    const d = Ticket.dlv(tk)
-    return tk.dr === 0 && AMJ.amjUtc() > d
-  }
-
-  static estSupprimable (tk) {
-    const d = Ticket.dlv(tk)
-    return tk.dr === 0 && AMJ.amjUtc() <= d
+    return tk.dr === 0 && AMJ.amjUtc() > AMJ.djMoisN(tk.dg, 2)
   }
 
   clone () {

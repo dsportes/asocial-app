@@ -4,7 +4,7 @@ import { useQuasar } from 'quasar'
 
 import { arrayBuffer, random } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
-import { AMJ, appexc } from './api.mjs'
+import { AMJ, appexc, d10, idTkToL6 } from './api.mjs'
 
 let pako
 
@@ -364,18 +364,7 @@ export function rnd6 () {
   return r
 }
 
-/* retourne un code à 6 lettres majuscules depuis l'id d'un ticket */
-export function idTkToL6 (t) {
-  const am = Math.floor(t / d10)
-  const m = am % 100
-  const a = Math.floor(am / 100)
-  let x = String.fromCharCode(a % 2 === 0 ? 64 + m : 76 + m)
-  for (let i = 0, j = (t % d10); i < 5; i++) { x += String.fromCharCode(65 + (j % 26)); j = Math.floor(j / 26) }
-  return x
-}
-
 /* Génère l'id d'un ticket: aa mm rrr rrr rrr r */
-const d10 = 10000000000
 export function genIdTk (a, m) {
   const x1 = (((a % 100) * 100) + m)
   return (rnd6() % d10) + (x1 * d10)

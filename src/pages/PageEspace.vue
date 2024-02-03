@@ -235,7 +235,7 @@ export default {
     },
 
     async dlstat2 () {
-      const { err, blob } = await new DownloadStatC2().run(this.ns, parseInt(this.mois))
+      const { err, blob } = await new DownloadStatC2().run(this.ns, parseInt(this.mois), 'C')
       const nf = this.espace.org + '-C_' + this.mois
       if (!err) {
         saveAs(blob, nf)

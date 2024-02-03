@@ -36,11 +36,11 @@
         <span class="text-italic fs-md">{{$t('TKrefc')}}</span>
         <span class="q-ml-sm font-mono text-bold">{{tk.refc}}</span>
       </div>
-      <q-btn v-if="!session.estComptable && Ticket.estSupprimable(tk)" class="q-mt-xs"
+      <q-btn v-if="!session.estComptable && !Ticket.estObsolete(tk)" class="q-mt-xs"
         dense color="warning" icon="close" :label="$t('supprimer')" @click="deltk"/>
-      <q-btn v-if="session.estComptable && Ticket.estSupprimable(tk)" class="q-mt-xs"
+      <q-btn v-if="session.estComptable && !Ticket.estObsolete(tk)" class="q-mt-xs"
         dense color="warning" icon="check" :label="$t('TKenreg1')" @click="recep1"/>
-      <q-btn v-if="session.estComptable && Ticket.estSupprimable(tk)" class="q-ml-xs q-mt-xs"
+      <q-btn v-if="session.estComptable && !Ticket.estObsolete(tk)" class="q-ml-xs q-mt-xs"
         dense color="warning" icon="check" :label="$t('TKenreg2')" @click="recep2"/>
       <q-separator class="q-mb-sm" size="3px"/>
     </div>
@@ -68,8 +68,8 @@
 
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { mon, idTkToL6, dkli, styp } from '../app/util.mjs'
-import { AMJ } from '../app/api.mjs'
+import { mon, dkli, styp, afficherDiag } from '../app/util.mjs'
+import { AMJ, idTkToL6 } from '../app/api.mjs'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import { Ticket } from '../app/modele.mjs'
 import { ReceptionTicket, MoinsTicket } from '../app/operations.mjs'

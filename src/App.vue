@@ -2,21 +2,7 @@
 <q-layout view="hHh lpR fFf">
   <q-header elevated>
     <q-toolbar class="full-width">
-      <!-- 
-      ça marche (en utilisant le préchargement dans config)
-      <img :src="session.ok && session.estComptable ? config.iconSuperman : config.logoSvg" 
-        height="32" width="32"/>
-      Mais ça, ça ne marche pas pour SVG en direct dans une expression
-      <img :src="session.ok && session.estComptable ? '~assets/superman.jpg' : '~assets/logo.svg'" 
-        height="32" width="32"/>
-      -->
-      <img v-if="session.ok && session.estComptable" src="~assets/superman.jpg" 
-        height="28" width="28" class="q-pa-none" @click="reload"/>
-      <img v-else src="~assets/logo.svg" 
-        height="28" width="28"  class="q-pa-none" @click="reload"/>
       
-      <bouton-help page="pa"/>
-
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
         @click="clickNotif" apptb/>
@@ -57,6 +43,8 @@
           </div>
         </div>
       </q-toolbar-title>
+
+      <bouton-help :page="'pg_' + ui.page"/>
 
       <!-- Fichiers avion -->
       <q-btn v-if="session.ok" :disable="session.incognito" 
@@ -106,7 +94,7 @@
 
   <q-footer>
     <q-toolbar class="sombre overflow-hidden">
-      <bouton-help page="page1"/>
+      <bouton-help page="pa"/>
 
       <bouton-langue style="position:relative;top:2px;"/>
 
@@ -144,7 +132,20 @@
         <queue-icon/>
       </q-btn>
 
-      <q-toolbar-title class="titre-md text-right q-mx-xs">
+      <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
+        <!-- 
+        ça marche (en utilisant le préchargement dans config)
+        <img :src="session.ok && session.estComptable ? config.iconSuperman : config.logoSvg" 
+          height="32" width="32"/>
+        Mais ça, ça ne marche pas pour SVG en direct dans une expression
+        <img :src="session.ok && session.estComptable ? '~assets/superman.jpg' : '~assets/logo.svg'" 
+          height="32" width="32"/>
+        -->
+        <img v-if="session.ok && session.estComptable" src="~assets/superman.jpg" 
+          height="28" width="28" class="q-pa-none q-mr-sm img" @click="reload"/>
+        <img v-if="session.ok && !session.estComptable" src="~assets/logo.svg" 
+          height="28" width="28"  class="q-pa-none q-mr-sm img bg-white" @click="reload"/>
+
         <span v-if="session.ok" class="titre-lg">{{aSt.avC.na.nomc}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
         <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
@@ -632,4 +633,6 @@ un élément qui apparaît quand le drawer est caché*/
   overflow: hidden
 .lg1
   min-width: 6rem
+.img
+  border-radius: 12px
 </style>

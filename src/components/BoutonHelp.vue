@@ -17,7 +17,7 @@ export default ({
   props: { size: String, page: String, label: String },
 
   computed: {
-    tp () { return !this.ph.has(this.page) ? this.$t('HLPaidebd') : this.$t('A_' + this.page) }
+    tp () { return !this.ph.has(this.page) ? this.$t('HLPaidebd', [this.page]) : this.$t('A_' + this.page) }
   },
 
   methods: {

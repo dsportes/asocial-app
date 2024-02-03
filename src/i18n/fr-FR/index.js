@@ -456,7 +456,7 @@ export default {
 
   // DialogueHelp.vue
   HLPaide: 'Page d\'aide : ',
-  HLPaidebd: 'Page d\'aide bientôt disponible',
+  HLPaidebd: 'Page "{0}" bientôt disponible',
   HLPaidebd2: 'Cette page d\'aide n\'est pas encore disponible mais devrait l\'être bientôt.',
   HLPfermer: 'Fermer l\'aide',
   HLPprec: 'Page d\'aide précédente',
@@ -861,6 +861,9 @@ export default {
   ESnsh: 'De 10 à 59',
   ESmois2: '202405',
   ESmois: 'Mois: AAAAMM',
+  ESmoiser1: 'Date mal formée: attendu entre 202301 et 209912.',
+  ESmoiser2: 'Aucune statistique n\'est enregistrée après fin M-2 [{0}]. Les tickets peuvent encore évoluer: accéder à la liste vivante.',
+  ESmoiser3: 'Cette statistique n\'a pas encore été enregistrée. La dernière est celle de {0}.',
   ESorg: 'Organisation',
   ESprf: 'Profil: #{0}',
   ESreq: 'Valeur requise',
@@ -1898,8 +1901,9 @@ export default {
   PEedn: 'Editer le nom',
   PEabo: 'Abon. & max conso.',
   PEstm: 'Téléchargement du fichier CSV statistique d\'abonnement / consommation d\'un mois ...',
+  PEsttk: 'Téléchargement du fichier CSV des tickets d\'un mois ...',
   PEnd1: 'Statistique non trouvée',
-  PEnd2: 'La statistique ne peut pas $etre décryptée: a) soit elle est destinée à un autre compte, b) soit elle est ancienne et la clé fixée par l\'administateur du site a été changée.',
+  PEnd2: 'La statistique ne peut pas être décryptée: a) soit elle est destinée à un autre compte, b) soit elle est ancienne et la clé fixée par l\'administateur du site a été changée.',
   PEsd: 'Statistique téléchargée sous le nom [{0}]',
 
   // PanelCredits
