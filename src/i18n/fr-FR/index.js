@@ -22,6 +22,7 @@ export default {
   entre: 'entre {0} et {1}',
   OK: 'OK',
   ok: 'OK',
+  go: 'GO',
   moi: 'moi',
   de: 'de',
   moi2: '{0} [moi]',
@@ -848,7 +849,7 @@ export default {
 
   // PageAdmin et ApercuEspace
   ESgc: 'Lancer un GC',
-  ESgcstc: 'Lancer un GCstc',
+  ESgcop: 'Tester GC op',
   ESdms: 'Dernière stat: {0}',
   ESck: 'Afficher le dernier checkpoint',
   ESne: 'Nouvelle organisation',
@@ -888,7 +889,8 @@ export default {
   ESt3: 'GCPrg : Purges des données comptes / avatars / groupes résiliés',
   ESt4: 'GCTra : Traitement des transferts de fichiers interrompus',
   ESt5: 'GCFpu : Purges des fichiers non référencés',
-  ESt6: 'GCDlv : Purge des sposorings et des versions des avats et groupes hors limite de validité',
+  ESt6: 'GCDlv : Purge des sponsorings et des versions des avatars et groupes hors limite de validité',
+  ESt7: 'GCstc : Calcul des statistiques des compteurs de comptabilité et des tickets',
   ESlog: 'Synthèses des exécutions des tâches',
   ESretry: 'Reprise {0}',
   ESping: 'Test disponible seulement en mode Firestore (pas SQL)',

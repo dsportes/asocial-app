@@ -1,10 +1,13 @@
 <template>
   <q-page class="q-pa-xs">
     <div class="column">
-      <div class="row q-gutter-xs justify-center">
+      <div class="row justify-center">
         <q-btn padding="xs" dense color="warning" :label="$t('ESgc')" @click="testGC"/>
-        <q-btn padding="xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
-        <q-btn padding="xs" dense color="warning" :label="$t('ESgcstc')" @click="testGCstc"/>
+        <q-btn padding="xs" class="q-ml-xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
+        <q-select v-model="gcop" dense :options="gcops" 
+          class="q-ml-lg" label="GCop ???" style="width:6rem"/>
+        <q-btn padding="xs" class="q-ml-xs" dense color="warning" 
+          :disable="gcop === ''" :label="$t('go')" @click="testGCop"/>
       </div>
 
       <div class="q-mt-sm row q-gutter-xs justify-center">
@@ -218,11 +221,14 @@ export default {
 
   methods: {
     ev0 (idx) { return mon(this.cfg.profils[idx][0]) },
+
     ev1 (idx) { 
       const n = this.cfg.profils[idx][1]
       return '[' + n + '] ' + nbn(n * UNITEV1)
     },
+
     ev2 (idx) { return edvol(this.cfg.profils[idx][2] * UNITEV2) },
+
     brd (idx) { 
       const x = this.prf === idx + 1 ? ' bord6': (this.profil === idx + 1 ? ' bord7' : ' bord5') 
       return x 
@@ -250,28 +256,34 @@ export default {
     async rafraichir () {
       await reconnexionCompte()
     },
+
     aNS (ns) {
       const mesp = this.session.espaces
       return mesp.has(ns)
     },
+
     aOrg (org) {
       const mesp = this.session.espaces
       for (const [ns, e] of mesp)
         if (e.org === org) return true
       return false
     },
+
     plusNS () {
       this.ui.oD('PAcreationesp')
     },
+
     cancelNS () {
       this.ns = 0
       this.ps = null
       this.ui.fD()
     },
+
     okps (ps) {
       if (ps) ps.phrase = null
       this.ps = ps
     },
+
     async creerNS () {
       this.session.setNs(this.ns)
       await new CreerEspace().run(this.org, this.ps, this.ns)
@@ -285,6 +297,7 @@ export default {
       new SetEspaceT().run(this.esp.id, this.prf)
       this.ui.fD()
     },
+
     ovchgprf1 (e) {
       this.profil = e.t
       this.esp = e
@@ -299,29 +312,25 @@ export default {
       this.ui.oD('PApageespace')
     },
 
-    /*
-    async testGCRes () {
-      const ret = await new GC().run('GCRes')
-      console.log(ret.a.length)
-    },
-    async testGCHeb () {
-      await new GC().run('GCHeb')
-    },
-    */
-    async testGCstc () {
-      const ret = await new GC().run('GCstc')
-      console.log(ret.stats.nbstc)
+    async testGCop () {
+      const ret = await new GC().run(this.gcop)
+      if (ret.stats) console.log(JSON.stringify(ret.stats))
+      if (ret.err) console.log(JSON.stringify(ret.err))
     },
 
     async testGC () {
       await new GC().run('GC')
     },
+
     async affCkpt () {
       this.ck = await new GetCheckpoint().run()
       this.ui.oD('PAcheckpoint')
     },
+
     dhIso (t) { return new Date(t).toISOString() },
+
     duree (d) { return d < 1000 ? (d + 'ms') : (d / 1000).toPrecision(3) + 's'},
+
     stat (s) {
       const r = []
       for (const f in s) { r.push(f + '=' + s[f])}
@@ -331,6 +340,8 @@ export default {
 
   data () {
     return {
+      gcops: ['GCHeb', 'GCGro', 'GCPag', 'GCTra', 'GCFpu', 'GCDlv', 'GCstc'],
+      gcop: '',
       ns: 0,
       nsc: 0, // ns "courant" de PageEspca à ouvrir
       org: '',
