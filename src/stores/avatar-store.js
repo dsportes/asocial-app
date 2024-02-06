@@ -41,6 +41,14 @@ export const useAvatarStore = defineStore('avatar', {
   }),
 
   getters: {
+    session (state) { return stores.session },
+    config (state) { return stores.config },
+    gSt (state) { return stores.groupe },
+    ui (state) { return stores.ui },
+    filtre (state) { return stores.filtre },
+    pSt (state) { return stores.people },
+    nSt (state) { return stores.note },
+    
     /* retourne l'avatar principal du compte actuellement connecté */
     compte: (state) => { return state.avatarP },
 
@@ -54,11 +62,11 @@ export const useAvatarStore = defineStore('avatar', {
     compta: (state) => { return state.comptaP },
 
     /* retourne la tribu de l'avatar principal du compte actuellement connecté */
-    tribu: (state) => { return state.maptr.get(stores.session.tribuId) },
+    tribu: (state) => { return state.maptr.get(state.session.tribuId) },
 
     /* retourne la tribu "courante" ou à défaut celle du compte actuellement connecté */
     tribuC: (state) => { 
-      return stores.session.tribuCId ? state.maptr.get(stores.session.tribuCId) : state.tribu 
+      return state.session.tribuCId ? state.maptr.get(state.session.tribuCId) : state.tribu 
     },
 
     qv: (state) => {
@@ -87,13 +95,13 @@ export const useAvatarStore = defineStore('avatar', {
 
     // Avatar courant
     avC (state) { 
-      const e = state.map.get(stores.session.avatarId)
+      const e = state.map.get(state.session.avatarId)
       return e ? e.avatar : null 
     },
 
     // Element avatar courant
     eavC (state) { 
-      return state.map.get(stores.session.avatarId)
+      return state.map.get(state.session.avatarId)
     },
 
     chatDeAvec: (state) => { return (de, avec) => { 
@@ -108,7 +116,7 @@ export const useAvatarStore = defineStore('avatar', {
     celle de la configuration et celle du compte */
     mapMC (state) {
       const m = new Map()
-      let mx = stores.config.motsclesLOC
+      let mx = state.config.motsclesLOC
       for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
       mx = state.motscles || {}
       for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
@@ -119,12 +127,12 @@ export const useAvatarStore = defineStore('avatar', {
     celle de la configuration, celle du compte et celle du groupe courant*/
     mapMCGr (state) {
       const m = new Map()
-      let mx = stores.config.motsclesLOC
+      let mx = state.config.motsclesLOC
       for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
       mx = state.motscles || {}
       for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-      if (stores.session.groupeId) {
-        mx = stores.groupe.egrC.groupe.motscles || {}
+      if (state.session.groupeId) {
+        mx = state.gSt.egrC.groupe.motscles || {}
         for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
       }
       return m
@@ -141,8 +149,8 @@ export const useAvatarStore = defineStore('avatar', {
     /* Construit une Map idx:{c, n} fusionnée depuis celle du groupe courant*/
     mapMCG (state) {
       const m = new Map()
-      if (stores.session.groupeId) {
-        const mx = stores.groupe.egrC.groupe.mc || {}
+      if (state.session.groupeId) {
+        const mx = state.gSt.egrC.groupe.mc || {}
         for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
       }
       return m
@@ -156,7 +164,7 @@ export const useAvatarStore = defineStore('avatar', {
       state.compte.atr.forEach(x => { 
         if (x) t.push({id: x.id, info: x.info || ''})
       })
-      const idp = stores.session.tribuId
+      const idp = state.session.tribuId
       t.sort((a,b) => { return (a.id === idp ? -1 : 
         (b.id === idp ? 1: (a.info < b.info ? -1 : (a.info === b.info ? 0 : 1))) )})
       const tr = []
@@ -288,7 +296,7 @@ export const useAvatarStore = defineStore('avatar', {
     },
     // retourne l'array des tickets de l'avatar du compte
     getTickets: (state) => {
-        const e = state.map.get(stores.session.compteId)
+        const e = state.map.get(state.session.compteId)
         return e ? Array.from(e.tickets.values()) : []
     },
 
@@ -301,7 +309,7 @@ export const useAvatarStore = defineStore('avatar', {
     /** PanelPeople ****************************************************/
     // elt act dans tribu pour la tribu courante et le people courant
     actPeC: (state) => {
-      const peId = stores.session.peopleId
+      const peId = state.session.peopleId
       for (const e of (state.tribuC || state.tribu).act) 
         if (e && e.id === peId) return e
     },
@@ -310,8 +318,8 @@ export const useAvatarStore = defineStore('avatar', {
     ptLcFT: (state) => {
       const lcF = state.ptLcF
 
-      const f = stores.filtre.tri.tranche
-      if (!f) { stores.ui.fmsg(lcF.length); return lcF }
+      const f = state.filtre.tri.tranche
+      if (!f) { state.ui.fmsg(lcF.length); return lcF }
 
       const ctf = fx[f][0]
       const ctm = fx[f][1]
@@ -326,12 +334,12 @@ export const useAvatarStore = defineStore('avatar', {
 
       const x = []; lcF.forEach(t => { x.push(t) })
       x.sort(comp)
-      stores.ui.fmsg(x.length)
+      state.ui.fmsg(x.length)
       return x
     },
 
     ptLcF: (state) => {
-      const f = stores.filtre.filtre.tranche
+      const f = state.filtre.filtre.tranche
       if (!f) return state.ptLc
       const r = []
       for (const c of state.ptLc) {
@@ -355,7 +363,7 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     ptLc: (state) => {
-      const pow = stores.session.pow
+      const pow = state.session.pow
       const t = []
       for (const e of state.tribuC.act) {
         if (e && !e.vide && (pow < 4 || e.nasp)) t.push(e)
@@ -371,14 +379,13 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     tousChats: (state) => {
-      const session = stores.session
-      const f = stores.filtre.filtre.chats
+      const f = state.filtre.filtre.chats
       const flimj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
       const fsetp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       const fsetn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
       for (const [,elt] of state.map) {
-        if (!f.tous && session.avatarId !== elt.avatar.id) continue
+        if (!f.tous && state.session.avatarId !== elt.avatar.id) continue
         for (const [,c] of elt.chats) {
           if (f.rac) {
             if (f.rac === 1 && stI !== 1) continue
@@ -404,11 +411,10 @@ export const useAvatarStore = defineStore('avatar', {
 
   actions: {
     setCompte (avatar, compta, tribu) { // avatar principal du compte connecté
-      const session = stores.session
       this.avatarP = avatar
       if (tribu) {
-        session.setTribuId(tribu.id)
-        session.setTribuCId(tribu.id)
+        this.session.setTribuId(tribu.id)
+        this.session.setTribuCId(tribu.id)
       }
       this.comptaP = compta // utilisé par setTribu
       if (tribu) this.setTribu(tribu)
@@ -422,18 +428,17 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     setCompta (compta) {
-      const session = stores.session
       let bl = this.comptaP && ((this.comptaP.dhvu || 0) !== (compta.dhvu || 0))
-      if (bl) session.setDhvu(compta.dhvu)
+      if (bl) this.session.setDhvu(compta.dhvu)
       // détection des dépassements de quota : génération de la notif
-      if (session.setNotifQ(compta.compteurs.notifQ)) bl = true
+      if (this.session.setNotifQ(compta.compteurs.notifQ)) bl = true
       // détection de solde négatif / consommation excessive: génération de la notif
       const ntf = compta.estA ? 
         compta.compteurs.notifS(compta.credits.total)
         : compta.compteurs.notifX
-      if (session.setNotifS(ntf)) bl = true
+      if (this.session.setNotifS(ntf)) bl = true
       this.comptaP = compta
-      if (bl) session.setBlocage()
+      if (bl) this.session.setBlocage()
     },
 
     setccCpt (ccCpt) {
@@ -444,12 +449,11 @@ export const useAvatarStore = defineStore('avatar', {
     ou par convention (sans paramètre) rend "courante" la tribu de la session
     */
     setTribuC (tribu) { 
-      const session = stores.session
       if (!tribu) {
         // Par convention, rend "courante" la tribu de la session
-        session.setTribuCId(session.tribuId)
+        this.session.setTribuCId(this.session.tribuId)
       } else {
-        session.setTribuCId(tribu.id)
+        this.session.setTribuCId(tribu.id)
         this.setTribu(tribu)
       }
     },
@@ -459,9 +463,7 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     setTribu (tribu) { // set / remplacement de la tribu
-      const session = stores.session
-      if (!tribu || session.tribuId === tribu.id) {
-        const pSt = stores.people
+      if (!tribu || this.session.tribuId === tribu.id) {
         const nasp = new Map()
         const spAv = new Set() // people sponsor avant
         if (this.tribu) for (const e of this.tribu.act) 
@@ -473,17 +475,17 @@ export const useAvatarStore = defineStore('avatar', {
             nasp.set(e.id, e.nasp)
           }
         // enlève des people ceux qui étaient avant mais pas après
-        spAv.forEach(id => { if (!spAp.has(id)) pSt.unsetPeopleTribu(id)})
+        spAv.forEach(id => { if (!spAp.has(id)) this.pSt.unsetPeopleTribu(id)})
         // ajoute aux people ceux y sont après mais n'y étaient pas avant
-        spAp.forEach(id => { if (!spAv.has(id)) pSt.setPeopleTribu(nasp.get(id)) })
+        spAp.forEach(id => { if (!spAv.has(id)) this.pSt.setPeopleTribu(nasp.get(id)) })
       }
       if (tribu) {
         this.maptr.set(tribu.id, tribu)
-        if (session.tribuId === tribu.id) {
+        if (this.session.tribuId === tribu.id) {
           const act = tribu.act[this.compta.it] // du compte
-          session.setNotifTC(tribu.notif, act.notif)
+          this.session.setNotifTC(tribu.notif, act.notif)
         }
-      } else session.setTribuId(0)
+      } else this.session.setTribuId(0)
     },
 
     delTribuC (id) { // delete d'une tribu quelconque pour le Comptable
@@ -491,7 +493,6 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     setAvatar (avatar) {
-      const session = stores.session
       if (!avatar) return
       let e = this.map.get(avatar.id)
       if (!e) {
@@ -503,51 +504,46 @@ export const useAvatarStore = defineStore('avatar', {
           tickets: new Map()
          }
         this.map.set(avatar.id, e)
-        if (avatar.id === session.compteId) this.setMotscles (avatar.mc)
+        if (avatar.id === this.session.compteId) this.setMotscles (avatar.mc)
       } else {
-        if (avatar.id === session.compteId) {
+        if (avatar.id === this.session.compteId) {
           const mcav = new Uint8Array(encode(e.avatar.mc || {}))
           const mcap = new Uint8Array(encode(avatar.mc || {}))
           if (!egaliteU8(mcav, mcap )) this.setMotscles(avatar.mc || {})
         }
         e.avatar = avatar
       }
-      if (avatar.id === stores.session.compteId) this.avatarP = avatar
-      const nSt = stores.note
-      nSt.setAvatar(avatar.na)
+      if (avatar.id === this.session.compteId) this.avatarP = avatar
+      this.nSt.setAvatar(avatar.na)
     },
 
     setNote (note) {
       if (!note) return
       const e = this.map.get(note.id)
       if (e) e.notes.set(note.ids, note.v2)
-      const nSt = stores.note
-      nSt.setNote(note)
+      this.nSt.setNote(note)
     },
 
     delNote (id, ids) {
       const e = this.map.get(id)
       if (e) e.notes.delete(ids)
-      const nSt = stores.note
-      nSt.delNote(id, ids)
+      this.nSt.delNote(id, ids)
     },
 
     setChat (chat) {
       if (!chat) return
-      const pSt = stores.people
       const e = this.map.get(chat.id)
       if (!e) return
       e.chats.set(chat.ids, chat)
-      pSt.setPeopleChat(chat, chat.cv)
+      this.pSt.setPeopleChat(chat, chat.cv)
     },
     
     delChat (id, id2) {
       const e = this.map.get(id)
       if (!e) return
-      const pSt = stores.people
       const ids = hash(id < id2 ? id + '/' + id2 : id2 + '/' + id)
       e.chats.delete(ids)
-      pSt.unsetPeopleChat(id, id2)
+      this.pSt.unsetPeopleChat(id, id2)
     },
 
     setTicket (ticket) {
@@ -596,14 +592,13 @@ export const useAvatarStore = defineStore('avatar', {
         e._zombi = true
         delete this.map[id]
       }
-      const nSt = stores.note
-      nSt.delAvatar(id)
+      this.nSt.delAvatar(id)
     },
 
     /* Pseudo opération : GetPub */
     async getPub (id) {
       try {
-        const args = { token: stores.session.authToken, id }
+        const args = { token: this.session.authToken, id }
         const ret = await post(null, 'GetPub', args)
         return ret.pub
       } catch (e) {

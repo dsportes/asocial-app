@@ -19,6 +19,14 @@
         @click="clickNotif" apptb/>
       -->
 
+      <!-- Suppression de compte proche -->
+      <q-avatar class="cursor-pointer q-ml-xs" 
+        v-if="session.ok && alerteDlv >= 0" @click="infoSession()"
+        size="sm" square>
+        <img src="~assets/zombi.png">
+        <q-tooltip>{{$t('MLAcptz', alerteDlv, {count: alerteDlv})}}</q-tooltip>
+      </q-avatar>
+
       <q-btn v-if="session.ok && !session.estMinimal" 
         dense size="md" icon="menu" round padding="none">
         <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
@@ -509,6 +517,13 @@ export default {
         case 'groupe' : { arg = this.gSt.egrC ? this.gSt.egrC.groupe.na.nom : this.$t('disparu'); break }
       }
       return this.$t('P' + p, [arg])
+    },
+
+    alerteDlv () {
+      const dlv = aSt.compta.dlv
+      if (dlv < 0) return 0
+      const n = AMJ.diff(AMJ.dlv(dlv), session.dateJourConnx)
+      return n > 40 ? n : -1
     }
   },
 

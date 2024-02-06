@@ -39,7 +39,7 @@ export const useConfigStore = defineStore('config', {
     ],
     nomDuComptable: 'Comptable',
     nomTribuPrimitive: 'Primitive',
-    allocComptable: [32, 32, 32],
+    allocComptable: [8, 2, 4],
     allocPrimitive: [256, 256, 256],
     quotas: { '0': 0, 'XXS': 1, 'XS': 2, 'SM': 4, 'MD': 8, 'LG': 16, 'XL': 32, 'XXL': 64 },
     profils: [[100, 10, 10], [1000, 50, 50], [10000, 250, 250], [1000, 50, 10], [10000, 250, 50]],
@@ -47,6 +47,9 @@ export const useConfigStore = defineStore('config', {
     lgtitre: 120,
     maxlgtextegen: 250,
     maxlgtextenote: 5000,
+    /* Une base locale IDB non resynchronisée depuis plus de idbObs jours est
+    considérée comme obsolète et détruite à la première connexion synchronisée */
+    idbObs: 500, 
   
     motscles: {},
 

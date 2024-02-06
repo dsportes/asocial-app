@@ -563,6 +563,8 @@ export class Espace extends GenDoc {
     this.dcreation = row.dcreation || 20240101
     this.moisStat = row.moisStat || 0
     this.moisStatT = row.moisStatT || 0
+    this.dlvat = row.dlvat || AMJ.max
+    this.nbmi = row.nbmi || 6
     this.t = row.t || 0
     // la clé est la clé du Comptable de l'espace
     if (row.notif) {
@@ -725,15 +727,6 @@ export class Tribu extends GenDoc {
   }
 
   get clet () { return getCle(this.id) }
-
-  signable (it) {
-    let x = this.stn
-    if (it) {
-      const item = this.act[it]
-      if (item && item.stn > x) x = item.stn
-    }
-    return x < 2
-  }
 
   async compile (row) {
     const session = stores.session
@@ -1032,6 +1025,27 @@ export class Compta extends GenDoc {
       }
       delete this.donsX
     }
+  }
+
+  /* 
+  Pour un compte A c'est la date à laquelle le crédit tombe à 0 
+  prolongée au dernier jour du mois.
+  Retourne la plus proche des deux dlv,
+  - a) celle donnée par l'administrateur technique dans espace,
+  - b) celle correspondant à (nbmi * 30 jours) + auj, prolongée au dernier jour du mois.
+  a) est le premier jour du mois qui suit la dlv, b) est le dernier jour du mois de dlv
+  Dans les deux cas c'est 0 si elle est déjà dépassée.
+  */
+  get dlv () {
+    const session = stores.session
+    if (ID.estComptable(this.id)) return AMJ.max
+    if (this.estA) {
+      const nbj = this.compteurs.nbj(this.credits)
+      return nbj === 0 ? -1 : AMJ.djMois(AMJ.amjUtcPlusNbj(session.dateJourConnx, nbj))
+    }
+    const dlvmax = AMJ.djMois(AMJ.amjUtcPlusNbj(session.dateJourConnx, session.espace.nbmi * 30))
+    if (session.dateJourConnx > session.espace.dlvat) return -2
+    return dlvmax > session.espace.dlvat ? session.espace.dlvat : dlvmax
   }
 
   async debitDon (don) {

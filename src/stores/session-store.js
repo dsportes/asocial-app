@@ -116,6 +116,9 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
+    aSt (state) { return stores.aSt },
+    ui (state) { return stores.ui },
+
     espace (state) { return state.espaces.get(state.ns) },
     estComptable (state) { return ID.estComptable(state.compteId) },
     estAdmin (state) { return state.compteId === 0 },
@@ -129,7 +132,7 @@ export const useSessionStore = defineStore('session', {
     accesNetNf (state) { return state.accesNet && !state.estFige },
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
-
+  
     accepteA (state) { return state.espace.opt !== 0 },
 
     notifAdmin (state) { return state.notifs[0] },
@@ -314,9 +317,9 @@ export const useSessionStore = defineStore('session', {
 
     setStats (stats) { this.stats = stats},
 
-    setEspace (espace) {
+    setEspace (espace, estAdmin) {
       this.espaces.set(espace.id, espace)
-      if (!this.estAdmin) {
+      if (estAdmin) {
         const ne = espace.notif
         const n = this.notifs[0]
         if (ne) {
@@ -412,8 +415,7 @@ export const useSessionStore = defineStore('session', {
 
     setBlocage () {
       if (this.estAdmin) return
-      const aSt = stores.avatar
-      const c = aSt.compta
+      const c = this.aSt.compta
       const dhvu = c ? (c.dhvu || 0) : 0
       this.niv = 0
       this.alire = false
@@ -476,19 +478,17 @@ export const useSessionStore = defineStore('session', {
     },
 
     startOp (op) {
-      const ui = stores.ui
       this.opEncours = op
       this.opSpinner = 0
-      ui.oD('opDialog')
+      this.ui.oD('opDialog')
       this.opCount()
     },
 
     finOp () {
-      const ui = stores.ui
       if (this.opTimer) clearTimeout(this.opTimer)
       this.opEncours = null
       this.opSpinner = 0
-      ui.fD()
+      this.ui.fD()
     }
   }
 })

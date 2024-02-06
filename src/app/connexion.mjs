@@ -6,7 +6,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post, getEstFs } from './net.mjs'
 import { AMJ, ID, PINGTO2, limitesjour, FLAGS, d14 } from './api.mjs'
-import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, GenDoc, getNg, Versions } from './modele.mjs'
+import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, SessionSync, getNg, Versions } from './modele.mjs'
 import {
   openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, NLfromIDB, FLfromIDB, lectureSessionSyncIdb
@@ -184,6 +184,7 @@ export class ConnexionCompte extends OperationUI {
   async avGrSignatures () {
     const session = stores.session
 
+    /*
     let dlv1 = 0, dlv2 = 0
     if (!session.estFige && 
       (!this.compta.it || this.compta.signable)) {
@@ -195,7 +196,8 @@ export class ConnexionCompte extends OperationUI {
       dlv1 = AMJ.amjUtcDeT(tdlv1 * 86400000)
       dlv2 = AMJ.amjUtcDeT(tdlv2 * 86400000)
     }
-    
+    */
+
     while (true) {
       const abPlus = []
       this.versions = {}
@@ -213,14 +215,14 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesIdb) for (const row of this.cAvatars) {
         if (this.avRequis.has(row.id)) {
           this.avatarsToStore.set(row.id, await compile(row))
-          avsMap[row.id] = { v: this.avatar.v, dlv: session.compteId === row.id ? dlv1 : dlv2 }
+          avsMap[row.id] = { v: this.avatar.v, dlv: this.dlvApres }
         } else this.avToSuppr.add(row.id)
       }
       // avatars non stockés en IDB
       for (const id of this.avRequis) {
         if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
         if (!this.avatarsToStore.has(id))
-          avsMap[id] = { v: 0, dlv: session.compteId === id ? dlv1 : dlv2 }
+          avsMap[id] = { v: 0, dlv: this.dlvApres }
       }
 
       // Traitement des groupes
@@ -311,7 +313,8 @@ export class ConnexionCompte extends OperationUI {
       // rows Compa ou Avatar modifiés, on boucle
       this.rowCompta = ret.rowCompta
       this.rowAvatar = ret.rowAvatar
-      await this.connex2()
+      const err = await this.connex2()
+      if (err < 0) throw new AppExc(F_BRO, 10 - err) // DLV dépassée
     }
   }
 
@@ -609,11 +612,16 @@ export class ConnexionCompte extends OperationUI {
     }
     
     this.espace = await compile(ret.rowEspace)
-    if (session.estClos) return
+    session.setEspace(this.espace)
     session.setOrg(this.espace.org)
+    /* La compilation a enregistré les notifications de l'AT
+    dans session. estClos indique donc si l'espace est clos
+    */
+    if (session.estClos) return
 
     this.rowCompta = ret.rowCompta
     this.rowAvatar = ret.rowAvatar
+    this.dlvAvant = ret.dlv // dlv actuelle du compte
   }
 
   /* Compile rowCompta et rowAvatar, obtient la tribu (si compte O). Définit:
@@ -624,6 +632,10 @@ export class ConnexionCompte extends OperationUI {
   async connex2 () {
     const session = stores.session
     this.compta = await compile(this.rowCompta)
+    // DLV à gérer
+    this.dlvApres = this.compta.dlv
+    if (this.dlvApres < 0) return this.dlvApres
+
     this.avatar = await compile(this.rowAvatar)
     if (this.compta.rowCletK || this.compta.donsX) {
       await this.compta.compile2(this.avatar.priv)
@@ -645,10 +657,12 @@ export class ConnexionCompte extends OperationUI {
       if (session.fsSync)
         await session.fsSync.setTribu(session.tribuId)
     }
+    return 0
   }
 
   async phase0Net() {
     const session = stores.session
+    const config = stores.config
 
     // maintenant que la cle K est connue
     if (session.accesIdb && !session.nombase) await session.setNombase()
@@ -657,18 +671,31 @@ export class ConnexionCompte extends OperationUI {
       let dbok = false
       try {
         await openIDB()
-        const x = await getCompte()
-        if (x) dbok = true
-        /* Login OK avec le serveur, MAIS phrase secrète changée depuis la session précédente */
-      } catch (e) { }
+        /* const idk = */ await getCompte()
+        /* Remarque si idk !== false
+        le login est OK avec le serveur, MAIS la phrase secrète a changé
+        depuis la session précédente. 
+        Le row 'compte' {id, k} sera dans tous les cas réécrit en fin de synchronisation.
+        */
+        const s = await lectureSessionSyncIdb()
+        /* Nombre de jours depuis la dernière synchronisation.
+        Si 0, JAMAIS synchronisé, sinon au moins 1 
+        */
+        const nbjds = s.dhsync ? Math.ceil((Date.now() - s.dhsync) / 86400000) : 0
+        dbok = nbjds > config.idbObs
+        // si dbok est false, la base est obsolète : elle va être réinitialisée
+      } catch (e) {
+        // Incident sur l'ouverture ou création de la base
+        dbok = false
+      }
+
       if (!dbok) {
         closeIDB()
         await deleteIDB(session.nombase)
         await openIDB()
         setTrigramme(session.nombase, await getTrigramme())
-        // setTrigramme(session.nombase, this.avatar.na.nomc)
+        session.setSessionSync(new SessionSync())
       }
-      await lectureSessionSyncIdb()
     }
   }
 
@@ -717,7 +744,9 @@ export class ConnexionCompte extends OperationUI {
           return this.finOK()
         }
         stores.ui.setPage('session')
-        await this.connex2()
+        const err = !await this.connex2()
+        if (err < 0) throw new AppExc(F_BRO, 10 - err) // DLV dépassée
+
         await this.phase0Net() // maintenant que la cle K est connue
       }
 
@@ -912,7 +941,9 @@ export class ConnexionCompte extends OperationUI {
       }
 
       // Finalisation en une seule fois de l'écriture du nouvel état en IDB
-      if (session.synchro) await this.buf.commitIDB(true, true) // MAJ compte.id / cle K et versions
+      // MAJ compte {id, k} et versions
+      if (session.synchro) await this.buf.commitIDB(true, true) 
+      
 
       if (session.accesIdb) {
         await gestionFichierCnx(this.buf.mapSec)
@@ -1101,6 +1132,7 @@ export class AcceptationSponsoring extends OperationUI {
 
       const espace = await compile(ret.rowEspace)
       session.setEspace(espace)
+      session.setOrg(espace.org)
       if (session.estClos) {
         this.ui.setPage('clos')
         this.finOK()
@@ -1112,12 +1144,16 @@ export class AcceptationSponsoring extends OperationUI {
 
       const rowTribu = ret.rowTribu
       const rowChat = ret.rowChat
-      const rowEspace = ret.rowEspace
       rowCompta = ret.rowCompta
-      session.setOrg(rowEspace.org)
-
+      
       // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
       const compta = await compile(rowCompta)
+      // DLV à gérer
+      this.dlvApres = compta.dlv
+      if (this.dlvApres < 0) {
+        throw new AppException(F_BRO, 13)
+      }
+
       const avatar = await compile(rowAvatar)
       const tribu = rowTribu ? await compile(rowTribu) : null
 

@@ -142,6 +142,7 @@ export async function lectureSessionSyncIdb () {
       } // session vide si pas lisible sur IDB
     }
     session.setSessionSync(s)
+    return s
   } catch (e) {
     throw EX2(e)
   }
@@ -280,9 +281,11 @@ export async function FLdel (id) {
 }
 
 /**********************************************************************
-Lecture du compte : crypté par le PBKFD de la phrase secrète. { id, k }
+Lecture du compte : crypté par le PBKFD de la phrase secrète.
+Retourne { id, k } si la phrase secrète de la session cryptait bien l'item
 - id: id du compte
 - k: clé K 
+Retourne false si la phrase secrète de la session n'est pas celle employée pour crypter l'item
 */
 
 export async function getCompte () {

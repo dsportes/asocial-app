@@ -161,7 +161,14 @@ export default {
     mo () { return this.session.synchro ? this.$t('sync') : 
       (this.session.avion ? this.$t('avion') : 'incognito')},
     cb () { return ' text-' + cbl[this.session.blocage]},
-    dsync () { return this.session.sessionSync }
+    dsync () { return this.session.sessionSync },
+    dlv () {
+      const dlv = this.aSt.compta.dlv
+      return dlv < 0 ? 0 : AMJ.dlv(dlv)
+    },
+    nbj () {
+      return AMJ.diff(this.dlv, this.session.dateJourConnx)
+    }
   },
 
   methods: {
@@ -186,6 +193,7 @@ export default {
       edvol, mon,
       ui: stores.ui,
       session: stores.session,
+      aSt: stores.session,
       fSt: stores.fetat
     }
   }

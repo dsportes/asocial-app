@@ -302,6 +302,9 @@ export default {
   Code erreur: {0}<br>Se connecter en mode synchronisé ou incognito.`,
   EX5006: `Base locale corrompue.<br>Impossible d'en décrypter les données.`,
   EX5007: 'Le sponsor a disparu (compte résilié)',
+  EX5011: 'Le compte a été résilié pour défaut de crédit',
+  EX5012: 'Le compte a été résilié pour défaut de crédit de l\'organisation',
+  EX5013: 'Le compte ne peut pas être créé du fait du défaut de crédit de l\'organisation',
 
   // A_BRO = 6000 Situation inattendue : assertion trappée par le browser
   EX6001: 'Clé RSA publique de l\'avatar non trouvée',
@@ -713,6 +716,7 @@ export default {
   MLAcont: 'J\'ai lu, la session continue',
   MLAregl: 'Réglages et outils',
   MLAinfm: 'Etat de la session',
+  MLAcptz: 'La suppression du compte est en cours | Suppression du compte demain | Suppression du compte dans {count} jours',
   MLAnot: 'Notifications, abonnement et consommation, chats d\'urgence',
   MLAesp: 'Décompte de l\'espace disponible / utilisé',
   MLAt1c: 'Compte',
