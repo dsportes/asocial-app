@@ -211,9 +211,9 @@ export default {
       this.dns = ''
     },
     org (ap, av) {
-      if (org.length < 4) { this.dorg = this.$t('ESorg1'); return }
-      if (org.length > 8) { this.dorg = this.$t('ESorg2'); return }
-      if (!op.match(reg)) { this.dorg = this.$t('ESorg3'); return }
+      if (ap.length < 4) { this.dorg = this.$t('ESorg1'); return }
+      if (ap.length > 8) { this.dorg = this.$t('ESorg2'); return }
+      if (!ap.match(reg)) { this.dorg = this.$t('ESorg3'); return }
       if (this.aOrg(ap)) { this.dorg = this.$t('ESorg4'); return }
       this.dorg = ''
     },

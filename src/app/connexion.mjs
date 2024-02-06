@@ -184,20 +184,6 @@ export class ConnexionCompte extends OperationUI {
   async avGrSignatures () {
     const session = stores.session
 
-    /*
-    let dlv1 = 0, dlv2 = 0
-    if (!session.estFige && 
-      (!this.compta.it || this.compta.signable)) {
-      // En UTC la division d'une date est multiple de 86400000
-      const tjourJ = (AMJ.tDeAmjUtc(this.auj) / 86400000) + limitesjour.dlv
-      const tdlv1 = (Math.floor(tjourJ / 10) + 1) * 10
-      const tdlv2 = tdlv1 + 10
-      // pas de signatures quand une procédure de blocage est en cours
-      dlv1 = AMJ.amjUtcDeT(tdlv1 * 86400000)
-      dlv2 = AMJ.amjUtcDeT(tdlv2 * 86400000)
-    }
-    */
-
     while (true) {
       const abPlus = []
       this.versions = {}
@@ -671,7 +657,7 @@ export class ConnexionCompte extends OperationUI {
       let dbok = false
       try {
         await openIDB()
-        /* const idk = */ await getCompte()
+        const idk = await getCompte()
         /* Remarque si idk !== false
         le login est OK avec le serveur, MAIS la phrase secrète a changé
         depuis la session précédente. 
@@ -1286,7 +1272,7 @@ export class CreerEspace extends OperationUI {
       const r = {
         id: na.id,
         v: 1,
-        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.dlv)
+        dlv: AMJ.max
       }
       const _data_ = new Uint8Array(encode(r))
       r._data_ = _data_

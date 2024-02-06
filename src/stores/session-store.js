@@ -116,7 +116,7 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
-    aSt (state) { return stores.aSt },
+    aSt (state) { return stores.avatar },
     ui (state) { return stores.ui },
 
     espace (state) { return state.espaces.get(state.ns) },

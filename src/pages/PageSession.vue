@@ -1,6 +1,14 @@
 <template>
   <q-page class="column items-center">
     <q-card class="spmd">
+      <div class="column justify-center q-pa-xs q-my-sm text-italic text-bold bg-yellow-5 text-warning">
+        <div v-if="dlv > 0 && nbj < 40" class="titre-lg">{{$t('MLAcptz', nbj, {count: nbj})}}</div>
+        <div v-if="dlv === 0" class="titre-lg">{{$t('MLAcptz', nbj, {count: nbj})}}</div>
+        <div v-if="dlv > 0 && nbj < 40" class="titre-md">{{$t('MLAcptz' + (aSt.compta.estA ? 'A' : '0'))}}</div>
+      </div>
+
+      <div v-if="dlv > 0" class="titre-md q-my-sm">{{$t('MLAcptzd', [AMJ.editDeAmj(dlv)])}}</div>
+
       <div class="text-italic titre-lg">{{$t('ISst', [st, mo])}}</div>
 
       <div class="titre-md text-italic q-mt-md">{{$t('ISconso', [mon(couts[4], 4)])}}</div>
