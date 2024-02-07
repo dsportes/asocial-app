@@ -106,7 +106,7 @@ export default {
     dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     async prolonger (sp, nj) {
-      const ndlv = !nj ? 0 : AMJ.amjUtcPlusNbj(this.session.dateJourConnx, nj)
+      const ndlv = !nj ? 0 : AMJ.amjUtcPlusNbj(this.session.auj, nj)
       new ProlongerSponsoring().run(sp, ndlv)
     }
   },

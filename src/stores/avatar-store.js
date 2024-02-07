@@ -59,7 +59,9 @@ export const useAvatarStore = defineStore('avatar', {
     estComptable (state) { return ID.estComptable(state.comptaP.id) },
 
     /* retourne la compta de l'avatar principal du compte actuellement connecté */
-    compta: (state) => { return state.comptaP },
+    compta: (state) => { 
+      return state.comptaP 
+    },
 
     /* retourne la tribu de l'avatar principal du compte actuellement connecté */
     tribu: (state) => { return state.maptr.get(state.session.tribuId) },

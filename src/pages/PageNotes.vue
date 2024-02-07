@@ -572,7 +572,7 @@ export default {
     stest1 (na, g) {
       const nbn1 = 100 // nombre de blocks de 4 * nbn2 messages sous la racine d'un avatar ou groupe
       const nbn2 = 9
-      const auj = this.session.dateJourConnx
+      const auj = this.session.auj
 
       const id = na.id
       const demain = AMJ.amjUtcPlusNbj(auj, 1)

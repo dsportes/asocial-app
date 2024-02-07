@@ -145,7 +145,7 @@ export const useNoteStore = defineStore('note', {
       const n = state.note
       if (!n || n.st === 99999999) return 0
       const session = stores.session
-      const auj = session.dateJourConnx
+      const auj = session.auj
       return AMJ.diff(n.st, auj)
     },
 

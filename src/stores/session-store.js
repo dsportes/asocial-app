@@ -41,7 +41,7 @@ export const useSessionStore = defineStore('session', {
     */
     authToken: '',
     phrase: null,
-    dateJourConnx: 0,
+    auj: 0,
     dhConnx: 0,
     lsk: '',
     nombase: '',
@@ -119,6 +119,7 @@ export const useSessionStore = defineStore('session', {
     aSt (state) { return stores.avatar },
     ui (state) { return stores.ui },
 
+    dlv (state) { return state.ok ? this.aSt.compta.dlv : 0 },
     espace (state) { return state.espaces.get(state.ns) },
     estComptable (state) { return ID.estComptable(state.compteId) },
     estAdmin (state) { return state.compteId === 0 },
@@ -260,7 +261,7 @@ export const useSessionStore = defineStore('session', {
       const x = new Uint8Array(encode(token))
       this.authToken = u8ToB64(new Uint8Array(x), true)
       this.nombase = this.lsk ? localStorage.getItem(this.lsk) : ''
-      this.dateJourConnx = AMJ.amjUtc()
+      this.auj = AMJ.amjUtc()
       this.dhConnx = Date.now()
       this.status = 1
     },

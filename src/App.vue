@@ -411,7 +411,7 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
-import { ID } from './app/api.mjs'
+import { ID, AMJ } from './app/api.mjs'
 
 import { set$t, hms, dkli, styp, beep } from './app/util.mjs'
 import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
@@ -520,10 +520,8 @@ export default {
     },
 
     alerteDlv () {
-      const dlv = aSt.compta.dlv
-      if (dlv < 0) return 0
-      const n = AMJ.diff(AMJ.dlv(dlv), session.dateJourConnx)
-      return n > 40 ? n : -1
+      const n = AMJ.diff(AMJ.dlv(this.session.dlv), this.session.auj)
+      return n < 40 ? n : -1
     }
   },
 
@@ -604,7 +602,7 @@ export default {
       gSt: stores.groupe,
       config: stores.config,
       ui, 
-      styp, dkli, hms, deconnexion
+      styp, dkli, hms, deconnexion, AMJ
     }
   }
 }

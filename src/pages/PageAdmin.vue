@@ -254,6 +254,7 @@ export default {
     },
 
     async rafraichir () {
+      this.session.setOrg('admin')
       await reconnexionCompte()
     },
 
@@ -290,7 +291,7 @@ export default {
       this.ns = 0
       this.ps = null
       this.ui.fD()
-      this.rafraichir()
+      await this.rafraichir()
     },
 
     async valider () {

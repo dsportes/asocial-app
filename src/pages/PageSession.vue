@@ -1,13 +1,17 @@
 <template>
   <q-page class="column items-center">
     <q-card class="spmd">
-      <div class="column justify-center q-pa-xs q-my-sm text-italic text-bold bg-yellow-5 text-warning">
+      <div v-if="session.ok && (nbj < 40 || dlv === 0)"
+        class="column justify-center q-pa-xs q-my-sm text-italic text-bold bg-yellow-5 text-warning">
         <div v-if="dlv > 0 && nbj < 40" class="titre-lg">{{$t('MLAcptz', nbj, {count: nbj})}}</div>
         <div v-if="dlv === 0" class="titre-lg">{{$t('MLAcptz', nbj, {count: nbj})}}</div>
         <div v-if="dlv > 0 && nbj < 40" class="titre-md">{{$t('MLAcptz' + (aSt.compta.estA ? 'A' : '0'))}}</div>
       </div>
 
-      <div v-if="dlv > 0" class="titre-md q-my-sm">{{$t('MLAcptzd', [AMJ.editDeAmj(dlv)])}}</div>
+      <div v-if="session.ok && dlv > 0" class="titre-md q-my-sm">
+        <span>{{$t('MLAcptzd', [AMJ.editDeAmj(dlv)])}}</span>
+        <span class="titre-sm q-ml-sm">{{$t('MLAnbj', nbj, {count: nbj})}}</span>
+      </div>
 
       <div class="text-italic titre-lg">{{$t('ISst', [st, mo])}}</div>
 
@@ -143,7 +147,7 @@
 import RapportSynchro from '../components/RapportSynchro.vue'
 import stores from '../stores/stores.mjs'
 import { dhcool, edvol, mon } from '../app/util.mjs'
-import { Tarif } from '../app/api.mjs'
+import { Tarif, AMJ } from '../app/api.mjs'
 
 const cbl = ['green-5', 'warning', 'warning', 'negative', 'negative']
 
@@ -175,7 +179,7 @@ export default {
       return dlv < 0 ? 0 : AMJ.dlv(dlv)
     },
     nbj () {
-      return AMJ.diff(this.dlv, this.session.dateJourConnx)
+      return AMJ.diff(this.dlv, this.session.auj)
     }
   },
 
@@ -198,10 +202,10 @@ export default {
 
   setup () {
     return {
-      edvol, mon,
+      edvol, mon, AMJ,
       ui: stores.ui,
       session: stores.session,
-      aSt: stores.session,
+      aSt: stores.avatar,
       fSt: stores.fetat
     }
   }

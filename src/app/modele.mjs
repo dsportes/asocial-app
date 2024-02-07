@@ -53,7 +53,7 @@ export class Versions {
   static compile (row) { // objv: { v, vols: {v1, v2, q1, q2} }
     if (!row) return null
     const session = stores.session
-    const z = row.dlv && row.dlv <= session.dateJourConnx
+    const z = row.dlv && row.dlv <= session.auj
     if (!z && row._data_) return decode(row._data_)
     return { id: row.id, v: row.v, _zombi: true }
   }
@@ -524,7 +524,7 @@ export async function compile (row) {
   if (row.dlv) obj.dlv = row.dlv
   if (row.dfh) obj.dfh = row.dfh
   obj.v = row.v || 0
-  const z = row.dlv && row.dlv <= session.dateJourConnx
+  const z = row.dlv && row.dlv <= session.auj
   // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
   if (z || !row._data_) {
     obj._zombi = true
@@ -536,7 +536,7 @@ export async function compile (row) {
 }
 
 export function estZombi (row) {
-  const z = row.dlv && row.dlv <= stores.session.dateJourConnx
+  const z = row.dlv && row.dlv <= stores.session.auj
   // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
   return z || !row._data_
 }
@@ -870,6 +870,7 @@ _data_ :
 
 - `hpsc`: hash du PBKFD de la phrase secrète complète.
 - `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète complète.
+- `dlv` : DLV du compte.
 - `dhvu` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
 - `sp` : 1: est sponsor
 - `cletX` : clé de la tribu cryptée par la clé K du comptable.
@@ -906,8 +907,6 @@ export class Compta extends GenDoc {
     return a && a.info ? a.info : ''
   }
 
-  get signable () { return this.compteurs.notifX.nr !== 4 }
-
   async compile (row) {
     this.vsh = row.vsh || 0
     const session = stores.session
@@ -921,6 +920,7 @@ export class Compta extends GenDoc {
     this.sp = this.it !== 0 ? row.sp : 0
     this.estSponsor = this.sp === 1
     this.estA = this.it === 0
+    this.dlv = row.dlv
     session.setEstSponsor(this.estSponsor)
     session.setEstAutonome(this.estA)
 
@@ -1030,32 +1030,39 @@ export class Compta extends GenDoc {
   /* 
   Pour un compte A c'est la date à laquelle le crédit tombe à 0 
   prolongée au dernier jour du mois.
-  Retourne la plus proche des deux dlv,
+  Pour un compte O, c'est la plus proche des deux dlv,
   - a) celle donnée par l'administrateur technique dans espace,
   - b) celle correspondant à (nbmi * 30 jours) + auj, prolongée au dernier jour du mois.
   a) est le premier jour du mois qui suit la dlv, b) est le dernier jour du mois de dlv
   Dans les deux cas c'est 0 si elle est déjà dépassée.
+  Pour un compteO, total est donné à 0
   */
-  get dlv () {
-    const session = stores.session
+  calculDlv (total) {
     if (ID.estComptable(this.id)) return AMJ.max
-    if (this.estA) {
-      const nbj = this.compteurs.nbj(this.credits)
-      return nbj === 0 ? -1 : AMJ.djMois(AMJ.amjUtcPlusNbj(session.dateJourConnx, nbj))
-    }
-    const dlvmax = AMJ.djMois(AMJ.amjUtcPlusNbj(session.dateJourConnx, session.espace.nbmi * 30))
-    if (session.dateJourConnx > session.espace.dlvat) return -2
+    return this.estA ? Compta.dlvA(this.compteurs, total) : Compta.dlvO()
+  }
+
+  static dlvA (compteurs, total) {
+    const session = stores.session
+    const nbj = compteurs.nbj(total)
+    return AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, nbj))
+  }
+
+  static dlvO () {
+    const session = stores.session
+    const dlvmax = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, session.espace.nbmi * 30))
     return dlvmax > session.espace.dlvat ? session.espace.dlvat : dlvmax
   }
 
   async debitDon (don) {
     const session = stores.session
     const credits = { ...this.credits }
-    credits.bla = '*******************************************************************'
+    // credits.bla = '*******************************************************************'
     credits.total -= don
     const r = await crypter(session.clek, new Uint8Array(encode(credits)))
-    const x = decode(await decrypter(session.clek, r))
-    return r
+    // const x = decode(await decrypter(session.clek, r))
+    const dlv = this.calculDlv(credits.total)
+    return { dlv, creditsK: r}
   }
 
   /* Depuis la liste actuelle des tickets de compta,
@@ -1157,8 +1164,12 @@ export class Compta extends GenDoc {
     }
 
     const session = stores.session
-    return maj ? 
-      await crypter(session.clek, new Uint8Array(encode(credits))) : null
+    if (maj) {
+      const creditsK = await crypter(session.clek, new Uint8Array(encode(credits)))
+      const dlv = this.calculDlv(credits.total)
+      return { dlv, creditsK }
+    } else 
+      return { dlv: 0, creditsK: null }
   }
 
   static async atrItem (clet, info, q) {
@@ -1190,31 +1201,38 @@ export class Compta extends GenDoc {
     r.hps1 = (ns * d14) + phrase.hps1
     r.hpsc = phrase.hpsc
     
+    r.qv = { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: nc || 0, ng: 0, v2: 0}
+    const compteurs = new Compteurs(null, r.qv)
+    r.compteurs = compteurs.serial
+
+    const estC = ID.estComptable(na.id) 
+    let dlv
     if (clet) {
       // compte O
       r.it = 1 // 1 pour une création d'espace, sera surchargé sur le serveur en AcceptationSponsoring
       r.cletK = await crypter(k, clet)
-      r.cletX = ID.estComptable(na.id) ? r.cletK : cletX
+      r.cletX = estC ? r.cletK : cletX
+      dlv = estC ? AMJ.max : Compta.dlvO()
     } else {
       // compte A
+      const donx = don || cfg.donorg
       r.it = 0
       r.cletK = null
       r.cletX = null
-      const cr = { total: don || cfg.donorg, tickets: [] }
+      const cr = { total: donx, tickets: [] }
       r.credits = await crypter(k, new Uint8Array(encode(cr)))
+      dlv = Compta.dlvA(compteurs, donx)
     }
+    r.dlv = dlv
 
-    r.qv = { qc: q[0], q1: q[1], q2: q[2], nn: 0, nc: nc || 0, ng: 0, v2: 0}
-    r.compteurs = new Compteurs(null, r.qv).serial
-
-    if (ID.estComptable(r.id)) {
+    if (estC) {
       const x = { clet, info: '', q }
       r.atr = [ null, await crypter(k, new Uint8Array(encode(x)))]
       r.astn = [0, 0]
     }
 
     const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'comptas', id: r.id, v: r.v, hps1: r.hps1, _data_ }
+    return { dlv: dlv, rowCompta: { _nom: 'comptas', id: r.id, v: r.v, hps1: r.hps1, _data_ }}
   }
 
 }
@@ -1370,6 +1388,13 @@ export class Avatar extends GenDoc {
   // Retourne {mc, memo} à propos d'une id donnée
   mcmemo (id) { return this.mcmemos.get(id) }
 
+  get lavLmb () {
+    const lav = Array.from(this.mav.keys())
+    const lmb = []
+    for (const [, empg] of this.mpg) lmb.push([empg.ng.id, empg.im])
+    return [lav, lmb]
+  }
+
   /** compile *********************************************************/
   async compile (row) {
     const session = stores.session
@@ -1407,10 +1432,11 @@ export class Avatar extends GenDoc {
 
       this.mpg = new Map()
       for(const i in row.mpgk) {
+        const npgk = parseInt(i)
         const { nomg, cleg, im, idav } = decode(await decrypter(session.clek, row.mpgk[i]))
         const ng = NomGenerique.from([nomg, cleg])
         const id = ID.long(idav, session.ns)
-        this.mpg.set(parseInt(i), { ng, im, id })
+        this.mpg.set(npgk, { ng, im, id })
       }
     }
 
@@ -2126,16 +2152,13 @@ export class Membre extends GenDoc {
     const r = { id: nag.id, ids: im, v: 0, dlv: 0, vcv: cv ? cv.v : 0,
       ddi: 0, dac: 0, fac: 0, dln: 0, fln: 0, den: 0, fen: 0, dam: 0, fam: 0 }
     if (nvgr) {
-      // En UTC la division d'une date est multiple de 86400000
-      const auj = AMJ.amjUtc()
-      const tjourJ = (AMJ.tDeAmjUtc(AMJ.amjUtc()) / 86400000) + limitesjour.dlv
-      const tdlv = ((Math.floor(tjourJ / 10) + 1) * 10) + 10
-      r.dlv = AMJ.amjUtcDeT(tdlv * 86400000)
       r.dac = auj
       r.dam = auj
       r.dln = auj
       r.den = auj
+      // membre.dlv est mis par le serveur depuis compta
     } else {
+      // Un nouveau contact n'a pas de dlv active vis à vis du GC
       r.dlv = AMJ.max
     }
     r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))

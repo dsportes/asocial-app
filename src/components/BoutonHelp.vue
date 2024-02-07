@@ -1,6 +1,6 @@
 <template>
 <span @click="ouvrir">
-  <q-btn icon="help" dense :size="size || 'md'">
+  <q-btn icon="help" padding="none" dense :size="size || 'md'">
     <q-tooltip class="bg-white text-primary">{{tp}}</q-tooltip>
   </q-btn>
   <span v-if="label" class="q-ml-sm">{{label}}</span>

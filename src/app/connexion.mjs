@@ -201,14 +201,14 @@ export class ConnexionCompte extends OperationUI {
       if (session.accesIdb) for (const row of this.cAvatars) {
         if (this.avRequis.has(row.id)) {
           this.avatarsToStore.set(row.id, await compile(row))
-          avsMap[row.id] = { v: this.avatar.v, dlv: this.dlvApres }
+          avsMap[row.id] = this.avatar.v
         } else this.avToSuppr.add(row.id)
       }
       // avatars non stockés en IDB
       for (const id of this.avRequis) {
         if (session.fsSync) await session.fsSync.setGroupe(id); else abPlus.push(id)
         if (!this.avatarsToStore.has(id))
-          avsMap[id] = { v: 0, dlv: this.dlvApres }
+          avsMap[id] = 0
       }
 
       // Traitement des groupes
@@ -226,8 +226,10 @@ export class ConnexionCompte extends OperationUI {
         const empg = mgx.get(row.id)
         if (empg) {
           this.groupesToStore.set(row.id, await compile(row))
-          const x = { idg: row.id, v: row.v, dlv: dlv2,
-            npgk: Array.from(empg.npgks.values()), mbs: Array.from(empg.ims.values())
+          const x = { 
+            v: row.v,
+            npgk: Array.from(empg.npgks.values()), 
+            mbs: Array.from(empg.ims.values())
           }
           this.mbsMap[row.id] = x
         } else this.grToSuppr.add(row.id)
@@ -240,8 +242,10 @@ export class ConnexionCompte extends OperationUI {
         if (!this.groupesToStore.has(idg)) {
           let x = this.mbsMap[idg]
           if (!x) {
-            x = { idg: idg, v: 0, dlv: dlv2,
-              npgk: Array.from(empg.npgks.values()), mbs: Array.from(empg.ims.values())
+            x = { 
+              v: 0,
+              npgk: Array.from(empg.npgks.values()), 
+              mbs: Array.from(empg.ims.values())
             }
           }
           this.mbsMap[idg] = x
@@ -253,7 +257,7 @@ export class ConnexionCompte extends OperationUI {
       const args = { 
         token: session.authToken, 
         vcompta: this.compta.v, vavatar: this.avatar.v, 
-        estFige: dlv1 === 0,
+        estFige: session.estFige,
         mbsMap: this.mbsMap, avsMap, abPlus 
       }
       const ret = this.tr(await post(this, 'avGrSignatures', args))
@@ -272,12 +276,19 @@ export class ConnexionCompte extends OperationUI {
       - `rowCompta` : compta si KO.
       */
       if (!ret.KO) {
-        if (ret.rowAvatar) {
-          const grAvant = new Set(this.avatar.mpg.keys())
-          this.avatar = await compile(ret.rowAvatar)
-          // On traite les groupes supprimés
-          for(const idg of grAvant)
-            if (!this.avatar.mpg.has(idg)) this.grToSuppr.add(idg)
+        if (ret.npgkDisp) {
+          /* Traitement des groupes détectés disparus, 
+          - les purges GC de groupes NE SONT PAS répercutées dans mpgk
+          - supprime l'élément de mpg (anticipe les effets d'une future synchro)
+          - ajoute l'id du groupe dans le set des groupes disparus
+          */
+          ret.npgkDisp.forEach(npgk => {
+            const e = this.avatar.mpg.get(npgk)
+            if (e) {
+              this.grToSuppr.add(e.ng.id)
+              this.avatar.mpg.delete(npgk)
+            }
+          })
         }
         
         if (ret.rowAvatars && ret.rowAvatars.length) for (const row of ret.rowAvatars){
@@ -296,11 +307,11 @@ export class ConnexionCompte extends OperationUI {
         return
       }
 
-      // rows Compa ou Avatar modifiés, on boucle
+      // KO: rows Compta ou Avatar modifiés, on boucle
       this.rowCompta = ret.rowCompta
       this.rowAvatar = ret.rowAvatar
-      const err = await this.connex2()
-      if (err < 0) throw new AppExc(F_BRO, 10 - err) // DLV dépassée
+      if (!await this.connex2()) 
+        throw new AppExc(F_BRO, this.compta.estA ? 11 : 12) // DLV dépassée
     }
   }
 
@@ -332,7 +343,6 @@ export class ConnexionCompte extends OperationUI {
         n2++
       }
     }
-    const auj = AMJ.amjUtc()
     for (const ids in rows) {
       const note = await compile(rows[ids])
       if (!note._zombi) {
@@ -583,6 +593,7 @@ export class ConnexionCompte extends OperationUI {
 
     if (ret.admin) {
       session.setCompteId(0)
+      session.setOrg('admin')
       if (ret.espaces) for (const e of ret.espaces)
         session.setEspace(await compile(e), true)
       return
@@ -607,7 +618,6 @@ export class ConnexionCompte extends OperationUI {
 
     this.rowCompta = ret.rowCompta
     this.rowAvatar = ret.rowAvatar
-    this.dlvAvant = ret.dlv // dlv actuelle du compte
   }
 
   /* Compile rowCompta et rowAvatar, obtient la tribu (si compte O). Définit:
@@ -618,9 +628,9 @@ export class ConnexionCompte extends OperationUI {
   async connex2 () {
     const session = stores.session
     this.compta = await compile(this.rowCompta)
-    // DLV à gérer
-    this.dlvApres = this.compta.dlv
-    if (this.dlvApres < 0) return this.dlvApres
+    // Gestion de la DLV
+    this.dlvApres = this.compta.calculDlv(this.compta.estA ? this.compta.credits.total : 0)
+    if (this.dlvApres < session.auj) return false
 
     this.avatar = await compile(this.rowAvatar)
     if (this.compta.rowCletK || this.compta.donsX) {
@@ -643,7 +653,7 @@ export class ConnexionCompte extends OperationUI {
       if (session.fsSync)
         await session.fsSync.setTribu(session.tribuId)
     }
-    return 0
+    return true
   }
 
   async phase0Net() {
@@ -730,8 +740,8 @@ export class ConnexionCompte extends OperationUI {
           return this.finOK()
         }
         stores.ui.setPage('session')
-        const err = !await this.connex2()
-        if (err < 0) throw new AppExc(F_BRO, 10 - err) // DLV dépassée
+        if (!await this.connex2()) 
+          throw new AppExc(F_BRO, this.compta.estA ? 11 : 12) // DLV dépassée
 
         await this.phase0Net() // maintenant que la cle K est connue
       }
@@ -1045,14 +1055,13 @@ export class AcceptationSponsoring extends OperationUI {
 
       // !!! dans rowCompta: it (indice du compte dans sa tribu) N'EST PAS inscrit
       // (na, clet, cletX, q1, q2, estSponsor, phrase, nc) - le filleul a 1 chat en ligne
-      let rowCompta = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp, session.ns, ps, 1, don)
-      // set de session.clek
+      let { dlv, rowCompta } = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp, session.ns, ps, 1, don)
+      // session.clek est fixée
+
+      if (dlv < session.auj) throw new AppException(F_BRO, 13)
+
       const rowAvatar = await Avatar.primaireRow(sp.naf, publicKey, privateKey)
-      const rowVersion = {
-        id: sp.naf.id,
-        v: 1,
-        dlv: AMJ.amjUtcPlusNbj(this.auj, limitesjour.dlv)
-      }
+      const rowVersion = { id: sp.naf.id, v: 1, dlv: dlv }
       const _data_ = new Uint8Array(encode(rowVersion))
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
@@ -1134,12 +1143,6 @@ export class AcceptationSponsoring extends OperationUI {
       
       // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
       const compta = await compile(rowCompta)
-      // DLV à gérer
-      this.dlvApres = compta.dlv
-      if (this.dlvApres < 0) {
-        throw new AppException(F_BRO, 13)
-      }
-
       const avatar = await compile(rowAvatar)
       const tribu = rowTribu ? await compile(rowTribu) : null
 
@@ -1262,18 +1265,14 @@ export class CreerEspace extends OperationUI {
 
       const na = NomGenerique.comptable()
       // static async row (na, clet, cletX, q, estSponsor, phrase, nc)
-      const rowCompta = await Compta.row(na, clet, null, aco, true, ns, phrase)
-      // set de session.clek
+      const { dlv, rowCompta } = await Compta.row(na, clet, null, aco, true, ns, phrase)
+      // session.clek est fixée
       const rowTribu = await Tribu.nouvelle(idt, apr, true, aco)
 
       const { publicKey, privateKey } = await genKeyPair()
       const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)
 
-      const r = {
-        id: na.id,
-        v: 1,
-        dlv: AMJ.max
-      }
+      const r = { id: na.id, v: 1, dlv: dlv }
       const _data_ = new Uint8Array(encode(r))
       r._data_ = _data_
       r._nom = 'versions'

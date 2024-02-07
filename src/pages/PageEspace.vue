@@ -333,7 +333,7 @@ export default {
 
   data () {
     return {
-      mois: Math.floor(this.session.dateJourConnx / 100),
+      mois: Math.floor(this.session.auj / 100),
       nom: '',
       quotas: null,
       ligne: null,

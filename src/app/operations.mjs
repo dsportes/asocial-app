@@ -338,8 +338,13 @@ export class AjoutSponsoring extends OperationUI {
       const aSt = stores.avatar
       while (await this.retry()) {
         const compta = aSt.compta
-        const credits = don ? await aSt.compta.debitDon(don) : null
-        const args = { token: session.authToken, rowSponsoring: row, credits, v: compta.v }
+        const args = { token: session.authToken, rowSponsoring: row, v: compta.v }
+        if (don) {
+          const { dlv, creditsK } = await aSt.compta.debitDon(don)
+          args.dlv = dlv
+          args.credits = creditsK
+          args.lavLmb = aSt.compte.lavLmb
+        }
         const ret = this.tr(await post(this, 'AjoutSponsoring', args))
         if (!ret.KO) break
       }
@@ -510,12 +515,15 @@ export class MajChat extends OperationUI {
           dh: dh || 0
         }
         if (don) {
-          const compta = aSt.compta
-          args.credits = await compta.debitDon(don)
+          const { dlv, creditsK } = await aSt.compta.debitDon(don)
+          args.dlv = dlv
+          args.credits = creditsK
+          args.lavLmb = aSt.compte.lavLmb
+
           const pubE = await aSt.getPub(args.idE)
           const ec = encode(don)
           args.crDon = await crypterRSA(pubE, ec)
-          args.v = compta.v
+          args.v = aSt.compta.v
         }
         ret = this.tr(await post(this, 'MajChat', args))
         if (!ret.KO) break
@@ -656,7 +664,7 @@ export class NouvelAvatar extends OperationUI {
       const rowVersion = {
         id: na.id,
         v: 1,
-        dlv: AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.dlv)
+        dlv: 0 // sera mis par le serveur à la DLV de compta
       }
       const _data_ = new Uint8Array(encode(rowVersion))
       rowVersion._data_ = _data_
@@ -2097,9 +2105,13 @@ export class RafraichirTickets extends OperationUI {
           for(const row of ret1.rowTickets) 
             m.set(row.ids, await compile(row))
         }
-        const credits = await compta.majCredits(m)
-        if (!credits) break
-        const args2 = { token: session.authToken, credits, v: compta.v }
+        const { dlv, creditsK } = await compta.majCredits(m)
+        if (!creditsK) break
+
+        // lister les avatars et membres pour changement de dlv
+        const args2 = { token: session.authToken, credits: creditsK, v: compta.v,
+          dlv: dlv, lavLmb: aSt.compte.lavLmb
+        }
         const ret2 = this.tr(await post(this, 'MajCredits', args2))
         if (!ret2.KO) break
       }
@@ -2123,9 +2135,13 @@ export class RafraichirDons extends OperationUI {
       while (await this.retry()) {
         const compta = aSt.compta
         if (!compta.dons) break
-        const credits = await compta.majCredits()
-        if (!credits) break
-        const args2 = { token: session.authToken, credits, v: compta.v }
+        const { dlv, creditsK } = await compta.majCredits()
+        if (!creditsK) break
+
+        // lister les avatars et membres pour changement de dlv
+        const args2 = { token: session.authToken, credits: creditsK, v: compta.v,
+          dlv: dlv, lavLmb: aSt.compte.lavLmb 
+        }
         const ret2 = this.tr(await post(this, 'MajCredits', args2))
         if (!ret2.KO) break
       }

@@ -721,6 +721,7 @@ export default {
   MLAcptzA: 'Le crédit du compte est presque épuisé',
   MLAcptz0: 'L\'organisation ne participe plus aux coûts d\'hébergement des comptes "O"',
   MLAcptzd: 'Dernier jour prévu de vie du compte: {0}',
+  MLAnbj: '(aujourd\'hui)|(demain)|(dans {count} jours)',
   MLAnot: 'Notifications, abonnement et consommation, chats d\'urgence',
   MLAesp: 'Décompte de l\'espace disponible / utilisé',
   MLAt1c: 'Compte',
