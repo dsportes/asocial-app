@@ -893,6 +893,8 @@ _data_ :
 - `astn` : table des restriction d'accès des notifications des tribus _0:aucune, 1:lecture seule, 2:accès minimal_.
 */
 export class Compta extends GenDoc {
+  static creditMinimal = 2
+
   /* Map des versions des tickets détenus pour rafraîchissement par le serveur */
   get mtk () {
     const m = {}
@@ -954,7 +956,7 @@ export class Compta extends GenDoc {
       // credits en cryptant par la clé K. Il met 'true' pour provoquer l'init ici
       this.toSave = row.credits === true
       const cr = this.toSave ? null : decode(await decrypter(session.clek, row.credits)) 
-      this.credits = { total: cr ? cr.total : 2, tickets: [] }
+      this.credits = { total: cr ? cr.total : Compta.creditMinimal, tickets: [] }
       if (cr) cr.tickets.forEach(tk => { 
         if (!Ticket.estObsolete(tk)) this.credits.tickets.push(tk)
       })
@@ -1045,6 +1047,12 @@ export class Compta extends GenDoc {
   static dlvA (compteurs, total) {
     const session = stores.session
     const nbj = compteurs.nbj(total)
+    return AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, nbj))
+  }
+
+  // dlv estimée d'un compte A muté depuis son compteurs actuel avec un solde minimal
+  static dlvAinit (compteurs) {
+    const nbj = compteurs.nbj(Compta.creditMinimal, true)
     return AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, nbj))
   }
 

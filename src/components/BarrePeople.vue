@@ -262,6 +262,7 @@ export default {
     },
 
     async mut () {
+      await new GetCompteursCompta().run(this.id)
       const c = this.aSt.compta
       const pub = await this.aSt.getPub(this.id)
       const trib = { idt: c.idt }
@@ -276,7 +277,7 @@ export default {
         qc: this.quotas.qc
       }
       await new MuterCompte()
-        .run(this.id, this.st, this.chat, this.texte || this.txtdef, quotas, trib)
+        .run(this.id, this.st, this.chat, this.texte || this.txtdef, quotas, trib, this.aSt.ccCpt)
       this.ui.fD()
     },
 

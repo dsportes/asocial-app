@@ -548,7 +548,10 @@ POST:
 - `txt1` : texte à ajouter crypté par la clé cc du chat.
 - `lgtxt1` : longueur du texte
 
-Si st === 1:
+- `dlv`: nouvelle dlv
+- `lavLmb`: liste des avatars et membres
+
+Si st === 1: mutation de A en O
 - `quotas`: {qc, q2, q1}
 - `trib`: { 
   idT: id courte du compte crypté par la clé de la tribu,
@@ -562,9 +565,11 @@ Retour:
 export class MuterCompte extends OperationUI {
   constructor () { super('MuterCompte') }
 
-  async run (id, st, chat, txt, quotas, trib) {
+  async run (id, st, chat, txt, quotas, trib, compteurs) {
     try {
       const session = stores.session
+      const aSt = stores.avatar
+      const compte = aSt.compte
       const naI = chat.naI
       const naE = chat.naE
 
@@ -577,11 +582,18 @@ export class MuterCompte extends OperationUI {
         idE: naE.id, 
         idsE: await Chat.getIds(naE, naI), 
         txt1: await Chat.getTxtCC(chat.cc, txt),
-        lgtxt1: txt.length
+        lgtxt1: txt.length,
+        lavLmb: compte.lavLmb
       }
-      if (st === 1) args.quotas = quotas
-      args.trib = trib
-      
+
+      if (st === 1) { // A devient O
+        args.quotas = quotas
+        args.dlv = Compta.dlvO()
+        args.trib = trib
+      } else { // O devient A
+        args.dlv = Compta.dlvAinit(compteurs)
+      }
+
       this.tr(await post(this, 'MuterCompte', args))
       return this.finOK()
     } catch (e) {
@@ -868,7 +880,9 @@ export class SetSponsor extends OperationUI {
 args.token: éléments d'authentification du compte.
 args.idt : id de la tribu
 args.idc: id du compte
-args.q1 args.q2 : quotas
+args.qc args.q1 args.q2 : quotas
+args.dlv: si compte A, la future dlv calculée
+args.lavLmb : liste des avatars et membres à qui propager le changement de dlv
 Retour:
 */
 export class SetQuotas extends OperationUI {
@@ -877,7 +891,20 @@ export class SetQuotas extends OperationUI {
   async run (id, idc, q) {
     try {
       const session = stores.session
+      const aSt = stores.avatar
+      const compte = aSt.compte
+      const compta = aSt.compta
       const args = { token: session.authToken, idt: id, idc, q }
+
+      if (compte.estA) {
+        const qv = { qc: 0, q1: q[1], q2: q[2], nn: 0, nc: 0, ng: 0, v2: 0 }
+        // Simulation anticipée des futurs compteurs
+        const compteurs = new Compteurs(compta.compteurs.serial, qv)
+        args.dlv = Compta.dlvA(compteurs, compta.credits.total)
+        args.idt = 0
+        args.lavLmb = compte.lavLmb
+      }
+
       this.tr(await post(this, 'SetQuotas', args))
       this.finOK()
     } catch (e) {

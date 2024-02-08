@@ -5,7 +5,7 @@ import { OperationUI, RafraichirTickets } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post, getEstFs } from './net.mjs'
-import { AMJ, ID, PINGTO2, limitesjour, FLAGS, d14 } from './api.mjs'
+import { AMJ, ID, PINGTO2, IDBOBS, FLAGS, d14 } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, SessionSync, getNg, Versions } from './modele.mjs'
 import {
   openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
@@ -678,7 +678,7 @@ export class ConnexionCompte extends OperationUI {
         Si 0, JAMAIS synchronisé, sinon au moins 1 
         */
         const nbjds = s.dhsync ? Math.ceil((Date.now() - s.dhsync) / 86400000) : 0
-        dbok = nbjds > config.idbObs
+        dbok = nbjds > IDBOBS
         // si dbok est false, la base est obsolète : elle va être réinitialisée
       } catch (e) {
         // Incident sur l'ouverture ou création de la base
