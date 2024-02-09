@@ -2,5 +2,5 @@
   { "id": "pa", "lp": ["presentation", "comptes", "coutshebergement", "page2"] },
   { "id": "av", "lp": []},
   { "id": "faq", "lp": ["page3"]},
-  { "id": "dev", "lp": ["crypto"]}
+  { "id": "dev", "lp": ["documents", "crypto"]}
 ]

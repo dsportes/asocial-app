@@ -2016,10 +2016,10 @@ Elle n'écrit QUE dans espaces.
 export class SetEspaceOptionA extends OperationUI {
   constructor () { super('SetEspaceOptionA') }
 
-  async run (optionA) { 
+  async run (optionA, nbmi, dlvat) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, ns: session.ns, optionA }
+      const args = { token: session.authToken, ns: session.ns, optionA, nbmi, dlvat }
       this.tr(await post(this, 'SetEspaceOptionA', args))
       this.finOK()
     } catch (e) {

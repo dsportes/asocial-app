@@ -256,9 +256,13 @@ export class ConnexionCompte extends OperationUI {
 
       const args = { 
         token: session.authToken, 
-        vcompta: this.compta.v, vavatar: this.avatar.v, 
+        vcompta: this.compta.v,
+        vavatar: this.avatar.v, 
         estFige: session.estFige,
-        mbsMap: this.mbsMap, avsMap, abPlus 
+        mbsMap: this.mbsMap, 
+        dlv: this.dlvApres,
+        avsMap, 
+        abPlus 
       }
       const ret = this.tr(await post(this, 'avGrSignatures', args))
       /*Retour:
@@ -631,6 +635,7 @@ export class ConnexionCompte extends OperationUI {
     // Gestion de la DLV
     this.dlvApres = this.compta.calculDlv(this.compta.estA ? this.compta.credits.total : 0)
     if (this.dlvApres < session.auj) return false
+    this.compta.dlv = this.dlvApres
 
     this.avatar = await compile(this.rowAvatar)
     if (this.compta.rowCletK || this.compta.donsX) {

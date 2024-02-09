@@ -869,6 +869,10 @@ export default {
   ESlo: 'Aucune organisations hébergée | Une organisation hébergée | {count} organisations hébergées',
   ESns: 'ID de l\'espace attribué',
   ESnsh: 'De 10 à 59',
+  ESdlvat: 'Hébergment des comptes "O" assuré jusqu\'à :',
+  ESdlvat2: 'Hébergment des comptes "O" assuré jusqu\'à  {0}-{1}',
+  ESdlc: 'Rapport du mois :',
+  ESnbmi: 'Compte supprimé après N mois sans connexion',
   ESmois2: '202405',
   ESmois: 'Mois: AAAAMM',
   ESmoiser1: 'Date mal formée: attendu entre 202301 et 209912.',
@@ -1912,7 +1916,7 @@ export default {
   PEsp: 'pas de sponsor | un sponsor | {count} sponsors',
   PEedn: 'Editer le nom',
   PEabo: 'Abon. & max conso.',
-  PEstm: 'Téléchargement du fichier CSV statistique d\'abonnement / consommation d\'un mois ...',
+  PEstm: 'Téléchargement de la statistique CSV d\'abonnement / consommation du mois',
   PEsttk: 'Téléchargement du fichier CSV des tickets d\'un mois ...',
   PEnd1: 'Statistique non trouvée',
   PEnd2: 'La statistique ne peut pas être décryptée: a) soit elle est destinée à un autre compte, b) soit elle est ancienne et la clé fixée par l\'administateur du site a été changée.',
@@ -2081,5 +2085,5 @@ Fermer TOUTES les fenêtres / onglets où s'exécute l'application.
 
   A_comptes: 'Information détaillée à propos de la gestion des comptes',
   A_crypto: 'L\'usage de la cryptographie dans a-social',
-
+  A_documents: 'Données persistantes sur le serveur',
 }

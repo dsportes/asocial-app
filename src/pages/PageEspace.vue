@@ -13,37 +13,57 @@ Depuis un Comptable: ns est celui de la session
 - source secondaire de données: compta.act
 -->
 <template>
-  <q-page>
-    <div v-if="session.pow===2" class="column">
-      <div class="row q-my-sm">
-        <q-btn class="col-auto self-start" size="md" padding="xs" dense color="primary" 
-          :label="$t('PTnv')" @click="ouvrirnt"/>
+  <q-page class="column q-pa-xs">
+    <div v-if="session.pow <= 2" class="q-mb-sm">
+      <div class="titre-md">{{$t('PEstm')}}</div>
+      <div class="row q-gutter-sm q-mb-sm">
+        <q-btn class="self-start" dense color="warning" padding="none xs" size="md" label="M" @click="dlstat(0)"/>
+        <q-btn class="self-start" dense color="primary" padding="none xs" size="md" label="M-1" @click="dlstat(1)"/>
+        <q-btn class="self-start" dense color="primary" padding="none xs" size="md" label="M-2" @click="dlstat(2)"/>
+        <q-btn class="self-start" dense color="primary" padding="none xs" size="md" label="M-3" @click="dlstat(3)"/>
+        <saisie-mois v-model="dlvat" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
+          @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
+      </div>
+    </div>
 
-        <q-select class="col q-ml-md self-start" borderless v-model="optionA" :options="options" dense />
-        <div class="col-auto q-mx-sm q-gutter-xs column self-start">
-          <q-btn dense size="md" color="primary" padding="none" round 
-            :disable="!chgOptionA"
-            icon="undo" @click="undoOptionA"/>
-          <q-btn dense size="md" color="warning" padding="none" round 
-            :disable="!chgOptionA"
-            icon="check" @click="saveOptionA"/>
-        </div>
-      </div>
+    <div class="q-mb-sm">
+      <saisie-mois v-if="session.pow === 1" v-model="dlvat" 
+        :dmax="maxdlvat" :dmin="mindlvat" :dinit="initdlvat"
+        @ok="setDlvat" icon="check" :label="$t('ESdlvat')"/>
+      <span v-if="session.pow > 1" class="titre-md">
+        {{$t('ESdlvat2', [Math.floor(initdlvat/100), (''+(initdlvat % 100)).padStart(2, '0')])}}
+      </span>
     </div>
-    <div class="titre-md">{{$t('PEstm')}}</div>
-    <div class="row justify-between items-center">
-      <div class="row q-gutter-sm">
-        <q-btn dense color="warning" padding="none xs" size="md" label="M" @click="dlstat(0)"/>
-        <q-btn dense color="primary" padding="none xs" size="md" label="M-1" @click="dlstat(1)"/>
-        <q-btn dense color="primary" padding="none xs" size="md" label="M-2" @click="dlstat(2)"/>
-        <q-btn dense color="primary" padding="none xs" size="md" label="M-3" @click="dlstat(3)"/>
-      </div>
-        <q-input class="w10" v-model="mois" :label="$t('ESmois')" :hint="$t('ESmois2')" dense clearable>
-          <template v-slot:append>
-            <q-icon name="download" @click="dlstat2" class="cursor-pointer" color="warning"/>
-          </template>
-        </q-input>
+
+    <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
+      <q-btn class="col-auto self-start q-mr-sm"
+        dense size="md" color="primary" padding="none" round 
+        :disable="session.pow !== 2 || espace.nbmi === nbmi" icon="undo" 
+        @click="undoNbmi"/>
+      <q-btn class="col-auto self-start q-mr-sm" dense size="md" color="warning" padding="none" round 
+        :disable="session.pow !== 2 || espace.nbmi === nbmi" icon="check" @click="saveNbmi"/>
+      <div class="tire-md q-mr-sm">{{$t('ESnbmi')}}</div>
+      <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
+        borderless style="position:relative;top:-8px;"
+        :disable="session.pow !== 2"
+        v-model.number="nbmi" :options="optionsNbmi" dense />
     </div>
+
+    <div v-if="session.pow === 2" class="row q-mb-sm justify-start">
+      <q-btn class="col-auto self-start q-mr-sm"
+        dense size="md" color="primary" padding="none" round 
+        :disable="!chgOptionA" icon="undo" @click="undoOptionA"/>
+      <q-btn class="col-auto self-start" dense size="md" color="warning" padding="none" round 
+        :disable="!chgOptionA" icon="check" @click="saveOptionA"/>
+      <q-select class="col q-ml-sm self-start" borderless style="position:relative;top:-8px"
+        v-model="optionA" :options="options" dense />
+    </div>
+
+    <div v-if="session.pow === 2" class="row justify-center q-mb-sm">
+      <q-btn class="col-auto" size="md" padding="xs" dense color="primary" 
+        :label="$t('PTnv')" @click="ouvrirnt"/>
+    </div>
+
     <q-separator color="orange" class="q-my-sm"/>
 
     <div class="q-mx-xs" 
@@ -152,16 +172,17 @@ Depuis un Comptable: ns est celui de la session
 </template>
 
 <script>
-import { onMounted, toRef } from 'vue'
+import { onMounted, toRef, ref } from 'vue'
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
+import SaisieMois from '../components/SaisieMois.vue'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import { SetNotifT } from '../app/operations.mjs'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
-import { ID } from '../app/api.mjs'
+import { ID, AMJ } from '../app/api.mjs'
 import { DownloadStatC, DownloadStatC2, SetEspaceOptionA, NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
 
 const fx = [['id', 1], 
@@ -180,9 +201,26 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
+  components: { SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
 
   computed: {
+    maxdl () { 
+      const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
+      return Math.floor(m / 100)
+    },
+    mindl () { 
+      return Math.floor(this.espace.dcreation / 100)
+    },
+    mindlvat () { 
+      const m = AMJ.djMoisN(AMJ.amjUtc(), 3)
+      return Math.floor(m / 100)
+    },
+    initdlvat () {
+      return Math.floor(this.espace.dlvat / 100)
+    },
+    maxdlvat () { 
+      return Math.floor(AMJ.max / 100)
+    },
     synth () {
       const l = this.aSt.synthese.atr
       const fv = this.fSt.tri.espace
@@ -200,8 +238,7 @@ export default {
     notif () { return this.session.pow === 2 ? this.aSt.tribuC.notif : null },
     optesp () { return this.session.espace ? this.session.espace.opt : 0 },
     chgOptionA () { return this.session.espace.opt !== this.optionA.value },
-    tribuv () { const t = this.aSt.tribuC; return t ? [t.id, t.v] : [0, 0] },
-    espace () { return this.session.espaces.get(this.ns)}
+    tribuv () { const t = this.aSt.tribuC; return t ? [t.id, t.v] : [0, 0] }
   },
 
   watch: {
@@ -321,23 +358,37 @@ export default {
       this.ui.fD()
     },
 
-    setOptionA (e) { this.optionA = options[e.opt] },
+    setOptionA (e) { this.optionA = this.options[e.opt] },
 
-    undoOptionA () { this.optionA = options[this.session.espace.opt] },
+    undoOptionA () { this.optionA = this.options[this.session.espace.opt] },
 
     async saveOptionA () {
       await new SetEspaceOptionA().run(this.optionA.value)
-    }
+    },
 
+    async setDlvat () {
+      const dlv = AMJ.pjMoisSuiv((this.dlvat * 100) + 1)
+      await new SetEspaceOptionA().run(null, null, dlv )
+    },
+
+    undoNbmi () { this.nbmi = this.espace.nbmi},
+
+    async saveNbmi () {
+      console.log(this.nbmi)
+      await new SetEspaceOptionA().run(null, this.nbmi)
+    }
   },
 
   data () {
     return {
+      dlvat: 0,
       mois: Math.floor(this.session.auj / 100),
       nom: '',
       quotas: null,
       ligne: null,
-      optionA: this.options[this.session.espace.opt]
+      optionA: this.options[this.session.espace.opt],
+      optionsNbmi: [3, 6, 12, 18, 24],
+      nbmi: this.espace.nbmi
     }
   },
 
@@ -370,6 +421,7 @@ export default {
     const aSt = stores.avatar
     const fSt = stores.filtre
     const session = stores.session
+    const espace = ref(session.espaces.get(ns.value))
 
     const options = [
       { label: $t('PTopt0'), value: 0 },
@@ -387,7 +439,7 @@ export default {
 
     return {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
-      ID, dkli, styp, options,
+      ID, AMJ, dkli, styp, options, espace,
       aSt, fSt, session, ui
     }
   }

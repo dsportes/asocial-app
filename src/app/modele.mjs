@@ -524,7 +524,7 @@ export async function compile (row) {
   if (row.dlv) obj.dlv = row.dlv
   if (row.dfh) obj.dfh = row.dfh
   obj.v = row.v || 0
-  const z = row.dlv && row.dlv <= session.auj
+  const z = row.dlv && row.dlv < session.auj
   // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
   if (z || !row._data_) {
     obj._zombi = true
@@ -536,7 +536,7 @@ export async function compile (row) {
 }
 
 export function estZombi (row) {
-  const z = row.dlv && row.dlv <= stores.session.auj
+  const z = row.dlv && row.dlv < stores.session.auj
   // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
   return z || !row._data_
 }
@@ -1046,14 +1046,18 @@ export class Compta extends GenDoc {
 
   static dlvA (compteurs, total) {
     const session = stores.session
+    const dlvmax = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, session.espace.nbmi * 30))
     const nbj = compteurs.nbj(total)
-    return AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, nbj))
+    const d = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, nbj))
+    return dlvmax > d ? d : dlvmax
   }
 
   // dlv estimée d'un compte A muté depuis son compteurs actuel avec un solde minimal
   static dlvAinit (compteurs) {
+    const dlvmax = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, session.espace.nbmi * 30))
     const nbj = compteurs.nbj(Compta.creditMinimal, true)
-    return AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, nbj))
+    const d = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, nbj))
+    return dlvmax > d ? d : dlvmax
   }
 
   static dlvO () {
