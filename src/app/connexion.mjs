@@ -969,6 +969,10 @@ export class ConnexionCompte extends OperationUI {
       } else {
         stores.ui.setPage('accueil')
       }
+      if (session.nbj < stores.config.alertedlv)  // stores.config.alertedlv
+        setTimeout(() => {
+          stores.ui.oD('estzombi')
+        }, 50)
       setTimeout(() => {
         SyncQueue.traiterQueue()
         Demon.start()
@@ -1044,6 +1048,10 @@ export class AcceptationSponsoring extends OperationUI {
       this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
       this.dh = 0
+
+      const rowEspace = await new GetEspace().run()
+      let espace = await compile(rowEspace)
+      session.setEspace(espace)
 
       /* Réenregistrement dans repertoire des na créé en PageLogin */
       NomGenerique.from(sp.na.anr)
@@ -1130,7 +1138,7 @@ export class AcceptationSponsoring extends OperationUI {
       const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
       // Retourne: credentials, rowTribu
 
-      const espace = await compile(ret.rowEspace)
+      espace = await compile(ret.rowEspace)
       session.setEspace(espace)
       session.setOrg(espace.org)
       if (session.estClos) {
@@ -1397,6 +1405,28 @@ export class GetEstFs extends OperationUI {
         session.setEstFs(false)
       }
       this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_GetEspace : 'Obtention de l\'espace du compte'
+POST:
+- `token` : éléments d'authentification du compte.
+- `ns` : id de l'espace.
+Retour:
+- `rowEspace`
+*/
+export class GetEspace extends OperationUI {
+  constructor() { super('GetEspace') }
+
+  async run() {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns: session.ns }
+      const ret = this.tr(await post(this, 'GetEspace', args))
+      return this.finOK(ret.rowEspace)
     } catch (e) {
       await this.finKO(e)
     }

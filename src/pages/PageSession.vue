@@ -1,11 +1,11 @@
 <template>
   <q-page class="column items-center">
     <q-card class="spmd">
-      <div v-if="session.ok && (nbj < 40 || dlv === 0)"
+      <div v-if="session.ok && (nbj < config.alertedlv || dlv === 0)"
         class="column justify-center q-pa-xs q-my-sm text-italic text-bold bg-yellow-5 text-warning">
-        <div v-if="dlv > 0 && nbj < 40" class="titre-lg">{{$t('MLAcptz', nbj, {count: nbj})}}</div>
+        <div v-if="dlv > 0 && nbj < config.alertedlv" class="titre-lg">{{$t('MLAcptz', nbj, {count: nbj})}}</div>
         <div v-if="dlv === 0" class="titre-lg">{{$t('MLAcptz', nbj, {count: nbj})}}</div>
-        <div v-if="dlv > 0 && nbj < 40" class="titre-md">{{$t('MLAcptz' + (aSt.compta.estA ? 'A' : '0'))}}</div>
+        <div v-if="dlv > 0 && nbj < config.alertedlv" class="titre-md">{{$t('MLAcptz' + (aSt.compta.estA ? 'A' : '0'))}}</div>
       </div>
 
       <div v-if="session.ok && dlv > 0" class="titre-md q-my-sm">
@@ -205,6 +205,7 @@ export default {
       edvol, mon, AMJ,
       ui: stores.ui,
       session: stores.session,
+      config: stores.config,
       aSt: stores.avatar,
       fSt: stores.fetat
     }

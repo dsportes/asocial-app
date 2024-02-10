@@ -120,6 +120,8 @@ export const useSessionStore = defineStore('session', {
     ui (state) { return stores.ui },
 
     dlv (state) { return state.ok ? this.aSt.compta.dlv : 0 },
+    nbj (state) { return AMJ.diff(AMJ.dlv(state.dlv), state.auj) },
+
     espace (state) { return state.espaces.get(state.ns) },
     estComptable (state) { return ID.estComptable(state.compteId) },
     estAdmin (state) { return state.compteId === 0 },

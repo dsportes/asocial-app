@@ -284,6 +284,21 @@
     </q-card>
   </q-dialog>
 
+  <!-- ui.d.estzombi : Affiche l'annonce de suppression proche du compte -->
+  <q-dialog v-model="ui.d.estzombi" persistent>
+    <q-card :class="lidk + ' spsm q-pa-sm row'">
+      <q-avatar class="q-mr-md col-auto" size="lg" square>
+        <img src="~assets/zombi.png">
+      </q-avatar>
+      <div class="col column items-center">
+        <div class="titre-lg">{{$t('MLAcptz', session.nbj, {count: session.nbj})}}</div>
+        <div class="titre-md">{{$t('MLAcptz' + (aSt.compta.estA ? 'A' : '0'))}}</div>
+        <q-btn class="q-mt-lg self-end" flat dense color="primary" size="md" padding="xs" icon="check"
+            :label="$t('jailu')" @click="ui.fD()"/>
+      </div>
+    </q-card>
+  </q-dialog>
+
   <!-- ui.d.confirmFerm : demande de confirmation d'une fermeture de dialogue avec perte de saisie -->
   <q-dialog v-model="ui.d.confirmFerm" persistent>
     <q-card :class="styp('sm') + 'q-pa-sm'">
@@ -519,10 +534,7 @@ export default {
       return this.$t('P' + p, [arg])
     },
 
-    alerteDlv () {
-      const n = AMJ.diff(AMJ.dlv(this.session.dlv), this.session.auj)
-      return n < 40 ? n : -1
-    }
+    alerteDlv () { return this.session.nbj < this.config.alertedlv ? this.session.nbj : -1 }
   },
 
   // Gère le franchissement du seuil etroit / large

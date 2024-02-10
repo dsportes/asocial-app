@@ -29,7 +29,7 @@ export default ({
 
   components: { },
 
-  emits: ['ok'],
+  emits: ['ok', 'update:modelValue'],
 
   computed: {
   },

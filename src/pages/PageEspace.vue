@@ -21,7 +21,7 @@ Depuis un Comptable: ns est celui de la session
         <q-btn class="self-start" dense color="primary" padding="none xs" size="md" label="M-1" @click="dlstat(1)"/>
         <q-btn class="self-start" dense color="primary" padding="none xs" size="md" label="M-2" @click="dlstat(2)"/>
         <q-btn class="self-start" dense color="primary" padding="none xs" size="md" label="M-3" @click="dlstat(3)"/>
-        <saisie-mois v-model="dlvat" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
+        <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
           @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
       </div>
     </div>
@@ -31,7 +31,7 @@ Depuis un Comptable: ns est celui de la session
         :dmax="maxdlvat" :dmin="mindlvat" :dinit="initdlvat"
         @ok="setDlvat" icon="check" :label="$t('ESdlvat')"/>
       <span v-if="session.pow > 1" class="titre-md">
-        {{$t('ESdlvat2', [Math.floor(initdlvat/100), (''+(initdlvat % 100)).padStart(2, '0')])}}
+        {{$t('ESdlvat2', [AMJ.editDeAmj(espace.dlvat)])}}
       </span>
     </div>
 
@@ -117,6 +117,43 @@ Depuis un Comptable: ns est celui de la session
       </q-expansion-item>
     </div>
 
+    <!-- Suivi du changement d'une dlvat -->
+    <q-dialog v-model="ui.d.PEdlvat" persistent>
+      <q-card :class="styp('sm')">
+        <q-toolbar class="bg-secondary text-white">
+          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTdlvat')}}</q-toolbar-title>
+        </q-toolbar>
+        <q-card-section class="q-ma-sm">
+          <div class="q-my-md row justify-around">
+            <div class="titre-md">{{$t('PTdlvata', [AMJ.editDeAmj(espace.dlvat)])}}</div>
+            <div class="titre-md">{{$t('PTdlvatf', [AMJ.editDeAmj(dlv)])}}</div>
+          </div>
+          <div class="row q-my-sm">
+            <div class="col-4"/>
+            <div class="col-4 text-italic titre-md text-center">{{$t('PTdlvat1')}}</div>
+            <div class="col-4 text-italic titre-md text-center">{{$t('PTdlvat2')}}</div>
+          </div>
+          <div class="row q-my-xs">
+            <div class="col-4 text-italic titre-md">{{$t('PTdlvat3')}}</div>
+            <div class="col-4 font-mono fs-md text-center">{{nbav1}}</div>
+            <div class="col-4 font-mono fs-md text-center">{{nbav2}}</div>
+          </div>
+          <div class="row q-my-xs">
+            <div class="col-4 text-italic titre-md">{{$t('PTdlvat4')}}</div>
+            <div class="col-4 font-mono fs-md text-center">{{nbmb1}}</div>
+            <div class="col-4 font-mono fs-md text-center">{{nbmb2}}</div>
+          </div>
+        </q-card-section>
+
+        <q-card-actions vertical align="right">
+          <bouton-confirm class="q-my-md maauto" :actif="stp===2" :confirmer="chgDlvat"/>
+          <q-btn dense size="md" no-caps padding="xs" color="primary" :disable="stp < 3" 
+            :label="$t('PTdlterm', [nbmb2 + nbav2])" @click="ui.fD" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <!-- Edition de l'info attachée à une tribu -->
     <q-dialog v-model="ui.d.PEedcom" persistent>
       <q-card :class="styp('sm')">
@@ -181,9 +218,12 @@ import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import { SetNotifT } from '../app/operations.mjs'
+import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
-import { DownloadStatC, DownloadStatC2, SetEspaceOptionA, NouvelleTribu, GetTribu, AboTribuC, GetSynthese, SetAtrItemComptable } from '../app/operations.mjs'
+import { DownloadStatC, DownloadStatC2, SetEspaceOptionA, NouvelleTribu, GetTribu, 
+  AboTribuC, GetSynthese, SetAtrItemComptable,
+  GetVersionsDlvat, GetMembresDlvat, ChangeAvDlvat, ChangeMbDlvat } from '../app/operations.mjs'
 
 const fx = [['id', 1], 
   ['ntr2', 1], ['ntr2', -1],
@@ -201,7 +241,7 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
+  components: { SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif, BoutonConfirm },
 
   computed: {
     maxdl () { 
@@ -366,22 +406,66 @@ export default {
       await new SetEspaceOptionA().run(this.optionA.value)
     },
 
-    async setDlvat () {
-      const dlv = AMJ.pjMoisSuiv((this.dlvat * 100) + 1)
-      await new SetEspaceOptionA().run(null, null, dlv )
-    },
-
     undoNbmi () { this.nbmi = this.espace.nbmi},
 
     async saveNbmi () {
       console.log(this.nbmi)
       await new SetEspaceOptionA().run(null, this.nbmi)
+    },
+
+    splitLst (lst) {
+      const r = []
+      let t = []
+      for(let i = 0; i < lst.length; i++) {
+        t.push(lst[i])
+        if (t.length === 10) { r.push(t); t = [] }
+      }
+      if (t.length) r.push(t)
+      return r
+    },
+
+    async setDlvat () {
+      this.dlv = AMJ.pjMoisSuiv((this.dlvat * 100) + 1)
+      this.stp = 1; this.nbav1 = 0; this.nbav2; this.nbmb1 = 0; this.nbmb2 = 0
+      this.ui.oD('PEdlvat')
+      const lav = await new GetVersionsDlvat().run(this.espace.dlvat)
+      this.nbav1 = lav.length
+      this.lstav = this.splitLst(lav)
+      const lmb = await new GetMembresDlvat().run(this.espace.dlvat)
+      this.nbmb1 = lmb.length
+      this.lstmb = this.splitLst(lmb)
+      this.stp = 2
+    },
+
+    async chgDlvat () {
+      for(let i = 0; i < this.lstav.length; i++) {
+        const lids = this.lstav[i]
+        await new ChangeAvDlvat().run(this.dlv, lids)
+        this.nbav2 += lids.length
+      }
+      for(let i = 0; i < this.lstmb.length; i++) {
+        const lidids = this.lstmb[i]
+        await new ChangeMbDlvat().run(this.dlv, lidids)
+        this.nbmb2 += lidids.length
+      }
+      await new SetEspaceOptionA().run(null, null, this.dlv )
+      this.stp = 3
     }
+
   },
 
   data () {
     return {
-      dlvat: 0,
+      dlvat: 0, // dlvat saisie
+      dlv: 0, // Premier jour du mois suivant de dlvat
+      nbav1: 0, // nombre d'avatars à traiter
+      nbav2: 0, // nombre d'avatars traités
+      nbmb1: 0, // nombre de membres à traiter
+      nbmb2: 0, // nombre de membres traités
+      lstav: null, // av à traiter
+      lstmb: null, // mb à traiter
+      stp: 0, // 0: pas lancé, 1: décompte en cours, 2: décompte terminé, 3: maj terminée
+
       mois: Math.floor(this.session.auj / 100),
       nom: '',
       quotas: null,

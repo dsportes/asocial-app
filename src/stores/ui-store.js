@@ -50,6 +50,7 @@ export const useUiStore = defineStore('ui', {
 
     d: {
       reload: false, // App: reload
+      estzombi: false,
       aunmessage: false,
       PSouvrir: false,
       choixEmoji: false,
@@ -125,6 +126,7 @@ export const useUiStore = defineStore('ui', {
       PEnt: false, // PageEspace
       PEedcom: false,
       PEedq: false,
+      PEdlvat: false,
       ASaccsp: false, // AcceptationSponsoring
       NE: false, // NoteEdit
       NX: false, // NoteExclu

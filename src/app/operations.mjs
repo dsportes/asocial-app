@@ -2028,6 +2028,95 @@ export class SetEspaceOptionA extends OperationUI {
   }
 }
 
+/* OP_GetVersionsDlvat: 'Obtention de la liste des avatars contraints par la DLV fixée par l\'administrteur technique',
+POST:
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `ns` : id de l'espace
+- dlvat: aamm,
+Retour:
+- lids: array des id
+*/
+export class GetVersionsDlvat extends OperationUI {
+  constructor () { super('GetVersionsDlvat') }
+
+  async run (dlvat) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns: session.ns, dlvat }
+      const ret = this.tr(await post(this, 'GetVersionsDlvat', args))
+      return this.finOK(ret.lids)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_GetMembresDlvat: 'Obtention de la liste des membres contraints par la DLV fixée par l\'administrteur technique',
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `ns` : id de l'espace
+- dlvat: aamm,
+Retour:
+- lidids: array des [id, ids]
+*/
+export class GetMembresDlvat extends OperationUI {
+  constructor () { super('GetMembresDlvat') }
+
+  async run (dlvat) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns: session.ns, dlvat }
+      const ret = this.tr(await post(this, 'GetMembresDlvat', args))
+      return this.finOK(ret.lidids)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+ 
+/* OP_ChangeAvDlvat: 'Changement de DLV pour une liste d\'avatars'
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- dlvat: aamm,
+- lids: array des id
+*/
+export class ChangeAvDlvat extends OperationUI {
+  constructor () { super('ChangeAvDlvat') }
+
+  async run (dlvat, lids) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, lids, dlvat }
+      this.tr(await post(this, 'ChangeAvDlvat', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_ChangeMbDlvat: 'Changement de DLV pour une liste de membres'
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- dlvat: aamm,
+- lidids: array des [id, ids]
+*/
+export class ChangeMbDlvat extends OperationUI {
+  constructor () { super('ChangeMbDlvat') }
+
+  async run (dlvat, lidids) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, lidids, dlvat }
+      this.tr(await post(this, 'ChangeMbDlvat', args))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* OP_PlusTicket: 'Génération d\'un ticket de crédit'
 et ajout du ticket au Comptable
 POST:

@@ -563,7 +563,7 @@ export class Espace extends GenDoc {
     this.dcreation = row.dcreation || 20240101
     this.moisStat = row.moisStat || 0
     this.moisStatT = row.moisStatT || 0
-    this.dlvat = row.dlvat || AMJ.max
+    this.dlvat = row.dlvat >= AMJ.min && row.dlvat <= AMJ.max ? row.dlvat : AMJ.max
     this.nbmi = row.nbmi || 6
     this.t = row.t || 0
     // la clé est la clé du Comptable de l'espace
@@ -2161,13 +2161,14 @@ export class Membre extends GenDoc {
   } 
 
   static async rowNouveauMembre (nag, na, im, cv, nvgr) {
+    const session = stores.session
     const r = { id: nag.id, ids: im, v: 0, dlv: 0, vcv: cv ? cv.v : 0,
       ddi: 0, dac: 0, fac: 0, dln: 0, fln: 0, den: 0, fen: 0, dam: 0, fam: 0 }
     if (nvgr) {
-      r.dac = auj
-      r.dam = auj
-      r.dln = auj
-      r.den = auj
+      r.dac = session.auj
+      r.dam = session.auj
+      r.dln = session.auj
+      r.den = session.auj
       // membre.dlv est mis par le serveur depuis compta
     } else {
       // Un nouveau contact n'a pas de dlv active vis à vis du GC
