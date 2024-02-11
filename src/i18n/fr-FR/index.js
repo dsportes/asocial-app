@@ -601,7 +601,7 @@ export default {
   OP_SupprFichier: 'Suppression d\'un fichier attaché à une note',
   OP_SupprAvatar: 'Suppression d\'un avatar du compte',
   OP_GC: 'Déclenchement du nettoyage quotidien',
-  OP_GetCheckpoint: 'Obtention du rapport d\'exécution du dernier traitement de nettoyage quotidien',
+  OP_GetSingletons: 'Obtention des rapports d\'exécution des traitements périodiques',
   OP_GetSynthese: 'Obtention de la synthèse de l\'espace',
   OP_ForceDlv: 'TEST seulement: forçage de dlv / dfh',
   OP_SetEspaceOptionA: 'Changement des options de l\'espace',
@@ -1991,6 +1991,15 @@ export default {
   MMCnomaj: 'Mise à jour non autorisée : {0}',
   MCChint: '3 à 12 lettres, émoji conseillé en tête',
   MCCph: 'Par exemple: Ecologie',
+
+  SINGL10: 'Récupération des fins d\'hébergement',
+  SINGL11: 'Récupération des membres disparus et des groupes devenant orphelins',
+  SINGL12: 'Purge des avatars et groupes',
+  SINGL13: 'Purge des fichiers (et des transferts) des transferts abandonnés',
+  SINGL14: 'Purges des fichiers détruits accumulés dans fpurges',
+  SINGL15: 'Purges des versions ayant une dlv de plus d\'un an',
+  SINGL20: 'Statistiques "mensuelles" comptas',
+  SINGL21: 'Sttatistiques "mensuelles" tickets (avec purges)',
   
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.

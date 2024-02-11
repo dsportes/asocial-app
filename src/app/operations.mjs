@@ -1937,15 +1937,15 @@ export class GC extends OperationUI {
   }
 }
 
-/* OP_GetCheckpoint: 'Obtention du rapport d\'exécution du dernier traitement de nettoyage quotidien'
+/*  OP_GetSingletons: 'Obtention des rapports d\'exécution des traitements périodiques',
 */
-export class GetCheckpoint extends OperationUI {
-  constructor () { super('GetCheckpoint') }
+export class GetSingletons extends OperationUI {
+  constructor () { super('GetSingletons') }
 
   async run () { 
     try {
-      const ret = this.tr(await post(this, 'GetCheckpoint', {}))
-      return this.finOK(ret.checkpoint)
+      const ret = this.tr(await post(this, 'GetSingletons', {}))
+      return this.finOK(ret.singletons)
     } catch (e) {
       await this.finKO(e)
     }

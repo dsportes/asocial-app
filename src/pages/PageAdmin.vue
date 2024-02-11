@@ -123,39 +123,18 @@
         </q-header>
 
         <q-page-container class="q-pa-xs">
-          <div class="q-my-sm">
-            <span class="titre-md text-italic q-mr-lg">{{$t('ESver')}}</span>
-            <span class="font-mono fs-md">{{ck.v ? dhIso(ck.v) : '-'}}</span>
-          </div>
-          <div v-if="ck.dhStart" class="q-my-sm">
-            <div class="titre-md text-italic q-mr-lg">{{$t('ESdex')}}</div>
-            <div class="q-ml-md">
-              <span class="font-mono fs-md">{{dhIso(ck.dhStart)}}</span>
-              <span v-if="ck.duree" class="q-ml-md font-mono fs-md">{{duree(ck.duree)}}</span>
-              <span v-else class="q-ml-md font-mono fs-md">{{$t('ESec')}}</span>
-            </div>
-          </div>
-          <div v-if="!ck.dhStart" class="q-my-sm titre-md text-italic q-mr-lg">{{$t('ESnex')}}</div>
-
-          <div v-if="ck.dhStart">
-            <div class="q-my-sm titre-md text-italic">{{$t('EStex')}}</div>
-            <div v-for="idx in ck.nbTaches" :key="idx" class="q-ml-xl fs-md">{{$t('ESt' + idx)}}</div>
-          </div>
-
-          <div v-if="ck.log && ck.log.length" class="q-my-md titre-lg text-italic">{{$t('ESlog')}}</div>
-
-          <div v-for="(log, idx) in ck.log" :key="idx" class="q-mt-md q-ml-md">
+          <div v-for="(s, idx) in singl" :key="s.id" :class="dkli(idx)">
             <!-- nom retry start duree stats err -->
-            <div class="fs-md font-mono text-bold">
-              {{log.nom}}
-              <span v-if="log.retry" class="q-ml-md">{{$t('ESretry', [log.retry])}}</span>
-              <span class="q-ml-md">{{dhIso(log.start)}}</span>
-              <span v-if="log.duree" class="q-ml-md">{{duree(log.duree)}}</span>
+            <div class="fs-md font-mono text-bold">{{$t('SINGL' + s.id)}}</div>
+            <div class="q-ml-lg">
+              <span v-if="s.nr" class="q-mr-md">{{$t('ESretry', [s.nr])}}</span>
+              <span class="q-mr-md">{{dhIso(s.v)}}</span>
+              <span>{{duree(s.duree)}}</span>
             </div>
-            <div v-if="log.stats" class="q-ml-lg fs-md font-mono">{{stat(log.stats)}}</div>
-            <div v-if="log.err" class="bord q-ml-lg fs-md font-mono height-4 overflow-auto">
-              {{log.err}}</div>
-            <q-separator color="orange" class="q-mt-sm q-mb-md"/>
+            <div v-if="s.stats" class="q-ml-lg fs-md font-mono">{{stat(s.stats)}}</div>
+            <div v-if="s.exc" class="bord q-ml-lg fs-md font-mono height-4 overflow-auto">
+              {{s.exc}}</div>
+            <q-separator color="orange" class="q-mt-sm"/>
           </div>
         </q-page-container>
       </q-layout>
@@ -183,13 +162,14 @@
 </template>
 
 <script>
+import { decode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
 import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
-import { GC, GetCheckpoint, SetEspaceT } from '../app/operations.mjs'
+import { GC, GetSingletons, SetEspaceT } from '../app/operations.mjs'
 import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
@@ -324,13 +304,17 @@ export default {
     },
 
     async affCkpt () {
-      this.ck = await new GetCheckpoint().run()
+      this.singl = []
+      const r = await new GetSingletons().run()
+      r.forEach(d => { this.singl.push(decode(d))})
       this.ui.oD('PAcheckpoint')
     },
 
     dhIso (t) { return new Date(t).toISOString() },
 
-    duree (d) { return d < 1000 ? (d + 'ms') : (d / 1000).toPrecision(3) + 's'},
+    duree (d) { if (!d) return '<1ms'
+      return d < 1000 ? (d + 'ms') : (d / 1000).toPrecision(3) + 's'
+    },
 
     stat (s) {
       const r = []
@@ -341,13 +325,13 @@ export default {
 
   data () {
     return {
-      gcops: ['GCHeb', 'GCGro', 'GCPag', 'GCTra', 'GCFpu', 'GCDlv', 'GCstc'],
+      gcops: ['GCHeb', 'GCGro', 'GCPag', 'GCTra', 'GCFpu', 'GCDlv', 'GCstcc', 'GCstct'],
       gcop: '',
       ns: 0,
       nsc: 0, // ns "courant" de PageEspca à ouvrir
       org: '',
       ps: null,
-      ck: null,
+      singl: null,
       dns: this.$t('ESreq'),
       dorg: this.$t('ESreq'),
       prf: 0,
