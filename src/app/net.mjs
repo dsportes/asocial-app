@@ -88,7 +88,9 @@ export async function post (op, fonction, args) {
   try {
     if (op) op.BRK()
     //const data = new Uint8Array(encode(args))
-    const data = new Uint8Array(encode([args, process.env.APITK]))
+    // const x = config.iconSuperman.substring(config.iconSuperman.length - 24)
+    const data = new Uint8Array(encode([args, config[process.env.APITK].substring(config[process.env.APITK].length - 24)]))
+    // const data = new Uint8Array(encode([args, process.env.APITK]))
     const u = config.opsrv + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
     const par = { method: 'post', url: u, data: data, headers: headers, responseType: 'arraybuffer' }

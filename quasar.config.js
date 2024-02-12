@@ -61,7 +61,7 @@ module.exports = configure(function (ctx) {
       devtool: 'source-map',
       env: {
         BUILD: 18,
-        APITK: 'VldNo2aLLvXRm0Q' // Token d'autorisation d'usage de l'API
+        APITK: 'iconSuperman' // Token d'autorisation d'usage de l'API
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
