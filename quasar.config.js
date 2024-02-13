@@ -61,7 +61,10 @@ module.exports = configure(function (ctx) {
       devtool: 'source-map',
       env: {
         BUILD: 18,
-        APITK: 'iconSuperman' // Token d'autorisation d'usage de l'API
+        FNSEC: 's.config.iconSuperman.substring(d,f)',
+        DSEC: 24,
+        FSEC: 48,
+        // APITK: '+ZLv3wyXYMITASVFzH//2Q==' // Token d'autorisation d'usage de l'API
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
@@ -172,7 +175,6 @@ module.exports = configure(function (ctx) {
       maxAge: 1000 * 60 * 60 * 24 * 30,
         // Tell browser when a file from the server should expire from cache (in ms)
 
-      
       chainWebpackWebserver (chain) {
         chain.plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: [ 'js' ] }])

@@ -12,6 +12,7 @@ export const useSessionStore = defineStore('session', {
   state: () => ({
     swev1: false,
     swev2: false,
+    registration: null,
 
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
@@ -211,6 +212,9 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
+    setRegistration(reg) {
+      this.registration = reg
+    },
     setSwev (n) {
       console.log('SW event reçu : ' + n)
       if (n === 1) this.swev1 = true

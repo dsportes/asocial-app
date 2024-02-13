@@ -74,6 +74,15 @@ export async function get (fonction, args) {
 }
 
 /*
+const f = () => { 
+  const s = stores; 
+  const d = process.env.DSEC; 
+  const f = process.env.FSEC; 
+  return eval(process.env.FNSEC)
+}
+*/
+
+/*
 Envoi une requête POST :
 - op : opération émettrice. Requise si interruptible, sinon facultative
 - fonction : classe de l'opération invoquée
@@ -87,10 +96,9 @@ export async function post (op, fonction, args) {
   const config = stores.config
   try {
     if (op) op.BRK()
-    //const data = new Uint8Array(encode(args))
-    // const x = config.iconSuperman.substring(config.iconSuperman.length - 24)
-    const data = new Uint8Array(encode([args, config[process.env.APITK].substring(config[process.env.APITK].length - 24)]))
     // const data = new Uint8Array(encode([args, process.env.APITK]))
+    const data = new Uint8Array(encode([args, 
+      (() => { const s = stores; const d = process.env.DSEC; const f = process.env.FSEC; return eval(process.env.FNSEC)})()]))
     const u = config.opsrv + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
     const par = { method: 'post', url: u, data: data, headers: headers, responseType: 'arraybuffer' }

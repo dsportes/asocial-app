@@ -1,3 +1,6 @@
+// import { initializeApp } from 'firebase/app'
+// import { getFirestore } from 'firebase/firestore'
+
 import { boot } from 'quasar/wrappers'
 const pako = require('pako')
 
@@ -69,6 +72,7 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.iconAvatar = require('../assets/avatar.jpg')
   cfg.iconGroupe = require('../assets/groupe.jpg')
   cfg.iconSuperman = require('../assets/superman.jpg')
+  console.log(cfg.iconSuperman.substring(process.env.DSEC, process.env.FSEC))
 
   cfg.logoSvg = require('../assets/logo.svg') // Taitement spécial Webpack (quasar.config.js)
 
@@ -85,6 +89,27 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.planHelp = require('../assets/help/_plan.json')
 
   stores.config.setConfig(cfg)
+
+/*
+  const ev = `
+fetch("https://test.sportes.fr:8443/fbcfg")
+.then(resp => {
+  resp.json().then(t => {
+    console.log(t)
+    resolve(f2(f1(t)))
+  })
+}) 
+`
+  const waitEval = (ev) => {
+    return new Promise((resolve, reject) => {
+      const f1 = initializeApp
+      const f2 = getFirestore
+      eval(ev)
+    })
+  }
+
+  const fs = await waitEval(ev)
+*/
 
   setRequiredModules({ pako: pako })
 })
