@@ -64,10 +64,6 @@ export const useSessionStore = defineStore('session', {
 
     // Objet de synchro pour Firestore
     fsSync: null,
-    /* Juste avant login, récupération du statut fs / sql du server
-    par ping /fs (retournant 'true' ou 'false') SAUF en mode avion
-    */
-    estFs: false,
 
     clek: null,
 
@@ -304,10 +300,6 @@ export const useSessionStore = defineStore('session', {
 
     setFsSync (fsSync) {
       this.fsSync = fsSync
-    },
-
-    setEstFs (estFs) {
-      this.estFs = estFs
     },
 
     setAvatarId (id) { this.avatarId = id},

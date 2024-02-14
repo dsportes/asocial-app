@@ -6,6 +6,7 @@ import { sha256 as jssha256 } from 'js-sha256'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AppExc, E_BRO } from './api.mjs'
 import { $t, ungzipT } from './util.mjs'
+import { app_keys } from './keys.mjs'
 
 const SALTS = new Array(256)
 
@@ -173,7 +174,7 @@ export function concat (arrays) {
 }
 */
 
-/* Cryptage Serveur *******************************
+/* Cryptage Serveur ******************************* 
 const CLE = new Uint8Array(32)
 {
   const s = new Uint8Array([5, 255, 10, 250, 15, 245, 20, 240, 25, 235, 30, 230, 35, 225, 40, 220])
@@ -181,7 +182,11 @@ const CLE = new Uint8Array(32)
     for (let j = 0; j < 16; j++) CLE[i + j] = (s[j] + i) % 256
   }
 }
-const IV = CLE.slice(8, 24)
+*/
+
+const CLE = app_keys.sites.A
+
+const IV = new Uint8Array([5, 255, 10, 250, 15, 245, 20, 240, 25, 235, 30, 230, 35, 225, 40, 220])
 
 export async function crypterSrv (u8) {
   try {
@@ -201,11 +206,13 @@ export async function decrypterSrv (u8) {
   }
 }
 
+/*
 setTimeout(async () => {
   const x = await crypterSrv(enc.encode('toto est très très très très beau'))
   console.log(dec.decode(await decrypterSrv(x)))
 }, 1)
 */
+
 
 /* Retourne le contenu binaire décrypté d'un buffer long.
 

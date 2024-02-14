@@ -48,7 +48,7 @@ async function initSession(phrase) {
   const config = stores.config
   session.init(phrase)
   if (session.accesNet) {
-    if (!session.estFs) {
+    if (!config.estFs) {
       await openWS()
       session.fsSync = null
     } else {
@@ -1382,27 +1382,6 @@ export class TraitGcvols extends OperationUI {
         }
         const args = { token: session.authToken, m, lidc }
         this.tr(await post(this, 'SupprComptesTribu', args))
-      }
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_GetEstFs: 'Détermination du mode du serveur (Filestore ou SQL)'
-*/
-export class GetEstFs extends OperationUI {
-  constructor() { super('GetEstFs') }
-
-  async run() {
-    try {
-      const session = stores.session
-      if (session.accesNet) {
-        const estFs = await getEstFs()
-        session.setEstFs(estFs)
-      } else {
-        session.setEstFs(false)
       }
       this.finOK()
     } catch (e) {

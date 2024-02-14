@@ -95,19 +95,13 @@ export default {
       this.ui.oD('PSouvrir')
     },
     reset () {  },
-    async setFs () {
-      const ret = await new GetEstFs().run()
-      if (isAppExc(ret)) { this.raz(); return false } else return true
-    },
     async onps (phrase) {
       if (phrase) phrase.phrase = null
-      if (!await this.setFs()) return
       connecterCompte(phrase, this.ui.razdb)
     },
     async crypterphrase (pc) {
       this.pc = pc
       this.org = pc.org
-      if (!await this.setFs()) return
       try {
         /* Recherche sponsoring ******
         args.ids : hash de la phrase de contact

@@ -5,7 +5,8 @@ import { decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { SyncQueue } from './sync.mjs'
-import { ID } from './api.mjs'
+import { ID, rowCryptes } from './api.mjs'
+import { decrypterSrv } from './webcrypto.mjs'
 
 export class FsSyncSession {
   static initfaite = false
@@ -77,8 +78,8 @@ export class FsSyncSession {
   }
 
   async sub (nom, id) {
-    return onSnapshot(doc(this.fs, nom + '/' + id), (doc) => {
-      if (doc.exists()) this.onRow(doc)
+    return onSnapshot(doc(this.fs, nom + '/' + id), async (doc) => {
+      if (doc.exists()) await this.onRow(doc)
       // else console.log(`Doc non existant: ${doc.ref.path}`)
     })
   }
@@ -86,13 +87,14 @@ export class FsSyncSession {
   /*
   Mettre un row reçu à traiter : SyncQueue.push(row)
   */
-  onRow (d) {
+  async onRow (d) {
     const nom = d.ref.parent.path
     const row = d.data()
     row._nom = nom
     let z = true
     if (row._data_) {
       row._data_ = row._data_.toUint8Array()
+      if (rowCryptes.has(nom)) row._data_ = await decrypterSrv(row._data_)
       z = false
     }
     console.log(`onRow: ${row._nom} ${z ? 'zombi' : ''} ${row.id}`)
