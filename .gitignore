@@ -1,4 +1,4 @@
-/src/keys.mjs
+/src/app/keys.mjs
 
 .DS_Store
 .thumbs.db
