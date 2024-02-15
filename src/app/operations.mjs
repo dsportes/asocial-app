@@ -144,7 +144,7 @@ export class ExistePhrase extends OperationUI {
     try {
       const session = stores.session
       const args = { token: session.authToken, hps1: hps1, t }
-      const ret = this.tr(await post(this, 'ExistePhrase', args))
+      const ret = this.tr(await post(this, 'ExistePhrase' + (t === 1 ? '1' : ''), args))
       const ex = ret.existe || false
       return this.finOK(ex)
     } catch (e) {

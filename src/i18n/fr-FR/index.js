@@ -366,7 +366,11 @@ export default {
   EX8065: 'Maximum de volume V1 pour les notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8066: 'Maximum de volume V2 pour les notes du couple dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8067: 'Groupe sans hébergeur {0} : augmentation de volumer interdit.',
-  EX8101: 'Essayer de saisir à nouveau la phrase secrète.\nLe code de l\`organisation a pu aussi être mal saisi.',
+
+  EX8101: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
+  EX8102: 'Le code de l\`organisation n\'est pas reconnu.\nSaisir à nouveau l\'identification.',
+  EX8103: 'Cette phrase secrète de correspond à aucun compte enregistré.',
+  EX8104: 'Cette phrase secrète de correspond pas elle du Comptable.',
   EX8888: 'Cette phrase secrète ne correspond à aucun compte enregistré',
 
   // A_SRV = 9000 // Situation inattendue : assertion trappée sur le serveur
@@ -387,6 +391,7 @@ export default {
   EX9016: 'Synthese non trouvé ({1}) - @{0}',
   EX9017: 'Ticket non trouvé ({1} / {2}) - @{0}',
   EX9018: 'Organisation {0} non trouvée',
+  EX9019: 'Mode d\'authentication non reconnu [{0}]',
 
   EX9100: 'Données d\'authentification illisibles (détail: {0})',
 

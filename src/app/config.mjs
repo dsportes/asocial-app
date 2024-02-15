@@ -7,7 +7,7 @@ export const config = {
   SRV: 'test.sportes.fr:8443',
   // WSSRV: 'wss://localhost.fr:8443/ws/', // calculé depuis SRV par défaut
   // OPSRV: 'https://test.sportes.fr:8443/op/', // calculé depuis SRV par défaut
-  estFs: true, // Si Firestore: synchro par Firestore et non par WS
+  estFs: false, // Si Firestore: synchro par Firestore et non par WS
 
   portupload: 33666, // Ne pas changer en général
 

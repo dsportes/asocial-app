@@ -115,6 +115,7 @@ export const useSessionStore = defineStore('session', {
   getters: {
     aSt (state) { return stores.avatar },
     ui (state) { return stores.ui },
+    config (state) { return stores.config },
 
     dlv (state) { return state.ok ? this.aSt.compta.dlv : 0 },
     nbj (state) { return AMJ.diff(AMJ.dlv(state.dlv), state.auj) },
@@ -252,11 +253,12 @@ export const useSessionStore = defineStore('session', {
         this.phrase = phrase
         this.lsk = '$asocial$-' + phrase.hps1
       }
-      const token = { sessionId: this.sessionId }
+      const token = { }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
+        if (!this.config.estFs) token.sessionId = this.sessionId
         token.hps1 = phrase ? phrase.hps1 : null
-        token.hpsc = phrase ? phrase.hpsc : null
+        token.pcb = phrase ? phrase.pcb : null
       }
       token.org = this.org
       
