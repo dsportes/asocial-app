@@ -371,6 +371,7 @@ export default {
   EX8102: 'Le code de l\`organisation n\'est pas reconnu.\nSaisir à nouveau l\'identification.',
   EX8103: 'Cette phrase secrète de correspond à aucun compte enregistré.',
   EX8104: 'Cette phrase secrète de correspond pas elle du Comptable.',
+  EX8105: 'Cette opération n\'est pas autorisée, l\'espace est figé',
   EX8888: 'Cette phrase secrète ne correspond à aucun compte enregistré',
 
   // A_SRV = 9000 // Situation inattendue : assertion trappée sur le serveur
