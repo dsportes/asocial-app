@@ -1732,7 +1732,6 @@ Comme c'est un GET, les arguments sont en string (et pas en number)
 args.token: éléments d'authentification du compte.
 args.id : id de la note
 args.idf : id du fichier
-args.idc : id du compte demandeur
 args.vt : volume du fichier (pour compta des volumes v2 transférés)
 */
 export class DownloadFichier extends OperationUI {
@@ -1742,8 +1741,7 @@ export class DownloadFichier extends OperationUI {
     try {
       const session = stores.session
       const vt = note.mfa.get(idf).lg
-      const idc = session.compteId
-      const args = { token: session.authToken, id: note.id, idf, idc, vt }
+      const args = { token: session.authToken, id: note.id, idf, vt }
       const ret =  this.tr(await post(this, 'GetUrl', args))
       if (!ret) return null
       const url = ret.getUrl

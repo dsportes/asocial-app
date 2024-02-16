@@ -131,8 +131,7 @@ export const useFetatStore = defineStore('fetat', {
               this.dernierFichierCharge.idf = 0
             } else {
               /* imputation sur LA COMPTA du compte. idc : id de la compta */
-              const idc = session.compteId
-              const args = { token: session.authToken, id: e.ids, idf: e.id, idc, vt: e.lg }
+              const args = { token: session.authToken, id: e.ids, idf: e.id, vt: e.lg }
               const ret =  await post(null, 'GetUrl', args)
               if (!ret) throw new AppExc(E_BRO, 3, [e.id])
               const url = ret.getUrl
