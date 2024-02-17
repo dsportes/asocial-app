@@ -48,7 +48,7 @@ async function initSession(phrase) {
   const config = stores.config
   session.init(phrase)
   if (session.accesNet) {
-    if (!config.hasWS) {
+    if (config.hasWS) {
       await openWS()
       session.fsSync = null
     } else {

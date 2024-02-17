@@ -43,9 +43,9 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.srv = config.SRV ? config.SRV : h
   console.log('SRV depuis ' + (config.SRV ? ' config: ': 'location: ') + cfg.srv)
 
-  cfg.opsrv = config.OPSRV ? config.OPSRV : ('https://' + cfg.srv + '/op/')
-  cfg.wssrv = config.WSSRV ? config.WSSRV : ('wss://' + cfg.srv + '/ws/')
-  console.log('opsrv: ' + cfg.opsrv + ' --- wssrv: ' + cfg.wssrv)
+  cfg.opsrv = process.env.OPSRV ? process.env.OPSRV : ('https://' + cfg.srv + '/op/')
+  cfg.wssrv = process.env.WSSRV ? process.env.WSSRV : ('wss://' + cfg.srv + '/ws/')
+  console.log('opsrv: ' + cfg.opsrv + '\nwssrv: ' + cfg.wssrv)
 
   console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
 

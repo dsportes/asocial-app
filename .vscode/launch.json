@@ -13,19 +13,6 @@
       "sourceMapPathOverrides": {
         "webpack://asocial/./src/*": "${webRoot}/*"
       }
-    },
-    {
-      "type": "firefox",
-      "request": "launch",
-      "name": "Quasar App: firefox",
-      "url": "https://localhost:8343",
-      "webRoot": "${workspaceFolder}/src",
-      "pathMappings": [
-        {
-          "url": "webpack://asocial/src",
-          "path": "${workspaceFolder}/src"
-        }
-      ]
     }
   ]
 }
