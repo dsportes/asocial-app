@@ -58,7 +58,7 @@ import { ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { afficherDiag } from '../app/util.mjs'
-import { connecterCompte, GetEstFs } from '../app/connexion.mjs'
+import { connecterCompte } from '../app/connexion.mjs'
 import { Sponsoring, resetRepertoire } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ, ID, isAppExc } from '../app/api.mjs'

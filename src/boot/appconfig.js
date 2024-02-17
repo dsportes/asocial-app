@@ -34,9 +34,6 @@ export default boot(async ({ app /* Vue */ }) => {
   const cfg = {}
   for(const x in config) cfg[x] = config[x]
 
-  const b = process.env.BUILD
-  if (b) cfg.BUILD = b
-
   console.log('debug:' + (cfg.DEBUG ? true : false) +
     ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
 
@@ -72,8 +69,6 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.iconAvatar = require('../assets/avatar.jpg')
   cfg.iconGroupe = require('../assets/groupe.jpg')
   cfg.iconSuperman = require('../assets/superman.jpg')
-  console.log(cfg.iconSuperman.substring(process.env.DSEC, process.env.FSEC))
-
   cfg.logoSvg = require('../assets/logo.svg') // Taitement spécial Webpack (quasar.config.js)
 
   /* N'importe quel binaire en .bin peut être chargé en dataURL:

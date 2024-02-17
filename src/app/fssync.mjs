@@ -21,7 +21,6 @@ export class FsSyncSession {
   }
 
   open (firebaseConfig, fsEmulator) {
-    const cfg = stores.config
     // Initialize Firebase
     if (!FsSyncSession.initfaite)
       FsSyncSession.app = initializeApp(firebaseConfig)

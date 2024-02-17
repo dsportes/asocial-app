@@ -256,7 +256,7 @@ export const useSessionStore = defineStore('session', {
       const token = { }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
-        if (!this.config.estFs) token.sessionId = this.sessionId
+        if (!this.config.hasWS) token.sessionId = this.sessionId
         token.hps1 = phrase ? phrase.hps1 : null
         token.pcb = phrase ? phrase.pcb : null
       }

@@ -4,7 +4,7 @@ import { encode } from '@msgpack/msgpack'
 import { OperationUI, RafraichirTickets } from './operations.mjs'
 import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
-import { post, getEstFs } from './net.mjs'
+import { post } from './net.mjs'
 import { AMJ, ID, PINGTO2, IDBOBS, FLAGS, d14 } from './api.mjs'
 import { resetRepertoire, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, SessionSync, getNg, Versions } from './modele.mjs'
 import {
@@ -48,7 +48,7 @@ async function initSession(phrase) {
   const config = stores.config
   session.init(phrase)
   if (session.accesNet) {
-    if (!config.estFs) {
+    if (!config.hasWS) {
       await openWS()
       session.fsSync = null
     } else {

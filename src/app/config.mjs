@@ -2,12 +2,12 @@ export const config = {
   // CONFIGURATION TECHNIQUE : à adapter à chaque déploiement
   DEV: true,
   DEBUG: true,
-  BUILD: 'test-1',
+  BUILD: '22',
   // Commenter quand l'application UI est servie directement par le serveur
   SRV: 'test.sportes.fr:8443',
   // WSSRV: 'wss://localhost.fr:8443/ws/', // calculé depuis SRV par défaut
   // OPSRV: 'https://test.sportes.fr:8443/op/', // calculé depuis SRV par défaut
-  estFs: false, // Si Firestore: synchro par Firestore et non par WS
+  hasWS: false, // true si Data Sync est assuré par WS
 
   portupload: 33666, // Ne pas changer en général
 

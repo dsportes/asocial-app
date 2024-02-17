@@ -59,13 +59,6 @@ module.exports = configure(function (ctx) {
       // this is a configuration passed on
       // to the underlying Webpack
       devtool: 'source-map',
-      env: {
-        BUILD: 18,
-        FNSEC: 's.config.iconSuperman.substring(d,f)',
-        DSEC: 24,
-        FSEC: 48,
-        // APITK: '+ZLv3wyXYMITASVFzH//2Q==' // Token d'autorisation d'usage de l'API
-      },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
