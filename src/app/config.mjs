@@ -3,10 +3,6 @@ export const config = {
   DEV: true,
   DEBUG: true,
   BUILD: '22',
-  // Commenter quand l'application UI est servie directement par le serveur
-  SRV: 'test.sportes.fr:8443',
-  // WSSRV: 'wss://localhost.fr:8443/ws/', // calculé depuis SRV par défaut
-  OPSRV: 'http://test.sportes.fr:8443/op/', // calculé depuis SRV par défaut
   hasWS: false, // true si Data Sync est assuré par WS
 
   portupload: 33666, // Ne pas changer en général

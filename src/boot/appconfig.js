@@ -1,11 +1,8 @@
-// import { initializeApp } from 'firebase/app'
-// import { getFirestore } from 'firebase/firestore'
-
 import { boot } from 'quasar/wrappers'
 const pako = require('pako')
 
 import { setRequiredModules } from '../app/util.mjs'
-
+import { Tarif } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import { config } from '../app/config.mjs'
 
@@ -37,15 +34,29 @@ export default boot(async ({ app /* Vue */ }) => {
   console.log('debug:' + (cfg.DEBUG ? true : false) +
     ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
 
+  Tarif.tarifs = cfg.tarifs
+  
   cfg.search = window.location.search.replace('?', '')
 
-  const h = window.location.host
-  cfg.srv = config.SRV ? config.SRV : h
-  console.log('SRV depuis ' + (config.SRV ? ' config: ': 'location: ') + cfg.srv)
+  cfg.host = window.location.host
 
-  cfg.opsrv = process.env.OPSRV ? process.env.OPSRV : ('https://' + cfg.srv + '/op/')
-  cfg.wssrv = process.env.WSSRV ? process.env.WSSRV : ('wss://' + cfg.srv + '/ws/')
-  console.log('opsrv: ' + cfg.opsrv + '\nwssrv: ' + cfg.wssrv)
+  if (process.env.OPSRV) {
+    cfg.opsrv = process.env.OPSRV
+    console.log('OPSRV depuis ENV: ' + cfg.opsrv)
+  } else {
+    cfg.opsrv = 'https://' + cfg.host + '/op/'
+    console.log('OPSRV depuis location.host: ' + cfg.opsrv)
+  }
+
+  if (config.hasWS) {
+    if (process.env.WSSRV) {
+      cfg.wssrv = process.env.WSSRV
+      console.log('OPSRV depuis ENV: ' + cfg.wssrv)
+    } else {
+      cfg.wssrv = 'wss://' + cfg.host + '/ws/'
+      console.log('WSSRV depuis location.host: ' + cfg.wssrv)
+    }  
+  }
 
   console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
 
@@ -84,27 +95,6 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.planHelp = require('../assets/help/_plan.json')
 
   stores.config.setConfig(cfg)
-
-/*
-  const ev = `
-fetch("https://test.sportes.fr:8443/fbcfg")
-.then(resp => {
-  resp.json().then(t => {
-    console.log(t)
-    resolve(f2(f1(t)))
-  })
-}) 
-`
-  const waitEval = (ev) => {
-    return new Promise((resolve, reject) => {
-      const f1 = initializeApp
-      const f2 = getFirestore
-      eval(ev)
-    })
-  }
-
-  const fs = await waitEval(ev)
-*/
 
   setRequiredModules({ pako: pako })
 })

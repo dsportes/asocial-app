@@ -62,7 +62,7 @@ module.exports = configure(function (ctx) {
       env: {
         OPSRV1: 'https://test.sportes.fr:8443/op/',
         OPSRV: 'http://localhost:8443/op/',
-        WSSRV: 'wss://test.sportes.fr:8443/ws/'
+        WSSRV1: 'wss://test.sportes.fr:8443/ws/'
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
