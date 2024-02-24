@@ -372,12 +372,13 @@ export default {
   EX8103: 'Cette phrase secrète de correspond à aucun compte enregistré.',
   EX8104: 'Cette phrase secrète de correspond pas elle du Comptable.',
   EX8105: 'Cette opération n\'est pas autorisée, l\'espace est figé',
+  EX8106: 'Aucune opération autorisée, l\'espace est clos',
   EX8888: 'Cette phrase secrète ne correspond à aucun compte enregistré',
 
   // A_SRV = 9000 // Situation inattendue : assertion trappée sur le serveur
   EX9001: 'Espace non trouvé ({1}) - @{0}',
-  EX9002: 'Tranche de quotas non trouvée ({1}) - @{0}',
-  EX9003: 'Compte non trouvé ({1}) - @{0}',
+  EX9002: 'Partition non trouvée ({1}) - @{0}',
+  EX9003: 'Compta non trouvé ({1}) - @{0}',
   EX9004: 'Ligne comptable non trouvée ({1}) - @{0}',
   EX9005: 'Chat non trouvé ({1}) - @{0}',
   EX9007: 'Note non trouvée ({1} / {2}) - @{0}',
