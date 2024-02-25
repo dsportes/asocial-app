@@ -209,6 +209,9 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
+    setNotifs (notifs) {
+      // TODO
+    },
     setRegistration(reg) {
       this.registration = reg
     },

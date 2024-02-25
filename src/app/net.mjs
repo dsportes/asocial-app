@@ -69,6 +69,7 @@ Exception : un AppExc avec les propriétés code, message, stack
 export async function post (op, fonction, args) {
   let buf
   const config = stores.config
+  const session = stores.session
   try {
     if (op) op.BRK()
     const data = new Uint8Array(encode(args))
@@ -91,10 +92,7 @@ export async function post (op, fonction, args) {
   // les status HTTP non 2xx sont tombés en exception
   try {
     const resp = decode(buf)
-    if (resp && (resp.nl || resp.ne)) {
-      const session = stores.session
-      session.setNlNe(resp.nl || 0, resp.ne || 0)
-    }
+    if (resp && resp.notifs) session.setNotifs(resp.notifs)
     return resp
   } catch (e) { // Résultat mal formé
     throw new AppExc(E_BRO, 2, [op ? op.label: '', e.message])
