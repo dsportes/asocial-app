@@ -3,6 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { isAppExc, AppExc, version, E_BRO, E_SRV, E_BRK } from './api.mjs'
+import { syncQueue } from './synchro.mjs'
 
 const headers = { 'x-api-version': version }
 
@@ -93,6 +94,7 @@ export async function post (op, fonction, args) {
   try {
     const resp = decode(buf)
     if (resp && resp.notifs) session.setNotifs(resp.notifs)
+    if (resp.compta) syncQueue.setCompta(resp.compta.v, resp.compta)
     return resp
   } catch (e) { // Résultat mal formé
     throw new AppExc(E_BRO, 2, [op ? op.label: '', e.message])
