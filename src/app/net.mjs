@@ -74,10 +74,6 @@ export async function post (op, fonction, args) {
   try {
     if (op) op.BRK()
     const data = new Uint8Array(encode(args))
-    /*
-    const data = new Uint8Array(encode([args, 
-      (() => { const s = stores; const d = process.env.DSEC; const f = process.env.FSEC; return eval(process.env.FNSEC)})()]))
-    */
     const u = config.opsrv + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
     const par = { method: 'post', url: u, data: data, headers: headers, responseType: 'arraybuffer' }
@@ -94,7 +90,8 @@ export async function post (op, fonction, args) {
   try {
     const resp = decode(buf)
     if (resp && resp.notifs) session.setNotifs(resp.notifs)
-    if (resp.compta) syncQueue.setCompta(resp.compta.v, resp.compta)
+    if (fonction !== 'Sync' && (resp.compte || resp.compta || resp.espace || resp.partition))
+      syncQueue.postResp(resp)
     return resp
   } catch (e) { // Résultat mal formé
     throw new AppExc(E_BRO, 2, [op ? op.label: '', e.message])
