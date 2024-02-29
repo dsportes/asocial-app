@@ -3,7 +3,8 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { SessionSync, Versions, NoteLocale, FichierLocal } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
-import { isAppExc, AppExc, E_DB } from './api.mjs'
+import { isAppExc, AppExc, E_DB, DataSync } from './api.mjs'
+import { syncQueue } from './synchro.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
 
 function decodeIn (buf, cible) {
@@ -12,73 +13,14 @@ function decodeIn (buf, cible) {
 }
 
 const STORES = {
-  compte: 'id',
-  avgrversions: 'id',
-  sessionsync: 'id',
-  tribus: 'id',
-  comptas: 'id',
-  avatars: 'id',
-  chats: '[id+ids]',
-  tickets: '[id+ids]',
-  sponsorings: '[id+ids]',
-  groupes: 'id',
-  membres: '[id+ids]',
-  chatgrs: '[id+ids]',
-  notes: '[id+ids]',
+  singletons: 'n',
+  collections: 'id+n+ids',
   avnote: '[id+ids]',
   fetat: 'id',
   fdata: 'id',
   loctxt: 'id',
   locfic: 'id',
   locdata: 'id'
-}
-
-const TABLES = []
-for (const x in STORES) TABLES.push(x)
-
-function EX1 (e) {
-  return isAppExc(e) ? e : new AppExc(E_DB, 1, [e.message])
-}
-
-function EX2 (e) {
-  return isAppExc(e) ? e : new AppExc(E_DB, 2, [e.message])
-}
-
-let db
-
-async function ouverture (nb) {
-  console.log('Open: [' + nb + ']')
-  db = new Dexie(nb, { autoOpen: true })
-  db.version(1).stores(STORES)
-  await db.open()
-  return db
-}
-
-export async function openIDB () {
-  const session = stores.session
-  try {
-    db = await ouverture (session.nombase)
-  } catch (e) {
-    throw EX1(e)
-  }
-}
-
-export function closeIDB () {
-  if (db && db.isOpen()) {
-    try { db.close() } catch (e) {}
-  }
-  db = null
-}
-
-export async function deleteIDB (nb) {
-  try {
-    await Dexie.delete(nb)
-    await sleep(100)
-    console.log('RAZ db')
-  } catch (e) {
-    console.log(e.toString())
-  }
-  db = null
 }
 
 /*************************************************************************
@@ -90,13 +32,16 @@ Calcul du volume utile d'une base
 export async function vuIDB (nb) {
   const session = stores.session
   session.volumeTable = ''
-  const db = await ouverture(nb)
+  const db = new Dexie(nb, { autoOpen: true })
+  db.version(1).stores(STORES)
+  await db.open()
+
   let v1 = 0, v2 = 0
   const map = {}
   for (const x in STORES) {
     let v = 0
-    await db[x].each(async (idb) => { 
-      v += idb.data.length
+    await db[x].each(async (rec) => { 
+      v += rec.data.length
     })
     session.volumeTable = x + ': ' + edvol(v)
     if (x === 'fdata' || x === 'locdata') v2 += v; else v1 += v
@@ -107,257 +52,398 @@ export async function vuIDB (nb) {
   return [v1, v2, map]
 }
 
-/*************************************************************************
-Chargement des versions des avatars et groupes
-*/
-export async function loadVersions () {
-  try {
+/* Classe IDB *******************************************************************/
+class IDB {
+  static snoms = { clek: 1, datasync: 2, comptes: 3, comptas: 4, espaces: 5, partitions: 6 }
+  static lnoms = [ '', 'clek', 'datasync', 'comptes', 'comptas', 'espaces', 'partitions' ]
+  static cnoms = { avatars: 1, groupes: 2, notes: 3, chats: 4, sponsorings: 5, tickets: 6, membres: 7, chatgrs: 8 }
+
+  static EX1 (e) { return isAppExc(e) ? e : new AppExc(E_DB, 1, [e.message])}
+  
+  static EX2 (e) { return isAppExc(e) ? e : new AppExc(E_DB, 2, [e.message])}
+
+  static async delete (nb) {
+    try {
+      await Dexie.delete(nb)
+      await sleep(100)
+      console.log('RAZ db')
+    } catch (e) {
+      console.log(e.toString())
+    }
+    idb.db = null
+  }
+
+  static async open() {
+    const nb = stores.session.nombase
+    try {
+      console.log('Open: [' + nb + ']')
+      idb.db = new Dexie(nb, { autoOpen: true })
+      idb.db.version(1).stores(STORES)
+      await idb.db.open()
+    } catch (e) {
+      throw IDB.EX1(e)
+    }
+  }
+
+  constructor () { this.idb = null }
+
+  close () {
+    if (this.db && this.db.isOpen()) {
+      try { this.db.close() } catch (e) {}
+    }
+    this.db = null
+  }
+
+  /** Lecture et enregistrement en session de la cleK *******************************/
+  async getCleK () {
     const session = stores.session
     try {
-      const r = await db.avgrversions.get('1')
-      const idb = r.data ? await decrypter(session.clek, r.data) : null
-      return Versions.load(idb)
+      const rec = await this.db.singletons.get(IDB.snoms.clek)
+      if (rec) { session.setCleK(rec.data); return true } else return false
     } catch (e) {
-      Versions.reset()
+      return false
     }
-  } catch (e) {
-    throw EX2(e)
   }
-}
 
-/** Gestion de l'état de la dernière session ***********************************************************/
-
-// lecture de l'état de la dernière session (ou vide en mode incognito)
-export async function lectureSessionSyncIdb () {
-  try {
+  /* Enregistre la cleK cryptée par le PBKFD de la phrase secrète */
+  async storeCleK () {
     const session = stores.session
-    const s = new SessionSync()
-    if (session.accesIdb) {
-      try {
-        const r = await db.sessionsync.get('1')
-        const idb = await decrypter(session.clek, r.data)
-        s.fromIdb(idb)
-      } catch (e) {
-        console.log('Pas de sessionsync en IDB')
-      } // session vide si pas lisible sur IDB
+    const data = session.getCryptCleK()
+    try {
+      await this.db.transaction('rw', ['singletons'], async () => {
+        await this.db.singletons.put({ n: IDB.snoms.clek, data })
+      })
+    } catch (e) {
+      throw IDB.EX2(e)
     }
-    session.setSessionSync(s)
-    return s
-  } catch (e) {
-    throw EX2(e)
   }
-}
 
-// sauvegarde de l'état courant (sauf incognito)
-export async function saveSessionSync (idb) {
-  try {
+  /** Retourne l'objet DataSync *******************************/
+  async getDataSync () {
     const session = stores.session
-    await db.sessionsync.put({ id: '1', data: await crypter(session.clek, idb) })
-  } catch (e) {
-    throw EX2(e)
+    try {
+      const rec = await this.db.singletons.get(IDB.snoms.datasync)
+      if (rec) { 
+        const x = await decrypter(session.clek, rec.data)
+        return new DataSync(decode(x))
+      } 
+      else return null
+    } catch (e) {
+      return null
+    }
   }
-}
 
-/** Note Locale - TL **********************************************************************/
-export async function NLfromIDB () {
-  const session = stores.session
-  const ppSt = stores.pp
-  try {
-    await db.loctxt.each(async (idb) => {
-      const nl = new NoteLocale()
-      const n = await nl.fromIdb(await decrypter(session.clek, idb.data))
+  /** Retourne la Map des CCEP (mode avion) *************************************
+  Map: clé: _nom, valeur: row
+  */
+  async getCcep () {
+    const session = stores.session
+    try {
+      const r = []
+      await this.db.singletons.each(rec => { 
+        if (rec.n > 2) r.push(rec.data)
+      })
+      const m = new Map()
+      for(const data of r) {
+        const row = decode(await decrypter(session.clek, data))
+        m.set(row._nom, row)
+      }
+      return x
+    } catch (e) {
+      throw EX2(e)
+    }
+  }
+
+  /** Retourne un sous-arbre d'id donné (avion et synchronisé *************************
+  clé: _nom, valeur: [row]
+  */
+  async getSA (id) {
+    const session = stores.session
+    try {
+      const r = await this.db.collections.where('id').equals(id).toArray()
+      const m = new Map()
+      for(const data of r) {
+        const row = decode(await decrypter(session.clek, data))
+        let e = x.get(row._nom); if (!e) { e = []; x.set(row._nom, e)}
+        e.push(row)
+      }
+      return m
+    } catch (e) {
+      throw EX2(e)
+    }
+  }
+
+  async commit(arg) {
+    /*
+    const arg = {
+      singl: [], // singletons à mettre à jour
+      colls: [], // collections à mettre à jour
+      idac: [], // avatars à purger
+      idgc: [], // groupes à purger
+      idgcmb: [], // groupes membres à purger
+      idgcno: [] // groupes notes à purger
+    }
+    */
+    try {
+      await db.transaction('rw', ['singletons', 'collections'], async () => {  
+        for (const x of arg.singl) {
+          if (x.data) await this.db.singletons.put({ n: x.n, data: x.data })
+          else await this.db.singletons.where({ n: x.n }).delete()
+        }
+
+        for (const x of arg.colls) {
+          if (x.data) await this.db.collections.put( { id: x.id, n: x.n, ids: x.ids, data: x.data })
+          else await this.db.singletons.where({ id: x.id, n: x.n, ids: x.ids }).delete()
+        }
+  
+        for (const idk of arg.idac) 
+          await this.db.collections.where({id: idk}).delete()
+        for (const idk of arg.idgc)
+          await this.db.collections.where({id: idk}).delete()
+        for (const idk of arg.idgcmb) {
+          await this.db.collections.where({id: idk, n: IDB.cnoms.membres}).delete()
+          await this.db.collections.where({id: idk, n: IDB.cnoms.chatgrs}).delete()
+        }
+        for (const idk of idgcno)
+          await this.db.collections.where({id: idk, n: IDB.cnoms.notes}).delete()
+      })
+    } catch (e) {
+      throw this.EX2(e)
+    }
+  }
+
+  /** Note Locale - TL **********************************************************************/
+  async NLfromIDB () {
+    const session = stores.session
+    const ppSt = stores.pp
+    try {
+      await this.db.loctxt.each(async (rec) => {
+        const nl = new NoteLocale()
+        const n = await nl.fromIdb(await decrypter(session.clek, rec.data))
+        ppSt.setNote(n)
+      })
+    } catch (e) {
+      throw IDB.EX2(e)
+    }
+  }
+
+  async NLset (txt, id) {
+    const session = stores.session
+    const ppSt = stores.pp
+    try {
+      const n = new NoteLocale().nouveau(txt)
+      if (id) n.id = id
       ppSt.setNote(n)
-    })
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function NLset (txt, id) {
-  const session = stores.session
-  const ppSt = stores.pp
-  try {
-    const n = new NoteLocale().nouveau(txt)
-    if (id) n.id = id
-    ppSt.setNote(n)
-    if (session.accesIdb) {
-      const buf = await crypter(session.clek, await n.toIdb())
-      const cle = u8ToB64(await crypter(session.clek, '' + n.id, 1), true)
-      await db.loctxt.put({ id: cle, data: buf })
+      if (session.accesIdb) {
+        const buf = await crypter(session.clek, await n.toIdb())
+        const cle = u8ToB64(await crypter(session.clek, '' + n.id, 1), true)
+        await this.db.loctxt.put({ id: cle, data: buf })
+      }
+    } catch (e) {
+      throw IDB.EX2(e)
     }
-  } catch (e) {
-    throw EX2(e)
   }
-}
 
-export async function NLdel (id) {
-  const session = stores.session
-  const ppSt = stores.pp
-  try {
-    ppSt.delNote(id)
-    if (session.accesIdb) {
-      const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
-      await db.loctxt.where({ id: cle }).delete()
-    }
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-/** Fichier Local ********************************************
-locdata: contenu d'un fichier local
-  - id: id du fichier local
-  - data: contenu gzippé ou non crypté par la clé K
-*/
-
-export async function FLfromIDB () {
-  const session = stores.session
-  const ppSt = stores.pp
-  try {
-    await db.locfic.each(async (idb) => {
-      const fl = new FichierLocal().fromIdb(await decrypter(session.clek, idb.data))
-      ppSt.setFichier(fl)
-    })
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function FLset (nom, info, type, u8, id) {
-  const session = stores.session
-  const ppSt = stores.pp
-  try {
-    const fl = new FichierLocal().nouveau(nom, info, type, u8)
-    if (id) fl.id = id
-    ppSt.setFichier(fl)
-    if (session.accesIdb) {
-      const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
-      const data = await crypter(session.clek, fl.toIdb)
-      const buf = await crypter(session.clek, fl.gz ? await gzipT(u8) : u8)
-      await db.transaction('rw', ['locfic', 'locdata'], async () => {
-        await db.locfic.put({ id: cle, data: data })
-        await db.locdata.put({ id: cle, data: buf })
-      })
-    } else {
-      fl.u8 = u8
-    }
-    return fl
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-/* get du CONTENU du fichier */
-export async function FLget (fl) { // get du CONTENU
-  try {
+  async NLdel (id) {
     const session = stores.session
-    const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
-    const idb = await db.locdata.get(cle)
-    if (idb) {
-      const buf = await decrypter(session.clek, idb.data)
-      return fl.gz ? await ungzipB(buf) : buf
+    const ppSt = stores.pp
+    try {
+      ppSt.delNote(id)
+      if (session.accesIdb) {
+        const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
+        await this.db.loctxt.where({ id: cle }).delete()
+      }
+    } catch (e) {
+      throw IDB.EX2(e)
     }
-    return null
-  } catch (e) {
-    throw EX2(e)
   }
-}
 
-export async function FLdel (id) {
-  const session = stores.session
-  const ppSt = stores.pp
-  try {
-    if (session.accesIdb) {
-      const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
-      await db.transaction('rw', ['locfic', 'locdata'], async () => {
-        await db.locfic.where({ id: cle }).delete()
-        await db.locdata.where({ id: cle }).delete()
+  /** Fichier Local ********************************************
+  locdata: contenu d'un fichier local
+    - id: id du fichier local
+    - data: contenu gzippé ou non crypté par la clé K
+  */
+
+  async FLfromIDB () {
+    const session = stores.session
+    const ppSt = stores.pp
+    try {
+      await this.db.locfic.each(async (rec) => {
+        const fl = new FichierLocal().fromIdb(await decrypter(session.clek, rec.data))
+        ppSt.setFichier(fl)
       })
+    } catch (e) {
+      throw IDB.EX2(e)
     }
-    ppSt.delFichier(id)
-  } catch (e) {
-    throw EX2(e)
   }
-}
 
-/**********************************************************************
-Lecture du compte : crypté par le PBKFD de la phrase secrète.
-Retourne { id, k } si la phrase secrète de la session cryptait bien l'item
-- id: id du compte
-- k: clé K 
-Retourne false si la phrase secrète de la session n'est pas celle employée pour crypter l'item
-*/
-
-export async function getCompte () {
-  const session = stores.session
-  try {
-    const idb = await db.compte.get('1')
-    return decode(await decrypter(session.phrase.pcb, idb.data))
-  } catch (e) {
-    return false
-  }
-}
-
-export async function getAvatarPrimaire () {
-  const session = stores.session
-  try {
-    const idk = u8ToB64(await crypter(session.clek, '' + session.compteId, 1), true)
-    const idb = await db.avatars.get(idk)
-    return decode(await decrypter(session.clek, idb.data))
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getCompta () {
-  const session = stores.session
-  try {
-    const idk = u8ToB64(await crypter(session.clek, '' + session.compteId, 1), true)
-    const idb = await db.comptas.get(idk)
-    return decode(await decrypter(session.clek, idb.data))
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getTribu (idt) {
-  const session = stores.session
-  try {
-    const idk = u8ToB64(await crypter(session.clek, '' + idt, 1), true)
-    const idb = await db.tribus.get(idk)
-    return decode(await decrypter(session.clek, idb.data))
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-/** Lecture d'une collection complète : 
-Retourne l'array des rows reçus du serveur : { _nom, id, ids, v, dlv, _data_} 
-*/
-export async function getColl (nom) {
-  const session = stores.session
-  try {
-    const r = []
-    await db[nom].each(idb => { 
-      r.push(idb.data)
-    })
-    const x = []
-    for(const data of r) {
-      const row = decode(await decrypter(session.clek, data))
-      x.push(row)
+  async FLset (nom, info, type, u8, id) {
+    const session = stores.session
+    const ppSt = stores.pp
+    try {
+      const fl = new FichierLocal().nouveau(nom, info, type, u8)
+      if (id) fl.id = id
+      ppSt.setFichier(fl)
+      if (session.accesIdb) {
+        const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
+        const data = await crypter(session.clek, fl.toIdb)
+        const buf = await crypter(session.clek, fl.gz ? await gzipT(u8) : u8)
+        await this.db.transaction('rw', ['locfic', 'locdata'], async () => {
+          await this.db.locfic.put({ id: cle, data: data })
+          await this.db.locdata.put({ id: cle, data: buf })
+        })
+      } else {
+        fl.u8 = u8
+      }
+      return fl
+    } catch (e) {
+      throw IDB.EX2(e)
     }
-    return x
-  } catch (e) {
-    throw EX2(e)
+  }
+
+  /* get du CONTENU du fichier */
+  async FLget (fl) { // get du CONTENU
+    try {
+      const session = stores.session
+      const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
+      const rec = await db.locdata.get(cle)
+      if (rec) {
+        const buf = await decrypter(session.clek, rec.data)
+        return fl.gz ? await ungzipB(buf) : buf
+      }
+      return null
+    } catch (e) {
+      throw IDB.EX2(e)
+    }
+  }
+
+  async FLdel (id) {
+    const session = stores.session
+    const ppSt = stores.pp
+    try {
+      if (session.accesIdb) {
+        const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
+        await this.db.transaction('rw', ['locfic', 'locdata'], async () => {
+          await this.db.locfic.where({ id: cle }).delete()
+          await this.db.locdata.where({ id: cle }).delete()
+        })
+      }
+      ppSt.delFichier(id)
+    } catch (e) {
+      throw EX2(e)
+    }
+  }
+
+  /* Fin de chargement d'un fichier : maj conjointe de fetat (pour dhc) et insertion de fdata */
+  async setFa (fetat, buf) { // buf : contenu du fichier non crypté
+    try {
+      const session = stores.session
+      const row1 = {}
+      row1.id = u8ToB64(await crypter(session.clek, '' + fetat.id, 1), true)
+      row1.data = await crypter(session.clek, fetat.toIdb)
+      const row2 = { id: row1.id, data: buf }
+      await this.db.transaction('rw', ['fetat', 'fdata'], async () => {
+        await db.fetat.put(row1)
+        await db.fdata.put(row2)
+      })
+      if (stores.config.DEBUG) {
+        console.log('IDB fetat to PUT', fetat.id, fetat.dhc)
+        console.log('IDB fdata to PUT', fetat.id)
+      }
+    } catch (e) {
+      throw EX2(e)
+    }
+  }
+
+  async getFetats (map) {
+    try {
+      await this.db.fetat.each(async (rec) => {
+        const x = new Fetat().fromIdb(await decrypter(stores.session.clek, rec.data))
+        map[x.id] = x
+      })
+    } catch (e) {
+      throw IDB.EX2(e)
+    }
+  }
+  
+  async getFichierIDB (idf) {
+    try {
+      const id = u8ToB64(await crypter(stores.session.clek, '' + idf, 1), true)
+      const rec = await this.db.fdata.where({ id: id }).first()
+      return !rec ? null : rec.data
+    } catch (e) {
+      throw EX2(e)
+    }
+  }
+  
+  async getAvNotes (map) {
+    try {
+      await this.db.avnote.each(async (rec) => {
+        const x = new AvNote().fromIdb(await decrypter(stores.session.clek, rec.data))
+        map[x.pk] = x
+      })
+    } catch (e) {
+      throw IDB.EX2(e)
+    }
+  }
+  
+  /* Commit des MAJ de fetat et avnote */
+  async commitFic (lstAvNotes, lstFetats) { // lst : array / set d'idfs
+    const session = stores.session
+    const debug = stores.config.DEBUG
+    try {
+      const x = []
+      const y = []
+      for (const obj of lstAvNotes) {
+        const row = {}
+        row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
+        row.ids = u8ToB64(await crypter(session.clek, '' + obj.ids, 1), true)
+        row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
+        x.push(row)
+        if (debug) console.log('IDB avnote to ', obj.suppr ? 'DEL' : 'PUT', obj.pk)
+      }
+  
+      for (const obj of lstFetats) {
+        const row = {}
+        row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
+        row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
+        y.push(row)
+        if (debug) {
+          console.log('IDB fetat to ', obj.suppr ? 'DEL' : 'PUT', obj.id, obj.dhc)
+          if (obj.suppr) console.log('IDB fdata to DEL', obj.id)
+        }
+      }
+  
+      await this.db.transaction('rw', ['avnotes', 'fetat'], async () => {
+        for (const row of x) {
+          if (row.data) {
+            await this.db.avnote.put(row)
+          } else {
+            await this.db.avnote.where({ id: row.id, ids: row.ids }).delete()
+          }
+        }
+        for (const row of y) {
+          if (row.data) {
+            await this.db.fetat.put(row)
+          } else {
+            await this.db.fetat.where({ id: row.id }).delete()
+            await this.db.fdata.where({ id: row.id }).delete()
+          }
+        }
+      })
+    } catch (e) {
+      throw EX2(e)
+    }
   }
 }
+export const idb = new IDB()
+
 
 /** OpBufC : buffer des actions de mise à jour de IDB ***************************/
 export class IDBbuffer {
   constructor () {
-    this.synchro = stores.session.synchro
-    this.lmaj = [] // rows à modifier / insérer en IDB
-    this.lsuppr = [] // row { _nom, id, ids } à supprimer de IDB
+    this.w = stores.session.synchro
+    this.lmaj = [] // rows { _nom, id, ids, _data } à modifier / insérer en IDB / supprimer si _data est null
     this.lav = new Set() // set des ids des avatars à purger (avec notes, sponsorings, chats, tickets)
     this.lgr = new Set() // set des ids des groupes à purger (avec notes, membres)
     this.lgrmb = new Set() // set des ids des groupes dont les membres sont à purger
@@ -365,129 +451,57 @@ export class IDBbuffer {
     this.mapSec = {} // map des notes (cle: id/ids, valeur: note) pour gestion des fichiers locaux
   }
 
-  putIDB (row) { if (this.synchro) this.lmaj.push(row); return row }
-  supprIDB (row) { if (this.synchro) this.lsuppr.push(row); return row } // obj : { _nom, id, ids }
-  purgeAvatarIDB (id) { if (this.synchro) this.lav.add(id) }
-  purgeGroupeIDB (id) { if (this.synchro) this.lgr.add(id) }
-  purgeGroupeMbIDB (id) { if (this.synchro) this.lgrmb.add(id) }
-  purgeGroupeNoIDB (id) { if (this.synchro) this.lgrno.add(id) }
-  async commitIDB (setCompteClek, setVersions) { if (this.synchro) await commitRows(this, setCompteClek, setVersions) }
-}
+  putIDB (row) { if (this.w) this.lmaj.push(row); return row }
+  purgeAvatarIDB (id) { if (this.w) this.lav.add(id) }
+  purgeGroupeIDB (id) { if (this.w) this.lgr.add(id) }
+  purgeGroupeMbIDB (id) { if (this.w) this.lgrmb.add(id) }
+  purgeGroupeNoIDB (id) { if (this.w) this.lgrno.add(id) }
 
-/** Mises à jour / purges globales de IDB *****************************************/
-export async function commitRows (opBuf, setCompteClek, setVersions) {
-  try {
-    const session = stores.session
-    const clek = session.clek
+  async commit () { 
+    if (!this.w) return
 
-    const x = setCompteClek ? { id: session.compteId, k: session.clek } : null
-    const dataCompte = x ? await crypter(session.phrase.pcb, new Uint8Array(encode(x))) : null
-
-    const dataVersions = setVersions && Versions.toSave ? await crypter(session.clek, Versions.toIdb()) : null
-
-    // Objets à mettre à jour
-    const lidb = []
-    if (opBuf.lmaj && opBuf.lmaj.length) {
-      for (const row of opBuf.lmaj) {
-        if (row._nom === 'comptas') {
-          console.log(row.id)
-        }
-        const idk = u8ToB64(await crypter(clek, '' + row.id, 1), true)
-        const idsk = row.ids ? u8ToB64(await crypter(clek, '' + row.ids, 1), true) : null
-        const rowk = await crypter(clek, new Uint8Array(encode(row)) , 1)
-        lidb.push({ table: row._nom, idk, idsk, rowk })
-      }
+    const clek = stores.session.clek
+    const arg = {
+      singl: [], // singletons à mettre à jour
+      colls: [], // collections à mettre à jour
+      idac: [], // avatars à purger
+      idgc: [], // groupes à purger
+      idgcmb: [], // groupes membres à purger
+      idgcno: [] // groupes notes à purger
     }
 
-    // Objets à supprimer individuellement - rows : { _nom, id, ids }
-    const lidbs = []
-    if (opBuf.lsuppr && opBuf.lsuppr.length) {
-      for (const row of opBuf.lsuppr) {
-        const idk = u8ToB64(await crypter(clek, '' + row.id, 1), true)
-        const idsk = row.ids ? u8ToB64(await crypter(clek, '' + row.ids, 1), true) : null
-        lidbs.push({ table: row._nom, idk, idsk })
-      }
-    }
-
-    // set des ids des avatars à purger
-    const idac = []
-    if (opBuf.lav && opBuf.lav.size) {
-      for (const id of opBuf.lav) idac.push(u8ToB64(await crypter(clek, '' + id, 1), true))
-    }
-
-    // set des ids des groupes à purger
-    const idgc = []
-    if (opBuf.lgr && opBuf.lgr.size) {
-      for (const id of opBuf.lgr) idgc.push(u8ToB64(await crypter(clek, '' + id, 1), true))
-    }
-
-    // set des ids des groupes dont les membres sont à purger
-    const idgcmb = []
-    if (opBuf.lgr && opBuf.lgrmb.size) {
-      for (const id of opBuf.lgr) idgcmb.push(u8ToB64(await crypter(clek, '' + id, 1), true))
-    }
-
-    // set des ids des groupes dont les notes sont à purger
-    const idgcno = []
-    if (opBuf.lgr && opBuf.lgrno.size) {
-      for (const id of opBuf.lgr) idgcno.push(u8ToB64(await crypter(clek, '' + id, 1), true))
-    }
-
-    await db.transaction('rw', TABLES, async () => {
-      if (dataCompte) {
-        await db.compte.put({ id: '1', data: dataCompte })
-      }
-      if (dataVersions) {
-        await db.avgrversions.put({ id: '1', data: dataVersions })
-      }
-
-      for (const x of lidb) { // tous objets
-        if (x.idsk) {
-          await db[x.table].put( { id: x.idk, ids: x.idsk, data: x.rowk })
-        } else {
-          await db[x.table].put( { id: x.idk, data: x.rowk })
-        }
-      }
-
-      for (const x of lidbs) { // tous objets à supprimer
-        if (x.idsk) {
-          await db[x.table].where({ id: x.idk, ids: x.idsk }).delete()
-        } else {
-          await db[x.table].where({ id: x.idk }).delete()
-        }
-      }
-
-      for (const idk of idac) {
-        const id = { id: idk }
-        await db.avatars.where(id).delete()
-        await db.sponsorings.where(id).delete()
-        await db.chats.where(id).delete()
-        await db.tickets.where(id).delete()
-        await db.notes.where(id).delete()
-      }
-
-      for (const idk of idgc) {
-        const id = { id: idk }
-        await db.groupes.where(id).delete()
-        await db.membres.where(id).delete()
-        await db.chatgrs.where(id).delete()
-        await db.notes.where(id).delete()
-      }
-
-      for (const idk of idgcmb) {
-        const id = { id: idk }
-        await db.membres.where(id).delete()
-        await db.chatgrs.where(id).delete()
-      }
-
-      for (const idk of idgcno) {
-        const id = { id: idk }
-        await db.notes.where(id).delete()
-      }
-
+    arg.singl.push({ 
+      n: IDB.snoms.datasync, 
+      data: await crypter(clek, new Uint8Array(syncQueue.dataSync.serial))
     })
-  } catch (e) {
-    throw EX2(e)
+
+    for(const row of this.lmaj) {
+      const n = IDB.snoms[row._nom]
+      if (n) { // c'est un singleton
+        arg.singl.push({ 
+          n, 
+          data: row._data ? await crypter(clek, new Uint8Array(encode(row))) : null
+        })
+      } else {
+        arg.colls.push({ 
+          n: IDB.cnoms[row.nom],
+          id: u8ToB64(await crypter(clek, '' + row.id, 1), true),
+          ids: u8ToB64(await crypter(clek, '' + row.ids, 1), true),
+          data: row._data ? await crypter(clek, new Uint8Array(encode(row))) : null
+        })
+      }
+    }
+
+    if (this.lav.size)
+      for (const id of this.lav) arg.idac.push(u8ToB64(await crypter(clek, '' + id, 1), true))   
+    if (this.lgr.size)
+      for (const id of this.lgr) arg.idgc.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+    if (this.lgrmb.size)
+      for (const id of this.lgrmb) arg.idgcmb.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+    if (this.lgrno.size)
+      for (const id of this.lgrno) arg.idgcno.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+
+    await idb.commit(arg)
   }
 }
 
@@ -518,109 +532,6 @@ La table `fetat` est,
 - lue à l'ouverture d'une session en modes _synchronisé_ et _avion_ (lecture seule),
 - l'état _commité_ est disponible en mémoire durant toute la session.
 */
-
-
-async function getFetats (map) {
-  try {
-    await db.fetat.each(async (idb) => {
-      const x = new Fetat().fromIdb(await decrypter(stores.session.clek, idb.data))
-      map[x.id] = x
-    })
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-export async function getFichierIDB (idf) {
-  try {
-    const id = u8ToB64(await crypter(stores.session.clek, '' + idf, 1), true)
-    const idb = await db.fdata.where({ id: id }).first()
-    return !idb ? null : idb.data
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-async function getAvNotes (map) {
-  try {
-    await db.avnote.each(async (idb) => {
-      const x = new AvNote().fromIdb(await decrypter(stores.session.clek, idb.data))
-      map[x.pk] = x
-    })
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-/* Commit des MAJ de fetat et avnote */
-async function commitFic (lstAvNotes, lstFetats) { // lst : array / set d'idfs
-  const session = stores.session
-  const debug = stores.config.DEBUG
-  try {
-    const x = []
-    const y = []
-    for (const obj of lstAvNotes) {
-      const row = {}
-      row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
-      row.ids = u8ToB64(await crypter(session.clek, '' + obj.ids, 1), true)
-      row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
-      x.push(row)
-      if (debug) console.log('IDB avnote to ', obj.suppr ? 'DEL' : 'PUT', obj.pk)
-    }
-
-    for (const obj of lstFetats) {
-      const row = {}
-      row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
-      row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
-      y.push(row)
-      if (debug) {
-        console.log('IDB fetat to ', obj.suppr ? 'DEL' : 'PUT', obj.id, obj.dhc)
-        if (obj.suppr) console.log('IDB fdata to DEL', obj.id)
-      }
-    }
-
-    await db.transaction('rw', TABLES, async () => {
-      for (const row of x) {
-        if (row.data) {
-          await db.avnote.put(row)
-        } else {
-          await db.avnote.where({ id: row.id, ids: row.ids }).delete()
-        }
-      }
-      for (const row of y) {
-        if (row.data) {
-          await db.fetat.put(row)
-        } else {
-          await db.fetat.where({ id: row.id }).delete()
-          await db.fdata.where({ id: row.id }).delete()
-        }
-      }
-    })
-  } catch (e) {
-    throw EX2(e)
-  }
-}
-
-/* Fin de chargement d'un fichier : maj conjointe de fetat (pour dhc) et insertion de fdata */
-async function setFa (fetat, buf) { // buf : contenu du fichier non crypté
-  try {
-    const session = stores.session
-    const row1 = {}
-    row1.id = u8ToB64(await crypter(session.clek, '' + fetat.id, 1), true)
-    row1.data = await crypter(session.clek, fetat.toIdb)
-    const row2 = { id: row1.id, data: buf }
-    await db.transaction('rw', TABLES, async () => {
-      await db.fetat.put(row1)
-      await db.fdata.put(row2)
-    })
-    if (stores.config.DEBUG) {
-      console.log('IDB fetat to PUT', fetat.id, fetat.dhc)
-      console.log('IDB fdata to PUT', fetat.id)
-    }
-  } catch (e) {
-    throw EX2(e)
-  }
-}
 
 /*********************************************************************
 Gestion des fichiers hors-ligne : fin de connexion et synchronisation

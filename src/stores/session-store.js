@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
-import { encode } from '@msgpack/msgpack'
+import { encode, decode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
-import { pbkfd } from '../app/webcrypto.mjs'
+import { pbkfd, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { NomGenerique } from '../app/modele.mjs'
@@ -16,8 +16,8 @@ export const useSessionStore = defineStore('session', {
 
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
-    sessionId: '', // identifiant de session (random(6) -> base64)
-    estSponsor: false,
+    sessionId: '', // identifiant de session si WS (random(6) -> base64)
+    estSelegue: false,
     estAutonome: false,
     compteKO: false,
 
@@ -26,6 +26,15 @@ export const useSessionStore = defineStore('session', {
     */
     ns: 0, 
     org: '', // code de l'organisation
+    compteId: 0, // id du compte / son avatar principal
+    clek: null, // clek du compte
+    partitionId: 0, // id de la partition actuelle du compte
+
+    avatarId: 0, // avatar "courant"
+    groupeId: 0, // groupe "courant"
+    membreId: 0, // membre "courant" (son im/ids dans son groupe)
+    partitionCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
+    peopleId: 0, // people "courant"
     
     naComptable: null,
     dh: 0,
@@ -64,17 +73,6 @@ export const useSessionStore = defineStore('session', {
 
     // Objet de synchro pour Firestore
     fsSync: null,
-
-    clek: null,
-
-    compteId: 0, // id du compte / son avatar principal
-    tribuId: 0, // id de la tribu actuelle du compte
-    avatarId: 0, // avatar "courant"
-    groupeId: 0, // groupe "courant"
-    membreId: 0, // membre "courant" (son im/ids dans son groupe)
-    tribuId: 0, // id de la tribu actuelle du compte
-    tribuCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
-    peopleId: 0, // people "courant"
 
     /* Type des notifications:
     - 0 : de l'espace
@@ -220,6 +218,39 @@ export const useSessionStore = defineStore('session', {
       if (n === 1) this.swev1 = true
       else if (n === 2) this.swev2 = true
     },
+
+    init (phrase) {
+      this.sessionId = this.config.hasWS ? intToB64(rnd6()) : ''
+      if (phrase) {
+        this.phrase = phrase
+        this.lsk = '$asocial$-' + phrase.hps1
+      }
+      const token = { }
+      if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
+      else {
+        if (!this.config.hasWS) token.sessionId = this.sessionId
+        token.hXR = phrase ? phrase.hps1 : null
+        token.hXC = phrase ? phrase.hpsc : null
+      }
+      token.org = this.org
+      
+      const x = new Uint8Array(encode(token))
+      this.authToken = u8ToB64(new Uint8Array(x), true)
+      this.nombase = this.lsk ? localStorage.getItem(this.lsk) : ''
+      this.auj = AMJ.amjUtc()
+      this.dhConnx = Date.now()
+      this.clek = null
+      this.status = 1
+    },
+
+    async setCleK (cleKXR) {
+      this.clek = await decrypter(this.phrase.pcb, cleKXR)
+    },
+
+    async getCryptCleK () {
+      return await crypter(this.phrase.pcb, this.clek)
+    },
+
     setStatus (s) {
       this.status = s
     },
@@ -250,28 +281,7 @@ export const useSessionStore = defineStore('session', {
       this.consoatt.vm = 0
     },
     
-    init (phrase) {
-      this.sessionId = intToB64(rnd6())
-      if (phrase) {
-        this.phrase = phrase
-        this.lsk = '$asocial$-' + phrase.hps1
-      }
-      const token = { }
-      if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
-      else {
-        if (!this.config.hasWS) token.sessionId = this.sessionId
-        token.hps1 = phrase ? phrase.hps1 : null
-        token.pcb = phrase ? phrase.pcb : null
-      }
-      token.org = this.org
-      
-      const x = new Uint8Array(encode(token))
-      this.authToken = u8ToB64(new Uint8Array(x), true)
-      this.nombase = this.lsk ? localStorage.getItem(this.lsk) : ''
-      this.auj = AMJ.amjUtc()
-      this.dhConnx = Date.now()
-      this.status = 1
-    },
+
 
     async setNombase () { // Après avoir obtenu cle K du serveur
       const x = await pbkfd(this.clek)

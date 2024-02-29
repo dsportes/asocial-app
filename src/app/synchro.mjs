@@ -132,7 +132,7 @@ class Job {
     syncQueue.finAv(rds, v)
   }
 
-  async doAvgroupeatar(rds, v) {
+  async doGroupe(rds, v) {
     // TODO
     syncQueue.finGr(rds, v)
   }

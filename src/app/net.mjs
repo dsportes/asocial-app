@@ -90,6 +90,10 @@ export async function post (op, fonction, args) {
   try {
     const resp = decode(buf)
     if (resp && resp.notifs) session.setNotifs(resp.notifs)
+    if (!session.clek && resp.compte) {
+      const c = decode(resp.compte)
+      await session.setCleK(c.cleKXR)
+    }
     if (fonction !== 'Sync' && (resp.compte || resp.compta || resp.espace || resp.partition))
       syncQueue.postResp(resp)
     return resp
