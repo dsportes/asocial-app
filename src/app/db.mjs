@@ -54,8 +54,8 @@ export async function vuIDB (nb) {
 
 /* Classe IDB *******************************************************************/
 class IDB {
-  static snoms = { clek: 1, datasync: 2, comptes: 3, comptas: 4, espaces: 5, partitions: 6 }
-  static lnoms = [ '', 'clek', 'datasync', 'comptes', 'comptas', 'espaces', 'partitions' ]
+  static snoms = { boot: 1, datasync: 2, comptes: 3, comptas: 4, espaces: 5, partitions: 6 }
+  static lnoms = [ '', 'boot', 'datasync', 'comptes', 'comptas', 'espaces', 'partitions' ]
   static cnoms = { avatars: 1, groupes: 2, notes: 3, chats: 4, sponsorings: 5, tickets: 6, membres: 7, chatgrs: 8 }
 
   static EX1 (e) { return isAppExc(e) ? e : new AppExc(E_DB, 1, [e.message])}
@@ -94,24 +94,30 @@ class IDB {
     this.db = null
   }
 
-  /** Lecture et enregistrement en session de la cleK *******************************/
-  async getCleK () {
+  /** Lecture de { id, clek } (crypté par le PBKFD de la phrase secrète) 
+  et enregistrement en session  */
+  async getBoot () {
     const session = stores.session
     try {
-      const rec = await this.db.singletons.get(IDB.snoms.clek)
-      if (rec) { session.setCleK(rec.data); return true } else return false
+      const rec = await this.db.singletons.get(IDB.snoms.boot)
+      if (rec) {
+        const x = decode (await decrypter(session.phrase.pcb, rec))
+        session.setIdCleK(x.id, x.clek)
+        return true 
+      } else return false
     } catch (e) {
       return false
     }
   }
 
-  /* Enregistre la cleK cryptée par le PBKFD de la phrase secrète */
-  async storeCleK () {
+  /* Enregistre { id, clek } crypté par le PBKFD de la phrase secrète */
+  async storeBoot () {
     const session = stores.session
-    const data = session.getCryptCleK()
+    const x = encode({ id: session.compteId, clek: session.clek })
+    const data = await crypter(session.phrase.pcb, x)
     try {
       await this.db.transaction('rw', ['singletons'], async () => {
-        await this.db.singletons.put({ n: IDB.snoms.clek, data })
+        await this.db.singletons.put({ n: IDB.snoms.boot, data })
       })
     } catch (e) {
       throw IDB.EX2(e)
@@ -376,11 +382,12 @@ class IDB {
     }
   }
   
-  async getAvNotes (map) {
+  async loadAvNotes () {
     try {
+      const avnSt = stores.avnote
       await this.db.avnote.each(async (rec) => {
-        const x = new AvNote().fromIdb(await decrypter(stores.session.clek, rec.data))
-        map[x.pk] = x
+        const avn = new AvNote().fromIdb(await decrypter(stores.session.clek, rec.data))
+        avnSt.setAvNote(avn)
       })
     } catch (e) {
       throw IDB.EX2(e)

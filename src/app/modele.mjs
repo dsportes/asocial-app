@@ -1205,9 +1205,11 @@ export class Compta extends GenDoc {
     r.vcv = 0
     r.vsh = 0
 
+    /*
     const k = random(32)
     r.kx = await crypter(phrase.pcb, k)
     session.clek = k
+    */
 
     r.sp = estSponsor ? 1 : 0
     r.hps1 = (ns * d14) + phrase.hps1

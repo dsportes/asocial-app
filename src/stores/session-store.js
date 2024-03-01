@@ -207,24 +207,24 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
-    setNotifs (notifs) {
-      // TODO
-    },
+    // ServiceWorker : apriori registration ne sert à rien
     setRegistration(reg) {
       this.registration = reg
     },
+    // ServiceWorker : événements de détection de changement de version
     setSwev (n) {
       console.log('SW event reçu : ' + n)
       if (n === 1) this.swev1 = true
       else if (n === 2) this.swev2 = true
     },
 
-    init (phrase) {
+    /* Initialise une session depuis une phrase secrète
+    session.mode et org ont été enregistrés par PageLogin (connexion ou création compte)
+    */
+    async initSession(phrase) {
       this.sessionId = this.config.hasWS ? intToB64(rnd6()) : ''
-      if (phrase) {
-        this.phrase = phrase
-        this.lsk = '$asocial$-' + phrase.hps1
-      }
+      this.phrase = phrase
+
       const token = { }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
@@ -232,23 +232,44 @@ export const useSessionStore = defineStore('session', {
         token.hXR = phrase ? phrase.hps1 : null
         token.hXC = phrase ? phrase.hpsc : null
       }
-      token.org = this.org
+      token.org = this.org      
+      this.authToken = u8ToB64(new Uint8Array(encode(token)), true)
+
+      this.lsk = '$asocial$-' + phrase.hps1
+      this.nombase = localStorage.getItem(this.lsk) || ''
       
-      const x = new Uint8Array(encode(token))
-      this.authToken = u8ToB64(new Uint8Array(x), true)
-      this.nombase = this.lsk ? localStorage.getItem(this.lsk) : ''
       this.auj = AMJ.amjUtc()
       this.dhConnx = Date.now()
+      this.compteId = 0
       this.clek = null
       this.status = 1
+
+      if (session.accesNet) {
+        if (this.sessionId) {
+          await openWS()
+          session.fsSync = null
+        } else {
+          session.fsSync = new FsSyncSession()
+        }
+      }
+
+      resetRepertoire() // TODO à rediscuter
+      stores.reset(true) // reset SAUF session
     },
 
-    async setCleK (cleKXR) {
-      this.clek = await decrypter(this.phrase.pcb, cleKXR)
+    /* id / clek connu depuis: (voir synchro.mjs)
+    - connexionAvion (fn): lecture du record "boot" de IDB
+    - ConnexionSynchroIncognito (op): retour du row "comptes" sur le premier Sync
+    - AcceptationSponsoring (op)
+    */
+    setIdCleK (id, clek) {
+      this.compteId = id
+      this.ns = ID.ns(id)
+      this.clek = clek
     },
 
-    async getCryptCleK () {
-      return await crypter(this.phrase.pcb, this.clek)
+    setNotifs (notifs) {
+      // TODO
     },
 
     setStatus (s) {

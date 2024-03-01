@@ -92,7 +92,8 @@ export async function post (op, fonction, args) {
     if (resp && resp.notifs) session.setNotifs(resp.notifs)
     if (!session.clek && resp.compte) {
       const c = decode(resp.compte)
-      await session.setCleK(c.cleKXR)
+      const clek = await decrypter(session.phrase.pcb, c.cleKXR)
+      session.setIdCleK(c.id, clek)
     }
     if (fonction !== 'Sync' && (resp.compte || resp.compta || resp.espace || resp.partition))
       syncQueue.postResp(resp)
