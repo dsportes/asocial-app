@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { encode, decode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
-import { pbkfd, decrypter } from '../app/webcrypto.mjs'
+import { pbkfd, crypter } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { NomGenerique } from '../app/modele.mjs'
@@ -16,20 +16,29 @@ export const useSessionStore = defineStore('session', {
 
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
+
+    ns: 0, // namespace de 10 à 89 : pour "admin" : espace "courant", donc peut être 0
+    org: '', // code de l'organisation
+    compteId: 0, // id du compte
+    clek: null, // clek du compte
+    authToken: '',
+    phrase: null,
+    auj: 0,
+    dhConnx: 0, // dh de début de la session
+    dh: 0, // dh de la dernière opération
+    consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
+
+    lsk: '', // nom de la variable localStorage contenant le nom de la base
+    nombase: '', // nom de la base locale
+    volumeTable: '', // volume des tables de la base locale
+
+    fsSync: null, // Objet de synchro pour Firestore
     sessionId: '', // identifiant de session si WS (random(6) -> base64)
+
     estSelegue: false,
     estAutonome: false,
-    compteKO: false,
 
-    /* namespace de 10 à 59 
-    Pour "admin" : espace "courant", donc peut être 0
-    */
-    ns: 0, 
-    org: '', // code de l'organisation
-    compteId: 0, // id du compte / son avatar principal
-    clek: null, // clek du compte
     partitionId: 0, // id de la partition actuelle du compte
-
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
     membreId: 0, // membre "courant" (son im/ids dans son groupe)
@@ -37,25 +46,6 @@ export const useSessionStore = defineStore('session', {
     peopleId: 0, // people "courant"
     
     naComptable: null,
-    dh: 0,
-    dhConso: 0,
-
-    consocumul: { nl: 0, ne: 0, vm: 0, vd: 0},
-    consoatt: { nl: 0, ne: 0, vm: 0, vd: 0},
-    // nombres de lectures, écritures, volume montant / descendant sur les POST
-
-    /* authToken : base64 de la sérialisation de :
-    - `sessionId`
-    - `shax` : SHA de X, le PBKFD de la phrase complète.
-    - `hps1` : hash du PBKFD de la ligne 1 de la phrase secrète.
-    */
-    authToken: '',
-    phrase: null,
-    auj: 0,
-    dhConnx: 0,
-    lsk: '',
-    nombase: '',
-    volumeTable: '',
 
     espaces: new Map(), // sauf pour admin il n'y en a qu'un
     syntheses: new Map(), // sauf pour admin il n'y en a qu'un
@@ -63,50 +53,16 @@ export const useSessionStore = defineStore('session', {
     opEncours: null,
     opSpinner: 0,
 
-    /* Objet de classe SessionSync traçant l'état de synchronisation d'une session sur IDB
-    - créé par db à la lecture de l'état de synchronisation
-    - reset à la déconnexion par reset du store
-    */
-    sessionSync: null,
-
-    syncEncours: false,
-
-    // Objet de synchro pour Firestore
-    fsSync: null,
-
-    /* Type des notifications:
-    - 0 : de l'espace
-    - 1 : d'une tribu
-    - 2 : d'un compte
-    - 3 : dépassement de quotas
-    - 4 : alerte de solde / consommation
-    */
-    notifs: [null, null, null, null, null, null],
-
-    /*
-    Une notification a les propriétés suivantes:
-    - `nr`: restriction d'accès: (niv)
-      - 0 : pas de restriction (1)
-      - 1 : espace figé (3)
-      - 2 : espace bloqué (5)
-      - 3 : accès en lecture seule (3)
-      - 4 : accès minimal (4)
-      - 5 : actions accroissant le volume interdites (2)
-    - `dh` : date-heure de création.
-    - `texte`: texte de la notification.
-    - `idSource`: id du sponsor ayant créé cette notification pour un type 3.
-    */
-    nivx: [1, 3, 5, 3, 4, 2],
-    /* niveau d'information / restriction: 
-    - 0 : aucune notification
-    - 1 : au moins une notification informative
-    - 2 : accroissement de volume interdit
-    - 3 : accés en lecture seule
-    - 4 : accès minimal
-    - 5 : bloqué
-    */
-    niv: 0,
+    notifs: { G: null, P: null, C: null, Q: null, X: null },
+    niv: 0, // niveau de restriction : 0 1 2
     alire: false, // Il y a des notifications à lire
+
+    /* Exception insurmontable:exc.code ...
+    - 9998 : compte clos
+    - 9999 : application fermée par l'administrateur
+    - autre : exception rencontrée en synchronisation
+    */
+    excKO: null 
 
   }),
 
@@ -134,8 +90,6 @@ export const useSessionStore = defineStore('session', {
   
     accepteA (state) { return state.espace.opt !== 0 },
 
-    notifAdmin (state) { return state.notifs[0] },
-
     pow (state) {
       if (state.estAdmin) return 1
       if (state.estComptable) return 2
@@ -145,8 +99,9 @@ export const useSessionStore = defineStore('session', {
 
     // editable (state) { return state.mode < 3 && state.niv < 2 },
     estSansNotif (state) { return state.niv === 0 },
-    estFige (state) { const n = state.notifAdmin; return n && (n.nr === 1) },
-    estClos (state) { const n = state.notifAdmin; return n && (n.nr === 2) },
+    estFige (state) { const n = state.notifs.G; return n && (n.nr === 1) },
+    estClos (state) { const n = state.notifs.G; return n && (n.nr === 2) },
+
     estLecture (state) {
       if (state.pow <= 2) return false
       const nt = state.notifs[1]; const nc = state.notifs[2]
@@ -218,6 +173,12 @@ export const useSessionStore = defineStore('session', {
       else if (n === 2) this.swev2 = true
     },
 
+    setMode (mode) { this.mode = mode },
+
+    setOrg (org) { this.org = org || '' },
+
+    setNs (ns) { this.ns = ns; NomGenerique.ns = ns },
+
     /* Initialise une session depuis une phrase secrète
     session.mode et org ont été enregistrés par PageLogin (connexion ou création compte)
     */
@@ -258,18 +219,58 @@ export const useSessionStore = defineStore('session', {
     },
 
     /* id / clek connu depuis: (voir synchro.mjs)
-    - connexionAvion (fn): lecture du record "boot" de IDB
-    - ConnexionSynchroIncognito (op): retour du row "comptes" sur le premier Sync
-    - AcceptationSponsoring (op)
+    - ConnexionAvion: lecture du record "boot" de IDB
+    - ConnexionSynchroIncognito: retour du row "comptes" sur le premier Sync
+    - AcceptationSponsoring
     */
-    setIdCleK (id, clek) {
+    async setIdCleK (id, clek) {
       this.compteId = id
-      this.ns = ID.ns(id)
+      this.setNs(ID.ns(id))
+      this.naComptable = NomGenerique.comptable()
       this.clek = clek
+      const x = await crypter(this.clek, '' + id, 1)
+      this.nombase = '$asocial$-' + u8ToB64(x, true)
+      if (session.accesIdb) localStorage.setItem(this.lsk, this.nombase)
     },
 
+    setDh (dh) { if (dh && dh > this.dh) this.dh = dh },
+
+    setDhvu (dhvu) { this.dhvu = dhvu; this.setBlocage() },
+
     setNotifs (notifs) {
-      // TODO
+      if (!notifs) return
+      if (notifs.G) this.notifs.G = notifs.G
+      if (notifs.P) this.notifs.P = notifs.P
+      if (notifs.C) this.notifs.C = notifs.C
+      if (notifs.Q) this.notifs.Q = notifs.Q
+      if (notifs.X) this.notifs.X = notifs.X
+      this.setBlocage()
+    },
+
+    setBlocage () {
+      if (this.estAdmin) return
+      const c = this.aSt.compta
+      const dhvu = c ? (c.dhvu || 0) : 0
+      this.niv = 0
+      this.alire = false
+      this.notifs.forEach(ntf => {
+        if (ntf && ntf.texte) {
+          if (ntf.dh > dhvu) this.alire = true
+          if (ntf.nr > this.niv) this.niv = ntf.nr
+        }
+      })
+    },
+
+    /* Le compte a disparu OU l'administrateur a fermé l'application ***********/
+    setExcKO (exc) { this.excKO = exc; ui.setPage('clos') },
+
+    setConso (c) {
+      if (c) {
+        if (c.nl) this.consocumul.nl += c.nl
+        if (c.ne) this.consocumul.ne += c.ne
+        if (c.vm) this.consocumul.vm += c.vm
+        if (c.vd) this.consocumul.vd += c.vd
+      }
     },
 
     setStatus (s) {
@@ -280,58 +281,6 @@ export const useSessionStore = defineStore('session', {
     },
     setEstAutonome (a) {
       this.estAutonome = a
-    },
-    setNlNe (nl, ne) { 
-      this.consoatt.nl += nl
-      this.consoatt.ne += ne
-      this.consocumul.nl += nl
-      this.consocumul.ne += ne
-    },
-    setVm (vm) { 
-      this.consoatt.vm += vm
-      this.consoatt.vm += vm
-    },
-    setVd (vd) { 
-      this.consoatt.vd += vd
-      this.consoatt.vd += vd
-    },
-    razConsoatt () {
-      this.consoatt.nl = 0
-      this.consoatt.ne = 0
-      this.consoatt.vd = 0
-      this.consoatt.vm = 0
-    },
-    
-
-
-    async setNombase () { // Après avoir obtenu cle K du serveur
-      const x = await pbkfd(this.clek)
-      this.nombase = '$asocial$-' + u8ToB64(x, true)
-      localStorage.setItem(this.lsk, this.nombase)
-    },
-
-    setCompteId (id) {
-      this.setNs(ID.ns(id))
-      this.compteId = id
-      if (!this.estAdmin) this.naComptable = NomGenerique.comptable()
-    },
-
-    setMode (mode) { 
-      this.mode = mode
-    },
-
-    setOrg (org) { 
-      this.org = org
-    },
-
-    resetOrg () { 
-      this.org = ''
-    },
-
-    setNs (ns) { this.ns = ns; NomGenerique.ns = ns },
-
-    setSessionSync (s) {
-      this.sessionSync = s
     },
 
     setFsSync (fsSync) {
@@ -386,20 +335,6 @@ export const useSessionStore = defineStore('session', {
       this.authToken = u8ToB64(new Uint8Array(x), true)
     },
 
-    setDh (dh) {
-      if (dh && dh > this.dh) this.dh = dh
-    },
-
-    setDhConso (dh) {
-      if (dh && dh > this.dhConso) this.dhConso = dh
-      this.setDh(dh)
-    },
-
-    setDhvu (dhvu) {
-      this.dhvu = dhvu
-      this.setBlocage()
-    },
-
     setNotifE (ne) {
       const n = this.notifs[0]
       if (ne) {
@@ -446,26 +381,6 @@ export const useSessionStore = defineStore('session', {
         }
       }
       if (chg) this.setBlocage()
-    },
-
-    setBlocage () {
-      if (this.estAdmin) return
-      const c = this.aSt.compta
-      const dhvu = c ? (c.dhvu || 0) : 0
-      this.niv = 0
-      this.alire = false
-      this.notifs.forEach(ntf => {
-        if (ntf && ntf.texte) {
-          if (ntf.dh > dhvu) this.alire = true
-          // nivx: [1, 3, 5, 3, 4, 2],
-          const niv = !ntf.texte ? 0 : ( !ntf.nr ? 1 : this.nivx[ntf.nr])
-          if (niv > this.niv) this.niv = niv
-        }
-      })
-      if (this.estClos) {
-        Demon.stop()
-        this.status = 0
-      }
     },
 
     async editUrgence () {

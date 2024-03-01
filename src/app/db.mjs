@@ -3,7 +3,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { SessionSync, Versions, NoteLocale, FichierLocal } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
-import { isAppExc, AppExc, E_DB, DataSync } from './api.mjs'
+import { isAppExc, AppExc, E_DB, DataSync, IDBOBS } from './api.mjs'
 import { syncQueue } from './synchro.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
 
@@ -52,6 +52,17 @@ export async function vuIDB (nb) {
   return [v1, v2, map]
 }
 
+// Pour la gestion des bases locales : destruction d'une base sans l'avoir ouverte
+export async function deleteIDB (nb) {
+  try {
+    await Dexie.delete(nb)
+    await sleep(100)
+    console.log('RAZ db')
+  } catch (e) {
+    console.log(e.toString())
+  }
+}
+
 /* Classe IDB *******************************************************************/
 class IDB {
   static snoms = { boot: 1, datasync: 2, comptes: 3, comptas: 4, espaces: 5, partitions: 6 }
@@ -62,18 +73,7 @@ class IDB {
   
   static EX2 (e) { return isAppExc(e) ? e : new AppExc(E_DB, 2, [e.message])}
 
-  static async delete (nb) {
-    try {
-      await Dexie.delete(nb)
-      await sleep(100)
-      console.log('RAZ db')
-    } catch (e) {
-      console.log(e.toString())
-    }
-    idb.db = null
-  }
-
-  static async open() {
+  async open() {
     const nb = stores.session.nombase
     try {
       console.log('Open: [' + nb + ']')
@@ -85,8 +85,6 @@ class IDB {
     }
   }
 
-  constructor () { this.idb = null }
-
   close () {
     if (this.db && this.db.isOpen()) {
       try { this.db.close() } catch (e) {}
@@ -94,20 +92,49 @@ class IDB {
     this.db = null
   }
 
-  /** Lecture de { id, clek } (crypté par le PBKFD de la phrase secrète) 
+  async delete () {
+    try {
+      await Dexie.delete(stores.session.nombase)
+      await sleep(100)
+      console.log('RAZ db')
+    } catch (e) {
+      console.log(e.toString())
+    }
+    idb.db = null
+  }
+
+  constructor () { this.idb = null }
+
+  /** MODE AVION : lecture boot data { id, clek } (crypté par le PBKFD de la phrase secrète) 
   et enregistrement en session  */
   async getBoot () {
     const session = stores.session
     try {
       const rec = await this.db.singletons.get(IDB.snoms.boot)
       if (rec) {
-        const x = decode (await decrypter(session.phrase.pcb, rec))
+        const x = decode (await decrypter(session.phrase.pcb, rec.data))
         session.setIdCleK(x.id, x.clek)
         return true 
       } else return false
     } catch (e) {
       return false
     }
+  }
+
+  /** MODE SYNCHRO : lecture boot dh 
+  Retourne false si la dh était trop ancienne pour que la base locale soit utilisable
+  Dans ce cas a détruit et réouvert une base neuve
+  */
+  async checkAge () {
+    const session = stores.session
+    const rec = await this.db.singletons.get(IDB.snoms.boot)
+    if (rec && rec.dh) {
+      const nbjds = Math.ceil((Date.now() - rec.dh) / 86400000)
+      if (nbjds < IDBOBS) return true
+    } 
+    await IDB.delete(stores.session.nombase)
+    await IDB.open()
+    return false
   }
 
   /* Enregistre { id, clek } crypté par le PBKFD de la phrase secrète */
@@ -117,7 +144,7 @@ class IDB {
     const data = await crypter(session.phrase.pcb, x)
     try {
       await this.db.transaction('rw', ['singletons'], async () => {
-        await this.db.singletons.put({ n: IDB.snoms.boot, data })
+        await this.db.singletons.put({ n: IDB.snoms.boot, dh: Date.now(), data })
       })
     } catch (e) {
       throw IDB.EX2(e)

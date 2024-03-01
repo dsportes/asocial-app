@@ -444,30 +444,34 @@ export class Qui {
 }
 
 /* Notification *******************************************
-De facto un objet notification est immuable: 
-en cas de _mise à jour_ il est remplacé par un autre.
-
-Il est crypté selon son type par: 
-0) la clé du Comptable, 1,2) la clé de la tribu.
-
 Type des notifications:
-- 0 : de l'espace
-- 1 : d'une tribu
-- 2 : d'un compte
-- 3 : dépassement de quotas
-- 4 : alerte de solde / consommation
+- E : de l'espace
+- P : d'une partition (comptes O)
+- C : d'un compte (comptes O)
+- Q : de dépassement de quotas
+- X : d'excès de consommation (dépassement du solde pour un compte "A"). 
 
 Une notification a les propriétés suivantes:
 - `nr`: restriction d'accès: 
-  - 0 : pas de restriction
-  - 1 : espace figé
-  - 2 : espace bloqué
-  - 3 : accès en lecture seule
-  - 4 : accès minimal
-  - 5 : actions accroissant le volume interdites.
+  - 0 : **aucune restriction**. La notification est informative mais peut annoncer une restriction imminente.
+  - 1 : **restriction réduite**
+    - E : espace figé
+    - P : accès en lecture seule
+    - C : accès en lecture seule
+    - Q : actions accroissant le volume interdites
+  - 2 : **restriction forte**
+    - E : espace clos
+    - P : accès minimal
+    - C : accès minimal
+    - X : accès minimal
 - `dh` : date-heure de création.
-- `texte`: texte de la notification.
-- `idSource`: id du sponsor ayant créé cette notification pour un type 3.
+- `texte`: il est crypté par: 
+  - type E: la clé A du Comptable (que tous les comptes de l'espace ont).
+  - types P et C par la clé P de la partition.
+  - types Q et X: pas de texte, juste un code.
+- `idSource`: id du délégué ayant créé cette notification pour un type P ou C quand ce n'est pas le Comptable. !!!Discutable!!!
+
+**Remarque:** une notification `{ dh: ... }` correspond à la suppression de la notification antérieure (ni restriction, ni texte).
 */
 export class Notification {
   // Factory construisant une objet Notification depuis sa sérialisation
@@ -2462,68 +2466,6 @@ export class Note extends GenDoc {
     }
     return idfx
   }  
-}
-
-/**SessionSync : Dernier état de session synchronisé***************************
-Uniquement sur IDB - pas de fromRow - compilé par fromIdb
-- dhdebutp : dh de début de la dernière session sync terminée
-- dhfinp : dh de fin de la dernière session sync terminée
-- dhdebut: dh de début de la session sync en cours
-- dhsync: dh du dernier traitement de synchronisation
-- dhpong: dh du dernier pong reçu
-*/
-
-function max (a) { let m = 0; a.forEach(x => { if (x > m) m = x }); return m }
-
-export class SessionSync {
-  constructor () {
-    this.dhdebutp = 0
-    this.dhfinp = 0
-    this.dhdebut = 0
-    this.dhsync = 0
-    this.dhpong = 0 // pong ou fin de connexion ou fin de sync
-  }
-
-  fromIdb (idb) {
-    const row = decode(idb)
-    this.dhdebut = row.dhdebut
-    this.dhsync = row.dhsync
-    this.dhpong = row.dhpong
-    this.dhdebutp = this.dhdebut
-    this.dhfinp = max([this.dhdebut, this.dhsync, this.dhpong])
-    return this
-  }
-
-  async setConnexion (dh) { // appel quand la session est ouverte (fin de l'opération de connexion)
-    this.dhdebut = dh
-    this.dhpong = dh
-    await this.save()
-  }
-
-  async setDhSync (dh) { // appel à la fin de chaque synchro
-    if (stores.session.status < 2) return
-    this.dhsync = dh
-    this.dhpong = dh
-    await this.save()
-  }
-
-  async setDhPong (dh) { // appel par WebSocket sur réception de pong
-    this.dhpong = dh
-    await this.save()
-  }
-
-  async save () {
-    if (stores.session.synchro) {
-      const x = { 
-        dhdebutp: this.dhdebutp,
-        dhfinp: this.dhfinp,
-        dhdebut: this.dhdebut,
-        dhsync: this.dhsync,
-        dhpong: this.dhpong
-      }
-      await saveSessionSync(new Uint8Array(encode(x)))
-    }
-  }
 }
 
 /*****************************************************************/

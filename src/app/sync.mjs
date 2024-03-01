@@ -316,7 +316,7 @@ export class OnchangeVersion extends OperationWS {
 
       if (this.ret.rowVersions) for (const row of this.ret.rowVersions) {
         if (row.id === this.session.compteId && estZombi(row)) {
-          stores.ui.compteKO = true
+          stores.session.setKO()
           stores.ui.setPage('clos')
           return
         }

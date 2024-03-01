@@ -89,14 +89,18 @@ export async function post (op, fonction, args) {
   // les status HTTP non 2xx sont tombés en exception
   try {
     const resp = decode(buf)
-    if (resp && resp.notifs) session.setNotifs(resp.notifs)
-    if (!session.clek && resp.compte) {
-      const c = decode(resp.compte)
-      const clek = await decrypter(session.phrase.pcb, c.cleKXR)
-      session.setIdCleK(c.id, clek)
+    if (resp) {
+      if (resp.dh) session.setDh(resp.dh)
+      if (resp.notifs) session.setNotifs(resp.notifs)
+      if (resp.conso) session.setConso(resp.conso)
+      if (!session.clek && resp.compte) {
+        const c = decode(resp.compte)
+        const clek = await decrypter(session.phrase.pcb, c.cleKXR)
+        await session.setIdCleK(c.id, clek)
+      }
+      if (fonction === 'Sync' && (resp.compte || resp.compta || resp.espace || resp.partition))
+        syncQueue.postResp(resp)
     }
-    if (fonction !== 'Sync' && (resp.compte || resp.compta || resp.espace || resp.partition))
-      syncQueue.postResp(resp)
     return resp
   } catch (e) { // Résultat mal formé
     throw new AppExc(E_BRO, 2, [op ? op.label: '', e.message])
@@ -119,6 +123,7 @@ function procEx (e, op) {
     let ex
     try {
       const x = JSON.parse(decoder.decode(e.response.data))
+      if (x.code === 9999) stores.session.setKO()
       ex = new AppExc(Math.floor(x.code / 1000) * 1000, x.code % 1000, x.args, x.stack)
     } catch (e2) {
       throw new AppExc(E_BRO, 1, [op ? op.nom : '', e2.message])

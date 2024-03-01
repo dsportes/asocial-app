@@ -40,8 +40,9 @@ export async function pbkfd (secret) {
 }
 
 export function sha256 (buffer) {
+  const b = typeof buffer === 'string' ? enc.encode(buffer) : buffer
   // return ab2b(await window.crypto.subtle.digest('SHA-256', buffer))
-  return ab2b(jssha256.arrayBuffer(buffer))
+  return ab2b(jssha256.arrayBuffer(b))
 }
 
 export function random (nbytes) {

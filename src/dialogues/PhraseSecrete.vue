@@ -199,12 +199,6 @@ export default ({
     }
 
     if (initVal.value) ligne1.value = initVal.value
-    
-    /*
-    watch(() => orgL.value, (ap, av) => {
-      if (ap) session.setOrg(ap); else session.resetOrg()
-    })
-    */
 
     const layout = {
       default: [

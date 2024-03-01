@@ -12,33 +12,32 @@ import { commitRows, IDBbuffer } from './db.mjs'
 
 /* Opération générique ******************************************/
 export class Operation {
-  constructor (nomop) { this.nom = nomop }
+  constructor (nomop, modeSync) { 
+    this.nom = nomop 
+    this.modeSync = modeSync || false
+    if (!modeSync) {
+      stores.session.startOp(this)
+      this.cancelToken = null
+      this.break = false
+      this.nbretry = 0
+    }
+  }
 
   get label () { 
     // console.log('label', 'OP_' + this.nom)
     return $t('OP_' + this.nom) 
   }
 
-  BRK () { }
-
   tr (ret) {
+    /*
     if (!this.dh) this.dh = 0
     if (this.dh < ret.dh) this.dh = ret.dh
     return ret
-  }
-
-}
-
-export class OperationUI extends Operation {
-  constructor (nomop) {
-    super(nomop)
-    stores.session.startOp(this)
-    this.cancelToken = null
-    this.break = false
-    this.nbretry = 0
+    */
   }
 
   async retry () {
+    if (this.modeSync) return
     if (this.nbretry++ > 5) 
       throw new AppExc(E_BRO, 21, [this.label])
     if (this.retry > 1) await sleep((this.retry * 300))
@@ -46,11 +45,13 @@ export class OperationUI extends Operation {
   }
 
   BRK () { 
+    if (this.modeSync) return
     if (this.break) 
       throw new AppExc(E_BRK, 0)
   }
 
   stop () {
+    if (this.modeSync) return
     if (this.cancelToken) {
       this.cancelToken.cancel('break')
       this.cancelToken = null
@@ -59,10 +60,11 @@ export class OperationUI extends Operation {
   }
 
   finOK (res, silence) {
-    const session = stores.session
-    session.setDh(this.dh)
-    session.finOp()
-    if (!silence) stores.ui.afficherMessage($t('OPok', [this.nom]), false)
+    if (!this.modeSync) {
+      const session = stores.session
+      session.finOp()
+      if (!silence) stores.ui.afficherMessage($t('OPok', [this.label]), false)
+    }
     return res
   }
 
@@ -70,22 +72,19 @@ export class OperationUI extends Operation {
     const session = stores.session
     const ui = stores.ui
     const exc = appexc(e)
-    session.finOp()
-    if (exc.code === 1001 || exc.code === 1002) {
-      const texte = exc.args[0]
-      const dh = exc.args[1]
-      const nr = exc.code % 10
-      const notif = new Notification({nr, dh, texte, idSource: 0})
-      session.setNotifE(notif)
-      if (nr === 2) {
-        ui.setPage('clos')
-        return
+    if (!this.modeSync) {
+      session.finOp()
+      if (exc.code === 9999) {
+        session.setExcKO(exc)
+        throw(exc)
       }
-    } else {
-      ui.afficherMessage($t('OPko', [this.nom]), true)
+      ui.afficherMessage($t('OPko', [this.label]), true)
       await ui.afficherExc(exc)
       throw(exc)
     }
+    // En synchro toutes les exceptions sont tueuses
+    session.setExcKO(exc)
+    throw(exc)
   }
 }
 

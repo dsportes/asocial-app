@@ -123,7 +123,8 @@ export default {
   disparu: 'disparu',
   cv: 'Carte de visite',
   plustard: 'Plus Tard',
-  compteKO: 'Le compte #{0} nommé "{1}" vient d\'être supprimé. Se connecter à un autre compte.',
+  compteKO: 'Le compte #{0} nommé "{1}" vient d\'être supprimé ou a changé de phrase secrète.',
+  sessionKO: 'Incident technique nécessitant l\'interruption immédiate de la session. Tenter de se reconnecter plus tard.',
   test: 'Test',
 
   // Filtre notif
@@ -249,8 +250,6 @@ export default {
 
   // E_BRK = 1000 // Interruption volontaire de l'opération
   EX1000: 'Interruption volontaire',
-  EX1001: 'L\'administrateur technique vient de restreindre l\'application à la lecture seulement. L\'opération ayant tenté une écriture, elle a échoué.',
-  EX1002: 'L\'administrateur technique vient de fermer l\'application.',
 
   // E_WS = 2000 // Toutes erreurs de réseau
   EX2000: 'Erreur à l\'ouverture de la connexion avec le serveur ( {0} ).\nDétail: {1}',
@@ -291,7 +290,6 @@ export default {
   EX4022: 'Fichier brut impossible à décrypter: {0}',
 
   // F_BRO = 5000 // Erreur fonctionnelle trappée sur le browser
-  EX5001: 'La phrase secrète a changé depuis l\'authentification du compte. Après déconnexion, se reconnecter avec la nouvelle phrase secrète.',
   EX5003: 'Avatar déjà cité dans le groupe, ne peut pas être inscrit à nouveau',
   EX5004: `Base locale non trouvée<br>
   - soit la phrase secrète est incorrecte,<br>
@@ -367,13 +365,11 @@ export default {
   EX8066: 'Maximum de volume V2 pour les notes du couple dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8067: 'Groupe sans hébergeur {0} : augmentation de volumer interdit.',
 
-  EX8101: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
+  EX8101: 'L\'administrateur technique a restreint l\'application à la lecture seulement : {0}\nL\'opération ayant tenté une écriture, elle a échoué.',
   EX8102: 'Le code de l\`organisation n\'est pas reconnu.\nSaisir à nouveau l\'identification.',
-  EX8103: 'Cette phrase secrète de correspond à aucun compte enregistré.',
-  EX8104: 'Cette phrase secrète de correspond pas elle du Comptable.',
-  EX8105: 'Cette opération n\'est pas autorisée, l\'espace est figé',
-  EX8106: 'Aucune opération autorisée, l\'espace est clos',
-  EX8888: 'Cette phrase secrète ne correspond à aucun compte enregistré',
+  EX8104: 'Cette phrase secrète de correspond pas celle du Comptable.',
+  EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
+  EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
 
   // A_SRV = 9000 // Situation inattendue : assertion trappée sur le serveur
   EX9001: 'Espace non trouvé ({1}) - @{0}',
@@ -394,8 +390,9 @@ export default {
   EX9017: 'Ticket non trouvé ({1} / {2}) - @{0}',
   EX9018: 'Organisation {0} non trouvée',
   EX9019: 'Mode d\'authentication non reconnu [{0}]',
+  EX9020: 'Données d\'authentification illisibles (détail: {0})',
 
-  EX9100: 'Données d\'authentification illisibles (détail: {0})',
+  EX9999: 'L\'administrateur technique a fermé l\'application : {0}.',
 
   LOGreinit: 'Ré-initialiser complètement la base locale',
   LOGrazbl: '<b>Attention:</b> la base locale sera effacée et rechargée totalement.' +
@@ -540,7 +537,6 @@ export default {
   ERrec: 'Tenter de se reconnecter',
   ERcont: 'Poursuivre la session quand-même',
   ERmod: 'Continuer pour modifier les données',
-  ERsync: 'Rupture irrémédiable de la synchronisation des données.',
   ERrlog: 'Reprendre la procédure de connexion',
 
   OPok: 'Succès de l\'opération {0}',

@@ -151,7 +151,7 @@ export function deconnexion(garderMode) {
   const mode = session.mode
   const org = session.org
 
-  if (session.accesIdb) closeIDB()
+  if (session.accesIdb) idb.close()
   if (session.accesNet) {
     if (session.fsSync) session.fsSync.close(); else closeWS()
   }
@@ -175,36 +175,62 @@ export async function connexion(phrase, razdb) {
   const session = stores.session
   await session.initSession(phrase)
 
-  if (session.avion) 
-    await connexionAvion(phrase)
+  if (session.avion) {
+    if (!this.nombase) { // nom base pas trouvé en localStorage de clé lsk
+      await afficherDiag($t('OPmsg1'))
+      deconnexion(true)
+      return
+    }
+    try {
+      await idb.open()
+    } catch (e) {
+      await afficherDiag($t('OPmsg2', [e.message]))
+      deconnexion()
+      return
+    }
+    // initialisation de compteId et clek depuis boot de IDB
+    if (!await idb.getBoot()) { // false si KO 
+      await afficherDiag($t('OPmsg3'))
+      deconnexion()
+      return
+    }
+    try { await new ConnexionAvion().run() } catch (e) { /* */ }
+  }
   else {
     if (razdb && session.synchro && session.nombase)
-      await deleteIDB(session.nombase)
+      await idb.delete(session.nombase)
     try { await new ConnexionSynchroIncognito().run() } catch (e) { /* */ }
   }
 }
 
-/* Connexion à un compte en mode avion *************************************************/
-export async function connexionAvion(phrase) {
-  if (!session.nombase) { // nom base pas trouvé en localStorage de clé lsk
-    await afficherDiag($t('OPmsg1'))
-    deconnexion(true)
-    return
+/* Connexion à un compte en mode avion *********************************/
+export class ConnexionAvion extends OperationUI {
+  constructor() { super('ConnexionCompte') }
+
+  async run() {
+    try {
+      this.auj = AMJ.amjUtc()
+      this.dh = 0
+
+      const session = stores.session
+
+      // Chargement des "avnotes" des notes ayant des fichiers locaux
+      await idb.loadAvNotes()  
+
+      // TODO
+
+      // Chargement des descriptifs des fichiers du presse-papier
+      await idb.FLfromIDB()
+
+      console.log('Connexion compte : ' + session.compteId)
+      session.setStatus(2)
+      stores.ui.setPage('accueil')
+      this.finOK()
+    } catch (e) {
+      stores.ui.setPage('login')
+      await this.finKO(e)
+    }
   }
-  try {
-    await openIDB()
-  } catch (e) {
-    await afficherDiag($t('OPmsg2', [e.message]))
-    deconnexion()
-    return
-  }
-  if (!await idb.getBoot()) { // false si KO - init compteId et clek
-    await afficherDiag($t('OPmsg3'))
-    deconnexion()
-    return
-  }
-  // compteId et clek sont fixées
-  // TODO suite
 }
 
 /* Connexion à un compte en mode synchro ou incognito *********************************/
@@ -218,9 +244,35 @@ export class ConnexionSynchroIncognito extends OperationUI {
       this.dh = 0
 
       const session = stores.session
+
+      if (session.synchro) // Chargement des "avnotes" des notes ayant des fichiers locaux 
+        await idb.loadAvNotes()
+
+      // TODO : Premier appel Sync
+      
+      // Premier retour de Sync a rempli session. compteId, clek, nomBase
+      this.blOK = false // la base locale est vide, aucune données utilisables
+      if (session.synchro) {
+        await idb.open()
+        this.blOK = idb.checkAge()
+        await idb.storeBoot()
+        if (!this.blOK)
+          setTrigramme(session.nombase, await getTrigramme())
+      }
+      // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK
+
+      // TODO : appels Sync suivant
+  
       const aSt = stores.avatar
       const gSt = stores.groupe
 
+      if (session.synchro) // Chargement des descriptifs des fichiers du presse-papier
+        await idb.FLfromIDB()
+
+      console.log('Connexion compte : ' + session.compteId)
+      session.setStatus(2)
+      stores.ui.setPage('accueil')
+      idb.reveil()
       this.finOK()
     } catch (e) {
       stores.ui.setPage('login')
@@ -286,7 +338,7 @@ export class AcceptationSponsoring extends OperationUI {
       const session = stores.session
       session.setOrg(sp.org)
       await session.initSession(ps)
-      session.setIdCleK(sp.id, random(32)) 
+      await session.setIdCleK(sp.id, random(32)) 
 
       this.auj = AMJ.amjUtc()
       this.buf = new IDBbuffer()
@@ -447,10 +499,7 @@ export class AcceptationSponsoring extends OperationUI {
       console.log('Connexion compte : ' + session.compteId)
       session.setStatus(2)
       stores.ui.setPage('accueil')
-      setTimeout(() => {
-        SyncQueue.traiterQueue()
-        Demon.start()
-      }, 50)
+      idb.reveil()
       this.finOK()
     } catch (e) {
       await this.finKO(e)
