@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, inverse, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA, abToPem } from './webcrypto.mjs'
-import { Rds, ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS, limitesjour, djMoisN } from './api.mjs'
+import { Rds, ID, Cles, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS, limitesjour, djMoisN } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -11,92 +11,33 @@ import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
 const decoder = new TextDecoder('utf-8')
 const encoder = new TextEncoder('utf-8')
 
-/* Versions (statique) ***********************************
-Versions des sous-collections d'avatars et groupes
-- chaque sous collection identifiée par un id d'avatar ou de groupe a une version courante
-- au chargement depuis IDB elle donne la version stockée en base:
-  - pour un avatar : l'avatar, ses notes, chats, sponsorings sont tous disponibles
-    et consistents jusqu'à cette version v. 
-  - pour un groupe : le groupe, ses notes, ses membres.
-- au chargement, pour chaque sous-collection, LA version de la sous-collection peut progresser
-  suite au chargement de tous les documents de la sous-collection estampillée à une version postérieure.
-- en synchronisation, les sous-collections évoluent de même globalement.
-- pour une entrée donnée, la version v d'une sous-collection évolue en fonction des synchronisations.
-- même en l'absence de IDB, la map donne l'état courant des stores
-- en mode avion, la map n'évolue pas depuis le chargement initial, les stores non plus.
-La map globale Versions est sauvegardée sur IDB :
-- en fin de chargement,
-- en fin de chaque synchronisation.
+/* Registre des clés (statique) des clés connues dans la session **********
+- `resetRegistreDesCles ()` : réinitialisation en début de session
+- `getCle (id)` : retourne la clé enregistrée avec cette id
+- `setCle (cle)` : enregistré la clé sous son id
 */
-export class Versions {
-  static map = {}
-  static toSave = false
 
-  static reset () { Versions.map = {}; Versions.toSave = false; return Versions.map }
-  static get (id) { return Versions.map[id] || { v: 0 } }
-  static v (id) { return (Versions.map[id] || { v: 0 }).v }
-  static set (id, objv) { // objv: { v, vols: {v1, v2, q1, q2} }
-    const e = Versions.map[id]
-    if (!e || e.v < objv.v) {
-      Versions.map[id] = objv
-      Versions.toSave = true
-    }
-  } 
-  static del (id) { delete Versions.map[id]; Versions.toSave = true }
-  static load (idb) { 
-    Versions.map = idb ? decode(idb) : {}
-    Versions.toSave = false
-    return Versions.map
-  }
-  static toIdb () { Versions.toSave = false; return new Uint8Array(encode(Versions.map))}
+const registreCles = new Map()
 
-  static compile (row) { // objv: { v, vols: {v1, v2, q1, q2} }
-    if (!row) return null
-    const session = stores.session
-    const z = row.dlv && row.dlv <= session.auj
-    if (!z && row._data_) return decode(row._data_)
-    return { id: row.id, v: row.v, _zombi: true }
-  }
-}
+export function resetRegistreDesCles () { registreCles.clear }
 
-/* Répertoire (statique) *********************************
-- `resetRepertoire ()` : réinitialisation
-- `getCle (id)` : retourne le rnd du nom générique enregistré avec cette id
-- `getNg (id)` : retourne le nom générique enregistré avec cette id
-*/
-const repertoire = { rep: {}, clet: {} }
+export function getCle (id) { return registreCles.get(id) }
 
-export function resetRepertoire () { 
-  repertoire.rep = {}
-  repertoire.clet = {} 
-}
-
-export function getCle (id) { 
-  if (ID.estTribu(id)) return repertoire.clet[id]
-  const e = repertoire.rep[id]
-  return e ? e.rnd : null
-}
-
-export function getNg (id) { return repertoire.rep[id] }
-
-export function setClet (clet, id) { 
-  const x = ID.long(id || Tribu.id(clet), NomGenerique.ns)
-  if (!repertoire.clet[x]) repertoire.clet[x] = clet
-  return x
+export function setCle (cle) {
+  const id = Cles.id(cle, stores.session.ns)
+  registreCles.set(id, cle)
 }
 
 /***********************************************************
 NomGenerique : NomAvatar, NomGroupe
-************************************************************/
+***********************************************************
 export class NomGenerique {
-  static ns = 0
-
   static cleComptable = new Uint8Array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
   static idOf (rnd) {
     let z = true; for (let i = 1; i < 32; i++) if(rnd[i]) { z = false; break }
     const n = z ? 0 : (hash(rnd) % d13)
-    return (((NomGenerique.ns * 10) + rnd[0]) * d13) + n
+    return (((stores.session.ns * 10) + rnd[0]) * d13) + n
   }
 
   constructor (id, nom, rnd) {
@@ -163,6 +104,7 @@ export class NomGenerique {
 // NE PAS UTILISER les constructeurs ci-dessous MAIS les factories de NomGenerique
 export class NomAvatar extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
 export class NomGroupe extends NomGenerique { constructor (n, nom, rnd) { super(n, nom, rnd) } }
+*/ 
 
 /******************************************************
  * classe MotsCles
@@ -669,24 +611,29 @@ export class Synthese extends GenDoc {
   }
 }
 
-/** Tribu *********************************
+/** Partition *********************************
 _data_:
-- `id` : numéro d'ordre de création de la tribu.
-- `v`
+- `id` : numéro d'ordre de création de la partition par le Comptable.
+- `v` : 1..N
 
-- `cletX` : clé de la tribu cryptée par la clé K du comptable.
-- `qc q1 q2` : quotas totaux de la tribu.
-- `stn` : restriction d'accès de la notification _tribu_:
-   _0:aucune 1:lecture seule 2:minimal_
-- `notif`: notification de niveau tribu cryptée par la clé de la tribu.
-- `act` : table des comptes de la tribu. L'index `it` dans cette liste figure dans la propriété `it` du `comptas` correspondant :
-  - `idT` : id court du compte crypté par la clé de la tribu.
-  - `nasp` : si sponsor `[nom, cle]` crypté par la cle de la tribu.
-  - `notif`: notification de niveau compte cryptée par la clé de la tribu.
-  - `stn` : restriction d'accès de la notification _compte_: 
-    _0:aucune 1:lecture seule 2:minimal_  
-  - `qc q1 q2` : quotas attribués.
-  - `ca v1 v2` : volumes **approximatifs** effectivement utilisés.
+- `rds`
+- `qc q1 q2` : quotas totaux de la partition.
+- `clePK` : clé P de la partition cryptée par la clé K du comptable.
+- `notif`: notification de niveau _partition_ dont le texte est crypté par la clé P de la partition.
+- `notifC`: notification de niveau _compte_ dont le texte est crypté par la clé P de la partition. Voir ci-après.
+
+- `ldel` : liste des clés A des délégués cryptées par la clé P de la partition.
+
+- `tcpt` : table des comptes attachés à la partition. L'index `it` dans cette table figure dans la propriété `it` du document `comptes` correspondant :
+  - `notif`: notification de niveau compte dont le texte est crypté par la clé P de la partition (`null` s'il n'y en a pas).
+  - `cleAP` : clé A du compte crypté par la clé P de la partition.
+  - `del`: `true` si c'est un délégué.
+  - `q` : `qc q1 q2 c2M nx v2` extraits du document `comptas` du compte. 
+    - En cas de changement de `qc q1 q2` la copie est immédiate, sinon c'est effectué seulement lors de la prochaine connexion du compte.
+    - `c2M` : consommation moyenne mensuelle lissée sur M et M-1 (conso2M de compteurs)
+    - `nx` : nn + nc + ng nombre de notes, chats, participation aux groupes.
+    - `v2` : volume de fichiers effectivement occupé.
+
 Calculés localement :
 - pccj : pourcentage d'utilisation de la consommation journalière / qc
 - pcv1 : pourcentage d'utilisation effective de q1 : v1 / q1
@@ -703,8 +650,8 @@ Calcul des compteurs de Synthese dans .synth :
   - pcv2
 
 */
-export class Tribu extends GenDoc {
-  /* Génère la clé de la tribu de numéro d'ordre idx (index de Compta.atr du comptable)*/
+export class Partition extends GenDoc {
+  /* Génère la clé de la partition de numéro d'ordre idx (index de Compte.tp du comptable)*/
   static genCle (idx) { 
     const rnd = random(32)
     rnd[0] = 0
@@ -713,13 +660,14 @@ export class Tribu extends GenDoc {
     return rnd
   }
 
-  /* Retourne l'id longue d'une tribu depuis sa clé et le ns courant de la session */
+  /* Retourne l'id longue d'une partition depuis sa clé et le ns courant de la session */
   static id (cle) {
     if (!cle) return 0
     const x = (cle[1] * 256) + cle[2] // son numéro d'ordre dans Compta.atr du comptable
-    return (NomGenerique.ns * d14) + x
+    return (stores.session.ns * d14) + x
   }
 
+  /*
   get nom () { 
     return '#' + ID.court(this.id)
   }
@@ -729,14 +677,20 @@ export class Tribu extends GenDoc {
     const session = stores.session
     return !session.estComptable ? '' : (aSt.compta ? aSt.compta.atr[ID.court(this.id)].info : '')
   }
+  */
 
   get clet () { return getCle(this.id) }
 
   async compile (row) {
     const session = stores.session
     this.vsh = row.vsh || 0
-    this.id = row.id
-    this.v = row.v
+
+    this.rds = row.rds
+    this.qc = row.qc || 0; this.q1 = row.q1 || Object; this.q2 = row.q2 || 0
+
+    if (session.estComptable) this.cleP = await decrypter(session.clek, row.clePK)
+    else this.cleP = session.clep
+    setCle(this.cleP)
 
     /* la clé de la Tribu du COMPTE est décryptée et enregistrée par Compta.compile
     Le comptable est le seul qui peut avoir à accéder à d'autres tribus que la sienne.
@@ -856,7 +810,7 @@ export class Tribu extends GenDoc {
   }
 }
 
-/** Compta **********************************************************************
+/** Compte **********************************************************************
 _data_ :
 - `id` : numéro du compte = id de son avatar principal.
 - `v` : 1..N.
@@ -913,28 +867,28 @@ export class Compte extends GenDoc {
       const e = row.mav[idx]
       const rds = Rds.long(e.rds, ns)
       const cleA = await decrypter(session.clek, e.cleAK)
-      this.mav.set(ida, { rds, cleA })
-      if (ida === this.id) this.cleA = cleA // cleA de l'avatar principal du compte
+      setCle(cleA)
+      this.mav.set(ida, rds)
     }
 
-    if (!this.estA) this.cleP = await decrypter(this.cleA, row.clePA)
+    if (!this.estA) setCle(await decrypter(this.cleA, row.clePA))
 
     this.mpg = new Map()
     for(const idx in row.mpg) {
       const idg = ID.long(parsInt(idx), ns)
       const e = row.mpg[idx]
       const rds = Rds.long(e.rds, ns)
-      const cleG = await decrypter(session.clek, e.cleGK)
+      setCle(await decrypter(session.clek, e.cleGK))
       const lp = new Map()
       for(const idx2 in e.lp) {
         const ida = ID.long(parseInt(idx2), ns)
         lp.set(ida, e.lp[idx2])
       }
-      this.mpg.set(ida, { rds, cleG, lp })
+      this.mpg.set(ida, { rds, lp })
     }
 
     if (this.estComptable) {
-      this.cleE = await decrypter(session.clek, row.cleEK)
+      setCle(await decrypter(session.clek, row.cleEK))
       this.tp = []
       for(const e of row.tp) {
         const c = decode(await decrypter(session.clek, e.c))
@@ -950,6 +904,13 @@ export class Compte extends GenDoc {
     return a && a.code ? a.code : ''
   }
   
+  // A REPRENDRE
+  static async atrItem (clet, info, q) {
+    const session = stores.session
+    const item = {clet, info, q}
+    return await crypter(session.clek, new Uint8Array(encode(item)))
+  }
+
 }
 
 /** Compta **********************************************************************
@@ -999,55 +960,7 @@ export class Compta extends GenDoc {
     }
   }
 
-  /* 
-  Pour un compte A c'est la date à laquelle le crédit tombe à 0 
-  prolongée au dernier jour du mois.
-  Pour un compte O, c'est la plus proche des deux dlv,
-  - a) celle donnée par l'administrateur technique dans espace,
-  - b) celle correspondant à (nbmi * 30 jours) + auj, prolongée au dernier jour du mois.
-  a) est le premier jour du mois qui suit la dlv, b) est le dernier jour du mois de dlv
-  Dans les deux cas c'est 0 si elle est déjà dépassée.
-  Pour un compteO, total est donné à 0
-  */
-  calculDlv (total) {
-    if (ID.estComptable(this.id)) return AMJ.max
-    return this.estA ? Compta.dlvA(this.compteurs, total) : Compta.dlvO()
-  }
-
-  static dlvA (compteurs, total) {
-    const session = stores.session
-    const dlvmax = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, session.espace.nbmi * 30))
-    const nbj = compteurs.nbj(total)
-    const d = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, nbj))
-    return dlvmax > d ? d : dlvmax
-  }
-
-  // dlv estimée d'un compte A muté depuis son compteurs actuel avec un solde minimal
-  static dlvAinit (compteurs) {
-    const dlvmax = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, session.espace.nbmi * 30))
-    const nbj = compteurs.nbj(Compta.creditMinimal, true)
-    const d = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, nbj))
-    return dlvmax > d ? d : dlvmax
-  }
-
-  static dlvO () {
-    const session = stores.session
-    const dlvmax = AMJ.djMois(AMJ.amjUtcPlusNbj(session.auj, session.espace.nbmi * 30))
-    return dlvmax > session.espace.dlvat ? session.espace.dlvat : dlvmax
-  }
-
-  async debitDon (don) {
-    const session = stores.session
-    const credits = { ...this.credits }
-    // credits.bla = '*******************************************************************'
-    credits.total -= don
-    const r = await crypter(session.clek, new Uint8Array(encode(credits)))
-    // const x = decode(await decrypter(session.clek, r))
-    const dlv = this.calculDlv(credits.total)
-    return { dlv, creditsK: r}
-  }
-
-  /* Depuis la liste actuelle des tickets de compta,
+  /* TODO Depuis la liste actuelle des tickets de compta,
   - enlève les obsolètes,
   - ajoute tk s'il n'y était pas, le remplace sinon
   - retourne credits crypté par la clé K
@@ -1070,7 +983,7 @@ export class Compta extends GenDoc {
     return await crypter(session.clek, new Uint8Array(encode(credits)))
   }
 
-  /* Depuis la liste actuelle des tickets de compta,
+  /* TODO Depuis la liste actuelle des tickets de compta,
   - enlève les obsolètes,
   - ajoute tk s'il n'y était pas, le remplace sinon
   - retourne credits crypté par la clé K
@@ -1086,7 +999,7 @@ export class Compta extends GenDoc {
     return await crypter(session.clek, new Uint8Array(encode(credits)))
   }
 
-  /* Incorporation des tickets et des dons en attente au credits,
+  /* TODO Incorporation des tickets et des dons en attente au credits,
   - des tickets mis à jour reçus dans m (s'il y en a)
   - des montants des dons en attente (s'il y en a)
   Retourne credits crypté par la clé K, ou null si inchangé
@@ -1152,12 +1065,6 @@ export class Compta extends GenDoc {
       return { dlv, creditsK }
     } else 
       return { dlv: 0, creditsK: null }
-  }
-
-  static async atrItem (clet, info, q) {
-    const session = stores.session
-    const item = {clet, info, q}
-    return await crypter(session.clek, new Uint8Array(encode(item)))
   }
 
   static async row (na, clet, cletX, q, estSponsor, ns, phrase, nc, don) { 

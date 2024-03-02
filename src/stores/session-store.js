@@ -214,7 +214,7 @@ export const useSessionStore = defineStore('session', {
         }
       }
 
-      resetRepertoire() // TODO à rediscuter
+      resetRegistreDesCles() 
       stores.reset(true) // reset SAUF session
     },
 
