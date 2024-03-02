@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, inverse, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA, abToPem } from './webcrypto.mjs'
-import { ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS, limitesjour, djMoisN } from './api.mjs'
+import { Rds, ID, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS, limitesjour, djMoisN } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { getFichierIDB, saveSessionSync, FLget } from './db.mjs'
@@ -856,180 +856,146 @@ export class Tribu extends GenDoc {
   }
 }
 
-/** Gcvols ******************************************/
-export class Gcvols extends GenDoc {
-  async compile (row) {
-    const session = stores.session
-    this.clet = await decrypter(session.clek, row.cletX)
-    this.idt = Tribu.id(this.clet)
-    this.it = row.it
-  }
-}
-
 /** Compta **********************************************************************
 _data_ :
-- `id` : numéro du compte, id de son avatar principal.
+- `id` : numéro du compte = id de son avatar principal.
 - `v` : 1..N.
-- `hps1` : le hash du PBKFD du début de la phrase secrète du compte.
+- `hXR` : `ns` + `hXR`, hash du PBKFD d'un extrait de la phrase secrète.
+- `dlv` : dernier jour de validité du compte.
 
-- `hpsc`: hash du PBKFD de la phrase secrète complète.
-- `kx` : clé K du compte, cryptée par le PBKFD de la phrase secrète complète.
-- `dlv` : DLV du compte.
-- `dhvu` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
-- `sp` : 1: est sponsor
-- `cletX` : clé de la tribu cryptée par la clé K du comptable.
-- `cletK` : clé de la tribu cryptée par la clé K du compte : si cette clé a une longueur de 256, elle est cryptée par la _clé publique RSA_ du compte (en cas de changement de tribu forcé par le comptable).
-- `it` : index du compte dans la table `act` de sa tribu.
-- `qv` : `{qc, q1, q2, nn, nc, ng, v2}`: quotas et nombre de groupes, chats, notes, volume fichiers. Valeurs courantes.
-- `oko` : hash du PBKFD de la phrase de confirmation d'un accord pour passage de O à A ou de A à O.
-- `credits` : pour un compte A seulement crypté par la clé K:
-  - `total`: cumul des crédits reçus depuis le début de la vie du compte.
-  - `tickets`: liste des tickets (`{ids, v, dg, dr, ma, mc, refa, refc, di}`).
-  - juste après une conversion de compte O en A, `credits` est égal à `true`, une convention pour une création vierge.
-- `dons`: liste des montants des dons en attente d'incorporation cryptés par la clé publique du compte.
-- `compteurs` sérialisation non cryptée d'évolution des quotas, volumes et coûts.
+- `rds`
+- `hXC`: hash du PBKFD de la phrase secrète complète (sans son `ns`).
+- `cleKXR` : clé K cryptée par XR.
 
-**Pour le Comptable seulement**
--`atr` : table des tribus : `{clet, info, qc, q1, q2}` crypté par la clé K du comptable.
-  - `clet` : clé de la tribu (donne aussi son id, index dans `act / astn`).
-  - `info` : texte très court pour le seul usage du comptable.
-  - `q` : `[qc, q1, q2]` : quotas globaux de la tribu.
-- `astn` : table des restriction d'accès des notifications des tribus _0:aucune, 1:lecture seule, 2:accès minimal_.
+_Comptes "O" seulement:_
+- `clePA` : clé P de la partition cryptée par la clé A de l'avatar principal du compte.
+- `del` : `true` si le compte est délégué de la partition.
+- `it` : index du compte dans `tcpt` de son document `partitions`.
+
+- `mav` : map des avatars du compte. 
+  - _clé_ : id court de l'avatar.
+  - _valeur_ : `{ rds, claAK }`
+    - `rds`: de l'avatar (clé d'accès à son `versions`).
+    - `cleAK`: clé A de l'avatar crypté par la clé K du compte.
+
+- `mpg` : map des participations aux groupes:
+  - _clé_ : id du groupe
+  - _valeur_: `{ cleGK, rds, lp }`
+    - `cleGK` : clé G du groupe cryptée par la clé K du compte.
+    - rds: du groupe (clé d'accès à son `versions`)
+    - `lp`: map des participations: 
+      - _clé_: id court de l'avatar.
+      - _valeur_: indice `im` du membre dans la table `tid` du groupe (`ids` du membre).
+
+**Comptable seulement:**
+- `cleEK` : Clé E de l'espace cryptée par la clé K.
+- `tp` : table des partitions : `{c, qc, q1, q2}`. => compilé { cleP, code, qc, q1, q2 }
+  - `c` : `{ cleP, code }` crypté par la clé K du comptable
+    - `cleP` : clé P de la partition.
+    - `code` : texte très court pour le seul usage du comptable.
+  - `qc, q1, q2` : quotas globaux de la partition.
 */
-export class Compta extends GenDoc {
-  static creditMinimal = 2
-
-  /* Map des versions des tickets détenus pour rafraîchissement par le serveur */
-  get mtk () {
-    const m = {}
-    if (this.credits) this.credits.tickets.forEach(tk => { m[tk.ids] = tk.v || 0})
-    return m
-  }
-  
-  // retourne le nom / info de la tribu id
-  infoTr (id) { 
-    if (!this.atr) return ''
-    const a = this.atr[ID.court(id)]
-    return a && a.info ? a.info : ''
-  }
+export class Compte extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
     const session = stores.session
-    const aSt = stores.avatar
-    /*
-    Un getter dans session a un comportement erratique
-    et n'arrive pas à accéder à stores.avatar
-    !!! NE PAS CHANGER CE QUI SUIT !!!
-    */
+    const ns = session.ns
+    this.rds = Rds.long(row.rds, ns)
     this.it = row.it || 0
-    this.sp = this.it !== 0 ? row.sp : 0
-    this.estSponsor = this.sp === 1
     this.estA = this.it === 0
-    this.dlv = row.dlv
-    session.setEstSponsor(this.estSponsor)
-    session.setEstAutonome(this.estA)
+    this.estDelegue = this.it && row.del
+    this.estComptable = ID.estComptable(this.id)
 
-    this.k = await decrypter(session.phrase.pcb, row.kx)
-    session.clek = this.k
-
-    const avatar = aSt.getAvatar(this.id)
-    if (!this.estA) {
-      this.cletX = row.cletX
-      if (row.cletK.length !== 256) {
-        this.clet = await decrypter(session.clek, row.cletK)
-        this.idt = setClet(this.clet)
-      } else { // CHANGEMENT DE TRIBU par le comptable
-        // Le Comptable a crypté la tribu par la clé PUB du compte (il ne connait pas K)
-        if (avatar) {
-          this.clet = await decrypterRSA(avatar.priv, row.cletK)
-          // pour mettre à jour le row compta sur le serveur
-          this.cletK = await crypter(session.clek, this.clet)
-          this.idt = setClet(this.clet)
-        } else { 
-          // CA SE FERA DANS compile2() quand l'avatar sera en store (seulement à la connexion)
-          this.rowCletK = row.cletK
-        }
-      }
-    } else {
-      this.clet = null
-      this.cletK = null
-      this.idt = 0
-      
-      // en cas de passage de compte O à A, le Comptable ne peut pas initialiser
-      // credits en cryptant par la clé K. Il met 'true' pour provoquer l'init ici
-      this.toSave = row.credits === true
-      const cr = this.toSave ? null : decode(await decrypter(session.clek, row.credits)) 
-      this.credits = { total: cr ? cr.total : Compta.creditMinimal, tickets: [] }
-      if (cr) cr.tickets.forEach(tk => { 
-        if (!Ticket.estObsolete(tk)) this.credits.tickets.push(tk)
-      })
-      if (row.dons) {
-        if (avatar) {
-          this.dons = []
-          for(const x of row.dons) {
-            const m = decode(await decrypterRSA(avatar.priv, x))
-            this.dons.push(m)
-          }
-        } else {
-          // En connexion avatar (et son pub) pas encore connu. Ca se fera dans compile2
-          this.donsX = row.dons
-        }
-      } else this.dons = null
+    this.mav = new Map()
+    for(const idx in row.mav) {
+      const ida = ID.long(parsInt(idx), ns)
+      const e = row.mav[idx]
+      const rds = Rds.long(e.rds, ns)
+      const cleA = await decrypter(session.clek, e.cleAK)
+      this.mav.set(ida, { rds, cleA })
+      if (ida === this.id) this.cleA = cleA // cleA de l'avatar principal du compte
     }
 
-    this.hps1 = row.hps1
-    this.hpsc = row.hpsc
-    this.dhvu = row.dhvu ? parseInt(await decrypterStr(session.clek, row.dhvu)) : 0
+    if (!this.estA) this.cleP = await decrypter(this.cleA, row.clePA)
 
-    this.qv = row.qv
-    this.compteurs = new Compteurs(row.compteurs, this.qv)
-    this.pc = this.compteurs.pourcents.max
-    let chg = session.setNotifQ(this.compteurs.notifQ)
-    if (this.estA) {
-      if (session.setNotifS(this.compteurs.notifS(this.credits.total))) chg = true
-    } else {
-      if (session.setNotifS(this.compteurs.notifX)) chg = true
-    }
-    if (chg) session.setBlocage()
-
-    /**Pour le Comptable seulement**
-    -`atr` : table des tribus : `{clet, info, qc, q1, q2}` crypté par la clé K du comptable.
-      - `clet` : clé de la tribu (donne aussi son id, index dans `atrx / astn`).
-      - `info` : texte très court pour le seul usage du comptable.
-      - `qc q1 q2` : quotas globaux de la tribu.
-    - `astn` : table des statuts de notification des tribus _aucune simple bloquante_.
-    */
-    if (ID.estComptable(this.id)) {
-      this.atr = new Array(row.atr.length)
-      for (let i = 0; i < row.atr.length; i++) {
-        if (row.atr[i]) {
-          const item = decode(await decrypter(session.clek, row.atr[i]))
-          item.id = Tribu.id(item.clet)
-          this.atr[i] = item
-        } else this.atr[i] = null
+    this.mpg = new Map()
+    for(const idx in row.mpg) {
+      const idg = ID.long(parsInt(idx), ns)
+      const e = row.mpg[idx]
+      const rds = Rds.long(e.rds, ns)
+      const cleG = await decrypter(session.clek, e.cleGK)
+      const lp = new Map()
+      for(const idx2 in e.lp) {
+        const ida = ID.long(parseInt(idx2), ns)
+        lp.set(ida, e.lp[idx2])
       }
-      this.astn = row.astn
+      this.mpg.set(ida, { rds, cleG, lp })
+    }
+
+    if (this.estComptable) {
+      this.cleE = await decrypter(session.clek, row.cleEK)
+      this.tp = []
+      for(const e of row.tp) {
+        const c = decode(await decrypter(session.clek, e.c))
+        this.tp.push({cleP: c.cleP, code: c.code, qc: e.qc, q1: e.q1, q2: e.q2})
+      }
     }
   }
 
-  async compile2 (priv) { // UNIQUEMENT à la connexion
-    const session = stores.session
-    if (this.rowCletK) {
-      this.clet = await decrypterRSA(priv, this.rowCletK)
-      // pour mettre à jour le row compta sur le serveur
-      this.cletK = await crypter(session.clek, this.clet)
-      this.idt = setClet(this.clet)
-      delete this.rowCletK
-    }
+  // retourne le nom / info de la partition id
+  infoP (id) { 
+    if (!this.tp) return ''
+    const a = this.tp[ID.court(id)]
+    return a && a.code ? a.code : ''
+  }
+  
+}
 
-    if (this.donsX) {
-      this.dons = []
-      for(const x of this.donsX) {
-        const m = decode(await decrypterRSA(priv, x))
-        this.dons.push(m)
-      }
-      delete this.donsX
+/** Compta **********************************************************************
+_data_ :
+- `id` : numéro du compte = id de son avatar principal.
+- `v` : 1..N.
+
+- `rds`
+- `dhvuK` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
+- `qv` : `{qc, q1, q2, nn, nc, ng, v2}`: quotas et nombre de groupes, chats, notes, volume fichiers. Valeurs courantes.
+- `compteurs` sérialisation des quotas, volumes et coûts.
+
+_Comptes "A" seulement_
+- `solde`: résultat, 
+  - du cumul des crédits reçus depuis le début de la vie du compte (ou de son dernier passage en compte A), 
+  - plus les dons reçus des autres,
+  - moins les dons faits aux autres.
+- `ticketsK`: liste des tickets cryptée par la clé K du compte `{ids, v, dg, dr, ma, mc, refa, refc, di}`.
+
+- `apropos` : map à propos des contacts (des avatars) et des groupes _connus_ du compte
+  - _cle_: `id` court de l'avatar ou du groupe,
+  - _valeur_ : `{ hashtags, texte }` cryptée par la clé K du compte.
+    - `hashtags` : liste des hashtags attribués par le compte.
+    - `texte` : commentaire écrit par le compte.
+
+Juste après une conversion de compte "O" en "A", `ticketsK` est vide et le `solde` est de 2c.
+*/
+export class Compta extends GenDoc {
+
+  async compile (row) {
+    this.vsh = row.vsh || 0
+    const session = stores.session
+    const ns = session.ns
+    this.rds = Rds.long(row.rds, ns)
+    this.dhvu = row.dhvuK ? parseInt(await decrypterStr(session.clek, row.dhvuK)) : 0
+    this.qv = row.qv
+    this.compteurs = new Compteurs(row.compteurs, this.qv)
+    this.pc = this.compteurs.pourcents.max
+    this.solde = row.solde || 0
+    if (row.ticketsK) this.tickets = decode(await decrypter(session.clek, row.ticketsK))
+    this.estA = this.tickets !== undefined
+    this.apropos = new Map()
+    if (row.apropos) for(const idx in row.apropos) {
+      const id = ID.long(parseInt(idx, session.ns))
+      const ht = decode(await decrypter(session.clek, row.apropos[idx]))
+      this.apropos.set(id, ht)
     }
   }
 

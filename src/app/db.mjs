@@ -181,7 +181,7 @@ class IDB {
         const row = decode(await decrypter(session.clek, data))
         m.set(row._nom, row)
       }
-      return x
+      return m
     } catch (e) {
       throw EX2(e)
     }
@@ -388,11 +388,12 @@ class IDB {
     }
   }
 
-  async getFetats (map) {
+  async loadFetats () {
     try {
+      const feSt = stores.fetat
       await this.db.fetat.each(async (rec) => {
-        const x = new Fetat().fromIdb(await decrypter(stores.session.clek, rec.data))
-        map[x.id] = x
+        const fe = new Fetat().fromIdb(await decrypter(stores.session.clek, rec.data))
+        feSt.setFetat(fe)
       })
     } catch (e) {
       throw IDB.EX2(e)
@@ -756,13 +757,7 @@ avoir au moins un des fichiers attachés disponible en mode avion.
   - `mnom` : une map ayant,
     - _clé_ : `nom` d'un fichier dont le compte a souhaité disposer de la _version la plus récente_ hors ligne.
     - _valeur_ : `idf`, identifiant de cette version constaté dans l'état le plus récent de la note.
-
-schemas.forSchema({
-  name: 'idbAvNote',
-  cols: ['id', 'ns', 'v', 'lidf', 'mnom']
-})
-
-Une note off-line */
+*/
 class AvNote {
   constructor () { 
     this.lidf = []

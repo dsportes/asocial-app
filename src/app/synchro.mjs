@@ -216,8 +216,11 @@ export class ConnexionAvion extends OperationUI {
 
       // Chargement des "avnotes" des notes ayant des fichiers locaux
       await idb.loadAvNotes()  
+      await idb.loadFetats()  
 
       // TODO
+      const m = await idb.getCcep()
+      const c = await compile(m.comptes)
 
       // Chargement des descriptifs des fichiers du presse-papier
       await idb.FLfromIDB()
@@ -245,8 +248,11 @@ export class ConnexionSynchroIncognito extends OperationUI {
 
       const session = stores.session
 
-      if (session.synchro) // Chargement des "avnotes" des notes ayant des fichiers locaux 
+      if (session.synchro) {
+        // Chargement des "avnotes" des notes ayant des fichiers locaux 
         await idb.loadAvNotes()
+        await idb.loadFetats()
+      } 
 
       // TODO : Premier appel Sync
       

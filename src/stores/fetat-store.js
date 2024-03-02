@@ -52,6 +52,15 @@ export const useFetatStore = defineStore('fetat', {
   },
 
   actions: {
+    setFetat (fetat) {
+      if (fetat.suppr) {
+        // TODO
+      } else {
+        this.map.set(fetat.id, fetat)
+        // TODO
+      }
+    },
+
     setAny () {
     },
 
