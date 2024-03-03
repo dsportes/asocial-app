@@ -59,7 +59,7 @@ import stores from '../stores/stores.mjs'
 
 import { afficherDiag } from '../app/util.mjs'
 import { connecterCompte } from '../app/connexion.mjs'
-import { Sponsoring, resetRegistreDesCles } from '../app/modele.mjs'
+import { Sponsoring, RegCles } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ, ID, isAppExc } from '../app/api.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
@@ -108,7 +108,7 @@ export default {
         Retour:
         - rowSponsoring s'il existe
         */
-        resetRegistreDesCles()
+        RegCles.reset()
         stores.reset(true)
         const res = await new ChercherSponsoring().run(this.org, this.pc.hps1)
         if (isAppExc(res) || !res || !res.rowSponsoring) {

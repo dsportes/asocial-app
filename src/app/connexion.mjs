@@ -6,7 +6,7 @@ import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ, ID, PINGTO2, IDBOBS, FLAGS, d14 } from './api.mjs'
-import { resetRegistreDesCles, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, SessionSync, getNg, Versions } from './modele.mjs'
+import { RegCles, compile, Espace, Compta, Avatar, Tribu, Synthese, Chat, NomGenerique, SessionSync, getNg, Versions } from './modele.mjs'
 import {
   openIDB, closeIDB, deleteIDB, getCompte, getCompta, getTribu, loadVersions, getAvatarPrimaire, getColl,
   IDBbuffer, gestionFichierCnx, NLfromIDB, FLfromIDB, lectureSessionSyncIdb
@@ -55,7 +55,7 @@ async function initSession(phrase) {
       session.fsSync = new FsSyncSession()
     }
   }
-  resetRegistreDesCles()
+  RegCles.reset()
   stores.reset(true)
 }
 

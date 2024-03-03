@@ -25,10 +25,15 @@ Chaque element de la map (ayant pour clé l'id de l'avatar) :
 */
 export const usePeopleStore = defineStore('people', {
   state: () => ({
-    map: new Map()
+    map: new Map(),
+    cvs: new Map()
   }),
 
-  getters: { // entrée du people courant
+  getters: { 
+    /* Retourne la CV la plus récente pour une id */
+    getCV: (state) => { return (id) => { return state.cvs.get(id) } },
+
+    // entrée du people courant
     peC: (state) => { 
       const id = stores.session.peopleId
       return state.map.get(id)
@@ -55,19 +60,7 @@ export const usePeopleStore = defineStore('people', {
     },
 
     /* Retourne la CV */
-    getCv: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.cv : null
-      }
-    },
-
-    /* Retourne la CV */
-    photo: (state) => { return (id) => {
-        const ic = stores.config.iconAvatar
-        const e = state.map.get(id)
-        return e && e.cv ? (e.cv.photo || ic) : ic
-      }
-    },
+    getCv: (state) => { return (id) => { return state.cvs.get(id) } },
 
     estPeople: (state) => { return (id) => { 
         return state.map.has(id)
@@ -167,6 +160,11 @@ export const usePeopleStore = defineStore('people', {
   },
   
   actions: {
+    setCV (cv) {
+      const x = this.cvs.get(cv.id)
+      if (!x || x.dh < cv.dh) this.cvs.set(cv.id, cv)
+    },
+
     // retourne { na, cv, sp, chats: Set(), groupes: Map(idg, im)}
     getPeople (id) {
       const e = this.map.get(id)

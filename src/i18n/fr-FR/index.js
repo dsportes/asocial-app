@@ -126,6 +126,7 @@ export default {
   compteKO: 'Le compte #{0} nommé "{1}" vient d\'être supprimé ou a changé de phrase secrète.',
   sessionKO: 'Incident technique nécessitant l\'interruption immédiate de la session. Tenter de se reconnecter plus tard.',
   test: 'Test',
+  dateinc: 'date inconnue',
 
   // Filtre notif
   gravite0: '(ignorer)',
