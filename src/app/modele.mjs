@@ -113,14 +113,9 @@ export class Qui {
 }
 
 /* class CV : Carte de Visite ****************************************
-Création: CV.set(cv, id) => objet CV
+Création: await CV.set(cv, id (, cle)) => objet CV
 cv : { dh, photo, texte}
 id : id du propriétaire (avatar ou groupe)
-
-  cfg.iconAvatar = require('../assets/avatar.jpg')
-  cfg.iconGroupe = require('../assets/groupe.jpg')
-  cfg.iconSuperman = require('../assets/superman.jpg')
-
 */
 export class CV {
   static async set (cv, id, cle) { // cle si l'id n'est pas enregistrée (sponsoring)
@@ -160,9 +155,7 @@ export class CV {
     if (!this.tx) return this.texte
     let i = this.tx.indexOf('\n')
     let l = i === -1 ? this.tx : this.tx.substring(0, i)
-    let j = 0
-    while (j < l.length) { if (l.charAt(j) !== '#') break; else j++ }
-    l = l.substring(j).trim()
+    l = (l.replaceAll('#', '')).trim()
     return l.length < 16 ? l : l.substring(0, 16)
   }
 
@@ -294,8 +287,7 @@ export class Espace extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    const session = stores.session
-    const ns = session.ns
+    const ns = ID.ns(this.id)
     this.rds = Rds.long(row.rds, ns)
 
     this.org = row.org
@@ -453,18 +445,19 @@ export class Partition extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    const session = stores.session
-    const ns = session.ns
+    const estComptable = stores.session.estComptable
+    const clek = session.clek
+    const ns = ID.ns(this.id)
     this.rds = Rds.long(row.rds, ns)
 
     this.qc = row.qc || 0; this.qn = row.qn || 0; this.qv = row.qv || 0
 
-    if (session.estComptable) RegCles.set(await decrypter(session.clek, row.clePK))
+    if (estComptable) RegCles.set(await decrypter(clek, row.clePK))
     /* Pour les comptes standard, 
     compile() de leur compte a enregistré la clé P de LEUR partition */
 
     const clep = RegCles.get(this.id)
-    if (session.estComptable && row.notif) 
+    if (estComptable && row.notif) 
       // Le Comptable peut visiter et notifier TOUTES les partitions (pas seulement la soienne)
       this.notif = Notification.deSerial(await decrypter(clep, row.notif))
 
@@ -487,7 +480,7 @@ export class Partition extends GenDoc {
         if (item.del) r.del = true
         const cleA = await decrypter(clep, r.cleAP)
         RegCles.set(cleA)
-        r.id = Cles.id(cleA, session.ns)
+        r.id = Cles.id(cleA, ns)
         r.it = it
         if (item.notif)
           r.notif = Notification.deSerial(await decrypter(clep, item.notif))
@@ -619,8 +612,8 @@ export class Compte extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    const session = stores.session
-    const ns = session.ns
+    const clek = stores.session.clek
+    const ns = ID.ns(this.id)
     this.rds = Rds.long(row.rds, ns)
 
     this.it = row.it || 0
@@ -631,7 +624,7 @@ export class Compte extends GenDoc {
     this.mav = new Map()
     for(const idx in row.mav) {
       const e = row.mav[idx]
-      RegCles.set(await decrypter(session.clek, e.cleAK))
+      RegCles.set(await decrypter(clek, e.cleAK))
       this.mav.set(ID.long(parsInt(idx), ns), Rds.long(e.rds, ns))
     }
 
@@ -641,17 +634,17 @@ export class Compte extends GenDoc {
     for(const idx in row.mpg) {
       const idg = ID.long(parsInt(idx), ns)
       const e = row.mpg[idx]
-      RegCles.set(await decrypter(session.clek, e.cleGK))
+      RegCles.set(await decrypter(clek, e.cleGK))
       const sav = new Set()
       for(const idx2 in e.lp) sav.add(ID.long(parseInt(idx2), ns))
       this.mpg.set(idg, { rds: Rds.long(e.rds, ns), sav })
     }
 
     if (this.estComptable) {
-      RegCles.set(await decrypter(session.clek, row.cleEK))
+      RegCles.set(await decrypter(clek, row.cleEK))
       this.tp = []
       for(const e of row.tp) {
-        const c = decode(await decrypter(session.clek, e.c))
+        const c = decode(await decrypter(clek, e.c))
         RegCles.set(c.cleP)
         this.tp.push({ code: c.code, qc: e.qc, qn: e.qn, qv: e.qv})
       }
@@ -827,21 +820,21 @@ export class Compta extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    const session = stores.session
-    const ns = session.ns
+    const clek = stores.session.clek
+    const ns = ID.ns(this.id)
     this.rds = Rds.long(row.rds, ns)
 
-    this.dhvu = row.dhvuK ? parseInt(await decrypterStr(session.clek, row.dhvuK)) : 0
+    this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
     this.qv = row.qv
     this.compteurs = new Compteurs(row.compteurs, this.qv)
     this.pc = this.compteurs.pourcents.max
     this.solde = row.solde || 0
-    if (row.ticketsK) this.tickets = decode(await decrypter(session.clek, row.ticketsK))
+    if (row.ticketsK) this.tickets = decode(await decrypter(clek, row.ticketsK))
     this.estA = this.tickets !== undefined
     this.apropos = new Map()
     if (row.apropos) for(const idx in row.apropos) {
       const id = ID.long(parseInt(idx, ns))
-      const ht = decode(await decrypter(session.clek, row.apropos[idx]))
+      const ht = decode(await decrypter(clek, row.apropos[idx]))
       this.apropos.set(id, ht)
     }
   }
@@ -1043,20 +1036,20 @@ export class Avatar extends GenDoc {
   /** compile *********************************************************/
   async compile (row) {
     this.vsh = row.vsh || 0
-    const session = stores.session
-    const ns = session.ns
+    const clek = stores.session.clek
+    const ns = ID.ns(this.id)
     this.rds = Rds.long(row.rds, ns)
     // this.vcv = row.vcv || 0
     // this.hZR = row.hZR
 
     if (row.pcK) { // phrase de contact cryptée par la clé K.
       // this.cleAZC = row.cleAZC
-      this.pc = await decrypterStr(session.clek, row.pcK)
+      this.pc = await decrypterStr(clek, row.pcK)
     }
 
     const clea = RegCles.get(this.id)
     const cv = row.cvA ? await decrypter(clea, row.cvA) : null
-    CV.set(cv, this.id).store()
+    await CV.set(cv, this.id).store()
 
     this.invits = new Map()
     if (row.invits) {
@@ -1067,7 +1060,7 @@ export class Avatar extends GenDoc {
         const e = row.invits[nx] // {cleGA, rds, cvg, im, ivpar, dh}
         const cleG = await decrypter(clea, e.cleGA)
         RegCles.set(cleG)
-        CV.set(e.cvG, this.idg).store()
+        await CV.set(e.cvG, this.idg).store()
         const rds = Rds.long(e.rds, ns)
         const inv = { idav, idg, rds, im: e.im, ivpar: e.ivpar, dh: e.dh }
         this.invits.set(nx, inv)
@@ -1122,17 +1115,17 @@ export class Sponsoring extends GenDoc {
   /* Par l'avatar sponsor */
   async compile (row) {
     this.vsh = row.vsh || 0
-    const session = stores.session
+    const clek = stores.session.clek
 
     this.dh = row.dh
     this.st = row.st
-    this.psp = await decrypter(session.clek, row.pspK)
+    this.psp = await decrypter(clek, row.pspK)
     this.del = row.del || false
     this.estA = !row.clePYC
     this.quotas = row.quotas
     this.don = row.don || 0
     this.dconf = row.dconf || false
-    this.YC = await decrypter(session.clek, row.YCK)
+    this.YC = await decrypter(clek, row.YCK)
     this.ard = await decrypter(this.YC, row.ardYC)
   }
 
@@ -1144,7 +1137,7 @@ export class Sponsoring extends GenDoc {
     this.don = row.don || 0
     this.dconf = row.dconf || false
     this.cleA = await decrypter(cle, row.cleAYC)
-    this.cv = CV.set(row.cvA, 0, cleA)
+    this.cv = await CV.set(row.cvA, 0, cleA)
     this.estA = !row.clePYC
     if (this.estA) this.cleP = await decrypter(cle, row.clePYC)
     this.ard = await decrypter(cle, row.ardYC)
@@ -1335,22 +1328,22 @@ export class Chat extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    const session = stores.session
-    const ns = session.ns
+    const clek = stores.session.clek
+    const ns = ID.ns(this.id)
 
     this.stI = Math.floor(row.st / 10)
     this.stE = row.st % 10
     this.idE = ID.long(row.idE, ns)
     this.idsE = ID.long(row.idsE, ns)
 
-    if (row.CK) this.clec = await decrypter(session.clek, row.CK)
+    if (row.CK) this.clec = await decrypter(clek, row.CK)
     else this.clec = await decrypter(RegCles.get(this.id), row.CA)
     let cleA = RegCles.get(this.idE)
     if (!cleA) {
       cleA = await decrypter(this.clec, row.cleEC)
       RegCles.set(cleA)
     }
-    const cvE = CV.set(row.cvA).store()
+    const cvE = await CV.set(row.cvA).store()
     const cvI = CV.get(this.id)
 
     this.items = []
@@ -1428,28 +1421,47 @@ export class Chat extends GenDoc {
 /** Groupe ***********************************************************************
 _data_:
 - `id` : id du groupe.
-- `v` :  1..N, version du groupe de ses notes et membres.
+- `v` :  1..N, Par convention, une version à 999999 désigne un **groupe logiquement détruit** mais dont les données sont encore présentes. Le groupe est _en cours de suppression_.
 - `dfh` : date de fin d'hébergement.
 
-- `idhg` : id du compte hébergeur crypté par la clé du groupe.
+- `rds`
+- `qn qv n v`: nombres de notes actuel et maximum attribué par l'hébergeur, volume total actuel des fichiers des notes et maximum attribué par l'hébergeur.
+- `idh` : id du compte hébergeur (pas transmise aux sessions).
 - `imh` : indice `im` du membre dont le compte est hébergeur.
 - `msu` : mode _simple_ ou _unanime_.
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
-- `flags` : table des flags des membres (12 bits sur un entier).
-- `anag` : table des nag des membres.
-- `lna` : liste noire _animateurs_ des `nag` des avatars à ne pas inviter / ré-inviter.
-- `lnc` : liste noire _comptes_ des `nag` des avatars à ne pas inviter / ré-inviter.
-- `mcg` : liste des mots clés définis pour le groupe cryptée par la clé du groupe.
-- `cvg` : carte de visite du groupe cryptée par la clé du groupe `{v, photo, info}`.
+- `tid` : table des ids courts des membres.
+- `flags` : tables des flags.
+- `lng` : liste noire _groupe_ des ids (courts) des membres.
+- `lnc` : liste noire _compte_ des ids (courts) des membres.
+- `cvG` : carte de visite du groupe, textes cryptés par la clé du groupe `{v, photo, info}`.
 */
 
 export class Groupe extends GenDoc {
-  get cle () { return getCle(this.id) }
-  get na () { return getNg(this.id) }
-  get nom () { return this.na.nom }
-  get nomc () { return this.na.nomc }
-  get photo () { return this.cv && this.cv.photo ? this.cv.photo : stores.config.iconGroupe }
+  async compile (row) {
+    this.vsh = row.vsh || 0
+    const ns = ID.ns(this.id)
+    this.rds = Rds.long(row.rds, ns)
+
+    this.qn = row.qn; this.qv = row.qv; this.n = row.n; this.v = row.v
+    this.imh = row.imh
+    this.msu = row.msu || null
+
+    this.mmb = new Map()
+    this.tid = new Array(row.tid.length)
+    row.tid.forEach((id, im) => { 
+      const ida = ID.long(id, this.ns)
+      this.tid[im] = ida
+      this.mmb.set(ida, im)
+    })
+    this.flags = row.flags
+    this.lng = new Array(row.lng.length)
+    row.lng.forEach((id, i) => { this.lng[i] = ID.long(id, ns)})
+    this.lnc = new Array(row.lnc.length)
+    row.lnc.forEach((id, i) => { this.lnc[i] = ID.long(id, ns)})
+    await CV.set(row.cvG, this.id).store()
+  }
   
   get nbInvits () { let n = 0
     for (let im = 1; im < this.flags.length; im++) { 
@@ -1466,6 +1478,8 @@ export class Groupe extends GenDoc {
     }
     return n
   }
+
+  imDeId (id) { return this.mmb(id) }
 
   estContact (im) { return this.anag[im] && this.anag[im] > 1 && !(this.flags[im] & FLAGS.AC) }
   estDisparu (im)  { return !this.anag[im] || this.anag[im] === 1 }
@@ -1582,26 +1596,6 @@ export class Groupe extends GenDoc {
     return s
   }
 
-  async compile (row) {
-    this.mmb = new Map()
-    this.tid.forEach((id, im) => { this.mmb.set(ID.long(id, this.ns), im)})
-
-    const session = stores.session
-    this.vsh = row.vsh || 0
-    this.dfh = row.dfh || 0
-    this.msu = row.msu || null
-    this.flags = row.flags || [0]
-    this.anag = row.anag || [0]
-    const x = row.idhg ? parseInt(await decrypterStr(this.cle, row.idhg)) : 0
-    this.idh = x ? ID.long(x, session.ns) : 0
-    this.hebC = this.idh === session.compteId
-    this.imh = row.imh || 0
-    this.mc = row.mcg ? decode(await decrypter(this.cle, row.mcg)) : {}
-    this.cv = row.cvg ? decode(await decrypter(this.cle, row.cvg)) : null
-    this.lna = row.lna || []
-    this.lnc = row.lnc || []
-  }
-
   get mbHeb () { // membre hébergeur
     const gSt = stores.groupe
     return  this.dfh ? null : gSt.getMembre(this.id, this.imh)
@@ -1658,35 +1652,31 @@ export class Groupe extends GenDoc {
 }
 
 /** Membre ***********************************************************
-_data_:
 - `id` : id du groupe.
 - `ids`: identifiant, indice `im` de membre relatif à son groupe.
 - `v` : 
 - `vcv` : version de la carte de visite du membre.
-- `dlv` : date de dernière signature + 365 lors de la connexion du compte de l'avatar membre du groupe.
-- `ddi` : date de la dernière invitation. 0 s'il n'a jamais été invité.
-- `dpa` : date de la _première_ période d'activité. 0 s'il ne l'a jamais été.
-- `ddp` : date de passivité (entre `dpa` et `dfa`): date la plus élevée depuis que le membre n'est pas hébergeur et n'a ni accès aux membres ni aux notes. 0 s'il est actif et est soit hébergeur ou a accès aux notes ou aux membres.
-- `dfa` : date de la _fin de la dernière_ période d'activité. 0 s'il est toujours actif.
-- `inv` : dernière invitation. Liste des indices des animateurs ayant validé l'invitation.
-- `nag` : `[nom, cle]` : nom et clé de l'avatar crypté par la clé du groupe.
-- `cva` : carte de visite du membre `{v, photo, info}` cryptée par la clé du membre.
-- `ardg` : ardoise entre les animateurs et le membre, cryptée par la clé du groupe.
+
+- `ddi` : date de l'invitation la plus récente.
+- **dates de début de la première et fin de la dernière période...**
+  - `dac fac` : d'activité
+  - `dln fln` : d'accès en lecture aux notes.
+  - `den fen` : d'accès en écriture aux notes.
+  - `dam fam` : d'accès aux membres.
+- `flagsiv` : flags de l'invitation en cours.
+- `inv` : . Liste des indices des animateurs ayant validé la dernière invitation.
+- `idm` : id de l'avatar membre
+- `cleAG` : clé A de l'avatar membre cryptée par la clé G du groupe.
+- `cvA` : carte de visite du membre `{v, photo, info}`, textes cryptés par la clé A de l'avatar membre.
 
 **Extension pour une fiche Invitation **
 - ext : { flags, invs: map, chatg }
   invs : clé: im, valeur: { cva, nag }
 */
 export class Membre extends GenDoc {
-  // Du groupe
-  get cleg () { return getCle(this.id) }
-  get ng () { return getNg(this.id) } // nom complet du groupe
-  // na : nom complet de l'avatar membre
-
   async compile (row) {
-    const aSt = stores.avatar
+    const ns = ID.ns(this.id)
     this.vsh = row.vsh || 0
-    this.dac = row.dac || 0
     this.ddi = row.ddi || 0
     this.dac = row.dac || 0
     this.fac = row.fac || 0
@@ -1698,11 +1688,12 @@ export class Membre extends GenDoc {
     this.fam = row.fam || 0
     this.flagsiv = row.flagsiv || 0
     this.inv = row.inv || null
+    this.idm = ID.long(row.idm, ns)
     this.na = NomGenerique.from(decode(await decrypter(this.cleg, row.nag)))
     this.nag = await Groupe.getNag (this.ng, this.na) 
     this.estAc = aSt.compte.avatarIds.has(this.na.id)
     this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
-
+    /*
     if (row.ext) {
       const pSt = stores.people
       this.ext = { flags: row.ext.flags, invs: new Map() }
@@ -1718,6 +1709,7 @@ export class Membre extends GenDoc {
         if (!aSt.compte.mav.has(na.id)) pSt.setCv(na, cv) // c'est un people
       }
     }
+    */
   } 
 
   static async rowNouveauMembre (nag, na, im, cv, nvgr) {
@@ -1748,34 +1740,36 @@ _data_:
 - `ids` : `1`
 - `v` : sa version.
 
-- `items` : liste ordonnée des items de chat `{im, dh, lg, textg}`
+- `items` : liste ordonnée des items de chat `{im, dh, lg, texte}`
   - `im` : indice membre de l'auteur,
   - `dh` : date-heure d'enregistrement de l'item,
-  - `dhx` : date-heure d'effacement de l'item,
-  - `l` : longueur du texte en clair de l'item. 0 correspond à un item effacé.
-  - `t` : texte crypté par la clé du groupe.
+  - `dhx` : date-heure de suppression
+  - `t` : texte (gzippé) crypté par la clé G du groupe.
 */
 export class Chatgr extends GenDoc {
-  // Du groupe
-  get cleg () { return getCle(this.id) }
-  get ng () { return getNg(this.id) } // nom complet du groupe
 
   async compile (row) {
+    this.vsh = row.vsh || 0
     const gSt = stores.groupe
+    const pSt = stores.people
+    const cle = RegCles.get(this.id)
+    const g = gSt.groupe(this.id)
     this.items = []
     const a = []
     this.tit = ''
     this.dh = 0
     const mbs = gSt.egr(this.id)
     if (row.items) for (const item of row.items) {
-      const i = { im: item.im, dh: item.dh, l: item.l, t: '', dhx: item.dhx}
+      const i = { im: item.im, dh: item.dh, t: '', dhx: item.dhx}
       if (!item.dhx) {
-        i.t = ungzipB(await decrypter(this.cleg, item.t))
+        i.t = ungzipB(await decrypter(cle, item.t))
         if (!this.tit && i.t) this.tit = titre(i.t)
       }
       if (this.dh === 0) this.dh = i.dhx ? i.dhx : i.dh
-      const mb = mbs ? mbs.membres.get(i.im) : null
-      a.push('_**' + $t('dedh', [mb ? mb.na.nomc : '#' + i.im, dhstring(i.dh)]) + '**_')
+      const idm = g.tid[i.im]
+      if (!idm) continue
+      const cv = pSt.getCV(idm) || await CV.set(null, idm)
+      a.push('_**' + $t('dedh', [cv.nomC, dhstring(i.dh)]) + '**_')
       if (i.dhx) a.push('\n' + $t('supprime', [dhstring(i.dhx)]) + '\n')
       else a.push('\n' + i.t + '\n')
       this.items.push(i)
@@ -1786,38 +1780,67 @@ export class Chatgr extends GenDoc {
 
   static async getItem (cleg, im, txt, dh) {
     const t = txt && txt.length ? await crypter(cleg, gzipB(txt)) : null
-    return { im: im, lg: txt ? txt.length || 0 : 0, t, dh: dh || Date.now() }
+    return { im: im, t, dh: dh || Date.now() }
   }
 }
 
 /* Note ***************************************************
 _data_:
 - `id` : id de l'avatar ou du groupe.
-- `ids` : identifiant relatif à son avatar.
+- `ids` : identifiant aléatoire relatif à son avatar.
 - `v` : 1..N.
 
-- `im` : exclusivité dans un groupe. L'écriture et la gestion de la protection d'écriture sont restreintes au membre du groupe dont `im` est `ids`. 
-// - `p` : _0: pas protégé, 1: protégé en écriture_.
-- `v` : volume total des fichiers attachés.
-- `mc` :
-  - note personnelle : vecteur des index de mots clés.
-  - note de groupe : map sérialisée,
-    - _clé_ : `hgc` du compte l'auteur (1 pour les mots clés du groupe),
-    - _valeur_ : vecteur des index des mots clés attribués par le membre.
-- `txts` : crypté par la clé de la note.
-  - `d` : date-heure de dernière modification du texte.
-  - `t` : texte gzippé ou non.
-- `mfas` : map des fichiers attachés.
-- `refs` : triplet `[id_court, ids, nomp]` crypté par la clé de la note, référence de sa  note _parent_.
+- `im` : exclusivité dans un groupe. L'écriture est restreinte au membre du groupe dont `im` est `ids`. 
+- `vf` : volume total des fichiers attachés.
+- `ht` : liste des hashtags _personnels_ cryptée par la clé K du compte.
+- `htg` : note de groupe : liste des hashtags cryptée par la clé du groupe.
+- `htm` : NON TRANSMIS en session pour une note de groupe seulement, hashtags des membres. Map:
+    - _clé_ : id courte du compte de l'auteur,
+    - _valeur_ : liste des hashtags cryptée par la clé K du compte.
+- `l` : liste des _auteurs_ (leurs `im`) pour une note de groupe.
+- `d` : date-heure de dernière modification.
+- `texte` : texte (gzippé) crypté par la clé de la note.
+- `mfa` : map des fichiers attachés.
+- `ref` : triplet `[id_court, ids, nomp]` crypté par la clé de la note, référence de sa note _parent_.
 
 **Map `mfas` des fichiers attachés dans une note:**
 - _clé_ `idf`: identifiant du fichier.
 - _valeur_ : { lg, datas }
   - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v d'un note.
-  - `datas` : sérialisation cryptée par la clé S du note de : `{ nom, info, dh, type, gz, lg, sha }`.
+  - `data` : sérialisation cryptée par la clé de la note de : `{ nom, info, dh, type, gz, lg, sha }`.
 
 */
 export class Note extends GenDoc {
+  async compile (row) {
+    this.vsh = row.vsh || 0
+    const ns = ID.ns(this.id)
+    this.deGroupe = ID.estGroupe(this.id)
+    const clek = stores.session.clek
+    const cleg = this.deGroupe ? RegCles.get(this.id) : null
+
+    this.im = row.im || 0
+    if (row.ht) this.ht = await decrypter(clek, row.ht)
+    if (row.htg) this.htg = await decrypter(cleg, row.htg)
+    this.l = row.l || []
+    this.d = row.d || 0
+
+    const t = await decrypter(this.deGroupe ? cleg : clek, row.texte)
+    this.texte = ungzipB(t)
+    this.titre = titre(this.texte)
+
+    // row.ref à une id de note COURTE
+    this.ref = row.ref || null
+    if (this.ref) this.ref[0] = ID.long(this.ref[0], ns)
+
+    this.mfa = new Map()
+    if (this.vf && row.mfa) for (const idf in row.mfa) {
+      const [lg, x] = row.mfa[idf]
+      const f = decode(await decrypter(this.deGroupe ? cleg : clek, x))
+      f.idf = parseInt(idf)
+      this.mfa.set(f.idf, f)
+    }
+  }
+
   static sort1 (a, b) { // les fake à la fin
     const x = (a.note ? '1' : '2') + a.label
     const y = (b.note ? '1' : '2') + b.label
@@ -1849,42 +1872,6 @@ export class Note extends GenDoc {
 
   get nomFake () { return '$' + this.rids }
 
-  async compile (row) {
-    const session = stores.session
-    this.im = row.im || 0
-    // this.p = row.p || 0
-    this.v = row.v || 0
-    this.deGroupe = ID.estGroupe(this.id)
-    if (this.deGroupe) {
-      this.hgc = hash(await crypter(session.clek, '' + this.id, 1))
-      const mx = row.mc ? decode(row.mc) : {}
-      this.mc0 = mx['0'] || new Uint8Array([])
-      this.smc = new Set(this.mc0)
-      this.mc = mx[this.hgc] || new Uint8Array([])
-      this.mc.forEach(x => {this.smc.add(x)})
-    } else {
-      this.mc = row.mc || new Uint8Array([])
-      this.smc = this.mc ? new Set(this.mc) : new Set()
-    }
-    const x = decode(await decrypter(this.cle, row.txts))
-    this.txt = ungzipB(x.t)
-    this.titre = titre(this.txt)
-    this.dh = x.d
-    this.auts = row.auts || []
-    // row.ref à une id de note COURTE
-    this.ref = row.ref ? decode(await decrypter(this.cle, row.ref)) : null
-    if (this.ref) this.ref[0] = ID.long(this.ref[0], NomGenerique.ns)
-    this.mfa = new Map()
-    if (this.v) {
-      const map = row.mfas ? decode(row.mfas) : {}
-      for (const idf in map) {
-        const [lg, x] = map[idf]
-        const f = decode(await decrypter(this.cle, x))
-        f.idf = parseInt(idf)
-        this.mfa.set(f.idf, f)
-      }
-    }
-  }
 
   /*
   initTest (id, ids, ref, txt, dh, n, v) { // pour les tests
