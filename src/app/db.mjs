@@ -176,10 +176,10 @@ class IDB {
       await this.db.singletons.each(rec => { 
         if (rec.n > 2) r.push(rec.data)
       })
-      const m = new Map()
+      const m = {}
       for(const data of r) {
         const row = decode(await decrypter(session.clek, data))
-        m.set(row._nom, row)
+        m[row._nom] = row
       }
       return m
     } catch (e) {
@@ -194,10 +194,10 @@ class IDB {
     const session = stores.session
     try {
       const r = await this.db.collections.where('id').equals(id).toArray()
-      const m = new Map()
+      const m = {}
       for(const data of r) {
         const row = decode(await decrypter(session.clek, data))
-        let e = x.get(row._nom); if (!e) { e = []; x.set(row._nom, e)}
+        let e = m[row._nom]; if (!e) { e = []; x[row._nom] = e }
         e.push(row)
       }
       return m
@@ -492,7 +492,7 @@ export class IDBbuffer {
   purgeGroupeMbIDB (id) { if (this.w) this.lgrmb.add(id) }
   purgeGroupeNoIDB (id) { if (this.w) this.lgrno.add(id) }
 
-  async commit () { 
+  async commit (dataSync) { 
     if (!this.w) return
 
     const clek = stores.session.clek
@@ -505,9 +505,9 @@ export class IDBbuffer {
       idgcno: [] // groupes notes à purger
     }
 
-    arg.singl.push({ 
+    if (dataSync) arg.singl.push({ 
       n: IDB.snoms.datasync, 
-      data: await crypter(clek, new Uint8Array(syncQueue.dataSync.serial))
+      data: await crypter(clek, new Uint8Array(dataSync.serial))
     })
 
     for(const row of this.lmaj) {

@@ -1,6 +1,8 @@
 import { afficherDiag } from './util.mjs'
-import { idb, openIDB, deleteIDB } from './db.mjs'
+import { idb, openIDB, IDBbuffer } from './db.mjs'
 import { OperationUI } from './operations.mjs'
+import { DataSync } from './api.mjs'
+import { post } from './net.mjs'
 
 class Queue {
   constructor () {
@@ -203,12 +205,102 @@ export async function connexion(phrase, razdb) {
   }
 }
 
+/* Store Buffers *******************************************************/
+class SBccep {
+  constructor () {
+    this.s = stores.session
+    this.compte = null
+    this.compta = null
+    this.espace = null
+    this.partition = null
+  }
+
+  store (ds) {
+    this.s.setDataSync(ds)
+    if (this.compte) this.s.setCompte(this.compte)
+    if (this.compta) this.s.setCompta(this.compta)
+    if (this.espace) this.s.setEspace(this.espace)
+    if (this.partition) this.s.setPartition(this.partition)
+  }
+}
+
+class SBav {
+  constructor () {
+    this.s = stores.session
+    this.a = stores.avatar
+    this.n = stores.notes
+    this.p = stores.people
+    this.avatar = null
+    this.notes = new Map()
+    this.chats = new Map()
+    this.sponsorings = new Map()
+    this.tickets = new Map()
+  }
+
+  setA (d) { this.avatar = d }
+
+  setN (d) { this.notes.set(d.ids, d) }
+
+  setC (d) { this.chats.set(d.ids, d) }
+
+  setS (d) { this.sponsorings.set(d.ids, d) }
+
+  setT (d) { this.tickets.set(d.ids, d) }
+
+  store (ds) {
+    if (ds) this.s.setDataSync(ds)
+    if (this.avatar) this.a.setAvatar(this.avatar)
+    if (this.notes.size) for(const x of this.notes) 
+      this.n.setNote(x)
+    if (this.chats.size) for(const x of this.chats) {
+      this.a.setChat(x); this.p.setPCh(x.idE, x.id)
+    }
+    if (this.sponsorings.size) for(const x of this.sponsorings) 
+      this.a.setSponsoring(x)
+    if (this.tickets.size) for(const x of this.tickets) 
+      this.a.setTicket(x)
+  }
+}
+
+class SBgr {
+  constructor () {
+    this.s = stores.session
+    this.g = stores.groupe
+    this.n = stores.notes
+    this.p = stores.people
+    this.groupe = null
+    this.chatgr = null
+    this.notes = new Map()
+    this.membres = new Map()
+  }
+
+  setG (d) { this.groupe = d }
+
+  setC (d) { this.chatgr = d }
+
+  setN (d) { this.notes.set(d.ids, d) }
+
+  setM (d) { this.membres.set(d.ids, d) }
+
+  store (ds) {
+    if (ds) this.s.setDataSync(ds)
+    if (this.groupe) this.g.setGrouper(this.groupe)
+    if (this.chatgr) this.g.setChatgr(this.chatgr)
+    if (this.notes.size) for(const x of this.notes) 
+      this.n.setNote(x)
+    if (this.membres.size) for(const x of this.membres) {
+      this.g.setMembre(x); this.p.setPGr(x.idm, x.id)
+    }
+  }
+}
+
 /* Connexion à un compte en mode avion *********************************/
-export class ConnexionAvion extends OperationUI {
+export class ConnexionAvion extends Operation {
   constructor() { super('ConnexionCompte') }
 
   async run() {
     try {
+      // idb: ouverte - session.clek compteId définis
       this.auj = AMJ.amjUtc()
       this.dh = 0
 
@@ -218,9 +310,41 @@ export class ConnexionAvion extends OperationUI {
       await idb.loadAvNotes()  
       await idb.loadFetats()  
 
-      // TODO
-      const m = await idb.getCcep()
-      const c = await compile(m.comptes)
+      { // Phase 1 : CCEP
+        const sb = new SBccep()
+        const ds = await idb.getDataSync()
+        const m = await idb.getCcep()
+        sb.compte = await compile(m.comptes)
+        sb.compta = await compile(m.comptas)
+        sb.espace = await compile(m.espaces)
+        if (m.partitions) sb.partition = await compile(m.partitions)
+        sb.store(ds)
+      }
+      
+      { // Phase 2 : itérative pour chaque avatar
+        for(const eds of ds.avatars) {
+          const sb = new SBav()
+          const m = await idb.getSA (eds.id)
+          if (m.avatars) for(const row of m.avatars) sb.setA(await compile(row))
+          if (m.notes) for(const row of m.notes) sb.setN(await compile(row))
+          if (m.chats) for(const row of m.chats) sb.setC(await compile(row))
+          if (m.sponsorings) for(const row of m.sponsorings) sb.setS(await compile(row))
+          if (m.tickets) for(const row of m.tickets) sb.setT(await compile(row))
+          sb.store()
+        }
+      }
+      
+      { // Phase 3 : itérative pour chaque groupe
+        for(const eds of ds.groupes) {
+          const sb = new SBgr()
+          const m = await idb.getSA (eds.id)
+          if (m.groupes) for(const row of m.groupes) sb.setG(await compile(row))
+          if (m.chatgrs) for(const row of m.chatgrs) sb.setC(await compile(row))
+          if (m.notes) for(const row of m.notes) sb.setN(await compile(row))
+          if (m.membres) for(const row of m.membres) sb.setM(await compile(row))
+          sb.store()
+        }
+      }
 
       // Chargement des descriptifs des fichiers du presse-papier
       await idb.FLfromIDB()
@@ -240,12 +364,37 @@ export class ConnexionAvion extends OperationUI {
 export class ConnexionSynchroIncognito extends OperationUI {
   constructor() { super('ConnexionCompte') }
 
-  async run() {
-    try {
-      this.auj = AMJ.amjUtc()
-      this.buf = new IDBbuffer()
-      this.dh = 0
+  async retCCep (ret, ds, sb) {
+    if (ret.rowCompte) {
+      this.compte = await compile(ret.rowCompte)
+      ds.compte.vs = ds.compte.vb
+      sb.compte = this.compte
+    }
+    if (ret.rowCompta) {
+      this.compta = await compile(ret.rowCompta)
+      ds.compta.vs = ds.compta.vb
+      sb.compta = this.compta
+    }
+    if (ret.rowEspace) {
+      this.espace = await compile(ret.rowEspace)
+      ds.espace.vs = ds.espace.vb
+      sb.espace = this.espace
+    }
+    if (ret.rowPartition) {
+      this.partition = await compile(ret.rowPartition)
+      ds.partition.vs = ds.partition.vb
+      sb.partition = this.partition
+    }
+  }
 
+  async run() {
+    /* TODO: synchro
+    - fusion ds serveur et ds IDB
+    - chargement des rows depuis IDB
+    - gérer les suppressions groupes / avatars
+    - gérer fichiers des notes AvNote / Fetat
+    */
+    try {
       const session = stores.session
 
       if (session.synchro) {
@@ -254,23 +403,81 @@ export class ConnexionSynchroIncognito extends OperationUI {
         await idb.loadFetats()
       } 
 
-      // TODO : Premier appel Sync
-      
-      // Premier retour de Sync a rempli session. compteId, clek, nomBase
-      this.blOK = false // la base locale est vide, aucune données utilisables
-      if (session.synchro) {
-        await idb.open()
-        this.blOK = idb.checkAge()
-        await idb.storeBoot()
-        if (!this.blOK)
-          setTrigramme(session.nombase, await getTrigramme())
-      }
-      // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK
+      let ds
+      { // Phase 1 : CCEP
+        const sb = new SBccep()
+        const buf = new IDBbuffer()
+        const args =  { authData: session.authToken, optionC: true, dataSync: DataSync.nouveau() }
+        const ret = await post(this, 'Sync', args)
+        ds = new DataSync(ret.dataSync)
+        await this.retCCep(ret, ds, sb)
 
-      // TODO : appels Sync suivant
-  
-      const aSt = stores.avatar
-      const gSt = stores.groupe
+        // Premier retour de Sync a rempli session. compteId, clek, nomBase
+        this.blOK = false // la base locale est vide, aucune données utilisables
+        if (session.synchro) {
+          await idb.open()
+          this.blOK = idb.checkAge()
+          await idb.storeBoot()
+          if (!this.blOK)
+            setTrigramme(session.nombase, await getTrigramme())
+        }
+        // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK
+        
+        await buf.commit(ds)
+        sb.store(ds)
+      }
+
+      while (true) { // Phase 2 : itérative pour chaque avatar / groupe
+        let item = null
+        for(const e of ds.avatars) { 
+          if (e.vs === e.vb) continue // déjà traité
+          item = e
+          break
+        }
+        if (!item) for(const e of ds.groupes) { 
+          if (e.vs === e.vb) continue // déjà traité
+          item = e
+          break
+        }
+        if (!item) break // tous traités
+
+        const ida = item.id
+
+        const g = ID.estGroupe(ida)
+        const sb = g ? new SBgr() : new SBav()
+        const buf = new IDBbuffer()
+        const args =  { authData: session.authToken, dataSync: ds, ida }
+        const ret = await post(this, 'Sync', args)
+        ds = new DataSync(ret.dataSync)
+        const sbccep = new SBccep()
+        await this.retCCep(ret, ds, sbccep)
+
+        if (ret.rowAvatars) {
+          sb.setA(await compile(ret.rowAvatars))
+          item.vs = item.vb
+          ds.setAv(item.id, item)
+        }
+        if (ret.rowGroupes) {
+          sb.setG(await compile(ret.rowGroupes))
+          item.vs = item.vb
+          ds.setGr(item.id, item)
+        }
+        if (ret.rowNotes) 
+          for(const row of ret.rowNotes) sb.setN(await compile(row))
+        if (ret.rowChats) 
+          for(const row of ret.rowChats) sb.setC(await compile(row))
+        if (ret.rowSponsorings) 
+          for(const row of ret.rowSponsorings) sb.setS(await compile(row))
+        if (ret.rowTickets) 
+          for(const row of ret.rowTickets) sb.setT(await compile(row))
+        if (ret.rowMembres) 
+          for(const row of ret.rowMembres) sb.setM(await compile(row))
+        if (ret.rowChatgrs) 
+          for(const row of ret.rowChatgrs) sb.setC(await compile(row))
+
+        buf.commit(ds)
+        sb.store()
+      }
 
       if (session.synchro) // Chargement des descriptifs des fichiers du presse-papier
         await idb.FLfromIDB()

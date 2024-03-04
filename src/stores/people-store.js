@@ -5,23 +5,14 @@ import { NomGenerique } from '../app/modele.mjs'
 import { difference, intersection } from '../app/util.mjs'
 
 /* 
-Un "people" est un avatar :
-- (M) soit un membre d'un des groupes du compte qui n'est PAS avatar du compte
-- (T) soit un SPONSOR de la tribu du compte
-- (C) soit l'interlocuteur d'un chat avec un avatar du compte
-Un people peut l'être à plusieurs titre:
-  - N fois pour M, N fois au titre C, 1 fois au titre T
-La "carte de visite" d'un people provient :
-  - de l'un membres M
-  - soit d'un des chats
-La plus récente est conservée. 
-Chaque element de la map (ayant pour clé l'id de l'avatar) :
-- na : nom d'avatar
-- disparu : true si le people a été détecté disparu
-- sp: 0: pas sponsor de la tribu, 1: sponsor de la tribu
-- cv : carte de visite de l'avatar si elle a été explicitement chargée
-- chats: Map par chats, cle id(de l'avatar) valeur [idsI, idsE].
-- groupes : Map des groupes cle:idg, valeur:ids auquel le people participe
+Un people est un avatar (pas du compte):
+- soit membre d'un groupe auquel le compte accède,
+- soit interlocuteur d'un chat avec un avatar du compte.
+Map:
+- clé: id de l'avatar
+- valeur: { sgr, sch }
+  - sgr: Set des groupes dont le people est membre.
+  - sch: Set des avatars du compte avec lequel le people a un chat.
 */
 export const usePeopleStore = defineStore('people', {
   state: () => ({
@@ -32,6 +23,19 @@ export const usePeopleStore = defineStore('people', {
   getters: { 
     /* Retourne la CV la plus récente pour une id */
     getCV: (state) => { return (id) => { return state.cvs.get(id) } },
+
+    getSgr: (state) => { return (idp) => { 
+        const e = state.map.get(idp)
+        return e ? e.sgr : new Set() 
+      }
+    },
+
+    getSch: (state) => { return (idp) => { 
+        const e = state.map.get(idp)
+        return e ? e.sch : new Set() 
+      }
+    },
+
 
     // entrée du people courant
     peC: (state) => { 
@@ -163,6 +167,50 @@ export const usePeopleStore = defineStore('people', {
     setCV (cv) {
       const x = this.cvs.get(cv.id)
       if (!x || x.dh < cv.dh) this.cvs.set(cv.id, cv)
+    },
+
+    delGr (idg) {
+      const ppvides = new Set()
+      this.map.forEach((e, idp) => {
+        if (e.sgr.has(idg)) {
+          e.sgr.delete(idg)
+          if (!e.sgr.size && !e.sch.size) ppvides.add(idp)
+        }
+      })
+      if (ppvides.vides.size) ppvides.forEach(idp => { this.map.delete(idp) })
+    },
+
+    delCh (ida) {
+      const ppvides = new Set()
+      this.map.forEach((e, idp) => {
+        if (e.sch.has(ida)) {
+          e.sch.delete(ida)
+          if (!e.sgr.size && !e.sch.size) ppvides.add(ida)
+        }
+      })
+      if (ppvides.vides.size) ppvides.forEach(idp => { this.map.delete(idp) })
+    },
+
+    setPGr (idp, idg) {
+      let e = this.map.get(idp); if (!e) { e = { sgr: new Set(), sch: new Set()}; this.map.set(idp, e)}
+      e.sgr.add(idg)
+    },
+
+    delPGr (idp, idg) {
+      const e = this.map.get(idp); if (!e) return
+      e.sgr.delete(idg)
+      if (!e.sgr.size && !e.sch.size) this.map.delete(idp)
+    },
+
+    setPCh (idp, ida) {
+      let e = this.map.get(idp); if (!e) { e = { sgr: new Set(), sch: new Set()}; this.map.set(idp, e)}
+      e.sch.add(ida)
+    },
+
+    delPCh (idp, ida) {
+      const e = this.map.get(idp); if (!e) return
+      e.sch.delete(ida)
+      if (!e.sgr.size && !e.sch.size) this.map.delete(idp)
     },
 
     // retourne { na, cv, sp, chats: Set(), groupes: Map(idg, im)}
