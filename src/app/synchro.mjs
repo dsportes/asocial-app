@@ -1,7 +1,7 @@
 import { afficherDiag } from './util.mjs'
 import { idb, openIDB, IDBbuffer } from './db.mjs'
 import { OperationUI } from './operations.mjs'
-import { DataSync } from './api.mjs'
+import { DataSync, ID, Rds } from './api.mjs'
 import { post } from './net.mjs'
 
 class Queue {
@@ -10,50 +10,77 @@ class Queue {
 
     this.job = null // traitement en cours
 
-    // version des rds arrivés et pas encore traités
-    this.compte = { rds: 0, row: null }
-    this.compta = { rds: 0, row: null }
-    this.espace = { rds: 0, row: null }
-    this.partition = { rds: 0, row: null }
-    this.avatars = new Map() // cle: rds, valeur: version
+    /* Evénnements à traiter
+      v : si true version des événnement arrivés et pas encore traités
+      mv : plus haute version traitée
+    */
+    this.compte = { rowv: null, mv: 0, row: null }
+    this.compta = { rowv: null, mv: 0, row: null }
+    this.espace = { rowv: null, mv: 0, row: null }
+    this.partition = { rowv: null, mv: 0, row: null }
+    this.avatars = new Map() // cle: rds, valeur: v
     this.groupes = new Map()
   }
 
-  postResp (r) {
-    if (this.compta.v > v) return // la dernière version est à obtenir
-    this.compta.v = v
-    this.rowCompta = row || null
+  /* Au retour de n'importe quelle opération un ou plusieurs rows CCEP
+  peuvent être retournés. Ils vont être enregistrés dans le flow normal de synchro
+  resp.compte || resp.compta || resp.espace || resp.partition
+  */
+  postResp (resp) { // Au retour d'un POST PAS Sync
+    if (resp.rowCompte && (resp.rowCompte.v > this.compte.mv)) {
+      this.compte.row = resp.rowCompte
+      this.compte.rowv = null
+      this.compte.mv = resp.rowCompte.v
+    }
+    if (resp.rowCompta && (resp.rowCompta.v > this.compta.mv)) {
+      this.compta.row = resp.rowCompta
+      this.compta.rowv = null
+      this.compta.mv = resp.rowCompta.v
+    }
+    if (resp.rowEspace && (resp.rowEspace.v > this.espace.mv)) {
+      this.espace.row = resp.rowEspace
+      this.espace.rowv = null
+      this.espace.mv = resp.rowEspace.v
+    }
+    if (resp.rowPartition && (resp.rowPartition.v > this.partition.mv)) {
+      this.partition.row = resp.rowPartition
+      this.partition.rowv = null
+      this.partition.mv = resp.rowPartition.v
+    }
     this.reveil()
   }
 
-  setRows (rows) { // Arrivée de rows versions
+  /* A l'arrivée d'un ou plusuieurs row versions sur écoute / WS */
+  setRows (rows) { 
+    const session = stores.session
     if (rows) rows.forEach(row => {
-      const nom = Rds.typeS(row.rds)
+      const rds = Rds.long(row.rds, session.ns)
+      const nom = Rds.typeS(rds)
       switch (nom) {
       case 'comptes' : {
-        if (this.compte.v < row.v) { this.compte.v = row.v; this.compte.row = null }
+        if (this.compte.mv < row.v) { this.compte.mv = row.v; this.compte.rowv = row; this.compte.row = null }
         break
       }
       case 'comptas' : {
-        if (this.compta.v < row.v) { this.compta.v = row.v; this.compta.row = null }
+        if (this.compta.v < row.v) { this.compta.mv = row.v; this.compta.rowv = row; this.compta.row = null }
         break
       }
       case 'espaces' : {
-        if (this.espace < row.v) { this.espace.v = row.v; this.espace.row = null }
+        if (this.espace < row.v) { this.espace.mv = row.v; this.espace.rowv = row; this.espace.row = null }
         break
       }
       case 'partitions' : {
-        if (this.partition < row.v) { this.partition.v = row.v; this.partition.row = null }
+        if (this.partition < row.v) { this.partition.mv = row.v; this.partition.rowv = row; this.partition.row = null }
         break
       }
       case 'avatars' : {
-        const x = this.avatars.get(row.rds)
-        if (!x || x < row.v) this.avatars.set(row.rds, row.v)
+        const v = this.avatars.get(rds)
+        if (!v || v < row.v) this.avatars.set(rds, row.v)
         break
       }
       case 'groupes' : {
-        const x = this.groupes.get(row.rds)
-        if (!x || x < row.v) this.groupes.set(row.rds, row.v)
+        const v = this.groupes.get(rds)
+        if (!v || v < row.v) this.groupes.set(rds, row.v)
         break
       }
       }
@@ -61,24 +88,37 @@ class Queue {
     })
   }
 
-  get CCEPtodo () {
-    return this.compte.v || this.compta.v || this.espace.v || this.partition.v
+  get VersionCCEPtodo () {
+    return this.compte.rowv || this.compta.rowv || this.espace.rowv || this.partition.rowv
+  }
+
+  get RowCCEPtodo () {
+    return this.compte.row || this.compta.row || this.espace.row || this.partition.row
   }
 
   reveil () {
     if (this.job || !stores.session.ok) return
-    if (this.CCEPtodo) {
-      this.job = new Job(1)
-      const ccep = {
-        compte: { ...this.compte },
-        compta: { ...this.compta },
-        espace: { ...this.espace },
-        partition: { ...this.partition }
-      }
-      setTimeout(() => this.job.doCcep(ccep), 5)
+    if (this.RowCCEPtodo) { // PRIORITE 1 : Traitement des rows directement reçus en retour d'un POST
+      this.job = new Job(0)
+      const arg = { }
+      if (this.compte.row) { arg.rowCompte = this.compte.row; this.compte.row = null }
+      if (this.compta.row) { arg.rowCompta = this.compta.row; this.compta.row = null }
+      if (this.espace.row) { arg.rowEspace = this.espace.row; this.espace.row = null }
+      if (this.partition.row) { arg.rowPartition = this.partition.row; this.partition.row = null }
+      setTimeout(() => this.job.doRowCcep(arg), 5)
       return
     }
-    if (this.this.avatars.size) {
+    if (this.VersionCCEPtodo) { // PRIORITE 2 : Traitement des versions des CCEP reçus sur écoute / WS
+      this.job = new Job(1)
+      const arg = { }
+      if (this.compte.rowv) { arg.compte = this.compte.rowv; this.compte.rowv = null }
+      if (this.compta.rowv) { arg.compta = this.compta.rowv; this.compta.rowv = null }
+      if (this.espace.rowv) { arg.espace = this.espace.rowv; this.espace.rowv = null }
+      if (this.partition.rowv) { arg.partition = this.partition.rowv; this.partition.rowv = null }
+      setTimeout(() => this.job.doVersionCcep(arg), 5)
+      return
+    }
+    if (this.avatars.size) { // Traitement d'UN versions d'un sous-arbre avatar reçu sur écoute / WS
       this.job = new Job(2)
       for (const [rds, v] of this.avatars) {
         setTimeout(() => this.job.doAvatar(rds, v), 5)
@@ -86,7 +126,7 @@ class Queue {
       }
       return
     }
-    if (this.this.groupes.size) {
+    if (this.groupes.size) { // Traitement d'UN versions d'un sous-arbre groupe reçu sur écoute / WS
       this.job = new Job(3)
       for (const [rds, v] of this.groupes) {
         setTimeout(() => this.job.doGroupe(rds, v), 5)
@@ -96,29 +136,14 @@ class Queue {
     }
   }
 
-  finJob () {
+  finJob (ds) {
+    /* Le ds contient les dernières versions pour les CCEP, avatars et groupes
+    Maj de queue
+    */
+    // TODO
+    this.dataSync = ds
     this.job = null
     this.reveil()
-  }
-
-  finAv (rds, v) {
-    const x = this.avatars.get(rds)
-    if (x && x.v <= v) this.avatars.delete(rds)
-    this.finJob()
-  }
-
-  finGr (rds, v) {
-    const x = this.groupes.get(rds)
-    if (x && x.v <= v) this.avatars.delete(rds)
-    this.finJob()
-  }
-
-  finCcep (ccep) {
-    if (this.ccep.compte.v <= ccep.compte.v) this.ccep.compte.v = { v: 0, row: null }
-    if (this.ccep.compta.v <= ccep.compta.v) this.ccep.compta.v = { v: 0, row: null }
-    if (this.ccep.espace.v <= ccep.espace.v) this.ccep.espace.v = { v: 0, row: null }
-    if (this.ccep.partition.v <= ccep.partition.v) this.ccep.partition.v = { v: 0, row: null }
-    this.finJob()
   }
 }
 export const syncQueue = new Queue()
@@ -127,19 +152,34 @@ class Job {
   // type: 1:CCEP 2:avatar 3:groupe
   constructor (type) { this.type = type }
 
-  async doCcep(ccep) {
+  async doRowCcep ({ rowCompte, rowCompta, rowEspace, rowPartition }) {
+    let ds = syncQueue.dataSync
     // TODO
-    syncQueue.finCcep(ccep)
+    syncQueue.finJob(ds)
+  }
+
+  async doVersionCcep(vccep) {
+    // TODO - tient compte qu'il peut y avoir déjà des "rows" à ne pas aller chercher au serveur
+    let ds = syncQueue.dataSync
+    const sb = new SBccep()
+    const buf = new IDBbuffer()
+    const args =  { authData: session.authToken, dataSync: ds }
+    const ret = await post(this, 'Sync', args)
+    ds = new DataSync(ret.dataSync) // Remplacé au retour par celui calculé par le serveur
+    await this.retCcep(ret, ds, sb)
+    buf.commit
+
+    syncQueue.finJob(ds)
   }
 
   async doAvatar(rds, v) {
     // TODO
-    syncQueue.finAv(rds, v)
+    syncQueue.finJob(ds)
   }
 
   async doGroupe(rds, v) {
     // TODO
-    syncQueue.finGr(rds, v)
+    syncQueue.finJob(ds)
   }
 
 }
@@ -294,80 +334,71 @@ class SBgr {
   }
 }
 
-/* Connexion à un compte en mode avion *********************************/
-export class ConnexionAvion extends Operation {
-  constructor() { super('ConnexionCompte') }
+export class OperationS extends Operation {
+  constructor(nomop) { super(nomop, true) }
 
-  async run() {
-    try {
-      // idb: ouverte - session.clek compteId définis
-      this.auj = AMJ.amjUtc()
-      this.dh = 0
-
-      const session = stores.session
-
-      // Chargement des "avnotes" des notes ayant des fichiers locaux
-      await idb.loadAvNotes()  
-      await idb.loadFetats()  
-
-      { // Phase 1 : CCEP
-        const sb = new SBccep()
-        const ds = await idb.getDataSync()
-        const m = await idb.getCcep()
-        sb.compte = await compile(m.comptes)
-        sb.compta = await compile(m.comptas)
-        sb.espace = await compile(m.espaces)
-        if (m.partitions) sb.partition = await compile(m.partitions)
-        sb.store(ds)
-      }
-      
-      { // Phase 2 : itérative pour chaque avatar
-        for(const eds of ds.avatars) {
-          const sb = new SBav()
-          const m = await idb.getSA (eds.id)
-          if (m.avatars) for(const row of m.avatars) sb.setA(await compile(row))
-          if (m.notes) for(const row of m.notes) sb.setN(await compile(row))
-          if (m.chats) for(const row of m.chats) sb.setC(await compile(row))
-          if (m.sponsorings) for(const row of m.sponsorings) sb.setS(await compile(row))
-          if (m.tickets) for(const row of m.tickets) sb.setT(await compile(row))
-          sb.store()
+  /* Chargment en Store des avatars / groupes connus en IDB
+  SAUF en mode synchro,
+  - les avatars et groupes marqués en suppression dans dataSync (vb = -1)
+    qui sont purhés de IDB
+  - les membres ou notes marqués à supprimer de dataSync
+    qui sont purgés de IDB
+  */
+  async loadAvatarsGroupes (ds) {
+    { // Phase itérative pour chaque avatar
+      for(const eds of ds.avatars) {
+        const buf = new IDBbuffer()
+        if (eds.vb === -1) { // Avatars à supprimer de IDB / store - NON chargés
+          buf.purgeAvatarIDB(eds.id)
+          ds.delAv(eds.id)
+          continue
         }
+        const sb = new SBav()
+        const m = await idb.getSA (eds.id)
+        if (m.avatars) for(const row of m.avatars) sb.setA(await compile(row))
+        if (m.notes) for(const row of m.notes) sb.setN(await compile(row))
+        if (m.chats) for(const row of m.chats) sb.setC(await compile(row))
+        if (m.sponsorings) for(const row of m.sponsorings) sb.setS(await compile(row))
+        if (m.tickets) for(const row of m.tickets) sb.setT(await compile(row))
+        buf.commit(ds)
+        sb.store()
       }
-      
-      { // Phase 3 : itérative pour chaque groupe
-        for(const eds of ds.groupes) {
-          const sb = new SBgr()
-          const m = await idb.getSA (eds.id)
-          if (m.groupes) for(const row of m.groupes) sb.setG(await compile(row))
-          if (m.chatgrs) for(const row of m.chatgrs) sb.setC(await compile(row))
-          if (m.notes) for(const row of m.notes) sb.setN(await compile(row))
-          if (m.membres) for(const row of m.membres) sb.setM(await compile(row))
-          sb.store()
+    }
+    
+    { // Phase itérative pour chaque groupe
+      for(const eds of ds.groupes) {
+        const buf = new IDBbuffer()
+        if (eds.vb === -1) { // Groupes à supprimer de IDB / store - NON chargés
+          buf.purgeGroupeIDB(eds.id)
+          ds.delGr(eds.id)
+          continue
         }
+        const sb = new SBgr()
+        const m = await idb.getSA (eds.id)
+        if (m.groupes) for(const row of m.groupes) sb.setG(await compile(row))
+        if (m.chatgrs) for(const row of m.chatgrs) sb.setC(await compile(row))
+        if (eds.n === -1) { // Membres à supprimer
+          eds.n = 0
+          buf.purgeGroupeNoIDB(eds.id)
+        } else if (m.notes) for(const row of m.notes) sb.setN(await compile(row))
+        if (eds.m === -1) { // Membres à supprimer
+          eds.m = 0
+          buf.purgeGroupeMbIDB(eds.id)
+        } else if (m.membres) for(const row of m.membres) sb.setM(await compile(row))
+        buf.commit(ds)
+        sb.store()
       }
-
-      // Chargement des descriptifs des fichiers du presse-papier
-      await idb.FLfromIDB()
-
-      console.log('Connexion compte : ' + session.compteId)
-      session.setStatus(2)
-      stores.ui.setPage('accueil')
-      this.finOK()
-    } catch (e) {
-      stores.ui.setPage('login')
-      await this.finKO(e)
     }
   }
-}
 
-/* Connexion à un compte en mode synchro ou incognito *********************************/
-export class ConnexionSynchroIncognito extends OperationUI {
-  constructor() { super('ConnexionCompte') }
-
-  async retCCep (ret, ds, sb) {
+  /* Traitement du retour d'un Sync pour les rows CCEP
+  */
+  async retCCep (ret, ds, sb) { // ret du post Sync, dataSync courant (mis à jour ici), IDBbuffer
     if (ret.rowCompte) {
       this.compte = await compile(ret.rowCompte)
       ds.compte.vs = ds.compte.vb
+      // Maj du dataStore - Gestion des avatars et des groupes en plus et en moins
+      // TODO
       sb.compte = this.compte
     }
     if (ret.rowCompta) {
@@ -387,6 +418,136 @@ export class ConnexionSynchroIncognito extends OperationUI {
     }
   }
 
+  /* Fusion des dataSync: 1) rempli par le serveur depuis rien, 2) celui connu de IDB en mode synchro 
+  Le ds "courant" transmis en argument est MIS A JOUR
+  */
+  async fusionDS (ds) {
+    const d2 = await idb.getDataSync()
+    // TODO
+  }
+
+  /* Depuis un dataSync courant, charge u serveur toutes les mises à jour
+  des avatars et des groupes.
+  - Itère tant qu'il y a des avatars / groupes à mettre à jour
+  - Toutefois chaque appel Syn PEUT ramener des CCEP
+    - ils sont traités
+    - ceci PEUT conduire à avoir des groupes / avatars en plus ou moins
+    - ce qui peut provoquer une itération
+  - le DataStync courant est retourné
+  */
+  async majAvatarsGroupes (ds) {
+    while (true) { // Phase 2 : itérative pour chaque avatar / groupe
+      let item = null
+      for(const e of ds.avatars) { 
+        if (e.vs === e.vb) continue // déjà traité
+        item = e
+        break
+      }
+      if (!item) for(const e of ds.groupes) { 
+        if (e.vs === e.vb) continue // déjà traité
+        item = e
+        break
+      }
+      if (!item) break // YES !!! tous traités
+
+      // Traitement d'un item ds ds avatar ou groupe
+      const ida = item.id
+      const g = ID.estGroupe(ida)
+      const sb = g ? new SBgr() : new SBav() // StoreBuffer
+      const buf = new IDBbuffer()
+
+      const args =  { authData: session.authToken, dataSync: ds, ida }
+      const ret = await post(this, 'Sync', args)
+      ds = new DataSync(ret.dataSync) // Mis à jour par le serveur
+      const sbccep = new SBccep()
+      await this.retCCep(ret, ds, sbccep) // Prise en compte, IDB / store et maj de ds
+
+      const eds = (g ? ds.groupes : ds.avatars).get(ida)
+      if (!eds) { // ida a été supprimé depuis- On enregistre les maj de CCEP
+        buf.commit(ds)
+        sb.store(ds)
+        continue 
+      }
+
+      // Cas "normal" : chargement incrémental d'un sous-arbre avatar / groupe
+      if (ret.rowAvatars) {
+        sb.setA(await compile(ret.rowAvatars))
+        item.vs = item.vb
+        ds.setAv(item)
+      }
+      if (ret.rowGroupes) {
+        sb.setG(await compile(ret.rowGroupes))
+        item.vs = item.vb
+        ds.setGr(item)
+      }
+      if (ret.rowNotes) 
+        for(const row of ret.rowNotes) sb.setN(await compile(row))
+      if (ret.rowChats) 
+        for(const row of ret.rowChats) sb.setC(await compile(row))
+      if (ret.rowSponsorings) 
+        for(const row of ret.rowSponsorings) sb.setS(await compile(row))
+      if (ret.rowTickets) 
+        for(const row of ret.rowTickets) sb.setT(await compile(row))
+      if (ret.rowMembres) 
+        for(const row of ret.rowMembres) sb.setM(await compile(row))
+      if (ret.rowChatgrs) 
+        for(const row of ret.rowChatgrs) sb.setC(await compile(row))
+
+      buf.commit(ds)
+      sb.store(ds)
+    }
+  }
+}
+
+/* Connexion à un compte en mode avion *********************************/
+export class ConnexionAvion extends OperationS {
+  constructor() { super('ConnexionCompte') }
+
+  async run() {
+    try {
+      // idb: ouverte - session.clek compteId définis
+      this.auj = AMJ.amjUtc()
+      this.dh = 0
+
+      const session = stores.session
+
+      // Chargement des "avnotes" des notes ayant des fichiers locaux
+      await idb.loadAvNotes()  
+      await idb.loadFetats()  
+
+      const ds = await idb.getDataSync()
+
+      { // Phase 1 : CCEP
+        const sb = new SBccep()
+        const m = await idb.getCcep()
+        sb.compte = await compile(m.comptes)
+        sb.compta = await compile(m.comptas)
+        sb.espace = await compile(m.espaces)
+        if (m.partitions) sb.partition = await compile(m.partitions)
+        sb.store(ds)
+      }
+      
+      // Chargement des groupes et avatars depuis IDB
+      await this.loadAvatarsGroupes (ds)
+
+      // Chargement des descriptifs des fichiers du presse-papier
+      await idb.FLfromIDB()
+
+      console.log('Connexion compte : ' + session.compteId)
+      session.setStatus(2)
+      stores.ui.setPage('accueil')
+      this.finOK()
+    } catch (e) {
+      stores.ui.setPage('login')
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Connexion à un compte en mode synchro ou incognito *********************************/
+export class ConnexionSynchroIncognito extends OperationUI {
+  constructor() { super('ConnexionCompte') }
+
   async run() {
     /* TODO: synchro
     - fusion ds serveur et ds IDB
@@ -403,14 +564,14 @@ export class ConnexionSynchroIncognito extends OperationUI {
         await idb.loadFetats()
       } 
 
-      let ds
-      { // Phase 1 : CCEP
+      let ds = DataSync.nouveau()
+      { // Phase 1 : CCEP - Le dataSync initial est VIDE: rempli par Sync
         const sb = new SBccep()
         const buf = new IDBbuffer()
-        const args =  { authData: session.authToken, optionC: true, dataSync: DataSync.nouveau() }
+        const args =  { authData: session.authToken, optionC: true, dataSync: ds }
         const ret = await post(this, 'Sync', args)
-        ds = new DataSync(ret.dataSync)
-        await this.retCCep(ret, ds, sb)
+        ds = new DataSync(ret.dataSync) // Remplacé au retour par celui calculé par le serveur
+        await this.retCcep(ret, ds, sb)
 
         // Premier retour de Sync a rempli session. compteId, clek, nomBase
         this.blOK = false // la base locale est vide, aucune données utilisables
@@ -422,70 +583,33 @@ export class ConnexionSynchroIncognito extends OperationUI {
             setTrigramme(session.nombase, await getTrigramme())
         }
         // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK
+
+        if (session.synchro) {
+          await this.fusionDS(ds) // Enrichit le ds courant par celui de IDB
+          // Chargement des groupes et avatars depuis IDB
+          await this.loadAvatarsGroupes (ds)
+          /* Etat rétabli à celui de IDB, MAIS
+          - CCEP sont rafraîchis par ceux du serveur
+          - les avatars et groupes disparus de compte ont été purgés
+          */
+        }
         
         await buf.commit(ds)
         sb.store(ds)
       }
 
-      while (true) { // Phase 2 : itérative pour chaque avatar / groupe
-        let item = null
-        for(const e of ds.avatars) { 
-          if (e.vs === e.vb) continue // déjà traité
-          item = e
-          break
-        }
-        if (!item) for(const e of ds.groupes) { 
-          if (e.vs === e.vb) continue // déjà traité
-          item = e
-          break
-        }
-        if (!item) break // tous traités
-
-        const ida = item.id
-
-        const g = ID.estGroupe(ida)
-        const sb = g ? new SBgr() : new SBav()
-        const buf = new IDBbuffer()
-        const args =  { authData: session.authToken, dataSync: ds, ida }
-        const ret = await post(this, 'Sync', args)
-        ds = new DataSync(ret.dataSync)
-        const sbccep = new SBccep()
-        await this.retCCep(ret, ds, sbccep)
-
-        if (ret.rowAvatars) {
-          sb.setA(await compile(ret.rowAvatars))
-          item.vs = item.vb
-          ds.setAv(item.id, item)
-        }
-        if (ret.rowGroupes) {
-          sb.setG(await compile(ret.rowGroupes))
-          item.vs = item.vb
-          ds.setGr(item.id, item)
-        }
-        if (ret.rowNotes) 
-          for(const row of ret.rowNotes) sb.setN(await compile(row))
-        if (ret.rowChats) 
-          for(const row of ret.rowChats) sb.setC(await compile(row))
-        if (ret.rowSponsorings) 
-          for(const row of ret.rowSponsorings) sb.setS(await compile(row))
-        if (ret.rowTickets) 
-          for(const row of ret.rowTickets) sb.setT(await compile(row))
-        if (ret.rowMembres) 
-          for(const row of ret.rowMembres) sb.setM(await compile(row))
-        if (ret.rowChatgrs) 
-          for(const row of ret.rowChatgrs) sb.setC(await compile(row))
-
-        buf.commit(ds)
-        sb.store()
-      }
+      // Phase 2 : chargement des sous-arbres groupes et avatars
+      await this.majAvatarsGroupes (ds)
 
       if (session.synchro) // Chargement des descriptifs des fichiers du presse-papier
         await idb.FLfromIDB()
 
-      console.log('Connexion compte : ' + session.compteId)
+      syncQueue.dataSync = ds //ds courant pour synchronisation au fil de l'eau
       session.setStatus(2)
+      syncQueue.reveil()
+
+      console.log('Connexion compte : ' + session.compteId)
       stores.ui.setPage('accueil')
-      idb.reveil()
       this.finOK()
     } catch (e) {
       stores.ui.setPage('login')
