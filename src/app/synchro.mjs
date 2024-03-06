@@ -13,49 +13,74 @@ class Queue {
     /* Evénnements à traiter
       v : si true version des événnement arrivés et pas encore traités
       mv : plus haute version traitée
+      rowv : tiré d'un row version { rds, v, (suppr) }
     */
     this.compte = { rowv: null, mv: 0, row: null }
     this.compta = { rowv: null, mv: 0, row: null }
     this.espace = { rowv: null, mv: 0, row: null }
     this.partition = { rowv: null, mv: 0, row: null }
-    this.avatars = new Map() // cle: rds, valeur: v
-    this.groupes = new Map()
+    this.avgrs = new Map() // cle: rds, valeur: {v
   }
 
   /* Au retour de n'importe quelle opération un ou plusieurs rows CCEP
   peuvent être retournés. Ils vont être enregistrés dans le flow normal de synchro
   resp.compte || resp.compta || resp.espace || resp.partition
   */
-  postResp (resp) { // Au retour d'un POST PAS Sync
-    if (resp.rowCompte && (resp.rowCompte.v > this.compte.mv)) {
-      this.compte.row = resp.rowCompte
-      this.compte.rowv = null
-      this.compte.mv = resp.rowCompte.v
+  async postResp (resp) { // Au retour d'un POST PAS Sync
+    if (resp.rowCompte) {
+      if (resp.rowCompte.v > this.compte.mv) {
+        this.compte.mv = resp.rowCompte.v
+        const c = await compile(resp.rowCompte)
+        if (c.okDataSync(this.dataSync)) {
+          /* Le nouveau compte n'a pas d'avatar / groupe / partition inconnus du DataSync
+          Il peut être traité en mode "simple", sinon il doit l'être en mode "Sync"
+          comme si un 'versions' avait été reçu */
+          this.compte.row = resp.rowCompte
+          this.compte.rowv = null   
+        } else {
+          this.compte.rowv = { rds: c.rds, v: c.v }
+          this.compte.row = null
+        }
+        this.reveil()
+      }
+      return
     }
-    if (resp.rowCompta && (resp.rowCompta.v > this.compta.mv)) {
-      this.compta.row = resp.rowCompta
-      this.compta.rowv = null
-      this.compta.mv = resp.rowCompta.v
+
+    if (resp.rowCompta) {
+      if (resp.rowCompta.v > this.compta.mv) {
+        this.compta.row = resp.rowCompta
+        this.compta.rowv = null
+        this.compta.mv = resp.rowCompta.v
+        this.reveil()
+      }
+      return
     }
-    if (resp.rowEspace && (resp.rowEspace.v > this.espace.mv)) {
-      this.espace.row = resp.rowEspace
-      this.espace.rowv = null
-      this.espace.mv = resp.rowEspace.v
+
+    if (resp.rowEspace) {
+      if (resp.rowEspace.v > this.espace.mv) {
+        this.espace.row = resp.rowEspace
+        this.espace.rowv = null
+        this.espace.mv = resp.rowEspace.v
+        this.reveil()
+      }
+      return 
     }
-    if (resp.rowPartition && (resp.rowPartition.v > this.partition.mv)) {
-      this.partition.row = resp.rowPartition
-      this.partition.rowv = null
-      this.partition.mv = resp.rowPartition.v
+    if (resp.rowPartition) {
+      if (resp.rowPartition.v > this.partition.mv) {
+        this.partition.row = resp.rowPartition
+        this.partition.rowv = null
+        this.partition.mv = resp.rowPartition.v
+        this.reveil()
+      }
     }
-    this.reveil()
   }
 
   /* A l'arrivée d'un ou plusuieurs row versions sur écoute / WS */
   setRows (rows) { 
-    const session = stores.session
-    if (rows) rows.forEach(row => {
-      const rds = Rds.long(row.rds, session.ns)
-      const nom = Rds.typeS(rds)
+    if (rows) rows.forEach(r => {
+      const nom = Rds.typeS(r.rds)
+      const row = { v: r.v, rds: r.rds }
+      if (r.suppr) row.suppr = true
       switch (nom) {
       case 'comptes' : {
         if (this.compte.mv < row.v) { this.compte.mv = row.v; this.compte.rowv = row; this.compte.row = null }
@@ -66,21 +91,17 @@ class Queue {
         break
       }
       case 'espaces' : {
-        if (this.espace < row.v) { this.espace.mv = row.v; this.espace.rowv = row; this.espace.row = null }
+        if (this.espace.v < row.v) { this.espace.mv = row.v; this.espace.rowv = row; this.espace.row = null }
         break
       }
       case 'partitions' : {
-        if (this.partition < row.v) { this.partition.mv = row.v; this.partition.rowv = row; this.partition.row = null }
+        if (this.partition.v < row.v) { this.partition.mv = row.v; this.partition.rowv = row; this.partition.row = null }
         break
       }
+      case 'groupes' :
       case 'avatars' : {
-        const v = this.avatars.get(rds)
-        if (!v || v < row.v) this.avatars.set(rds, row.v)
-        break
-      }
-      case 'groupes' : {
-        const v = this.groupes.get(rds)
-        if (!v || v < row.v) this.groupes.set(rds, row.v)
+        const x = this.avgrs.get(row.rds)
+        if (!x || x.v < row.v) this.avgrs.set(rds, row.v, row.suppr)
         break
       }
       }
@@ -98,8 +119,10 @@ class Queue {
 
   reveil () {
     if (this.job || !stores.session.ok) return
-    if (this.RowCCEPtodo) { // PRIORITE 1 : Traitement des rows directement reçus en retour d'un POST
-      this.job = new Job(0)
+    /* PRIORITE 1 : Traitement SIMPLE des rows directement reçus en retour d'un POST
+    Aucun impact sur la synchro, seulement stockage en Store et IDB */
+    if (this.RowCCEPtodo) {
+      this.job = new Job()
       const arg = { }
       if (this.compte.row) { arg.rowCompte = this.compte.row; this.compte.row = null }
       if (this.compta.row) { arg.rowCompta = this.compta.row; this.compta.row = null }
@@ -108,8 +131,10 @@ class Queue {
       setTimeout(() => this.job.doRowCcep(arg), 5)
       return
     }
-    if (this.VersionCCEPtodo) { // PRIORITE 2 : Traitement des versions des CCEP reçus sur écoute / WS
-      this.job = new Job(1)
+    /* PRIORITE 2 : Traitement des versions des CCEP reçus sur écoute / WS
+    Possible impact de synchro (avatars / groupes nouveaux ou disparus) */
+    if (this.VersionCCEPtodo) {
+      this.job = new Job()
       const arg = { }
       if (this.compte.rowv) { arg.compte = this.compte.rowv; this.compte.rowv = null }
       if (this.compta.rowv) { arg.compta = this.compta.rowv; this.compta.rowv = null }
@@ -118,21 +143,12 @@ class Queue {
       setTimeout(() => this.job.doVersionCcep(arg), 5)
       return
     }
-    if (this.avatars.size) { // Traitement d'UN versions d'un sous-arbre avatar reçu sur écoute / WS
-      this.job = new Job(2)
-      for (const [rds, v] of this.avatars) {
-        setTimeout(() => this.job.doAvatar(rds, v), 5)
-        break
+    if (this.avgrs.size) { // Traitement d'UN versions d'un sous-arbre reçu sur écoute / WS
+      this.job = new Job()
+      for (const [, row] of this.avgrs) {
+        setTimeout(() => this.job.doAvGr(row), 5)
+        return
       }
-      return
-    }
-    if (this.groupes.size) { // Traitement d'UN versions d'un sous-arbre groupe reçu sur écoute / WS
-      this.job = new Job(3)
-      for (const [rds, v] of this.groupes) {
-        setTimeout(() => this.job.doGroupe(rds, v), 5)
-        break
-      }
-      return
     }
   }
 
@@ -149,16 +165,17 @@ class Queue {
 export const syncQueue = new Queue()
 
 class Job {
-  // type: 1:CCEP 2:avatar 3:groupe
-  constructor (type) { this.type = type }
-
+  /* Traitement "SIMPLE" SANS IMPACT SYNC de chagement des row compte ... 
+  obtenus en retour de POST */
   async doRowCcep ({ rowCompte, rowCompta, rowEspace, rowPartition }) {
-    let ds = syncQueue.dataSync
     // TODO
     syncQueue.finJob(ds)
   }
 
-  async doVersionCcep(vccep) {
+  /* Traitement "SYNC" d'une arrivée de versions par OnSnapShot ou WS 
+  relatif à un compte, compta ...*/
+  async doVersionCcep({ compte, compta, espace, partition }) {
+    // compte ... : { rds, v, suppr }
     // TODO - tient compte qu'il peut y avoir déjà des "rows" à ne pas aller chercher au serveur
     let ds = syncQueue.dataSync
     const sb = new SBccep()
@@ -172,16 +189,14 @@ class Job {
     syncQueue.finJob(ds)
   }
 
-  async doAvatar(rds, v) {
+  /* Traitement "SYNC" d'une arrivée de versions par OnSnapShot ou WS 
+  relatif à un sous-arbre avatar / groupe */
+  async doAvGr({rds, v, suppr}) {
+    const ida = RegRds.id(rds)
+    let ds = syncQueue.dataSync
     // TODO
     syncQueue.finJob(ds)
   }
-
-  async doGroupe(rds, v) {
-    // TODO
-    syncQueue.finJob(ds)
-  }
-
 }
 
 /* Déconnexion, reconexion, commexion *************************************************/

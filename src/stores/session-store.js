@@ -177,7 +177,7 @@ export const useSessionStore = defineStore('session', {
 
     setOrg (org) { this.org = org || '' },
 
-    setNs (ns) { this.ns = ns; NomGenerique.ns = ns },
+    setNs (ns) { this.ns = ns; RegRds.ns = ns; RegCles.ns = ns },
 
     /* Initialise une session depuis une phrase secrète
     session.mode et org ont été enregistrés par PageLogin (connexion ou création compte)

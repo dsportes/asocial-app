@@ -17,15 +17,43 @@ const encoder = new TextEncoder('utf-8')
 - `set (cle)` : enregistré la clé sous son id
 */
 export class RegCles {
+  static ns = 0
   static registre = new Map()
 
-  static reset () { Cles.registre.clear }
+  static reset () { RegCles.registre.clear; RegRds.reset() }
 
-  static get (id) { return registre.get(id) }
+  static get (id) { return RegCles.registre.get(ID.long(id, RegCles.ns)) }
 
   static set (cle) {
-    const id = Cles.id(cle, stores.session.ns)
-    registreCles.set(id, cle)
+    const id = Cles.id(cle, RegCles.ns)
+    RegCles.registre.set(id, cle)
+    return id
+  }
+}
+
+/* classe RegRds : registre des rds (référence DataSync) connues dans la session **********
+- `reset ()` : réinitialisation en début de session
+- `rds (id)` : retourne le rds enregistré avec cette id
+- `id` (rds) : retourne l'id enregistré avec ce rds
+- `set (rds, id)` : enregistré le rds / id
+*/
+export class RegRds {
+  static ns = 0
+  static regId = new Map()
+  static regRds = new Map()
+
+  static reset () { RegRds.regId.clear;  RegRds.regRds.clear }
+
+  static rds (id) { return RegRds.regId.get(ID.long(id, RegRds.ns)) }
+
+  static id (rds) { return RegRds.regRds.get(Rds.long(rds, RegRds.ns)) }
+
+  static set (rds, id) {
+    const i = ID.long(id, RegRds.ns)
+    const r = Rds.long(rds, RegRds.ns)
+    RegRds.regId.set(i, r)
+    RegRds.regRds.set(r, i)
+    return r
   }
 }
 
@@ -284,11 +312,12 @@ _data_ :
 - `nbmi`: nombre de mois d'inactivité acceptable pour un compte O fixé par le comptable. Ce changement n'a pas d'effet rétroactif.
 */
 export class Espace extends GenDoc {
+  get rds () { return RegRds.rds(this.id) }
+  get ns () { return ID.ns(this.id) }
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    const ns = ID.ns(this.id)
-    this.rds = Rds.long(row.rds, ns)
+    RdsReg.set(row.rds)
 
     this.org = row.org
     this.creation = row.creation
@@ -442,13 +471,14 @@ Compilé:
     - pcv : pourcentage d'utilisation effective de qc : v / qv
 */
 export class Partition extends GenDoc {
+  get rds () { return RegRds.rds(this.id) }
 
   async compile (row) {
     this.vsh = row.vsh || 0
     const estComptable = stores.session.estComptable
     const clek = session.clek
     const ns = ID.ns(this.id)
-    this.rds = Rds.long(row.rds, ns)
+    RdsReg.set(row.rds)
 
     this.qc = row.qc || 0; this.qn = row.qn || 0; this.qv = row.qv || 0
 
@@ -580,6 +610,8 @@ _data_ :
 
 _Comptes "O" seulement:_
 - `clePA` : clé P de la partition cryptée par la clé A de l'avatar principal du compte.
+- `rdsp` : `rds` (court) du documents partitions.
+- `idp` : id de la partition (pour le serveur) (sinon 0)
 - `del` : `true` si le compte est délégué de la partition.
 - `it` : index du compte dans `tcpt` de son document `partitions`.
 
@@ -588,6 +620,7 @@ _Comptes "O" seulement:_
   - _valeur_ : `{ rds, claAK }` compilé => rds (long)
     - `rds`: de l'avatar (clé d'accès à son `versions`).
     - `cleAK`: clé A de l'avatar crypté par la clé K du compte.
+  mav compilé: Set des id des avatars
 
 - `mpg` : map des participations aux groupes:
   - _clé_ : id du groupe
@@ -598,7 +631,7 @@ _Comptes "O" seulement:_
       - _clé_: id court de l'avatar.
       - _valeur_: indice `im` du membre dans la table `tid` du groupe (`ids` du membre).
 
-    - lp compilé => sav : set des ids des avatars du compte participant au groupe
+    - _valeur_ compilé => sav : set des id (long) des avatars du compte participant au groupe
 
 **Comptable seulement:**
 - `cleEK` : Clé E de l'espace cryptée par la clé K.
@@ -609,35 +642,41 @@ _Comptes "O" seulement:_
   - `qc, qn, qv` : quotas globaux de la partition.
 */
 export class Compte extends GenDoc {
+  get rds () { return RegRds.rds(this.id) }
 
   async compile (row) {
     this.vsh = row.vsh || 0
     const clek = stores.session.clek
     const ns = ID.ns(this.id)
-    this.rds = Rds.long(row.rds, ns)
+    RegRds.set(row.rds)
 
     this.it = row.it || 0
     this.estA = this.it === 0
-    this.estDelegue = this.it && row.del
     this.estComptable = ID.estComptable(this.id)
 
-    this.mav = new Map()
+    this.mav = new Set()
     for(const idx in row.mav) {
       const e = row.mav[idx]
       RegCles.set(await decrypter(clek, e.cleAK))
-      this.mav.set(ID.long(parsInt(idx), ns), Rds.long(e.rds, ns))
+      RegRds.set(e.rds)
+      this.mav.add(ID.long(parsInt(idx), ns))
     }
 
-    if (!this.estA) RegCles.set(await decrypter(this.cleA, row.clePA))
+    if (!this.estA) {
+      this.idp = RegCles.set(await decrypter(this.cleA, row.clePA))
+      this.del = row.del
+      this.rdsp = RdsReg.set(row.rdsp)
+    }
 
     this.mpg = new Map()
     for(const idx in row.mpg) {
       const idg = ID.long(parsInt(idx), ns)
       const e = row.mpg[idx]
       RegCles.set(await decrypter(clek, e.cleGK))
+      RegRds.set(e.rds)
       const sav = new Set()
       for(const idx2 in e.lp) sav.add(ID.long(parseInt(idx2), ns))
-      this.mpg.set(idg, { rds: Rds.long(e.rds, ns), sav })
+      this.mpg.set(idg, sav)
     }
 
     if (this.estComptable) {
@@ -662,12 +701,12 @@ export class Compte extends GenDoc {
   // Retourne [amb, amo] - un avatar au moins accède aux membres / notes du groupe
   ambano (groupe) {
     let ano = false, amb = false
-    const e = this.mpg.get(groupe.id)
-    if (e) {
-      for(const idav of e.sav) {
+    const sav = this.mpg.get(groupe.id)
+    if (sav) {
+      for(const idav of sav) {
         const im = groupe.imDe(idav)
         if (im) {
-          const f = groupe.flags[e.im]
+          const f = groupe.flags[im]
           if ((f & FLAGS.AM) && (f & FLAGS.DM)) amb = true
           if ((f & FLAGS.AN) && (f & FLAGS.DN)) ano = true  
         }
@@ -679,9 +718,21 @@ export class Compte extends GenDoc {
   /* Ids des groupes de l'avatar ida (tous avatars si ida absent) */
   idGroupes (ida) {
     const x = new Set()
-    for(const [idg, e] of this.mpg) 
-      if (!ida || (ida && e.sav.has(ida))) x.add(idg)
+    if (ida) this.mpg.forEach((sav, idg) => { if (ida && sav.has(ida)) x.add(idg) })
+    else this.mpg.forEach((sav, idg) => { x.add(idg)})
     return x
+  }
+
+  /* Retourne false si le compte référence un avatar, un groupe, 
+  une partition qui n'est pas dans le dataSync passé en argument */
+  okDataSync (ds) {
+    if (this.rdsp && ds.partitions && ds.partitions.rds !== this.rdsp) return false
+    if (!this.rdsp && ds.partitions && ds.partitions.rds) return false
+    for(const id of this.mav) if (!ds.avatars.has(id)) return false
+    for(const [id, ] of ds.avatars) if (!this.mav.has(id)) return false
+    for(const [id, ] of this.mpg) if (!ds.groupes.has(id)) return false
+    for(const [id, ] of ds.groupes) if (!this.mpg.has(id)) return false
+    return true
   }
   
     /*
@@ -817,12 +868,13 @@ _Comptes "A" seulement_
 Juste après une conversion de compte "O" en "A", `ticketsK` est vide et le `solde` est de 2c.
 */
 export class Compta extends GenDoc {
+  get rds () { return RegRds.rds(this.id) }
 
   async compile (row) {
     this.vsh = row.vsh || 0
     const clek = stores.session.clek
     const ns = ID.ns(this.id)
-    this.rds = Rds.long(row.rds, ns)
+    RdsReg.set(row.rds)
 
     this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
     this.qv = row.qv
@@ -1033,12 +1085,14 @@ _data_:
   Compilé en : { idav, idg, rds, im, ivpar, dh }
 */
 export class Avatar extends GenDoc {
+  get rds () { return RegRds.rds(this.id) }
+
   /** compile *********************************************************/
   async compile (row) {
     this.vsh = row.vsh || 0
     const clek = stores.session.clek
     const ns = ID.ns(this.id)
-    this.rds = Rds.long(row.rds, ns)
+    RegRds.set(row.rds)
     // this.vcv = row.vcv || 0
     // this.hZR = row.hZR
 
@@ -1061,8 +1115,8 @@ export class Avatar extends GenDoc {
         const cleG = await decrypter(clea, e.cleGA)
         RegCles.set(cleG)
         await CV.set(e.cvG, this.idg).store()
-        const rds = Rds.long(e.rds, ns)
-        const inv = { idav, idg, rds, im: e.im, ivpar: e.ivpar, dh: e.dh }
+        RegRds.set(e.rds)
+        const inv = { idav, idg, im: e.im, ivpar: e.ivpar, dh: e.dh }
         this.invits.set(nx, inv)
         gSt.setInvit(invh)
       }
@@ -1439,10 +1493,12 @@ _data_:
 */
 
 export class Groupe extends GenDoc {
+  get rds () { return RegRds.rds(this.id) }
+
   async compile (row) {
     this.vsh = row.vsh || 0
     const ns = ID.ns(this.id)
-    this.rds = Rds.long(row.rds, ns)
+    RegRds.set(row.rds)
 
     this.qn = row.qn; this.qv = row.qv; this.n = row.n; this.v = row.v
     this.imh = row.imh
