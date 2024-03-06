@@ -615,8 +615,8 @@ export const useNoteStore = defineStore('note', {
       n.label = (pfx ? (pfx + ' '): '') + sfx
     },
 
-    setAvatar (na, type) { // on ajoute un node pour l'avatar juste à la racine
-      this.setRacine('' + na.id, 1, na.nom )
+    setAvatar (id) { // on ajoute un node pour l'avatar juste à la racine
+      this.setRacine('' + id, 1, na.nom ) // TODO
     },
 
     setGroupe (na) { // on ajoute un node pour l'avatar juste à la racine

@@ -17,14 +17,14 @@ export const useAvatarStore = defineStore('avatar', {
   state: () => ({
     /* Map des avatars du compte courant. Sous-collection pour chaque avatar id :
       - avatar: avatar,
-      - sponsorings: new Map(),
-      - chats: new Map(),
-      - tickets: new Map(),
-      - // Ids des groupes dont l'avatar est membre: aSt.compte.idGroupes(id)
-      - notes: Map des notes : clé: ids, valeur: v2
+      - sponsorings: new Map(), // clé: ids, valeur : sponsoring
+      - chats: new Map(), // clé: ids, valeur : chat
+      - tickets: new Map(), // clé: ids, valeur : ticket
+      - notes: new Map() // clé: ids, valeur: vf
       */
     map: new Map(),
 
+    // A REVISER
     motscles: null, // mots clés du compte
     avatarP: null, // avatar principal du compte courant
     comptaP: null, // compta actuelle du compte courant
@@ -48,6 +48,12 @@ export const useAvatarStore = defineStore('avatar', {
     filtre (state) { return stores.filtre },
     pSt (state) { return stores.people },
     nSt (state) { return stores.note },
+
+    getChat: (state) => { return (id, ids) => { 
+        const e = state.map.get(id)
+        return e ? e.chats.get(ids) : null 
+      }
+    },
     
     /* retourne l'avatar principal du compte actuellement connecté */
     compte: (state) => { return state.avatarP },
@@ -221,11 +227,7 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
-    getAvatar: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.avatar : null 
-      }
-    },
+
 
     estAvatar: (state) => { return (id) => { 
         return state.map.has(id)
@@ -414,6 +416,66 @@ export const useAvatarStore = defineStore('avatar', {
   },
 
   actions: {
+    setAvatar (avatar) {
+      let e = this.map.get(avatar.id)
+      if (!e) { e = { 
+          avatar: avatar,
+          notes: new Map(),
+          sponsorings: new Map(),
+          chats: new Map(),
+          tickets: new Map()
+       }
+       this.map.set(avatar.id, e)
+      }
+      e.avatar = avatar
+      this.nSt.setAvatar(avatar.id)
+    },
+
+    delAvatar (id) {
+      this.map.delete(id)
+    },
+
+    setSponsoring (sponsoring) {
+      const e = this.map.get(sponsoring.id)
+      if (e) e.sponsorings.set(sponsoring.ids, sponsoring)
+    },
+
+    delSponsoring (id, ids) {
+      const e = this.map.get(id)
+      if (e) e.sponsorings.delete(ids)
+    },
+
+    setTicket (ticket) {
+      const e = this.map.get(ticket.id)
+      if (e) e.tickets.set(ticket.ids, tickets)
+    },
+
+    delTicket (id, ids) {
+      const e = this.map.get(id)
+      if (e) e.tickets.delete(ids)
+    },
+
+    setNote (note) {
+      const e = this.map.get(note.id)
+      if (e) e.notes.set(note.ids, note.vf)
+    },
+
+    delNote (id, ids) {
+      const e = this.map.get(id)
+      if (e) e.notes.delete(ids)
+    },
+
+    setChat (chat) {
+      const e = this.map.get(chat.id)
+      if (e) e.chats.set(chat.ids, chat)
+    },
+    
+    delChat (id, id2) {
+      const e = this.map.get(id)
+      if (e) e.chats.delete(ids)
+    },
+
+    // PURGATOIRE ////////////////////////////////////////////////////////////////
     setCompte (avatar, compta, tribu) { // avatar principal du compte connecté
       this.avatarP = avatar
       if (tribu) {
@@ -424,11 +486,6 @@ export const useAvatarStore = defineStore('avatar', {
       if (tribu) this.setTribu(tribu)
       this.setCompta(compta)
       this.setAvatar(avatar)
-    },
-
-    /* Evite de faire recalculer mapMC tant que les mots clés du compte n'ont pas changé */
-    setMotscles (mc) {
-      this.motscles = mc
     },
 
     setCompta (compta) {
@@ -443,10 +500,6 @@ export const useAvatarStore = defineStore('avatar', {
       if (this.session.setNotifS(ntf)) bl = true
       this.comptaP = compta
       if (bl) this.session.setBlocage()
-    },
-
-    setccCpt (ccCpt) {
-      this.ccCpt = ccCpt
     },
 
     /* set d'une tribu courante (pour le Comptable)
@@ -494,120 +547,6 @@ export const useAvatarStore = defineStore('avatar', {
 
     delTribuC (id) { // delete d'une tribu quelconque pour le Comptable
        this.maptr.delete(id)
-    },
-
-    setAvatar (avatar) {
-      if (!avatar) return
-      let e = this.map.get(avatar.id)
-      if (!e) {
-        e = { 
-          avatar: avatar,
-          notes: new Map(),
-          sponsorings: new Map(),
-          chats: new Map(),
-          tickets: new Map()
-         }
-        this.map.set(avatar.id, e)
-        if (avatar.id === this.session.compteId) this.setMotscles (avatar.mc)
-      } else {
-        if (avatar.id === this.session.compteId) {
-          const mcav = new Uint8Array(encode(e.avatar.mc || {}))
-          const mcap = new Uint8Array(encode(avatar.mc || {}))
-          if (!egaliteU8(mcav, mcap )) this.setMotscles(avatar.mc || {})
-        }
-        e.avatar = avatar
-      }
-      if (avatar.id === this.session.compteId) this.avatarP = avatar
-      this.nSt.setAvatar(avatar.na)
-    },
-
-    setNote (note) {
-      if (!note) return
-      const e = this.map.get(note.id)
-      if (e) e.notes.set(note.ids, note.v2)
-      this.nSt.setNote(note)
-    },
-
-    delNote (id, ids) {
-      const e = this.map.get(id)
-      if (e) e.notes.delete(ids)
-      this.nSt.delNote(id, ids)
-    },
-
-    setChat (chat) {
-      if (!chat) return
-      const e = this.map.get(chat.id)
-      if (!e) return
-      e.chats.set(chat.ids, chat)
-      this.pSt.setPeopleChat(chat, chat.cv)
-    },
-    
-    delChat (id, id2) {
-      const e = this.map.get(id)
-      if (!e) return
-      const ids = hash(id < id2 ? id + '/' + id2 : id2 + '/' + id)
-      e.chats.delete(ids)
-      this.pSt.unsetPeopleChat(id, id2)
-    },
-
-    setTicket (ticket) {
-      if (!ticket) return
-      const e = this.map.get(ticket.id)
-      if (!e) return
-      e.tickets.set(ticket.ids, ticket)
-    },
-    
-    delTicket (id, ids) {
-      const e = this.map.get(id)
-      if (!e) return
-      e.tickets.delete(ids)
-    },
-
-    setSponsoring (sponsoring) {
-      if (!sponsoring) return
-      const e = this.map.get(sponsoring.id)
-      if (!e) return
-      e.sponsorings.set(sponsoring.ids, sponsoring)
-    },
-    delSponsoring (id, ids) {
-      const e = this.map.get(id)
-      if (!e) return
-      e.sponsorings.delete(ids)
-    },
-
-    /* Mise jour groupée pour un avatar
-    e : { id, av: avatar, lch: [], lsp: [], lsc: [] }
-    */
-    lotMaj ({id, av, lch, lsp, lno, ltk}) {
-      if (av) this.setAvatar(av)
-      lno.forEach(s => { 
-        if (s._zombi) this.delNote(s.id, s.ids); else this.setNote(s) 
-      })
-      lsp.forEach(s => { 
-        if (s._zombi) this.delSponsoring(s.id, s.ids); else this.setSponsoring(s) 
-      })
-      lch.forEach(c => { this.setChat(c) })
-      ltk.forEach(t => { this.setTicket(t) })
-    },
-
-    del (id) {
-      const e = this.map[id]
-      if (e) {
-        e._zombi = true
-        delete this.map[id]
-      }
-      this.nSt.delAvatar(id)
-    },
-
-    /* Pseudo opération : GetPub */
-    async getPub (id) {
-      try {
-        const args = { token: this.session.authToken, id }
-        const ret = await post(null, 'GetPub', args)
-        return ret.pub
-      } catch (e) {
-        throw new AppExc(E_WS, 3)
-      }
     }
   }
 })
