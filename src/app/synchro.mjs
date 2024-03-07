@@ -1,3 +1,10 @@
+/* TODO: synchro
+- Transmettre dataSync au module d'écoute (abonnement)
+- Opération Sync2 du serveur
+- gérer / vérifier les suppressions groupes / avatars
+- gérer fichiers des notes AvNote / Fetat - Changer Fetat id av /gr, ids note - idf en index (plus en id)
+*/
+
 import { afficherDiag } from './util.mjs'
 import { idb, openIDB, IDBbuffer } from './db.mjs'
 import { OperationUI } from './operations.mjs'
@@ -18,8 +25,8 @@ class Queue {
     this.compte = { rowv: null, mv: 0, row: null }
     this.compta = { rowv: null, mv: 0, row: null }
     this.espace = { rowv: null, mv: 0, row: null }
-    this.partition = { rowv: null, mv: 0, row: null }
-    this.avgrs = new Map() // cle: rds, valeur: {v
+    this.partition = { rds: 0, rowv: null, mv: 0, row: null }
+    this.avgrs = new Map() // cle: rds, valeur: v
   }
 
   /* Au retour de n'importe quelle opération un ou plusieurs rows CCEP
@@ -121,44 +128,76 @@ class Queue {
   reveil () {
     if (this.job || !stores.session.ok) return
 
-    /* PRIORITE 1 : Traitement SIMPLE des rows directement reçus en retour d'un POST
-    Aucun impact sur la synchro, seulement stockage en Store et IDB */
+    /* PRIORITE 1 : Traitement des rows directement reçus en retour d'un POST */
     if (this.RowCCEPtodo) {
       const arg = { }
       if (this.compte.row) { arg.rowCompte = this.compte.row; this.compte.row = null }
       if (this.compta.row) { arg.rowCompta = this.compta.row; this.compta.row = null }
       if (this.espace.row) { arg.rowEspace = this.espace.row; this.espace.row = null }
       if (this.partition.row) { arg.rowPartition = this.partition.row; this.partition.row = null }
-      this.job.doRowCcep(arg)
+      this.job = new Job()
+      const ds = new DataSync(syncQueue.dataSync.serial)
+      setTimeout(() => { this.job.doRowCcep(ds, arg) }, 5)
+      return
     }
 
-    /* PRIORITE 2 : Traitement des versions des CCEP reçus sur écoute / WS
-    Possible impact de synchro (avatars / groupes nouveaux ou disparus) */
+    /* PRIORITE 2 : Traitement des notifications de changement des versions des CCEP
+    reçues sur écoute / WS. Possible impact de synchro (avatars / groupes nouveaux ou disparus) */
     if (this.VersionCCEPtodo) {
-      const arg = { }
-      if (this.compte.rowv) { arg.compte = this.compte.rowv; this.compte.rowv = null }
-      if (this.compta.rowv) { arg.compta = this.compta.rowv; this.compta.rowv = null }
-      if (this.espace.rowv) { arg.espace = this.espace.rowv; this.espace.rowv = null }
-      if (this.partition.rowv) { arg.partition = this.partition.rowv; this.partition.rowv = null }
-      this.job.doVersionCcep(arg)
+      if (this.compte.rowv) { this.compte.rowv = null }
+      if (this.compta.rowv) { this.compta.rowv = null }
+      if (this.espace.rowv) { this.espace.rowv = null }
+      if (this.partition.rowv) { this.partition.rowv = null }
+      this.job = new Job()
+      const ds = new DataSync(syncQueue.dataSync.serial)
+      setTimeout(() => { this.job.doVersionCcep(ds) }, 5)
+      return
     }
 
-    if (this.avgrs.size) { // Traitement d'UN versions d'un sous-arbre reçu sur écoute / WS
+    /* PRIORITE 3 : Traitement des notifications de changement des versions des avatars / groupes
+    reçues sur écoute / WS. */
+    if (this.avgrs.size) {
+      const lida = []
       for (const [, row] of this.avgrs) {
         this.avgrs.delete(row.rds)
-        const ida = Reg.Rds(row.rds)
-        const ds = syncQueue.dataSync
-        const ag = (ID.estGroupe(ida) ? ds.groupes : ds.avatars).get(ida)
-        // if (ag && ag.vb < row.v)
-  
-        this.job = new Job()
-        setTimeout(() => { this.job.doAvGr(row) }, 5)
-        return
+        lida.push(Reg.Rds(row.rds))
       }
+      const ds = new DataSync(syncQueue.dataSync.serial)
+      this.job = new Job()
+      setTimeout(() => { this.job.doAvGr(ds, lida) }, 5)
+      return
     }
   }
 
-  finJob () {
+  finJob (ds) {
+    /* Maj de queue en fonction du nouveau DataSync
+    this.compte = { rowv: null, mv: 0, row: null }
+    ...
+    this.avgrs = new Map() Recalculé depuis ds ET les valeurs restées pertinentes de l'actuel
+    */
+    if (ds.compte.vs >= this.compte.mv) { 
+      this.compte.rowv = null; this.compte.row = null; this.compte.mv = ds.compte.vs
+    }
+    if (ds.compta.vs >= this.compta.mv) { 
+      this.compta.rowv = null; this.compta.row = null; this.compta.mv = ds.compta.vs
+    }
+    if (ds.espace.vs >= this.espace.mv) { 
+      this.espace.rowv = null; this.espace.row = null; this.espace.mv = ds.espace.vs
+    }
+    if (ds.partition && (ds.partition.rds === this.partition.rds)) {
+      this.partition.rowv = null; this.partition.row = null; this.partition.mv = ds.partition.vs
+    } else this.partition = { rds: ds.partition ? ds.partition.rds : 0, rowv: null, mv: 0, row: null }
+    const nvavgrs = new Map()
+    for(const e of ds.avatars) {
+      const e2 = this.avgrs.get(e.rds)
+      if (e2 && e2.v <= e.vs) nvavgrs.set(e.rds, e2.v)
+    }
+    for(const e of ds.groupes) {
+      const e2 = this.avgrs.get(e.rds)
+      if (e2 && e2.v <= e.vs) nvavgrs.set(e.rds, e2.v)
+    }
+    this.avgrs = nvavgrs
+    syncQueue.dataSync = ds
     this.job = null
     this.reveil()
   }
@@ -166,45 +205,64 @@ class Queue {
 export const syncQueue = new Queue()
 
 class Job {
-  /* Traitement "SIMPLE" SANS IMPACT SYNC de chagement des row compte ... 
-  obtenus en retour de POST */
-  async doRowCcep ({ rowCompte, rowCompta, rowEspace, rowPartition }) {
+  /* Traitement du changement des "rows" compte ... obtenus,
+  - soit en retour de POST 
+  - soit par doVersionCcep() ci-après
+  */
+  async doRowCcep (ds, { rowCompte, rowCompta, rowEspace, rowPartition }) {
     const buf = new IDBbuffer()
-    const sbccep = new SBccep()
+    const sb = new SB()
     if (rowCompte) {
-      sbccep.compte = await compile(rowCompte)
+      /* TODO - rowCompte peut avoir :
+      - un changement de partition
+      - des sous-arbre en plus ou en moins
+      a) Répercussion sur DataSync
+      b) Pour les sous-arbres EN PLUS, inscription en queue
+      */
+      sb.compte = await compile(rowCompte)
       buf.putIDB(rowCompte)
+      ds.compte.vs = sb.compte.v
     }
     if (rowCompta) {
-      sbccep.compta = await compile(rowCompta)
+      sb.compta = await compile(rowCompta)
       buf.putIDB(rowCompta)
+      ds.compta.vs = sb.compta.v
     }
     if (rowEspace) {
-      sbccep.espace = await compile(rowEspace)
+      sb.espace = await compile(rowEspace)
       buf.putIDB(rowEspace)
+      ds.espace.vs = sb.espace.v
     }
     if (rowPartition) {
-      sbccep.partition = await compile(rowPartition)
+      sb.partition = await compile(rowPartition)
       buf.putIDB(rowPartition)
+      ds.partition.vs = sb.partition.v
     }
-    sbccep.store(buf)
-    buf.commit()
-    syncQueue.finJob()
+    sb.store(buf)
+    buf.commit(ds)
+    syncQueue.finJob(ds)
   }
 
-  /* Traitement "SYNC" d'une arrivée de versions par OnSnapShot ou WS 
+  /* Traitement de notifications de changement de versions par OnSnapShot ou WS 
   relatif à un compte, compta ...*/
-  async doVersionCcep(arg) {
-    // compte ... : { rds, v, suppr }
-    // TODO - Alléger quand il n'y a pas de Sync en cause
-    await new SyncStd1().run(arg)
-    syncQueue.finJob()
+  async doVersionCcep(ds1) {
+    const args = { authData: session.authToken, dataSync: ds1 }
+    const ret = await post(this, 'Sync2', args)
+    const ds = new DataSync(ret.dataSync) // Mis à jour par le serveur
+    const arg = { 
+      rowCompte: ret.rowCompte, 
+      rowCompta: ret.rowCompta, 
+      rowEspace: ret.rowEspace, 
+      rowPartition: ret.rowPartition
+    }
+    await this.doRowCcep (ds, arg)
+    syncQueue.finJob(ds)
   }
 
-  /* Traitement "SYNC" d'une arrivée de versions par OnSnapShot ou WS 
-  relatif à un sous-arbre avatar / groupe */
-  async doAvGr(rowv) {
-    await new SyncStd2().run(rowv)
+  /* Traitement de notifications de changement de versions par OnSnapShot ou WS 
+  relatif à des sous-arbres avatar / groupe */
+  async doAvGr(ds1, lida) {
+    const ds = await new SyncStd().run(ds1, lida)
     syncQueue.finJob(ds)
   }
 }
@@ -389,14 +447,14 @@ export class OperationS extends Operation {
   /* Chargment en Store des avatars / groupes connus en IDB
   SAUF en mode synchro,
   - les avatars et groupes marqués en suppression dans dataSync (vb = -1)
-    qui sont purhés de IDB
+    qui sont purgés de IDB (avec maj de ds)
   - les membres ou notes marqués à supprimer de dataSync
-    qui sont purgés de IDB
+    qui sont purgés de IDB (avec maj de ds)
   */
   async loadAvatarsGroupes (ds) {
     { // Phase itérative pour chaque avatar
       for(const eds of ds.avatars) {
-        const sb = new SBav()
+        const sb = new SB()
         const buf = new IDBbuffer()
         if (eds.vb === -1) { // Avatars à supprimer de IDB / store - NON chargés
           buf.purgeAvatarIDB(eds.id)
@@ -410,8 +468,7 @@ export class OperationS extends Operation {
           if (m.tickets) for(const row of m.tickets) sb.setT(await compile(row))
         }
         sb.store(buf)
-        syncQueue.dataSync = ds
-        await buf.commit()
+        await buf.commit(ds)
       }
     }
     
@@ -423,7 +480,7 @@ export class OperationS extends Operation {
           ds.delGr(eds.id)
           continue
         }
-        const sb = new SBgr()
+        const sb = new SB()
         const m = await idb.getSA (eds.id)
         if (m.groupes) for(const row of m.groupes) sb.setG(await compile(row))
         if (m.chatgrs) for(const row of m.chatgrs) sb.setC(await compile(row))
@@ -436,8 +493,7 @@ export class OperationS extends Operation {
           buf.purgeGroupeMbIDB(eds.id)
         } else if (m.membres) for(const row of m.membres) sb.setM(await compile(row))
         sb.store(buf)
-        syncQueue.dataSync = ds
-        await buf.commit()
+        await buf.commit(ds)
       }
     }
   }
@@ -490,7 +546,7 @@ export class OperationS extends Operation {
       if (session.synchro) {
         await this.fusionDS(ds) // Enrichit le ds courant par celui de IDB
         // Chargement des groupes et avatars depuis IDB
-        await this.loadAvatarsGroupes (ds)
+        await this.loadAvatarsGroupes (ds, buf)
         /* Etat rétabli à celui de IDB, MAIS
         - CCEP sont rafraîchis par ceux du serveur
         - les avatars et groupes disparus de compte ont été purgés
@@ -501,12 +557,29 @@ export class OperationS extends Operation {
     return [ds, sb, buf, ret]
   }
 
-  /* Fusion des dataSync: 1) rempli par le serveur depuis rien, 2) celui connu de IDB en mode synchro 
-  Le ds "courant" transmis en argument est MIS A JOUR
+  /* Fusion des dataSync: 
+  - ds: rempli par le serveur depuis rien, 
+  - d2: celui connu de IDB en mode synchro 
+  ds est MIS A JOUR
   */
   async fusionDS (ds) {
     const d2 = await idb.getDataSync()
-    // TODO
+    ds.compte.vs = d2.compte.vb
+    ds.compta.vs = d2.compta.vb
+    ds.espace.vs = d2.espace.vb
+    if (ds.partition) {
+      if (d2.partition && (d2.partition.id === ds.partition.id)) ds.partition.vs = d2.partition.vb
+      else ds.partition.vs = 0
+    }
+    for(const e of ds.avatars) {
+      const e2 = d2.avatars(e.id)
+      e.vs = e2 ? e.vb : 0
+    }
+    for(const e of ds.groupes) {
+      const e2 = d2.groupes(e.id)
+      e.vs = e2 ? e.vb : 0
+    }
+    syncQueue.dataSync = ds
   }
 
   /* Depuis un dataSync courant, charge du serveur toutes les mises à jour
@@ -517,39 +590,39 @@ export class OperationS extends Operation {
     - ceci PEUT conduire à avoir des groupes / avatars en plus ou moins
     - ce qui peut provoquer une itération
   - le DataStync courant est retourné
+  lida : liste des ida A PRIORI à rechercher: des notifications ayant été reçue
   */
-  async majAvatarsGroupes (ds1) {
+  async majAvatarsGroupes (ds1, lida) {
+    const setIda = new Set(lida || [])
     let ds = ds1
-    while (true) { // Phase 2 : itérative pour chaque avatar / groupe
-      let item = null
-      for(const e of ds.avatars) { 
-        if (e.vs === e.vb) continue // déjà traité
-        item = e
-        break
-      }
-      if (!item) for(const e of ds.groupes) { 
-        if (e.vs === e.vb) continue // déjà traité
-        item = e
-        break
-      }
-      if (!item) break // YES !!! tous traités
+    /* Phase itérative pour chaque avatar / groupe
+    A chaque itération il y a un commit IDB / store résultant 
+    mais DataSync n'est retourné qu'à la fin
+    */
+    while (true) {
+      for(const e of ds.avatars) if (e.vs !== e.vb) setIda.add(e.id)
+      for(const e of ds.groupes) if (e.vs !== e.vb) setIda.add(e.id)
 
-      // Traitement d'un item ds ds avatar ou groupe
-      const ida = item.id
+      if (!setIda.size) return ds // YES !!! tous traités
+
+      // Traitement du PREMIER ida du set des ida à traiter
+      const ida = new Array(setIda)[0]
+      setIda.delete(ida)
       const g = ID.estGroupe(ida)
 
       const [dsx, sb, buf, ret] = await this.phase1(false, ds, ida)
-      const ds = dsx
-
-      const eds = (g ? ds.groupes : ds.avatars).get(ida)
-      if (!eds) { // ida a été supprimé depuis - On enregistre les maj de CCEP
+      ds = dsx // ds mis à jour 
+      
+      // MAIS ida peut ne plus être cité dans compte: il est désormais absent de ds.avatars / groupes 
+      const item = (g ? ds.groupes : ds.avatars).get(ida)
+      if (!item) { // ida a été supprimé - On enregistre les purge IDB et l'état du store
         if (g) buf.purgeGroupeIDB(ida); else buf.purgeAvatarIDB(ida)
         sb.store(buf)
         buf.commit(ds)
         continue 
       }
 
-      // Cas "normal" : chargement incrémental d'un sous-arbre avatar / groupe
+      // Cas "normal" : chargement incrémental du sous-arbre avatar / groupe
       if (ret.rowAvatars) {
         sb.setA(await compile(ret.rowAvatars))
         item.vs = item.vb
@@ -576,44 +649,19 @@ export class OperationS extends Operation {
       sb.store(buf)
       buf.commit(ds)
     }
-    return ds
   }
 }
 
 /* Synchronisation standard *********************************/
-export class SyncStd1 extends OperationS {
-  constructor() { super('SyncStd1') }
+export class SyncStd extends OperationS {
+  constructor() { super('SyncStd') }
 
-  async run(arg) {
-    try {
-      let ds = syncQueue.dataSync
-      const [dsx, sb, buf] = await this.phase1(false, ds)
-      ds = dsx
-      sb.store(buf)
-      buf.commit(ds)
-
-      // Phase 2 : chargement des sous-arbres groupes et avatars
-      ds = await this.majAvatarsGroupes(ds)
-
-      syncQueue.dataSync = ds
-    } catch (e) {
-      stores.ui.setPage('login')
-      await this.finKO(e)
-    }
-  }
-}
-
-export class SyncStd2 extends OperationS {
-  constructor() { super('SyncStd2') }
-
-  async run(rowv) {
-    try {
-      const ida = Reg.Rds(rowv.rds)
-      let ds = syncQueue.dataSync
-      const ag = (ID.estGroupe(ida) ? ds.groupes : ds.avatars).get(ida)
-      // if (ag && ag.vb < rowv.v)
-      // Phase 2 : chargement des sous-arbres groupes et avatars
-      syncQueue.dataSync = await this.majAvatarsGroupes(ds)
+  /* Chargement des sous-arbres groupes et avatars de la liste
+  lida. Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever)
+  */
+  async run(ds1, lida) {
+    try { 
+      return await this.majAvatarsGroupes(ds1, lida)
     } catch (e) {
       await this.finKO(e)
     }
@@ -638,8 +686,8 @@ export class ConnexionAvion extends OperationS {
 
       const ds = await idb.getDataSync()
 
-      { // Phase 1 : CCEP locale
-        const sb = new SBccep()
+      { // Phase 1 : chargement depuis IDB des CCEP
+        const sb = new SB()
         const m = await idb.getCcep()
         sb.compte = await compile(m.comptes)
         sb.compta = await compile(m.comptas)
@@ -670,12 +718,6 @@ export class ConnexionSynchroIncognito extends OperationUI {
   constructor() { super('ConnexionCompte') }
 
   async run() {
-    /* TODO: synchro
-    - fusion ds serveur et ds IDB
-    - chargement des rows depuis IDB
-    - gérer les suppressions groupes / avatars
-    - gérer fichiers des notes AvNote / Fetat
-    */
     try {
       const session = stores.session
 
@@ -685,16 +727,13 @@ export class ConnexionSynchroIncognito extends OperationUI {
         await idb.loadFetats()
       } 
 
-      let ds = DataSync.nouveau()
-      const [dsx, sb, buf] = await this.phase1(true, ds)
-      ds = dsx
+      const ds1 = DataSync.nouveau()
+      const [ds, sb, buf] = await this.phase1(true, ds1)
       sb.store(buf)
       buf.commit(ds)
 
       // Phase 2 : chargement des sous-arbres groupes et avatars
-      ds = await this.majAvatarsGroupes(ds)
-
-      syncQueue.dataSync = ds
+      syncQueue.dataSync = await this.majAvatarsGroupes(ds, [])
 
       if (session.synchro) // Chargement des descriptifs des fichiers du presse-papier
         await idb.FLfromIDB()
@@ -775,7 +814,6 @@ export class AcceptationSponsoring extends OperationUI {
       this.buf = new IDBbuffer()
       this.dh = 0
 
-      // TODO
       // await crypter(ps.pcb, session.clek)
       const aSt = stores.avatar
 
