@@ -98,10 +98,11 @@ export async function post (op, fonction, args) {
         const clek = await decrypter(session.phrase.pcb, c.cleKXR)
         await session.setIdCleK(c.id, clek)
       }
-      /* Retour immédiat pour les changements de CCEP - PAS TRAITE POUR Sync
+      /* Retour immédiat pour les changements de CCEP 
+      - PAS TRAITE POUR Sync / Sync2
       - très fréquent pour rowCompta
       - très rare pour les autres */
-      if (fonction !== 'Sync' && 
+      if (!fonction.startsWith('Sync') && 
         (resp.rowCompte || resp.rowCompta || resp.rowEspace || resp.rowPartition))
         await syncQueue.postResp(resp)
     }

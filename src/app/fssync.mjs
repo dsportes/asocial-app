@@ -9,6 +9,10 @@ import { ID, rowCryptes } from './api.mjs'
 import { decrypterSrv } from './webcrypto.mjs'
 
 export class FsSyncSession {
+  setDs (dataSync) {
+    // TODO
+  }
+
   static initfaite = false
   static app = null
 

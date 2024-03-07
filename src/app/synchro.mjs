@@ -1,7 +1,4 @@
 /* TODO: synchro
-- Transmettre dataSync au module d'écoute (abonnement)
-- Opération Sync2 du serveur
-- gérer / vérifier les suppressions groupes / avatars
 - gérer fichiers des notes AvNote / Fetat - Changer Fetat id av /gr, ids note - idf en index (plus en id)
 */
 
@@ -11,16 +8,19 @@ import { OperationUI } from './operations.mjs'
 import { DataSync, ID, Rds } from './api.mjs'
 import { post } from './net.mjs'
 
+/* classe Queue ***********************************************************/
 class Queue {
   constructor () {
     this.dataSync = null // dataSync courant de la session. Maj au retour de Sync
-
     this.job = null // traitement en cours
 
-    /* Evénnements à traiter
-      v : si true version des événnement arrivés et pas encore traités
-      mv : plus haute version traitée
-      rowv : tiré d'un row version { rds, v, (suppr) }
+    /* Evénnements à traiter: row OU rowv
+      Les rds sont longs
+      - mv : plus haute version traitée ou à traiter
+      - row : row reçu sur un POST
+      - rowv : { rds, v) } tiré d'une notification de changement d'un row versions
+        Remarque: la propriété suppr ne sert qu'au GC. La suppression effective
+        parvient sur un row comptes.
     */
     this.compte = { rowv: null, mv: 0, row: null }
     this.compta = { rowv: null, mv: 0, row: null }
@@ -85,10 +85,11 @@ class Queue {
 
   /* A l'arrivée d'un ou plusieurs row versions sur écoute / WS */
   setRows (rows) { 
+    const ns = stores.session.ns
     if (rows) rows.forEach(r => {
       const nom = Rds.typeS(r.rds)
-      const row = { v: r.v, rds: r.rds }
-      if (r.suppr) row.suppr = true
+      const row = { v: r.v, rds: Rds.long(r.rds, ns) } // suppr ne sert qu'au GC
+
       switch (nom) {
       case 'comptes' : {
         if (this.compte.mv < row.v) { this.compte.mv = row.v; this.compte.rowv = row; this.compte.row = null }
@@ -103,13 +104,15 @@ class Queue {
         break
       }
       case 'partitions' : {
-        if (this.partition.v < row.v) { this.partition.mv = row.v; this.partition.rowv = row; this.partition.row = null }
+        /* le "rds" de partition a été fixé avant par le compte et c'est lui qui prévaut */
+        if (this.partition.rds === row.rds && this.partition.v < row.v) 
+          { this.partition.mv = row.v; this.partition.rowv = row; this.partition.row = null }
         break
       }
       case 'groupes' :
       case 'avatars' : {
         const x = this.avgrs.get(row.rds)
-        if (!x || x.v < row.v) this.avgrs.set(rds, row.v, row.suppr)
+        if (!x || x.v < row.v) this.avgrs.set(row.rds, row.v)
         break
       }
       }
@@ -204,6 +207,7 @@ class Queue {
 }
 export const syncQueue = new Queue()
 
+/* classe Job ***********************************************************/
 class Job {
   /* Traitement du changement des "rows" compte ... obtenus,
   - soit en retour de POST 
@@ -213,13 +217,26 @@ class Job {
     const buf = new IDBbuffer()
     const sb = new SB()
     if (rowCompte) {
-      /* TODO - rowCompte peut avoir :
-      - un changement de partition
-      - des sous-arbre en plus ou en moins
-      a) Répercussion sur DataSync
-      b) Pour les sous-arbres EN PLUS, inscription en queue
+      /* rowCompte peut avoir :
+      - un changement de partition: 
+        finJob(ds) inscrira en queue l'acquisition du nouveau partition
+      - des sous-arbre en plus:
+        finJob(ds) inscrira en queue l'acquisition des nouveaux sous-arbres
+      - des sous-arbres en moins: traité ici
       */
       sb.compte = await compile(rowCompte)
+      {
+        const s = new Set(), sd = new Set()
+        ds.avatars.forEach(x => { if (x.vb !== -1) s.add(x.id) })
+        sb.compte.mav.forEach(id => { if (!s.has(id)) sd.add(id)})
+        sd.forEach(id => { buf.purgeAvatarIDB(id)})
+      }
+      {
+        const s = new Set(), sd = new Set()
+        ds.groupes.forEach(x => { if (x.vb !== -1) s.add(x.rds) })
+        sb.compte.mpg.forEach(id => { if (!s.has(id)) sd.add(id)})
+        sd.forEach(id => { buf.purgeGroupeIDB(id)})
+      }
       buf.putIDB(rowCompte)
       ds.compte.vs = sb.compte.v
     }
@@ -246,7 +263,7 @@ class Job {
   /* Traitement de notifications de changement de versions par OnSnapShot ou WS 
   relatif à un compte, compta ...*/
   async doVersionCcep(ds1) {
-    const args = { authData: session.authToken, dataSync: ds1 }
+    const args = { authData: session.authToken, dataSync: ds1.serial }
     const ret = await post(this, 'Sync2', args)
     const ds = new DataSync(ret.dataSync) // Mis à jour par le serveur
     const arg = { 
@@ -264,67 +281,6 @@ class Job {
   async doAvGr(ds1, lida) {
     const ds = await new SyncStd().run(ds1, lida)
     syncQueue.finJob(ds)
-  }
-}
-
-/* Déconnexion, reconnexion, commexion *************************************************/
-/* garderMode : si true, garder le mode */
-export function deconnexion(garderMode) {
-  const ui = stores.ui
-  // ui.setPage('null')
-  const session = stores.session
-  const mode = session.mode
-  const org = session.org
-
-  if (session.accesIdb) idb.close()
-  if (session.accesNet) {
-    if (session.fsSync) session.fsSync.close(); else closeWS()
-  }
-  stores.reset() // Y compris session
-  if (garderMode) session.setMode(mode)
-  session.org = org
-  SyncQueue.reset()
-  ui.setPage('login')
-}
-
-export async function reconnexion() {
-  const session = stores.session
-  const phrase = session.phrase
-  deconnexion(true)
-  await connexion(phrase)
-}
-
-/* Connexion depuis PageLogin ou reconnexion *****************************/
-export async function connexion(phrase, razdb) {
-  if (!phrase) return
-  const session = stores.session
-  await session.initSession(phrase)
-
-  if (session.avion) {
-    if (!this.nombase) { // nom base pas trouvé en localStorage de clé lsk
-      await afficherDiag($t('OPmsg1'))
-      deconnexion(true)
-      return
-    }
-    try {
-      await idb.open()
-    } catch (e) {
-      await afficherDiag($t('OPmsg2', [e.message]))
-      deconnexion()
-      return
-    }
-    // initialisation de compteId et clek depuis boot de IDB
-    if (!await idb.getBoot()) { // false si KO 
-      await afficherDiag($t('OPmsg3'))
-      deconnexion()
-      return
-    }
-    try { await new ConnexionAvion().run() } catch (e) { /* */ }
-  }
-  else {
-    if (razdb && session.synchro && session.nombase)
-      await idb.delete(session.nombase)
-    try { await new ConnexionSynchroIncognito().run() } catch (e) { /* */ }
   }
 }
 
@@ -441,6 +397,68 @@ class SB {
   }
 }
 
+/* Déconnexion, reconnexion, commexion *************************************************/
+/* garderMode : si true, garder le mode */
+export function deconnexion(garderMode) {
+  const ui = stores.ui
+  // ui.setPage('null')
+  const session = stores.session
+  const mode = session.mode
+  const org = session.org
+
+  if (session.accesIdb) idb.close()
+  if (session.accesNet) {
+    if (session.fsSync) session.fsSync.close(); else closeWS()
+  }
+  stores.reset() // Y compris session
+  if (garderMode) session.setMode(mode)
+  session.org = org
+  SyncQueue.reset()
+  ui.setPage('login')
+}
+
+export async function reconnexion() {
+  const session = stores.session
+  const phrase = session.phrase
+  deconnexion(true)
+  await connexion(phrase)
+}
+
+/* Connexion depuis PageLogin ou reconnexion *****************************/
+export async function connexion(phrase, razdb) {
+  if (!phrase) return
+  const session = stores.session
+  await session.initSession(phrase)
+
+  if (session.avion) {
+    if (!this.nombase) { // nom base pas trouvé en localStorage de clé lsk
+      await afficherDiag($t('OPmsg1'))
+      deconnexion(true)
+      return
+    }
+    try {
+      await idb.open()
+    } catch (e) {
+      await afficherDiag($t('OPmsg2', [e.message]))
+      deconnexion()
+      return
+    }
+    // initialisation de compteId et clek depuis boot de IDB
+    if (!await idb.getBoot()) { // false si KO 
+      await afficherDiag($t('OPmsg3'))
+      deconnexion()
+      return
+    }
+    try { await new ConnexionAvion().run() } catch (e) { /* */ }
+  }
+  else {
+    if (razdb && session.synchro && session.nombase)
+      await idb.delete(session.nombase)
+    try { await new ConnexionSynchroIncognito().run() } catch (e) { /* */ }
+  }
+}
+
+/* classe OperationS *******************************************************/
 export class OperationS extends Operation {
   constructor(nomop) { super(nomop, true) }
 
@@ -456,17 +474,12 @@ export class OperationS extends Operation {
       for(const eds of ds.avatars) {
         const sb = new SB()
         const buf = new IDBbuffer()
-        if (eds.vb === -1) { // Avatars à supprimer de IDB / store - NON chargés
-          buf.purgeAvatarIDB(eds.id)
-          ds.delAv(eds.id)
-        } else {
-          const m = await idb.getSA (eds.id)
-          if (m.avatars) for(const row of m.avatars) sb.setA(await compile(row))
-          if (m.notes) for(const row of m.notes) sb.setN(await compile(row))
-          if (m.chats) for(const row of m.chats) sb.setC(await compile(row))
-          if (m.sponsorings) for(const row of m.sponsorings) sb.setS(await compile(row))
-          if (m.tickets) for(const row of m.tickets) sb.setT(await compile(row))
-        }
+        const m = await idb.getSA(eds.id)
+        if (m.avatars) for(const row of m.avatars) sb.setA(await compile(row))
+        if (m.notes) for(const row of m.notes) sb.setN(await compile(row))
+        if (m.chats) for(const row of m.chats) sb.setC(await compile(row))
+        if (m.sponsorings) for(const row of m.sponsorings) sb.setS(await compile(row))
+        if (m.tickets) for(const row of m.tickets) sb.setT(await compile(row))
         sb.store(buf)
         await buf.commit(ds)
       }
@@ -475,16 +488,11 @@ export class OperationS extends Operation {
     { // Phase itérative pour chaque groupe
       for(const eds of ds.groupes) {
         const buf = new IDBbuffer()
-        if (eds.vb === -1) { // Groupes à supprimer de IDB / store - NON chargés
-          buf.purgeGroupeIDB(eds.id)
-          ds.delGr(eds.id)
-          continue
-        }
         const sb = new SB()
-        const m = await idb.getSA (eds.id)
+        const m = await idb.getSA(eds.id)
         if (m.groupes) for(const row of m.groupes) sb.setG(await compile(row))
         if (m.chatgrs) for(const row of m.chatgrs) sb.setC(await compile(row))
-        if (eds.n === -1) { // Membres à supprimer
+        if (eds.n === -1) { // notes à supprimer
           eds.n = 0
           buf.purgeGroupeNoIDB(eds.id)
         } else if (m.notes) for(const row of m.notes) sb.setN(await compile(row))
@@ -544,7 +552,12 @@ export class OperationS extends Operation {
       // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK
 
       if (session.synchro) {
-        await this.fusionDS(ds) // Enrichit le ds courant par celui de IDB
+        const dav = await idb.getDataSync()
+        // partition / avatars / groupes c / m / n disparus
+        this.supprdsdav(ds, dav, buf)
+        // Enrichit le ds courant par celui de IDB 
+        await this.fusionDS(ds)
+
         // Chargement des groupes et avatars depuis IDB
         await this.loadAvatarsGroupes (ds, buf)
         /* Etat rétabli à celui de IDB, MAIS
@@ -557,29 +570,44 @@ export class OperationS extends Operation {
     return [ds, sb, buf, ret]
   }
 
+  /* Gestion des suppressions entre ds (actuel) et dav (avant):
+  - partition disparue
+  - sous-arbres avatars
+  - sous-arbres groupes: complet / notes / membres
+  */
+  supprdsdav (ds, dav, buf) {
+    if (dav.partition && !ds.partition) 
+      buf.putIDB({ _nom: 'partitions', id: dav.partition.id })
+    dav.avatars.forEach((e, id) => { 
+      if (!ds.avatars.has(id)) buf.purgeAvatarIDB(id) })
+    dav.groupes.forEach((eav, id) => {
+      const e = ds.groupes.has(id)
+      if (!e) buf.purgeGroupeIDB(id)
+      else {
+        if (eav.m && !e.m) buf.purgeGroupeMbIDB(id)
+        if (eav.n && !e.n) buf.purgeGroupeNoIDB(id)
+      }
+    })
+  }
+
   /* Fusion des dataSync: 
   - ds: rempli par le serveur depuis rien, 
   - d2: celui connu de IDB en mode synchro 
   ds est MIS A JOUR
   */
-  async fusionDS (ds) {
-    const d2 = await idb.getDataSync()
-    ds.compte.vs = d2.compte.vb
-    ds.compta.vs = d2.compta.vb
-    ds.espace.vs = d2.espace.vb
+  async fusionDS (ds, dav) {  
     if (ds.partition) {
-      if (d2.partition && (d2.partition.id === ds.partition.id)) ds.partition.vs = d2.partition.vb
+      if (dav.partition && (dav.partition.id === ds.partition.id)) ds.partition.vs = dav.partition.vs
       else ds.partition.vs = 0
     }
     for(const e of ds.avatars) {
-      const e2 = d2.avatars(e.id)
-      e.vs = e2 ? e.vb : 0
+      const e2 = dav.avatars(e.id)
+      e.vs = e2 ? e2.vs : 0
     }
     for(const e of ds.groupes) {
-      const e2 = d2.groupes(e.id)
-      e.vs = e2 ? e.vb : 0
+      const e2 = dav.groupes(e.id)
+      e.vs = e2 ? e2.vs : 0
     }
-    syncQueue.dataSync = ds
   }
 
   /* Depuis un dataSync courant, charge du serveur toutes les mises à jour
@@ -593,6 +621,7 @@ export class OperationS extends Operation {
   lida : liste des ida A PRIORI à rechercher: des notifications ayant été reçue
   */
   async majAvatarsGroupes (ds1, lida) {
+    const fs = stores.session.fssync
     const setIda = new Set(lida || [])
     let ds = ds1
     /* Phase itérative pour chaque avatar / groupe
@@ -611,6 +640,8 @@ export class OperationS extends Operation {
       const g = ID.estGroupe(ida)
 
       const [dsx, sb, buf, ret] = await this.phase1(false, ds, ida)
+      // suppressions de IDB des disparus
+      this.supprdsdav(dsx, ds, buf)
       ds = dsx // ds mis à jour 
       
       // MAIS ida peut ne plus être cité dans compte: il est désormais absent de ds.avatars / groupes 
@@ -619,6 +650,7 @@ export class OperationS extends Operation {
         if (g) buf.purgeGroupeIDB(ida); else buf.purgeAvatarIDB(ida)
         sb.store(buf)
         buf.commit(ds)
+        if (fs) fs.setDS(syncQueue.dataSync)
         continue 
       }
 
@@ -648,6 +680,7 @@ export class OperationS extends Operation {
 
       sb.store(buf)
       buf.commit(ds)
+      if (fs) fs.setDS(syncQueue.dataSync)
     }
   }
 }
@@ -714,7 +747,7 @@ export class ConnexionAvion extends OperationS {
 }
 
 /* Connexion à un compte en mode synchro ou incognito *********************************/
-export class ConnexionSynchroIncognito extends OperationUI {
+export class ConnexionSynchroIncognito extends OperationS {
   constructor() { super('ConnexionCompte') }
 
   async run() {
@@ -729,11 +762,13 @@ export class ConnexionSynchroIncognito extends OperationUI {
 
       const ds1 = DataSync.nouveau()
       const [ds, sb, buf] = await this.phase1(true, ds1)
+      if (session.fssync) session.fssync.setDS(ds)
       sb.store(buf)
       buf.commit(ds)
 
       // Phase 2 : chargement des sous-arbres groupes et avatars
       syncQueue.dataSync = await this.majAvatarsGroupes(ds, [])
+      if (session.fssync) session.fssync.setDS(syncQueue.dataSync)
 
       if (session.synchro) // Chargement des descriptifs des fichiers du presse-papier
         await idb.FLfromIDB()
