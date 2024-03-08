@@ -47,8 +47,14 @@ export const useSessionStore = defineStore('session', {
     
     naComptable: null,
 
-    espaces: new Map(), // sauf pour admin il n'y en a qu'un
-    syntheses: new Map(), // sauf pour admin il n'y en a qu'un
+    espaces: new Map(), // Pour admin SEULEMENT
+    syntheses: new Map(), // Pour admin SEULEMENT
+
+    partition: null,
+    compte: null,
+    compta: null,
+    espace: null,
+    synthese: null, // Dernière synthèse demandée pour admin - de leur espace pour les comptes
 
     opEncours: null,
     opSpinner: 0,
@@ -276,22 +282,52 @@ export const useSessionStore = defineStore('session', {
     setStatus (s) {
       this.status = s
     },
+
+    setCompte (compte) { 
+      this.compte = compte
+      if (!this.compteId) this.compteId = compte.id
+    },
+
+    setCompta (compta) {
+      this.compta = compta
+    }, 
+
+    setEspace (espace, estAdmin) {
+      if (estAdmin) this.espaces.set(espace.id, espace)
+      else this.espace = espace
+    },
+
+    setPartition (partition) {
+      this.partition = partition
+      if (this.partitionId !== partition.id) this.partitionId = partition.id
+    },
+
+    delPartition () {
+      if (this.partitionId) this.partitionId = 0
+      this.partition = null
+    },
+
+    setSynthese (synthese) {
+      this.synthese = synthese
+    },
+
+
+    /*
     setEstSponsor (sp) {
       this.estSponsor = sp
     },
     setEstAutonome (a) {
       this.estAutonome = a
     },
+    */
 
     setFsSync (fsSync) {
       this.fsSync = fsSync
     },
 
-    setAvatarId (id) { this.avatarId = id},
+    setAvatarId (id) { this.avatarId = id },
 
-    setTribuId(id) { this.tribuId = id },
-
-    setTribuCId (id) { this.tribuCId = id },
+    setParticitionCId (id) { this.tribuCId = id },
 
     setPeopleId (id) { this.peopleId = id },
 
@@ -299,22 +335,7 @@ export const useSessionStore = defineStore('session', {
 
     setMembreId (id) { this.membreId = id },
 
-    setStats (stats) { this.stats = stats},
-
-    setEspace (espace, estAdmin) {
-      this.espaces.set(espace.id, espace)
-      if (estAdmin) {
-        const ne = espace.notif
-        const n = this.notifs[0]
-        if (ne) {
-          if (!n || ne.dh > n.dh) {
-            this.setNotifE(ne)
-          }
-        } else if (n) {
-          this.setNotifE(null)
-        }
-      }
-    },
+    setStats (stats) { this.stats = stats}, // ????
 
     chgps (phrase) {
       /*
@@ -342,45 +363,6 @@ export const useSessionStore = defineStore('session', {
       }
       else this.notifs[0] = { dh: (!n ? 0 : n.dh) }
       this.setBlocage()
-    },
-
-    setNotifQ (ne) { // depassement de quotas - return true si changement
-      if (!ne) return false
-      const n = this.notifs[3]
-      if (!n || ne.dh > n.dh) {
-        this.notifs[3] = ne
-        return true
-      }
-      return false
-    },
-
-    setNotifS (ne) { // solde négatif - return true si changement
-      if (!ne) return false
-      const n = this.notifs[4]
-      if (!n || ne.dh > n.dh) {
-        this.notifs[4] = ne
-        return true
-      }
-      return false
-    },
-
-    setNotifTC (nt, nc) { // notif tribu et compte (dans tribu)
-      let chg = false
-      if (nt) {
-        const n = this.notifs[1]
-        if (!n || nt.dh > n.dh) {
-          this.notifs[1] = nt
-          chg = true
-        }
-      }
-      if (nc) {
-        const n = this.notifs[2]
-        if (!n || nc.dh > n.dh) {
-          this.notifs[2] = nc
-          chg = true
-        }
-      }
-      if (chg) this.setBlocage()
     },
 
     async editUrgence () {

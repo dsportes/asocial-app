@@ -58,7 +58,7 @@ import { ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { afficherDiag } from '../app/util.mjs'
-import { connecterCompte } from '../app/connexion.mjs'
+import { connexion } from '../app/synchro.mjs'
 import { Sponsoring, RegCles } from '../app/modele.mjs'
 import { ChercherSponsoring } from '../app/operations.mjs'
 import { AMJ, ID, isAppExc } from '../app/api.mjs'
@@ -94,11 +94,14 @@ export default {
         }
       this.ui.oD('PSouvrir')
     },
+
     reset () {  },
+
     async onps (phrase) {
       if (phrase) phrase.phrase = null
-      connecterCompte(phrase, this.ui.razdb)
+      await connexion(phrase, this.ui.razdb)
     },
+
     async crypterphrase (pc) {
       this.pc = pc
       this.org = pc.org
@@ -144,6 +147,7 @@ export default {
         return
       }
     },
+
     raz () {
       this.btncd = false
       this.pc = null
