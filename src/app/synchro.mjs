@@ -284,15 +284,17 @@ class Job {
   }
 }
 
-/* Store Buffer *******************************************************/
+/* Store Buffer ******************************************************
+Liste des maj accumulées à effectuer en une fois au "commit"
+*/
 class SB {
   constructor () {
     this.s = stores.session
     this.a = stores.avatar
+    this.g = stores.groupe
     this.n = stores.notes
     this.p = stores.people
-    this.aSt = stores.avstore
-    this.gSt = stores.groupe
+    this.avSt = stores.avstore
 
     this.compte = null
     this.compta = null
@@ -300,13 +302,23 @@ class SB {
     this.partition = null
 
     this.avatar = null
+    this.groupe = null 
+    this.chatgr = null
     this.notes = new Map()
     this.chats = new Map()
-    this.sponsorings = new Map()
-    this.tickets = new Map()
+    this.sponsorings = new Map() // si dlv < auj à supprimer
+    this.tickets = new Map() // si dlv < auj à supprimer
+    this.membres = new Map() // si _zombi, à supprimer
+
+    this.supprAv = new Set() // avatars à supprimer
+    this.supprGr = new Set() // groupes à supprimer
+    this.supprMb = new Set() // groupes dont les membres sont à supprimer
+    this.supprNo = new Set() // groupes dont les notes sont à supprimer
   }
 
   setA (d) { this.avatar = d }
+
+  setG (d) { this.groupe = d }
 
   setN (d) { this.notes.set(d.ids, d) }
 
@@ -316,11 +328,15 @@ class SB {
 
   setT (d) { this.tickets.set(d.ids, d) }
 
-  setG (d) { this.groupe = d }
-
   setH (d) { this.chatgr = d }
 
   setM (d) { this.membres.set(d.ids, d) }
+
+  delG (idg) { this.supprGr.add(idg) }
+
+  delM (idg) { this.supprMb.add(idg) }
+
+  delN (idg) { this.supprNo.add(idg) }
 
   /* IDBbuffer passé en paramètres:
   La suppression d'un avatar et 
@@ -334,17 +350,21 @@ class SB {
     if (this.partition) this.s.setPartition(this.partition)
 
     if (this.avatar) {
-      if (this.avatar._zombi) {
-        this.a.delAvatar(this.avatar.id)
-        this.aSt.delAvatar(this.avatar.id, buf)
-      } else this.a.setAvatar(this.avatar)
+      this.a.setAvatar(this.avatar)
+    }
+
+    if (this.supprAv.size) for (const ida of this.supprAv) {
+      this.a.delAvatar(ida)
+      this.avSt.delNotes(ida, buf)
     }
 
     if (this.groupe) {
-      if (this.groupe._zombi) {
-        this.g.delGroupe(this.groupe.id)
-        this.dSt.delGroupe(this.groupe.id, buf)
-      } else this.g.setGroupe(this.groupe)
+      this.g.setGroupe(this.groupe)
+    }
+
+    if (this.supprGr.size) for (const idg of this.supprGr) {
+      this.g.delGroupe(idg)
+      this.avSt.delNotes(idg, buf)
     }
 
     if (this.chatgr) {
@@ -352,28 +372,30 @@ class SB {
     }
 
     if (this.notes.size) 
-      for(const x of this.notes) { 
-        const st = ID.estGroupe(x.id) ? this.gSt : this.aSt
-        if (x._zombi) {
-          this.n.delNote(x.id, x.ids)
-          st.delNote(x, buf)
+      for(const n of this.notes) { 
+        const st = ID.estGroupe(n.id) ? this.g : this.a
+        if (n._zombi) {
+          this.n.delNote(n.id, n.ids)
+          st.delNote(n.id, n.ids)
+          this.avSt.delNote(n.id, n.ids, buf)
         } else {
           this.n.setNote(x)
           st.setNote(x, buf)
+          this.avSt.setNote(n, buf)
         }
       }
     
     if (this.chats.size) 
-      for(const x of this.chats) {
-        if (x._zombi) {
-          const ch = this.a.getChat(x.id, x.ids)
-          if (ch) {
-            this.p.delPCh(ch.idE, x.id)
-            this.a.delChat(x.id, x.ids)
+      for(const ch of this.chats) {
+        if (ch._zombi) {
+          const chav = this.a.getChat(x.id, x.ids) // chat AVANT suppression
+          if (chav) {
+            this.p.delPCh(chav.idE, ch.id)
+            this.a.delChat(ch.id, ch.ids)
           }
         } else {
-          this.a.setChat(x)
-          this.p.setPCh(x.idE, x.id)
+          this.a.setChat(ch)
+          this.p.setPCh(ch.idE, ch.id)
         }
       }
     
@@ -390,10 +412,42 @@ class SB {
       }
 
     if (this.membres.size) 
-      for(const x of this.membres) {
-        if (x._zombi) { this.g.delMembre(x.id, x.ids); this.p.delPGr(x.idm, x.id) }
-        else { this.g.setMembre(x); this.p.setPGr(x.idm, x.id) }
+      for(const mb of this.membres) {
+        if (mb._zombi) { 
+          const mbav = this.g.getMembre(mb.id, mb.ids) // membre AVANT suppression
+          this.g.delMembre(mb.id, mb.ids)
+          this.p.delPGr(mbav.idm, mb.id) 
+        }
+        else { 
+          this.g.setMembre(mb); 
+          this.p.setPGr(mb.idm, mb.id) }
       }
+    /*
+    this.supprAv = new Set() // avatars à supprimer
+    this.supprGr = new Set() // groupes à supprimer
+    this.supprMb = new Set() // groupes dont les membres sont à supprimer
+    this.supprNo = new Set() // groupes dont les notes sont à supprimer
+    */
+
+    if (this.supprAv.size) for(const ida of this.supprAv) {
+      this.a.delAvatar(ida)
+      this.avSt.delNotes(ida, buf)
+    }
+    if (this.supprGr.size) for(const idg of this.supprGr) {
+      this.g.delGroupe(ida)
+      this.avSt.delNotes(idg, buf)
+    }
+    if (this.supprMb.size) for(const idg of this.supprMb) {
+      for (const ids of this.g.map(idg)) {
+        const mbav = this.g.getMembre(idg, ids) // membre AVANT suppression
+        this.p.delPGr(mbav.idm, idg) 
+      }
+      this.g.delMembres(idg)
+    }
+    if (this.supprAv.size) for(const ida of this.supprAv) {
+      this.a.delAvatar(ida)
+      this.avSt.delNotes(ida, buf)
+    }
   }
 }
 

@@ -416,6 +416,33 @@ export const useGroupeStore = defineStore('groupe', {
   },
 
   actions: {
+    setGroupe (groupe) {
+    },
+
+    setChatgr (chatgr) {
+    },
+
+    setMembre(membre) {
+    },
+
+    delMembre (id, ids) {
+    },
+
+    setNote (note) {
+    },
+
+    delNote (id, ids) {
+    },
+
+    delGroupe (idg) {
+    },
+
+    delMembres (idg) {
+    },
+
+    delNotes (idg) {
+    },
+
     /* Note Exclu : liste des {im, na} des membres aptes à recevoir l'exclusivité
     - pour les avatars du compte, le na est pris dans le compte
     - pour les autres,, pris dans membres, S'IL Y EN A UN
