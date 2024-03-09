@@ -5,7 +5,7 @@
 import { afficherDiag } from './util.mjs'
 import { idb, openIDB, IDBbuffer } from './db.mjs'
 import { OperationUI } from './operations.mjs'
-import { DataSync, ID, Rds } from './api.mjs'
+import { DataSync, ID, Rds, Cles } from './api.mjs'
 import { post } from './net.mjs'
 
 /* classe Queue ***********************************************************/
@@ -943,6 +943,54 @@ export class ConnexionSynchroIncognito extends OperationS {
 
       console.log('Connexion compte : ' + session.compteId)
       stores.ui.setPage('accueil')
+      this.finOK()
+    } catch (e) {
+      stores.ui.setPage('login')
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_CreerEspace: 'Création d\'un nouvel espace et de son comptable'
+- token : jeton d'authentification du compte de **l'administrateur**
+- ns : numéro de l'espace
+- org : code de l'organisation
+- cleE : clé de l'espace
+- clePK: clé P de la partition 1 cryptée par la clé K du Comptable
+- cleAP: clé A du Comptable cryptée par la clé de la partition
+- cleKXC: clé K du Comptable cryptée par XC du Comptable (PBKFD de la phrase secrète complète).
+- clePA: cle P de la partition cryptée par la clé A du Comptable
+- ck: `{ cleP, code }` crypté par la clé K du comptable
+
+*/
+export class CreerEspace extends OperationUI {
+  constructor() { super('CreerEspace') }
+
+  async run(org, phrase, ns) {
+    try {
+      const session = stores.session
+      const config = stores.config
+
+      const cleP = Cles.partition(1) // clé de la partition 1
+      const cleK = random(32) // clé K du Comptable
+      // `{ cleP, code }` crypté par la clé K du comptable
+      const c = { cleP, code: config.nomPartitionPrimitive }
+
+      const args = {
+        token: session.authToken,
+        ns: ns,
+        org: org,
+        hXR: (ns * d14) + phrase.hps1,
+        hXC: phrase.hpsc,
+        cleE: Cles.espace(), // clé de l'espace
+        clePK: await crypter(cleK, cleP),
+        cleAP: await crypter(cleP, Cles.comptable()),
+        cleAK: await crypter(cleK, Cles.comptable()),
+        cleKXC: await crypter(phrase.pcb, cleK),
+        clePA: await crypter(Cles.comptable(), cleP),
+        ck: await crypter(cleK, new Uint8Array(encode(c)))
+      }
+      await post(this, 'CreerEspace', args)
       this.finOK()
     } catch (e) {
       stores.ui.setPage('login')

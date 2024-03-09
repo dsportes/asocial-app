@@ -328,7 +328,7 @@ export default {
   // F_SRV = 8000 // Erreur fonctionnelle trappée sur le serveur
   EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
   EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
-  EX8003: 'Espace déjà créé.',
+
   EX8004: 'Compte Comptable déjà créé',
   EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
   EX8007: 'Phrase de sponsoring déjà déclarée.',
@@ -369,6 +369,12 @@ export default {
   EX8101: 'L\'administrateur technique a restreint l\'application à la lecture seulement : {0}\nL\'opération ayant tenté une écriture, elle a échoué.',
   EX8102: 'Le code de l\`organisation n\'est pas reconnu.\nSaisir à nouveau l\'identification.',
   EX8104: 'Cette phrase secrète de correspond pas celle du Comptable.',
+
+  EX8201: 'Code d\'organisation {0} incorrect (lg 4..8 /^([a-z0-9\-]+)$/).',
+  EX8202: 'Numéro d\'espace {0} incorrect (pas 10..89).',
+  EX8203: 'Création impossible de l\'espace [{0 / 1}], numéro déjà attribué.',
+  EX8204: 'Création impossible de l\'espace [{0 / 1}], code d\'organisation déjà attribué.',
+
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
 

@@ -21,7 +21,7 @@
     <div class="titre-lg text-white bg-secondary q-pa-xs full-width text-center q-my-sm">
       {{$t('ESlo', session.paLeFT.length, { count: session.paLeFT.length})}}</div>
 
-    <div class="spmd">
+    <div class="spmd"> <!-- Liste des espaces -->
       <div v-for="(esp, idx) in session.paLeFT" :key="esp.id">
         <div :class="dkli(idx) + 'q-my-sm'">
 
@@ -52,6 +52,7 @@
       </div>
     </div>
 
+    <!-- Création d'yn espace -->
     <q-dialog v-model="ui.d.PAcreationesp" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
@@ -168,7 +169,7 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
-import { CreerEspace, reconnexionCompte } from '../app/connexion.mjs'
+import { CreerEspace, reconnexion } from '../app/synchro.mjs'
 import { GC, GetSingletons, SetEspaceT } from '../app/operations.mjs'
 import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
 import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
@@ -235,7 +236,7 @@ export default {
 
     async rafraichir () {
       this.session.setOrg('admin')
-      await reconnexionCompte()
+      await reconnexion()
     },
 
     aNS (ns) {
