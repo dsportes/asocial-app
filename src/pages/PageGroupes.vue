@@ -109,7 +109,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import InvitationAcceptation from '../components/InvitationAcceptation.vue'
-import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { UNITEN, UNITEV } from '../app/api.mjs'
 import { NouveauGroupe } from '../app/operations.mjs'
 
 export default {
@@ -123,8 +123,8 @@ export default {
   },
 
   methods: {
-    edq1 (n) { return n * UNITEV1 },
-    edq2 (n) { return edvol(n * UNITEV2) },
+    edq1 (n) { return n * UNITEN },
+    edq2 (n) { return edvol(n * UNITEV) },
     ed2 (n) { return edvol(n) },
 
     nbiv (e) { return this.gSt.nbMesInvits(e) },
@@ -152,9 +152,9 @@ export default {
     async nvGr () {
       if (!await this.session.edit()) return
       const cpt = this.aSt.compta.compteurs.qv
-      let max1 = Math.floor(((cpt.q1 * UNITEV1) - (cpt.nn + cpt.nc + cpt.ng)) / UNITEV1)
+      let max1 = Math.floor(((cpt.q1 * UNITEN) - (cpt.nn + cpt.nc + cpt.ng)) / UNITEN)
       if (max1 < 0) max1 = 0
-      let max2 = Math.floor(((cpt.q2 * UNITEV2) - cpt.v2) / UNITEV2)
+      let max2 = Math.floor(((cpt.q2 * UNITEV) - cpt.v2) / UNITEV)
       if (max2 < 0) max2 = 0
       this.quotas = { q1: 0, q2: 0, min1: 0, min2: 0, max1, max2, err: ''}
       this.nom = ''

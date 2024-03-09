@@ -1052,6 +1052,7 @@ export class AcceptationSponsoring extends OperationUI {
     dconf: si true le sponsorisé refuse le chat
     */
     try {
+      /*
       // LE COMPTE EST CELUI DU FILLEUL
       const session = stores.session
       session.setOrg(sp.org)
@@ -1069,7 +1070,7 @@ export class AcceptationSponsoring extends OperationUI {
       let espace = await compile(rowEspace)
       session.setEspace(espace)
 
-      /* Réenregistrement dans repertoire des na créé en PageLogin */
+      // Réenregistrement dans repertoire des na créé en PageLogin 
       NomGenerique.from(sp.na.anr)
       NomGenerique.from(sp.naf.anr)
       const idt = sp.clet ? setClet(sp.clet) : 0
@@ -1094,6 +1095,7 @@ export class AcceptationSponsoring extends OperationUI {
       const _data_ = new Uint8Array(encode(rowVersion))
       rowVersion._data_ = _data_
       rowVersion._nom = 'versions'
+      */
 
       /* Element de act de tribu du nouveau compte
       - `idT` : id court du compte crypté par la clé de la tribu.
@@ -1102,6 +1104,8 @@ export class AcceptationSponsoring extends OperationUI {
       - `qc q1 q2` : quotas attribués.
       - `ca v1 v2` : volumes **approximatifs** effectivement utilisés
       */
+
+      /*
       let act = null
       if (sp.clet) act = {
         idT: await crypter(sp.clet, '' + ID.court(sp.naf.id)),
@@ -1206,9 +1210,6 @@ export class AcceptationSponsoring extends OperationUI {
       }
 
       if (session.fsSync) {
-        /* sql, le serveur a enregistré d'office à la connexion l'abonnement 
-        au compte et à sa tribu
-        mais en fs c'est à faire explicitement en session */
         await session.fsSync.setCompte(session.compteId)
         if (rowTribu) await session.fsSync.setTribu(session.tribuId)
       }
@@ -1217,6 +1218,7 @@ export class AcceptationSponsoring extends OperationUI {
       session.setStatus(2)
       stores.ui.setPage('accueil')
       idb.reveil()
+      */
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -1241,6 +1243,100 @@ export class GetSynthese extends OperationUI {
       const s = await compile(ret.rowSynthese)
       session.setSynthese(s)
       return this.finOK(s)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/** Opérations de type "ping" non authentifiées du tout */
+
+/** OP_EchoTexte: 'Lancement d\'un test d\'écho' ***********
+args.token donne les éléments d'authentification du compte.
+args.to : délai en secondes avant retour de la réponse
+args.texte : texte à renvoyer en écho
+Retour:
+- echo : texte d'entrée retourné
+*/
+export class EchoTexte extends OperationUI {
+  constructor() { super('EchoTexte') }
+
+  async run(texte, to) {
+    try {
+      // while (await this.retry()) {
+        const ret = this.tr(await post(this, 'EchoTexte', { to: to, texte }))
+        console.log('Echo : ' + ret.echo)
+      // }
+      return this.finOK(ret.echo)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* ErreurFonc *******************************************/
+export class ErreurFonc extends OperationUI {
+  constructor() { super('ErreurFonc') }
+
+  async run(texte, to) {
+    try {
+      this.tr(await post(this, 'ErreurFonc', { to, texte }))
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_PingDB: '"Ping" de la base distante' *********
+*/
+export class PingDB extends OperationUI {
+  constructor() { super('PingDB') }
+
+  async run() {
+    try {
+      const ret = this.tr(await post(this, 'PingDB', {}))
+      this.finOK()
+      return ret
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_RefusSponsoring: 'Rejet d\'une proposition de sponsoring'**
+args.id ids : identifiant du sponsoring
+args.arx : réponse du filleul
+*/
+export class RefusSponsoring extends OperationUI {
+  constructor() { super('RefusSponsoring') }
+
+  async run(sp, ardx) { // ids du sponsoring
+    try {
+      const session = stores.session
+      await initSession()
+      const args = { token: session.authToken, ids: sp.ids, ardx }
+      await post(this, 'RefusSponsoring', args)
+      deconnexion(true)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_ProlongerSponsoring: 'Prolongation / annulation d\'un sponsoring'
+args.id ids : identifiant du sponsoring
+args.dlv : nouvelle dlv (0 == annulation)
+*/
+export class ProlongerSponsoring extends OperationUI {
+  constructor() { super('ProlongerSponsoring') }
+
+  async run(sp, dlv) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id: sp.id, ids: sp.ids, dlv }
+      await post(this, 'ProlongerSponsoring', args)
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

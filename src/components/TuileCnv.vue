@@ -10,11 +10,11 @@
       </div>
       <div v-if="type==='q1'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
         <div class='font-mono text-center fs-sm'>[{{src.q1}}]</div>
-        <div class='font-mono text-center fs-md'>{{nbn(src.q1 * UNITEV1)}}</div>
+        <div class='font-mono text-center fs-md'>{{nbn(src.q1 * UNITEN)}}</div>
       </div>
       <div v-if="type==='q2'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
         <div class='font-mono text-center fs-sm'>[{{src.q2}}]</div>
-        <div class='font-mono text-center fs-md'>{{edvol(src.q2 * UNITEV2)}}</div>
+        <div class='font-mono text-center fs-md'>{{edvol(src.q2 * UNITEV)}}</div>
       </div>
       <div :class="(occupation ? 'col-3' : 'col-5') + ' column items-center'">
         <div class='fs-sm text-italic text-center'>{{$t('TUaff')}}</div>
@@ -36,7 +36,7 @@
 
 <script>
 import { toRef, ref, watch } from 'vue'
-import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { UNITEN, UNITEV } from '../app/api.mjs'
 import { edvol, mon, nbn } from '../app/util.mjs'
 
 export default {
@@ -79,7 +79,7 @@ export default {
 
     return {
       uti, aff,
-      edvol, mon, nbn, UNITEV1, UNITEV2
+      edvol, mon, nbn, UNITEN, UNITEV
     }
   }
 

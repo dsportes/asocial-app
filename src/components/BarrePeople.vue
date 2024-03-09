@@ -166,7 +166,7 @@
 import { ref, toRef } from 'vue'
 import { encode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
-import { ID, UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -225,8 +225,8 @@ export default {
   },
 
   methods: {
-    edv1 (v) { return edvol(v * UNITEV1) },
-    edv2 (v) { return edvol(v * UNITEV2) },
+    edv1 (v) { return edvol(v * UNITEN) },
+    edv2 (v) { return edvol(v * UNITEV) },
 
     async muter () {
       if (!await this.session.edit()) return
@@ -247,8 +247,8 @@ export default {
           q1: c.q1,
           q2: c.q2,
           qc: c.qc,
-          min1: Math.ceil((c.nc + c.ng + c.nn) / UNITEV1),
-          min2: Math.ceil(c.v2 / UNITEV2),
+          min1: Math.ceil((c.nc + c.ng + c.nn) / UNITEN),
+          min2: Math.ceil(c.v2 / UNITEV),
           minc: 0,
           max1: s.q1 - s.a1,
           max2: s.q2 - s.a2,
@@ -284,8 +284,8 @@ export default {
     async getCpt() {
       await new GetCompteursCompta().run(this.id)
       const x = this.aSt.ccCpt
-      this.pc1 = x.q1 ? Math.round((x.v1 * 100) / (x.q1 * UNITEV1)) : 0,
-      this.pc2 = x.q2 ? Math.round((x.v2 * 100) / (x.q2 * UNITEV2)) : 0
+      this.pc1 = x.q1 ? Math.round((x.v1 * 100) / (x.q1 * UNITEN)) : 0,
+      this.pc2 = x.q2 ? Math.round((x.v2 * 100) / (x.q2 * UNITEV)) : 0
     },
 
     async voirCompta () { // comptable OU sponsor

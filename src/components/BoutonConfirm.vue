@@ -6,7 +6,7 @@
 <script>
 
 import { ref } from 'vue'
-import { random } from '../app/webcrypto.mjs'
+import { random } from '../app/util.mjs'
 
 export default ({
   name: 'BoutonConfirm',

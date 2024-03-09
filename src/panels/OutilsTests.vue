@@ -153,13 +153,12 @@ import { encode, decode } from '@msgpack/msgpack'
 // import CompTest from './CompTest.vue'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { EchoTexte, ErreurFonc } from '../app/connexion.mjs'
-import { styp, dhcool, $t, html, afficherDiag, edvol, b64ToU8, u8ToB64 } from '../app/util.mjs'
+import { EchoTexte, ErreurFonc, PingDB } from '../app/synchro.mjs'
+import { styp, dhcool, $t, html, afficherDiag, edvol, b64ToU8, u8ToB64, random } from '../app/util.mjs'
 import { ping } from '../app/net.mjs'
-import { getCompte, vuIDB, deleteIDB } from '../app/db.mjs'
-import { PingDB } from '../app/connexion.mjs'
+import { vuIDB, deleteIDB } from '../app/db.mjs'
 import { ForceDlv, TestRSA, CrypterRaw } from '../app/operations.mjs'
-import { decrypterRSA, random } from '../app/webcrypto.mjs'
+import { decrypterRSA } from '../app/webcrypto.mjs'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
@@ -266,7 +265,7 @@ export default ({
         this.resultat3a = '-'
         this.resultat3b = '-'
         try {
-          await getCompte()
+          // await getCompte() // TODO
           this.resultat3a = 'OK'
         } catch (exc) {
           this.resultat3a = 'KO'

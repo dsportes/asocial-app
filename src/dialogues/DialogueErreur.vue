@@ -35,7 +35,7 @@
 <script>
 import stores from '../stores/stores.mjs'
 
-import { reconnexionCompte, deconnexion } from '../app/connexion.mjs'
+import { reconnexionCompte, deconnexion } from '../app/synchro.mjs'
 import { styp, html } from '../app/util.mjs'
 
 const lcont = new Set([1, 4, 6, 7])
@@ -80,7 +80,7 @@ export default ({
     },
     async reconnecter () {
       this.ui.resetExc()
-      await reconnexionCompte()
+      await reconnexion()
     },
     continuer () {
       const resolve = this.ui.dialogueerreurresolve

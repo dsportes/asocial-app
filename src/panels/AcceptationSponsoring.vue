@@ -94,7 +94,7 @@
 import stores from '../stores/stores.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
-import { AcceptationSponsoring, RefusSponsoring } from '../app/connexion.mjs'
+import { AcceptationSponsoring, RefusSponsoring } from '../app/synchro.mjs'
 import { ExistePhrase } from '../app/operations.mjs'
 import QuotasVols from '../components/QuotasVols.vue'
 import { styp, dhcool } from '../app/util.mjs'

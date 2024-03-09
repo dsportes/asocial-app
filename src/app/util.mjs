@@ -2,7 +2,6 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { useQuasar } from 'quasar'
 
-import { arrayBuffer, random } from './webcrypto.mjs'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AMJ, appexc, d10, idTkToL6 } from './api.mjs'
 
@@ -15,6 +14,17 @@ export function setRequiredModules (m) {
 }
 
 let $q
+
+export function random (nbytes) {
+  const u8 = new Uint8Array(nbytes)
+  window.crypto.getRandomValues(u8)
+  return u8
+}
+
+export function arrayBuffer (u8) {
+  // https://stackoverflow.com/questions/37228285/uint8array-to-arraybuffer
+  return u8 ? u8.buffer.slice(u8.byteOffset, u8.byteLength + u8.byteOffset) : null
+}
 
 export function dkli (idx) {
   if (!$q) $q = useQuasar()

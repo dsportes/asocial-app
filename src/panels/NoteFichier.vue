@@ -175,7 +175,7 @@ import { $t, styp, sty, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } fro
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
-import { isAppExc, UNITEV2 } from '../app/api.mjs'
+import { isAppExc, UNITEV } from '../app/api.mjs'
 import { saveAs } from 'file-saver'
 import { SupprFichier } from '../app/operations.mjs'
 import { gestionFichierMaj, FLset } from '../app/db.mjs'
@@ -200,7 +200,7 @@ export default {
     exv () { if (this.ro) return 0 
       if (!this.estGr) return this.aSt.exV2
       const eg = this.gSt.egr(this.id)
-      return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV2)
+      return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV)
     },
 
     ro () { 
@@ -371,7 +371,7 @@ export default {
         return
       }
       try {
-        await FLset(f.nom, f.info, f.type, u8) // throw AppExc
+        await idb.FLset(f.nom, f.info, f.type, u8) // throw AppExc
       } catch (e) { await trapex (e, 2) } // ferme le dialogue
       this.ui.afficherMessage(this.$t('PNFcpp'))
       this.ppSt.modecc = false
@@ -406,7 +406,7 @@ export default {
 
     ergrV2 (dv) {
       const eg = this.gSt.egr(this.id)
-      return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV2)
+      return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV)
     }
 
   },

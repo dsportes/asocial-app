@@ -48,7 +48,7 @@
       <div :class="dkli(0) + ' row items-center full-width'">
         <div class="col-4">{{$t('PCPabo')}}</div>
         <div class="col-4 font-mono text-center bg-secondary text-white text-bold">
-          {{(c.qv.q1 * UNITEV1) + ' [' + c.qv.q1 + ']'}}</div>
+          {{(c.qv.q1 * UNITEN) + ' [' + c.qv.q1 + ']'}}</div>
         <div class="col-4 font-mono text-center">{{exM ? q1M : '-'}}</div>
       </div>
       <div :class="dkli(1) + ' row items-center full-width'">
@@ -90,7 +90,7 @@
       <div :class="dkli(0) + ' row items-center full-width'">
         <div class="col-4">{{$t('PCPabo')}}</div>
         <div class="col-4 font-mono text-center bg-secondary text-white text-bold">
-          {{edvol(c.qv.q2 * UNITEV2) + ' [' + c.qv.q2 + ']'}}</div>
+          {{edvol(c.qv.q2 * UNITEV) + ' [' + c.qv.q2 + ']'}}</div>
         <div class="col-4 font-mono text-center">{{exM ? edvol(q2M) : '-'}}</div>
       </div>
       <div :class="dkli(1) + ' row items-center full-width'">
@@ -250,7 +250,7 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { UNITEV1, UNITEV2, AMJ, Compteurs, Tarif } from '../app/api.mjs'
+import { UNITEN, UNITEV, AMJ, Compteurs, Tarif } from '../app/api.mjs'
 import { dhcool, edqt, mon, nbn, edvol, dkli, $t } from '../app/util.mjs'
 import MoisM from './MoisM.vue'
 import PanelDeta from '../components/PanelDeta.vue'
@@ -308,17 +308,17 @@ export default ({
     },
 
     exM () { return this.c.vd[this.idm][Compteurs.MS] !== 0 },
-    q2M () { return this.c.vd[this.idm][Compteurs.Q2] * UNITEV2 },
+    q2M () { return this.c.vd[this.idm][Compteurs.Q2] * UNITEV },
     v2M () { return this.c.vd[this.idm][Compteurs.V2 + Compteurs.X2]},
     pcutq2M () { return Math.round(this.v2M * 100 / this.q2M)},
-    pcutq2 () { return Math.round(this.c.v2 * 100 / (this.c.qv.q2 * UNITEV2)) },
+    pcutq2 () { return Math.round(this.c.v2 * 100 / (this.c.qv.q2 * UNITEV)) },
 
-    q1M () { return this.c.vd[this.idm][Compteurs.Q1] * UNITEV1},
+    q1M () { return this.c.vd[this.idm][Compteurs.Q1] * UNITEN},
     nnM () { return this.c.vd[this.idm][Compteurs.NN + Compteurs.X2]},
     ncM () { return this.c.vd[this.idm][Compteurs.NC + Compteurs.X2]},
     ngM () { return this.c.vd[this.idm][Compteurs.NG + Compteurs.X2]},
     pcutq1M () { return Math.round((this.nnM + this. ncM + this.ngM) * 100 / this.q1M)},
-    pcutq1 () { return Math.round(this.c.v1 * 100 / (this.c.qv.q1 * UNITEV1)) },
+    pcutq1 () { return Math.round(this.c.v1 * 100 / (this.c.qv.q1 * UNITEN)) },
 
     aboM () { return this.c.vd[this.idm][Compteurs.CA] },
     consoM () {  return this.c.vd[this.idm][Compteurs.CC] },
@@ -362,7 +362,7 @@ export default ({
     return {
       tarifs: Tarif.tarifs,
       aSt, c, cu,
-      edqt, mon, nbn, edvol, dhcool, dkli, libm, UNITEV1, UNITEV2
+      edqt, mon, nbn, edvol, dhcool, dkli, libm, UNITEN, UNITEV
     }
   }
 })

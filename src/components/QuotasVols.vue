@@ -29,7 +29,7 @@
 
 <script>
 import { toRef } from 'vue'
-import { UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { UNITEN, UNITEV } from '../app/api.mjs'
 import { edvol, edqt, nbn, mon } from '../app/util.mjs'
 
 export default {
@@ -42,8 +42,8 @@ export default {
   },
 
   computed: {
-    q1n () { return this.vols.q1 * UNITEV1 },
-    q2v () { return this.vols.q2 * UNITEV2 },
+    q1n () { return this.vols.q1 * UNITEN },
+    q2v () { return this.vols.q2 * UNITEV },
     pc1 () { return Math.round(this.vols.v1 * 100 / (this.q1n)) },
     pc2 () { return Math.round(this.vols.v2 * 100 / (this.q2v)) },
   },

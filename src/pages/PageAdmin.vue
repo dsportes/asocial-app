@@ -171,7 +171,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
 import { CreerEspace, reconnexion } from '../app/synchro.mjs'
 import { GC, GetSingletons, SetEspaceT } from '../app/operations.mjs'
-import { AMJ, UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { AMJ, UNITEN, UNITEV } from '../app/api.mjs'
 import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
@@ -205,10 +205,10 @@ export default {
 
     ev1 (idx) { 
       const n = this.cfg.profils[idx][1]
-      return '[' + n + '] ' + nbn(n * UNITEV1)
+      return '[' + n + '] ' + nbn(n * UNITEN)
     },
 
-    ev2 (idx) { return edvol(this.cfg.profils[idx][2] * UNITEV2) },
+    ev2 (idx) { return edvol(this.cfg.profils[idx][2] * UNITEV) },
 
     brd (idx) { 
       const x = this.prf === idx + 1 ? ' bord6': (this.profil === idx + 1 ? ' bord7' : ' bord5') 

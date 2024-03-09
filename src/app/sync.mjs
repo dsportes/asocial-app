@@ -1,6 +1,6 @@
 import stores from '../stores/stores.mjs'
 import { Operation, RafraichirDons } from './operations.mjs'
-import { deconnexion } from './connexion.mjs'
+import { deconnexion } from './synchro.mjs'
 // import { decode } from '@msgpack/msgpack'
 import { compile, Versions, estZombi } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'

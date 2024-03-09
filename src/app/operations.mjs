@@ -2,12 +2,12 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 
 import { ID, AppExc, appexc, E_WS, E_BRK, E_BRO, AMJ, Compteurs, limitesjour, d14 } from './api.mjs'
-import { $t, sleep} from './util.mjs'
+import { $t, sleep, random } from './util.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
 import { Versions, NomGenerique, Avatar, Chat, Compta, Note, Ticket, Notification,
   Groupe, Membre, Tribu, Chatgr, getNg, getCle, compile, setClet} from './modele.mjs'
-import { decrypter, crypterRSA, genKeyPair, random, decrypterRaw } from './webcrypto.mjs'
+import { decrypter, crypterRSA, genKeyPair, decrypterRaw } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 
 /* Opération générique ******************************************/
@@ -87,6 +87,8 @@ export class Operation {
     throw(exc)
   }
 }
+
+export class OperationUI extends Operation {}
 
 /* Abonnement / désabonnement à la tranche courante ************************
 args.token: éléments d'authentification du compte.

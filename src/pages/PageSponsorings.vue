@@ -65,14 +65,14 @@
 <script>
 
 import stores from '../stores/stores.mjs'
-import { AMJ, UNITEV1, UNITEV2, ID } from '../app/api.mjs'
+import { AMJ, UNITEN, UNITEV, ID } from '../app/api.mjs'
 import { dhcool, edvol, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import { Tribu } from '../app/modele.mjs'
-import { ProlongerSponsoring } from '../app/connexion.mjs'
+import { ProlongerSponsoring } from '../app/synchro.mjs'
 
 export default {
   name: 'PageSponsorings',
@@ -95,8 +95,8 @@ export default {
   },
 
   methods: {
-    ed1 (f) { return edvol(f * UNITEV1) },
-    ed2 (f) { return edvol(f * UNITEV2) },
+    ed1 (f) { return edvol(f * UNITEN) },
+    ed2 (f) { return edvol(f * UNITEV) },
     idtr (sp) { return Tribu.id(sp.descr.clet) },
     estA (sp) { return !sp.descr.clet },
     quotas (sp) { const q = sp.descr.quotas; return { qc: q[0], q1: q[1], q2: q[2]}},

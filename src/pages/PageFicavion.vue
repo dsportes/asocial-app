@@ -88,7 +88,7 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { afficherDiag, edvol, dhcool, dkli, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { FLset } from '../app/db.mjs'
+import { idb } from '../app/db.mjs'
 
 export default ({
   name: 'PageFicavion',
@@ -157,7 +157,7 @@ export default ({
         await afficherDiag(this.$t('PNFgetEr'))
         return
       }
-      await FLset(this.fc.f.nom, this.fc.f.info, this.fc.f.type, u8)
+      await idb.FLset(this.fc.f.nom, this.fc.f.info, this.fc.f.type, u8)
       this.ui.afficherMessage(this.$t('PNFcpp'))
       this.ppSt.modecc = false
       this.ppSt.setTabFichiers()

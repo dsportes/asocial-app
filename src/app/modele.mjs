@@ -1,14 +1,23 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
-import { $t, dhcool, hash, rnd6, inverse, u8ToB64, b64ToU8, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
-import { random, pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA, decrypterRSA, abToPem } from './webcrypto.mjs'
-import { Rds, ID, Cles, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS, limitesjour, djMoisN } from './api.mjs'
+import { $t, dhcool, hash, rnd6, inverse, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
+import { pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA } from './webcrypto.mjs'
+import { Rds, ID, Cles, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
-import { getFichierIDB, FLget } from './db.mjs'
+import { idb } from './db.mjs'
 
-const decoder = new TextDecoder('utf-8')
+// FAKE
+export const Versions = 0
+export function getCle() {}
+export const NomGenerique = 0
+export class Tribu {}
+export function setClet() {}
+export function getNg() {}
+export class Motscles {}
+
+// const decoder = new TextDecoder('utf-8')
 const encoder = new TextEncoder('utf-8')
 
 /* classe RegCles : registre des clés connues dans la session **********
@@ -2027,7 +2036,7 @@ export class Note extends GenDoc {
     const session = stores.session
     let buf = null
     if (fetat && fetat.estCharge) {
-      const b = await getFichierIDB(idf)
+      const b = await idb.getFichierIDB(idf)
       buf = await decrypter(this.cle, b)
     } else if (session.accesNet) {
       const b = await new DownloadFichier().run(this, idf, session.compteId)
@@ -2150,7 +2159,7 @@ export class FichierLocal {
   async getU8 () {
     const session = stores.session
     if (!session.accesIdb) return this.u8
-    return await FLget(this)
+    return await idb.FLget(this)
   }
 
   get titre () {

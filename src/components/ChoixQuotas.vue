@@ -42,7 +42,7 @@
 import { edvol, edqt, mon } from '../app/util.mjs'
 import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
-import { UNITEV2, UNITEV1 } from '../app/api.mjs'
+import { UNITEV, UNITEN } from '../app/api.mjs'
 
 export default {
   name: 'ChoixQuotas',
@@ -58,8 +58,8 @@ export default {
   },
 
   methods: {
-    ed1 (v) { return edqt(v * UNITEV1) },
-    ed2 (v) { return edvol(v * UNITEV2) },
+    ed1 (v) { return edqt(v * UNITEN) },
+    ed2 (v) { return edvol(v * UNITEV) },
     edc (v) { return mon(v) }
   },
 

@@ -143,7 +143,7 @@ import stores from '../stores/stores.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import { readFile, dhcool, edvol, afficherDiag, dkli, styp } from '../app/util.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
-import { NLset, NLdel, FLset, FLdel } from '../app/db.mjs'
+import { idb } from '../app/db.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
 import { interdits, regInt } from '../app/api.mjs'
 
@@ -204,17 +204,17 @@ export default ({
       this.ui.oD('PPsupprnote')
     },
     async cfSupprnote () {
-      await NLdel(this.rec.id)
+      await idb.NLdel(this.rec.id)
       this.ui.fD()
     },
     async majnote () {
-      await NLset(this.txt, this.rec ? this.rec.id : 0)
+      await idb.NLset(this.txt, this.rec ? this.rec.id : 0)
       this.ui.fD()
     },
 
     async majfic () {
       const f = this.fic
-      await FLset(this.nomfic, this.info, f.type, f.u8, this.fic.id || 0)
+      await idb.FLset(this.nomfic, this.info, f.type, f.u8, this.fic.id || 0)
       this.ui.fD()
     },
     ajouterfichier () {
@@ -234,7 +234,7 @@ export default ({
       this.ui.oD('PPsupprfic')
     },
     async cfSupprfic () {
-      await FLdel(this.fic.id)
+      await idb.FLdel(this.fic.id)
       this.ui.fD()
     },
 

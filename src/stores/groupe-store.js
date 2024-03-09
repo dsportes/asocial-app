@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { encode } from '@msgpack/msgpack'
 import { egaliteU8, difference, intersection } from '../app/util.mjs'
-import { UNITEV1, UNITEV2, FLAGS } from '../app/api.mjs'
+import { UNITEN, UNITEV, FLAGS } from '../app/api.mjs'
 import { Versions } from '../app/modele.mjs'
 
 /* Store maître des groupes du compte courant :
@@ -40,7 +40,7 @@ export const useGroupeStore = defineStore('groupe', {
     exV2 (state) {
       const e = state.map.get(stores.session.groupeId)
       if (!e) return false
-      return e.vols.q2 * UNITEV2 < e.vols.v2
+      return e.vols.q2 * UNITEV < e.vols.v2
     },
 
     // chat du groupe courant
@@ -273,7 +273,7 @@ export const useGroupeStore = defineStore('groupe', {
         const g = e.groupe
         if (f.ngr && !g.na.nom.startsWith(f.ngr)) continue
         if (f.sansheb && g.dfh === 0) continue
-        if (f.excedent && ((v.q1 * UNITEV1) > v.v1) && ((v.q2 * UNITEV2) > v.v2 )) continue
+        if (f.excedent && ((v.q1 * UNITEN) > v.v1) && ((v.q2 * UNITEV) > v.v2 )) continue
         const mcmemo = aSt.compte.mcmemo(g.id)
 
         if (f.infmb && mcmemo && mcmemo.memo && mcmemo.memo.indexOf(f.infmb) === -1) continue

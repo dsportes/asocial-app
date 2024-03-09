@@ -1,11 +1,13 @@
 import Dexie from 'dexie'
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { SessionSync, Versions, NoteLocale, FichierLocal } from './modele.mjs'
+import { NoteLocale, FichierLocal } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
 import { isAppExc, AppExc, E_DB, DataSync, IDBOBS } from './api.mjs'
-import { syncQueue } from './synchro.mjs'
 import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
+
+// FAKE
+export function commitRows() {}
 
 function decodeIn (buf, cible) {
   const x = decode(buf)

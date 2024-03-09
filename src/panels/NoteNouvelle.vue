@@ -70,7 +70,7 @@
 <script>
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
-import { ID, UNITEV1 } from '../app/api.mjs'
+import { ID, UNITEN } from '../app/api.mjs'
 import { getNg } from '../app/modele.mjs'
 import { dkli, styp, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -192,7 +192,7 @@ export default {
         else {
           const eg = gSt.egr(groupe.value.id)
           // Excède le max attribué du groupe
-          if (eg.objv.vols.v1 >= eg.objv.vols.q1 * UNITEV1) err.value = 2
+          if (eg.objv.vols.v1 >= eg.objv.vols.q1 * UNITEN) err.value = 2
         }
       }
     }

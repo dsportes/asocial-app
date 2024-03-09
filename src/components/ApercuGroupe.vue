@@ -257,7 +257,7 @@ import stores from '../stores/stores.mjs'
 import { getNg, Groupe } from '../app/modele.mjs'
 import { ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
 import { styp, edvol, dhcool, dkli, aaaammjj } from '../app/util.mjs'
-import { UNITEV1, UNITEV2, AMJ } from '../app/api.mjs'
+import { UNITEN, UNITEV, AMJ } from '../app/api.mjs'
 
 // Niveau 1
 import BoutonMembre from './BoutonMembre.vue'
@@ -299,16 +299,16 @@ export default {
       if (!m) return ''
       return m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': '')
     },
-    q1 () { const v = this.eg.groupe.vols; return v.q1 + ' - ' + edvol(v.q1 * UNITEV1) },
-    q2 () { const v = this.eg.groupe.vols; return v.q2 + ' - ' + edvol(v.q2 * UNITEV2) },
+    q1 () { const v = this.eg.groupe.vols; return v.q1 + ' - ' + edvol(v.q1 * UNITEN) },
+    q2 () { const v = this.eg.groupe.vols; return v.q2 + ' - ' + edvol(v.q2 * UNITEV) },
     
     // nbv () { let n = 0; this.eg.membres.forEach(m => { if (m.vote) n++ }); return n }
     lstAn () {
       const t = []; this.anims.forEach(id => { t.push(getNg(id).nom)})
       return t.join(', ')
     },
-    alq1 () { return !this.eg.groupe.imh || (this.eg.objv.v1 > (this.eg.objv.q1 * UNITEV1)) },
-    alq2 () { return !this.eg.groupe.imh || (this.eg.objv.v2 > (this.eg.objv.q2 * UNITEV2)) },
+    alq1 () { return !this.eg.groupe.imh || (this.eg.objv.v1 > (this.eg.objv.q1 * UNITEN)) },
+    alq2 () { return !this.eg.groupe.imh || (this.eg.objv.v2 > (this.eg.objv.q2 * UNITEV)) },
     moi () { return getNg(this.session.avatarId).nom },
     hbg () { return this.eg.membres.get(this.eg.groupe.imh).na.nom },
 
@@ -470,8 +470,8 @@ export default {
       this.q.q2 = vx.q2 || 0
       this.q.min1 = 0
       this.q.min2 = 0
-      this.q.max1 = cpt.q1 - Math.ceil((cpt.nn + cpt.nc + cpt.ng) / UNITEV1)
-      this.q.max2 = cpt.q2 - Math.ceil(cpt.v2 / UNITEV2)
+      this.q.max1 = cpt.q1 - Math.ceil((cpt.nn + cpt.nc + cpt.ng) / UNITEN)
+      this.q.max2 = cpt.q2 - Math.ceil(cpt.v2 / UNITEV)
       this.q.err = false
       this.onChgQ()
       this.ui.oD('AGgererheb', this.idc)
@@ -479,14 +479,14 @@ export default {
     onChgQ () {
       const cpt = this.aSt.compta.compteurs.qv
       const vx = this.eg.objv.vols
-      this.al1 = vx.v1 > (this.q.q1 * UNITEV1)
-      this.al2 = vx.v2 > (this.q.q2 * UNITEV2)
-      const r1 = (cpt.q1 - Math.ceil((cpt.nn + cpt.nc + cpt.ng) / UNITEV1) - this.q.q1) * UNITEV1
-      const r2 = (cpt.q2 - Math.ceil(cpt.v2 / UNITEV2) - this.q.q2) * UNITEV2
+      this.al1 = vx.v1 > (this.q.q1 * UNITEN)
+      this.al2 = vx.v2 > (this.q.q2 * UNITEV)
+      const r1 = (cpt.q1 - Math.ceil((cpt.nn + cpt.nc + cpt.ng) / UNITEN) - this.q.q1) * UNITEN
+      const r2 = (cpt.q2 - Math.ceil(cpt.v2 / UNITEV) - this.q.q2) * UNITEV
       this.rst1 = r1 >=0 ? r1 : 0
       this.rst2 = edvol(r2 >=0 ? r2 : 0)
-      this.ar1 = r1 < (cpt.q1 * UNITEV1 * 0.1)
-      this.ar2 = r2 < (cpt.q2 * UNITEV2 * 0.1)
+      this.ar1 = r1 < (cpt.q1 * UNITEN * 0.1)
+      this.ar2 = r2 < (cpt.q2 * UNITEV * 0.1)
     },
 
     async chgQ () {

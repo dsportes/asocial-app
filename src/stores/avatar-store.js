@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { hash, egaliteU8, difference, intersection } from '../app/util.mjs'
 import { encode } from '@msgpack/msgpack'
-import { ID, E_WS, AppExc, UNITEV1, UNITEV2 } from '../app/api.mjs'
+import { ID, E_WS, AppExc, UNITEN, UNITEV } from '../app/api.mjs'
 import { post } from '../app/net.mjs'
 import { getNg, Motscles } from '../app/modele.mjs'
 
@@ -88,17 +88,17 @@ export const useAvatarStore = defineStore('avatar', {
 
     exV1: (state) => {
       const c = state.compta.qv
-      return c.nn + c.nc + c.ng > c.q1 * UNITEV1
+      return c.nn + c.nc + c.ng > c.q1 * UNITEN
     },
 
     exV2: (state) => {
       const c = state.compta.qv
-      return c.v2 > c.q2 * UNITEV2
+      return c.v2 > c.q2 * UNITEV
     },
 
     occV2: (state) => {
       const c = state.compta.qv
-      return (c.q2 * UNITEV2) - c.v2
+      return (c.q2 * UNITEV) - c.v2
     },
 
     // Avatar courant

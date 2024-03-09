@@ -429,7 +429,7 @@ import stores from './stores/stores.mjs'
 import { ID, AMJ } from './app/api.mjs'
 
 import { set$t, hms, dkli, styp, beep } from './app/util.mjs'
-import { reconnexionCompte, deconnexion } from './app/connexion.mjs'
+import { reconnexion, deconnexion } from './app/synchro.mjs'
 import { SetDhvuCompta } from './app/operations.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -556,7 +556,7 @@ export default {
       if (this.session.status === 3) deconnexion()
       else this.ui.oD('dialoguedrc')
     },
-    async reconnexion () { this.ui.fD(); await reconnexionCompte() },
+    async reconnexion () { this.ui.fD(); await reconnexion() },
 
     reload () { location.reload(true) },
 
