@@ -1,12 +1,13 @@
 import stores from '../stores/stores.mjs'
-import { Operation, RafraichirDons } from './operations.mjs'
+import { RafraichirDons } from './operations.mjs'
 import { deconnexion } from './synchro.mjs'
 // import { decode } from '@msgpack/msgpack'
 import { compile, Versions, estZombi } from './modele.mjs'
 import { IDBbuffer, gestionFichierSync } from './db.mjs'
-import { $t, difference } from './util.mjs'
+import { difference } from './util.mjs'
 import { appexc, ID } from './api.mjs'
 import { post } from './net.mjs'
+import { Operation } from './synchro.mjs'
 
 export class SyncQueue {
   static queue = []

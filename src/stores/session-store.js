@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia';
-import { encode, decode } from '@msgpack/msgpack'
+import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
-import { pbkfd, crypter } from '../app/webcrypto.mjs'
-import { u8ToB64, intToB64, rnd6, $t, afficherDiag, hms } from '../app/util.mjs'
+import { crypter } from '../app/webcrypto.mjs'
+import { u8ToB64, intToB64, rnd6, $t, afficherDiag } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { RegCles } from '../app/modele.mjs'
+import { openWS } from '../app/ws.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -79,7 +80,6 @@ export const useSessionStore = defineStore('session', {
     dlv (state) { return state.ok ? this.aSt.compta.dlv : 0 },
     nbj (state) { return AMJ.diff(AMJ.dlv(state.dlv), state.auj) },
 
-    espace (state) { return state.espaces.get(state.ns) },
     estComptable (state) { return ID.estComptable(state.compteId) },
     estAdmin (state) { return state.compteId === 0 },
 
@@ -194,7 +194,7 @@ export const useSessionStore = defineStore('session', {
       const token = { }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
-        if (!this.config.hasWS) token.sessionId = this.sessionId
+        if (this.config.hasWS) token.sessionId = this.sessionId
         token.hXR = phrase ? phrase.hps1 : null
         token.hXC = phrase ? phrase.hpsc : null
       }
@@ -210,12 +210,12 @@ export const useSessionStore = defineStore('session', {
       this.clek = null
       this.status = 1
 
-      if (session.accesNet) {
+      if (this.accesNet) {
         if (this.sessionId) {
           await openWS()
-          session.fsSync = null
+          this.fsSync = null
         } else {
-          session.fsSync = new FsSyncSession()
+          this.fsSync = new FsSyncSession()
         }
       }
 
@@ -283,8 +283,13 @@ export const useSessionStore = defineStore('session', {
     },
 
     setCompte (compte) { 
-      this.compte = compte
-      if (!this.compteId) this.compteId = compte.id
+      if (compte) {
+        this.compte = compte
+        if (!this.compteId) this.compteId = compte.id
+      } else {
+        this.compte = null
+        this.compteId = 0
+      }
     },
 
     setCompta (compta) {

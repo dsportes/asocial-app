@@ -3,7 +3,7 @@ export const config = {
   DEV: true,
   DEBUG: true,
   BUILD: '22',
-  hasWS: false, // true si Data Sync est assuré par WS
+  hasWS: true, // true si Data Sync est assuré par WS
 
   portupload: 33666, // Ne pas changer en général
 

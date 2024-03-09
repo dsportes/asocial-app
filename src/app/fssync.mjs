@@ -4,7 +4,7 @@ import { getFirestore, connectFirestoreEmulator, doc, getDoc, onSnapshot } from 
 import { decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { SyncQueue } from './sync.mjs'
+import { syncQueue } from './synchro.mjs'
 import { ID, rowCryptes } from './api.mjs'
 import { decrypterSrv } from './webcrypto.mjs'
 
@@ -88,7 +88,7 @@ export class FsSyncSession {
   }
 
   /*
-  Mettre un row reçu à traiter : SyncQueue.push(row)
+  Mettre un row reçu à traiter : syncQueue.setRows([row])
   */
   async onRow (d) {
     const nom = d.ref.parent.path
@@ -101,7 +101,7 @@ export class FsSyncSession {
       z = false
     }
     console.log(`onRow: ${row._nom} ${z ? 'zombi' : ''} ${row.id}`)
-    SyncQueue.push(row)
+    syncQueue.setRows([row])
   }
 
   async setCompte (id) { // comptas ET espace

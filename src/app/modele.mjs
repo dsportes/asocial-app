@@ -2186,8 +2186,7 @@ export class FichierLocal {
 const classes = {
   espaces: Espace,
   tickets: Ticket,
-  tribus: Tribu,
-  gcvols: Gcvols,
+  partitions: Partition,
   syntheses: Synthese,
   comptas: Compta,
   avatars: Avatar,
@@ -2196,6 +2195,5 @@ const classes = {
   sponsorings: Sponsoring,
   chats: Chat,
   membres: Membre,
-  chatgrs: Chatgr,
-  cvs: Cv
+  chatgrs: Chatgr
 }

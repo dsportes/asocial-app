@@ -2,10 +2,10 @@
 - gérer fichiers des notes AvNote / Fetat - Changer Fetat id av /gr, ids note - idf en index (plus en id)
 */
 
-import { afficherDiag } from './util.mjs'
-import { idb, openIDB, IDBbuffer } from './db.mjs'
-import { OperationUI } from './operations.mjs'
-import { DataSync, ID, Rds, Cles } from './api.mjs'
+import stores from '../stores/stores.mjs'
+import { afficherDiag, $t } from './util.mjs'
+import { idb, IDBbuffer } from './db.mjs'
+import { DataSync, appexc, ID, Rds, Cles } from './api.mjs'
 import { post } from './net.mjs'
 
 /* classe Queue ***********************************************************/
@@ -542,6 +542,84 @@ export async function connexion(phrase, razdb) {
 
 }
 
+/* Opération générique ******************************************/
+export class Operation {
+  constructor (nomop, modeSync) { 
+    this.nom = nomop 
+    this.modeSync = modeSync || false
+    if (!modeSync) {
+      stores.session.startOp(this)
+      this.cancelToken = null
+      this.break = false
+      this.nbretry = 0
+    }
+  }
+
+  get label () { 
+    // console.log('label', 'OP_' + this.nom)
+    return $t('OP_' + this.nom) 
+  }
+
+  tr (ret) {
+    /*
+    if (!this.dh) this.dh = 0
+    if (this.dh < ret.dh) this.dh = ret.dh
+    return ret
+    */
+  }
+
+  async retry () {
+    if (this.modeSync) return
+    if (this.nbretry++ > 5) 
+      throw new AppExc(E_BRO, 21, [this.label])
+    if (this.retry > 1) await sleep((this.retry * 300))
+    return true
+  }
+
+  BRK () { 
+    if (this.modeSync) return
+    if (this.break) 
+      throw new AppExc(E_BRK, 0)
+  }
+
+  stop () {
+    if (this.modeSync) return
+    if (this.cancelToken) {
+      this.cancelToken.cancel('break')
+      this.cancelToken = null
+    }
+    this.break = true
+  }
+
+  finOK (res, silence) {
+    if (!this.modeSync) {
+      const session = stores.session
+      session.finOp()
+      if (!silence) stores.ui.afficherMessage($t('OPok', [this.label]), false)
+    }
+    return res
+  }
+
+  async finKO (e) {
+    const session = stores.session
+    const ui = stores.ui
+    const exc = appexc(e)
+    if (!this.modeSync) {
+      session.finOp()
+      if (exc.code === 9999) {
+        session.setExcKO(exc)
+        throw(exc)
+      }
+      ui.afficherMessage($t('OPko', [this.label]), true)
+      await ui.afficherExc(exc)
+      throw(exc)
+    }
+    // En synchro toutes les exceptions sont tueuses
+    session.setExcKO(exc)
+    throw(exc)
+  }
+}
+
 /* classe OperationS *******************************************************/
 export class OperationS extends Operation {
   constructor(nomop) { super(nomop, true) }
@@ -843,14 +921,15 @@ export class SyncStd extends OperationS {
 }
 
 /* Connexion à un compte en mode avion *********************************/
-export class ConnexionAdmin extends OperationS {
+export class ConnexionAdmin extends Operation {
   constructor() { super('ConnexionAdmin') }
 
   async run() {
     try {
+      const session = stores.session
       const args = { token: session.authToken }
-      const ret = this.tr(await post(this, 'GetEspaces', args))
-      session.setCompteId(0)
+      const ret = await post(this, 'GetEspaces', args)
+      session.setCompte(null)
       session.setOrg('admin')
       if (ret.espaces) for (const e of ret.espaces)
         session.setEspace(await compile(e), true)
@@ -860,14 +939,13 @@ export class ConnexionAdmin extends OperationS {
       stores.ui.setPage('admin')
       this.finOK()
     } catch (e) {
-      stores.ui.setPage('login')
       await this.finKO(e)
     }
   }
 }
 
 /* Connexion à un compte en mode avion *********************************/
-export class ConnexionAvion extends OperationS {
+export class ConnexionAvion extends Operation {
   constructor() { super('ConnexionCompte') }
 
   async run() {
@@ -912,7 +990,7 @@ export class ConnexionAvion extends OperationS {
 }
 
 /* Connexion à un compte en mode synchro ou incognito *********************************/
-export class ConnexionSynchroIncognito extends OperationS {
+export class ConnexionSynchroIncognito extends Operation {
   constructor() { super('ConnexionCompte') }
 
   async run() {
@@ -963,7 +1041,7 @@ export class ConnexionSynchroIncognito extends OperationS {
 - ck: `{ cleP, code }` crypté par la clé K du comptable
 
 */
-export class CreerEspace extends OperationUI {
+export class CreerEspace extends Operation {
   constructor() { super('CreerEspace') }
 
   async run(org, phrase, ns) {
@@ -1028,7 +1106,7 @@ Assertions:
 - existence du row `Avatars` du sponsorisé.
 - existence du row `Espaces`.
 */
-export class AcceptationSponsoring extends OperationUI {
+export class AcceptationSponsoring extends Operation {
   constructor() { super('AcceptationSponsoring') }
 
   async run(sp, ardx, txt1, txt2, ps, don, dconf) {
@@ -1232,7 +1310,7 @@ args.ns
 Retour:
 - rowSynthse
 */
-export class GetSynthese extends OperationUI {
+export class GetSynthese extends Operation {
   constructor () { super('GetSynthese') }
 
   async run (ns) { 
@@ -1258,7 +1336,7 @@ args.texte : texte à renvoyer en écho
 Retour:
 - echo : texte d'entrée retourné
 */
-export class EchoTexte extends OperationUI {
+export class EchoTexte extends Operation {
   constructor() { super('EchoTexte') }
 
   async run(texte, to) {
@@ -1275,7 +1353,7 @@ export class EchoTexte extends OperationUI {
 }
 
 /* ErreurFonc *******************************************/
-export class ErreurFonc extends OperationUI {
+export class ErreurFonc extends Operation {
   constructor() { super('ErreurFonc') }
 
   async run(texte, to) {
@@ -1290,7 +1368,7 @@ export class ErreurFonc extends OperationUI {
 
 /* OP_PingDB: '"Ping" de la base distante' *********
 */
-export class PingDB extends OperationUI {
+export class PingDB extends Operation {
   constructor() { super('PingDB') }
 
   async run() {
@@ -1308,7 +1386,7 @@ export class PingDB extends OperationUI {
 args.id ids : identifiant du sponsoring
 args.arx : réponse du filleul
 */
-export class RefusSponsoring extends OperationUI {
+export class RefusSponsoring extends Operation {
   constructor() { super('RefusSponsoring') }
 
   async run(sp, ardx) { // ids du sponsoring
@@ -1328,7 +1406,7 @@ export class RefusSponsoring extends OperationUI {
 args.id ids : identifiant du sponsoring
 args.dlv : nouvelle dlv (0 == annulation)
 */
-export class ProlongerSponsoring extends OperationUI {
+export class ProlongerSponsoring extends Operation {
   constructor() { super('ProlongerSponsoring') }
 
   async run(sp, dlv) {

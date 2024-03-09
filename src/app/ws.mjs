@@ -3,7 +3,7 @@ import stores from '../stores/stores.mjs'
 import { decode } from '@msgpack/msgpack'
 
 import { AppExc, E_WS } from './api.mjs'
-import { SyncQueue } from './sync.mjs'
+import { syncQueue } from './synchro.mjs'
 
 let ws, exc
 
@@ -13,16 +13,16 @@ function reset () {
 }
 
 // // 'Erreur à l\'ouverture de la connexion avec le serveur ( {0} ).\nDétail: {1}',
-function EX0 (e) { return new AppExc(E_WS, 0, [config.wssrv, e.message]) }
+function EX0 (e) { return new AppExc(E_WS, 0, [stores.config.wssrv, e.message]) }
 
 // 'Ouverture de la connexion avec le serveur impossible ( {0} ).',
-function EX1 () { return new AppExc(E_WS, 1, [config.wssrv]) }
+function EX1 () { return new AppExc(E_WS, 1, [stores.config.wssrv]) }
 
 // 'Envoi d\'un message au serveur impossible ( {0} ).\nDétail: {1}',
-function EX2 (e) { return new AppExc(E_WS, 2, [config.wssrv, e.message]) }
+function EX2 (e) { return new AppExc(E_WS, 2, [stores.config.wssrv, e.message]) }
 
 // 'Rupture de la liaison avec le serveur par le serveur ou URL mal configurée ( {0} ).',
-function EX3 () { return new AppExc(E_WS, 3, [config.wssrv])}
+function EX3 () { return new AppExc(E_WS, 3, [stores.config.wssrv])}
 
 export function closeWS () {
   if (ws) { try { ws.close(); } catch (e) { } }
@@ -38,6 +38,7 @@ function setExc (e) {
 export async function openWS () {
   reset()
   const session = stores.session
+  const config = stores.config
   const sessionId = session.sessionId
   return new Promise((resolve, reject) => {
     try {
@@ -75,5 +76,5 @@ async function onmessage (m) {
   const msg = new Uint8Array(ab)
   const sl = decode(msg) // syncList : { sessionId, rows[] }
   if (sl.sessionId === session.sessionId && sl.rows && sl.rows.length)
-    SyncQueue.push(sl.rows)
+    syncQueue.setRows(sl.rows)
 }

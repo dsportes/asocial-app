@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode } from '@msgpack/msgpack'
 
 import { OperationUI, RafraichirTickets } from './operations.mjs'
-import { SyncQueue } from './sync.mjs'
+// import { SyncQueue } from './sync.mjs'
 import { $t, setTrigramme, getTrigramme, afficherDiag, sleep } from './util.mjs'
 import { post } from './net.mjs'
 import { AMJ, ID, PINGTO2, IDBOBS, FLAGS, d14 } from './api.mjs'
@@ -32,7 +32,7 @@ export function deconnexion(garderMode) {
   stores.reset()
   if (garderMode) session.setMode(mode)
   session.org = org
-  SyncQueue.reset()
+  // SyncQueue.reset()
   ui.setPage('login')
 }
 
@@ -974,7 +974,7 @@ export class ConnexionCompte extends OperationUI {
           stores.ui.oD('estzombi')
         }, 50)
       setTimeout(() => {
-        SyncQueue.traiterQueue()
+        // SyncQueue.traiterQueue()
         Demon.start()
       }, 50)
       this.finOK()
@@ -1201,7 +1201,7 @@ export class AcceptationSponsoring extends OperationUI {
       session.setStatus(2)
       stores.ui.setPage('accueil')
       setTimeout(() => {
-        SyncQueue.traiterQueue()
+        // SyncQueue.traiterQueue()
         Demon.start()
       }, 50)
       this.finOK()

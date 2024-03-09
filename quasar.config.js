@@ -60,9 +60,10 @@ module.exports = configure(function (ctx) {
       // to the underlying Webpack
       devtool: 'source-map',
       env: {
-        OPSRV1: 'https://test.sportes.fr:8443/op/',
-        OPSRV: 'http://localhost:8443/op/',
-        WSSRV1: 'wss://test.sportes.fr:8443/ws/'
+        OPSRV: 'https://test.sportes.fr:8443/op/',
+        // OPSRV: 'http://localhost:8443/op/',
+        WSSRV: 'wss://test.sportes.fr:8443/ws/',
+        // WSSRV: ''
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
