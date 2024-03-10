@@ -5,14 +5,17 @@ import stores from './stores.mjs'
 import { crypter } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
-import { RegCles } from '../app/modele.mjs'
-import { openWS } from '../app/ws.mjs'
+import { RegCles, RegRds } from '../app/modele.mjs'
+import { WS } from '../app/ws.mjs'
+import { FsSyncSession } from '../app/fssync.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
     swev1: false,
     swev2: false,
     registration: null,
+
+    websocket: null,
 
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
@@ -73,11 +76,9 @@ export const useSessionStore = defineStore('session', {
   }),
 
   getters: {
-    aSt (state) { return stores.avatar },
-    ui (state) { return stores.ui },
     config (state) { return stores.config },
 
-    dlv (state) { return state.ok ? this.aSt.compta.dlv : 0 },
+    dlv (state) { return state.ok && state.compte ? state.compte.dlv : 0 },
     nbj (state) { return AMJ.diff(AMJ.dlv(state.dlv), state.auj) },
 
     estComptable (state) { return ID.estComptable(state.compteId) },
@@ -93,7 +94,7 @@ export const useSessionStore = defineStore('session', {
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
   
-    accepteA (state) { return state.espace.opt !== 0 },
+    accepteA (state) { return state.espace && (state.espace.opt !== 0) },
 
     pow (state) {
       if (state.estAdmin) return 1
@@ -188,13 +189,15 @@ export const useSessionStore = defineStore('session', {
     session.mode et org ont été enregistrés par PageLogin (connexion ou création compte)
     */
     async initSession(phrase) {
-      this.sessionId = this.config.hasWS ? intToB64(rnd6()) : ''
       this.phrase = phrase
 
       const token = { }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
-        if (this.config.hasWS) token.sessionId = this.sessionId
+        if (stores.config.hasWs) {
+          this.sessionId = intToB64(rnd6())
+          token.sessionId = this.sessionId
+        }
         token.hXR = phrase ? phrase.hps1 : null
         token.hXC = phrase ? phrase.hpsc : null
       }
@@ -211,8 +214,10 @@ export const useSessionStore = defineStore('session', {
       this.status = 1
 
       if (this.accesNet) {
-        if (this.sessionId) {
-          await openWS()
+        if (stores.config.hasWS) {
+          if (this.websocket) this.websocket.close()
+          this.websocket = new WS()
+          await this.websocket.open()
           this.fsSync = null
         } else {
           this.fsSync = new FsSyncSession()
@@ -253,8 +258,8 @@ export const useSessionStore = defineStore('session', {
     },
 
     setBlocage () {
-      if (this.estAdmin) return
-      const c = this.aSt.compta
+      if (this.estAdmin || !this.compte) return
+      const c = this.compte
       const dhvu = c ? (c.dhvu || 0) : 0
       this.niv = 0
       this.alire = false
@@ -267,7 +272,7 @@ export const useSessionStore = defineStore('session', {
     },
 
     /* Le compte a disparu OU l'administrateur a fermé l'application ***********/
-    setExcKO (exc) { this.excKO = exc; ui.setPage('clos') },
+    setExcKO (exc) { this.excKO = exc; stores.ui.setPage('clos') },
 
     setConso (c) {
       if (c) {
@@ -416,7 +421,7 @@ export const useSessionStore = defineStore('session', {
     startOp (op) {
       this.opEncours = op
       this.opSpinner = 0
-      this.ui.oD('opDialog')
+      stores.ui.oD('opDialog')
       this.opCount()
     },
 
@@ -424,7 +429,7 @@ export const useSessionStore = defineStore('session', {
       if (this.opTimer) clearTimeout(this.opTimer)
       this.opEncours = null
       this.opSpinner = 0
-      this.ui.fD()
+      stores.ui.fD()
     }
   }
 })

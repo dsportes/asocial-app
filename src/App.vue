@@ -154,7 +154,7 @@
         <img v-if="session.ok && !session.estComptable" src="~assets/logo.svg" 
           height="28" width="28"  class="q-pa-none q-mr-sm img bg-white" @click="reload"/>
 
-        <span v-if="session.ok" class="titre-lg">{{aSt.avC.na.nomc}}</span>
+        <span v-if="session.ok" class="titre-lg">{{people.getCV(session.compteId).nom}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
         <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>
       </q-toolbar-title>
@@ -383,16 +383,17 @@
   <apercu-cv v-if="ui.d.ACVouvrir"/>
   <phrase-secrete v-if="ui.d.PSouvrir"/>
 
+  <!-- Opération en cours et son arrêt -->
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
     <div class="q-mt-sm column items-center" style="width:20rem">
       <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
         <div v-if="session.opSpinner >= 2" 
-          class="spinlargeur height-4 row items-center justify-between no-wrap text-black bg-amber-2 q-pa-sm"
+          class="spinlargeur height-5 row items-center justify-between no-wrap text-black bg-amber-2 q-pa-sm"
           style="margin:0 auto; overflow:hidden;">
           <div class="col column items-center">
-            <div class="text-bold">{{$t('MLAbrk')}}</div>
-            <div class="text-bold">{{session.opEncours.label}}</div>
+            <div class="text-bold titre-md">{{$t('MLAbrk')}}</div>
+            <div class="text-bold oplbl">{{session.opEncours.label}}</div>
           </div>
           <div class="col-auto q-mt-sm cursor-pointer column items-center" style="position:relative"
             @click="ui.oD('confirmstopop')">
@@ -430,6 +431,7 @@ import { ID, AMJ } from './app/api.mjs'
 
 import { set$t, hms, dkli, styp, beep } from './app/util.mjs'
 import { reconnexion, deconnexion } from './app/synchro.mjs'
+import { CV } from './app/modele.mjs'
 import { SetDhvuCompta } from './app/operations.mjs'
 
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -527,9 +529,9 @@ export default {
           if (this.session.pow > 3) return this.$t('ACspons')
           return this.$t('Ptranche', [ID.court(this.aSt.tribuC.id), this.aSt.tribuC.info])
         }
-        case 'sponsorings' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
-        case 'groupesac' : { arg = this.aSt.avC ? this.aSt.avC.na.nom : '?'; break }
-        case 'groupe' : { arg = this.gSt.egrC ? this.gSt.egrC.groupe.na.nom : this.$t('disparu'); break }
+        case 'sponsorings' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }
+        case 'groupesac' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }
+        case 'groupe' : { arg = this.gSt.egrC ? this.people.getCV(this.session.groupeId).nom : this.$t('disparu'); break }
       }
       return this.$t('P' + p, [arg])
     },
@@ -613,7 +615,8 @@ export default {
       aSt: stores.avatar, 
       gSt: stores.groupe,
       config: stores.config,
-      ui, 
+      people: stores.people,
+      ui, CV,
       styp, dkli, hms, deconnexion, AMJ
     }
   }
@@ -660,4 +663,8 @@ un élément qui apparaît quand le drawer est caché*/
   min-width: 6rem
 .img
   border-radius: 12px
+.oplbl
+  line-height: 1rem
+  max-height: 4rem
+  overflow-y: hidden
 </style>

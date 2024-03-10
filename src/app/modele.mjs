@@ -58,8 +58,8 @@ export class RegRds {
   static id (rds) { return RegRds.regRds.get(Rds.long(rds, RegRds.ns)) }
 
   static set (rds, id) {
+    const r = rds < d14 ? Rds.long(rds, RegRds.ns) : rds
     const i = ID.long(id, RegRds.ns)
-    const r = Rds.long(rds, RegRds.ns)
     RegRds.regId.set(i, r)
     RegRds.regRds.set(r, i)
     return r
@@ -169,19 +169,23 @@ export class CV {
     return c
   }
 
+  static fake (id) { const c = new CV; c.id = id; c.fake = true; return c}
+
   store () { stores.people.setCV(this); return this }
 
   get photo () {
     if (this.ph) return this.ph
     const cfg = stores.config
+    if (this.id === 0) return cfg.iconSuperman
     if (ID.estGroupe(this.id)) return cfg.iconGroupe
-    if (ID.estComptable(this.id)) return cfg.iconSuperman
+    if (ID.estComptable(this.id)) return cfg.iconComptable
     return cfg.iconAvatar
   }
 
   get texte () {
     if (this.tx) return this.tx
     const cfg = stores.config
+    if (this.id === 0) return cfg.nomDeAdmin
     if (ID.estComptable(this.id)) return cfg.nomDuComptable
     return '#' + this.id
   }
@@ -321,12 +325,12 @@ _data_ :
 - `nbmi`: nombre de mois d'inactivité acceptable pour un compte O fixé par le comptable. Ce changement n'a pas d'effet rétroactif.
 */
 export class Espace extends GenDoc {
-  get rds () { return RegRds.rds(this.id) }
+  // get rds () { return RegRds.rds(this.id) }
   get ns () { return ID.ns(this.id) }
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    RdsReg.set(row.rds)
+    this.rds = RegRds.set(Rds.long(row.rds, this.ns), this.id)
 
     this.org = row.org
     this.creation = row.creation
@@ -336,6 +340,7 @@ export class Espace extends GenDoc {
     this.dlvat = row.dlvat
     this.nbmi = row.nbmi || 6
     this.t = row.t || 0
+    console.log(this.rds)
   }
 
   static async nouveau (org) {
@@ -380,7 +385,7 @@ _data_:
 
 */
 export class Synthese extends GenDoc {
-
+  get ns () { return ID.ns(this.id) }
   /* lcSynt = ['qc', 'qn', 'qv', 'ac', 'an', 'av', 'c', 'n', 'v', 
   'nbc', 'nbd', 'ntr0', 'ntr1', 'ntr2', 'nco0', 'nco1', 'nco2'] */
 
@@ -392,9 +397,9 @@ export class Synthese extends GenDoc {
     lcSynt.forEach(f => { a0[f] = 0 })
 
     for (let i = 1; i < row.tp.length; i++) {
-      const x = decode(row.tp[i])
+      const x = row.tp[i]
       if (x && !x.vide) {
-        x.id = ID.long(i, session.ns)
+        x.id = ID.long(i, this.ns)
         x.pcac = !x.qc ? 0 : Math.round(x.ac * 100 / x.qc) 
         x.pcan = !x.qn ? 0 : Math.round(x.an * 100 / x.qn) 
         x.pcav = !x.qv ? 0 : Math.round(x.av * 100 / x.qv) 

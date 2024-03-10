@@ -1,16 +1,24 @@
 /* TODO: synchro
 - gérer fichiers des notes AvNote / Fetat - Changer Fetat id av /gr, ids note - idf en index (plus en id)
 */
+import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { afficherDiag, $t } from './util.mjs'
+import { afficherDiag, $t, random } from './util.mjs'
 import { idb, IDBbuffer } from './db.mjs'
-import { DataSync, appexc, ID, Rds, Cles } from './api.mjs'
+import { DataSync, appexc, ID, Rds, Cles, d14 } from './api.mjs'
 import { post } from './net.mjs'
+import { CV, compile } from './modele.mjs'
+import { closeWS } from './ws.mjs'
+import { crypter } from './webcrypto.mjs'
 
 /* classe Queue ***********************************************************/
 class Queue {
   constructor () {
+    this.reset()
+  }
+
+  reset () {
     this.dataSync = null // dataSync courant de la session. Maj au retour de Sync
     this.job = null // traitement en cours
 
@@ -484,13 +492,12 @@ export function deconnexion(garderMode) {
   const org = session.org
 
   if (session.accesIdb) idb.close()
-  if (session.accesNet) {
-    if (session.fsSync) session.fsSync.close(); else closeWS()
-  }
+  if (session.websocket) session.websocket.close()
+  if (session.fsSync) session.fsSync.close()
   stores.reset() // Y compris session
   if (garderMode) session.setMode(mode)
   session.org = org
-  SyncQueue.reset()
+  syncQueue.reset()
   ui.setPage('login')
 }
 
@@ -931,6 +938,8 @@ export class ConnexionAdmin extends Operation {
       const ret = await post(this, 'GetEspaces', args)
       session.setCompte(null)
       session.setOrg('admin')
+      // const cv = ne sert à rien, mais bug si on l'enlève !!!
+      const cv = (await CV.set(null, 0)).store()
       if (ret.espaces) for (const e of ret.espaces)
         session.setEspace(await compile(e), true)
   
@@ -1058,7 +1067,7 @@ export class CreerEspace extends Operation {
         token: session.authToken,
         ns: ns,
         org: org,
-        hXR: (ns * d14) + phrase.hps1,
+        hXR: phrase.hps1,
         hXC: phrase.hpsc,
         cleE: Cles.espace(), // clé de l'espace
         clePK: await crypter(cleK, cleP),
@@ -1071,7 +1080,6 @@ export class CreerEspace extends Operation {
       await post(this, 'CreerEspace', args)
       this.finOK()
     } catch (e) {
-      stores.ui.setPage('login')
       await this.finKO(e)
     }
   }
@@ -1317,7 +1325,7 @@ export class GetSynthese extends Operation {
     try {
       const session = stores.session
       const args = { token: session.authToken, ns }
-      const ret = this.tr(await post(this, 'GetSynthese', args))
+      const ret = await post(this, 'GetSynthese', args)
       const s = await compile(ret.rowSynthese)
       session.setSynthese(s)
       return this.finOK(s)

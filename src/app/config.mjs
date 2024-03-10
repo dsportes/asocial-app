@@ -36,6 +36,7 @@ export const config = {
     'auzvillagezSANSzjaizmauvaisezREPUTATIONz'
   ],
   nomDuComptable: 'Comptable',
+  nomDeAdmin: 'Administrateur',
   nomPartitionPrimitive: 'Primitive',
   donorg: 2, // don par défaut à un compte A par création depuis un compte O
   dons: [50, 100, 200], // choix des dons d'un compte A au sponsotring d'un autre compte A

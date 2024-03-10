@@ -559,6 +559,7 @@ export default {
   OPmsg7: 'Code local à 3 lettres',
   OPmsg8: 'Ce code -par défaut "xxx"- facilite la gestion / suppressions des bases locales obsolètes.',
 
+  OP_ConnexionAdmin: 'Connexion en tant qu\'administrateur technique',
   OP_AboTribuC: 'Abonnement / désabonnement à la tranche courante',
   OP_McMemo: 'Changement des mots clés et mémo attachés à un contact ou groupe',
   OP_ExistePhrase: 'Test d\'existence d\'une phrase de connexion / contact / sponsoring',
@@ -1921,8 +1922,8 @@ export default {
   SAVabo2: 'Part fichiers: {0}',
 
   TUtqc: 'Plafond conso. mensuelle',
-  TUtq1: 'Abon. nombre notes...',
-  TUtq2: 'Abon. volume fichiers',
+  TUtqn: 'Abon. nombre notes...',
+  TUtqv: 'Abon. volume fichiers',
   TUaff: 'Affecté',
   TUuti: 'Utilisé',
   TUntft: 'Notif. tranches',
@@ -1934,7 +1935,7 @@ export default {
   TUtrb: 'Nb tranches',
   TUco: 'Nb comptes',
   PEnbc: 'aucun compte | un compte | {count} comptes',
-  PEsp: 'pas de sponsor | un sponsor | {count} sponsors',
+  PEnbd: 'pas de délégué | un délégué | {count} délégués',
   PEedn: 'Editer le nom',
   PEabo: 'Abon. & max conso.',
   PEstm: 'Téléchargement de la statistique CSV d\'abonnement / consommation du mois',

@@ -8,13 +8,13 @@
         <div class='font-mono fs-sm'>[{{src.qc}}]</div>
         <div class='font-mono fs-md'>{{mon(src.qc)}}</div>
       </div>
-      <div v-if="type==='q1'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
-        <div class='font-mono text-center fs-sm'>[{{src.q1}}]</div>
-        <div class='font-mono text-center fs-md'>{{nbn(src.q1 * UNITEN)}}</div>
+      <div v-if="type==='qn'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
+        <div class='font-mono text-center fs-sm'>[{{src.qn}}]</div>
+        <div class='font-mono text-center fs-md'>{{nbn(src.qn * UNITEN)}}</div>
       </div>
-      <div v-if="type==='q2'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
-        <div class='font-mono text-center fs-sm'>[{{src.q2}}]</div>
-        <div class='font-mono text-center fs-md'>{{edvol(src.q2 * UNITEV)}}</div>
+      <div v-if="type==='qv'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
+        <div class='font-mono text-center fs-sm'>[{{src.qv}}]</div>
+        <div class='font-mono text-center fs-md'>{{edvol(src.qv * UNITEV)}}</div>
       </div>
       <div :class="(occupation ? 'col-3' : 'col-5') + ' column items-center'">
         <div class='fs-sm text-italic text-center'>{{$t('TUaff')}}</div>
@@ -43,9 +43,9 @@ export default {
   name: 'TuileCnv',
 
   props: { 
-    src: Object, // {qc q1 q2 ac a1 a2 ca v1 v2}
-    occupation: Boolean, // si true ca v1 v2 sont interprétés comme "occupation / utilisation"
-    type: String, //'qc': limite coûts, 'q1' 'q2'
+    src: Object, // {qc qn qv ac an av c n v}
+    occupation: Boolean, // si true c n v sont interprétés comme "occupation / utilisation"
+    type: String, //'qc': limite coûts, 'qn' 'qv'
   },
 
   computed: {
@@ -62,10 +62,10 @@ export default {
     const type = toRef(props, 'type')
 
     function faff (v) {
-      return type.value === 'qc' ? v.pcac : (type.value === 'q1' ? v.pca1 : v.pca2) 
+      return type.value === 'qc' ? v.pcac : (type.value === 'qn' ? v.pcan : v.pcav) 
     }
     function futi (v) {
-      return type.value === 'qc' ? v.pcca : (type.value === 'q1' ? v.pcv1 : v.pcv2) 
+      return type.value === 'qc' ? v.pcc : (type.value === 'qn' ? v.pcn : v.pcv) 
     }
 
     const uti = ref(futi(src.value))

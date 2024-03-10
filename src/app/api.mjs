@@ -163,10 +163,11 @@ export class Rds {
   static AVATAR = 5
   static GROUPE = 6
 
-  static nouveau (type) {
+  static nouveau (type, ns) {
     const i = typeof type === 'string' ? Rds.DOCS.indexOf(type) : type
-    const n = hash(rnd6())
-    return (i * d13) + (n % d13)
+    const n = rnd6()
+    const r = (i * d13) + (n % d13)
+    return ns ? Rds.long(r, ns) : r
   }
 
   static court (long) {
@@ -258,7 +259,8 @@ export class ID {
   - une id, longue ou courte, string ou number
   */
   static long (court, ns) { 
-    return (ns * d14) + ID.court(court)
+    const x = typeof court === 'string' ? parseInt(court) : court
+    return x > d14 ? x : ((ns * d14) + x)
   }
 
   static duComptable (ns) { 
@@ -1114,7 +1116,7 @@ sync : { id (long), rds (long), vs, vc, vb }
 */
 export class DataSync {
   static vide = { id: 0, rds: 0, vs: 0, vc: 0, vb: 0 }
-  static videg = { id: 0, rds: 0, vs: [0,0,0,0], 
+  static videg = { id: 0, rds: 0, vs: [0,0,0,0],  // gen, gr, mb, no
     vc: 0, vb: [0,0,0,0] } // m:true, n:true
 
   static nouveau () {

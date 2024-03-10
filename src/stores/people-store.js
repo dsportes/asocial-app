@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { ID } from '../app/api.mjs'
-import { NomGenerique } from '../app/modele.mjs'
+import { CV, NomGenerique } from '../app/modele.mjs'
 import { difference, intersection } from '../app/util.mjs'
 
 /* 
@@ -22,7 +22,7 @@ export const usePeopleStore = defineStore('people', {
 
   getters: { 
     /* Retourne la CV la plus récente pour une id */
-    getCV: (state) => { return (id) => { return state.cvs.get(id) } },
+    getCV: (state) => { return (id) => { return state.cvs.get(id) || CV.fake(id)} },
 
     getSgr: (state) => { return (idp) => { 
         const e = state.map.get(idp)
@@ -62,9 +62,6 @@ export const usePeopleStore = defineStore('people', {
         return e ? e.na : null 
       }
     },
-
-    /* Retourne la CV */
-    getCv: (state) => { return (id) => { return state.cvs.get(id) } },
 
     estPeople: (state) => { return (id) => { 
         return state.map.has(id)

@@ -35,7 +35,7 @@
 <script>
 import stores from '../stores/stores.mjs'
 
-import { reconnexionCompte, deconnexion } from '../app/synchro.mjs'
+import { reconnexion, deconnexion } from '../app/synchro.mjs'
 import { styp, html } from '../app/util.mjs'
 
 const lcont = new Set([1, 4, 6, 7])

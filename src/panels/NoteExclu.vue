@@ -104,7 +104,7 @@ export default {
 
   methods: {
     cv (x) {
-      return !x.avc ? this.pSt.getCv(x.na.id) : this.aSt.getAvatar(x.na.id).cv
+      return !x.avc ? this.pSt.getCV(x.na.id) : this.aSt.getAvatar(x.na.id).cv
     },
     selmb (e) {
       e.cv = this.cv(e)

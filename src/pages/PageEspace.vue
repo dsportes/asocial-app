@@ -66,6 +66,7 @@ Depuis un Comptable: ns est celui de la session
 
     <q-separator color="orange" class="q-my-sm"/>
 
+    <div v-if="synth.length">
     <div class="q-mx-xs" 
       v-for="(lg, idx) in synth" :key="lg.id" @click="lgCourante(lg)">
       <q-expansion-item switch-toggle-side expand-separator dense group="trgroup">
@@ -74,15 +75,15 @@ Depuis un Comptable: ns est celui de la session
             <div class="col-3 fs-md">
               <span v-if="!lg.id">{{$t('total')}}</span>
               <span v-else>#{{ID.court(lg.id)}}
-                <span v-if="session.pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
+                <span v-if="session.pow === 2" class= "q-ml-sm">{{session.compte.codeP(lg.id)}}</span>
               </span>
             </div>
             <div class="col-4">
-              {{$t('PEnbc', lg.nbc, { count: lg.nbc })}}, {{$t('PEsp', lg.nbsp, { count: lg.nbsp })}}
+              {{$t('PEnbc', lg.nbc, { count: lg.nbc })}}, {{$t('PEnbd', lg.nbd, { count: lg.nbd })}}
             </div>
             <div class="col-1 font-mono fs-sm text-center">{{lg.qc}}<br/>{{lg.pcac}}%</div>
-            <div class="col-1 font-mono fs-sm text-center">{{lg.q1}}<br/> {{lg.pca1}}%</div>
-            <div class="col-1 font-mono fs-sm text-center">{{lg.q2}}<br/> {{lg.pca2}}%</div>
+            <div class="col-1 font-mono fs-sm text-center">{{lg.qn}}<br/> {{lg.pcan}}%</div>
+            <div class="col-1 font-mono fs-sm text-center">{{lg.qv}}<br/> {{lg.pcav}}%</div>
             <div class="col-2">
               <q-icon v-if="lg.ntr0 + lg.nco0 !== 0" name="info" color="primary" size="xs" />
               <q-icon v-else name="check" color="grey-5" size="xs" />
@@ -96,8 +97,8 @@ Depuis un Comptable: ns est celui de la session
         <div :class="dkli(idx) + 'q-ml-xl q-mb-lg'">
           <div class="row q-gutter-sm">
             <tuile-cnv type="qc" :src="lg" occupation/>
-            <tuile-cnv type="q1" :src="lg" occupation/>
-            <tuile-cnv type="q2" :src="lg" occupation/>
+            <tuile-cnv type="qn" :src="lg" occupation/>
+            <tuile-cnv type="qv" :src="lg" occupation/>
             <tuile-notif :src="lg" :total="idx === 0" occupation/>
           </div>
           <div v-if="idx !== 0" class="q-my-xs">
@@ -115,6 +116,7 @@ Depuis un Comptable: ns est celui de la session
           </div>
         </div>
       </q-expansion-item>
+    </div>
     </div>
 
     <!-- Suivi du changement d'une dlvat -->
@@ -221,8 +223,9 @@ import { SetNotifT } from '../app/operations.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
+import { GetSynthese } from '../app/synchro.mjs'
 import { DownloadStatC, DownloadStatC2, SetEspaceOptionA, NouvelleTribu, GetTribu, 
-  AboTribuC, GetSynthese, SetAtrItemComptable,
+  AboTribuC, SetAtrItemComptable,
   GetVersionsDlvat, GetMembresDlvat, ChangeAvDlvat, ChangeMbDlvat } from '../app/operations.mjs'
 
 const fx = [['id', 1], 
@@ -262,7 +265,8 @@ export default {
       return Math.floor(AMJ.max / 100)
     },
     synth () {
-      const l = this.aSt.synthese.atr
+      if (!this.session.synthese) return []
+      const l = this.session.synthese.tp
       const fv = this.fSt.tri.espace
       const f = fv ? fv.value : 0
       const ct = { f: fx[f][0], m: fx[f][1] }
@@ -470,7 +474,7 @@ export default {
       nom: '',
       quotas: null,
       ligne: null,
-      optionA: this.options[this.session.espace.opt],
+      optionA: this.options[this.espace.opt],
       optionsNbmi: [3, 6, 12, 18, 24],
       nbmi: this.espace.nbmi
     }

@@ -32,8 +32,8 @@
               <span v-if="esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
             </div>
             <div class="row q-gutter-xs">
-              <q-btn dense color="primary" flat label="ping"
-                @click="ping(esp)"/>
+              <!--<q-btn dense color="primary" flat label="ping"
+                @click="ping(esp)"/>-->
               <q-btn dense color="primary" icon="open_in_new" :label="$t('detail')"
                 @click="pageesp(esp)"/>
             </div>
@@ -225,6 +225,7 @@ export default {
       this.ui.oD('PSouvrir')
     },
 
+    /*
     async ping (esp) {
       if (this.session.fsSync) {
         const org = await this.session.fsSync.getEspace(esp.id)
@@ -233,6 +234,7 @@ export default {
         await afficherDiag(this.$t('ESping'))
       }
     },
+    */
 
     async rafraichir () {
       this.session.setOrg('admin')

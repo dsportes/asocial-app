@@ -155,7 +155,7 @@ export default {
     function selNa (elt) { naAut.value = elt.na }
 
     function cv(x) {
-      return !x.avc ? pSt.getCv(x.na.id) : aSt.getAvatar(x.na.id).cv
+      return !x.avc ? pSt.getCV(x.na.id) : aSt.getAvatar(x.na.id).cv
     }
 
     return {
