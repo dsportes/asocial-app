@@ -1,6 +1,6 @@
 <template>
   <q-card :class="dkli(idx)">
-    <apercu-genx :id="avatar.id" :idx="idx"/>
+    <apercu-genx :id="idav" :idx="idx"/>
 
     <div class="q-mt-sm" v-if="avatar.pc">
       <div>
@@ -12,7 +12,7 @@
     </div>
     <div v-else>
       <span class="titre-md text-italic">{{$t('FAnpc')}}</span>
-      <q-btn v-if="edit && !ID.estComptable(avatar.id)" class="q-ml-sm" dense flat color="primary" size="sm"
+      <q-btn v-if="edit && !ID.estComptable(idav)" class="q-ml-sm" dense flat color="primary" size="sm"
         :label="$t('FAdeclpc')" @click="editerpc"/>
     </div>
 
@@ -57,7 +57,7 @@ export default {
   components: { PhraseContact, BoutonHelp, ApercuGenx },
 
   computed: {
-    avatar () { return this.aSt.getAvatar(this.idav)}
+    avatar () { return this.aSt.getElt(this.idav).avatar}
   },
 
   data () {
@@ -69,7 +69,7 @@ export default {
   methods: {
     async editerpc () {
       if (!await this.session.edit()) return
-      this.session.setAvatarId(this.avatar.id)
+      this.session.setAvatarId(this.idav)
       this.ui.oD('AAeditionpc', this.idc)
     },
     
@@ -82,11 +82,11 @@ export default {
       }
       const { id, na } = await new GetAvatarPC().run(pc)
       if (id) {
-        if (id === this.avatar.id && na) {
+        if (id === this.idav && na) {
           afficherDiag(this.$t('FAerr1')) // déjà celle de l'avatar
           return
         }
-        if (id !== this.avatar.id && na) {
+        if (id !== this.idav && na) {
           afficherDiag(this.$t('FAerr2')) // déjà exactement utilisée par un autre avatar
           return
         }

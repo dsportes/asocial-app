@@ -5,7 +5,7 @@
       :label="$t('PPcht')" @click="chgTribu"/>
     <q-btn v-if="session.estComptable" dense color="primary" size="sm" padding="xs"
       :label="$t('PPchsp')" @click="chgSponsor"/>
-    <q-btn v-if="session.estComptable || (aSt.estSponsor && estDeMaTribu)" 
+    <q-btn v-if="session.estComptable || (session.estDelegue && estDeMaTribu)" 
       dense color="primary" size="sm" padding="xs"
       :label="$t('PPcompta')" @click="voirCompta"/>
     <q-btn dense color="warning" size="md" padding="none" round icon="change_history"

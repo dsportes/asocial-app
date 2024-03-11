@@ -27,9 +27,10 @@
   <div v-if="!bloc">
     <q-item clickable @click="ui.setPage('compte')">
       <q-item-section>
-        <q-item-label lines="1">{{$t('ACmesav' + (session.estSponsor ? '1' : '2'))}}</q-item-label>
+        <q-item-label lines="1">{{$t('ACmesav' + (session.estDelegue ? '1' : '2'))}}</q-item-label>
       </q-item-section>
     </q-item>
+
     <q-item clickable>
       <q-item-section clickable @click="ui.setPage('groupes')">
         <q-item-label>
@@ -42,6 +43,7 @@
         </q-item-label>
       </q-item-section>
     </q-item>
+
     <q-item clickable @click="ui.setPage('people')">
       <q-item-section>
         <q-item-label lines="1">{{$t('ACmesctc')}}</q-item-label>
@@ -54,7 +56,7 @@
         </q-item-label>
       </q-item-section>
     </q-item>
-    <q-item v-if="!aSt.compta.estA" clickable  @click="maTribu()">
+    <q-item v-if="!session.compta.estA" clickable  @click="maParition()">
       <q-item-section>
         <q-item-label lines="1">{{$t(session.pow <= 3 ? 'ACalloc' : 'ACspons')}}</q-item-label>
       </q-item-section>
@@ -74,6 +76,7 @@
         </q-item-label>
       </q-item-section>
     </q-item>
+
     <q-item clickable class="q-ml-lg" @click="chatsAv">
       <q-item-section>
         <q-item-label lines="1">{{$t('ACchats')}}
@@ -81,6 +84,7 @@
         </q-item-label>
       </q-item-section>
     </q-item>
+
     <q-item clickable class="q-ml-lg" @click="ui.setPage('sponsorings')">
       <q-item-section>
         <q-item-label lines="1">{{$t('ACsponsorings')}}
@@ -92,16 +96,19 @@
 
     <q-item v-if="session.groupeId" clickable @click="ui.setPage('groupe', 'groupe')">
       <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACgr')}}</span>
-      <q-btn class="q-ml-md text-bold" dense :label="gSt.egrC.groupe.na.nomc" no-caps
+      <q-btn class="q-ml-md text-bold" dense :label="nomg" no-caps
         icon-right="open_in_new" @click="ui.setPage('groupe', 'groupe')"/>
     </q-item>
+
     <q-item v-if="session.groupeId" clickable @click="ui.setPage('groupe', 'membres')">
       <q-item-section class="q-ml-lg">
         <q-item-label lines="1">{{$t('ACnotes')}}
         </q-item-label>
       </q-item-section>
     </q-item>
+
   </div>
+
 </q-list>
 </template>
 
@@ -116,34 +123,22 @@ export default {
   computed: {
     options () {
       const l = []
-      this.aSt.map.forEach(e => { 
-        const a = e.avatar
-        l.push({ label: a.na.nom, value: a.id }) 
+      this.session.compte.mav.forEach(id => { 
+        l.push({ label: this.pSt.getCV(id).nom, value: id }) 
       })
       return l
     },
 
-    nbchats () { return this.aSt.nbchats + this.gSt.nbchats },
+    nbchats () { return this.aSt.nbchats },
     nbchatsAv () { return this.aSt.eavC.chats.size },
     nbspons () { return this.aSt.eavC.sponsorings.size },
-    nbgrps () { 
-      return this.aSt.compte.idGroupes(this.session.avatarId).size
-    },
-    nbgrpsT () { 
-      return this.aSt.compte.idGroupes().size
-    },
-    nbInvits () { return this.gSt.invits.size },
-
-    nbgrsecs () { return '?' },
-    nbmbs () { return '?' },
-
-    nbtav () { return this.aSt.compta.mav.size },
-    nbtgr () { return this.gSt.map.size },
-    nbtct () { return this.pSt.map.size },
-    nbttr () { return this.aSt.nbTribus },
-    nbtsp () { return 1 },
-    nbtiv () { return 1 },
+    nbgrps () { return this.session.compte.idGroupes(this.session.avatarId).size },
+    nbgrpsT () { return this.session.compte.idGroupes().size },
+    nbInvits () { return this.aSt.invits.size },
     bloc () { return this.session.estMinimal },
+    nomg () { const idg = this.session.groupeid
+      return idg ? this.pSt.getCV(idg).nom : ''
+    }
   },
 
   watch: {
@@ -154,7 +149,7 @@ export default {
     clickNotif2 () {
       this.ui.setPage('compta', 'chats')
     },
-    maTribu () { 
+    maPartition () { 
       this.aSt.setTribuC()
       this.ui.setPage('tranche')
     },
@@ -170,7 +165,10 @@ export default {
 
   data () {
     return {
-      cav: { label: this.aSt.compte.na.nom, value: this.aSt.compte.na.id }
+      cav: { 
+        label: this.pSt.getCV(this.session.compte.id).nom, 
+        value: this.session.compte.id 
+      }
     }
   },
 
@@ -180,7 +178,8 @@ export default {
       session: stores.session, 
       gSt: stores.groupe, 
       ui: stores.ui, 
-      fSt: stores.filtre
+      fSt: stores.filtre,
+      pSt: stores.people
     }
   }
 

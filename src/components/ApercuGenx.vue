@@ -2,7 +2,7 @@
 <div :class="dkli(idx)">
   <div class="q-pa-xs row items-start">
     <div class="col-auto items-center q-mr-sm column">
-      <img class="photomax" :src="photo" />
+      <img class="photomax" :src="cv.photo" />
       <q-btn v-if="!ID.estComptable(id)" class="q-mt-xs"
         size="md" icon="zoom_in" dense color="primary" padding="none" round
         @click.stop="ovcv"/>
@@ -10,7 +10,7 @@
     <div class="col">
       <div class="row">
         <div class="col">
-          <span class="text-bold titre-lg q-mr-sm">{{na.nomc}}</span> 
+          <span class="text-bold titre-lg q-mr-sm">{{cv.nomc}}</span> 
           <span v-if="estAvc" class="fs-md q-mr-sm">[{{$t('moi')}}]</span> 
           <span class="fs-sm font-mono q-mr-sm">
             {{'#' + id + (im ? ' ['+ im + ']': '')}}</span> 
@@ -19,7 +19,7 @@
           dense size="md" color="primary" icon="open_in_new"
           :label="$t('page')" @click.stop="ouvrirdetails"/>
       </div>
-      <div v-if="info" class="titre-md">{{titre(info)}} ...</div>
+      <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}} ...</div>
       <mc-memo :id="id" :idx="idx"/>        
     </div>
   </div>
@@ -49,7 +49,7 @@ export default {
 
   computed: {
     estGroupe () { return ID.estGroupe(this.id) },
-    estAvc () { return this.estGroupe ? false : this.aSt.compte.estAvDuCompte(this.id) },
+    estAvc () { return this.session.compte.mav.has(this.id) },
     eg () { return this.estGroupe ? this.gSt.egr(this.id) : null },
     agp () { 
       if (this.estGroupe) return this.eg.groupe
@@ -57,10 +57,8 @@ export default {
       return this.pSt.getPeople(this.id)
     },
     estAnim () { return this.estGroupe ? this.eg.estAnim : false },
-    na () { return this.agp.na },
-    cv () { return this.agp.cv },
+    cv () { return this.pSt.getCV(this.id) },
     
-    photo () { return this.cv && this.cv.photo ? this.cv.photo : this.na.defIcon },
     info () { return this.cv ? (this.cv.info || '') : '' },
     det () { return this.session.peopleId === this.id && this.ui.estOuvert('detailspeople') }
   },

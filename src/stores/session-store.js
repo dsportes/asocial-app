@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
-import { crypter } from '../app/webcrypto.mjs'
+import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import { RegCles, RegRds } from '../app/modele.mjs'
@@ -83,6 +83,8 @@ export const useSessionStore = defineStore('session', {
 
     estComptable (state) { return ID.estComptable(state.compteId) },
     estAdmin (state) { return state.compteId === 0 },
+    estDelegue (state) { return state.compte && state.compte.del },
+    estA (state) { return state.compte && state.compte.estA },
 
     editable (state) { return state.mode < 3 && state.niv < 4 },
 
@@ -99,7 +101,7 @@ export const useSessionStore = defineStore('session', {
     pow (state) {
       if (state.estAdmin) return 1
       if (state.estComptable) return 2
-      if (state.estSponsor) return 3
+      if (state.estDelegue) return 3
       return 4
     },
 
@@ -107,7 +109,9 @@ export const useSessionStore = defineStore('session', {
     estSansNotif (state) { return state.niv === 0 },
     estFige (state) { const n = state.notifs.G; return n && (n.nr === 1) },
     estClos (state) { const n = state.notifs.G; return n && (n.nr === 2) },
+    estMinimal (state) { return state.niv === 2 },
 
+    // TODO
     estLecture (state) {
       if (state.pow <= 2) return false
       const nt = state.notifs[1]; const nc = state.notifs[2]
@@ -115,28 +119,11 @@ export const useSessionStore = defineStore('session', {
       if (nc && nc.nr > nr) nr = nc.nr
       return nr === 3
     },
-    estMinimalTC (state) {
-      if (state.pow <= 2) return false
-      const nt = state.notifs[1]
-      const nc = state.notifs[2]
-      let nr = nt ? nt.nr : 0
-      if (nc && nc.nr > nr) nr = nc.nr
-      return nr === 4
-    },
-    estMinimalC (state) {
-      if (state.pow <= 2) return false
-      const n = state.notifs[4]
-      return n && (n.nr === 4) 
-    },
+
     estDecr (state) { 
       if (state.pow <= 2) return false
       const n = state.notifs[3]
       return n && (n.nr === 5) 
-    },
-
-    estMinimal (state) { 
-      if (!state.fige) return state.estMinimalC || state.estMinimalTC
-      return state.estMinimalTC
     },
 
     roSt (state) {
@@ -194,7 +181,7 @@ export const useSessionStore = defineStore('session', {
       const token = { }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
-        if (stores.config.hasWs) {
+        if (stores.config.hasWS) {
           this.sessionId = intToB64(rnd6())
           token.sessionId = this.sessionId
         }
@@ -228,19 +215,15 @@ export const useSessionStore = defineStore('session', {
       stores.reset(true) // reset SAUF session
     },
 
-    /* id / clek connu depuis: (voir synchro.mjs)
-    - ConnexionAvion: lecture du record "boot" de IDB
-    - ConnexionSynchroIncognito: retour du row "comptes" sur le premier Sync
-    - AcceptationSponsoring
-    */
-    async setIdCleK (id, clek) {
+    async setIdClek (id, cleKXC) {
       this.compteId = id
+      this.avatarId = id
       this.setNs(ID.ns(id))
-      this.naComptable = NomGenerique.comptable()
-      this.clek = clek
+      this.clek = await decrypter(this.phrase.pcb, cleKXC)
       const x = await crypter(this.clek, '' + id, 1)
       this.nombase = '$asocial$-' + u8ToB64(x, true)
-      if (session.accesIdb) localStorage.setItem(this.lsk, this.nombase)
+      if (this.accesIdb) localStorage.setItem(this.lsk, this.nombase)
+      return this.clek
     },
 
     setDh (dh) { if (dh && dh > this.dh) this.dh = dh },
@@ -263,12 +246,13 @@ export const useSessionStore = defineStore('session', {
       const dhvu = c ? (c.dhvu || 0) : 0
       this.niv = 0
       this.alire = false
-      this.notifs.forEach(ntf => {
+      for (const t in this.notifs) {
+        const ntf = this.notifs[t]
         if (ntf && ntf.texte) {
           if (ntf.dh > dhvu) this.alire = true
           if (ntf.nr > this.niv) this.niv = ntf.nr
         }
-      })
+      }
     },
 
     /* Le compte a disparu OU l'administrateur a fermé l'application ***********/
@@ -290,7 +274,6 @@ export const useSessionStore = defineStore('session', {
     setCompte (compte) { 
       if (compte) {
         this.compte = compte
-        if (!this.compteId) this.compteId = compte.id
       } else {
         this.compte = null
         this.compteId = 0
@@ -323,7 +306,7 @@ export const useSessionStore = defineStore('session', {
 
     /*
     setEstSponsor (sp) {
-      this.estSponsor = sp
+      this.estDelegue = sp
     },
     setEstAutonome (a) {
       this.estAutonome = a

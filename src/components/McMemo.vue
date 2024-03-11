@@ -7,9 +7,9 @@
           <span v-else>{{$t('MMCnomemo')}}</span>
         </div>
         <div class="col">
-          <div v-if="mclg.length" class="row q-gutter-xs fs-sm font-mono z1 items-center">
-            <div class="text-warning text-bold q-mr-xs">{{mclg.length}}</div>
-            <div v-for="mc in mclg" :key="mc" class="bg-yellow-2 text-bold text-black">
+          <div v-if="apropos.ht.size" class="row q-gutter-xs fs-sm font-mono z1 items-center">
+            <div class="text-warning text-bold q-mr-xs">{{apropos.ht.size}}</div>
+            <div v-for="mc in apropos.ht.size" :key="mc" class="bg-yellow-2 text-bold text-black">
               {{mc}}
             </div>
           </div>
@@ -25,11 +25,11 @@
           <span v-else>{{$t('MMCnomemo')}}</span>
         </div>
         <div class="row items-center">
-          <div v-if="mclg.length" class="col row q-gutter-xs fs-sm font-mono z1">
-            <div class="text-warning text-bold q-mr-xs">{{mclg.length}}</div>
-            <div v-for="mc in mclg" :key="mc" 
+          <div v-if="apropos.ht.size" class="col row q-gutter-xs fs-sm font-mono z1">
+            <div class="text-warning text-bold q-mr-xs">{{apropos.ht.size}}</div>
+            <div v-for="ht in ht" :key="ht" 
               class="bg-yellow-2 text-bold text-black">
-              {{mc}}
+              {{ht}}
             </div>
           </div>
           <div v-else class="col text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
@@ -51,16 +51,12 @@
 
         <q-card-section class="q-py-sm">
           <div class="titre-lg text-italic">{{$t('MMCmc')}}</div>
-          <apercu-motscles 
-            :ok="changerMc" 
-            :idx="0"
-            :edit="!session.diag"
-            :src="nvmc || mc"/>
+          <div>{{hashtags.join(' / ')}}</div>
         </q-card-section>
 
         <q-card-section class="q-py-sm">
           <div class="titre-md">{{$t('MMCcom')}}</div>
-          <editeur-md mh="10rem" v-model="txt" :texte="memo" :idx="0"
+          <editeur-md mh="10rem" v-model="txt" :texte="apropos.texte" :idx="0"
            :editable="!diag" modetxt/>
         </q-card-section>
 
@@ -80,8 +76,6 @@
 import { ref, onMounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { Motscles, getNg } from '../app/modele.mjs'
-import ApercuMotscles from './ApercuMotscles.vue'
 import EditeurMd from './EditeurMd.vue'
 import { styp, dkli, titre } from '../app/util.mjs'
 import { McMemo } from '../app/operations.mjs'
@@ -93,18 +87,12 @@ export default {
 
   props: { id: Number, idx: Number },
 
-  components: { ApercuMotscles, EditeurMd },
+  components: { EditeurMd },
 
   computed: { 
-    mapmc () { return this.aSt.mapMC },
-    mcmemo () { return this.aSt.compte.mcmemo(this.id) },
-    memo () { return this.mcmemo && this.mcmemo.memo ? this.mcmemo.memo : '' },
-    memolg () { return titre(this.memo) },
-    nom () { return getNg(this.id).nom },
-    mc () { return this.mcmemo && this.mcmemo.mc ? this.mcmemo.mc : new Uint8Array([])},
-    mclg () { return this.mcmemo && this.mcmemo.mc ?
-      Motscles.editU8(this.mcmemo.mc, this.mapmc) : []
-    },
+    apropos () { return this.session.compta.apropos.get(this.id) || { ht: new Set(), texte: '' } },
+    memolg () { return titre(this.apropos.texte) },
+    nom () { return this.pSt.getCV(this.id).nom }
   },
 
   data () { return {

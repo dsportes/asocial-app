@@ -374,6 +374,8 @@ export default {
   EX8202: 'Numéro d\'espace {0} incorrect (pas 10..89).',
   EX8203: 'Création impossible de l\'espace [{0 / 1}], numéro déjà attribué.',
   EX8204: 'Création impossible de l\'espace [{0 / 1}], code d\'organisation déjà attribué.',
+  EX8205: 'Données d\'authentification absentes.',
+  EX8206: 'Données d\'authentification illisibles (détail: {0})',
 
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
@@ -397,7 +399,6 @@ export default {
   EX9017: 'Ticket non trouvé ({1} / {2}) - @{0}',
   EX9018: 'Organisation {0} non trouvée',
   EX9019: 'Mode d\'authentication non reconnu [{0}]',
-  EX9020: 'Données d\'authentification illisibles (détail: {0})',
 
   EX9999: 'L\'administrateur technique a fermé l\'application : {0}.',
 
@@ -503,7 +504,7 @@ export default {
   NPst2: 'Proposition acceptée {0}',
   NPst3: 'Proposition annulée par l\'avatar sponsor {0}',
   NPnom: 'Nom de l\'avatar sponsorisé:',
-  NPspons: 'Compte sponsor de la tranche #{0}',
+  NPdel: 'Compte délégué de la partition #{0}',
   NPsponsA: 'Compte sponsor',
   NPsponsor: 'Sponsor du compte:',
   NPacc: 'J\'accepte',
@@ -845,7 +846,7 @@ export default {
   ACpourav: 'Pour l\'avatar {0}',
   ACpourgr: 'Groupe courant {0}',
   ACmesav2: 'Ce compte, ses avatars',
-  ACmesav1: 'Ce compte (SPONSOR), ses avatars',
+  ACmesav1: 'Ce compte (délégué), ses avatars',
   ACmesgr: 'Tous les groupes',
   ACmesinv: 'Invitations en attente',
   ACmesctc: 'Tous les contacts',

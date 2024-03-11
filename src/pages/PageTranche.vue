@@ -23,7 +23,7 @@
 
     <q-toolbar class="bg-secondary text-white">
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (session.pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
-      <q-btn v-if="session.estSponsor || session.estComptable"
+      <q-btn v-if="session.estDelegue || session.estComptable"
         size="md" dense color="primary" 
         :label="$t('PTnvc')" @click="ui.oD('NSnvsp')"/>
     </q-toolbar>
@@ -60,7 +60,7 @@
         <div class="q-ml-lg">
           <apercu-genx v-if="type(c)===2 || type(c)===1" :id="c.id" :idx="idx"/>
           <div v-else class="titre-md">#{{c.id}}</div>
-          <barre-people v-if="session.estComptable || aSt.estSponsor" :id="c.id"/>
+          <barre-people v-if="session.estComptable || aSt.estDelegue" :id="c.id"/>
 
           <apercu-notif class="q-my-xs" editable
             :notif="c.notif" :type="2" :idx="idx" :ctx="{ idt: aSt.tribuC.id, idc: c.id }"/>

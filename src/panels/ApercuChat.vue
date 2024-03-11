@@ -140,7 +140,7 @@ export default {
     estA () { return this.aSt.compta.estA },
     estSp () {
       const id = this.naE.id
-      return ID.estComptable(id) || this.pSt.estSponsor(id)
+      return ID.estComptable(id) || this.pSt.estDelegue(id)
     }
   },
 

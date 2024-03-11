@@ -151,7 +151,7 @@ export default {
           idt.value = ctx.value.idt
           idcpt.value = ctx.value.idc
           // un sponsor ne peut pas éditer la notif d'un autre sponsor
-          if (pSt.estSponsor(idc.value)) return 5
+          if (pSt.estDelegue(idc.value)) return 5
           break
         }
         case 3 :

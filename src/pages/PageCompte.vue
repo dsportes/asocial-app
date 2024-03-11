@@ -11,12 +11,8 @@
           :label="$t('CPTnvav')" color="warning" dense @click="ouvrirNvav"/>
         <bouton-help class="q-ml-sm" page="page1"/>
       </div>
-      <!-- mots clés du compte -->
-      <q-btn icon="open_in_new" size="md" color="primary" padding="xs xs"
-        :label="$t('CPTkwc')" no-caps
-        @click="mcleditAut"/>
       <!-- maj quotas du compte -->
-      <q-btn v-if="estSponsor || estA"
+      <q-btn v-if="estDelegue || estA"
         icon="settings" size="md" color="primary" padding="xs xs"
         :label="$t('CPTedq')" no-caps
         @click="editerq"/>
@@ -26,41 +22,38 @@
     <span v-if="estA" class="q-pa-xs text-warning bg-yellow-3 text-bold">
       {{$t('compteA')}}
     </span>
-    <span v-if="estSponsor" class="q-pa-xs text-warning bg-yellow-3 text-bold">
-      {{$t('NPspons', [ID.court(session.tribuId)])}}
+    <span v-if="estDelegue" class="q-pa-xs text-warning bg-yellow-3 text-bold">
+      {{$t('NPdel', [ID.court(session.partition.id)])}}
     </span>
     </div>
 
     <!-- Avatars du compte -->
-    <q-card class="q-my-md q-pa-xs" v-for="(na, idx) in aSt.compte.lstAvatarNas" :key="na.id">
+    <q-card class="q-my-md q-pa-xs" v-for="(id, idx) in session.compte.mav" :key="id">
       <div class="row items-start">
         <div class="col-auto column items-center q-mr-sm">
           <q-btn flat icon="navigate_next" size="lg"
-            :color="na.id === session.avatarId ? 'warning' : 'primary'" @click="courant(na.id)"/>
-          <q-btn icon="delete" size="md" class="q-mt-sm" @click="delAvatar(na.id)"/>
+            :color="id === session.avatarId ? 'warning' : 'primary'" @click="courant(id)"/>
+          <q-btn icon="delete" size="md" class="q-mt-sm" @click="delAvatar(id)"/>
         </div>
-        <div :class="'col ' + (na.id === session.avatarId ? 'courant' : 'zone')">
-          <apercu-avatar edit  :idav="na.id" :idx="idx"/>
+        <div :class="'col ' + (id === session.avatarId ? 'courant' : 'zone')">
+          <apercu-avatar edit  :idav="id" :idx="idx"/>
           <div class="row q-mt-sm q-gutter-sm">
             <q-btn class="q-ml-sm" size="md" icon="chat" no-caps padding="xs xs"
-              :label="$t('ACgroupes')" color="primary" dense @click="courant(na.id, 2)">
-              <q-badge class="cl1" color="secondary" rounded>{{nbgrps(na.id)}}</q-badge>
+              :label="$t('ACgroupes')" color="primary" dense @click="courant(id, 2)">
+              <q-badge class="cl1" color="secondary" rounded>{{nbgrps(id)}}</q-badge>
             </q-btn>
             <q-btn class="q-ml-sm" size="md" icon="chat" no-caps padding="xs xs"
-              :label="$t('ACseschats')" color="primary" dense @click="courant(na.id, 3)">
-              <q-badge class="cl1" color="secondary" rounded>{{nbchats(na.id)}}</q-badge>
+              :label="$t('ACseschats')" color="primary" dense @click="courant(id, 3)">
+              <q-badge class="cl1" color="secondary" rounded>{{nbchats(id)}}</q-badge>
             </q-btn>
             <q-btn class="q-ml-sm" size="md" icon="chat" no-caps padding="xs xs"
-              :label="$t('ACsponsorings')" color="primary" dense @click="courant(na.id, 4)">
-              <q-badge class="cl1" color="secondary" rounded>{{nbspons(na.id)}}</q-badge>
+              :label="$t('ACsponsorings')" color="primary" dense @click="courant(id, 4)">
+              <q-badge class="cl1" color="secondary" rounded>{{nbspons(id)}}</q-badge>
             </q-btn>
           </div>
         </div>
       </div>
     </q-card>
-
-    <!-- Dialogue d'édition des mots clés du compte -->
-    <mots-cles v-if="ui.d.MCmcledit"/>
 
     <!-- Dialogue de création d'un nouvel avatar -->
     <q-dialog v-model="ui.d.PCnvav" persistent>
@@ -111,12 +104,9 @@
 </template>
 
 <script>
-import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { crypter } from '../app/webcrypto.mjs'
-import { SetQuotas, ChangementPS, MotsclesCompte, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
-import MotsCles from '../dialogues/MotsCles.vue'
+import { SetQuotas, ChangementPS, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
@@ -130,19 +120,18 @@ export default {
   name: 'PageCompte',
 
   components: { 
-    ChoixQuotas, NomAvatar, BoutonHelp, ApercuAvatar, MotsCles, SupprAvatar, BoutonConfirm
+    ChoixQuotas, NomAvatar, BoutonHelp, ApercuAvatar, SupprAvatar, BoutonConfirm
   },
 
   computed: {
     memo () { return this.aSt.compte.memo },
-    estA () { return this.aSt.compta.estA },
-    estSponsor () { return this.aSt.compta.estSponsor }
+    estA () { return this.session.estA },
+    estDelegue () { return this.session.estDelegue }
   },
 
   data () {
     return {
       ps: null,
-      memoed: null,
       nomav: '',
       avid: 0,
       quotas: null
@@ -193,9 +182,7 @@ export default {
 
     nbchats (id) { return this.aSt.getElt(id).chats.size },
     nbspons (id) { return this.aSt.getElt(id).sponsorings.size },
-    nbgrps (id) { 
-      return this.aSt.compte.idGroupes(id).size
-    },
+    nbgrps (id) { return this.session.compte.idGroupes(id).size },
     courant (id, action) {
       this.session.setAvatarId(id)
       if (action) switch (action){
@@ -211,6 +198,7 @@ export default {
 
     async oknomav (nom) {
       if (!nom) { this.ui.fD(); return }
+      // TODO : à changer complètement
       if (this.aSt.compte.avatarDeNom(nom)) {
         await afficherDiag(this.$t('CPTndc'))
         return
@@ -218,8 +206,6 @@ export default {
       this.ui.fD()
       await new NouvelAvatar().run(nom)
     },
-
-    async mcleditAut () { if (await this.session.edit()) this.ui.oD('MCmcledit') },
 
     async editerq () {
       if (! await this.session.edit()) return
@@ -247,18 +233,11 @@ export default {
       this.ui.fD()
     },
 
-    async okmc (mmc) {
-      if (mmc !== false) {
-        const mck = await crypter(this.session.clek, new Uint8Array(encode(mmc)))
-        await new MotsclesCompte().run(mck)
-      }
-    },
-
     async delAvatar (id) {
       if (!await this.session.edit()) return
-      const lna = this.aSt.compte.lstAvatarNas
+      const lna = this.session.compte.mav
       if (this.session.compteId === id) { // c'est le compte
-        if (lna.length > 1) { // il reste des avatars secondaires
+        if (lna.size > 1) { // il reste des avatars secondaires
           await afficherDiag(this.$t('SAVer1'))
           return
         }

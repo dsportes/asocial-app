@@ -417,9 +417,38 @@ export const useGroupeStore = defineStore('groupe', {
 
   actions: {
     setGroupe (groupe) {
+      if (!groupe) return
+      let e = this.map.get(groupe.id)
+      if (!e) {
+        e = { 
+          groupe: groupe, 
+          chatgr: null,
+          notes: new Map(),
+          membres: new Map(), // tous membres
+          estAnim: false, // un des avatars du compte est animateur du groupe
+          estHeb: false // un des avatars du compte est hébergeur du groupe
+        }
+        this.map.set(groupe.id, e)
+      } else {
+        if (groupe.v > e.groupe.v) e.groupe = groupe
+      }
+      e.estAnim = false
+      e.estHeb = false
+      // Set des avatars participants au groupe
+      const sav = stores.session.compte.mpg.get(groupe.id)
+      sav.forEach(ida => {
+        const im = groupe.mmb.get(ida)
+        if (im === groupe.imh) e.estHeb = true
+        if (groupe.estAnim(im)) e.estAnim = true
+      })
+      stores.note.setGroupe(groupe.id)
     },
 
     setChatgr (chatgr) {
+      if (!chatgr) return
+      const e = this.map.get(chatgr.id)
+      if (!e) return
+      if (!e.chatgr || e.chatgr.v < chatgr.v) e.chatgr = chatgr
     },
 
     setMembre(membre) {
@@ -470,9 +499,6 @@ export const useGroupeStore = defineStore('groupe', {
     setMotscles (id, mc) {
     },
 
-    setInvit (ng, na, im, ivpar, dh) { // na du groupe et de l'avatar invité
-      this.invits.set(ng.id + '/' + na.id, {ng, na, im, ivpar, dh})
-    },
 
     clearInvits (id) {
       for (let [cle, val] of this.invits) {

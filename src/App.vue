@@ -141,19 +141,8 @@
       </q-btn>
 
       <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
-        <!-- 
-        ça marche (en utilisant le préchargement dans config)
-        <img :src="session.ok && session.estComptable ? config.iconSuperman : config.logoSvg" 
-          height="32" width="32"/>
-        Mais ça, ça ne marche pas pour SVG en direct dans une expression
-        <img :src="session.ok && session.estComptable ? '~assets/superman.jpg' : '~assets/logo.svg'" 
-          height="32" width="32"/>
-        -->
-        <img v-if="session.ok && session.estComptable" src="~assets/superman.jpg" 
-          height="28" width="28" class="q-pa-none q-mr-sm img" @click="reload"/>
-        <img v-if="session.ok && !session.estComptable" src="~assets/logo.svg" 
-          height="28" width="28"  class="q-pa-none q-mr-sm img bg-white" @click="reload"/>
-
+        <img v-if="session.ok" :src="people.getCV(session.compteId).photo" 
+          height="28" width="28" class="q-pa-none q-mr-sm img"/>
         <span v-if="session.ok" class="titre-lg">{{people.getCV(session.compteId).nom}}</span>
         <span v-else class="titre-md text-italic">{{$t('MLAsfer')}}</span>
         <span v-if="session.org" class="q-ml-md titre-md">[{{session.org}}]</span>

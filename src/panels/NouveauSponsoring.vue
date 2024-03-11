@@ -92,7 +92,7 @@
           <div class="titre-md">{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nom}}</span></div>
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div v-if="!estAutonome">
-            <div class="titre-md">{{$t(estSponsor ? 'compteS' : 'compteO')}}</div>
+            <div class="titre-md">{{$t(estDelegue ? 'compteS' : 'compteO')}}</div>
             <quotasVols class="q-ml-md" :vols="quotas" noutil/>
           </div>
           <div v-else class="text-warning titre-md">
@@ -139,7 +139,7 @@ export default ({
   components: { PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp, QuotasVols },
 
   computed: {
-    estSponsor () { return this.optOSA === 1 },
+    estDelegue () { return this.optOSA === 1 },
     estAutonome () { return this.optOSA === 2}
   },
 
@@ -230,7 +230,7 @@ export default ({
       const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, 
         this.estAutonome ? null : this.tribu.cletX, 
         this.estAutonome ? null : this.tribu.clet, 
-        this.estSponsor, q, this.mot, this.don, this.dconf)
+        this.estDelegue, q, this.mot, this.don, this.dconf)
       try {
         await new AjoutSponsoring().run(row, this.don)
         this.ui.fD()

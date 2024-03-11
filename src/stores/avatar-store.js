@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { hash, egaliteU8, difference, intersection } from '../app/util.mjs'
-import { encode } from '@msgpack/msgpack'
-import { ID, E_WS, AppExc, UNITEN, UNITEV } from '../app/api.mjs'
-import { post } from '../app/net.mjs'
+import { difference, intersection } from '../app/util.mjs'
+import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import { getNg, Motscles } from '../app/modele.mjs'
 
 const fx = [['id', 1],
@@ -54,28 +52,28 @@ export const useAvatarStore = defineStore('avatar', {
         return e ? e.chats.get(ids) : null 
       }
     },
-    
-    /* retourne l'avatar principal du compte actuellement connecté */
-    compte: (state) => { return state.avatarP },
 
-    estSponsor (state) { 
-      const c = state.comptaP
-      return c.estSponsor
-    },
-    estComptable (state) { return ID.estComptable(state.comptaP.id) },
-
-    /* retourne la compta de l'avatar principal du compte actuellement connecté */
-    compta: (state) => { 
-      return state.comptaP 
+    invits (state) {
+      const m = new Map()
+      state.map.forEach(e => {
+        const a = e.avatar
+        if (a) a.invits.forEach((inv, nx) => { m.set(nx, inv) })
+      })
+      return m
     },
 
-    /* retourne la tribu de l'avatar principal du compte actuellement connecté */
-    tribu: (state) => { return state.maptr.get(state.session.tribuId) },
+    getElt: (state) => { return (id) => { return state.map.get(id) } },
 
-    /* retourne la tribu "courante" ou à défaut celle du compte actuellement connecté */
-    tribuC: (state) => { 
-      return state.session.tribuCId ? state.maptr.get(state.session.tribuCId) : state.tribu 
+    // Avatar courant
+    avC (state) { 
+      const e = state.map.get(state.session.avatarId)
+      return e ? e.avatar : null 
     },
+
+    // Element avatar courant
+    eavC (state) { return state.map.get(state.session.avatarId) },
+
+    /*************************************************** */
 
     qv: (state) => {
       const qv = { nc: 0, nn: 0, v2: 0 }
@@ -99,17 +97,6 @@ export const useAvatarStore = defineStore('avatar', {
     occV2: (state) => {
       const c = state.compta.qv
       return (c.q2 * UNITEV) - c.v2
-    },
-
-    // Avatar courant
-    avC (state) { 
-      const e = state.map.get(state.session.avatarId)
-      return e ? e.avatar : null 
-    },
-
-    // Element avatar courant
-    eavC (state) { 
-      return state.map.get(state.session.avatarId)
     },
 
     chatDeAvec: (state) => { return (de, avec) => { 
@@ -222,10 +209,7 @@ export const useAvatarStore = defineStore('avatar', {
       return state.maptr.size
     },
 
-    getElt: (state) => { return (id) => { 
-        return state.map.get(id)
-      }
-    },
+    getElt: (state) => { return (id) => { return state.map.get(id) } },
 
 
 

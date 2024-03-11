@@ -326,7 +326,7 @@ class SB {
     this.g = stores.groupe
     this.n = stores.notes
     this.p = stores.people
-    this.avSt = stores.avstore
+    this.avSt = stores.avnote
 
     this.compte = null
     this.compta = null
@@ -460,14 +460,6 @@ class SB {
           this.p.setPGr(mb.idm, mb.id) }
       }
 
-    if (this.supprAv.size) for(const ida of this.supprAv) {
-      this.a.delAvatar(ida)
-      this.avSt.delNotes(ida, buf)
-    }
-    if (this.supprGr.size) for(const idg of this.supprGr) {
-      this.g.delGroupe(ida)
-      this.avSt.delNotes(idg, buf)
-    }
     if (this.supprMb.size) for(const idg of this.supprMb) {
       for (const ids of this.g.map(idg)) {
         const mbav = this.g.getMembre(idg, ids) // membre AVANT suppression
@@ -475,10 +467,7 @@ class SB {
       }
       this.g.delMembres(idg)
     }
-    if (this.supprAv.size) for(const ida of this.supprAv) {
-      this.a.delAvatar(ida)
-      this.avSt.delNotes(ida, buf)
-    }
+
   }
 }
 
@@ -545,20 +534,25 @@ export async function connexion(phrase, razdb) {
   
   if (razdb && session.synchro && session.nombase)
     await idb.delete(session.nombase)
-  try { await new ConnexionSynchroIncognito().run() } catch (e) { /* */ }
+  try { 
+    const op = await new ConnexionSynchroIncognito()
+    op.run() 
+  } catch (e) { 
+    throw e
+  }
 
 }
 
 /* Opération générique ******************************************/
 export class Operation {
-  constructor (nomop, modeSync) { 
+  constructor (nomop) { 
     this.nom = nomop 
-    this.modeSync = modeSync || false
-    if (!modeSync) {
+    this.modeSync = this.nom.startsWith('Sync')
+    if (!this.modeSync) {
       stores.session.startOp(this)
       this.cancelToken = null
       this.break = false
-      this.nbretry = 0
+      // this.nbretry = 0
     }
   }
 
@@ -567,14 +561,7 @@ export class Operation {
     return $t('OP_' + this.nom) 
   }
 
-  tr (ret) {
-    /*
-    if (!this.dh) this.dh = 0
-    if (this.dh < ret.dh) this.dh = ret.dh
-    return ret
-    */
-  }
-
+  /* A SUPPRIMER ??? */
   async retry () {
     if (this.modeSync) return
     if (this.nbretry++ > 5) 
@@ -585,8 +572,7 @@ export class Operation {
 
   BRK () { 
     if (this.modeSync) return
-    if (this.break) 
-      throw new AppExc(E_BRK, 0)
+    if (this.break) throw new AppExc(E_BRK, 0)
   }
 
   stop () {
@@ -629,7 +615,7 @@ export class Operation {
 
 /* classe OperationS *******************************************************/
 export class OperationS extends Operation {
-  constructor(nomop) { super(nomop, true) }
+  constructor(nomop) { super(nomop) }
 
   /* Chargment en Store des avatars / groupes connus en IDB (avion et synchro).
   Remarque en mode synchro,
@@ -687,9 +673,10 @@ export class OperationS extends Operation {
 
   /* Phase 1 : sync des rows CCEP */
   async phase1 (cnx, ds1, ida) {
+    const session = stores.session
     const args =  { 
-      authData: session.authToken, 
-      dataSync: ds1, optionC: cnx, ida: ida || 0
+      token: session.authToken, 
+      dataSync: ds1.serial, optionC: cnx, ida: ida || 0
     }
     const ret = await post(this, 'Sync', args)
     const ds = new DataSync(ret.dataSync) // Mis à jour par le serveur
@@ -823,9 +810,9 @@ export class OperationS extends Operation {
     mais DataSync n'est retourné qu'à la fin
     */
     while (true) {
-      for(const e of ds.avatars) 
+      for(const [,e] of ds.avatars) 
         if (e.vs !== e.vb) setIda.add(e.id)
-      for(const e of ds.groupes) {
+      for(const [,e] of ds.groupes) {
         if ((e.vs[1] !== e.vb[1]) || (e.vs[2] !== e.vb[2]) || (e.vs[3] !== e.vb[3]))
           setIda.add(e.id)
       }
@@ -834,7 +821,8 @@ export class OperationS extends Operation {
       if (!setIda.size) return ds // YES !!! tous traités
 
       // Traitement du PREMIER ida du set des ida à traiter
-      const ida = new Array(setIda)[0]
+      let ida
+      for(const x of setIda) { ida = x; break }
       setIda.delete(ida)
       const g = ID.estGroupe(ida)
 
@@ -999,8 +987,10 @@ export class ConnexionAvion extends Operation {
 }
 
 /* Connexion à un compte en mode synchro ou incognito *********************************/
-export class ConnexionSynchroIncognito extends Operation {
-  constructor() { super('ConnexionCompte') }
+export class ConnexionSynchroIncognito extends OperationS {
+  constructor() { 
+    super('ConnexionCompte') 
+  }
 
   async run() {
     try {
@@ -1032,7 +1022,7 @@ export class ConnexionSynchroIncognito extends Operation {
       stores.ui.setPage('accueil')
       this.finOK()
     } catch (e) {
-      stores.ui.setPage('login')
+      // stores.ui.setPage('login')
       await this.finKO(e)
     }
   }
@@ -1060,8 +1050,8 @@ export class CreerEspace extends Operation {
 
       const cleP = Cles.partition(1) // clé de la partition 1
       const cleK = random(32) // clé K du Comptable
-      // `{ cleP, code }` crypté par la clé K du comptable
-      const c = { cleP, code: config.nomPartitionPrimitive }
+      const cleE = Cles.espace() // clé de l'espace
+      const cleA = Cles.comptable() // clé A de l'avatar Comptable
 
       const args = {
         token: session.authToken,
@@ -1070,12 +1060,15 @@ export class CreerEspace extends Operation {
         hXR: phrase.hps1,
         hXC: phrase.hpsc,
         cleE: Cles.espace(), // clé de l'espace
+        cleEK: await crypter(cleK, cleE),
         clePK: await crypter(cleK, cleP),
-        cleAP: await crypter(cleP, Cles.comptable()),
-        cleAK: await crypter(cleK, Cles.comptable()),
+        cleAP: await crypter(cleP, cleA),
+        cleAK: await crypter(cleK, cleA),
         cleKXC: await crypter(phrase.pcb, cleK),
         clePA: await crypter(Cles.comptable(), cleP),
-        ck: await crypter(cleK, new Uint8Array(encode(c)))
+        // `{ cleP, code }` crypté par la clé K du comptable
+        ck: await crypter(cleK, 
+          new Uint8Array(encode({ cleP, code: config.nomPartitionPrimitive })))
       }
       await post(this, 'CreerEspace', args)
       this.finOK()
@@ -1170,7 +1163,7 @@ export class AcceptationSponsoring extends Operation {
       const { publicKey, privateKey } = await genKeyPair()
 
       // !!! dans rowCompta: it (indice du compte dans sa tribu) N'EST PAS inscrit
-      // (na, clet, cletX, q1, q2, estSponsor, phrase, nc) - le filleul a 1 chat en ligne
+      // (na, clet, cletX, q1, q2, estDelegue, phrase, nc) - le filleul a 1 chat en ligne
       let { dlv, rowCompta } = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp, session.ns, ps, 1, don)
       // session.clek est fixée
 

@@ -1067,7 +1067,7 @@ export class AcceptationSponsoring extends OperationUI {
       const { publicKey, privateKey } = await genKeyPair()
 
       // !!! dans rowCompta: it (indice du compte dans sa tribu) N'EST PAS inscrit
-      // (na, clet, cletX, q1, q2, estSponsor, phrase, nc) - le filleul a 1 chat en ligne
+      // (na, clet, cletX, q1, q2, estDelegue, phrase, nc) - le filleul a 1 chat en ligne
       let { dlv, rowCompta } = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp, session.ns, ps, 1, don)
       // session.clek est fixée
 
@@ -1277,7 +1277,7 @@ export class CreerEspace extends OperationUI {
       setClet(clet, idt)
 
       const na = NomGenerique.comptable()
-      // static async row (na, clet, cletX, q, estSponsor, phrase, nc)
+      // static async row (na, clet, cletX, q, estDelegue, phrase, nc)
       const { dlv, rowCompta } = await Compta.row(na, clet, null, aco, true, ns, phrase)
       // session.clek est fixée
       const rowTribu = await Tribu.nouvelle(idt, apr, true, aco)

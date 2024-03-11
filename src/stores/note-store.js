@@ -616,11 +616,13 @@ export const useNoteStore = defineStore('note', {
     },
 
     setAvatar (id) { // on ajoute un node pour l'avatar juste à la racine
-      this.setRacine('' + id, 1, na.nom ) // TODO
+      const nom = stores.people.getCV(id).nom
+      this.setRacine('' + id, 1, nom)
     },
 
-    setGroupe (na) { // on ajoute un node pour l'avatar juste à la racine
-      this.setRacine('' + na.id, 2, na.nomc)
+    setGroupe (id) { // on ajoute un node pour le groupe juste à la racine
+      const nomc = stores.people.getCV(id).nomc
+      this.setRacine('' + na.id, 2, nomc)
     },
 
     delAvatar (id) { // TODO
