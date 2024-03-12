@@ -1078,6 +1078,81 @@ export class CreerEspace extends Operation {
   }
 }
 
+/** Ajout d\'un sponsoring ****************************************************
+- `token` : éléments d'authentification du comptable / compte sponsor de sa tribu.
+- id : id du sponsor
+- hYR : hash du PNKFD de la phrase de sponsoring réduite
+- `psK` : texte de la phrase de sponsoring cryptée par la clé K du sponsor.
+- `YCK` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
+- `cleAYC` : clé A du sponsor crypté par le PBKFD de la phrase complète de sponsoring.
+- `partitionId`: id de la partition si compte 0    
+- `cleAP` : clé A du COMPTE sponsor crypté par la clé P de la partition.
+  Permet au serveur de vérifier que le compte est vraiement de cette partition
+  et est délégué.
+- `clePYC` : clé P de sa partition (si c'est un compte "O") cryptée par le PBKFD 
+  de la phrase complète de sponsoring (donne l'id de la partition).
+- `nomYC` : nom du sponsorisé, crypté par le PBKFD de la phrase complète de sponsoring.
+- `cvA` : `{ v, photo, info }` du sponsor, textes cryptés par sa cle A.
+- `ardYC` : ardoise de bienvenue du sponsor / réponse du sponsorisé cryptée par le PBKFD de la phrase de sponsoring.
+
+- `quotas` : `[qc, q1, q2]` pour un compte O, quotas attribués par le sponsor.
+  - pour un compte "A" `[0, 1, 1]`. Un tel compte n'a pas de `qc` et peut changer à loisir
+   `[qn, qv]` qui sont des protections pour lui-même (et fixe le coût de l'abonnement).
+- don: montant du don pour un compte autonome sponsorisé par un compte autonome
+- dconf: true, si le sponsor demande la confidentialité (pas de chat à l'avcceptation)
+- del: true si le compte est délégué de la partition
+Retour:
+*/
+export class AjoutSponsoring extends Operation {
+  constructor () { super('AjoutSponsoring') }
+
+  async run (arg) {
+    /*
+    - pc: phrase de contact,
+    - nom: nom du compte,
+    - `quotas` : `[qc, q1, q2]` quotas attribués par le sponsor.
+      - pour un compte "A" `[0, 1, 1]`. Un tel compte n'a pas de `qc` et peut changer à loisir `[q1, q2]` qui sont des protections pour lui-même (et fixe le coût de l'abonnement).
+    - mot: mot de bienvenue,
+    - don: montant du don pour un compte autonome sponsorisé par un compte autonome
+    - dconf: true, si le sponsor demande la confidentialité (pas de chat à l'avcceptation)
+    - partitionId: id de la partition pour un compte O, sinon c'est un compte A
+    - del: true si le compte est délégué de la partition
+    */
+    try {
+      const session = stores.session
+      const cleA = RegCles.get(session.avatarId)
+      const cleAC = RegCles.get(session.compteId)
+      const cv = stores.people.getCV(session.avatarId)
+      const args = { 
+        token: session.authToken, 
+        id: session.avatarId,
+        hYR: arg.pc.hps1,
+        psK: await crypter(session.clek, arg.pc.phrase),
+        YCK: await crypter(session.clek, arg.pc.pcb),
+        cleAYC : await crypter(arg.pc.pcb, cleA),
+        nomYC: await crypter(arg.pc.pcb, arg.nom),
+        cvA: await cv.crypter(cleA),
+        ardYC: await crypter(arg.pc.pcb, arg.mot),
+        dconf: arg.dconf
+      }
+      if (arg.partitionId) { // compte O
+        const cleP = RegCles.get(arg.partitionId)
+        args.quotas = arg.quotas
+        args.partitionId = arg.partitionId
+        args.del = arg.del
+        args.clePYC = await crypter(arg.pc.pcb, cleP)
+        args.cleAP = await crypter(cleP, cleAC)
+      } else {
+        args.don = arg.don
+      }
+      await post(this, 'AjoutSponsoring', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /*   OP_AcceptationSponsoring: 'Acceptation d\'un sponsoring et création d\'un nouveau compte'
 POST:
 - `token` : éléments d'authentification du compte à créer
@@ -1416,6 +1491,31 @@ export class ProlongerSponsoring extends Operation {
       const args = { token: session.authToken, id: sp.id, ids: sp.ids, dlv }
       await post(this, 'ProlongerSponsoring', args)
       this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Test d\'existence d\'une phrase de connexion / contact / sponsoring ******
+args.ids : hash de la phrase de contact / de connexion
+args.t :
+  - 1 : phrase de connexion(hps1 de compta)
+  - 2 : phrase de sponsoring (ids)
+  - 3 : phrase de contact (hpc d'avatar)
+Retour:
+- existe : true si le hash de la phrase existe
+*/
+export class ExistePhrase extends Operation {
+  constructor () { super('ExistePhrase') }
+
+  async run (hps1, t) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, hps1: hps1, t }
+      const ret = await post(this, 'ExistePhrase' + (t === 1 ? '1' : ''), args)
+      const ex = ret.existe || false
+      return this.finOK(ex)
     } catch (e) {
       await this.finKO(e)
     }

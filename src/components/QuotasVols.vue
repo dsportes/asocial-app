@@ -3,18 +3,18 @@
     <div class="row items-center">
       <span class="text-italic titre-md">{{$t('QVab1')}}</span>
       <span class="q-ml-md fs-md font-mono text-bold">
-        {{'[' + vols.q1 + '] ' + nbn(q1n)}}
+        {{'[' + vols.qn + '] ' + nbn(qnn)}}
       </span>
-      <span v-if="!noutil && q1n" class="fs-md font-mono text-italic q-ml-md">
-        {{ $t('QVut', [pc1]) }}
+      <span v-if="!noutil && qnn" class="fs-md font-mono text-italic q-ml-md">
+        {{ $t('QVut', [pcn]) }}
       </span>
     </div>
     <div class="row items-center">
       <span class="text-italic titre-md">{{$t('QVab2')}}</span>
       <span class="q-ml-md fs-md font-mono text-bold">
-        {{'[' + vols.q2 + '] ' + edvol(q2v)}}
+        {{'[' + vols.qv + '] ' + edvol(qvv)}}
       </span>
-      <span v-if="!noutil && q2v" class="fs-md text-italic font-mono q-ml-md">
+      <span v-if="!noutil && qvv" class="fs-md text-italic font-mono q-ml-md">
         {{$t('QVut', [pc2])}}
       </span>
     </div>
@@ -38,14 +38,14 @@ export default {
   props: { 
     noutil: Boolean, // sans % utilisation
     vols: Object,
-    /* {v1 v2 q1 q2 qc} si estA: qc == 0 */
+    /* {v1 v2 qn qv qc} si estA: qc == 0 */
   },
 
   computed: {
-    q1n () { return this.vols.q1 * UNITEN },
-    q2v () { return this.vols.q2 * UNITEV },
-    pc1 () { return Math.round(this.vols.v1 * 100 / (this.q1n)) },
-    pc2 () { return Math.round(this.vols.v2 * 100 / (this.q2v)) },
+    qnn () { return this.vols.qn * UNITEN },
+    qvv () { return this.vols.qv * UNITEV },
+    pcn () { return Math.round(this.vols.v1 * 100 / (this.qnn)) },
+    pc2 () { return Math.round(this.vols.v2 * 100 / (this.qvv)) },
   },
 
   methods: {

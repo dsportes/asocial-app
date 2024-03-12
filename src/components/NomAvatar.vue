@@ -1,25 +1,27 @@
 <template>
   <q-card-section class="q-pt-none fs-md">
-    <div class="titre-lg">{{$t('NAph' + phase)}}</div>
+    <div class="titre-lg">{{$t('NAph0')}}</div>
     <div v-if="verif">
-      <div class="text-warning">{{$t('NAw1')}}</div>
+      <div class="text-italic titre-sm">{{$t('NAw1')}}</div>
       <div>
         <span class="q-px-sm text-negative bg-yellow text-bold">{{interdits}}</span>
         <span class="q-ml-sm">{{$t('NAw2')}}</span>
       </div>
     </div>
     <q-input dense counter v-model="nom"
-      :label="groupe ? $t('NAng') : (tribu ? $t('NAnt') : $t('NAna'))"
+      :label="groupe ? $t('NAng') : $t('NAna')"
       :rules="[r1,r2]"
       @keydown.enter.prevent="ok" type="text" 
       :hint="nom && r1(nom) && r2(nom) ? $t('NPpe') : $t('NAe1', [min, max])">
       <template v-slot:append>
-        <span :class="nom.length === 0 ? 'disabled' : ''"><q-icon name="cancel" class="cursor-pointer"  @click="nom=''"/></span>
+        <span :class="nom.length === 0 ? 'disabled' : ''">
+          <q-icon name="cancel" class="cursor-pointer"  @click="nom=''"/>
+        </span>
       </template>
     </q-input>
     <div v-if="labelValider" class="row justify-between items-center no-wrap">
       <q-btn flat dense color="primary" icon="close" :label="$t('renoncer')" @click="ko" />
-      <q-btn v-if="phase < 3" color="warning" :label="labelValider" 
+      <q-btn color="primary" :label="labelValider" 
         size="md" :icon="iconValider" padding="xs xs"
         :disable="r1(nom) !== true || r2(nom) !== true" @click="ok" />
     </div>
@@ -37,15 +39,12 @@ export default {
   name: 'NomAvatar',
   props: {
     iconValider: String,
-    verif: Boolean,
     groupe: Boolean,
-    tribu: Boolean,
     labelValider: String,
     initVal: String
   },
   data () {
     return {
-      phase: 0,
       interdits: interdits
     }
   },
@@ -53,34 +52,11 @@ export default {
     r2 (val) { return val.length < min || val.length > max ? this.$t('NAe1', [min, max]) : true },
     r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true },
     ok () {
-      if (this.phase < 2 || this.phase === 3) {
-        this.vnom = this.nom
-        if (this.verif) {
-          this.phase = 2
-          this.nom = ''
-          // this.$emit('ok-nom', null)
-        } else {
-          this.phase = 3
-          this.$emit('ok-nom', this.nom)
-        }
-      } else {
-        if (this.nom === this.vnom) {
-          this.phase = 3
-          this.$emit('ok-nom', this.nom)
-        } else {
-          this.phase = 1
-          // this.$emit('ok-nom', null)
-        }
-      }
+      this.$emit('ok-nom', this.nom)
     },
     ko () {
-      this.raz()
-      this.$emit('ok-nom', null)
-    },
-    raz () {
       this.nom = ''
-      this.vnom = ''
-      this.phase = 0
+      this.$emit('ok-nom', null)
     }
   },
 

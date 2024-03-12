@@ -205,6 +205,14 @@ export class CV {
     const s = '' + this.id
     return this.nom + '#' + s.substring(s.length - 4)
   }
+
+  async crypter(cle) {
+    return {
+      dh: this.dh,
+      photo: this.ph ? await crypter(cle, this.ph) : null,
+      texte: this.tx ? await crypter(cle, this.tx) : '',
+    }
+  }
 }
 
 
@@ -338,7 +346,7 @@ export class Espace extends GenDoc {
     this.creation = row.creation
     this.moisStat = row.moisStat || 0
     this.moisStatT = row.moisStatT || 0
-    this.opt = row.opt || 0
+    this.opt = row.opt || 1 // POUR TEST
     this.dlvat = row.dlvat
     this.nbmi = row.nbmi || 6
     this.t = row.t || 0
@@ -420,6 +428,7 @@ export class Synthese extends GenDoc {
     this.tp[0] = a0 
   }
 
+  /*
   static async nouveau (aco, apr) { 
     const session = stores.session
     const r = { id: session.ns, v: Date.now(), atr: [null, null] }
@@ -438,6 +447,7 @@ export class Synthese extends GenDoc {
     r.atr[1] = new Uint8Array(encode(e))
     return { _nom: 'syntheses', id: r.id, v: r.v, _data_: new Uint8Array(encode(r))}
   }
+  */
 }
 
 /** Partition *********************************
@@ -537,42 +547,8 @@ export class Partition extends GenDoc {
         r.q.pcv = !r.q.qv ? 0 : Math.round(r.q.v * 100 / r.q.qv) 
         this.tcpt[it] = r
       }
-
       // synth : généré localement
-      const r = { notif: this.notif, id: this.id }
-      /* lcSynt = ['qc', 'qn', 'qv', 'ac', 'an', 'av', 'c', 'n', 'v', 
-        'nbc', 'nbd', 'ntr0', 'ntr1', 'ntr2', 'nco0', 'nco1', 'nco2'] */
-      lcSynt.forEach(f => { r[f] = 0 })
-      r.qc = this.qc
-      r.qn = this.qn
-      r.qv = this.qv
-      r.ntr0 = this.notif && this.notif.nr === 0 ? 1 : 0
-      r.ntr1 = this.notif && this.notif.nr === 1 ? 1 : 0
-      r.ntr2 = this.notif && this.notif.nr === 2 ? 1 : 0
-      this.tcpt.forEach(x => {
-        if (x) {
-          r.ac += x.q.qc
-          r.an += x.q.qn
-          r.av += x.q.qv
-          r.c += x.q.c
-          r.n += x.q.n
-          r.v += x.q.v
-          r.nbc++
-          if (x.del) r.nbd++
-          if (x.notif) {
-            if (x.notif.nr === 0) r.nco0++
-            else if (x.notif.nr === 1) r.nco1++
-            else if (x.notif.nr === 2) r.nco2++
-          }
-        }
-      })
-      r.pcac = !r.qc ? 0 : Math.round(r.ac * 100 / r.qc) 
-      r.pcan = !r.qn ? 0 : Math.round(r.an * 100 / r.qn) 
-      r.pcav = !r.qv ? 0 : Math.round(r.av * 100 / r.qv) 
-      r.pcc = !r.qc ? 0 : Math.round(r.c * 100 / r.qc) 
-      r.pcn = !r.qn ? 0 : Math.round(r.n * 100 / r.qn) 
-      r.pcv = !r.qv ? 0 : Math.round(r.v * 100 / r.qv) 
-      this.synth = r
+      this.synth = synthesesPartition(this)
     }
   }
 
@@ -1115,6 +1091,7 @@ _data_:
 - `ardYC` : ardoise de bienvenue du sponsor / réponse du sponsorisé cryptée par le PBKFD de la phrase de sponsoring.
 */
 export class Sponsoring extends GenDoc {
+  get ns () { return ID.ns(this.id) }
 
   /* Par l'avatar sponsor */
   async compile (row) {
@@ -1131,20 +1108,32 @@ export class Sponsoring extends GenDoc {
     this.dconf = row.dconf || false
     this.YC = await decrypter(clek, row.YCK)
     this.ard = await decrypter(this.YC, row.ardYC)
+    this.nom = await decrypter(this.YC, row.nomYC)
+    if (this.estA) {
+      this.cleP = await decrypter(cle, row.clePYC)
+      this.partitionId = Cles.id(cleP, ns)
+    }
   }
 
-  /* Par l'avatar sponsorisé : HORS SESSION */
-  static async compileHS (row, psp) {
-    const cle = psp.pcb
+  /* Par l'avatar sponsorisé : HORS SESSION 
+  Création: await new Sponsoring().compile(decode(row)._data, psp)
+  */
+  async compileHS (row, psp) {
+    this.YC = psp.pcb
+    this.dh = row.dh
+    this.st = row.st
     this.del = row.del || false
     this.quotas = row.quotas
     this.don = row.don || 0
     this.dconf = row.dconf || false
-    this.cleA = await decrypter(cle, row.cleAYC)
+    this.cleA = await decrypter(this.YC, row.cleAYC)
     this.cv = await CV.set(row.cvA, 0, cleA)
     this.estA = !row.clePYC
-    if (this.estA) this.cleP = await decrypter(cle, row.clePYC)
-    this.ard = await decrypter(cle, row.ardYC)
+    if (this.estA) {
+      this.cleP = await decrypter(this.YC, row.clePYC)
+      this.partitionId = Cles.id(cleP, ns)
+    }
+    this.ard = await decrypter(this.YC, row.ardYC)
   }
 
   /* Par le candidat sponsorisé qui connaît la clé X

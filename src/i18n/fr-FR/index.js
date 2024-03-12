@@ -93,7 +93,7 @@ export default {
   auteur: 'Auteur',
   test: 'Test',
   compteO: 'Compte de l\'organisation',
-  compteS: 'Compte sponsor de l\'organisation',
+  compteD: 'Compte délégué de l\'organisation',
   compteA: 'Compte autonome',
   don: 'Don de {0}c',
   don2: 'Don de {0}€',
@@ -376,6 +376,12 @@ export default {
   EX8204: 'Création impossible de l\'espace [{0 / 1}], code d\'organisation déjà attribué.',
   EX8205: 'Données d\'authentification absentes.',
   EX8206: 'Données d\'authentification illisibles (détail: {0})',
+  EX8207: 'Phrase de sponsoring trop proche d\'une phrase existante.',
+  EX8208: 'Partition [{0}] inconnue.',
+  EX8209: 'Compte [{1}] inconnu dans la partition [{0}].',
+  EX8210: 'Compte [{1}] pas délégué de la partition [{0}].',
+  EX8211: 'Quotas non attribués de la partition [{0}] inférieurs aux quotas proposés au compte sponsorisé.',
+  EX8212: 'Le don du sponsor au sponsorisé [{1}] est trop important vis à vis du solde du compte du sponsor [{0}].',
 
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
@@ -1728,15 +1734,11 @@ export default {
   EMOcustom: 'Custom',
 
   // NomAvatar
-  NAw1: 'Ce nom NE POURRA PLUS être changé.',
+  NAw1: 'Le nom est le début de la première ligne du texte de la carte de visite.',
   NAw2: 'et caractères non imprimables (CR TAB ...) interdits.',
   NAng: 'Nom du groupe',
-  NAnt: 'Nom / code de la tranche',
   NAna: 'Nom de l\'avatar',
   NAph0: 'Saisir un nom', 
-  NAph1: 'Saisie non confirmée, re-saisir le nom',
-  NAph2: 'Confirmer le nom',
-  NAph3: 'Nom confirmé',
   NAe1: 'Entre {0} et {1} caractères',
   NAe2: 'Caractères interdits',
   

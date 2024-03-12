@@ -56,8 +56,9 @@
       </div>
     </q-card>
 
-    <!-- Dialogue de création d'un sponsoring -->
-    <nouveau-sponsoring v-if="ui.d.NSnvsp" :tribu="aSt.tribu"/>
+    <!-- Dialogue de création d'un sponsoring 
+    Pour le Comptable, la partition est soit la partition "courante", soit la sienne -->
+    <nouveau-sponsoring v-if="ui.d.NSnvsp" :partition="session.partitionC || session.partition"/>
 
   </q-page>
 </template>

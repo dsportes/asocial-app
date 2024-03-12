@@ -12,7 +12,7 @@
   <q-page-container>
     <q-page :class="dkli(0)">
       <q-stepper v-model="step" vertical color="primary" animated>
-        <q-step v-if="!estA" :name="0" :title="$t('NPprof')" icon="settings" :done="step > 0">
+        <q-step v-if="!session.estA" :name="0" :title="$t('NPprof')" icon="settings" :done="step > 0">
           <div class="q-my-sm">
             <q-option-group :options="optionsOSA" type="radio" dense v-model="optOSA" />
           </div>
@@ -26,7 +26,7 @@
           </q-stepper-navigation>
         </q-step>
 
-        <q-step v-if="estA" :name="1" :title="$t('NPprof')" icon="settings" :done="step > 1">
+        <q-step v-if="session.estA" :name="1" :title="$t('NPprof')" icon="settings" :done="step > 1">
           <div class="q-my-sm">
             <q-option-group :options="optionsDon" type="radio" dense v-model="optDon" />
           </div>
@@ -43,7 +43,7 @@
               :init-val="pc && pc.phrase ? pc.phrase : ''"/>
           </div>
           <q-stepper-navigation>
-            <q-btn :label="$t('precedent')" @click="step = estA ? 1 : 0"
+            <q-btn :label="$t('precedent')" @click="step = session.estA ? 1 : 0"
               flat  color="primary" padding="none" dense size="md"/>
             <!--q-btn flat @click="step = 3" color="primary" padding="none" dense size="md"
               :label="$t('suivant')" :disable="!pc || !pc.phrase"
@@ -92,8 +92,8 @@
           <div class="titre-md">{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nom}}</span></div>
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div v-if="!estAutonome">
-            <div class="titre-md">{{$t(estDelegue ? 'compteS' : 'compteO')}}</div>
-            <quotasVols class="q-ml-md" :vols="quotas" noutil/>
+            <div class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO')}}</div>
+            <quotas-vols class="q-ml-md" :vols="quotas" noutil/>
           </div>
           <div v-else class="text-warning titre-md">
             <span>{{$t('compteA')}}</span>
@@ -101,7 +101,7 @@
             <span v-if="dconf" class="q-ml-sm">{{$t('conf')}}</span>
           </div>
           <q-stepper-navigation class="row items-center q-gutter-sm q-mt-md">
-            <q-btn flat @click="step = this.estAutonome ? 4 : 5" color="primary" padding="xs" dense size="md"
+            <q-btn flat @click="step = estAutonome ? 4 : 5" color="primary" padding="xs" dense size="md"
               :label="$t('corriger')"/>
             <q-btn @click="confirmer" color="warning" padding="xs" dense size="md"
               :label="$t('confirmer')" icon="check" />
@@ -127,14 +127,15 @@ import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { AjoutSponsoring, ExistePhrase } from '../app/operations.mjs'
+import { AjoutSponsoring } from '../app/operations.mjs'
+import { ExistePhrase } from '../app/synchro.mjs'
 
 export default ({
   name: 'NouveauSponsoring',
 
-  /* La tribu est nécessaire pour une action du Comptable
-  qui lui peut choisir la tribu du sponsorisé */
-  props: { tribu: Object },
+  /* La partition est nécessaire pour une action du Comptable
+  qui lui peut choisir la partition du sponsorisé */
+  props: { partition: Object },
 
   components: { PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp, QuotasVols },
 
@@ -200,8 +201,7 @@ export default ({
       this.step = 3
     },
     async setDon () {
-      const credits = this.aSt.compta.credits
-      const total = credits && credits.total ? credits.total : 0
+      const total = this.session.compta.total || 0
       this.don = this.optDon
       if (total - this.don <= 0) {
         await afficherDiag($t('NPcred', [total, this.don]))
@@ -223,16 +223,26 @@ export default ({
       }
     },
     async confirmer () {
-      // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) {
+      // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) { pc, nom, estAutonome, estDelegue, quotas, mot, don, dconf
       const q = this.estAutonome ? [0, 1, 1] : [this.quotas.qc, this.quotas.q1, this.quotas.q2]
-      const dlv = AMJ.amjUtcPlusNbj(AMJ.amjUtc(), this.limj)
+      
       // (phrase, dlv, nom, cletX, clet, sp, quotas, ard)
       const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, 
-        this.estAutonome ? null : this.tribu.cletX, 
-        this.estAutonome ? null : this.tribu.clet, 
+        this.estAutonome ? null : this.partition.cletX, 
+        this.estAutonome ? null : this.partition.clet, 
         this.estDelegue, q, this.mot, this.don, this.dconf)
       try {
-        await new AjoutSponsoring().run(row, this.don)
+        const args = {
+          pc: this.pc,
+          nom: this.nom,
+          estAutonome: this.estAutonome,
+          estDelegue: this.estDelegue,
+          quotas: this.quotas,
+          mot: this.mot,
+          don: this.don, 
+          dconf: this.dconf
+        }
+        await new AjoutSponsoring().run(args)
         this.ui.fD()
       } catch {}
     }
@@ -243,10 +253,6 @@ export default ({
     const ui = stores.ui
     const session = stores.session
     const accepteA = session.espace.opt > 0
-    const aSt = stores.avatar
-    const c = aSt.compta
-    const estA = ref(c.estA)
-    const estS = ref(c.sp)
 
     const limj = limitesjour.sponsoring
     const step4 = ref(null)
@@ -255,7 +261,7 @@ export default ({
     const step = ref(0)
     const optionsOSA = [
       { label: $t('compteO'), value: 0 },
-      { label: $t('compteS'), value: 1 }
+      { label: $t('compteD'), value: 1 }
     ]
     const optOSA = ref(0)
     const optionsDon = [ ]
@@ -265,7 +271,7 @@ export default ({
 
     const quotas = ref(null)
 
-    if (estA.value) {
+    if (session.estA) {
       step.value = 1
       optOSA.value = 2
       optDon.value = optionsDon[0].value
@@ -273,23 +279,20 @@ export default ({
       step.value = 0
       if (accepteA) optionsOSA.push({ label: $t('compteA'), value: 2 })
       optOSA.value = 0
-      const tribu = toRef(props, 'tribu')
-      const cpt = tribu.value.synth
-      quotas.value = { qc: 1, q1: 1, q2: 1, 
-        max1: cpt.q1 > cpt.a1 ? cpt.q1 - cpt.a1 : 0, 
-        max2: cpt.q2 > cpt.a2 ? cpt.q2 - cpt.a2 : 0,
+      const partition = toRef(props, 'partition')
+      const cpt = partition.value.synth
+      quotas.value = { qc: 1, qn: 1, qv: 1, 
+        maxn: cpt.qn > cpt.an ? cpt.qn - cpt.an : 0, 
+        maxv: cpt.qv > cpt.av ? cpt.qv - cpt.an : 0,
         maxc: cpt.qc > cpt.ac ? cpt.qc - cpt.ac : 0,
-        min1: 1, min2: 0, minc: 1 }
+        minn: 1, minv: 0, minc: 1 }
     }
 
     return {
-      ui, dkli, styp, aSt,
+      ui, dkli, styp,
       limj,
-      step,
-      step4,
-      step2,
-      step3,
-      optionsOSA, optOSA, estA, estS, optionsDon, optDon,
+      step, step4, step2, step3,
+      optionsOSA, optOSA, optionsDon, optDon,
       session: stores.session,
       quotas
     }

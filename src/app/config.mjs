@@ -16,19 +16,6 @@ export const config = {
 
   silence: true,
   
-  motscles: { 
-    '255': { 'fr-FR': 'Statut/Nouveau', 'en-EN': 'Status/New' },
-    '254': { 'fr-FR': 'Visibilité/Liste noire', 'en-EN': 'Visibility/Black List' },
-    '253': { 'fr-FR': 'Compte/Sponsorisé', 'en-EN': 'Account/Sponsored' },
-    '252': { 'fr-FR': 'Compte/Sponsor', 'en-EN': 'Account/Sponsor' },
-    '251': { 'fr-FR': 'Visibilité/Favori', 'en-EN': 'Visibility/Favorite' },
-    '250': { 'fr-FR': 'Visibilité/Important', 'en-EN': 'Visibility/Important' },
-    '249': { 'fr-FR': 'Visibilité/Obsolète', 'en-EN': 'Visibility/Deprecated' },
-    '248': { 'fr-FR': 'Visibilité/A lire', 'en-EN': 'Visibility/To Read' },
-    '247': { 'fr-FR': 'Visibilité/A traiter', 'en-EN': 'Visibility/To Do' },
-    '246': { 'fr-FR': 'Visibilité/Poubelle', 'en-EN': 'Visibility/Trash' }
-  },
-
   /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
   // En test pour éviter de frapper les "phrases secrètes" de test
   phrases: [
