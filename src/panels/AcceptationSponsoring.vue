@@ -16,38 +16,36 @@
         <span class="q-ml-sm font-mono text-bold fs-md">{{pc.phrase}}</span>
       </div>
       <div class="titre-md">{{$t('NPdlv')}}
-        <span class="q-ml-sm font-mono text-bold fs-md">{{dlved(sp)}}</span>
+        <span class="q-ml-sm font-mono text-bold fs-md">{{AMJ.editDeAmj(sp.dlv)}}</span>
       </div>
       <div class="titre-md">{{$t('NPnom')}}
-        <span class="text-bold font-mono q-px-md">{{sp.naf.nom}}</span>
+        <span class="text-bold font-mono q-px-md">{{sp.cv.nom}}</span>
       </div>
       <div class="q-mt-md titre-md">{{$t('NPsponsor')}}</div>
       <div class="row items-start">
-        <img class="photomax col-auto q-mr-sm" :src="photoP" />
+        <img class="photomax col-auto q-mr-sm" :src="sp.cv.photo" />
         <div class="col column">
           <div>
-            <span class="text-bold fs-md q-mr-sm">{{sp.na.nom}}</span> 
-            <span class="text-bold fs-sm font-mono q-mr-sm">#{{sp.na.id}}</span> 
+            <span class="text-bold fs-md q-mr-sm">{{sp.cv.nomc}}</span> 
+            <span class="text-bold fs-sm font-mono q-mr-sm">#{{sp.cv.id}}</span> 
           </div>
-          <show-html v-if="sp.na.info" class="q-my-xs border1" zoom maxh="4rem" :texte="infoP"/>
+          <show-html v-if="sp.cv.texte" class="q-my-xs border1" zoom maxh="4rem" :texte="sp.cv.texte"/>
           <div v-else class="text-italic">{{$t('FAnocv')}}</div>
         </div>
       </div>
 
-      <div v-if="estA" class="text-warning titre-md text-bold">
+      <div v-if="sp.estA" class="text-warning titre-md text-bold">
         <span>{{$t('compteA')}}</span>
         <span v-if="sp.don" class="q-ml-sm">{{$t('NPdon', [sp.don])}}</span>
         <span v-if="sp.dconf" class="q-ml-sm">{{$t('conf')}}</span>
       </div>
-      <div v-else> 
-        <div v-if="sp.sp" class="titre-md text-warning">
-          {{$t('NPspons', [ID.court(idtr)])}}
-        </div>
-        <span v-else class="titre-md">{{$t('compteO')}}</span>
+
+      <div :class="'titre-md ' + (sp.del ? 'text-warning' : 'text.primary')">
+        {{$t(sp.del ? 'compteD' : 'compteO', [ID.court(sp.partitionId)])}}
       </div>
 
       <div class="titre-md">{{$t('NPquo')}}</div>
-      <quotas-vols class="q-ml-md" :vols="quotas" noutil/>
+      <quotas-vols class="q-ml-md" :vols="sp.quotas" noutil/>
 
       <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
       <show-html class="q-mb-xs border1" zoom maxh="4rem" :texte="sp.ard"/>
@@ -62,11 +60,8 @@
       <q-separator color="orange" class="q-my-md"/>
 
       <div v-if="accdec===1 && ps">
-        <div v-if="estA">
-          <div v-if="sp.dconf" class="text-bold titre-md">{{$t('APAcf1')}}</div>
-          <q-checkbox v-else class="titre-md text-bold" size="md" dense 
-              left-label v-model="dconf" :label="$t('APAcf2')" />
-        </div>
+        <q-checkbox v-if="!sp.dconf" class="titre-md text-bold" size="md" dense 
+            left-label v-model="dconf" :label="$t('APAcf2', [sp.cv.nom])" />
         <div class="titre-md q-mt-sm">{{$t('NPmota')}}</div>
         <editeur-md mh="10rem" v-model="texte" :texte="textedef" editable modetxt/>
         <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
@@ -91,55 +86,49 @@
 </template>
 
 <script>
+// import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
-import { AcceptationSponsoring, RefusSponsoring } from '../app/synchro.mjs'
-import { ExistePhrase } from '../app/operations.mjs'
+import { AcceptationSponsoring, RefusSponsoring, ExistePhrase } from '../app/synchro.mjs'
 import QuotasVols from '../components/QuotasVols.vue'
 import { styp, dhcool } from '../app/util.mjs'
 import { AMJ, ID, d14 } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { crypter } from '../app/webcrypto.mjs'
-import { Tribu } from '../app/modele.mjs'
 
 export default ({
   name: 'AcceptationSponsoring',
 
-  props: { sp: Object, pc: Object },
+  props: { sp: Object, pc: Object, org: String },
   /*
   pc : objet Phrase
   sp : objet Sponsoring décodé
-    - id
-    - org
-    - ids
-    - `ard`: ardoise.
-    - 'dlv': 
-    - `na` : du sponsor P.
-    - `cv` : du sponsor P.
-    - `naf` : na attribué au filleul.
-    - `clet` : clé de sa tribu.
-    - 'cletX' : clé de sa tribu cryptée par la clé K du comptable
-    - 'quotas' : [qc, q1, q2]
-    - `sp` : vrai si le filleul est lui-même sponsor (créé par le Comptable, le seul qui peut le faire).
-    - 'idcsp': id du COMPTE de l'avatar sponsor
-    - 'don': don attribué par un sponsor A
-    - 'dconf': don confidentiel demandé par le sponsor
-- `quotas` : `[v1, v2]` quotas attribués par le parrain.
+    this.vsh = row.vsh || 0
+    this.st = row.st
+    this.dh = row.dh
+    this.partitionId = row.partitionId || 0
+    this.estA = !this.partitionId
+    this.nom = await decrypterStr(this.YC, row.nomYC)
+    this.del = row.del || false
+    this.quotas = row.quotas
+    this.don = row.don || 0
+    this.dconf = row.dconf || false
+    this.ard = await decrypterStr(this.YC, row.ardYC)
+    if (this.estA) this.cleP = await decrypter(this.YP, row.clePYC)
+    this.id = row.id
+    this.ids = row.ids
+    this.v = row.v
+    this.dlv = row.dlv
+    this.YC = psp.pcb
+    await this.comp(row)
+    this.cleA = await decrypter(this.YC, row.cleAYC)
+    this.cv = await CV.set(row.cvA, 0, cleA)
   */
 
   components: { EditeurMd, ShowHtml, BoutonHelp, QuotasVols },
 
   computed: {
-    estA () { return !this.sp.clet },
-    quotas () { const q = this.sp.quotas; return { qc: q[0], q1: q[1], q2: q[2]}},
-    photoP () { return this.sp.cv && this.sp.cv.photo ? this.sp.cv.photo : this.sp.na.defIcon },
-    infoP () { return this.sp.cv && this.sp.cv.info ? this.sp.cv.info : '' },
-    estpar () { return this.sp.sp },
-    textedef () { return this.$t('merci', [this.sp.na.nom]) },
-    valid () { return this.sp.dlv},
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    idtr () { return Tribu.id(this.sp.clet) },
+    textedef () { return this.$t('merci', [this.sp.cv.nom]) }
   },
 
   data () {
@@ -163,7 +152,7 @@ export default ({
         this.ui.ps = {
           labelValider: 'ok',
           verif: true,
-          orgext: this.sp.org,
+          orgext: this.org,
           ok: this.okps,
           initVal: this.ps ? this.ps.phrase : ''
         }
@@ -173,7 +162,6 @@ export default ({
   },
 
   methods: {
-    dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
     fermer () {
       this.texte = ''
@@ -196,14 +184,11 @@ export default ({
       }
     },
     async confirmer () {
-      const ardx = await crypter(this.pc.pcb, this.texte)
-      await new AcceptationSponsoring()
-        .run(this.sp, ardx, this.texte, this.sp.ard, this.ps, this.sp.don, this.dconf)
+      await new AcceptationSponsoring().run(this.org, this.sp, this.texte, this.ps, this.dconf)
       this.fermer()
     },
     async refuser () {
-      const ardx = await crypter(this.pc.pcb, this.texte)
-      await new RefusSponsoring().run(this.sp, ardx)
+      await new RefusSponsoring().run(this.sp, this.texte)
       this.fermer()
     }
   },
@@ -213,7 +198,8 @@ export default ({
     // const sp = toRef(props, 'sp')
     // const pc = toRef(props, 'pc')
     return {
-      ui, ID, styp
+      ui, ID, styp, AMJ,
+      pSt: stores.people
     }
   }
 })

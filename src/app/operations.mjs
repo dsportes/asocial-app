@@ -277,24 +277,6 @@ export class AjoutSponsoring extends Operation {
   }
 }
 
-/** Chercher Sponsoring ****************************************************
-args.token: éléments d'authentification du compte.
-args.rowSponsoring : row Sponsoring, sans la version
-Retour:
-*/
-export class ChercherSponsoring extends Operation {
-  constructor () { super('ChercherSponsoring') }
-
-  async run (org, hps1) {
-    try {
-      const ret = this.tr(await post(this, 'ChercherSponsoring', { org, hps1 }))
-      return this.finOK(ret)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* Mise en état "passif" d\'un chat
 Nombre de chat - 1, items vidé
 POST:

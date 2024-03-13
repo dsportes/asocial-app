@@ -1184,39 +1184,81 @@ Assertions:
 export class AcceptationSponsoring extends Operation {
   constructor() { super('AcceptationSponsoring') }
 
-  async run(sp, ardx, txt1, txt2, ps, don, dconf) {
-    /* sp : objet Sponsoring
-    - id ids : identifiant
-    - `ard`: ardoise.
-    - 'dlv': 
-    - 'sp': est sponsor
-    - `na` : du sponsor P.
-    - `cv` : du sponsor P.
-    - `naf` : na attribué au filleul.
-    - 'cletX' : cle de sa tribu cryptée par clé K du comptable
-    - `clet` : cle de sa tribu. 0 pour compte A
-    - 'don' : don du sponsor
-    - 'dconf' : confidentialité requise par le sponsor
-    ardx : texte du sponsorisé crypté par la cleX du sponsoring
-    txt1 : texte du sponsor
-    txt2 : texte du sponsorisé
-    ps : phrase secrète du nouveau compte
-    don : montant du don
-    dconf: si true le sponsorisé refuse le chat
+  async run(org, sp, texte, ps, dconf) {
+    /* 
+    texte: réponse du sponsorisé
+    ps: sa phrase secrète
+    dconf: refuse le chat
+    sp: sponsoring
+      pc : objet Phrase
+      sp : objet Sponsoring décodé
+      this.vsh = row.vsh || 0
+      this.st = row.st
+      this.dh = row.dh
+      this.partitionId = row.partitionId || 0
+      this.estA = !this.partitionId
+      this.nom = await decrypterStr(this.YC, row.nomYC)
+      this.del = row.del || false
+      this.quotas = row.quotas
+      this.don = row.don || 0
+      this.dconf = row.dconf || false
+      this.ard = await decrypterStr(this.YC, row.ardYC)
+      if (this.estA) this.cleP = await decrypter(this.YP, row.clePYC)
+      this.id = row.id
+      this.ids = row.ids
+      this.v = row.v
+      this.dlv = row.dlv
+      this.YC = psp.pcb
+      await this.comp(row)
+      this.cleA = await decrypter(this.YC, row.cleAYC)
+      this.cv = await CV.set(row.cvA, 0, cleA)
     */
     try {
-      /*
-      // LE COMPTE EST CELUI DU FILLEUL
+      /* LE COMPTE EST CELUI DU FILLEUL
+      Info pour création:
+      - calculé sur serveur: it rdsav
+      - depuis sp sur serveur: 
+        - idp del quotas don csp (id compte sponsor)
+      - d'un compte (et son versions) avec ou sans don
+        - id, hXR, hXC, cleKXC, rdsav, cleAK, o, quotas
+        - o : clePA rdsp idp del it
+      - de son compta (quotas)
+      - son inscription éventuelle dans sa partition
+        - cleAP del q (`qc qn qv c n v`)
+      - son avatar (et son versions)
+      - un double chat
+      - la mise à jour du sponsoring
+        - st ard
+      */
+      const ns = ID.ns(sp.id)
+      const clek = random(32) // du compte
+      const cleA = Cles.avatar()
+      const id = Cles.id(cleA, ns)
+  
       const session = stores.session
-      session.setOrg(sp.org)
+      session.setOrg(org)
       await session.initSession(ps)
-      await session.setIdCleK(sp.id, random(32)) 
+      // Reset après ça, dont RegCles (mais pas session)
+      await session.setIdCleK(id, clek)
+      RegCles.set(cleA)
+      
+      const args = {
+        // token: session.authToken,
+        id,
+        hXR: ps.hps1,
+        hXC: ps.hpsc,
+        cleKXC: await crypter(ps.pcb, clek),
+        cleAK: await crypter(clek, cleA)
+      }
+      if (!sp.estA) {
+        RegCles.set(sp.cleP)
+        args.clePA = await crypter(cleA, sp.cleP)
+        args.cleAP = await crypter(sp.cleP, cleA)
+      }
 
-      this.auj = AMJ.amjUtc()
-      this.buf = new IDBbuffer()
-      this.dh = 0
-
+      // double chat 
       // await crypter(ps.pcb, session.clek)
+      /*
       const aSt = stores.avatar
 
       const rowEspace = await new GetEspace().run()
@@ -1515,6 +1557,26 @@ export class ExistePhrase extends Operation {
       const ret = await post(this, 'ExistePhrase' + (t === 1 ? '1' : ''), args)
       const ex = ret.existe || false
       return this.finOK(ex)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/** Chercher Sponsoring ****************************************************
+args.token: éléments d'authentification du compte.
+args.org : organisation
+args.hps1 : hash du PBKFD de la phrase de contact réduite
+Retour:
+- rowSponsoring s'il existe
+*/
+export class ChercherSponsoring extends Operation {
+  constructor () { super('ChercherSponsoring') }
+
+  async run (org, hps1) {
+    try {
+      const ret = await post(this, 'ChercherSponsoring', { org, hps1 })
+      return this.finOK(ret)
     } catch (e) {
       await this.finKO(e)
     }

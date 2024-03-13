@@ -58,10 +58,9 @@ import { ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { afficherDiag } from '../app/util.mjs'
-import { connexion } from '../app/synchro.mjs'
+import { connexion, ChercherSponsoring } from '../app/synchro.mjs'
 import { Sponsoring, RegCles } from '../app/modele.mjs'
-import { ChercherSponsoring } from '../app/operations.mjs'
-import { AMJ, ID, isAppExc } from '../app/api.mjs'
+import { AMJ, ID } from '../app/api.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../panels/AcceptationSponsoring.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -106,25 +105,23 @@ export default {
       this.pc = pc
       this.org = pc.org
       try {
-        /* Recherche sponsoring ******
-        args.ids : hash de la phrase de contact
-        Retour:
-        - rowSponsoring s'il existe
-        */
+        /* Recherche sponsoring *******/
         RegCles.reset()
         stores.reset(true)
         const res = await new ChercherSponsoring().run(this.org, this.pc.hps1)
-        if (isAppExc(res) || !res || !res.rowSponsoring) {
+        if (!res || !res.rowSponsoring) {
           await afficherDiag(this.$t('LOGnopp'))
           this.raz()
           return
         }
         try {
-          const sp = res.rowSponsoring
+          const row = res.rowSponsoring
           const session = stores.session
-          session.setNs(ID.ns(sp.id))
-          this.sp = await Sponsoring.fromRow(sp, this.pc.pcb)
-          if (isAppExc(this.sp) || this.sp.dlv <  AMJ.amjUtc()) {
+          session.setOrg(this.org)
+          session.setNs(ID.ns(row.id))
+          this.sp = new Sponsoring()
+          await this.sp.compileHS(row, this.pc.pcb)
+          if (this.sp.dlv <  AMJ.amjUtc()) {
             await afficherDiag(this.$t('LOGppinv'))
             this.raz()
             return                  

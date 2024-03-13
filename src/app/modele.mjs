@@ -152,7 +152,7 @@ export class Qui {
 
 /* class CV : Carte de Visite ****************************************
 Création: await CV.set(cv, id (, cle)) => objet CV
-cv : { dh, photo, texte}
+cv : { id, dh, photo, texte}
 id : id du propriétaire (avatar ou groupe)
 */
 export class CV {
@@ -171,6 +171,11 @@ export class CV {
   }
 
   static fake (id) { const c = new CV; c.id = id; c.fake = true; return c}
+
+  constructor (id, dh, photo, texte) {
+    this.id = id; this.dh = dh || 0; 
+    this.photo = photo || null; this.texte = texte || ''
+  }
 
   store () { stores.people.setCV(this); return this }
 
@@ -209,6 +214,7 @@ export class CV {
 
   async crypter(cle) {
     return {
+      id: this.id,
       dh: this.dh,
       photo: this.ph ? await crypter(cle, this.ph) : null,
       texte: this.tx ? await crypter(cle, this.tx) : '',
@@ -1086,7 +1092,7 @@ _data_:
 - `clePYC` : clé P de sa partition (si c'est un compte "O") cryptée par le PBKFD de la phrase complète de sponsoring (donne le numéro de partition).
 - `nomYC` : nom du sponsorisé, crypté par le PBKFD de la phrase complète de sponsoring.
 - `del` : `true` si le sponsorisé est délégué de sa partition.
-- `cvA` : `{ v, photo, info }` du sponsor, textes cryptés par sa cle A.
+- `cvA` : CV du sponsor, textes cryptés par sa cle A.
 - `quotas` : `[qc, q1, q2]` quotas attribués par le sponsor.
   - pour un compte "A" `[0, 1, 1]`. Un tel compte n'a pas de `qc` et peut changer à loisir `[q1, q2]` qui sont des protections pour lui-même (et fixe le coût de l'abonnement).
 - `don` : pour un compte autonome, montant du don.
@@ -1097,7 +1103,7 @@ _data_:
 export class Sponsoring extends GenDoc {
   get ns () { return ID.ns(this.id) }
 
-  /* Par l'avatar sponsor */
+  /* commun */
   async comp (row) {
     this.vsh = row.vsh || 0
     this.st = row.st
@@ -1110,7 +1116,7 @@ export class Sponsoring extends GenDoc {
     this.don = row.don || 0
     this.dconf = row.dconf || false
     this.ard = await decrypterStr(this.YC, row.ardYC)
-    if (this.estA) this.cleP = await decrypter(this.YP, row.clePYC)
+    if (!this.estA) this.cleP = await decrypter(this.YP, row.clePYC)
   }
 
   /* Par l'avatar sponsor */
@@ -1123,17 +1129,18 @@ export class Sponsoring extends GenDoc {
   }
 
   /* Par l'avatar sponsorisé : HORS SESSION 
-  Création: await new Sponsoring().compileHS(decode(row)._data, psp)
+  Création: await new Sponsoring().compileHS(row, psp)
   */
-  async compileHS (row, psp) {
+  async compileHS (rowSp, cle) {
+    const row = decode(rowSp._data_)
     this.id = row.id
     this.ids = row.ids
     this.v = row.v
     this.dlv = row.dlv
-    this.YC = psp.pcb
+    this.YC = cle
     await this.comp(row)
     this.cleA = await decrypter(this.YC, row.cleAYC)
-    this.cv = await CV.set(row.cvA, 0, cleA)
+    this.cv = await CV.set(row.cvA, 0, this.cleA)
   }
 
   /* Par le candidat sponsorisé qui connaît la clé X

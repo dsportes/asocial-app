@@ -92,7 +92,7 @@ export default {
   animateur: 'Animateur',
   auteur: 'Auteur',
   test: 'Test',
-  compteO: 'Compte de l\'organisation, partition #{0}.',
+  compteO: 'Compte de l\'organisation rattaché à la partition #{0}.',
   compteD: 'Compte de l\'organisation, DÉLÉGUÉ par le Comptable pour la partition #{0}.',
   compteA: 'Compte autonome',
   don: 'Don de {0}c',
@@ -510,7 +510,6 @@ export default {
   NPst2: 'Proposition acceptée {0}',
   NPst3: 'Proposition annulée par l\'avatar sponsor {0}',
   NPnom: 'Nom de l\'avatar sponsorisé:',
-  NPdel: 'Compte délégué de la partition #{0}',
   NPsponsA: 'Compte sponsor',
   NPsponsor: 'Sponsor du compte:',
   NPacc: 'J\'accepte',
@@ -1761,8 +1760,7 @@ export default {
   APAconf: 'Confirmer la création du compte',
   APAdec: 'Remerciement et explication : pourquoi je décline la proposition',
   APAdec2: 'Décliner définitivement ce sponsoring',
-  APAcf1: 'Le sponsor a demandé à ne pas établir de chat avec vous (ce sponsoring ne laissera pas de trace).',
-  APAcf2: 'Ne pas conserver de lien avec le sponsor (pas de chat)', 
+  APAcf2: 'Ne pas ouvrir de "chat" avec {0}', 
 
   // Aperçu notification
   ANro1: 'L\'Administrateur ne peut éditer qu\'une notification globale',
