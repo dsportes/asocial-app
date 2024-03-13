@@ -15,7 +15,7 @@
         {{'[' + vols.qv + '] ' + edvol(qvv)}}
       </span>
       <span v-if="!noutil && qvv" class="fs-md text-italic font-mono q-ml-md">
-        {{$t('QVut', [pc2])}}
+        {{$t('QVut', [pcv])}}
       </span>
     </div>
     <div v-if="vols.qc" class="row items-center">
@@ -38,14 +38,14 @@ export default {
   props: { 
     noutil: Boolean, // sans % utilisation
     vols: Object,
-    /* {v1 v2 qn qv qc} si estA: qc == 0 */
+    /* {qn qv qc v n} si estA: qc == 0 */
   },
 
   computed: {
     qnn () { return this.vols.qn * UNITEN },
     qvv () { return this.vols.qv * UNITEV },
-    pcn () { return Math.round(this.vols.v1 * 100 / (this.qnn)) },
-    pc2 () { return Math.round(this.vols.v2 * 100 / (this.qvv)) },
+    pcn () { return Math.round(this.vols.n * 100 / (this.qnn)) },
+    pcv () { return Math.round(this.vols.v * 100 / (this.qvv)) },
   },
 
   methods: {

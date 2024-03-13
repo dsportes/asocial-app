@@ -1,7 +1,7 @@
 <template>
   <q-card-section class="q-pt-none fs-md">
     <div class="titre-lg">{{$t('NAph0')}}</div>
-    <div v-if="verif">
+    <div>
       <div class="text-italic titre-sm">{{$t('NAw1')}}</div>
       <div>
         <span class="q-px-sm text-negative bg-yellow text-bold">{{interdits}}</span>

@@ -8,8 +8,7 @@ import { afficherDiag, $t, random } from './util.mjs'
 import { idb, IDBbuffer } from './db.mjs'
 import { DataSync, appexc, ID, Rds, Cles, d14 } from './api.mjs'
 import { post } from './net.mjs'
-import { CV, compile } from './modele.mjs'
-import { closeWS } from './ws.mjs'
+import { CV, compile, RegCles } from './modele.mjs'
 import { crypter } from './webcrypto.mjs'
 
 /* classe Queue ***********************************************************/
@@ -409,7 +408,7 @@ class SB {
     }
 
     if (this.notes.size) 
-      for(const n of this.notes) { 
+      for(const [,n] of this.notes) { 
         const st = ID.estGroupe(n.id) ? this.g : this.a
         if (n._zombi) {
           this.n.delNote(n.id, n.ids)
@@ -423,7 +422,7 @@ class SB {
       }
     
     if (this.chats.size) 
-      for(const ch of this.chats) {
+      for(const [,ch] of this.chats) {
         if (ch._zombi) {
           const chav = this.a.getChat(x.id, x.ids) // chat AVANT suppression
           if (chav) {
@@ -437,19 +436,19 @@ class SB {
       }
     
     if (this.sponsorings.size) 
-      for(const x of this.sponsorings) {
+      for(const [,x] of this.sponsorings) {
         if (x._zombi) this.a.delSponsoring(x.id, x.ids)
         else this.a.setSponsoring(x)
       }
     
     if (this.tickets.size)
-      for(const x of this.tickets) {
+      for(const [,x] of this.tickets) {
         if (x._zombi) this.a.delTicket(x.id, x.ids)
         else this.a.setTicket(x)
       }
 
     if (this.membres.size) 
-      for(const mb of this.membres) {
+      for(const [,mb] of this.membres) {
         if (mb._zombi) { 
           const mbav = this.g.getMembre(mb.id, mb.ids) // membre AVANT suppression
           this.g.delMembre(mb.id, mb.ids)
@@ -1062,7 +1061,7 @@ export class CreerEspace extends Operation {
         cleE: Cles.espace(), // clé de l'espace
         cleEK: await crypter(cleK, cleE),
         clePK: await crypter(cleK, cleP),
-        cleAP: await crypter(cleP, cleA),
+        cleAP: await crypter(cleP, cleA, 1),
         cleAK: await crypter(cleK, cleA),
         cleKXC: await crypter(phrase.pcb, cleK),
         clePA: await crypter(Cles.comptable(), cleP),
@@ -1141,7 +1140,7 @@ export class AjoutSponsoring extends Operation {
         args.partitionId = arg.partitionId
         args.del = arg.del
         args.clePYC = await crypter(arg.pc.pcb, cleP)
-        args.cleAP = await crypter(cleP, cleAC)
+        args.cleAP = await crypter(cleP, cleAC, 1)
       } else {
         args.don = arg.don
       }

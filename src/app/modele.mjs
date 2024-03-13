@@ -3,7 +3,8 @@ import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, dhcool, hash, rnd6, inverse, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA } from './webcrypto.mjs'
-import { Rds, ID, Cles, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, lcSynt, FLAGS } from './api.mjs'
+import { Rds, ID, Cles, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, 
+  lcSynt, synthesesPartition, FLAGS } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { idb } from './db.mjs'
@@ -1081,59 +1082,58 @@ _data_:
 - `YCK` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
 - `dh`: date-heure du dernier changement d'état.
 - `cleAYC` : clé A du sponsor crypté par le PBKFD de la phrase complète de sponsoring.
+- `partitionId`: id de la partition si compte 0
 - `clePYC` : clé P de sa partition (si c'est un compte "O") cryptée par le PBKFD de la phrase complète de sponsoring (donne le numéro de partition).
+- `nomYC` : nom du sponsorisé, crypté par le PBKFD de la phrase complète de sponsoring.
 - `del` : `true` si le sponsorisé est délégué de sa partition.
 - `cvA` : `{ v, photo, info }` du sponsor, textes cryptés par sa cle A.
-- `quotas` : `[qc, qn, qv]` quotas attribués par le sponsor.
+- `quotas` : `[qc, q1, q2]` quotas attribués par le sponsor.
   - pour un compte "A" `[0, 1, 1]`. Un tel compte n'a pas de `qc` et peut changer à loisir `[q1, q2]` qui sont des protections pour lui-même (et fixe le coût de l'abonnement).
 - `don` : pour un compte autonome, montant du don.
 - `dconf` : le sponsor a demandé à rester confidentiel. Si oui, aucun chat ne sera créé à l'acceptation du sponsoring.
 - `ardYC` : ardoise de bienvenue du sponsor / réponse du sponsorisé cryptée par le PBKFD de la phrase de sponsoring.
+- `csp, itsp` : id du COMPTE sponsor et sont it dans sa partition. Écrit par le serveur et NON communiqué aux sessions.
 */
 export class Sponsoring extends GenDoc {
   get ns () { return ID.ns(this.id) }
 
   /* Par l'avatar sponsor */
+  async comp (row) {
+    this.vsh = row.vsh || 0
+    this.st = row.st
+    this.dh = row.dh
+    this.partitionId = row.partitionId || 0
+    this.estA = !this.partitionId
+    this.nom = await decrypterStr(this.YC, row.nomYC)
+    this.del = row.del || false
+    this.quotas = row.quotas
+    this.don = row.don || 0
+    this.dconf = row.dconf || false
+    this.ard = await decrypterStr(this.YC, row.ardYC)
+    if (this.estA) this.cleP = await decrypter(this.YP, row.clePYC)
+  }
+
+  /* Par l'avatar sponsor */
   async compile (row) {
     this.vsh = row.vsh || 0
     const clek = stores.session.clek
-
-    this.dh = row.dh
-    this.st = row.st
-    this.psp = await decrypter(clek, row.pspK)
-    this.del = row.del || false
-    this.estA = !row.clePYC
-    this.quotas = row.quotas
-    this.don = row.don || 0
-    this.dconf = row.dconf || false
+    this.psp = await decrypterStr(clek, row.psK)
     this.YC = await decrypter(clek, row.YCK)
-    this.ard = await decrypter(this.YC, row.ardYC)
-    this.nom = await decrypter(this.YC, row.nomYC)
-    if (this.estA) {
-      this.cleP = await decrypter(cle, row.clePYC)
-      this.partitionId = Cles.id(cleP, ns)
-    }
+    await this.comp(row)
   }
 
   /* Par l'avatar sponsorisé : HORS SESSION 
-  Création: await new Sponsoring().compile(decode(row)._data, psp)
+  Création: await new Sponsoring().compileHS(decode(row)._data, psp)
   */
   async compileHS (row, psp) {
+    this.id = row.id
+    this.ids = row.ids
+    this.v = row.v
+    this.dlv = row.dlv
     this.YC = psp.pcb
-    this.dh = row.dh
-    this.st = row.st
-    this.del = row.del || false
-    this.quotas = row.quotas
-    this.don = row.don || 0
-    this.dconf = row.dconf || false
+    await this.comp(row)
     this.cleA = await decrypter(this.YC, row.cleAYC)
     this.cv = await CV.set(row.cvA, 0, cleA)
-    this.estA = !row.clePYC
-    if (this.estA) {
-      this.cleP = await decrypter(this.YC, row.clePYC)
-      this.partitionId = Cles.id(cleP, ns)
-    }
-    this.ard = await decrypter(this.YC, row.ardYC)
   }
 
   /* Par le candidat sponsorisé qui connaît la clé X

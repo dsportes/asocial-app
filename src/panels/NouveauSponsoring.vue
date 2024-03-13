@@ -92,7 +92,7 @@
           <div class="titre-md">{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nom}}</span></div>
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div v-if="!estAutonome">
-            <div class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO')}}</div>
+            <div class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO', [ID.court(partition.id)])}}</div>
             <quotas-vols class="q-ml-md" :vols="quotas" noutil/>
           </div>
           <div v-else class="text-warning titre-md">
@@ -121,14 +121,12 @@ import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, edvol, afficherDiag, dkli, $t } from '../app/util.mjs'
-import { Sponsoring } from '../app/modele.mjs'
-import { UNITEN, UNITEV, AMJ, limitesjour, d14 } from '../app/api.mjs'
+import { ID, UNITEN, UNITEV, d14 } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { AjoutSponsoring } from '../app/operations.mjs'
-import { ExistePhrase } from '../app/synchro.mjs'
+import { ExistePhrase, AjoutSponsoring } from '../app/synchro.mjs'
 
 export default ({
   name: 'NouveauSponsoring',
@@ -225,23 +223,18 @@ export default ({
     async confirmer () {
       // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) { pc, nom, estAutonome, estDelegue, quotas, mot, don, dconf
       const q = this.estAutonome ? [0, 1, 1] : [this.quotas.qc, this.quotas.q1, this.quotas.q2]
-      
-      // (phrase, dlv, nom, cletX, clet, sp, quotas, ard)
-      const row = await Sponsoring.nouveauRow(this.pc, dlv, this.nom, 
-        this.estAutonome ? null : this.partition.cletX, 
-        this.estAutonome ? null : this.partition.clet, 
-        this.estDelegue, q, this.mot, this.don, this.dconf)
       try {
         const args = {
           pc: this.pc,
           nom: this.nom,
           estAutonome: this.estAutonome,
-          estDelegue: this.estDelegue,
+          del: this.estDelegue,
           quotas: this.quotas,
           mot: this.mot,
           don: this.don, 
           dconf: this.dconf
         }
+        if (!this.estAutonome) args.partitionId = this.partition.id
         await new AjoutSponsoring().run(args)
         this.ui.fD()
       } catch {}
@@ -253,15 +246,15 @@ export default ({
     const ui = stores.ui
     const session = stores.session
     const accepteA = session.espace.opt > 0
+    const partition = toRef(props, 'partition')
 
-    const limj = limitesjour.sponsoring
     const step4 = ref(null)
     const step2 = ref(null)
     const step3 = ref(null)
     const step = ref(0)
     const optionsOSA = [
       { label: $t('compteO'), value: 0 },
-      { label: $t('compteD'), value: 1 }
+      { label: $t('compteD', [ID.court(partition.value.id)]), value: 1 }
     ]
     const optOSA = ref(0)
     const optionsDon = [ ]
@@ -289,8 +282,7 @@ export default ({
     }
 
     return {
-      ui, dkli, styp,
-      limj,
+      ID, ui, dkli, styp,
       step, step4, step2, step3,
       optionsOSA, optOSA, optionsDon, optDon,
       session: stores.session,

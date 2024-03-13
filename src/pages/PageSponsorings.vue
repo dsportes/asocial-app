@@ -18,25 +18,21 @@
           <span class="q-ml-sm font-mono text-bold fs-md">{{sp.psp}}</span>
         </div>
         <div class="titre-md">{{$t('NPdlv')}}
-          <span class="q-ml-sm font-mono text-bold fs-md">{{dlved(sp)}}</span>
+          <span class="q-ml-sm font-mono text-bold fs-md">{{AMJ.editDeAmj(sp.dlv)}}</span>
         </div>
         <div class="titre-md">{{$t('NPnom')}}
-          <span class="text-bold font-mono q-px-md">{{sp.descr.naf.nom}}</span>
+          <span class="text-bold font-mono q-px-md">{{sp.nom}}</span>
         </div>
 
-        <div v-if="estA(sp)" class="row q-gutter-sm titre-md">
+        <div v-if="sp.estA" class="row q-gutter-sm titre-md">
           <div class="text-warning">{{$t('compteA')}}</div>
-          <div>{{$t('don', [sp.descr.don])}}</div>
-          <div v-if="sp.descr.dconf">{{$t('conf')}}</div>
+          <div>{{$t('don', [sp.don])}}</div>
         </div>
-        <div v-else class="titre-md">{{$t('compteO')}}</div>
-
-        <div v-if="sp.descr.sp" class="titre-md text-warning">
-          {{$t('NPspons' + (estA(sp) ? 'A' : ''), [ID.court(idtr(sp))])}}
-        </div>
+        <div v-else class="titre-md">{{$t(sp.del ? 'compteD' : 'compteO', [sp.partitionId || 0])}}</div>
+        <div v-if="sp.dconf">{{$t('conf')}}</div>
 
         <div class="titre-md">{{$t('NPquo')}}</div>
-        <quotas-vols class="q-ml-md" :vols="quotas(sp)" noutil/>
+        <quotas-vols class="q-ml-md" :vols="sp.quotas" noutil/>
         <div class="titre-md q-mt-xs">{{$t('NPmot')}}</div>
         <show-html class="q-mb-xs bord" zoom maxh="4rem" :texte="sp.ard" :idx="idx"/>
 
@@ -85,13 +81,11 @@ export default {
       const r = Array.from(this.aSt.getSponsorings(this.aSt.avC.id).values()) || []
       r.sort((a,b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)} )
       return r
-    },
-    estComptable () { return ID.estComptable(this.aSt.avC.id) }
+    }
   },
 
   data () {
     return {
-      dhcool: dhcool
     }
   },
 
@@ -99,13 +93,12 @@ export default {
     ed1 (f) { return edvol(f * UNITEN) },
     ed2 (f) { return edvol(f * UNITEV) },
     idtr (sp) { return Tribu.id(sp.descr.clet) },
-    estA (sp) { return !sp.descr.clet },
-    quotas (sp) { const q = sp.descr.quotas; return { qc: q[0], q1: q[1], q2: q[2]}},
+    clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
+
     async nouveausp () { 
       if (await this.session.edit()) this.ui.oD('NSnvsp') 
     },
-    dlved (sp) { return AMJ.editDeAmj(sp.dlv) },
-    clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
+
     async prolonger (sp, nj) {
       const ndlv = !nj ? 0 : AMJ.amjUtcPlusNbj(this.session.auj, nj)
       new ProlongerSponsoring().run(sp, ndlv)
@@ -114,7 +107,7 @@ export default {
 
   setup () {
     return {
-      ID, dkli,
+      ID, AMJ, dkli, dhcool,
       aSt: stores.avatar, 
       session: stores.session, 
       ui: stores.ui
