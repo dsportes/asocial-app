@@ -223,8 +223,8 @@ import { SetNotifT } from '../app/operations.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
-import { GetSynthese } from '../app/synchro.mjs'
-import { DownloadStatC, DownloadStatC2, SetEspaceOptionA, NouvelleTribu, GetTribu, 
+import { GetSynthese, SetEspaceOptionA } from '../app/synchro.mjs'
+import { DownloadStatC, DownloadStatC2, NouvelleTribu, GetTribu, 
   AboTribuC, SetAtrItemComptable,
   GetVersionsDlvat, GetMembresDlvat, ChangeAvDlvat, ChangeMbDlvat } from '../app/operations.mjs'
 

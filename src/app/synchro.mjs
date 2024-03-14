@@ -1158,43 +1158,49 @@ export class AjoutSponsoring extends Operation {
 }
 
 /*   OP_AcceptationSponsoring: 'Acceptation d\'un sponsoring et création d\'un nouveau compte'
-POST:
 - `token` : éléments d'authentification du compte à créer
-        id, // id du compte sponsorisé à créer
-        hXR: ps.hps1, // hash du PBKD de sa phrase secrète réduite
-        hXC: ps.hpsc, // hash du PBKD de sa phrase secrète complète
-        cleKXC: await crypter(ps.pcb, clek), // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
-        cleAK: await crypter(clek, cleA) // clé A de son avatar principal cryptée par la clé K du compte
-      }
-      if (!sp.estA) {
-        RegCles.set(sp.cleP)
-        args.clePA = await crypter(cleA, sp.cleP) // clé P de sa partition cryptée par la clé A de son avatar principal
-        args.cleAP = await crypter(sp.cleP, cleA) // clé A de son avatar principâl cryptée par la clé P de sa partition
-      }
-      if (!sp.dconf && !dconf) {
-        const cc = random(32)
-        const pub = await syncPub(sp.id)
-        args.ch = {
-          ccK: await crypter(clek, cc), // clé C du chat cryptée par la clé K du compte
-          ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
-          t1c: await crypter(cc, sp.ard), // mot du sponsor crypté par la clé C
-          t2c: await crypter(cc, texte) // mot du sponsorisé crypté par la clé C
+- idsp idssp : identifinat du sponosing
+- id : id du compte sponsorisé à créer
+- hXR: hash du PBKD de sa phrase secrète réduite
+- hXC: hash du PBKD de sa phrase secrète complète
+- cleKXC: clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
+- cleAK: clé A de son avatar principal cryptée par la clé K du compte
+- ardYC: ardoise du sponsoring
+- dconf: du sponsorisé
+- pub: clé RSA publique de l'avatar
+- privK: clé privée RSA de l(avatar cryptée par la clé K du compte
+- cvA: CV de l'avatar cryptée par sa clé A
 
-Retour: rows permettant d'initialiser la session avec le nouveau compte qui se trouvera ainsi connecté.
-- `rowTribu`
-- `rowChat` : le chat _interne_, celui concernant le compte.
-- `credentials` : données d'authentification permettant à la session d'accéder au serveur de données Firestore.
-- `rowEspace` : row de l'espace, informations générales / statistiques de l'espace et présence de la notification générale éventuelle.
+- clePA: clé P de sa partition cryptée par la clé A de son avatar principal
+- cleAP: clé A de son avatar principâl cryptée par la clé P de sa partition
+
+- ch: { cck, ccP, t1c, t2c }
+  - ccK: clé C du chat cryptée par la clé K du compte
+  - ccP: clé C du chat cryptée par la clé publique de l'avatar sponsor
+  - cleE1C: clé A de l'avatar E (sponsor) cryptée par la clé du chat.
+  - cleE2C: clé A de l'avatar E (sponsorisé) cryptée par la clé du chat.
+  - t1c: mot du sponsor crypté par la clé C
+  - t2c: mot du sponsorisé crypté par la clé C
+
+Retour: 
+- rowEspace
+- rowPartition si compte O
+- rowCompte 
+- rowAvater 
+- rowChat si la confidentialité n'a pas été requise
+- notifs
+- conso
 
 Exceptions:
-- `F_SRV, 8` : il n'y a pas de sponsoring ayant ids comme hash de phrase de connexion.
+- `A_SRV, 13` : sponsorings non trouvé
 - `F_SRV, 9` : le sponsoring a déjà été accepté ou refusé ou est hors limite.
-
-Assertions:
-- existence du row `Tribus`,
-- existence du row `Versions` du compte sponsor.
-- existence du row `Avatars` du sponsorisé.
-- existence du row `Espaces`.
+- F_SRV, 212: solde du sonsor ne couvre pas son don
+- A_SRV, 999: application close
+- F_SRV, 101: application figée
+- F_SRV, 211: quotas restants de la partition insuffisants pour couvrir les quotas proposés au compte
+- A_SRV, 16: syntheses non trouvée
+- A_SRV, 1: espace non trouvé
+- A_SRV, 8: partition non trouvée
 */
 export class AcceptationSponsoring extends Operation {
   constructor() { super('AcceptationSponsoring') }
@@ -1221,13 +1227,22 @@ export class AcceptationSponsoring extends Operation {
       const clek = random(32) // du compte
       const cleA = Cles.avatar()
       const id = Cles.id(cleA, ns)
+      const kp = await genKeyPair()
+      const cv = new CV(id, 0, null, sp.nom)
       
       const args = {
+        idsp: sp.id,
+        idssp: sp.ids,
         id, // id du compte sponsorisé à créer
         hXR: ps.hps1, // hash du PBKD de sa phrase secrète réduite
         hXC: ps.hpsc, // hash du PBKD de sa phrase secrète complète
         cleKXC: await crypter(ps.pcb, clek), // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
-        cleAK: await crypter(clek, cleA) // clé A de son avatar principal cryptée par la clé K du compte
+        cleAK: await crypter(clek, cleA), // clé A de son avatar principal cryptée par la clé K du compte
+        ardYC: await crypter(sp.YC, texte + '\n' + sp.ard), // ardoise du sponsoring
+        dconf: dconf,
+        pub: kp.publicKey,
+        privK: await crypter(cleK, kp.privateKey),
+        cvA: await cv.crypter(cleA)
       }
       if (!sp.estA) {
         RegCles.set(sp.cleP)
@@ -1240,6 +1255,8 @@ export class AcceptationSponsoring extends Operation {
         args.ch = {
           ccK: await crypter(clek, cc), // clé C du chat cryptée par la clé K du compte
           ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
+          cleE1C:  await crypter(cc, sp.cleA), // clé A de l'avatar E (sponsor) cryptée par la clé du chat.
+          cleE2C:  await crypter(cc, cleA), // clé A de l'avatar E (sponsorisé) cryptée par la clé du chat.
           t1c: await crypter(cc, sp.ard), // mot du sponsor crypté par la clé C
           t2c: await crypter(cc, texte) // mot du sponsorisé crypté par la clé C
         }
@@ -1456,6 +1473,32 @@ export class ChercherSponsoring extends Operation {
     try {
       const ret = await post(this, 'ChercherSponsoring', { org, hps1 })
       return this.finOK(ret)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_SetEspaceOptionA: 'Changement de l\'option A de l\'espace'
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `ns` : id de l'espace notifié.
+- `optionA` : 0 1 2.
+- dlvat: aaaammjj,
+- nbmi:
+Retour: rien
+Assertion sur l'existence du row `Espaces`.
+L'opération échappe au contrôle espace figé / clos.
+Elle n'écrit QUE dans espaces.
+*/
+export class SetEspaceOptionA extends Operation {
+  constructor () { super('SetEspaceOptionA') }
+
+  async run (optionA, nbmi, dlvat) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns: session.ns, optionA, nbmi, dlvat }
+      await post(this, 'SetEspaceOptionA', args)
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

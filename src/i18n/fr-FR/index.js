@@ -390,7 +390,7 @@ export default {
   EX9001: 'Espace non trouvé ({1}) - @{0}',
   EX9002: 'Partition non trouvée ({1}) - @{0}',
   EX9003: 'Compta non trouvé ({1}) - @{0}',
-  EX9004: 'Ligne comptable non trouvée ({1}) - @{0}',
+  EX9004: 'Compte non trouvé ({1}) - @{0}',
   EX9005: 'Chat non trouvé ({1}) - @{0}',
   EX9007: 'Note non trouvée ({1} / {2}) - @{0}',
   EX9008: 'Avatar non trouvé ({1}) - @{0}',

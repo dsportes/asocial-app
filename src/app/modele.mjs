@@ -201,7 +201,7 @@ export class CV {
 
   constructor (id, dh, photo, texte) {
     this.id = id; this.dh = dh || 0; 
-    this.photo = photo || null; this.texte = texte || ''
+    this.ph = photo || null; this.tx = texte || ''
   }
 
   store () { stores.people.setCV(this); return this }
@@ -1140,6 +1140,7 @@ export class Sponsoring extends GenDoc {
     this.partitionId = row.partitionId || 0
     this.estA = !this.partitionId
     this.nom = await decrypterStr(this.YC, row.nomYC)
+    this.cleA = await decrypter(this.YC, row.cleAYC)
     this.del = row.del || false
     this.quotas = row.quotas
     this.don = row.don || 0
