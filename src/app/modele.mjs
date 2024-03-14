@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, dhcool, hash, rnd6, inverse, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
-import { pbkfd, sha256, crypter, decrypter, decrypterStr, crypterRSA } from './webcrypto.mjs'
+import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
 import { Rds, ID, Cles, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, 
   lcSynt, synthesesPartition, FLAGS } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
@@ -41,6 +41,34 @@ export class RegCles {
   }
 }
 
+/* classe RegCc : registre des clés des chats ******************************
+*/
+export class RegCc {
+  static registre = new Map() // clé: ids d'un chat - valeur: clé C du chat
+  static regpriv = new Map() // clé: id d'un avatar du compte - valeur: clé privée
+
+  static async getCc (chat) {
+    const session = stores.session
+    let cc = RegCc.get(chat.ids)
+    if (cc) return cc
+    if (chat.cleCKP.length !== 256) {
+      cc = await decrypter(session.clek, chat.cleCKP)
+      RegCc.set(chat.ids, cc)
+      return cc
+    }
+    let priv = RegCc.regpriv(chat.id)
+    if (!priv) {
+      const av = stores.avatar.getAvatar(chat.id)
+      priv = await decrypter(session.clek, av.privK)
+      RegCc.regpriv.set(av.id, priv)
+    }
+    cc = await decrypterRSA(priv, chat.cleCKP)
+    RegCc.set(chat.ids, cc)
+    return cc
+  }
+
+}
+
 /* classe RegRds : registre des rds (référence DataSync) connues dans la session **********
 - `reset ()` : réinitialisation en début de session
 - `rds (id)` : retourne le rds enregistré avec cette id
@@ -48,18 +76,17 @@ export class RegCles {
 - `set (rds, id)` : enregistré le rds / id
 */
 export class RegRds {
-  static ns = 0
   static regId = new Map()
   static regRds = new Map()
 
   static reset () { RegRds.regId.clear;  RegRds.regRds.clear }
 
-  static rds (id) { return RegRds.regId.get(ID.long(id, RegRds.ns)) }
+  static rds (id) { return RegRds.regId.get(ID.long(id, RegCles.ns)) }
 
-  static id (rds) { return RegRds.regRds.get(Rds.long(rds, RegRds.ns)) }
+  static id (rds) { return RegRds.regRds.get(Rds.long(rds, RegCles.ns)) }
 
   static set (rds, id) {
-    const r = rds < d14 ? Rds.long(rds, RegRds.ns) : rds
+    const r = rds < d14 ? Rds.long(rds, RegCles.ns) : rds
     const i = ID.long(id, RegRds.ns)
     RegRds.regId.set(i, r)
     RegRds.regRds.set(r, i)
@@ -1006,6 +1033,7 @@ _data_:
 - `pcK` : phrase de contact complète cryptée par la clé K du compte.
 
 - `cvA` : carte de visite de l'avatar `{v, photo, texte}`. photo et texte cryptés par la clé A de l'avatar.
+- `pub privK` : couple des clés publique / privée RSA de l'avatar.
 
 - `invits`: map des invitations en cours de l'avatar:
   - _clé_: `idav/idg` id court de l'avatar invité / id court du groupe.
@@ -1038,6 +1066,7 @@ export class Avatar extends GenDoc {
     const clea = RegCles.get(this.id)
     const x = row.cvA ? await decrypter(clea, row.cvA) : null
     const cv = (await CV.set(x, this.id)).store()
+    this.privK = row.privK
 
     this.invits = new Map()
     if (row.invits) {
@@ -1143,91 +1172,6 @@ export class Sponsoring extends GenDoc {
     this.cv = await CV.set(row.cvA, 0, this.cleA)
   }
 
-  /* Par le candidat sponsorisé qui connaît la clé X
-    du fait qu'il connaît la phrase de sponsoring
-  */
-  static async fromRow (row, clex) {
-    const x = decode(row._data_)
-    const obj = {}
-    obj.org = x.org
-    obj.dlv = x.dlv
-    obj.id = x.id
-    obj.ids = x.ids
-    obj.dh = x.dh
-    obj.st = x.st
-    obj.ard = await decrypterStr(clex, x.ardx)
-    await Sponsoring.decrypterDescr(obj, clex, x.descrx)
-    return obj
-  }
-
-  static async decrypterDescr (obj, clex, descrx) {
-    const x = decode(await decrypter(clex, descrx))
-    obj.cv = x.cv
-    obj.sp = x.sp || false
-    obj.it = x.it || 0
-    obj.quotas = x.quotas
-    obj.cletX = x.cletX || null
-    obj.na = NomGenerique.from(x.na)
-    obj.naf = NomGenerique.from(x.naf)
-    obj.clet =  x.clet || null
-    obj.don = x.don || 0
-    obj.dconf = x.dconf || false
-  }
-
-  static async nouveauRow (phrase, dlv, nom, cletX, clet, sp, quotas, ard, don, dconf) {
-    /* 
-      - 'phrase: objet phrase
-      - 'dlv'
-      - 'nom': nom de l'avatar du compte à créer
-      - 'cletX' : clé de la tribu crypté par la clé K du comptable
-      - `clet` : cle de la tribu.
-      - `sp` : 1 si le filleul est lui-même sponsor 
-      - `quotas` : `[qc, qn, qv]` quotas attribués par le parrain
-      - `ard`: mot de bienvenue
-      - `don`: montant du don
-      - `dconf`: don confidentiel
-    */
-    const session = stores.session
-    const aSt = stores.avatar
-    const av = aSt.avC
-    const n = NomGenerique.avatar(nom)
-    const d = { 
-      na: [av.na.nom, av.na.rnd],
-      cv: av.cv,
-      naf: [n.nom, n.rnd],
-      sp, quotas,
-      cletX: cletX || null, 
-      clet: clet || null, 
-      it : 0,
-      don,
-      dconf
-    }
-    if (!aSt.estDelegue && !session.estComptable) {
-      const c = aSt.compta
-      d.it = c.it || 0
-    }
-    const descrx = await crypter(phrase.pcb, new Uint8Array(encode(d)))
-    const ardx = await crypter(phrase.pcb, ard || '')
-    const pspk = await crypter(session.clek, phrase.phrase)
-    const bpspk = await crypter(session.clek, phrase.pcb)
-    const org = session.org
-    const ids = (session.ns * d14) + phrase.hps1
-    const _data_ = new Uint8Array(encode({ 
-      id: av.id,
-      org,
-      ids,
-      dlv,
-      st: 0,
-      dh: Date.now(),
-      pspk,
-      bpspk,
-      descrx,
-      ardx,
-      vsh: 0
-    }))
-    const row = { _nom: 'sponsorings', id: av.id, ids, dlv, _data_ }
-    return row
-  }
 }
 
 /** Ticket ***********************************************
@@ -1312,9 +1256,10 @@ _data_ (de l'exemplaire I):
   - E : 0:passif, 1:actif, 2:disparu
 - `idE idsE` : identifiant de _l'autre_ chat.
 - `cvA` : `{v, photo, info}` carte de visite de E au moment de la création / dernière mise à jour du chat (textes cryptés par sa clé A).
-- `CK` : clé C du chat cryptée par la clé K du compte de I.
-- `CA` : clé C du chat cryptée par la clé A quand le chat vient d'être créé par E (sera ré-encryptée en CK).
-- `cleEC` : cle de l'avatar E cryptée par la clé du chat.
+- `cleCKP` : clé C du chat cryptée,
+  - si elle a une longueur inférieure à 256 bytes par la clé K du compte de I.
+  - sinon cryptée par la clé RSA publique de I.
+- `cleEC` : clé A de l'avatar E cryptée par la clé du chat.
 - `items` : liste des items `[{a, dh, dhx, t}]`
   - `a` : 0:écrit par I, 1: écrit par E
   - `dh` : date-heure d'écriture.
@@ -1328,7 +1273,6 @@ export class Chat extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    const clek = stores.session.clek
     const ns = ID.ns(this.id)
 
     this.stI = Math.floor(row.st / 10)
@@ -1336,12 +1280,11 @@ export class Chat extends GenDoc {
     this.idE = ID.long(row.idE, ns)
     this.idsE = ID.long(row.idsE, ns)
 
-    if (row.CK) this.clec = await decrypter(clek, row.CK)
-    else this.clec = await decrypter(RegCles.get(this.id), row.CA)
-    let cleA = RegCles.get(this.idE)
-    if (!cleA) {
-      cleA = await decrypter(this.clec, row.cleEC)
-      RegCles.set(cleA)
+    this.clec = await RegCc.get(this)
+    let cleE = RegCles.get(this.idE)
+    if (!cleE) {
+      cleE = await decrypter(this.clec, row.cleEC)
+      RegCles.set(cleE)
     }
     const cvE = await CV.set(row.cvA).store()
     const cvI = CV.get(this.id)

@@ -9,7 +9,7 @@ import { idb, IDBbuffer } from './db.mjs'
 import { DataSync, appexc, ID, Rds, Cles, d14 } from './api.mjs'
 import { post } from './net.mjs'
 import { CV, compile, RegCles } from './modele.mjs'
-import { crypter } from './webcrypto.mjs'
+import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
 
 /* classe Queue ***********************************************************/
 class Queue {
@@ -705,6 +705,8 @@ export class OperationS extends Operation {
     }
 
     if (cnx) {
+      if (session.fssync) session.fssync.open(ret.credentials, ret.emulator)
+
       // Premier retour de Sync a rempli session. compteId, clek, nomBase
       let blOK = false // la base locale est vide, aucune données utilisables
       if (session.synchro) {
@@ -1051,6 +1053,7 @@ export class CreerEspace extends Operation {
       const cleK = random(32) // clé K du Comptable
       const cleE = Cles.espace() // clé de l'espace
       const cleA = Cles.comptable() // clé A de l'avatar Comptable
+      const kp = await genKeyPair()
 
       const args = {
         token: session.authToken,
@@ -1058,6 +1061,8 @@ export class CreerEspace extends Operation {
         org: org,
         hXR: phrase.hps1,
         hXC: phrase.hpsc,
+        pub: kp.publicKey,
+        privK: await crypter(cleK, kp.privateKey),
         cleE: Cles.espace(), // clé de l'espace
         cleEK: await crypter(cleK, cleE),
         clePK: await crypter(cleK, cleP),
@@ -1155,15 +1160,25 @@ export class AjoutSponsoring extends Operation {
 /*   OP_AcceptationSponsoring: 'Acceptation d\'un sponsoring et création d\'un nouveau compte'
 POST:
 - `token` : éléments d'authentification du compte à créer
-- `rowCompta` : row du compte à créer.
-- `rowAvatar` : row de son avatar principal.
-- `rowVersion` : row de avatar en création.
-- `idt` : id de sa tribu. 0 SI compte A
-- `ids` : ids du sponsoring, hash de sa phrase de reconnaissance qui permet de retrouver le sponsoring.
-- `rowChatI` : row chat _interne_ pour le compte en création donnant le message de remerciement au sponsor.
-- `rowChatE` : row chat _externe_ pour le sponsor avec le même message. La version est obtenue par le serveur.
-- `ardx` : texte de l'ardoise du sponsoring à mettre à jour (avec statut 2 accepté), copie du texte du chat échangé.
-- `act`: élément de la map act de sa tribu. null SI compte A
+        id, // id du compte sponsorisé à créer
+        hXR: ps.hps1, // hash du PBKD de sa phrase secrète réduite
+        hXC: ps.hpsc, // hash du PBKD de sa phrase secrète complète
+        cleKXC: await crypter(ps.pcb, clek), // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
+        cleAK: await crypter(clek, cleA) // clé A de son avatar principal cryptée par la clé K du compte
+      }
+      if (!sp.estA) {
+        RegCles.set(sp.cleP)
+        args.clePA = await crypter(cleA, sp.cleP) // clé P de sa partition cryptée par la clé A de son avatar principal
+        args.cleAP = await crypter(sp.cleP, cleA) // clé A de son avatar principâl cryptée par la clé P de sa partition
+      }
+      if (!sp.dconf && !dconf) {
+        const cc = random(32)
+        const pub = await syncPub(sp.id)
+        args.ch = {
+          ccK: await crypter(clek, cc), // clé C du chat cryptée par la clé K du compte
+          ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
+          t1c: await crypter(cc, sp.ard), // mot du sponsor crypté par la clé C
+          t2c: await crypter(cc, texte) // mot du sponsorisé crypté par la clé C
 
 Retour: rows permettant d'initialiser la session avec le nouveau compte qui se trouvera ainsi connecté.
 - `rowTribu`
@@ -1185,34 +1200,6 @@ export class AcceptationSponsoring extends Operation {
   constructor() { super('AcceptationSponsoring') }
 
   async run(org, sp, texte, ps, dconf) {
-    /* 
-    texte: réponse du sponsorisé
-    ps: sa phrase secrète
-    dconf: refuse le chat
-    sp: sponsoring
-      pc : objet Phrase
-      sp : objet Sponsoring décodé
-      this.vsh = row.vsh || 0
-      this.st = row.st
-      this.dh = row.dh
-      this.partitionId = row.partitionId || 0
-      this.estA = !this.partitionId
-      this.nom = await decrypterStr(this.YC, row.nomYC)
-      this.del = row.del || false
-      this.quotas = row.quotas
-      this.don = row.don || 0
-      this.dconf = row.dconf || false
-      this.ard = await decrypterStr(this.YC, row.ardYC)
-      if (this.estA) this.cleP = await decrypter(this.YP, row.clePYC)
-      this.id = row.id
-      this.ids = row.ids
-      this.v = row.v
-      this.dlv = row.dlv
-      this.YC = psp.pcb
-      await this.comp(row)
-      this.cleA = await decrypter(this.YC, row.cleAYC)
-      this.cv = await CV.set(row.cvA, 0, cleA)
-    */
     try {
       /* LE COMPTE EST CELUI DU FILLEUL
       Info pour création:
@@ -1234,186 +1221,69 @@ export class AcceptationSponsoring extends Operation {
       const clek = random(32) // du compte
       const cleA = Cles.avatar()
       const id = Cles.id(cleA, ns)
-  
+      
+      const args = {
+        id, // id du compte sponsorisé à créer
+        hXR: ps.hps1, // hash du PBKD de sa phrase secrète réduite
+        hXC: ps.hpsc, // hash du PBKD de sa phrase secrète complète
+        cleKXC: await crypter(ps.pcb, clek), // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
+        cleAK: await crypter(clek, cleA) // clé A de son avatar principal cryptée par la clé K du compte
+      }
+      if (!sp.estA) {
+        RegCles.set(sp.cleP)
+        args.clePA = await crypter(cleA, sp.cleP) // clé P de sa partition cryptée par la clé A de son avatar principal
+        args.cleAP = await crypter(sp.cleP, cleA) // clé A de son avatar principâl cryptée par la clé P de sa partition
+      }
+      if (!sp.dconf && !dconf) {
+        const cc = random(32)
+        const pub = await syncPub(sp.id)
+        args.ch = {
+          ccK: await crypter(clek, cc), // clé C du chat cryptée par la clé K du compte
+          ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
+          t1c: await crypter(cc, sp.ard), // mot du sponsor crypté par la clé C
+          t2c: await crypter(cc, texte) // mot du sponsorisé crypté par la clé C
+        }
+      }
+
+      const ret = await post(this, 'SyncSp', args)
+
       const session = stores.session
       session.setOrg(org)
       await session.initSession(ps)
       // Reset après ça, dont RegCles (mais pas session)
       await session.setIdCleK(id, clek)
       RegCles.set(cleA)
-      
-      const args = {
-        // token: session.authToken,
-        id,
-        hXR: ps.hps1,
-        hXC: ps.hpsc,
-        cleKXC: await crypter(ps.pcb, clek),
-        cleAK: await crypter(clek, cleA)
+
+      if (session.fssync) session.fssync.open(ret.credentials, ret.emulator)
+
+      const ds = ret.dataSync
+      syncQueue.dataSync = ds
+      if (session.fssync) session.fssync.setDS(ds)
+
+      const sb = new SB()
+      const buf = new IDBbuffer()
+      buf.putIDB(ret.compte)
+      sb.compte = await compile(ret.compte)
+      buf.putIDB(ret.compta)
+      sb.compta = await compile(ret.compta)
+      buf.putIDB(ret.espace)
+      sb.espace = await compile(ret.espace)
+      if (ret.partition) {
+        buf.putIDB(ret.partition)
+        sb.partition = await compile(ret.partition)
       }
-      if (!sp.estA) {
-        RegCles.set(sp.cleP)
-        args.clePA = await crypter(cleA, sp.cleP)
-        args.cleAP = await crypter(sp.cleP, cleA)
+      if (ret.chat) {
+        buf.putIDB(ret.chat)
+        sb.setC(await compile(ret.chat))
       }
+      sb.store(buf)
+      buf.commit(ds)
 
-      // double chat 
-      // await crypter(ps.pcb, session.clek)
-      /*
-      const aSt = stores.avatar
-
-      const rowEspace = await new GetEspace().run()
-      let espace = await compile(rowEspace)
-      session.setEspace(espace)
-
-      // Réenregistrement dans repertoire des na créé en PageLogin 
-      NomGenerique.from(sp.na.anr)
-      NomGenerique.from(sp.naf.anr)
-      const idt = sp.clet ? setClet(sp.clet) : 0
-
-      session.setCompteId(sp.naf.id)
-      session.setTribuId(idt)
-      session.setAvatarId(session.compteId)
-
-      const aChat = sp.clet || (!sp.clet && !sp.dconf && !dconf)
-
-      const { publicKey, privateKey } = await genKeyPair()
-
-      // !!! dans rowCompta: it (indice du compte dans sa tribu) N'EST PAS inscrit
-      // (na, clet, cletX, q1, q2, estDelegue, phrase, nc) - le filleul a 1 chat en ligne
-      let { dlv, rowCompta } = await Compta.row(sp.naf, sp.clet, sp.cletX, sp.quotas, sp.sp, session.ns, ps, 1, don)
-      // session.clek est fixée
-
-      if (dlv < session.auj) throw new AppException(F_BRO, 13)
-
-      const rowAvatar = await Avatar.primaireRow(sp.naf, publicKey, privateKey)
-      const rowVersion = { id: sp.naf.id, v: 1, dlv: dlv }
-      const _data_ = new Uint8Array(encode(rowVersion))
-      rowVersion._data_ = _data_
-      rowVersion._nom = 'versions'
-      */
-
-      /* Element de act de tribu du nouveau compte
-      - `idT` : id court du compte crypté par la clé de la tribu.
-      - `sp` : est sponsor ou non.
-      - `stn` : statut de la notification _du compte_: _aucune simple bloquante_
-      - `qc q1 q2` : quotas attribués.
-      - `ca v1 v2` : volumes **approximatifs** effectivement utilisés
-      */
-
-      /*
-      let act = null
-      if (sp.clet) act = {
-        idT: await crypter(sp.clet, '' + ID.court(sp.naf.id)),
-        nasp: sp.sp ? await crypter(sp.clet, new Uint8Array(encode(sp.naf.anr))) : null,
-        notif: null,
-        stn: 0,
-        qc: sp.quotas[0],
-        q1: sp.quotas[1],
-        q2: sp.quotas[2],
-        ca: 0,
-        v1: 0,
-        v2: 0
-      }
-
-      // chatI : chat pour le compte, chatE : chat pour son sponsor
-      const naI = sp.naf
-      const naE = sp.na
-      const cc = random(32)
-      const pubE = await aSt.getPub(sp.na.id)
-      if (!pubE) throw new AppExc(F_BRO, 7)
-
-      const args = !aChat ? {
-        token: session.authToken, 
-        rowCompta, rowAvatar, rowVersion,
-        ids: sp.ids,
-        ardx, idt, act,
-        abPlus: [idt, sp.naf.id],
-        idI: 0
-      } : { 
-        token: session.authToken, 
-        rowCompta, rowAvatar, rowVersion,
-        ids: sp.ids,
-        ardx, idt, act,
-        abPlus: [idt, sp.naf.id],
-
-        idI : naI.id,
-        idsI : await Chat.getIds(naI, naE),
-        idE : naE.id, 
-        idsE : await Chat.getIds(naE, naI), 
-        ccKI : await crypter(session.clek, cc), 
-        ccPE : await crypterRSA(pubE, cc),
-        naccI : await crypter(cc, encode([naI.nom, naI.rnd])),
-        naccE : await crypter(cc, encode([naE.nom, naE.rnd])),
-        txt1 : await Chat.getTxtCC(cc, txt1),
-        lgtxt1 : txt1.length,
-        txt2 : await Chat.getTxtCC(cc, txt2),
-        lgtxt2 : txt2.length
-      }
-
-      const ret = this.tr(await post(this, 'AcceptationSponsoring', args))
-      // Retourne: credentials, rowTribu
-
-      espace = await compile(ret.rowEspace)
-      session.setEspace(espace)
-      session.setOrg(espace.org)
-      if (session.estClos) {
-        this.ui.setPage('clos')
-        this.finOK()
-      }
-
-      if (session.fsSync && ret.credentials) {
-        await session.fsSync.open(ret.credentials, ret.fsEmulator || 0)
-      }
-
-      const rowTribu = ret.rowTribu
-      const rowChat = ret.rowChat
-      rowCompta = ret.rowCompta
-      
-      // Le compte vient d'être créé, clek est enregistrée par la création de rowCompta
-      const compta = await compile(rowCompta)
-      const avatar = await compile(rowAvatar)
-      const tribu = rowTribu ? await compile(rowTribu) : null
-
-      aSt.setCompte(avatar, compta, tribu)
-
-      if (rowChat) {
-        const chat = await compile(rowChat)
-        aSt.setChat(chat)
-      }
-
-      Versions.reset()
-      Versions.set(session.compteId, { v: 1 })
-
-      if (session.synchro) {
-        try {
-          await session.setNombase()
-          await openIDB()
-          // setTrigramme(session.nombase, avatar.na.nomc)
-          setTrigramme(session.nombase, await getTrigramme())
-          lectureSessionSyncIdb()
-          // Finalisation en une seule fois de l'écriture du nouvel état en IDB
-          this.buf.putIDB(rowCompta)
-          this.buf.putIDB(rowAvatar)
-          this.buf.putIDB(rowChatI)
-          if (rowTribu) this.buf.putIDB(rowTribu)
-          await this.buf.commitIDB(true, true) // MAJ compte.id / cle K et versions
-          await session.sessionSync.setConnexion(this.dh)
-        } catch (e) {
-          session.mode = 2
-          await afficherDiag(this.$t('LOGnoidb'))
-        }
-      }
-
-      if (session.fsSync) {
-        await session.fsSync.setCompte(session.compteId)
-        if (rowTribu) await session.fsSync.setTribu(session.tribuId)
-      }
+      session.setStatus(2)
+      syncQueue.reveil()
 
       console.log('Connexion compte : ' + session.compteId)
-      session.setStatus(2)
       stores.ui.setPage('accueil')
-      idb.reveil()
-      */
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -1469,13 +1339,23 @@ export class EchoTexte extends Operation {
   }
 }
 
+/* Pseudo opération : cyncPub **************************************/
+export async function syncPub (id) {
+  try {
+    const ret = await post(null, 'SyncPub', { id })
+    return ret.pub
+  } catch (e) {
+    throw new AppExc(E_WS, 3)
+  }
+}
+
 /* ErreurFonc *******************************************/
 export class ErreurFonc extends Operation {
   constructor() { super('ErreurFonc') }
 
   async run(texte, to) {
     try {
-      this.tr(await post(this, 'ErreurFonc', { to, texte }))
+      await post(this, 'ErreurFonc', { to, texte })
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -1490,9 +1370,8 @@ export class PingDB extends Operation {
 
   async run() {
     try {
-      const ret = this.tr(await post(this, 'PingDB', {}))
-      this.finOK()
-      return ret
+      const ret = await post(this, 'PingDB', {})
+      return this.finOK(ret)
     } catch (e) {
       await this.finKO(e)
     }
