@@ -112,7 +112,7 @@ Depuis un Comptable: ns est celui de la session
             <q-btn size="sm" class="fs-md" padding="xs"
               icon="settings" :label="$t('PEabo')" dense color="primary" @click="editerq"/>
             <q-btn v-if="lg.id" class="fs-md" size="sm" dense color="primary" padding="xs"
-              :label="$t('detail')" icon-right="open_in_new" @click="pageTranche"/>
+              :label="$t('detail')" icon-right="open_in_new" @click="pagePartition"/>
           </div>
         </div>
       </q-expansion-item>
@@ -279,7 +279,9 @@ export default {
       })
       return l
     },
-    notif () { return this.session.pow === 2 ? this.aSt.tribuC.notif : null },
+    notif () { 
+      return this.session.pow === 2 ? this.session.partition.notif : null 
+    },
     optesp () { return this.session.espace ? this.session.espace.opt : 0 },
     chgOptionA () { return this.session.espace.opt !== this.optionA.value },
     tribuv () { const t = this.aSt.tribuC; return t ? [t.id, t.v] : [0, 0] }
@@ -340,40 +342,24 @@ export default {
     async lgCourante (lg) {
       if (!lg.id) return
       if (this.session.pow === 2) {
-        const t = await this.getTr(lg.id)
-        this.ligne = t.synth
+        const p = await this.getPart(lg.id)
+        this.ligne = p.synth
       } else {
         this.ligne = lg
       }
     },
 
-    async getTr (id) { // rend courante cette tribu
-      if (this.session.tribuCId === id) return this.aSt.tribuC // elle l'était déjà
-
-      let t = this.aSt.getTribu(id)
-      let abot = false
-      if (!t) {
-        t = await new GetTribu().run(id, true) // true: abonnement
-        abot = true
-      }
-      // abonnement à la nouvelle tribu courante
-      if (this.session.fsSync) {
-        // désabonne l'actuelle courante si nécessaire et pas tribu du compte
-        await this.session.fsSync.setTribuC(id) 
-      } else {
-        // ce qui désabonne de facto de la précédente (mais pas de celle du compte)
-        if (!abot) await new AboTribuC().run(id)
-      }
-
-      this.session.setTribuCId(id)
-      this.aSt.setTribuC(t)
-      return t
+    async getPart (id) { // rend courante cette partition
+      const session = stores.session
+      if (session.partition.id === id) return session.partition // partition du compte  
+      if (this.session.partitionCId === id) return session.partitionC // elle l'était déjà
+      return await new GetPartitionC().run(id)
     },
 
-    async pageTranche () { // Comptable seulement
+    async pagePartition () { // Comptable seulement
       if (!await this.session.editpow(2, true)) return
-      await this.getTr(this.ligne.id)
-      this.ui.setPage('tranche')
+      await this.getPart(this.ligne.id)
+      this.ui.setPage('partition')
     },
 
     async chgNtfT (ntf) {
@@ -509,7 +495,7 @@ export default {
     const aSt = stores.avatar
     const fSt = stores.filtre
     const session = stores.session
-    const espace = ref(session.espaces.get(ns.value))
+    const espace = session.estAdmin ?ref(session.espaces.get(ns.value)) : session.espace
 
     const options = [
       { label: $t('PTopt0'), value: 0 },

@@ -52,6 +52,10 @@ export class FsSyncSession {
     this.subEspace = null
   }
 
+  setPartitionC (rds) {
+    // TODO
+  }
+
   async getEspace (ns) { // Pour tester
     try {
       const docRef = doc(this.fs, 'espaces/' + ns)

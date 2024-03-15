@@ -54,6 +54,7 @@ export const useSessionStore = defineStore('session', {
     syntheses: new Map(), // Pour admin SEULEMENT
 
     partition: null,
+    partitionC: null,
     compte: null,
     compta: null,
     espace: null,
@@ -77,6 +78,9 @@ export const useSessionStore = defineStore('session', {
 
   getters: {
     config (state) { return stores.config },
+    filtre (state) { return stores.filtre },
+    pSt: (state) => stores.people,
+    ui: (state) => stores.ui,
 
     dlv (state) { return state.ok && state.compte ? state.compte.dlv : 0 },
     nbj (state) { return AMJ.diff(AMJ.dlv(state.dlv), state.auj) },
@@ -145,13 +149,79 @@ export const useSessionStore = defineStore('session', {
       return x ? $t(y[x]) : ''
     },
 
+    getCV: (state) => { return (id) => { return state.pSt.getCV(id) } },
+
     // PageAdmin ***************************************************    
     paLeFT: (state) => {
       const x = []; state.espaces.forEach(e => { x.push(e) })
       x.sort((a, b) => { return a.id < b.id ? -1 : (a.id === b.id ? 0 : 1)})
       return x
-    }
+    },
 
+    // PagePartition ***************************************************    
+    ptLcFT: (state) => {
+      const lcF = state.ptLcF
+
+      const f = state.filtre.tri.partition
+      if (!f) { state.ui.fmsg(lcF.length); return lcF }
+
+      const ctf = fx[f][0]
+      const ctm = fx[f][1]
+
+      function comp (x, y) {
+        if (x.nasp && !y.nasp) return -1
+        if (!x.nasp && y.nasp) return 1
+        const a = x[ctf]
+        const b = y[ctf]
+        return a > b ? ctm : (a < b ? -ctm : 0) 
+      }
+
+      const x = []; lcF.forEach(t => { x.push(t) })
+      x.sort(comp)
+      state.ui.fmsg(x.length)
+      return x
+    },
+
+    ptLcF: (state) => {
+      const f = state.filtre.filtre.partition
+      if (!f) return state.ptLc
+      const r = []
+      for (const c of state.ptLc) {
+        if (f.avecsp && !c.del) continue
+        if (f.nomc) {
+          const nom = state.getCV(c.id).nom
+          if (!nom.startsWith(f.nomc)) continue
+        }
+        /* 
+        - tcpt compilé
+        - it : indice dans la table tcpt (id de la partition)
+        - notif: notification de niveau compte
+        - del: true si délégué
+        - q : 
+          - qc qn qv c n v : extraits du document `comptas` du compte
+          - pcc : pourcentage d'utilisation de la consommation journalière c / qc
+          - pcn : pourcentage d'utilisation effective de qn : n / qn
+          - pcv : pourcentage d'utilisation effective de qc : v / qv
+        // Filtre notif
+        gravite0: '(ignorer)',
+        gravite1: 'normale ou importante', // notif existe
+        gravite2: 'importante' // notif avec restriction
+        0:simple 1:lecture 2:accès minimal, 9:aucune
+        */
+        const nr = !c.notif ? 9 : c.notif.nr
+        if (f.notif && nr === 9) continue
+        if (f.notif === 2 && nr ===0) continue
+        r.push(c)
+      }
+      return r
+    },
+
+    ptLc: (state) => {
+      const t = []
+      for (const e of (state.partitionC || state.partition).tcpt)
+        if (e && !e.vide && (state.pow < 4 || e.del)) t.push(e)
+      return t
+    }
   },
 
   actions: {
@@ -294,6 +364,17 @@ export const useSessionStore = defineStore('session', {
       if (this.partitionId !== partition.id) this.partitionId = partition.id
     },
 
+    setParticitionC (partition) { 
+      if (partition.id === this.partitionId) {
+        this.partitionC = null
+        this;partitionCId = 0
+      } else {
+        this.partitionC = partition
+        this.partitionCId = partition.id
+        if (this.fsSync) fsSync.setPartitionC(partition.rds)
+      }
+    },
+
     delPartition () {
       if (this.partitionId) this.partitionId = 0
       this.partition = null
@@ -318,8 +399,6 @@ export const useSessionStore = defineStore('session', {
     },
 
     setAvatarId (id) { this.avatarId = id },
-
-    setParticitionCId (id) { this.tribuCId = id },
 
     setPeopleId (id) { this.peopleId = id },
 

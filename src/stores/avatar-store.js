@@ -304,63 +304,6 @@ export const useAvatarStore = defineStore('avatar', {
         if (e && e.id === peId) return e
     },
 
-    // PageTranche ***************************************************    
-    ptLcFT: (state) => {
-      const lcF = state.ptLcF
-
-      const f = state.filtre.tri.tranche
-      if (!f) { state.ui.fmsg(lcF.length); return lcF }
-
-      const ctf = fx[f][0]
-      const ctm = fx[f][1]
-
-      function comp (x, y) {
-        if (x.nasp && !y.nasp) return -1
-        if (!x.nasp && y.nasp) return 1
-        const a = x[ctf]
-        const b = y[ctf]
-        return a > b ? ctm : (a < b ? -ctm : 0) 
-      }
-
-      const x = []; lcF.forEach(t => { x.push(t) })
-      x.sort(comp)
-      state.ui.fmsg(x.length)
-      return x
-    },
-
-    ptLcF: (state) => {
-      const f = state.filtre.filtre.tranche
-      if (!f) return state.ptLc
-      const r = []
-      for (const c of state.ptLc) {
-        if (f.avecsp && !c.nasp) continue
-        if (f.nomc) {
-          const na = getNg(c.id)
-          if (!na || !na.nomc.startsWith(f.nomc)) continue
-        }
-        /*   // Filtre notif
-        gravite0: '(ignorer)',
-        gravite1: 'normale ou importante', // notif existe
-        gravite2: 'importante' // notif avec restriction
-        0:simple 1:lecture 2:accès minimal, 9:aucune
-        */
-        const stn = !c.notif ? 9 : c.notif.stn
-        if (f.notif && stn === 9) continue
-        if (f.notif === 2 && stn ===0) continue
-        r.push(c)
-      }
-      return r
-    },
-
-    ptLc: (state) => {
-      const pow = state.session.pow
-      const t = []
-      for (const e of state.tribuC.act) {
-        if (e && !e.vide && (pow < 4 || e.nasp)) t.push(e)
-      }
-      return t
-    },
-
     // PageChats ******************************************
     nbchats: (state) => {
       let n = 0

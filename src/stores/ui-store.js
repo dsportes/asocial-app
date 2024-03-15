@@ -75,7 +75,7 @@ export const useUiStore = defineStore('ui', {
       AMoubli: {},
       AMinvit: {},
       NSnvsp: false, // NouveauSponsoring
-      PTedq: false, // PageTranche
+      PTedq: false, // PagePartition
       PTcptdial: false,
       PMdetailsmembre: false, // PanelMembre
       BPchgTr: {}, // BarrePeople

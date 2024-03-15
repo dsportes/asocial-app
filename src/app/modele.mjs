@@ -187,7 +187,7 @@ export class CV {
     const c = new CV()
     c.id = id
     if (cv) {
-      c.dhx = cv.dh
+      c.dh = cv.dh || 0
       const k = cle || RegCles.get(id)
       if (k) {
         if (cv.photo) c.ph = await decrypter(k, cv.photo)
@@ -223,7 +223,7 @@ export class CV {
     return '#' + this.id
   }
 
-  get dh () { return this.dhx ? dhcool(this.dhx) : $t('dateinc')}
+  get dhed () { return this.dhx ? dhcool(this.dh) : $t('dateinc')}
 
   get nom () {
     if (!this.tx) return this.texte
@@ -569,7 +569,7 @@ export class Partition extends GenDoc {
         if (!item || item.vide) { this.tcpt[it] = null; continue }
         const r = { }
         if (item.del) r.del = true
-        const cleA = await decrypter(clep, r.cleAP)
+        const cleA = await decrypter(clep, item.cleAP)
         RegCles.set(cleA)
         r.id = Cles.id(cleA, ns)
         r.it = it
@@ -1146,7 +1146,7 @@ export class Sponsoring extends GenDoc {
     this.don = row.don || 0
     this.dconf = row.dconf || false
     this.ard = await decrypterStr(this.YC, row.ardYC)
-    if (!this.estA) this.cleP = await decrypter(this.YP, row.clePYC)
+    if (!this.estA) this.cleP = await decrypter(this.YC, row.clePYC)
   }
 
   /* Par l'avatar sponsor */

@@ -179,11 +179,11 @@
         <div v-if="ui.page === 'espace'" class="column justify-start">
           <filtre-tri nom="espace" :nb-options="19" :idx="0"/>
         </div>
-        <div v-if="ui.page === 'tranche'" class="column justify-start">
-          <filtre-nom nom="tranche" prop='nomc' :idx="0"/>
-          <filtre-notif nom="tranche" :idx="1"/>
-          <filtre-avecsp nom="tranche" :idx="0"/>
-          <filtre-tri nom="tranche" :nb-options="9" :idx="1"/>
+        <div v-if="ui.page === 'partition'" class="column justify-start">
+          <filtre-nom nom="partition" prop='nomc' :idx="0"/>
+          <filtre-notif nom="partition" :idx="1"/>
+          <filtre-avecsp nom="partition" :idx="0"/>
+          <filtre-tri nom="partition" :nb-options="9" :idx="1"/>
         </div>
         <div v-if="ui.page === 'people'" class="column justify-start">
           <filtre-nom nom="people" prop='nom' :idx="0"/>
@@ -243,7 +243,7 @@
       <page-chats class="page" v-if="ui.page === 'chats'"/>
       <page-compta class="page" v-if="ui.page === 'compta'"/>
       <page-espace class="page" v-if="ui.page === 'espace'" :ns="session.ns"/>
-      <page-tranche class="page" v-if="ui.page === 'tranche'"/>
+      <page-partition class="page" v-if="ui.page === 'partition'"/>
       <page-people class="page" v-if="ui.page === 'people'"/>
       <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
       <page-groupes class="page" v-if="ui.page === 'groupesac'"/>
@@ -476,7 +476,7 @@ import PageCompte from './pages/PageCompte.vue'
 import PageChats from './pages/PageChats.vue'
 import PageCompta from './pages/PageCompta.vue'
 import PageNotes from './pages/PageNotes.vue'
-import PageTranche from './pages/PageTranche.vue'
+import PagePartition from './pages/PagePartition.vue'
 import PanelPeople from './panels/PanelPeople.vue'
 
 // Niveau 8
@@ -496,7 +496,7 @@ export default {
     BoutonHelp, BoutonBulle, BoutonLangue, NotifIcon, QueueIcon, OutilsTests,
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageEspace, PageTranche, PagePeople, PanelPeople, PanelMembre,
+    PageCompta, PageEspace, PagePartition, PagePeople, PanelPeople, PanelMembre,
     FiltreRac, FiltreNom, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
@@ -514,9 +514,10 @@ export default {
       let arg = ''
       switch (p) {
         case 'espace' : { return this.$t('Pespace', [this.session.ns, this.session.org]) }
-        case 'tranche' : { 
+        case 'partition' : { 
           if (this.session.pow > 3) return this.$t('ACspons')
-          return this.$t('Ptranche', [ID.court(this.aSt.tribuC.id), this.aSt.tribuC.info])
+          const p = this.session.partitionC || this.session.partition
+          return this.$t('Ppartition', [ID.court(p.id), this.session.compte.codeP(p.id)])
         }
         case 'sponsorings' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }
         case 'groupesac' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }

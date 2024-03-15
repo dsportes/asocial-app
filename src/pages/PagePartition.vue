@@ -4,19 +4,19 @@
       switch-toggle-side expand-separator dense>
       <template v-slot:header>
         <div class="row full-width fs-md">
-          <span>{{$t('TUtr')}} #{{ID.court(lg.id)}}</span>
-          <span v-if="session.pow === 2" class= "q-ml-sm">{{aSt.compta.infoTr(lg.id)}}</span>
+          <span>{{$t('TUtr')}} #{{ID.court(p.id)}}</span>
+          <span v-if="session.pow === 2" class= "q-ml-sm">{{session.compte.codeP(p.id)}}</span>
         </div>
       </template>
       <div class="q-ml-xl q-mb-lg splg">
         <div class="row justify-around">
           <tuile-cnv type="qc" :src="lg" occupation/>
-          <tuile-cnv type="q1" :src="lg" occupation/>
-          <tuile-cnv type="q2" :src="lg" occupation/>
+          <tuile-cnv type="qn" :src="lg" occupation/>
+          <tuile-cnv type="qv" :src="lg" occupation/>
           <tuile-notif :src="lg" occupation/>
         </div>
         <div class="q-my-xs">
-          <apercu-notif editable :notif="lg.notif" :type="1" :ctx="{ idt: aSt.tribuC.id }"/>
+          <apercu-notif editable :notif="lg.notif" :type="1" :ctx="{ idt: p.id }"/>
         </div>
       </div>
     </q-expansion-item>
@@ -28,22 +28,16 @@
         :label="$t('PTnvc')" @click="ui.oD('NSnvsp')"/>
     </q-toolbar>
 
-    <div v-for="(c, idx) in aSt.ptLcFT" :key="c.id" class="spmd">
+    <div v-for="(c, idx) in session.ptLcFT" :key="c.id" class="spmd">
       <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)">
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
-              <div>
-                <img v-if="c.id === session.compteId" class="photomax" :src="aSt.compte.photo" />
-                <span v-else>
-                  <img v-if="pSt.estPeople(c.id)" class="photomax" :src="pSt.photo(c.id)" />
-                  <img v-else class="photomax" :src="cfg.iconAvatar"/>
-                </span>
-              </div>
+              <img class="photomax" :src="pSt.getCV(c.id).photo" />
 
               <div class="titre-md q-ml-sm">{{nomc(c)}}
                 <span v-if="type(c)===1" class="q-ml-sm">[{{$t('moi')}}]</span>
-                <span v-if="c.nasp" class="q-ml-sm">[{{$t('sponsor2')}}]</span>
+                <span v-if="c.del" class="q-ml-sm">[{{$t('sponsor2')}}]</span>
               </div>
 
               <q-icon size="md" v-if="c.notif" :name="ico(c)"
@@ -60,15 +54,15 @@
         <div class="q-ml-lg">
           <apercu-genx v-if="type(c)===2 || type(c)===1" :id="c.id" :idx="idx"/>
           <div v-else class="titre-md">#{{c.id}}</div>
-          <barre-people v-if="session.estComptable || aSt.estDelegue" :id="c.id"/>
+          <barre-people v-if="session.estComptable || session.estDelegue" :id="c.id"/>
 
           <apercu-notif class="q-my-xs" editable
-            :notif="c.notif" :type="2" :idx="idx" :ctx="{ idt: aSt.tribuC.id, idc: c.id }"/>
+            :notif="c.notif" :type="2" :idx="idx" :ctx="{ idt: p.id, idc: c.id }"/>
 
-          <div v-if="c.nasp" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
+          <div v-if="c.del && !ID.estComptable(c.id)" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
 
           <div v-if="vis(c)" class="q-my-sm row">
-            <quotas-vols class="col" :vols="c" />
+            <quotas-vols class="col" :vols="c.q" />
             <q-btn v-if="session.pow < 4" size="md" class="col-auto q-ml-sm self-start"
                 icon="settings"
                 dense padding="none" round color="primary" @click="editerq(c)"/>
@@ -138,14 +132,15 @@ const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative
 const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
 
 export default {
-  name: 'PageTranche',
+  name: 'PagePartition',
   components: { TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuGenx,
     PanelCompta, QuotasVols, NouveauSponsoring, BarrePeople },
 
   props: { },
 
   computed: {
-    lg () { return this.aSt.tribuC.synth }
+    lg () { return this.p.synth },
+    p () { return this.session.partitionC || this.session.partition }
   },
 
   methods: {
@@ -164,9 +159,8 @@ export default {
     },
 
     nomc (c) {
-      if (this.type(c) === 1) return this.aSt.getAvatar(c.id).na.nom
-      if (this.type(c) === 2) return this.pSt.getNa(c.id).nomc
-      return '#' + c.id
+      const cv = this.session.getCV(c.id)
+      return this.type(c) === 1 ? cv.nom : (this.type(c) === 2 ? cv.nomc : '#' + c.id)
     },
 
     async voirpage (c) { 

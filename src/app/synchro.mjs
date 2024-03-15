@@ -1331,6 +1331,29 @@ export class GetSynthese extends Operation {
   }
 }
 
+/* OP_GetPartitionC: 'Obtention d\'une partition' *********
+args.token donne les éléments d'authentification du compte Comptable.
+args.id
+Retour:
+- rowPartition
+*/
+export class GetPartitionC extends Operation {
+  constructor () { super('GetPartitionC') }
+
+  async run (id) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id }
+      const ret = await post(this, 'GetPartitionC', args)
+      const p = await compile(ret.rowPartition)
+      if (p) session.setPartitionC(p)
+      return this.finOK(p)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /** Opérations de type "ping" non authentifiées du tout */
 
 /** OP_EchoTexte: 'Lancement d\'un test d\'écho' ***********
