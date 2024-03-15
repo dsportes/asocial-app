@@ -65,7 +65,7 @@
       </div>
 
       <!-- credits -->
-      <div v-if="session.estComptable || aSt.compta.estA"
+      <div v-if="session.estComptable || session.compte.estA"
         class="btn2" @click="clickCred">
         <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
         <span class="q-ml-xs">{{$t('MLAcred')}}</span>

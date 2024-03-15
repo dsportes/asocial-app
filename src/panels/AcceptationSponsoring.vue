@@ -19,7 +19,7 @@
         <span class="q-ml-sm font-mono text-bold fs-md">{{AMJ.editDeAmj(sp.dlv)}}</span>
       </div>
       <div class="titre-md">{{$t('NPnom')}}
-        <span class="text-bold font-mono q-px-md">{{sp.cv.nom}}</span>
+        <span class="text-bold font-mono q-px-md">{{sp.nom}}</span>
       </div>
       <div class="q-mt-md titre-md">{{$t('NPsponsor')}}</div>
       <div class="row items-start">
@@ -27,7 +27,7 @@
         <div class="col column">
           <div>
             <span class="text-bold fs-md q-mr-sm">{{sp.cv.nomc}}</span> 
-            <span class="text-bold fs-sm font-mono q-mr-sm">#{{sp.cv.id}}</span> 
+            <span class="text-bold fs-sm font-mono q-mr-sm">#{{ID.long(sp.cv.id, ns)}}</span> 
           </div>
           <show-html v-if="sp.cv.texte" class="q-my-xs border1" zoom maxh="4rem" :texte="sp.cv.texte"/>
           <div v-else class="text-italic">{{$t('FAnocv')}}</div>
@@ -86,7 +86,7 @@
 </template>
 
 <script>
-// import { toRef } from 'vue'
+import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
@@ -103,32 +103,13 @@ export default ({
   /*
   pc : objet Phrase
   sp : objet Sponsoring décodé
-    this.vsh = row.vsh || 0
-    this.st = row.st
-    this.dh = row.dh
-    this.partitionId = row.partitionId || 0
-    this.estA = !this.partitionId
-    this.nom = await decrypterStr(this.YC, row.nomYC)
-    this.del = row.del || false
-    this.quotas = row.quotas
-    this.don = row.don || 0
-    this.dconf = row.dconf || false
-    this.ard = await decrypterStr(this.YC, row.ardYC)
-    if (this.estA) this.cleP = await decrypter(this.YP, row.clePYC)
-    this.id = row.id
-    this.ids = row.ids
-    this.v = row.v
-    this.dlv = row.dlv
-    this.YC = psp.pcb
-    await this.comp(row)
-    this.cleA = await decrypter(this.YC, row.cleAYC)
-    this.cv = await CV.set(row.cvA, 0, cleA)
   */
 
   components: { EditeurMd, ShowHtml, BoutonHelp, QuotasVols },
 
   computed: {
-    textedef () { return this.$t('merci', [this.sp.cv.nom]) }
+    textedef () { return this.$t('merci', [this.sp.cv.nom]) },
+    ns () { return ID.ns(this.sp.id)}
   },
 
   data () {
@@ -195,7 +176,7 @@ export default ({
 
   setup (props) {
     const ui = stores.ui
-    // const sp = toRef(props, 'sp')
+    const sp = toRef(props, 'sp')
     // const pc = toRef(props, 'pc')
     return {
       ui, ID, styp, AMJ,

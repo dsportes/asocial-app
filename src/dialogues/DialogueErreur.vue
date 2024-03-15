@@ -56,9 +56,7 @@ export default ({
     */
     special () { return speciaux.has(this.exc.code) },
     html () { return html(this.exc) },
-    exc () {
-      return this.ui.exc || { code: 0, majeur : 0 }
-    },
+    exc () { return this.ui.exc || { code: 0, majeur : 0 } },
     rlog () { return !this.session.status },
     fige () { return this.exc.code === 8101 },
     rec () { return this.session.status > 1 },

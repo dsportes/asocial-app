@@ -927,8 +927,6 @@ export class ConnexionAdmin extends Operation {
       const ret = await post(this, 'GetEspaces', args)
       session.setCompte(null)
       session.setOrg('admin')
-      // const cv = ne sert à rien, mais bug si on l'enlève !!!
-      const cv = (await CV.set(null, 0)).store()
       if (ret.espaces) for (const e of ret.espaces)
         session.setEspace(await compile(e), true)
   
@@ -1207,22 +1205,6 @@ export class AcceptationSponsoring extends Operation {
 
   async run(org, sp, texte, ps, dconf) {
     try {
-      /* LE COMPTE EST CELUI DU FILLEUL
-      Info pour création:
-      - calculé sur serveur: it rdsav
-      - depuis sp sur serveur: 
-        - idp del quotas don csp (id compte sponsor)
-      - d'un compte (et son versions) avec ou sans don
-        - id, hXR, hXC, cleKXC, rdsav, cleAK, o, quotas
-        - o : clePA rdsp idp del it
-      - de son compta (quotas)
-      - son inscription éventuelle dans sa partition
-        - cleAP del q (`qc qn qv c n v`)
-      - son avatar (et son versions)
-      - un double chat
-      - la mise à jour du sponsoring
-        - st ard
-      */
       const ns = ID.ns(sp.id)
       const clek = random(32) // du compte
       const cleA = Cles.avatar()
@@ -1241,7 +1223,7 @@ export class AcceptationSponsoring extends Operation {
         ardYC: await crypter(sp.YC, texte + '\n' + sp.ard), // ardoise du sponsoring
         dconf: dconf,
         pub: kp.publicKey,
-        privK: await crypter(cleK, kp.privateKey),
+        privK: await crypter(clek, kp.privateKey),
         cvA: await cv.crypter(cleA)
       }
       if (!sp.estA) {
@@ -1289,6 +1271,8 @@ export class AcceptationSponsoring extends Operation {
         buf.putIDB(ret.partition)
         sb.partition = await compile(ret.partition)
       }
+      sb.setA(await compile(ret.avatar))
+      buf.putIDB(ret.avatar)
       if (ret.chat) {
         buf.putIDB(ret.chat)
         sb.setC(await compile(ret.chat))

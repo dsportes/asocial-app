@@ -5,8 +5,7 @@ import { decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { syncQueue } from './synchro.mjs'
-import { ID, rowCryptes } from './api.mjs'
-import { decrypterSrv } from './webcrypto.mjs'
+import { ID } from './api.mjs'
 
 export class FsSyncSession {
   setDs (dataSync) {
@@ -101,7 +100,6 @@ export class FsSyncSession {
     let z = true
     if (row._data_) {
       row._data_ = row._data_.toUint8Array()
-      if (rowCryptes.has(nom)) row._data_ = await decrypterSrv(row._data_)
       z = false
     }
     console.log(`onRow: ${row._nom} ${z ? 'zombi' : ''} ${row.id}`)

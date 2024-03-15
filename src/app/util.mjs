@@ -65,9 +65,8 @@ export function $t (a, b, c) {
 }
 
 export function html (exc) {
-  const str = exc.code + ' - ' + 
-    (!exc.args ? $t('EX' + exc.code) : $t('EX' + exc.code, exc.args))
-  return str.replace(/\n/g, '<br>')
+  const str = !exc.args ? $t('EX' + exc.code) : $t('EX' + exc.code, exc.args)
+  return  exc.code + ' - ' + str.replace(/\n/g, '<br>')
 }
 
 /* gère une exception Javascript inattendue
