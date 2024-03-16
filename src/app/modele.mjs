@@ -47,6 +47,15 @@ export class RegCc {
   static registre = new Map() // clé: ids d'un chat - valeur: clé C du chat
   static regpriv = new Map() // clé: id d'un avatar du compte - valeur: clé privée
 
+  static async setPriv (id, privK) {
+    if (!RegCc.regpriv.has(id)) {
+      const priv = await decrypter(stores.session.clek, privK)
+      RegCc.regpriv.set(id, priv)
+    }
+  }
+
+  static getPriv (id) { return RegCc.regpriv.get(id)}
+
   static async get (chat) {
     const session = stores.session
     let cc = RegCc.registre.get(chat.ids)
@@ -56,13 +65,7 @@ export class RegCc {
       RegCc.registre.set(chat.ids, cc)
       return cc
     }
-    let priv = RegCc.regpriv.get(chat.id)
-    if (!priv) {
-      const av = stores.avatar.getAvatar(chat.id)
-      priv = await decrypter(session.clek, av.privK)
-      RegCc.regpriv.set(av.id, priv)
-    }
-    cc = await decrypterRSA(priv, chat.cleCKP)
+    cc = await decrypterRSA(RegCc.getPriv(chat.id), chat.cleCKP)
     RegCc.registre.set(chat.ids, cc)
     return cc
   }
@@ -1074,7 +1077,7 @@ export class Avatar extends GenDoc {
     const clea = RegCles.get(this.id)
     const cv = row.cvA ? await CV.set(row.cvA) : CV.fake(this.id)
     cv.store()
-    this.privK = row.privK
+    await RegCc.setPriv(this.id, row.privK)
 
     this.invits = new Map()
     if (row.invits) {
@@ -1297,7 +1300,7 @@ export class Chat extends GenDoc {
       cleE = await decrypter(this.clec, row.cleEC)
       RegCles.set(cleE)
     }
-    const cvx = row.cvA || CV.fake(this.idE)
+    const cvx = row.cvE || CV.fake(this.idE)
     const cvE = await CV.set(cvx)
     cvE.store()
     const cvI = session.getCV(this.id)

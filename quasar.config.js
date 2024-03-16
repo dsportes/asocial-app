@@ -62,8 +62,8 @@ module.exports = configure(function (ctx) {
       env: {
         OPSRV: 'https://test.sportes.fr:8443/op/',
         // OPSRV: 'http://localhost:8443/op/',
-        // WSSRV: 'wss://test.sportes.fr:8443/ws/',
-        WSSRV: 'wss://localhost:8443/ws/',
+        WSSRV: 'wss://test.sportes.fr:8443/ws/',
+        // WSSRV: 'wss://localhost:8443/ws/',
         // WSSRV: ''
       },
 

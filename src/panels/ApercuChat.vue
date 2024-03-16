@@ -4,15 +4,15 @@
     <q-header elevated>
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [naI.nom, naE.nom])}}</q-toolbar-title>
+        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [nomI, nomE])}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <apercu-genx class="bordb" :id="naE.id" :idx="0" />
+      <apercu-genx class="bordb" :id="idE" :idx="0" />
       <div :class="sty() + 'q-pa-xs row justify-around items-center'">
         <div class="row q-gutter-xs items-center">
           <q-btn :label="$t('CHadd2')" @click="editer(false)" 
             padding="xs" color="primary" icon="add" dense size="md"/>
-          <q-btn v-if="estA" @click="editer(true)" 
+          <q-btn v-if="session.estA" @click="editer(true)" 
             round padding="xs" color="secondary" icon="savings" dense size="md"/>
         </div>
         <q-btn v-if="chat && chat.stI" :label="$t('CHrac')" @click="raccrocher"
@@ -30,12 +30,12 @@
             :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
             text-color="white"
             :stamp="dhcool(it.dh)">
-            <sd-blanc v-if="!it.dhx" :texte="it.txt"/>
+            <sd-blanc v-if="!it.dhx" :texte="it.t"/>
             <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
-                <span>{{it.a===0 ? $t('moi') : naE.nom}}</span>
-                <q-btn v-if="it.a===0 && !it.dfx" size="sm" padding="none" round
+                <span>{{it.a===0 ? $t('moi') : nomE}}</span>
+                <q-btn v-if="it.a===0 && !it.dhx" size="sm" padding="none" round
                   icon="clear" color="warning" @click="effacer(it.dh)"/>
               </div>
             </template>
@@ -128,8 +128,8 @@ export default {
   name: 'ApercuChat',
 
   props: { 
-    naI: Object, 
-    naE: Object,
+    idI: Number, 
+    idE: Number,
     chatx: Object,
     idc: Number
   },
@@ -137,11 +137,9 @@ export default {
   components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp },
 
   computed: {
-    estA () { return this.aSt.compta.estA },
-    estSp () {
-      const id = this.naE.id
-      return ID.estComptable(id) || this.pSt.estDelegue(id)
-    }
+    nomE () { return this.session.getCV(this.idE).nom },
+    nomI () { return this.session.getCV(this.idI).nom },
+    estDel () { return ID.estComptable(this.idE) || this.session.estDelegue }
   },
 
   data () { return {
@@ -153,7 +151,7 @@ export default {
 
   methods: {
     async creerchat () {
-      if (this.estSp) {
+      if (this.estDel) {
         if (!await this.session.editUrgence()) return
       } else {
         if (!await this.session.edit()) return
@@ -162,7 +160,7 @@ export default {
     },
 
     async effacer (dh) {
-      if (this.estSp) {
+      if (this.estDel) {
         if (!await this.session.editUrgence()) return
       } else {
         if (!await this.session.edit()) return
@@ -210,7 +208,7 @@ export default {
     },
 
     async editer (avecDon) {
-      if (this.estSp) {
+      if (this.estDel) {
         if (!await this.session.editUrgence()) return
       } else {
         if (!await this.session.edit()) return
@@ -229,7 +227,7 @@ export default {
     },
 
     async raccrocher () {
-      if (this.estSp) {
+      if (this.estDel) {
         if (!await this.session.editUrgence()) return
       } else {
         if (!await this.session.edit()) return

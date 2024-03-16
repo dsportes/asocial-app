@@ -47,6 +47,12 @@ export const useAvatarStore = defineStore('avatar', {
     pSt (state) { return stores.people },
     nSt (state) { return stores.note },
 
+    getAvatar: (state) => { return (id) => { 
+        const e = state.map.get(id)
+        return e ? e.avatarId : null 
+      }
+    },
+
     getChat: (state) => { return (id, ids) => { 
         const e = state.map.get(id)
         return e ? e.chats.get(ids) : null 

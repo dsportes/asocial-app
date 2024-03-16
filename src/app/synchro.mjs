@@ -4,9 +4,9 @@
 import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { afficherDiag, $t, random } from './util.mjs'
+import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme } from './util.mjs'
 import { idb, IDBbuffer } from './db.mjs'
-import { DataSync, appexc, ID, Rds, Cles, d14 } from './api.mjs'
+import { DataSync, appexc, ID, Rds, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
 import { CV, compile, RegCles } from './modele.mjs'
 import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
@@ -288,7 +288,7 @@ class Job {
     }
 
     sb.store(buf)
-    buf.commit(ds)
+    await buf.commit(ds)
     syncQueue.finJob(ds)
   }
 
@@ -509,7 +509,7 @@ export async function connexion(phrase, razdb) {
   }
 
   if (session.avion) {
-    if (!this.nombase) { // nom base pas trouvé en localStorage de clé lsk
+    if (!session.nombase) { // nom base pas trouvé en localStorage de clé lsk
       await afficherDiag($t('OPmsg1'))
       deconnexion(true)
       return
@@ -534,8 +534,8 @@ export async function connexion(phrase, razdb) {
   if (razdb && session.synchro && session.nombase)
     await idb.delete(session.nombase)
   try { 
-    const op = await new ConnexionSynchroIncognito()
-    op.run() 
+    const op = new ConnexionSynchroIncognito()
+    await op.run() 
   } catch (e) { 
     throw e
   }
@@ -594,21 +594,19 @@ export class Operation {
 
   async finKO (e) {
     const session = stores.session
-    const ui = stores.ui
     const exc = appexc(e)
-    if (!this.modeSync) {
-      session.finOp()
-      if (exc.code === 9999) {
-        session.setExcKO(exc)
-        throw(exc)
-      }
-      ui.afficherMessage($t('OPko', [this.label]), true)
-      await ui.afficherExc(exc)
-      throw(exc)
+
+    if (this.modeSync || exc.code === 9999) {
+      // en mode Sync toutes les exceptions sont "tueuses"
+      session.setExcKO(exc)
+      throw exc
     }
-    // En synchro toutes les exceptions sont tueuses
-    session.setExcKO(exc)
-    throw(exc)
+
+    session.finOp()
+    const ui = stores.ui
+    ui.afficherMessage($t('OPko', [this.label]), true)
+    await ui.afficherExc(exc)
+    throw exc
   }
 }
 
@@ -621,11 +619,9 @@ export class OperationS extends Operation {
   - les avatars et groupes absents de ds ne sont pas chargés (ont été supprimés avant)
   - les membres ou notes absents de ds ne sont pas chargés (ont été supprimés avant)
   */
-  async loadAvatarsGroupes (ds) {
+  async loadAvatarsGroupes (sb, ds) {
     { // Phase itérative pour chaque avatar EXISTANT en ds
-      for(const eds of ds.avatars) {
-        const sb = new SB()
-        const buf = new IDBbuffer()
+      for(const [,eds] of ds.avatars) {
         const m = await idb.getSA(eds.id)
         if (m.avatars) for(const row of m.avatars) { // En fait il n'y en a toujours qu'un
           sb.setA(await compile(row))
@@ -642,8 +638,6 @@ export class OperationS extends Operation {
         if (m.tickets) for(const row of m.tickets) {
           sb.setT(await compile(row))
         }
-        sb.store(buf)
-        await buf.commit(ds)
       }
     }
     
@@ -670,14 +664,7 @@ export class OperationS extends Operation {
     }
   }
 
-  /* Phase 1 : sync des rows CCEP */
-  async phase1 (cnx, ds1, ida) {
-    const session = stores.session
-    const args =  { 
-      token: session.authToken, 
-      dataSync: ds1.serial, optionC: cnx, ida: ida || 0
-    }
-    const ret = await post(this, 'Sync', args)
+  async doCCEP (ret) {
     const ds = new DataSync(ret.dataSync) // Mis à jour par le serveur
 
     const sb = new SB()
@@ -703,6 +690,18 @@ export class OperationS extends Operation {
       ds.partition.vs = ds.partition.vb
       buf.putIDB(ret.rowPartition)
     }
+    return [ds, sb, buf, ret]
+  }
+ 
+  /* Phase 1 : sync des rows CCEP */
+  async phase1 (cnx, ds1, ida) {
+    const session = stores.session
+    const args =  { 
+      token: session.authToken, 
+      dataSync: ds1.serial, optionC: cnx, ida: ida || 0
+    }
+    const ret1 = await post(this, 'Sync', args)
+    const [ds, sb, buf, ret] = await this.doCCEP(ret1)
 
     if (cnx) {
       if (session.fssync) session.fssync.open(ret.credentials, ret.emulator)
@@ -711,22 +710,23 @@ export class OperationS extends Operation {
       let blOK = false // la base locale est vide, aucune données utilisables
       if (session.synchro) {
         await idb.open()
-        blOK = idb.checkAge()
+        blOK = await idb.checkAge()
         await idb.storeBoot()
         if (!blOK)
           setTrigramme(session.nombase, await getTrigramme())
-      }
-      // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK
+        // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK 
 
-      if (session.synchro) {
+        await idb.loadAvNotes()
+        await idb.loadFetats()
+
         const dav = await idb.getDataSync()
         // partition / avatars / groupes c / m / n disparus
         this.supprdsdav(true, ds, dav, sb, buf)
         // Enrichit le ds courant par celui de IDB 
-        this.fusionDS(ds)
+        this.fusionDS(ds, dav)
 
-        // Chargement des groupes et avatars depuis IDB
-        await this.loadAvatarsGroupes (ds)
+        // Chargement dans sb des groupes et avatars depuis IDB
+        await this.loadAvatarsGroupes (sb, ds)
         /* Etat rétabli à celui de IDB, MAIS
         - CCEP sont rafraîchis par ceux du serveur
         - les avatars et groupes disparus (complètement ou partiellement) de compte ont été purgés
@@ -744,6 +744,7 @@ export class OperationS extends Operation {
   - sous-arbres groupes: complet / notes / membres
   */
   supprdsdav (cnx, ds, dav, sb, buf) {
+    if (!dav) return
     if (dav.partition && !ds.partition) {
       buf.putIDB({ _nom: 'partitions', id: dav.partition.id })
       if (!cnx) sb.delP()
@@ -777,7 +778,8 @@ export class OperationS extends Operation {
   - dav: ds "avant", celui connu de IDB en mode synchro 
   ds est MIS A JOUR
   */
-  fusionDS (ds, dav) {  
+  fusionDS (ds, dav) { 
+    if (!dav) return 
     if (ds.partition) {
       if (dav.partition && (dav.partition.id === ds.partition.id)) ds.partition.vs = dav.partition.vs
       else ds.partition.vs = 0
@@ -839,7 +841,7 @@ export class OperationS extends Operation {
       La maj est terminée pour ce cycle */
       if (!item) { 
         sb.store(buf)
-        buf.commit(ds)
+        await buf.commit(ds)
         if (fs) fs.setDS(syncQueue.dataSync)
         continue 
       }
@@ -847,7 +849,7 @@ export class OperationS extends Operation {
       // Cas "normal" : chargement incrémental du sous-arbre avatar / groupe
       if (ret.rowAvatar) {
         sb.setA(await compile(ret.rowAvatar))
-        buf.putIDB(ret.rowAvatars)
+        buf.putIDB(ret.rowAvatar)
         item.vs = item.vb
       }
 
@@ -894,7 +896,7 @@ export class OperationS extends Operation {
         }
 
       sb.store(buf)
-      buf.commit(ds)
+      await buf.commit(ds)
       if (fs) fs.setDS(syncQueue.dataSync)
     }
   }
@@ -941,7 +943,7 @@ export class ConnexionAdmin extends Operation {
 }
 
 /* Connexion à un compte en mode avion *********************************/
-export class ConnexionAvion extends Operation {
+export class ConnexionAvion extends OperationS {
   constructor() { super('ConnexionCompte') }
 
   async run() {
@@ -968,8 +970,11 @@ export class ConnexionAvion extends Operation {
         sb.store()
       }
       
-      // Chargement des groupes et avatars depuis IDB
-      await this.loadAvatarsGroupes(ds)
+      { // Chargement des groupes et avatars depuis IDB
+        const sb = new SB()
+        await this.loadAvatarsGroupes(sb, ds)
+        sb.store()
+      }
 
       // Chargement des descriptifs des fichiers du presse-papier
       await idb.FLfromIDB()
@@ -995,17 +1000,11 @@ export class ConnexionSynchroIncognito extends OperationS {
     try {
       const session = stores.session
 
-      if (session.synchro) {
-        // Chargement des "avnotes" des notes ayant des fichiers locaux 
-        await idb.loadAvNotes()
-        await idb.loadFetats()
-      } 
-
       const ds1 = DataSync.nouveau()
       const [ds, sb, buf] = await this.phase1(true, ds1)
       if (session.fssync) session.fssync.setDS(ds)
       sb.store(buf)
-      buf.commit(ds)
+      await buf.commit(ds)
 
       // Phase 2 : chargement des sous-arbres groupes et avatars
       syncQueue.dataSync = await this.majAvatarsGroupes(ds, [])
@@ -1200,13 +1199,14 @@ Exceptions:
 - A_SRV, 1: espace non trouvé
 - A_SRV, 8: partition non trouvée
 */
-export class AcceptationSponsoring extends Operation {
+export class AcceptationSponsoring extends OperationS {
   constructor() { super('AcceptationSponsoring') }
 
   async run(org, sp, texte, ps, dconf) {
     try {
       const ns = ID.ns(sp.id)
       const clek = random(32) // du compte
+      const cleKXC = await crypter(ps.pcb, clek) // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
       const cleA = Cles.avatar()
       const id = Cles.id(cleA, ns)
       const kp = await genKeyPair()
@@ -1218,7 +1218,7 @@ export class AcceptationSponsoring extends Operation {
         id, // id du compte sponsorisé à créer
         hXR: ps.hps1, // hash du PBKD de sa phrase secrète réduite
         hXC: ps.hpsc, // hash du PBKD de sa phrase secrète complète
-        cleKXC: await crypter(ps.pcb, clek), // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
+        cleKXC: cleKXC, // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
         cleAK: await crypter(clek, cleA), // clé A de son avatar principal cryptée par la clé K du compte
         ardYC: await crypter(sp.YC, texte + '\n' + sp.ard), // ardoise du sponsoring
         dconf: dconf,
@@ -1239,46 +1239,48 @@ export class AcceptationSponsoring extends Operation {
           ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
           cleE1C:  await crypter(cc, sp.cleA), // clé A de l'avatar E (sponsor) cryptée par la clé du chat.
           cleE2C:  await crypter(cc, cleA), // clé A de l'avatar E (sponsorisé) cryptée par la clé du chat.
-          t1c: await crypter(cc, sp.ard), // mot du sponsor crypté par la clé C
-          t2c: await crypter(cc, texte) // mot du sponsorisé crypté par la clé C
+          t1c: await crypter(cc, gzipB(sp.ard)), // mot du sponsor crypté par la clé C
+          t2c: await crypter(cc, gzipB(texte)) // mot du sponsorisé crypté par la clé C
         }
       }
-
-      const ret = await post(this, 'SyncSp', args)
 
       const session = stores.session
       session.setOrg(org)
       await session.initSession(ps)
       // Reset après ça, dont RegCles (mais pas session)
-      await session.setIdCleK(id, clek)
+      // set compteId, avatarId, ns, clek, nomBase
+      await session.setIdClek(id, null, clek) 
       RegCles.set(cleA)
 
-      if (session.fssync) session.fssync.open(ret.credentials, ret.emulator)
+      const ret1 = await post(this, 'SyncSp', args)
+      const [ds, sb, buf, ret] = await this.doCCEP(ret1)
+  
+      const item = ds.avatars.get(id)
+      sb.setA(await compile(ret.rowAvatar))
+      buf.putIDB(ret.rowAvatar)
+      item.vs = item.vb
 
-      const ds = ret.dataSync
-      syncQueue.dataSync = ds
-      if (session.fssync) session.fssync.setDS(ds)
+      if (ret.rowChat) {
+        sb.setC(await compile(ret.rowChat))
+        buf.putIDB(ret.rowChat)
+      }
 
-      const sb = new SB()
-      const buf = new IDBbuffer()
-      buf.putIDB(ret.compte)
-      sb.compte = await compile(ret.compte)
-      buf.putIDB(ret.compta)
-      sb.compta = await compile(ret.compta)
-      buf.putIDB(ret.espace)
-      sb.espace = await compile(ret.espace)
-      if (ret.partition) {
-        buf.putIDB(ret.partition)
-        sb.partition = await compile(ret.partition)
+      if (session.synchro) {
+        await idb.delete(session.nombase)
+        await idb.open()
+        await idb.storeBoot()
+        setTrigramme(session.nombase, await getTrigramme())
       }
-      sb.setA(await compile(ret.avatar))
-      buf.putIDB(ret.avatar)
-      if (ret.chat) {
-        buf.putIDB(ret.chat)
-        sb.setC(await compile(ret.chat))
-      }
+
       sb.store(buf)
-      buf.commit(ds)
+      await buf.commit(ds)
+
+      syncQueue.dataSync = ds
+
+      if (session.fssync) {
+        session.fssync.open(ret.credentials, ret.emulator)
+        session.fssync.setDS(ds)
+      }
 
       session.setStatus(2)
       syncQueue.reveil()

@@ -16,7 +16,7 @@ function decodeIn (buf, cible) {
 
 const STORES = {
   singletons: 'n',
-  collections: 'id+n+ids',
+  collections: '[id+n+ids]',
   avnote: '[id+ids]',
   fetat: 'id',
   fdata: 'id',
@@ -115,7 +115,7 @@ class IDB {
       const rec = await this.db.singletons.get(IDB.snoms.boot)
       if (rec) {
         const x = decode (await decrypter(session.phrase.pcb, rec.data))
-        session.setIdCleK(x.id, x.clek)
+        session.setIdClek(x.id, null, x.clek)
         return true 
       } else return false
     } catch (e) {
@@ -134,8 +134,10 @@ class IDB {
       const nbjds = Math.ceil((Date.now() - rec.dh) / 86400000)
       if (nbjds < IDBOBS) return true
     } 
-    await IDB.delete(stores.session.nombase)
-    await IDB.open()
+    if (rec) {
+      await this.delete(stores.session.nombase)
+      await IDB.open()
+    }
     return false
   }
 
@@ -160,7 +162,7 @@ class IDB {
       const rec = await this.db.singletons.get(IDB.snoms.datasync)
       if (rec) { 
         const x = await decrypter(session.clek, rec.data)
-        return new DataSync(decode(x))
+        return new DataSync(x)
       } 
       else return null
     } catch (e) {
@@ -185,7 +187,7 @@ class IDB {
       }
       return m
     } catch (e) {
-      throw EX2(e)
+      throw IDB.EX2(e)
     }
   }
 
@@ -194,17 +196,19 @@ class IDB {
   */
   async getSA (id) {
     const session = stores.session
+    const idx = u8ToB64(await crypter(session.clek, '' + id, 1), true)
     try {
-      const r = await this.db.collections.where('id').equals(id).toArray()
+      const r = await this.db.collections.where('id').equals(idx).toArray()
       const m = {}
-      for(const data of r) {
-        const row = decode(await decrypter(session.clek, data))
-        let e = m[row._nom]; if (!e) { e = []; x[row._nom] = e }
+      for(const l of r) {
+        const x = await decrypter(session.clek, l.data)
+        const row = decode(x)
+        let e = m[row._nom]; if (!e) { e = []; m[row._nom] = e }
         e.push(row)
       }
       return m
     } catch (e) {
-      throw EX2(e)
+      throw IDB.EX2(e)
     }
   }
 
@@ -220,7 +224,7 @@ class IDB {
     }
     */
     try {
-      await db.transaction('rw', ['singletons', 'collections'], async () => {  
+      await this.db.transaction('rw', ['singletons', 'collections'], async () => {  
         for (const x of arg.singl) {
           if (x.data) await this.db.singletons.put({ n: x.n, data: x.data })
           else await this.db.singletons.where({ n: x.n }).delete()
@@ -239,11 +243,11 @@ class IDB {
           await this.db.collections.where({id: idk, n: IDB.cnoms.membres}).delete()
           await this.db.collections.where({id: idk, n: IDB.cnoms.chatgrs}).delete()
         }
-        for (const idk of idgcno)
+        for (const idk of arg.idgcno)
           await this.db.collections.where({id: idk, n: IDB.cnoms.notes}).delete()
       })
     } catch (e) {
-      throw this.EX2(e)
+      throw IDB.EX2(e)
     }
   }
 
@@ -517,14 +521,14 @@ export class IDBbuffer {
       if (n) { // c'est un singleton
         arg.singl.push({ 
           n, 
-          data: row._data ? await crypter(clek, new Uint8Array(encode(row))) : null
+          data: row._data_ ? await crypter(clek, new Uint8Array(encode(row))) : null
         })
       } else {
         arg.colls.push({ 
-          n: IDB.cnoms[row.nom],
+          n: IDB.cnoms[row._nom],
           id: u8ToB64(await crypter(clek, '' + row.id, 1), true),
           ids: u8ToB64(await crypter(clek, '' + row.ids, 1), true),
-          data: row._data ? await crypter(clek, new Uint8Array(encode(row))) : null
+          data: row._data_ ? await crypter(clek, new Uint8Array(encode(row))) : null
         })
       }
     }

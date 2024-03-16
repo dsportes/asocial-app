@@ -285,11 +285,11 @@ export const useSessionStore = defineStore('session', {
       stores.reset(true) // reset SAUF session
     },
 
-    async setIdClek (id, cleKXC) {
+    async setIdClek (id, cleKXC, clek) {
       this.compteId = id
       this.avatarId = id
       this.setNs(ID.ns(id))
-      this.clek = await decrypter(this.phrase.pcb, cleKXC)
+      this.clek = clek || await decrypter(this.phrase.pcb, cleKXC)
       const x = await crypter(this.clek, '' + id, 1)
       this.nombase = '$asocial$-' + u8ToB64(x, true)
       if (this.accesIdb) localStorage.setItem(this.lsk, this.nombase)
@@ -326,7 +326,10 @@ export const useSessionStore = defineStore('session', {
     },
 
     /* Le compte a disparu OU l'administrateur a fermé l'application ***********/
-    setExcKO (exc) { this.excKO = exc; stores.ui.setPage('clos') },
+    setExcKO (exc) { 
+      this.excKO = exc
+      stores.ui.setPage('clos') 
+    },
 
     setConso (c) {
       if (c) {

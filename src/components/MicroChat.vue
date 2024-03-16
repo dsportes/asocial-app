@@ -7,7 +7,7 @@
           <span v-if="chatx.stI===1" class="q-mr-sm">{{$t('actif')}}</span>
           <span v-else class="q-mr-sm text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</span>
           <span v-if="chatx.stE===0" class="q-mr-sm text-warning text-bold bg-yellow-5">
-            {{$t('CHraccroche2', [chatx.naE.nom])}}</span>
+            {{$t('CHraccroche2', [session.getCV(chatx.idE).nom])}}</span>
           <span v-if="chatx.stE===2" class="q-mr-sm text-warning text-bold bg-yellow-5">{{$t('CHavdisp')}}</span>
           <span class="q-mr-sm">{{$t('CHnbit', chatx.items.length, {count:chatx.items.length} )}}</span>
         </div>
@@ -23,8 +23,8 @@
   </div>
 
   <apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc"
-    :na-i="chat ? chat.naI : naI" 
-    :na-e="chat ? chat.naE : naE" 
+    :idI="chat ? chat.id : idI" 
+    :idE="chat ? chat.idE : idE" 
     :chatx="chatx"/>
 
 </div>
@@ -42,12 +42,12 @@ export default ({
 
   props: { 
     chat: Object, // si chat est donné, c'est lui qui est visualisé
-    naI: Object, naE: Object // sinon couple de na (avatar du compte, people)
+    idI: Number, idE: Number // sinon couple d'id (avatar du compte, people)
   },
 
   computed: {
     chatx () { 
-      return this.chat || this.aSt.chatDeAvec(this.naI.id, this.naE.id) 
+      return this.chat || this.aSt.chatDeAvec(this.idI, this.idE) 
     }
   },
 

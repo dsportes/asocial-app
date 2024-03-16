@@ -93,15 +93,11 @@ export async function post (op, fonction, args) {
       if (resp.dh) session.setDh(resp.dh)
       if (resp.notifs) session.setNotifs(resp.notifs)
       if (resp.conso) session.setConso(resp.conso)
-      if (!session.clek && resp.compte) {
-        const c = decode(resp.compte)
-        const clek = await decrypter(session.phrase.pcb, c.cleKXR)
-        await session.setIdCleK(c.id, clek)
-      }
-      /* Retour immédiat pour les changements de CCEP 
-      - PAS TRAITE POUR Sync / Sync2
+      /* 
+      Traitement immédiat pour les changements de CCEP SAUF SI Sync / Sync2
       - très fréquent pour rowCompta
-      - très rare pour les autres */
+      - très rare pour les autres 
+      */
       if (!fonction.startsWith('Sync') && 
         (resp.rowCompte || resp.rowCompta || resp.rowEspace || resp.rowPartition))
         await syncQueue.postResp(resp)

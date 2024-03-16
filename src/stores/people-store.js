@@ -21,8 +21,10 @@ export const usePeopleStore = defineStore('people', {
   }),
 
   getters: { 
+    ns: (state) => stores.session.ns,
+
     /* Retourne la CV la plus récente pour une id */
-    getCV: (state) => { return (id) => { return state.cvs.get(id) || CV.fake(id)} },
+    getCV: (state) => { return (id) => { return state.cvs.get(ID.long(id, state.ns)) || CV.fake(id)} },
 
     getSgr: (state) => { return (idp) => { 
         const e = state.map.get(idp)
@@ -162,8 +164,9 @@ export const usePeopleStore = defineStore('people', {
   
   actions: {
     setCV (cv) {
-      const x = this.cvs.get(cv.id)
-      if (!x || x.dh < cv.dh) this.cvs.set(cv.id, cv)
+      const id = ID.long(cv.id, this.ns)
+      const x = this.cvs.get(id)
+      if (!x || x.dh < cv.dh) this.cvs.set(id, cv)
     },
 
     delGr (idg) {
