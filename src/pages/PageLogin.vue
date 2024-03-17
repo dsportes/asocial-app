@@ -58,7 +58,7 @@ import { ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { afficherDiag } from '../app/util.mjs'
-import { connexion, ChercherSponsoring } from '../app/synchro.mjs'
+import { connexion, GetSponsoring } from '../app/synchro.mjs'
 import { Sponsoring, RegCles } from '../app/modele.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
@@ -108,7 +108,7 @@ export default {
         /* Recherche sponsoring *******/
         RegCles.reset()
         stores.reset(true)
-        const res = await new ChercherSponsoring().run(this.org, this.pc.hps1)
+        const res = await new GetSponsoring().run(this.org, this.pc.hps1)
         if (!res || !res.rowSponsoring) {
           await afficherDiag(this.$t('LOGnopp'))
           this.raz()

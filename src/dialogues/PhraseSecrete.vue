@@ -179,16 +179,16 @@ export default ({
     // Vient de login: proposer le raz de la base locale ET enregistrer org
     const login = ref(ui.ps.login || false)
     const orgext = ref(ui.ps.orgext || '') // le code de l'organisation a été saisi en dehors de ce dialogue
-    const initVal = ref(ui.ps.initVal || '') // valeur initiale de la phrase (AcceptationSponsoring)
+    const initVal = ref(ui.ps.initVal || '') // valeur initiale de la phrase (SyncSp)
 
     const orgL = ref()
     const ligne1 = ref('')
 
-    if (orgext.value) { // PageAdmin AcceptationSponsoring PageCompte
+    if (orgext.value) { // PageAdmin SyncSp PageCompte
       if (orgext.value !== session.org) {
         /* l'organisation a été saisie préalablement: 
         - PageAdmin: juste avant dans le dialogue
-        - AcceptationSponsoring: saisie pour accéder à la phrase de sponsoring et au sponsoring
+        - SyncSp: saisie pour accéder à la phrase de sponsoring et au sponsoring
         */
         session.setOrg(orgext.value)
       }

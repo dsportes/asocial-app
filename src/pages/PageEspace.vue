@@ -223,9 +223,9 @@ import { SetNotifT } from '../app/operations.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
-import { GetSynthese, SetEspaceOptionA } from '../app/synchro.mjs'
-import { DownloadStatC, DownloadStatC2, NouvelleTribu, GetTribu, 
-  AboTribuC, SetAtrItemComptable,
+import { GetSynthese } from '../app/synchro.mjs'
+import { SetEspaceOptionA } from '../app/operations4.mjs'
+import { DownloadStatC, DownloadStatC2, NouvelleTribu, SetAtrItemComptable,
   GetVersionsDlvat, GetMembresDlvat, ChangeAvDlvat, ChangeMbDlvat } from '../app/operations.mjs'
 
 const fx = [['id', 1], 

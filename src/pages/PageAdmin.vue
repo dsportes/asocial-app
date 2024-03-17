@@ -169,10 +169,11 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
-import { CreerEspace, reconnexion } from '../app/synchro.mjs'
+import { reconnexion } from '../app/synchro.mjs'
+import { CreerEspace } from '../app/operations4.mjs'
 import { GC, GetSingletons, SetEspaceT } from '../app/operations.mjs'
 import { AMJ, UNITEN, UNITEV } from '../app/api.mjs'
-import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
+import { styp, edvol, mon, nbn, dkli } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
 

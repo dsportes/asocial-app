@@ -126,7 +126,8 @@ import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { ExistePhrase, AjoutSponsoring } from '../app/synchro.mjs'
+import { ExistePhrase } from '../app/synchro.mjs'
+import { AjoutSponsoring } from '../app/operations4.mjs'
 
 export default ({
   name: 'NouveauSponsoring',

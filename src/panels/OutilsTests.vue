@@ -157,8 +157,8 @@ import { EchoTexte, ErreurFonc, PingDB } from '../app/synchro.mjs'
 import { styp, dhcool, $t, html, afficherDiag, edvol, b64ToU8, u8ToB64, random } from '../app/util.mjs'
 import { ping } from '../app/net.mjs'
 import { vuIDB, deleteIDB } from '../app/db.mjs'
-import { ForceDlv, TestRSA, CrypterRaw } from '../app/operations.mjs'
-import { decrypterRSA } from '../app/webcrypto.mjs'
+// import { ForceDlv, TestRSA, CrypterRaw } from '../app/operations.mjs'
+// import { decrypterRSA } from '../app/webcrypto.mjs'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
@@ -287,15 +287,15 @@ export default ({
       this.ui.fD()
     },
 
+    /*
     async test () {
-      /*lop : liste d'opérations [op, id, ids, date]
-      - op:1 : dlv de versions id
-      - op:2 : dfh de groupes id
-      - op:3 : dlv de membrs id / ids
-      [1, 3210299393509425, 0, 20230809]
-      [2, 3236776594934708, 0, 20230809]
-      [3, 3236776594934708, 1, 20230809]
-      */
+      //lop : liste d'opérations [op, id, ids, date]
+      //- op:1 : dlv de versions id
+      //- op:2 : dfh de groupes id
+      //- op:3 : dlv de membrs id / ids
+      //[1, 3210299393509425, 0, 20230809]
+      //[2, 3236776594934708, 0, 20230809]
+      //[3, 3236776594934708, 1, 20230809]
       const lop = [[1, 3210299393509425, 0, 20230809]]
       await new ForceDlv().run(lop)
     },
@@ -326,7 +326,7 @@ export default ({
       const out = decoder.decode(ec)
       console.log(inp === out)
     }
-
+    */
   },
 
   setup () {
