@@ -382,6 +382,9 @@ export default {
   EX8210: 'Compte [{1}] pas délégué de la partition [{0}].',
   EX8211: 'Quotas non attribués de la partition [{0}] inférieurs aux quotas proposés au compte sponsorisé.',
   EX8212: 'Le don du sponsor au sponsorisé [{1}] est trop important vis à vis du solde du compte du sponsor [{0}].',
+  EX8213: 'Un don par un "chat" ne peut être effectué que si le "chat" concerne l\'avatar PRINCIPAL du destinataire du don.',
+  EX8214: 'Un don par ne peut être effectué qu\'entre comptes "autonomes".',
+  EX8215: 'Le don est  [{0}c] trop important vis à vis du solde du compte du donateur [{1}c].',
 
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',

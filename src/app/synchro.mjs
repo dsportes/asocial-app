@@ -5,7 +5,7 @@ import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme } from './u
 import { idb, IDBbuffer } from './db.mjs'
 import { DataSync, appexc, ID, Rds, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
-import { CV, compile, RegCles } from './modele.mjs'
+import { CV, compile, RegCles, RegRds } from './modele.mjs'
 import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
 
 /* classe Queue ***********************************************************/
@@ -88,10 +88,12 @@ class Queue {
 
   /* Enregistrement à l'arrivée d'un ou plusieurs row versions sur écoute / WS */
   setRows (rows) { 
-    const ns = stores.session.ns
+    const session =  stores.session
+    const ns = session.ns
+    const rdsp = session.compte ? session.compte.rdsp : 0
     if (rows) rows.forEach(r => {
-      const nom = Rds.typeS(r.rds)
-      const rds = Rds.long(r.rds, ns)
+      const nom = Rds.typeS(r.id)
+      const rds = Rds.long(r.id, ns)
       const v = r.v
 
       switch (nom) {
@@ -100,16 +102,17 @@ class Queue {
         break
       }
       case 'comptas' : {
-        if (this.compta.v < v) { this.compta.mv = v; this.compta.rowv = row; this.compta.row = null }
+        if (this.compta.mv < v) { this.compta.mv = v; this.compta.rowv = row; this.compta.row = null }
         break
       }
       case 'espaces' : {
-        if (this.espace.v < v) { this.espace.mv = v; this.espace.rowv = row; this.espace.row = null }
+        if (this.espace.mv < v) { this.espace.mv = v; this.espace.rowv = row; this.espace.row = null }
         break
       }
       case 'partitions' : {
-        /* le "rds" de partition a été fixé avant par le compte et c'est lui qui prévaut */
-        if (this.partition.rds === rds && this.partition.v < v) 
+        /* le "rds" de SA partition a été fixé avant par le compte 
+        On ignore les notifications de changements des autres (antérieurs) */
+        if (this.partition.mv < v && (!rdsp || rdsp === rds)) 
           { this.partition.mv = v; this.partition.rowv = row; this.partition.row = null }
         break
       }
@@ -170,9 +173,10 @@ class Queue {
     reçues sur écoute / WS. */
     if (this.avgrs.size) {
       const lida = []
-      for (const [, x] of this.avgrs) {
-        this.avgrs.delete(x.rds)
-        lida.push(Reg.Rds(x.rds))
+      for (const [rds, v] of this.avgrs) {
+        this.avgrs.delete(rds)
+        const ida = RegRds.id(rds)
+        lida.push(ida)
       }
       const ds = new DataSync(syncQueue.dataSync.serial)
       this.job = new Job()

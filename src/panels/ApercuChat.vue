@@ -116,7 +116,8 @@ import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
-import { MajChat, PassifChat, NouveauChat, EstAutonome } from '../app/operations.mjs'
+import { PassifChat, NouveauChat, EstAutonome } from '../app/operations.mjs'
+import { MajChat } from '../app/operations4.mjs'
 import { ID } from '../app/api.mjs'
 
 import SdBlanc from '../components/SdBlanc.vue'
@@ -130,7 +131,7 @@ export default {
   props: { 
     idI: Number, 
     idE: Number,
-    chatx: Object,
+    chatx: Object, // Le chat peut être créé ici (pas forcément existant avant)
     idc: Number
   },
 
@@ -165,31 +166,31 @@ export default {
       } else {
         if (!await this.session.edit()) return
       }
-      this.txt = this.chat ? this.chat.txt : ''
-      this.ui.oD('ACconfirmeff')
       this.dheff = dh
+      // this.txt = this.chat ? this.chat.txt : ''
+      this.ui.oD('ACconfirmeff')
     },
 
     async effop () {
-      const disp = await new MajChat().run(this.naI, this.naE, null, this.dheff, this.chat)
+      const disp = await new MajChat().run(this.chat, null, this.dheff)
       if (disp) { await afficherDiag(this.$t('CHdisp')) }
       this.dheff = 0
       this.ui.fD()
     },
 
     async addop () {
-      const compta = this.aSt.compta
-      if (this.avecDon && this.mdon && (this.mdon * 100 > compta.credits.total)) {
-        await afficherDiag(this.$t('CHcred', [compta.credits.total, this.mdon * 100]))
+      const compta = this.session.compta
+      if (this.avecDon && this.mdon && (this.mdon * 100 > compta.total)) {
+        await afficherDiag(this.$t('CHcred', [compta.total, this.mdon * 100]))
         return
       }
       if (this.chat) {
         const don = this.avecDon ? this.mdon * 100 : 0
         const txt = (this.avecDon && !this.dconf ? (this.$t('CHdonde', [this.mdon]) + '\n') : '') + this.txt
-        const disp = await new MajChat().run(this.naI, this.naE, txt, 0, this.chat, don)
+        const disp = await new MajChat().run(this.chat, txt, 0, don)
         if (disp) { await afficherDiag(this.$t('CHdisp')) }
       } else { 
-        const [st, chat] = await new NouveauChat().run(this.naI, this.naE, this.txt)
+        const [st, chat] = await new NouveauChat().run(this.idI, this.idE, this.txt)
         if (st === 0) {
           await afficherDiag(this.$t('OPnvch0'))
         } else  {
@@ -245,7 +246,7 @@ export default {
       pSt: stores.people, 
       ui: stores.ui,
       aSt: stores.avatar,
-      chat: toRef(props, 'chatx')
+      chat: toRef(props, 'chatx') // chat reçu OU créé ici
     }
   }
 }

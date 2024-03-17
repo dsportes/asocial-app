@@ -89,7 +89,7 @@ export class RegRds {
   static id (rds) { return RegRds.regRds.get(Rds.long(rds, RegCles.ns)) }
 
   static set (rds, id) {
-    const r = rds < d14 ? Rds.long(rds, RegCles.ns) : rds
+    const r = Rds.long(rds, RegCles.ns)
     const i = ID.long(id, RegRds.ns)
     RegRds.regId.set(i, r)
     RegRds.regRds.set(r, i)
@@ -549,7 +549,7 @@ export class Partition extends GenDoc {
     const estComptable = session.estComptable
     const clek = session.clek
     const ns = ID.ns(this.id)
-    RegRds.set(row.rds)
+    RegRds.set(row.rds, this.id)
 
     this.qc = row.qc || 0; this.qn = row.qn || 0; this.qv = row.qv || 0
 
@@ -687,7 +687,7 @@ export class Compte extends GenDoc {
     const session = stores.session
     const clek = session.clek || await session.setIdClek(this.id, row.cleKXC)
     const ns = ID.ns(this.id)
-    RegRds.set(row.rds)
+    RegRds.set(row.rds, this.id)
 
     this.it = row.it || 0
     this.estA = this.it === 0
@@ -696,16 +696,17 @@ export class Compte extends GenDoc {
     this.mav = new Set()
     for(const idx in row.mav) {
       const e = row.mav[idx]
+      const id = ID.long(parseInt(idx), ns)
       RegCles.set(await decrypter(clek, e.cleAK))
-      RegRds.set(e.rds)
-      this.mav.add(ID.long(parseInt(idx), ns))
+      RegRds.set(e.rds, id)
+      this.mav.add(id)
     }
 
     if (!this.estA) {
       const cleA = RegCles.get(this.id)
       this.idp = RegCles.set(await decrypter(cleA, row.clePA))
       this.del = row.del
-      this.rdsp = RegRds.set(row.rdsp)
+      this.rdsp = RegRds.set(row.rdsp, this.idp)
     }
 
     this.mpg = new Map()
@@ -713,7 +714,7 @@ export class Compte extends GenDoc {
       const idg = ID.long(parsInt(idx), ns)
       const e = row.mpg[idx]
       RegCles.set(await decrypter(clek, e.cleGK))
-      RegRds.set(e.rds)
+      RegRds.set(e.rds, idg)
       const sav = new Set()
       for(const idx2 in e.lp) sav.add(ID.long(parseInt(idx2), ns))
       this.mpg.set(idg, sav)
@@ -905,7 +906,7 @@ export class Compta extends GenDoc {
     this.vsh = row.vsh || 0
     const clek = stores.session.clek
     const ns = ID.ns(this.id)
-    RegRds.set(row.rds)
+    RegRds.set(row.rds, this.id)
 
     this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
     this.qv = row.qv
@@ -1065,7 +1066,7 @@ export class Avatar extends GenDoc {
     this.vsh = row.vsh || 0
     const clek = stores.session.clek
     const ns = ID.ns(this.id)
-    RegRds.set(row.rds)
+    RegRds.set(row.rds, this.id)
     // this.vcv = row.vcv || 0
     // this.hZR = row.hZR
 
@@ -1089,7 +1090,7 @@ export class Avatar extends GenDoc {
         const cleG = await decrypter(clea, e.cleGA)
         RegCles.set(cleG)
         await CV.set(e.cvG).store()
-        RegRds.set(e.rds)
+        RegRds.set(e.rds, idg)
         const inv = { idav, idg, im: e.im, ivpar: e.ivpar, dh: e.dh }
         this.invits.set(nx, inv)
       }
@@ -1403,7 +1404,7 @@ export class Groupe extends GenDoc {
   async compile (row) {
     this.vsh = row.vsh || 0
     const ns = ID.ns(this.id)
-    RegRds.set(row.rds)
+    RegRds.set(row.rds, this.id)
 
     this.qn = row.qn; this.qv = row.qv; this.n = row.n; this.v = row.v
     this.imh = row.imh

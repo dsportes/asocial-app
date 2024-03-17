@@ -11,27 +11,6 @@ import { decrypter, crypterRSA, genKeyPair, decrypterRaw } from './webcrypto.mjs
 import { commitRows, IDBbuffer } from './db.mjs'
 import { Operation } from './synchro.mjs'
 
-/* Abonnement / désabonnement à la tranche courante ************************
-args.token: éléments d'authentification du compte.
-args.id : id de la tribu - Si 0 désabonnement
-Retour:
-- rowtribu: row de la tribu
-*/
-export class AboTribuC extends Operation {
-  constructor () { super('AboTribuC') }
-
-  async run (id) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, id }
-      this.tr(await post(this, 'AboTribuC', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* Changement des mots clés et mémo attachés à un contact ou groupe ********************************
 */
 export class McMemo extends Operation {
@@ -368,74 +347,6 @@ export class NouveauChat extends Operation {
         aSt.setChat(chat)
       }
       return this.finOK([st, chat])
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/*   OP_MajChat: 'Mise à jour d\'un "chat".'
-POST:
-- `token` : éléments d'authentification du compte.
-- `idI idsI` : id du chat, côté _interne_.
-- `idE idsE` : id du chat, côté _externe_.
-- `ccKI` : clé cc du chat cryptée par la clé K du compte de I. _Seulement_ si en session la clé cc était cryptée par la clé publique de I.
-- `txt1` : texte à ajouter crypté par la clé cc du chat.
-- `lgtxt1` : longueur du texte
-- `dh` : date-heure du chat dont le texte est à annuler.
-
-Si don:
-- `dbDon`: nouveau credits de compta du compte incorporant le don
-- `crDon`: don crypté par RSA du bénéficiaire idE à ajouter dans son compta.dons
-- `v`: version de compta du compte
-
-Retour:
-- `KO`: true si régression de version de compta du compte
-- `st` :
-  0 : E a disparu, chat zombi.
-  1 : chat mis à jour.
-- `rowChat` : row du chat I.
-
-Assertions sur l'existence du row `Avatars` de l'avatar I, sa `Versions`, et le cas échéant la `Versions` de l'avatar E (quand il existe).
-*/
-export class MajChat extends Operation {
-  constructor () { super('MajChat') }
-
-  async run (naI, naE, txt, dh, chat, don) {
-    try {
-      const session = stores.session
-      const aSt =  stores.avatar
-      let ret
-      while (await this.retry()) {
-        const args = { 
-          token: session.authToken, 
-          idI: naI.id, 
-          idsI: await Chat.getIds(naI, naE), 
-          idE: naE.id, 
-          idsE: await Chat.getIds(naE, naI), 
-          ccKI: chat.ccK ? await crypter(session.clek, chat.cc) : null, 
-          txt1: txt ? await Chat.getTxtCC(chat.cc, txt) : null,
-          lgtxt1: txt ? txt.length : 0,
-          dh: dh || 0
-        }
-        if (don) {
-          const { dlv, creditsK } = await aSt.compta.debitDon(don)
-          args.dlv = dlv
-          args.credits = creditsK
-          args.lavLmb = aSt.compte.lavLmb
-
-          const pubE = await aSt.getPub(args.idE)
-          const ec = encode(don)
-          args.crDon = await crypterRSA(pubE, ec)
-          args.v = aSt.compta.v
-        }
-        ret = this.tr(await post(this, 'MajChat', args))
-        if (!ret.KO) break
-      }
-      const disp = ret.disp
-      const ch = await compile(ret.rowChat)
-      aSt.setChat(ch)
-      return this.finOK(disp)
     } catch (e) {
       await this.finKO(e)
     }
