@@ -73,7 +73,7 @@
     </div>
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
-    <nouveau-sponsoring v-if="ui.d.NSnvsp" :tribu="aSt.tribuC || aSt.tribu"/>
+    <nouveau-sponsoring v-if="ui.d.NSnvsp" :partition="session.partitionC || session.partition"/>
     
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="ui.d.PTedq" persistent>

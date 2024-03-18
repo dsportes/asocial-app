@@ -5,7 +5,7 @@ import stores from './stores.mjs'
 import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, afficherDiag } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
-import { RegCles, RegRds } from '../app/modele.mjs'
+import { RegCles } from '../app/modele.mjs'
 import { WS } from '../app/ws.mjs'
 import { FsSyncSession } from '../app/fssync.mjs'
 

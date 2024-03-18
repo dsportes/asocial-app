@@ -31,17 +31,17 @@ Depuis un Comptable: ns est celui de la session
         :dmax="maxdlvat" :dmin="mindlvat" :dinit="initdlvat"
         @ok="setDlvat" icon="check" :label="$t('ESdlvat')"/>
       <span v-if="session.pow > 1" class="titre-md">
-        {{$t('ESdlvat2', [AMJ.editDeAmj(espace.dlvat)])}}
+        {{$t('ESdlvat2', [AMJ.editDeAmj(session.espace.dlvat)])}}
       </span>
     </div>
 
     <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
       <q-btn class="col-auto self-start q-mr-sm"
         dense size="md" color="primary" padding="none" round 
-        :disable="session.pow !== 2 || espace.nbmi === nbmi" icon="undo" 
+        :disable="session.pow !== 2 || session.espace.nbmi === nbmi" icon="undo" 
         @click="undoNbmi"/>
       <q-btn class="col-auto self-start q-mr-sm" dense size="md" color="warning" padding="none" round 
-        :disable="session.pow !== 2 || espace.nbmi === nbmi" icon="check" @click="saveNbmi"/>
+        :disable="session.pow !== 2 || session.espace.nbmi === nbmi" icon="check" @click="saveNbmi"/>
       <div class="tire-md q-mr-sm">{{$t('ESnbmi')}}</div>
       <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
         borderless style="position:relative;top:-8px;"
@@ -50,6 +50,7 @@ Depuis un Comptable: ns est celui de la session
     </div>
 
     <div v-if="session.pow === 2" class="row q-mb-sm justify-start">
+      <div class="font-mono fs-sm q-mr-sm">{{session.espace.v}}</div>
       <q-btn class="col-auto self-start q-mr-sm"
         dense size="md" color="primary" padding="none" round 
         :disable="!chgOptionA" icon="undo" @click="undoOptionA"/>
@@ -128,7 +129,7 @@ Depuis un Comptable: ns est celui de la session
         </q-toolbar>
         <q-card-section class="q-ma-sm">
           <div class="q-my-md row justify-around">
-            <div class="titre-md">{{$t('PTdlvata', [AMJ.editDeAmj(espace.dlvat)])}}</div>
+            <div class="titre-md">{{$t('PTdlvata', [AMJ.editDeAmj(session.espace.dlvat)])}}</div>
             <div class="titre-md">{{$t('PTdlvatf', [AMJ.editDeAmj(dlv)])}}</div>
           </div>
           <div class="row q-my-sm">
@@ -174,7 +175,7 @@ Depuis un Comptable: ns est celui de la session
       </q-card>
     </q-dialog>
 
-    <!-- Dialogue de mise à jour des quotas de la tribu -->
+    <!-- Dialogue de mise à jour des quotas de la partition -->
     <q-dialog v-model="ui.d.PEedq" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
@@ -189,7 +190,7 @@ Depuis un Comptable: ns est celui de la session
       </q-card>
     </q-dialog>
 
-    <!-- Dialogue de création d'une nouvelle tribu -->
+    <!-- Dialogue de création d'une nouvelle partition -->
     <q-dialog v-model="ui.d.PEnt" persistent>
       <q-card :class="stype('sm')">
         <div class="titre-lg q-my-sm">{{$t('PTnv')}}</div>
@@ -211,7 +212,7 @@ Depuis un Comptable: ns est celui de la session
 </template>
 
 <script>
-import { onMounted, toRef, ref } from 'vue'
+import { onMounted, toRef } from 'vue'
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import SaisieMois from '../components/SaisieMois.vue'
@@ -252,14 +253,14 @@ export default {
       return Math.floor(m / 100)
     },
     mindl () { 
-      return Math.floor(this.espace.dcreation / 100)
+      return Math.floor(this.session.espace.dcreation / 100)
     },
     mindlvat () { 
       const m = AMJ.djMoisN(AMJ.amjUtc(), 3)
       return Math.floor(m / 100)
     },
     initdlvat () {
-      return Math.floor(this.espace.dlvat / 100)
+      return Math.floor(this.session.espace.dlvat / 100)
     },
     maxdlvat () { 
       return Math.floor(AMJ.max / 100)
@@ -307,8 +308,8 @@ export default {
 
   methods: {
     async dlstat (mr) {
-      const { err, blob, creation, mois } = await new DownloadStatC().run(this.espace.org, mr)
-      const nf = this.espace.org + '-C_' + mois
+      const { err, blob, creation, mois } = await new DownloadStatC().run(this.session.espace.org, mr)
+      const nf = this.session.espace.org + '-C_' + mois
       if (!err) {
         saveAs(blob, nf)
         await afficherDiag($t('PEsd', [nf]))
@@ -319,7 +320,7 @@ export default {
 
     async dlstat2 () {
       const { err, blob } = await new DownloadStatC2().run(this.ns, parseInt(this.mois), 'C')
-      const nf = this.espace.org + '-C_' + this.mois
+      const nf = this.session.espace.org + '-C_' + this.mois
       if (!err) {
         saveAs(blob, nf)
         await afficherDiag($t('PEsd', [nf]))
@@ -396,7 +397,7 @@ export default {
       await new SetEspaceOptionA().run(this.optionA.value)
     },
 
-    undoNbmi () { this.nbmi = this.espace.nbmi},
+    undoNbmi () { this.nbmi = this.session.espace.nbmi},
 
     async saveNbmi () {
       console.log(this.nbmi)
@@ -418,10 +419,10 @@ export default {
       this.dlv = AMJ.pjMoisSuiv((this.dlvat * 100) + 1)
       this.stp = 1; this.nbav1 = 0; this.nbav2; this.nbmb1 = 0; this.nbmb2 = 0
       this.ui.oD('PEdlvat')
-      const lav = await new GetVersionsDlvat().run(this.espace.dlvat)
+      const lav = await new GetVersionsDlvat().run(this.session.espace.dlvat)
       this.nbav1 = lav.length
       this.lstav = this.splitLst(lav)
-      const lmb = await new GetMembresDlvat().run(this.espace.dlvat)
+      const lmb = await new GetMembresDlvat().run(this.session.espace.dlvat)
       this.nbmb1 = lmb.length
       this.lstmb = this.splitLst(lmb)
       this.stp = 2
@@ -460,48 +461,14 @@ export default {
       nom: '',
       quotas: null,
       ligne: null,
-      optionA: this.options[this.espace.opt],
       optionsNbmi: [3, 6, 12, 18, 24],
-      nbmi: this.espace.nbmi
+      nbmi: this.session.espace.nbmi,
+      optionA: this.options[this.session.espace.opt]
     }
   },
 
-  /** Synthese *********************************************
-  _data_:
-  - `id` : id de l'espace
-  - `v` : date-heure d'écriture
-  - `atr` : sérialisation de la table des synthèses des tribus de l'espace. 
-    L'indice dans cette table est l'id très court de la tribu (sans le 4 en tête). 
-    Chaque élément est la sérialisation de:
-    - `q1 q2` : quotas de la tribu.
-    - `a1 a2` : sommes des quotas attribués aux comptes de la tribu.
-    - `v1 v2` : somme des volumes (approximatifs) effectivement utilisés.
-    - `ntr1` : nombre de notifications tribu_simples
-    - `ntr2` : nombre de notifications tribu bloquantes
-    - `nbc` : nombre de comptes.
-    - `nbsp` : nombre de sponsors.
-    - `nco1` : nombres de comptes ayant une notification simple.
-    - `nco2` : nombres de comptes ayant une notification bloquante.
-    Calculé localement :
-    - pca1 : pourcentage d'affectation des quotas : a1 / q1
-    - pca2
-    - pcv1 : pourcentage d'utilisation effective des quotas : v1 / q1
-    - pcv2
-  atr[0] est la somme des atr[1..N] : calculé sur compile (pas stocké)
-  */
   setup (props) {
     const ns = toRef(props, 'ns')
-    const ui = stores.ui
-    const aSt = stores.avatar
-    const fSt = stores.filtre
-    const session = stores.session
-    const espace = session.estAdmin ?ref(session.espaces.get(ns.value)) : session.espace
-
-    const options = [
-      { label: $t('PTopt0'), value: 0 },
-      { label: $t('PTopt1'), value: 1 },
-      { label: $t('PTopt2'), value: 2 },
-    ]
 
     async function refreshSynth () {
       await new GetSynthese().run(ns.value)
@@ -513,8 +480,16 @@ export default {
 
     return {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
-      ID, AMJ, dkli, styp, options, espace,
-      aSt, fSt, session, ui
+      ID, AMJ, dkli, styp, 
+      options: [
+        { label: $t('PTopt0'), value: 0 },
+        { label: $t('PTopt1'), value: 1 },
+        { label: $t('PTopt2'), value: 2 },
+      ],
+      aSt: stores.avatar,
+      fSt: stores.filtre,
+      session: stores.session,
+      ui: stores.ui
     }
   }
 

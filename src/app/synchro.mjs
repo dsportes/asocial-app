@@ -1,4 +1,4 @@
-import { encode, decode } from '@msgpack/msgpack'
+import { decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme } from './util.mjs'
@@ -91,38 +91,37 @@ class Queue {
     const session =  stores.session
     const ns = session.ns
     const rdsp = session.compte ? session.compte.rdsp : 0
-    if (rows) rows.forEach(r => {
-      const nom = Rds.typeS(r.id)
-      const rds = Rds.long(r.id, ns)
-      const v = r.v
+    if (rows) rows.forEach(row => {
+      const rds = Rds.deId(row.id)
+      const v = row.v
 
-      switch (nom) {
-      case 'comptes' : {
+      switch (Rds.type(row.id)) {
+      case Rds.COMPTE : {
         if (this.compte.mv < v) { this.compte.mv = v; this.compte.rowv = row; this.compte.row = null }
         break
       }
-      case 'comptas' : {
+      case Rds.COMPTA : {
         if (this.compta.mv < v) { this.compta.mv = v; this.compta.rowv = row; this.compta.row = null }
         break
       }
-      case 'espaces' : {
+      case Rds.ESPACE : {
         if (this.espace.mv < v) { this.espace.mv = v; this.espace.rowv = row; this.espace.row = null }
         break
       }
-      case 'partitions' : {
+      case Rds.PARTITION : {
         /* le "rds" de SA partition a été fixé avant par le compte 
         On ignore les notifications de changements des autres (antérieurs) */
         if (this.partition.mv < v && (!rdsp || rdsp === rds)) 
           { this.partition.mv = v; this.partition.rowv = row; this.partition.row = null }
         break
       }
-      case 'groupes' : {
+      case Rds.GROUPE : {
         const vx = decode(r._data) // vx: { v, vg, vm, vn  }
         const x = this.avgrs.get(rds)
         if (!x || x.v < vx.v) this.avgrs.set(rds, vx)
         break
       }
-      case 'avatars' : {
+      case Rds.AVATAR : {
         const x = this.avgrs.get(rds)
         if (!x || x.v < v) this.avgrs.set(rds, v)
         break
@@ -141,7 +140,9 @@ class Queue {
   }
 
   reveil () {
-    if (this.job || !stores.session.ok) return
+    const ok = stores.session.ok
+    if (this.job || !ok) return
+    console.log('réveil')
 
     /* PRIORITE 1 : Traitement des rows directement reçus en retour d'un POST */
     if (this.RowCCEPtodo) {
@@ -232,6 +233,7 @@ class Job {
   - soit par doVersionCcep() ci-après
   */
   async doRowCcep (ds, { rowCompte, rowCompta, rowEspace, rowPartition }) {
+    console.log('doRowCcep')
     const buf = new IDBbuffer()
     const sb = new SB()
     if (rowCompte) {
@@ -296,9 +298,8 @@ class Job {
   /* Traitement de notifications de changement de versions par OnSnapShot ou WS 
   relatif à un compte, compta ...*/
   async doVersionCcep(ds1) {
-    const args = { authData: session.authToken, dataSync: ds1.serial }
-    const ret = await post(this, 'Sync2', args)
-    const ds = new DataSync(ret.dataSync) // Mis à jour par le serveur
+    console.log('doVersionCcep')
+    const [ds, ret] = await new Sync2().run(ds1)
     const arg = { 
       rowCompte: ret.rowCompte, 
       rowCompta: ret.rowCompta, 
@@ -311,6 +312,7 @@ class Job {
   /* Traitement de notifications de changement de versions par OnSnapShot ou WS 
   relatif à des sous-arbres avatar / groupe */
   async doAvGr(ds1, lida) {
+    console.log('doAvGr', lida)
     const ds = await new SyncStd().run(ds1, lida)
     syncQueue.finJob(ds)
   }
@@ -913,6 +915,26 @@ export class SyncStd extends OperationS {
   async run(ds1, lida) {
     try { 
       return await this.majAvatarsGroupes(ds1, lida)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* Synchronisation standard *********************************/
+export class Sync2 extends OperationS {
+  constructor() { super('Sync2') }
+
+  /* Chargement des sous-arbres groupes et avatars de la liste
+  lida. Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever)
+  */
+  async run(ds1) {
+    try { 
+      const session = stores.session
+      const args = { token: session.authToken, dataSync: ds1.serial }
+      const ret = await post(this, 'Sync2', args)
+      const ds = new DataSync(ret.dataSync) // Mis à jour par le serveur
+      return this.finOK([ds, ret])
     } catch (e) {
       await this.finKO(e)
     }

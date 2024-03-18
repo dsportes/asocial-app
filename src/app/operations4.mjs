@@ -91,7 +91,7 @@ export class CreerEspace extends Operation {
 /** Ajout d\'un sponsoring ****************************************************
 - `token` : éléments d'authentification du comptable / compte sponsor de sa tribu.
 - id : id du sponsor
-- hYR : hash du PNKFD de la phrase de sponsoring réduite
+- hYR : hash du PNKFD de la phrase de sponsoring réduite (SANS ns)
 - `psK` : texte de la phrase de sponsoring cryptée par la clé K du sponsor.
 - `YCK` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
 - `cleAYC` : clé A du sponsor crypté par le PBKFD de la phrase complète de sponsoring.
@@ -102,10 +102,10 @@ export class CreerEspace extends Operation {
 - `clePYC` : clé P de sa partition (si c'est un compte "O") cryptée par le PBKFD 
   de la phrase complète de sponsoring (donne l'id de la partition).
 - `nomYC` : nom du sponsorisé, crypté par le PBKFD de la phrase complète de sponsoring.
-- `cvA` : `{ v, photo, info }` du sponsor, textes cryptés par sa cle A.
+- `cvA` : `{ id, v, ph, tx }` du sponsor, (ph et tx) cryptés par sa cle A.
 - `ardYC` : ardoise de bienvenue du sponsor / réponse du sponsorisé cryptée par le PBKFD de la phrase de sponsoring.
 
-- `quotas` : `[qc, q1, q2]` pour un compte O, quotas attribués par le sponsor.
+- `quotas` : `{qc, qn, qv}` pour un compte O, quotas attribués par le sponsor.
   - pour un compte "A" `[0, 1, 1]`. Un tel compte n'a pas de `qc` et peut changer à loisir
    `[qn, qv]` qui sont des protections pour lui-même (et fixe le coût de l'abonnement).
 - don: montant du don pour un compte autonome sponsorisé par un compte autonome
@@ -132,7 +132,7 @@ export class AjoutSponsoring extends Operation {
       const session = stores.session
       const cleA = RegCles.get(session.avatarId)
       const cleAC = RegCles.get(session.compteId)
-      const cv = stores.people.getCV(session.avatarId)
+      const cv = session.getCV(session.avatarId)
       const args = { 
         token: session.authToken, 
         id: session.avatarId,

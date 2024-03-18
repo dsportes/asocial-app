@@ -30,7 +30,7 @@ export class McMemo extends Operation {
 }
 
 /* Test d\'existence d\'une phrase de connexion / contact / sponsoring ******
-args.ids : hash de la phrase de contact / de connexion
+args.hps1 : ns + hash de la phrase de contact / de connexion
 args.t :
   - 1 : phrase de connexion(hps1 de compta)
   - 2 : phrase de sponsoring (ids)

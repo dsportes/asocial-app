@@ -86,14 +86,13 @@ export class RegRds {
 
   static rds (id) { return RegRds.regId.get(ID.long(id, RegCles.ns)) }
 
-  static id (rds) { return RegRds.regRds.get(Rds.long(rds, RegCles.ns)) }
+  static id (rds) { return RegRds.regRds.get(rds) }
 
   static set (rds, id) {
-    const r = Rds.long(rds, RegCles.ns)
     const i = ID.long(id, RegRds.ns)
-    RegRds.regId.set(i, r)
-    RegRds.regRds.set(r, i)
-    return r
+    RegRds.regId.set(i, rds)
+    RegRds.regRds.set(rds, i)
+    return rds
   }
 }
 
@@ -183,21 +182,24 @@ export class Qui {
 /* class CV : Carte de Visite ****************************************
 Création: 
 - await CV.set(cv, (cle)) => objet CV (photo et texte en clair)
-    cv : { id, dh, photo, texte} (photo et texte cryptés)
-- new CV(id, dh, photo, texte) (photo et texte en clair)
+    cv : { id, v, ph, tx} (photo et texte cryptés)
+- new CV(id, v, ph, tx) (ph et tx en clair)
 - CV.fake(id) (sans photo ni texte)
 */
 export class CV {
-  static async set (cv, cle) { // cle si l'id n'est pas enregistrée (sponsoring)
-    if (cv && cv.clair) return cv
+  /* cv "cryptée" (ou sans tx / ph) OU instance de CV (toujours en clair) 
+  cle: (fac) si l'id n'est pas enregistrée (sponsoring)
+  */
+  static async set (cv, cle) { 
+    if (cv instanceof CV) return cv
     const c = new CV()
     if (cv) {
       c.id = ID.court(cv.id)
-      c.dh = cv.dh || 0
+      c.v = cv.v || 0
       const k = cle || RegCles.get(cv.id)
       if (k) {
-        if (cv.photo) c.ph = await decrypterStr(k, cv.photo)
-        if (cv.texte) c.tx = await decrypterStr(k, cv.texte)
+        if (cv.ph) c.ph = await decrypterStr(k, cv.ph)
+        if (cv.tx) c.tx = await decrypterStr(k, cv.tx)
       }
     } else { 
       c.id = 0 
@@ -205,14 +207,13 @@ export class CV {
     return c
   }
 
-  static fake (id) { const c = new CV; c.id = ID.court(id); c.clair = true; return c}
+  static fake (id) { return new CV(ID.court(id))}
 
-  constructor (id, dh, photo, texte) {
-    this.id = id
-    this.dh = dh || 0
-    this.ph = photo || null
-    this.tx = texte || ''
-    this.clair = true
+  constructor (id, v, ph, tx) {
+    this.id = ID.court(id)
+    this.v = v || 0
+    this.ph = ph || null
+    this.tx = tx || ''
   }
 
   store () { stores.people.setCV(this); return this }
@@ -231,10 +232,8 @@ export class CV {
     const cfg = stores.config
     if (this.id === 0) return cfg.nomDeAdmin
     if (ID.estComptable(this.id)) return cfg.nomDuComptable
-    return '#' + this.id
+    return '#' + ID.long(this.id, RegCles.ns)
   }
-
-  get dhed () { return this.dhx ? dhcool(this.dh) : $t('dateinc')}
 
   get nom () {
     if (!this.tx) return this.texte
@@ -250,16 +249,16 @@ export class CV {
     return this.nom + '#' + s.substring(s.length - 4)
   }
 
+  /* Retourne un objet {id,v,ph,tx} ph/tx cryptés (pas une CV)*/
   async crypter(cle) {
     return {
       id: ID.court(this.id),
-      dh: this.dh,
-      photo: this.ph ? await crypter(cle, this.ph) : null,
-      texte: this.tx ? await crypter(cle, this.tx) : '',
+      v: this.v || 0,
+      ph: this.ph ? await crypter(cle, this.ph) : null,
+      tx: this.tx ? await crypter(cle, this.tx) : '',
     }
   }
 }
-
 
 /* Notification *********************************************************
 Type des notifications:
@@ -385,7 +384,7 @@ export class Espace extends GenDoc {
     this.vsh = row.vsh || 0
     /* cas admin: espace peut être compilé SANS qu'un ns  
     n'ait été enregistré dans RegRds (admin n'ayant pas de ns courant) */
-    this.rds = RegRds.set(Rds.long(row.rds, this.ns), this.id)
+    this.rds = RegRds.set(row.rds, this.id)
 
     this.org = row.org
     this.creation = row.creation
@@ -1076,7 +1075,7 @@ export class Avatar extends GenDoc {
     }
 
     const clea = RegCles.get(this.id)
-    const cv = row.cvA ? await CV.set(row.cvA) : CV.fake(this.id)
+    const cv = await CV.set(row.cvA || CV.fake(this.id))
     cv.store()
     await RegCc.setPriv(this.id, row.privK)
 
@@ -1089,7 +1088,8 @@ export class Avatar extends GenDoc {
         const e = row.invits[nx] // {cleGA, rds, cvg, im, ivpar, dh}
         const cleG = await decrypter(clea, e.cleGA)
         RegCles.set(cleG)
-        await CV.set(e.cvG).store()
+        const cv = await CV.set(e.cvG || CV.fake(idg))
+        cv.store()
         RegRds.set(e.rds, idg)
         const inv = { idav, idg, im: e.im, ivpar: e.ivpar, dh: e.dh }
         this.invits.set(nx, inv)
@@ -1301,8 +1301,8 @@ export class Chat extends GenDoc {
       cleE = await decrypter(this.clec, row.cleEC)
       RegCles.set(cleE)
     }
-    const cvx = row.cvE || CV.fake(this.idE)
-    const cvE = await CV.set(cvx)
+
+    const cvE = await CV.set(row.cvE || CV.fake(this.idE))
     cvE.store()
     const cvI = session.getCV(this.id)
 
@@ -1422,7 +1422,8 @@ export class Groupe extends GenDoc {
     row.lng.forEach((id, i) => { this.lng[i] = ID.long(id, ns)})
     this.lnc = new Array(row.lnc.length)
     row.lnc.forEach((id, i) => { this.lnc[i] = ID.long(id, ns)})
-    await CV.set(row.cvG).store()
+    const cv = await CV.set(row.cvG || CV.fake(this.id))
+    cv.store()
   }
   
   get nbInvits () { let n = 0
@@ -1730,7 +1731,7 @@ export class Chatgr extends GenDoc {
       if (this.dh === 0) this.dh = i.dhx ? i.dhx : i.dh
       const idm = g.tid[i.im]
       if (!idm) continue
-      const cv = pSt.getCV(idm) || await CV.set(null, idm)
+      const cv = pSt.getCV(idm)
       a.push('_**' + $t('dedh', [cv.nomC, dhstring(i.dh)]) + '**_')
       if (i.dhx) a.push('\n' + $t('supprime', [dhstring(i.dhx)]) + '\n')
       else a.push('\n' + i.t + '\n')

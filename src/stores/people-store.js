@@ -166,7 +166,7 @@ export const usePeopleStore = defineStore('people', {
     setCV (cv) {
       const id = ID.long(cv.id, this.ns)
       const x = this.cvs.get(id)
-      if (!x || x.dh < cv.dh) this.cvs.set(id, cv)
+      if (!x || x.v < cv.v) this.cvs.set(id, cv)
     },
 
     delGr (idg) {
