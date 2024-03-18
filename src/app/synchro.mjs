@@ -787,12 +787,12 @@ export class OperationS extends Operation {
       if (dav.partition && (dav.partition.id === ds.partition.id)) ds.partition.vs = dav.partition.vs
       else ds.partition.vs = 0
     }
-    for(const e of ds.avatars) {
-      const eav = dav.avatars(e.id)
+    for(const [,e] of ds.avatars) {
+      const eav = dav.avatars.get(e.id)
       if (eav) e.vs = eav.vs
     }
-    for(const e of ds.groupes) {
-      const eav = dav.groupes(e.id)
+    for(const [,e] of ds.groupes) {
+      const eav = dav.groupes.get(e.id)
       if (eav) e.vs = eav.vs
     }
   }
