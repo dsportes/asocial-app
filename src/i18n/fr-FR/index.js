@@ -400,7 +400,7 @@ export default {
   EX9009: 'Groupe non trouvé ({1}) - [{0}]',
   EX9010: 'Membre non trouvé ({1} / {2}) - [{0}]',
   EX9011: 'Ligne comptable de l\'avatar hébergeur non trouvée ({1}) - [{0}]',
-  EX9012: 'Chat non trouvé ({1} / {2}) - [{0}]',
+  EX9012: 'Compti non trouvé ({1} / {2}) - [{0}]',
   EX9013: 'Sponsoring non trouvé ({1} / {2}) - [{0}]',
   EX9014: 'Version non trouvé ({1}) - [{0}]',
   EX9015: 'Ticket non trouvé ({1}) - [{0}]',

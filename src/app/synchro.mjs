@@ -16,24 +16,14 @@ class Queue {
 
   reset () {
     this.dataSync = null // dataSync courant de la session. Maj au retour de Sync
-    this.job = null // traitement en cours
+    this.EnCours = false // traitement en cours
 
-    /* Evénnements à traiter: row OU rowv
-      Les rds sont longs
-      - mv : max v, plus haute version traitée ou à traiter
-      - row : row reçu sur un POST
-      - rowv : { rds, v) } tiré d'une notification de changement d'un row versions
-        Remarque: la propriété suppr ne sert qu'au GC. La suppression effective
-        parvient sur un row comptes.
-    */
-    this.compte = { rowv: null, mv: 0, row: null }
-    this.compta = { rowv: null, mv: 0, row: null }
-    this.espace = { rowv: null, mv: 0, row: null }
-    this.partition = { rds: 0, rowv: null, mv: 0, row: null }
+    /* Evénnements à traiter */
+    this.vcpt = 0
     /* cle: rds, 
       valeur pour un avatar: v
       valeur pour un groupe: { v, vg, vm, vn }
-        - v: version générale, incrémentée quelque soit la maj de versuions
+        - v: version générale, incrémentée quelque soit la maj de versions
         - vg: version de groupe / chatgr
         - vm: version des membres
         - vn: version des notres
@@ -41,282 +31,84 @@ class Queue {
     this.avgrs = new Map()
   }
 
-  /* Au retour de n'importe quelle opération un ou plusieurs rows CCEP
-  peuvent être retournés. Ils vont être enregistrés dans le flow normal de synchro
-  resp.compte || resp.compta || resp.espace || resp.partition
-  */
-  async postResp (resp) { // Au retour d'un POST PAS Sync
-    if (resp.rowCompte) {
-      if (resp.rowCompte.v > this.compte.mv) {
-        this.compte.row = resp.rowCompte
-        this.compte.rowv = null
-        this.compte.mv = resp.rowCompte.v  
-        this.reveil()
-      }
-      return
-    }
-
-    if (resp.rowCompta) {
-      if (resp.rowCompta.v > this.compta.mv) {
-        this.compta.row = resp.rowCompta
-        this.compta.rowv = null
-        this.compta.mv = resp.rowCompta.v
-        this.reveil()
-      }
-      return
-    }
-
-    if (resp.rowEspace) {
-      if (resp.rowEspace.v > this.espace.mv) {
-        this.espace.row = resp.rowEspace
-        this.espace.rowv = null
-        this.espace.mv = resp.rowEspace.v
-        this.reveil()
-      }
-      return 
-    }
-    
-    if (resp.rowPartition) {
-      if (resp.rowPartition.v > this.partition.mv) {
-        this.partition.row = resp.rowPartition
-        this.partition.rowv = null
-        this.partition.mv = resp.rowPartition.v
-        this.reveil()
-      }
-    }
-  }
-
-  /* Enregistrement à l'arrivée d'un ou plusieurs row versions sur écoute / WS */
+  /* Enregistrement de l'arrivée d'un ou plusieurs row versions sur écoute / WS */
   setRows (rows) { 
-    const session =  stores.session
-    const ns = session.ns
-    const rdsp = session.compte ? session.compte.rdsp : 0
     if (rows) rows.forEach(row => {
       const rds = Rds.deId(row.id)
-      const v = row.v
 
       switch (Rds.type(row.id)) {
-      case Rds.COMPTE : {
-        if (this.compte.mv < v) { this.compte.mv = v; this.compte.rowv = row; this.compte.row = null }
-        break
-      }
-      case Rds.COMPTA : {
-        if (this.compta.mv < v) { this.compta.mv = v; this.compta.rowv = row; this.compta.row = null }
-        break
-      }
-      case Rds.ESPACE : {
-        if (this.espace.mv < v) { this.espace.mv = v; this.espace.rowv = row; this.espace.row = null }
-        break
-      }
-      case Rds.PARTITION : {
-        /* le "rds" de SA partition a été fixé avant par le compte 
-        On ignore les notifications de changements des autres (antérieurs) */
-        if (this.partition.mv < v && (!rdsp || rdsp === rds)) 
-          { this.partition.mv = v; this.partition.rowv = row; this.partition.row = null }
+      case Rds.COMPTE : { 
+        if (this.vcpt.v < row.v) this.vcpt.v = row.v
         break
       }
       case Rds.GROUPE : {
-        const vx = decode(r._data) // vx: { v, vg, vm, vn  }
+        const vx = decode(r._data) // vx: { v, vg, vm, vn  } ???
         const x = this.avgrs.get(rds)
         if (!x || x.v < vx.v) this.avgrs.set(rds, vx)
         break
       }
       case Rds.AVATAR : {
         const x = this.avgrs.get(rds)
-        if (!x || x.v < v) this.avgrs.set(rds, v)
+        if (!x || x.v < row.v) this.avgrs.set(rds, row.v)
         break
       }
       }
+
       this.reveil()
     })
   }
 
-  get VersionCCEPtodo () {
-    return this.compte.rowv || this.compta.rowv || this.espace.rowv || this.partition.rowv
-  }
-
-  get RowCCEPtodo () {
-    return this.compte.row || this.compta.row || this.espace.row || this.partition.row
-  }
-
   reveil () {
     const ok = stores.session.ok
-    if (this.job || !ok) return
+    if (this.EnCours || !ok) return
     console.log('réveil')
 
-    /* PRIORITE 1 : Traitement des rows directement reçus en retour d'un POST */
-    if (this.RowCCEPtodo) {
-      const arg = { }
-      if (this.compte.row) { arg.rowCompte = this.compte.row; this.compte.row = null }
-      if (this.compta.row) { arg.rowCompta = this.compta.row; this.compta.row = null }
-      if (this.espace.row) { arg.rowEspace = this.espace.row; this.espace.row = null }
-      if (this.partition.row) { arg.rowPartition = this.partition.row; this.partition.row = null }
-      this.job = new Job()
-      const ds = new DataSync(syncQueue.dataSync.serial)
-      setTimeout(() => { this.job.doRowCcep(ds, arg) }, 5)
-      return
+    const ds = syncQueue.dataSync
+
+    if (this.vcpt.v) {
+      const vx = this.vcpt.v 
+      this.vcpt.v = 0 // retrait de la tâche en attente
+      if (vx > ds.compte.vs) {
+        // Lancement de l'opération de Sync
+        this.EnCours = true
+        setTimeout(async () => { 
+          await new SyncStd().run([])
+          this.EnCours = false
+          this.reveil()
+        })
+        return // Une opération a été lancée
+      }
     }
 
-    /* PRIORITE 2 : Traitement des notifications de changement des versions des CCEP
-    reçues sur écoute / WS. Possible impact de synchro (avatars / groupes nouveaux ou disparus) */
-    if (this.VersionCCEPtodo) {
-      if (this.compte.rowv) { this.compte.rowv = null }
-      if (this.compta.rowv) { this.compta.rowv = null }
-      if (this.espace.rowv) { this.espace.rowv = null }
-      if (this.partition.rowv) { this.partition.rowv = null }
-      this.job = new Job()
-      const ds = new DataSync(syncQueue.dataSync.serial)
-      setTimeout(() => { this.job.doVersionCcep(ds) }, 5)
-      return
-    }
-
-    /* PRIORITE 3 : Traitement des notifications de changement des versions des avatars / groupes
-    reçues sur écoute / WS. */
     if (this.avgrs.size) {
       const lida = []
       for (const [rds, v] of this.avgrs) {
-        this.avgrs.delete(rds)
         const ida = RegRds.id(rds)
+        if (ID.estGroupe(ida)) {
+          const item = ds.avatars.get(ida)
+          if (this.avgrs[rds] <= item.vs) continue // ida déjà traité
+        } else {
+          const item = ds.groupes.get(ida)
+          const e = this.avgrs[rds] // { v, vg, vm, vn }
+          if (e.vg <= item.vs[0]) continue // ida déjà traité
+        }
         lida.push(ida)
       }
-      const ds = new DataSync(syncQueue.dataSync.serial)
-      this.job = new Job()
-      setTimeout(() => { this.job.doAvGr(ds, lida) }, 5)
-      return
+      this.avgrs.clear() // retrait des tâches en attente
+      if (lida.length) {
+        this.EnCours = true
+        setTimeout(async () => { 
+          await new SyncStd().run(lida)
+          this.EnCours = false
+          this.reveil()
+        })
+        return // un job a été lancé
+      }
     }
-  }
-
-  finJob (ds) {
-    /* Maj de queue en fonction du nouveau DataSync
-    this.compte = { rowv: null, mv: 0, row: null }
-    ...
-    this.avgrs = new Map() Recalculé depuis ds ET les valeurs restées pertinentes de l'actuel
-    */
-    if (ds.compte.vs >= this.compte.mv) { 
-      this.compte.rowv = null; this.compte.row = null; this.compte.mv = ds.compte.vs
-    }
-    if (ds.compta.vs >= this.compta.mv) { 
-      this.compta.rowv = null; this.compta.row = null; this.compta.mv = ds.compta.vs
-    }
-    if (ds.espace.vs >= this.espace.mv) { 
-      this.espace.rowv = null; this.espace.row = null; this.espace.mv = ds.espace.vs
-    }
-    if (ds.partition && (ds.partition.rds === this.partition.rds)) {
-      this.partition.rowv = null; this.partition.row = null; this.partition.mv = ds.partition.vs
-    } else this.partition = { 
-      rds: ds.partition ? ds.partition.rds : 0, 
-      rowv: null, 
-      mv: 0, 
-      row: null
-    }
-    const nvavgrs = new Map()
-    for(const e of ds.avatars) {
-      const v = this.avgrs.get(e.rds) // version en queue en attente de traitement
-      if (v && v > e.vs) nvavgrs.set(e.rds, v) // conservation en queue
-    }
-    for(const e of ds.groupes) {
-      const vx = this.avgrs.get(e.rds) // version en queue en attente de traitement
-      if (vx && vx.v > e.vs[0]) nvavgrs.set(e.rds, vx) // conservation en queue
-    }
-    this.avgrs = nvavgrs
-    syncQueue.dataSync = ds
-    this.job = null
-    this.reveil()
+    // il n'y avait pas de job à lancer, tout avait déjà été traité
   }
 }
 export const syncQueue = new Queue()
-
-/* classe Job ***********************************************************/
-class Job {
-  /* Traitement du changement des "rows" compte ... obtenus,
-  - soit en retour de POST 
-  - soit par doVersionCcep() ci-après
-  */
-  async doRowCcep (ds, { rowCompte, rowCompta, rowEspace, rowPartition }) {
-    console.log('doRowCcep')
-    const buf = new IDBbuffer()
-    const sb = new SB()
-    if (rowCompte) {
-      /* rowCompte peut avoir :
-      - un changement de partition: 
-        finJob(ds) inscrira en queue l'acquisition du nouveau partition
-      - des sous-arbre en plus:
-        finJob(ds) inscrira en queue l'acquisition des nouveaux sous-arbres
-      - des sous-arbres complets en moins: traité ici
-      */
-      sb.compte = await compile(rowCompte)
-      { // avatars perdus: présents dans DataSync mais plus dans compte
-        const sd = new Set()
-        ds.avatars.forEach((x,id) => { if (!sb.compte.mav.has(id)) sd.add(id)})
-        sd.forEach(id => { 
-          buf.purgeAvatarIDB(id)
-          sb.delA(id)
-        })
-      }
-      { // groupes perdus: présents dans DataSync mais plus dans compte
-        const sd = new Set()
-        ds.groupes.forEach((x,id) => { if (!sb.compte.mpg.has(id)) sd.add(id)})
-        sd.forEach(id => { 
-          buf.purgeGroupeIDB(id)
-          sb.delG(id)
-        })
-      }
-      { // partition perdue / changée: présente dans DataSync mais plus (ou plus la même) dans compte
-        if ((sb.compte.idp && ds.partition.id !== sb.compte.idp ) // partition changée
-          || (!sb.compte.idp && ds.partition.id)) { // plus de partition
-          buf.putIDB({ _nom: 'partitions' }) // purge, pas de data
-          sb.delP()
-        }
-      }
-      buf.putIDB(rowCompte)
-      ds.compte.vs = sb.compte.v
-    }
-
-    if (rowCompta) {
-      sb.compta = await compile(rowCompta)
-      buf.putIDB(rowCompta)
-      ds.compta.vs = sb.compta.v
-    }
-
-    if (rowEspace) {
-      sb.espace = await compile(rowEspace)
-      buf.putIDB(rowEspace)
-      ds.espace.vs = sb.espace.v
-    }
-
-    if (rowPartition) {
-      sb.partition = await compile(rowPartition)
-      buf.putIDB(rowPartition)
-      ds.partition.vs = sb.partition.v
-    }
-
-    sb.store(buf)
-    await buf.commit(ds)
-    syncQueue.finJob(ds)
-  }
-
-  /* Traitement de notifications de changement de versions par OnSnapShot ou WS 
-  relatif à un compte, compta ...*/
-  async doVersionCcep(ds1) {
-    console.log('doVersionCcep')
-    const [ds, ret] = await new Sync2().run(ds1)
-    const arg = { 
-      rowCompte: ret.rowCompte, 
-      rowCompta: ret.rowCompta, 
-      rowEspace: ret.rowEspace, 
-      rowPartition: ret.rowPartition
-    }
-    await this.doRowCcep (ds, arg) // ci-dessus
-  }
-
-  /* Traitement de notifications de changement de versions par OnSnapShot ou WS 
-  relatif à des sous-arbres avatar / groupe */
-  async doAvGr(ds1, lida) {
-    console.log('doAvGr', lida)
-    const ds = await new SyncStd().run(ds1, lida)
-    syncQueue.finJob(ds)
-  }
-}
 
 /* Store Buffer ******************************************************
 Liste des maj accumulées à effectuer en une fois au "commit"
@@ -326,14 +118,12 @@ class SB {
     this.s = stores.session
     this.a = stores.avatar
     this.g = stores.groupe
-    this.n = stores.notes
+    this.n = stores.note
     this.p = stores.people
     this.avSt = stores.avnote
 
     this.compte = null
-    this.compta = null
-    this.espace = null
-    this.partition = null
+    this.compti = null
     this.supprPa = false
 
     this.avatar = null
@@ -350,6 +140,10 @@ class SB {
     this.supprMb = new Set() // groupes dont les membres sont à supprimer
     this.supprNo = new Set() // groupes dont les notes sont à supprimer
   }
+
+  setCe (d) { this.compte = d}
+
+  setCi (d) { this.compti = d}
 
   setA (d) { this.avatar = d }
 
@@ -383,32 +177,24 @@ class SB {
   */
   store (buf) {
     if (this.compte) this.s.setCompte(this.compte)
-    if (this.compta) this.s.setCompta(this.compta)
-    if (this.espace) this.s.setEspace(this.espace)
-    if (this.partition) this.s.setPartition(this.partition)
+    if (this.compti) this.s.setCompti(this.compti)
     if (this.supprPa) this.s.delPartition()
 
-    if (this.avatar) {
-      this.a.setAvatar(this.avatar)
-    }
+    if (this.avatar) { this.a.setAvatar(this.avatar) }
 
     if (this.supprAv.size) for (const ida of this.supprAv) {
       this.a.delAvatar(ida)
       this.avSt.delNotes(ida, buf)
     }
 
-    if (this.groupe) {
-      this.g.setGroupe(this.groupe)
-    }
+    if (this.groupe) { this.g.setGroupe(this.groupe)}
 
     if (this.supprGr.size) for (const idg of this.supprGr) {
       this.g.delGroupe(idg)
       this.avSt.delNotes(idg, buf)
     }
 
-    if (this.chatgr) {
-      this.g.setChatgr(this.chatgr)
-    }
+    if (this.chatgr) { this.g.setChatgr(this.chatgr) }
 
     if (this.notes.size) 
       for(const [,n] of this.notes) { 
@@ -667,79 +453,6 @@ export class OperationS extends Operation {
     }
   }
 
-  async doCCEP (ret) {
-    const ds = new DataSync(ret.dataSync) // Mis à jour par le serveur
-
-    const sb = new SB()
-    const buf = new IDBbuffer()
-
-    if (ret.rowCompte) {
-      sb.compte = await compile(ret.rowCompte)
-      ds.compte.vs = ds.compte.vb
-      buf.putIDB(ret.rowCompte)
-    }
-    if (ret.rowCompta) {
-      sb.compta = await compile(ret.rowCompta)
-      ds.compta.vs = ds.compta.vb
-      buf.putIDB(ret.rowCompta)
-    }
-    if (ret.rowEspace) {
-      sb.espace = await compile(ret.rowEspace)
-      ds.espace.vs = ds.espace.vb
-      buf.putIDB(ret.rowEspace)
-    }
-    if (ret.rowPartition) {
-      sb.partition = await compile(ret.rowPartition)
-      ds.partition.vs = ds.partition.vb
-      buf.putIDB(ret.rowPartition)
-    }
-    return [ds, sb, buf, ret]
-  }
- 
-  /* Phase 1 : sync des rows CCEP */
-  async phase1 (cnx, ds1, ida) {
-    const session = stores.session
-    const args =  { 
-      token: session.authToken, 
-      dataSync: ds1.serial, optionC: cnx, ida: ida || 0
-    }
-    const ret1 = await post(this, 'Sync', args)
-    const [ds, sb, buf, ret] = await this.doCCEP(ret1)
-
-    if (cnx) {
-      if (session.fssync) session.fssync.open(ret.credentials, ret.emulator)
-
-      // Premier retour de Sync a rempli session. compteId, clek, nomBase
-      let blOK = false // la base locale est vide, aucune données utilisables
-      if (session.synchro) {
-        await idb.open()
-        blOK = await idb.checkAge()
-        await idb.storeBoot()
-        if (!blOK)
-          setTrigramme(session.nombase, await getTrigramme())
-        // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK 
-
-        await idb.loadAvNotes()
-        await idb.loadFetats()
-
-        const dav = await idb.getDataSync()
-        // partition / avatars / groupes c / m / n disparus
-        this.supprdsdav(true, ds, dav, sb, buf)
-        // Enrichit le ds courant par celui de IDB 
-        this.fusionDS(ds, dav)
-
-        // Chargement dans sb des groupes et avatars depuis IDB
-        await this.loadAvatarsGroupes (sb, ds)
-        /* Etat rétabli à celui de IDB, MAIS
-        - CCEP sont rafraîchis par ceux du serveur
-        - les avatars et groupes disparus (complètement ou partiellement) de compte ont été purgés
-        */
-      }
-    }
-
-    return [ds, sb, buf, ret]
-  }
-
   /* Gestion des suppressions entre ds (actuel) et dav (avant):
   - en "connexion", la maj du store est inutile (il n'a pas été rempli)
   - partition disparue
@@ -800,20 +513,21 @@ export class OperationS extends Operation {
   /* Depuis un dataSync courant, charge du serveur toutes les mises à jour
   des avatars et des groupes.
   - Itère tant qu'il y a des avatars / groupes à mettre à jour
-  - Toutefois chaque appel Sync PEUT ramener des CCEP
-    - ils sont traités
+  - Chaque appel Sync PEUT ramener une évolution de compte:
+    - elle est traitée
     - ceci PEUT conduire à avoir des groupes / avatars en plus ou moins
     - ce qui peut provoquer une itération
-  - le DataStync courant est retourné
+    - le DataStync courant est mis à jour à chaque itération
   lida : liste des ida A PRIORI à rechercher: des notifications ayant été reçue
   */
   async majAvatarsGroupes (ds1, lida) {
     const fs = stores.session.fssync
+    const session = stores.session
     const setIda = new Set(lida || [])
     let ds = ds1
     /* Phase itérative pour chaque avatar / groupe
-    A chaque itération il y a un commit IDB / store résultant 
-    mais DataSync n'est retourné qu'à la fin
+    A chaque itération il y a un commit IDB / store résultant (y compris le DataSync)
+    DataSync n'est retourné qu'à la fin
     */
     while (true) {
       for(const [,e] of ds.avatars) 
@@ -823,84 +537,80 @@ export class OperationS extends Operation {
           setIda.add(e.id)
       }
 
-      /* LA SORTIE DE LA BOUCLE 'et de la fonction) EST ICI */
+      /* LA SORTIE DE LA BOUCLE (et de la fonction) EST ICI */
       if (!setIda.size) return ds // YES !!! tous traités
 
-      // Traitement du PREMIER ida du set des ida à traiter
-      let ida
-      for(const x of setIda) { ida = x; break }
-      setIda.delete(ida)
-      const g = ID.estGroupe(ida)
-
-      const [dsx, sb, buf, ret] = await this.phase1(false, ds, ida)
-      // suppressions de IDB des disparus
-      this.supprdsdav(false, dsx, ds, sb, buf)
-      ds = dsx // ds mis à jour 
-
-      const item = (g ? ds.groupes : ds.avatars).get(ida)
+      // Extraction pour traitement d'un ida du set des ida à traiter
+      let ida; for(const x of setIda) { ida = x; break }; setIda.delete(ida)
       
-      /* MAIS ida lui-même PEUT ne plus être cité dans compte: 
-      il est désormais absent de ds.avatars / groupes 
-      La maj est terminée pour ce cycle */
-      if (!item) { 
-        sb.store(buf)
-        await buf.commit(ds)
-        if (fs) fs.setDS(syncQueue.dataSync)
-        continue 
-      }
+      const args =  { token: session.authToken, dataSync: ds.serial, ida }
+      const ret = await post(this, 'Sync', args)
+      const nvds = new DataSync(ret.dataSync)
+      const [sb, buf] = await this.traitCompte(ret, nvds)
+  
+      // suppressions de IDB des disparus
+      this.supprdsdav(false, nvds, ds, sb, buf) 
+      ds = nvds // // le nouveau ds devient le ds courant
+      const item = (ID.estGroupe(ida) ? ds.groupes : ds.avatars).get(ida)
+      
+      if (!item) {
+        /* ida lui-même PEUT ne plus être cité dans compte: il n'y a plus d'item
+        il est désormais absent de ds.avatars / groupes . Dans ce cas la maj est terminée pour ce cycle
+        Cas "normal" : chargement incrémental du sous-arbre avatar / groupe
+        */
+        if (ID.estGroupe(ida)) {
+          if (ret.rowGroupe || ret.rowChatgr) item.vs[1] = item.vb[1]
+          if (ret.rowMembres) item.vs[2] = item.vb[2]
+          if (ret.rowNotes) item.vs[3] = item.vb[3]
 
-      // Cas "normal" : chargement incrémental du sous-arbre avatar / groupe
-      if (ret.rowAvatar) {
-        sb.setA(await compile(ret.rowAvatar))
-        buf.putIDB(ret.rowAvatar)
-        item.vs = item.vb
-      }
-
-      if (g) {
-        if (ret.rowGroupe || ret.rowChatgr) item.vs[1] = item.vb[1]
-        if (ret.rowMembres) item.vs[2] = item.vb[2]
-        if (ret.rowNotes) item.vs[3] = item.vb[3]
-
-        if (ret.rowGroupe) {
-          sb.setG(await compile(ret.rowGroupe))
-          buf.putIDB(ret.rowGroupe)
-        }
-        if (ret.rowChatgr) {
-          sb.setH(await compile(rowChatgr))
-          buf.putIDB(ret.rowGroupe)
-        }
-        if (ret.rowMembres) 
-        for(const row of ret.rowMembres) {
-          sb.setM(await compile(row))
-          buf.putIDB(row)
-        }
-      } else {
-        if (ret.rowChats) 
-          for(const row of ret.rowChats) {
-            sb.setC(await compile(row))
+          if (ret.rowGroupe) {
+            sb.setG(await compile(ret.rowGroupe))
+            buf.putIDB(ret.rowGroupe)
+          }
+          if (ret.rowChatgr) {
+            sb.setH(await compile(rowChatgr))
+            buf.putIDB(ret.rowGroupe)
+          }
+          if (ret.rowMembres) 
+          for(const row of ret.rowMembres) {
+            sb.setM(await compile(row))
             buf.putIDB(row)
           }
-        if (ret.rowSponsorings) 
-          for(const row of ret.rowSponsorings) {
-            sb.setS(await compile(row))
-            buf.putIDB(row)
-          }
-        if (ret.rowTickets) 
-          for(const row of ret.rowTickets) {
-            sb.setT(await compile(row))
+        } else {
+          if (ret.rowAvatar) {
+            sb.setA(await compile(ret.rowAvatar))
+            buf.putIDB(ret.rowAvatar)
+            item.vs = item.vb
+          }  
+          if (ret.rowChats) 
+            for(const row of ret.rowChats) {
+              sb.setC(await compile(row))
+              buf.putIDB(row)
+            }
+          if (ret.rowSponsorings) 
+            for(const row of ret.rowSponsorings) {
+              sb.setS(await compile(row))
+              buf.putIDB(row)
+            }
+          if (ret.rowTickets) 
+            for(const row of ret.rowTickets) {
+              sb.setT(await compile(row))
+              buf.putIDB(row)
+            }
+        }
+
+        if (ret.rowNotes) 
+          for(const row of ret.rowNotes) {
+            sb.setN(await compile(row))
             buf.putIDB(row)
           }
       }
 
-      if (ret.rowNotes) 
-        for(const row of ret.rowNotes) {
-          sb.setN(await compile(row))
-          buf.putIDB(row)
-        }
-
+      // Commit Store et IDB d'un cycle, un sous-arbre de plus est enegistré
       sb.store(buf)
       await buf.commit(ds)
-      if (fs) fs.setDS(syncQueue.dataSync)
+      syncQueue.dataSync = ds
+      if (fs) fs.setDS(ds)
     }
   }
 }
@@ -912,22 +622,21 @@ export class SyncStd extends OperationS {
   /* Chargement des sous-arbres groupes et avatars de la liste
   lida. Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever)
   */
-  async run(ds1, lida) {
+  async run(lida) {
     try { 
-      return await this.majAvatarsGroupes(ds1, lida)
+      await this.majAvatarsGroupes(syncQueue.dataSync, lida)
     } catch (e) {
       await this.finKO(e)
     }
   }
 }
 
-/* Synchronisation standard *********************************/
+/* Synchronisation standard *********************************
 export class Sync2 extends OperationS {
   constructor() { super('Sync2') }
 
-  /* Chargement des sous-arbres groupes et avatars de la liste
-  lida. Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever)
-  */
+  // Chargement des sous-arbres groupes et avatars de la liste lida
+  // Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever)
   async run(ds1) {
     try { 
       const session = stores.session
@@ -940,6 +649,7 @@ export class Sync2 extends OperationS {
     }
   }
 }
+*/
 
 /* Connexion à un compte en mode avion *********************************/
 export class ConnexionAdmin extends Operation {
@@ -985,11 +695,9 @@ export class ConnexionAvion extends OperationS {
 
       { // Phase 1 : chargement depuis IDB des CCEP
         const sb = new SB()
-        const m = await idb.getCcep()
-        sb.compte = await compile(m.comptes)
-        sb.compta = await compile(m.comptas)
-        sb.espace = await compile(m.espaces)
-        if (m.partitions) sb.partition = await compile(m.partitions)
+        const [rce, rci] = await idb.getRceRci()
+        sb.setCe(await compile(rce))
+        sb.setCi(await compile(rci))
         sb.store()
       }
       
@@ -1022,15 +730,51 @@ export class ConnexionSynchroIncognito extends OperationS {
   async run() {
     try {
       const session = stores.session
+      const args =  { 
+        token: session.authToken, 
+        dataSync: DataSync.nouveau().serial, 
+        optionC: true, 
+        ida: 0
+      }
+      const ret = await post(this, 'Sync', args)
+      const ds = new DataSync(ret.dataSync)
+      const [sb, buf] = await this.traitCompte(ret, ds) // met à jour ds
 
-      const ds1 = DataSync.nouveau()
-      const [ds, sb, buf] = await this.phase1(true, ds1)
+      { // Premier retour de Sync a rempli: session. compteId, clek, nomBase
+        if (session.fssync) session.fssync.open(ret.credentials, ret.emulator)
+        
+        if (session.synchro) {
+          await idb.open()
+          const blOK = await idb.checkAge()
+          await idb.storeBoot()
+          if (!blOK)
+            setTrigramme(session.nombase, await getTrigramme())
+          // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK 
+  
+          await idb.loadAvNotes()
+          await idb.loadFetats()
+  
+          const dav = await idb.getDataSync()
+          // partition / avatars / groupes c / m / n disparus
+          this.supprdsdav(true, ds, dav, sb, buf)
+          // Enrichit le ds courant par celui de IDB 
+          this.fusionDS(ds, dav)
+  
+          // Chargement dans sb des groupes et avatars depuis IDB
+          await this.loadAvatarsGroupes (sb, ds)
+          /* Etat rétabli à celui de IDB, MAIS
+          - CCEP sont rafraîchis par ceux du serveur
+          - les avatars et groupes disparus (complètement ou partiellement) de compte ont été purgés
+          */
+        }
+      }
+  
       if (session.fssync) session.fssync.setDS(ds)
       sb.store(buf)
       await buf.commit(ds)
 
       // Phase 2 : chargement des sous-arbres groupes et avatars
-      syncQueue.dataSync = await this.majAvatarsGroupes(ds, [])
+      await this.majAvatarsGroupes(ds, [])
       if (session.fssync) session.fssync.setDS(syncQueue.dataSync)
 
       if (session.synchro) // Chargement des descriptifs des fichiers du presse-papier
@@ -1147,13 +891,25 @@ export class SyncSp extends OperationS {
       await session.setIdClek(id, null, clek) 
       RegCles.set(cleA)
 
-      const ret1 = await post(this, 'SyncSp', args)
-      const [ds, sb, buf, ret] = await this.doCCEP(ret1)
+      const ret = await post(this, 'SyncSp', args)
+      const ds = DataSync.nouveau()
+      // const [sb, buf] = await this.loadCompte(ret, ds)
   
-      const item = ds.avatars.get(id)
-      sb.setA(await compile(ret.rowAvatar))
+      const sb = new SB()
+      const buf = new IDBbuffer()
+    
+      const compte = await compile(ret.rowCompte)
+      sb.setCe(compte)
+      ds.compte = { id: compte.id, rds: compte.rds, vs: 1, vb: 1 }
+      buf.putIDB(ret.rowCompte)
+      sb.setCi(await compile(ret.rowCompti))
+      buf.putIDB(ret.rowCompti)
+
+      const avatar = await compile(ret.rowAvatar)
+      sb.setA(avatar)
       buf.putIDB(ret.rowAvatar)
-      item.vs = item.vb
+      const item = { id: avatar.id, rds: avatar.rds, vs: 1, vb: 1 }
+      ds.avatars.set(id, item)
 
       if (ret.rowChat) {
         sb.setC(await compile(ret.rowChat))

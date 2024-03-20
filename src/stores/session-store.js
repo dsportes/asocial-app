@@ -353,9 +353,13 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    setCompta (compta) {
-      this.compta = compta
+    setCompti (compti) {
+      if (!this.compti || this.compti.v < compti.v) this.compti = compti
     }, 
+
+    setCompta (compta) {
+      if (!this.compta || this.compta.v < compta.v) this.compta = compta
+    },
 
     setEspace (espace, estAdmin) {
       if (estAdmin) this.espaces.set(espace.id, espace)
@@ -386,16 +390,6 @@ export const useSessionStore = defineStore('session', {
     setSynthese (synthese) {
       this.synthese = synthese
     },
-
-
-    /*
-    setEstSponsor (sp) {
-      this.estDelegue = sp
-    },
-    setEstAutonome (a) {
-      this.estAutonome = a
-    },
-    */
 
     setFsSync (fsSync) {
       this.fsSync = fsSync

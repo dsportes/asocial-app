@@ -67,8 +67,8 @@ export async function deleteIDB (nb) {
 
 /* Classe IDB *******************************************************************/
 class IDB {
-  static snoms = { boot: 1, datasync: 2, comptes: 3, comptas: 4, espaces: 5, partitions: 6 }
-  static lnoms = [ '', 'boot', 'datasync', 'comptes', 'comptas', 'espaces', 'partitions' ]
+  static snoms = { boot: 1, datasync: 2, comptes: 3, comptis: 4 }
+  static lnoms = [ '', 'boot', 'datasync', 'comptes', 'comptis' ]
   static cnoms = { avatars: 1, groupes: 2, notes: 3, chats: 4, sponsorings: 5, tickets: 6, membres: 7, chatgrs: 8 }
 
   static EX1 (e) { return isAppExc(e) ? e : new AppExc(E_DB, 1, [e.message])}
@@ -173,19 +173,23 @@ class IDB {
   /** Retourne la Map des CCEP (mode avion) *************************************
   Map: clé: _nom, valeur: row
   */
-  async getCcep () {
+  async getRceRci () {
     const session = stores.session
     try {
-      const r = []
-      await this.db.singletons.each(rec => { 
-        if (rec.n > 2) r.push(rec.data)
-      })
-      const m = {}
-      for(const data of r) {
-        const row = decode(await decrypter(session.clek, data))
-        m[row._nom] = row
+      let rce, rci
+      {
+        const rec = await this.db.singletons.get(IDB.snoms.comptes)
+        if (rec) { 
+          rce = await decrypter(session.clek, rec.data)
+        }
       }
-      return m
+      {
+        const rec = await this.db.singletons.get(IDB.snoms.comptis)
+        if (rec) { 
+          rci = await decrypter(session.clek, rec.data)
+        }
+      }
+      return [rce, rci]
     } catch (e) {
       throw IDB.EX2(e)
     }
