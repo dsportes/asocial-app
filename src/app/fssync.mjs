@@ -103,7 +103,7 @@ export class FsSyncSession {
       z = false
     }
     console.log(`onRow: ${row._nom} ${z ? 'zombi' : ''} ${row.id}`)
-    syncQueue.setRows([row])
+    await syncQueue.setRows([row])
   }
 
   async setCompte (id) { // comptas ET espace

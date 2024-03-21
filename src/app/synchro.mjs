@@ -20,34 +20,27 @@ class Queue {
 
     /* Evénnements à traiter */
     this.vcpt = 0
-    /* cle: rds, 
-      valeur pour un avatar: v
-      valeur pour un groupe: { v, vg, vm, vn }
-        - v: version générale, incrémentée quelque soit la maj de versions
-        - vg: version de groupe / chatgr
-        - vm: version des membres
-        - vn: version des notres
-    */
-    this.avgrs = new Map()
+    this.avgrs = new Map() /* clé: rds, valeur: v */
   }
 
   /* Enregistrement de l'arrivée d'un ou plusieurs row versions sur écoute / WS */
-  setRows (rows) { 
-    if (rows) rows.forEach(row => {
-      const rds = Rds.deId(row.id)
+  async setRows (rows) { 
+    if (rows) for (const row of rows) {
+      
+      if (row._nom === 'espaces') {
+        const espace = await compile(row)
+        stores.session.setEspace(espace)
+        continue
+      }
 
       switch (Rds.type(row.id)) {
       case Rds.COMPTE : { 
         if (this.vcpt.v < row.v) this.vcpt.v = row.v
         break
       }
-      case Rds.GROUPE : {
-        const vx = decode(r._data) // vx: { v, vg, vm, vn  } ???
-        const x = this.avgrs.get(rds)
-        if (!x || x.v < vx.v) this.avgrs.set(rds, vx)
-        break
-      }
-      case Rds.AVATAR : {
+      case Rds.AVATAR :
+      case Rds.GROUPE : { // le détail des versions dans _data_ n'est pas utile ici
+        const rds = Rds.deId(row.id)
         const x = this.avgrs.get(rds)
         if (!x || x.v < row.v) this.avgrs.set(rds, row.v)
         break
@@ -55,7 +48,7 @@ class Queue {
       }
 
       this.reveil()
-    })
+    }
   }
 
   reveil () {

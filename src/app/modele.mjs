@@ -4,7 +4,7 @@ import mime2ext from 'mime2ext'
 import { $t, dhcool, hash, rnd6, inverse, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
 import { Rds, ID, Cles, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, 
-  lcSynt, synthesesPartition, FLAGS } from './api.mjs'
+  lcSynt, synthesesPartition, compileMcpt, FLAGS } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { idb } from './db.mjs'
@@ -270,13 +270,13 @@ Type des notifications:
 
 Une notification a les propriétés suivantes:
 - `nr`: restriction d'accès: 
-  - 0 : **aucune restriction**. La notification est informative mais peut annoncer une restriction imminente.
-  - 1 : **restriction réduite**
+  - 1 : **aucune restriction**. La notification est informative mais peut annoncer une restriction imminente.
+  - 2 : **restriction réduite**
     - E : espace figé
     - P : accès en lecture seule
     - C : accès en lecture seule
     - Q : actions accroissant le volume interdites
-  - 2 : **restriction forte**
+  - 3 : **restriction forte**
     - E : espace clos
     - P : accès minimal
     - C : accès minimal
@@ -286,31 +286,43 @@ Une notification a les propriétés suivantes:
   - type E: la clé A du Comptable (que tous les comptes de l'espace ont).
   - types P et C par la clé P de la partition.
   - types Q et X: pas de texte, juste un code.
-- `idSource`: id du délégué ayant créé cette notification pour un type P ou C quand ce n'est pas le Comptable. !!!Discutable!!!
+- `idDel`: id du délégué ayant créé cette notification pour un type P ou C quand ce n'est pas le Comptable. !!!Discutable!!!
 
 **Remarque:** une notification `{ dh: ... }` correspond à la suppression de la notification antérieure (ni restriction, ni texte).
 */
 export class Notification {
-  // Factory construisant une objet Notification depuis sa sérialisation
-  static deSerial (serial) {
-    return new Notification(decode(serial))
+  // Factory construisant une objet Notification depuis sa forme cryptée
+  static async decrypt (ntf, cle) {
+    const n = { nr: ntf.nr || 0, dh: ntf.dh || 0 }
+    n.texte = ntf.texte ? await decrypterStr(cle, nrf.texte) : ''
+    if (ntf.idDel) n.idEl = ntf.idDel
+    return new Notification(n)
   }
 
-  constructor ({nr, dh, texte, idSource}) {
-    if (idSource) this.idSource = ID.long(idSource, NomGenerique.ns)
+  async crypt(cle) {
+    const n = { nr: this.nr, dh: this.dh }
+    if (this.idDel) n.idDel = ID.court(this.idDel)
+    n.texte = this.texte ? await crypter(cle, this.texte) : ''
+    return n
+  }
+
+  constructor ({nr, dh, texte, idDel}) {
+    if (idDel) this.idDel = ID.long(idSource, RegCles.ns)
     this.nr = nr || 0
     this.texte = texte || ''
-    this.dh = dh || Date.now()
+    this.dh = dh || Date.now()  
   }
 
+  /*
   clone () { return Notification.deSerial(this.serial) }
 
   get serial() {
     const x = { nr: this.nr || 0, dh: this.dh }
     if (this.texte) x.texte = this.texte
-    if (this.idSource) x.idSource = ID.court(this.idSource)
+    if (this.idDel) x.idDel = ID.court(this.idDel)
     return new Uint8Array(encode(x))
   }
+  */
 }
 
 /****************************************************
@@ -414,223 +426,117 @@ export class Espace extends GenDoc {
 
 /** Synthese *********************************************
 _data_:
-- `id` : id de l'espace.
-- `v` : date-heure d'écriture (purement informative).
+- `id` : ns de son espace.
+- `v` : date-heure de dernière mise à jour (à titre informatif).
 
-- `tp` : table des synthèses des partitions de l'espace. L'indice dans cette table est l'id court de la partition. Chaque élément est la sérialisation de:
-  - id : id long de la partition (calculé localement)
-  - `qc qn qv` : quotas de la partition.
-  - `ac an av` : sommes des quotas attribués aux comptes attachés à la partition.
-  - `c n v` : somme des consommations journalières et des volumes effectivement utilisés.
-  - `ntr0` : nombre de notifications partition sans restriction d'accès.
-  - `ntr1` : nombre de notifications partition avec restriction d'accès 1.
-  - `ntr2` : nombre de notifications partition avec restriction d'accès 2_.
-  - `nbc` : nombre de comptes.
-  - `nbd` : nombre de comptes _délégués_.
-  - `nco0` : nombres de comptes ayant une notification sans restriction d'accès.
-  - `nco1` : nombres de comptes ayant une notification avec restriction d'accès 1.
-  - `nco2` : nombres de comptes ayant une notification avec restriction d'accès 2.
+- `tsp` : table des _synthèses_ des partitions.
+  - _index_: numéro de la partition.
+  - _valeur_ : `synth`, objet des compteurs de synthèse calculés de la partition.
+    - `id nbc nbd`
+    - `ntfp[1,2,3]`
+    - `q` : `{ qc, qn, qv }`
+    - `qt` : { qc qn qv c2m n v }`
+    - `ntf[1,2,3]`
+    - `pcac pcan pcav pcc pcn pcv`
 
-  Claculés localement les _pourcentages_: 
-  - pcac pcan pcav pcc pcn pcv
-
-`tp[0]` est la somme des `tp[1..N]` calculé en session, pas stocké.
-
+Une agrégation des `synth[i]` est calculée en session et stockée en `tsp[0]`.
 */
 export class Synthese extends GenDoc {
   get ns () { return ID.ns(this.id) }
-  /* lcSynt = ['qc', 'qn', 'qv', 'ac', 'an', 'av', 'c', 'n', 'v', 
-  'nbc', 'nbd', 'ntr0', 'ntr1', 'ntr2', 'nco0', 'nco1', 'nco2'] */
 
   async compile (row) {
-    const session = stores.session
-    this.tp = new Array(row.tp.length)
+    this.tsp = new Array(row.tsp.length)
 
-    const a0 = { id: 0 } // colonne 0 de totalisation
-    lcSynt.forEach(f => { a0[f] = 0 })
-
-    for (let i = 1; i < row.tp.length; i++) {
-      const x = row.tp[i]
-      if (x && !x.vide) {
-        x.id = ID.long(i, this.ns)
-        x.pcac = !x.qc ? 0 : Math.round(x.ac * 100 / x.qc) 
-        x.pcan = !x.qn ? 0 : Math.round(x.an * 100 / x.qn) 
-        x.pcav = !x.qv ? 0 : Math.round(x.av * 100 / x.qv) 
-        x.pcc = !x.qc ? 0 : Math.round(x.c * 100 / x.qc) 
-        x.pcn = !x.qn ? 0 : Math.round(x.n * 100 / x.qn) 
-        x.pcv = !x.qv ? 0 : Math.round(x.v * 100 / x.qv)   
-        lcSynt.forEach(f => { a0[f] +=  x[f] })
-      }
-      this.tp[i] = x
+    const a = { // colonne 0 de totalisation
+      id: 0, 
+      nbc: 0, 
+      nbd: 0,
+      ntfp: [0, 0, 0],
+      ntf: [0, 0, 0],
+      q: { qc: 0, qn: 0, qv: 0 },
+      qt: { qc: 0, qn: 0, qv: 0, c2m: 0, n, v }
     }
-    a0.pcac = !a0.qc ? 0 : Math.round(a0.ac * 100 / a0.qc) 
-    a0.pcan = !a0.qn ? 0 : Math.round(a0.an * 100 / a0.qn) 
-    a0.pcav = !a0.qv ? 0 : Math.round(a0.av * 100 / a0.qv) 
-    a0.pcc = !a0.qc ? 0 : Math.round(a0.c * 100 / a0.qc) 
-    a0.pcn = !a0.qn ? 0 : Math.round(a0.n * 100 / a0.qn) 
-    a0.pcv = !a0.qv ? 0 : Math.round(a0.v * 100 / a0.qv) 
-    this.tp[0] = a0 
+
+    for (let i = 1; i < row.tsp.length; i++) {
+      const r = row.tsp[i] || null
+      if (r) {
+        r.id = ID.long(i, this.ns)
+        r.pcac = !r.q.qc ? 0 : Math.round(r.qt.qc * 100 / r.q.qc) 
+        r.pcan = !r.q.qn ? 0 : Math.round(r.qt.qn * 100 / r.q.qn) 
+        r.pcav = !r.q.qv ? 0 : Math.round(r.qt.qv * 100 / r.q.qv) 
+        r.pcc = !r.q.qc ? 0 : Math.round(r.qt.c2m * 100 / r.q.qc) 
+        r.pcn = !r.q.qn ? 0 : Math.round(r.qt.n * 100 / r.q.qn) 
+        r.pcv = !r.q.qv ? 0 : Math.round(r.qt.v * 100 / r.q.qv) 
+      }
+      a.nbc += r.nbc
+      a.nbd += r.nbd
+      a.ntfp[0] += r.ntfp[0]; a.ntfp[1] += r.ntfp[1]; a.ntfp[2] += r.ntfp[2]
+      a.ntf[0] += r.ntf[0]; a.ntf[1] += r.ntf[1]; a.ntf[2] += r.ntf[2]
+      ['qc', 'qn', 'qv'].forEach(f => { a.q[f] += r.q[f]})
+      ['qc', 'qn', 'qv', 'c2m', 'n', 'v'].forEach(f => { a.qt[f] += r.qt[f]})
+    }
+    a.pcac = !a.q.qc ? 0 : Math.round(a.qt.qc * 100 / a.q.qc) 
+    a.pcan = !a.q.qn ? 0 : Math.round(a.qt.qn * 100 / a.q.qn) 
+    a.pcav = !a.q.qv ? 0 : Math.round(a.qt.qv * 100 / a.q.qv) 
+    a.pcc = !a.q.qc ? 0 : Math.round(a.qt.c2m * 100 / a.q.qc) 
+    a.pcn = !a.q.qn ? 0 : Math.round(a.qt.n * 100 / a.q.qn) 
+    a.pcv = !a.q.qv ? 0 : Math.round(a.qt.v * 100 / a.q.qv) 
+    this.tps[0] = a
   }
 
-  /*
-  static async nouveau (aco, apr) { 
-    const session = stores.session
-    const r = { id: session.ns, v: Date.now(), atr: [null, null] }
-
-    const e = {}
-    lcSynt.forEach(f => { e[f] = 0 })
-    e.qc = apr[0]
-    e.qn = apr[1]
-    e.qv = apr[2]
-    e.ac = aco[0]
-    e.a1 = aco[1]
-    e.a2 = aco[2]
-    e.nbc = 1
-    e.nbsp = 1
-
-    r.atr[1] = new Uint8Array(encode(e))
-    return { _nom: 'syntheses', id: r.id, v: r.v, _data_: new Uint8Array(encode(r))}
-  }
-  */
 }
 
 /** Partition *********************************
 _data_:
-- `id` : numéro d'ordre de création de la partition par le Comptable.
+- `id` : numéro de partition attribué par le Comptable à sa création.
 - `v` : 1..N
 
-- `rds`
-- `qc qn qv` : quotas totaux de la partition.
-- `clePK` : clé P de la partition cryptée par la clé K du comptable.
-- `notif`: notification de niveau _partition_ dont le texte est crypté par la clé P de la partition.
-
-- `ldel` : liste des clés A des délégués cryptées par la clé P de la partition.
-
-- `tcpt` : table des comptes attachés à la partition. L'index `it` dans cette table figure dans la propriété `it` du document `comptes` correspondant :
-  - `notif`: notification de niveau compte dont le texte est crypté par la clé P de la partition (`null` s'il n'y en a pas).
-  - `cleAP` : clé A du compte crypté par la clé P de la partition.
-  - `del`: `true` si c'est un délégué.
-  - `q` : `qc qn qv c n v` extraits du document `comptas` du compte. 
-    - En cas de changement de `qc qn qv` la copie est immédiate, sinon c'est effectué seulement lors de la prochaine connexion du compte.
-    - `c` : consommation moyenne mensuelle lissée sur M et M-1 (`conso2M` de compteurs)
-    - `n` : nn + nc + ng nombre de notes, chats, participation aux groupes.
-    - `v` : volume de fichiers effectivement occupé.
+- `dhic` : date-heure de la dernière incorporation des consommations des comptes attachés à la partition.
+- `nrp`: niveau de restriction de la notification (éventuelle) de niveau _partition_ mémorisée dans `espaces` et dont le texte est crypté par la clé P de la partition.
+- `q`: `{ qc, qn, qv }` quotas globaux attribués à la partition par le Comptable.
+- `mcpt` : map des comptes attachés à la partition. 
+  - _clé_: id du compte.
+  - _valeur_: `{ nr, cleA, del, q }`
+    - `nr`: niveau de restriction de la notification de niveau _compte_ (0 s'il n'y en a pas, 1 (sans restriction), 2 ou 3).
+    - `cleAP` : clé A du compte crypté par la clé P de la partition.
+    - `del`: `true` si c'est un délégué.
+    - `q` : `qc qn qv c2m nn nc ng v` extraits du document `comptas` du compte.
+      - `c2m` est le compteur `conso2M` de compteurs, montant moyen _mensualisé_ de consommation de calcul observé sur M/M-1 (observé à `dhic`). 
 
 Compilé:
 - this.sdel: Set des ids des délégués
 
-- tcpt compilé
-  - it : indice dans la table tcpt (id de la partition)
-  - notif: notification de niveau compte
-  - del: true si délégué
-  - q : 
-    - qc qn qv c n v : extraits du document `comptas` du compte
-    - pcc : pourcentage d'utilisation de la consommation journalière c / qc
-    - pcn : pourcentage d'utilisation effective de qn : n / qn
-    - pcv : pourcentage d'utilisation effective de qc : v / qv
+- mcpt compilé - Ajout à q :
+  - pcc : pourcentage d'utilisation de la consommation journalière c2m / qc
+  - pcn : pourcentage d'utilisation effective de qn : nn + nc ng / qn
+  - pcv : pourcentage d'utilisation effective de qc : v / qv
 
-- this.synth: item de synthese calculé localement, 
-  - cet objet est exactement similaire à une ligne de Synthese de l'espace.
-  - plus, calculés localement :
-    - pcac : pourcentage d'affectation des quotas : ac / qc
-    - pcan : pourcentage d'affectation des quotas : an / qn
-    - pcav : pourcentage d'affectation des quotas : av / qv
-    - pcc : pourcentage d'utilisation de la consommation journalière c / qc
-    - pcn : pourcentage d'utilisation effective de qn : n / qn
-    - pcv : pourcentage d'utilisation effective de qc : v / qv
+this.synth est calculé:
+- `qt` : les totaux des compteurs `q` :
+  (`qc qn qv c2m n (nn+nc+ng) v`) de tous les comptes,
+- `ntf`: [1, 2, 3] - le nombre de comptes ayant des notifications de niveau de restriction 1 / 2 / 3. 
+- `nbc nbd` : le nombre total de comptes et le nombre de délégués.
+- _recopiés de la racine dans `synth`_ : `id nrp q`
+- plus, calculés localement :
+  - pcac : pourcentage d'affectation des quotas : qt.qc / q.qc
+  - pcan : pourcentage d'affectation des quotas : qt.qn / q.qn
+  - pcav : pourcentage d'affectation des quotas : qt.qv / q.qv
+  - pcc : pourcentage d'utilisation de la consommation journalière qt.c2m / q.qc
+  - pcn : pourcentage d'utilisation effective de qn : qt.n / q.qn
+  - pcv : pourcentage d'utilisation effective de qc : qt.v / q.qv
 */
 export class Partition extends GenDoc {
-  get rds () { return RegRds.rds(this.id) }
+  get ns() { return ID.ns(this.id) }
+
+  async locComp (id, cleAP) {
+    const cleP = RegCles.get(id)
+    const cleA = await decrypter(cleP, cleAP)
+    RegCles.set(cleA)
+  }
 
   async compile (row) {
-    const session = stores.session
     this.vsh = row.vsh || 0
-    const estComptable = session.estComptable
-    const clek = session.clek
-    const ns = ID.ns(this.id)
-    RegRds.set(row.rds, this.id)
-
-    this.qc = row.qc || 0; this.qn = row.qn || 0; this.qv = row.qv || 0
-
-    if (estComptable) RegCles.set(await decrypter(clek, row.clePK))
-    /* Pour les comptes standard, 
-    compile() de leur compte a enregistré la clé P de LEUR partition */
-
-    const clep = RegCles.get(this.id)
-    if (estComptable && row.notif) 
-      // Le Comptable peut visiter et notifier TOUTES les partitions (pas seulement la soienne)
-      this.notif = Notification.deSerial(await decrypter(clep, row.notif))
-
-    this.qc = row.qc; this.qn = row.qn; this.qv = row.qv
-
-    this.sdel = new Set() // Set des délégués
-    if (row.ldel) {
-      for(const cleAP of row.ldel) {
-        const cleA = await decrypter(clep, cleAP)
-        RegCles.set(cleA)
-        this.sdel.add(Cles.id(cleA, ns))
-      }
-    }
-
-    if (row.tcpt) { // Transmis seulement aux délégués
-      this.tcpt = new Array(row.tcpt.length)
-      for (let it = 0; it < row.tcpt.length; it++) {
-        const item = row.tcpt[it]
-        if (!item || item.vide) { this.tcpt[it] = null; continue }
-        const r = { }
-        if (item.del) r.del = true
-        const cleA = await decrypter(clep, item.cleAP)
-        RegCles.set(cleA)
-        r.id = Cles.id(cleA, ns)
-        r.it = it
-        if (item.notif)
-          r.notif = Notification.deSerial(await decrypter(clep, item.notif))
-        r.q = { ...item.q }
-        r.q.pcc = !r.q.qc ? 0 : Math.round(r.q.c * 100 / r.q.qc) 
-        r.q.pcn = !r.q.qn ? 0 : Math.round(r.q.n * 100 / r.q.qn) 
-        r.q.pcv = !r.q.qv ? 0 : Math.round(r.q.v * 100 / r.q.qv) 
-        this.tcpt[it] = r
-      }
-      // synth : généré localement
-      this.synth = synthesesPartition(this)
-    }
-  }
-
-  get aCompte () {
-    for (const x of this.act) if (!x.vide) return true
-    return false
-  }
-
-  static async getIdT (clet, id) {
-    return await crypter(clet, '' + ID.court(id))
-  }
-
-  // id de la partition, qn , qv 
-  static async nouvelle (idt, qt, primitive, qc) {
-    const session = stores.session
-    const c = getCle(idt)
-    const r = {}
-    r.vsh = 0
-    r.id = idt
-    r.v = 1
-    r.act = [null]
-    r.qc = qt[0]
-    r.qn = qt[1]
-    r.qv = qt[2]
-    r.stn = 0
-    r.cletX = await crypter(session.clek, c)
-    if (primitive) { // inscription du comptable comme premier compte
-      const nac = NomGenerique.comptable()
-      const item = {
-        idT: await Tribu.getIdT(c, nac.id),
-        qc: qc[0], qn: qc[1], qv: qc[2],
-        ac: 0, a1: 0, a2: 0, stn: 0, ca: 0, n: 0, v: 0,
-        nasp: await crypter(c, new Uint8Array(encode(nac.anr)))
-      }
-      r.act.push(item)
-    }
-    const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'tribus', id: r.id, v: r.v, _data_ }
+    this.synth = compileMcpt(this, row, this.locComp)
   }
 }
 
@@ -643,54 +549,69 @@ _data_ :
 
 - `rds`
 - `hXC`: hash du PBKFD de la phrase secrète complète (sans son `ns`).
-- `cleKXC` : clé K cryptée par XC (PBKFD phrase secrète complète).
+- `cleKXC` : clé K cryptée par XC (PBKFD de la phrase secrète complète).
+- `cleEK` : clé de l'espace cryptée par la clé K du compte, à la création de l'espace pour le Comptable, à l'acceptation du sponsoring pour les autres comptes.
+
+- `dhvuK` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
+- `qv` : `{ qc, qn, qv, pcc, pcn, pcv, nbj }`
+  - `pcc, pcn, pcv, nbj` : remontés de `compta` en fin d'opération quand l'un d'eux passe un seuil de 5% / 5j, à la montée ou à la descente.
+    - `pcc` : pour un compte O, pourcentage de sa consommation mensualisée sur M/M-1 par rapport à son quota `qc`.
+    - `nbj` : pour un compta A, nombre de jours estimés de vie du compte avant épuisement de son solde en prolongeant sa consommation des 4 derniers mois et son abonnement `qn qv`.
+    - `pcn` : pourcentage de son volume de notes / chats / groupes par rapport à son quota qn.
+    - `pcv` : pourcentage de son volume de fichiers par rapport à son quota qv.
+  - `qc qn qv` : maj immédiate en cas de changement des quotas.
+    - pour un compte O identiques à ceux de son entrée dans partition.
+    - pour un compte A, qn qv donné par le compte lui-même.
+    - en cas de changement, les compteurs de consommation sont remontés. 
+  - permet de calculer `notifQ`, `notifX` (O), `notifS` (A)
 
 _Comptes "O" seulement:_
-- `clePA` : clé P de la partition cryptée par la clé A de l'avatar principal du compte.
-- `rdsp` : `rds` (court) du documents partitions.
-- `idp` : id de la partition (pour le serveur) (sinon 0)
+- `clePK` : clé P de la partition cryptée par la clé K du compte. Si cette clé a une longueur de 256, la clé P a été cryptée par la clé publique de l'avatar principal du compte suite à une affectation à une partition APRÈS sa création (changement de partition, passage de compte A à O)
+- `idp` : id de la partition (son numéro).
 - `del` : `true` si le compte est délégué de la partition.
-- `it` : index du compte dans `tcpt` de son document `partitions`.
+- `notif`: notification de niveau _compte_ dont le texte est crypté par la clé P de la partition (`null` s'il n'y en a pas).
 
 - `mav` : map des avatars du compte. 
   - _clé_ : id court de l'avatar.
-  - _valeur_ : `{ rds, claAK }` compilé => rds (long)
+  - _valeur_ : `{ rds, claAK }`
     - `rds`: de l'avatar (clé d'accès à son `versions`).
     - `cleAK`: clé A de l'avatar crypté par la clé K du compte.
-  mav compilé: Set des id des avatars
 
 - `mpg` : map des participations aux groupes:
   - _clé_ : id du groupe
-  - _valeur_: `{ cleGK, rds, lp }`
+  - _valeur_: `{ rds, cleGK, lav }`
+    - `rds`: du groupe (clé d'accès à son `versions`)
     - `cleGK` : clé G du groupe cryptée par la clé K du compte.
-    - rds: du groupe (clé d'accès à son `versions`)
-    - `lp`: map des participations: 
-      - _clé_: id court de l'avatar.
-      - _valeur_: indice `im` du membre dans la table `tid` du groupe (`ids` du membre).
-
-    - _valeur_ compilé => sav : set des id (long) des avatars du compte participant au groupe
+    - `lav`: liste de ses avatars participant au groupe. compilé -> sav : Set
 
 **Comptable seulement:**
-- `cleEK` : Clé E de l'espace cryptée par la clé K.
-- `tp` : table des partitions : `{c, qc, qn, qv}`. => compilé { code, qc, qn, qv }
-  - `c` : `{ cleP, code }` crypté par la clé K du comptable
-    - `cleP` : clé P de la partition.
-    - `code` : texte très court pour le seul usage du comptable.
-  - `qc, qn, qv` : quotas globaux de la partition.
+- `tpK` : table des partitions cryptée par la clé K du Comptable `[ {cleP, code }]`. Son index est le numéro de la partition.
+  - `cleP` : clé P de la partition.
+  - `code` : code / commentaire court de convenance attribué par le Comptable
+Compilé en mcode: Map(): clé: idp, valeur: code
 */
 export class Compte extends GenDoc {
+  get ns () { return ID.ns(this.id) }
   get rds () { return RegRds.rds(this.id) }
+  get estComptable () { return ID.estComptable(this.id) }
 
   async compile (row) {
     this.vsh = row.vsh || 0
     const session = stores.session
     const clek = session.clek || await session.setIdClek(this.id, row.cleKXC)
-    const ns = ID.ns(this.id)
-    RegRds.set(row.rds, this.id)
 
-    this.it = row.it || 0
-    this.estA = this.it === 0
-    this.estComptable = ID.estComptable(this.id)
+    RegCles.set(await decrypter(clek, e.cleEK))
+    RegRds.set(row.rds, this.id)
+    this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
+    this.qv = row.qv
+
+    if (row.idp) {
+      this.estA = true
+      this.idp = row.idp
+      const clep = RegCles.set(await decrypter(clek, e.clePK))
+      this.del = row.del || false
+      this.notif = row.notif ? await Notification.decrypt(row.notif, clep) : null
+    }
 
     this.mav = new Set()
     for(const idx in row.mav) {
@@ -701,13 +622,6 @@ export class Compte extends GenDoc {
       this.mav.add(id)
     }
 
-    if (!this.estA) {
-      const cleA = RegCles.get(this.id)
-      this.idp = RegCles.set(await decrypter(cleA, row.clePA))
-      this.del = row.del
-      this.rdsp = RegRds.set(row.rdsp, this.idp)
-    }
-
     this.mpg = new Map()
     for(const idx in row.mpg) {
       const idg = ID.long(parsInt(idx), ns)
@@ -715,30 +629,27 @@ export class Compte extends GenDoc {
       RegCles.set(await decrypter(clek, e.cleGK))
       RegRds.set(e.rds, idg)
       const sav = new Set()
-      for(const idx2 in e.lp) sav.add(ID.long(parseInt(idx2), ns))
+      for(const idx2 of e.lp) sav.add(ID.long(parseInt(idx2), this.ns))
       this.mpg.set(idg, sav)
     }
 
     if (this.estComptable) {
-      RegCles.set(await decrypter(clek, row.cleEK))
-      this.tp = new Array(row.tp.length)
-      for(let i = 0; i < row.tp.length; i++) {
+      this.mcode = new Map()
+      const t = await decrypter(clek, row.tpK)
+      for(let i = 1; i < row.tp.length; i++) {
         const e = row.tp[i]
-        if (e && !e.vide) {
-          const c = decode(await decrypter(clek, e.c))
-          RegCles.set(c.cleP)
-          this.tp[i] = { code: c.code, qc: e.qc, qn: e.qn, qv: e.qv}
-        } else this.tp[i] = null
+        if (e) {
+          const c = RegCles.set(e.cleP)
+          if (e.code) this.mcode.set(Cles.id(c, this.ns), e.code)
+        }
       }
     }
   }
 
   // retourne le code de la partition id (Comptable)
   codeP (id) { 
-    const n = ID.court(id)
-    if (!this.tp) return '#' + n
-    const a = this.tp[n]
-    return a && a.code ? a.code : '#' + n
+    const n = ID.long(id, this.ns)
+    return this.mcode(n) || '#' + ID.court(id)
   }
   
   // Retourne [amb, amo] - un avatar au moins accède aux membres / notes du groupe
@@ -758,23 +669,15 @@ export class Compte extends GenDoc {
     return [amb, ano]
   }
   
-  /* Ids des groupes de l'avatar ida (tous avatars si ida absent) */
+  /* Id des groupes de l'avatar ida (tous avatars si ida absent) */
   idGroupes (ida) {
     const x = new Set()
-    if (ida) this.mpg.forEach((sav, idg) => { if (ida && sav.has(ida)) x.add(idg) })
+    if (ida) this.mpg.forEach((sav, idg) => { if (sav.has(ida)) x.add(idg) })
     else this.mpg.forEach((sav, idg) => { x.add(idg)})
     return x
   }
 
   /*
-  // im de l'avatar ida dans le groupe idg
-  imGA (idg, ida) {
-    for (const [ ,e]  of this.mpg){
-      if (e.ng.id === idg && e.id === ida) return e.im
-    }
-    return 0
-  }
-
   // Map(ida, im) des avatars du compte dans mpg ou les invits des avatars
   imIdGroupe (idg) { // map (cle:id val:im) pour le groupe idg
     const m = new Map()
@@ -787,139 +690,35 @@ export class Compte extends GenDoc {
     })
     return m
   }
-
-  // Map (cle:im val:na) des avc participants au groupe idg, 
-  // et sur option invits ayant une invitation dans le groupe 
-  imNaGroupe (idg, invits) { 
-    const m = new Map()
-    this.mpg.forEach(e => { if (e.ng.id === idg) m.set(e.im, this.mav.get(e.id)) })
-    if (invits) {
-      const aSt = stores.avatar
-      aSt.map.forEach(e => {
-        if (e.avatar.invits) e.avatar.invits.forEach(x => { // { ng, im, id }
-          if (x.ng.id === idg) m.set(x.im, e.avatar.na)
-        })
-      })
-    }
-    return m
-  }
-
-  // Map(im, na) des avatars du compte participant à idg d'après membres
-  imNaGroupeMB (idg) {
-    const m = new Map()
-    const gSt = stores.groupe
-    const mm = gSt.getMembres(idg)
-    if (mm) mm.forEach(e => {
-      if (this.avatarIds.has(e.na.id)) m.set(e.ids, e.na)
-    })
-    return m
-  }
-
-  imGroupe (idg) {
-    const s = new Set()
-    this.mpg.forEach(e => { if (e.ng.id === idg) s.add(e.im) })
-    return s
-  }
-  
-  // Retourne {mc, memo} à propos d'une id donnée
-  mcmemo (id) { return this.mcmemos.get(id) }
-
-  get lavLmb () {
-    const lav = Array.from(this.mav.keys())
-    const lmb = []
-    for (const [, empg] of this.mpg) lmb.push([empg.ng.id, empg.im])
-    return [lav, lmb]
-  }
-
-  get mgkParIdg () {
-    const m = new Map()
-    for (const [npgk, empg] of this.mpg) {
-      const idg = empg.ng.id
-      let x = m.get(idg)
-      if (!x) { x = { npgks: new Set(), ims: new Set() }; m.set(idg, x) }
-      x.npgks.add(npgk)
-      x.ims.add(empg.im)
-    }
-    return m
-  }
-
-  async getEpgk (ni) { // {nomg, cleg, im, idav (court)} cryptée par la clé K.
-    const e = this.invits.get(ni)
-    const x = { nomg: e.ng.nom, cleg: e.ng.rnd, im: e.im, idav: ID.court(e.id)}
-    return await crypter(stores.session.clek, new Uint8Array(encode(x)))
-  }
-
-  static async genMcMemo (id, mc, memo) {
-    const session = stores.session
-    const idk = u8ToB64(await crypter(session.clek, '' + id, 1))
-    const mmk = (!mc || !mc.length) && !memo ? null : 
-      await crypter(session.clek, new Uint8Array(encode({mc, memo})))
-    return [idk, mmk]
-  }
-
-  static async atrItem (clet, info, q) {
-    const session = stores.session
-    const item = {clet, info, q}
-    return await crypter(session.clek, new Uint8Array(encode(item)))
-  }
-
-  static async mavkKV (na) {
-    return await crypter(stores.session.clek, new Uint8Array(encode([na.nomx, na.rnd])))
-  }
-
-  static async mavkK (id) {
-    return hash(await crypter(stores.session.clek, '' + ID.court(id), 1))
-  }
   */
 }
 
 /** Compta **********************************************************************
-_data_ :
+_data_:
 - `id` : numéro du compte = id de son avatar principal.
 - `v` : 1..N.
-
-- `rds`
-- `dhvuK` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
 - `qv` : `{qc, qn, qv, nn, nc, ng, v}`: quotas et nombre de groupes, chats, notes, volume fichiers. Valeurs courantes.
 - `compteurs` sérialisation des quotas, volumes et coûts.
-
-_Comptes "A" seulement_
-- `solde`: résultat, 
-  - du cumul des crédits reçus depuis le début de la vie du compte (ou de son dernier passage en compte A), 
-  - plus les dons reçus des autres,
-  - moins les dons faits aux autres.
-- `ticketsK`: liste des tickets cryptée par la clé K du compte `{ids, v, dg, dr, ma, mc, refa, refc, di}`.
-
-- `apropos` : map à propos des contacts (des avatars) et des groupes _connus_ du compte
-  - _cle_: `id` court de l'avatar ou du groupe,
-  - _valeur_ : `{ hashtags, texte }` cryptée par la clé K du compte.
-    - `hashtags` : liste des hashtags attribués par le compte. (compilé ==> ht: Set)
-    - `texte` : commentaire écrit par le compte.
-
-Juste après une conversion de compte "O" en "A", `ticketsK` est vide et le `solde` est de 2c.
+- _Comptes "A" seulement_
+  - `solde`: résultat, 
+    - du cumul des crédits reçus depuis le début de la vie du compte (ou de son dernier passage en compte A), 
+    - plus les dons reçus des autres,
+    - moins les dons faits aux autres.
+  - `ticketsK`: liste des tickets cryptée par la clé K du compte `{ids, v, dg, dr, ma, mc, refa, refc, di}`.
 */
 export class Compta extends GenDoc {
-  get rds () { return RegRds.rds(this.id) }
+  get ns () { return ID.ns(this.id) }
 
   async compile (row) {
     this.vsh = row.vsh || 0
     const clek = stores.session.clek
-    const ns = ID.ns(this.id)
-    RegRds.set(row.rds, this.id)
 
-    this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
     this.qv = row.qv
     this.compteurs = new Compteurs(row.compteurs, this.qv)
-    this.pc = this.compteurs.pourcents.max
+    this.pc = this.compteurs.pourcents // {pcc, pcn, pcv, max}
     this.solde = row.solde || 0
     if (row.ticketsK) this.tickets = decode(await decrypter(clek, row.ticketsK))
     this.estA = this.tickets !== undefined
-    this.apropos = new Map()
-    if (row.apropos) for(const idx in row.apropos) {
-      const id = ID.long(parseInt(idx, ns))
-      const x = decode(await decrypter(clek, row.apropos[idx]))
-      this.apropos.set(id, { ht: new Set(x.hashtags || []), texte: x.texte || ''})
-    }
   }
 
   /* TODO Depuis la liste actuelle des tickets de compta,
@@ -1029,6 +828,36 @@ export class Compta extends GenDoc {
       return { dlv: 0, creditsK: null }
   }
 
+}
+
+/* Classe compti ****************************************************
+_data_:
+- `id` : id du compte.
+- `v` : version.
+
+- `mc` : map à propos des contacts (des avatars) et des groupes _connus_ du compte,
+  - _cle_: `id` court de l'avatar ou du groupe,
+  - _valeur_ : `{ ht, tx }` cryptée par la clé K du compte.
+    - `ht` : liste des hashtags attribués par le compte.
+    - `tx` : commentaire écrit par le compte (gzippé)
+*/
+export class Compti extends GenDoc {
+  get rds () { return RegRds.rds(this.id) }
+  get ns () { return ID.ns(this.id) }
+
+  async compile (row) {
+    this.vsh = row.vsh || 0
+    const clek = stores.session.clek
+
+    this.mc = new Map()
+    if (row.mc) for(const idx in row.mc) {
+      const x = row[idx]
+      const id = ID.long(parseInt(idx), this.ns)
+      const ht = x.ht ? decode(await decrypter(clek, x.ht)) : []
+      const tx = x.tx ? ungzipB(await decrypter(this.clek, x.tx)) : ''
+      this.mc.set(id, { ht, tx })
+    }
+  }
 }
 
 /** Avatar *********************************************************
@@ -2088,6 +1917,7 @@ const classes = {
   syntheses: Synthese,
   comptes: Compte,
   comptas: Compta,
+  comptis: Compti,
   avatars: Avatar,
   groupes: Groupe,
   notes: Note,

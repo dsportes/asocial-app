@@ -78,7 +78,7 @@ export class WS {
       console.log('pong ' + sl.sessionId + ' ' + dhstring(sl.dh, true))
     } else {
       if (sl.sessionId === session.sessionId && sl.rows && sl.rows.length)
-        syncQueue.setRows(sl.rows)
+        await syncQueue.setRows(sl.rows)
     }
   }
 

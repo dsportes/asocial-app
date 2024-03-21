@@ -91,16 +91,7 @@ export async function post (op, fonction, args) {
     const resp = decode(buf)
     if (resp) {
       if (resp.dh) session.setDh(resp.dh)
-      if (resp.notifs) session.setNotifs(resp.notifs)
       if (resp.conso) session.setConso(resp.conso)
-      /* 
-      Traitement immédiat pour les changements de CCEP SAUF SI Sync / Sync2
-      - très fréquent pour rowCompta
-      - très rare pour les autres 
-      */
-      if (!fonction.startsWith('Sync') && 
-        (resp.rowCompte || resp.rowCompta || resp.rowEspace || resp.rowPartition))
-        await syncQueue.postResp(resp)
     }
     return resp
   } catch (e) { // Résultat mal formé
