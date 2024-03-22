@@ -624,26 +624,6 @@ export class SyncStd extends OperationS {
   }
 }
 
-/* Synchronisation standard *********************************
-export class Sync2 extends OperationS {
-  constructor() { super('Sync2') }
-
-  // Chargement des sous-arbres groupes et avatars de la liste lida
-  // Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever)
-  async run(ds1) {
-    try { 
-      const session = stores.session
-      const args = { token: session.authToken, dataSync: ds1.serial }
-      const ret = await post(this, 'Sync2', args)
-      const ds = new DataSync(ret.dataSync) // Mis à jour par le serveur
-      return this.finOK([ds, ret])
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-*/
-
 /* Connexion à un compte en mode avion *********************************/
 export class ConnexionAdmin extends Operation {
   constructor() { super('ConnexionAdmin') }
