@@ -1,10 +1,9 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
-import { $t, dhcool, hash, rnd6, inverse, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
+import { $t, hash, rnd6, inverse, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
-import { Rds, ID, Cles, isAppExc, d13, d14, Compteurs, AMJ, nomFichier, 
-  lcSynt, synthesesPartition, compileMcpt, FLAGS } from './api.mjs'
+import { ID, Cles, isAppExc, d14, Compteurs, AMJ, nomFichier, compileMcpt, FLAGS } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { idb } from './db.mjs'
@@ -30,14 +29,14 @@ export class RegCles {
   static ns = 0
   static registre = new Map()
 
-  static reset () { RegCles.registre.clear; RegRds.reset() }
+  static reset () { RegCles.registre.clear }
 
   static get (id) { return RegCles.registre.get(ID.long(id, RegCles.ns)) }
 
   static set (cle) {
     const id = Cles.id(cle, RegCles.ns)
     RegCles.registre.set(id, cle)
-    return id
+    return cle
   }
 }
 
@@ -70,30 +69,6 @@ export class RegCc {
     return cc
   }
 
-}
-
-/* classe RegRds : registre des rds (référence DataSync) connues dans la session **********
-- `reset ()` : réinitialisation en début de session
-- `rds (id)` : retourne le rds enregistré avec cette id
-- `id` (rds) : retourne l'id enregistré avec ce rds
-- `set (rds, id)` : enregistré le rds / id
-*/
-export class RegRds {
-  static regId = new Map()
-  static regRds = new Map()
-
-  static reset () { RegRds.regId.clear;  RegRds.regRds.clear }
-
-  static rds (id) { return RegRds.regId.get(ID.long(id, RegCles.ns)) }
-
-  static id (rds) { return RegRds.regRds.get(rds) }
-
-  static set (rds, id) {
-    const i = ID.long(id, RegRds.ns)
-    RegRds.regId.set(i, rds)
-    RegRds.regRds.set(rds, i)
-    return rds
-  }
 }
 
 /******************************************************
@@ -349,6 +324,7 @@ export async function compile (row) {
   if (row.ids) obj.ids = row.ids
   if (row.dlv) obj.dlv = row.dlv
   if (row.dfh) obj.dfh = row.dfh
+  obj.vsh = row.vsh || 0
   obj.v = row.v || 0
   const z = row.dlv && row.dlv < session.auj
   // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
@@ -373,55 +349,33 @@ _data_ :
 - `v` : 1..N
 - `org` : code de l'organisation propriétaire.
 
-- `rds`
-- `cleES` : clé E cryptée par la clé S.
 - `creation` : date de création.
 - `moisStat` : dernier mois de calcul de la statistique des comptas.
 - `moisStatT` : dernier mois de calcul de la statistique des tickets.
-- `notif` : notification de l'administrateur. Texte crypté par la clé A du Comptable (une constante bien connue depuis le `ns`).
 - `dlvat` : `dlv` de l'administrateur technique.
-- `t` : numéro de _profil_ de quotas dans la table des profils définis dans la configuration. 
-**Mis à jour par le Comptable:**
-- `opt`:
-  - 0: 'Pas de comptes "autonomes"',
-  - 1: 'Le Comptable peut rendre un compte "autonome" sans son accord',
-  - 2: 'Le Comptable NE peut PAS rendre un compte "autonome" sans son accord',
+- `notifE` : notification pour l'espace de l'administrateur technique. Le texte n'est pas crypté.
+- `notifP` : pour un délégué, la notification de sa partition.
+- `opt`: option des comptes autonomes.
 - `nbmi`: nombre de mois d'inactivité acceptable pour un compte O fixé par le comptable. Ce changement n'a pas d'effet rétroactif.
+- `tnotifP` : table des notifications de niveau _partition_.
+  - _index_ : id (numéro) de la partition.
+  - _valeur_ : notification (ou `null`), texte crypté par la clé P de la partition.
 */
 export class Espace extends GenDoc {
-  // get rds () { return RegRds.rds(this.id) }
-  get ns () { return ID.ns(this.id) }
 
   async compile (row) {
-    this.vsh = row.vsh || 0
-    /* cas admin: espace peut être compilé SANS qu'un ns  
-    n'ait été enregistré dans RegRds (admin n'ayant pas de ns courant) */
-    this.rds = RegRds.set(row.rds, this.id)
-
     this.org = row.org
     this.creation = row.creation
     this.moisStat = row.moisStat || 0
     this.moisStatT = row.moisStatT || 0
     this.opt = row.opt || 0
-    this.dlvat = row.dlvat
+    this.dlvat = row.dlvat || 0
     this.nbmi = row.nbmi || 6
-    this.t = row.t || 0
+    this.notifE = row.notifE || null
+    this.notifP = row.notifP || null
+    this.tnotifP = row.tnotifP || []
   }
 
-  static async nouveau (org) {
-    const session = stores.session
-    const r = { 
-      id: session.ns, 
-      org, 
-      v: 1, 
-      t: 1, 
-      notif: null, 
-      dcreation: AMJ.amjUtc(),
-      moisStat: 0,
-      moisStatT: 0
-    }
-    return { _nom: 'espaces', id: r.id, org: r.org, v: r.v, _data_: new Uint8Array(encode(r))}
-  }
 }
 
 /** Synthese *********************************************
@@ -467,13 +421,14 @@ export class Synthese extends GenDoc {
         r.pcc = !r.q.qc ? 0 : Math.round(r.qt.c2m * 100 / r.q.qc) 
         r.pcn = !r.q.qn ? 0 : Math.round(r.qt.n * 100 / r.q.qn) 
         r.pcv = !r.q.qv ? 0 : Math.round(r.qt.v * 100 / r.q.qv) 
+      
+        a.nbc += r.nbc
+        a.nbd += r.nbd
+        a.ntfp[0] += r.ntfp[0]; a.ntfp[1] += r.ntfp[1]; a.ntfp[2] += r.ntfp[2]
+        a.ntf[0] += r.ntf[0]; a.ntf[1] += r.ntf[1]; a.ntf[2] += r.ntf[2]
+        ['qc', 'qn', 'qv'].forEach(f => { a.q[f] += r.q[f]})
+        ['qc', 'qn', 'qv', 'c2m', 'n', 'v'].forEach(f => { a.qt[f] += r.qt[f]})
       }
-      a.nbc += r.nbc
-      a.nbd += r.nbd
-      a.ntfp[0] += r.ntfp[0]; a.ntfp[1] += r.ntfp[1]; a.ntfp[2] += r.ntfp[2]
-      a.ntf[0] += r.ntf[0]; a.ntf[1] += r.ntf[1]; a.ntf[2] += r.ntf[2]
-      ['qc', 'qn', 'qv'].forEach(f => { a.q[f] += r.q[f]})
-      ['qc', 'qn', 'qv', 'c2m', 'n', 'v'].forEach(f => { a.qt[f] += r.qt[f]})
     }
     a.pcac = !a.q.qc ? 0 : Math.round(a.qt.qc * 100 / a.q.qc) 
     a.pcan = !a.q.qn ? 0 : Math.round(a.qt.qn * 100 / a.q.qn) 
@@ -481,7 +436,7 @@ export class Synthese extends GenDoc {
     a.pcc = !a.q.qc ? 0 : Math.round(a.qt.c2m * 100 / a.q.qc) 
     a.pcn = !a.q.qn ? 0 : Math.round(a.qt.n * 100 / a.q.qn) 
     a.pcv = !a.q.qv ? 0 : Math.round(a.qt.v * 100 / a.q.qv) 
-    this.tps[0] = a
+    this.tsp[0] = a
   }
 
 }
@@ -547,7 +502,7 @@ _data_ :
 - `hXR` : `ns` + `hXR`, hash du PBKFD d'un extrait de la phrase secrète.
 - `dlv` : dernier jour de validité du compte.
 
-- `rds`
+- `rds` : non transmis en session
 - `hXC`: hash du PBKFD de la phrase secrète complète (sans son `ns`).
 - `cleKXC` : clé K cryptée par XC (PBKFD de la phrase secrète complète).
 - `cleEK` : clé de l'espace cryptée par la clé K du compte, à la création de l'espace pour le Comptable, à l'acceptation du sponsoring pour les autres comptes.
@@ -591,17 +546,14 @@ _Comptes "O" seulement:_
 Compilé en mcode: Map(): clé: idp, valeur: code
 */
 export class Compte extends GenDoc {
-  get ns () { return ID.ns(this.id) }
-  get rds () { return RegRds.rds(this.id) }
   get estComptable () { return ID.estComptable(this.id) }
 
   async compile (row) {
-    this.vsh = row.vsh || 0
+    this.ns = ID.ns(this.id)
     const session = stores.session
     const clek = session.clek || await session.setIdClek(this.id, row.cleKXC)
 
     RegCles.set(await decrypter(clek, e.cleEK))
-    RegRds.set(row.rds, this.id)
     this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
     this.qv = row.qv
 
@@ -616,18 +568,16 @@ export class Compte extends GenDoc {
     this.mav = new Set()
     for(const idx in row.mav) {
       const e = row.mav[idx]
-      const id = ID.long(parseInt(idx), ns)
+      const id = ID.long(parseInt(idx), this.ns)
       RegCles.set(await decrypter(clek, e.cleAK))
-      RegRds.set(e.rds, id)
       this.mav.add(id)
     }
 
     this.mpg = new Map()
     for(const idx in row.mpg) {
-      const idg = ID.long(parsInt(idx), ns)
+      const idg = ID.long(parsInt(idx), this.ns)
       const e = row.mpg[idx]
       RegCles.set(await decrypter(clek, e.cleGK))
-      RegRds.set(e.rds, idg)
       const sav = new Set()
       for(const idx2 of e.lp) sav.add(ID.long(parseInt(idx2), this.ns))
       this.mpg.set(idg, sav)
@@ -636,11 +586,11 @@ export class Compte extends GenDoc {
     if (this.estComptable) {
       this.mcode = new Map()
       const t = await decrypter(clek, row.tpK)
-      for(let i = 1; i < row.tp.length; i++) {
-        const e = row.tp[i]
+      for(let i = 1; i < t.length; i++) {
+        const e = t[i]
         if (e) {
-          const c = RegCles.set(e.cleP)
-          if (e.code) this.mcode.set(Cles.id(c, this.ns), e.code)
+          const idp = Cles.id(RegCles.set(e.cleP), this.ns)
+          if (e.code) this.mcode.set(idp, e.code)
         }
       }
     }
@@ -672,8 +622,7 @@ export class Compte extends GenDoc {
   /* Id des groupes de l'avatar ida (tous avatars si ida absent) */
   idGroupes (ida) {
     const x = new Set()
-    if (ida) this.mpg.forEach((sav, idg) => { if (sav.has(ida)) x.add(idg) })
-    else this.mpg.forEach((sav, idg) => { x.add(idg)})
+    this.mpg.forEach((sav, idg) => { if (!ida || sav.has(ida)) x.add(idg) })
     return x
   }
 
@@ -710,7 +659,6 @@ export class Compta extends GenDoc {
   get ns () { return ID.ns(this.id) }
 
   async compile (row) {
-    this.vsh = row.vsh || 0
     const clek = stores.session.clek
 
     this.qv = row.qv
@@ -842,13 +790,10 @@ _data_:
     - `tx` : commentaire écrit par le compte (gzippé)
 */
 export class Compti extends GenDoc {
-  get rds () { return RegRds.rds(this.id) }
-  get ns () { return ID.ns(this.id) }
 
   async compile (row) {
-    this.vsh = row.vsh || 0
     const clek = stores.session.clek
-
+    this.ns = ID.ns(this.id)
     this.mc = new Map()
     if (row.mc) for(const idx in row.mc) {
       const x = row[idx]
@@ -867,34 +812,30 @@ _data_:
 - `vcv` : version de la carte de visite afin qu'une opération puisse détecter (sans lire le document) si la carte de visite est plus récente que celle qu'il connaît.
 - `hZR` : `ns` + hash du PBKFD de la phrase de contact réduite.
 
-- `rds`
-
+- `rds` : pas transmis en session.
 - `cleAZC` : clé A cryptée par ZC (PBKFD de la phrase de contact complète).
 - `pcK` : phrase de contact complète cryptée par la clé K du compte.
 
-- `cvA` : carte de visite de l'avatar `{v, photo, texte}`. photo et texte cryptés par la clé A de l'avatar.
+- `cvA` : carte de visite de l'avatar `{id, v, photo, texte}`. photo et texte cryptés par la clé A de l'avatar.
+
 - `pub privK` : couple des clés publique / privée RSA de l'avatar.
 
 - `invits`: map des invitations en cours de l'avatar:
-  - _clé_: `idav/idg` id court de l'avatar invité / id court du groupe.
-  - _valeur_: `{cleGA, rds, cvg, im, ivpar, dh}` 
+  - _clé_: `idg` id court du groupe.
+  - _valeur_: `{cleGA, cvG, ivpar, dh}` 
     - `cleGA`: clé du groupe crypté par la clé A de l'avatar.
-    - `rds`: du groupe. ??? intérêt. Sera obtenu à l'acceptation
-    - `cvG` : carte de visite du groupe (photo et texte sont cryptés par la clé G du groupe)
-    - `im`: indice du membre dans la table `tid` du groupe.
+    - `cvG` : carte de visite du groupe (photo et texte sont cryptés par la clé G du groupe).
     - `ivpar` : indice `im` de l'invitant.
     - `dh` : date-heure d'invitation. Le couple `[ivpar, dh]` permet de retrouver l'item dans le chat du groupe donnant le message de bienvenue / invitation émis par l'invitant.
-  Compilé en : { idav, idg, rds, im, ivpar, dh }
+
+  Compilé en : { ivpar, dh }
 */
 export class Avatar extends GenDoc {
-  get rds () { return RegRds.rds(this.id) }
 
   /** compile *********************************************************/
   async compile (row) {
-    this.vsh = row.vsh || 0
+    this.ns = ID.ns(this.id)
     const clek = stores.session.clek
-    const ns = ID.ns(this.id)
-    RegRds.set(row.rds, this.id)
     // this.vcv = row.vcv || 0
     // this.hZR = row.hZR
 
@@ -910,40 +851,17 @@ export class Avatar extends GenDoc {
 
     this.invits = new Map()
     if (row.invits) {
-      for (const nx in row.invits) {
-        const { id, ids } = splitPK(nx)
-        const idav = ID.long(id, ns)
-        const idg = ID.long(ids, ns)
-        const e = row.invits[nx] // {cleGA, rds, cvg, im, ivpar, dh}
-        const cleG = await decrypter(clea, e.cleGA)
-        RegCles.set(cleG)
+      for (const idgx in row.invits) {
+        const idg = ID.long(parseInt(idgx), this.ns)
+        const e = row.invits[idgx] // {cleGA, cvg, ivpar, dh}
+        RegCles.set(await decrypter(clea, e.cleGA))
         const cv = await CV.set(e.cvG || CV.fake(idg))
         cv.store()
-        RegRds.set(e.rds, idg)
-        const inv = { idav, idg, im: e.im, ivpar: e.ivpar, dh: e.dh }
-        this.invits.set(nx, inv)
+        this.invits.set(idg, { ivpar: e.ivpar, dh: e.dh })
       }
     }
   }
 
-  static async primaireRow (na, publicKey, privateKey, second) {
-    const session = stores.session
-    const r = {}
-    r.id = na.id
-    r.v = 1
-    r.vcv = 0
-    r.privk = await crypter(session.clek, privateKey)
-    r.pub = publicKey
-    if (!second) {
-      r.mavk = {}
-      const c = await Avatar.mavkK(na.id)
-      const v = await Avatar.mavkKV(na)
-      r.mavk[c] = v
-    }
-    const _data_ = new Uint8Array(encode(r))
-    const row = { _nom: 'avatars', id: r.id, v: r.v, vcv: r.vcv, _data_ }
-    return row
-  }
 }
 
 /** Sponsoring ************************************************************
@@ -975,7 +893,6 @@ export class Sponsoring extends GenDoc {
 
   /* commun */
   async comp (row) {
-    this.vsh = row.vsh || 0
     this.st = row.st
     this.dh = row.dh
     this.partitionId = row.partitionId || 0
@@ -987,7 +904,7 @@ export class Sponsoring extends GenDoc {
     this.don = row.don || 0
     this.dconf = row.dconf || false
     this.ard = await decrypterStr(this.YC, row.ardYC)
-    if (!this.estA) this.cleP = await decrypter(this.YC, row.clePYC)
+    if (!this.estA) this.cleP = RegCles.set(await decrypter(this.YC, row.clePYC))
   }
 
   /* Par l'avatar sponsor */
@@ -1010,7 +927,7 @@ export class Sponsoring extends GenDoc {
     this.dlv = row.dlv
     this.YC = cle
     await this.comp(row)
-    this.cleA = await decrypter(this.YC, row.cleAYC)
+    this.cleA = RegCles.set(await decrypter(this.YC, row.cleAYC))
     this.cv = await CV.set(row.cvA, this.cleA)
   }
 
@@ -1032,7 +949,6 @@ _data_:
 */
 export class Ticket extends GenDoc {
   async compile (row) {
-    this.vsh = row.vsh || 0
     this.dg = row.dg
     this.ma = row.ma || 0
     this.mc = row.mc || 0
@@ -1115,12 +1031,11 @@ export class Chat extends GenDoc {
 
   async compile (row) {
     const session = stores.session
-    this.vsh = row.vsh || 0
-    const ns = ID.ns(this.id)
+    this.ns = ID.ns(this.id)
 
     this.st = row.st
-    this.idE = ID.long(row.idE, ns)
-    this.idsE = ID.long(row.idsE, ns)
+    this.idE = ID.long(row.idE, this.ns)
+    this.idsE = ID.long(row.idsE, this.ns)
 
     this.cleCKP = row.cleCKP
     this.clec = await RegCc.get(this)
@@ -1137,7 +1052,6 @@ export class Chat extends GenDoc {
 
     this.items = []
     const a = []
-    const supp = $t('supprime')
     this.tit = ''
     this.dh = 0
     let t1r = false
@@ -1213,7 +1127,7 @@ _data_:
 - `v` :  1..N, Par convention, une version à 999999 désigne un **groupe logiquement détruit** mais dont les données sont encore présentes. Le groupe est _en cours de suppression_.
 - `dfh` : date de fin d'hébergement.
 
-- `rds`
+- `rds` : pas transmis en session.
 - `qn qv n v`: nombres de notes actuel et maximum attribué par l'hébergeur, volume total actuel des fichiers des notes et maximum attribué par l'hébergeur.
 - `idh` : id du compte hébergeur (pas transmise aux sessions).
 - `imh` : indice `im` du membre dont le compte est hébergeur.
@@ -1222,18 +1136,16 @@ _data_:
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
 - `tid` : table des ids courts des membres.
 - `flags` : tables des flags.
+- `hists` : tables des flags historiques.
 - `lng` : liste noire _groupe_ des ids (courts) des membres.
 - `lnc` : liste noire _compte_ des ids (courts) des membres.
 - `cvG` : carte de visite du groupe, textes cryptés par la clé du groupe `{v, photo, info}`.
 */
 
 export class Groupe extends GenDoc {
-  get rds () { return RegRds.rds(this.id) }
 
   async compile (row) {
-    this.vsh = row.vsh || 0
-    const ns = ID.ns(this.id)
-    RegRds.set(row.rds, this.id)
+    this.ns = ID.ns(this.id)
 
     this.qn = row.qn; this.qv = row.qv; this.n = row.n; this.v = row.v
     this.imh = row.imh
@@ -1247,10 +1159,11 @@ export class Groupe extends GenDoc {
       this.mmb.set(ida, im)
     })
     this.flags = row.flags
+    this.hists = row.hists
     this.lng = new Array(row.lng.length)
-    row.lng.forEach((id, i) => { this.lng[i] = ID.long(id, ns)})
+    row.lng.forEach((id, i) => { this.lng[i] = ID.long(id, this.ns)})
     this.lnc = new Array(row.lnc.length)
-    row.lnc.forEach((id, i) => { this.lnc[i] = ID.long(id, ns)})
+    row.lnc.forEach((id, i) => { this.lnc[i] = ID.long(id, this.ns)})
     const cv = await CV.set(row.cvG || CV.fake(this.id))
     cv.store()
   }
@@ -1284,8 +1197,8 @@ export class Groupe extends GenDoc {
   estInvitable (im) { const f = this.flags[im] || 0; 
     return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !this.enLNA(im) && !this.enLNC(im)
   }
-  estOubliable (im) { const f = this.flags[im] || 0; 
-    return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !(f & FLAGS.HA)
+  estOubliable (im) { const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
+    return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !(h & FLAGS.HA)
   }
 
   estHeb (im) { return this.estActif(im) && im === this.imh }
@@ -1304,24 +1217,24 @@ export class Groupe extends GenDoc {
     return b
   }
   actifH (im) { // 0:jamais, 1:oui, 2:l'a été, ne l'est plus
-    const f = this.flags[im] || 0;
+    const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
     if (f & FLAGS.AC) return 1
-    return f & FLAGS.HA ? 2 : 0
+    return h & FLAGS.HA ? 2 : 0
   }
   accesMembreH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
-    const f = this.flags[im] || 0;
+    const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
     if ((f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM)) return 1
-    return f & FLAGS.HM ? 2 : 0
+    return h & FLAGS.HM ? 2 : 0
   }
   accesLecNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
-    const f = this.flags[im] || 0;
+    const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
     if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN)) return 1
-    return f & FLAGS.HN ? 2 : 0
+    return h & FLAGS.HN ? 2 : 0
   }
   accesEcrNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
-    const f = this.flags[im] || 0;
+    const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
     if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DE)) return 1
-    return f & FLAGS.HE ? 2 : 0
+    return h & FLAGS.HE ? 2 : 0
   }
   accesMembreNA (im) { // accès aux membres NON activé
     const f = this.flags[im] || 0;
@@ -1337,7 +1250,6 @@ export class Groupe extends GenDoc {
     if ((f & FLAGS.AC) && !(f & FLAGS.AN) && (f & FLAGS.DN)) return f & FLAGS.DE ? 2 : 1
     return 0
   }
-  estLibre (im) { return !this.anag[im] || this.anag[im] === 1 } 
 
   statutMajeur (im) { 
     /* 

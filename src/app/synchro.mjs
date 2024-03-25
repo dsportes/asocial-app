@@ -2,8 +2,8 @@ import { decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme } from './util.mjs'
-import { idb, IDBbuffer } from './db.mjs'
-import { DataSync, appexc, ID, Rds, Cles, AMJ } from './api.mjs'
+import { idb, IDBbuffer, storeEspace } from './db.mjs'
+import { DataSync, appexc, ID, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
 import { CV, compile, RegCles, RegRds } from './modele.mjs'
 import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
@@ -18,37 +18,29 @@ class Queue {
     this.dataSync = null // dataSync courant de la session. Maj au retour de Sync
     this.EnCours = false // traitement en cours
 
-    /* Evénnements à traiter */
-    this.vcpt = 0
-    this.avgrs = new Map() /* clé: rds, valeur: v */
+    /* Evénnements à traiter. [version en attente, version traitée] */
+    this.vcpt = [0, 0]
+    this.avgrs = new Map() /* clé: rds, valeur: [v, vt] */
   }
 
   /* Enregistrement de l'arrivée d'un ou plusieurs row versions sur écoute / WS */
   async setRows (rows) { 
-    if (rows) for (const row of rows) {
-      
-      if (row._nom === 'espaces') {
-        const espace = await compile(row)
-        stores.session.setEspace(espace)
-        continue
+    let rev = false
+    if (rows) for (const row of rows) {   
+      if (ID.estEspace(row.id)) {
+        // Maj _Store_ et IDB
+        await post(this, 'GestEspace',  { token: session.authToken })
+      } else {
+        if (ID.rdsType(row.id) === ID.RDSCOMPTE) { 
+          if (this.vcpt.v[0] < row.v) { this.vcpt.v[0] = row.v; rev = true }
+        } else {
+          const x = this.avgrs.get(row.id)
+          if (!x) { this.avgrs.set(row.id, [row.v, 0]); rev = true }
+          else if (x.v[0] < row.v) { this.avgrs.set(row.id, [row.v, x.v[1]]); rev = true }
+        }
       }
-
-      switch (Rds.type(row.id)) {
-      case Rds.COMPTE : { 
-        if (this.vcpt.v < row.v) this.vcpt.v = row.v
-        break
-      }
-      case Rds.AVATAR :
-      case Rds.GROUPE : { // le détail des versions dans _data_ n'est pas utile ici
-        const rds = Rds.deId(row.id)
-        const x = this.avgrs.get(rds)
-        if (!x || x.v < row.v) this.avgrs.set(rds, row.v)
-        break
-      }
-      }
-
-      this.reveil()
     }
+    if (rev) this.reveil()
   }
 
   reveil () {
@@ -58,9 +50,9 @@ class Queue {
 
     const ds = syncQueue.dataSync
 
-    if (this.vcpt.v) {
-      const vx = this.vcpt.v 
-      this.vcpt.v = 0 // retrait de la tâche en attente
+    if (this.vcpt.v[0] > this.vcpt.v[1]) {
+      const vx = this.vcpt.v[0]
+      this.vcpt.v = [vx, vx] // retrait de la tâche en attente
       if (vx > ds.compte.vs) {
         // Lancement de l'opération de Sync
         this.EnCours = true
@@ -73,32 +65,24 @@ class Queue {
       }
     }
 
-    if (this.avgrs.size) {
-      const lida = []
-      for (const [rds, v] of this.avgrs) {
-        const ida = RegRds.id(rds)
-        if (ID.estGroupe(ida)) {
-          const item = ds.avatars.get(ida)
-          if (this.avgrs[rds] <= item.vs) continue // ida déjà traité
-        } else {
-          const item = ds.groupes.get(ida)
-          const e = this.avgrs[rds] // { v, vg, vm, vn }
-          if (e.vg <= item.vs[0]) continue // ida déjà traité
-        }
-        lida.push(ida)
-      }
-      this.avgrs.clear() // retrait des tâches en attente
-      if (lida.length) {
-        this.EnCours = true
-        setTimeout(async () => { 
-          await new SyncStd().run(lida)
-          this.EnCours = false
-          this.reveil()
-        })
-        return // un job a été lancé
-      }
+    const lrds = []
+    const nvm = new Map()
+    for(const [rds, [va, vt]] of this.avgrs) {
+      if (va > vt) {
+        lrds.push(rds)
+        nvm.set(rds, [va, va])
+      } else nvm.set(rds, [va, vt])
     }
-    // il n'y avait pas de job à lancer, tout avait déjà été traité
+    if (lrds.length) { // une opération est à lancer
+      this.avgrs = nvm
+      this.EnCours = true
+      setTimeout(async () => { 
+        await new SyncStd().run(lrds)
+        this.EnCours = false
+        this.reveil()
+      })
+    }
+    // il n'y avait pas d'opération à lancer, tout avait déjà été traité
   }
 }
 export const syncQueue = new Queue()
@@ -115,6 +99,7 @@ class SB {
     this.p = stores.people
     this.avSt = stores.avnote
 
+    this.espace = null
     this.compte = null
     this.compti = null
     this.supprPa = false
@@ -133,6 +118,8 @@ class SB {
     this.supprMb = new Set() // groupes dont les membres sont à supprimer
     this.supprNo = new Set() // groupes dont les notes sont à supprimer
   }
+
+  setEs (d) { this.espace = d}
 
   setCe (d) { this.compte = d}
 
@@ -169,6 +156,7 @@ class SB {
   conduit à mettre à jour / supprimer des Avnote et des Fetat. 
   */
   store (buf) {
+    if (this.espace) this.s.setEspace(this.espace)
     if (this.compte) this.s.setCompte(this.compte)
     if (this.compti) this.s.setCompti(this.compti)
     if (this.supprPa) this.s.delPartition()
@@ -513,10 +501,10 @@ export class OperationS extends Operation {
     - le DataStync courant est mis à jour à chaque itération
   lida : liste des ida A PRIORI à rechercher: des notifications ayant été reçue
   */
-  async majAvatarsGroupes (ds1, lida) {
+  async majAvatarsGroupes (ds1, lrds) {
     const fs = stores.session.fssync
     const session = stores.session
-    const setIda = new Set(lida || [])
+    const setRds = new Set(lrds || [])
     let ds = ds1
     /* Phase itérative pour chaque avatar / groupe
     A chaque itération il y a un commit IDB / store résultant (y compris le DataSync)
@@ -612,12 +600,12 @@ export class OperationS extends Operation {
 export class SyncStd extends OperationS {
   constructor() { super('SyncStd') }
 
-  /* Chargement des sous-arbres groupes et avatars de la liste
-  lida. Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever)
+  /* Chargement des sous-arbres groupes et avatars de la liste lrds.
+  Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever de cette liste)
   */
-  async run(lida) {
+  async run(lrds) {
     try { 
-      await this.majAvatarsGroupes(syncQueue.dataSync, lida)
+      await this.majAvatarsGroupes(syncQueue.dataSync, lrds)
     } catch (e) {
       await this.finKO(e)
     }
@@ -666,9 +654,10 @@ export class ConnexionAvion extends OperationS {
 
       const ds = await idb.getDataSync()
 
-      { // Phase 1 : chargement depuis IDB des CCEP
+      { // Phase 1 : chargement depuis IDB des espaces / comptes / comptis
         const sb = new SB()
-        const [rce, rci] = await idb.getRceRci()
+        const [res, rce, rci] = await idb.getECC()
+        sb.setEs(await compile(res))
         sb.setCe(await compile(rce))
         sb.setCi(await compile(rci))
         sb.store()
@@ -918,6 +907,30 @@ export class SyncSp extends OperationS {
   }
 }
 
+/* OP_GetEspace: 'Obtention de l\'espace' *********
+args.token donne les éléments d'authentification du compte.
+args.ns
+Retour:
+- rowSynthse
+*/
+export class GetEspace extends OperationS {
+  constructor () { super('GetEspace') }
+
+  async run (ns) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns }
+      const ret = await post(this, 'GetEspace', args)
+      const s = await compile(ret.rowEspace)
+      session.setEspace(s)
+      storeEspace(ret.rowEspace)
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* OP_GetSynthese: 'Obtention de la synthèse de l\'espace' *********
 args.token donne les éléments d'authentification du compte.
 args.ns
@@ -1111,4 +1124,3 @@ export class GetSponsoring extends Operation {
     }
   }
 }
-

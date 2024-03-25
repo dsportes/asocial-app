@@ -67,8 +67,8 @@ export async function deleteIDB (nb) {
 
 /* Classe IDB *******************************************************************/
 class IDB {
-  static snoms = { boot: 1, datasync: 2, comptes: 3, comptis: 4 }
-  static lnoms = [ '', 'boot', 'datasync', 'comptes', 'comptis' ]
+  static snoms = { boot: 1, espaces: 2, datasync: 3, comptes: 4, comptis: 5 }
+  static lnoms = [ '', 'boot', 'espaces', 'datasync', 'comptes', 'comptis' ]
   static cnoms = { avatars: 1, groupes: 2, notes: 3, chats: 4, sponsorings: 5, tickets: 6, membres: 7, chatgrs: 8 }
 
   static EX1 (e) { return isAppExc(e) ? e : new AppExc(E_DB, 1, [e.message])}
@@ -155,6 +155,19 @@ class IDB {
     }
   }
 
+    /* Enregistre le row espace */
+    async storeEspace (row) {
+      const session = stores.session
+      const data = await crypter(session.clek, row)
+      try {
+        await this.db.transaction('rw', ['singletons'], async () => {
+          await this.db.singletons.put({ n: IDB.snoms.espaces, dh: Date.now(), data })
+        })
+      } catch (e) {
+        throw IDB.EX2(e)
+      }
+    }
+  
   /** Retourne l'objet DataSync *******************************/
   async getDataSync () {
     const session = stores.session
@@ -170,13 +183,19 @@ class IDB {
     }
   }
 
-  /** Retourne la Map des CCEP (mode avion) *************************************
+  /** Retourne les rows espace / compte / compti (mode avion) *************************************
   Map: clé: _nom, valeur: row
   */
-  async getRceRci () {
+  async getECC () {
     const session = stores.session
     try {
-      let rce, rci
+      let res, rce, rci
+      {
+        const rec = await this.db.singletons.get(IDB.snoms.espaces)
+        if (rec) { 
+          rce = await decrypter(session.clek, rec.data)
+        }
+      }
       {
         const rec = await this.db.singletons.get(IDB.snoms.comptes)
         if (rec) { 
@@ -189,7 +208,7 @@ class IDB {
           rci = await decrypter(session.clek, rec.data)
         }
       }
-      return [rce, rci]
+      return [res, rce, rci]
     } catch (e) {
       throw IDB.EX2(e)
     }

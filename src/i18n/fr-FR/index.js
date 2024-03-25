@@ -623,6 +623,7 @@ export default {
   OP_GC: 'Déclenchement du nettoyage quotidien',
   OP_GetSingletons: 'Obtention des rapports d\'exécution des traitements périodiques',
   OP_GetSynthese: 'Obtention de la synthèse de l\'espace',
+  OP_GetEspace: 'Obtention de l\'espace',
   OP_ForceDlv: 'TEST seulement: forçage de dlv / dfh',
   OP_SetEspaceOptionA: 'Changement des options de l\'espace',
   OP_GetVersionsDlvat: 'Obtention de la liste des avatars contraints par la DLV fixée par l\'administrteur technique',
