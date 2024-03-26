@@ -175,7 +175,7 @@ class IDB {
       const rec = await this.db.singletons.get(IDB.snoms.datasync)
       if (rec) { 
         const x = await decrypter(session.clek, rec.data)
-        return new DataSync(x)
+        return DataSync.deserial(x)
       } 
       else return null
     } catch (e) {

@@ -5,7 +5,7 @@ import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme } from './u
 import { idb, IDBbuffer, storeEspace } from './db.mjs'
 import { DataSync, appexc, ID, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
-import { CV, compile, RegCles, RegRds } from './modele.mjs'
+import { CV, compile, RegCles } from './modele.mjs'
 import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
 
 /* classe Queue ***********************************************************/
@@ -25,9 +25,10 @@ class Queue {
 
   /* Enregistrement de l'arrivée d'un ou plusieurs row versions sur écoute / WS */
   async setRows (rows) { 
+    const session = stores.session
     let rev = false
     if (rows) for (const row of rows) {   
-      if (ID.estEspace(row.id)) {
+      if (row.id === session.ns) {
         // Maj _Store_ et IDB
         await post(this, 'GestEspace',  { token: session.authToken })
       } else {
@@ -66,15 +67,15 @@ class Queue {
     }
 
     const lrds = []
-    const nvm = new Map()
-    for(const [rds, [va, vt]] of this.avgrs) {
-      if (va > vt) {
+    const nvm = new Map() // future liste d'attente des rds notifiés
+    for(const [rds, [vn, vt]] of this.avgrs) {
+      if (vn > vt) {
         lrds.push(rds)
-        nvm.set(rds, [va, va])
-      } else nvm.set(rds, [va, vt])
+        nvm.set(rds, [vn, vn]) // version notifiée -> version traitée
+      } else nvm.set(rds, [vn, vt]) // pas de changement
     }
     if (lrds.length) { // une opération est à lancer
-      this.avgrs = nvm
+      this.avgrs = nvm // la liste d'attente a changé
       this.EnCours = true
       setTimeout(async () => { 
         await new SyncStd().run(lrds)
@@ -102,11 +103,10 @@ class SB {
     this.espace = null
     this.compte = null
     this.compti = null
-    this.supprPa = false
 
-    this.avatar = null
-    this.groupe = null 
-    this.chatgr = null
+    this.avatars = new Map()
+    this.groupes = new Map() 
+    this.chatgrs = new Map()
     this.notes = new Map()
     this.chats = new Map()
     this.sponsorings = new Map() // si dlv < auj à supprimer
@@ -125,9 +125,9 @@ class SB {
 
   setCi (d) { this.compti = d}
 
-  setA (d) { this.avatar = d }
+  setA (d) { this.avatars.set(d.id, d) }
 
-  setG (d) { this.groupe = d }
+  setG (d) { this.groupes.set(d.id, d) }
 
   setN (d) { this.notes.set(d.ids, d) }
 
@@ -137,7 +137,7 @@ class SB {
 
   setT (d) { this.tickets.set(d.ids, d) }
 
-  setH (d) { this.chatgr = d }
+  setH (d) { this.chatgrs.set(d.id, d) }
 
   setM (d) { this.membres.set(d.ids, d) }
 
@@ -149,85 +149,81 @@ class SB {
 
   delN (idg) { this.supprNo.add(idg) }
 
-  delP () { this.supprPa = true}
-
   /* IDBbuffer passé en paramètres:
-  La suppression d'un avatar et la maj / suppression des notes 
-  conduit à mettre à jour / supprimer des Avnote et des Fetat. 
+  La suppression des notes d'un avatar ou d'un groupe 
+  conduit à mettre à jour / supprimer des Avnote. 
   */
   store (buf) {
     if (this.espace) this.s.setEspace(this.espace)
     if (this.compte) this.s.setCompte(this.compte)
     if (this.compti) this.s.setCompti(this.compti)
-    if (this.supprPa) this.s.delPartition()
 
-    if (this.avatar) { this.a.setAvatar(this.avatar) }
-
+    if (this.avatars.size) for(const [,a] of this.avatars) { 
+      this.a.setAvatar(a) 
+    }
     if (this.supprAv.size) for (const ida of this.supprAv) {
       this.a.delAvatar(ida)
       this.avSt.delNotes(ida, buf)
     }
 
-    if (this.groupe) { this.g.setGroupe(this.groupe)}
-
+    if (this.groupes.size) for(const [,g] of this.groupes) { 
+      this.g.setGroupe(g) 
+    }
     if (this.supprGr.size) for (const idg of this.supprGr) {
       this.g.delGroupe(idg)
       this.avSt.delNotes(idg, buf)
     }
 
-    if (this.chatgr) { this.g.setChatgr(this.chatgr) }
+    if (this.chatgrs.size) for(const [,ch] of this.chatgrs) { 
+      this.g.setChatgr(ch) 
+    }
 
-    if (this.notes.size) 
-      for(const [,n] of this.notes) { 
-        const st = ID.estGroupe(n.id) ? this.g : this.a
-        if (n._zombi) {
-          this.n.delNote(n.id, n.ids)
-          st.delNote(n.id, n.ids)
-          this.avSt.delNote(n.id, n.ids, buf)
-        } else {
-          this.n.setNote(x)
-          st.setNote(x, buf)
-          this.avSt.setNote(n, buf)
+    if (this.notes.size) for(const [,n] of this.notes) { 
+      const st = ID.estGroupe(n.id) ? this.g : this.a
+      if (n._zombi) {
+        this.n.delNote(n.id, n.ids)
+        st.delNote(n.id, n.ids)
+        this.avSt.delNote(n.id, n.ids, buf)
+      } else {
+        this.n.setNote(x)
+        st.setNote(x, buf)
+        this.avSt.setNote(n, buf)
+      }
+    }
+    
+    if (this.chats.size) for(const [,ch] of this.chats) {
+      if (ch._zombi) {
+        const chav = this.a.getChat(x.id, x.ids) // chat AVANT suppression
+        if (chav) {
+          this.p.delPCh(chav.idE, ch.id)
+          this.a.delChat(ch.id, ch.ids)
         }
+      } else {
+        this.a.setChat(ch)
+        this.p.setPCh(ch.idE, ch.id)
       }
+    }
     
-    if (this.chats.size) 
-      for(const [,ch] of this.chats) {
-        if (ch._zombi) {
-          const chav = this.a.getChat(x.id, x.ids) // chat AVANT suppression
-          if (chav) {
-            this.p.delPCh(chav.idE, ch.id)
-            this.a.delChat(ch.id, ch.ids)
-          }
-        } else {
-          this.a.setChat(ch)
-          this.p.setPCh(ch.idE, ch.id)
-        }
-      }
+    if (this.sponsorings.size) for(const [,x] of this.sponsorings) {
+      if (x._zombi) this.a.delSponsoring(x.id, x.ids)
+      else this.a.setSponsoring(x)
+    }
     
-    if (this.sponsorings.size) 
-      for(const [,x] of this.sponsorings) {
-        if (x._zombi) this.a.delSponsoring(x.id, x.ids)
-        else this.a.setSponsoring(x)
-      }
-    
-    if (this.tickets.size)
-      for(const [,x] of this.tickets) {
-        if (x._zombi) this.a.delTicket(x.id, x.ids)
-        else this.a.setTicket(x)
-      }
+    if (this.tickets.size) for(const [,x] of this.tickets) {
+      if (x._zombi) this.a.delTicket(x.id, x.ids)
+      else this.a.setTicket(x)
+    }
 
-    if (this.membres.size) 
-      for(const [,mb] of this.membres) {
-        if (mb._zombi) { 
-          const mbav = this.g.getMembre(mb.id, mb.ids) // membre AVANT suppression
-          this.g.delMembre(mb.id, mb.ids)
-          this.p.delPGr(mbav.idm, mb.id) 
-        }
-        else { 
-          this.g.setMembre(mb); 
-          this.p.setPGr(mb.idm, mb.id) }
+    if (this.membres.size) for(const [,mb] of this.membres) {
+      if (mb._zombi) { 
+        const mbav = this.g.getMembre(mb.id, mb.ids) // membre AVANT suppression
+        this.g.delMembre(mb.id, mb.ids)
+        this.p.delPGr(mbav.idm, mb.id) 
       }
+      else { 
+        this.g.setMembre(mb); 
+        this.p.setPGr(mb.idm, mb.id) }
+    }
 
     if (this.supprMb.size) for(const idg of this.supprMb) {
       for (const ids of this.g.map(idg)) {
@@ -237,6 +233,10 @@ class SB {
       this.g.delMembres(idg)
     }
 
+    if (this.supprNo.size) for(const idg of this.supprNo) {
+      this.g.delNotes(idg, buf)
+      this.avSt.delNotes(idg)
+    }
   }
 }
 
@@ -390,7 +390,7 @@ export class OperationS extends Operation {
   - les membres ou notes absents de ds ne sont pas chargés (ont été supprimés avant)
   */
   async loadAvatarsGroupes (sb, ds) {
-    { // Phase itérative pour chaque avatar EXISTANT en ds
+    { // Pour chaque avatar EXISTANT en ds
       for(const [,eds] of ds.avatars) {
         const m = await idb.getSA(eds.id)
         if (m.avatars) for(const row of m.avatars) { // En fait il n'y en a toujours qu'un
@@ -411,7 +411,7 @@ export class OperationS extends Operation {
       }
     }
     
-    { // Phase itérative pour chaque groupe EXISTANT en ds
+    { // Pour chaque groupe EXISTANT en ds
       for(const eds of ds.groupes) {
         const buf = new IDBbuffer()
         const sb = new SB()
@@ -428,24 +428,15 @@ export class OperationS extends Operation {
         if (eds.m && m.membres) for(const row of m.membres) {
           sb.setM(await compile(row))
         }
-        sb.store(buf)
-        await buf.commit(ds)
       }
     }
   }
 
   /* Gestion des suppressions entre ds (actuel) et dav (avant):
   - en "connexion", la maj du store est inutile (il n'a pas été rempli)
-  - partition disparue
-  - sous-arbres avatars
-  - sous-arbres groupes: complet / notes / membres
+  - ds est INCHANGE
   */
   supprdsdav (cnx, ds, dav, sb, buf) {
-    if (!dav) return
-    if (dav.partition && !ds.partition) {
-      buf.putIDB({ _nom: 'partitions', id: dav.partition.id })
-      if (!cnx) sb.delP()
-    }
     dav.avatars.forEach((e, id) => { 
       if (!ds.avatars.has(id)) {
         buf.purgeAvatarIDB(id)
@@ -470,128 +461,155 @@ export class OperationS extends Operation {
     })
   }
 
-  /* Fusion initiale des dataSync: 
-  - ds: rempli par le serveur depuis rien, 
-  - dav: ds "avant", celui connu de IDB en mode synchro 
-  ds est MIS A JOUR
-  */
-  fusionDS (ds, dav) { 
-    if (!dav) return 
-    if (ds.partition) {
-      if (dav.partition && (dav.partition.id === ds.partition.id)) ds.partition.vs = dav.partition.vs
-      else ds.partition.vs = 0
+  setDsVs(ds, id, n) {
+    if (!n) {
+      const x = ds.avatars.get(id)
+      x.vs = x.vb
+    } else {
+      const x = ds.groupes.get(id)
+      x.vs[0] = x.vb[0]; x.vs[n] = x.vb[n];    
     }
-    for(const [,e] of ds.avatars) {
-      const eav = dav.avatars.get(e.id)
-      if (eav) e.vs = eav.vs
+  }
+
+  setCeCi (ds, ret, sb, buf) {
+    if (ret.rowCompte) {
+      sb.setCe(compile(ret.rowCompte))
+      buf.putIDB(ret.rowCompte)
+      ds.vs = ds.vb
     }
-    for(const [,e] of ds.groupes) {
-      const eav = dav.groupes.get(e.id)
-      if (eav) e.vs = eav.vs
+    if (ret.rowCompti) {
+      sb.setCi(compile(ret.rowCompti))
+      buf.putIDB(ret.rowCompti)
+      ds.vs = ds.vb
     }
   }
 
   /* Depuis un dataSync courant, charge du serveur toutes les mises à jour
   des avatars et des groupes.
-  - Itère tant qu'il y a des avatars / groupes à mettre à jour
-  - Chaque appel Sync PEUT ramener une évolution de compte:
+  - Itère tant que le serveur dit qu'il n'a pas fini
+  - Chaque itération PEUT ramener une évolution de compte:
     - elle est traitée
     - ceci PEUT conduire à avoir des groupes / avatars en plus ou moins
-    - ce qui peut provoquer une itération
     - le DataStync courant est mis à jour à chaque itération
-  lida : liste des ida A PRIORI à rechercher: des notifications ayant été reçue
+  - lrds : liste des notifications reçues et pas traitées
   */
-  async majAvatarsGroupes (ds1, lrds) {
+  async syncStd (ds1, lrds) {
     const fs = stores.session.fssync
     const session = stores.session
-    const setRds = new Set(lrds || [])
+    const cnx = !ds1
     let ds = ds1
-    /* Phase itérative pour chaque avatar / groupe
-    A chaque itération il y a un commit IDB / store résultant (y compris le DataSync)
-    DataSync n'est retourné qu'à la fin
-    */
-    while (true) {
-      for(const [,e] of ds.avatars) 
-        if (e.vs !== e.vb) setIda.add(e.id)
-      for(const [,e] of ds.groupes) {
-        if ((e.vs[1] !== e.vb[1]) || (e.vs[2] !== e.vb[2]) || (e.vs[3] !== e.vb[3]))
-          setIda.add(e.id)
+    let fini = false
+
+    /* A chaque itération il y a un commit IDB / store résultant (y compris le DataSync)*/
+    while (!fini) {
+      const args =  { 
+        token: session.authToken, 
+        dataSync: cnx ? null : ds.serial(), 
+        lrds 
       }
-
-      /* LA SORTIE DE LA BOUCLE (et de la fonction) EST ICI */
-      if (!setIda.size) return ds // YES !!! tous traités
-
-      // Extraction pour traitement d'un ida du set des ida à traiter
-      let ida; for(const x of setIda) { ida = x; break }; setIda.delete(ida)
-      
-      const args =  { token: session.authToken, dataSync: ds.serial, ida }
       const ret = await post(this, 'Sync', args)
-      const nvds = new DataSync(ret.dataSync)
-      const [sb, buf] = await this.traitCompte(ret, nvds)
-  
-      // suppressions de IDB des disparus
-      this.supprdsdav(false, nvds, ds, sb, buf) 
-      ds = nvds // // le nouveau ds devient le ds courant
-      const item = (ID.estGroupe(ida) ? ds.groupes : ds.avatars).get(ida)
-      
-      if (!item) {
-        /* ida lui-même PEUT ne plus être cité dans compte: il n'y a plus d'item
-        il est désormais absent de ds.avatars / groupes . Dans ce cas la maj est terminée pour ce cycle
-        Cas "normal" : chargement incrémental du sous-arbre avatar / groupe
-        */
-        if (ID.estGroupe(ida)) {
-          if (ret.rowGroupe || ret.rowChatgr) item.vs[1] = item.vb[1]
-          if (ret.rowMembres) item.vs[2] = item.vb[2]
-          if (ret.rowNotes) item.vs[3] = item.vb[3]
+      if (cnx && fs) fs.open(ret.credentials, ret.emulator)
+      const nvds = DataSync.deserial(ret.dataSync)
+      const sb = new SB()
+      const buf = new IDBbuffer()
+      this.setCeCi(nvds, ret, sb, buf)
 
-          if (ret.rowGroupe) {
-            sb.setG(await compile(ret.rowGroupe))
-            buf.putIDB(ret.rowGroupe)
+      if (cnx && session.synchro) { // Premier retour de Sync a rempli: session. compteId, clek, nomBase
+        await idb.open()
+        const blOK = await idb.checkAge()
+        await idb.storeBoot()
+        if (!blOK)
+          setTrigramme(session.nombase, await getTrigramme())
+        // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK 
+
+        await idb.loadAvNotes()
+        await idb.loadFetats()
+
+        const dav = await idb.getDataSync()
+        if (dav) {
+          this.supprdsdav(true, nvds, dav, sb, buf)
+          // Enrichit le nvds par celui de IDB 
+          for(const [,e] of nvds.avatars) {
+            const eav = dav.avatars.get(e.id)
+            if (eav) e.vs = eav.vs
           }
-          if (ret.rowChatgr) {
-            sb.setH(await compile(rowChatgr))
-            buf.putIDB(ret.rowGroupe)
+          for(const [,e] of nvds.groupes) {
+            const eav = dav.groupes.get(e.id)
+            if (eav) e.vs = eav.vs
           }
-          if (ret.rowMembres) 
-          for(const row of ret.rowMembres) {
-            sb.setM(await compile(row))
-            buf.putIDB(row)
-          }
-        } else {
-          if (ret.rowAvatar) {
-            sb.setA(await compile(ret.rowAvatar))
-            buf.putIDB(ret.rowAvatar)
-            item.vs = item.vb
-          }  
-          if (ret.rowChats) 
-            for(const row of ret.rowChats) {
-              sb.setC(await compile(row))
-              buf.putIDB(row)
-            }
-          if (ret.rowSponsorings) 
-            for(const row of ret.rowSponsorings) {
-              sb.setS(await compile(row))
-              buf.putIDB(row)
-            }
-          if (ret.rowTickets) 
-            for(const row of ret.rowTickets) {
-              sb.setT(await compile(row))
-              buf.putIDB(row)
-            }
         }
 
-        if (ret.rowNotes) 
-          for(const row of ret.rowNotes) {
-            sb.setN(await compile(row))
-            buf.putIDB(row)
-          }
+        // Chargement dans sb des groupes et avatars depuis IDB
+        await this.loadAvatarsGroupes (sb, nvds)
+        // espace
+        /* Etat rétabli à celui de IDB, MAIS
+        - espace / compte / compti rafraîchis par ceux du serveur
+        - les avatars et groupes disparus (complètement ou partiellement) de compte ont été purgés
+        */
+        ds = nvds
+      } else {
+        // suppressions de IDB des disparus
+        fini = nvds.fini
+        this.supprdsdav(false, nvds, ds, sb, buf) 
+
+        ds = nvds // // le nouveau ds devient le ds courant
+
+        if (ret.rowAvatars) for(const row of ret.rowAvatars) {
+          this.setDsVs(ds, row.id)
+          sb.setA(await compile(row))
+          buf.putIDB(row)
+        }
+        if (ret.rowChats) for(const row of ret.rowChats) {
+          this.setDsVs(ds, row.id)
+          sb.setC(await compile(row))
+          buf.putIDB(row)
+        }
+        if (ret.rowSponsorings) for(const row of ret.rowSponsorings) {
+          this.setDsVs(ds, row.id)
+          sb.setS(await compile(row))
+          buf.putIDB(row)
+        }
+        if (ret.rowTickets) for(const row of ret.rowTickets) {
+          this.setDsVs(ds, row.id)
+          sb.setT(await compile(row))
+          buf.putIDB(row)
+        }
+        if (ret.rowNotes) for(const row of ret.rowNotes) {
+          const n = ID.estGroupe(row.id) ? 2 : 0
+          this.setDsVs(ds, row.id, n)
+          sb.setN(await compile(row))
+          buf.putIDB(row)
+        }
+        if (ret.rowGroupes) for(const row of ret.rowGroupes) {
+          this.setDsVs(ds, row.id, 1)
+          sb.setG(await compile(row))
+          buf.putIDB(row)
+        }
+        if (ret.rowChatgrs) for(const row of ret.rowChatgrs) {
+          this.setDsVs(ds, row.id, 2)
+          sb.setH(await compile(row))
+          buf.putIDB(row)
+        }
+        if (ret.rowMembres) for(const row of ret.rowMembres) {
+          this.setDsVs(ds, row.id, 2)
+          sb.setM(await compile(row))
+          buf.putIDB(row)
+        }
       }
 
-      // Commit Store et IDB d'un cycle, un sous-arbre de plus est enegistré
+      if (cnx) {
+        const ret = await post(this, 'GetEspace', { token: session.authToken })
+        sb.setEs(await compile(ret.rowEspace))
+        buf.putIDB(ret.rowEspace)  
+      }
+
+      // Commit Store et IDB d'un cycle
+      // 0 à N sous-arbres de plus enegistrés
       sb.store(buf)
       await buf.commit(ds)
       syncQueue.dataSync = ds
-      if (fs) fs.setDS(ds)
+      if (fs) fs.setDS(ds.tousRds)
+      fini = ds.estAJour
     }
   }
 }
@@ -605,7 +623,7 @@ export class SyncStd extends OperationS {
   */
   async run(lrds) {
     try { 
-      await this.majAvatarsGroupes(syncQueue.dataSync, lrds)
+      await this.syncStd(syncQueue.dataSync, lrds)
     } catch (e) {
       await this.finKO(e)
     }
@@ -692,55 +710,10 @@ export class ConnexionSynchroIncognito extends OperationS {
   async run() {
     try {
       const session = stores.session
-      const args =  { 
-        token: session.authToken, 
-        dataSync: DataSync.nouveau().serial, 
-        optionC: true, 
-        ida: 0
-      }
-      const ret = await post(this, 'Sync', args)
-      const ds = new DataSync(ret.dataSync)
-      const [sb, buf] = await this.traitCompte(ret, ds) // met à jour ds
+      await this.syncStd(null, [])
 
-      { // Premier retour de Sync a rempli: session. compteId, clek, nomBase
-        if (session.fssync) session.fssync.open(ret.credentials, ret.emulator)
-        
-        if (session.synchro) {
-          await idb.open()
-          const blOK = await idb.checkAge()
-          await idb.storeBoot()
-          if (!blOK)
-            setTrigramme(session.nombase, await getTrigramme())
-          // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK 
-  
-          await idb.loadAvNotes()
-          await idb.loadFetats()
-  
-          const dav = await idb.getDataSync()
-          // partition / avatars / groupes c / m / n disparus
-          this.supprdsdav(true, ds, dav, sb, buf)
-          // Enrichit le ds courant par celui de IDB 
-          this.fusionDS(ds, dav)
-  
-          // Chargement dans sb des groupes et avatars depuis IDB
-          await this.loadAvatarsGroupes (sb, ds)
-          /* Etat rétabli à celui de IDB, MAIS
-          - CCEP sont rafraîchis par ceux du serveur
-          - les avatars et groupes disparus (complètement ou partiellement) de compte ont été purgés
-          */
-        }
-      }
-  
-      if (session.fssync) session.fssync.setDS(ds)
-      sb.store(buf)
-      await buf.commit(ds)
-
-      // Phase 2 : chargement des sous-arbres groupes et avatars
-      await this.majAvatarsGroupes(ds, [])
-      if (session.fssync) session.fssync.setDS(syncQueue.dataSync)
-
-      if (session.synchro) // Chargement des descriptifs des fichiers du presse-papier
-        await idb.FLfromIDB()
+      // Chargement des descriptifs des fichiers du presse-papier
+      if (session.synchro) await idb.FLfromIDB()
 
       session.setStatus(2)
       syncQueue.reveil()

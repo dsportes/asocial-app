@@ -502,7 +502,7 @@ _data_ :
 - `hXR` : `ns` + `hXR`, hash du PBKFD d'un extrait de la phrase secrète.
 - `dlv` : dernier jour de validité du compte.
 
-- `rds` : non transmis en session
+- `rds` : null en session.
 - `hXC`: hash du PBKFD de la phrase secrète complète (sans son `ns`).
 - `cleKXC` : clé K cryptée par XC (PBKFD de la phrase secrète complète).
 - `cleEK` : clé de l'espace cryptée par la clé K du compte, à la création de l'espace pour le Comptable, à l'acceptation du sponsoring pour les autres comptes.
@@ -529,13 +529,13 @@ _Comptes "O" seulement:_
 - `mav` : map des avatars du compte. 
   - _clé_ : id court de l'avatar.
   - _valeur_ : `{ rds, claAK }`
-    - `rds`: de l'avatar (clé d'accès à son `versions`).
+    - `rds`: de l'avatar (clé d'accès à son `versions`). null en session.
     - `cleAK`: clé A de l'avatar crypté par la clé K du compte.
 
 - `mpg` : map des participations aux groupes:
   - _clé_ : id du groupe
   - _valeur_: `{ rds, cleGK, lav }`
-    - `rds`: du groupe (clé d'accès à son `versions`)
+    - `rds`: du groupe (clé d'accès à son `versions`). null en session.
     - `cleGK` : clé G du groupe cryptée par la clé K du compte.
     - `lav`: liste de ses avatars participant au groupe. compilé -> sav : Set
 
