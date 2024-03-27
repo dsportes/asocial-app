@@ -30,6 +30,7 @@ export const useSessionStore = defineStore('session', {
     dhConnx: 0, // dh de début de la session
     dh: 0, // dh de la dernière opération
     consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
+    setR: new Set(), // set des restrictions
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
@@ -338,6 +339,11 @@ export const useSessionStore = defineStore('session', {
         if (c.vm) this.consocumul.vm += c.vm
         if (c.vd) this.consocumul.vd += c.vd
       }
+    },
+
+    setRestrictions (t) {
+      const s = new Set(); if (t && t.length) t.forEach(r => { s.add(r) })
+      this.setR = s
     },
 
     setStatus (s) {

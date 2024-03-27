@@ -39,9 +39,13 @@ export class SetEspaceOptionA extends Operation {
 - token : jeton d'authentification du compte de **l'administrateur**
 - ns : numéro de l'espace
 - org : code de l'organisation
-- cleE : clé de l'espace
+- hXR : hash du PBKFD de la phrase secrète réduite
+- hXC : hash du PBKFD de la phrase secrète complète
+- pub: clé RSA publique du Comptable
+- privK: clé RSA privée du Comptable cryptée par la clé K
 - clePK: clé P de la partition 1 cryptée par la clé K du Comptable
 - cleAP: clé A du Comptable cryptée par la clé de la partition
+- cleAK: clé A du Comptable cryptée par la clé K du Comptable
 - cleKXC: clé K du Comptable cryptée par XC du Comptable (PBKFD de la phrase secrète complète).
 - clePA: cle P de la partition cryptée par la clé A du Comptable
 - ck: `{ cleP, code }` crypté par la clé K du comptable
@@ -57,9 +61,10 @@ export class CreerEspace extends Operation {
 
       const cleP = Cles.partition(1) // clé de la partition 1
       const cleK = random(32) // clé K du Comptable
-      const cleE = Cles.espace() // clé de l'espace
       const cleA = Cles.comptable() // clé A de l'avatar Comptable
       const kp = await genKeyPair()
+
+      const tp = {cleP: cleP, code: config.nomPartitionPrimitive}
 
       const args = {
         token: session.authToken,
@@ -69,16 +74,13 @@ export class CreerEspace extends Operation {
         hXC: phrase.hpsc,
         pub: kp.publicKey,
         privK: await crypter(cleK, kp.privateKey),
-        cleE: Cles.espace(), // clé de l'espace
-        cleEK: await crypter(cleK, cleE),
         clePK: await crypter(cleK, cleP),
         cleAP: await crypter(cleP, cleA, 1),
         cleAK: await crypter(cleK, cleA),
         cleKXC: await crypter(phrase.pcb, cleK),
         clePA: await crypter(Cles.comptable(), cleP),
         // `{ cleP, code }` crypté par la clé K du comptable
-        ck: await crypter(cleK, 
-          new Uint8Array(encode({ cleP, code: config.nomPartitionPrimitive })))
+        ck: await crypter(cleK, new Uint8Array(encode(tp)))
       }
       await post(this, 'CreerEspace', args)
       this.finOK()

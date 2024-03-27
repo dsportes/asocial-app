@@ -68,7 +68,6 @@ export class RegCc {
     RegCc.registre.set(chat.ids, cc)
     return cc
   }
-
 }
 
 /******************************************************
@@ -393,7 +392,7 @@ _data_:
     - `ntf[1,2,3]`
     - `pcac pcan pcav pcc pcn pcv`
 
-Une agrégation des `synth[i]` est calculée en session et stockée en `tsp[0]`.
+L'agrégation des `synth[i]` est calculée en session et stockée en `tsp[0]`.
 */
 export class Synthese extends GenDoc {
   get ns () { return ID.ns(this.id) }
@@ -446,7 +445,6 @@ _data_:
 - `id` : numéro de partition attribué par le Comptable à sa création.
 - `v` : 1..N
 
-- `dhic` : date-heure de la dernière incorporation des consommations des comptes attachés à la partition.
 - `nrp`: niveau de restriction de la notification (éventuelle) de niveau _partition_ mémorisée dans `espaces` et dont le texte est crypté par la clé P de la partition.
 - `q`: `{ qc, qn, qv }` quotas globaux attribués à la partition par le Comptable.
 - `mcpt` : map des comptes attachés à la partition. 
@@ -491,7 +489,8 @@ export class Partition extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    this.synth = compileMcpt(this, row, this.locComp)
+    compileMcpt(this, row, this.locComp)
+    this.synth = synthesesPartition(this)
   }
 }
 
@@ -540,7 +539,8 @@ _Comptes "O" seulement:_
     - `lav`: liste de ses avatars participant au groupe. compilé -> sav : Set
 
 **Comptable seulement:**
-- `tpK` : table des partitions cryptée par la clé K du Comptable `[ {cleP, code }]`. Son index est le numéro de la partition.
+- `tpK` : table des partitions {cleP, code } cryptés par la clé K du Comptable. 
+  Son index est le numéro de la partition.
   - `cleP` : clé P de la partition.
   - `code` : code / commentaire court de convenance attribué par le Comptable
 Compilé en mcode: Map(): clé: idp, valeur: code
@@ -586,11 +586,12 @@ export class Compte extends GenDoc {
     if (this.estComptable) {
       this.mcode = new Map()
       const t = await decrypter(clek, row.tpK)
-      for(let i = 1; i < t.length; i++) {
-        const e = t[i]
-        if (e) {
-          const idp = Cles.id(RegCles.set(e.cleP), this.ns)
-          if (e.code) this.mcode.set(idp, e.code)
+      for(let i = 1; i < row.tpK.length; i++) {
+        const x = row.tpK[i]
+        if (x) {
+          const { cleP, code } = decode(await decrypter(clek, x))
+          const idp = Cles.id(RegCles.set(cleP), this.ns)
+          if (e.code) this.mcode.set(idp, code)
         }
       }
     }
@@ -599,7 +600,7 @@ export class Compte extends GenDoc {
   // retourne le code de la partition id (Comptable)
   codeP (id) { 
     const n = ID.long(id, this.ns)
-    return this.mcode(n) || '#' + ID.court(id)
+    return this.mcode.get(n) || '#' + ID.court(id)
   }
   
   // Retourne [amb, amo] - un avatar au moins accède aux membres / notes du groupe

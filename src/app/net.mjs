@@ -92,6 +92,7 @@ export async function post (op, fonction, args) {
     if (resp) {
       if (resp.dh) session.setDh(resp.dh)
       if (resp.conso) session.setConso(resp.conso)
+      if (resp.setR) session.setRestrictions(resp.setR)
     }
     return resp
   } catch (e) { // Résultat mal formé
