@@ -63,6 +63,9 @@ export const useSessionStore = defineStore('session', {
 
     opEncours: null,
     opSpinner: 0,
+    opTimer: null,
+    opTimer2: null,
+    signalOp: false,
 
     notifs: { G: null, P: null, C: null, Q: null, X: null },
     niv: 0, // niveau de restriction : 0 1 2
@@ -73,8 +76,7 @@ export const useSessionStore = defineStore('session', {
     - 9999 : application fermée par l'administrateur
     - autre : exception rencontrée en synchronisation
     */
-    excKO: null 
-
+    excKO: null
   }),
 
   getters: {
@@ -488,6 +490,8 @@ export const useSessionStore = defineStore('session', {
       this.opSpinner = 0
       stores.ui.oD('opDialog')
       this.opCount()
+      if (this.opTimer2) clearTimeout(this.opTimer2)
+      this.signalOp = true
     },
 
     finOp () {
@@ -495,6 +499,7 @@ export const useSessionStore = defineStore('session', {
       this.opEncours = null
       this.opSpinner = 0
       stores.ui.fD()
+      this.opTimer2 = setTimeout(() => { this.signalOp = false }, 1000)
     }
   }
 })

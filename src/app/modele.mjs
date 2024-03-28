@@ -351,6 +351,7 @@ _data_ :
 - `creation` : date de création.
 - `moisStat` : dernier mois de calcul de la statistique des comptas.
 - `moisStatT` : dernier mois de calcul de la statistique des tickets.
+- `nprof` : numéro de profil d'abonnement.
 - `dlvat` : `dlv` de l'administrateur technique.
 - `notifE` : notification pour l'espace de l'administrateur technique. Le texte n'est pas crypté.
 - `notifP` : pour un délégué, la notification de sa partition.
@@ -368,6 +369,7 @@ export class Espace extends GenDoc {
     this.moisStat = row.moisStat || 0
     this.moisStatT = row.moisStatT || 0
     this.opt = row.opt || 0
+    this.nprof = row.nprof || 0
     this.dlvat = row.dlvat || 0
     this.nbmi = row.nbmi || 6
     this.notifE = row.notifE || null
@@ -539,7 +541,7 @@ _Comptes "O" seulement:_
     - `lav`: liste de ses avatars participant au groupe. compilé -> sav : Set
 
 **Comptable seulement:**
-- `tpK` : table des partitions {cleP, code } cryptés par la clé K du Comptable. 
+- `tpk` : table des partitions {cleP, code } cryptés par la clé K du Comptable. 
   Son index est le numéro de la partition.
   - `cleP` : clé P de la partition.
   - `code` : code / commentaire court de convenance attribué par le Comptable
@@ -553,14 +555,13 @@ export class Compte extends GenDoc {
     const session = stores.session
     const clek = session.clek || await session.setIdClek(this.id, row.cleKXC)
 
-    RegCles.set(await decrypter(clek, e.cleEK))
     this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
     this.qv = row.qv
 
     if (row.idp) {
       this.estA = true
       this.idp = row.idp
-      const clep = RegCles.set(await decrypter(clek, e.clePK))
+      const clep = RegCles.set(await decrypter(clek, row.clePK))
       this.del = row.del || false
       this.notif = row.notif ? await Notification.decrypt(row.notif, clep) : null
     }
@@ -585,13 +586,12 @@ export class Compte extends GenDoc {
 
     if (this.estComptable) {
       this.mcode = new Map()
-      const t = await decrypter(clek, row.tpK)
-      for(let i = 1; i < row.tpK.length; i++) {
-        const x = row.tpK[i]
+      for(let i = 1; i < row.tpk.length; i++) {
+        const x = row.tpk[i]
         if (x) {
           const { cleP, code } = decode(await decrypter(clek, x))
           const idp = Cles.id(RegCles.set(cleP), this.ns)
-          if (e.code) this.mcode.set(idp, code)
+          if (code) this.mcode.set(idp, code)
         }
       }
     }

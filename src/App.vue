@@ -74,6 +74,10 @@
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </q-btn>
 
+      <q-page-sticky v-if="session.signalOp" position="top" :offset="[0, -25]">
+        <q-btn round color="warning" icon="wifi" padding="0"/>
+      </q-page-sticky>
+
     </q-toolbar>
 
     <q-toolbar v-if="ui.page === 'compta'" inset 

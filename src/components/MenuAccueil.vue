@@ -56,7 +56,7 @@
         </q-item-label>
       </q-item-section>
     </q-item>
-    <q-item v-if="!session.compta.estA" clickable  @click="maParition()">
+    <q-item v-if="!session.estA" clickable  @click="maParition()">
       <q-item-section>
         <q-item-label lines="1">{{$t(session.pow <= 3 ? 'ACalloc' : 'ACspons')}}</q-item-label>
       </q-item-section>

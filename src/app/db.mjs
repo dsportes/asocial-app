@@ -155,18 +155,18 @@ class IDB {
     }
   }
 
-    /* Enregistre le row espace */
-    async storeEspace (row) {
-      const session = stores.session
-      const data = await crypter(session.clek, row)
-      try {
-        await this.db.transaction('rw', ['singletons'], async () => {
-          await this.db.singletons.put({ n: IDB.snoms.espaces, dh: Date.now(), data })
-        })
-      } catch (e) {
-        throw IDB.EX2(e)
-      }
+  /* Enregistre le row espace */
+  async storeEspace (row) {
+    const session = stores.session
+    const data = await crypter(session.clek, row)
+    try {
+      await this.db.transaction('rw', ['singletons'], async () => {
+        await this.db.singletons.put({ n: IDB.snoms.espaces, dh: Date.now(), data })
+      })
+    } catch (e) {
+      throw IDB.EX2(e)
     }
+  }
   
   /** Retourne l'objet DataSync *******************************/
   async getDataSync () {

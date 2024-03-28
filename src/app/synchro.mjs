@@ -2,7 +2,7 @@ import { decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme } from './util.mjs'
-import { idb, IDBbuffer, storeEspace } from './db.mjs'
+import { idb, IDBbuffer } from './db.mjs'
 import { DataSync, appexc, ID, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
 import { CV, compile, RegCles } from './modele.mjs'
@@ -51,9 +51,9 @@ class Queue {
 
     const ds = syncQueue.dataSync
 
-    if (this.vcpt.v[0] > this.vcpt.v[1]) {
-      const vx = this.vcpt.v[0]
-      this.vcpt.v = [vx, vx] // retrait de la tâche en attente
+    if (this.vcpt[0] > this.vcpt[1]) {
+      const vx = this.vcpt[0]
+      this.vcpt = [vx, vx] // retrait de la tâche en attente
       if (vx > ds.compte.vs) {
         // Lancement de l'opération de Sync
         this.EnCours = true
@@ -357,7 +357,7 @@ export class Operation {
     if (!this.modeSync) {
       const session = stores.session
       session.finOp()
-      if (!silence) stores.ui.afficherMessage($t('OPok', [this.label]), false)
+      // if (!silence) stores.ui.afficherMessage($t('OPok', [this.label]), false)
     }
     return res
   }
@@ -471,16 +471,16 @@ export class OperationS extends Operation {
     }
   }
 
-  setCeCi (ds, ret, sb, buf) {
+  async setCeCi (ds, ret, sb, buf) {
     if (ret.rowCompte) {
-      sb.setCe(compile(ret.rowCompte))
+      sb.setCe(await compile(ret.rowCompte))
       buf.putIDB(ret.rowCompte)
-      ds.vs = ds.vb
+      ds.compte.vs = ds.compte.vb
     }
     if (ret.rowCompti) {
-      sb.setCi(compile(ret.rowCompti))
+      sb.setCi(await compile(ret.rowCompti))
       buf.putIDB(ret.rowCompti)
-      ds.vs = ds.vb
+      ds.compte.vs = ds.compte.vb
     }
   }
 
@@ -499,20 +499,21 @@ export class OperationS extends Operation {
     const cnx = !ds1
     let ds = ds1
     let fini = false
+    let nbIter = 0
 
     /* A chaque itération il y a un commit IDB / store résultant (y compris le DataSync)*/
     while (!fini) {
       const args =  { 
         token: session.authToken, 
-        dataSync: cnx ? null : ds.serial(), 
-        lrds 
+        dataSync: ds ? ds.serial() : null, 
       }
+      if (!nbIter && lrds) args.lrds = lrds || []
       const ret = await post(this, 'Sync', args)
       if (cnx && fs) fs.open(ret.credentials, ret.emulator)
       const nvds = DataSync.deserial(ret.dataSync)
       const sb = new SB()
       const buf = new IDBbuffer()
-      this.setCeCi(nvds, ret, sb, buf)
+      await this.setCeCi(nvds, ret, sb, buf)
 
       if (cnx && session.synchro) { // Premier retour de Sync a rempli: session. compteId, clek, nomBase
         await idb.open()
@@ -549,8 +550,7 @@ export class OperationS extends Operation {
         ds = nvds
       } else {
         // suppressions de IDB des disparus
-        fini = nvds.fini
-        this.supprdsdav(false, nvds, ds, sb, buf) 
+        if (ds) this.supprdsdav(false, nvds, ds, sb, buf) 
 
         ds = nvds // // le nouveau ds devient le ds courant
 
@@ -597,7 +597,7 @@ export class OperationS extends Operation {
         }
       }
 
-      if (cnx) {
+      if (cnx && !nbIter) {
         const ret = await post(this, 'GetEspace', { token: session.authToken })
         sb.setEs(await compile(ret.rowEspace))
         buf.putIDB(ret.rowEspace)  
@@ -610,6 +610,7 @@ export class OperationS extends Operation {
       syncQueue.dataSync = ds
       if (fs) fs.setDS(ds.tousRds)
       fini = ds.estAJour
+      nbIter++
     }
   }
 }
@@ -896,7 +897,7 @@ export class GetEspace extends OperationS {
       const ret = await post(this, 'GetEspace', args)
       const s = await compile(ret.rowEspace)
       session.setEspace(s)
-      storeEspace(ret.rowEspace)
+      idb.storeEspace(ret.rowEspace)
       return this.finOK()
     } catch (e) {
       await this.finKO(e)

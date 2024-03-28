@@ -40,7 +40,7 @@
           </div>
 
           <div class="row justify-between q-ml-lg q-my-xs">
-            <span class="fs-md">{{$t('ESprf', [esp.t])}}</span>
+            <span class="fs-md">{{$t('ESprf', [esp.nprof])}}</span>
             <q-btn dense color="primary" :label="$t('changer')" padding="xs"
               @click="ovchgprf1(esp)"/>
           </div>
@@ -82,6 +82,7 @@
       </q-card>
     </q-dialog>
 
+    <!-- Changement du profil de l'espace -->
     <q-dialog v-model="ui.d.PAedprf" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
@@ -92,7 +93,7 @@
           <div class="row bord4">
             <div class="col-3 text-center font-mono">#</div>
             <div class="col-3 text-center font-mono">{{$t('limco')}}</div>
-            <div class="col-3 text-center font-mono">{{$t('nbnotes')}}</div>
+            <div class="col-3 text-center font-mono">{{$t('nbnnncng')}}</div>
             <div class="col-3 text-center font-mono">{{$t('volv2')}}</div>
           </div>
           <div v-for="(x, idx) of cfg.profils" :key="idx" @click="prf = idx+1">
@@ -170,8 +171,8 @@ import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
 import { reconnexion } from '../app/synchro.mjs'
-import { CreerEspace } from '../app/operations4.mjs'
-import { GC, GetSingletons, SetEspaceT } from '../app/operations.mjs'
+import { CreerEspace, SetEspaceNprof } from '../app/operations4.mjs'
+import { GC, GetSingletons } from '../app/operations.mjs'
 import { AMJ, UNITEN, UNITEV } from '../app/api.mjs'
 import { styp, edvol, mon, nbn, dkli } from '../app/util.mjs'
 
@@ -279,12 +280,13 @@ export default {
     },
 
     async valider () {
-      new SetEspaceT().run(this.esp.id, this.prf)
+      await new SetEspaceNprof().run(this.esp.id, this.prf)
       this.ui.fD()
+      await this.rafraichir()
     },
 
     ovchgprf1 (e) {
-      this.profil = e.t
+      this.profil = e.nprof
       this.esp = e
       this.prf = 0
       this.ui.oD('PAedprf')

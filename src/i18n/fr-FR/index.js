@@ -597,7 +597,7 @@ export default {
   OP_GetCompteursCompta: 'Obtention des compteurs d\'abonnement / consomation d\'un compte',
   OP_GetTribu: 'Obtention d\'une tranche de quotas',
   OP_GetEspace: 'Obtention de l\'espace du compte',
-  OP_SetEspaceT: 'Attribution d\'un profil à l\'espace',
+  OP_SetEspaceNprof: 'Attribution d\'un profil à un espace',
   OP_NouveauGroupe: 'Création d\'un nouveau groupe',
   OP_MotsclesGroupe: 'Insciption / mise à jour des mots clés d\'un groupe',
   OP_InvitationFiche: 'Récupération des informations d\'invitation à un groupe',

@@ -2,12 +2,11 @@ import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { Operation } from './synchro.mjs'
-import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme } from './util.mjs'
-import { idb, IDBbuffer } from './db.mjs'
-import { DataSync, appexc, ID, Rds, Cles, AMJ } from './api.mjs'
+import { random, gzipB } from './util.mjs'
+import { Cles } from './api.mjs'
 import { post } from './net.mjs'
-import { CV, compile, RegCles } from './modele.mjs'
-import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
+import { RegCles } from './modele.mjs'
+import { crypter, genKeyPair } from './webcrypto.mjs'
 
 /* OP_SetEspaceOptionA: 'Changement de l\'option A de l\'espace'
 - `token` : jeton d'authentification du compte de **l'administrateur**
@@ -205,6 +204,27 @@ export class MajChat extends Operation {
       }
       const ret = await post(this, 'MajChat', args)
       return this.finOK(ret.disp)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_SetEspaceT: 'Attribution d\'un profil à un espace' ******************
+args.token donne les éléments d'authentification de l'administrateur.
+args.ns
+args.nprof
+Retour:
+*/
+export class SetEspaceNprof extends Operation {
+  constructor () { super('SetEspaceNprof') }
+
+  async run (ns, nprof) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns, nprof}
+      await post(this, 'SetEspaceNprof', args)
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }
