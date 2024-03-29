@@ -18,7 +18,7 @@
 
   <q-item v-if="session.estComptable" clickable  @click="ui.setPage('espace')">
     <q-item-section>
-      <q-item-label lines="1">{{$t('ACtribus')}}</q-item-label>
+      <q-item-label lines="1">{{$t('ACpartitions')}}</q-item-label>
     </q-item-section>
   </q-item>
 

@@ -1,17 +1,3 @@
-<!--
-Source principale : Synthese
-Depuis PageAdmin par l'administrateur: ns est donné par PageAdmin
-- les "tribus / tranche d'allocation de quotas" n'ont PAS de nom
-- dans DetailTribu les notifs tribu ne sont pas accessibles, seulement leurs gravités
-- la création d'une nouvelle tribu n'est pas possible
-- zoom impossible sur une tribu
-Depuis un Comptable: ns est celui de la session
-- les "tribus / tranche d'allocation de quotas" ont un nom / info
-- dans DetailTribu les notifs tribu sont accessibles
-- la création d'une nouvelle tribu est possible
-- zoom possible sur une tribu
-- source secondaire de données: compta.act
--->
 <template>
   <q-page class="column q-pa-xs">
     <div v-if="session.pow <= 2" class="q-mb-sm">
@@ -36,27 +22,16 @@ Depuis un Comptable: ns est celui de la session
     </div>
 
     <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
-      <q-btn class="col-auto self-start q-mr-sm"
-        dense size="md" color="primary" padding="none" round 
-        :disable="session.pow !== 2 || session.espace.nbmi === nbmi" icon="undo" 
-        @click="undoNbmi"/>
-      <q-btn class="col-auto self-start q-mr-sm" dense size="md" color="warning" padding="none" round 
-        :disable="session.pow !== 2 || session.espace.nbmi === nbmi" icon="check" @click="saveNbmi"/>
-      <div class="tire-md q-mr-sm">{{$t('ESnbmi')}}</div>
+      <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
       <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
-        borderless style="position:relative;top:-8px;"
+        standout style="position:relative;top:-8px;"
         :disable="session.pow !== 2"
         v-model.number="nbmi" :options="optionsNbmi" dense />
     </div>
 
-    <div v-if="session.pow === 2" class="row q-mb-sm justify-start">
-      <div class="font-mono fs-sm q-mr-sm">{{session.espace.v}}</div>
-      <q-btn class="col-auto self-start q-mr-sm"
-        dense size="md" color="primary" padding="none" round 
-        :disable="!chgOptionA" icon="undo" @click="undoOptionA"/>
-      <q-btn class="col-auto self-start" dense size="md" color="warning" padding="none" round 
-        :disable="!chgOptionA" icon="check" @click="saveOptionA"/>
-      <q-select class="col q-ml-sm self-start" borderless style="position:relative;top:-8px"
+    <div v-if="session.pow === 2" class="q-mb-sm">
+      <!--div class="font-mono fs-sm q-mr-sm">{{session.espace.v}}</div-->
+      <q-select standout style="position:relative;top:-8px"
         v-model="optionA" :options="options" dense />
     </div>
 
@@ -102,10 +77,12 @@ Depuis un Comptable: ns est celui de la session
             <tuile-cnv type="qv" :src="lg" occupation/>
             <tuile-notif :src="lg" :total="idx === 0" occupation/>
           </div>
+          <!--
           <div v-if="idx !== 0" class="q-my-xs">
             <apercu-notif :editable="session.pow > 1 && session.pow < 4" :notif="notif" :type="1" 
               :ctx="{ idt: lg.id }" :idx="idx"/>
           </div>
+          -->
           <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs">
             <q-btn class="fs-md" size="sm" dense padding="xs"
               color="primary" :icon="lg.info ? 'edit' : 'add'" 
@@ -219,12 +196,12 @@ import SaisieMois from '../components/SaisieMois.vue'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import ApercuNotif from '../components/ApercuNotif.vue'
+// import ApercuNotif from '../components/ApercuNotif.vue'
 import { SetNotifT } from '../app/operations.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
-import { GetSynthese } from '../app/synchro.mjs'
+import { GetSynthese, GetPartition } from '../app/synchro.mjs'
 import { SetEspaceOptionA } from '../app/operations4.mjs'
 import { DownloadStatC, DownloadStatC2, NouvelleTribu, SetAtrItemComptable,
   GetVersionsDlvat, GetMembresDlvat, ChangeAvDlvat, ChangeMbDlvat } from '../app/operations.mjs'
@@ -245,7 +222,9 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif, BoutonConfirm },
+  components: { SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, 
+  // ApercuNotif, 
+  BoutonConfirm },
 
   computed: {
     maxdl () { 
@@ -267,7 +246,7 @@ export default {
     },
     synth () {
       if (!this.session.synthese) return []
-      const l = this.session.synthese.tp
+      const l = this.session.synthese.tsp
       const fv = this.fSt.tri.espace
       const f = fv ? fv.value : 0
       const ct = { f: fx[f][0], m: fx[f][1] }
@@ -280,29 +259,31 @@ export default {
       })
       return l
     },
-    notif () { 
+    notif () { // ????????????
       return this.session.pow === 2 ? this.session.partition.notif : null 
     },
     optesp () { return this.session.espace ? this.session.espace.opt : 0 },
-    chgOptionA () { return this.session.espace.opt !== this.optionA.value },
-    tribuv () { const t = this.aSt.tribuC; return t ? [t.id, t.v] : [0, 0] }
+    nbmiesp () { return this.session.espace ? this.session.espace.nbmi : 12 }
   },
 
   watch: {
     synth (l) { // repositionnement de la ligne courante sur la nouvelle valeur
-      if (this.aSt.tribuC)
-        l.forEach(s => { if (s.id === this.session.tribuCId) { this.ligne = s } })
+      if (this.session.compte && this.session.compte.idp)
+        l.forEach(s => { if (s.id === this.session.compte.idp) { this.ligne = s } })
       else
         this.ligne = l[0] // ligne de synthèse courante initiale
     },
 
-    optesp (ap) { // refixe la valeur courante de l'option A quand elle a changé dans espace
-      this.optionA = this.options[ap]
+    // refixe les valeurs courantes de optionA et nbmi quand elles ont changé dans espace
+    optesp (ap) { this.optionA = this.options[ap] },
+    nbmiesp (ap) { this.nbmi = this.session.espace ? this.session.espace.nbmi : 12 },
+    async optionA (ap) {
+      if (this.session.espace && this.session.espace.opt !== ap.value) 
+        await new SetEspaceOptionA().run(this.optionA.value)
     },
-
-    async tribuv (ap) {
-      if (this.session.status > 2)
-        await this.refreshSynth()
+    async nbmi (ap) {
+      if (this.session.espace && this.session.espace.nbmi !== ap) 
+        new SetEspaceOptionA().run(null, this.nbmi)
     }
   },
 
@@ -352,9 +333,9 @@ export default {
 
     async getPart (id) { // rend courante cette partition
       const session = stores.session
-      if (session.partition.id === id) return session.partition // partition du compte  
-      if (this.session.partitionCId === id) return session.partitionC // elle l'était déjà
-      return await new GetPartitionC().run(id)
+      if (session.partition && session.partition.id === id) return session.partition // partition du compte  
+      await new GetPartition().run(id)
+      return session.partition
     },
 
     async pagePartition () { // Comptable seulement
@@ -387,21 +368,6 @@ export default {
     async validerq () {
       await new SetAtrItemComptable().run(this.ligne.id, null, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
       this.ui.fD()
-    },
-
-    setOptionA (e) { this.optionA = this.options[e.opt] },
-
-    undoOptionA () { this.optionA = this.options[this.session.espace.opt] },
-
-    async saveOptionA () {
-      await new SetEspaceOptionA().run(this.optionA.value)
-    },
-
-    undoNbmi () { this.nbmi = this.session.espace.nbmi},
-
-    async saveNbmi () {
-      console.log(this.nbmi)
-      await new SetEspaceOptionA().run(null, this.nbmi)
     },
 
     splitLst (lst) {
@@ -462,8 +428,8 @@ export default {
       quotas: null,
       ligne: null,
       optionsNbmi: [3, 6, 12, 18, 24],
-      nbmi: this.session.espace.nbmi,
-      optionA: this.options[this.session.espace.opt]
+      nbmi: this.session.espace ? this.session.espace.nbmi : 12,
+      optionA: this.options[this.session.espace ? this.session.espace.opt : 0]
     }
   },
 

@@ -158,6 +158,7 @@ class IDB {
   /* Enregistre le row espace */
   async storeEspace (row) {
     const session = stores.session
+    if (!session.synchro) return
     const data = await crypter(session.clek, row)
     try {
       await this.db.transaction('rw', ['singletons'], async () => {

@@ -385,6 +385,7 @@ export default {
   EX8213: 'Un don par un "chat" ne peut être effectué que si le "chat" concerne l\'avatar PRINCIPAL du destinataire du don.',
   EX8214: 'Un don par ne peut être effectué qu\'entre comptes "autonomes".',
   EX8215: 'Le don est  [{0}c] trop important vis à vis du solde du compte du donateur [{1}c].',
+  EX8216: 'Seul un compte "délégué" peut accéder au détail d\'une partition.',
 
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
@@ -659,7 +660,7 @@ export default {
   OP_ComptaStat : 'Enregistre en storage la statistique de comptabilité',
   OP_DownloadStatC: 'Téléchargement d\'un fichier statistique comptable mensuel',
   OP_DownloadStatC2: 'Téléchargement d\'un fichier statistique comptable mensuel déjà calculé',
-  OP_GetPartitionC: 'Obtention d\'une partition',
+  OP_GetPartition: 'Obtention d\'une partition',
 
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
@@ -862,7 +863,7 @@ export default {
   ACmesctc: 'Tous les contacts',
   ACspons: 'Mes sponsors',
   ACalloc: 'Comptes sponsors et sponsorisés',
-  ACtribus: 'Tranches de quotas de l\'espace',
+  ACpartitions: 'Partitions de l\'espace',
   ACmacompta: 'Ma comptabilité',
   ACmesspons: 'Mes sponsorings',
   ACmesinvits: 'Mes invitations',
@@ -1327,11 +1328,11 @@ export default {
   DTv1: 'Quota pour les textes des notes: [{0}] soit {1}. {2}% alloués. {3}% occupés',
   DTv2: 'Quota pour les fichiers des notes: [{0}] soit {1}. {2}% alloués. {3}% occupés',
 
-  // Panel Tribu
+  // Panel Partition
   PTci: 'Commentaires / information',
   PTvat: 'Volumes déjà attribués aux comptes de la tribu',
   PTres: 'Réserves restantes de volumes à attribuer',
-  PTnv: 'Nouvelle tranche',
+  PTnv: 'Nouvelle partition',
   PTraf: 'Alertes recalculées',
   PTnoinfo: 'Pas de commentaires',
   PTattr: 'Attribué aux comptes',

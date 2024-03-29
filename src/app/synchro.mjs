@@ -30,7 +30,7 @@ class Queue {
     if (rows) for (const row of rows) {   
       if (row.id === session.ns) {
         // Maj _Store_ et IDB
-        await post(this, 'GestEspace',  { token: session.authToken })
+        await new GetEspace().run(row.id)
       } else {
         if (ID.rdsType(row.id) === ID.RDSCOMPTE) { 
           if (this.vcpt.v[0] < row.v) { this.vcpt.v[0] = row.v; rev = true }
@@ -928,23 +928,23 @@ export class GetSynthese extends Operation {
   }
 }
 
-/* OP_GetPartitionC: 'Obtention d\'une partition' *********
+/* OP_GetPartition: 'Obtention d\'une partition' *********
 args.token donne les éléments d'authentification du compte Comptable.
 args.id
 Retour:
 - rowPartition
 */
-export class GetPartitionC extends Operation {
-  constructor () { super('GetPartitionC') }
+export class GetPartition extends Operation {
+  constructor () { super('GetPartition') }
 
   async run (id) { 
     try {
       const session = stores.session
       const args = { token: session.authToken, id }
-      const ret = await post(this, 'GetPartitionC', args)
+      const ret = await post(this, 'GetPartition', args)
       const p = await compile(ret.rowPartition)
-      if (p) session.setPartitionC(p)
-      return this.finOK(p)
+      if (p) session.setPartition(p)
+      return this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

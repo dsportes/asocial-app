@@ -55,7 +55,6 @@ export const useSessionStore = defineStore('session', {
     syntheses: new Map(), // Pour admin SEULEMENT
 
     partition: null,
-    partitionC: null,
     compte: null,
     compta: null,
     espace: null,
@@ -376,23 +375,6 @@ export const useSessionStore = defineStore('session', {
 
     setPartition (partition) {
       this.partition = partition
-      if (this.partitionId !== partition.id) this.partitionId = partition.id
-    },
-
-    setParticitionC (partition) { 
-      if (partition.id === this.partitionId) {
-        this.partitionC = null
-        this;partitionCId = 0
-      } else {
-        this.partitionC = partition
-        this.partitionCId = partition.id
-        if (this.fsSync) fsSync.setPartitionC(partition.rds)
-      }
-    },
-
-    delPartition () {
-      if (this.partitionId) this.partitionId = 0
-      this.partition = null
     },
 
     setSynthese (synthese) {

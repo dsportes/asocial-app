@@ -296,6 +296,7 @@ export default {
       this.ns = e.id
       this.session.setNs(this.ns)
       this.esp = e
+      this.session.setEspace(e)
       this.ui.oD('PApageespace')
     },
 

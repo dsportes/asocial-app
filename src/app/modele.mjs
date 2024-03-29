@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, inverse, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
-import { ID, Cles, isAppExc, d14, Compteurs, AMJ, nomFichier, compileMcpt, FLAGS } from './api.mjs'
+import { ID, Cles, isAppExc, d14, Compteurs, AMJ, nomFichier, compileMcpt, synthesesPartition, FLAGS } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { idb } from './db.mjs'
@@ -397,10 +397,13 @@ _data_:
 L'agrégation des `synth[i]` est calculée en session et stockée en `tsp[0]`.
 */
 export class Synthese extends GenDoc {
+  static l1 = ['qc', 'qn', 'qv']
+  static l2 = ['qc', 'qn', 'qv', 'c2m', 'n', 'v']
+
   get ns () { return ID.ns(this.id) }
 
   async compile (row) {
-    this.tsp = new Array(row.tsp.length)
+    this.tsp = [null]
 
     const a = { // colonne 0 de totalisation
       id: 0, 
@@ -409,7 +412,7 @@ export class Synthese extends GenDoc {
       ntfp: [0, 0, 0],
       ntf: [0, 0, 0],
       q: { qc: 0, qn: 0, qv: 0 },
-      qt: { qc: 0, qn: 0, qv: 0, c2m: 0, n, v }
+      qt: { qc: 0, qn: 0, qv: 0, c2m: 0, n: 0, v: 0 }
     }
 
     for (let i = 1; i < row.tsp.length; i++) {
@@ -427,9 +430,10 @@ export class Synthese extends GenDoc {
         a.nbd += r.nbd
         a.ntfp[0] += r.ntfp[0]; a.ntfp[1] += r.ntfp[1]; a.ntfp[2] += r.ntfp[2]
         a.ntf[0] += r.ntf[0]; a.ntf[1] += r.ntf[1]; a.ntf[2] += r.ntf[2]
-        ['qc', 'qn', 'qv'].forEach(f => { a.q[f] += r.q[f]})
-        ['qc', 'qn', 'qv', 'c2m', 'n', 'v'].forEach(f => { a.qt[f] += r.qt[f]})
-      }
+        Synthese.l1.forEach(f => { a.q[f] += r.q[f] })
+        Synthese.l2.forEach(f => { a.qt[f] += r.qt[f] })
+        this.tsp.push(r)
+      } 
     }
     a.pcac = !a.q.qc ? 0 : Math.round(a.qt.qc * 100 / a.q.qc) 
     a.pcan = !a.q.qn ? 0 : Math.round(a.qt.qn * 100 / a.q.qn) 
@@ -491,7 +495,7 @@ export class Partition extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    compileMcpt(this, row, this.locComp)
+    await compileMcpt(this, row, this.locComp)
     this.synth = synthesesPartition(this)
   }
 }
@@ -560,7 +564,7 @@ export class Compte extends GenDoc {
 
     if (row.idp) {
       this.estA = true
-      this.idp = row.idp
+      this.idp = ID.long(row.idp, this.ns)
       const clep = RegCles.set(await decrypter(clek, row.clePK))
       this.del = row.del || false
       this.notif = row.notif ? await Notification.decrypt(row.notif, clep) : null
