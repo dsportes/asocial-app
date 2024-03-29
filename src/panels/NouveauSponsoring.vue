@@ -222,7 +222,6 @@ export default ({
       }
     },
     async confirmer () {
-      // async nouveauRow (phrase, dlv, nom, sp, quotas, ard) { pc, nom, estAutonome, estDelegue, quotas, mot, don, dconf
       const q = this.estAutonome ? [0, 1, 1] : [this.quotas.qc, this.quotas.q1, this.quotas.q2]
       try {
         const args = {
@@ -276,9 +275,9 @@ export default ({
       const partition = toRef(props, 'partition')
       const cpt = partition.value.synth
       quotas.value = { qc: 1, qn: 1, qv: 1, 
-        maxn: cpt.qn > cpt.an ? cpt.qn - cpt.an : 0, 
-        maxv: cpt.qv > cpt.av ? cpt.qv - cpt.an : 0,
-        maxc: cpt.qc > cpt.ac ? cpt.qc - cpt.ac : 0,
+        maxn: cpt.q.qn > cpt.qt.qn ? cpt.q.qn - cpt.qt.qn : 0, 
+        maxv: cpt.q.qv > cpt.qt.qv ? cpt.q.qv - cpt.qt.qn : 0,
+        maxc: cpt.q.qc > cpt.qt.qc ? cpt.q.qc - cpt.qt.qc : 0,
         minn: 1, minv: 0, minc: 1 }
     }
 

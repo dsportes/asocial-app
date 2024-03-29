@@ -563,12 +563,12 @@ export class Compte extends GenDoc {
     this.qv = row.qv
 
     if (row.idp) {
-      this.estA = true
+      this.estA = false
       this.idp = ID.long(row.idp, this.ns)
       const clep = RegCles.set(await decrypter(clek, row.clePK))
       this.del = row.del || false
       this.notif = row.notif ? await Notification.decrypt(row.notif, clep) : null
-    }
+    } else this.estA = true
 
     this.mav = new Set()
     for(const idx in row.mav) {

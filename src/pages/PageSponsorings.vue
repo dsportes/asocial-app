@@ -52,9 +52,8 @@
       </div>
     </q-card>
 
-    <!-- Dialogue de création d'un sponsoring 
-    Pour le Comptable, la partition est soit la partition "courante", soit la sienne -->
-    <nouveau-sponsoring v-if="ui.d.NSnvsp" :partition="session.partitionC || session.partition"/>
+    <!-- Dialogue de création d'un sponsoring ici la partition est la sienne -->
+    <nouveau-sponsoring v-if="ui.d.NSnvsp" :partition="session.partition"/>
 
   </q-page>
 </template>
@@ -69,7 +68,7 @@ import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import { Tribu } from '../app/modele.mjs'
-import { ProlongerSponsoring } from '../app/synchro.mjs'
+import { ProlongerSponsoring, GetPartition } from '../app/synchro.mjs'
 
 export default {
   name: 'PageSponsorings',
@@ -96,7 +95,8 @@ export default {
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
 
     async nouveausp () { 
-      if (await this.session.edit()) this.ui.oD('NSnvsp') 
+      await new GetPartition().run(this.session.compte.idp)
+      this.ui.oD('NSnvsp') 
     },
 
     async prolonger (sp, nj) {
