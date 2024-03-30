@@ -808,6 +808,11 @@ export class Compti extends GenDoc {
       this.mc.set(id, { ht, tx })
     }
   }
+
+  get (id) {
+    const x = this.mc.get(id)
+    return x ||  { ht: new Set(), texte: '', fake: true }
+  }
 }
 
 /** Avatar *********************************************************

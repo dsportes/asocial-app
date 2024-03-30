@@ -3,18 +3,16 @@
   <q-icon size="28px" class="relative-position" :name="ico">
     <span v-if="alire" class="rond"></span>
   </q-icon>
-  <q-tooltip v-if="apptb" class="bg-indigi text-white font-sm">{{$t('MLAnot')}}</q-tooltip>
-  <q-tooltip v-else class="bg-indigi text-white font-sm">{{$t('ANlong' + niv)}}</q-tooltip>
+  <!--q-tooltip v-if="apptb" class="bg-indigi text-white font-sm">{{$t('MLAnot')}}</q-tooltip-->
+  <q-tooltip class="bg-indigi text-white font-sm">{{$t('ANlong' + niv)}}</q-tooltip>
 </span>
 </template>
 
 <script>
 
-const txt = ['green-5', 'green-5', 'orange-9', 'negative', 'negative', 'negative']
-const bg = ['none', 'none', 'yellow-1', 'yellow-3', 'yellow-5',  'yellow-7']
-// const bg = ['none', 'none', 'none', 'none', 'none',  'none']
-const ic = ['circle', 'report', 'trending_down', 'edit_off', 'lock', 'close']
-// const ic = ['check', 'report', 'trending_down', 'edit_off', 'lock', 'close']
+const txt = ['green-5', 'green-5', 'orange-9', 'orange-9', 'negative', 'negative', 'negative']
+const bg = ['none', 'none', 'yellow-1', 'yellow-3', 'yellow-5', 'yellow-7', 'yellow-9']
+const ic = ['circle', 'report', 'trending_down', 'edit_off', 'edit_off', 'emergency', 'lock']
 
 export default ({
   name: 'NotifIcon2',
@@ -23,9 +21,10 @@ export default ({
     - 0 : aucune notification
     - 1 : au moins une notification informative
     - 2 : accroissement de volume interdit
-    - 3 : acceés en lecture seule
-    - 4 : accès minimal
-    - 5 : bloqué
+    - 3 : accés en lecture seule (sauf urgence)
+    - 4 : accés en lecture seule (strict, figé)
+    - 5 : accès d'urgence seulement
+    - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
     */
     niv: Number,
     alire: Boolean, // présence de l'indicateur à lire

@@ -90,7 +90,7 @@ export default {
   components: { EditeurMd },
 
   computed: { 
-    apropos () { return this.session.compta.apropos.get(this.id) || { ht: new Set(), texte: '' } },
+    apropos () { return this.session.compti.get(this.id) },
     memolg () { return titre(this.apropos.texte) },
     nom () { return this.pSt.getCV(this.id).nom }
   },

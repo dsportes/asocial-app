@@ -1804,10 +1804,11 @@ export default {
 
   ANlong0: 'Aucune notification',
   ANlong1: 'Au moins une notication informative',
-  ANlong2: 'Accroissement de volume des fichiers et du nombre de notes, chats ou groupes interdits',
-  ANlong3: 'Mises à jour sont interdites, tout reste consultable.',
-  ANlong4: 'Presque rien n\'est consultable, mises à jour interdites sauf quelques rares actions.',
-  ANlong5: 'Compte(s) résilié(s) ou en cours de résiliation.',
+  ANlong2: 'Accroissement de volume des fichiers et du nombre de notes ... bloqué interdits',
+  ANlong3: 'Mises à jour interdites, SAUF pour les actions d\'urgence',
+  ANlong4: 'Mises à jour interdites dans TOUS LES CAS',
+  ANlong5: 'Consultations limitées SAUF pour les actions d\'URGENCE',
+  ANlong6: 'Consultations interdites, même les actions d\'URGENCE sont interdites',
 
   ANlon0: 'Pas d\'alerte en cours',
   ANlon1: 'Alerte en cours, sans blocage planifié',

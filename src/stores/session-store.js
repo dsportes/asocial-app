@@ -31,6 +31,21 @@ export const useSessionStore = defineStore('session', {
     dh: 0, // dh de la dernière opération
     consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
     setR: new Set(), // set des restrictions
+    /*
+      static RAL1 = 1 // Ralentissement des opérations
+      static RAL2 = 2 // Ralentissement des opérations
+      // Comptes O : compte.qv.pcc > 90% / 100%
+      // Comptes A : compte.qv.nbj < 20 / 10
+      static NRED = 3 // Nombre de notes / chats / groupes en réduction
+      // compte.qv.pcn > 100
+      static VRED = 4 // Volume de fichier en réduction
+      // compte.qv.pcv > 100
+      static LECT = 5 // Compte en lecture seule (sauf actions d'urgence) - P2 C2
+      // Comptes 0 : espace.notifP compte.notifC de nr == 2
+      static MINI = 6 // Accès minimal, actions d'urgence seulement - P3 C3
+      // Comptes 0 : espace.notifP compte.notifC de nr == 3
+      static FIGE = 9 // Espace figé en lecture - E2
+    */
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
@@ -46,7 +61,6 @@ export const useSessionStore = defineStore('session', {
     avatarId: 0, // avatar "courant"
     groupeId: 0, // groupe "courant"
     membreId: 0, // membre "courant" (son im/ids dans son groupe)
-    partitionCId: 0, // tribu "courante" pour le comptable (page tribu affichée)
     peopleId: 0, // people "courant"
     
     naComptable: null,
@@ -101,8 +115,35 @@ export const useSessionStore = defineStore('session', {
     accesNetNf (state) { return state.accesNet && !state.estFige },
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
-  
-    accepteA (state) { return state.espace && (state.espace.opt !== 0) },
+
+    ntfE (state) { return state.espace && state.espace.notifE ? state.espace.notifE : null },
+    ntfP (state) { return state.espace && state.espace.notifP ? state.espace.notifP : null },
+    ntfC (state) { return state.compte && state.compte.notif ? state.compte.notif : null },
+
+    mini (state) { (state.ntfP && state.ntfP.nr === 3) || (state.ntfC && state.ntfC.nr === 3) },
+    lect (state) { (state.ntfP && state.ntfP.nr >= 2) || (state.ntfC && state.ntfC.nr >= 2) },
+
+    /* NotifIcon.niv :  
+    /* niveau d'information / restriction: 
+    - 0 : aucune notification
+    - 1 : au moins une notification informative
+    - 2 : accroissement de volume interdit
+    - 3 : accés en lecture seule (sauf urgence)
+    - 4 : accés en lecture seule (strict, figé)
+    - 5 : accès d'urgence seulement
+    - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
+    */
+
+    ntfIco (state) {
+      const f = state.setR.has(R.FIGE)
+      if (f && state.mini) return 6
+      if (state.mini) return 5
+      if (f) return 4
+      if (state.lect) return 3
+      if (state.setR.has(R.VRED) || state.setR.has(R.NRED)) return 2
+      if (state.setR.size || state.ntfE || state.ntfP || state.ntfC) return 1
+      return 0
+    },
 
     pow (state) {
       if (state.estAdmin) return 1
@@ -302,16 +343,6 @@ export const useSessionStore = defineStore('session', {
 
     setDhvu (dhvu) { this.dhvu = dhvu; this.setBlocage() },
 
-    setNotifs (notifs) {
-      if (!notifs) return
-      if (notifs.G) this.notifs.G = notifs.G
-      if (notifs.P) this.notifs.P = notifs.P
-      if (notifs.C) this.notifs.C = notifs.C
-      if (notifs.Q) this.notifs.Q = notifs.Q
-      if (notifs.X) this.notifs.X = notifs.X
-      this.setBlocage()
-    },
-
     setBlocage () {
       if (this.estAdmin || !this.compte) return
       const c = this.compte
@@ -344,6 +375,8 @@ export const useSessionStore = defineStore('session', {
 
     setRestrictions (t) {
       const s = new Set(); if (t && t.length) t.forEach(r => { s.add(r) })
+      const now = Date.now()
+
       this.setR = s
     },
 
@@ -392,8 +425,6 @@ export const useSessionStore = defineStore('session', {
     setGroupeId (id) { this.groupeId = id },
 
     setMembreId (id) { this.membreId = id },
-
-    setStats (stats) { this.stats = stats}, // ????
 
     chgps (phrase) {
       /*

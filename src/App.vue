@@ -4,7 +4,9 @@
     <q-toolbar class="full-width">
       
       <!-- Notifications -->
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :alire="session.alire" :niv="session.niv" 
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" 
+        :alire="session.alire" 
+        :niv="session.ntfIco" 
         @click="clickNotif" apptb/>
       <!-- Test du look des icones de notification
       <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="1" 
