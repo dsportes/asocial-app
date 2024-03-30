@@ -95,6 +95,7 @@ export class CreerEspace extends Operation {
 - hYR : hash du PNKFD de la phrase de sponsoring réduite (SANS ns)
 - `psK` : texte de la phrase de sponsoring cryptée par la clé K du sponsor.
 - `YCK` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
+- `hYC` : hash du PBKFD de la phrase de sponsoring,
 - `cleAYC` : clé A du sponsor crypté par le PBKFD de la phrase complète de sponsoring.
 - `partitionId`: id de la partition si compte 0    
 - `cleAP` : clé A du COMPTE sponsor crypté par la clé P de la partition.
@@ -138,6 +139,7 @@ export class AjoutSponsoring extends Operation {
         token: session.authToken, 
         id: session.avatarId,
         hYR: arg.pc.hps1,
+        hYC: arg.pc.hpsc,
         psK: await crypter(session.clek, arg.pc.phrase),
         YCK: await crypter(session.clek, arg.pc.pcb),
         cleAYC : await crypter(arg.pc.pcb, cleA),

@@ -3,7 +3,7 @@
 
   <div class="font-mono fs-sm self-end text-italic q-ma-xs">{{config.BUILD}}</div>
 
-  <q-expansion-item class="q-mt-xl spsm" group="g1" default-opened>
+  <q-expansion-item class="q-mt-xl spsm" group="g1" v-model="ui.loginitem">
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn2')}}</div>
@@ -28,7 +28,7 @@
     </div>
   </q-expansion-item>
 
-  <q-expansion-item class="q-mt-xl spsm" group="g1">
+  <q-expansion-item class="q-mt-xl spsm" v-model="loginitem2">
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn3')}}</div>
@@ -39,10 +39,11 @@
     <div class="q-px-sm">
       <div class="titre-md q-my-md">{{$t('LOGpar')}}</div>
       <div class="col q-py-sm q-gutter-md row justify-center">
-        <q-radio dense v-model="locmode" :val="1" :label="$t('sync')" />
-        <q-radio dense v-model="locmode" :val="2" :label="$t('incognito')" />
+        <q-radio dense v-model="session.mode" :val="1" :label="$t('sync')" />
+        <q-radio dense v-model="session.mode" :val="2" :label="$t('incognito')" />
       </div>
-      <phrase-contact :class="(!locmode ? 'disabled' : '') + ' full-width'" @ok="crypterphrase"/>
+      <phrase-contact v-if="session.mode" class="full-width"
+        :init-val="initval" @ok="crypterphrase"/>
     </div>
   </q-expansion-item>
 
@@ -72,14 +73,29 @@ export default {
 
   data () {
     return {
+      loginitem2: false,
       btncd: false,
+      initval: '',
       sp: null,
       pc: null,
       org: ''
     }
   },
 
+  computed: {
+    loginitem () { return this.ui.loginitem }
+  },
+
+
   watch: {
+    loginitem(ap) {
+      this.loginitem2 = !ap
+      this.initval = ''
+      this.session.setMode(0)
+    },
+    loginitem2 (ap) {
+      this.ui.loginitem = !ap
+    }
   },
 
   methods: {
@@ -132,6 +148,7 @@ export default {
             return                  
           }
           this.ui.oD('ASaccsp')
+          this.qexp = true
           return
         } catch (e) {
           await afficherDiag(this.$t('LOGppatt'))
@@ -150,6 +167,8 @@ export default {
       this.pc = null
       this.sp = null
       this.org = ''
+      this.initval = ''
+      this.session.setMode(0)
     }
   },
 
@@ -157,7 +176,6 @@ export default {
     const config = stores.config
     const session = stores.session
     const ui = stores.ui
-    const locmode = ref(session.mode)
 
     /*
     watch(razdb, async (ap, av) => {
@@ -166,18 +184,17 @@ export default {
         console.log('Raz db diag')
       }
     })
-    */
-
+    
     watch(locmode, (ap, av) => {
       if (ap !== session.mode) {
         session.setMode(ap)
       }
     })
+    */
 
     return {
       session, ui,
-      config,
-      locmode
+      config
     }
   }
 }

@@ -256,6 +256,7 @@ export function deconnexion(garderMode) {
   if (garderMode) session.setMode(mode)
   session.org = org
   syncQueue.reset()
+  ui.loginitem = true
   ui.setPage('login')
 }
 
@@ -735,6 +736,7 @@ export class ConnexionSynchroIncognito extends OperationS {
 - id : id du compte sponsorisé à créer
 - hXR: hash du PBKD de sa phrase secrète réduite
 - hXC: hash du PBKD de sa phrase secrète complète
+- `hYC`: hash du PNKFD de la phrase de sponsoring
 - cleKXC: clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
 - cleAK: clé A de son avatar principal cryptée par la clé K du compte
 - ardYC: ardoise du sponsoring
@@ -794,6 +796,7 @@ export class SyncSp extends OperationS {
         id, // id du compte sponsorisé à créer
         hXR: ps.hps1, // hash du PBKD de sa phrase secrète réduite
         hXC: ps.hpsc, // hash du PBKD de sa phrase secrète complète
+        hYC: sp.hYC, // hash du PNKFD de la phrase de sponsoring
         cleKXC: cleKXC, // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
         cleAK: await crypter(clek, cleA), // clé A de son avatar principal cryptée par la clé K du compte
         ardYC: await crypter(sp.YC, texte + '\n' + sp.ard), // ardoise du sponsoring
@@ -1018,18 +1021,24 @@ export class PingDB extends Operation {
 
 /* OP_RefusSponsoring: 'Rejet d\'une proposition de sponsoring'**
 args.id ids : identifiant du sponsoring
-args.arx : réponse du filleul
+args.ardx : réponse du filleul
+args.hYC: hash du PBKFD de la phrase de sponsoring
 */
 export class RefusSponsoring extends Operation {
   constructor() { super('RefusSponsoring') }
 
-  async run(sp, ardx) { // ids du sponsoring
+  async run(sp, texte) {
     try {
+      console.log(texte)
       const session = stores.session
-      await initSession()
-      const args = { token: session.authToken, ids: sp.ids, ardx }
+      const args = { 
+        token: session.authToken,
+        id: sp.id,
+        ids: sp.ids,
+        hYC: sp.hYC,
+        ardYC: await crypter(sp.YC, texte)
+      }
       await post(this, 'RefusSponsoring', args)
-      deconnexion(true)
     } catch (e) {
       await this.finKO(e)
     }

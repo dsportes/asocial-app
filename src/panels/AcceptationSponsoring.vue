@@ -90,7 +90,7 @@ import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
-import { SyncSp, RefusSponsoring, ExistePhrase } from '../app/synchro.mjs'
+import { deconnexion, SyncSp, RefusSponsoring, ExistePhrase } from '../app/synchro.mjs'
 import QuotasVols from '../components/QuotasVols.vue'
 import { styp, dhcool } from '../app/util.mjs'
 import { AMJ, ID, d14 } from '../app/api.mjs'
@@ -169,8 +169,9 @@ export default ({
       this.fermer()
     },
     async refuser () {
-      await new RefusSponsoring().run(this.sp, this.texte)
+      await new RefusSponsoring().run(this.sp, this.texte + '\n\n' + this.sp.ard)
       this.fermer()
+      deconnexion()
     }
   },
 

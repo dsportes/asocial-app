@@ -386,6 +386,7 @@ export default {
   EX8214: 'Un don par ne peut être effectué qu\'entre comptes "autonomes".',
   EX8215: 'Le don est  [{0}c] trop important vis à vis du solde du compte du donateur [{1}c].',
   EX8216: 'Seul un compte "délégué" peut accéder au détail d\'une partition.',
+  EX8217: 'Phrase de sponsoring non reconnue.',
 
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',

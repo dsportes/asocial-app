@@ -52,6 +52,9 @@ export default ({
       encours: false
     }
   },
+  watch: {
+    initVal (ap) { this.phrase = '' }
+  },
   methods: {
     r1 (val) { return val.length >= min || this.$t('NP16', [min]) },
 

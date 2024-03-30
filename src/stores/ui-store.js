@@ -21,6 +21,7 @@ export const useUiStore = defineStore('ui', {
     pageback: '',
     menug: false,
     pfiltre: false,
+    loginitem: true,
 
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
