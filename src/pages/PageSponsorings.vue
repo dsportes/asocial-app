@@ -67,7 +67,6 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { Tribu } from '../app/modele.mjs'
 import { ProlongerSponsoring, GetPartition } from '../app/synchro.mjs'
 
 export default {
@@ -91,7 +90,6 @@ export default {
   methods: {
     ed1 (f) { return edvol(f * UNITEN) },
     ed2 (f) { return edvol(f * UNITEV) },
-    idtr (sp) { return Tribu.id(sp.descr.clet) },
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
 
     async nouveausp () { 

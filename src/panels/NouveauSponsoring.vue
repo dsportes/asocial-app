@@ -229,7 +229,7 @@ export default ({
           nom: this.nom,
           estAutonome: this.estAutonome,
           del: this.estDelegue,
-          quotas: this.quotas,
+          quotas: { qc: this.quotas.qc, qn: this.quotas.qn, qv: this.quotas.qv },
           mot: this.mot,
           don: this.don, 
           dconf: this.dconf

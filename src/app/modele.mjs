@@ -886,7 +886,7 @@ _data_:
 - `nomYC` : nom du sponsorisé, crypté par le PBKFD de la phrase complète de sponsoring.
 - `del` : `true` si le sponsorisé est délégué de sa partition.
 - `cvA` : CV du sponsor, textes cryptés par sa cle A.
-- `quotas` : `[qc, q1, q2]` quotas attribués par le sponsor.
+- `quotas` : `{qc, q1, q2}` quotas attribués par le sponsor.
   - pour un compte "A" `[0, 1, 1]`. Un tel compte n'a pas de `qc` et peut changer à loisir `[q1, q2]` qui sont des protections pour lui-même (et fixe le coût de l'abonnement).
 - `don` : pour un compte autonome, montant du don.
 - `dconf` : le sponsor a demandé à rester confidentiel. Si oui, aucun chat ne sera créé à l'acceptation du sponsoring.
@@ -1018,7 +1018,7 @@ _data_ (de l'exemplaire I):
   - I : 0:passif, 1:actif
   - E : 0:passif, 1:actif, 2:disparu
 - `idE idsE` : identifiant de _l'autre_ chat.
-- `cvA` : `{v, photo, info}` carte de visite de E au moment de la création / dernière mise à jour du chat (textes cryptés par sa clé A).
+- `cvA` : `{id, v, photo, info}` carte de visite de E au moment de la création / dernière mise à jour du chat (textes cryptés par sa clé A).
 - `cleCKP` : clé C du chat cryptée,
   - si elle a une longueur inférieure à 256 bytes par la clé K du compte de I.
   - sinon cryptée par la clé RSA publique de I.
@@ -1028,7 +1028,6 @@ _data_ (de l'exemplaire I):
   - `dh` : date-heure d'écriture.
   - `dhx` : date-heure de suppression.
   - `t` : texte crypté par la clé C du chat (vide s'il a été supprimé).
-
 */
 export class Chat extends GenDoc {
   get stI () { return Math.floor(this.st / 10) }

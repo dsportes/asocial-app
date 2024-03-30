@@ -6,7 +6,7 @@ import { idb, IDBbuffer } from './db.mjs'
 import { DataSync, appexc, ID, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
 import { CV, compile, RegCles } from './modele.mjs'
-import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
+import { crypter, decrypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
 
 /* classe Queue ***********************************************************/
 class Queue {
@@ -37,7 +37,7 @@ class Queue {
         } else {
           const x = this.avgrs.get(row.id)
           if (!x) { this.avgrs.set(row.id, [row.v, 0]); rev = true }
-          else if (x.v[0] < row.v) { this.avgrs.set(row.id, [row.v, x.v[1]]); rev = true }
+          else if (x[0] < row.v) { this.avgrs.set(row.id, [row.v, x[1]]); rev = true }
         }
       }
     }
@@ -731,7 +731,7 @@ export class ConnexionSynchroIncognito extends OperationS {
 
 /*   OP_SyncSp: 'Acceptation d\'un sponsoring et création d\'un nouveau compte'
 - `token` : éléments d'authentification du compte à créer
-- idsp idssp : identifinat du sponosing
+- idsp idssp : identifinat du sponsoring
 - id : id du compte sponsorisé à créer
 - hXR: hash du PBKD de sa phrase secrète réduite
 - hXC: hash du PBKD de sa phrase secrète complète
@@ -743,8 +743,9 @@ export class ConnexionSynchroIncognito extends OperationS {
 - privK: clé privée RSA de l(avatar cryptée par la clé K du compte
 - cvA: CV de l'avatar cryptée par sa clé A
 
-- clePA: clé P de sa partition cryptée par la clé A de son avatar principal
+- clePK: clé P de sa partition cryptée par la clé K du nouveau compte
 - cleAP: clé A de son avatar principâl cryptée par la clé P de sa partition
+- clePA: cle P de la partition cryptée par la clé A du nouveau compte
 
 - ch: { cck, ccP, t1c, t2c }
   - ccK: clé C du chat cryptée par la clé K du compte
@@ -803,6 +804,7 @@ export class SyncSp extends OperationS {
       }
       if (!sp.estA) {
         RegCles.set(sp.cleP)
+        args.clePK = await crypter(clek, sp.cleP) // clé P de sa partition cryptée par la clé A de son avatar principal
         args.clePA = await crypter(cleA, sp.cleP) // clé P de sa partition cryptée par la clé A de son avatar principal
         args.cleAP = await crypter(sp.cleP, cleA) // clé A de son avatar principâl cryptée par la clé P de sa partition
       }
@@ -828,15 +830,14 @@ export class SyncSp extends OperationS {
       RegCles.set(cleA)
 
       const ret = await post(this, 'SyncSp', args)
-      const ds = DataSync.nouveau()
-      // const [sb, buf] = await this.loadCompte(ret, ds)
+      const ds = DataSync.deserial(ret.dataSync)
   
       const sb = new SB()
       const buf = new IDBbuffer()
     
       const compte = await compile(ret.rowCompte)
       sb.setCe(compte)
-      ds.compte = { id: compte.id, rds: compte.rds, vs: 1, vb: 1 }
+      ds.compte.vs = ds.compte.vb
       buf.putIDB(ret.rowCompte)
       sb.setCi(await compile(ret.rowCompti))
       buf.putIDB(ret.rowCompti)
@@ -844,8 +845,8 @@ export class SyncSp extends OperationS {
       const avatar = await compile(ret.rowAvatar)
       sb.setA(avatar)
       buf.putIDB(ret.rowAvatar)
-      const item = { id: avatar.id, rds: avatar.rds, vs: 1, vb: 1 }
-      ds.avatars.set(id, item)
+      const item = ds.avatars.get(avatar.id)
+      item.vs = item.vb
 
       if (ret.rowChat) {
         sb.setC(await compile(ret.rowChat))
