@@ -52,7 +52,7 @@ export const usePeopleStore = defineStore('people', {
       const session = stores.session
       const t = []
       if (!session.estComptable) t.push(session.naComptable)
-      if (!session.estAutonome)
+      if (!session.estA)
         state.map.forEach(e => { 
           if (e.sp && !ID.estComptable(e.na.id)) t.push(e.na) 
         })

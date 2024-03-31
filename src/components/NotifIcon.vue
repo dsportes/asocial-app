@@ -10,9 +10,9 @@
 
 <script>
 
-const txt = ['green-5', 'green-5', 'orange-9', 'orange-9', 'negative', 'negative', 'negative']
-const bg = ['none', 'none', 'yellow-1', 'yellow-3', 'yellow-5', 'yellow-7', 'yellow-9']
-const ic = ['circle', 'report', 'trending_down', 'edit_off', 'edit_off', 'emergency', 'lock']
+const txt = ['green-5', 'green-5', 'orange-9', 'orange-9', 'negative', 'negative', 'negative', 'orange-9', 'negative']
+const bg = ['none', 'none', 'yellow-1', 'yellow-3', 'yellow-5', 'yellow-7', 'yellow-9', 'yellow-5', 'yellow-7']
+const ic = ['circle', 'report', 'trending_down', 'edit_off', 'edit_off', 'emergency', 'lock', 'speed', 'speed']
 
 export default ({
   name: 'NotifIcon2',
@@ -25,6 +25,8 @@ export default ({
     - 4 : accés en lecture seule (strict, figé)
     - 5 : accès d'urgence seulement
     - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
+    - 7 : ralentissement 1
+    - 8 : ralentissement 2
     */
     niv: Number,
     alire: Boolean, // présence de l'indicateur à lire

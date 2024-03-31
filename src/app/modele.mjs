@@ -287,16 +287,10 @@ export class Notification {
     this.dh = dh || Date.now()  
   }
 
-  /*
-  clone () { return Notification.deSerial(this.serial) }
-
-  get serial() {
-    const x = { nr: this.nr || 0, dh: this.dh }
-    if (this.texte) x.texte = this.texte
-    if (this.idDel) x.idDel = ID.court(this.idDel)
-    return new Uint8Array(encode(x))
+  clone () {
+    return new Notification(this)
   }
-  */
+
 }
 
 /****************************************************
@@ -372,8 +366,8 @@ export class Espace extends GenDoc {
     this.nprof = row.nprof || 0
     this.dlvat = row.dlvat || 0
     this.nbmi = row.nbmi || 6
-    this.notifE = row.notifE || null
-    this.notifP = row.notifP || null
+    this.notifE = row.notifE ? new Notification(row.notifE) : null
+    this.notifP = row.notifP ? new Notification(row.notifP) : null
     this.tnotifP = row.tnotifP || []
   }
 
@@ -557,10 +551,16 @@ export class Compte extends GenDoc {
   async compile (row) {
     this.ns = ID.ns(this.id)
     const session = stores.session
+    const cfg = stores.config
     const clek = session.clek || await session.setIdClek(this.id, row.cleKXC)
 
     this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
     this.qv = row.qv
+
+    this.dlv = row.dlv
+    this.nbj = AMJ.diff(this.dlv, session.auj)
+    this.alerteDlv = cfg.alerteDlv > this.nbj
+    // this.alerteDlv = this.nbj > 5 // test
 
     if (row.idp) {
       this.estA = false

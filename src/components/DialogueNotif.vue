@@ -7,22 +7,13 @@
     </q-toolbar>
     <q-card-section class="q-my-sm q-mx-sm column">
 
-      <div v-if="type===0">
+      <div>
         <q-checkbox size="sm" v-model="restrloc"/>
-          <span>{{$t('ANnr1')}}<bouton-bulle idtext="nr1"/></span>
+        <span>{{$t('ANnr' + type + '2')}}<bouton-bulle :idtext="'nr'+ type + '2'"/></span>
       </div>
-      <div v-if="type===0">
+      <div>
         <q-checkbox size="sm" v-model="restrbloc"/>
-          <span>{{$t('ANnr2')}}<bouton-bulle idtext="nr2"/></span>
-      </div>
-
-      <div v-if="type===1 || type===2">
-        <q-checkbox size="sm" v-model="restrloc"/>
-          <span>{{$t('ANnr3')}}<bouton-bulle idtext="nr3"/></span>
-      </div>
-      <div v-if="type===1 || type===2">
-        <q-checkbox size="sm" v-model="restrbloc"/>
-          <span>{{$t('ANnr4')}}<bouton-bulle idtext="nr4"/></span>
+        <span>{{$t('ANnr' + type + '3')}}<bouton-bulle :idtext="'nr'+ type + '3'"/></span>
       </div>
 
     </q-card-section>
@@ -48,7 +39,9 @@ import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
 import EditeurMd from './EditeurMd.vue'
 import { styp, dhcool, afficherDiag } from '../app/util.mjs'
-import { SetNotifG, SetNotifT, SetNotifC } from '../app/operations.mjs'
+import { SetNotifT, SetNotifC } from '../app/operations.mjs'
+import { SetNotifE } from '../app/operations4.mjs'
+import { reconnexion } from '../app/synchro.mjs'
 
 export default {
   name: 'DialogueNotif',
@@ -87,27 +80,24 @@ export default {
   methods: {
     async valider (suppr) {
       if (!suppr) {
-        this.n.nr = 0
-        if (this.type === 0) {
-          if (this.restrloc) this.n.nr = 1
-          if (this.restrbloc) this.n.nr = 2
-        } else {
-          if (this.restrloc) this.n.nr = 3
-          if (this.restrbloc) this.n.nr = 4
-        }
+        this.n.nr = suppr ? 0 : 1
+        if (this.restrloc) this.n.nr = 2
+        if (this.restrbloc) this.n.nr = 3
         // Interdiction de se bloquer soi-même
-        if (this.type === 1 && this.session.pow === 3 && this.n.nr) { 
+        if (this.type === 1 && this.session.pow === 3 && this.n.nr > 1) { 
           await afficherDiag(this.$t('ANer10'))
           return
         }
         if (this.type === 2 && (this.session.pow === 3 || this.session.pow === 2)
-          && this.n.nr && this.idc === this.session.compteId) {
+          && this.n.nr > 2 && this.idc === this.session.compteId) {
             await afficherDiag(this.$t('ANer11'))
             return
         }
       }
       if (this.type === 0) {
-        await new SetNotifG().run(suppr ? null : this.n, this.ns)
+        await new SetNotifE().run(suppr ? null : this.n, this.ns)
+        this.session.setOrg('admin')
+        reconnexion()
       } else if (this.type === 1) {
         await new SetNotifT().run(suppr ? null : this.n, this.idt)
       } else {

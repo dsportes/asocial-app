@@ -29,6 +29,8 @@ class Queue {
     let rev = false
     if (rows) for (const row of rows) {   
       if (row.id === session.ns) {
+        const x = decode(row._data_) || null
+        session.setNotifE(x)
         // Maj _Store_ et IDB
         await new GetEspace().run(row.id)
       } else {
@@ -366,11 +368,12 @@ export class Operation {
   async finKO (e) {
     const session = stores.session
     const exc = appexc(e)
-
     if (this.modeSync || exc.code === 9999) {
       // en mode Sync toutes les exceptions sont "tueuses"
       session.setExcKO(exc)
-      throw exc
+      session.finOp()
+      stores.ui.setPage('clos') 
+      return
     }
 
     session.finOp()

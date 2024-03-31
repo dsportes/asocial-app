@@ -1,31 +1,34 @@
 <template>
   <q-page class="column align-start items-center">
     <!-- Application close par l'administrateur -->
-    <q-card v-if="session.excKO.code === 9999" class="q-mt-lg spsm column justify-center">
+    <q-card v-if="session.excKO && session.excKO.code === 9999" class="q-mt-lg spsm column justify-center">
       <div class="text-center">
         <span class="titre-lg">{{$t('ECclos', [session.org])}}</span>
         <bouton-bulle class="q-mr-md fs-md" icon="report_problem" idtext="clos"/>
       </div>
-      <div class="q-mt-md q-mb-sm text-center text-italic titre-md">{{$t('ECmi', [dh])}}</div>
-      <show-html class="bord" zoom maxh="10rem" :texte="ng.texte"/>
-      <q-btn class="q-mt-lg text-center" flat :label="$t('jailu')" @click="deconn"/>
+      <div class="q-mt-md q-mb-sm text-center text-italic titre-md">
+        {{$t('ECmi', [dhcool(session.excKO.args[1])])}}
+      </div>
+      <show-html class="bord" zoom maxh="10rem" :texte="session.excKO.args[0]"/>
+      <q-btn class="q-mt-lg text-center" flat size="lg"
+        color="warning" :label="$t('jailu')" @click="deconnexion"/>
     </q-card>
 
     <!-- Compte disparu en cours de session, chgt phrase ou résiliation -->
-    <q-card v-if="session.excKO.code === 8998" class="q-mt-lg spsm column justify-center">
+    <q-card v-if="session.excKO && session.excKO.code === 8998" class="q-mt-lg spsm column justify-center">
       <div class="text-center titre-lg titre-italic">
-        {{$t('compteKO', [cpt.na.id, cpt.na.nom])}}
+        {{$t('compteKO', [session.compteId, pSt.getCV(session.compteId).nom])}}
       </div>
       <q-btn class="q-mt-lg text-center" flat size="lg"
-        color="warning" :label="$t('jailu')" @click="deconn"/>
+        color="warning" :label="$t('jailu')" @click="deconnexion"/>
     </q-card>
 
     <!-- Toute exception survenue en synchronisation -->
-    <q-card v-if="session.excKO.code < 9900" class="q-mt-lg spsm column justify-center">
+    <q-card v-if="session.excKO && session.excKO.code < 9900" class="q-mt-lg spsm column justify-center">
       <div class="text-center titre-lg titre-italic">{{$t('sessionKO')}}</div>
       <div class="text-center titre-sm q-my-md q-mx-md" v-html="html(session.excKO)"/>
       <q-btn class="q-mt-lg text-center" flat size="lg"
-        color="warning" :label="$t('jailu')" @click="deconn"/>
+        color="warning" :label="$t('jailu')" @click="deconnexion"/>
     </q-card>
   </q-page>
 </template>
@@ -42,13 +45,9 @@ export default {
 
   components: { BoutonBulle, ShowHtml },
 
-  computed: {
-    dh () { return this.ng ? dhcool(this.ng.dh) : '' }
-  },
+  computed: { },
 
-  methods: {
-    deconn () { deconnexion() }
-  },
+  methods: { },
 
   data () {
     return {
@@ -56,14 +55,11 @@ export default {
   },
 
   setup () {
-    const session = stores.session
+    const session = stores.session.excKO
     return {
-      session, 
-      html,
-      ui: stores.ui,
-      cpt: stores.avatar.compte,
-      ng: session.notifs.G || { texte: '???' }, // notifs.G
-      exc: session.excKo
+      session: stores.session,
+      pSt: stores.people,
+      html, dhcool, deconnexion
     }
   }
 

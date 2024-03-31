@@ -12,7 +12,9 @@
         <q-btn v-if="session.status" dense size="md" padding="xs" color="warning" icon="logout" 
           :label="$t('ERdec')" @click="deconnecter"/>
         <q-btn v-if="fige" dense size="md" padding="xs" color="primary" icon="notifications"
-          :label="$t('ERfige')" @click="gotonotif"/>
+          :label="$t('ERfige')" @click="reconnecter"/>
+        <q-btn v-if="fige && cont" dense size="md" padding="xs" color="primary" icon="notifications"
+          :label="$t('ERfige')" @click="continuer"/>
         <q-btn v-if="rec" dense size="md" padding="xs" color="warning" icon="refresh" 
           :label="$t('ERrec')" @click="reconnecter"/>
         <q-btn v-if="!fige && cont" dense size="md" padding="xs" color="primary" icon="arrow_forward" 

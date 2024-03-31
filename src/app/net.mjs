@@ -92,7 +92,6 @@ export async function post (op, fonction, args) {
     if (resp) {
       if (resp.dh) session.setDh(resp.dh)
       if (resp.conso) session.setConso(resp.conso)
-      if (resp.setR) session.setRestrictions(resp.setR)
     }
     return resp
   } catch (e) { // Résultat mal formé
@@ -116,10 +115,9 @@ function procEx (e, op) {
     let ex
     try {
       const x = JSON.parse(decoder.decode(e.response.data))
-      if (x.code === 9999) stores.session.setKO()
       ex = new AppExc(Math.floor(x.code / 1000) * 1000, x.code % 1000, x.args, x.stack)
     } catch (e2) {
-      throw new AppExc(E_BRO, 1, [op ? op.nom : '', e2.message])
+      ex = new AppExc(E_BRO, 1, [op ? op.nom : '', e2.message])
     }
     throw ex
   } else { 

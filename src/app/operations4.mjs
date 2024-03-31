@@ -232,3 +232,24 @@ export class SetEspaceNprof extends Operation {
     }
   }
 }
+
+/* OP_SetNotifE: 'Inscription d\'une notification générale' ***********************
+args.token donne les éléments d'authentification du compte.
+args.ns
+args.ntf
+Retour:
+*/
+export class SetNotifE extends Operation {
+  constructor () { super('SetNotifE') }
+
+  async run (ntf, ns) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns, ntf}
+      await post(this, 'SetNotifE', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

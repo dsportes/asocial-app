@@ -35,17 +35,17 @@
               <!--<q-btn dense color="primary" flat label="ping"
                 @click="ping(esp)"/>-->
               <q-btn dense color="primary" icon="open_in_new" :label="$t('detail')"
-                @click="pageesp(esp)"/>
+                padding="none" @click="pageesp(esp)"/>
             </div>
           </div>
 
           <div class="row justify-between q-ml-lg q-my-xs">
             <span class="fs-md">{{$t('ESprf', [esp.nprof])}}</span>
-            <q-btn dense color="primary" :label="$t('changer')" padding="xs"
+            <q-btn dense padding="none" color="primary" :label="$t('changer')"
               @click="ovchgprf1(esp)"/>
           </div>
 
-          <apercu-notif class="q-ml-lg q-mt-sm" :notif="esp.notif" :idx="idx" 
+          <apercu-notif class="q-ml-lg q-mt-sm" :notif="esp.notifE" :idx="idx" 
             editable :type="0" :idsource="esp.id" :ctx="{ ns: esp.id }"/>
 
         </div>

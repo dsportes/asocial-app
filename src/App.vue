@@ -5,31 +5,29 @@
       
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" 
-        :alire="session.alire" 
+        :alire="session.alire && session.ntfIco" 
         :niv="session.ntfIco" 
-        @click="clickNotif" apptb/>
+        @click="clickNotif"/>
       <!-- Test du look des icones de notification
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="1" 
-        @click="clickNotif" apptb/>
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="2" 
-        @click="clickNotif" apptb/>
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="3" 
-        @click="clickNotif" apptb/>
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="4" 
-        @click="clickNotif" apptb/>
-      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="5" 
-        @click="clickNotif" apptb/>
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="1"/>
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="2"/>
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="3"/>
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="4"/>
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="5"/> 
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="6"/> 
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="7"/> 
+      <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="8"/>
       -->
 
       <!-- Suppression de compte proche -->
       <q-avatar class="cursor-pointer q-ml-xs" 
-        v-if="session.ok && alerteDlv >= 0" @click="infoSession()"
+        v-if="session.ok && session.compte && session.compte.alerteDlv" @click="infoSession()"
         size="sm" square>
         <img src="~assets/zombi.png">
-        <q-tooltip>{{$t('MLAcptz', alerteDlv, {count: alerteDlv})}}</q-tooltip>
+        <q-tooltip>{{$t('MLAcptz', session.compte.nbj, {count: session.compte.nbj})}}</q-tooltip>
       </q-avatar>
 
-      <q-btn v-if="session.ok && !session.estMinimal" 
+      <q-btn v-if="session.ok && !session.mini && (!session.ral === 3)"
         dense size="md" icon="menu" round padding="none">
         <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
           <page-menu menu/>
@@ -530,9 +528,7 @@ export default {
         case 'groupe' : { arg = this.gSt.egrC ? this.people.getCV(this.session.groupeId).nom : this.$t('disparu'); break }
       }
       return this.$t('P' + p, [arg])
-    },
-
-    alerteDlv () { return this.session.nbj < this.config.alertedlv ? this.session.nbj : -1 }
+    }
   },
 
   // Gère le franchissement du seuil etroit / large

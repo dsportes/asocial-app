@@ -10,15 +10,15 @@
           </span>
           <span class="fs-sm font-mono">{{dhcool(notif.dh)}}</span>
           <q-btn v-if="type < 3 && editable" color="primary" 
-            class="q-ml-sm" size="md" padding="xs"
+            class="q-ml-sm" size="md" padding="none"
             :label="$t('editer')" dense icon="add" @click="editer"/>
         </div>
       </div>
-      <div v-if="notif.nr">
+      <div v-if="notif.nr > 1" class="q-mt-xs">
           <span class="q-pa-xs bg-yellow-3 text-negative text-bold">
-            {{$t('ANnr' + notif.nr)}}
+            {{$t('ANnr' + type + notif.nr)}}
           </span>
-          <bouton-bulle :idtext="'nr' + notif.nr"/>
+          <bouton-bulle :idtext="'nr' + type + notif.nr"/>
       </div>
       <show-html class="q-mt-xs bord" :texte="texteEd" :idx="idx" 
         maxh="3rem" zoom scroll/>
@@ -56,12 +56,10 @@ export default {
     - 0 : de l'espace
     - 1 : d'une tribu
     - 2 : d'un compte
-    - 3 : dépassement de quotas
-    - 4 : alerte de solde / consommation
     */
     idsource: Number,
     editable: Boolean,
-    ctx: Object, // id de l'espace, ou de la tranche, ou de la tranche et du compte ...
+    ctx: Object, // id de l'espace, ou de la partition, ou de la partition et du compte ...
     idx: Number
   },
 
@@ -96,27 +94,20 @@ export default {
     async editer () {
       if (this.diag) { await afficherDiag($t('ANer' + this.diag)); return }
       this.ntf = this.notif.clone()
-      if (this.idsource) ntf.idSource = this.idsource
+      if (this.idsource) this.ntf.idSource = this.idsource
       if (this.session.pow === 3 && !this.ntf.idSource) {
         await afficherDiag($t('ANnospon'))
         return
       }
-      if (this.type === 0) {
-        if (this.ntf.nr === 1) { this.restr = true; this.restrb = false }
-        if (this.ntf.nr === 2) { this.restr = false; this.restrb = true }
-      } else {
-        if (this.ntf.nr === 3) { this.restr = true; this.restrb = false }
-        if (this.ntf.nr === 4) { this.restr = false; this.restrb = true }
-      }
-      // this.ui.notifc = { type: this.type, ntf, restr, restrb, ns: this.ns, idt: this.idt, idc: this.idc }
+      if (this.ntf.nr === 2) { this.restr = true; this.restrb = false }
+      if (this.ntf.nr === 3) { this.restr = false; this.restrb = true }
       this.ui.oD('DNdialoguenotif', this.idc)
     },
 
     async creer () {
       if (this.diag) { await afficherDiag($t('ANer' + this.diag)); return }
       this.ntf = new Notification({})
-      if (this.idsource) ntf.idSource = this.idsource
-      // this.ui.notifc = { type: this.type, ntf, restr: false, restrb: false, ns: this.ns, idt: this.idt, idc: this.idc }
+      if (this.idsource) this.ntf.idSource = this.idsource
       this.ui.oD('DNdialoguenotif', this.idc)
     }
   },

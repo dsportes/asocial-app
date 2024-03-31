@@ -3,8 +3,8 @@ import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
 import { crypter, decrypter } from '../app/webcrypto.mjs'
-import { u8ToB64, intToB64, rnd6, $t, afficherDiag } from '../app/util.mjs'
-import { AMJ, ID } from '../app/api.mjs'
+import { u8ToB64, intToB64, rnd6, $t, afficherDiag, dhcool } from '../app/util.mjs'
+import { AMJ, ID, R } from '../app/api.mjs'
 import { RegCles } from '../app/modele.mjs'
 import { WS } from '../app/ws.mjs'
 import { FsSyncSession } from '../app/fssync.mjs'
@@ -30,22 +30,6 @@ export const useSessionStore = defineStore('session', {
     dhConnx: 0, // dh de début de la session
     dh: 0, // dh de la dernière opération
     consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
-    setR: new Set(), // set des restrictions
-    /*
-      static RAL1 = 1 // Ralentissement des opérations
-      static RAL2 = 2 // Ralentissement des opérations
-      // Comptes O : compte.qv.pcc > 90% / 100%
-      // Comptes A : compte.qv.nbj < 20 / 10
-      static NRED = 3 // Nombre de notes / chats / groupes en réduction
-      // compte.qv.pcn > 100
-      static VRED = 4 // Volume de fichier en réduction
-      // compte.qv.pcv > 100
-      static LECT = 5 // Compte en lecture seule (sauf actions d'urgence) - P2 C2
-      // Comptes 0 : espace.notifP compte.notifC de nr == 2
-      static MINI = 6 // Accès minimal, actions d'urgence seulement - P3 C3
-      // Comptes 0 : espace.notifP compte.notifC de nr == 3
-      static FIGE = 9 // Espace figé en lecture - E2
-    */
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
@@ -53,9 +37,6 @@ export const useSessionStore = defineStore('session', {
 
     fsSync: null, // Objet de synchro pour Firestore
     sessionId: '', // identifiant de session si WS (random(6) -> base64)
-
-    estSelegue: false,
-    estAutonome: false,
 
     partitionId: 0, // id de la partition actuelle du compte
     avatarId: 0, // avatar "courant"
@@ -80,9 +61,8 @@ export const useSessionStore = defineStore('session', {
     opTimer2: null,
     signalOp: false,
 
-    notifs: { G: null, P: null, C: null, Q: null, X: null },
-    niv: 0, // niveau de restriction : 0 1 2
     alire: false, // Il y a des notifications à lire
+    dhvu: 0, // Dernière validation de lecture des alertes
 
     /* Exception insurmontable:exc.code ...
     - 9998 : compte clos
@@ -116,12 +96,23 @@ export const useSessionStore = defineStore('session', {
     accesIdb (state) { return state.mode === 1 || state.mode === 3},
     ok (state) { return state.status === 2 },
 
-    ntfE (state) { return state.espace && state.espace.notifE ? state.espace.notifE : null },
-    ntfP (state) { return state.espace && state.espace.notifP ? state.espace.notifP : null },
-    ntfC (state) { return state.compte && state.compte.notif ? state.compte.notif : null },
+    ntfE (state) { return state.espace && state.espace.notifE && state.espace.notifE.nr ? state.espace.notifE : null },
+    ntfP (state) { return state.espace && state.espace.notifP && state.espace.notifP.nr ? state.espace.notifP : null },
+    ntfC (state) { return state.compte && state.compte.notif && state.espace.notif.nr ? state.compte.notif : null },
 
     mini (state) { (state.ntfP && state.ntfP.nr === 3) || (state.ntfC && state.ntfC.nr === 3) },
     lect (state) { (state.ntfP && state.ntfP.nr >= 2) || (state.ntfC && state.ntfC.nr >= 2) },
+    ral (state) { if (!state.compte) return 0
+      if (state.compte.estA)
+        { const n = state.compte.qv.nbj; return n <= 0 ? 3 : (n < 10 ? 2 : (n < 20 ? 1 : 0)) }
+      const n = state.compte.qv.pcc; return n >= 100 ? 2 : (n >= 90 ? 1 : 0)
+    },
+    quotn (state) { if (!state.compte) return 0
+      const n = state.compte.pcn; return n >= 100 ? 2 : (n >= 90 ? 1 : 0)
+    },
+    quotv (state) { if (!state.compte) return 0
+      const n = state.compte.pcv; return n >= 100 ? 2 : (n >= 90 ? 1 : 0)
+    },
 
     /* NotifIcon.niv :  
     /* niveau d'information / restriction: 
@@ -132,16 +123,20 @@ export const useSessionStore = defineStore('session', {
     - 4 : accés en lecture seule (strict, figé)
     - 5 : accès d'urgence seulement
     - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
+    - 7 : ralentissement 1
+    - 8 : ralentissement 2
     */
 
     ntfIco (state) {
-      const f = state.setR.has(R.FIGE)
+      const f = state.ntfE && state.ntfE.nr === 2
       if (f && state.mini) return 6
-      if (state.mini) return 5
+      if (state.mini || state.ral === 3) return 5
       if (f) return 4
       if (state.lect) return 3
-      if (state.setR.has(R.VRED) || state.setR.has(R.NRED)) return 2
-      if (state.setR.size || state.ntfE || state.ntfP || state.ntfC) return 1
+      if (state.quotn === 2 || state.quotv === 2) return 2
+      if (state.ral === 2) return 8
+      if (state.ral === 1) return 7
+      if (state.ral || state.quotn || state.quotv || state.ntfE || state.ntfP || state.ntfC) return 1
       return 0
     },
 
@@ -341,27 +336,9 @@ export const useSessionStore = defineStore('session', {
 
     setDh (dh) { if (dh && dh > this.dh) this.dh = dh },
 
-    setDhvu (dhvu) { this.dhvu = dhvu; this.setBlocage() },
-
-    setBlocage () {
-      if (this.estAdmin || !this.compte) return
-      const c = this.compte
-      const dhvu = c ? (c.dhvu || 0) : 0
-      this.niv = 0
-      this.alire = false
-      for (const t in this.notifs) {
-        const ntf = this.notifs[t]
-        if (ntf && ntf.texte) {
-          if (ntf.dh > dhvu) this.alire = true
-          if (ntf.nr > this.niv) this.niv = ntf.nr
-        }
-      }
-    },
-
     /* Le compte a disparu OU l'administrateur a fermé l'application ***********/
     setExcKO (exc) { 
       this.excKO = exc
-      stores.ui.setPage('clos') 
     },
 
     setConso (c) {
@@ -373,20 +350,17 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    setRestrictions (t) {
-      const s = new Set(); if (t && t.length) t.forEach(r => { s.add(r) })
-      const now = Date.now()
-
-      this.setR = s
-    },
-
     setStatus (s) {
       this.status = s
     },
 
     setCompte (compte) { 
       if (compte) {
+        if (compte.dhvu && compte.dhvu !== this.dhvu) { this.dhvu = compte.dhvu; this.alire = false }
+        const ral = this.ral, quotn = this.quotn, quotv = this.quotv
         this.compte = compte
+        if (ral !== this.ral || quotn !== this.quotn || quotv !== this.quotv) this.alire = true
+        if (compte.notif && compte.notif.dh > this.dhvu) this.alire = true
       } else {
         this.compte = null
         this.compteId = 0
@@ -401,9 +375,18 @@ export const useSessionStore = defineStore('session', {
       if (!this.compta || this.compta.v < compta.v) this.compta = compta
     },
 
+    setNotifE (notif) {
+      if (notif.nr === 3) {
+        this.excKO = new AppExc(A_SRV, 999, [notif.texte, notif.dh])
+        stores.ui.setPage('clos')
+      }
+    },
+
     setEspace (espace, estAdmin) {
-      if (estAdmin) this.espaces.set(espace.id, espace)
-      else this.espace = espace
+      if (estAdmin) { this.espaces.set(espace.id, espace); return }
+      this.espace = espace
+      if (espace.notifE && espace.notifE.dh > this.dhvu) this.alire = true
+      if (espace.notifP && espace.notifP.dh > this.dhvu) this.alire = true
     },
 
     setPartition (partition) {
@@ -443,15 +426,6 @@ export const useSessionStore = defineStore('session', {
       }
       const x = new Uint8Array(encode(token))
       this.authToken = u8ToB64(new Uint8Array(x), true)
-    },
-
-    setNotifE (ne) {
-      const n = this.notifs[0]
-      if (ne) {
-        if (!n || ne.dh > n.dh) this.notifs[0] = ne
-      }
-      else this.notifs[0] = { dh: (!n ? 0 : n.dh) }
-      this.setBlocage()
     },
 
     async editUrgence () {
@@ -514,5 +488,15 @@ export const useSessionStore = defineStore('session', {
       stores.ui.fD()
       this.opTimer2 = setTimeout(() => { this.signalOp = false }, 1000)
     }
+  },
+
+  setNotifE (arg) {
+    const ntf = arg.notif
+    if (ntf.nr === 3) {
+      session.setExcKO(new AppExc(A_SRV, 999, [ntf.texte, ntf.dh]))
+      stores.ui.setPage('clos')
+      return
+    }
+    console.log(dhcool(ntf.dh), ntf.nr, ntf.texte)
   }
 })
