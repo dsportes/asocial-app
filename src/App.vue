@@ -85,7 +85,7 @@
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
         <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setTab('notif')"/>
         <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setTab('compta')"/>
-        <q-tab v-if="session.estComptable || aSt.compta.estA"
+        <q-tab v-if="session.estComptable || session.compte.estA"
           name="credits" :label="$t('PNCcre')" @click="ui.setTab('credits')"/>
         <q-tab name="chats" :label="$t('PNCchats')" @click="ui.setTab('chats')"/>
       </q-tabs>
@@ -284,8 +284,8 @@
         <img src="~assets/zombi.png">
       </q-avatar>
       <div class="col column items-center">
-        <div class="titre-lg">{{$t('MLAcptz', session.nbj, {count: session.nbj})}}</div>
-        <div class="titre-md">{{$t('MLAcptz' + (aSt.compta.estA ? 'A' : '0'))}}</div>
+        <div class="titre-lg">{{$t('MLAcptz', session.compte.nbj, {count: session.compte.nbj})}}</div>
+        <div class="titre-md">{{$t('MLAcptz' + (session.compte.estA ? 'A' : '0'))}}</div>
         <q-btn class="q-mt-lg self-end" flat dense color="primary" size="md" padding="xs" icon="check"
             :label="$t('jailu')" @click="ui.fD()"/>
       </div>

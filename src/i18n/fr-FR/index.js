@@ -387,6 +387,8 @@ export default {
   EX8215: 'Le don est  [{0}c] trop important vis à vis du solde du compte du donateur [{1}c].',
   EX8216: 'Seul un compte "délégué" peut accéder au détail d\'une partition.',
   EX8217: 'Phrase de sponsoring non reconnue.',
+  EX8218: 'Seuls le Comptable ou un Délégué peut consulter la comptabilité d\'un autre compte que le leur.',
+  EX8219: 'Un délégué ne peut consulter la comptabilité que des comptes de la partition dont il est délégué.',
 
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
@@ -1263,6 +1265,11 @@ export default {
   P11tit: 'Avatar du compte | Avatar du compte | Avatars du compte',
 
   // PageCompta
+  PCPnbj: '{0} jour(s) avant suppression automatique du compte',
+  PCPqn: 'Quota de notes ...: {0} [{1}%] - {2} note(s), {3} chat(s), {4} groupe(s)',
+  PCPqv: 'Quota de volume de fichiers: {0} [{1}%] - {2} utilisés',
+  PCPsolde: 'Solde restant: {0}c - {1} jour(s) de consomation',
+  PCPqcal: 'Quota de consommation de calcul mensuel: {0}c [{1}%]',
   PCPnot: 'Aucune notification',
   PCPabo1: 'Abonnement: nombre de notes + chats + groupes',
   PCPabo2: 'Abonnement: volume des fichiers attachés aux notes',

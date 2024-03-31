@@ -1111,3 +1111,28 @@ export class GetSponsoring extends Operation {
     }
   }
 }
+
+/** Get Sponsoring ****************************************************
+args.token: éléments d'authentification du compte.
+args.id : id du compte
+Retour:
+- rowCompta s'il existe
+*/
+export class GetCompta extends Operation {
+  constructor () { super('GetCompta') }
+
+  async run (id) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id: id || session.compteId }
+      const ret = await post(this, 'GetCompta', args)
+      if (ret.rowCompta) {
+        const c = await compile(ret.rowCompta)
+        session.setCompta(c)
+      }
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

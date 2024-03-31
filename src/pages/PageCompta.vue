@@ -4,12 +4,33 @@
 
   <panel-credits v-if="ui.pagetab==='credits'"/>
 
-  <div v-if="ui.pagetab==='notif'" class="spmd q-pa-sm">
-
-    <div v-if="bl" class="bord q-pa-sm q-mb-xl">
-      <sd-rouge :texte="$t('SB' + bl)"/>
+  <div v-if="ui.pagetab==='notif' && session.compta" class="spmd q-pa-sm">
+    <div class="row q-my-sm items-center">
+      <div class="colauto"><n3-icon :niv="nnbj"/></div>
+      <div class="col titre-md">{{$t('PCPnbj', [nbj])}}</div>
+    </div>
+    <div class="row q-my-sm items-center">
+      <div class="colauto"><n3-icon :niv="npcn"/></div>
+      <div class="col titre-md">
+        {{$t('PCPqn', [(c.qv.qn * UNITEN), pc.pcn, c.qv.nn, c.qv.nc, c.qv.ng])}}</div>
+    </div>
+    <div class="row q-my-sm items-center">
+      <div class="colauto"><n3-icon :niv="npcv"/></div>
+      <div class="col titre-md">
+        {{$t('PCPqv', [edvol(c.qv.qv * UNITV), pc.pcv, c.qv.v])}}</div>
+    </div>
+    <div v-if="session.compte.estA" class="row q-my-sm items-center">
+      <div class="colauto"><n3-icon :niv="nnj"/></div>
+      <div class="col titre-md">
+        {{$t('PCPsolde', [s, nj])}}</div>
+    </div>
+    <div v-else class="row q-my-sm items-center">
+      <div class="colauto"><n3-icon :niv="npcc"/></div>
+      <div class="col titre-md">
+        {{$t('PCPqcal', [c.qv.qc, pc.pcc])}}</div>
     </div>
 
+<!--
     <div v-if="!nbNtf" class="titre-lg text-italic q-my-md">{{$t('PCPnot')}}</div>
     
     <div v-for="(ntf, idx) of session.notifs" :key="idx">
@@ -20,6 +41,7 @@
         <apercu-notif class="q-ml-sm" :type="idx" :notif="ntf"/>
       </div>
     </div>
+-->
   </div>
 
   <div v-if="ui.pagetab==='chats'" class="spmd q-pa-sm">
@@ -38,6 +60,7 @@
 
 <script>
 
+import { onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -45,27 +68,41 @@ import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
 import SdRouge from '../components/SdRouge.vue'
 import MicroChat from '../components/MicroChat.vue'
-import { dkli } from '../app/util.mjs'
+import { dkli, edvol } from '../app/util.mjs'
 import { getNg } from '../app/modele.mjs'
+import { GetCompta } from '../app/synchro.mjs'
+import N3Icon from '../components/N3Icon.vue'
+import { UNITEN, UNITEV } from '../app/api.mjs'
 
 export default {
   name: 'PageCompta',
 
-  components: { MicroChat, SdRouge, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits },
+  components: { N3Icon, MicroChat, SdRouge, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits },
 
   computed: {
+    nbj () { return 5 /*this.session.compte.nbj*/ },
+    nnbj () { return this.nbj > 40 ? 1 : (this.nbj > 10 ? 2 : 3)},
     nac () { return getNg(this.session.compteId) },
-    c () { return this.aSt.compta.compteurs },
+    c () { return this.session.compta.compteurs },
+    s ()  { return this.session.compta.solde },
+    pc () { return this.c.pourcents },
+    npcn () { return this.pc.pcn < 80 ? 1 : (this.pc.pcn <= 90 ? 2 : 3)},
+    npcv () { return this.pc.pcv < 80 ? 1 : (this.pc.pcv <= 90 ? 2 : 3)},
+    npcc () { return this.pc.pcc < 80 ? 1 : (this.pc.pcc <= 90 ? 2 : 3)},
+    nj () { return this.c.conso4M },
+    nnj () { return this.nj > 40 ? 1 : (this.nj > 10 ? 2 : 3)},
     bl () {
+      /*
       if (this.session.estFige) { return this.session.estMinimal ? 'fm' : 'f' }
       if (this.session.estMinimal) { return 'm' }
       if (this.session.estLecture) { return 'l' }
       if (this.session.estDecr) { return 'd' }
+      */
       return false
     },
     nbNtf () {
       let nb = 0
-      this.session.notifs.forEach(n => { if (n && n.texte) nb++ })
+      // this.session.notifs.forEach(n => { if (n && n.texte) nb++ })
       return nb
     }
   },
@@ -84,10 +121,13 @@ export default {
     const pSt = stores.people
     const ui = stores.ui
 
-    aSt.setccCpt(aSt.compta.compteurs)
+    onMounted(async () => {
+      await new GetCompta().run()
+      const c = session.compta
+    })
 
     return {
-      session, pSt, ui, aSt,  dkli
+      session, pSt, ui, aSt,  dkli, UNITEN, UNITEV, edvol
     }
   }
 }
