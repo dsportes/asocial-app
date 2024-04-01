@@ -621,6 +621,7 @@ export class SetNotifC extends Operation {
 
   async run (notifC, idt, idc) { // id de la tribu, id du compte cible, notif
     try {
+      // TODO : obtenir la clé de la partition
       const session = stores.session
       if (!notifC) notifC = new Notification({})
       else notifC.dh = Date.now()
@@ -762,26 +763,6 @@ export class ChangerTribu extends Operation {
   }
 }
 
-/* OP_SetDhvuCompta: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte'
-args.token: éléments d'authentification du compte.
-args.dhvu : dhvu cryptée par la clé K
-Retour:
-*/
-export class SetDhvuCompta extends Operation {
-  constructor () { super('OPdhvu') }
-
-  async run () {
-    try {
-      const session = stores.session
-      const dhvu = await crypter(session.clek, '' + (Date.now()))
-      const args = { token: session.authToken, dhvu }
-      this.tr(await post(this, 'SetDhvuCompta', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
 
 /* OP_GetCompteursCompta: 'Obtention des compteurs d\'abonnement / consomation d\'un compte'
 (autre que celle du compte de la session)

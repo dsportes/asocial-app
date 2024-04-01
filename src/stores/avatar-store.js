@@ -108,7 +108,7 @@ export const useAvatarStore = defineStore('avatar', {
     chatDeAvec: (state) => { return (de, avec) => { 
       const e = state.map.get(de)
       if (e) for (const [ids, c] of e.chats) {
-        if (c.naE.id === avec) return c
+        if (c.idE === avec) return c
       }
       return null
     }},

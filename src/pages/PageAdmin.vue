@@ -46,7 +46,7 @@
           </div>
 
           <apercu-notif class="q-ml-lg q-mt-sm" :notif="esp.notifE" :idx="idx" 
-            editable :type="0" :idsource="esp.id" :ctx="{ ns: esp.id }"/>
+            :type="0" :cible="esp.id"/>
 
         </div>
       </div>

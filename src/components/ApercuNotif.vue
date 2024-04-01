@@ -3,16 +3,14 @@
   <div :class="dkli(idx)">
     <div v-if="notif && notif.texte" class="column q-my-sm">
       <div class="row justify-between">
-        <div class="titre-md">{{$t('ANnot')}}</div>
-        <div>
-          <span v-if="nomSource" class="fs-sm text-italic q-mr-sm">
-            {{$t('de')}} [{{nomSource}}]
-          </span>
-          <span class="fs-sm font-mono">{{dhcool(notif.dh)}}</span>
-          <q-btn v-if="type < 3 && editable" color="primary" 
-            class="q-ml-sm" size="md" padding="none"
-            :label="$t('editer')" dense icon="add" @click="editer"/>
-        </div>
+        <div class="titre-md">{{$t('ANnot' + type)}}</div>
+        <q-btn v-if="cible" color="primary" 
+          class="q-ml-sm" size="md" padding="none"
+          :label="$t('editer')" dense icon="add" @click="editer"/>
+      </div>
+      <div>
+        <span class="fs-sm text-italic q-mr-sm">{{nomSource}}</span>
+        <span class="fs-sm font-mono">{{dhcool(notif.dh)}}</span>
       </div>
       <div v-if="notif.nr > 1" class="q-mt-xs">
           <span class="q-pa-xs bg-yellow-3 text-negative text-bold">
@@ -20,31 +18,29 @@
           </span>
           <bouton-bulle :idtext="'nr' + type + notif.nr"/>
       </div>
-      <show-html class="q-mt-xs bord" :texte="texteEd" :idx="idx" 
+      <show-html class="q-mt-xs bord" :texte="notif.texte" :idx="idx" 
         maxh="3rem" zoom scroll/>
     </div>
-    <div v-if="type < 3 && (!notif || !notif.texte)" class="row">
-      <div class="titre-md">{{$t('ANauc')}}</div>
-      <q-btn v-if="editable" class="q-ml-sm col-auto self-start" 
+    <div v-if="!notif || !notif.texte" class="row">
+      <div class="titre-md">{{$t('ANauc' + type)}}</div>
+      <q-btn v-if="cible" class="q-ml-sm col-auto self-start" 
         color="primary" padding="xs" size="sm" 
         :label="$t('ANcre')" dense icon="add" @click="creer"/>
     </div>
   </div>
 
   <q-dialog v-model="ui.d.DNdialoguenotif[idc]" persistent>
-    <dialogue-notif :type="type" :ntf="ntf" :restr="restr" :restrb="restrb"
-      :ns="ns" :idt="idt" :idc="idcpt"/>
+    <dialogue-notif :type="type" :cible="cible" :ntf="ntf" :restr="restr" :restrb="restrb"/>
   </q-dialog>
 </div>
 </template>
 <script>
-import { ref, toRef } from 'vue'
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonBulle from './BoutonBulle.vue'
 import ShowHtml from './ShowHtml.vue'
 import DialogueNotif from './DialogueNotif.vue'
-import { Notification, Qui } from '../app/modele.mjs'
-import { dhcool, dkli, afficherDiag, $t } from '../app/util.mjs'
+import { dhcool, dkli, $t } from '../app/util.mjs'
 
 export default {
   name: 'ApercuNotif',
@@ -54,12 +50,10 @@ export default {
     type: Number,
     /* Type des notifications:
     - 0 : de l'espace
-    - 1 : d'une tribu
+    - 1 : d'une partition
     - 2 : d'un compte
     */
-    idsource: Number,
-    editable: Boolean,
-    ctx: Object, // id de l'espace, ou de la partition, ou de la partition et du compte ...
+    cible: Number, // type 0: ns, type 1: idPartition, type 2: idCompte
     idx: Number
   },
 
@@ -71,16 +65,12 @@ export default {
   },
 
   computed: {
-    texteEd () {
-      if (this.notif.texte.startsWith('%')) {
-        return this.$t('ANrntf' + this.notif.texte.substring(1, 2))
-      } else return this.notif.texte
-    },
     nomSource () {
-      if (this.type > 2) return ''
-      if (this.type === 0) return this.$t('admin')
-      if (!this.idsource) return this.$t('comptable')
-      return Qui.de(idsource).nom
+      if (this.type === 0) return this.$t('ANadmin')
+      const del = this.notif.idDel
+      if (!del) return this.$t('ANcomptable')
+      const cv = this.pSt.getCV(del)
+      return cv.tx ? $t('ANdel1', cv.nom) : $t('ANdel2')
     }
   },
 
@@ -92,70 +82,26 @@ export default {
 
   methods: {
     async editer () {
-      if (this.diag) { await afficherDiag($t('ANer' + this.diag)); return }
       this.ntf = this.notif.clone()
-      if (this.idsource) this.ntf.idSource = this.idsource
-      if (this.session.pow === 3 && !this.ntf.idSource) {
-        await afficherDiag($t('ANnospon'))
-        return
-      }
       if (this.ntf.nr === 2) { this.restr = true; this.restrb = false }
       if (this.ntf.nr === 3) { this.restr = false; this.restrb = true }
       this.ui.oD('DNdialoguenotif', this.idc)
     },
 
     async creer () {
-      if (this.diag) { await afficherDiag($t('ANer' + this.diag)); return }
       this.ntf = new Notification({})
-      if (this.idsource) this.ntf.idSource = this.idsource
       this.ui.oD('DNdialoguenotif', this.idc)
     }
   },
 
-  setup (props) {
-    const session = stores.session
-    const pSt = stores.people
+  setup () {
     const ui = stores.ui
     const idc = ref(ui.getIdc())
-    const type = toRef(props, 'type')
-    const ctx = toRef(props, 'ctx')
-    // const n = toRef(props, 'notif')
-    const ns = ref(0)
-    const idt = ref(0)
-    const idcpt = ref(0)
-    const editable = toRef(props, 'editable')
-
-    function setDiag () {
-      switch (type.value) {
-        case 0 : {
-          if (session.pow !== 1) return 1
-          ns.value = ctx.value.ns
-          break
-        }
-        case 1 : {
-          if (session.pow !== 2 && session.pow !== 3) return 2
-          idt.value = ctx.value.idt
-          break
-        }
-        case 2 : {
-          if (session.pow !== 2 && session.pow !== 3) return 3
-          idt.value = ctx.value.idt
-          idcpt.value = ctx.value.idc
-          // un sponsor ne peut pas éditer la notif d'un autre sponsor
-          if (pSt.estDelegue(idc.value)) return 5
-          break
-        }
-        case 3 :
-        case 4 : return 4 // on ne devrait jamais arriver là
-      }
-      return 0
-    }
-
-    const diag = ref(editable.value ? setDiag() : 0)
-
     return {
-      dhcool, dkli, diag, ns, idt, idcpt,
-      session, ui, idc
+      dhcool, dkli, 
+      pSt: stores.people,
+      session: stores.session,
+      ui, idc
     }
   }
 }

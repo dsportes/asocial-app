@@ -1,6 +1,7 @@
 <template>
 <div class="spmd q-pa-sm">
-    <q-expansion-item switch-toggle-side default-opened dense
+<div v-if="session.compta">
+  <q-expansion-item switch-toggle-side default-opened dense
       header-class="titre-md text-bold bg-primary text-white"
       :label="$t('PCPsyn') + ' - ' + dhcool(c.dh)">
     <div class="spmd column q-my-sm">
@@ -48,7 +49,7 @@
       <div :class="dkli(0) + ' row items-center full-width'">
         <div class="col-4">{{$t('PCPabo')}}</div>
         <div class="col-4 font-mono text-center bg-secondary text-white text-bold">
-          {{(c.qv.q1 * UNITEN) + ' [' + c.qv.q1 + ']'}}</div>
+          {{(c.qv.qn * UNITEN) + ' [' + c.qv.qn + ']'}}</div>
         <div class="col-4 font-mono text-center">{{exM ? q1M : '-'}}</div>
       </div>
       <div :class="dkli(1) + ' row items-center full-width'">
@@ -90,7 +91,7 @@
       <div :class="dkli(0) + ' row items-center full-width'">
         <div class="col-4">{{$t('PCPabo')}}</div>
         <div class="col-4 font-mono text-center bg-secondary text-white text-bold">
-          {{edvol(c.qv.q2 * UNITEV) + ' [' + c.qv.q2 + ']'}}</div>
+          {{edvol(c.qv.qv * UNITEV) + ' [' + c.qv.qv + ']'}}</div>
         <div class="col-4 font-mono text-center">{{exM ? edvol(q2M) : '-'}}</div>
       </div>
       <div :class="dkli(1) + ' row items-center full-width'">
@@ -100,7 +101,7 @@
       </div>
       <div :class="dkli(0) + ' row items-center full-width'">
         <div class="col-4">{{$t('PCPv2')}}</div>
-        <div class="col-4 font-mono text-center">{{c.qv.v2}}</div>
+        <div class="col-4 font-mono text-center">{{c.qv.v}}</div>
         <div class="col-4 font-mono text-center">{{exM ? v2M : '-'}}</div>
       </div>
     </div>
@@ -162,7 +163,7 @@
       </div>
 
       <div v-if="estA" class="column q-my-sm full-width">
-        <panel-deta :c="c" :total="aSt.compta.credits.total"/>
+        <panel-deta :c="c" :total="session.compta.solde"/>
       </div>
 
       <div v-if="c.decouvert" class="titre-md q-my-sm">
@@ -245,15 +246,17 @@
     </div>
   </q-expansion-item>
 </div>
+</div>
 </template>
 
 <script>
-import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV, AMJ, Compteurs, Tarif } from '../app/api.mjs'
-import { dhcool, edqt, mon, nbn, edvol, dkli, $t } from '../app/util.mjs'
+import { dhcool, edqt, mon, nbn, edvol, dkli } from '../app/util.mjs'
 import MoisM from './MoisM.vue'
 import PanelDeta from '../components/PanelDeta.vue'
+
+const cu = ['AN', 'AF', 'lec', 'ecr', 'mon', 'des']
 
 export default ({
   name: 'PanelCompta',
@@ -263,7 +266,8 @@ export default ({
   components: { MoisM, PanelDeta },
 
   computed: {
-    estA () { return this.aSt.compta.estA },
+    c () { return this.session.compta.compteurs },
+    estA () { return this.session.compta.estA },
     icoabo1 () {
       if (this.abo1w) return 'report'
       else if (this.abo1n) return 'lock'
@@ -308,21 +312,21 @@ export default ({
     },
 
     exM () { return this.c.vd[this.idm][Compteurs.MS] !== 0 },
-    q2M () { return this.c.vd[this.idm][Compteurs.Q2] * UNITEV },
-    v2M () { return this.c.vd[this.idm][Compteurs.V2 + Compteurs.X2]},
+    q2M () { return this.c.vd[this.idm][Compteurs.QV] * UNITEV },
+    v2M () { return this.c.vd[this.idm][Compteurs.V + Compteurs.X2]},
     pcutq2M () { return Math.round(this.v2M * 100 / this.q2M)},
-    pcutq2 () { return Math.round(this.c.v2 * 100 / (this.c.qv.q2 * UNITEV)) },
+    pcutq2 () { return Math.round(this.c.qv.v * 100 / (this.c.qv.qv * UNITEV)) },
 
-    q1M () { return this.c.vd[this.idm][Compteurs.Q1] * UNITEN},
+    q1M () { return this.c.vd[this.idm][Compteurs.QN] * UNITEN},
     nnM () { return this.c.vd[this.idm][Compteurs.NN + Compteurs.X2]},
     ncM () { return this.c.vd[this.idm][Compteurs.NC + Compteurs.X2]},
     ngM () { return this.c.vd[this.idm][Compteurs.NG + Compteurs.X2]},
     pcutq1M () { return Math.round((this.nnM + this. ncM + this.ngM) * 100 / this.q1M)},
-    pcutq1 () { return Math.round(this.c.v1 * 100 / (this.c.qv.q1 * UNITEN)) },
+    pcutq1 () { return Math.round((this.c.qv.nn + this.c.qv.nc + this.c.qv.ng) * 100 / (this.c.qv.qn * UNITEN)) },
 
     aboM () { return this.c.vd[this.idm][Compteurs.CA] },
     consoM () {  return this.c.vd[this.idm][Compteurs.CC] },
-    nbj () { return this.c.nbj(this.aSt.compta.credits.total) },
+    nbj () { return this.c.nbj(this.session.compta.solde) },
     txconso () { return this.c.pourcents.pcc },
     alconso () {
       if (this.txconso < 80) return ''
@@ -343,26 +347,31 @@ export default ({
     ne (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.NE] },
     vm (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.VM] },
     vd (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.VD] },
-    em (m) { return this.c.mm[m] !== 0  }
+    em (m) { return this.c.mm[m] !== 0  },
+
+    libm (idm) {
+      const [ax, mx] = AMJ.am(this.c.dh)
+      const x = mx - idm
+      const m = x <= 0 ? 12 + x : x
+      return this.$t('mois' + m)
+    }
+    
   },
 
   setup () {
-    const aSt = stores.avatar
-    const c = ref(aSt.compta.compteurs)
-    // c.value.qv.qc = 0
+    /*
+    const session = stores.session
 
-    function libm (idm) {
-      const [ax, mx] = AMJ.am(c.value.dh)
-      const x = mx - idm
-      const m = x <= 0 ? 12 + x : x
-      return $t('mois' + m)
-    }
-    const cu = ['AN', 'AF', 'lec', 'ecr', 'mon', 'des']
-
+    onMounted(async () => {
+      await new GetCompta().run()
+      const c = session.compta
+    })
+    */
     return {
+      session: stores.session,
       tarifs: Tarif.tarifs,
-      aSt, c, cu,
-      edqt, mon, nbn, edvol, dhcool, dkli, libm, UNITEN, UNITEV
+      cu,
+      edqt, mon, nbn, edvol, dhcool, dkli, UNITEN, UNITEV
     }
   }
 })

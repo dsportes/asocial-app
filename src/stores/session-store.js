@@ -44,8 +44,6 @@ export const useSessionStore = defineStore('session', {
     membreId: 0, // membre "courant" (son im/ids dans son groupe)
     peopleId: 0, // people "courant"
     
-    naComptable: null,
-
     espaces: new Map(), // Pour admin SEULEMENT
     syntheses: new Map(), // Pour admin SEULEMENT
 
@@ -78,6 +76,8 @@ export const useSessionStore = defineStore('session', {
     pSt: (state) => stores.people,
     ui: (state) => stores.ui,
 
+    idComptable (state) { return ID.duComptable(state.ns)},
+    
     dlv (state) { return state.ok && state.compte ? state.compte.dlv : 0 },
     nbj (state) { return AMJ.diff(AMJ.dlv(state.dlv), state.auj) },
 
@@ -102,6 +102,8 @@ export const useSessionStore = defineStore('session', {
 
     mini (state) { (state.ntfP && state.ntfP.nr === 3) || (state.ntfC && state.ntfC.nr === 3) },
     lect (state) { (state.ntfP && state.ntfP.nr >= 2) || (state.ntfC && state.ntfC.nr >= 2) },
+    estFige (state) { const n = state.ntfE; return n && (n.nr === 2) },
+    estClos (state) { const n = state.ntfE; return n && (n.nr === 3) },
     ral (state) { if (!state.compte) return 0
       if (state.compte.estA)
         { const n = state.compte.qv.nbj; return n <= 0 ? 3 : (n < 10 ? 2 : (n < 20 ? 1 : 0)) }
@@ -124,7 +126,7 @@ export const useSessionStore = defineStore('session', {
     - 5 : accès d'urgence seulement
     - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
     - 7 : ralentissement 1
-    - 8 : ralentissement 2
+    - 8 : ralentissement 2 
     */
 
     ntfIco (state) {
@@ -140,6 +142,32 @@ export const useSessionStore = defineStore('session', {
       return 0
     },
 
+    cEdit (state) {
+      if (state.estAdmin) return ''
+      if (state.avion) return $t('condA')
+      if (state.estFige) return $t('condF')
+      if (state.lect) return $t('condL')
+      return ''
+    },
+
+    cUrgence (state) {
+      if (state.estAdmin) return ''
+      if (state.avion) return $t('condA')
+      if (state.estFige) return $t('condF')
+      return ''
+    },
+
+    cVisu () {
+      if (state.estAdmin) return ''
+      if (state.mini) return $t('condM')
+      return ''
+    },
+
+    cSync () {
+      if (state.avion) return $t('condA')
+      return ''
+    },
+
     pow (state) {
       if (state.estAdmin) return 1
       if (state.estComptable) return 2
@@ -147,13 +175,11 @@ export const useSessionStore = defineStore('session', {
       return 4
     },
 
-    // editable (state) { return state.mode < 3 && state.niv < 2 },
+    /*
     estSansNotif (state) { return state.niv === 0 },
-    estFige (state) { const n = state.notifs.G; return n && (n.nr === 1) },
-    estClos (state) { const n = state.notifs.G; return n && (n.nr === 2) },
+
     estMinimal (state) { return state.niv === 2 },
 
-    // TODO
     estLecture (state) {
       if (state.pow <= 2) return false
       const nt = state.notifs[1]; const nc = state.notifs[2]
@@ -186,6 +212,7 @@ export const useSessionStore = defineStore('session', {
       const x = state.roSt
       return x ? $t(y[x]) : ''
     },
+    */
 
     getCV: (state) => { return (id) => { return state.pSt.getCV(id) } },
 
@@ -337,9 +364,7 @@ export const useSessionStore = defineStore('session', {
     setDh (dh) { if (dh && dh > this.dh) this.dh = dh },
 
     /* Le compte a disparu OU l'administrateur a fermé l'application ***********/
-    setExcKO (exc) { 
-      this.excKO = exc
-    },
+    setExcKO (exc) { this.excKO = exc },
 
     setConso (c) {
       if (c) {
@@ -350,9 +375,7 @@ export const useSessionStore = defineStore('session', {
       }
     },
 
-    setStatus (s) {
-      this.status = s
-    },
+    setStatus (s) { this.status = s },
 
     setCompte (compte) { 
       if (compte) {
@@ -389,17 +412,21 @@ export const useSessionStore = defineStore('session', {
       if (espace.notifP && espace.notifP.dh > this.dhvu) this.alire = true
     },
 
-    setPartition (partition) {
-      this.partition = partition
+    setNotifE (arg) {
+      const ntf = arg.notif
+      if (ntf.nr === 3) {
+        session.setExcKO(new AppExc(A_SRV, 999, [ntf.texte, ntf.dh]))
+        stores.ui.setPage('clos')
+        return
+      }
+      console.log(dhcool(ntf.dh), ntf.nr, ntf.texte)
     },
 
-    setSynthese (synthese) {
-      this.synthese = synthese
-    },
+    setPartition (partition) { this.partition = partition },
 
-    setFsSync (fsSync) {
-      this.fsSync = fsSync
-    },
+    setSynthese (synthese) { this.synthese = synthese },
+
+    setFsSync (fsSync) { this.fsSync = fsSync },
 
     setAvatarId (id) { this.avatarId = id },
 
@@ -428,6 +455,7 @@ export const useSessionStore = defineStore('session', {
       this.authToken = u8ToB64(new Uint8Array(x), true)
     },
 
+    /*
     async editUrgence () {
       if (this.mode === 3) {
         await afficherDiag($t('editavion'))
@@ -462,6 +490,7 @@ export const useSessionStore = defineStore('session', {
       }
       return noed ? true : await this.edit()
     },
+    */
     
     opCount () {
       const self = this
@@ -488,15 +517,5 @@ export const useSessionStore = defineStore('session', {
       stores.ui.fD()
       this.opTimer2 = setTimeout(() => { this.signalOp = false }, 1000)
     }
-  },
-
-  setNotifE (arg) {
-    const ntf = arg.notif
-    if (ntf.nr === 3) {
-      session.setExcKO(new AppExc(A_SRV, 999, [ntf.texte, ntf.dh]))
-      stores.ui.setPage('clos')
-      return
-    }
-    console.log(dhcool(ntf.dh), ntf.nr, ntf.texte)
   }
 })

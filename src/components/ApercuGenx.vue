@@ -12,8 +12,9 @@
         <div class="col">
           <span class="text-bold titre-lg q-mr-sm">{{cv.nomc}}</span> 
           <span v-if="estAvc" class="fs-md q-mr-sm">[{{$t('moi')}}]</span> 
+          <span v-if="del" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
           <span class="fs-sm font-mono q-mr-sm">
-            {{'#' + id + (im ? ' ['+ im + ']': '')}}</span> 
+            {{'#' + id + (del ? ' ['+ im + ']': '')}}</span> 
         </div>
         <q-btn class="col-auto" v-if="!estAvc && !estGroupe && !det" 
           dense size="md" color="primary" icon="open_in_new"
@@ -42,6 +43,7 @@ export default {
   props: { 
     id: Number, // id du groupe, avatar du compte ou contact
     im: Number, // si c'est un membre d'un groupe, son im pour l'afficher
+    del: Boolean, // true si délégué, pour l'afficher
     idx: Number
   },
 

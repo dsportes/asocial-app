@@ -4,8 +4,8 @@
 
 <script>
 
-const txt = ['green-5', 'orange-5', 'negative']
-const ic = ['circle', 'warning', 'crisis_alert']
+const txt = ['grey', 'green-5', 'orange-5', 'negative']
+const ic = ['circle', 'circle', 'warning', 'crisis_alert']
 
 export default ({
   name: 'N3Icon',
@@ -13,7 +13,7 @@ export default ({
     niv: Number // 1: vert, 2: orange, 3:rouge
   },
   computed: {
-    i () { return (this.niv || 1) - 1 },
+    i () { return this.niv || 0 },
     tclr () { return 'q-mx-sm text-' + txt[this.i]},
     ico () { return ic[this.i] }
   }

@@ -5,52 +5,76 @@
   <panel-credits v-if="ui.pagetab==='credits'"/>
 
   <div v-if="ui.pagetab==='notif' && session.compta" class="spmd q-pa-sm">
-    <div class="row q-my-sm items-center">
+    <!--
+    <btn-cond :ctx="{d: 'toto'}" v-on:ok="onok" label="mon bouton" 
+      icon="check" color="warning" tp="tool tip"
+      cond="cEdit"/>
+    -->
+
+    <div class="row q-my-md items-center q-ml-sm">
+      <notif-icon class="col-auto" :niv="session.ntfIco"/>
+      <div class="q-ml-sm titre-lg">{{$t('ANlong' + session.ntfIco)}}</div>
+    </div>
+
+    <div class="row q-mt-lg items-center">
       <div class="colauto"><n3-icon :niv="nnbj"/></div>
       <div class="col titre-md">{{$t('PCPnbj', [nbj])}}</div>
     </div>
-    <div class="row q-my-sm items-center">
+
+    <div class="row q-mt-sm items-center">
       <div class="colauto"><n3-icon :niv="npcn"/></div>
       <div class="col titre-md">
         {{$t('PCPqn', [(c.qv.qn * UNITEN), pc.pcn, c.qv.nn, c.qv.nc, c.qv.ng])}}</div>
     </div>
+    <div v-if="npcn===3" :class="al">{{$t('ANlong2a')}}</div>
+
     <div class="row q-my-sm items-center">
       <div class="colauto"><n3-icon :niv="npcv"/></div>
       <div class="col titre-md">
-        {{$t('PCPqv', [edvol(c.qv.qv * UNITV), pc.pcv, c.qv.v])}}</div>
+        {{$t('PCPqv', [edvol(c.qv.qv * UNITEV), pc.pcv, c.qv.v])}}</div>
     </div>
-    <div v-if="session.compte.estA" class="row q-my-sm items-center">
+    <div v-if="npcv===3" :class="al">{{$t('ANlong2b')}}</div>
+
+    <div v-if="session.compte.estA" class="row q-mt-sm items-center">
       <div class="colauto"><n3-icon :niv="nnj"/></div>
-      <div class="col titre-md">
-        {{$t('PCPsolde', [s, nj])}}</div>
+      <div class="col titre-md">{{$t('PCPsolde', [s, nj])}}</div>
     </div>
-    <div v-else class="row q-my-sm items-center">
+    <div v-if="session.compte.estA && nnj===3" :class="al">{{$t('ANlong5')}}</div>
+
+    <div v-if="!session.compte.estA" class="row q-mt-sm items-center">
       <div class="colauto"><n3-icon :niv="npcc"/></div>
-      <div class="col titre-md">
-        {{$t('PCPqcal', [c.qv.qc, pc.pcc])}}</div>
+      <div class="col titre-md">{{$t('PCPqcal', [c.qv.qc, pc.pcc])}}</div>
+    </div>
+    <div v-if="!session.compte.estA && npcc===2" :class="al">{{$t('ANlong7')}}</div>
+    <div v-if="!session.compte.estA && npcc===3" :class="al">{{$t('ANlong8')}}</div>
+
+    <q-separator color="orange" class="q-mt-md"/>
+    <div class="row q-my-sm items-start">
+      <div class="colauto"><n3-icon :niv="session.ntfE ? session.ntfE.nr : 0"/></div>
+      <apercu-notif class="q-ml-sm col" :idx="0" :type="0" :notif="session.ntfE"/>
     </div>
 
-<!--
-    <div v-if="!nbNtf" class="titre-lg text-italic q-my-md">{{$t('PCPnot')}}</div>
-    
-    <div v-for="(ntf, idx) of session.notifs" :key="idx">
-      <div v-if="ntf && ntf.texte" class="q-my-sm q-mx-xs">
-        <div class="titre-lg text-italic">
-          {{$t('CPTtn' + idx + (idx === 4 && aSt.compta.estA ? 'a' : ''))}}
-        </div>
-        <apercu-notif class="q-ml-sm" :type="idx" :notif="ntf"/>
+    <div v-if="!session.compte.estA">
+      <q-separator color="orange" class="q-mt-md"/>
+      <div class="row q-my-sm items-start">
+        <div class="colauto"><n3-icon :niv="session.ntfP ? session.ntfP.nr : 0"/></div>
+        <apercu-notif class="q-ml-sm" :idx="1" :type="1" :notif="session.ntfP"/>
+      </div>
+      <q-separator color="orange" class="q-mt-md"/>
+      <div class="row q-my-sm items-start">
+        <div class="colauto"><n3-icon :niv="session.ntfC ? session.ntfC.nr : 0"/></div>
+        <apercu-notif  class="q-ml-sm" :idx="2" :type="2" :notif="session.ntfC"/>
       </div>
     </div>
--->
   </div>
 
   <div v-if="ui.pagetab==='chats'" class="spmd q-pa-sm">
     <div class="titre-lg text-italic text-center q-py-md">{{$t('CPTtitch')}}</div>
 
-    <q-card v-for="(na, idx) in pSt.nasUrgence" :key="na.id">
+    <q-card v-for="(e, idx) in lurg" :key="e.id">
       <div :class="'q-my-sm q-px-sm ' + dkli(idx)">
-        <apercu-genx :id="na.id" :idx="idx" />
-        <micro-chat :na-e="na" :na-i="nac"/>
+        <apercu-genx :id="e.id" :del="e.del" :idx="idx" />
+        <micro-chat :id-e="e.id" :id-i="session.compteId"/>
       </div>
     </q-card>
   </div>
@@ -66,44 +90,47 @@ import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
-import SdRouge from '../components/SdRouge.vue'
 import MicroChat from '../components/MicroChat.vue'
+// import BtnCond from '../components/BtnCond.vue'
 import { dkli, edvol } from '../app/util.mjs'
 import { getNg } from '../app/modele.mjs'
-import { GetCompta } from '../app/synchro.mjs'
+import { GetCompta, GetPartition } from '../app/synchro.mjs'
 import N3Icon from '../components/N3Icon.vue'
-import { UNITEN, UNITEV } from '../app/api.mjs'
+import NotifIcon from '../components/NotifIcon.vue'
+import { UNITEN, UNITEV, ID } from '../app/api.mjs'
 
 export default {
   name: 'PageCompta',
 
-  components: { N3Icon, MicroChat, SdRouge, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits },
+  components: { /*BtnCond,*/ N3Icon, NotifIcon, MicroChat, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits },
 
   computed: {
-    nbj () { return 5 /*this.session.compte.nbj*/ },
+    al () { return 'titre-md text-italic bg-yellow-3 text-negative text-bold q-mb-xs q-ml-xl'},
+    // nbj () { return 5 },
+    nbj () { return this.session.compte.nbj },
     nnbj () { return this.nbj > 40 ? 1 : (this.nbj > 10 ? 2 : 3)},
     nac () { return getNg(this.session.compteId) },
     c () { return this.session.compta.compteurs },
     s ()  { return this.session.compta.solde },
     pc () { return this.c.pourcents },
     npcn () { return this.pc.pcn < 80 ? 1 : (this.pc.pcn <= 90 ? 2 : 3)},
+    // npcv () { return 3 },
     npcv () { return this.pc.pcv < 80 ? 1 : (this.pc.pcv <= 90 ? 2 : 3)},
+    // npcc () { return 2 },
     npcc () { return this.pc.pcc < 80 ? 1 : (this.pc.pcc <= 90 ? 2 : 3)},
     nj () { return this.c.conso4M },
     nnj () { return this.nj > 40 ? 1 : (this.nj > 10 ? 2 : 3)},
-    bl () {
-      /*
-      if (this.session.estFige) { return this.session.estMinimal ? 'fm' : 'f' }
-      if (this.session.estMinimal) { return 'm' }
-      if (this.session.estLecture) { return 'l' }
-      if (this.session.estDecr) { return 'd' }
-      */
-      return false
-    },
-    nbNtf () {
-      let nb = 0
-      // this.session.notifs.forEach(n => { if (n && n.texte) nb++ })
-      return nb
+    lurg () {
+      const l = []
+      const p = this.session.partition
+      if (!p) return l
+      for (const idx in p.mcpt) {
+        const e = p.mcpt[idx]
+        const id = ID.long(parseInt(idx), this.session.ns)
+        if (id !== this.session.compteId)
+          l.push({ del: e.del, id: id })
+      }
+      return l
     }
   },
 
@@ -113,21 +140,22 @@ export default {
   },
 
   methods: {
+    onok (ctx) {
+      console.log(ctx)
+    }
   },
 
   setup () {
-    const session = stores.session
-    const aSt = stores.avatar
-    const pSt = stores.people
-    const ui = stores.ui
-
     onMounted(async () => {
       await new GetCompta().run()
-      const c = session.compta
+      await new GetPartition().run()
+      // const c = session.compta
     })
 
     return {
-      session, pSt, ui, aSt,  dkli, UNITEN, UNITEV, edvol
+      session: stores.session, 
+      ui: stores.ui, 
+      dkli, UNITEN, UNITEV, edvol
     }
   }
 }
@@ -135,6 +163,8 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.mr1
+  margin-right: 24px
 .bord
   border: 3px solid red
   border-radius: 10px

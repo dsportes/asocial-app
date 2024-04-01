@@ -49,15 +49,14 @@ export default {
   props: {  
     type: Number,
     /* Type des notifications:
-    - 0 : de l'espace
-    - 1 : d'une tribu
-    - 2 : d'un compte
-    - 3 : dépassement de quotas
-    - 4 : alerte de solde / consommation
+    - 0 : de l'espace - cible: ns
+    - 1 : d'une partition - cible: idPartition
+    - 2 : d'un compte - cible: idCompte
     */
     ntf: Object,
     restr: Boolean,
     restrb: Boolean,
+    cible: Number,
     ns: Number,
     idt: Number,
     idc: Number
@@ -80,7 +79,7 @@ export default {
   methods: {
     async valider (suppr) {
       if (!suppr) {
-        this.n.nr = suppr ? 0 : 1
+        this.n.nr = 1
         if (this.restrloc) this.n.nr = 2
         if (this.restrbloc) this.n.nr = 3
         // Interdiction de se bloquer soi-même
@@ -89,19 +88,25 @@ export default {
           return
         }
         if (this.type === 2 && (this.session.pow === 3 || this.session.pow === 2)
-          && this.n.nr > 2 && this.idc === this.session.compteId) {
+          && this.n.nr > 2 && this.cible === this.session.compteId) {
             await afficherDiag(this.$t('ANer11'))
             return
         }
+      } else {
+        this.n.nr = 0
+        this.texte = ''
       }
       if (this.type === 0) {
-        await new SetNotifE().run(suppr ? null : this.n, this.ns)
+        await new SetNotifE().run(suppr ? null : this.n, this.cible)
         this.session.setOrg('admin')
         reconnexion()
-      } else if (this.type === 1) {
-        await new SetNotifT().run(suppr ? null : this.n, this.idt)
       } else {
-        await new SetNotifC().run (suppr ? null : this.n, this.idt, this.idc)
+        // TODO : obtenir la clé de la partition et crypter le texte
+        if (this.type === 1) {
+          await new SetNotifT().run(suppr ? null : this.n, this.cible)
+        } else {
+          await new SetNotifC().run (suppr ? null : this.n, this.cible)
+        }
       }
       this.ui.fD()
     }

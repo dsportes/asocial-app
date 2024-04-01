@@ -87,11 +87,11 @@
         <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setTab('compta')"/>
         <q-tab v-if="session.estComptable || session.compte.estA"
           name="credits" :label="$t('PNCcre')" @click="ui.setTab('credits')"/>
-        <q-tab name="chats" :label="$t('PNCchats')" @click="ui.setTab('chats')"/>
+        <q-tab name="chats" :label="$t('PNCurg')" @click="ui.setTab('chats')"/>
       </q-tabs>
-      <q-btn v-if="ui.pagetab==='notif' && session.alire" class="col-auto q-px-sm" 
-        dense size="md" color="warning" padding="xs" icon="check" 
-        :label="$t('jailu')" @click="jailu"/>
+      <btn-cond v-if="ui.pagetab==='notif' && session.alire" class="col-auto q-px-sm" 
+        color="warning" icon="check" :label="$t('jailu')" 
+        cond="cEdit" v-on:ok="jailu"/>
     </q-toolbar>
 
     <q-toolbar v-if="ui.page === 'groupe'" inset 
@@ -314,13 +314,6 @@
       <div class="titre-md q-mb-sm">{{$t('RLtit1')}}</div>
       <div class="titre-md q-mb-sm">{{$t('RLtit2')}}</div>
 
-      <!--
-      <div class="row no-wrap items-start justify-between q-mb-sm">
-        <div class="titre-md">{{$t('RLtit3')}}</div>
-        <bouton-bulle idtext="rl0"/>
-      </div>
-      -->
-
       <div class="row no-wrap items-start justify-between q-mb-sm">
         <div class="row">
           <div class="titre-md text-bold text-primary q-pr-sm lg1">{{$t('RLopt', ['1'])}}</div>
@@ -425,8 +418,9 @@ import { ID, AMJ } from './app/api.mjs'
 import { set$t, hms, dkli, styp, beep } from './app/util.mjs'
 import { reconnexion, deconnexion } from './app/synchro.mjs'
 import { CV } from './app/modele.mjs'
-import { SetDhvuCompta } from './app/operations.mjs'
+import { SetDhvuCompta } from './app/operations4.mjs'
 
+import BtnCond from './components/BtnCond.vue'
 import BoutonHelp from './components/BoutonHelp.vue'
 import BoutonLangue from './components/BoutonLangue.vue'
 import BoutonBulle from './components/BoutonBulle.vue'
@@ -497,7 +491,7 @@ export default {
   name: 'App',
 
   components: { 
-    BoutonHelp, BoutonBulle, BoutonLangue, NotifIcon, QueueIcon, OutilsTests,
+    BtnCond, BoutonHelp, BoutonBulle, BoutonLangue, NotifIcon, QueueIcon, OutilsTests,
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PagePartition, PagePeople, PanelPeople, PanelMembre,

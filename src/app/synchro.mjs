@@ -6,7 +6,7 @@ import { idb, IDBbuffer } from './db.mjs'
 import { DataSync, appexc, ID, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
 import { CV, compile, RegCles } from './modele.mjs'
-import { crypter, decrypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
+import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
 
 /* classe Queue ***********************************************************/
 class Queue {
@@ -35,7 +35,7 @@ class Queue {
         await new GetEspace().run(row.id)
       } else {
         if (ID.rdsType(row.id) === ID.RDSCOMPTE) { 
-          if (this.vcpt.v[0] < row.v) { this.vcpt.v[0] = row.v; rev = true }
+          if (this.vcpt[0] < row.v) { this.vcpt[0] = row.v; rev = true }
         } else {
           const x = this.avgrs.get(row.id)
           if (!x) { this.avgrs.set(row.id, [row.v, 0]); rev = true }
