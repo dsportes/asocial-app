@@ -752,7 +752,7 @@ export class ConnexionSynchroIncognito extends OperationS {
 - cleAP: clé A de son avatar principâl cryptée par la clé P de sa partition
 - clePA: cle P de la partition cryptée par la clé A du nouveau compte
 
-- ch: { cck, ccP, t1c, t2c }
+- ch: { cck, ccP, cleE1C, cleE2C, t1c, t2c }
   - ccK: clé C du chat cryptée par la clé K du compte
   - ccP: clé C du chat cryptée par la clé publique de l'avatar sponsor
   - cleE1C: clé A de l'avatar E (sponsor) cryptée par la clé du chat.
@@ -983,7 +983,7 @@ export class EchoTexte extends Operation {
   }
 }
 
-/* Pseudo opération : cyncPub **************************************/
+/* Pseudo opération : syncPub **************************************/
 export async function getPub (id) {
   try {
     const ret = await post(null, 'GetPub', { id })

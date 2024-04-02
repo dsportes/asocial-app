@@ -13,19 +13,27 @@
         </div>
         <div v-if="chatx.items.length" class="text-italic font-mono q-mr-sm">{{dhcool(chatx.dh)}}</div>
       </div>
-      <div v-if="chatx.items.length" class="fs-md">{{chatx.tit}}</div>
+      <div class="row justify-between items-start">
+        <div v-if="chatx.items.length" class="fs-md">{{chatx.tit}}</div>
+        <btn-cond icon="open_in_new" :label="$t('CHbtnov')" @click="ouvrirChat()"
+          :cond="ui.urgence ? 'cUrgence' : 'cVisu'" />
+      </div>
     </div>
-    <div v-else class="text-italic titre-md">{{$t('CHnotit')}}</div>
-    <q-btn class="absolute-bottom-right"
-      color="primary" dense icon="open_in_new" padding="xs" size="sm"
-      :label="$t(!chatx ? 'CHbtncr' : 'CHbtnov')"
-      @click="ouvrirChat()"/>
+    <div v-else class="row justify-between items-start">
+      <div v-if="mode===1" class="text-italic titre-md">{{$t('CHnxdel', [nomE])}}</div>
+      <div v-if="mode===0" class="text-italic titre-md">{{$t('CHnxpc', [nomE])}}</div>
+      <div v-if="mode>1" class="text-italic titre-md">{{$t('CHnxmb', [nomE, nomG])}}</div>
+      <btn-cond icon="open_in_new" :label="$t('CHbtncr')" @click="creerChat()"
+        :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+    </div>
   </div>
 
-  <apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc"
+  <apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc" :chat="chatx"/>
+
+  <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc"
     :idI="chat ? chat.id : idI" 
-    :idE="chat ? chat.idE : idE" 
-    :chatx="chatx"/>
+    :idE="chat ? chat.idE : idE"
+    :mode="mode"/>
 
 </div>
 </template>
@@ -34,21 +42,33 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import ApercuChat from '../panels/ApercuChat.vue'
+import NouveauChat from '../dialogues/NouveauChat.vue'
 
 export default ({
   name: 'MicroChat',
 
-  components: { ApercuChat },
+  components: { ApercuChat, NouveauChat },
 
   props: { 
     chat: Object, // si chat est donné, c'est lui qui est visualisé
-    idI: Number, idE: Number // sinon couple d'id (avatar du compte, people)
+    idI: Number, // sinon couple d'id (avatar du compte, people)
+    idE: Number, 
+    del: Boolean // Quand le chat n'est pas connu et que idE est délégué de la partition du compte de idI
   },
 
   computed: {
-    chatx () { 
-      return this.chat || this.aSt.chatDeAvec(this.idI, this.idE) 
-    }
+    chatx () { return this.chat || this.aSt.chatDeAvec(this.idI, this.idE) },
+
+    /* Le chat PEUT être créé en tant que: 
+    0:par phrase de contact, 1:délégué, idg:co-membre du groupe */
+    mode () {
+      if (this.del) return 1
+      const l = pSt.getListeIdGrComb(this.idE, this.idI)
+      return l.length ? l[0] : 0
+    },
+
+    nomE () { return session.getCV(this.idE).nom },
+    nomG () { return session.getCV(this.mode).nom },
   },
 
  data () {
@@ -60,6 +80,9 @@ export default ({
     ouvrirChat () {
       this.ui.oD('ACouvrir', this.idc)
     },
+    creerChat () {
+      this.ui.oD('CCouvrir', this.idc)
+    },
   },
   
   setup () {
@@ -68,6 +91,7 @@ export default ({
     return {
       ui, idc,
       aSt: stores.avatar,
+      pSt: stores.people,
       session: stores.session,
       dhcool
     }

@@ -6,9 +6,11 @@
         no-caps dense color="primary" 
         :label="$t('CVraf')" @click="rafCvs"/>
 
+<!-- A REPRENDRE : choisir l'avatar du compte idI et BtnCond
       <q-btn v-if="session.accesNet" size="md" no-caps 
         dense color="primary" padding="xs xs"
-        :label="$t('CChtit')" @click="ovContact"/>
+        :label="$t('CChtit')" @click="creerChat"/>
+-->
     </div>
 
     <div class="row justify-center items-center g-gutter-md">
@@ -47,7 +49,7 @@
       </div>
     </div>
 
-    <contact-chat v-if="ui.d.CCouvrir"/>
+    <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="idI"/>
 
   </q-page>
 </template>
@@ -60,8 +62,7 @@ import stores from '../stores/stores.mjs'
 import MicroChat from '../components/MicroChat.vue'
 import MicroChatgr from '../components/MicroChatgr.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import ContactChat from '../dialogues/ContactChat.vue'
-import { Motscles, getNg } from '../app/modele.mjs'
+import NouveauChat from '../dialogues/NouveauChat.vue'
 import { RafraichirCvs } from '../app/operations.mjs'
 import { dhstring, afficherDiag, photoToBin, dkli, dhcool } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
@@ -75,7 +76,7 @@ const encoder = new TextEncoder('utf-8')
 export default {
   name: 'PageChats',
 
-  components: { MicroChat, MicroChatgr, ContactChat, ApercuGenx },
+  components: { MicroChat, MicroChatgr, NouveauChat, ApercuGenx },
 
   computed: {
     fusion () {
@@ -91,18 +92,13 @@ export default {
   },
 
   methods: {
-    cv (id) { 
-      const g = this.gSt.getGroupe(id)
-      return g ? g.cv : null
-    },
-
     async rafCvs () {
       const [nt, nr] = await new RafraichirCvs().run(this.session.avatarId)
       stores.ui.afficherMessage(this.$t('CVraf2', [nr, nt - nr]), false)
     },
 
-    async ovContact () {
-      if (await this.session.edit()) this.ui.oD('CCouvrir')
+    creerChat () {
+      this.ui.oD('CCouvrir', this.idc)
     },
 
     saveph (nf, u8, mime) {
@@ -110,7 +106,7 @@ export default {
       if (blob) saveAs(blob, nf)
     },
 
-    async exp () {
+    async exp () { // export des contacts - A VERIFIER
       const expPfx = new Date().toISOString().replaceAll(':', '_')
       const res = []
       let nb = 1
@@ -120,19 +116,18 @@ export default {
         } else {
           res.push('## ' + this.$t('CHoch3', [c.naI.nom, c.naE.nomc]) + '\n\n')
         }
-        if (c.cv) {
-          if (c.cv.photo) {
-            const [mime, bin] = photoToBin(c.cv.photo)
-            if (!this.optb64) {
-              const nf = encodeURI(expPfx + '_' + (nb++) + '.' + mime2ext(mime))
-              this.saveph(nf, bin, mime)
-              res.push('\n' + img1 + nf + img2 + '\n\n')
-            } else {
-              res.push('\n\n![Image en base64](' + c.cv.photo + ')\n\n')
-            }
+        const cv = this.session.getCV(id)
+        if (cv.ph) {
+          const [mime, bin] = photoToBin(cv.photo)
+          if (!this.optb64) {
+            const nf = encodeURI(expPfx + '_' + (nb++) + '.' + mime2ext(mime))
+            this.saveph(nf, bin, mime)
+            res.push('\n' + img1 + nf + img2 + '\n\n')
+          } else {
+            res.push('\n\n![Image en base64](' + cv.photo + ')\n\n')
           }
-          if (c.cv.info) res.push(c.cv.info + '\n')
         }
+        if (cv.tx) res.push(cv.photo + '\n')
         res.push('\n\n> ' + this.$t('CHdhc', [dhstring(c.dh)]) + '\n')
         res.push('\n' + c.txt + '\n\n---\n')
       }
@@ -151,6 +146,7 @@ export default {
 
   data () {
     return {
+      idI: 0,
       optb64: false,
       chatc: null
     }

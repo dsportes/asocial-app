@@ -143,7 +143,8 @@ export const useUiStore = defineStore('ui', {
     aUnFiltre (state) { 
       if (!pagesF.has(state.page)) return false
       return !state.pagetab || tabF.has(state.pagetab)
-    }
+    },
+    urgence (state) { return state.page = 'compta' && state.pagetab === 'chats' }
   },
 
   actions: {

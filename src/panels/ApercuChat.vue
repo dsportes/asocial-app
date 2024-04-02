@@ -7,7 +7,7 @@
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [nomI, nomE])}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <apercu-genx class="bordb" :id="idE" :idx="0" />
+      <apercu-genx class="bordb" :id="chat.idE" :idx="0" />
       <div :class="sty() + 'q-pa-xs row justify-around items-center'">
         <div class="row q-gutter-xs items-center">
           <q-btn :label="$t('CHadd2')" @click="editer(false)" 
@@ -24,7 +24,7 @@
     </q-header>
 
     <q-page-container>
-      <q-card v-if="chat" class="q-pa-sm">
+      <q-card class="q-pa-sm">
         <div v-for="it in chat.items" :key="it.dh + '/' + it.a">
           <q-chat-message :sent="it.a===0" 
             :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
@@ -41,12 +41,6 @@
             </template>
           </q-chat-message>
         </div>
-      </q-card>
-
-      <q-card v-else>
-        <div class="titre-md text-italic text-bold">{{$t('CHnotit')}}</div>
-        <q-btn class="maauto q-mt-md" :label="$t('CHbtncr')" size="md" color="primary" icon="add"
-          @click="creerchat"/>
       </q-card>
     </q-page-container>
 
@@ -116,7 +110,7 @@ import { toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
-import { PassifChat, NouveauChat, EstAutonome } from '../app/operations.mjs'
+import { PassifChat, EstAutonome } from '../app/operations.mjs'
 import { MajChat } from '../app/operations4.mjs'
 import { ID } from '../app/api.mjs'
 
@@ -129,17 +123,15 @@ export default {
   name: 'ApercuChat',
 
   props: { 
-    idI: Number, 
-    idE: Number,
-    chatx: Object, // Le chat peut être créé ici (pas forcément existant avant)
+    chat: Object, // Le chat peut être créé ici (pas forcément existant avant)
     idc: Number
   },
 
   components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp },
 
   computed: {
-    nomE () { return this.session.getCV(this.idE).nom },
-    nomI () { return this.session.getCV(this.idI).nom },
+    nomE () { return this.session.getCV(chat.idE).nom },
+    nomI () { return this.session.getCV(chat.idI).nom },
     estDel () { return ID.estComptable(this.idE) || this.session.estDelegue }
   },
 
@@ -151,15 +143,6 @@ export default {
   }},
 
   methods: {
-    async creerchat () {
-      if (this.estDel) {
-        if (!await this.session.editUrgence()) return
-      } else {
-        if (!await this.session.edit()) return
-      }
-      this.ui.oD('ACchatedit')
-    },
-
     async effacer (dh) {
       if (this.estDel) {
         if (!await this.session.editUrgence()) return
@@ -184,20 +167,10 @@ export default {
         await afficherDiag(this.$t('CHcred', [compta.total, this.mdon * 100]))
         return
       }
-      if (this.chat) {
-        const don = this.avecDon ? this.mdon * 100 : 0
-        const txt = (this.avecDon && !this.dconf ? (this.$t('CHdonde', [this.mdon]) + '\n') : '') + this.txt
-        const disp = await new MajChat().run(this.chat, txt, 0, don)
-        if (disp) { await afficherDiag(this.$t('CHdisp')) }
-      } else { 
-        const [st, chat] = await new NouveauChat().run(this.idI, this.idE, this.txt)
-        if (st === 0) {
-          await afficherDiag(this.$t('OPnvch0'))
-        } else  {
-          this.chat = chat
-          if (st === 2) await afficherDiag(this.$t('OPnvch2'))
-        }
-      }
+      const don = this.avecDon ? this.mdon * 100 : 0
+      const txt = (this.avecDon && !this.dconf ? (this.$t('CHdonde', [this.mdon]) + '\n') : '') + this.txt
+      const disp = await new MajChat().run(this.chat, txt, 0, don)
+      if (disp) { await afficherDiag(this.$t('CHdisp')) }
       this.txt = ''
       this.ui.fD()
     },
@@ -245,8 +218,7 @@ export default {
       session: stores.session,
       pSt: stores.people, 
       ui: stores.ui,
-      aSt: stores.avatar,
-      chat: toRef(props, 'chatx') // chat reçu OU créé ici
+      aSt: stores.avatar
     }
   }
 }

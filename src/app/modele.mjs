@@ -481,15 +481,26 @@ this.synth est calculé:
 export class Partition extends GenDoc {
   get ns() { return ID.ns(this.id) }
 
-  async locComp (id, cleAP) {
-    const cleP = RegCles.get(id)
-    const cleA = await decrypter(cleP, cleAP)
-    RegCles.set(cleA)
-  }
-
   async compile (row) {
     this.vsh = row.vsh || 0
-    await compileMcpt(this, row, this.locComp)
+    const cleP = RegCles.get(this.id)
+    this.nrp = row.nrp || 0
+    this.q = row.q
+    const ns = ID.ns(this.id)
+    this.mcpt = {}
+    this.sdel = new Set() // Set des délégués
+    
+    if (row.mcpt) for(const idx in row.mcpt) {
+      const id = ID.long(parseInt(idx), ns)
+      const e = row.mcpt[idx]
+      if (e.del) { this.sdel.add(id); e.del = true }
+      RegCles.set(await decrypter(cleP, e.cleAP))
+      const q = { ...e.q }
+      q.pcc = !q.qc ? 0 : Math.round(q.c2m * 100 / q.qc) 
+      q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / q.qn) 
+      q.pcv = !q.qv ? 0 : Math.round(q.v * 100 / q.qv) 
+      this.mcpt[id] = { nr: e.nr || 0, q: e.q }
+    }
     this.synth = synthesesPartition(this)
   }
 }
@@ -825,6 +836,7 @@ _data_:
 - `rds` : pas transmis en session.
 - `cleAZC` : clé A cryptée par ZC (PBKFD de la phrase de contact complète).
 - `pcK` : phrase de contact complète cryptée par la clé K du compte.
+- `hZC` : hash du PBKFD de la phrase de contact complète.
 
 - `cvA` : carte de visite de l'avatar `{id, v, photo, texte}`. photo et texte cryptés par la clé A de l'avatar.
 

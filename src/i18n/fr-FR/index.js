@@ -952,7 +952,10 @@ export default {
   APtit: 'Détail du contact {0}',
   APtitav: 'Détail de l\'avatar {0}',
 
-  CHnotit: 'Ce chat n\'a jamais été créé. Il peut l\'être maintenant.',
+  CHnxdel: '[{0}] est délégué de la partition: il n\'existe pas de chat avec lui, mais il peut être crée maintenant.',
+  CHnxmb: '[{0}] est membre du groupe [{1}]: il n\'existe pas de chat avec lui, mais il peut être crée maintenant.',
+  CHnxpc: 'Il n\'existe pas de chat avec [{0}]: pour en créer un maintenant, il faut connaître SA PHRASE DE CONTACT.',
+  CHech1: 'Texte du premier échange:',
   CHbtncr: 'Créer le chat',
   CHbtnov: 'Ouvrir le chat',
   CHtxt: 'Texte du chat',

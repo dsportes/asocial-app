@@ -74,7 +74,7 @@
     <q-card v-for="(e, idx) in lurg" :key="e.id">
       <div :class="'q-my-sm q-px-sm ' + dkli(idx)">
         <apercu-genx :id="e.id" :del="e.del" :idx="idx" />
-        <micro-chat :id-e="e.id" :id-i="session.compteId"/>
+        <micro-chat :id-e="e.id" :id-i="session.compteId" :del="e.del"/>
       </div>
     </q-card>
   </div>

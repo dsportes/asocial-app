@@ -21,7 +21,8 @@ export const usePeopleStore = defineStore('people', {
   }),
 
   getters: { 
-    ns: (state) => stores.session.ns,
+    ns: () => stores.session.ns,
+    gSt: () => stores.groupe,
 
     /* Retourne la CV la plus récente pour une id */
     getCV: (state) => { return (id) => { return state.cvs.get(ID.long(id, state.ns)) || CV.fake(id)} },
@@ -38,7 +39,6 @@ export const usePeopleStore = defineStore('people', {
       }
     },
 
-
     // entrée du people courant
     peC: (state) => { 
       const id = stores.session.peopleId
@@ -48,20 +48,24 @@ export const usePeopleStore = defineStore('people', {
     // Array des ids des people
     peopleIds: (state) => { return Array.from(state.map.keys()) },
 
-    getNa: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.na : null 
+    /* liste des groupes dont le people est co-membre actif 
+    de l'avatar idav (ayant accès aux membres) */
+    getListeIdGrComb: (state) => { return (idp, idav) => { 
+        const l = []
+        const e = state.map.get(idp)
+        if (e) for (const idg of e.sgr) {
+          const eg = gSt.map.get(idg)
+          if (eg) {
+            const g = eg.groupe
+            if (g && ((g.accesMembre(g.mmb(idav) || 0) && g.estActif(g.mmb(idp) || 0)))) l.push(idg)
+          }
+        }
+        return l
       }
     },
 
     estPeople: (state) => { return (id) => { 
         return state.map.has(id)
-      }
-    },
-
-    estDelegue: (state) => { return (id) => { // retourne 0, 1 sponsor de la tribu
-        const e = state.map.get(id)
-        return e ? e.sp : 0
       }
     },
 
