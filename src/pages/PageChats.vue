@@ -37,7 +37,7 @@
         <q-card v-else>
           <div :class="'column ' + dkli(idx)">
             <div class="row justify-between">
-              <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHde', [session.getCV(chat.idE).nom])}}</div>
+              <div class="titre-lg text-italic q-mb-xs text-orange">{{$t('CHde', [session.getCV(chat.id).nom])}}</div>
             </div>
             <div class="q-mx-sm">
               <apercu-genx class="bordb" :id="chat.idE" :idx="idx" />

@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.CCouvrir" persistent>
+<q-dialog v-model="ui.d.CCouvrir[idc]" persistent>
   <q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
     <q-btn dense size="md" color="warning" padding="none" icon="close" @click="ui.fD"/>
@@ -22,30 +22,35 @@
   </q-card-actions>
 </q-card>
 
-<apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc" :chat="chat"/>
+<apercu-chat v-if="ui.d.ACouvrir[idc2]" :idc="idc2" :chat="chat"/>
 
 </q-dialog>
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { GetAvatarPC, NouveauChat } from '../app/operations4.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
+import EditeurMd from '../components/EditeurMd.vue'
+import BtnCond from '../components/BtnCond.vue'
 
 export default ({
   name: 'NouveauChat',
 
   props: { 
     /* Le chat PEUT être créé en tant que: 
-    0:par phrase de contact, 1:délégué, idg:co-membre du groupe */
+    0:par phrase de contact, 1:comptable, 2:délégué, idg:co-membre du groupe */
     mode: Number,
     idI: Number, // avatar du compte
-    idE: Number // avater externe, co-membre d'un groupe ou délégué ou à contacter
+    idE: Number, // avater externe, co-membre d'un groupe ou délégué ou à contacter
+    idc: Number
   },
 
-  components: { PhraseContact, BoutonHelp },
+  components: { PhraseContact, BoutonHelp, ApercuGenx, EditeurMd, BtnCond },
 
   computed: {
   },
@@ -80,12 +85,12 @@ export default ({
 
   setup () {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc2 = ref(ui.getIdc())
 
     return {
       aSt: stores.avatar,
       session: stores.session,
-      ui, idc, styp
+      ui, idc2, styp
     }
   }
 })

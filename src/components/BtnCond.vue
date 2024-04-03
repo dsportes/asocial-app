@@ -2,7 +2,8 @@
   <q-btn 
     :icon="diag ? 'error' : icon"
     padding="none" 
-    disable
+    :disable="disable"
+    :flat="flat"
     dense
     :color="!diag ? (color || 'primary') : 'accent'"
     :size="size || 'md'"
@@ -27,7 +28,8 @@ export default ({
     tp: String, // tooltip: dfeaut aucun
     ctx: Object, // defaut null. Retransmis sur l'événement ok
     cond: String, // code condition dans stores.session
-    disable: Boolean
+    disable: Boolean,
+    flat: Boolean
   },
 
   emits: ['ok'],

@@ -157,7 +157,7 @@ export const useSessionStore = defineStore('session', {
       return ''
     },
 
-    cVisu () {
+    cVisu (state) {
       if (state.estAdmin) return ''
       if (state.mini) return $t('condM')
       return ''

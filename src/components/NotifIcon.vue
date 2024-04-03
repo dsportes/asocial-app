@@ -4,7 +4,7 @@
     <span v-if="alire" class="rond"></span>
   </q-icon>
   <!--q-tooltip v-if="apptb" class="bg-indigi text-white font-sm">{{$t('MLAnot')}}</q-tooltip-->
-  <q-tooltip class="bg-indigi text-white font-sm">{{$t('ANlong' + niv)}}</q-tooltip>
+  <q-tooltip class="bg-indigi text-white font-sm">{{$t('ANlong' + (niv || 0))}}</q-tooltip>
 </span>
 </template>
 
@@ -15,7 +15,7 @@ const bg = ['none', 'none', 'yellow-1', 'yellow-3', 'yellow-5', 'yellow-7', 'yel
 const ic = ['circle', 'report', 'trending_down', 'edit_off', 'edit_off', 'emergency', 'lock', 'speed', 'speed']
 
 export default ({
-  name: 'NotifIcon2',
+  name: 'NotifIcon',
   props: { 
     /* niveau d'information / restriction: 
     - 0 : aucune notification
@@ -29,8 +29,7 @@ export default ({
     - 8 : ralentissement 2
     */
     niv: Number,
-    alire: Boolean, // présence de l'indicateur à lire
-    apptb: Boolean
+    alire: Boolean // présence de l'indicateur à lire
   },
   computed: {
     tclr () { return 'text-' + txt[this.niv || 0]},

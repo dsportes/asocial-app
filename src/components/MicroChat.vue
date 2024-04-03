@@ -20,10 +20,11 @@
       </div>
     </div>
     <div v-else class="row justify-between items-start">
-      <div v-if="mode===1" class="text-italic titre-md">{{$t('CHnxdel', [nomE])}}</div>
-      <div v-if="mode===0" class="text-italic titre-md">{{$t('CHnxpc', [nomE])}}</div>
-      <div v-if="mode>1" class="text-italic titre-md">{{$t('CHnxmb', [nomE, nomG])}}</div>
-      <btn-cond icon="open_in_new" :label="$t('CHbtncr')" @click="creerChat()"
+      <div v-if="mode===1" class="col text-italic titre-md">{{$t('CHnxco')}}</div>
+      <div v-if="mode===2" class="col text-italic titre-md">{{$t('CHnxdel', [nomE])}}</div>
+      <div v-if="mode===0" class="col text-italic titre-md">{{$t('CHnxpc', [nomE])}}</div>
+      <div v-if="mode>2" class="col text-italic titre-md">{{$t('CHnxmb', [nomE, nomG])}}</div>
+      <btn-cond class="col-auto" icon="open_in_new" :label="$t('CHbtncr')" @ok="creerChat()"
         :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
     </div>
   </div>
@@ -43,11 +44,13 @@ import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import ApercuChat from '../panels/ApercuChat.vue'
 import NouveauChat from '../dialogues/NouveauChat.vue'
+import BtnCond from './BtnCond.vue'
+import { ID } from '../app/api.mjs'
 
 export default ({
   name: 'MicroChat',
 
-  components: { ApercuChat, NouveauChat },
+  components: { ApercuChat, NouveauChat, BtnCond },
 
   props: { 
     chat: Object, // si chat est donné, c'est lui qui est visualisé
@@ -60,15 +63,16 @@ export default ({
     chatx () { return this.chat || this.aSt.chatDeAvec(this.idI, this.idE) },
 
     /* Le chat PEUT être créé en tant que: 
-    0:par phrase de contact, 1:délégué, idg:co-membre du groupe */
+    0:par phrase de contact, 1:comptable, 2:délégué, idg:co-membre du groupe */
     mode () {
-      if (this.del) return 1
-      const l = pSt.getListeIdGrComb(this.idE, this.idI)
+      if (ID.estComptable(this.idE)) return 1
+      if (this.del) return 2
+      const l = this.pSt.getListeIdGrComb(this.idE, this.idI)
       return l.length ? l[0] : 0
     },
 
-    nomE () { return session.getCV(this.idE).nom },
-    nomG () { return session.getCV(this.mode).nom },
+    nomE () { return this.session.getCV(this.idE).nom },
+    nomG () { return this.session.getCV(this.mode).nom },
   },
 
  data () {

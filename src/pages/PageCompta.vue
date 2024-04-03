@@ -5,11 +5,6 @@
   <panel-credits v-if="ui.pagetab==='credits'"/>
 
   <div v-if="ui.pagetab==='notif' && session.compta" class="spmd q-pa-sm">
-    <!--
-    <btn-cond :ctx="{d: 'toto'}" v-on:ok="onok" label="mon bouton" 
-      icon="check" color="warning" tp="tool tip"
-      cond="cEdit"/>
-    -->
 
     <div class="row q-my-md items-center q-ml-sm">
       <notif-icon class="col-auto" :niv="session.ntfIco"/>
@@ -91,7 +86,6 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
 import MicroChat from '../components/MicroChat.vue'
-// import BtnCond from '../components/BtnCond.vue'
 import { dkli, edvol } from '../app/util.mjs'
 import { getNg } from '../app/modele.mjs'
 import { GetCompta, GetPartition } from '../app/synchro.mjs'
@@ -102,7 +96,7 @@ import { UNITEN, UNITEV, ID } from '../app/api.mjs'
 export default {
   name: 'PageCompta',
 
-  components: { /*BtnCond,*/ N3Icon, NotifIcon, MicroChat, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits },
+  components: { N3Icon, NotifIcon, MicroChat, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits },
 
   computed: {
     al () { return 'titre-md text-italic bg-yellow-3 text-negative text-bold q-mb-xs q-ml-xl'},
@@ -118,10 +112,10 @@ export default {
     npcv () { return this.pc.pcv < 80 ? 1 : (this.pc.pcv <= 90 ? 2 : 3)},
     // npcc () { return 2 },
     npcc () { return this.pc.pcc < 80 ? 1 : (this.pc.pcc <= 90 ? 2 : 3)},
-    nj () { return this.c.conso4M },
+    nj () { return this.c.nbj(this.session.compta.solde) },
     nnj () { return this.nj > 40 ? 1 : (this.nj > 10 ? 2 : 3)},
     lurg () {
-      const l = []
+      const l = [{ id: ID.long(ID.duComptable(this.session.ns), this.session.ns)}]
       const p = this.session.partition
       if (!p) return l
       for (const idx in p.mcpt) {
@@ -146,14 +140,15 @@ export default {
   },
 
   setup () {
+    const session = stores.session
+
     onMounted(async () => {
       await new GetCompta().run()
-      await new GetPartition().run()
-      // const c = session.compta
+      if (!session.estA) await new GetPartition().run()
     })
 
     return {
-      session: stores.session, 
+      session, 
       ui: stores.ui, 
       dkli, UNITEN, UNITEV, edvol
     }

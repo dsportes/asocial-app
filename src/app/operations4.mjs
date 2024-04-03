@@ -3,11 +3,11 @@ import { encode, decode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { Operation } from './synchro.mjs'
 import { random, gzipB } from './util.mjs'
-import { Cles } from './api.mjs'
+import { Cles, d14 } from './api.mjs'
 import { post } from './net.mjs'
-import { RegCles } from './modele.mjs'
+import { RegCles, compile } from './modele.mjs'
 import { getPub } from './synchro.mjs'
-import { crypter, genKeyPair } from './webcrypto.mjs'
+import { decrypter, crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
 
 /* OP_SetEspaceOptionA: 'Changement de l\'option A de l\'espace'
 - `token` : jeton d'authentification du compte de **l'administrateur**
@@ -261,7 +261,7 @@ args.dhvu : dhvu cryptée par la clé K
 Retour:
 */
 export class SetDhvuCompta extends Operation {
-  constructor () { super('OP_SetDhvuCompta') }
+  constructor () { super('SetDhvuCompta') }
 
   async run () {
     try {
@@ -276,13 +276,14 @@ export class SetDhvuCompta extends Operation {
   }
 }
 
-/** Récupération d\'un avatar par sa phrase de contact *******
+/* OP_GetAvatarPC: 'Récupération d\'un avatar par sa phrase de contact'
 - token: éléments d'authentification du compte.
 - hZR: hash de la phrase de contact réduite
 - hZC: hash de la phrase de contact complète
 Retour:
 - cleAZC : clé A cryptée par ZC (PBKFD de la phrase de contact complète)
 - cvA: carte de visite cryptée par sa clé A
+- collision: true si la phrase courte pointe sur un  autre avatar
 */
 export class GetAvatarPC extends Operation {
   constructor () { super('GetAvatarPC') }
@@ -294,7 +295,8 @@ export class GetAvatarPC extends Operation {
       const args = { token: session.authToken, hZR, hZC: p.hpsc }
       const ret = await post(this, 'GetAvatarPC', args)
       let id = 0
-      if (ret.cleAZC) {
+      if (ret.collision) id = -1
+      else if (ret.cleAZC) {
         try {
           const cleA = decode(await decrypter(p.pcb, ret.cleAZC))
           RegCles.set(cleA)
@@ -309,42 +311,56 @@ export class GetAvatarPC extends Operation {
   }
 }
 
-/* Nouveau chat *********************************
-args.token: éléments d'authentification du compte.
-args.idI idsI : id du chat, côté interne
-args.idE idsE : id du chat côté externe
-args.ccKI : clé cc cryptée par la clé K du compte de I
-args.ccPE ! clé cc cryptée par la clé publique de l'avatar E
-args.contc : contenu du chat crypté par la clé cc
-args.naccI: na de I crypté par la clé du chat
-args.naccE: na de I crypté par la clé du chat
-args.txt1: texte crypté par la clé cc
-args.lgtxt1: lg du texte
+/* OP_ChangementPC: 'Changement de la phrase de contact d\'un avatar' *************************
+token: éléments d'authentification du compte.
+- `id`: de l'avatar
+- `hZR`: hash de la phrase de contact réduite (SUPPRESSION si null)
+- `cleAZC` : clé A cryptée par ZC (PBKFD de la phrase de contact complète).
+- `pcK` : phrase de contact complète cryptée par la clé K du compte.
+- `hZC` : hash du PBKFD de la phrase de contact complète.
+*/
+export class ChangementPC extends Operation {
+  constructor () { super('ChangementPC') }
 
+  async run (id, p) {
+    try {
+      const session = stores.session
+      const pcK = p ? await crypter(session.clek, p.phrase) : null
+      const cleAZC = p ? await crypter(p.pcb, RegCles.get(id)) : null
+      const hZR = p ? p.hps1 : 0
+      const hZC = p ? p.pcb : 0
+      const args = { token: session.authToken, id, pcK, hZR, hZC, cleAZC }
+      await post(this, 'ChangementPC', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_NouveauChat: 'Création d\'un nouveau chat' *********************************
+- token: éléments d'authentification du compte.
+- idI
+- idE
+- mode 
+  - 0: par phrase de contact - hZC en est le hash
+  - 1: idE est Comptable
+  - 2: idE est délégué de la partition de idI
+  - idp: idE et idI sont co-membres du groupe idg (idI a accès aux membres)
+- hZC : hash du PBKFD de la phrase de contact compléte pour le mode 0
 - ch: { cck, ccP, cleE1C, cleE2C, t1c }
   - ccK: clé C du chat cryptée par la clé K du compte de idI
   - ccP: clé C du chat cryptée par la clé publique de idE
   - cleE1C: clé A de l'avatar E (idI) cryptée par la clé du chat.
   - cleE2C: clé A de l'avatar E (idE) cryptée par la clé du chat.
-  - t1c: mot du sponsor crypté par la clé C
-  - t2c: mot du sponsorisé crypté par la clé C
+  - txt: item crypté par la clé C
 
 Retour:
-- `st` : 
-  0 : E a disparu. rowChat absent
-  1 : chat créé avec l'item txt1. rowChat a le chat I créé avec le texte txt1.
-  2 : le chat était déjà créé: rowChat est le chat I SANS le texte txt1.
 - `rowChat` : row du chat I.
-
 */
 export class NouveauChat extends Operation {
   constructor () { super('NouveauChat') }
 
-  /* mode: 
-  - 0: par phrase de contact - hZC en est le hash
-  - 1: idE est délégué de la partition de idI
-  - idp: idE et idI sont co-membres du groupe idg (idI a accès aux membres)
-  */
   async run (idI, idE, mode, hZC, txt) {
     try {
       const session = stores.session
@@ -361,7 +377,7 @@ export class NouveauChat extends Operation {
         ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
         cleE1C:  await crypter(cc, cleAI), // clé A de l'avatar E (sponsor) cryptée par la clé du chat.
         cleE2C:  await crypter(cc, cleAE), // clé A de l'avatar E (sponsorisé) cryptée par la clé du chat.
-        t1c: await crypter(cc, gzipB(txt)), // mot du sponsor crypté par la clé C
+        txt: await crypter(cc, gzipB(txt)), // mot du sponsor crypté par la clé C
       }
       const ret = await post(this, 'NouveauChat', args)
       let ch

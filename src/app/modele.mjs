@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, inverse, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
-import { ID, Cles, isAppExc, d14, Compteurs, AMJ, nomFichier, compileMcpt, synthesesPartition, FLAGS } from './api.mjs'
+import { ID, Cles, isAppExc, d14, Compteurs, AMJ, nomFichier, compileMcpt, synthesesPartition, FLAGS, R } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { idb } from './db.mjs'
@@ -31,7 +31,9 @@ export class RegCles {
 
   static reset () { RegCles.registre.clear }
 
-  static get (id) { return RegCles.registre.get(ID.long(id, RegCles.ns)) }
+  static get (id) { 
+    return ID.estComptable(id) ? Cles.comptable() : RegCles.registre.get(ID.long(id, RegCles.ns)) 
+  }
 
   static set (cle) {
     const id = Cles.id(cle, RegCles.ns)
@@ -515,7 +517,6 @@ _data_ :
 - `rds` : null en session.
 - `hXC`: hash du PBKFD de la phrase secrète complète (sans son `ns`).
 - `cleKXC` : clé K cryptée par XC (PBKFD de la phrase secrète complète).
-- `cleEK` : clé de l'espace cryptée par la clé K du compte, à la création de l'espace pour le Comptable, à l'acceptation du sponsoring pour les autres comptes.
 
 - `dhvuK` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
 - `qv` : `{ qc, qn, qv, pcc, pcn, pcv, nbj }`

@@ -122,7 +122,7 @@ export const useUiStore = defineStore('ui', {
       PAcreationesp: false,
       PAcheckpoint: false,
       PApageespace: false,
-      CCouvrir: false, // ContactChat
+      CCouvrir: {}, // NouveauChat
       PGcrgr: false, // PageGroupes
       PEnt: false, // PageEspace
       PEedcom: false,
@@ -144,7 +144,7 @@ export const useUiStore = defineStore('ui', {
       if (!pagesF.has(state.page)) return false
       return !state.pagetab || tabF.has(state.pagetab)
     },
-    urgence (state) { return state.page = 'compta' && state.pagetab === 'chats' }
+    urgence (state) { return state.page === 'compta' && state.pagetab === 'chats' }
   },
 
   actions: {

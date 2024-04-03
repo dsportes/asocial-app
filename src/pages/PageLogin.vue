@@ -120,9 +120,11 @@ export default {
     async crypterphrase (pc) {
       this.pc = pc
       this.org = pc.org
+      const session = stores.session
       try {
         /* Recherche sponsoring *******/
         RegCles.reset()
+        const mode = session.mode
         stores.reset(true)
         const res = await new GetSponsoring().run(this.org, this.pc.hps1)
         if (!res || !res.rowSponsoring) {
@@ -132,7 +134,7 @@ export default {
         }
         try {
           const row = res.rowSponsoring
-          const session = stores.session
+          session.setMode(mode)
           session.setOrg(this.org)
           session.setNs(ID.ns(row.id))
           this.sp = new Sponsoring()

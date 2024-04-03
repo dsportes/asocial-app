@@ -105,7 +105,7 @@
 </template>
 <script>
 
-import { toRef } from 'vue'
+// import { toRef } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
@@ -130,8 +130,8 @@ export default {
   components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp },
 
   computed: {
-    nomE () { return this.session.getCV(chat.idE).nom },
-    nomI () { return this.session.getCV(chat.idI).nom },
+    nomE () { return this.session.getCV(this.chat.idE).nom },
+    nomI () { return this.session.getCV(this.chat.id).nom },
     estDel () { return ID.estComptable(this.idE) || this.session.estDelegue }
   },
 

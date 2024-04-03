@@ -140,7 +140,7 @@ export async function crypterRSA (clepub, u8) {
   } catch (e) {
     const x1 = JSON.stringify(u8.slice(0, 4))
     const x2 = JSON.stringify(k.slice(0, 4))
-    throw new AppExc(E_BRO, 21, [x1, x2, e.toString()], e.stack)
+    throw new AppExc(E_BRO, 24, [x1, x2, e.toString()], e.stack)
   }
 }
 
@@ -156,7 +156,7 @@ export async function decrypterRSA (clepriv, u8) {
   } catch (e) {
     const x1 = JSON.stringify(u8.slice(0, 4))
     const x2 = JSON.stringify(k.slice(0, 4))
-    throw new AppExc(E_BRO, 20, [x1, x2, e.toString()], e.stack)
+    throw new AppExc(E_BRO, 23, [x1, x2, e.toString()], e.stack)
   }
 }
 

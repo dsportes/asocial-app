@@ -5,15 +5,15 @@
     <div class="q-mt-sm" v-if="avatar.pc">
       <div>
         <span class="titre-md text-italic">{{$t('FApc')}}</span>
-        <q-btn v-if="edit" class="q-ml-lg" dense flat color="primary" size="sm"
-          :label="$t('FApcms')" @click="editerpc"/>
+        <btn-cond cond="cEdit" class="q-ml-lg" flat
+          :label="$t('FApcms')" @ok="editerpc"/>
         </div>
       <div class="q-ml-lg font-mono fs-md text-bold">[{{avatar.pc}}]</div>
     </div>
     <div v-else>
       <span class="titre-md text-italic">{{$t('FAnpc')}}</span>
-      <q-btn v-if="edit && !ID.estComptable(idav)" class="q-ml-sm" dense flat color="primary" size="sm"
-        :label="$t('FAdeclpc')" @click="editerpc"/>
+      <btn-cond v-if="!ID.estComptable(idav)" cond="cEdit" class="q-ml-lg" flat
+        :label="$t('FApcms')" @ok="editerpc"/>
     </div>
 
     <!-- Dialogue d'édition de la phrase de contact -->
@@ -29,8 +29,8 @@
             declaration :orgext="session.org"/>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn v-if="avatar.pc" :label="$t('FAsup')" @click="supprPC"
-            flat color="warning" dense size="md" padding="xs" />
+          <btn-cond v-if="avatar.pc" :label="$t('FAsup')" @ok="supprPC"
+            flat color="warning" cond="cEdit"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -42,19 +42,21 @@
 import { ref } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { GetAvatarPC, ChangementPC, ExistePhrase } from '../app/operations.mjs'
+import { GetAvatarPC, ChangementPC } from '../app/operations4.mjs'
+import { ExistePhrase } from '../app/synchro.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import PhraseContact from './PhraseContact.vue'
+import BtnCond from './BtnCond.vue' 
 import { afficherDiag, dkli, styp } from '../app/util.mjs'
 import { ID, d14 } from '../app/api.mjs'
 
 export default {
   name: 'ApercuAvatar',
 
-  props: { idav: Number, idx: Number, edit: Boolean },
+  props: { idav: Number, idx: Number },
 
-  components: { PhraseContact, BoutonHelp, ApercuGenx },
+  components: { PhraseContact, BoutonHelp, ApercuGenx, BtnCond },
 
   computed: {
     avatar () { return this.aSt.getElt(this.idav).avatar}
@@ -68,7 +70,6 @@ export default {
 
   methods: {
     async editerpc () {
-      if (!await this.session.edit()) return
       this.session.setAvatarId(this.idav)
       this.ui.oD('AAeditionpc', this.idc)
     },
@@ -80,25 +81,27 @@ export default {
         await afficherDiag(this.$t('existe'))
         return
       }
-      const { id, na } = await new GetAvatarPC().run(pc)
+      const id = await new GetAvatarPC().run(pc)
       if (id) {
-        if (id === this.idav && na) {
+        if (id === this.idav) {
           afficherDiag(this.$t('FAerr1')) // déjà celle de l'avatar
           return
         }
-        if (id !== this.idav && na) {
+        if (id === -1) {
+          afficherDiag(this.$t('FAerr3')) // trop proche d'une déjà utilisée par un autre avatar
+          return
+        }
+        if (id !== this.idav) {
           afficherDiag(this.$t('FAerr2')) // déjà exactement utilisée par un autre avatar
           return
         }
-        afficherDiag(this.$t('FAerr3')) // trop proche d'une déjà utilisée par un autre avatar
-        return
       }
-      await new ChangementPC().run(this.avatar.na, pc)
+      await new ChangementPC().run(this.avatar.id, pc)
       this.ui.fD()
     },
 
     async supprPC () {
-      await new ChangementPC().run(this.avatar.na)
+      await new ChangementPC().run(this.avatar.id)
       this.ui.fD()
     }
   },

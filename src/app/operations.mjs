@@ -29,31 +29,6 @@ export class McMemo extends Operation {
   }
 }
 
-/* Test d\'existence d\'une phrase de connexion / contact / sponsoring ******
-args.hps1 : ns + hash de la phrase de contact / de connexion
-args.t :
-  - 1 : phrase de connexion(hps1 de compta)
-  - 2 : phrase de sponsoring (ids)
-  - 3 : phrase de contact (hpc d'avatar)
-Retour:
-- existe : true si le hash de la phrase existe
-*/
-export class ExistePhrase extends Operation {
-  constructor () { super('ExistePhrase') }
-
-  async run (hps1, t) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, hps1: hps1, t }
-      const ret = this.tr(await post(this, 'ExistePhrase' + (t === 1 ? '1' : ''), args))
-      const ex = ret.existe || false
-      return this.finOK(ex)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* Changement des mots clés d\'un compte  ************************
 */
 export class MotsclesCompte extends Operation {
@@ -147,31 +122,6 @@ export class ChangementPS extends Operation {
       this.tr(await post(this, 'ChangementPS', args))
       session.chgps(ps)
       if (session.synchro) commitRows(new IDBbuffer(), true)
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/** Changement de la phrase de contact d\'un avatar *************************
-args.token: éléments d'authentification du compte.
-args.id: de l'avatar
-args.hpc: hash de la phrase de contact (SUPPRESSION si null)
-args.napc: na de l'avatar crypté par le PBKFD de la phrase
-args.pck: phrase de contact cryptée par la clé K du compte
-*/
-export class ChangementPC extends Operation {
-  constructor () { super('ChangementPC') }
-
-  async run (na, p) {
-    try {
-      const session = stores.session
-      const pck = p ? await crypter(session.clek, p.phrase) : null
-      const napc = p ? await crypter(p.pcb, new Uint8Array(encode([na.nom, na.rnd]))) : null
-      const hpc = p ? ((session.ns * d14) + p.hps1) : 0
-      const args = { token: session.authToken, id: na.id, hpc, napc, pck }
-      this.tr(await post(this, 'ChangementPC', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)

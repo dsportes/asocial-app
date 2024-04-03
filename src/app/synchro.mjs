@@ -834,7 +834,8 @@ export class SyncSp extends OperationS {
       // set compteId, avatarId, ns, clek, nomBase
       await session.setIdClek(id, null, clek) 
       RegCles.set(cleA)
-
+      
+      args.token = session.authToken
       const ret = await post(this, 'SyncSp', args)
       const ds = DataSync.deserial(ret.dataSync)
   
@@ -1112,7 +1113,7 @@ export class GetSponsoring extends Operation {
   }
 }
 
-/** Get Sponsoring ****************************************************
+/** GetCompta ****************************************************
 args.token: éléments d'authentification du compte.
 args.id : id du compte
 Retour:

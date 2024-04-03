@@ -285,8 +285,6 @@ export default {
   EX4011: 'Crypter : buffer incorrect (pas Uint8Array)',
   EX4012: 'Décrypter : cle incorrecte (pas Uint8Array ou longueur != 32)',
   EX4013: 'Décrypter : buffer incorrect (pas Uint8Array)',
-  EX4020: 'Echec de decryption RSA. Buffer: {0} - Clé: {1} - Détail: {2}',
-  EX4021: 'Echec d\'encryption RSA. Buffer: {0} - Clé: {1} - Détail: {2}',
   EX4014: 'Crypter RSA : cle publique incorrecte (pas Uint8Array)',
   EX4015: 'Crypter RSA : buffer incorrect (pas Uint8Array)',
   EX4016: 'Décrypter RSA : cle publique incorrecte (pas Uint8Array)',
@@ -295,6 +293,8 @@ export default {
   EX4020: 'Erreur de téléchargement d\'un fichier',
   EX4021: 'Bug probable de \'opération "{0}" après plusieurs tentatives aynat échoué.',
   EX4022: 'Fichier brut impossible à décrypter: {0}',
+  EX4023: 'Echec de decryption RSA. Buffer: {0} - Clé: {1} - Détail: {2}',
+  EX4024: 'Echec d\'encryption RSA. Buffer: {0} - Clé: {1} - Détail: {2}',
 
   // F_BRO = 5000 // Erreur fonctionnelle trappée sur le browser
   EX5003: 'Avatar déjà cité dans le groupe, ne peut pas être inscrit à nouveau',
@@ -395,6 +395,11 @@ export default {
   EX8218: 'Seuls le Comptable ou un Délégué peut consulter la comptabilité d\'un autre compte que le leur.',
   EX8219: 'Un délégué ne peut consulter la comptabilité que des comptes de la partition dont il est délégué.',
   EX8220: 'Un compte "A" ne peut pas accéder aux partitions',
+  EX8221: '(BUG) Hash de la phrase de contact incorrect',
+  EX8222: '(BUG) L\'interlocuteur du chat n\'est pas délégué de la partition',
+  EX8223: '(BUG) L\'interlocuteur du chat n\'est pas membre du groupe cité',
+  EX8224: '(BUG) L\'avatar n\'est pas un avatar du compte.',
+  EX8225: '(BUG) L\'interlocuteur du chat n\'est pas le Comptable',
 
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
@@ -662,6 +667,8 @@ export default {
   OP_MuterCompte: 'Mutation dy type d\'un compte',
 
   OP_GetPub: 'Obtention d\'une clé publique',
+  OP_GetAvatarPC: 'Récupération d\'un avatar par sa phrase de contact',
+  OP_NouveauChat: 'Création d\'un nouveau chat',
 
   OP_TestRSA: 'Test encryption RSA',
   OP_CrypterRaw: 'Test d\'encryptage serveur d\'un buffer long',
@@ -669,6 +676,7 @@ export default {
   OP_DownloadStatC: 'Téléchargement d\'un fichier statistique comptable mensuel',
   OP_DownloadStatC2: 'Téléchargement d\'un fichier statistique comptable mensuel déjà calculé',
   OP_GetPartition: 'Obtention d\'une partition',
+  OP_GetCompta: 'Obtention dùne comptabilité',
 
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
@@ -952,6 +960,7 @@ export default {
   APtit: 'Détail du contact {0}',
   APtitav: 'Détail de l\'avatar {0}',
 
+  CHnxco: 'Il n\'existe pas de chat avec le Comptable, mais il est possible d\'en créer un maintenant.',
   CHnxdel: '[{0}] est délégué de la partition: il n\'existe pas de chat avec lui, mais il peut être crée maintenant.',
   CHnxmb: '[{0}] est membre du groupe [{1}]: il n\'existe pas de chat avec lui, mais il peut être crée maintenant.',
   CHnxpc: 'Il n\'existe pas de chat avec [{0}]: pour en créer un maintenant, il faut connaître SA PHRASE DE CONTACT.',
@@ -1258,7 +1267,7 @@ export default {
   EMDph: 'texte ici ...',
   
   // ContactChat
-  CChtit: 'Joindre un avatar par sa phrase de contact',
+  CChtit: 'Créer un chat',
   CChnopc: 'Aucun avatar n\'a enregistré cette phrase de contact',
 
   // PanelContacts
@@ -1687,6 +1696,7 @@ export default {
 
   CPTkwc: 'Mots clés du compte',
   CPTedq: 'Quotas du compte',
+  CPTdel: 'Délégué de la partition [{0}]',
   CPTnvav: 'Nouvel avatar',
   CPTnvav2: 'Création d\'un nouvel avatar',
   CPTchq: 'Quotas attribués',

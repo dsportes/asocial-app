@@ -5,7 +5,7 @@
       
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" 
-        :alire="session.alire && session.ntfIco" 
+        :alire="session.alire && (session.ntfIco !== 0)" 
         :niv="session.ntfIco" 
         @click="clickNotif"/>
       <!-- Test du look des icones de notification

@@ -23,7 +23,7 @@
       {{$t('compteA')}}
     </span>
     <span v-if="estDelegue" class="q-pa-xs text-warning bg-yellow-3 text-bold">
-      {{$t('NPdel', [ID.court(session.partition.id)])}}
+      {{$t('CPTdel', [ID.court(session.compte.idp)])}}
     </span>
     </div>
 
@@ -106,7 +106,8 @@
 <script>
 
 import stores from '../stores/stores.mjs'
-import { SetQuotas, ChangementPS, NouvelAvatar, ExistePhrase } from '../app/operations.mjs'
+import { SetQuotas, ChangementPS, NouvelAvatar } from '../app/operations.mjs'
+import { ExistePhrase } from '../app/synchro.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'
 import NomAvatar from '../components/NomAvatar.vue'
@@ -167,7 +168,7 @@ export default {
       this.ps = ps 
     },
 
-    async changerps () {
+    async changerps () { // TODO
       this.ui.fD()
       const hps1 = (this.session.ns * d14) + this.ps.hps1
       const ret = await new ExistePhrase().run(hps1, 1)
