@@ -519,7 +519,7 @@ export class OperationS extends Operation {
       const buf = new IDBbuffer()
       await this.setCeCi(nvds, ret, sb, buf)
 
-      if (cnx && session.synchro) { // Premier retour de Sync a rempli: session. compteId, clek, nomBase
+      if (cnx && session.synchro && !nbIter) { // Premier retour de Sync a rempli: session. compteId, clek, nomBase
         await idb.open()
         const blOK = await idb.checkAge()
         await idb.storeBoot()
@@ -682,7 +682,8 @@ export class ConnexionAvion extends OperationS {
       { // Phase 1 : chargement depuis IDB des espaces / comptes / comptis
         const sb = new SB()
         const [res, rce, rci] = await idb.getECC()
-        sb.setEs(await compile(res))
+        const esp = await compile(res)
+        sb.setEs(esp)
         sb.setCe(await compile(rce))
         sb.setCi(await compile(rci))
         sb.store()

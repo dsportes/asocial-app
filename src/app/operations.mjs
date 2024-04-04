@@ -206,36 +206,6 @@ export class AjoutSponsoring extends Operation {
   }
 }
 
-/* Mise en état "passif" d\'un chat
-Nombre de chat - 1, items vidé
-POST:
-- `token` : éléments d'authentification du compte.
-- `id ids` : id du chat
-
-Assertions sur le row `Chats` et la `Versions` de l'avatar id.
-*/
-export class PassifChat extends Operation {
-  constructor () { super('PassifChat') }
-
-  async run (chat) {
-    try {
-      const session = stores.session
-      const args = { 
-        token: session.authToken, 
-        idI: chat.naI.id, 
-        idsI: await Chat.getIds(chat.naI, chat.naE),
-        idE: chat.naE.id,
-        idsE: await Chat.getIds(chat.naE, chat.naI)
-      }
-      const ret = this.tr(await post(this, 'PassifChat', args))
-      const disp = ret.disp
-      return this.finOK(disp)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_MuterCompte: 'Mutation dy type d\'un compte'
 POST:
 - `token` : éléments d'authentification du compte.
@@ -1938,31 +1908,6 @@ export class RafraichirDons extends Operation {
         if (!ret2.KO) break
       }
       return this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_EstAutonome: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome'
-indique si l'avatar donné en argument est 
-l'avatar principal d'un compte autonome
-POST:
-- `token` : jeton d'authentification du compte de **l'administrateur**
-- `id` : id de l'avatar
-
-Retour: 
-- `estA`: true si avatar principal d'un compte autonome
-*/
-export class EstAutonome extends Operation {
-  constructor () { super('EstAutonome') }
-
-  async run (id) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, id }
-      const ret = this.tr(await post(this, 'EstAutonome', args))
-      return this.finOK(ret.st)
     } catch (e) {
       await this.finKO(e)
     }

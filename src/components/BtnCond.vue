@@ -7,7 +7,8 @@
     dense
     :color="!diag ? (color || 'primary') : 'accent'"
     :size="size || 'md'"
-    :label="label || $t('ok')" 
+    :label="label || $t('ok')"
+    :round="round"
     @click="ok">
     <q-tooltip v-if="tp || diag" class="bg-white text-primary">{{diag || tp}}</q-tooltip>
   </q-btn>
@@ -29,7 +30,8 @@ export default ({
     ctx: Object, // defaut null. Retransmis sur l'événement ok
     cond: String, // code condition dans stores.session
     disable: Boolean,
-    flat: Boolean
+    flat: Boolean,
+    round: Boolean
   },
 
   emits: ['ok'],

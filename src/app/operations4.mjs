@@ -213,6 +213,33 @@ export class MajChat extends Operation {
   }
 }
 
+/* Mise en état "passif" d\'un chat
+Nombre de chat - 1, items vidé
+- token : éléments d'authentification du compte.
+- id ids : id du chat
+Retour
+- disp: true si E a disparu
+*/
+export class PassifChat extends Operation {
+  constructor () { super('PassifChat') }
+
+  async run (chat) {
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        id: chat.id, 
+        ids: chat.ids
+      }
+      const ret = this.tr(await post(this, 'PassifChat', args))
+      const disp = ret.disp
+      return this.finOK(disp)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* OP_SetEspaceT: 'Attribution d\'un profil à un espace' ******************
 args.token donne les éléments d'authentification de l'administrateur.
 args.ns
@@ -387,6 +414,32 @@ export class NouveauChat extends Operation {
         pSt.setPCh(ch.idE, ch.id)
       }
       this.finOK(ch)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_EstAutonome: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome'
+indique si l'avatar donné en argument est 
+l'avatar principal d'un compte autonome
+- token : jeton d'authentification du compte de **l'administrateur**
+- id : id de l'avatar
+Retour: 
+- `st`: 
+  - 0 : pas avatar principal 
+  - 1 : avatar principal d'un compte A
+  - 2 : avatar principal d'un compte O
+*/
+export class EstAutonome extends Operation {
+  constructor () { super('EstAutonome') }
+
+  async run (id) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id }
+      const ret = await post(this, 'EstAutonome', args)
+      return this.finOK(ret.st)
     } catch (e) {
       await this.finKO(e)
     }

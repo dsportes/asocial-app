@@ -194,19 +194,19 @@ class IDB {
       {
         const rec = await this.db.singletons.get(IDB.snoms.espaces)
         if (rec) { 
-          rce = await decrypter(session.clek, rec.data)
+          res = decode(await decrypter(session.clek, rec.data))
         }
       }
       {
         const rec = await this.db.singletons.get(IDB.snoms.comptes)
         if (rec) { 
-          rce = await decrypter(session.clek, rec.data)
+          rce = decode(await decrypter(session.clek, rec.data))
         }
       }
       {
         const rec = await this.db.singletons.get(IDB.snoms.comptis)
         if (rec) { 
-          rci = await decrypter(session.clek, rec.data)
+          rci = decode(await decrypter(session.clek, rec.data))
         }
       }
       return [res, rce, rci]
@@ -537,7 +537,7 @@ export class IDBbuffer {
 
     if (dataSync) arg.singl.push({ 
       n: IDB.snoms.datasync, 
-      data: await crypter(clek, new Uint8Array(dataSync.serial))
+      data: await crypter(clek, new Uint8Array(dataSync.serial()))
     })
 
     for(const row of this.lmaj) {

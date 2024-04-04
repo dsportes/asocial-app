@@ -1,4 +1,4 @@
-<template>
+<template> <!-- BtnCond incorporés -->
 <q-dialog v-model="ui.d.ACouvrir[idc]" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated>
@@ -10,13 +10,13 @@
       <apercu-genx class="bordb" :id="chat.idE" :idx="0" />
       <div :class="sty() + 'q-pa-xs row justify-around items-center'">
         <div class="row q-gutter-xs items-center">
-          <q-btn :label="$t('CHadd2')" @click="editer(false)" 
-            padding="xs" color="primary" icon="add" dense size="md"/>
-          <q-btn v-if="session.estA" @click="editer(true)" 
-            round padding="xs" color="secondary" icon="savings" dense size="md"/>
+          <btn-cond :label="$t('CHadd2')" icon="add" @ok="editer(false)"
+            :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+          <btn-cond v-if="session.estA" :label="$t('CHadd2')" icon="add" color="secondary"
+            @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
         </div>
-        <q-btn v-if="chat && chat.stI" :label="$t('CHrac')" @click="raccrocher"
-          padding="xs" color="primary" icon="phone_disabled" dense size="md"/>
+        <btn-cond v-if="chat && chat.stI" :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
+          :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
         <div v-if="chat && !chat.stI" class="text-warning text-bold titre-md text-italic">
           {{$t('CHraccroche')}}
         </div>
@@ -35,8 +35,9 @@
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
                 <span>{{it.a===0 ? $t('moi') : nomE}}</span>
-                <q-btn v-if="it.a===0 && !it.dhx" size="sm" padding="none" round
-                  icon="clear" color="warning" @click="effacer(it.dh)"/>
+                <btn-cond v-if="it.a===0 && !it.dhx" size="sm" icon="clear" color="secondary"
+                  @ok="effacer(it.dh)" 
+                  :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
               </div>
             </template>
           </q-chat-message>
@@ -110,14 +111,14 @@
 import stores from '../stores/stores.mjs'
 
 import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
-import { PassifChat, EstAutonome } from '../app/operations.mjs'
-import { MajChat } from '../app/operations4.mjs'
+import { MajChat, EstAutonome, PassifChat } from '../app/operations4.mjs'
 import { ID } from '../app/api.mjs'
 
 import SdBlanc from '../components/SdBlanc.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BtnCond from '../components/BtnCond.vue'
 
 export default {
   name: 'ApercuChat',
@@ -127,7 +128,7 @@ export default {
     idc: Number
   },
 
-  components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp },
+  components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp, BtnCond },
 
   computed: {
     nomE () { return this.session.getCV(this.chat.idE).nom },
@@ -144,13 +145,7 @@ export default {
 
   methods: {
     async effacer (dh) {
-      if (this.estDel) {
-        if (!await this.session.editUrgence()) return
-      } else {
-        if (!await this.session.edit()) return
-      }
       this.dheff = dh
-      // this.txt = this.chat ? this.chat.txt : ''
       this.ui.oD('ACconfirmeff')
     },
 
@@ -182,11 +177,6 @@ export default {
     },
 
     async editer (avecDon) {
-      if (this.estDel) {
-        if (!await this.session.editUrgence()) return
-      } else {
-        if (!await this.session.edit()) return
-      }
       if (avecDon) {
         this.dconf = false
         const st = await new EstAutonome().run(this.chat.naE.id)

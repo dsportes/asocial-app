@@ -174,9 +174,10 @@ import MicroChat from '../components/MicroChat.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
-import { MuterCompte, GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese, EstAutonome } from '../app/operations.mjs'
+import { MuterCompte, GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese } from '../app/operations.mjs'
 import { getNg, getCle, Tribu } from '../app/modele.mjs'
 import { crypter, crypterRSA } from '../app/webcrypto.mjs'
+import { EstAutonome } from '../app/operations4.mjs'
 
 export default {
   name: 'BarrePeople',
