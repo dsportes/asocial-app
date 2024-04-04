@@ -74,6 +74,9 @@
     </q-card>
   </div>
 
+  <q-page-sticky position="top-left" :offset="[3, 3]">
+    <q-btn size="md" color="primary" icon="refresh" padding="none" @click="reload()"/>
+  </q-page-sticky>
 </q-page>
 </template>
 
@@ -142,15 +145,17 @@ export default {
   setup () {
     const session = stores.session
 
-    onMounted(async () => {
+    async function reload () {
       await new GetCompta().run()
       if (!session.estA) await new GetPartition().run()
-    })
+    }
+
+    onMounted(async () => { await reload() })
 
     return {
       session, 
       ui: stores.ui, 
-      dkli, UNITEN, UNITEV, edvol
+      dkli, UNITEN, UNITEV, edvol, reload
     }
   }
 }
@@ -158,10 +163,8 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.mr1
-  margin-right: 24px
-.bord
-  border: 3px solid red
-  border-radius: 10px
-  background-color: rgb(239, 251, 148)
+.rld
+  position: absolute
+  top: -24px
+  left: 0
 </style>

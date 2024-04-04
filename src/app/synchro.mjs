@@ -1,7 +1,7 @@
 import { decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme } from './util.mjs'
+import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme, sleep } from './util.mjs'
 import { idb, IDBbuffer } from './db.mjs'
 import { DataSync, appexc, ID, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
@@ -665,6 +665,8 @@ export class ConnexionAvion extends OperationS {
 
   async run() {
     try {
+      stores.ui.setPage('session')
+
       // idb: ouverte - session.clek compteId définis
       this.auj = AMJ.amjUtc()
       this.dh = 0
@@ -696,6 +698,7 @@ export class ConnexionAvion extends OperationS {
       await idb.FLfromIDB()
 
       console.log('Connexion compte : ' + session.compteId)
+      await sleep(1000)
       session.setStatus(2)
       stores.ui.setPage('accueil')
       this.finOK()
@@ -714,12 +717,14 @@ export class ConnexionSynchroIncognito extends OperationS {
 
   async run() {
     try {
+      stores.ui.setPage('session')
       const session = stores.session
       await this.syncStd(null, [])
 
       // Chargement des descriptifs des fichiers du presse-papier
       if (session.synchro) await idb.FLfromIDB()
 
+      await sleep(1000)
       session.setStatus(2)
       syncQueue.reveil()
 

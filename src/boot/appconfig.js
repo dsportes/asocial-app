@@ -38,24 +38,13 @@ export default boot(async ({ app /* Vue */ }) => {
   
   cfg.search = window.location.search.replace('?', '')
 
-  cfg.host = window.location.host
-
-  if (process.env.OPSRV) {
-    cfg.opsrv = process.env.OPSRV
-    console.log('OPSRV depuis ENV: ' + cfg.opsrv)
-  } else {
-    cfg.opsrv = 'https://' + cfg.host + '/op/'
-    console.log('OPSRV depuis location.host: ' + cfg.opsrv)
-  }
+  const srv = process.env.SRV ? process.env.SRV : window.location.host
+  cfg.opsrv = 'https://' + srv + '/op/'
+  console.log('OPSRV: ' + cfg.opsrv)
 
   if (config.hasWS) {
-    if (process.env.WSSRV) {
-      cfg.wssrv = process.env.WSSRV
-      console.log('OPSRV depuis ENV: ' + cfg.wssrv)
-    } else {
-      cfg.wssrv = 'wss://' + cfg.host + '/ws/'
-      console.log('WSSRV depuis location.host: ' + cfg.wssrv)
-    }  
+    cfg.wssrv = 'wss://' + srv + '/ws/'
+    console.log('WSSRV: ' + cfg.wssrv)
   }
 
   console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))

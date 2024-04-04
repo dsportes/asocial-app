@@ -74,7 +74,8 @@
         <q-tooltip>{{$t('MLAfiltre')}}</q-tooltip>
       </q-btn>
 
-      <q-page-sticky v-if="session.signalOp" position="top" :offset="[0, -25]">
+      <q-page-sticky v-if="session.signalOp" position="top" :offset="offset"
+        style="z-index:1000!important">
         <q-btn round color="warning" icon="wifi" padding="0"/>
       </q-page-sticky>
 
@@ -91,7 +92,7 @@
       </q-tabs>
       <btn-cond v-if="ui.pagetab==='notif' && session.alire" class="col-auto q-px-sm" 
         color="warning" icon="check" :label="$t('jailu')" 
-        cond="cEdit" v-on:ok="jailu"/>
+        cond="cEdit" @ok="jailu"/>
     </q-toolbar>
 
     <q-toolbar v-if="ui.page === 'groupe'" inset 
@@ -502,6 +503,8 @@ export default {
    },
 
   computed: {
+    offset () { return this.ui.pagetab ? [0, -55] : [0, -25]},
+
     lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
 
     aHome () { return (this.session.status === 2 && this.ui.page !== 'accueil')

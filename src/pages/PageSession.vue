@@ -1,18 +1,6 @@
 <template>
-  <q-page class="column items-center">
-    <q-card class="spmd">
-      <div v-if="session.ok && (nbj < config.alertedlv || dlv === 0)"
-        class="column justify-center q-pa-xs q-my-sm text-italic text-bold bg-yellow-5 text-warning">
-        <div v-if="dlv > 0 && nbj < config.alertedlv" class="titre-lg">{{$t('MLAcptz', nbj, {count: nbj})}}</div>
-        <div v-if="dlv === 0" class="titre-lg">{{$t('MLAcptz', nbj, {count: nbj})}}</div>
-        <div v-if="dlv > 0 && nbj < config.alertedlv" class="titre-md">{{$t('MLAcptz' + (aSt.compta.estA ? 'A' : '0'))}}</div>
-      </div>
-
-      <div v-if="session.ok && dlv > 0" class="titre-md q-my-sm">
-        <span>{{$t('MLAcptzd', [AMJ.editDeAmj(dlv)])}}</span>
-        <span class="titre-sm q-ml-sm">{{$t('MLAnbj', nbj, {count: nbj})}}</span>
-      </div>
-
+  <q-page class="spmd">
+    <div v-if="session.ok" class="q-mb-md">
       <div class="text-italic titre-lg">{{$t('ISst', [st, mo])}}</div>
 
       <div class="titre-md text-italic q-mt-md">{{$t('ISconso', [mon(couts[4], 4)])}}</div>
@@ -36,44 +24,17 @@
         <div class="col-4 text-center font-mono">{{edvol(session.consocumul.vm)}}</div>
         <div class="col-4 text-center font-mono">{{mon(couts[3], 4)}}</div>
       </div>
+    </div>
 
-      <div class="titre-md q-mt-md">{{$t('ISdcs')}}</div>
-      <div v-if="session.ok && dsync">
-        <div class='q-ml-md row'>
-          <div class='col-7 text-right text-italic q-pr-md'>{{$t('ISsy1')}}</div>
-          <div class='col-5 text-bold'>{{dhcool(dsync.dhdebutp)}}</div>
-        </div>
-        <div class='q-ml-md row'>
-          <div class='col-7 text-right text-italic q-pr-md'>{{$t('ISsy2')}}</div>
-          <div class='col-5 text-bold'>{{dhcool(dsync.dhfinp)}}</div>
-        </div>
-        <div class='q-ml-md row'>
-          <div class='col-7 text-right text-italic q-pr-md'>{{$t('ISsy3')}}</div>
-          <div class='col-5 text-bold'>{{dhcool(dsync.dhdebut)}}</div>
-        </div>
-        <div class='q-ml-md row'>
-          <div class='col-7 text-right text-italic q-pr-md'>{{$t('ISsy4')}}</div>
-          <div class='col-5 text-bold'>{{dhcool(dsync.dhsync)}}</div>
-        </div>
-        <div class='q-ml-md row'>
-          <div class='col-7 text-right text-italic q-pr-md'>{{$t('ISsy5')}}</div>
-          <div class='col-5 text-bold'>{{dhcool(dsync.dhpong)}}</div>
-        </div>
-      </div>
-      <div v-else class="q-ml-md titre-md text-italic">{{$t('ISnc')}}</div>
-    </q-card>
-
-    <q-card class="spmd q-my-sm">
-    <q-expansion-item v-if="session.status" group="etc" class="col" switch-toggle-side default-opened
-      header-class="expansion-header-class-1 titre-md bg-secondary text-white" :label="$t('SYtit')">
-      <q-card-section>
-        <rapport-synchro/>
-      </q-card-section>
+    <q-expansion-item v-if="session.status" group="etc" class="full-width" switch-toggle-side default-opened
+      header-class="expansion-header-class-1 titre-md bg-primary text-white" 
+      :label="$t('RStit', [nc])">
+      <rapport-synchro class="q-ma-sm"/>
     </q-expansion-item>
     <q-separator/>
 
-    <q-expansion-item group="etc" class="col" switch-toggle-side :disable="!fSt.queue.length"
-      header-class="expansion-header-class-1 titre-md bg-secondary text-white">
+    <q-expansion-item group="etc" class="full-width" switch-toggle-side :disable="!fSt.queue.length"
+      header-class="expansion-header-class-1 titre-md bg-primary text-white">
       <template v-slot:header>
         <q-item-section>
           <div class="row items-center">
@@ -97,8 +58,8 @@
     </q-expansion-item>
     <q-separator/>
 
-    <q-expansion-item group="etc" class="col" switch-toggle-side :disable="!fSt.echecs.size"
-      header-class="expansion-header-class-1 titre-md bg-secondary text-white">
+    <q-expansion-item group="etc" class="full-width" switch-toggle-side :disable="!fSt.echecs.size"
+      header-class="expansion-header-class-1 titre-md bg-primary text-white">
       <template v-slot:header>
         <q-item-section>
           <div class="row items-center">
@@ -137,7 +98,6 @@
         <q-separator class="q-my-sm"/>
       </q-card-section>
     </q-expansion-item>
-    </q-card>
 
   </q-page>
 </template>
@@ -149,38 +109,20 @@ import stores from '../stores/stores.mjs'
 import { dhcool, edvol, mon } from '../app/util.mjs'
 import { Tarif, AMJ } from '../app/api.mjs'
 
-const cbl = ['green-5', 'warning', 'warning', 'negative', 'negative']
-
-/*
-- dhdebutp : dh de début de la dernière session sync terminée
-- dhfinp : dh de fin de la dernière session sync terminée
-- dhdebut: dh de début de la session sync en cours
-- dhsync: dh du dernier traitement de synchronisation
-- dhpong: dh du dernier pong reçu
-*/
-
 export default {
   name: 'PageSession',
 
   components: { RapportSynchro },
 
   computed: {
+    nc () { return this.session.getCV(this.session.compteId).nom },
     couts () { return Tarif.evalConso(this.session.consocumul) },
     st () { 
       const n = this.session.status < 2 ? this.session.status : 2
       return this.$t('ISst' + n)
     },
     mo () { return this.session.synchro ? this.$t('sync') : 
-      (this.session.avion ? this.$t('avion') : 'incognito')},
-    cb () { return ' text-' + cbl[this.session.blocage]},
-    dsync () { return this.session.sessionSync },
-    dlv () {
-      const dlv = this.aSt.compta.dlv
-      return dlv < 0 ? 0 : AMJ.dlv(dlv)
-    },
-    nbj () {
-      return AMJ.diff(this.dlv, this.session.auj)
-    }
+      (this.session.avion ? this.$t('avion') : 'incognito')}
   },
 
   methods: {

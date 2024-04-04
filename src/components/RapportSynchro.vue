@@ -1,32 +1,64 @@
 <template>
-  <q-card class="q-pa-xs fs-md spmd">
-    <q-toolbar class="bg-secondary text-white">
-      <q-toolbar-title class="titre-md q-ml-sm">{{$t('SYtit')}}</q-toolbar-title>
-      <q-btn v-if="close" dense size="md" color="warning" icon="close" 
-        @click="ui.rapportSynchroMenu = false"/>
-    </q-toolbar>
-    <q-card-section style="q-mt-md max-height:70vh;overflow:auto">
-      <div v-for="item in syncitem.liste" :key="item.k" class="row no-wrap items-start">
-        <q-icon class="col-1" size="sm" :name="item.st ? 'done' : 'arrow_right'"/>
-        <div class="col-11">{{$t(item.label, item.args)}}</div>
+  <div class="q-pa-xs fs-md full-width">
+    <div class="full-width row items-start titre-md text-italic bg-secondary text-white text-bold">
+      <div class="col-4">{{$t('RScav')}}</div>
+      <div class="col-2 text-center">{{$t('RScno')}}</div>
+      <div class="col-2 text-center">{{$t('RScch')}}</div>
+      <div class="col-2 text-center">{{$t('RScsp')}}</div>
+      <div class="col-2 text-center">{{$t('RSctk')}}</div>
+    </div>
+    <div style="width:100%;max-height:20vh;overflow:scroll-y">
+      <div v-for="([id, item], idx) in aSt.map" :key="id" 
+        :class="'row items-start titre-md q-py-xs' + dkli(idx)">
+        <div class="col-4">{{nom(id)}}</div>
+        <div class="col-2 font-mono text-center">{{item.notes.size}}</div>
+        <div class="col-2 font-mono text-center">{{item.chats.size}}</div>
+        <div class="col-2 font-mono text-center">{{item.sponsorings.size}}</div>
+        <div class="col-2 font-mono text-center">{{item.tickets.size}}</div>
       </div>
-    </q-card-section>
-  </q-card>
+    </div>
+    <div class="full-width row items-start titre-md text-italic bg-secondary text-white text-bold">
+      <div class="col-4">{{$t('RScgr')}}</div>
+      <div class="col-2 text-center">{{$t('RScno')}}</div>
+      <div class="col-2 text-center">{{$t('RScmb')}}</div>
+      <div class="col-2 text-center">{{$t('RScbl')}}</div>
+      <div class="col-2 text-center">{{$t('RScbl')}}</div>
+    </div>
+    <div style="width:100%;max-height:20vh;overflow:scroll-y">
+      <div v-for="([id, item], idx) in gSt.map" :key="id" 
+        :class="'row items-start titre-md q-py-xs' + dkli(idx)">
+        <div class="col-4">{{nom(id)}}</div>
+        <div class="col-2 font-mono text-center">{{item.notes.size}}</div>
+        <div class="col-2 font-mono text-center">{{item.membres.size}}</div>
+        <div class="col-2 font-mono text-center"></div>
+        <div class="col-2 font-mono text-center"></div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import stores from '../stores/stores.mjs'
+import { dkli } from '../app/util.mjs'
 
 export default ({
   name: 'RapportSynchro',
 
-  props: { close: Boolean },
+  props: { },
+
+  computed: {
+  },
+
+  methods: {
+    nom (id) { return this.session.getCV(id).nom }
+  },
 
   setup () {
     return {
       session: stores.session,
-      ui: stores.ui,
-      syncitem: stores.syncitem
+      aSt: stores.avatar,
+      gSt: stores.groupe,
+      dkli
     }
   }
 })

@@ -403,7 +403,7 @@ export default {
 
   EX8801: 'Restriction de lecture seulement',
   EX8802: 'Restriction d\'accès minimal',
-  
+
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
 
@@ -446,6 +446,17 @@ export default {
   LOGsp1: 'Sponsoring dèjà refusé',
   LOGsp2: 'Sponsoring dèjà accepté',
   LOGsp3: 'Sponsoring annulé par le sponsor',
+
+  // Rapport Synchro
+  RStit: 'Avatars et groupes du compte "{0}"',
+  RScav: 'Avatars',
+  RScgr: 'Groupes',
+  RScno: 'notes',
+  RScch: 'chats',
+  RScsp: 'sponsor.',
+  RSctk: 'tickets',
+  RScmb: 'membres',
+  RScbl: '-',
 
   // App.vue reload
   RLnvver: 'Nouvelle version disponible',
