@@ -401,6 +401,9 @@ export default {
   EX8224: '(BUG) L\'avatar n\'est pas un avatar du compte.',
   EX8225: '(BUG) L\'interlocuteur du chat n\'est pas le Comptable',
 
+  EX8801: 'Restriction de lecture seulement',
+  EX8802: 'Restriction d\'accès minimal',
+  
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
 
