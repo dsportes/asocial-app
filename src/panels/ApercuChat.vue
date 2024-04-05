@@ -1,21 +1,24 @@
 <template> <!-- BtnCond incorporés -->
 <q-dialog v-model="ui.d.ACouvrir[idc]" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+  <q-layout v-if="chat && !chat._zombi" container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated>
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [nomI, nomE])}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <apercu-genx class="bordb" :id="chat.idE" :idx="0" />
+      <div v-if="chat.stE === 2" class="text-center full-width bg-yellow-5 titre-lg text-bold text-negative q-paxs">
+        {{$t('disparu')}}</div>
+      <apercu-genx v-else class="bordb" :id="chat.idE" :idx="0" />
       <div :class="sty() + 'q-pa-xs row justify-around items-center'">
-        <div class="row q-gutter-xs items-center">
-          <btn-cond :label="$t('CHadd2')" icon="add" @ok="editer(false)"
+        <div v-if="chat.stE !== 2" class="row q-gutter-xs items-center">
+          <btn-cond :label="$t('CHadd1')" icon="add" @ok="editer(false)"
             :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-          <btn-cond v-if="session.estA" :label="$t('CHadd2')" icon="add" color="secondary"
+          <btn-cond v-if="session.estA" :label="$t('CHadd2')" icon="savings"
             @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
         </div>
-        <btn-cond v-if="chat && chat.stI" :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
+        <btn-cond v-if="chat && chat.stI" 
+          :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
           :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
         <div v-if="chat && !chat.stI" class="text-warning text-bold titre-md text-italic">
           {{$t('CHraccroche')}}
@@ -52,9 +55,9 @@
           {{$t('CHeff')}}
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="md" color="primary" icon="undo"
+          <q-btn flat dense size="md" padding="none" color="primary" icon="undo"
             :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="md" color="warning" icon="delete"
+          <q-btn dense size="md" padding="none" color="warning" icon="delete"
             :label="$t('CHeffcf')" @click="effop"/>
         </q-card-actions>
       </q-card>
@@ -64,12 +67,12 @@
     <q-dialog v-model="ui.d.ACconfirmrac">
       <q-card :class="styp('sm')">
         <q-card-section class="q-pa-md fs-md text-center">
-          {{$t('CHrac2', [naE.nom])}}
+          {{$t('CHrac2', [nomE])}}
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="md" color="primary" icon="undo"
+          <q-btn flat dense size="md" padding="none" color="primary" icon="undo"
             :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="md" color="warning" icon="clear"
+          <q-btn dense size="md" padding="none" color="warning" icon="clear"
             :label="$t('CHrac')" @click="passifop"/>
         </q-card-actions>
       </q-card>
@@ -93,15 +96,22 @@
         </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
+          <q-btn flat dense size="md" padding="none" color="primary" icon="undo"
             :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="xs" color="primary" icon="add"
+          <q-btn dense size="md" padding="none" color="primary" icon="add"
             :label="$t('valider')"  @click="addop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
 
   </q-layout>
+  <q-card v-else>
+    <div class="row justify-between items-center spsm">
+      <q-btn dense padding="none" size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
+      <span class="text-center titre-lg q-pa-sm">{{$t('CHzombi')}}</span>
+      <bouton-help page="page1"/>
+    </div>
+  </q-card>
 </q-dialog>
 </template>
 <script>
@@ -124,7 +134,7 @@ export default {
   name: 'ApercuChat',
 
   props: { 
-    chat: Object, // Le chat peut être créé ici (pas forcément existant avant)
+    chat: Object,
     idc: Number
   },
 
@@ -171,15 +181,15 @@ export default {
     },
 
     async passifop () {
-      const disp = await new PassifChat().run(this.chat)
-      if (disp) { await afficherDiag(this.$t('CHdisp')) }
+      const suppr = await new PassifChat().run(this.chat)
+      if (suppr) { await afficherDiag(this.$t('CHsuppr')) }
       this.ui.fD()
     },
 
     async editer (avecDon) {
       if (avecDon) {
         this.dconf = false
-        const st = await new EstAutonome().run(this.chat.naE.id)
+        const st = await new EstAutonome().run(this.chat.idE)
         if (st !== 1) {
           await afficherDiag(this.$t('CHauto'))
           return
@@ -191,12 +201,7 @@ export default {
     },
 
     async raccrocher () {
-      if (this.estDel) {
-        if (!await this.session.editUrgence()) return
-      } else {
-        if (!await this.session.edit()) return
-      }
-      this.txt = this.chat ? this.chat.txt : ''
+      this.txt = ''
       this.ui.oD('ACconfirmrac')
     }
   },

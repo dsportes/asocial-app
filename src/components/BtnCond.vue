@@ -7,7 +7,7 @@
     dense
     :color="!diag ? (color || 'primary') : 'accent'"
     :size="size || 'md'"
-    :label="label || $t('ok')"
+    :label="label"
     :round="round"
     @click="ok">
     <q-tooltip v-if="tp || diag" class="bg-white text-primary">{{diag || tp}}</q-tooltip>

@@ -231,9 +231,9 @@ export class PassifChat extends Operation {
         id: chat.id, 
         ids: chat.ids
       }
-      const ret = this.tr(await post(this, 'PassifChat', args))
-      const disp = ret.disp
-      return this.finOK(disp)
+      const ret = await post(this, 'PassifChat', args)
+      const suppr = ret.suppr
+      return this.finOK(suppr)
     } catch (e) {
       await this.finKO(e)
     }

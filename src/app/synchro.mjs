@@ -20,7 +20,7 @@ class Queue {
 
     /* Evénnements à traiter. [version en attente, version traitée] */
     this.vcpt = [0, 0]
-    this.avgrs = new Map() /* clé: rds, valeur: [v, vt] */
+    this.avgrs = new Map() /* clé: rds, valeur: v */
   }
 
   /* Enregistrement de l'arrivée d'un ou plusieurs row versions sur écoute / WS */
@@ -416,9 +416,7 @@ export class OperationS extends Operation {
     }
     
     { // Pour chaque groupe EXISTANT en ds
-      for(const eds of ds.groupes) {
-        const buf = new IDBbuffer()
-        const sb = new SB()
+      for(const [,eds] of ds.groupes) {
         const m = await idb.getSA(eds.id)
         if (m.groupes) for(const row of m.groupes) { // En fait il n'y en a toujours qu'un
           sb.setG(await compile(row))
@@ -463,16 +461,6 @@ export class OperationS extends Operation {
         }
       }
     })
-  }
-
-  setDsVs(ds, id, n) {
-    if (!n) {
-      const x = ds.avatars.get(id)
-      x.vs = x.vb
-    } else {
-      const x = ds.groupes.get(id)
-      x.vs[0] = x.vb[0]; x.vs[n] = x.vb[n];    
-    }
   }
 
   async setCeCi (ds, ret, sb, buf) {
@@ -540,13 +528,19 @@ export class OperationS extends Operation {
           }
           for(const [,e] of nvds.groupes) {
             const eav = dav.groupes.get(e.id)
-            if (eav) e.vs = eav.vs
+            if (eav) {
+              e.vs = eav.vs
+              e.ms = eav.ms // la session AVAIT l'option m
+              e.ns = eav.ns // la session AVAIT l'option n
+            }
           }
         }
 
-        // Chargement dans sb des groupes et avatars depuis IDB
+        /* Chargement dans sb des groupes et avatars depuis IDB
+        Pour les groupes ne charge (s'il y en avait) les membres et notes
+        que si elles sont requises */
         await this.loadAvatarsGroupes (sb, nvds)
-        // espace
+        
         /* Etat rétabli à celui de IDB, MAIS
         - espace / compte / compti rafraîchis par ceux du serveur
         - les avatars et groupes disparus (complètement ou partiellement) de compte ont été purgés
@@ -556,48 +550,49 @@ export class OperationS extends Operation {
         // suppressions de IDB des disparus
         if (ds) this.supprdsdav(false, nvds, ds, sb, buf) 
 
-        ds = nvds // // le nouveau ds devient le ds courant
+        ds = nvds // le nouveau ds devient le ds courant
 
         if (ret.rowAvatars) for(const row of ret.rowAvatars) {
-          this.setDsVs(ds, row.id)
           sb.setA(await compile(row))
           buf.putIDB(row)
         }
         if (ret.rowChats) for(const row of ret.rowChats) {
-          this.setDsVs(ds, row.id)
           sb.setC(await compile(row))
           buf.putIDB(row)
         }
         if (ret.rowSponsorings) for(const row of ret.rowSponsorings) {
-          this.setDsVs(ds, row.id)
           sb.setS(await compile(row))
           buf.putIDB(row)
         }
         if (ret.rowTickets) for(const row of ret.rowTickets) {
-          this.setDsVs(ds, row.id)
           sb.setT(await compile(row))
           buf.putIDB(row)
         }
         if (ret.rowNotes) for(const row of ret.rowNotes) {
-          const n = ID.estGroupe(row.id) ? 2 : 0
-          this.setDsVs(ds, row.id, n)
+          if (ID.estGroupe(row.id)) {
+            const x = ds.groupes.get(row.id)
+            x.vs[2] = x.vb[2]
+          }
           sb.setN(await compile(row))
           buf.putIDB(row)
         }
         if (ret.rowGroupes) for(const row of ret.rowGroupes) {
-          this.setDsVs(ds, row.id, 1)
           sb.setG(await compile(row))
           buf.putIDB(row)
         }
         if (ret.rowChatgrs) for(const row of ret.rowChatgrs) {
-          this.setDsVs(ds, row.id, 2)
           sb.setH(await compile(row))
           buf.putIDB(row)
         }
         if (ret.rowMembres) for(const row of ret.rowMembres) {
-          this.setDsVs(ds, row.id, 2)
           sb.setM(await compile(row))
           buf.putIDB(row)
+        }
+        for (const [,x] of ds.avatars) {
+          if (x.chg) { x.chg = false; x.vs = x.vb }
+        }
+        for (const [,x] of ds.groupes) {
+          if (x.chg) { x.chg = false; x.vs = x.vb; x.ms = x.m; x.ns = x.n }
         }
       }
 
@@ -725,7 +720,7 @@ export class ConnexionSynchroIncognito extends OperationS {
       // Chargement des descriptifs des fichiers du presse-papier
       if (session.synchro) await idb.FLfromIDB()
 
-      await sleep(1000)
+      await sleep(300)
       session.setStatus(2)
       syncQueue.reveil()
 
