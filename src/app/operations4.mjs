@@ -5,7 +5,7 @@ import { Operation } from './synchro.mjs'
 import { random, gzipB } from './util.mjs'
 import { Cles, d14 } from './api.mjs'
 import { post } from './net.mjs'
-import { RegCles, compile } from './modele.mjs'
+import { RegCles, compile, CV } from './modele.mjs'
 import { getPub } from './synchro.mjs'
 import { decrypter, crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
 
@@ -325,11 +325,14 @@ export class GetAvatarPC extends Operation {
       if (ret.collision) id = -1
       else if (ret.cleAZC) {
         try {
-          const cleA = decode(await decrypter(p.pcb, ret.cleAZC))
+          const cleA = await decrypter(p.pcb, ret.cleAZC)
           RegCles.set(cleA)
           id = Cles.id(cleA, session.ns)
-          CV.set(ret.cvA)
-        } catch (e) { }
+          const cv = await CV.set(ret.cvA)
+          cv.store()
+        } catch (e) {
+          console.log(e)
+        }
       }
       return this.finOK(id)
     } catch (e) {
@@ -355,7 +358,7 @@ export class ChangementPC extends Operation {
       const pcK = p ? await crypter(session.clek, p.phrase) : null
       const cleAZC = p ? await crypter(p.pcb, RegCles.get(id)) : null
       const hZR = p ? p.hps1 : 0
-      const hZC = p ? p.pcb : 0
+      const hZC = p ? p.hpsc : 0
       const args = { token: session.authToken, id, pcK, hZR, hZC, cleAZC }
       await post(this, 'ChangementPC', args)
       this.finOK()
@@ -398,13 +401,15 @@ export class NouveauChat extends Operation {
       const pub = await getPub(idE)
       const cleAI = RegCles.get(idI)
       const cleAE = RegCles.get(idE)
+      const y = gzipB(txt)
+      const txtc = await crypter(cc, y)
       const args = { token: session.authToken, idI, idE, mode, hZC }
       args.ch = {
         ccK: await crypter(session.clek, cc), // clé C du chat cryptée par la clé K du compte
         ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
         cleE1C:  await crypter(cc, cleAI), // clé A de l'avatar E (sponsor) cryptée par la clé du chat.
         cleE2C:  await crypter(cc, cleAE), // clé A de l'avatar E (sponsorisé) cryptée par la clé du chat.
-        txt: await crypter(cc, gzipB(txt)), // mot du sponsor crypté par la clé C
+        txt: txtc, // mot du sponsor crypté par la clé C
       }
       const ret = await post(this, 'NouveauChat', args)
       let ch

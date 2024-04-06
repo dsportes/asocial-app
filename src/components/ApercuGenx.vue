@@ -57,7 +57,8 @@ export default {
       return this.pSt.getPeople(this.id)
     },
     estAnim () { return this.estGroupe ? this.eg.estAnim : false },
-    cv () { return this.pSt.getCV(this.id) },
+    cv () { const x = this.session.getCV(this.id)
+      return x },
     
     info () { return this.cv ? (this.cv.info || '') : '' },
     det () { return this.session.peopleId === this.id && this.ui.estOuvert('detailspeople') }

@@ -2,15 +2,16 @@
   <q-page class="column q-pl-xs q-mr-sm spmd">
 
     <div class="q-my-xs q-pa-xs row justify-around">
-      <q-btn v-if="session.accesNet" size="md" padding="xs xs" 
+      <q-btn v-if="session.accesNet" size="md" padding="none" 
         no-caps dense color="primary" 
         :label="$t('CVraf')" @click="rafCvs"/>
 
-<!-- A REPRENDRE : choisir l'avatar du compte idI et BtnCond
-      <q-btn v-if="session.accesNet" size="md" no-caps 
-        dense color="primary" padding="xs xs"
-        :label="$t('CChtit')" @click="creerChat"/>
--->
+      <sel-avid aucun/>
+
+      <btn-cond :disable="!session.avatarId" icon="open_in_new" 
+        :label="$t('CHbtncr')" @ok="creerChat()"
+        :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+
     </div>
 
     <div class="row justify-center items-center g-gutter-md">
@@ -49,7 +50,7 @@
       </div>
     </div>
 
-    <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="idI"/>
+    <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="session.avatarId" :mode="0"/>
 
   </q-page>
 </template>
@@ -63,6 +64,8 @@ import MicroChat from '../components/MicroChat.vue'
 import MicroChatgr from '../components/MicroChatgr.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import NouveauChat from '../dialogues/NouveauChat.vue'
+import SelAvid from '../components/SelAvid.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { RafraichirCvs } from '../app/operations.mjs'
 import { dhstring, afficherDiag, photoToBin, dkli, dhcool } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
@@ -76,7 +79,7 @@ const encoder = new TextEncoder('utf-8')
 export default {
   name: 'PageChats',
 
-  components: { MicroChat, MicroChatgr, NouveauChat, ApercuGenx },
+  components: { BtnCond, SelAvid, MicroChat, MicroChatgr, NouveauChat, ApercuGenx },
 
   computed: {
     fusion () {
@@ -88,6 +91,13 @@ export default {
       this.ui.fmsg(r.length)
       // console.log(Date.now())
       return r
+    },
+    avid () { return this.session.avatarId }
+  },
+
+  watch: {
+    avid (ap) {
+      console.log(ap)
     }
   },
 

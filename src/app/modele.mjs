@@ -29,7 +29,10 @@ export class RegCles {
   static ns = 0
   static registre = new Map()
 
-  static reset () { RegCles.registre.clear }
+  static reset () { 
+    RegCles.registre.clear
+    RegCc.reset()
+  }
 
   static get (id) { 
     return ID.estComptable(id) ? Cles.comptable() : RegCles.registre.get(ID.long(id, RegCles.ns)) 
@@ -47,6 +50,8 @@ export class RegCles {
 export class RegCc {
   static registre = new Map() // clé: ids d'un chat - valeur: clé C du chat
   static regpriv = new Map() // clé: id d'un avatar du compte - valeur: clé privée
+
+  static reset () { RegCc.registre.clear; RegCc.regpriv.clear }
 
   static async setPriv (id, privK) {
     if (!RegCc.regpriv.has(id)) {
@@ -1059,7 +1064,7 @@ export class Chat extends GenDoc {
 
     this.st = row.st
     this.idE = ID.long(row.idE, this.ns)
-    this.idsE = ID.long(row.idsE, this.ns)
+    this.idsE = row.idsE
 
     this.cleCKP = row.cleCKP
     this.clec = await RegCc.get(this)
@@ -1081,7 +1086,11 @@ export class Chat extends GenDoc {
     let t1r = false
     this.yo = false
     if (row.items) for (const it of row.items) {
-      const t = it.t ? ungzipB(await decrypter(this.clec, it.t)) : null
+      let t = ''
+      if (it.t) {
+        const y = await decrypter(this.clec, it.t)
+        t = ungzipB(y)
+      }
       if (!t1r && it.a === 1) {
         if (t === '**YO**') this.yo = true
         t1r = true

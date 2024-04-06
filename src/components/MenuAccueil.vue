@@ -64,9 +64,7 @@
     <q-separator color="orange"/>
 
     <q-item class="row items-center">
-      <span class="text-italic text-bold q-mr-sm">{{$t('ACav')}}</span>
-      <q-select v-model="cav" borderless dense options-dense standard filled
-        :options="options" style="max-width: 150px" behavior="menu"/>
+      <sel-avid/>
     </q-item>
 
     <q-item clickable>
@@ -114,21 +112,16 @@
 
 <script>
 import stores from '../stores/stores.mjs'
+import SelAvid from './SelAvid.vue'
 
 export default {
   name: 'MenuAccueil',
 
   props: { menu: Boolean },
 
-  computed: {
-    options () {
-      const l = []
-      this.session.compte.mav.forEach(id => { 
-        l.push({ label: this.pSt.getCV(id).nom, value: id }) 
-      })
-      return l
-    },
+  components: { SelAvid },
 
+  computed: {
     nbchats () { return this.aSt.nbchats },
     nbchatsAv () { return this.aSt.eavC.chats.size },
     nbspons () { return this.aSt.eavC.sponsorings.size },
@@ -137,12 +130,11 @@ export default {
     nbInvits () { return this.aSt.invits.size },
     bloc () { return this.session.estMinimal },
     nomg () { const idg = this.session.groupeid
-      return idg ? this.pSt.getCV(idg).nom : ''
+      return idg ? this.session.getCV(idg).nom : ''
     }
   },
 
   watch: {
-    cav (ap) { this.session.setAvatarId(ap.value) }
   },
 
   methods: {
@@ -165,10 +157,6 @@ export default {
 
   data () {
     return {
-      cav: { 
-        label: this.pSt.getCV(this.session.compte.id).nom, 
-        value: this.session.compte.id 
-      }
     }
   },
 
@@ -176,10 +164,8 @@ export default {
     return {
       aSt: stores.avatar,
       session: stores.session, 
-      gSt: stores.groupe, 
       ui: stores.ui, 
-      fSt: stores.filtre,
-      pSt: stores.people
+      fSt: stores.filtre
     }
   }
 

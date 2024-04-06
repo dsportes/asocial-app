@@ -27,7 +27,7 @@
         <q-tooltip>{{$t('MLAcptz', session.compte.nbj, {count: session.compte.nbj})}}</q-tooltip>
       </q-avatar>
 
-      <q-btn v-if="session.ok && !session.mini && (!session.ral === 3)"
+      <q-btn v-if="session.ok && !session.mini && (session.ral !== 3)"
         dense size="md" icon="menu" round padding="none">
         <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
           <page-menu menu/>

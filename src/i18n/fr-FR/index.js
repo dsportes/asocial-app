@@ -400,6 +400,7 @@ export default {
   EX8223: '(BUG) L\'interlocuteur du chat n\'est pas membre du groupe cité',
   EX8224: '(BUG) L\'avatar n\'est pas un avatar du compte.',
   EX8225: '(BUG) L\'interlocuteur du chat n\'est pas le Comptable',
+  EX8226: 'Il n\'est pass possible de créer un chat avec soi-même (entre deux avatars du même compte)',
 
   EX8801: 'Restriction de lecture seulement',
   EX8802: 'Restriction d\'accès minimal',
@@ -874,6 +875,7 @@ export default {
   TRIpartition7: '% utilisation de Q2 ↑',
   TRIpartition8: '% utilisation de Q2 ↓',
 
+  SAVtit: 'Avatar sélectionné',
   ACav: 'Relativement à l\'avatar',
   ACgr: 'Relativement au groupe',
   ACaproposav: 'Information',
@@ -1285,6 +1287,7 @@ export default {
   // ContactChat
   CChtit: 'Créer un chat',
   CChnopc: 'Aucun avatar n\'a enregistré cette phrase de contact',
+  CChself: 'Il n\'est pas possible de créer un chat avec soi-même (entre deux avatars du même compte)',
 
   // PanelContacts
   PCnom: "Nom ...",

@@ -11,18 +11,19 @@
     <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
   </q-card-section>
   <q-card-section v-if="step===2">
-    <apercu-genx :id="idE" :del="del"/>
+    <apercu-genx :id="nvIdE || idE"/>
     <div class="q-mt-md q-mb-sm titre-md">{{$t('CHech1')}}</div>
     <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
   </q-card-section>
   <q-card-actions v-if="step===2" align="right">
-    <q-btn dense flat size="md" color="primary" padding="none" icon="close" @click="ui.fD"/>
-    <btn-cond color="warning" icon="check" @ok="creer" :disable="!txt.length"
+    <q-btn dense flat size="md" color="primary" :label="$t('renoncer')"
+      padding="none" icon="close" @click="ui.fD"/>
+    <btn-cond color="warning" icon="check" @ok="creer" 
+      :label="$t('valider')"
+      :disable="!txt.length"
       :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
   </q-card-actions>
 </q-card>
-
-<apercu-chat v-if="ui.d.ACouvrir[idc2]" :idc="idc2" :chat="chat"/>
 
 </q-dialog>
 </template>
@@ -59,7 +60,8 @@ export default ({
     return {
       step: this.mode ? 2 : 1,
       diag: '',
-      txt: ''
+      txt: '',
+      nvIdE: 0
     }
   },
 
@@ -69,17 +71,23 @@ export default ({
   methods: {
     async ok (p) {
       this.hZC = p.hpsc
-      const id = await new GetAvatarPC().run(p)
-      if (!id) this.diag = this.$t('CChnopc')
-      else this.step = 2
+      this.nvIdE = await new GetAvatarPC().run(p)
+      if (!this.nvIdE) {
+        this.diag = this.$t('CChnopc')
+        return
+      }
+      const cpt = this.session.compte
+      if (cpt.mav.has(this.nvIdE)) {
+        this.diag = this.$t('CChself')
+        return
+      }
+      this.step = 2
     },
 
     async creer () {
-      this.chat = await new NouveauChat().run(this.idI, this.idE, this.mode, this.hZC, this.txt)
-      if (this.chat) {
-        this.ui.fD()
-        this.ui.oD('ACouvrir', this.idc)
-      }
+      this.chat = await new NouveauChat()
+        .run(this.idI, this.nvIdE || this.idE, this.mode, this.hZC, this.txt)
+      this.ui.fD()
     }
   },
 
