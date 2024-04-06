@@ -66,6 +66,10 @@
   <div v-if="ui.pagetab==='chats'" class="spmd q-pa-sm">
     <div class="titre-lg text-italic text-center q-py-md">{{$t('CPTtitch')}}</div>
 
+    <btn-cond class="q-my-sm" 
+      :cond="session.estAdmin ? 'cUrgence' : 'cVisu'"
+      :label="$t('CVraf')" @ok="rafCvs"/>
+
     <q-card v-for="(e, idx) in lurg" :key="e.id">
       <div :class="'q-my-sm q-px-sm ' + dkli(idx)">
         <apercu-genx :id="e.id" :del="e.del" :idx="idx" />
@@ -89,17 +93,19 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
 import MicroChat from '../components/MicroChat.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { dkli, edvol } from '../app/util.mjs'
 import { getNg } from '../app/modele.mjs'
 import { GetCompta, GetPartition } from '../app/synchro.mjs'
 import N3Icon from '../components/N3Icon.vue'
 import NotifIcon from '../components/NotifIcon.vue'
 import { UNITEN, UNITEV, ID } from '../app/api.mjs'
+import { RafraichirCvsAv } from '../app/operations4.mjs'
 
 export default {
   name: 'PageCompta',
 
-  components: { N3Icon, NotifIcon, MicroChat, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits },
+  components: { BtnCond, N3Icon, NotifIcon, MicroChat, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits },
 
   computed: {
     al () { return 'titre-md text-italic bg-yellow-3 text-negative text-bold q-mb-xs q-ml-xl'},
@@ -139,7 +145,16 @@ export default {
   methods: {
     onok (ctx) {
       console.log(ctx)
-    }
+    },
+    async rafCvs () {
+      let nc = 0, nv = 0
+      for (const id of this.session.compte.mav) {
+        const [x, y] = await new RafraichirCvsAv().run(id)
+        nc += x; nv += y
+      }
+      stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
+    },
+
   },
 
   setup () {
@@ -147,7 +162,7 @@ export default {
 
     async function reload () {
       await new GetCompta().run()
-      if (!session.estA) await new GetPartition().run()
+      if (!session.estA) await new GetPartition().run(session.compte.idp)
     }
 
     onMounted(async () => { await reload() })

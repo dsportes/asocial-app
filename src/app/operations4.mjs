@@ -450,3 +450,24 @@ export class EstAutonome extends Operation {
     }
   }
 }
+
+/* OP_RafraichirCvsAv: 'Rafraichissement des CVs des chats de l\'avatar'
+- token : jeton d'authentification du compte de **l'administrateur**
+- id : id de l'avatar
+Retour:
+- `n`: nombre de CV mises à jour
+*/
+export class RafraichirCvsAv extends Operation {
+  constructor () { super('RafraichirCvsAv') }
+
+  async run (id) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id }
+      const ret = await post(this, 'RafraichirCvsAv', args)
+      return this.finOK(ret.ncnv)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

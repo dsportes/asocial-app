@@ -29,6 +29,9 @@ export const useUiStore = defineStore('ui', {
     messageto: null, // timeOut du message affiché
     message: null,
 
+    filtreMsgTo: null,
+    filtreMsg: null,
+
     cveditionId: 0, // id de l'avatar / groupe dont la CV est en édition
 
     helpstack: [],
@@ -300,8 +303,9 @@ export const useUiStore = defineStore('ui', {
     },
 
     fmsg (n, msg) {
-      const filtreMsg = hms(new Date(), true) + ' / ' + (msg || $t('items', n, { count: n }))
-      this.afficherMessage(filtreMsg)
+      if (this.filtreMsgTo) clearTimeout(this.filtreMsgTo)
+      this.filtreMsg = hms(new Date(), true) + ' / ' + (msg || $t('items', n, { count: n }))
+      this.filtreMsgTo = setTimeout(() => { this.filtreMsg = null }, 2000)
     }
   }
 })

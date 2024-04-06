@@ -216,6 +216,10 @@ export const useSessionStore = defineStore('session', {
 
     getCV: (state) => { return (id) => { return state.pSt.getCV(id) } },
 
+    eltPart: (state) => { return (id) =>  
+      state.partition ? (state.partition.mcpt[id] || { fake: true }) : { fake: true }
+    },
+
     // PageAdmin ***************************************************    
     paLeFT: (state) => {
       const x = []; state.espaces.forEach(e => { x.push(e) })

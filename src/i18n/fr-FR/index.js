@@ -401,6 +401,7 @@ export default {
   EX8224: '(BUG) L\'avatar n\'est pas un avatar du compte.',
   EX8225: '(BUG) L\'interlocuteur du chat n\'est pas le Comptable',
   EX8226: 'Il n\'est pass possible de créer un chat avec soi-même (entre deux avatars du même compte)',
+  EX8227: '(BUG) L\'avatar cible du rafraîssement des cartes de visite des chats n\'est pas un avatar du compte.',
 
   EX8801: 'Restriction de lecture seulement',
   EX8802: 'Restriction d\'accès minimal',
@@ -612,7 +613,7 @@ export default {
   OP_PassifChat: 'Mise en état "passif" d\'un chat',
   OP_NouveauChat: 'Création d\'un "chat"',
   OP_MajChat: 'Mise à jour d\'un "chat".',
-  OP_RafraichirCvs: 'Rafraîchissement des cartes de visite',
+  OP_RafraichirCvsAv: 'Rafraichissement des CVs des chats de l\'avatar',
   OP_NouvelAvatar: 'Création d\'un nouvel avatar du compte',
   OP_NouvelleTribu: 'Création d\'une nouvelle tranche de quotas',
   OP_SetNotifE: 'Inscription d\'une notification générale',
@@ -1288,6 +1289,7 @@ export default {
   CChtit: 'Créer un chat',
   CChnopc: 'Aucun avatar n\'a enregistré cette phrase de contact',
   CChself: 'Il n\'est pas possible de créer un chat avec soi-même (entre deux avatars du même compte)',
+  CHcrpc: 'Créer un chat depuis la phrase de contact de l\'avatar',
 
   // PanelContacts
   PCnom: "Nom ...",

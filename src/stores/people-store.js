@@ -129,12 +129,12 @@ export const usePeopleStore = defineStore('people', {
     peLpF: (state) => {
       const aSt = stores.avatar
       const f = stores.filtre.filtre.people
-      if (!f) { stores.ui.fmsg(state.peLp.length); return state.peLp }
       f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
       f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
       const r = []
-      for (const [, p] of state.map) {
-        if (f.nom && !p.na.nom.startsWith(f.nom)) continue
+      for (const [id, p] of state.map) {
+        const cv = state.getCV(id)
+        if (f.nom && !cv.nom.startsWith(f.nom)) continue
         if (f.roletr && (p.sp < f.roletr)) continue
         if (f.avecgr && (!p.groupes.size)) continue
         if (f.setp.size || f.setn.size) {
@@ -144,10 +144,10 @@ export const usePeopleStore = defineStore('people', {
           if (f.setp.size && difference(f.setp, s).size) continue
           if (f.setn.size && intersection(f.setn, s).size) continue          
         }        
-        r.push(p)
+        r.push({ id, cv, sgr: p.sgr, sch: p.sch })
       }
       r.sort((a, b) => { 
-        return (ID.estComptable(a.na.id) || a.na.nom < b.na.nom) ? -1 : (a.na.nom > b.na.nom ? 1 : 0)
+        return (ID.estComptable(a.id) || a.cv.nom < b.cv.nom) ? -1 : (a.cv.nom > b.cv.nom ? 1 : 0)
       })
       stores.ui.fmsg(r.length)
       return r

@@ -35,7 +35,7 @@
       </q-btn>
 
       <q-btn :disable="!aHome" flat icon="home" dense size="md" padding="none"
-        :color="aHome ? 'warning' : 'grey'" @click="gotoAccueilLogin()"/>
+        :color="aHome ? 'green-5' : 'grey'" @click="gotoAccueilLogin()"/>
 
       <q-btn v-if="ui.pageback" icon="arrow_back" dense size="md" round padding="none"
         @click="ui.gotoBack()"/>
@@ -166,6 +166,11 @@
 
   <q-drawer v-model="ui.pfiltre" side="right" elevated bordered persistent
     :width="250" :breakpoint="ui.seuillarge" :overlay="ui.etroite">
+    <q-page-sticky v-if="ui.filtreMsg" position="top" :offset="[0,0]"
+      style="z-index:1000!important">
+      <div class="bg-yellow-3 text-black text-bold font-mono q-pa-xs">{{ui.filtreMsg}}</div>
+    </q-page-sticky>
+
     <q-scroll-area :class="'fit ' + dkli(1)">
       <div>
         <div class="row justify-bettween q-mb-md">
@@ -306,7 +311,7 @@
     </q-card>
   </q-dialog>
 
-  <!-- ui.d.reload : information / option d'instllation d'une nouvelle version -->
+  <!-- ui.d.reload : information / option d'installation d'une nouvelle version -->
   <q-dialog v-model="ui.d.reload" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-btn size="md" padding="xs" color="primary" dense icon="close"

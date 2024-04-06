@@ -5,7 +5,7 @@
       :label="$t('PPcht')" @click="chgTribu"/>
     <q-btn v-if="session.estComptable" dense color="primary" size="sm" padding="xs"
       :label="$t('PPchsp')" @click="chgSponsor"/>
-    <q-btn v-if="session.estComptable || (session.estDelegue && estDeMaTribu)" 
+    <q-btn v-if="session.estComptable || (session.estDelegue && !session.eltPart(id).fake)" 
       dense color="primary" size="sm" padding="xs"
       :label="$t('PPcompta')" @click="voirCompta"/>
     <q-btn dense color="warning" size="md" padding="none" round icon="change_history"
@@ -148,7 +148,7 @@
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
-            {{$t('PTcompta', [na ? na.nomc : ('#' + id)])}}</q-toolbar-title>
+            {{$t('PTcompta', [cv.nomc])}}</q-toolbar-title>
         </q-toolbar>
       </q-header>
       <q-page-container>
@@ -187,11 +187,8 @@ export default {
   props: { id: Number },
 
   computed: {
+    cv () { return this.session.getCV(this.id) },
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    estDeMaTribu () {
-      const [t, it, eltAct] = this.aSt.getTribuDeCompte(this.id)
-      return t !== null
-    },
     naI () { return this.aSt.compte.na },
     naE () { return getNg(this.id) },
     yo () { return this.chat && this.chat.yo },
@@ -283,14 +280,14 @@ export default {
     },
 
     async getCpt() {
-      await new GetCompteursCompta().run(this.id)
+      await new GetCompta().run(this.id)
       const x = this.aSt.ccCpt
       this.pc1 = x.q1 ? Math.round((x.v1 * 100) / (x.q1 * UNITEN)) : 0,
       this.pc2 = x.q2 ? Math.round((x.v2 * 100) / (x.q2 * UNITEV)) : 0
     },
 
     async voirCompta () { // comptable OU sponsor
-      await this.getCpt()
+      await new GetCompta().run(this.id)
       this.ui.oD('BPcptdial', this.idc)
     },
 

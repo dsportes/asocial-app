@@ -1,25 +1,32 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm spmd">
 
-    <div class="q-my-xs q-pa-xs row justify-around">
-      <q-btn v-if="session.accesNet" size="md" padding="none" 
-        no-caps dense color="primary" 
-        :label="$t('CVraf')" @click="rafCvs"/>
-
+    <div class="q-mt-xs q-pa-xs row justify-around items-center">
+      <btn-cond class="q-my-sm" 
+        :cond="session.estAdmin ? 'cUrgence' : 'cVisu'"
+        :label="$t('CVraf')" @ok="rafCvs"/>
       <sel-avid aucun/>
+    </div>
 
+    <q-separator color="primary" class="q-my-xs q-mx-lg"/>
+
+    <div class="q-pa-xs row justify-center items-center">
+      <div class="titre-md text-italic q-mr-md">{{$t('CHcrpc')}}</div>
       <btn-cond :disable="!session.avatarId" icon="open_in_new" 
         :label="$t('CHbtncr')" @ok="creerChat()"
         :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-
     </div>
+
+    <q-separator color="orange" class="q-my-xs"/>
 
     <div class="row justify-center items-center g-gutter-md">
       <q-btn dense color="primary" padding="xs xs" :label="$t('CHexp')" @click="exp" />
       <q-checkbox v-model="optb64" :label="$t('CHopt')" />
     </div>
 
-    <div class="q-mt-xs titre-md text-italic text-center">
+    <q-separator color="primary" class="q-my-xs q-mx-lg"/>
+
+    <div class="titre-md text-italic text-center">
       {{$t('CHnch2', fusion.length, {count: fusion.length}) + ' ' + $t('CHnchtot', [aSt.nbchats + gSt.nbchats])}}
     </div>
 
@@ -66,7 +73,7 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import NouveauChat from '../dialogues/NouveauChat.vue'
 import SelAvid from '../components/SelAvid.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { RafraichirCvs } from '../app/operations.mjs'
+import { RafraichirCvsAv } from '../app/operations4.mjs'
 import { dhstring, afficherDiag, photoToBin, dkli, dhcool } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
@@ -103,8 +110,16 @@ export default {
 
   methods: {
     async rafCvs () {
-      const [nt, nr] = await new RafraichirCvs().run(this.session.avatarId)
-      stores.ui.afficherMessage(this.$t('CVraf2', [nr, nt - nr]), false)
+      let nc = 0, nv = 0
+      if (this.session.avatarId) {
+          const [x, y] = await new RafraichirCvsAv().run(this.session.avatarId)
+          nc += x; nv += y
+      } else
+        for (const id of this.session.compte.mav) {
+          const [x, y] = await new RafraichirCvsAv().run(id)
+          nc += x; nv += y
+        }
+      stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
     },
 
     creerChat () {

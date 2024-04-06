@@ -270,57 +270,6 @@ export class MuterCompte extends Operation {
   }
 }
 
-/* OP_RafraichirCvs: 'Rafraîchissement des cartes de visite' ***************************
-args.token: éléments d'authentification du compte.
-args.cibles : array de  { idE, vcv, lch: [[idI, idsI, idsE] ...], lmb: [[idg, im] ...] }
-Retour: les chats et membres de la cible sont mis à jour
-*/
-export class RafraichirCvs extends Operation {
-  constructor () { super('RafraichirCvs') }
-
-  async run (id) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
-    try {
-      const session = stores.session
-      const pSt = stores.people
-      const aSt = stores.avatar
-      const gSt = stores.groupe
-
-      const toutes = [] // toutes les cibles
-      if (!id) {
-        pSt.peopleIds.forEach(idE => { 
-          const exp = pSt.exportPourCv(idE)
-          if (exp) toutes.push(exp)
-        })
-      } else if (ID.estAvatar(id)) {
-        aSt.getChatIdEs(id).forEach(idE => { 
-          const exp = pSt.exportPourCv(idE)
-          if (exp) toutes.push(exp)
-        })
-      } else {
-        gSt.getMembreIdEs(id).forEach(idE => { 
-          const exp = pSt.exportPourCv(idE)
-          if (exp) toutes.push(exp)
-        })
-      }
-      const nt = toutes.length
-      let next = 0
-      let nr = 0
-      while (next < toutes.length) {
-        const cibles = []
-        for (let i = 0; i < 10 && next < toutes.length; i++, next++) cibles.push(toutes[next])
-        const args = { token: session.authToken, cibles }
-        if (session.estFige) args.estFige = true
-        const ret = this.tr(await post(this, 'RafraichirCvs', args))
-        nr += ret.nbrech
-      }
-
-      return this.finOK([nt, nr], true)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /*OP_NouvelAvatar: 'Création d\'un nouvel avatar du compte' **********************
 args.token: éléments d'authentification du compte.
 args.rowAvatar : row du nouvel avatar
