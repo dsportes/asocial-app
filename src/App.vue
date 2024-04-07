@@ -523,7 +523,7 @@ export default {
         case 'partition' : { 
           if (this.session.pow > 3) return this.$t('ACspons')
           const p = this.session.partitionC || this.session.partition
-          return this.$t('Ppartition', [ID.court(p.id), this.session.compte.codeP(p.id)])
+          return this.$t('Ppartition', [this.session.codePart(p.id)])
         }
         case 'sponsorings' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }
         case 'groupesac' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }

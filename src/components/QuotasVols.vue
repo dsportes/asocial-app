@@ -44,8 +44,9 @@ export default {
   computed: {
     qnn () { return this.vols.qn * UNITEN },
     qvv () { return this.vols.qv * UNITEV },
-    pcn () { return Math.round(this.vols.n * 100 / (this.qnn)) },
-    pcv () { return Math.round(this.vols.v * 100 / (this.qvv)) },
+    nn () { return this.vols.nn + this.vols.nc + this.vols.ng },
+    pcn () { return this.qnn ? Math.round(this.nn * 100 / (this.qnn)) : 0 },
+    pcv () { return this.qvv ? Math.round(this.vols.v * 100 / (this.qvv)) : 0 },
   },
 
   methods: {

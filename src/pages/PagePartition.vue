@@ -1,12 +1,11 @@
 <template>
-  <q-page>
-    <q-expansion-item class="q-mb-md" header-class="bg-primary text-white" 
+<q-page>
+  <div v-if="p" class="column">
+    <q-expansion-item v-if="session.estDelegue || session.estComptable"
+      class="q-mt-xs q-mb-md" header-class="bg-primary text-white" 
       switch-toggle-side expand-separator dense>
       <template v-slot:header>
-        <div class="row full-width fs-md">
-          <span>{{$t('TUtr')}} #{{ID.court(p.id)}}</span>
-          <span v-if="session.pow === 2" class= "q-ml-sm">{{session.compte.codeP(p.id)}}</span>
-        </div>
+        <div class="full-width fs-md">{{$t('TUpart', [session.codePart(p.id)])}}</div>
       </template>
       <div class="q-ml-xl q-mb-lg splg">
         <div class="row justify-around">
@@ -16,56 +15,59 @@
           <tuile-notif :src="lg" occupation/>
         </div>
         <div class="q-my-xs">
-          <apercu-notif editable :notif="lg.notif" :type="1" :ctx="{ idt: p.id }"/>
+          <apercu-notif editable :notif="lg.notif" :type="1" :cible="p.id"/>
         </div>
       </div>
     </q-expansion-item>
 
+    <div class="full-width fs-md bg-primary text-white q-my-xs">{{$t('TUpart', [session.codePart(p.id)])}}</div>
+
     <q-toolbar class="bg-secondary text-white">
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (session.pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
-      <q-btn v-if="session.estDelegue || session.estComptable"
-        size="md" dense color="primary" 
+      <btn-cond v-if="session.estDelegue || session.estComptable"
+        cond="cEdit"
         :label="$t('PTnvc')" @click="ui.oD('NSnvsp')"/>
     </q-toolbar>
 
-    <div v-for="(c, idx) in session.ptLcFT" :key="c.id" class="spmd">
+    <div v-for="(c, idx) in session.ptLcFT" :key="c.id" class="spmd q-my-xs">
       <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)">
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
-              <img class="photomax" :src="pSt.getCV(c.id).photo" />
+              <img class="photomax" :src="c.cv.photo" />
 
-              <div class="titre-md q-ml-sm">{{nomc(c)}}
+              <div class="titre-md q-ml-sm">{{c.cv.nomC}}
                 <span v-if="type(c)===1" class="q-ml-sm">[{{$t('moi')}}]</span>
-                <span v-if="c.del" class="q-ml-sm">[{{$t('sponsor2')}}]</span>
+                <span v-if="c.del" class="q-ml-sm">[{{$t('delegue')}}]</span>
               </div>
 
               <q-icon size="md" v-if="c.notif" :name="ico(c)"
                 :class="'q-ml-md ' + tclr(c) + ' ' + bgclr(c)"/>
 
             </div>
-            <!--
+            
             <q-btn v-if="type(c)===2" class="q-ml-md" icon="open_in_new" size="md" color="primary" dense
               @click.stop="voirpage(c)"/>
-              -->
+            
           </div>
         </template>
 
         <div class="q-ml-lg">
-          <apercu-genx v-if="type(c)===2 || type(c)===1" :id="c.id" :idx="idx"/>
-          <div v-else class="titre-md">#{{c.id}}</div>
+          <apercu-genx v-if="type(c)!==3 && (session.compteId !== c.id)" :id="c.id" :idx="idx" :del="c.del"/>
+
           <barre-people v-if="session.estComptable || session.estDelegue" :id="c.id"/>
 
-          <apercu-notif class="q-my-xs" editable
-            :notif="c.notif" :type="2" :idx="idx" :ctx="{ idt: p.id, idc: c.id }"/>
+          <chats-avec v-if="session.compteId !== c.id" class="q-mt-xs" 
+            :idE="c.id" :del="(session.estComptable || session.estDelegue) || c.del"/>
 
-          <div v-if="c.del && !ID.estComptable(c.id)" class="titre-md text-bold text-warning">{{$t('PTsp')}}</div>
+          <apercu-notif v-if="session.estDelegue || session.estComptable" class="q-my-xs" editable
+            :notif="c.notif" :type="2" :idx="idx" :cible="c.id"/>
 
           <div v-if="vis(c)" class="q-my-sm row">
             <quotas-vols class="col" :vols="c.q" />
-            <q-btn v-if="session.pow < 4" size="md" class="col-auto q-ml-sm self-start"
-                icon="settings"
-                dense padding="none" round color="primary" @click="editerq(c)"/>
+            <btn-cond v-if="session.pow < 4" class="col-auto q-ml-sm self-start"
+              cond="cEdit"
+              icon="settings" round @ok="editerq(c)"/>
           </div>
           
         </div>
@@ -73,7 +75,7 @@
     </div>
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
-    <nouveau-sponsoring v-if="ui.d.NSnvsp" :partition="session.partitionC || session.partition"/>
+    <nouveau-sponsoring v-if="ui.d.NSnvsp"/>
     
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="ui.d.PTedq" persistent>
@@ -84,69 +86,56 @@
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" color="primary" padding="xs" icon="undo" 
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" color="primary" padding="xs" icon="check" 
-            :disable="quotas.err" :label="$t('ok')" @click="validerq"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond icon="check" :disable="quotas.err" :label="$t('ok')" @ok="validerq"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
-
-    <!-- Affichage des compteurs de compta du compte "courant"-->
-    <q-dialog v-model="ui.d.PTcptdial" full-height position="left" persistent>
-      <q-layout container view="hHh lpR fFf" :class="styp('md')">
-        <q-header elevated>
-          <q-toolbar class="bg-secondary text-white">
-            <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
-            <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTcompta', [ccnomc])}}</q-toolbar-title>
-          </q-toolbar>
-        </q-header>
-        <q-page-container>
-          <panel-compta style="margin:0 auto"/>
-        </q-page-container>
-      </q-layout>
-    </q-dialog>
-
-  </q-page>
+  </div>
+  <div v-else class="titre-lg text-italic full-width text-center">{{$t('TUnopart')}}</div>
+</q-page>
 </template>
 
 <script>
-import { ref } from 'vue'
+
+// import { onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dkli } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
+import BtnCond from '../components/BtnCond.vue'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import PanelCompta from '../components/PanelCompta.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
-import { SetQuotas, SetNotifT, SetNotifC } from '../app/operations.mjs'
+import ChatsAvec from '../components/ChatsAvec.vue'
+import { SetNotifT, SetNotifC } from '../app/operations.mjs'
+import { SetQuotas } from '../app/operations4.mjs'
 import { styp } from '../app/util.mjs'
 
-const ic = ['check', 'report', 'alarm_on', 'lock_open', 'lock', 'close']
-const txt = ['green-3', 'green-3', 'orange-9', 'negative', 'negative', 'negative']
-const bg = ['none', 'none', 'yellow-1', 'yellow-2', 'yellow-5',  'yellow-7']
+const ic = ['check', 'report', 'alarm_on', 'lock']
+const txt = ['green-3', 'green-5', 'warning', 'negative']
+const bg = ['none', 'none', 'yellow-1', 'yellow-5']
 
 export default {
   name: 'PagePartition',
-  components: { TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuGenx,
-    PanelCompta, QuotasVols, NouveauSponsoring, BarrePeople },
+  components: { ChatsAvec, BtnCond, TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuGenx,
+    QuotasVols, NouveauSponsoring, BarrePeople },
 
   props: { },
 
   computed: {
-    lg () { return this.p.synth },
-    p () { return this.session.partitionC || this.session.partition }
+    lg () { return this.p ? this.p.synth : {} },
+    p () { return this.session.partition }
   },
 
   methods: {
-    ico (c) { return ic[c.notif.niv || 0] },
-    tclr (c) { return 'text-' + txt[c.notif.niv || 0]},
-    bgclr (c) { return 'bg-' + bg[c.notif.niv || 0] },
+    ico (c) { return ic[c.notif.nr || 0] },
+    tclr (c) { return 'text-' + txt[c.notif.nr || 0]},
+    bgclr (c) { return 'bg-' + bg[c.notif.nr || 0] },
 
     vis (c) { 
       return (this.session.pow < 4 || (c.id === this.aSt.compteId))
@@ -169,19 +158,19 @@ export default {
     },
 
     async editerq (c) {
-      if (! await this.session.edit()) return
-      this.quotas = { q1: c.q1, q2: c.q2, qc: c.qc, min1: 0, min2: 0, minc: 0,
-        max1: this.aSt.tribuC.synth.q1 - this.aSt.tribuC.synth.a1 + c.q1,
-        max2: this.aSt.tribuC.synth.q2 - this.aSt.tribuC.synth.a2 + c.q2,
-        maxc: this.aSt.tribuC.synth.qc - this.aSt.tribuC.synth.ac + c.qc,
-        c: c
+      this.ccid = c.id
+      const s = this.session.partition.synth
+      this.quotas = { qn: c.q.qn, qv: c.q.qv, qc: c.q.qc, minn: 0, minv: 0, minc: 0,
+        maxn: s.q.qn - s.qt.qn + c.q.qn,
+        maxv: s.q.qv - s.qt.qv + c.q.qv,
+        maxc: s.q.qc - s.qt.qc + c.q.qc,
+        err: ''
         }
       this.ui.oD('PTedq')
     },
     
     async validerq () {
-      await new SetQuotas().run(this.aSt.tribuC.id, 
-        this.quotas.c.id, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
+      await new SetQuotas().run(this.ccid, this.quotas.qc)
       this.ui.fD()
     },
 
@@ -206,8 +195,16 @@ export default {
   },
 
   setup () {
+    const session = stores.session
+    /*
+    async function reload () {
+      if (session.accesNet && !session.estA) await new GetPartition().run(session.compte.idp)
+    }
+    if (session.accesNet) onMounted(async () => { await reload() })
+    */
+
      return {
-      session: stores.session, 
+      session, 
       aSt: stores.avatar, 
       pSt: stores.people, 
       ui: stores.ui,

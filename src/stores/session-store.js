@@ -175,49 +175,17 @@ export const useSessionStore = defineStore('session', {
       return 4
     },
 
-    /*
-    estSansNotif (state) { return state.niv === 0 },
-
-    estMinimal (state) { return state.niv === 2 },
-
-    estLecture (state) {
-      if (state.pow <= 2) return false
-      const nt = state.notifs[1]; const nc = state.notifs[2]
-      let nr = nt ? nt.nr : 0
-      if (nc && nc.nr > nr) nr = nc.nr
-      return nr === 3
-    },
-
-    estDecr (state) { 
-      if (state.pow <= 2) return false
-      const n = state.notifs[3]
-      return n && (n.nr === 5) 
-    },
-
-    roSt (state) {
-      if (state.mode === 3) {
-        return 1
-      } else {
-        if (state.estFige) return 2
-        else if (state.pow > 2) {
-          if (state.estMinimal) return 3
-          else if (state.estLecture) return 4
-        }
-      }
-      return 0
-    },
-
-    editDiag (state) {
-      const y = ['', 'editavion', 'editfige', 'editminimal', 'editlecture']
-      const x = state.roSt
-      return x ? $t(y[x]) : ''
-    },
-    */
-
     getCV: (state) => { return (id) => { return state.pSt.getCV(id) } },
 
     eltPart: (state) => { return (id) =>  
       state.partition ? (state.partition.mcpt[id] || { fake: true }) : { fake: true }
+    },
+
+    codePart: (state) => { return (id) => { 
+        const n = ID.long(id, state.ns)
+        const code = state.estComptable ? ' [' + state.compte.mcode.get(n) + ']': ''
+        return '#' + ID.court(id) + code
+      }
     },
 
     // PageAdmin ***************************************************    
@@ -234,21 +202,34 @@ export const useSessionStore = defineStore('session', {
       const f = state.filtre.tri.partition
       if (!f) { state.ui.fmsg(lcF.length); return lcF }
 
-      const ctf = fx[f][0]
-      const ctm = fx[f][1]
+      /*
+      TRIpartition1: 'Quota nb notes, chats ↑',
+      TRIpartition2: 'Quota nb notes, chats ↓',
+      TRIpartition3: 'Quota fichiers des notes ↑',
+      TRIpartition4: 'Quota fichiers des notes ↓',
+      TRIpartition5: '% util. quota nb notes... ↑',
+      TRIpartition6: '% util. quota nb notes... ↓',
+      TRIpartition7: '% util. quota fichiers ↑',
+      TRIpartition8: '% util. quota fichiers ↓'
+      */
+      function vf (x) {
+        return f === 1 || f === 2 ? x.q.qn 
+          : (f === 3 || f === 4 ? x.q.qv 
+          : (f === 5 || f === 6 ? x.pcn : x.pcv))
+      }
+      const ctm = (f % 2) === 1 ? -1 : 1
 
       function comp (x, y) {
-        if (x.nasp && !y.nasp) return -1
-        if (!x.nasp && y.nasp) return 1
-        const a = x[ctf]
-        const b = y[ctf]
+        if (x.del && !y.del) return -1
+        if (!x.del && y.del) return 1
+        const a = vf(x)
+        const b = vf(y)
         return a > b ? ctm : (a < b ? -ctm : 0) 
       }
 
-      const x = []; lcF.forEach(t => { x.push(t) })
-      x.sort(comp)
-      state.ui.fmsg(x.length)
-      return x
+      lcf.sort(comp)
+      state.ui.fmsg(lcf.length)
+      return lcf
     },
 
     ptLcF: (state) => {
@@ -257,29 +238,23 @@ export const useSessionStore = defineStore('session', {
       const r = []
       for (const c of state.ptLc) {
         if (f.avecsp && !c.del) continue
-        if (f.nomc) {
-          const nom = state.getCV(c.id).nom
-          if (!nom.startsWith(f.nomc)) continue
-        }
+        if (f.nomc && !c.cv.nom.startsWith(f.nomc)) continue
         /* 
-        - tcpt compilé
-        - it : indice dans la table tcpt (id de la partition)
-        - notif: notification de niveau compte
-        - del: true si délégué
-        - q : 
-          - qc qn qv c n v : extraits du document `comptas` du compte
-          - pcc : pourcentage d'utilisation de la consommation journalière c / qc
-          - pcn : pourcentage d'utilisation effective de qn : n / qn
-          - pcv : pourcentage d'utilisation effective de qc : v / qv
-        // Filtre notif
-        gravite0: '(ignorer)',
-        gravite1: 'normale ou importante', // notif existe
-        gravite2: 'importante' // notif avec restriction
-        0:simple 1:lecture 2:accès minimal, 9:aucune
+        - `mcpt` : map (object) des comptes attachés à la partition. 
+          - _clé_: id du compte.
+          - _valeur_: `{ id, nr, del, q }`
+            - `nr`: niveau de restriction de la notification de niveau _compte_ (0 s'il n'y en a pas, 1 (sans restriction), 2 ou 3).
+            - `del`: `true` si c'est un délégué.
+            - `q` : `qc qn qv c2m nn nc ng v` extraits du document `comptas` du compte.
+              - `c2m` est le compteur `conso2M` de compteurs, montant moyen _mensualisé_ de consommation de calcul observé sur M/M-1 (observé à `dhic`). 
+
+            Ajout à q :
+            - pcc : pourcentage d'utilisation de la consommation journalière c2m / qc
+            - pcn : pourcentage d'utilisation effective de qn : nn + nc ng / qn
+            - pcv : pourcentage d'utilisation effective de qc : v / qv
         */
-        const nr = !c.notif ? 9 : c.notif.nr
-        if (f.notif && nr === 9) continue
-        if (f.notif === 2 && nr ===0) continue
+        if (f.notif && c.nr === 0) continue
+        if (f.notif && c.nr < f.notif) continue
         r.push(c)
       }
       return r
@@ -287,8 +262,11 @@ export const useSessionStore = defineStore('session', {
 
     ptLc: (state) => {
       const t = []
-      for (const e of (state.partitionC || state.partition).tcpt)
-        if (e && !e.vide && (state.pow < 4 || e.del)) t.push(e)
+      if (state.partition) for (const id in state.partition.mcpt) {
+        const e = state.partition.mcpt[id]
+        const cv = state.getCV(e.id)
+        t.push( { ...e, cv} )
+      }
       return t
     }
   },

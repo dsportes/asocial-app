@@ -4,9 +4,11 @@
     <div v-if="notif && notif.texte" class="column q-my-sm">
       <div class="row justify-between">
         <div class="titre-md">{{$t('ANnot' + type)}}</div>
-        <q-btn v-if="cible" color="primary" 
-          class="q-ml-sm" size="md" padding="none"
-          :label="$t('editer')" dense icon="add" @click="editer"/>
+        <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" :label="$t('editer')" icon="edit"
+          @ok="editer"/>
+        <btn-cond v-if="type!==0 && session.pow < 4" class="q-ml-sm" :label="$t('editer')" icon="edit"
+          cond="cUrgence"
+          @ok="editer"/>
       </div>
       <div>
         <span class="fs-sm text-italic q-mr-sm">{{nomSource}}</span>
@@ -23,9 +25,11 @@
     </div>
     <div v-if="!notif || !notif.texte" class="row">
       <div class="titre-md">{{$t('ANauc' + type)}}</div>
-      <q-btn v-if="cible" class="q-ml-sm col-auto self-start" 
-        color="primary" padding="xs" size="sm" 
-        :label="$t('ANcre')" dense icon="add" @click="creer"/>
+      <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" :label="$t('ANcre')" icon="add"
+        @ok="creer"/>
+      <btn-cond v-if="type!==0 && session.pow < 4" class="q-ml-sm" :label="$t('ANcre')" icon="add"
+        cond="cUrgence"
+        @ok="creer"/>
     </div>
   </div>
 
@@ -34,10 +38,12 @@
   </q-dialog>
 </div>
 </template>
+
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonBulle from './BoutonBulle.vue'
+import BtnCond from './BtnCond.vue'
 import ShowHtml from './ShowHtml.vue'
 import DialogueNotif from './DialogueNotif.vue'
 import { dhcool, dkli, $t } from '../app/util.mjs'
@@ -57,7 +63,7 @@ export default {
     idx: Number
   },
 
-  components: { BoutonBulle, ShowHtml, DialogueNotif },
+  components: { BtnCond, BoutonBulle, ShowHtml, DialogueNotif },
 
   watch: {
     restr (ap) { if (ap && this.restrb) this.restrb = false },
@@ -69,7 +75,7 @@ export default {
       if (this.type === 0) return this.$t('ANadmin')
       const del = this.notif.idDel
       if (!del) return this.$t('ANcomptable')
-      const cv = this.pSt.getCV(del)
+      const cv = this.session.getCV(del)
       return cv.tx ? $t('ANdel1', cv.nom) : $t('ANdel2')
     }
   },

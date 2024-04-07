@@ -471,3 +471,25 @@ export class RafraichirCvsAv extends Operation {
     }
   }
 }
+
+/* OP_SetQuotas: 'Fixation des quotas d'un compte dans sa partition'
+- token: éléments d'authentification du compte.
+- idp : id de la partition
+- idc: id du compte
+- q: {qc, qn, qv}
+Retour:
+*/
+export class SetQuotas extends Operation {
+  constructor () { super('SetQuotas') }
+
+  async run (idc, q) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, idp: session.partition.id, idc, q }
+      await post(this, 'SetQuotas', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

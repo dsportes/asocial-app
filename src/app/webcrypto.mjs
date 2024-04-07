@@ -5,8 +5,8 @@ IMPLEMENTATION de webcrypto.js EN UTILISANT Web Cryptography API (sans Node)
 import { sha256 as jssha256 } from 'js-sha256'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AppExc, E_BRO } from './api.mjs'
-import { $t, ungzipT } from './util.mjs'
-import { app_keys } from './keys.mjs'
+import { $t } from './util.mjs'
+// import { app_keys } from './keys.mjs'
 
 const SALTS = new Array(256)
 
@@ -185,6 +185,7 @@ const CLE = new Uint8Array(32)
 }
 */
 
+/*
 const CLE = app_keys.sites.A
 
 const IV = new Uint8Array([5, 255, 10, 250, 15, 245, 20, 240, 25, 235, 30, 230, 35, 225, 40, 220])
@@ -206,6 +207,7 @@ export async function decrypterSrv (u8) {
     throw new AppExc(E_BRO, 8, ['', 'srv', e.toString()], e.stack)
   }
 }
+*/
 
 /*
 setTimeout(async () => {
@@ -239,7 +241,7 @@ Le binaire retourné a plusieurs parties:
 
 SI clepriv est donnée, le décryptage emploie la clé privée pour obtenir X depuis p1
 SINON c'est la clé du site qui est employée pour obtenir X depuis p3
-*/
+
 export async function decrypterRaw (clepriv, clesite, u8) {
   if (!u8) return null
   try {
@@ -272,3 +274,4 @@ export async function decrypterRaw (clepriv, clesite, u8) {
     throw new AppExc(E_BRO, 22, [e.toString()], e.stack)
   }
 }
+*/

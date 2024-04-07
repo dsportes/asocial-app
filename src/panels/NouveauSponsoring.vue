@@ -132,9 +132,7 @@ import { AjoutSponsoring } from '../app/operations4.mjs'
 export default ({
   name: 'NouveauSponsoring',
 
-  /* La partition est nécessaire pour une action du Comptable
-  qui lui peut choisir la partition du sponsorisé */
-  props: { partition: Object },
+  props: { },
 
   components: { PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp, QuotasVols },
 
@@ -246,15 +244,15 @@ export default ({
     const ui = stores.ui
     const session = stores.session
     const accepteA = session.espace.opt > 0
-    const partition = toRef(props, 'partition')
+    const partition = session.partition
 
     const step4 = ref(null)
     const step2 = ref(null)
     const step3 = ref(null)
     const step = ref(0)
     const optionsOSA = [
-      { label: $t('compteO'), value: 0 },
-      { label: $t('compteD', [ID.court(partition.value.id)]), value: 1 }
+      { label: $t('compteO', [session.codePart(partition.value.id)]), value: 0 },
+      { label: $t('compteD', [session.codePart(partition.value.id)]), value: 1 }
     ]
     const optOSA = ref(0)
     const optionsDon = [ ]
@@ -284,7 +282,7 @@ export default ({
     return {
       ID, ui, dkli, styp,
       step, step4, step2, step3,
-      optionsOSA, optOSA, optionsDon, optDon,
+      partition, optionsOSA, optOSA, optionsDon, optDon,
       session: stores.session,
       quotas
     }

@@ -1,17 +1,16 @@
 <template>
 <div>
   <div class="row justify-center q-gutter-sm q-my-sm items-center">
-    <q-btn v-if="session.estComptable" dense color="primary" size="sm" padding="xs"
-      :label="$t('PPcht')" @click="chgTribu"/>
-    <q-btn v-if="session.estComptable" dense color="primary" size="sm" padding="xs"
-      :label="$t('PPchsp')" @click="chgSponsor"/>
-    <q-btn v-if="session.estComptable || (session.estDelegue && !session.eltPart(id).fake)" 
-      dense color="primary" size="sm" padding="xs"
-      :label="$t('PPcompta')" @click="voirCompta"/>
-    <q-btn dense color="warning" size="md" padding="none" round icon="change_history"
-      class="justify-start" @click="muter">
+    <btn-cond v-if="session.estComptable"
+      cond="cEdit" :label="$t('PPcht')" @click="chgTribu"/>
+    <btn-cond v-if="session.estComptable" 
+      cond="cEdit" :label="$t('PPchsp')" @ok="chgDelegue"/>
+    <btn-cond v-if="(session.estComptable || (session.estDelegue && !session.eltPart(id).fake)) && id !== session.compteId"
+      cond="cVisu" :label="$t('PPcompta')" @ok="voirCompta"/>
+    <btn-cond color="warning" round icon="change_history"
+      cond="cEdit" class="justify-start" @ok="muter">
       <q-tooltip>{{$t('PPmut')}}</q-tooltip>
-    </q-btn>
+    </btn-cond>
   </div>
 
   <!-- Mutation de type de compte -->
@@ -79,7 +78,7 @@
     </q-card>
   </q-dialog>
 
-  <!-- Changement de tribu -->
+  <!-- Changement de partition -->
   <q-dialog v-model="ui.d.BPchgTr[idc]" persistent>
     <q-card :class="styp('sm')">
       <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [na.nom, ID.court(aSt.tribuC.id)])}}</div>
@@ -123,7 +122,7 @@
     </q-card>
   </q-dialog>
 
-  <!-- Changement de statut sponsor -->
+  <!-- Changement de statut délégué -->
   <q-dialog v-model="ui.d.BPchgSp[idc]" persistent>
     <q-card :class="styp('md') + 'q-pa-sm'">
       <div v-if="aSt.ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
@@ -148,7 +147,7 @@
         <q-toolbar>
           <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
-            {{$t('PTcompta', [cv.nomc])}}</q-toolbar-title>
+            {{$t('PTcompta', [cv.nomC])}}</q-toolbar-title>
         </q-toolbar>
       </q-header>
       <q-page-container>
@@ -170,6 +169,7 @@ import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BtnCond from '../components/BtnCond.vue'
 import MicroChat from '../components/MicroChat.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -178,11 +178,12 @@ import { MuterCompte, GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese 
 import { getNg, getCle, Tribu } from '../app/modele.mjs'
 import { crypter, crypterRSA } from '../app/webcrypto.mjs'
 import { EstAutonome } from '../app/operations4.mjs'
+import { GetCompta } from '../app/synchro.mjs'
 
 export default {
   name: 'BarrePeople',
 
-  components: { EditeurMd, PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
+  components: { BtnCond, EditeurMd, PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
 
   props: { id: Number },
 
@@ -286,12 +287,12 @@ export default {
       this.pc2 = x.q2 ? Math.round((x.v2 * 100) / (x.q2 * UNITEV)) : 0
     },
 
-    async voirCompta () { // comptable OU sponsor
+    async voirCompta () { // comptable OU délégué
       await new GetCompta().run(this.id)
       this.ui.oD('BPcptdial', this.idc)
     },
 
-    async chgSponsor () { // comptable
+    async chgDelegue () { // comptable
       if (!await this.session.edit()) return
       await this.getCpt()
       if (ID.estComptable(this.id)) {

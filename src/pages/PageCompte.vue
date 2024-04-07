@@ -106,7 +106,8 @@
 <script>
 
 import stores from '../stores/stores.mjs'
-import { SetQuotas, ChangementPS, NouvelAvatar } from '../app/operations.mjs'
+import { ChangementPS, NouvelAvatar } from '../app/operations.mjs'
+import { SetQuotas } from '../app/operations4.mjs'
 import { ExistePhrase } from '../app/synchro.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuAvatar from '../components/ApercuAvatar.vue'

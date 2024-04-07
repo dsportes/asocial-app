@@ -1,39 +1,44 @@
 <template>
-  <q-card-section :class="'q-mx-sm q-pt-none fs-md bord' + (mv.err ? 'ko' : 'ok')">
+  <q-card-section class="q-pt-none fs-md">
     <div v-if="!groupe" class="titre-md text-italic">{{$t('CQabo')}}</div>
-    <div class="q-ml-md row  items-center">
-      <div class="col-5 titre-md mh">{{$t(groupe ? 'nbnotes' : 'nbnnncng')}}</div>
-      <q-select class="col-2" v-model="qns" :options="options" :disable="lecture" dense options-dense/>
-      <q-input class="col-2 q-px-sm" v-model.number="mv.qn" type="number" :disable="lecture" dense/>
-      <span :class="'col-2 text-center fs-sm' + ((mv.qn > mv.maxn || mv.qn < mv.minn) ? ' text-warning' : '')">
-        {{mv.minn + '...' + mv.maxn}}</span>
-      <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo1"/>
+    <div :class="'q-pa-xs bord'  + (mv.err ? 'ko' : 'ok')">
+      <div class="row items-center">
+        <div class="col-5 titre-md mh">{{$t(groupe ? 'nbnotes' : 'nbnnncng')}}</div>
+        <q-select class="col-2" v-model="qns" :options="options" :disable="lecture" dense options-dense/>
+        <q-input class="col-2 q-px-sm" v-model.number="mv.qn" type="number" :disable="lecture" dense/>
+        <span :class="'col-2 text-center fs-sm' + ((mv.qn > mv.maxn || mv.qn < mv.minn) ? ' text-warning' : '')">
+          {{mv.minn + '...' + mv.maxn}}</span>
+        <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo1"/>
+      </div>
+      <div class="q-ml-md font-mono">{{ed1(mv.qn)}} {{$t(groupe ? 'notes' : 'unnncng')}}</div>
+
+      <q-separator color="orange" class="q-my-sm q-mx-md"/>
+
+      <div class="q-mt-md row items-center">
+        <div class="col-5 titre-md">{{$t('volv2')}}</div>
+        <q-select class="col-2" v-model="qvs" :options="options" :disable="lecture" dense options-dense/>
+        <q-input class="col-2 q-px-sm" v-model.number="mv.qv" type="number" :disable="lecture" dense/>
+        <span :class="'col-2 text-center fs-sm' + ((mv.qv > mv.maxv || mv.qv < mv.minv) ? ' text-warning' : '')">
+          {{mv.minv + '...' + mv.maxv}}</span>
+        <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo2"/>
+      </div>
+      <div class="q-ml-md font-mono">{{ed2(mv.qv, 0, 'B')}}</div>
     </div>
-    <div class="q-ml-md font-mono">{{ed1(mv.qn)}} {{$t(groupe ? 'notes' : 'unnncng')}}</div>
-    <div class="q-ml-md q-mt-md row items-center">
-      <div class="col-5 titre-md">{{$t('volv2')}}</div>
-      <q-select class="col-2" v-model="qvs" :options="options" :disable="lecture" dense options-dense/>
-      <q-input class="col-2 q-px-sm" v-model.number="mv.qv" type="number" :disable="lecture" dense/>
-      <span :class="'col-2 text-center fs-sm' + ((mv.qv > mv.maxv || mv.qv < mv.minv) ? ' text-warning' : '')">
-        {{mv.minv + '...' + mv.maxv}}</span>
-      <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo2"/>
-    </div>
-    <div class="q-ml-md font-mono">{{ed2(mv.qv, 0, 'B')}}</div>
 
     <div v-if="!groupe">
-      <q-separator color="orange" class="q-my-md"/>
-
-      <div class="titre-md text-italic">{{$t('CQconso')}}</div>
+      <div class="q-mt-md titre-md text-italic">{{$t('CQconso')}}</div>
       <div class="titre-sm text-italic">{{$t('CQclec')}}</div>
-      <div class="q-ml-md row  items-center">
-        <div class="col-5 titre-md mh">{{$t('CQcu')}}</div>
-        <q-select class="col-2" v-model="qcs" :options="options" :disable="lecture" dense options-dense/>
-        <q-input class="col-2 q-px-sm" v-model.number="mv.qc" type="number" :disable="lecture" dense/>
-        <span :class="'col-2 text-center fs-sm' + ((mv.qc > mv.maxc || mv.qc < mv.minc) ? ' text-warning' : '')">
-          {{mv.minc + '...' + mv.maxc}}</span>
-        <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undoc"/>
+      <div :class="'q-pa-xs bord' + (mv.err ? 'ko' : 'ok')">
+        <div class="row items-center">
+          <div class="col-5 titre-md mh">{{$t('CQcu')}}</div>
+          <q-select class="col-2" v-model="qcs" :options="options" :disable="lecture" dense options-dense/>
+          <q-input class="col-2 q-px-sm" v-model.number="mv.qc" type="number" :disable="lecture" dense/>
+          <span :class="'col-2 text-center fs-sm' + ((mv.qc > mv.maxc || mv.qc < mv.minc) ? ' text-warning' : '')">
+            {{mv.minc + '...' + mv.maxc}}</span>
+          <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undoc"/>
+        </div>
+        <div class="q-ml-md font-mono">{{edc(mv.qc)}}</div>
       </div>
-      <div class="q-ml-md font-mono">{{edc(mv.qc)}}</div>
     </div>
 
   </q-card-section>

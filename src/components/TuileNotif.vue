@@ -9,9 +9,9 @@
         <div class="col-4 text-italic text-center fs-sm">{{$t('TUmin')}}</div>
       </div>
       <div class="row items-center full-width">
-        <div class="col-4 font-mono text-center fs-md">{{src.ntr0 || '-'}}</div>
-        <div :class="cw(src.ntr1)">{{src.ntr1 || '-'}}</div>
-        <div :class="cn(src.ntr2)">{{src.ntr2 || '-'}}</div>
+        <div class="col-4 font-mono text-center fs-md">{{src.ntfp[0] || '-'}}</div>
+        <div :class="cw(src.ntfp[1])">{{src.ntfp[1] || '-'}}</div>
+        <div :class="cn(src.ntfp[2])">{{src.ntfp[2] || '-'}}</div>
       </div>
     </div>
 
@@ -24,9 +24,9 @@
         <div class="col-4 text-italic text-center fs-sm">{{$t('TUmin')}}</div>
       </div>
       <div class="row items-center full-width">
-        <div class="col-4 font-mono text-center fs-md">{{src.nco0 || '-'}}</div>
-        <div :class="cw(src.nco1)">{{src.nco1 || '-'}}</div>
-        <div :class="cn(src.nco2)">{{src.nco2 || '-'}}</div>
+        <div class="col-4 font-mono text-center fs-md">{{src.ntf[0] || '-'}}</div>
+        <div :class="cw(src.ntf[1])">{{src.ntf[1] || '-'}}</div>
+        <div :class="cn(src.ntf[2])">{{src.ntf[2] || '-'}}</div>
       </div>
     </div>
   </div>
@@ -40,8 +40,7 @@ export default {
 
   props: { 
     src: Object, // {ntr0, ntr1, ntr2, nco0, nco1, nco2}
-    occupation: Boolean, // grande largeur pour harmonisation TuileCnv
-    total: Boolean
+    occupation: Boolean // grande largeur pour harmonisation TuileCnv
   },
 
   computed: {

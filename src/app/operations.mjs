@@ -7,7 +7,7 @@ import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
 import { Versions, NomGenerique, Avatar, Chat, Compta, Note, Ticket, Notification,
   Groupe, Membre, Tribu, Chatgr, getNg, getCle, compile, setClet} from './modele.mjs'
-import { decrypter, crypterRSA, genKeyPair, decrypterRaw } from './webcrypto.mjs'
+import { decrypter, crypterRSA, genKeyPair } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 import { Operation } from './synchro.mjs'
 
@@ -487,43 +487,6 @@ export class SetSponsor extends Operation {
       }
       const args = { token: session.authToken, idt, idc: na.id, nasp, estSp }
       this.tr(await post(this, 'SetSponsor', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_SetQuotas: 'Fixation des quotas dùn compte dans sa tranche de quotas'
-args.token: éléments d'authentification du compte.
-args.idt : id de la tribu
-args.idc: id du compte
-args.qc args.q1 args.q2 : quotas
-args.dlv: si compte A, la future dlv calculée
-args.lavLmb : liste des avatars et membres à qui propager le changement de dlv
-Retour:
-*/
-export class SetQuotas extends Operation {
-  constructor () { super('SetQuotas') }
-
-  async run (id, idc, q) {
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      const compte = aSt.compte
-      const compta = aSt.compta
-      const args = { token: session.authToken, idt: id, idc, q }
-
-      if (compte.estA) {
-        const qv = { qc: 0, q1: q[1], q2: q[2], nn: 0, nc: 0, ng: 0, v2: 0 }
-        // Simulation anticipée des futurs compteurs
-        const compteurs = new Compteurs(compta.compteurs.serial, qv)
-        args.dlv = Compta.dlvA(compteurs, compta.credits.total)
-        args.idt = 0
-        args.lavLmb = compte.lavLmb
-      }
-
-      this.tr(await post(this, 'SetQuotas', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -1359,6 +1322,7 @@ export class TicketsStat extends Operation {
   constructor () { super('TicketStat') }
 
   async run () { 
+    /*
     try {
       const session = stores.session
       const aSt = stores.avatar
@@ -1380,6 +1344,7 @@ export class TicketsStat extends Operation {
     } catch (e) {
       this.finKO(e)
     }
+    */
   }
 }
 

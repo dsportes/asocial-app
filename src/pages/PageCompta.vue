@@ -165,7 +165,7 @@ export default {
       if (!session.estA) await new GetPartition().run(session.compte.idp)
     }
 
-    onMounted(async () => { await reload() })
+    if (session.accesNet) onMounted(async () => { await reload() })
 
     return {
       session, 

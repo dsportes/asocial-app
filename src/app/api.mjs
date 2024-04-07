@@ -1138,12 +1138,14 @@ export function synthesesPartition (p) {
   }
   for(const idx in p.mcpt) {
     const x = p.mcpt[idx]
-    r.qt.qc += x.q.qc
-    r.qt.qn += x.q.qn
-    r.qt.qv += x.q.qv
-    r.qt.c2m += x.q.c2m
-    r.qt.n += x.q.nn + x.q.nc + x.q.ng
-    r.qt.v += x.q.v
+    if (x.q) {
+      r.qt.qc += x.q.qc
+      r.qt.qn += x.q.qn
+      r.qt.qv += x.q.qv
+      r.qt.c2m += x.q.c2m
+      r.qt.n += x.q.nn + x.q.nc + x.q.ng
+      r.qt.v += x.q.v
+    }
     if (x.nr) r.ntf[x.nr - 1]++
     r.nbc++
     if (x.del) r.nbd++

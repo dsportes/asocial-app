@@ -56,9 +56,9 @@
         </q-item-label>
       </q-item-section>
     </q-item>
-    <q-item v-if="!session.estA" clickable  @click="maParition()">
+    <q-item v-if="session.accesNet && !session.estA" clickable  @click="maPartition()">
       <q-item-section>
-        <q-item-label lines="1">{{$t(session.pow <= 3 ? 'ACalloc' : 'ACspons')}}</q-item-label>
+        <q-item-label lines="1">{{$t(session.pow <= 3 ? 'ACgpart' : 'ACdeleg')}}</q-item-label>
       </q-item-section>
     </q-item>
     <q-separator color="orange"/>
@@ -113,6 +113,7 @@
 <script>
 import stores from '../stores/stores.mjs'
 import SelAvid from './SelAvid.vue'
+import { GetPartition } from '../app/synchro.mjs'
 
 export default {
   name: 'MenuAccueil',
@@ -141,9 +142,9 @@ export default {
     clickNotif2 () {
       this.ui.setPage('compta', 'chats')
     },
-    maPartition () { 
-      this.aSt.setTribuC()
-      this.ui.setPage('tranche')
+    async maPartition () { 
+      await new GetPartition().run(this.session.compte.idp)
+      this.ui.setPage('partition')
     },
     chatsAv () {
       this.fSt.filtre.chats.tous = false

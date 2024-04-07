@@ -53,7 +53,7 @@
     </q-card>
 
     <!-- Dialogue de création d'un sponsoring ici la partition est la sienne -->
-    <nouveau-sponsoring v-if="ui.d.NSnvsp" :partition="session.partition"/>
+    <nouveau-sponsoring v-if="ui.d.NSnvsp"/>
 
   </q-page>
 </template>

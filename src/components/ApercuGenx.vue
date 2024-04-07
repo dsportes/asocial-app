@@ -12,7 +12,7 @@
         <div class="col">
           <span class="text-bold titre-lg q-mr-sm">{{cv.nomc}}</span> 
           <span v-if="estAvc" class="fs-md q-mr-sm">[{{$t('moi')}}]</span> 
-          <span v-if="del" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
+          <span v-if="del && !ID.estComptable(id)" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
           <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
         </div>
         <q-btn class="col-auto" v-if="!estAvc && !estGroupe && !det" 

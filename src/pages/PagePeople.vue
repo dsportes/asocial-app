@@ -12,17 +12,21 @@
     
     <div v-if="pSt.peLpF.length">
       <q-card class="q-my-md" v-for="(p, idx) in pSt.peLpF" :key="p.id">
-        <apercu-genx class="q-pa-xs" :id="p.id" :idx="idx"/>
+        <apercu-genx class="q-pa-xs" :id="p.id" :idx="idx" 
+          :del="session.eltPart(p.id).del"/>
       </q-card>
     </div>
   </q-page>
 </template>
 
 <script>
+
+import { onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
+import { GetPartition } from '../app/synchro.mjs'
 
 export default {
   name: 'PagePeople',
@@ -49,9 +53,17 @@ export default {
   },
 
   setup () {
+    const session = stores.session
+
+    async function reload () {
+      if (session.accesNet && !session.estA) await new GetPartition().run(session.compte.idp)
+    }
+
+    if (session.accesNet) onMounted(async () => { await reload() })
+
     return {
       ui: stores.ui,
-      session: stores.session,
+      session, reload,
       pSt: stores.people
     }
   }

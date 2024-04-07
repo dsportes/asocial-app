@@ -500,13 +500,14 @@ export class Partition extends GenDoc {
     if (row.mcpt) for(const idx in row.mcpt) {
       const id = ID.long(parseInt(idx), ns)
       const e = row.mcpt[idx]
-      if (e.del) { this.sdel.add(id); e.del = true }
       RegCles.set(await decrypter(cleP, e.cleAP))
       const q = { ...e.q }
       q.pcc = !q.qc ? 0 : Math.round(q.c2m * 100 / q.qc) 
       q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / q.qn) 
       q.pcv = !q.qv ? 0 : Math.round(q.v * 100 / q.qv) 
-      this.mcpt[id] = { nr: e.nr || 0, q: e.q }
+      const r = { id: id, nr: e.nr || 0, q: e.q }
+      if (e.del) { this.sdel.add(id); r.del = true }
+      this.mcpt[id] = r
     }
     this.synth = synthesesPartition(this)
   }
@@ -618,12 +619,16 @@ export class Compte extends GenDoc {
     }
   }
 
-  // retourne le code de la partition id (Comptable)
-  codeP (id) { 
-    const n = ID.long(id, this.ns)
-    return this.mcode.get(n) || '#' + ID.court(id)
+  get lstAvatars () {
+    const session = stores.session
+    const l = []
+    for (const id of this.mav) { const cv = session.getCV(id); l.push({id, cv, nom: cv.nom }) }
+    if (l.length > 1) l.sort((a, b) => {
+      return a.id === this.id ? -1 : (a.id === this.id ? 1 : (a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0))) 
+    })
+    return l
   }
-  
+
   // Retourne [amb, amo] - un avatar au moins accède aux membres / notes du groupe
   ambano (groupe) {
     let ano = false, amb = false
