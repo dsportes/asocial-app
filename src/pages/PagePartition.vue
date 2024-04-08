@@ -2,7 +2,7 @@
 <q-page>
   <div v-if="p" class="column">
     <q-expansion-item v-if="session.estDelegue || session.estComptable"
-      class="q-mt-xs q-mb-md" header-class="bg-primary text-white" 
+      class="q-ml-xl q-mt-xs q-mb-md" header-class="bg-primary text-white" 
       switch-toggle-side expand-separator dense>
       <template v-slot:header>
         <div class="full-width fs-md">{{$t('TUpart', [session.codePart(p.id)])}}</div>
@@ -35,20 +35,16 @@
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
               <img class="photomax" :src="c.cv.photo" />
-
               <div class="titre-md q-ml-sm">{{c.cv.nomC}}
                 <span v-if="type(c)===1" class="q-ml-sm">[{{$t('moi')}}]</span>
                 <span v-if="c.del" class="q-ml-sm">[{{$t('delegue')}}]</span>
               </div>
-
               <q-icon size="md" v-if="c.notif" :name="ico(c)"
                 :class="'q-ml-md ' + tclr(c) + ' ' + bgclr(c)"/>
-
             </div>
             
             <q-btn v-if="type(c)===2" class="q-ml-md" icon="open_in_new" size="md" color="primary" dense
               @click.stop="voirpage(c)"/>
-            
           </div>
         </template>
 
@@ -66,7 +62,7 @@
           <div v-if="vis(c)" class="q-my-sm row">
             <quotas-vols class="col" :vols="c.q" />
             <btn-cond v-if="session.pow < 4" class="col-auto q-ml-sm self-start"
-              cond="cEdit"
+              cond="cUrgence"
               icon="settings" round @ok="editerq(c)"/>
           </div>
           
@@ -84,15 +80,20 @@
           <q-btn dense size="md" color="warning" padding="xs" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
-        <choix-quotas class="q-mt-sm" :quotas="quotas" />
+        <choix-quotas class="q-mt-sm" :quotas="quotas"/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond icon="check" :disable="quotas.err" :label="$t('ok')" @ok="validerq"/>
+          <btn-cond icon="check" :disable="quotas.err" :label="$t('valider')" @ok="validerq"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
   <div v-else class="titre-lg text-italic full-width text-center">{{$t('TUnopart')}}</div>
+
+  <q-page-sticky position="top-left" :offset="[3, 3]">
+    <q-btn size="md" color="primary" icon="refresh" padding="none" @click="reload()"/>
+  </q-page-sticky>
+
 </q-page>
 </template>
 
@@ -114,6 +115,7 @@ import BarrePeople from '../components/BarrePeople.vue'
 import ChatsAvec from '../components/ChatsAvec.vue'
 import { SetNotifT, SetNotifC } from '../app/operations.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
+import { GetPartition } from '../app/synchro.mjs'
 import { styp } from '../app/util.mjs'
 
 const ic = ['check', 'report', 'alarm_on', 'lock']
@@ -158,19 +160,23 @@ export default {
     },
 
     async editerq (c) {
+      // c.q : {qc qn qv c2m nn nc ng v} extraits du document `comptas` du compte.
       this.ccid = c.id
       const s = this.session.partition.synth
       this.quotas = { qn: c.q.qn, qv: c.q.qv, qc: c.q.qc, minn: 0, minv: 0, minc: 0,
         maxn: s.q.qn - s.qt.qn + c.q.qn,
         maxv: s.q.qv - s.qt.qv + c.q.qv,
         maxc: s.q.qc - s.qt.qc + c.q.qc,
+        n: c.q.nn + c.q.nc + c.q.ng, v: c.q.v,
+        // n: 380, v: 5 * UNITEV,
         err: ''
         }
       this.ui.oD('PTedq')
     },
     
     async validerq () {
-      await new SetQuotas().run(this.ccid, this.quotas.qc)
+      await new SetQuotas().run(this.ccid, this.quotas)
+      await this.reload()
       this.ui.fD()
     },
 
@@ -196,20 +202,19 @@ export default {
 
   setup () {
     const session = stores.session
-    /*
+  
     async function reload () {
       if (session.accesNet && !session.estA) await new GetPartition().run(session.compte.idp)
     }
-    if (session.accesNet) onMounted(async () => { await reload() })
-    */
+    // if (session.accesNet) onMounted(async () => { await reload() })
 
-     return {
+    return {
       session, 
       aSt: stores.avatar, 
       pSt: stores.people, 
       ui: stores.ui,
       cfg: stores.config,
-      ID, dkli, styp
+      ID, dkli, styp, reload
     }
   }
 

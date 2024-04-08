@@ -1765,6 +1765,7 @@ export default {
 
   // choix quotas
   CQabo: 'Abonnements:',
+  CQtxut: 'Utilisé à {0}%',
   CQconso: 'Consommation mensuelle plafond:',
   CQclec: 'Coût des lectures, écritures, transferts de fichiers',
   CQcu: 'En centimes par mois',

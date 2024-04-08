@@ -50,7 +50,7 @@
         <div class="col-4">{{$t('PCPabo')}}</div>
         <div class="col-4 font-mono text-center bg-secondary text-white text-bold">
           {{(c.qv.qn * UNITEN) + ' [' + c.qv.qn + ']'}}</div>
-        <div class="col-4 font-mono text-center">{{exM ? q1M : '-'}}</div>
+        <div class="col-4 font-mono text-center">{{exM ? q1M.toPrecision(6) : '-'}}</div>
       </div>
       <div :class="dkli(1) + ' row items-center full-width'">
         <div class="col-4">{{$t('PCPutil')}}</div>

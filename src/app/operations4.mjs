@@ -44,6 +44,8 @@ export class SetEspaceOptionA extends Operation {
 - pub: clé RSA publique du Comptable
 - privK: clé RSA privée du Comptable cryptée par la clé K
 - clePK: clé P de la partition 1 cryptée par la clé K du Comptable
+- cleEK: clé E cryptée par la clé K
+- cleE: clé en clair
 - cleAP: clé A du Comptable cryptée par la clé de la partition
 - cleAK: clé A du Comptable cryptée par la clé K du Comptable
 - cleKXC: clé K du Comptable cryptée par XC du Comptable (PBKFD de la phrase secrète complète).
@@ -61,6 +63,7 @@ export class CreerEspace extends Operation {
 
       const cleP = Cles.partition(1) // clé de la partition 1
       const cleK = random(32) // clé K du Comptable
+      const cleE = random(32) // clé de l'espace pour lire les rapports générés sur le serveur
       const cleA = Cles.comptable() // clé A de l'avatar Comptable
       const kp = await genKeyPair()
 
@@ -74,6 +77,8 @@ export class CreerEspace extends Operation {
         hXC: phrase.hpsc,
         pub: kp.publicKey,
         privK: await crypter(cleK, kp.privateKey),
+        cleEK: await crypter(cleK, cleE),
+        cleE,
         clePK: await crypter(cleK, cleP),
         cleAP: await crypter(cleP, cleA, 1),
         cleAK: await crypter(cleK, cleA),
@@ -485,7 +490,8 @@ export class SetQuotas extends Operation {
   async run (idc, q) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, idp: session.partition.id, idc, q }
+      const idp = session.partition ? session.partition.id :0
+      const args = { token: session.authToken, idp, idc, q }
       await post(this, 'SetQuotas', args)
       this.finOK()
     } catch (e) {

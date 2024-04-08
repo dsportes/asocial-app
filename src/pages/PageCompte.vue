@@ -12,10 +12,9 @@
         <bouton-help class="q-ml-sm" page="page1"/>
       </div>
       <!-- maj quotas du compte -->
-      <q-btn v-if="estDelegue || estA"
-        icon="settings" size="md" color="primary" padding="xs xs"
-        :label="$t('CPTedq')" no-caps
-        @click="editerq"/>
+      <btn-cond v-if="estDelegue || estA"
+        icon="settings" :label="$t('CPTedq')" @ok="editerq"
+        cond="cUrgence"/>
     </div>
 
     <div class="row justify-center">
@@ -90,12 +89,10 @@
           <q-btn dense size="md" color="warning" padding="xs" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
-        <choix-quotas class="q-mt-sm" :quotas="quotas" :groupe="estA"/>
+        <choix-quotas class="q-mt-sm" :quotas="quotas"/>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" color="primary" padding="xs" icon="undo" 
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" color="primary" padding="xs" icon="check" 
-            :disable="quotas.err" :label="$t('ok')" @click="validerq"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond icon="check" :disable="quotas.err" :label="$t('valider')" @ok="validerq"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -115,13 +112,15 @@ import NomAvatar from '../components/NomAvatar.vue'
 import SupprAvatar from '../panels/SupprAvatar.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { styp, afficherDiag, trapex } from '../app/util.mjs'
 import { isAppExc, ID } from '../app/api.mjs'
+import { GetCompta, GetPartition } from '../app/synchro.mjs'
 
 export default {
   name: 'PageCompte',
 
-  components: { 
+  components: { BtnCond,
     ChoixQuotas, NomAvatar, BoutonHelp, ApercuAvatar, SupprAvatar, BoutonConfirm
   },
 
@@ -210,28 +209,32 @@ export default {
     },
 
     async editerq () {
-      if (! await this.session.edit()) return
-      const c = this.aSt.compta.qv
+      await new GetCompta().run()
+      const c = this.session.compta
       if (this.estA) {
-        this.quotas = { q1: c.q1, q2: c.q2, qc: c.qc, min1: 0, min2: 0, minc: 0,
-          max1: 256,
-          max2: 256,
-          maxc: 256
+        this.quotas = { qn: c.qv.qn, qv: c.qv.qv, qc: 0, minn: 0, minv: 0, minc: 0,
+          maxn: 256,
+          maxv: 256,
+          maxc: 256,
+          n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
+          err: ''
         }
       } else {
-        const s = this.aSt.tribu.synth
-        this.quotas = { q1: c.q1, q2: c.q2, qc: c.qc, min1: 0, min2: 0, minc: 0,
-          max1: s.q1 - s.a1 + c.q1,
-          max2: s.q2 - s.a2 + c.q2,
-          maxc: s.qc - s.ac + c.qc
+        await new GetPartition().run(this.session.compte.idp)
+        const s = this.session.partition.synth
+        this.quotas = { qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
+        maxn: s.q.qn - s.qt.qn + c.qv.qn,
+        maxv: s.q.qv - s.qt.qv + c.qv.qv,
+        maxc: s.q.qc - s.qt.qc + c.qv.qc,
+        n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
+        err: ''
         }
       }
       this.ui.oD('PTedq')
     },
     
     async validerq () {
-      await new SetQuotas().run(this.estA ? 0 : this.aSt.tribu.id, 
-        this.aSt.compta.id, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
+      await new SetQuotas().run(this.session.compteId, this.quotas)
       this.ui.fD()
     },
 

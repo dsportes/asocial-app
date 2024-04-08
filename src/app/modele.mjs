@@ -571,7 +571,7 @@ export class Compte extends GenDoc {
     const session = stores.session
     const cfg = stores.config
     const clek = session.clek || await session.setIdClek(this.id, row.cleKXC)
-
+    if (row.cleEK) this.cleE = await decrypter(clek, row.cleEK)
     this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
     this.qv = row.qv
 

@@ -11,7 +11,8 @@
         <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo1"/>
       </div>
       <div class="q-ml-md font-mono">{{ed1(mv.qn)}} {{$t(groupe ? 'notes' : 'unnncng')}}</div>
-
+      <div :class="'q-mt-xs fnt-mono q-pa-xs ' + st(pcn)">{{$t('CQtxut', [pcn])}}</div>
+      
       <q-separator color="orange" class="q-my-sm q-mx-md"/>
 
       <div class="q-mt-md row items-center">
@@ -23,9 +24,10 @@
         <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo2"/>
       </div>
       <div class="q-ml-md font-mono">{{ed2(mv.qv, 0, 'B')}}</div>
+      <div :class="'q-mt-xs fnt-mono q-pa-xs ' + st(pcv)">{{$t('CQtxut', [pcv])}}</div>
     </div>
 
-    <div v-if="!groupe">
+    <div v-if="quotas.qc !== 0">
       <div class="q-mt-md titre-md text-italic">{{$t('CQconso')}}</div>
       <div class="titre-sm text-italic">{{$t('CQclec')}}</div>
       <div :class="'q-pa-xs bord' + (mv.err ? 'ko' : 'ok')">
@@ -57,12 +59,21 @@ export default {
     groupe: Boolean
   },
 
+  computed: {
+    pcn () { return this.quotas.qn ? Math.floor(this.quotas.n * 100 / (this.quotas.qn * UNITEN)) : 999 },
+    pcv () { return this.quotas.qv ? Math.floor(this.quotas.v * 100 / (this.quotas.qv * UNITEV)) : 999 }
+  },
+
   data () {
     return {
     }
   },
 
   methods: {
+    st (pc) { return pc < 80 ? 'fs-md' : 
+      (pc < 100 ? 'bg-yellow-3 fs-lg text-bold text-negative' : 
+      'bg-yellow-3 fs-xl text-bold text-negative')
+    },
     ed1 (v) { return edqt(v * UNITEN) },
     ed2 (v) { return edvol(v * UNITEV) },
     edc (v) { return mon(v) }
