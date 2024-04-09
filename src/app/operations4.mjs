@@ -499,3 +499,37 @@ export class SetQuotas extends Operation {
     }
   }
 }
+
+/* OP_NouvellePartition: 'Création d\'une nouvelle partition' *******
+Dans Comptes : **Comptable seulement:**
+- `tpK` : table des partitions cryptée par la clé K du Comptable `[ {cleP, code }]`. Son index est le numéro de la partition.
+  - `cleP` : clé P de la partition.
+  - `code` : code / commentaire court de convenance attribué par le Comptable
+
+- token: éléments d'authentification du compte.
+- n : numéro de partition
+- itemK: {cleP, code} crypté par la clé K du Comptable.
+- quotas: { qc, qn, qv }
+Retour:
+*/
+export class NouvellePartition extends Operation {
+  constructor () { super('NouvellePartition') }
+
+  async run (code, q) { // q: [qc, q1, q2]
+    try {
+      const session = stores.session
+      const n = session.compte.mcode.size + 1
+      const cleP = Cles.partition(n)
+      const args = { 
+        token: session.authToken, 
+        itemK: await crypter(session.clek, new Uint8Array(encode({cleP, code}))),
+        quotas: { qc: q.qc, qn: q.qn, qv: q.qv },
+        n
+      }
+      await post(this, 'NouvellePartition', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

@@ -35,9 +35,8 @@
         v-model="optionA" :options="options" dense />
     </div>
 
-    <div v-if="session.pow === 2" class="row justify-center q-mb-sm">
-      <q-btn class="col-auto" size="md" padding="xs" dense color="primary" 
-        :label="$t('PTnv')" @click="ouvrirnt"/>
+    <div class="text-center q-mb-sm">
+      <btn-cond cond="cUrgence" icon="add" :label="$t('PTnv')" @ok="ouvrirnt"/>
     </div>
 
     <q-separator color="orange" class="q-my-sm"/>
@@ -51,7 +50,7 @@
             <div class="col-3 fs-md">
               <span v-if="!lg.id">{{$t('total')}}</span>
               <span v-else>#{{ID.court(lg.id)}}
-                <span v-if="session.pow === 2" class= "q-ml-sm">{{session.compte.codeP(lg.id)}}</span>
+                <span v-if="session.pow === 2" class= "q-ml-sm">{{session.codePart(lg.id)}}</span>
               </span>
             </div>
             <div class="col-4">
@@ -169,7 +168,7 @@
 
     <!-- Dialogue de création d'une nouvelle partition -->
     <q-dialog v-model="ui.d.PEnt" persistent>
-      <q-card :class="stype('sm')">
+      <q-card :class="styp('sm')">
         <div class="titre-lg q-my-sm">{{$t('PTnv')}}</div>
         <div class="q-pa-sm">
           <q-input v-model="nom" clearable :placeholder="$t('PTinfoph')">
@@ -178,10 +177,9 @@
         </div>
         <choix-quotas :quotas="quotas" />
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense color="primary" padding="xs" size="md" icon="undo" 
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense color="warning" padding="xs" size="md" icon="check" 
-            :disable="!nom || quotas.err" :label="$t('valider')" @click="creer"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond color="warning" icon="add" :disable="!nom || quotas.err" 
+            :label="$t('valider')" @ok="creer"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -192,6 +190,7 @@
 import { onMounted, toRef } from 'vue'
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
+import BtnCond from '../components/BtnCond.vue'
 import SaisieMois from '../components/SaisieMois.vue'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
@@ -202,8 +201,8 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition } from '../app/synchro.mjs'
-import { SetEspaceOptionA } from '../app/operations4.mjs'
-import { DownloadStatC, DownloadStatC2, NouvelleTribu, SetAtrItemComptable,
+import { SetEspaceOptionA, NouvellePartition } from '../app/operations4.mjs'
+import { DownloadStatC, DownloadStatC2, SetAtrItemComptable,
   GetVersionsDlvat, GetMembresDlvat, ChangeAvDlvat, ChangeMbDlvat } from '../app/operations.mjs'
 
 const fx = [['id', 1], 
@@ -222,7 +221,7 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, 
+  components: { BtnCond, SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, 
   // ApercuNotif, 
   BoutonConfirm },
 
@@ -311,13 +310,19 @@ export default {
     },
 
     async ouvrirnt () { 
-      if (!await this.session.editpow(2)) return
       this.nom = ''
-      this.quotas = { q1: 1, q2: 1, qc: 1, min1: 0, min2: 0, max1: 9999, max2: 9999, minc: 1, maxc: 9999, err: false }
+      this.quotas = { 
+        qc: 1, qn: 1, qv: 1, 
+        minc: 0, minn: 0, minv: 0,
+        maxc: 9999, maxn: 9999, maxv: 9999, 
+        n: 0, v: 0,
+        err: false
+      }
       this.ui.oD('PEnt')
     },
     async creer () {
-      await new NouvelleTribu().run(this.nom || '', [this.quotas.qc, this.quotas.q1, this.quotas.q2])
+      await new NouvellePartition().run(this.nom || '', this.quotas)
+      await this.refreshSynth()
       this.ui.fD()
     },
 

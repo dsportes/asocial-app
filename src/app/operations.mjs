@@ -312,43 +312,6 @@ export class NouvelAvatar extends Operation {
   }
 }
 
-/* OP_NouvelleTribu: 'Création d\'une nouvelle tranche de quotas' *******
-args.token: éléments d'authentification du compte.
-args.rowTribu : row de la nouvelle tribu
-args.idc: id du comptable
-args atrItem : item à insérer dans Compta en dernière position
-Retour:
-- OK : false si l'index dans rowTribu.id (poids faible) n'est pas égal à la longueur
-de Compta.atr (conflit d'attribution)
-*/
-export class NouvelleTribu extends Operation {
-  constructor () { super('NouvelleTribu') }
-
-  async run (info, q) { // q: [qc, q1, q2]
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      let ret
-      while (await this.retry()) {
-        const idx = aSt.compta.atr.length
-
-        const clet = Tribu.genCle(idx) // enregistre la clé
-        const idt = Tribu.id(clet)
-        setClet(clet, idt)
-        const rowTribu = await Tribu.nouvelle(idt, q)
-
-        const atrItem = await Compta.atrItem(clet, info, q)
-        const args = { token: session.authToken, rowTribu, atrItem }
-        ret = this.tr(await post(this, 'NouvelleTribu', args))
-        if (!ret.KO) break
-      }
-      this.finOK(ret)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_SetNotifGg: 'Inscription d\'une notification générale' ***********************
 args.token donne les éléments d'authentification du compte.
 args.ns

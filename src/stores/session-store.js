@@ -380,28 +380,17 @@ export const useSessionStore = defineStore('session', {
       if (!this.compta || this.compta.v < compta.v) this.compta = compta
     },
 
-    setNotifE (notif) {
-      if (notif.nr === 3) {
-        this.excKO = new AppExc(A_SRV, 999, [notif.texte, notif.dh])
-        stores.ui.setPage('clos')
-      }
-    },
-
     setEspace (espace, estAdmin) {
+      const ntf = espace.notifE
+      if (ntf && ntf.nr === 3) {
+        this.setExcKO(new AppExc(A_SRV, 999, [ntf.texte, ntf.dh]))
+        stores.ui.setPage('clos')
+        return
+      }
       if (estAdmin) { this.espaces.set(espace.id, espace); return }
       this.espace = espace
       if (espace.notifE && espace.notifE.dh > this.dhvu) this.alire = true
       if (espace.notifP && espace.notifP.dh > this.dhvu) this.alire = true
-    },
-
-    setNotifE (arg) {
-      const ntf = arg.notif
-      if (ntf.nr === 3) {
-        session.setExcKO(new AppExc(A_SRV, 999, [ntf.texte, ntf.dh]))
-        stores.ui.setPage('clos')
-        return
-      }
-      console.log(dhcool(ntf.dh), ntf.nr, ntf.texte)
     },
 
     setPartition (partition) { this.partition = partition },

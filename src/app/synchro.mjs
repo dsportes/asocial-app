@@ -29,9 +29,6 @@ class Queue {
     let rev = false
     if (rows) for (const row of rows) {   
       if (row.id === session.ns) {
-        const x = decode(row._data_) || null
-        session.setNotifE(x)
-        // Maj _Store_ et IDB
         await new GetEspace().run(row.id)
       } else {
         if (ID.rdsType(row.id) === ID.RDSCOMPTE) { 

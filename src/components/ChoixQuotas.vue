@@ -11,7 +11,7 @@
         <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo1"/>
       </div>
       <div class="q-ml-md font-mono">{{ed1(mv.qn)}} {{$t(groupe ? 'notes' : 'unnncng')}}</div>
-      <div :class="'q-mt-xs fnt-mono q-pa-xs ' + st(pcn)">{{$t('CQtxut', [pcn])}}</div>
+      <div v-if="quotas.n" :class="'q-mt-xs fnt-mono q-pa-xs ' + st(pcn)">{{$t('CQtxut', [pcn])}}</div>
       
       <q-separator color="orange" class="q-my-sm q-mx-md"/>
 
@@ -24,7 +24,7 @@
         <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo2"/>
       </div>
       <div class="q-ml-md font-mono">{{ed2(mv.qv, 0, 'B')}}</div>
-      <div :class="'q-mt-xs fnt-mono q-pa-xs ' + st(pcv)">{{$t('CQtxut', [pcv])}}</div>
+      <div v-if="quotas.v" :class="'q-mt-xs fnt-mono q-pa-xs ' + st(pcv)">{{$t('CQtxut', [pcv])}}</div>
     </div>
 
     <div v-if="quotas.qc !== 0">
