@@ -2,7 +2,7 @@
 <div>
   <div class="row justify-center q-gutter-sm q-my-sm items-center">
     <btn-cond v-if="session.estComptable"
-      cond="cEdit" :label="$t('PPcht')" @click="chgTribu"/>
+      cond="cUrgence" :label="$t('PPcht')" @click="chgPartition"/>
     <btn-cond v-if="session.estComptable" 
       cond="cEdit" :label="$t('PPchsp')" @ok="chgDelegue"/>
     <btn-cond v-if="(session.estComptable || (session.estDelegue && !session.eltPart(id).fake)) && id !== session.compteId"
@@ -81,7 +81,8 @@
   <!-- Changement de partition -->
   <q-dialog v-model="ui.d.BPchgTr[idc]" persistent>
     <q-card :class="styp('sm')">
-      <div class="titre-lg bg-secondary text-white text-center">{{$t('PPchgtr', [na.nom, ID.court(aSt.tribuC.id)])}}</div>
+      <div class="titre-lg bg-secondary text-white text-center">
+        {{$t('PPchgpart', [cv.nom, session.codePart(session.partition.id)])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqv1', [aSt.ccCpt.q1, edv1(aSt.ccCpt.q1), pc1])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqv2', [aSt.ccCpt.q2, edv2(aSt.ccCpt.q2), pc2])}}</div>
 
@@ -174,11 +175,11 @@ import MicroChat from '../components/MicroChat.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
-import { MuterCompte, GetCompteursCompta, SetSponsor, ChangerTribu, GetSynthese } from '../app/operations.mjs'
+import { MuterCompte, GetCompteursCompta, SetSponsor } from '../app/operations.mjs'
 import { getNg, getCle, Tribu } from '../app/modele.mjs'
 import { crypter, crypterRSA } from '../app/webcrypto.mjs'
-import { EstAutonome } from '../app/operations4.mjs'
-import { GetCompta } from '../app/synchro.mjs'
+import { EstAutonome, ChangerPartition } from '../app/operations4.mjs'
+import { GetCompta, GetSynthese } from '../app/synchro.mjs'
 
 export default {
   name: 'BarrePeople',
@@ -196,7 +197,7 @@ export default {
     yoreq () { return (this.opt === 2 && this.st === 2) || this.st === 1 },
     opt () { return this.session.espace.opt },
     chat () { return this.aSt.getChatIdIE(this.session.compteId, this.id) },
-    cpt () { return this.aSt.ccCpt },
+    cpt () { return this.session.compta },
     synth () { return this.aSt.tribu.synth },
     txtdef () { return this.$t('PPmsg' + (this.st === 1 ? 'o' : 'a'))}
   },
@@ -215,8 +216,9 @@ export default {
       filtre: '',
       lstTr: [],
       atr: [],
-      pc1: 0,
-      pc2: 0,
+      pcc: 0,
+      pcn: 0,
+      pcv: 0,
       st: 0, // 0: contact pas compte principal, 1: contact A, 2: contact O
       cf: false,
       quotas: {} // { q1, q2, qc, min1, min2, max1, max2, minc, maxc, err}
@@ -315,38 +317,44 @@ export default {
     },
 
     filtrer () {
-      this.lstTr = []
-      this.aSt.compta.atr.forEach(x => {
-        if (x && x.id !== this.aSt.tribuC.id &&
-          (!this.filtre || (x.info && x.info.contains(this.filtre)))) {
-          const e = this.atr[ID.court(x.id)]
+      this.lst = []
+      /*
+      - `tsp` : table des _synthèses_ des partitions.
+        - _index_: numéro de la partition.
+        - _valeur_ : `synth`, objet des compteurs de synthèse calculés de la partition.
+          - `id nbc nbd`
+          - `ntfp[1,2,3]`
+          - `q` : `{ qc, qn, qv }`
+          - `qt` : { qc qn qv c2m n v }`
+          - `ntf[1,2,3]`
+          - `pcac pcan pcav pcc pcn pcv`
+      */
+      const tsp = this.session.synthese.tsp
+      for([idp, code] of this.compte.mcode) {
+        if (!this.filtre || (code && code.contains(this.filtre))) {
+          const n = ID.court(idp)
+          const e = tsp[n]
           const y = { 
-            id: x.id,
-            info: x.info ? x.info : ('#' + ID.court(x.id)), 
-            q1: x.q[1], 
-            q2: x.q[2],
-            d1: x.q[1] - (e ? e.a1 : 0),
-            d2: x.q[2] - (e ? e.a2 : 0)
+            idp,
+            code: '#' + n + ' [' + code  + ']',
+            qc: e.q.qc, 
+            qn: e.q.qn,
+            qv: e.q.qv,
+            dc: e.q.qc - e.qt.qc,
+            dn: e.q.qn - e.qt.qn,
+            dv: e.q.qv - e.qt.qv,
           }
-          y.ok1 = this.aSt.ccCpt.qv.q1 <= y.d1
-          y.ok2 = this.aSt.ccCpt.qv.q2 <= y.d2
-          this.lstTr.push(y)
+          y.okc = this.cpt.qv.qc <= y.dc
+          y.okn = this.cpt.qv.qn <= y.dn
+          y.okv = this.cpt.qv.qv <= y.dv
+          this.lst.push(y)
         }
-      })
+      }
     },
 
-    async chgTribu () { // comptable
-      if (!await this.session.edit()) return
-      await this.getCpt()
-        if (ID.estComptable(this.id)) {
-          await afficherDiag(this.$t('PTspn2c'))
-          return
-      }
-      if (!this.na) { 
-        await afficherDiag(this.$t('PTspn2'))
-        return
-      }
-      this.atr = await new GetSynthese().run(this.session.ns)
+    async chgPartition () { // comptable
+      await new GetSynthese().run(this.session.ns)
+      await new GetCompta().run(this.id)
       this.filtre = ''
       this.filtrer()
       this.ui.oD('BPchgTr', this.idc)
