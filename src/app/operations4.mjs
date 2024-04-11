@@ -533,3 +533,36 @@ export class NouvellePartition extends Operation {
     }
   }
 }
+
+/*  OP_ChangerTribu: 'Transfert d\'un compte dans une autre tranche de quotas' ************
+args.token: éléments d'authentification du compte.
+args.id : id du compte qui change de tribu
+args.idtAv : id de la tribu quittée
+args.idtAp : id de la tribu intégrée
+args.idT : id court du compte crypté par la clé de la nouvelle tribu.
+args.nasp : si sponsor `[nom, cle]` crypté par la cle de la nouvelle tribu.
+args.stn : statut de la notification 0, 1, 2
+args.notif`: notification de niveau compte cryptée par la clé de la nouvelle tribu.
+
+Sur Compta:
+args.cletX : clé de la tribu cryptée par la clé K du comptable.
+args.cletK : clé de la tribu cryptée par la clé K du compte : 
+  si cette clé a une longueur de 256, elle est cryptée par la clé publique RSA du compte 
+  (en cas de changement de tribu forcé par le comptable).
+Retour:
+- rowTribu (nouvelle)
+*/
+export class ChangerPartition extends Operation {
+  constructor () { super('ChangerPartition') }
+
+  async run (args) {
+    try {
+      const session = stores.session
+      args.token = session.authToken
+      // await post(this, 'ChangerPartition', args)
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

@@ -344,8 +344,7 @@ export default {
     },
 
     async pagePartition () { // Comptable seulement
-      if (!await this.session.editpow(2, true)) return
-      await this.getPart(this.ligne.id)
+      await this.getPart(ID.long(this.ligne.id, this.session.ns))
       this.ui.setPage('partition')
     },
 

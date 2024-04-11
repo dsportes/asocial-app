@@ -2,7 +2,7 @@
 <div>
   <div class="row justify-center q-gutter-sm q-my-sm items-center">
     <btn-cond v-if="session.estComptable"
-      cond="cUrgence" :label="$t('PPcht')" @click="chgPartition"/>
+      cond="cUrgence" :label="$t('PPchpart')" @click="chgPartition"/>
     <btn-cond v-if="session.estComptable" 
       cond="cEdit" :label="$t('PPchsp')" @ok="chgDelegue"/>
     <btn-cond v-if="(session.estComptable || (session.estDelegue && !session.eltPart(id).fake)) && id !== session.compteId"
@@ -83,42 +83,51 @@
     <q-card :class="styp('sm')">
       <div class="titre-lg bg-secondary text-white text-center">
         {{$t('PPchgpart', [cv.nom, session.codePart(session.partition.id)])}}</div>
-      <div class="q-mx-sm titre-md">{{$t('PPqv1', [aSt.ccCpt.q1, edv1(aSt.ccCpt.q1), pc1])}}</div>
-      <div class="q-mx-sm titre-md">{{$t('PPqv2', [aSt.ccCpt.q2, edv2(aSt.ccCpt.q2), pc2])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqvc', [cpt.qv.qc, cpt.pc.pcc])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqvn', [cpt.qv.qn, edn(cpt.qv.qn), cpt.pc.pcn])}}</div>
+      <div class="q-mx-sm titre-md">{{$t('PPqvv', [cpt.qv.qv, edv(cpt.qv.qv), cpt.pc.pcv])}}</div>
 
+      <q-input filled v-model="filtre" :label="$t('PPnt')" />
       <q-separator class="q-mt-sm"/>
 
       <q-card-section>
-        <q-input filled v-model="filtre" :label="$t('PPnt')" />
+        <div class="titre-md text-italic">{{$t('PPc0')}}</div>
         <div class="titre-md text-italic row items-center">
-          <div class="col-4">{{$t('PPc2')}}</div>
-          <div class="col-2 text-center">{{$t('PPc3')}}</div>
-          <div class="col-2 text-center" >{{$t('PPc5')}}</div>
-          <div class="col-2 text-center">{{$t('PPc4')}}</div>
-          <div class="col-2 text-center" >{{$t('PPc5')}}</div>
+          <div class="col-3">{{$t('PPc1')}}</div>
+          <div class="col-3 text-center">{{$t('PPc2')}}</div>
+          <div class="col-3 text-center" >{{$t('PPc3')}}</div>
+          <div class="col-3 text-center">{{$t('PPc4')}}</div>
         </div>
       </q-card-section>
 
       <q-card-section style="height: 30vh" class="scroll bord1">
-        <div v-for="x in lstTr" :key="x.id" 
-          :class="'row items-center cursor-pointer' + (selx && (x.id === selx.id) ? ' bord2' : '')"
+        <div v-for="x in lst" :key="x.id" 
+          :class="'row items-center cursor-pointer' + (selx && (ID.court(x.id) === selx.id) ? ' bord2' : '')"
           @click="selx = x">
-          <div class="col-4">{{x.info}}</div>
-          <div class="col-2 text-center">{{x.q1}}</div>
-          <div :class="'col-2 text-center' + (x.ok2 ? '' : ' bg-yellow-5 text-bold text-negative')">
-            {{x.d1}}</div>
-          <div class="col-2 text-center">{{x.q2}}</div>
-          <div :class="'col-2 text-center' + (x.ok1 ? '' : ' bg-yellow-5 text-bold text-negative')">
-            {{x.d2}}</div>
+          <div class="col-3">{{x.code}}</div>
+          <div class="col-3 text-center">
+            <span class="q-mr-md">{{x.qc}}</span>
+            <span :class="'col-2 text-center' + (x.okc ? '' : ' bg-yellow-5 text-bold text-negative')">
+              {{x.dc}}</span>
+          </div>
+          <div class="col-3 text-center">
+            <span class="q-mr-md">{{x.qn}}</span>
+            <span :class="'col-2 text-center' + (x.okn ? '' : ' bg-yellow-5 text-bold text-negative')">
+              {{x.dn}}</span>
+          </div>
+          <div class="col-2 text-center">
+            <span class="q-mr-md">{{x.qv}}</span>
+            <span :class="'col-2 text-center' + (x.okv ? '' : ' bg-yellow-5 text-bold text-negative')">
+              {{x.dv}}</span>
+          </div>
         </div>
       </q-card-section>
 
       <q-separator />      
       <q-card-actions align="right" class="q-gutter-sm">
-        <q-btn flat dense padding="xs" size="md" color="primary" icon="undo"
-          :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn dense padding="xs" size="md" icon="check" color="warning" 
-          :label="$t('valider')" :disable="!selx || !selx.ok1 || !selx.ok2" @click="changerTr()"/>
+        <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+        <btn-cond color="warning" cond="cUrgence"
+          :label="$t('valider')" :disable="!selx || !selx.okc || !selx.okn || !selx.okv" @ok="changerPart()"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -214,7 +223,7 @@ export default {
       texte: '',
       selx: null,
       filtre: '',
-      lstTr: [],
+      lst: [],
       atr: [],
       pcc: 0,
       pcn: 0,
@@ -226,8 +235,8 @@ export default {
   },
 
   methods: {
-    edv1 (v) { return edvol(v * UNITEN) },
-    edv2 (v) { return edvol(v * UNITEV) },
+    edn (v) { return v * UNITEN },
+    edv (v) { return edvol(v * UNITEV) },
 
     async muter () {
       if (!await this.session.edit()) return
@@ -284,9 +293,7 @@ export default {
 
     async getCpt() {
       await new GetCompta().run(this.id)
-      const x = this.aSt.ccCpt
-      this.pc1 = x.q1 ? Math.round((x.v1 * 100) / (x.q1 * UNITEN)) : 0,
-      this.pc2 = x.q2 ? Math.round((x.v2 * 100) / (x.q2 * UNITEV)) : 0
+
     },
 
     async voirCompta () { // comptable OU délégué
@@ -330,8 +337,8 @@ export default {
           - `pcac pcan pcav pcc pcn pcv`
       */
       const tsp = this.session.synthese.tsp
-      for([idp, code] of this.compte.mcode) {
-        if (!this.filtre || (code && code.contains(this.filtre))) {
+      for(const [idp, code] of this.session.compte.mcode) {
+        if (!this.filtre || (code && code.indexOf(this.filtre) !== -1)) {
           const n = ID.court(idp)
           const e = tsp[n]
           const y = { 
@@ -360,8 +367,11 @@ export default {
       this.ui.oD('BPchgTr', this.idc)
     },
 
-    async changerTr () {
+    async changerPart () {
+      await new ChangerPartition().run(this.id, this.selx.id)
+      await new GetSynthese().run(this.session.ns)
       this.ui.fD()
+      /*
       const cletAv = this.aSt.ccCpt.clet
       const idtAv = Tribu.id(cletAv)
       const trAv = this.aSt.getTribu(idtAv)
@@ -381,13 +391,13 @@ export default {
       const idT = await crypter(cletAp, '' + ID.court(this.id))
       const args = { id: this.id, idtAv, idtAp, idT, nasp, stn, notif, cletX, cletK } 
       const t = await new ChangerTribu().run(args)
-      /* en sql, la nouvelle tribu this.id est abonnée, de facto la précédente désabonnée
-        mais pas en fs */
+      // en sql, la nouvelle tribu this.id est abonnée, de facto la précédente désabonnée mais pas en fs
       if (this.session.fsSync) {
         await this.session.fsSync.setTribuC(t.id)
       }
       this.session.setTribuCId(t.id)
       this.aSt.setTribuC(t)
+      */
     }
   },
 
