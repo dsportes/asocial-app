@@ -53,27 +53,30 @@
                 <span v-if="session.pow === 2" class= "q-ml-sm">{{session.codePart(lg.id)}}</span>
               </span>
             </div>
-            <div class="col-4">
+            <div class="col-3">
               {{$t('PEnbc', lg.nbc, { count: lg.nbc })}}, {{$t('PEnbd', lg.nbd, { count: lg.nbd })}}
             </div>
-            <div class="col-1 font-mono fs-sm text-center">{{lg.qc}}<br/>{{lg.pcac}}%</div>
-            <div class="col-1 font-mono fs-sm text-center">{{lg.qn}}<br/> {{lg.pcan}}%</div>
-            <div class="col-1 font-mono fs-sm text-center">{{lg.qv}}<br/> {{lg.pcav}}%</div>
-            <div class="col-2">
-              <q-icon v-if="lg.ntr0 + lg.nco0 !== 0" name="info" color="primary" size="xs" />
+            <div class="col-1 font-mono fs-sm text-center">{{lg.q.qc}}<br/>{{lg.pcac}}%</div>
+            <div class="col-1 font-mono fs-sm text-center">{{lg.q.qn}}<br/> {{lg.pcan}}%</div>
+            <div class="col-1 font-mono fs-sm text-center">{{lg.q.qv}}<br/> {{lg.pcav}}%</div>
+            <div class="col-2 text-right">
+              <q-icon v-if="lg.ntf[0] + lg.ntfp[0] !== 0" name="info" color="primary" size="xs" />
               <q-icon v-else name="check" color="grey-5" size="xs" />
-              <q-icon v-if="lg.ntr1 + lg.nco1 !== 0" class="bg-yellow-3" name="warning_amber" color="warning" size="xs" />
+              <q-icon v-if="lg.ntf[1] + lg.ntfp[1] !== 0" class="bg-yellow-3" name="warning_amber" color="warning" size="xs" />
               <q-icon v-else name="check" color="grey-5" size="xs" />
-              <q-icon v-if="lg.ntr2 + lg.nco2 !== 0" class="bg-yellow-5" name="lock" color="negative" size="xs" />
+              <q-icon v-if="lg.ntf[2] + lg.ntfp[2]" class="bg-yellow-5" name="lock" color="negative" size="xs" />
               <q-icon v-else name="check" color="grey-5" size="xs" />
+            </div>
+            <div class="col-1 text-right">
+              <btn-cond v-if="lg.id" round icon="open_in_new" @ok="pagePartition"/>
             </div>
           </div>
         </template>
         <div :class="dkli(idx) + 'q-ml-xl q-mb-lg'">
           <div class="row q-gutter-sm">
-            <tuile-cnv type="qc" :src="lg" occupation/>
-            <tuile-cnv type="qn" :src="lg" occupation/>
-            <tuile-cnv type="qv" :src="lg" occupation/>
+            <tuile-cnv type="qc" :src="lg.q" occupation/>
+            <tuile-cnv type="qn" :src="lg.q" occupation/>
+            <tuile-cnv type="qv" :src="lg.q" occupation/>
             <tuile-notif :src="lg" :total="idx === 0" occupation/>
           </div>
           <!--
@@ -88,8 +91,6 @@
               :label="$t('PEedn')" @click="editer"/>
             <q-btn size="sm" class="fs-md" padding="xs"
               icon="settings" :label="$t('PEabo')" dense color="primary" @click="editerq"/>
-            <q-btn v-if="lg.id" class="fs-md" size="sm" dense color="primary" padding="xs"
-              :label="$t('detail')" icon-right="open_in_new" @click="pagePartition"/>
           </div>
         </div>
       </q-expansion-item>

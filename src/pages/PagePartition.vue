@@ -9,9 +9,9 @@
       </template>
       <div class="q-ml-xl q-mb-lg splg">
         <div class="row justify-around">
-          <tuile-cnv type="qc" :src="lg" occupation/>
-          <tuile-cnv type="qn" :src="lg" occupation/>
-          <tuile-cnv type="qv" :src="lg" occupation/>
+          <tuile-cnv type="qc" :src="lg.q" occupation/>
+          <tuile-cnv type="qn" :src="lg.q" occupation/>
+          <tuile-cnv type="qv" :src="lg.q" occupation/>
           <tuile-notif :src="lg" occupation/>
         </div>
         <div class="q-my-xs">
@@ -204,7 +204,7 @@ export default {
     const session = stores.session
   
     async function reload () {
-      if (session.accesNet && !session.estA) await new GetPartition().run(session.compte.idp)
+      if (session.accesNet && !session.estA) await new GetPartition().run(session.partition.id)
     }
     // if (session.accesNet) onMounted(async () => { await reload() })
 
