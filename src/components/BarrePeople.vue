@@ -94,31 +94,37 @@
         <div class="titre-md text-italic">{{$t('PPc0')}}</div>
         <div class="titre-md text-italic row items-center">
           <div class="col-3">{{$t('PPc1')}}</div>
-          <div class="col-3 text-center">{{$t('PPc2')}}</div>
-          <div class="col-3 text-center" >{{$t('PPc3')}}</div>
-          <div class="col-3 text-center">{{$t('PPc4')}}</div>
+          <div class="col-3 text-center">{{$t('PPc2', [cpt.qv.qc])}}</div>
+          <div class="col-3 text-center" >{{$t('PPc3', [cpt.qv.qn])}}</div>
+          <div class="col-3 text-center">{{$t('PPc4', [cpt.qv.qv])}}</div>
         </div>
       </q-card-section>
 
       <q-card-section style="height: 30vh" class="scroll bord1">
         <div v-for="x in lst" :key="x.id" 
-          :class="'row items-center cursor-pointer' + (selx && (ID.court(x.id) === selx.id) ? ' bord2' : '')"
+          :class="'row items-center cursor-pointer' + (selx && (x.idp === selx.idp) ? ' bord2' : ' bord1')"
           @click="selx = x">
           <div class="col-3">{{x.code}}</div>
-          <div class="col-3 text-center">
-            <span class="q-mr-md">{{x.qc}}</span>
-            <span :class="'col-2 text-center' + (x.okc ? '' : ' bg-yellow-5 text-bold text-negative')">
-              {{x.dc}}</span>
+          <div class="col-3 q-px-xs">
+            <div :class="'text-center' + (x.okc ? '' : ' bg-yellow-5 text-bold text-negative')">
+              <span >{{x.dc}}</span>
+              <span class="q-mx-sm">/</span>
+              <span>{{x.qc}}</span>
+            </div>
           </div>
-          <div class="col-3 text-center">
-            <span class="q-mr-md">{{x.qn}}</span>
-            <span :class="'col-2 text-center' + (x.okn ? '' : ' bg-yellow-5 text-bold text-negative')">
-              {{x.dn}}</span>
+          <div class="col-3 q-px-xs">
+            <div :class="'text-center' + (x.okn ? '' : ' bg-yellow-5 text-bold text-negative')">
+              <span >{{x.dn}}</span>
+              <span class="q-mx-sm">/</span>
+              <span>{{x.qn}}</span>
+            </div>
           </div>
-          <div class="col-2 text-center">
-            <span class="q-mr-md">{{x.qv}}</span>
-            <span :class="'col-2 text-center' + (x.okv ? '' : ' bg-yellow-5 text-bold text-negative')">
-              {{x.dv}}</span>
+         <div class="col-3 q-px-xs">
+            <div :class="'text-center' + (x.okv ? '' : ' bg-yellow-5 text-bold text-negative')">
+              <span >{{x.dv}}</span>
+              <span class="q-mx-sm">/</span>
+              <span>{{x.qv}}</span>
+            </div>
           </div>
         </div>
       </q-card-section>
@@ -338,7 +344,8 @@ export default {
       */
       const tsp = this.session.synthese.tsp
       for(const [idp, code] of this.session.compte.mcode) {
-        if (!this.filtre || (code && code.indexOf(this.filtre) !== -1)) {
+        if ((!this.filtre || (code && code.indexOf(this.filtre) !== -1))
+          && idp !== this.session.partition.id) {
           const n = ID.court(idp)
           const e = tsp[n]
           const y = { 
@@ -349,7 +356,7 @@ export default {
             qv: e.q.qv,
             dc: e.q.qc - e.qt.qc,
             dn: e.q.qn - e.qt.qn,
-            dv: e.q.qv - e.qt.qv,
+            dv: e.q.qv - e.qt.qv
           }
           y.okc = this.cpt.qv.qc <= y.dc
           y.okn = this.cpt.qv.qn <= y.dn
@@ -421,9 +428,8 @@ export default {
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .bord1
-  border: 1px solid $grey-5
+  border: 2px solid transparent
 .bord2
-  background: $yellow-3
-  color: black
+  border: 2px solid $warning
   font-weight: bold
 </style>
