@@ -1135,3 +1135,31 @@ export class GetCompta extends Operation {
     }
   }
 }
+
+/* `GetNotifC` : obtention de la notification d'un compte
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `id` : id du compte dont on cherche la notification
+Réservée au comptable et aux délégués de la partition du compte
+Retour:
+- notif
+*/
+export class GetNotifC extends Operation {
+  constructor () { super('GetNotifC') }
+
+  async run (id, idp) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id}
+      const ret = await post(this, 'GetNotifC', args)
+      let notif = null
+      if (ret.notif) {
+        const cleP = RegCles.get(idp)
+        if (cleP) notif = Notification.decrypt(ret.notif, cleP)
+      }
+      session.notifC = notif
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

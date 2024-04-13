@@ -402,33 +402,6 @@ export class SetNotifC extends Operation {
   }
 }
 
-/*   OP_SetAtrItemComptable: 'Mise à jour des quotas d\'une tranche de quotas'
-args.token: éléments d'authentification du compte.
-args.id : id de la tribu
-args.idc: id du comptable
-args.atrItem: élément de atr {clet, info, q1, q2} cryptés par sa clé K
-args.quotas: [q1, q2] ]si changement des quotas, sinon null
-Retour:
-*/
-export class SetAtrItemComptable extends Operation {
-  constructor () { super('SetAtrItemComptable') }
-
-  async run (id, info, quotas) {
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      const c = aSt.compta
-      const a = c.atr[ID.court(id)]
-      const atrItem = await Compta.atrItem(a.clet, info ? info : a.info, quotas ? quotas : a.q)
-      const args = { token: session.authToken, id, idc: c.id, atrItem, quotas}
-      this.tr(await post(this, 'SetAtrItemComptable', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_SetSponsor: 'Changement pour un compte de son statut de sponsor de sa tranche de quotas'
 args.token: éléments d'authentification du compte.
 args.idt : id de la tribu

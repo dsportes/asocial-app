@@ -9,9 +9,9 @@
       </template>
       <div class="q-ml-xl q-mb-lg splg">
         <div class="row justify-around">
-          <tuile-cnv type="qc" :src="lg.q" occupation/>
-          <tuile-cnv type="qn" :src="lg.q" occupation/>
-          <tuile-cnv type="qv" :src="lg.q" occupation/>
+          <tuile-cnv type="qc" :src="lg" occupation/>
+          <tuile-cnv type="qn" :src="lg" occupation/>
+          <tuile-cnv type="qv" :src="lg" occupation/>
           <tuile-notif :src="lg" occupation/>
         </div>
         <div class="q-my-xs">
@@ -30,7 +30,7 @@
     </q-toolbar>
 
     <div v-for="(c, idx) in session.ptLcFT" :key="c.id" class="spmd q-my-xs">
-      <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)">
+      <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)" @click="selCpt(c)">
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
@@ -43,7 +43,7 @@
                 :class="'q-ml-md ' + tclr(c) + ' ' + bgclr(c)"/>
             </div>
             
-            <q-btn v-if="type(c)===2" class="q-ml-md" icon="open_in_new" size="md" color="primary" dense
+            <btn-cond v-if="type(c)===2" class="q-ml-md" icon="open_in_new"
               @click.stop="voirpage(c)"/>
           </div>
         </template>
@@ -57,7 +57,7 @@
             :idE="c.id" :del="(session.estComptable || session.estDelegue) || c.del"/>
 
           <apercu-notif v-if="session.estDelegue || session.estComptable" class="q-my-xs" editable
-            :notif="c.notif" :type="2" :idx="idx" :cible="c.id"/>
+            :notif="session.notifC" :type="2" :idx="idx" :cible="c.id"/>
 
           <div v-if="vis(c)" class="q-my-sm row">
             <quotas-vols class="col" :vols="c.q" />
@@ -115,7 +115,7 @@ import BarrePeople from '../components/BarrePeople.vue'
 import ChatsAvec from '../components/ChatsAvec.vue'
 import { SetNotifT, SetNotifC } from '../app/operations.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
-import { GetPartition } from '../app/synchro.mjs'
+import { GetPartition, GetNotifC } from '../app/synchro.mjs'
 import { styp } from '../app/util.mjs'
 
 const ic = ['check', 'report', 'alarm_on', 'lock']
@@ -149,19 +149,18 @@ export default {
       return 3
     },
 
-    nomc (c) {
-      const cv = this.session.getCV(c.id)
-      return this.type(c) === 1 ? cv.nom : (this.type(c) === 2 ? cv.nomc : '#' + c.id)
+    async selCpt (c) {
+      this.session.setPeopleId(c.id)
+      await new GetNotifC().run(this.session.peopleId)
     },
 
-    async voirpage (c) { 
+    voirpage (c) { 
       this.session.setPeopleId(c.id)
       this.ui.oD('detailspeople')
     },
 
     async editerq (c) {
       // c.q : {qc qn qv c2m nn nc ng v} extraits du document `comptas` du compte.
-      this.ccid = c.id
       const s = this.session.partition.synth
       this.quotas = { qn: c.q.qn, qv: c.q.qv, qc: c.q.qc, minn: 0, minv: 0, minc: 0,
         maxn: s.q.qn - s.qt.qn + c.q.qn,
@@ -175,7 +174,7 @@ export default {
     },
     
     async validerq () {
-      await new SetQuotas().run(this.ccid, this.quotas)
+      await new SetQuotas().run(this.session.peopleId, this.quotas)
       await this.reload()
       this.ui.fD()
     },
@@ -192,11 +191,7 @@ export default {
 
   data () {
     return {
-      ccid: 0, // compte "courant" dans la liste
-      ccnomc: '', // nom plus ou moins complet du compte "courant"
-      quotas: {},
-      cpt: null,
-      fipeople: false
+      quotas: {}
     }
   },
 

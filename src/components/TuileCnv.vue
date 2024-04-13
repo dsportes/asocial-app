@@ -5,16 +5,16 @@
 
     <div class="col-6 row items-center bordgris">
       <div v-if="type==='qc'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
-        <div class='font-mono fs-sm'>[{{src.qc}}]</div>
-        <div class='font-mono fs-md'>{{mon(src.qc)}}</div>
+        <div class='font-mono fs-sm'>[{{src.q.qc}}]</div>
+        <div class='font-mono fs-md'>{{mon(src.q.qc)}}</div>
       </div>
       <div v-if="type==='qn'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
-        <div class='font-mono text-center fs-sm'>[{{src.qn}}]</div>
-        <div class='font-mono text-center fs-md'>{{nbn(src.qn * UNITEN)}}</div>
+        <div class='font-mono text-center fs-sm'>[{{src.q.qn}}]</div>
+        <div class='font-mono text-center fs-md'>{{nbn(src.q.qn * UNITEN)}}</div>
       </div>
       <div v-if="type==='qv'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
-        <div class='font-mono text-center fs-sm'>[{{src.qv}}]</div>
-        <div class='font-mono text-center fs-md'>{{edvol(src.qv * UNITEV)}}</div>
+        <div class='font-mono text-center fs-sm'>[{{src.q.qv}}]</div>
+        <div class='font-mono text-center fs-md'>{{edvol(src.q.qv * UNITEV)}}</div>
       </div>
       <div :class="(occupation ? 'col-3' : 'col-5') + ' column items-center'">
         <div class='fs-sm text-italic text-center'>{{$t('TUaff')}}</div>

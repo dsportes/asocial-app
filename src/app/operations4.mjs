@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { Operation } from './synchro.mjs'
 import { random, gzipB } from './util.mjs'
-import { Cles, d14 } from './api.mjs'
+import { Cles, d14, ID } from './api.mjs'
 import { post } from './net.mjs'
 import { RegCles, compile, CV } from './modele.mjs'
 import { getPub } from './synchro.mjs'
@@ -535,34 +535,81 @@ export class NouvellePartition extends Operation {
 }
 
 /*  OP_ChangerTribu: 'Transfert d\'un compte dans une autre tranche de quotas' ************
-args.token: éléments d'authentification du compte.
-args.id : id du compte qui change de tribu
-args.idtAv : id de la tribu quittée
-args.idtAp : id de la tribu intégrée
-args.idT : id court du compte crypté par la clé de la nouvelle tribu.
-args.nasp : si sponsor `[nom, cle]` crypté par la cle de la nouvelle tribu.
-args.stn : statut de la notification 0, 1, 2
-args.notif`: notification de niveau compte cryptée par la clé de la nouvelle tribu.
-
-Sur Compta:
-args.cletX : clé de la tribu cryptée par la clé K du comptable.
-args.cletK : clé de la tribu cryptée par la clé K du compte : 
-  si cette clé a une longueur de 256, elle est cryptée par la clé publique RSA du compte 
-  (en cas de changement de tribu forcé par le comptable).
+- token: éléments d'authentification du compte.
+- id : id du compte qui change de partition
+- idp : id de la nouvelle partition
+- cleAP : clé A du compte cryptée par la clé P de la nouvelle partition
+- clePK : clé de la nouvelle partition cryptée par la clé publique du compte
+- notif: notification du compte cryptée par la clé P de la nouvelle partition
 Retour:
-- rowTribu (nouvelle)
 */
 export class ChangerPartition extends Operation {
   constructor () { super('ChangerPartition') }
 
-  async run (args) {
+  async run (id, idpart, ntf) { // id du compte, id nouvelle partition
     try {
       const session = stores.session
-      args.token = session.authToken
-      // await post(this, 'ChangerPartition', args)
-      return this.finOK()
+      const idp = ID.long(idpart, session.ns)
+      const cleA = RegCles.get(id)
+      const cleP = RegCles.get(idp)
+      const cleAP = await crypter(cleP, cleA)
+      const notif = ntf ? await ntf.crypt(cleP) : null
+      const pub = await getPub(id)
+      const clePK = await crypterRSA(pub, cleP)
+      const args = {
+        token: session.authToken,
+        id, idp, cleAP, clePK, notif
+      }
+      await post(this, 'ChangerPartition', args)
+      return this.finOK(notif)
     } catch (e) {
       await this.finKO(e)
     }
   }
 }
+
+/* OP_SetQuotasPart: 'Mise à jour des quotas d\'une tpartition'
+- token: éléments d'authentification du compte.
+- idp : id de la partition
+- quotas: {qc, qn, qv}
+Retour:
+*/
+export class SetQuotasPart extends Operation {
+  constructor () { super('SetQuotasPart') }
+
+  async run (idp, quotas) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, idp: ID.long(idp, session.ns), quotas}
+      await post(this, 'SetQuotasPart', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_SetCodePart: 'Mise à jour du code d\'une partition'
+- token: éléments d'authentification du compte.
+- idp : id de la partition
+- etpk: {codeP, code} crypté par la clé K du Comptable
+Retour:
+*/
+export class SetCodePart extends Operation {
+  constructor () { super('SetQuotasPart') }
+
+  async run (id, code) {
+    try {
+      const session = stores.session
+      const idp = ID.long(id, session.ns)
+      const cleP = RegCles.get(idp)
+      const etpk = await crypter(session.clek, new Uint8Array(encode({ cleP, code })))
+      const args = { token: session.authToken, idp, etpk}
+      await post(this, 'SetCodePart', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+

@@ -43,6 +43,7 @@ export const useSessionStore = defineStore('session', {
     groupeId: 0, // groupe "courant"
     membreId: 0, // membre "courant" (son im/ids dans son groupe)
     peopleId: 0, // people "courant"
+    notifC: null, // notifC du people courant
     
     espaces: new Map(), // Pour admin SEULEMENT
     syntheses: new Map(), // Pour admin SEULEMENT

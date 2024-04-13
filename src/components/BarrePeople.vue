@@ -375,36 +375,9 @@ export default {
     },
 
     async changerPart () {
-      await new ChangerPartition().run(this.id, this.selx.id)
+      await new ChangerPartition().run(this.id, this.selx.id, this.session.notifC)
       await new GetSynthese().run(this.session.ns)
       this.ui.fD()
-      /*
-      const cletAv = this.aSt.ccCpt.clet
-      const idtAv = Tribu.id(cletAv)
-      const trAv = this.aSt.getTribu(idtAv)
-      const itAv = this.aSt.ccCpt.it
-      const notifAv = trAv.act[itAv].notif
-      const idtAp = this.selx.id
-      const cletAp = getCle(idtAp) // le comptable qui a les clés de toutes les tribus
-      const nasp = !this.aSt.ccCpt.sp ? null : await crypter(cletAp, new Uint8Array(encode(this.na.anr)))
-      let notif = null, stn = 0
-      if (notifAv) {
-        stn = notifAv.stn
-        notif = await crypter(cletAp, notifAv.serial)
-      }
-      const cletX = await crypter(this.session.clek, cletAp)
-      const pub = await this.aSt.getPub(this.id)
-      const cletK = await crypterRSA(pub, cletAp)
-      const idT = await crypter(cletAp, '' + ID.court(this.id))
-      const args = { id: this.id, idtAv, idtAp, idT, nasp, stn, notif, cletX, cletK } 
-      const t = await new ChangerTribu().run(args)
-      // en sql, la nouvelle tribu this.id est abonnée, de facto la précédente désabonnée mais pas en fs
-      if (this.session.fsSync) {
-        await this.session.fsSync.setTribuC(t.id)
-      }
-      this.session.setTribuCId(t.id)
-      this.aSt.setTribuC(t)
-      */
     }
   },
 

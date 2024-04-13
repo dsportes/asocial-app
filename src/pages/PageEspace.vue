@@ -73,10 +73,10 @@
           </div>
         </template>
         <div :class="dkli(idx) + 'q-ml-xl q-mb-lg'">
-          <div class="row q-gutter-sm">
-            <tuile-cnv type="qc" :src="lg.q" occupation/>
-            <tuile-cnv type="qn" :src="lg.q" occupation/>
-            <tuile-cnv type="qv" :src="lg.q" occupation/>
+          <div class="row q-gutter-sm justify-center">
+            <tuile-cnv type="qc" :src="lg" occupation/>
+            <tuile-cnv type="qn" :src="lg" occupation/>
+            <tuile-cnv type="qv" :src="lg" occupation/>
             <tuile-notif :src="lg" :total="idx === 0" occupation/>
           </div>
           <!--
@@ -85,12 +85,9 @@
               :ctx="{ idt: lg.id }" :idx="idx"/>
           </div>
           -->
-          <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs">
-            <q-btn class="fs-md" size="sm" dense padding="xs"
-              color="primary" :icon="lg.info ? 'edit' : 'add'" 
-              :label="$t('PEedn')" @click="editer"/>
-            <q-btn size="sm" class="fs-md" padding="xs"
-              icon="settings" :label="$t('PEabo')" dense color="primary" @click="editerq"/>
+          <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs justify-center">
+            <btn-cond icon="edit" cond="cUrgence" :label="$t('PEedn')" @ok="editer"/>
+            <btn-cond cond="cUrgence" icon="settings" :label="$t('PEabo')" @ok="editerq"/>
           </div>
         </div>
       </q-expansion-item>
@@ -134,17 +131,17 @@
       </q-card>
     </q-dialog>
 
-    <!-- Edition de l'info attachée à une tribu -->
+    <!-- Edition du code d'une partition -->
     <q-dialog v-model="ui.d.PEedcom" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTinfo')}}</q-toolbar-title>
         </q-toolbar>
         <div class="q-ma-sm">
-          <q-input v-model="info" clearable :placeholder="$t('PTinfoph')">
+          <q-input v-model="code" clearable :placeholder="$t('PTinfoph')">
             <template v-slot:append>
-              <q-btn dense icon="check" padding="xs" :label="$t('ok')" @click="valider" color="warning"/>
+              <btn-cond icon="check" :label="$t('ok')" @ok="valider" color="warning"/>
             </template>
             <template v-slot:hint>{{$t('PTinfoh')}}</template>
           </q-input>
@@ -156,13 +153,13 @@
     <q-dialog v-model="ui.d.PEedq" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+          <btn-cond color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqut')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn :disable="quotas.err" dense size="md" padding="xs" color="primary" icon="check" 
-            :label="$t('ok')" @click="validerq"/>
+          <btn-cond :disable="quotas.err" icon="check" cond="cUrgence"
+            :label="$t('ok')" @ok="validerq"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -202,8 +199,8 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition } from '../app/synchro.mjs'
-import { SetEspaceOptionA, NouvellePartition } from '../app/operations4.mjs'
-import { DownloadStatC, DownloadStatC2, SetAtrItemComptable,
+import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, SetCodePart } from '../app/operations4.mjs'
+import { DownloadStatC, DownloadStatC2,
   GetVersionsDlvat, GetMembresDlvat, ChangeAvDlvat, ChangeMbDlvat } from '../app/operations.mjs'
 
 const fx = [['id', 1], 
@@ -353,25 +350,26 @@ export default {
       await new SetNotifT().run(this.ligne.id, ntf)
     },
     async editer () {
-      if (!await this.session.editpow(2)) return
-      this.info = this.infoC
+      this.code = this.session.compte.mcode.get(ID.long(this.ligne.id, this.session.ns))
       this.ui.oD('PEedcom')
     },
     async valider () {
-      await new SetAtrItemComptable().run(this.ligne.id, this.info, null)
+      await new SetCodePart().run(this.ligne.id, this.code)
       this.ui.fD()
     },
     async editerq () {
-      if (!await this.session.editpow(2)) return
+      const q = this.ligne.q
       this.quotas = { 
-        q1: this.ligne.q1, q2: this.ligne.q2, qc: this.ligne.qc,
-        min1: 0, min2: 0, minc: 0,
-        max1: 9999, max2: 9999, maxc: 9999
+        qc: q.qc, qn: q.qn, qv: q.qv,
+        minc: 0, minn: 0, minv: 0,
+        maxc: 9999, maxn: 9999, maxv: 9999,
+        err: ''
       }
       this.ui.oD('PEedq')
     },
     async validerq () {
-      await new SetAtrItemComptable().run(this.ligne.id, null, [this.quotas.qc, this.quotas.q1, this.quotas.q2])
+      await new SetQuotasPart().run(this.ligne.id, this.quotas)
+      await this.refreshSynth()
       this.ui.fD()
     },
 
@@ -431,6 +429,7 @@ export default {
       mois: Math.floor(this.session.auj / 100),
       nom: '',
       quotas: null,
+      code: '',
       ligne: null,
       optionsNbmi: [3, 6, 12, 18, 24],
       nbmi: this.session.espace ? this.session.espace.nbmi : 12,
