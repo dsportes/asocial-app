@@ -1,6 +1,6 @@
 <template>  
   <div :class="(occupation ? 'w3b' : 'w2b') + ' row items-start'">
-    <div class="col-3 titre-md text-italic">{{$t('TUntft')}}</div>
+    <div class="col-3 titre-md text-italic">{{$t('TUntfp')}}</div>
 
     <div class="col-3 column bordgris">
       <div class="row full-width">

@@ -287,6 +287,26 @@ export class SetNotifE extends Operation {
   }
 }
 
+/* OP_SetNotifP: 'Inscription / mise à jour de la notification d\'une partition'
+- `token` : éléments d'authentification du compte.
+- `idp` : id de la partition
+- `notif` : notification cryptée par la clé de la partition.
+*/
+export class SetNotifP extends Operation {
+  constructor () { super('SetNotifP') }
+
+  async run (notif, idp) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, idp, notif }
+      await post(this, 'SetNotifP', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* OP_SetDhvuCompta: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte'
 args.token: éléments d'authentification du compte.
 args.dhvu : dhvu cryptée par la clé K

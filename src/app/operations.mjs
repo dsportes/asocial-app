@@ -342,35 +342,6 @@ export class SetNotifG extends Operation {
   }
 }
 
-/* OP_SetNotifT: 'Inscription / mise à jour de la notification d\'une tranche de quotas'
-POST:
-- `token` : éléments d'authentification du compte.
-- `id` : id de la tribu
-- `notif` : notification cryptée par la clé de la tribu.
-- `stn`: statut de notif 0:simple 1 2 9:aucune notif
-
-Assertion sur l'existence du row `Tribus` de la tribu.
-*/
-export class SetNotifT extends Operation {
-  constructor () { super('SetNotifT') }
-
-  async run (notifT, idt) {
-    try {
-      const session = stores.session
-      if (!notifT) notifT = new Notification({})
-      else notifT.dh = Date.now()
-      const stn = notifT.stn
-      const cle = getCle(idt)
-      const notif = await crypter(cle, notifT.serial)
-      const args = { token: session.authToken, id: idt, notif, stn }
-      this.tr(await post(this, 'SetNotifT', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_SetNotifC: 'Inscription / mise à jour de la notification d\'un compte'
 POST:
 - `token` : éléments d'authentification du compte.

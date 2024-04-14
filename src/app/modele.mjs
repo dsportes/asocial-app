@@ -276,7 +276,7 @@ export class Notification {
   // Factory construisant une objet Notification depuis sa forme cryptée
   static async decrypt (ntf, cle) {
     const n = { nr: ntf.nr || 0, dh: ntf.dh || 0 }
-    n.texte = ntf.texte ? await decrypterStr(cle, nrf.texte) : ''
+    n.texte = ntf.texte ? await decrypterStr(cle, ntf.texte) : ''
     if (ntf.idDel) n.idEl = ntf.idDel
     return new Notification(n)
   }
@@ -376,8 +376,18 @@ export class Espace extends GenDoc {
     this.dlvat = row.dlvat || 0
     this.nbmi = row.nbmi || 6
     this.notifE = row.notifE ? new Notification(row.notifE) : null
-    this.notifP = row.notifP ? new Notification(row.notifP) : null
+    this.notifPx = row.notifP || null
     this.tnotifP = row.tnotifP || []
+  }
+
+  async notifP (idp) {
+    const session = stores.session
+    let ntf = this.notifPx
+    if (idp) ntf = this.tnotifP[ID.court(idp)]
+    if (!ntf) return null
+    const id = idp || this.session.compte.idp
+    const cleP = RegCles.get(id)
+    return await Notification.decrypt(ntf, cleP)
   }
 
 }

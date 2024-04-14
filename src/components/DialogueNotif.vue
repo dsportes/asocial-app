@@ -2,7 +2,7 @@
   <q-card :class="styp('md')">
     <q-toolbar class="bg-secondary text-white">
       <q-btn dense color="warning" size="md" icon="close" @click="ui.fD"/>
-      <q-toolbar-title class="titre-lg full-width text-center">{{$t('ANnot')}}</q-toolbar-title>
+      <q-toolbar-title class="titre-lg full-width text-center">{{$t('ANnot' + type)}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
     <q-card-section class="q-my-sm q-mx-sm column">
@@ -22,11 +22,10 @@
         editable modetxt/>
     </q-card-section>
     <q-card-actions align="right">
-      <q-btn flat color="primary" size="md" padding="xs" dense icon="undo" 
-        :label="$t('renoncer')" @click="ui.fD"/>
-      <q-btn dense size="md" padding="xs" color="warning" icon="delete" 
-        :label="$t('supprimer')" :disable="!ntf.texte" @click="valider(true)"/>
-      <q-btn class="q-ml-md" size="md" padding="xs" color="warning" icon="check" 
+      <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+      <btn-cond color="warning" icon="delete" cond="cUrgence"
+        :label="$t('supprimer')" :disable="!ntf.texte" @ok="valider(true)"/>
+      <btn-cond class="q-ml-md" icon="check" cond="cUrgence"
         :label="$t('valider')" :disable="!n.texte" @click="valider(false)"/>
     </q-card-actions>
   </q-card>
@@ -37,11 +36,13 @@ import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
+import BtnCond from './BtnCond.vue'
 import EditeurMd from './EditeurMd.vue'
-import { styp, dhcool, afficherDiag } from '../app/util.mjs'
-import { SetNotifT, SetNotifC } from '../app/operations.mjs'
-import { SetNotifE } from '../app/operations4.mjs'
+import { styp, dhcool } from '../app/util.mjs'
+import { SetNotifC } from '../app/operations.mjs'
+import { SetNotifE, SetNotifP } from '../app/operations4.mjs'
 import { reconnexion } from '../app/synchro.mjs'
+import { RegCles } from '../app/modele.mjs'
 
 export default {
   name: 'DialogueNotif',
@@ -56,13 +57,10 @@ export default {
     ntf: Object,
     restr: Boolean,
     restrb: Boolean,
-    cible: Number,
-    ns: Number,
-    idt: Number,
-    idc: Number
+    cible: Number
   },
 
-  components: { BoutonHelp, BoutonBulle, EditeurMd },
+  components: { BtnCond, BoutonHelp, BoutonBulle, EditeurMd },
 
   watch: {
     restrloc (ap) { if (ap && this.restrbloc) this.restrbloc = false },
@@ -82,16 +80,6 @@ export default {
         this.n.nr = 1
         if (this.restrloc) this.n.nr = 2
         if (this.restrbloc) this.n.nr = 3
-        // Interdiction de se bloquer soi-même
-        if (this.type === 1 && this.session.pow === 3 && this.n.nr > 1) { 
-          await afficherDiag(this.$t('ANer10'))
-          return
-        }
-        if (this.type === 2 && (this.session.pow === 3 || this.session.pow === 2)
-          && this.n.nr > 2 && this.cible === this.session.compteId) {
-            await afficherDiag(this.$t('ANer11'))
-            return
-        }
       } else {
         this.n.nr = 0
         this.texte = ''
@@ -101,9 +89,10 @@ export default {
         this.session.setOrg('admin')
         reconnexion()
       } else {
-        // TODO : obtenir la clé de la partition et crypter le texte
         if (this.type === 1) {
-          await new SetNotifT().run(suppr ? null : this.n, this.cible)
+          const cleP = RegCles.get(this.cible)
+          const ntf = await this.n.crypt(cleP)
+          await new SetNotifP().run(suppr ? null : ntf, this.cible)
         } else {
           await new SetNotifC().run (suppr ? null : this.n, this.cible)
         }

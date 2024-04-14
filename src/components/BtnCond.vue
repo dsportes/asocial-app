@@ -1,5 +1,18 @@
 <template>
-  <q-btn 
+  <q-btn v-if="stop"
+    :icon="diag ? 'error' : icon"
+    padding="none" 
+    :disable="disable"
+    :flat="flat"
+    dense
+    :color="!diag ? (color || 'primary') : 'accent'"
+    :size="size || 'md'"
+    :label="label"
+    :round="round"
+    @click.stop="ok">
+    <q-tooltip v-if="tp || diag" class="bg-white text-primary">{{diag || tp}}</q-tooltip>
+  </q-btn>
+  <q-btn v-else
     :icon="diag ? 'error' : icon"
     padding="none" 
     :disable="disable"
@@ -31,7 +44,8 @@ export default ({
     cond: String, // code condition dans stores.session
     disable: Boolean,
     flat: Boolean,
-    round: Boolean
+    round: Boolean,
+    stop: Boolean
   },
 
   emits: ['ok'],

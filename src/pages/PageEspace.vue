@@ -68,7 +68,7 @@
               <q-icon v-else name="check" color="grey-5" size="xs" />
             </div>
             <div class="col-1 text-right">
-              <btn-cond v-if="lg.id" round icon="open_in_new" @ok="pagePartition(lg)"/>
+              <btn-cond v-if="lg.id" round icon="open_in_new" stop @ok="pagePartition(lg)"/>
             </div>
           </div>
         </template>
@@ -79,12 +79,13 @@
             <tuile-cnv type="qv" :src="lg" occupation/>
             <tuile-notif :src="lg" :total="idx === 0" occupation/>
           </div>
-          <!--
+          
           <div v-if="idx !== 0" class="q-my-xs">
-            <apercu-notif :editable="session.pow > 1 && session.pow < 4" :notif="notif" :type="1" 
-              :ctx="{ idt: lg.id }" :idx="idx"/>
+            <apercu-notif :editable="session.pow > 1 && session.pow < 4" 
+              :notif="notifP(lg.id)" 
+              :type="1" :cible="lg.id" :idx="idx"/>
           </div>
-          -->
+          
           <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs justify-center">
             <btn-cond icon="edit" cond="cUrgence" :label="$t('PEedn')" @ok="editer(lg)"/>
             <btn-cond cond="cUrgence" icon="settings" :label="$t('PEabo')" @ok="editerq(lg)"/>
@@ -193,7 +194,7 @@ import SaisieMois from '../components/SaisieMois.vue'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-// import ApercuNotif from '../components/ApercuNotif.vue'
+import ApercuNotif from '../components/ApercuNotif.vue'
 import { SetNotifT } from '../app/operations.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
@@ -220,8 +221,7 @@ export default {
 
   props: { ns: Number },
   components: { BtnCond, SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, 
-  // ApercuNotif, 
-  BoutonConfirm },
+  ApercuNotif, BoutonConfirm },
 
   computed: {
     maxdl () { 
@@ -256,23 +256,11 @@ export default {
       })
       return l
     },
-    notif () { // ????????????
-      return this.session.pow === 2 ? this.session.partition.notif : null 
-    },
     optesp () { return this.session.espace ? this.session.espace.opt : 0 },
     nbmiesp () { return this.session.espace ? this.session.espace.nbmi : 12 }
   },
 
   watch: {
-    /*
-    synth (l) { // repositionnement de la ligne courante sur la nouvelle valeur
-      if (this.session.compte && this.session.compte.idp)
-        l.forEach(s => { if (s.id === this.session.compte.idp) { this.ligne = s } })
-      else
-        this.ligne = l[0] // ligne de synthèse courante initiale
-    },
-    */
-
     // refixe les valeurs courantes de optionA et nbmi quand elles ont changé dans espace
     optesp (ap) { this.optionA = this.options[ap] },
     nbmiesp (ap) { this.nbmi = this.session.espace ? this.session.espace.nbmi : 12 },
@@ -287,6 +275,10 @@ export default {
   },
 
   methods: {
+    notifP (id) {
+      const ntf = this.session.espace.notifP(id)
+      return ntf
+    },
     async dlstat (mr) {
       const { err, blob, creation, mois } = await new DownloadStatC().run(this.session.espace.org, mr)
       const nf = this.session.espace.org + '-C_' + mois

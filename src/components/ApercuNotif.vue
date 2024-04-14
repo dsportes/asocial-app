@@ -46,6 +46,7 @@ import BoutonBulle from './BoutonBulle.vue'
 import BtnCond from './BtnCond.vue'
 import ShowHtml from './ShowHtml.vue'
 import DialogueNotif from './DialogueNotif.vue'
+import { Notification } from '../app/modele.mjs'
 import { dhcool, dkli, $t } from '../app/util.mjs'
 
 export default {
