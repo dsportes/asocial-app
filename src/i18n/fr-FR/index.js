@@ -404,6 +404,8 @@ export default {
   EX8229: '(BUG) Numéro de partition inconnu',
   EX8230: '(BUG) Compte A, partition non définie',
   EX8231: '(BUG) Accès interdit à la notification d\'un compte par un non délégué',
+  EX8232: '(BUG) Compte non enregistré dans sa partition',
+  EX8233: '(BUG) Compte déjà enregistré dans sa partition future',
 
   EX8801: 'Restriction de lecture seulement',
   EX8802: 'Restriction d\'accès minimal',
@@ -625,7 +627,7 @@ export default {
   OP_SetCodePart: 'Mise à jour du code d\'une partition',
   OP_SetSponsor: 'Changement pour un compte de son statut de sponsor de sa tranche de quotas',
   OP_SetQuotas: 'Fixation des quotas dùn compte dans sa tranche de quotas',
-  OP_ChangerTribu: 'Transfert d\'un compte dans une autre tranche de quotas',
+  OP_ChangerPartition: 'Transfert d\'un compte O dans une autre partition',
   OP_SetDhvuCompta: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte',
   OP_GetCompteursCompta: 'Obtention des compteurs d\'abonnement / consomation d\'un compte',
   OP_GetTribu: 'Obtention d\'une tranche de quotas',

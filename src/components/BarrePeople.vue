@@ -191,10 +191,10 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
 import { MuterCompte, GetCompteursCompta, SetSponsor } from '../app/operations.mjs'
-import { getNg, getCle, Tribu } from '../app/modele.mjs'
-import { crypter, crypterRSA } from '../app/webcrypto.mjs'
+import { getNg, Tribu } from '../app/modele.mjs'
+import { crypterRSA } from '../app/webcrypto.mjs'
 import { EstAutonome, ChangerPartition } from '../app/operations4.mjs'
-import { GetCompta, GetSynthese } from '../app/synchro.mjs'
+import { GetCompta, GetSynthese, GetPartition } from '../app/synchro.mjs'
 
 export default {
   name: 'BarrePeople',
@@ -299,7 +299,6 @@ export default {
 
     async getCpt() {
       await new GetCompta().run(this.id)
-
     },
 
     async voirCompta () { // comptable OU délégué
@@ -375,7 +374,8 @@ export default {
     },
 
     async changerPart () {
-      await new ChangerPartition().run(this.id, this.selx.id, this.session.notifC)
+      await new ChangerPartition().run(this.id, this.selx.idp, this.session.notifC)
+      await new GetPartition().run(this.session.partition.id)
       await new GetSynthese().run(this.session.ns)
       this.ui.fD()
     }

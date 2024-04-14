@@ -3,7 +3,8 @@ import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, hash, rnd6, inverse, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
-import { ID, Cles, isAppExc, d14, Compteurs, AMJ, nomFichier, compileMcpt, synthesesPartition, FLAGS, R } from './api.mjs'
+import { ID, Cles, isAppExc, d14, Compteurs, AMJ, nomFichier, 
+  synthesesPartition, FLAGS, UNITEN, UNITEV } from './api.mjs'
 import { DownloadFichier } from './operations.mjs'
 
 import { idb } from './db.mjs'
@@ -425,8 +426,8 @@ export class Synthese extends GenDoc {
         r.pcan = !r.q.qn ? 0 : Math.round(r.qt.qn * 100 / r.q.qn) 
         r.pcav = !r.q.qv ? 0 : Math.round(r.qt.qv * 100 / r.q.qv) 
         r.pcc = !r.q.qc ? 0 : Math.round(r.qt.c2m * 100 / r.q.qc) 
-        r.pcn = !r.q.qn ? 0 : Math.round(r.qt.n * 100 / r.q.qn) 
-        r.pcv = !r.q.qv ? 0 : Math.round(r.qt.v * 100 / r.q.qv) 
+        r.pcn = !r.q.qn ? 0 : Math.round(r.qt.n * 100 / (r.q.qn * UNITEN)) 
+        r.pcv = !r.q.qv ? 0 : Math.round(r.qt.v * 100 / (r.q.qv * UNITEV)) 
       
         a.nbc += r.nbc
         a.nbd += r.nbd
@@ -441,8 +442,8 @@ export class Synthese extends GenDoc {
     a.pcan = !a.q.qn ? 0 : Math.round(a.qt.qn * 100 / a.q.qn) 
     a.pcav = !a.q.qv ? 0 : Math.round(a.qt.qv * 100 / a.q.qv) 
     a.pcc = !a.q.qc ? 0 : Math.round(a.qt.c2m * 100 / a.q.qc) 
-    a.pcn = !a.q.qn ? 0 : Math.round(a.qt.n * 100 / a.q.qn) 
-    a.pcv = !a.q.qv ? 0 : Math.round(a.qt.v * 100 / a.q.qv) 
+    a.pcn = !a.q.qn ? 0 : Math.round(a.qt.n * 100 / (a.q.qn * UNITEN)) 
+    a.pcv = !a.q.qv ? 0 : Math.round(a.qt.v * 100 / (a.q.qv * UNITEV)) 
     this.tsp[0] = a
   }
 
@@ -504,8 +505,8 @@ export class Partition extends GenDoc {
       RegCles.set(await decrypter(cleP, e.cleAP))
       const q = { ...e.q }
       q.pcc = !q.qc ? 0 : Math.round(q.c2m * 100 / q.qc) 
-      q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / q.qn) 
-      q.pcv = !q.qv ? 0 : Math.round(q.v * 100 / q.qv) 
+      q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / (q.qn * UNITEN)) 
+      q.pcv = !q.qv ? 0 : Math.round(q.v * 100 / (q.qv * UNITEV)) 
       const r = { id: id, nr: e.nr || 0, q: e.q }
       if (e.del) { this.sdel.add(id); r.del = true }
       this.mcpt[id] = r

@@ -534,7 +534,7 @@ export class NouvellePartition extends Operation {
   }
 }
 
-/*  OP_ChangerTribu: 'Transfert d\'un compte dans une autre tranche de quotas' ************
+/*  OP_ChangerPartition: 'Transfert d\'un compte dans une autre tranche de quotas' ************
 - token: éléments d'authentification du compte.
 - id : id du compte qui change de partition
 - idp : id de la nouvelle partition
@@ -561,7 +561,8 @@ export class ChangerPartition extends Operation {
         id, idp, cleAP, clePK, notif
       }
       await post(this, 'ChangerPartition', args)
-      return this.finOK(notif)
+      session.notifC = notif
+      return this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

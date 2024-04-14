@@ -49,6 +49,8 @@ export default {
   },
 
   computed: {
+    uti () { return this.type === 'qc' ? this.src.pcc : (this.type === 'qn' ? this.src.pcn : this.src.pcv) },
+    aff () { return this.type === 'qc' ? this.src.pcac : (this.type === 'qn' ? this.src.pcan : this.src.pcav) }
   },
 
   methods: {
@@ -58,27 +60,7 @@ export default {
   }},
 
   setup (props) {
-    const src = toRef(props, 'src')
-    const type = toRef(props, 'type')
-
-    function faff (v) {
-      return type.value === 'qc' ? v.pcac : (type.value === 'qn' ? v.pcan : v.pcav) 
-    }
-    function futi (v) {
-      return type.value === 'qc' ? v.pcc : (type.value === 'qn' ? v.pcn : v.pcv) 
-    }
-
-    const uti = ref(futi(src.value))
-    const aff = ref(faff(src.value))
-
-    watch(() => src.value, (ap, av) => {
-        uti.value = futi(ap)
-        aff.value = faff(ap)
-      }
-    )
-
     return {
-      uti, aff,
       edvol, mon, nbn, UNITEN, UNITEV
     }
   }
