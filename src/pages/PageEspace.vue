@@ -43,7 +43,7 @@
 
     <div v-if="synth.length">
     <div class="q-mx-xs" 
-      v-for="(lg, idx) in synth" :key="lg.id" @click="lgCourante(lg)">
+      v-for="(lg, idx) in synth" :key="lg.id">
       <q-expansion-item switch-toggle-side expand-separator dense group="trgroup">
         <template v-slot:header>
           <div :class="dkli(idx) + ' row full-width'">
@@ -68,7 +68,7 @@
               <q-icon v-else name="check" color="grey-5" size="xs" />
             </div>
             <div class="col-1 text-right">
-              <btn-cond v-if="lg.id" round icon="open_in_new" @ok="pagePartition"/>
+              <btn-cond v-if="lg.id" round icon="open_in_new" @ok="pagePartition(lg)"/>
             </div>
           </div>
         </template>
@@ -86,8 +86,8 @@
           </div>
           -->
           <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs justify-center">
-            <btn-cond icon="edit" cond="cUrgence" :label="$t('PEedn')" @ok="editer"/>
-            <btn-cond cond="cUrgence" icon="settings" :label="$t('PEabo')" @ok="editerq"/>
+            <btn-cond icon="edit" cond="cUrgence" :label="$t('PEedn')" @ok="editer(lg)"/>
+            <btn-cond cond="cUrgence" icon="settings" :label="$t('PEabo')" @ok="editerq(lg)"/>
           </div>
         </div>
       </q-expansion-item>
@@ -264,12 +264,14 @@ export default {
   },
 
   watch: {
+    /*
     synth (l) { // repositionnement de la ligne courante sur la nouvelle valeur
       if (this.session.compte && this.session.compte.idp)
         l.forEach(s => { if (s.id === this.session.compte.idp) { this.ligne = s } })
       else
         this.ligne = l[0] // ligne de synthèse courante initiale
     },
+    */
 
     // refixe les valeurs courantes de optionA et nbmi quand elles ont changé dans espace
     optesp (ap) { this.optionA = this.options[ap] },
@@ -325,31 +327,21 @@ export default {
     },
 
     async lgCourante (lg) {
-      if (!lg.id) return
-      if (this.session.pow === 2) {
-        const p = await this.getPart(lg.id)
-        this.ligne = p.synth
-      } else {
-        this.ligne = lg
-      }
+      this.ligne = lg
+      if (!this.session.partition || this.session.partition.id !== lg.id)
+        await new GetPartition().run(lg.id)
     },
 
-    async getPart (id) { // rend courante cette partition
-      const session = stores.session
-      if (session.partition && session.partition.id === id) return session.partition // partition du compte  
-      await new GetPartition().run(id)
-      return session.partition
-    },
-
-    async pagePartition () { // Comptable seulement
-      await this.getPart(ID.long(this.ligne.id, this.session.ns))
+    async pagePartition (lg) { // Comptable seulement
+      await this.lgCourante(lg)
       this.ui.setPage('partition')
     },
 
     async chgNtfT (ntf) {
       await new SetNotifT().run(this.ligne.id, ntf)
     },
-    async editer () {
+    async editer (lg) {
+      await this.lgCourante(lg)
       this.code = this.session.compte.mcode.get(ID.long(this.ligne.id, this.session.ns))
       this.ui.oD('PEedcom')
     },
@@ -357,7 +349,8 @@ export default {
       await new SetCodePart().run(this.ligne.id, this.code)
       this.ui.fD()
     },
-    async editerq () {
+    async editerq (lg) {
+      await this.lgCourante(lg)
       const q = this.ligne.q
       this.quotas = { 
         qc: q.qc, qn: q.qn, qv: q.qv,

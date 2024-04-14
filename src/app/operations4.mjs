@@ -562,7 +562,28 @@ export class ChangerPartition extends Operation {
       }
       await post(this, 'ChangerPartition', args)
       session.notifC = notif
-      return this.finOK()
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*  OP_DeleguePartition: 'Changement de statut délégué d\'un compte dans sa partition' ************
+- token: éléments d'authentification du compte.
+- id : id du compte qui change de statut
+- del: true / false, statut délégué
+Retour:
+*/
+export class DeleguePartition extends Operation {
+  constructor () { super('ChangerPartition') }
+
+  async run (id, del) { // id du compte, statut délégué
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, del }
+      await post(this, 'DeleguePartition', args)
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

@@ -4,9 +4,9 @@
     <btn-cond v-if="session.estComptable"
       cond="cUrgence" :label="$t('PPchpart')" @click="chgPartition"/>
     <btn-cond v-if="session.estComptable" 
-      cond="cEdit" :label="$t('PPchsp')" @ok="chgDelegue"/>
+      cond="cUrgence" :label="$t('PPchdel')" @ok="chgDelegue"/>
     <btn-cond v-if="(session.estComptable || (session.estDelegue && !session.eltPart(id).fake)) && id !== session.compteId"
-      cond="cVisu" :label="$t('PPcompta')" @ok="voirCompta"/>
+      cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
     <btn-cond color="warning" round icon="change_history"
       cond="cEdit" class="justify-start" @ok="muter">
       <q-tooltip>{{$t('PPmut')}}</q-tooltip>
@@ -141,17 +141,14 @@
   <!-- Changement de statut délégué -->
   <q-dialog v-model="ui.d.BPchgSp[idc]" persistent>
     <q-card :class="styp('md') + 'q-pa-sm'">
-      <div v-if="aSt.ccCpt.sp" class="text-center q-my-md titre-md">{{$t('sponsor')}}</div>
-      <div v-else class="text-center q-my-md titre-md">{{$t('PPco')}}</div>
+      <div v-if="estDel" class="text-center q-my-md titre-md">{{$t('PPdel')}}</div>
+      <div v-else class="text-center q-my-md titre-md">{{$t('PPndel')}}</div>
       <q-card-actions align="right" class="q-gutter-sm">
-        <q-btn flat dense padding="xs" size="md" color="primary" icon="undo"
-          :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn dense padding="xs" size="md" icon="check" color="warning" 
-          :label="$t('valider')" :disable="!selx || !selx.ok1 || !selx.ok2" @click="changerTr()"/>
-        <q-btn v-if="aSt.ccCpt.sp" dense padding="xs" size="md" icon="check" color="warning"
-          :label="$t('PPkosp')" @click="changerSp(false)"/>
-        <q-btn v-else dense padding="xs" size="md" icon="check" color="warning"
-          :label="$t('PPoksp')" @click="changerSp(true)"/>
+        <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+        <btn-cond v-if="estDel" icon="check" color="warning"
+          :label="$t('PPkodel')" @ok="changerDel(false)"/>
+        <btn-cond v-else icon="check" color="warning"
+          :label="$t('PPokdel')" @ok="changerDel(true)"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -179,7 +176,6 @@
 <script>
 
 import { ref, toRef } from 'vue'
-import { encode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
@@ -193,7 +189,7 @@ import { styp, edvol, afficherDiag } from '../app/util.mjs'
 import { MuterCompte, GetCompteursCompta, SetSponsor } from '../app/operations.mjs'
 import { getNg, Tribu } from '../app/modele.mjs'
 import { crypterRSA } from '../app/webcrypto.mjs'
-import { EstAutonome, ChangerPartition } from '../app/operations4.mjs'
+import { EstAutonome, ChangerPartition, DeleguePartition } from '../app/operations4.mjs'
 import { GetCompta, GetSynthese, GetPartition } from '../app/synchro.mjs'
 
 export default {
@@ -206,6 +202,8 @@ export default {
   computed: {
     cv () { return this.session.getCV(this.id) },
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    estDel () { return this.session.partition.estDel(this.id)},
+
     naI () { return this.aSt.compte.na },
     naE () { return getNg(this.id) },
     yo () { return this.chat && this.chat.yo },
@@ -213,7 +211,6 @@ export default {
     opt () { return this.session.espace.opt },
     chat () { return this.aSt.getChatIdIE(this.session.compteId, this.id) },
     cpt () { return this.session.compta },
-    synth () { return this.aSt.tribu.synth },
     txtdef () { return this.$t('PPmsg' + (this.st === 1 ? 'o' : 'a'))}
   },
 
@@ -258,7 +255,7 @@ export default {
       if (this.st === 1) {
         await new GetCompteursCompta().run(this.id)
         const c = this.cpt.qv
-        const s = this.synth
+        const s = this.session.synthese
         this.quotas = {
           q1: c.q1,
           q2: c.q2,
@@ -306,28 +303,6 @@ export default {
       this.ui.oD('BPcptdial', this.idc)
     },
 
-    async chgDelegue () { // comptable
-      if (!await this.session.edit()) return
-      await this.getCpt()
-      if (ID.estComptable(this.id)) {
-        await afficherDiag(this.$t('PTspn1c'))
-        return
-      }
-      if (!this.na) { 
-        await afficherDiag(this.$t('PTspn1'))
-        return
-      }
-      this.ui.oD('BPchgSp', this.idc)
-    },
-
-    async changerSp(estSp) {
-      const cletAv = this.aSt.ccCpt.clet
-      const idtAv = Tribu.id(cletAv)
-      // si estSp, le na existe, voir quelques lignes au-dessus
-      await new SetSponsor().run(idtAv, this.na || this.id, estSp)
-      this.ui.fD()
-    },
-
     filtrer () {
       this.lst = []
       /*
@@ -363,6 +338,17 @@ export default {
           this.lst.push(y)
         }
       }
+    },
+
+    async chgDelegue () { // comptable
+      this.ui.oD('BPchgSp', this.idc)
+    },
+
+    async changerDel(del) {
+      await new DeleguePartition().run(this.id, del)
+      await new GetPartition().run(this.session.partition.id)
+      await new GetSynthese().run(this.session.ns)
+      this.ui.fD()
     },
 
     async chgPartition () { // comptable

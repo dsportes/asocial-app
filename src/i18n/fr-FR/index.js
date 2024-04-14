@@ -406,6 +406,7 @@ export default {
   EX8231: '(BUG) Accès interdit à la notification d\'un compte par un non délégué',
   EX8232: '(BUG) Compte non enregistré dans sa partition',
   EX8233: '(BUG) Compte déjà enregistré dans sa partition future',
+  EX8234: '(BUG) Le Comptable ne peut ni changer de partition ni changer son statut de délégué',
 
   EX8801: 'Restriction de lecture seulement',
   EX8802: 'Restriction d\'accès minimal',
@@ -699,7 +700,7 @@ export default {
   OP_GetPartition: 'Obtention d\'une partition',
   OP_GetCompta: 'Obtention dùne comptabilité',
   OP_GetNotifC: 'Obtention de la notification d\'un compte.',
-
+  OP_DeleguePartition: 'Changement de statut délégué d\'un compte dans sa partition',
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
 
@@ -1925,10 +1926,11 @@ export default {
   // PanelPeople et apercu compte
   PPchats: 'Chats avec ...',
   PPgroupes: 'Participations aux groupes',
-  PPco: 'Compte non sponsor',
+  PPndel: 'Compte non délégué',
+  PPdel: 'Compte délégué',
   PPpaschat: 'chat pas encore initialisé',
   PPchpart: 'Changer de partition',
-  PPchsp: 'Changer le statut de "délégué"',
+  PPchdel: 'Changer le statut de "délégué"',
   PPcompta: 'Abon. et conso.',
   PPchatreq: 'Un "chat" avec le compte doit avoir été établi avant d\'envisager un changement de type du compte.',
   PPmut: 'Changer le type du compte',
@@ -1945,8 +1947,8 @@ export default {
   PPmutf: 'Mais l\'organisation autorise de changer son type en "AUTONOME" sans son autorisation explicite.',
   PPmutv: 'Vérifier soigneusement les quotas à attribuer',
   PPmutm: 'Message informatif à écrire sur le "chat"',
-  PPkosp: 'Retirer au compte la qualité de sponsor',
-  PPoksp: 'Conférer au compte la qualité de sponsor',
+  PPkodel: 'Retirer au compte le statut de "délégué"',
+  PPokdel: 'Conférer au compte le statut de "délégué"',
   PPchgpart: 'Départ de {0} de sa partition {1}',
   PPqvn: 'Quota de notes+chats+groupes : {0} - ({1}) - Occupé à {2}%',
   PPqvv: 'Quota de volume de fichiers: {0} - ({1}) - Occupé à {2}%',

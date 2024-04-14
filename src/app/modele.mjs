@@ -513,6 +513,11 @@ export class Partition extends GenDoc {
     }
     this.synth = synthesesPartition(this)
   }
+
+  estDel (id) {
+    const e = this.mcpt[id]
+    return e && e.del
+  }
 }
 
 /** Compte **********************************************************************
