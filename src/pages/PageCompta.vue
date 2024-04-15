@@ -45,20 +45,22 @@
 
     <q-separator color="orange" class="q-mt-md"/>
     <div class="row q-my-sm items-start">
-      <div class="colauto"><n3-icon :niv="session.ntfE ? session.ntfE.nr : 0"/></div>
-      <apercu-notif class="q-ml-sm col" :idx="0" :type="0" :notif="session.ntfE"/>
+      <div class="colauto"><n3-icon :niv="session.espace.notifE ? session.espace.notifE.nr : 0"/></div>
+      <apercu-notif class="q-ml-sm col" :idx="0" :type="0" 
+        :cible="session.ns" :notif="session.espace.notifE"/>
     </div>
 
     <div v-if="!session.compte.estA">
       <q-separator color="orange" class="q-mt-md"/>
       <div class="row q-my-sm items-start">
-        <div class="colauto"><n3-icon :niv="session.ntfP ? session.ntfP.nr : 0"/></div>
-        <apercu-notif class="q-ml-sm" :idx="1" :type="1" :notif="session.ntfP"/>
+        <div class="colauto"><n3-icon :niv="notifP ? notifP.nr : 0"/></div>
+        <apercu-notif class="q-ml-sm" :idx="1" :type="1" :cible="session.compte.idp" :notif="notifP"/>
       </div>
       <q-separator color="orange" class="q-mt-md"/>
       <div class="row q-my-sm items-start">
-        <div class="colauto"><n3-icon :niv="session.ntfC ? session.ntfC.nr : 0"/></div>
-        <apercu-notif  class="q-ml-sm" :idx="2" :type="2" :notif="session.ntfC"/>
+        <div class="colauto"><n3-icon :niv="session.compte.notif ? session.compte.notif.nr : 0"/></div>
+        <apercu-notif  class="q-ml-sm" :idx="2" :type="2" 
+          :cible="session.compteId" :notif="session.compte.notif"/>
       </div>
     </div>
   </div>
@@ -86,7 +88,7 @@
 
 <script>
 
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -134,11 +136,18 @@ export default {
           l.push({ del: e.del, id: id })
       }
       return l
-    }
+    },
+    notifPx () { return this.session.espace ? this.session.espace.notifP : null }
   },
 
   data () {
     return {
+    }
+  },
+
+  watch: {
+    async notifPx (ap) {
+      this.notifP = this.session.espace ? await this.session.espace.notifPX() : null
     }
   },
 
@@ -159,18 +168,24 @@ export default {
 
   setup () {
     const session = stores.session
+    const notifP = ref(null)
 
     async function reload () {
       await new GetCompta().run()
       if (!session.estA) await new GetPartition().run(session.compte.idp)
     }
 
-    if (session.accesNet) onMounted(async () => { await reload() })
+    if (session.accesNet) onMounted(
+      async () => { 
+        notifP.value = session.espace ? await session.espace.notifPX() : null
+        await reload() 
+      }
+    )
 
     return {
       session, 
       ui: stores.ui, 
-      dkli, UNITEN, UNITEV, edvol, reload
+      dkli, UNITEN, UNITEV, edvol, reload, notifP
     }
   }
 }

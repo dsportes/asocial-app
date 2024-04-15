@@ -1886,6 +1886,7 @@ export default {
   ANnot1: 'Notification à tous les comptes de la partition',
   ANnot2: 'Notification spécifique du compte',
   ANadmin: 'de l\'adimistrateur technique',
+  ANnotc: 'La notification a été émise par la Comptable: il est seul autorisé à la modifier / supprimer.',
   ANcomptable: 'du Comptable',
   ANdel1: 'de {0}, délégué sur la partition',
   ANdel2: 'd\'un délégué sur la partition',

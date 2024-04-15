@@ -113,7 +113,6 @@ import QuotasVols from '../components/QuotasVols.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
 import BarrePeople from '../components/BarrePeople.vue'
 import ChatsAvec from '../components/ChatsAvec.vue'
-import { SetNotifT, SetNotifC } from '../app/operations.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
 import { GetPartition, GetNotifC } from '../app/synchro.mjs'
 import { styp } from '../app/util.mjs'
@@ -177,17 +176,8 @@ export default {
       await new SetQuotas().run(this.session.peopleId, this.quotas)
       await this.reload()
       this.ui.fD()
-    },
-
-    async chgNtf (ntf) {
-      const idc = ntf.ctx.id
-      delete ntf.ctx
-      await new SetNotifC().run (this.aSt.tribuC.id, idc, ntf)
-    },
-    async chgNtfT (ntf) {
-      await new SetNotifT().run(this.aSt.tribuC.id, ntf)
     }
-},
+  },
 
   data () {
     return {

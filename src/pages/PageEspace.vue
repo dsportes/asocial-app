@@ -82,7 +82,7 @@
           
           <div v-if="idx !== 0" class="q-my-xs">
             <apercu-notif :editable="session.pow > 1 && session.pow < 4" 
-              :notif="notifP(lg.id)" 
+              :notif="session.espace.notifPX(lg.id)" 
               :type="1" :cible="lg.id" :idx="idx"/>
           </div>
           
@@ -195,7 +195,6 @@ import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
-import { SetNotifT } from '../app/operations.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
@@ -275,10 +274,6 @@ export default {
   },
 
   methods: {
-    notifP (id) {
-      const ntf = this.session.espace.notifP(id)
-      return ntf
-    },
     async dlstat (mr) {
       const { err, blob, creation, mois } = await new DownloadStatC().run(this.session.espace.org, mr)
       const nf = this.session.espace.org + '-C_' + mois
@@ -329,9 +324,6 @@ export default {
       this.ui.setPage('partition')
     },
 
-    async chgNtfT (ntf) {
-      await new SetNotifT().run(this.ligne.id, ntf)
-    },
     async editer (lg) {
       await this.lgCourante(lg)
       this.code = this.session.compte.mcode.get(ID.long(this.ligne.id, this.session.ns))

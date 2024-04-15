@@ -376,17 +376,18 @@ export class Espace extends GenDoc {
     this.dlvat = row.dlvat || 0
     this.nbmi = row.nbmi || 6
     this.notifE = row.notifE ? new Notification(row.notifE) : null
-    this.notifPx = row.notifP || null
+    this.notifP = row.notifP || null
     this.tnotifP = row.tnotifP || []
   }
 
-  async notifP (idp) {
+  async notifPX (idp) {
     const session = stores.session
-    let ntf = this.notifPx
-    if (idp) ntf = this.tnotifP[ID.court(idp)]
+    const idpx = idp || session.compte.idp
+    let ntf = null
+    if (!idp || idp === session.compte.idp) ntf = this.notifP 
+    else ntf = this.tnotifP ? this.tnotifP[idpx] : null
     if (!ntf) return null
-    const id = idp || this.session.compte.idp
-    const cleP = RegCles.get(id)
+    const cleP = RegCles.get(idpx)
     return await Notification.decrypt(ntf, cleP)
   }
 

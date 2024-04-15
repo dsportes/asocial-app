@@ -11,7 +11,7 @@
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
       </q-btn>
     </div>
-    <sd-nb :style="styx" :texte="texte" :idx="idx"/>
+    <sd-nb :style="styx" :texte="texte || ''" :idx="idx"/>
   </div>
 
   <q-dialog v-model="ui.d.SHfs[idc]" persistent maximized 

@@ -23,7 +23,7 @@
       <show-html class="q-mt-xs bord" :texte="notif.texte" :idx="idx" 
         maxh="3rem" zoom scroll/>
     </div>
-    <div v-if="!notif || !notif.texte" class="row">
+    <div v-if="!diag && (!notif || !notif.texte)" class="row">
       <div class="titre-md">{{$t('ANauc' + type)}}</div>
       <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" :label="$t('ANcre')" icon="add"
         @ok="creer"/>
@@ -31,6 +31,8 @@
         cond="cUrgence"
         @ok="creer"/>
     </div>
+    <div v-if="diag" class="q-pa-xs bg-yellow-5 text-italic text-bold titre-md text-center">
+      {{diag}}</div>
   </div>
 
   <q-dialog v-model="ui.d.DNdialoguenotif[idc]" persistent>
@@ -40,7 +42,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonBulle from './BoutonBulle.vue'
 import BtnCond from './BtnCond.vue'
@@ -78,6 +80,10 @@ export default {
       if (!del) return this.$t('ANcomptable')
       const cv = this.session.getCV(del)
       return cv.tx ? $t('ANdel1', cv.nom) : $t('ANdel2')
+    },
+    diag () {
+      if (this.session.estComptable || !this.notif || this.notif.idDel) return ''
+      return this.$t('ANnotc') 
     }
   },
 
@@ -101,9 +107,11 @@ export default {
     }
   },
 
-  setup () {
+  setup (props) {
     const ui = stores.ui
     const idc = ref(ui.getIdc())
+    const cible = toRef(props, 'cible')
+    const notif = toRef(props, 'notif')
     return {
       dhcool, dkli, 
       pSt: stores.people,
