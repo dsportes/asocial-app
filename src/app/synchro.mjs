@@ -150,15 +150,18 @@ class SB {
 
   /* IDBbuffer passé en paramètres:
   La suppression des notes d'un avatar ou d'un groupe 
-  conduit à mettre à jour / supprimer des Avnote. 
+  conduit à mettre à jour / supprimer des Avnote.
+  async : à cause de compile2() du compte
   */
-  store (buf) {
+  async store (buf) {
     if (this.espace) this.s.setEspace(this.espace)
     if (this.compte) this.s.setCompte(this.compte)
     if (this.compti) this.s.setCompti(this.compti)
 
-    if (this.avatars.size) for(const [,a] of this.avatars) { 
-      this.a.setAvatar(a) 
+    if (this.avatars.size) {
+      for(const [,a] of this.avatars) this.a.setAvatar(a)
+      if (this.s.compte.clePKX) 
+        await this.s.compte.compile2()
     }
     if (this.supprAv.size) for (const ida of this.supprAv) {
       this.a.delAvatar(ida)
@@ -601,7 +604,7 @@ export class OperationS extends Operation {
 
       // Commit Store et IDB d'un cycle
       // 0 à N sous-arbres de plus enegistrés
-      sb.store(buf)
+      await sb.store(buf)
       await buf.commit(ds)
       syncQueue.dataSync = ds
       if (fs) fs.setDS(ds.tousRds)
@@ -678,13 +681,13 @@ export class ConnexionAvion extends OperationS {
         sb.setEs(esp)
         sb.setCe(await compile(rce))
         sb.setCi(await compile(rci))
-        sb.store()
+        await sb.store()
       }
       
       { // Chargement des groupes et avatars depuis IDB
         const sb = new SB()
         await this.loadAvatarsGroupes(sb, ds)
-        sb.store()
+        await sb.store()
       }
 
       // Chargement des descriptifs des fichiers du presse-papier
@@ -865,7 +868,7 @@ export class SyncSp extends OperationS {
         setTrigramme(session.nombase, await getTrigramme())
       }
 
-      sb.store(buf)
+      await sb.store(buf)
       await buf.commit(ds)
 
       syncQueue.dataSync = ds

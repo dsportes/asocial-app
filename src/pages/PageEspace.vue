@@ -81,9 +81,7 @@
           </div>
           
           <div v-if="idx !== 0" class="q-my-xs">
-            <apercu-notif :editable="session.pow > 1 && session.pow < 4" 
-              :notif="session.espace.notifPX(lg.id)" 
-              :type="1" :cible="lg.id" :idx="idx"/>
+            <q-btn label="Voir Notif" primary @click="voirNotif(lg.id)"/>
           </div>
           
           <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs justify-center">
@@ -129,6 +127,19 @@
           <q-btn dense size="md" no-caps padding="xs" color="primary" :disable="stp < 3" 
             :label="$t('PTdlterm', [nbmb2 + nbav2])" @click="ui.fD" />
         </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Edition / création d'une notification P -->
+    <q-dialog v-model="ui.d.PEnotif[idc]" persistent>
+      <q-card :class="styp('md')">
+        <q-toolbar class="bg-secondary text-white">
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">Notification</q-toolbar-title>
+        </q-toolbar>
+        <apercu-notif class="q-ma-sm" :editable="session.pow > 1 && session.pow < 4" 
+          :notif="notif" 
+          :type="1" :cible="idp" :idx="1"/>
       </q-card>
     </q-dialog>
 
@@ -186,7 +197,7 @@
 </template>
 
 <script>
-import { onMounted, toRef } from 'vue'
+import { onMounted, toRef, ref } from 'vue'
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import BtnCond from '../components/BtnCond.vue'
@@ -194,8 +205,8 @@ import SaisieMois from '../components/SaisieMois.vue'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
+import ApercuNotif from '../components/ApercuNotif.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition } from '../app/synchro.mjs'
@@ -274,6 +285,11 @@ export default {
   },
 
   methods: {
+    async voirNotif (idp) {
+      this.notif = await this.session.espace.notifPX(idp)
+      this.ui.oD('PEnotif', this.idc)
+    },
+
     async dlstat (mr) {
       const { err, blob, creation, mois } = await new DownloadStatC().run(this.session.espace.org, mr)
       const nf = this.session.espace.org + '-C_' + mois
@@ -393,6 +409,7 @@ export default {
 
   data () {
     return {
+      notif: null,
       dlvat: 0, // dlvat saisie
       dlv: 0, // Premier jour du mois suivant de dlvat
       nbav1: 0, // nombre d'avatars à traiter
@@ -415,6 +432,8 @@ export default {
   },
 
   setup (props) {
+    const ui = stores.ui
+    const idc = ref(ui.getIdc())
     const ns = toRef(props, 'ns')
 
     async function refreshSynth () {
@@ -436,7 +455,7 @@ export default {
       aSt: stores.avatar,
       fSt: stores.filtre,
       session: stores.session,
-      ui: stores.ui
+      ui, idc
     }
   }
 

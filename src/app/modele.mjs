@@ -385,10 +385,11 @@ export class Espace extends GenDoc {
     const idpx = idp || session.compte.idp
     let ntf = null
     if (!idp || idp === session.compte.idp) ntf = this.notifP 
-    else ntf = this.tnotifP ? this.tnotifP[idpx] : null
+    else ntf = this.tnotifP ? this.tnotifP[ID.court(idpx)] : null
     if (!ntf) return null
     const cleP = RegCles.get(idpx)
-    return await Notification.decrypt(ntf, cleP)
+    const n = await Notification.decrypt(ntf, cleP)
+    return n
   }
 
 }
@@ -602,9 +603,19 @@ export class Compte extends GenDoc {
     if (row.idp) {
       this.estA = false
       this.idp = ID.long(row.idp, this.ns)
-      const clep = RegCles.set(await decrypter(clek, row.clePK))
+      let clep
+      if (row.clePK.length === 256) {
+        const priv = RegCc.getPriv(this.id)
+        if (priv) clep = await decrypterRSA(priv, row.clePK)
+        else this.clePKX = row.clePK
+      }
+      else clep = RegCles.set(await decrypter(clek, row.clePK))
       this.del = row.del || false
-      this.notif = row.notif ? await Notification.decrypt(row.notif, clep) : null
+      if (row.notif) {
+        if (clep) {
+          this.notif = await Notification.decrypt(row.notif, clep)
+        } else this.notif = row.notif
+      } else this.notif = null
     } else this.estA = true
 
     this.mav = new Set()
@@ -635,6 +646,17 @@ export class Compte extends GenDoc {
           if (code) this.mcode.set(idp, code)
         }
       }
+    }
+  }
+
+  // Compilation différée (après compile du premier avatar)
+  async compile2 () {
+    if (this.clePKX) {
+      const priv = RegCc.getPriv(this.id)
+      const clep = RegCles.set(await decrypterRSA(priv, this.clePKX))
+      if (this.notif)
+        this.notif = await Notification.decrypt(this.notif, clep)
+      this.clePKX = null
     }
   }
 
@@ -887,7 +909,8 @@ export class Avatar extends GenDoc {
   /** compile *********************************************************/
   async compile (row) {
     this.ns = ID.ns(this.id)
-    const clek = stores.session.clek
+    const session = stores.session
+    const clek = session.clek
     // this.vcv = row.vcv || 0
     // this.hZR = row.hZR
 

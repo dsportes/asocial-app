@@ -131,6 +131,7 @@ export const useUiStore = defineStore('ui', {
       PEedcom: false,
       PEedq: false,
       PEdlvat: false,
+      PEnotif: {},
       ASaccsp: false, // AcceptationSponsoring
       NE: false, // NoteEdit
       NX: false, // NoteExclu

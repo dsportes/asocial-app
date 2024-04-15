@@ -6,7 +6,7 @@
         <div class="titre-md">{{$t('ANnot' + type)}}</div>
         <btn-cond v-if="type===0 && session.estAdmin" class="q-ml-sm" :label="$t('editer')" icon="edit"
           @ok="editer"/>
-        <btn-cond v-if="type!==0 && session.pow < 4" class="q-ml-sm" :label="$t('editer')" icon="edit"
+        <btn-cond v-if="!diag && type!==0 && session.pow < 4" class="q-ml-sm" :label="$t('editer')" icon="edit"
           cond="cUrgence"
           @ok="editer"/>
       </div>
@@ -14,6 +14,10 @@
         <span class="fs-sm text-italic q-mr-sm">{{nomSource}}</span>
         <span class="fs-sm font-mono">{{dhcool(notif.dh)}}</span>
       </div>
+      <div v-if="diag" class="q-pa-xs bg-yellow-5 text-italic text-bold text-negative titre-md text-center">
+        {{diag}}
+      </div>
+
       <div v-if="notif.nr > 1" class="q-mt-xs">
           <span class="q-pa-xs bg-yellow-3 text-negative text-bold">
             {{$t('ANnr' + type + notif.nr)}}
@@ -31,8 +35,6 @@
         cond="cUrgence"
         @ok="creer"/>
     </div>
-    <div v-if="diag" class="q-pa-xs bg-yellow-5 text-italic text-bold titre-md text-center">
-      {{diag}}</div>
   </div>
 
   <q-dialog v-model="ui.d.DNdialoguenotif[idc]" persistent>

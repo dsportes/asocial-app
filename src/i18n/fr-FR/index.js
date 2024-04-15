@@ -407,8 +407,9 @@ export default {
   EX8232: '(BUG) Compte non enregistré dans sa partition',
   EX8233: '(BUG) Compte déjà enregistré dans sa partition future',
   EX8234: '(BUG) Le Comptable ne peut ni changer de partition ni changer son statut de délégué',
-  EX8235: '(BUG) Une notification de partition ne peut être éditer que par un délégué pour sa partition ou le Comptable',
+  EX8235: '(BUG) Une notification de partition ne peut être éditée que par un délégué pour sa partition ou le Comptable',
   EX8236: '(BUG) Numéro de partition non existant dans espace.',
+  EX8237: '(BUG) Un délégué ne peut pas surcharger / supprimer une notification émise par le Comptable',
 
   EX8801: 'Restriction de lecture seulement',
   EX8802: 'Restriction d\'accès minimal',
