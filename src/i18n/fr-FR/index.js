@@ -410,6 +410,7 @@ export default {
   EX8235: '(BUG) Une notification de partition ne peut être éditée que par un délégué pour sa partition ou le Comptable',
   EX8236: '(BUG) Numéro de partition non existant dans espace.',
   EX8237: '(BUG) Un délégué ne peut pas surcharger / supprimer une notification émise par le Comptable',
+  EX8238: '(BUG) Une notification de compte ne peut être éditée que par un délégué de la partition du compte ou le Comptable',
 
   EX8801: 'Restriction de lecture seulement',
   EX8802: 'Restriction d\'accès minimal',
@@ -1896,6 +1897,8 @@ export default {
   ANnr03: 'Application "bloquée" par l\'administrateur technique',
   ANnr12: 'Mises à jour bloquées pour tous les comptes de la partition',
   ANnr13: 'Ni mises à jour, ni visualisations (actions d\'urgence seulement) pour tous les comptes de la partition',
+  ANnr22: 'Mises à jour bloquées pour ce compte',
+  ANnr23: 'Ni mises à jour, ni visualisations (actions d\'urgence seulement) pour ce compte',
   ANnr3: 'Application en lecture seulement',
   ANnr4: 'Accès minimal très restreint à l\'application',
   ANnospon: 'La notification provient du Comptable, lui seul peut l\'éditer (pas un sponsor).',

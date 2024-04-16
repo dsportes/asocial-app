@@ -307,6 +307,26 @@ export class SetNotifP extends Operation {
   }
 }
 
+/* OP_SetNotifC: 'Inscription / mise à jour de la notification d\'un compte'
+- `token` : éléments d'authentification du compte.
+- `idc` : id du compte
+- `notif` : notification du compte cryptée par la clé de partition
+*/
+export class SetNotifC extends Operation {
+  constructor () { super('SetNotifC') }
+
+  async run (notif, idc) { // id de la tribu, id du compte cible, notif
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, idc, notif }
+      await post(this, 'SetNotifC', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* OP_SetDhvuCompta: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte'
 args.token: éléments d'authentification du compte.
 args.dhvu : dhvu cryptée par la clé K

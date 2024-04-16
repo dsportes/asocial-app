@@ -39,9 +39,8 @@ import BoutonBulle from './BoutonBulle.vue'
 import BtnCond from './BtnCond.vue'
 import EditeurMd from './EditeurMd.vue'
 import { styp, dhcool } from '../app/util.mjs'
-import { SetNotifC } from '../app/operations.mjs'
-import { SetNotifE, SetNotifP } from '../app/operations4.mjs'
-import { reconnexion, GetSynthese } from '../app/synchro.mjs'
+import { SetNotifE, SetNotifP, SetNotifC } from '../app/operations4.mjs'
+import { reconnexion, GetSynthese, GetPartition } from '../app/synchro.mjs'
 import { RegCles } from '../app/modele.mjs'
 
 export default {
@@ -90,11 +89,15 @@ export default {
         reconnexion()
       } else {
         if (this.type === 1) {
-          const cleP = RegCles.get(this.cible)
-          const ntf = await this.n.crypt(cleP)
+          const clep = RegCles.get(this.cible)
+          const ntf = suppr ? null : await this.n.crypt(clep)
           await new SetNotifP().run(suppr ? null : ntf, this.cible)
         } else {
-          await new SetNotifC().run (suppr ? null : this.n, this.cible)
+          const idp = this.session.partition.id
+          const clep = RegCles.get(idp)
+          const ntf = suppr ? null : await this.n.crypt(clep)
+          await new SetNotifC().run (suppr ? null : ntf, this.cible)
+          await new GetPartition().run(idp)
         }
         await new GetSynthese().run(this.session.ns)
       }

@@ -250,7 +250,7 @@ export const useSessionStore = defineStore('session', {
           - _clé_: id du compte.
           - _valeur_: `{ id, nr, del, q }`
             - `nr`: niveau de restriction de la notification de niveau _compte_ (0 s'il n'y en a pas, 1 (sans restriction), 2 ou 3).
-            - `del`: `true` si c'est un délégué.
+            - `notif`: notification du compte cryptée par la clé P de la partition (redonde celle dans compte).            - `del`: `true` si c'est un délégué.
             - `q` : `qc qn qv c2m nn nc ng v` extraits du document `comptas` du compte.
               - `c2m` est le compteur `conso2M` de compteurs, montant moyen _mensualisé_ de consommation de calcul observé sur M/M-1 (observé à `dhic`). 
 

@@ -459,6 +459,7 @@ _data_:
   - _clé_: id du compte.
   - _valeur_: `{ nr, cleA, del, q }`
     - `nr`: niveau de restriction de la notification de niveau _compte_ (0 s'il n'y en a pas, 1 (sans restriction), 2 ou 3).
+    - `notif`: notification du compte cryptée par la clé P de la partition (redonde celle dans compte).
     - `cleAP` : clé A du compte crypté par la clé P de la partition.
     - `del`: `true` si c'est un délégué.
     - `q` : `qc qn qv c2m nn nc ng v` extraits du document `comptas` du compte.
@@ -507,6 +508,10 @@ export class Partition extends GenDoc {
       q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / (q.qn * UNITEN)) 
       q.pcv = !q.qv ? 0 : Math.round(q.v * 100 / (q.qv * UNITEV)) 
       const r = { id: id, nr: e.nr || 0, q: e.q }
+      if (e.notif) {
+        const clep = RegCles.get(this.id)
+        if (clep) r.notif = await Notification.decrypt(e.notif, clep)
+      }
       if (e.del) { this.sdel.add(id); r.del = true }
       this.mcpt[id] = r
     }

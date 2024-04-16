@@ -342,37 +342,6 @@ export class SetNotifG extends Operation {
   }
 }
 
-/* OP_SetNotifC: 'Inscription / mise à jour de la notification d\'un compte'
-POST:
-- `token` : éléments d'authentification du compte.
-- `id` : id de la tribu
-- `idc` : id du compte
-- `notif` : notification du compte cryptée par la clé de la tribu
-- `stn` : 0:simple 1:lecture 2:mi,imal, 9:aucune
-
-Assertion sur l'existence du row `Tribus` de la tribu et `Comptas` du compte.
-*/
-export class SetNotifC extends Operation {
-  constructor () { super('SetNotifC') }
-
-  async run (notifC, idt, idc) { // id de la tribu, id du compte cible, notif
-    try {
-      // TODO : obtenir la clé de la partition
-      const session = stores.session
-      if (!notifC) notifC = new Notification({})
-      else notifC.dh = Date.now()
-      const stn = notifC.stn
-      const cle = getCle(idt)
-      const notif = await crypter(cle, notifC.serial)
-      const args = { token: session.authToken, id: idt, idc, notif, stn }
-      this.tr(await post(this, 'SetNotifC', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_SetSponsor: 'Changement pour un compte de son statut de sponsor de sa tranche de quotas'
 args.token: éléments d'authentification du compte.
 args.idt : id de la tribu
