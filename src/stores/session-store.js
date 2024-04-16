@@ -5,7 +5,7 @@ import stores from './stores.mjs'
 import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t, dhcool } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
-import { RegCles } from '../app/modele.mjs'
+import { RegCles, Notification } from '../app/modele.mjs'
 import { WS } from '../app/ws.mjs'
 import { FsSyncSession } from '../app/fssync.mjs'
 
@@ -44,6 +44,8 @@ export const useSessionStore = defineStore('session', {
     membreId: 0, // membre "courant" (son im/ids dans son groupe)
     peopleId: 0, // people "courant"
     notifC: null, // notifC du people courant
+    notifP: null, // notifP de la partition du compte
+    mnotifP: new Map(), // map des notifP
     
     espaces: new Map(), // Pour admin SEULEMENT
     syntheses: new Map(), // Pour admin SEULEMENT
@@ -98,11 +100,11 @@ export const useSessionStore = defineStore('session', {
     ok (state) { return state.status === 2 },
 
     ntfE (state) { return state.espace && state.espace.notifE && state.espace.notifE.nr ? state.espace.notifE : null },
-    ntfP (state) { return state.espace && state.espace.notifP && state.espace.notifP.nr ? state.espace.notifP : null },
+    ntfP (state) { return state.notifP && state.notifP.nr ? state.notifP : null },
     ntfC (state) { return state.compte && state.compte.notif && state.espace.notif.nr ? state.compte.notif : null },
 
-    mini (state) { (state.ntfP && state.ntfP.nr === 3) || (state.ntfC && state.ntfC.nr === 3) },
-    lect (state) { (state.ntfP && state.ntfP.nr >= 2) || (state.ntfC && state.ntfC.nr >= 2) },
+    mini (state) { return (state.ntfP && state.ntfP.nr === 3) || (state.ntfC && state.ntfC.nr === 3) },
+    lect (state) { return (state.ntfP && state.ntfP.nr >= 2) || (state.ntfC && state.ntfC.nr >= 2) },
     estFige (state) { const n = state.ntfE; return n && (n.nr === 2) },
     estClos (state) { const n = state.ntfE; return n && (n.nr === 3) },
     ral (state) { if (!state.compte) return 0
@@ -116,6 +118,7 @@ export const useSessionStore = defineStore('session', {
     quotv (state) { if (!state.compte) return 0
       const n = state.compte.pcv; return n >= 100 ? 2 : (n >= 90 ? 1 : 0)
     },
+    quotmax (state) { return state.quotn > state.quotv ? state.quotn : state.quotv },
 
     /* NotifIcon.niv :  
     /* niveau d'information / restriction: 
@@ -177,6 +180,8 @@ export const useSessionStore = defineStore('session', {
     },
 
     getCV: (state) => { return (id) => { return state.pSt.getCV(id) } },
+
+    notifPX: (state) => { return (id) => { return state.mnotifP.get(ID.court(id)) } },
 
     eltPart: (state) => { return (id) =>  
       state.partition ? (state.partition.mcpt[id] || { fake: true }) : { fake: true }
@@ -371,6 +376,7 @@ export const useSessionStore = defineStore('session', {
         this.compte = null
         this.compteId = 0
       }
+      setTimeout(async () => { await this.setNotifP()}, 1)
     },
 
     setCompti (compti) {
@@ -390,8 +396,8 @@ export const useSessionStore = defineStore('session', {
       }
       if (estAdmin) { this.espaces.set(espace.id, espace); return }
       this.espace = espace
+      setTimeout(async () => { await this.setNotifP()}, 1)
       if (espace.notifE && espace.notifE.dh > this.dhvu) this.alire = true
-      if (espace.notifP && espace.notifP.dh > this.dhvu) this.alire = true
     },
 
     setPartition (partition) { this.partition = partition },
@@ -426,43 +432,6 @@ export const useSessionStore = defineStore('session', {
       const x = new Uint8Array(encode(token))
       this.authToken = u8ToB64(new Uint8Array(x), true)
     },
-
-    /*
-    async editUrgence () {
-      if (this.mode === 3) {
-        await afficherDiag($t('editavion'))
-        return false
-      }
-      if (this.estFige) {
-        await afficherDiag($t('editfige'))
-        return false
-      }
-      return true
-    },
-
-    async edit () {
-      const d = this.editDiag
-      if (!d) return true
-      await afficherDiag(d)
-      return false
-    },
-
-    async editpow (p, noed) {
-      const y = ['', 'powadmin', 'powcompta', 'powsponsor']
-      if (p === 3) {
-        if (this.pow !== 3 && this.pow !== 2) {
-          await afficherDiag(p ? $t(y[p]) : '')
-          return false
-        }
-      } else if (p === 1 || p === 2) {
-        if (this.pow !== p) {
-          await afficherDiag(p ? $t(y[p]) : '')
-          return false
-        }
-      }
-      return noed ? true : await this.edit()
-    },
-    */
     
     opCount () {
       const self = this
@@ -488,6 +457,32 @@ export const useSessionStore = defineStore('session', {
       this.opSpinner = 0
       stores.ui.fD()
       this.opTimer2 = setTimeout(() => { this.signalOp = false }, 1000)
+    },
+
+    /* Recalcul notifP et tnotifP quand le compte ou l'espace ont changé
+    a) Les notifs P ne sont pas decryptables depuis espace
+    avant que compte et son premier avatar ne soit mis en store
+    b) Si le compte change de partition, les notifs dans espace sont à redecrypter
+    et d'ailleurs espace N'EST PAS mis à jour.
+    */
+    async setNotifP () { 
+      const e = this.espace
+      const c = this.compte
+      if (e && c && c.clep) {
+        this.notifP = null
+        this.mnotifP.clear()
+        for (let i = 1; i < e.tnotifP.length; i++) {
+          const n = e.tnotifP[i]
+          if (n) {
+            const cl = RegCles.get(ID.long(i, this.ns))
+            const ntf = await Notification.decrypt(n, cl)
+            this.mnotifP.set(i, ntf)
+            if (i === ID.court(c.idp)) this.notifP = ntf
+          }
+        }
+      }
+      if (this.notifP && this.notifP.dh > this.dhvu) this.alire = true
     }
+
   }
 })

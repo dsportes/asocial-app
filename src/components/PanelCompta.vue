@@ -165,11 +165,6 @@
       <div v-if="estA" class="column q-my-sm full-width">
         <panel-deta :c="c" :total="session.compta.solde"/>
       </div>
-
-      <div v-if="c.decouvert" class="titre-md q-my-sm">
-        <div v-if="estA">{{$t('PCPdeca', [dhcool(c.decouvert[1]), mon(c.dec)])}}</div>
-        <div v-else>{{$t('PCPdeco', [dhcool(c.decouvert[1]), c.dec])}}</div>
-      </div>
     </div>
   </q-expansion-item>
   <q-separator size="3px"/>

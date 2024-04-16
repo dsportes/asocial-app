@@ -1,6 +1,6 @@
 <template>
 <div>
-  <sd-noir v-if="idxPair || !$q.dark.isActive" :texte="texte"/>
+  <sd-noir v-if="!$q.dark.isActive" :texte="texte"/>
   <sd-blanc v-else :texte="texte"/>
 </div>
 </template>
@@ -14,7 +14,7 @@ export default ({
   components: { SdNoir, SdBlanc },
 
   computed: {
-    idxPair () { return this.idx === undefined || this.idx % 2 === 0 }
+    // idxPair () { return this.idx === undefined || this.idx % 2 === 0 }
   },
 
   props: { 

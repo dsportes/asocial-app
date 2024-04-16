@@ -15,7 +15,8 @@
           <tuile-notif :src="lg" occupation/>
         </div>
         <div class="q-my-xs">
-          <apercu-notif editable :notif="lg.notif" :type="1" :cible="p.id"/>
+          <apercu-notif :editable="session.estComptable || session.estDelegue"
+            :notif="ntfp" :type="1" :cible="p.id"/>
         </div>
       </div>
     </q-expansion-item>
@@ -57,7 +58,7 @@
             :idE="c.id" :del="(session.estComptable || session.estDelegue) || c.del"/>
 
           <apercu-notif v-if="session.estDelegue || session.estComptable" class="q-my-xs" editable
-            :notif="session.notifC" :type="2" :idx="idx" :cible="c.id"/>
+            :notif="c.notif" :type="2" :idx="idx" :cible="c.id"/>
 
           <div v-if="vis(c)" class="q-my-sm row">
             <quotas-vols class="col" :vols="c.q" />
@@ -129,6 +130,7 @@ export default {
   props: { },
 
   computed: {
+    ntfp () { return this.session.notifPX(this.p.id) },
     lg () { return this.p ? this.p.synth : {} },
     p () { return this.session.partition }
   },

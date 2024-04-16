@@ -54,26 +54,27 @@
 
       <!-- Notifications -->
       <div class="btn2" @click="clickNotif">
-        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <notif-icon class="q-ml-xs" 
+          :alire="session.alire && (session.ntfIco !== 0)" :niv="session.ntfIco"/>
         <span class="q-ml-xs">{{$t('MLAntf')}}</span>
       </div>
 
       <!-- Abonnement -->
       <div class="btn2" @click="clickAbo">
-        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <n3-icon class="q-ml-xs" :niv="session.quotmax"/>
         <span class="q-ml-xs">{{$t('MLAabo')}}</span>
       </div>
 
       <!-- credits -->
       <div v-if="session.estComptable || session.compte.estA"
         class="btn2" @click="clickCred">
-        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <n3-icon class="q-ml-xs" :niv="session.ral"/>
         <span class="q-ml-xs">{{$t('MLAcred')}}</span>
       </div>
 
       <!-- Chats d'urgence -->
       <div class="btn2" @click="clickChats">
-        <notif-icon class="q-ml-xs" :alire="session.alire" :niv="session.niv"/>
+        <n3-icon class="q-ml-xs" :niv="1"/>
         <span class="q-ml-xs">{{$t('MLAchats')}}</span>
       </div>
 
@@ -104,13 +105,14 @@ import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
 import NotifIcon from '../components/NotifIcon.vue'
+import N3Icon from '../components/N3Icon.vue'
 import QueueIcon from '../components/QueueIcon.vue'
 import MenuAccueil from '../components/MenuAccueil.vue'
 
 export default {
   name: 'PageAccueil',
 
-  components: { MenuAccueil, BoutonHelp, BoutonLangue, NotifIcon, QueueIcon },
+  components: { MenuAccueil, BoutonHelp, BoutonLangue, NotifIcon, N3Icon, QueueIcon },
 
   computed: {
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },

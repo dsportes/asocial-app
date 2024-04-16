@@ -151,34 +151,27 @@ class SB {
   /* IDBbuffer passé en paramètres:
   La suppression des notes d'un avatar ou d'un groupe 
   conduit à mettre à jour / supprimer des Avnote.
-  async : à cause de compile2() du compte
   */
-  async store (buf) {
+  store (buf) {
     if (this.espace) this.s.setEspace(this.espace)
     if (this.compte) this.s.setCompte(this.compte)
     if (this.compti) this.s.setCompti(this.compti)
 
-    if (this.avatars.size) {
-      for(const [,a] of this.avatars) this.a.setAvatar(a)
-      if (this.s.compte.clePKX) 
-        await this.s.compte.compile2()
-    }
+    if (this.avatars.size) for(const [,a] of this.avatars) this.a.setAvatar(a)
+    
     if (this.supprAv.size) for (const ida of this.supprAv) {
       this.a.delAvatar(ida)
       this.avSt.delNotes(ida, buf)
     }
 
-    if (this.groupes.size) for(const [,g] of this.groupes) { 
-      this.g.setGroupe(g) 
-    }
+    if (this.groupes.size) for(const [,g] of this.groupes) this.g.setGroupe(g) 
+    
     if (this.supprGr.size) for (const idg of this.supprGr) {
       this.g.delGroupe(idg)
       this.avSt.delNotes(idg, buf)
     }
 
-    if (this.chatgrs.size) for(const [,ch] of this.chatgrs) { 
-      this.g.setChatgr(ch) 
-    }
+    if (this.chatgrs.size) for(const [,ch] of this.chatgrs) this.g.setChatgr(ch) 
 
     if (this.notes.size) for(const [,n] of this.notes) { 
       const st = ID.estGroupe(n.id) ? this.g : this.a

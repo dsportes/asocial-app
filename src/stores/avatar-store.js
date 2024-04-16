@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { difference, intersection } from '../app/util.mjs'
 import { ID, UNITEN, UNITEV } from '../app/api.mjs'
-import { getNg, Motscles } from '../app/modele.mjs'
+import { Motscles, RegCc } from '../app/modele.mjs'
+import { decrypterRSA } from '../app/webcrypto.mjs'
 
 const fx = [['id', 1],
 ['q1', 1], ['q1', -1],
@@ -217,8 +218,6 @@ export const useAvatarStore = defineStore('avatar', {
 
     getElt: (state) => { return (id) => { return state.map.get(id) } },
 
-
-
     estAvatar: (state) => { return (id) => { 
         return state.map.has(id)
       }
@@ -362,6 +361,21 @@ export const useAvatarStore = defineStore('avatar', {
       }
       e.avatar = avatar
       this.nSt.setAvatar(avatar.id)
+      const c = this.session.compte
+      if (avatar.id === this.session.compteId && !c.priv) {
+        c.priv = RegCc.getPriv(this.id)
+        setTimeout(async () => { 
+          if (!c.clep && c.clePX) {
+            c.clep = RegCles.set(await decrypterRSA(c.priv, c.clePKX))
+            delete c.clePX
+          }
+          if (c.notifX) {
+            c.notif = await Notification.decrypt(c.notifX, c.clep)
+            delete c.notifX
+          }
+          this.s.setNotifP() 
+        }, 1)
+      }
     },
 
     delAvatar (id) {

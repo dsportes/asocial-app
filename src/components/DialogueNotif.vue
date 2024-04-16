@@ -41,7 +41,7 @@ import EditeurMd from './EditeurMd.vue'
 import { styp, dhcool } from '../app/util.mjs'
 import { SetNotifC } from '../app/operations.mjs'
 import { SetNotifE, SetNotifP } from '../app/operations4.mjs'
-import { reconnexion } from '../app/synchro.mjs'
+import { reconnexion, GetSynthese } from '../app/synchro.mjs'
 import { RegCles } from '../app/modele.mjs'
 
 export default {
@@ -96,6 +96,7 @@ export default {
         } else {
           await new SetNotifC().run (suppr ? null : this.n, this.cible)
         }
+        await new GetSynthese().run(this.session.ns)
       }
       this.ui.fD()
     }

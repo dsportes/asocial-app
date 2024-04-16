@@ -376,20 +376,7 @@ export class Espace extends GenDoc {
     this.dlvat = row.dlvat || 0
     this.nbmi = row.nbmi || 6
     this.notifE = row.notifE ? new Notification(row.notifE) : null
-    this.notifP = row.notifP || null
     this.tnotifP = row.tnotifP || []
-  }
-
-  async notifPX (idp) {
-    const session = stores.session
-    const idpx = idp || session.compte.idp
-    let ntf = null
-    if (!idp || idp === session.compte.idp) ntf = this.notifP 
-    else ntf = this.tnotifP ? this.tnotifP[ID.court(idpx)] : null
-    if (!ntf) return null
-    const cleP = RegCles.get(idpx)
-    const n = await Notification.decrypt(ntf, cleP)
-    return n
   }
 
 }
@@ -600,21 +587,32 @@ export class Compte extends GenDoc {
     this.alerteDlv = cfg.alerteDlv > this.nbj
     // this.alerteDlv = this.nbj > 5 // test
 
+    if (this.estComptable) {
+      this.mcode = new Map()
+      for(let i = 1; i < row.tpk.length; i++) {
+        const x = row.tpk[i]
+        if (x) {
+          const { cleP, code } = decode(await decrypter(clek, x))
+          const idp = Cles.id(RegCles.set(cleP), this.ns)
+          if (code) this.mcode.set(idp, code)
+        }
+      }
+    }
+
+    this.priv = RegCc.getPriv(this.id)
+
     if (row.idp) {
       this.estA = false
       this.idp = ID.long(row.idp, this.ns)
-      let clep
       if (row.clePK.length === 256) {
-        const priv = RegCc.getPriv(this.id)
-        if (priv) clep = await decrypterRSA(priv, row.clePK)
-        else this.clePKX = row.clePK
-      }
-      else clep = RegCles.set(await decrypter(clek, row.clePK))
+        if (this.priv) this.clep = await decrypterRSA(priv, row.clePK)
+        else { this.clePKX = row.clePK; this.clep = null }
+      } else this.clep = RegCles.set(await decrypter(clek, row.clePK))
       this.del = row.del || false
       if (row.notif) {
-        if (clep) {
-          this.notif = await Notification.decrypt(row.notif, clep)
-        } else this.notif = row.notif
+        if (this.clep) {
+          this.notif = await Notification.decrypt(row.notif, this.clep)
+        } else { this.notif = row.notif; this.notifX = row.notif }
       } else this.notif = null
     } else this.estA = true
 
@@ -634,29 +632,6 @@ export class Compte extends GenDoc {
       const sav = new Set()
       for(const idx2 of e.lp) sav.add(ID.long(parseInt(idx2), this.ns))
       this.mpg.set(idg, sav)
-    }
-
-    if (this.estComptable) {
-      this.mcode = new Map()
-      for(let i = 1; i < row.tpk.length; i++) {
-        const x = row.tpk[i]
-        if (x) {
-          const { cleP, code } = decode(await decrypter(clek, x))
-          const idp = Cles.id(RegCles.set(cleP), this.ns)
-          if (code) this.mcode.set(idp, code)
-        }
-      }
-    }
-  }
-
-  // Compilation différée (après compile du premier avatar)
-  async compile2 () {
-    if (this.clePKX) {
-      const priv = RegCc.getPriv(this.id)
-      const clep = RegCles.set(await decrypterRSA(priv, this.clePKX))
-      if (this.notif)
-        this.notif = await Notification.decrypt(this.notif, clep)
-      this.clePKX = null
     }
   }
 
