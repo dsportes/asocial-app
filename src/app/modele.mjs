@@ -610,7 +610,7 @@ export class Compte extends GenDoc {
       this.estA = false
       this.idp = ID.long(row.idp, this.ns)
       if (row.clePK.length === 256) {
-        if (this.priv) this.clep = await decrypterRSA(priv, row.clePK)
+        if (this.priv) this.clep = await decrypterRSA(this.priv, row.clePK)
         else { this.clePKX = row.clePK; this.clep = null }
       } else this.clep = RegCles.set(await decrypter(clek, row.clePK))
       this.del = row.del || false

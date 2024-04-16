@@ -7,8 +7,9 @@
       cond="cUrgence" :label="$t('PPchdel')" @ok="chgDelegue"/>
     <btn-cond v-if="(session.estComptable || (session.estDelegue && !session.eltPart(id).fake)) && id !== session.compteId"
       cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
-    <btn-cond color="warning" round icon="change_history"
-      cond="cEdit" class="justify-start" @ok="muter">
+    <btn-cond color="warning" icon="change_history"
+      cond="cEdit" class="justify-start" @ok="muter"
+      :label="$t('PPmuter')">
       <q-tooltip>{{$t('PPmut')}}</q-tooltip>
     </btn-cond>
   </div>

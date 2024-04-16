@@ -101,7 +101,7 @@ export const useSessionStore = defineStore('session', {
 
     ntfE (state) { return state.espace && state.espace.notifE && state.espace.notifE.nr ? state.espace.notifE : null },
     ntfP (state) { return state.notifP && state.notifP.nr ? state.notifP : null },
-    ntfC (state) { return state.compte && state.compte.notif && state.espace.notif.nr ? state.compte.notif : null },
+    ntfC (state) { return state.compte && state.compte.notif ? state.compte.notif : null },
 
     mini (state) { return (state.ntfP && state.ntfP.nr === 3) || (state.ntfC && state.ntfC.nr === 3) },
     lect (state) { return (state.ntfP && state.ntfP.nr >= 2) || (state.ntfC && state.ntfC.nr >= 2) },

@@ -1766,8 +1766,8 @@ export default {
   CPTal2a: 'Dépassement du quota pour les fichiers attachés aux notes ({0}%).',
   CPTal2b: 'Ajouts et remplacements de fichiers attachés à un note autorisés seulement si le volume total du note est en réduction.',
 
-  CPTtitch: 'Chats avec le Comptable et les sponsors',
-
+  CPTtitchO: 'Chats avec le Comptable et ses délégués',
+  CPTtitchA: 'Chat avec le Comptable',
   CPTtn0: 'Notification de l\'administrateur technique de l\'application',
   CPTtn1: 'Notification pour tous les comptes de la tranche, du Comptable ou d\'un sponsor',
   CPTtn2: 'Notification spécifique au compte (émise par le Comptable ou un sponsor de la tranche)',
@@ -1891,7 +1891,6 @@ export default {
   ANnotc: 'La notification a été émise par la Comptable: il est seul autorisé à la modifier / supprimer.',
   ANcomptable: 'du Comptable',
   ANdel1: 'de {0}, délégué sur la partition',
-  ANdel2: 'd\'un délégué sur la partition',
   ANrestr: 'Restriction d\'accès',
   ANnr02: 'Application "figée" par l\'administrateur technique: aucune mise à jour possible',
   ANnr03: 'Application "bloquée" par l\'administrateur technique',
@@ -1940,6 +1939,7 @@ export default {
   PPchpart: 'Changer de partition',
   PPchdel: 'Changer le statut de "délégué"',
   PPcompta: 'Abon. et conso.',
+  PPmuter: 'Mutation O<=>A',
   PPchatreq: 'Un "chat" avec le compte doit avoir été établi avant d\'envisager un changement de type du compte.',
   PPmut: 'Changer le type du compte',
   PPmut1: 'Cet avatar n\'est pas l\'avatar principal de son compte: impossible d\'envisager de changer son type.',

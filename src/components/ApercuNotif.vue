@@ -52,6 +52,7 @@ import ShowHtml from './ShowHtml.vue'
 import DialogueNotif from './DialogueNotif.vue'
 import { Notification } from '../app/modele.mjs'
 import { dhcool, dkli, $t } from '../app/util.mjs'
+import { ID } from '../app/api.mjs'
 
 export default {
   name: 'ApercuNotif',
@@ -76,15 +77,14 @@ export default {
   },
 
   computed: {
+    aut () { return this.notif.idDel ? ID.long(this.notif.idDel, this.session.ns) : ID.duComptable(this.session.ns)},
     nomSource () {
       if (this.type === 0) return this.$t('ANadmin')
-      const del = this.notif.idDel
-      if (!del) return this.$t('ANcomptable')
-      const cv = this.session.getCV(del)
-      return cv.tx ? $t('ANdel1', cv.nom) : $t('ANdel2')
+      const cv = this.session.getCV(this.aut)
+      return this.$t('ANdel1', [cv.nomC])
     },
     diag () {
-      if (this.session.estComptable || !this.notif || this.notif.idDel) return ''
+      if (this.session.estComptable || !this.notif || !ID.estComptable(this.aut)) return ''
       return this.$t('ANnotc') 
     }
   },

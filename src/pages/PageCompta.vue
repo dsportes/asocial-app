@@ -54,19 +54,21 @@
       <q-separator color="orange" class="q-mt-md"/>
       <div class="row q-my-sm items-start">
         <div class="colauto"><n3-icon :niv="session.notifP ? session.notifP.nr : 0"/></div>
-        <apercu-notif class="q-ml-sm" :idx="1" :type="1" :cible="session.compte.idp" :notif="session.notifP"/>
+        <apercu-notif class="q-ml-sm col" :idx="1" :type="1" :cible="session.compte.idp" :notif="session.notifP"/>
       </div>
       <q-separator color="orange" class="q-mt-md"/>
       <div class="row q-my-sm items-start">
         <div class="colauto"><n3-icon :niv="session.compte.notif ? session.compte.notif.nr : 0"/></div>
-        <apercu-notif  class="q-ml-sm" :idx="2" :type="2" 
+        <apercu-notif  class="q-ml-sm col" :idx="2" :type="2" 
           :cible="session.compteId" :notif="session.compte.notif"/>
       </div>
     </div>
   </div>
 
   <div v-if="ui.pagetab==='chats'" class="spmd q-pa-sm">
-    <div class="titre-lg text-italic text-center q-py-md">{{$t('CPTtitch')}}</div>
+    <div class="titre-lg text-italic text-center q-py-md">
+      {{$t('CPTtitch' + (session.estA ? 'A' : 'O'))}}
+    </div>
 
     <btn-cond class="q-my-sm" 
       :cond="session.estAdmin ? 'cUrgence' : 'cVisu'"
