@@ -31,7 +31,7 @@ export class RegCles {
   static registre = new Map()
 
   static reset () { 
-    RegCles.registre.clear
+    RegCles.registre.clear()
     RegCc.reset()
   }
 
@@ -52,7 +52,7 @@ export class RegCc {
   static registre = new Map() // clé: ids d'un chat - valeur: clé C du chat
   static regpriv = new Map() // clé: id d'un avatar du compte - valeur: clé privée
 
-  static reset () { RegCc.registre.clear; RegCc.regpriv.clear }
+  static reset () { RegCc.registre.clear(); RegCc.regpriv.clear() }
 
   static async setPriv (id, privK) {
     if (!RegCc.regpriv.has(id)) {
@@ -277,7 +277,7 @@ export class Notification {
   static async decrypt (ntf, cle) {
     const n = { nr: ntf.nr || 0, dh: ntf.dh || 0 }
     n.texte = ntf.texte ? await decrypterStr(cle, ntf.texte) : ''
-    if (ntf.idDel) n.idEl = ntf.idDel
+    if (ntf.idDel) n.idDel = ntf.idDel
     return new Notification(n)
   }
 
@@ -289,7 +289,7 @@ export class Notification {
   }
 
   constructor ({nr, dh, texte, idDel}) {
-    if (idDel) this.idDel = ID.long(idSource, RegCles.ns)
+    if (idDel) this.idDel = ID.long(idDel, RegCles.ns)
     this.nr = nr || 0
     this.texte = texte || ''
     this.dh = dh || Date.now()  

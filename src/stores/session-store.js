@@ -3,9 +3,9 @@ import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
 import { crypter, decrypter } from '../app/webcrypto.mjs'
-import { u8ToB64, intToB64, rnd6, $t, dhcool } from '../app/util.mjs'
+import { u8ToB64, intToB64, rnd6, $t } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
-import { RegCles, Notification } from '../app/modele.mjs'
+import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
 import { WS } from '../app/ws.mjs'
 import { FsSyncSession } from '../app/fssync.mjs'
 
@@ -475,7 +475,7 @@ export const useSessionStore = defineStore('session', {
           const n = e.tnotifP[i]
           if (n) {
             const cl = RegCles.get(ID.long(i, this.ns))
-            const ntf = await Notification.decrypt(n, cl)
+            const ntf = await MaNotification.decrypt(n, cl)
             this.mnotifP.set(i, ntf)
             if (i === ID.court(c.idp)) this.notifP = ntf
           }
