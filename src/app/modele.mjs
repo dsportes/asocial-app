@@ -701,7 +701,13 @@ _data_:
     - du cumul des crédits reçus depuis le début de la vie du compte (ou de son dernier passage en compte A), 
     - plus les dons reçus des autres,
     - moins les dons faits aux autres.
-  - `ticketsK`: liste des tickets cryptée par la clé K du compte `{ids, v, dg, dr, ma, mc, refa, refc, di}`.
+  - `tickets`: map des tickets / dons:
+    - _clé_: `ids`
+    - _valeur_: `{dg, iddb, dr, ma, mc, refa, refc, di}`
+    - Pour un don :
+      - `dg` est la date du don.
+      - `ma` est le montant du don (positif ou négatif)
+      - `iddb`: id du donateur / bénéficiaire (selon le signe de `ma`).
 */
 export class Compta extends GenDoc {
   get ns () { return ID.ns(this.id) }
@@ -713,31 +719,31 @@ export class Compta extends GenDoc {
     this.compteurs = new Compteurs(row.compteurs, this.qv)
     this.pc = this.compteurs.pourcents // {pcc, pcn, pcv, max}
     this.solde = row.solde || 0
-    if (row.ticketsK) this.tickets = decode(await decrypter(clek, row.ticketsK))
+    if (row.tickets) this.tickets = row.tickets
     this.estA = this.tickets !== undefined
   }
 
-  /* TODO Depuis la liste actuelle des tickets de compta,
+  /* Depuis la liste actuelle des tickets de compta,
   - enlève les obsolètes,
   - ajoute tk s'il n'y était pas, le remplace sinon
-  - retourne credits crypté par la clé K
+  - retourne tickets crypté par la clé K
   */
   async creditsSetTk (tk) {
-    const credits = { total: this.credits.total, tickets: [] }
+    const tickets = []
     let repl = false
-    this.credits.tickets.forEach(t => {
+    this.tickets.forEach(t => {
       if (!Ticket.estObsolete(t)) {
         if (t.ids === tk.ids) {
-          credits.tickets.push(tk)
+          tickets.push(tk)
           repl = true
         } else {
-          credits.tickets.push(t)
+          tickets.push(t)
         }
       }
     })
-    if (!repl && !Ticket.estObsolete(tk)) credits.tickets.push(tk)
+    if (!repl && !Ticket.estObsolete(tk)) tickets.push(tk)
     const session = stores.session
-    return await crypter(session.clek, new Uint8Array(encode(credits)))
+    return await crypter(session.clek, new Uint8Array(encode(tickets)))
   }
 
   /* TODO Depuis la liste actuelle des tickets de compta,
@@ -1007,6 +1013,7 @@ _data_:
 export class Ticket extends GenDoc {
   async compile (row) {
     this.dg = row.dg
+    this.iddb = row.iddb || 0
     this.ma = row.ma || 0
     this.mc = row.mc || 0
     this.di = row.di || 0
@@ -1030,6 +1037,14 @@ export class Ticket extends GenDoc {
     return t
   }
 
+  static nouveauTicket (ids, ma, refa) {
+    return {
+      ids, ma, refa: refa || 0, 
+      mc: 0, refc: 0, di: 0, dr: 0, dg: AMJ.amjUtc()
+    }
+  }
+
+  /*
   static nouveauRow (ids, ma, refa) {
     const session = stores.session
     const r = { 
@@ -1040,6 +1055,7 @@ export class Ticket extends GenDoc {
     const rowTicket = { _nom: 'tickets', id: r.id, ids, _data_: new Uint8Array(encode(r)) }
     return { rowTicket, ticket: r }
   }
+  */
 
   async recepRow (mc, refc) {
     const t = { }

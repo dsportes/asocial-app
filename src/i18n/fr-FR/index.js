@@ -411,7 +411,8 @@ export default {
   EX8236: '(BUG) Numéro de partition non existant dans espace.',
   EX8237: '(BUG) Un délégué ne peut pas surcharger / supprimer une notification émise par le Comptable',
   EX8238: '(BUG) Une notification de compte ne peut être éditée que par un délégué de la partition du compte ou le Comptable',
-
+  EX8239: '(BUG) Doublon de numéro de ticket (déjà enregistré)',
+  
   EX8801: 'Restriction de lecture seulement',
   EX8802: 'Restriction d\'accès minimal',
 

@@ -5,7 +5,7 @@ import { Operation } from './synchro.mjs'
 import { random, gzipB } from './util.mjs'
 import { Cles, d14, ID } from './api.mjs'
 import { post } from './net.mjs'
-import { RegCles, compile, CV } from './modele.mjs'
+import { RegCles, compile, CV, Ticket } from './modele.mjs'
 import { getPub } from './synchro.mjs'
 import { decrypter, crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
 
@@ -675,3 +675,116 @@ export class SetCodePart extends Operation {
   }
 }
 
+/* OP_PlusTicket: 'Génération d\'un ticket de crédit'
+et ajout du ticket au Comptable
+- token : jeton d'authentification du compte de **l'administrateur**
+- ma: montant attendu
+- refa: référence éventuelle du compte
+- ids: ids du ticket généré
+Retour: 
+- rowCompta: du compte après insertion du ticket
+*/
+export class PlusTicket extends Operation {
+  constructor () { super('PlusTicket') }
+
+  async run (ma, refa, ids) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ma, refa, ids }
+      const ret = await post(this, 'PlusTicket', args)
+      const compta = await compile(ret.rowCompta)
+      session.setCompta(compta)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_MoinsTicket: 'Suppression d\'un ticket de crédit'
+et retrait (zombi) du ticket du Comptable
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `credits` : credits crypté par la clé K du compte
+- `ids` : ticket à enlever
+
+Retour: rien
+*/
+export class MoinsTicket extends Operation {
+  constructor () { super('MoinsTicket') }
+
+  async run (ids) { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+
+      while (await this.retry()) {
+        const compta = aSt.compta
+        const credits = await compta.creditsUnsetTk(ids)
+
+        const args = { token: session.authToken, credits, ids }
+        const ret = this.tr(await post(this, 'MoinsTicket', args))
+        if (!ret.KO) break
+      }
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_RafraichirTickets: 'Obtention des nouveaux tickets réceptionnés par le Comptable'
+et incorporation au solde le cas échéant
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `mtk` : map des tickets. clé: ids, valeur: version détenue en session
+
+Retour: 
+- rowTickets: liste des rows des tickets ayant changé
+*/
+/* `MajCredits` : mise a jour du crédits d'un compte A
+POST:
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `credits` : credits crypté par la clé K du compte
+- `dhdons`: array des dh des dons incorporés
+
+Retour: rien
+*/
+export class RafraichirTickets extends Operation {
+  constructor () { super('RafraichirTickets') }
+
+  async run () { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      let nb = 0
+
+      while (await this.retry()) {
+        const compta = aSt.compta
+        const mtk = compta.mtk
+        const args1 = { token: session.authToken, mtk }
+        const ret1 = this.tr(await post(this, 'RafraichirTickets', args1))
+        nb = 0
+        let m = null
+        if (ret1.rowTickets) {
+          nb = ret1.rowTickets.length
+          m = new Map()
+          for(const row of ret1.rowTickets) 
+            m.set(row.ids, await compile(row))
+        }
+        const { dlv, creditsK } = await compta.majCredits(m)
+        if (!creditsK) break
+
+        // lister les avatars et membres pour changement de dlv
+        const args2 = { token: session.authToken, credits: creditsK, v: compta.v,
+          dlv: dlv, lavLmb: aSt.compte.lavLmb
+        }
+        const ret2 = this.tr(await post(this, 'MajCredits', args2))
+        if (!ret2.KO) break
+      }
+      return this.finOK(nb)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

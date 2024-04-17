@@ -317,7 +317,7 @@ export class Operation {
       stores.session.startOp(this)
       this.cancelToken = null
       this.break = false
-      // this.nbretry = 0
+      this.nbretry = 0
     }
   }
 
@@ -326,7 +326,7 @@ export class Operation {
     return $t('OP_' + this.nom) 
   }
 
-  /* A SUPPRIMER ??? */
+  /* Utilisé dans PlusTicket */
   async retry () {
     if (this.modeSync) return
     if (this.nbretry++ > 5) 

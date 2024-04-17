@@ -12,23 +12,24 @@
     </q-input>
   </div>
 
-  <panel-deta v-if="!session.estComptable" :c="c" :total="aSt.compta.credits.total"
-    class="q-ma-xs q-pa-xs bord1"/>
+  <!--panel-deta v-if="!session.estComptable" :c="c" :total="aSt.compta.credits.total"
+    class="q-ma-xs q-pa-xs bord1"/-->
 
-  <q-btn v-if="!session.estComptable" class="q-my-xs" dense color="primary" padding="xs"
-    icon="add" :label="$t('TKnv')" @click="nvtk"/>
+  <btn-cond v-if="!session.estComptable" class="q-my-xs" cond="cUrgence"
+    icon="add" :label="$t('TKnv')" @ok="nvtk"/>
 
-  <div v-if="!session.estComptable" class="q-ma-xs q-pa-xs bord1">
+  <!--div v-if="!session.estComptable" class="q-ma-xs q-pa-xs bord1">
     <div class="text-italic titre-md">{{$t('TKinc')}}</div>
     <div v-if="dhinc" class="row titre-sm">
       <span class="q-mr-sm">{{$t('TKverif', [dhcool(dhinc)])}}</span>
       <span>{{$t('TKnbt', nbinc, { count: nbinc })}}</span>
     </div>
-    <q-btn class="q-my-xs" flat size="sm" dense color="primary" padding="xs"
-      icon="check" :label="$t('TKbtnv')" @click="rafraichirIncorp"/>
-  </div>
+    <btn-cond class="q-my-xs" flat size="sm" cond="cUrgence"
+      icon="check" :label="$t('TKbtnv')" @ok="rafraichirIncorp"/>
+  </div
 
   <q-separator color="orange" class="q-my-xs"/>
+  -->
 
   <div class="row justify-center">
     <q-radio v-model="att" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" 
@@ -50,8 +51,10 @@
     {{$t('TK' + (session.estComptable ? '1' : '2') + att)}}
   </div>
 
-  <div v-for="(tk, idx) in lstTk" :key="tk.ids">
-    <apercu-ticket :tk="tk" :idx="idx"/>
+  <div v-if="session.compta">
+    <div v-for="(tk, idx) in lstTk" :key="tk.ids">
+      <apercu-ticket :tk="tk" :idx="idx"/>
+    </div>
   </div>
 
   <q-dialog v-model="ui.d.PCdialtk[idc]" persistent>
@@ -65,10 +68,12 @@
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import ApercuTicket from '../components/ApercuTicket.vue'
-import PanelDeta from '../components/PanelDeta.vue'
+// import PanelDeta from '../components/PanelDeta.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { dhcool, mon, dkli, genIdTk, styp, afficherDiag } from '../app/util.mjs'
-import { PlusTicket, RafraichirTickets, TicketsStat, DownloadStatC2 } from '../app/operations.mjs'
+import { TicketsStat, DownloadStatC2 } from '../app/operations.mjs'
+import { PlusTicket } from '../app/operations4.mjs'
 import { AMJ, idTkToL6 } from '../app/api.mjs'
 
 export default ({
@@ -76,10 +81,10 @@ export default ({
 
   props: { },
 
-  components: { ApercuTicket, PanelDeta, PanelDialtk },
+  components: { BtnCond, ApercuTicket, PanelDialtk },
 
   computed: {
-    c () { return this.session.estComptable ? null : this.aSt.compta.compteurs },
+    c () { return this.session.estComptable ? null : this.session.compta.compteurs },
 
     lstTk () {
       function filtre (l, att, deb) {
@@ -96,7 +101,13 @@ export default ({
         return l
       }
 
-      const src = this.session.estComptable ? this.aSt.getTickets : this.aSt.compta.credits.tickets
+      let src = []
+      if (this.session.estComptable) src =  this.aSt.getTickets
+      else {
+        const ltk = this.session.compta.tickets
+        for(const ids in ltk) src.push(ltk[ids])
+      } 
+      
       const l = filtre(src, this.att, this.deb)
       if (this.att === 'A') l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : 1) })
       else l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : -1) })
@@ -160,10 +171,10 @@ export default ({
     },
 
     async nvtk () {
-      if (!await this.session.editUrgence()) return
       this.mx = '0'
       this.ui.oD('PCdialtk', this.idc)
     },
+
     async generer ({m, ref}) {
       const [ax, mx, j] = AMJ.aaaammjj(AMJ.amjUtc())
       const ids = genIdTk(ax, mx)
@@ -171,11 +182,8 @@ export default ({
       this.ui.fD()
       await new PlusTicket().run(m, ref, ids)
       await afficherDiag(this.$t('TKrefp', [this.session.org, tkx]))
-    },
-    async rafraichirIncorp () {
-      dhinc.value = Date.now()
-      nbinc.value = await new RafraichirTickets().run()
     }
+
   },
 
   setup () {

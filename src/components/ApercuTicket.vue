@@ -68,11 +68,12 @@
 
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { mon, dkli, styp, afficherDiag } from '../app/util.mjs'
+import { mon, dkli, styp } from '../app/util.mjs'
 import { AMJ, idTkToL6 } from '../app/api.mjs'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import { Ticket } from '../app/modele.mjs'
-import { ReceptionTicket, MoinsTicket } from '../app/operations.mjs'
+import { ReceptionTicket } from '../app/operations.mjs'
+import { MoinsTicket } from '../app/operations4.mjs'
 
 export default {
   name: 'ApercuTicket',

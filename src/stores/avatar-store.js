@@ -394,7 +394,7 @@ export const useAvatarStore = defineStore('avatar', {
 
     setTicket (ticket) {
       const e = this.map.get(ticket.id)
-      if (e) e.tickets.set(ticket.ids, tickets)
+      if (e) e.tickets.set(ticket.ids, ticket)
     },
 
     delTicket (id, ids) {
