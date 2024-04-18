@@ -18,43 +18,45 @@
   <btn-cond v-if="!session.estComptable" class="q-my-xs" cond="cUrgence"
     icon="add" :label="$t('TKnv')" @ok="nvtk"/>
 
-  <!--div v-if="!session.estComptable" class="q-ma-xs q-pa-xs bord1">
-    <div class="text-italic titre-md">{{$t('TKinc')}}</div>
-    <div v-if="dhinc" class="row titre-sm">
-      <span class="q-mr-sm">{{$t('TKverif', [dhcool(dhinc)])}}</span>
-      <span>{{$t('TKnbt', nbinc, { count: nbinc })}}</span>
-    </div>
-    <btn-cond class="q-my-xs" flat size="sm" cond="cUrgence"
-      icon="check" :label="$t('TKbtnv')" @ok="rafraichirIncorp"/>
-  </div
-
-  <q-separator color="orange" class="q-my-xs"/>
-  -->
-
-  <div class="row justify-center">
-    <q-radio v-model="att" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" 
-      val="A" :label="$t('TKatt')" class="q-mr-lg"/>
-    <q-radio v-model="att" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" 
-      val="T" :label="$t('tous')" />
-  </div>
-
-  <div v-if="session.estComptable" class="q-mt-sm row justify-center">
-    <div class="row items-center">
-      <span class="text-italic fs-md q-mr-md">{{$t('TKdeb')}}</span>
-      <q-input class="lg2" dense v-model="deb" clearable counter maxlength="6">
-        <template v-slot:hint>{{$t('TKdebh')}}</template>
-      </q-input>
-    </div>
-  </div>
-
-  <div class="titre-lg text-italic text-center q-mt-sm q-mb-md">
-    {{$t('TK' + (session.estComptable ? '1' : '2') + att)}}
-  </div>
-
   <div v-if="session.compta">
-    <div v-for="(tk, idx) in lstTk" :key="tk.ids">
-      <apercu-ticket :tk="tk" :idx="idx"/>
-    </div>
+    <q-expansion-item switch-toggle-side dense group="tkdon"
+      header-class="titre-md text-bold bg-primary text-white"
+      :label="$t('TK' + (session.estComptable ? '1' : '2') + att)">
+      <div class="row justify-center">
+        <q-radio v-model="att" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" 
+          val="A" :label="$t('TKatt')" class="q-mr-lg"/>
+        <q-radio v-model="att" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" 
+          val="T" :label="$t('tous')" />
+      </div>
+      <div v-if="session.estComptable" class="q-mt-sm row justify-center">
+        <div class="row items-center">
+          <span class="text-italic fs-md q-mr-md">{{$t('TKdeb')}}</span>
+          <q-input class="lg2" dense v-model="deb" clearable counter maxlength="6">
+            <template v-slot:hint>{{$t('TKdebh')}}</template>
+          </q-input>
+        </div>
+      </div>
+      <div v-for="(tk, idx) in lstTk" :key="tk.ids" class="q-ml-md">
+        <apercu-ticket :tk="tk" :idx="idx"/>
+      </div>
+    </q-expansion-item>
+
+    <q-separator size="3px"/>
+
+    <q-expansion-item v-if="!session.estComptable" switch-toggle-side dense group="tkdon"
+      header-class="titre-md text-bold bg-primary text-white"
+      :label="$t('TKdons')">
+      <div v-for="(d, idx) in lstDons" :key="idx" class="q-ml-md">
+        <div class="row justify-between">
+          <div v-if="d.m > 0">{{$t('TKcr', [d.m])}}</div>
+          <div v-else>{{$t('TKdb', [-d.m])}}</div>
+          <div class="font-mono">{{dhcool(d.dh)}}</div>
+        </div>
+        <apercu-genx :id="ID.long(d.iddb, session.ns)" :idx="0"/>
+        <q-separator color="grey-5" class="q-mb-md"/>
+      </div>
+    </q-expansion-item>
+
   </div>
 
   <q-dialog v-model="ui.d.PCdialtk[idc]" persistent>
@@ -68,20 +70,20 @@
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import ApercuTicket from '../components/ApercuTicket.vue'
-// import PanelDeta from '../components/PanelDeta.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import BtnCond from '../components/BtnCond.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
 import { dhcool, mon, dkli, genIdTk, styp, afficherDiag } from '../app/util.mjs'
 import { TicketsStat, DownloadStatC2 } from '../app/operations.mjs'
 import { PlusTicket } from '../app/operations4.mjs'
-import { AMJ, idTkToL6 } from '../app/api.mjs'
+import { AMJ, idTkToL6, ID } from '../app/api.mjs'
 
 export default ({
   name: 'PanelCredits',
 
   props: { },
 
-  components: { BtnCond, ApercuTicket, PanelDialtk },
+  components: { ApercuGenx, BtnCond, ApercuTicket, PanelDialtk },
 
   computed: {
     c () { return this.session.estComptable ? null : this.session.compta.compteurs },
@@ -109,9 +111,18 @@ export default ({
       } 
       
       const l = filtre(src, this.att, this.deb)
-      if (this.att === 'A') l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : 1) })
-      else l.sort((a, b) => { return a.dg < b.dg ? -1 : (a.dg === b.dg ? 0 : -1) })
+      if (this.att === 'A') l.sort((a, b) => { return a.dg < b.dg ? 1 : (a.dg === b.dg ? 0 : -1) })
+      else l.sort((a, b) => { return a.dg < b.dg ? 1 : (a.dg === b.dg ? 0 : -1) })
       return l
+    },
+    lstDons () {
+      // const t = this.session.compta.dons || []
+      const t = [
+        { iddb: ID.duComptable(this.session.ns), dh: this.session.dhConnx, m: 15 },
+        { iddb: ID.duComptable(this.session.ns), dh: this.session.dhConnx, m: -25 }
+      ]
+      t.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1) })
+      return t
     }
   },
 
@@ -171,7 +182,6 @@ export default ({
     },
 
     async nvtk () {
-      this.mx = '0'
       this.ui.oD('PCdialtk', this.idc)
     },
 
@@ -189,7 +199,7 @@ export default ({
   setup () {
     const ui = stores.ui
     return {
-      styp, mon, dhcool, dkli, AMJ,
+      styp, mon, dhcool, dkli, AMJ, ID,
       session: stores.session,
       aSt: stores.avatar,  
       ui, 

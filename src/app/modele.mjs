@@ -719,8 +719,9 @@ export class Compta extends GenDoc {
     this.compteurs = new Compteurs(row.compteurs, this.qv)
     this.pc = this.compteurs.pourcents // {pcc, pcn, pcv, max}
     this.solde = row.solde || 0
-    if (row.tickets) this.tickets = row.tickets
-    this.estA = this.tickets !== undefined
+    this.tickets = row.tickets || {}
+    this.dons = row.dons || []
+    this.estA = !this.qv.qc
   }
 
   /* Depuis la liste actuelle des tickets de compta,

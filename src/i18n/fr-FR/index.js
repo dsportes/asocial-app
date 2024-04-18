@@ -2067,7 +2067,9 @@ export default {
 
   TK1: 'En attente',
   TK2: 'Reçu',
-  TK3: 'Incorporé',
+  TKdons: 'Dons reçus / donnés',
+  TKdb: 'Donné: {0}c',
+  TKcr: 'Reçu: {0}c',
   TKdg: 'Génération le: {0}',
   TKdr: 'Réception le: {0}',
   TKdi: 'Incorporation le: {0}',
