@@ -703,12 +703,10 @@ export class PlusTicket extends Operation {
 
 /* OP_MoinsTicket: 'Suppression d\'un ticket de crédit'
 et retrait (zombi) du ticket du Comptable
-POST:
-- `token` : jeton d'authentification du compte de **l'administrateur**
-- `credits` : credits crypté par la clé K du compte
-- `ids` : ticket à enlever
-
-Retour: rien
+- token : jeton d'authentification du compte
+- ids : ticket à enlever
+Retour: 
+- rowCompta
 */
 export class MoinsTicket extends Operation {
   constructor () { super('MoinsTicket') }
@@ -716,16 +714,32 @@ export class MoinsTicket extends Operation {
   async run (ids) { 
     try {
       const session = stores.session
-      const aSt = stores.avatar
+      const args = { token: session.authToken, ids }
+      const ret = await post(this, 'MoinsTicket', args)
+      const compta = await compile(ret.rowCompta)
+      session.setCompta(compta)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
 
-      while (await this.retry()) {
-        const compta = aSt.compta
-        const credits = await compta.creditsUnsetTk(ids)
+/* OP_ReceptionTicket: 'Réception d\'un ticket par le Comptable'
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `ids` : du ticket
+- `mc` : montant reçu
+- `refc` : référence du Comptable
+Retour: rien
+*/
+export class ReceptionTicket extends Operation {
+  constructor () { super('ReceptionTicket') }
 
-        const args = { token: session.authToken, credits, ids }
-        const ret = this.tr(await post(this, 'MoinsTicket', args))
-        if (!ret.KO) break
-      }
+  async run (ids, mc, refc) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ids, mc, refc }
+      await post(this, 'ReceptionTicket', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -749,7 +763,7 @@ POST:
 - `dhdons`: array des dh des dons incorporés
 
 Retour: rien
-*/
+
 export class RafraichirTickets extends Operation {
   constructor () { super('RafraichirTickets') }
 
@@ -788,3 +802,4 @@ export class RafraichirTickets extends Operation {
     }
   }
 }
+*/

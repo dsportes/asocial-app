@@ -1548,30 +1548,6 @@ export class RafraichirDons extends Operation {
   }
 }
 
-/* OP_ReceptionTicket: 'Réception d\'un ticket par le Comptable'
-POST:
-- `token` : jeton d'authentification du compte de **l'administrateur**
-- `ids` : du ticket
-- `mc` : montant reçu
-- `refc` : référence du Comptable
-
-Retour: rien
-*/
-export class ReceptionTicket extends Operation {
-  constructor () { super('ReceptionTicket') }
-
-  async run (ids, mc, refc) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, ids, mc, refc }
-      this.tr(await post(this, 'ReceptionTicket', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_TestRSA: 'Test encryption RSA'
 args.token
 args.id

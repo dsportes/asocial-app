@@ -704,10 +704,10 @@ _data_:
   - `tickets`: map des tickets / dons:
     - _clé_: `ids`
     - _valeur_: `{dg, iddb, dr, ma, mc, refa, refc, di}`
-    - Pour un don :
-      - `dg` est la date du don.
-      - `ma` est le montant du don (positif ou négatif)
-      - `iddb`: id du donateur / bénéficiaire (selon le signe de `ma`).
+  - `dons` : liste des dons effectués / reçus
+    - `dh`: date-heure du don
+    - `m`: montant du don (positif ou négatif)
+    - `iddb`: id du donateur / bénéficiaire (selon le signe de `m`).
 */
 export class Compta extends GenDoc {
   get ns () { return ID.ns(this.id) }
@@ -727,7 +727,7 @@ export class Compta extends GenDoc {
   - enlève les obsolètes,
   - ajoute tk s'il n'y était pas, le remplace sinon
   - retourne tickets crypté par la clé K
-  */
+
   async creditsSetTk (tk) {
     const tickets = []
     let repl = false
@@ -745,12 +745,13 @@ export class Compta extends GenDoc {
     const session = stores.session
     return await crypter(session.clek, new Uint8Array(encode(tickets)))
   }
+  */
 
-  /* TODO Depuis la liste actuelle des tickets de compta,
+  /* Depuis la liste actuelle des tickets de compta,
   - enlève les obsolètes,
   - ajoute tk s'il n'y était pas, le remplace sinon
   - retourne credits crypté par la clé K
-  */
+  
   async creditsUnsetTk (ids) {
     const credits = { total: this.credits.total, tickets: [] }
     this.credits.tickets.forEach(t => {
@@ -761,8 +762,9 @@ export class Compta extends GenDoc {
     const session = stores.session
     return await crypter(session.clek, new Uint8Array(encode(credits)))
   }
+  */
 
-  /* TODO Incorporation des tickets et des dons en attente au credits,
+  /* Incorporation des tickets et des dons en attente au credits,
   - des tickets mis à jour reçus dans m (s'il y en a)
   - des montants des dons en attente (s'il y en a)
   Retourne credits crypté par la clé K, ou null si inchangé
@@ -779,7 +781,7 @@ export class Compta extends GenDoc {
   - `refa` : texte court (32c) facultatif du compte A à l'émission.
   - `refc` : texte court (32c) facultatif du Comptable à la réception.
   - `di`: date d'incorporation du crédit par le compte A dans son solde.
-  */
+  
   async majCredits (m) {
     const credits = { total: this.credits.total, tickets: [] }
     let maj = this.toSave || false
@@ -797,11 +799,10 @@ export class Compta extends GenDoc {
     }
 
     this.credits.tickets.forEach(t => {
-      /* report des tickets actuels:
-      - éventeullemnt mis à jor
-      - si pas obsolète
-      - en incorporant éventuellement leur montant dans le solde
-      */
+      // report des tickets actuels:
+      // - éventeullemnt mis à jor
+      // - si pas obsolète
+      //- en incorporant éventuellement leur montant dans le solde
       const tk = m ? m.get(t.ids) : null
       if (tk) { // rafraichi par m
         incorp(tk)
@@ -829,7 +830,7 @@ export class Compta extends GenDoc {
     } else 
       return { dlv: 0, creditsK: null }
   }
-
+  */
 }
 
 /* Classe compti ****************************************************
@@ -1008,7 +1009,6 @@ _data_:
 - `mc` : montant déclaré reçu par le Comptable.
 - `refa` : code court (32c) facultatif du compte A à l'émission.
 - `refc` : code court (32c) facultatif du Comptable à la réception.
-- `di`: date d'incorporation du crédit par le compte A dans son solde.
 */
 export class Ticket extends GenDoc {
   async compile (row) {
@@ -1016,7 +1016,6 @@ export class Ticket extends GenDoc {
     this.iddb = row.iddb || 0
     this.ma = row.ma || 0
     this.mc = row.mc || 0
-    this.di = row.di || 0
     this.dr = row.dr || 0
     this.refa = row.refa || ''
     this.refc = row.refc || ''
@@ -1025,7 +1024,7 @@ export class Ticket extends GenDoc {
   /* Un ticket est obsolète SSI,
   a) il est encore en attente (n'a pas été reçu)
   b) ET que sa génération a plus de 2 mois
-  */
+  
   static estObsolete (tk) {
     return tk.dr === 0 && AMJ.amjUtc() > AMJ.djMoisN(tk.dg, 2)
   }
@@ -1036,26 +1035,6 @@ export class Ticket extends GenDoc {
     t.refa = this.refa; t.refc = this.refc; t.di = this.di
     return t
   }
-
-  static nouveauTicket (ids, ma, refa) {
-    return {
-      ids, ma, refa: refa || 0, 
-      mc: 0, refc: 0, di: 0, dr: 0, dg: AMJ.amjUtc()
-    }
-  }
-
-  /*
-  static nouveauRow (ids, ma, refa) {
-    const session = stores.session
-    const r = { 
-      id: ID.duComptable(session.ns),
-      ids, ma, refa: refa || 0, 
-      mc: 0, refc: 0, di: 0, dr: 0, dg: AMJ.amjUtc()
-    }
-    const rowTicket = { _nom: 'tickets', id: r.id, ids, _data_: new Uint8Array(encode(r)) }
-    return { rowTicket, ticket: r }
-  }
-  */
 
   async recepRow (mc, refc) {
     const t = { }
@@ -1072,7 +1051,7 @@ export class Ticket extends GenDoc {
     t.di = Date.now()
     return { _row: 'tickets', id, ids, _data_: new Uint8Array(encode(r)) }
   }
-
+  */
 }
 
 /** Chat ************************************************************

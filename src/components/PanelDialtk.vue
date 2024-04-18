@@ -19,10 +19,9 @@
 
     </q-card-section>
     <q-card-actions align="right" class="q-gutter-sm">
-      <q-btn flat dense padding="xs" size="md" color="primary" icon="undo"
-        :label="$t('renoncer')" @click="ui.fD"/>
-      <q-btn dense padding="xs" size="md" color="warning" icon="check"
-        :label="$t('TKgen')" :disable="diag !== ''" @click="generer"/>
+      <btn-cond icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+      <btn-cond color="warning" icon="check" cond="cUrgence"
+        :label="$t('TKgen')" :disable="diag !== ''" @ok="generer"/>
     </q-card-actions>
   </q-card>
 </template>
@@ -31,6 +30,7 @@
 import { toRef, ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import { $t, styp } from '../app/util.mjs'
+import BtnCond from './BtnCond.vue'
 
 export default {
   name: 'PanelDialtk',
@@ -38,6 +38,8 @@ export default {
   props: { 
     min: Number, init: Number, titre: String
   },
+
+  components: { BtnCond },
 
   computed: {
   },

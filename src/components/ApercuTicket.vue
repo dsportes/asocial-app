@@ -36,12 +36,15 @@
         <span class="text-italic fs-md">{{$t('TKrefc')}}</span>
         <span class="q-ml-sm font-mono text-bold">{{tk.refc}}</span>
       </div>
-      <q-btn v-if="!session.estComptable && !Ticket.estObsolete(tk)" class="q-mt-xs"
-        dense color="warning" icon="close" :label="$t('supprimer')" @click="deltk"/>
-      <q-btn v-if="session.estComptable && !Ticket.estObsolete(tk)" class="q-mt-xs"
-        dense color="warning" icon="check" :label="$t('TKenreg1')" @click="recep1"/>
-      <q-btn v-if="session.estComptable && !Ticket.estObsolete(tk)" class="q-ml-xs q-mt-xs"
-        dense color="warning" icon="check" :label="$t('TKenreg2')" @click="recep2"/>
+      <btn-cond v-if="!session.estComptable" 
+        class="q-mt-xs" cond="cUrgence"
+        color="warning" icon="close" :label="$t('supprimer')" @ok="deltk"/>
+      <btn-cond v-if="session.estComptable" 
+        class="q-mt-xs" cond="cUrgence"
+        color="warning" icon="check" :label="$t('TKenreg1')" @ok="recep1"/>
+      <btn-cond v-if="session.estComptable" 
+        class="q-ml-xs q-mt-xs" cond="cUrgence"
+        color="warning" icon="check" :label="$t('TKenreg2')" @ok="recep2"/>
       <q-separator class="q-mb-sm" size="3px"/>
     </div>
   </q-expansion-item>
@@ -55,10 +58,9 @@
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('TKdel')}}</q-card-section>
       <q-card-actions align="right" class="q-gutter-sm">
-        <q-btn flat dense padding="xs" size="md" color="primary" icon="undo"
-          :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn dense padding="xs" size="md" color="warning" icon="delete" 
-          :label="$t('TKdel2')" @click="deletetk"/>
+        <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+        <btn-cond color="warning" icon="delete" cond="cUrgence"
+          :label="$t('TKdel2')" @ok="deletetk"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -71,16 +73,16 @@ import stores from '../stores/stores.mjs'
 import { mon, dkli, styp } from '../app/util.mjs'
 import { AMJ, idTkToL6 } from '../app/api.mjs'
 import PanelDialtk from '../components/PanelDialtk.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { Ticket } from '../app/modele.mjs'
-import { ReceptionTicket } from '../app/operations.mjs'
-import { MoinsTicket } from '../app/operations4.mjs'
+import { MoinsTicket, ReceptionTicket } from '../app/operations4.mjs'
 
 export default {
   name: 'ApercuTicket',
 
   props: { tk: Object, idx: Number },
 
-  components: { PanelDialtk },
+  components: { BtnCond, PanelDialtk },
 
   computed: { 
     aMj () {
@@ -88,9 +90,9 @@ export default {
       const mx = this.$t('mois' + m)
       return { a: a, m: mx, j: j }
     },
-    mt () { return mon(!this.tk.dr ? this.tk.ma : (this.tk.ma > this.tk.mc ? this.tk.mc : this.tk.ma)) },
+    mt () { return mon(!this.tk.dr ? this.tk.ma : this.tk.mc) },
     cmt () { return !this.tk.dr || (this.tk.ma === this.tk.mc) ? '' : 'bg-yellow-3 text-negative'},
-    st () { const i = this.tk.di ? 3 : (this.tk.dr ? 2 : 1); return this.$t('TK' + i)},
+    st () { return this.$t('TK' + (this.tk.dr ? 2 : 1))},
   },
 
   data () { return {
@@ -98,24 +100,22 @@ export default {
 
   methods: {
     async deltk () {
-      if (!await this.session.editUrgence()) return
       this.ui.oD('ATconfirmdel', this.idc)
-    },
-    async recep1 () {      
-      if (!await this.session.editUrgence()) return
-      await this.reception ({ m: this.tk.ma, ref: ''})
-    },
-    async recep2 () {      
-      if (!await this.session.editUrgence()) return
-      this.ui.oD('ATdialtk', this.idc)
-    },
-    async reception ({m, ref}) {
-      this.ui.fD()
-      await new ReceptionTicket().run(this.tk.ids, m, ref)
     },
     async deletetk () {
       this.ui.fD()
       await new MoinsTicket().run(this.tk.ids)
+    },
+    async recep1 () { 
+      await new ReceptionTicket().run(this.tk.ids, this.tk.ma, '')
+      this.ui.fD()
+    },
+    async recep2 () { 
+      this.ui.oD('ATdialtk', this.idc)
+    },
+    async reception ({m, ref}) {
+      await new ReceptionTicket().run(this.tk.ids, m, ref)
+      this.ui.fD()
     }
   },
 
