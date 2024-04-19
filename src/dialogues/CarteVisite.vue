@@ -2,35 +2,35 @@
 <q-dialog v-model="ui.d.CVedition" persistent>
   <q-card :class="styp('md')">
     <q-toolbar class="bg-secondary text-white">
-      <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+      <btn-cond color="warning" icon="close" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CVtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
     <div class="marginauto q-pa-md">
-      <span class='titre-lg'>{{na.nom}}</span>
-      <span class='q-mx-md fs-md font-mono'>[{{na.id}}]</span>
+      <span class='titre-lg'>{{ncv.nom}}</span>
+      <span class='q-mx-md fs-sm font-mono'>[{{ID.long(ncv.id, session.ns)}}]</span>
     </div>
     <q-separator />
     <q-card-section class="row justify-start">
-      <img  class="col-auto classeph q-mr-sm" :src="photolocal" :width="taillephoto.width" :height="taillephoto.height"/>
+      <img  class="col-auto classeph q-mr-sm" :src="ncv.ph" :width="taillephoto.width" :height="taillephoto.height"/>
       <div class="col column jusitify-center">
-        <q-btn icon="mode_edit" :label="$t('CVcph')" @click="enedition=true" />
-        <q-btn :disable="!modifph" icon="undo" :label="$t('CVgph')" @click="undoph" />
+        <btn-cond icon="mode_edit" :label="$t('CVcph')" @ok="enEdition=true" />
+        <btn-cond :disable="!modifph" icon="undo" :label="$t('CVgph')" @ok="undoph" />
       </div>
     </q-card-section>
     <q-separator />
-    <q-card-section v-if="enedition">
+    <q-card-section v-if="enEdition">
       <div class="q-mb-sm column justify-center">
         <q-file v-model="fileList" :label="$t('CVcph')" accept=".jpg, .jpeg, .png" max-file-size="4000000" max-file="1"/>
         <div class="row justify-center q-gutter-sm">
-          <q-btn flat :disable="camOn" color="primary" :label="$t('CVdwc')" @click="startCam" />
-          <q-btn flat :disable="!camOn" :label="$t('CVawc')" @click="stopCam" />
-          <q-btn flat :disable="camOn" icon="flip_camera_ios" @click="flipCam" />
+          <btn-cond flat :disable="camOn" :label="$t('CVdwc')" @ok="startCam" />
+          <btn-cond flat :disable="!camOn" :label="$t('CVawc')" @ok="stopCam" />
+          <btn-cond flat :disable="camOn" icon="flip_camera_ios" @ok="flipCam" />
         </div>
-        <q-btn flat :disable="!camOn" color="primary" :label="$t('CVpph')" @click="snapCam" />
+        <btn-cond flat :disable="!camOn" :label="$t('CVpph')" @ok="snapCam" />
         <div class="row justify-center q-gutter-sm">
-          <q-btn icon="check" small-caps :disable="!file.b64" color="warning" :label="$t('CVtop')" @click="phok" />
-          <q-btn icon="undo" small-caps :label="$t('CVmav')" @click="undoph" />
+          <btn-cond icon="check" :disable="!file.b64" color="warning" :label="$t('CVtop')" @ok="phok" />
+          <btn-cond icon="undo" :label="$t('CVmav')" @ok="undoph" />
         </div>
       </div>
       <div class="column items-center" style="width:100%">
@@ -50,17 +50,17 @@
     </q-card-section>
     <q-separator />
     <q-card-section>
-      <editeur-md ref="md" :texte="infolocal" v-model="resultat.info"
+      <editeur-md ref="md" :texte="cv.tx" v-model="ncv.tx"
         editable modetxt mh="10rem"></editeur-md>
     </q-card-section>
     <q-separator />
     <q-card-actions align="right" class="q-gutter-sm">
-      <q-btn v-if="!modif" flat dense size="md" padding="xs" icon="undo" color="primary"
-        :label="$t('fermer')" @click="undogen" />
-      <q-btn v-else flat dense size="md" padding="xs" icon="undo" color="primary"
-        :label="$t('annuler')" @click="undogen" />
-      <q-btn :disable="!modif" dense size="md" padding="xs" icon="check" color="primary"
-        :label="$t('valider')" @click="valider" />
+      <btn-cond v-if="!modif" flat icon="undo" color="primary"
+        :label="$t('fermer')" @ok="undogen" />
+      <btn-cond v-else flat icon="undo"
+        :label="$t('annuler')" @ok="undogen" />
+      <btn-cond :disable="!modif" icon="check"
+        :label="$t('valider')" @ok="valider" />
     </q-card-actions>
   </q-card>
 </q-dialog>
@@ -73,6 +73,9 @@ import { Cropper } from 'vue-advanced-cropper'
 import { ref, watch, toRef, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { styp, readFile } from '../app/util.mjs'
+import BtnCond from '../components/BtnCond.vue'
+import { CV } from '../app/modele.mjs'
+import { ID } from '../app/api.mjs'
 
 import BoutonHelp from '../components/BoutonHelp.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -83,23 +86,21 @@ export default ({
   name: 'CarteVisite',
 
   props: {
-    photoInit: String,
-    infoInit: String,
-    na: Object
+    cv: Object
   },
 
   components: {
-    BoutonHelp, Cropper, EditeurMd
+    BoutonHelp, Cropper, EditeurMd, BtnCond
   },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     taillephoto () { return TPH },
     modif () {
-      return this.resultat.info !== this.infoInit || this.modifph
+      return this.ncv.tx !== this.cv.tx || this.modifph
     },
     modifph () {
-      return this.resultat.ph !== this.photoInit
+      return this.ncv.ph !== this.cv.ph
     }
   },
 
@@ -114,37 +115,36 @@ export default ({
 
   data () {
     return {
+      enEdition: false,
       fileList: null,
       file: { b64: '' },
       cam: null,
-      camOn: false,
-      nvinfo: ''
+      camOn: false
     }
   },
 
   methods: {
     undogen () {
       this.undoph()
-      this.md.undo()
+      // this.md.undo()
+      this.ncv.tx = this.cv.tx
       this.$emit('ok', false)
       this.ui.fD()
     },
     valider () {
-      this.$emit('ok', !this.modif ? false : this.resultat)
+      this.$emit('ok', !this.modif ? false : this.ncv)
       this.ui.fD()
     },
     undoph () {
-      this.enedition = false
-      this.photolocal = this.photoInit || this.phdef
-      this.resultat.ph = this.photoInit
+      this.enEdition = false
+      this.ncv.ph = this.cv.photo
       this.stopCam()
     },
     phok () {
       // eslint-disable-next-line no-unused-vars
       const { coordinates, canvas } = this.cropper.getResult()
-      this.photolocal = canvas.toDataURL()
-      this.resultat.ph = this.photolocal
-      this.enedition = false
+      this.ncv.ph = canvas.toDataURL()
+      this.enEdition = false
       this.stopCam()
     },
     startCam () {
@@ -177,70 +177,22 @@ export default ({
   },
 
   setup (props) {
-    const ui = stores.ui
-    const config = stores.config
-    const phdef = stores.config.iconavatar
-    const clic = stores.config.cliccamera
-
+    const md = ref(null)
     const webcam = ref(null)
-    const canvas = ref(null)
     const sound = ref(null)
     const cropper = ref(null)
-    const md = ref(null)
-    const infolocal = ref('') // en Ref parce que sa valeur dépend du changement de la prop texte ET de enedition (sinon ça serait texte)
-    const photolocal = ref('')
-    const enedition = ref(false) // en Ref pour pouvoir le traiter dans le watch
-    const nom = ref('')
-    // const sid = ref('')
+    const canvas = ref(null)
 
-    const infoInit = toRef(props, 'infoInit') // pour pouvoir mettre un watch sur le changement de la propriété
-    const photoInit = toRef(props, 'photoInit') // pour pouvoir mettre un watch sur le changement de la propriété
-    const na = toRef(props, 'na')
+    const ui = stores.ui
+    const config = stores.config
+    const clic = stores.config.cliccamera
 
-    const resultat = reactive({ info: '', ph: '' })
-
-    function init () {
-      nom.value = na.value.nom
-      // sid.value = na.value.sid
-      infolocal.value = infoInit.value
-      photolocal.value = photoInit.value ? photoInit.value : phdef
-      resultat.info = infolocal.value
-      resultat.ph = photoInit.value
-    }
-
-    watch(photoInit, (ap, av) => { // quand texte change, textelocal ne change pas si en édition
-      if (!enedition.value) {
-        photolocal.value = ap || phdef
-      }
-    })
-
-    watch(infoInit, (ap, av) => {
-      if (!enedition.value) {
-        infolocal.value = ap
-      }
-    })
-
-    watch(na, (ap, av) => {
-      nom.value = ap.nom
-      // sid.value = ap.sid
-    })
-
-    init()
+    const cv = toRef(props, 'cv')
+    const ncv = ref(new CV(cv.value.id, cv.value.v, cv.value.photo, cv.value.tx))
 
     return {
-      ui, styp, config,
-      phdef,
-      clic,
-      nom,
-      md,
-      webcam,
-      canvas,
-      sound,
-      enedition,
-      photolocal,
-      infolocal,
-      resultat,
-      cropper
+      ui, styp, config, clic, md, webcam, sound, cropper, canvas, ncv, ID,
+      session: stores.session
     }
   }
 })

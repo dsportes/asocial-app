@@ -14,7 +14,7 @@ export const config = {
     { value: 'fr-FR', label: 'Français', flag: '🇫🇷' }
   ],
 
-  silence: true,
+  silence: false,
   
   /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
   // En test pour éviter de frapper les "phrases secrètes" de test

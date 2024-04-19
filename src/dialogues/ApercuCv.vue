@@ -5,28 +5,25 @@
       <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
       <q-toolbar-title> 
         <!--span>{{estAvc}} - {{estGroupe}} - {{diag.substring(0, 4)}}</span-->
-        <span class="titre-lg">{{estAvc ? na.nom : na.nomc}}</span> 
+        <span class="titre-lg">{{estAvc ? cv.nom : cv.nomC}}</span> 
         <span v-if="estAvc" class="titre-md q-ml-md">[{{$t('moi')}}]</span>
       </q-toolbar-title>
-      <q-btn v-if="!estGroupe && !estAvc && net" dense size="md" padding="none" round
-        color="primary" icon="refresh" @click="refresh"/>
-      <q-btn v-if="(estAvc || estGroupe) && diag === ''" dense size="md" 
-        icon="edit" color="primary"
-        :label="$t('editer')" @click="ovcved"/>
+      <btn-cond v-if="!estGroupe && !estAvc && net" round icon="refresh" @ok="refresh"/>
+      <btn-cond v-if="(estAvc || estGroupe) && diag === ''" icon="edit"
+        :label="$t('editer')" @ok="ovcved"/>
     </q-toolbar>
     <q-toolbar inset v-if="diag !== ''" class="bg-yellow-5 text-bold text-black titre-md">
       {{diag}}
     </q-toolbar>
 
     <div class="row q-pa-xs">
-      <img class="col-auto q-mr-sm photomax" :src="photo" />
-      <show-html v-if="info" class="col" zoom scroll maxh="15rem" :texte="info"/>
+      <img class="col-auto q-mr-sm photomax" :src="cv.photo" />
+      <show-html v-if="cv.texte" class="col" zoom scroll maxh="15rem" :texte="cv.texte"/>
       <div v-else class="col text-italic">{{$t('FAnoinfo')}}</div>
     </div>
 
     <!-- Dialogue d'édition de la carte de visite -->
-    <carte-visite v-model="ui.d.CVedition" @ok="cvok"
-      :photo-init="photo" :info-init="info" :na="na"/>
+    <carte-visite v-model="ui.d.CVedition" @ok="cvok" :cv="cv"/>
 
   </q-card>
 </q-dialog>
@@ -40,6 +37,7 @@ import { styp } from '../app/util.mjs'
 
 import ShowHtml from '../components/ShowHtml.vue'
 import CarteVisite from '../dialogues/CarteVisite.vue'
+import BtnCond from '../components/BtnCond.vue'
 
 export default {
   name: 'ApercuCv',
@@ -47,13 +45,13 @@ export default {
   props: {
   },
 
-  components: { ShowHtml, CarteVisite },
+  components: { BtnCond, ShowHtml, CarteVisite },
 
   computed: {
     lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
 
     estGroupe () { return ID.estGroupe(this.id) },
-    estAvc () { return this.estGroupe ? false : this.aSt.compte.estAvDuCompte(this.id) },
+    estAvc () { return this.estGroupe ? false : this.session.compte.mav.has(this.id) },
     eg () { return this.estGroupe ? this.gSt.egr(this.id) : null },
     agp () { 
       if (this.estGroupe) return this.eg.groupe
@@ -68,8 +66,7 @@ export default {
       } 
       return false 
     },
-    na () { return this.agp.na },
-    cv () { return this.agp.cv },
+    cv () { return this.session.getCV(this.id) },
     diag () {
       if (this.session.editDiag) return this.session.editDiag
       if (!this.estGroupe) return ''
@@ -78,10 +75,7 @@ export default {
         return this.$t('FAcvgr') 
       else 
         return ''
-    },
-
-    photo () { return this.cv && this.cv.photo ? this.cv.photo : this.na.defIcon },
-    info () { return this.cv ? (this.cv.info || '') : '' }
+    }
   },
 
   data () {

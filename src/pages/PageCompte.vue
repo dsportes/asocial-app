@@ -13,8 +13,7 @@
       </div>
       <!-- maj quotas du compte -->
       <btn-cond v-if="estDelegue || estA"
-        icon="settings" :label="$t('CPTedq')" @ok="editerq"
-        cond="cUrgence"/>
+        icon="settings" :label="$t('CPTedq')" @ok="editerq" cond="cUrgence"/>
     </div>
 
     <div class="row justify-center">
@@ -30,25 +29,23 @@
     <q-card class="q-my-md q-pa-xs" v-for="(id, idx) in session.compte.mav" :key="id">
       <div class="row items-start">
         <div class="col-auto column items-center q-mr-sm">
-          <q-btn flat icon="navigate_next" size="lg"
-            :color="id === session.avatarId ? 'warning' : 'primary'" @click="courant(id)"/>
-          <q-btn icon="delete" size="md" class="q-mt-sm" @click="delAvatar(id)"/>
+          <btn-cond flat icon="navigate_next" size="lg"
+            :color="id === session.avatarId ? 'warning' : 'primary'" @ok="courant(id)"/>
+          <btn-cond icon="delete" size="md" class="q-mt-sm" cond="cEdit"
+            @ok="delAvatar(id)"/>
         </div>
         <div :class="'col ' + (id === session.avatarId ? 'courant' : 'zone')">
           <apercu-avatar edit  :idav="id" :idx="idx"/>
           <div class="row q-mt-sm q-gutter-sm">
-            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps padding="xs xs"
-              :label="$t('ACgroupes')" color="primary" dense @click="courant(id, 2)">
-              <q-badge class="cl1" color="secondary" rounded>{{nbgrps(id)}}</q-badge>
-            </q-btn>
-            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps padding="xs xs"
-              :label="$t('ACseschats')" color="primary" dense @click="courant(id, 3)">
-              <q-badge class="cl1" color="secondary" rounded>{{nbchats(id)}}</q-badge>
-            </q-btn>
-            <q-btn class="q-ml-sm" size="md" icon="chat" no-caps padding="xs xs"
-              :label="$t('ACsponsorings')" color="primary" dense @click="courant(id, 4)">
-              <q-badge class="cl1" color="secondary" rounded>{{nbspons(id)}}</q-badge>
-            </q-btn>
+            <btn-cond class="q-ml-sm" icon="group" cond="cVisu"
+              :label="$t('ACgroupes')" @ok="courant(id, 2)"/>
+            <q-badge class="cl1" color="secondary">{{nbgrps(id)}}</q-badge>
+            <btn-cond class="q-ml-sm" icon="chat" cond="cVisu"
+              :label="$t('ACseschats')" @ok="courant(id, 3)"/>
+            <q-badge class="cl1" color="secondary">{{nbchats(id)}}</q-badge>
+            <btn-cond class="q-ml-sm" icon="diversity_3" cond="cVisu"
+              :label="$t('ACsponsorings')" @ok="courant(id, 4)"/>
+            <q-badge class="cl1" color="secondary">{{nbspons(id)}}</q-badge>
           </div>
         </div>
       </div>
@@ -73,8 +70,7 @@
           <q-btn dense :label="$t('renoncer')" color="primary" icon="close" @click="ui.fD"/>
           <bouton-help page="page1"/>
         </div>
-        <q-btn :label="$t('CPTchps2')" dense size="md" padding="xs" color="primary"
-          no-caps class="titre-lg" @click="saisiePS" />
+        <btn-cond :label="$t('CPTchps2')" cond="cUrgence" class="titre-lg" @ok="saisiePS" />
         <bouton-confirm class="q-my-md" :actif="ps !== null" :confirmer="changerps"/>
       </q-card>
     </q-dialog>
@@ -277,5 +273,5 @@ export default {
 .cl1
   position: relative
   top: -10px
-  left: 5px
+  left: -15px
 </style>
