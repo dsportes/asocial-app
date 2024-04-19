@@ -116,7 +116,7 @@
 </template>
 
 <script>
-import { ref, toRef } from 'vue'
+import { ref } from 'vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -126,7 +126,7 @@ import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { ExistePhrase } from '../app/synchro.mjs'
+import { ExistePhrase, GetCompta } from '../app/synchro.mjs'
 import { AjoutSponsoring } from '../app/operations4.mjs'
 
 export default ({
@@ -198,10 +198,11 @@ export default ({
       this.step = 3
     },
     async setDon () {
-      const total = this.session.compta.total || 0
+      await new GetCompta().run(this.session.compteId)
+      const solde = this.session.compta.solde || 0
       this.don = this.optDon
-      if (total - this.don <= 0) {
-        await afficherDiag($t('NPcred', [total, this.don]))
+      if (solde - this.don <= 0) {
+        await afficherDiag($t('NPcred', [solde, this.don]))
         return
       }
       this.step = 2
@@ -220,14 +221,15 @@ export default ({
       }
     },
     async confirmer () {
-      const q = this.estAutonome ? [0, 1, 1] : [this.quotas.qc, this.quotas.q1, this.quotas.q2]
+      const quotas = this.estAutonome ? { qc: 0, qn: 1, qv: 1 } :
+        { qc : this.quotas.qc, qn: this.quotas.qn, qv: this.quotas.qv }
       try {
         const args = {
           pc: this.pc,
           nom: this.nom,
           estAutonome: this.estAutonome,
           del: this.estDelegue,
-          quotas: { qc: this.quotas.qc, qn: this.quotas.qn, qv: this.quotas.qv },
+          quotas,
           mot: this.mot,
           don: this.don, 
           dconf: this.dconf
@@ -239,7 +241,7 @@ export default ({
     }
   },
 
-  setup (props) {
+  setup () {
     const cfg = stores.config
     const ui = stores.ui
     const session = stores.session
@@ -251,8 +253,8 @@ export default ({
     const step3 = ref(null)
     const step = ref(0)
     const optionsOSA = [
-      { label: $t('compteO', [session.codePart(partition.value.id)]), value: 0 },
-      { label: $t('compteD', [session.codePart(partition.value.id)]), value: 1 }
+      { label: $t('compteO', [partition ? session.codePart(partition.id) : '']), value: 0 },
+      { label: $t('compteD', [partition ? session.codePart(partition.id) : '']), value: 1 }
     ]
     const optOSA = ref(0)
     const optionsDon = [ ]
@@ -270,7 +272,6 @@ export default ({
       step.value = 0
       if (accepteA) optionsOSA.push({ label: $t('compteA'), value: 2 })
       optOSA.value = 0
-      const partition = toRef(props, 'partition')
       const cpt = partition.value.synth
       quotas.value = { qc: 1, qn: 1, qv: 1, 
         maxn: cpt.q.qn > cpt.qt.qn ? cpt.q.qn - cpt.qt.qn : 0, 

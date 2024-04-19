@@ -3,9 +3,8 @@
     <q-card class="spmd q-mb-lg q-pa-sm row justify-center items-center" 
       v-if="session.estDelegue || session.estComptable || (session.estA && session.espace.opt > 0)"> 
       <!-- Nouveau sponsoring -->
-      <q-btn class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts" no-caps
-        :label="$t('NPnouv')" color="warning" dense
-        padding="xs" @click="nouveausp"/>
+      <btn-cond class="q-mt-sm q-ml-xs" size="md" icon="manage_accounts"
+        :label="$t('NPnouv')" color="warning" cond="cEdit" @ok="nouveausp"/>
       <bouton-help class="q-ml-sm" page="page1"/>
     </q-card>
 
@@ -38,16 +37,16 @@
 
         <div v-if="sp.st===0" class="q-my-sm row justify-center items-center q-gutter-sm">
           <div class="titre-md text-italic q-mr-sm">{{$t('NPpro')}}</div>
-          <q-btn class="q-mr-xs" color="primary" size="md" dense padding="xs"
-            :label="$t('NPpro7')" @click="prolonger(sp, 7)"/>
-          <q-btn class="q-mr-xs" color="primary" size="md" dense padding="xs"
-            :label="$t('NPpro20')" @click="prolonger(sp, 20)"/>
-          <q-btn class="q-mr-lg" color="primary" size="md" dense padding="xs"
-            :label="$t('NPpro30')" @click="prolonger(sp, 30)"/>
+          <btn-cond class="q-mr-xs" cond="cEdit"
+            :label="$t('NPpro7')" @ok="prolonger(sp, 7)"/>
+          <btn-cond class="q-mr-xs" cond="cEdit"
+            :label="$t('NPpro20')" @ok="prolonger(sp, 20)"/>
+          <btn-cond class="q-mr-lg" cond="cEdit"
+            :label="$t('NPpro30')" @ok="prolonger(sp, 30)"/>
         </div>
         <div class="text-center">
-          <q-btn v-if="sp.st===0" class="q-my-md" color="warning" size="md" dense padding="xs"
-            :label="$t('NPann')" @click="prolonger(sp, 0)"/>
+          <btn-cond v-if="sp.st===0" class="q-my-md" color="warning" cond="cEdit"
+            :label="$t('NPann')" @ok="prolonger(sp, 0)"/>
         </div>
       </div>
     </q-card>
@@ -66,13 +65,14 @@ import { dhcool, edvol, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import NouveauSponsoring from '../panels/NouveauSponsoring.vue'
+import BtnCond from '../components/BtnCond.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import { ProlongerSponsoring, GetPartition } from '../app/synchro.mjs'
 
 export default {
   name: 'PageSponsorings',
 
-  components: { BoutonHelp, NouveauSponsoring, ShowHtml, QuotasVols },
+  components: { BtnCond, BoutonHelp, NouveauSponsoring, ShowHtml, QuotasVols },
 
   computed: {
     sponsorings () { 
@@ -93,7 +93,7 @@ export default {
     clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
 
     async nouveausp () { 
-      await new GetPartition().run(this.session.compte.idp)
+      if (this.session.compte.idp) await new GetPartition().run(this.session.compte.idp)
       this.ui.oD('NSnvsp') 
     },
 

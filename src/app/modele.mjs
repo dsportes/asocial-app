@@ -724,114 +724,6 @@ export class Compta extends GenDoc {
     this.estA = !this.qv.qc
   }
 
-  /* Depuis la liste actuelle des tickets de compta,
-  - enlève les obsolètes,
-  - ajoute tk s'il n'y était pas, le remplace sinon
-  - retourne tickets crypté par la clé K
-
-  async creditsSetTk (tk) {
-    const tickets = []
-    let repl = false
-    this.tickets.forEach(t => {
-      if (!Ticket.estObsolete(t)) {
-        if (t.ids === tk.ids) {
-          tickets.push(tk)
-          repl = true
-        } else {
-          tickets.push(t)
-        }
-      }
-    })
-    if (!repl && !Ticket.estObsolete(tk)) tickets.push(tk)
-    const session = stores.session
-    return await crypter(session.clek, new Uint8Array(encode(tickets)))
-  }
-  */
-
-  /* Depuis la liste actuelle des tickets de compta,
-  - enlève les obsolètes,
-  - ajoute tk s'il n'y était pas, le remplace sinon
-  - retourne credits crypté par la clé K
-  
-  async creditsUnsetTk (ids) {
-    const credits = { total: this.credits.total, tickets: [] }
-    this.credits.tickets.forEach(t => {
-      if (!Ticket.estObsolete(t)) {
-        if (t.ids !== ids) credits.tickets.push(t)
-      }
-    })
-    const session = stores.session
-    return await crypter(session.clek, new Uint8Array(encode(credits)))
-  }
-  */
-
-  /* Incorporation des tickets et des dons en attente au credits,
-  - des tickets mis à jour reçus dans m (s'il y en a)
-  - des montants des dons en attente (s'il y en a)
-  Retourne credits crypté par la clé K, ou null si inchangé
-
-  Ticket:
-  - `id`: id du Comptable.
-  - `ids` : numéro du ticket
-  - `v` : version du ticket.
-
-  - `dg` : date de génération.
-  - `dr`: date de réception. Si 0 le ticket est _en attente_.
-  - `ma`: montant déclaré émis par le compte A.
-  - `mc` : montant déclaré reçu par le Comptable.
-  - `refa` : texte court (32c) facultatif du compte A à l'émission.
-  - `refc` : texte court (32c) facultatif du Comptable à la réception.
-  - `di`: date d'incorporation du crédit par le compte A dans son solde.
-  
-  async majCredits (m) {
-    const credits = { total: this.credits.total, tickets: [] }
-    let maj = this.toSave || false
-
-    function incorp (tk) {
-      if (m) m.delete(tk.ids)
-      if (!Ticket.estObsolete(tk)) {
-        maj = true
-        if (tk.dr && !tk.di) {
-          tk.di = AMJ.amjUtc()
-          credits.total += tk.ma > tk.mc ? tk.mc : tk.ma
-        }
-        credits.tickets.push(tk)
-      }
-    }
-
-    this.credits.tickets.forEach(t => {
-      // report des tickets actuels:
-      // - éventeullemnt mis à jor
-      // - si pas obsolète
-      //- en incorporant éventuellement leur montant dans le solde
-      const tk = m ? m.get(t.ids) : null
-      if (tk) { // rafraichi par m
-        incorp(tk)
-      } else {
-        if (Ticket.estObsolete(t)) maj = true
-        else credits.tickets.push(t)
-      }
-    })
-    if (m && m.size) m.forEach((ids, tk) => { 
-      incorp(tk)
-    })
-
-    if (this.dons) {
-      this.dons.forEach(mc => { 
-        credits.total += mc 
-      })
-      maj = true
-    }
-
-    const session = stores.session
-    if (maj) {
-      const creditsK = await crypter(session.clek, new Uint8Array(encode(credits)))
-      const dlv = this.calculDlv(credits.total)
-      return { dlv, creditsK }
-    } else 
-      return { dlv: 0, creditsK: null }
-  }
-  */
 }
 
 /* Classe compti ****************************************************
@@ -1022,37 +914,6 @@ export class Ticket extends GenDoc {
     this.refc = row.refc || ''
   }
 
-  /* Un ticket est obsolète SSI,
-  a) il est encore en attente (n'a pas été reçu)
-  b) ET que sa génération a plus de 2 mois
-  
-  static estObsolete (tk) {
-    return tk.dr === 0 && AMJ.amjUtc() > AMJ.djMoisN(tk.dg, 2)
-  }
-
-  clone () {
-    const t = new Ticket()
-    t.id = this.id; t.ids = this.ids; t.ma = this.ma; t.mc = this.mc;
-    t.refa = this.refa; t.refc = this.refc; t.di = this.di
-    return t
-  }
-
-  async recepRow (mc, refc) {
-    const t = { }
-    t.id = this.id; t.ids = this.ids; t.ma = this.ma; t.mc = mc;
-    t.refa = this.refa; t.refc = refc; t.di = 0
-    t.dr = Date.now()
-    return { _row: 'tickets', id, ids, _data_: new Uint8Array(encode(r)) }
-  }
-
-  async incorpRow () {
-    const t = { }
-    t.id = this.id; t.ids = this.ids; t.ma = this.ma; t.mc = this.mc;
-    t.refa = this.refa; t.refc = this.refc;
-    t.di = Date.now()
-    return { _row: 'tickets', id, ids, _data_: new Uint8Array(encode(r)) }
-  }
-  */
 }
 
 /** Chat ************************************************************
@@ -1131,50 +992,6 @@ export class Chat extends GenDoc {
     if (!this.tit) this.tit = '???'
   }
 
-  /*
-  st: 10 pour le chat I, 1 pour le chat E
-  naI, naE : na des avatars I et E
-  dh : date-heure d'écriture
-  txt: texte du chat
-  seq: numéro de séquence du "source" d'où txt a été modifié
-  cc: clé du chat : si null créé random
-  publicKey: clé publique de I. Si null récupérée depuis son avatar
-  mc: mot clés attribués
-  */
-  static async newRows (naI, naE, txt, cc, pubE) {
-    const [itI, itE] = Chat.newItems(txt, cc)
-    const rI = { 
-      id: naI.id, 
-      ids: await Chat.getIds(naI, naE), 
-      st: 10,
-      cc: await crypter(stores.session.clek, cc),
-      nacc: await crypter(cc, encode([naE.nom, naE.rnd])),
-      items: [itI]
-    } // v vcv cva sont mis par le serveur
-    const rE = { 
-      id: naE.id, 
-      ids: await Chat.getIds(naE, naI), 
-      st: 1,
-      cc: await crypter(await crypterRSA(pubE, cc)),
-      nacc: await crypter(cc, encode([naI.nom, naI.rnd])),
-      items: [itE]
-    } // v vcv cva sont mis par le serveur
-    const I = new Uint8Array(encode(rI))
-    const E = new Uint8Array(encode(rE))
-    return [{ _nom: 'chats', id: rI.id, ids: rI.ids, _data_: I}, 
-      { _nom: 'chats', id: rE.id, ids: rE.ids, _data_: E}]
-  }
-
-  static async newItems (txt, cc) {
-    const dh = Date.now()
-    const t = txt ? await crypter(cc, gzipB(txt)) : null
-    const l = txt ? txt.length : 0
-    return [{dh, a:0, txt: t, l}, {dh, a:1, t, l}]
-  }
-
-  static async getTxtCC (cc, txt) {
-    return txt ? await crypter(cc, gzipB(txt)) : null
-  }
 }
 
 /** Groupe ***********************************************************************

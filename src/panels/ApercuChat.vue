@@ -55,10 +55,9 @@
           {{$t('CHeff')}}
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="none" color="primary" icon="undo"
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="none" color="warning" icon="delete"
-            :label="$t('CHeffcf')" @click="effop"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond color="warning" icon="delete" :cond="ui.urgence ? 'cUrgence' : 'cEdit'"
+            :label="$t('CHeffcf')" @ok="effop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -70,10 +69,10 @@
           {{$t('CHrac2', [nomE])}}
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="none" color="primary" icon="undo"
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="none" color="warning" icon="clear"
-            :label="$t('CHrac')" @click="passifop"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <q-btn color="warning" icon="clear"
+            :cond="ui.urgence ? 'cUrgence' : 'cEdit'"
+            :label="$t('CHrac')" @ok="passifop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -82,8 +81,8 @@
     <q-dialog v-model="ui.d.ACchatedit">
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd')}}</q-toolbar-title>
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd1')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
         <q-toolbar v-if="avecDon" inset class="bg-secondary text-white">
@@ -96,10 +95,9 @@
         </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="none" color="primary" icon="undo"
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="none" color="primary" icon="add"
-            :label="$t('valider')"  @click="addop"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond icon="add" :cond="ui.urgence ? 'cUrgence' : 'cEdit'"
+            :label="$t('valider')"  @ok="addop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -129,6 +127,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
+import { GetCompta } from '../app/synchro.mjs'
 
 export default {
   name: 'ApercuChat',
@@ -167,10 +166,13 @@ export default {
     },
 
     async addop () {
-      const compta = this.session.compta
-      if (this.avecDon && this.mdon && (this.mdon * 100 > compta.total)) {
-        await afficherDiag(this.$t('CHcred', [compta.total, this.mdon * 100]))
-        return
+      if (this.avecDon && this.mdon) {
+        await new GetCompta().run()
+        const compta = this.session.compta
+        if (this.mdon * 100 > compta.solde + 2) {
+          await afficherDiag(this.$t('CHcred', [compta.solde, this.mdon * 100]))
+          return
+        }
       }
       const don = this.avecDon ? this.mdon * 100 : 0
       const txt = (this.avecDon && !this.dconf ? (this.$t('CHdonde', [this.mdon]) + '\n') : '') + this.txt

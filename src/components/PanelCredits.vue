@@ -116,11 +116,7 @@ export default ({
       return l
     },
     lstDons () {
-      // const t = this.session.compta.dons || []
-      const t = [
-        { iddb: ID.duComptable(this.session.ns), dh: this.session.dhConnx, m: 15 },
-        { iddb: ID.duComptable(this.session.ns), dh: this.session.dhConnx, m: -25 }
-      ]
+      const t = this.session.compta.dons || []
       t.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1) })
       return t
     }

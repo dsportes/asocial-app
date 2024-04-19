@@ -92,7 +92,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { deconnexion, SyncSp, RefusSponsoring, ExistePhrase } from '../app/synchro.mjs'
 import QuotasVols from '../components/QuotasVols.vue'
-import { styp, dhcool } from '../app/util.mjs'
+import { styp, dhcool, afficherDiag } from '../app/util.mjs'
 import { AMJ, ID, d14 } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 
