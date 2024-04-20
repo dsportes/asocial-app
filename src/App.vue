@@ -372,7 +372,6 @@
   <panel-people v-if="ui.d.detailspeople"/>
   <panel-membre v-if="ui.d.PMdetailsmembre"/>
   <outils-tests v-if="ui.d.PAoutilsTests"/>
-  <apercu-cv v-if="ui.d.ACVouvrir"/>
   <phrase-secrete v-if="ui.d.PSouvrir"/>
 
   <!-- Opération en cours et son arrêt -->
@@ -414,12 +413,12 @@
 </template>
 
 <script>
-import { onMounted } from 'vue'
+// import { onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
-import { ID, AMJ } from './app/api.mjs'
+import { AMJ } from './app/api.mjs'
 
 import { set$t, hms, dkli, styp, beep } from './app/util.mjs'
 import { reconnexion, deconnexion } from './app/synchro.mjs'
@@ -466,7 +465,6 @@ import PressePapier from './panels/PressePapier.vue'
 // Niveau 4
 import PageSponsorings from './pages/PageSponsorings.vue'
 import PageEspace from './pages/PageEspace.vue'
-import ApercuCv from './dialogues/ApercuCv.vue'
 
 // Niveau 5
 import PageLogin from './pages/PageLogin.vue'
@@ -504,7 +502,7 @@ export default {
     FiltreRac, FiltreNom, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
-    PressePapier, ApercuCv, PhraseSecrete
+    PressePapier, PhraseSecrete
    },
 
   computed: {
@@ -599,10 +597,8 @@ export default {
       })
     })
     */
-
-    onMounted(async () => {
-      await beep()
-    })
+    
+    // onMounted(async () => { await beep() })
 
     return {
       session: stores.session,

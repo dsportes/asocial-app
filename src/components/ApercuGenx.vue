@@ -25,11 +25,16 @@
   </div>
   <q-separator color="orange" size="1px"/>
 
+  <q-dialog v-model="ui.d.ACVouvrir[idc]" persistent>
+    <apercu-cv :cv="cv"/>
+  </q-dialog>
 </div>
 </template>
 
 <script>
+import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
+import ApercuCv from '../dialogues/ApercuCv.vue'
 import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
@@ -45,7 +50,7 @@ export default {
     idx: Number
   },
 
-  components: { McMemo },
+  components: { McMemo, ApercuCv },
 
   computed: {
     estGroupe () { return ID.estGroupe(this.id) },
@@ -57,8 +62,7 @@ export default {
       return this.pSt.getPeople(this.id)
     },
     estAnim () { return this.estGroupe ? this.eg.estAnim : false },
-    cv () { const x = this.session.getCV(this.id)
-      return x },
+    cv () { return this.session.getCV(this.id) },
     
     info () { return this.cv ? (this.cv.info || '') : '' },
     det () { return this.session.peopleId === this.id && this.ui.estOuvert('detailspeople') }
@@ -71,8 +75,7 @@ export default {
 
   methods: {
     ovcv () {
-      this.ui.cveditionId = this.id 
-      this.ui.oD('ACVouvrir')
+      this.ui.oD('ACVouvrir', this.idc)
     },
     ouvrirdetails () {
       this.session.setPeopleId(this.id)
@@ -81,13 +84,15 @@ export default {
   },
 
   setup () {
+    const ui = stores.ui
+    const idc =  ref(ui.getIdc())
     return {
       dkli, titre, ID, 
       aSt: stores.avatar, 
       gSt: stores.groupe, 
       pSt: stores.people, 
       session: stores.session, 
-      ui: stores.ui
+      ui, idc
     }
   }
 }

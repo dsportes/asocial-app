@@ -11,26 +11,32 @@
       {{$t('PNOauts2')}}
     </div>
 
+    <q-dialog v-model="ui.d.ACVouvrir[idc]" persistent>
+      <apercu-cv :cv="cv"/>
+    </q-dialog>
+
   </div>
 </template>
 
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
+import ApercuCv from '../dialogues/ApercuCv.vue'
 
 export default {
   name: 'ListeAuts',
 
   props: { },
 
-  components: { },
+  components: { ApercuCv },
 
   computed: {
-    nb () { return this.nSt.note.auts.length }
+    nb () { return this.nSt.note.auts.length },
   },
 
   data () {
     return {
+      cv: null
     }
   },
 
@@ -42,13 +48,14 @@ export default {
       return m ? m.na : null
     },
     openCv (im) {
-      this.ui.cveditionId = this.na(im).id
-      this.ui.oD('ACVouvrir')
+      this.cv = this.session.getCv(this.na(im).id)
+      this.ui.oD('ACVouvrir', this.idc)
     }
   },
 
   setup () {
     const ui = stores.ui
+    const idc = ui.getIdc()
     const nSt = stores.note
     const gSt = stores.groupe
     const aSt = stores.avatar

@@ -47,63 +47,6 @@ export class MotsclesCompte extends Operation {
   }
 }
 
-/* Mise à jour de la carte de visite d\'un avatar ******************************************
-args.token
-args.id : id de l'avatar dont la Cv est mise à jour
-args.v: version de versions de l'avatar incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
-args.cva: {v, photo, info} crypté par la clé de l'avatar
-Retour:
-- KO : true s'il faut boucler sur la requête. 
-La version de l'avatar figure DANS cva, qu'il faut 
-recrypter si ce n'était pas la bonne.
-*/
-export class MajCv extends Operation {
-  constructor () { super('MajCv') }
-
-  async run (avatar, photo, info) {
-    try {
-      const session = stores.session
-      while (await this.retry()) {
-        const v = Versions.get(avatar.id).v + 1
-        const cva = await crypter(getCle(avatar.id), 
-          new Uint8Array(encode({v, photo, info})))
-        const args = { token: session.authToken, id: avatar.id, v, cva }
-        const ret = this.tr(await post(this, 'MajCv', args))
-        if (!ret.KO) break
-      }
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* Mise à jour de la carte de visite d\'un groupe ******************************************
-args.token: éléments d'authentification du compte.
-args.id : id du groupe dont la Cv est mise à jour
-args.v: version du groupe incluse dans la Cv. Si elle a changé sur le serveur, retour OK false (boucle sur la requête)
-args.cvg: {v, photo, info} crypté par la clé du groupe
-*/
-export class MajCvGr extends Operation {
-  constructor () { super('MajCvGr') }
-
-  async run (groupe, photo, info) {
-    try {
-      const session = stores.session
-      while (await this.retry()) {
-        const v = groupe.v + 1
-        const cvg = await crypter(getCle(groupe.id), new Uint8Array(encode({v, photo, info})))
-        const args = { token: session.authToken, id: groupe.id, v, cvg }
-        const ret = this.tr(await post(this, 'MajCvGr', args))
-        if (!ret.KO) break
-      }
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /** Changement de la phrase secrete de connexion du compte ********************
 args.token: éléments d'authentification du compte.
 args.hps1: hash du PBKFD de la phrase secrète réduite du compte.
@@ -1512,36 +1455,6 @@ export class ChangeMbDlvat extends Operation {
       const args = { token: session.authToken, lidids, dlvat }
       this.tr(await post(this, 'ChangeMbDlvat', args))
       this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_RafraichirDons: 'Recalcul du solde du compte après réception de nouveaux dons'
-et n'ont pas encore été intégrés (compta.dons !== null)
-*/
-export class RafraichirDons extends Operation {
-  constructor () { super('RafraichirDons') }
-
-  async run () { 
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      while (await this.retry()) {
-        const compta = aSt.compta
-        if (!compta.dons) break
-        const { dlv, creditsK } = await compta.majCredits()
-        if (!creditsK) break
-
-        // lister les avatars et membres pour changement de dlv
-        const args2 = { token: session.authToken, credits: creditsK, v: compta.v,
-          dlv: dlv, lavLmb: aSt.compte.lavLmb 
-        }
-        const ret2 = this.tr(await post(this, 'MajCredits', args2))
-        if (!ret2.KO) break
-      }
-      return this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

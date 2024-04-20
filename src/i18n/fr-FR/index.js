@@ -414,9 +414,12 @@ export default {
   EX8239: '(BUG) Doublon de numéro de ticket (déjà enregistré)',
   EX8240: '(BUG) Ticket inconnu',
   EX8241: '(BUG) Ticket déjà réceptionné',
-  
-  EX8801: 'Restriction de lecture seulement',
-  EX8802: 'Restriction d\'accès minimal',
+  EX8242: '(BUG) Mise à jour d\'une CV d\'un avatar qui n\'est du compte.',
+  EX8243: '(BUG) Le compte n\'a pas d\'avatar membre actif animateur du groupe dont la CV est à mettre à jour',
+  EX8244: '(BUG) Le compte n\'a de chat avec le titulaire de la carte de visite',
+
+  EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
+  EX8802: 'Action impossible du fait de la restriction "accès minimal"',
 
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
@@ -675,7 +678,6 @@ export default {
   OP_ChangeMbDlvat: 'Changement de DLV pour une liste de membres',
   OP_PlusTicket: 'Génération d\'un ticket de crédit',
   OP_MoinsTicket: 'Suppression d\'un ticket de crédit',
-  OP_RafraichirTickets: 'Obtention des nouveaux tickets réceptionnés par le Comptable',
   OP_RafraichirDons: 'Recalcul du solde du compte après réception de nouveaux dons',
   OP_EstAutonome: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome',
   OP_ReceptionTicket: 'Réception d\'un ticket par le Comptable',
@@ -1701,6 +1703,7 @@ export default {
   FAnocv: 'Pas de carte de visite',
   FAnoinfo: '(pas d\'autre information)',
   FAcvgr: 'La carte de visite d\'un groupe ne peut être modifiée que si le compte a au moins un avatar ayant pouvoir d\'animateur sur le groupe.',
+  FAcvav: 'La carte de visite d\'un avatar ne peut être modifiée que par le compte de cet avatar',
 
   FAphc: 'Déclaration de la phrase de contact',
   FAsup: 'Supprimer la phrase de contact actuelle',
@@ -1811,6 +1814,7 @@ export default {
   
   // Carte Visite
   CVtit: 'Édition de la carte de visite',
+  CVsil: 'Clic silencieux',
   CVgph: 'Garder la photo initiale',
   CVcph: 'Changer la photo',
   CVfph: 'Choisir un fichier photo',

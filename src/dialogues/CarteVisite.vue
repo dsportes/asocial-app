@@ -23,11 +23,15 @@
       <div class="q-mb-sm column justify-center">
         <q-file v-model="fileList" :label="$t('CVcph')" accept=".jpg, .jpeg, .png" max-file-size="4000000" max-file="1"/>
         <div class="row justify-center q-gutter-sm">
+          <q-toggle v-model="silence" color="primary" dense class="col-auto" :label="$t('CVsil')" />
           <btn-cond flat :disable="camOn" :label="$t('CVdwc')" @ok="startCam" />
           <btn-cond flat :disable="!camOn" :label="$t('CVawc')" @ok="stopCam" />
           <btn-cond flat :disable="camOn" icon="flip_camera_ios" @ok="flipCam" />
         </div>
-        <btn-cond flat :disable="!camOn" :label="$t('CVpph')" @ok="snapCam" />
+        <div class="row justify-center q-gutter-md">
+          <btn-cond class="col" :flat="!camOn" :disable="!camOn" color="green-5"
+            :label="$t('CVpph')" @ok="snapCam" />
+        </div>
         <div class="row justify-center q-gutter-sm">
           <btn-cond icon="check" :disable="!file.b64" color="warning" :label="$t('CVtop')" @ok="phok" />
           <btn-cond icon="undo" :label="$t('CVmav')" @ok="undoph" />
@@ -58,7 +62,7 @@
       <btn-cond v-if="!modif" flat icon="undo" color="primary"
         :label="$t('fermer')" @ok="undogen" />
       <btn-cond v-else flat icon="undo"
-        :label="$t('annuler')" @ok="undogen" />
+        :label="$t('renoncer')" @ok="undogen" />
       <btn-cond :disable="!modif" icon="check"
         :label="$t('valider')" @ok="valider" />
     </q-card-actions>
@@ -70,12 +74,13 @@
 import Webcam from 'webcam-easy'
 import { Cropper } from 'vue-advanced-cropper'
 
-import { ref, watch, toRef, reactive } from 'vue'
+import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { styp, readFile } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import { CV } from '../app/modele.mjs'
 import { ID } from '../app/api.mjs'
+import { MajCv } from '../app/operations4.mjs'
 
 import BoutonHelp from '../components/BoutonHelp.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -115,6 +120,7 @@ export default ({
 
   data () {
     return {
+      silence: false,
       enEdition: false,
       fileList: null,
       file: { b64: '' },
@@ -128,11 +134,11 @@ export default ({
       this.undoph()
       // this.md.undo()
       this.ncv.tx = this.cv.tx
-      this.$emit('ok', false)
+      // this.$emit('ok', false)
       this.ui.fD()
     },
-    valider () {
-      this.$emit('ok', !this.modif ? false : this.ncv)
+    async valider () {
+      await new MajCv().run(this.ncv)
       this.ui.fD()
     },
     undoph () {
@@ -150,7 +156,7 @@ export default ({
     startCam () {
       if (!this.cam) {
         this.cam = new Webcam(this.webcam, 'user', this.canvas, 
-          this.config.silence ? null : this.sound)
+          this.silence ? null : this.sound)
       }
       this.cam.start()
       this.camOn = true

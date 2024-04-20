@@ -106,7 +106,7 @@ export const useUiStore = defineStore('ui', {
       ATdialtk: {},
       EMmax: {}, // EditeurMd
       IAaccinvit: {}, // InvitationAcceptation
-      ACVouvrir: false, // ApercuCv
+      ACVouvrir: {}, // ApercuCv
       MMedition: {}, // McMemo
       PCnouveautk: false, // PanelCredits
       PCdialtk: {}, // PanelCredits

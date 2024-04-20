@@ -114,6 +114,16 @@ export const useAvatarStore = defineStore('avatar', {
       return null
     }},
 
+    chatsAvec: (state) => { return (avec) => {
+      const l = []
+      for (const [id, e] of state.map) {
+        for (const [ids, c] of e.chats) {
+          if (c.idE === avec) l.push(c)
+        }
+      }
+      return l
+    }},
+
     /* Construit une Map idx:{c, n} fusionnée depuis,
     celle de la configuration et celle du compte */
     mapMC (state) {
