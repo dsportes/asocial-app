@@ -798,3 +798,41 @@ export class GetCv extends Operation {
     }
   }
 }
+
+/*OP_NouvelAvatar: 'Création d\'un nouvel avatar du compte' **********************
+- token: éléments d'authentification du compte.
+- id: de l'avatar à créér
+- cleAK : sa clé A cryptée par la clé K
+- pub: sa clé RSA publique
+- priv: sa clé RSA privée cryptée par la clé K
+- cvA: sa CV cryptée par sa clé A
+Retour:
+*/
+export class NouvelAvatar extends Operation {
+  constructor () { super('NouvelAvatar') }
+
+  async run (nom) {
+    try {
+      const session = stores.session
+      const clek = session.clek
+      const cleA = Cles.avatar()
+      const id = Cles.id(cleA, session.ns)
+      const kp = await genKeyPair()
+      const cv = new CV(id, 0, null, nom)
+
+      const args = {
+        token: session.authToken,
+        id, // id avatar à créer
+        cleAK: await crypter(clek, cleA), // clé A de l'avatar cryptée par la clé K du compte
+        pub: kp.publicKey,
+        privK: await crypter(clek, kp.privateKey),
+        cvA: await cv.crypter(cleA)
+      }
+
+      await post(this, 'NouvelAvatar', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

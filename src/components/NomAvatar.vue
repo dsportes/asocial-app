@@ -20,10 +20,9 @@
       </template>
     </q-input>
     <div v-if="labelValider" class="row justify-between items-center no-wrap">
-      <q-btn flat dense color="primary" icon="close" :label="$t('renoncer')" @click="ko" />
-      <q-btn color="primary" :label="labelValider" 
-        size="md" :icon="iconValider" padding="xs xs"
-        :disable="r1(nom) !== true || r2(nom) !== true" @click="ok" />
+      <btn-cond flat icon="close" :label="$t('renoncer')" @ok="ko" />
+      <btn-cond :label="labelValider" :icon="iconValider"
+        :disable="r1(nom) !== true || r2(nom) !== true" @ok="ok" />
     </div>
   </q-card-section>
 </template>
@@ -31,6 +30,7 @@
 <script>
 import { toRef, ref } from 'vue'
 import { interdits, regInt } from '../app/api.mjs'
+import BtnCond from '../components/BtnCond.vue'
 
 const min = 6
 const max = 24
@@ -43,6 +43,7 @@ export default {
     labelValider: String,
     initVal: String
   },
+  components: { BtnCond },
   data () {
     return {
       interdits: interdits

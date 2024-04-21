@@ -1,13 +1,12 @@
 import stores from '../stores/stores.mjs'
-import { encode, decode } from '@msgpack/msgpack'
+import { encode } from '@msgpack/msgpack'
 
-import { ID, AppExc, appexc, E_WS, E_BRK, E_BRO, AMJ, Compteurs, limitesjour, d14 } from './api.mjs'
-import { $t, sleep, random } from './util.mjs'
+import { ID, AppExc, E_WS, AMJ, limitesjour, d14 } from './api.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
-import { Versions, NomGenerique, Avatar, Chat, Compta, Note, Ticket, Notification,
-  Groupe, Membre, Tribu, Chatgr, getNg, getCle, compile, setClet} from './modele.mjs'
-import { decrypter, crypterRSA, genKeyPair } from './webcrypto.mjs'
+import { NomGenerique, Avatar, Chat, Compta, Note,
+  Groupe, Membre, Chatgr, getNg, getCle, compile } from './modele.mjs'
+import { crypterRSA } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 import { Operation } from './synchro.mjs'
 
@@ -22,24 +21,6 @@ export class McMemo extends Operation {
       const [idk, mmk] = await Avatar.genMcMemo(id, mc, memo)
       const args = { token: session.authToken, idk, mmk }
       this.tr(await post(this, 'McMemo', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* Changement des mots clés d\'un compte  ************************
-*/
-export class MotsclesCompte extends Operation {
-  constructor () { super('MotsclesCompte') }
-
-  async run (mmc) {
-    try {
-      const session = stores.session
-      const mck = await crypter(session.clek, new Uint8Array(encode(mmc)))
-      const args = { token: session.authToken, mck }
-      this.tr(await post(this, 'MotsclesCompte', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -65,83 +46,6 @@ export class ChangementPS extends Operation {
       this.tr(await post(this, 'ChangementPS', args))
       session.chgps(ps)
       if (session.synchro) commitRows(new IDBbuffer(), true)
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/** Récupération d\'un avatar par sa phrase de contact *******
-args.token: éléments d'authentification du compte.
-args.hpc: hash de la phrase de contact
-Retour: idnapc : {id, napc}
-- id : id de l'avatar ayant ce hash de phrase de contact (0 si aucun)
-- napc : na de l'avatar ayant cette phrase de contact crypté par le PBKFD de cette phrase
-
-Retour: idnapc: {id, napc}
-- id : id de l'avatar ayant ce hash de phrase de contact (0 si aucun)
-- napc : na de l'avatar ayant cette phrase de contact décrypté 
-  par le PBKFD de cette phrase OU null si non décryptable
-*/
-export class GetAvatarPC extends Operation {
-  constructor () { super('GetAvatarPC') }
-
-  async run (p) { // p: objet Phrase
-    try {
-      const session = stores.session
-      let res
-      const hpc = (session.ns * d14) + p.hps1
-      const args = { token: session.authToken, hpc }
-      const ret = this.tr(await post(this, 'GetAvatarPC', args))
-      if (ret.cvnapc) {
-        try {
-          const { cv, napc } = ret.cvnapc
-          const x = decode(await decrypter(p.pcb, napc))
-          const na = NomGenerique.from(x)
-          res = { cv, na }
-        } catch (e) {
-          res = { }
-        }
-      } else {
-        res = { }
-      }
-      return this.finOK(res)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/** Création d\'un sponsoring ****************************************************
-POST:
-- `token` : éléments d'authentification du comptable / compte sponsor de sa tribu.
-- `rowSponsoring` : row Sponsoring, SANS la version (qui est calculée par le serveur).
-- `credits`: nouveau credits du compte si non null
-- `v`: version de compta si credits
-
-Retour:
-- KO: true - si régression de version de compta
-*/
-export class AjoutSponsoring extends Operation {
-  constructor () { super('AjoutSponsoring') }
-
-  async run (row, don) {
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      while (await this.retry()) {
-        const compta = aSt.compta
-        const args = { token: session.authToken, rowSponsoring: row, v: compta.v }
-        if (don) {
-          const { dlv, creditsK } = await aSt.compta.debitDon(don)
-          args.dlv = dlv
-          args.credits = creditsK
-          args.lavLmb = aSt.compte.lavLmb
-        }
-        const ret = this.tr(await post(this, 'AjoutSponsoring', args))
-        if (!ret.KO) break
-      }
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -213,191 +117,6 @@ export class MuterCompte extends Operation {
   }
 }
 
-/*OP_NouvelAvatar: 'Création d\'un nouvel avatar du compte' **********************
-args.token: éléments d'authentification du compte.
-args.rowAvatar : row du nouvel avatar
-args.rowVersion : row de le la version de l'avatar
-args.kx args.vx: entrée dans mavk de compta pour le nouvel avatar
-Retour:
-*/
-export class NouvelAvatar extends Operation {
-  constructor () { super('NouvelAvatar') }
-
-  async run (nom) {
-    try {
-      const session = stores.session
-
-      const na = NomGenerique.avatar(nom)
-
-      const { publicKey, privateKey } = await genKeyPair()
-
-      const rowAvatar = await Avatar.primaireRow(na, publicKey, privateKey)
-
-      const rowVersion = {
-        id: na.id,
-        v: 1,
-        dlv: 0 // sera mis par le serveur à la DLV de compta
-      }
-      const _data_ = new Uint8Array(encode(rowVersion))
-      rowVersion._data_ = _data_
-      rowVersion._nom = 'versions'
-
-      const kx = await Avatar.mavkK(na.id)
-      const vx = await Avatar.mavkKV(na)
-      if (session.fsSync) await session.fsSync.setAvatar(na.id)
-      const args = { token: session.authToken, rowAvatar, 
-        rowVersion, kx, vx, abPlus: [na.id] }
-      this.tr(await post(this, 'NouvelAvatar', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_SetNotifGg: 'Inscription d\'une notification générale' ***********************
-args.token donne les éléments d'authentification du compte.
-args.ns
-args.notif
-Retour:
-*/
-export class SetNotifG extends Operation {
-  constructor () { super('SetNotifG') }
-
-  async run (notifG, ns) {
-    try {
-      const session = stores.session
-      const naComptable = NomGenerique.comptable()
-      if (!notifG) notifG = new Notification({})
-      else notifG.dh = Date.now()
-      const notif = await crypter(naComptable.rnd, notifG.serial)
-      const args = { token: session.authToken, ns, notif}
-      const ret = this.tr(await post(this, 'SetNotifG', args))
-      if (ret.rowEspace && session.estAdmin) {
-        // PageAdmin : update liste espace
-        const esp = await compile(ret.rowEspace)
-        session.setEspace(esp, true)
-      }
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_SetSponsor: 'Changement pour un compte de son statut de sponsor de sa tranche de quotas'
-args.token: éléments d'authentification du compte.
-args.idt : id de la tribu
-args.idc: id du compte
-args.nasp: na du compte crypté par la cle de la tribu
-args.estSp: true si sponsor
-Retour:
-*/
-export class SetSponsor extends Operation {
-  constructor () { super('SetSponsor') }
-
-  async run (idt, na, estSp) { // na du compte, true/false sponsor
-    try {
-      const session = stores.session
-      let nasp = null
-      if (idt && estSp) {
-        const cle = getCle(idt)
-        nasp = await crypter(cle, new Uint8Array(encode(na.anr)))
-      }
-      const args = { token: session.authToken, idt, idc: na.id, nasp, estSp }
-      this.tr(await post(this, 'SetSponsor', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_GetCompteursCompta: 'Obtention des compteurs d\'abonnement / consomation d\'un compte'
-(autre que celle du compte de la session)
-Pour le comptable (tous comptes), un sponsor (comptes de sa tribu)
-args.token: éléments d'authentification du compte.
-args.id : id de la compta
-Retour:
-- compteurs : objet compteurs de cette compta
-- cletX: clé de sa tribu cryptée par la clé K du comptable
-- it : indice du compte dans sa tribu
-*/
-export class GetCompteursCompta extends Operation {
-  constructor () { super('GetCompteursCompta') }
-
-  async run (id) { // id d'un compte
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      const args = { token: session.authToken, id }
-      const ret = this.tr(await post(this, 'GetCompteursCompta', args))
-      const cpt = new Compteurs(ret.compteurs)
-      cpt.it = ret.it
-      cpt.clet = !session.estComptable ? null : await decrypter(session.clek, ret.cletX)
-      if (!cpt.clet) {
-        const [t, i, e] = aSt.getTribuDeCompte(id)
-        if (t) cpt.clet = t.clet
-      }
-      cpt.id = id
-      cpt.sp = ret.sp
-      aSt.setccCpt(cpt)
-      return this.finOK(cpt)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_GetTribu: 'Obtention d\'une tranche de quotas' ************
-args.token: éléments d'authentification du compte.
-args.id : id de la tribu
-args.setC: déclarer la tribu courante
-Retour:
-- rowtribu: row de la tribu
-*/
-export class GetTribu extends Operation {
-  constructor () { super('GetTribu') }
-
-  async run (id, setC) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, id, setC: setC || false}
-      const ret = this.tr(await post(this, 'GetTribu', args))
-      const tribu = await compile(ret.rowTribu)
-      return this.finOK(tribu)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_SetEspaceT: 'Attribution d\'un profil à l\'espace' ******************
-args.token donne les éléments d'authentification du compte.
-args.ns
-args.t
-Retour:
-*/
-export class SetEspaceT extends Operation {
-  constructor () { super('SetEspaceT') }
-
-  async run (ns, t) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, ns, t}
-      const ret = this.tr(await post(this, 'SetEspaceT', args))
-      if (ret.rowEspace && !session.ns) {
-        // PageAdmin : update liste espace
-        const esp = await compile(ret.rowEspace)
-        session.setEspace(esp, true)
-      }
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_NouveauGroupe: 'Création d\'un nouveau groupe' ********
 args.token donne les éléments d'authentification du compte.
 args.rowGroupe : le groupe créé
@@ -447,28 +166,6 @@ export class NouveauGroupe extends Operation {
       this.finOK()
     } catch (e) {
       await this.finKO(e)
-    }
-  }
-}
-
-/* Changement des mots clés d'un groupe ******************************************
-args.token donne les éléments d'authentification du compte.
-args.mcg : map des mots clés cryptée par la clé du groupe
-args.idg : id du groupe
-Retour:
-*/
-export class MotsclesGroupe extends Operation {
-  constructor () { super('MotsclesGroupe') }
-
-  async run (mmc, nag) {
-    try {
-      const session = stores.session
-      const mcg = await crypter(nag.rnd, new Uint8Array(encode(mmc)))
-      const args = { token: session.authToken, mcg, idg: nag.id }
-      this.tr(await post(this, 'MotsclesGroupe', args))
-      this.finOK()
-    } catch (e) {
-      return await this.finKO(e)
     }
   }
 }
@@ -965,36 +662,6 @@ export class RattNote extends Operation {
       const args = { token: session.authToken, id, ids, ref }
       this.tr(await post(this, 'RattNote', args))
       return this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_ChargerCvs: 'Chargement des cartes de visite plus récentes que celles détenues en session'
-args.token: éléments d'authentification du compte.
-args.mcv : cle: id, valeur: version détenue en session (ou 0)
-Retour:
-rowCvs: liste des row Cv { _nom: 'cvs', id, _data_ }
-  _data_ : cva {v, photo, info} cryptée par la clé de son avatar
-*/
-export class ChargerCvs extends Operation {
-  constructor () { super('ChargerCvs') }
-
-  async run (id) {
-    try {
-      const session = stores.session
-      const pSt = stores.people
-      const mcv = { }
-      mcv[id] = 0
-      const args = { token: session.authToken, id, mcv }
-      const ret = this.tr(await post(this, 'ChargerCvs', args))
-      let cv = null
-      if (ret.rowCvs && ret.rowCvs.length > 0) {
-        cv = await compile(ret.rowCvs[0])
-        if (cv && cv.cv) pSt.setCv(getNg(id), cv.cv)
-      }
-      return this.finOK(cv ? cv.cv : null)
     } catch (e) {
       await this.finKO(e)
     }

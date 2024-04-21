@@ -78,7 +78,6 @@ import ChoixEmoji from './ChoixEmoji.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { Motscles, getNg } from '../app/modele.mjs'
 import { styp, $t, afficherDiag } from '../app/util.mjs'
-import { MotsclesGroupe, MotsclesCompte } from '../app/operations.mjs'
 
 export default ({
   name: 'MotsCles',
@@ -160,9 +159,9 @@ export default ({
     async okEdit () {
       const mmc = this.motscles.finEdition()
       if (this.duGroupe) {
-        await new MotsclesGroupe().run(mmc, this.gSt.egrC.groupe.na)
+        // await new MotsclesGroupe().run(mmc, this.gSt.egrC.groupe.na)
       } else {
-        await new MotsclesCompte().run(mmc)
+        // await new MotsclesCompte().run(mmc)
       }
       this.ui.fD()
     }

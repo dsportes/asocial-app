@@ -1,5 +1,5 @@
 <template>
-  <q-card :class="dkli(idx)">
+  <q-card v-if="avatar" :class="dkli(idx)">
     <apercu-genx :id="idav" :idx="idx"/>
 
     <div class="q-mt-sm" v-if="avatar.pc">
@@ -59,7 +59,9 @@ export default {
   components: { PhraseContact, BoutonHelp, ApercuGenx, BtnCond },
 
   computed: {
-    avatar () { return this.aSt.getElt(this.idav).avatar}
+    avatar () { const e = this.aSt.getElt(this.idav)
+      return e ? e.avatar : null
+    }
   },
 
   data () {

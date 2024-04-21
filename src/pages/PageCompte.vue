@@ -2,13 +2,13 @@
   <q-page class="column q-pa-xs splg">
     <div class="row q-my-sm items-center justify-center q-gutter-sm">
       <div> <!-- Changement de phrase secrète -->
-        <q-btn class="q-ml-sm" size="md" icon="manage_accounts" no-caps
-          :label="$t('CPTchps')" color="warning" dense @click="ouvrirchgps"/>
+        <btn-cond class="q-ml-sm" icon="manage_accounts" no-caps cond="cUrgence"
+          :label="$t('CPTchps')" color="warning" @ok="ouvrirchgps"/>
         <bouton-help class="q-ml-sm" page="page1"/>
       </div>
       <div> <!-- Nouvel avatar -->
-        <q-btn class="q-ml-sm" size="md" icon="add" no-caps
-          :label="$t('CPTnvav')" color="warning" dense @click="ouvrirNvav"/>
+        <btn-cond class="q-ml-sm" icon="add" no-caps cond="cEdit"
+          :label="$t('CPTnvav')" color="warning" @ok="ouvrirNvav"/>
         <bouton-help class="q-ml-sm" page="page1"/>
       </div>
       <!-- maj quotas du compte -->
@@ -27,7 +27,7 @@
 
     <!-- Avatars du compte -->
     <q-card class="q-my-md q-pa-xs" v-for="(id, idx) in session.compte.mav" :key="id">
-      <div class="row items-start">
+      <div v-if="eltav(id)" class="row items-start">
         <div class="col-auto column items-center q-mr-sm">
           <btn-cond flat icon="navigate_next" size="lg"
             :color="id === session.avatarId ? 'warning' : 'primary'" @ok="courant(id)"/>
@@ -55,7 +55,7 @@
     <q-dialog v-model="ui.d.PCnvav" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
+          <btn-cond icon="close" color="warning" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTnvav2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -67,7 +67,7 @@
     <q-dialog v-model="ui.d.PCchgps" persistent>
       <q-card :class="styp('sm') + 'column items-center'">
         <div class="row q-my-md q-gutter-md justify-center items-center">
-          <q-btn dense :label="$t('renoncer')" color="primary" icon="close" @click="ui.fD"/>
+          <btn-cond :label="$t('renoncer')" icon="close" @ok="ui.fD"/>
           <bouton-help page="page1"/>
         </div>
         <btn-cond :label="$t('CPTchps2')" cond="cUrgence" class="titre-lg" @ok="saisiePS" />
@@ -82,7 +82,7 @@
     <q-dialog v-model="ui.d.PTedq" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" padding="xs" icon="close" @click="ui.fD"/>
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas"/>
@@ -99,7 +99,8 @@
 <script>
 
 import stores from '../stores/stores.mjs'
-import { ChangementPS, NouvelAvatar } from '../app/operations.mjs'
+import { ChangementPS } from '../app/operations.mjs'
+import { NouvelAvatar } from '../app/operations4.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
 import { ExistePhrase } from '../app/synchro.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -121,7 +122,6 @@ export default {
   },
 
   computed: {
-    memo () { return this.aSt.compte.memo },
     estA () { return this.session.estA },
     estDelegue () { return this.session.estDelegue }
   },
@@ -137,14 +137,13 @@ export default {
 
   methods: {
     async ouvrirNvav () { 
-      if (await this.session.edit()) { this.ui.oD('PCnvav'); this.nomav = '' }
+      this.ui.oD('PCnvav')
+      this.nomav = ''
     },
 
     async ouvrirchgps () {
-      try {
-        // { const x = null; x.toto } // Pour tester la récupération d'un bug
-        if (await this.session.edit()) { this.ui.oD('PCchgps'); this.ps = null }
-      } catch (e) { trapex(e, 1) }
+      this.ui.oD('PCchgps')
+      this.ps = null
     },
 
     saisiePS () {
@@ -177,8 +176,9 @@ export default {
       this.reset()
     },
 
-    nbchats (id) { return this.aSt.getElt(id).chats.size },
-    nbspons (id) { return this.aSt.getElt(id).sponsorings.size },
+    eltav (id) { return this.aSt.getElt(id) },
+    nbchats (id) { const e = this.eltav(id); return e ? e.chats.size : 0 },
+    nbspons (id) { const e = this.eltav(id); return e ? e.sponsorings.size : 0 },
     nbgrps (id) { return this.session.compte.idGroupes(id).size },
     courant (id, action) {
       this.session.setAvatarId(id)
@@ -195,13 +195,12 @@ export default {
 
     async oknomav (nom) {
       if (!nom) { this.ui.fD(); return }
-      // TODO : à changer complètement
-      if (this.aSt.compte.avatarDeNom(nom)) {
+      if (this.session.compte.avatarDeNom(nom)) {
         await afficherDiag(this.$t('CPTndc'))
         return
       }
-      this.ui.fD()
       await new NouvelAvatar().run(nom)
+      this.ui.fD()
     },
 
     async editerq () {

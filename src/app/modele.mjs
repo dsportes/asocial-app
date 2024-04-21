@@ -663,6 +663,15 @@ export class Compte extends GenDoc {
     }
     return [amb, ano]
   }
+
+  avatarDeNom (nom) {
+    const session = stores.session
+    for(const ida of this.mav) {
+      const cv = session.getCV(ida)
+      if (cv.nom === nom) return ida 
+    }
+    return null
+  }
   
   /* Id des groupes de l'avatar ida (tous avatars si ida absent) */
   idGroupes (ida) {

@@ -187,7 +187,7 @@ import MicroChat from '../components/MicroChat.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
-import { MuterCompte, GetCompteursCompta, SetSponsor } from '../app/operations.mjs'
+import { MuterCompte } from '../app/operations.mjs'
 import { getNg, Tribu } from '../app/modele.mjs'
 import { crypterRSA } from '../app/webcrypto.mjs'
 import { EstAutonome, ChangerPartition, DeleguePartition } from '../app/operations4.mjs'
@@ -254,7 +254,7 @@ export default {
         return
       }
       if (this.st === 1) {
-        await new GetCompteursCompta().run(this.id)
+        // await new GetCompteursCompta().run(this.id)
         const c = this.cpt.qv
         const s = this.session.synthese
         this.quotas = {
@@ -276,7 +276,7 @@ export default {
     },
 
     async mut () {
-      await new GetCompteursCompta().run(this.id)
+      // await new GetCompteursCompta().run(this.id)
       const c = this.aSt.compta
       const pub = await this.aSt.getPub(this.id)
       const trib = { idt: c.idt }
