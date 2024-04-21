@@ -59,6 +59,7 @@ export class RegCc {
       const priv = await decrypter(stores.session.clek, privK)
       RegCc.regpriv.set(id, priv)
     }
+    return RegCc.regpriv.get(id)
   }
 
   static getPriv (id) { return RegCc.regpriv.get(id)}
@@ -367,6 +368,7 @@ _data_ :
 export class Espace extends GenDoc {
 
   async compile (row) {
+    const session = stores.session
     this.org = row.org
     this.creation = row.creation
     this.moisStat = row.moisStat || 0
@@ -492,7 +494,7 @@ export class Partition extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    const cleP = RegCles.get(this.id)
+    const clep = RegCles.get(this.id)
     this.nrp = row.nrp || 0
     this.q = row.q
     const ns = ID.ns(this.id)
@@ -502,14 +504,13 @@ export class Partition extends GenDoc {
     if (row.mcpt) for(const idx in row.mcpt) {
       const id = ID.long(parseInt(idx), ns)
       const e = row.mcpt[idx]
-      RegCles.set(await decrypter(cleP, e.cleAP))
+      RegCles.set(await decrypter(clep, e.cleAP))
       const q = { ...e.q }
       q.pcc = !q.qc ? 0 : Math.round(q.c2m * 100 / q.qc) 
       q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / (q.qn * UNITEN)) 
       q.pcv = !q.qv ? 0 : Math.round(q.v * 100 / (q.qv * UNITEV)) 
       const r = { id: id, nr: e.nr || 0, q: e.q }
       if (e.notif) {
-        const clep = RegCles.get(this.id)
         if (clep) r.notif = await Notification.decrypt(e.notif, clep)
       }
       if (e.del) { this.sdel.add(id); r.del = true }
@@ -535,6 +536,7 @@ _data_ :
 - `hXC`: hash du PBKFD de la phrase secrète complète (sans son `ns`).
 - `cleKXC` : clé K cryptée par XC (PBKFD de la phrase secrète complète).
 - `cleEK` : clé de l'espace cryptée par la clé K du compte, à la création de l'espace pour le Comptable. Permet au comptable de lire les reports créés sur le serveur et cryptés par cette clé E.
+- `privK` : clé privée RSA de son avatar principal cryptée par la clé K du compte.
 
 - `dhvuK` : date-heure de dernière vue des notifications par le titulaire du compte, cryptée par la clé K.
 - `qv` : `{ qc, qn, qv, pcc, pcn, pcv, nbj }`
@@ -584,6 +586,7 @@ export class Compte extends GenDoc {
     const cfg = stores.config
     const clek = session.clek || await session.setIdClek(this.id, row.cleKXC)
     if (row.cleEK) this.cleE = await decrypter(clek, row.cleEK)
+    this.priv = await RegCc.setPriv(this.id, row.privK)
     this.dhvu = row.dhvuK ? parseInt(await decrypterStr(clek, row.dhvuK)) : 0
     this.qv = row.qv
 
@@ -604,21 +607,14 @@ export class Compte extends GenDoc {
       }
     }
 
-    this.priv = RegCc.getPriv(this.id)
-
     if (row.idp) {
       this.estA = false
       this.idp = ID.long(row.idp, this.ns)
-      if (row.clePK.length === 256) {
-        if (this.priv) this.clep = await decrypterRSA(this.priv, row.clePK)
-        else { this.clePKX = row.clePK; this.clep = null }
-      } else this.clep = RegCles.set(await decrypter(clek, row.clePK))
+      if (row.clePK.length === 256) this.clep = await decrypterRSA(this.priv, row.clePK)
+      else this.clep = RegCles.set(await decrypter(clek, row.clePK))
       this.del = row.del || false
-      if (row.notif) {
-        if (this.clep) {
-          this.notif = await Notification.decrypt(row.notif, this.clep)
-        } else { this.notif = row.notif; this.notifX = row.notif }
-      } else this.notif = null
+      if (row.notif) this.notif = await Notification.decrypt(row.notif, this.clep)
+      else this.notif = null
     } else this.estA = true
 
     this.mav = new Set()

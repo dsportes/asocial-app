@@ -45,7 +45,8 @@ export const useSessionStore = defineStore('session', {
     peopleId: 0, // people "courant"
     notifC: null, // notifC du people courant
     notifP: null, // notifP de la partition du compte
-    mnotifP: new Map(), // map des notifP
+    mnotifP: new Map(), // map des notifP compilées
+    tnotifP: null, // dernière table des notifp PAS compilées
     
     espaces: new Map(), // Pour admin SEULEMENT
     syntheses: new Map(), // Pour admin SEULEMENT
@@ -396,6 +397,7 @@ export const useSessionStore = defineStore('session', {
       }
       if (estAdmin) { this.espaces.set(espace.id, espace); return }
       this.espace = espace
+      this.tnotifP = espace.tnotifP
       setTimeout(async () => { await this.setNotifP()}, 1)
       if (espace.notifE && espace.notifE.dh > this.dhvu) this.alire = true
     },
@@ -459,28 +461,31 @@ export const useSessionStore = defineStore('session', {
       this.opTimer2 = setTimeout(() => { this.signalOp = false }, 1000)
     },
 
-    /* Recalcul notifP et tnotifP quand le compte ou l'espace ont changé
-    a) Les notifs P ne sont pas decryptables depuis espace
-    avant que compte et son premier avatar ne soit mis en store
-    b) Si le compte change de partition, les notifs dans espace sont à redecrypter
-    et d'ailleurs espace N'EST PAS mis à jour.
+    /* La notifP de la partition d'un compte peut changer:
+    - soit parce qu'elle est mise à jour par Espace,
+    - soit parce que le compte a changé de partition par Compte.
+    En conséquence il faut recalculer la notifP à l'occasion de
+    l'enregistrement en store de ceux événements.
+    Le Comptable est le seul qui peut obtenir toutes les clés P
+    qui cryptent les notifs de toutes les partitions. Pour les autres comptes
+    il n'y a qu'une seule notif de partition décryptable.
     */
-    async setNotifP () { 
-      const e = this.espace
-      const c = this.compte
-      if (e && c && c.clep) {
-        this.notifP = null
-        this.mnotifP.clear()
-        for (let i = 1; i < e.tnotifP.length; i++) {
-          const n = e.tnotifP[i]
-          if (n) {
+    async setNotifP () {
+      const mnotifP = new Map()
+      if (this.estComptable) {
+        for (let i = 1; i < this.notifP.length; i++) {
+          const ntf = e.this.tnotifP[i]
+          if (ntf) {
             const cl = RegCles.get(ID.long(i, this.ns))
-            const ntf = await MaNotification.decrypt(n, cl)
-            this.mnotifP.set(i, ntf)
-            if (i === ID.court(c.idp)) this.notifP = ntf
+            if (cl) mnotifP.set(i, await Notification.decrypt(ntf, cl))
           }
         }
+      } else if (!this.estA) {
+        const cl = RegCles.get(ID.long(this.compte.idp, this.ns))
+        if (cl) mnotifP.set(this.compte.idp, await Notification.decrypt(ntf, cl))
       }
+      this.mnotifP = mnotifP
+      this.notifP = this.compte.idp ? mnotifP.get(this.compte.idp) : null
       if (this.notifP && this.notifP.dh > this.dhvu) this.alire = true
     }
 

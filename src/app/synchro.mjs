@@ -597,7 +597,7 @@ export class OperationS extends Operation {
 
       // Commit Store et IDB d'un cycle
       // 0 à N sous-arbres de plus enegistrés
-      await sb.store(buf)
+      sb.store(buf)
       await buf.commit(ds)
       syncQueue.dataSync = ds
       if (fs) fs.setDS(ds.tousRds)
@@ -670,17 +670,16 @@ export class ConnexionAvion extends OperationS {
       { // Phase 1 : chargement depuis IDB des espaces / comptes / comptis
         const sb = new SB()
         const [res, rce, rci] = await idb.getECC()
-        const esp = await compile(res)
-        sb.setEs(esp)
         sb.setCe(await compile(rce))
         sb.setCi(await compile(rci))
-        await sb.store()
+        sb.setEs(await compile(res))
+        sb.store()
       }
       
       { // Chargement des groupes et avatars depuis IDB
         const sb = new SB()
         await this.loadAvatarsGroupes(sb, ds)
-        await sb.store()
+        sb.store()
       }
 
       // Chargement des descriptifs des fichiers du presse-papier
@@ -836,12 +835,9 @@ export class SyncSp extends OperationS {
       const sb = new SB()
       const buf = new IDBbuffer()
     
-      const compte = await compile(ret.rowCompte)
-      sb.setCe(compte)
-      ds.compte.vs = ds.compte.vb
-      buf.putIDB(ret.rowCompte)
-      sb.setCi(await compile(ret.rowCompti))
-      buf.putIDB(ret.rowCompti)
+      await this.setCeCi(ds, ret, sb, buf)
+      sb.setEs(await compile(ret.rowEspace))
+      buf.putIDB(ret.rowEspace)
 
       const avatar = await compile(ret.rowAvatar)
       sb.setA(avatar)
@@ -861,7 +857,7 @@ export class SyncSp extends OperationS {
         setTrigramme(session.nombase, await getTrigramme())
       }
 
-      await sb.store(buf)
+      sb.store(buf)
       await buf.commit(ds)
 
       syncQueue.dataSync = ds
