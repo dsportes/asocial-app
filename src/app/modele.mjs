@@ -464,7 +464,7 @@ _data_:
     - `notif`: notification du compte cryptée par la clé P de la partition (redonde celle dans compte).
     - `cleAP` : clé A du compte crypté par la clé P de la partition.
     - `del`: `true` si c'est un délégué.
-    - `q` : `qc qn qv c2m nn nc ng v` extraits du document `comptas` du compte.
+    - `q` : `qc qn qv c2m nn nc ng v` extraits du document `comptas.qv` du compte.
       - `c2m` est le compteur `conso2M` de compteurs, montant moyen _mensualisé_ de consommation de calcul observé sur M/M-1 (observé à `dhic`). 
 
 Compilé:

@@ -3,7 +3,7 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-primary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
+      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -64,17 +64,16 @@
             left-label v-model="dconf" :label="$t('APAcf2', [sp.cv.nom])" />
         <div class="titre-md q-mt-sm">{{$t('NPmota')}}</div>
         <editeur-md mh="10rem" v-model="texte" :texte="textedef" editable modetxt/>
-        <q-btn flat @click="fermer" color="primary" :label="$t('renoncer')" class="q-ml-sm" />
-        <q-btn flat @click="confirmer" :disable="texte.length === 0"
+        <btn-cond flat @ok="fermer" :label="$t('renoncer')" class="q-ml-sm" />
+        <btn-cond flat @ok="confirmer" :disable="texte.length === 0"
           color="warning" :label="$t('APAconf')" class="q-ml-sm" />
       </div>
 
       <div v-if="accdec===2">
         <div class="titre-md q-mt-sm">{{$t('NPmotd')}}</div>
         <editeur-md mh="10rem" v-model="texte" :texte="textedef" editable modetxt/>
-        <q-btn flat @click="fermer" color="primary" padding="xs" dense size="md"
-          :label="$t('renoncer')" class="q-ml-sm" />
-        <q-btn flat @click="refuser" color="warning" padding="xs" dense size="md"
+        <btn-cond flat @ok="fermer" :label="$t('renoncer')" class="q-ml-sm" />
+        <btn-cond flat @ok="refuser" color="warning"
           :disable="texte.length === 0"
           :label="$t('APAdec2')" class="q-ml-sm" />
       </div>
@@ -92,6 +91,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
 import { deconnexion, SyncSp, RefusSponsoring, ExistePhrase } from '../app/synchro.mjs'
 import QuotasVols from '../components/QuotasVols.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { styp, dhcool, afficherDiag } from '../app/util.mjs'
 import { AMJ, ID, d14 } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -105,7 +105,7 @@ export default ({
   sp : objet Sponsoring décodé
   */
 
-  components: { EditeurMd, ShowHtml, BoutonHelp, QuotasVols },
+  components: { BtnCond, EditeurMd, ShowHtml, BoutonHelp, QuotasVols },
 
   computed: {
     textedef () { return this.$t('merci', [this.sp.cv.nom]) },

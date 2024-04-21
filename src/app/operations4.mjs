@@ -592,7 +592,7 @@ export class ChangerPartition extends Operation {
       const idp = ID.long(idpart, session.ns)
       const cleA = RegCles.get(id)
       const cleP = RegCles.get(idp)
-      const cleAP = await crypter(cleP, cleA)
+      const cleAP = await crypter(cleP, cleA, 1)
       const notif = ntf ? await ntf.crypt(cleP) : null
       const pub = await getPub(id)
       const clePK = await crypterRSA(pub, cleP)

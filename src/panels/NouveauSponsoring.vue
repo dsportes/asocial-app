@@ -3,7 +3,7 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
+      <btn-cond color="warning" icon="chevron_left" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
@@ -21,8 +21,7 @@
               left-label v-model="dconf" :label="$t('CHcdon')" />
           </div>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 2" :label="$t('suivant')"
-              color="primary" padding="none" dense size="md"/>
+            <btn-cond flat @ok="step = 2" :label="$t('suivant')"/>
           </q-stepper-navigation>
         </q-step>
 
@@ -31,8 +30,7 @@
             <q-option-group :options="optionsDon" type="radio" dense v-model="optDon" />
           </div>
           <q-stepper-navigation>
-            <q-btn flat @click="setDon" :label="$t('suivant')"
-              color="primary" padding="none" dense size="md"/>
+            <btn-cond flat @ok="setDon" :label="$t('suivant')"/>
           </q-stepper-navigation>
         </q-step>
 
@@ -43,8 +41,7 @@
               :init-val="pc && pc.phrase ? pc.phrase : ''"/>
           </div>
           <q-stepper-navigation>
-            <q-btn :label="$t('precedent')" @click="step = session.estA ? 1 : 0"
-              flat  color="primary" padding="none" dense size="md"/>
+            <btn-cond :label="$t('precedent')" @ok="step = session.estA ? 1 : 0" flat/>
             <!--q-btn flat @click="step = 3" color="primary" padding="none" dense size="md"
               :label="$t('suivant')" :disable="!pc || !pc.phrase"
               class="q-ml-sm"/-->
@@ -57,8 +54,7 @@
               icon-valider="check" :label-valider="$t('suivant')"></nom-avatar>
           </div>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 2" color="primary" padding="none" dense size="md"
-            :label="$t('precedent')"/>
+            <btn-cond flat @ok="step = 2" :label="$t('precedent')"/>
           </q-stepper-navigation>
         </q-step>
 
@@ -68,10 +64,8 @@
           </div>
           <div v-if="diagmot" class="fs-sm text-warning">{{$t('NP10s', [mot.length])}}</div>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 3" color="primary" padding="none" dense size="md"
-              :label="$t('precedent')"/>
-            <q-btn flat @click="okmot" color="primary" padding="none" dense size="md"
-              :label="$t('suivant')" 
+            <btn-cond flat @ok="step = 3" :label="$t('precedent')"/>
+            <btn-cond flat @ok="okmot" :label="$t('suivant')" 
               :disable="mot.length<10" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
@@ -79,10 +73,8 @@
         <q-step v-if="!estAutonome" :name="5" :title="$t('NPquo1')" icon="settings" :done="step > 5" >
           <choix-quotas :quotas="quotas"/>
           <q-stepper-navigation>
-            <q-btn flat @click="step = 4" color="primary" padding="none" dense size="md"
-              :label="$t('precedent')" />
-            <q-btn flat @click="step = 6" :disable="quotas.err"
-              color="primary" padding="none" dense size="md"
+            <btn-cond flat @ok="step = 4" :label="$t('precedent')" />
+            <btn-cond flat @ok="step = 6" :disable="quotas.err"
               :label="$t('suivant')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
@@ -101,10 +93,9 @@
             <span v-if="dconf" class="q-ml-sm">{{$t('conf')}}</span>
           </div>
           <q-stepper-navigation class="row items-center q-gutter-sm q-mt-md">
-            <q-btn flat @click="step = estAutonome ? 4 : 5" color="primary" padding="xs" dense size="md"
-              :label="$t('corriger')"/>
-            <q-btn @click="confirmer" color="warning" padding="xs" dense size="md"
-              :label="$t('confirmer')" icon="check" />
+            <btn-cond flat @ok="step = estAutonome ? 4 : 5" :label="$t('corriger')"/>
+            <btn-cond @ok="confirmer" color="warning" :label="$t('confirmer')" 
+            icon="check" cond="cEdit"/>
           </q-stepper-navigation>
         </q-step>
 
@@ -124,6 +115,7 @@ import { styp, edvol, afficherDiag, dkli, $t } from '../app/util.mjs'
 import { ID, UNITEN, UNITEV, d14 } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BtnCond from '../components/BtnCond.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import { ExistePhrase, GetCompta } from '../app/synchro.mjs'
@@ -134,7 +126,7 @@ export default ({
 
   props: { },
 
-  components: { PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp, QuotasVols },
+  components: { BtnCond, PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp, QuotasVols },
 
   computed: {
     estDelegue () { return this.optOSA === 1 },
