@@ -471,21 +471,26 @@ export const useSessionStore = defineStore('session', {
     il n'y a qu'une seule notif de partition décryptable.
     */
     async setNotifP () {
+      if (this.estAdmin) return
       const mnotifP = new Map()
+      const n = ID.court(this.compte.idp)
       if (this.estComptable) {
-        for (let i = 1; i < this.notifP.length; i++) {
-          const ntf = e.this.tnotifP[i]
+        for (let i = 1; i < this.tnotifP.length; i++) {
+          const ntf = this.tnotifP[i]
           if (ntf) {
             const cl = RegCles.get(ID.long(i, this.ns))
             if (cl) mnotifP.set(i, await Notification.decrypt(ntf, cl))
           }
         }
       } else if (!this.estA) {
-        const cl = RegCles.get(ID.long(this.compte.idp, this.ns))
-        if (cl) mnotifP.set(this.compte.idp, await Notification.decrypt(ntf, cl))
+        const ntf = this.tnotifP[n]
+        if (ntf) {
+          const cl = RegCles.get(ID.long(this.compte.idp, this.ns))
+          if (cl) mnotifP.set(n, await MaNotification.decrypt(ntf, cl))
+        }
       }
       this.mnotifP = mnotifP
-      this.notifP = this.compte.idp ? mnotifP.get(this.compte.idp) : null
+      this.notifP = this.compte.idp ? mnotifP.get(n) : null
       if (this.notifP && this.notifP.dh > this.dhvu) this.alire = true
     }
 

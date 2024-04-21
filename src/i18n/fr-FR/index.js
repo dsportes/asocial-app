@@ -1946,7 +1946,7 @@ export default {
   PPchpart: 'Changer de partition',
   PPchdel: 'Changer le statut de "délégué"',
   PPcompta: 'Abon. et conso.',
-  PPmuter: 'Mutation O<=>A',
+  PPmuter: 'Mutation O↔A',
   PPchatreq: 'Un "chat" avec le compte doit avoir été établi avant d\'envisager un changement de type du compte.',
   PPmut: 'Changer le type du compte',
   PPmut1: 'Cet avatar n\'est pas l\'avatar principal de son compte: impossible d\'envisager de changer son type.',

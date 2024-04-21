@@ -592,6 +592,7 @@ export class Compte extends GenDoc {
 
     this.dlv = row.dlv
     this.nbj = AMJ.diff(this.dlv, session.auj)
+    if (this.nbj > 999) this.nbj = 999
     this.alerteDlv = cfg.alerteDlv > this.nbj
     // this.alerteDlv = this.nbj > 5 // test
 
@@ -610,7 +611,7 @@ export class Compte extends GenDoc {
     if (row.idp) {
       this.estA = false
       this.idp = ID.long(row.idp, this.ns)
-      if (row.clePK.length === 256) this.clep = await decrypterRSA(this.priv, row.clePK)
+      if (row.clePK.length === 256) this.clep = RegCles.set(await decrypterRSA(this.priv, row.clePK))
       else this.clep = RegCles.set(await decrypter(clek, row.clePK))
       this.del = row.del || false
       if (row.notif) this.notif = await Notification.decrypt(row.notif, this.clep)

@@ -70,7 +70,7 @@
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <q-btn color="warning" icon="clear"
+          <btn-cond color="warning" icon="clear"
             :cond="ui.urgence ? 'cUrgence' : 'cEdit'"
             :label="$t('CHrac')" @ok="passifop"/>
         </q-card-actions>

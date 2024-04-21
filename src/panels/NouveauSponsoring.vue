@@ -272,7 +272,7 @@ export default ({
       step.value = 0
       if (accepteA) optionsOSA.push({ label: $t('compteA'), value: 2 })
       optOSA.value = 0
-      const cpt = partition.value.synth
+      const cpt = partition.synth
       quotas.value = { qc: 1, qn: 1, qv: 1, 
         maxn: cpt.q.qn > cpt.qt.qn ? cpt.q.qn - cpt.qt.qn : 0, 
         maxv: cpt.q.qv > cpt.qt.qv ? cpt.q.qv - cpt.qt.qn : 0,
