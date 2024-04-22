@@ -1,5 +1,5 @@
 <template>
-<q-card :class="styp('sm')">
+<q-card>
   <q-toolbar class="bg-secondary text-white">
     <btn-cond color="warning" icon="undo" @ok="$emit('ko')"/>
     <q-toolbar-title class="titre-md full-width text-center">{{$t('HTtit')}}</q-toolbar-title>
@@ -50,16 +50,20 @@ const reg = /^([a-z0-9]{2,12})$/
 export default ({
   name: 'HashTags',
 
-  props: { src: String }, // édite les mots clés du compte OU duGroupe
-
+  props: { 
+    src: String, // liste d'origine, la liste resultat est v-model
+    okbtn: Boolean // true s'il faut afficher le bouton ok
+  },
   components: { BoutonBulle, BoutonHelp, BtnCond },
+
+  emits: ['update:modelValue', 'ok', 'ko'],
 
   computed: {
     res () { return this.lr.join(' ')}
   },
 
   watch: {
-    sel (ap) { this.filtre() }
+    sel () { this.filtre() }
   },
 
   data () {
@@ -77,6 +81,7 @@ export default ({
           this.lr.push(this.sel)
           this.tri(this.lr)
           this.sel = ''
+          this.$emit('update:modelValue', this.res)
         }
       }
     },
@@ -86,7 +91,9 @@ export default ({
       if (this.lc.indexOf(t) === -1) {
         this.lc.push(t)
         this.tri(this.lc)
+        this.$emit('update:modelValue', this.res)
       }
+      if (this.defht.indexOf(t) !== -1) return
       if (this.lb.indexOf(t) === -1) {
         this.lb.push(t)
         this.session.hashtags.add(t)
@@ -98,6 +105,7 @@ export default ({
       if (this.lr.indexOf(t) === -1) {
         this.lr.push(t)
         this.tri(this.lr)
+        this.$emit('update:modelValue', this.res)
       }
     }
   },
@@ -110,6 +118,7 @@ export default ({
     const lc = ref(null)
     const sel = ref('')
     const src = toRef(props, 'src')
+    const defht = ref(null)
 
     lr.value = src.value ? src.value.split(' ') : []
 
@@ -124,8 +133,8 @@ export default ({
     function initlb () {
       const x = []
       const def = $t('defhashtags')
-      const y = def ? def.split(' ') : []
-      y.forEach(t => { x.push(t)})
+      defht.value = def ? def.split(' ') : []
+      defht.value.forEach(t => { x.push(t)})
       session.hashtags.forEach(ht => { x.push(ht) })
       lb.value = tri(x)
       filtre()
@@ -137,7 +146,7 @@ export default ({
 
     return {
       styp, initlb, filtre, tri,
-      lr, lb, lc, sel,
+      lr, lb, lc, sel, defht,
       session, ui
     }
   }

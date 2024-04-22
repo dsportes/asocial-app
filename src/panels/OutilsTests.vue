@@ -110,7 +110,7 @@
     </q-card-section>
 
     <q-dialog v-model="ui.d.HTags[idc]" persistent>
-      <hash-tags src="toto titi tutu" @ok="htok" @ko="ui.fD()"/>
+      <hash-tags src="toto titi tutu" v-model="htx" okbtn @ok="htok" @ko="ui.fD()"/>
     </q-dialog>
 
     <q-dialog v-model="ui.d.OTrunning" persistent>
@@ -184,6 +184,8 @@ export default ({
       tab: 'tst',
       ps: null,
 
+      htx: '',
+
       resultat1a: '-',
       resultat2a: '-',
       resultat2b: '-',
@@ -234,7 +236,7 @@ export default ({
     },
 
     htok (r) { 
-      console.log('Hashtags: ' + r)
+      console.log('Hashtags: ' + this.htx)
       this.ui.fD() 
     },
 
@@ -404,7 +406,7 @@ export default ({
     }
     
     return {
-      idc: ui.getIdc(),
+      idc: ref(ui.getIdc()),
       styp, session, config, ui, aSt,
       bases,
       nbbases,

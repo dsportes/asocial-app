@@ -7,16 +7,10 @@
           <span v-else>{{$t('MMCnomemo')}}</span>
         </div>
         <div class="col">
-          <div v-if="apropos.ht.size" class="row q-gutter-xs fs-sm font-mono z1 items-center">
-            <div class="text-warning text-bold q-mr-xs">{{apropos.ht.size}}</div>
-            <div v-for="mc in apropos.ht.size" :key="mc" class="bg-yellow-2 text-bold text-black">
-              {{mc}}
-            </div>
-          </div>
+          <div v-if="apropos.ht.length" class="font-mono fs-md ht1">{{apropos.ht}}</div>
           <div v-else class="text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
         </div>
-        <q-btn class="col-auto text-right" size="md" color="primary" padding="none" round
-          icon="edit" @click="zoom"/>
+        <btn-cond class="col-auto text-right" round icon="zoom_in" @ok="zoom"/>
       </div>
 
       <div v-else class="column full-width">
@@ -25,24 +19,17 @@
           <span v-else>{{$t('MMCnomemo')}}</span>
         </div>
         <div class="row items-center">
-          <div v-if="apropos.ht.size" class="col row q-gutter-xs fs-sm font-mono z1">
-            <div class="text-warning text-bold q-mr-xs">{{apropos.ht.size}}</div>
-            <div v-for="ht in ht" :key="ht" 
-              class="bg-yellow-2 text-bold text-black">
-              {{ht}}
-            </div>
-          </div>
-          <div v-else class="col text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
-          <q-btn class="col-auto text-right" size="md" color="primary" padding="none" round
-            icon="edit" @click="zoom"/>
+          <div v-if="apropos.ht.length" class="font-mono fs-md ht1">{{apropos.ht}}</div>
+          <div v-else class="text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
+          <btn-cond class="col-auto text-right" round icon="zoom_in" @ok="zoom"/>
         </div>
       </div>
     </div>
 
     <q-dialog v-model="ui.d.MMedition[idc]">
-      <q-card :class="styp('md')">
+      <q-card :class="styp('sm')">
         <q-toolbar class="col-auto bg-secondary text-white">
-          <q-btn dense size="md" icon="close" color="warning" @click="ui.fD"/>
+          <btn-cond icon="close" color="warning" @ok="ui.fD"/>
           <q-toolbar-title>{{$t('MMCap', [nom])}}</q-toolbar-title>
         </q-toolbar>
         <q-toolbar inset v-if="diag" class='q-ma-sm bg-yellow-5 text-warning text-bold'>
@@ -50,21 +37,19 @@
         </q-toolbar>
 
         <q-card-section class="q-py-sm">
-          <div class="titre-lg text-italic">{{$t('MMCmc')}}</div>
-          <div>{{hashtags.join(' / ')}}</div>
+          <hash-tags v-model="nvht" :src="apropos.ht"/>
         </q-card-section>
 
         <q-card-section class="q-py-sm">
           <div class="titre-md">{{$t('MMCcom')}}</div>
-          <editeur-md mh="10rem" v-model="txt" :texte="apropos.texte" :idx="0"
+          <editeur-md mh="10rem" v-model="nvtx" :texte="apropos.tx" :idx="0"
            :editable="!diag" modetxt/>
         </q-card-section>
 
         <q-card-actions v-if="!diag" align="right" class="q-gutter-sm">
-          <q-btn flat dense padding="xs" color="primary" size="md" icon="undo" 
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn class="q-ml-md" dense padding="xs" color="primary" size="md" icon="check" 
-            :label="$t('valider')" @click="valider"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond class="q-ml-md" icon="check" cond="cEdit" :disable="!chg"
+            :label="$t('valider')" @ok="valider"/>
         </q-card-actions>
 
       </q-card>
@@ -77,8 +62,10 @@ import { ref, onMounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import EditeurMd from './EditeurMd.vue'
+import BtnCond from './BtnCond.vue'
+import HashTags from './HashTags.vue'
 import { styp, dkli, titre } from '../app/util.mjs'
-import { McMemo } from '../app/operations.mjs'
+import { McMemo } from '../app/operations4.mjs'
 
 const LARGE = 500
 
@@ -87,18 +74,22 @@ export default {
 
   props: { id: Number, idx: Number },
 
-  components: { EditeurMd },
+  components: { EditeurMd, HashTags, BtnCond },
 
   computed: { 
-    apropos () { return this.session.compti.get(this.id) },
-    memolg () { return titre(this.apropos.texte) },
-    nom () { return this.pSt.getCV(this.id).nom }
+    apropos () { 
+      const e = this.session.compti.mc.get(this.id) 
+      return e || { tx:'', ht: ''} 
+    },
+    memolg () { return titre(this.apropos.tx) },
+    nom () { return this.session.getCV(this.id).nom },
+    chg () { return this.apropos.tx !== this.nvtx || this.apropos.ht !== this.nvht }
   },
 
   data () { return {
     diag: '',
-    nvmc: null,
-    txt: '',
+    nvht: '',
+    nvtx: ''
   }},
 
   watch: {
@@ -109,19 +100,17 @@ export default {
   },
 
   methods: {
-    async zoom () { 
-      this.diag = await this.session.editDiag
-      this.nvmc = null
-      this.txt = this.memo
+    zoom () { 
+      this.diag = this.session.cEdit
+      this.nvht = ''
+      this.nvtx = ''
       this.ui.oD('MMedition', this.idc)
     },
-    changerMc (nvmc) {
-      this.nvmc = nvmc
-    },
+
     async valider () {
-      // console.log(this.txt)
-      // console.log(Motscles.editU8(this.nvmc, this.mapmc))
-      await new McMemo().run(this.id, this.nvmc || this.mc, this.txt)
+      console.log(this.nvtx)
+      console.log(this.nvht)
+      await new McMemo().run(this.id, this.nvht, this.nvtx)
       this.ui.fD()
     }
    },
@@ -134,6 +123,7 @@ export default {
 
     const root = ref(null)
     const large = ref(false)
+
     onMounted(() => {
       large.value = root.value.offsetWidth > LARGE
     })

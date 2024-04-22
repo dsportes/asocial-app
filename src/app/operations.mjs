@@ -10,24 +10,6 @@ import { crypterRSA } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 import { Operation } from './synchro.mjs'
 
-/* Changement des mots clés et mémo attachés à un contact ou groupe ********************************
-*/
-export class McMemo extends Operation {
-  constructor () { super('McMemo') }
-
-  async run (id, mc, memo) {
-    try {
-      const session = stores.session
-      const [idk, mmk] = await Avatar.genMcMemo(id, mc, memo)
-      const args = { token: session.authToken, idk, mmk }
-      this.tr(await post(this, 'McMemo', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /** Changement de la phrase secrete de connexion du compte ********************
 args.token: éléments d'authentification du compte.
 args.hps1: hash du PBKFD de la phrase secrète réduite du compte.
