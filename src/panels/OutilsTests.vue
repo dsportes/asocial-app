@@ -28,10 +28,9 @@
       -->
 
       <q-card-section v-if="tab === 'tst'" class="column items-center">
-        <q-btn class="q-ma-xs" color="primary" dense padding="xs xs"
-          :label="$t('OTt1')" @click="testEcho"/>
-        <q-btn class="q-ma-xs" color="primary" dense padding="xs xs"
-          :label="$t('OTt2')" @click="testErr"/>
+        <btn-cond class="q-ma-xs" :label="$t('OTt1')" @ok="testEcho"/>
+        <btn-cond class="q-ma-xs" :label="$t('OTt2')" @ok="testErr"/>
+        <btn-cond class="q-ma-xs" :label="$t('OTt3')" @ok="testHT"/>
       </q-card-section>
 
       <q-card-section v-if="tab === 'tst'">
@@ -110,6 +109,10 @@
         </div>
     </q-card-section>
 
+    <q-dialog v-model="ui.d.HTags[idc]" persistent>
+      <hash-tags src="toto titi tutu" @ok="htok" @ko="htko"/>
+    </q-dialog>
+
     <q-dialog v-model="ui.d.OTrunning" persistent>
       <q-card :class="styp('sm')">
         <div class="column items-center">
@@ -153,6 +156,8 @@ import { encode, decode } from '@msgpack/msgpack'
 // import CompTest from './CompTest.vue'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BtnCond from '../components/BtnCond.vue'
+import HashTags from '../components/HashTags.vue'
 import { EchoTexte, ErreurFonc, PingDB } from '../app/synchro.mjs'
 import { styp, dhcool, $t, html, afficherDiag, edvol, b64ToU8, u8ToB64, random } from '../app/util.mjs'
 import { ping } from '../app/net.mjs'
@@ -168,7 +173,7 @@ export default ({
 
   props: { },
 
-  components: { BoutonHelp /*, CompTest */ },
+  components: { HashTags, BtnCond, BoutonHelp /*, CompTest */ },
 
   computed: {
   },
@@ -222,6 +227,16 @@ export default ({
 
     async testErr () {
       await new ErreurFonc().run(this.$t('OTer'), 1)
+    },
+
+    testHT () {
+      this.ui.oD('HTags', this.idc)
+    },
+
+    htok (r) { console.log('Hashtags: ' + r) },
+    htko (r) { 
+      this.ui.fD()
+      console.log('Hashtags: undo')
     },
 
     async testEcho () {
@@ -390,6 +405,7 @@ export default ({
     }
     
     return {
+      idc: ui.getIdc(),
       styp, session, config, ui, aSt,
       bases,
       nbbases,

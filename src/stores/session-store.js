@@ -71,7 +71,9 @@ export const useSessionStore = defineStore('session', {
     - 9999 : application fermée par l'administrateur
     - autre : exception rencontrée en synchronisation
     */
-    excKO: null
+    excKO: null,
+
+    hashtags: new Set(['important', 'indesirable', 'alire', 'archive'])
   }),
 
   getters: {

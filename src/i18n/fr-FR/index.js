@@ -500,6 +500,7 @@ export default {
   OTer: 'Erreur simulée',
   OTt1: 'Test d\'écho',
   OTt2: 'Simulation d\'erreur',
+  OTt3: 'Hashtags',
   OTsb: 'Blocage',
 
   // TestPing
@@ -2101,6 +2102,12 @@ export default {
   MCChint: '3 à 12 lettres, émoji conseillé en tête',
   MCCph: 'Par exemple: Ecologie',
 
+  HTtit: 'Sélectionner des mots clés',
+  HTfil: 'Filtre',
+  HThint: '1 à 12 [a-z 0-9]',
+  HTe1: 'Entre {0} et {1} caractères',
+  HTe2: 'Minusules a-z et chiffres 0-9',
+
   SINGL10: 'Récupération des fins d\'hébergement',
   SINGL11: 'Récupération des membres disparus et des groupes devenant orphelins',
   SINGL12: 'Purge des avatars et groupes',
@@ -2108,7 +2115,7 @@ export default {
   SINGL14: 'Purges des fichiers détruits accumulés dans fpurges',
   SINGL15: 'Purges des versions ayant une dlv de plus d\'un an',
   SINGL20: 'Statistiques "mensuelles" comptas',
-  SINGL21: 'Sttatistiques "mensuelles" tickets (avec purges)',
+  SINGL21: 'Statistiques "mensuelles" tickets (avec purges)',
   
   SBf: `### Aucune mise à jour n\'est possible, mais la consultation n'est pas limitée (comme en mode avion):
 - Le compte est considéré comme **inactif** depuis la dernière connexion avant que la cette restriction ne soit enplace.
@@ -2202,6 +2209,12 @@ export default {
  
 Fermer TOUTES les fenêtres / onglets où s'exécute l'application.
 `,
+
+  BULLEhashtags: `A droite les hashtags déjà utilisés, à gauche ceux de la sélection. 
+  - Ajouter un hashtag non trouvé à droite: le saisir et <ENTREE>
+  - Ajouter un hashtag présent à droite: cliquer dessus
+  - Enlever un hashtag sélectionné à gauche: cliquer dessus
+  `,
 
   A_pa: 'L\'application "a-social"',
   A_av: 'Les vues, interprétation et saisie',
