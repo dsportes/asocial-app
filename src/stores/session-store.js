@@ -73,7 +73,7 @@ export const useSessionStore = defineStore('session', {
     */
     excKO: null,
 
-    hashtags: new Set(['important', 'indesirable', 'alire', 'archive'])
+    hashtags: new Set()
   }),
 
   getters: {

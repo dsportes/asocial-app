@@ -1,4 +1,6 @@
 export default {
+  defhashtags: 'important indesirable alire archive',
+  
   bonjour: 'Bonjour !',
   bonjour2: 'Bonjour {0} !',
 

@@ -752,7 +752,7 @@ export class Compti extends GenDoc {
     if (row.mc) for(const idx in row.mc) {
       const x = row[idx]
       const id = ID.long(parseInt(idx), this.ns)
-      const ht = x.ht ? decode(await decrypter(clek, x.ht)) : []
+      const ht = x.ht ? await decrypterStr(clek, x.ht) : ''
       const tx = x.tx ? ungzipB(await decrypter(this.clek, x.tx)) : ''
       this.mc.set(id, { ht, tx })
     }

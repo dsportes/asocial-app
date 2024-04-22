@@ -110,7 +110,7 @@
     </q-card-section>
 
     <q-dialog v-model="ui.d.HTags[idc]" persistent>
-      <hash-tags src="toto titi tutu" @ok="htok" @ko="htko"/>
+      <hash-tags src="toto titi tutu" @ok="htok" @ko="ui.fD()"/>
     </q-dialog>
 
     <q-dialog v-model="ui.d.OTrunning" persistent>
@@ -233,10 +233,9 @@ export default ({
       this.ui.oD('HTags', this.idc)
     },
 
-    htok (r) { console.log('Hashtags: ' + r) },
-    htko (r) { 
-      this.ui.fD()
-      console.log('Hashtags: undo')
+    htok (r) { 
+      console.log('Hashtags: ' + r)
+      this.ui.fD() 
     },
 
     async testEcho () {

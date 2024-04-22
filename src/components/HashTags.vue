@@ -1,7 +1,7 @@
 <template>
 <q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
-    <btn-cond color="warning" icon="undo" @ko="$emit('ok',res)"/>
+    <btn-cond color="warning" icon="undo" @ok="$emit('ko')"/>
     <q-toolbar-title class="titre-md full-width text-center">{{$t('HTtit')}}</q-toolbar-title>
     <bouton-help page="page1"/>
     <bouton-bulle idtext="hashtags"/>
@@ -12,7 +12,8 @@
     <q-input dense counter v-model="sel" class="q-mt-sm q-ml-sm" style="width:20rem"
       :label="$t('HTfil')"
       :rules="[r1,r2]"
-      @keydown.enter.prevent="val" type="text" 
+      @keydown.enter.prevent="val"
+      type="text" 
       :hint="$t('HThint')">
       <template v-slot:append>
         <span :class="sel.length === 0 ? 'disabled' : ''">
@@ -22,12 +23,12 @@
     </q-input>
     <div class="q-mt-md row font-mono fs-md justify-between">
       <q-scroll-area class="bord1" style="height:25vh; width:45%">
-        <div v-for="t in lr" :key="t" class="text-center cursor-pointer" 
-        @click="cllr(t)">{{t}}</div>
+        <div v-for="(t, i) in lr" :key="t" class="text-center cursor-pointer" 
+        @click="cllr(t, i)">{{t}}</div>
       </q-scroll-area>
       <q-scroll-area class="col-5 bord2" style="height:25vh; width:45%">
-        <div v-for="t in lc" :key="t" class="text-center cursor-pointer"
-         @click="cllc(t)">{{t}}</div>
+        <div v-for="(t, i) in lc" :key="t" class="text-center cursor-pointer"
+         @click="cllc(t, i)">{{t}}</div>
       </q-scroll-area>
     </div>
   </div>
@@ -44,7 +45,7 @@ import { styp, $t } from '../app/util.mjs'
 
 const min = 2
 const max = 12
-const reg = /[a-z][0-9]/
+const reg = /^([a-z0-9]{2,12})$/
 
 export default ({
   name: 'HashTags',
@@ -54,11 +55,11 @@ export default ({
   components: { BoutonBulle, BoutonHelp, BtnCond },
 
   computed: {
-    res () { return this.lb.join(' ')}
+    res () { return this.lr.join(' ')}
   },
 
   watch: {
-    sel (ap) { this.lc = this.filtre() }
+    sel (ap) { this.filtre() }
   },
 
   data () {
@@ -67,17 +68,37 @@ export default ({
   },
 
   methods: {
-    r2 (val) { return val.length < min || val.length > max ? this.$t('HTe1', [min, max]) : true },
-    r1 (val) { return reg.test(val) ? this.$t('HTe2') : true },
+    r2 (val) { return val.length < min || val.length > max ? this.$t('HTe1', [min, max]) : true},
+    r1 (val) { return !reg.test(val) ? this.$t('HTe2') : true},
 
     val () {
-      console.log(this.sel)
+      if (this.r1(this.sel) && this.r2(this.sel)) {
+        if (this.lr.indexOf(this.sel) === -1) {
+          this.lr.push(this.sel)
+          this.tri(this.lr)
+          this.sel = ''
+        }
+      }
     },
-    cllr (t) {
-      console.log('clickr ', t)
+
+    cllr (t, i) {
+      this.lr.splice(i, 1)
+      if (this.lc.indexOf(t) === -1) {
+        this.lc.push(t)
+        this.tri(this.lc)
+      }
+      if (this.lb.indexOf(t) === -1) {
+        this.lb.push(t)
+        this.session.hashtags.add(t)
+      }
     },
-    cllc (t) {
-      console.log('clickc ', t)
+
+    cllc (t, i) {
+      this.lc.splice(i, 1)
+      if (this.lr.indexOf(t) === -1) {
+        this.lr.push(t)
+        this.tri(this.lr)
+      }
     }
   },
 
@@ -95,16 +116,19 @@ export default ({
     function filtre () {
       const t = []
       lb.value.forEach(v => { if (!sel.value || v.indexOf(sel.value) !== -1) t.push(v)})
-      return t
+      lc.value = t
     }
 
     function tri (l) { l.sort((a, b) => { return a < b ? -1 : (a > b ? 1 : 0)}); return l }
 
     function initlb () {
       const x = []
+      const def = $t('defhashtags')
+      const y = def ? def.split(' ') : []
+      y.forEach(t => { x.push(t)})
       session.hashtags.forEach(ht => { x.push(ht) })
       lb.value = tri(x)
-      lc.value = filtre()
+      filtre()
     }
 
     initlb()
