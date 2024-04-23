@@ -2,12 +2,12 @@
   <div ref="root">
     <div :class="dkli(idx)">
       <div v-if="large" class="row full-width items-center">
-        <div class="col-6 text-italic fs-sm z1">
+        <div class="col-6 fs-sm z1">
           <span v-if="memolg">{{memolg}}</span>
-          <span v-else>{{$t('MMCnomemo')}}</span>
+          <span v-else class="text-italic">{{$t('MMCnomemo')}}</span>
         </div>
         <div class="col">
-          <div v-if="apropos.ht.length" class="font-mono fs-md ht1">{{apropos.ht}}</div>
+          <div v-if="apropos.ht.size" class="font-mono fs-sm z1">{{s2Str(apropos.ht)}}</div>
           <div v-else class="text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
         </div>
         <btn-cond class="col-auto text-right" round icon="zoom_in" @ok="zoom"/>
@@ -16,10 +16,10 @@
       <div v-else class="column full-width">
         <div class="text-italic fs-sm z1">
           <span v-if="memolg">{{memolg}}</span>
-          <span v-else>{{$t('MMCnomemo')}}</span>
+          <span v-else class="text-italic">{{$t('MMCnomemo')}}</span>
         </div>
         <div class="row items-center">
-          <div v-if="apropos.ht.length" class="font-mono fs-md ht1">{{apropos.ht}}</div>
+          <div v-if="apropos.ht.size" class="font-mono fs-md z1">{{s2Str(apropos.ht)}}</div>
           <div v-else class="text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
           <btn-cond class="col-auto text-right" round icon="zoom_in" @ok="zoom"/>
         </div>
@@ -83,12 +83,13 @@ export default {
     },
     memolg () { return titre(this.apropos.tx) },
     nom () { return this.session.getCV(this.id).nom },
-    chg () { return this.apropos.tx !== this.nvtx || this.apropos.ht !== this.nvht }
+    chg () { return this.apropos.tx !== this.nvtx || 
+      this.s2Str(this.apropos.ht) !== this.s2Str(this.nvht) }
   },
 
   data () { return {
     diag: '',
-    nvht: '',
+    nvht: null,
     nvtx: ''
   }},
 
@@ -100,17 +101,19 @@ export default {
   },
 
   methods: {
+    s2Str (s) { return Array.from(s).sort().join(' ')},
+
     zoom () { 
       this.diag = this.session.cEdit
-      this.nvht = ''
-      this.nvtx = ''
+      this.nvht = this.apropos.ht || new Set()
+      this.nvtx = this.apropos.tx || ''
       this.ui.oD('MMedition', this.idc)
     },
 
     async valider () {
       console.log(this.nvtx)
       console.log(this.nvht)
-      await new McMemo().run(this.id, this.nvht, this.nvtx)
+      await new McMemo().run(this.id, this.s2Str(this.nvht), this.nvtx)
       this.ui.fD()
     }
    },

@@ -110,7 +110,7 @@
     </q-card-section>
 
     <q-dialog v-model="ui.d.HTags[idc]" persistent>
-      <hash-tags src="toto titi tutu" v-model="htx" okbtn @ok="htok" @ko="ui.fD()"/>
+      <hash-tags :src="new Set(['toto', 'titi', 'tutu'])" v-model="htx" okbtn @ok="htok" @ko="ui.fD()"/>
     </q-dialog>
 
     <q-dialog v-model="ui.d.OTrunning" persistent>
@@ -184,7 +184,7 @@ export default ({
       tab: 'tst',
       ps: null,
 
-      htx: '',
+      htx: new Set(),
 
       resultat1a: '-',
       resultat2a: '-',
@@ -236,7 +236,8 @@ export default ({
     },
 
     htok (r) { 
-      console.log('Hashtags: ' + this.htx)
+      const l = Array.from(this.htx).sort().join(' ')
+      console.log('Hashtags: ' + l)
       this.ui.fD() 
     },
 

@@ -739,9 +739,9 @@ _data_:
 
 - `mc` : map à propos des contacts (des avatars) et des groupes _connus_ du compte,
   - _cle_: `id` court de l'avatar ou du groupe,
-  - _valeur_ : `{ ht, tx }` cryptée par la clé K du compte.
-    - `ht` : liste des hashtags attribués par le compte.
-    - `tx` : commentaire écrit par le compte (gzippé)
+  - _valeur_ : `{ ht, tx }`.
+    - `ht` : liste des hashtags séparés par un espace attribués par le compte et cryptée par la clé K du compte.
+    - `tx` : commentaire écrit par le compte gzippé et crypté par la clé K du compte.
 */
 export class Compti extends GenDoc {
 
@@ -750,10 +750,13 @@ export class Compti extends GenDoc {
     this.ns = ID.ns(this.id)
     this.mc = new Map()
     if (row.mc) for(const idx in row.mc) {
-      const x = row[idx]
+      const x = row.mc[idx]
       const id = ID.long(parseInt(idx), this.ns)
-      const ht = x.ht ? await decrypterStr(clek, x.ht) : ''
-      const tx = x.tx ? ungzipB(await decrypter(this.clek, x.tx)) : ''
+      const y = x.ht ? await decrypterStr(clek, x.ht) : ''
+      const ht = new Set(y ? y.split(' ') : [])
+      let tx = ''
+      const b = x.tx ? await decrypter(clek, x.tx) : null
+      tx = x.tx ? ungzipB(b) : ''
       this.mc.set(id, { ht, tx })
     }
   }

@@ -837,17 +837,23 @@ export class NouvelAvatar extends Operation {
   }
 }
 
-/* Changement des mots clés et mémo attachés à un contact ou groupe ********************************
+/* OP_McMemo Changement des mots clés et mémo attachés à un contact ou groupe ********************************
+- token: éléments d'authentification du compte.
+- id: de l'avatar ou du groupe
+- htK : hashtags séparés par un espace et crypté par la clé K
+- txK : texte du mémo gzippé et crypté par la clé K
 */
 export class McMemo extends Operation {
   constructor () { super('McMemo') }
 
-  async run (id, mc, memo) {
+  async run (id, ht, tx) {
     try {
       const session = stores.session
-      const [idk, mmk] = await Avatar.genMcMemo(id, mc, memo)
-      const args = { token: session.authToken, idk, mmk }
-      this.tr(await post(this, 'McMemo', args))
+      const x = tx ? gzipB(tx) : null
+      const txK = tx ? await crypter(session.clek, x) : null
+      const htK = ht ? await crypter(session.clek, ht) : null
+      const args = { token: session.authToken, id, txK, htK }
+      await post(this, 'McMemo', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

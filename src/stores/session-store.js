@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { encode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
+import { useI18n } from 'vue-i18n'
 import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
@@ -54,6 +55,7 @@ export const useSessionStore = defineStore('session', {
     partition: null,
     compte: null,
     compta: null,
+    compti: null,
     espace: null,
     synthese: null, // Dernière synthèse demandée pour admin - de leur espace pour les comptes
 
@@ -81,6 +83,8 @@ export const useSessionStore = defineStore('session', {
     filtre (state) { return stores.filtre },
     pSt: (state) => stores.people,
     ui: (state) => stores.ui,
+
+    locale () { return useI18n().locale },
 
     idComptable (state) { return ID.duComptable(state.ns)},
     
@@ -195,6 +199,15 @@ export const useSessionStore = defineStore('session', {
         const code = state.estComptable ? ' [' + state.compte.mcode.get(n) + ']': ''
         return '#' + ID.court(id) + code
       }
+    },
+
+    defHT (state) {
+      const s = new Set()
+      state.locale
+      const def = $t('defhashtags')
+      const x = def ? def.split(' ') : []
+      x.forEach(t => { s.add(t)})
+      return s
     },
 
     // PageAdmin ***************************************************    
@@ -494,7 +507,9 @@ export const useSessionStore = defineStore('session', {
       this.mnotifP = mnotifP
       this.notifP = this.compte.idp ? mnotifP.get(n) : null
       if (this.notifP && this.notifP.dh > this.dhvu) this.alire = true
-    }
+    },
+
+    setHT (s) { if (s && s.size) s.forEach(t => { if (!this.defHT.has(t)) this.hashtags.add(t) }) }
 
   }
 })

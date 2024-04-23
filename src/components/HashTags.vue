@@ -5,7 +5,7 @@
     <q-toolbar-title class="titre-md full-width text-center">{{$t('HTtit')}}</q-toolbar-title>
     <bouton-help page="page1"/>
     <bouton-bulle idtext="hashtags"/>
-    <btn-cond icon="check" :disable="src===res" @ok="$emit('ok',res)"/>
+    <btn-cond v-if="okbtn" icon="check" :disable="!chg" @ok="$emit('ok',sr)"/>
   </q-toolbar>
 
   <div class="q-mb-md">
@@ -41,7 +41,7 @@ import stores from '../stores/stores.mjs'
 import BtnCond from './BtnCond.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
-import { styp, $t } from '../app/util.mjs'
+import { styp } from '../app/util.mjs'
 
 const min = 2
 const max = 12
@@ -51,15 +51,18 @@ export default ({
   name: 'HashTags',
 
   props: { 
-    src: String, // liste d'origine, la liste resultat est v-model
+    src: Object, // set d'origine, le set resultat est v-model
     okbtn: Boolean // true s'il faut afficher le bouton ok
   },
+
   components: { BoutonBulle, BoutonHelp, BtnCond },
 
   emits: ['update:modelValue', 'ok', 'ko'],
 
   computed: {
-    res () { return this.lr.join(' ')}
+    lr () { return Array.from(this.sr).sort()},
+    lc () { return Array.from(this.sc).sort()},
+    chg () { return Array.from(this.src).sort().join(' ') !== this.lr.join(' ') }
   },
 
   watch: {
@@ -77,35 +80,29 @@ export default ({
 
     val () {
       if (this.r1(this.sel) && this.r2(this.sel)) {
-        if (this.lr.indexOf(this.sel) === -1) {
-          this.lr.push(this.sel)
-          this.tri(this.lr)
+        if (!this.sr.has(this.sel)) {
+          this.sr.add(this.sel)
           this.sel = ''
-          this.$emit('update:modelValue', this.res)
+          this.$emit('update:modelValue', this.sr)
         }
       }
     },
 
-    cllr (t, i) {
-      this.lr.splice(i, 1)
-      if (this.lc.indexOf(t) === -1) {
-        this.lc.push(t)
-        this.tri(this.lc)
-        this.$emit('update:modelValue', this.res)
+    cllr (t) {
+      this.sr.delete(t)
+      if (!this.sc.has(t)) this.sc.add(t)
+      if (!this.session.defHT.has(t) && !this.sb.has(t)) {
+        this.sb.add(t)
+        this.session.setHT(new Set([t]))
       }
-      if (this.defht.indexOf(t) !== -1) return
-      if (this.lb.indexOf(t) === -1) {
-        this.lb.push(t)
-        this.session.hashtags.add(t)
-      }
+      this.$emit('update:modelValue', this.sr)
     },
 
-    cllc (t, i) {
-      this.lc.splice(i, 1)
-      if (this.lr.indexOf(t) === -1) {
-        this.lr.push(t)
-        this.tri(this.lr)
-        this.$emit('update:modelValue', this.res)
+    cllc (t) {
+      this.sc.delete(t)
+      if (!this.sr.has(t)) {
+        this.sr.add(t)
+        this.$emit('update:modelValue', this.sr)
       }
     }
   },
@@ -113,40 +110,29 @@ export default ({
   setup (props) {
     const session = stores.session
     const ui = stores.ui
-    const lr = ref([])
-    const lb = ref([])
-    const lc = ref(null)
+    const sb = ref(null)
+    const sc = ref(null)
     const sel = ref('')
     const src = toRef(props, 'src')
-    const defht = ref(null)
-
-    lr.value = src.value ? src.value.split(' ') : []
+    const sr = ref(new Set())
+    src.value.forEach(t => { sr.value.add(t)})
 
     function filtre () {
-      const t = []
-      lb.value.forEach(v => { if (!sel.value || v.indexOf(sel.value) !== -1) t.push(v)})
-      lc.value = t
+      const s = new Set()
+      sb.value.forEach(v => { if (!sel.value || v.indexOf(sel.value) !== -1) s.add(v)})
+      sc.value = s
     }
 
-    function tri (l) { l.sort((a, b) => { return a < b ? -1 : (a > b ? 1 : 0)}); return l }
+    const x = new Set()
+    session.defHT.forEach(t => { x.add(t) })
+    session.hashtags.forEach(t => { x.add(t) })
+    sb.value = x
 
-    function initlb () {
-      const x = []
-      const def = $t('defhashtags')
-      defht.value = def ? def.split(' ') : []
-      defht.value.forEach(t => { x.push(t)})
-      session.hashtags.forEach(ht => { x.push(ht) })
-      lb.value = tri(x)
-      filtre()
-    }
-
-    initlb()
-
-    tri(lr.value)
+    filtre()
 
     return {
-      styp, initlb, filtre, tri,
-      lr, lb, lc, sel, defht,
+      styp, filtre,
+      sr, sb, sc, sel,
       session, ui
     }
   }
