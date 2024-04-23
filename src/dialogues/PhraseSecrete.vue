@@ -3,7 +3,7 @@
   transition-show="slide-down" transition-hide="fade">
   <q-card :class="styp('sm')" style="position:relative; top:2.5rem">
     <q-toolbar class="bg-secondary text-white">
-      <q-btn dense size="md" color="warning" icon="close" @click="ko"/>
+      <btn-cond color="warning" icon="close" @ok="ko"/>
       <q-toolbar-title class="titre-lg">
         {{$t('PSm' + phase)}}
       </q-toolbar-title>
@@ -25,16 +25,16 @@
         @keydown.enter.prevent="ok2" 
         :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">
         <template v-slot:append>
-          <q-btn :icon="isPwd ? 'visibility_off' : 'visibility'" size="md" padding="none" round @click="isPwd = !isPwd"/>
-          <q-btn icon="cancel" size="md" padding="none" round :disable="ligne1.length === 0" @click="forceInput('')"/>
+          <btn-cond :icon="isPwd ? 'visibility_off' : 'visibility'" round @ok="isPwd = !isPwd"/>
+          <btn-cond icon="cancel" round :disable="ligne1.length === 0" @ok="forceInput('')"/>
           <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
         </template>
       </q-input>
       <div v-else class="row items-center">
         <div class="col q-mr-sm font-mono text-bold fs-md height-2 bord">{{secligne1}}</div>
-        <q-btn class="col-auto" :icon="isPwd ? 'visibility_off' : 'visibility'" size="md" padding="none" round @click="isPwd = !isPwd"/>
-        <q-btn icon="cancel" size="md" padding="none" round 
-          :disable="ligne1.length === 0" @click="forceInput('')"/>
+        <btn-cond class="col-auto" :icon="isPwd ? 'visibility_off' : 'visibility'" round @ok="isPwd = !isPwd"/>
+        <btn-cond icon="cancel" round 
+          :disable="ligne1.length === 0" @ok="forceInput('')"/>
       </div>
 
       <div class="row justify-between items-center q-my-md">
@@ -44,12 +44,10 @@
         </div>
         <div v-else></div>
         <div>
-          <q-btn class="q-mr-sm" color="primary" flat :label="$t('PSren')" 
-            size="md" @click="ko" padding="xs md"/>
-          <q-btn color="warning" :label="labelVal()" size="md" :icon-right="iconValider"
-            padding="xs md" 
+          <btn-cond class="q-mr-sm" flat :label="$t('PSren')" @ok="ko"/>
+          <btn-cond color="warning" :label="labelVal()" :icon-right="iconValider"
             :disable="!ligne1 || ligne1.length < lgph || !orgL" 
-            @click="ok" />
+            @ok="ok" />
         </div>
       </div>
 
@@ -74,6 +72,7 @@ import { ref, watch, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import { Phrase } from '../app/modele.mjs'
+import BtnCond from '../components/BtnCond.vue'
 import { $t, styp, afficherDiag } from '../app/util.mjs'
 
 const lgph = 24
@@ -83,6 +82,8 @@ export default ({
 
   props: {
   },
+  
+  components: { BtnCond },
 
   computed: {
     secligne1 () { return this.isPwd ? ''.padStart(this.ligne1.length, '*') : this.ligne1 }

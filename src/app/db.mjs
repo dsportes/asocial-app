@@ -105,7 +105,9 @@ class IDB {
     idb.db = null
   }
 
-  constructor () { this.idb = null }
+  constructor () { 
+    this.truc = 'machin ' + Date.now()
+  }
 
   /** MODE AVION : lecture boot data { id, clek } (crypté par le PBKFD de la phrase secrète) 
   et enregistrement en session  */

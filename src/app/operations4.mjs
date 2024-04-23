@@ -4,6 +4,7 @@ import stores from '../stores/stores.mjs'
 import { Operation } from './synchro.mjs'
 import { random, gzipB } from './util.mjs'
 import { Cles, d14, ID } from './api.mjs'
+import { idb } from '../app/db.mjs'
 import { post } from './net.mjs'
 import { RegCles, compile, CV, Ticket } from './modele.mjs'
 import { getPub } from './synchro.mjs'
@@ -854,6 +855,30 @@ export class McMemo extends Operation {
       const htK = ht ? await crypter(session.clek, ht) : null
       const args = { token: session.authToken, id, txK, htK }
       await post(this, 'McMemo', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_ChangementPS: 'Changement de la phrase secrete de connexion du compte' ********************
+- token: éléments d'authentification du compte.
+- hps1: hash du PBKFD de la phrase secrète réduite du compte.
+- hXC: hash du PBKFD de la phrase secrète complète.
+- cleKXC: clé K cryptée par la phrase secrète
+*/
+export class ChangementPS extends Operation {
+  constructor () { super('ChangementPS') }
+
+  async run (ps) {
+    try {
+      const session = stores.session
+      const cleKXC = await crypter(ps.pcb, session.clek)
+      const args = { token: session.authToken, hps1: ps.hps1, hXC: ps.hpsc, cleKXC }
+      await post(this, 'ChangementPS', args)
+      session.chgps(ps)
+      if (session.synchro) await idb.storeBoot()
       this.finOK()
     } catch (e) {
       await this.finKO(e)

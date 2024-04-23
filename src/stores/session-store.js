@@ -311,17 +311,12 @@ export const useSessionStore = defineStore('session', {
 
     setNs (ns) { this.ns = ns; RegCles.ns = ns },
 
-    /* Initialise une session depuis une phrase secrète
-    session.mode et org ont été enregistrés par PageLogin (connexion ou création compte)
-    */
-    async initSession(phrase) {
-      this.phrase = phrase
-
+    setAuthToken (phrase, sessionId) {
       const token = { }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
         if (stores.config.hasWS) {
-          this.sessionId = intToB64(rnd6())
+          this.sessionId = sessionId || intToB64(rnd6())
           token.sessionId = this.sessionId
         }
         token.hXR = phrase ? phrase.hps1 : null
@@ -329,8 +324,16 @@ export const useSessionStore = defineStore('session', {
       }
       token.org = this.org      
       this.authToken = u8ToB64(new Uint8Array(encode(token)), true)
-
       this.lsk = '$asocial$-' + phrase.hps1
+    },
+
+    /* Initialise une session depuis une phrase secrète
+    session.mode et org ont été enregistrés par PageLogin (connexion ou création compte)
+    */
+    async initSession(phrase, sessionId) {
+      this.phrase = phrase
+      this.setAuthToken(phrase, sessionId)
+
       this.nombase = localStorage.getItem(this.lsk) || ''
       
       this.auj = AMJ.amjUtc()
@@ -352,6 +355,18 @@ export const useSessionStore = defineStore('session', {
 
       RegCles.reset() 
       stores.reset(true) // reset SAUF session
+    },
+
+    chgps (phrase) {
+      /*
+      Suppression de l'ancienne clé lsk donnant le nom de la base du compte
+      Recalcul de la nouvelle clé lsk donnant le même nom qu'avant
+      Changement du token d'accès
+      */
+      localStorage.removeItem(this.lsk)
+      this.phrase = phrase
+      this.setAuthToken(phrase, this.sessionId)
+      localStorage.setItem(this.lsk, this.nombase)
     },
 
     async setIdClek (id, cleKXC, clek) {
@@ -431,25 +446,6 @@ export const useSessionStore = defineStore('session', {
 
     setMembreId (id) { this.membreId = id },
 
-    chgps (phrase) {
-      /*
-      Suppression de l'ancienne clé lsk donnant le nom de la base du compte
-      Recalcul de la nouvelle clé lsk donnant le même nom qu'avant
-      Changement du token d'accès
-      */
-      localStorage.removeItem(this.lsk)
-      this.phrase = phrase
-      this.lsk = '$asocial$-' + phrase.hps1
-      localStorage.setItem(this.lsk, this.nombase)
-      const token = {
-        sessionId: this.sessionId,
-        shax: phrase.shax,
-        hps1: phrase.hps1
-      }
-      const x = new Uint8Array(encode(token))
-      this.authToken = u8ToB64(new Uint8Array(x), true)
-    },
-    
     opCount () {
       const self = this
       if (this.opTimer) clearTimeout(this.opTimer)

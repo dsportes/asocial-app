@@ -99,8 +99,7 @@
 <script>
 
 import stores from '../stores/stores.mjs'
-import { ChangementPS } from '../app/operations.mjs'
-import { NouvelAvatar } from '../app/operations4.mjs'
+import { NouvelAvatar, ChangementPS } from '../app/operations4.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
 import { ExistePhrase } from '../app/synchro.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -111,7 +110,7 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { styp, afficherDiag, trapex } from '../app/util.mjs'
-import { isAppExc, ID } from '../app/api.mjs'
+import { isAppExc, ID, d14 } from '../app/api.mjs'
 import { GetCompta, GetPartition } from '../app/synchro.mjs'
 
 export default {
@@ -264,8 +263,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.q-btn
-  padding: 2px 4px !important
 .bord
   border-top: 1px solid $grey-5
   border-bottom: 1px solid $grey-5

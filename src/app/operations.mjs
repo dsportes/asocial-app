@@ -10,31 +10,6 @@ import { crypterRSA } from './webcrypto.mjs'
 import { commitRows, IDBbuffer } from './db.mjs'
 import { Operation } from './synchro.mjs'
 
-/** Changement de la phrase secrete de connexion du compte ********************
-args.token: éléments d'authentification du compte.
-args.hps1: hash du PBKFD de la phrase secrète réduite du compte.
-args.hpsc: hash du PBKFD de la phrase secrète complète.
-args.kx: clé K cryptée par la phrase secrète
-*/
-export class ChangementPS extends Operation {
-  constructor () { super('ChangementPS') }
-
-  async run (ps) {
-    try {
-      const session = stores.session
-      const hps1 = (session.ns * d14) + ps.hps1
-      const kx = await crypter(ps.pcb, session.clek)
-      const args = { token: session.authToken, hps1: hps1, hpsc: ps.hpsc, kx }
-      this.tr(await post(this, 'ChangementPS', args))
-      session.chgps(ps)
-      if (session.synchro) commitRows(new IDBbuffer(), true)
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_MuterCompte: 'Mutation dy type d\'un compte'
 POST:
 - `token` : éléments d'authentification du compte.
