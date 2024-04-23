@@ -27,18 +27,17 @@
         <q-tooltip>{{$t('MLAcptz', session.compte.nbj, {count: session.compte.nbj})}}</q-tooltip>
       </q-avatar>
 
-      <q-btn v-if="session.ok && !session.mini && (session.ral !== 3)"
-        dense size="md" icon="menu" round padding="none">
+      <btn-cond v-if="session.ok && !session.mini && (session.ral !== 3)"
+        icon="menu" round color="none">
         <q-menu v-model="ui.menug" max-height="90vh" class="sombre1 text-white">
           <page-menu menu/>
         </q-menu>
-      </q-btn>
+      </btn-cond>
 
-      <q-btn :disable="!aHome" flat icon="home" dense size="md" padding="none"
-        :color="aHome ? 'green-5' : 'grey'" @click="gotoAccueilLogin()"/>
+      <btn-cond :disable="!aHome" flat icon="home"
+        :color="aHome ? 'green-5' : 'grey'" @ok="gotoAccueilLogin()"/>
 
-      <q-btn v-if="ui.pageback" icon="arrow_back" dense size="md" round padding="none"
-        @click="ui.gotoBack()"/>
+      <btn-cond v-if="ui.pageback" icon="arrow_back" round @ok="ui.gotoBack()"/>
 
       <q-toolbar-title>
         <div style="position:relative">
@@ -55,11 +54,10 @@
       <bouton-help :page="'pg_' + ui.page"/>
 
       <!-- Fichiers avion -->
-      <q-btn v-if="session.ok" :disable="session.incognito" 
-        dense size="md" icon="save" round padding="none"
-        @click="pageFicavion">
+      <btn-cond v-if="session.ok" :disable="session.incognito" 
+        icon="save" round color="none" @ok="pageFicavion">
         <q-tooltip>{{$t('MLAfav')}}</q-tooltip>
-      </q-btn>
+      </btn-cond>
 
       <!-- Presse papier -->
       <q-btn v-if="session.ok" dense size="md" 
@@ -112,10 +110,9 @@
       <bouton-langue style="position:relative;top:2px;"/>
 
       <!-- Dark ou clair -->
-      <q-btn dense size="md" icon="contrast" padding="none" round 
-        @click="$q.dark.toggle()">
+      <btn-cond icon="contrast" round @ok="$q.dark.toggle()" color="none">
         <q-tooltip>{{$t('clairfonce')}}</q-tooltip>
-      </q-btn>
+      </btn-cond>
 
       <!-- Outils et tests -->
       <q-btn dense size="md" icon="settings" padding="none" round 

@@ -31,6 +31,8 @@ export const useGroupeStore = defineStore('groupe', {
   }),
 
   getters: {
+    session (state) { return stores.session },
+
     // groupe courant
     egrC (state) { 
       const id = stores.session.groupeId
@@ -387,27 +389,22 @@ export const useGroupeStore = defineStore('groupe', {
 
     tousChats: (state) => {
       const f = stores.filtre.filtre.chats
-      const aSt = stores.avatar
+      const ci = state.session.compti
       const r = []
       if (!f.tous) return r
       const flimj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
-      const fsetp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
-      const fsetn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
+      const fsetp = f.mcp && f.mcp.size ? f.mcp : null
+      const fsetn = f.mcn && f.mcn.size ? f.mcn : null
       for (const [,elt] of state.map) {
         const c = elt.chatgr
-        const na = elt.groupe.na
+        const cv = state.session.getCV(c.idE)
         if (c) {
           if (f.rac === 2) continue
           if (flimj && c.dh < flimj) continue
-          if (f.nom && !na.nom.startsWith(f.nom)) continue
+          if (f.nom && !cv.nom.startsWith(f.nom)) continue
           if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
-          if (fsetp.size || fsetn.size) {
-            const mcmemo = aSt.compte.mcmemo(na.id)
-            if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
-            const s = new Set(mcmemo.mc)
-            if (fsetp.size && difference(fsetp, s).size) continue
-            if (fsetn.size && intersection(fsetn, s).size) continue
-          }
+          if (fsetp && !ci.aHT(c.idE, fsetp)) continue
+          if (fsetn && ci.aHT(c.idE, fsetn)) continue
           r.push(c)
         }
       }

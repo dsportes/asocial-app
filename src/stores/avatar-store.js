@@ -328,9 +328,10 @@ export const useAvatarStore = defineStore('avatar', {
 
     tousChats: (state) => {
       const f = state.filtre.filtre.chats
+      const ci = state.session.compti
       const flimj = f.nbj ? (Date.now() - (f.nbj * 86400000)) : 0
-      const fsetp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
-      const fsetn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
+      const fsetp = f.mcp && f.mcp.size ? f.mcp : null
+      const fsetn = f.mcn && f.mcn.size ? f.mcn : null
       const r = []
       for (const [,elt] of state.map) {
         if (!f.tous && state.session.avatarId !== elt.avatar.id) continue
@@ -340,15 +341,13 @@ export const useAvatarStore = defineStore('avatar', {
             if (f.rac === 2 && stI !== 0) continue
           }
           if (flimj && c.dh < flimj) continue
-          if (f.nom && !c.naE.nom.startsWith(f.nom)) continue
-          if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
-          if (fsetp.size || fsetn.size) {
-            const mcmemo = state.compte.mcmemo(c.naE.id)
-            if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
-            const s = new Set(mcmemo.mc)
-            if (fsetp.size && difference(fsetp, s).size) continue
-            if (fsetn.size && intersection(fsetn, s).size) continue          
+          if (f.nom) {
+            const cv = state.session.getCV(c.idE)
+            if (!cv.nom.startsWith(f.nom)) continue
           }
+          if (f.txt && (!c.txt || c.txt.indexOf(f.txt) === -1)) continue
+          if (fsetp && !ci.aHT(c.idE, fsetp)) continue
+          if (fsetn && ci.aHT(c.idE, fsetn)) continue
           r.push(c)
         }
       }

@@ -68,7 +68,7 @@ export default {
   contient: 'contient',
   debute: 'débute par',
   langue: 'Choix de la langue',
-  clairfonce: 'Choix style clair / foncé',
+  clairfonce: 'Mode clair / foncé',
   supprime: 'SUPPRIMÉ',
   plus: 'Plus ...',
   plus2: 'Plus',

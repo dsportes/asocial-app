@@ -11,6 +11,7 @@
     :round="round"
     @click.stop="ok">
     <q-tooltip v-if="tp || diag" class="bg-white text-primary">{{diag || tp}}</q-tooltip>
+    <slot />
   </q-btn>
   <q-btn v-else
     :icon="diag ? 'error' : icon"
@@ -24,6 +25,7 @@
     :round="round"
     @click="ok">
     <q-tooltip v-if="tp || diag" class="bg-white text-primary">{{diag || tp}}</q-tooltip>
+    <slot />
   </q-btn>
 </template>
 

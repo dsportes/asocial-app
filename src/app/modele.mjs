@@ -761,12 +761,13 @@ export class Compti extends GenDoc {
     }
   }
 
-  /*
-  get (id) {
+  aHT (id, s) {
     const x = this.mc.get(id)
-    return x ||  { ht: new Set(), texte: '', fake: true }
+    if (!x || !s || !s.size) return false
+    for(const t of s) if (x.ht.has(t)) return true
+    return false
   }
-  */
+  
 }
 
 /** Avatar *********************************************************
