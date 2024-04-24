@@ -14,8 +14,8 @@
           <span v-if="del && !ID.estComptable(id)" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
           <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
         </div>
-        <btn-cond class="col-auto" v-if="!estAvc && !estGroupe && !det" 
-          icon="open_in_new" :label="$t('page')" stop @ok="ouvrirdetails"/>
+        <btn-cond class="col-auto" v-if="!estAvc && !estGroupe && !det" size="sm"
+          icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
       </div>
       <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
       <mc-memo v-if="!ID.estComptable(id)" :id="id" :idx="idx"/>     
@@ -41,7 +41,7 @@ import stores from '../stores/stores.mjs'
 import ApercuCv from '../dialogues/ApercuCv.vue'
 import BtnCond from './BtnCond.vue'
 import { dkli, titre } from '../app/util.mjs'
-import { NouveauMembre } from '../app/operations4.mjs'
+// import { NouveauMembre } from '../app/operations4.mjs'
 import { ID } from '../app/api.mjs'
 
 // Niveau 4
@@ -84,8 +84,8 @@ export default {
       this.ui.oD('detailspeople')
     },
     async select () {
-      this.session.setPeopleId(this.id)
-      await new NouveauMembre().run()
+      this.ui.selectContact(this.id)
+      // await new NouveauMembre().run()
     }
   },
 

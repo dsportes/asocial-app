@@ -42,6 +42,7 @@ export const useUiStore = defineStore('ui', {
     notifc: null, // notification courante en cours d'édition
 
     egrplus: false, // un contact peut-être ajouté au groupe courant
+    selContact: 0, // contact sélectionné
 
     dernierfichiercree: '',
 
@@ -308,6 +309,12 @@ export const useUiStore = defineStore('ui', {
       if (this.filtreMsgTo) clearTimeout(this.filtreMsgTo)
       this.filtreMsg = hms(new Date(), true) + ' / ' + (msg || $t('items', n, { count: n }))
       this.filtreMsgTo = setTimeout(() => { this.filtreMsg = null }, 2000)
+    },
+
+    selectContact (id) {
+      this.selContact = id
+      this.egrplus = false
+      // TODO revenir au dialogue de nouveau contact
     }
   }
 })

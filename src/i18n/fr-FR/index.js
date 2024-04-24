@@ -178,8 +178,8 @@ export default {
   FLAGS11: 'a pu écrire des notes',
   
   roledel0: '(ignorer)',
-  roledelC: 'Compte de ma partition',
-  roledelD: 'Délégué de ma partition',
+  roledel1: 'Compte de ma partition',
+  roledel2: 'Délégué de ma partition',
 
   enalerte: 'En alerte',
   ensursis: 'En sursis',
@@ -821,7 +821,7 @@ export default {
   FIstmb: 'Ayant un statut ... {0}',
   FIambno: 'Accès aux notes / membres...',
   FIrac: 'Chats actifs / raccrochés...',
-  FItribu: 'Même tranche de quotas ... {0}',
+  FIpart: 'Comptes de ma partition ... {0}',
   FIsansheb: 'Groupes sans hébergement',
   FIexcesvol: 'Groupes en excédent de volume',
   FItri: 'Tier par ...',

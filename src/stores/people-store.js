@@ -129,6 +129,7 @@ export const usePeopleStore = defineStore('people', {
     // PagePeople ********************************************
     peLpF: (state) => {
       const ci = state.session.compti
+      const part = state.session.partition
       const f = stores.filtre.filtre.people
       const fsetp = f.mcp && f.mcp.size ? f.mcp : null
       const fsetn = f.mcn && f.mcn.size ? f.mcn : null
@@ -136,8 +137,11 @@ export const usePeopleStore = defineStore('people', {
       for (const [id, p] of state.map) {
         const cv = state.getCV(id)
         if (f.nom && !cv.nom.startsWith(f.nom)) continue
-        if (f.roletr && (p.sp < f.roletr)) continue
-        if (f.avecgr && (!p.groupes.size)) continue
+        if (f.rolepart && part) {
+          if (!part.estCpt(id)) continue
+          if (f.rolepart === 2 && !part.estDel(id)) continue
+        } 
+        if (f.avecgr && (!p.sgr.size)) continue
         if (fsetp && !ci.aHT(id, fsetp)) continue
         if (fsetn && ci.aHT(id, fsetn)) continue
         r.push({ id, cv, nom: cv.nom, sgr: p.sgr, sch: p.sch })

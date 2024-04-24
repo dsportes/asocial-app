@@ -48,7 +48,7 @@ let audioContext = null
 export async function beep() {
   const config = stores.config
   if (config.silence) return
-  if (!audiocontext) audioContext = new AudioContext()
+  if (!audioContext) audioContext = new AudioContext()
   const b64 = config.beep.substring(config.beep.indexOf(',') + 1)
   const beep = toByteArray(b64)
 

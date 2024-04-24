@@ -255,7 +255,8 @@
 import { ref, reactive } from 'vue'
 import stores from '../stores/stores.mjs'
 import { getNg, Groupe } from '../app/modele.mjs'
-import { ModeSimple, HebGroupe, NouveauMembre } from '../app/operations.mjs'
+import { ModeSimple, HebGroupe } from '../app/operations.mjs'
+import { NouveauMembre } from '../app/operations4.mjs'
 import { styp, edvol, dhcool, dkli, aaaammjj } from '../app/util.mjs'
 import { UNITEN, UNITEV, AMJ } from '../app/api.mjs'
 

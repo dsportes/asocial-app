@@ -523,6 +523,8 @@ export class Partition extends GenDoc {
     const e = this.mcpt[id]
     return e && e.del
   }
+
+  estCpt (id) { return this.mcpt[id] !== undefined }
 }
 
 /** Compte **********************************************************************

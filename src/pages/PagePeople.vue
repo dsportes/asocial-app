@@ -31,7 +31,7 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
 import { GetPartition } from '../app/synchro.mjs'
-import { beep } from '../app/util.mjs'
+// import { beep } from '../app/util.mjs'
 
 export default {
   name: 'PagePeople',
@@ -61,7 +61,7 @@ export default {
     const session = stores.session
 
     async function reload () {
-      await beep()
+      // await beep()
       if (session.accesNet && !session.estA) await new GetPartition().run(session.compte.idp)
     }
 
