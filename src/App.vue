@@ -194,10 +194,10 @@
         </div>
         <div v-if="ui.page === 'people'" class="column justify-start">
           <filtre-nom nom="people" prop='nom' :idx="0"/>
-          <filtre-tribu nom="people" :idx="1"/>
-          <filtre-avecgr nom="people" :idx="0"/>
-          <filtre-mc nom="people" attr="mcp" :idx="1"/>
-          <filtre-mc nom="people" attr="mcn" :idx="0"/>
+          <filtre-avecgr nom="people" :idx="1"/>
+          <filtre-mc nom="people" attr="mcp" :idx="0"/>
+          <filtre-mc nom="people" attr="mcn" :idx="1"/>
+          <filtre-del v-if="session.compte.idp" nom="people" :idx="0"/>
         </div>
         <div v-if="ui.page === 'groupes'" class="column justify-start">
           <filtre-nom nom="groupes" prop='ngr' :idx="0"/>
@@ -417,7 +417,7 @@ import { useI18n } from 'vue-i18n'
 import stores from './stores/stores.mjs'
 import { AMJ } from './app/api.mjs'
 
-import { set$t, hms, dkli, styp, beep } from './app/util.mjs'
+import { set$t, hms, dkli, styp } from './app/util.mjs'
 import { reconnexion, deconnexion } from './app/synchro.mjs'
 import { CV } from './app/modele.mjs'
 import { SetDhvuCompta } from './app/operations4.mjs'
@@ -432,7 +432,7 @@ import FiltreNom from './components/FiltreNom.vue'
 import FiltreMc from './components/FiltreMc.vue'
 import FiltreNbj from './components/FiltreNbj.vue'
 import FiltreAvecgr from './components/FiltreAvecgr.vue'
-import FiltreTribu from './components/FiltreTribu.vue'
+import FiltreDel from './components/FiltreDel.vue'
 import FiltreAvecsp from './components/FiltreAvecsp.vue'
 import FiltreTri from './components/FiltreTri.vue'
 import FiltreNotif from './components/FiltreNotif.vue'
@@ -497,7 +497,7 @@ export default {
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
     PageCompta, PageEspace, PagePartition, PagePeople, PanelPeople, PanelMembre,
     FiltreRac, FiltreNom, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
-    FiltreAvecgr, FiltreAvecsp, FiltreTribu, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
+    FiltreAvecgr, FiltreAvecsp, FiltreDel, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
     PressePapier, PhraseSecrete
    },

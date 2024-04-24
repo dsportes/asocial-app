@@ -370,21 +370,6 @@ export const useAvatarStore = defineStore('avatar', {
       }
       e.avatar = avatar
       this.nSt.setAvatar(avatar.id)
-      const c = this.session.compte
-      if (avatar.id === this.session.compteId && !c.priv) {
-        c.priv = RegCc.getPriv(avatar.id)
-        setTimeout(async () => { 
-          if (!c.clep && c.clePKX) {
-            c.clep = RegCles.set(await decrypterRSA(c.priv, c.clePKX))
-            delete c.clePX
-          }
-          if (c.notifX) {
-            c.notif = await Notification.decrypt(c.notifX, c.clep)
-            delete c.notifX
-          }
-          await this.session.setNotifP()
-        }, 1)
-      }
     },
 
     delAvatar (id) {

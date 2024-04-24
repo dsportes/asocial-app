@@ -177,9 +177,9 @@ export default {
   FLAGS10: 'a pu accéder aux membres',
   FLAGS11: 'a pu écrire des notes',
   
-  roletribu0: '(ignorer)',
-  roletribuC: 'Compte de ma tranche de quotas',
-  roletribuS: 'Sponsor de ma tranche de quotas',
+  roledel0: '(ignorer)',
+  roledelC: 'Compte de ma partition',
+  roledelD: 'Délégué de ma partition',
 
   enalerte: 'En alerte',
   ensursis: 'En sursis',

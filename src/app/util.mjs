@@ -7,8 +7,6 @@ import { AMJ, appexc, d10, idTkToL6 } from './api.mjs'
 
 let pako
 
-const audioContext = new AudioContext()
-
 export function setRequiredModules (m) { 
   pako = m.pako
 }
@@ -44,9 +42,13 @@ export function sty () {
 const decoder = new TextDecoder('utf-8')
 const encoder = new TextEncoder('utf-8')
 
+
+let audioContext = null
+
 export async function beep() {
   const config = stores.config
   if (config.silence) return
+  if (!audiocontext) audioContext = new AudioContext()
   const b64 = config.beep.substring(config.beep.indexOf(',') + 1)
   const beep = toByteArray(b64)
 

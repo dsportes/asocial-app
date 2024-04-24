@@ -119,7 +119,9 @@ export default ({
 
     function filtre () {
       const s = new Set()
-      sb.value.forEach(v => { if (!sel.value || v.indexOf(sel.value) !== -1) s.add(v)})
+      sb.value.forEach(v => { 
+        if ((!sel.value || v.indexOf(sel.value) !== -1) && !sr.value.has(v)) s.add(v)
+      })
       sc.value = s
     }
 

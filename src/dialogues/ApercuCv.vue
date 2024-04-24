@@ -2,7 +2,7 @@
   <q-card :class="styp('sm') + 'column'">
     <q-toolbar class="col-auto bg-secondary text-white">
       <btn-cond color="warning" icon="close" @click="ui.fD"/>
-      <q-toolbar-title> 
+      <q-toolbar-title class="lh1"> 
         <span class="titre-lg">{{estAvc ? cv.nom : cv.nomC}}</span> 
         <span v-if="estAvc" class="titre-md q-ml-md">[{{$t('moi')}}]</span>
       </q-toolbar-title>
@@ -93,6 +93,8 @@ export default {
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.lh1
+  line-height: 1rem
 .border1
   border: 1px solid $grey-5
   padding: 3px

@@ -23,6 +23,7 @@ export const usePeopleStore = defineStore('people', {
   getters: { 
     ns: () => stores.session.ns,
     gSt: () => stores.groupe,
+    session: () => stores.session, 
 
     /* Retourne la CV la plus récente pour une id */
     getCV: (state) => { return (id) => { return state.cvs.get(ID.long(id, state.ns)) || CV.fake(id)} },
@@ -127,27 +128,22 @@ export const usePeopleStore = defineStore('people', {
 
     // PagePeople ********************************************
     peLpF: (state) => {
-      const aSt = stores.avatar
+      const ci = state.session.compti
       const f = stores.filtre.filtre.people
-      f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
-      f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
+      const fsetp = f.mcp && f.mcp.size ? f.mcp : null
+      const fsetn = f.mcn && f.mcn.size ? f.mcn : null
       const r = []
       for (const [id, p] of state.map) {
         const cv = state.getCV(id)
         if (f.nom && !cv.nom.startsWith(f.nom)) continue
         if (f.roletr && (p.sp < f.roletr)) continue
         if (f.avecgr && (!p.groupes.size)) continue
-        if (f.setp.size || f.setn.size) {
-          const mcmemo = aSt.compte.mcmemo(p.na.id)
-          if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
-          const s = new Set(mcmemo.mc)
-          if (f.setp.size && difference(f.setp, s).size) continue
-          if (f.setn.size && intersection(f.setn, s).size) continue          
-        }        
-        r.push({ id, cv, sgr: p.sgr, sch: p.sch })
+        if (fsetp && !ci.aHT(id, fsetp)) continue
+        if (fsetn && ci.aHT(id, fsetn)) continue
+        r.push({ id, cv, nom: cv.nom, sgr: p.sgr, sch: p.sch })
       }
       r.sort((a, b) => { 
-        return (ID.estComptable(a.id) || a.cv.nom < b.cv.nom) ? -1 : (a.cv.nom > b.cv.nom ? 1 : 0)
+        return (ID.estComptable(a.id) || a.nom < b.nom) ? -1 : (a.nom > b.nom ? 1 : 0)
       })
       stores.ui.fmsg(r.length)
       return r

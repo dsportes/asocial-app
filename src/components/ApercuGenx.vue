@@ -3,9 +3,8 @@
   <div class="q-pa-xs row items-start">
     <div class="col-auto items-center q-mr-sm column">
       <img class="photomax" :src="cv.photo" />
-      <q-btn v-if="!ID.estComptable(id)" class="q-mt-xs"
-        size="md" icon="zoom_in" dense color="primary" padding="none" round
-        @click.stop="ovcv"/>
+      <btn-cond v-if="!ID.estComptable(id)" class="q-mt-xs"
+        icon="zoom_in" round stop @ok="ovcv"/>
     </div>
     <div class="col">
       <div class="row">
@@ -15,9 +14,8 @@
           <span v-if="del && !ID.estComptable(id)" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
           <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
         </div>
-        <q-btn class="col-auto" v-if="!estAvc && !estGroupe && !det" 
-          dense size="md" color="primary" icon="open_in_new"
-          :label="$t('page')" @click.stop="ouvrirdetails"/>
+        <btn-cond class="col-auto" v-if="!estAvc && !estGroupe && !det" 
+          icon="open_in_new" :label="$t('page')" stop @ok="ouvrirdetails"/>
       </div>
       <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
       <mc-memo v-if="!ID.estComptable(id)" :id="id" :idx="idx"/>        
@@ -35,6 +33,7 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuCv from '../dialogues/ApercuCv.vue'
+import BtnCond from './BtnCond.vue'
 import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
@@ -50,7 +49,7 @@ export default {
     idx: Number
   },
 
-  components: { McMemo, ApercuCv },
+  components: { BtnCond, McMemo, ApercuCv },
 
   computed: {
     estGroupe () { return ID.estGroupe(this.id) },

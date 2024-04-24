@@ -75,7 +75,8 @@ export const useSessionStore = defineStore('session', {
     */
     excKO: null,
 
-    hashtags: new Set()
+    hashtags: new Set(),
+    locale: null
   }),
 
   getters: {
@@ -83,8 +84,6 @@ export const useSessionStore = defineStore('session', {
     filtre (state) { return stores.filtre },
     pSt: (state) => stores.people,
     ui: (state) => stores.ui,
-
-    locale () { return useI18n().locale },
 
     idComptable (state) { return ID.duComptable(state.ns)},
     
@@ -202,6 +201,7 @@ export const useSessionStore = defineStore('session', {
     },
 
     defHT (state) {
+      if (state.locale) locale = useI18n().locale
       const s = new Set()
       state.locale
       const def = $t('defhashtags')
@@ -412,6 +412,7 @@ export const useSessionStore = defineStore('session', {
 
     setCompti (compti) {
       if (!this.compti || this.compti.v < compti.v) this.compti = compti
+      for (const [,e] of compti.mc) this.setHT(e.ht)
     }, 
 
     setCompta (compta) {

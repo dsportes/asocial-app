@@ -83,7 +83,7 @@
   </div>
 
   <q-page-sticky position="top-left" :offset="[3, 3]">
-    <q-btn size="md" color="primary" icon="refresh" padding="none" @click="reload()"/>
+    <btn-cond icon="refresh" @ok="reload()"/>
   </q-page-sticky>
 </q-page>
 </template>

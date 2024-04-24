@@ -1,16 +1,16 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli(0)">
-    <q-btn no-caps flat :label="$t('FItribu', [$t('roletribu' + val)])">
+    <q-btn no-caps flat :label="$t('FItribu', [$t('roledel' + val)])">
     <q-menu anchor="bottom left" self="top left">
       <q-list style="min-width: 50px">
         <q-item clickable v-close-popup @click="val=0">
-          <span class="fs-md text-italic">{{$t('roletribu0')}}</span>
+          <span class="fs-md text-italic">{{$t('roledel0')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=1">
-          <span class="fs-md text-italic">{{$t('roletribuC')}}</span>
+          <span class="fs-md text-italic">{{$t('roledelC')}}</span>
         </q-item>
         <q-item clickable v-close-popup @click="val=2">
-          <span class="fs-md text-italic">{{$t('roletribuS')}}</span>
+          <span class="fs-md text-italic">{{$t('roledelD')}}</span>
         </q-item>
       </q-list>
     </q-menu>
@@ -24,7 +24,7 @@ import { ref, toRef } from 'vue'
 import { dkli } from '../app/util.mjs'
 
 export default ({
-  name: 'FiltreTribu',
+  name: 'FiltreDel',
 
   props: { nom: String, idx: Number },
 

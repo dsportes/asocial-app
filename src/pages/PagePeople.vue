@@ -6,8 +6,8 @@
         :label="$t('CVraf')" @ok="rafCvs"/>
     </q-card>
 
-    <div v-if="pSt.peLp && !pSt.peLpF" class="q-my-md titre-lg text-italic">
-      {{$t('APnb', [pSt.peLp.length])}}
+    <div v-if="pSt.map.size && !pSt.peLpF" class="q-my-md titre-lg text-italic">
+      {{$t('APnb', [pSt.map.size])}}
     </div>
     
     <div v-if="pSt.peLpF.length">
@@ -16,6 +16,10 @@
           :del="session.eltPart(p.id).del"/>
       </q-card>
     </div>
+
+    <q-page-sticky v-if="session.accesNet && !session.estA" position="top-left" :offset="[3, 3]">
+      <btn-cond icon="refresh" @ok="reload()" :cond="session.estAdmin ? 'cUrgence' : 'cVisu'"/>
+    </q-page-sticky>
   </q-page>
 </template>
 
@@ -27,6 +31,7 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
 import { GetPartition } from '../app/synchro.mjs'
+import { beep } from '../app/util.mjs'
 
 export default {
   name: 'PagePeople',
@@ -56,6 +61,7 @@ export default {
     const session = stores.session
 
     async function reload () {
+      await beep()
       if (session.accesNet && !session.estA) await new GetPartition().run(session.compte.idp)
     }
 

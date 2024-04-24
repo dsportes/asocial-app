@@ -25,15 +25,18 @@
         @keydown.enter.prevent="ok2" 
         :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">
         <template v-slot:append>
-          <btn-cond :icon="isPwd ? 'visibility_off' : 'visibility'" round @ok="isPwd = !isPwd"/>
-          <btn-cond icon="cancel" round :disable="ligne1.length === 0" @ok="forceInput('')"/>
+          <btn-cond :icon="isPwd ? 'visibility_off' : 'visibility'" round 
+            color="none" @ok="isPwd = !isPwd"/>
+          <btn-cond icon="cancel" round :disable="ligne1.length === 0"
+            color="none" @ok="forceInput('')"/>
           <q-spinner v-if="encours" color="primary" size="1.5rem" :thickness="8" />
         </template>
       </q-input>
       <div v-else class="row items-center">
         <div class="col q-mr-sm font-mono text-bold fs-md height-2 bord">{{secligne1}}</div>
-        <btn-cond class="col-auto" :icon="isPwd ? 'visibility_off' : 'visibility'" round @ok="isPwd = !isPwd"/>
-        <btn-cond icon="cancel" round 
+        <btn-cond class="col-auto" :icon="isPwd ? 'visibility_off' : 'visibility'" 
+          color="none" round @ok="isPwd = !isPwd"/>
+        <btn-cond icon="cancel" round color="none" 
           :disable="ligne1.length === 0" @ok="forceInput('')"/>
       </div>
 
@@ -46,7 +49,7 @@
         <div>
           <btn-cond class="q-mr-sm" flat :label="$t('PSren')" @ok="ko"/>
           <btn-cond color="warning" :label="labelVal()" :icon-right="iconValider"
-            :disable="!ligne1 || ligne1.length < lgph || !orgL" 
+            :disable="!ligne1 || ligne1.length < lgph || !orgL"
             @ok="ok" />
         </div>
       </div>
