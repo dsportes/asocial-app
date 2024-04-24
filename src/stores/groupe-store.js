@@ -32,6 +32,7 @@ export const useGroupeStore = defineStore('groupe', {
 
   getters: {
     session (state) { return stores.session },
+    ui: (state) => stores.ui,
 
     // groupe courant
     egrC (state) { 
@@ -54,6 +55,21 @@ export const useGroupeStore = defineStore('groupe', {
     // Retourne [amb, ano] : les avatars du compte ont ou non accès aux membres / notes
     ambano (state) {
       return state.egrC ? stores.avatar.compte.ambano(state.egrC.groupe) : [false, false]
+    },
+
+    // L'avatar ida est-il sélectionnable pour devenir contact du groupe courant ?
+    diagContact: (state) => { return (ida) => { 
+        if (!state.ui.egrplus) return 1 // NON, pas de recherche de candidat en cours
+        if (ID.estGroupe(ida)) return 2 // NON ida est un groupe, pas un avatar
+        if (!state.egrC) return 3 // NON il n'y a pas de groupe courant
+        if (!state.ambano[0]) return 4 // NON, le compte n'a pas d'avatars ayant accès aux membres
+        const g = state.egrC.groupe
+        const im = g.mmb.get(ida)
+        if (im) return 5 // NON ida est déjà contact (au moins) du groupe
+        if (g.lng.indexOf(ida)) return 6 // NON est en liste noire "anamiateur" du groupe
+        if (g.lnc.indexOf(idc)) return 7 // NON est en liste noire "compte" du groupe
+        return 0 // OUI, ida POURRAIT être sélectionné pour devenir "contact" du groupe
+      }
     },
 
     amb: (state) => { return (id) => { 

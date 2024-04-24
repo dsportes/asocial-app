@@ -226,39 +226,6 @@ export class HebGroupe extends Operation {
   }
 }
 
-/* Nouveau membre (contact) *******************************************
-args.token donne les éléments d'authentification du compte.
-args.id : id du contact
-args.idg : id du groupe
-args.im: soit l'indice de l'avatar dans ast/nag s'il avait déjà participé, soit ast.length
-args.nag: hash du rnd du membre crypté par le rnd du groupe. Permet de vérifier l'absence de doublons.
-args.rowMembre
-- vérification que le slot est libre
-- insertion du row membre, maj groupe
-Retour:
-- KO : si l'indice im est déjà attribué
-*/
-export class NouveauMembre extends Operation {
-  constructor () { super('NouveauMembre') }
-
-  async run (gr, im, na, cv) {
-    try {
-      const session = stores.session
-      const rowMembre = await Membre.rowNouveauMembre(gr.na, na, im, cv, false)
-      const nag = await Groupe.getNag(gr.na, na)
-      const args = { token: session.authToken, 
-        id: na.id,
-        idg: gr.id,
-        nag, im, rowMembre
-      }
-      const ret = this.tr(await post(this, 'NouveauMembre', args))
-      return this.finOK(!ret.KO)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_MajDroitsMembre: 'Mise à jour des droits d\'un membre sur un groupe' *******
 args.token donne les éléments d'authentification du compte.
 args.idg : id du groupe

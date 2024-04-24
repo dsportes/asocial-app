@@ -885,3 +885,31 @@ export class ChangementPS extends Operation {
     }
   }
 }
+
+/* OP_Nouveau membre (contact) *******************************************
+- token donne les éléments d'authentification du compte.
+- ida : id du contact
+- idg : id du groupe
+Retour:
+- im : indice im attribué
+*/
+export class NouveauMembre extends Operation {
+  constructor () { super('NouveauMembre') }
+
+  async run () { // people courant nouveau contact du groupe courant
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, 
+        ida: session.peopleId,
+        idg: session.groupeId,
+      }
+      const ret = await post(this, 'NouveauMembre', args)
+      session.setMembreId(ret.im)
+      this.ui.setPage('groupe', 'membres')
+      this.ui.egrplus = false
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

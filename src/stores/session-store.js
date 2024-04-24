@@ -86,6 +86,7 @@ export const useSessionStore = defineStore('session', {
     ui: (state) => stores.ui,
 
     idComptable (state) { return ID.duComptable(state.ns)},
+    nomGrC (state) { if (!state.groupeId) return ''; return state.getCV(state.groupeId).nomC },
     
     dlv (state) { return state.ok && state.compte ? state.compte.dlv : 0 },
     nbj (state) { return AMJ.diff(AMJ.dlv(state.dlv), state.auj) },

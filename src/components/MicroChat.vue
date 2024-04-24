@@ -1,4 +1,4 @@
-<template> <!-- BtnCond incorporés -->
+<template>
 <div>
   <div class="relative-position">
     <div v-if="chatx">

@@ -18,7 +18,13 @@
           icon="open_in_new" :label="$t('page')" stop @ok="ouvrirdetails"/>
       </div>
       <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
-      <mc-memo v-if="!ID.estComptable(id)" :id="id" :idx="idx"/>        
+      <mc-memo v-if="!ID.estComptable(id)" :id="id" :idx="idx"/>     
+    </div>
+    <div v-if="ui.egrplus && (diagC === 0 || diagC < 4)">
+      <div v-if="diagC > 3" class="texte-italic fs-md">{{$t('PPctc' + diagC)}}</div>
+      <btn-cond cond="cEdit" icon="check" color="warning" 
+        :label="$t('PPctcok', [session.nomGrC])"
+        @ok="select"/>
     </div>
   </div>
   <q-separator color="orange" size="1px"/>
@@ -35,6 +41,7 @@ import stores from '../stores/stores.mjs'
 import ApercuCv from '../dialogues/ApercuCv.vue'
 import BtnCond from './BtnCond.vue'
 import { dkli, titre } from '../app/util.mjs'
+import { NouveauMembre } from '../app/operations4.mjs'
 import { ID } from '../app/api.mjs'
 
 // Niveau 4
@@ -54,17 +61,13 @@ export default {
   computed: {
     estGroupe () { return ID.estGroupe(this.id) },
     estAvc () { return this.session.compte.mav.has(this.id) },
-    eg () { return this.estGroupe ? this.gSt.egr(this.id) : null },
-    agp () { 
-      if (this.estGroupe) return this.eg.groupe
-      if (this.estAvc) return this.aSt.getAvatar(this.id)
-      return this.pSt.getPeople(this.id)
-    },
-    estAnim () { return this.estGroupe ? this.eg.estAnim : false },
+
     cv () { return this.session.getCV(this.id) },
-    
-    info () { return this.cv ? (this.cv.info || '') : '' },
-    det () { return this.session.peopleId === this.id && this.ui.estOuvert('detailspeople') }
+    // true si le panel de détail est déjà ouvert
+    det () { return this.session.peopleId === this.id && this.ui.estOuvert('detailspeople') },
+
+    // Peut être choisi pour devenir contact du groupe courant
+    diagC () { return this.gSt.diagContact(this.id) }
   },
 
   data () {
@@ -79,6 +82,10 @@ export default {
     ouvrirdetails () {
       this.session.setPeopleId(this.id)
       this.ui.oD('detailspeople')
+    },
+    async select () {
+      this.session.setPeopleId(this.id)
+      await new NouveauMembre().run()
     }
   },
 

@@ -238,7 +238,7 @@ export default {
   temp60: 'deux mois',
   temp90: 'un trimestre',
   tempx: '{0} jour(s)',
-  
+
   MOdis: 'DISPARU',
 
   ECclos: 'L\'administrateur technique a fermé l\'application pour l\'organisation "{0}"',
@@ -1969,10 +1969,11 @@ export default {
   PPctc: 'Ajouter {1} comme contact du groupe {0}',
   PPquot: 'Corriger les valeurs non admissibles dans les quotas c-dessus',
 
-  PPctc1: 'Inscription comme contact impossible, le compte n\'a pas accès aux membres de ce groupe.',
-  PPctc2: 'Ajout sans effet, l\'avatar est déjà membre du groupe.',
-  PPctc3: 'Cet avatar a été mis en liste noire du groupe par un animateur. Il n\'est plus possible de l\'inscrire comme contact.',
-  PPctc4: 'Cet avatar s\'est inscrit lui-même en liste noire du groupe. Il n\'est plus possible de l\'inscrire comme contact.',
+  PPctc4: 'Le compte n\'a pas d\'avatar ayant accès aux membres du groupe {0}. Impossible de choisir un nouveau contact pour ce groupe.',
+  PPctc5: 'Cet avatar est déjà connu du groupe {0}, actif ou contact.',
+  PPctc6: 'Cet avatar a été mis en liste noire du groupe {0} par un animateur. Il n\'est plus possible de l\'inscrire comme contact.',
+  PPctc7: 'Cet avatar s\'est inscrit lui-même en liste noire du groupe {0}. Il n\'est plus possible de l\'inscrire comme contact.',
+  PPctcok: 'Choir cet avatar pour devenir contact du groupe {0}',
 
   SAVtit1: 'Suppression de l\'avatar {0}',
   SAVtit2: 'Résiliation du COMPTE {0}',
