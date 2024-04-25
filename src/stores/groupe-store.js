@@ -17,10 +17,10 @@ import { Versions } from '../app/modele.mjs'
     objv: { v: 0, vols: {v1: 0, v2: 0, q1: 0, q2: 0} }
 - invits: map des invitations en attente.
   - clé : id du groupe + '/' + id de l'avatar invité
-  - valeur: {ng, na, im, ivpar, dh}
-    - ng : du groupe
-    - na : de l'avatar invité
-    - ivpar : indice im de l'invitant,
+  - valeur: {idg, ida, idiv, dh}
+    - idg : du groupe
+    - ida : de l'avatar invité
+    - idiv : id de l'invitant,
     - dh : date-heure
 */
 
@@ -429,12 +429,11 @@ export const useGroupeStore = defineStore('groupe', {
   },
 
   actions: {
-    setGroupe (groupe) {
-      if (!groupe) return
-      let e = this.map.get(groupe.id)
+    setE (id) {
+      let e = this.map.get(id)
       if (!e) {
         e = { 
-          groupe: groupe, 
+          groupe: null, 
           chatgr: null,
           notes: new Map(),
           membres: new Map(), // tous membres
@@ -442,9 +441,15 @@ export const useGroupeStore = defineStore('groupe', {
           estHeb: false // un des avatars du compte est hébergeur du groupe
         }
         this.map.set(groupe.id, e)
-      } else {
-        if (groupe.v > e.groupe.v) e.groupe = groupe
       }
+      return e
+    },
+
+    setGroupe (groupe) {
+      if (!groupe) return
+      const e = this.setE(groupe.id)
+      if (!e.groupe) e.groupe = groupe
+      else if (groupe.v > e.groupe.v) e.groupe = groupe
       e.estAnim = false
       e.estHeb = false
       // Set des avatars participants au groupe
@@ -457,10 +462,14 @@ export const useGroupeStore = defineStore('groupe', {
       stores.note.setGroupe(groupe.id)
     },
 
+    setInvit (inv) { // inv: {idg, ida, idiv, dh}
+      const e = this.setE(inv.idg)
+      this.invits.set(inv.idg + '/' + inv.ida, inv)
+    },
+
     setChatgr (chatgr) {
       if (!chatgr) return
-      const e = this.map.get(chatgr.id)
-      if (!e) return
+      const e = this.setE(chatgr.id)
       if (!e.chatgr || e.chatgr.v < chatgr.v) e.chatgr = chatgr
     },
 

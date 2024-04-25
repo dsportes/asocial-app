@@ -790,13 +790,13 @@ _data_:
 
 - `invits`: map des invitations en cours de l'avatar:
   - _clé_: `idg` id court du groupe.
-  - _valeur_: `{cleGA, cvG, ivpar, dh}` 
+  - _valeur_: `{cleGA, cvG, idiv, dh}` 
     - `cleGA`: clé du groupe crypté par la clé A de l'avatar.
     - `cvG` : carte de visite du groupe (photo et texte sont cryptés par la clé G du groupe).
-    - `ivpar` : indice `im` de l'invitant.
-    - `dh` : date-heure d'invitation. Le couple `[ivpar, dh]` permet de retrouver l'item dans le chat du groupe donnant le message de bienvenue / invitation émis par l'invitant.
+    - `idiv` : id court de l'invitant.
+    - `dh` : date-heure d'invitation. Le couple `[idiv, dh]` permet de retrouver l'item dans le chat du groupe donnant le message de bienvenue / invitation émis par l'invitant.
 
-  Compilé en : { ivpar, dh }
+  Compilé en : { idiv, dh }
 */
 export class Avatar extends GenDoc {
 
@@ -826,7 +826,12 @@ export class Avatar extends GenDoc {
         RegCles.set(await decrypter(clea, e.cleGA))
         const cv = await CV.set(e.cvG || CV.fake(idg))
         cv.store()
-        this.invits.set(idg, { ivpar: e.ivpar, dh: e.dh })
+        this.invits.set(idg, { 
+          idg: idg, 
+          ida: this.id, 
+          idiv: ID.long(e.idiv, this.ns), 
+          dh: e.dh 
+        })
       }
     }
   }
