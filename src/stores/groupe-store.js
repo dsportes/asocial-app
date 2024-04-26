@@ -14,25 +14,27 @@ import { Versions } from '../app/modele.mjs'
     membres: new Map(), // tous membres
     estAnim: false, // un des avatars du compte est animateur du groupe
     estHeb: false // un des avatars du compte est hébergeur du groupe
-    objv: { v: 0, vols: {v1: 0, v2: 0, q1: 0, q2: 0} }
 - invits: map des invitations en attente.
   - clé : id du groupe + '/' + id de l'avatar invité
-  - valeur: {idg, ida, idiv, dh}
+  - valeur: {idg, ida, idi, txt}
     - idg : du groupe
     - ida : de l'avatar invité
-    - idiv : id de l'invitant,
-    - dh : date-heure
+    - idi : id de l'invitant,
+    - txt : message d'invitation
 */
 
 export const useGroupeStore = defineStore('groupe', {
   state: () => ({
     map: new Map(),
-    invits: new Map()
+    invits: new Map(),
+    stats: {}
   }),
 
   getters: {
     session (state) { return stores.session },
     ui: (state) => stores.ui,
+    aSt: (state) => stores.avatar,
+    filtre: (state) => stores.filtre,
 
     // groupe courant
     egrC (state) { 
@@ -148,13 +150,11 @@ export const useGroupeStore = defineStore('groupe', {
 
     nbMesInvits: (state) => { return (e) => {
         let n = 0
-        const fx = e.groupe.flags
-        for(let i = 1; i < fx.length; i++) {
-          const fl = fx[i]
-          if (fl & FLAGS.IN) {
-            if (e.membres.get(i).estAc) n++
-          }
-        }
+        const g = e.groupe
+        const c = state.session.compte
+        for(let im = 1; i < g.st.length; im++) {
+          if (g.st[im] === 2 && c.mav.has(g.tid[im])) n++
+        }        
         return n
       }
     },
@@ -270,51 +270,42 @@ export const useGroupeStore = defineStore('groupe', {
 
     // PageGroupes ***************************************************
     pgLgFT: (state) => {
-      const aSt = stores.avatar
-      function f0 (x, y) {
-        const a = x.groupe, b = y.groupe
-        return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) 
-      }
-      const f = stores.filtre.filtre.groupes
-      f.setp = f.mcp && f.mcp.length ? new Set(f.mcp) : new Set()
-      f.setn = f.mcn && f.mcn.length ? new Set(f.mcn) : new Set()
-      const stt = { v1: 0, v2: 0, q1: 0, q2: 0 }
+      const ci = state.session.compti
+      const f = state.filtre.groupes
+      const fsetp = f.mcp && f.mcp.size ? f.mcp : null
+      const fsetn = f.mcn && f.mcn.size ? f.mcn : null
+      const stt = { nn: 0, vf: 0, qn: 0, qv: 0 }
       const r = []
       for (const [, e] of state.pgLg) {
-        const v = e.objv.vols
-        if (e.estHeb) {
-          stt.v1 += v.v1 || 0
-          stt.v2 += v.v2 || 0
-          stt.q1 += v.q1 || 0
-          stt.q2 += v.q2 || 0
-        }
         const g = e.groupe
-        if (f.ngr && !g.na.nom.startsWith(f.ngr)) continue
-        if (f.sansheb && g.dfh === 0) continue
-        if (f.excedent && ((v.q1 * UNITEN) > v.v1) && ((v.q2 * UNITEV) > v.v2 )) continue
-        const mcmemo = aSt.compte.mcmemo(g.id)
-
-        if (f.infmb && mcmemo && mcmemo.memo && mcmemo.memo.indexOf(f.infmb) === -1) continue
-        if (f.setp.size || f.setn.size) {
-          if (!mcmemo || !mcmemo.mc || !mcmemo.mc.length) continue
-          const s = new Set(mcmemo.mc)
-          if (f.setp.size && difference(f.setp, s).size) continue
-          if (f.setn.size && intersection(f.setn, s).size) continue          
+        if (e.estHeb) {
+          stt.nn += g.nn || 0
+          stt.vf += g.vf || 0
+          stt.qn += v.qn || 0
+          stt.qv += v.qv || 0
         }
+        const cv = state.session.getCV(g.id)
+        e.nom = cv.nom
+        if (f.ngr && !cv.nom.startsWith(f.ngr)) continue
+        if (f.sansheb && g.dfh === 0) continue
+        if (f.excedent && ((g.qn * UNITEN) > g.nn) && ((g.qv * UNITEV) > q.vf )) continue
+        const mc = ci.mc.get(g.id)
+        if (f.infmb && (!mc.tx || mc.tx.indexOf(f.infmb)) === -1) continue
+        if (fsetp && !ci.aHT(g.id, fsetp)) continue
+        if (fsetn && ci.aHT(g.id, fsetn)) continue
         if (f.invits && g.nbInvits === 0) continue
         r.push(e)
       }
-      stores.filtre.stats.groupes = stt
-      r.sort(f0)
+      state.stats = stt
+      r.sort((a,b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0)})
       stores.ui.fmsg(r.length)
       return r
     },
 
     pgLg: (state) => {
-      const f = stores.filtre.filtre.groupes
+      const f = state.filtre.groupes
       if (f.tous) return state.map
-      const aSt = stores.avatar
-      const s = aSt.compte.idGroupes(stores.session.avatarId)
+      const s = state.session.compte.idGroupes(state.session.avatarId)
       const m = new Map()
       s.forEach(idg => {
         const e = state.map.get(idg)
@@ -462,7 +453,7 @@ export const useGroupeStore = defineStore('groupe', {
       stores.note.setGroupe(groupe.id)
     },
 
-    setInvit (inv) { // inv: {idg, ida, idiv, dh}
+    setInvit (inv) { // inv: {idg, ida, idi, txt}
       const e = this.setE(inv.idg)
       this.invits.set(inv.idg + '/' + inv.ida, inv)
     },

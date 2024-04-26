@@ -2,8 +2,7 @@
 <q-page class="q-pa-sm column items-center">
   <q-card class="spmd column items-center">
 
-    <q-btn class="q-my-sm" size="md" dense color="primary" padding="xs"
-      :label="$t('PGcrea')" @click="nvGr"/>
+    <btn-cond class="q-my-sm" :label="$t('PGcrea')" @ok="nvGr" cond="cEdit"/>
 
     <div class="q-my-sm full-width">
       <div class="row">
@@ -13,26 +12,26 @@
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PGvut')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{stats.groupes.v1}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ed2(stats.groupes.v2)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{gSt.stats.nn}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{edv(gSt.stats.vf)}}</div>
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PGvq')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ '[' + stats.groupes.q1 + '] / ' + edq1(stats.groupes.q1)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ '[' + stats.groupes.q2 + '] / ' + edq2(stats.groupes.q2)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{'[' + gSt.stats.nn + '] / ' + edqn(gSt.stats.nn)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ '[' + gSt.stats.qv + '] / ' + edqv(gSt.stats.qv)}}</div>
       </div>
     </div>
   </q-card>
 
-  <q-card v-if="session.accesNet" class="spsm q-my-lg">
+  <q-card class="spsm q-my-lg">
     <div class="full-width titre-md text-italic bg-primary text-white q-mt-md text-center">
       {{$t('ICtit', gSt.invits.size, {count: gSt.invits.size})}}
     </div>
     <div v-for="([k, inv], idx) of gSt.invits" :key="k">
-      <div :class="dkli(idx) + 'q-mx-xs row invs cursor-pointer items-center'" @click="ouvaccinv(inv)">
-        <q-icon class="col-1" size="md" name="zoom_in"/>
-        <div class="col-5">{{inv.na.nom}}</div>
-        <div class="col-6">{{inv.ng.nom}}</div>
+      <div :class="dkli(idx) + 'q-mx-xs row invs items-center'" >
+        <btn-cond class="col-1" icon="zoom_in" cond="cEdit" @ok="ouvaccinv(inv)"/>
+        <div class="col-5">{{session.getCV(inv.ida).nom}}</div>
+        <div class="col-6">{{session.getCV(inv.idg).nom}}</div>
       </div>
     </div>
   </q-card>
@@ -56,10 +55,10 @@
           </div>
         </div>
         <div class="row justify-end">
-          <q-btn class="q-ml-md" size="sm" icon="chat" :label="$t('PGchat')" 
-            color="primary" dense padding="xs" @click.stop="chat(e)"/>
-          <q-btn class="q-ml-md" size="sm" icon="open_in_new" :label="$t('page')" 
-            color="primary" dense padding="xs" @click.stop="courant(e)"/>
+          <btn-cond class="q-ml-md" size="sm" icon="chat" :label="$t('PGchat')" 
+            cond="cVisu" @ok.stop="chat(e)"/>
+          <btn-cond class="q-ml-md" size="sm" icon="open_in_new" :label="$t('page')"
+            cond="cVisu" @ok.stop="ovpageGr(e)"/>
         </div>
       </div>
     </q-card>
@@ -67,14 +66,14 @@
 
   <!-- Acceptation de l'invitation -->
   <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
-    <invitation-acceptation :idg="inv.ng.id" :im="inv.im" :na="inv.na"/>
+    <invitation-acceptation :inv="inv"/>
   </q-dialog>
 
   <!-- Nouveau groupe ------------------------------------------------>
   <q-dialog v-model="ui.d.PGcrgr" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+        <btn-cond color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('PGcrea')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
@@ -85,10 +84,9 @@
         <choix-quotas :quotas="quotas" groupe/>
         <q-option-group :options="options" type="radio" v-model="una"/>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense padding="xs" color="primary" icon="undo"
-            :label="$t('renoncer')" @click="ui.fD" />
-          <q-btn dense padding="xs" color="warning" icon="add" 
-            :disable="quotas.err || !nom" :label="$t('creer')" @click="okCreation" />
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD" />
+          <btn-cond color="warning" icon="add" cond="cEdit"
+            :disable="quotas.err || !nom" :label="$t('creer')" @ok="okCreation" />
         </q-card-actions>
       </div>
     </q-card>
@@ -103,6 +101,7 @@
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { edvol, $t, dkli, styp } from '../app/util.mjs'
+import BtnCond from '../components/BtnCond.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -117,25 +116,24 @@ export default {
 
   props: { tous: Boolean },
 
-  components: { ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, ApercuChatgr, InvitationAcceptation },
+  components: { BtnCond, ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, ApercuChatgr, InvitationAcceptation },
 
   computed: {
   },
 
   methods: {
-    edq1 (n) { return n * UNITEN },
-    edq2 (n) { return edvol(n * UNITEV) },
-    ed2 (n) { return edvol(n) },
+    edqn (n) { return n * UNITEN },
+    edqv (n) { return edvol(n * UNITEV) },
+    edv (n) { return edvol(n) },
 
     nbiv (e) { return this.gSt.nbMesInvits(e) },
 
     async ouvaccinv (inv) {
-      if (!await this.session.edit()) return
       this.inv = inv
       this.ui.oD('IAaccinvit', this.idc)
     },
 
-    async courant (elt) {
+    async ovpageGr (elt) {
       this.session.setGroupeId(elt.groupe.id)
       this.ui.setPage('groupe', 'groupe')
     },
@@ -145,12 +143,7 @@ export default {
       this.ui.oD('ACGouvrir', this.idc)
     },
 
-    exp (g) {
-      this.session.setGroupeId(g.id)
-    },
-
     async nvGr () {
-      if (!await this.session.edit()) return
       const cpt = this.aSt.compta.compteurs.qv
       let max1 = Math.floor(((cpt.q1 * UNITEN) - (cpt.nn + cpt.nc + cpt.ng)) / UNITEN)
       if (max1 < 0) max1 = 0

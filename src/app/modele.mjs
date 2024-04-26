@@ -789,14 +789,15 @@ _data_:
 - `pub privK` : couple des clés publique / privée RSA de l'avatar.
 
 - `invits`: map des invitations en cours de l'avatar:
-  - _clé_: `idg` id court du groupe.
-  - _valeur_: `{cleGA, cvG, idiv, dh}` 
+  - _clé_: `idg` id du groupe.
+  - _valeur_: `{cleGA, cvG, cleAG, cvA, txtG}`
     - `cleGA`: clé du groupe crypté par la clé A de l'avatar.
     - `cvG` : carte de visite du groupe (photo et texte sont cryptés par la clé G du groupe).
-    - `idiv` : id court de l'invitant.
-    - `dh` : date-heure d'invitation. Le couple `[idiv, dh]` permet de retrouver l'item dans le chat du groupe donnant le message de bienvenue / invitation émis par l'invitant.
+    - `cleAG`: clé A de l'avatar invitant crypté par la clé G du groupe.
+    - `cvA` : carte de visite de l'invitant (photo et texte sont cryptés par la clé G du groupe). 
+    - `txtG` : message de bienvenue / invitation émis par l'invitant.
 
-  Compilé en : { idiv, dh }
+  Compilé en : { idg, ida, idi, txt }
 */
 export class Avatar extends GenDoc {
 
@@ -822,15 +823,19 @@ export class Avatar extends GenDoc {
     if (row.invits) {
       for (const idgx in row.invits) {
         const idg = ID.long(parseInt(idgx), this.ns)
-        const e = row.invits[idgx] // {cleGA, cvg, ivpar, dh}
-        RegCles.set(await decrypter(clea, e.cleGA))
+        const e = row.invits[idgx] // {cleGA, cvG, cleAG, cvA, txtG}
+        const cleg = RegCles.set(await decrypter(clea, e.cleGA))
         const cv = await CV.set(e.cvG || CV.fake(idg))
         cv.store()
+        const clea = RegCles.set(await decrypter(cleg, e.cleAG))
+        const cvA = await CV.set(e.cvA || CV.fake(idg))
+        cvA.store()
+        const txt = await decrypterStr(cleg, e.txtG)
         this.invits.set(idg, { 
           idg: idg, 
           ida: this.id, 
-          idiv: ID.long(e.idiv, this.ns), 
-          dh: e.dh 
+          idi: Cles.id(clea, this.ns),
+          txt
         })
       }
     }
@@ -1020,15 +1025,15 @@ _data_:
 - `dfh` : date de fin d'hébergement.
 
 - `rds` : pas transmis en session.
-- `qn qv n v`: nombres de notes actuel et maximum attribué par l'hébergeur, volume total actuel des fichiers des notes et maximum attribué par l'hébergeur.
+- `nn qn vf qv`: nombres de notes actuel et maximum attribué par l'hébergeur, volume total actuel des fichiers des notes et maximum attribué par l'hébergeur.
 - `idh` : id du compte hébergeur (pas transmise aux sessions).
 - `imh` : indice `im` du membre dont le compte est hébergeur.
 - `msu` : mode _simple_ ou _unanime_.
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
 - `tid` : table des ids courts des membres.
+- `st` : table des statuts. 0:radié, 1:proposé, 2:invité, 3:actif, 4:animateur
 - `flags` : tables des flags.
-- `hists` : tables des flags historiques.
 - `lng` : liste noire _groupe_ des ids (courts) des membres.
 - `lnc` : liste noire _compte_ des ids (courts) des membres.
 - `cvG` : carte de visite du groupe, textes cryptés par la clé du groupe `{v, photo, info}`.
@@ -1039,7 +1044,7 @@ export class Groupe extends GenDoc {
   async compile (row) {
     this.ns = ID.ns(this.id)
 
-    this.qn = row.qn; this.qv = row.qv; this.n = row.n; this.v = row.v
+    this.qn = row.qn; this.qv = row.qv; this.nn = row.nn; this.vf = row.vf
     this.imh = row.imh
     this.msu = row.msu || null
 
@@ -1051,63 +1056,77 @@ export class Groupe extends GenDoc {
       this.mmb.set(ida, im)
     })
     this.flags = row.flags
-    this.hists = row.hists
-    this.lng = new Array(row.lng.length)
-    row.lng.forEach((id, i) => { this.lng[i] = ID.long(id, this.ns)})
-    this.lnc = new Array(row.lnc.length)
-    row.lnc.forEach((id, i) => { this.lnc[i] = ID.long(id, this.ns)})
+    this.st = row.st
+    this.lng = new Set()
+    row.lng.forEach(id => { this.lng.add(ID.long(id, this.ns))})
+    this.lnc = new Set()
+    row.lnc.forEach(id => { this.lnc.add(ID.long(id, this.ns))})
     const cv = await CV.set(row.cvG || CV.fake(this.id))
     cv.store()
+    let n = 0; this.st.forEach(st => { if (st === 2) n++});
+    this.nbInvits = n
+    n = 0; this.st.forEach(st => { if (st === 4) n++});
+    this.nbAnims = n
   }
   
-  get nbInvits () { let n = 0
-    for (let im = 1; im < this.flags.length; im++) { 
-      const f = this.flags[im]
-      if (f & FLAGS.IN) n++ 
-    }
-    return n
-  }
+  imDeId (id) { return this.mmb.get(id) }
 
-  get nbAnims () { let n = 0
-    for (let im = 1; im < this.flags.length; im++) { 
-      const f = this.flags[im]
-      if ((f & FLAGS.PA) && (f & FLAGS.AC)) n++ 
-    }
-    return n
-  }
-
-  imDeId (id) { return this.mmb(id) }
-
-  estContact (im) { return this.anag[im] && this.anag[im] > 1 && !(this.flags[im] & FLAGS.AC) }
-  estDisparu (im)  { return !this.anag[im] || this.anag[im] === 1 }
-  estInvite (im) { return this.flags[im] & FLAGS.IN }
-  estActif (im) { return this.flags[im] & FLAGS.AC }
-  estAnim (im) { const f = this.flags[im] || 0; return (f & FLAGS.AC) && (f & FLAGS.PA) }
+  estRadie (im)  { return this.st[im] === 0 }
+  estProposé (im) { return this.st[im] === 1 }
+  estInvite (im) { return this.st[im] === 2 }
+  estActif (im) { return this.st[im] >= 3 }
+  estAnim (im) { return this.st[im] >= 4 }
   estAuteur (im) { const f = this.flags[im] || 0; 
-    return (f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
+    return im && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
-  estInvitable (im) { const f = this.flags[im] || 0; 
-    return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !this.enLNA(im) && !this.enLNC(im)
+  estInvitable (id) { const im = this.mmb.get(id); 
+    return (!im || (this.st[im] < 2)) && !this.lnc.has(id) && !this.lng.has(id)
   }
-  estOubliable (im) { const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
-    return !(f & FLAGS.AC) && !(f & FLAGS.IN) && !(h & FLAGS.HA)
-  }
+  estProposable (id) { return !this.mmb.get(id) && !this.lnc.has(id) && !this.lng.has(id) }
 
   estHeb (im) { return this.estActif(im) && im === this.imh }
+
   accesMembre (im) {
     const f = this.flags[im] || 0;
-    return (f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM) 
+    return im && this.estActif(im) && (f & FLAGS.AM) && (f & FLAGS.DM) 
   }
   aUnAccesMembre (s) { // Set des im
     let b = false
     s.forEach(im => { if (this.accesMembre(im)) b = true})
     return b
   }
+  accesMembreNA (im) { // accès aux membres NON activé 0: pas accès
+    if (!im || !this.estActif(im)) return 0
+    const f = this.flags[im] || 0
+    return (f & FLAGS.AC) && !(f & FLAGS.AM) && (f & FLAGS.DM) ? 1 : 0
+  }
+
+
+  accesNote (im) {
+    const f = this.flags[im] || 0;
+    return im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DN) 
+  }
   aUnAccesNote (s) { // Set des im
     let b = false
     s.forEach(im => { if (this.accesNote(im)) b = true})
     return b
   }
+  accesNoteE (im) {
+    const f = this.flags[im] || 0;
+    return im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DE) 
+  }
+  /* acces aux notes activable: 
+  - 0:pas activable 
+  - 1: déjà activé
+  - 2:activable en lect, 
+  - 3:activable en ecr */
+  accesNoteNA (im) { 
+    const f = this.flags[im] || 0
+    if (!im || !this.estActif(im) || !(f & FLAGS.DN)) return 0
+    return !(f & FLAGS.AN) ? (f & FLAGS.DE ? 3 : 2) : 1
+  }
+
+
   actifH (im) { // 0:jamais, 1:oui, 2:l'a été, ne l'est plus
     const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
     if (f & FLAGS.AC) return 1
@@ -1127,20 +1146,6 @@ export class Groupe extends GenDoc {
     const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
     if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DE)) return 1
     return h & FLAGS.HE ? 2 : 0
-  }
-  accesMembreNA (im) { // accès aux membres NON activé
-    const f = this.flags[im] || 0;
-    return (f & FLAGS.AC) && !(f & FLAGS.AM) && (f & FLAGS.DM) ? 1 : 0
-  }
-  accesNote (im) {
-    const f = this.flags[im] || 0;
-    if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN)) return f & FLAGS.DE ? 2 : 1
-    return 0
-  }
-  accesNoteNA (im) { // acces aux notes NON activé
-    const f = this.flags[im] || 0;
-    if ((f & FLAGS.AC) && !(f & FLAGS.AN) && (f & FLAGS.DN)) return f & FLAGS.DE ? 2 : 1
-    return 0
   }
 
   statutMajeur (im) { 
