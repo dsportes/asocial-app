@@ -1,7 +1,7 @@
 <template>
   <q-btn v-if="stop"
     :icon="diag ? 'error' : icon"
-    padding="none" 
+    padding="1px 1px" 
     :disable="disable"
     :flat="flat"
     dense
@@ -15,7 +15,7 @@
   </q-btn>
   <q-btn v-else
     :icon="diag ? 'error' : icon"
-    padding="none" 
+    padding="1px 1px" 
     :disable="disable"
     :flat="flat"
     dense

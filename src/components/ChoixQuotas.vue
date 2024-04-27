@@ -21,13 +21,13 @@
         <q-input class="col-2 q-px-sm" v-model.number="mv.qv" type="number" :disable="lecture" dense/>
         <span :class="'col-2 text-center fs-sm' + ((mv.qv > mv.maxv || mv.qv < mv.minv) ? ' text-warning' : '')">
           {{mv.minv + '...' + mv.maxv}}</span>
-        <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo2"/>
+        <btn-cond class="col-1" icon="undo" size="sm" color="warning" @ok="undo2"/>
       </div>
       <div class="q-ml-md font-mono">{{ed2(mv.qv, 0, 'B')}}</div>
       <div v-if="quotas.v" :class="'q-mt-xs fnt-mono q-pa-xs ' + st(pcv)">{{$t('CQtxut', [pcv])}}</div>
     </div>
 
-    <div v-if="quotas.qc !== 0">
+    <div v-if="!groupe && quotas.qc !== 0">
       <div class="q-mt-md titre-md text-italic">{{$t('CQconso')}}</div>
       <div class="titre-sm text-italic">{{$t('CQclec')}}</div>
       <div :class="'q-pa-xs bord' + (mv.err ? 'ko' : 'ok')">
@@ -37,7 +37,7 @@
           <q-input class="col-2 q-px-sm" v-model.number="mv.qc" type="number" :disable="lecture" dense/>
           <span :class="'col-2 text-center fs-sm' + ((mv.qc > mv.maxc || mv.qc < mv.minc) ? ' text-warning' : '')">
             {{mv.minc + '...' + mv.maxc}}</span>
-          <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undoc"/>
+          <btn-cond class="col-1" icon="undo" size="sm" color="warning" @ok="undoc"/>
         </div>
         <div class="q-ml-md font-mono">{{edc(mv.qc)}}</div>
       </div>
@@ -50,6 +50,7 @@ import { edvol, edqt, mon } from '../app/util.mjs'
 import { ref, toRef, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import { UNITEV, UNITEN } from '../app/api.mjs'
+import BtnCond from './BtnCond.vue'
 
 export default {
   name: 'ChoixQuotas',
@@ -58,6 +59,8 @@ export default {
     lecture: Boolean,
     groupe: Boolean
   },
+
+  components: { BtnCond },
 
   computed: {
     pcn () { return this.quotas.qn ? Math.floor(this.quotas.n * 100 / (this.quotas.qn * UNITEN)) : 999 },

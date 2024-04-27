@@ -48,6 +48,7 @@ export const useFiltreStore = defineStore('filtre', {
         const nSt = useNoteStore()
         nSt.setFiltre(f)
       }
+      this.filtre[nom] = { ...f }
     },
     setTri (nom, val) {
       this.tri[nom] = val

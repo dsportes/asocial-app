@@ -913,3 +913,40 @@ export class NouveauMembre extends Operation {
     }
   }
 }
+
+/* OP_NouveauGroupe: 'Création d\'un nouveau groupe' ********
+- token donne les éléments d'authentification du compte.
+- idg : du groupe
+- ida : de l'avatar fondateur
+- cleGA : clé G cryptée par la clé A de l'avatar
+- cvG: carte de visite du groupe crypté par la clé G du groupe
+- msu: true si mode simple
+- quotas: { qn, qv } maximum de nombre de notes et de volume fichiers
+Retour:
+*/
+export class NouveauGroupe extends Operation {
+  constructor () { super('NouveauGroupe') }
+
+  async run (nom, msu, quotas) { // quotas: {qn, qv ...}
+    try {
+      const session = stores.session
+
+      const cleg = Cles.groupe()
+      const idg = Cles.id(cleg, session.ns)
+      const cleA = RegCles.get(session.avatarId)
+      const cleGA = await crypter(cleA, cleg)
+      const cv = new CV(idg, 0, null, nom) // (id, v, ph, tx)
+      const cvG = await cv.crypter(cleg)
+
+      const args = { 
+        token: session.authToken, idg, cvG, cleGA, msu,
+        quotas: { qn: quotas.qn, qv: quotas.qv },
+        ida: session.avatarId
+      }
+      // await post(this, 'NouveauGroupe', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

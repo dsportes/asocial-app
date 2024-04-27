@@ -1,9 +1,8 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { encode } from '@msgpack/msgpack'
-import { egaliteU8, difference, intersection } from '../app/util.mjs'
+import { egaliteU8 } from '../app/util.mjs'
 import { UNITEN, UNITEV, FLAGS } from '../app/api.mjs'
-import { Versions } from '../app/modele.mjs'
 
 /* Store maître des groupes du compte courant :
 - map : des groupes dont un des avatars du compte courant est membre
@@ -26,8 +25,7 @@ import { Versions } from '../app/modele.mjs'
 export const useGroupeStore = defineStore('groupe', {
   state: () => ({
     map: new Map(),
-    invits: new Map(),
-    stats: {}
+    invits: new Map()
   }),
 
   getters: {
@@ -271,7 +269,7 @@ export const useGroupeStore = defineStore('groupe', {
     // PageGroupes ***************************************************
     pgLgFT: (state) => {
       const ci = state.session.compti
-      const f = state.filtre.groupes
+      const f = stores.filtre.filtre.groupes
       const fsetp = f.mcp && f.mcp.size ? f.mcp : null
       const fsetn = f.mcn && f.mcn.size ? f.mcn : null
       const stt = { nn: 0, vf: 0, qn: 0, qv: 0 }
@@ -296,14 +294,13 @@ export const useGroupeStore = defineStore('groupe', {
         if (f.invits && g.nbInvits === 0) continue
         r.push(e)
       }
-      state.stats = stt
       r.sort((a,b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0)})
-      stores.ui.fmsg(r.length)
-      return r
+      state.ui.fmsg(r.length)
+      return [r, stt]
     },
 
     pgLg: (state) => {
-      const f = state.filtre.groupes
+      const f = state.filtre.filtre.groupes
       if (f.tous) return state.map
       const s = state.session.compte.idGroupes(state.session.avatarId)
       const m = new Map()

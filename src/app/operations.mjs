@@ -74,59 +74,6 @@ export class MuterCompte extends Operation {
   }
 }
 
-/* OP_NouveauGroupe: 'Création d\'un nouveau groupe' ********
-args.token donne les éléments d'authentification du compte.
-args.rowGroupe : le groupe créé
-args.rowMembre : le membre
-args.id: id de l'avatar créateur
-args.quotas : [q1, q2] attribué au groupe
-args.npgk: clé dans mpg du compte (hash du cryptage par la clé K du compte de `idg / idav`)
-args.empgk: élément de mpg dans le compte de l'avatar créateur
-Retour:
-*/
-export class NouveauGroupe extends Operation {
-  constructor () { super('NouveauGroupe') }
-
-  async run (nom, unanime, quotas) { // quotas: [q1, q2]
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      const nag = NomGenerique.groupe(nom)
-      const na = getNg(session.avatarId)
-      const avatar = aSt.getAvatar(na.id)
-      const rowGroupe = await Groupe.rowNouveauGroupe(nag, na, unanime)
-      
-      /*
-      - `mpgk` : map des participations aux groupes des avatars du compte.
-        - _clé_: `npgk`. hash du cryptage par la clé K du compte de `idg / idav`. Cette identification permet au serveur de supprimer une entrée de la map sans disposer de la clé K. `idg`: id courte du groupe, `idav`: id courte de l'avatar.
-        - _valeur_: `{nomg, cleg, im, idav}` cryptée par la clé K.
-          - `nomg`: nom du groupe,
-          - `cleg`: clé du groupe,
-          - `im`: indice du membre dans la table `flags / anag` du groupe.
-          - `idav` : id (court) de l'avatar.
-      */
-      const e = { nomg: nag.nom, cleg: nag.rnd, im: 1, idav: na.id }
-      const npgk = await Groupe.getNpgk(nag, na)
-      const empgk = await crypter(session.clek, new Uint8Array(encode(e))) 
-
-      const rowMembre = await Membre.rowNouveauMembre (nag, na, 1, avatar.cv || null, true)
-
-      const args = { 
-        token: session.authToken, 
-        rowGroupe, rowMembre, 
-        id: session.avatarId,
-        quotas: [quotas.q1, quotas.q2], 
-        npgk, empgk, 
-        abPlus: [nag.id]
-      }
-      this.tr(await post(this, 'NouveauGroupe', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_InvitationFiche: 'Récupération des informations d\'invitation à un groupe' ******
 args.token donne les éléments d'authentification du compte.
 args.idg : id du groupe

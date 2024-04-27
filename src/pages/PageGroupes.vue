@@ -1,6 +1,6 @@
 <template>
 <q-page class="q-pa-sm column items-center">
-  <q-card class="spmd column items-center">
+  <q-card v-if="gSt.pgLgFT" class="spmd column items-center">
 
     <btn-cond class="q-my-sm" :label="$t('PGcrea')" @ok="nvGr" cond="cEdit"/>
 
@@ -12,13 +12,13 @@
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PGvut')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{gSt.stats.nn}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{edv(gSt.stats.vf)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{stt.nn}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{edv(stt.vf)}}</div>
       </div>
       <div class="row">
         <div class="col-6 fs-md text-italic text-right">{{$t('PGvq')}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{'[' + gSt.stats.nn + '] / ' + edqn(gSt.stats.nn)}}</div>
-        <div class="col-3 fs-md font-mono text-center">{{ '[' + gSt.stats.qv + '] / ' + edqv(gSt.stats.qv)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{'[' + stt.nn + '] / ' + edqn(stt.nn)}}</div>
+        <div class="col-3 fs-md font-mono text-center">{{ '[' + stt.qv + '] / ' + edqv(stt.qv)}}</div>
       </div>
     </div>
   </q-card>
@@ -36,12 +36,12 @@
     </div>
   </q-card>
 
-  <div v-if="!gSt.pgLgFT.length" class="q-my-lg titre-lg text-italic text-center">
+  <div v-if="!lg.length" class="q-my-lg titre-lg text-italic text-center">
     {{$t('PGvide', [gSt.pgLg.size])}}
   </div>
 
-  <div class="spmd" v-if="gSt.pgLgFT.length">
-    <q-card v-for="(e, idx) in gSt.pgLgFT" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-md'">
+  <div class="spmd" v-if="lg.length">
+    <q-card v-for="(e, idx) in lg" :key="e.groupe.id" :class="dkli(idx) + 'q-mb-md'">
       <apercu-genx :id="e.groupe.id" :idx="idx" />
       <div class="row full-width items-center justify-between">
         <div>
@@ -73,11 +73,12 @@
   <q-dialog v-model="ui.d.PGcrgr" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
-        <btn-cond color="warning" icon="close" @click="ui.fD"/>
+        <btn-cond color="warning" icon="close" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center">{{$t('PGcrea')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
       <div class="q-pa-xs">
+        <sel-avid/>
         <div class="titre-md q-mb-xs text-center">{{$t('PGnom', [nom || '?'])}}</div>
         <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="okNom"/>
         <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
@@ -107,18 +108,21 @@ import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
+import SelAvid from '../components/SelAvid.vue'
 import InvitationAcceptation from '../components/InvitationAcceptation.vue'
 import { UNITEN, UNITEV } from '../app/api.mjs'
-import { NouveauGroupe } from '../app/operations.mjs'
+import { NouveauGroupe } from '../app/operations4.mjs'
 
 export default {
   name: 'PageGroupes',
 
   props: { tous: Boolean },
 
-  components: { BtnCond, ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, ApercuChatgr, InvitationAcceptation },
+  components: { SelAvid, BtnCond, ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, ApercuChatgr, InvitationAcceptation },
 
   computed: {
+    stt () { return this.gSt.pgLgFT[1] || { nn:0, qn: 0, vf: 0, qv: 0 }},
+    lg () { return this.gSt.pgLgFT[0] || [] }
   },
 
   methods: {
@@ -144,12 +148,10 @@ export default {
     },
 
     async nvGr () {
-      const cpt = this.aSt.compta.compteurs.qv
-      let max1 = Math.floor(((cpt.q1 * UNITEN) - (cpt.nn + cpt.nc + cpt.ng)) / UNITEN)
-      if (max1 < 0) max1 = 0
-      let max2 = Math.floor(((cpt.q2 * UNITEV) - cpt.v2) / UNITEV)
-      if (max2 < 0) max2 = 0
-      this.quotas = { q1: 0, q2: 0, min1: 0, min2: 0, max1, max2, err: ''}
+      const cpt = this.session.compte.qv // { qc, qn, qv, pcc, pcn, pcv, nbj }
+      const maxn = Math.floor(cpt.qn * (100 - cpt.pcn) / 100)
+      const maxv = Math.floor(cpt.qn * (100 - cpt.pcv) / 100)
+      this.quotas = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, maxn, maxv, err: ''}
       this.nom = ''
       this.una = false
       this.ui.oD('PGcrgr')
@@ -158,7 +160,7 @@ export default {
     okNom (n) { this.nom = n },
     
     async okCreation () {
-      console.log(this.nom, this.quotas.q1, this.quotas.q2, this.una)
+      console.log(this.nom, this.quotas.qn, this.quotas.qv, this.una)
       await new NouveauGroupe().run(this.nom, this.una, this.quotas)
       this.ui.fD()
     }

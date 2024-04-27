@@ -25,7 +25,9 @@ export default ({
   components : { BtnCond, HashTags },
 
   data () {
-    return { }
+    return {
+      ht: ''
+    }
   },
 
   computed: {
