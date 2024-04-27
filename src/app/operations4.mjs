@@ -918,7 +918,8 @@ export class NouveauMembre extends Operation {
 - token donne les éléments d'authentification du compte.
 - idg : du groupe
 - ida : de l'avatar fondateur
-- cleGA : clé G cryptée par la clé A de l'avatar
+- cleAG : clé A de l'avatar cryptée par la clé G
+- cleGK : clé du groupe cryptée par la clé K du compte
 - cvG: carte de visite du groupe crypté par la clé G du groupe
 - msu: true si mode simple
 - quotas: { qn, qv } maximum de nombre de notes et de volume fichiers
@@ -934,12 +935,13 @@ export class NouveauGroupe extends Operation {
       const cleg = Cles.groupe()
       const idg = Cles.id(cleg, session.ns)
       const cleA = RegCles.get(session.avatarId)
-      const cleGA = await crypter(cleA, cleg)
+      const cleAG = await crypter(cleg, cleA)
+      const cleGK = await crypter(session.clek, cleg)
       const cv = new CV(idg, 0, null, nom) // (id, v, ph, tx)
       const cvG = await cv.crypter(cleg)
 
       const args = { 
-        token: session.authToken, idg, cvG, cleGA, msu,
+        token: session.authToken, idg, cvG, cleAG, cleGK msu,
         quotas: { qn: quotas.qn, qv: quotas.qv },
         ida: session.avatarId
       }

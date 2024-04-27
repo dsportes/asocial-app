@@ -420,6 +420,7 @@ export default {
   EX8243: '(BUG) Le compte n\'a pas d\'avatar membre actif animateur du groupe dont la CV est à mettre à jour',
   EX8244: '(BUG) Le compte n\'a de chat avec le titulaire de la carte de visite',
   EX8245: '(BUG) Conflit d\'id d\'avatar.',
+  EX8246: '(BUG) Groupe déjà créé.',
 
   EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
   EX8802: 'Action impossible du fait de la restriction "accès minimal"',
