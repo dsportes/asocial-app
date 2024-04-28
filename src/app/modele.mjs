@@ -630,11 +630,11 @@ export class Compte extends GenDoc {
 
     this.mpg = new Map()
     for(const idx in row.mpg) {
-      const idg = ID.long(parsInt(idx), this.ns)
+      const idg = ID.long(parseInt(idx), this.ns)
       const e = row.mpg[idx]
       RegCles.set(await decrypter(clek, e.cleGK))
       const sav = new Set()
-      for(const idx2 of e.lp) sav.add(ID.long(parseInt(idx2), this.ns))
+      for(const idx2 of e.lav) sav.add(ID.long(parseInt(idx2), this.ns))
       this.mpg.set(idg, sav)
     }
   }
@@ -682,11 +682,16 @@ export class Compte extends GenDoc {
     return x
   }
 
-  /*
-  // Map(ida, im) des avatars du compte dans mpg ou les invits des avatars
+  /* Map(ida, im) des avatars du compte dans mpg 
+  ou les invits des avatars
   imIdGroupe (idg) { // map (cle:id val:im) pour le groupe idg
     const m = new Map()
-    this.mpg.forEach(e => { if (e.ng.id === idg) m.set(e.id, e.im) })
+    this.mpg.forEach((sav, id) => { 
+      if (id === idg && sav && sav.size) 
+        sav.forEach(im => {m.set(id, im)})
+    })
+    return m
+    /*
     const aSt = stores.avatar
     aSt.map.forEach(e => {
       if (e.avatar.invits) e.avatar.invits.forEach(x => { // { ng, im, id }
@@ -1051,9 +1056,11 @@ export class Groupe extends GenDoc {
     this.mmb = new Map()
     this.tid = new Array(row.tid.length)
     row.tid.forEach((id, im) => { 
-      const ida = ID.long(id, this.ns)
-      this.tid[im] = ida
-      this.mmb.set(ida, im)
+      if (im) {
+        const ida = ID.long(id, this.ns)
+        this.tid[im] = ida
+        this.mmb.set(ida, im)
+      }
     })
     this.flags = row.flags
     this.st = row.st
@@ -1100,7 +1107,6 @@ export class Groupe extends GenDoc {
     const f = this.flags[im] || 0
     return (f & FLAGS.AC) && !(f & FLAGS.AM) && (f & FLAGS.DM) ? 1 : 0
   }
-
 
   accesNote (im) {
     const f = this.flags[im] || 0;
@@ -1258,21 +1264,15 @@ export class Groupe extends GenDoc {
 - `v` : 
 - `vcv` : version de la carte de visite du membre.
 
-- `ddi` : date de l'invitation la plus récente.
+- `ddi` : date d'invitation.
+- `dac` : date de début d'activité
 - **dates de début de la première et fin de la dernière période...**
-  - `dac fac` : d'activité
   - `dln fln` : d'accès en lecture aux notes.
   - `den fen` : d'accès en écriture aux notes.
   - `dam fam` : d'accès aux membres.
-- `flagsiv` : flags de l'invitation en cours.
-- `inv` : . Liste des indices des animateurs ayant validé la dernière invitation.
-- `idm` : id de l'avatar membre
+- `inv` : Liste des im des animateurs ayant validé la dernière invitation.
 - `cleAG` : clé A de l'avatar membre cryptée par la clé G du groupe.
-- `cvA` : carte de visite du membre `{v, photo, info}`, textes cryptés par la clé A de l'avatar membre.
-
-**Extension pour une fiche Invitation **
-- ext : { flags, invs: map, chatg }
-  invs : clé: im, valeur: { cva, nag }
+- `cvA` : carte de visite du membre `{id, v, photo, info}`, textes cryptés par la clé A de l'avatar membre.
 */
 export class Membre extends GenDoc {
   async compile (row) {
@@ -1280,37 +1280,19 @@ export class Membre extends GenDoc {
     this.vsh = row.vsh || 0
     this.ddi = row.ddi || 0
     this.dac = row.dac || 0
-    this.fac = row.fac || 0
     this.dln = row.dln || 0
     this.fln = row.fln || 0
     this.den = row.den || 0
     this.fen = row.fen || 0    
     this.dam = row.dam || 0
     this.fam = row.fam || 0
-    this.flagsiv = row.flagsiv || 0
     this.inv = row.inv || null
-    this.idm = ID.long(row.idm, ns)
-    this.na = NomGenerique.from(decode(await decrypter(this.cleg, row.nag)))
-    this.nag = await Groupe.getNag (this.ng, this.na) 
-    this.estAc = aSt.compte.avatarIds.has(this.na.id)
-    this.cv = row.cva && !this.estAc ? decode(await decrypter(this.na.rnd, row.cva)) : null
-    /*
-    if (row.ext) {
-      const pSt = stores.people
-      this.ext = { flags: row.ext.flags, invs: new Map() }
-      if (row.ext.chatg)
-        this.ext.chattxt = ungzipB(await decrypter(this.cleg, row.ext.chatg))
-      this.ext.cvg = row.ext.cvg ? decode(await decrypter(this.ng.rnd, row.ext.cvg)) : null
-      for (const imx in row.ext.invs) {
-        const im = parseInt(imx)
-        const x = row.ext.invs[imx]
-        const na = NomGenerique.from(decode(await decrypter(this.ng.rnd, x.nag)))
-        const cv = x.cva ? decode(await decrypter(na.rnd, x.cva)) : null
-        this.ext.invs.set(im, na)
-        if (!aSt.compte.mav.has(na.id)) pSt.setCv(na, cv) // c'est un people
-      }
-    }
-    */
+    const cleg = RegCles.get(this.id)
+    const clea = await decrypter(cleg, row.cleAG)
+    RegCles.set(clea)
+    const ida = Cles.id(clea, ns)
+    const cv = await CV.set(row.cvA || CV.fake(ida))
+    cv.store()
   } 
 
   static async rowNouveauMembre (nag, na, im, cv, nvgr) {
@@ -1351,15 +1333,10 @@ export class Chatgr extends GenDoc {
 
   async compile (row) {
     this.vsh = row.vsh || 0
-    const gSt = stores.groupe
-    const pSt = stores.people
     const cle = RegCles.get(this.id)
-    const g = gSt.groupe(this.id)
     this.items = []
-    const a = []
-    this.tit = ''
     this.dh = 0
-    const mbs = gSt.egr(this.id)
+    this.tit = '?'
     if (row.items) for (const item of row.items) {
       const i = { im: item.im, dh: item.dh, t: '', dhx: item.dhx}
       if (!item.dhx) {
@@ -1367,16 +1344,23 @@ export class Chatgr extends GenDoc {
         if (!this.tit && i.t) this.tit = titre(i.t)
       }
       if (this.dh === 0) this.dh = i.dhx ? i.dhx : i.dh
+      this.items.push(i)
+    }
+  }
+
+  get txt () {
+    const g = stores.groupe.groupe.get(this.id)
+    const session = stores.session
+    const a = []
+    if (this.items) for (const item of this.items) {
       const idm = g.tid[i.im]
       if (!idm) continue
-      const cv = pSt.getCV(idm)
+      const cv = session.getCV(idm)
       a.push('_**' + $t('dedh', [cv.nomC, dhstring(i.dh)]) + '**_')
       if (i.dhx) a.push('\n' + $t('supprime', [dhstring(i.dhx)]) + '\n')
       else a.push('\n' + i.t + '\n')
-      this.items.push(i)
     }
-    this.txt = a.join('\n')
-    if (!this.tit) this.tit = '???'
+    return a.join('\n')
   }
 
   static async getItem (cleg, im, txt, dh) {

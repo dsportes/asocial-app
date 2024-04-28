@@ -941,11 +941,11 @@ export class NouveauGroupe extends Operation {
       const cvG = await cv.crypter(cleg)
 
       const args = { 
-        token: session.authToken, idg, cvG, cleAG, cleGK msu,
+        token: session.authToken, idg, cvG, cleAG, cleGK, msu,
         quotas: { qn: quotas.qn, qv: quotas.qv },
         ida: session.avatarId
       }
-      // await post(this, 'NouveauGroupe', args)
+      await post(this, 'NouveauGroupe', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

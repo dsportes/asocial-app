@@ -29,9 +29,10 @@ export const useGroupeStore = defineStore('groupe', {
   }),
 
   getters: {
-    session (state) { return stores.session },
+    session: (state) => stores.session,
     ui: (state) => stores.ui,
     aSt: (state) => stores.avatar,
+    nSt: (state) => stores.note,
     filtre: (state) => stores.filtre,
 
     // groupe courant
@@ -150,7 +151,7 @@ export const useGroupeStore = defineStore('groupe', {
         let n = 0
         const g = e.groupe
         const c = state.session.compte
-        for(let im = 1; i < g.st.length; im++) {
+        for(let im = 1; im < g.st.length; im++) {
           if (g.st[im] === 2 && c.mav.has(g.tid[im])) n++
         }        
         return n
@@ -528,7 +529,6 @@ export const useGroupeStore = defineStore('groupe', {
     
     setGroupe (groupe) {
       if (!groupe) return
-      const aSt = stores.avatar
       let e = this.map.get(groupe.id)
       if (!e) {
         e = { 
@@ -550,13 +550,13 @@ export const useGroupeStore = defineStore('groupe', {
       }
       e.estAnim = false
       e.estHeb = false
-      const m = aSt.compte.imIdGroupe(groupe.id)
-      for (const [id, im] of m) {
+      const sav = this.session.compte.mpg.get(groupe.id)
+      for (const ida of sav) {
+        const im = groupe.mmb.get(ida)
         if (groupe.estAnim(im)) e.estAnim = true
         if (im === groupe.imh) e.estHeb = true
       }
-      const nSt = stores.note
-      nSt.setGroupe(groupe.na)
+      this.nSt.setGroupe(groupe.id)
     },
 
     setVols (id, objv) {
