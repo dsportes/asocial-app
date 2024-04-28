@@ -213,16 +213,16 @@ class SB {
       if (mb._zombi) { 
         const mbav = this.g.getMembre(mb.id, mb.ids) // membre AVANT suppression
         this.g.delMembre(mb.id, mb.ids)
-        this.p.delPGr(mbav.idm, mb.id) 
+        this.p.delPGr(mbav.ida, mb.id) 
       }
       else { 
         this.g.setMembre(mb); 
-        this.p.setPGr(mb.idm, mb.id) }
+        this.p.setPGr(mb.ida, mb.id) }
     }
 
     if (this.supprMb.size) for(const idg of this.supprMb) {
-      for (const ids of this.g.map(idg)) {
-        const mbav = this.g.getMembre(idg, ids) // membre AVANT suppression
+      const e = this.g.map.get(idg)
+      if (e) for (const mbav of e.membres) {
         this.p.delPGr(mbav.idm, idg) 
       }
       this.g.delMembres(idg)
@@ -439,7 +439,7 @@ export class OperationS extends Operation {
       }
     })
     dav.groupes.forEach((eav, id) => {
-      const e = ds.groupes.has(id)
+      const e = ds.groupes.get(id)
       if (!e) {
         buf.purgeGroupeIDB(id)
         if (!cnx) sb.delG(id)

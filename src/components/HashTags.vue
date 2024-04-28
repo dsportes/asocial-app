@@ -79,7 +79,7 @@ export default ({
     r1 (val) { return !reg.test(val) ? this.$t('HTe2') : true},
 
     val () {
-      if (this.r1(this.sel) && this.r2(this.sel)) {
+      if (this.r1(this.sel) === true && this.r2(this.sel) === true) {
         if (!this.sr.has(this.sel)) {
           this.sr.add(this.sel)
           this.sel = ''

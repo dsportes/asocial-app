@@ -44,9 +44,16 @@ export default {
     initVal: String
   },
   components: { BtnCond },
+  emits: ['update:modelValue', 'ok', 'ko'],
   data () {
     return {
       interdits: interdits
+    }
+  },
+  watch: {
+    nom (ap) {
+      const ok = this.r2(ap) === true && this.r1(ap) === true
+      this.$emit('update:modelValue', ok ? ap : '')
     }
   },
   methods: {

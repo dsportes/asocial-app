@@ -79,7 +79,7 @@ export default {
   computed: { 
     apropos () { 
       const e = this.session.compti.mc.get(this.id) 
-      return e || { tx:'', ht: ''} 
+      return e || { ht: new Set(), tx: ''} 
     },
     memolg () { return titre(this.apropos.tx) },
     nom () { return this.session.getCV(this.id).nom },

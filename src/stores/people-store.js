@@ -162,6 +162,27 @@ export const usePeopleStore = defineStore('people', {
       if (!x || x.v < cv.v) this.cvs.set(id, cv)
     },
 
+    getElt (id) {
+      let e = this.map.get(id)
+      if (!e) { e = { sch: new Set(), sgr: new Set() }; this.map.set(id, e) }
+      return e
+    },
+
+    delElt (id, e) {
+      if (e && !e.sch.size && !e.sgr.size) this.map.delete(id)
+    },
+
+    setPGr (idp, idg) {
+      const e = this.getElt(idp)
+      e.sgr.add(idg)
+    },
+
+    delPGr (idp, idg) {
+      const e = this.map.get(idp); if (!e) return
+      e.sgr.delete(idg)
+      this.delElt(idp, e)
+    },
+
     delGr (idg) {
       const ppvides = new Set()
       this.map.forEach((e, idp) => {
@@ -182,17 +203,6 @@ export const usePeopleStore = defineStore('people', {
         }
       })
       if (ppvides.vides.size) ppvides.forEach(idp => { this.map.delete(idp) })
-    },
-
-    setPGr (idp, idg) {
-      let e = this.map.get(idp); if (!e) { e = { sgr: new Set(), sch: new Set()}; this.map.set(idp, e)}
-      e.sgr.add(idg)
-    },
-
-    delPGr (idp, idg) {
-      const e = this.map.get(idp); if (!e) return
-      e.sgr.delete(idg)
-      if (!e.sgr.size && !e.sch.size) this.map.delete(idp)
     },
 
     setPCh (idp, ida) {
@@ -220,20 +230,6 @@ export const usePeopleStore = defineStore('people', {
       return e
     },
   
-    getElt (na, cv, disp) {
-      let e = this.map.get(na.id)
-      if (!e) {
-        if (disp) return null
-        e = { na: na, sp: 0, groupes: new Map(), chats: new Map() }; this.map.set(na.id, e)
-      }
-      if (cv && (!e.cv || e.cv.v < cv.v)) e.cv = cv
-      return e
-    },
-
-    delElt (id, e) {
-      if (!ID.estComptable(id) && !e.sp && !e.chats.size && !e.groupes.size) this.map.delete(id)
-    },
-
     setDisparu (na) {
       const e = this.getElt(na, null, true)
       if (!e) return null
@@ -256,18 +252,6 @@ export const usePeopleStore = defineStore('people', {
       const e = this.map.get(id)
       if (!e) return
       e.sp = 0
-      this.delElt(id, e)
-    },
-
-    setPeopleMembre (na, idg, ids, cv) {
-      const e = this.getElt(na, cv)
-      e.groupes.set(idg, ids)
-    },
-
-    unsetPeopleMembre (id, idg) {
-      const e = this.map.get(id)
-      if (!e) return
-      e.groupes.delete(idg)
       this.delElt(id, e)
     },
 

@@ -3,6 +3,7 @@ import stores from './stores.mjs'
 import { encode } from '@msgpack/msgpack'
 import { egaliteU8 } from '../app/util.mjs'
 import { UNITEN, UNITEV, FLAGS } from '../app/api.mjs'
+import { NouvellePartition } from 'src/app/operations4.mjs'
 
 /* Store maître des groupes du compte courant :
 - map : des groupes dont un des avatars du compte courant est membre
@@ -33,6 +34,7 @@ export const useGroupeStore = defineStore('groupe', {
     ui: (state) => stores.ui,
     aSt: (state) => stores.avatar,
     nSt: (state) => stores.note,
+    pSt: (state) => stores.people,
     filtre: (state) => stores.filtre,
 
     // groupe courant
@@ -116,15 +118,17 @@ export const useGroupeStore = defineStore('groupe', {
         return e ? e.groupe : null 
       }
     },
-    getMembre: (state) => { return (id, im) => { 
+    getMembre: (state) => { return (id, idaIm) => { 
         const e = state.map.get(id)
-        return e ? e.membres.get(im) : null 
+        if (!e) return null
+        if (idaIm < 10000) return e.membres.get(idaIm) || null
+        for (const m of e.membres) if (m.ida === idaIm) return m
+        return null
       }
     },
+
     membreC: (state) => {
-      const session = stores.session
-      const e = state.map.get(session.groupeId)
-      return e ? e.membres.get(session.membreId) : null 
+      return state.getMembre(state.session.groupeId, state.session.membreId)
     },
 
     getMembres: (state) => { return (id) => { 
@@ -132,6 +136,7 @@ export const useGroupeStore = defineStore('groupe', {
         return e ? e.membres : null 
       }
     },
+
     // Array des Ids des membres "people" du groupe id
     getMembreIdEs: (state) => { return (id) => {
         const a = []
@@ -280,8 +285,8 @@ export const useGroupeStore = defineStore('groupe', {
         if (e.estHeb) {
           stt.nn += g.nn || 0
           stt.vf += g.vf || 0
-          stt.qn += v.qn || 0
-          stt.qv += v.qv || 0
+          stt.qn += g.qn || 0
+          stt.qv += g.qv || 0
         }
         const cv = state.session.getCV(g.id)
         e.nom = cv.nom
@@ -429,7 +434,7 @@ export const useGroupeStore = defineStore('groupe', {
           estAnim: false, // un des avatars du compte est animateur du groupe
           estHeb: false // un des avatars du compte est hébergeur du groupe
         }
-        this.map.set(groupe.id, e)
+        this.map.set(id, e)
       }
       return e
     },
@@ -451,9 +456,23 @@ export const useGroupeStore = defineStore('groupe', {
       stores.note.setGroupe(groupe.id)
     },
 
+    delGroupe (idg) {
+      this.delMembre(idg) // tous
+      this.delNote(idg) // toutes
+      this.map.delete(idg)
+    },
+
+    getInvit (idg, ida) { // na du groupe et de l'avatar invité
+      return this.invits.get(idg + '/' + ida)
+    },
+
     setInvit (inv) { // inv: {idg, ida, idi, txt}
       const e = this.setE(inv.idg)
       this.invits.set(inv.idg + '/' + inv.ida, inv)
+    },
+
+    delInvit (idg, ida) { // inv: {idg, ida, idi, txt}
+      this.invits.delete(idg + '/' + ida)
     },
 
     setChatgr (chatgr) {
@@ -462,10 +481,26 @@ export const useGroupeStore = defineStore('groupe', {
       if (!e.chatgr || e.chatgr.v < chatgr.v) e.chatgr = chatgr
     },
 
-    setMembre(membre) {
+    getChatgr (idg) { return this.map.has(idg) ? this.map.get(idg).chatgr : null },
+
+    setMembre (membre) {
+      if (!membre) return
+      const estAvc = this.session.compte.mav.has(membre.ida)
+      const e = this.map.get(membre.id) // entrée du groupe
+      if (!e) return
+      if (membre._zombi) e.membres.delete(membre.ids)
+      else e.membres.set(membre.ids, membre)
     },
 
     delMembre (id, ids) {
+      const e = this.map.get(id)
+      if (!e) return
+      if (ids) delete m.membres(ids)
+      else e.membres.clear()
+    },
+
+    delMembres (idg) {
+      thgis.delMembre(idg)
     },
 
     setNote (note) {
@@ -474,14 +509,12 @@ export const useGroupeStore = defineStore('groupe', {
     delNote (id, ids) {
     },
 
-    delGroupe (idg) {
-    },
-
-    delMembres (idg) {
-    },
-
     delNotes (idg) {
+      this.delNote(idg)
     },
+
+
+
 
     /* Note Exclu : liste des {im, na} des membres aptes à recevoir l'exclusivité
     - pour les avatars du compte, le na est pris dans le compte
@@ -505,108 +538,6 @@ export const useGroupeStore = defineStore('groupe', {
       }
       return t
     },
-    
-    /* Sert à pouvoir attacher un écouteur pour détecter les changements de mc */
-    setMotscles (id, mc) {
-    },
-
-
-    clearInvits (id) {
-      for (let [cle, val] of this.invits) {
-        if (val.na.id === id) this.invits.delete(cle)
-      }
-    },
-
-    getInvit (idg, ida) { // na du groupe et de l'avatar invité
-      return this.invits.get(idg + '/' + ida)
-    },
-
-    delInvit (idg, ida) { // id du groupe et de l'avatar invité
-      const e = this.invits.get(ida)
-      if (!e) return
-      e.delete(idg)
-    },
-    
-    setGroupe (groupe) {
-      if (!groupe) return
-      let e = this.map.get(groupe.id)
-      if (!e) {
-        e = { 
-          groupe: groupe, 
-          notes: new Map(),
-          membres: new Map(), // tous membres
-          estAnim: false, // un des avatars du compte est animateur du groupe
-          estHeb: false, // un des avatars du compte est hébergeur du groupe
-          objv: { v: 0, vols: {v1: 0, v2: 0, q1: 0, q2: 0} } //  { v, vols: {v1, v2, q1, q2} }
-        }
-        this.map.set(groupe.id, e)
-      } else {
-        if (groupe.v > e.groupe.v) {
-          const mcav = new Uint8Array(encode(e.groupe.mc || {}))
-          const mcap = new Uint8Array(encode(groupe.mc || {}))
-          if (!egaliteU8(mcav, mcap )) this.setMotscles(groupe.id, mcap)
-          e.groupe = groupe
-        }
-      }
-      e.estAnim = false
-      e.estHeb = false
-      const sav = this.session.compte.mpg.get(groupe.id)
-      for (const ida of sav) {
-        const im = groupe.mmb.get(ida)
-        if (groupe.estAnim(im)) e.estAnim = true
-        if (im === groupe.imh) e.estHeb = true
-      }
-      this.nSt.setGroupe(groupe.id)
-    },
-
-    setVols (id, objv) {
-      const e = this.map.get(id)
-      if (e && objv.v > e.objv.v) e.objv = objv
-    },
-
-    setMembre (membre) {
-      const aSt = stores.avatar
-      if (!membre) return
-      const e = this.map.get(membre.id)
-      if (!e) return
-      const pSt = stores.people
-      if (membre._zombi) {
-        // membre disparu : c'est sync qui a détecté que le membre n'existait plus
-        const m = e.membres.get(membre.ids)
-        if (!m) return // membre déjà traité disparu
-        e.membres.delete(membre.ids)
-        const na = m.na
-        if (m.estAc) return
-        pSt.unsetPeopleMembre(na.id, membre.id)
-      } else {
-        e.membres.set(membre.ids, membre)
-        const na = membre.na
-        if (!membre.estAc) {
-          // ajoute ou remplace le people, met à jour sa cv le cas échéant
-          pSt.setPeopleMembre(na, membre.id, membre.ids, membre.cv)
-        }
-      }
-    },
-
-    delMembre (id, ids) {
-      const pSt = stores.people
-      const aSt = stores.avatar
-      const e = this.map.get(id)
-      if (!e) return
-      if (ids) {
-        const m = e.membres.get(ids)
-        if (!m) return
-        const idp = m.na.id
-        if (!m.estAc) pSt.unsetPeopleMembre(idp, id)
-        delete m.membres(ids)
-      } else {
-        e.membres.forEach((m, ids) => {
-          const idp = m.na.id
-          pSt.unsetPeopleMembre(idp, id)
-        })
-        e.membres.clear()
-      }
-    },
 
     setNote (note) {
       if (!note) return
@@ -629,31 +560,6 @@ export const useGroupeStore = defineStore('groupe', {
         })
         e.notes.clear()
       }
-    },
-
-    setChatgr (chatgr) {
-      if (!chatgr) return
-      const e = this.map.get(chatgr.id)
-      if (e) e.chatgr = chatgr
-    },
-
-    /* Mise jour groupée pour un groupe
-    e : { id, gr, lmb: [], lno: [] }
-    */
-    lotMaj ({id, gr, lmb, lno, lch, objv}) {
-      if (gr) this.setGroupe(gr)
-      if (objv) this.setVols (id, objv)
-      lno.forEach(s => { 
-        if (s._zombi) this.delNote(s.id, s.ids); else this.setNote(s)  
-      })
-      lmb.forEach(m => { this.setMembre(m) }) // traite AUSSI le cas _zombi (disparu)
-      lch.forEach(c => { this.setChatgr(c) })
-    },
-
-    del (id) {
-      this.map.delete(id)
-      const nSt = stores.note
-      nSt.delGroupe(id)
     }
   }
 })

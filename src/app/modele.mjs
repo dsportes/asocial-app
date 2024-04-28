@@ -1290,8 +1290,8 @@ export class Membre extends GenDoc {
     const cleg = RegCles.get(this.id)
     const clea = await decrypter(cleg, row.cleAG)
     RegCles.set(clea)
-    const ida = Cles.id(clea, ns)
-    const cv = await CV.set(row.cvA || CV.fake(ida))
+    this.ida = Cles.id(clea, ns)
+    const cv = await CV.set(row.cvA || CV.fake(this.ida))
     cv.store()
   } 
 

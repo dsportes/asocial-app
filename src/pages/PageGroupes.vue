@@ -80,7 +80,7 @@
       <div class="q-pa-xs">
         <sel-avid/>
         <div class="titre-md q-mb-xs text-center">{{$t('PGnom', [nom || '?'])}}</div>
-        <nom-avatar class="titre-md q-mb-sm" verif groupe @ok-nom="okNom"/>
+        <nom-avatar class="titre-md q-mb-sm" verif groupe v-model="nom"/>
         <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
         <choix-quotas :quotas="quotas" groupe/>
         <q-option-group :options="options" type="radio" v-model="una"/>
@@ -157,7 +157,7 @@ export default {
       this.ui.oD('PGcrgr')
     },
 
-    okNom (n) { this.nom = n },
+    //okNom (n) { this.nom = n },
     
     async okCreation () {
       console.log(this.nom, this.quotas.qn, this.quotas.qv, this.una)
