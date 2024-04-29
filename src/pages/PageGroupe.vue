@@ -2,7 +2,7 @@
 <q-page>
   <!-- Tab "groupe" -------------------------------------------------->
   <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm spmd">
-    <apercu-groupe class="q-my-sm" :eg="gSt.egrC" :idx="0"/>
+    <apercu-groupe class="q-my-sm"/>
   </div>
 
   <!-- Tab "membres" -------------------------------------------------->

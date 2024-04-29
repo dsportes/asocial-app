@@ -38,10 +38,7 @@ export const useGroupeStore = defineStore('groupe', {
     filtre: (state) => stores.filtre,
 
     // groupe courant
-    egrC (state) { 
-      const id = stores.session.groupeId
-      return state.map.get(id)
-    },
+    egrC (state) { return state.map.get(state.session.groupeId) },
 
     exV2 (state) {
       const e = state.map.get(stores.session.groupeId)

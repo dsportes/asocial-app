@@ -1,25 +1,25 @@
 <template>
 <div>
-  <div v-if="!eg || !eg.objv || !eg.objv.vols" class="titre-lg text-italic q-ma-md">{{$t('PGdisp')}}</div>
+  <div v-if="!eg || !eg.groupe" class="titre-lg text-italic q-ma-md">{{$t('PGdisp')}}</div>
 
-  <div v-else :class="dkli(idx)">
-    <apercu-genx :id="eg.groupe.id" :idx="idx"/>
+  <div v-else :class="sty()">
+    <apercu-genx :id="eg.groupe.id" :idx="0"/>
 
     <div v-if="eg.groupe.dfh" class="q-mr-sm">
       <q-icon name="warning" size="md" color="negative"/>
       <span class="q-ml-xs q-pa-xs bg-yellow-3 text-negative">{{$t('PGnh')}}</span>
     </div>
     <div class="q-mr-sm">
-      <q-icon v-if="nbiv(eg)" class="q-mr-xs" name="star" size="md" color="green-5"/>
-      <span class="text-italic">{{$t('PGinv', nbiv(eg), {count: nbiv(eg)})}}</span>
+      <q-icon v-if="nbiv" class="q-mr-xs" name="star" size="md" color="green-5"/>
+      <span class="text-italic">{{$t('PGinv', nbiv, {count: nbiv})}}</span>
     </div>
 
-    <div class="q-mt-sm row justify-end">
-      <q-btn size="sm" icon="chat" :label="$t('PGchat')" 
-        color="primary" dense padding="xs" @click="this.ui.oD('ACGouvrir')"/>
+    <div v-if="gSt.ambano[0]" class="q-mt-sm row justify-end">
+      <btn-cond size="sm" icon="chat" :label="$t('PGchat')" cond="cVisu"
+        @ok="this.ui.oD('ACGouvrir')"/>
     </div>
 
-    <div v-if="fond">
+    <div v-if="!eg.groupe.estRadie(1)">
       <span class="q-mt-sm titre-md q-mr-sm">{{$t('AGfond')}}</span>
       <bouton-membre :eg="eg" :im="1" btn/>
     </div>
@@ -257,7 +257,7 @@ import stores from '../stores/stores.mjs'
 import { getNg, Groupe } from '../app/modele.mjs'
 import { ModeSimple, HebGroupe } from '../app/operations.mjs'
 import { NouveauMembre } from '../app/operations4.mjs'
-import { styp, edvol, dhcool, dkli, aaaammjj } from '../app/util.mjs'
+import { sty, styp, edvol, dhcool, dkli, aaaammjj } from '../app/util.mjs'
 import { UNITEN, UNITEV, AMJ } from '../app/api.mjs'
 
 // Niveau 1
@@ -281,25 +281,18 @@ import ApercuChatgr from '../panels/ApercuChatgr.vue'
 export default {
   name: 'ApercuGroupe',
 
-  props: { 
-    eg: Object,
-    idx: Number
-  },
+  props: { },
 
   components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, 
   ApercuGenx, BoutonMembre, QuotasVols, ApercuChatgr },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    eg () { return this.gSt.egrC },
+    nbiv () { return this.gSt.nbMesInvits(this.session.groupeId) },
+    dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },
+
     bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
 
-    dfh () { return dhcool(AMJ.tDeAmjUtc(this.eg.groupe.dfh)) },
-    fond () {
-      if (this.eg.groupe.estDisparu(1)) return ''
-      const m = this.eg.membres.get(1)
-      if (!m) return ''
-      return m.na.nomc + (m.estAC ? ' [' + $t('moi') + ']': '')
-    },
     q1 () { const v = this.eg.groupe.vols; return v.q1 + ' - ' + edvol(v.q1 * UNITEN) },
     q2 () { const v = this.eg.groupe.vols; return v.q2 + ' - ' + edvol(v.q2 * UNITEV) },
     
@@ -370,8 +363,6 @@ export default {
     disparu (im) {
       return this.eg.groupe.estDisparu(im)
     },
-
-    nbiv (e) { return this.gSt.nbMesInvits(e) },
 
     async dialctc () {
       if (!await this.session.edit()) return
@@ -544,7 +535,7 @@ export default {
     const q = reactive({q1:0, q2:0, min1:0, min2:0, max1:0, max2:0, err:false })
 
     return {
-      styp, dkli, aaaammjj,
+      sty, styp, dkli, aaaammjj,
       session, ui, idc,
       photoDef,
       gSt,
