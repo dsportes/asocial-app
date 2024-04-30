@@ -56,9 +56,9 @@
         </div>
         <div class="row justify-end">
           <btn-cond class="q-ml-md" size="sm" icon="chat" :label="$t('PGchat')" 
-            cond="cVisu" @ok.stop="chat(e)"/>
+            cond="cVisu" stop @ok="chat(e)"/>
           <btn-cond class="q-ml-md" size="sm" icon="open_in_new" :label="$t('page')"
-            cond="cVisu" @ok.stop="ovpageGr(e)"/>
+            cond="cVisu" stop @ok="ovpageGr(e)"/>
         </div>
       </div>
     </q-card>

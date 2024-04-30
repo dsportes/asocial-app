@@ -57,18 +57,17 @@ export const useGroupeStore = defineStore('groupe', {
       return state.egrC ? stores.avatar.compte.ambano(state.egrC.groupe) : [false, false]
     },
 
-    // L'avatar ida est-il sélectionnable pour devenir contact du groupe courant ?
+    // L'avatar ida est-il sélectionnable pour devenir proposé / invité du groupe courant ?
     diagContact: (state) => { return (ida) => { 
-        if (!state.ui.egrplus) return 1 // NON, pas de recherche de candidat en cours
         if (ID.estGroupe(ida)) return 2 // NON ida est un groupe, pas un avatar
         if (!state.egrC) return 3 // NON il n'y a pas de groupe courant
         if (!state.ambano[0]) return 4 // NON, le compte n'a pas d'avatars ayant accès aux membres
         const g = state.egrC.groupe
         const im = g.mmb.get(ida)
-        if (im) return 5 // NON ida est déjà contact (au moins) du groupe
-        if (g.lng.indexOf(ida)) return 6 // NON est en liste noire "anamiateur" du groupe
+        if (im) return 5 // NON ida est déjà actif du groupe
+        if (g.lng.indexOf(ida)) return 6 // NON est en liste noire "animateur" du groupe
         if (g.lnc.indexOf(idc)) return 7 // NON est en liste noire "compte" du groupe
-        return 0 // OUI, ida POURRAIT être sélectionné pour devenir "contact" du groupe
+        return 0 // OUI, ida PEUT être sélectionné pour devenir "proposé / invité" du groupe
       }
     },
 
@@ -152,10 +151,12 @@ export const useGroupeStore = defineStore('groupe', {
     nbMesInvits: (state) => { return (e) => {
         let n = 0
         const g = e.groupe
-        const c = state.session.compte
-        for(let im = 1; im < g.st.length; im++) {
-          if (g.st[im] === 2 && c.mav.has(g.tid[im])) n++
-        }        
+        if (g) {
+          const c = state.session.compte
+          for(let im = 1; im < g.st.length; im++) {
+            if (g.st[im] === 2 && c.mav.has(g.tid[im])) n++
+          }
+        }    
         return n
       }
     },

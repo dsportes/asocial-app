@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { $t, hms } from '../app/util.mjs'
 
 const seuillarge = 900
-const pagesF = new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 'groupesac', 'groupe', 'notes'])
+const pagesF = new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 'groupesac', 'groupe', 'invitation', 'notes'])
 const tabF = new Set(['membres'])
 const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes', 'ficavion'])
 
@@ -68,7 +68,6 @@ export const useUiStore = defineStore('ui', {
       detailspeople: false,
       confirmstopop: false,
       opDialog: false,
-      MCmcledit: false, // MotsCles
       PPnvnote: false, // PressePapier
       PPsupprnote: false,
       PPnvfic: false,

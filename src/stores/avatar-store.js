@@ -60,6 +60,18 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
+    chatsDuCompte: (state) => { return (idE, chex) => { // chex: true - Seulement ceux ayant un chat
+        const l = []
+        const lav = state.session.compte.lstAvatars
+        for(let i = 0; i < lav.length; i++) {
+          const e = { ...lav[i] }
+          e.ch = state.chatDeAvec(e.id, idE)
+          if (!chex || e.ch) l.push(e)
+        }
+        return l
+      }
+    },
+
     invits (state) {
       const m = new Map()
       state.map.forEach(e => {

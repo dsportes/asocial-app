@@ -21,13 +21,6 @@
 
       <chats-avec :id-e="id" :del="del"/>
 
-      <!--
-      <div class="q-ml-lg" v-for="(na) in aSt.compte.lstAvatarNas" :key="na.id">
-        <div class="titre-md text-bold">{{na.nom}}</div>
-        <micro-chat class="q-ml-md" :na-e="pSt.peC.na" :na-i="na"/>
-      </div>
-      -->
-
       <q-separator color="orange" class="q-my-md q-mx-sm"/>
 
       <div class="titre-md text-italic y-mb-sm">{{$t('PPgroupes')}}</div>

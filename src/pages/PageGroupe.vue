@@ -1,8 +1,10 @@
 <template>
 <q-page>
   <!-- Tab "groupe" -------------------------------------------------->
-  <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm spmd">
-    <apercu-groupe class="q-my-sm"/>
+  <div v-if="ui.pagetab==='groupe' && gSt.egrC" class="q-pa-sm spmd column justify-center">
+    <div class="text-center"><btn-cond icon="people" cond="cEdit" class="top3"
+      :label="$t('PGinvitation')" @ok="ui.setPage('invitation')"/></div>
+    <!--apercu-groupe class="q-my-sm"/-->
   </div>
 
   <!-- Tab "membres" -------------------------------------------------->
@@ -25,12 +27,13 @@
 <script>
 import stores from '../stores/stores.mjs'
 import ApercuMembre from '../components/ApercuMembre.vue'
-import ApercuGroupe from '../components/ApercuGroupe.vue'
+//import ApercuGroupe from '../components/ApercuGroupe.vue'
+import BtnCond from '../components/BtnCond.vue'
 
 export default {
   name: 'PageGroupe',
 
-  components: { ApercuMembre, ApercuGroupe },
+  components: { BtnCond, ApercuMembre, /* ApercuGroupe */},
 
   computed: {
     amb () { return this.gSt.ambano[0] },
@@ -59,4 +62,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.top3
+  margin-top: 3rem
 </style>

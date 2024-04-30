@@ -25,7 +25,6 @@
 
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { Motscles } from '../app/modele.mjs'
 import { styp } from '../app/util.mjs'
 
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -43,8 +42,6 @@ export default {
   props: { },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre ' : 'clair ' },
-    bcf () { return this.$q.dark.isActive ? ' bordfonce' : ' bordclair' },
     eg () { return this.gSt.egrC },
     amb () { return this.gSt.ambano[0] },
     mb () { return this.eg && this.amb ? this.gSt.membreC : null },

@@ -14,18 +14,24 @@
           <span v-if="del && !ID.estComptable(id)" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
           <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
         </div>
-        <btn-cond class="col-auto" v-if="!estAvc && !estGroupe && !det" size="sm"
+        <btn-cond class="col-auto" v-if="!nodet && !estAvc && !estGroupe && !det" size="sm"
           icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
       </div>
       <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
       <mc-memo v-if="!ID.estComptable(id)" :id="id" :idx="idx"/>     
-    </div>
-    <div v-if="ui.egrplus && (diagC === 0 || diagC < 4)">
-      <div v-if="diagC > 3" class="texte-italic fs-md">{{$t('PPctc' + diagC)}}</div>
-      <btn-cond cond="cEdit" icon="check" color="warning" 
-        :label="$t('PPctcok', [session.nomGrC])"
-        @ok="select"/>
-    </div>
+
+      <q-separator v-if="chats.length || groupes.size" class="q-mx-sm" color="grey-5"/>
+      <div v-if="chats.length" class="row q-gutter-sm">
+        <span class="text-italic titre-md">{{$t('CAVtit')}}</span>
+        <span v-for="e in chats" :key="e.id" class="fs-md bord">{{e.nom}}</span>
+      </div>
+
+      <div v-if="groupes.size" class="row q-gutter-sm">
+        <span class="text-italic titre-md">{{$t('CAVmb')}}</span>
+        <span v-for="idg in groupes" :key="idg" class="fs-md bord">{{session.getCV(idg).nomC}}</span>
+      </div>
+      
+      </div>
   </div>
   <q-separator color="orange" size="1px"/>
 
@@ -53,16 +59,20 @@ export default {
   props: { 
     id: Number, // id du groupe, avatar du compte ou contact
     del: Boolean, // true si délégué, pour l'afficher
+    nodet: Boolean, // true si le panel de détail ne peut PAS être ouvert
     idx: Number
   },
 
   components: { BtnCond, McMemo, ApercuCv },
 
   computed: {
+    chats () { return this.aSt.chatsDuCompte(this.id, true) },
+    groupes () { return this.pSt.getSgr(this.id) },
     estGroupe () { return ID.estGroupe(this.id) },
     estAvc () { return this.session.compte.mav.has(this.id) },
 
     cv () { return this.session.getCV(this.id) },
+
     // true si le panel de détail est déjà ouvert
     det () { return this.session.peopleId === this.id && this.ui.estOuvert('detailspeople') },
 
@@ -111,4 +121,8 @@ export default {
   padding: 1px !important
 .b1
   border: 1px solid $yellow-5
+.bord
+  border: 1px solid $grey-5
+  border-radius: 5px
+  padding: 0px
 </style>

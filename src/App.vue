@@ -222,6 +222,11 @@
           <filtre-stmb nom="groupe" prop="stmb" :idx="1"/>
           <filtre-ambno nom="groupe" prop="ambno" :idx="0"/>
         </div>
+        <div v-if="ui.page === 'invitation'" class="column justify-start">
+          <filtre-nom nom="people" prop='nom' :idx="0"/>
+          <filtre-mc nom="people" attr="mcp" :idx="1"/>
+          <filtre-mc nom="people" attr="mcn" :idx="0"/>
+        </div>
         <div v-if="ui.page === 'notes'" class="column justify-start">
           <filtre-avgr nom="notes" prop='avgr' :idx="0"/>
           <filtre-nbj nom="notes" prop='nbj' :idx="1"/>
@@ -255,6 +260,7 @@
       <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
       <page-groupes class="page" v-if="ui.page === 'groupesac'"/>
       <page-groupe class="page" v-if="ui.page === 'groupe'"/>    
+      <page-invitation class="page" v-if="ui.page === 'invitation'"/>    
       <page-notes class="page" v-if="ui.page === 'notes'"/>    
       <page-ficavion class="page" v-if="ui.page === 'ficavion'"/>    
     </transition-group>
@@ -486,6 +492,7 @@ import PanelMembre from './panels/PanelMembre.vue'
 
 // Niveau 10
 import PageGroupe from './pages/PageGroupe.vue'
+import PageInvitation from './pages/PageInvitation.vue'
 
 export default {
   displayName: 'App',
@@ -495,7 +502,7 @@ export default {
     BtnCond, BoutonHelp, BoutonBulle, BoutonLangue, NotifIcon, QueueIcon, OutilsTests,
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageEspace, PagePartition, PagePeople, PanelPeople, PanelMembre,
+    PageCompta, PageEspace, PagePartition, PagePeople, PanelPeople, PanelMembre, PageInvitation,
     FiltreRac, FiltreNom, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreDel, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
@@ -523,6 +530,7 @@ export default {
         case 'sponsorings' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }
         case 'groupesac' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }
         case 'groupe' : { arg = this.gSt.egrC ? this.people.getCV(this.session.groupeId).nom : this.$t('disparu'); break }
+        case 'invitation' : { arg = this.gSt.egrC ? this.people.getCV(this.session.groupeId).nom : this.$t('disparu'); break }
       }
       return this.$t('P' + p, [arg])
     }

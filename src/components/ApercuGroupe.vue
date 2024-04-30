@@ -45,13 +45,6 @@
       <quotas-vols class="q-mt-xs" :vols="eg.objv.vols"/>
     </div>
 
-    <!-- Mots clés du groupe -->
-    <div class="row items-center q-mt-sm justify-between">
-      <div class="titre-md q-mr-md">{{$t('AGmc')}}</div>
-      <q-btn class="self-start" icon="edit" size="md" color="primary" round padding="none"
-        @click="ui.oD('MCmcledit')"/>
-    </div>
-
     <div v-if="eg.groupe.nbInvits !== 0" class="q-mt-sm fs-md text-bold text-warning">
       {{$t('AGinvits', [eg.groupe.nbInvits])}}
     </div>
@@ -72,9 +65,6 @@
   </div>
 
   <apercu-chatgr v-if="ui.d.ACGouvrir"/>
-
-  <!-- Dialogue d'édition des mots clés du groupe -->
-  <mots-cles v-if="ui.d.MCmcledit" duGroupe/>
 
   <!-- Gérer le mode simple / unanime -->
   <q-dialog v-model="ui.d.AGediterUna[idc]" full-height position="left" persistent>
@@ -267,9 +257,6 @@ import BoutonHelp from './BoutonHelp.vue'
 import QuotasVols from './QuotasVols.vue'
 import ChoixQuotas from './ChoixQuotas.vue'
 
-// Niveau 2
-import MotsCles from '../dialogues/MotsCles.vue'
-
 // Niveau 5
 import ApercuGenx from './ApercuGenx.vue'
 
@@ -283,7 +270,7 @@ export default {
 
   props: { },
 
-  components: { MotsCles, ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, 
+  components: { ChoixQuotas, BoutonConfirm, BoutonHelp, ApercuMembre, 
   ApercuGenx, BoutonMembre, QuotasVols, ApercuChatgr },
 
   computed: {

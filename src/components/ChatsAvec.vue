@@ -1,8 +1,8 @@
-<template> <!-- BtnCond incorporés -->
+<template>
 <div>
   <div class="row">
     <div class="text-italic text-bold titre-md q-mr-sm">{{$t('CAVtit')}}</div>
-    <div v-for="(e, idx) in lchats" :key="e.id">
+    <div v-for="(e, idx) in aSt.chatsDuCompte(idE)" :key="e.id">
       <span v-if="idx === 0 && (e.ch || (!e.ch && del))" class="q-mr-md bord">
         <span class="fs-md q-mr-sm">{{e.nom}}</span>
         <btn-cond v-if="e.ch" round icon="open_in_new" cond="cVisu" @ok="ouvrirChat(e.ch)"/>
@@ -44,16 +44,6 @@ export default ({
   },
 
   computed: {
-    lchats () { 
-      const l = []
-      const lav = this.session.compte.lstAvatars
-      for(let i = 0; i < lav.length; i++) {
-        const e = { ...lav[i] }
-        e.ch = this.aSt.chatDeAvec(e.id, this.idE)
-        l.push(e)
-      }
-      return l
-    }
   },
 
  data () {

@@ -1,6 +1,6 @@
 <template>
-  <div ref="root">
-    <div :class="dkli(idx)">
+  <div>
+    <div ref="root" :class="dkli(idx)">
       <div v-if="large" class="row full-width items-center">
         <div class="col-6 fs-sm z1">
           <span v-if="memolg">{{memolg}}</span>
@@ -67,7 +67,7 @@ import HashTags from './HashTags.vue'
 import { styp, dkli, titre } from '../app/util.mjs'
 import { McMemo } from '../app/operations4.mjs'
 
-const LARGE = 500
+const LARGE = 380
 
 export default {
   name: 'McMemo',

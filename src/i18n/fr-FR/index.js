@@ -753,6 +753,7 @@ export default {
   Pgroupes: 'Tous les groupes',
   Pgroupesac: 'Groupes de {0}',
   Pgroupe: 'Groupe {0}',
+  Pinvitation: 'Invitation au groupe {0}',
   Ppeople: 'Tous les contacts',
   Pnotes: 'Toutes les notes',
   Pficavion: 'Fichiers visibles en avion',
@@ -1390,8 +1391,6 @@ export default {
   PTrest: 'Restant attribuable aux comptes',
   PTncoS: 'Comptes ayant une alerte simple : {0}',
   PTncoB: 'Comptes ayant une alerte bloquante : {0}',
-  
-  CAVtit: 'Chats avec :',
 
   PTtit1: 'Délégués',
   PTtit2: 'Délégués et comptes non délégués',
@@ -1422,6 +1421,11 @@ export default {
   PTopt1: 'Le Comptable peut rendre un compte "autonome" sans son accord',
   PTopt2: 'Le Comptable NE peut PAS rendre un compte "autonome" sans son accord',
 
+  CAVtit: 'Chats avec :',
+  CAVmb: 'Membre des groupes :',
+  PIng: 'Groupe {0}',
+  PIfi: 'Seulement ceux proposables',
+
   // QuotasVols
   QVab1: 'Nombre de notes+chats+groupes:',
   QVut: '({0}% utilisé)',
@@ -1434,6 +1438,7 @@ export default {
   QVplc: 'Plafond de consommation (rythme mensuel):',
 
   // Page groupe(s)
+  PGinvitation: 'Inviter un contact',
   PGdisp: 'Groupe disparu',
   PGnoinvit: 'Pas d\'invitation en attente de décision.',
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',
@@ -1974,7 +1979,7 @@ export default {
   PPctc5: 'Cet avatar est déjà connu du groupe {0}, actif ou contact.',
   PPctc6: 'Cet avatar a été mis en liste noire du groupe {0} par un animateur. Il n\'est plus possible de l\'inscrire comme contact.',
   PPctc7: 'Cet avatar s\'est inscrit lui-même en liste noire du groupe {0}. Il n\'est plus possible de l\'inscrire comme contact.',
-  PPctcok: 'Choir cet avatar pour devenir contact du groupe {0}',
+  PPctcok: 'Choisir',
 
   SAVtit1: 'Suppression de l\'avatar {0}',
   SAVtit2: 'Résiliation du COMPTE {0}',
