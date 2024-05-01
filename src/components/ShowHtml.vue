@@ -2,14 +2,13 @@
 <div>
   <div v-if="!ui.d.SHfs[idc]" style="position:relative">
     <div v-if="zoom || edit" class="row btn">
-      <q-btn v-if="zoom" dense color="primary" icon="fullscreen" round size="md" padding="none"
-        @click.stop="ui.oD('SHfs', idc)">
+      <btn-cond v-if="zoom" icon="fullscreen" round stop @ok="ui.oD('SHfs', idc)">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
-      </q-btn>
-      <q-btn v-if="edit" class="q-ml-xs" dense color="warning" padding="none" round
-        icon="edit" size="md" @click.stop="editer">
+      </btn-cond>
+      <btn-cond v-if="edit" class="q-ml-xs" color="warning" round
+        icon="edit" stop @ok="editer">
         <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
-      </q-btn>
+      </btn-cond>
     </div>
     <sd-nb :style="styx" :texte="texte || ''" :idx="idx"/>
   </div>
@@ -19,12 +18,12 @@
     <q-card>
       <q-bar>
         <q-space />
-        <q-btn v-if="edit" dense padding="none" round color="primary" icon="edit" size="md" @click="editer">
+        <btn-cond v-if="edit" round icon="edit" @ok="editer">
           <q-tooltip class="bg-white text-primary">{{$t('SHed')}}</q-tooltip>
-        </q-btn>
-        <q-btn dense padding="none" round color="primary" size="md" icon="close_fullscreen" @click="ui.fD">
+        </btn-cond>
+        <btn-cond round icon="close_fullscreen" @ok="ui.fD">
           <q-tooltip class="bg-white text-primary">{{$t('SHre')}}</q-tooltip>
-        </q-btn>
+        </btn-cond>
       </q-bar>
       <q-card-section style="max-height: 100vh" :class="sty() + 'scroll'">
         <sd-nb :style="styx" :texte="texte"/>
@@ -38,13 +37,13 @@
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { sty } from '../app/util.mjs'
-
+import BtnCond from './BtnCond.vue'
 import SdNb from './SdNb.vue'
 
 export default ({
   name: 'ShowHtml',
 
-  components: { SdNb },
+  components: { SdNb, BtnCond },
 
   props: { 
     texte: String, 

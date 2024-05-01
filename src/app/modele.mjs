@@ -1090,7 +1090,7 @@ export class Groupe extends GenDoc {
     return im && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
   estInvitable (id) { const im = this.mmb.get(id); 
-    return (!im || (this.st[im] < 2)) && !this.lnc.has(id) && !this.lng.has(id)
+    return (!im || (this.st[im] === 1)) && !this.lnc.has(id) && !this.lng.has(id)
   }
   estProposable (id) { return !this.mmb.get(id) && !this.lnc.has(id) && !this.lng.has(id) }
 
@@ -1273,20 +1273,24 @@ export class Groupe extends GenDoc {
 - `v` : 
 - `vcv` : version de la carte de visite du membre.
 
+- `dpr` : date de proposition
 - `ddi` : date d'invitation.
 - `dac` : date de début d'activité
 - **dates de début de la première et fin de la dernière période...**
   - `dln fln` : d'accès en lecture aux notes.
   - `den fen` : d'accès en écriture aux notes.
   - `dam fam` : d'accès aux membres.
-- `inv` : Liste des im des animateurs ayant validé la dernière invitation.
 - `cleAG` : clé A de l'avatar membre cryptée par la clé G du groupe.
 - `cvA` : carte de visite du membre `{id, v, photo, info}`, textes cryptés par la clé A de l'avatar membre.
+- `inv` : Liste des im des animateurs ayant validé la dernière invitation.
+- `flinv`: flags d'invitation: AN (animateur) DM DN DE.
+- `msgG`: message d'invitation crypté par la clé G.
 */
 export class Membre extends GenDoc {
   async compile (row) {
     const ns = ID.ns(this.id)
     this.vsh = row.vsh || 0
+    this.dpr = row.dpr || 0
     this.ddi = row.ddi || 0
     this.dac = row.dac || 0
     this.dln = row.dln || 0
@@ -1296,12 +1300,14 @@ export class Membre extends GenDoc {
     this.dam = row.dam || 0
     this.fam = row.fam || 0
     this.inv = row.inv || null
+    this.flinv = row.flinv || 0
     const cleg = RegCles.get(this.id)
     const clea = await decrypter(cleg, row.cleAG)
     RegCles.set(clea)
     this.ida = Cles.id(clea, ns)
     const cv = await CV.set(row.cvA || CV.fake(this.ida))
     cv.store()
+    this.msg = row.msgG ? ungzipB(await decrypter(cleg, row.msgG)) : ''
   } 
 
   static async rowNouveauMembre (nag, na, im, cv, nvgr) {

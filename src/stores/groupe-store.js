@@ -183,27 +183,26 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
-    /* NA des animateurs du groupe courant ayant voté 
+    /* Animateurs du groupe courant ayant voté 
     - pour inviter le membre courant 
     - contre (en fait pas encore voté)
     */
-    animInv: (state) => {
-      const lc = []
-      const la = []
-      const session = stores.session
-      const e = state.map.get(session.groupeId)
-      if (!e) return
-      const m = e.membres.get(session.membreId)
-      const g = e.groupe
-      if (!m) return [lc, la]
-      const inv = m.inv || []
-      for(let im = 1; im < g.flags.length; im++) {
-        if (g.flags[im] & FLAGS.PA) {
-        const a = e.membres.get(im)
-        if (inv.indexOf(im) === -1) la.push(a.na); else lc.push(a.na)
+    animInv: (state) => { return (im) => {
+        const lc = []
+        const la = []
+        const g = state.egrC.groupe
+        if (!im) return [lc, la]
+        const m = state.egrC.membres.get(im)
+        if (!m) return [lc, la]
+        const inv = m.inv || []
+        for(let i = 1; i < g.st.length; i++) {
+          if (g.st[i] === 4) {
+            const cv = state.session.getCV(g.tid[i])
+            if (inv.indexOf(i) === -1) la.push(cv); else lc.push(cv)
+          }
         }
+        return [lc, la]
       }
-      return [lc, la]
     },
 
     /* Retour true si un des avatars du compte a l'exclusivité */

@@ -172,7 +172,7 @@ export default {
   FLAGS4: 'a droit d\'éditer les notes', // DE
   FLAGS5: 'a pu voir les membres', // HM
   FLAGS6: 'a pu voir les notes', // HN
-  FLAGS11: 'a pu éditer les notes', // HE
+  FLAGS7: 'a pu éditer les notes', // HE
   
   roledel0: '(ignorer)',
   roledel1: 'Compte de ma partition',
@@ -1474,14 +1474,18 @@ export default {
   AMcfa2: 'Faites',
   AMcfa3: 'En attente',
   AMnoinfo: 'Pas de commentaires à propos du groupe',
+  AMdpr: 'Date de proposition d\'invitation:',
+  AMddi: 'Date de la dernière invitation:',
+  AMinv0: 'jamais invité',
+  AMdac: 'Date de début d\'activité:',
+  
   AMchanger: 'Changer...',
 
   AMactif: 'En état actif:',
   AMmembres: 'Accès aux membres:',
   AMlecture: 'Accès en lecture aux notes:',
   AMecriture: 'Accès en écriture aux notes:',
-  AMinv0: 'N\'a jamais été invité.',
-  AMinvd: 'Date de dernière invitation:',
+
   AMdroits: 'Détail des droits',
   AMacno1: 'Droit de lecture NON activé.',
   AMacno2: 'Droit d\'écriture NON activé.',
@@ -1496,25 +1500,27 @@ export default {
   AMbtnano: 'Activer l\'accès aux notes',
   AMbtndao: 'Désactiver l\'accès aux notes',
 
-  AMdam1: 'Accès aux membres.',
-  AMdamd: 'Plus d\'accès aux membres depuis {0}.',
-  AMinvit: 'Invitation en attente avec droits:',
+  AMinvit2: 'Invitation en attente avec droits:',
+  AMinvit1: 'Invitation en vote avec droits:',
   AMinvan: 'd\'animation',
   AMinvam: 'd\'accès aux membres',
   AMinvln: 'de lecture des notes',
-  AMinven: 'd\'accès aux notes',
+  AMinven: 'de lecture / écriture aux notes',
+
   AMlnoire: 'Ce contact a demandé à ne plus être invité.',
   AMinvtit: 'Invitation de {0} au groupe {1}',
-  AMinvitbtn1: 'Inviter ce contact',
+  AMinvitbtn1: 'Inviter',
   AMinvitbtn2: 'Modifier l\'invitation',
   AMinvitbtn3: 'Supprimer l\'invitation',
   AMinvitbtn4: 'Voter l\'invitation de ce contact',
+  
   AMinvitanim: 'Seul un animateur AYANT accès aux membres peut inviter un contact.',
   AMinvpa: 'animation',
   AMinvdm: 'accès aux membres',
   AMinvdn: 'lecture des notes',
   AMinvde: 'écriture des notes',
-  AMinvev: 'Invitation en cours: {0}',
+  AMinvev: 'Invitation en vote:',
+  AMbienv: 'Message de bienvenue pour l\'invité:',
   AMinvvp: 'Ont voté pour:',
   AMinvvc: 'N\'ont pas voté:',
   AMinvpar: 'Invité par ...',
@@ -1569,6 +1575,7 @@ export default {
   AMmm: 'A accès aux membres',
   AMn1: 'Peut voir les notes',
   AMn2: 'Peut éditer les notes',
+  AMnomb: 'Pas d\'autre information disponible.',
 
   AMdra: 'droits d\'animation',
   AMdrm: 'droits d\'accès aux membres',
