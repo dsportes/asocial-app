@@ -165,18 +165,14 @@ export default {
   tmc1: 'Groupe',
   tmc2: 'App.',
 
-  FLAGS0: 'est actif',
-  FLAGS1: 'a une invitation en cours',
-  FLAGS2: 'a activé l\'accès aux notes', 
-  FLAGS3: 'a activé l\'accès aux membres',
-  FLAGS4: 'a droit d\'accès à la liste des membres',
-  FLAGS5: 'a droit d\'accès aux notes du groupe',
-  FLAGS6: 'a droit d\'écriture sur les notes',
-  FLAGS7: 'a pouvoir d\'animateur',
-  FLAGS8: 'a été actif',
-  FLAGS9: 'a pu lire les notes',
-  FLAGS10: 'a pu accéder aux membres',
-  FLAGS11: 'a pu écrire des notes',
+  FLAGS0: 'a activé l\'accès aux membres', // AM
+  FLAGS1: 'a activé l\'accès aux notes',  // AN
+  FLAGS2: 'a accès de voir membres', // DM
+  FLAGS3: 'a droit de voir les notes', // DN
+  FLAGS4: 'a droit d\'éditer les notes', // DE
+  FLAGS5: 'a pu voir les membres', // HM
+  FLAGS6: 'a pu voir les notes', // HN
+  FLAGS11: 'a pu éditer les notes', // HE
   
   roledel0: '(ignorer)',
   roledel1: 'Compte de ma partition',
@@ -1486,7 +1482,7 @@ export default {
   AMecriture: 'Accès en écriture aux notes:',
   AMinv0: 'N\'a jamais été invité.',
   AMinvd: 'Date de dernière invitation:',
-  AMhist: 'Historique résumé',
+  AMdroits: 'Détail des droits',
   AMacno1: 'Droit de lecture NON activé.',
   AMacno2: 'Droit d\'écriture NON activé.',
   AMacmb: 'Le droit N\'A PAS été activé.',
@@ -1563,16 +1559,16 @@ export default {
   AMdan2: 'Dernier animateur du groupe : laisser vraiment le groupe sans animateur ?',
   AMard: 'Ardoise du groupe',
 
-  AMm0: 'Contact (pas invité)',
-  AMm1: 'Contact invité',
-  AMm2: 'Membre actif',
-  AMm3: 'Membre animateur',
-  AMm4: 'DISPARU',
+  AMm0: 'Radié',
+  AMm1: 'Proposé (pour être invité)',
+  AMm2: 'Invité',
+  AMm3: 'Actif (pas animateur)',
+  AMm4: 'Animateur',
   AMmh: 'Hébergeur',
   AMmf: 'Fondateur',
   AMmm: 'A accès aux membres',
-  AMn1: 'A accès aux notes (en lecture)',
-  AMn2: 'A accès aux notes',
+  AMn1: 'Peut voir les notes',
+  AMn2: 'Peut éditer les notes',
 
   AMdra: 'droits d\'animation',
   AMdrm: 'droits d\'accès aux membres',

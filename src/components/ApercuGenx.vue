@@ -9,10 +9,11 @@
     <div class="col">
       <div class="row">
         <div class="col">
-          <span class="text-bold titre-lg q-mr-sm">{{cv.nomc}}</span> 
+          <span class="text-bold titre-lg q-mr-sm">{{cv.nomC}}</span> 
           <span v-if="estAvc" class="fs-md q-mr-sm">[{{$t('moi')}}]</span> 
           <span v-if="del && !ID.estComptable(id)" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
           <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
+          <span v-if="im" class="fs-sm font-mono q-mr-sm">{{'[' + im + ']'}}</span> 
         </div>
         <btn-cond class="col-auto" v-if="!nodet && !estAvc && !estGroupe && !det"
           icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
@@ -59,6 +60,7 @@ export default {
   props: { 
     id: Number, // id du groupe, avatar du compte ou contact
     del: Boolean, // true si délégué, pour l'afficher
+    im: Number, // pour un membre pour l'afficher
     nodet: Boolean, // true si le panel de détail ne peut PAS être ouvert
     idx: Number
   },

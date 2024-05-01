@@ -59,8 +59,8 @@
     </div>
     <div v-if="sav.size">
       <div v-for="(id, idx) of sav" :key="id" class="q-mt-sm">
-        <!--apercu-membre :id="id" :idx="idx"/-->
-        <div>{{session.getCV(id).nom}}</div>
+        <apercu-membre :id="id" :idx="idx"/>
+        <!--div>{{session.getCV(id).nom}}</div-->
         <q-separator v-if="idx < (sav.size - 1)" color="orange"/>
       </div>
     </div>
@@ -91,12 +91,13 @@ import stores from '../stores/stores.mjs'
 import { bcf, dhcool } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
+import ApercuMembre from '../components/ApercuMembre.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 
 export default {
   name: 'PageGroupe',
 
-  components: { BtnCond, ApercuGenx, QuotasVols /*, ApercuMembre */},
+  components: { BtnCond, ApercuGenx, QuotasVols, ApercuMembre },
 
   computed: {
     idg () { return this.session.groupeId },

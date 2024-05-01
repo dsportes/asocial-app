@@ -1,5 +1,5 @@
 <template>
-  <q-btn class="q-mx-xs" size="sm" text-color="grey-5" 
+  <q-btn class="q-mx-xs" size="md" padding="none"
     :icon="icon || 'info'" :label="label">
     <q-popup-proxy ref="qpp">
       <q-banner class="bord bordgris" @click="hide">

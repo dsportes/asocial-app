@@ -1115,6 +1115,12 @@ export class Groupe extends GenDoc {
     const f = this.flags[im] || 0;
     return im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DN) 
   }
+  accesNote2 (im) {
+    const f = this.flags[im] || 0;
+    const x = im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DN) 
+    if (!x) return 0
+    return (f & FLAGS.DE) ? 2 : 1
+  }
   aUnAccesNote (s) { // Set des im
     let b = false
     s.forEach(im => { if (this.accesNote(im)) b = true})
