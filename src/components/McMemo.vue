@@ -111,8 +111,6 @@ export default {
     },
 
     async valider () {
-      console.log(this.nvtx)
-      console.log(this.nvht)
       await new McMemo().run(this.id, this.s2Str(this.nvht), this.nvtx)
       this.ui.fD()
     }

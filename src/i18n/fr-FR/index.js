@@ -128,6 +128,7 @@ export default {
   sessionKO: 'Incident technique nécessitant l\'interruption immédiate de la session. Tenter de se reconnecter plus tard.',
   test: 'Test',
   dateinc: 'date inconnue',
+  inconnu: '(inconnu)',
 
   condA: 'Action impossible, l\'application est en mode "avion".',
   condF: 'Action impossible, l\'application est figée.',
@@ -1427,6 +1428,7 @@ export default {
   PIfi: 'Seulement ceux proposables',
 
   // QuotasVols
+  QVab0: 'Nombre de notes:',
   QVab1: 'Nombre de notes+chats+groupes:',
   QVut: '({0}% utilisé)',
   QVab2: 'Volume des fichiers:',
@@ -1449,7 +1451,7 @@ export default {
   PGinv: 'Pas d\'invitation en cours | Une invitation encours | {count} invitations encours',
   PGnocv: 'Pas d\'autre information',
   PGnoamb: 'Le compte n\'a pas accès aux membres de ce groupe',
-  PGnope: 'Le groupe n\'a aucun autre membre que les avatars du compte',
+  PGnope: 'Le groupe n\'a pas d\'autre membre que les avatars du compte',
   PGnomb: 'Aucun membre (sur {0}) ne répond au critère de sélection',
   PGcrea: 'Création d\'un nouveau groupe',
   PGnom: 'Nom du groupe à créer: {0}',
@@ -1618,10 +1620,11 @@ export default {
   PGv2a0: 'Quotas V2 déjà attribués : [{0}] soit {1}',
 
   // Aperçu groupe
+  AGstm: 'Statuts des membres:',
   AGinvits: '{0} invitations en cours ou à confirmer par les animateurs',
-  AGheb: 'Hébergeur du groupe.',
+  AGheb: 'Hébergeur du groupe: ',
   AGnheb: 'N\'est PLUS hébergé. Date de disparition du groupe : {0}',
-  AGfond: 'Fondateur',
+  AGfond: 'Fondateur: {0}',
   AGactiv: 'Dates de dernière invitation, période d\'activité',
   AGflags: '',
   AGmcgr: 'Mes hashtags qualifiant le groupe',
@@ -1630,6 +1633,10 @@ export default {
   AGsimple: 'Invitations sur demande d\'UN SEUL animateur',
   AGunanime: 'Invitations sur UNANIMITÉ des animateurs',
   AGgerh: 'Gérer l\'hébergement du groupe {0}',
+  AGsts1: 'proposés',
+  AGsts2: 'invités',
+  AGsts3: 'actifs (non an.)',
+  AGsts4: 'animateurs',
 
   AGcas1: 'Il n\'y a pas d\'hébergeur pour ce groupe: disparition prévue le {0}.',
   AGcas2: 'Vous êtes hébergeur de ce groupe',
@@ -1976,9 +1983,9 @@ export default {
   PPquot: 'Corriger les valeurs non admissibles dans les quotas c-dessus',
 
   PPctc4: 'Le compte n\'a pas d\'avatar ayant accès aux membres du groupe {0}. Impossible de choisir un nouveau contact pour ce groupe.',
-  PPctc5: 'Cet avatar est déjà connu du groupe {0}, actif ou contact.',
-  PPctc6: 'Cet avatar a été mis en liste noire du groupe {0} par un animateur. Il n\'est plus possible de l\'inscrire comme contact.',
-  PPctc7: 'Cet avatar s\'est inscrit lui-même en liste noire du groupe {0}. Il n\'est plus possible de l\'inscrire comme contact.',
+  PPctc5: 'Cet avatar est déjà actif dans le groupe {0}.',
+  PPctc6: 'Cet avatar a été mis en liste noire du groupe {0} par un animateur. Il n\'est plus possible de l\'inviter.',
+  PPctc7: 'Cet avatar s\'est inscrit lui-même en liste noire du groupe {0}. Il n\'est plus possible de l\'inviter.',
   PPctcok: 'Choisir',
 
   SAVtit1: 'Suppression de l\'avatar {0}',

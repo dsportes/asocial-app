@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { encode } from '@msgpack/msgpack'
-import { egaliteU8 } from '../app/util.mjs'
-import { UNITEN, UNITEV, FLAGS } from '../app/api.mjs'
-import { NouvellePartition } from 'src/app/operations4.mjs'
+import { UNITEN, UNITEV, FLAGS, ID } from '../app/api.mjs'
+
 
 /* Store maître des groupes du compte courant :
 - map : des groupes dont un des avatars du compte courant est membre
@@ -40,12 +38,6 @@ export const useGroupeStore = defineStore('groupe', {
     // groupe courant
     egrC (state) { return state.map.get(state.session.groupeId) },
 
-    exV2 (state) {
-      const e = state.map.get(stores.session.groupeId)
-      if (!e) return false
-      return e.vols.q2 * UNITEV < e.vols.v2
-    },
-
     // chat du groupe courant
     chatgr (state) {
       const id = stores.session.groupeId
@@ -54,7 +46,7 @@ export const useGroupeStore = defineStore('groupe', {
 
     // Retourne [amb, ano] : les avatars du compte ont ou non accès aux membres / notes
     ambano (state) {
-      return state.egrC ? stores.avatar.compte.ambano(state.egrC.groupe) : [false, false]
+      return state.egrC ? state.session.compte.ambano(state.egrC.groupe) : [false, false]
     },
 
     // L'avatar ida est-il sélectionnable pour devenir proposé / invité du groupe courant ?
@@ -65,15 +57,17 @@ export const useGroupeStore = defineStore('groupe', {
         const g = state.egrC.groupe
         const im = g.mmb.get(ida)
         if (im) return 5 // NON ida est déjà actif du groupe
-        if (g.lng.indexOf(ida)) return 6 // NON est en liste noire "animateur" du groupe
-        if (g.lnc.indexOf(idc)) return 7 // NON est en liste noire "compte" du groupe
+        if (g.enLNG(ida)) return 6 // NON est en liste noire "animateur" du groupe
+        if (g.enLNC(ida)) return 7 // NON est en liste noire "compte" du groupe
         return 0 // OUI, ida PEUT être sélectionné pour devenir "proposé / invité" du groupe
       }
     },
 
+    // 
+
     amb: (state) => { return (id) => { 
         const e = state.map.get(id)
-        return e ? stores.avatar.compte.ambano(e.groupe)[0] : false
+        return e ? state.session.compte.ambano(e.groupe)[0] : false
       }
     },
 
@@ -315,54 +309,22 @@ export const useGroupeStore = defineStore('groupe', {
       return m
     },
 
-    /* PageGroupe - membres people ***************************************************
-    pgLmFT1: (state) => {
-      function f0 (a, b) { return a.na.nom < b.na.nom ? -1 : (a.na.nom > b.na.nom ? 1 : 0) }
-      const f = stores.filtre.filtre.groupe
-      const r = []
-      const g = state.egrC.groupe
-      for (const m of state.pgLm) {
-        if (f.nmb && !m.na.nom.startsWith(f.nmb)) continue
-        if (f.stmb) {
-          const stm = g.statutMajeur(m.ids)
-          if (stm + 1 !== f.stmb) continue
-        }
-        if (f.ambno) {
-          const mb = g.accesMembre(m.ids)
-          const no = g.accesNote(m.ids)
-          if (f.ambno === 1 && !(mb && !no)) continue
-          if (f.ambno === 2 && !(no && !mb)) continue
-          if (f.ambno === 3 && !(mb && no)) continue
-          if (f.ambno === 4 && !(!mb && !no)) continue
-          if (f.ambno === 5 && g.accesEcrNoteH(m.ids) !== 1) continue
-        }
-        r.push(m)
-      }
-      r.sort(f0)
-      stores.ui.fmsg(r.length)
-      return r
-    },
-    */
-
+    /* PageGroupe - membres people **************************************************/
     pgLmFT: (state) => {
-      function f0 (a, b) { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0) }
-      const f = stores.filtre.filtre.groupe
-      const aSt = stores.avatar
-      let n = 0
+      const f = state.filtre.filtre.groupe
+      const c = state.session.compte
       const r = []
-      const eg = state.egrC
-      const g = eg.groupe
-      const imNaAvc = aSt.compte.imNaGroupe(g.id) // Map (cle:im val:na) des avc participants au groupe idg
-      for (let im = 1; im < g.flags.length; im++) {
-        if (imNaAvc.has(im)) continue
-        const nag = g.anag[im]
-        if (nag <= 1) continue
-        const stm = g.statutMajeur(im)
-        const m = eg.membres.get(im)
-        const na = m.na
-        const nom = m.na.nom
+      let n = 0
+      const g = state.egrC.groupe
+      for (let im = 1; im < g.st.length; im++) {
+        const stm = g.st[im]
+        if (!stm) continue
+        const idm = g.tid[im]
+        if (!idm) continue
+        if (c.mav.has(idm)) continue
         n++
-        if (f.nmb && !m.na.nom.startsWith(f.nmb)) continue
+        const nom = this.state.session.getCV(idm).nomC
+        if (f.nmb && !nom.startsWith(f.nmb)) continue
         if (f.stmb && stm + 1 !== f.stmb) continue
         if (f.ambno) {
           const mb = g.accesMembre(im)
@@ -371,23 +333,14 @@ export const useGroupeStore = defineStore('groupe', {
           if (f.ambno === 2 && !(no && !mb)) continue
           if (f.ambno === 3 && !(mb && no)) continue
           if (f.ambno === 4 && !(!mb && !no)) continue
-          if (f.ambno === 5 && g.accesEcrNoteH(im) !== 1) continue
+          if (f.ambno === 5 && g.accesEcrNote(im) !== 1) continue
         } 
-        r.push({m, im, nom, na})
+        r.push({ idm, im, nom })
       }
-      r.sort(f0)
+      r.sort((a, b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0) })
       stores.ui.fmsg(r.length)
       return [r, n]
     },
-
-    /*
-    pgLm (state) {
-      const t = []
-      const e = state.map.get(stores.session.groupeId)
-      if (e) e.membres.forEach(m => { if (!m.estAc) t.push(m) })
-      return t
-    },
-    */ 
 
     nbchats: (state) => {
       let n = 0

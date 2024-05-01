@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="row items-center">
-      <span class="text-italic titre-md">{{$t('QVab1')}}</span>
+      <span class="text-italic titre-md">{{$t('QVab' + (groupe ? '0' : '1'))}}</span>
       <span class="q-ml-md fs-md font-mono text-bold">
         {{'[' + vols.qn + '] ' + nbn(qnn)}}
       </span>
@@ -37,14 +37,14 @@ export default {
 
   props: { 
     noutil: Boolean, // sans % utilisation
-    vols: Object,
-    /* {qn qv qc v n} si estA: qc == 0 */
+    vols: Object, // {qn qv qc v n} si estA: qc == 0
+    groupe: Boolean
   },
 
   computed: {
     qnn () { return this.vols.qn * UNITEN },
     qvv () { return this.vols.qv * UNITEV },
-    nn () { return this.vols.nn + this.vols.nc + this.vols.ng },
+    nn () { return this.vols.nn + (this.vols.nc || 0) + (this.vols.ng || 0) },
     pcn () { return this.qnn ? Math.round(this.nn * 100 / (this.qnn)) : 0 },
     pcv () { return this.qvv ? Math.round(this.vols.v * 100 / (this.qvv)) : 0 },
   },

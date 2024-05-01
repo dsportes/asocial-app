@@ -655,7 +655,7 @@ export class Compte extends GenDoc {
     const sav = this.mpg.get(groupe.id)
     if (sav) {
       for(const idav of sav) {
-        const im = groupe.imDe(idav)
+        const im = groupe.mmb.get(idav)
         if (im) {
           const f = groupe.flags[im]
           if ((f & FLAGS.AM) && (f & FLAGS.DM)) amb = true
@@ -1070,13 +1070,16 @@ export class Groupe extends GenDoc {
     row.lnc.forEach(id => { this.lnc.add(ID.long(id, this.ns))})
     const cv = await CV.set(row.cvG || CV.fake(this.id))
     cv.store()
-    let n = 0; this.st.forEach(st => { if (st === 2) n++});
-    this.nbInvits = n
-    n = 0; this.st.forEach(st => { if (st === 4) n++});
-    this.nbAnims = n
+    const nx = [0, 0, 0, 0, 0]
+    this.st.forEach(st => { nx[st]++ });
+    this.nbPropos = nx[1]
+    this.nbInvits = nx[2]
+    this.nbActifs = nx[3] + nx[4]
+    this.nbAnims = nx[4]
+    this.sts = nx
   }
   
-  imDeId (id) { return this.mmb.get(id) }
+  imDeId (id) { return this.mmb.get(id) || 0 }
 
   estRadie (im)  { return this.st[im] === 0 }
   estProposé (im) { return this.st[im] === 1 }
@@ -1121,6 +1124,17 @@ export class Groupe extends GenDoc {
     const f = this.flags[im] || 0;
     return im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DE) 
   }
+  accesLecNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
+    const f = this.flags[im] || 0 
+    if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN)) return 1
+    return f & FLAGS.HN ? 2 : 0
+  }
+  accesEcrNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
+    const f = this.flags[im] || 0
+    if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DE)) return 1
+    return f & FLAGS.HE ? 2 : 0
+  }
+
   /* acces aux notes activable: 
   - 0:pas activable 
   - 1: déjà activé
@@ -1132,7 +1146,6 @@ export class Groupe extends GenDoc {
     return !(f & FLAGS.AN) ? (f & FLAGS.DE ? 3 : 2) : 1
   }
 
-
   actifH (im) { // 0:jamais, 1:oui, 2:l'a été, ne l'est plus
     const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
     if (f & FLAGS.AC) return 1
@@ -1142,16 +1155,6 @@ export class Groupe extends GenDoc {
     const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
     if ((f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM)) return 1
     return h & FLAGS.HM ? 2 : 0
-  }
-  accesLecNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
-    const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
-    if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN)) return 1
-    return h & FLAGS.HN ? 2 : 0
-  }
-  accesEcrNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
-    const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
-    if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DE)) return 1
-    return h & FLAGS.HE ? 2 : 0
   }
 
   statutMajeur (im) { 
@@ -1170,9 +1173,9 @@ export class Groupe extends GenDoc {
   }
 
   // mis dans la liste noire par un animateur
-  enLNA (im, nag) { const x = im ? this.anag[im] : nag; return (this.lna.indexOf(x) !== -1)}
+  enLNG (ida) { return this.lng.has(this.mmb.get(ida) || 0) }
   // mis dans la liste noire par le compte lui-même
-  enLNC (im, nag) { const x = im ? this.anag[im] : nag; return (this.lnc.indexOf(x) !== -1)}
+  enLNC (ida) { return this.lnc.has(this.mmb.get(ida) || 0)}
 
   setDisparu (im) {
     if (!this.estDisparu(im)) {

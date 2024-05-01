@@ -95,6 +95,7 @@ export const useSessionStore = defineStore('session', {
     estAdmin (state) { return state.compteId === 0 },
     estDelegue (state) { return state.compte && state.compte.del },
     estA (state) { return state.compte && state.compte.estA },
+    estAvc: (state) => { return (id) => { return state.compte && state.compte.mav.has(id) } },
 
     editable (state) { return state.mode < 3 && state.niv < 4 },
 

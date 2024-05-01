@@ -29,6 +29,8 @@ export function dkli (idx) {
   return ($q.dark.isActive ? (idx ? 'sombre' + (idx % 2) : 'sombre0') : (idx ? 'clair' + (idx % 2) : 'clair0')) + ' '
 }
 
+export function bcf () { return $q.dark.isActive ? ' bordfonce' : ' bordclair' }
+
 export function styp (sz) { 
   if (!$q) $q = useQuasar()
   return ($q.dark.isActive ? 'sombre bsf pw' : 'clair bsc pw') + (sz || 'md') + ' '

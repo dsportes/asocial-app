@@ -1,15 +1,17 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm spmd" style="padding-top:5em">
-    <div v-if="pSt.map.size && !pSt.peLpF" class="q-my-md titre-lg text-italic">
+    <div v-if="pSt.map.size && !lst.length" class="q-my-md titre-lg text-italic">
       {{$t('APnb', [pSt.map.size])}}
     </div>
     
-    <div v-if="pSt.peLpF.length">
-      <q-card class="q-my-md column justify-center" v-for="(p, idx) in pSt.peLpF" :key="p.id">
+    <div v-if="lst.length">
+      <q-card class="q-my-md column justify-center" v-for="(p, idx) in lst" :key="p.id">
         <apercu-genx class="q-pa-xs" :id="p.id" :idx="idx" nodet/>
-        <div v-if="p.d > 3" class="texte-italic fs-md">{{$t('PPctc' + p.d)}}</div>
-        <div class="text-center"><btn-cond cond="cEdit" icon="check" color="green-5" :label="$t('PPctcok')"
-          @ok="select(p)"/></div>
+        <div :class="dkli(idx) + ' text-center'">
+          <span v-if="p.d > 3" class="msg">{{$t('PPctc' + p.d)}}</span>
+          <btn-cond v-else cond="cEdit" icon="check" color="green-5" :label="$t('PPctcok')"
+            @ok="select(p)"/>
+        </div>
       </q-card>
     </div>
 
@@ -30,6 +32,7 @@ import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
+import { dkli } from '../app/util.mjs'
 
 export default {
   name: 'PageInvitation',
@@ -38,8 +41,13 @@ export default {
 
   computed: {
     lst () { const src = this.pSt.peLpF; const l = []
+      this.session.compte.lstAvatars.forEach(x => {
+        const y = { id: x.id }
+        y.d = this.gSt.diagContact(x.id)
+        if (!y.d || this.propos) l.push(y)
+      })
       src.forEach(x => {
-        const y = { ...x }
+        const y = { id: x.id }
         y.d = this.gSt.diagContact(x.id)
         if (!y.d || this.propos) l.push(y)
       })
@@ -69,6 +77,7 @@ export default {
 
   setup () {
     return {
+      dkli,
       session: stores.session,
       ui: stores.ui,
       pSt: stores.people,

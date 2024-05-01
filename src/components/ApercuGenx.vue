@@ -14,7 +14,7 @@
           <span v-if="del && !ID.estComptable(id)" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
           <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
         </div>
-        <btn-cond class="col-auto" v-if="!nodet && !estAvc && !estGroupe && !det" size="sm"
+        <btn-cond class="col-auto" v-if="!nodet && !estAvc && !estGroupe && !det"
           icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
       </div>
       <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
@@ -33,7 +33,7 @@
       
       </div>
   </div>
-  <q-separator color="orange" size="1px"/>
+  <!--q-separator color="orange" size="1px"/-->
 
   <q-dialog v-model="ui.d.ACVouvrir[idc]" persistent>
     <apercu-cv :cv="cv"/>

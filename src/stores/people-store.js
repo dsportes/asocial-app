@@ -173,14 +173,20 @@ export const usePeopleStore = defineStore('people', {
     },
 
     setPGr (idp, idg) {
-      const e = this.getElt(idp)
-      e.sgr.add(idg)
+      if (!this.session.estAvc(idp)) {
+        const e = this.getElt(idp)
+        e.sgr.add(idg)
+      }
     },
 
     delPGr (idp, idg) {
-      const e = this.map.get(idp); if (!e) return
-      e.sgr.delete(idg)
-      this.delElt(idp, e)
+      if (!this.session.estAvc(idp)) {
+        const e = this.map.get(idp)
+        if (e) {
+          e.sgr.delete(idg)
+          this.delElt(idp, e)  
+        }
+      }
     },
 
     delGr (idg) {
