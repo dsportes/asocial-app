@@ -1482,9 +1482,9 @@ export default {
   AMchanger: 'Changer...',
 
   AMactif: 'En activité:',
-  AMmembres: 'Accès aux membres:',
-  AMlecture: 'Accès en lecture aux notes:',
-  AMecriture: 'Accès en écriture aux notes:',
+  AMmembres: 'A accès aux membres:',
+  AMlecture: 'A accès en lecture aux notes:',
+  AMecriture: 'A accès en écriture aux notes:',
 
   AMdroits: 'Détail des droits',
   AMacno1: 'Droit de lecture NON activé.',
@@ -1642,10 +1642,11 @@ export default {
   AGsimple: 'Invitations sur demande d\'UN SEUL animateur',
   AGunanime: 'Invitations sur UNANIMITÉ des animateurs',
   AGgerh: 'Gérer l\'hébergement du groupe {0}',
-  AGsts1: 'proposés',
-  AGsts2: 'invités',
-  AGsts3: 'actifs (non an.)',
-  AGsts4: 'animateurs',
+  AGsts1: 'contacts',
+  AGsts2: 'pré-invités',
+  AGsts3: 'invités',
+  AGsts4: 'actifs',
+  AGsts5: 'animateurs',
 
   AGcas1: 'Il n\'y a pas d\'hébergeur pour ce groupe: disparition prévue le {0}.',
   AGcas2: 'Vous êtes hébergeur de ce groupe',

@@ -1,3 +1,16 @@
+<!--
+ApercuMembre est un sous-composant de PageGroupe:
+- dans l'onglet groupe, un item par avatar du COMPTE inscrit dans le groupe
+  - le "membre" mb est diponible SSI un des avatars du compte est
+    actif avec accès aux membres.
+  - mb n'est pas disponible dans le cas contraire.
+- dans l'onglet membres, un item par memebre du groupe SAUF ceux du compte.
+  - le membre mb est toujours disponible (sinon l'onglet ne s'est pas affiché)
+Les actions réservées aux ANIMATEURS s'appliquent si l'auteur de l'action
+a accès aux membres (donc dans l'onglet "membres").
+  - toutefois elles peuvent s'appliquer aux avatars du groupe (onglet groupe)
+  à condition qu'au moins un avatar du groupe soit ANIMATEUR, même sans accès aux membres.
+-->
 <template>
 <div>
   <q-expansion-item :class="dkli(idx)" v-model="qexp"
@@ -20,8 +33,8 @@
       <div class="col-auto q-ml-sm q-mt-sm">
         <btn-cond icon="menu" round>
           <q-menu max-height="90vh" class="sombre1 text-white">
-            <q-list class="titre-md" style="min-width: 300px">
-              <q-item class="row items-center"><sel-avid/></q-item>
+            <q-list class="titre-md bordm" style="min-width: 300px">
+              <q-item class="row items-center"><sel-avid :groupe="gr"/></q-item>
               <q-separator color="orange"/>
               <q-item v-for="ac in lstAc" :key="ac" clickable  v-close-popup @click="doAction(ac)">
                 <q-item-section v-if="condAc[ac]">
@@ -51,7 +64,7 @@
         </div>
 
         <div v-else>
-          <div v-if="mb.dpr" class="row">
+          <div v-if="mb.dpc" class="row">
             <div class="text-itali col-6">{{$t('AMdpc')}}</div>
             <div class="font-mono text-bold">{{xd(mb.dpc)}}</div>
           </div>
@@ -412,4 +425,8 @@ export default {
   margin-left: 3rem
 .q-tab
   min-height: 0 !important
+.bordm
+  border: 2px solid $primary
+  border-radius: 5px
+  padding: 3px
 </style>

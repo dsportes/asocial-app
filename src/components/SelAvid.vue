@@ -15,15 +15,18 @@ import stores from '../stores/stores.mjs'
 export default {
   name: 'SelAvid',
 
-  props: { aucun: Boolean },
+  props: { 
+    aucun: Boolean, 
+    groupe: Object // si groupe, mettre une étoile pour les avatars "animateurs"
+  },
 
   computed: {
     options () {
       const l = []
       this.session.compte.mav.forEach(id => { 
-        l.push({ label: this.session.getCV(id).nom, value: id }) 
+         l.push({ label: this.pfx(id) + this.session.getCV(id).nom, value: id }) 
       })
-      const cid = this.session.compteId
+      const cid = this.session.avatarId
       l.sort((a,b) => { return a.value === cid ? - 1 : (b.value === cid ? 1 : 
         (a.label < b.label ? -1 : (b.label > a.label ? 1 : 0)))})
       if (this.aucun) l.unshift({ label: '-', value: 0 })
@@ -47,22 +50,28 @@ export default {
     const aucun = toRef(props, 'aucun')
     const cav = ref()
     const session = stores.session
+    const groupe = toRef(props, 'groupe')
+
+    function pfx (id) {
+      return groupe.value && (groupe.value.estAnim(groupe.value.mmb.get(id))) ? '*' : ''
+    }
+
     if (session.avatarId) {
       cav.value = { 
-        label: session.getCV(session.avatarId).nom, 
+        label: pfx(session.avatarId) + session.getCV(session.avatarId).nom, 
         value: session.avatarId 
       }
     } else if (aucun.value) {
       cav.value = { label: '-', value: 0 }
     } else {
       cav.value = { 
-        label: session.getCV(session.compteId).nom, 
+        label: pfx(session.compteId) + session.getCV(session.compteId).nom, 
         value: session.compteId 
       }
     }
 
     return {
-      session, cav
+      session, cav, pfx
     }
   }
 

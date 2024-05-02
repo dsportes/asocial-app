@@ -47,16 +47,17 @@
 
       <div class="titre-md text-italic q-mt-xs">{{$t('AGstm')}}</div>
       <div class="row spsm items-center titre-md text-italic">
-        <div v-for="i in 4" :key="i" class="col-3 text-center">{{$t('AGsts' + i)}}</div>
+        <div v-for="i in 5" :key="i" class="col-2 text-center">{{$t('AGsts' + i)}}</div>
       </div>
       <div class="row spsm items-center font-mono">
-        <div v-for="i in 4" :key="i" class="col-3 text-center">{{gr.sts[i]}}</div>
+        <div v-for="i in 5" :key="i" class="col-2 text-center">{{gr.sts[i]}}</div>
       </div>
     </div>
 
-    <div class="titre-lg full-width text-center text-white bg-secondary q-mt-md q-mb-sm q-pa-xs">
+    <div class="titre-lg full-width text-center text-white bg-secondary q-my-sm q-pa-xs">
       {{$t('PGmesav', sav.size)}}
     </div>
+    
     <div v-if="sav.size">
       <div v-for="(id, idx) of sav" :key="id" class="q-mt-sm">
         <apercu-membre :id="id" :idx="idx"/>

@@ -373,7 +373,6 @@
   <dialogue-help v-if="ui.d.dialoguehelp"/>
   <presse-papier v-if="ui.d.pressepapier"/>
   <panel-people v-if="ui.d.detailspeople"/>
-  <panel-membre v-if="ui.d.PMdetailsmembre"/>
   <outils-tests v-if="ui.d.PAoutilsTests"/>
   <phrase-secrete v-if="ui.d.PSouvrir"/>
 
@@ -487,9 +486,6 @@ import PanelPeople from './panels/PanelPeople.vue'
 // Niveau 8
 import PageGroupes from './pages/PageGroupes.vue'
 
-// Niveau 9
-import PanelMembre from './panels/PanelMembre.vue'
-
 // Niveau 10
 import PageGroupe from './pages/PageGroupe.vue'
 import PageInvitation from './pages/PageInvitation.vue'
@@ -502,7 +498,7 @@ export default {
     BtnCond, BoutonHelp, BoutonBulle, BoutonLangue, NotifIcon, QueueIcon, OutilsTests,
     PageGroupe, PageGroupes, PageNotes, PageFicavion,
     PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageEspace, PagePartition, PagePeople, PanelPeople, PanelMembre, PageInvitation,
+    PageCompta, PageEspace, PagePartition, PagePeople, PanelPeople, PageInvitation,
     FiltreRac, FiltreNom, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreDel, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
