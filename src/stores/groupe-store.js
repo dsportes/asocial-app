@@ -49,7 +49,7 @@ export const useGroupeStore = defineStore('groupe', {
       return state.egrC ? state.session.compte.ambano(state.egrC.groupe) : [false, false]
     },
 
-    // L'avatar ida est-il sélectionnable pour devenir proposé / invité du groupe courant ?
+    // L'avatar ida est-il sélectionnable pour devenir contact du groupe courant ?
     diagContact: (state) => { return (ida) => { 
         if (ID.estGroupe(ida)) return 2 // NON ida est un groupe, pas un avatar
         if (!state.egrC) return 3 // NON il n'y a pas de groupe courant
@@ -57,9 +57,9 @@ export const useGroupeStore = defineStore('groupe', {
         const g = state.egrC.groupe
         const im = g.mmb.get(ida)
         if (im) return 5 // NON ida est déjà actif du groupe
-        if (g.enLNG(ida)) return 6 // NON est en liste noire "animateur" du groupe
+        if (g.enLNG(ida)) return 6 // NON est en liste noire "groupe" du groupe
         if (g.enLNC(ida)) return 7 // NON est en liste noire "compte" du groupe
-        return 0 // OUI, ida PEUT être sélectionné pour devenir "proposé / invité" du groupe
+        return 0 // OUI, ida PEUT être sélectionné pour devenir contact du groupe
       }
     },
 
@@ -148,7 +148,7 @@ export const useGroupeStore = defineStore('groupe', {
         if (g) {
           const c = state.session.compte
           for(let im = 1; im < g.st.length; im++) {
-            if (g.st[im] === 2 && c.mav.has(g.tid[im])) n++
+            if (g.estInvite(im) && c.mav.has(g.tid[im])) n++
           }
         }    
         return n
@@ -188,20 +188,19 @@ export const useGroupeStore = defineStore('groupe', {
     - contre (en fait pas encore voté)
     */
     animInv: (state) => { return (im) => {
-        const lc = []
-        const la = []
+        const lc = [] // vote contre (pas voté)
+        const lp = [] // vote pour
         const g = state.egrC.groupe
-        if (!im) return [lc, la]
-        const m = state.egrC.membres.get(im)
-        if (!m) return [lc, la]
-        const inv = m.inv || []
+        if (!im) return [lc, lp]
+        const invits = g.invits[im] || { fl, li }
+        if (!invits.li) return [lc, la]
         for(let i = 1; i < g.st.length; i++) {
-          if (g.st[i] === 4) {
+          if (g.estAnim(i)) {
             const cv = state.session.getCV(g.tid[i])
-            if (inv.indexOf(i) === -1) la.push(cv); else lc.push(cv)
+            if (invits.li.indexOf(i) === -1) lc.push(cv); else lp.push(cv)
           }
         }
-        return [lc, la]
+        return [lp, lc]
       }
     },
 
@@ -238,13 +237,6 @@ export const useGroupeStore = defineStore('groupe', {
     },
     */
 
-    /* Return le na du membre im du groupe id */
-    imNa: (state) => { return (id, im) => {
-        const e = state.map.get(id)
-        const mb = e.membres.get(im)
-        return mb ? m.na : null
-      }
-    },
   
     /* Map par im des { na, st, avc } des membres du groupe, avc ou auteur-animateur */
     imNaStMb: (state) => { return (id) => {

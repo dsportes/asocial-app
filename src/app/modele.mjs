@@ -1036,12 +1036,15 @@ _data_:
 - `msu` : mode _simple_ ou _unanime_.
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
+- `invits` : map `{ fl, li[] }` des invitations en attente de vote ou de réponse.
 - `tid` : table des ids courts des membres.
-- `st` : table des statuts. 0:radié, 1:proposé, 2:invité, 3:actif, 4:animateur
+- `st` : table des statuts.
 - `flags` : tables des flags.
 - `lng` : liste noire _groupe_ des ids (courts) des membres.
 - `lnc` : liste noire _compte_ des ids (courts) des membres.
 - `cvG` : carte de visite du groupe, textes cryptés par la clé du groupe `{v, photo, info}`.
+
+Calculée : mmb: Map des membres. Clé: id long du membre, Valeur: son im
 */
 
 export class Groupe extends GenDoc {
@@ -1052,6 +1055,7 @@ export class Groupe extends GenDoc {
     this.qn = row.qn; this.qv = row.qv; this.nn = row.nn; this.vf = row.vf
     this.imh = row.imh
     this.msu = row.msu || null
+    this.invits = row.invits || {}
 
     this.mmb = new Map()
     this.tid = new Array(row.tid.length)
@@ -1070,29 +1074,31 @@ export class Groupe extends GenDoc {
     row.lnc.forEach(id => { this.lnc.add(ID.long(id, this.ns))})
     const cv = await CV.set(row.cvG || CV.fake(this.id))
     cv.store()
-    const nx = [0, 0, 0, 0, 0]
+    const nx = [0, 0, 0, 0, 0, 0]
     this.st.forEach(st => { nx[st]++ });
-    this.nbPropos = nx[1]
-    this.nbInvits = nx[2]
-    this.nbActifs = nx[3] + nx[4]
-    this.nbAnims = nx[4]
+    this.nbContacts = nx[1]
+    this.nbPreInvites = nx[2]
+    this.nbInvites = nx[3]
+    this.nbActifs = nx[4] + nx[5]
+    this.nbAnims = nx[5]
     this.sts = nx
   }
   
   imDeId (id) { return this.mmb.get(id) || 0 }
 
   estRadie (im)  { return this.st[im] === 0 }
-  estProposé (im) { return this.st[im] === 1 }
-  estInvite (im) { return this.st[im] === 2 }
-  estActif (im) { return this.st[im] >= 3 }
-  estAnim (im) { return this.st[im] >= 4 }
+  estContact (im) { return this.st[im] === 1 }
+  estPreInvite (im) { return this.st[im] === 2 }
+  estInvite (im) { return this.st[im] === 3 }
+  estActif (im) { return this.st[im] >= 4 }
+  estAnim (im) { return this.st[im] === 5 }
   estAuteur (im) { const f = this.flags[im] || 0; 
     return im && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
   estInvitable (id) { const im = this.mmb.get(id); 
     return (!im || (this.st[im] === 1)) && !this.lnc.has(id) && !this.lng.has(id)
   }
-  estProposable (id) { return !this.mmb.get(id) && !this.lnc.has(id) && !this.lng.has(id) }
+  estContactable (id) { return !this.mmb.get(id) && !this.lnc.has(id) && !this.lng.has(id) }
 
   estHeb (im) { return this.estActif(im) && im === this.imh }
 
@@ -1163,48 +1169,12 @@ export class Groupe extends GenDoc {
     return h & FLAGS.HM ? 2 : 0
   }
 
-  statutMajeur (im) { 
-    /* 
-      AMm0: 'Contact',
-      AMm1: 'Contact invité',
-      AMm2: 'Membre actif',
-      AMm3: 'Membre animateur',
-      AMm4: 'DISPARU',
-    */
-    if (this.estDisparu(im)) return 4
-    if (this.estAnim(im)) return 3
-    if (this.estActif(im)) return 2
-    if (this.estInvite(im)) return 1
-    return 0
-  }
-
   // mis dans la liste noire par un animateur
   enLNG (ida) { return this.lng.has(this.mmb.get(ida) || 0) }
   // mis dans la liste noire par le compte lui-même
   enLNC (ida) { return this.lnc.has(this.mmb.get(ida) || 0)}
 
-  setDisparu (im) {
-    if (!this.estDisparu(im)) {
-      this.anag[im] = this.flags[im] & FLAGS.HA ? 1 : 0
-      this.flags[im] = 0 
-    }
-  }
-
-  /* Retourne [nv, im]
-  - nv: true si l'avatar n'est pas déjà membre du groupe
-  - im: im actuel de l'avatar ou du slot qu'il peut occuper
-  */
-  async slot (na) {
-    const nag = await Groupe.getNag(this.na, na)
-    let im = 0
-    let slot = 0
-    for(let i = 1; i < this.anag.length; i++) { 
-      if (!slot && this.estLibre(i)) slot = i
-      if (this.anag[i] === nag) { im = i; break }
-    }
-    return !im ? [true, slot || this.anag.length] : [false, im]
-  }
-
+  /* A valider ********************/
   avcAuteurs () {
     const aSt = stores.avatar
     const s = new Set()
@@ -1217,54 +1187,6 @@ export class Groupe extends GenDoc {
     return  this.dfh ? null : gSt.getMembre(this.id, this.imh)
   }
 
-  static CREATEUR = FLAGS.AC | FLAGS.AN | FLAGS.AM | FLAGS.DM | FLAGS.DN | FLAGS.DE | FLAGS.PA | FLAGS.HA  | FLAGS.HN | FLAGS.HM | FLAGS.HE
-  static async rowNouveauGroupe (nagr, namb, unanime) {
-    const n = await Groupe.getNag(nagr, namb)
-    const idhg = await Groupe.toIdhg(nagr.rnd)
-    const r = {
-      id: nagr.id,
-      v: 0,
-      dfh: 0,
-      msu: unanime ? [] : null,
-      pe: 0,
-      imh: 1,
-      flags: [0, Groupe.CREATEUR],
-      anag: [0, n],
-      idhg
-    }
-    const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'groupes', id: r.id, v: r.v, _data_ }
-  }
-
-  static async getNag (nagr, namb) {
-    return hash(await crypter(nagr.rnd, namb.rnd, 1))
-  }
-
-  static async getNi (nagr, namb) {
-    return hash(await crypter(nagr.rnd, inverse(namb.rnd), 1))
-  }
-
-  /* npgk: numéro de participation à un groupe: 
-  hash du cryptage par la clé K du compte de `idg / idav`. 
-  Ce numéro est la clé du membre dans la map `mpgk` de l'avatar principal du compte.
-  */
-  static async getNpgk (idg, idav) {
-    const session = stores.session
-    return hash(await crypter(session.clek, ID.court(idg) + '/' + ID.court(idav), 1))
-  }
-
-  static async toIdhg (cle) {
-    return await crypter(cle, '' + ID.court(stores.session.compteId))
-  }
-
-  async toCvg (cv) {
-    return await crypter(this.cle, new Uint8Array(encode(cv)))
-  }
-
-  async toMcg (mc) {
-    return Object.keys(mc).length ? await crypter(this.cle, new Uint8Array(encode(mc))) : null
-  }
-
 }
 
 /** Membre ***********************************************************
@@ -1273,34 +1195,31 @@ export class Groupe extends GenDoc {
 - `v` : 
 - `vcv` : version de la carte de visite du membre.
 
-- `dpr` : date de proposition
-- `ddi` : date d'invitation.
-- `dac` : date de début d'activité
+- `dpc` : date de premier contact (ou de première invitation s'il a été directement invité).
+- `ddi` : date de la dernière invitation (envoyée au membre, c'est à dire _votée_).
 - **dates de début de la première et fin de la dernière période...**
+  - `dac fac` : d'activité.
   - `dln fln` : d'accès en lecture aux notes.
   - `den fen` : d'accès en écriture aux notes.
   - `dam fam` : d'accès aux membres.
 - `cleAG` : clé A de l'avatar membre cryptée par la clé G du groupe.
 - `cvA` : carte de visite du membre `{id, v, photo, info}`, textes cryptés par la clé A de l'avatar membre.
-- `inv` : Liste des im des animateurs ayant validé la dernière invitation.
-- `flinv`: flags d'invitation: AN (animateur) DM DN DE.
-- `msgG`: message d'invitation crypté par la clé G.
+- `msgG`: message d'invitation crypté par la clé G pour une invitation en attente de vote ou de réponse. 
 */
 export class Membre extends GenDoc {
   async compile (row) {
     const ns = ID.ns(this.id)
     this.vsh = row.vsh || 0
-    this.dpr = row.dpr || 0
+    this.dpc = row.dpc || 0
     this.ddi = row.ddi || 0
     this.dac = row.dac || 0
+    this.fac = row.fac || 0
     this.dln = row.dln || 0
     this.fln = row.fln || 0
     this.den = row.den || 0
     this.fen = row.fen || 0    
     this.dam = row.dam || 0
     this.fam = row.fam || 0
-    this.inv = row.inv || null
-    this.flinv = row.flinv || 0
     const cleg = RegCles.get(this.id)
     const clea = await decrypter(cleg, row.cleAG)
     RegCles.set(clea)
@@ -1309,26 +1228,6 @@ export class Membre extends GenDoc {
     cv.store()
     this.msg = row.msgG ? ungzipB(await decrypter(cleg, row.msgG)) : ''
   } 
-
-  static async rowNouveauMembre (nag, na, im, cv, nvgr) {
-    const session = stores.session
-    const r = { id: nag.id, ids: im, v: 0, dlv: 0, vcv: cv ? cv.v : 0,
-      ddi: 0, dac: 0, fac: 0, dln: 0, fln: 0, den: 0, fen: 0, dam: 0, fam: 0 }
-    if (nvgr) {
-      r.dac = session.auj
-      r.dam = session.auj
-      r.dln = session.auj
-      r.den = session.auj
-      // membre.dlv est mis par le serveur depuis compta
-    } else {
-      // Un nouveau contact n'a pas de dlv active vis à vis du GC
-      r.dlv = AMJ.max
-    }
-    r.cva = !cv ? null : await crypter(na.rnd, new Uint8Array(encode(cv)))
-    r.nag = await crypter(nag.rnd, new Uint8Array(encode([na.nomx, na.rnd])))
-    const _data_ = new Uint8Array(encode(r))
-    return { _nom: 'membres', id: r.id, ids: r.ids, v: r.v, vcv: r.vcv, dlv: r.dlv, _data_ }
-  }
 
 }
 

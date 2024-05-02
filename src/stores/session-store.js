@@ -441,7 +441,7 @@ export const useSessionStore = defineStore('session', {
 
     setFsSync (fsSync) { this.fsSync = fsSync },
 
-    setAvatarId (id) { this.avatarId = id },
+    setAvatarId (id) { this.avatarId = id ; console.log(id)},
 
     setPeopleId (id) { this.peopleId = id },
 

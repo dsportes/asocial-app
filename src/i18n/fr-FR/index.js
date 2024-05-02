@@ -143,10 +143,10 @@ export default {
   // Filtre stmb
   stmb0: '(n\'importe lequel)',
   stmb1: 'contact',
-  stmb2: 'invité',
-  stmb3: 'actif',
-  stmb4: 'animateur',
-  stmb5: 'DISPARU',
+  stmb2: 'pré-invité',
+  stmb3: 'invité',
+  stmb4: 'actif',
+  stmb5: 'animateur',
 
   // Filtre ambno
   ambno0: '(indifférent)',
@@ -1474,14 +1474,14 @@ export default {
   AMcfa2: 'Faites',
   AMcfa3: 'En attente',
   AMnoinfo: 'Pas de commentaires à propos du groupe',
-  AMdpr: 'Date de proposition d\'invitation:',
+  AMdpc: 'Date du premier contact:',
   AMddi: 'Date de la dernière invitation:',
   AMinv0: 'jamais invité',
   AMdac: 'Date de début d\'activité:',
   
   AMchanger: 'Changer...',
 
-  AMactif: 'En état actif:',
+  AMactif: 'En activité:',
   AMmembres: 'Accès aux membres:',
   AMlecture: 'Accès en lecture aux notes:',
   AMecriture: 'Accès en écriture aux notes:',
@@ -1500,12 +1500,17 @@ export default {
   AMbtnano: 'Activer l\'accès aux notes',
   AMbtndao: 'Désactiver l\'accès aux notes',
 
-  AMinvit2: 'Invitation en attente avec droits:',
-  AMinvit1: 'Invitation en vote avec droits:',
+  AMinvit3: 'Invitation en attente de réponse avec droits:',
+  AMinvit2: 'Invitation en cours de vote avec droits:',
   AMinvan: 'd\'animation',
   AMinvam: 'd\'accès aux membres',
   AMinvln: 'de lecture des notes',
   AMinven: 'de lecture / écriture aux notes',
+
+  AMactionsIC: 'Inscription en contact',
+  AMactionsRC: 'Radiation d\'un contact',
+  AMactionsIS: 'Invitation simple',
+  
 
   AMlnoire: 'Ce contact a demandé à ne plus être invité.',
   AMinvtit: 'Invitation de {0} au groupe {1}',
@@ -1566,10 +1571,11 @@ export default {
   AMard: 'Ardoise du groupe',
 
   AMm0: 'Radié',
-  AMm1: 'Proposé (pour être invité)',
-  AMm2: 'Invité',
-  AMm3: 'Actif (pas animateur)',
-  AMm4: 'Animateur',
+  AMm1: 'Contact',
+  AMm2: 'Pré-invité',
+  AMm3: 'Invité',
+  AMm4: 'Actif',
+  AMm5: 'Animateur',
   AMmh: 'Hébergeur',
   AMmf: 'Fondateur',
   AMmm: 'A accès aux membres',
