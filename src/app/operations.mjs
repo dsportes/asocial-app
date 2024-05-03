@@ -224,28 +224,6 @@ export class OublierMembre extends Operation {
   }
 }
 
-/* OP_ModeSimple: 'Demande de retour au mode simple d\'invitation à un groupe' **********
-args.token donne les éléments d'authentification du compte.
-args.id : id du groupe
-args.ids : ids du membre demandant le retour au mode simple.
-  Si 0, mode unanime.
-Retour:
-*/
-export class ModeSimple extends Operation {
-  constructor () { super('ModeSimple') }
-
-  async run (id, ids) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, id, ids }
-      this.tr(await post(this, 'ModeSimple', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_ItemChatgr: 'Ajout d\'un item de dialogue à un "chat" de groupe' *************************
 args.token: éléments d'authentification du compte.
 args.chatit : row de la note

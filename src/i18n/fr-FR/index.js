@@ -420,6 +420,8 @@ export default {
   EX8246: '(BUG) Groupe déjà créé.',
   EX8247: '(BUG) Le compte n\'a pas accès aux membres du groupe',
   EX8248: '(BUG) Contact déjà inscrit, doublon',
+  EX8249: '(BUG) L\'avatar demandeur n\'est pas un avatar du compte',
+  EX8250: '(BUG) L\'avatar demandeur n\'est pas animateur du groupe',
 
   EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
   EX8802: 'Action impossible du fait de la restriction "accès minimal"',

@@ -982,3 +982,32 @@ export class NouveauContact extends Operation {
     }
   }
 }
+
+/* OP_ModeSimple: 'Demande de retour au mode simple d\'invitation à un groupe' **********
+- token donne les éléments d'authentification du compte.
+- idg : id du groupe
+- ida : id de l'avatar demandant le retour au mode simple.
+- simple:
+  - true 'Je vote pour passer au mode "SIMPLE"'
+  - false: 'Annuler les votes et rester en mode UNANIME'
+Retour:
+*/
+export class ModeSimple extends Operation {
+  constructor () { super('ModeSimple') }
+
+  async run (simple) {
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        idg: session.groupeId, 
+        ida: session.avatarId,
+        simple
+      }
+      await post(this, 'ModeSimple', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
