@@ -952,3 +952,33 @@ export class NouveauGroupe extends Operation {
     }
   }
 }
+
+/* OP_NouveauContact: 'Ajout d\'un contact à un groupe' ********
+- token donne les éléments d'authentification du compte.
+- idg : du groupe
+- ida : de l'avatar contact
+- cleAG : clé A du contact cryptée par la clé G du groupe
+Retour:
+*/
+export class NouveauContact extends Operation {
+  constructor () { super('NouveauContact') }
+
+  async run () { 
+    try {
+      const session = stores.session
+      const cleg = RegCles.get(session.groupeId)
+      const cleA = RegCles.get(session.peopleId)
+
+      const args = { 
+        token: session.authToken, 
+        idg: session.groupeId,
+        ida: session.peopleId,
+        cleAG: await crypter(cleg, cleA)
+      }
+      await post(this, 'NouveauContact', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

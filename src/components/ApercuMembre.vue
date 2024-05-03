@@ -54,22 +54,22 @@ a accès aux membres (donc dans l'onglet "membres").
           </div>
           <div class="row">
             <div class="text-italic col-6">{{$t('AMlecture')}}</div>
-            <div class="col-6">{{$t('etre', eg.groupe.accesLecNoteH(im))}}</div>
+            <div class="col-6">{{$t('etre', gr.accesLecNoteH(im))}}</div>
           </div>
           <div class="row">
             <div class="text-italic col-6">{{$t('AMecriture')}}</div>
-            <div class="col-6">{{$t('etre', eg.groupe.accesEcrNoteH(im))}}</div>
+            <div class="col-6">{{$t('etre', gr.accesEcrNoteH(im))}}</div>
           </div>
 
         </div>
 
         <div v-else>
           <div v-if="mb.dpc" class="row">
-            <div class="text-itali col-6">{{$t('AMdpc')}}</div>
+            <div class="text-italic col-6">{{$t('AMdpc')}}</div>
             <div class="font-mono text-bold">{{xd(mb.dpc)}}</div>
           </div>
           <div class="row">
-            <div class="text-itali col-6">{{$t('AMddi')}}</div>
+            <div class="text-italic col-6">{{$t('AMddi')}}</div>
             <div v-if="mb.ddi" class="font-mono text-bold">{{xd(mb.ddi)}}</div>
             <div v-else class="font-mono text-bold">{{$t('AMinv0')}}</div>
           </div>
@@ -162,7 +162,6 @@ export default {
   props: { 
     id: Number, // id de l'avatar membre
     idx: Number, 
-    people: Boolean,
     ouvert: Boolean
   },
 

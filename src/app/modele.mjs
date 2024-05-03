@@ -1164,9 +1164,9 @@ export class Groupe extends GenDoc {
     return h & FLAGS.HA ? 2 : 0
   }
   accesMembreH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
-    const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
+    const f = this.flags[im] || 0
     if ((f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM)) return 1
-    return h & FLAGS.HM ? 2 : 0
+    return f & FLAGS.HM ? 2 : 0
   }
 
   // mis dans la liste noire par un animateur

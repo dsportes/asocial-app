@@ -140,6 +140,7 @@ export const useUiStore = defineStore('ui', {
       NF: false, // NoteFichier
       NC: false, // NoteConfirme
       PNdl: false, // PageNotes
+      PInvit: false, // PageInvitation
     }
 
   }),

@@ -418,6 +418,8 @@ export default {
   EX8244: '(BUG) Le compte n\'a de chat avec le titulaire de la carte de visite',
   EX8245: '(BUG) Conflit d\'id d\'avatar.',
   EX8246: '(BUG) Groupe déjà créé.',
+  EX8247: '(BUG) Le compte n\'a pas accès aux membres du groupe',
+  EX8248: '(BUG) Contact déjà inscrit, doublon',
 
   EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
   EX8802: 'Action impossible du fait de la restriction "accès minimal"',
@@ -709,6 +711,8 @@ export default {
   OP_GetPartition: 'Obtention d\'une partition',
   OP_GetCompta: 'Obtention dùne comptabilité',
   OP_GetNotifC: 'Obtention de la notification d\'un compte.',
+  OP_NouveauContact: 'Ajout d\'un contact à un groupe',
+
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
 
@@ -1627,6 +1631,10 @@ export default {
   PGv2a: 'Quotas V2 déjà attribués : [{0}] soit {1} - {2} du quota total',
   PGv2u0: 'Volume V2 utilisé : {0}',
   PGv2a0: 'Quotas V2 déjà attribués : [{0}] soit {1}',
+
+  // Page Invitation
+  PItit: 'Contact du groupe {0}',
+  PItx1: 'Voulez-vous inscrire cet avatar comme contact du groupe ?',
 
   // Aperçu groupe
   AGstm: 'Statuts des membres:',

@@ -314,7 +314,7 @@ export const useGroupeStore = defineStore('groupe', {
         if (!idm) continue
         if (c.mav.has(idm)) continue
         n++
-        const nom = this.state.session.getCV(idm).nomC
+        const nom = state.session.getCV(idm).nomC
         if (f.nmb && !nom.startsWith(f.nmb)) continue
         if (f.stmb && stm + 1 !== f.stmb) continue
         if (f.ambno) {
@@ -326,7 +326,7 @@ export const useGroupeStore = defineStore('groupe', {
           if (f.ambno === 4 && !(!mb && !no)) continue
           if (f.ambno === 5 && g.accesEcrNote(im) !== 1) continue
         } 
-        r.push({ idm, im, nom })
+        r.push({ id: idm, im, nom })
       }
       r.sort((a, b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0) })
       stores.ui.fmsg(r.length)

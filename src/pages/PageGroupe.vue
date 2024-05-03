@@ -75,9 +75,9 @@
       <div v-if="nb && !lst.length" class="titre-lg text-italic">
         {{$t('PGnomb', [nb])}}</div>
       <div v-if="lst.length">
-        <div v-for="e of lst" :key="e.id">{{e.nom}}</div>
-        <!--apercu-membre v-for="(e, idx) of lst" :key="e.id"
-          class="q-my-lg" :idm="e.idm" :im="e.im" people :idx="idx"/-->
+        <!--div v-for="e of lst" :key="e.id">{{e.nom}}</div-->
+        <apercu-membre v-for="(e, idx) of lst" :key="e.id"
+          class="q-my-lg" :id="e.id" :idx="idx"/>
       </div>
     </div>
     <div v-else class="titre-lg text-italic">{{$t('PGnoamb')}}</div>
@@ -88,7 +88,6 @@
 
 <script>
 import stores from '../stores/stores.mjs'
-// import ApercuMembre from '../components/ApercuMembre.vue'
 import { bcf, dhcool } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
