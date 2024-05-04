@@ -3,8 +3,6 @@
   <div class="q-pa-xs row items-start">
     <div class="col-auto items-center q-mr-sm column">
       <img class="photomax" :src="cv.photo" />
-      <btn-cond v-if="!ID.estComptable(id)" class="q-mt-xs"
-        icon="zoom_in" round stop @ok="ovcv"/>
     </div>
     <div class="col">
       <div class="row">
@@ -15,24 +13,29 @@
           <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
           <span v-if="im" class="fs-sm font-mono q-mr-sm">{{'[' + im + ']'}}</span> 
         </div>
-        <btn-cond class="col-auto" v-if="!nodet && !estAvc && !estGroupe && !det"
-          icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
+        <btn-cond class="col-auto" v-if="!ID.estComptable(id)"
+          icon="zoom_in" round stop @ok="ovcv"/>
       </div>
       <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
+
       <mc-memo v-if="!ID.estComptable(id)" :id="id" :idx="idx"/>     
 
-      <q-separator v-if="chats.length || groupes.size" class="q-mx-sm" color="grey-5"/>
-      <div v-if="chats.length" class="row q-gutter-sm">
-        <span class="text-italic titre-md">{{$t('CAVtit')}}</span>
-        <span v-for="e in chats" :key="e.id" class="fs-md bord">{{e.nom}}</span>
-      </div>
+      <div class="row">
+        <div class="col">
+          <div v-if="chats.length" class="row q-gutter-sm">
+            <span class="text-italic titre-md">{{$t('CAVtit')}}</span>
+            <span v-for="e in chats" :key="e.id" class="fs-md bord">{{e.nom}}</span>
+          </div>
 
-      <div v-if="groupes.size" class="row q-gutter-sm">
-        <span class="text-italic titre-md">{{$t('CAVmb')}}</span>
-        <span v-for="idg in groupes" :key="idg" class="fs-md bord">{{session.getCV(idg).nomC}}</span>
+          <div v-if="groupes.size" class="row q-gutter-sm">
+            <span class="text-italic titre-md">{{$t('CAVmb')}}</span>
+            <span v-for="idg in groupes" :key="idg" class="fs-md bord">{{session.getCV(idg).nomC}}</span>
+          </div>
+        </div>
+        <btn-cond class="col-auto self-start" v-if="!nodet && !estAvc && !estGroupe && !det" size="sm"
+            icon="open_in_new" :label="$t('detail')" stop @ok="ouvrirdetails"/>
       </div>
-      
-      </div>
+    </div>
   </div>
   <!--q-separator color="orange" size="1px"/-->
 

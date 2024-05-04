@@ -216,6 +216,7 @@ import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV } from '../app/api.mjs'
 import { bcf, dhcool, styp, dkli, edvol } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
+import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ApercuMembre from '../components/ApercuMembre.vue'
 import SelAvid from '../components/SelAvid.vue'
@@ -227,7 +228,8 @@ import { ModeSimple } from '../app/operations4.mjs'
 export default {
   name: 'PageGroupe',
 
-  components: { BtnCond, ApercuGenx, QuotasVols, ApercuMembre, SelAvid, BoutonConfirm, ChoixQuotas },
+  components: { BoutonHelp, BtnCond, ApercuGenx, QuotasVols, ApercuMembre,
+    SelAvid, BoutonConfirm, ChoixQuotas },
 
   computed: {
     nomg () { return this.session.getCV(this.session.groupeId).nom },

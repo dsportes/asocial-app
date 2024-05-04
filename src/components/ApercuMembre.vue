@@ -13,12 +13,12 @@ a accès aux membres (donc dans l'onglet "membres").
 -->
 <template>
 <div>
-  <q-expansion-item :class="dkli(idx)" v-model="qexp"
+  <q-expansion-item :class="dkli(idx)" v-model="ouvert"
     switch-toggle-side expand-separator dense group="trgroup">
     <template v-slot:header>
       <div class="column full-width">
         <apercu-genx :id="id" :im="im" :idx="idx"/>
-        <div class="row q-gutter-sm titre-md">
+        <div class="row titre-md items-center">
           <span class="stx">{{$t('AMm' + stm)}}</span>
           <span v-if="gr.imh === im" class="stx">{{$t('AMmh')}}</span>
           <span v-if="im === 1" class="stx">{{$t('AMmf')}}</span>
@@ -26,149 +26,186 @@ a accès aux membres (donc dans l'onglet "membres").
           <span v-if="ano" class="stx">{{$t('AMn' + ano)}}</span>
           <bouton-bulle2 :texte="edit(fl, $t, '\n')"/>
         </div>
+
+        <div class="q-mt-xs row q-gutter-xs">
+          <btn-cond v-if="condm === 1" icon="grade" cond="cEdit" size="sm" stop
+            :label="$t('AMinvitbtn1')" @ok="ouvririnvit"/>
+          <btn-cond v-if="condm === 2" icon="check" cond="cEdit" size="sm" stop
+            :label="$t('AMinvitbtn2')" @ok="ui.oD('IAaccinvit', idc)"/>
+          <btn-cond v-if="condm === 3" icon="check" cond="cEdit" size="sm" stop
+            :label="$t('AMinvitbtn3')" @ok="gererDroits"/>
+          <btn-cond v-if="condm === 3" icon="check" cond="cEdit" size="sm" stop
+            :label="$t('AMinvitbtn4')" @ok="radiation"/>
+        </div>
       </div>
     </template>
 
-    <div class="row q-mt-sm">
-      <div class="col-auto q-ml-sm q-mt-sm">
-        <btn-cond icon="menu" round>
-          <q-menu max-height="90vh" class="sombre1 text-white">
-            <q-list class="titre-md bordm" style="min-width: 300px">
-              <q-item class="row items-center"><sel-avid :groupe="gr"/></q-item>
-              <q-separator color="orange"/>
-              <q-item v-for="ac in lstAc" :key="ac" clickable  v-close-popup @click="doAction(ac)">
-                <q-item-section v-if="condAc[ac]">
-                  <q-item-label lines="1">{{$t('AMactions' + ac)}}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </btn-cond>
+    <div class="q-ml-xl">
+      <div v-if="!mb" class="titre-md">
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMmembres')}}</div>
+          <div class="col-6">{{$t('etre', gr.accesMembreH(im))}}</div>
+        </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMlecture')}}</div>
+          <div class="col-6">{{$t('etre', gr.accesLecNoteH(im))}}</div>
+        </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMecriture')}}</div>
+          <div class="col-6">{{$t('etre', gr.accesEcrNoteH(im))}}</div>
+        </div>
+
       </div>
 
-      <div class="col q-ml-sm">
-        <div v-if="!mb" class="titre-md">
-          <div class="row">
-            <div class="text-italic col-6">{{$t('AMmembres')}}</div>
-            <div class="col-6">{{$t('etre', gr.accesMembreH(im))}}</div>
-          </div>
-          <div class="row">
-            <div class="text-italic col-6">{{$t('AMlecture')}}</div>
-            <div class="col-6">{{$t('etre', gr.accesLecNoteH(im))}}</div>
-          </div>
-          <div class="row">
-            <div class="text-italic col-6">{{$t('AMecriture')}}</div>
-            <div class="col-6">{{$t('etre', gr.accesEcrNoteH(im))}}</div>
-          </div>
-
+      <div v-else>
+        <div v-if="mb.dpc" class="row">
+          <div class="text-italic col-6">{{$t('AMdpc')}}</div>
+          <div class="font-mono text-bold">{{xd(mb.dpc)}}</div>
         </div>
-
-        <div v-else>
-          <div v-if="mb.dpc" class="row">
-            <div class="text-italic col-6">{{$t('AMdpc')}}</div>
-            <div class="font-mono text-bold">{{xd(mb.dpc)}}</div>
-          </div>
-          <div class="row">
-            <div class="text-italic col-6">{{$t('AMddi')}}</div>
-            <div v-if="mb.ddi" class="font-mono text-bold">{{xd(mb.ddi)}}</div>
-            <div v-else class="font-mono text-bold">{{$t('AMinv0')}}</div>
-          </div>
-          <div class="row">
-            <div class="text-italic col-6">{{$t('AMactif')}}</div>
-            <div class="col-6">{{edd([mb.dac, mb.fac])}}</div>
-          </div>
-          <div class="row">
-            <div class="text-italic col-6">{{$t('AMmembres')}}</div>
-            <div class="col-6">{{edd([mb.dam, mb.fam])}}</div>
-          </div>
-          <div class="row">
-            <div class="text-italic col-6">{{$t('AMlecture')}}</div>
-            <div class="col-6">{{edd([mb.dln, mb.fln])}}</div>
-          </div>
-          <div class="row">
-            <div class="text-italic col-6">{{$t('AMecriture')}}</div>
-            <div v-if="mb" class="col-6">{{edd([mb.den, mb.fen])}}</div>
-            <div v-else class="col-6">{{$t('etre', eg.groupe.accesEcrNoteH(im))}}</div>
-          </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMddi')}}</div>
+          <div v-if="mb.ddi" class="font-mono text-bold">{{xd(mb.ddi)}}</div>
+          <div v-else class="font-mono text-bold">{{$t('AMinv0')}}</div>
         </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMactif')}}</div>
+          <div class="col-6">{{edd([mb.dac, mb.fac])}}</div>
+        </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMmembres')}}</div>
+          <div class="col-6">{{edd([mb.dam, mb.fam])}}</div>
+        </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMlecture')}}</div>
+          <div class="col-6">{{edd([mb.dln, mb.fln])}}</div>
+        </div>
+        <div class="row">
+          <div class="text-italic col-6">{{$t('AMecriture')}}</div>
+          <div v-if="mb" class="col-6">{{edd([mb.den, mb.fen])}}</div>
+          <div v-else class="col-6">{{$t('etre', eg.groupe.accesEcrNoteH(im))}}</div>
+        </div>
+      </div>
 
-        <div v-if="stm === 2 || stm === 3">
-          <div class="q-my-xs">
-            <div class="text-italic">
-              <span>{{$t('AMinvit' + stm)}}</span>
-              <span v-if="invits.fl & FLAGS.AN" class="q-ml-sm">- {{$t('AMinvan')}}</span>
-              <span v-if="invits.fl & FLAGS.DM" class="q-ml-sm">- {{$t('AMinvam')}}</span>
-              <span v-if="(invits.fl & FLAGS.DN) && !(invits.fl & FLAGS.DE)" class="q-ml-sm">- {{$t('AMinvln')}}</span>
-              <span v-if="invits.fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
-            </div>
-            <div class="titre-md text-italic q-mt-xs">{{$t('AMbienv')}}</div>
-            <show-html v-if="mb" :idx="idx" :texte="mb.msg" maxh="4rem" scroll zoom/>
+      <div v-if="stm === 2 || stm === 3">
+        <div class="q-my-xs">
+          <div class="text-italic">
+            <span>{{$t('AMinvit' + stm)}}</span>
+            <span v-if="invits.fl & FLAGS.AN" class="q-ml-sm">- {{$t('AMinvan')}}</span>
+            <span v-if="invits.fl & FLAGS.DM" class="q-ml-sm">- {{$t('AMinvam')}}</span>
+            <span v-if="(invits.fl & FLAGS.DN) && !(invits.fl & FLAGS.DE)" class="q-ml-sm">- {{$t('AMinvln')}}</span>
+            <span v-if="invits.fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
           </div>
+          <div class="titre-md text-italic q-mt-xs">{{$t('AMbienv')}}</div>
+          <show-html v-if="mb" :idx="idx" :texte="mb.msg" maxh="4rem" scroll zoom/>
 
-          <div v-if="gr.msu !== null && gr.invits">
-            <div class="titre-md">{{$t('AMinvev')}}</div>
-            <div class="fs-md q-ml-md">
-              <span class="text-italic">{{$t('AMinvvp')}}</span>
-              <span class="q-ml-sm" v-for="cv of animInv[0]" :key="cv.id">{{cv.nomC}}</span>
-            </div>
-            <div class="fs-md q-ml-md">
-              <span class="text-italic">{{$t('AMinvvc')}}</span>
-              <span class="q-ml-sm" v-for="cv of animInv[1]" :key="cv.id">{{cv.nomC}}</span>
-            </div>
+          <div class="fs-md q-ml-md">
+            <span class="text-italic">{{$t('AMinvvp')}}</span>
+            <span class="q-ml-sm" v-for="[id, cv] of animInv[0]" :key="id">{{cv.nomC}}</span>
+          </div>
+          <div v-if="animInv[1].size" class="fs-md q-ml-md">
+            <span class="text-italic">{{$t('AMinvvc')}}</span>
+            <span class="q-ml-sm" v-for="[id, cv] of animInv[1]" :key="id">{{cv.nomC}}</span>
           </div>
         </div>
       </div>
     </div>
   </q-expansion-item>
 
-      <!--
-      <div class="q-mt-sm row q-gutter-xs">
-        <btn-cond v-if="stm === 1 && gr.msu === null && gSt.egrC.estAnim && invitable" 
-          icon="add" cond="cEdit"
-          :label="$t('AMinvitbtn1')" @ok="ouvririnvit(1)"/>
-        <btn-cond v-if="stm === 2 && gr.msu === null && gSt.egrC.estAnim" 
-          icon="edit" cond="cEdit"
-          :label="$t('AMinvitbtn2')" @ok="ouvririnvit(2)"/>
-        <btn-cond v-if="stm === 2 && gSt.egrC.estAnim" 
-          icon="delete" cond="cEdit"
-          :label="$t('AMinvitbtn3')" @ok="ouvririnvit(3)"/>
-        <btn-cond v-if="(stm === 1 || stm === 2) && gr.msu !== null && gSt.egrC.estAnim" 
-          icon="how_to_vote" cond="cEdit"
-          :label="$t('AMinvitbtn4')" @ok="ouvririnvit(4)"/>
-        <btn-cond v-if="(stm === 1 || stm === 2) && gr.msu !== null && gSt.egrC.estAnim" 
-          icon="how_to_vote" cond="cEdit"
-          :label="$t('AMinvitbtn3')" @ok="ouvririnvit(6)"/>
-      </div>
-      -->
+  <!-- Dialogue d'invitation -->
+  <q-dialog v-model="ui.d.AMinvit[idc]" persistent full-height position="left">
+    <q-layout container view="hHh lpR fFf" :class="styp('md')">
+      <q-header elevated>
+        <q-toolbar class="bg-secondary text-white">
+          <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">
+            {{$t('AMinvtit', [session.getCV(id).nomm, nomg])}}</q-toolbar-title>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+      </q-header>
+
+      <q-page-container>
+      <q-card-section>
+        <div class="row justify betwwen">
+          <span class="titre-lg">{{$t('AMcas' + stm)}}</span>
+          <span v-if="stm > 1" class="titre-md">{{edFlagsiv}}</span>
+        </div>
+        <div v-if="stm > 1" class="fs-md">
+          <span class="text-italic">{{$t('AMinvvp')}}</span>
+          <span class="q-ml-sm" v-for="[id, cv] of animInv[0]" :key="id">{{cv.nomC}}</span>
+        </div>
+        <div v-if="stm === 2" class="fs-md">
+          <span class="text-italic">{{$t('AMinvvc')}}</span>
+          <span class="q-ml-sm" v-for="[id, cv] of animInv[1]" :key="id">{{cv.nomC}}</span>
+        </div>
+        <div v-if="stm > 1" class="titre-md text-italic">{{$t('AMbienv')}}</div>
+        <show-html class="bord1" v-if="stm > 1" :texte="mb.msg" :idx="0" maxh="4rem" zoom/>
+        <div v-if="stm > 1" class="bordm">
+           <q-option-group dense v-model="rmsv" :options="optRMSV" color="primary" />
+        </div>
+      </q-card-section>
+
+      <q-card-section class="q-ma-sm">
+        <div class="bord2 column q-pa-xs q-mb-sm titre-md">
+          <q-checkbox dense v-model="ina" :label="$t('AManimateur')" />
+          <q-checkbox dense v-model="idm" :label="$t('AMmembres')" />
+          <q-checkbox dense v-model="idn" :label="$t('AMlecture')" />
+          <q-checkbox dense v-if="idn" v-model="ide" :label="$t('AMecriture')" />
+        </div>
+
+        <div class="stx fs-md" v-if="nvfl !== invits.fl && stm === 2">{{$t('AMchg')}}</div>
+
+        <div class="q-mt-md titre-md text-italic">{{$t('AMbienv')}}</div>
+        <editeur-md class="q-mb-sm bord1" :lgmax="1000" v-model="msg" :texte="mb.msg || ''" 
+          modetxt mh="8rem" editable/>
+      </q-card-section>
+
+      <q-card-actions align="right" class="q-gutter-xs">
+        <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+        <btn-cond v-if="rmsv !== 1" color="warning" icon="check"
+          :label="$t('AMconf' + rmsv)"
+          :disable="(rmsv === 0 || rmsv === 2) && (!nvfl || !msg)"
+          @ok="inviter"/>
+      </q-card-actions>
+      </q-page-container>
+    </q-layout>
+  </q-dialog>
+
+  <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
+    <invitation-acceptation :inv="aSt.getAvatar(id).invits.get(gr.id)"/>
+  </q-dialog>
 
 </div>
 </template>
 <script>
-import { ref, toRef } from 'vue'
+import { ref } from 'vue'
 
-import { styp, dkli, afficherDiag, dhcool } from 'src/app/util.mjs'
+import { styp, dkli, dhcool } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonBulle2 from './BoutonBulle2.vue'
+import BoutonHelp from './BoutonHelp.vue'
 import BtnCond from './BtnCond.vue'
-import SelAvid from './SelAvid.vue'
 import { OublierMembre, MajDroitsMembre, InvitationGroupe } from '../app/operations.mjs'
 import ShowHtml from './ShowHtml.vue'
+import InvitationAcceptation from './InvitationAcceptation.vue'
+import EditeurMd from './EditeurMd.vue'
 
 export default {
   name: 'ApercuMembre',
 
   props: { 
     id: Number, // id de l'avatar membre
-    idx: Number, 
-    ouvert: Boolean
+    idx: Number
   },
 
-  components: { ApercuGenx, BoutonBulle2, ShowHtml, BtnCond, SelAvid },
+  components: { ApercuGenx, BoutonBulle2, BoutonHelp, ShowHtml, EditeurMd,
+    BtnCond, ShowHtml, InvitationAcceptation },
 
   computed: {
     avid () { return this.session.avatarId },
+    nomg () { return this.session.getCV(this.gr.id).nom },
+    nomm () { return this.session.getCV(this.id).nomC },
 
     mb () { return this.gSt.egrC && this.gSt.egrC.membres ? this.gSt.egrC.membres.get(this.im) : null },
     im () { return this.gSt.egrC && this.gSt.egrC.groupe ? this.gSt.egrC.groupe.mmb.get(this.id) : 0 },
@@ -179,87 +216,39 @@ export default {
     stm () { return this.gr.st[this.im]},
     animInv () { return gSt.animInv(this.im) },
     invits () { return this.gr.invits[this.im] || { fl: 0, li: []} },
-
-    invitable () { return this.gr.estInvitable(this.id) },
-
-    /*
-    oubliable () { return this.eg.groupe.estOubliable(this.im)},
-
-
-
-    stm () { return this.eg.groupe.statutMajeur(this.im) },
-
-
-
-    // accès aux notes autorisé MAIS NON activé
-    anona () { return this.eg.groupe.accesNoteNA(this.im) },
-
-    // accès aux membres autorisé MAIS NON activé
-    ambna () { return this.eg.groupe.accesMembreNA(this.im) },
+    condm () {
+      // Peut créer / modifier / supprimer une invitation
+      if (this.stm >= 1 && this.stm <= 3 && this.gSt.egrC.estAnim) return 1
+      // Peut accepter / refuser SA PROPRE invitation
+      if (this.stm === 3 && this.session.estAvc(this.id)) return 2
+      // Gestion des droits et accès / Gestion des radiations
+      if (this.stm >= 4 && (this.session.estAvc(this.id) || this.gSt.egrC.estAnim)) return 3
+      return 0
+    },
 
     edFlagsiv () { 
-      const f = this.mb.flagsiv
+      const f = this.invits.fl
       if (!f) return ''
       const ed = []
-      if (f & FLAGS.PA) ed.push(this.$t('AMinvpa'))
+      if (f & FLAGS.AN) ed.push(this.$t('AMinvan'))
       if (f & FLAGS.DM) ed.push(this.$t('AMinvdm'))
       if (f & FLAGS.PE) ed.push(this.$t('AMinvpe'))
       else if (f & FLAGS.DN) ed.push(this.$t('AMinvdn'))
       return ed.join(', ')
     },
 
-    una () { return this.eg.groupe.inv !== null },
-
-    nvflags () {
-      let n = 0
-      if (this.ipa) n |= FLAGS.PA
-      if (this.idm) n |= FLAGS.DM
-      if (this.ide) n |= FLAGS.DE | FLAGS.DN
-      else if (this.idn) n |= FLAGS.DN
-      return n
-    },
-
-    nvflags2 () {
-      let n = 0
-      if (this.dra) n |= FLAGS.PA
-      if (this.drm) n |= FLAGS.DM
-      if (this.drl) n |= FLAGS.DN
-      if (this.dre) n |= FLAGS.DE | FLAGS.DN
-      if (this.adrm) n |= FLAGS.AM
-      if (this.adrl) n |= FLAGS.AN
-      return n
-    },
-
-    drupd () { return this.cas < 3 || this.cas === 4 || this.cas === 5 },
-    */
-
-    /* droits de modification des droits
-    - être animateur (un des avc est animateur)
-    - ET la cible n'est pas animateur OU la cible est un avc (c'est moi)
-    
-    drro () { 
-      return !(this.eg.estAnim && (!this.eg.groupe.estAnim(this.im) || this.moi))
-    },
-
-    moi () { return this.aSt.compte.estAvDuCompte(this.na.id) },
-
-    chgdr () { return this.flags2av !== this.nvflags2 },
-
-    cfln () { return this.decl !== 0 },
-
-    dernierAnim () { const g = this.eg.groupe
-      return this.moi && g.nbAnims <= 1 && this.dra === false }
-    */
+    nvfl () { let fl = 0
+      if (this.ina) fl |= FLAGS.AN 
+      if (this.idm) fl |= FLAGS.DM 
+      if (this.idn) fl |= FLAGS.DN 
+      if (this.ide) fl |= FLAGS.DE 
+      return fl
+    }
   },
 
   watch: {
-    qexp (v) {
-      if (v) this.session.setMembreId(this.im)
-    },
-    avid (ap) {
-      console.log('>>' + ap)
-      this.lstAc.forEach(ac => { this.condAc[ac] = true })
-    }
+    ouvert (v) { if (v) this.session.setMembreId(this.im) },
+    idn () { this.ide = false },
     /*
     drm (v) {
       if (v) this.adrm = (this.fl & FLAGS.AM) !== 0
@@ -282,15 +271,14 @@ export default {
   },
 
   data () { return {
-    /* 
-    1: invit std, 2: modif invit std, 3: suppr invit std, 
-    4: vote pour, 5: vote contre, 6: suppr invit una 
-    */
-    cas: 0,
-    ipa: false, idm: false, idn: false, ide: false,
+    ouvert: false,
+    optRMSV: [],
+    rmsv: 1, // 1: ne pas changer, 2:modifier, 3: supprimer, 4: voter
+    ina: false, idm: false, idn: false, ide: false,
+    msg: '',
+    
     invpar: null,
     options: null,
-    ard: '',
     cfgtab: 'droits',
     dra: false, drm: false, drl: false, dre: false, adrm: false, adrl: false,
     flags2av: 0,
@@ -310,50 +298,38 @@ export default {
 
     xd (d) { return !d ? '-' : AMJ.editDeAmj(d, true) },
 
-    doAction (ac) {
-      console.log(ac)
-    },
+    gererDroits () {},
+    radiation () {},
 
-    async accinviter () {
-      if (!await this.session.edit()) return
-      this.ui.oD('IAaccinvit', this.idc)
-    },
-
-    ouvrirdetails () {
-      this.session.setPeopleId(this.na.id)
-      this.ui.oD('detailspeople')
-    },
-
-    async ouvririnvit (cas) { 
-      this.cas = cas
-      const fl = this.mb.flinv || 0
+    ouvririnvit () { 
+      this.rmsv = this.stm === 1 ? 0 : 1
+      const fl = this.invits.fl
       this.ina = (fl & FLAGS.NA) !== 0
       this.idm = (fl & FLAGS.DM) !== 0
       this.idn = (fl & FLAGS.DN) !== 0
       this.ide = (fl & FLAGS.DE) !== 0
-      this.options = []
-      const g = this.eg.groupe
-      this.aSt.compte.lstAvatarNas.forEach(na => {
-        const im = this.aSt.compte.imGA(this.eg.groupe.id, na.id)
-        if (g.estAnim(im) && g.accesMembre(im)) 
-          this.options.push({ label: na.nom, value: im })
-      })
-      if (!this.options.length) {
-        afficherDiag(this.$t('AMinvitanim'))
-        return
+      this.msg = this.mb.msg || ''
+
+      this.optRMSV = [
+        { label: this.$t('AMopt1'), value: 1 },
+        { label: this.$t('AMopt2'), value: 2 },
+        { label: this.$t('AMopt3'), value: 3 },
+      ]
+      if (this.stm === 2 && this.animInv.lc.size) {
+        let ok = false
+        this.session.compte.mpg.get(this.session.groupeId).forEach(ida => {
+          if (this.animInv.lc.has(ida)) ok = true
+        })
+        if (ok) this.optRMSV.push({ label: this.$t('AMopt4'), value: 4 })
       }
-      this.invpar = this.options[0]
-      this.ard = this.mb.ard || ''
       this.session.setMembreId(this.im)
       this.ui.oD('AMinvit', this.idc)
     },
 
-    async inviter (cas) { 
-      /* 
-      1: invit std, 2: modif invit std, 3: suppr invit std, 
-      4: vote pour, 5: vote contre, 6: suppr invit una 
-      */
-      await new InvitationGroupe().run(cas, this.eg.groupe, this.mb, this.invpar.value, this.nvflags, this.ard)
+    async inviter () { 
+      /* rmsv: 0: inviter, 2: modifier, 3: supprimer, 4: voter pour */
+
+      // await new InvitationGroupe().run(this.rmsv, fl, this.msg)
       this.ui.fD()
     },
 
@@ -386,23 +362,15 @@ export default {
 
   },
 
-  setup (props) {
+  setup () {
     const session = stores.session
     const ui = stores.ui
     const idc = ref(ui.getIdc())
     const gSt = stores.groupe
     const aSt = stores.avatar
 
-    const ouvert = toRef(props, 'ouvert')
-    const qexp = ref(ouvert.value || false)
-
-    const lstAc = ['IC', 'RC', 'IS']
-    const condAc = ref({})
-    lstAc.forEach(ac => { if (ac.indexOf('I') !== -1) condAc.value[ac] = true })
-
     return {
-      FLAGS, dkli, styp, edit, dhcool, lstAc, condAc,
-      qexp,
+      FLAGS, dkli, styp, edit, dhcool,
       session, gSt, aSt, ui, idc
     }
   }
@@ -418,6 +386,7 @@ export default {
   font-weight: bold
   font-style: italic
   color: black
+  margin: 0 2px 0 0
 .lgsel
   width: 10rem
 .mlx
@@ -427,5 +396,11 @@ export default {
 .bordm
   border: 2px solid $primary
   border-radius: 5px
+  padding: 3px
+.bord1
+  border-bottom: 1px solid $grey-5
+.bord2
+  border: 1px solid $grey-5
+  border-radius: 3px
   padding: 3px
 </style>

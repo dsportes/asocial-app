@@ -183,21 +183,21 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
-    /* Animateurs du groupe courant ayant voté 
-    - pour inviter le membre courant 
-    - contre (en fait pas encore voté)
+    /* Animateurs du groupe courant:
+    - ayant invité ou  voter pour inviter le membre courant 
+    - n'ayant pas invité ou pas encore voté pour l'invitation
     */
     animInv: (state) => { return (im) => {
-        const lc = [] // vote contre (pas voté)
-        const lp = [] // vote pour
+        const lc = new Map() // vote contre (pas voté)
+        const lp = new Map() // vote pour
         const g = state.egrC.groupe
         if (!im) return [lc, lp]
         const invits = g.invits[im] || { fl, li }
-        if (!invits.li) return [lc, la]
+        if (!invits.li) return [lp, lc]
         for(let i = 1; i < g.st.length; i++) {
           if (g.estAnim(i)) {
             const cv = state.session.getCV(g.tid[i])
-            if (invits.li.indexOf(i) === -1) lc.push(cv); else lp.push(cv)
+            if (invits.li.indexOf(i) === -1) lc.set(cv.id, cv); else lp.set(cv.id, cv)
           }
         }
         return [lp, lc]

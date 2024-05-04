@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div ref="root" :class="dkli(idx)">
+    <div ref="root" :class="dkli(idx + 1) + ' mcm'">
       <div v-if="large" class="row full-width items-center">
         <div class="col-6 fs-sm z1">
           <span v-if="memolg">{{memolg}}</span>
@@ -149,4 +149,8 @@ export default {
   overflow: hidden
   text-overflow: ellipsis
   white-space: nowrap
+.mcm
+  border-radius: 10px
+  padding: 0 0 0 5px
+  margin: 2px 0
 </style>
