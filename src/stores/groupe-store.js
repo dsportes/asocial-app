@@ -183,8 +183,17 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
+    /* avatars du compte étant animateurs du groupe courant: [{ label: nom, value: id}] */
+    avcAnims: (state) => {
+      const l = []
+      state.session.compte.mav.forEach(id => { 
+        if (state.grC.estAnim(state.grC.mmb.get(id)))
+          l.push({ label: state.session.getCV(id).nom, value: id }) 
+      })
+    },
+
     /* Animateurs du groupe courant:
-    - ayant invité ou  voter pour inviter le membre courant 
+    - ayant invité ou voter pour inviter le membre courant 
     - n'ayant pas invité ou pas encore voté pour l'invitation
     */
     animInv: (state) => { return (im) => {

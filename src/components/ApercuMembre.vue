@@ -129,13 +129,18 @@ a accès aux membres (donc dans l'onglet "membres").
           <span class="titre-lg">{{$t('AMcas' + stm)}}</span>
           <span v-if="stm > 1" class="titre-md">{{edFlagsiv}}</span>
         </div>
-        <div v-if="stm > 1" class="fs-md">
-          <span class="text-italic">{{$t('AMinvvp')}}</span>
-          <span class="q-ml-sm" v-for="[id, cv] of animInv[0]" :key="id">{{cv.nomC}}</span>
+        <div v-if="gr.msu">
+          <div v-if="stm > 1" class="fs-md">
+            <span class="text-italic">{{$t('AMinvvp')}}</span>
+            <span class="q-ml-sm" v-for="[id, cv] of animInv[0]" :key="id">{{cv.nomC}}</span>
+          </div>
+          <div v-if="stm === 2" class="fs-md">
+            <span class="text-italic">{{$t('AMinvvc')}}</span>
+            <span class="q-ml-sm" v-for="[id, cv] of animInv[1]" :key="id">{{cv.nomC}}</span>
+          </div>
         </div>
-        <div v-if="stm === 2" class="fs-md">
-          <span class="text-italic">{{$t('AMinvvc')}}</span>
-          <span class="q-ml-sm" v-for="[id, cv] of animInv[1]" :key="id">{{cv.nomC}}</span>
+        <div v-else>
+          <div v-if="stm === 2">{{$t('AMinvpar', [invpar])}}</div>
         </div>
         <div v-if="stm > 1" class="titre-md text-italic">{{$t('AMbienv')}}</div>
         <show-html class="bord1" v-if="stm > 1" :texte="mb.msg" :idx="0" maxh="4rem" zoom/>
@@ -144,7 +149,18 @@ a accès aux membres (donc dans l'onglet "membres").
         </div>
       </q-card-section>
 
-      <q-card-section class="q-ma-sm">
+      <q-card-section v-if="stm === 1 || rmsv === 2" class="q-ma-sm">
+        <!-- Edition / création d'une invitation -->
+        <div v-if="!gr.msu">
+          <div v-if="optAvAnims.length === 1">{{$t('AMinvpar2', [invparf.label])}}</div>
+          <div v-else class="row items-center">
+            <span class="q-mr-md">{{$t('AMchinv')}}</span>
+            <q-select v-model="invparf" borderless dense options-dense standard filled
+              :options="optAvAnims" style="min-width:120px;max-width:120px"
+              popup-content-class="bg-accent text-white titre-md text-bold q-pa-sm"/>
+          </div>
+        </div>
+
         <div class="bord2 column q-pa-xs q-mb-sm titre-md">
           <q-checkbox dense v-model="ina" :label="$t('AManimateur')" />
           <q-checkbox dense v-model="idm" :label="$t('AMmembres')" />
@@ -157,6 +173,11 @@ a accès aux membres (donc dans l'onglet "membres").
         <div class="q-mt-md titre-md text-italic">{{$t('AMbienv')}}</div>
         <editeur-md class="q-mb-sm bord1" :lgmax="1000" v-model="msg" :texte="mb.msg || ''" 
           modetxt mh="8rem" editable/>
+      </q-card-section>
+
+      <q-card-section v-if="rmsv === 3" class="q-ma-sm">
+        <!-- Suppression d'une invitation -->
+        <q-option-group dense v-model="suppr" :options="optSuppr" color="primary" />
       </q-card-section>
 
       <q-card-actions align="right" class="q-gutter-xs">
@@ -186,7 +207,8 @@ import ApercuGenx from './ApercuGenx.vue'
 import BoutonBulle2 from './BoutonBulle2.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import BtnCond from './BtnCond.vue'
-import { OublierMembre, MajDroitsMembre, InvitationGroupe } from '../app/operations.mjs'
+import { OublierMembre, MajDroitsMembre } from '../app/operations.mjs'
+import { InvitationGroupe } from '../app/operations4.mjs'
 import ShowHtml from './ShowHtml.vue'
 import InvitationAcceptation from './InvitationAcceptation.vue'
 import EditeurMd from './EditeurMd.vue'
@@ -216,6 +238,9 @@ export default {
     stm () { return this.gr.st[this.im]},
     animInv () { return gSt.animInv(this.im) },
     invits () { return this.gr.invits[this.im] || { fl: 0, li: []} },
+    invpar () { const x = invits.li[0]
+      return x ? this.session.getCV(this.gr.tid[x]).nomC : ''
+    },
     condm () {
       // Peut créer / modifier / supprimer une invitation
       if (this.stm >= 1 && this.stm <= 3 && this.gSt.egrC.estAnim) return 1
@@ -240,10 +265,12 @@ export default {
     nvfl () { let fl = 0
       if (this.ina) fl |= FLAGS.AN 
       if (this.idm) fl |= FLAGS.DM 
-      if (this.idn) fl |= FLAGS.DN 
+      if (this.idn) fl |= FLAGS.DN
       if (this.ide) fl |= FLAGS.DE 
       return fl
-    }
+    },
+
+    optAvAnims () { return this.gSt.avcAnims }
   },
 
   watch: {
@@ -273,11 +300,17 @@ export default {
   data () { return {
     ouvert: false,
     optRMSV: [],
+    optSuppr: [
+      { label: this.$t('AMoptSupp1'), value: 1},
+      { label: this.$t('AMoptSupp2'), value: 2},
+      { label: this.$t('AMoptSupp3'), value: 3}
+    ],
     rmsv: 1, // 1: ne pas changer, 2:modifier, 3: supprimer, 4: voter
     ina: false, idm: false, idn: false, ide: false,
     msg: '',
-    
-    invpar: null,
+    invparf: null,
+    suppr: 1,
+
     options: null,
     cfgtab: 'droits',
     dra: false, drm: false, drl: false, dre: false, adrm: false, adrl: false,
@@ -309,6 +342,7 @@ export default {
       this.idn = (fl & FLAGS.DN) !== 0
       this.ide = (fl & FLAGS.DE) !== 0
       this.msg = this.mb.msg || ''
+      this.suppr = 1
 
       this.optRMSV = [
         { label: this.$t('AMopt1'), value: 1 },
@@ -322,14 +356,17 @@ export default {
         })
         if (ok) this.optRMSV.push({ label: this.$t('AMopt4'), value: 4 })
       }
+
+      if (!this.gr.msu && this.optAvAnims.length) this.invparf = this.optAvAnims[0]
+
       this.session.setMembreId(this.im)
       this.ui.oD('AMinvit', this.idc)
     },
 
     async inviter () { 
       /* rmsv: 0: inviter, 2: modifier, 3: supprimer, 4: voter pour */
-
-      // await new InvitationGroupe().run(this.rmsv, fl, this.msg)
+      const ida = !this.gr.msu && this.invparf ? this.invparf.value : 0
+      await new InvitationGroupe().run(this.rmsv, ida, this.fl, this.msg, this.suppr)
       this.ui.fD()
     },
 

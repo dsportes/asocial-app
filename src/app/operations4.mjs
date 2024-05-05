@@ -1011,3 +1011,81 @@ export class ModeSimple extends Operation {
     }
   }
 }
+
+/* OP_InvitationGroupe: 'Invitation à un groupe' **********
+- token donne les éléments d'authentification du compte.
+- idg: id du groupe
+- idm: id du membre invité
+- rmsv: 0: inviter, 2: modifier, 3: supprimer, 4: voter pour
+- flags: flags d'invitation
+- msgG: message de bienvenue crypté par la clé G du groupe
+- idi: id de l'invitant pour le mode d'invitation simple 
+  (sinon tous les avatars du comptes animateurs du groupe)
+- suppr: 1-contact, 2:radié, 3-radié + LN
+Retour:
+*/
+export class InvitationGroupe extends Operation {
+  constructor () { super('InvitationGroupe') }
+
+  async run (rmsv, ida, flags, msg, suppr) { 
+    try {
+      const session = stores.session
+      const cleg = RegCles.get(session.groupeId)
+
+      const args = { token: session.authToken, 
+        rmsv, ida, flags, 
+        suppr: rmsv === 3 ? suppr : 0,
+        msgG: await crypter(cleg, gzipB(msg))
+      }
+      await post(this, 'InvitationGroupe', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_AcceptInvitation: 'Acceptation d\'une invitation à un groupe' *************
+args.token donne les éléments d'authentification du compte.
+args.idg : id du groupe
+args.ids: indice du membre invité
+args.id: id de l'avatar invité
+args.nag: nag du membre (pour liste noire)
+args.ni: numéro d'invitation (pour maj avatar)
+args.npgk: cle de l'entrée dans mpgk du compte (pour maj mpgk)
+args.epgk: entrée dans mpgk du compte
+args.cas: 1: acceptation, 2: refus, 3: refus et oubli, 4: refus et liste noire
+args.iam: true si accès membre
+args.ian: true si accès note
+args.ardg: ardoise du membre cryptée par la clé du groupe
+args.chatit: item de chat (copie de l'ardoise)
+Retour:
+*/
+export class AcceptInvitation extends Operation {
+  constructor () { super('AcceptInvitation') }
+
+  async run (cas, na, ng, im, chattxt, iam, ian) {
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const av = aSt.getAvatar(na.id)
+      const ni = await Groupe.getNi(ng, na)
+      const epgk = await av.getEpgk(ni)
+      const chatit = chattxt ? await Chatgr.getItem(ng.rnd, im, chattxt) : null
+
+      const args = { token: session.authToken, 
+        idg: ng.id, 
+        ids: im,
+        id: na.id,
+        nag: await Groupe.getNag(ng, na),
+        npgk: await Groupe.getNpgk(ng.id, na.id),
+        cas, iam, ian, ni, epgk,
+        chatit
+      }
+      const ret = this.tr(await post(this, 'AcceptInvitation', args))
+      return this.finOK(ret.disparu)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
