@@ -14,17 +14,18 @@ import { UNITEN, UNITEV, FLAGS, ID } from '../app/api.mjs'
     estHeb: false // un des avatars du compte est hébergeur du groupe
 - invits: map des invitations en attente.
   - clé : id du groupe + '/' + id de l'avatar invité
-  - valeur: {idg, ida, idi, txt}
+  - valeur: {idg, ida, flags, invpar, msg}
     - idg : du groupe
     - ida : de l'avatar invité
-    - idi : id de l'invitant,
-    - txt : message d'invitation
+    - flags: d'invitation
+    - invpar : set des ids des invitants,
+    - msg : message d'invitation
 */
 
 export const useGroupeStore = defineStore('groupe', {
   state: () => ({
     map: new Map(),
-    invits: new Map()
+    invits: new Map() // clé: idg/ida val: {idg, ida, invpar (Set), msg}
   }),
 
   getters: {
@@ -186,10 +187,12 @@ export const useGroupeStore = defineStore('groupe', {
     /* avatars du compte étant animateurs du groupe courant: [{ label: nom, value: id}] */
     avcAnims: (state) => {
       const l = []
+      const g = state.egrC.groupe
       state.session.compte.mav.forEach(id => { 
-        if (state.grC.estAnim(state.grC.mmb.get(id)))
+        if (g.estAnim(g.mmb.get(id)))
           l.push({ label: state.session.getCV(id).nom, value: id }) 
       })
+      return l
     },
 
     /* Animateurs du groupe courant:
@@ -417,13 +420,10 @@ export const useGroupeStore = defineStore('groupe', {
       return this.invits.get(idg + '/' + ida)
     },
 
-    setInvit (inv) { // inv: {idg, ida, idi, txt}
-      const e = this.setE(inv.idg)
-      this.invits.set(inv.idg + '/' + inv.ida, inv)
-    },
-
-    delInvit (idg, ida) { // inv: {idg, ida, idi, txt}
-      this.invits.delete(idg + '/' + ida)
+    setInvits (ida, l) { // [ {idg, ida, invpar (Set), msg} ]
+      const x = [ ...this.invits.keys() ]
+      if (x.length) x.forEach(k => { if (k.endsWith('/' + ida)) this.invits.delete(k) })
+      for(const inv of l) this.invits.set(inv.idg + '/' + inv.ida, inv)
     },
 
     setChatgr (chatgr) {

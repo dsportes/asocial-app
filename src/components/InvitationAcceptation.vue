@@ -3,36 +3,42 @@
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated>
     <q-toolbar v-if="mb" class="bg-secondary text-white">
-      <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
-      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('ICtit2', [mb.na.nom, mb.ng.nom])}}</q-toolbar-title>
+      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
+      <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('ICtit2', [nomm, nomg])}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>
   </q-header>
 
   <q-page-container>
-    <q-card-section v-if="mb">
-      <apercu-genx :id="mb.id"/>
-      <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICinvpar')}}</div>
-      <div class="q-ma-sm" v-for="[im, na] in mb.ext.invs" :key="im">
-        <apercu-genx :id="na.id"/>
-        <q-separator color="orange"/>
-      </div>
+    <q-card-section>
+      <apercu-genx :id="inv.idg"/>
+      <q-separator class="q-my-sm" color="orange"/>
+      <apercu-genx :id="inv.ida"/>
+    </q-card-section>
+
+    <q-card-section>
+      <div class="titre-lg">{{$t('AMinvvp')}}</div>
+      <apercu-genx class="q-my-xs" v-for="(id, idx) in inv.invpar" :key="id" :id="id" :idx="idx"/>
+    </q-card-section>
+
+    <q-card-section>
+      <div class="titre-md q-mb-sm">{{$t('ICbienv')}}</div>
+      <show-html :texte="inv.msg" maxh="4rem" scroll zoom/>
 
       <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICflags', [edFlags])}}</div>
       <div class="titre-md text-italic">{{$t('ICcfl')}}</div>
-      <q-checkbox v-if="fl & FLAGS.DM" v-model="iam" :label="$t('FLAGS3')" />
-      <q-checkbox v-if="fl & FLAGS.DN" v-model="ian" :label="$t('FLAGS2')" />
+      <q-checkbox v-if="fl & FLAGS.DM" v-model="iam" :label="$t('ICcflm')" />
+      <q-checkbox v-if="fl & FLAGS.DN" v-model="ian" :label="$t('ICcfln')" />
 
       <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICrem')}}</div>
-      <editeur-md :lgmax="1000" v-model="chattxt" :texte="mb.ext.chattxt || ''" modetxt mh="8rem"
-        editable />
+      <editeur-md :lgmax="1000" v-model="msg" :texte="defmsg" modetxt mh="8rem" editable />
     </q-card-section>
             
-    <div v-if="mb" class="column justify-center items-center q-gutter-xs">
-      <q-btn dense flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+    <div class="column justify-center items-center q-gutter-xs">
+      <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
       <div class="row justify-center q-gutter-sm">
-        <q-btn dense :label="$t('ICacc')" color="primary" @click="ok(1)"/>
-        <q-btn dense :label="$t('ICdec')" color="warning" @click="cfln = true"/>
+        <btn-cond :label="$t('ICacc')" cond="cEdit" @ok="ok(1)"/>
+        <btn-cond :label="$t('ICdec')" color="warning" cond="cEdit" @ok="cfln = true"/>
       </div>
       <div v-if="cfln" class="column justify-left">
         <span><q-radio v-model="decl" :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="inv2"/></span>
@@ -46,7 +52,6 @@
 </template>
 <script>
 
-import { ref, toRef, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 
 import EditeurMd from './EditeurMd.vue'
@@ -54,35 +59,44 @@ import BoutonHelp from './BoutonHelp.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonBulle from './BoutonBulle.vue'
 import ApercuGenx from './ApercuGenx.vue'
+import BtnCond from './BtnCond.vue'
+import ShowHtml from './ShowHtml.vue'
 
-import { InvitationFiche, AcceptInvitation } from '../app/operations.mjs'
+import { AcceptInvitation } from '../app/operations4.mjs'
 import { styp } from '../app/util.mjs'
 import { FLAGS } from '../app/api.mjs'
 
 export default ({
   name: 'InvitationAcceptation',
 
-  components: { EditeurMd, BoutonHelp, ApercuGenx, BoutonConfirm, BoutonBulle },
+  components: { BtnCond, ShowHtml, EditeurMd, BoutonHelp, ApercuGenx, BoutonConfirm, BoutonBulle },
 
   props: { 
-    idg: Number, // id du groupe
-    im: Number, // im de l'invité
-    na: Object
+    inv: Object // { idg, ida, flags, invpar: Set(id invitant), msg }
   },
 
   computed: {
+    nomm () { return this.session.getCV(this.inv.ida).nom },
+    nomg () { return this.session.getCV(this.inv.idg).nom },
     edFlags () { 
-      if (!this.fl) return ''
+      const f = this.inv.flags
+      if (!f) return ''
       const ed = []
-      if (this.fl & FLAGS.PA) ed.push(this.$t('AMinvpa'))
-      if (this.fl & FLAGS.DM) ed.push(this.$t('AMinvdm'))
-      if (this.fl & FLAGS.DE) ed.push(this.$t('AMinvde'))
-      else if (this.fl & FLAGS.DN) ed.push(this.$t('AMinvdn'))
+      if (f & FLAGS.AN) ed.push(this.$t('AMinvan'))
+      if (f & FLAGS.DM) ed.push(this.$t('AMinvdm'))
+      if (f & FLAGS.DE) ed.push(this.$t('AMinvde'))
+      else if (f & FLAGS.DN) ed.push(this.$t('AMinvdn'))
       return ed.join(', ')
     },
   },
 
   data () { return {
+    msg: '',
+    iam: true,
+    ian: true,
+    defmsg: this.$t('merci'),
+    cfln: 0,
+    decl: 0
   }},
 
   methods: {
@@ -90,42 +104,16 @@ export default ({
     async ko () { await this.ok(this.decl) },
 
     async ok (cas) {
+      await new AcceptInvitation().run(cas, inv, this.iam, this.ian, this.msg)
       this.ui.fD()
-      const disp = await new AcceptInvitation(). // (cas, na, ng, im, chattxt, iam, ian)
-        run(cas, this.mb.na, this.mb.ng, this.mb.ids, this.chattxt, this.iam, this.ian)
-      if (disp) {
-        await afficherDiag(this.$t('AMdisp'))
-      }
     }
   },
   
-  setup (props) {
-    const session = stores.session
-    const ui = stores.ui
-    const gSt = stores.groupe
-
-    const idg = toRef(props, 'idg')
-    const im = toRef(props, 'im')
-    const na = toRef(props, 'na')
-    const mb = ref()
-    const chattxt = ref()
-    const fl = ref()
-    const ln = ref(false)
-    const cfln = ref(false)
-    const decl = ref(2)
-    const iam = ref(false)
-    const ian = ref(false)
-
-    onMounted(async () => {
-      mb.value = await new InvitationFiche().run(idg.value, im.value, na.value)
-      chattxt.value = mb.value.ext.chattxt || ''
-      fl.value = mb.value.ext.flags
-      if (fl.value & FLAGS.DM) iam.value = true
-      if (fl.value & FLAGS.DN) ian.value = true
-    })
-
+  setup () {
     return {
-      styp, session, ui, gSt, FLAGS, mb, chattxt, fl, ln, cfln, decl, iam, ian
+      styp, FLAGS,
+      session: stores.session,
+      ui: stores.ui
     }
   } 
 })

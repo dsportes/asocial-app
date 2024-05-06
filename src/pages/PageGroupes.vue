@@ -29,9 +29,9 @@
     </div>
     <div v-for="([k, inv], idx) of gSt.invits" :key="k">
       <div :class="dkli(idx) + 'q-mx-xs row invs items-center'" >
-        <btn-cond class="col-1" icon="zoom_in" cond="cEdit" @ok="ouvaccinv(inv)"/>
+        <btn-cond class="col-1" icon="zoom_in" @ok="ouvaccinv(inv)"/>
         <div class="col-5">{{session.getCV(inv.ida).nom}}</div>
-        <div class="col-6">{{session.getCV(inv.idg).nom}}</div>
+        <div class="col-6">{{session.getCV(inv.idg).nomC}}</div>
       </div>
     </div>
   </q-card>
@@ -64,7 +64,7 @@
     </q-card>
   </div>
 
-  <!-- Acceptation de l'invitation -->
+  <!-- Acceptation / refus de l'invitation -->
   <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
     <invitation-acceptation :inv="inv"/>
   </q-dialog>

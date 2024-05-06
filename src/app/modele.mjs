@@ -795,12 +795,14 @@ _data_:
 
 - `invits`: map des invitations en cours de l'avatar:
   - _clé_: `idg` id du groupe.
-  - _valeur_: `{cleGA, cvG, cleAG, cvA, txtG}`
+  - _valeur_: `{cleGA, cvG, invpar, txtG}`
     - `cleGA`: clé du groupe crypté par la clé A de l'avatar.
     - `cvG` : carte de visite du groupe (photo et texte sont cryptés par la clé G du groupe).
-    - `cleAG`: clé A de l'avatar invitant crypté par la clé G du groupe.
-    - `cvA` : carte de visite de l'invitant (photo et texte sont cryptés par la clé G du groupe). 
-    - `txtG` : message de bienvenue / invitation émis par l'invitant.
+    - `flags` : d'invitation.
+    - `invpar` : `[{ cleAG, cvA }]`
+      - `cleAG`: clé A de l'avatar invitant crypté par la clé G du groupe.
+      - `cvA` : carte de visite de l'invitant (photo et texte sont cryptés par la clé G du groupe). 
+    - `msgG` : message de bienvenue / invitation émis par l'invitant.
 
   Compilé en : { idg, ida, idi, txt }
 */
@@ -824,24 +826,24 @@ export class Avatar extends GenDoc {
     cv.store()
     await RegCc.setPriv(this.id, row.privK)
 
-    this.invits = new Map()
+    this.invits = []
     if (row.invits) {
       for (const idgx in row.invits) {
         const idg = ID.long(parseInt(idgx), this.ns)
-        const e = row.invits[idgx] // {cleGA, cvG, cleAG, cvA, txtG}
+        const e = row.invits[idgx] // {cleGA, cvG, invpar, msgG}
         const cleg = RegCles.set(await decrypter(clea, e.cleGA))
         const cv = await CV.set(e.cvG || CV.fake(idg))
         cv.store()
-        const clea = RegCles.set(await decrypter(cleg, e.cleAG))
-        const cvA = await CV.set(e.cvA || CV.fake(idg))
-        cvA.store()
-        const txt = await decrypterStr(cleg, e.txtG)
-        this.invits.set(idg, { 
-          idg: idg, 
-          ida: this.id, 
-          idi: Cles.id(clea, this.ns),
-          txt
-        })
+        const s = new Set()
+        for (const x of e.invpar) {
+          const clea = RegCles.set(await decrypter(cleg, x.cleAG))
+          s.add(Cles.id(clea, this.ns))
+          const cvA = await CV.set(x.cvA || CV.fake(idg))
+          cvA.store()
+        }
+        const b = e.msgG ? await decrypter(cleg, e.msgG) : null
+        const msg = b ? ungzipB(b) : ''
+        this.invits.push({ idg: idg, ida: this.id, flags: e.flags, invpar: s, msg })
       }
     }
   }

@@ -1022,19 +1022,24 @@ export class ModeSimple extends Operation {
 - idi: id de l'invitant pour le mode d'invitation simple 
   (sinon tous les avatars du comptes animateurs du groupe)
 - suppr: 1-contact, 2:radié, 3-radié + LN
+- cleGA: clé G du groupe cryptée par la clé A de l'invité
 Retour:
 */
 export class InvitationGroupe extends Operation {
   constructor () { super('InvitationGroupe') }
 
-  async run (rmsv, ida, flags, msg, suppr) { 
+  async run (rmsv, idm, idi, flags, msg, suppr) { 
     try {
       const session = stores.session
       const cleg = RegCles.get(session.groupeId)
+      const clea = RegCles.get(idm)
 
       const args = { token: session.authToken, 
-        rmsv, ida, flags, 
+        idg: session.groupeId,
+        idm: idm,
+        rmsv, idi, flags, 
         suppr: rmsv === 3 ? suppr : 0,
+        cleGA: await crypter(clea, cleg),
         msgG: await crypter(cleg, gzipB(msg))
       }
       await post(this, 'InvitationGroupe', args)
@@ -1046,44 +1051,29 @@ export class InvitationGroupe extends Operation {
 }
 
 /* OP_AcceptInvitation: 'Acceptation d\'une invitation à un groupe' *************
-args.token donne les éléments d'authentification du compte.
-args.idg : id du groupe
-args.ids: indice du membre invité
-args.id: id de l'avatar invité
-args.nag: nag du membre (pour liste noire)
-args.ni: numéro d'invitation (pour maj avatar)
-args.npgk: cle de l'entrée dans mpgk du compte (pour maj mpgk)
-args.epgk: entrée dans mpgk du compte
-args.cas: 1: acceptation, 2: refus, 3: refus et oubli, 4: refus et liste noire
-args.iam: true si accès membre
-args.ian: true si accès note
-args.ardg: ardoise du membre cryptée par la clé du groupe
-args.chatit: item de chat (copie de l'ardoise)
+- token donne les éléments d'authentification du compte.
+- idg : id du groupe
+- idm: id du membre invité
+- cas: 1:accepte 2:contact 3:radié 4:radié + LN
+- msgG: message de remerciement crypté par la cle G du groupe
 Retour:
 */
 export class AcceptInvitation extends Operation {
   constructor () { super('AcceptInvitation') }
 
-  async run (cas, na, ng, im, chattxt, iam, ian) {
+  async run (cas, inv, iam, ian, msg) { //
     try {
       const session = stores.session
-      const aSt = stores.avatar
-      const av = aSt.getAvatar(na.id)
-      const ni = await Groupe.getNi(ng, na)
-      const epgk = await av.getEpgk(ni)
-      const chatit = chattxt ? await Chatgr.getItem(ng.rnd, im, chattxt) : null
-
+      const cleg = RegCles.get(inv.idg)
+      
       const args = { token: session.authToken, 
-        idg: ng.id, 
-        ids: im,
-        id: na.id,
-        nag: await Groupe.getNag(ng, na),
-        npgk: await Groupe.getNpgk(ng.id, na.id),
-        cas, iam, ian, ni, epgk,
-        chatit
+        idg: inv.idg, 
+        idm: inv.ida,
+        cas, iam, ian,
+        msgG: await crypter(cleg, gzipB(msg))
       }
-      const ret = this.tr(await post(this, 'AcceptInvitation', args))
-      return this.finOK(ret.disparu)
+      await post(this, 'AcceptInvitation', args)
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }

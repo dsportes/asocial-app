@@ -118,7 +118,7 @@ a accès aux membres (donc dans l'onglet "membres").
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">
-            {{$t('AMinvtit', [session.getCV(id).nomm, nomg])}}</q-toolbar-title>
+            {{$t('AMinvtit', [nomm, nomg])}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
       </q-header>
@@ -365,8 +365,9 @@ export default {
 
     async inviter () { 
       /* rmsv: 0: inviter, 2: modifier, 3: supprimer, 4: voter pour */
-      const ida = !this.gr.msu && this.invparf ? this.invparf.value : 0
-      await new InvitationGroupe().run(this.rmsv, ida, this.fl, this.msg, this.suppr)
+      const idi = !this.gr.msu && this.invparf ? this.invparf.value : 0
+      await new InvitationGroupe()
+        .run(this.rmsv, this.id, idi, this.nvfl, this.msg, this.suppr)
       this.ui.fD()
     },
 
