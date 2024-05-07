@@ -212,12 +212,15 @@ class SB {
     if (this.membres.size) for(const [,mb] of this.membres) {
       if (mb._zombi) { 
         const mbav = this.g.getMembre(mb.id, mb.ids) // membre AVANT suppression
-        this.g.delMembre(mb.id, mb.ids)
-        this.p.delPGr(mbav.ida, mb.id) 
+        if (mbav) {
+          this.g.delMembre(mb.id, mb.ids)
+          this.p.delPGr(mbav.ida, mb.id) 
+        }
       }
       else { 
         this.g.setMembre(mb); 
-        this.p.setPGr(mb.ida, mb.id) }
+        this.p.setPGr(mb.ida, mb.id) 
+      }
     }
 
     if (this.supprMb.size) for(const idg of this.supprMb) {

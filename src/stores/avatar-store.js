@@ -382,7 +382,7 @@ export const useAvatarStore = defineStore('avatar', {
       }
       e.avatar = avatar
       this.nSt.setAvatar(avatar.id)
-      this.gSt.setInvits(this.id, avatar.invits)
+      this.gSt.setInvits(avatar.id, avatar.invits)
     },
 
     delAvatar (id) {

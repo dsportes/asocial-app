@@ -25,7 +25,7 @@ import { UNITEN, UNITEV, FLAGS, ID } from '../app/api.mjs'
 export const useGroupeStore = defineStore('groupe', {
   state: () => ({
     map: new Map(),
-    invits: new Map() // clé: idg/ida val: {idg, ida, invpar (Set), msg}
+    invits: [] // [ {idg, ida, invpar (Set), msg} ]
   }),
 
   getters: {
@@ -421,9 +421,10 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     setInvits (ida, l) { // [ {idg, ida, invpar (Set), msg} ]
-      const x = [ ...this.invits.keys() ]
-      if (x.length) x.forEach(k => { if (k.endsWith('/' + ida)) this.invits.delete(k) })
-      for(const inv of l) this.invits.set(inv.idg + '/' + inv.ida, inv)
+      const t = []
+      this.invits.forEach(e => {if (e.ida !== ida) t.push(e)})
+      if (l && l.length) l.forEach(e => { t.push(e)})
+      this.invits = t
     },
 
     setChatgr (chatgr) {
@@ -446,12 +447,12 @@ export const useGroupeStore = defineStore('groupe', {
     delMembre (id, ids) {
       const e = this.map.get(id)
       if (!e) return
-      if (ids) delete m.membres(ids)
+      if (ids) e.membres.delete(ids)
       else e.membres.clear()
     },
 
     delMembres (idg) {
-      thgis.delMembre(idg)
+      this.delMembre(idg)
     },
 
     setNote (note) {

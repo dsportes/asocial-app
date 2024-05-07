@@ -25,9 +25,9 @@
 
   <q-card class="spsm q-my-lg">
     <div class="full-width titre-md text-italic bg-primary text-white q-mt-md text-center">
-      {{$t('ICtit', gSt.invits.size, {count: gSt.invits.size})}}
+      {{$t('ICtit', gSt.invits.length, {count: gSt.invits.length})}}
     </div>
-    <div v-for="([k, inv], idx) of gSt.invits" :key="k">
+    <div v-for="(inv, idx) of gSt.invits" :key="inv.idg + '/' + inv.ida">
       <div :class="dkli(idx) + 'q-my-xs row invs items-center'" >
         <btn-cond class="col-auto text-center" icon="zoom_in" @ok="ouvaccinv(inv)"/>
         <div class="col-5 text-center">{{session.getCV(inv.ida).nom}}</div>

@@ -9,44 +9,74 @@
     </q-toolbar>
   </q-header>
 
-  <q-page-container>
-    <q-card-section>
+  <q-page-container class="q-pa-xs">
+    <q-expansion-item  :label="$t('ICti1')" class="q-my-xs q-mx-xs"
+      header-class="bg-primary text-white titre-md"
+      switch-toggle-side expand-separator dense group="trgroup">
       <apercu-genx :id="inv.idg" :idx="0"/>
       <q-separator class="q-my-xs" color="orange"/>
       <apercu-genx :id="inv.ida" :idx="1"/>
-    </q-card-section>
+    </q-expansion-item>
 
-    <q-card-section>
+    <q-expansion-item  :label="$t('ICti2')" class="q-my-xs q-mx-xs"
+      header-class="bg-primary text-white titre-md"
+      switch-toggle-side expand-separator dense group="trgroup">
       <div class="titre-lg">{{$t('AMinvvp')}}</div>
       <apercu-genx class="q-my-xs" v-for="(id, idx) in inv.invpar" :key="id" :id="id" :idx="idx"/>
-    </q-card-section>
+    </q-expansion-item>
 
-    <q-card-section>
+    <q-expansion-item  :label="$t('ICti3')" class="q-my-xs q-mx-xs"
+      header-class="bg-primary text-white titre-md"
+      switch-toggle-side expand-separator dense group="trgroup">
+      <div class="q-my-md titre-lg text-bold">
+        <span class="text-italic">{{$t('ICflags')}}</span>
+        <span class="q-ml-md text-warning">{{edFlags}}</span>
+      </div>
+
       <div class="titre-md q-mb-sm">{{$t('ICbienv')}}</div>
       <show-html class="bord1" :texte="inv.msg" maxh="4rem" scroll zoom/>
 
-      <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICflags', [edFlags])}}</div>
+    </q-expansion-item>
+
+    <q-card class="q-my-lg row justify-end items-center q-gutter-md">
+      <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
+      <btn-cond :label="$t('ICacc')" cond="cEdit" @ok="accref(1)"/>
+      <btn-cond :label="$t('ICdec')" color="warning" cond="cEdit" @ok="accref(2)"/>
+    </q-card>
+
+    <div v-if="acc === 1">
+      <q-separator class="q-my-md" color="orange"/>
 
       <div class="bord1 column q-my-xs">
         <q-checkbox v-model="iam" :label="$t('ICcflm')" />
         <q-checkbox v-model="ian" :label="$t('ICcfln')" />
       </div>
 
-      <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICrem')}}</div>
+      <div class="q-mt-md q-mb-xs titre-md text-italic">{{$t('ICrem1')}}</div>
       <editeur-md :lgmax="1000" v-model="msg" :texte="defmsg" modetxt mh="8rem" editable />
-    </q-card-section>
-            
-    <div class="q-mb-md column justify-center items-center q-gutter-xs">
-      <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
-      <div class="row justify-center q-gutter-sm">
-        <btn-cond :label="$t('ICacc')" cond="cEdit" @ok="ok(1)"/>
-        <btn-cond :label="$t('ICdec')" color="warning" cond="cEdit" @ok="cfln = true"/>
+
+      <div class="row justify-end items-center q-gutter-md">
+        <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
+        <btn-cond class="q-ml-md" color="warning" :disable="!msg"
+          :label="$t('confirmer')" @ok="ok(1)"/>
       </div>
-      <div v-if="cfln" class="column justify-left">
-        <span><q-radio v-model="decl" :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="inv2"/></span>
-        <span><q-radio v-model="decl" :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="inv3"/></span>
-        <span><q-radio v-model="decl" :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="inv4"/></span>
-        <bouton-confirm :actif="cfln && decl" :confirmer="ko"/>
+    </div>
+
+    <div v-if="acc === 2">
+      <q-separator class="q-my-md" color="orange"/>
+      <div class="bord1 column justify-left">
+        <span><q-radio v-model="decl" dense :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="inv2"/></span>
+        <span><q-radio v-model="decl" dense :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="inv3"/></span>
+        <span><q-radio v-model="decl" dense :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="inv4"/></span>
+      </div>
+
+      <div class="q-mt-md q-mb-xs titre-md text-italic">{{$t('ICrem2')}}</div>
+      <editeur-md :lgmax="1000" v-model="msg" :texte="defmsg" modetxt mh="8rem" editable />
+
+      <div class="row justify-end items-center q-gutter-md">
+        <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
+        <btn-cond class="q-ml-md" color="warning" :disable="!decl || !msg"
+          :label="$t('confirmer')" @ok="ok(decl)"/>
       </div>
     </div>
   </q-page-container>
@@ -58,7 +88,6 @@ import stores from '../stores/stores.mjs'
 
 import EditeurMd from './EditeurMd.vue'
 import BoutonHelp from './BoutonHelp.vue'
-import BoutonConfirm from './BoutonConfirm.vue'
 import BoutonBulle from './BoutonBulle.vue'
 import ApercuGenx from './ApercuGenx.vue'
 import BtnCond from './BtnCond.vue'
@@ -71,7 +100,7 @@ import { FLAGS } from '../app/api.mjs'
 export default ({
   name: 'InvitationAcceptation',
 
-  components: { BtnCond, ShowHtml, EditeurMd, BoutonHelp, ApercuGenx, BoutonConfirm, BoutonBulle },
+  components: { BtnCond, ShowHtml, EditeurMd, BoutonHelp, ApercuGenx, BoutonBulle },
 
   props: { 
     inv: Object // { idg, ida, flags, invpar: Set(id invitant), msg }
@@ -99,13 +128,12 @@ export default ({
     ian: true,
     defmsg: this.$t('merci'),
     cfln: 0,
-    decl: 0
+    decl: 0,
+    acc: 0,
   }},
 
   methods: {
-
-    async ko () { await this.ok(this.decl) },
-
+    accref (x) { this.acc = x },
     async ok (cas) {
       await new AcceptInvitation().run(cas, this.inv, this.iam, this.ian, this.msg)
       this.ui.fD()

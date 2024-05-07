@@ -1054,6 +1054,9 @@ export class InvitationGroupe extends Operation {
 - token donne les éléments d'authentification du compte.
 - idg : id du groupe
 - idm: id du membre invité
+- iam: accepte accès aux membres
+- ian: accepte l'accès aux notes
+- cleGK: cle du groupe cryptée par la clé K du compte
 - cas: 1:accepte 2:contact 3:radié 4:radié + LN
 - msgG: message de remerciement crypté par la cle G du groupe
 Retour:
@@ -1070,9 +1073,10 @@ export class AcceptInvitation extends Operation {
         idg: inv.idg, 
         idm: inv.ida,
         cas, iam, ian,
+        cleGK: await crypter(session.clek, cleg),
         msgG: await crypter(cleg, gzipB(msg))
       }
-      // await post(this, 'AcceptInvitation', args)
+      await post(this, 'AcceptInvitation', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)
