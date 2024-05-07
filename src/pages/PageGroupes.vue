@@ -28,10 +28,10 @@
       {{$t('ICtit', gSt.invits.size, {count: gSt.invits.size})}}
     </div>
     <div v-for="([k, inv], idx) of gSt.invits" :key="k">
-      <div :class="dkli(idx) + 'q-mx-xs row invs items-center'" >
-        <btn-cond class="col-1" icon="zoom_in" @ok="ouvaccinv(inv)"/>
-        <div class="col-5">{{session.getCV(inv.ida).nom}}</div>
-        <div class="col-6">{{session.getCV(inv.idg).nomC}}</div>
+      <div :class="dkli(idx) + 'q-my-xs row invs items-center'" >
+        <btn-cond class="col-auto text-center" icon="zoom_in" @ok="ouvaccinv(inv)"/>
+        <div class="col-5 text-center">{{session.getCV(inv.ida).nom}}</div>
+        <div class="col-5 text-center">{{session.getCV(inv.idg).nomC}}</div>
       </div>
     </div>
   </q-card>

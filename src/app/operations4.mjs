@@ -1072,7 +1072,7 @@ export class AcceptInvitation extends Operation {
         cas, iam, ian,
         msgG: await crypter(cleg, gzipB(msg))
       }
-      await post(this, 'AcceptInvitation', args)
+      // await post(this, 'AcceptInvitation', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

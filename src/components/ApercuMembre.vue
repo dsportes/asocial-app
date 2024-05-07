@@ -96,13 +96,13 @@ a accès aux membres (donc dans l'onglet "membres").
             <span v-if="invits.fl & FLAGS.DE" class="q-ml-sm">- {{$t('AMinven')}}</span>
           </div>
           <div class="titre-md text-italic q-mt-xs">{{$t('AMbienv')}}</div>
-          <show-html v-if="mb" :idx="idx" :texte="mb.msg" maxh="4rem" scroll zoom/>
+          <show-html class="bord2" v-if="mb" :idx="idx" :texte="mb.msg" maxh="4rem" scroll zoom/>
 
-          <div class="fs-md q-ml-md">
+          <div class="fs-md">
             <span class="text-italic">{{$t('AMinvvp')}}</span>
             <span class="q-ml-sm" v-for="[id, cv] of animInv[0]" :key="id">{{cv.nomC}}</span>
           </div>
-          <div v-if="animInv[1].size" class="fs-md q-ml-md">
+          <div v-if="animInv[1].size" class="fs-md">
             <span class="text-italic">{{$t('AMinvvc')}}</span>
             <span class="q-ml-sm" v-for="[id, cv] of animInv[1]" :key="id">{{cv.nomC}}</span>
           </div>
@@ -236,7 +236,7 @@ export default {
     ano () { return this.gr.accesNote2(this.im) },
     fl () { return this.gr.flags[this.im] },
     stm () { return this.gr.st[this.im]},
-    animInv () { return gSt.animInv(this.im) },
+    animInv () { return this.gSt.animInv(this.im) },
     invits () { return this.gr.invits[this.im] || { fl: 0, li: []} },
     invpar () { const x = invits.li[0]
       return x ? this.session.getCV(this.gr.tid[x]).nomC : ''
@@ -431,14 +431,13 @@ export default {
   margin-left: 3rem
 .q-tab
   min-height: 0 !important
-.bordm
-  border: 2px solid $primary
+.bord2, .bordm
   border-radius: 5px
   padding: 3px
+.bordm
+  border: 2px solid $primary
 .bord1
   border-bottom: 1px solid $grey-5
 .bord2
   border: 1px solid $grey-5
-  border-radius: 3px
-  padding: 3px
 </style>

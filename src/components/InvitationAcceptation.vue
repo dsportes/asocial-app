@@ -2,7 +2,7 @@
 
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated>
-    <q-toolbar v-if="mb" class="bg-secondary text-white">
+    <q-toolbar class="bg-secondary text-white">
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('ICtit2', [nomm, nomg])}}</q-toolbar-title>
       <bouton-help page="page1"/>
@@ -11,9 +11,9 @@
 
   <q-page-container>
     <q-card-section>
-      <apercu-genx :id="inv.idg"/>
-      <q-separator class="q-my-sm" color="orange"/>
-      <apercu-genx :id="inv.ida"/>
+      <apercu-genx :id="inv.idg" :idx="0"/>
+      <q-separator class="q-my-xs" color="orange"/>
+      <apercu-genx :id="inv.ida" :idx="1"/>
     </q-card-section>
 
     <q-card-section>
@@ -23,18 +23,20 @@
 
     <q-card-section>
       <div class="titre-md q-mb-sm">{{$t('ICbienv')}}</div>
-      <show-html :texte="inv.msg" maxh="4rem" scroll zoom/>
+      <show-html class="bord1" :texte="inv.msg" maxh="4rem" scroll zoom/>
 
       <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICflags', [edFlags])}}</div>
-      <div class="titre-md text-italic">{{$t('ICcfl')}}</div>
-      <q-checkbox v-if="fl & FLAGS.DM" v-model="iam" :label="$t('ICcflm')" />
-      <q-checkbox v-if="fl & FLAGS.DN" v-model="ian" :label="$t('ICcfln')" />
+
+      <div class="bord1 column q-my-xs">
+        <q-checkbox v-model="iam" :label="$t('ICcflm')" />
+        <q-checkbox v-model="ian" :label="$t('ICcfln')" />
+      </div>
 
       <div class="q-my-md titre-md text-italic bg-secondary text-white">{{$t('ICrem')}}</div>
       <editeur-md :lgmax="1000" v-model="msg" :texte="defmsg" modetxt mh="8rem" editable />
     </q-card-section>
             
-    <div class="column justify-center items-center q-gutter-xs">
+    <div class="q-mb-md column justify-center items-center q-gutter-xs">
       <btn-cond flat :label="$t('renoncer')" @ok="ui.fD"/>
       <div class="row justify-center q-gutter-sm">
         <btn-cond :label="$t('ICacc')" cond="cEdit" @ok="ok(1)"/>
@@ -44,7 +46,7 @@
         <span><q-radio v-model="decl" :val="2" :label="$t('ICd2')"/><bouton-bulle idtext="inv2"/></span>
         <span><q-radio v-model="decl" :val="3" :label="$t('ICd3')" /><bouton-bulle idtext="inv3"/></span>
         <span><q-radio v-model="decl" :val="4" :label="$t('ICd4')" /><bouton-bulle idtext="inv4"/></span>
-        <bouton-confirm :actif="cfln" :confirmer="ko"/>
+        <bouton-confirm :actif="cfln && decl" :confirmer="ko"/>
       </div>
     </div>
   </q-page-container>
@@ -78,6 +80,7 @@ export default ({
   computed: {
     nomm () { return this.session.getCV(this.inv.ida).nom },
     nomg () { return this.session.getCV(this.inv.idg).nom },
+    fl () { return this.inv.flags },
     edFlags () { 
       const f = this.inv.flags
       if (!f) return ''
@@ -104,7 +107,7 @@ export default ({
     async ko () { await this.ok(this.decl) },
 
     async ok (cas) {
-      await new AcceptInvitation().run(cas, inv, this.iam, this.ian, this.msg)
+      await new AcceptInvitation().run(cas, this.inv, this.iam, this.ian, this.msg)
       this.ui.fD()
     }
   },
@@ -120,4 +123,8 @@ export default ({
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.bord1
+  border: 1px solid $grey-5
+  border-radius: 5px
+  padding: 3px
 </style>
