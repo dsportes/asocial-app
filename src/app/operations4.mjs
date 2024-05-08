@@ -1083,3 +1083,54 @@ export class AcceptInvitation extends Operation {
     }
   }
 }
+
+/* OP_MajDroitsMembre: 'Mise à jour des droits d\'un membre sur un groupe' *******
+- token donne les éléments d'authentification du compte.
+- idg : id du groupe
+- idm : id du membre
+- nvflags : nouveau flags. Peuvent changer DM DN DE AM AN
+- anim: true si animateur
+Retour:
+*/
+export class MajDroitsMembre extends Operation {
+  constructor () { super('MajDroitsMembre') }
+
+  async run (idm, nvflags, anim) {
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        idg: session.groupeId,
+        idm, nvflags, anim }
+      // await post(this, 'MajDroitsMembre', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_RadierMembre: 'Oubli d\'un membre d\'un groupe' **************
+- token donne les éléments d'authentification du compte.
+- idg : id du groupe
+- idm : id du membre
+- rad: 1-redevient contact, 2-radiation, 3-radiation + ln
+Retour:
+*/
+export class RadierMembre extends Operation {
+  constructor () { super('RadierMembre') }
+
+  async run (idm, rad) {
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        idg: session.groupeId,
+        idm, rad }
+      // await post(this, 'RadierMembre', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

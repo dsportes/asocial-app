@@ -76,7 +76,8 @@ export const useUiStore = defineStore('ui', {
       FAdetaildial: false, // PageFicavion
       AGvisucv: false, // ApercuGenx
       AMconfig: {}, // ApercuMembre
-      AMoubli: {},
+      AMdroits: {},
+      AMradiation: {},
       AMinvit: {},
       NSnvsp: false, // NouveauSponsoring
       PTedq: false, // PagePartition

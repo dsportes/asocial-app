@@ -74,39 +74,6 @@ export class MuterCompte extends Operation {
   }
 }
 
-/* OP_InvitationFiche: 'Récupération des informations d\'invitation à un groupe' ******
-args.token donne les éléments d'authentification du compte.
-args.idg : id du groupe
-args.ids: indice du membre invité
-args.ivpar : indice du membre invitant
-args.dh: date-heure de l'item de chat d'invitation
-Retour:
-- rowMembre : avec un champ supplémentaire ext : { flags, cvg, invs: map, chatg }
-  chatg: texte du chat crypté par la clé du groupe
-  invs : clé: im, valeur: { cva, nag }
-*/
-export class InvitationFiche extends Operation {
-  constructor () { super('InvitationFiche') }
-
-  async run (idg, ids, na) {
-    try {
-      const session = stores.session
-      const gSt = stores.groupe
-      const invit = gSt.getInvit(idg, na.id)
-      const args = { token: session.authToken, idg, ids }
-      if (invit) {
-        args.ivpar = invit.ivpar
-        args.dh = invit.dh
-      }
-      const ret = this.tr(await post(this, 'InvitationFiche', args))
-      const mb = await compile(ret.rowMembre)
-      return this.finOK(mb)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_HebGroupe: 'Gestion / transfert d\'hébergement d\'un groupe' **********
 args.token donne les éléments d'authentification du compte.
 args.action : 1 à 5
@@ -166,57 +133,6 @@ export class HebGroupe extends Operation {
         dfh
       }
       this.tr(await post(this, 'HebGroupe', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_MajDroitsMembre: 'Mise à jour des droits d\'un membre sur un groupe' *******
-args.token donne les éléments d'authentification du compte.
-args.idg : id du groupe
-args.ids : ids du membre
-args.nvflags : nouveau flags. Peuvent changer PA DM DN DE AM AN
-Retour:
-*/
-export class MajDroitsMembre extends Operation {
-  constructor () { super('MajDroitsMembre') }
-
-  async run (idg, ids, nvflags) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, idg, ids, nvflags }
-      this.tr(await post(this, 'MajDroitsMembre', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_OublierMembre: 'Oubli d\'un membre d\'un groupe' **************
-args.token donne les éléments d'authentification du compte.
-args.idg : id du groupe
-args.ids : ids du membre
-args.npgk : entrée dans la table mpg
-args.cas : 
-  - 1 : (moi) retour en simple contact
-  - 2 : (moi) m'oublier
-  - 3 : (moi) m'oublier définitivement
-  - 4 : oublier le membre (qui est simple contact pas invité)
-  - 5 : oublier définitivement le membre
-Retour:
-*/
-export class OublierMembre extends Operation {
-  constructor () { super('OublierMembre') }
-
-  async run (ng, na, ids, cas) {
-    try {
-      const session = stores.session
-      const npgk = await Groupe.getNpgk(ng.id, na.id)
-      const args = { token: session.authToken, idg: ng.id, npgk, ids, cas }
-      this.tr(await post(this, 'OublierMembre', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)

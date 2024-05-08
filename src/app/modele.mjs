@@ -1176,14 +1176,6 @@ export class Groupe extends GenDoc {
   // mis dans la liste noire par le compte lui-même
   enLNC (ida) { return this.lnc.has(ida) }
 
-  /* A valider ********************/
-  avcAuteurs () {
-    const aSt = stores.avatar
-    const s = new Set()
-    aSt.compte.imGroupe(this.id).forEach(im => { if (this.estAuteur(im)) s.add(im)})
-    return s
-  }
-
   get mbHeb () { // membre hébergeur
     const gSt = stores.groupe
     return  this.dfh ? null : gSt.getMembre(this.id, this.imh)
