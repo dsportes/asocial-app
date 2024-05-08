@@ -8,7 +8,10 @@
       <q-card class="q-my-md column justify-center" v-for="(p, idx) in lst" :key="p.id">
         <apercu-genx class="q-pa-xs" :id="p.id" :idx="idx" nodet/>
         <div :class="dkli(idx) + ' text-center'">
-          <span v-if="p.d > 3" class="msg">{{$t('PPctc' + p.d)}}</span>
+          <span v-if="p.d[0] > 3" class="msg">
+            <span>{{$t('PPctc' + p.d[0])}}</span>
+            <span v-if="p.d[1]" class="q-ml-xs">({{$t('AMm' + p.d[1])}}}</span>
+          </span>
           <btn-cond v-else cond="cEdit" icon="check" color="green-5" :label="$t('PPctcok')"
             @ok="select(p)"/>
         </div>
@@ -67,12 +70,12 @@ export default {
       this.session.compte.lstAvatars.forEach(x => {
         const y = { id: x.id }
         y.d = this.gSt.diagContact(x.id)
-        if (!y.d || this.propos) l.push(y)
+        if (!y.d[0] || this.propos) l.push(y)
       })
       src.forEach(x => {
         const y = { id: x.id }
         y.d = this.gSt.diagContact(x.id)
-        if (!y.d || this.propos) l.push(y)
+        if (!y.d[0] || this.propos) l.push(y)
       })
       return l
     }
@@ -99,7 +102,7 @@ export default {
 
   data () {
     return {
-      propos: true
+      propos: true // n'afficher que ceux proposables
     }
   },
 

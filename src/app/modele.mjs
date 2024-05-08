@@ -1172,9 +1172,9 @@ export class Groupe extends GenDoc {
   }
 
   // mis dans la liste noire par un animateur
-  enLNG (ida) { return this.lng.has(this.mmb.get(ida) || 0) }
+  enLNG (ida) { return this.lng.has(ida) }
   // mis dans la liste noire par le compte lui-même
-  enLNC (ida) { return this.lnc.has(this.mmb.get(ida) || 0)}
+  enLNC (ida) { return this.lnc.has(ida) }
 
   /* A valider ********************/
   avcAuteurs () {

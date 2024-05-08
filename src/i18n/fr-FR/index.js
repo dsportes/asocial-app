@@ -1615,6 +1615,8 @@ export default {
   AMn1: 'Peut voir les notes',
   AMn2: 'Peut éditer les notes',
   AMnomb: 'Pas d\'autre information disponible.',
+  AMlng: 'en liste noire (par un animateur)',
+  AMlnc: 'en liste noire (par lui-même)',
 
   AMdra: 'droits d\'animation',
   AMdrm: 'droits d\'accès aux membres',
@@ -2036,10 +2038,10 @@ export default {
   PPctc: 'Ajouter {1} comme contact du groupe {0}',
   PPquot: 'Corriger les valeurs non admissibles dans les quotas c-dessus',
 
-  PPctc4: 'Le compte n\'a pas d\'avatar ayant accès aux membres du groupe {0}. Impossible de choisir un nouveau contact pour ce groupe.',
-  PPctc5: 'Cet avatar est déjà actif dans le groupe {0}.',
-  PPctc6: 'Cet avatar a été mis en liste noire du groupe {0} par un animateur. Il n\'est plus possible de l\'inviter.',
-  PPctc7: 'Cet avatar s\'est inscrit lui-même en liste noire du groupe {0}. Il n\'est plus possible de l\'inviter.',
+  PPctc4: 'Le compte n\'a pas d\'avatar ayant accès aux membres du groupe. Impossible de choisir un nouveau contact pour ce groupe.',
+  PPctc5: 'Cet avatar est déjà connu du groupe.',
+  PPctc6: 'Cet avatar a été mis en liste noire du groupe par un animateur. Il n\'est plus possible de l\'inviter.',
+  PPctc7: 'Cet avatar s\'est inscrit lui-même en liste noire du groupe. Il n\'est plus possible de l\'inviter.',
   PPctcok: 'Choisir',
 
   SAVtit1: 'Suppression de l\'avatar {0}',

@@ -24,17 +24,19 @@ a accès aux membres (donc dans l'onglet "membres").
           <span v-if="im === 1" class="stx">{{$t('AMmf')}}</span>
           <span v-if="amb" class="stx">{{$t('AMmm')}}</span>
           <span v-if="ano" class="stx">{{$t('AMn' + ano)}}</span>
+          <span v-if="gr.enLNG(id)" class="stx2">{{$t('AMlng')}}</span>
+          <span v-if="gr.enLNC(id)" class="stx2">{{$t('AMlnc')}}</span>
           <bouton-bulle2 :texte="edit(fl, $t, '\n')"/>
         </div>
 
         <div class="q-mt-xs row q-gutter-xs">
-          <btn-cond v-if="condm === 1" icon="grade" cond="cEdit" size="sm" stop
+          <btn-cond v-if="condm.has(1)" icon="grade" cond="cEdit" size="sm" stop
             :label="$t('AMinvitbtn1')" @ok="ouvririnvit"/>
-          <btn-cond v-if="condm === 2" icon="check" cond="cEdit" size="sm" stop
+          <btn-cond v-if="condm.has(2)" icon="check" cond="cEdit" size="sm" stop
             :label="$t('AMinvitbtn2')" @ok="ui.oD('IAaccinvit', idc)"/>
-          <btn-cond v-if="condm === 3" icon="check" cond="cEdit" size="sm" stop
+          <btn-cond v-if="condm.has(3)" icon="check" cond="cEdit" size="sm" stop
             :label="$t('AMinvitbtn3')" @ok="gererDroits"/>
-          <btn-cond v-if="condm === 3" icon="check" cond="cEdit" size="sm" stop
+          <btn-cond v-if="condm.has(4)" icon="check" cond="cEdit" size="sm" stop
             :label="$t('AMinvitbtn4')" @ok="radiation"/>
         </div>
       </div>
@@ -125,9 +127,9 @@ a accès aux membres (donc dans l'onglet "membres").
 
       <q-page-container>
       <q-card-section>
-        <div class="row justify betwwen">
+        <div class="row justify betwwen items-end">
           <span class="titre-lg">{{$t('AMcas' + stm)}}</span>
-          <span v-if="stm > 1" class="titre-md">{{edFlagsiv}}</span>
+          <span v-if="stm > 1" class="titre-md q-ml-md">[ {{edFlagsiv}} ]</span>
         </div>
         <div v-if="gr.msu">
           <div v-if="stm > 1" class="fs-md">
@@ -242,13 +244,17 @@ export default {
       return x ? this.session.getCV(this.gr.tid[x]).nomC : ''
     },
     condm () {
+      const s = new Set()
+      const ln = this.gr.enLNG(this.id) || this.gr.enLNC(this.id) 
       // Peut créer / modifier / supprimer une invitation
-      if (this.stm >= 1 && this.stm <= 3 && this.gSt.egrC.estAnim) return 1
+      if (this.stm >= 1 && this.stm <= 3 && this.gSt.egrC.estAnim && !ln) s.add(1)
       // Peut accepter / refuser SA PROPRE invitation
-      if (this.stm === 3 && this.session.estAvc(this.id)) return 2
-      // Gestion des droits et accès / Gestion des radiations
-      if (this.stm >= 4 && (this.session.estAvc(this.id) || this.gSt.egrC.estAnim)) return 3
-      return 0
+      if (this.stm === 3 && this.session.estAvc(this.id) && !ln) s.add(2)
+      // Gestion des droits et accès
+      if (this.stm >= 4 && !ln && (this.session.estAvc(this.id) || this.gSt.egrC.estAnim)) s.add(3)
+      // Gestion radiations
+      if (this.stm > 0 && (this.session.estAvc(this.id) || this.gSt.egrC.estAnim)) s.add(4)
+      return s
     },
 
     edFlagsiv () { 
@@ -337,7 +343,7 @@ export default {
     ouvririnvit () { 
       this.rmsv = this.stm === 1 ? 0 : 1
       const fl = this.invits.fl
-      this.ina = (fl & FLAGS.NA) !== 0
+      this.ina = (fl & FLAGS.AN) !== 0
       this.idm = (fl & FLAGS.DM) !== 0
       this.idn = (fl & FLAGS.DN) !== 0
       this.ide = (fl & FLAGS.DE) !== 0
@@ -420,10 +426,17 @@ export default {
 .stx
   background-color: $yellow-3
   font-size: 0.8rem
-  padding: 0
+  padding: 1px
   font-weight: bold
   font-style: italic
   color: black
+  margin: 0 2px 0 0
+.stx2
+  background-color: $negative
+  font-size: 0.8rem
+  padding: 1px
+  font-weight: bold
+  color: white
   margin: 0 2px 0 0
 .lgsel
   width: 10rem

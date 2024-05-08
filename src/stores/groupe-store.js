@@ -52,15 +52,15 @@ export const useGroupeStore = defineStore('groupe', {
 
     // L'avatar ida est-il sélectionnable pour devenir contact du groupe courant ?
     diagContact: (state) => { return (ida) => { 
-        if (ID.estGroupe(ida)) return 2 // NON ida est un groupe, pas un avatar
-        if (!state.egrC) return 3 // NON il n'y a pas de groupe courant
-        if (!state.ambano[0]) return 4 // NON, le compte n'a pas d'avatars ayant accès aux membres
+        if (ID.estGroupe(ida)) return [2, 0] // NON ida est un groupe, pas un avatar
+        if (!state.egrC) return [3, 0] // NON il n'y a pas de groupe courant
+        if (!state.ambano[0]) return [4, 0] // NON, le compte n'a pas d'avatars ayant accès aux membres
         const g = state.egrC.groupe
         const im = g.mmb.get(ida)
-        if (im) return 5 // NON ida est déjà actif du groupe
-        if (g.enLNG(ida)) return 6 // NON est en liste noire "groupe" du groupe
-        if (g.enLNC(ida)) return 7 // NON est en liste noire "compte" du groupe
-        return 0 // OUI, ida PEUT être sélectionné pour devenir contact du groupe
+        if (im) return [5, im] // NON ida est déjà connu du groupe
+        if (g.enLNG(ida)) return [6, im] // NON est en liste noire "groupe" du groupe
+        if (g.enLNC(ida)) return [7, im] // NON est en liste noire "compte" du groupe
+        return [0, 0] // OUI, ida PEUT être sélectionné pour devenir contact du groupe
       }
     },
 
