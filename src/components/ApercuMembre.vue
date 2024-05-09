@@ -223,8 +223,10 @@ a accès aux membres (donc dans l'onglet "membres").
         <div v-if="!nbAnimsAp && !gr.nbAnims" class="titre-md text-italic q-my-sm">{{$t('AMnbanim1')}}</div>
         <div v-if="!nbAnimsAp && gr.nbAnims" class="stx2 titre-lg q-my-sm">{{$t('AMnbanim2')}}</div>
         <div class="q-mt-sm bord2 column q-pa-xs q-mb-sm titre-md">
-          <q-checkbox v-model="iam" dense :label="$t('ICcflm')" />
-          <q-checkbox v-model="ian" dense :label="$t('ICcfln')" />
+          <q-checkbox v-model="iam" dense 
+            :label="$t('ICcflm' + (pasmoi ? 'b' : ''))" :disable="pasmoi"/>
+          <q-checkbox v-model="ian" dense 
+            :label="$t('ICcfln' + (pasmoi ? 'b' : ''))" :disable="pasmoi"/>
         </div>
       </q-card-section>
 
@@ -316,6 +318,7 @@ export default {
     avid () { return this.session.avatarId },
     nomg () { return this.session.getCV(this.gr.id).nom },
     nomm () { return this.session.getCV(this.id).nomC },
+    pasmoi () { return !this.session.estAvc(this.id)},
 
     mb () { return this.gSt.egrC && this.gSt.egrC.membres ? this.gSt.egrC.membres.get(this.im) : null },
     im () { return this.gSt.egrC && this.gSt.egrC.groupe ? this.gSt.egrC.groupe.mmb.get(this.id) : 0 },
@@ -501,35 +504,7 @@ export default {
       await new InvitationGroupe()
         .run(this.rmsv, this.id, idi, this.nvfl, this.msg, this.suppr)
       this.ui.fD()
-    },
-
-    async ouvoubli () {
-      if (!await this.session.edit()) return
-      this.ui.oD('AMoubli', this.idc)
-    },
-
-    async ouvcfg () {
-      if (!await this.session.edit()) return
-      this.dra = (this.fl & FLAGS.PA) !== 0
-      this.drm = (this.fl & FLAGS.DM) !== 0
-      this.drl = (this.fl & FLAGS.DN) !== 0
-      this.dre = (this.fl & FLAGS.DE) !== 0
-      this.adrm = (this.fl & FLAGS.AM) !== 0
-      this.adrl = (this.fl & FLAGS.AN) !== 0
-      this.flags2av = this.nvflags2
-      this.ui.oD('AMconfig', this.idc)
-    },
-
-    async changerdr () {
-      await new MajDroitsMembre().run(this.eg.groupe.id, this.im, this.nvflags2)
-      this.ui.fD()
-    },
-
-    async ko () {
-      await new OublierMembre().run(this.eg.groupe.na, this.na, this.im, this.decl)
-      this.ui.fD()
     }
-
   },
 
   setup () {

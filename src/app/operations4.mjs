@@ -1102,7 +1102,7 @@ export class MajDroitsMembre extends Operation {
         token: session.authToken, 
         idg: session.groupeId,
         idm, nvflags, anim }
-      // await post(this, 'MajDroitsMembre', args)
+      await post(this, 'MajDroitsMembre', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)
