@@ -358,7 +358,6 @@ _data_ :
 - `dlvat` : `dlv` de l'administrateur technique.
 - `cleES` : clé de l'espace cryptée par la clé du site. Permet au comptable de lire les reports créés sur le serveur et cryptés par cette clé E.
 - `notifE` : notification pour l'espace de l'administrateur technique. Le texte n'est pas crypté.
-- `notifP` : pour un délégué, la notification de sa partition.
 - `opt`: option des comptes autonomes.
 - `nbmi`: nombre de mois d'inactivité acceptable pour un compte O fixé par le comptable. Ce changement n'a pas d'effet rétroactif.
 - `tnotifP` : table des notifications de niveau _partition_.
@@ -716,8 +715,8 @@ _data_:
     - moins les dons faits aux autres.
   - `tickets`: map des tickets / dons:
     - _clé_: `ids`
-    - _valeur_: `{dg, iddb, dr, ma, mc, refa, refc, di}`
-  - `dons` : liste des dons effectués / reçus
+    - _valeur_: `{dg, dr, ma, mc, refa, refc, di}`
+  - `dons` : liste des dons effectués / reçus `[{ dh, m, iddb }]`
     - `dh`: date-heure du don
     - `m`: montant du don (positif ou négatif)
     - `iddb`: id du donateur / bénéficiaire (selon le signe de `m`).
@@ -747,7 +746,7 @@ _data_:
 - `mc` : map à propos des contacts (des avatars) et des groupes _connus_ du compte,
   - _cle_: `id` court de l'avatar ou du groupe,
   - _valeur_ : `{ ht, tx }`.
-    - `ht` : liste des hashtags séparés par un espace attribués par le compte et cryptée par la clé K du compte.
+    - `ht` : suite des hashtags séparés par un espace attribués par le compte et cryptée par la clé K du compte.
     - `tx` : commentaire écrit par le compte gzippé et crypté par la clé K du compte.
 */
 export class Compti extends GenDoc {
@@ -785,6 +784,7 @@ _data_:
 - `hZR` : `ns` + hash du PBKFD de la phrase de contact réduite.
 
 - `rds` : pas transmis en session.
+- `idc` : id du compte de l'avatar (égal à son id pour l'avatar principal).
 - `cleAZC` : clé A cryptée par ZC (PBKFD de la phrase de contact complète).
 - `pcK` : phrase de contact complète cryptée par la clé K du compte.
 - `hZC` : hash du PBKFD de la phrase de contact complète.
@@ -821,6 +821,7 @@ export class Avatar extends GenDoc {
       this.pc = await decrypterStr(clek, row.pcK)
     }
 
+    // this.idc = row.idc // inutile en session
     const clea = RegCles.get(this.id)
     const cv = await CV.set(row.cvA || CV.fake(this.id))
     cv.store()
@@ -873,7 +874,6 @@ _data_:
 - `don` : pour un compte autonome, montant du don.
 - `dconf` : le sponsor a demandé à rester confidentiel. Si oui, aucun chat ne sera créé à l'acceptation du sponsoring.
 - `ardYC` : ardoise de bienvenue du sponsor / réponse du sponsorisé cryptée par le PBKFD de la phrase de sponsoring.
-- `csp, itsp` : id du COMPTE sponsor et sont it dans sa partition. Écrit par le serveur et NON communiqué aux sessions.
 */
 export class Sponsoring extends GenDoc {
   get ns () { return ID.ns(this.id) }
