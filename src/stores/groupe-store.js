@@ -12,9 +12,7 @@ import { UNITEN, UNITEV, FLAGS, ID } from '../app/api.mjs'
     membres: new Map(), // tous membres
     estAnim: false, // un des avatars du compte est animateur du groupe
     estHeb: false // un des avatars du compte est hébergeur du groupe
-- invits: map des invitations en attente.
-  - clé : id du groupe + '/' + id de l'avatar invité
-  - valeur: {idg, ida, flags, invpar, msg}
+- invits: table des invitations en attente. [{idg, ida, flags, invpar, msg}]
     - idg : du groupe
     - ida : de l'avatar invité
     - flags: d'invitation
@@ -88,9 +86,7 @@ export const useGroupeStore = defineStore('groupe', {
     },
 
     nbInvits: (state) => {
-      let n = 0
-      state.invits.forEach(s => { n += s.size })
-      return n
+      return state.invits.length
     },
     
     /* liste des ng des groupes triée par ordre alphabétique de leur noms */
@@ -221,20 +217,6 @@ export const useGroupeStore = defineStore('groupe', {
         return false
       }
     },
-  
-    /* Map par im des { na, st } des avc membres du groupe 
-    imNaStAvc: (state) => { return (id) => {
-        const r = new Map()
-        const e = state.map.get(id)
-        const ast = e.groupe.ast
-        if (e.membres) e.membres.forEach((m) => { 
-          if (m.estAc) r.set(m.ids, { na: m.na, st: ast[m.ids]})
-        })
-        return r
-      }
-    },
-    */
-
   
     /* Map par im des { na, st, avc } des membres du groupe, avc ou auteur-animateur */
     imNaStMb: (state) => { return (id) => {
@@ -402,15 +384,8 @@ export const useGroupeStore = defineStore('groupe', {
       this.map.delete(idg)
     },
 
-    getInvit (idg, ida) { // na du groupe et de l'avatar invité
-      return this.invits.get(idg + '/' + ida)
-    },
-
-    setInvits (ida, l) { // [ {idg, ida, invpar (Set), msg} ]
-      const t = []
-      this.invits.forEach(e => {if (e.ida !== ida) t.push(e)})
-      if (l && l.length) l.forEach(e => { t.push(e)})
-      this.invits = t
+    setInvit (invit) { // invits:[ {idg, ida, invpar (Set), msg} ]
+      this.invits = invit.invits
     },
 
     setChatgr (chatgr) {

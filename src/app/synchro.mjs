@@ -102,6 +102,7 @@ class SB {
     this.espace = null
     this.compte = null
     this.compti = null
+    this.invit = null
 
     this.avatars = new Map()
     this.groupes = new Map() 
@@ -123,6 +124,8 @@ class SB {
   setCe (d) { this.compte = d}
 
   setCi (d) { this.compti = d}
+
+  setIn (d) { this.invit = d}
 
   setA (d) { this.avatars.set(d.id, d) }
 
@@ -156,7 +159,8 @@ class SB {
     if (this.espace) this.s.setEspace(this.espace)
     if (this.compte) this.s.setCompte(this.compte)
     if (this.compti) this.s.setCompti(this.compti)
-
+    if (this. invit) this.g.setInvit(this.invit)
+    
     if (this.avatars.size) for(const [,a] of this.avatars) this.a.setAvatar(a)
     
     if (this.supprAv.size) for (const ida of this.supprAv) {
@@ -459,7 +463,7 @@ export class OperationS extends Operation {
     })
   }
 
-  async setCeCi (ds, ret, sb, buf) {
+  async setCeCiIn (ds, ret, sb, buf) {
     if (ret.rowCompte) {
       sb.setCe(await compile(ret.rowCompte))
       buf.putIDB(ret.rowCompte)
@@ -468,6 +472,11 @@ export class OperationS extends Operation {
     if (ret.rowCompti) {
       sb.setCi(await compile(ret.rowCompti))
       buf.putIDB(ret.rowCompti)
+      ds.compte.vs = ds.compte.vb
+    }
+    if (ret.rowInvit) {
+      sb.setIn(await compile(ret.rowInvit))
+      buf.putIDB(ret.rowInvit)
       ds.compte.vs = ds.compte.vb
     }
   }
@@ -501,7 +510,7 @@ export class OperationS extends Operation {
       const nvds = DataSync.deserial(ret.dataSync)
       const sb = new SB()
       const buf = new IDBbuffer()
-      await this.setCeCi(nvds, ret, sb, buf)
+      await this.setCeCiIn(nvds, ret, sb, buf)
 
       if (cnx && session.synchro && !nbIter) { // Premier retour de Sync a rempli: session. compteId, clek, nomBase
         await idb.open()
@@ -672,10 +681,11 @@ export class ConnexionAvion extends OperationS {
 
       { // Phase 1 : chargement depuis IDB des espaces / comptes / comptis
         const sb = new SB()
-        const [res, rce, rci] = await idb.getECC()
+        const [res, rce, rci, rin] = await idb.getECCI()
         sb.setCe(await compile(rce))
         sb.setCi(await compile(rci))
         sb.setEs(await compile(res))
+        sb.setIn(await compile(rin))
         sb.store()
       }
       
@@ -760,6 +770,7 @@ Retour:
 - rowEspace
 - rowPartition si compte O
 - rowCompte 
+- rowInvit
 - rowAvater 
 - rowChat si la confidentialité n'a pas été requise
 - notifs
@@ -838,7 +849,7 @@ export class SyncSp extends OperationS {
       const sb = new SB()
       const buf = new IDBbuffer()
     
-      await this.setCeCi(ds, ret, sb, buf)
+      await this.setCeCiIn(ds, ret, sb, buf)
       sb.setEs(await compile(ret.rowEspace))
       buf.putIDB(ret.rowEspace)
 

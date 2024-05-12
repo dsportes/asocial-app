@@ -23,14 +23,6 @@ export const useAvatarStore = defineStore('avatar', {
       */
     map: new Map(),
 
-    // A REVISER
-    motscles: null, // mots clés du compte
-    avatarP: null, // avatar principal du compte courant
-    comptaP: null, // compta actuelle du compte courant
-    synthese: {atr: []}, // synthese de l'espace courant (comptable seulement)
- 
-    maptr: new Map(), // Map des tribus, uniquement pour le Comptable
-
     // Filtre des tribus dans BarrePeople
     ppFiltre: '',
     ppSelId: 0,
@@ -382,7 +374,6 @@ export const useAvatarStore = defineStore('avatar', {
       }
       e.avatar = avatar
       this.nSt.setAvatar(avatar.id)
-      this.gSt.setInvits(avatar.id, avatar.invits)
     },
 
     delAvatar (id) {

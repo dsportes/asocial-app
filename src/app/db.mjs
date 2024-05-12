@@ -67,8 +67,8 @@ export async function deleteIDB (nb) {
 
 /* Classe IDB *******************************************************************/
 class IDB {
-  static snoms = { boot: 1, espaces: 2, datasync: 3, comptes: 4, comptis: 5 }
-  static lnoms = [ '', 'boot', 'espaces', 'datasync', 'comptes', 'comptis' ]
+  static snoms = { boot: 1, espaces: 2, datasync: 3, comptes: 4, comptis: 5, invits: 6 }
+  static lnoms = [ '', 'boot', 'espaces', 'datasync', 'comptes', 'comptis', 'invits' ]
   static cnoms = { avatars: 1, groupes: 2, notes: 3, chats: 4, sponsorings: 5, tickets: 6, membres: 7, chatgrs: 8 }
 
   static EX1 (e) { return isAppExc(e) ? e : new AppExc(E_DB, 1, [e.message])}
@@ -189,10 +189,10 @@ class IDB {
   /** Retourne les rows espace / compte / compti (mode avion) *************************************
   Map: clé: _nom, valeur: row
   */
-  async getECC () {
+  async getECCI () {
     const session = stores.session
     try {
-      let res, rce, rci
+      let res, rce, rci, rin
       {
         const rec = await this.db.singletons.get(IDB.snoms.espaces)
         if (rec) { 
@@ -211,7 +211,13 @@ class IDB {
           rci = decode(await decrypter(session.clek, rec.data))
         }
       }
-      return [res, rce, rci]
+      {
+        const rec = await this.db.singletons.get(IDB.snoms.invits)
+        if (rec) { 
+          rin = decode(await decrypter(session.clek, rec.data))
+        }
+      }
+      return [res, rce, rci, rin]
     } catch (e) {
       throw IDB.EX2(e)
     }

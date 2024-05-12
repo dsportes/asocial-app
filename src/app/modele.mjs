@@ -459,7 +459,6 @@ _data_:
 - `mcpt` : map des comptes attachés à la partition. 
   - _clé_: id du compte.
   - _valeur_: `{ nr, cleA, del, q }`
-    - `nr`: niveau de restriction de la notification de niveau _compte_ (0 s'il n'y en a pas, 1 (sans restriction), 2 ou 3).
     - `notif`: notification du compte cryptée par la clé P de la partition (redonde celle dans compte).
     - `cleAP` : clé A du compte crypté par la clé P de la partition.
     - `del`: `true` si c'est un délégué.
@@ -508,10 +507,8 @@ export class Partition extends GenDoc {
       q.pcc = !q.qc ? 0 : Math.round(q.c2m * 100 / q.qc) 
       q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / (q.qn * UNITEN)) 
       q.pcv = !q.qv ? 0 : Math.round(q.v * 100 / (q.qv * UNITEV)) 
-      const r = { id: id, nr: e.nr || 0, q: e.q }
-      if (e.notif) {
-        if (clep) r.notif = await Notification.decrypt(e.notif, clep)
-      }
+      const r = { id: id, q: e.q }
+      if (e.notif && clep) r.notif = await Notification.decrypt(e.notif, clep)
       if (e.del) { this.sdel.add(id); r.del = true }
       this.mcpt[id] = r
     }
@@ -776,6 +773,49 @@ export class Compti extends GenDoc {
   
 }
 
+/**Invits *********************************************************
+ * - `invits`: liste des invitations en cours:
+  - _valeur_: `{idg, ida, cleGA, cvG, ivpar, dh}`
+    - `idg`: id du groupe,
+    - `ida`: id de l'avatar invité
+    - `cleGA`: clé du groupe crypté par la clé A de l'avatar.
+    - `cvG` : carte de visite du groupe (photo et texte sont cryptés par la clé G du groupe).
+    - `flags` : d'invitation.
+    - `invpar` : `[{ cleAG, cvA }]`
+      - `cleAG`: clé A de l'avatar invitant crypté par la clé G du groupe.
+      - `cvA` : carte de visite de l'invitant (photo et texte sont cryptés par la clé G du groupe). 
+    - `msgG` : message de bienvenue / invitation émis par l'invitant.
+*/
+export class Invit extends GenDoc {
+
+  async compile (row) {
+    this.ns = ID.ns(this.id)
+    const session = stores.session
+    const clek = session.clek
+    this.invits = []
+    if (row.invits) {
+      for (const e in row.invits) {
+        const idg = ID.long(e.idg, this.ns)
+        const ida = ID.long(e.ida, this.ns)
+        const cleg = RegCles.set(await decrypter(clea, e.cleGA))
+        const cv = await CV.set(e.cvG || CV.fake(idg))
+        cv.store()
+        const s = new Set()
+        for (const x of e.invpar) {
+          const clea = RegCles.set(await decrypter(cleg, x.cleAG))
+          s.add(Cles.id(clea, this.ns))
+          const cvA = await CV.set(x.cvA || CV.fake(idg))
+          cvA.store()
+        }
+        const b = e.msgG ? await decrypter(cleg, e.msgG) : null
+        const msg = b ? ungzipB(b) : ''
+        this.invits.push({ idg, ida, flags: e.flags, invpar: s, msg })
+      }
+    }
+
+  }
+}
+
 /** Avatar *********************************************************
 _data_:
 - `id` : id de l'avatar.
@@ -792,19 +832,6 @@ _data_:
 - `cvA` : carte de visite de l'avatar `{id, v, photo, texte}`. photo et texte cryptés par la clé A de l'avatar.
 
 - `pub privK` : couple des clés publique / privée RSA de l'avatar.
-
-- `invits`: map des invitations en cours de l'avatar:
-  - _clé_: `idg` id du groupe.
-  - _valeur_: `{cleGA, cvG, invpar, txtG}`
-    - `cleGA`: clé du groupe crypté par la clé A de l'avatar.
-    - `cvG` : carte de visite du groupe (photo et texte sont cryptés par la clé G du groupe).
-    - `flags` : d'invitation.
-    - `invpar` : `[{ cleAG, cvA }]`
-      - `cleAG`: clé A de l'avatar invitant crypté par la clé G du groupe.
-      - `cvA` : carte de visite de l'invitant (photo et texte sont cryptés par la clé G du groupe). 
-    - `msgG` : message de bienvenue / invitation émis par l'invitant.
-
-  Compilé en : { idg, ida, idi, txt }
 */
 export class Avatar extends GenDoc {
 
@@ -827,26 +854,6 @@ export class Avatar extends GenDoc {
     cv.store()
     await RegCc.setPriv(this.id, row.privK)
 
-    this.invits = []
-    if (row.invits) {
-      for (const idgx in row.invits) {
-        const idg = ID.long(parseInt(idgx), this.ns)
-        const e = row.invits[idgx] // {cleGA, cvG, invpar, msgG}
-        const cleg = RegCles.set(await decrypter(clea, e.cleGA))
-        const cv = await CV.set(e.cvG || CV.fake(idg))
-        cv.store()
-        const s = new Set()
-        for (const x of e.invpar) {
-          const clea = RegCles.set(await decrypter(cleg, x.cleAG))
-          s.add(Cles.id(clea, this.ns))
-          const cvA = await CV.set(x.cvA || CV.fake(idg))
-          cvA.store()
-        }
-        const b = e.msgG ? await decrypter(cleg, e.msgG) : null
-        const msg = b ? ungzipB(b) : ''
-        this.invits.push({ idg: idg, ida: this.id, flags: e.flags, invpar: s, msg })
-      }
-    }
   }
 
 }
@@ -1618,6 +1625,7 @@ const classes = {
   syntheses: Synthese,
   comptes: Compte,
   comptas: Compta,
+  invits: Invit,
   comptis: Compti,
   avatars: Avatar,
   groupes: Groupe,
