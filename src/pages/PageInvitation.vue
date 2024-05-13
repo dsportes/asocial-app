@@ -28,7 +28,7 @@
         </q-toolbar>
         <div class="q-pa-xs">
           <div class="titre-md q-mb-xs text-center">{{$t('PItx1')}}</div>
-          <apercu-genx class="q-pa-xs" :id="session.peopleId" :idx="idx" nodet/>
+          <apercu-genx class="q-pa-xs" :id="session.peopleId" :idx="0" nodet/>
           <q-card-actions align="right" class="q-gutter-sm">
             <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD" />
             <btn-cond color="warning" icon="add" cond="cEdit"

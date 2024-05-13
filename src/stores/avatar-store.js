@@ -64,15 +64,6 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
-    invits (state) {
-      const m = new Map()
-      state.map.forEach(e => {
-        const a = e.avatar
-        if (a) a.invits.forEach((inv, nx) => { m.set(nx, inv) })
-      })
-      return m
-    },
-
     getElt: (state) => { return (id) => { return state.map.get(id) } },
 
     // Avatar courant

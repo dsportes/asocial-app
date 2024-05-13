@@ -794,16 +794,17 @@ export class Invit extends GenDoc {
     const clek = session.clek
     this.invits = []
     if (row.invits) {
-      for (const e in row.invits) {
+      for (const e of row.invits) {
         const idg = ID.long(e.idg, this.ns)
         const ida = ID.long(e.ida, this.ns)
+        const clea = RegCles.get(ida)
         const cleg = RegCles.set(await decrypter(clea, e.cleGA))
         const cv = await CV.set(e.cvG || CV.fake(idg))
         cv.store()
         const s = new Set()
         for (const x of e.invpar) {
-          const clea = RegCles.set(await decrypter(cleg, x.cleAG))
-          s.add(Cles.id(clea, this.ns))
+          const clei = RegCles.set(await decrypter(cleg, x.cleAG))
+          s.add(Cles.id(clei, this.ns))
           const cvA = await CV.set(x.cvA || CV.fake(idg))
           cvA.store()
         }

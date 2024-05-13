@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc" :chat="chat"/>
+  <apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc" :id="chat.id" :ids="chat.ids"/>
 
   <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="session.compteId" :idE="idE" :mode="2"/>
 

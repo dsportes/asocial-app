@@ -2,7 +2,7 @@
 <span class="row items-center">
   <span class="text-italic text-bold q-mr-sm">{{$t('SAVtit')}}</span>
   <q-select v-model="cav" borderless dense options-dense standard filled
-    :options="options" style="min-width:120px;max-width:120px"
+    :options="options" style="min-width:120px;max-width:240px"
     popup-content-class="bg-accent text-white titre-lg text-bold q-pa-sm"/>
 </span>
 </template>

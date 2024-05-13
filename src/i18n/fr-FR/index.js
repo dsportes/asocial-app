@@ -1458,7 +1458,7 @@ export default {
   QVplc: 'Plafond de consommation (rythme mensuel):',
 
   // Page groupe(s)
-  PGinvitation: 'Inviter un contact',
+  PGinvitation: 'Ajouter un contact',
   PGdisp: 'Groupe disparu',
   PGnoinvit: 'Pas d\'invitation en attente de décision.',
   PGvide: 'Aucun groupe (sur {0}) ne répond au critère de filtre',

@@ -133,13 +133,15 @@ export default {
   name: 'ApercuChat',
 
   props: { 
-    chat: Object,
+    id: Number,
+    ids: Number,
     idc: Number
   },
 
   components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp, BtnCond },
 
   computed: {
+    chat () { return this.aSt.getChat(this.id, this.ids) },
     nomE () { return this.session.getCV(this.chat.idE).nom },
     nomI () { return this.session.getCV(this.chat.id).nom },
     estDel () { return ID.estComptable(this.idE) || this.session.estDelegue }

@@ -128,7 +128,7 @@ export default {
     nbspons () { return this.aSt.eavC.sponsorings.size },
     nbgrps () { return this.session.compte.idGroupes(this.session.avatarId).size },
     nbgrpsT () { return this.session.compte.idGroupes().size },
-    nbInvits () { return this.aSt.invits.size },
+    nbInvits () { return this.gSt.invits.length },
     bloc () { return this.session.estMinimal },
     nomg () { const idg = this.session.groupeid
       return idg ? this.session.getCV(idg).nom : ''
@@ -164,6 +164,7 @@ export default {
   setup () {
     return {
       aSt: stores.avatar,
+      gSt: stores.groupe,
       session: stores.session, 
       ui: stores.ui, 
       fSt: stores.filtre

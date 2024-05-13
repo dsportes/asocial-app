@@ -1063,10 +1063,10 @@ export class Compteurs {
 
 /** DataSync ****************************************************/
 export class DataSync {
-  static vide = { vs: 0, vb: 0 }
-  static videg = { vs: 0, vb: 0, ms: false, ns: false, m: false, n:false } 
+  static vide = { rds: 0, vs: 0, vb: 0 }
+  static videg = { rds: 0, vs: 0, vb: 0, ms: false, ns: false, m: false, n:false } 
 
-  static deserial (serial, decrypt, k) {
+  static deserial (serial) {
     const ds = new DataSync()
     const x = serial ? decode(serial) : {}
     ds.compte = x.compte || { ...DataSync.vide },
@@ -1074,31 +1074,37 @@ export class DataSync {
     if (x.avatars) x.avatars.forEach(t => ds.avatars.set(t.id, t))
     ds.groupes = new Map()
     if (x.groupes) x.groupes.forEach(t => ds.groupes.set(t.id, t))
-    if (decrypt) {
-      // Dans le serveur : secret est décrypté
-      const s = x.secret ? decode(decrypt(k, x.secret)) : {}
-      ds.rdsId = s.rdsId || {}
-      ds.idRds = {}
-      ds.rdsC = s.rdsC || 0
-      for (const rds in ds.rdsId) ds.idRds[ds.rdsId[rds]] = parseInt(rds)
-    } else ds.secret = x.secret || null
-    ds.tousRds = x.tousRds || []
     return ds
   }
 
-  serial (dh, crypt, k) {
+  serial () {
     const x = {
       compte: this.compte || { ...DataSync.vide },
       avatars: [],
-      groupes: [],
-      tousRds: this.tousRds || []
+      groupes: []
     }
     if (this.avatars) this.avatars.forEach(t => x.avatars.push(t))
     if (this.groupes) this.groupes.forEach(t => x.groupes.push(t))
-    /* Sur le serveur, rdsId est retransmis crypté, illisable en session
-    En session, rdsId est retransmis tel que reçu la dernière fois du serveur */
-    x.secret = crypt ? crypt(k, encode({ rdsId: this.rdsId, rdsC: this.rdsC})) : (this.secret || null)
     return new Uint8Array(encode(x))
+  }
+
+  idDeRds (rds) {
+    const rdsc = ID.court(rds)
+    if (ID.rdsType(rds) === ID.RDSAVATAR) {
+      for(const [id, e] of this.avatars) if (rdsc === e.rds) return id
+    } else {
+      for(const [id, e] of this.groupes) if (rdsc === e.rds) return id
+    }
+    return 0
+  }
+
+  setLongsRds (ns) {
+    const s = new Set()
+    s.add(ns) // espaces
+    s.add(ID.long(this.compte.rds, ns)) // compte
+    if (this.avatars) this.avatars.forEach(t => s.add(ID.long(t.rds, ns))) // avatars
+    if (this.groupes) this.groupes.forEach(t => s.add(ID.long(t.rds, ns))) // groupes
+    return s
   }
 
   get estAJour() {
@@ -1132,7 +1138,7 @@ export function synthesesPartition (p) {
     r.qt.c2m += x.q.c2m
     r.qt.n += x.q.nn + x.q.nc + x.q.ng
     r.qt.v += x.q.v
-    if (x.nr) r.ntf[x.nr - 1]++
+    if (x.notif && x.notif.nr) r.ntf[x.notif.nr - 1]++
     r.nbc++
     if (x.del) r.nbd++
   }
@@ -1143,28 +1149,4 @@ export function synthesesPartition (p) {
   r.pcn = !r.q.qn ? 0 : Math.round(r.qt.n * 100 / (r.q.qn * UNITEN)) 
   r.pcv = !r.q.qv ? 0 : Math.round(r.qt.v * 100 / (r.q.qv * UNITEV)) 
   return r
-}
-
-/* Compile un row partition dans un objet self
-La fonction async locComp effectue la compilation locale d'une cleAP
-*/
-export async function compileMcpt (self, row, locComp) {
-  self.dhic = row.dhic || 0
-  self.nrp = row.nrp || 0
-  self.q = row.q
-  const ns = ID.ns(self.id)
-  self.mcpt = {}
-  self.sdel = new Set() // Set des délégués
-  
-  if (row.mcpt) for(const idx in row.mcpt) {
-    const id = ID.long(parseInt(idx), ns)
-    const e = row.mcpt[idx]
-    if (e.del) { self.sdel.add(id); e.del = true }
-    if (locComp) await locComp(self.id, e.cleAP)
-    const q = { ...e.q }
-    q.pcc = !q.qc ? 0 : Math.round(q.c2m * 100 / q.qc) 
-    q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / q.qn) 
-    q.pcv = !q.qv ? 0 : Math.round(q.v * 100 / q.qv) 
-    self.mcpt[id] = { nr: e.nr || 0, q: e.q }
-  }
 }

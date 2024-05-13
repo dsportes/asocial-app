@@ -29,7 +29,7 @@
     </div>
   </div>
 
-  <apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc" :chat="chatx"/>
+  <apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc" :id="chatx.id" :ids="chatx.ids"/>
 
   <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc"
     :idI="chat ? chat.id : idI" 

@@ -2,12 +2,10 @@ import { useConfigStore } from './config-store.js'
 import { useSessionStore } from './session-store.js'
 import { useUiStore } from './ui-store.js'
 
-import { useTribuStore } from './tribu-store.js'
 import { useAvatarStore } from './avatar-store.js'
 import { useGroupeStore } from './groupe-store.js'
 import { usePeopleStore } from './people-store.js'
 import { useNoteStore } from './note-store.js'
-import { useSyncitemStore } from './syncitem-store.js'
 import { useFetatStore } from './fetat-store.js'
 import { useFiltreStore } from './filtre-store.js'
 import { useAvnoteStore } from './avnote-store.js'
@@ -15,8 +13,7 @@ import { usePpStore } from './pp-store.js'
 
 class Stores {
   static listeStores = [ // toutes SAUF config
-    'session', 'ui', 'tribu', 'avatar', 'groupe', 'people', 
-    'note', 'syncitem', 'fetat', 'avnote', 'pp', 'filtre'
+    'session', 'ui', 'avatar', 'groupe', 'people', 'note', 'fetat', 'avnote', 'pp', 'filtre'
   ]
 
   get config() { return this.configStore || (this.configStore = useConfigStore()) }
