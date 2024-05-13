@@ -574,10 +574,6 @@ export class OperationS extends Operation {
           buf.putIDB(row)
         }
         if (ret.rowNotes) for(const row of ret.rowNotes) {
-          if (ID.estGroupe(row.id)) {
-            const x = ds.groupes.get(row.id)
-            x.vs[2] = x.vb[2]
-          }
           sb.setN(await compile(row))
           buf.putIDB(row)
         }
@@ -612,7 +608,7 @@ export class OperationS extends Operation {
       sb.store(buf)
       await buf.commit(ds)
       syncQueue.dataSync = ds
-      if (fs) fs.setDS(ds.tousRds)
+      if (fs) fs.setDS(ds.setLongsRds(session.ns))
       fini = ds.estAJour
       nbIter++
     }
