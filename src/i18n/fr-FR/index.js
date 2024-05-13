@@ -438,6 +438,10 @@ export default {
   EX8264: '(BUG) Supprimer le statut d\'animateur d\'un membre ne peut être fait que par lui-même',
   EX8265: '(BUG) Les accès membre / note ne peuvent être changés que par l\'avatar lui-même',
   EX8266: '(BUG) Les droits membre / note / écriture ne peuvent être changés que par un animateur',
+  EX8267: '(BUG) Seul un animateur du groupe peut radier un autre membre',
+  EX8268: '(BUG) Un animateur du groupe doit avoir accès aux membres pour radier un autre membre que lui-même',
+  EX8269: '(BUG) Un animateur du groupe ne peut être radié que par lui-même',
+  EX8270: '(BUG) L\'auto-radiation n\'est possible qu\'en état "actif"',
 
   EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
   EX8802: 'Action impossible du fait de la restriction "accès minimal"',
