@@ -443,6 +443,10 @@ export default {
   EX8269: '(BUG) Un animateur du groupe ne peut être radié que par lui-même',
   EX8270: '(BUG) L\'auto-radiation n\'est possible qu\'en état "actif"',
 
+  EX8507: '(BUG) Compte supprimé',
+  EX8508: '(BUG) Avatar supprimé',
+  EX8509: '(BUG) Groupe supprimé',
+
   EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
   EX8802: 'Action impossible du fait de la restriction "accès minimal"',
 
