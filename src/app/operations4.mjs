@@ -103,6 +103,7 @@ export class CreerEspace extends Operation {
 - `psK` : texte de la phrase de sponsoring cryptée par la clé K du sponsor.
 - `YCK` : PBKFD de la phrase de sponsoring cryptée par la clé K du sponsor.
 - `hYC` : hash du PBKFD de la phrase de sponsoring,
+- `hYR` : hash du PBKFD de la phrase réduite de sponsoring,
 - `cleAYC` : clé A du sponsor crypté par le PBKFD de la phrase complète de sponsoring.
 - `partitionId`: id de la partition si compte 0    
 - `cleAP` : clé A du COMPTE sponsor crypté par la clé P de la partition.
