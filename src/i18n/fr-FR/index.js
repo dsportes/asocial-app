@@ -330,17 +330,19 @@ export default {
 
   // F_SRV = 8000 // Erreur fonctionnelle trappée sur le serveur
   EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
-  EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
 
-  EX8004: 'Compte Comptable déjà créé',
-  EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
-  EX8007: 'Phrase de sponsoring déjà déclarée.',
-  EX8008: 'Phrase de sponsoring non trouvée.',
-  EX8009: 'Ce sponsoring a déjà été accepté ou refusé ou est hors limite.',
-  EX8010: 'Opération réservée à l\'administrateur technique du site.',
+  // EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
+  // EX8004: 'Compte Comptable déjà créé',
+  // EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
+  // EX8007: 'Phrase de sponsoring déjà déclarée.',
+  // EX8010: 'Opération réservée à l\'administrateur technique du site.',
 
-  EX8011: 'Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète',
-  EX8012: 'Une phrase secrète semblable est déjà utilisée. Changer a minima le début de la phrase secrète pour ce nouveau compte',
+  // EX8011: 'Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète',
+  EX8011: 'Sponsoring non trouvée pour cette phrase.',
+  EX8012: 'Ce sponsoring a déjà été accepté ou refusé ou est hors limite. ({0})',
+
+
+  // EX8012: 'Une phrase secrète semblable est déjà utilisée. Changer a minima le début de la phrase secrète pour ce nouveau compte',
   EX8013: 'Réserves de volume V1 insuffisantes de la tranche de quotas pour affectation au nouveau compte',
   EX8014: 'Réserves de volume V2 insuffisantes de la tranche de quotas pour affectation au nouveau compte',
   EX8015: 'Cet avatar n\'est pas l\'hébergeur actuel du groupe',
@@ -370,7 +372,7 @@ export default {
   EX8067: 'Groupe sans hébergeur {0} : augmentation de volumer interdit.',
 
   EX8101: 'L\'administrateur technique a restreint l\'application à la lecture seulement : {0}\nL\'opération ayant tenté une écriture, elle a échoué.',
-  EX8102: 'Le code de l\`organisation n\'est pas reconnu.\nSaisir à nouveau l\'identification.',
+  EX8102: 'Le code de l\`organisation n\'est pas reconnu.\nCorriger la saisie.',
   EX8104: 'Cette phrase secrète de correspond pas celle du Comptable.',
 
   EX8201: 'Code d\'organisation {0} incorrect (lg 4..8 /^([a-z0-9\-]+)$/).',
@@ -384,7 +386,6 @@ export default {
   EX8209: 'Compte [{1}] inconnu dans la partition [{0}].',
   EX8210: 'Compte [{1}] pas délégué de la partition [{0}].',
   EX8211: 'Quotas non attribués de la partition [{0}] inférieurs aux quotas proposés au compte sponsorisé.',
-  EX8212: 'Le don du sponsor au sponsorisé [{1}] est trop important vis à vis du solde du compte du sponsor [{0}].',
   EX8213: 'Un don par un "chat" ne peut être effectué que si le "chat" concerne l\'avatar PRINCIPAL du destinataire du don.',
   EX8214: 'Un don par ne peut être effectué qu\'entre comptes "autonomes".',
   EX8215: 'Le don est  [{0}c] trop important vis à vis du solde du compte du donateur [{1}c].',
@@ -397,7 +398,7 @@ export default {
   EX8223: '(BUG) L\'interlocuteur du chat n\'est pas membre du groupe cité',
   EX8224: '(BUG) L\'avatar n\'est pas un avatar du compte.',
   EX8225: '(BUG) L\'interlocuteur du chat n\'est pas le Comptable',
-  EX8226: 'Il n\'est pass possible de créer un chat avec soi-même (entre deux avatars du même compte)',
+  EX8226: 'Il n\'est pas possible de créer un chat avec soi-même (entre deux avatars du même compte)',
   EX8227: '(BUG) L\'avatar cible du rafraîssement des cartes de visite des chats n\'est pas un avatar du compte.',
   EX8228: 'Numéro de partition déjà attribué',
   EX8229: '(BUG) Numéro de partition inconnu',
@@ -443,10 +444,8 @@ export default {
   EX8269: '(BUG) Un animateur du groupe ne peut être radié que par lui-même',
   EX8270: '(BUG) L\'auto-radiation n\'est possible qu\'en état "actif"',
 
-  EX8500: '(BUG) Espace inexistant',
-  EX8501: 'Compte disparu',
-  EX8502: 'Avatar disparu',
-  EX8503: 'Groupe disparu',
+  EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
+  EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
 
   EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
   EX8802: 'Action impossible du fait de la restriction "accès minimal"',
@@ -457,22 +456,30 @@ export default {
   // A_SRV = 9000 // Situation inattendue : assertion trappée sur le serveur
   EX9001: 'Espace non trouvé ({1}) - [{0}]',
   EX9002: 'Partition non trouvée ({1}) - [{0}]',
-  EX9003: 'Compta non trouvé ({1}) - [{0}]',
-  EX9004: 'Compte non trouvé ({1}) - [{0}]',
-  EX9005: 'Chat non trouvé ({1}) - [{0}]',
+  EX9003: 'Compta non trouvé ({1}) - [{0}]. Résilié ?',
+  EX9004: 'Compte non trouvé ({1}) - [{0}]. Compte résilié ?',
+  EX9005: 'Chat non trouvé ({1}) - [{0}]. Avatar résilié ?',
   EX9007: 'Note non trouvée ({1} / {2}) - [{0}]',
-  EX9008: 'Avatar non trouvé ({1}) - [{0}]',
-  EX9009: 'Groupe non trouvé ({1}) - [{0}]',
-  EX9010: 'Membre non trouvé ({1} / {2}) - [{0}]',
-  EX9011: 'Ligne comptable de l\'avatar hébergeur non trouvée ({1}) - [{0}]',
-  EX9012: 'Compti non trouvé ({1} / {2}) - [{0}]',
-  EX9013: 'Sponsoring non trouvé ({1} / {2}) - [{0}]',
+  EX9008: 'Avatar non trouvé ({1}) - [{0}]. Résilié ?',
+  EX9009: 'Groupe non trouvé ({1}) - [{0}]. Supprimé ?',
+  EX9010: 'Membre non trouvé ({1}) - [{0}]. Groupe supprimé ?',
+  EX9011: 'Invit non trouvé ({1}) - [{0}]. Compte résilié ?',
+  EX9012: 'Compti non trouvé ({1}) - [{0}]. Compte résilié ?',
+  EX9013: 'Sponsoring non trouvé ({1}) - [{0}]. Compte résilié ?',
   EX9014: 'Version non trouvé ({1}) - [{0}]',
   EX9015: 'Ticket non trouvé ({1}) - [{0}]',
-  EX9016: 'Synthese non trouvé ({1}) - [{0}]',
-  EX9017: 'Ticket non trouvé ({1} / {2}) - [{0}]',
+  EX9016: 'Synthese non trouvée ({1}) - [{0}]',
+  EX9017: 'Chat du groupe non trouvé ({1}) - [{0}]. Groupe supprimé ?',
   EX9018: 'Organisation {0} non trouvée',
+  EX9020: 'Mise à jour [{2} / {1}] d\'un document obtenu autrement que par un getXXX ({0})',
+
+
   EX9019: 'Mode d\'authentication non reconnu [{0}]',
+  
+
+  EX9101: 'Disparition non gérée du compte [{1}] - ({0})',
+  EX9102: 'Disparition non gérée de l\'avatar [{1}] - ({0})',
+  EX9103: 'Disparition non gérée du groupe [{1}] - ({0})',
 
   EX9999: 'L\'administrateur technique a fermé l\'application : {0}.',
 
