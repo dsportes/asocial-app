@@ -333,7 +333,6 @@ export default {
 
   // EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
   // EX8004: 'Compte Comptable déjà créé',
-  // EX8005: 'Compte non authentifié : aucun compte n\'est déclaré avec cette phrase secrète',
   // EX8007: 'Phrase de sponsoring déjà déclarée.',
   // EX8010: 'Opération réservée à l\'administrateur technique du site.',
 
@@ -476,7 +475,6 @@ export default {
 
   EX9019: 'Mode d\'authentication non reconnu [{0}]',
   
-
   EX9101: 'Disparition non gérée du compte [{1}] - ({0})',
   EX9102: 'Disparition non gérée de l\'avatar [{1}] - ({0})',
   EX9103: 'Disparition non gérée du groupe [{1}] - ({0})',
@@ -676,7 +674,7 @@ export default {
   OP_DeleguePartition: 'Changement de statut délégué d\'un compte dans sa partition',
   OP_SetQuotas: 'Fixation des quotas d\'ùn compte dans sa partition',
   OP_ChangerPartition: 'Transfert d\'un compte O dans une autre partition',
-  OP_SetDhvuCompta: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte',
+  OP_SetDhvuCompte: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte',
   OP_GetCompteursCompta: 'Obtention des compteurs d\'abonnement / consomation d\'un compte',
   OP_GetTribu: 'Obtention d\'une tranche de quotas',
   OP_GetEspace: 'Obtention de l\'espace du compte',

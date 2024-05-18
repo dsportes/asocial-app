@@ -425,7 +425,7 @@ import { AMJ } from './app/api.mjs'
 import { set$t, hms, dkli, styp } from './app/util.mjs'
 import { reconnexion, deconnexion } from './app/synchro.mjs'
 import { CV } from './app/modele.mjs'
-import { SetDhvuCompta } from './app/operations4.mjs'
+import { SetDhvuCompte } from './app/operations4.mjs'
 
 import BtnCond from './components/BtnCond.vue'
 import BoutonHelp from './components/BoutonHelp.vue'
@@ -578,7 +578,7 @@ export default {
       setTimeout(() => { this.ui.fD() }, 50)
     },
     async jailu () {
-      if (this.session.accesNetNf) await new SetDhvuCompta().run()
+      if (this.session.accesNetNf) await new SetDhvuCompte().run()
     }
   },
 

@@ -329,20 +329,20 @@ export class SetNotifC extends Operation {
   }
 }
 
-/* OP_SetDhvuCompta: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte'
+/* OP_SetDhvuCompte: 'Mise à jour de la date-heure de "vu" des notifications d\'un compte'
 args.token: éléments d'authentification du compte.
 args.dhvu : dhvu cryptée par la clé K
 Retour:
 */
-export class SetDhvuCompta extends Operation {
-  constructor () { super('SetDhvuCompta') }
+export class SetDhvuCompte extends Operation {
+  constructor () { super('SetDhvuCompte') }
 
   async run () {
     try {
       const session = stores.session
       const dhvu = await crypter(session.clek, '' + (Date.now()))
       const args = { token: session.authToken, dhvu }
-      await post(this, 'SetDhvuCompta', args)
+      await post(this, 'SetDhvuCompte', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)
