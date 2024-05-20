@@ -26,18 +26,18 @@
       </q-toolbar>
 
       <div class="q-pa-xs column q-gutter-sm">
-        <div class="titre-lg text-bold">{{$t('PPmut' + (st === 1 ? 'A' : 'O'))}}</div>
+        <div class="titre-lg text-bold">{{$t('PPmut' + (sta ? 'A' : 'O'))}}</div>
         <div v-if="yo" class="titre-md">{{$t('PPmutok')}}</div>
         <div v-if="!yo" :class="'titre-md ' + (yoreq ? 'bg-yellow-5 text-bold text-black' : '')">
           {{$t('PPmutko')}}
         </div>
-        <div v-if="opt === 1 && st===2 && !yo" class="titre-md text-bold">{{$t('PPmutf')}}</div>
+        <div v-if="opt === 1 && !sta && !yo" class="titre-md text-bold">{{$t('PPmutf')}}</div>
       </div>
 
       <micro-chat class="q-pa-xs q-my-md" 
         :chat="chat" :na-i="naI" :na-e="naE"/>
       
-      <q-expansion-item v-if="st === 1" class="q-mt-sm" v-model="verif1"
+      <q-expansion-item v-if="sta" class="q-mt-sm" v-model="verif1"
         :label="$t('PPmutv')" icon="warning"
         header-class="bg-secondary text-white text-bold titre-md"
         switch-toggle-side expand-separator dense group="trgroup">
@@ -58,7 +58,7 @@
           :texte="txtdef"/>
       </q-expansion-item>
 
-      <div v-if="st === 1 && (!verifd || quotas.err)" class="bg-yellow-5 text-black titre-md text-italic">
+      <div v-if="sta && (!verifd || quotas.err)" class="bg-yellow-5 text-black titre-md text-italic">
         {{$t('PPmutv')}}</div>
       <div v-if="!yo && yoreq" class="bg-yellow-5 text-black titre-md text-italic">
         {{$t('PPmutreq')}}</div>
@@ -66,7 +66,7 @@
       <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
         <q-btn dense color="primary" size="md" padding="xs" icon="undo" 
           :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn v-if="st===2" 
+        <q-btn v-if="!sta" 
           :disable="!yo && yoreq"
           dense color="warning" size="md" padding="xs" icon="change_history" 
           :label="$t('PPmutA2')" @click="cf=true"/>
@@ -190,7 +190,7 @@ import { styp, edvol, afficherDiag } from '../app/util.mjs'
 import { MuterCompte } from '../app/operations.mjs'
 import { getNg, Tribu } from '../app/modele.mjs'
 import { crypterRSA } from '../app/webcrypto.mjs'
-import { EstAutonome, ChangerPartition, DeleguePartition } from '../app/operations4.mjs'
+import { StatutAvatar, ChangerPartition, DeleguePartition } from '../app/operations4.mjs'
 import { GetCompta, GetSynthese, GetPartition } from '../app/synchro.mjs'
 
 export default {
@@ -208,11 +208,11 @@ export default {
     naI () { return this.aSt.compte.na },
     naE () { return getNg(this.id) },
     yo () { return this.chat && this.chat.yo },
-    yoreq () { return (this.opt === 2 && this.st === 2) || this.st === 1 },
+    yoreq () { return (this.opt === 2 && !this.sta) || !this.sta },
     opt () { return this.session.espace.opt },
     chat () { return this.aSt.getChatIdIE(this.session.compteId, this.id) },
     cpt () { return this.session.compta },
-    txtdef () { return this.$t('PPmsg' + (this.st === 1 ? 'o' : 'a'))}
+    txtdef () { return this.$t('PPmsg' + (this.sta ? 'a' : 'o'))}
   },
 
   watch: {
@@ -232,7 +232,8 @@ export default {
       pcc: 0,
       pcn: 0,
       pcv: 0,
-      st: 0, // 0: contact pas compte principal, 1: contact A, 2: contact O
+      stp: true, // avatar principal, 
+      sta: true, // compte A
       cf: false,
       quotas: {} // { q1, q2, qc, min1, min2, max1, max2, minc, maxc, err}
     }
@@ -248,12 +249,14 @@ export default {
         await afficherDiag(this.$t('PPchatreq'))
         return
       }
-      this.st = await new EstAutonome().run(this.id)
-      if (this.st === 0) {
+      const [p, a] = await new StatutAvatar().run(this.id)
+      this.stp = p
+      this.sta = a
+      if (!this.stp) {
         await afficherDiag(this.$t('PPmut1'))
         return
       }
-      if (this.st === 1) {
+      if (this.sta) {
         // await new GetCompteursCompta().run(this.id)
         const c = this.cpt.qv
         const s = this.session.synthese
@@ -280,12 +283,12 @@ export default {
       const c = this.aSt.compta
       const pub = await this.aSt.getPub(this.id)
       const trib = { idt: c.idt }
-      if (this.st === 1) {
+      if (this.sta) {
         trib.idT = await Tribu.getIdT(c.clet, this.id)
         trib.cletX = c.cletX
         trib.cletK = await crypterRSA(pub, c.clet)
       }
-      const quotas = this.st === 2 ? null : {
+      const quotas = !this.sta ? null : {
         q1: this.quotas.q1,
         q2: this.quotas.q2,
         qc: this.quotas.qc

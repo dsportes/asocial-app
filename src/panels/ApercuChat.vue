@@ -119,7 +119,7 @@
 import stores from '../stores/stores.mjs'
 
 import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
-import { MajChat, EstAutonome, PassifChat } from '../app/operations4.mjs'
+import { MajChat, StatutAvatar, PassifChat } from '../app/operations4.mjs'
 import { ID } from '../app/api.mjs'
 
 import SdBlanc from '../components/SdBlanc.vue'
@@ -193,7 +193,7 @@ export default {
     async editer (avecDon) {
       if (avecDon) {
         this.dconf = false
-        const st = await new EstAutonome().run(this.chat.idE)
+        const st = await new StatutAvatar().run(this.chat.idE)
         if (st !== 1) {
           await afficherDiag(this.$t('CHauto'))
           return

@@ -474,23 +474,22 @@ export class NouveauChat extends Operation {
 
 /* OP_EstAutonome: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome'
 indique si l'avatar donné en argument est 
-l'avatar principal d'un compte autonome
+un avatar principal ou non, d'un compte autonome ou non
 - token : jeton d'authentification du compte de **l'administrateur**
 - id : id de l'avatar
 Retour: 
-- `st`: 
-  - 0 : pas avatar principal 
-  - 1 : avatar principal d'un compte A
-  - 2 : avatar principal d'un compte O
+- `st`: [P, A]
+  - P : true si avatar principal
+  - A : true si compte A
 */
-export class EstAutonome extends Operation {
-  constructor () { super('EstAutonome') }
+export class StatutAavatar extends Operation {
+  constructor () { super('StatutAavatar') }
 
   async run (id) { 
     try {
       const session = stores.session
       const args = { token: session.authToken, id }
-      const ret = await post(this, 'EstAutonome', args)
+      const ret = await post(this, 'StatutAavatar', args)
       return this.finOK(ret.st)
     } catch (e) {
       await this.finKO(e)
