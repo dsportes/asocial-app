@@ -329,14 +329,14 @@ export default {
   EX7101: 'Le serveur est joignable mais a retourné une erreur technique, bref il n\'est pas opérationnel: HTTP:[{0}] - message:[{1}]',
 
   // F_SRV = 8000 // Erreur fonctionnelle trappée sur le serveur
-  EX8001: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
-
+  EX8001: 'Exception générique 1',
   // EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
   // EX8004: 'Compte Comptable déjà créé',
   // EX8007: 'Phrase de sponsoring déjà déclarée.',
   // EX8010: 'Opération réservée à l\'administrateur technique du site.',
 
   // EX8011: 'Phrase secrète probablement déjà utilisée. Vérifier que le compte n\'existe pas déjà en essayant de s\'y connecter avec la phrase secrète',
+  EX8010: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
   EX8011: 'Sponsoring non trouvée pour cette phrase.',
   EX8012: 'Ce sponsoring a déjà été accepté ou refusé ou est hors limite. ({0})',
 
@@ -663,6 +663,7 @@ export default {
   OP_NouveauChat: 'Création d\'un "chat"',
   OP_MajChat: 'Mise à jour d\'un "chat".',
   OP_RafraichirCvsAv: 'Rafraichissement des CVs des chats de l\'avatar',
+  OP_RafraichirCvChat: 'Rafraichissement de la carte de visite d\'un chat',
   OP_NouvelAvatar: 'Création d\'un nouvel avatar du compte',
   OP_NouvellePartition: 'Création d\'une nouvelle partition',
   OP_SetNotifE: 'Inscription d\'une notification générale',

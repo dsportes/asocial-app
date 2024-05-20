@@ -500,8 +500,11 @@ export class StatutAavatar extends Operation {
 /* OP_RafraichirCvsAv: 'Rafraichissement des CVs des chats de l\'avatar'
 - token : jeton d'authentification du compte de **l'administrateur**
 - id : id de l'avatar
-Retour:
-- `n`: nombre de CV mises à jour
+Retour: [nc, nv]
+- `nc`: nombre de CV mises à jour
+- `nv` : nombre de chats existants
+Exception générique:
+- 8001: avatar disparu
 */
 export class RafraichirCvsAv extends Operation {
   constructor () { super('RafraichirCvsAv') }
@@ -513,10 +516,39 @@ export class RafraichirCvsAv extends Operation {
       const ret = await post(this, 'RafraichirCvsAv', args)
       return this.finOK(ret.ncnv)
     } catch (e) {
+      if (isAppExc(e) && e.code === 8001) return -1
       await this.finKO(e)
     }
   }
 }
+
+/* OP_RafraichirCvChat: 'Rafraichissement de la carte de visite d\'un chat'
+- token : jeton d'authentification du compte de **l'administrateur**
+- id, ids : id du chat
+Retour:
+Exception générique:
+- 8001: avatar disparu
+- 8002: chat disparu
+*/
+export class RafraichirCvChat extends Operation {
+  constructor () { super('RafraichirCvChat') }
+
+  async run (id, ids) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, ids }
+      const ret = await post(this, 'RafraichirCvChat', args)
+      return this.finOK(ret.ncnv)
+    } catch (e) {
+      if (isAppExc(e)) {
+        if (e.code === 8001) return -1
+        if (e.code === 8002) return -2
+      }
+      await this.finKO(e)
+    }
+  }
+}
+
 
 /* OP_SetQuotas: 'Fixation des quotas d'un compte dans sa partition'
 - token: éléments d'authentification du compte.
