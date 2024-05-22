@@ -472,7 +472,7 @@ export class NouveauChat extends Operation {
   }
 }
 
-/* OP_EstAutonome: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome'
+/* OP_StatutAvatar: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome'
 indique si l'avatar donné en argument est 
 un avatar principal ou non, d'un compte autonome ou non
 - token : jeton d'authentification du compte de **l'administrateur**
@@ -482,8 +482,8 @@ Retour:
   - P : true si avatar principal
   - A : true si compte A
 */
-export class StatutAavatar extends Operation {
-  constructor () { super('StatutAavatar') }
+export class StatutAvatar extends Operation {
+  constructor () { super('StatutAvatar') }
 
   async run (id) { 
     try {
