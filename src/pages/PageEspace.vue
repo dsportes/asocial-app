@@ -16,8 +16,8 @@
       <saisie-mois v-if="session.pow === 1" v-model="dlvat" 
         :dmax="maxdlvat" :dmin="mindlvat" :dinit="initdlvat"
         @ok="setDlvat" icon="check" :label="$t('ESdlvat')"/>
-      <span v-if="session.pow > 1" class="titre-md">
-        {{$t('ESdlvat2', [AMJ.editDeAmj(session.espace.dlvat)])}}
+      <span v-else class="titre-md q-ml-sm">
+        {{session.espace.dlvat ? $t('ESdlvat2', [AMJ.editDeAmj(session.espace.dlvat)]) : $t('ESdlvat3')}}
       </span>
     </div>
 
