@@ -370,6 +370,11 @@ export default {
 
     async setDlvat () {
       this.dlv = AMJ.pjMoisSuiv((this.dlvat * 100) + 1)
+      await new SetEspaceOptionA().run(null, null, this.dlv )
+    },
+
+    async setDlvat2 () {
+      this.dlv = AMJ.pjMoisSuiv((this.dlvat * 100) + 1)
       this.stp = 1; this.nbav1 = 0; this.nbav2; this.nbmb1 = 0; this.nbmb2 = 0
       this.ui.oD('PEdlvat')
       const lav = await new GetVersionsDlvat().run(this.session.espace.dlvat)

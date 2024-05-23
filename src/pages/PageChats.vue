@@ -131,17 +131,18 @@ export default {
       if (blob) saveAs(blob, nf)
     },
 
-    async exp () { // export des contacts - A VERIFIER
+    async exp () { // export des chats
       const expPfx = new Date().toISOString().replaceAll(':', '_')
       const res = []
       let nb = 1
       for (const c of this.fusion) {
+        const cv = this.session.getCV(ID.estGroupe(c.id) ? c.id : c.idE)
         if (ID.estGroupe(c.id)) {
-          res.push('## ' + this.$t('CHoch2', [c.ng.nomc]) + '\n\n')
+          res.push('## ' + this.$t('CHoch2', [cv.nomc]) + '\n\n')
         } else {
-          res.push('## ' + this.$t('CHoch3', [c.naI.nom, c.naE.nomc]) + '\n\n')
+          const cvI = this.session.getCV(c.id)
+          res.push('## ' + this.$t('CHoch3', [cvI.nom, cv.nomc]) + '\n\n')
         }
-        const cv = this.session.getCV(id)
         if (cv.ph) {
           const [mime, bin] = photoToBin(cv.photo)
           if (!this.optb64) {
@@ -152,7 +153,7 @@ export default {
             res.push('\n\n![Image en base64](' + cv.photo + ')\n\n')
           }
         }
-        if (cv.tx) res.push(cv.photo + '\n')
+        if (cv.tx) res.push(cv.tx + '\n')
         res.push('\n\n> ' + this.$t('CHdhc', [dhstring(c.dh)]) + '\n')
         res.push('\n' + c.txt + '\n\n---\n')
       }
