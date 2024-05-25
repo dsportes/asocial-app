@@ -815,7 +815,7 @@ export class SyncSp extends OperationS {
         RegCles.set(sp.cleP)
         args.clePK = await crypter(clek, sp.cleP) // clé P de sa partition cryptée par la clé A de son avatar principal
         args.clePA = await crypter(cleA, sp.cleP) // clé P de sa partition cryptée par la clé A de son avatar principal
-        args.cleAP = await crypter(sp.cleP, cleA) // clé A de son avatar principâl cryptée par la clé P de sa partition
+        args.cleAP = await crypter(sp.cleP, cleA, 1) // clé A de son avatar principâl cryptée par la clé P de sa partition
       }
       if (!sp.dconf && !dconf) {
         const cc = random(32)

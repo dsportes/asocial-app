@@ -4,7 +4,7 @@ import { useNoteStore } from './note-store.js'
 export const useFiltreStore = defineStore('filtre', {
   state: () => ({
     filtre: { 
-      chats: { tous: true },
+      chats: { tous: true, rac: 0 },
       partition: {},
       people: {},
       groupes: { tous: true },

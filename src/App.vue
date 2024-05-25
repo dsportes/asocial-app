@@ -375,6 +375,9 @@
   <panel-people v-if="ui.d.detailspeople"/>
   <outils-tests v-if="ui.d.PAoutilsTests"/>
   <phrase-secrete v-if="ui.d.PSouvrir"/>
+  <apercu-chat v-if="ui.d.ACouvrir"/>
+  <apercu-chatgr v-if="ui.d.ACouvrir"/>
+  <apercu-chatgr v-if="ui.d.ACGouvrir"/>
 
   <!-- Opération en cours et son arrêt -->
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
@@ -482,6 +485,8 @@ import PageCompta from './pages/PageCompta.vue'
 import PageNotes from './pages/PageNotes.vue'
 import PagePartition from './pages/PagePartition.vue'
 import PanelPeople from './panels/PanelPeople.vue'
+import ApercuChat from './panels/ApercuChat.vue'
+import ApercuChatgr from './panels/ApercuChatgr.vue'
 
 // Niveau 8
 import PageGroupes from './pages/PageGroupes.vue'
@@ -502,7 +507,7 @@ export default {
     FiltreRac, FiltreNom, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
     FiltreAvecgr, FiltreAvecsp, FiltreDel, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
     DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
-    PressePapier, PhraseSecrete
+    PressePapier, PhraseSecrete, ApercuChat, ApercuChatgr
    },
 
   computed: {

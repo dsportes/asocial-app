@@ -1,27 +1,13 @@
 <template>
   <div :class="'q-pa-xs full-width ' + dkli(idx)">
-    <q-btn no-caps flat><div>{{$t('FIrac')}}<br>{{$t('rac' + val)}}</div>
-    <q-menu anchor="bottom left" self="top left">
-      <q-list style="min-width: 50px">
-        <q-item clickable v-close-popup @click="val=0">
-          <span class="fs-md text-italic">{{$t('rac0')}}</span>
-        </q-item>
-        <q-item clickable v-close-popup @click="val=1">
-          <span class="fs-md text-italic">{{$t('rac1')}}</span>
-        </q-item>
-        <q-item clickable v-close-popup @click="val=2">
-          <span class="fs-md text-italic">{{$t('rac2')}}</span>
-        </q-item>
-      </q-list>
-    </q-menu>
-    </q-btn>
+    <q-option-group v-model="val" dense :options="options" />
   </div>
 </template>
 
 <script>
 import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
-import { dkli } from '../app/util.mjs'
+import { dkli, $t } from '../app/util.mjs'
 
 export default ({
   name: 'FiltreRac',
@@ -37,7 +23,7 @@ export default ({
 
   watch: {
     val (ap) {
-      this.st.setFiltre(this.nom, 'ambno', ap)
+      this.st.setFiltre(this.nom, 'rac', ap)
     }
   },
 
@@ -48,10 +34,14 @@ export default ({
     const st = stores.filtre
     const val = ref('')
     const nom = toRef(props, 'nom')
+    const options = [
+      { label: $t('rac0'), value: 0 },
+      { label: $t('rac1'), value: 1 }
+    ]
     const x = st.filtre[nom.value]
-    val.value = x && x.notif ? x.notif : 0
+    val.value = x.rac || 0
     return {
-      st, dkli,
+      st, dkli, options,
       val
     }
   }

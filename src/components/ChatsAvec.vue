@@ -17,8 +17,6 @@
     </div>
   </div>
 
-  <apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc" :id="chat.id" :ids="chat.ids"/>
-
   <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="session.compteId" :idE="idE" :mode="2"/>
 
 </div>
@@ -27,14 +25,13 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
-import ApercuChat from '../panels/ApercuChat.vue'
 import NouveauChat from '../dialogues/NouveauChat.vue'
 import BtnCond from './BtnCond.vue'
 
 export default ({
   name: 'ChatsAvec',
 
-  components: { ApercuChat, NouveauChat, BtnCond },
+  components: { NouveauChat, BtnCond },
 
   props: { 
     idE: Number, 
@@ -55,7 +52,8 @@ export default ({
   methods: {
     ouvrirChat (ch) {
       this.chat = ch
-      this.ui.oD('ACouvrir', this.idc)
+      this.ui.setChatc(ch,id, ch.ids)
+      this.ui.oD('ACouvrir')
     },
     creerChat () {
       this.ui.oD('CCouvrir', this.idc)

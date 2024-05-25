@@ -29,8 +29,6 @@
     </div>
   </div>
 
-  <apercu-chat v-if="ui.d.ACouvrir[idc]" :idc="idc" :id="chatx.id" :ids="chatx.ids"/>
-
   <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc"
     :idI="chat ? chat.id : idI" 
     :idE="chat ? chat.idE : idE"
@@ -50,7 +48,7 @@ import { ID } from '../app/api.mjs'
 export default ({
   name: 'MicroChat',
 
-  components: { ApercuChat, NouveauChat, BtnCond },
+  components: { NouveauChat, BtnCond },
 
   props: { 
     chat: Object, // si chat est donné, c'est lui qui est visualisé
@@ -82,7 +80,8 @@ export default ({
 
   methods: {
     ouvrirChat () {
-      this.ui.oD('ACouvrir', this.idc)
+      this.ui.setChatc(this.chatx.id, this.chatx.ids)
+      this.ui.oD('ACouvrir')
     },
     creerChat () {
       this.ui.oD('CCouvrir', this.idc)

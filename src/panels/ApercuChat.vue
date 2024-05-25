@@ -1,6 +1,6 @@
 <template> <!-- BtnCond incorporés -->
-<q-dialog v-model="ui.d.ACouvrir[idc]" full-height position="left" persistent>
-  <q-layout v-if="chat && !chat._zombi" container view="hHh lpR fFf" :class="styp('md')">
+<q-dialog v-model="ui.d.ACouvrir" full-height position="left" persistent>
+  <q-layout v-if="!chat._zombi" container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated>
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
@@ -17,10 +17,10 @@
           <btn-cond v-if="session.estA" :label="$t('CHadd2')" icon="savings"
             @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
         </div>
-        <btn-cond v-if="chat && chat.stI" 
+        <btn-cond v-if="chat.stI" 
           :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
           :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-        <div v-if="chat && !chat.stI" class="text-warning text-bold titre-md text-italic">
+        <div v-if="!chat.stI" class="text-warning text-bold titre-md text-italic">
           {{$t('CHraccroche')}}
         </div>
       </div>
@@ -114,7 +114,7 @@
 </template>
 <script>
 
-// import { toRef } from 'vue'
+// import { } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
@@ -132,19 +132,21 @@ import { GetCompta } from '../app/synchro.mjs'
 export default {
   name: 'ApercuChat',
 
-  props: { 
-    id: Number,
-    ids: Number,
-    idc: Number
-  },
+  props: { },
 
   components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp, BtnCond },
 
   computed: {
-    chat () { return this.aSt.getChat(this.id, this.ids) },
-    nomE () { return this.session.getCV(this.chat.idE).nom },
-    nomI () { return this.session.getCV(this.chat.id).nom },
+    chat () { return this.aSt.getChat(this.ui.chatc.id, this.ui.chatc.ids) },
+    nomE () { return this.chat ? this.session.getCV(this.chat.idE).nom : ''},
+    nomI () { return this.chat ? this.session.getCV(this.chat.id).nom : ''},
     estDel () { return ID.estComptable(this.idE) || this.session.estDelegue }
+  },
+
+  watch: {
+    mod (ap) {
+      console.log(this.idc2, mod)
+    }
   },
 
   data () { return {
@@ -161,13 +163,15 @@ export default {
     },
 
     async effop () {
+      this.ui.fD()
       const disp = await new MajChat().run(this.chat, null, this.dheff)
       if (disp) { await afficherDiag(this.$t('CHdisp')) }
       this.dheff = 0
-      this.ui.fD()
     },
 
     async addop () {
+      // console.log('ApercuChat.addop', 'fD')
+      this.ui.fD()
       if (this.avecDon && this.mdon) {
         await new GetCompta().run()
         const compta = this.session.compta
@@ -181,13 +185,13 @@ export default {
       const disp = await new MajChat().run(this.chat, txt, 0, don)
       if (disp) { await afficherDiag(this.$t('CHdisp')) }
       this.txt = ''
-      this.ui.fD()
     },
 
     async passifop () {
+      // console.log('ApercuChat.passifOp', 'fD')
+      this.ui.fD()
       const suppr = await new PassifChat().run(this.chat)
       if (suppr) { await afficherDiag(this.$t('CHsuppr')) }
-      this.ui.fD()
     },
 
     async editer (avecDon) {
@@ -201,22 +205,24 @@ export default {
       }
       this.txt = this.chat ? this.chat.txt : ''
       this.avecDon = avecDon
+      // console.log('ApercuChat.editer', 'ACchatedit')
       this.ui.oD('ACchatedit')
     },
 
     async raccrocher () {
       this.txt = ''
+      // console.log('ApercuChat.raccrocher', 'ACconfirmrac')
       this.ui.oD('ACconfirmrac')
     }
   },
 
   setup (props) {
     return {
+      ui: stores.ui,
       styp, sty, dkli, dhcool,
       cfg: stores.config,
       session: stores.session,
       pSt: stores.people, 
-      ui: stores.ui,
       aSt: stores.avatar
     }
   }

@@ -50,6 +50,8 @@ export const useUiStore = defineStore('ui', {
 
     idc: 1,
 
+    chatc: null,
+
     // gestion des dialogues
     dialogStack: [],
 
@@ -91,11 +93,11 @@ export const useUiStore = defineStore('ui', {
       OTrunning: false,
       AAeditionpc: {}, // ApercuAvatar
       ACchatedit: false, // ApercuChat
-      ACouvrir: {},
+      ACouvrir: false,
       ACconfirmeff: false,
       ACconfirmrac: false,
       ACGchatedit: false, // ApercuChatgr
-      ACGouvrir: {},
+      ACGouvrir: false,
       ACGconfirmeff: false,
       CVedition: false, // CarteVisite
       AGnvctc: {}, // ApercuGroupe
@@ -151,7 +153,12 @@ export const useUiStore = defineStore('ui', {
       if (!pagesF.has(state.page)) return false
       return !state.pagetab || tabF.has(state.pagetab)
     },
-    urgence (state) { return state.page === 'compta' && state.pagetab === 'chats' }
+    urgence (state) { return state.page === 'compta' && state.pagetab === 'chats' },
+    edStack (state) {
+      let s = []
+      state.dialogStack.forEach(t => { s.push(t[0] + '.' + t[1]) })
+      return s.join(' | ')
+    }
   },
 
   actions: {
@@ -178,10 +185,13 @@ export const useUiStore = defineStore('ui', {
     },
 
     fD () {
-      const e = this.dialogStack.pop()
+      const l = this.dialogStack.length
+      const e = this.dialogStack.length ? this.dialogStack[l - 1] : null
+      // console.log('fD:', e ? e[0] : '???', this.edStack)
       if (e) {
+        this.dialogStack.length = l - 1
         if (e[1] !== 0)
-          delete this.d[e[0]][e[1]]
+          this.d[e[0]][e[1]] = false
         else
           this.d[e[0]] = false
       }
@@ -190,6 +200,7 @@ export const useUiStore = defineStore('ui', {
     oD (n, idc) {
       const ix = idc || 0
       this.dialogStack.push([n, ix])
+      // console.log('oD', n, ix, this.edStack)
       if (typeof this.d[n] === 'object') this.d[n][ix] = true
       else this.d[n] = true
     },
@@ -316,6 +327,10 @@ export const useUiStore = defineStore('ui', {
       this.selContact = id
       this.egrplus = false
       // TODO revenir au dialogue de nouveau contact
+    },
+
+    setChatc (id, ids) {
+      this.chatc = { id, ids }
     }
   }
 })

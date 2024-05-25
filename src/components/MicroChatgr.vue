@@ -15,8 +15,6 @@
       @click="ouvrirChat()"/>
   </div>
 
-  <apercu-chatgr v-if="ui.d.ACGouvrir[idc]" :idc="idc" :chat="chat"/>
-
 </div>
 </template>
 <script>
@@ -28,7 +26,7 @@ import ApercuChatgr from '../panels/ApercuChatgr.vue'
 export default ({
   name: 'MicroChatgr',
 
-  components: { ApercuChatgr },
+  components: { },
 
   props: { 
     chat: Object
@@ -45,15 +43,14 @@ export default ({
   methods: {
     ouvrirChat () {
       this.session.setGroupeId(this.chat.id)
-      this.ui.oD('ACGouvrir', this.idc)
+      this.ui.setChatc(this.chat.id)
+      this.ui.oD('ACGouvrir')
     },
   },
   
   setup () {
-    const ui = stores.ui
-    const idc = ref(ui.getIdc())
     return {
-      ui, idc,
+      ui: stores.ui,
       aSt: stores.avatar,
       session: stores.session,
       dhcool

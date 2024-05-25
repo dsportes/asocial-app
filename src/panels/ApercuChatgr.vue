@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.ACGouvrir[idc]" full-height position="left" persistent>
+<q-dialog v-model="ui.d.ACGouvrir" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
@@ -90,7 +90,7 @@ import { ItemChatgr } from '../app/operations.mjs'
 export default {
   name: 'ApercuChat',
 
-  props: {idc: Number },
+  props: { },
 
   components: { SdBlanc, EditeurMd, BoutonHelp, NoteEcritepar },
 

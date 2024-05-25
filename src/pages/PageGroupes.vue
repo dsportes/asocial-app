@@ -93,8 +93,6 @@
     </q-card>
   </q-dialog>
 
-  <apercu-chatgr v-if="ui.d.ACGouvrir[idc]" :idc="idc"/>
-
 </q-page>
 </template>
 
@@ -107,7 +105,6 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import SelAvid from '../components/SelAvid.vue'
 import InvitationAcceptation from '../components/InvitationAcceptation.vue'
 import { UNITEN, UNITEV } from '../app/api.mjs'
@@ -118,7 +115,7 @@ export default {
 
   props: { tous: Boolean },
 
-  components: { SelAvid, BtnCond, ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, ApercuChatgr, InvitationAcceptation },
+  components: { SelAvid, BtnCond, ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, InvitationAcceptation },
 
   computed: {
     stt () { return this.gSt.pgLgFT[1] || { nn:0, qn: 0, vf: 0, qv: 0 }},

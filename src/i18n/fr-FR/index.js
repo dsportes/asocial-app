@@ -157,9 +157,8 @@ export default {
   ambno5: 'aux notes en écriture',
 
   // Filtre Rac
-  rac0: '(tous, actifs et raccrochés)',
-  rac1: 'Chats actifs seulement',
-  rac2: 'Chats raccrochés seulement',
+  rac0: 'actifs',
+  rac1: 'INDESIRABLES',
   
   tmc0: 'Compte',
   tmc1: 'Groupe',
@@ -855,7 +854,7 @@ export default {
   FInotif: 'Ayant une notification ... {0}',
   FIstmb: 'Ayant un statut ... {0}',
   FIambno: 'Accès aux notes / membres...',
-  FIrac: 'Chats actifs / raccrochés...',
+  FIrac: 'Actifs / Indésirables...',
   FIpart: 'Comptes de ma partition ... {0}',
   FIsansheb: 'Groupes sans hébergement',
   FIexcesvol: 'Groupes en excédent de volume',
@@ -1034,8 +1033,8 @@ export default {
   CHde: 'Entre {0} et ...',
   CHgr: 'Dans le groupe ...',
   CHel: '[en ligne]',
-  CHraccroche: '[raccroché]',
-  CHraccroche2: '[{0} a raccroché]',
+  CHraccroche: 'INDÉSIRABLE',
+  CHraccroche2: '[INDÉSIRABLE pour {0}]',
   CHavdisp: '[l\'interlocuteur a disparu]',
   CHreact: 'Réactiver le chat',
   CHnch2: 'Aucun chat ne répond au critère de recherche | Un chat répond au critère de recherche | {count} chats répondent au critère de recherche',
@@ -1058,10 +1057,10 @@ export default {
   CHeffcf: 'Je confirme l\'effacement',
   CHadd1: 'Nouvel échange',
   CHadd2: 'Faire un don',
-  CHrac: 'Raccrocher le chat',
+  CHrac: 'Classer "INDÉSIRABLE"',
   CHrac2: 'Tous les échanges vont être supprimés pour vous (pas pour {0}).' +
-  ' Le chat ne sera plus "actif". Si {0} écrit un échange il apparaîtra.' +
-  ' Le chat ne redeviendra "actif" qu\'à la prochaine écriture.',
+  ' Le chat sera callsé "INDÉSIRABLE". Si {0} écrit un échange il apparaîtra.' +
+  ' Le chat cessera d\'être indésirable à la prochaine écriture.',
   CHeffa: '(effacé {0})',
   CHzombi: 'Ce chat n\'existe plus',
   CHdisp: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" avec lui ne peut plus être mis à jour.',

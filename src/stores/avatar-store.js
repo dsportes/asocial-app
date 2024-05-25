@@ -331,10 +331,8 @@ export const useAvatarStore = defineStore('avatar', {
       for (const [,elt] of state.map) {
         if (!f.tous && state.session.avatarId !== elt.avatar.id) continue
         for (const [,c] of elt.chats) {
-          if (f.rac) {
-            if (f.rac === 1 && stI !== 1) continue
-            if (f.rac === 2 && stI !== 0) continue
-          }
+          if (f.rac === 0 && c.stI !== 1) continue
+          if (f.rac === 1 && c.stI !== 0) continue
           if (flimj && c.dh < flimj) continue
           if (f.nom) {
             const cv = state.session.getCV(c.idE)

@@ -153,15 +153,15 @@ export default ({
         await pc.init(this.ligne1)
         // await sleep(5000)
         if (this.login) this.session.setOrg(this.orgL)
+        this.ui.fD()
         this.ui.ps.ok(pc)
         this.raz()
-        this.ui.fD()
       }, 300)
     },
     ko () {
       this.raz()
-      this.ui.ps.ok(null)
       this.ui.fD()
+      this.ui.ps.ok(null)
     },
     raz () {
       this.encours = false
