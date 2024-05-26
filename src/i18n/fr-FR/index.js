@@ -397,7 +397,7 @@ export default {
   EX8225: '(BUG) L\'interlocuteur du chat n\'est pas le Comptable',
   EX8226: 'Il n\'est pas possible de créer un chat avec soi-même (entre deux avatars du même compte)',
   EX8227: '(BUG) L\'avatar cible du rafraîssement des cartes de visite des chats n\'est pas un avatar du compte.',
-  EX8228: 'Numéro de partition déjà attribué',
+  EX8228: '(BUG) Numéro de partition déjà attribué',
   EX8229: '(BUG) Numéro de partition inconnu',
   EX8230: '(BUG) Compte A, partition non définie',
   EX8231: '(BUG) Accès interdit à la notification d\'un compte par un non délégué',
@@ -440,6 +440,7 @@ export default {
   EX8268: '(BUG) Un animateur du groupe doit avoir accès aux membres pour radier un autre membre que lui-même',
   EX8269: '(BUG) Un animateur du groupe ne peut être radié que par lui-même',
   EX8270: '(BUG) L\'auto-radiation n\'est possible qu\'en état "actif"',
+  EX8271: '(BUG) Il n\'est pas possible de supprimer une partition ayant encore des comptes',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',

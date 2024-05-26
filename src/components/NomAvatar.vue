@@ -44,7 +44,7 @@ export default {
     initVal: String
   },
   components: { BtnCond },
-  emits: ['update:modelValue', 'ok', 'ko'],
+  emits: ['update:modelValue', 'ok-nom'],
   data () {
     return {
       interdits: interdits

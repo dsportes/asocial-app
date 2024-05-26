@@ -591,7 +591,7 @@ export class NouvellePartition extends Operation {
   async run (code, q) { // q: [qc, q1, q2]
     try {
       const session = stores.session
-      const n = session.compte.mcode.size + 1
+      const n = session.synthese.prochNp
       const cleP = Cles.partition(n)
       const args = { 
         token: session.authToken, 
@@ -600,6 +600,34 @@ export class NouvellePartition extends Operation {
         n
       }
       await post(this, 'NouvellePartition', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_SupprPartition: 'Création d\'une nouvelle partition' *******
+Dans Comptes : **Comptable seulement:**
+- `tpK` : table des partitions cryptée par la clé K du Comptable `[ {cleP, code }]`. Son index est le numéro de la partition.
+  - `cleP` : clé P de la partition.
+  - `code` : code / commentaire court de convenance attribué par le Comptable
+
+- token: éléments d'authentification du compte.
+- n : numéro de partition
+Retour:
+*/
+export class SupprPartition extends Operation {
+  constructor () { super('SupprPartition') }
+
+  async run (n) { 
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        n
+      }
+      await post(this, 'SupprPartition', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

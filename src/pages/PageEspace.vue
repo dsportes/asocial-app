@@ -35,7 +35,7 @@
         v-model="optionA" :options="options" dense />
     </div>
 
-    <div class="text-center q-mb-sm">
+    <div v-if="session.pow === 2" class="text-center q-mb-sm">
       <btn-cond cond="cUrgence" icon="add" :label="$t('PTnv')" @ok="ouvrirnt"/>
     </div>
 
@@ -44,7 +44,8 @@
     <div v-if="synth.length">
     <div class="q-mx-xs" 
       v-for="(lg, idx) in synth" :key="lg.id">
-      <q-expansion-item switch-toggle-side expand-separator dense group="trgroup">
+      <q-expansion-item v-if="idx === 0 || session.pow === 2"
+        switch-toggle-side expand-separator dense group="trgroup">
         <template v-slot:header>
           <div :class="dkli(idx) + ' row full-width'">
             <div class="col-3 fs-md">
@@ -89,6 +90,8 @@
           <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs justify-center">
             <btn-cond icon="edit" cond="cUrgence" :label="$t('PEedn')" @ok="editer(lg)"/>
             <btn-cond cond="cUrgence" icon="settings" :label="$t('PEabo')" @ok="editerq(lg)"/>
+            <btn-cond :disable="lg.nbc > 0" cond="cUrgence" icon="close" color="warning"
+              :label="$t('supprimer')" @ok="supprimer(lg)"/>
           </div>
         </div>
       </q-expansion-item>
@@ -199,7 +202,8 @@ import ApercuNotif from '../components/ApercuNotif.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition } from '../app/synchro.mjs'
-import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, SetCodePart } from '../app/operations4.mjs'
+import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, 
+  SetCodePart, SupprPartition } from '../app/operations4.mjs'
 import { DownloadStatC, DownloadStatC2,
   GetVersionsDlvat, GetMembresDlvat, ChangeAvDlvat, ChangeMbDlvat } from '../app/operations.mjs'
 
@@ -242,7 +246,8 @@ export default {
     },
     synth () {
       if (!this.session.synthese) return []
-      const l = this.session.synthese.tsp
+      const l = []
+      this.session.synthese.tsp.forEach(x => { if (x) l.push(x)})
       const fv = this.fSt.tri.espace
       const f = fv ? fv.value : 0
       const ct = { f: fx[f][0], m: fx[f][1] }
@@ -316,6 +321,11 @@ export default {
     },
     async creer () {
       await new NouvellePartition().run(this.nom || '', this.quotas)
+      await this.refreshSynth()
+      this.ui.fD()
+    },
+    async supprimer (lg) {
+      await new SupprPartition().run(ID.court(lg.id))
       await this.refreshSynth()
       this.ui.fD()
     },

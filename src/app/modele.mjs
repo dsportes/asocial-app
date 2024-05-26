@@ -417,7 +417,7 @@ export class Synthese extends GenDoc {
       q: { qc: 0, qn: 0, qv: 0 },
       qt: { qc: 0, qn: 0, qv: 0, c2m: 0, n: 0, v: 0 }
     }
-
+    this.prochNp = row.tsp.length
     for (let i = 1; i < row.tsp.length; i++) {
       const r = row.tsp[i] || null
       if (r) {
@@ -436,7 +436,7 @@ export class Synthese extends GenDoc {
         Synthese.l1.forEach(f => { a.q[f] += r.q[f] })
         Synthese.l2.forEach(f => { a.qt[f] += r.qt[f] })
         this.tsp.push(r)
-      } 
+      } else this.tsp.push(null)
     }
     a.pcac = !a.q.qc ? 0 : Math.round(a.qt.qc * 100 / a.q.qc) 
     a.pcan = !a.q.qn ? 0 : Math.round(a.qt.qn * 100 / a.q.qn) 
