@@ -1,12 +1,11 @@
 <template>
 <div>
   <div class="row justify-center q-gutter-sm q-my-sm items-center">
-    <btn-cond v-if="session.estComptable"
+    <btn-cond v-if="session.estComptable && id !== session.compteId"
       cond="cUrgence" :label="$t('PPchpart')" @click="chgPartition"/>
-    <btn-cond v-if="session.estComptable" 
+    <btn-cond v-if="session.estComptable && id !== session.compteId" 
       cond="cUrgence" :label="$t('PPchdel')" @ok="chgDelegue"/>
-    <btn-cond v-if="(session.estComptable || (session.estDelegue && !session.eltPart(id).fake)) && id !== session.compteId"
-      cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
+    <btn-cond v-if="comptaVis" cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
     <btn-cond color="warning" icon="change_history"
       cond="cEdit" class="justify-start" @ok="muter"
       :label="$t('PPmuter')">
@@ -204,6 +203,9 @@ export default {
     cv () { return this.session.getCV(this.id) },
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     estDel () { return this.session.partition.estDel(this.id)},
+    comptaVis () { return (this.session.estComptable || 
+      (this.session.estDelegue && !this.session.eltPart(this.id).fake)) && this.id !== this.session.compteId 
+    },
 
     naI () { return this.aSt.compte.na },
     naE () { return getNg(this.id) },

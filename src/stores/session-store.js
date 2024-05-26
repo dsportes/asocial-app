@@ -493,7 +493,7 @@ export const useSessionStore = defineStore('session', {
           const ntf = this.tnotifP[i]
           if (ntf) {
             const cl = RegCles.get(ID.long(i, this.ns))
-            if (cl) mnotifP.set(i, await Notification.decrypt(ntf, cl))
+            if (cl) mnotifP.set(i, await MaNotification.decrypt(ntf, cl))
           }
         }
       } else if (!this.estA) {
