@@ -12,7 +12,7 @@
 
     <q-card class="spmd q-my-md" v-for="(sp, idx) in sponsorings" :key="sp.ids">
       <div :class="'q-px-sm ' + dkli(idx)">
-        <div :class="'titre-md text-' + clr(sp)">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
+        <div :class="'titre-md ' + clx[sp.st]">{{$t('NPst' + sp.st, [dhcool(sp.dh)])}}</div>
         <div class="titre-md">{{$t('NPphr')}}
           <span class="q-ml-sm font-mono text-bold fs-md">{{sp.psp}}</span>
         </div>
@@ -69,6 +69,13 @@ import BtnCond from '../components/BtnCond.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import { ProlongerSponsoring, GetPartition } from '../app/synchro.mjs'
 
+const clx = [
+  'text-primary',
+  'text-warning bg-yellow-3',
+  'text-green-5',
+  'text-negative bg-yellow-3',
+]
+
 export default {
   name: 'PageSponsorings',
 
@@ -90,7 +97,6 @@ export default {
   methods: {
     ed1 (f) { return edvol(f * UNITEN) },
     ed2 (f) { return edvol(f * UNITEV) },
-    clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
 
     async nouveausp () { 
       if (this.session.compte.idp) await new GetPartition().run(this.session.compte.idp)
@@ -105,7 +111,7 @@ export default {
 
   setup () {
     return {
-      ID, AMJ, dkli, dhcool,
+      ID, AMJ, dkli, dhcool, clx,
       aSt: stores.avatar, 
       session: stores.session, 
       ui: stores.ui

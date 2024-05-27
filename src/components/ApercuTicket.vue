@@ -36,13 +36,13 @@
         <span class="text-italic fs-md">{{$t('TKrefc')}}</span>
         <span class="q-ml-sm font-mono text-bold">{{tk.refc}}</span>
       </div>
-      <btn-cond v-if="!session.estComptable" 
+      <btn-cond v-if="!session.estComptable && !tk.dr" 
         class="q-mt-xs" cond="cUrgence"
         color="warning" icon="close" :label="$t('supprimer')" @ok="deltk"/>
-      <btn-cond v-if="session.estComptable" 
+      <btn-cond v-if="session.estComptable && !tk.dr" 
         class="q-mt-xs" cond="cUrgence"
         color="warning" icon="check" :label="$t('TKenreg1')" @ok="recep1"/>
-      <btn-cond v-if="session.estComptable" 
+      <btn-cond v-if="session.estComptable && !tk.dr" 
         class="q-ml-xs q-mt-xs" cond="cUrgence"
         color="warning" icon="check" :label="$t('TKenreg2')" @ok="recep2"/>
       <q-separator class="q-mb-sm" size="3px"/>

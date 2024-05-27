@@ -5,7 +5,7 @@ import stores from './stores.mjs'
 import { useI18n } from 'vue-i18n'
 import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, intToB64, rnd6, $t } from '../app/util.mjs'
-import { AMJ, ID } from '../app/api.mjs'
+import { AMJ, ID, AppExc, A_SRV } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
 import { WS } from '../app/ws.mjs'
 import { FsSyncSession } from '../app/fssync.mjs'
@@ -423,7 +423,7 @@ export const useSessionStore = defineStore('session', {
 
     setEspace (espace, estAdmin) {
       const ntf = espace.notifE
-      if (ntf && ntf.nr === 3) {
+      if (this.pow !== 1 && ntf && ntf.nr === 3) {
         this.setExcKO(new AppExc(A_SRV, 999, [ntf.texte, ntf.dh]))
         stores.ui.setPage('clos')
         return
