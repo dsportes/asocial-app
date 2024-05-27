@@ -802,7 +802,7 @@ export class Invit extends GenDoc {
         const cv = await CV.set(e.cvG || CV.fake(idg))
         cv.store()
         const s = new Set()
-        for (const x of e.invpar) {
+        if (e.invpar) for (const x of e.invpar) {
           const clei = RegCles.set(await decrypter(cleg, x.cleAG))
           s.add(Cles.id(clei, this.ns))
           const cvA = await CV.set(x.cvA || CV.fake(idg))

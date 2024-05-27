@@ -130,6 +130,7 @@ export const useUiStore = defineStore('ui', {
       PApageespace: false,
       CCouvrir: {}, // NouveauChat
       PGcrgr: false, // PageGroupes
+      PGctc: {},
       PEnt: false, // PageEspace
       PEedcom: false,
       PEedq: false,

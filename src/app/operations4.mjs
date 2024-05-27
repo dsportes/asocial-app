@@ -1018,6 +1018,7 @@ export class NouveauGroupe extends Operation {
 - idg : du groupe
 - ida : de l'avatar contact
 - cleAG : clé A du contact cryptée par la clé G du groupe
+- cleGA : clé G du groupe cryptée par la clé A du contact
 Retour:
 */
 export class NouveauContact extends Operation {
@@ -1033,7 +1034,8 @@ export class NouveauContact extends Operation {
         token: session.authToken, 
         idg: session.groupeId,
         ida: session.peopleId,
-        cleAG: await crypter(cleg, cleA)
+        cleAG: await crypter(cleg, cleA),
+        cleGA: await crypter(cleA, cleg)
       }
       await post(this, 'NouveauContact', args)
       this.finOK()

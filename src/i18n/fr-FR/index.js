@@ -129,6 +129,8 @@ export default {
   test: 'Test',
   dateinc: 'date inconnue',
   inconnu: '(inconnu)',
+  invite: 'Invité',
+  contact: 'Simple contact',
 
   condA: 'Action impossible, l\'application est en mode "avion".',
   condF: 'Action impossible, l\'application est figée.',
@@ -1487,6 +1489,9 @@ export default {
   PGnope: 'Le groupe n\'a pas d\'autre membre que les avatars du compte',
   PGnomb: 'Aucun membre (sur {0}) ne répond au critère de sélection',
   PGcrea: 'Création d\'un nouveau groupe',
+  PGctc: 'Déclaré "contact" du groupe {0}',
+  PGctc1: 'Me retirer de la liste des contacts',
+  PGctc2: 'Interdire définitivement à ce groupe de me contacter',
   PGnom: 'Nom du groupe à créer: {0}',
   PGquotas: 'Nombre maximum de notes et volume maximum pour leurs fichiers',
   PGplus1: 'Pour ajouter un "contact" à ce groupe,',

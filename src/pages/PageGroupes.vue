@@ -28,10 +28,11 @@
       {{$t('ICtit', gSt.invits.length, {count: gSt.invits.length})}}
     </div>
     <div v-for="(inv, idx) of gSt.invits" :key="inv.idg + '/' + inv.ida">
-      <div :class="dkli(idx) + 'q-my-xs row invs items-center'" >
-        <btn-cond class="col-auto text-center" icon="zoom_in" @ok="ouvaccinv(inv)"/>
-        <div class="col-5 text-center">{{session.getCV(inv.ida).nom}}</div>
-        <div class="col-5 text-center">{{session.getCV(inv.idg).nomC}}</div>
+      <div :class="dkli(idx) + 'q-my-xs row invs items-center cursor-pointer'" @click="ouvaccinv(inv)">
+        <div class="col-4 text-center">{{session.getCV(inv.ida).nom}}</div>
+        <div class="col-4 text-center">{{session.getCV(inv.idg).nomC}}</div>
+        <div v-if="inv.invpar.size" class="col-4 text-center text-bold">{{$t('invite')}}</div>
+        <div v-else class="col-4 text-center text-italic">{{$t('contact')}}</div>
       </div>
     </div>
   </q-card>
@@ -67,6 +68,27 @@
   <!-- Acceptation / refus de l'invitation -->
   <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
     <invitation-acceptation :inv="inv"/>
+  </q-dialog>
+
+  <!-- Contact du groupe ------------------------------------------------>
+  <q-dialog v-model="ui.d.PGctc[idc]" persistent>
+    <q-card :class="styp('sm')">
+      <q-toolbar class="bg-secondary text-white">
+        <btn-cond color="warning" icon="close" @ok="ui.fD"/>
+        <q-toolbar-title class="titre-lg text-center">{{$t('PGctc', [nomgi] )}}</q-toolbar-title>
+        <bouton-help page="page1"/>
+      </q-toolbar>
+      <div class="q-pa-xs">
+        <apercu-genx :id="inv.idg" :idx="0"/>
+        <q-card-actions align="right" class="q-gutter-sm" vertical>
+          <btn-cond flat icon="close" :label="$t('jailu')" @ok="ui.fD" />
+          <btn-cond color="warning" icon="add" cond="cEdit"
+            :label="$t('PGctc1')" @ok="ctc(1)" />
+          <btn-cond color="warning" icon="add" cond="cEdit"
+            :label="$t('PGctc2')" @ok="ctc(2)" />
+        </q-card-actions>
+      </div>
+    </q-card>
   </q-dialog>
 
   <!-- Nouveau groupe ------------------------------------------------>
@@ -119,7 +141,8 @@ export default {
 
   computed: {
     stt () { return this.gSt.pgLgFT[1] || { nn:0, qn: 0, vf: 0, qv: 0 }},
-    lg () { return this.gSt.pgLgFT[0] || [] }
+    lg () { return this.gSt.pgLgFT[0] || [] },
+    nomgi () { return this.session.getCV(this.inv.idg).nom }
   },
 
   methods: {
@@ -131,7 +154,8 @@ export default {
 
     async ouvaccinv (inv) {
       this.inv = inv
-      this.ui.oD('IAaccinvit', this.idc)
+      if (inv.invpar.size) this.ui.oD('IAaccinvit', this.idc)
+      else this.ui.oD('PGctc', this.idc)
     },
 
     async ovpageGr (elt) {
@@ -154,6 +178,10 @@ export default {
       this.ui.oD('PGcrgr')
     },
 
+    async ctc(opt) {
+      this.ui.fD()
+      console.log(opt)
+    },
     //okNom (n) { this.nom = n },
     
     async okCreation () {
