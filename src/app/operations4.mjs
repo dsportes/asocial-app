@@ -2,7 +2,7 @@ import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { Operation } from './synchro.mjs'
-import { random, gzipB } from './util.mjs'
+import { random, gzipB, afficherDiag } from './util.mjs'
 import { Cles, d14, ID, isAppExc } from './api.mjs'
 import { idb } from '../app/db.mjs'
 import { post } from './net.mjs'
@@ -1069,6 +1069,34 @@ export class ModeSimple extends Operation {
       await post(this, 'ModeSimple', args)
       this.finOK()
     } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_AnnulerContact: 'Annulation du statut de contact d\'un groupe par un avatar' **********
+- token donne les éléments d'authentification du compte.
+- idg : id du groupe
+- ida : id de l'avatar demandant l'annulation.
+- ln : true Inscription en liste noire
+Retour:
+*/
+export class AnnulerContact extends Operation {
+  constructor () { super('AnnulerContact') }
+
+  async run (idg, ida, ln) {
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        idg, 
+        ida,
+        ln
+      }
+      await post(this, 'AnnulerContact', args)
+      return this.finOK(0)
+    } catch (e) {
+      if (isAppExc(e) && e.code === 8002) return e.code
       await this.finKO(e)
     }
   }

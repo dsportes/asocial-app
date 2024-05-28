@@ -82,10 +82,10 @@
         <apercu-genx :id="inv.idg" :idx="0"/>
         <q-card-actions align="right" class="q-gutter-sm" vertical>
           <btn-cond flat icon="close" :label="$t('jailu')" @ok="ui.fD" />
-          <btn-cond color="warning" icon="add" cond="cEdit"
-            :label="$t('PGctc1')" @ok="ctc(1)" />
-          <btn-cond color="warning" icon="add" cond="cEdit"
-            :label="$t('PGctc2')" @ok="ctc(2)" />
+          <btn-cond color="warning" icon="close" cond="cEdit"
+            :label="$t('PGctc1')" @ok="ctc(false)" />
+          <btn-cond color="warning" icon="close" cond="cEdit"
+            :label="$t('PGctc2')" @ok="ctc(true)" />
         </q-card-actions>
       </div>
     </q-card>
@@ -121,7 +121,7 @@
 <script>
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { edvol, $t, dkli, styp } from '../app/util.mjs'
+import { edvol, $t, dkli, styp, afficherDiag } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
@@ -130,7 +130,7 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import SelAvid from '../components/SelAvid.vue'
 import InvitationAcceptation from '../components/InvitationAcceptation.vue'
 import { UNITEN, UNITEV } from '../app/api.mjs'
-import { NouveauGroupe } from '../app/operations4.mjs'
+import { NouveauGroupe, AnnulerContact } from '../app/operations4.mjs'
 
 export default {
   name: 'PageGroupes',
@@ -178,11 +178,11 @@ export default {
       this.ui.oD('PGcrgr')
     },
 
-    async ctc(opt) {
+    async ctc(ln) {
       this.ui.fD()
-      console.log(opt)
+      const code = await new AnnulerContact().run(this.inv.idg, this.inv.ida, ln)
+      if (code === 8002) await afficherDiag(this.$t('EX8001_1'))
     },
-    //okNom (n) { this.nom = n },
     
     async okCreation () {
       console.log(this.nom, this.quotas.qn, this.quotas.qv, this.una)
