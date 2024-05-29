@@ -735,7 +735,8 @@ export default {
   OP_OnchangeTribu: 'Opération de synchronisation (changement de tranche)',
   OP_OnchangeEspace: 'Opération de synchronisation (changement de espace)',
   OP_MuterCompte: 'Mutation dy type d\'un compte',
-
+  OP_InitTachesGC: 'Initialisation des tâches du GC',
+  
   OP_GetPub: 'Obtention d\'une clé publique',
   OP_GetAvatarPC: 'Récupération d\'un avatar par sa phrase de contact',
   OP_NouveauChat: 'Création d\'un nouveau chat',
@@ -961,7 +962,9 @@ export default {
   CNXdeg2: 'Le compte a été restreint à un accès minimal. Seuls les modes "avion" et "incognito" étant admis, la session a été mise en mode "incognito".',
 
   // PageAdmin et ApercuEspace
+  ESinitgc: 'Tâches du GC initialisées: {0} existante(s), {1} créées',
   ESgc: 'Lancer un GC',
+  ESgcin: 'Init. tâches GC',
   ESgcop: 'Tester GC op',
   ESdms: 'Dernière stat: {0}',
   ESck: 'Afficher le dernier checkpoint',

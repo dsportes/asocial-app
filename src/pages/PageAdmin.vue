@@ -2,7 +2,7 @@
   <q-page class="q-pa-xs">
     <div class="column">
       <div class="row justify-center">
-        <q-btn padding="xs" dense color="warning" :label="$t('ESgc')" @click="testGC"/>
+        <q-btn padding="xs" dense color="warning" :label="$t('ESgcin')" @click="initGC"/>
         <q-btn padding="xs" class="q-ml-xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
         <q-select v-model="gcop" dense :options="gcops" 
           class="q-ml-lg" label="GCop ???" style="width:6rem"/>
@@ -171,10 +171,10 @@ import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import PageEspace from '../pages/PageEspace.vue'
 import { reconnexion } from '../app/synchro.mjs'
-import { CreerEspace, SetEspaceNprof } from '../app/operations4.mjs'
+import { CreerEspace, SetEspaceNprof, InitTachesGC } from '../app/operations4.mjs'
 import { GC, GetSingletons } from '../app/operations.mjs'
 import { AMJ, UNITEN, UNITEV } from '../app/api.mjs'
-import { styp, edvol, mon, nbn, dkli } from '../app/util.mjs'
+import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
 
@@ -225,6 +225,11 @@ export default {
         ok: this.okps
       }
       this.ui.oD('PSouvrir')
+    },
+
+    async initGC () {
+      const [nx, nc] = await new InitTachesGC().run()
+      await afficherDiag(this.$t('ESinitgc', [nx, nc]))
     },
 
     /*

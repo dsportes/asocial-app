@@ -36,6 +36,21 @@ export class SetEspaceOptionA extends Operation {
   }
 }
 
+export class InitTachesGC extends Operation {
+  constructor() { super('InitTachesGC') }
+
+  async run() {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken }
+      const ret = await post(this, 'InitTachesGC', args)
+      return this.finOK(ret.nxnc)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* OP_CreerEspace: 'Création d\'un nouvel espace et de son comptable'
 - token : jeton d'authentification du compte de **l'administrateur**
 - ns : numéro de l'espace
