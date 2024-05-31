@@ -164,8 +164,7 @@ export default {
 
     async changerps () { // TODO
       this.ui.fD()
-      const hps1 = (this.session.ns * d14) + this.ps.hps1
-      const ret = await new ExistePhrase().run(hps1, 1)
+      const ret = await new ExistePhrase().run(this.ps.hps1, 1)
       if (isAppExc(ret)) return this.reset()
       if (ret) {
         await afficherDiag(this.$t('existe'))

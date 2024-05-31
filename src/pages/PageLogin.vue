@@ -136,7 +136,7 @@ export default {
           const row = res.rowSponsoring
           session.setMode(mode)
           session.setOrg(this.org)
-          session.setNs(ID.ns(row.id))
+          session.setNs(res.ns)
           this.sp = new Sponsoring()
           await this.sp.compileHS(row, this.pc.pcb)
           if (this.sp.dlv <  AMJ.amjUtc()) {

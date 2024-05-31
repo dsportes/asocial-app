@@ -608,7 +608,7 @@ export class OperationS extends Operation {
       sb.store(buf)
       await buf.commit(ds)
       syncQueue.dataSync = ds
-      if (fs) fs.setDS(ds.setLongsRds(session.ns))
+      if (fs) fs.setDS(ds.setRds)
       fini = ds.estAJour
       nbIter++
     }
@@ -985,9 +985,9 @@ export class EchoTexte extends Operation {
 }
 
 /* Pseudo opération : syncPub **************************************/
-export async function getPub (id) {
+export async function getPub (id, org) {
   try {
-    const ret = await post(null, 'GetPub', { id })
+    const ret = await post(null, org ? 'PetPubOrg' : 'GetPub', { id, org })
     return ret.pub
   } catch (e) {
     throw new AppExc(E_WS, 3)
@@ -1023,10 +1023,11 @@ export class PingDB extends Operation {
   }
 }
 
-/* OP_RefusSponsoring: 'Rejet d\'une proposition de sponsoring'**
-args.id ids : identifiant du sponsoring
-args.ardx : réponse du filleul
-args.hYC: hash du PBKFD de la phrase de sponsoring
+/* OP_RefusSponsoring: 'Rejet d\'une proposition de sponsoring'
+- `token` : éléments d'authentification du compte.
+- id ids : identifiant du sponsoring
+- ardYC : réponse du filleul
+- hYC: hash du PBKFD de la phrase de sponsoring
 */
 export class RefusSponsoring extends Operation {
   constructor() { super('RefusSponsoring') }
@@ -1083,7 +1084,7 @@ export class ExistePhrase extends Operation {
   async run (hps1, t) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, hps1: hps1, t }
+      const args = { token: session.authToken, hps1: hps1, t, org: this.session.org }
       const ret = await post(this, 'ExistePhrase' + (t === 1 ? '1' : ''), args)
       const ex = ret.existe || false
       return this.finOK(ex)
