@@ -27,7 +27,7 @@
         <div class="col column">
           <div>
             <span class="text-bold fs-md q-mr-sm">{{sp.cv.nomc}}</span> 
-            <span class="text-bold fs-sm font-mono q-mr-sm">#{{ID.long(sp.cv.id, ns)}}</span> 
+            <span class="text-bold fs-sm font-mono q-mr-sm">#{{sp.cv.id}}</span> 
           </div>
           <show-html v-if="sp.cv.texte" class="q-my-xs border1" zoom maxh="4rem" :texte="sp.cv.texte"/>
           <div v-else class="text-italic">{{$t('FAnocv')}}</div>
@@ -41,7 +41,7 @@
       </div>
 
       <div :class="'titre-md ' + (sp.del ? 'text-warning' : 'text.primary')">
-        {{$t(sp.del ? 'compteD' : 'compteO', [ID.court(sp.partitionId)])}}
+        {{$t(sp.del ? 'compteD' : 'compteO', [sp.partitionId])}}
       </div>
 
       <div class="titre-md">{{$t('NPquo')}}</div>
@@ -108,8 +108,7 @@ export default ({
   components: { BtnCond, EditeurMd, ShowHtml, BoutonHelp, QuotasVols },
 
   computed: {
-    textedef () { return this.$t('merci', [this.sp.cv.nom]) },
-    ns () { return ID.ns(this.sp.id)}
+    textedef () { return this.$t('merci', [this.sp.cv.nom]) }
   },
 
   data () {

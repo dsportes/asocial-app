@@ -52,7 +52,7 @@
           <div v-else>{{$t('TKdb', [-d.m])}}</div>
           <div class="font-mono">{{dhcool(d.dh)}}</div>
         </div>
-        <apercu-genx :id="ID.long(d.iddb, session.ns)" :idx="0"/>
+        <apercu-genx :id="d.iddb" :idx="0"/>
         <q-separator color="grey-5" class="q-mb-md"/>
       </div>
     </q-expansion-item>

@@ -85,7 +85,6 @@ export const useSessionStore = defineStore('session', {
     pSt: (state) => stores.people,
     ui: (state) => stores.ui,
 
-    idComptable (state) { return ID.duComptable(state.ns)},
     nomGrC (state) { if (!state.groupeId) return ''; return state.getCV(state.groupeId).nomC },
     
     dlv (state) { return state.ok && state.compte ? state.compte.dlv : 0 },
@@ -189,16 +188,15 @@ export const useSessionStore = defineStore('session', {
 
     getCV: (state) => { return (id) => { return state.pSt.getCV(id) } },
 
-    notifPX: (state) => { return (id) => { return state.mnotifP.get(ID.court(id)) } },
+    notifPX: (state) => { return (id) => { return state.mnotifP.get(id) } },
 
     eltPart: (state) => { return (id) =>  
       state.partition ? (state.partition.mcpt[id] || { fake: true }) : { fake: true }
     },
 
     codePart: (state) => { return (id) => { 
-        const n = ID.long(id, state.ns)
-        const code = state.estComptable ? ' [' + state.compte.mcode.get(n) + ']': ''
-        return '#' + ID.court(id) + code
+        const code = state.estComptable ? ' [' + state.compte.mcode.get(id) + ']': ''
+        return '#' + id + code
       }
     },
 
@@ -210,13 +208,6 @@ export const useSessionStore = defineStore('session', {
       const x = def ? def.split(' ') : []
       x.forEach(t => { s.add(t)})
       return s
-    },
-
-    // PageAdmin ***************************************************    
-    paLeFT: (state) => {
-      const x = []; state.espaces.forEach(e => { x.push(e) })
-      x.sort((a, b) => { return a.id < b.id ? -1 : (a.id === b.id ? 0 : 1)})
-      return x
     },
 
     // PagePartition ***************************************************    
@@ -311,7 +302,7 @@ export const useSessionStore = defineStore('session', {
 
     setOrg (org) { this.org = org || '' },
 
-    setNs (ns) { this.ns = ns; RegCles.ns = ns },
+    // setNs (ns) { this.ns = ns; RegCles.ns = ns },
 
     setAuthToken (phrase, sessionId) {
       const token = { }
@@ -487,24 +478,23 @@ export const useSessionStore = defineStore('session', {
     async setNotifP () {
       if (this.estAdmin) return
       const mnotifP = new Map()
-      const n = ID.court(this.compte.idp)
       if (this.estComptable) {
         for (let i = 1; i < this.tnotifP.length; i++) {
           const ntf = this.tnotifP[i]
           if (ntf) {
-            const cl = RegCles.get(ID.long(i, this.ns))
+            const cl = RegCles.get(i)
             if (cl) mnotifP.set(i, await MaNotification.decrypt(ntf, cl))
           }
         }
       } else if (!this.estA) {
-        const ntf = this.tnotifP[n]
+        const ntf = this.tnotifP[this.compte.idp]
         if (ntf) {
-          const cl = RegCles.get(ID.long(this.compte.idp, this.ns))
-          if (cl) mnotifP.set(n, await MaNotification.decrypt(ntf, cl))
+          const cl = RegCles.get(this.compte.idp)
+          if (cl) mnotifP.set(this.compte.idp, await MaNotification.decrypt(ntf, cl))
         }
       }
       this.mnotifP = mnotifP
-      this.notifP = this.compte.idp ? mnotifP.get(n) : null
+      this.notifP = this.compte.idp ? mnotifP.get(this.compte.idp) : null
       if (this.notifP && this.notifP.dh > this.dhvu) this.alire = true
     },
 

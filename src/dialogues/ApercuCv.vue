@@ -48,12 +48,11 @@ export default {
   computed: {
     lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
 
-    id () { return ID.long(this.cv.id, this.session.ns) },
-    estGroupe () { return ID.estGroupe(this.id) },
-    estAvc () { return this.estGroupe ? false : this.session.compte.mav.has(this.id) },
+    estGroupe () { return ID.estGroupe(this.cv.id) },
+    estAvc () { return this.estGroupe ? false : this.session.compte.mav.has(this.cv.id) },
     diag () {
       if (this.estGroupe) {
-        const g = this.gSt.groupe(this.id)
+        const g = this.gSt.groupe(this.cv.id)
         if (!g || !g.estAdmin) return this.$t('FAcvgr')
       } else {
         if (!this.estAvc) return this.$t('FAcvav')
@@ -73,7 +72,7 @@ export default {
     },
 
     async refresh () {
-      const x = await new GetCv().run(this.id)
+      const x = await new GetCv().run(this.cv.id)
       if (x) cv = x
     }
 

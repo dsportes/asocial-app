@@ -128,12 +128,12 @@ export default {
     nj () { return this.c.nbj(this.session.compta.solde) },
     nnj () { return this.nj > 40 ? 1 : (this.nj > 10 ? 2 : 3)},
     lurg () {
-      const l = [{ id: ID.long(ID.duComptable(this.session.ns), this.session.ns)}]
+      const l = [{ id: ID.duComptable() }]
       const p = this.session.partition
       if (!p) return l
       for (const idx in p.mcpt) {
         const e = p.mcpt[idx]
-        const id = ID.long(parseInt(idx), this.session.ns)
+        const id = parseInt(idx)
         if (id !== this.session.compteId)
           l.push({ del: e.del, id: id })
       }

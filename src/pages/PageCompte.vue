@@ -21,7 +21,7 @@
       {{$t('compteA')}}
     </span>
     <span v-if="estDelegue" class="q-pa-xs text-warning bg-yellow-3 text-bold">
-      {{$t('CPTdel', [ID.court(session.compte.idp)])}}
+      {{$t('CPTdel', [session.compte.idp])}}
     </span>
     </div>
 

@@ -78,8 +78,7 @@ export default {
     
     async declPC (pc) {
       if (!pc) return
-      const hps1 = (this.session.ns * d14) + pc.hps1
-      if (await new ExistePhrase().run(hps1, 3)) {
+      if (await new ExistePhrase().run(pc.hps1, 3)) {
         await afficherDiag(this.$t('existe'))
         return
       }

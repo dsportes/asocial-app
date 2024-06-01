@@ -99,7 +99,7 @@ export default {
           await new SetNotifC().run (suppr ? null : ntf, this.cible)
           await new GetPartition().run(idp)
         }
-        await new GetSynthese().run(this.session.ns)
+        await new GetSynthese().run()
       }
       this.ui.fD()
     }

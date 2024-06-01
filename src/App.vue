@@ -254,7 +254,7 @@
       <page-sponsorings class="page" v-if="ui.page === 'sponsorings'"/>
       <page-chats class="page" v-if="ui.page === 'chats'"/>
       <page-compta class="page" v-if="ui.page === 'compta'"/>
-      <page-espace class="page" v-if="ui.page === 'espace'" :ns="session.ns"/>
+      <page-espace class="page" v-if="ui.page === 'espace'"/>
       <page-partition class="page" v-if="ui.page === 'partition'"/>
       <page-people class="page" v-if="ui.page === 'people'"/>
       <page-groupes tous class="page" v-if="ui.page === 'groupes'"/>
@@ -522,7 +522,7 @@ export default {
       const p = this.ui.page
       let arg = ''
       switch (p) {
-        case 'espace' : { return this.$t('Pespace', [this.session.ns, this.session.org]) }
+        case 'espace' : { return this.$t('Pespace', [this.session.org]) }
         case 'partition' : { 
           if (this.session.pow > 3) return this.$t('ACspons')
           const p = this.session.partitionC || this.session.partition

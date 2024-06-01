@@ -77,7 +77,7 @@ export default {
   },
 
   computed: {
-    aut () { return this.notif.idDel ? ID.long(this.notif.idDel, this.session.ns) : ID.duComptable(this.session.ns)},
+    aut () { return this.notif.idDel ? this.notif.idDel : ID.duComptable()},
     nomSource () {
       if (this.type === 0) return this.$t('ANadmin')
       const cv = this.session.getCV(this.aut)

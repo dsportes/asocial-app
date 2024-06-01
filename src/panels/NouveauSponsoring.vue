@@ -84,7 +84,7 @@
           <div class="titre-md">{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nom}}</span></div>
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
           <div v-if="!estAutonome">
-            <div class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO', [ID.court(partition.id)])}}</div>
+            <div class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO', [partition.id])}}</div>
             <quotas-vols class="q-ml-md" :vols="quotas" noutil/>
           </div>
           <div v-else class="text-warning titre-md">

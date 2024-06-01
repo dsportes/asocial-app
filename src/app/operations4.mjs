@@ -27,7 +27,7 @@ export class SetEspaceOptionA extends Operation {
   async run (optionA, nbmi, dlvat) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, ns: session.ns, optionA, nbmi, dlvat }
+      const args = { token: session.authToken, optionA, nbmi, dlvat }
       await post(this, 'SetEspaceOptionA', args)
       this.finOK()
     } catch (e) {
@@ -662,10 +662,9 @@ Retour:
 export class ChangerPartition extends Operation {
   constructor () { super('ChangerPartition') }
 
-  async run (id, idpart, ntf) { // id du compte, id nouvelle partition
+  async run (id, idp, ntf) { // id du compte, id nouvelle partition
     try {
       const session = stores.session
-      const idp = ID.long(idpart, session.ns)
       const cleA = RegCles.get(id)
       const cleP = RegCles.get(idp)
       const cleAP = await crypter(cleP, cleA, 1)
@@ -718,7 +717,7 @@ export class SetQuotasPart extends Operation {
   async run (idp, quotas) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, idp: ID.long(idp, session.ns), quotas}
+      const args = { token: session.authToken, idp, quotas}
       await post(this, 'SetQuotasPart', args)
       this.finOK()
     } catch (e) {
@@ -736,10 +735,9 @@ Retour:
 export class SetCodePart extends Operation {
   constructor () { super('SetQuotasPart') }
 
-  async run (id, code) {
+  async run (idp, code) {
     try {
       const session = stores.session
-      const idp = ID.long(id, session.ns)
       const cleP = RegCles.get(idp)
       const etpk = await crypter(session.clek, new Uint8Array(encode({ cleP, code })))
       const args = { token: session.authToken, idp, etpk}
@@ -834,7 +832,7 @@ export class MajCv extends Operation {
   async run (cv1) {
     try {
       const session = stores.session
-      const cle = RegCles.get(ID.long(cv1.id, session.ns))
+      const cle = RegCles.get(cv1.id)
       const cv = await cv1.crypter(cle)
       const args = { token: session.authToken, cv }
       await post(this, 'MajCv', args)
@@ -865,7 +863,7 @@ export class GetCv extends Operation {
       const ret = await post(this, 'GetCv', args)
       let cv = null
       if (ret.cv) {
-        const cle = RegCles.get(ID.long(id, session.ns))
+        const cle = RegCles.get(id)
         cv = CV.set(ret.cv, cle)
       }
       return this.finOK(cv)

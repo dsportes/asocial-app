@@ -27,16 +27,20 @@ class Queue {
   async setRows (rows) { 
     const session = stores.session
     let rev = false
-    if (rows) for (const row of rows) {   
-      if (row.id === session.ns) {
-        await new GetEspace().run(row.id)
+    if (rows) for (const row of rows) {
+      const idEsp = ID.idEsp(row.id)
+      if (idEsp) {
+        await new GetEspace().run(idEsp)
       } else {
         if (ID.rdsType(row.id) === ID.RDSCOMPTE) { 
           if (this.vcpt[0] < row.v) { this.vcpt[0] = row.v; rev = true }
         } else {
           const x = this.avgrs.get(row.id)
           if (!x) { this.avgrs.set(row.id, [row.v, 0]); rev = true }
-          else if (x[0] < row.v) { this.avgrs.set(row.id, [row.v, x[1]]); rev = true }
+          else if (x[0] < row.v) { 
+            this.avgrs.set(ID.court(row.id), [row.v, x[1]])
+            rev = true 
+          }
         }
       }
     }
@@ -638,13 +642,8 @@ export class ConnexionAdmin extends Operation {
   async run() {
     try {
       const session = stores.session
-      const args = { token: session.authToken }
-      const ret = await post(this, 'GetEspaces', args)
       session.setCompte(null)
       session.setOrg('admin')
-      if (ret.espaces) for (const e of ret.espaces)
-        session.setEspace(await compile(e), true)
-  
       console.log('Connexion admin')
       session.setStatus(2)
       stores.ui.setPage('admin')
@@ -769,19 +768,6 @@ Retour:
 - rowInvit
 - rowAvater 
 - rowChat si la confidentialité n'a pas été requise
-- notifs
-- conso
-
-Exceptions:
-- `A_SRV, 13` : sponsorings non trouvé
-- `F_SRV, 9` : le sponsoring a déjà été accepté ou refusé ou est hors limite.
-- F_SRV, 212: solde du sonsor ne couvre pas son don
-- A_SRV, 999: application close
-- F_SRV, 101: application figée
-- F_SRV, 211: quotas restants de la partition insuffisants pour couvrir les quotas proposés au compte
-- A_SRV, 16: syntheses non trouvée
-- A_SRV, 1: espace non trouvé
-- A_SRV, 8: partition non trouvée
 */
 export class SyncSp extends OperationS {
   constructor() { super('SyncSp') }
@@ -915,17 +901,16 @@ export class GetEspace extends OperationS {
 
 /* OP_GetSynthese: 'Obtention de la synthèse de l\'espace' *********
 args.token donne les éléments d'authentification du compte.
-args.ns
 Retour:
 - rowSynthse
 */
 export class GetSynthese extends Operation {
   constructor () { super('GetSynthese') }
 
-  async run (ns) { 
+  async run () { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, ns }
+      const args = { token: session.authToken }
       const ret = await post(this, 'GetSynthese', args)
       const s = await compile(ret.rowSynthese)
       session.setSynthese(s)

@@ -12,14 +12,6 @@
       </div>
     </div>
 
-    <div class="q-mb-sm">
-      <saisie-mois v-if="session.pow === 1" v-model="dlvat" 
-        :dmax="maxdlvat" :dmin="mindlvat" :dinit="initdlvat"
-        @ok="setDlvat" icon="check" :label="$t('ESdlvat')"/>
-      <span v-else class="titre-md q-ml-sm">
-        {{session.espace.dlvat ? $t('ESdlvat2', [AMJ.editDeAmj(session.espace.dlvat)]) : $t('ESdlvat3')}}
-      </span>
-    </div>
 
     <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
       <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
@@ -29,13 +21,13 @@
         v-model.number="nbmi" :options="optionsNbmi" dense />
     </div>
 
-    <div v-if="session.pow === 2" class="q-mb-sm">
+    <div class="q-mb-sm">
       <!--div class="font-mono fs-sm q-mr-sm">{{session.espace.v}}</div-->
       <q-select standout style="position:relative;top:-8px"
         v-model="optionA" :options="options" dense />
     </div>
 
-    <div v-if="session.pow === 2" class="text-center q-mb-sm">
+    <div class="text-center q-mb-sm">
       <btn-cond cond="cUrgence" icon="add" :label="$t('PTnv')" @ok="ouvrirnt"/>
     </div>
 
@@ -50,7 +42,7 @@
           <div :class="dkli(idx) + ' row full-width'">
             <div class="col-3 fs-md">
               <span v-if="!lg.id">{{$t('total')}}</span>
-              <span v-else>#{{ID.court(lg.id)}}
+              <span v-else>#{{lg.id}}
                 <span v-if="session.pow === 2" class= "q-ml-sm">{{session.codePart(lg.id)}}</span>
               </span>
             </div>
@@ -83,7 +75,7 @@
           
           <div v-if="idx !== 0" class="q-my-xs">
             <apercu-notif class="q-ma-sm" :editable="session.pow > 1 && session.pow < 4" 
-              :notif="session.mnotifP.get(ID.court(lg.id))" 
+              :notif="session.mnotifP.get(lg.id)" 
               :type="1" :cible="lg.id" :idx="1"/>
           </div>
           
@@ -98,42 +90,7 @@
     </div>
     </div>
 
-    <!-- Suivi du changement d'une dlvat -->
-    <q-dialog v-model="ui.d.PEdlvat" persistent>
-      <q-card :class="styp('sm')">
-        <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTdlvat')}}</q-toolbar-title>
-        </q-toolbar>
-        <q-card-section class="q-ma-sm">
-          <div class="q-my-md row justify-around">
-            <div class="titre-md">{{$t('PTdlvata', [AMJ.editDeAmj(session.espace.dlvat)])}}</div>
-            <div class="titre-md">{{$t('PTdlvatf', [AMJ.editDeAmj(dlv)])}}</div>
-          </div>
-          <div class="row q-my-sm">
-            <div class="col-4"/>
-            <div class="col-4 text-italic titre-md text-center">{{$t('PTdlvat1')}}</div>
-            <div class="col-4 text-italic titre-md text-center">{{$t('PTdlvat2')}}</div>
-          </div>
-          <div class="row q-my-xs">
-            <div class="col-4 text-italic titre-md">{{$t('PTdlvat3')}}</div>
-            <div class="col-4 font-mono fs-md text-center">{{nbav1}}</div>
-            <div class="col-4 font-mono fs-md text-center">{{nbav2}}</div>
-          </div>
-          <div class="row q-my-xs">
-            <div class="col-4 text-italic titre-md">{{$t('PTdlvat4')}}</div>
-            <div class="col-4 font-mono fs-md text-center">{{nbmb1}}</div>
-            <div class="col-4 font-mono fs-md text-center">{{nbmb2}}</div>
-          </div>
-        </q-card-section>
-
-        <q-card-actions vertical align="right">
-          <bouton-confirm class="q-my-md maauto" :actif="stp===2" :confirmer="chgDlvat"/>
-          <q-btn dense size="md" no-caps padding="xs" color="primary" :disable="stp < 3" 
-            :label="$t('PTdlterm', [nbmb2 + nbav2])" @click="ui.fD" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    
 
     <!-- Edition du code d'une partition -->
     <q-dialog v-model="ui.d.PEedcom" persistent>
@@ -223,8 +180,7 @@ export default {
   name: 'PageEspace',
 
   props: { ns: Number },
-  components: { BtnCond, SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, 
-  ApercuNotif, BoutonConfirm },
+  components: { BtnCond, SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
 
   computed: {
     maxdl () { 
@@ -234,16 +190,7 @@ export default {
     mindl () { 
       return Math.floor(this.session.espace.dcreation / 100)
     },
-    mindlvat () { 
-      const m = AMJ.djMoisN(AMJ.amjUtc(), 3)
-      return Math.floor(m / 100)
-    },
-    initdlvat () {
-      return Math.floor(this.session.espace.dlvat / 100)
-    },
-    maxdlvat () { 
-      return Math.floor(AMJ.max / 100)
-    },
+
     synth () {
       if (!this.session.synthese) return []
       const l = []
@@ -325,7 +272,7 @@ export default {
       this.ui.fD()
     },
     async supprimer (lg) {
-      await new SupprPartition().run(ID.court(lg.id))
+      await new SupprPartition().run(lg.id)
       await this.refreshSynth()
       this.ui.fD()
     },
@@ -343,7 +290,7 @@ export default {
 
     async editer (lg) {
       await this.lgCourante(lg)
-      this.code = this.session.compte.mcode.get(ID.long(this.ligne.id, this.session.ns))
+      this.code = this.session.compte.mcode.get(this.ligne.id)
       this.ui.oD('PEedcom')
     },
     async valider () {
@@ -365,67 +312,11 @@ export default {
       await new SetQuotasPart().run(this.ligne.id, this.quotas)
       await this.refreshSynth()
       this.ui.fD()
-    },
-
-    splitLst (lst) {
-      const r = []
-      let t = []
-      for(let i = 0; i < lst.length; i++) {
-        t.push(lst[i])
-        if (t.length === 10) { r.push(t); t = [] }
-      }
-      if (t.length) r.push(t)
-      return r
-    },
-
-    async setDlvat () {
-      this.dlv = AMJ.pjMoisSuiv((this.dlvat * 100) + 1)
-      await new SetEspaceOptionA().run(null, null, this.dlv )
-    },
-
-    async setDlvat2 () {
-      this.dlv = AMJ.pjMoisSuiv((this.dlvat * 100) + 1)
-      this.stp = 1; this.nbav1 = 0; this.nbav2; this.nbmb1 = 0; this.nbmb2 = 0
-      this.ui.oD('PEdlvat')
-      const lav = await new GetVersionsDlvat().run(this.session.espace.dlvat)
-      this.nbav1 = lav.length
-      this.lstav = this.splitLst(lav)
-      const lmb = await new GetMembresDlvat().run(this.session.espace.dlvat)
-      this.nbmb1 = lmb.length
-      this.lstmb = this.splitLst(lmb)
-      this.stp = 2
-    },
-
-    async chgDlvat () {
-      for(let i = 0; i < this.lstav.length; i++) {
-        const lids = this.lstav[i]
-        await new ChangeAvDlvat().run(this.dlv, lids)
-        this.nbav2 += lids.length
-      }
-      for(let i = 0; i < this.lstmb.length; i++) {
-        const lidids = this.lstmb[i]
-        await new ChangeMbDlvat().run(this.dlv, lidids)
-        this.nbmb2 += lidids.length
-      }
-      await new SetEspaceOptionA().run(null, null, this.dlv )
-      this.stp = 3
     }
-
   },
 
   data () {
     return {
-      // notif: null,
-      dlvat: 0, // dlvat saisie
-      dlv: 0, // Premier jour du mois suivant de dlvat
-      nbav1: 0, // nombre d'avatars à traiter
-      nbav2: 0, // nombre d'avatars traités
-      nbmb1: 0, // nombre de membres à traiter
-      nbmb2: 0, // nombre de membres traités
-      lstav: null, // av à traiter
-      lstmb: null, // mb à traiter
-      stp: 0, // 0: pas lancé, 1: décompte en cours, 2: décompte terminé, 3: maj terminée
-
       mois: Math.floor(this.session.auj / 100),
       nom: '',
       quotas: null,
@@ -443,7 +334,7 @@ export default {
     const ns = toRef(props, 'ns')
 
     async function refreshSynth () {
-      await new GetSynthese().run(ns.value)
+      await new GetSynthese().run()
     }
 
     onMounted(async () => {

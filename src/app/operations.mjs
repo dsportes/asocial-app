@@ -690,56 +690,9 @@ export class SetEspaceOptionA extends Operation {
   async run (optionA, nbmi, dlvat) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, ns: session.ns, optionA, nbmi, dlvat }
+      const args = { token: session.authToken, optionA, nbmi, dlvat }
       this.tr(await post(this, 'SetEspaceOptionA', args))
       this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_GetVersionsDlvat: 'Obtention de la liste des avatars contraints par la DLV fixée par l\'administrteur technique',
-POST:
-POST:
-- `token` : jeton d'authentification du compte de **l'administrateur**
-- `ns` : id de l'espace
-- dlvat: aamm,
-Retour:
-- lids: array des id
-*/
-export class GetVersionsDlvat extends Operation {
-  constructor () { super('GetVersionsDlvat') }
-
-  async run (dlvat) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, ns: session.ns, dlvat }
-      const ret = this.tr(await post(this, 'GetVersionsDlvat', args))
-      return this.finOK(ret.lids)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_GetMembresDlvat: 'Obtention de la liste des membres contraints par la DLV fixée par l\'administrteur technique',
-POST:
-- `token` : jeton d'authentification du compte de **l'administrateur**
-- `ns` : id de l'espace
-- dlvat: aamm,
-Retour:
-- lidids: array des [id, ids]
-*/
-export class GetMembresDlvat extends Operation {
-  constructor () { super('GetMembresDlvat') }
-
-  async run (dlvat) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, ns: session.ns, dlvat }
-      const ret = this.tr(await post(this, 'GetMembresDlvat', args))
-      return this.finOK(ret.lidids)
     } catch (e) {
       await this.finKO(e)
     }

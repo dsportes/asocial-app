@@ -8,7 +8,7 @@
     </q-toolbar>
     <div class="marginauto q-pa-md">
       <span class='titre-lg'>{{ncv.nom}}</span>
-      <span class='q-mx-md fs-sm font-mono'>[{{ID.long(ncv.id, session.ns)}}]</span>
+      <span class='q-mx-md fs-sm font-mono'>[{{ncv.id}}]</span>
     </div>
     <q-separator />
     <q-card-section class="row justify-start">

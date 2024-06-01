@@ -326,11 +326,10 @@ export default {
       for(const [idp, code] of this.session.compte.mcode) {
         if ((!this.filtre || (code && code.indexOf(this.filtre) !== -1))
           && idp !== this.session.partition.id) {
-          const n = ID.court(idp)
-          const e = tsp[n]
+          const e = tsp[idp]
           const y = { 
             idp,
-            code: '#' + n + ' [' + code  + ']',
+            code: '#' + idp + ' [' + code  + ']',
             qc: e.q.qc, 
             qn: e.q.qn,
             qv: e.q.qv,
@@ -353,12 +352,12 @@ export default {
     async changerDel(del) {
       await new DeleguePartition().run(this.id, del)
       await new GetPartition().run(this.session.partition.id)
-      await new GetSynthese().run(this.session.ns)
+      await new GetSynthese().run()
       this.ui.fD()
     },
 
     async chgPartition () { // comptable
-      await new GetSynthese().run(this.session.ns)
+      await new GetSynthese().run()
       await new GetCompta().run(this.id)
       this.filtre = ''
       this.filtrer()
@@ -368,7 +367,7 @@ export default {
     async changerPart () {
       await new ChangerPartition().run(this.id, this.selx.idp, this.session.notifC)
       await new GetPartition().run(this.session.partition.id)
-      await new GetSynthese().run(this.session.ns)
+      await new GetSynthese().run()
       this.ui.fD()
     }
   },

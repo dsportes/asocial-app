@@ -1,6 +1,7 @@
 <template>
   <q-page class="q-pa-xs">
     <div class="column">
+      <!--
       <div class="row justify-center">
         <q-btn padding="xs" dense color="warning" :label="$t('ESgcin')" @click="initGC"/>
         <q-btn padding="xs" class="q-ml-xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
@@ -9,10 +10,11 @@
         <q-btn padding="xs" class="q-ml-xs" dense color="warning" 
           :disable="gcop === ''" :label="$t('go')" @click="testGCop"/>
       </div>
+      -->
 
       <div class="q-mt-sm row q-gutter-xs justify-center">
         <q-btn dense size="md" color="primary" icon="refresh" padding="xs"
-          :label="$t('rafraichir')" @click="rafraichir"/>
+          :label="$t('rafraichir')" @click="loadEsp"/>
         <q-btn dense size="md" color="primary" icon="add" padding="xs"
           :label="$t('ESne')" @click="plusNS"/>
       </div>
@@ -22,37 +24,35 @@
       {{$t('ESlo', session.paLeFT.length, { count: session.paLeFT.length})}}</div>
 
     <div class="spmd"> <!-- Liste des espaces -->
-      <div v-for="(esp, idx) in session.paLeFT" :key="esp.id">
-        <div :class="dkli(idx) + 'q-my-sm'">
-
-          <div class="row justify-between">
-            <div class="text-bold font-mono fs-lg">
-              <span class="q-mr-md">#{{esp.id}}</span>
-              <span>{{esp.org}}</span>
-              <span v-if="esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
-            </div>
-            <div class="row q-gutter-xs">
-              <!--<q-btn dense color="primary" flat label="ping"
-                @click="ping(esp)"/>-->
-              <q-btn dense color="primary" icon="open_in_new" :label="$t('detail')"
-                padding="none" @click="pageesp(esp)"/>
-            </div>
+      <q-expansion-item  v-for="(esp, idx) in lstEsp" :key="esp.id" class="q-my-xs"
+        switch-toggle-side expand-separator dense group="espaces">
+        <template v-slot:header>
+          <div :class="dkli(idx) + ' row justify-between text-bold font-mono fs-lg'">
+            <span class="q-mr-md">#{{esp.id}}</span>
+            <span>{{esp.org}}</span>
+            <span v-if="esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
           </div>
+        </template>
 
+        <div>
           <div class="row justify-between q-ml-lg q-my-xs">
             <span class="fs-md">{{$t('ESprf', [esp.nprof])}}</span>
             <q-btn dense padding="none" color="primary" :label="$t('changer')"
               @click="ovchgprf1(esp)"/>
           </div>
 
+          <div class="q-mb-sm">
+            <bouton-dlvat :espace="esp" @close="finDlv"/>
+          </div>
+
           <apercu-notif class="q-ml-lg q-mt-sm" :notif="esp.notifE" :idx="idx" 
             :type="0" :cible="esp.id"/>
 
         </div>
-      </div>
+      </q-expansion-item>
     </div>
 
-    <!-- Création d'yn espace -->
+    <!-- Création d'un espace -->
     <q-dialog v-model="ui.d.PAcreationesp" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
@@ -114,6 +114,7 @@
       </q-card>
     </q-dialog>
 
+    <!--
     <q-dialog v-model="ui.d.PAcheckpoint" full-height position="left" persistent>
       <q-layout container view="hHh lpR fFf" :class="styp('md')">
         <q-header elevated>
@@ -126,7 +127,6 @@
 
         <q-page-container class="q-pa-xs">
           <div v-for="(s, idx) in singl" :key="s.id" :class="dkli(idx)">
-            <!-- nom retry start duree stats err -->
             <div class="fs-md font-mono text-bold">{{$t('SINGL' + s.id)}}</div>
             <div class="q-ml-lg">
               <span v-if="s.nr" class="q-mr-md">{{$t('ESretry', [s.nr])}}</span>
@@ -141,7 +141,9 @@
         </q-page-container>
       </q-layout>
     </q-dialog>
+    -->
 
+    <!--
     <q-dialog v-model="ui.d.PApageespace" full-height position="left" persistent>
       <q-layout container view="hHh lpR fFf" :class="styp('md')">
         <q-header elevated>
@@ -159,20 +161,19 @@
 
       </q-layout>
     </q-dialog>
-
+    -->
   </q-page>
 </template>
 
 <script>
-import { decode } from '@msgpack/msgpack'
+import { ref, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
+import BoutonDlvat from '../components/BoutonDlvat.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import PageEspace from '../pages/PageEspace.vue'
-import { reconnexion } from '../app/synchro.mjs'
 import { CreerEspace, SetEspaceNprof, InitTachesGC } from '../app/operations4.mjs'
-import { GC, GetSingletons } from '../app/operations.mjs'
+// import { GC, GetSingletons } from '../app/operations.mjs'
 import { AMJ, UNITEN, UNITEV } from '../app/api.mjs'
 import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
@@ -181,7 +182,7 @@ const reg = /^([a-z0-9\-]+)$/
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, ApercuNotif, BoutonHelp, PageEspace },
+  components: { BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -227,35 +228,23 @@ export default {
       this.ui.oD('PSouvrir')
     },
 
+    async finDlv (tf) {
+      if (tf) await this.loadEsp()
+    },
+
     async initGC () {
       const [nx, nc] = await new InitTachesGC().run()
       await afficherDiag(this.$t('ESinitgc', [nx, nc]))
     },
 
-    /*
-    async ping (esp) {
-      if (this.session.fsSync) {
-        const org = await this.session.fsSync.getEspace(esp.id)
-        await afficherDiag('Ping: ' + org)
-      } else {
-        await afficherDiag(this.$t('ESping'))
-      }
-    },
-    */
-
-    async rafraichir () {
-      this.session.setOrg('admin')
-      await reconnexion()
-    },
-
     aNS (ns) {
-      const mesp = this.session.espaces
+      for (const e of this.lstEsp)
+        if (e.id === ns) return true
       return mesp.has(ns)
     },
 
     aOrg (org) {
-      const mesp = this.session.espaces
-      for (const [ns, e] of mesp)
+      for (const e of this.lstEsp)
         if (e.org === org) return true
       return false
     },
@@ -276,18 +265,18 @@ export default {
     },
 
     async creerNS () {
-      this.session.setNs(this.ns)
+      // this.session.setNs(this.ns)
       await new CreerEspace().run(this.org, this.ps, this.ns)
       this.ns = 0
       this.ps = null
       this.ui.fD()
-      await this.rafraichir()
+      await this.loadEsp()
     },
 
     async valider () {
       await new SetEspaceNprof().run(this.esp.id, this.prf)
       this.ui.fD()
-      await this.rafraichir()
+      await this.loadEsp()
     },
 
     ovchgprf1 (e) {
@@ -297,14 +286,7 @@ export default {
       this.ui.oD('PAedprf')
     },
 
-    pageesp (e) {
-      this.ns = e.id
-      this.session.setNs(this.ns)
-      this.esp = e
-      this.session.setEspace(e)
-      this.ui.oD('PApageespace')
-    },
-
+    /*
     async testGCop () {
       const ret = await new GC().run(this.gcop)
       if (ret.stats) console.log(JSON.stringify(ret.stats))
@@ -333,11 +315,11 @@ export default {
       for (const f in s) { r.push(f + '=' + s[f])}
       return r.join(', ')
     }
+    */
   },
 
   data () {
     return {
-      gcops: ['GCHeb', 'GCGro', 'GCPag', 'GCTra', 'GCFpu', 'GCDlv', 'GCstcc', 'GCstct'],
       gcop: '',
       ns: 0,
       nsc: 0, // ns "courant" de PageEspca à ouvrir
@@ -356,9 +338,24 @@ export default {
     const session = stores.session
     const ui = stores.ui
     const cfg = stores.config
+    const lstEsp = ref([])
+
+    async function loadEsp () {
+      const args = { token: session.authToken }
+      const ret = await post(this, 'GetEspaces', args)
+      const lst = []
+      if (ret.espaces) for (const e of ret.espaces)
+        lst.push((await compile(e), true))
+      lst.sort((a, b) => { return a.id < b.id ? -1 : (a.id === b.id ? 0 : 1)})
+      lstEsp.value = lst
+    }
+
+    onMounted(async () => {
+      await loadEsp()
+    })
 
     return {
-      session, ui, cfg, dkli, styp,
+      session, ui, cfg, dkli, styp, lstEsp, loadEsp,
       AMJ
     }
   }

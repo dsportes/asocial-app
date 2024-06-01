@@ -786,7 +786,7 @@ export default {
   Pcompte: 'Ce compte et ses avatars',
   Psponsorings: 'Sponsorings de {0}',
   Pchats: 'Tous les "chats"',
-  Pespace: 'Espace #{0} - {1}',
+  Pespace: 'Espace {0}',
   Ppartition: 'Partition {0}',
   Pcompta: 'Notifications & abonnement ...',
   Pgroupes: 'Tous les groupes',
