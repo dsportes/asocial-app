@@ -262,18 +262,21 @@ export async function compile (row) {
   if (!cl) return null
   const obj = new cl()
   obj._nom = row._nom
-  obj.id = row.id || 0
-  if (row.ids) obj.ids = row.ids
-  if (row.dlv) obj.dlv = row.dlv
-  if (row.dfh) obj.dfh = row.dfh
-  obj.vsh = row.vsh || 0
-  obj.v = row.v || 0
   const z = row.dlv && row.dlv < session.auj
   // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
   if (z || !row._data_) {
+    obj.id = ID.court(row.id || 0)
+    if (row.ids !== undefined) obj.ids = ID.court(row.ids)
+    obj.v = row.v || 0
     obj._zombi = true
   } else {
     const x = decode(row._data_)
+    obj.id = x.id || 0
+    if (x.ids !== undefined) obj.ids = x.ids
+    if (x.dlv !== undefined) obj.dlv = x.dlv
+    if (row.dfh !== undefined) obj.dfh = x.dfh
+    obj.vsh = x.vsh || 0
+    obj.v = x.v || 0  
     await obj.compile(x)
   }
   return obj
@@ -535,7 +538,8 @@ export class Compte extends GenDoc {
         const x = row.tpk[i]
         if (x) {
           const { cleP, code } = decode(await decrypter(clek, x))
-          const idp = Cles.id(RegCles.set(cleP))
+          RegCles.set(cleP)
+          const idp = Cles.id(cleP)
           if (code) this.mcode.set(idp, code)
         }
       }

@@ -40,6 +40,8 @@
 
           <div class="titre-md q-my-xs">{{$t('ESnbmi2', [esp.nbmi])}}</div>
 
+          <div class="titre-md q-my-xs">{{$t('PTopt' + esp.opt)}}</div>
+
           <div class="q-my-xs">
             <bouton-dlvat :espace="esp" @close="finDlv"/>
           </div>
@@ -265,7 +267,6 @@ export default {
     },
 
     async creerNS () {
-      // this.session.setNs(this.ns)
       await new CreerEspace().run(this.org, this.ps, this.ns)
       this.ns = 0
       this.ps = null
@@ -353,7 +354,7 @@ export default {
     })
 
     return {
-      session, ui, cfg, dkli, styp, lstEsp, loadEsp,
+      session, ui, cfg, dkli, styp, lstEsp, loadEsp, ID,
       AMJ
     }
   }

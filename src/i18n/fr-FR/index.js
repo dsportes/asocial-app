@@ -710,6 +710,7 @@ export default {
   OP_GetEspace: 'Obtention de l\'espace',
   OP_ForceDlv: 'TEST seulement: forçage de dlv / dfh',
   OP_SetEspaceOptionA: 'Changement des options de l\'espace',
+  OP_SetEspaceDlvat: 'Changement de la date limite de vie des comptes "O" par l\'administrateur',
   OP_GetVersionsDlvat: 'Obtention de la liste des avatars contraints par la DLV fixée par l\'administrteur technique',
   OP_GetMembresDlvat: 'Obtention de la liste des membres contraints par la DLV fixée par l\'administrteur technique',
   OP_ChangeAvDlvat: 'Changement de DLV pour une liste d\'avatars',

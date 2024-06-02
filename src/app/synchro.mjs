@@ -3,7 +3,7 @@ import { decode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme, sleep } from './util.mjs'
 import { idb, IDBbuffer } from './db.mjs'
-import { DataSync, appexc, ID, Cles, AMJ } from './api.mjs'
+import { DataSync, AppExc, appexc, ID, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
 import { CV, compile, RegCles } from './modele.mjs'
 import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
@@ -612,7 +612,7 @@ export class OperationS extends Operation {
       sb.store(buf)
       await buf.commit(ds)
       syncQueue.dataSync = ds
-      if (fs) fs.setDS(ds.setRds)
+      if (fs) fs.setDS(new Set(ds.setRds))
       fini = ds.estAJour
       nbIter++
     }
@@ -774,11 +774,10 @@ export class SyncSp extends OperationS {
 
   async run(org, sp, texte, ps, dconf) {
     try {
-      const ns = ID.ns(sp.id)
       const clek = random(32) // du compte
       const cleKXC = await crypter(ps.pcb, clek) // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
       const cleA = Cles.avatar()
-      const id = Cles.id(cleA, ns)
+      const id = Cles.id(cleA)
       const kp = await genKeyPair()
       const cv = new CV(id, 0, null, sp.nom)
       
@@ -805,7 +804,7 @@ export class SyncSp extends OperationS {
       }
       if (!sp.dconf && !dconf) {
         const cc = random(32)
-        const pub = await getPub(sp.id)
+        const pub = await getPub(sp.id, org)
         args.ch = {
           ccK: await crypter(clek, cc), // clé C du chat cryptée par la clé K du compte
           ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor
@@ -972,7 +971,7 @@ export class EchoTexte extends Operation {
 /* Pseudo opération : syncPub **************************************/
 export async function getPub (id, org) {
   try {
-    const ret = await post(null, org ? 'PetPubOrg' : 'GetPub', { id, org })
+    const ret = await post(null, org ? 'GetPubOrg' : 'GetPub', { id, org })
     return ret.pub
   } catch (e) {
     throw new AppExc(E_WS, 3)
@@ -1069,7 +1068,7 @@ export class ExistePhrase extends Operation {
   async run (hps1, t) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, hps1: hps1, t, org: this.session.org }
+      const args = { token: session.authToken, hps1: hps1, t, org: session.org }
       const ret = await post(this, 'ExistePhrase' + (t === 1 ? '1' : ''), args)
       const ex = ret.existe || false
       return this.finOK(ex)

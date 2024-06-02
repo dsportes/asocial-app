@@ -24,11 +24,32 @@ Elle n'écrit QUE dans espaces.
 export class SetEspaceOptionA extends Operation {
   constructor () { super('SetEspaceOptionA') }
 
-  async run (optionA, nbmi, dlvat) { 
+  async run (optionA, nbmi) { 
     try {
       const session = stores.session
-      const args = { token: session.authToken, optionA, nbmi, dlvat }
+      const args = { token: session.authToken, optionA, nbmi }
       await post(this, 'SetEspaceOptionA', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*   OP_SetEspaceDlvat: 'Changement de la date limite de vie des comptes "O" par l\'administrateur',
+- token : jeton d'authentification du compte de **l'administrateur**
+- ns : id de l'espace notifié.
+- dlvat: aaaammjj,
+Retour: rien
+*/
+export class SetEspaceDlvat extends Operation {
+  constructor () { super('SetEspaceDlvat') }
+
+  async run (ns, dlvat) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns, dlvat }
+      await post(this, 'SetEspaceDlvat', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

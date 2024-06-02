@@ -213,7 +213,7 @@ export default {
     nbmiesp (ap) { this.nbmi = this.session.espace ? this.session.espace.nbmi : 12 },
     async optionA (ap) {
       if (this.session.espace && this.session.espace.opt !== ap.value) 
-        await new SetEspaceOptionA().run(this.optionA.value)
+        await new SetEspaceOptionA().run(this.optionA.value, null)
     },
     async nbmi (ap) {
       if (this.session.espace && this.session.espace.nbmi !== ap) 

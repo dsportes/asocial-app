@@ -55,7 +55,6 @@ export default {
   },
 
   setup () {
-    const session = stores.session.excKO
     return {
       session: stores.session,
       pSt: stores.people,

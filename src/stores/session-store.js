@@ -302,8 +302,6 @@ export const useSessionStore = defineStore('session', {
 
     setOrg (org) { this.org = org || '' },
 
-    // setNs (ns) { this.ns = ns; RegCles.ns = ns },
-
     setAuthToken (phrase, sessionId) {
       const token = { }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
@@ -365,7 +363,6 @@ export const useSessionStore = defineStore('session', {
     async setIdClek (id, cleKXC, clek) {
       this.compteId = id
       this.avatarId = id
-      this.setNs(ID.ns(id))
       this.clek = clek || await decrypter(this.phrase.pcb, cleKXC)
       const x = await crypter(this.clek, '' + id, 1)
       this.nombase = '$asocial$-' + u8ToB64(x, true)
