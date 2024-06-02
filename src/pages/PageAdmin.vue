@@ -3,7 +3,6 @@
     <div class="column">
       <!--
       <div class="row justify-center">
-        <q-btn padding="xs" dense color="warning" :label="$t('ESgcin')" @click="initGC"/>
         <q-btn padding="xs" class="q-ml-xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
         <q-select v-model="gcop" dense :options="gcops" 
           class="q-ml-lg" label="GCop ???" style="width:6rem"/>
@@ -13,15 +12,14 @@
       -->
 
       <div class="q-mt-sm row q-gutter-xs justify-center">
-        <q-btn dense size="md" color="primary" icon="refresh" padding="xs"
-          :label="$t('rafraichir')" @click="loadEsp"/>
-        <q-btn dense size="md" color="primary" icon="add" padding="xs"
-          :label="$t('ESne')" @click="plusNS"/>
+        <btn-cond icon="refresh" :label="$t('rafraichir')" @click="loadEsp"/>
+        <btn-cond color="warning" :label="$t('ESgcin')" @click="initGC"/>
+        <btn-cond icon="add" :label="$t('ESne')" @click="plusNS"/>
       </div>
     </div>
 
     <div class="titre-lg text-white bg-secondary q-pa-xs full-width text-center q-my-sm">
-      {{$t('ESlo', session.paLeFT.length, { count: session.paLeFT.length})}}</div>
+      {{$t('ESlo', lstEsp.length, { count: lstEsp.length })}}</div>
 
     <div class="spmd"> <!-- Liste des espaces -->
       <q-expansion-item  v-for="(esp, idx) in lstEsp" :key="esp.id" class="q-my-xs"
@@ -34,19 +32,20 @@
           </div>
         </template>
 
-        <div>
-          <div class="row justify-between q-ml-lg q-my-xs">
+        <div class="q-ml-lg">
+          <div class="row justify-between q-my-xs">
             <span class="fs-md">{{$t('ESprf', [esp.nprof])}}</span>
-            <q-btn dense padding="none" color="primary" :label="$t('changer')"
-              @click="ovchgprf1(esp)"/>
+            <btn-cond :label="$t('changer')"  @click="ovchgprf1(esp)"/>
           </div>
 
-          <div class="q-mb-sm">
+          <div class="titre-md q-my-xs">{{$t('ESnbmi2', [esp.nbmi])}}</div>
+
+          <div class="q-my-xs">
             <bouton-dlvat :espace="esp" @close="finDlv"/>
           </div>
 
-          <apercu-notif class="q-ml-lg q-mt-sm" :notif="esp.notifE" :idx="idx" 
-            :type="0" :cible="esp.id"/>
+          <apercu-notif class="q-my-xs" :notif="esp.notifE" :idx="idx" 
+            :type="0" :cible="ID.court(esp.id)"/>
 
         </div>
       </q-expansion-item>
@@ -56,7 +55,7 @@
     <q-dialog v-model="ui.d.PAcreationesp" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" icon="close" color="warning" @click="cancelNS"/>
+          <btn-cond icon="close" color="warning" @click="cancelNS"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESne2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -72,8 +71,7 @@
             <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
           </div>
           <div class="column justify-center q-mt-md">
-            <q-btn :label="$t('ESps')" dense size="md" padding="xs" color="primary"
-              no-caps class="titre-lg" @click="saisiePS" 
+            <btn-cond :label="$t('ESps')" no-caps class="titre-lg" @click="saisiePS" 
               :disable="!org"/>
             <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
               :confirmer="creerNS"/>
@@ -86,7 +84,7 @@
     <q-dialog v-model="ui.d.PAedprf" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense color="warning" size="md" icon="close" @click="ui.fD"/>
+          <btn-cond color="warning" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('STchg')}}</q-toolbar-title>
         </q-toolbar>
         <q-card-section class="q-my-md q-mx-sm">
@@ -106,9 +104,8 @@
           </div>
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense color="primary" size="md" padding="xs" icon="undo" 
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense color="warning" size="md" padding="xs" icon="check" 
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+          <btn-cond color="warning" icon="check" 
             :label="$t('valider')" :disable="prf === profil" @click="valider"/>
         </q-card-actions>
       </q-card>
@@ -172,9 +169,12 @@ import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonDlvat from '../components/BoutonDlvat.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { CreerEspace, SetEspaceNprof, InitTachesGC } from '../app/operations4.mjs'
+import { GetEspaces } from '../app/synchro.mjs'
+import { compile } from '../app/modele.mjs'
 // import { GC, GetSingletons } from '../app/operations.mjs'
-import { AMJ, UNITEN, UNITEV } from '../app/api.mjs'
+import { ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
 import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
@@ -182,7 +182,7 @@ const reg = /^([a-z0-9\-]+)$/
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat },
+  components: { BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
@@ -240,7 +240,7 @@ export default {
     aNS (ns) {
       for (const e of this.lstEsp)
         if (e.id === ns) return true
-      return mesp.has(ns)
+      return false
     },
 
     aOrg (org) {
@@ -274,7 +274,7 @@ export default {
     },
 
     async valider () {
-      await new SetEspaceNprof().run(this.esp.id, this.prf)
+      await new SetEspaceNprof().run(ID.court(this.esp.id), this.prf)
       this.ui.fD()
       await this.loadEsp()
     },
@@ -341,11 +341,9 @@ export default {
     const lstEsp = ref([])
 
     async function loadEsp () {
-      const args = { token: session.authToken }
-      const ret = await post(this, 'GetEspaces', args)
       const lst = []
-      if (ret.espaces) for (const e of ret.espaces)
-        lst.push((await compile(e), true))
+      const rows = await new GetEspaces().run()
+      if (rows) for (const row of rows) lst.push(await compile(row))
       lst.sort((a, b) => { return a.id < b.id ? -1 : (a.id === b.id ? 0 : 1)})
       lstEsp.value = lst
     }

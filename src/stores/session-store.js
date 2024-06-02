@@ -419,7 +419,6 @@ export const useSessionStore = defineStore('session', {
         stores.ui.setPage('clos')
         return
       }
-      if (estAdmin) { this.espaces.set(espace.id, espace); return }
       this.espace = espace
       this.tnotifP = espace.tnotifP
       setTimeout(async () => { await this.setNotifP()}, 1)

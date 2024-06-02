@@ -736,7 +736,8 @@ export default {
   OP_OnchangeEspace: 'Opération de synchronisation (changement de espace)',
   OP_MuterCompte: 'Mutation dy type d\'un compte',
   OP_InitTachesGC: 'Initialisation des tâches du GC',
-  
+  OP_GetEspaces : 'Obtient tous les espaces',
+
   OP_GetPub: 'Obtention d\'une clé publique',
   OP_GetAvatarPC: 'Récupération d\'un avatar par sa phrase de contact',
   OP_NouveauChat: 'Création d\'un nouveau chat',
@@ -980,7 +981,8 @@ export default {
   ESdlvat2: 'Hébergment des comptes "O" assuré jusqu\'à  {0}.',
   ESdlvat3: 'Hébergment des comptes "O" assuré sans limite de date.',
   ESdlc: 'Rapport du mois :',
-  ESnbmi: 'Compte supprimé après N mois sans connexion',
+  ESnbmi: 'Comptes supprimés après N mois sans connexion',
+  ESnbmi2: 'Comptes supprimés après {0} mois sans connexion',
   ESmois2: '202405',
   ESmois: 'Mois: AAAAMM',
   ESmoiser1: 'Date mal formée: attendu entre 202301 et 209912.',

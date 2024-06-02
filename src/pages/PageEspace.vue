@@ -1,6 +1,7 @@
 <template>
   <q-page class="column q-pa-xs">
-    <div v-if="session.pow <= 2" class="q-mb-sm">
+    <!--
+    <div v-if="session.pow === 2" class="q-mb-sm">
       <div class="titre-md">{{$t('PEstm')}}</div>
       <div class="row q-gutter-sm q-mb-sm">
         <q-btn class="self-start" dense color="warning" padding="none xs" size="md" label="M" @click="dlstat(0)"/>
@@ -12,7 +13,6 @@
       </div>
     </div>
 
-
     <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
       <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
       <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
@@ -20,15 +20,15 @@
         :disable="session.pow !== 2"
         v-model.number="nbmi" :options="optionsNbmi" dense />
     </div>
+    -->
 
     <div class="q-mb-sm">
-      <!--div class="font-mono fs-sm q-mr-sm">{{session.espace.v}}</div-->
       <q-select standout style="position:relative;top:-8px"
         v-model="optionA" :options="options" dense />
     </div>
 
     <div class="text-center q-mb-sm">
-      <btn-cond cond="cUrgence" icon="add" :label="$t('PTnv')" @ok="ouvrirnt"/>
+      <btn-cond cond="cUrgence" icon="add" :label="$t('PTnv')" @ok="ovnvPart"/>
     </div>
 
     <q-separator color="orange" class="q-my-sm"/>
@@ -90,8 +90,6 @@
     </div>
     </div>
 
-    
-
     <!-- Edition du code d'une partition -->
     <q-dialog v-model="ui.d.PEedcom" persistent>
       <q-card :class="styp('sm')">
@@ -147,22 +145,20 @@
 
 <script>
 import { onMounted, toRef, ref } from 'vue'
-import { saveAs } from 'file-saver'
+// import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import BtnCond from '../components/BtnCond.vue'
-import SaisieMois from '../components/SaisieMois.vue'
+// import SaisieMois from '../components/SaisieMois.vue'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
-import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
+import { dkli, styp, $t } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition } from '../app/synchro.mjs'
 import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, 
   SetCodePart, SupprPartition } from '../app/operations4.mjs'
-import { DownloadStatC, DownloadStatC2,
-  GetVersionsDlvat, GetMembresDlvat, ChangeAvDlvat, ChangeMbDlvat } from '../app/operations.mjs'
+// import { DownloadStatC, DownloadStatC2 } from '../app/operations.mjs'
 
 const fx = [['id', 1], 
   ['ntr2', 1], ['ntr2', -1],
@@ -179,8 +175,8 @@ const fx = [['id', 1],
 export default {
   name: 'PageEspace',
 
-  props: { ns: Number },
-  components: { BtnCond, SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
+  props: { },
+  components: { BtnCond, /*SaisieMois, */ ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
 
   computed: {
     maxdl () { 
@@ -233,6 +229,7 @@ export default {
     },
     */
 
+    /*
     async dlstat (mr) {
       const { err, blob, creation, mois } = await new DownloadStatC().run(this.session.espace.org, mr)
       const nf = this.session.espace.org + '-C_' + mois
@@ -254,8 +251,9 @@ export default {
         await afficherDiag($t('PEnd') + err)
       }
     },
+    */
 
-    async ouvrirnt () { 
+    async ovnvPart () { 
       this.nom = ''
       this.quotas = { 
         qc: 1, qn: 1, qv: 1, 
@@ -266,11 +264,13 @@ export default {
       }
       this.ui.oD('PEnt')
     },
+
     async creer () {
       await new NouvellePartition().run(this.nom || '', this.quotas)
       await this.refreshSynth()
       this.ui.fD()
     },
+
     async supprimer (lg) {
       await new SupprPartition().run(lg.id)
       await this.refreshSynth()
@@ -293,10 +293,12 @@ export default {
       this.code = this.session.compte.mcode.get(this.ligne.id)
       this.ui.oD('PEedcom')
     },
+
     async valider () {
       await new SetCodePart().run(this.ligne.id, this.code)
       this.ui.fD()
     },
+
     async editerq (lg) {
       await this.lgCourante(lg)
       const q = this.ligne.q
@@ -308,6 +310,7 @@ export default {
       }
       this.ui.oD('PEedq')
     },
+
     async validerq () {
       await new SetQuotasPart().run(this.ligne.id, this.quotas)
       await this.refreshSynth()
@@ -331,7 +334,6 @@ export default {
   setup (props) {
     const ui = stores.ui
     const idc = ref(ui.getIdc())
-    const ns = toRef(props, 'ns')
 
     async function refreshSynth () {
       await new GetSynthese().run()

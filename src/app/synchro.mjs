@@ -1151,3 +1151,23 @@ export class GetNotifC extends Operation {
     }
   }
 }
+
+/* OP_GetEspaces : Obtient tous les espaces
+- `token` : éléments d'authentification du compte.
+Retour:
+- espaces : array de row espaces
+*/
+export class GetEspaces extends Operation {
+  constructor () { super('GetEspaces') }
+
+  async run () {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken }
+      const ret = await post(this, 'GetEspaces', args)
+      return this.finOK(ret.espaces)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

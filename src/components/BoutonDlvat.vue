@@ -25,6 +25,8 @@
 </template>
 <script>
 
+import stores from '../stores/stores.mjs'
+import { AMJ } from '../app/api.mjs'
 import SaisieMois from './SaisieMois.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
 import { SetEspaceOptionA } from '../app/operations4.mjs'
@@ -44,7 +46,7 @@ export default ({
       return Math.floor(m / 100)
     },
     initdlvat () {
-      return Math.floor(espace.dlvat / 100)
+      return Math.floor(this.espace.dlvat / 100)
     },
     maxdlvat () { 
       return Math.floor(AMJ.max / 100)
