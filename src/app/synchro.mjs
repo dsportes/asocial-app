@@ -971,10 +971,17 @@ export class EchoTexte extends Operation {
 /* Pseudo opération : syncPub **************************************/
 export async function getPub (id, org) {
   try {
-    const ret = await post(null, org ? 'GetPubOrg' : 'GetPub', { id, org })
-    return ret.pub
+    if (org) {
+      const ret = await post(null, 'GetPubOrg', { id, org })
+      return ret.pub
+    } else {
+      const session = stores.session
+      const args = { token: session.authToken, id }
+      const ret = await post(null, 'GetPub', args)
+      return ret.pub
+    }
   } catch (e) {
-    throw new AppExc(E_WS, 3)
+    throw appexc(e)
   }
 }
 

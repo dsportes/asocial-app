@@ -81,6 +81,7 @@
 
     <q-toolbar v-if="ui.page === 'compta'" inset 
       class="full-width bg-secondary text-white row justify-between">
+      <btn-cond icon="refresh" @ok="this.session.reloadCompta()"/>
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
         <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setTab('notif')"/>
         <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setTab('compta')"/>

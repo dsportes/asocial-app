@@ -174,7 +174,7 @@ export class Cles {
     rnd[0] = 4
     return rnd
   }
-
+  
   /* Retourne l'id courte ou longue depuis une clé */
   static id (cle) {
     if (!cle) return 0
@@ -187,7 +187,6 @@ export class Cles {
     }
     return id
   }
-
   static lnoms = ['partitions', 'avatars', 'avatars', 'groupes', 'espaces']
 
   static nom (cle) { return Cles.lnoms[cle[0]] }
@@ -1090,7 +1089,7 @@ export class DataSync {
       avatars: [],
       groupes: []
     }
-    if (ns) x.setRds = this.setLongsRds(ns)
+    if (ns) x.setRds = Array.from(this.setLongsRds(ns))
     else if (this.setRds) x.setRds = this.setRds
     if (this.avatars) this.avatars.forEach(t => x.avatars.push(t))
     if (this.groupes) this.groupes.forEach(t => x.groupes.push(t))

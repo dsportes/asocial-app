@@ -9,6 +9,7 @@ import { AMJ, ID, AppExc, A_SRV } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
 import { WS } from '../app/ws.mjs'
 import { FsSyncSession } from '../app/fssync.mjs'
+import { GetCompta, GetPartition } from '../app/synchro.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -494,7 +495,12 @@ export const useSessionStore = defineStore('session', {
       if (this.notifP && this.notifP.dh > this.dhvu) this.alire = true
     },
 
-    setHT (s) { if (s && s.size) s.forEach(t => { if (!this.defHT.has(t)) this.hashtags.add(t) }) }
+    setHT (s) { if (s && s.size) s.forEach(t => { if (!this.defHT.has(t)) this.hashtags.add(t) }) },
+
+    async reloadCompta () {
+      await new GetCompta().run()
+      if (!this.estA) await new GetPartition().run(this.compte.idp)
+    }
 
   }
 })

@@ -12,7 +12,7 @@
           @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
       </div>
     </div>
-
+    -->
     <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
       <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
       <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
@@ -20,7 +20,6 @@
         :disable="session.pow !== 2"
         v-model.number="nbmi" :options="optionsNbmi" dense />
     </div>
-    -->
 
     <div class="q-mb-sm">
       <q-select standout style="position:relative;top:-8px"
@@ -222,13 +221,6 @@ export default {
   },
 
   methods: {
-    /*
-    async voirNotif (idp) {
-      this.notif = await this.session.espace.notifPX(idp)
-      this.ui.oD('PEnotif', this.idc)
-    },
-    */
-
     /*
     async dlstat (mr) {
       const { err, blob, creation, mois } = await new DownloadStatC().run(this.session.espace.org, mr)

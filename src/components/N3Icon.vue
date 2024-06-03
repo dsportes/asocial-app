@@ -1,5 +1,5 @@
 <template>
-  <q-icon size="28px" :class="tclr" :name="ico"/>
+  <q-icon size="md" :class="tclr" :name="ico"/>
 </template>
 
 <script>
@@ -14,7 +14,7 @@ export default ({
   },
   computed: {
     i () { return this.niv || 0 },
-    tclr () { return 'q-mx-sm text-' + txt[this.i]},
+    tclr () { return 'text-' + txt[this.i]},
     ico () { return ic[this.i] }
   }
 })

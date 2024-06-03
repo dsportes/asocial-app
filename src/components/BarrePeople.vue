@@ -283,7 +283,7 @@ export default {
     async mut () {
       // await new GetCompteursCompta().run(this.id)
       const c = this.aSt.compta
-      const pub = await this.aSt.getPub(this.id)
+      const pub = await getPub(this.id)
       const trib = { idt: c.idt }
       if (this.sta) {
         trib.idT = await Tribu.getIdT(c.clet, this.id)

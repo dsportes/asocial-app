@@ -82,9 +82,6 @@
     </q-card>
   </div>
 
-  <q-page-sticky position="top-left" :offset="[3, 3]">
-    <btn-cond icon="refresh" @ok="reload()"/>
-  </q-page-sticky>
 </q-page>
 </template>
 
@@ -100,7 +97,6 @@ import MicroChat from '../components/MicroChat.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { dkli, edvol } from '../app/util.mjs'
 import { getNg } from '../app/modele.mjs'
-import { GetCompta, GetPartition } from '../app/synchro.mjs'
 import N3Icon from '../components/N3Icon.vue'
 import NotifIcon from '../components/NotifIcon.vue'
 import { UNITEN, UNITEV, ID } from '../app/api.mjs'
@@ -167,17 +163,12 @@ export default {
   setup () {
     const session = stores.session
 
-    async function reload () {
-      await new GetCompta().run()
-      if (!session.estA) await new GetPartition().run(session.compte.idp)
-    }
-
-    if (session.accesNet) onMounted( async () => { await reload() } )
+    if (session.accesNet) onMounted( async () => { await session.reloadCompta() } )
 
     return {
       session, 
       ui: stores.ui, 
-      dkli, UNITEN, UNITEV, edvol, reload
+      dkli, UNITEN, UNITEV, edvol
     }
   }
 }
