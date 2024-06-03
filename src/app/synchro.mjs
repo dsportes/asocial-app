@@ -36,7 +36,7 @@ class Queue {
           if (this.vcpt[0] < row.v) { this.vcpt[0] = row.v; rev = true }
         } else {
           const x = this.avgrs.get(row.id)
-          if (!x) { this.avgrs.set(row.id, [row.v, 0]); rev = true }
+          if (!x) { this.avgrs.set(ID.court(row.id), [row.v, 0]); rev = true }
           else if (x[0] < row.v) { 
             this.avgrs.set(ID.court(row.id), [row.v, x[1]])
             rev = true 

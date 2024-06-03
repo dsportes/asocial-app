@@ -7,6 +7,9 @@
         <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [nomI, nomE])}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
+      <div v-if="chat.stE===0" class="text-warning text-bold bg-yellow-5">
+            {{$t('CHraccroche2', [session.getCV(chat.idE).nom])}}</div>
+      <div v-if="chat.stI===0" class="text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</div>
       <div v-if="chat.stE === 2" class="text-center full-width bg-yellow-5 titre-lg text-bold text-negative q-paxs">
         {{$t('disparu')}}</div>
       <apercu-genx v-else class="bordb" :id="chat.idE" :idx="0" />
