@@ -5,7 +5,7 @@
       <q-toolbar>
         <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
-          {{$t('CHGtit', [gSt.egrC.groupe.na.nomc])}}
+          {{$t('CHGtit', [cv.nomc])}}
         </q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
@@ -97,8 +97,9 @@ export default {
   computed: { 
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     egr () { return this.gSt.egrC },
+    cv () { return this.session.getCV(this.egr.groupe.id)},
     // Map: cle:im, val:na de l'avc
-    imNa1 () { return this.aSt.compte.imNaGroupe(this.egr.groupe.id) },
+    imNa1 () { return this.session.compte.imNaGroupe(this.egr.groupe.id) },
     groupe () { return this.egr.groupe },
     items () { return this.gSt.chatgr && this.gSt.chatgr.items ? this.gSt.chatgr.items : []}
   },

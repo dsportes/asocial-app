@@ -729,7 +729,7 @@ export class Invit extends GenDoc {
     this.invits = []
     if (row.invits) {
       for (const e of row.invits) {
-        const clea = RegCles.get(ida)
+        const clea = RegCles.get(e.ida)
         const cleg = RegCles.set(await decrypter(clea, e.cleGA))
         const cv = await CV.set(e.cvG || CV.fake(e.idg))
         cv.store()
@@ -999,7 +999,7 @@ export class Groupe extends GenDoc {
     row.tid.forEach((id, im) => { 
       if (im) {
         this.tid[im] = id
-        this.mmb.set(ida, im)
+        this.mmb.set(id, im)
       }
     })
     this.flags = row.flags
