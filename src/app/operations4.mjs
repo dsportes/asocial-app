@@ -1258,3 +1258,37 @@ export class RadierMembre extends Operation {
     }
   }
 }
+
+/* OP_ItemChatgr: 'Ajout ou effacement d\'un item au chat du groupe' *************
+- token donne les éléments d'authentification du compte.
+- idg : id du groupe
+- idaut: id du membre auteur du texte
+- dh: date-heure de l'item effacé
+- msgG: texte de l'item
+Retour:
+EXC: 
+- 8002: groupe disparu
+*/
+export class ItemChatgr extends Operation {
+  constructor () { super('ItemChatgr') }
+
+  async run (idaut, dh, msg) {
+    try {
+      const session = stores.session
+      const cleg = RegCles.get(session.groupeId)
+
+      const args = { 
+        token: session.authToken, 
+        idg: session.groupeId,
+        msgG: msg ? await crypter(cleg, gzipB(msg)) : null,
+        idaut: idaut || 0,
+        dh: dh || 0 
+      }
+      await post(this, 'ItemChatgr', args)
+      return this.finOK(0)
+    } catch (e) {
+      if (isAppExc(e) && e.code === 8002) return 8002
+      await this.finKO(e)
+    }
+  }
+}

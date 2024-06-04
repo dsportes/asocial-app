@@ -3,34 +3,36 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
-        <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
+        <btn-cond color="warning" icon="chevron_left" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
-          {{$t('CHGtit', [cv.nomc])}}
+          {{$t('CHGtit', [cvg.nom])}}
         </q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
       <q-toolbar inset>
-        <note-ecritepar :groupe="groupe" optmb @ok="selAut"/>
+        <sel-avmbr v-model="avid" acmbr/>
         <q-space/>
-        <q-btn :label="$t('CHGadd')" class="btn" icon="add" color="primary"
-          padding="xs xs" :disable="!naAut" @click="editer"/>
+        <btn-cond v-if="avid" :label="$t('CHGadd')" icon="add"
+          cond="cEdit" @click="editer"/>
+        <div v-else class="msg">{{$t('CHGnot')}}</div>
       </q-toolbar>
+      <apercu-genx class="q-ma-xs" :id="session.groupeId" nodet />
     </q-header>
 
     <q-page-container>
       <q-card class="q-pa-sm">
         <div v-for="it in items" :key="it.dh + '/' + it.im">
-          <q-chat-message :sent="imNa(it.im) !== undefined" 
-            :bg-color="imNa(it.im) ? 'primary' : 'secondary'" 
+          <q-chat-message
+            bg-color="primary" 
             text-color="white"
             :stamp="dhcool(it.dh)">
             <sd-blanc v-if="!it.dhx" :texte="it.t"/>
             <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
-                <span>{{imNa(it.im) ? imNa(it.im).nom : membre(it.im).na.nomc }}</span>
-                <q-btn v-if="(imNa(it.im) || egr.estAnim) && !it.dfx" size="sm" 
-                  icon="clear" color="warning" padding="none" round
+                <span>{{cvm(it.im).nomC }}</span>
+                <btn-cond cond="cEdit" v-if="egr.estAnim && !it.dhx" size="sm" 
+                  icon="clear" color="warning" round
                   @click="effacer(it.im, it.dh)"/>
               </div>
             </template>
@@ -46,10 +48,8 @@
           {{$t('CHeff')}}
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="xs" color="warning" icon="clear"
-            :label="$t('CHeffcf')" @click="effop"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+          <btn-cond color="warning" icon="clear" :label="$t('CHeffcf')" @click="effop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -58,16 +58,14 @@
     <q-dialog v-model="ui.d.ACGchatedit" persistent>
       <q-card :class="styp()">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd')}}</q-toolbar-title>
+          <btn-cond color="warning" icon="close" @click="ui.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd1')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="xs" color="primary" icon="add"
-            :label="$t('valider')" @click="addop"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+          <btn-cond icon="add" :label="$t('valider')" @click="addop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -84,59 +82,58 @@ import SdBlanc from '../components/SdBlanc.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, dhcool, dkli } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import NoteEcritepar from '../components/NoteEcritepar.vue'
-import { ItemChatgr } from '../app/operations.mjs'
+import SelAvmbr from '../components/SelAvmbr.vue'
+import ApercuGenx from '../components/ApercuGenx.vue'
+import BtnCond from '../components/BtnCond.vue'
+import { ItemChatgr } from '../app/operations4.mjs'
 
 export default {
-  name: 'ApercuChat',
+  name: 'ApercuChatgr',
 
   props: { },
 
-  components: { SdBlanc, EditeurMd, BoutonHelp, NoteEcritepar },
+  components: { SdBlanc, EditeurMd, BoutonHelp, ApercuGenx, BtnCond, SelAvmbr },
 
   computed: { 
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     egr () { return this.gSt.egrC },
-    cv () { return this.session.getCV(this.egr.groupe.id)},
-    // Map: cle:im, val:na de l'avc
-    imNa1 () { return this.session.compte.imNaGroupe(this.egr.groupe.id) },
-    groupe () { return this.egr.groupe },
+    cvg () { return this.session.getCV(this.session.groupeId)},
+    gr () { return this.egr.groupe },
     items () { return this.gSt.chatgr && this.gSt.chatgr.items ? this.gSt.chatgr.items : []}
   },
 
   data () { return {
     txt: '',
+    avid: 0,
     im: 0,
     dh: 0
   }},
 
   methods: {
-    membre (im) { return this.egr.membres.get(im) },
-
-    imNa (im) { return this.imNa1.get(im)},
+    cvm (im) {
+      const idm = this.gr.tid[im]
+      return this.session.getCV(idm)
+    },
 
     async effacer (im, dh) {
-      if (!await this.session.edit()) return
       this.im = im
       this.dh = dh
       this.ui.oD('ACGconfirmeff')
     },
 
     async effop () {
-      await new ItemChatgr().run(this.groupe.id, this.im, this.dh, null)
+      await new ItemChatgr().run(0, this.dh, null)
       this.im = 0
       this.dh = 0
       this.ui.fD()
     },
 
     async addop () {
-      await new ItemChatgr().run(this.groupe.id, this.imAut, 0, this.txt)
+      await new ItemChatgr().run(this.avid, 0, this.txt)
       this.txt = ''
       this.ui.fD()
     },
 
     async editer () {
-      if (!await this.session.edit()) return
       this.txt = ''
       this.ui.oD('ACGchatedit')
     }

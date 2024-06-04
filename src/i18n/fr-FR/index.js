@@ -444,7 +444,9 @@ export default {
   EX8269: '(BUG) Un animateur du groupe ne peut être radié que par lui-même',
   EX8270: '(BUG) L\'auto-radiation n\'est possible qu\'en état "actif"',
   EX8271: '(BUG) Il n\'est pas possible de supprimer une partition ayant encore des comptes',
-  EX8272: '(BUG) L\'avatar n\'est "contact" du groupe',
+  EX8272: '(BUG) L\'avatar n\'est pas "contact" du groupe',
+  EX8273: '(BUG) L\'avatar n\'est pas "actif" ayant accès aux membres du groupe',
+  EX8274: '(BUG) Le compte n\'a pas d\'avatar animateur du groupe',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
@@ -690,7 +692,7 @@ export default {
   OP_MajDroitsMembre: 'Mise à jour des droits d\'un membre sur un groupe',
   OP_RadierMembre: 'Radiation d\'un membre d\'un groupe',
   OP_ModeSimple: 'Demande de retour au mode simple ou unanime d\'invitation à un groupe',
-  OP_ItemChatgr: 'Ajout d\'un item de dialogue à un "chat" de groupe',
+  OP_ItemChatgr: 'Ajout ou effacement d\'un item "chat" d\'un groupe',
   OP_InvitationGroupe: 'Invitation à un groupe',
   OP_AcceptInvitation: 'Acceptation d\'une invitation à un groupe',
   OP_NouvelleNote: 'Création d\'une nouvelle note',
@@ -1084,7 +1086,8 @@ export default {
   CHcred: 'Le solde du compte ({0}c) est insuffisant pour couvrir le montant du don ({1}c).',
 
   CHGtit: 'Chat du groupe {0}',
-  CHGadd: 'Item',
+  CHGadd: 'Ajouter un item',
+  CHGnot: 'Aucun avatar du groupe a accès aux membres (donc au chat).',
 
   SYtit: 'Chargement et synchronisation du compte',
   SYcpt: 'Compte et comptabilité',

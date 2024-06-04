@@ -56,7 +56,7 @@
           </div>
         </div>
         <div class="row justify-end">
-          <btn-cond class="q-ml-sm" icon="chat" :label="$t('PGchat')" 
+          <btn-cond v-if="am(e.groupe.id)" class="q-ml-sm" icon="chat" :label="$t('PGchat')" 
             cond="cVisu" stop @ok="chat(e)"/>
           <btn-cond class="q-ml-sm" icon="open_in_new" :label="$t('detail')"
             cond="cVisu" stop @ok="ovpageGr(e)"/>
@@ -146,6 +146,7 @@ export default {
   },
 
   methods: {
+    am (idg) { return this.gSt.amb(idg) },
     edqn (n) { return n * UNITEN },
     edqv (n) { return edvol(n * UNITEV) },
     edv (n) { return edvol(n) },
@@ -165,7 +166,7 @@ export default {
 
     async chat (elt) {
       this.session.setGroupeId(elt.groupe.id)
-      this.ui.oD('ACGouvrir', this.idc)
+      this.ui.oD('ACGouvrir')
     },
 
     async nvGr () {
