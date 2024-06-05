@@ -331,7 +331,8 @@ export default {
 
   // F_SRV = 8000 // Erreur fonctionnelle trappée sur le serveur
   EX8001: 'Exception générique 1',
-  EX8001_1: 'Le groupe a disparu, opération impossible',
+  EX8002a: 'Le groupe a disparu, opération impossible',
+  EX8001a: 'L\'avatar a disparu, opération impossible',
   // EX8002: 'Cette phrase secrète n\'est pas reconnue comme étant celle du comptable de l\'organisation.\nClé configurée dans le serveur: {0}',
   // EX8004: 'Compte Comptable déjà créé',
   // EX8007: 'Phrase de sponsoring déjà déclarée.',
@@ -447,6 +448,7 @@ export default {
   EX8272: '(BUG) L\'avatar n\'est pas "contact" du groupe',
   EX8273: '(BUG) L\'avatar n\'est pas "actif" ayant accès aux membres du groupe',
   EX8274: '(BUG) Le compte n\'a pas d\'avatar animateur du groupe',
+  EX8275: '(BUG) Le compte n\'a pas d\'avatar membre actif du groupe',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
@@ -732,6 +734,7 @@ export default {
   OP_PingDB: '"Ping" de la base distante',
   OP_TraitGcvols: 'Récupération des quotas libérés par les comptes disparus',
   OP_AnnulerContact: 'Annulation du statut de contact d\'un groupe par un avatar',
+  OP_RafraichirCvsGr: 'Rafraichissement des CVs des membres d\'un grouper',
 
   OP_OnchangeVersion: 'Opération de synchronisation (changement de version)',
   OP_OnchangeCompta: 'Opération de synchronisation (changement de compta)',
@@ -1498,6 +1501,7 @@ export default {
   PGinv: 'Pas d\'invitation en cours | Une invitation encours | {count} invitations encours',
   PGnocv: 'Pas d\'autre information',
   PGnoamb: 'Le compte n\'a pas accès aux membres de ce groupe',
+  PGrafcvs: 'Rafraîchir les cartes de visite',
   PGnope: 'Le groupe n\'a pas d\'autre membre que les avatars du compte',
   PGnomb: 'Aucun membre (sur {0}) ne répond au critère de sélection',
   PGcrea: 'Création d\'un nouveau groupe',

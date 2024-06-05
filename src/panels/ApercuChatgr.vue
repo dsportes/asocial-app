@@ -80,7 +80,7 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import SdBlanc from '../components/SdBlanc.vue'
 import EditeurMd from '../components/EditeurMd.vue'
-import { styp, dhcool, dkli } from '../app/util.mjs'
+import { styp, dhcool, dkli, afficher8000 } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import SelAvmbr from '../components/SelAvmbr.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -121,14 +121,16 @@ export default {
     },
 
     async effop () {
-      await new ItemChatgr().run(0, this.dh, null)
+      const r = await new ItemChatgr().run(0, this.dh, null)
+      if (r) await afficher8000(r, 0, this.session.groupeId)
       this.im = 0
       this.dh = 0
       this.ui.fD()
     },
 
     async addop () {
-      await new ItemChatgr().run(this.avid, 0, this.txt)
+      const r = await new ItemChatgr().run(this.avid, 0, this.txt)
+      if (r) await afficher8000(r, this.avid, this.session.groupeId)
       this.txt = ''
       this.ui.fD()
     },

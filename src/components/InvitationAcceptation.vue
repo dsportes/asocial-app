@@ -94,7 +94,7 @@ import BtnCond from './BtnCond.vue'
 import ShowHtml from './ShowHtml.vue'
 
 import { AcceptInvitation } from '../app/operations4.mjs'
-import { styp } from '../app/util.mjs'
+import { styp, afficher8000 } from '../app/util.mjs'
 import { FLAGS } from '../app/api.mjs'
 
 export default ({
@@ -135,7 +135,8 @@ export default ({
   methods: {
     accref (x) { this.acc = x },
     async ok (cas) {
-      await new AcceptInvitation().run(cas, this.inv, this.iam, this.ian, this.msg)
+      const r = await new AcceptInvitation().run(cas, this.inv, this.iam, this.ian, this.msg)
+      if (r) await afficher8000(r, this.inv.ida, this.inv.idg)
       this.ui.fD()
     }
   },

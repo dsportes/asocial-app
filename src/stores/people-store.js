@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import stores from './stores.mjs'
 import { ID } from '../app/api.mjs'
 import { CV, NomGenerique } from '../app/modele.mjs'
-import { difference, intersection } from '../app/util.mjs'
+// import { difference, intersection } from '../app/util.mjs'
 
 /* 
 Un people est un avatar (pas du compte):
@@ -39,6 +39,12 @@ export const usePeopleStore = defineStore('people', {
         const e = state.map.get(idp)
         return e ? e.sch : new Set() 
       }
+    },
+
+    getMembres: (state) => {
+      const l = []
+      for(const [id, e] of state.map) if (e.sgr.size) l.push(id)
+      return l
     },
 
     // entrée du people courant

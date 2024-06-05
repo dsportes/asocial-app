@@ -2,8 +2,8 @@ import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { Operation } from './synchro.mjs'
-import { random, gzipB, afficherDiag } from './util.mjs'
-import { Cles, d14, ID, isAppExc } from './api.mjs'
+import { random, gzipB } from './util.mjs'
+import { Cles, d14, isAppExc } from './api.mjs'
 import { idb } from '../app/db.mjs'
 import { post } from './net.mjs'
 import { RegCles, compile, CV } from './modele.mjs'
@@ -536,27 +536,55 @@ export class StatutAvatar extends Operation {
 /* OP_RafraichirCvsAv: 'Rafraichissement des CVs des chats de l\'avatar'
 - token : jeton d'authentification du compte de **l'administrateur**
 - id : id de l'avatar
+- membres: true si rafraichir les CV des membres des groupes auxquels le compte de l'avatar participe
 Retour: [nc, nv]
 - `nc`: nombre de CV mises à jour
 - `nv` : nombre de chats existants
-Exception générique:
+EXC:
 - 8001: avatar disparu
 */
 export class RafraichirCvsAv extends Operation {
   constructor () { super('RafraichirCvsAv') }
 
-  async run (id) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
+  async run (id, membres) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
     try {
       const session = stores.session
       const args = { token: session.authToken, id }
+      if (membres) args.membres = true
       const ret = await post(this, 'RafraichirCvsAv', args)
       return this.finOK(ret.ncnv)
     } catch (e) {
-      if (isAppExc(e) && e.code === 8001) return -1
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
     }
   }
 }
+
+/* OP_RafraichirCvsGr: 'Rafraichissement des CVs des membres d\'un grouper'
+- token : jeton d'authentification du compte de **l'administrateur**
+- idg : id du groupe
+Retour: [nc, nv]
+- `nc`: nombre de CV mises à jour
+- `nv` : nombre de chats existants
+Exception générique:
+- 8002: groupe disparu
+*/
+export class RafraichirCvsGr extends Operation {
+  constructor () { super('RafraichirCvsGr') }
+
+  async run () { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, idg: session.groupeId }
+      const ret = await post(this, 'RafraichirCvsGr', args)
+      return this.finOK(ret.ncnv)
+    } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
+      await this.finKO(e)
+    }
+  }
+}
+
 
 /* OP_RafraichirCvChat: 'Rafraichissement de la carte de visite d\'un chat'
 - token : jeton d'authentification du compte de **l'administrateur**
@@ -1054,6 +1082,9 @@ export class NouveauGroupe extends Operation {
 - cleAG : clé A du contact cryptée par la clé G du groupe
 - cleGA : clé G du groupe cryptée par la clé A du contact
 Retour:
+EXC: 
+- 8002: groupe disparu
+- 8001: avatar disparu
 */
 export class NouveauContact extends Operation {
   constructor () { super('NouveauContact') }
@@ -1072,8 +1103,9 @@ export class NouveauContact extends Operation {
         cleGA: await crypter(cleA, cleg)
       }
       await post(this, 'NouveauContact', args)
-      this.finOK()
+      return this.finOK(0)
     } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
     }
   }
@@ -1087,6 +1119,8 @@ export class NouveauContact extends Operation {
   - true 'Je vote pour passer au mode "SIMPLE"'
   - false: 'Annuler les votes et rester en mode UNANIME'
 Retour:
+EXC:
+- 8002: groupe disparu
 */
 export class ModeSimple extends Operation {
   constructor () { super('ModeSimple') }
@@ -1101,8 +1135,9 @@ export class ModeSimple extends Operation {
         simple
       }
       await post(this, 'ModeSimple', args)
-      this.finOK()
+      return this.finOK(0)
     } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
     }
   }
@@ -1114,6 +1149,8 @@ export class ModeSimple extends Operation {
 - ida : id de l'avatar demandant l'annulation.
 - ln : true Inscription en liste noire
 Retour:
+EXC: 
+- 8002: groupe disparu
 */
 export class AnnulerContact extends Operation {
   constructor () { super('AnnulerContact') }
@@ -1130,7 +1167,7 @@ export class AnnulerContact extends Operation {
       await post(this, 'AnnulerContact', args)
       return this.finOK(0)
     } catch (e) {
-      if (isAppExc(e) && e.code === 8002) return e.code
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
     }
   }
@@ -1148,6 +1185,9 @@ export class AnnulerContact extends Operation {
 - suppr: 1-contact, 2:radié, 3-radié + LN
 - cleGA: clé G du groupe cryptée par la clé A de l'invité
 Retour:
+EXC: 
+- 8002: groupe disparu
+- 8001: avatar disparu
 */
 export class InvitationGroupe extends Operation {
   constructor () { super('InvitationGroupe') }
@@ -1167,8 +1207,9 @@ export class InvitationGroupe extends Operation {
         msgG: await crypter(cleg, gzipB(msg))
       }
       await post(this, 'InvitationGroupe', args)
-      this.finOK()
+      return this.finOK(0)
     } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
     }
   }
@@ -1184,6 +1225,9 @@ export class InvitationGroupe extends Operation {
 - cas: 1:accepte 2:contact 3:radié 4:radié + LN
 - msgG: message de remerciement crypté par la cle G du groupe
 Retour:
+EXC: 
+- 8002: groupe disparu
+- 8001: avatar disparu
 */
 export class AcceptInvitation extends Operation {
   constructor () { super('AcceptInvitation') }
@@ -1201,8 +1245,9 @@ export class AcceptInvitation extends Operation {
         msgG: await crypter(cleg, gzipB(msg))
       }
       await post(this, 'AcceptInvitation', args)
-      this.finOK()
+      return this.finOK(0)
     } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
     }
   }
@@ -1215,6 +1260,9 @@ export class AcceptInvitation extends Operation {
 - nvflags : nouveau flags. Peuvent changer DM DN DE AM AN
 - anim: true si animateur
 Retour:
+EXC: 
+- 8002: groupe disparu
+- 8001: avatar disparu
 */
 export class MajDroitsMembre extends Operation {
   constructor () { super('MajDroitsMembre') }
@@ -1227,8 +1275,9 @@ export class MajDroitsMembre extends Operation {
         idg: session.groupeId,
         idm, nvflags, anim }
       await post(this, 'MajDroitsMembre', args)
-      this.finOK()
+      return this.finOK(0)
     } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
     }
   }
@@ -1240,6 +1289,9 @@ export class MajDroitsMembre extends Operation {
 - idm : id du membre
 - rad: 1-redevient contact, 2-radiation, 3-radiation + ln
 Retour:
+EXC: 
+- 8002: groupe disparu
+- 8001: avatar disparu
 */
 export class RadierMembre extends Operation {
   constructor () { super('RadierMembre') }
@@ -1250,10 +1302,13 @@ export class RadierMembre extends Operation {
       const args = { 
         token: session.authToken, 
         idg: session.groupeId,
-        idm, rad }
-      // await post(this, 'RadierMembre', args)
-      this.finOK()
+        idm, 
+        rad 
+      }
+      await post(this, 'RadierMembre', args)
+      return this.finOK(0)
     } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
     }
   }
@@ -1287,7 +1342,7 @@ export class ItemChatgr extends Operation {
       await post(this, 'ItemChatgr', args)
       return this.finOK(0)
     } catch (e) {
-      if (isAppExc(e) && e.code === 8002) return 8002
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
     }
   }

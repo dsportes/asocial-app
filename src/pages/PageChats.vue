@@ -74,7 +74,7 @@ import NouveauChat from '../dialogues/NouveauChat.vue'
 import SelAvid from '../components/SelAvid.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
-import { dhstring, afficherDiag, photoToBin, dkli, dhcool } from '../app/util.mjs'
+import { dhstring, afficher8000, afficherDiag, photoToBin, dkli, dhcool } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
 // const img1 = '<img src="'
@@ -112,11 +112,21 @@ export default {
     async rafCvs () {
       let nc = 0, nv = 0
       if (this.session.avatarId) {
-          const [x, y] = await new RafraichirCvsAv().run(this.session.avatarId)
+          const r = await new RafraichirCvsAv().run(this.session.avatarId)
+          if (typeof r ==='number') {
+            await afficher8000(r, this.session.avatarId, 0)
+            return
+          }
+          const [x, y] = r
           nc += x; nv += y
       } else
         for (const id of this.session.compte.mav) {
-          const [x, y] = await new RafraichirCvsAv().run(id)
+          const r = await new RafraichirCvsAv().run(id)
+          if (typeof r ==='number') {
+            await afficher8000(r, id, 0)
+            return
+          }
+          const [x, y] = r
           nc += x; nv += y
         }
       stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)

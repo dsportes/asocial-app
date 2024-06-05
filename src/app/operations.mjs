@@ -1,13 +1,10 @@
 import stores from '../stores/stores.mjs'
 import { encode } from '@msgpack/msgpack'
 
-import { ID, AppExc, E_WS, AMJ, limitesjour, d14 } from './api.mjs'
+import { ID, AppExc, E_WS } from './api.mjs'
 import { crypter } from './webcrypto.mjs'
 import { post, putData, getData } from './net.mjs'
-import { NomGenerique, Avatar, Chat, Compta, Note,
-  Groupe, Membre, Chatgr, getNg, getCle, compile } from './modele.mjs'
-import { crypterRSA } from './webcrypto.mjs'
-import { commitRows, IDBbuffer } from './db.mjs'
+import { Chat, Compta, Note, getCle } from './modele.mjs'
 import { Operation } from './synchro.mjs'
 
 /* OP_MuterCompte: 'Mutation dy type d\'un compte'
@@ -68,101 +65,6 @@ export class MuterCompte extends Operation {
 
       this.tr(await post(this, 'MuterCompte', args))
       return this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_HebGroupe: 'Gestion / transfert d\'hébergement d\'un groupe' **********
-args.token donne les éléments d'authentification du compte.
-args.action : 1 à 5
-args.idg : id du groupe
-args.idd : (3) id du compte de départ en cas de transfert
-args.idhg : id du compte d'arrivée en cas de transfert CRYPTE par la clé du groupe
-args.imh : im du nouvel hébergeur
-args.q1, q2 : nouveau quotas
-args.dfh: date de fin d'hébergement
-args.action :
-  AGac1: 'Je prends l\'hébergement à mon compte',
-  AGac2: 'Je cesse d\'héberger ce groupe',
-  AGac3: 'Je reprends l\'hébergement de ce groupe par un autre de mes avatars',
-  AGac4: 'Je met à jour les quotas maximum attribués au groupe',
-  AGac5: 'Je reprends l\'hébergement à mon compte, je suis animateur et l\hébergeur actuel ne l\'est pas',
-
-Prise hébergement (1)
-- les volumes v1 et v2 sont lus sur la version du groupe
-- les volumes (pas les quotas) sont augmentés sur compta a
-- sur la version du groupe, q1 et q2 sont mis à jour
-- sur le groupe, idhg / imh mis à jour
-Fin d'hébergement (2):
-- les volumes v1 et v2 sont lus sur la version du groupe
-- les volumes (pas les quotas) sont diminués sur la compta du compte
-- sur le groupe :
-  - dfh : date du jour + N jours
-  - idhg, imh : 0
-Transfert dans le même compte (3):
-- sur le groupe, imh est mis à jour
-- sur la version du groupe, q1 et q2 sont mis à jour
-Changement de quotas (4):
-- les volumes et quotas sur compta a sont inchangés
-- sur la version du groupe, q1 et q2 sont mis à jour
-Transfert (5):
-- les volumes v1 et v2 sont lus sur la version du groupe
-- les volumes (pas les quotas) sont diminués sur compta d
-- les volumes (pas les quotas) sont augmentés sur compta a
-- sur la version du groupe, q1 et q2 sont mis à jour
-- sur le groupe, idhg / imh mis à jour
-Retour:
-*/
-export class HebGroupe extends Operation {
-  constructor () { super('HebGroupe') }
-
-  async run (action, groupe, imh, q1, q2) {
-    try {
-      const session = stores.session
-      const dfh = action !== 2 ? 0 : AMJ.amjUtcPlusNbj(AMJ.amjUtc(), limitesjour.groupenonheb)
-      const args = { 
-        token: session.authToken, 
-        action, 
-        imh, 
-        q1, q2, 
-        idg: groupe.id, 
-        idhg: await Groupe.toIdhg(groupe.na.rnd),
-        idd: groupe.idh,
-        dfh
-      }
-      this.tr(await post(this, 'HebGroupe', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_ItemChatgr: 'Ajout d\'un item de dialogue à un "chat" de groupe' *************************
-args.token: éléments d'authentification du compte.
-args.chatit : row de la note
-args.idg: id du groupe
-args.im args.dh : pour une suppression
-Retour: rien
-*/
-export class ItemChatgr extends Operation {
-  constructor () { super('ItemChatgr') }
-
-  async run (idg, im, dh, txt) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, idg }
-      if (!dh) {
-        const ng = getNg(idg)
-        args.chatit = await Chatgr.getItem(ng.rnd, im, txt || '')
-      } else {
-        args.im = im
-        args.dh = dh
-      }
-      this.tr(await post(this, 'ItemChatgr', args))
-      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }
@@ -459,7 +361,6 @@ export class TicketsStat extends Operation {
   }
 }
 
-
 /* OP_DownloadStatC: 'Téléchargement d\'un fichier statistique comptable mensuel'
 ComptaStat (org, mr)
 args.token: éléments d'authentification du compte.
@@ -531,7 +432,6 @@ export class DownloadStatC2 extends Operation {
   }
 }
 
-
 /* OP_SupprFichier: 'Suppression d\'un fichier attaché à une note'
 args.id, ids : de la note
 args.idh : id de l'hébergeur pour une note groupe
@@ -549,191 +449,6 @@ export class SupprFichier extends Operation {
       const idh = ID.estGroupe(note.id) ? gSt.getGroupe(note.id).idh : session.compteId
       const args = { token: session.authToken, id: note.id, ids: note.ids, idf, idh, aut }
       this.tr(await post(this, 'SupprFichier', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_SupprAvatar: 'Suppression d\'un avatar du compte' **********
-args.token: éléments d'authentification du compte.
-args.id : id de l'avatar
-args.va : version de l'avatar
-args.idc : id du compte - si égal à id, suppression du compte
-args.idk : cet id crypté par la clé K du compte. Clé de la map mavk dans compta
-args.chats : liste des id / ids des chats externes à traiter
-args.spons : liste des ids des sponsorings à purger
-args.dfh : date de fin d'hébergement des groupes
-args.grps : liste des items groupes à traiter.
-  - idg : id du groupe
-  - vg : version du groupe
-  - im : ids du membre (correspondant à l'avatar)
-  - suppr : true si le groupe est à supprimer
-Suppression de compte seulement
-args.idt: id de la tribu du compte
-args.it: indice du compte dans act de tribu, pour suppression de cette entrée
-Suppression d'avatar seulement
-args.dv1: réduction du volume v1 du compte (notes avatar et notes des groupes hébergés)
-args.dv2
-Retour: OK
-- true : suprresion OK
-- false : retry requis, les versions des groupes et/ou avatar ont chnagé
-*/
-export class SupprAvatar extends Operation {
-  constructor () { super('SupprAvatar') }
-
-  async run (args) { 
-    try {
-      const session = stores.session
-      args.token = session.authToken
-      const ret = this.tr(await post(this, 'SupprAvatar', args))
-      return this.finOK(ret.KO ? false : true)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_GC: 'Déclenchement du nettoyage quotidien' *******/
-export class GC extends Operation {
-  constructor () { super('GC') }
-
-  async run (nomop) { 
-    try {
-      const ret = this.tr(await post(this, nomop, {}))
-      return this.finOK(ret)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/*  OP_GetSingletons: 'Obtention des rapports d\'exécution des traitements périodiques',
-*/
-export class GetSingletons extends Operation {
-  constructor () { super('GetSingletons') }
-
-  async run () { 
-    try {
-      const ret = this.tr(await post(this, 'GetSingletons', {}))
-      return this.finOK(ret.singletons)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_GetSynthese: 'Obtention de la synthèse de l\'espace' *********
-args.token donne les éléments d'authentification du compte.
-args.ns
-Retour:
-- rowSynthse
-*/
-export class GetSynthese extends Operation {
-  constructor () { super('GetSynthese') }
-
-  async run (ns) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, ns }
-      const ret = await post(this, 'GetSynthese', args)
-      const s = await compile(ret.rowSynthese)
-      aSt.setSynthese(s)
-      return this.finOK(s)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* ForceDlv **********************************************
-Force des dlv / dfh pour tester.
-args.token donne les éléments d'authentification du compte.
-args.lop : liste d'opérations [op, id, ids, date]
-  - op:1 : dlv de versions id
-  - op:2 : dfh de groupes id
-  - op:3 : dlv de membrs id / ids
-Retour:
-*/
-export class ForceDlv extends Operation {
-  constructor () { super('ForceDlv') }
-
-  async run (lop) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, lop }
-      this.tr(await post(this, 'ForceDlv', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_SetEspaceOptionA: 'Changement de l\'option A de l\'espace'
-POST:
-- `token` : jeton d'authentification du compte de **l'administrateur**
-- `ns` : id de l'espace notifié.
-- `optionA` : 0 1 2.
-
-Retour: rien
-
-Assertion sur l'existence du row `Espaces`.
-
-L'opération échappe au contrôle espace figé / clos.
-Elle n'écrit QUE dans espaces.
-*/
-export class SetEspaceOptionA extends Operation {
-  constructor () { super('SetEspaceOptionA') }
-
-  async run (optionA, nbmi, dlvat) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, optionA, nbmi, dlvat }
-      this.tr(await post(this, 'SetEspaceOptionA', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
- 
-/* OP_ChangeAvDlvat: 'Changement de DLV pour une liste d\'avatars'
-POST:
-- `token` : jeton d'authentification du compte de **l'administrateur**
-- dlvat: aamm,
-- lids: array des id
-*/
-export class ChangeAvDlvat extends Operation {
-  constructor () { super('ChangeAvDlvat') }
-
-  async run (dlvat, lids) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, lids, dlvat }
-      this.tr(await post(this, 'ChangeAvDlvat', args))
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_ChangeMbDlvat: 'Changement de DLV pour une liste de membres'
-POST:
-- `token` : jeton d'authentification du compte de **l'administrateur**
-- dlvat: aamm,
-- lidids: array des [id, ids]
-*/
-export class ChangeMbDlvat extends Operation {
-  constructor () { super('ChangeMbDlvat') }
-
-  async run (dlvat, lidids) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, lidids, dlvat }
-      this.tr(await post(this, 'ChangeMbDlvat', args))
       this.finOK()
     } catch (e) {
       await this.finKO(e)

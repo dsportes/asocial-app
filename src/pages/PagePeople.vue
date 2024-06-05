@@ -31,7 +31,7 @@ import ApercuGenx from '../components/ApercuGenx.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
 import { GetPartition } from '../app/synchro.mjs'
-// import { beep } from '../app/util.mjs'
+import { afficher8000 } from '../app/util.mjs'
 
 export default {
   name: 'PagePeople',
@@ -45,7 +45,12 @@ export default {
     async rafCvs () {
       let nc = 0, nv = 0
       for (const id of this.session.compte.mav) {
-        const [x, y] = await new RafraichirCvsAv().run(id)
+        const r = await new RafraichirCvsAv().run(id, true)
+        if (typeof r ==='number') {
+          await afficher8000(r, id, 0)
+          continue
+        }
+        const [x, y] = r
         nc += x; nv += y
       }
       stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)

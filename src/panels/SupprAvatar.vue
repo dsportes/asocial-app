@@ -137,7 +137,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { styp, edvol, afficherDiag, sleep, dkli } from '../app/util.mjs'
 import { AMJ, limitesjour, FLAGS } from '../app/api.mjs'
-import { SupprAvatar } from '../app/operations.mjs'
+// import { SupprAvatar } from '../app/operations.mjs'
 
 export default ({
   name: 'SupprAvatar',

@@ -57,7 +57,7 @@ import BtnCond from '../components/BtnCond.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
 import { NouveauContact } from '../app/operations4.mjs'
-import { dkli, styp } from '../app/util.mjs'
+import { dkli, styp, afficher8000 } from '../app/util.mjs'
 
 export default {
   name: 'PageInvitation',
@@ -85,7 +85,12 @@ export default {
     async rafCvs () {
       let nc = 0, nv = 0
       for (const id of this.session.compte.mav) {
-        const [x, y] = await new RafraichirCvsAv().run(id)
+        const r = await new RafraichirCvsAv().run(id)
+        if (typeof r ==='number') {
+          await afficher8000(r, this.id, this.session.groupeId)
+          continue
+        }
+        const [x, y] = r
         nc += x; nv += y
       }
       stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
@@ -95,8 +100,9 @@ export default {
       this.ui.oD('PInvit')
     },
     async okAjouter () {
-      await new NouveauContact().run()
-      this.ui.setPage('groupe', 'groupe')
+      const r = await new NouveauContact().run()
+      if (r) await afficher8000(r, this.session.peopleId, this.session.groupeId)
+      else this.ui.setPage('groupe', 'groupe')
     }
   },
 

@@ -121,7 +121,7 @@
 <script>
 import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { edvol, $t, dkli, styp, afficherDiag } from '../app/util.mjs'
+import { edvol, $t, dkli, styp, afficher8000 } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import NomAvatar from '../components/NomAvatar.vue'
@@ -181,8 +181,8 @@ export default {
 
     async ctc(ln) {
       this.ui.fD()
-      const code = await new AnnulerContact().run(this.inv.idg, this.inv.ida, ln)
-      if (code === 8002) await afficherDiag(this.$t('EX8001_1'))
+      const r = await new AnnulerContact().run(this.inv.idg, this.inv.ida, ln)
+      if (r) await afficher8000(r, this.inv.ida, this.inv.idg)
     },
     
     async okCreation () {

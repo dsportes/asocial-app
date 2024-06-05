@@ -477,6 +477,11 @@ export async function afficherDiag (diag) {
   })
 }
 
+export async function afficher8000 (r, idg, ida) {
+  if (r === 1) await afficherDiag(this.$t('EX8001a', [ida]))
+  else await afficherDiag(this.$t('EX8002a', [idg]))
+}
+
 export function setTrigramme (nombase, trig) {
   const nt = '$asocial$-trigrammes'
   const x = localStorage.getItem(nt)

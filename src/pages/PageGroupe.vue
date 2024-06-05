@@ -70,6 +70,7 @@
   <!-- Tab "membres" -------------------------------------------------->
   <div v-if="ui.pagetab==='membres' && gSt.egrC" class="q-pa-sm spmd">
     <div v-if="amb">
+      <div><btn-cond cond="cEdit" icon="check" :label="$t('PGrafcvs')" @ok="rafCvs"/></div>
       <div v-if="!nb" class="titre-lg text-italic">
         {{$t('PGnope')}}</div>
       <div v-if="nb && !lst.length" class="titre-lg text-italic">
@@ -214,7 +215,7 @@
 <script>
 import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV } from '../app/api.mjs'
-import { bcf, dhcool, styp, dkli, edvol } from '../app/util.mjs'
+import { bcf, dhcool, styp, dkli, edvol, afficher8000 } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -223,7 +224,7 @@ import SelAvid from '../components/SelAvid.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import { ModeSimple } from '../app/operations4.mjs'
+import { ModeSimple, RafraichirCvsGr } from '../app/operations4.mjs'
 
 export default {
   name: 'PageGroupe',
@@ -262,6 +263,17 @@ export default {
         }
       }
       this.ui.oD('AGediterUna', this.idc)
+    },
+
+    async rafCvs () {
+      let nc = 0, nv = 0
+      const r = await new RafraichirCvsGr().run()
+      if (typeof r ==='number') await afficher8000(r, 0, this.session.groupeId)
+      else {
+        const [x, y] = r
+        nc += x; nv += y
+        stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
+      }
     },
 
     async chgU () {

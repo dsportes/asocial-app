@@ -291,7 +291,7 @@ a accès aux membres (donc dans l'onglet "membres").
 <script>
 import { ref } from 'vue'
 
-import { styp, dkli, dhcool } from 'src/app/util.mjs'
+import { styp, dkli, dhcool, afficher8000 } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from './ApercuGenx.vue'
@@ -448,7 +448,8 @@ export default {
     },
 
     async changer () {
-      await new MajDroitsMembre().run(this.id, this.nvfl2, this.animAp)
+      const r = await new MajDroitsMembre().run(this.id, this.nvfl2, this.animAp)
+      if (r) await afficher8000(r, this.id, this.session.groupeId)
       this.ui.fD()
     },
 
@@ -465,7 +466,8 @@ export default {
     },
 
     async radier () {
-      await new RadierMembre().run(this.id, this.rad)
+      const r = await new RadierMembre().run(this.id, this.rad)
+      if (r) await afficher8000(r, this.id, this.session.groupeId)
       this.ui.fD()
     },
 
@@ -501,8 +503,9 @@ export default {
     async inviter () { 
       /* rmsv: 0: inviter, 2: modifier, 3: supprimer, 4: voter pour */
       const idi = !this.gr.msu && this.invparf ? this.invparf.value : 0
-      await new InvitationGroupe()
+      const r = await new InvitationGroupe()
         .run(this.rmsv, this.id, idi, this.nvfl, this.msg, this.suppr)
+      if (r) await afficher8000(r, this.id, this.session.groupeId)
       this.ui.fD()
     }
   },

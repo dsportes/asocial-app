@@ -87,7 +87,7 @@
 
 <script>
 
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -95,7 +95,7 @@ import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
 import MicroChat from '../components/MicroChat.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { dkli, edvol } from '../app/util.mjs'
+import { dkli, edvol, afficher8000 } from '../app/util.mjs'
 import { getNg } from '../app/modele.mjs'
 import N3Icon from '../components/N3Icon.vue'
 import NotifIcon from '../components/NotifIcon.vue'
@@ -152,7 +152,12 @@ export default {
     async rafCvs () {
       let nc = 0, nv = 0
       for (const id of this.session.compte.mav) {
-        const [x, y] = await new RafraichirCvsAv().run(id)
+        const r = await new RafraichirCvsAv().run(id)
+        if (typeof r ==='number') {
+          await afficher8000(r, id, 0)
+          continue
+        }
+        const [x, y] = r
         nc += x; nv += y
       }
       stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
