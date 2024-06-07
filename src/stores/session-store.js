@@ -50,7 +50,6 @@ export const useSessionStore = defineStore('session', {
     mnotifP: new Map(), // map des notifP compilées
     tnotifP: null, // dernière table des notifp PAS compilées
     
-    espaces: new Map(), // Pour admin SEULEMENT
     syntheses: new Map(), // Pour admin SEULEMENT
 
     partition: null,

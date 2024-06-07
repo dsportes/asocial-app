@@ -283,7 +283,7 @@ a accès aux membres (donc dans l'onglet "membres").
   </q-dialog>
 
   <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
-    <invitation-acceptation :inv="aSt.getAvatar(id).invits.get(gr.id)"/>
+    <invitation-acceptation :inv="gSt.getInvit(gr.id, id)"/>
   </q-dialog>
 
 </div>
@@ -486,10 +486,10 @@ export default {
         { label: this.$t('AMopt2'), value: 2 },
         { label: this.$t('AMopt3'), value: 3 },
       ]
-      if (this.stm === 2 && this.animInv.lc.size) {
+      if (this.stm === 2 && this.animInv[1].size) {
         let ok = false
         this.session.compte.mpg.get(this.session.groupeId).forEach(ida => {
-          if (this.animInv.lc.has(ida)) ok = true
+          if (this.animInv[1].has(ida)) ok = true
         })
         if (ok) this.optRMSV.push({ label: this.$t('AMopt4'), value: 4 })
       }

@@ -54,15 +54,17 @@
       </div>
     </div>
 
-    <div class="titre-lg full-width text-center text-white bg-secondary q-my-sm q-pa-xs">
-      {{$t('PGmesav', sav.size)}}
-    </div>
-    
-    <div v-if="sav.size">
-      <div v-for="(id, idx) of sav" :key="id" class="q-mt-sm">
-        <apercu-membre :id="id" :idx="idx"/>
-        <!--div>{{session.getCV(id).nom}}</div-->
-        <q-separator v-if="idx < (sav.size - 1)" color="orange"/>
+    <div  v-if="mesav">
+      <div class="titre-lg full-width text-center text-white bg-secondary q-my-sm q-pa-xs">
+        {{$t('PGmesav', mesav.length)}}
+      </div>
+      
+      <div v-if="mesav.length">
+        <div v-for="(id, idx) of mesav" :key="id" class="q-mt-sm">
+          <apercu-membre :id="id" :idx="idx"/>
+          <!--div>{{session.getCV(id).nom}}</div-->
+          <q-separator v-if="idx < (sav.size - 1)" color="orange"/>
+        </div>
       </div>
     </div>
   </div>
@@ -165,32 +167,32 @@
             <div class="column q-ml-md">
               <q-radio v-if="cas===1"  v-model="action" :val="1" :label="$t('AGac1')" />
               <q-radio v-if="cas===2"  v-model="action" :val="4" :label="$t('AGac4')" />
-              <q-radio v-if="cas===2 && options.length > 0"  v-model="action" :val="3" :label="$t('AGac3')" />
               <q-radio v-if="cas===2"  v-model="action" :val="2" :label="$t('AGac2')" />
-              <q-radio v-if="cas===3"  v-model="action" :val="5" :label="$t('AGac5')" />
+              <q-radio v-if="cas===3"  v-model="action" :val="3" :label="$t('AGac3')" />
             </div>
 
-            <div v-if="(action===1 || action===3 || action===5) && options.length > 0" class="row items-center">
-              <div class="titre-md q-mt-sm text-italic q-mr-md">{{$t('AGselav')}}</div>
-              <q-select class="lgsel" v-model="nvHeb" :options="options"/>
+            <div v-if="(action === 1 || action === 3)">
+              <div v-if="options.length > 1" class="row items-center">
+                <div class="titre-md q-mt-sm text-italic q-mr-md">{{$t('AGselav')}}</div>
+                <q-select class="lgsel" v-model="nvHeb" :options="options"/>
+              </div>
+              <div v-if="options.length === 1">{{$t('AGselav2', [nvHeb.label])}}</div>
             </div>
 
-            <div v-if="action !==0 && action !==2">
+            <div v-if="action !== 0 && action !== 2">
               <choix-quotas class="q-my-sm" :quotas="q" @change="onChgQ" groupe/>
               <div v-if="q.err" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGmx')}}</div>
               <div v-else>
-                <div v-if="alq1 || alq2">
+                <div v-if="aln || alv">
                   <q-separator color="orange" class="q-my-xs"/>
-                  <div v-if="alqn && gr.imh" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGq1x')}}</div>
-                  <div v-if="alqn" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1')}}</div>
-                  <div v-if="alqv && gr.imh" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGq2x')}}</div>
-                  <div v-if="alqv" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2')}}</div>
+                  <div v-if="aln && gr.imh" class="msg q-pa-xs">{{$t('AGaln')}}</div>
+                  <div v-if="alv" class="msg q-pa-xs">{{$t('AGalv')}}</div>
                   <q-separator color="orange" class="q-my-xs"/>
                 </div>
               </div>
             </div>
 
-            <div v-if="action!==0 && action!==2">
+            <div v-if="action !== 0 && action !== 2">
               <div v-if="aln" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1b')}}</div>
               <div v-if="alv" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2b')}}</div>
               <div :class="'q-pa-xs titre-md q-ma-sm ' + (arn ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp1', [rstn])}}</div>
@@ -234,14 +236,20 @@ export default {
 
   computed: {
     nomg () { return this.session.getCV(this.session.groupeId).nom },
+    mesav () { const l = []; const mav = this.session.compte.mav
+      this.gr.tid.forEach(id => {if (mav.has(id)) l.push(id)})
+      return l
+    },
     idg () { return this.session.groupeId },
     sav () { return this.session.compte.mpg.get(this.idg) || new Set() },
     gr () { return this.gSt.egrC ? this.gSt.egrC.groupe : null },
+    actuelAnim () { return this.gr.imh && this.gr.st[this.gr.imh === 5] },
+    dejaHeb () { return this.sav.has(this.gr.tid[this.gr.imh]) },
     nbiv () { return this.gr.nbInvites },
     amb () { return this.gSt.ambano[0] },
     lst () { return this.gSt.pgLmFT[0] },
     nb () { return this.gSt.pgLmFT[1] },
-    vols () { return { qn: this.gr.qn, qv: this.gr.qv, n: this.gr.nn, v: this.gr.vf }},
+    vols () { return { qn: this.gr.qn, qv: this.gr.qv, nn: this.gr.nn, v: this.gr.vf }},
     estAnim () { return this.gr.estAnim(this.gr.mmb.get(this.session.avatarId)) },
     restn () { const cpt = this.session.compte.qv; return (cpt.qn * (100 - cpt.pcn) / 100) },
     restv () { const cpt = this.session.compte.qv; return (cpt.qv * (100 - cpt.pcv) / 100) },
@@ -283,70 +291,88 @@ export default {
     },
 
     setCas () {
-      const c = this.session.compte
-
+      /* Pour être / devenir hébergeur, il faut:
+      - a) que le nn et vf actuels du groupe ne fasse pas excéder les quotas du compte
+      - b) que l'avatar choisi ait accès aux notes
+      Si l'hébergeur actuel est animateur et un autre compte, il faut être animateur pour prendre l'hébergment.
+      */
       this.actions = []
-      this.action = 0
-      this.hko = 0
-      this.cas = 0
       this.nvHeb = null
+      this.action = 0
+      this.nbSubst = 0
+      this.cas = 0
+      this.hko = 0
+      /*
+      AGhko1: 'Je ne peux pas être hébergeur, aucun de mes avatars n\'a accès aux notes du groupe.',
+      AGhko2: 'Je suis hébergeur, mais je ne peux pas transférer l\'hébergement à un autre de mes avatars, aucun n\'ayant accès aux notes du groupe',
+      AGhko3: 'L\'hébergeur actuel étant animateur, je ne peux pas me substituer à lui aucun de mes avatars ayant accès aux notes du groupe n\'est animateur.',
+      */
 
-      /* Liste des (autres) avatars du compte pouvant être hébergeur
-        - options : [{ label, value, na, im}] - mes avatars pouvant être hébergeur
+      /* Liste des avatars du compte pouvant être hébergeur (sauf celui actuel):
+        - options : [{ label, value, cv, im}] - mes avatars pouvant être hébergeur
         - nvHeb : nouvel hébergeur pré-sélectionné
       */
       this.options = []
-      const mesIm = new Set()
-      let estAnim = false
-      for (const id of c.mpg.get(this.gr.id)) {
+      for (const id of this.sav) {
         const im = this.gr.mmb.get(id)
-        if (this.gr.st[im] === 5) estAnim = true
-        mesIm.add(im)
-        if (im === this.gr.imh) continue // celui actuel
-        if (!this.gr.estActif(im)) continue
-        const cv = this.session.getCV(id)
-        this.options.push({ label: cv.nom, value: id, cv, im })
+        if (im) {
+          if (im === this.gr.imh) continue
+          if (this.gr.accesNote(im)) {
+            this.nbSubst++
+            if (this.actuelAnim && this.gr.st[im] !== 5) continue
+            const cv = this.session.getCV(id)
+            this.options.push({ label: cv.nom, value: id, cv, im })
+          }
+        }
       }
       if (this.options.length) this.nvHeb = this.options[0]
+      if (this.nbSubst === 0) this.hko = 1
 
-      if (!this.gr.imh) {
-        /* Cas 1 : il n'y a pas d'hébergeur. */
+      if (!this.gr.imh) { // Cas 1 : il n'y a pas d'hébergeur.
         this.cas = 1
-        if (this.options.length === 0) this.hko = 1
-        // Je peux prendre l'hébergement
         return
       }
 
-      if (mesIm.has(this.gr.imh)) {
+      if (this.dejaHeb) { // Cas 2 : je suis hébergeur
         this.cas = 2
-        /* Cas 2 : je suis hébergeur
-        - si options.length = 0 Je ne peux pas envisager un transfert sur un autre de mes avatars
-        */
+        if (this.options.length === 0) this.hko = 2
         return
       }
 
       /* cas 3 : il y a un hébergeur mais ce n'est pas un des avatars de mon compte */
       this.cas = 3
-      if (this.options.length === 0) { this.hko = 4; return }
-      if (this.gr.estAnim(this.gr.imh)) { this.hko = 2; return }
-      if (!estAnim) this.hko = 3
-      /* je peux remplacer l'animateur actuel */
+      if (this.nbSubst !== 0 && this.options.length === 0) this.hko = 3
     },
 
     async gererheb () {
       this.setCas()
+      const cpt = this.session.compte.qv
+      this.restqn = Math.floor(((cpt.qn * UNITEN) * (100 - cpt.pcn) / 100) / UNITEN) + (this.dejaHeb ? this.gr.qn : 0)
+      this.restqv =  Math.floor(((cpt.qv * UNITEV) * (100 - cpt.pcv) / 100) / UNITEV) + (this.dejaHeb ? this.gr.qv : 0)
       this.q.qn = this.gr.qn || 0
       this.q.qv = this.gr.qv || 0
       this.q.minn = 0
       this.q.minv = 0
-      this.q.maxn = Math.floor(this.q.qn + this.restn)
-      this.q.maxv = Math.floor(this.q.qv + this.restv)
+      this.q.maxn = this.restqn
+      this.q.maxv = this.restqv
       this.q.err = false
       this.onChgQ()
       this.ui.oD('AGgererheb', this.idc)
     },
 
     onChgQ () {
+      const cpt = this.session.compte.qv
+      this.aln = this.gr.nn > (this.q.qn * UNITEN)
+      this.alv = this.gr.vf > (this.q.qv * UNITEV)
+      const rn = (this.restqn - this.q.qn) * UNITEN
+      const rv = (this.restqv - this.q.qv) * UNITEV
+      this.rstn = rn >= 0 ? rn : 0
+      this.rstv = edvol(rv >=0 ? rv : 0)
+      this.arn = rn < (cpt.qn * UNITEN * 0.1)
+      this.arv = rv < (cpt.qv * UNITEV * 0.1)
+    },
+
+    onChgQ2 () {
       const cpt = this.session.compte.qv
       this.aln = this.gr.nn > (this.q.qn * UNITEN)
       this.alv = this.gr.vf > (this.q.qv * UNITEV)

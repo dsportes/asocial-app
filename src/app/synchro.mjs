@@ -163,7 +163,7 @@ class SB {
     if (this.espace) this.s.setEspace(this.espace)
     if (this.compte) this.s.setCompte(this.compte)
     if (this.compti) this.s.setCompti(this.compti)
-    if (this. invit) this.g.setInvit(this.invit)
+    if (this.invit) this.g.setInvit(this.invit)
     
     if (this.avatars.size) for(const [,a] of this.avatars) this.a.setAvatar(a)
     

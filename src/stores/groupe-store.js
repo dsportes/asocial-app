@@ -55,9 +55,9 @@ export const useGroupeStore = defineStore('groupe', {
         if (!state.ambano[0]) return [4, 0] // NON, le compte n'a pas d'avatars ayant accès aux membres
         const g = state.egrC.groupe
         const im = g.mmb.get(ida)
-        if (im) return [5, im] // NON ida est déjà connu du groupe
-        if (g.enLNG(ida)) return [6, im] // NON est en liste noire "groupe" du groupe
-        if (g.enLNC(ida)) return [7, im] // NON est en liste noire "compte" du groupe
+        if (im) return [5, g.st[im]] // NON ida est déjà connu du groupe
+        if (g.enLNG(ida)) return [6, 0] // NON est en liste noire "groupe" du groupe
+        if (g.enLNC(ida)) return [7, 0] // NON est en liste noire "compte" du groupe
         return [0, 0] // OUI, ida PEUT être sélectionné pour devenir contact du groupe
       }
     },
@@ -386,6 +386,12 @@ export const useGroupeStore = defineStore('groupe', {
 
     setInvit (invit) { // invits:[ {idg, ida, invpar (Set), msg} ]
       this.invits = invit.invits
+    },
+
+    getInvit (idg, ida) {
+      for (const inv of this.invits)
+        if (inv.idg === idg && inv.ida === ida) return inv
+      return null
     },
 
     setChatgr (chatgr) {

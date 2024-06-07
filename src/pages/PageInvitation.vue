@@ -1,21 +1,23 @@
 <template>
   <q-page class="column q-pl-xs q-mr-sm spmd" style="padding-top:5em">
-    <div v-if="pSt.map.size && !lst.length" class="q-my-md titre-lg text-italic">
-      {{$t('APnb', [pSt.map.size])}}
-    </div>
-    
-    <div v-if="lst.length">
-      <q-card class="q-my-md column justify-center" v-for="(p, idx) in lst" :key="p.id">
-        <apercu-genx class="q-pa-xs" :id="p.id" :idx="idx" nodet/>
-        <div :class="dkli(idx) + ' text-center'">
-          <span v-if="p.d[0] > 3" class="msg">
-            <span>{{$t('PPctc' + p.d[0])}}</span>
-            <span v-if="p.d[1]" class="q-ml-xs">({{$t('AMm' + p.d[1])}}}</span>
-          </span>
-          <btn-cond v-else cond="cEdit" icon="check" color="green-5" :label="$t('PPctcok')"
-            @ok="select(p)"/>
-        </div>
-      </q-card>
+    <div v-if="lst">
+      <div v-if="pSt.map.size && !lst.length" class="q-my-md titre-lg text-italic">
+        {{$t('APnb', [pSt.map.size])}}
+      </div>
+      
+      <div v-if="lst.length">
+        <q-card class="q-my-md column justify-center" v-for="(p, idx) in lst" :key="p.id">
+          <apercu-genx class="q-pa-xs" :id="p.id" :idx="idx" nodet/>
+          <div :class="dkli(idx) + ' text-center'">
+            <span v-if="p.d[0] > 3" class="msg">
+              <span>{{$t('PPctc' + p.d[0])}}</span>
+              <span v-if="p.d[1]" class="q-ml-xs">({{$t('AMm' + p.d[1])}}}</span>
+            </span>
+            <btn-cond v-else cond="cEdit" icon="check" color="green-5" :label="$t('PPctcok')"
+              @ok="select(p)"/>
+          </div>
+        </q-card>
+      </div>
     </div>
 
       <!-- Confirmation du contact ------------------------------------------------>
@@ -38,8 +40,7 @@
       </q-card>
     </q-dialog>
 
-    <q-page-sticky v-if="session.accesNet && !session.estA" position="top" 
-      :offset="[0, 0]">
+    <q-page-sticky v-if="session.accesNet" position="top" :offset="[0, 0]">
       <div class="row bg-secondary text-white justify-between" style="width:100vw">
         <btn-cond :label="$t('renoncer')" @ok="ui.setPage('groupe', 'groupe')"/>
         <q-checkbox v-model="propos" :label="$t('PIfi')" />
@@ -66,7 +67,10 @@ export default {
 
   computed: {
     nomg () { return this.session.getCV(this.session.groupeId).nom },
-    lst () { const src = this.pSt.peLpF; const l = []
+    
+    lst () { 
+      const src = this.pSt.peLpF
+      const l = []
       this.session.compte.lstAvatars.forEach(x => {
         const y = { id: x.id }
         y.d = this.gSt.diagContact(x.id)
@@ -79,6 +83,7 @@ export default {
       })
       return l
     }
+    
   },
 
   methods: {
@@ -108,6 +113,7 @@ export default {
 
   data () {
     return {
+      // lst: [],
       propos: true // n'afficher que ceux proposables
     }
   },

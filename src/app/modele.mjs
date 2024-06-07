@@ -745,8 +745,8 @@ export class Invit extends GenDoc {
         this.invits.push({ idg: e.idg, ida: e.ida, flags: e.flags, invpar: s, msg })
       }
     }
-
   }
+
 }
 
 /** Avatar *********************************************************

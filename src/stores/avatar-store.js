@@ -20,7 +20,7 @@ export const useAvatarStore = defineStore('avatar', {
       - chats: new Map(), // clé: ids, valeur : chat
       - tickets: new Map(), // clé: ids, valeur : ticket
       - notes: new Map() // clé: ids, valeur: vf
-      */
+    */
     map: new Map(),
 
     // Filtre des tribus dans BarrePeople
