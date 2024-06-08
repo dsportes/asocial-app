@@ -38,7 +38,8 @@
             <span class="titre-md q-mr-sm">{{$t('AGheb')}}</span>
             <span class="fs-md">{{nom(gr.imh)}}</span>
           </div>
-          <div v-else class="col fs-md text-warning text-bold">{{$t('AGnheb', [dhcool(dfh)])}}</div>
+          <div v-else class="col fs-md text-warning text-bold">
+            {{$t('AGnheb', [AMJ.editDeAmj(gr.dfh)])}}</div>
           <btn-cond class="col-auto q-ml-sm self-start" size="sm" cond="cEdit"
             :label="$t('gerer')" icon="settings" @ok="gererheb"/>
         </div>
@@ -152,7 +153,7 @@
       <q-page-container>
         <q-page class="q-pa-xs">
           <div class="titre-lg text-center q-ma-sm">
-            <span v-if="cas===1">{{$t('AGcas1', [aaaammjj(gr.dfh)])}}</span>
+            <span v-if="cas===1">{{$t('AGcas1', [AMJ.editDeAmj(gr.dfh)])}}</span>
             <span v-if="cas===2">{{$t('AGcas2')}}</span>
             <span v-if="cas===3">{{$t('AGcas3')}}</span>
           </div>
@@ -168,10 +169,12 @@
               <q-radio v-if="cas===1"  v-model="action" :val="1" :label="$t('AGac1')" />
               <q-radio v-if="cas===2"  v-model="action" :val="4" :label="$t('AGac4')" />
               <q-radio v-if="cas===2"  v-model="action" :val="2" :label="$t('AGac2')" />
-              <q-radio v-if="cas===3"  v-model="action" :val="3" :label="$t('AGac3')" />
+              <q-radio v-if="cas===2"  v-model="action" :val="3" :label="$t('AGac3')" />
+              <q-radio v-if="cas===3"  v-model="action" :val="5" :label="$t('AGac5')" />
             </div>
 
-            <div v-if="(action === 1 || action === 3)">
+            <div v-if="(action === 1 || action === 3 || action === 5)" 
+              :class="'spsm row justify-center q-my-sm' + (options.length > 1 ? ' bord' : '')">
               <div v-if="options.length > 1" class="row items-center">
                 <div class="titre-md q-mt-sm text-italic q-mr-md">{{$t('AGselav')}}</div>
                 <q-select class="lgsel" v-model="nvHeb" :options="options"/>
@@ -181,7 +184,7 @@
 
             <div v-if="action !== 0 && action !== 2">
               <choix-quotas class="q-my-sm" :quotas="q" @change="onChgQ" groupe/>
-              <div v-if="q.err" class="q-ma-sm q-pa-xs titre-md text-bold text-negative bg-yellow-3">{{$t('AGmx')}}</div>
+              <div v-if="q.err" class="q-ma-sm q-pa-xs msg titre-md">{{$t('AGmx')}}</div>
               <div v-else>
                 <div v-if="aln || alv">
                   <q-separator color="orange" class="q-my-xs"/>
@@ -192,11 +195,11 @@
               </div>
             </div>
 
-            <div v-if="action !== 0 && action !== 2">
-              <div v-if="aln" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv1b')}}</div>
-              <div v-if="alv" class="q-pa-xs q-ma-sm titre-md text-bold text-negative bg-yellow-3">{{$t('AGv2b')}}</div>
-              <div :class="'q-pa-xs titre-md q-ma-sm ' + (arn ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp1', [rstn])}}</div>
-              <div :class="'q-pa-xs titre-md q-ma-sm ' + (arv ? 'text-negative text-bold bg-yellow-3' : '')">{{$t('AGdisp2', [rstv])}}</div>
+            <div v-if="action !== 0 && action !== 2 && !q.err">
+              <div v-if="aln" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGv1b')}}</div>
+              <div v-if="alv" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGv2b')}}</div>
+              <div v-if="!aln" :class="'q-pa-xs titre-md q-ma-sm ' + (arn ? 'msg' : '')">{{$t('AGdisp1', [rstn])}}</div>
+              <div v-if="!alv" :class="'q-pa-xs titre-md q-ma-sm ' + (arv ? 'msg' : '')">{{$t('AGdisp2', [rstv])}}</div>
             </div>
 
             <div class="q-mt-md row justify-center items-center q-gutter-md">
@@ -216,7 +219,7 @@
 
 <script>
 import stores from '../stores/stores.mjs'
-import { UNITEN, UNITEV } from '../app/api.mjs'
+import { UNITEN, UNITEV, AMJ } from '../app/api.mjs'
 import { bcf, dhcool, styp, dkli, edvol, afficher8000 } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -226,7 +229,7 @@ import SelAvid from '../components/SelAvid.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
-import { ModeSimple, RafraichirCvsGr } from '../app/operations4.mjs'
+import { ModeSimple, RafraichirCvsGr, HebGroupe } from '../app/operations4.mjs'
 
 export default {
   name: 'PageGroupe',
@@ -243,7 +246,7 @@ export default {
     idg () { return this.session.groupeId },
     sav () { return this.session.compte.mpg.get(this.idg) || new Set() },
     gr () { return this.gSt.egrC ? this.gSt.egrC.groupe : null },
-    actuelAnim () { return this.gr.imh && this.gr.st[this.gr.imh === 5] },
+    actuelAnim () { return this.gr.imh && this.gr.st[this.gr.imh] === 5 },
     dejaHeb () { return this.sav.has(this.gr.tid[this.gr.imh]) },
     nbiv () { return this.gr.nbInvites },
     amb () { return this.gSt.ambano[0] },
@@ -293,7 +296,7 @@ export default {
     setCas () {
       /* Pour être / devenir hébergeur, il faut:
       - a) que le nn et vf actuels du groupe ne fasse pas excéder les quotas du compte
-      - b) que l'avatar choisi ait accès aux notes
+      - b) que l'avatar choisi ait accès aux notes en écriture
       Si l'hébergeur actuel est animateur et un autre compte, il faut être animateur pour prendre l'hébergment.
       */
       this.actions = []
@@ -317,9 +320,10 @@ export default {
         const im = this.gr.mmb.get(id)
         if (im) {
           if (im === this.gr.imh) continue
-          if (this.gr.accesNote(im)) {
+          if (this.gr.accesNote2(im) === 2) { // accès aux notes en écriture
             this.nbSubst++
-            if (this.actuelAnim && this.gr.st[im] !== 5) continue
+            if (this.actuelAnim && !this.dejaHeb 
+              && this.gr.st[im] !== 5) continue
             const cv = this.session.getCV(id)
             this.options.push({ label: cv.nom, value: id, cv, im })
           }
@@ -372,22 +376,10 @@ export default {
       this.arv = rv < (cpt.qv * UNITEV * 0.1)
     },
 
-    onChgQ2 () {
-      const cpt = this.session.compte.qv
-      this.aln = this.gr.nn > (this.q.qn * UNITEN)
-      this.alv = this.gr.vf > (this.q.qv * UNITEV)
-      const rn = (this.restn - this.q.qn) * UNITEN
-      const rv = (this.restv - this.q.qv) * UNITEV
-      this.rstn = rn >=0 ? rn : 0
-      this.rstv = edvol(rv >=0 ? rv : 0)
-      this.arn = rn < (cpt.qn * UNITEN * 0.1)
-      this.arv = rv < (cpt.qv * UNITEV * 0.1)
-    },
-
     async chgQ () {
-      // action, groupe, imh, q1, q2
-      const imh = this.nvHeb ? this.nvHeb.im : 0
-      // await new HebGroupe().run(this.action, this.eg.groupe, imh, this.q.q1, this.q.q2 )
+      if (this.action === 5) this.action = 1
+      const r = await new HebGroupe().run(this.action, this.nvHeb.value, this.q.qn, this.q.qv )
+      if (r) await afficher8000(r, 0, this.session.groupeId, this.nvHeb.value)
       this.ui.fD()
     },
   },
@@ -408,7 +400,7 @@ export default {
     const ui = stores.ui
     const idc = ui.getIdc()
     return {
-      bcf, dhcool, styp, dkli, edvol,
+      bcf, dhcool, styp, dkli, edvol, AMJ,
       ui, idc,
       session: stores.session,
       gSt: stores.groupe
@@ -422,4 +414,8 @@ export default {
 @import '../css/app.sass'
 .top3
   margin-top: 3rem
+.bord
+  border: 3px solid $warning
+  border-radius: 5px !important
+  padding: 3px
 </style>

@@ -449,6 +449,17 @@ export default {
   EX8273: '(BUG) L\'avatar n\'est pas "actif" ayant accès aux membres du groupe',
   EX8274: '(BUG) Le compte n\'a pas d\'avatar animateur du groupe',
   EX8275: '(BUG) Le compte n\'a pas d\'avatar membre actif du groupe',
+  EX8276: '(BUG) Fin d\'hébergement demandé, mais le compte n\'est pas l\'hébergeur actuel',
+  EX8277: '(BUG) Reprise d\'hébergement impossible, le groupe n\'était pas hébergé',
+  EX8278: '(BUG) Reprise d\'hébergement impossible, le groupe était déjà hébergé par le compte',
+  EX8279: '(BUG) Reprise d\'hébergement impossible, l\'avatar proposé n\'a pas accès aux notes en écriture',
+  EX8280: '(BUG) Reprise d\'hébergement impossible, l\'avatar proposé n\'est pas animateur alors que l\'hébergeur actuel l\'est',
+  EX8280: '(BUG) Reprise d\'hébergement impossible, l\'avatar proposé n\'est pas animateur alors que l\'hébergeur actuel l\'est',
+  EX8281: '(BUG) Reprise d\'hébergement impossible, le quota de nombre de notes / chats / groupes du compte est trop faible pour héberger ce groupe',
+  EX8282: '(BUG) Reprise d\'hébergement impossible, le quota de volume de fichiers du compte est trop faible pour héberger ce groupe',
+  EX8283: '(BUG) Reprise d\'hébergement par un autre avatar impossible, le compte n\'est pas hébergeur',
+  EX8284: '(BUG) Reprise d\'hébergement par un autre avatar impossible, l\'avatar proposé n\'a pas accès aux notes en écriture',
+  EX8285: '(BUG) Mise à jour des maximum de notes / fichiers impossible, le compte n\'est pas hébergeur',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
@@ -1769,6 +1780,7 @@ export default {
   AGac2: 'Je cesse d\'héberger ce groupe',
   AGac3: 'Je reprends l\'hébergement de ce groupe par un autre de mes avatars',
   AGac4: 'Je met à jour les nombres de notes et volumes de fichiers maximum attribués au groupe',
+  AGac5: 'Je reprends l\'hébergement de ce groupe par un de mes avatars',
 
   AGmx: 'Impossible d\'allouer des quotas supérieurs aux volumes libres sur le compte.',
 

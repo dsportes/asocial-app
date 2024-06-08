@@ -585,7 +585,6 @@ export class RafraichirCvsGr extends Operation {
   }
 }
 
-
 /* OP_RafraichirCvChat: 'Rafraichissement de la carte de visite d\'un chat'
 - token : jeton d'authentification du compte de **l'administrateur**
 - id, ids : id du chat
@@ -1341,6 +1340,41 @@ export class ItemChatgr extends Operation {
       }
       await post(this, 'ItemChatgr', args)
       return this.finOK(0)
+    } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_HebGroupe: 'Gestion de l\'hébergement et des quotas d\'un grouper'
+- token : jeton d'authentification du compte de **l'administrateur**
+- idg : id du groupe
+- nvHeb: id de l'avatar nouvel hébergeur
+- action
+  AGac1: 'Je prends l\'hébergement à mon compte',
+  AGac2: 'Je cesse d\'héberger ce groupe',
+  AGac3: 'Je reprends l\'hébergement de ce groupe par un autre de mes avatars',
+  AGac4: 'Je met à jour les nombres de notes et volumes de fichiers maximum attribués au groupe',
+- qn : nombre maximum de notes
+- qv : volume maximum des fichiers
+Retour:
+Exception générique:
+- 8001: avatar disparu
+- 8002: groupe disparu
+*/
+export class HebGroupe extends Operation {
+  constructor () { super('HebGroupe') }
+
+  async run (action, nvHeb, qn, qv) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, 
+        idg: session.groupeId,
+        nvHeb, action, qn, qv
+      }
+      const ret = await post(this, 'HebGroupe', args)
+      return this.finOK(ret.ncnv)
     } catch (e) {
       if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
