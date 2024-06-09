@@ -14,6 +14,7 @@
       <div class="q-mt-sm row q-gutter-xs justify-center">
         <btn-cond icon="refresh" :label="$t('rafraichir')" @click="loadEsp"/>
         <btn-cond color="warning" :label="$t('ESgcin')" @click="initGC"/>
+        <btn-cond color="warning" :label="$t('ESstartd')" @click="startDemon"/>
         <btn-cond icon="add" :label="$t('ESne')" @click="plusNS"/>
       </div>
     </div>
@@ -172,7 +173,7 @@ import BoutonDlvat from '../components/BoutonDlvat.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { CreerEspace, SetEspaceNprof, InitTachesGC } from '../app/operations4.mjs'
+import { CreerEspace, SetEspaceNprof, InitTachesGC, StartDemon } from '../app/operations4.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
 // import { GC, GetSingletons } from '../app/operations.mjs'
@@ -237,6 +238,10 @@ export default {
     async initGC () {
       const [nx, nc] = await new InitTachesGC().run()
       await afficherDiag(this.$t('ESinitgc', [nx, nc]))
+    },
+
+    async startDemon () {
+      await new StartDemon().run()
     },
 
     aNS (ns) {

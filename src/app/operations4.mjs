@@ -37,7 +37,7 @@ export class SetEspaceOptionA extends Operation {
 }
 
 /*   OP_SetEspaceDlvat: 'Changement de la date limite de vie des comptes "O" par l\'administrateur',
-- token : jeton d'authentification du compte de **l'administrateur**
+- token : jeton d'authentification de l'administrateur
 - ns : id de l'espace notifié.
 - dlvat: aaaammjj,
 Retour: rien
@@ -57,6 +57,12 @@ export class SetEspaceDlvat extends Operation {
   }
 }
 
+/* OP_InitTachesGC: 'Initialisation des tâches du GC',
+- token : jeton d'authentification de l'administrateur
+Retour: [nx nc]
+- nx : nombre de tâches existantes
+- nc : nombre de tâches créées
+*/
 export class InitTachesGC extends Operation {
   constructor() { super('InitTachesGC') }
 
@@ -66,6 +72,25 @@ export class InitTachesGC extends Operation {
       const args = { token: session.authToken }
       const ret = await post(this, 'InitTachesGC', args)
       return this.finOK(ret.nxnc)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_StartDemon: 'Lancement immédiat du démon',
+- token : jeton d'authentification de l'administrateur
+Retour:
+*/
+export class StartDemon extends Operation {
+  constructor() { super('StartDemon') }
+
+  async run() {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken }
+      const ret = await post(this, 'StartDemon', args)
+      this.finOK()
     } catch (e) {
       await this.finKO(e)
     }
@@ -1286,6 +1311,7 @@ export class MajDroitsMembre extends Operation {
 - token donne les éléments d'authentification du compte.
 - idg : id du groupe
 - idm : id du membre
+- cleGA: cle G du groupe cryptée par la clé du membre 
 - rad: 1-redevient contact, 2-radiation, 3-radiation + ln
 Retour:
 EXC: 
@@ -1298,9 +1324,14 @@ export class RadierMembre extends Operation {
   async run (idm, rad) {
     try {
       const session = stores.session
+      const cleg = RegCles.get(session.groupeId)
+      const clea = RegCles.get(idm)
+      const cleGA = await crypter(clea, cleg)
+
       const args = { 
         token: session.authToken, 
         idg: session.groupeId,
+        cleGA,
         idm, 
         rad 
       }

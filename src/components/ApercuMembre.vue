@@ -455,12 +455,10 @@ export default {
 
     radiation () {
       const x = this.session.estAvc(this.id) ? 'b' : 'a'
-      this.optRad = [
-        { label: this.$t('AMoptRad1' + x), value: 1},
-        { label: this.$t('AMoptRad2' + x), value: 2},
-        { label: this.$t('AMoptRad3' + x), value: 3}
-      ]
-      
+      this.optRad = [ ]
+      if (this.gr.st[this.im] > 1) this.optRad.push({ label: this.$t('AMoptRad1' + x), value: 1})
+      this.optRad.push({ label: this.$t('AMoptRad2' + x), value: 2})
+      this.optRad.push({ label: this.$t('AMoptRad3' + x), value: 3})
       this.session.setMembreId(this.im)
       this.ui.oD('AMradiation', this.idc)
     },

@@ -769,6 +769,9 @@ export default {
   OP_GetNotifC: 'Obtention de la notification d\'un compte.',
   OP_NouveauContact: 'Ajout d\'un contact à un groupe',
 
+  OP_InitTachesGC: 'Initialisation des tâches du GC',
+  OP_StartDemon: 'Lancement immédiat du démon',
+  
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
 
@@ -983,6 +986,7 @@ export default {
   ESinitgc: 'Tâches du GC initialisées: {0} existante(s), {1} créées',
   ESgc: 'Lancer un GC',
   ESgcin: 'Init. tâches GC',
+  ESstartd: 'Start Démon',
   ESgcop: 'Tester GC op',
   ESdms: 'Dernière stat: {0}',
   ESck: 'Afficher le dernier checkpoint',

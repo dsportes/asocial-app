@@ -996,18 +996,19 @@ export class Groupe extends GenDoc {
 
     this.mmb = new Map()
     this.tid = new Array(row.tid.length)
-    row.tid.forEach((id, im) => { 
-      if (im) {
+    for (let im = 0; im < row.tid.length; im++) { 
+      const id = row.tid[im]
+      if (id) {
         this.tid[im] = id
         this.mmb.set(id, im)
       }
-    })
+    }
     this.flags = row.flags
     this.st = row.st
     this.lng = new Set()
-    row.lng.forEach(id => { this.lng.add(id)})
+    if (row.lng) row.lng.forEach(id => { this.lng.add(id)})
     this.lnc = new Set()
-    row.lnc.forEach(id => { this.lnc.add(id)})
+    if (row.lnc) row.lnc.forEach(id => { this.lnc.add(id)})
     const cv = await CV.set(row.cvG || CV.fake(this.id))
     cv.store()
     const nx = [0, 0, 0, 0, 0, 0]
