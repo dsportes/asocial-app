@@ -241,7 +241,7 @@ class SB {
 
     if (this.supprNo.size) for(const idg of this.supprNo) {
       this.g.delNotes(idg, buf)
-      this.avSt.delNotes(idg)
+      this.avSt.delNotes(idg, buf)
     }
   }
 }

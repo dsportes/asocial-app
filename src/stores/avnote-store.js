@@ -48,6 +48,9 @@ export const useAvnoteStore = defineStore('avnote', {
       }
     },
 
+    delNotes (id, buf) { // TODO  mettre à jour / supprimer des Avnote
+    },
+
     del (id, ids) {
       const e = this.map.get(id)
       if (!e) return

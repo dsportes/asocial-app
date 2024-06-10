@@ -428,7 +428,7 @@ export const useGroupeStore = defineStore('groupe', {
     delNote (id, ids) {
     },
 
-    delNotes (idg) {
+    delNotes (idg, buf) {
       this.delNote(idg)
     },
 
