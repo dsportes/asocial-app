@@ -2139,7 +2139,7 @@ export default {
   SAVgr2: ' ? | Un groupe hébergé par cet avatar va disparaître dans 3 mois : | {count} groupes hébergés par cet avatar vont disparaître dans 3 mois :',
   SAVgr3: ' ? | Cet avatar est le dernier animateur d\'un groupe | Cet avatar est le dernier animateur de {count} groupes :',
   SAVgr0: ' ? | Cet avatar est membre d\'un groupe : | Cet avatar est membre de {count} groupes :',
-  SAVdspt:  'Ce compte est le dernier sponsor de sa tranche de quotas.',
+  SAVdspt:  'Ce compte est le dernier délégué de sa partition.',
   SAVspons: 'Aucun "sponsoring" en attente ne sera annulé | Un "sponsoring" en attente sera annulé | {count} "sponsorings" en attente seront annulés',
   SAVvol: 'Volumes rendus disponibles pour le compte par la suppression de l\'avatar :',
   SAVvola: '{0} notes supprimées de l\'avatar. {1} de fichiers',

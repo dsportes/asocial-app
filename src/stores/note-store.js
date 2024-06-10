@@ -215,7 +215,7 @@ export const useNoteStore = defineStore('note', {
       }
     },
 
-    // Retourne une map de clé racine et de valeur { n: nombre de notes, v1, v2 }
+    // Retourne une map de clé racine et de valeur { nn: nombre de notes, v2 }
     statsParRacine: (state) => {
       const m = {}
       for (const [key, node] of state.map) {

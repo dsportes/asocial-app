@@ -1412,3 +1412,19 @@ export class HebGroupe extends Operation {
     }
   }
 }
+
+export class SupprAvatar extends Operation {
+  constructor () { super('SupprAvatar') }
+
+  async run (id) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id }
+      await post(this, 'SupprAvatar', args)
+      this.finOK()
+    } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
+      await this.finKO(e)
+    }
+  }
+}

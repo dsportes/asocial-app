@@ -459,6 +459,8 @@ export class Partition extends GenDoc {
     return e && e.del
   }
 
+  get nbDels () { let n = 0; this.mcpt.forEach(e => { if (e.del) n++ }); return n }
+
   estCpt (id) { return this.mcpt[id] !== undefined }
 }
 

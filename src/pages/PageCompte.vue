@@ -109,8 +109,8 @@ import SupprAvatar from '../panels/SupprAvatar.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { styp, afficherDiag, trapex } from '../app/util.mjs'
-import { isAppExc, ID, d14 } from '../app/api.mjs'
+import { styp, afficherDiag } from '../app/util.mjs'
+import { isAppExc, ID } from '../app/api.mjs'
 import { GetCompta, GetPartition } from '../app/synchro.mjs'
 
 export default {
@@ -232,10 +232,8 @@ export default {
     },
 
     async delAvatar (id) {
-      if (!await this.session.edit()) return
-      const lna = this.session.compte.mav
       if (this.session.compteId === id) { // c'est le compte
-        if (lna.size > 1) { // il reste des avatars secondaires
+        if (this.session.compte.mav.size > 1) { // il reste des avatars secondaires
           await afficherDiag(this.$t('SAVer1'))
           return
         }

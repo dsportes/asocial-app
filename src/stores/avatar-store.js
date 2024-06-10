@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { difference, intersection } from '../app/util.mjs'
-import { ID, UNITEN, UNITEV } from '../app/api.mjs'
-import { Motscles, RegCc, RegCles } from '../app/modele.mjs'
-import { decrypterRSA } from '../app/webcrypto.mjs'
+import { UNITEN, UNITEV } from '../app/api.mjs'
+import { Motscles } from '../app/modele.mjs'
 
 const fx = [['id', 1],
 ['q1', 1], ['q1', -1],
