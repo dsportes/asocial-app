@@ -293,14 +293,13 @@ export default ({
     async valider () {
       this.ui.fD() // boite de confirmation
       await sleep(50)
+      this.ui.fD() // Dialogue de suppression
       if (this.avid) {
         const r = await new SupprAvatar().run(this.avid)
         if (r) await afficher8000(r, 0, avid)
-        this.ui.fD() // Dialogue de suppression
       } else {
         const r = await new SupprCompte().run()
         if (r) await afficherDiag(this.$t('SAcptdisp'))
-        this.ui.fD() // Dialogue de suppression
         deconnexion()
       }
     }

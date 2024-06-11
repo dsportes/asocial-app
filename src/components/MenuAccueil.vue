@@ -1,5 +1,5 @@
 <template>
-<q-list class="titre-md" style="min-width: 300px">
+<q-list v-if="session.status === 2" class="titre-md" style="min-width: 300px">
   <div v-if="bloc && !session.estComptable" 
     class="q-px-sm titre-md text-bold text-italic bg-yellow-5 text-warning cursor-pointer"
     @click="clickNotif2">{{$t('ACbloc')}}
@@ -124,7 +124,10 @@ export default {
 
   computed: {
     nbchats () { return this.aSt.nbchats },
-    nbchatsAv () { return this.aSt.eavC.chats.size },
+    nbchatsAv () { 
+      const x = this.aSt.eavC
+      return x.chats.size 
+    },
     nbspons () { return this.aSt.eavC.sponsorings.size },
     nbgrps () { return this.session.compte.idGroupes(this.session.avatarId).size },
     nbgrpsT () { return this.session.compte.idGroupes().size },

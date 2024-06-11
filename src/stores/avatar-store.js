@@ -71,7 +71,10 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     // Element avatar courant
-    eavC (state) { return state.map.get(state.session.avatarId) },
+    eavC (state) { 
+      const x = state.session.avatarId
+      return state.map.get(x)
+    },
 
     /*************************************************** */
 
