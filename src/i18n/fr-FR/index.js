@@ -460,6 +460,7 @@ export default {
   EX8283: '(BUG) Reprise d\'hébergement par un autre avatar impossible, le compte n\'est pas hébergeur',
   EX8284: '(BUG) Reprise d\'hébergement par un autre avatar impossible, l\'avatar proposé n\'a pas accès aux notes en écriture',
   EX8285: '(BUG) Mise à jour des maximum de notes / fichiers impossible, le compte n\'est pas hébergeur',
+  EX8286: '(BUG) Suppression d\'avatar demandée mais ce n\'est pas un avatar secondaire',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
