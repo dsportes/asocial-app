@@ -16,7 +16,7 @@
   </q-header>
 
   <q-page-container>
-    <q-page :class="dkli(0) + ' q-pa-xs'">
+    <q-page v-if="s" :class="dkli(0) + ' q-pa-xs'">
 
       <div v-if="s.ddel" class="row q-my-md items-start">
         <q-checkbox class="col-auto cb" size="sm" v-model="checks._ddel" :label="$t('vu')" />
@@ -37,7 +37,7 @@
           <div class="titre-md">{{$t('SAVchats', s.ch.length, { count: s.ch.length })}}</div>
           <div v-if="s.ch.length" class="q-ml-md">
             <span v-for="c in s.ch" :key="c.pk" class="q-my-sm q-mr-sm b1">
-              {{session.getCV(c.idE).nomc}}</span>
+              {{session.getCV(c.idE).nomC}}</span>
           </div>
         </div>
       </div>
@@ -56,8 +56,8 @@
         <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr1" :label="$t('vu')" />
         <div class="col column">
           <div class="titre-md">{{$t('SAVgr1', s.gr1.length, { count: s.gr1.length })}}</div>
-          <div class="q-ml-md q-my-sm" v-for="x in s.gr1" :key="x.gr.id">
-            <span class="b1 q-mr-lg">{{session.getCV(x.gr.id).nomc}}</span>
+          <div class="q-ml-md q-my-sm" v-for="x in s.gr1" :key="x.id">
+            <span class="b1 q-mr-lg">{{x.nomC}}</span>
             <span>{{$t('SAVvlib1', x.nn, {count: x.nn})}}</span>
             <span class="q-ml-sm">{{$t('SAVvlib', [edvol(x.v2)])}}</span>
           </div>
@@ -68,8 +68,8 @@
         <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr2" :label="$t('vu')" />
         <div class="col column">
           <div class="titre-md">{{$t('SAVgr2', s.gr2.length, { count: s.gr2.length })}}</div>
-          <div class="q-ml-md q-my-sm" v-for="x in s.gr2" :key="x.gr.id">
-            <span class="b1 q-mr-lg">{{session.getCV(x.gr.id).nomc}}</span>
+          <div class="q-ml-md q-my-sm" v-for="x in s.gr2" :key="x.id">
+            <span class="b1 q-mr-lg">{{x.nomC}}</span>
             <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
             <span class="q-ml-sm">{{$t('SAVvlib3m', [edvol(x.v2)])}}</span>
           </div>
@@ -80,8 +80,8 @@
         <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr3" :label="$t('vu')" />
         <div class="col column">
           <div class="titre-md">{{$t('SAVgr3', s.gr3.length, { count: s.gr3.length })}}</div>
-          <div class="q-ml-md q-my-sm" v-for="x in s.gr3" :key="x.gr.id">
-            <span class="b1 q-mr-lg">{{session.getCV(x.gr.id).nomc}}</span>
+          <div class="q-ml-md q-my-sm" v-for="x in s.gr3" :key="x.id">
+            <span class="b1 q-mr-lg">{{x.nomC}}</span>
             <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
           </div>
         </div>
@@ -91,8 +91,8 @@
         <q-checkbox class="col-auto cb" size="sm" v-model="checks._gr0" :label="$t('vu')" />
         <div class="col column">
           <div class="titre-md">{{$t('SAVgr0', s.gr0.length, { count: s.gr0.length })}}</div>
-          <div class="q-ml-md q-my-sm" v-for="x in s.gr0" :key="x.gr.id">
-            <span class="b1 q-mr-lg">{{session.getCV(x.gr.id).nomc}}</span>
+          <div class="q-ml-md q-my-sm" v-for="x in s.gr0" :key="x.id">
+            <span class="b1 q-mr-lg">{{x.nomC}}</span>
             <span>{{$t('SAVvlib2', x.nn, {count: x.nn})}}</span>
           </div>
         </div>
@@ -135,8 +135,8 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import { styp, edvol, sleep, dkli } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
-import { SupprAvatar } from '../app/operations4.mjs'
-import { GetPartition } from '../app/synchro.mjs'
+import { SupprAvatar, SupprCompte } from '../app/operations4.mjs'
+import { GetPartition, deconnexion } from '../app/synchro.mjs'
 
 export default ({
   name: 'SupprAvatar',
@@ -243,14 +243,18 @@ export default ({
         let nan = 0, nac = 0, estAn = false, estAc = false
         for (let i = 1; i < x.gr.st.length; i++) {
           const s = x.gr.st[i]
-          if (s === 5) { nan++; if (i == x.im) estAn = true }
-          if (s === 4) { nac++; if (i == x.im) estAc = true }
+          if (s === 5) { nan++; if (i === x.im) estAn = true }
+          if (s >= 4) { nac++; if (i === x.im) estAc = true }
         }
         x.dan = nan === 1 && estAn
         x.dac = nac === 1 && estAc
 
         x.st = x.dac ? 1 : (x.heb ? 2 : (x.dan ? 3 : 0))
-        s['gr' + x.st].push(x)
+        s['gr' + x.st].push({
+          nomC: this.session.getCV(x.gr.id).nomC,
+          id: x.gr.id,
+          nn: x.gr.nn
+        })
       }
 
       for (let i = 0; i < 4; i++) if (s['gr' + i].length) s.checks['_gr' + i] = true
@@ -289,8 +293,16 @@ export default ({
     async valider () {
       this.ui.fD() // boite de confirmation
       await sleep(50)
-      await new SupprAvatar().run(this.avid || this.session.compteId)
-      this.ui.fD() // Dialogue de suppression
+      if (this.avid) {
+        const r = await new SupprAvatar().run(this.avid)
+        if (r) await afficher8000(r, 0, avid)
+        this.ui.fD() // Dialogue de suppression
+      } else {
+        const r = await new SupprCompte().run()
+        if (r) await afficherDiag(this.$t('SAcptdisp'))
+        this.ui.fD() // Dialogue de suppression
+        deconnexion()
+      }
     }
   },
 

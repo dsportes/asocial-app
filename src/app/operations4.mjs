@@ -1413,6 +1413,13 @@ export class HebGroupe extends Operation {
   }
 }
 
+/* OP_SupprAvatar: 'Suppression d\'un avatar'
+- token : jeton d'authentification du compte de **l'administrateur**
+- id : id de l'avatar
+Retour:
+Exception générique:
+- 8001: avatar disparu
+*/
 export class SupprAvatar extends Operation {
   constructor () { super('SupprAvatar') }
 
@@ -1421,7 +1428,29 @@ export class SupprAvatar extends Operation {
       const session = stores.session
       const args = { token: session.authToken, id }
       await post(this, 'SupprAvatar', args)
-      this.finOK()
+      return this.finOK(0)
+    } catch (e) {
+      if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_SupprCompte: 'Suppression d\'un compte'
+- token : jeton d'authentification du compte de **l'administrateur**
+Retour:
+Exception générique:
+- 8001: avatar disparu
+*/
+export class SupprCompte extends Operation {
+  constructor () { super('SupprCompte') }
+
+  async run (id) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken }
+      await post(this, 'SupprCompte', args)
+      return this.finOK(0)
     } catch (e) {
       if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
