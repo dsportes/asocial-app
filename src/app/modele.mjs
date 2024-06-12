@@ -264,7 +264,7 @@ export async function compile (row) {
   obj._nom = row._nom
   const z = row.dlv && row.dlv < session.auj
   // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
-  if (z || !row._data_) {
+  if (z || !row._data_ || !row._data_.length) {
     obj.id = ID.court(row.id || 0)
     if (row.ids !== undefined) obj.ids = ID.court(row.ids)
     obj.v = row.v || 0

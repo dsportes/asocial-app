@@ -101,12 +101,14 @@
       <div v-if="avid !== 0" class="row q-my-md items-start">
         <q-checkbox class="col-auto cb" size="sm" v-model="checks._vol" :label="$t('vu')" />
         <div class="col">
-          <div v-if="s.nna + s.nng" class="titre-md">{{$t('SAVvol')}}</div>        
+          <div v-if="nbn" class="titre-md">{{$t('SAVvol')}}</div>        
           <div v-if="s.nna" class="q-ml-lg q-my-sm">{{$t('SAVvola', [s.nna, edvol(s.v2a)])}}</div>
           <div v-if="s.nng" lass="q-ml-lg q-my-sm">{{$t('SAVvolg', [s.nng, edvol(s.v2g)])}}</div>
           <div class="titre-md">{{$t('SAVabo')}}</div>        
-          <div class="q-ml-md q-my-sm">{{$t('SAVabo1', [s.nna + s.nng, s.ch.length, s.ng])}}</div>
-          <div v-if="s.v2a" class="q-ml-md q-my-sm">{{$t('SAVabo2', [edvol(s.v2a)])}}</div>
+          <div class="q-ml-md q-my-sm">
+            {{$t('SAVabo1', [nbn, s.ch.length, s.ng, nbtot])}}</div>
+          <div v-if="s.v2a" class="q-ml-md q-my-sm">
+            {{$t('SAVabo2', [edvol(s.v2a)])}}</div>
         </div>
       </div>
 
@@ -156,14 +158,15 @@ export default ({
 
     nbn () { return this.s.nna + this.s.nng },
 
+    nbtot () { return this.nbn + this.s.ch.length + this.s.ng },
+
     v2n () { return this.s.v2a + this.s.v2g },
 
     s () { 
       const s = {
-        touches: {},
         checks: { 
-          _notes: true, _chats: true, _spons: false, _ddel: false, _vol: false,
-          _gr0: false, _gr1: false, _gr2: false, _gr3: false, _gr4: false 
+          _notes: false, _chats: false, _spons: false, _ddel: false, _vol: false,
+          _gr0: false, _gr1: false, _gr2: false, _gr3: false 
         },
         stats: {}, // map des nbn notes, v1 v2 par avatar et groupe
         /* gri : { 
@@ -182,18 +185,14 @@ export default ({
         sp: [], // liste des sponsorings
         ch: [], // liste des chats
 
-        nng: 0, // nombre total de notes des groupes hébérgés
-        v2g: 0, // v2 total des fichiers des notes des groupes hébérgés
+        nng: 0, // nombre total de notes des groupes disparaissant
+        v2g: 0, // v2 total des fichiers des notes des groupes disparaissant
 
         nna: 0, // nombre total des notes de l'avatar
         v2a: 0, // v2 total des fichiers des notes de l'avatar
 
         // résiliation compte
-        ddel: false, // dernier délégué de sa partition
-
-        hrnd: 0,
-        idt: 0, // id de la partition
-        it: 0 // indice du compte dans sa tribu ???
+        ddel: false // dernier délégué de sa partition
       }
 
       const id = this.avid || this.session.compteId
@@ -204,68 +203,55 @@ export default ({
       s.nna = a.nn; s.v2a = a.v2
 
       const e = this.aSt.getElt(id)
-      s.touches[id] = e.avatar
-      e.chats.forEach(c => {
-        s.touches[c.id + '/' + c.ids] = c
-        s.ch.push(c)
-      })
-      s.ch = Array.from(e.chats.values()) // ????????
 
-      s.sp = []
-      e.sponsorings.forEach(sp => { 
-        if (sp.st === 0) {
-          s.touches[sp.id + '/' + sp.ids] = sp
-          s.sp.push(sp) 
-        }
-      })
+      e.chats.forEach(c => { if (c.stI === 1) s.ch.push(c) })
+      if (s.ch.length) s.checks._chats = true
+
+      e.sponsorings.forEach(sp => { if (sp.st === 0) s.sp.push(sp) })
       if (s.sp.length) s.checks._spons = true
 
       for (const [idg, sav] of this.session.compte.mpg) {
         if (!sav.has(id)) continue
         s.ng++
-        const egr = this.gSt.egr(idg)
-        const x = {}
-        x.gr = egr.groupe
-        x.im = x.gr.mmb.get(id)
-        x.nn = x.gr.nn
-        x.v2 = x.gr.vf
-        if (x.gr.imh === x.im) { 
-          x.heb = true
-          x.nnh = x.nn
-          x.v2h = x.v2
-          s.nng += x.nn
-          s.v2g += x.v2
-        } else {
-          x.nnh = 0
-          x.v2h = 0
+        const gr = this.gSt.egr(idg).groupe
+        const im = gr.mmb.get(id)
+        const x = {
+          nomC: this.session.getCV(gr.id).nomC,
+          nn: gr.nn,
+          v2: gr.vf,
+          heb: false,
+          nnh: 0,
+          v2h: 0
         }
+        if (gr.imh === im) { x.heb = true; x.nnh = x.nn; x.v2h = x.v2 } 
         
         let nan = 0, nac = 0, estAn = false, estAc = false
-        for (let i = 1; i < x.gr.st.length; i++) {
-          const s = x.gr.st[i]
+        for (let i = 1; i < gr.st.length; i++) {
+          const s = gr.st[i]
           if (s === 5) { nan++; if (i === x.im) estAn = true }
           if (s >= 4) { nac++; if (i === x.im) estAc = true }
         }
         x.dan = nan === 1 && estAn
         x.dac = nac === 1 && estAc
-
+        if (x.dac) {
+          s.nng += x.nn
+          s.v2g += x.v2
+        }
+        
         x.st = x.dac ? 1 : (x.heb ? 2 : (x.dan ? 3 : 0))
-        s['gr' + x.st].push({
-          nomC: this.session.getCV(x.gr.id).nomC,
-          id: x.gr.id,
-          nn: x.gr.nn
-        })
+        s['gr' + x.st] = x
       }
+
+      if (s.nna + s.nng) s.checks._notes = true
 
       for (let i = 0; i < 4; i++) if (s['gr' + i].length) s.checks['_gr' + i] = true
 
-      s.idp = this.session.compte.idp
-      if (this.avid === 0 && s.idp) {
+      if (this.avid === 0 && this.session.compte.idp) {
         const ndel = this.session.partition.nbDels
         if (ndel === 1 && this.session.compte.del) { s.ddel = true; s.checks._ddel = true }
-      } else {
-        s.checks._vol = true
       }
+      if (this.avid)  s.checks._vol = true // Abonnements - sans intéret si le compte est résilié
+
       return s
     }
   },

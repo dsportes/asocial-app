@@ -196,7 +196,7 @@ class SB {
     
     if (this.chats.size) for(const [,ch] of this.chats) {
       if (ch._zombi) {
-        const chav = this.a.getChat(x.id, x.ids) // chat AVANT suppression
+        const chav = this.a.getChat(ch.id, ch.ids) // chat AVANT suppression
         if (chav) {
           this.p.delPCh(chav.idE, ch.id)
           this.a.delChat(ch.id, ch.ids)

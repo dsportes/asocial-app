@@ -2148,8 +2148,8 @@ export default {
   SAVvola: '{0} notes supprimées de l\'avatar. {1} de fichiers',
   SAVvolg: '{0} notes des groupes détruits. {1} de fichiers',
   SAVabo: 'Baisse des ressources occupées dans l\'abonnement:',
-  SAVabo1: 'Part 1: {0} note(s), {1} chat(s), {2} participation(s) à des groupes',
-  SAVabo2: 'Part fichiers: {0}',
+  SAVabo1: '{4} document(s): {0} note(s) + {1} chat(s) + {2} participation(s) à des groupes',
+  SAVabo2: 'Volume des fichiers: {0}',
 
   TUtqc: 'Plafond conso. mensuelle',
   TUtqn: 'Abon. nombre notes...',
