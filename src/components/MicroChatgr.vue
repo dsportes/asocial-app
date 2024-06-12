@@ -18,10 +18,9 @@
 </div>
 </template>
 <script>
-import { ref } from 'vue'
+// import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
-import ApercuChatgr from '../panels/ApercuChatgr.vue'
 
 export default ({
   name: 'MicroChatgr',

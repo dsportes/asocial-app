@@ -1,36 +1,40 @@
 <template> <!-- BtnCond incorporés -->
 <q-dialog v-model="ui.d.ACouvrir" full-height position="left" persistent>
-  <q-layout v-if="!chat._zombi" container view="hHh lpR fFf" :class="styp('md')">
+  <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated>
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
-        <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHoch3', [nomI, nomE])}}</q-toolbar-title>
+        <q-toolbar-title class="titre-lg text-center q-mx-sm">
+          {{!zombi ? $t('CHoch3', [nomI, nomE]) : $t('CHzombi')}}
+        </q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <div v-if="chat.stE===0" class="text-warning text-bold bg-yellow-5">
-            {{$t('CHraccroche2', [session.getCV(chat.idE).nom])}}</div>
-      <div v-if="chat.stI===0" class="text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</div>
-      <div v-if="chat.stE === 2" class="text-center full-width bg-yellow-5 titre-lg text-bold text-negative q-paxs">
-        {{$t('disparu')}}</div>
-      <apercu-genx v-else class="bordb" :id="chat.idE" :idx="0" />
-      <div :class="sty() + 'q-pa-xs row justify-around items-center'">
-        <div v-if="chat.stE !== 2" class="row q-gutter-xs items-center">
-          <btn-cond :label="$t('CHadd1')" icon="add" @ok="editer(false)"
+      <div v-if="!zombi">
+        <div v-if="chat.stE===0" class="text-warning text-bold bg-yellow-5">
+              {{$t('CHraccroche2', [session.getCV(chat.idE).nom])}}</div>
+        <div v-if="chat.stI===0" class="text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</div>
+        <div v-if="chat.stE === 2" class="text-center full-width bg-yellow-5 titre-lg text-bold text-negative q-paxs">
+          {{$t('disparu')}}</div>
+        <apercu-genx v-else class="bordb" :id="chat.idE" :idx="0" />
+        <div :class="sty() + 'q-pa-xs row justify-around items-center'">
+          <div v-if="chat.stE !== 2" class="row q-gutter-xs items-center">
+            <btn-cond :label="$t('CHadd1')" icon="add" @ok="editer(false)"
+              :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+            <btn-cond v-if="session.estA" :label="$t('CHadd2')" icon="savings"
+              @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
+          </div>
+          <btn-cond v-if="chat.stI" 
+            :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
             :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-          <btn-cond v-if="session.estA" :label="$t('CHadd2')" icon="savings"
-            @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-        </div>
-        <btn-cond v-if="chat.stI" 
-          :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
-          :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-        <div v-if="!chat.stI" class="text-warning text-bold titre-md text-italic">
-          {{$t('CHraccroche')}}
+          <div v-if="!chat.stI" class="text-warning text-bold titre-md text-italic">
+            {{$t('CHraccroche')}}
+          </div>
         </div>
       </div>
     </q-header>
 
     <q-page-container>
-      <q-card class="q-pa-sm">
+      <q-card  v-if="!zombi" class="q-pa-sm">
         <div v-for="it in chat.items" :key="it.dh + '/' + it.a">
           <q-chat-message :sent="it.a===0" 
             :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
@@ -104,15 +108,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-
   </q-layout>
-  <q-card v-else>
-    <div class="row justify-between items-center spsm">
-      <q-btn dense padding="none" size="md" color="warning" icon="chevron_left" @click="ui.fD"/>
-      <span class="text-center titre-lg q-pa-sm">{{$t('CHzombi')}}</span>
-      <bouton-help page="page1"/>
-    </div>
-  </q-card>
 </q-dialog>
 </template>
 <script>
@@ -143,7 +139,8 @@ export default {
     chat () { return this.aSt.getChat(this.ui.chatc.id, this.ui.chatc.ids) },
     nomE () { return this.chat ? this.session.getCV(this.chat.idE).nom : ''},
     nomI () { return this.chat ? this.session.getCV(this.chat.id).nom : ''},
-    estDel () { return ID.estComptable(this.idE) || this.session.estDelegue }
+    estDel () { return ID.estComptable(this.idE) || this.session.estDelegue },
+    zombi () { return this.ui.chatc._zombi }
   },
 
   watch: {

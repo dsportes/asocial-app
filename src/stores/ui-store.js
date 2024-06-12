@@ -50,7 +50,7 @@ export const useUiStore = defineStore('ui', {
 
     idc: 1,
 
-    chatc: null,
+    chatc: {},
 
     // gestion des dialogues
     dialogStack: [],
@@ -331,7 +331,12 @@ export const useUiStore = defineStore('ui', {
     },
 
     setChatc (id, ids) {
-      this.chatc = { id, ids }
+      this.chatc = { id, ids: ids || 1 }
+    },
+
+    setZombiChat (id, idsx) {
+      const ids = idsx || 1
+      if (this.chatc.id === id && this.chatc.ids === ids) this.chatc._zombi = true
     }
   }
 })

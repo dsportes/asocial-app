@@ -382,6 +382,7 @@ export const useGroupeStore = defineStore('groupe', {
       this.delMembre(idg) // tous
       this.delNote(idg) // toutes
       this.map.delete(idg)
+      this.ui.setZombiChat(idg)
     },
 
     setInvit (invit) { // invits:[ {idg, ida, invpar (Set), msg} ]
