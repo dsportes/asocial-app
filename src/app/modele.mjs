@@ -262,7 +262,7 @@ export async function compile (row) {
   if (!cl) return null
   const obj = new cl()
   obj._nom = row._nom
-  const z = row.dlv && row.dlv < session.auj
+  const z = row._nom !== 'comptes' && row.dlv && row.dlv < session.auj
   // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
   if (z || !row._data_ || !row._data_.length) {
     obj.id = ID.court(row.id || 0)
