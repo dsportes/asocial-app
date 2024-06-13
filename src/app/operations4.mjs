@@ -1470,23 +1470,21 @@ export class DownloadStatC extends Operation {
   async run (org, mr) { 
     try {
       const session = stores.session
-      const aSt = stores.avatar
+      const cleES = session.compte.cleE
       const args = { token: session.authToken, org, mr }
       const ret =  await post(this, 'ComptaStat', args)
-      let buf = null
+      let buf, buf2
       try { 
         buf = await getData(ret.getUrl) 
       } catch (e) { 
         return this.finOK({ err: 1 })
       }
-      /*
       try {
-        buf = await decrypterRaw (aSt.compte.priv, null, buf)
+        buf2 = await decrypter(cleES, buf)
       } catch (e) { 
         return this.finOK({ err: 2 })
       }
-      */
-      const blob = new Blob([buf], { type: 'text/csv' })
+      const blob = new Blob([buf2], { type: 'text/csv' })
       return this.finOK({ blob, creation: ret.creation || false, mois: ret.mois })
     } catch (e) {
       this.finKO(e)

@@ -491,6 +491,8 @@ export default {
   EX9018: 'Organisation {0} non trouvée',
   EX9020: 'Mise à jour [{2} / {1}] d\'un document obtenu autrement que par un getXXX ({0})',
 
+  EX9100: 'Erreur de cryptage AES: {0}',
+  EX9101: 'Erreur de cryptage RSA: {0}',
 
   EX9019: 'Mode d\'authentication non reconnu [{0}]',
   
