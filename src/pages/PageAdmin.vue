@@ -50,6 +50,19 @@
           <apercu-notif class="q-my-xs" :notif="esp.notifE" :idx="idx" 
             :type="0" :cible="ID.court(esp.id)"/>
 
+          <div class="q-mb-sm">
+            <div class="titre-md">{{$t('PEstm')}}</div>
+            <div class="row q-gutter-sm q-mb-sm">
+              <btn-cond class="self-start b1" label="M" @click="dlstat(esp, 0)"/>
+              <btn-cond class="self-start b1" label="M-1" @click="dlstat(esp, 1)"/>
+              <btn-cond class="self-start b1" label="M-2" @click="dlstat(esp, 2)"/>
+              <btn-cond class="self-start b1" label="M-3" @click="dlstat(esp, 3)"/>
+              <!--
+              <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
+                @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
+              -->
+            </div>
+          </div>
         </div>
       </q-expansion-item>
     </div>
@@ -173,7 +186,8 @@ import BoutonDlvat from '../components/BoutonDlvat.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { CreerEspace, SetEspaceNprof, InitTachesGC, StartDemon } from '../app/operations4.mjs'
+import { CreerEspace, SetEspaceNprof, InitTachesGC, 
+  StartDemon, DownloadStatC } from '../app/operations4.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
 // import { GC, GetSingletons } from '../app/operations.mjs'
@@ -292,36 +306,18 @@ export default {
       this.ui.oD('PAedprf')
     },
 
-    /*
-    async testGCop () {
-      const ret = await new GC().run(this.gcop)
-      if (ret.stats) console.log(JSON.stringify(ret.stats))
-      if (ret.err) console.log(JSON.stringify(ret.err))
-    },
-
-    async testGC () {
-      await new GC().run('GC')
-    },
-
-    async affCkpt () {
-      this.singl = []
-      const r = await new GetSingletons().run()
-      r.forEach(d => { this.singl.push(decode(d))})
-      this.ui.oD('PAcheckpoint')
-    },
-
-    dhIso (t) { return new Date(t).toISOString() },
-
-    duree (d) { if (!d) return '<1ms'
-      return d < 1000 ? (d + 'ms') : (d / 1000).toPrecision(3) + 's'
-    },
-
-    stat (s) {
-      const r = []
-      for (const f in s) { r.push(f + '=' + s[f])}
-      return r.join(', ')
+   async dlstat (esp, mr) {
+      const cleES = esp.cleES
+      const { err, blob, creation, mois } = 
+        await new DownloadStatC().run(esp.org, mr, cleES)
+      const nf = esp.org + '-C_' + mois
+      if (!err) {
+        saveAs(blob, nf)
+        await afficherDiag($t('PEsd', [nf]))
+      } else {
+        await afficherDiag($t('PEnd' + err))
+      }
     }
-    */
   },
 
   data () {
@@ -379,4 +375,6 @@ export default {
   border: 2px solid $warning
 .bord7
   border: 2px solid $primary
+.b1
+  width: 4rem
 </style>

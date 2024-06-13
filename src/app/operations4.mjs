@@ -1467,10 +1467,9 @@ args.mr : mois relatif 1 2 ou 3
 export class DownloadStatC extends Operation {
   constructor () { super('DownloadStatC') }
 
-  async run (org, mr) { 
+  async run (org, mr, cleES) { 
     try {
       const session = stores.session
-      const cleES = session.compte.cleE
       const args = { token: session.authToken, org, mr }
       const ret =  await post(this, 'ComptaStat', args)
       let buf, buf2

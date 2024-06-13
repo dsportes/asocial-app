@@ -313,6 +313,7 @@ export class Espace extends GenDoc {
     const session = stores.session
     this.org = row.org
     this.creation = row.creation
+    this.cleES = row.cleES
     this.moisStat = row.moisStat || 0
     this.moisStatT = row.moisStatT || 0
     this.opt = row.opt || 0

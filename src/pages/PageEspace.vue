@@ -223,7 +223,9 @@ export default {
 
   methods: {
     async dlstat (mr) {
-      const { err, blob, creation, mois } = await new DownloadStatC().run(this.session.espace.org, mr)
+      const cleES = this.session.compte.cleE
+      const { err, blob, creation, mois } = 
+        await new DownloadStatC().run(this.session.espace.org, mr, cleES)
       const nf = this.session.espace.org + '-C_' + mois
       if (!err) {
         saveAs(blob, nf)
