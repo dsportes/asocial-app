@@ -1,11 +1,11 @@
-import { encode, decode } from '@msgpack/msgpack'
+import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
 import { Operation } from './synchro.mjs'
 import { random, gzipB } from './util.mjs'
 import { Cles, d14, isAppExc } from './api.mjs'
 import { idb } from '../app/db.mjs'
-import { post } from './net.mjs'
+import { post, getData } from './net.mjs'
 import { RegCles, compile, CV } from './modele.mjs'
 import { getPub } from './synchro.mjs'
 import { decrypter, crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
@@ -1454,6 +1454,42 @@ export class SupprCompte extends Operation {
     } catch (e) {
       if (isAppExc(e) && (e.code === 8001 || e.code === 8002)) return e.code - 8000
       await this.finKO(e)
+    }
+  }
+}
+
+/* OP_DownloadStatC: 'Téléchargement d\'un fichier statistique comptable mensuel'
+ComptaStat (org, mr)
+args.token: éléments d'authentification du compte.
+args.org
+args.mr : mois relatif 1 2 ou 3
+*/
+export class DownloadStatC extends Operation {
+  constructor () { super('DownloadStatC') }
+
+  async run (org, mr) { 
+    try {
+      const session = stores.session
+      const aSt = stores.avatar
+      const args = { token: session.authToken, org, mr }
+      const ret =  await post(this, 'ComptaStat', args)
+      let buf = null
+      try { 
+        buf = await getData(ret.getUrl) 
+      } catch (e) { 
+        return this.finOK({ err: 1 })
+      }
+      /*
+      try {
+        buf = await decrypterRaw (aSt.compte.priv, null, buf)
+      } catch (e) { 
+        return this.finOK({ err: 2 })
+      }
+      */
+      const blob = new Blob([buf], { type: 'text/csv' })
+      return this.finOK({ blob, creation: ret.creation || false, mois: ret.mois })
+    } catch (e) {
+      this.finKO(e)
     }
   }
 }

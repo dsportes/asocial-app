@@ -1,18 +1,19 @@
 <template>
   <q-page class="column q-pa-xs">
-    <!--
-    <div v-if="session.pow === 2" class="q-mb-sm">
+    <div class="q-mb-sm">
       <div class="titre-md">{{$t('PEstm')}}</div>
       <div class="row q-gutter-sm q-mb-sm">
-        <q-btn class="self-start" dense color="warning" padding="none xs" size="md" label="M" @click="dlstat(0)"/>
-        <q-btn class="self-start" dense color="primary" padding="none xs" size="md" label="M-1" @click="dlstat(1)"/>
-        <q-btn class="self-start" dense color="primary" padding="none xs" size="md" label="M-2" @click="dlstat(2)"/>
-        <q-btn class="self-start" dense color="primary" padding="none xs" size="md" label="M-3" @click="dlstat(3)"/>
+        <btn-cond class="self-start b1" label="M" @click="dlstat(0)"/>
+        <btn-cond class="self-start b1" label="M-1" @click="dlstat(1)"/>
+        <btn-cond class="self-start b1" label="M-2" @click="dlstat(2)"/>
+        <btn-cond class="self-start b1" label="M-3" @click="dlstat(3)"/>
+        <!--
         <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
           @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
+        -->
       </div>
     </div>
-    -->
+    
     <div class="q-mb-sm row justify-start" style="height:1.8rem;overflow:hidden">
       <div class="titre-md q-mx-sm">{{$t('ESnbmi')}}</div>
       <q-select class="col-auto items-start items-start text-bold bg-primary text-white titre-lg q-pl-sm" 
@@ -143,8 +144,8 @@
 </template>
 
 <script>
-import { onMounted, toRef, ref } from 'vue'
-// import { saveAs } from 'file-saver'
+import { onMounted, ref } from 'vue'
+import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import BtnCond from '../components/BtnCond.vue'
 // import SaisieMois from '../components/SaisieMois.vue'
@@ -156,7 +157,7 @@ import { dkli, styp, $t } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition } from '../app/synchro.mjs'
 import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, 
-  SetCodePart, SupprPartition } from '../app/operations4.mjs'
+  SetCodePart, SupprPartition, DownloadStatC } from '../app/operations4.mjs'
 // import { DownloadStatC, DownloadStatC2 } from '../app/operations.mjs'
 
 const fx = [['id', 1], 
@@ -221,7 +222,6 @@ export default {
   },
 
   methods: {
-    /*
     async dlstat (mr) {
       const { err, blob, creation, mois } = await new DownloadStatC().run(this.session.espace.org, mr)
       const nf = this.session.espace.org + '-C_' + mois
@@ -233,6 +233,7 @@ export default {
       }
     },
 
+    /*
     async dlstat2 () {
       const { err, blob } = await new DownloadStatC2().run(this.ns, parseInt(this.mois), 'C')
       const nf = this.session.espace.org + '-C_' + this.mois
@@ -359,4 +360,6 @@ export default {
 @import '../css/app.sass'
 .w10
   width: 10rem
+.b1
+  width: 4rem
 </style>
