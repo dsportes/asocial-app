@@ -1,7 +1,20 @@
 <template>
 <div class="spmd q-pa-sm">
-  <!-- <q-btn dense color="warning" padding="none xs" size="md" no-caps
-    label="Test-Stat-T" @click="dlstat"/> Test de génération du CSV Tickets -->
+  <div class="q-mb-sm">
+    <div class="titre-md">{{$t('PEsttk')}}</div>
+    <div class="row q-gutter-sm q-mb-sm">
+      <btn-cond class="self-start b1" label="M" @click="dlstat(0)"/>
+      <btn-cond class="self-start b1" label="M-1" @click="dlstat(1)"/>
+      <btn-cond class="self-start b1" label="M-2" @click="dlstat(2)"/>
+      <btn-cond class="self-start b1" label="M-3" @click="dlstat(3)"/>
+      <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
+        @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
+    </div>
+  </div>
+
+<!--
+  <btn-cond dense color="warning" padding="none xs" size="md" no-caps
+    label="Test-Stat-T" @click="dlstat"/>
 
   <div v-if="session.estComptable" class="row justify-start items-center">
     <div class="titre-md q-mr-md">{{$t('PEsttk')}}</div>
@@ -11,6 +24,7 @@
       </template>
     </q-input>
   </div>
+  -->
 
   <!--panel-deta v-if="!session.estComptable" :c="c" :total="aSt.compta.credits.total"
     class="q-ma-xs q-pa-xs bord1"/-->
@@ -73,9 +87,9 @@ import ApercuTicket from '../components/ApercuTicket.vue'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import BtnCond from '../components/BtnCond.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
-import { dhcool, mon, dkli, genIdTk, styp, afficherDiag } from '../app/util.mjs'
-import { TicketsStat, DownloadStatC2 } from '../app/operations.mjs'
-import { PlusTicket } from '../app/operations4.mjs'
+import SaisieMois from '../components/SaisieMois.vue'
+import { $t, dhcool, mon, dkli, genIdTk, styp, afficherDiag } from '../app/util.mjs'
+import { PlusTicket, TicketsStat } from '../app/operations4.mjs'
 import { AMJ, idTkToL6, ID } from '../app/api.mjs'
 
 export default ({
@@ -83,7 +97,7 @@ export default ({
 
   props: { },
 
-  components: { ApercuGenx, BtnCond, ApercuTicket, PanelDialtk },
+  components: { ApercuGenx, BtnCond, ApercuTicket, PanelDialtk, SaisieMois },
 
   computed: {
     c () { return this.session.estComptable ? null : this.session.compta.compteurs },
@@ -119,7 +133,14 @@ export default ({
       const t = this.session.compta.dons || []
       t.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1) })
       return t
-    }
+    },
+    maxdl () { 
+      const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
+      return Math.floor(m / 100)
+    },
+    mindl () { 
+      return Math.floor(this.session.espace.dcreation / 100)
+    },
   },
 
   data () {
@@ -128,13 +149,13 @@ export default ({
       nbinc: 0,
       att: 'A', 
       deb: '',
-      mois: 202312,
+      mois: Math.floor(this.session.auj / 100)
     }
   },
 
   methods: {
-    async dlstat () { // Pour tester  la création de la stats
-      const { err, blob, creation, mois } = await new TicketsStat().run()
+    async dlstat (mr) {
+      const { err, blob, creation, mois } = await new TicketsStat().run(mr)
       const nf = this.session.espace.org + '-T_' + mois
       if (!err) {
         saveAs(blob, nf)
@@ -145,35 +166,17 @@ export default ({
     },
 
     async dlstat2 () {
-      const esp = this.session.espace
-      const am = parseInt(this.mois)
-      const aa = Math.floor(am / 100)
-      const mm = am % 100
-      if (aa < 2023 || aa > 2099 || mm < 1 || mm > 12) {
-        await afficherDiag(this.$t('ESmoiser1'));
-        return
-      }
-      const lim = Math.floor(AMJ.djMoisN(AMJ.amjUtc(), -2) / 100)
-      if (lim < Math.floor(esp.dcreation / 100)) {
-        await afficherDiag(this.$t('ESmoiser4', [esp.dcreation]));
-        return
-      }
-      if (am > lim) {
-        await afficherDiag(this.$t('ESmoiser2', [lim]));
-        return
-      }
-      const mesp = esp.moisStatT
-      if (am > mesp) {
-        await afficherDiag(this.$t('ESmoiser3', [mesp]));
-        return
-      }
-      const { err, blob } = await new DownloadStatC2().run(this.session.ns, am, 'T')
-      const nf = this.session.org + '-T_' + am
+      const n1 = (Math.floor(this.mois / 100) * 12) + (this.mois % 100)
+      const aj = Math.floor(AMJ.amjUtc() / 100)
+      const n2 = (Math.floor(aj / 100) * 12) + (aj % 100)
+      const mr = n2 - n1
+      const { err, blob } = await new TicketsStat().run(mr)
+      const nf = this.session.org + '-T_' + this.mois
       if (!err) {
         saveAs(blob, nf)
         await afficherDiag($t('PEsd', [nf]))
       } else {
-        await afficherDiag($t('PEnd') + err)
+        await afficherDiag($t('PEnd' + err))
       }
     },
 
@@ -214,4 +217,6 @@ export default ({
   width: 8rem
 .w10
   width: 10rem
+.b1
+  width: 4rem
 </style>

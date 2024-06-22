@@ -1490,3 +1490,65 @@ export class DownloadStatC extends Operation {
     }
   }
 }
+
+/* OP_DownloadStatC2: 'Téléchargement d\'un fichier statistique comptable mensuel déjà calculé'
+*/
+export class DownloadStatC2 extends Operation {
+  constructor () { super('DownloadStatC2') }
+
+  async run (org, mois, cs, cleES) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, org, mois, cs }
+      const ret =  await post(this, 'GetUrlStat', args)
+      let buf, buf2
+      try { 
+        buf = await getData(ret.getUrl) 
+      } catch (e) { 
+        return this.finOK({ err: 1 })
+      }
+      try {
+        buf2 = await decrypter(cleES, buf)
+      } catch (e) { 
+        return this.finOK({ err: 2 })
+      }
+      const blob = new Blob([buf2], { type: 'text/csv' })
+      return this.finOK({ blob })
+    } catch (e) {
+      this.finKO(e)
+    }
+  }
+}
+
+/* OP_TicketsStat: 'Téléchargements en CSV de la liste des tickets d\'un mois'
+args.token: éléments d'authentification du compte.
+args.org
+args.mr : mois relatif demandé
+*/
+export class TicketsStat extends Operation {
+  constructor () { super('TicketStat') }
+
+  async run (mr) { 
+    try {
+      const session = stores.session
+      const cleES = session.compte.cleE
+      const args = { token: session.authToken, org: session.org, mr }
+      const ret =  await post(this, 'TicketsStat', args)
+      let buf = null, buf2 = null
+      try { 
+        buf = await getData(ret.getUrl) 
+      } catch (e) { 
+        return this.finOK({ err: 1 })
+      }
+      try {
+        buf2 = await decrypter(cleES, buf)
+      } catch (e) { 
+        return this.finOK({ err: 2 })
+      }
+      const blob = new Blob([buf2], { type: 'text/csv' })
+      return this.finOK({ blob, creation: ret.creation || false, mois: ret.mois })
+    } catch (e) {
+      this.finKO(e)
+    }
+  }
+}

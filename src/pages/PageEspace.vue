@@ -7,10 +7,8 @@
         <btn-cond class="self-start b1" label="M-1" @click="dlstat(1)"/>
         <btn-cond class="self-start b1" label="M-2" @click="dlstat(2)"/>
         <btn-cond class="self-start b1" label="M-3" @click="dlstat(3)"/>
-        <!--
         <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
           @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
-        -->
       </div>
     </div>
     
@@ -148,17 +146,16 @@ import { onMounted, ref } from 'vue'
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import BtnCond from '../components/BtnCond.vue'
-// import SaisieMois from '../components/SaisieMois.vue'
+import SaisieMois from '../components/SaisieMois.vue'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
-import { dkli, styp, $t } from '../app/util.mjs'
+import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition } from '../app/synchro.mjs'
 import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, 
-  SetCodePart, SupprPartition, DownloadStatC } from '../app/operations4.mjs'
-// import { DownloadStatC, DownloadStatC2 } from '../app/operations.mjs'
+  SetCodePart, SupprPartition, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 
 const fx = [['id', 1], 
   ['ntr2', 1], ['ntr2', -1],
@@ -176,7 +173,7 @@ export default {
   name: 'PageEspace',
 
   props: { },
-  components: { BtnCond, /*SaisieMois, */ ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
+  components: { BtnCond, SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
 
   computed: {
     maxdl () { 
@@ -235,18 +232,18 @@ export default {
       }
     },
 
-    /*
     async dlstat2 () {
-      const { err, blob } = await new DownloadStatC2().run(this.ns, parseInt(this.mois), 'C')
+      const cleES = this.session.compte.cleE
+      const { err, blob } = await new DownloadStatC2()
+        .run(this.session.espace.org, parseInt(this.mois), 'C', cleES)
       const nf = this.session.espace.org + '-C_' + this.mois
       if (!err) {
         saveAs(blob, nf)
         await afficherDiag($t('PEsd', [nf]))
       } else {
-        await afficherDiag($t('PEnd') + err)
+        await afficherDiag($t('PEnd' + err))
       }
     },
-    */
 
     async ovnvPart () { 
       this.nom = ''

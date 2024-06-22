@@ -57,10 +57,8 @@
               <btn-cond class="self-start b1" label="M-1" @click="dlstat(esp, 1)"/>
               <btn-cond class="self-start b1" label="M-2" @click="dlstat(esp, 2)"/>
               <btn-cond class="self-start b1" label="M-3" @click="dlstat(esp, 3)"/>
-              <!--
-              <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
-                @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
-              -->
+              <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl(esp)" :dinit="maxdl"
+                @ok="dlstat2(esp)" icon="download" :label="$t('ESdlc')"/>
             </div>
           </div>
         </div>
@@ -186,11 +184,11 @@ import BoutonDlvat from '../components/BoutonDlvat.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
+import SaisieMois from '../components/SaisieMois.vue'
 import { CreerEspace, SetEspaceNprof, InitTachesGC, 
-  StartDemon, DownloadStatC } from '../app/operations4.mjs'
+  StartDemon, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
-// import { GC, GetSingletons } from '../app/operations.mjs'
 import { ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
 import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
@@ -199,10 +197,14 @@ const reg = /^([a-z0-9\-]+)$/
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond },
+  components: { BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond, SaisieMois },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' }
+    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
+    maxdl () { 
+      const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
+      return Math.floor(m / 100)
+    }
   },
 
   watch: {
@@ -317,14 +319,32 @@ export default {
       } else {
         await afficherDiag($t('PEnd' + err))
       }
+    },
+
+    mindl (esp) { 
+      return Math.floor(esp.dcreation / 100)
+    },
+
+    async dlstat2 (esp) {
+      const cleES = esp.cleES
+      const { err, blob } = await new DownloadStatC2()
+        .run(esp.org, parseInt(this.mois), 'C', cleES)
+      const nf = esp.org + '-C_' + this.mois
+      if (!err) {
+        saveAs(blob, nf)
+        await afficherDiag($t('PEsd', [nf]))
+      } else {
+        await afficherDiag($t('PEnd') + err)
+      }
     }
+
   },
 
   data () {
     return {
       gcop: '',
       ns: 0,
-      nsc: 0, // ns "courant" de PageEspca à ouvrir
+      nsc: 0, // ns "courant" de PageEspace à ouvrir
       org: '',
       ps: null,
       singl: null,
@@ -332,7 +352,8 @@ export default {
       dorg: this.$t('ESreq'),
       prf: 0,
       profil: 0,
-      esp: null
+      esp: null,
+      mois: Math.floor(this.session.auj / 100)
     }
   },
 

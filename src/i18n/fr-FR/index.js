@@ -775,6 +775,7 @@ export default {
 
   OP_InitTachesGC: 'Initialisation des tâches du GC',
   OP_StartDemon: 'Lancement immédiat du démon',
+  OP_TicketsStat: 'Téléchargements en CSV de la liste des tickets d\'un mois',
   
   OPnvch0: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée). Echanger un "chat" avec lui n\'est plus possible.',
   OPnvch2: 'Le "chat" a été créé en parallèle avec votre action : son contenu actuel va s\'afficher au lieu de celui saisi.',
