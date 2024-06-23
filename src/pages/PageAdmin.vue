@@ -190,7 +190,7 @@ import { CreerEspace, SetEspaceNprof, InitTachesGC,
 import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
 import { ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
-import { styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
+import { $t, styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
 

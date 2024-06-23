@@ -166,10 +166,8 @@ export default ({
     },
 
     async dlstat2 () {
-      const n1 = (Math.floor(this.mois / 100) * 12) + (this.mois % 100)
       const aj = Math.floor(AMJ.amjUtc() / 100)
-      const n2 = (Math.floor(aj / 100) * 12) + (aj % 100)
-      const mr = n2 - n1
+      const mr = AMJ.nbMois(this.mois, aj)
       const { err, blob } = await new TicketsStat().run(mr)
       const nf = this.session.org + '-T_' + this.mois
       if (!err) {
