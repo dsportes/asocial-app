@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
 import stores from './stores.mjs'
-import { UNITEN, UNITEV } from '../app/api.mjs'
-import { Motscles } from '../app/modele.mjs'
 
 const fx = [['id', 1],
 ['q1', 1], ['q1', -1],
@@ -78,6 +76,7 @@ export const useAvatarStore = defineStore('avatar', {
 
     /*************************************************** */
 
+    /*
     qv: (state) => {
       const qv = { nc: 0, nn: 0, v2: 0 }
       state.map.forEach((av, id) => {
@@ -101,6 +100,7 @@ export const useAvatarStore = defineStore('avatar', {
       const c = state.compta.qv
       return (c.q2 * UNITEV) - c.v2
     },
+    */
 
     chatDeAvec: (state) => { return (de, avec) => { 
       const e = state.map.get(de)
@@ -121,7 +121,7 @@ export const useAvatarStore = defineStore('avatar', {
     }},
 
     /* Construit une Map idx:{c, n} fusionnée depuis,
-    celle de la configuration et celle du compte */
+    celle de la configuration et celle du compte 
     mapMC (state) {
       const m = new Map()
       let mx = state.config.motsclesLOC
@@ -130,9 +130,10 @@ export const useAvatarStore = defineStore('avatar', {
       for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
       return m
     },
+    */
 
     /* Construit une Map idx:{c, n} fusionnée depuis,
-    celle de la configuration, celle du compte et celle du groupe courant*/
+    celle de la configuration, celle du compte et celle du groupe courant
     mapMCGr (state) {
       const m = new Map()
       let mx = state.config.motsclesLOC
@@ -145,16 +146,18 @@ export const useAvatarStore = defineStore('avatar', {
       }
       return m
     },
+    */
 
-    /* Construit une Map idx:{c, n} fusionnée depuis celle du compte */
+    /* Construit une Map idx:{c, n} fusionnée depuis celle du compte
     mapMCC (state) {
       const m = new Map()
       const mx = state.motscles || {}
       for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
       return m
     },
+    */
 
-    /* Construit une Map idx:{c, n} fusionnée depuis celle du groupe courant*/
+    /* Construit une Map idx:{c, n} fusionnée depuis celle du groupe courant
     mapMCG (state) {
       const m = new Map()
       if (state.session.groupeId) {
@@ -163,30 +166,16 @@ export const useAvatarStore = defineStore('avatar', {
       }
       return m
     },
+    */
 
-    /* Array des tribus, pour le Comptable, 
-     triée par ordre alphabétique de leur info, la Primitive en tête
-    */ 
-    getTribus: (state) => {
-      const t = []
-      state.compte.atr.forEach(x => { 
-        if (x) t.push({id: x.id, info: x.info || ''})
-      })
-      const idp = state.session.tribuId
-      t.sort((a,b) => { return (a.id === idp ? -1 : 
-        (b.id === idp ? 1: (a.info < b.info ? -1 : (a.info === b.info ? 0 : 1))) )})
-      const tr = []
-      t.forEach(x => { tr.push(state.maptr.get(x.id))})
-      return tr
-    },
-
+    /*
     avatars: (state) => {
       const m = new Map()
       state.map.forEach((av, id) => { m.set(id, av.avatar) })
       return m
     },
 
-    /* liste des na des avatars triée par ordre alphabétique de leur noms */
+    // liste des na des avatars triée par ordre alphabétique de leur noms
     naAvatars: (state) => {
       const l = []
       state.map.forEach(e => { l.push(e.avatar.na) })
@@ -202,9 +191,8 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
-    /* retourne [tribu, it, eltAct] du compte id 
-    SI il est dans la tribu du compte ou la tribu courante.
-    */
+    // retourne [tribu, it, eltAct] du compte id 
+    // SI il est dans la tribu du compte ou la tribu courante.
     getTribuDeCompte: (state) => { return (id) => { 
         if (state.tribu) for (let it = 1; it < state.tribu.act.length; it++) {
           const e = state.tribu.act[it]
@@ -221,6 +209,7 @@ export const useAvatarStore = defineStore('avatar', {
     nbTribus: (state) => {
       return state.maptr.size
     },
+    */
 
     getElt: (state) => { return (id) => { return state.map.get(id) } },
 
@@ -232,7 +221,7 @@ export const useAvatarStore = defineStore('avatar', {
     /* id d'un groupe ou avatar. Retourne [mcs, memos]
     - mcs : union des mots clés attribués par les avatars
     - memos : concaténation des textes des mémos attribués par les avatars
-    */
+    
     mcmemosDeId: (state) => { return (id) => { 
         let mcs = new Set()
         const memos = []
@@ -244,6 +233,7 @@ export const useAvatarStore = defineStore('avatar', {
         return [new Uint8Array.from(mcs), memos.join('\n\n')]
       }
     },
+    */
 
     // retourne le chat ids de l'avatar id
     getChat: (state) => { return (id, ids) => { 
@@ -251,13 +241,8 @@ export const useAvatarStore = defineStore('avatar', {
       return e ? e.chats.get(ids) : null 
     }
     },
-    // retourne la Map des chats (clé ids) de l'avatar id
-    getChats: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.chats : null 
-      }
-    },
-    // retourne l'array des idE des chats de l'avatar id
+
+    /* retourne l'array des idE des chats de l'avatar id
     getChatIdEs: (state) => { return (id) => { 
         const a = []
         const e = state.map.get(id)
@@ -267,6 +252,8 @@ export const useAvatarStore = defineStore('avatar', {
         return a
       }
     },
+    */
+
     getChatIdIE: (state) => {  return (idI, idE) => { 
         const e = state.map.get(idI)
         if (e) for (const [ids, chat] of e.chats) { 
@@ -275,44 +262,33 @@ export const useAvatarStore = defineStore('avatar', {
         return null
       }
     },
+
     // retourne le sponsoring d'id ids de l'avatar id
     getSponsoring: (state) => { return (id, ids) => { 
       const e = state.map.get(id)
       return e ? e.sponsorings.get(ids) : null 
     }
     },
+
     // retourne la Map des sponsorings (clé ids) de l'avatar id
     getSponsorings: (state) => { return (id) => { 
         const e = state.map.get(id)
         return e ? e.sponsorings : null 
       }
     },
-    // retourne le ticket ids de l'avatar id
+
+    /* retourne le ticket ids de l'avatar id
     getTicket: (state) => { return (id, ids) => { 
       const e = state.map.get(id)
       return e ? e.tickets.get(ids) : null 
     }
     },
+    */
+
     // retourne l'array des tickets de l'avatar du compte
     getTickets: (state) => {
         const e = state.map.get(state.session.compteId)
         return e ? Array.from(e.tickets.values()) : []
-    },
-
-    // elt act dans tribu pour la tribu courante et le compte courant
-    act: (state) => {
-      const t = state.tribu
-      return t ? t.act[state.compta.it] : { vide: true}
-    },
-
-    /** PanelPeople ****************************************************/
-    // elt act dans tribu pour la tribu courante et le people courant
-    actPeC: (state) => {
-      const t = state.tribuC || state.tribu
-      if (!t) return null
-      const peId = state.session.peopleId
-      for (const e of t.act) 
-        if (e && e.id === peId) return e
     },
 
     // PageChats ******************************************
@@ -347,7 +323,6 @@ export const useAvatarStore = defineStore('avatar', {
       }
       return r
     }
-
   },
 
   actions: {

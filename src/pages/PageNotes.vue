@@ -253,7 +253,6 @@ import NotePlus from '../components/NotePlus.vue'
 // import XTest from '../components/XTest.vue'
 import { RattNote } from '../app/operations.mjs'
 import { putData, getData } from '../app/net.mjs'
-import { getNg } from '../app/modele.mjs'
 
 const icons = ['','person','group','group','description','article','close','close']
 const colors = ['','primary','orange','negative','primary','orange','primary','orange']
@@ -285,11 +284,11 @@ export default {
       if (n.type <= 3) return n.label
       if (n.type === 4) {
         const nomg = n.note.refn
-        const nom = getNg(n.note.id).nom
+        // const nom = getNg(n.note.id).nom
         return nomg ? this.$t('avatar3', [nom, nomg]) : this.$t('avatar2', [nom])
       }
       if (n.type === 5) {
-        const nom = getNg(n.note.id).nom
+        // const nom = getNg(n.note.id).nom
         return this.$t('groupe2', [nom])
       }
       const { id, ids } = splitPK(n.key)

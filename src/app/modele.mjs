@@ -10,12 +10,6 @@ import { DownloadFichier } from './operations.mjs'
 import { idb } from './db.mjs'
 
 // FAKE
-export const Versions = 0
-export function getCle() {}
-export const NomGenerique = 0
-export class Tribu {}
-export function setClet() {}
-export function getNg() {}
 export class Motscles {}
 
 // const decoder = new TextDecoder('utf-8')
@@ -932,6 +926,7 @@ export class Chat extends GenDoc {
 
     const cvE = await CV.set(row.cvE || CV.fake(this.idE))
     cvE.store()
+    this.vcv = cvE.v
     const cvI = session.getCV(this.id)
 
     this.items = []
@@ -1157,6 +1152,7 @@ export class Membre extends GenDoc {
     this.ida = Cles.id(clea)
     const cv = await CV.set(row.cvA || CV.fake(this.ida))
     cv.store()
+    this.vcv = cv.v
     this.msg = row.msgG ? ungzipB(await decrypter(cleg, row.msgG)) : ''
   } 
 

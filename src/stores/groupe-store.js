@@ -405,7 +405,6 @@ export const useGroupeStore = defineStore('groupe', {
 
     setMembre (membre) {
       if (!membre) return
-      const estAvc = this.session.compte.mav.has(membre.ida)
       const e = this.map.get(membre.id) // entrée du groupe
       if (!e) return
       if (membre._zombi) e.membres.delete(membre.ids)

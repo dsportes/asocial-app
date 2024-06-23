@@ -27,7 +27,7 @@
 <script>
 import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
-import { getNg } from '../app/modele.mjs'
+// import { getNg } from '../app/modele.mjs'
 import { ID } from '../app/api.mjs'
 import { dkli } from '../app/util.mjs'
 

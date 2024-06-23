@@ -187,7 +187,7 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
 import { MuterCompte } from '../app/operations.mjs'
-import { getNg, Tribu } from '../app/modele.mjs'
+// import { getNg, Tribu } from '../app/modele.mjs'
 import { crypterRSA } from '../app/webcrypto.mjs'
 import { StatutAvatar, ChangerPartition, DeleguePartition } from '../app/operations4.mjs'
 import { GetCompta, GetSynthese, GetPartition } from '../app/synchro.mjs'
@@ -208,7 +208,7 @@ export default {
     },
 
     naI () { return this.aSt.compte.na },
-    naE () { return getNg(this.id) },
+    // naE () { return getNg(this.id) },
     yo () { return this.chat && this.chat.yo },
     yoreq () { return (this.opt === 2 && !this.sta) || !this.sta },
     opt () { return this.session.espace.opt },
@@ -286,7 +286,7 @@ export default {
       const pub = await getPub(this.id)
       const trib = { idt: c.idt }
       if (this.sta) {
-        trib.idT = await Tribu.getIdT(c.clet, this.id)
+        // trib.idT = await Tribu.getIdT(c.clet, this.id)
         trib.cletX = c.cletX
         trib.cletK = await crypterRSA(pub, c.clet)
       }
@@ -379,7 +379,7 @@ export default {
     const aSt = stores.avatar
     const id = toRef(props, 'id')
     const na = ref()
-    na.value = getNg(id.value)
+    // na.value = getNg(id.value)
 
     return {
       na,

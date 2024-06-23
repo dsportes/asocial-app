@@ -71,7 +71,6 @@
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEN } from '../app/api.mjs'
-import { getNg } from '../app/modele.mjs'
 import { dkli, styp, splitPK } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
@@ -126,7 +125,7 @@ export default {
         } else if (this.idp && this.idp) { // rattachée à une note d'un groupe ou de l'avatar
           let rnom = ''
           if (ID.estGroupe(this.idp)) { // d'un groupe
-            const na = getNg(this.idp) // normalement le groupe "parent" est connu
+            // const na = getNg(this.idp) // normalement le groupe "parent" est connu
             if (na) rnom = na.nomc
           }
           ref = [this.idp, this.idsp, rnom]

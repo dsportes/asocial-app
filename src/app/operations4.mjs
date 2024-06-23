@@ -561,7 +561,8 @@ export class StatutAvatar extends Operation {
 /* OP_RafraichirCvsAv: 'Rafraichissement des CVs des chats de l\'avatar'
 - token : jeton d'authentification du compte de **l'administrateur**
 - id : id de l'avatar
-- membres: true si rafraichir les CV des membres des groupes auxquels le compte de l'avatar participe
+- lch : liste des chats. { ids, idE, vcv }
+- lmb : liste des membres: { id, im, ida, vcv}
 Retour: [nc, nv]
 - `nc`: nombre de CV mises à jour
 - `nv` : nombre de chats existants
@@ -571,11 +572,26 @@ EXC:
 export class RafraichirCvsAv extends Operation {
   constructor () { super('RafraichirCvsAv') }
 
-  async run (id, membres) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
+  async run (id, membres) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id }
-      if (membres) args.membres = true
+      const aSt = stores.avatar
+      const gSt = stores.groupe
+      const lch = []
+      const e = aSt.getElt(id)
+      if (e) for(const [ids, ch] of e.chats) 
+        lch.push({ ids, idE: ch.idE, vcv: ch.vcv })
+      const lmb = []
+      if (membres) {
+        for(const idg of session.compte.idGroupes(id)) {
+          const e = gSt.egr(idg)
+          if (e) {
+            for(const [im, mb] of e.membres)
+              lmb.push({ id: idg, im: im, vcv: mb.vcv, ida: mb.ida})
+          }
+        }
+      }
+      const args = { token: session.authToken, id, lch, lmb }
       const ret = await post(this, 'RafraichirCvsAv', args)
       return this.finOK(ret.ncnv)
     } catch (e) {
@@ -588,6 +604,7 @@ export class RafraichirCvsAv extends Operation {
 /* OP_RafraichirCvsGr: 'Rafraichissement des CVs des membres d\'un grouper'
 - token : jeton d'authentification du compte de **l'administrateur**
 - idg : id du groupe
+- lmb : liste des membres: { id, im, ida, vcv}
 Retour: [nc, nv]
 - `nc`: nombre de CV mises à jour
 - `nv` : nombre de chats existants
@@ -597,10 +614,18 @@ Exception générique:
 export class RafraichirCvsGr extends Operation {
   constructor () { super('RafraichirCvsGr') }
 
-  async run () { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
+  async run () {
     try {
       const session = stores.session
-      const args = { token: session.authToken, idg: session.groupeId }
+      const idg = session.groupeId
+      const gSt = stores.groupe
+      const lmb = []
+      const e = gSt.egr(idg)
+      if (e) {
+        for(const [im, mb] of e.membres)
+          lmb.push({ id: idg, im: im, vcv: mb.vcv, ida: mb.ida})
+      }
+      const args = { token: session.authToken, idg, lmb }
       const ret = await post(this, 'RafraichirCvsGr', args)
       return this.finOK(ret.ncnv)
     } catch (e) {
@@ -609,34 +634,6 @@ export class RafraichirCvsGr extends Operation {
     }
   }
 }
-
-/* OP_RafraichirCvChat: 'Rafraichissement de la carte de visite d\'un chat'
-- token : jeton d'authentification du compte de **l'administrateur**
-- id, ids : id du chat
-Retour:
-Exception générique:
-- 8001: avatar disparu
-- 8002: chat disparu
-*/
-export class RafraichirCvChat extends Operation {
-  constructor () { super('RafraichirCvChat') }
-
-  async run (id, ids) { // id: 0-tous people, id d'avatar:chats de id, id de groupe: membres du groupe
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, id, ids }
-      const ret = await post(this, 'RafraichirCvChat', args)
-      return this.finOK(ret.ncnv)
-    } catch (e) {
-      if (isAppExc(e)) {
-        if (e.code === 8001) return -1
-        if (e.code === 8002) return -2
-      }
-      await this.finKO(e)
-    }
-  }
-}
-
 
 /* OP_SetQuotas: 'Fixation des quotas d'un compte dans sa partition'
 - token: éléments d'authentification du compte.

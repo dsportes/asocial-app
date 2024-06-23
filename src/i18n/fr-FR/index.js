@@ -685,7 +685,6 @@ export default {
   OP_NouveauChat: 'Création d\'un "chat"',
   OP_MajChat: 'Mise à jour d\'un "chat".',
   OP_RafraichirCvsAv: 'Rafraichissement des CVs des chats de l\'avatar',
-  OP_RafraichirCvChat: 'Rafraichissement de la carte de visite d\'un chat',
   OP_NouvelAvatar: 'Création d\'un nouvel avatar du compte',
   OP_NouvellePartition: 'Création d\'une nouvelle partition',
   OP_SetNotifE: 'Inscription d\'une notification générale',

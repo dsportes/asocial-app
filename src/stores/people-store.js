@@ -229,6 +229,7 @@ export const usePeopleStore = defineStore('people', {
     },
 
     // retourne { na, cv, sp, chats: Set(), groupes: Map(idg, im)}
+    /*
     getPeople (id) {
       const e = this.map.get(id)
       if (!e) {
@@ -241,6 +242,7 @@ export const usePeopleStore = defineStore('people', {
       }
       return e
     },
+    */
   
     setDisparu (na) {
       const e = this.getElt(na, null, true)

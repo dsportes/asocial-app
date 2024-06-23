@@ -219,7 +219,7 @@ export class RattNote extends Operation {
   async run (id, ids, rid, rids, refn) {
     try {
       const session = stores.session
-      const cle = ID.estGroupe(id) ? getCle(id) : session.clek
+      // const cle = ID.estGroupe(id) ? getCle(id) : session.clek
       const ref = rid === 0 ? null : await crypter(cle, new Uint8Array(encode([rid, rids, refn])))
       const args = { token: session.authToken, id, ids, ref }
       this.tr(await post(this, 'RattNote', args))

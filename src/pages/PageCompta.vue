@@ -96,7 +96,6 @@ import PanelCredits from '../components/PanelCredits.vue'
 import MicroChat from '../components/MicroChat.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { dkli, edvol, afficher8000 } from '../app/util.mjs'
-import { getNg } from '../app/modele.mjs'
 import N3Icon from '../components/N3Icon.vue'
 import NotifIcon from '../components/NotifIcon.vue'
 import { UNITEN, UNITEV, ID } from '../app/api.mjs'
@@ -112,7 +111,6 @@ export default {
     // nbj () { return 5 },
     nbj () { return this.session.compte.nbj },
     nnbj () { return this.nbj > 40 ? 1 : (this.nbj > 10 ? 2 : 3)},
-    nac () { return getNg(this.session.compteId) },
     c () { return this.session.compta.compteurs },
     s ()  { return this.session.compta.solde },
     pc () { return this.c.pourcents },
