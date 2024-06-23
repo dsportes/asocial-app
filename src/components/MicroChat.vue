@@ -40,7 +40,6 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
-import ApercuChat from '../panels/ApercuChat.vue'
 import NouveauChat from '../dialogues/NouveauChat.vue'
 import BtnCond from './BtnCond.vue'
 import { ID } from '../app/api.mjs'

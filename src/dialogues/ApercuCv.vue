@@ -72,8 +72,7 @@ export default {
     },
 
     async refresh () {
-      const x = await new GetCv().run(this.cv.id)
-      if (x) cv = x
+      await new GetCv().run(this.cv.id)
     }
 
   },

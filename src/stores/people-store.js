@@ -284,10 +284,6 @@ export const usePeopleStore = defineStore('people', {
       this.delElt(id, e)
     },
 
-    setCv (na, cv) { // cv: { v, photo, info }
-      this.getElt(na, cv)
-    },
-
     del (id) {
       delete this.map[id]
     }

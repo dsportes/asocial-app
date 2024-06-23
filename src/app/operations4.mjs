@@ -937,7 +937,7 @@ export class GetCv extends Operation {
       let cv = null
       if (ret.cv) {
         const cle = RegCles.get(id)
-        cv = CV.set(ret.cv, cle)
+        cv = (await CV.set(ret.cv, cle)).store()
       }
       return this.finOK(cv)
     } catch (e) {
