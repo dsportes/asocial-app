@@ -197,7 +197,7 @@ export default {
     async editer (avecDon) {
       if (avecDon) {
         this.dconf = false
-        const idp = await new StatutAvatar().run(this.chat.idE)
+        const [ ,idp] = await new StatutAvatar().run(this.chat.idE)
         if (idp !== 0) {
           await afficherDiag(this.$t('CHauto'))
           return

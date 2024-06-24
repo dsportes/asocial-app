@@ -538,7 +538,8 @@ indique si l'avatar donné en argument est
 un avatar principal ou non, d'un compte autonome ou non
 - token : jeton d'authentification du compte de **l'administrateur**
 - id : id de l'avatar
-Retour: 
+Retour: [idc, idp]
+- `idc`: id du compte
 - `idp`: numéro de tranche de quota si compte "0", 0 si compte "A"
 */
 export class StatutAvatar extends Operation {
@@ -549,7 +550,7 @@ export class StatutAvatar extends Operation {
       const session = stores.session
       const args = { token: session.authToken, id }
       const ret = await post(this, 'StatutAvatar', args)
-      return this.finOK(ret.idp)
+      return this.finOK(ret.idcidp)
     } catch (e) {
       await this.finKO(e)
     }
@@ -711,6 +712,38 @@ export class SupprPartition extends Operation {
         n
       }
       await post(this, 'SupprPartition', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*  OP_MuterCompteO: 'Mutation d\'un compte A en compte O' ************
+- token: éléments d'authentification du compte.
+- id : id du compte devenant O
+- quotas: { qc, qn, qv }
+- cleAP : clé A du compte cryptée par la clé P de la partition
+- clePK : clé de la nouvelle partition cryptée par la clé publique du compte
+Retour:
+*/
+export class MuterCompteO extends Operation {
+  constructor () { super('MuterCompteO') }
+
+  async run (id, q) { // id du compte, id nouvelle partition
+    try {
+      const session = stores.session
+      const idp = session.compte.idp
+      const cleA = RegCles.get(id)
+      const cleP = RegCles.get(idp)
+      const cleAP = await crypter(cleP, cleA, 1)
+      const pub = await getPub(id)
+      const clePK = await crypterRSA(pub, cleP)
+      const args = {
+        token: session.authToken,
+        id, cleAP, clePK, quotas: { qc: q.qc, qn: q.qn, qv: q.qv}
+      }
+      await post(this, 'MuterCompteO', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

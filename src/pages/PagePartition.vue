@@ -52,7 +52,7 @@
         <div class="q-ml-lg">
           <apercu-genx v-if="type(c)!==3 && (session.compteId !== c.id)" :id="c.id" :idx="idx" :del="c.del"/>
 
-          <barre-people v-if="session.estComptable || session.estDelegue" :id="c.id"/>
+          <barre-people v-if="session.estComptable || session.estDelegue" :id="c.id" part />
 
           <chats-avec v-if="session.compteId !== c.id" class="q-mt-xs" 
             :idE="c.id" :del="(session.estComptable || session.estDelegue) || c.del"/>

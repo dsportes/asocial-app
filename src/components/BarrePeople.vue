@@ -161,9 +161,8 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
-import { MuterCompte } from '../app/operations.mjs'
-import { crypterRSA } from '../app/webcrypto.mjs'
-import { StatutAvatar, ChangerPartition, DeleguePartition, GetAvatarPC } from '../app/operations4.mjs'
+import { StatutAvatar, ChangerPartition, DeleguePartition, 
+  GetAvatarPC, MuterCompteO } from '../app/operations4.mjs'
 import { GetCompta, GetSynthese, GetPartition } from '../app/synchro.mjs'
 
 export default {
@@ -171,7 +170,7 @@ export default {
 
   components: { PhraseContact, BtnCond, EditeurMd, PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
 
-  props: { id: Number },
+  props: { id: Number, part: Boolean },
 
   computed: {
     cv () { return this.session.getCV(this.id) },
@@ -216,7 +215,7 @@ export default {
 
     async okpc (p) {
       const id = await new GetAvatarPC().run(p)
-      this.diag = this.id !== id ? this.$t('PPmutpc') : ''
+      this.diag = this.idcpt !== id ? this.$t('PPmutpc') : ''
     },
 
     async muter () {
@@ -224,7 +223,7 @@ export default {
         await afficherDiag(this.$t('PPchatreq'))
         return
       }
-      await new GetCompta().run(this.id)
+      await new GetCompta().run(this.idcpt)
       await new GetPartition().run(this.session.partition.id)
       const c = this.cpt.qv
       const s = this.session.partition.synth
@@ -245,24 +244,10 @@ export default {
     },
 
     async mut () {
-      /*
-      // await new GetCompteursCompta().run(this.id)
-      const c = this.aSt.compta
-      const pub = await getPub(this.id)
-      const trib = { idt: c.idt }
-      if (this.sta) {
-        // trib.idT = await Tribu.getIdT(c.clet, this.id)
-        trib.cletX = c.cletX
-        trib.cletK = await crypterRSA(pub, c.clet)
-      }
-      const quotas = !this.sta ? null : {
-        q1: this.quotas.q1,
-        q2: this.quotas.q2,
-        qc: this.quotas.qc
-      }
-      await new MuterCompte()
-        .run(this.id, this.st, this.chat, this.texte || this.txtdef, quotas, trib, this.aSt.ccCpt)
-      */
+      await new MuterCompteO().run(this.idcpt, this.quotas)
+      this.idp = this.session.partition.id
+      await new GetPartition().run(this.session.partition.id)
+      await new GetSynthese().run()
       this.ui.fD()
     },
 
@@ -335,20 +320,23 @@ export default {
   },
 
   setup (props) {
+    const session = stores.session
     const ui = stores.ui
     const idc = ref(ui.getIdc())
-    const partid = toRef(props, 'partid')
+    const part = toRef(props, 'part')
     const id = toRef(props, 'id')
-    const idp = ref(partid.value || 0)
+    const idp = ref(part.value ? session.partition.id : 0)
+    const idcpt = ref(id.value)
 
-    if (!partid.value) {
+    if (!part.value) {
       onMounted(async () => {
-        idp.value = await new StatutAvatar().run(id.value)
+        const [idc, idp] = await new StatutAvatar().run(id.value)
+        idp.value = idp
+        idcpt.value = idc
       })
     }
     return {
-      ID, styp, ui, idc, idp,
-      session: stores.session, 
+      ID, styp, ui, idc, idp, idcpt, session,      
       aSt: stores.avatar
     }
   }
