@@ -539,9 +539,7 @@ un avatar principal ou non, d'un compte autonome ou non
 - token : jeton d'authentification du compte de **l'administrateur**
 - id : id de l'avatar
 Retour: 
-- `st`: [P, A]
-  - P : true si avatar principal
-  - A : true si compte A
+- `idp`: numéro de tranche de quota si compte "0", 0 si compte "A"
 */
 export class StatutAvatar extends Operation {
   constructor () { super('StatutAvatar') }
@@ -550,8 +548,8 @@ export class StatutAvatar extends Operation {
     try {
       const session = stores.session
       const args = { token: session.authToken, id }
-      const ret = await post(this, 'StatutAavatar', args)
-      return this.finOK(ret.st)
+      const ret = await post(this, 'StatutAvatar', args)
+      return this.finOK(ret.idp)
     } catch (e) {
       await this.finKO(e)
     }

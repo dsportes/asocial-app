@@ -190,6 +190,8 @@ export const useSessionStore = defineStore('session', {
 
     notifPX: (state) => { return (id) => { return state.mnotifP.get(id) } },
 
+    // Elément mcpt du compte O id dans sa partition : {notif, del, q}
+    // Si non trouvé retourne { fake: true }
     eltPart: (state) => { return (id) =>  
       state.partition ? (state.partition.mcpt[id] || { fake: true }) : { fake: true }
     },

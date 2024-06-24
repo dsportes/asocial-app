@@ -257,7 +257,7 @@ export const useAvatarStore = defineStore('avatar', {
     getChatIdIE: (state) => {  return (idI, idE) => { 
         const e = state.map.get(idI)
         if (e) for (const [ids, chat] of e.chats) { 
-          if (chat.naE.id === idE) return chat
+          if (chat.idE === idE) return chat
         }
         return null
       }

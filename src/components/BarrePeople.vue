@@ -6,7 +6,7 @@
     <btn-cond v-if="session.estComptable && id !== session.compteId" 
       cond="cUrgence" :label="$t('PPchdel')" @ok="chgDelegue"/>
     <btn-cond v-if="comptaVis" cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
-    <btn-cond color="warning" icon="change_history"
+    <btn-cond v-if="idp === 0" color="warning" icon="change_history"
       cond="cEdit" class="justify-start" @ok="muter"
       :label="$t('PPmuter')">
       <q-tooltip>{{$t('PPmut')}}</q-tooltip>
@@ -17,61 +17,35 @@
   <q-dialog v-model="ui.d.BPmut[idc]" persistent>
     <q-card :class="styp('md')">
       <q-toolbar class="bg-secondary text-white">
-        <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+        <btn-cond color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
-          {{$t('PPmut') + ' ' + opt}}
+          {{$t('PPmut')}}
         </q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
 
-      <div class="q-pa-xs column q-gutter-sm">
-        <div class="titre-lg text-bold">{{$t('PPmut' + (sta ? 'A' : 'O'))}}</div>
-        <div v-if="yo" class="titre-md">{{$t('PPmutok')}}</div>
-        <div v-if="!yo" :class="'titre-md ' + (yoreq ? 'bg-yellow-5 text-bold text-black' : '')">
-          {{$t('PPmutko')}}
-        </div>
-        <div v-if="opt === 1 && !sta && !yo" class="titre-md text-bold">{{$t('PPmutf')}}</div>
+      <micro-chat class="q-pa-xs q-my-md" :chat="chat"/>
+      
+      <q-card-section>
+        <phrase-contact @ok="okpc" :orgext="session.org" declaration/>
+        <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
+      </q-card-section>
+      
+      <choix-quotas :quotas="quotas"/>
+      <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
+        {{$t('PPquot')}}
       </div>
 
-      <micro-chat class="q-pa-xs q-my-md" 
-        :chat="chat" :na-i="naI" :na-e="naE"/>
-      
-      <q-expansion-item v-if="sta" class="q-mt-sm" v-model="verif1"
-        :label="$t('PPmutv')" icon="warning"
-        header-class="bg-secondary text-white text-bold titre-md"
-        switch-toggle-side expand-separator dense group="trgroup">
-        <div class="q-pa-xs">
-          <choix-quotas :quotas="quotas"/>
-          <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
-            {{$t('PPquot')}}
-          </div>
-        </div>
-      </q-expansion-item>
-
-      <q-expansion-item class="q-my-sm"
-        :label="$t('PPmutm')" icon="edit"
-        header-class="bg-secondary text-white text-bold titre-md"
-        switch-toggle-side expand-separator dense group="trgroup">
-        <editeur-md class="q-pa-xs q-mt-sm"
+      <q-card-section>
+        <div class="titre-md">{{$t('PPmutmc')}}</div>
+        <editeur-md
           v-model="texte" :lgmax="250" modetxt editable mh="6rem"
           :texte="txtdef"/>
-      </q-expansion-item>
-
-      <div v-if="sta && (!verifd || quotas.err)" class="bg-yellow-5 text-black titre-md text-italic">
-        {{$t('PPmutv')}}</div>
-      <div v-if="!yo && yoreq" class="bg-yellow-5 text-black titre-md text-italic">
-        {{$t('PPmutreq')}}</div>
+      </q-card-section>
 
       <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
-        <q-btn dense color="primary" size="md" padding="xs" icon="undo" 
-          :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn v-if="!sta" 
-          :disable="!yo && yoreq"
-          dense color="warning" size="md" padding="xs" icon="change_history" 
-          :label="$t('PPmutA2')" @click="cf=true"/>
-        <q-btn v-else 
-          :disable="(!yo && yoreq) || quotas.err || !verifd"
-          dense color="warning" size="md" padding="xs" icon="change_history" 
+        <btn-cond icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+        <btn-cond :disable="(diag !== '') || quotas.err" color="warning" icon="change_history" 
           :label="$t('PPmutO2')" @click="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mut"/>
       </q-card-actions>
@@ -175,7 +149,7 @@
 </template>
 <script>
 
-import { ref, toRef } from 'vue'
+import { ref, toRef, onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
@@ -185,17 +159,17 @@ import BtnCond from '../components/BtnCond.vue'
 import MicroChat from '../components/MicroChat.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
+import PhraseContact from '../components/PhraseContact.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
 import { MuterCompte } from '../app/operations.mjs'
-// import { getNg, Tribu } from '../app/modele.mjs'
 import { crypterRSA } from '../app/webcrypto.mjs'
-import { StatutAvatar, ChangerPartition, DeleguePartition } from '../app/operations4.mjs'
+import { StatutAvatar, ChangerPartition, DeleguePartition, GetAvatarPC } from '../app/operations4.mjs'
 import { GetCompta, GetSynthese, GetPartition } from '../app/synchro.mjs'
 
 export default {
   name: 'BarrePeople',
 
-  components: { BtnCond, EditeurMd, PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
+  components: { PhraseContact, BtnCond, EditeurMd, PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
 
   props: { id: Number },
 
@@ -207,14 +181,10 @@ export default {
       (this.session.estDelegue && !this.session.eltPart(this.id).fake)) && this.id !== this.session.compteId 
     },
 
-    naI () { return this.aSt.compte.na },
-    // naE () { return getNg(this.id) },
-    yo () { return this.chat && this.chat.yo },
-    yoreq () { return (this.opt === 2 && !this.sta) || !this.sta },
     opt () { return this.session.espace.opt },
     chat () { return this.aSt.getChatIdIE(this.session.compteId, this.id) },
     cpt () { return this.session.compta },
-    txtdef () { return this.$t('PPmsg' + (this.sta ? 'a' : 'o'))}
+    txtdef () { return this.$t('PPmsgo', [this.session.partition.id])}
   },
 
   watch: {
@@ -224,8 +194,6 @@ export default {
   
   data () {
     return {
-      verif1: false,
-      verifd: false,
       texte: '',
       selx: null,
       filtre: '',
@@ -237,7 +205,8 @@ export default {
       stp: true, // avatar principal, 
       sta: true, // compte A
       cf: false,
-      quotas: {} // { q1, q2, qc, min1, min2, max1, max2, minc, maxc, err}
+      quotas: {}, // { q1, q2, qc, min1, min2, max1, max2, minc, maxc, err}
+      diag: ''
     }
   },
 
@@ -245,42 +214,38 @@ export default {
     edn (v) { return v * UNITEN },
     edv (v) { return edvol(v * UNITEV) },
 
+    async okpc (p) {
+      const id = await new GetAvatarPC().run(p)
+      this.diag = this.id !== id ? this.$t('PPmutpc') : ''
+    },
+
     async muter () {
-      if (!await this.session.edit()) return
       if (!this.chat) {
         await afficherDiag(this.$t('PPchatreq'))
         return
       }
-      const [p, a] = await new StatutAvatar().run(this.id)
-      this.stp = p
-      this.sta = a
-      if (!this.stp) {
-        await afficherDiag(this.$t('PPmut1'))
-        return
-      }
-      if (this.sta) {
-        // await new GetCompteursCompta().run(this.id)
-        const c = this.cpt.qv
-        const s = this.session.synthese
-        this.quotas = {
-          q1: c.q1,
-          q2: c.q2,
-          qc: c.qc,
-          min1: Math.ceil((c.nc + c.ng + c.nn) / UNITEN),
-          min2: Math.ceil(c.v2 / UNITEV),
-          minc: 0,
-          max1: s.q1 - s.a1,
-          max2: s.q2 - s.a2,
-          maxc: s.qc - s.ac
-        }
+      await new GetCompta().run(this.id)
+      await new GetPartition().run(this.session.partition.id)
+      const c = this.cpt.qv
+      const s = this.session.partition.synth
+      this.quotas = {
+        qn: c.qn,
+        qv: c.qv,
+        qc: 1,
+        minn: Math.ceil((c.nc + c.ng + c.nn) / UNITEN),
+        minv: Math.ceil(c.v / UNITEV),
+        minc: 1,
+        maxn: s.q.qn - s.qt.qn,
+        maxv: s.q.qv - s.qt.qv,
+        maxc: s.q.qc - s.qt.qc
       }
       this.cf = false
-      this.verif1 = false
-      this.verifd = false
+      this.diag = this.$t('PPmutpc2')
       this.ui.oD('BPmut', this.idc)
     },
 
     async mut () {
+      /*
       // await new GetCompteursCompta().run(this.id)
       const c = this.aSt.compta
       const pub = await getPub(this.id)
@@ -297,11 +262,8 @@ export default {
       }
       await new MuterCompte()
         .run(this.id, this.st, this.chat, this.texte || this.txtdef, quotas, trib, this.aSt.ccCpt)
+      */
       this.ui.fD()
-    },
-
-    async getCpt() {
-      await new GetCompta().run(this.id)
     },
 
     async voirCompta () { // comptable OU délégué
@@ -373,18 +335,21 @@ export default {
   },
 
   setup (props) {
-    const session = stores.session
     const ui = stores.ui
     const idc = ref(ui.getIdc())
-    const aSt = stores.avatar
+    const partid = toRef(props, 'partid')
     const id = toRef(props, 'id')
-    const na = ref()
-    // na.value = getNg(id.value)
+    const idp = ref(partid.value || 0)
 
+    if (!partid.value) {
+      onMounted(async () => {
+        idp.value = await new StatutAvatar().run(id.value)
+      })
+    }
     return {
-      na,
-      ID,
-      styp, session, aSt, ui, idc
+      ID, styp, ui, idc, idp,
+      session: stores.session, 
+      aSt: stores.avatar
     }
   }
 }
