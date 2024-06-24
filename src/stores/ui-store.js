@@ -124,6 +124,7 @@ export const useUiStore = defineStore('ui', {
       PCnvav: false, // PageCompte
       PCchgps: false,
       PCedq: false,
+      PCmuta: false,
       PAedprf: false, // PageAdmin
       PAcreationesp: false,
       PAcheckpoint: false,

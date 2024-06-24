@@ -719,6 +719,26 @@ export class SupprPartition extends Operation {
   }
 }
 
+/*  OP_MuterCompteA: 'Mutation du compte O en compte A' ************
+- token: éléments d'authentification du compte.
+Retour:
+*/
+export class MuterCompteA extends Operation {
+  constructor () { super('MuterCompteA') }
+
+  async run (id, q) { // id du compte, id nouvelle partition
+    try {
+      const session = stores.session
+      const args = { token: session.authToken }
+      await post(this, 'MuterCompteA', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+
 /*  OP_MuterCompteO: 'Mutation d\'un compte A en compte O' ************
 - token: éléments d'authentification du compte.
 - id : id du compte devenant O

@@ -14,6 +14,11 @@
       <!-- maj quotas du compte -->
       <btn-cond v-if="estDelegue || estA"
         icon="settings" :label="$t('CPTedq')" @ok="editerq" cond="cUrgence"/>
+      <btn-cond v-if="!estA" color="warning" icon="change_history"
+        cond="cEdit" class="justify-start" @ok="ui.oD('PCmuta')"
+        :label="$t('PPmuterA')">
+        <q-tooltip>{{$t('PPmutA')}}</q-tooltip>
+      </btn-cond>
     </div>
 
     <div class="row justify-center">
@@ -50,6 +55,24 @@
         </div>
       </div>
     </q-card>
+
+    <!-- Dialogue de confirmation de mutation en compte A -->
+    <q-dialog v-model="ui.d.PCmuta" persistent>
+      <q-card :class="styp('md')">
+        <q-toolbar class="bg-secondary text-white">
+          <btn-cond icon="close" color="warning" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPmutA')}}</q-toolbar-title>
+        </q-toolbar>
+        <div class="q-ma-sm text-center">
+          <span class="titre-lg">{{$t('PPmutA2')}}</span>
+          <bouton-help page="page2"/>
+        </div>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <bouton-confirm actif :confirmer="muterA"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <!-- Dialogue de création d'un nouvel avatar -->
     <q-dialog v-model="ui.d.PCnvav" persistent>
@@ -99,7 +122,7 @@
 <script>
 
 import stores from '../stores/stores.mjs'
-import { NouvelAvatar, ChangementPS } from '../app/operations4.mjs'
+import { NouvelAvatar, ChangementPS, MuterCompteA } from '../app/operations4.mjs'
 import { SetQuotas } from '../app/operations4.mjs'
 import { ExistePhrase } from '../app/synchro.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -135,6 +158,11 @@ export default {
   },
 
   methods: {
+    async muterA () {
+      await new MuterCompteA().run()
+      this.ui.fD()
+    },
+
     async ouvrirNvav () { 
       this.ui.oD('PCnvav')
       this.nomav = ''

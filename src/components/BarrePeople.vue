@@ -8,8 +8,8 @@
     <btn-cond v-if="comptaVis" cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
     <btn-cond v-if="idp === 0" color="warning" icon="change_history"
       cond="cEdit" class="justify-start" @ok="muter"
-      :label="$t('PPmuter')">
-      <q-tooltip>{{$t('PPmut')}}</q-tooltip>
+      :label="$t('PPmuterO')">
+      <q-tooltip>{{$t('PPmutO')}}</q-tooltip>
     </btn-cond>
   </div>
 
@@ -19,7 +19,7 @@
       <q-toolbar class="bg-secondary text-white">
         <btn-cond color="warning" icon="close" @click="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
-          {{$t('PPmut')}}
+          {{$t('PPmutO')}}
         </q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
@@ -46,7 +46,7 @@
       <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
         <btn-cond icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
         <btn-cond :disable="(diag !== '') || quotas.err" color="warning" icon="change_history" 
-          :label="$t('PPmutO2')" @click="cf=true"/>
+          cond="cUrgence" :label="$t('PPmutO2')" @click="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mut"/>
       </q-card-actions>
     </q-card>
@@ -244,7 +244,7 @@ export default {
     },
 
     async mut () {
-      await new MuterCompteO().run(this.idcpt, this.quotas)
+      await new MuterCompteO().run(this.idcpt, this.quotas, this.texte)
       this.idp = this.session.partition.id
       await new GetPartition().run(this.session.partition.id)
       await new GetSynthese().run()
@@ -330,9 +330,9 @@ export default {
 
     if (!part.value) {
       onMounted(async () => {
-        const [idc, idp] = await new StatutAvatar().run(id.value)
-        idp.value = idp
-        idcpt.value = idc
+        const [c, p] = await new StatutAvatar().run(id.value)
+        idp.value = p
+        idcpt.value = c
       })
     }
     return {
