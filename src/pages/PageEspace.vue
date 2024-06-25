@@ -21,8 +21,7 @@
     </div>
 
     <div class="q-mb-sm">
-      <q-select standout style="position:relative;top:-8px"
-        v-model="optionA" :options="options" dense />
+      <q-toggle v-model="optionA" :label="$t('PTopt')" />
     </div>
 
     <div class="text-center q-mb-sm">
@@ -200,17 +199,17 @@ export default {
       })
       return l
     },
-    optesp () { return this.session.espace ? this.session.espace.opt : 0 },
+    optesp () { return this.session.espace ? (this.session.espace.opt ? true : false) : false },
     nbmiesp () { return this.session.espace ? this.session.espace.nbmi : 12 }
   },
 
   watch: {
     // refixe les valeurs courantes de optionA et nbmi quand elles ont changé dans espace
-    optesp (ap) { this.optionA = this.options[ap] },
+    optesp (ap) { this.optionA = ap },
     nbmiesp (ap) { this.nbmi = this.session.espace ? this.session.espace.nbmi : 12 },
     async optionA (ap) {
-      if (this.session.espace && this.session.espace.opt !== ap.value) 
-        await new SetEspaceOptionA().run(this.optionA.value, null)
+      if (this.session.espace && ((this.session.espace.opt ? true : false) !== ap))
+        await new SetEspaceOptionA().run(this.optionA ? 1 : 0, null)
     },
     async nbmi (ap) {
       if (this.session.espace && this.session.espace.nbmi !== ap) 
@@ -319,7 +318,7 @@ export default {
       ligne: null,
       optionsNbmi: [3, 6, 12, 18, 24],
       nbmi: this.session.espace ? this.session.espace.nbmi : 12,
-      optionA: this.options[this.session.espace ? this.session.espace.opt : 0]
+      optionA: this.session.espace ? (this.session.espace.opt ? true : false) : false
     }
   },
 
@@ -337,12 +336,7 @@ export default {
 
     return {
       refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
-      ID, AMJ, dkli, styp, 
-      options: [
-        { label: $t('PTopt0'), value: 0 },
-        { label: $t('PTopt1'), value: 1 },
-        { label: $t('PTopt2'), value: 2 },
-      ],
+      ID, AMJ, dkli, styp,
       aSt: stores.avatar,
       fSt: stores.filtre,
       session: stores.session,
@@ -352,9 +346,6 @@ export default {
 
 }
 </script>
-<style lang="css">
-.q-item__section--avatar { min-width: 0 !important; }
-</style>
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .w10

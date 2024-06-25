@@ -1491,9 +1491,7 @@ export default {
   PTdlvata: 'DLV actuelle: {0}',
   PTdlvatf: 'DLV future: {0}',
   PTdlterm: 'Terminé: {0} mise(s) à jour faite(s)',
-  PTopt0: 'Pas de comptes "autonomes"',
-  PTopt1: 'Le Comptable peut rendre un compte "autonome" sans son accord',
-  PTopt2: 'Le Comptable NE peut PAS rendre un compte "autonome" sans son accord',
+  PTopt: 'Comptes "autonomes" autorisés',
 
   CAVtit: 'Chats avec :',
   CAVmb: 'Membre des groupes :',
