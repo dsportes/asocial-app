@@ -244,7 +244,7 @@ export default {
     },
 
     async mut () {
-      await new MuterCompteO().run(this.idcpt, this.quotas, this.texte)
+      await new MuterCompteO().run(this.idcpt, this.quotas, this.chat, this.texte)
       this.idp = this.session.partition.id
       await new GetPartition().run(this.session.partition.id)
       await new GetSynthese().run()

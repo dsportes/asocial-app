@@ -236,29 +236,13 @@ export class AjoutSponsoring extends Operation {
 }
 
 /*   OP_MajChat: 'Mise à jour d\'un "chat".'
-POST:
 - `token` : éléments d'authentification du compte.
-- `idI idsI` : id du chat, côté _interne_.
-- `idE idsE` : id du chat, côté _externe_.
-- `ccKI` : clé cc du chat cryptée par la clé K du compte de I. _Seulement_ si en session la clé cc était cryptée par la clé publique de I.
-- `txt1` : texte à ajouter crypté par la clé cc du chat.
-- `lgtxt1` : longueur du texte
-- `dh` : date-heure du chat dont le texte est à annuler.
-
-Si don:
-- `dbDon`: nouveau credits de compta du compte incorporant le don
-- `crDon`: don crypté par RSA du bénéficiaire idE à ajouter dans son compta.dons
-- `v`: version de compta du compte
-
+- id, ids: id du chat
+- t: texte gzippé crypté par la clé C du chat (null si suppression)
+- dh : 0 ou date-heure de l'item du chat à supprimer
+- don : montant du don de I à E
 Retour:
-- `KO`: true si régression de version de compta du compte
-- `st` :
-  0 : E a disparu, chat zombi.
-  1 : chat mis à jour.
-- `rowChat` : row du chat I.
-
-Assertions sur l'existence du row `Avatars` de l'avatar I, sa `Versions`, et le cas échéant la `Versions` de l'avatar E (quand il existe).
-*/
+- disp: true si E a disparu (pas de maj faite)*/
 export class MajChat extends Operation {
   constructor () { super('MajChat') }
 
@@ -750,7 +734,7 @@ Retour:
 export class MuterCompteO extends Operation {
   constructor () { super('MuterCompteO') }
 
-  async run (id, q) { // id du compte, id nouvelle partition
+  async run (id, q, chat, txt) { // id du compte, id nouvelle partition
     try {
       const session = stores.session
       const idp = session.compte.idp
@@ -761,7 +745,10 @@ export class MuterCompteO extends Operation {
       const clePK = await crypterRSA(pub, cleP)
       const args = {
         token: session.authToken,
-        id, cleAP, clePK, quotas: { qc: q.qc, qn: q.qn, qv: q.qv}
+        id, cleAP, clePK, 
+        quotas: { qc: q.qc, qn: q.qn, qv: q.qv},
+        t: txt ? await crypter(chat.clec, gzipB(txt)) : null,
+        ids: chat.ids
       }
       await post(this, 'MuterCompteO', args)
       this.finOK()
