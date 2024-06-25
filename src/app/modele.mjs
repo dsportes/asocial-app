@@ -933,17 +933,11 @@ export class Chat extends GenDoc {
     const a = []
     this.tit = ''
     this.dh = 0
-    let t1r = false
-    this.yo = false
     if (row.items) for (const it of row.items) {
       let t = ''
       if (it.t) {
         const y = await decrypter(this.clec, it.t)
         t = ungzipB(y)
-      }
-      if (!t1r && it.a === 1) {
-        if (t === '**YO**') this.yo = true
-        t1r = true
       }
       if (this.dh === 0) this.dh = it.dhx ? it.dhx : it.dh
       this.items.push({ a: it.a, t, dh: it.dh, dhx: it.dhx || 0})
@@ -1019,21 +1013,21 @@ export class Groupe extends GenDoc {
     this.sts = nx
   }
   
-  imDeId (id) { return this.mmb.get(id) || 0 }
+  // imDeId (id) { return this.mmb.get(id) || 0 }
 
   estRadie (im)  { return this.st[im] === 0 }
-  estContact (im) { return this.st[im] === 1 }
-  estPreInvite (im) { return this.st[im] === 2 }
+  // estContact (im) { return this.st[im] === 1 }
+  //.estPreInvite (im) { return this.st[im] === 2 }
   estInvite (im) { return this.st[im] === 3 }
   estActif (im) { return this.st[im] >= 4 }
   estAnim (im) { return this.st[im] === 5 }
   estAuteur (im) { const f = this.flags[im] || 0; 
     return im && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
-  estInvitable (id) { const im = this.mmb.get(id); 
-    return (!im || (this.st[im] === 1)) && !this.lnc.has(id) && !this.lng.has(id)
-  }
-  estContactable (id) { return !this.mmb.get(id) && !this.lnc.has(id) && !this.lng.has(id) }
+  // estInvitable (id) { const im = this.mmb.get(id); 
+  //  return (!im || (this.st[im] === 1)) && !this.lnc.has(id) && !this.lng.has(id)
+  //}
+  // estContactable (id) { return !this.mmb.get(id) && !this.lnc.has(id) && !this.lng.has(id) }
 
   estHeb (im) { return this.estActif(im) && im === this.imh }
 
@@ -1046,11 +1040,13 @@ export class Groupe extends GenDoc {
     s.forEach(im => { if (this.accesMembre(im)) b = true})
     return b
   }
+  /*
   accesMembreNA (im) { // accès aux membres NON activé 0: pas accès
     if (!im || !this.estActif(im)) return 0
     const f = this.flags[im] || 0
     return (f & FLAGS.AC) && !(f & FLAGS.AM) && (f & FLAGS.DM) ? 1 : 0
   }
+  */
 
   accesNote (im) {
     const f = this.flags[im] || 0;
@@ -1067,10 +1063,12 @@ export class Groupe extends GenDoc {
     s.forEach(im => { if (this.accesNote(im)) b = true})
     return b
   }
+  /*
   accesNoteE (im) {
     const f = this.flags[im] || 0;
     return im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DE) 
   }
+  */
   accesLecNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
     const f = this.flags[im] || 0 
     if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN)) return 1
@@ -1086,18 +1084,20 @@ export class Groupe extends GenDoc {
   - 0:pas activable 
   - 1: déjà activé
   - 2:activable en lect, 
-  - 3:activable en ecr */
+  - 3:activable en ecr 
   accesNoteNA (im) { 
     const f = this.flags[im] || 0
     if (!im || !this.estActif(im) || !(f & FLAGS.DN)) return 0
     return !(f & FLAGS.AN) ? (f & FLAGS.DE ? 3 : 2) : 1
   }
-
+  */
+  /*
   actifH (im) { // 0:jamais, 1:oui, 2:l'a été, ne l'est plus
     const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
     if (f & FLAGS.AC) return 1
     return h & FLAGS.HA ? 2 : 0
   }
+  */
   accesMembreH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
     const f = this.flags[im] || 0
     if ((f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM)) return 1
@@ -1109,10 +1109,12 @@ export class Groupe extends GenDoc {
   // mis dans la liste noire par le compte lui-même
   enLNC (ida) { return this.lnc.has(ida) }
 
+  /*
   get mbHeb () { // membre hébergeur
     const gSt = stores.groupe
     return  this.dfh ? null : gSt.getMembre(this.id, this.imh)
   }
+  */
 
 }
 
@@ -1221,46 +1223,44 @@ _data_:
 - `ht` : liste des hashtags _personnels_ cryptée par la clé K du compte.
 - `htg` : note de groupe : liste des hashtags cryptée par la clé du groupe.
 - `htm` : NON TRANSMIS en session pour une note de groupe seulement, hashtags des membres. Map:
-    - _clé_ : id courte du compte de l'auteur,
+    - _clé_ : id du compte de l'auteur,
     - _valeur_ : liste des hashtags cryptée par la clé K du compte.
 - `l` : liste des _auteurs_ (leurs `im`) pour une note de groupe.
 - `d` : date-heure de dernière modification.
 - `texte` : texte (gzippé) crypté par la clé de la note.
 - `mfa` : map des fichiers attachés.
-- `ref` : triplet `[id_court, ids, nomp]` crypté par la clé de la note, référence de sa note _parent_.
+- `ref` : `[id, ids]` référence de sa note _parent_.
 
 **Map `mfas` des fichiers attachés dans une note:**
 - _clé_ `idf`: identifiant du fichier.
-- _valeur_ : { lg, datas }
+- _valeur_ : [ lg, data ]
   - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v d'un note.
   - `data` : sérialisation cryptée par la clé de la note de : `{ nom, info, dh, type, gz, lg, sha }`.
-
 */
 export class Note extends GenDoc {
+  static clen (id) { return ID.estGroupe(id) ? RegCles.get(id) : stores.session.clek }
+
   async compile (row) {
     this.vsh = row.vsh || 0
     this.deGroupe = ID.estGroupe(this.id)
-    const clek = stores.session.clek
-    const cleg = this.deGroupe ? RegCles.get(this.id) : null
+    this.cle = this.deGroupe ? RegCles.get(this.id) : stores.session.clek
 
     this.im = row.im || 0
-    if (row.ht) this.ht = await decrypter(clek, row.ht)
-    if (row.htg) this.htg = await decrypter(cleg, row.htg)
+    this.ht = (row.ht && !this.deGroupe) ? await decrypter(this.cle, row.ht) : []
+    this.htg = (row.htg && this.deGroupe) ? await decrypter(this.cle, row.htg) : []
     this.l = row.l || []
     this.d = row.d || 0
 
-    const t = await decrypter(this.deGroupe ? cleg : clek, row.texte)
+    const t = await decrypter(this.cle)
     this.texte = ungzipB(t)
     this.titre = titre(this.texte)
 
-    // row.ref à une id de note COURTE
     this.ref = row.ref || null
-    if (this.ref) this.ref[0] = this.ref[0]
 
     this.mfa = new Map()
     if (this.vf && row.mfa) for (const idf in row.mfa) {
       const [lg, x] = row.mfa[idf]
-      const f = decode(await decrypter(this.deGroupe ? cleg : clek, x))
+      const f = decode(await decrypter(this.cle, x))
       f.idf = parseInt(idf)
       this.mfa.set(f.idf, f)
     }
@@ -1281,9 +1281,7 @@ export class Note extends GenDoc {
   static estG (key) { return key.charAt(2) === '3' }
   static fake = { txt: '', dh: 0 }
 
-  static clen (id) { return ID.estGroupe(id) ? getCle(id) : stores.session.clek }
 
-  get cle () { return Note.clen(this.id)}
   get ng () { return getNg(this.id) }
   get key () { return this.id + '/' + this.ids }
   get rkey () { return '' + this.id }
@@ -1296,7 +1294,6 @@ export class Note extends GenDoc {
   get shIds () { return ('' + (this.ids % 1000)).padStart(3, '0')}
 
   get nomFake () { return '$' + this.rids }
-
 
   /*
   initTest (id, ids, ref, txt, dh, n, v) { // pour les tests
