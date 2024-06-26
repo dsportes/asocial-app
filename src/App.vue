@@ -234,7 +234,7 @@
           <filtre-nom nom="notes" prop='note' :idx="0"/>
           <filtre-mc nom="notes" attr="mcp" :idx="1"/>
           <filtre-mc nom="notes" attr="mcn" :idx="0"/>
-          <filtre-vols nom="notes" attr="v2" :idx="1"/>
+          <filtre-vols nom="notes" attr="vf" :idx="1"/>
         </div>
       </div>
     </q-scroll-area>

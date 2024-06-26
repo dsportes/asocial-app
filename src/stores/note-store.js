@@ -19,7 +19,8 @@ export const useNoteStore = defineStore('note', {
       key : 'id/ids'
       rkey : 'id' (clé de sa racine)
       note : absent pour une fake
-      pfx : préfixe [nom] du label (ou '')
+      pfx : [nom du groupe] pour une note avatar rattachée à une note de groupe ou un groupe
+        figure devant le titre de la note dans le label
       label :
         - réelle : titre de la note
         - fake : $56789 (id en chiffres)
@@ -65,6 +66,7 @@ export const useNoteStore = defineStore('note', {
     session: (state) => stores.sesion,
     aSt: (state) => stores.avatar,
     gSt: (state) => stores.groupe,
+    ui: (state) => stores.ui,
 
     // Pour le node courant
     note: (state) => { return state.node ? state.node.note : null },
@@ -121,12 +123,12 @@ export const useNoteStore = defineStore('note', {
     aptes à recevoir l'exclusivité, sauf celui actuel */
     lstImNa (state) { 
       const lx = []
-      const egr = gSt.egr(n.id)
-      if (!egr) return lx
-      const gr = egr.groupe
-      const id = state.note.id
+      if (!state.egr) return lx
+      const gr = state.egr.groupe
       const acMNE = gr.aUnAccesMNE(state.session.compte.mav)
       if (!acMNE) return lx
+
+      const id = state.note.id
       const anim = egr.estAnim
       const xav = state.mbExclu // retourne { avc: true/false, ida, im, nom } ou null s'il n'y a pas d'exclusivité
 
@@ -157,6 +159,7 @@ export const useNoteStore = defineStore('note', {
       return lx
     },
     
+    /*
     nbjTemp: (state) => {
       const n = state.note
       if (!n || n.st === 99999999) return 0
@@ -173,6 +176,7 @@ export const useNoteStore = defineStore('note', {
       n.auts.forEach(im => { l.push(gSt.getMembre(n.id, im)) })
       return l
     },
+    */
 
     estGr: (state) => { 
       return state.node && state.node.note && ID.estGroupe(state.node.note.id)
@@ -188,11 +192,13 @@ export const useNoteStore = defineStore('note', {
       return gSt.egr(state.node.note.id)
     },
 
+    /*
     eav: (state) => {
       if (!state.estAv) return null
       const aSt = stores.avatar
       return eSt.getElt(state.node.note.id)
     },
+    */
 
     // get de l'entrée Note
     getNode: (state) => { return (id, ids) => {  // id / ids ou pk (id/ids)
@@ -231,19 +237,19 @@ export const useNoteStore = defineStore('note', {
       }
     },
 
-    // Retourne une map de clé racine et de valeur { nn: nombre de notes, v2 }
+    // Retourne une map de clé racine et de valeur { nn: nombre de notes, vf }
     statsParRacine: (state) => {
       const m = {}
       for (const [key, node] of state.map) {
         const {id, ids} = splitPK(key)
         if (node.type >= 4 && node.type <= 5) {
-          let e = m[id]; if (!e) { e = { nn: 0, v2: 0 }; m[id] = e }
+          let e = m[id]; if (!e) { e = { nn: 0, vf: 0 }; m[id] = e }
           e.nn++
-          e.v2 += node.note.v2
+          e.vf += node.note.vf
         }
       }
       for (const r of state.nodes) {
-        if (!m[r.key]) m[r.key] = { nn: 0, v2: 0 }
+        if (!m[r.key]) m[r.key] = { nn: 0, vf: 0 }
       }
       return m
     }
@@ -253,8 +259,7 @@ export const useNoteStore = defineStore('note', {
   actions: {
     calculNfnt () {
       const m = {}
-      const ui = stores.ui
-      if (ui.page === 'notes') {
+      if (this.ui.page === 'notes') {
         this.nodes.forEach(n => m[n.key] = { nf: 0, nt: 0 })
         this.map.forEach(node => {
           const ok = this.filtrage(node)
@@ -278,7 +283,7 @@ export const useNoteStore = defineStore('note', {
       if (f.avgr && n.id !== f.avgr) return false
       if (f.lim && n.dh && n.dh < f.lim) return false
       if (f.note && n.txt && n.txt.indexOf(f.note) === -1) return false
-      if (f.v2 && n.v2 < f.v2) return false
+      if (f.vf && n.vf < f.vf) return false
       if (f.mcp && n.smc && difference(f.mcp, n.smc).size) return false
       if (f.mcn && n.smc && intersection(f.mcn, n.smc).size) return false
       return true
@@ -487,15 +492,14 @@ export const useNoteStore = defineStore('note', {
     },
 
     delNote (id, ids) {
-      const session = stores.session
       const key = id + '/' + ids
       const n = this.map.get(key)
       if (!n || !n.note) return // note inexistante ou était déjà fake
 
-      const npkey = n.note.refk || '' + id // parent avatar / groupe ou autre note
+      const npkey = n.note.refk || '' + id // node parent: avatar, roupe ou autre note
       const np = this.map.get(npkey)
 
-      if (!n.note.refk || !n.note.ref[1]) {
+      if (!n.note.ref /* pas rattachée */ || !n.note.ref[1] /* rattachée à une racine groupe */) {
         // était rattachée à UNE racine (la sienne ou un groupe pour un avatar) - devient fake ou supprimée
         if (n.children.length) { // a des enfants : devient fake
           n.note = null
@@ -512,18 +516,18 @@ export const useNoteStore = defineStore('note', {
             if (!np.children.length) {
               // avatar ou groupe zombi inutile
               this.map.delete(np.key)
-              // par convention on sépliera la racine du compte
+              // par convention on dépliera la racine du compte
               cpt = true
             }
           }
           this.map.delete(n.key) // note simplement supprimée (puisqu'elle n'a pas d'enfant)
-          this.setPreSelect(cpt ? '' + session.compteId : npkey) // la racine ou celle du compte s'ouvre
+          this.setPreSelect(cpt ? '' + this.session.compteId : npkey) // la racine ou celle du compte s'ouvre
         }
         this.calculNfnt()
         return
       }
 
-      // La note était rattachée à une autre note
+      // La note supprimée était rattachée à une autre note np
 
       if (!n.children.length) {
         // elle n'avait pas d'enfants
@@ -536,17 +540,17 @@ export const useNoteStore = defineStore('note', {
         return
       }
 
-      // note rattachée ayant des enfants : DEVIENT UNE FAKE rattachée à sa racine
+      // la note supprimée avait des enfants : elle DEVIENT UNE FAKE rattachée à sa racine
       // on l'enlève de son parent
       const a = []
       np.children.forEach(c => { if (c.key !== key) a.push(c)})
       np.children = a
 
-      n.note = null
       n.type = Note.estG(n.rkey) ? 7 : 6
-      // refn SI c'était une note d'avatar rattachée à une note de groupe
-      const refn = (!Note.estG(n.key) && Note.estG(np.key)) ? np.rkey : '' 
-      this.rattachRac (n, refn)
+      // SI c'était une note d'avatar rattachée à une note de groupe
+      // const refn = (!Note.estG(n.key) && Note.estG(np.key)) ? np.rkey : '' 
+      n.note = null
+      this.rattachRac (n)
       this.setLabel(n)
       this.setPreSelect(n.key) // elle sera dépliée
       this.calculNfnt()
@@ -569,28 +573,34 @@ export const useNoteStore = defineStore('note', {
         this.setLabel(nr)
         this.map.set(key, nr)
         // On rattache la note de rattachement à sa racine
-        this.rattachRac(nr, n.note.refn)
+        this.rattachRac(nr)
       }
     },
 
-    rattachRac (n, refn) { // n peut être réelle ou fake (rkey donne la clé de sa racine)
+    rattachRac (n) { // n peut être réelle ou fake (rkey donne la clé de sa racine)
       let r = this.map.get(n.rkey) // racine
-      if (r) {
+      if (r) { // Racine existante
         r.children.push(n)
         r.children.sort(Node.sort1)
-      } else {
-        if (Note.estG(n.rkey)) { // la racine est un groupe
-          // création d'un groupe zombi et rattachement à lui
-          const x = refn || (n.note ? n.note.refn : '???')
-          const r = this.setRacine(n.rkey, 3, refn)
-          r.children.push(n)
-        }
+      } else { 
+        // Racine NON existante.
+        const r = this.setRacine(n.rkey, 3)
+        r.children.push(n)
       }
     },
 
-    setRacine (key, type, nom) { // on ajoute un node pour l'avatar juste à la racine
+    setRacine (key, type) { // on ajoute un node pour l'avatar juste à la racine
       let n = this.map.get(key)
       if (!n) {
+        const id = parseInt(key)
+        let nom = '' + id
+        const cv = this.session.getCV(id)
+        if (cv.v) nom = cv.nomC
+        else {
+          const compti = this.session.compti
+          const e = compti.mc.get(this.ref[0])
+          if (e) nom = titre(e.tx)
+        }
         n = { 
           nb: 0,
           type,
@@ -612,11 +622,11 @@ export const useNoteStore = defineStore('note', {
       let pfx = '', sfx = ''
       if (n.type === 4 && n.note.refrk) {
         if (n.note.refrk !== n.rkey) {
-          // note avatar rattachée à une note ayant une racine différente
+          // note avatar rattachée à une note de groupe (ayant une racine différente)
           pfx = '[' + this.map.get(n.rkey).label + ']'
         } else {
           const nr = this.map.get(n.note.refk)
-          // note ratachée à une note ayant un préfixe : reconduction du préfixe
+          // note avatar rattachée à une note avatar ayant un préfixe : reconduction du préfixe
           if (nr && nr.pfx) pfx = nr.pfx
         }
       }
@@ -632,13 +642,11 @@ export const useNoteStore = defineStore('note', {
     },
 
     setAvatar (id) { // on ajoute un node pour l'avatar juste à la racine
-      const nom = stores.people.getCV(id).nom
-      this.setRacine('' + id, 1, nom)
+      this.setRacine('' + id, 1)
     },
 
     setGroupe (id) { // on ajoute un node pour le groupe juste à la racine
-      const nomC = stores.people.getCV(id).nomC
-      this.setRacine('' + id, 2, nomC)
+      this.setRacine('' + id, 2)
     },
 
     delAvatar (id) { // TODO

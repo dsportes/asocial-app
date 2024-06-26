@@ -1304,7 +1304,7 @@ export class Note extends GenDoc {
     return x < y ? -1 : (x === y ? 0 : 1)
   }
 
-  static estG (key) { return key.charAt(2) === '3' }
+  static estG (key) { return key.charAt(0) === '3' }
   static fake = { txt: '', dh: 0 }
 
   get key () { return this.id + '/' + this.ids }
@@ -1316,14 +1316,20 @@ export class Note extends GenDoc {
 
   // get refn () {  return this.ref && this.ref.length === 3 ? this.ref[2] : ''}
 
-  get refn () { if (!this.deGroupe || !this.ref) return ''
+  /* Nom du groupe auquel est rattaché la note - Permet de qualifier un groupe disparu / radié
+  - soit nomC de sa CV si c'est une vraie CV
+  - soit le commentaire donné par le compte (attribué par défaut à acceptation d'invitation)
+  - soit ...6789 les 4 derniers chiffres de son id
+  */
+  get refn () { 
+    if (this.deGroupe || !this.ref) return ''
     const session = stores.session
     const cv = session.getCV(this.ref[0])
     if (cv.v) return cv.nomC
     const compti = session.compti
     const e = compti.mc.get(this.ref[0])
     if (e) return titre(e.tx)
-    return '...' + ('' + this.ref[0]).substring(12)
+    return null
   }
 
   get shIds () { return ('' + (this.ids % 1000)).padStart(3, '0')}

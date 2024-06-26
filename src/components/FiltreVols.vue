@@ -37,7 +37,7 @@ export default ({
     const attr = toRef(props, 'attr')
 
     const vols = {
-      v2: [1000000, 10000000, 100000000, 1000000000]
+      vf: [1000000, 10000000, 100000000, 1000000000]
     }
     const options = ref([])
     options.value.push({ value: 0, label: $t('nolimite')})
