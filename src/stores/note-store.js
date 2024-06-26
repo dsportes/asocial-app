@@ -9,18 +9,17 @@ export const useNoteStore = defineStore('note', {
     /* 
     note 
       key: 'id/ids' (clé de la note)
-      rkey: 'id' (clé de sa racine)
-      refk: 'id/ids de ref' (clé de sa note de rattachement)
-      refrk: 'id de ref' (clé de la racine de sa note de rattachement)
-      refn: nom du groupe de ref (nom du groupe de sa note de rattachement)
 
+      // rkey: 'id' (clé de sa racine)
+      refk: 'id/ids de ref' (clé de sa note de rattachement)
+      // refrk: 'id de ref' (clé de la racine de sa note de rattachement)
     node
       type
       key : 'id/ids'
-      rkey : 'id' (clé de sa racine)
+      rac : id de sa racine dans l'arbre
+      // rkey : 'id' (clé de sa racine)
       note : absent pour une fake
-      pfx : [nom du groupe] pour une note avatar rattachée à une note de groupe ou un groupe
-        figure devant le titre de la note dans le label
+      npg : pour type 4 seulement, true si la note parent est une note de groupe
       label :
         - réelle : titre de la note
         - fake : $56789 (id en chiffres)
@@ -394,11 +393,12 @@ export const useNoteStore = defineStore('note', {
       if (!note) return
       const key = note.key
       let n = this.map.get(key)
-      if (!note.ref) { // note rattachée à la racine
+      if (!note.ref) { // note rattachée à la racine de son avatar / groupe
         if (n) { // elle existait - remplacement - fake ou pas, elle devient réelle
           if (!n.note) n.type -= 2 // si c'était une fake, elle est réelle
-          const nrav = n.note ? n.note.refk : '' // rattachement AVANT
+          const nrav = n.note ? n.note.refk : null // rattachement AVANT
           n.note = note
+          n.rac = note.id
           if (nrav) {
             // elle était attachée à une note : on la détache de celle-ci
             this.detachNote(n, nrav)
@@ -408,8 +408,9 @@ export const useNoteStore = defineStore('note', {
         } else {
           // création d'une note réelle à la racine
           n = {
-            rkey: note.rkey,
+            // rkey: note.rkey,
             key: key,
+            rac: note.id,
             type: Note.estG(key) ? 5 : 4,
             note: note,
             children: []
@@ -505,14 +506,12 @@ export const useNoteStore = defineStore('note', {
           n.note = null
           n.type = Note.estG(n.rkey) ? 7 : 6
           this.setLabel(n)
-        } else {
-          // note à supprimer de sa racine
-          const a = []
-          np.children.forEach(c => { if (c.key !== key) a.push(c)})
-          np.children = a
+        } else { // la note n'a pas d'enfants
+          // à supprimer des enfants de sa racine
+          const a = []; np.children.forEach(c => { if (c.key !== key) a.push(c)}); np.children = a
           let cpt = false
           if (np.type === 3) {
-            // c'est une racine groupe "zombi" : inutile ?
+            // c'est une racine groupe "zombi"
             if (!np.children.length) {
               // avatar ou groupe zombi inutile
               this.map.delete(np.key)
@@ -529,12 +528,12 @@ export const useNoteStore = defineStore('note', {
 
       // La note supprimée était rattachée à une autre note np
 
-      if (!n.children.length) {
-        // elle n'avait pas d'enfants
+      if (!n.children.length) { // elle n'avait pas d'enfants
+        // elle est retirée de la liste des enfants de son parent
         const a = []
         np.children.forEach(c => { if (c.key !== key) a.push(c)})
         np.children = a
-        this.map.delete(n.key) // note simplement supprimée (puisqu'elle n'a pas d'enfant)
+        this.map.delete(n.key) // elle est simplement supprimée
         this.setPreSelect(npkey) // son parent s'ouvrira
         this.calculNfnt()
         return
@@ -577,14 +576,14 @@ export const useNoteStore = defineStore('note', {
       }
     },
 
-    rattachRac (n) { // n peut être réelle ou fake (rkey donne la clé de sa racine)
-      let r = this.map.get(n.rkey) // racine
+    rattachRac (n) { // n peut être réelle ou fake (rac donne l'id de sa racine)
+      let r = this.map.get('' + n.rac) // racine
       if (r) { // Racine existante
         r.children.push(n)
         r.children.sort(Node.sort1)
       } else { 
         // Racine NON existante.
-        const r = this.setRacine(n.rkey, 3)
+        const r = this.setRacine('' + n.rac, 3) // Groupe _zombi_
         r.children.push(n)
       }
     },
@@ -592,21 +591,11 @@ export const useNoteStore = defineStore('note', {
     setRacine (key, type) { // on ajoute un node pour l'avatar juste à la racine
       let n = this.map.get(key)
       if (!n) {
-        const id = parseInt(key)
-        let nom = '' + id
-        const cv = this.session.getCV(id)
-        if (cv.v) nom = cv.nomC
-        else {
-          const compti = this.session.compti
-          const e = compti.mc.get(this.ref[0])
-          if (e) nom = titre(e.tx)
-        }
         n = { 
           nb: 0,
           type,
           key,
-          rkey: key,
-          label: nom,
+          rac: parseInt(key),
           children: []
         }
         this.map.set(key, n)

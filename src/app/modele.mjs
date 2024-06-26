@@ -160,6 +160,8 @@ export class CV {
     return l.length < 16 ? l : l.substring(0, 16)
   }
 
+  get nom8 () { const n = this.nom; return n.length < 8 ? n : n.substring(0, 6) + '...' }
+
   get nomC () {
     if (!this.tx) return this.texte
     const s = '' + this.id

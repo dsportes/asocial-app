@@ -366,7 +366,7 @@ export default {
         this.selected = n.key
     },
 
-    lib (n) {
+    lib1 (n) {
       const nfnt = this.nSt.nfnt[n.key] || { nf: 0, nt:0 }
       if (n.type > 3)
         return (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') + n.label
@@ -374,6 +374,36 @@ export default {
       return this.$t('groupe1', [n.label, nfnt.nf, nfnt.nt])
     },
  
+    lib (n) {
+      const nfnt = this.nSt.nfnt[n.key] || { nf: 0, nt:0 }
+      switch (n.type) {
+        case 1 : {
+          const nom = this.pSt.getCV(parseInt(n.key)).nom
+          return this.$t('avatar1', [nom, nfnt.nf, nfnt.nt])
+        }
+        case 2 : 
+        case 3 : {
+          const nom = this.gSt.nom(parseInt(n.key)).nom
+          return this.$t('groupe1', [nom, nfnt.nf, nfnt.nt])
+        }
+        case 4 : 
+        case 5 : {
+          return (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') +
+          (n.rac !== n.note.id ? '(' + this.gSt.nom(n.rac).nom8 + ')' : '' ) + 
+          n.note.titre
+        }
+        case 6 : 
+        case 7 : {
+          return (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '')
+        }
+      }
+
+      if (n.type > 3)
+        return (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') + n.label
+      if (n.type === 1) return this.$t('avatar1', [n.label, nfnt.nf, nfnt.nt])
+      return this.$t('groupe1', [n.label, nfnt.nf, nfnt.nt])
+    },
+
     async noteedit1 () {
       if (this.nSt.note.p) {
         await afficherDiag($t('PNOarchivee'))

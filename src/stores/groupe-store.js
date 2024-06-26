@@ -62,7 +62,15 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
-    // 
+    nom: (state) => { return (id) => {
+        const cv = state.pSt.getCV(id)
+        if (cv.v) return cv.nomC
+        const compti = state.session.compti
+        const e = compti.mc.get(this.ref[0])
+        if (e) return titre(e.tx)
+        return '#' + id
+      }
+    },
 
     amb: (state) => { return (id) => { 
         const e = state.map.get(id)
