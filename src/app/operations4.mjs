@@ -1283,6 +1283,7 @@ export class InvitationGroupe extends Operation {
 - cleGK: cle du groupe cryptée par la clé K du compte
 - cas: 1:accepte 2:contact 3:radié 4:radié + LN
 - msgG: message de remerciement crypté par la cle G du groupe
+- httx: { ht, tx } à attacher à idg s'il n'y en a pas
 Retour:
 EXC: 
 - 8002: groupe disparu
@@ -1295,11 +1296,18 @@ export class AcceptInvitation extends Operation {
     try {
       const session = stores.session
       const cleg = RegCles.get(inv.idg)
-      
+      let txK = null
+
+      if (session.compti.mc.has(inv.idg)) {
+        const cv = session.getCV(inv.idg)
+        txK = await crypter(session.clek, gzipB(cv.nomC))
+      }
+
       const args = { token: session.authToken, 
         idg: inv.idg, 
         idm: inv.ida,
         cas, iam, ian,
+        httx,
         cleGK: await crypter(session.clek, cleg),
         msgG: await crypter(cleg, gzipB(msg))
       }

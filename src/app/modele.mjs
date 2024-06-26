@@ -687,7 +687,7 @@ export class Compti extends GenDoc {
     if (row.mc) for(const idx in row.mc) {
       const x = row.mc[idx]
       const id = parseInt(idx)
-      const y = x.ht ? await decrypterStr(clek, x.ht) : ''
+      const y = x.ht ? await decrypterStr(clek, x.ht) : null
       const ht = new Set(y ? y.split(' ') : new Set())
       let tx = ''
       const b = x.tx ? await decrypter(clek, x.tx) : null
@@ -1047,6 +1047,14 @@ export class Groupe extends GenDoc {
     return (f & FLAGS.AC) && !(f & FLAGS.AM) && (f & FLAGS.DM) ? 1 : 0
   }
   */
+ // A un accès aux membres et aux notes en écriture
+  aUnAccesMNE (s) { // Set des im
+    let b = false
+    s.forEach(im => { 
+      if (this.accesMembre(im) || this.accesNote2(im) === 2) b = true
+    })
+    return b
+  }
 
   accesNote (im) {
     const f = this.flags[im] || 0;
@@ -1218,24 +1226,39 @@ _data_:
 - `ids` : identifiant aléatoire relatif à son avatar.
 - `v` : 1..N.
 
+- `rds`:
 - `im` : exclusivité dans un groupe. L'écriture est restreinte au membre du groupe dont `im` est `ids`. 
 - `vf` : volume total des fichiers attachés.
 - `ht` : liste des hashtags _personnels_ cryptée par la clé K du compte.
+  - En session, pour une note de groupe, `ht` est le terme de `htm` relatif au compte de la session.
 - `htg` : note de groupe : liste des hashtags cryptée par la clé du groupe.
-- `htm` : NON TRANSMIS en session pour une note de groupe seulement, hashtags des membres. Map:
-    - _clé_ : id du compte de l'auteur,
+- `htm` : note de groupe seulement, hashtags des membres. Map:
+    - _clé_ : id courte du compte de l'auteur,
     - _valeur_ : liste des hashtags cryptée par la clé K du compte.
+    - non transmis en session.
 - `l` : liste des _auteurs_ (leurs `im`) pour une note de groupe.
-- `d` : date-heure de dernière modification.
+- `d` : date-heure de dernière modification du texte.
 - `texte` : texte (gzippé) crypté par la clé de la note.
 - `mfa` : map des fichiers attachés.
-- `ref` : `[id, ids]` référence de sa note _parent_.
+- `ref` : triplet `[id, ids]` référence de sa note _parent_:
 
-**Map `mfas` des fichiers attachés dans une note:**
-- _clé_ `idf`: identifiant du fichier.
-- _valeur_ : [ lg, data ]
-  - `lg` : taille du fichier, en clair afin que le serveur puisse toujours recalculer la taille totale v d'un note.
-  - `data` : sérialisation cryptée par la clé de la note de : `{ nom, info, dh, type, gz, lg, sha }`.
+**A propos de `ref`**:
+- Pour un note de groupe:
+  - absent: rattachement _virtuel_ au groupe lui-même.
+  - `[id, ids]` : 
+    - `id`: du groupe (de la note), 
+    - `ids`: de la note du groupe à laquelle elle est rattachée (possiblement supprimée)
+- Pour un note personnelle:
+  - absent: rattachement _virtuel_ à l'avatar de la note.
+  - `[id, ids]` : 
+    - `id`: de l'avatar (de la note), 
+    - `ids`: de la note de l'avatar à laquelle elle est rattachée (possiblement supprimée).
+  - `[id, 0]` : 
+    - `id`: d'UN GROUPE, 
+    - rattachement _virtuel_ au groupe lui-même, possiblement disparu / radié.
+  - `[id, ids]` : 
+    - `id`: d'UN GROUPE, possiblement disparu / radié.
+    - `ids`: de la note de ce groupe à laquelle elle est rattachée (possiblement supprimée).
 */
 export class Note extends GenDoc {
   static clen (id) { return ID.estGroupe(id) ? RegCles.get(id) : stores.session.clek }
@@ -1243,11 +1266,14 @@ export class Note extends GenDoc {
   async compile (row) {
     this.vsh = row.vsh || 0
     this.deGroupe = ID.estGroupe(this.id)
-    this.cle = this.deGroupe ? RegCles.get(this.id) : stores.session.clek
+    const clek = stores.session.clek
+    this.cle = this.deGroupe ? RegCles.get(this.id) : clek
 
     this.im = row.im || 0
-    this.ht = (row.ht && !this.deGroupe) ? await decrypter(this.cle, row.ht) : []
-    this.htg = (row.htg && this.deGroupe) ? await decrypter(this.cle, row.htg) : []
+    let y = row.ht ? await decrypterStr(clek, row.ht) : null
+    this.ht = new Set(y ? y.split(' ') : new Set())
+    y = row.htg && this.deGroupe ? await decrypterStr(this.cle, row.htg) : null
+    this.htg = new Set(y ? y.split(' ') : new Set())
     this.l = row.l || []
     this.d = row.d || 0
 
@@ -1281,15 +1307,24 @@ export class Note extends GenDoc {
   static estG (key) { return key.charAt(2) === '3' }
   static fake = { txt: '', dh: 0 }
 
-
-  get ng () { return getNg(this.id) }
   get key () { return this.id + '/' + this.ids }
   get rkey () { return '' + this.id }
   get refk () { return this.ref ? (this.ref[0] + (this.ref[1] ? '/' + this.ref[1] : ''))  : ''}
   get refrk () { return this.ref ? '' + this.ref[0] : ''}
-  get refn () {  return this.ref && this.ref.length === 3 ? this.ref[2] : ''}
   get rid () {  return this.ref ? this.ref[0] : 0 }
   get rids () {  return this.ref ? this.ref[1] : 0 }
+
+  // get refn () {  return this.ref && this.ref.length === 3 ? this.ref[2] : ''}
+
+  get refn () { if (!this.deGroupe || !this.ref) return ''
+    const session = stores.session
+    const cv = session.getCV(this.ref[0])
+    if (cv.v) return cv.nomC
+    const compti = session.compti
+    const e = compti.mc.get(this.ref[0])
+    if (e) return titre(e.tx)
+    return '...' + ('' + this.ref[0]).substring(12)
+  }
 
   get shIds () { return ('' + (this.ids % 1000)).padStart(3, '0')}
 

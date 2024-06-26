@@ -34,8 +34,7 @@ export const useNoteStore = defineStore('note', {
 
     map: new Map(), // map des nodes cle: key, value: node
 
-    nodes: [
-    ],
+    nodes: [ ],
 
     node: null, // node "courant"
 
@@ -63,6 +62,10 @@ export const useNoteStore = defineStore('note', {
   }),
 
   getters: {
+    session: (state) => stores.sesion,
+    aSt: (state) => stores.avatar,
+    gSt: (state) => stores.groupe,
+
     // Pour le node courant
     note: (state) => { return state.node ? state.node.note : null },
 
@@ -85,11 +88,19 @@ export const useNoteStore = defineStore('note', {
       return n && n.ref ? state.map.get(n.refk) : null
     },
 
-    // retourne { avc: true/false, nom } ou null s'il n'y a pas d'exclusivité
+    // retourne { avc: true/false, ida, im, nom } ou null s'il n'y a pas d'exclusivité
     mbExclu: (state) => {
       const n = state.note
-      let x
+      let avc = false
       if (!n || !n.im) return null
+      const egr = state.gSt.egr(n.id)
+      if (!egr) return { avc, ida: 0, im: n.im, nom: '#' + n.im }
+      const gr = egr.groupe
+      const ida = gr.tid[n.im]
+      avc = state.session.compte.mav.has(ida)
+      const cv = state.session.getCV(ida)
+      return { avc, ida, im: n.im, nom: this.session.getCV(ida).nomC }
+      /*
       const aSt = stores.avatar
       let na = aSt.compte.naDeIdgIm(n.id, n.im)
       if (na) {
@@ -103,18 +114,23 @@ export const useNoteStore = defineStore('note', {
         } else x = { avc: false, im: n.im, nom: '#' + n.im }
       }
       return x
+      */
     },
 
-    /* Pour une note de groupe, liste des {im, na, nom} des membres 
+    /* Pour une note de groupe, liste des {im, ida, nom} des membres 
     aptes à recevoir l'exclusivité, sauf celui actuel */
     lstImNa (state) { 
       const lx = []
+      const egr = gSt.egr(n.id)
+      if (!egr) return lx
+      const gr = egr.groupe
       const id = state.note.id
-      const gSt = stores.groupe
-      const aSt = stores.avatar
-      const anim = gSt.egr(id).estAnim
-      const xav = state.mbExclu // retourne { avc: true/false, nom } ou null s'il n'y a pas d'exclusivité
+      const acMNE = gr.aUnAccesMNE(state.session.compte.mav)
+      if (!acMNE) return lx
+      const anim = egr.estAnim
+      const xav = state.mbExclu // retourne { avc: true/false, ida, im, nom } ou null s'il n'y a pas d'exclusivité
 
+      // TODO fonctionnalité pas claire. 
       let autAvc = true
       const ims = aSt.compte.imGroupe(id) 
       state.note.auts.forEach(im => { if (!ims.has(im)) autAvc = false })
