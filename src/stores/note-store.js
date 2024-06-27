@@ -22,12 +22,10 @@ export const useNoteStore = defineStore('note', {
         - 'id': rattachement direct à une racine de groupe ou d'avatar
         - 'id/ids': rattachement à une autre note
       children : [] nodes fils
+      idg : pour un node avatar FAKE (rattaché à une racine), id du groupe
+        auquel la note était rattachée quand elle existait
       note : absent pour une racine et une note fake
-      // rac : id de sa racine dans l'arbre
-      // rkey : 'id' (clé de sa racine)
-      note : absent pour une fake
-      // npg : pour type 4 seulement, true si la note parent est une note de groupe
-      //label : - réelle : titre de la note - fake : $56789 (id en chiffres)
+      label : titre de la note
       
     type:
       1 : racine avatar
@@ -408,6 +406,12 @@ export const useNoteStore = defineStore('note', {
       }
     },
 
+    sort1 (a, b) { // les fake à la fin
+      const x = a.note ? '1' + a.note.titre : (a.idg ? '3' + a.idg + a.key : '2' + a.key)
+      const y = b.note ? '1' + a.note.titre : (b.idg ? '3' + b.idg + b.key : '2' + b.key)
+      return x < y ? -1 : (x === y ? 0 : 1)
+    },
+
     setNote (note){
       if (!note) return
       const key = note.key
@@ -449,10 +453,12 @@ export const useNoteStore = defineStore('note', {
         // node ayant des enfants
         if (Note.pEstRac(n.pkey)) { // elle était rattachée à sa racine
           delete n.note // devient juste fake
-        } else { // elle DEVIENT UNE FAKE rattachée à sa racine
+        } else { // le node DEVIENT FAKE rattaché à sa racine
           this.detachNote(n) // détachement de son parent actuel (racine ou non)
           const nf = this.creationFake(Note.racNoteP(n.pkey)) // création d'une fake rattachée à la racine
           nf.children = n.children // récupération des enfants
+          nf.idg = n.note.refIdg
+          delete n.note // devient fake
         }
       }
 
@@ -519,7 +525,7 @@ export const useNoteStore = defineStore('note', {
       let p = this.map.get(n.pkey)
       if (p) { // cas "normal", la note / racine de rattachement existe
         p.children.push(n)
-        p.children.sort(Node.sort1)
+        p.children.sort(this.sort1)
         return
       }
       // la note / racine de rattachement n'existait pas
@@ -561,7 +567,7 @@ export const useNoteStore = defineStore('note', {
       let r = this.map.get(n.pkey)
       if (r) { // cas "normal" la racine avatar / groupe existe
         r.children.push(n)
-        r.children.sort(Node.sort1)
+        r.children.sort(this.sort1)
       } else { // cas "rare": création d'une racine groupe fake
         r = this.setRacine(n.pkey, 3) // Groupe _zombi_
         r.children.push(n)

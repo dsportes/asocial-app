@@ -83,6 +83,8 @@ export default {
   groupe: 'Groupe {0}',
   avatar1: 'Avatar {0} - {1} / {2} note(s)',
   groupe1: 'Groupe {0} - {1} / {2} note(s)',
+  notef1: 'Note disparue #{0}',
+  notef2: 'Note disparue #{0} - à propos du groupe {1}',
   avatar2: 'Note de {0}',
   groupe2: 'Note du groupe {0}',
   avatar3: 'Note de {0} rattachée à une note de {1}',

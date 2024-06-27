@@ -1294,18 +1294,6 @@ export class Note extends GenDoc {
     }
   }
 
-  static sort1 (a, b) { // les fake à la fin
-    const x = (a.note ? '1' : '2') + a.label
-    const y = (b.note ? '1' : '2') + b.label
-    return x < y ? -1 : (x === y ? 0 : 1)
-  }
-
-  static sortNodes (a,b) { 
-    const x = a.type + a.label
-    const y = b.type + b.label
-    return x < y ? -1 : (x === y ? 0 : 1)
-  }
-
   static estG (key) { return key.charAt(0) === '3' }
   // key de la racine de rattachement SSI le rattachement est à une racine
   static pEstRac (pkey) { return pkey && pkey.length === 14 }
@@ -1324,6 +1312,12 @@ export class Note extends GenDoc {
   */
   get pkey () {
     return !this.ref ? '' + this.id : (this.ref[1] ? this.ref[0] + '/' + this.ref[1] : this.ref[0])
+  }
+
+  // Retourne l'id du groupe de rattachement d'un note avatar
+  get refIdg () {
+    if (!this.ref || this.deGroupe) return 0
+    return ID.estGroupe(this.ref[0]) ? this.ref[0] : 9
   }
 
   get rkey () { return '' + this.id }

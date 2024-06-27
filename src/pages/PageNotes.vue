@@ -277,6 +277,15 @@ export default {
     NoteExclu, NoteFichier, NoteConfirme, BoutonHelp, ListeAuts },
 
   computed: {
+    nodesTries () {
+      const t = this.nSt.nodes
+      t.sort((a, b) => {
+        const noma = a.type + this.pSt.getCV(parseInt(a.key)).nom
+        const nomb = b.type + this.pSt.getCV(parseInt(b.key)).nom
+        return noma > nomb ? 1 : (noma < nomb ? -1 : 0)
+      })
+      return t
+    },
     presel () {  return this.nSt.presel },
 
     lib2 () {
@@ -365,14 +374,6 @@ export default {
       } else
         this.selected = n.key
     },
-
-    lib1 (n) {
-      const nfnt = this.nSt.nfnt[n.key] || { nf: 0, nt:0 }
-      if (n.type > 3)
-        return (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') + n.label
-      if (n.type === 1) return this.$t('avatar1', [n.label, nfnt.nf, nfnt.nt])
-      return this.$t('groupe1', [n.label, nfnt.nf, nfnt.nt])
-    },
  
     lib (n) {
       const nfnt = this.nSt.nfnt[n.key] || { nf: 0, nt:0 }
@@ -389,16 +390,15 @@ export default {
         case 4 : 
         case 5 : {
           const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
-          if (n.note) return s1 + n.note.titre
-          const s2 = '(' + this.gSt.nom(n.p.pkey).nom8 + ')'
-          n.note.titre
+          if (n.note) {
+            const r = n.note.ref
+            const s2 = r && r[0] !== n.note.id ? '(' + this.gSt.nom(n.note.id).nom8 + ') ' : ''
+            return s1 + s2 + n.note.titre
+          }
+          return n.idg ? s1 + this.$t('notef2', [n.key, this.gSt.nom(n.idg).nom8])
+            : s1 + this.$t('notef2', [n.key])
         }
       }
-
-      if (n.type > 3)
-        return (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') + n.label
-      if (n.type === 1) return this.$t('avatar1', [n.label, nfnt.nf, nfnt.nt])
-      return this.$t('groupe1', [n.label, nfnt.nf, nfnt.nt])
     },
 
     async noteedit1 () {
