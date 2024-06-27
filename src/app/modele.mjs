@@ -1307,11 +1307,27 @@ export class Note extends GenDoc {
   }
 
   static estG (key) { return key.charAt(0) === '3' }
+  // key de la racine de rattachement SSI le rattachement est à une racine
+  static pEstRac (pkey) { return pkey && pkey.length === 14 }
+  // key de la racine de la note de rattachement SSI le rattachement est à une note
+  static racNoteP (pkey) { return pkey && pkey.length > 14 ? pkey.substring(0, 14) : null }
+
   static fake = { txt: '', dh: 0 }
 
   get key () { return this.id + '/' + this.ids }
+
+  /* clé du parent:
+    - si elle n'est pas rattachée, c'est la racine (avatar ou groupe) de son id
+    - sinon, c'est,
+      - si ref[1] = 0 elle est rattachée à une autre racine (un groupe pour une note d'avatar): ref[0]
+      - sinon c'est la note ref[0]/ref[1]
+  */
+  get pkey () {
+    return !this.ref ? '' + this.id : (this.ref[1] ? this.ref[0] + '/' + this.ref[1] : this.ref[0])
+  }
+
   get rkey () { return '' + this.id }
-  get refk () { return this.ref ? (this.ref[0] + (this.ref[1] ? '/' + this.ref[1] : ''))  : ''}
+  get refk () { return this.ref ? (this.ref[0] + (this.ref[1] ? '/' + this.ref[1] : '')) : '' }
   get refrk () { return this.ref ? '' + this.ref[0] : ''}
   get rid () {  return this.ref ? this.ref[0] : 0 }
   get rids () {  return this.ref ? this.ref[1] : 0 }

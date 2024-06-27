@@ -388,13 +388,10 @@ export default {
         }
         case 4 : 
         case 5 : {
-          return (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') +
-          (n.rac !== n.note.id ? '(' + this.gSt.nom(n.rac).nom8 + ')' : '' ) + 
+          const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
+          if (n.note) return s1 + n.note.titre
+          const s2 = '(' + this.gSt.nom(n.p.pkey).nom8 + ')'
           n.note.titre
-        }
-        case 6 : 
-        case 7 : {
-          return (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '')
         }
       }
 
