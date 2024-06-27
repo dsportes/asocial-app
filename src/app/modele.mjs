@@ -1294,6 +1294,12 @@ export class Note extends GenDoc {
     }
   }
 
+  get tousHt () { const s = new Set()
+    this.ht.forEach(ht => { s.add(ht)})
+    this.htg.forEach(ht => { s.add(ht)})
+    return s
+  }
+
   static estG (key) { return key.charAt(0) === '3' }
   // key de la racine de rattachement SSI le rattachement est à une racine
   static pEstRac (pkey) { return pkey && pkey.length === 14 }

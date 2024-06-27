@@ -98,27 +98,12 @@ export const useNoteStore = defineStore('note', {
       let avc = false
       if (!n || !n.im) return null
       const egr = state.gSt.egr(n.id)
-      if (!egr) return { avc, ida: 0, im: n.im, nom: '#' + n.im }
+      if (!egr) return null
       const gr = egr.groupe
       const ida = gr.tid[n.im]
       avc = state.session.compte.mav.has(ida)
       const cv = state.session.getCV(ida)
-      return { avc, ida, im: n.im, nom: this.session.getCV(ida).nomC }
-      /*
-      const aSt = stores.avatar
-      let na = aSt.compte.naDeIdgIm(n.id, n.im)
-      if (na) {
-        x = { avc: true, na: na, nom: $t('moi2', [na.nom]), im: n.im }
-      } else {
-        const gSt = stores.groupe
-        const m = gSt.getMembre(n.id, n.im)
-        if (m) {
-          na = m.na
-          x = { avc: false, im: n.im, na: na, nom: m.na.nomc }
-        } else x = { avc: false, im: n.im, nom: '#' + n.im }
-      }
-      return x
-      */
+      return { avc, ida, im: n.im, cv }
     },
 
     /* Pour une note de groupe, liste des {im, ida, nom} des membres 

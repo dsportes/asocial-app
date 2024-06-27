@@ -39,7 +39,7 @@
     <q-dialog v-model="ui.d.PNdl" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
-          <q-btn dense size="md" padding="none" color="warning" icon="close" @click="dlfin"/>
+          <btn-cond color="warning" icon="close" @click="dlfin"/>
           <q-toolbar-title class="titre-lg full-width text-center">
             {{$t('PNOdlc')}}
           </q-toolbar-title>
@@ -87,42 +87,27 @@
               outlined :label="$t('PNOdlhp')"/>
             <q-input class="col" dense v-model="dirloc" 
               outlined :label="$t('PNOdldir')"/>
-            <q-btn color="primary" dense :label="$t('test')"
-              @click="testup"/>
+            <btn-cond dense :label="$t('test')" @click="testup"/>
           </div>
         </q-card-section>
 
         <q-card-actions v-if="dlst===1" vertical align="right" class="q-gutter-sm">
-          <q-btn flat dense size="md" padding="xs" color="primary" icon="undo"
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn dense size="md" padding="xs" color="primary" icon="start"
-            :label="$t('PNOdlst1')" @click="dlgo(true)"/>
-          <q-btn dense size="md" padding="xs" color="primary" icon="start"
-            :label="$t('PNOdlst2')" @click="dlgo(false)"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+          <btn-cond icon="start" :label="$t('PNOdlst1')" @click="dlgo(true)"/>
+          <btn-cond icon="start" :label="$t('PNOdlst2')" @click="dlgo(false)"/>
         </q-card-actions>
 
         <q-card-actions v-if="dlst=== 2 && dlst === 3" vertical align="right" class="q-gutter-sm">
-          <q-btn dense size="md" padding="xs" color="warning" icon="stop_circle"
-            :label="$t('PNOdls')" @click="dlfin"/>
-          <q-btn v-if="dlst===2" dense size="md" padding="xs" color="primary" icon="pause_circle"
-            :label="$t('PNOdlp')" @click="dlpause"/>
-          <q-btn v-if="dlst===3" dense size="md" padding="xs" color="warning" icon="play_circle" 
-            :label="$t('PNOdlr')" @click="dlreprise"/>
+          <btn-cond color="warning" icon="stop_circle" :label="$t('PNOdls')" @click="dlfin"/>
+          <btn-cond v-if="dlst===2" icon="pause_circle" :label="$t('PNOdlp')" @click="dlpause"/>
+          <btn-cond v-if="dlst===3" icon="play_circle" :label="$t('PNOdlr')" @click="dlreprise"/>
         </q-card-actions>
 
         <div v-if="dlst===4" class="column q-gutter-sm">
-          <div class="self-center titre-lg text-bold text-italic">
-            {{$t('PNOdlok1')}}
-          </div>
-          <div class="self-center titre-lg text-bold">
-            {{$t('PNOdlok2', [dlnbn, dlnbf, dlv2f])}}
-          </div>
-          <div class="self-center titre-md text-italic">
-            {{$t('PNOdlok3')}}
-          </div>
-          <q-btn class="self-center q-mb-md" 
-            flat dense padding="none" color="primary" icon="check" size="lg"
-            :label="$t('jailu')" @click="ui.fD"/>
+          <div class="self-center titre-lg text-bold text-italic">{{$t('PNOdlok1')}}</div>
+          <div class="self-center titre-lg text-bold">{{$t('PNOdlok2', [dlnbn, dlnbf, dlv2f])}}</div>
+          <div class="self-center titre-md text-italic">{{$t('PNOdlok3')}}</div>
+          <btn-cond class="self-center q-mb-md" flat icon="check" size="lg" :label="$t('jailu')" @click="ui.fD"/>
         </div>
       </q-card>
     </q-dialog>
@@ -136,53 +121,43 @@
             <span v-if="nSt.node && nSt.node.note" class="q-ml-xs font-mono fs-sm">#{{nSt.node.note.shIds}}</span>
           </div>
           <div v-if="nSt.note" class="col-auto font-mono fs-sm">
-            <span class="q-mr-sm">({{edvol(nSt.note.txt.length)}})</span>
+            <span class="q-mr-sm">({{edvol(nSt.note.texte.length)}})</span>
             <span>{{dhcool(nSt.note.dh)}}</span>
           </div>
         </div>
 
         <div v-if="selected && nSt.note" class="q-ml-md row"> 
-          <show-html class="col bord1 q-mr-lg" :texte="nSt.note.txt" zoom maxh="4rem" />
-          <q-btn :disable="rec!==0" class="col-auto self-start" 
-            round dense size="md" icon="edit" padding="none"
-            :color="nSt.note.p ? 'grey-5' : 'primary'" 
-            @click="noteedit1"/>
+          <show-html class="col bord1 q-mr-lg" :texte="nSt.note.texte" zoom maxh="4rem" />
+          <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @click="noteedit1"/>
         </div>
 
         <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
 
-        <div v-if="selected && nSt.note && !rec" class="q-mt-xs q-mb-sm row">  
-          <apercu-motscles class="q-mr-sm"
-            :du-groupe="nSt.estGroupe"
-            :src="Array.from(nSt.note.smc)" 
-            nozoom/>
-          <q-btn color="primary" class="col-auto self-start" 
-            round dense size="md" icon="edit" padding="none"
-            @click="ui.oD('NM')"/>
+        <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between"> 
+          <div class="col row">
+            <span v-for="ht of nSt.note.tousHt" :key="ht" class="bord"/>
+          </div>
+          <btn-cond class="col-auto self-start" round icon="edit" @click="ui.oD('NM')"/>
         </div>
 
-        <div v-if="selected && nSt.note && !rec" class="q-mt-xs q-mb-sm row">  
+        <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between">  
           <div class="col titre-sm">
             <span :class="!nSt.note.mfa.size ? 'text-italic': ''">
               {{$t('PNOnf', nSt.note.mfa.size, {count: nSt.note.mfa.size})}}
             </span>
-            <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.v2) + '.') : ''}}</span>
+            <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.vf) + '.') : ''}}</span>
           </div>
-          <q-btn class="col-auto self-start" 
-            dense round size="md" color="primary" padding="none" icon="attach_file"
-            @click="ui.oD('NF')">
+          <btn-cond class="col-auto self-start" round icon="attach_file" @click="ui.oD('NF')">
             <q-tooltip>{{$t('PNOattach')}}</q-tooltip>
-          </q-btn>
+          </btn-cond>
         </div>
 
         <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs q-mb-sm row">  
-          <div v-if="nSt.mbExclu" class="col titre-sm">{{$t('PNOexclu', [nSt.mbExclu.nom])}}</div>
+          <div v-if="nSt.mbExclu" class="col titre-sm">{{$t('PNOexclu', [nSt.mbExclu.cv.nomC])}}</div>
           <div v-else class="col text-italic titre-sm">{{$t('PNOnoexclu')}}</div>
-          <q-btn color="primary" class="col-auto self-start" 
-            round dense size="md" icon="person" padding="none"
-            @click="ui.oD('NX')">
+          <btn-cond class="col-auto self-start" round icon="person" @click="ui.oD('NX')">
             <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
-          </q-btn>
+          </btn-cond>
         </div>
 
         <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs justify-end items-center">
@@ -240,7 +215,6 @@ import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
 import { dkli, sty, styp, $t, u8ToB64, dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
-import ApercuMotscles from '../components/ApercuMotscles.vue'
 import { ID, nomFichier, appexc, AppExc } from '../app/api.mjs'
 import NoteConfirme from '../dialogues/NoteConfirme.vue'
 import NoteEdit from '../panels/NoteEdit.vue'
@@ -273,7 +247,7 @@ const dec = new TextDecoder()
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, ApercuMotscles, NoteEdit, NoteMc, NotePlus,
+  components: { ShowHtml, NoteEdit, NoteMc, NotePlus,
     NoteExclu, NoteFichier, NoteConfirme, BoutonHelp, ListeAuts },
 
   computed: {
@@ -289,6 +263,8 @@ export default {
     presel () {  return this.nSt.presel },
 
     lib2 () {
+      return this.lib(this.nSt.node)
+      /*
       const n = this.nSt.node
       if (n.type <= 3) return n.label
       if (n.type === 4) {
@@ -309,6 +285,7 @@ export default {
         return this.$t('groupe9', [ids, r.label])
       }
       return ''
+      */
     },
 
     rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <= 5 }
@@ -713,4 +690,9 @@ $hb2: 17rem
 .bord1
   border-top: 1px solid $grey-8 !important
   border-bottom: 1px solid $grey-8 !important
+.bord
+  padding: 1px
+  margin: 1px
+  border: 1px solid $grey-5
+  border-radius: 5px
 </style>

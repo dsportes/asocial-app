@@ -1,15 +1,13 @@
 <template>
   <div v-if="nb" class='row q-gutter-xs titre-sm'>
     <div>{{$t('PNOauts', nb)}}</div>
-    <div v-for="im in nSt.note.auts" :key="im">
+    <div v-for="im in nSt.note.l" :key="im">
       <span class="bord cursor-pointer q-px-xs">
-        <span v-if="na(im)" class="cursor-pointer" @click="openCv(im)">{{na(im).nomc}}</span>
+        <span v-if="ida(im)" class="cursor-pointer" @click="openCv(im)">{{nomC(im)}}</span>
         <span v-else>#{{im}}</span>
       </span>
     </div>
-    <div v-if="autAvc" class="titre-md text-bold text-italic text-warning">
-      {{$t('PNOauts2')}}
-    </div>
+    <div v-if="autAvc" class="msg">{{$t('PNOauts2')}}</div>
 
     <q-dialog v-model="ui.d.ACVouvrir[idc]" persistent>
       <apercu-cv :cv="cv"/>
@@ -31,7 +29,7 @@ export default {
   components: { ApercuCv },
 
   computed: {
-    nb () { return this.nSt.note.auts.length },
+    nb () { return this.nSt.note.l.length },
   },
 
   data () {
@@ -41,14 +39,15 @@ export default {
   },
 
   methods: {
-    na (im) {
-      const na = this.aSt.compte.naDeIdgIm(this.nSt.note.id, im)
-      if (na) return na
-      const m = this.gSt.getMembre(this.nSt.note.id, im)
-      return m ? m.na : null
-    },
+    ida (im) { return this.session.compte.tid[im] },
+    getCV (im) { 
+      const ida = this.ida(im)
+      return ida ? this.session.getCV(ida) : null
+    }, 
+    nomC (im) { return this.getCV(im).nomC },
+
     openCv (im) {
-      this.cv = this.session.getCv(this.na(im).id)
+      this.cv = this.getCv(im)
       this.ui.oD('ACVouvrir', this.idc)
     }
   },
@@ -56,18 +55,20 @@ export default {
   setup () {
     const ui = stores.ui
     const idc = ui.getIdc()
+    const session = stores.session
     const nSt = stores.note
     const gSt = stores.groupe
-    const aSt = stores.avatar
     const autAvc = ref(false)
     
-    const ims = aSt.compte.imGroupe(nSt.note.id) // im des avatars du compte participant au groupe
     let b = false
-    nSt.note.auts.forEach(im => { if (ims.has(im)) b = true})
-    autAvc.value = b
+    const egr = gSt.egr(nSt.note.id)
+    if (egr) {
+      nSt.note.l.forEach(im => { if (session.compte.mav.has(egr.groupe.tid[im])) b = true })
+      autAvc.value = b
+    }
 
     return {
-      ui, nSt, gSt, aSt, autAvc
+      session, ui, idc, nSt, gSt, autAvc
     }
   }
 }
