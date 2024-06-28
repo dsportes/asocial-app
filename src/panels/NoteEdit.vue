@@ -3,20 +3,16 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="chevron_left" padding="xs" @click="fermer"/>
+      <btn-cond color="warning" icon="chevron_left" @click="fermer"/>
       <q-toolbar-title v-if="avatar" 
         class="titre-lg full-width text-center">{{$t('PNOedtit1', [avatar.na.nom])}}</q-toolbar-title>
       <q-toolbar-title v-if="groupe" 
         class="titre-lg full-width text-center">{{$t('PNOedtit2', [groupe.na.nomc])}}</q-toolbar-title>
-      <q-btn dense size="md" color="primary" icon="check" padding="xs" :label="$t('valider')"
-        :disable="(groupe && !naAut) || session.editDiag || !modifie"  @click="valider"/>
+      <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
+        :disable="(groupe && !naAut) || !modifie"  @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="session.editDiag" inset class="full-width bg-secondary text-white">
-      <div class='q-ma-sm q-pa-sm text-center text-bold titre-md bg-yellow-5 text-warning'>
-        {{session.editDiag}}
-      </div>
-    </q-toolbar>
+    <q-toolbar v-if="session.editDiag" inset class="full-width msg">{{session.cEdit}}</q-toolbar>
   </q-header>
 
   <q-page-container >
@@ -76,12 +72,13 @@ import EditeurMd from '../components/EditeurMd.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { ID } from '../app/api.mjs'
 
 export default {
   name: 'NoteEdit',
 
-  components: { BoutonHelp, EditeurMd, ListeAuts, NoteEcritepar, ApercuGenx },
+  components: { BoutonHelp, EditeurMd, ListeAuts, NoteEcritepar, ApercuGenx, BtnCond },
 
   props: { },
 

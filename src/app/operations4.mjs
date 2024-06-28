@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { Operation } from './synchro.mjs'
 import { random, gzipB } from './util.mjs'
-import { Cles, d14, isAppExc } from './api.mjs'
+import { Cles, d14, isAppExc, ID } from './api.mjs'
 import { idb } from '../app/db.mjs'
 import { post, getData } from './net.mjs'
 import { RegCles, compile, CV } from './modele.mjs'
@@ -1592,6 +1592,32 @@ export class TicketsStat extends Operation {
       return this.finOK({ blob, creation: ret.creation || false, mois: ret.mois })
     } catch (e) {
       this.finKO(e)
+    }
+  }
+}
+
+/* OP_NouvelleNote: 'Création d\'une nouvelle note' ***************
+- token: éléments d'authentification du compte
+- id : de la note
+- ida : pour une note de groupe, id de son avatar auteur
+- exclu : auteur est exclusif
+- ref : [id, ids] pour une note rattachée
+Retour: rien
+*/
+export class NouvelleNote extends Operation {
+  constructor () { super('NouvelleNote') }
+
+  async run (id, txt, ida, exclu, ref) {
+    try {
+      const session = stores.session
+      const cle = !ID.estGroupe ? session.clek : RegCles.get(id)
+      const t = txt ? await crypter(cle, gzipB(txt)) : null
+      const args = { token: session.authToken, id, t, ida, exclu, ref }
+      // const ret = await post(this, 'NouvelleNote', args)
+      const ret = { key: 'toto' }
+      return this.finOK(ret.key)
+    } catch (e) {
+      await this.finKO(e)
     }
   }
 }

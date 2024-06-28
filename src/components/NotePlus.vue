@@ -16,11 +16,11 @@
   </q-btn>
 
   <q-btn v-if="estAv" dense class="q-mr-xs" no-caps 
-    :label="$t('NPLnote', [avatar.na.nom])" 
+    :label="$t('NPLnote', [nom])" 
     icon="control_point" color="primary" @click="ok(false)" padding="none" size="md"/>
 
   <q-btn v-if="!estAv" dense class="q-mr-xs" no-caps 
-    :label="$t('NPLnote', [groupe.na.nom])" 
+    :label="$t('NPLnote', [nom])" 
     icon="control_point" color="orange" @click="ok(true)" padding="none" size="md"/>
 
   <note-nouvelle v-if="ui.d.NNnotenouvelle" 
@@ -47,11 +47,12 @@ export default ({
   computed: {
     n () { return this.nSt.node }, // OK: est réévalué quand nSt.node change
     t () { return this.n.type },
-    estAv () { return this.t === 1 || this.t === 4 || this.t === 6},
+    estAv () { return this.t === 1 || this.t === 4 },
     id () { return splitPK(this.n.key).id },
     groupe () { return this.estAv ? null : this.gSt.egr(this.id).groupe },
     avatar () { return this.estAv ? this.aSt.getElt(this.id).avatar : null },
-    lna () { const l = this.aSt.compte.lstAvatarNas; return l.length > 1 ? l : null }
+    lna () { const l = this.session.compte.lstAvatars; return l.length > 1 ? l : null },
+    nom () { const cv = this.session.getCV(this.id); return this.estAv ? cv.nom : cv.nomC }
   },
 
   data () { return {
@@ -65,14 +66,15 @@ export default ({
       this.ui.oD('NNnotenouvelle')
     },
 
-    selNa (na) {
-      this.avatarx = this.aSt.getElt(na.id).avatar
+    selNa (id) {
+      this.avatarx = this.aSt.getElt(id).avatar
       this.ok(false)
     }
   },
   
   setup () {
     return {
+      session: stores.session,
       aSt: stores.avatar,
       gSt: stores.groupe,
       nSt: stores.note,

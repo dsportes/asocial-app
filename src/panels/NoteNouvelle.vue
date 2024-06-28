@@ -3,53 +3,39 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" padding="xs" color="warning" icon="chevron_left" @click="fermer"/>
-      <q-toolbar-title v-if="!estgr" 
-        class="titre-lg full-width text-center">{{$t('PNOnvtit1', [avatar.na.nom])}}</q-toolbar-title>
-      <q-toolbar-title v-if="estgr" 
-        class="titre-lg full-width text-center">{{$t('PNOnvtit2', [groupe.na.nomc])}}</q-toolbar-title>
-      <q-btn dense size="md" color="primary" icon="check" padding="xs" :label="$t('valider')"
-        :disable="err || session.editDiag || (estgr && !naAut)" @click="valider"/>
+      <btn-cond color="warning" icon="chevron_left" @click="fermer"/>
+      <q-toolbar-title v-if="!estgr" class="titre-lg full-width text-center">
+        {{$t(estgr ? 'PNOnvtit2' : 'PNOnvtit1', [nom])}}
+      </q-toolbar-title>
+      <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
+        :disable="err || (estgr && !naAut) || !texte" @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="session.editDiag" inset class="full-width bg-secondary text-white">
-      <div class='q-ma-sm q-pa-sm text-center text-bold titre-md bg-yellow-5 text-warning'>
-        {{session.editDiag}}
-      </div>
-    </q-toolbar>
+    <q-toolbar v-if="session.cEdit" inset class="msg">{{session.cEdit}}</q-toolbar>
   </q-header>
 
   <q-page-container>
     <q-page class="q-pa-xs">
 
-      <div v-if="avP" class="q-ma-xs q-pa-xs bord1">
+      <div v-if="notep" class="q-ma-xs q-pa-xs bord1">
         <div class="titre-md">
           <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-          <span>{{$t('PNOrav', [avP.na.nom])}}</span>
+          <span v-if="ID.estGroupe(notep.id)">{{$t('PNOrgr', [nomp])}}</span>
+          <span v-else>{{$t('PNOrav', [nomp])}}</span>
         </div>
-        <div class="q-ml-sm text-italic">{{nSt.node.label}}</div>
-      </div>
-
-      <div v-if="grP" class="q-ma-xs q-pa-xs bord1">
-        <div class="titre-md">
-          <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-          <span>{{$t('PNOrgr', [grP.na.nomc])}}</span>
-        </div>
-        <div class="q-ml-sm text-italic">{{nSt.node.label}}</div>
+        <div class="q-ml-sm text-italic">{{notep.titre}}</div>
       </div>
 
       <div v-if="!estgr && nSt.node.type === 2" class="q-ma-xs q-pa-xs bord1 titre-md">
         <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-        <span>{{$t('PNOracgr', [nSt.node.label])}}</span>
+        <span>{{$t('PNOracgr', [nSt.cvNode.nomC])}}</span>
       </div>
 
-      <div v-if="err" class="titre-md q-my-sm q-pa-xs bg-yellow-5 text-bold text-italic">
-        {{$t('PNOer' + err)}}
-      </div>
+      <div v-if="err" class="msg">{{$t('PNOer' + err)}}</div>
 
       <note-ecritepar v-if="estgr" :groupe="groupe" @ok="selNa"/>
 
-      <div v-if="!err && !session.editDiag && (!estgr || (estgr && naAut))" class="column spmd">
+      <div v-if="!err && !session.cEdit && (!estgr || (estgr && naAut))" class="column spmd">
         <editeur-md mh="50vh" class="col" texte="" :placeholder="$t('PNOdeft')"
           :lgmax="cfg.maxlgtextesecret" editable modetxt v-model="texte"/>
         <q-separator color="orange" class="q-mt-sm"/>
@@ -68,31 +54,45 @@
 </template>
 
 <script>
-import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
-import { ID, UNITEN } from '../app/api.mjs'
-import { dkli, styp, splitPK } from '../app/util.mjs'
+import { dkli, styp } from '../app/util.mjs'
+import { ID } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import EditeurMd from '../components/EditeurMd.vue'
-import { NouvelleNote } from '../app/operations.mjs'
+import BtnCond from '../components/BtnCond.vue'
+import { NouvelleNote } from '../app/operations4.mjs'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
 
 export default {
   name: 'NoteNouvelle',
 
-  components: { BoutonHelp, BoutonUndo, EditeurMd, NoteEcritepar },
+  components: { BoutonHelp, BoutonUndo, EditeurMd, NoteEcritepar, BtnCond },
 
   props: {
     estgr: Boolean, // note de groupe à créer
     groupe: Object, // si estgr, le groupe
     avatar: Object, // si !estgr, l'avatar
-    notep: Object // si sous-note, la note parent
+    notep: Object // si sous-note, la note "parent" (en fait celle courante)
   },
 
   computed: {
+    id () { return this.estgr ? this.groupe.id : this.avatar.id },
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    modifie () { return this.texte !== '' || this.exclu }
+    modifie () { return this.texte !== '' },
+    nom () { const cv = this.session.getCV(this.id); return this.estgr ? cv.nomC : cv.nom },
+    nomp () { if (!this.notep) return ''
+      const cv = this.session.getCV(this.notep.id); return ID.estGroupe(this.notep.id) ? cv.nomC : cv.nom 
+    },
+    err () {
+      if (!this.estgr) {
+        if (this.session.compte.qv.pcn >= 100) return 1 // excédent nn + nc + ng / q1
+      } else {
+        if (!this.groupe.imh) return 3 // pas d'hébergeur
+        else if (groupe.nn >= groupe.qn) return 2 // nb max se notes du groupe dépassé
+      }
+      return 0
+    }
   },
 
   watch: {
@@ -101,46 +101,27 @@ export default {
   methods: {
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
+    selNa (elt) { naAut = elt },
+
     async valider () {
-      let id = 0, idc = 0, ref = null, im = 0, rnom = ''
-      if (!this.estgr) {
-        id = this.avatar.id
-        idc = this.session.compteId
-      } else {
-        id = this.groupe.id
-        idc = this.groupe.idh
-        im = this.aSt.compte.imGA(id, this.naAut.id)
-      }
+      let ref = null
+      const aut = this.estgr ? this.naAut.id : 0
 
-      /* note rattachée à une autre note OU note avatar rattachée à une racine de groupe
-        `ref` : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
-        rnom n'est défini que pour une note d'avatar référençant un note de groupe
-        (rnom est celui du groupe)
-      */
+      // note rattachée à une autre note OU note avatar rattachée à une racine de groupe
       if (!this.estgr) { // Note avatar
-      const nd = this.nSt.node
-        if (nd.type === 2) { // rattachée à une racine de groupe
-          const x = splitPK(nd.key)
-          ref = [x.id, x.ids, nd.label]
-        } else if (this.idp && this.idp) { // rattachée à une note d'un groupe ou de l'avatar
-          let rnom = ''
-          if (ID.estGroupe(this.idp)) { // d'un groupe
-            // const na = getNg(this.idp) // normalement le groupe "parent" est connu
-            if (na) rnom = na.nomc
-          }
-          ref = [this.idp, this.idsp, rnom]
-        }
-      } else if (this.idp) { // Note de groupe rattachée
-        ref = [this.idp, this.idsp, '']
-      }
+        const nd = this.nSt.node
+        if (nd.type === 2) ref = [Note.idDekey(nd.key), 0] // rattachée à une racine de groupe
+        else if (this.notep) ref = [this.notep.id, this.notep.ids] // rattachée à une note d'un groupe ou de l'avatar
+      } else if (this.notep) ref = [this.notep.id, this.notep.ids] // Note de groupe rattachée
 
-      const key = await new NouvelleNote().run(id, this.texte, im, this.exclu, ref, idc)
+      const key = await new NouvelleNote().run(this.id, this.texte, aut, this.exclu, ref)
       this.ui.fD()
     }
   },
 
   data () {
     return {
+      naAut: null, // {nom, i, im, ida, ko} ko: 1 pas auteur, 2: n'a pas exclusiité (edition seulement) 
       texte: '',
       exclu: false
     }
@@ -150,58 +131,10 @@ export default {
     const ui = stores.ui
     const session = stores.session
     const nSt = stores.note
-    const aSt = stores.avatar
-    const gSt = stores.groupe
     const cfg = stores.config
 
-    const estgr = toRef(props, 'estgr')
-    const avatar = toRef(props, 'avatar')
-    const groupe = toRef(props, 'groupe')
-    const notep = toRef(props, 'notep')
-
-    const idp = ref(notep.value ? notep.value.id : 0) // id du parent 
-    const idsp = ref(notep.value ? notep.value.ids : 0) // ids du parent 
-    const grP = ref(null) // groupe de la note parente
-    const avP = ref(null) // avatar de la note parente
-    if (idp.value) {
-      if (ID.estGroupe(idp.value)) {
-        grP.value = gSt.egr(idp.value).groupe
-      } else {
-        avP.value = aSt.getElt(idp.value).avatar
-      }
-    }
-
-    const err = ref(0)
-
-    const naAut = ref()
-    function selNa (elt) {
-      naAut.value = elt.na
-    }
-
-    /*
-    const rack = parseInt(nSt.node.rkey)
-    const grRac = ref(ID.estGroupe(rack) ? gSt.egr(rack).groupe : null) 
-    */
-
-    function setErr () {
-      if (!estgr.value) {
-        if (aSt.exV1) err.value = 1 // excédent nn + nc + ng / q1
-      } else {
-        if (!groupe.value.imh) err.value = 3
-        else {
-          const eg = gSt.egr(groupe.value.id)
-          // Excède le max attribué du groupe
-          if (eg.objv.vols.v1 >= eg.objv.vols.q1 * UNITEN) err.value = 2
-        }
-      }
-    }
-
-    setErr()
-
     return {
-      ui, session, nSt, aSt, gSt, cfg,
-      err, naAut, selNa, idp, idsp, grP, avP,
-      dkli, styp
+      ui, session, nSt, cfg, dkli, styp
     }
   }
 

@@ -34,10 +34,10 @@ export const useFiltreStore = defineStore('filtre', {
         const fx = this.filtre.notes
         const dh = Date.now()
         let f
-        if (fx.v2 || fx.note || fx.nbj || fx.mcp || fx.mcn || fx.avgr) {
+        if (fx.vf || fx.note || fx.nbj || fx.mcp || fx.mcn || fx.avgr) {
           f = {
             v: '' + dh,
-            v2: fx.v2 || 0,
+            vf: fx.vf || 0,
             note: fx.note || null,
             lim: fx.nbj ? dh - (86400000 * fx.nbj) : 0,
             mcp: fx.mcp ? new Set(fx.mcp) : null,
@@ -54,7 +54,7 @@ export const useFiltreStore = defineStore('filtre', {
       this.tri[nom] = val
     },
     setMcgroupe (val) {
-      this.Mcgroupe = val
+      this.mcgroupe = val
     }
   }
 })

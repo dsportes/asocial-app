@@ -97,10 +97,13 @@ export const useGroupeStore = defineStore('groupe', {
       return state.invits.length
     },
     
-    /* liste des ng des groupes triée par ordre alphabétique de leur noms */
+    /* liste des couples {id, nom} des groupes triés par ordre alphabétique de leur noms */
     ngGroupes: (state) => {
       const l = []
-      state.map.forEach(e => { l.push(e.groupe.na) })
+      state.map.forEach(e => { 
+        const id = e.groupe.id
+        l.push({id, nom: state.pSt.getCV(id).nom }) 
+      })
       l.sort((a,b) => { return a.nomc < b.nomc ? -1 : (a.nomc === b.nomc ? 0 : 1)})
       return l
     },

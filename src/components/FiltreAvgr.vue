@@ -16,7 +16,7 @@
         <q-separator/>
         <q-item v-for="ng in lg" :key="ng.id" clickable 
           v-close-popup @click="val=ng">
-          <span class="fs-md">{{ng.nomc}}</span>
+          <span class="fs-md">{{ng.nom}}</span>
         </q-item>
       </q-list>
     </q-menu>
@@ -27,7 +27,6 @@
 <script>
 import stores from "../stores/stores.mjs"
 import { ref, toRef } from 'vue'
-// import { getNg } from '../app/modele.mjs'
 import { ID } from '../app/api.mjs'
 import { dkli } from '../app/util.mjs'
 
@@ -63,17 +62,19 @@ export default ({
     const aSt = stores.avatar
     const gSt = stores.groupe
     const val = ref(null)
-    const nom = toRef(props, 'nom')
-    const x = fSt.filtre[nom.value]
-    val.value = x ? getNg(x) : null
+    // const nom = toRef(props, 'nom')
+    // const x = fSt.filtre[nom.value]
+    // val.value = x ? getNg(x) : null
 
     const la = ref(aSt.naAvatars)
     const lg = ref(gSt.ngGroupes)
 
+    /*
     function setm () {
       la.value = aSt.naAvatars
       lg.value = gSt.ngGroupes
     }
+    */
 
     return {
       fSt, dkli,

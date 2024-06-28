@@ -115,7 +115,7 @@
     <q-page-sticky expand position="top" class="splg">
       <div :class="sty() + ' box2 full-width q-pa-xs'">
         <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
-
+        
         <div v-if="selected" class="row justify-between">
           <div class="titre-md">{{lib2}}
             <span v-if="nSt.node && nSt.node.note" class="q-ml-xs font-mono fs-sm">#{{nSt.node.note.shIds}}</span>
@@ -160,8 +160,7 @@
           </btn-cond>
         </div>
 
-        <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs justify-end items-center">
-          <!--x-test :k1="nSt.node.key"/-->
+        <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs justify-start items-center">
           <note-plus/>
           <btn-cond v-if="nSt.note" color="warning" icon="delete" 
             :label="$t('PNOsupp')" @click="op='suppr';ui.oD('NC')"/>
@@ -195,7 +194,6 @@
           :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
         <btn-cond v-if="expandAll" size="sm" icon="unfold_less"
           :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
-        <!--q-btn class="q-ml-sm" dense size="sm" label="T1" @click="test1"/-->
       </div>
     </q-page-sticky>
   </q-page>
@@ -214,9 +212,9 @@ import NoteExclu from '../panels/NoteExclu.vue'
 import NoteMc from '../panels/NoteMc.vue'
 import NoteFichier from '../panels/NoteFichier.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BtnCond from '../components/BtnCond.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NotePlus from '../components/NotePlus.vue'
-// import XTest from '../components/XTest.vue'
 import { RattNote } from '../app/operations.mjs'
 import { putData, getData } from '../app/net.mjs'
 
@@ -239,7 +237,7 @@ const dec = new TextDecoder()
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, NoteEdit, NoteMc, NotePlus,
+  components: { ShowHtml, NoteEdit, NoteMc, NotePlus, BtnCond,
     NoteExclu, NoteFichier, NoteConfirme, BoutonHelp, ListeAuts },
 
   computed: {
@@ -341,8 +339,7 @@ export default {
       if (this.rec) {
         this.rec = 2
         this.noderatt = n
-      } else
-        this.selected = n.key
+      } else this.selected = n.key
     },
  
     lib (n) {
@@ -557,7 +554,7 @@ export default {
       tree: ref(null),
       session: stores.session, 
       ui: stores.ui, 
-      aSt: stores.avatar, 
+      pSt: stores.people, 
       gSt: stores.groupe, 
       cfg: stores.config,
       nSt,

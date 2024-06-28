@@ -70,6 +70,8 @@ export const useNoteStore = defineStore('note', {
     gSt: (state) => stores.groupe,
     ui: (state) => stores.ui,
 
+    cvNode: (state) => { return state.session.getCV(Note.idDekey(state.node.key)) },
+
     // Pour le node courant
     note: (state) => { return state.node ? state.node.note : null },
 

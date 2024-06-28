@@ -86,11 +86,6 @@ export const useAvatarStore = defineStore('avatar', {
       return qv
     },
 
-    exV1: (state) => {
-      const c = state.compta.qv
-      return c.nn + c.nc + c.ng > c.q1 * UNITEN
-    },
-
     exV2: (state) => {
       const c = state.compta.qv
       return c.v2 > c.q2 * UNITEV
@@ -119,6 +114,18 @@ export const useAvatarStore = defineStore('avatar', {
       }
       return l
     }},
+
+    // liste des couples {id, nom} des avatars triés par ordre alphabétique de leur noms
+    naAvatars: (state) => {
+      const l = []
+      state.map.forEach(e => { 
+        const id = e.avatar.id
+        l.push({ id, nom: state.pSt.getCV(id).nom})
+      })
+      l.sort((a,b) => { return a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)})
+      return l
+    },
+    
 
     /* Construit une Map idx:{c, n} fusionnée depuis,
     celle de la configuration et celle du compte 
@@ -173,14 +180,6 @@ export const useAvatarStore = defineStore('avatar', {
       const m = new Map()
       state.map.forEach((av, id) => { m.set(id, av.avatar) })
       return m
-    },
-
-    // liste des na des avatars triée par ordre alphabétique de leur noms
-    naAvatars: (state) => {
-      const l = []
-      state.map.forEach(e => { l.push(e.avatar.na) })
-      l.sort((a,b) => { return a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)})
-      return l
     },
 
     // liste (array) des ids des avatars DU COMPTE enregistrés
