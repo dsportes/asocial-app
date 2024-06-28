@@ -1305,6 +1305,10 @@ export class Note extends GenDoc {
   static pEstRac (pkey) { return pkey && pkey.length === 14 }
   // key de la racine de la note de rattachement SSI le rattachement est à une note
   static racNoteP (pkey) { return pkey && pkey.length > 14 ? pkey.substring(0, 14) : null }
+  // id d'une key
+  static idDekey (key) { return parseInt(key.substring(0, 14)) }
+  // ids d'une key
+  static idsDekey (key) { return parseInt(key.substring(15)) }
 
   static fake = { txt: '', dh: 0 }
 

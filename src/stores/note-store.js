@@ -18,7 +18,7 @@ export const useNoteStore = defineStore('note', {
       type
       key : 'id/ids'
       pkey : clé du parent
-        - null: racine avter ou groupe
+        - null: racine avatar ou groupe
         - 'id': rattachement direct à une racine de groupe ou d'avatar
         - 'id/ids': rattachement à une autre note
       children : [] nodes fils
@@ -76,15 +76,12 @@ export const useNoteStore = defineStore('note', {
     // Si le node courant est un groupe
     estGroupe (state) {
       const t = state.node ? state.node.type : 0
-      return t === 2 || t === 5 || t === 7
+      return t === 2 || t === 5
     },
 
     // id du node courant
     idC (state) {
-      const t = state.node ? state.node.type : 0
-      if (!t) return 0
-      if (t < 4) return parseInt(state.node.key)
-      return state.node.note ? state.node.note.id : 0
+      return Note.idDeKey(state.node.key)
     },
 
     nodeP: (state) => {
@@ -179,8 +176,8 @@ export const useNoteStore = defineStore('note', {
       return gSt.egr(state.node.note.id)
     },
 
-    // get de l'entrée Note
-    getNode: (state) => { return (id, ids) => {  // id / ids ou pk (id/ids)
+    // get du node id ou id / ids
+    getNode: (state) => { return (id, ids) => {
         return state.map.get(ids ? (id + '/' + ids) : ('' + id))
       }
     },
@@ -295,9 +292,7 @@ export const useNoteStore = defineStore('note', {
       this.calculNfnt()
     },
 
-    setCourant (key) {
-      this.node = this.getNode(key)
-    },
+    setCourant (key) { this.node = this.map.get(key) },
 
     setPreSelect (key) {
       this.presel = key
@@ -319,28 +314,22 @@ export const useNoteStore = defineStore('note', {
       this.map.forEach(n => { n.ratt = tf })
     },
 
-    koP (n) { // exclusion du node parent de la note (elle y est déjà rattachée !)
-      const np = this.map.get(n.refk ? n.refk : n.rkey)
-      np.ratt = false
+    koP () { // exclusion du node parent du node courant (sa note est déjà rattachée)
+      if (this.node.pkey) this.map.get(this.node.pkey).ratt = false
     },
 
-    koSA (n) { // exclut sans condition le sous-arbre démarrant au noeud n 
+    koSA (n) { // exclut sans condition le sous-arbre démarrant au node n 
       n.ratt = false
       if (n.children) for(const c of n.children) this.koSA(c)
     },
 
+    // exclut tous les sous-arbres démarrant à n dès qu'ils ne sont ni du groupe idg, ni de l'avatar ida
     koSAC (n, idg, ida) { 
-      /* exclut tous les sous-arbres démarrant à n 
-      dès qu'ils ne sont ni du groupe idg, ni de l'avatar ida */
-      if (n.type > 5) { // exclusion inconditionnelle des sous-arbres fake
-        this.koSA(n)
-      } else if (''+ idg === n.rkey) { 
-        // sous-arbre du groupe, on descend
+      const id = Note.idDekey(n.key)
+      if (!n.note) this.koSA(n) // exclusion inconditionnelle des sous-arbres fake ??? DISCUTABLE ???
+      else if (id === idg) { // sous-arbre du groupe, on descend
         if (n.children) for(const c of n.children) this.koSAC(c, idg, ida)
-      } else if (''+ ida !== n.rkey) {
-        // sous-arbre d'un autre avatar que ida: à exclure
-        this.koSA(n)
-      }
+      } else if (id !== ida) this.koSA(n) // sous-arbre d'un autre avatar que ida: à exclure
       // début d'un sous-arbre de l'avatar : OK
     },
 
@@ -361,33 +350,19 @@ export const useNoteStore = defineStore('note', {
     koAV (ida) { // exclut les sous arbres zombi et groupes/avatars autres que idg et les fakes
       for (const n of this.nodes) { // n est une racine : types 1, 2, 3
         const id = parseInt(n.key)
-        if (n.type === 3 || (n.type === 1 && id !== ida)) { 
-          // exclusion inconditionnelle des arbres "groupes zombis"
-          // et des arbres d'un autre avatar
-          this.koSA(n)
-        } else {
-          if (id !== ida) {
-            // c'est une racine de groupe (les autres avatars ont été exclus ci-dessus)
-            this.koSAC(n, id, ida)
-          }
-        }
+        // exclusion inconditionnelle des arbres "groupes zombis" et des arbres d'un autre avatar
+        if (n.type === 3 || (n.type === 1 && id !== ida)) this.koSA(n)
+        else if (id !== ida) this.koSAC(n, id, ida) // c'est une racine de groupe (les autres avatars ont été exclus ci-dessus)
       }
     },
 
     koGR (idg) { // exclut les sous arbres zombi et groupes/avatars autres que idg et les fakes
       for (const n of this.nodes) { // n est une racine : types 1, 2, 3
         const id = parseInt(n.key)
-        if (n.type === 3) { 
-          // exclusion inconditionnelle des "groupes zombis"
-          this.koSA(n)
-        } else {
-          if (id === idg) {
-            // c'est la racine du groupe idg : à explorer
-            this.koSAG(n, id)
-          } else { // racine d'un autre groupe, d'un avatars ... : à exclure
-            this.koSA(n)
-          }
-        }
+        if (n.type === 3) this.koSA(n) // exclusion inconditionnelle des "groupes zombis"
+        else 
+          if (id === idg) this.koSAG(n, id) // c'est la racine du groupe idg : à explorer
+          else this.koSA(n) // racine d'un autre groupe, d'un avatars ... : à exclure
       }
     },
 

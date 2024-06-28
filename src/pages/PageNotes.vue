@@ -2,7 +2,7 @@
   <q-page class="column q-pl-xs">
 
     <q-tree ref="tree" :class="sty() + 'sep q-mb-sm splg'"
-      :nodes="nSt.nodes"
+      :nodes="nodesTries"
       no-transition
       dense
       accordion
@@ -128,7 +128,7 @@
 
         <div v-if="selected && nSt.note" class="q-ml-md row"> 
           <show-html class="col bord1 q-mr-lg" :texte="nSt.note.texte" zoom maxh="4rem" />
-          <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @click="noteedit1"/>
+          <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @click="ui.oD('NE')"/>
         </div>
 
         <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
@@ -163,45 +163,37 @@
         <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs justify-end items-center">
           <!--x-test :k1="nSt.node.key"/-->
           <note-plus/>
-          <q-btn v-if="nSt.note" color="warning" icon="delete" padding="none" size="md" dense
+          <btn-cond v-if="nSt.note" color="warning" icon="delete" 
             :label="$t('PNOsupp')" @click="op='suppr';ui.oD('NC')"/>
-          <q-btn v-if="rattaut" color="primary" icon="account_tree" padding="none" size="md" dense
-            :label="$t('PNOratt')" @click="rattacher"/>
+          <btn-cond v-if="rattaut" icon="account_tree" :label="$t('PNOratt')" 
+            cond="cEdit" @click="rattacher"/>
         </div>
 
         <div v-if="selected && nSt.note && rec===1" class="q-ma-sm">
-          <div class="q-pa-xs bg-yellow-5 text-bold text-black text-italic text-center titre-md">
-            {{$t('PNOrattinfo')}}</div>
+          <div class="msg">{{$t('PNOrattinfo')}}</div>
           <div class="q-mt-sm row justify-end">
-            <q-btn color="primary" size="md" icon="undo" padding="none" dense
-              :label="$t('PNOanratt')" @click="anrattacher"/>
+            <btn-cond icon="undo" :label="$t('PNOanratt')" @click="anrattacher"/>
           </div>
         </div>
 
         <div v-if="selected && nSt.note && rec===2" class="q-ma-sm">
           <div>
             <span class="q-pa-xs text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
-            <span class="q-pa-xs bg-yellow-5 text-bold text-black titre-md">{{noderatt.label}}</span>
+            <span class="msg">{{lib(noderatt)}}</span>
           </div>
           <div class="q-mt-sm row q-gutter-sm justify-end">
-            <q-btn color="primary" size="md" icon="check" padding="none" dense
-              :label="$t('PNOcfratt')" @click="okrattacher"/>
-            <q-btn color="primary" size="md" icon="account_tree" padding="none" dense
-              :label="$t('PNOratt2')" @click="rattacher"/>
-            <q-btn color="primary" size="md" icon="undo" padding="none" dense
-              :label="$t('PNOanratt')" @click="anrattacher"/>
+            <btn-cond icon="check" :label="$t('PNOcfratt')" @click="okrattacher"/>
+            <btn-cond icon="account_tree" :label="$t('PNOratt2')" @click="rattacher"/>
+            <btn-cond icon="undo" :label="$t('PNOanratt')" @click="anrattacher"/>
           </div>
         </div>
       </div>
           
       <div class="row full-width bg-secondary text-white items-center">
-        <q-btn class="q-mr-sm" flat dense size="md" icon="file_download" padding="none"
-          :label="$t('PNOdlc')" @click="dlopen"/>
-        <q-btn v-if="!expandAll" 
-          dense size="sm" color="primary" icon="unfold_more" padding="none"
+        <btn-cond class="q-mr-sm" flat icon="file_download" :label="$t('PNOdlc')" @click="dlopen"/>
+        <btn-cond v-if="!expandAll" size="sm" icon="unfold_more"
           :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
-        <q-btn v-if="expandAll" 
-          dense size="sm" color="primary" icon="unfold_less" padding="none"
+        <btn-cond v-if="expandAll" size="sm" icon="unfold_less"
           :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
         <!--q-btn class="q-ml-sm" dense size="sm" label="T1" @click="test1"/-->
       </div>
@@ -213,7 +205,7 @@
 import { ref } from 'vue'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
-import { dkli, sty, styp, $t, u8ToB64, dhcool, difference, intersection, splitPK, edvol, afficherDiag, sleep } from '../app/util.mjs'
+import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, sleep } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import { ID, nomFichier, appexc, AppExc } from '../app/api.mjs'
 import NoteConfirme from '../dialogues/NoteConfirme.vue'
@@ -260,6 +252,7 @@ export default {
       })
       return t
     },
+
     presel () {  return this.nSt.presel },
 
     lib2 () {
@@ -378,28 +371,15 @@ export default {
       }
     },
 
-    async noteedit1 () {
-      if (this.nSt.note.p) {
-        await afficherDiag($t('PNOarchivee'))
-        return
-      }
-      this.ui.oD('NE')
-    },
-
     // Rattachement d'une note *********************************************
     async rattacher () {
-      if (!await this.session.edit()) return
-      const n = this.nSt.node.note
       this.rec = 1
       this.noderatt = null
       this.nSt.resetRatt(true) // tous OK
-      this.nSt.koP(n) // exclut LE node parent, vu que la note y est, par définition, déjà rattachée
+      this.nSt.koP() // exclusion du node parent du node courant (sa note est déjà rattachée)
       this.nSt.koSA(this.nSt.node) // exclut le node lui-même et son sous-arbre
-      if (ID.estGroupe(n.id)) {
-        this.nSt.koGR(n.id)
-      } else {
-        this.nSt.koAV(n.id)
-      }
+      if (this.nSt.estGroupe) this.nSt.koGR(this.nSt.id)
+      else this.nSt.koAV(this.nSt.id)
     },
 
     anrattacher () { 
@@ -411,16 +391,12 @@ export default {
     async okrattacher () {
       const n = this.nSt.note
       const r = this.noderatt
-      let rid = parseInt(r.key), refn = '', rids = 0
+      let rid = Note.idDekey(r.key), rids = 0
       if (r.type < 3) {
         // rattachement à une racine
         if (rid === n.id) rid = 0 // c'est SA racine, donc pas rattachée
-      } else {
-        // refn n'est défini que pour une note d'avatar référençant une note de groupe (rnom est celui du groupe)
-        if (!ID.estGroupe(n.id) && ID.estGroupe(rid)) refn = r.label
-        rids = r.note.ids
-      }
-      await new RattNote().run(n.id, n.ids, rid, rids, refn)
+      } else rids = r.note.ids
+      await new RattNote().run(n.id, n.ids, rid, rids)
       this.rec = 0
       this.noderatt = null
       this.nSt.resetRatt(false)
@@ -570,88 +546,6 @@ export default {
       this.dlst = 0
       this.ui.fD()
     }
-
-    /*
-    stest1 (na, g) {
-      const nbn1 = 100 // nombre de blocks de 4 * nbn2 messages sous la racine d'un avatar ou groupe
-      const nbn2 = 9
-      const auj = this.session.auj
-
-      const id = na.id
-      const demain = AMJ.amjUtcPlusNbj(auj, 1)
-      const sem = AMJ.amjUtcPlusNbj(auj, 7)
-
-      for(let i = 0; i < nbn1; i++) {
-        // (id, ids, ref, texte, dh, v1, v2)
-        const n1 = new Note()
-        const x = i * 1000
-        n1.initTest(id, x + 1, null, '', this.testdh(), 10, 12)
-        n1.settxt('## Ma note ' + n1.key)
-        n1.p = 1; n1.st = auj
-        if (g) this.gSt.setNote(n1); else this.aSt.setNote(n1)
-        for( let j = 1; j < nbn2; j++) {
-          const x = (i * 1000) + (j * 10)
-          const n2 = new Note()
-          n2.initTest(id, x + 2, [n1.id, n1.ids], '', this.testdh(), 8, 20)
-          n2.settxt('Ma note ' + n2.key + ' bla bla bla bla bla\nbla bla bla bla')
-          n2.st = demain; n2.im = g ? 1 : 0
-          if (g) this.gSt.setNote(n2); else this.aSt.setNote(n2)
-          const n3 = new Note()
-          n3.initTest(id, x + 3, [n1.id, n1.ids], '', this.testdh(), 8, 20000)
-          n3.settxt('Ma tres belle note ' + n3.key + ' bla bla bla bla bla\nbla bla bla bla')
-          n3.st = sem
-          if (g) this.gSt.setNote(n3); else this.aSt.setNote(n3)
-          const n4 = new Note()
-          n4.initTest(id, x + 4, [n2.id, n2.ids], '', this.testdh(), 8, 0)
-          n4.settxt('Ma tres belle note ' + n4.key + ' bla bla bla bla bla\nbla bla bla bla')
-          if (g) this.gSt.setNote(n4); else this.aSt.setNote(n4)
-        }
-      }
-    },
-
-    stest2 (na) {
-      let i = 0
-      for(const ng of this.ngs) {
-        const ids = 100000 + (10 * i++)
-        const n1 = new Note()
-        n1.initTest(na.id, ids + 1, [ng.id, 1, ng.nom], '', this.testdh(), 8, 0)
-        n1.settxt(`Note ${n1.key} de ${na.nom} attachée à ${n1.rids} du groupe ${n1.refn} `)
-        this.gSt.setNote(n1)
-        const n2 = new Note()
-        n2.initTest(na.id, ids + 2, [ng.id, 1, ng.nom], '', this.testdh(), 8, 100000)
-        n2.settxt(`Note ${n2.key} de ${na.nom} attachée à ${n2.rids} du groupe ${n2.refn} `)
-        this.gSt.setNote(n2)
-        const n3 = new Note()
-        n3.initTest(na.id, ids + 3, [n1.id, n1.ids], '', this.testdh(), 8, 100000000)
-        n3.settxt(`Note ${n3.key} de ${na.nom} attachée à ${n1.rids} du groupe ${n1.refn} `)
-        this.gSt.setNote(n3)
-      }
-      // des groupes zombis
-      {
-        const gz = 1020000000000099
-        const n1 = new Note()
-        n1.initTest(na.id, 99999999, [gz, 1, 'MonZombi'], '', this.testdh(), 8, 0)
-        n1.settxt(`Note ${n1.key} de ${na.nom} attachée à ${n1.rids} du groupe ${n1.refn} `)
-        this.gSt.setNote(n1)
-      }
-    },
-
-    test1 () { // génération de notes de test
-      this.nas = []
-      this.aSt.map.forEach(m => { this.nas.push(m.avatar.na) })
-      for(const na of this.nas) this.stest1(na)
-      this.ngs = []
-      this.gSt.map.forEach(m => { this.ngs.push(m.groupe.na) })
-      for(const na of this.ngs) this.stest1(na, true)
-      for(const na of this.nas) this.stest2(na)
-    },
-
-    testdh () {
-      const nj = Math.floor(Math.random() * 100)
-      return this.now - ( 86400000 * nj)
-    },
-    */
-
   },
 
   setup () {
