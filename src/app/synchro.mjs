@@ -188,8 +188,8 @@ class SB {
         st.delNote(n.id, n.ids)
         this.avSt.delNote(n.id, n.ids, buf)
       } else {
-        this.n.setNote(x)
-        st.setNote(x, buf)
+        this.n.setNote(n)
+        st.setNote(n)
         this.avSt.setNote(n, buf)
       }
     }

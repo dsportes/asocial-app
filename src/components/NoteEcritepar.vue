@@ -1,10 +1,10 @@
 <template>
   <div class="titre-md">
     <q-btn-dropdown no-caps dense :color="naAut ? 'primary' : 'warning'"
-      :label="naAut ? $t('PNOaut1' + (fic || ''), [naAut.na.nom]) : $t('PNOaut2')" 
+      :label="naAut ? $t('PNOaut1' + (fic || ''), [naAut.nom]) : $t('PNOaut2')" 
       content-style="width:25rem!important">
       <q-list class="bg-secondary text-white q-py-xs">
-        <q-item v-for="e in la" :key="e.na.id" 
+        <q-item v-for="e in la" :key="e.id" 
           :clickable="!e.ko"
           v-close-popup @click="selAut(e)"
           class="row items-start full-width">
@@ -60,7 +60,7 @@ export default {
       const auts = nSt.note ? nSt.note.l || [] : []
       const l = []
       let ok = false
-      const sav = session.compte.mpg(g.value.id)
+      const sav = session.compte.mpg.get(g.value.id)
       if (sav) for (const id of sav) {
         const im = g.value.mmb.get(id)
         if (!im) continue

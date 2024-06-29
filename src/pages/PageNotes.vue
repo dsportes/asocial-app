@@ -117,12 +117,11 @@
         <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
         
         <div v-if="selected" class="row justify-between">
-          <div class="titre-md">{{lib2}}
-            <span v-if="nSt.node && nSt.node.note" class="q-ml-xs font-mono fs-sm">#{{nSt.node.note.shIds}}</span>
-          </div>
+          <div class="titre-md">{{lib2}}</div>
           <div v-if="nSt.note" class="col-auto font-mono fs-sm">
+            <span v-if="nSt.node && nSt.node.note" class="q-mr-xs font-mono fs-sm">#{{nSt.node.note.shIds}}</span>
             <span class="q-mr-sm">({{edvol(nSt.note.texte.length)}})</span>
-            <span>{{dhcool(nSt.note.dh)}}</span>
+            <span>{{dhcool(nSt.note.d)}}</span>
           </div>
         </div>
 
@@ -134,7 +133,8 @@
         <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
 
         <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between"> 
-          <div class="col row">
+          <div class="col row q-gutter-xs">
+            <span class="text-italic">{{$t('hashtags')}} : </span>
             <span v-for="ht of nSt.note.tousHt" :key="ht" class="bord"/>
           </div>
           <btn-cond class="col-auto self-start" round icon="edit" @click="ui.oD('NM')"/>
@@ -169,7 +169,8 @@
         </div>
 
         <div v-if="selected && nSt.note && rec===1" class="q-ma-sm">
-          <div class="msg">{{$t('PNOrattinfo')}}</div>
+          <div class="titre-md text-italic">{{$t('PNOrattpos', nSt.nbRatt, {count: nSt.nbRatt})}}</div>
+          <div v-if="nSt.nbRatt" class="msg">{{$t('PNOrattinfo')}}</div>
           <div class="q-mt-sm row justify-end">
             <btn-cond icon="undo" :label="$t('PNOanratt')" @click="anrattacher"/>
           </div>
@@ -288,7 +289,7 @@ export default {
         this.selected = ap
         this.expanded = this.nSt.getAncetres(ap)
         // this.nSt.setCourant(ap)
-        this.nSt.preSelect('')
+        this.nSt.setPreSelect('')
       }
     },
 

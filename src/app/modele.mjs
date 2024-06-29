@@ -1279,8 +1279,8 @@ export class Note extends GenDoc {
     this.l = row.l || []
     this.d = row.d || 0
 
-    const t = await decrypter(this.cle)
-    this.texte = ungzipB(t)
+    const t = row.texte ? await decrypter(this.cle, row.texte) : null
+    this.texte = t ? ungzipB(t) : ''
     this.titre = titre(this.texte)
 
     this.ref = row.ref || null
@@ -1306,7 +1306,7 @@ export class Note extends GenDoc {
   // key de la racine de la note de rattachement SSI le rattachement est à une note
   static racNoteP (pkey) { return pkey && pkey.length > 14 ? pkey.substring(0, 14) : null }
   // id d'une key
-  static idDekey (key) { return parseInt(key.substring(0, 14)) }
+  static idDeKey (key) { return parseInt(key.substring(0, 14)) }
   // ids d'une key
   static idsDekey (key) { return parseInt(key.substring(15)) }
 
@@ -1335,7 +1335,7 @@ export class Note extends GenDoc {
   get refrk () { return this.ref ? '' + this.ref[0] : ''}
   get rid () {  return this.ref ? this.ref[0] : 0 }
   get rids () {  return this.ref ? this.ref[1] : 0 }
-  get shIds () { return ('' + (this.ids % 1000)).padStart(3, '0')}
+  get shIds () { return ('' + (this.ids % 10000)).padStart(4, '0')}
 
   /*
   initTest (id, ids, ref, txt, dh, n, v) { // pour les tests

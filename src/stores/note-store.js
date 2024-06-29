@@ -70,7 +70,7 @@ export const useNoteStore = defineStore('note', {
     gSt: (state) => stores.groupe,
     ui: (state) => stores.ui,
 
-    cvNode: (state) => { return state.session.getCV(Note.idDekey(state.node.key)) },
+    cvNode: (state) => { return state.session.getCV(Note.idDeKey(state.node.key)) },
 
     // Pour le node courant
     note: (state) => { return state.node ? state.node.note : null },
@@ -89,6 +89,12 @@ export const useNoteStore = defineStore('note', {
     nodeP: (state) => {
       const n = state.note
       return n && n.ref ? state.map.get(n.refk) : null
+    },
+
+    nbRatt: (state) => {
+      let nb = 0
+      for (const [,n] of state.map) { if (n.ratt) nb++ }
+      return nb
     },
 
     // retourne { avc: true/false, ida, im, nom } ou null s'il n'y a pas d'exclusivité
@@ -311,7 +317,7 @@ export const useNoteStore = defineStore('note', {
         }
       })
     },
-
+    
     resetRatt (tf) {
       this.map.forEach(n => { n.ratt = tf })
     },
@@ -327,7 +333,7 @@ export const useNoteStore = defineStore('note', {
 
     // exclut tous les sous-arbres démarrant à n dès qu'ils ne sont ni du groupe idg, ni de l'avatar ida
     koSAC (n, idg, ida) { 
-      const id = Note.idDekey(n.key)
+      const id = Note.idDeKey(n.key)
       if (!n.note) this.koSA(n) // exclusion inconditionnelle des sous-arbres fake ??? DISCUTABLE ???
       else if (id === idg) { // sous-arbre du groupe, on descend
         if (n.children) for(const c of n.children) this.koSAC(c, idg, ida)
@@ -395,6 +401,7 @@ export const useNoteStore = defineStore('note', {
           pkey,
           note: note
         }
+        this.map.set(n.key, n)
         this.rattachNote(n) // rattachement à sa racine ou sa note
       }
 

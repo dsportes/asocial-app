@@ -1611,7 +1611,7 @@ export class NouvelleNote extends Operation {
   async run (id, txt, ida, exclu, ref) {
     try {
       const session = stores.session
-      const cle = !ID.estGroupe ? session.clek : RegCles.get(id)
+      const cle = !ID.estGroupe(id) ? session.clek : RegCles.get(id)
       const t = txt ? await crypter(cle, gzipB(txt)) : null
       const args = { token: session.authToken, id, t, ida, exclu, ref }
       const ret = await post(this, 'NouvelleNote', args)

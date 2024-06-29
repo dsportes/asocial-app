@@ -33,6 +33,10 @@ export const useAvnoteStore = defineStore('avnote', {
   },
 
   actions: {
+    setNote (note, buf) {
+      // TODO
+    },
+    
     setAvnote (avnote) {
       let e = this.map.get(avnote.id)
       if (e) {

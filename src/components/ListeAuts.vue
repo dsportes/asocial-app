@@ -1,13 +1,15 @@
 <template>
   <div v-if="nb" class='row q-gutter-xs titre-sm'>
     <div>{{$t('PNOauts', nb)}}</div>
-    <div v-for="im in nSt.note.l" :key="im">
-      <span class="bord cursor-pointer q-px-xs">
-        <span v-if="ida(im)" class="cursor-pointer" @click="openCv(im)">{{nomC(im)}}</span>
-        <span v-else>#{{im}}</span>
-      </span>
+    <div class="row items-center q-gutter-xs">
+      <div v-for="im in nSt.note.l" :key="im">
+        <span class="bord cursor-pointer q-pa-xs">
+          <span v-if="ida(im)" class="cursor-pointer" @click="openCv(im)">{{nomC(im)}}</span>
+          <span v-else>#{{im}}</span>
+        </span>
+      </div>
+      <div v-if="autAvc" class="msg">{{$t('PNOauts2')}}</div>
     </div>
-    <div v-if="autAvc" class="msg">{{$t('PNOauts2')}}</div>
 
     <q-dialog v-model="ui.d.ACVouvrir[idc]" persistent>
       <apercu-cv :cv="cv"/>
@@ -39,7 +41,7 @@ export default {
   },
 
   methods: {
-    ida (im) { return this.session.compte.tid[im] },
+    ida (im) { return this.groupe ? this.groupe.tid[im] : 0 },
     getCV (im) { 
       const ida = this.ida(im)
       return ida ? this.session.getCV(ida) : null
@@ -59,16 +61,18 @@ export default {
     const nSt = stores.note
     const gSt = stores.groupe
     const autAvc = ref(false)
+    const groupe = ref(null)
     
     let b = false
     const egr = gSt.egr(nSt.note.id)
     if (egr) {
+      groupe.value = egr.groupe
       nSt.note.l.forEach(im => { if (session.compte.mav.has(egr.groupe.tid[im])) b = true })
       autAvc.value = b
     }
 
     return {
-      session, ui, idc, nSt, gSt, autAvc
+      session, ui, idc, nSt, gSt, autAvc, groupe
     }
   }
 }

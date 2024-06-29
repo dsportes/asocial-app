@@ -133,6 +133,7 @@ export default {
   inconnu: '(inconnu)',
   invite: 'Invité',
   contact: 'Simple contact',
+  hashtags: 'Hashtags',
 
   condA: 'Action impossible, l\'application est en mode "avion".',
   condF: 'Action impossible, l\'application est figée.',
@@ -1189,6 +1190,7 @@ export default {
   PNOanratt: 'Renoncer au rattachement en cours',
   PNOauts: ' Pas d\'auteur. | Auteur: | Auteurs: ',
   PNOauts2: 'Votre compte est le seul éditeur',
+  PNOrattpos: 'Aucun rattachement possible. | Un ratachement possible. | {count} ratachements possibles.',
   PNOrattinfo: 'Cliquer ci-dessous sur l\'icône "étoile verte" du groupe, avatar ou note à laquelle vous voulez rattacher la note courante.',
   PNOattach: 'Fichiers attachés',
 

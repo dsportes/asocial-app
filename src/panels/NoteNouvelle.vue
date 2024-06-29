@@ -4,7 +4,7 @@
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @click="fermer"/>
-      <q-toolbar-title v-if="!estgr" class="titre-lg full-width text-center">
+      <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(estgr ? 'PNOnvtit2' : 'PNOnvtit1', [nom])}}
       </q-toolbar-title>
       <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
@@ -89,7 +89,7 @@ export default {
         if (this.session.compte.qv.pcn >= 100) return 1 // excédent nn + nc + ng / q1
       } else {
         if (!this.groupe.imh) return 3 // pas d'hébergeur
-        else if (groupe.nn >= groupe.qn) return 2 // nb max se notes du groupe dépassé
+        else if (this.groupe.nn >= this.groupe.qn) return 2 // nb max se notes du groupe dépassé
       }
       return 0
     }
@@ -101,7 +101,7 @@ export default {
   methods: {
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
-    selNa (elt) { naAut = elt },
+    selNa (elt) { this.naAut = elt },
 
     async valider () {
       let ref = null
