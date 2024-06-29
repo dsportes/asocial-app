@@ -1622,3 +1622,24 @@ export class NouvelleNote extends Operation {
     }
   }
 }
+
+/* OP_RattNote: 'Gestion du rattachement d\'une note à une autre' ********
+- token: éléments d'authentification du compte.
+- id ids: identifiant de la note
+- ref : [id, ids] : racine ou note de rattachemnt
+Retour: rien
+*/
+export class RattNote extends Operation {
+  constructor () { super('RattNote') }
+
+  async run (id, ids, ref) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, ids, ref }
+      await post(this, 'RattNote', args)
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

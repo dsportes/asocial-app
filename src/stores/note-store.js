@@ -150,25 +150,6 @@ export const useNoteStore = defineStore('note', {
       })
       return lx
     },
-    
-    /*
-    nbjTemp: (state) => {
-      const n = state.note
-      if (!n || n.st === 99999999) return 0
-      const session = stores.session
-      const auj = session.auj
-      return AMJ.diff(n.st, auj)
-    },
-
-    mbAuteurs: (state) => {
-      const l = []
-      const n = state.note
-      if (!n || !n.auts.length) return l
-      const gSt = stores.groupe
-      n.auts.forEach(im => { l.push(gSt.getMembre(n.id, im)) })
-      return l
-    },
-    */
 
     estGr: (state) => { 
       return state.node && state.node.note && ID.estGroupe(state.node.note.id)
@@ -222,26 +203,6 @@ export const useNoteStore = defineStore('note', {
         return anc
       }
     },
-
-    /*
-    getAncetres1: (state) => { return (key) => {
-        const anc = []
-        const node = state.map.get(key)
-        if (!node || !node.note) return anc
-        anc.push(key)
-        let refk = node.note.refk
-        if (!refk) { anc.push(node.rkey); return anc }
-        anc.push(refk)
-        while (true) {        
-          const p = state.map.get(refk)
-          if (!p.note || !p.note.refk) { anc.push(p.rkey); break }
-          refk = p.note.refk
-          anc.push(refk)
-        }
-        return anc
-      }
-    },
-    */
 
     // Retourne une map de clé racine et de valeur { nn: nombre de notes, vf }
     statsParRacine: (state) => {
@@ -322,55 +283,31 @@ export const useNoteStore = defineStore('note', {
       this.map.forEach(n => { n.ratt = tf })
     },
 
-    koP () { // exclusion du node parent du node courant (sa note est déjà rattachée)
-      if (this.node.pkey) this.map.get(this.node.pkey).ratt = false
-    },
-
-    koSA (n) { // exclut sans condition le sous-arbre démarrant au node n 
-      n.ratt = false
-      if (n.children) for(const c of n.children) this.koSA(c)
-    },
-
-    // exclut tous les sous-arbres démarrant à n dès qu'ils ne sont ni du groupe idg, ni de l'avatar ida
-    koSAC (n, idg, ida) { 
-      const id = Note.idDeKey(n.key)
-      if (!n.note) this.koSA(n) // exclusion inconditionnelle des sous-arbres fake ??? DISCUTABLE ???
-      else if (id === idg) { // sous-arbre du groupe, on descend
-        if (n.children) for(const c of n.children) this.koSAC(c, idg, ida)
-      } else if (id !== ida) this.koSA(n) // sous-arbre d'un autre avatar que ida: à exclure
-      // début d'un sous-arbre de l'avatar : OK
-    },
-
-    koSAG (n, idg) { 
-      /* exclut tous les sous-arbres démarrant à n 
-      dès qu'ils ne sont pas du groupe idg */
-      if (n.type > 5) { // exclusion inconditionnelle des sous-arbres fake
-        this.koSA(n)
-      } else if (''+ idg === n.rkey) { 
-        // sous-arbre du groupe, on descend
-        if (n.children) for(const c of n.children) this.koSAG(c, idg)
-      } else {
-        // sous-arbre autre que du groupe: à exclure
-        this.koSA(n)
+    scanTop () {
+      const id = Note.idDeKey(this.node.key)
+      const pk = this.node.pkey
+      const g = ID.estGroupe(id)
+      for (const n of this.nodes) { // n est une racine : types 1, 2, 3
+        const idt = parseInt(n.key)
+        if (n.type === 1) { // sous-arbre avatar
+          if (!g && id === idt) this.scanST(n, this.node.key, pk, id, g)
+        } else { // sous-arbre groupe
+          if (!g || (g && id === idt)) this.scanST(n, this.node.key, pk, id, g)
+        }
       }
     },
 
-    koAV (ida) { // exclut les sous arbres zombi et groupes/avatars autres que idg et les fakes
-      for (const n of this.nodes) { // n est une racine : types 1, 2, 3
-        const id = parseInt(n.key)
-        // exclusion inconditionnelle des arbres "groupes zombis" et des arbres d'un autre avatar
-        if (n.type === 3 || (n.type === 1 && id !== ida)) this.koSA(n)
-        else if (id !== ida) this.koSAC(n, id, ida) // c'est une racine de groupe (les autres avatars ont été exclus ci-dessus)
-      }
-    },
-
-    koGR (idg) { // exclut les sous arbres zombi et groupes/avatars autres que idg et les fakes
-      for (const n of this.nodes) { // n est une racine : types 1, 2, 3
-        const id = parseInt(n.key)
-        if (n.type === 3) this.koSA(n) // exclusion inconditionnelle des "groupes zombis"
-        else 
-          if (id === idg) this.koSAG(n, id) // c'est la racine du groupe idg : à explorer
-          else this.koSA(n) // racine d'un autre groupe, d'un avatars ... : à exclure
+    scanST (x, k, pk, id, g) {
+      if (pk !== x.key && x.type !== 3) x.ratt = true
+      for (const c of x.children) {
+        if (c.key === k) continue // pas rattachable dans son propre sous-arbre
+        // const i = anc.indexOf(k); if (i !== -1) continue // non rattachable à mes descendants
+        const idn = Note.idDeKey(c.key)
+        const ok = (g && (idn === id)) || (!g && ((idn === id) || ID.estGroupe(idn)))
+        if (ok) { // rattachements possibles 
+          c.ratt = true
+          this.scanST(c, k, pk, id, g)
+        }
       }
     },
 

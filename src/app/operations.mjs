@@ -207,29 +207,6 @@ export class McNote extends Operation {
   }
 }
 
-/* OP_RattNote: 'Gestion du rattachement d\'une note à une autre' ********
-args.token: éléments d'authentification du compte.
-args.id ids: identifiant de la note
-args.ref : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
-Retour: rien
-*/
-export class RattNote extends Operation {
-  constructor () { super('RattNote') }
-
-  async run (id, ids, rid, rids, refn) {
-    try {
-      const session = stores.session
-      // const cle = ID.estGroupe(id) ? getCle(id) : session.clek
-      const ref = rid === 0 ? null : await crypter(cle, new Uint8Array(encode([rid, rids, refn])))
-      const args = { token: session.authToken, id, ids, ref }
-      this.tr(await post(this, 'RattNote', args))
-      return this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_NouveauFichier: 'Enregistrement d\'un nouveau fichier attaché à une note'
 */
 export class NouveauFichier extends Operation {

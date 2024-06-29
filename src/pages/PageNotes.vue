@@ -169,20 +169,23 @@
         </div>
 
         <div v-if="selected && nSt.note && rec===1" class="q-ma-sm">
+          <q-separator color="orange" size="2px" class="q-mb-xs"/>
           <div class="titre-md text-italic">{{$t('PNOrattpos', nSt.nbRatt, {count: nSt.nbRatt})}}</div>
           <div v-if="nSt.nbRatt" class="msg">{{$t('PNOrattinfo')}}</div>
-          <div class="q-mt-sm row justify-end">
+          <div class="q-mt-sm row">
             <btn-cond icon="undo" :label="$t('PNOanratt')" @click="anrattacher"/>
           </div>
         </div>
 
         <div v-if="selected && nSt.note && rec===2" class="q-ma-sm">
+          <q-separator color="orange" size="2px" class="q-mb-xs"/>
           <div>
             <span class="q-pa-xs text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
             <span class="msg">{{lib(noderatt)}}</span>
           </div>
-          <div class="q-mt-sm row q-gutter-sm justify-end">
-            <btn-cond icon="check" :label="$t('PNOcfratt')" @click="okrattacher"/>
+          <div class="q-mt-sm row q-gutter-sm">
+            <btn-cond icon="check" :label="$t('PNOcfratt')" color="warning" 
+              @click="okrattacher" cond="cEdit"/>
             <btn-cond icon="account_tree" :label="$t('PNOratt2')" @click="rattacher"/>
             <btn-cond icon="undo" :label="$t('PNOanratt')" @click="anrattacher"/>
           </div>
@@ -254,31 +257,7 @@ export default {
 
     presel () {  return this.nSt.presel },
 
-    lib2 () {
-      return this.lib(this.nSt.node)
-      /*
-      const n = this.nSt.node
-      if (n.type <= 3) return n.label
-      if (n.type === 4) {
-        const nomg = n.note.refn
-        // const nom = getNg(n.note.id).nom
-        return nomg ? this.$t('avatar3', [nom, nomg]) : this.$t('avatar2', [nom])
-      }
-      if (n.type === 5) {
-        // const nom = getNg(n.note.id).nom
-        return this.$t('groupe2', [nom])
-      }
-      const { id, ids } = splitPK(n.key)
-      const r = this.nSt.map.get(''+id)
-      if (n.type === 6) { 
-        return this.$t('avatar9', [ids, r.label])
-      }
-      if (n.type === 7) {
-        return this.$t('groupe9', [ids, r.label])
-      }
-      return ''
-      */
-    },
+    lib2 () { return this.lib(this.nSt.node) },
 
     rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <= 5 }
   },
@@ -337,10 +316,11 @@ export default {
     pc (i, j) { return !i ? '' : Math.round((j * 100) / i) + '%' },
 
     clicknode (n) {
-      if (this.rec) {
-        this.rec = 2
-        this.noderatt = n
-      } else this.selected = n.key
+      switch (this.rec) {
+        case 0 : { this.selected = n.key; return }
+        case 1 : { if (n.ratt) {this.rec = 2; this.noderatt = n}; return }
+        case 2 : { return }
+      }
     },
  
     lib (n) {
@@ -373,11 +353,8 @@ export default {
     async rattacher () {
       this.rec = 1
       this.noderatt = null
-      this.nSt.resetRatt(true) // tous OK
-      this.nSt.koP() // exclusion du node parent du node courant (sa note est déjà rattachée)
-      this.nSt.koSA(this.nSt.node) // exclut le node lui-même et son sous-arbre
-      if (this.nSt.estGroupe) this.nSt.koGR(this.nSt.id)
-      else this.nSt.koAV(this.nSt.id)
+      this.nSt.resetRatt(false) // tous KO
+      this.nSt.scanTop()
     },
 
     anrattacher () { 
@@ -389,12 +366,9 @@ export default {
     async okrattacher () {
       const n = this.nSt.note
       const r = this.noderatt
-      let rid = Note.idDekey(r.key), rids = 0
-      if (r.type < 3) {
-        // rattachement à une racine
-        if (rid === n.id) rid = 0 // c'est SA racine, donc pas rattachée
-      } else rids = r.note.ids
-      await new RattNote().run(n.id, n.ids, rid, rids)
+      const rid = Note.idDeKey(r.key)
+      const rids = r.type > 3 ? r.note.ids : 0
+      await new RattNote().run(n.id, n.ids, [rid, rids])
       this.rec = 0
       this.noderatt = null
       this.nSt.resetRatt(false)
@@ -548,7 +522,7 @@ export default {
 
   setup () {
     const nSt = stores.note
-
+    nSt.resetRatt(false) // tous KO
     nSt.calculNfnt()
 
     return {
