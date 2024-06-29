@@ -345,7 +345,6 @@ export default {
   EX8011: 'Sponsoring non trouvée pour cette phrase.',
   EX8012: 'Ce sponsoring a déjà été accepté ou refusé ou est hors limite. ({0})',
 
-
   // EX8012: 'Une phrase secrète semblable est déjà utilisée. Changer a minima le début de la phrase secrète pour ce nouveau compte',
   EX8013: 'Réserves de volume V1 insuffisantes de la tranche de quotas pour affectation au nouveau compte',
   EX8014: 'Réserves de volume V2 insuffisantes de la tranche de quotas pour affectation au nouveau compte',
@@ -369,10 +368,10 @@ export default {
   EX8032: 'Le contact a déjà accepté son invitation, impossible de revenir dessus dans le cadre d\'une invitation.',
   EX8033: 'Ce contact n\'est pas invité.',
 
-  EX8055: 'Quota du compte dépassé pour le volume V1. Demande:{0} - Quota:{1}',
-  EX8056: 'Quota du compte dépassé pour le volume V2. Demande:{0} - Quota:{1}',
-  EX8065: 'Maximum de volume V1 pour les notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
-  EX8066: 'Maximum de volume V2 pour les notes du couple dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
+  EX8055: 'Quota du compte dépassé pour le nombre de notes, chats, groupes V1. Demande:{0} - Quota:{1}',
+  EX8056: 'Quota du compte dépassé pour le volume de fichiers. Demande:{0} - Quota:{1}',
+  EX8065: 'Maximum de notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
+  EX8066: 'Maximum de volume de fichiers pour les notes du groupe dépassé (attribué par le compte hébergeur du groupe). Demande:{0} - Maximum:{1}',
   EX8067: 'Groupe sans hébergeur {0} : augmentation de volumer interdit.',
 
   EX8101: 'L\'administrateur technique a restreint l\'application à la lecture seulement : {0}\nL\'opération ayant tenté une écriture, elle a échoué.',
@@ -466,6 +465,14 @@ export default {
   EX8287: '(BUG) La mutation d\'un compte "A" en "O" ne peut être demandée que par un délégué pour sa partition ou le Comptable',
   EX8288: '(BUG) Le compte à muter en compte "O" est déjà un compte O.',
   EX8289: '(BUG) Le compte à muter en compte "A" est déjà un compte A.',
+  EX8290: '(BUG) Aucun avatar du compte n\'est membre du groupe de la note.',
+  EX8291: '(BUG) Aucun avatar du compte n\'a accès aux notes du groupe de la note.',
+  EX8292: '(BUG) L\'avatar de la note n\'est pas avatar du compte.',
+  EX8293: '(BUG) L\'avatar du compte auteur de la note n\'a le droit d\'écrire des notes.',
+  EX8294: '(BUG) La note "parent" -de rattachement- n\'existe pas.',
+  EX8295: '(BUG) Cycle détecté de rattachement [{0}].',
+  EX8296: '(BUG) Rattachement d\'une note d\'avatar à une note d\'un autre avatar.',
+  EX8297: '(BUG) Rattachement d\'une note de groupe à une note d\'un autre groupe ou d\'un avatar.',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',

@@ -1602,6 +1602,7 @@ export class TicketsStat extends Operation {
 - ida : pour une note de groupe, id de son avatar auteur
 - exclu : auteur est exclusif
 - ref : [id, ids] pour une note rattachée
+- t : texte crypté
 Retour: rien
 */
 export class NouvelleNote extends Operation {
@@ -1613,8 +1614,8 @@ export class NouvelleNote extends Operation {
       const cle = !ID.estGroupe ? session.clek : RegCles.get(id)
       const t = txt ? await crypter(cle, gzipB(txt)) : null
       const args = { token: session.authToken, id, t, ida, exclu, ref }
-      // const ret = await post(this, 'NouvelleNote', args)
-      const ret = { key: 'toto' }
+      const ret = await post(this, 'NouvelleNote', args)
+      // const ret = { key: 'toto' }
       return this.finOK(ret.key)
     } catch (e) {
       await this.finKO(e)
