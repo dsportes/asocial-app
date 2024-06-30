@@ -56,6 +56,24 @@ export const usePeopleStore = defineStore('people', {
     // Array des ids des people
     peopleIds: (state) => { return Array.from(state.map.keys()) },
 
+    nom: (state) => { return (id, c) => { // c: 0 court, 1: long, n : lg max 
+        const cv = state.getCV(id)
+        let n
+        if (cv.v) {
+          if (!c) return cv.nom
+          if (c === 1) return cv.nomC 
+          l = cv.nom
+        }
+        if (!l) {
+          const compti = state.session.compti
+          const e = compti.mc.get(id)
+          l = e ? e.tx : '#' + ('' + id).substring(10)
+        }
+        if (c < 2 || l.length < c) return l 
+        return l.substring(0, c) + '...'
+      }
+    },
+
     /* liste des groupes dont le people est co-membre actif 
     de l'avatar idav (ayant accès aux membres) */
     getListeIdGrComb: (state) => { return (idp, idav) => { 

@@ -8,7 +8,7 @@
       max-width="10rem">
       <q-list class="bg-secondary titre-md text-white q-py-xs">
         <q-item v-for="na in lna" :key="na.id" clickable v-close-popup
-          @click="selNa(na)">
+          @click="selNa(na.id)">
           {{na.nom}}
         </q-item>
       </q-list>

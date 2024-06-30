@@ -481,6 +481,7 @@ export default {
   EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
   EX8802: 'Action impossible du fait de la restriction "accès minimal"',
 
+  EX8997: 'Le compte a été radié pour non utilisation prolongée.',
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
 
@@ -1193,6 +1194,7 @@ export default {
   PNOrattpos: 'Aucun rattachement possible. | Un ratachement possible. | {count} ratachements possibles.',
   PNOrattinfo: 'Cliquer ci-dessous sur l\'icône "étoile verte" du groupe, avatar ou note à laquelle vous voulez rattacher la note courante.',
   PNOattach: 'Fichiers attachés',
+  PNOtype3: 'Le compte a été actif dans ce groupe, MAIS NE L\'EST PLUS. Le groupe "peut" avoir disparu.',
 
   PNOdlc: 'Téléchargement des notes affichées',
   PNOdlst1: 'GO ! notes et leurs fichiers',

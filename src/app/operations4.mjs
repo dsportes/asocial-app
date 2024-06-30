@@ -1283,7 +1283,7 @@ export class InvitationGroupe extends Operation {
 - cleGK: cle du groupe cryptée par la clé K du compte
 - cas: 1:accepte 2:contact 3:radié 4:radié + LN
 - msgG: message de remerciement crypté par la cle G du groupe
-- httx: { ht, tx } à attacher à idg s'il n'y en a pas
+- txK: texte à attacher à compti/idg s'il n'y en a pas
 Retour:
 EXC: 
 - 8002: groupe disparu
@@ -1307,7 +1307,7 @@ export class AcceptInvitation extends Operation {
         idg: inv.idg, 
         idm: inv.ida,
         cas, iam, ian,
-        httx,
+        txK,
         cleGK: await crypter(session.clek, cleg),
         msgG: await crypter(cleg, gzipB(msg))
       }

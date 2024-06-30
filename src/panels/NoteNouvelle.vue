@@ -63,6 +63,7 @@ import EditeurMd from '../components/EditeurMd.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { NouvelleNote } from '../app/operations4.mjs'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
+import { Note } from '../app/modele.mjs'
 
 export default {
   name: 'NoteNouvelle',
@@ -110,7 +111,7 @@ export default {
       // note rattachée à une autre note OU note avatar rattachée à une racine de groupe
       if (!this.estgr) { // Note avatar
         const nd = this.nSt.node
-        if (nd.type === 2) ref = [Note.idDekey(nd.key), 0] // rattachée à une racine de groupe
+        if (nd.type === 2) ref = [Note.idDeKey(nd.key), 0] // rattachée à une racine de groupe
         else if (this.notep) ref = [this.notep.id, this.notep.ids] // rattachée à une note d'un groupe ou de l'avatar
       } else if (this.notep) ref = [this.notep.id, this.notep.ids] // Note de groupe rattachée
 

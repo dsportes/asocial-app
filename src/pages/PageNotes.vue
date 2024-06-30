@@ -20,6 +20,8 @@
               color="green-5"/>
             <q-icon :name="icons[prop.node.type]" :color="colors[prop.node.type]"
               size="sm" class="col-auto q-mr-xs"/>
+            <q-icon v-if="prop.node.type === 3 || prop.node.type > 5" class="col-auto q-mr-xs"
+              name="close" color="negative" size="sm"/>
             <q-icon v-if="nbf(prop.node)" name="attachment" class="col-auto q-mr" color="orange" size="sm"/>
             <q-badge v-if="nbf(prop.node)" class="col-auto q-mr-xs" color="orange" rounded 
               :label="nbf(prop.node)" text-color="black"/>
@@ -123,6 +125,8 @@
             <span class="q-mr-sm">({{edvol(nSt.note.texte.length)}})</span>
             <span>{{dhcool(nSt.note.d)}}</span>
           </div>
+          <div v-if="nSt.node.type === 3" class="titre-md text-italic text-bold">
+            {{$t('PNOtype3')}}</div>
         </div>
 
         <div v-if="selected && nSt.note" class="q-ml-md row"> 
@@ -219,11 +223,11 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NotePlus from '../components/NotePlus.vue'
-import { RattNote } from '../app/operations.mjs'
+import { RattNote } from '../app/operations4.mjs'
 import { putData, getData } from '../app/net.mjs'
 
-const icons = ['','person','group','group','description','article','close','close']
-const colors = ['','primary','orange','negative','primary','orange','primary','orange']
+const icons = ['','person','group','group','description','article','description','article']
+const colors = ['','primary','orange','grey-5','primary','orange','grey-5','grey-5']
 const styles = [
   '',
   'titre-md text-bold', 
@@ -327,24 +331,28 @@ export default {
       const nfnt = this.nSt.nfnt[n.key] || { nf: 0, nt:0 }
       switch (n.type) {
         case 1 : {
-          const nom = this.pSt.getCV(parseInt(n.key)).nom
+          const nom = this.pSt.nom(parseInt(n.key))
           return this.$t('avatar1', [nom, nfnt.nf, nfnt.nt])
         }
-        case 2 : 
+        case 2 : {
+          const nom = this.pSt.nom(parseInt(n.key), 1)
+          return this.$t('groupe1', [nom, nfnt.nf, nfnt.nt])
+        }
         case 3 : {
-          const nom = this.gSt.nom(parseInt(n.key)).nom
+          const nom = this.pSt.nom(parseInt(n.key), 24)
           return this.$t('groupe1', [nom, nfnt.nf, nfnt.nt])
         }
         case 4 : 
         case 5 : {
           const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
-          if (n.note) {
-            const r = n.note.ref
-            const s2 = r && r[0] !== n.note.id ? '(' + this.gSt.nom(n.note.id).nom8 + ') ' : ''
-            return s1 + s2 + n.note.titre
-          }
-          return n.idg ? s1 + this.$t('notef2', [n.key, this.gSt.nom(n.idg).nom8])
-            : s1 + this.$t('notef2', [n.key])
+          const r = n.note.ref
+          const s2 = r && r[0] !== n.note.id ? '(' + this.pSt.nom(n.note.id, 8)+ ') ' : ''
+          return s1 + s2 + n.note.titre
+        }
+        case 6 : 
+        case 7 : {
+          const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
+          return s1 + '#' + Note.idsDekey(n.key)
         }
       }
     },

@@ -372,7 +372,7 @@ export class Operation {
   async finKO (e) {
     const session = stores.session
     const exc = appexc(e)
-    if (this.modeSync || exc.code === 9999) {
+    if (this.modeSync || exc.code > 8990) {
       // en mode Sync toutes les exceptions sont "tueuses"
       session.setExcKO(exc)
       session.finOp()
