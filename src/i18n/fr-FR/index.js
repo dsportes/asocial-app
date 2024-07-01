@@ -476,6 +476,8 @@ export default {
   EX8297: '(BUG) Rattachement d\'une note de groupe à une note d\'un autre groupe ou d\'un avatar.',
   EX8298: '(BUG) Une note de groupe rattachée à une racine ne peut l\'être qu\'à celle du sien.',
   EX8299: '(BUG) Une note d\'avatar ne peut pas être rattachée à la racine d\'un autre avatar.',
+  EX8300: '(BUG) Note ou racine de rattachement non identifiée',
+  EX8301: '(BUG) Le compte n\'a pas d\'avatar ayant droit d\'édition sur cette note.',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
@@ -1270,6 +1272,8 @@ export default {
   
   PNOrav: 'Rattachée à la note de {0}',
   PNOrgr: 'Rattachée à la note du groupe "{0}"',
+  PNOrav1: 'Attachée directement à l\'avatar {0}',
+  PNOrgr2: 'Aattachée directement au groupe "{0}"',
   PNOaut1: 'Note écrite par {0}',
   PNOaut1a: 'Fichier ajouté par {0}',
   PNOaut1m: 'Fichier modifié par {0}',

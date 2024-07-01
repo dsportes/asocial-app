@@ -330,7 +330,7 @@ export default {
         case 0 : { this.selected = n.key; return }
         case 1 : { 
           if (n.ratt) {
-            const idas = Note.idasEdit(n)
+            const idas = Note.idasEdit(this.nSt.node)
             if (!idas.size) this.nodeDiag = this.$t('PNOnoedit')
             this.rec = 2
             this.noderatt = n

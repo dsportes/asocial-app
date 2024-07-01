@@ -116,10 +116,7 @@ export const useNoteStore = defineStore('note', {
       return Note.idDeKey(state.node.key)
     },
 
-    nodeP: (state) => {
-      const n = state.note
-      return n && n.ref ? state.map.get(n.refk) : null
-    },
+    nodeP: (state) => { return state.map.get(state.node.pkey) },
 
     nbRatt: (state) => {
       let nb = 0
@@ -317,11 +314,9 @@ export const useNoteStore = defineStore('note', {
       for (const c of x.children) {
         if (c.key === k || c.key === pk) continue // pas rattachable dans son propre sous-arbre
         const idn = Note.idDeKey(c.key)
-        const ok = (g && (idn === id)) || (!g && ((idn === id) || ID.estGroupe(idn)))
-        if (ok) { // rattachements possibles 
-          c.ratt = true
-          this.scanST(c, k, pk, id, g)
-        }
+        const okst = (g && (idn === id)) || (!g && ((idn === id) || ID.estGroupe(idn)))
+        if (okst && (x.type === 4 || x.type === 5)) c.ratt = true 
+        if (okst) this.scanST(c, k, pk, id, g)
       }
     },
 

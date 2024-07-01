@@ -4,26 +4,28 @@
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @click="fermer"/>
-      <q-toolbar-title v-if="avatar" 
-        class="titre-lg full-width text-center">{{$t('PNOedtit1', [avatar.na.nom])}}</q-toolbar-title>
-      <q-toolbar-title v-if="groupe" 
-        class="titre-lg full-width text-center">{{$t('PNOedtit2', [groupe.na.nomc])}}</q-toolbar-title>
+      <q-toolbar-title class="titre-lg full-width text-center">
+        {{$t(note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
+      </q-toolbar-title>
       <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-        :disable="(groupe && !naAut) || !modifie"  @click="valider"/>
+        :disable="(note.deGroupe && !naAut) || !modifie"  @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
     <q-toolbar v-if="session.editDiag" inset class="full-width msg">{{session.cEdit}}</q-toolbar>
   </q-header>
 
-  <q-page-container >
+  <q-page-container>
     <q-page class="q-pa-xs">
+      <node-parent />
 
-      <div v-if="groupe">
+      <q-separator class="q-my-sm" color="orange"/>
+
+      <div v-if="note.estGroupe">
         <liste-auts class="q-my-sm"/>
 
         <note-ecritepar :groupe="groupe" :note="nSt.note" @ok="selNa"/>
 
-        <div v-if="xav"> <!-- Bloc exclu -->
+        <div v-if="xav">
           <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
           <apercu-genx v-if="xav.na" class="q-my-md" 
             :id="xav.na.id" :im="xav.im"/>
@@ -31,29 +33,11 @@
         </div>
         <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
 
-        <div v-if="grP" class="q-pa-xs bord1">
-          <div class="titre-md">
-            <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-            <span>{{$t('PNOrgr', [grP.na.nomc])}}</span>
-          </div>
-          <div class="q-ml-sm text-italic">{{nodeP.label}}</div>
-        </div>
-
       </div>
 
-      <div v-else>
-        <div v-if="avP" class="q-pa-xs bord1">
-          <div class="titre-md">
-            <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-            <span>{{$t('PNOrav', [avP.na.nom])}}</span>
-          </div>
-          <div class="q-ml-sm text-italic">{{nodeP.label}}</div>
-        </div>
-      </div>
-      
-      <editeur-md class="col" :texte="nSt.note.txt" mh="50vh"
+      <editeur-md class="col" :texte="nSt.note.texte" mh="50vh"
         :lgmax="cfg.maxlgtextesecret" 
-        :editable="(!groupe || (groupe && naAut)) && !session.editDiag"
+        :editable="(!groupe || (groupe && naAut)) && !session.cEdit"
         modetxt v-model="texte"/>
 
     </q-page>
@@ -65,33 +49,36 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { splitPK, dkli, styp } from '../app/util.mjs'
+import { dkli, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import { MajNote } from '../app/operations.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
+import NodeParent from '../components/NodeParent.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { ID } from '../app/api.mjs'
 
 export default {
   name: 'NoteEdit',
 
-  components: { BoutonHelp, EditeurMd, ListeAuts, NoteEcritepar, ApercuGenx, BtnCond },
+  components: { BoutonHelp, EditeurMd, ListeAuts, NoteEcritepar, ApercuGenx, BtnCond, NodeParent },
 
   props: { },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    modifie () { return this.nSt.note.txt !== this.texte }
+    modifie () { return this.note.texte !== this.texte },
+    idas () { return Note.idasEdit(this.node) },
+    nom () { return this.pSt.nom(this.note.id)}
   },
 
   methods: {
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
     async valider () {
-      const n = this.nSt.note
+      const n = this.note
       const aut = this.avatar ? 0 : this.aSt.compte.imGA(this.groupe.id, this.naAut.id)
       await new MajNote().run(n.id, n.ids, aut, this.texte)
       this.ui.fD()
@@ -112,7 +99,9 @@ export default {
     const pSt = stores.people
     const cfg = stores.config
     const ui = stores.ui
-
+    const node = ref(nSt.node)
+    const note = ref(nSt.note)
+    /*
     const type = ref(0)
 
     const naAut = ref()
@@ -154,9 +143,10 @@ export default {
     function cv(x) {
       return !x.avc ? pSt.getCV(x.na.id) : aSt.getAvatar(x.na.id).cv
     }
-
+    */
     return {
-      session, nSt, aSt, gSt, ui, cfg, naAut, selNa, styp,
+      session, nSt, aSt, gSt, ui, cfg, node, note, nodeP,
+      naAut, selNa, styp,
       avatar, groupe, type, nodeP, avP, grP, xav,
       dkli, cv
     }

@@ -1299,7 +1299,7 @@ export class Note extends GenDoc {
     return s
   }
 
-  // Set des id des avatars du compte pouvant éditer la note ou sa racine
+  // Set des id des avatars du compte pouvant éditer la note
   static idasEdit (n) { // n : node du store notes
     const session = stores.session
     const lav = session.compte.mav
@@ -1311,8 +1311,8 @@ export class Note extends GenDoc {
     const gr = e.groupe
     for (const ida of lav) {
       const im = gr.mmb.get(ida)
-      if (im && gr.accesNote2(im) === 2 &&
-          (!this.im || this.im === im || gr.estAnim(im))) s.add(ida)
+      const an = gr.accesNote2(im)
+      if (an === 2  && (!this.im || this.im === im || gr.estAnim(im))) s.add(ida)
     }
     return s
   }
