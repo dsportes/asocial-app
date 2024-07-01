@@ -124,7 +124,7 @@ export const useNoteStore = defineStore('note', {
       return nb
     },
 
-    // retourne { avc: true/false, ida, im, nom } ou null s'il n'y a pas d'exclusivité
+    // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
     mbExclu: (state) => {
       const n = state.note
       let avc = false

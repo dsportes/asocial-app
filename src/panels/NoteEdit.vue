@@ -8,10 +8,10 @@
         {{$t(note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
       </q-toolbar-title>
       <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-        :disable="(note.deGroupe && !naAut) || !modifie"  @click="valider"/>
+        :disable="(note.deGroupe && !aut) || !modifie"  @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="session.editDiag" inset class="full-width msg">{{session.cEdit}}</q-toolbar>
+    <q-toolbar v-if="session.cEdit" inset class="full-width msg">{{session.cEdit}}</q-toolbar>
   </q-header>
 
   <q-page-container>
@@ -20,16 +20,14 @@
 
       <q-separator class="q-my-sm" color="orange"/>
 
-      <div v-if="note.estGroupe">
+      <div v-if="note.deGroupe">
         <liste-auts class="q-my-sm"/>
 
-        <note-ecritepar :groupe="groupe" :note="nSt.note" @ok="selNa"/>
+        <note-ecritepar :note="nSt.note" @ok="selNa"/>
 
         <div v-if="xav">
           <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
-          <apercu-genx v-if="xav.na" class="q-my-md" 
-            :id="xav.na.id" :im="xav.im"/>
-          <div v-else class="titre-md text-bold">{{xav.nom}}</div>
+          <apercu-genx class="q-my-md" :id="xav.id" :im="xav.im"/>
         </div>
         <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
 
@@ -37,7 +35,7 @@
 
       <editeur-md class="col" :texte="nSt.note.texte" mh="50vh"
         :lgmax="cfg.maxlgtextesecret" 
-        :editable="(!groupe || (groupe && naAut)) && !session.cEdit"
+        :editable="(!note.estGroupe || (note.estGroupe && naAut)) && !session.cEdit"
         modetxt v-model="texte"/>
 
     </q-page>
@@ -49,16 +47,15 @@
 <script>
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
-import { dkli, styp } from '../app/util.mjs'
+import { styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { MajNote } from '../app/operations.mjs'
+import { MajNote } from '../app/operations4.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import NodeParent from '../components/NodeParent.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { ID } from '../app/api.mjs'
 
 export default {
   name: 'NoteEdit',
@@ -71,7 +68,8 @@ export default {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     modifie () { return this.note.texte !== this.texte },
     idas () { return Note.idasEdit(this.node) },
-    nom () { return this.pSt.nom(this.note.id)}
+    nom () { return this.pSt.nom(this.note.id)},
+    xav () { return this.nSt.mbExclu } // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
   },
 
   methods: {
@@ -79,76 +77,36 @@ export default {
 
     async valider () {
       const n = this.note
-      const aut = this.avatar ? 0 : this.aSt.compte.imGA(this.groupe.id, this.naAut.id)
+      const aut = !this.note.deGroupe ? 0 : this.aut.id
       await new MajNote().run(n.id, n.ids, aut, this.texte)
       this.ui.fD()
-    }
+    },
+
+    selNa (e) { 
+      this.aut = e 
+    } // { nom, i, ko, im, id }
   },
 
   data () {
     return {
       texte: '',
+      aut: null
     }
   },
 
   setup () {
     const session = stores.session
     const nSt = stores.note
-    const aSt = stores.avatar
+
     const gSt = stores.groupe
     const pSt = stores.people
     const cfg = stores.config
     const ui = stores.ui
     const node = ref(nSt.node)
     const note = ref(nSt.note)
-    /*
-    const type = ref(0)
 
-    const naAut = ref()
-    const xav = ref()
-
-    const avatar = ref(null)
-    const groupe = ref(null)
-    
-    const { id, ids } = splitPK(nSt.node.note.refk)
-    const idp = ref(id) // id du parent - racine si ids = 0 - GROUPE ou AVATAR
-    const grP = ref(null) // groupe de la note parente
-    const avP = ref(null) // avatar de la note parente
-    if (idp.value) {
-      if (ID.estGroupe(idp.value)) {
-        grP.value = gSt.egr(idp.value).groupe
-      } else {
-        avP.value = aSt.getElt(idp.value).avatar
-      }
-    }
-
-    const nodeP = ref(idp.value ? nSt.nodeP : null)
-
-    switch (nSt.node.type) {
-      case 4: {
-        type.value = 4
-        avatar.value = aSt.getElt(nSt.note.id).avatar
-        break
-      }
-      case 5: {
-        type.value = 5
-        groupe.value = gSt.egr(nSt.note.id).groupe
-        xav.value = nSt.mbExclu // retourne { avc: true/false, nom } ou null s'il n'y a pas d'exclusivité
-        break
-      }
-    }
-
-    function selNa (elt) { naAut.value = elt.na }
-
-    function cv(x) {
-      return !x.avc ? pSt.getCV(x.na.id) : aSt.getAvatar(x.na.id).cv
-    }
-    */
     return {
-      session, nSt, aSt, gSt, ui, cfg, node, note, nodeP,
-      naAut, selNa, styp,
-      avatar, groupe, type, nodeP, avP, grP, xav,
-      dkli, cv
+      session, nSt, gSt, pSt, ui, cfg, node, note, styp
     }
   }
 
@@ -157,16 +115,4 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.mh
-  max-height: 3.2rem
-  width: 15rem
-.bord1
-  border: 1px solid $grey-5
-  border-radius: 5px
-.bord2
-  border: 3px solid $warning
-  border-radius: 5px
-.dec
-  position: relative
-  left: -7px
 </style>

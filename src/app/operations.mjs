@@ -136,30 +136,6 @@ export class NoteOpx extends Operation {
   }
 }
 
-/* OP_MajNote: 'Mise à jour du texte d\'une note' ******
-args.token: éléments d'authentification du compte.
-args.id ids: identifiant de la note (dont celle du groupe pour un note de groupe)
-args.txts : nouveau texte encrypté
-args.im : auteur de la note pour un groupe
-Retour:
-*/
-export class MajNote extends Operation {
-  constructor () { super('MajNote') }
-
-  async run (id, ids, aut, texte) {
-    try {
-      const session = stores.session
-      const cle = Note.clen(id)
-      const txts = await Note.toRowTxt(cle, texte)
-      const args = { token: session.authToken, id, ids, txts, aut}
-      this.tr(await post(this, 'MajNote', args))
-      return this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_ExcluNote: 'Changement de l\'attribution de l\'exclusivité d\'écriture d\'une note'
 args.token: éléments d'authentification du compte.
 args.id ids: identifiant de la note

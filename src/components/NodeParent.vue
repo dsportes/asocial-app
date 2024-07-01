@@ -25,7 +25,7 @@ export default ({
   components: { },
 
   computed: {
-    n () { return this.nSt.node },
+    n () { return this.nSt.nodeP },
     t () { return this.n.type },
     estAv () { return this.t === 1 || this.t === 4 || this.t === 6 },
     id () { return Note.idDeKey(this.n.key) },
@@ -41,7 +41,8 @@ export default ({
   
   setup () {
     return {
-      nSt: stores.note
+      nSt: stores.note,
+      pSt: stores.people
     }
   } 
 })

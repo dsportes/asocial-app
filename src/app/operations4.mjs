@@ -1643,3 +1643,27 @@ export class RattNote extends Operation {
     }
   }
 }
+
+/* OP_MajNote: 'Mise à jour du texte d\'une note' ******
+- token: éléments d'authentification du compte.
+- id ids: identifiant de la note (dont celle du groupe pour un note de groupe)
+- t : nouveau texte encrypté
+- aut : id de l'auteur de la note pour un groupe
+Retour:
+*/
+export class MajNote extends Operation {
+  constructor () { super('MajNote') }
+
+  async run (id, ids, aut, texte) {
+    try {
+      const session = stores.session
+      const cle = !ID.estGroupe(id) ? session.clek : RegCles.get(id)
+      const t = texte ? await crypter(cle, gzipB(texte)) : null
+      const args = { token: session.authToken, id, ids, t, aut}
+      await post(this, 'MajNote', args)
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

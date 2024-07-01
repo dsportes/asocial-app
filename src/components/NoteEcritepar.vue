@@ -1,7 +1,7 @@
 <template>
   <div class="titre-md">
     <q-btn-dropdown no-caps dense :color="naAut ? 'primary' : 'warning'"
-      :label="naAut ? $t('PNOaut1' + (fic || ''), [naAut.nom]) : $t('PNOaut2')" 
+      :label="naAut ? $t('PNOaut1' + (fic || ''), [naAut.nom]) : $t('PNOaut' + (g ? '2' : '3'))" 
       content-style="width:25rem!important">
       <q-list class="bg-secondary text-white q-py-xs">
         <q-item v-for="e in la" :key="e.id" 
@@ -46,13 +46,17 @@ export default {
 
   setup (props, context) {
     const session = stores.session
-    const aSt = stores.avatar
+    const gSt = stores.groupe
     const nSt = stores.note
     /* {nom, i, im, id, ko} ko: 1 pas auteur, 2: n'a pas exclusiité (edition seulement) */
     const la = ref([])
-    const g = toRef(props, 'groupe')
+    const gx = toRef(props, 'groupe')
+    const g = ref(gx.value)
     const n = toRef(props, 'note')
-    const xav = ref()
+    if (n.value) {
+      const e = gSt.egr(n.value.id)
+      g.value = e ? e.groupe : null
+    }
     const naAut = ref()
     const optmb = toRef(props, 'optmb')
 
@@ -61,7 +65,7 @@ export default {
       const l = []
       let ok = false
       const sav = session.compte.mpg.get(g.value.id)
-      if (sav) for (const id of sav) {
+      if (sav && g.value) for (const id of sav) {
         const im = g.value.mmb.get(id)
         if (!im) continue
         let i = auts.indexOf(im)
@@ -75,7 +79,7 @@ export default {
           if (!a) {
             x.ko = 1
           } else {
-            if ((n.value && n.value.im) && (n.value.im !== im)) x.ko = 2
+            if (n.value && n.value.im && n.value.im !== im && !g.value.estAnim(im)) x.ko = 2
             else ok = true
           }
         }
@@ -94,7 +98,7 @@ export default {
     init ()
 
     return {
-      aSt,selAut, la, xav, naAut
+      selAut, la, naAut
     }
   }
 

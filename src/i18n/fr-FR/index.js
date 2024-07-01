@@ -1245,7 +1245,7 @@ export default {
 
   PNOarchivee: ' La note est "archivée", elle ne peut plus être modifiée. Elle peut toutefois être "réactivée" et redevenir éditable.',
   PNOecrko1: 'N\'est pas autorisé à l\'écriture de notes dans le groupe',
-  PNOecrko2: 'N\'a pas l\'exclusivité d\'écriture sur cette note',
+  PNOecrko2: 'N\'a pas l\'exclusivité sur cette note et n{est pas animateur',
   PNOecrko3: 'N\'a pas accès à la liste des membres du groupe',
 
   PNOer1: 'Il n\'est pas possible d\'ajouter une nouvelle note tant que le nombre total des notes, chats, participations aux groupes, excède le quota attribué au compte.',
@@ -1272,12 +1272,13 @@ export default {
   
   PNOrav: 'Rattachée à la note de {0}',
   PNOrgr: 'Rattachée à la note du groupe "{0}"',
-  PNOrav1: 'Attachée directement à l\'avatar {0}',
+  PNOrav2: 'Attachée directement à l\'avatar {0}',
   PNOrgr2: 'Aattachée directement au groupe "{0}"',
   PNOaut1: 'Note écrite par {0}',
   PNOaut1a: 'Fichier ajouté par {0}',
   PNOaut1m: 'Fichier modifié par {0}',
   PNOaut2: 'Aucun avatar ne peut écrire cette note',
+  PNOaut3: 'Le compte n\'est pas actif sur ce groupe',
   PNOngr: 'Note du groupe "{0}"',
   PNOnper: 'Note personnelle de {0}',
   PNOdeft: 'Nouvelle note ...',
