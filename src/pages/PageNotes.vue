@@ -185,12 +185,13 @@
 
         <div v-if="selected && nSt.note && rec===2" class="q-ma-sm">
           <q-separator color="orange" size="2px" class="q-mb-xs"/>
-          <div>
+          <div v-if="!nodeDiag">
             <span class="q-pa-xs text-italic titre-md q-mr-md">{{$t('PNOratta')}}</span>
             <span class="msg">{{lib(noderatt)}}</span>
           </div>
+          <div v-if="nodeDiag" class="msg">{{nodeDiag}}</div>
           <div class="q-mt-sm row q-gutter-sm">
-            <btn-cond icon="check" :label="$t('PNOcfratt')" color="warning" 
+            <btn-cond v-if="!nodeDiag" icon="check" :label="$t('PNOcfratt')" color="warning" 
               @click="okrattacher" cond="cEdit"/>
             <btn-cond icon="account_tree" :label="$t('PNOratt2')" @click="rattacher"/>
             <btn-cond icon="undo" :label="$t('PNOanratt')" @click="anrattacher"/>
@@ -295,6 +296,7 @@ export default {
     return {
       selected: '',
       expanded: [],
+      nodeDiag: '',
 
       op: '', // suppr arch react
       expandAll: false,
@@ -323,9 +325,17 @@ export default {
     pc (i, j) { return !i ? '' : Math.round((j * 100) / i) + '%' },
 
     clicknode (n) {
+      this.nodeDiag = ''
       switch (this.rec) {
         case 0 : { this.selected = n.key; return }
-        case 1 : { if (n.ratt) {this.rec = 2; this.noderatt = n}; return }
+        case 1 : { 
+          if (n.ratt) {
+            const idas = Note.idasEdit(n)
+            if (!idas.size) this.nodeDiag = this.$t('PNOnoedit')
+            this.rec = 2
+            this.noderatt = n
+          }
+          return }
         case 2 : { return }
       }
     },

@@ -1198,6 +1198,7 @@ export default {
   PNOattach: 'Fichiers attachés',
   PNOtype3: 'Le compte a été actif dans ce groupe, MAIS NE L\'EST PLUS. Le groupe "peut" avoir disparu.',
   PNOtype67: 'Cette note "n\'existe plus" mais des notes existantes lui ayant été rattachées, elle subsite juste pour permettre de voir ces dernières.',
+  PNOnoedit: 'Aucun avatar du compte n\'a l\'autosisation de modifier cette note.',
 
   PNOdlc: 'Téléchargement des notes affichées',
   PNOdlst1: 'GO ! notes et leurs fichiers',

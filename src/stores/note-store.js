@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { AMJ, ID } from '../app/api.mjs'
+import { ID } from '../app/api.mjs'
 import { Note } from '../app/modele.mjs'
 import stores from './stores.mjs'
-import { splitPK, $t } from '../app/util.mjs'
+import { splitPK, $t, difference, intersection } from '../app/util.mjs'
 
 /* On ne peut recevoir des notes que de ce type:
 - note d'avatar (4) - key:av1/ids1 relative à l'avatar av1 du compte. Elle peut avoir un ref:
@@ -43,13 +43,6 @@ A la racine (3) d'un groupe NON actif pour le compte de key: gr3, on peut trouve
 export const useNoteStore = defineStore('note', {
   state: () => ({
     /* 
-    note 
-      key: 'id/ids' (clé de la note)
-
-      // rkey: 'id' (clé de sa racine)
-      // refk: 'id/ids de ref' (clé de sa note de rattachement)
-      // refrk: 'id de ref' (clé de la racine de sa note de rattachement)
-
     node
       type
       key : 'id/ids'
@@ -58,10 +51,7 @@ export const useNoteStore = defineStore('note', {
         - 'id': rattachement direct à une racine de groupe ou d'avatar
         - 'id/ids': rattachement à une autre note
       children : [] nodes fils
-      idg : pour un node avatar FAKE (rattaché à une racine), id du groupe
-        auquel la note était rattachée quand elle existait
       note : absent pour une racine et une note fake
-      label : titre de la note
       
     type:
       1 : racine avatar
@@ -325,8 +315,7 @@ export const useNoteStore = defineStore('note', {
     scanST (x, k, pk, id, g) {
       if (pk !== x.key && x.type !== 3) x.ratt = true
       for (const c of x.children) {
-        if (c.key === k) continue // pas rattachable dans son propre sous-arbre
-        // const i = anc.indexOf(k); if (i !== -1) continue // non rattachable à mes descendants
+        if (c.key === k || c.key === pk) continue // pas rattachable dans son propre sous-arbre
         const idn = Note.idDeKey(c.key)
         const ok = (g && (idn === id)) || (!g && ((idn === id) || ID.estGroupe(idn)))
         if (ok) { // rattachements possibles 

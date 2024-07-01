@@ -1299,6 +1299,24 @@ export class Note extends GenDoc {
     return s
   }
 
+  // Set des id des avatars du compte pouvant éditer la note ou sa racine
+  static idasEdit (n) { // n : node du store notes
+    const session = stores.session
+    const lav = session.compte.mav
+    if (!Note.estG(n.key)) return lav
+    const s = new Set()
+    const gSt = stores.groupe
+    const e = gSt.egr(Note.idDeKey(n.key))
+    if (!e) return s
+    const gr = e.groupe
+    for (const ida of lav) {
+      const im = gr.mmb.get(ida)
+      if (im && gr.accesNote2(im) === 2 &&
+          (!this.im || this.im === im || gr.estAnim(im))) s.add(ida)
+    }
+    return s
+  }
+
   static estG (key) { return key.charAt(0) === '3' }
   // key de la racine de rattachement SSI le rattachement est à une racine
   static pEstRac (pkey) { return pkey && pkey.length === 14 }
@@ -1309,10 +1327,7 @@ export class Note extends GenDoc {
   // ids d'une key
   static idsDeKey (key) { return parseInt(key.substring(15)) }
 
-  static fake = { txt: '', dh: 0 }
-
   get key () { return this.id + '/' + this.ids }
-
   /* clé du parent:
     - si elle n'est pas rattachée, c'est la racine (avatar ou groupe) de son id
     - sinon, c'est,
@@ -1322,80 +1337,11 @@ export class Note extends GenDoc {
   get pkey () {
     return !this.ref ? '' + this.id : (this.ref[1] ? this.ref[0] + '/' + this.ref[1] : '' + this.ref[0])
   }
-
-  // Retourne l'id du groupe de rattachement d'un note avatar
-  get refIdg () {
-    if (!this.ref || this.deGroupe) return 0
-    return ID.estGroupe(this.ref[0]) ? this.ref[0] : 9
-  }
-
   get rkey () { return '' + this.id }
   get refk () { return this.ref ? (this.ref[0] + (this.ref[1] ? '/' + this.ref[1] : '')) : '' }
-  get refrk () { return this.ref ? '' + this.ref[0] : ''}
   get rid () {  return this.ref ? this.ref[0] : 0 }
   get rids () {  return this.ref ? this.ref[1] : 0 }
   get shIds () { return ('' + (this.ids % 10000)).padStart(4, '0')}
-
-  /*
-  initTest (id, ids, ref, txt, dh, n, v) { // pour les tests
-    this.id = id
-    this.ids = ids
-    this.ref = ref
-    this.txt = txt
-    this.titre = titre(this.txt)
-    this.dh = dh,
-    this.n = txt ? txt.length : 0
-    this.v = v
-    this.mfa = { size : v ? (ids % 10) : 0 }
-    if (ID.estGroupe(id)) {
-      switch (ids % 3) {
-        case 0: { this.smc = new Set([1, 101, 255]); break}
-        case 1: { this.smc = new Set([1, 102]); break}
-        case 0: { this.smc = new Set([255]); break}
-      }
-    } else {
-      switch (ids % 3) {
-        case 0: { this.smc = new Set([1, 255]); break}
-        case 1: { this.smc = new Set([1, 2]); break}
-        case 0: { this.smc = new Set([255]); break}
-      }
-    }
-  }
-
-  settxt (txt) { // pour les tests
-    this.txt = txt
-    this.titre = titre(this.txt)
-    this.n = txt ? txt.length : 0
-  }
-  */
-
-  static async toRowNouveau (id, txt, im, exclu, ref) {
-    const session = stores.session
-    const cle = Note.clen(id)
-    const r = { id, ids: rnd6(), im: exclu ? im : 0, v : 0, mc: null }
-    r.txts = await Note.toRowTxt(cle, txt)
-    if (im) r.auts = [im]
-    r.ref = await Note.toRowRef(cle, ref)
-    const _data_ = encode(r)
-    return { _nom: 'notes', id, ids: r.ids, _data_ }
-  }
-
-  static async toRowTxt (cle, txt) {
-    const x = { d: Date.now(), t: gzipB(txt) }
-    return await crypter(cle, new Uint8Array(encode(x)))
-  }
-
-  static async toRowRef (cle, arg) {
-    // arg : [rid, rids, rnom || '']
-    /*`ref` : [rid, rids, rnom] crypté par la clé de la note. Référence d'une autre note
-    rnom n'est défini que pour une note d'avatar référençant un note de groupe (rnom est celui du groupe)*/
-    if (!arg) return null
-    const x = new Array(arg.length)
-    x[0] = arg[0]
-    x[1] = arg[1]
-    if (arg.length === 3) x[2] = arg[2]
-    return await crypter(cle, new Uint8Array(encode(x)))
-  }
 
   async nouvFic (idf, nom, info, lg, type, u8) {
     // propriétés ajoutées : u8 (contenu du fichier gzippé crypté), sha, dh gz
