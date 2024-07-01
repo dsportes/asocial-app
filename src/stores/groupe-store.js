@@ -392,6 +392,7 @@ export const useGroupeStore = defineStore('groupe', {
     delGroupe (idg) {
       this.delMembre(idg) // tous
       this.delNote(idg) // toutes
+      this.nSt.delGroupe(idg)
       this.map.delete(idg)
       this.ui.setZombiChat(idg)
     },
@@ -433,19 +434,6 @@ export const useGroupeStore = defineStore('groupe', {
       this.delMembre(idg)
     },
 
-    setNote (note) {
-    },
-
-    delNote (id, ids) {
-    },
-
-    delNotes (idg, buf) {
-      this.delNote(idg)
-    },
-
-
-
-
     /* Note Exclu : liste des {im, na} des membres aptes à recevoir l'exclusivité
     - pour les avatars du compte, le na est pris dans le compte
     - pour les autres,, pris dans membres, S'IL Y EN A UN
@@ -472,7 +460,7 @@ export const useGroupeStore = defineStore('groupe', {
     setNote (note) {
       if (!note) return
       const e = this.map.get(note.id)
-      if (e) e.notes.set(note.ids, note.v2)
+      if (e) e.notes.set(note.ids, note.vf)
       const nSt = stores.note
       nSt.setNote(note)
     },
@@ -490,6 +478,10 @@ export const useGroupeStore = defineStore('groupe', {
         })
         e.notes.clear()
       }
-    }
+    },
+
+    delNotes (idg, buf) {
+      this.delNote(idg)
+    },
   }
 })

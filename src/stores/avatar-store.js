@@ -341,6 +341,7 @@ export const useAvatarStore = defineStore('avatar', {
     },
 
     delAvatar (id) {
+      this.nSt.delAvatar(id)
       this.map.delete(id)
     },
 

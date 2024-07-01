@@ -196,8 +196,8 @@
             </div>
 
             <div v-if="action !== 0 && action !== 2 && !q.err">
-              <div v-if="aln" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGv1b')}}</div>
-              <div v-if="alv" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGv2b')}}</div>
+              <div v-if="aln" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGaln')}}</div>
+              <div v-if="alv" class="q-pa-xs q-ma-sm msg titre-md">{{$t('AGalv')}}</div>
               <div v-if="!aln" :class="'q-pa-xs titre-md q-ma-sm ' + (arn ? 'msg' : '')">{{$t('AGdisp1', [rstn])}}</div>
               <div v-if="!alv" :class="'q-pa-xs titre-md q-ma-sm ' + (arv ? 'msg' : '')">{{$t('AGdisp2', [rstv])}}</div>
             </div>

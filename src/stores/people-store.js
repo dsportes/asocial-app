@@ -58,7 +58,7 @@ export const usePeopleStore = defineStore('people', {
 
     nom: (state) => { return (id, c) => { // c: 0 court, 1: long, n : lg max 
         const cv = state.getCV(id)
-        let n
+        let l
         if (cv.v) {
           if (!c) return cv.nom
           if (c === 1) return cv.nomC 

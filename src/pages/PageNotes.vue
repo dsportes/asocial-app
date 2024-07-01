@@ -127,6 +127,8 @@
           </div>
           <div v-if="nSt.node.type === 3" class="titre-md text-italic text-bold">
             {{$t('PNOtype3')}}</div>
+          <div v-if="nSt.node.type === 6 || nSt.node.type === 7" class="titre-md text-italic text-bold">
+            {{$t('PNOtype67')}}</div>
         </div>
 
         <div v-if="selected && nSt.note" class="q-ml-md row"> 
@@ -224,6 +226,7 @@ import BtnCond from '../components/BtnCond.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NotePlus from '../components/NotePlus.vue'
 import { RattNote } from '../app/operations4.mjs'
+import { Note } from '../app/modele.mjs'
 import { putData, getData } from '../app/net.mjs'
 
 const icons = ['','person','group','group','description','article','description','article']
@@ -346,13 +349,13 @@ export default {
         case 5 : {
           const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
           const r = n.note.ref
-          const s2 = r && r[0] !== n.note.id ? '(' + this.pSt.nom(n.note.id, 8)+ ') ' : ''
+          const s2 = r && r[0] !== n.note.id ? '(' + this.pSt.nom(n.note.id, 16)+ ') ' : ''
           return s1 + s2 + n.note.titre
         }
         case 6 : 
         case 7 : {
           const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
-          return s1 + '#' + Note.idsDekey(n.key)
+          return s1 + '#' + Note.idsDeKey(n.key)
         }
       }
     },

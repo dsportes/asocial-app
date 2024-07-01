@@ -273,8 +273,8 @@ export const useNoteStore = defineStore('note', {
       const f = this.filtre
       if (f.v === '0') return true
       if (f.avgr && n.id !== f.avgr) return false
-      if (f.lim && n.dh && n.dh < f.lim) return false
-      if (f.note && n.txt && n.txt.indexOf(f.note) === -1) return false
+      if (f.lim && n.d && n.d < f.lim) return false
+      if (f.note && n.texte && n.texte.indexOf(f.note) === -1) return false
       if (f.vf && n.vf < f.vf) return false
       if (f.mcp && n.smc && difference(f.mcp, n.smc).size) return false
       if (f.mcn && n.smc && intersection(f.mcn, n.smc).size) return false
@@ -361,6 +361,7 @@ export const useNoteStore = defineStore('note', {
           type: Note.estG(key) ? 5 : 4,
           key,
           pkey,
+          children: [],
           note: note
         }
         this.map.set(n.key, n)
@@ -416,7 +417,7 @@ export const useNoteStore = defineStore('note', {
         children: [n]
       }
       this.rattachRac(nf)
-      this.map.set(nf,key, nf)
+      this.map.set(nf.key, nf)
     },
 
     rattachRac (n) {
@@ -460,6 +461,8 @@ export const useNoteStore = defineStore('note', {
         this.map.set(key, n)
         this.nodes.push(n)
         this.calculNfnt()
+      } else {
+        n.type = type // re-création d'un groupe 3 devenant 2
       }
       return n
     },
@@ -473,22 +476,25 @@ export const useNoteStore = defineStore('note', {
     },
 
     delAvatar (id) { // delNote de toutes les notes de l'avatar
+      const k = '' + id
       this.map.forEach(n => { 
         if ((n.type === 4 || n.type === 6) && (n.note.id === id))
           this.delNote(n.note.id, n.note.ids)
       })
-      const k = '' + id
       const a = []; for(const n of this.notes) { if (n.key !== k) a.push(n)}; this.notes = a
+      this.map.delete(k)
       this.calculNfnt()
     },
 
-    delGroupe (id) {  // delNote de toutes les notes du groupe
-      this.map.forEach(n => { 
-        if ((n.type === 5 || n.type === 6) && (n.note.id === id))
-          this.delNote(n.note.id, n.note.ids)
-      })
+    delGroupe (id) {  // les notes du groupe ont déjà été supprimées
       const k = '' + id
-      const a = []; for(const n of this.notes) { if (n.key !== k) a.push(n)}; this.notes = a
+      const n = this.map.get(k)
+      if (n && n.children.length) { // il reste des notes zombi / avatar
+        n.type === 3
+      } else { // on retire le groupe de la racine
+        const a = []; for(const n of this.notes) { if (n.key !== k) a.push(n)}; this.notes = a
+        this.map.delete(k)
+      }
       this.calculNfnt()
     }
   }

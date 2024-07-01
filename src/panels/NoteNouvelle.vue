@@ -135,7 +135,7 @@ export default {
     const cfg = stores.config
 
     return {
-      ui, session, nSt, cfg, dkli, styp
+      ui, session, nSt, cfg, dkli, styp, ID
     }
   }
 

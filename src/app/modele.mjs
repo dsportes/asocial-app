@@ -1307,7 +1307,7 @@ export class Note extends GenDoc {
   // id d'une key
   static idDeKey (key) { return parseInt(key.substring(0, 14)) }
   // ids d'une key
-  static idsDekey (key) { return parseInt(key.substring(15)) }
+  static idsDeKey (key) { return parseInt(key.substring(15)) }
 
   static fake = { txt: '', dh: 0 }
 
@@ -1320,7 +1320,7 @@ export class Note extends GenDoc {
       - sinon c'est la note ref[0]/ref[1]
   */
   get pkey () {
-    return !this.ref ? '' + this.id : (this.ref[1] ? this.ref[0] + '/' + this.ref[1] : this.ref[0])
+    return !this.ref ? '' + this.id : (this.ref[1] ? this.ref[0] + '/' + this.ref[1] : '' + this.ref[0])
   }
 
   // Retourne l'id du groupe de rattachement d'un note avatar

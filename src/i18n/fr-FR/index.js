@@ -474,6 +474,8 @@ export default {
   EX8295: '(BUG) Cycle détecté de rattachement [{0}].',
   EX8296: '(BUG) Rattachement d\'une note d\'avatar à une note d\'un autre avatar.',
   EX8297: '(BUG) Rattachement d\'une note de groupe à une note d\'un autre groupe ou d\'un avatar.',
+  EX8298: '(BUG) Une note de groupe rattachée à une racine ne peut l\'être qu\'à celle du sien.',
+  EX8299: '(BUG) Une note d\'avatar ne peut pas être rattachée à la racine d\'un autre avatar.',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
@@ -1195,6 +1197,7 @@ export default {
   PNOrattinfo: 'Cliquer ci-dessous sur l\'icône "étoile verte" du groupe, avatar ou note à laquelle vous voulez rattacher la note courante.',
   PNOattach: 'Fichiers attachés',
   PNOtype3: 'Le compte a été actif dans ce groupe, MAIS NE L\'EST PLUS. Le groupe "peut" avoir disparu.',
+  PNOtype67: 'Cette note "n\'existe plus" mais des notes existantes lui ayant été rattachées, elle subsite juste pour permettre de voir ces dernières.',
 
   PNOdlc: 'Téléchargement des notes affichées',
   PNOdlst1: 'GO ! notes et leurs fichiers',
