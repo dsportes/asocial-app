@@ -478,6 +478,7 @@ export default {
   EX8299: '(BUG) Une note d\'avatar ne peut pas être rattachée à la racine d\'un autre avatar.',
   EX8300: '(BUG) Note ou racine de rattachement non identifiée',
   EX8301: '(BUG) Le compte n\'a pas d\'avatar ayant droit d\'édition sur cette note.',
+  EX8302: '(BUG) Seul un animateur peut modifier les hashtags de niveau groupe.',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
@@ -1289,6 +1290,10 @@ export default {
   PNOexb1: 'Je m\'attribue l\'exclusivité d\'écriture sur cette note.',
   PNOexaut: 'Pour transmettre une exclusivité d\'écriture il faut, soit l\'avoir soi-même, soit être animateur.',
   PNOracgr: 'attachée à la racine du groupe "{0}"',
+  PNOht0: 'Hashtags attachés à la note',
+  PNOht1: 'Hashtags privés du compte',
+  PNOht2: 'Hashtags publics au groupe des animateurs',
+  PNOht3: 'Les anaimateurs n\'ont pas déclaré de hashtags publics.',
 
   PNOpr: 'Protéger la note contre l\'écriture',
   PNOexclu1: 'Mon avatar {0} a l\'exclusité d\'écriture de cette note.',

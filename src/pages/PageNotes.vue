@@ -33,7 +33,6 @@
 
     <note-edit v-if="ui.d.NE"/>
     <note-exclu v-if="ui.d.NX"/>
-    <note-mc v-if="ui.d.NM"/>
     <note-fichier v-if="ui.d.NF"/>
     <note-confirme v-if="ui.d.NC" :op="op"/>
 
@@ -114,6 +113,32 @@
       </q-card>
     </q-dialog>
 
+    <q-dialog v-model="ui.d.NM" persistent>
+      <div :class="styp('md')">
+        <q-toolbar class="bg-secondary text-white">
+          <btn-cond color="warning" icon="chevron_left" @click="fermer"/>
+          <q-toolbar-title class="titre-lg full-width text-center">
+            {{$t('PNOht0')}}
+          </q-toolbar-title>
+          <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
+            :disable="!modifie"  @click="validerHt"/>
+          <bouton-help page="page1"/>
+        </q-toolbar>
+      
+        <hash-tags v-model="ht" :src="nSt.note.ht" :titre="$t('PNOht1')"/>
+
+        <hash-tags v-if="nSt.note.deGroupe && estAnim" v-model="htg" :src="nSt.note.htg" :titre="$t('PNOht2')"/>
+
+        <q-card v-if="nSt.note.deGroupe && !estAnim">
+          <div v-if="nSt.note.htg.size" class="row q-gutter-xs q-ma-sm">
+            <span class="text-italic">{{$t('PNOht2')}} : </span>
+            <span v-for="ht of nSt.note.htg" :key="ht" class="bord"/>
+          </div>
+          <div v-else class="text-italic">{{$t('PNOht3')}}</div>
+        </q-card>
+      </div>
+    </q-dialog>
+
     <q-page-sticky expand position="top" class="splg">
       <div :class="sty() + ' box2 full-width q-pa-xs'">
         <div v-if="!selected" class="q-ml-xs titre-md text-italic">{{$t('PNOnosel')}}</div>
@@ -141,9 +166,9 @@
         <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between"> 
           <div class="col row q-gutter-xs">
             <span class="text-italic">{{$t('hashtags')}} : </span>
-            <span v-for="ht of nSt.note.tousHt" :key="ht" class="bord"/>
+            <span v-for="ht of nSt.note.tousHt" :key="ht">{{ht}}</span>
           </div>
-          <btn-cond class="col-auto self-start" round icon="edit" @click="ui.oD('NM')"/>
+          <btn-cond class="col-auto self-start" round icon="edit" @click="ovHT"/>
         </div>
 
         <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between">  
@@ -214,19 +239,19 @@
 import { ref } from 'vue'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
-import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, sleep } from '../app/util.mjs'
+import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, sleep, egalite } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
 import { ID, nomFichier, appexc, AppExc } from '../app/api.mjs'
 import NoteConfirme from '../dialogues/NoteConfirme.vue'
 import NoteEdit from '../panels/NoteEdit.vue'
 import NoteExclu from '../panels/NoteExclu.vue'
-import NoteMc from '../panels/NoteMc.vue'
 import NoteFichier from '../panels/NoteFichier.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import NotePlus from '../components/NotePlus.vue'
-import { RattNote } from '../app/operations4.mjs'
+import HashTags from '../components/HashTags.vue'
+import { RattNote, HTNote } from '../app/operations4.mjs'
 import { Note } from '../app/modele.mjs'
 import { putData, getData } from '../app/net.mjs'
 
@@ -249,7 +274,7 @@ const dec = new TextDecoder()
 export default {
   name: 'PageNotes',
 
-  components: { ShowHtml, NoteEdit, NoteMc, NotePlus, BtnCond,
+  components: { ShowHtml, NoteEdit, NotePlus, BtnCond, HashTags,
     NoteExclu, NoteFichier, NoteConfirme, BoutonHelp, ListeAuts },
 
   computed: {
@@ -263,11 +288,22 @@ export default {
       return t
     },
 
+    estAnim () {
+      if (this.nSt.node.type !== 5) return false
+      const e = this.gSt.egr(this.nSt.note.id)
+      return e && e.estAnim
+    },
+
     presel () {  return this.nSt.presel },
 
     lib2 () { return this.lib(this.nSt.node) },
 
-    rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <= 5 }
+    rattaut () { const n = this.nSt.node; return n && n.type >= 4 && n.type <= 5 },
+
+    modifie () { 
+      if (!this.nSt.note) return false
+      return !egalite(this.nSt.note.ht, this.ht) || (this.nSt.note.deGroupe && !egalite(this.nSt.note.htg, this.htg))
+    }
   },
 
   watch: {
@@ -298,6 +334,9 @@ export default {
       expanded: [],
       nodeDiag: '',
 
+      ht: new Set(),
+      htg: new Set (),
+
       op: '', // suppr arch react
       expandAll: false,
       rec: 0, // rattachement en cours
@@ -318,6 +357,23 @@ export default {
   },
 
   methods: {
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
+
+    s2Str (s) { return Array.from(s).sort().join(' ')},
+
+  ovHT () {
+    this.ht.clear()
+    this.nSt.note.ht.forEach(t => { this.ht.add(t)})
+    this.nSt.note.htg.forEach(t => { this.htg.add(t)})
+    this.ui.oD('NM')
+  },
+  
+  async validerHt () {
+      await new HTNote().run(this.nSt.note, this.s2Str(this.ht), 
+        this.nSt.note.deGroupe ? this.s2Str(this.htg) : null)
+      this.ui.fD()
+    },
+
     nbf(node) {
       const n = node.note
       return n && n.mfa ? n.mfa.size : 0

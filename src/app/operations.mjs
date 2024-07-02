@@ -157,32 +157,6 @@ export class ExcluNote extends Operation {
   }
 }
 
-/* OP_McNote: 'Changement des mots clés attachés à une note par un compte' ******
-args.token: éléments d'authentification du compte.
-args.id ids: identifiant de la note
-args.hgc: si mc perso d'une note de groupe, id dans la map mc
-args.mc: mots clés perso
-args.mc0: mots clés du groupe
-Retour: rien
-*/
-export class McNote extends Operation {
-  constructor () { super('McNote') }
-
-  async run (note, mc, mc0) {
-    try {
-      const session = stores.session
-      const args = { 
-        token: session.authToken, 
-        id: note.id, ids: note.ids, hgc: note.hgc, 
-        mc, mc0 }
-      this.tr(await post(this, 'McNote', args))
-      return this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_NouveauFichier: 'Enregistrement d\'un nouveau fichier attaché à une note'
 */
 export class NouveauFichier extends Operation {

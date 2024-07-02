@@ -1667,3 +1667,30 @@ export class MajNote extends Operation {
     }
   }
 }
+
+/* OP_HTNote: 'Changement des hashtags attachés à une note par un compte' ******
+- token: éléments d'authentification du compte.
+- id ids: identifiant de la note
+- htK : ht personels
+- htG : hashtags du groupe
+Retour: rien
+*/
+export class HTNote extends Operation {
+  constructor () { super('McNote') }
+
+  async run (note, ht, htg) {
+    try {
+      const session = stores.session
+      const htK = ht ? await crypter(session.clek, ht) : null
+      const htG = htg ? await crypter(note.cle, htg) : null
+      const args = { 
+        token: session.authToken, 
+        id: note.id, ids: note.ids, htK, htG
+      }
+      await post(this, 'HTNote', args)
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

@@ -1,8 +1,8 @@
 <template>
 <q-card>
   <q-toolbar class="bg-secondary text-white">
-    <btn-cond color="warning" icon="undo" @ok="$emit('ko')"/>
-    <q-toolbar-title class="titre-md full-width text-center">{{$t('HTtit')}}</q-toolbar-title>
+    <btn-cond color="warning" icon="undo" @ok="undo"/>
+    <q-toolbar-title class="titre-md full-width text-center">{{titre || $t('HTtit')}}</q-toolbar-title>
     <bouton-help page="page1"/>
     <bouton-bulle idtext="hashtags"/>
     <btn-cond v-if="okbtn" icon="check" :disable="!chg" @ok="$emit('ok',sr)"/>
@@ -52,7 +52,8 @@ export default ({
 
   props: { 
     src: Object, // set d'origine, le set resultat est v-model
-    okbtn: Boolean // true s'il faut afficher le bouton ok
+    okbtn: Boolean, // true s'il faut afficher le bouton ok
+    titre: String
   },
 
   components: { BoutonBulle, BoutonHelp, BtnCond },
@@ -77,6 +78,13 @@ export default ({
   methods: {
     r2 (val) { return val.length < min || val.length > max ? this.$t('HTe1', [min, max]) : true},
     r1 (val) { return !reg.test(val) ? this.$t('HTe2') : true},
+
+    undo () {
+      this.sr.clear()
+      this.src.forEach(t => { this.sr.add(t)})
+      this.filtre()
+      this.$emit('update:modelValue', this.sr)
+    },
 
     val () {
       if (this.r1(this.sel) === true && this.r2(this.sel) === true) {
