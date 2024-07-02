@@ -300,7 +300,7 @@ export const useGroupeStore = defineStore('groupe', {
       const g = state.egrC.groupe
       for (let im = 1; im < g.st.length; im++) {
         const stm = g.st[im]
-        // if (!stm) continue
+        if (!stm) continue
         const idm = g.tid[im]
         if (!idm) continue
         if (c.mav.has(idm)) continue

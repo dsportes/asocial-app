@@ -132,7 +132,7 @@
         <q-card v-if="nSt.note.deGroupe && !estAnim">
           <div v-if="nSt.note.htg.size" class="row q-gutter-xs q-ma-sm">
             <span class="text-italic">{{$t('PNOht2')}} : </span>
-            <span v-for="ht of nSt.note.htg" :key="ht" class="bord"/>
+            <span v-for="ht of nSt.note.htg" :key="ht">{{ht}}</span>
           </div>
           <div v-else class="text-italic">{{$t('PNOht3')}}</div>
         </q-card>
@@ -302,7 +302,7 @@ export default {
 
     modifie () { 
       if (!this.nSt.note) return false
-      return !egalite(this.nSt.note.ht, this.ht) || (this.nSt.note.deGroupe && !egalite(this.nSt.note.htg, this.htg))
+      return !egalite(this.nSt.note.ht, this.ht) || (this.estAnim && !egalite(this.nSt.note.htg, this.htg))
     }
   },
 
