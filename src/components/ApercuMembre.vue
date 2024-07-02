@@ -173,7 +173,7 @@ a accès aux membres (donc dans l'onglet "membres").
         <div class="stx fs-md" v-if="nvfl !== invits.fl && stm === 2">{{$t('AMchg')}}</div>
 
         <div class="q-mt-md titre-md text-italic">{{$t('AMbienv')}}</div>
-        <editeur-md class="q-mb-sm bord1" :lgmax="1000" v-model="msg" :texte="mb.msg || ''" 
+        <editeur-md class="q-mb-sm bord1" :lgmax="1000" v-model="msg" :texte="mb.msg || $t('invitation')" 
           modetxt mh="8rem" editable/>
       </q-card-section>
 

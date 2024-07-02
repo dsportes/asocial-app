@@ -14,7 +14,8 @@
       :filter-method="nSt.filtrage"
     >
       <template v-slot:default-header="prop">
-        <div @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)">
+        <div @click.stop="clicknode(prop.node)" @keypress.stop="clicknode(prop.node)" 
+          :class="cl(prop.node.type)">
           <div class="row items-center">
             <q-icon v-if="prop.node.ratt" size="xs" class="col-auto q-mr-xs cursor-pointer" name="star"
               color="green-5"/>
@@ -224,8 +225,8 @@
         </div>
       </div>
           
-      <div class="row full-width bg-secondary text-white items-center">
-        <btn-cond class="q-mr-sm" flat icon="file_download" :label="$t('PNOdlc')" @click="dlopen"/>
+      <div class="row full-width bg-secondary text-white items-center justify-between">
+        <btn-cond class="q-mr-sm" flat icon="file_download" color="white" :label="$t('PNOdlc')" @click="dlopen"/>
         <btn-cond v-if="!expandAll" size="sm" icon="unfold_more"
           :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
         <btn-cond v-if="expandAll" size="sm" icon="unfold_less"
@@ -357,16 +358,20 @@ export default {
   },
 
   methods: {
+    cl (t) {
+      return t > 3 ? '' : 'cl' + t
+    },
+
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
     s2Str (s) { return Array.from(s).sort().join(' ')},
 
-  ovHT () {
-    this.ht.clear()
-    this.nSt.note.ht.forEach(t => { this.ht.add(t)})
-    this.nSt.note.htg.forEach(t => { this.htg.add(t)})
-    this.ui.oD('NM')
-  },
+    ovHT () {
+      this.ht.clear()
+      this.nSt.note.ht.forEach(t => { this.ht.add(t)})
+      this.nSt.note.htg.forEach(t => { this.htg.add(t)})
+      this.ui.oD('NM')
+    },
   
   async validerHt () {
       await new HTNote().run(this.nSt.note, this.s2Str(this.ht), 
@@ -638,4 +643,13 @@ $hb2: 17rem
   margin: 1px
   border: 1px solid $grey-5
   border-radius: 5px
+.cl1,.cl2,.cl3
+  margin-top: 15px
+  width: 100%
+.cl1
+  border-top: 3px solid $primary
+.cl2
+  border-top: 3px solid $orange
+.cl3
+  border-top: 3px solid $grey-5
 </style>

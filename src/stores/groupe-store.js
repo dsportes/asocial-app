@@ -246,6 +246,16 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
+    invitsAtt: (state) => { const l = []
+      for (const x of state.invits) if (x.invpar.size) l.push(x)
+      return l
+    },
+
+    contactsAtt: (state) => { const l = []
+      for (const x of state.invits) if (!x.invpar.size) l.push(x)
+      return l
+    },
+
     // PageGroupes ***************************************************
     pgLgFT: (state) => {
       const ci = state.session.compti

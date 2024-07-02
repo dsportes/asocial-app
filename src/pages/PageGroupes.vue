@@ -23,16 +23,25 @@
     </div>
   </q-card>
 
-  <q-card class="spsm q-my-lg">
-    <div class="full-width titre-md text-italic bg-primary text-white q-mt-md text-center">
-      {{$t('ICtit', gSt.invits.length, {count: gSt.invits.length})}}
-    </div>
-    <div v-for="(inv, idx) of gSt.invits" :key="inv.idg + '/' + inv.ida">
-      <div :class="dkli(idx) + 'q-my-xs row invs items-center cursor-pointer'" @click="ouvaccinv(inv)">
-        <div class="col-4 text-center">{{session.getCV(inv.ida).nom}}</div>
-        <div class="col-4 text-center">{{session.getCV(inv.idg).nomC}}</div>
-        <div v-if="inv.invpar.size" class="col-4 text-center text-bold">{{$t('invite')}}</div>
-        <div v-else class="col-4 text-center text-italic">{{$t('contact')}}</div>
+  <q-card class="spmd q-my-lg">
+    <div class="row">
+      <div class="col-6 q-px-xs">
+        <div class="full-width titre-md text-italic bg-primary text-white text-center">{{$t('ICtita')}}</div>
+        <div v-for="(inv, idx) of gSt.invitsAtt" :key="inv.idg + '/' + inv.ida">
+          <div :class="dkli(idx) + 'q-my-xs row invs items-center cursor-pointer'" @click="ouvaccinv(inv)">
+            <div class="col-6 text-center">{{session.getCV(inv.ida).nom}}</div>
+            <div class="col-6 text-center">{{session.getCV(inv.idg).nomC}}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 q-px-xs">
+        <div class="full-width titre-md text-italic bg-primary text-white text-center">{{$t('ICtitc')}}</div>
+        <div v-for="(inv, idx) of gSt.contactsAtt" :key="inv.idg + '/' + inv.ida">
+          <div :class="dkli(idx) + 'q-my-xs row invs items-center cursor-pointer'" @click="ouvaccinv(inv)">
+            <div class="col-6 text-center">{{session.getCV(inv.ida).nom}}</div>
+            <div class="col-6 text-center">{{session.getCV(inv.idg).nomC}}</div>
+          </div>
+        </div>
       </div>
     </div>
   </q-card>

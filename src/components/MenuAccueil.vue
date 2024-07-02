@@ -37,9 +37,14 @@
           <span>{{$t('ACmesgr')}}
             <q-badge color="primary" rounded>{{nbgrpsT}}</q-badge>
           </span>
-          <span class="q-ml-sm">{{$t('ACmesinv')}}
-            <q-badge color="primary" rounded>{{nbInvits}}</q-badge>
-          </span>
+          <div class="q-ml-lg">
+            <span>{{$t('ACmesinva')}}
+              <q-badge :color="nbInvits ? 'warning' : 'primary'" rounded>{{nbInvits}}</q-badge>
+            </span>
+            <span class="q-ml-md">{{$t('ACmesinvc')}}
+              <q-badge color="primary" rounded>{{nbContacts}}</q-badge>
+            </span>
+          </div>
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -131,7 +136,8 @@ export default {
     nbspons () { return this.aSt.eavC.sponsorings.size },
     nbgrps () { return this.session.compte.idGroupes(this.session.avatarId).size },
     nbgrpsT () { return this.session.compte.idGroupes().size },
-    nbInvits () { return this.gSt.invits.length },
+    nbInvits () { return this.gSt.invitsAtt.length },
+    nbContacts () { return this.gSt.contactsAtt.length },
     bloc () { return this.session.estMinimal },
     nomg () { const idg = this.session.groupeid
       return idg ? this.session.getCV(idg).nom : ''

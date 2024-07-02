@@ -448,6 +448,7 @@ export const useNoteStore = defineStore('note', {
       } else {
         n.type = type // re-création d'un groupe 3 devenant 2
       }
+      // console.log('setRacine', n.key, n.type)
       return n
     },
 
@@ -474,7 +475,8 @@ export const useNoteStore = defineStore('note', {
       const k = '' + id
       const n = this.map.get(k)
       if (n && n.children.length) { // il reste des notes zombi / avatar
-        n.type === 3
+        n.type = 3
+        // console.log('delGroupe', n.key, n.type)
       } else { // on retire le groupe de la racine
         const a = []; for(const n of this.notes) { if (n.key !== k) a.push(n)}; this.notes = a
         this.map.delete(k)

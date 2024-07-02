@@ -134,6 +134,7 @@ export default {
   invite: 'Invité',
   contact: 'Simple contact',
   hashtags: 'Hashtags',
+  invitation: 'Invitation',
 
   condA: 'Action impossible, l\'application est en mode "avion".',
   condF: 'Action impossible, l\'application est figée.',
@@ -981,7 +982,8 @@ export default {
   ACmesav2: 'Ce compte, ses avatars',
   ACmesav1: 'Ce compte (délégué), ses avatars',
   ACmesgr: 'Tous les groupes',
-  ACmesinv: 'Invitations en attente',
+  ACmesinva: 'Invitations en attente',
+  ACmesinvc: 'Contacts',
   ACmesctc: 'Tous les contacts',
   ACdeleg: 'Délégués de ma partition',
   ACgpart: 'Gestion de ma partition',
@@ -1741,7 +1743,8 @@ export default {
   AMx7: 'inviter un membre déjà actif n\'est pas possible.',
   AMx8: 'le membre a disparu.',
 
-  ICtit: 'Pas d\'invitation en attente de décision.| Une invitation en attente de décision. | {count} invitations en attente de décision',
+  ICtita: 'Invitations en attente',
+  ICtitc: 'Citations en tant que contact',
   ICtit2: 'Invitation de {0} au groupe {1}',
   ICti1: 'Groupe et invité',
   ICti2: 'Animateur du groupe invitant | Animateurs du groupe invitants',
