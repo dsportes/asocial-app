@@ -1694,3 +1694,24 @@ export class HTNote extends Operation {
     }
   }
 }
+
+/* OP_ExcluNote: 'Changement de l\'attribution de l\'exclusivité d\'écriture d\'une note'
+- token: éléments d'authentification du compte.
+- id ids: identifiant de la note
+- ida: id de l'avatar prenant l'exclusivité
+Retour: rien
+*/
+export class ExcluNote extends Operation {
+  constructor () { super('ExcluNote') }
+
+  async run (id, ids, ida) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id, ids, ida }
+      await post(this, 'ExcluNote', args)
+      return this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

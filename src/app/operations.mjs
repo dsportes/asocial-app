@@ -136,27 +136,6 @@ export class NoteOpx extends Operation {
   }
 }
 
-/* OP_ExcluNote: 'Changement de l\'attribution de l\'exclusivité d\'écriture d\'une note'
-args.token: éléments d'authentification du compte.
-args.id ids: identifiant de la note
-args.im : 0 / im
-Retour: rien
-*/
-export class ExcluNote extends Operation {
-  constructor () { super('ExcluNote') }
-
-  async run (id, ids, im) {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, id, ids, im }
-      this.tr(await post(this, 'ExcluNote', args))
-      return this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_NouveauFichier: 'Enregistrement d\'un nouveau fichier attaché à une note'
 */
 export class NouveauFichier extends Operation {

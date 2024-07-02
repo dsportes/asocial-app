@@ -26,7 +26,7 @@
             <q-icon v-if="nbf(prop.node)" name="attachment" class="col-auto q-mr" color="orange" size="sm"/>
             <q-badge v-if="nbf(prop.node)" class="col-auto q-mr-xs" color="orange" rounded 
               :label="nbf(prop.node)" text-color="black"/>
-            <div :class="'col ' + styles[prop.node.type]">{{lib(prop.node)}}</div>
+            <div :class="'col ' + styn(prop.node)">{{lib(prop.node)}}</div>
           </div>
         </div>
       </template>
@@ -265,8 +265,8 @@ const styles = [
   'titre-md text-bold text-italic', 
   'fs-md', 
   'fs-md',
-  'fs-md text-italic text-primary',
-  'fs-md text-italic text-orange'
+  'fs-md text-italic',
+  'fs-md text-italic'
   ]
 
 const enc = new TextEncoder()
@@ -358,8 +358,10 @@ export default {
   },
 
   methods: {
-    cl (t) {
-      return t > 3 ? '' : 'cl' + t
+    cl (t) { return t > 3 ? '' : 'cl' + t },
+
+    styn (n) { const s1 = styles[n.type] 
+      return s1 + (n.key === this.nSt.node.key ? ' msg' : '')
     },
 
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
@@ -373,7 +375,7 @@ export default {
       this.ui.oD('NM')
     },
   
-  async validerHt () {
+    async validerHt () {
       await new HTNote().run(this.nSt.note, this.s2Str(this.ht), 
         this.nSt.note.deGroupe ? this.s2Str(this.htg) : null)
       this.ui.fD()

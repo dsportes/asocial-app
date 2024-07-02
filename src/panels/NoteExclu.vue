@@ -3,48 +3,47 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" padding="xs" icon="chevron_left" @click="ui.fD"/>
+      <btn-cond color="warning" icon="chevron_left" @click="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">
-        {{$t('PNOextit', [groupe.na.nomc])}}
+        {{$t(nSt.note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
       </q-toolbar-title>
+      <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
+        :disable="!xap"  @click="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="session.editDiag" inset class="full-width bg-secondary text-white">
-      <div class='q-ma-sm q-pa-sm text-center text-bold titre-md bg-yellow-5 text-warning'>
-        {{session.editDiag}}
-      </div>
-    </q-toolbar>
+    <q-toolbar v-if="session.cEdit" inset class="full-width msg">{{session.cEdit}}</q-toolbar>
   </q-header>
 
   <q-page-container >
     <q-page class="q-pa-xs">
+      <node-parent />
+
+      <q-separator class="q-my-sm" color="orange"/>
+
       <liste-auts class="q-my-sm"/>
 
       <div class="spsm"> <!-- Bloc "perdre" -->
         <div v-if="xav">
           <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
-          <apercu-genx v-if="xav.na" class="q-my-md" 
-            :id="xav.na.id" :im="xav.im"/>
-          <div v-else class="titre-md text-bold">{{xav.nom}}</div>
-          <q-btn v-if="xav.avc" 
-            dense size="md" color="primary" icon="close" padding="xs"
+          <apercu-genx class="q-my-md" :id="xav.ida" :im="xav.im"/>
+          <btn-cond v-if="xav.avc" icon="close" cond="cEdit"
             :label="$t('PNOperdre1')" @click="perdre"/>
-          <q-btn v-if="!xav.avc && anim" 
-            dense size="md" color="primary" icon="close" padding="xs"
+          <btn-cond v-if="!xav.avc && anim" icon="close" cond="cEdit"
             :label="$t('PNOperdre2')" @click="perdre"/>
         </div>
         <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
       </div>
 
-      <div v-if="!amb" class="q-my-md q-pa-xs text-bold text-negative bg-yellow-5">
-        {{$t('PNOamb')}}</div>
+      <div v-if="!amb" class="q-my-md msg">{{$t('PNOamb')}}</div>
 
-      <div class="q-mt-md titre-lg text-italic text-center">
-        {{$t('PNOlex')}}
+      <div :class="'q-my-md ' + (peutTr ? '' : 'msg')">{{$t('PNOpeut')}}</div>
+
+      <div class="q-mt-md">
+        <span class="titre-lg text-italic text-center">{{$t('PNOlex')}}</span>
         <bouton-bulle idtext="exclu"/>
       </div>
 
-      <div class="spsm q-mt-sm scroll" style="max-height:40vh">
+      <div class="spsm q-mt-sm" style="max-height:40vh;overflow-y:auto">
         <div v-for="(e, idx) in lst" :key="idx" 
           :class="dkli(idx) + ' q-mt-xs row cursor-pointer bord' + (xap && (e.im === xap.im) ? '2' : '1')"
           @click="selmb(e)">
@@ -55,15 +54,7 @@
 
       <q-separator color="orange" class="q-my-sm"/>
 
-      <div class="row justify-end q-gutter-sm">
-        <q-btn flat size="md" dense color="primary" padding="xs" icon="undo"
-          :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn v-if="!session.editDiag" :disable="!xap"
-          padding="xs" size="md" dense color="warning" icon="check"
-          :label="$t('PNOex')" @click="valider"/>
-      </div>
-
-      <apercu-genx v-if="xap" class="q-my-md" :id="xap.na.id" :im="xap.im"/>
+      <apercu-genx v-if="xap" class="q-my-md" :id="xap.ida" :im="xap.im"/>
 
     </q-page>
   </q-page-container>
@@ -79,21 +70,28 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import ListeAuts from '../components/ListeAuts.vue'
 import BoutonBulle from '../components/BoutonBulle.vue'
-import { ExcluNote } from '../app/operations.mjs'
+import BtnCond from '../components/BtnCond.vue'
+import NodeParent from '../components/NodeParent.vue'
+import { ExcluNote } from '../app/operations4.mjs'
 
 export default {
   name: 'NoteExclu',
 
-  components: { BoutonHelp, BoutonBulle, ApercuGenx, ListeAuts },
+  components: { BoutonHelp, BoutonBulle, ApercuGenx, ListeAuts, BtnCond, NodeParent },
 
   props: { },
 
   computed: { 
+    nom () { return this.pSt.nom(this.nSt.note.id)},
+    mav () { return this.session.compte.mav },
+
     egr () { return this.gSt.egr(this.nSt.note.id) },
     groupe () { return this.egr.groupe },
-    amb () { return this.aSt.compte.ambano(this.groupe)[0] },
+    amb () { return this.session.compte.ambano(this.groupe)[0] },
     anim () { return this.egr.estAnim },
-    xav () { return this.nSt.mbExclu },
+    xav () { return this.nSt.mbExclu }, // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
+
+    peutTr () { return !this.xav || this.estAnim || (this.xav && this.mav.has(this.xav.ida)) },
 
     /* Pour une note de groupe, liste des {im, na, nom} des membres 
     aptes à recevoir l'exclusivité, sauf celui actuel */
@@ -103,22 +101,18 @@ export default {
   watch: {  },
 
   methods: {
-    cv (x) {
-      return !x.avc ? this.pSt.getCV(x.na.id) : this.aSt.getAvatar(x.na.id).cv
-    },
     selmb (e) {
-      e.cv = this.cv(e)
       this.xap = e
     },
     async valider () {
       const n = this.nSt.note
-      await new ExcluNote().run(n.id, n.ids, this.xap.im)
+      const ida = this.xap ? this.xap.ida : 0
+      await new ExcluNote().run(n.id, n.ids, ida)
       this.xap = null
     },
     async perdre () {
-      const n = this.nSt.note
-      await new ExcluNote().run(n.id, n.ids, 0)
       this.xap = null
+      await this.valider()
     }
   },
 

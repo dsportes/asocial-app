@@ -480,6 +480,10 @@ export default {
   EX8300: '(BUG) Note ou racine de rattachement non identifiée',
   EX8301: '(BUG) Le compte n\'a pas d\'avatar ayant droit d\'édition sur cette note.',
   EX8302: '(BUG) Seul un animateur peut modifier les hashtags de niveau groupe.',
+  EX8303: '(BUG) Seule note de groupe peut recevoir une exclusivité.',
+  EX8304: '(BUG) Pour attribuer l\'exclusité d\'écriture d\'une note, il faut, a) soit être animateur, b) soit l\'avoir soi-même, c) soit que personne ne l\'ait déjà.',
+  EX8305: '(BUG) On ne peut attribuer l\'exclusité d\'écriture d\'une note qu\'à un membre ayant droit d\'écriture sur les notes.',
+  EX8306: '(BUG) Pour supprimer l\'exclusité d\'écriture d\'une note, il faut, a) soit être animateur, b) soit l\'avoir soi-même.',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
@@ -1310,6 +1314,7 @@ export default {
   PNOmcap: 'Mots clés "personnels"',
   PNOmcgr: 'Mots clés "du groupe"',
   PNOmcgp: 'Mots clés personnels',
+  PNOpeut: 'Pour attribuer l\'exclusité d\'écriture d\'une note, il faut, a) soit être animateur, b) soit l\'avoir soi-même, c) soit que personne ne l\'ait déjà.',
 
   NCFm0: 'Droits insuffisants pour exécuter cette opération', 
   NCFm1: 'C\'est une note de groupe: au moins un des avatars du compte doit avoir le droit d\'écriture sur les notes du groupe.',
