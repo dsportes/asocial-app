@@ -6,14 +6,13 @@ import { useAvatarStore } from './avatar-store.js'
 import { useGroupeStore } from './groupe-store.js'
 import { usePeopleStore } from './people-store.js'
 import { useNoteStore } from './note-store.js'
-import { useFetatStore } from './fetat-store.js'
+import { useFicavStore } from './ficav-store.js'
 import { useFiltreStore } from './filtre-store.js'
-import { useAvnoteStore } from './avnote-store.js'
 import { usePpStore } from './pp-store.js'
 
 class Stores {
   static listeStores = [ // toutes SAUF config
-    'session', 'ui', 'avatar', 'groupe', 'people', 'note', 'fetat', 'avnote', 'pp', 'filtre'
+    'session', 'ui', 'avatar', 'groupe', 'people', 'note', 'ficav', 'pp', 'filtre'
   ]
 
   get config() { return this.configStore || (this.configStore = useConfigStore()) }
@@ -26,8 +25,7 @@ class Stores {
   get people() { return this.peopleStore || (this.peopleStore = usePeopleStore()) }
   get note() { return this.noteStore || (this.noteStore = useNoteStore()) }
   get syncitem() { return this.syncitemStore || (this.syncitemStore = useSyncitemStore()) }
-  get fetat() { return this.fetatStore || (this.fetatStore = useFetatStore()) }
-  get avnote() { return this.avnoteStore || (this.avnoteStore = useAvnoteStore()) }
+  get ficav() { return this.ficavStore || (this.ficavStore = useFicavStore()) }
   get pp() { return this.ppStore || (this.ppStore = usePpStore()) }
   get filtre() { return this.filtreStore || (this.filtreStore = useFiltreStore()) }
 

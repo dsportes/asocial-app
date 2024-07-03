@@ -169,7 +169,7 @@ export class OnchangeVersion extends OperationWS {
       if (note._zombi) this.buf.supprIDB(row); else this.buf.putIDB(row)
       const e = ID.estGroupe(note.id) ? this.egrMaj(note.id) : this.eavMaj(note.id)
       e.lno.push(note)
-      if (this.session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
+      // if (this.session.accesIdb) this.buf.mapSec[note.pk] = note // Pour gestion des fichiers
     }
 
     if (this.ret.rowChats) for (const row of this.ret.rowChats) {
@@ -408,7 +408,7 @@ export class OnchangeVersion extends OperationWS {
       if (this.abPlus.size || this.abMoins.size)
         await this.gestionAb()
 
-      if (this.session.accesIdb) await gestionFichierSync(this.buf.mapSec)
+      // if (this.session.accesIdb) await gestionFichierSync(this.buf.mapSec)
 
       this.session.setDh(this.dh)
     } catch (e) {

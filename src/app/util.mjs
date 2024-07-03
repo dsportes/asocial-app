@@ -225,6 +225,13 @@ export function ungzipB (arg) {
 
 
 /* divers *****************************************************************/
+export function toRetry (nbr, dh) {
+  const rdl = state.config.retriesdlinmin
+  const d = nbr >= rdl.length ? (nbr - rdl.length) * rdl[rdl.length - 1] : rdl[nbr]
+  const t = dh + (d * 60000)
+  return t < Date.now()
+}
+
 export function splitPK(pk) {
   if (!pk) return { id: 0, ids: 0 }
   const i = pk.indexOf('/')

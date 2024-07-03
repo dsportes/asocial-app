@@ -101,7 +101,7 @@ class SB {
     this.g = stores.groupe
     this.n = stores.note
     this.p = stores.people
-    this.avSt = stores.avnote
+    this.faSt = stores.ficav
 
     this.espace = null
     this.compte = null
@@ -169,14 +169,14 @@ class SB {
     
     if (this.supprAv.size) for (const ida of this.supprAv) {
       this.a.delAvatar(ida)
-      this.avSt.delNotes(ida, buf)
+      this.faSt.delNotes(ida, buf)
     }
 
     if (this.groupes.size) for(const [,g] of this.groupes) this.g.setGroupe(g) 
     
     if (this.supprGr.size) for (const idg of this.supprGr) {
       this.g.delGroupe(idg)
-      this.avSt.delNotes(idg, buf)
+      this.faSt.delNotes(idg, buf)
     }
 
     if (this.chatgrs.size) for(const [,ch] of this.chatgrs) this.g.setChatgr(ch) 
@@ -186,11 +186,11 @@ class SB {
       if (n._zombi) {
         this.n.delNote(n.id, n.ids)
         st.delNote(n.id, n.ids)
-        this.avSt.delNote(n.id, n.ids, buf)
+        this.faSt.delNote(n.id, n.ids, buf)
       } else {
         this.n.setNote(n)
         st.setNote(n)
-        this.avSt.setNote(n, buf)
+        this.faSt.setNote(n, buf)
       }
     }
     
@@ -241,7 +241,7 @@ class SB {
 
     if (this.supprNo.size) for(const idg of this.supprNo) {
       this.g.delNotes(idg, buf)
-      this.avSt.delNotes(idg, buf)
+      this.faSt.delNotes(idg, buf)
     }
   }
 }

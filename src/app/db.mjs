@@ -17,12 +17,11 @@ function decodeIn (buf, cible) {
 const STORES = {
   singletons: 'n',
   collections: '[id+n+ids]',
-  avnote: '[id+ids]',
-  fetat: 'id',
-  fdata: 'id',
+  ficav: 'id',
   loctxt: 'id',
   locfic: 'id',
-  locdata: 'id'
+  fdata: 'id',
+  locdata: 'id' // ?????
 }
 
 /*************************************************************************
@@ -223,6 +222,19 @@ class IDB {
     }
   }
 
+  async loadFicav () {
+    const session = stores.session
+    const faSt = stores.ficav
+    try {
+      await this.db.ficav.each(async (rec) => {
+        const f = Ficav.fromData(await decrypter(session.clek, rec.data))
+        faSt.setFicav(f)
+      })
+    } catch (e) {
+      throw IDB.EX2(e)
+    }
+  }
+
   /** Retourne un sous-arbre d'id donné (avion et synchronisé *************************
   clé: _nom, valeur: [row]
   */
@@ -244,15 +256,43 @@ class IDB {
     }
   }
 
+  async setFdata (idf, data) {
+    const session = stores.session
+    try {
+      if (session.accesIdb) {
+        const cle = u8ToB64(await crypter(session.clek, '' + idf, 1), true)
+        await this.db.fdata.put({ id: cle, data })
+      }
+    } catch (e) {
+      throw IDB.EX2(e)
+    }
+  }
+
+  async getFdata (idf) {
+    const session = stores.session
+    try {
+      if (session.accesIdb) {
+        const cle = u8ToB64(await crypter(session.clek, '' + idf, 1), true)
+        const rec = await this.db.fdata.get(cle)
+        return rec.data || null
+      }
+      return null
+    } catch (e) {
+      throw IDB.EX2(e)
+    }
+  }
+
   async commit(arg) {
     /*
     const arg = {
       singl: [], // singletons à mettre à jour
       colls: [], // collections à mettre à jour
+      ficav: [], // ficav à créer / mettre à jour
       idac: [], // avatars à purger
       idgc: [], // groupes à purger
       idgcmb: [], // groupes membres à purger
-      idgcno: [] // groupes notes à purger
+      idgcno: [], // groupes notes à purger
+      idf: [] // id des fichiers à supprimer
     }
     */
     try {
@@ -266,7 +306,11 @@ class IDB {
           if (x.data) await this.db.collections.put( { id: x.id, n: x.n, ids: x.ids, data: x.data })
           else await this.db.singletons.where({ id: x.id, n: x.n, ids: x.ids }).delete()
         }
-  
+
+        for (const x of arg.ficav) {
+          await this.db.ficav.put( { id: x.id, data: x.data } )
+        }
+
         for (const idk of arg.idac) 
           await this.db.collections.where({id: idk}).delete()
         for (const idk of arg.idgc)
@@ -277,6 +321,11 @@ class IDB {
         }
         for (const idk of arg.idgcno)
           await this.db.collections.where({id: idk, n: IDB.cnoms.notes}).delete()
+        for (const idk of arg.idgcno) {
+          await this.db.ficav.where({id: idk}).delete()
+          await this.db.fdata.where({id: idk}).delete()
+        }
+
       })
     } catch (e) {
       throw IDB.EX2(e)
@@ -517,14 +566,18 @@ export class IDBbuffer {
   constructor () {
     this.w = stores.session.synchro
     this.lmaj = [] // rows { _nom, id, ids, _data } à modifier / insérer en IDB / supprimer si _data est null
+    this.lmajf = [] // { id, data } des ficav à créeer / mettre à jour
+    this.lfic = new Set() // set des ids des fichiers (ficav) à purger
     this.lav = new Set() // set des ids des avatars à purger (avec notes, sponsorings, chats, tickets)
     this.lgr = new Set() // set des ids des groupes à purger (avec notes, membres)
     this.lgrmb = new Set() // set des ids des groupes dont les membres sont à purger
     this.lgrno = new Set() // set des ids des groupes dont les notes sont à purger
-    this.mapSec = {} // map des notes (cle: id/ids, valeur: note) pour gestion des fichiers locaux
+    // this.mapSec = {} // map des notes (cle: id/ids, valeur: note) pour gestion des fichiers locaux
   }
 
   putIDB (row) { if (this.w) this.lmaj.push(row); return row }
+  putFIDB (f) { if (this.w) this.lmajf.push({ id: f.id, data: f.toData() }) }
+  purgeFIDB (id) { if (this.w) this.lfic.add(id) }
   purgeAvatarIDB (id) { if (this.w) this.lav.add(id) }
   purgeGroupeIDB (id) { if (this.w) this.lgr.add(id) }
   purgeGroupeMbIDB (id) { if (this.w) this.lgrmb.add(id) }
@@ -540,7 +593,9 @@ export class IDBbuffer {
       idac: [], // avatars à purger
       idgc: [], // groupes à purger
       idgcmb: [], // groupes membres à purger
-      idgcno: [] // groupes notes à purger
+      idgcno: [], // groupes notes à purger
+      idf: [], // ficavs à purger
+      ficav: [], // rows ficav à mettre à jour
     }
 
     if (dataSync) arg.singl.push({ 
@@ -549,6 +604,13 @@ export class IDBbuffer {
     })
 
     for(const row of this.lmaj) {
+      arg.ficav.push({ 
+        id: u8ToB64(await crypter(clek, '' + row.id, 1), true),
+        data: await crypter(clek, new Uint8Array(encode(row.data)))
+      })
+    }
+
+    for(const row of this.lmajf) {
       const n = IDB.snoms[row._nom]
       if (n) { // c'est un singleton
         arg.singl.push({ 
@@ -573,7 +635,9 @@ export class IDBbuffer {
       for (const id of this.lgrmb) arg.idgcmb.push(u8ToB64(await crypter(clek, '' + id, 1), true))
     if (this.lgrno.size)
       for (const id of this.lgrno) arg.idgcno.push(u8ToB64(await crypter(clek, '' + id, 1), true))
-
+    if (this.lfic.size)
+      for (const id of this.lfic) arg.idf.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+    
     await idb.commit(arg)
   }
 }

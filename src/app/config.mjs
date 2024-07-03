@@ -36,6 +36,7 @@ export const config = {
   maxlgtextegen: 250,
   maxlgtextesecret: 5000,
   alertedlv: 40,
+  retriesdlinmin: [1, 10, 60, 360],
 
   /* Une base locale IDB non resynchronisée depuis plus de idbObs jours est
   considérée comme obsolète et détruite à la première connexion synchronisée */

@@ -1527,6 +1527,29 @@ export class FichierLocal {
 
 }
 
+export class Ficav {
+  get key () { return this.ref[0] + '/' + this.ref[1]}
+
+  static fromData (data) {
+    const f = new Ficav()
+    f.id = data.id
+    f.dhdc = data.dhdc || 0
+    if (data.exc) f.exc = data.exc
+    if (data.nbr) f.nbr = data.nbr
+    f.ref = splitPK(data.key)
+    f.nom = data.nom
+    f.st = data.st
+    return f
+  }
+
+  toData () {
+    const r = { id: this.id, dhdc: this.dhdc, key: this.key, nom: this.nom, st: this.st }
+    if (this.exc) { r.exc = this.exc; r.nbr = this.nbr }
+    return encode(r)
+  }
+
+}
+
 const classes = {
   espaces: Espace,
   tickets: Ticket,
