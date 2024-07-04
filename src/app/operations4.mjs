@@ -1715,3 +1715,28 @@ export class ExcluNote extends Operation {
     }
   }
 }
+
+/* OP_DownloadFichier: 'Téléchargement d\'un fichier attaché à une note'
+Download fichier / getUrl
+GetUrlNf : retourne l'URL de get d'un fichier
+- token: éléments d'authentification du compte.
+- id ids : id de la note.
+- idf : id du fichier.
+Retour:
+- url : url de get
+*/
+export class DownloadFichier extends Operation {
+  constructor () { super('DownloadFichier') }
+
+  async run (note, idf) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id: note.id, ids: note.ids, idf }
+      const ret =  await post(this, 'GetUrlNf', args)
+      const buf = await getData(ret.url)
+      return this.finOK(buf || null)
+    } catch (e) {
+      this.finKO(e)
+    }
+  }
+}

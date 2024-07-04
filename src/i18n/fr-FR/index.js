@@ -484,6 +484,8 @@ export default {
   EX8304: '(BUG) Pour attribuer l\'exclusité d\'écriture d\'une note, il faut, a) soit être animateur, b) soit l\'avoir soi-même, c) soit que personne ne l\'ait déjà.',
   EX8305: '(BUG) On ne peut attribuer l\'exclusité d\'écriture d\'une note qu\'à un membre ayant droit d\'écriture sur les notes.',
   EX8306: '(BUG) Pour supprimer l\'exclusité d\'écriture d\'une note, il faut, a) soit être animateur, b) soit l\'avoir soi-même.',
+  EX8307: '(BUG) Fichier inconnu pour cette note.',
+  EX8308: '(BUG) L\'avatar sponsor n\'est pas un avatar du compte.',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',

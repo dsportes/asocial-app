@@ -1241,6 +1241,8 @@ _data_:
 - `d` : date-heure de dernière modification du texte.
 - `texte` : texte (gzippé) crypté par la clé de la note.
 - `mfa` : map des fichiers attachés.
+  - clé: idf
+  - valeur: { nom, info, dh, type, gz, lg, sha }
 - `ref` : triplet `[id, ids]` référence de sa note _parent_:
 
 **A propos de `ref`**:
@@ -1534,17 +1536,32 @@ export class Ficav {
     const f = new Ficav()
     f.id = data.id
     f.dhdc = data.dhdc || 0
-    if (data.exc) f.exc = data.exc
-    if (data.nbr) f.nbr = data.nbr
+    f.exc = data.exc || null
+    f.nbr = data.nbr || 0
     f.ref = splitPK(data.key)
     f.nom = data.nom
-    f.st = data.st
+    f.av = data.av
+    f.avn = data.avn
+    return f
+  }
+
+  static fromNote (note, idf, av, avn) {
+    const data = note.mfa[idf]
+    const f = new Ficav()
+    f.id = idf
+    f.dhdc = Date.now()
+    f.exc = null
+    f.nbr = 0
+    f.ref = [note.id, note.ids]
+    f.nom = data.nom
+    f.av = av
+    f.avn = avn
     return f
   }
 
   toData () {
-    const r = { id: this.id, dhdc: this.dhdc, key: this.key, nom: this.nom, st: this.st }
-    if (this.exc) { r.exc = this.exc; r.nbr = this.nbr }
+    const r = { id: this.id, ref: this.ref, dhdc: this.dhdc, key: this.key, nom: this.nom, 
+      av: this.av, avn: this.avn, exc: this.exc, nbr: this.nbr }
     return encode(r)
   }
 

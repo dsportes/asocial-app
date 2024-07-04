@@ -7,101 +7,6 @@ import { post, putData, getData } from './net.mjs'
 import { Chat, Compta, Note, getCle } from './modele.mjs'
 import { Operation } from './synchro.mjs'
 
-/* OP_MuterCompte: 'Mutation dy type d\'un compte'
-POST:
-- `token` : éléments d'authentification du compte.
-- 'id': id du compte à muter
-- 'st': type actuel: 1: A, 2: 0
-- `idI idsI` : id du chat, côté _interne_.
-- `idE idsE` : id du chat, côté _externe_.
-- `txt1` : texte à ajouter crypté par la clé cc du chat.
-- `lgtxt1` : longueur du texte
-
-- `dlv`: nouvelle dlv
-- `lavLmb`: liste des avatars et membres
-
-Si st === 1: mutation de A en O
-- `quotas`: {qc, q2, q1}
-- `trib`: { 
-  idT: id courte du compte crypté par la clé de la tribu,
-  idt: id de la tribu, 
-  cletX: cle de la tribu cryptée par la clé K du comptable,
-  cletK: cle de la tribu cryptée par la clé K du compte ou sa clé RSA.
-}
-
-Retour:
-*/
-export class MuterCompte extends Operation {
-  constructor () { super('MuterCompte') }
-
-  async run (id, st, chat, txt, quotas, trib, compteurs) {
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      const compte = aSt.compte
-      const naI = chat.naI
-      const naE = chat.naE
-
-      const args = { 
-        token: session.authToken,
-        id,
-        st,
-        idI: naI.id, 
-        idsI: await Chat.getIds(naI, naE), 
-        idE: naE.id, 
-        idsE: await Chat.getIds(naE, naI), 
-        txt1: await Chat.getTxtCC(chat.cc, txt),
-        lgtxt1: txt.length,
-        lavLmb: compte.lavLmb
-      }
-
-      if (st === 1) { // A devient O
-        args.quotas = quotas
-        args.dlv = Compta.dlvO()
-        args.trib = trib
-      } else { // O devient A
-        args.dlv = Compta.dlvAinit(compteurs)
-      }
-
-      this.tr(await post(this, 'MuterCompte', args))
-      return this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_NouvelleNote: 'Création d\'une nouvelle note' ***************
-args.token: éléments d'authentification du compte.
-args.rowNote : row de la note
-args.idc: id du compte (note avatar) ou de l'hébergeur (note groupe)
-Retour: rien
-*/
-export class NouvelleNote extends Operation {
-  constructor () { super('NouvelleNote') }
-
-  /* 
-  id: groupe ou avatar
-  txt: texte de la note
-  im: indice du membre auteur
-  exclu: pour un groupe true si im a demandé un e exclusivité d'auteur
-  ref: référence de la note parent [rid, rids, rnom]
-  idc: id du compte de l'auteur ou de l'hébergeur pour une note de groupe
-  */
-  async run (id, txt, im, exclu, ref, idc) {
-    try {
-      const session = stores.session
-
-      const rowNote = await Note.toRowNouveau(id, txt, im, exclu, ref)
-      const args = { token: session.authToken, rowNote : rowNote, idc }
-      this.tr(await post(this, 'NouvelleNote', args))
-      return this.finOK((rowNote.id + '/' + rowNote.ids))
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* OP_NoteOpx: 'Suppression d\'une note'  ******
 args.token: éléments d'authentification du compte.
 op: 'suppr'
@@ -205,34 +110,6 @@ export class NouveauFichier extends Operation {
   }
 }
 
-/* OP_DownloadFichier: 'Téléchargement d\'un fichier attaché à une note'
-Download fichier / getUrl
-GetUrl : retourne l'URL de get d'un fichier
-Comme c'est un GET, les arguments sont en string (et pas en number)
-args.token: éléments d'authentification du compte.
-args.id : id de la note
-args.idf : id du fichier
-args.vt : volume du fichier (pour compta des volumes v2 transférés)
-*/
-export class DownloadFichier extends Operation {
-  constructor () { super('DownloadFichier') }
-
-  async run (note, idf) { 
-    try {
-      const session = stores.session
-      const vt = note.mfa.get(idf).lg
-      const args = { token: session.authToken, id: note.id, idf, vt }
-      const ret =  this.tr(await post(this, 'GetUrl', args))
-      if (!ret) return null
-      const url = ret.getUrl
-      const buf = await getData(url)
-      return this.finOK(buf || null)
-    } catch (e) {
-      this.finKO(e)
-    }
-  }
-}
-
 /* OP_SupprFichier: 'Suppression d\'un fichier attaché à une note'
 args.id, ids : de la note
 args.idh : id de l'hébergeur pour une note groupe
@@ -251,58 +128,6 @@ export class SupprFichier extends Operation {
       const args = { token: session.authToken, id: note.id, ids: note.ids, idf, idh, aut }
       this.tr(await post(this, 'SupprFichier', args))
       this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_TestRSA: 'Test encryption RSA'
-args.token
-args.id
-args.data
-Retour:
-- data: args.data crypré RSA par la clé publique de l'avatar
-*/
-export class TestRSA extends Operation {
-  constructor () { super('TestRSA') }
-
-  async run (id, data) { 
-    try {
-      const session = stores.session
-      const args = { token: session.authToken, id, data }
-      const ret = this.tr(await post(this, 'TestRSA', args))
-      return this.finOK(ret.data)
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
-/* OP_CrypterRaw: 'Test d\'encryptage serveur d\'un buffer long',
-Le serveur créé un binaire dont,
-- les 256 premiers bytes crypte en RSA, la clé AES, IV et l'indicateur gz
-- les suivants sont le texte du buffer long crypté par la clé AES générée.
-args.token
-args.id
-args.data
-args.gz
-Retour:
-- data: "fichier" binaire auto-décryptable en ayant la clé privée RSA
-OU la clé du site
-*/
-export class CrypterRaw extends Operation {
-  constructor () { super('CrypterRaw') }
-
-  async run (id, data, gz, clesite) { 
-    try {
-      const session = stores.session
-      const aSt = stores.avatar
-      const args = { token: session.authToken, id, data, gz }
-      const ret = this.tr(await post(this, 'CrypterRaw', args))
-      const priv = clesite ? null : aSt.getAvatar(id).priv
-      const res = await decrypterRaw(priv, clesite, ret.data, gz)
-      return this.finOK(res)
     } catch (e) {
       await this.finKO(e)
     }
