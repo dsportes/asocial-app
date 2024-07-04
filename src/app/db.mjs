@@ -224,12 +224,13 @@ class IDB {
 
   async loadFicav () {
     const session = stores.session
-    const faSt = stores.ficav
+    const l = []
     try {
       await this.db.ficav.each(async (rec) => {
         const f = Ficav.fromData(await decrypter(session.clek, rec.data))
-        faSt.setFicav(f)
+        l.push(f)
       })
+      return l
     } catch (e) {
       throw IDB.EX2(e)
     }

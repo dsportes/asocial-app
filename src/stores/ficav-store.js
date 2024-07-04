@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { splitPK, toRetry } from '../app/util.mjs'
 import { getData } from '../app/net.mjs'
+import { IDBbuffer } from '../app/db.mjs'
 
 export const useFicavStore = defineStore('ficav', {
   state: () => ({
     map: new Map(), // Map des ficav : clé idf
-    keys: new Map() // Clé: key d'une note: value: Set des idf des fichiers attachés à cette note
+    keys: new Map(), // Clé: key d'une note: value: Set des idf des fichiers attachés à cette note
+    queue: new Set() // set des idf des fichiers à charger
   }),
 
   getters: {
@@ -33,10 +35,13 @@ export const useFicavStore = defineStore('ficav', {
       return nc ? state.mapDeNote(nc.key) : new Map()
     },
 
-    queue: (state) => {
+    // Fichiers à charger par dhdc croissantes
+    getQueue: (state) => {
       const l = []
-      for(const [idf, f] of state.map)
-        if (f.dhdc && (!f.nbr || toRetry(f.nbr, f.dhdc))) l.push(f)
+      for(const idf of state.queue) {
+        const f = state.map.get(idf)
+        if (f) l.push(f)
+      }
       l.sort((a,b) => { return a.dhdc < b.dhdc ? -1 : ( a.dhdc > b.dhdc ? 1 : 0)})
       return l
     }
@@ -44,6 +49,8 @@ export const useFicavStore = defineStore('ficav', {
 
   actions: {
     setFicav (f) {
+      if (f.dhdc && !state.queue.has(f.idf)) state.queue.add(f.idf)
+      if (!f.dhdc && state.queue.has(f.idf)) state.queue.delete(f.idf)
       this.map.set(f.id, f)
       let e = this.keys.get(f.key); if (!e) { e = new Set(); this.keys.set(f.key, e) }
       e.add(f.id)
@@ -58,10 +65,55 @@ export const useFicavStore = defineStore('ficav', {
           if (!e.size) this.keys.delete(f.key)
         }
       }
+      state.queue.delete(f.idf)
     },
 
-    // Positionne ou enlève l'indicateur d'un fichier demandant que CETTE version soit gardée
-    setAV (note, idf, av) {
+    /* Chargement depuis IDB: lf est la liste des ficav enregistrés en IDB. Pour chacun:
+    - si la note n'existe plus, NON enregistrement du ficav et purge du ficav et de la data du fichier le cas échéant
+    - si la note existe MAIS PAS ce fichier,
+      - il ne faut pas enregistrer ce ficav et le purger de IDB
+      - mais si ce ficav spécifiait de garder le version la plus récente de ce nom, il faut,
+        - soit récupérer ce ficav depuis IDB,
+        - soit en créer un à charger 
+    */
+    async loadFicav (mf) { // mf: Map - clé:idf, valeur: ficav
+      const buf = new IDBbuffer()
+      for (const [idf, f] of mf) {
+        const node = this.nSt.map.get(f.key)
+        if (!node || !node.note) { // note absente, suppression du ficav de IDB
+          buf.purgeFIDB(idf)
+          continue
+        } 
+        const nf = n.note.mfa[idf] // son entrée dans la note
+        if (!nf) { // N'existe plus dans la note : CE ficav désormais inutile N'EST PAS enregistré et purgé de IDN
+          buf.purgeFIDB(idf)
+          const idfr = n.note.idfDeNom(f.nom) // idf du fichier le plus récent de ce nom dans la note
+          if (f.avn && idfr) { // MAIS il faut garder la dernière version pour ce nom
+            if (!state.map.has(idfr)) { // Ce fichier n'est PAS (encore) été enregistré, il faut le faire
+              let af = mf.get(idfr) // existait-il un ficav pour idfr ?
+              if (!af) af = Ficav.fromNote(n.note, f.id, false, true) // NON : création à charger
+              this.setFicav(af)
+              buf.putFIDB(af)
+            } // sinon il l'a été auparavent dans cette boucle
+          }
+        } else { // enregistrement du ficav
+          this.setFicav(f)
+        }
+      }
+      await buf.commit()
+      this.startDemon()
+    },
+
+    async save (maj, del) {
+      const buf = new IDBbuffer()
+      for(const f of maj) buf.putFIDB(f)
+      for(const idf of del) buf.purgeFIDB(idf)
+      await buf.commit()
+      if (maj.length) this.startDemon()
+    },
+
+    // En cours de session, l'utilisateur positionne ou enlève l'indicateur d'un fichier demandant que CETTE version soit gardée
+    async setAV (note, idf, av) {
       const nf = note.mfa[idf]
       const nom = nf.nom
       const idfr = note.idfDeNom(nom) // idf du fichier le plus récent de ce nom
@@ -78,27 +130,84 @@ export const useFicavStore = defineStore('ficav', {
           av.dhdc = Date.now()
           av.nbr = 0
           av.exc = null
-          this.save([af])
+          await this.save([af])
         } else { // pas connue: créer cet entrée pour enregistrer la demande
           af = Ficav.fromNote(note, idf, true, avn) // création
           this.setFicav(af)
-          this.save([af])
+          await this.save([af])
         }
       } else { // Il NE FAUT PAS garder cette version spécifiquement
         if (af) { // était connue
           // Faut-il garder cette entrée ?
           if (!avn || (sidfDeNom.size === 1 && sidfDeNom.has(idf))) {
             this.delFicav(idf)
-            this.save([], [idf])
+            await this.save([], [idf])
           } else {
             av.af = false
-            this.save([af])
+            await this.save([af])
           }
         } else return // N'était pas enregistrée et n'a toujours pas à l'être
       }
     },
 
+    // En cours de session, l'utilisateur positionne ou enlève l'indicateur d'un fichier demandant que LA VERSION LA PLUS RECENTE soit gardée
+    async setAVN (note, nom, av) {
+      const sidfDeNom = this.sidfDeNom(note.key, nom)
+      let avn = false // Garder la version la plus récente pour ce nom 
+      sidfDeNom.forEach(idf => { const x = this.map.get(idf); if (x && x.avn) avn = true})
+      const maj = []
+      const del = []
+      if (av) { // le mettre partout, ajouter si nécessaire l'entrée idfr
+        const idfr = note.idfDeNom(nom) // idf du fichier le plus récent de ce nom
+        // let af = this.map.get(idfr)
+        sidfDeNom.forEach(idf => {
+          const af = this.map.get(idf)
+          if (af) { // normalement af existe toujours ici
+            if (af.id !== idfr && !af.an) { // entrée inutile
+              this.delFicav(idf)
+              del.push[idf] 
+            } else {
+              if (!af.avn) { // entrée utile déjà enregistrée à mettre à jour et déjà enregistrée
+                af.avn = true
+                maj.push(af)
+              } // sinon, était déjà à jour
+            }
+          }
+        })
+        let af = this.map.get(idfr)
+        if (!af) { // cette entrée n'existait pas, elle doit être créée
+          af = Ficav.fromNote(note, idfr, false, true) // création
+          this.setFicav(af)
+          this.maj.push(af)
+        }
+      } else { // l'enlever partout, supprimer l'entrée (ou les) inutiles
+        sidfDeNom.forEach(idf => {
+          const af = this.map.get(idf)
+          if (af) { // normalement af existe toujours ici
+            if (af.avn) {
+              if (!af.av) { // entrée inutile
+                this.delFicav(idf)
+                del.push[idf] 
+              } else {
+                af.avn = false
+                maj.push(af)
+              }
+            } else {
+              if (!af.av) { // entrée inutile, mais normalement ce cas n'est pas possible
+                this.delFicav(idf)
+                del.push[idf] 
+              }
+              // sinon, rien n'a changé pour cette entrée
+            }
+          }
+        })
+      }
+      if (maj.length || del.length) await this.save(maj, del)
+    },
+
+    // En régime établi (synchro) alors que IDB a été chargé
     setNote (note, buf) {
+      if (!this.session.ok || !this.session.accesIdb) return
       const m = this.mapDeNote(note.key)
 
       const mn = new Map() // map des ficav de même nom - clé: nom, valeur: set des idf
@@ -106,14 +215,14 @@ export const useFicavStore = defineStore('ficav', {
         let e = mn.get(f.nom); if (!e) { e = new Set(); mn.set(f.nom, e) }; e.add(idf)
       }
 
-      const mfan = new Map() // map des fichiersde la de même nom - clé: nom, valeur: set des idf
+      const mfan = new Map() // map des fichiers de même nom - clé: nom, valeur: set des idf
       for (const [idf, f] of mfa) {
-        let e = mn.get(f.nom); if (!e) { e = new Set(); mfan.set(f.nom, e) }; e.add(idf)
+        let e = mfan.get(f.nom); if (!e) { e = new Set(); mfan.set(f.nom, e) }; e.add(idf)
       }
 
       const mfa = note.mfa
       for (const [idf, nf] of mfa) {
-        if (!m.has(idf)) { // Traiter le cas d'un nouveau fichier
+        if (!m.has(idf)) { // Cas d'un nouveau fichier
           
         }
       }
@@ -126,23 +235,25 @@ export const useFicavStore = defineStore('ficav', {
       
     },
 
-    // Suppression d'une note
+    // En régime établi (synchro) alors que IDB a été chargé, suppression d'une note
     delNote (id, ids, buf) {
+      if (!this.session.ok || !this.session.accesIdb) return
       const k = id + '/' + ids
       const lf = this.keys.get(k)
       if (lf) for(const idf of lf) {
-        this.map.delete(idf)
+        this.delFicav(idf)
         buf.purgeFIDB(idf)
       }
       this.keys.delete(k)
     },
 
-    // Suppression de toutes les notes de l'avatar ou du groupe id
+    // En régime établi (synchro) alors que IDB a été chargé, suppression d'un avatar ou d'un groupe idag
     delNotes (idag, buf) {
+      if (!this.session.ok || !this.session.accesIdb) return
       for(const [k, lf] of this.keys) {
-        const [id, ids] = splitPK(k)
+        const [id, ] = splitPK(k)
         if (id === idag) lf.forEach(idf => { 
-          this.map.delete(idf)
+          this.delFicav(idf)
           buf.purgeFIDB(idf)
         })
         this.keys.delete(k)

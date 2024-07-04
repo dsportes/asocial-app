@@ -693,8 +693,12 @@ export class ConnexionAvion extends OperationS {
       // Chargement des descriptifs des fichiers du presse-papier
       await idb.FLfromIDB()
 
+      // Chargement des ficav
+      const mf = await idb.loadFicav()
+      stores.ficav.loadFicav(mf)
+
       console.log('Connexion compte : ' + session.compteId)
-      await sleep(1000)
+      await sleep(300)
       session.setStatus(2)
       stores.ui.setPage('accueil')
       this.finOK()
@@ -720,11 +724,16 @@ export class ConnexionSynchroIncognito extends OperationS {
       // Chargement des descriptifs des fichiers du presse-papier
       if (session.synchro) await idb.FLfromIDB()
 
-      await sleep(300)
-      session.setStatus(2)
-      syncQueue.reveil()
+      // Chargement des ficav
+      if (session.synchro) {
+        const mf = await idb.loadFicav()
+        stores.ficav.loadFicav(mf)
+      }
 
       console.log('Connexion compte : ' + session.compteId)
+      session.setStatus(2)
+      syncQueue.reveil()
+      await sleep(300)
       stores.ui.setPage('accueil')
       this.finOK()
     } catch (e) {
