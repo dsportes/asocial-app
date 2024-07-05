@@ -527,8 +527,7 @@ export default {
         const res = dec.decode(await getData(u))
         afficherDiag($t('PNOdltok', [u, res]))
       } catch (e) {
-        const x = appexc(e)
-        afficherDiag($t('PNOdltko', [u, x.message]))
+        afficherDiag($t('PNOdltko', [u, e.message]))
       }
     },
 

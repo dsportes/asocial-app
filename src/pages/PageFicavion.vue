@@ -100,7 +100,7 @@ export default ({
       const l = []
       for (const [pk, f] of this.fSt.map) {
         const n = this.nSt.getNode(f.ids, f.ns)
-        const r = this.nSt.getNode(n.rkey).label
+        const r = this.nSt.getNode(n.rkey).label // ????????????????????
         l.push({f, n, r})
       }
       l.sort((a, b) => {

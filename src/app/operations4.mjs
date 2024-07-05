@@ -1519,7 +1519,7 @@ export class DownloadStatC extends Operation {
       try { 
         buf = await getData(ret.getUrl) 
       } catch (e) { 
-        return this.finOK({ err: 1 })
+        return this.finOK({ err: 1, msg: e.message })
       }
       try {
         buf2 = await decrypter(cleES, buf)
@@ -1548,7 +1548,7 @@ export class DownloadStatC2 extends Operation {
       try { 
         buf = await getData(ret.getUrl) 
       } catch (e) { 
-        return this.finOK({ err: 1 })
+        return this.finOK({ err: 1, msg: e.message })
       }
       try {
         buf2 = await decrypter(cleES, buf)
@@ -1581,7 +1581,7 @@ export class TicketsStat extends Operation {
       try { 
         buf = await getData(ret.getUrl) 
       } catch (e) { 
-        return this.finOK({ err: 1 })
+        return this.finOK({ err: 1, msg: e.message })
       }
       try {
         buf2 = await decrypter(cleES, buf)

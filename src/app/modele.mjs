@@ -1242,7 +1242,7 @@ _data_:
 - `texte` : texte (gzippé) crypté par la clé de la note.
 - `mfa` : map des fichiers attachés.
   - clé: idf
-  - valeur: { nom, info, dh, type, gz, lg, sha }
+  - valeur: { idf, nom, info, dh, type, gz, lg, sha }
 - `ref` : triplet `[id, ids]` référence de sa note _parent_:
 
 **A propos de `ref`**:
@@ -1287,11 +1287,13 @@ export class Note extends GenDoc {
     this.ref = row.ref || null
 
     this.mfa = new Map()
+    this.fnom = new Map()
     if (this.vf && row.mfa) for (const idf in row.mfa) {
-      const [lg, x] = row.mfa[idf]
-      const f = decode(await decrypter(this.cle, x))
-      f.idf = parseInt(idf)
-      this.mfa.set(f.idf, f)
+      const f = row.mfa[idf]
+      this.mfa.set(f.idf, row.mfa[idf])
+      let e = this.fnom[f.nom]; if (!e) { e = []; this.fnom[f.nom] = e }
+      e.push(f)
+      e.sort((a,b) => { return a.dh > b.dh ? -1 : (a.dh < b.dh ? 1 : 0) })
     }
   }
 
@@ -1339,11 +1341,17 @@ export class Note extends GenDoc {
   get pkey () {
     return !this.ref ? '' + this.id : (this.ref[1] ? this.ref[0] + '/' + this.ref[1] : '' + this.ref[0])
   }
-  get rkey () { return '' + this.id }
-  get refk () { return this.ref ? (this.ref[0] + (this.ref[1] ? '/' + this.ref[1] : '')) : '' }
-  get rid () {  return this.ref ? this.ref[0] : 0 }
-  get rids () {  return this.ref ? this.ref[1] : 0 }
+
   get shIds () { return ('' + (this.ids % 10000)).padStart(4, '0')}
+
+  
+  // fichier le plus récent portant le nom donné
+  dfDeNom (nom) {
+    let fx = null
+    for (const [, x] of this.mfa)
+      if (x.nom !== nom && (!fx || (fx.dh < x.dh))) fx = x
+    return fx
+  }
 
   async nouvFic (idf, nom, info, lg, type, u8) {
     // propriétés ajoutées : u8 (contenu du fichier gzippé crypté), sha, dh gz
@@ -1407,17 +1415,6 @@ export class Note extends GenDoc {
     const n = fn + '_' + s + '#' + f.idf + ext
     return n
   }
-
-  // fichier le plus récent portant le nom donné
-  idfDeNom (nom) {
-    let idfx = 0
-    let dh = 0
-    for (const [idf, x] of this.mfa) {
-      if (x.nom !== nom) continue
-      if (!idfx || dh < x.dh) { idfx = idf; dh = x.dh }
-    }
-    return idfx
-  }  
 }
 
 /*****************************************************************/
@@ -1535,6 +1532,7 @@ export class Ficav {
   static fromData (data) {
     const f = new Ficav()
     f.id = data.id
+    f.dh = data.dh
     f.dhdc = data.dhdc || 0
     f.exc = data.exc || null
     f.nbr = data.nbr || 0
@@ -1546,9 +1544,10 @@ export class Ficav {
   }
 
   static fromNote (note, idf, av, avn) {
-    const data = note.mfa[idf]
+    const nf = note.mfa.get(idf)
     const f = new Ficav()
     f.id = idf
+    f.dh = nf.dh
     f.dhdc = Date.now()
     f.exc = null
     f.nbr = 0
@@ -1560,8 +1559,7 @@ export class Ficav {
   }
 
   toData () {
-    const r = { id: this.id, ref: this.ref, dhdc: this.dhdc, key: this.key, nom: this.nom, 
-      av: this.av, avn: this.avn, exc: this.exc, nbr: this.nbr }
+    const r = { ...this }
     return encode(r)
   }
 

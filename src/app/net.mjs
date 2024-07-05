@@ -128,21 +128,14 @@ function procEx (e, op) {
 }
 
 // Utilisé pour obtenir le texte depuis une URL sur le stockage de fichier
-export async function getData (url) {
-  try {
-    const r = await axios({ 
-      method: 'get', 
-      url, 
-      responseType: 'arraybuffer' 
-    })
-    return new Uint8Array(r.data)
-  } catch (e) {
-    if (e.response && e.response.status === 404) {
-      const txt = decoder.decode(e.response.data)
-      throw new AppExc(E_SRV, 0, [txt])
-    }
-    throw new AppExc(E_SRV, 0, [e.message])
-  }
+export async function getData (url, nf) {
+  const r = await axios({ 
+    method: 'get', 
+    url, 
+    responseType: 'arraybuffer' 
+  })
+  return new Uint8Array(r.data)
+  // Exception : e.message
 }
 
 export async function putData (url, data) {
@@ -157,6 +150,6 @@ export async function putData (url, data) {
     })
     return r.status === 200 ? null : 'Status:' + r.statusText
   } catch (e) {
-    return e.toString()
+    return e.message
   }
 }
