@@ -456,20 +456,20 @@ class IDB {
   }
 
   /* Fin de chargement d'un fichier : maj conjointe de fetat (pour dhc) et insertion de fdata */
-  async setFa (fetat, buf) { // buf : contenu du fichier non crypté
+  async setFa (f, buf) { // f: ficav, data: contenu brut du fichier
     try {
       const session = stores.session
-      const row1 = {}
-      row1.id = u8ToB64(await crypter(session.clek, '' + fetat.id, 1), true)
-      row1.data = await crypter(session.clek, fetat.toIdb)
-      const row2 = { id: row1.id, data: buf }
-      await this.db.transaction('rw', ['fetat', 'fdata'], async () => {
-        await db.fetat.put(row1)
-        await db.fdata.put(row2)
+      const k = u8ToB64(await crypter(session.clek, '' + f.id, 1), true)
+      const dataf = await crypter(clek, new Uint8Array(encode(f.toRow())))
+      await this.db.transaction('rw', ['ficav', 'fdata'], async () => {
+        await this.db.ficav.put( { id: k, data: dataf } )
+        if (buf) await this.db.fdata.put( { id: k, data: buf } )
+          else this.db.fdata.where({ id: k }).delete()
       })
       if (stores.config.DEBUG) {
-        console.log('IDB fetat to PUT', fetat.id, fetat.dhc)
-        console.log('IDB fdata to PUT', fetat.id)
+        console.log('IDB PUT ficav', f.id, f.dhdc)
+        if (buf) console.log('IDB PUT fdata', f.id, buf.length )
+        else console.log('IDB DEL fdata', f.id )
       }
     } catch (e) {
       throw EX2(e)

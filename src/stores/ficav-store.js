@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { splitPK, toRetry } from '../app/util.mjs'
+import { splitPK } from '../app/util.mjs'
 import { getData } from '../app/net.mjs'
-import { IDBbuffer } from '../app/db.mjs'
+import { IDBbuffer, idb } from '../app/db.mjs'
+import { Ficav } from '../app/modele.mjs'
 
 export const useFicavStore = defineStore('ficav', {
   state: () => ({
@@ -112,11 +113,55 @@ export const useFicavStore = defineStore('ficav', {
       if (maj.length) this.startDemon()
     },
 
-    // En cours de session, l'utilisateur positionne ou enlève l'indicateur d'un fichier demandant que CETTE version soit gardée
+    // Invoqué depuis UI
+    async retry (idf) {
+      const f = this.map.get(idf)
+      if (f) {
+        f.dhdc = Date.now()
+        f.exc = null
+        f.nbr = 0
+        this.setFicav (f)
+        await this.save([f])
+      }
+    },
+
+    // Invoqué depuis UI
+    async cancel (idf) {
+      const f = this.map.get(idf)
+      if (f) {
+        this.delFicav (f)
+        await this.save([], [idf])
+      }
+    },
+
+    // Invoqué depuis le démon
+    async ok (idf, data) {
+      const f = this.map.get(idf)
+      if (f) {
+        f.dhdc = 0
+        f.exc = null
+        f.nbr = 0
+        this.setFicav (f)
+        await idb.setFa(f, data)
+      }
+    },
+
+    // Invoqué depuis le démon
+    async ko (idf, exc, delaisec) {
+      const f = this.map.get(idf)
+      if (f) {
+        f.dhdc = Date.now() + (delaisec * 1000) // retry dans 1 minute
+        f.exc = exc
+        f.nbr++
+        this.setFicav (f)
+        await idb.setFa(f, data)
+      }
+    },
+
+    // Invoqué depuis UI. L'utilisateur positionne ou enlève l'indicateur d'un fichier demandant que CETTE version soit gardée
     async setAV (note, idf, av) {
       const nf = note.mfa[idf]
       const nom = nf.nom
-      const idfr = note.idfDeNom(nom) // idf du fichier le plus récent de ce nom
       let af = this.map.get(idf)
       const sidfDeNom = this.sidfDeNom(note.key, nom)
       let avn = false // Garder la version la plus récente pour ce nom 
@@ -150,7 +195,7 @@ export const useFicavStore = defineStore('ficav', {
       }
     },
 
-    // En cours de session, l'utilisateur positionne ou enlève l'indicateur d'un fichier demandant que LA VERSION LA PLUS RECENTE soit gardée
+    // Invoqué depuis UI. L'utilisateur positionne ou enlève l'indicateur d'un fichier demandant que LA VERSION LA PLUS RECENTE soit gardée
     async setAVN (note, nom, av) {
       const sidfDeNom = this.sidfDeNom(note.key, nom)
       let avn = false // Garder la version la plus récente pour ce nom 
@@ -208,29 +253,42 @@ export const useFicavStore = defineStore('ficav', {
     // En régime établi (synchro) alors que IDB a été chargé
     setNote (note, buf) {
       if (!this.session.ok || !this.session.accesIdb) return
-      const m = this.mapDeNote(note.key)
+      const m = this.mapDeNote(note.key) // map des ficav relatifs à cette note. MAINTENUE A JOUR dans cette méthode
 
-      const mn = new Map() // map des ficav de même nom - clé: nom, valeur: set des idf
-      for (const [idf, f] of m) {
-        let e = mn.get(f.nom); if (!e) { e = new Set(); mn.set(f.nom, e) }; e.add(idf)
-      }
+      for (const [idf, nf] of note.mfa) {
+        let fx = null // ficav de version la plus récente de ce nom. Si fx null, nouveau nom
+        for(const idf of m) { const f = this.map.get(idf); if (f.nom === nf.nom && (!fx || fx.dh < f.dh)) fx = f } 
 
-      const mfan = new Map() // map des fichiers de même nom - clé: nom, valeur: set des idf
-      for (const [idf, f] of mfa) {
-        let e = mfan.get(f.nom); if (!e) { e = new Set(); mfan.set(f.nom, e) }; e.add(idf)
-      }
+        let fy = nf // fichier de la note de version la plus récente de ce nom (fy n'est jamais null)
+        for(const [, f] of note.mfa) { if (f.nom === nf.nom && (fy.dh < f.dh)) fy = f } 
 
-      const mfa = note.mfa
-      for (const [idf, nf] of mfa) {
-        if (!m.has(idf)) { // Cas d'un nouveau fichier
-          
+        const fav = m.get(idf) // ficav associé à nf
+
+        if (!fav) { // Cas d'un nouveau fichier, nouveau nom ou nom existant
+          if (!fx || nf.dh <= fy.dh) continue // nouveau nom OU nf n'est pas la dernière version pde ce nom pour cette note
+        } else { // le fichier nf (idf) existe dans la note ET a un ficav fav
+          if (!fav.avn) continue // (fav.av est true . Rien de nouveau, la version spécifique est toujours requise
+          if (fx && fx.dh >= fy.dh) continue // elle est déjà enregistrée par fx
         }
+
+        if (fx && !fx.av) { // le ficav actuel le plus récent du nom (s'il existe) N'EST PLUS requis (av est false)
+          this.delFicav(fx.idf)
+          buf.purgeFIDB(fx.idf)
+          m.delete(fx.idf)
+        }
+        // Inscription d'un nouveau ficav avec avn
+        const af = Ficav.fromNote(note, idf, false, true)
+        this.setFicav(af)
+        buf.putFIDB(af)
+        m.set(idf, af)
       }
+
+      // Fichiers ayant un ficav ...
       for (const [idf, f] of m) {
-        if (!mfa.has(idf)) { // Traiter le cas d'un fichier disparu
+        if (!note.mfa.has(idf)) { // dont l'idf n'est PLUS existant dans la note
           buf.purgeFIDB(idf)
           this.delFicav(idf)
-        }
+        } // else : le cas a été traité ci-dessus - fichier existant dans la note ET ayant un ficav
       }
       
     },
