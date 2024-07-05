@@ -90,7 +90,7 @@ export const useFicavStore = defineStore('ficav', {
             (a.dh > b.dh ? -1 : (a.dh < b.dh ? 1 : 0)))))
       })
       const m = new Map() // clé: note (key) - valeur Map (clé: nom, valeur: liste des ficav par dh)
-      for (const [idf, f] of mf) {
+      for (const [idf, f] of lfav) {
         const node = this.nSt.map.get(f.key)
         if (!node || !node.note || node.note.fnom.has(f.nom)) { 
           // note absente ou pas ce nom dans la note, suppression du ficav de IDB
@@ -102,11 +102,11 @@ export const useFicavStore = defineStore('ficav', {
         e2.unshift(f)
       }
 
-      for (const [key, m1] of m) {
+      for (const [key, m1] of m) { // les m1 ne sont jamais vide
         const node = this.nSt.map.get(key)
         const note = node.note
         if (!note) continue
-        for (const [nom, m2] of m1) {
+        for (const [nom, m2] of m1) { // les m2 ne sont jamais vide
           const lnom = note.fnom.get(nom) // fichiers de la note ayant ce nom
           const df = lnom[0] // fichier le plus récent de ce nom dans la note
           const avn = m2[0].avn // Il faut garder le ficav le plus récent : df.idf
