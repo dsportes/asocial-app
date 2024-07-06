@@ -1,14 +1,19 @@
 import { defineStore } from 'pinia'
 import { splitPK } from '../app/util.mjs'
 import { getData } from '../app/net.mjs'
+import { appexc } from '../app/api.mjs'
 import { IDBbuffer, idb } from '../app/db.mjs'
 import { Ficav } from '../app/modele.mjs'
+
+const delaisec = 60
 
 export const useFicavStore = defineStore('ficav', {
   state: () => ({
     map: new Map(), // Map des ficav : clé idf
     keys: new Map(), // Clé: key d'une note: value: Set des idf des fichiers attachés à cette note
-    queue: new Set() // set des idf des fichiers à charger
+    queue: new Set(), // set des idf des fichiers à charger
+    encours: null, // sessionId du démon en cours d'éxecution
+    cacheDL: [] // cache des N derniers téléchargements : {idf, data}
   }),
 
   getters: {
@@ -50,10 +55,32 @@ export const useFicavStore = defineStore('ficav', {
       }
       l.sort((a,b) => { return a.dhdc < b.dhdc ? -1 : ( a.dhdc > b.dhdc ? 1 : 0)})
       return l
-    }
+    },
+
+    // prochain téléchargement à traiter
+    prochain: (state) => {
+      const now = Date.now()
+      const fx = null
+      for(const idf of state.queue) {
+        const f = state.map.get(idf)
+        if (f.dhdc < now && (!fx || (f.dhdc < fx.dhdc))) fx = f
+      }
+      return fx
+    },
+
+    getDataDeCache: (state) => { return (idf) => {
+        for(const [id, data] of state.cacheDL) if (id === idf) return data
+        return null
+      }
+    },
   },
 
   actions: {
+    putDataEnCache (idf, data) {
+      if (this.cacheDL.length > 5) this.cacheDL.pop()
+      this.cacheDL.unshidt([idf, data])
+    },
+
     setFicav (f) {
       if (f.dhdc && !state.queue.has(f.idf)) state.queue.add(f.idf)
       if (!f.dhdc && state.queue.has(f.idf)) state.queue.delete(f.idf)
@@ -74,8 +101,8 @@ export const useFicavStore = defineStore('ficav', {
       state.queue.delete(f.idf)
     },
 
-    /* Chargement depuis IDB: lf est la liste des ficav enregistrés en IDB. Pour chacun:
-    - si la note n'existe plus, NON enregistrement du ficav et purge du ficav et de la data du fichier le cas échéant
+    /* Chargement depuis IDB: lfav est la liste des ficav enregistrés en IDB. Pour chacun:
+    - si la note n'existe plus, NON enregistrement du ficav et purge du ficav
     - si la note existe MAIS PAS ce fichier,
       - il ne faut pas enregistrer ce ficav et le purger de IDB
       - mais si ce ficav spécifiait de garder le version la plus récente de ce nom, il faut,
@@ -83,6 +110,7 @@ export const useFicavStore = defineStore('ficav', {
         - soit en créer un à charger 
     */
     async loadFicav (lfav) { // mf: Map - clé:idf, valeur: ficav
+      // Traitement par note / nom / ficav - 
       const buf = new IDBbuffer()
       lfav.sort((a,b) => { // Tri par note / nom / dh décroissante
         a.key < b.key ? -1 : (a.key > b.key ? 1 :
@@ -92,55 +120,41 @@ export const useFicavStore = defineStore('ficav', {
       const m = new Map() // clé: note (key) - valeur Map (clé: nom, valeur: liste des ficav par dh)
       for (const [idf, f] of lfav) {
         const node = this.nSt.map.get(f.key)
-        if (!node || !node.note || node.note.fnom.has(f.nom)) { 
-          // note absente ou pas ce nom dans la note, suppression du ficav de IDB
-          buf.purgeFIDB(idf)
-          continue
+        // pas de note portant ce nom, suppression du ficav de IDB
+        if (!node || !node.note || !node.note.fnom.has(f.nom)) buf.purgeFIDB(idf)
+        else { // ranger dans m pour traitement
+          let e1 = m.get(f.key); if (!e1) { e1 = new Map(); m.set(f.key, e1) }
+          let e2 = e1.get(f.nom); if (!e2) { e2 = []; e1.set(f.nom, e2) }
+          e2.push(f)
         }
-        let e1 = m.get(f.key); if (!e1) { e1 = new Map(); m.set(f.key, e1) }
-        let e2 = e1.get(f.nom); if (!e2) { e2 = []; e1.set(f.nom, e2) }
-        e2.unshift(f)
       }
 
       for (const [key, m1] of m) { // les m1 ne sont jamais vide
+        // Pour chaque note
         const node = this.nSt.map.get(key)
         const note = node.note
         if (!note) continue
-        for (const [nom, m2] of m1) { // les m2 ne sont jamais vide
+        for (const [nom, m2] of m1) { // les m2 ne sont jamais vides
+          // Pour chaque nom
           const lnom = note.fnom.get(nom) // fichiers de la note ayant ce nom
           const df = lnom[0] // fichier le plus récent de ce nom dans la note
-          const avn = m2[0].avn // Il faut garder le ficav le plus récent : df.idf
-          for(const fa of m2) {
-            
-
+          const avn = m2[0].avn // faut-il garder le ficav le plus récent ?
+          if (avn) { // oui
+            if (df.idf === avn.id) this.setFicav(avn) // le ficav avn convient, gardé
+            else { // Création d'un ficav associé à df
+              const fa = Ficav.fromNote(note, df.idf, false, true) // création
+              this.setFicav(fa)
+            }
           }
-        }
-      }
-
-        const note = node.note
-        const setAvn = new Set() // Set des noms dont il faut garder le fichier le plus récent
-        for (const [, f] of mf) if (f.key === note.key && f.avn) setAvn.add(f.nom)
-  
-        // const lnom = note.fnom.get(f.nom) // fichiers de la note ayant ce nom
-
-        const nf = note.mfa[idf] // son entrée dans la note
-        if (!nf) { // N'existe plus dans la note : CE ficav désormais inutile N'EST PAS enregistré et purgé de IDN
-          buf.purgeFIDB(idf)
-          const df = lnom[0] // idf du fichier le plus récent de ce nom dans la note
-          if (f.avn && df.id === f.id) { // MAIS il faut garder la dernière version pour ce nom
-            if (!state.map.has(idfr)) { // Ce fichier n'est PAS (encore) été enregistré, il faut le faire
-              let af = mf.get(idfr) // existait-il un ficav pour idfr ?
-              if (!af) af = Ficav.fromNote(n.note, f.id, false, true) // NON : création à charger
-              this.setFicav(af)
-              buf.putFIDB(af)
-            } // sinon il l'a été auparavent dans cette boucle
+          // Pour chaque ficav
+          for(const fa of m2) { // conserver les ficav ayant un av et pour lesquels il existe une note
+            if (fa.id === df.idf) continue // traité ci-avant avec avn
+            if (!fa.av || !note.mfa[fa.id]) buf.purgeFIDB(fa.idf)
           }
-        } else { // enregistrement du ficav
-          this.setFicav(f)
         }
       }
       await buf.commit()
-      this.startDemon()
+      this.startDemon(this.session.sessionId)
     },
 
     async save (maj, del) {
@@ -148,13 +162,13 @@ export const useFicavStore = defineStore('ficav', {
       for(const f of maj) buf.putFIDB(f)
       for(const idf of del) buf.purgeFIDB(idf)
       await buf.commit()
-      if (maj.length) this.startDemon()
+      if (maj.length) this.startDemon(this.session.sessionId)
     },
 
     // Invoqué depuis UI
     async retry (idf) {
       const f = this.map.get(idf)
-      if (f) {
+      if (f && f.dhdc) {
         f.dhdc = Date.now()
         f.exc = null
         f.nbr = 0
@@ -167,7 +181,7 @@ export const useFicavStore = defineStore('ficav', {
     async cancel (idf) {
       const f = this.map.get(idf)
       if (f) {
-        this.delFicav (f)
+        this.delFicav(f)
         await this.save([], [idf])
       }
     },
@@ -185,14 +199,14 @@ export const useFicavStore = defineStore('ficav', {
     },
 
     // Invoqué depuis le démon
-    async ko (idf, exc, delaisec) {
+    async ko (idf, exc) {
       const f = this.map.get(idf)
       if (f) {
         f.dhdc = Date.now() + (delaisec * 1000) // retry dans 1 minute
         f.exc = exc
         f.nbr++
         this.setFicav (f)
-        await idb.setFa(f, data)
+        await idb.setFa(f, null)
       }
     },
 
@@ -314,41 +328,45 @@ export const useFicavStore = defineStore('ficav', {
       }
     },
 
-    startDemon () {
-      if (this.encours || !this.queue.length) return
-      this.encours = this.queue[0]
-      const session = stores.session
+    startDemon (sessionId) {
+      if (!this.session.accesIdb || (sessionId !== this.session.sessionId)) return
       setTimeout(async () => {
-        while (this.encours) {
-          const e = this.map.get(this.encours)
-          try {
-            let buf
-            if (this.dernierFichierCharge.idf === e.id) {
-              // Il arrive que le fichier demandé soit le dernier chargé
-              buf = this.dernierFichierCharge.data
-              this.dernierFichierCharge.data = null
-              this.dernierFichierCharge.idf = 0
-            } else {
-              /* imputation sur LA COMPTA du compte. idc : id de la compta */
-              const args = { token: session.authToken, id: e.ids, idf: e.id, vt: e.lg }
-              const ret =  await post(null, 'GetUrlNf', args)
-              const url = ret.getUrl
-              buf = await getData(url)
-              // await sleep(10000)
-              // throw 'Ex de test'
-            }
-            this.setQueue(0, 0)
-            if (stores.config.DEBUG) console.log(`OK chargement : ${e.idf} ${e.nom}#${e.info}`)
-            await e.chargementOK(buf) // Maj IDB de fetat et fdata conjointement
-          } catch (ex) {
-            e.chargementKO(appexc(ex, 20))
-            this.setEchec(true, this.encours)
-            this.setQueue(0, 0)
+        while (sessionId === this.session.sessionId) {
+          const fa = this.prochain()
+          if (!fa) {
+            setTimeout(() => { this.startDemon(sessionId) }, 60000)
+            break
           }
-          this.encours = this.queue.length ? this.queue[0] : 0
+          try {
+            let buf = getDataDeCache(fa.idf)
+            if (buf) {
+              await this.ok(fa.idf, buf)
+              continue
+            }
+            const args = { 
+              token: session.authToken, 
+              id: fa.ref[0], 
+              ids: fa.ref[1],
+              idf: fa.id
+            }
+            const ret =  await post(null, 'GetUrlNf', args)
+            if (sessionId !== this.session.sessionId) break
+            try {
+              buf = await getData(ret.url)
+              if (sessionId !== this.session.sessionId) break
+              await this.ok(fa.idf, buf)
+              if (stores.config.DEBUG) console.log(`OK chargement : ${fa.idf} ${fa.nom}#${fa.info}`)
+            } catch (e) {
+              if (sessionId !== this.session.sessionId) break
+              await this.ko(fa.idf, [404, e.message])
+            }
+          } catch (ex) {
+            if (sessionId !== this.session.sessionId) break
+            const exc = appexc(ex)
+            await this.ko(fa.idf, [exc.code, ''])
+          }
         }
       }, 10)
     }
-
   }
 })
