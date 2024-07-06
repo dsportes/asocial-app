@@ -3,10 +3,10 @@
     <div class="q-mb-sm">
       <div class="titre-md">{{$t('PEstm')}}</div>
       <div class="row q-gutter-sm q-mb-sm">
-        <btn-cond class="self-start b1" label="M" @click="dlstat(0)"/>
-        <btn-cond class="self-start b1" label="M-1" @click="dlstat(1)"/>
-        <btn-cond class="self-start b1" label="M-2" @click="dlstat(2)"/>
-        <btn-cond class="self-start b1" label="M-3" @click="dlstat(3)"/>
+        <btn-cond class="self-start b1" label="M" @ok="dlstat(0)"/>
+        <btn-cond class="self-start b1" label="M-1" @ok="dlstat(1)"/>
+        <btn-cond class="self-start b1" label="M-2" @ok="dlstat(2)"/>
+        <btn-cond class="self-start b1" label="M-3" @ok="dlstat(3)"/>
         <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
           @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
       </div>
@@ -109,7 +109,7 @@
     <q-dialog v-model="ui.d.PEedq" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <btn-cond color="warning" icon="close" @click="ui.fD"/>
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqut')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />

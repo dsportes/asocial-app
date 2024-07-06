@@ -3,7 +3,7 @@
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <btn-cond color="warning" icon="chevron_left" @click="ui.fD"/>
+      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title v-if="avid!==0" class="titre-lg full-width text-center">{{$t('SAVtit1', [cv.nom])}}</q-toolbar-title>
       <q-toolbar-title v-else class="titre-lg full-width text-center msg">
         {{$t('SAVtit2', [cv.nom])}}</q-toolbar-title>
@@ -119,7 +119,7 @@
     <q-card :class="styp('sm') + 'q-pa-sm'">
       <div class="q-mt-md titre-lg text-italic">{{$t('SAVcf' + (avid !== 0 ? '1' : '2'))}}</div>
       <div class="q-mt-md row justify-center q-gutter-md">
-        <btn-cond flat :label="$t('renoncer')" color="primary" @click="ui.fD"/>
+        <btn-cond flat :label="$t('renoncer')" color="primary" @ok="ui.fD"/>
         <bouton-confirm actif :confirmer="valider"/>
       </div>
     </q-card>

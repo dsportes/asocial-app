@@ -15,7 +15,7 @@
       </div>
       <div class="row justify-between items-start">
         <div v-if="chatx.items.length" class="fs-md">{{chatx.tit}}</div>
-        <btn-cond icon="open_in_new" :label="$t('CHbtnov')" @click="ouvrirChat()"
+        <btn-cond icon="open_in_new" :label="$t('CHbtnov')" @ok="ouvrirChat()"
           :cond="ui.urgence ? 'cUrgence' : 'cVisu'" />
       </div>
     </div>

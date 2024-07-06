@@ -3,28 +3,14 @@
   <div class="q-mb-sm">
     <div class="titre-md">{{$t('PEsttk')}}</div>
     <div class="row q-gutter-sm q-mb-sm">
-      <btn-cond class="self-start b1" label="M" @click="dlstat(0)"/>
-      <btn-cond class="self-start b1" label="M-1" @click="dlstat(1)"/>
-      <btn-cond class="self-start b1" label="M-2" @click="dlstat(2)"/>
-      <btn-cond class="self-start b1" label="M-3" @click="dlstat(3)"/>
+      <btn-cond class="self-start b1" label="M" @ok="dlstat(0)"/>
+      <btn-cond class="self-start b1" label="M-1" @ok="dlstat(1)"/>
+      <btn-cond class="self-start b1" label="M-2" @ok="dlstat(2)"/>
+      <btn-cond class="self-start b1" label="M-3" @ok="dlstat(3)"/>
       <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl" :dinit="maxdl"
         @ok="dlstat2" icon="download" :label="$t('ESdlc')"/>
     </div>
   </div>
-
-<!--
-  <btn-cond dense color="warning" padding="none xs" size="md" no-caps
-    label="Test-Stat-T" @click="dlstat"/>
-
-  <div v-if="session.estComptable" class="row justify-start items-center">
-    <div class="titre-md q-mr-md">{{$t('PEsttk')}}</div>
-    <q-input class="w10" v-model="mois" :label="$t('ESmois')" :hint="$t('ESmois2')" dense clearable>
-      <template v-slot:append>
-        <q-icon name="download" @click="dlstat2" class="cursor-pointer" color="warning"/>
-      </template>
-    </q-input>
-  </div>
-  -->
 
   <!--panel-deta v-if="!session.estComptable" :c="c" :total="aSt.compta.credits.total"
     class="q-ma-xs q-pa-xs bord1"/-->

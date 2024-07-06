@@ -3,12 +3,12 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <btn-cond color="warning" icon="chevron_left" @click="fermer"/>
+      <btn-cond color="warning" icon="chevron_left" @ok="fermer"/>
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
       </q-toolbar-title>
       <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-        :disable="(note.deGroupe && !aut) || !modifie"  @click="valider"/>
+        :disable="(note.deGroupe && !aut) || !modifie"  @ok="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
     <q-toolbar v-if="session.cEdit" inset class="full-width msg">{{session.cEdit}}</q-toolbar>

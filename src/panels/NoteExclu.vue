@@ -3,12 +3,12 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <btn-cond color="warning" icon="chevron_left" @click="ui.fD"/>
+      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(nSt.note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
       </q-toolbar-title>
       <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-        :disable="!xap"  @click="valider"/>
+        :disable="!xap"  @ok="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
     <q-toolbar v-if="session.cEdit" inset class="full-width msg">{{session.cEdit}}</q-toolbar>
@@ -27,9 +27,9 @@
           <div class="text-italic titre-md text-bold">{{$t('PNOext2')}}</div>
           <apercu-genx class="q-my-md" :id="xav.ida" :im="xav.im"/>
           <btn-cond v-if="xav.avc" icon="close" cond="cEdit"
-            :label="$t('PNOperdre1')" @click="perdre"/>
+            :label="$t('PNOperdre1')" @ok="perdre"/>
           <btn-cond v-if="!xav.avc && anim" icon="close" cond="cEdit"
-            :label="$t('PNOperdre2')" @click="perdre"/>
+            :label="$t('PNOperdre2')" @ok="perdre"/>
         </div>
         <div v-else class="text-italic titre-md text-bold">{{$t('PNOext1')}}</div>
       </div>

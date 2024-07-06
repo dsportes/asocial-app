@@ -26,7 +26,7 @@
       <btn-cond color="warning" icon="delete" cond="cUrgence"
         :label="$t('supprimer')" :disable="!ntf.texte" @ok="valider(true)"/>
       <btn-cond class="q-ml-md" icon="check" cond="cUrgence"
-        :label="$t('valider')" :disable="!n.texte" @click="valider(false)"/>
+        :label="$t('valider')" :disable="!n.texte" @ok="valider(false)"/>
     </q-card-actions>
   </q-card>
 </template>

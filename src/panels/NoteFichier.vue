@@ -3,12 +3,10 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <q-btn dense size="md" color="warning" icon="chevron_left" padding="xs" @click="fermer"/>
-      <q-toolbar-title v-if="avatar" 
-        class="titre-lg full-width text-center">{{$t('PNOfictit1', [avatar.na.nom])}}</q-toolbar-title>
-      <q-toolbar-title v-if="groupe" 
-        class="titre-lg full-width text-center">{{$t('PNOfictit2', [groupe.na.nomc])}}</q-toolbar-title>
-      <bouton-help page="page1"/>
+      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
+      <q-toolbar-title class="titre-lg full-width text-center">
+        {{$t(nSt.note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
+      </q-toolbar-title>      <bouton-help page="page1"/>
     </q-toolbar>
     <q-toolbar v-if="ro !==0 || exv" inset
       class="full-width bg-yellow-5 text-black titre-md text-bold">

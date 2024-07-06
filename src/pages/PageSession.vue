@@ -32,7 +32,7 @@
       <rapport-synchro class="q-ma-sm"/>
     </q-expansion-item>
     <q-separator/>
-
+<!--
     <q-expansion-item group="etc" class="full-width" switch-toggle-side :disable="!fSt.queue.length"
       header-class="expansion-header-class-1 titre-md bg-primary text-white">
       <template v-slot:header>
@@ -98,7 +98,7 @@
         <q-separator class="q-my-sm"/>
       </q-card-section>
     </q-expansion-item>
-
+-->
   </q-page>
 </template>
 

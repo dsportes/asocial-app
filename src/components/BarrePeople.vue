@@ -2,7 +2,7 @@
 <div>
   <div class="row justify-center q-gutter-sm q-my-sm items-center">
     <btn-cond v-if="session.estComptable && id !== session.compteId"
-      cond="cUrgence" :label="$t('PPchpart')" @click="chgPartition"/>
+      cond="cUrgence" :label="$t('PPchpart')" @ok="chgPartition"/>
     <btn-cond v-if="session.estComptable && id !== session.compteId" 
       cond="cUrgence" :label="$t('PPchdel')" @ok="chgDelegue"/>
     <btn-cond v-if="comptaVis" cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
@@ -17,7 +17,7 @@
   <q-dialog v-model="ui.d.BPmut[idc]" persistent>
     <q-card :class="styp('md')">
       <q-toolbar class="bg-secondary text-white">
-        <btn-cond color="warning" icon="close" @click="ui.fD"/>
+        <btn-cond color="warning" icon="close" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
           {{$t('PPmutO')}}
         </q-toolbar-title>
@@ -44,9 +44,9 @@
       </q-card-section>
 
       <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
-        <btn-cond icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+        <btn-cond icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
         <btn-cond :disable="(diag !== '') || quotas.err" color="warning" icon="change_history" 
-          cond="cUrgence" :label="$t('PPmutO2')" @click="cf=true"/>
+          cond="cUrgence" :label="$t('PPmutO2')" @ok="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mut"/>
       </q-card-actions>
     </q-card>

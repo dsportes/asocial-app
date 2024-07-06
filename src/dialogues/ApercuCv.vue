@@ -1,13 +1,12 @@
 <template>
   <q-card :class="styp('sm') + 'column'">
     <q-toolbar class="col-auto bg-secondary text-white">
-      <btn-cond color="warning" icon="close" @click="ui.fD"/>
+      <btn-cond color="warning" icon="close" @ok="ui.fD"/>
       <q-toolbar-title class="lh1"> 
         <span class="titre-lg">{{estAvc ? cv.nom : cv.nomC}}</span> 
         <span v-if="estAvc" class="titre-md q-ml-md">[{{$t('moi')}}]</span>
       </q-toolbar-title>
-      <btn-cond v-if="net" round icon="refresh" 
-        cond="cVisu" @ok="refresh"/>
+      <btn-cond v-if="net" round icon="refresh" cond="cVisu" @ok="refresh"/>
       <btn-cond v-if="(estAvc || estGroupe) && diag === ''" icon="edit" cond="cEdit"
         :label="$t('editer')" @ok="ovcved"/>
     </q-toolbar>

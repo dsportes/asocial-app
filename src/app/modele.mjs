@@ -5,7 +5,7 @@ import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
 import { ID, Cles, isAppExc, d14, Compteurs, AMJ, nomFichier, 
   synthesesPartition, FLAGS, UNITEN, UNITEV } from './api.mjs'
-import { DownloadFichier } from './operations.mjs'
+import { DownloadFichier } from './operations4.mjs'
 
 import { idb } from './db.mjs'
 

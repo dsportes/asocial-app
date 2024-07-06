@@ -41,7 +41,7 @@
     <q-dialog v-model="ui.d.PNdl" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
-          <btn-cond color="warning" icon="close" @click="dlfin"/>
+          <btn-cond color="warning" icon="close" @ok="dlfin"/>
           <q-toolbar-title class="titre-lg full-width text-center">
             {{$t('PNOdlc')}}
           </q-toolbar-title>
@@ -89,27 +89,27 @@
               outlined :label="$t('PNOdlhp')"/>
             <q-input class="col" dense v-model="dirloc" 
               outlined :label="$t('PNOdldir')"/>
-            <btn-cond dense :label="$t('test')" @click="testup"/>
+            <btn-cond dense :label="$t('test')" @ok="testup"/>
           </div>
         </q-card-section>
 
         <q-card-actions v-if="dlst===1" vertical align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
-          <btn-cond icon="start" :label="$t('PNOdlst1')" @click="dlgo(true)"/>
-          <btn-cond icon="start" :label="$t('PNOdlst2')" @click="dlgo(false)"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond icon="start" :label="$t('PNOdlst1')" @ok="dlgo(true)"/>
+          <btn-cond icon="start" :label="$t('PNOdlst2')" @ok="dlgo(false)"/>
         </q-card-actions>
 
         <q-card-actions v-if="dlst=== 2 && dlst === 3" vertical align="right" class="q-gutter-sm">
-          <btn-cond color="warning" icon="stop_circle" :label="$t('PNOdls')" @click="dlfin"/>
-          <btn-cond v-if="dlst===2" icon="pause_circle" :label="$t('PNOdlp')" @click="dlpause"/>
-          <btn-cond v-if="dlst===3" icon="play_circle" :label="$t('PNOdlr')" @click="dlreprise"/>
+          <btn-cond color="warning" icon="stop_circle" :label="$t('PNOdls')" @ok="dlfin"/>
+          <btn-cond v-if="dlst===2" icon="pause_circle" :label="$t('PNOdlp')" @ok="dlpause"/>
+          <btn-cond v-if="dlst===3" icon="play_circle" :label="$t('PNOdlr')" @ok="dlreprise"/>
         </q-card-actions>
 
         <div v-if="dlst===4" class="column q-gutter-sm">
           <div class="self-center titre-lg text-bold text-italic">{{$t('PNOdlok1')}}</div>
           <div class="self-center titre-lg text-bold">{{$t('PNOdlok2', [dlnbn, dlnbf, dlv2f])}}</div>
           <div class="self-center titre-md text-italic">{{$t('PNOdlok3')}}</div>
-          <btn-cond class="self-center q-mb-md" flat icon="check" size="lg" :label="$t('jailu')" @click="ui.fD"/>
+          <btn-cond class="self-center q-mb-md" flat icon="check" size="lg" :label="$t('jailu')" @ok="ui.fD"/>
         </div>
       </q-card>
     </q-dialog>
@@ -117,12 +117,12 @@
     <q-dialog v-model="ui.d.NM" persistent>
       <div :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
-          <btn-cond color="warning" icon="chevron_left" @click="fermer"/>
+          <btn-cond color="warning" icon="chevron_left" @ok="fermer"/>
           <q-toolbar-title class="titre-lg full-width text-center">
             {{$t('PNOht0')}}
           </q-toolbar-title>
           <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-            :disable="!modifie"  @click="validerHt"/>
+            :disable="!modifie"  @ok="validerHt"/>
           <bouton-help page="page1"/>
         </q-toolbar>
       
@@ -159,7 +159,7 @@
 
         <div v-if="selected && nSt.note" class="q-ml-md row"> 
           <show-html class="col bord1 q-mr-lg" :texte="nSt.note.texte" zoom maxh="4rem" />
-          <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @click="ui.oD('NE')"/>
+          <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @ok="ui.oD('NE')"/>
         </div>
 
         <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
@@ -169,7 +169,7 @@
             <span class="text-italic">{{$t('hashtags')}} : </span>
             <span v-for="ht of nSt.note.tousHt" :key="ht">{{ht}}</span>
           </div>
-          <btn-cond class="col-auto self-start" round icon="edit" @click="ovHT"/>
+          <btn-cond class="col-auto self-start" round icon="edit" @ok="ovHT"/>
         </div>
 
         <div v-if="selected && nSt.note && !rec" class="q-my-sm row justify-between">  
@@ -179,7 +179,7 @@
             </span>
             <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.vf) + '.') : ''}}</span>
           </div>
-          <btn-cond class="col-auto self-start" round icon="attach_file" @click="ui.oD('NF')">
+          <btn-cond class="col-auto self-start" round icon="attach_file" @ok="ui.oD('NF')">
             <q-tooltip>{{$t('PNOattach')}}</q-tooltip>
           </btn-cond>
         </div>
@@ -187,7 +187,7 @@
         <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs q-mb-sm row">  
           <div v-if="nSt.mbExclu" class="col titre-sm">{{$t('PNOexclu', [nSt.mbExclu.cv.nomC])}}</div>
           <div v-else class="col text-italic titre-sm">{{$t('PNOnoexclu')}}</div>
-          <btn-cond class="col-auto self-start" round icon="person" @click="ui.oD('NX')">
+          <btn-cond class="col-auto self-start" round icon="person" @ok="ui.oD('NX')">
             <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
           </btn-cond>
         </div>
@@ -195,9 +195,9 @@
         <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs justify-start items-center">
           <note-plus/>
           <btn-cond v-if="nSt.note" color="warning" icon="delete" 
-            :label="$t('PNOsupp')" @click="op='suppr';ui.oD('NC')"/>
+            :label="$t('PNOsupp')" @ok="op='suppr';ui.oD('NC')"/>
           <btn-cond v-if="rattaut" icon="account_tree" :label="$t('PNOratt')" 
-            cond="cEdit" @click="rattacher"/>
+            cond="cEdit" @ok="rattacher"/>
         </div>
 
         <div v-if="selected && nSt.note && rec===1" class="q-ma-sm">
@@ -205,7 +205,7 @@
           <div class="titre-md text-italic">{{$t('PNOrattpos', nSt.nbRatt, {count: nSt.nbRatt})}}</div>
           <div v-if="nSt.nbRatt" class="msg">{{$t('PNOrattinfo')}}</div>
           <div class="q-mt-sm row">
-            <btn-cond icon="undo" :label="$t('PNOanratt')" @click="anrattacher"/>
+            <btn-cond icon="undo" :label="$t('PNOanratt')" @ok="anrattacher"/>
           </div>
         </div>
 
@@ -219,18 +219,18 @@
           <div class="q-mt-sm row q-gutter-sm">
             <btn-cond v-if="!nodeDiag" icon="check" :label="$t('PNOcfratt')" color="warning" 
               @click="okrattacher" cond="cEdit"/>
-            <btn-cond icon="account_tree" :label="$t('PNOratt2')" @click="rattacher"/>
-            <btn-cond icon="undo" :label="$t('PNOanratt')" @click="anrattacher"/>
+            <btn-cond icon="account_tree" :label="$t('PNOratt2')" @ok="rattacher"/>
+            <btn-cond icon="undo" :label="$t('PNOanratt')" @ok="anrattacher"/>
           </div>
         </div>
       </div>
           
       <div class="row full-width bg-secondary text-white items-center justify-between">
-        <btn-cond class="q-mr-sm" flat icon="file_download" color="white" :label="$t('PNOdlc')" @click="dlopen"/>
+        <btn-cond class="q-mr-sm" flat icon="file_download" color="white" :label="$t('PNOdlc')" @ok="dlopen"/>
         <btn-cond v-if="!expandAll" size="sm" icon="unfold_more"
-          :label="$t('PNOdep')" @click="tree.expandAll();expandAll=true"/>
+          :label="$t('PNOdep')" @ok="tree.expandAll();expandAll=true"/>
         <btn-cond v-if="expandAll" size="sm" icon="unfold_less"
-          :label="$t('PNOrep')" @click="tree.collapseAll();expandAll=false"/>
+          :label="$t('PNOrep')" @ok="tree.collapseAll();expandAll=false"/>
       </div>
     </q-page-sticky>
   </q-page>
@@ -360,8 +360,8 @@ export default {
   methods: {
     cl (t) { return t > 3 ? '' : 'cl' + t },
 
-    styn (n) { const s1 = styles[n.type] 
-      return s1 + (n.key === this.nSt.node.key ? ' msg' : '')
+    styn (n) { const s1 = styles[n ? n.type : 0] 
+      return s1 + (n && this.nSt.node && (n.key === this.nSt.node.key) ? ' msg' : '')
     },
 
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },

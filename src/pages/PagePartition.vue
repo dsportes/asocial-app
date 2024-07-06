@@ -27,7 +27,7 @@
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (session.pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
       <btn-cond v-if="session.estDelegue || session.estComptable"
         cond="cEdit"
-        :label="$t('PTnvc')" @click="ui.oD('NSnvsp')"/>
+        :label="$t('PTnvc')" @ok="ui.oD('NSnvsp')"/>
     </q-toolbar>
 
     <div v-for="(c, idx) in session.ptLcFT" :key="c.id" class="spmd q-my-xs">
@@ -45,7 +45,7 @@
             </div>
             
             <btn-cond v-if="type(c)===2" class="q-ml-md" icon="open_in_new"
-              @click.stop="voirpage(c)"/>
+              stop @ok="voirpage(c)"/>
           </div>
         </template>
 

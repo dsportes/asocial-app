@@ -183,7 +183,7 @@ a accès aux membres (donc dans l'onglet "membres").
       </q-card-section>
 
       <q-card-actions align="right" class="q-gutter-xs">
-        <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+        <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
         <btn-cond v-if="rmsv !== 1" color="warning" icon="check"
           :label="$t('AMconf' + rmsv)"
           :disable="(rmsv === 0 || rmsv === 2) && (!nvfl || !msg)"
@@ -231,7 +231,7 @@ a accès aux membres (donc dans l'onglet "membres").
       </q-card-section>
 
       <q-card-actions align="right" class="q-gutter-xs">
-        <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+        <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
         <btn-cond color="warning" icon="check"
           :label="$t('AMconf5')"
           :disable="!chgDr"
@@ -273,7 +273,7 @@ a accès aux membres (donc dans l'onglet "membres").
       </q-card-section>
 
       <q-card-actions align="right" class="q-gutter-xs">
-        <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+        <btn-cond flat size="md" icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
         <btn-cond color="warning" icon="close"
           :label="$t('AMconf6')"
           @ok="radier"/>

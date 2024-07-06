@@ -3,7 +3,7 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <btn-cond color="warning" icon="chevron_left" @click="ui.fD"/>
+      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">{{$t('NPtit')}}</q-toolbar-title>
       <bouton-help page="page1"/>
     </q-toolbar>

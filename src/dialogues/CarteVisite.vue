@@ -59,12 +59,9 @@
     </q-card-section>
     <q-separator />
     <q-card-actions align="right" class="q-gutter-sm">
-      <btn-cond v-if="!modif" flat icon="undo" color="primary"
-        :label="$t('fermer')" @ok="undogen" />
-      <btn-cond v-else flat icon="undo"
-        :label="$t('renoncer')" @ok="undogen" />
-      <btn-cond :disable="!modif" icon="check"
-        :label="$t('valider')" @ok="valider" />
+      <btn-cond v-if="!modif" flat icon="undo" color="primary" :label="$t('fermer')" @ok="undogen" />
+      <btn-cond v-else flat icon="undo" :label="$t('renoncer')" @ok="undogen" />
+      <btn-cond :disable="!modif" icon="check" :label="$t('valider')" @ok="valider" />
     </q-card-actions>
   </q-card>
 </q-dialog>

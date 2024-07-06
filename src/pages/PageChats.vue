@@ -20,7 +20,7 @@
     <q-separator color="orange" class="q-my-xs"/>
 
     <div class="row justify-center items-center g-gutter-md">
-      <btn-cond :label="$t('CHexp')" @click="exp" />
+      <btn-cond :label="$t('CHexp')" @ok="exp" />
       <q-checkbox v-model="optb64" :label="$t('CHopt')" />
     </div>
 

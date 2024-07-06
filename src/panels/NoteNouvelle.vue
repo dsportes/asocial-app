@@ -3,12 +3,12 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
-      <btn-cond color="warning" icon="chevron_left" @click="fermer"/>
+      <btn-cond color="warning" icon="chevron_left" @ok="fermer"/>
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(estgr ? 'PNOnvtit2' : 'PNOnvtit1', [nom])}}
       </q-toolbar-title>
       <btn-cond icon="check" :label="$t('valider')" cond="cEdit"
-        :disable="err || (estgr && !naAut) || !texte" @click="valider"/>
+        :disable="err || (estgr && !naAut) || !texte" @ok="valider"/>
       <bouton-help page="page1"/>
     </q-toolbar>
     <q-toolbar v-if="session.cEdit" inset class="msg">{{session.cEdit}}</q-toolbar>

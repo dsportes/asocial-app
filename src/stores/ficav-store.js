@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+
+import stores from './stores.mjs'
 import { splitPK } from '../app/util.mjs'
 import { getData } from '../app/net.mjs'
 import { appexc } from '../app/api.mjs'

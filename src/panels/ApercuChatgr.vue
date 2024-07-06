@@ -3,7 +3,7 @@
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
-        <btn-cond color="warning" icon="chevron_left" @click="ui.fD"/>
+        <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg text-center q-mx-sm">
           {{$t('CHGtit', [cvg.nom])}}
         </q-toolbar-title>
@@ -13,7 +13,7 @@
         <sel-avmbr v-model="avid" acmbr/>
         <q-space/>
         <btn-cond v-if="avid" :label="$t('CHGadd')" icon="add"
-          cond="cEdit" @click="editer"/>
+          cond="cEdit" @ok="editer"/>
         <div v-else class="msg">{{$t('CHGnot')}}</div>
       </q-toolbar>
       <apercu-genx class="q-ma-xs" :id="session.groupeId" nodet />
@@ -33,7 +33,7 @@
                 <span>{{cvm(it.im).nomC }}</span>
                 <btn-cond cond="cEdit" v-if="egr.estAnim && !it.dhx" size="sm" 
                   icon="clear" color="warning" round
-                  @click="effacer(it.im, it.dh)"/>
+                  @ok="effacer(it.im, it.dh)"/>
               </div>
             </template>
           </q-chat-message>
@@ -48,8 +48,8 @@
           {{$t('CHeff')}}
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
-          <btn-cond color="warning" icon="clear" :label="$t('CHeffcf')" @click="effop"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond color="warning" icon="clear" :label="$t('CHeffcf')" @ok="effop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -58,14 +58,14 @@
     <q-dialog v-model="ui.d.ACGchatedit" persistent>
       <q-card :class="styp()">
         <q-toolbar class="bg-secondary text-white">
-          <btn-cond color="warning" icon="close" @click="ui.fD"/>
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('CHadd1')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
         <editeur-md mh="20rem" v-model="txt" :texte="''" editable modetxt/>
         <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
-          <btn-cond icon="add" :label="$t('valider')" @click="addop"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond icon="add" :label="$t('valider')" @ok="addop"/>
         </q-card-actions>
       </q-card>
     </q-dialog>

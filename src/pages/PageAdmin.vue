@@ -12,10 +12,10 @@
       -->
 
       <div class="q-mt-sm row q-gutter-xs justify-center">
-        <btn-cond icon="refresh" :label="$t('rafraichir')" @click="loadEsp"/>
-        <btn-cond color="warning" :label="$t('ESgcin')" @click="initGC"/>
-        <btn-cond color="warning" :label="$t('ESstartd')" @click="startDemon"/>
-        <btn-cond icon="add" :label="$t('ESne')" @click="plusNS"/>
+        <btn-cond icon="refresh" :label="$t('rafraichir')" @ok="loadEsp"/>
+        <btn-cond color="warning" :label="$t('ESgcin')" @ok="initGC"/>
+        <btn-cond color="warning" :label="$t('ESstartd')" @ok="startDemon"/>
+        <btn-cond icon="add" :label="$t('ESne')" @ok="plusNS"/>
       </div>
     </div>
 
@@ -36,7 +36,7 @@
         <div class="q-ml-lg">
           <div class="row justify-between q-my-xs">
             <span class="fs-md">{{$t('ESprf', [esp.nprof])}}</span>
-            <btn-cond :label="$t('changer')"  @click="ovchgprf1(esp)"/>
+            <btn-cond :label="$t('changer')"  @ok="ovchgprf1(esp)"/>
           </div>
 
           <div class="titre-md q-my-xs">{{$t('ESnbmi2', [esp.nbmi])}}</div>
@@ -53,10 +53,10 @@
           <div class="q-mb-sm">
             <div class="titre-md">{{$t('PEstm')}}</div>
             <div class="row q-gutter-sm q-mb-sm">
-              <btn-cond class="self-start b1" label="M" @click="dlstat(esp, 0)"/>
-              <btn-cond class="self-start b1" label="M-1" @click="dlstat(esp, 1)"/>
-              <btn-cond class="self-start b1" label="M-2" @click="dlstat(esp, 2)"/>
-              <btn-cond class="self-start b1" label="M-3" @click="dlstat(esp, 3)"/>
+              <btn-cond class="self-start b1" label="M" @ok="dlstat(esp, 0)"/>
+              <btn-cond class="self-start b1" label="M-1" @ok="dlstat(esp, 1)"/>
+              <btn-cond class="self-start b1" label="M-2" @ok="dlstat(esp, 2)"/>
+              <btn-cond class="self-start b1" label="M-3" @ok="dlstat(esp, 3)"/>
               <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl(esp)" :dinit="maxdl"
                 @ok="dlstat2(esp)" icon="download" :label="$t('ESdlc')"/>
             </div>
@@ -69,7 +69,7 @@
     <q-dialog v-model="ui.d.PAcreationesp" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <btn-cond icon="close" color="warning" @click="cancelNS"/>
+          <btn-cond icon="close" color="warning" @ok="cancelNS"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESne2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
@@ -85,7 +85,7 @@
             <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
           </div>
           <div class="column justify-center q-mt-md">
-            <btn-cond :label="$t('ESps')" no-caps class="titre-lg" @click="saisiePS" 
+            <btn-cond :label="$t('ESps')" no-caps class="titre-lg" @ok="saisiePS" 
               :disable="!org"/>
             <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
               :confirmer="creerNS"/>
@@ -98,7 +98,7 @@
     <q-dialog v-model="ui.d.PAedprf" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
-          <btn-cond color="warning" icon="close" @click="ui.fD"/>
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('STchg')}}</q-toolbar-title>
         </q-toolbar>
         <q-card-section class="q-my-md q-mx-sm">
@@ -118,9 +118,9 @@
           </div>
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond flat icon="undo" :label="$t('renoncer')" @click="ui.fD"/>
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond color="warning" icon="check" 
-            :label="$t('valider')" :disable="prf === profil" @click="valider"/>
+            :label="$t('valider')" :disable="prf === profil" @ok="valider"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
