@@ -118,7 +118,7 @@ export const useUiStore = defineStore('ui', {
       NFsupprfichier: false, // NoteFichier
       NFconfirmav1: false,
       NFconfirmav2: false,
-      NFdetail: false,
+      DFouvrir: false, // DetailFichier
       NNnotenouvelle: false, // NoteNouvelle
       SAsuppravatar: false, // SupprAvatar
       SAconfirmsuppr: false,

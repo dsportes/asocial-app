@@ -144,20 +144,7 @@
   </q-page-container>
 
   <!-- Détail d'un fichier -->
-  <q-dialog v-model="ui.d.NFdetail" persistent>
-    <q-header elevated class="bg-secondary text-white">
-    <q-toolbar>
-      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
-      <q-toolbar-title class="titre-lg full-width text-center">
-        {{$t('PNOdetail', [nom, dhcool(fc.dh, true)])}}
-      </q-toolbar-title>      
-      <bouton-help page="page1"/>
-    </q-toolbar>
-    </q-header>
-
-    <q-card :class="styp('sm') + ' q-pa-sm'">
-    </q-card>
-  </q-dialog>
+  <detail-fichier v-if="ui.d.DFouvrir" :note="note" :idf="fc.f.idf" :ro="ro"/>
 
   <!-- Dialogue de création d'un nouveau fichier -->
   <nouveau-fichier v-if="ui.d.NFouvrir" :nomfic="nomfic" :na="naAut"/>
@@ -296,7 +283,7 @@ export default {
 
     detail (e) {
       this.fc = e
-      this.ui.oD('')
+      this.ui.oD('DFouvrir')
     },
 
     /****************************/

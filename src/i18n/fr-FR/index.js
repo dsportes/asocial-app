@@ -1241,6 +1241,11 @@ export default {
   PNOdlv12: 'Volume fichiers:',
   PNOdlpath: 'Path:',
 
+  DFavion: 'ACCESSIBILTÉ en mode AVION',
+  DFavn: 'de la révision la plus récente pour ce nom de fichier',
+  DFav: 'de cette révision spécifiquement',
+
+
   PNOnvtit1: 'Nouvelle note de {0}',
   PNOnvtit2: 'Nouvelle note du groupe {0}',
 
@@ -1264,7 +1269,6 @@ export default {
   PNOdlhp: 'Port d\'écoute de l\'application de stockage local',
   PNOdldir: 'Répertoire local dans cette application',
 
-  PNOarchivee: ' La note est "archivée", elle ne peut plus être modifiée. Elle peut toutefois être "réactivée" et redevenir éditable.',
   PNOecrko1: 'N\'est pas autorisé à l\'écriture de notes dans le groupe',
   PNOecrko2: 'N\'a pas l\'exclusivité sur cette note et n{est pas animateur',
   PNOecrko3: 'N\'a pas accès à la liste des membres du groupe',

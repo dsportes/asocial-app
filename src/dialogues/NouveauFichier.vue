@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.NFouvrir" persistent>
+<q-dialog v-model="ui.d.FDouvrir" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')" style="height:70vh">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
