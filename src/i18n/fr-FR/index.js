@@ -1209,7 +1209,16 @@ export default {
   PNOattach: 'Fichiers attachés',
   PNOtype3: 'Le compte a été actif dans ce groupe, MAIS NE L\'EST PLUS. Le groupe "peut" avoir disparu.',
   PNOtype67: 'Cette note "n\'existe plus" mais des notes existantes lui ayant été rattachées, elle subsite juste pour permettre de voir ces dernières.',
-  PNOnoedit: 'Aucun avatar du compte n\'a l\'autosisation de modifier cette note.',
+
+  PNOro: 'CONSULTATION SEULEMENT',
+  PNOred: 'RÉDUCTION DE VOLUME DES FICHIERS REQUISE',
+  PNOpasheb: 'Le groupe n\'a pas de compte hébergeur.',
+  PNOvgr2: 'Le volume occupé par les fichiers des notes du groupe dépasse le maximum déclaré par l\'hébergeur du groupe.',
+  PNOvgr1: 'Le volume occupé par les fichiers des notes du groupe dépasse 90% de maximum déclaré par l\'hébergeur du groupe.',
+  PNOvcpt1: 'Le volume maximum des fichiers des notes du compte (et de celles des groupes qu\'il héberge) dépasse 90% du quota attribué au compte.',
+  PNOvcpt2: 'Le volume maximum des fichiers des notes du compte (et de celles des groupes qu\'il héberge) dépasse le quota attribué au compte.',
+  PNOnoedit: 'Aucun avatar du compte n\'a l\'autorisation de modifier cette note.',
+  PNOexclu: 'Un avatar a l\'exclusité d\'écriture sur cette note mais ce n\'est pas un avatar du compte.',
 
   PNOdlc: 'Téléchargement des notes affichées',
   PNOdlst1: 'GO ! notes et leurs fichiers',

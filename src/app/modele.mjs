@@ -1013,42 +1013,44 @@ export class Groupe extends GenDoc {
     this.nbAnims = nx[5]
     this.sts = nx
   }
-  
-  // imDeId (id) { return this.mmb.get(id) || 0 }
+
+  get pcv () { return !this.qv ? 0 : Math.ceil(this.vf * 100 / this.qv * UNITEV) }
 
   estRadie (im)  { return this.st[im] === 0 }
-  // estContact (im) { return this.st[im] === 1 }
-  //.estPreInvite (im) { return this.st[im] === 2 }
   estInvite (im) { return this.st[im] === 3 }
   estActif (im) { return this.st[im] >= 4 }
   estAnim (im) { return this.st[im] === 5 }
   estAuteur (im) { const f = this.flags[im] || 0; 
     return im && (f & FLAGS.AN) && (f & FLAGS.DN) && (f & FLAGS.DE) 
   }
-  // estInvitable (id) { const im = this.mmb.get(id); 
-  //  return (!im || (this.st[im] === 1)) && !this.lnc.has(id) && !this.lng.has(id)
-  //}
-  // estContactable (id) { return !this.mmb.get(id) && !this.lnc.has(id) && !this.lng.has(id) }
 
   estHeb (im) { return this.estActif(im) && im === this.imh }
+
+  cptEstHeb () {
+    for(const ida of this.session.mav) 
+      if (this.imh === this.mmb.get(ida)) return true
+    return false
+  }
+
+  cptOkExclu () {
+    if (!this.im) return true
+    for(const ida of this.session.mav) 
+      if (this.im === this.mmb.get(ida)) return true
+    return false
+  }
 
   accesMembre (im) {
     const f = this.flags[im] || 0;
     return im && this.estActif(im) && (f & FLAGS.AM) && (f & FLAGS.DM) 
   }
+
   aUnAccesMembre (s) { // Set des im
     let b = false
     s.forEach(im => { if (this.accesMembre(im)) b = true})
     return b
   }
-  /*
-  accesMembreNA (im) { // accès aux membres NON activé 0: pas accès
-    if (!im || !this.estActif(im)) return 0
-    const f = this.flags[im] || 0
-    return (f & FLAGS.AC) && !(f & FLAGS.AM) && (f & FLAGS.DM) ? 1 : 0
-  }
-  */
- // A un accès aux membres et aux notes en écriture
+
+  // A un accès aux membres et aux notes en écriture
   aUnAccesMNE (s) { // Set des im
     let b = false
     s.forEach(im => { 
@@ -1072,12 +1074,7 @@ export class Groupe extends GenDoc {
     s.forEach(im => { if (this.accesNote(im)) b = true})
     return b
   }
-  /*
-  accesNoteE (im) {
-    const f = this.flags[im] || 0;
-    return im && this.estActif(im) && (f & FLAGS.AN) && (f & FLAGS.DE) 
-  }
-  */
+
   accesLecNoteH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
     const f = this.flags[im] || 0 
     if ((f & FLAGS.AC) && (f & FLAGS.AN) && (f & FLAGS.DN)) return 1
@@ -1089,24 +1086,6 @@ export class Groupe extends GenDoc {
     return f & FLAGS.HE ? 2 : 0
   }
 
-  /* acces aux notes activable: 
-  - 0:pas activable 
-  - 1: déjà activé
-  - 2:activable en lect, 
-  - 3:activable en ecr 
-  accesNoteNA (im) { 
-    const f = this.flags[im] || 0
-    if (!im || !this.estActif(im) || !(f & FLAGS.DN)) return 0
-    return !(f & FLAGS.AN) ? (f & FLAGS.DE ? 3 : 2) : 1
-  }
-  */
-  /*
-  actifH (im) { // 0:jamais, 1:oui, 2:l'a été, ne l'est plus
-    const f = this.flags[im] || 0; const h = this.hists[im] || 0; 
-    if (f & FLAGS.AC) return 1
-    return h & FLAGS.HA ? 2 : 0
-  }
-  */
   accesMembreH (im) { // 0:jamais, 1:oui, 2:l'a eu, ne l'a plus
     const f = this.flags[im] || 0
     if ((f & FLAGS.AC) && (f & FLAGS.AM) && (f & FLAGS.DM)) return 1
@@ -1117,13 +1096,6 @@ export class Groupe extends GenDoc {
   enLNG (ida) { return this.lng.has(ida) }
   // mis dans la liste noire par le compte lui-même
   enLNC (ida) { return this.lnc.has(ida) }
-
-  /*
-  get mbHeb () { // membre hébergeur
-    const gSt = stores.groupe
-    return  this.dfh ? null : gSt.getMembre(this.id, this.imh)
-  }
-  */
 
 }
 

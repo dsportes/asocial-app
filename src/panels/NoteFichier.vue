@@ -6,27 +6,23 @@
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
       <q-toolbar-title class="titre-lg full-width text-center">
         {{$t(nSt.note.deGroupe ? 'PNOngr' : 'PNOnper', [nom])}}
-      </q-toolbar-title>      <bouton-help page="page1"/>
+      </q-toolbar-title>      
+      <bouton-help page="page1"/>
     </q-toolbar>
-    <q-toolbar v-if="ro !==0 || exv" inset
-      class="full-width bg-yellow-5 text-black titre-md text-bold">
-      <div class="row justify-center">
-        <q-icon name="warning" color="warning" size="md" class="q-mr-sm"/>
-        <span v-if="ro">{{$t('PNOro' + ro)}}</span>
-        <span v-if="exv">{{$t('PNOexv2' + exv)}}</span>
-      </div>
-    </q-toolbar>
-    <div class="full-width row justify-between items-center">
-      <note-ecritepar v-if="nSt.node.type === 5" 
-        :groupe="groupe" :note="nSt.note" @ok="selNa" fic="a"/>
-      <q-btn :disable="nSt.node.type === 5 && !naAut" 
-        dense color="primary" class="q-mt-sm" size="md" padding="xs" icon="add"
-        :label="$t('PNFnvaj')" @click="nouveau()"/>
+    <q-toolbar v-if="ro" inset class="full-width msg">{{$t('PNOro')}} - {{ro}}</q-toolbar>
+    <q-toolbar v-if="red" inset class="full-width msg">{{$t('PNOred')}} - {{red}}</q-toolbar>
+    <q-toolbar v-if="!ro && vcpt === 1" inset class="full-width">{{$t('PNOcpt1')}}</q-toolbar>
+    <q-toolbar v-if="!ro && vgr === 1" inset class="full-width">{{$t('PNOcpt1')}}</q-toolbar>
+
+    <div v-if="!ro" class="full-width row justify-between items-center">
+      <note-ecritepar v-if="groupe" :groupe="groupe" @ok="selAut"/>
+      <btn-cond :disable="groupe && !aut" icon="add" :label="$t('PNFnvaj')" @ok="nouveau()"/>
     </div>
   </q-header>
 
   <q-page-container>
     <q-page class="q-pa-xs column items-center">
+      
 
       <div v-for="it in state.listefic" :key="it.nom" class="full-width">
 
@@ -186,41 +182,48 @@ export default {
   props: { },
 
   computed: {
+    nom () { return this.pSt.nom(this.nSt.note.id)},
     modifie () { return false },
     id () { return this.nSt.note.id },
+    estGr () { return ID.estGroupe(this.id) },
+    egr () { return this.estGr ? this.gSt.egr(this.id) : null },
+    groupe () { return this.egr ? egr.groupe : null},
+
+    // % quota de vf groupe - 0: ok, 1:90%, 2:>100% (RED)
+    vgr () { if (!this.groupe || this.groupe.pcv < 90) return 0
+      return this.groupe.pcv > 100 ? 2 : 1
+    },
+
+    // volume fichier du compte (si hébergeur pour un groupe)
+    vcpt () {
+      if (!this.estGr) {
+        const pc = this.session.compte.pcv
+        return pc > 100 ? 2 : (pc > 90 ? 1 : 0) 
+      }
+      if (!this.groupe || !this.groupe.cptEstHeb) return 0
+      const pcv = this.compte.qv.pcv
+      return pcv > 100 ? 2 : (pcv > 90 ? 1 : 0)
+    },
+
+    pasHeb () { return this.groupe && !this.groupe.imh },
+
+    cptOkExclu () { return !this.groupe || this.groupe.cptOkExclu },
+
+    editn () { return Note.idasEdit(this.nSt.node).size > 0 },
+
+    ro () { return this.session.cEdit ? this.session.cEdit :
+      (!this.cptOkExclu ? this.$t('PNOexclu') : (!this.editn ? this.$t('PNOnoedit') : ''))
+    },
+
+    red () { return !this.ro && (this.pasHeb ? this.$t('PNOpasheb') : 
+      (this.vcpt === 2 ? this.$t('PNOvcpt2') : (this.vgr === 2 ? this.$t('PNOvgr2') : false)))
+    },
+
     avn () { 
       const n = this.nSt.note
       return this.avnSt.getAvnote(n.id, n.ids)
     },
-    estGr () { return this.nSt.node.type === 5 },
-    groupe () { return this.estGr ? this.gSt.egr(this.id).groupe : null },
-    avatar () { return !this.estGr ? this.aSt.getElt(this.id).avatar : null },
-    exv () { if (this.ro) return 0 
-      if (!this.estGr) return this.aSt.exV2
-      const eg = this.gSt.egr(this.id)
-      return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV)
-    },
-
-    ro () { 
-      /* Retourne 
-      1: avion 2:figée 3:minimal 4:lecture
-      5: note archivée (inutilisé)
-      6: exclu (pour un autre compte), 
-      7: pas auteur
-      */
-      const x = this.session.roSt // 1:avion 2:figée 3:minimal 4:lecture
-      if (x) return x
-      // const n = this.nSt.note; if (n.p) return 5 // note archivée
-      if (!this.estGr) return 0
-      if (this.groupe) {
-        const s = this.groupe.avcAuteurs()
-        if (!s.size) return 7 // pas auteur 
-        const xav = this.nSt.mbExclu
-        if (xav && !xav.avc) return 6 // un autre membre a l'exclusivité
-      }
-      return 0
-    },
-
+    
     state () {
       try {
         const state = { noms: {}, idfs: {}, listefic: [], avn: this.avn }
@@ -259,6 +262,8 @@ export default {
 
   methods: {
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
+
+    selAut (elt) { this.aut = elt },
 
     async nouveau (nf) {
       if (!await this.session.edit()) return
@@ -412,7 +417,7 @@ export default {
   data () {
     return {
       texte: '',
-      naAut: null,
+      aut: null,
       fc: null, // fichier courant
       itc: null // item courant
     }
