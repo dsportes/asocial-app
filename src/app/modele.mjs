@@ -1269,6 +1269,13 @@ export class Note extends GenDoc {
     }
   }
 
+  get lstNoms () {
+    const l = []
+    for(const [nom,] of this.fnom) l.push(nom)
+    l.sort((a,b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 : 0)})
+    return l
+  }
+
   get tousHt () { const s = new Set()
     this.ht.forEach(ht => { s.add(ht)})
     this.htg.forEach(ht => { s.add(ht)})

@@ -13,17 +13,51 @@
     <q-toolbar v-if="red" inset class="full-width msg">{{$t('PNOred')}} - {{red}}</q-toolbar>
     <q-toolbar v-if="!ro && vcpt === 1" inset class="full-width">{{$t('PNOcpt1')}}</q-toolbar>
     <q-toolbar v-if="!ro && vgr === 1" inset class="full-width">{{$t('PNOcpt1')}}</q-toolbar>
-
-    <div v-if="!ro" class="full-width row justify-between items-center">
-      <note-ecritepar v-if="groupe" :groupe="groupe" @ok="selAut"/>
-      <btn-cond :disable="groupe && !aut" icon="add" :label="$t('PNFnvaj')" @ok="nouveau()"/>
-    </div>
   </q-header>
 
   <q-page-container>
     <q-page class="q-pa-xs column items-center">
-      
+      <q-expansion-item class="full-width q-my-xs" dense :label="$t('PNOapropos')" header-class="bg-secondary text-white">
+        <div class="q-pa-sm">
+          <node-parent />
+          <q-separator class="q-my-sm" color="orange"/>
+          <liste-auts class="q-my-sm"/>
+        </div>
+      </q-expansion-item>
 
+      <div class="full-width bg-secondary text-white row justify-between items-center">
+        <div class="col titre-md q-pa-xs">
+          {{$t('PNOlstfic', note.mfa.size, {count: note.mfa.size}) + (note.mfa.size ? ' - ' + edvol(note.vf) : '')}}
+        </div>
+        <div v-if="!ro" class="col-auto row">
+          <note-ecritepar v-if="groupe" :groupe="groupe" @ok="selAut"/>
+          <btn-cond :disable="groupe && !aut" icon="add" :label="$t('PNFnvaj')" @ok="nouveau()"/>
+        </div>
+      </div>
+
+      <div v-for="nom in note.lstNoms" :key="nom" class="full-width q-mb-sm">
+        <div class="row justify-between full-width  q-mb-sm">
+          <span class="text-bold titre-md">{{nom}}</span>
+          <q-icon v-if="mpn[nom][0].fa.avn" name="airplanemode_active" size="md" color="warning"/>
+        </div>
+        <div v-for="e in mpn[nom]" :key="e.f.idf" class="q-ml-lg">
+          <div class="row justify-between full-width">
+            <div class="col">
+              <span class="font-mono">{{e.f.idf}}</span>
+              <span class="q-mr-sm">{{e.f.type}}</span>
+              <span>{{edvol(e.f.lg)}}</span>
+            </div>
+            <div class="col-auto">
+              <span class="font-mono fs-sm q-mr-sm">{{dhcool(f.dh, true)}}</span>
+              <q-icon class="q-ml-xs" v-if="e.fa.av" name="airplanemode_active" size="md" color="primary"/>
+              <btn-cond class="q-ml-xs" icon="more_vert" @ok="detail(e)"/>
+            </div>
+          </div>
+        </div>
+        <q-separator color="orange" size="2px" class="q-mb-sm"/>
+      </div>
+
+      <!--
       <div v-for="it in state.listefic" :key="it.nom" class="full-width">
 
         <div class="row items-center">
@@ -105,8 +139,25 @@
         </div>
         <q-separator color="orange" size="2px" class="q-mb-sm"/>
       </div>
+      -->
     </q-page>
   </q-page-container>
+
+  <!-- Détail d'un fichier -->
+  <q-dialog v-model="ui.d.NFdetail" persistent>
+    <q-header elevated class="bg-secondary text-white">
+    <q-toolbar>
+      <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
+      <q-toolbar-title class="titre-lg full-width text-center">
+        {{$t('PNOdetail', [nom, dhcool(fc.dh, true)])}}
+      </q-toolbar-title>      
+      <bouton-help page="page1"/>
+    </q-toolbar>
+    </q-header>
+
+    <q-card :class="styp('sm') + ' q-pa-sm'">
+    </q-card>
+  </q-dialog>
 
   <!-- Dialogue de création d'un nouveau fichier -->
   <nouveau-fichier v-if="ui.d.NFouvrir" :nomfic="nomfic" :na="naAut"/>
@@ -169,7 +220,11 @@ import { $t, styp, sty, dkli, edvol, dhcool, afficherDiag, suffixe, trapex } fro
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
-import { isAppExc, UNITEV } from '../app/api.mjs'
+import BtnCond from '../components/BtnCond.vue'
+import { Note } from '../app/modele.mjs'
+import ListeAuts from '../components/ListeAuts.vue'
+import NodeParent from '../components/NodeParent.vue'
+import { isAppExc, UNITEV, ID } from '../app/api.mjs'
 import { saveAs } from 'file-saver'
 import { SupprFichier } from '../app/operations.mjs'
 import { gestionFichierMaj, FLset } from '../app/db.mjs'
@@ -177,16 +232,17 @@ import { gestionFichierMaj, FLset } from '../app/db.mjs'
 export default {
   name: 'NoteFichier',
 
-  components: { BoutonHelp, NouveauFichier, NoteEcritepar },
+  components: { BoutonHelp, NouveauFichier, NoteEcritepar, BtnCond, NodeParent, ListeAuts },
 
   props: { },
 
   computed: {
-    nom () { return this.pSt.nom(this.nSt.note.id)},
+    note () { return this.nSt.note },
+    nom () { return this.pSt.nom(this.note.id)},
     modifie () { return false },
-    id () { return this.nSt.note.id },
-    estGr () { return ID.estGroupe(this.id) },
-    egr () { return this.estGr ? this.gSt.egr(this.id) : null },
+
+    estGr () { return ID.estGroupe(this.note.id) },
+    egr () { return this.estGr ? this.gSt.egr(this.note.id) : null },
     groupe () { return this.egr ? egr.groupe : null},
 
     // % quota de vf groupe - 0: ok, 1:90%, 2:>100% (RED)
@@ -218,42 +274,15 @@ export default {
     red () { return !this.ro && (this.pasHeb ? this.$t('PNOpasheb') : 
       (this.vcpt === 2 ? this.$t('PNOvcpt2') : (this.vgr === 2 ? this.$t('PNOvgr2') : false)))
     },
-
-    avn () { 
-      const n = this.nSt.note
-      return this.avnSt.getAvnote(n.id, n.ids)
-    },
     
-    state () {
-      try {
-        const state = { noms: {}, idfs: {}, listefic: [], avn: this.avn }
-        const avn = state.avn
-        const lst = []
-        const mnom = {}
-        for (const [idf, f] of this.nSt.note.mfa) {
-          /* mfa : Map de clé idf : { nom, info, dh, type, gz, lg, sha } */
-          let e = mnom[f.nom]; 
-          if (!e) { 
-            state.noms[f.nom] = avn && avn.mnom[f.nom] ? true : false
-            e = []
-            mnom[f.nom] = e
-            lst.push(f.nom) 
-          }
-          const av = avn && (avn.lidf.indexOf(idf) !== -1) ? true : false
-          state.idfs[idf] = av
-          e.push({ ...f, idf, av })
-        }
-        lst.sort((a, b) => { return a < b ? -1 : (a > b ? 1 : 0) })
-        lst.forEach(nom => {
-          const l = mnom[nom]
-          l.sort((a, b) => { return a.dh < b.dh ? 1 : (a.dh > b.dh ? -1 : 0) })
-          state.listefic.push({ nom, l, avn: avn && avn.mnom[nom] ? true : false })
-        })
-        return state
-      } catch (e) { 
-        trapex(e, 1)
-        return { noms: {}, idfs: {}, listefic: [], avn: this.avn }
+    mpn () {
+      const m = new Map()
+      for(const nom of this.note.lstNoms) {
+        const l = []
+        for(const f of this.note.fnom[nom]) l.push[{f, fa: this.faSt.map.get(f.idf) || { }}]
+        m.set[nom, l]
       }
+      return m
     }
   },
 
@@ -264,6 +293,13 @@ export default {
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
     selAut (elt) { this.aut = elt },
+
+    detail (e) {
+      this.fc = e
+      this.ui.oD('')
+    },
+
+    /****************************/
 
     async nouveau (nf) {
       if (!await this.session.edit()) return
@@ -403,10 +439,6 @@ export default {
       }
     },
 
-    selNa (elt) { 
-      this.naAut = elt.na
-    },
-
     ergrV2 (dv) {
       const eg = this.gSt.egr(this.id)
       return (eg.objv.vols.v2 + dv >= eg.objv.vols.q2 * UNITEV)
@@ -428,9 +460,9 @@ export default {
       ui: stores.ui, 
       session: stores.session,
       nSt: stores.note, 
-      aSt: stores.avatar, 
+      pSt: stores.people, 
       gSt: stores.groupe, 
-      avnSt: stores.avnote, 
+      faSt: stores.ficav, 
       ppSt: stores.pp,
       styp, sty, dkli, edvol, dhcool, suffixe
     }

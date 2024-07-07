@@ -1219,7 +1219,10 @@ export default {
   PNOvcpt2: 'Le volume maximum des fichiers des notes du compte (et de celles des groupes qu\'il héberge) dépasse le quota attribué au compte.',
   PNOnoedit: 'Aucun avatar du compte n\'a l\'autorisation de modifier cette note.',
   PNOexclu: 'Un avatar a l\'exclusité d\'écriture sur cette note mais ce n\'est pas un avatar du compte.',
+  PNOdetail: 'Fichier "{0}" créé {1}',
 
+  PNOapropos: 'A propos de la note ...',
+  PNOlstfic: 'Aucun fichier actuellement | Un Fichier actuellement | {count} fichiers actuellement',
   PNOdlc: 'Téléchargement des notes affichées',
   PNOdlst1: 'GO ! notes et leurs fichiers',
   PNOdlst2: 'GO ! notes SANS leurs fichiers',
