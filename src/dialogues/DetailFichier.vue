@@ -20,12 +20,54 @@
         <span v-if="f.lg" >{{edvol(f.lg)}}</span>
       </div>
 
-      <div v-if="session.accesIdb" class="q-mx-xs q-my-sm q-pa-cs bord1">
+      <div v-if="session.accesIdb" class="q-mx-xs q-my-sm q-pa-xs bord1">
         <div class="titre-lg">{{$t('DFavion')}}</div>
-        <div class="q-ml-lg">
-
+        <div class="row items-start">
+          <div class="col-6 text-right">{{$('DFavn')}}</div>
+          <div :class="'col-1 text-center ' + (avn ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non2')}}</div>
+          <q-toggle v-if="!ro" class="col-5 text-center" indeterminate-value="nc" v-model="xavn" 
+            toggle-indeterminate :label="oxn(xavn)" :color="clr(xavn)"/>
+        </div>
+        <div class="row items-start">
+          <div class="col-6 text-right">{{$('DFav')}}</div>
+          <div :class="'col-1 text-center ' + (av ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non2')}}</div>
+          <q-toggle v-if="!ro" class="col-5 text-center" indeterminate-value="nc" v-model="xav" 
+            toggle-indeterminate :label="oxn(xav)" :color="clr(xav)"/>
+        </div>
+        <div v-if="!ro" class="row q-my-sm justify-end q-gutter-sm items-start">
+          <bouton-undo class="col-1 text-center" :cond="xavn !== avn" 
+            @click="xavn = '?'; xav = '?'"/>
+          <btn-cond :label="$t('valider')" :disable="!modifAv" icon="check" @ok="validerAv"/>
         </div>
       </div>
+
+    <div v-if="!fa.fake" class="q-my-sm bord1"> <!-- Etat du téléchargement -->
+      <div v-if="fa.dhdc === 0" class="titre-md">{{$t('DFchgdl')}}</div>
+      <div v-else>
+        <div class="titre-md">
+          <span>{{$t('DFchgdem', [dhcool(fa.dhdc, true)])}}</span>
+          <span v-if="fa.nbr" class="q-ml-sm">- {{$t('DFretry', [fa.nbr])}}</span>
+          <span v-if="!fa.exc">
+            <span v-if="fa.if === faSt.idfdl" class="q-ml-sm">- {{$t('DFchgec')}}</span>
+            <span v-if="fa.if === faSt.idfdl" class="q-ml-sm">- {{$t('DFchgatt')}}</span>
+          </span>
+        </div>
+        <div v-if="fa.exc">
+          <div class="titre-md msg">
+            {{$t('DFerr', [fa.exc[0] === 404 ? $t('ER404') : '' + fa.exc[0]])}}
+          </div>
+          <div class="q-my-xs q-ml-md font-mono fs-sm">
+            {{$t('DFerr2', [fa.exc[0] === 404 ? fa.exc[1] : $t('EX' + fa.exc[0])])}}
+          </div>
+          <div class="titre-md text-italic text-bold">
+            {{$t(fa.nbr < 3 ? 'DFretaut' : 'DFnoret')}}
+          </div>
+          <div class="q-my-sm text-right">
+            <btn-cond :label="$t('retry')" @ok="retry"/>
+          </div>
+        </div>
+      </div>
+    </div>
 
     </q-page>
   </q-page-container>
@@ -38,6 +80,7 @@ import stores from '../stores/stores.mjs'
 import { edvol, dhcool } from '../app/util.mjs'
 import { styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BoutonUndo from '../components/BoutonUndo.vue'
 import BtnCond from '../components/BtnCond.vue'
 
 export default {
@@ -49,26 +92,41 @@ export default {
     ro: String // raison de l'interdiction de mise à jour
   },
 
-  components: { BoutonHelp, BtnCond },
+  components: { BoutonHelp, BtnCond, BoutonUndo },
 
   computed: {
     f () { return this.note.mfa.get(this.idf) || { fake: true } },
     fa () { return this.faSt.get(this.idf) || { fake: true } },
     fpr () { return this.f.fake ?  { fake: true } : this.note.fnom[this.f.nom][0] },
     avn () { const fax = this.fpr ? this.faSt.get(this.fpr.idf) : null; return fax ? fax.avn : false },
-    av () { return this.fa.avn || false }
+    av () { return this.fa.avn || false },
+    modifAv () { return (this.xav !== '?' && this.xav !== this.av) || 
+      (this.xavn !== '?' && this.xavn !== this.avn)}
   },
 
   watch: {
+    av (ap, av) { this.xav = '?' },
+    avn (ap, av) { this.xavn = '?' },
   },
 
   data () {
     return {
+      xavn: '?',
+      xav: '?'
     }
   },
 
   methods: {
-
+    oxn(b) { return b === true ? this.t('oui1') : (b === false ? this.t('non1') : this.t('inchange')) },
+    clr (b) { return b === '?' ? 'warning' : 'grey-5'},
+    async validerAv () {
+      const b1 = this.xavn === '?' ? this.avn : this.xavn
+      const b2 = this.xav === '?' ? this.av : this.xav
+      await faSt.setAV (this.note, this.fnom, b1, this.idf, b2)
+    },
+    async retry () {
+      await faSt.retry(this.idf)
+    }
   },
 
   setup () {
@@ -86,4 +144,7 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.bord1
+  border: 1px solid $grey-5
+  border-radius: 5px
 </style>

@@ -15,7 +15,8 @@ export const useFicavStore = defineStore('ficav', {
     keys: new Map(), // Clé: key d'une note: value: Set des idf des fichiers attachés à cette note
     queue: new Set(), // set des idf des fichiers à charger
     encours: null, // sessionId du démon en cours d'éxecution
-    cacheDL: [] // cache des N derniers téléchargements : {idf, data}
+    cacheDL: [], // cache des N derniers téléchargements : {idf, data}
+    idfdl: 0 // idf en cours de téléchargement
   }),
 
   getters: {
@@ -340,9 +341,11 @@ export const useFicavStore = defineStore('ficav', {
             break
           }
           try {
+            this.idfdl = fa.id
             let buf = getDataDeCache(fa.idf)
             if (buf) {
               await this.ok(fa.idf, buf)
+              this.idfdl = 0
               continue
             }
             const args = { 
@@ -362,10 +365,12 @@ export const useFicavStore = defineStore('ficav', {
               if (sessionId !== this.session.sessionId) break
               await this.ko(fa.idf, [404, e.message])
             }
+            this.idfdl = 0
           } catch (ex) {
             if (sessionId !== this.session.sessionId) break
             const exc = appexc(ex)
             await this.ko(fa.idf, [exc.code, ''])
+            this.idfdl = 0
           }
         }
       }, 10)
