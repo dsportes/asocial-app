@@ -240,9 +240,10 @@
 import { ref } from 'vue'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
-import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, sleep, egalite } from '../app/util.mjs'
+import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, 
+  sleep, egalite, normNomFichier } from '../app/util.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
-import { ID, nomFichier, appexc, AppExc } from '../app/api.mjs'
+import { ID, appexc, AppExc } from '../app/api.mjs'
 import NoteConfirme from '../dialogues/NoteConfirme.vue'
 import NoteEdit from '../panels/NoteEdit.vue'
 import NoteExclu from '../panels/NoteExclu.vue'
@@ -460,7 +461,7 @@ export default {
 
     // Download de la sélection des notes **************************************
     nf (v, id, type) {
-      const s = nomFichier(v)
+      const s = normNomFichier(v)
       let ext = ''
       if (type) {
         const x = mime2ext(type)

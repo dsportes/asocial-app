@@ -1,9 +1,10 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
-import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, suffixe, dhstring } from './util.mjs'
+import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, 
+  suffixe, dhstring, normNomFichier } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
-import { ID, Cles, isAppExc, d14, Compteurs, AMJ, nomFichier, 
+import { ID, Cles, E_BRO, d14, Compteurs, AMJ, nomFichier, 
   synthesesPartition, FLAGS, UNITEN, UNITEV } from './api.mjs'
 import { DownloadFichier } from './operations4.mjs'
 
@@ -1323,18 +1324,18 @@ export class Note extends GenDoc {
 
   get shIds () { return ('' + (this.ids % 10000)).padStart(4, '0')}
 
-  
-  // fichier le plus récent portant le nom donné
+  /* fichier le plus récent portant le nom donné
   dfDeNom (nom) {
     let fx = null
     for (const [, x] of this.mfa)
       if (x.nom !== nom && (!fx || (fx.dh < x.dh))) fx = x
     return fx
   }
+  */
 
   async nouvFic (idf, nom, info, lg, type, u8) {
-    // propriétés ajoutées : u8 (contenu du fichier gzippé crypté), sha, dh gz
-    const fic = { idf, nom, info, lg, type, u8 }
+    // propriétés ajoutées : u8 (contenu du fichier gzippé crypté), sha, dh, gz
+    const fic = { idf, nom, info, lg, type }
     fic.sha = sha256(u8)
     fic.dh = Date.now()
     fic.gz = fic.type.startsWith('text/')
@@ -1351,6 +1352,7 @@ export class Note extends GenDoc {
     return v
   }
 
+  /*
   async toRowMfa (fic) {
     const x = await crypter(this.cle, new Uint8Array(encode((fic))))
     return [fic.lg, x]
@@ -1360,39 +1362,46 @@ export class Note extends GenDoc {
     const f = this.mfa.get(idf)
     return f ? f.nom : null
   }
+    */
 
-  async getFichier (idf) {
+  async getFichier (f) {
+    async function dec (cle, buf) {
+      try {
+        const b = await decrypter(this.cle, buf)
+        return f.gz ? await ungzipT(b) : b
+      } catch (e) {
+        throw new AppExc(E_BRO, 22, [f.idf])
+      }
+    }
+
     // Obtenu localement ou par download. Fichier décrypté ET dézippé
     // idf: id du fichier
-    const fSt = stores.fetat
-    const fetat = fSt.getFetat(idf)
+    const faSt = stores.ficav
     const session = stores.session
-    let buf = null
-    if (fetat && fetat.estCharge) {
-      const b = await idb.getFichierIDB(idf)
-      buf = await decrypter(this.cle, b)
-    } else if (session.accesNet) {
-      const b = await new DownloadFichier().run(this, idf, session.compteId)
-      if (b && !isAppExc(b)) buf = await decrypter(this.cle, b)
+    let buf = faSt.getDataDeCache(f.idf)
+    if (buf) return dec(this.cle, buf)
+
+    if (session.accesIdb) {
+      const fa = faSt.map.get(f.idf)
+      if (fa && fa.dhdc === 0) {
+        buf = await idb.getFichierIDB(idf)
+        return dec(this.cle, buf)
+      }
     }
-    if (!buf) return null
-    const f = this.mfa.get(idf)
-    const buf2 = f.gz ? await ungzipT(buf) : buf
-    session.setVd(buf2.length)
-    return buf2
+
+    if (session.accesNet) {
+      buf = await new DownloadFichier().run(this, idf)
+      return dec(this.cle, buf)
+    }
   }
 
-  nomFichier (idf) {
-    const f = this.mfa.get(idf)
-    if (!f) return '' + idf
-    const fn = nomFichier(f.nom)
-    const fi = nomFichier(f.info)
-    const i = fi.lastIndexOf('#')
-    const s = i == -1 ? fi : fi.substring(0, i)
-    const x = mime2ext(f.type)
-    const ext = x ? '.' + x : ''
-    const n = fn + '_' + s + '#' + f.idf + ext
-    return n
+  nomFichier (f) {
+    const n1 = normNomFichier(f.nom)
+    const n2 = f.info ? '#' + normNomFichier(f.info) : ''
+    const ext = mime2ext(f.type) || 'bin'
+    const s = '' + f.idf
+    const n3 = '#' + s.substring(s.length - 4)
+    return n1 + n2 + n3 + '.' + ext
   }
 }
 
@@ -1488,7 +1497,7 @@ export class FichierLocal {
     return this.nom + ' - ' + this.info.substring(0, 20) + (this.info.length > 20 ? ' ...' : '')
   }
 
-  get nomFichier () {
+  get nomFichier () { // Arevoir
     let i = this.nom.lastIndexOf('.')
     const ext1 = i === -1 ? '' : this.nom.substring(i)
     const s1 =  i === -1 ? this.nom : this.nom.substring(0, i)

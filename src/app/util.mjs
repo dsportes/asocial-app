@@ -404,6 +404,15 @@ export function suffixe (int) {
   return s.substring(s.length - 4, s.length)
 }
 
+/************************************************************************/
+export function normNomFichier (v) {
+  if (!v) return ''
+  const v2 = v.trim()
+  const i = v2.lastIndexOf('.')
+  const v3 = i === -1 ? v2 : v2.substring(0, i)
+  return v3.replace(regIntg, '_').replace(regInt2g, '')
+}
+
 /* retourne un safe integer (53 bits) hash:
 - d'un string
 - d'un u8

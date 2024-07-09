@@ -77,8 +77,7 @@ export const useUiStore = defineStore('ui', {
       PAoutilsTests: false, // PageAccueil
       FAdetaildial: false, // PageFicavion
       AGvisucv: false, // ApercuGenx
-      AMconfig: {}, // ApercuMembre
-      AMdroits: {},
+      AMdroits: {}, // ApercuMembre
       AMradiation: {},
       AMinvit: {},
       NSnvsp: false, // NouveauSponsoring
@@ -118,7 +117,7 @@ export const useUiStore = defineStore('ui', {
       NFsupprfichier: false, // NoteFichier
       NFconfirmav1: false,
       NFconfirmav2: false,
-      DFouvrir: false, // DetailFichier
+      DFouvrir: {}, // DetailFichier
       NNnotenouvelle: false, // NoteNouvelle
       SAsuppravatar: false, // SupprAvatar
       SAconfirmsuppr: false,

@@ -50,7 +50,8 @@ export default {
   },
 
   setup (props, context) {
-    const initVal = toRef(props, 'initVal')
+    const iVal = toRef(props, 'initVal')
+    const initVal = ref((iVal.value || ''))
     const val = ref(initVal.value || '')
     const lgmin = toRef(props, 'lgmin')
     const lgmax = toRef(props, 'lgmax')
