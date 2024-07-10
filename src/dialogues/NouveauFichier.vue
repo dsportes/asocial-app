@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.FDouvrir" persistent>
+<q-dialog v-model="ui.d.NFouvrir" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')" style="height:70vh">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -18,7 +18,7 @@
           <div class="column items-center">
             <btn-cond color="warning" :label="$t('PNFnv2')" @ok="selFic"/>
             <div class="q-my-sm msg">{{$t('PNFnv2b')}}</div>
-            <q-file class="full-width" v-model="fileList" :label="$t('PNFnv3')"
+            <q-file class="full-width q-ma-xs" rounded outlined v-model="fileList" :label="$t('PNFnv3')"
               max-file-size="50000000" max-file="1"/>
             <div v-if="fic.lg" class="font-mono fs-sm">{{fic.nom}} - {{fic.type}} - {{fic.lg}}o</div>
           </div>
@@ -40,26 +40,32 @@
         </q-step>
 
         <q-step :name="3" :title="$t('PNFrevsuppr')" icon="check" :done="step > 3">
-          <div class="titre-md text-italic text-bold">{{$t('PNFnv13')}}</div>
+          <div v-if="lstfic.length" class="titre-md text-italic text-bold">
+            {{$t('PNFnv13')}}</div>
+          <div v-else class="titre-md text-italic text-bold">
+            {{$t('PNFnv13b')}}</div>
 
-          <q-toggle v-model="revx" class="q-mt-md" :label="$t('PNFrevx')"/>
-          <div class="lst q-mt-xs full-width">
-            <div v-for="(f, idx) in lstfic" :key="f.idf">
-              <div v-if="!revx || f.nom === nom" 
-                :class="'row cursor-pointer items-center ' + sty(idx)" @click="clickFic(f)">
-                <q-checkbox class="col-1" v-model="f.sel" dense @click="calculvol" />
-                <div class="col-4">{{f.nom}}</div>
-                <div class="col-2">{{f.info}}</div>
-                <div class="col-2 font-mono text-center">{{edvol(f.lg)}}</div>
-                <div class="col-3 font-mono text-center">{{dhcool(f.dh)}}</div>
+          <div v-if="lstfic.length">
+            <q-toggle v-model="revx" class="q-mt-md" :label="$t('PNFrevx')"/>
+            <div class="lst q-mt-xs full-width">
+              <div v-for="(f, idx) in lstfic" :key="f.idf">
+                <div v-if="!revx || f.nom === nom" 
+                  :class="'row cursor-pointer items-center ' + sty(idx)" @click="clickFic(f)">
+                  <q-checkbox class="col-1" v-model="f.sel" dense @click="calculvol" />
+                  <div class="col-4">{{f.nom}}</div>
+                  <div class="col-2">{{f.info}}</div>
+                  <div class="col-2 font-mono text-center">{{edvol(f.lg)}}</div>
+                  <div class="col-3 font-mono text-center">{{dhcool(f.dh)}}</div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div v-if="volsupp > fic.lg" class="q-mt-md texte-italic">
-            {{$t('PNFnv14r', [edvol(volsupp - fic.lg), edvol(fic.lg), edvol(volsupp)])}}</div>
-          <div v-if="volsupp <= fic.lg" class="q-mt-md texte-italic">
-            {{$t('PNFnv14a', [edvol(fic.lg - volsupp), edvol(fic.lg), edvol(volsupp)])}}</div>
+            <div v-if="volsupp > fic.lg" class="q-mt-md texte-italic">
+              {{$t('PNFnv14r', [edvol(volsupp - fic.lg), edvol(fic.lg), edvol(volsupp)])}}</div>
+            <div v-if="volsupp <= fic.lg" class="q-mt-md texte-italic">
+              {{$t('PNFnv14a', [edvol(fic.lg - volsupp), edvol(fic.lg), edvol(volsupp)])}}</div>
+          </div>
+          
           <div v-if="vcpt === 1" class="q-mt-md texte-italic">{{$t('PNOvcpt1')}}</div>
           <div v-if="vgr === 1" class="q-mt-md texte-italic">{{$t('PNOvgr1')}}</div>
           <div v-if="alRed" class="q-mt-md msg full-width">
@@ -72,7 +78,7 @@
           <q-stepper-navigation class="row q-gutter-md justify-end">
             <btn-cond flat @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
             <btn-cond flat @ok="step=2" color="primary" :label="$t('precedent')" class="q-ml-sm" />
-            <btn-cond :disable="!valide || alRed || ui.etf !== 0" flat icon="check" :label="$t('valider')" 
+            <btn-cond :disable="!valide || alRed || ui.etf !== 0" icon="check" :label="$t('valider')" 
               color="warning" @ok="valider" />
           </q-stepper-navigation>
         </q-step>
@@ -99,9 +105,9 @@ import { edvol, dhcool, readFile } from '../app/util.mjs'
 import { styp, dkli, trapex, dhstring } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { NouveauFichier } from '../app/operations.mjs'
+import { NouveauFichier } from '../app/operations4.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
-import { isAppExc } from '../app/api.mjs'
+import { isAppExc, ID } from '../app/api.mjs'
 
 export default {
   name: 'NouveauFichier',
@@ -116,13 +122,17 @@ export default {
   components: { BoutonHelp, NomGenerique, BtnCond },
 
   computed: {
+    estGr () { return ID.estGroupe(this.note.id) },
+    egr () { return this.estGr ? this.gSt.egr(this.note.id) : null },
+    groupe () { return this.egr ? egr.groupe : null},
+
     valide () { return this.fic.lg && this.nfic },
     ccFic () { return  [this.ppSt.modecc, this.ppSt.ccfic] },
     vx () { return (this.fic.lg || 0) - this.volsupp },
     // volume fichier du compte (si hébergeur pour un groupe)
-    vcpt () { return this.groupe || !this.groupe.cptEstHeb ? 0 : this.session.compte.alVol(this.vx) },
+    vcpt () { return !this.groupe || (this.groupe && !this.groupe.cptEstHeb) ? 0 : this.session.compte.alVol(this.vx) },
     vgr () { return !this.groupe ? 0 : this.groupe.alVol(this.vx) },
-    alRed () { return (this.volsupp || 0) < (fic.lg || 0) 
+    alRed () { return (this.volsupp || 0) < (this.fic.lg || 0) 
       && (this.vcpt === 2 || this.vgr === 2 || this.pasheb) }
   },
 
@@ -197,7 +207,7 @@ export default {
       )
 
       this.ui.etf = 1
-      const res = await new NouveauFichier().run(this.note, aut, fic, Array.from(this.sidf))
+      const res = await new NouveauFichier().run(this.note, this.aut, fic, Array.from(this.sidf))
       if (!isAppExc(res))
         this.ui.setFichiercree(fic.nom)
       else {
@@ -239,7 +249,7 @@ export default {
       ui: stores.ui,
       session: stores.session,
       ppSt: stores.pp, 
-      edvol, dhcool, dkli, dhstring, styp
+      edvol, dhcool, dkli, dhstring, styp, ID
     }
   }
 }
@@ -248,7 +258,7 @@ export default {
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .lst
-  height: 10rem
+  height: 8rem
   overflow-y: scroll
   border: 1px solid $grey-5
   padding: 3px

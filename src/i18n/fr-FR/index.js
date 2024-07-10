@@ -1411,6 +1411,7 @@ export default {
   PNFnv8: 'Code court (facultatif) de cette révision',
   PNFnv9: 'Au plus 20 signes',
   PNFnv13: 'Cliquer les révisions à SUPPRIMER : elles ne le seront effectivement QU\'EN cas de succès de l\'enregistrement de la nouvelle.',
+  PNFnv13b: 'Aucun fichier n\'est attaché à cette note.',
   PNFnv14r: 'Volume réduit de {0}. {1} ajouté, {2} supprimé',
   PNFnv14a: 'Volume augmenté de {0}. {1} ajouté, {2} supprimé',
   PNFrevsuppr: 'Autres fichiers et révisions à supprimer éventuellement',

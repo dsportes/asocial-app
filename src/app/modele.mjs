@@ -1038,15 +1038,17 @@ export class Groupe extends GenDoc {
 
   estHeb (im) { return this.estActif(im) && im === this.imh }
 
-  cptEstHeb () {
-    for(const ida of this.session.mav) 
+  get cptEstHeb () {
+    const session = stores.session
+    for(const ida of session.compte.mav) 
       if (this.imh === this.mmb.get(ida)) return true
     return false
   }
 
-  cptOkExclu () {
+  get cptOkExclu () {
     if (!this.im) return true
-    for(const ida of this.session.mav) 
+    const session = stores.session
+    for(const ida of session.compte.mav) 
       if (this.im === this.mmb.get(ida)) return true
     return false
   }
@@ -1272,10 +1274,11 @@ export class Note extends GenDoc {
 
     this.mfa = new Map()
     this.fnom = new Map()
+    this.vf = row.vf
     if (this.vf && row.mfa) for (const idf in row.mfa) {
       const f = row.mfa[idf]
       this.mfa.set(f.idf, row.mfa[idf])
-      let e = this.fnom[f.nom]; if (!e) { e = []; this.fnom[f.nom] = e }
+      let e = this.fnom.get(f.nom); if (!e) { e = []; this.fnom.set(f.nom, e) }
       e.push(f)
       e.sort((a,b) => { return a.dh > b.dh ? -1 : (a.dh < b.dh ? 1 : 0) })
     }
@@ -1378,7 +1381,7 @@ export class Note extends GenDoc {
   async getFichier (f) {
     async function dec (cle, buf) {
       try {
-        const b = await decrypter(this.cle, buf)
+        const b = await decrypter(self.cle, buf)
         return f.gz ? await ungzipT(b) : b
       } catch (e) {
         throw new AppExc(E_BRO, 22, [f.idf])
@@ -1387,6 +1390,7 @@ export class Note extends GenDoc {
 
     // Obtenu localement ou par download. Fichier décrypté ET dézippé
     // idf: id du fichier
+    const self = this
     const faSt = stores.ficav
     const session = stores.session
     let buf = faSt.getDataDeCache(f.idf)
@@ -1401,7 +1405,7 @@ export class Note extends GenDoc {
     }
 
     if (session.accesNet) {
-      buf = await new DownloadFichier().run(this, idf)
+      buf = await new DownloadFichier().run(this, f.idf)
       return dec(this.cle, buf)
     }
   }
@@ -1410,9 +1414,7 @@ export class Note extends GenDoc {
     const n1 = normNomFichier(f.nom)
     const n2 = f.info ? '#' + normNomFichier(f.info) : ''
     const ext = mime2ext(f.type) || 'bin'
-    const s = '' + f.idf
-    const n3 = '#' + s.substring(s.length - 4)
-    return n1 + n2 + n3 + '.' + ext
+    return n1 + n2 + '#' + f.idf + '.' + ext
   }
 }
 

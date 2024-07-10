@@ -3,7 +3,7 @@ import { encode, decode } from '@msgpack/msgpack'
 import { useQuasar } from 'quasar'
 
 import { toByteArray, fromByteArray } from './base64.mjs'
-import { AMJ, appexc, d10, idTkToL6 } from './api.mjs'
+import { AMJ, appexc, d10, regIntg, regInt2g } from './api.mjs'
 
 let pako
 

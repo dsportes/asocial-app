@@ -33,7 +33,7 @@ import stores from '../stores/stores.mjs'
 import { $t, styp } from '../app/util.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { NoteOpx } from '../app/operations.mjs'
+import { NoteOpx } from '../app/operations4.mjs'
 
 export default {
   name: 'NoteConfirme',

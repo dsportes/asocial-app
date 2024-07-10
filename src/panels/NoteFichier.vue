@@ -37,30 +37,30 @@
       </div>
 
       <div v-for="nom in note.lstNoms" :key="nom" class="full-width q-mb-sm">
-        <div class="row justify-between full-width q-mb-sm">
+        <div class="row justify-between full-width q-my-sm">
           <div class="col q-pr-md">
             <span class="text-bold titre-md">{{nom}}</span>
-            <q-icon v-if="mpn[nom][0].fa.avn" name="airplanemode_active" size="md" color="warning"/>
+            <q-icon v-if="mpn.get(nom)[0].fa.avn" name="airplanemode_active" size="md" color="warning"/>
           </div>
           <btn-cond class="col-auto" :disable="groupe && !aut" icon="add" 
             :label="$t('PNFnvr')" @ok="nouveau(nom)"/>
         </div>
-        <div v-for="e in mpn[nom]" :key="e.f.idf" class="q-ml-lg">
+        <div v-for="e in mpn.get(nom)" :key="e.f.idf" class="q-ml-lg">
           <div class="row justify-between full-width">
             <div class="col">
-              <span class="font-mono">{{e.f.idf}}</span>
+              <span class="font-mono q-mr-sm">{{e.f.idf}}</span>
               <span class="q-mr-sm">{{e.f.type}}</span>
               <span>{{edvol(e.f.lg)}}</span>
             </div>
             <div class="col-auto">
-              <span class="font-mono fs-sm q-mr-sm">{{dhcool(f.dh, true)}}</span>
+              <span class="font-mono fs-sm q-mr-sm">{{dhcool(e.f.dh, true)}}</span>
               <q-icon class="q-ml-xs" v-if="e.fa.av" name="airplanemode_active" size="md" color="primary"/>
-              <menu-fichier class="q-ml-xs" :idf="e.f.id" 
+              <menu-fichier class="q-ml-xs" :idf="e.f.idf" 
                 :aut="ro ? 0 : (estGr ? aut : 1)" :note="note"/>
             </div>
           </div>
         </div>
-        <q-separator color="orange" size="2px" class="q-mb-sm"/>
+        <q-separator color="orange" size="2px" class="q-mt-xs q-mb-sm"/>
       </div>
     </q-page>
   </q-page-container>
@@ -107,7 +107,7 @@ export default {
     vgr () { return !this.groupe ? 0 : this.groupe.alVol(0) },
 
     // volume fichier du compte (si hébergeur pour un groupe)
-    vcpt () { return this.groupe || !this.groupe.cptEstHeb ? 0 : this.session.compte.alVol(0) },
+    vcpt () { return !this.groupe || (this.groupe && !this.groupe.cptEstHeb) ? 0 : this.session.compte.alVol(0) },
 
     pasHeb () { return this.groupe && !this.groupe.imh },
 
@@ -127,8 +127,12 @@ export default {
       const m = new Map()
       for(const nom of this.note.lstNoms) {
         const l = []
-        for(const f of this.note.fnom[nom]) l.push[{f, fa: this.faSt.map.get(f.idf) || { }}]
-        m.set[nom, l]
+        const lx = this.note.fnom.get(nom)
+        for(const f of lx) {
+          const fa = this.faSt.map.get(f.idf)
+          l.push({f, fa: fa || { fake: true }})
+        }
+        m.set(nom, l)
       }
       return m
     }
@@ -163,7 +167,8 @@ export default {
       session: stores.session,
       nSt: stores.note, 
       pSt: stores.people, 
-      gSt: stores.groupe, 
+      gSt: stores.groupe,
+      faSt: stores.ficav,
 
       styp, sty, dkli, edvol, dhcool, suffixe
     }

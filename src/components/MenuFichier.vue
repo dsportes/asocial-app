@@ -1,27 +1,27 @@
 <template>
 <q-btn dense size="md" round padding="none" icon="more_vert" color="primary">
-  <q-menu anchor="bottom left" self="top left" max-height="10rem" 
-    max-width="20rem">
-    <q-list class="q-py-xs bord1 bg-black text-white">
-      <q-item clickable v-close-popup  @click="copierFic">
-        <q-item-section><q-icon color="primary" name="content_copy" /></q-item-section>
-        <q-item-section>{{$t('PNFcop')}}</q-item-section>
+  <q-menu anchor="bottom left" self="top left" max-height="20rem" 
+    max-width="32rem">
+    <q-list class="q-py-xs bord1 bg-black text-white fs-md ">
+      <q-item clickable v-close-popup  @click="copierFic" class="row items-center">
+        <q-icon color="primary" size="md" name="content_copy" />
+        <span>{{$t('PNFcop')}}</span>
       </q-item>
-      <q-item clickable v-close-popup  @click="affFic">
-        <q-item-section><q-icon color="primary" name="open_in_new" /></q-item-section>
-        <q-item-section>{{$t('PNFaff')}}</q-item-section>
+      <q-item clickable v-close-popup  @click="affFic" class="row items-center">
+        <q-icon color="primary" size="md" name="open_in_new" />
+        <span>{{$t('PNFaff')}}</span>
       </q-item>
-      <q-item clickable v-close-popup  @click="enregFic">
-        <q-item-section><q-icon color="primary" name="save" /></q-item-section>
-        <q-item-section>{{$t('PNFenreg')}}</q-item-section>
+      <q-item clickable v-close-popup  @click="enregFic" class="row items-center">
+        <q-icon color="primary" size="md" name="save" />
+        <span>{{$t('PNFenreg')}}</span>
       </q-item>
-      <q-item :clickable="aut" v-close-popup  @click="ui.oD('NFsupprfichier')">
-        <q-item-section><q-icon color="warning" name="delete" /></q-item-section>
-        <q-item-section>{{$t('PNFsuppr')}}</q-item-section>
+      <q-item :clickable="aut !== 0" v-close-popup  @click="ui.oD('NFsupprfichier')" class="row items-center">
+        <q-icon color="warning" size="md" name="delete" />
+        <span>{{$t('PNFsuppr')}}</span>
       </q-item>
-      <q-item clickable v-close-popup  @click="ui.oD('DFouvrir', idc)">
-        <q-item-section><q-icon color="primary" name="more_horiz" /></q-item-section>
-        <q-item-section>{{$t('PNFdetail')}}</q-item-section>
+      <q-item clickable v-close-popup  @click="ui.oD('DFouvrir', idc)" class="row items-center">
+        <q-icon color="primary" size="md" name="more_horiz" />
+        <span>{{$t('PNFdetail')}}</span>
       </q-item>
     </q-list>
   </q-menu>
@@ -124,6 +124,7 @@
 
 <script>
 import stores from '../stores/stores.mjs'
+import { ref } from 'vue'
 import { edvol, dhcool, styp, trapex, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
@@ -145,9 +146,9 @@ export default {
 
   computed: {
     f () { return this.note.mfa.get(this.idf) || { fake: true } },
-    fa () { return this.faSt.get(this.idf) || { fake: true } },
-    fpr () { return this.f.fake ?  { fake: true } : this.note.fnom[this.f.nom][0] },
-    avn () { const fax = this.fpr ? this.faSt.get(this.fpr.idf) : null; return fax ? fax.avn : false },
+    fa () { return this.faSt.map.get(this.idf) || { fake: true } },
+    fpr () { return this.f.fake ?  { fake: true } : this.note.fnom.get(this.f.nom)[0] },
+    avn () { const fax = this.fpr ? this.faSt.map.get(this.fpr.idf) : null; return fax ? fax.avn : false },
     av () { return this.fa.avn || false },
     modifAv () { return (this.xav !== '?' && this.xav !== this.av) || 
       (this.xavn !== '?' && this.xavn !== this.avn)}
@@ -185,9 +186,9 @@ export default {
     },
 
     async blobde (b) {
-      const buf = await this.note.getFichier(f)
+      const buf = await this.note.getFichier(this.f)
       if (!buf || !buf.length) return null
-      const blob = new Blob([buf], { type: f.type })
+      const blob = new Blob([buf], { type: this.f.type })
       return b ? blob : URL.createObjectURL(blob)
     },
 
@@ -216,10 +217,10 @@ export default {
       }
     },
 
-    async enregFic (f) {
+    async enregFic () {
       const blob = await this.blobde(true)
       if (blob) {
-        saveAs(blob, this.note.nomFichier(f))
+        saveAs(blob, this.note.nomFichier(this.f))
       } else {
         await afficherDiag(this.$t('PNFgetEr'))
       }
