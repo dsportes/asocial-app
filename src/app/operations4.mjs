@@ -1740,3 +1740,60 @@ export class DownloadFichier extends Operation {
     }
   }
 }
+
+/* OP_NouveauFichier: 'Enregistrement d\'un nouveau fichier attaché à une note'
+*/
+export class NouveauFichier extends Operation {
+  constructor () { super('NouveauFichier') }
+
+  async run (note, aut, fic, lidf) {
+    // lidf : liste des idf des fichiers à supprimer
+    try {
+      const id = note.id
+      const ids = note.ids
+      const session = stores.session
+      const faSt = stores.ficav
+      const ui = stores.ui
+      const buf = fic.u8
+      delete fic.u8
+
+      ui.setEtf(2)
+      /* OP_PutUrlNf : retourne l'URL de put d'un fichier d'une note ******
+      - token: éléments d'authentification du compte.
+      - id ids : id de la note
+      - aut: pour une note de groupe, ida de l'auteur de l'enregistrement
+      Retour:
+      - idf : identifiant du fichier
+      - url : url à passer sur le PUT de son contenu
+      Remarque: l'excès de volume pour un groupe et un compte, ainsi que le volume 
+      descendant seront décomptés à la validation de l'upload
+      */
+      const args = { token: session.authToken, id, ids, aut }
+      const ret = await post(this, 'PutUrlNf', args)
+      const url = ret.putUrl
+      fic.idf = ret.idf
+
+      // Transfert effectif du fichier (si pas d'exception de volume sur putUrl)
+      const er = await putData(url, buf)
+      if (er) throw new AppExc(E_WS, 5, [er])
+      ui.setEtf(3)
+
+      /* validerUpload ****************************************
+      - token: éléments d'authentification du compte.
+      - id, ids : de la note
+      - fic : { idf, nom, info, type, lg, gz, sha}
+      - aut: id de l'auteur (pour une note de groupe)
+      - idf : liste des idf fichiers de la note à supprimer
+      Retour: aucun
+      */
+      const args2 = { token: session.authToken, id, ids, fic, lidf, aut }
+      await post(this, 'ValiderUpload', args2)
+      if (session.synchro) faSt.putDataEnCache(fic.idf, buf)
+      ui.setEtf(4)
+      // await sleep(1000)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}

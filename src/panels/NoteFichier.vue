@@ -67,7 +67,7 @@
 
   <!-- Dialogue de création d'un nouveau fichier -->
   <nouveau-fichier v-if="ui.d.NFouvrir" :note="note" :nom="nomf || ''" 
-    :aut="ro ? 0 : (estGr ? aut : 1)"/>
+    :aut="ro ? 0 : (estGr ? aut : 1)" :pasheb="pasHeb"/>
 
 </q-layout>
 </q-dialog>
@@ -104,20 +104,10 @@ export default {
     groupe () { return this.egr ? egr.groupe : null},
 
     // % quota de vf groupe - 0: ok, 1:90%, 2:>100% (RED)
-    vgr () { if (!this.groupe || this.groupe.pcv < 90) return 0
-      return this.groupe.pcv > 100 ? 2 : 1
-    },
+    vgr () { return !this.groupe ? 0 : this.groupe.alVol(0) },
 
     // volume fichier du compte (si hébergeur pour un groupe)
-    vcpt () {
-      if (!this.estGr) {
-        const pc = this.session.compte.pcv
-        return pc > 100 ? 2 : (pc > 90 ? 1 : 0) 
-      }
-      if (!this.groupe || !this.groupe.cptEstHeb) return 0
-      const pcv = this.compte.qv.pcv
-      return pcv > 100 ? 2 : (pcv > 90 ? 1 : 0)
-    },
+    vcpt () { return this.groupe || !this.groupe.cptEstHeb ? 0 : this.session.compte.alVol(0) },
 
     pasHeb () { return this.groupe && !this.groupe.imh },
 

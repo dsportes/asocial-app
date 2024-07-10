@@ -39,29 +39,40 @@
           </q-stepper-navigation>
         </q-step>
 
-        <q-step :name="3" title="Versions antérieures à supprimer" icon="check" :done="step > 3">
-          <div v-if="!lstfic.length" class="titre-md text-italic">{{$t('PNFnv11')}}
-            <span class="font-mono q-mx-sm text-bold q-px-sm">{{nfic}}</span>
-          </div>
-          <div v-else class="titre-md text-italic">
-            <span>{{$t('PNFnv12')}}</span>
-            <span class="font-mono q-mx-sm text-bold q-px-sm">{{nfic}}</span>
-            <br/>
-            <span>{{$t('PNFnv13')}}</span>
-          </div>
-          <div v-if="lstfic.length" class="fs-md q-my-md">
-            <div v-for="f in lstfic" :key="f.idf" class="row items-center">
-              <q-checkbox class="col-1" v-model="f.sel" dense @click="calculvol" />
-              <div class="col-5">{{f.info}}</div>
-              <div class="col-2 font-mono">{{edvol(f.lg)}}</div>
-              <div class="col-4 font-mono">{{dhcool(f.dh)}}</div>
+        <q-step :name="3" :title="$t('PNFrevsuppr')" icon="check" :done="step > 3">
+          <div class="titre-md text-italic text-bold">{{$t('PNFnv13')}}</div>
+
+          <q-toggle v-model="revx" class="q-mt-md" :label="$t('PNFrevx')"/>
+          <div class="lst q-mt-xs full-width">
+            <div v-for="(f, idx) in lstfic" :key="f.idf">
+              <div v-if="!revx || f.nom === nom" 
+                :class="'row cursor-pointer items-center ' + sty(idx)" @click="clickFic(f)">
+                <q-checkbox class="col-1" v-model="f.sel" dense @click="calculvol" />
+                <div class="col-4">{{f.nom}}</div>
+                <div class="col-2">{{f.info}}</div>
+                <div class="col-2 font-mono text-center">{{edvol(f.lg)}}</div>
+                <div class="col-3 font-mono text-center">{{dhcool(f.dh)}}</div>
+              </div>
             </div>
-            <div class="q-mt-md texte-italic">{{$t('PNFnv14', [edvol(volsupp)])}}</div>
           </div>
+
+          <div v-if="volsupp > fic.lg" class="q-mt-md texte-italic">
+            {{$t('PNFnv14r', [edvol(volsupp - fic.lg), edvol(fic.lg), edvol(volsupp)])}}</div>
+          <div v-if="volsupp <= fic.lg" class="q-mt-md texte-italic">
+            {{$t('PNFnv14a', [edvol(fic.lg - volsupp), edvol(fic.lg), edvol(volsupp)])}}</div>
+          <div v-if="vcpt === 1" class="q-mt-md texte-italic">{{$t('PNOvcpt1')}}</div>
+          <div v-if="vgr === 1" class="q-mt-md texte-italic">{{$t('PNOvgr1')}}</div>
+          <div v-if="alRed" class="q-mt-md msg full-width">
+            <div>{{$t('PNOred')}}</div>
+            <div v-if="vcpt === 2" class="q-ml-md">{{$t('PNOvcpt2')}}</div>
+            <div v-if="vgr === 2" class="q-ml-md">{{$t('PNOvgr2')}}</div>
+            <div v-if="pasheb" class="q-ml-md">{{$t('PNOpasheb')}}</div>
+          </div>
+
           <q-stepper-navigation class="row q-gutter-md justify-end">
             <btn-cond flat @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
             <btn-cond flat @ok="step=2" color="primary" :label="$t('precedent')" class="q-ml-sm" />
-            <btn-cond :disable="!valide || ui.etf !== 0" flat icon="check" :label="$t('valider')" 
+            <btn-cond :disable="!valide || alRed || ui.etf !== 0" flat icon="check" :label="$t('valider')" 
               color="warning" @ok="valider" />
           </q-stepper-navigation>
         </q-step>
@@ -84,13 +95,13 @@
 
 <script>
 import stores from '../stores/stores.mjs'
-import { afficherDiag, edvol, dhcool, readFile, rnd6, suffixe } from '../app/util.mjs'
-import { $t, styp, dkli, trapex, dhstring } from '../app/util.mjs'
+import { edvol, dhcool, readFile } from '../app/util.mjs'
+import { styp, dkli, trapex, dhstring } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { NouveauFichier } from '../app/operations.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
-import { UNITEV, isAppExc } from '../app/api.mjs'
+import { isAppExc } from '../app/api.mjs'
 
 export default {
   name: 'NouveauFichier',
@@ -98,45 +109,51 @@ export default {
   props: { 
     note: Object,
     nom: String, // nom du fichier pour une nouvelle révision
-    aut: Number  // pour un groupe, avatar "auteur"
+    aut: Number,  // pour un groupe, avatar "auteur"
+    pasheb: Boolean
   },
 
   components: { BoutonHelp, NomGenerique, BtnCond },
 
   computed: {
     valide () { return this.fic.lg && this.nfic },
-    ccFic () { return  [this.ppSt.modecc, this.ppSt.ccfic] }
+    ccFic () { return  [this.ppSt.modecc, this.ppSt.ccfic] },
+    vx () { return (this.fic.lg || 0) - this.volsupp },
+    // volume fichier du compte (si hébergeur pour un groupe)
+    vcpt () { return this.groupe || !this.groupe.cptEstHeb ? 0 : this.session.compte.alVol(this.vx) },
+    vgr () { return !this.groupe ? 0 : this.groupe.alVol(this.vx) },
+    alRed () { return (this.volsupp || 0) < (fic.lg || 0) 
+      && (this.vcpt === 2 || this.vgr === 2 || this.pasheb) }
   },
 
   watch: {
     async fileList (file) {
       try {
-      if (file) {
-        const { size, name, type, u8 } = await readFile(file, true)
-        const i = name.lastIndexOf('.')
-        const n = i == -1 ? name : name.substring(0, i)
-        this.fic.nom = this.nom || n
-        this.fic.info = ''
-        this.fic.lg = size
-        this.fic.type = type
-        this.fic.u8 = u8
-      }
+        if (file) {
+          const { size, name, type, u8 } = await readFile(file, true)
+          const i = name.lastIndexOf('.')
+          const n = i == -1 ? name : name.substring(0, i)
+          this.fic.nom = this.nom || n
+          this.fic.info = ''
+          this.fic.lg = size
+          this.fic.type = type
+          this.fic.u8 = u8
+        }
       } catch (e) { trapex (e, this.resetFic)}
     },
 
     step (s) {
       if (s === 1) { this.fileList = null; this.resetFic(); return }
       if (s === 2) { 
-        this.idf = rnd6()
         this.nfic = this.nom || this.fic.nom
-        // this.sfx = '#' + suffixe(this.idf)
         this.info = this.fic.info
       }
       if (s === 3) {
+        this.revx = true
+        this.sidf = new Set()
+        this.volsupp = 0
+        this.getLstfic()
         this.ui.setEtf(0)
-        try {
-          this.getLstfic()
-        } catch (e) { trapex (e); this.step = 1}
       }
     },
 
@@ -160,7 +177,7 @@ export default {
       etapes: [this.$t('PNFnvs0'), this.$t('PNFnvs1'), this.$t('PNFnvs2')],
       fileList: null,
       idf: 0,
-      lidf: [],
+      sidf: null,
       lstfic: [],
       volsupp: 0,
       info: ''
@@ -169,44 +186,18 @@ export default {
 
   methods: {
     async valider () {
-      try {
-        this.lstfic.forEach(fic => { 
-          if (fic.sel) this.lidf.push(fic.idf)
-        })
-        this.step = 4
-        this.ui.setEtf(0)
-        const fic = await this.note.nouvFic(
-          this.idf, 
-          this.nfic, 
-          this.info || '',
-          this.fic.lg, 
-          this.fic.type, 
-          this.fic.u8)
-        const dv2 = fic.lg - this.note.volLidf(this.lidf)
-
-        if (dv2 > 0) {
-          let x = 0
-          if (this.nSt.node.type === 4) {
-            x = this.aSt.occV2 - dv2
-            if (x < 0) {
-              await afficherDiag($t('PNFnv15a', [-x]))
-              this.ui.fD()
-              return
-            }
-          } if (this.nSt.node.type === 5) {
-            const eg = this.gSt.egr(this.nSt.note.id)
-            x = (eg.objv.vols.q2 * UNITEV) - eg.objv.vols.v2 - dv2
-            if (x < 0) {
-              await afficherDiag($t('PNFnv15b', [-x]))
-              this.ui.fD()
-              return
-            }
-          }
-        }
-      } catch(e) { trapex (e, 1); return }
+      this.step = 4
+      this.ui.setEtf(0)
+      const fic = await this.note.nouvFic(
+        this.nfic, 
+        this.info || '',
+        this.fic.lg, 
+        this.fic.type, 
+        this.fic.u8
+      )
 
       this.ui.etf = 1
-      const res = await new NouveauFichier().run(this.note, aut, fic, this.lidf)
+      const res = await new NouveauFichier().run(this.note, aut, fic, Array.from(this.sidf))
       if (!isAppExc(res))
         this.ui.setFichiercree(fic.nom)
       else {
@@ -216,19 +207,15 @@ export default {
 
     getLstfic () {
       this.lstfic = []
-      this.volsupp = 0
-      for (const [idf, fic] of this.nSt.note.mfa) {
-        if (fic.nom === this.nfic) {
-          this.lstfic.push({ sel: false, idf, info: fic.info, lg: fic.lg, dh: fic.dh })
-        }
-      }
-      this.lstfic.sort((a, b) => a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1))
+      for (const [idf, f] of this.note.mfa)
+        this.lstfic.push({ sel: false, idf, nom: f.nom, info: f.info, lg: f.lg, dh: f.dh })
+      this.lstfic.sort((a, b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 :
+        (a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)))})
     },
 
-    calculvol () {
-      this.volsupp = 0
-      this.lidf = []
-      this.lstfic.forEach(fic => { if (fic.sel) this.volsupp += fic.lg })
+    clickFic (f) {
+      if (f.sel) { f.sel = false; this.sidf.delete(f.idf); this.volsupp -= f.lg }
+      else { f.sel = true; this.sidf.add(f.idf); this.volsupp += f.lg }
     },
 
     resetFic () { 
@@ -260,4 +247,10 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.lst
+  height: 10rem
+  overflow-y: scroll
+  border: 1px solid $grey-5
+  padding: 3px
+  border-radius: 5px
 </style>

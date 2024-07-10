@@ -581,6 +581,12 @@ export class Compte extends GenDoc {
     return l
   }
 
+  alVol (v) {
+    const voc = (this.pcv * this.qv * UNITEV / 100) + v
+    const px = voc / UNITEV / this.qv
+    return px > 1 ? 2 : (px > 0.9 ? 1 : 0)
+  }
+
   // Retourne [amb, amo] - un avatar au moins accède aux membres / notes du groupe
   ambano (groupe) {
     let ano = false, amb = false
@@ -1017,6 +1023,11 @@ export class Groupe extends GenDoc {
 
   get pcv () { return !this.qv ? 0 : Math.ceil(this.vf * 100 / this.qv * UNITEV) }
 
+  alVol (v) {
+    const px = (this.vf + v) / UNITEV / this.qv
+    return px > 1 ? 2 : (px > 0.9 ? 1 : 0)
+  }
+
   estRadie (im)  { return this.st[im] === 0 }
   estInvite (im) { return this.st[im] === 3 }
   estActif (im) { return this.st[im] >= 4 }
@@ -1333,9 +1344,9 @@ export class Note extends GenDoc {
   }
   */
 
-  async nouvFic (idf, nom, info, lg, type, u8) {
+  async nouvFic (nom, info, lg, type, u8) {
     // propriétés ajoutées : u8 (contenu du fichier gzippé crypté), sha, dh, gz
-    const fic = { idf, nom, info, lg, type }
+    const fic = { nom, info, lg, type }
     fic.sha = sha256(u8)
     fic.dh = Date.now()
     fic.gz = fic.type.startsWith('text/')
