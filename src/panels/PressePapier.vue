@@ -3,7 +3,7 @@
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
-        <q-btn dense size="md" icon="chevron_left" color="warning" @click="ui.fD"/>
+        <btn-cond icon="chevron_left" color="warning" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg">{{$t('MLApp')}}</q-toolbar-title>
       </q-toolbar>
       <q-tabs class="titre-md" v-model="ppSt.tab" inline-label align="center" no-caps dense>
@@ -23,7 +23,7 @@
             <div class="fs-md font-mono">{{dhcool(rec.dh)}}
               <span class="q-ml-md fs-sm font-mono">#{{rec.id}}</span>
             </div>
-            <q-btn dense size="md" round paddind="none" icon="delete" color="warning" @click="supprn(rec)"/>
+            <btn-cond round icon="delete" color="warning" @ok="supprn(rec)"/>
           </div>
           <show-html class="bord1" :idx="idx" :texte="rec.txt" maxh="4rem" zoom edit @edit="editernote(rec)"/>
         </div>
@@ -39,7 +39,7 @@
             <div class="fs-md font-mono">
               <span class="text-bold q-mr-md">{{fic.nom}}</span>
               <span>{{dhcool(fic.dh)}}</span>
-              <span class="q-ml-md fs-sm font-mono">#{{fic.id}}</span>
+              <span class="q-ml-md fs-sm font-mono">#{{fic.idf}}</span>
             </div>
             <div class="col-auto row">
               <div class="col-auto fs-md font-mono">{{fic.type}}</div>
@@ -48,16 +48,16 @@
           </div>
           <div class="q-mx-md fs-md text-italic">{{fic.info || $t('PPnoi')}}</div>
           <div class="q-mb-lg row items-center justify-end q-gutter-sm">
-            <q-btn v-if="!ppSt.modecc" class="col-auto" :label="$t('afficher')" @click="affFic(fic)"
-              size="sm" dense color="primary" padding="none" icon="open_in_new"/>
-            <q-btn v-if="!ppSt.modecc" class="col-auto" :label="$t('enreg')" @click="enregFic(fic)"
-              size="sm" dense color="primary" padding="none" icon="save"/>
-            <q-btn v-if="ppSt.modecc" class="col-auto" :label="$t('copier')" @click="selFic(fic)"
-              size="sm" dense color="primary" padding="none" icon="copy"/>
-            <q-btn v-if="!ppSt.modecc" @click="editerfichier(fic)"
-              dense size="md" padding="none" round icon="mode_edit" color="primary"/>
-            <q-btn v-if="!ppSt.modecc" @click="supprfichier(fic)"
-              dense size="md" padding="none" round icon="delete" color="warning"/>
+            <btn-cond v-if="!ppSt.modecc" class="col-auto" :label="$t('afficher')" @ok="affFic(fic)"
+              icon="open_in_new"/>
+            <btn-cond v-if="!ppSt.modecc" class="col-auto" :label="$t('enreg')" @ok="enregFic(fic)"
+              icon="save"/>
+            <btn-cond v-if="ppSt.modecc" class="col-auto" :label="$t('copier')" @ok="selFic(fic)"
+              icon="copy"/>
+            <btn-cond v-if="!ppSt.modecc" @ok="editerfichier(fic)"
+              round icon="mode_edit" color="primary"/>
+            <btn-cond v-if="!ppSt.modecc" @click="supprfichier(fic)"
+              round icon="delete" color="warning"/>
           </div>
         </div>
       </div>
@@ -72,9 +72,8 @@
           <editeur-md mh="16rem" v-model="txt" :texte="rec ? rec.txt : ''" editable modetxt :lgmax="lgmax"/>
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat color="primary" dense padding="xs" size="md" icon="undo" 
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn color="primary" dense padding="xs" size="md" icon="check"
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond icon="check"
             :label="$t('valider')" :disable="!txt || (rec && txt === rec.txt)" @click="majnote"/>
         </q-card-actions>
       </q-card>
@@ -93,10 +92,8 @@
           :init-val="fic.info || ''" :lgmin="0" :lgmax="40" :placeholder="$t('PPphf')"/>
       </q-card-section>
       <q-card-actions align="right" class="q-gutter-sm">
-        <q-btn flat color="primary" dense icon="undo" padding="xs" size="md"
-          :label="$t('renoncer')" @click="ui.fD"/>
-        <q-btn color="primary" dense icon="check" padding="xs" size="md"
-          :label="$t('valider')" :disable="!valide" @click="majfic"/>
+        <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+        <btn-cond icon="check" :label="$t('valider')" :disable="!valide" @ok="majfic"/>
       </q-card-actions>
       </q-card>
     </q-dialog>
@@ -108,10 +105,8 @@
           <div class="q-mt-sm fs-md font-mono text-bold">{{rec.titre}}</div>
         </q-card-section>
         <q-card-actions align="right"  class="q-gutter-sm">
-          <q-btn flat color="primary" dense icon="undo" size="md" padding="xs" 
-            :label="$t('renoncer')"  @click="ui.fD"/>
-          <q-btn color="warning" dense size="md" icon="delete" padding="xs"
-            :label="$t('confirmer')" @click="cfSupprnote" />
+          <btn-cond flat icon="undo" :label="$t('renoncer')"  @ok="ui.fD"/>
+          <btn-cond color="warning" icon="delete" :label="$t('confirmer')" @ok="cfSupprnote" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -123,10 +118,8 @@
           <div class="q-mt-sm fs-md font-mono text-bold">{{fic.titre}}</div>
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
-          <q-btn flat color="primary" dense icon="undo" size="md" padding="xs"
-            :label="$t('renoncer')" @click="ui.fD"/>
-          <q-btn color="warning" dense size="md" icon="delete" padding="xs" 
-            :label="$t('confirmer')" @click="cfSupprfic" />
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond color="warning" icon="delete" :label="$t('confirmer')" @ok="cfSupprfic" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -145,12 +138,13 @@ import { readFile, dhcool, edvol, afficherDiag, dkli, styp } from '../app/util.m
 import EditeurMd from '../components/EditeurMd.vue'
 import { idb } from '../app/db.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { interdits, regInt } from '../app/api.mjs'
 
 export default ({
   name: 'PressePapier',
 
-  components: { ShowHtml, EditeurMd, NomGenerique },
+  components: { ShowHtml, EditeurMd, NomGenerique, BtnCond },
 
   data () {
     return {

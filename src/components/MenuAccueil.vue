@@ -129,11 +129,8 @@ export default {
 
   computed: {
     nbchats () { return this.aSt.nbchats },
-    nbchatsAv () { 
-      const x = this.aSt.eavC
-      return x.chats.size 
-    },
-    nbspons () { return this.aSt.eavC.sponsorings.size },
+    nbchatsAv () { const x = this.aSt.eavC; return x ? x.chats.size : 0 },
+    nbspons () { const x = this.aSt.eavC; return x ? x.sponsorings.size : 0 },
     nbgrps () { return this.session.compte.idGroupes(this.session.avatarId).size },
     nbgrpsT () { return this.session.compte.idGroupes().size },
     nbInvits () { return this.gSt.invitsAtt.length },

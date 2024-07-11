@@ -41,12 +41,6 @@ export const usePeopleStore = defineStore('people', {
       }
     },
 
-    getMembres: (state) => {
-      const l = []
-      for(const [id, e] of state.map) if (e.sgr.size) l.push(id)
-      return l
-    },
-
     // entrée du people courant
     peC: (state) => { 
       const id = stores.session.peopleId
@@ -92,40 +86,6 @@ export const usePeopleStore = defineStore('people', {
 
     estPeople: (state) => { return (id) => { 
         return state.map.has(id)
-      }
-    },
-
-    // Retourne l'Array des documents 'groupe' auquel ce people participe
-    getGroupes: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        if (!e) return null
-        const gSt = stores.groupe
-        const a = []
-        if (e.groupes && e.groupes.size)
-          e.groupes.forEach(idg => { a.push(gSt.getGroupe(idg)) })
-        return a
-      }
-    },
-
-    // Retourne l'Array de TOUS les documents membre pour 
-    // TOUS les groupes auquel ce people id participe
-    getMembres: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        if (!e || !e.groupes) return null
-        const gSt = stores.groupe
-        const a = []
-        e.groupes.forEach((im, idg) => { a.push(gSt.getMembre(idg, im)) })
-        return a
-      }
-    },
-
-    // Retourne LE document membre de ce people id dans LE groupe idg
-    getMembre: (state) => { return (id, idg) => { 
-        const gSt = stores.groupe
-        const e = state.map.get(id)
-        if (!e || !e.groupes) return null
-        const im = e.groupes.get(idg)
-        return im ? gSt.getMembre(idg, im) : null
       }
     },
 

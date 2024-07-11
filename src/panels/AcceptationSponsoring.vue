@@ -93,7 +93,7 @@ import { deconnexion, SyncSp, RefusSponsoring, ExistePhrase } from '../app/synch
 import QuotasVols from '../components/QuotasVols.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { styp, dhcool, afficherDiag } from '../app/util.mjs'
-import { AMJ, ID, d14 } from '../app/api.mjs'
+import { AMJ, ID } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 
 export default ({
@@ -152,9 +152,7 @@ export default ({
     },
     async okps (ps) {
       if (ps) {
-        const ns = ID.ns(this.sp.id)
-        const hps1 = (ns * d14) + ps.hps1
-        if (await new ExistePhrase().run(hps1, 1)) {
+        if (await new ExistePhrase().run(ps.hps1, 1)) {
           await afficherDiag(this.$t('existe'))
           return
         }

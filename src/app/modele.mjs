@@ -1,17 +1,14 @@
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
-import { $t, hash, rnd6, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, 
-  suffixe, dhstring, normNomFichier } from './util.mjs'
+import { $t, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, 
+  splitPK, dhstring, normNomFichier } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
-import { ID, Cles, E_BRO, d14, Compteurs, AMJ, nomFichier, 
-  synthesesPartition, FLAGS, UNITEN, UNITEV } from './api.mjs'
+import { ID, Cles, E_BRO, Compteurs, AMJ,
+  synthesesPartition, FLAGS, UNITEN, UNITEV, hash } from './api.mjs'
 import { DownloadFichier } from './operations4.mjs'
 
 import { idb } from './db.mjs'
-
-// FAKE
-export class Motscles {}
 
 // const decoder = new TextDecoder('utf-8')
 const encoder = new TextEncoder('utf-8')
@@ -83,11 +80,11 @@ export class Phrase {
     this.phrase = texte
     const u8 = encoder.encode(texte)
     this.pcb = await pbkfd(u8)
-    this.hpsc = (hash(this.pcb) % d14)
+    this.hpsc = hash(this.pcb, true)
     const u8b = Uint8Array.from(u8)
     Phrase.idxch.forEach(i => { u8b[i + 12] = 0 })
     const pr = await pbkfd(u8b)
-    this.hps1 = (hash(pr) % d14)
+    this.hps1 = hash(pr, true)
     return this
   }
 
@@ -1357,27 +1354,6 @@ export class Note extends GenDoc {
     return fic
   }
 
-  volLidf (lidf) {
-    let v = 0
-    lidf.forEach(idf => { 
-      const f = this.mfa.get(idf)
-      if (f)v += f.lg
-    })
-    return v
-  }
-
-  /*
-  async toRowMfa (fic) {
-    const x = await crypter(this.cle, new Uint8Array(encode((fic))))
-    return [fic.lg, x]
-  }
-
-  nomDeIdf (idf) {
-    const f = this.mfa.get(idf)
-    return f ? f.nom : null
-  }
-    */
-
   async getFichier (f) {
     async function dec (cle, buf) {
       try {
@@ -1438,7 +1414,7 @@ export class NoteLocale {
   }
 
   nouveau (txt) {
-    this.id = rnd6()
+    this.id = ID.rnd()
     this.txt = txt
     this.dh = Date.now()
     return this
@@ -1480,7 +1456,7 @@ export class FichierLocal {
   constructor () { }
 
   nouveau (nom, info, type, u8) {
-    this.id = rnd6()
+    this.idf = ID.rnd()
     this.nom = nom
     this.info = info
     this.dh = Date.now()
@@ -1510,19 +1486,11 @@ export class FichierLocal {
     return this.nom + ' - ' + this.info.substring(0, 20) + (this.info.length > 20 ? ' ...' : '')
   }
 
-  get nomFichier () { // Arevoir
-    let i = this.nom.lastIndexOf('.')
-    const ext1 = i === -1 ? '' : this.nom.substring(i)
-    const s1 =  i === -1 ? this.nom : this.nom.substring(0, i)
-    let s2 = '', ext2 = ''
-    if (this.info) {
-      i = this.info.lastIndexOf('.')
-      ext2 = i === -1 ? '' : this.info.substring(i)
-      s2 =  '#' + (i === -1 ? this.info : this.info.substring(0, i))
-    }
-    const pfx = '#' + suffixe(this.id)
-    const n = s1 + s2 + pfx + (ext2 || ext1)
-    return n
+  get nomFichier () {
+    const n1 = normNomFichier(this.nom)
+    const n2 = this.info ? '#' + normNomFichier(this.info) : ''
+    const ext = mime2ext(this.type) || 'bin'
+    return n1 + n2 + '#' + this.idf + '.' + ext
   }
 
 }
@@ -1530,7 +1498,8 @@ export class FichierLocal {
 export class Ficav {
   get key () { return this.ref[0] + '/' + this.ref[1]}
 
-  static fromData (data) {
+  static fromData (buf) {
+    const data = decode(buf)
     const f = new Ficav()
     f.id = data.id
     f.dh = data.dh

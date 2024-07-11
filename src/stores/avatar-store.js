@@ -74,29 +74,6 @@ export const useAvatarStore = defineStore('avatar', {
       return state.map.get(x)
     },
 
-    /*************************************************** */
-
-    /*
-    qv: (state) => {
-      const qv = { nc: 0, nn: 0, v2: 0 }
-      state.map.forEach((av, id) => {
-        av.notes.forEach((n, ids) => { qv.nn++; qv.v2 += n.v2})
-        av.chats.forEach((c, ids) => { if (c.r > 0) qv.nc++ })
-      })
-      return qv
-    },
-
-    exV2: (state) => {
-      const c = state.compta.qv
-      return c.v2 > c.q2 * UNITEV
-    },
-
-    occV2: (state) => {
-      const c = state.compta.qv
-      return (c.q2 * UNITEV) - c.v2
-    },
-    */
-
     chatDeAvec: (state) => { return (de, avec) => { 
       const e = state.map.get(de)
       if (e) for (const [ids, c] of e.chats) {
@@ -125,90 +102,6 @@ export const useAvatarStore = defineStore('avatar', {
       l.sort((a,b) => { return a.nom < b.nom ? -1 : (a.nom === b.nom ? 0 : 1)})
       return l
     },
-    
-
-    /* Construit une Map idx:{c, n} fusionnée depuis,
-    celle de la configuration et celle du compte 
-    mapMC (state) {
-      const m = new Map()
-      let mx = state.config.motsclesLOC
-      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-      mx = state.motscles || {}
-      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-      return m
-    },
-    */
-
-    /* Construit une Map idx:{c, n} fusionnée depuis,
-    celle de la configuration, celle du compte et celle du groupe courant
-    mapMCGr (state) {
-      const m = new Map()
-      let mx = state.config.motsclesLOC
-      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-      mx = state.motscles || {}
-      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-      if (state.session.groupeId) {
-        mx = state.gSt.egrC.groupe.motscles || {}
-        for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-      }
-      return m
-    },
-    */
-
-    /* Construit une Map idx:{c, n} fusionnée depuis celle du compte
-    mapMCC (state) {
-      const m = new Map()
-      const mx = state.motscles || {}
-      for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-      return m
-    },
-    */
-
-    /* Construit une Map idx:{c, n} fusionnée depuis celle du groupe courant
-    mapMCG (state) {
-      const m = new Map()
-      if (state.session.groupeId) {
-        const mx = state.gSt.egrC.groupe.mc || {}
-        for (const i in mx) { m.set(i, Motscles.cn(mx[i])) }
-      }
-      return m
-    },
-    */
-
-    /*
-    avatars: (state) => {
-      const m = new Map()
-      state.map.forEach((av, id) => { m.set(id, av.avatar) })
-      return m
-    },
-
-    // liste (array) des ids des avatars DU COMPTE enregistrés
-    ids: (state) => { return Array.from(state.map.keys()) },
-
-    getTribu: (state) => { return (id) => { 
-        return state.maptr.get(id)
-      }
-    },
-
-    // retourne [tribu, it, eltAct] du compte id 
-    // SI il est dans la tribu du compte ou la tribu courante.
-    getTribuDeCompte: (state) => { return (id) => { 
-        if (state.tribu) for (let it = 1; it < state.tribu.act.length; it++) {
-          const e = state.tribu.act[it]
-          if (e && !e.vide && e.id === id) { return [state.tribu, it, e] }
-        }
-        if (state.tribuC) for (let it = 1; it < state.tribu.act.length; it++) {
-          const e = state.tribuC.act[it]
-          if (e && !e.vide && e.id === id) { return [state.tribuC, it, e] }
-        }
-        return [null, 0, null]
-      }
-    },
-
-    nbTribus: (state) => {
-      return state.maptr.size
-    },
-    */
 
     getElt: (state) => { return (id) => { return state.map.get(id) } },
 
@@ -217,41 +110,12 @@ export const useAvatarStore = defineStore('avatar', {
       }
     },
 
-    /* id d'un groupe ou avatar. Retourne [mcs, memos]
-    - mcs : union des mots clés attribués par les avatars
-    - memos : concaténation des textes des mémos attribués par les avatars
-    
-    mcmemosDeId: (state) => { return (id) => { 
-        let mcs = new Set()
-        const memos = []
-        state.map.forEach(e => {
-          const {mc, memo} = e.avatar.mcmemosDeId(id)
-          if (mc) mc.forEach(i => {mcs.add(i)})
-          if (memo) memos.push(memo)
-        })
-        return [new Uint8Array.from(mcs), memos.join('\n\n')]
-      }
-    },
-    */
-
     // retourne le chat ids de l'avatar id
     getChat: (state) => { return (id, ids) => { 
       const e = state.map.get(id)
       return e ? e.chats.get(ids) : null 
     }
     },
-
-    /* retourne l'array des idE des chats de l'avatar id
-    getChatIdEs: (state) => { return (id) => { 
-        const a = []
-        const e = state.map.get(id)
-        if (e.chats) e.chats.forEach((chat, ids) => { 
-          a.push(chat.naE.id) 
-        })
-        return a
-      }
-    },
-    */
 
     getChatIdIE: (state) => {  return (idI, idE) => { 
         const e = state.map.get(idI)
@@ -275,14 +139,6 @@ export const useAvatarStore = defineStore('avatar', {
         return e ? e.sponsorings : null 
       }
     },
-
-    /* retourne le ticket ids de l'avatar id
-    getTicket: (state) => { return (id, ids) => { 
-      const e = state.map.get(id)
-      return e ? e.tickets.get(ids) : null 
-    }
-    },
-    */
 
     // retourne l'array des tickets de l'avatar du compte
     getTickets: (state) => {

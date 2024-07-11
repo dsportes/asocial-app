@@ -49,6 +49,16 @@ export const useFicavStore = defineStore('ficav', {
       return nc ? state.mapDeNote(nc.key) : new Map()
     },
 
+    echecs: (state) => {
+      const l = []
+      for(const idf of state.queue) {
+        const f = state.map.get(idf)
+        if (f && f.exc) l.push(f)
+      }
+      l.sort((a,b) => { return a.dhdc < b.dhdc ? -1 : ( a.dhdc > b.dhdc ? 1 : 0)})
+      return l
+    },
+
     // Fichiers à charger par dhdc croissantes
     getQueue: (state) => {
       const l = []
@@ -121,7 +131,7 @@ export const useFicavStore = defineStore('ficav', {
             (a.dh > b.dh ? -1 : (a.dh < b.dh ? 1 : 0)))))
       })
       const m = new Map() // clé: note (key) - valeur Map (clé: nom, valeur: liste des ficav par dh)
-      for (const [idf, f] of lfav) {
+      for (const f of lfav) {
         const node = this.nSt.map.get(f.key)
         // pas de note portant ce nom, suppression du ficav de IDB
         if (!node || !node.note || !node.note.fnom.has(f.nom)) buf.purgeFIDB(idf)
@@ -335,7 +345,7 @@ export const useFicavStore = defineStore('ficav', {
       if (!this.session.accesIdb || (sessionId !== this.session.sessionId)) return
       setTimeout(async () => {
         while (sessionId === this.session.sessionId) {
-          const fa = this.prochain()
+          const fa = this.prochain
           if (!fa) {
             setTimeout(() => { this.startDemon(sessionId) }, 60000)
             break

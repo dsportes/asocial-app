@@ -1,10 +1,10 @@
 import Dexie from 'dexie'
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
-import { NoteLocale, FichierLocal } from './modele.mjs'
+import { NoteLocale, FichierLocal, Ficav } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'
 import { isAppExc, AppExc, E_DB, DataSync, IDBOBS } from './api.mjs'
-import { u8ToB64, edvol, sleep, difference, html } from './util.mjs'
+import { u8ToB64, edvol, sleep } from './util.mjs'
 
 // FAKE
 export function commitRows() {}
@@ -20,14 +20,13 @@ const STORES = {
   ficav: 'id',
   loctxt: 'id',
   locfic: 'id',
-  fdata: 'id',
-  locdata: 'id' // ?????
+  fdata: 'id'
 }
 
 /*************************************************************************
 Calcul du volume utile d'une base
 - v1: volume de tout sauf des fichiers
-- v2: volume des tables fichiers locaux (fdata, flocdata)
+- v2: volume des tables fichiers locaux (fdata)
 - map: volume par table. clé: nom de la table, valeur: volume utile de la table
 */
 export async function vuIDB (nb) {
@@ -45,7 +44,7 @@ export async function vuIDB (nb) {
       v += rec.data.length
     })
     session.volumeTable = x + ': ' + edvol(v)
-    if (x === 'fdata' || x === 'locdata') v2 += v; else v1 += v
+    if (x === 'fdata') v2 += v; else v1 += v
     map[x] = v
     await sleep(50)
   }
@@ -297,7 +296,7 @@ class IDB {
     }
     */
     try {
-      await this.db.transaction('rw', ['singletons', 'collections'], async () => {  
+      await this.db.transaction('rw', ['singletons', 'collections', 'ficav', 'fdata'], async () => {  
         for (const x of arg.singl) {
           if (x.data) await this.db.singletons.put({ n: x.n, data: x.data })
           else await this.db.singletons.where({ n: x.n }).delete()
@@ -379,11 +378,7 @@ class IDB {
     }
   }
 
-  /** Fichier Local ********************************************
-  locdata: contenu d'un fichier local
-    - id: id du fichier local
-    - data: contenu gzippé ou non crypté par la clé K
-  */
+  /** Fichier Local *********************************************/
 
   async FLfromIDB () {
     const session = stores.session
@@ -406,12 +401,12 @@ class IDB {
       if (id) fl.id = id
       ppSt.setFichier(fl)
       if (session.accesIdb) {
-        const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
+        const cle = u8ToB64(await crypter(session.clek, '' + fl.idf, 1), true)
         const data = await crypter(session.clek, fl.toIdb)
         const buf = await crypter(session.clek, fl.gz ? await gzipT(u8) : u8)
-        await this.db.transaction('rw', ['locfic', 'locdata'], async () => {
+        await this.db.transaction('rw', ['locfic', 'fdata'], async () => {
           await this.db.locfic.put({ id: cle, data: data })
-          await this.db.locdata.put({ id: cle, data: buf })
+          await this.db.fdata.put({ id: cle, data: buf })
         })
       } else {
         fl.u8 = u8
@@ -426,8 +421,8 @@ class IDB {
   async FLget (fl) { // get du CONTENU
     try {
       const session = stores.session
-      const cle = u8ToB64(await crypter(session.clek, '' + fl.id, 1), true)
-      const rec = await db.locdata.get(cle)
+      const cle = u8ToB64(await crypter(session.clek, '' + fl.idf, 1), true)
+      const rec = await db.fdata.get(cle)
       if (rec) {
         const buf = await decrypter(session.clek, rec.data)
         return fl.gz ? await ungzipB(buf) : buf
@@ -444,9 +439,9 @@ class IDB {
     try {
       if (session.accesIdb) {
         const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
-        await this.db.transaction('rw', ['locfic', 'locdata'], async () => {
+        await this.db.transaction('rw', ['locfic', 'fdata'], async () => {
           await this.db.locfic.where({ id: cle }).delete()
-          await this.db.locdata.where({ id: cle }).delete()
+          await this.db.fdata.where({ id: cle }).delete()
         })
       }
       ppSt.delFichier(id)
@@ -475,18 +470,6 @@ class IDB {
       throw EX2(e)
     }
   }
-
-  async loadFetats () {
-    try {
-      const feSt = stores.fetat
-      await this.db.fetat.each(async (rec) => {
-        const fe = new Fetat().fromIdb(await decrypter(stores.session.clek, rec.data))
-        feSt.setFetat(fe)
-      })
-    } catch (e) {
-      throw IDB.EX2(e)
-    }
-  }
   
   async getFichierIDB (idf) {
     try {
@@ -498,66 +481,6 @@ class IDB {
     }
   }
   
-  async loadAvNotes () {
-    try {
-      const avnSt = stores.avnote
-      await this.db.avnote.each(async (rec) => {
-        const avn = new AvNote().fromIdb(await decrypter(stores.session.clek, rec.data))
-        avnSt.setAvNote(avn)
-      })
-    } catch (e) {
-      throw IDB.EX2(e)
-    }
-  }
-  
-  /* Commit des MAJ de fetat et avnote */
-  async commitFic (lstAvNotes, lstFetats) { // lst : array / set d'idfs
-    const session = stores.session
-    const debug = stores.config.DEBUG
-    try {
-      const x = []
-      const y = []
-      for (const obj of lstAvNotes) {
-        const row = {}
-        row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
-        row.ids = u8ToB64(await crypter(session.clek, '' + obj.ids, 1), true)
-        row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
-        x.push(row)
-        if (debug) console.log('IDB avnote to ', obj.suppr ? 'DEL' : 'PUT', obj.pk)
-      }
-  
-      for (const obj of lstFetats) {
-        const row = {}
-        row.id = u8ToB64(await crypter(session.clek, '' + obj.id, 1), true)
-        row.data = obj.suppr ? null : await crypter(session.clek, obj.toIdb)
-        y.push(row)
-        if (debug) {
-          console.log('IDB fetat to ', obj.suppr ? 'DEL' : 'PUT', obj.id, obj.dhc)
-          if (obj.suppr) console.log('IDB fdata to DEL', obj.id)
-        }
-      }
-  
-      await this.db.transaction('rw', ['avnotes', 'fetat'], async () => {
-        for (const row of x) {
-          if (row.data) {
-            await this.db.avnote.put(row)
-          } else {
-            await this.db.avnote.where({ id: row.id, ids: row.ids }).delete()
-          }
-        }
-        for (const row of y) {
-          if (row.data) {
-            await this.db.fetat.put(row)
-          } else {
-            await this.db.fetat.where({ id: row.id }).delete()
-            await this.db.fdata.where({ id: row.id }).delete()
-          }
-        }
-      })
-    } catch (e) {
-      throw EX2(e)
-    }
-  }
 }
 export const idb = new IDB()
 
@@ -604,14 +527,14 @@ export class IDBbuffer {
       data: await crypter(clek, new Uint8Array(dataSync.serial()))
     })
 
-    for(const row of this.lmaj) {
+    for(const row of this.lmajf) {
       arg.ficav.push({ 
         id: u8ToB64(await crypter(clek, '' + row.id, 1), true),
         data: await crypter(clek, new Uint8Array(encode(row.data)))
       })
     }
 
-    for(const row of this.lmajf) {
+    for(const row of this.lmaj) {
       const n = IDB.snoms[row._nom]
       if (n) { // c'est un singleton
         arg.singl.push({ 
@@ -640,339 +563,5 @@ export class IDBbuffer {
       for (const id of this.lfic) arg.idf.push(u8ToB64(await crypter(clek, '' + id, 1), true))
     
     await idb.commit(arg)
-  }
-}
-
-/*********************************************************************
-Gestion des fichiers hors-ligne sur IDB
-*********************************************************************
-Deux tables gèrent le stockage en IDB :
-idf : identifiant du fichier
-
-- `fdata` : colonnes `idf, data`. Seulement insertion et suppression
-  - `data` est le contenu du fichier tel que stocké sur le serveur (crypté / gzippé).
-- `fetat` : colonnes `idf, data : {dhd, dhc, lg, nom, info}`. Insertion, suppression et mise à jour.
-  - `dhd` : date-heure de demande de chargement.
-  - `dhc` : date-heure de chargement.
-  - `dhx` : date-heure d'échec du chargement.
-  - `lg` : taille du fichier (source, son v2).
-  - `nom info` : à titre d'information (redondance de sa note).
-  - `ids ns` : id/ns de sa note.
-})
-
-#### Transactions
-- `fetat` peut subir une insertion sans mise à jour de `fdada`.
-- `fetat` peut subir une suppression sans mise à jour de `fdata` si le row indique qu'il était encore en attente (`dhc` 0).
-- `fetat` et `fdata` peuvent subir une suppression synchronisée.
-- quand `fdata` subit une insertion, `fetat` subit dans la même transaction la mise à jour de `dhc`.
-
-La table `fetat` est,
-- lue à l'ouverture d'une session en modes _synchronisé_ et _avion_ (lecture seule),
-- l'état _commité_ est disponible en mémoire durant toute la session.
-*/
-
-/*********************************************************************
-Gestion des fichiers hors-ligne : fin de connexion et synchronisation
-**********************************************************************/
-
-/* Fin de synchronisation : map des notes notifiées */
-export async function gestionFichierSync (lst) {
-  const avst = stores.avnote
-  const fSt = stores.fetat
-
-  const nvFa = []
-  const nvAvs = []
-  for (const pk in lst) {
-    const n = lst[pk]
-    const avs = avst.getAvnote(n.id, n.ids)
-    if (!avs || avs.v >= n.v) continue // pas d'avnote associé ou déjà à jour (??)
-    const [nv, nvf] = avs.diff(n) // nouvel AvNote compte tenu de la nouvelle note
-    nvAvs.push(nv) // changé, au moins la version : il y a peut-être, des idfs en plus et en moins
-    if (nvf) for (const x of nvf) nvFa.push(x)
-  }
-
-  // Mise à jour de IDB (fetat / fdata et avnote)
-  if (nvFa.length || nvAvs.length) await commitFic(nvAvs, nvFa)
-
-  // Mise en store des AvNote créés / modifiés / supprimés
-  nvAvs.forEach(avs => { avst.setAvnote(avs) })
-
-  // Mise en db/store des fetat créés / supprimés
-  fSt.chargementIncremental(nvFa)
-}
-
-/* Fin de connexion en mode synchronisé : notes, map par pk de toutes les notes existantes */
-export async function gestionFichierCnx (notes) {
-  const fetats = {}
-  await getFetats(fetats) // chargement depuis IDB de tous les fetats
-  const avnotes = {}
-  await getAvNotes(avnotes) // changement depuis IDB de toutes les avnotes
-
-  const nvFa = [] // les fetat créés ou supprimés
-  const lavn = [] //  Tous les AvNote (existant et conservé, ou créé, ou modifié)
-  const nvAvn = [] // Les AvNotes créés / modifiés / supprimés
-  
-  /* Parcours des AvNote existants : elles peuvent,
-  - soit être détruits : la note correspondante n'existe plus ou n'a plus de fichiers
-  - soit être inchangés : la note correspondante a la même version
-  - soit être "mise à jour"" : des fichiers sont à supprimer, d'autres (cités dans mnom) ont une nouvelle version
-  voire le cas échéant réduits au point de disparaître.
-  */
-  for (const pk in avnotes) {
-    const avn = avnotes[pk]
-    const n = notes[pk]
-    if (n && n.v === avn.v) { lavn.push(avn); continue } // inchangé
-    const [nv, nvf] = avn.diff(n) // nouvel AVN compte tenu de la nouvelle note ou de son absence (peut-être à supprimer)
-    if (!nv.suppr) lavn.push(nv) // celles utiles seulement, pas les supprimées
-    nvAvn.push(nv) // changé, au moins la version : il y a peut-être, des idfs en plus et en moins
-    if (nvf) for (const x of nvf) nvFa.push(x)
-  }
-
-  // Liste des fetat utiles et mise en db/store ou delete
-  for (const fetat of nvFa) {
-    // fetat.dhc = Date.now()
-    if (fetat.suppr) delete fetats[fetat.idf]; else fetats[fetat.idf] = fetat
-  }
-
-  // Mise à jour de IDB (fetat / fdata et avnote)
-  if (nvFa.length || nvAvn.length) await commitFic(nvAvn, nvFa)
-
-  const avnSt = stores.avnote
-  lavn.forEach(avn => { avnSt.setAvnote(avn) })
-
-  const fSt = stores.fetat
-  fSt.chargementInitial(fetats)
-}
-
-/*********************************************************************
-Gestion des fichiers hors-ligne : MAJ des fichiers off-line pour une note
-**********************************************************************/
-
-/* Session UI : MAJ des fichiers off-line pour une note */
-export async function gestionFichierMaj (note, plus, idf, nom) {
-  const avnSt = stores.avnote
-  const fSt = stores.fetat
-
-  let avn = avnSt.getAvnote(note.id, note.ids)
-  if (!avn) avn = new AvNote().nouveau(note)
-  const [nvAvn, nvFa] = avn.maj(note, plus, idf, nom)
-
-  // Mise à jour de IDB (fetat / fdata et avnote)
-  if (nvFa.length || nvAvn) await commitFic(nvAvn ? [nvAvn] : [], nvFa)
-
-  // Mise en db/store de l'AvNote créé / modifié / supprimé
-  if (nvAvn) avnSt.setAvnote(nvAvn)
-
-  if (nvFa.length) fSt.chargementIncremental(nvFa)
-}
-
-/*********************************************************************
-Gestion des fichiers hors-ligne : classes Fetat et Avnote
-**********************************************************************/
-
-/* classe Fetat : un fichier off-line **********************************************
-- id: id du fichier (idf)
-- ids: id de l'avatar / groupe propriétaire (id de la note à laquelle le fichier est attaché)
-- ns: id secondaire de sa note ( la note est identifiée par ids / ns)
-***/
-class Fetat {
-  get table () { return 'fetat' }
-  get estCharge () { return this.dhc !== 0 }
-  get enAttente () { return this.dhc === 0 && !this.dhx }
-  get enEchec () { return this.dhc === 0 && this.dhx }
-
-  get st () {
-    if (this.enAttente) return 1
-    if (this.estCharge) return 2
-    if (this.enEchec) return 3
-    return 0
-  }
-
-  nouveauSuppr (idf) { this.id = idf; this.suppr = true; return this }
-
-  nouveau (n, f) {
-    this.id = f.idf
-    this.ids = n.id
-    this.dhd = Date.now()
-    this.dhc = 0
-    this.dhx = 0
-    this.lg = f.lg
-    this.nom = f.nom
-    this.info = f.info
-    this.type = f.type
-    this.dh = f.dh
-    this.ns = n.ids
-    this.err = ''
-    return this
-  }
-
-  get toIdb () {
-    const x = { ...this }
-    return new Uint8Array(encode(x))
-  }
-
-  fromIdb (idb) {
-    decodeIn(idb, this)
-    return this
-  }
-
-  async chargementOK(buf) {
-    this.dhc = Date.now()
-    this.err = ''
-    this.dhx = 0
-    await setFa(this, buf) // Maj IDB de fetat et fdata conjointement
-  }
-
-  async chargementKO(exc) {
-    this.dhx = Date.now()
-    this.err = html(exc)
-    await commitFic([], [this]) // Maj de IDB de fetat avant la date-heure d'échec
-    stores.ui.afficherExc(exc)
-  }
-
-  async retry () {
-    this.dhx = 0
-    this.err = ''
-    await commitFic([], [this])
-    const fSt = stores.fetat
-    fSt.retry(this.id)
-  }
-
-  async abandon () {
-    const fSt = stores.fetat
-    fSt.abandon(this.id)
-    const nSt = stores.note
-    const node = nSt.getNode(this.ids, this.ns)
-    const n = node ? node.note : null
-    if (!n) return
-    const nom = n.nomDeIdf(this.id)
-    if (!nom) return
-    await gestionFichierMaj(n, false, this.id, nom)
-  }
-}
-
-/* AvNote ****************************************************
-Un objet de classe `AvNote` existe pour chaque note pour laquelle le compte a souhaité
-avoir au moins un des fichiers attachés disponible en mode avion.
-- Identifiant : `[id, ids]`
-- Propriétés :
-  - `lidf` : liste des identifiants des fichiers explicitement cités par leur identifiant comme étant souhaité _hors ligne_.
-  - `mnom` : une map ayant,
-    - _clé_ : `nom` d'un fichier dont le compte a souhaité disposer de la _version la plus récente_ hors ligne.
-    - _valeur_ : `idf`, identifiant de cette version constaté dans l'état le plus récent de la note.
-*/
-class AvNote {
-  constructor () { 
-    this.lidf = []
-    this.mnom = {}
-    this.v = 0
-  }
-
-  get table () { return 'avnote' }
-  get pk () { return this.id + '/' + this.ids }
-  get key () { return this.id + '/' + this.ids }
-
-  nouveau (note) { 
-    this.id = note.id
-    this.ids = note.ids
-    this.v = 0
-    return this 
-  }
-
-  get estVide () { return !this.lidf.length && !Object.keys(this.mnom).length }
-
-  get toIdb () {
-    const x = { ...this }
-    return new Uint8Array(encode(x))
-  }
-
-  fromIdb (idb) {
-    decodeIn(idb, this)
-    return this
-  }
-
-  setNvFa (s, idfs, idfs2) { // calcul des fetat en plus et en moins
-    // difference (setA, setB) { // element de A pas dans B
-    const x1 = difference(idfs, idfs2) // idf disparus
-    const x2 = difference(idfs2, idfs) // nouveaux, version de nom plus récente
-    const nvFa = []
-    if (x1.size) {
-      for (const idf of x1) {
-        const e = new Fetat().nouveauSuppr(idf)
-        nvFa.push(e)
-      }
-    }
-    if (x2.size && s) {
-      for (const idf of x2) {
-        const f = s.mfa.get(idf)
-        nvFa.push(new Fetat().nouveau(s, f))
-      }
-    }
-    return nvFa
-  }
-
-  /* s est la mise à jour de la note. diff retourne [nv, nvFa]:
-  - nv.suppr : si avnote est à supprimer
-  - nv : le nouvel avnote de même id/ns qui remplace l'ancien. Dans ce cas obj a 2 propriétés :
-  - nvFa : la liste des nouveaux Fetat (ou null)
-    SI PAS de s : idfs à enlever (les fetat / fdata associés)
-  */
-  diff (s) {
-    const idfs = new Set(this.lidf) // set des idf actuels
-    const idfs2 = new Set() // nouvelle liste des idf
-    let n = 0
-    const nv = new AvNote().nouveau(this) // clone minimal de this
-
-    if (s) {
-      nv.v = s.v
-      for (const idf of this.lidf) {
-        if (s.mfa.get(idf)) { nv.lidf.push(idf); idfs2.add(idf) }
-      }
-      for (const nx in this.mnom) {
-        idfs.add(this.mnom[nx])
-        const idf = s.idfDeNom(nx)
-        if (idf) { nv.mnom[nx] = idf; idfs2.add(idf); n++ }
-      }
-    }
-    if (!n && !nv.lidf.length) nv.suppr = true // AvNote à détruire (plus aucun idf n'existe dans s, s'il y a un s)
-
-    const nvFa = this.setNvFa(s, idfs, idfs2)
-    return [nv, nvFa]
-  }
-
-  lstIdf () {
-    const idfs = new Set(this.lidf)
-    for (const nx in this.mnom) idfs.add(this.mnom[nx])
-    return idfs
-  }
-
-  maj (s, plus, idf, nom) {
-    /* plus : true: ajout de idf ou d'un nom, false: enlève un idf ou un nom */
-    const idfs = new Set(this.lidf) // set des idf actuels
-    const idfs2 = new Set() // nouvelle liste des idf
-    let n = 0
-    const nv = new AvNote().nouveau(this) // clone minimal de this
-    nv.v = s.v
-
-    for (const i of this.lidf) { // reconduction de la liste précédente
-      if (i === idf && !plus) continue // sauf si idf doit être enlevé
-      if (s.mfa.get(i)) { nv.lidf.push(i); idfs2.add(i) }
-    }
-    if (plus && idf && !idfs2.has(idf) && s.mfa.get(idf)) { nv.lidf.push(idf); idfs2.add(idf) }
-
-    for (const nx in this.mnom) {
-      idfs.add(this.mnom[nx]) // complète la liste des idf (avant)
-      if (nx === nom && !plus) continue // on ne reconduit pas le nom s'il est enlevé
-      const idf = s.idfDeNom(nx)
-      if (idf) { idfs2.add(idf); nv.mnom[nx] = idf; n++ }
-    }
-    if (plus && nom && !nv.mnom[nom]) {
-      const idf = s.idfDeNom(nom)
-      if (idf) { idfs2.add(idf); nv.mnom[nom] = idf; n++ }
-    }
-    if (!n && !nv.lidf.length) nv.suppr = true // AvNote à détruire (plus aucun idf n'existe dans s, s'il y a un s)
-
-    const nvFa = this.setNvFa(s, idfs, idfs2)
-    return [nv, nvFa]
   }
 }

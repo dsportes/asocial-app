@@ -9,13 +9,12 @@ export default ({
   name: 'QueueIcon',
   props: { },
   computed: {
-    c1 () { return this.fSt.queue.length !== 0 },
-    c2 () { return this.fSt.echecs.size !== 0 }
+    c1 () { return this.faSt.queue.size !== 0 },
+    c2 () { return this.faSt.echecs.size !== 0 }
   },
   setup () {
-    const fSt = stores.fetat
     return { 
-      fSt
+      faSt: stores.ficav
     }
   }
 })

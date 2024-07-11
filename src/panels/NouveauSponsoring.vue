@@ -112,7 +112,7 @@ import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import { styp, edvol, afficherDiag, dkli, $t } from '../app/util.mjs'
-import { ID, UNITEN, UNITEV, d14 } from '../app/api.mjs'
+import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
@@ -181,8 +181,7 @@ export default ({
     ed1 (f) { return edvol(f * UNITEN) },
     ed2 (f) { return edvol(f * UNITEV) },
     async crypterphrase (pc) {
-      const hps1 = (this.session.ns * d14) + pc.hps1
-      if (await new ExistePhrase().run(hps1, 2)) {
+      if (await new ExistePhrase().run(pc.hps1, 2)) {
         await afficherDiag(this.$t('existe'))
         return
       }

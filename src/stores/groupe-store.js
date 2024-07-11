@@ -83,16 +83,6 @@ export const useGroupeStore = defineStore('groupe', {
       }
     },
 
-    getqv: (state) => {
-      const qv = { ng: 0, nn: 0, v2: 0 }
-      state.map.forEach((gr, id) => {
-        qv.ng++
-        if (gr.groupe.hebC)
-          gr.notes.forEach((n, ids) => { qv.nn++; qv.v2 += n.v2})
-      })
-      return qv
-    },
-
     nbInvits: (state) => {
       return state.invits.length
     },
@@ -107,45 +97,12 @@ export const useGroupeStore = defineStore('groupe', {
       l.sort((a,b) => { return a.nomc < b.nomc ? -1 : (a.nomc === b.nomc ? 0 : 1)})
       return l
     },
-    
-    // liste (array) des ids des groupes
-    // ids: (state) => { return Array.from(state.map.keys()) },
 
-    getGroupe: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.groupe : null 
-      }
-    },
     getMembre: (state) => { return (id, idaIm) => { 
         const e = state.map.get(id)
         if (!e) return null
         if (idaIm < 10000) return e.membres.get(idaIm) || null
         for (const m of e.membres) if (m.ida === idaIm) return m
-        return null
-      }
-    },
-
-    membreC: (state) => {
-      return state.getMembre(state.session.groupeId, state.session.membreId)
-    },
-
-    getMembres: (state) => { return (id) => { 
-        const e = state.map.get(id)
-        return e ? e.membres : null 
-      }
-    },
-
-    // Array des Ids des membres "people" du groupe id
-    getMembreIdEs: (state) => { return (id) => {
-        const a = []
-        const e = state.map.get(id)
-        if (e.membres) e.membres.forEach((m, im) => { if (!m.estAc) a.push(m.na.id) })
-        return a 
-      }
-    },
-
-    membreDeId: (state) => { return (e, id) => {
-        for (const [,m] of e.membres) { if (m.na.id === id) return m }
         return null
       }
     },
@@ -160,20 +117,6 @@ export const useGroupeStore = defineStore('groupe', {
           }
         }    
         return n
-      }
-    },
-
-    animIds: (state) => { return (e) => {
-        const s = new Set()
-        for (const [,m] of e.membres) { if (e.groupe.estAnim(m.ids)) s.add(m.na.id) }
-        return s
-      }
-    },
-
-    actifIds: (state) => { return (e) => {
-        const s = new Set()
-        for (const [,m] of e.membres) { if (e.groupe.estActif(m.ids)) s.add(m.na.id) }
-        return s
       }
     },
 
@@ -206,43 +149,6 @@ export const useGroupeStore = defineStore('groupe', {
           }
         }
         return [lp, lc]
-      }
-    },
-
-    /* Retour true si un des avatars du compte a l'exclusivité */
-    excluEstAvc: (state) => { return (id) => {
-        const e = state.map.get(id)
-        if (!e) return false
-        for (const [ids, m] of e.membres) if (m.estAc) return true
-        return false
-      }
-    },
-
-    /* Retour true si un des avatars du compte peut éditer (auteur / animateur) */
-    avcAA: (state) => { return (id) => {
-        const e = state.map.get(id)
-        if (!e) return false
-        const ast = e.groupe.ast
-        for (const [ids, m] of e.membres) 
-          if (m.estAc && ast[ids] >= 31 && ast[ids] <= 32) return true
-        return false
-      }
-    },
-  
-    /* Map par im des { na, st, avc } des membres du groupe, avc ou auteur-animateur */
-    imNaStMb: (state) => { return (id) => {
-        const r = new Map()
-        const e = state.map.get(id)
-        const ast = e.groupe.ast
-        if (e.membres) e.membres.forEach((m) => { 
-          const st = ast[m.ids]
-          if (m.estAc) {
-            r.set(m.ids, { na: m.na, st, avc:true})
-          } else {
-            if (st >= 31 && st <= 32) r.set(m.ids, { na: m.na, st, avc:false})
-          }
-        })
-        return r
       }
     },
 
@@ -442,29 +348,6 @@ export const useGroupeStore = defineStore('groupe', {
 
     delMembres (idg) {
       this.delMembre(idg)
-    },
-
-    /* Note Exclu : liste des {im, na} des membres aptes à recevoir l'exclusivité
-    - pour les avatars du compte, le na est pris dans le compte
-    - pour les autres,, pris dans membres, S'IL Y EN A UN
-    */
-    nexLm (idg) {
-      const t = []
-      const e = this.egr(idg)
-      const g = e.groupe
-      const aSt = stores.avatar
-      const mavc = aSt.compte.imNaGroupe(idg)
-      for(let im = 1; im < g.flags.length; im++) {
-        if (g.estAuteur(im)) {
-          let na = mavc.get(im) 
-          let avc = na ? true : false
-          if (!na) {
-            const x = e.membres.get(im)
-            if (x) na = x.na}
-          if (na) t.push({im, na, avc})
-        }
-      }
-      return t
     },
 
     setNote (note) {

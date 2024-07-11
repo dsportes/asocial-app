@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { Operation } from './synchro.mjs'
 import { random, gzipB } from './util.mjs'
-import { Cles, d14, isAppExc, ID } from './api.mjs'
+import { Cles, isAppExc, ID } from './api.mjs'
 import { idb } from '../app/db.mjs'
 import { post, getData, putData } from './net.mjs'
 import { RegCles, compile, CV } from './modele.mjs'
@@ -410,7 +410,7 @@ export class GetAvatarPC extends Operation {
   async run (p) { // p: objet Phrase
     try {
       const session = stores.session
-      const hZR = (session.ns * d14) + p.hps1
+      const hZR = p.hps1
       const args = { token: session.authToken, hZR, hZC: p.hpsc }
       const ret = await post(this, 'GetAvatarPC', args)
       let id = 0

@@ -101,8 +101,7 @@
 
 <script>
 import stores from '../stores/stores.mjs'
-import { edvol, dhcool, readFile } from '../app/util.mjs'
-import { styp, sty, dkli, trapex, dhstring } from '../app/util.mjs'
+import { edvol, dhcool, readFile, styp, sty, dkli, trapex, dhstring } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { NouveauFichier } from '../app/operations4.mjs'
@@ -187,7 +186,7 @@ export default {
       step: 1,
       etapes: [this.$t('PNFnvs0'), this.$t('PNFnvs1'), this.$t('PNFnvs2')],
       fileList: null,
-      idf: 0,
+      idf: null,
       sidf: null,
       lstfic: [],
       volsupp: 0,

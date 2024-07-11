@@ -524,9 +524,6 @@ export class OperationS extends Operation {
           setTrigramme(session.nombase, await getTrigramme())
         // la base locale est utilisable en mode synchro, mais peut être VIDE si !this.blOK 
 
-        await idb.loadAvNotes()
-        await idb.loadFetats()
-
         const dav = await idb.getDataSync()
         if (dav) {
           this.supprdsdav(true, nvds, dav, sb, buf)
@@ -667,10 +664,6 @@ export class ConnexionAvion extends OperationS {
       this.dh = 0
 
       const session = stores.session
-
-      // Chargement des "avnotes" des notes ayant des fichiers locaux
-      await idb.loadAvNotes()  
-      await idb.loadFetats()  
 
       const ds = await idb.getDataSync()
 
