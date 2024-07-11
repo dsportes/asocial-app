@@ -51,7 +51,7 @@
               <div v-for="(f, idx) in lstfic" :key="f.idf">
                 <div v-if="!revx || f.nom === nom" 
                   :class="'row cursor-pointer items-center ' + sty(idx)" @click="clickFic(f)">
-                  <q-checkbox class="col-1" v-model="f.sel" dense @click="calculvol" />
+                  <q-checkbox class="col-1" v-model="f.sel" dense/>
                   <div class="col-4">{{f.nom}}</div>
                   <div class="col-2">{{f.info}}</div>
                   <div class="col-2 font-mono text-center">{{edvol(f.lg)}}</div>
@@ -102,7 +102,7 @@
 <script>
 import stores from '../stores/stores.mjs'
 import { edvol, dhcool, readFile } from '../app/util.mjs'
-import { styp, dkli, trapex, dhstring } from '../app/util.mjs'
+import { styp, sty, dkli, trapex, dhstring } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { NouveauFichier } from '../app/operations4.mjs'
@@ -181,6 +181,7 @@ export default {
 
   data () {
     return {
+      revx: true,
       nfic: this.nom || '',
       fic: { nom: '', info: '', lg: 0, type: '', u8: null },
       step: 1,
@@ -249,7 +250,7 @@ export default {
       ui: stores.ui,
       session: stores.session,
       ppSt: stores.pp, 
-      edvol, dhcool, dkli, dhstring, styp, ID
+      edvol, dhcool, dkli, dhstring, styp, sty, ID
     }
   }
 }

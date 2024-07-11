@@ -20,7 +20,7 @@
 
   <div class="q-my-md row justify-center items-center q-gutter-md">
     <q-btn class="q-pa-xs btn" size="md" dense :label="$t('renoncer')" color="primary" @click="ui.fD"/>
-    <bouton-confirm v-if="!session.dialog && !msg" actif :confirmer="noteopx"/>
+    <bouton-confirm v-if="!session.dialog && !msg" actif :confirmer="noteSuppr"/>
   </div>
 
 </q-card>
@@ -33,7 +33,7 @@ import stores from '../stores/stores.mjs'
 import { $t, styp } from '../app/util.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
-import { NoteOpx } from '../app/operations4.mjs'
+import { NoteSuppr } from '../app/operations4.mjs'
 
 export default {
   name: 'NoteConfirme',
@@ -49,9 +49,9 @@ export default {
   },
 
   methods: { 
-    async noteopx () {
+    async noteSuppr () {
       this.ui.fD()
-      await new NoteOpx().run(this.op)
+      await new NoteSuppr().run(this.op)
     }
   },
 

@@ -110,7 +110,9 @@
     <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFsf')}}</div>
-        <div class="q-mt-sm fs-md font-mono text-bold">{{f.nom}} - {{f.info}}</div>
+        <div class="q-mt-sm fs-md font-mono text-bold">
+          <span>{{f.nom}}</span><span v-if="f.info"> - {{f.info}}</span>
+        </div>
       </q-card-section>
       <q-card-actions align="right" class="q-gutter-sm">
         <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD" />
