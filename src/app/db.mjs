@@ -1,4 +1,5 @@
 import Dexie from 'dexie'
+import { ID } from './api.mjs'
 import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import { NoteLocale, FichierLocal, Ficav } from './modele.mjs'
@@ -355,7 +356,8 @@ class IDB {
       if (id) n.id = id
       ppSt.setNote(n)
       if (session.accesIdb) {
-        const buf = await crypter(session.clek, await n.toIdb())
+        const data = await n.toIdb()
+        const buf = await crypter(session.clek, data)
         const cle = u8ToB64(await crypter(session.clek, '' + n.id, 1), true)
         await this.db.loctxt.put({ id: cle, data: buf })
       }
@@ -421,7 +423,7 @@ class IDB {
     try {
       const session = stores.session
       const cle = u8ToB64(await crypter(session.clek, '' + fl.idf, 1), true)
-      const rec = await db.fdata.get(cle)
+      const rec = await this.db.fdata.get(cle)
       if (rec) {
         const buf = await decrypter(session.clek, rec.data)
         return fl.gz ? await ungzipB(buf) : buf
@@ -432,18 +434,18 @@ class IDB {
     }
   }
 
-  async FLdel (id) {
+  async FLdel (idf) {
     const session = stores.session
     const ppSt = stores.pp
     try {
       if (session.accesIdb) {
-        const cle = u8ToB64(await crypter(session.clek, '' + id, 1), true)
+        const cle = u8ToB64(await crypter(session.clek, '' + idf, 1), true)
         await this.db.transaction('rw', ['locfic', 'fdata'], async () => {
           await this.db.locfic.where({ id: cle }).delete()
           await this.db.fdata.where({ id: cle }).delete()
         })
       }
-      ppSt.delFichier(id)
+      ppSt.delFichier(idf)
     } catch (e) {
       throw EX2(e)
     }
@@ -498,7 +500,13 @@ export class IDBbuffer {
     // this.mapSec = {} // map des notes (cle: id/ids, valeur: note) pour gestion des fichiers locaux
   }
 
-  putIDB (row) { if (this.w) this.lmaj.push(row); return row }
+  putIDB (row) { 
+    if (this.w) {
+      row.id = ID.court(row.id)
+      if (row.ids) row.ids = ID.court(row.ids)
+      this.lmaj.push(row)
+    }
+  }
   putFIDB (f) { if (this.w) this.lmajf.push({ id: f.id, data: f.toData() }) }
   purgeFIDB (id) { if (this.w) this.lfic.add(id) }
   purgeAvatarIDB (id) { if (this.w) this.lav.add(id) }

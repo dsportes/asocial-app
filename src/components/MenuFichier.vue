@@ -140,7 +140,7 @@ export default {
 
   props: { 
     note: Object,
-    idf: Number,
+    idf: String,
     aut: Number // 0: lecture seulement, 1:note perso, ida: id de l'auteur pour un groupe
   },
 
@@ -194,14 +194,14 @@ export default {
       return b ? blob : URL.createObjectURL(blob)
     },
 
-    async copierFic (f) {
-      const u8 = await this.note.getFichier(f)
+    async copierFic () {
+      const u8 = await this.note.getFichier(this.f)
       if (!u8) {
         await afficherDiag(this.$t('PNFgetEr'))
         return
       }
       try {
-        await idb.FLset(f.nom, f.info, f.type, u8) // throw AppExc
+        await idb.FLset(this.f.nom, this.f.info, this.f.type, u8) // throw AppExc
       } catch (e) { await trapex (e, 2) } // ferme le dialogue
       this.ui.afficherMessage(this.$t('PNFcpp'))
       this.ppSt.modecc = false

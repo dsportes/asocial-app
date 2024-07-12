@@ -24,18 +24,18 @@
           </div>
           <q-stepper-navigation class="row q-gutter-md justify-end">
             <btn-cond flat @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
-            <btn-cond flat @ok="step=2" :disable="!fic.lg" color="primary" :label="$t('continuer')" class="q-ml-sm" />
+            <btn-cond flat @ok="step=2" :disable="!fic.lg" :label="$t('continuer')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
 
         <q-step :name="2" :title="$t('PNFnv4')" icon="mode_edit" :done="step > 2">
           <div class="q-my-sm font-mono fs-md">{{fic.type}} - {{fic.lg}}o</div>
-          <nom-generique v-if="!nom" v-model="nfic" :init-val="nfic" :label="$t('PNFnv7')" />
-          <nom-generique v-else v-model="info" :label="$t('PNFnv8')"/>
+          <nom-generique v-model="nfic" :init-val="nfic" :label="$t('PNFnv7')" />
+          <nom-generique v-model="info" :label="$t('PNFnv8')"/>
           <q-stepper-navigation class="row q-gutter-md justify-end">
-            <q-btn flat @click="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
-            <q-btn flat @click="step=1" color="primary" :label="$t('precedent')" class="q-ml-sm" />
-            <q-btn flat @click="step=3" :disable="!nfic" color="primary" :label="$t('continuer')" class="q-ml-sm" />
+            <btn-cond flat @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />
+            <btn-cond flat @ok="step=1" :label="$t('precedent')" class="q-ml-sm" />
+            <btn-cond flat @ok="step=3" :disable="!nfic" :label="$t('continuer')" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
 

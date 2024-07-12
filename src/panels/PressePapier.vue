@@ -42,7 +42,7 @@
               <span class="q-ml-md fs-sm font-mono">#{{fic.idf}}</span>
             </div>
             <div class="col-auto row">
-              <div class="col-auto fs-md font-mono">{{fic.type}}</div>
+              <div class="col-auto fs-md font-mono q-mr-sm">{{fic.type}}</div>
               <div class="col-auto fs-md font-mono">{{edvol(fic.lg)}}</div>
             </div>
           </div>
@@ -53,7 +53,7 @@
             <btn-cond v-if="!ppSt.modecc" class="col-auto" :label="$t('enreg')" @ok="enregFic(fic)"
               icon="save"/>
             <btn-cond v-if="ppSt.modecc" class="col-auto" :label="$t('copier')" @ok="selFic(fic)"
-              icon="copy"/>
+              icon="content_copy"/>
             <btn-cond v-if="!ppSt.modecc" @ok="editerfichier(fic)"
               round icon="mode_edit" color="primary"/>
             <btn-cond v-if="!ppSt.modecc" @click="supprfichier(fic)"
@@ -213,14 +213,14 @@ export default ({
       this.ui.fD()
     },
     ajouterfichier () {
-      this.fic = { id: 0, nom: '', info: '', lg: 0, type: '', u8: null }
+      this.fic = { nom: '', info: '', lg: 0, type: '', u8: null }
       this.ui.oD('PPnvfic')
     },
     async editerfichier (fic) {
       this.info = fic.info
       this.nomfic = fic.nom
       const u8 = await fic.getU8()
-      this.fic = { id: fic.id, nom: fic.nom, info: fic.info, 
+      this.fic = { idf: fic.id, nom: fic.nom, info: fic.info, 
         lg: fic.lg, type: fic.type, u8 }
       this.ui.oD('PPnvfic')
     },
@@ -229,7 +229,7 @@ export default ({
       this.ui.oD('PPsupprfic')
     },
     async cfSupprfic () {
-      await idb.FLdel(this.fic.id)
+      await idb.FLdel(this.fic.idf)
       this.ui.fD()
     },
 

@@ -689,6 +689,7 @@ export class ConnexionAvion extends OperationS {
       // Chargement des ficav
       const mf = await idb.loadFicav()
       stores.ficav.loadFicav(mf)
+      await idb.NLfromIDB()
 
       console.log('Connexion compte : ' + session.compteId)
       await sleep(300)
@@ -721,6 +722,7 @@ export class ConnexionSynchroIncognito extends OperationS {
       if (session.synchro) {
         const mf = await idb.loadFicav()
         stores.ficav.loadFicav(mf)
+        await idb.NLfromIDB()
       }
 
       console.log('Connexion compte : ' + session.compteId)

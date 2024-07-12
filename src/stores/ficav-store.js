@@ -25,7 +25,7 @@ export const useFicavStore = defineStore('ficav', {
 
     mapDeNote: (state) => { return (key) => {
         const m = new Map()
-        const lf = state.keys(key)
+        const lf = state.keys.get(key)
         if (lf) lf.forEach(f => { m.set(f.id, state.map.get(f.id))})
         return m
       }
