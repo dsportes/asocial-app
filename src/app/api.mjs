@@ -1,5 +1,6 @@
 /* eslint-disable lines-between-class-members */
 import { encode, decode } from '@msgpack/msgpack'
+import { fromByteArray } from './base64.mjs'
 import { random } from './util.mjs'
 
 export const version = '1'

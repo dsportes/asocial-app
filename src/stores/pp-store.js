@@ -39,7 +39,7 @@ export const usePpStore = defineStore('pp', {
       this.notes.delete(id)
     },
     setFichier (f) {
-      this.fichiers.set(f.id, f)
+      this.fichiers.set(f.idf, f)
     },
     delFichier (id) {
       this.fichiers.delete(id)

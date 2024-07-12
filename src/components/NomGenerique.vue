@@ -6,7 +6,9 @@
       :maxlength="max"
       :placeholder="placeholder || ''"
       :suffix="suffix || ''"
-      @keydown.enter.prevent="ok" type="text">
+      @update:modelValue="(newValue) => $emit('update:modelValue', newValue)"
+      @keydown.enter.prevent="ok"
+      type="text">
       <template v-slot:append>
         <span :class="val.length === 0 ? 'disabled' : ''">
           <q-icon name="cancel" class="cursor-pointer"  @click="val=''"/>
@@ -21,7 +23,7 @@
   </div>
 </template>
 <script>
-import { ref, toRef, watch } from 'vue'
+import { ref, toRef } from 'vue'
 import { interdits, regInt } from '../app/api.mjs'
 
 export default {
@@ -35,43 +37,33 @@ export default {
     lgmin: Number,
     modelValue: String,
     placeholder: String,
-    initVal: String,
-    suffix: String
+    suffix: String,
+    initVal: String
   },
 
   data () {
     return {
-      interdits: interdits
     }
   },
+
   methods: {
     r2 (val) { return val.length < this.min || val.length > this.max ? this.$t('NAe1') : true },
     r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true }
   },
 
   setup (props, context) {
+    const val = toRef(props, 'modelValue')
     const iVal = toRef(props, 'initVal')
-    const initVal = ref((iVal.value || ''))
-    const val = ref(initVal.value || '')
+    if (iVal.value) val.value = iVal.value
     const lgmin = toRef(props, 'lgmin')
     const lgmax = toRef(props, 'lgmax')
     const min = ref(lgmin.value || 0)
     const max = ref(lgmax.value || 32)
-    /* const sfx = toRef(props, 'suffix')
-    console.log('suffix=' + sfx.value) */
 
-    function ok () {
-      context.emit('update:modelValue', val.value)
-    }
-
-    watch(val, (ap, av) => { ok()})
-
-    watch(initVal, (ap, av) => { 
-      val.value = ap
-    })
+    function ok () { context.emit('update:modelValue', val.value) }
 
     return {
-      val, min, max, ok
+      val, min, max, ok, interdits
     }
   }
 }
@@ -81,14 +73,11 @@ export default {
 @import '../css/input.sass'
 ::v-deep(.q-field__bottom)
   font-size: 0.9rem
-  color: $warning
+  color: inherit !important
   font-style: italic
   bottom: 5px !important
 ::v-deep(.q-field__native)
   font-size: 1rem
   font-family: "Roboto Mono"
-  /* color: #1B5E20 !important */
-::v-deep(.q-field--dark .q-field__native)
-  /* color: #388E3C !important */
 
 </style>

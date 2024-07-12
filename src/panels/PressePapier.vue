@@ -87,9 +87,9 @@
           max-file-size="50000000" max-file="1"/>
         <div v-if="fic.lg" class="font-mono fs-sm">{{fic.nom}} - {{fic.type}} - {{fic.lg}}o</div>
         <nom-generique class="q-mt-md fs-md" v-model="nomfic" :label="$t('PPndf')"
-          :init-val="fic.nom" :lgmin="4" :lgmax="32" :placeholder="$t('PPphf')"/>
+          :lgmin="min" :lgmax="max1" :placeholder="$t('PPphf')"/>
         <nom-generique class="q-mt-md fs-md" v-model="info" :label="$t('PPapf')"
-          :init-val="fic.info || ''" :lgmin="0" :lgmax="40" :placeholder="$t('PPphf')"/>
+          :lgmin="0" :lgmax="max2" :placeholder="$t('PPphf')"/>
       </q-card-section>
       <q-card-actions align="right" class="q-gutter-sm">
         <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
@@ -131,6 +131,7 @@
 </template>
 
 <script>
+import { ref } from 'vue'
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
@@ -150,18 +151,18 @@ export default ({
     return {
       dhcool: dhcool,
       edvol: edvol,
-      fileList: null,
       info: '',
       nomfic: '',
       rec: null,
       fic: { nom: '', info: '', lg: 0, type: '', u8: null },
       txt: '',
-      interdits: interdits
-    }  
+      min: 4,
+      max1: 32,
+      max2: 16
+    } 
   },
 
   computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
     valide () { return this.fic.lg && this.nomfic && this.r1(this.nomfic) === true && this.r1(this.info) === true }
   },
 
@@ -169,20 +170,20 @@ export default ({
     async fileList (file) {
       if (file) {
         const { size, name, type, u8 } = await readFile(file, true)
-        this.fic.nom = name
-        this.nomfic = name
-        this.fic.info = ''
-        this.info = ''
-        this.fic.lg = size
-        this.fic.type = type
-        this.fic.u8 = u8
+        this.fic = {nom: name, lg: size, type, u8 }
       }
+    },
+    fic (ap) {
+      this.nomfic = ap.nom || ''
+      this.info = ''
+      this.fileList = null
     }
   },
 
   methods: {
-    r2 (val) { return val.length !== 0 || this.$t('NAe1') },
+    r2 (val) { return val.length < this.min || val.length > this.max ? this.$t('NAe1') : true },
     r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true },
+
     ajouternote () {
       this.rec = null
       this.txt = ''
@@ -208,7 +209,7 @@ export default ({
 
     async majfic () {
       const f = this.fic
-      await idb.FLset(this.nomfic, this.info, f.type, f.u8, this.fic.id || 0)
+      await idb.FLset(this.nomfic, this.info, f.type, f.u8)
       this.ui.fD()
     },
     ajouterfichier () {
@@ -278,11 +279,12 @@ export default ({
     const ppSt = stores.pp
     const cfg = stores.config
     const lgmax = cfg.maxlgtextenote
+    const fileList = ref(null)
 
     return {
       dkli, styp,
       session, ppSt, ui,
-      lgmax
+      lgmax, fileList, interdits
     }
   }
 })
