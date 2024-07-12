@@ -20,7 +20,7 @@
         <span>{{$t('PNFsuppr')}}</span>
       </q-item>
       <q-item clickable v-close-popup  @click="ui.oD('DFouvrir', idc)" class="row items-center">
-        <q-icon color="primary" size="md" name="more_horiz" />
+        <q-icon color="primary" size="md" name="airplanemode_active" />
         <span>{{$t('PNFdetail')}}</span>
       </q-item>
     </q-list>
@@ -47,58 +47,58 @@
           <span v-if="f.lg" >{{edvol(f.lg)}}</span>
         </div>
 
-        <div v-if="session.accesIdb" class="q-mx-xs q-my-sm q-pa-xs bord1">
+        <div v-if="session.accesIdb" class="q-mx-xs q-my-sm q-pa-xs bord1 items-center">
           <div class="titre-lg">{{$t('DFavion')}}</div>
-          <div class="row items-start">
-            <div class="col-6 text-right">{{$('DFavn')}}</div>
+          <div class="row items-center">
+            <div class="col-7 text-right">{{$t('DFavn')}}</div>
             <div :class="'col-1 text-center ' + (avn ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non2')}}</div>
-            <q-toggle v-if="!ro" class="col-5 text-center" indeterminate-value="nc" v-model="xavn" 
+            <q-toggle class="col-4" indeterminate-value="nc" v-model="xavn" 
               toggle-indeterminate :label="oxn(xavn)" :color="clr(xavn)"/>
           </div>
-          <div class="row items-start">
-            <div class="col-6 text-right">{{$('DFav')}}</div>
+          <div class="row items-center">
+            <div class="col-7 text-right">{{$t('DFav')}}</div>
             <div :class="'col-1 text-center ' + (av ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non2')}}</div>
-            <q-toggle v-if="!ro" class="col-5 text-center" indeterminate-value="nc" v-model="xav" 
+            <q-toggle class="col-4" indeterminate-value="nc" v-model="xav" 
               toggle-indeterminate :label="oxn(xav)" :color="clr(xav)"/>
           </div>
-          <div v-if="!ro" class="row q-my-sm justify-end q-gutter-sm items-start">
-            <bouton-undo class="col-1 text-center" :cond="xavn !== avn" 
+          <div class="row q-my-sm justify-end q-gutter-sm items-center">
+            <bouton-undo class="col-1 text-center" :cond="modifAv" 
               @click="xavn = '?'; xav = '?'"/>
             <btn-cond :label="$t('valider')" :disable="!modifAv" icon="check" @ok="validerAv"/>
           </div>
         </div>
 
-      <div v-if="!fa.fake" class="q-my-sm bord1"> <!-- Etat du téléchargement -->
-        <div v-if="fa.dhdc === 0" class="titre-md">{{$t('DFchgdl')}}</div>
-        <div v-else>
-          <div class="titre-md">
-            <span>{{$t('DFchgdem', [dhcool(fa.dhdc, true)])}}</span>
-            <span v-if="fa.nbr" class="q-ml-sm">- {{$t('DFretry', [fa.nbr])}}</span>
-            <span v-if="!fa.exc">
-              <span v-if="fa.if === faSt.idfdl" class="q-ml-sm">- {{$t('DFchgec')}}</span>
-              <span v-else class="q-ml-sm">- {{$t('DFchgatt')}}</span>
-            </span>
-          </div>
-          <div v-if="fa.exc">
-            <div class="titre-md msg">
-              {{$t('DFerr', [fa.exc[0] === 404 ? $t('ER404') : '' + fa.exc[0]])}}
+        <div v-if="!fa.fake" class="q-my-sm bord1"> <!-- Etat du téléchargement -->
+          <div v-if="fa.dhdc === 0" class="titre-md">{{$t('DFchgdl')}}</div>
+          <div v-else>
+            <div class="titre-md">
+              <span>{{$t('DFchgdem', [dhcool(fa.dhdc, true)])}}</span>
+              <span v-if="fa.nbr" class="q-ml-sm">- {{$t('DFretry', [fa.nbr])}}</span>
+              <span v-if="!fa.exc">
+                <span v-if="fa.if === faSt.idfdl" class="q-ml-sm">- {{$t('DFchgec')}}</span>
+                <span v-else class="q-ml-sm">- {{$t('DFchgatt')}}</span>
+              </span>
             </div>
-            <div class="q-my-xs q-ml-md font-mono fs-sm">
-              {{$t('DFerr2', [fa.exc[0] === 404 ? fa.exc[1] : $t('EX' + fa.exc[0])])}}
-            </div>
-            <div class="titre-md text-italic text-bold">
-              {{$t(fa.nbr < 3 ? 'DFretaut' : 'DFnoret')}}
-            </div>
-            <div class="q-my-sm text-right">
-              <btn-cond :label="$t('retry')" @ok="retry"/>
+            <div v-if="fa.exc">
+              <div class="titre-md msg">
+                {{$t('DFerr', [fa.exc[0] === 404 ? $t('ER404') : '' + fa.exc[0]])}}
+              </div>
+              <div class="q-my-xs q-ml-md font-mono fs-sm">
+                {{$t('DFerr2', [fa.exc[0] === 404 ? fa.exc[1] : $t('EX' + fa.exc[0])])}}
+              </div>
+              <div class="titre-md text-italic text-bold">
+                {{$t(fa.nbr < 3 ? 'DFretaut' : 'DFnoret')}}
+              </div>
+              <div class="q-my-sm text-right">
+                <btn-cond :label="$t('retry')" @ok="retry"/>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div v-if="faSt.getDataDeCache(f)" class="titre-md text-italic q-y-my-sm">
-        {{$t('DFdispm')}}
-      </div>
+        <div v-if="faSt.getDataDeCache(f)" class="titre-md text-italic q-y-my-sm">
+          {{$t('DFdispm')}}
+        </div>
 
       </q-page>
     </q-page-container>
@@ -141,6 +141,7 @@ export default {
   props: { 
     note: Object,
     idf: String,
+    ro: String, // raison du read-only
     aut: Number // 0: lecture seulement, 1:note perso, ida: id de l'auteur pour un groupe
   },
 
@@ -159,6 +160,8 @@ export default {
   watch: {
     av (ap, av) { this.xav = '?' },
     avn (ap, av) { this.xavn = '?' },
+    xav (ap, av) { if (ap !== '?' && ap === this.av) this.xav = '?' },
+    xavn (ap, av) { if (ap !== '?' && ap === this.avn) this.xavn = '?' },
   },
 
   data () {
@@ -169,13 +172,13 @@ export default {
   },
 
   methods: {
-    oxn(b) { return b === true ? this.t('oui1') : (b === false ? this.t('non1') : this.t('inchange')) },
+    oxn(b) { return b === true ? this.$t('oui1') : (b === false ? this.$t('non1') : this.$t('inchange')) },
     clr (b) { return b === '?' ? 'warning' : 'grey-5'},
 
     async validerAv () {
       const b1 = this.xavn === '?' ? this.avn : this.xavn
-      const b2 = this.xav === '?' ? this.av : this.xav
-      await faSt.setAV (this.note, this.fnom, b1, this.idf, b2)
+      if (this.xav !== '?') await this.faSt.setAV (this.note, this.f.nom, b1, this.f.idf, this.xav)
+      else await this.faSt.setAV (this.note, this.f.nom, b1)
     },
 
     async retry () {
@@ -251,4 +254,5 @@ export default {
 .bord1
   border: 1px solid $grey-5
   border-radius: 5px
+  overflow: hidden
 </style>

@@ -67,7 +67,7 @@
 
   <!-- Dialogue de création d'un nouveau fichier -->
   <nouveau-fichier v-if="ui.d.NFouvrir" :note="note" :nom="nomf || ''" 
-    :aut="ro ? 0 : (estGr ? aut : 1)" :pasheb="pasHeb"/>
+    :aut="ro ? 0 : (estGr ? aut : 1)" :pasheb="pasHeb" :ro="ro"/>
 
 </q-layout>
 </q-dialog>

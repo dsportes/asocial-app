@@ -140,6 +140,7 @@ export default {
   contact: 'Simple contact',
   hashtags: 'Hashtags',
   invitation: 'Invitation',
+  inchange: 'inchangé',
   ER404: 'Le serveur de fichier n\'a pas pu délivrer le contenu de fichier',
 
   condA: 'Action impossible, l\'application est en mode "avion".',
@@ -1393,7 +1394,7 @@ export default {
   PNFaff: 'Afficher dans un nouvel onglet',
   PNFenreg: 'Enregistrer une copie locale',
   PNFsuppr: 'Supprimer définitivement',
-  PNFdetail: 'Détail, autres actions ...',
+  PNFdetail: 'Accessibilité en avion ...',
   PNFversion: 'Version',
   PNFavion1: 'Dernière version visible en avion',
 

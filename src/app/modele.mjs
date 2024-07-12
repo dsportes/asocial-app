@@ -1522,7 +1522,7 @@ export class Ficav {
     f.exc = null
     f.nbr = 0
     f.ref = [note.id, note.ids]
-    f.nom = data.nom
+    f.nom = nf.nom
     f.av = av
     f.avn = avn
     return f

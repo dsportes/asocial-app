@@ -73,7 +73,7 @@ export const useFicavStore = defineStore('ficav', {
     // prochain téléchargement à traiter
     prochain: (state) => {
       const now = Date.now()
-      const fx = null
+      let fx = null
       for(const idf of state.queue) {
         const f = state.map.get(idf)
         if (f.dhdc < now && (!fx || (f.dhdc < fx.dhdc))) fx = f
@@ -95,8 +95,8 @@ export const useFicavStore = defineStore('ficav', {
     },
 
     setFicav (f) {
-      if (f.dhdc && !state.queue.has(f.idf)) state.queue.add(f.idf)
-      if (!f.dhdc && state.queue.has(f.idf)) state.queue.delete(f.idf)
+      if (f.dhdc && !this.queue.has(f.id)) this.queue.add(f.id)
+      if (!f.dhdc && this.queue.has(f.id)) this.queue.delete(f.id)
       this.map.set(f.id, f)
       let e = this.keys.get(f.key); if (!e) { e = new Set(); this.keys.set(f.key, e) }
       e.add(f.id)
@@ -259,10 +259,19 @@ export const useFicavStore = defineStore('ficav', {
         lfa = this.lfDeNom(note, nom) // lfa est recalculée après ajout / maj du plus récent
       }
 
-      // Mettre à jour les av des ficav
+      if (idf) { // changement de av pour idf
+        if (!this.map.has(idf)) { // n'avait pas de ficav
+          const fa = Ficav.fromNote(note, idf, av, avn) // création
+          this.setFicav(fa)
+          maj.push(fa)
+        }
+      }
+
+      // Mettre à jour les avn des ficav existants (s'il a été créé juste ci-dessus, il est ok et pas dans lfa)
       lfa.forEach(fa => {
-        if (fa.id === idf && fa.av !== av) { // normalement ceux mis à jour ci-dessus ont déjà leur av à jour
-          fa.av = av
+        if ((fa.idf === idf && fa.av !== av) || fa.avn !== avn) { // normalement ceux mis à jour ci-dessus ont déjà leur av à jour
+          fa.avn = avn
+          if (fa.idf === idf) fa.av = av
           this.setFicav(fa)
           maj.push(fa)
         }
