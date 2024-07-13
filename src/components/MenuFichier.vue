@@ -15,11 +15,11 @@
         <q-icon color="primary" size="md" name="save" />
         <span>{{$t('PNFenreg')}}</span>
       </q-item>
-      <q-item :clickable="aut !== 0" v-close-popup  @click="ui.oD('NFsupprfichier')" class="row items-center">
+      <q-item :clickable="aut !== 0" v-close-popup  @click="ovSuppr" class="row items-center">
         <q-icon color="warning" size="md" name="delete" />
         <span>{{$t('PNFsuppr')}}</span>
       </q-item>
-      <q-item clickable v-close-popup  @click="ui.oD('DFouvrir', idc)" class="row items-center">
+      <q-item clickable v-close-popup  @click="ouvrirDF" class="row items-center">
         <q-icon color="primary" size="md" name="airplanemode_active" />
         <span>{{$t('PNFdetail')}}</span>
       </q-item>
@@ -52,14 +52,16 @@
           <div class="row items-center">
             <div class="col-7 text-right">{{$t('DFavn')}}</div>
             <div :class="'col-1 text-center ' + (avn ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non2')}}</div>
-            <q-toggle class="col-4" indeterminate-value="nc" v-model="xavn" 
-              toggle-indeterminate :label="oxn(xavn)" :color="clr(xavn)"/>
+            <div class="q-pl-xs">
+              <q-toggle :class="'col-4 ' + clr1" indeterminate-value="?" color="grey-5" v-model="xavn" :label="oxn1" />
+            </div>
           </div>
           <div class="row items-center">
             <div class="col-7 text-right">{{$t('DFav')}}</div>
-            <div :class="'col-1 text-center ' + (av ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non2')}}</div>
-            <q-toggle class="col-4" indeterminate-value="nc" v-model="xav" 
-              toggle-indeterminate :label="oxn(xav)" :color="clr(xav)"/>
+            <div :class="'col-1 text-center ' + (av ? 'msg' : '')">{{$t(av ? 'oui1' : 'non2')}}</div>
+            <div class="q-pl-xs">
+              <q-toggle :class="'col-4 ' + clr2" indeterminate-value="?" color="grey-5" v-model="xav" :label="oxn2" />
+            </div>
           </div>
           <div class="row q-my-sm justify-end q-gutter-sm items-center">
             <bouton-undo class="col-1 text-center" :cond="modifAv" 
@@ -106,12 +108,13 @@
   </q-dialog>
 
   <!-- Confirmation de suppression -->
-  <q-dialog v-model="ui.d.NFsupprfichier" persistent>
+  <q-dialog v-model="ui.d.NFsupprfichier[idc]" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFsf')}}</div>
         <div class="q-mt-sm fs-md font-mono text-bold">
           <span>{{f.nom}}</span><span v-if="f.info"> - {{f.info}}</span>
+          <span> (#{{f.idf}})</span>
         </div>
       </q-card-section>
       <q-card-actions align="right" class="q-gutter-sm">
@@ -152,16 +155,19 @@ export default {
     fa () { return this.faSt.map.get(this.idf) || { fake: true } },
     fpr () { return this.f.fake ?  { fake: true } : this.note.fnom.get(this.f.nom)[0] },
     avn () { const fax = this.fpr ? this.faSt.map.get(this.fpr.idf) : null; return fax ? fax.avn : false },
-    av () { return this.fa.avn || false },
-    modifAv () { return (this.xav !== '?' && this.xav !== this.av) || 
-      (this.xavn !== '?' && this.xavn !== this.avn)}
+    av () { return this.fa.av || false },
+    modifAv () { return !(this.i1 && this.i2)},
+    i1 () { return this.avn === this.xavn || this.xavn === '?' },
+    i2 () { return this.av === this.xav || this.xav === '?' },
+    oxn1 () { return this.i1 ? this.$t('inchange') : this.$t(this.xavn ? 'oui2' : 'non2') },
+    oxn2 () { return this.i2 ? this.$t('inchange') : this.$t(this.xav ? 'oui2' : 'non2') },
+    clr1 () { return this.i1 ? '' : 'bg-warning'},
+    clr2 () { return this.i2 ? '' : 'bg-warning'}
   },
 
   watch: {
     av (ap, av) { this.xav = '?' },
-    avn (ap, av) { this.xavn = '?' },
-    xav (ap, av) { if (ap !== '?' && ap === this.av) this.xav = '?' },
-    xavn (ap, av) { if (ap !== '?' && ap === this.avn) this.xavn = '?' },
+    avn (ap, av) { this.xavn = '?' }
   },
 
   data () {
@@ -172,12 +178,15 @@ export default {
   },
 
   methods: {
-    oxn(b) { return b === true ? this.$t('oui1') : (b === false ? this.$t('non1') : this.$t('inchange')) },
-    clr (b) { return b === '?' ? 'warning' : 'grey-5'},
+    ouvrirDF () {
+      this.xav = '?'
+      this.xavn = '?'
+      this.ui.oD('DFouvrir', this.idc)
+    },
 
     async validerAv () {
-      const b1 = this.xavn === '?' ? this.avn : this.xavn
-      if (this.xav !== '?') await this.faSt.setAV (this.note, this.f.nom, b1, this.f.idf, this.xav)
+      const b1 = this.xavn === '?' || this.xavn === this.avn ? this.avn : this.xavn
+      if (this.xav !== '?' && this.xav !== this.av) await this.faSt.setAV (this.note, this.f.nom, b1, this.f.idf, this.xav)
       else await this.faSt.setAV (this.note, this.f.nom, b1)
     },
 
@@ -185,8 +194,15 @@ export default {
       await faSt.retry(this.idf)
     },
 
+    ovSuppr () {
+      this.ui.oD('NFsupprfichier', this.idc)
+    },
+
     async cfSuppr() {
+      const f = this.note.mfa.get(this.idf)
+      const nom = f ? f.nom : ''
       await new SupprFichier().run(this.note, this.idf, this.aut)
+      await this.faSt.delFic(this.note, nom, this.idf)
       this.ui.fD()
     },
 

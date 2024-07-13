@@ -25,7 +25,7 @@ export default {
   oui1: 'OUI',
   oui2: 'oui',
   non1: 'NON',
-  non2: 'non',
+  non2: 'NON',
   OK: 'OK',
   ok: 'OK',
   go: 'GO',

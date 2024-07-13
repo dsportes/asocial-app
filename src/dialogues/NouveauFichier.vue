@@ -30,7 +30,7 @@
 
         <q-step :name="2" :title="$t('PNFnv4')" icon="mode_edit" :done="step > 2">
           <div class="q-my-sm font-mono fs-md">{{fic.type}} - {{fic.lg}}o</div>
-          <nom-generique v-model="nfic" :init-val="nfic" :label="$t('PNFnv7')" />
+          <nom-generique v-model="nfic" :label="$t('PNFnv7')" />
           <nom-generique v-model="info" :label="$t('PNFnv8')"/>
           <q-stepper-navigation class="row q-gutter-md justify-end">
             <btn-cond flat @ok="ui.fD" color="warning" :label="$t('renoncer')" class="q-ml-sm" />

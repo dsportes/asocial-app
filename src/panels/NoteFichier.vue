@@ -40,22 +40,24 @@
         <div class="row justify-between full-width q-my-sm">
           <div class="col q-pr-md">
             <span class="text-bold titre-md">{{nom}}</span>
-            <q-icon v-if="mpn.get(nom)[0].fa.avn" name="airplanemode_active" size="md" color="warning"/>
           </div>
           <btn-cond class="col-auto" :disable="groupe && !aut" icon="add" 
             :label="$t('PNFnvr')" @ok="nouveau(nom)"/>
         </div>
-        <div v-for="e in mpn.get(nom)" :key="e.f.idf" class="q-ml-lg">
-          <div class="row justify-between full-width">
-            <div class="col">
-              <span class="font-mono q-mr-sm">{{e.f.idf}}</span>
-              <span class="q-mr-sm">{{e.f.type}}</span>
+        <div v-for="e in mpn.get(nom)" :key="e.f.idf" class="q-ml-lg q-my-xs">
+          <div class="row justify-between full-width items-center">
+            <div class="col-6 row q-gutter-xs">
+              <span v-if="e.f.info" class="font-mono">{{e.f.info}}</span>
+              <span class="font-mono">#{{e.f.idf}}</span>
+              <span>{{e.f.type}}</span>
               <span>{{edvol(e.f.lg)}}</span>
             </div>
-            <div class="col-auto">
-              <span class="font-mono fs-sm q-mr-sm">{{dhcool(e.f.dh, true)}}</span>
-              <q-icon class="q-ml-xs" v-if="e.fa.av" name="airplanemode_active" size="md" color="primary"/>
-              <menu-fichier class="q-ml-xs" :idf="e.f.idf" 
+            <div class="col-4 font-mono fs-sm text-center">{{dhcool(e.f.dh, true)}}</div>
+            <div class="col-2 row q-gutter-xs justify-end">
+              <q-icon v-if="mpn.get(nom)[0].fa.avn && mpn.get(nom)[0].f.idf === e.f.idf" 
+                name="airplanemode_active" size="sm" color="warning"/>
+              <q-icon v-if="e.fa.av" name="airplanemode_active" size="sm" color="primary"/>
+              <menu-fichier :idf="e.f.idf" class="self-start"
                 :aut="ro ? 0 : (estGr ? aut : 1)" :note="note"/>
             </div>
           </div>

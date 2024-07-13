@@ -114,7 +114,7 @@ export const useUiStore = defineStore('ui', {
       PCdialtk: {}, // PanelCredits
       SHfs: {}, // ShowHtml
       NFouvrir: false, // NouveauFichier
-      NFsupprfichier: false, // NoteFichier
+      NFsupprfichier: {}, // NoteFichier
       NFconfirmav1: false,
       NFconfirmav2: false,
       DFouvrir: {}, // DetailFichier

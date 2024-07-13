@@ -322,7 +322,7 @@ class IDB {
         }
         for (const idk of arg.idgcno)
           await this.db.collections.where({id: idk, n: IDB.cnoms.notes}).delete()
-        for (const idk of arg.idgcno) {
+        for (const idk of arg.idf) {
           await this.db.ficav.where({id: idk}).delete()
           await this.db.fdata.where({id: idk}).delete()
         }
@@ -456,7 +456,7 @@ class IDB {
     try {
       const session = stores.session
       const k = u8ToB64(await crypter(session.clek, '' + f.id, 1), true)
-      const dataf = await crypter(clek, new Uint8Array(encode(f.toRow())))
+      const dataf = await crypter(session.clek, new Uint8Array(encode(f.toRow())))
       await this.db.transaction('rw', ['ficav', 'fdata'], async () => {
         await this.db.ficav.put( { id: k, data: dataf } )
         if (buf) await this.db.fdata.put( { id: k, data: buf } )
@@ -507,7 +507,7 @@ export class IDBbuffer {
       this.lmaj.push(row)
     }
   }
-  putFIDB (f) { if (this.w) this.lmajf.push({ id: f.id, data: f.toData() }) }
+  putFIDB (f) { if (this.w) this.lmajf.push(f.toRow()) }
   purgeFIDB (id) { if (this.w) this.lfic.add(id) }
   purgeAvatarIDB (id) { if (this.w) this.lav.add(id) }
   purgeGroupeIDB (id) { if (this.w) this.lgr.add(id) }
@@ -537,7 +537,7 @@ export class IDBbuffer {
     for(const row of this.lmajf) {
       arg.ficav.push({ 
         id: u8ToB64(await crypter(clek, '' + row.id, 1), true),
-        data: await crypter(clek, new Uint8Array(encode(row.data)))
+        data: await crypter(clek, new Uint8Array(encode(row)))
       })
     }
 

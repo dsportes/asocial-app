@@ -4,7 +4,7 @@ import { encode } from '@msgpack/msgpack'
 import stores from './stores.mjs'
 import { useI18n } from 'vue-i18n'
 import { crypter, decrypter } from '../app/webcrypto.mjs'
-import { u8ToB64, intToB64, rnd6, $t } from '../app/util.mjs'
+import { u8ToB64, $t } from '../app/util.mjs'
 import { AMJ, ID, AppExc, A_SRV } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
 import { WS } from '../app/ws.mjs'
@@ -309,7 +309,7 @@ export const useSessionStore = defineStore('session', {
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
         if (stores.config.hasWS) {
-          this.sessionId = sessionId || intToB64(rnd6())
+          this.sessionId = sessionId || ID.rnd()
           token.sessionId = this.sessionId
         }
         token.hXR = phrase ? phrase.hps1 : null

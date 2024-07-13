@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 import stores from './stores.mjs'
 import { splitPK } from '../app/util.mjs'
-import { getData } from '../app/net.mjs'
+import { getData, post } from '../app/net.mjs'
 import { appexc } from '../app/api.mjs'
 import { IDBbuffer, idb } from '../app/db.mjs'
 import { Ficav } from '../app/modele.mjs'
@@ -26,7 +26,7 @@ export const useFicavStore = defineStore('ficav', {
     mapDeNote: (state) => { return (key) => {
         const m = new Map()
         const lf = state.keys.get(key)
-        if (lf) lf.forEach(f => { m.set(f.id, state.map.get(f.id))})
+        if (lf) lf.forEach(id => { m.set(id, state.map.get(id))})
         return m
       }
     },
@@ -37,7 +37,7 @@ export const useFicavStore = defineStore('ficav', {
         const lf = state.keys.get(note.key)
         if (lf) lf.forEach(idf => { 
           const f = state.map.get(idf)
-          if (f.nom === nom) l.push[f]
+          if (f.nom === nom) l.push(f)
         })
         l.sort((a,b) => { return a.dh > b.dh ? -1 : (a.dh < b.dh ? 1 : 0) })
         return l
@@ -90,8 +90,9 @@ export const useFicavStore = defineStore('ficav', {
 
   actions: {
     putDataEnCache (idf, data) {
+      if (this.getDataDeCache(idf)) return
       if (this.cacheDL.length > 5) this.cacheDL.pop()
-      this.cacheDL.unshidt([idf, data])
+      this.cacheDL.unshift([idf, data])
     },
 
     setFicav (f) {
@@ -110,8 +111,9 @@ export const useFicavStore = defineStore('ficav', {
           e.delete(idf)
           if (!e.size) this.keys.delete(f.key)
         }
+        this.map.delete(idf)
       }
-      state.queue.delete(f.idf)
+      this.queue.delete(idf)
     },
 
     /* Chargement depuis IDB: lfav est la liste des ficav enregistrés en IDB. Pour chacun:
@@ -160,9 +162,10 @@ export const useFicavStore = defineStore('ficav', {
             }
           }
           // Pour chaque ficav
-          for(const fa of m2) { // conserver les ficav ayant un av et pour lesquels il existe une note
-            if (fa.id === df.idf) continue // traité ci-avant avec avn
-            if (!fa.av || !note.mfa[fa.id]) buf.purgeFIDB(fa.idf)
+          for(const fa of m2) { 
+            // Supprimer les ficav sans av ou sans note
+            if (!fa.av || !note.mfa.has(fa.id)) buf.purgeFIDB(fa.id)
+            else this.setFicav(fa)
           }
         }
       }
@@ -223,6 +226,38 @@ export const useFicavStore = defineStore('ficav', {
       }
     },
 
+    // Depuis UI: suppression d'un fichier
+    async delFic (note, nom, idf) {
+      const fa = this.map.get(idf)
+      
+      const maj = []
+      const del = []
+      const avn = fa ? fa.avn : false
+      if (fa) {
+        del.push(fa.id)
+        this.delFicav(fa.id)
+      }
+      let lfa = this.lfDeNom(note, nom) // liste des ficav restant de ce nom
+
+      // Mettre à jour les avn des ficav existants (s'il a été créé juste ci-dessus, il est ok et pas dans lfa)
+      lfa.forEach(f => {
+        if (avn) {
+          if (!f.avn) { // Ne drait pas se produire
+            fa.avn = avn
+            this.setFicav(fa)
+            maj.push(fa)
+          }
+        } else {
+          if (!f.av) { // inutile
+            del.push(f.id)
+            this.delFicav(f.id)
+          }
+        }
+      })
+ 
+      await this.save(maj, del)
+    },
+
     // Invoqué depuis UI. L'utilisateur positionne ou enlève les indicateurs d'un fichier
     async setAV (note, nom, avn, idf, av) { // si av, idf indique pour lequel
       const maj = []
@@ -250,7 +285,7 @@ export const useFicavStore = defineStore('ficav', {
           maj.push(fa)
         } else { // le ficav du plus récent existait
           if (!fa.avn || (fa.idf === idf && fa.av !== av)) { // ses indicateurs peuvent avoir besoin d'être mis à jour
-            if (fa.idf === idf) fa.av = av
+            if (fa.id === idf) fa.av = av
             fa.avn = true
             this.setFicav(fa)
             maj.push(fa)
@@ -260,18 +295,27 @@ export const useFicavStore = defineStore('ficav', {
       }
 
       if (idf) { // changement de av pour idf
-        if (!this.map.has(idf)) { // n'avait pas de ficav
-          const fa = Ficav.fromNote(note, idf, av, avn) // création
+        let fa = this.map.get(idf)
+        if (av || avn) { // il faut un fa
+          if (!fa) { // n'avait pas de ficav  création 
+            fa = Ficav.fromNote(note, idf, av, avn)
+          } else {
+            fa.av = av
+            fa.avn = avn
+          }
           this.setFicav(fa)
           maj.push(fa)
+        } else { // ni av, ni avn, si le ficav existe, le supprimer
+          if (fa) { del.push(fa.id); this.delFicav(fa.id) }
         }
+        lfa = this.lfDeNom(note, nom) // lfa est recalculée après maj ci-dessus
       }
 
       // Mettre à jour les avn des ficav existants (s'il a été créé juste ci-dessus, il est ok et pas dans lfa)
       lfa.forEach(fa => {
-        if ((fa.idf === idf && fa.av !== av) || fa.avn !== avn) { // normalement ceux mis à jour ci-dessus ont déjà leur av à jour
+        if ((fa.id === idf && fa.av !== av) || fa.avn !== avn) { // normalement ceux mis à jour ci-dessus ont déjà leur av à jour
           fa.avn = avn
-          if (fa.idf === idf) fa.av = av
+          if (fa.id === idf) fa.av = av
           this.setFicav(fa)
           maj.push(fa)
         }
@@ -286,8 +330,7 @@ export const useFicavStore = defineStore('ficav', {
       let m = this.mapDeNote(note.key) // map des ficav relatifs à cette note
 
       // suppression des ficav ayant des noms inconnus de la note
-      m.forEach(idf => {
-        const fa = this.map.get(idf)
+      m.forEach(fa => {
         if (!note.fnom.has(fa.nom)) {
           idbuf.purgeFIDB(fa.id)
           this.delFicav(fa.id)
@@ -316,7 +359,7 @@ export const useFicavStore = defineStore('ficav', {
 
         // suppression des autres ficav éventuellement inutiles
         lfa.forEach(fa => {
-          const nf = note.map.get(fa.idf)
+          const nf = note.mfa.get(fa.id)
           if (!nf) { // fa inutile
             idbuf.purgeFIDB(fa.id)
             this.delFicav(fa.id)  
@@ -361,14 +404,14 @@ export const useFicavStore = defineStore('ficav', {
           }
           try {
             this.idfdl = fa.id
-            let buf = getDataDeCache(fa.idf)
+            let buf = this.getDataDeCache(fa.id)
             if (buf) {
-              await this.ok(fa.idf, buf)
+              await this.ok(fa.id, buf)
               this.idfdl = 0
               continue
             }
             const args = { 
-              token: session.authToken, 
+              token: this.session.authToken, 
               id: fa.ref[0], 
               ids: fa.ref[1],
               idf: fa.id
@@ -378,17 +421,17 @@ export const useFicavStore = defineStore('ficav', {
             try {
               buf = await getData(ret.url)
               if (sessionId !== this.session.sessionId) break
-              await this.ok(fa.idf, buf)
+              await this.ok(fa.id, buf)
               if (stores.config.DEBUG) console.log(`OK chargement : ${fa.idf} ${fa.nom}#${fa.info}`)
             } catch (e) {
               if (sessionId !== this.session.sessionId) break
-              await this.ko(fa.idf, [404, e.message])
+              await this.ko(fa.id, [404, e.message])
             }
             this.idfdl = 0
           } catch (ex) {
             if (sessionId !== this.session.sessionId) break
             const exc = appexc(ex)
-            await this.ko(fa.idf, [exc.code, ''])
+            await this.ko(fa.id, [exc.code, ''])
             this.idfdl = 0
           }
         }

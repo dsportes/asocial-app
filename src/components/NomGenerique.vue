@@ -5,7 +5,6 @@
       :rules="[r1,r2]" 
       :maxlength="max"
       :placeholder="placeholder || ''"
-      :suffix="suffix || ''"
       @update:modelValue="(newValue) => $emit('update:modelValue', newValue)"
       @keydown.enter.prevent="ok"
       type="text">
@@ -36,9 +35,7 @@ export default {
     lgmax: Number,
     lgmin: Number,
     modelValue: String,
-    placeholder: String,
-    suffix: String,
-    initVal: String
+    placeholder: String
   },
 
   data () {
@@ -53,8 +50,6 @@ export default {
 
   setup (props, context) {
     const val = toRef(props, 'modelValue')
-    const iVal = toRef(props, 'initVal')
-    if (iVal.value) val.value = iVal.value
     const lgmin = toRef(props, 'lgmin')
     const lgmax = toRef(props, 'lgmax')
     const min = ref(lgmin.value || 0)

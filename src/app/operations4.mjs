@@ -1731,9 +1731,11 @@ export class DownloadFichier extends Operation {
   async run (note, idf) { 
     try {
       const session = stores.session
+      const faSt = stores.ficav
       const args = { token: session.authToken, id: note.id, ids: note.ids, idf }
       const ret =  await post(this, 'GetUrlNf', args)
       const buf = await getData(ret.url)
+      if (session.synchro) faSt.putDataEnCache(idf, buf)
       return this.finOK(buf || null)
     } catch (e) {
       this.finKO(e)

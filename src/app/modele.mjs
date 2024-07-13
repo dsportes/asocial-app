@@ -1375,7 +1375,8 @@ export class Note extends GenDoc {
     if (session.accesIdb) {
       const fa = faSt.map.get(f.idf)
       if (fa && fa.dhdc === 0) {
-        buf = await idb.getFichierIDB(idf)
+        buf = await idb.getFichierIDB(f.idf)
+        faSt.putDataEnCache(f.idf, buf)
         return dec(this.cle, buf)
       }
     }
@@ -1506,7 +1507,7 @@ export class Ficav {
     f.dhdc = data.dhdc || 0
     f.exc = data.exc || null
     f.nbr = data.nbr || 0
-    f.ref = splitPK(data.key)
+    f.ref = data.ref
     f.nom = data.nom
     f.av = data.av
     f.avn = data.avn
@@ -1528,10 +1529,7 @@ export class Ficav {
     return f
   }
 
-  toData () {
-    const r = { ...this }
-    return encode(r)
-  }
+  toRow () { return { ...this } }
 
 }
 
