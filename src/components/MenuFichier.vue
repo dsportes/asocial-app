@@ -15,9 +15,13 @@
         <q-icon color="primary" size="md" name="save" />
         <span>{{$t('PNFenreg')}}</span>
       </q-item>
-      <q-item :clickable="aut !== 0" v-close-popup  @click="ovSuppr" class="row items-center">
+      <q-item v-if="!simple" :clickable="aut !== 0" v-close-popup  @click="ovSuppr" class="row items-center">
         <q-icon color="warning" size="md" name="delete" />
         <span>{{$t('PNFsuppr')}}</span>
+      </q-item>
+      <q-item v-if="simple" v-close-popup  clickable @click="voirNote" class="row items-center">
+        <q-icon color="primary" size="md" name="open_in_new" />
+        <span>{{$t('PNFvoirn')}}</span>
       </q-item>
       <q-item clickable v-close-popup  @click="ouvrirDF" class="row items-center">
         <q-icon color="primary" size="md" name="airplanemode_active" />
@@ -32,7 +36,7 @@
       <q-toolbar>
         <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
         <q-toolbar-title class="titre-lg full-width text-center">
-          {{$t('PNOdetail', [f.nom || '?', f.dh ? dhcool(f.dh, true) : '?'])}}
+          {{$t('PNOdetail', [f.nom])}}
         </q-toolbar-title>      
         <bouton-help page="page1"/>
       </q-toolbar>
@@ -41,10 +45,12 @@
 
     <q-page-container >
       <q-page class="q-pa-xs">
-        <div class="row q-guterr-md full-width">
-          <span class="font-mono">{{f.idf || '?'}}</span>
-          <span class="q-mr-sm">{{f.type || '?'}}</span>
-          <span v-if="f.lg" >{{edvol(f.lg)}}</span>
+        <div class="row q-gutter-sm q-my-sm">
+          <span v-if="f.info" class="font-mono text-bold">{{f.info}}</span>
+          <span class="font-mono">#{{f.idf || '?'}}</span>
+          <span>{{f.type || '?'}}</span>
+          <span v-if="f.lg">{{edvol(f.lg)}}</span>
+          <span v-if="f.dh">{{dhcool(f.dh, true)}}</span>
         </div>
 
         <div v-if="session.accesIdb" class="q-mx-xs q-my-sm q-pa-xs bord1 items-center">
@@ -77,7 +83,7 @@
               <span>{{$t('DFchgdem', [dhcool(fa.dhdc, true)])}}</span>
               <span v-if="fa.nbr" class="q-ml-sm">- {{$t('DFretry', [fa.nbr])}}</span>
               <span v-if="!fa.exc">
-                <span v-if="fa.if === faSt.idfdl" class="q-ml-sm">- {{$t('DFchgec')}}</span>
+                <span v-if="fa.id === faSt.idfdl" class="q-ml-sm">- {{$t('DFchgec')}}</span>
                 <span v-else class="q-ml-sm">- {{$t('DFchgatt')}}</span>
               </span>
             </div>
@@ -144,6 +150,7 @@ export default {
   props: { 
     note: Object,
     idf: String,
+    simple: Boolean,
     ro: String, // raison du read-only
     aut: Number // 0: lecture seulement, 1:note perso, ida: id de l'auteur pour un groupe
   },
@@ -178,6 +185,11 @@ export default {
   },
 
   methods: {
+    voirNote () {
+      this.ui.setPage('notes')
+      this.nSt.setPreSelect(this.fa.key, true)
+    },
+
     ouvrirDF () {
       this.xav = '?'
       this.xavn = '?'
@@ -191,7 +203,7 @@ export default {
     },
 
     async retry () {
-      await faSt.retry(this.idf)
+      await this.faSt.retry(this.idf)
     },
 
     ovSuppr () {

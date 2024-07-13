@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ID } from '../app/api.mjs'
 import { Note } from '../app/modele.mjs'
 import stores from './stores.mjs'
-import { splitPK, $t, difference, intersection } from '../app/util.mjs'
+import { splitPK, difference, intersection } from '../app/util.mjs'
 
 /* On ne peut recevoir des notes que de ce type:
 - note d'avatar (4) - key:av1/ids1 relative à l'avatar av1 du compte. Elle peut avoir un ref:
@@ -185,6 +185,13 @@ export const useNoteStore = defineStore('note', {
       }
     },
 
+    // get de la note id / ids
+    getNote: (state) => { return (id, ids) => {
+        const n = state.map.get(id + '/' + ids)
+        return n ? (n.note || null) : null
+      }
+    },
+  
     getRacine: (state) => { return (node) => {
         const anc = this.getAncetres(node.key)
         const k = anc[anc.length -1]
@@ -262,8 +269,13 @@ export const useNoteStore = defineStore('note', {
 
     setCourant (key) { this.node = this.map.get(key) },
 
-    setPreSelect (key) {
-      this.presel = key
+    setPreSelect (key, opt) {
+      if (opt) {
+        this.presel = ''
+        setTimeout(() => {
+          this.presel = key
+        }, 100)
+      } else   this.presel = key
     },
 
     stats (f) { // f(node): function de filtrage

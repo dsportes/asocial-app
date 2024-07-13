@@ -1232,7 +1232,7 @@ export default {
   PNOvcpt2: 'Le volume maximum des fichiers des notes du compte (et de celles des groupes qu\'il héberge) dépasse le quota attribué au compte.',
   PNOnoedit: 'Aucun avatar du compte n\'a l\'autorisation de modifier cette note.',
   PNOexclu: 'Un avatar a l\'exclusité d\'écriture sur cette note mais ce n\'est pas un avatar du compte.',
-  PNOdetail: 'Fichier "{0}" créé {1}',
+  PNOdetail: 'Fichier "{0}"',
 
   PNOapropos: 'A propos de la note ...',
   PNOlstfic: 'Aucun fichier actuellement | Un Fichier actuellement | {count} fichiers actuellement',
@@ -1394,6 +1394,7 @@ export default {
   PNFaff: 'Afficher dans un nouvel onglet',
   PNFenreg: 'Enregistrer une copie locale',
   PNFsuppr: 'Supprimer définitivement',
+  PNFvoirn: 'Voir la note ...',
   PNFdetail: 'Accessibilité en avion ...',
   PNFversion: 'Version',
   PNFavion1: 'Dernière version visible en avion',
