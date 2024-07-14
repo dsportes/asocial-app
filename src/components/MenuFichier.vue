@@ -94,11 +94,13 @@
               <div class="q-my-xs q-ml-md font-mono fs-sm">
                 {{$t('DFerr2', [fa.exc[0] === 404 ? fa.exc[1] : $t('EX' + fa.exc[0])])}}
               </div>
-              <div class="titre-md text-italic text-bold">
-                {{$t(fa.nbr < 3 ? 'DFretaut' : 'DFnoret')}}
-              </div>
-              <div class="q-my-sm text-right">
-                <btn-cond :label="$t('retry')" @ok="retry"/>
+              <div class="row justify-between q-gutter-xs">
+                <div class="col titre-md text-italic text-bold">
+                  {{$t(fa.nbr < 4 ? 'DFretaut' : 'DFnoret')}}
+                </div>
+                <btn-cond v-if="session.synchro" class="col-auto self-start" 
+                  :label="$t('retry')" icon="redo" @ok="retry(fa.id)"
+                  :color="fa.nbr < 4 ? 'primary' : 'warning'" />
               </div>
             </div>
           </div>

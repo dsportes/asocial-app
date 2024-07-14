@@ -1,13 +1,11 @@
 import { defineStore } from 'pinia'
 
 import stores from './stores.mjs'
-import { splitPK } from '../app/util.mjs'
+import { splitPK, dhcool } from '../app/util.mjs'
 import { getData, post } from '../app/net.mjs'
 import { appexc } from '../app/api.mjs'
 import { IDBbuffer, idb } from '../app/db.mjs'
 import { Ficav } from '../app/modele.mjs'
-
-const delaisec = 60
 
 export const useFicavStore = defineStore('ficav', {
   state: () => ({
@@ -22,6 +20,9 @@ export const useFicavStore = defineStore('ficav', {
   getters: {
     session: (state) => stores.session,
     nSt: (state) => stores.note,
+    cfg: (state => stores.config),
+
+    delaisec: (state) => { return state.cfg.dldemonsec },
 
     mapDeNote: (state) => { return (key) => {
         const m = new Map()
@@ -49,14 +50,10 @@ export const useFicavStore = defineStore('ficav', {
       return nc ? state.mapDeNote(nc.key) : new Map()
     },
 
+
     echecs: (state) => {
-      const l = []
-      for(const idf of state.queue) {
-        const f = state.map.get(idf)
-        if (f && f.exc) l.push(f)
-      }
-      l.sort((a,b) => { return a.dhdc < b.dhdc ? -1 : ( a.dhdc > b.dhdc ? 1 : 0)})
-      return l
+      for (const fa of state.map) if (fa.exc) return true
+      return false
     },
 
     // Fichiers à charger par dhdc croissantes
@@ -70,17 +67,6 @@ export const useFicavStore = defineStore('ficav', {
       return l
     },
 
-    // prochain téléchargement à traiter
-    prochain: (state) => {
-      const now = Date.now()
-      let fx = null
-      for(const idf of state.queue) {
-        const f = state.map.get(idf)
-        if (f.dhdc < now && (!fx || (f.dhdc < fx.dhdc))) fx = f
-      }
-      return fx
-    },
-
     getDataDeCache: (state) => { return (idf) => {
         for(const [id, data] of state.cacheDL) if (id === idf) return data
         return null
@@ -89,6 +75,17 @@ export const useFicavStore = defineStore('ficav', {
   },
 
   actions: {
+    // prochain téléchargement à traiter
+    prochain () {
+      const now = Date.now()
+      let fx = null
+      for(const idf of this.queue) {
+        const f = this.map.get(idf)
+        if (f.nbr < 4 && f.dhdc < now && (!fx || (f.dhdc < fx.dhdc))) fx = f
+      }
+      return fx
+    },
+
     putDataEnCache (idf, data) {
       if (this.getDataDeCache(idf)) return
       if (this.cacheDL.length > 5) this.cacheDL.pop()
@@ -155,10 +152,11 @@ export const useFicavStore = defineStore('ficav', {
           const df = lnom[0] // fichier le plus récent de ce nom dans la note
           const avn = m2[0].avn // faut-il garder le ficav le plus récent ?
           if (avn) { // oui
-            if (df.idf === avn.id) this.setFicav(avn) // le ficav avn convient, gardé
+            if (df.idf === m2[0].id) this.setFicav(m2[0]) // le ficav avn convient, gardé
             else { // Création d'un ficav associé à df
               const fa = Ficav.fromNote(note, df.idf, false, true) // création
               this.setFicav(fa)
+              buf.putFIDB(fa)
             }
           }
           // Pour chaque ficav
@@ -189,7 +187,7 @@ export const useFicavStore = defineStore('ficav', {
         f.exc = null
         f.nbr = 0
         this.setFicav (f)
-        await this.save([f])
+        await this.save([f], [])
       }
     },
 
@@ -218,7 +216,7 @@ export const useFicavStore = defineStore('ficav', {
     async ko (idf, exc) {
       const f = this.map.get(idf)
       if (f) {
-        f.dhdc = Date.now() + (delaisec * 1000) // retry dans 1 minute
+        f.dhdc = Date.now() + (this.delaisec * 1000) // retry dans 1 minute
         f.exc = exc
         f.nbr++
         this.setFicav (f)
@@ -396,13 +394,16 @@ export const useFicavStore = defineStore('ficav', {
     startDemon (sessionId) {
       if (!this.session.accesIdb || (sessionId !== this.session.sessionId)) return
       setTimeout(async () => {
+        if (this.cfg.DEBUG) console.log('Start démon ' + dhcool(Date.now(), true))
         while (sessionId === this.session.sessionId) {
-          const fa = this.prochain
+          const fa = this.prochain()
           if (!fa) {
-            setTimeout(() => { this.startDemon(sessionId) }, 60000)
+            if (this.cfg.DEBUG) console.log('Attente avant retart démon ' + dhcool(Date.now(), true))
+            setTimeout(() => { this.startDemon(sessionId) }, (this.delaisec * 1000))
             break
           }
           try {
+            if (this.cfg.DEBUG) console.log('Essai DL ' + fa.id + ' ' + fa.nbr + ' ' + dhcool(Date.now(), true))
             this.idfdl = fa.id
             let buf = this.getDataDeCache(fa.id)
             if (buf) {
@@ -419,10 +420,11 @@ export const useFicavStore = defineStore('ficav', {
             const ret =  await post(null, 'GetUrlNf', args)
             if (sessionId !== this.session.sessionId) break
             try {
+              // if (fa.nbr < 3) throw Error('test')
               buf = await getData(ret.url)
               if (sessionId !== this.session.sessionId) break
               await this.ok(fa.id, buf)
-              if (stores.config.DEBUG) console.log(`OK chargement : ${fa.idf} ${fa.nom}#${fa.info}`)
+              if (this.cfg.DEBUG) console.log(`OK chargement : ${fa.id} ${fa.nom}#${fa.info}`)
             } catch (e) {
               if (sessionId !== this.session.sessionId) break
               await this.ko(fa.id, [404, e.message])

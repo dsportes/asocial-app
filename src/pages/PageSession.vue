@@ -32,73 +32,7 @@
       <rapport-synchro class="q-ma-sm"/>
     </q-expansion-item>
     <q-separator/>
-<!--
-    <q-expansion-item group="etc" class="full-width" switch-toggle-side :disable="!fSt.queue.length"
-      header-class="expansion-header-class-1 titre-md bg-primary text-white">
-      <template v-slot:header>
-        <q-item-section>
-          <div class="row items-center">
-            <q-icon v-if="fSt.queue.length" color="white" name="check" size="md"/>
-            <span>{{$t('SYtec', fSt.queue.length, { count: fSt.queue.length })}}</span>
-          </div>
-        </q-item-section>
-      </template>
-      <q-card-section v-for="f in fSt.lstQueue" :key="f.id" class="ma-qcard-section">
-        <div class="row justify-between items-center">
-          <div class="col">
-            <span class="font-mono fs-md">{{f.id}}</span>
-            <span :class="'text-bold q-px-lg ' + (f.courant?'text-warning':'')" >{{f.nom + ' - ' + f.info}}</span>
-            <span class="font-mono fs-md">{{edvol(f.lg)}}</span>
-          </div>
-          <div class="col-auto">
-            <span class="font-mono fs-sm q-ml-sm">{{dhcool(f.dhd)}}</span>
-          </div>
-        </div>
-      </q-card-section>
-    </q-expansion-item>
-    <q-separator/>
 
-    <q-expansion-item group="etc" class="full-width" switch-toggle-side :disable="!fSt.echecs.size"
-      header-class="expansion-header-class-1 titre-md bg-primary text-white">
-      <template v-slot:header>
-        <q-item-section>
-          <div class="row items-center">
-            <q-icon v-if="fSt.echecs.size" color="warning" name="warning" size="md"/>
-            <span>{{$t('SYtex', fSt.echecs.size, { count: fSt.echecs.size })}}</span>
-          </div>
-        </q-item-section>
-      </template>
-      <q-card-section v-for="f in fSt.lstEchecs" :key="f.id" class="ma-qcard-section">
-        <div class="row justify-between items-center">
-          <div class="col">
-            <span class="font-mono fs-md">{{f.id}}</span>
-            <span class="text-bold q-px-lg">{{f.nom + ' - ' + f.info}}</span>
-            <span class="fs-md">{{edvol(f.lg)}}</span>
-          </div>
-          <div class="col-auto">
-            <span class="font-mono fs-sm q-mx-sm">{{dhcool(f.dhd)}}</span>
-            <q-btn dense color="primary" size="md" icon="menu">
-              <q-menu transition-show="scale" transition-hide="scale">
-                <q-list dense style="min-width: 15rem">
-                  <q-item clickable v-close-popup @click="retry(f.id)">
-                    <q-item-section>{{$t('reessayer')}}</q-item-section>
-                  </q-item>
-                  <q-item clickable v-close-popup @click="abandon(f.id)">
-                    <q-item-section>{{$t('SYren')}}</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
-          </div>
-        </div>
-        <div class="row justify-between q-mr-lg">
-          <div class="col font-mono fs-md" v-html="f.err"/>
-          <div class="col-auto font-mono fs-sm q-ml-sm">{{dhcool(f.dhx)}}</div>
-        </div>
-        <q-separator class="q-my-sm"/>
-      </q-card-section>
-    </q-expansion-item>
--->
   </q-page>
 </template>
 

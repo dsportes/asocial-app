@@ -3,9 +3,8 @@
   
   <div v-if="lst.length === 0" class="titre-lg text-italic">{{$t('FAVnone')}}</div>
 
-  <div v-else v-for="(x, idx) in lst" :key="x.fa.id" 
-    :class="dkli(idx) + ' q-mb-sm'">
-    <q-card class="q-mx-xs">
+  <div v-else v-for="(x, idx) in lst" :key="x.fa.id" class="column">
+    <q-card :class="dkli(idx) + ' q-mx-xs q-my-sm'">
 
       <div class="text-italic">{{x.titre}}</div>
 
@@ -13,6 +12,7 @@
         <div class="col row q-gutter-xs">
           <span class="font-mono text-bold">{{x.fa.nom}}</span>
           <span v-if="x.f.info" class="font-mono">{{x.f.info}}</span>
+          <span class="font-mono">(#{{x.fa.id}})</span>
           <span>{{x.f.type}}</span>
           <span>{{edvol(x.f.lg)}}</span>
         </div>
@@ -32,17 +32,19 @@
           </span>
         </div>
         <div v-if="x.fa.exc">
-          <div class="titre-md msg">
+          <div class="titre-md msg q-ml-sm">
             {{$t('DFerr', [x.fa.exc[0] === 404 ? $t('ER404') : '' + x.fa.exc[0]])}}
           </div>
-          <div class="q-my-xs q-ml-md font-mono fs-sm">
-            {{$t('DFerr2', [x.fa.exc[0] === 404 ? fa.exc[1] : $t('EX' + x.fa.exc[0])])}}
+          <div class="q-my-xs q-ml-sm font-mono fs-sm">
+            {{$t('DFerr2', [x.fa.exc[0] === 404 ? x.fa.exc[1] : $t('EX' + x.fa.exc[0])])}}
           </div>
-          <div class="titre-md text-italic text-bold">
-            {{$t(x.fa.nbr < 3 ? 'DFretaut' : 'DFnoret')}}
-          </div>
-          <div v-if="session.synchro" class="q-my-sm text-right">
-            <btn-cond :label="$t('retry')" @ok="retry(x.fa.id)"/>
+          <div class="row justify-between q-gutter-xs">
+            <div class="col titre-md text-italic text-bold">
+              {{$t(x.fa.nbr < 4 ? 'DFretaut' : 'DFnoret')}}
+            </div>
+            <btn-cond v-if="session.synchro" class="col-auto self-start" 
+              :label="$t('retry')" icon="redo" @ok="retry(x.fa.id)"
+              :color="x.fa.nbr < 4 ? 'primary' : 'warning'" />
           </div>
         </div>
       </div>
@@ -76,8 +78,8 @@ export default ({
         const f = n.mfa.get(fa.id)
         l.push({fa, n, f, titre})
       }
-      l.sort((a, b) => {
-        return a.fa.lg > b.fa.lg ? -1 : (a.fa.lg < b.fa.lg ? 1 : 0)
+      l.sort((a, b) => { return a.dhdc < b.dhdc ? -1 : (a.dhdc > b.dhdc ? 1 : 
+        (a.fa.lg > b.fa.lg ? -1 : (a.fa.lg < b.fa.lg ? 1 : 0)))
       })
       return l
     }

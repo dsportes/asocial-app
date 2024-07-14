@@ -25,13 +25,13 @@ export const useFetatStore = defineStore('fetat', {
     */
 
     queue: [], // liste ordonnée des idf des fichiers à charger par ordre croissant de leur dhd
-    echecs: new Set(), // set des ids des chargements ayant échoué
-    encours: 0, // id du fetat dont le chargement est en cours
+    encours: '', // id du ficav dont le chargement est en cours
     dernierFichierCharge: { idf: 0, data: null }
   }),
 
   getters: {
     getFetat: (state) => { return (idf) => state.map.get(idf) },
+
     lstQueue: (state) => {
       const l = []
       for (const idf of state.queue) {
@@ -41,14 +41,8 @@ export const useFetatStore = defineStore('fetat', {
       }
       return l
     },
-    lstEchecs: (state) => {
-      const l = []
-      for (const idf of state.echecs) {
-        const e = { ...state.map.get(idf) }
-        l.push(e)
-      }
-      return l
-    }
+
+
   },
 
   actions: {
@@ -66,11 +60,6 @@ export const useFetatStore = defineStore('fetat', {
 
     setQueue (push, splice) {
       if (push) this.queue.push(push); else this.queue.splice(splice, 1)
-      this.setAny()
-    },
-
-    setEchec (plus, idf) {
-      if (plus) this.echecs.add(idf); else this.echecs.delete(idf)
       this.setAny()
     },
 
@@ -112,13 +101,11 @@ export const useFetatStore = defineStore('fetat', {
       if (!e) return
       e.dhx = 0 // en fait c'est déja fait
       e.err = ''
-      this.setEchec(false, idf)
       if (this.queue.indexOf(idf) === -1) this.setQueue(idf)
       this.startDemon()
     },
 
     abandon (idf) {
-      this.setEchec(false, idf)
       const i = this.queue.indexOf(idf)
       if (i !== -1) this.setQueue(0, i) // normalement c'est inutile, il ne devrait pas y être
       this.setAny()
@@ -153,7 +140,6 @@ export const useFetatStore = defineStore('fetat', {
             await e.chargementOK(buf) // Maj IDB de fetat et fdata conjointement
           } catch (ex) {
             e.chargementKO(appexc(ex, 20))
-            this.setEchec(true, this.encours)
             this.setQueue(0, 0)
           }
           this.encours = this.queue.length ? this.queue[0] : 0

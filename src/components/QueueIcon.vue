@@ -1,5 +1,5 @@
 <template>
-  <span v-if="c1 || c2" :class="c2 ? 'rond1' : 'rond2'"/>
+  <span v-if="c2 || c1" :class="c2 ? 'rond1' : 'rond2'"/>
 </template>
 
 <script>
@@ -10,7 +10,7 @@ export default ({
   props: { },
   computed: {
     c1 () { return this.faSt.queue.size !== 0 },
-    c2 () { return this.faSt.echecs.size !== 0 }
+    c2 () { return this.faSt.echecs }
   },
   setup () {
     return { 

@@ -1258,7 +1258,7 @@ export default {
   DFavn: 'de la révision la plus récente pour ce nom de fichier :',
   DFav: 'de cette révision spécifiquement :',
   DFchgdl: 'Contenu disponible localement.',
-  DFchgdem: 'Téléchargement du Contenu pour disponibilté locale demandé {0}.',
+  DFchgdem: 'Téléchargement pour disponibilté locale demandé {0}.',
   DFchgatt: 'En attente ...',
   DFchgec: 'En cours.',
   DFretry: 'Tentative #{0}',

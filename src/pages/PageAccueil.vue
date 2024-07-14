@@ -4,7 +4,7 @@
       <div class="row justify-center">
       <!-- Déconnexion -->
       <div class="btn2" @click="ui.oD('dialoguedrc')">
-        <q-btn v-if="session.ok" dense size="md" color="warning" icon="logout" />
+        <btn-cond v-if="session.ok" color="warning" icon="logout" />
         <span class="q-ml-sm">{{$t('MLAdrc2')}}</span>
       </div>
 
@@ -18,21 +18,19 @@
 
       <!-- Dark ou clair -->
       <div class="btn2" @click="tgdark">
-        <q-btn dense size="md" icon="contrast"/>
+        <btn-cond icon="contrast"/>
         <span class="q-ml-xs">{{$t('clairfonce')}}</span>
       </div>
 
       <!-- Outils et tests -->
       <div class="btn2" @click="ui.oD('PAoutilsTests')">
-        <q-btn dense size="md" icon="settings"/>
+        <btn-cond icon="settings"/>
         <span class="q-ml-xs">{{$t('MLAout')}}</span>
       </div>
 
       <!-- Information session : mode synchro -->
       <div v-if="session.synchro" class="btn2" @click="infoSession">
-        <q-btn class="q-mr-xs" dense size="md" icon="autorenew">
-          <queue-icon/>
-        </q-btn>
+        <btn-cond class="q-mr-xs" icon="autorenew"/>
         <span>{{$t('MLAinfm')}}</span>
       </div>
 
@@ -46,9 +44,7 @@
 
       <!-- Information session : mode avion -->
       <div v-if="session.avion" class="btn2" @click="infoSession">
-        <q-btn class="q-mr-xs" dense size="md" icon="airplanemode_active" color="primary">
-          <queue-icon/>
-        </q-btn>
+        <btn-cond class="q-mr-xs" icon="airplanemode_active" />
         <span>{{$t('MLAinfm')}}</span>
       </div>
 
@@ -80,13 +76,15 @@
 
       <!-- Fichiers avion -->
       <div v-if="!session.incognito" class="btn2" @click="ficAvion">
-        <q-btn dense size="md" icon="save"/>
+        <btn-cond icon="save">
+          <queue-icon/>
+        </btn-cond>
         <span class="q-ml-xs">{{$t('MLAfav')}}</span>
       </div>
 
       <!-- Presse papier -->
       <div class="btn2" @click="ui.oD('pressepapier')">
-        <q-btn dense size="md" icon="content_paste"/>
+        <btn-cond icon="content_paste"/>
         <span class="q-ml-xs">{{$t('MLApp')}}</span>
       </div>
 
@@ -108,11 +106,12 @@ import NotifIcon from '../components/NotifIcon.vue'
 import N3Icon from '../components/N3Icon.vue'
 import QueueIcon from '../components/QueueIcon.vue'
 import MenuAccueil from '../components/MenuAccueil.vue'
+import BtnCond from '../components/BtnCond.vue'
 
 export default {
   name: 'PageAccueil',
 
-  components: { MenuAccueil, BoutonHelp, BoutonLangue, NotifIcon, N3Icon, QueueIcon },
+  components: { MenuAccueil, BoutonHelp, BoutonLangue, NotifIcon, N3Icon, QueueIcon, BtnCond },
 
   computed: {
     pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },

@@ -15,6 +15,7 @@ export const config = {
   ],
 
   silence: false,
+  dldemonsec: 10,
   
   /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
   // En test pour éviter de frapper les "phrases secrètes" de test

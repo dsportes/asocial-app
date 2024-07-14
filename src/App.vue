@@ -57,6 +57,7 @@
       <btn-cond v-if="session.ok" :disable="session.incognito" 
         icon="save" round color="none" @ok="pageFicavion">
         <q-tooltip>{{$t('MLAfav')}}</q-tooltip>
+        <queue-icon />
       </btn-cond>
 
       <!-- Presse papier -->
@@ -116,18 +117,15 @@
       </btn-cond>
 
       <!-- Outils et tests -->
-      <q-btn dense size="md" icon="settings" padding="none" round 
-        @click="ui.oD('PAoutilsTests')">
+      <btn-cond icon="settings" round @click="ui.oD('PAoutilsTests')">
         <q-tooltip>{{$t('MLAout')}}</q-tooltip>
-      </q-btn>
+      </btn-cond>
 
       <!-- Information session : mode synchro -->
-      <q-btn class="q-mr-xs" v-if="session.synchro"
-        dense size="md" icon="autorenew" padding="none" round 
-        @click="infoSession()">
+      <btn-cond class="q-mr-xs" v-if="session.synchro"
+        icon="autorenew" round @click="infoSession()">
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-        <queue-icon/>
-      </q-btn>
+      </btn-cond>
 
       <!-- Information session : mode incognito -->
       <q-avatar class="cursor-pointer q-mr-xs" v-if="session.incognito" @click="infoSession()"
@@ -137,11 +135,10 @@
       </q-avatar>
 
       <!-- Information session : mode avion -->
-      <q-btn class="cursor-pointer q-mr-xs" v-if="session.avion" @click="infoSession()"
-        dense size="md" icon="airplanemode_active" padding="none" round>
+      <btn-cond class="q-mr-xs" v-if="session.avion" @click="infoSession()"
+        icon="airplanemode_active" round>
         <q-tooltip>{{$t('MLAinfm')}}</q-tooltip>
-        <queue-icon/>
-      </q-btn>
+      </btn-cond>
 
       <q-toolbar-title class="row justify-end items-center titre-md text-right q-mx-xs">
         <img v-if="session.ok" :src="people.getCV(session.compteId).photo" 
