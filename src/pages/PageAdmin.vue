@@ -41,7 +41,7 @@
 
           <div class="titre-md q-my-xs">{{$t('ESnbmi2', [esp.nbmi])}}</div>
 
-          <div class="titre-md q-my-xs">{{$t('PTopt' + esp.opt)}}</div>
+          <div v-if="esp.opt" class="titre-md q-my-xs">{{$t('PTopt')}}</div>
 
           <div class="q-my-xs">
             <bouton-dlvat :espace="esp" @close="finDlv"/>
