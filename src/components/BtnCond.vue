@@ -40,7 +40,7 @@ export default ({
     color: String, // defaut primary
     icon: String, // defaut aucune
     size: String, // defaut 'md'
-    label: String, // defaut 'OK'
+    label: String, // defaut 'ok'
     tp: String, // tooltip: dfeaut aucun
     ctx: Object, // defaut null. Retransmis sur l'événement ok
     cond: String, // code condition dans stores.session

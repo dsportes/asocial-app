@@ -57,14 +57,14 @@
           <div class="titre-lg">{{$t('DFavion')}}</div>
           <div class="row items-center">
             <div class="col-7 text-right">{{$t('DFavn')}}</div>
-            <div :class="'col-1 text-center ' + (avn ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non2')}}</div>
+            <div :class="'col-1 text-center ' + (avn ? 'msg' : '')">{{$t(avn ? 'oui1' : 'non')}}</div>
             <div class="q-pl-xs">
               <q-toggle :class="'col-4 ' + clr1" indeterminate-value="?" color="grey-5" v-model="xavn" :label="oxn1" />
             </div>
           </div>
           <div class="row items-center">
             <div class="col-7 text-right">{{$t('DFav')}}</div>
-            <div :class="'col-1 text-center ' + (av ? 'msg' : '')">{{$t(av ? 'oui1' : 'non2')}}</div>
+            <div :class="'col-1 text-center ' + (av ? 'msg' : '')">{{$t(av ? 'oui1' : 'non')}}</div>
             <div class="q-pl-xs">
               <q-toggle :class="'col-4 ' + clr2" indeterminate-value="?" color="grey-5" v-model="xav" :label="oxn2" />
             </div>
@@ -168,8 +168,8 @@ export default {
     modifAv () { return !(this.i1 && this.i2)},
     i1 () { return this.avn === this.xavn || this.xavn === '?' },
     i2 () { return this.av === this.xav || this.xav === '?' },
-    oxn1 () { return this.i1 ? this.$t('inchange') : this.$t(this.xavn ? 'oui2' : 'non2') },
-    oxn2 () { return this.i2 ? this.$t('inchange') : this.$t(this.xav ? 'oui2' : 'non2') },
+    oxn1 () { return this.i1 ? this.$t('inchange') : this.$t(this.xavn ? 'oui' : 'non2') },
+    oxn2 () { return this.i2 ? this.$t('inchange') : this.$t(this.xav ? 'oui' : 'non2') },
     clr1 () { return this.i1 ? '' : 'bg-warning'},
     clr2 () { return this.i2 ? '' : 'bg-warning'}
   },

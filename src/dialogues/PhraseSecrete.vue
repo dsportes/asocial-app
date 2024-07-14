@@ -123,7 +123,7 @@ export default ({
     },
     labelVal () {
       if (!this.verif) return $t(this.labelValider || 'PSval')
-      return this.phase < 2 ? $t('OK') : $t((this.labelValider || 'PSval'))
+      return this.phase < 2 ? $t('ok') : $t((this.labelValider || 'PSval'))
     },
     ok2 () {
       if (this.ligne1.length >= lgph) this.ok()

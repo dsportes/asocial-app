@@ -1,15 +1,6 @@
 <template>
   <q-page class="q-pa-xs">
     <div class="column">
-      <!--
-      <div class="row justify-center">
-        <q-btn padding="xs" class="q-ml-xs" dense color="warning" :label="$t('ESck')" @click="affCkpt"/>
-        <q-select v-model="gcop" dense :options="gcops" 
-          class="q-ml-lg" label="GCop ???" style="width:6rem"/>
-        <q-btn padding="xs" class="q-ml-xs" dense color="warning" 
-          :disable="gcop === ''" :label="$t('go')" @click="testGCop"/>
-      </div>
-      -->
 
       <div class="q-mt-sm row q-gutter-xs justify-center">
         <btn-cond icon="refresh" :label="$t('rafraichir')" @ok="loadEsp"/>

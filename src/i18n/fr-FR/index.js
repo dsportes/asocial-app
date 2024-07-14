@@ -1,148 +1,108 @@
 export default {
   defhashtags: 'important indesirable alire archive',
   
-  bonjour: 'Bonjour !',
-  bonjour2: 'Bonjour {0} !',
+  aide: 'Un peu d\'aide ... ', // PageAccueil
 
-  build: 'Build: {0} - Debug: {1}',
-  aide: 'Un peu d\'aide ... ',
-
-  sync: 'Synchronisé',
+  sync: 'Synchronisé', // PageLogin Page Session
   incognito: 'Incognito',
   avion: 'Avion',
-  enmode: '... en mode {0}',
-
-  asc: 'tri asc.',
-  desc: 'tri desc.',
-  detail: 'Détails',
 
   oui: 'oui',
   non: 'non',
-  jamais: 'jamais',
-  depuis: 'depuis {0}',
-  avant: 'avant {0}',
-  entre: 'entre {0} et {1}',
   oui1: 'OUI',
-  oui2: 'oui',
   non1: 'NON',
-  non2: 'NON',
-  OK: 'OK',
+
+  jamais: 'jamais', // ApercuMembre
+  depuis: 'depuis {0}', // ApercuMembre
+  avant: 'avant {0}', // ApercuMembre
+  entre: 'entre {0} et {1}', // ApercuMembre
+
   ok: 'OK',
-  go: 'GO',
-  moi: 'moi',
-  de: 'de',
-  moi2: '{0} [moi]',
+  moi: 'moi', // ...
   jailu: 'J\'ai lu',
   vu: 'vu',
   continuer: 'Continuer',
   supprimer: 'Supprimer',
-  retry: 'Ré-essayer',
-  ajouter: 'Ajouter',
-  changer: 'Changer',
+  retry: 'Ré-essayer', // MenuFichier PageFavicon
+  ajouter: 'Ajouter', // PageInvitation
+  changer: 'Changer', // PageAdmin
   valider: 'Valider',
   renoncer: 'Renoncer',
-  afficher: 'Afficher',
-  termine: 'Terminé',
-  reessayer: 'Réessayer',
-  rechercher: "Rechercher",
-  copier: 'Copier',
-  enreg: 'Enregistrer',
-  zoomer: 'Voir en détail',
-  texte: 'Pur texte OU formaté mais non éditable',
-  raz: 'RAZ',
-  corriger: 'Corriger',
-  rafraichir: 'Rafraîchir',
-  confirm: 'Pour confirmer taper {0}',
-  rienconf: 'Rien à confirmer',
-  creer: 'Créer',
-  obs: '_Obsolète_',
-  tous: 'Tous',
-  annuler: 'Annuler',
-  retablir: 'Rétablir',
-  refuser: 'Refuser',
-  fermer: 'Fermer',
-  editer: 'Editer',
-  confirmer: 'Confirmer',
-  gerer: 'Gérer',
-  suivant: 'Suivant',
-  precedent: 'Précédent',
-  personnel: 'PERSONNEL ',
-  entree: 'Presser "Entrée" à la fin de la saisie',
-  cryptage: 'Cryptage en cours ...',
-  merci: 'Merci {0}',
-  contient: 'contient',
-  debute: 'débute par',
-  langue: 'Choix de la langue',
-  clairfonce: 'Mode clair / foncé',
-  supprime: 'SUPPRIMÉ',
-  plus: 'Plus ...',
-  plus2: 'Plus',
-  page: 'Page',
-  details: 'Plus de détails',
-  editavion: 'Les mises à jour ne sont pas possibles en mode avion.',
-  editfige: 'Les mises à jour ne sont pas possibles quand l\'administrateur technique a figé l\'application en lecture seulement.',
-  editminimal: 'Les mises à jour ne sont pas possibles quand le Comptable ou un sponsor a émis une notification avec restriction "d\'accès minimal"',
-  editlecture: 'Les mises à jour ne sont pas possibles quand le Comptable ou un sponsor a émis une notification avec restriction "d\'accès en lecture seulement"',
-  alerte: 'Alerte',
-  avatar: 'Avatar {0}',
-  groupe: 'Groupe {0}',
-  avatar1: 'Avatar {0} - {1} / {2} note(s)',
-  groupe1: 'Groupe {0} - {1} / {2} note(s)',
-  notef1: 'Note disparue #{0}',
-  notef2: 'Note disparue #{0} - à propos du groupe {1}',
-  avatar2: 'Note de {0}',
-  groupe2: 'Note du groupe {0}',
-  avatar3: 'Note de {0} rattachée à une note de {1}',
-  groupe9: 'Note DISPARUE #{0} du groupe {1}',
-  avatar9: 'Note DISPARUE #{0} de {1}',
-  existe: 'Changer le début de la phrase, il est trop proche de celui d\'une phrase déjà déclarée.',
-  nolimite: '(sans limite)',
-  fichiers: 'Fichiers',
-  animateur: 'Animateur',
-  delegue: 'Délégué',
-  auteur: 'Auteur',
-  test: 'Test',
-  compteO: 'Compte de l\'organisation rattaché à la partition {0}.',
-  compteD: 'Compte de l\'organisation, DÉLÉGUÉ par le Comptable pour la partition {0}.',
-  compteA: 'Compte autonome',
-  don: 'Don de {0}c',
-  don2: 'Don de {0}€',
-  conf: 'CONFIDENTIEL',
-  total: 'Total',
-  info: 'Info',
-  ping: 'Ping',
-  notes: 'notes',
-  nbnotes: 'Nb notes',
-  nbnnncng: 'Nb notes, chats et groupes',
-  unnncng: 'notes + chats + groupes',
-  volv2: 'Volume fichiers',
-  limco: 'Plafond conso.',
-  powadmin: 'Seul l\'administrateur technique peut effectuer cette action',
-  powcompta: 'Seul le Comptable peut effectuer cette action',
-  powsponsor: 'Seuls le Comptable ou un sponsor de la tranche peuvent effectuer cette action',
-  dedh: 'De {0} à {1}',
-  supprime: '_[supprimé à {0}]_',
-  actif: 'actif',
-  disp: 'disparu',
-  raccroche: 'raccroché',
-  pasdepuis: 'pas depuis {0}',
-  activer: 'Activer',
-  desactiver: 'Désactiver',
-  disparu: 'disparu',
-  cv: 'Carte de visite',
-  plustard: 'Plus Tard',
-  compteKO: 'Le compte #{0} nommé "{1}" vient d\'être supprimé ou a changé de phrase secrète.',
-  sessionKO: 'Incident technique nécessitant l\'interruption immédiate de la session. Tenter de se reconnecter plus tard.',
-  test: 'Test',
-  dateinc: 'date inconnue',
-  inconnu: '(inconnu)',
-  invite: 'Invité',
-  contact: 'Simple contact',
-  hashtags: 'Hashtags',
-  invitation: 'Invitation',
-  inchange: 'inchangé',
-  ER404: 'Le serveur de fichier n\'a pas pu délivrer le contenu de fichier',
+  afficher: 'Afficher', // PressePapier
+  copier: 'Copier', // PressePapier
+  enreg: 'Enregistrer', // PressePapier
+  texte: 'Pur texte OU formaté mais non éditable', // EditeurMd
+  corriger: 'Corriger', // NouveauSponsoring
+  rafraichir: 'Rafraîchir', // PageAdmin
+  confirm: 'Pour confirmer taper {0}', // BoutonConfirm
+  rienconf: 'Rien à confirmer', // BoutonConfirm
+  creer: 'Créer', // PageGroupes
+  tous: 'Tous', // PageGroupes PanelCredits
+  fermer: 'Fermer', // CarteVisite
+  editer: 'Editer', // ApercuNotif ApercuCv
+  confirmer: 'Confirmer', // ...
+  gerer: 'Gérer', // PageGroupe
+  suivant: 'Suivant', // NouveauSponsoring
+  precedent: 'Précédent', // NouveauSponsoring NouveauFichier
+  entree: 'Presser "Entrée" à la fin de la saisie', // FiltreNom FiltreTxt
+  merci: 'Merci {0}', // InvitationAcceptation AcceptationSponsoring
+  langue: 'Choix de la langue', // BoutonLangue PageAccueil
+  clairfonce: 'Mode clair / foncé', // PageAccueil App.vue
+  supprime: 'SUPPRIMÉ', // modele (chat chatgr)
+  detail: 'Détails', // PageGroupes ApercuGenx
+  details: 'Plus de détails', // PageGroupe
 
+  avatar: 'Avatar {0}', // FiltreAvgr
+  groupe: 'Groupe {0}', // FiltreAvgr
+  avatar1: 'Avatar {0} - {1} / {2} note(s)', // PageNotes
+  groupe1: 'Groupe {0} - {1} / {2} note(s)', // PageNotes
+  existe: 'Changer le début de la phrase, il est trop proche de celui d\'une phrase déjà déclarée.', // ...
+  nolimite: '(sans limite)', // FiltreVols
+  delegue: 'Délégué', // ApercuGenx PagePartition
+  test: 'Test', // PageNotes
+  compteO: 'Compte de l\'organisation rattaché à la partition {0}.', // NouveauSponsoring
+  compteD: 'Compte de l\'organisation, DÉLÉGUÉ par le Comptable pour la partition {0}.', // NouveauSponsoring
+  compteA: 'Compte autonome', // ...
+  don: 'Don de {0}c', // PageSponsoring NouveauSponsoring
+  conf: 'CONFIDENTIEL', // ...
+  total: 'Total', // PageEspace
+  ping: 'Ping', // OutilsTests
+  nbnotes: 'Nb notes', // PageGroupes
+  nbnnncng: 'Nb notes, chats et groupes', // PageAdmin
+  volv2: 'Volume fichiers', // ChoixQuotas PageAdmin PageGroupes
+  limco: 'Plafond conso.', // PageAdmin
+  dedh: 'De {0} à {1}', // modele (chat chatgr)
+  supprime: '_[supprimé à {0}]_', // modele (chat chatgr)
+  actif: 'actif', // MicroChat
+  disparu: 'disparu', // App ApercuChat
+  plustard: 'Plus Tard', // App
+  compteKO: 'Le compte #{0} nommé "{1}" vient d\'être supprimé ou a changé de phrase secrète.', // PageClos
+  sessionKO: 'Incident technique nécessitant l\'interruption immédiate de la session. Tenter de se reconnecter plus tard.', // PageClos
+  inconnu: '(inconnu)', // PageGroupe
+  hashtags: 'Hashtags', // PageNotes
+  invitation: 'Invitation', // ApercuMembre
+  inchange: 'inchangé', // MenuFichier
+  ER404: 'Le serveur de fichier n\'a pas pu délivrer le contenu de fichier', // MenuFichier PageFicavion
+
+  ECclos: 'L\'administrateur technique a fermé l\'application pour l\'organisation "{0}"', // PageClos
+  ECmi: 'Message d\'information de sa part [{0}]', // PageClos
+
+  // ApercuTicket MoisM PanelCompta
+  mois: 'mois',
+  mois1: 'Janvier',
+  mois2: 'Février',
+  mois3: 'Mars',
+  mois4: 'Avril',
+  mois5: 'Mai',
+  mois6: 'Juin',
+  mois7: 'Juillet',
+  mois8: 'Août',
+  mois9: 'Septembre',
+  mois10: 'Octobre',
+  mois11: 'Novembre',
+  mois12: 'Décembre',
+
+  // session-store
   condA: 'Action impossible, l\'application est en mode "avion".',
   condF: 'Action impossible, l\'application est figée.',
   condL: 'Action impossible, le compte a une restriction de "lecture seulement".',
@@ -172,11 +132,8 @@ export default {
   // Filtre Rac
   rac0: 'actifs',
   rac1: 'INDESIRABLES',
-  
-  tmc0: 'Compte',
-  tmc1: 'Groupe',
-  tmc2: 'App.',
 
+  /*
   FLAGS0: 'a activé l\'accès aux membres', // AM
   FLAGS1: 'a activé l\'accès aux notes',  // AN
   FLAGS2: 'a accès de voir membres', // DM
@@ -185,73 +142,21 @@ export default {
   FLAGS5: 'a pu voir les membres', // HM
   FLAGS6: 'a pu voir les notes', // HN
   FLAGS7: 'a pu éditer les notes', // HE
+  */
   
+  // FiltreDel
   roledel0: '(ignorer)',
   roledel1: 'Compte de ma partition',
   roledel2: 'Délégué de ma partition',
 
-  enalerte: 'En alerte',
-  ensursis: 'En sursis',
-  bloque: 'Bloqué',
-  aucuncompte: 'Aucun compte',
-
-  tribus: 'Tranche | Tranche | Tranches',
-  comptable: 'Comptable',
-  admin: 'Administrateur',
-  comptable: 'Comptable',
-  avdisp: 'Cet avatar a disparu (compte supprimé)',
-
+  // util
   auja: 'aujourd\'hui à {0}',
   hiera: 'hier à {0}',
   lea: 'le {0} à {1}',
   nondate: '(non daté)',
 
-  jour0: 'Dimanche',
-  jour1: 'Lundi',
-  jour2: 'Mardi',
-  jour3: 'Mercredi',
-  jour4: 'Jeudi',
-  jour5: 'Vendredi',
-  jour6: 'Samedi',
-  jour7: 'Dimanche',
-  jourc0: 'Di',
-  jourc1: 'Lu',
-  jourc2: 'Ma',
-  jourc3: 'Me',
-  jourc4: 'Je',
-  jourc5: 'Ve',
-  jourc6: 'Sa',
-  jourc7: 'Di',
-
-  mois: 'mois',
-  mois1: 'Janvier',
-  mois2: 'Février',
-  mois3: 'Mars',
-  mois4: 'Avril',
-  mois5: 'Mai',
-  mois6: 'Juin',
-  mois7: 'Juillet',
-  mois8: 'Août',
-  mois9: 'Septembre',
-  mois10: 'Octobre',
-  mois11: 'Novembre',
-  mois12: 'Décembre',
-
+  // ui-store
   items: 'Aucun item | Un item | {count} items',
-
-  permanent: 'note permanente',
-  temp1: 'une journée',
-  temp7: 'une semaine',
-  temp14: 'deux semaines',
-  temp30: 'un mois',
-  temp60: 'deux mois',
-  temp90: 'un trimestre',
-  tempx: '{0} jour(s)',
-
-  MOdis: 'DISPARU',
-
-  ECclos: 'L\'administrateur technique a fermé l\'application pour l\'organisation "{0}"',
-  ECmi: 'Message d\'information de sa part [{0}]', 
 
   // Exceptions
   EX1: 'Interruption volontaire (appui sur le bouton rouge)',
@@ -272,10 +177,10 @@ export default {
   EX2001: 'Ouverture de la connexion avec le serveur impossible ( {0} ).',
   EX2002: 'Envoi d\'un message au serveur impossible ( {0} ).\nDétail: {1}',
   EX2003: 'Rupture de la liaison avec le serveur par le serveur ou URL mal configurée ( {0} ).',
-  EX2004: 'ping / pong : pong non reçu ( {0} ).',
+  // EX2004: 'ping / pong : pong non reçu ( {0} ).',
   EX2005: 'Erreur de transfert du fichier vers le serveur de fichier. Détail: {0}',
   EX2006: 'Erreur de transfert du fichier vers l\'application locale de stockage de fichiers. Détail: {0}',
-  EX2100: 'Session interrompue. Se déconnecter et tenter de se reconnecter',
+  // EX2100: 'Session interrompue. Se déconnecter et tenter de se reconnecter',
 
   // E_DB = 3000 // Toutes erreurs d'accès à la base locale
   EX3001: 'Ouverture de la base locale impossible.\nDétail: {0}',
@@ -285,47 +190,29 @@ export default {
   EX4000: 'Bug probable de l\'application.\nDétail: {0}',
   EX4001: 'Retour de la requête mal formé : parse JSON en erreur. Opération: {0}\nDétail: {1}',
   EX4002: 'Retour de la requête mal formé : désérialisation en erreur. Opération: {0}\nDétail: {1}',
-  EX4003: 'Fichier {0} non accessible sur le serveur',
-  EX4005: 'Plus de 5 tentatives de connexions. Bug ou incident temporaire. Ré-essayer un peu plus tard',
-  EX4006: 'Compte anormalement sollicité, bug probable',
+  // EX4003: 'Fichier {0} non accessible sur le serveur',
+  // EX4005: 'Plus de 5 tentatives de connexions. Bug ou incident temporaire. Ré-essayer un peu plus tard',
+  // EX4006: 'Compte anormalement sollicité, bug probable',
   EX4007: 'Echec d\'encryption. Buffer: {0} - Clé: {1} - Détail: {2}',
   EX4008: 'Echec de decryption. Buffer: {0} - Clé: {1} - Détail: {2}',
-  EX4010: 'Crypter : clé incorrecte (pas Uint8Array ou longueur != 32)',
-  EX4011: 'Crypter : buffer incorrect (pas Uint8Array)',
-  EX4012: 'Décrypter : cle incorrecte (pas Uint8Array ou longueur != 32)',
-  EX4013: 'Décrypter : buffer incorrect (pas Uint8Array)',
-  EX4014: 'Crypter RSA : cle publique incorrecte (pas Uint8Array)',
-  EX4015: 'Crypter RSA : buffer incorrect (pas Uint8Array)',
-  EX4016: 'Décrypter RSA : cle publique incorrecte (pas Uint8Array)',
-  EX4017: 'Dérypter RSA : buffer incorrect (pas Uint8Array)',
-  EX4018: 'store {0} inconnu',
-  EX4020: 'Erreur de téléchargement d\'un fichier',
+  // EX4010: 'Crypter : clé incorrecte (pas Uint8Array ou longueur != 32)',
+  // EX4011: 'Crypter : buffer incorrect (pas Uint8Array)',
+  // EX4012: 'Décrypter : cle incorrecte (pas Uint8Array ou longueur != 32)',
+  // EX4013: 'Décrypter : buffer incorrect (pas Uint8Array)',
+  // EX4014: 'Crypter RSA : cle publique incorrecte (pas Uint8Array)',
+  // EX4015: 'Crypter RSA : buffer incorrect (pas Uint8Array)',
+  // EX4016: 'Décrypter RSA : cle publique incorrecte (pas Uint8Array)',
+  // EX4017: 'Dérypter RSA : buffer incorrect (pas Uint8Array)',
+  // EX4018: 'store {0} inconnu',
+  // EX4020: 'Erreur de téléchargement d\'un fichier',
   EX4021: 'Bug probable de \'opération "{0}" après plusieurs tentatives aynat échoué.',
   EX4022: 'Fichier impossible à décrypter: {0}',
   EX4023: 'Echec de decryption RSA. Buffer: {0} - Clé: {1} - Détail: {2}',
   EX4024: 'Echec d\'encryption RSA. Buffer: {0} - Clé: {1} - Détail: {2}',
 
   // F_BRO = 5000 // Erreur fonctionnelle trappée sur le browser
-  EX5003: 'Avatar déjà cité dans le groupe, ne peut pas être inscrit à nouveau',
-  EX5004: `Base locale non trouvée<br>
-  - soit la phrase secrète est incorrecte,<br>
-  - soit aucune session synchronisée n'a été ouverte antérieurement avec cette phrase secète,<br>
-  - soit la base locale a été détruite.<br>
-  Re-saisir la phrase secrète ou se connecter en mode synchronisé ou incognito.`,
-  EX5005: `Base locale absente ou corrompue.<br>
-  Code erreur: {0}<br>Se connecter en mode synchronisé ou incognito.`,
-  EX5006: `Base locale corrompue.<br>Impossible d'en décrypter les données.`,
-  EX5007: 'Le sponsor a disparu (compte résilié)',
-  EX5011: 'Le compte a été résilié pour défaut de crédit',
-  EX5012: 'Le compte a été résilié pour défaut de crédit de l\'organisation',
-  EX5013: 'Le compte ne peut pas être créé du fait du défaut de crédit de l\'organisation',
 
   // A_BRO = 6000 Situation inattendue : assertion trappée par le browser
-  EX6001: 'Clé RSA publique de l\'avatar non trouvée',
-  EX6002: 'Base locale corrompue ?\nCompte non trouvé',
-  EX6003: 'Base locale corrompue ?\nPréférences du compte non trouvé',
-  EX6004: 'Base locale corrompue ?\nChat du compte non trouvé',
-  EX6005: 'Base locale corrompue ?\nComptabilité du compte non trouvé',
 
   // E_SRV = 7000 // Erreur inattendue trappée sur le serveur
   EX7000: 'Erreur de réseau ou de serveur non identifiable : HTTP:[{0}] - message:[{1}]', // 0
