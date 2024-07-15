@@ -51,7 +51,6 @@ import stores from '../stores/stores.mjs'
 import ApercuCv from '../dialogues/ApercuCv.vue'
 import BtnCond from './BtnCond.vue'
 import { dkli, titre } from '../app/util.mjs'
-// import { NouveauMembre } from '../app/operations4.mjs'
 import { ID } from '../app/api.mjs'
 
 // Niveau 4
@@ -100,7 +99,6 @@ export default {
     },
     async select () {
       this.ui.selectContact(this.id)
-      // await new NouveauMembre().run()
     }
   },
 

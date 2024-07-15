@@ -20,7 +20,7 @@
       </div>
 
       <q-input v-if="!keyboard.v" dense counter
-        :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : $t('NPpe')" 
+        :hint="ligne1.length < lgph ? $t('PSnbc', [lgph]) : $t('entree')" 
         v-model="ligne1" 
         @keydown.enter.prevent="ok2" 
         :type="isPwd ? 'password' : 'text'" :placeholder="$t('PSl1')">

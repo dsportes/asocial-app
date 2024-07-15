@@ -12,7 +12,7 @@
       :label="groupe ? $t('NAng') : $t('NAna')"
       :rules="[r1,r2]"
       @keydown.enter.prevent="ok" type="text" 
-      :hint="nom && r1(nom) && r2(nom) ? $t('NPpe') : $t('NAe1', [min, max])">
+      :hint="nom && r1(nom) && r2(nom) ? $t('entree') : $t('NAe1', [min, max])">
       <template v-slot:append>
         <span :class="nom.length === 0 ? 'disabled' : ''">
           <q-icon name="cancel" class="cursor-pointer"  @click="nom=''"/>

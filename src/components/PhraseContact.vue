@@ -13,7 +13,7 @@
     <q-input class="col" dense v-model="phrase" :placeholder="$t('NPphl')" 
       counter :rules="[r1]"
       @keydown.enter.prevent="crypterphrase" :type="isPwd ? 'password' : 'text'"
-      :hint="phrase && r1(phrase) ? $t('NPpe') : $t('NP16', [min])">
+      :hint="phrase && r1(phrase) ? $t('entree') : $t('NP16', [min])">
       <template v-slot:append>
         <span class="row q-gutter-xs">
           <q-btn :icon="isPwd ? 'visibility_off' : 'visibility'" 
