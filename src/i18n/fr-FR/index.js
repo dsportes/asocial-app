@@ -56,6 +56,8 @@ export default {
   groupe: 'Groupe {0}', // FiltreAvgr
   avatar1: 'Avatar {0} - {1} / {2} note(s)', // PageNotes
   groupe1: 'Groupe {0} - {1} / {2} note(s)', // PageNotes
+  avatar2: 'Avatar_{0}', // PageNotes
+  groupe2: 'Groupe_{0}', // PageNotes
   existe: 'Changer le début de la phrase, il est trop proche de celui d\'une phrase déjà déclarée.', // ...
   nolimite: '(sans limite)', // FiltreVols
   delegue: 'Délégué', // ApercuGenx PagePartition
@@ -177,10 +179,8 @@ export default {
   EX2001: 'Ouverture de la connexion avec le serveur impossible ( {0} ).',
   EX2002: 'Envoi d\'un message au serveur impossible ( {0} ).\nDétail: {1}',
   EX2003: 'Rupture de la liaison avec le serveur par le serveur ou URL mal configurée ( {0} ).',
-  // EX2004: 'ping / pong : pong non reçu ( {0} ).',
   EX2005: 'Erreur de transfert du fichier vers le serveur de fichier. Détail: {0}',
   EX2006: 'Erreur de transfert du fichier vers l\'application locale de stockage de fichiers. Détail: {0}',
-  // EX2100: 'Session interrompue. Se déconnecter et tenter de se reconnecter',
 
   // E_DB = 3000 // Toutes erreurs d'accès à la base locale
   EX3001: 'Ouverture de la base locale impossible.\nDétail: {0}',
@@ -190,21 +190,8 @@ export default {
   EX4000: 'Bug probable de l\'application.\nDétail: {0}',
   EX4001: 'Retour de la requête mal formé : parse JSON en erreur. Opération: {0}\nDétail: {1}',
   EX4002: 'Retour de la requête mal formé : désérialisation en erreur. Opération: {0}\nDétail: {1}',
-  // EX4003: 'Fichier {0} non accessible sur le serveur',
-  // EX4005: 'Plus de 5 tentatives de connexions. Bug ou incident temporaire. Ré-essayer un peu plus tard',
-  // EX4006: 'Compte anormalement sollicité, bug probable',
   EX4007: 'Echec d\'encryption. Buffer: {0} - Clé: {1} - Détail: {2}',
   EX4008: 'Echec de decryption. Buffer: {0} - Clé: {1} - Détail: {2}',
-  // EX4010: 'Crypter : clé incorrecte (pas Uint8Array ou longueur != 32)',
-  // EX4011: 'Crypter : buffer incorrect (pas Uint8Array)',
-  // EX4012: 'Décrypter : cle incorrecte (pas Uint8Array ou longueur != 32)',
-  // EX4013: 'Décrypter : buffer incorrect (pas Uint8Array)',
-  // EX4014: 'Crypter RSA : cle publique incorrecte (pas Uint8Array)',
-  // EX4015: 'Crypter RSA : buffer incorrect (pas Uint8Array)',
-  // EX4016: 'Décrypter RSA : cle publique incorrecte (pas Uint8Array)',
-  // EX4017: 'Dérypter RSA : buffer incorrect (pas Uint8Array)',
-  // EX4018: 'store {0} inconnu',
-  // EX4020: 'Erreur de téléchargement d\'un fichier',
   EX4021: 'Bug probable de \'opération "{0}" après plusieurs tentatives aynat échoué.',
   EX4022: 'Fichier impossible à décrypter: {0}',
   EX4023: 'Echec de decryption RSA. Buffer: {0} - Clé: {1} - Détail: {2}',

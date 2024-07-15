@@ -434,6 +434,33 @@ export default {
       }
     },
 
+    libF (n) {
+      switch (n.type) {
+        case 1 : {
+          const nom = this.pSt.nom(parseInt(n.key))
+          return this.$t('avatar2', [nom])
+        }
+        case 2 : {
+          const nom = this.pSt.nom(parseInt(n.key), 1)
+          return this.$t('groupe2', [nom])
+        }
+        case 3 : {
+          const nom = this.pSt.nom(parseInt(n.key), 24)
+          return this.$t('groupe2', [nom])
+        }
+        case 4 : 
+        case 5 : {
+          const r = n.note.ref
+          const s2 = r && r[0] !== n.note.id ? '(' + this.pSt.nom(n.note.id, 16)+ ') ' : ''
+          return s2 + n.note.titre
+        }
+        case 6 : 
+        case 7 : {
+          return '#' + Note.idsDeKey(n.key)
+        }
+      }
+    },
+
     // Rattachement d'une note *********************************************
     async rattacher () {
       this.rec = 1
@@ -471,24 +498,25 @@ export default {
     },
 
     scanNode (node, rac, path, lstn) {
+      const label = this.libF(node)
       if (node.type > 5) {
         // note "fake" - push de son path, pas de note
         if (node.children.length) {
-          const p = path + '/' + node.label
-          for (const c of node.children) scanNode (c, rac, p, lstn)
+          const p = path + '/' + label
+          for (const c of node.children) this.scanNode(c, rac, p, lstn)
         } 
       } else {
         // c'est une vraie note
         const n = node.note
-        const p2 = this.nf(node.label.substring(0, 32), n.ids)
+        const p2 = this.nf(label.substring(0, 32), n.ids)
         const p = path + '/' + p2
         if (this.nSt.filtrage(node)) {
-          rac.v2 += n.v2
+          rac.v2 += n.vf
           rac.nbn++
           lstn.push({ r: rac.nom, p, n })
         }
         if (node.children.length) {
-          for (const c of node.children) this.scanNode (c, rac, p, lstn)
+          for (const c of node.children) this.scanNode(c, rac, p, lstn)
         }
       }
     },
@@ -497,7 +525,7 @@ export default {
       const lr = []
       this.lstn.length = 0
       for (const r of this.nSt.nodes) {
-        const nom = this.nf(r.label)
+        const nom = this.nf(this.libF(r))
         const path = nom
         const rac = { nom, v2: 0, v2d: 0, nbn: 0, v1d: 0, nbnd: 0}
         for (const node of r.children) this.scanNode(node, rac, path, this.lstn)
@@ -537,17 +565,18 @@ export default {
       return 'http://localhost:' + this.portupload + '/' + u8ToB64(enc.encode(d + u), true) 
     },
 
-    async dlnote(n, avecf) {
+    async dlnote (n, avecf) {
       // console.log(n.p)
+      // await sleep(2000)
       this.dlnbn++
-      const buf = enc.encode(n.n.txt)
+      const buf = enc.encode(n.n.texte)
       const u = this.url(n.p + '/_.md')
       const er = await putData(u, buf)
       if (er) throw new AppExc(E_WS, 6, [er])
       if (avecf) {
-        for (const [idf, f] of n.n.mfa) {
-          const nf = n.n.nomFichier(idf)
-          const buf = await n.n.getFichier(idf)
+        for (const [, f] of n.n.mfa) {
+          const nf = n.n.nomFichier(f)
+          const buf = await n.n.getFichier(f)
           if (buf) {
             const u = this.url(n.p + '/' + nf)
             const er = await putData(u, buf)
