@@ -742,9 +742,9 @@ export class ConnexionSynchroIncognito extends OperationS {
 - `token` : éléments d'authentification du compte à créer
 - idsp idssp : identifinat du sponsoring
 - id : id du compte sponsorisé à créer
-- hXR: hash du PBKD de sa phrase secrète réduite
-- hXC: hash du PBKD de sa phrase secrète complète
-- `hYC`: hash du PNKFD de la phrase de sponsoring
+- hXR: hash du PBKFD de sa phrase secrète réduite
+- hXC: hash du PBKFD de sa phrase secrète complète
+- hYC: hash du PBKFD de la phrase de sponsoring
 - cleKXC: clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
 - cleAK: clé A de son avatar principal cryptée par la clé K du compte
 - ardYC: ardoise du sponsoring

@@ -224,6 +224,8 @@ export default {
   EX8101: 'L\'administrateur technique a restreint l\'application à la lecture seulement : {0}\nL\'opération ayant tenté une écriture, elle a échoué.',
   EX8102: 'Le code de l\`organisation n\'est pas reconnu.\nCorriger la saisie.',
   EX8104: 'Cette phrase secrète de correspond pas celle du Comptable.',
+  EX8105: 'Le compte du Comptable a déjà été créé.',
+  EX8106: 'La phrase de sponsoring de l\'Administrateur Technique pour le Comptable de cette organisation n\'est pas celle saisie.',
 
   EX8201: 'Code d\'organisation {0} incorrect (lg 4..8 /^([a-z0-9\-]+)$/).',
   EX8202: 'Numéro d\'espace {0} incorrect (pas 10..89).',
@@ -321,7 +323,7 @@ export default {
   EX8299: '(BUG) Une note d\'avatar ne peut pas être rattachée à la racine d\'un autre avatar.',
   EX8300: '(BUG) Note ou racine de rattachement non identifiée',
   EX8301: '(BUG) Le compte n\'a pas d\'avatar ayant droit d\'édition sur cette note.',
-  EX8303: '(BUG) Seule note de groupe peut recevoir une exclusivité.',
+  EX8303: '(BUG) Seule une note de groupe peut recevoir une exclusivité.',
   EX8304: '(BUG) Pour attribuer l\'exclusité d\'écriture d\'une note, il faut, a) soit être animateur, b) soit l\'avoir soi-même, c) soit que personne ne l\'ait déjà.',
   EX8305: '(BUG) On ne peut attribuer l\'exclusité d\'écriture d\'une note qu\'à un membre ayant droit d\'écriture sur les notes.',
   EX8306: '(BUG) Pour supprimer l\'exclusité d\'écriture d\'une note, il faut, a) soit être animateur, b) soit l\'avoir soi-même.',
