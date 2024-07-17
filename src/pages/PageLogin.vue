@@ -211,21 +211,6 @@ export default {
     const session = stores.session
     const ui = stores.ui
 
-    /*
-    watch(razdb, async (ap, av) => {
-      if (ap === true && ap !== av) {
-        await afficherDiag($t('LOGrazbl'))
-        console.log('Raz db diag')
-      }
-    })
-    
-    watch(locmode, (ap, av) => {
-      if (ap !== session.mode) {
-        session.setMode(ap)
-      }
-    })
-    */
-
     return {
       session, ui,
       config

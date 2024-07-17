@@ -47,7 +47,7 @@
         </div>
         <div v-else></div>
         <div>
-          <btn-cond class="q-mr-sm" flat :label="$t('PSren')" @ok="ko"/>
+          <btn-cond class="q-mr-sm" flat :label="$t('renoncer')" @ok="ko"/>
           <btn-cond color="warning" :label="labelVal()" :icon-right="iconValider"
             :disable="!ligne1 || ligne1.length < lgph || !orgL"
             @ok="ok" />

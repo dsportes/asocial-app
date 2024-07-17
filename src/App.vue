@@ -275,7 +275,7 @@
   <!-- ui.d.diag : Affiche d'un message demandant confirmation 'j'ai lu' -->
   <q-dialog v-model="ui.d.diag" persistent>
     <q-card :class="lidk + ' spsm q-pa-sm'">
-      <div class="text-center titre-lg q-my-sm">{{$t('UTIatt')}}</div>
+      <div class="text-center titre-lg q-my-sm">{{$t('MLAatt')}}</div>
       <div class="fs-md text-center q-b-md" v-html="ui.diag"></div>
       <div class="row q-my-md justify-end"> 
         <q-btn flat dense color="primary" size="md" padding="xs" icon="check"
