@@ -1099,9 +1099,9 @@ Retour:
 export class GetSponsoring extends Operation {
   constructor () { super('GetSponsoring') }
 
-  async run (org, hps1) {
+  async run (org, hps1, hTC) {
     try {
-      const ret = await post(this, 'GetSponsoring', { org, hps1 })
+      const ret = await post(this, 'GetSponsoring', { org, hps1, hTC })
       return this.finOK(ret)
     } catch (e) {
       await this.finKO(e)

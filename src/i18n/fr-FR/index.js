@@ -208,6 +208,8 @@ export default {
   EX7004: 'Session déconnectée',
   EX7005: 'La version d\'API [{0}] gérée par le serveur est incompatble avec celle [{1}] de l\'application',
 
+  EX7101: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - message:[{1}]',
+
   // F_SRV = 8000 // Erreur fonctionnelle trappée sur le serveur
   EX8001: 'Exception générique 1',
   EX8002a: 'Le groupe a disparu, opération impossible',
@@ -414,6 +416,7 @@ export default {
   OP_ProlongerSponsoring: 'Prolongation / annulation d\'un sponsoring',
   OP_CreationEspace: 'Création d\'un nouvel espace',
   OP_MajSponsEspace : 'Changement de la phrase de contact du Comptable',
+  OP_CreationComptable: 'Ccréation du comptable d\'un nouvel espace.',
   OP_EchoTexte: 'Lancement d\'un test d\'écho',
   OP_ErreurFonc: 'Simulation d\'une erreur fonctionnelle',
   OP_PingDB: '"Ping" de la base distante',
@@ -452,7 +455,9 @@ export default {
   LOGsp1: 'Sponsoring dèjà refusé',
   LOGsp2: 'Sponsoring dèjà accepté',
   LOGsp3: 'Sponsoring annulé par le sponsor',
-
+  LOGnosp: 'Le compte du Comptable ne peut pas être créé: la phrase d\'autorisation déclarée par l\'Administrateur Technique n\'est pas celle saisie.',
+  LOGnosp2: '(BUG) Clé E non decryptable. Demander à l\'Administrateur Technique de décklarer une nouvelle phrase d\'autisation de compte Comptable.', 
+  
   // Rapport Synchro
   RStit: 'Avatars et groupes du compte "{0}"',
   RScav: 'Avatars',
@@ -517,9 +522,6 @@ export default {
   HLPfermer: 'Fermer l\'aide',
   HLPprec: 'Page d\'aide précédente',
   HLPfiltre: 'Filtre sur les titres',
-
-  // Stats espace
-  STchg: 'Changer le profil de l\'espace',
 
   // Page sponsorings - Nouveau sponsoring
   NPnouv: 'Sponsoriser un nouveau compte',
@@ -815,6 +817,7 @@ export default {
   ESdlvat: 'Hébergment des comptes "O" assuré jusqu\'à :',
   ESdlvat2: 'Hébergment des comptes "O" assuré jusqu\'à  {0}.',
   ESdlvat3: 'Hébergment des comptes "O" assuré sans limite de date.',
+  ESchg: 'Changer le profil de l\'espace',
   ESdlc: 'Rapport du mois :',
   ESnbmi: 'Comptes supprimés après N mois sans connexion',
   ESnbmi2: 'Comptes supprimés après {0} mois sans connexion',

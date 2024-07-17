@@ -89,15 +89,15 @@
       </q-card>
     </q-dialog>
 
-    <!-- Changement du profil de l'espace -->
+    <!-- Changement de la phrase de sponsoring du Comptable -->
     <q-dialog v-model="ui.d.PAnvspc" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('STchg')}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ENnpspc')}}</q-toolbar-title>
         </q-toolbar>
         <q-card-section class="q-my-md q-mx-sm">
-          <phrase-contact declaration :orgext="org" @ok="okps" :disable="!org"/>
+          <phrase-contact declaration :orgext="esp.org" @ok="okps" :disable="!org"/>
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
@@ -107,12 +107,12 @@
       </q-card>
     </q-dialog>
 
-    <!-- Changement de la phrase de sponsoring du Comptable -->
+    <!-- Changement du profil de l'espace -->
     <q-dialog v-model="ui.d.PAedprf" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ENnpspc')}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESchg')}}</q-toolbar-title>
         </q-toolbar>
         <q-card-section class="q-my-md q-mx-sm">
           <div class="row bord4">

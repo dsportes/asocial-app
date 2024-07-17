@@ -61,10 +61,12 @@ import stores from '../stores/stores.mjs'
 import { afficherDiag } from '../app/util.mjs'
 import { connexion, GetSponsoring } from '../app/synchro.mjs'
 import { Sponsoring, RegCles } from '../app/modele.mjs'
-import { AMJ, ID } from '../app/api.mjs'
+import { AMJ } from '../app/api.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../panels/AcceptationSponsoring.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import { decrypter } from '../app/webcrypto.mjs'
+import { CreationComptable } from '../app/operations4.mjs'
 
 export default {
   name: 'PageLogin',
@@ -85,7 +87,6 @@ export default {
   computed: {
     loginitem () { return this.ui.loginitem }
   },
-
 
   watch: {
     loginitem(ap) {
@@ -110,6 +111,16 @@ export default {
       this.ui.oD('PSouvrir')
     },
 
+    saisiePS () {
+      this.ui.ps = { 
+        orgext: this.org,
+        verif: true,
+        labelValider: 'ok',
+        ok: this.creationComptable
+      }
+      this.ui.oD('PSouvrir')
+    },
+
     reset () {  },
 
     async onps (phrase) {
@@ -126,7 +137,25 @@ export default {
         RegCles.reset()
         const mode = session.mode
         stores.reset(true)
-        const res = await new GetSponsoring().run(this.org, this.pc.hps1)
+        this.hTC = this.pc.hpsc
+        const res = await new GetSponsoring().run(this.org, this.pc.hps1, this.pc.hpsc)
+        if (res.cleET) {
+          if (res.cleET === false) {
+            await afficherDiag(this.$t('LOGnosp'))
+            this.raz()
+            return
+          } else {
+            try {
+              this.cleE = await decrypter(pc.pcb, res.cleET)
+              this.saisiePS()
+              return
+            } catch (e) {
+              await afficherDiag(this.$t('LOGnosp2'))
+              this.raz()
+              return
+            }
+          }
+        }
         if (!res || !res.rowSponsoring) {
           await afficherDiag(this.$t('LOGnopp'))
           this.raz()
@@ -161,6 +190,10 @@ export default {
         this.raz()
         return
       }
+    },
+
+    async creationComptable (pc) {
+      await new CreationComptable().run(this.org, pc, this.cleE, this.hTC)
     },
 
     raz () {

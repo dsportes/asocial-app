@@ -139,6 +139,7 @@ export const useUiStore = defineStore('ui', {
       PEdlvat: false,
       PEnotif: {},
       ASaccsp: false, // AcceptationSponsoring
+      LOGccc: false,
       HTags: {}, // HashTags
       NE: false, // NoteEdit
       NX: false, // NoteExclu
