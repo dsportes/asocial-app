@@ -97,6 +97,74 @@ export class StartDemon extends Operation {
   }
 }
 
+/* `CreationEspace` : création d'un nouvel espace
+- token : jeton d'authentification du compte de **l'administrateur**
+- ns : numéro de l'espace
+- org : code de l'organisation
+- TC : PBKFD de la phrase de sponsoring du Comptable par l'AT
+- hTC : hash de TC
+Retour: rien
+
+Traitement ssi si: 
+- soit espace n'existe pas, 
+- soit espace existe et a un `hTC` : re-création avec une nouvelle phrase de sponsoring.
+
+Création des rows espace, synthese
+- génération de la `cleE` de l'espace: -> `cleET` (par TC) et `cleES` (par clé système).
+- stocke dans l'espace: `hTC cleES cleET`. Il est _à demi_ créé, son Comptable n'a pas encore crée son compte.
+*/
+export class CreationEspace extends Operation {
+  constructor() { super('CreationEspace') }
+
+  async run(org, phrase, ns) {
+    try {
+      const session = stores.session
+
+      const args = {
+        token: session.authToken,
+        ns: ns,
+        org: org,
+        TC: phrase.pcb,
+        hTC: phrase.hpsc,
+      }
+      await post(this, 'CreationEspace', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+} // MajSponsEspace
+
+/* OP_MajSponsEspace : 'Changement de la phrase de contact du Comptable'
+- token : jeton d'authentification du compte de **l'administrateur**
+- ns : numéro de l'espace
+- org : code de l'organisation
+- TC : PBKFD de la phrase de sponsoring du Comptable par l'AT
+- hTC : hash de TC
+Retour: rien
+*/
+export class MajSponsEspace extends Operation {
+  constructor() { super('MajSponsEspace') }
+
+  async run(org, phrase, ns) {
+    try {
+      const session = stores.session
+
+      const args = {
+        token: session.authToken,
+        ns: ns,
+        org: org,
+        TC: phrase.pcb,
+        hTC: phrase.hpsc,
+      }
+      await post(this, 'MajSponsEspace', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
 /* OP_CreerEspace: 'Création d\'un nouvel espace et de son comptable'
 - token : jeton d'authentification du compte de **l'administrateur**
 - ns : numéro de l'espace

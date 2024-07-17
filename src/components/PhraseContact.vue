@@ -24,8 +24,8 @@
         </span>
       </template>
     </q-input>
-    <q-btn class="col-auto q-ml-xs" color="primary" dense padding="none" round
-      icon="check" v-if="r1(phrase) === true" @click="crypterphrase"/>
+    <btn-cond class="col-auto q-ml-xs" round
+      icon="check" v-if="r1(phrase) === true" @ok="crypterphrase"/>
   </div>
 
 </div>
@@ -34,6 +34,7 @@
 
 import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
+import BtnCond from '../components/BtnCond.vue'
 import { Phrase } from '../app/modele.mjs'
 import { afficherDiag } from '../app/util.mjs'
 
@@ -41,6 +42,7 @@ const min = 24
 
 export default ({
   name: 'PhraseContact',
+  components: { BtnCond },
   props: { 
     initVal: String, 
     orgext: String, 

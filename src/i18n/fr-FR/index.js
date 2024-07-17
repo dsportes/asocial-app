@@ -335,6 +335,7 @@ export default {
   EX8313: '(BUG) L\'auteur de l\'édition (texte / fichiers) de la note n\'a pas droit d\'écriture.',
   EX8314: '(BUG) La note a un auteur exclusif et ce n\'est pas l\'auteur de l\'édition (texte / fichiers).',
   EX8315: '(BUG) Le compte n\'a pas d\'avatar, animateur ou ayant droit d\'écriture et ayant l\'exclusivité (s\'il y en a une).',
+  EX8316: '(BUG) Le Comptable a déjà créé son compte, phrase de sponsoring sans utilité.',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
@@ -411,7 +412,8 @@ export default {
   OP_SyncSp: 'Acceptation d\'un sponsoring et création d\'un nouveau compte',
   OP_RefusSponsoring: 'Rejet d\'une proposition de sponsoring',
   OP_ProlongerSponsoring: 'Prolongation / annulation d\'un sponsoring',
-  OP_CreerEspace: 'Création d\'un nouvel espace et de son comptable',
+  OP_CreationEspace: 'Création d\'un nouvel espace',
+  OP_MajSponsEspace : 'Changement de la phrase de contact du Comptable',
   OP_EchoTexte: 'Lancement d\'un test d\'écho',
   OP_ErreurFonc: 'Simulation d\'une erreur fonctionnelle',
   OP_PingDB: '"Ping" de la base distante',
@@ -439,6 +441,7 @@ export default {
   LOGrazbl: '<b>Attention:</b> la base locale sera effacée et rechargée totalement.' +
   '<BR>Ceci peut alonger <b>significativement</b> la durée d\'initialisation (comme le mode <i>incognito</i>).' +
   '<BR>Les fichiers attachés aux notes conservés sur cet appareil ne seront plus accessibles en mode avion',
+  LOGconn: 'Se Connecter',
   LOGconn2: 'Se Connecter à son compte en mode ...',
   LOGconn3: 'Créer votre propre compte ...',
   LOGpar: 'Pour créer un compte, il faut qu\'un sponsor ait enregistré une phrase de reconnaissance spécifique au compte à créer. Saisir ci-après le nom de l\'organisation et cette phrase.',
@@ -792,6 +795,8 @@ export default {
   CNXdeg2: 'Le compte a été restreint à un accès minimal. Seuls les modes "avion" et "incognito" étant admis, la session a été mise en mode "incognito".',
 
   // PageAdmin et ApercuEspace
+  ESencrea: 'Comptable pas encore créé.',
+  ENnpspc: 'Nouvelle phrase de sponsoring du Comptable',
   ESinitgc: 'Tâches du GC initialisées: {0} existante(s), {1} créées',
   ESgc: 'Lancer un GC',
   ESgcin: 'Init. tâches GC',

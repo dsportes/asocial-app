@@ -20,36 +20,41 @@
           <div :class="dkli(idx) + ' row justify-between text-bold font-mono fs-lg'">
             <span class="q-mr-md">#{{esp.id}}</span>
             <span>{{esp.org}}</span>
-            <span v-if="esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
+            <span v-if="esp.hTC" class="msg q-mx-sm">{{$t('ESencrea')}}</span>
+            <span v-if="!esp.hTC && esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
           </div>
         </template>
 
         <div class="q-ml-lg">
+          <btn-cond v-if="esp.hTC" class="q-ma-xs" :label="$t('ENnpspc')" 
+            @ok="this.esp = esp; ui.oD('PAnvspc')" />
           <div class="row justify-between q-my-xs">
             <span class="fs-md">{{$t('ESprf', [esp.nprof])}}</span>
             <btn-cond :label="$t('changer')"  @ok="ovchgprf1(esp)"/>
           </div>
 
-          <div class="titre-md q-my-xs">{{$t('ESnbmi2', [esp.nbmi])}}</div>
+          <div v-if="!esp.hTC">
+            <div class="titre-md q-my-xs">{{$t('ESnbmi2', [esp.nbmi])}}</div>
 
-          <div v-if="esp.opt" class="titre-md q-my-xs">{{$t('PTopt')}}</div>
+            <div v-if="esp.opt" class="titre-md q-my-xs">{{$t('PTopt')}}</div>
 
-          <div class="q-my-xs">
-            <bouton-dlvat :espace="esp" @close="finDlv"/>
-          </div>
+            <div class="q-my-xs">
+              <bouton-dlvat :espace="esp" @close="finDlv"/>
+            </div>
 
-          <apercu-notif class="q-my-xs" :notif="esp.notifE" :idx="idx" 
-            :type="0" :cible="ID.court(esp.id)"/>
+            <apercu-notif class="q-my-xs" :notif="esp.notifE" :idx="idx" 
+              :type="0" :cible="ID.court(esp.id)"/>
 
-          <div class="q-mb-sm">
-            <div class="titre-md">{{$t('PEstm')}}</div>
-            <div class="row q-gutter-sm q-mb-sm">
-              <btn-cond class="self-start b1" label="M" @ok="dlstat(esp, 0)"/>
-              <btn-cond class="self-start b1" label="M-1" @ok="dlstat(esp, 1)"/>
-              <btn-cond class="self-start b1" label="M-2" @ok="dlstat(esp, 2)"/>
-              <btn-cond class="self-start b1" label="M-3" @ok="dlstat(esp, 3)"/>
-              <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl(esp)" :dinit="maxdl"
-                @ok="dlstat2(esp)" icon="download" :label="$t('ESdlc')"/>
+            <div class="q-mb-sm">
+              <div class="titre-md">{{$t('PEstm')}}</div>
+              <div class="row q-gutter-sm q-mb-sm">
+                <btn-cond class="self-start b1" label="M" @ok="dlstat(esp, 0)"/>
+                <btn-cond class="self-start b1" label="M-1" @ok="dlstat(esp, 1)"/>
+                <btn-cond class="self-start b1" label="M-2" @ok="dlstat(esp, 2)"/>
+                <btn-cond class="self-start b1" label="M-3" @ok="dlstat(esp, 3)"/>
+                <saisie-mois v-model="mois" :dmax="maxdl" :dmin="mindl(esp)" :dinit="maxdl"
+                  @ok="dlstat2(esp)" icon="download" :label="$t('ESdlc')"/>
+              </div>
             </div>
           </div>
         </div>
@@ -76,8 +81,7 @@
             <div v-if="dorg" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dorg}}</div>
           </div>
           <div class="column justify-center q-mt-md">
-            <btn-cond :label="$t('ESps')" no-caps class="titre-lg" @ok="saisiePS" 
-              :disable="!org"/>
+            <phrase-contact declaration :orgext="org" @ok="okps" :disable="!org"/>
             <bouton-confirm class="q-my-lg maauto" :actif="ps !== null && !dns && !dorg" 
               :confirmer="creerNS"/>
           </div>
@@ -86,11 +90,29 @@
     </q-dialog>
 
     <!-- Changement du profil de l'espace -->
-    <q-dialog v-model="ui.d.PAedprf" persistent>
+    <q-dialog v-model="ui.d.PAnvspc" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('STchg')}}</q-toolbar-title>
+        </q-toolbar>
+        <q-card-section class="q-my-md q-mx-sm">
+          <phrase-contact declaration :orgext="org" @ok="okps" :disable="!org"/>
+        </q-card-section>
+        <q-card-actions align="right" class="q-gutter-sm">
+          <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+          <btn-cond color="warning" icon="check" 
+            :label="$t('valider')" :disable="!ps" @ok="nvspc"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Changement de la phrase de sponsoring du Comptable -->
+    <q-dialog v-model="ui.d.PAedprf" persistent>
+      <q-card :class="styp('sm')">
+        <q-toolbar class="bg-secondary text-white">
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg full-width text-center">{{$t('ENnpspc')}}</q-toolbar-title>
         </q-toolbar>
         <q-card-section class="q-my-md q-mx-sm">
           <div class="row bord4">
@@ -116,54 +138,6 @@
       </q-card>
     </q-dialog>
 
-    <!--
-    <q-dialog v-model="ui.d.PAcheckpoint" full-height position="left" persistent>
-      <q-layout container view="hHh lpR fFf" :class="styp('md')">
-        <q-header elevated>
-          <q-toolbar class="bg-secondary text-white">
-            <q-btn dense size="md" icon="chevron_left" color="warning" @click="ui.fD"/>
-            <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESckpt', [ns])}}</q-toolbar-title>
-            <bouton-help page="page1"/>
-          </q-toolbar>
-        </q-header>
-
-        <q-page-container class="q-pa-xs">
-          <div v-for="(s, idx) in singl" :key="s.id" :class="dkli(idx)">
-            <div class="fs-md font-mono text-bold">{{$t('SINGL' + s.id)}}</div>
-            <div class="q-ml-lg">
-              <span v-if="s.nr" class="q-mr-md">{{$t('ESretry', [s.nr])}}</span>
-              <span class="q-mr-md">{{dhIso(s.v)}}</span>
-              <span>{{duree(s.duree)}}</span>
-            </div>
-            <div v-if="s.stats" class="q-ml-lg fs-md font-mono">{{stat(s.stats)}}</div>
-            <div v-if="s.exc" class="bord q-ml-lg fs-md font-mono height-4 overflow-auto">
-              {{s.exc}}</div>
-            <q-separator color="orange" class="q-mt-sm"/>
-          </div>
-        </q-page-container>
-      </q-layout>
-    </q-dialog>
-    -->
-
-    <!--
-    <q-dialog v-model="ui.d.PApageespace" full-height position="left" persistent>
-      <q-layout container view="hHh lpR fFf" :class="styp('md')">
-        <q-header elevated>
-          <q-toolbar class="bg-secondary text-white">
-            <q-btn dense size="md" icon="chevron_left" color="warning" @click="ui.fD"/>
-            <q-toolbar-title class="titre-lg full-width text-center">
-              {{$t('ESpgesp', [esp.id, esp.org])}}</q-toolbar-title>
-            <bouton-help page="page1"/>
-          </q-toolbar>
-        </q-header>
-
-        <q-page-container>
-          <PageEspace :ns="esp.id"/>
-        </q-page-container>
-
-      </q-layout>
-    </q-dialog>
-    -->
   </q-page>
 </template>
 
@@ -175,8 +149,9 @@ import BoutonDlvat from '../components/BoutonDlvat.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
+import PhraseContact from '../components/PhraseContact.vue'
 import SaisieMois from '../components/SaisieMois.vue'
-import { CreerEspace, SetEspaceNprof, InitTachesGC, 
+import { CreationEspace, MajSponsEspace, SetEspaceNprof, InitTachesGC, 
   StartDemon, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
@@ -188,7 +163,7 @@ const reg = /^([a-z0-9\-]+)$/
 export default {
   name: 'PageAdmin',
 
-  components: { BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond, SaisieMois },
+  components: { PhraseContact, BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond, SaisieMois },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -226,16 +201,6 @@ export default {
     brd (idx) { 
       const x = this.prf === idx + 1 ? ' bord6': (this.profil === idx + 1 ? ' bord7' : ' bord5') 
       return x 
-    },
-
-    saisiePS () {
-      this.ui.ps = { 
-        orgext: this.org,
-        verif: true,
-        labelValider: 'ok',
-        ok: this.okps
-      }
-      this.ui.oD('PSouvrir')
     },
 
     async finDlv (tf) {
@@ -278,8 +243,16 @@ export default {
       this.ps = ps
     },
 
+   async nvspc () {
+      await new MajSponsEspace().run(this.esp.org, this.ps, this.esp.id)
+      this.ns = 0
+      this.ps = null
+      this.ui.fD()
+      await this.loadEsp()
+    },
+
     async creerNS () {
-      await new CreerEspace().run(this.org, this.ps, this.ns)
+      await new CreationEspace().run(this.org, this.ps, this.ns)
       this.ns = 0
       this.ps = null
       this.ui.fD()

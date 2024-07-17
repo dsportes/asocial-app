@@ -307,6 +307,8 @@ export class Espace extends GenDoc {
     this.org = row.org
     this.creation = row.creation
     this.cleES = row.cleES
+    this.cleET = row.cleET
+    this.hTC = row.hTC
     this.moisStat = row.moisStat || 0
     this.moisStatT = row.moisStatT || 0
     this.opt = row.opt || 0
