@@ -1,3 +1,4 @@
+// Branch 20240801
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter à chaque déploiement
   DEV: true,
