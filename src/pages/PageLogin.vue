@@ -54,11 +54,9 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue'
-
 import stores from '../stores/stores.mjs'
 
-import { afficherDiag } from '../app/util.mjs'
+import { afficherDiag, beep } from '../app/util.mjs'
 import { connexion, GetSponsoring } from '../app/synchro.mjs'
 import { Sponsoring, RegCles } from '../app/modele.mjs'
 import { AMJ } from '../app/api.mjs'
@@ -126,6 +124,7 @@ export default {
     async onps (phrase) {
       if (phrase) phrase.phrase = null
       await connexion(phrase, this.ui.razdb)
+      if (!this.config.silenceHome) await beep()
     },
 
     async crypterphrase (pc) {

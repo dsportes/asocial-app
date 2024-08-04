@@ -208,6 +208,7 @@ export default {
   EX7004: 'Session déconnectée',
   EX7005: 'La version d\'API [{0}] gérée par le serveur est incompatble avec celle [{1}] de l\'application',
 
+  EX7100: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - message:[{1}]',
   EX7101: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - message:[{1}]',
 
   // F_SRV = 8000 // Erreur fonctionnelle trappée sur le serveur
@@ -357,6 +358,7 @@ export default {
   EX9999: 'L\'administrateur technique a fermé l\'application : {0}.',
 
   OP_ConnexionAdmin: 'Connexion en tant qu\'administrateur technique',
+  OP_ConnexionCompte: 'Connexion d\'un compte standard',
   OP_McMemo: 'Changement des hashtags et mémo attachés à un contact ou groupe',
   OP_ExistePhrase: 'Test d\'existence d\'une phrase de connexion / contact / sponsoring',
   OP_ExistePhrase1: 'Test d\'existence d\'une phrase de connexion / contact / sponsoring',

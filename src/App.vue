@@ -588,7 +588,8 @@ export default {
   setup () {
     set$t(useI18n().t)
     const $q = useQuasar()
-    stores.config.$q = $q
+    const config = stores.config
+    config.$q = $q
     $q.dark.set(true)
 
     const ui = stores.ui
@@ -601,15 +602,13 @@ export default {
       })
     })
     */
-    
-    // onMounted(async () => { await beep() })
 
     return {
       session: stores.session,
       aSt: stores.avatar, 
       gSt: stores.groupe,
-      config: stores.config,
       people: stores.people,
+      config,
       ui, CV,
       styp, dkli, hms, deconnexion, AMJ
     }

@@ -13,25 +13,23 @@ register(process.env.SERVICE_WORKER_FILE, {
 
   // registrationOptions: { scope: './' },
 
-  ready (registration) {
-    stores.session.setRegistration(registration)
+  async ready (registration) {
     console.log('Service worker is active.')
+    await stores.session.setRegistration(registration)
   },
 
   registered (registration) {
-    stores.session.setRegistration(registration)
     console.log('Service worker has been registered.')
   },
 
   cached (registration) {
-    stores.session.setRegistration(registration)
     console.log('Content has been cached for offline use.')
   },
 
   updatefound (/* registration */) {
     console.log('New content is downloading.')
     try {
-      stores.session.setSwev(1)
+      stores.session.setSwev('updatefound')
     } catch (e) {
       console.log('swev 1', e.toString())
     }
@@ -40,7 +38,7 @@ register(process.env.SERVICE_WORKER_FILE, {
   updated (/* registration */) {
     console.log('New content is available; please refresh.')
     try {
-      stores.session.setSwev(2)
+      stores.session.setSwev('updated')
     } catch (e) {
       console.log('swev 2', e.toString())
     }

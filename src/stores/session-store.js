@@ -10,6 +10,7 @@ import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
 import { WS } from '../app/ws.mjs'
 import { FsSyncSession } from '../app/fssync.mjs'
 import { GetCompta, GetPartition } from '../app/synchro.mjs'
+import { b64ToU8 } from '../app/util.mjs'
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
@@ -289,15 +290,23 @@ export const useSessionStore = defineStore('session', {
   },
 
   actions: {
-    // ServiceWorker : apriori registration ne sert à rien
-    setRegistration(reg) {
-      this.registration = reg
+    async setRegistration(registration) {
+      this.registration = registration
+      let subscription = await registration.pushManager.getSubscription() // déjà faite
+      if (!subscription) subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: b64ToU8(stores.config.vapid_public_key)
+        })
+      const subJSON = JSON.stringify(subscription)
+      this.config.subJSON = subJSON
+      console.log('Service worker has been registered. subJSON length: ' + subJSON.length) 
     },
+
     // ServiceWorker : événements de détection de changement de version
-    setSwev (n) {
-      console.log('SW event reçu : ' + n)
-      if (n === 1) this.swev1 = true
-      else if (n === 2) this.swev2 = true
+    setSwev (x) {
+      // console.log(x + 'event reçu')
+      if (x === 'updatefound') this.swev1 = true
+      else if (n === 'updated') this.swev2 = true
     },
 
     setMode (mode) { this.mode = mode },
@@ -305,7 +314,7 @@ export const useSessionStore = defineStore('session', {
     setOrg (org) { this.org = org || '' },
 
     setAuthToken (phrase, sessionId) {
-      const token = { }
+      const token = { subscription: this.config.subJSON }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
         if (stores.config.hasWS) {
@@ -501,6 +510,10 @@ export const useSessionStore = defineStore('session', {
     async reloadCompta () {
       await new GetCompta().run()
       if (!this.estA) await new GetPartition().run(this.compte.idp)
+    },
+
+    msgPush (msg) {
+      console.log(msg)
     }
 
   }

@@ -5,6 +5,7 @@ import { setRequiredModules } from '../app/util.mjs'
 import { Tarif } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import { config } from '../app/config.mjs'
+// import { toto } from '/testSW.js'
 
 export function getImgUrl (name) {
   try {
@@ -34,18 +35,28 @@ export default boot(async ({ app /* Vue */ }) => {
   console.log('debug:' + (cfg.DEBUG ? true : false) +
     ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
 
+  cfg.broadcast = new BroadcastChannel('channel-123')
+  cfg.broadcast.onmessage = (event) => {
+    if (event.data && event.data.type === 'MSG_ID') {
+      // console.log('Reçu: ', event.data.payload)
+      stores.session.msgPush(event.data.payload)
+    }
+  }
+
   Tarif.tarifs = cfg.tarifs
   
   cfg.search = window.location.search.replace('?', '')
 
-  const srv = process.env.SRV ? process.env.SRV : window.location.host
-  cfg.opsrv = 'https://' + srv + '/op/'
-  console.log('OPSRV: ' + cfg.opsrv)
-
-  if (config.hasWS) {
+  if (process.env.DEVSRV) {
+    cfg.opsrv = 'http://' + process.env.DEVSRV + '/op/'
+    cfg.wssrv = 'ws://' + process.env.DEVSRV + '/ws/'
+  } else {
+    const srv = process.env.SRV ? process.env.SRV : window.location.host
+    cfg.opsrv = 'https://' + srv + '/op/'
     cfg.wssrv = 'wss://' + srv + '/ws/'
-    console.log('WSSRV: ' + cfg.wssrv)
   }
+  console.log('OPSRV: ' + cfg.opsrv)
+  console.log('WSSRV: ' + cfg.wssrv)
 
   console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
 

@@ -60,9 +60,8 @@ module.exports = configure(function (ctx) {
       // to the underlying Webpack
       devtool: 'source-map',
       env: {
-        SRV: 'test.sportes.fr:8443',
-        // OPSRV: 'http://localhost:8443/op/',
-        // WSSRV: 'wss://test.sportes.fr:8443/ws/',
+        DEVSRV: 'localhost:8443',
+        SRV: 'test.sportes.fr:8443'
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
@@ -133,14 +132,18 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-devServer
     devServer: {
-      https: true,
-      port: 8343,
-      open: false // opens browser window automatically
+      // https: true,
+      port: 8080,
+      host: 'localhost',
+      open: false, // opens browser window automatically
+      server: {
+        type: 'http',
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-framework
     framework: {
-      config: {},
+      config: { },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack
@@ -186,7 +189,7 @@ module.exports = configure(function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli-webpack/developing-pwa/configuring-pwa
     pwa: {
-      workboxPluginMode: 'GenerateSW', // 'GenerateSW' or 'InjectManifest'
+      workboxPluginMode: 'InjectManifest', // 'GenerateSW' or 'InjectManifest'
       workboxOptions: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
       }, // only for GenerateSW
@@ -199,7 +202,6 @@ module.exports = configure(function (ctx) {
           .use(ESLintPlugin, [{ extensions: [ 'js' ] }])
       },
       
-
       manifest: {
         name: `asocial`,
         short_name: `asocial`,

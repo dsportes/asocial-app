@@ -5,6 +5,7 @@ export const config = {
   DEBUG: true,
   BUILD: '22',
   hasWS: true, // true si Data Sync est assuré par WS
+  vapid_public_key: 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew',
 
   portupload: 33666, // Ne pas changer en général
 
@@ -16,6 +17,7 @@ export const config = {
   ],
 
   silence: false,
+  silenceHome: true,
   dldemonsec: 10,
   
   /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
