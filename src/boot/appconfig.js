@@ -1,7 +1,8 @@
 import { boot } from 'quasar/wrappers'
+import { decode } from '@msgpack/msgpack'
 const pako = require('pako')
 
-import { setRequiredModules } from '../app/util.mjs'
+import { setRequiredModules, b64ToU8 } from '../app/util.mjs'
 import { Tarif } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import { config } from '../app/config.mjs'
@@ -35,13 +36,16 @@ export default boot(async ({ app /* Vue */ }) => {
   console.log('debug:' + (cfg.DEBUG ? true : false) +
     ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
 
-  cfg.broadcast = new BroadcastChannel('channel-123')
-  cfg.broadcast.onmessage = (event) => {
-    if (event.data && event.data.type === 'MSG_ID') {
-      // console.log('Reçu: ', event.data.payload)
-      stores.session.msgPush(event.data.payload)
+  if (Notification.permission !== 'granted') { // granted denied default
+    try { 
+      const p = await Notification.requestPermission()
+      cfg.permission = p === 'granted'
+    } catch (e) { 
+      cfg.permission = false
     }
-  }
+  } else cfg.permission = true
+  
+  new BroadcastChannel('channel-pubsub').onmessage = stores.session.msgPush2
 
   Tarif.tarifs = cfg.tarifs
   

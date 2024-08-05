@@ -9,11 +9,11 @@
 // Use with precache injection
 // precacheAndRoute(self.__WB_MANIFEST)
 
-const broadcast = new BroadcastChannel('channel-123')
+const broadcast = new BroadcastChannel('channel-pubsub')
 
 console.log('Dans mon SW')
 
 self.addEventListener('push', (event) => {
-  const payload = event.data ? event.data.text() : 'no payload'
-  broadcast.postMessage({ type: 'MSG_ID', payload: payload})
+  const payload = event.data ? event.data.text() : ''
+  broadcast.postMessage({ type: 'pubsub', payload: payload})
 })

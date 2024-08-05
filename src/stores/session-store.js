@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
-import { encode } from '@msgpack/msgpack'
+import { encode, decode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
 import { useI18n } from 'vue-i18n'
 import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, $t } from '../app/util.mjs'
-import { AMJ, ID, AppExc, A_SRV } from '../app/api.mjs'
+import { AMJ, ID, AppExc, A_SRV, hash } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
 import { WS } from '../app/ws.mjs'
 import { FsSyncSession } from '../app/fssync.mjs'
@@ -292,35 +292,48 @@ export const useSessionStore = defineStore('session', {
   actions: {
     async setRegistration(registration) {
       this.registration = registration
-      let subscription = await registration.pushManager.getSubscription() // déjà faite
-      if (!subscription) subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: b64ToU8(stores.config.vapid_public_key)
-        })
-      const subJSON = JSON.stringify(subscription)
-      this.config.subJSON = subJSON
-      console.log('Service worker has been registered. subJSON length: ' + subJSON.length) 
+      try {
+        let subscription = await registration.pushManager.getSubscription() // déjà faite
+        if (!subscription) subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: b64ToU8(stores.config.vapid_public_key)
+          })
+        const subJSON = JSON.stringify(subscription)
+        this.config.subJSON = subJSON
+        this.config.subOBJ = subscription
+        this.config.epHash = hash(subscription.endpoint)
+      } catch (e) {
+        this.config.subJSON = ''
+        this.config.subOBJ = null
+        this.config.epHash = 0
+      }
+      console.log('Service worker has been registered. endpoint hash: ' + this.config.epHash) 
     },
 
     // ServiceWorker : événements de détection de changement de version
     setSwev (x) {
       // console.log(x + 'event reçu')
       if (x === 'updatefound') this.swev1 = true
-      else if (n === 'updated') this.swev2 = true
+      else if (x === 'updated') this.swev2 = true
     },
 
     setMode (mode) { this.mode = mode },
 
     setOrg (org) { this.org = org || '' },
 
-    setAuthToken (phrase, sessionId) {
-      const token = { subscription: this.config.subJSON }
+    setAuthToken (phrase) {
+      const token = { }
       if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
       else {
-        if (stores.config.hasWS) {
-          this.sessionId = sessionId || ID.rnd()
+        if (this.config.permission && this.config.epHash) {
+          token.subscription = this.config.subJSON
+          this.sessionId = ID.rnd() + '.' + this.config.epHash + '.' + Date.now()
           token.sessionId = this.sessionId
+        } else {
+          this.sessionId = ''
         }
+        console.log('sessionId: ', this.sessionId || '(none)')
+
         token.hXR = phrase ? phrase.hps1 : null
         token.hXC = phrase ? phrase.hpsc : null
       }
@@ -332,9 +345,9 @@ export const useSessionStore = defineStore('session', {
     /* Initialise une session depuis une phrase secrète
     session.mode et org ont été enregistrés par PageLogin (connexion ou création compte)
     */
-    async initSession(phrase, sessionId) {
+    async initSession(phrase) {
       this.phrase = phrase
-      this.setAuthToken(phrase, sessionId)
+      this.setAuthToken(phrase)
 
       this.nombase = localStorage.getItem(this.lsk) || ''
       
@@ -367,7 +380,7 @@ export const useSessionStore = defineStore('session', {
       */
       localStorage.removeItem(this.lsk)
       this.phrase = phrase
-      this.setAuthToken(phrase, this.sessionId)
+      this.setAuthToken(phrase)
       localStorage.setItem(this.lsk, this.nombase)
     },
 
@@ -512,9 +525,20 @@ export const useSessionStore = defineStore('session', {
       if (!this.estA) await new GetPartition().run(this.compte.idp)
     },
 
-    msgPush (msg) {
-      console.log(msg)
-    }
+    async msgPush2 (event) {
+      if (event.data && event.data.type === 'pubsub') {
+        try {
+          const obj = decode(b64ToU8(event.data.payload))
+          if (obj.sessionId === stores.session.sessionId)
+            await this.msgPush(obj)
+        } catch (e) {
+          console.log(e.toString())
+        }
+      }
+    },
 
+    async msgPush (msg) {
+      console.log(JSON.stringify(msg))
+    }
   }
 })

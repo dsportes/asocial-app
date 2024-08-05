@@ -13,6 +13,11 @@ export const useConfigStore = defineStore('config', {
     wssrv: '',
     urlserveur: '',
 
+    subJSON: '',
+    subOBJ: null,
+    epHash: 0,
+    permission: false,
+
     aide: {},
     locales: [],
     motsclesloc: {},
