@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { encode, decode } from '@msgpack/msgpack'
 import mime2ext from 'mime2ext'
 import { $t, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre, 
-  splitPK, dhstring, normNomFichier } from './util.mjs'
+  dhstring, normNomFichier } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
 import { ID, Cles, E_BRO, Compteurs, AMJ,
   synthesesPartition, FLAGS, UNITEN, UNITEV, hash } from './api.mjs'
@@ -80,11 +80,11 @@ export class Phrase {
     this.phrase = texte
     const u8 = encoder.encode(texte)
     this.pcb = await pbkfd(u8)
-    this.hpsc = hash(this.pcb, true)
+    this.hpsc = Cles.hash9(this.pcb)
     const u8b = Uint8Array.from(u8)
     Phrase.idxch.forEach(i => { u8b[i + 12] = 0 })
     const pr = await pbkfd(u8b)
-    this.hps1 = hash(pr, true)
+    this.hps1 = Cles.hash9(pr)
     return this
   }
 
@@ -251,27 +251,34 @@ Les objets ont au moins les proriétés _nom, id, (ids), (dlv) même _zombi
 */
 export async function compile (row) {
   if (!row) return null
-  const session = stores.session
   const cl = classes[row._nom]
   if (!cl) return null
   const obj = new cl()
   obj._nom = row._nom
+
   // _zombi : objet n'ayant pas de _data_
   if (!row._data_ || !row._data_.length) {
-    obj.id = ID.court(row.id || 0)
+    obj.id = ID.court(row.id)
     if (row.ids !== undefined) obj.ids = ID.court(row.ids)
     obj.v = row.v || 0
     obj._zombi = true
-  } else {
-    const x = decode(row._data_)
-    obj.id = x.id || 0
-    if (x.ids !== undefined) obj.ids = x.ids
-    if (x.dlv !== undefined) obj.dlv = x.dlv
-    if (row.dfh !== undefined) obj.dfh = x.dfh
-    obj.vsh = x.vsh || 0
-    obj.v = x.v || 0  
-    await obj.compile(x)
+    return {
+      id: ID.court(row.id),
+      ids: row.ids !== undefined ? ID.court(row.ids) : '',
+      v: row.v || 0,
+      _zombi: true
+    }
   }
+
+  const x = decode(row._data_)
+  obj.id = x.id
+  if (x.ids !== undefined) obj.ids = x.ids
+  if (x.dlv !== undefined) obj.dlv = x.dlv
+  if (row.dfh !== undefined) obj.dfh = x.dfh
+  obj.vsh = x.vsh || 0
+  obj.v = x.v || 0  
+  await obj.compile(x)
+  
   return obj
 }
 
@@ -283,7 +290,7 @@ export function estZombi (row) {
 
 /** Espaces **************************************
 _data_ :
-- `id` : de l'espace de 10 à 89.
+- `id` : ns de l'espace [0-9][a-z][A-Z].
 - `v` : 1..N
 - `org` : code de l'organisation propriétaire.
 
@@ -296,14 +303,13 @@ _data_ :
 - `notifE` : notification pour l'espace de l'administrateur technique. Le texte n'est pas crypté.
 - `opt`: option des comptes autonomes.
 - `nbmi`: nombre de mois d'inactivité acceptable pour un compte O fixé par le comptable. Ce changement n'a pas d'effet rétroactif.
-- `tnotifP` : table des notifications de niveau _partition_.
-  - _index_ : id (numéro) de la partition.
+- `tnotifP` : map des notifications de niveau _partition_.
+  - _clé_ : ID de la partition.
   - _valeur_ : notification (ou `null`), texte crypté par la clé P de la partition.
 */
 export class Espace extends GenDoc {
 
   async compile (row) {
-    const session = stores.session
     this.org = row.org
     this.creation = row.creation
     this.cleES = row.cleES
@@ -316,7 +322,7 @@ export class Espace extends GenDoc {
     this.dlvat = row.dlvat || 0
     this.nbmi = row.nbmi || 6
     this.notifE = row.notifE ? new Notification(row.notifE) : null
-    this.tnotifP = row.tnotifP || []
+    this.tnotifP = row.tnotifP || {}
   }
 
 }
@@ -326,8 +332,8 @@ _data_:
 - `id` : ns de son espace.
 - `v` : date-heure de dernière mise à jour (à titre informatif).
 
-- `tsp` : table des _synthèses_ des partitions.
-  - _index_: numéro de la partition.
+- `tsp` : map des _synthèses_ des partitions.
+  - _clé_: ID de la partition.
   - _valeur_ : `synth`, objet des compteurs de synthèse calculés de la partition.
     - `id nbc nbd`
     - `ntfp[1,2,3]`
@@ -343,7 +349,7 @@ export class Synthese extends GenDoc {
   static l2 = ['qc', 'qn', 'qv', 'c2m', 'n', 'v']
 
   async compile (row) {
-    this.tsp = [null]
+    this.tsp = {}
 
     const a = { // colonne 0 de totalisation
       id: 0, 
@@ -354,41 +360,40 @@ export class Synthese extends GenDoc {
       q: { qc: 0, qn: 0, qv: 0 },
       qt: { qc: 0, qn: 0, qv: 0, c2m: 0, n: 0, v: 0 }
     }
-    this.prochNp = row.tsp.length
-    for (let i = 1; i < row.tsp.length; i++) {
-      const r = row.tsp[i] || null
-      if (r) {
-        r.id = i
-        r.pcac = !r.q.qc ? 0 : Math.round(r.qt.qc * 100 / r.q.qc) 
-        r.pcan = !r.q.qn ? 0 : Math.round(r.qt.qn * 100 / r.q.qn) 
-        r.pcav = !r.q.qv ? 0 : Math.round(r.qt.qv * 100 / r.q.qv) 
-        r.pcc = !r.q.qc ? 0 : Math.round(r.qt.c2m * 100 / r.q.qc) 
-        r.pcn = !r.q.qn ? 0 : Math.round(r.qt.n * 100 / (r.q.qn * UNITEN)) 
-        r.pcv = !r.q.qv ? 0 : Math.round(r.qt.v * 100 / (r.q.qv * UNITEV)) 
-      
-        a.nbc += r.nbc
-        a.nbd += r.nbd
-        a.ntfp[0] += r.ntfp[0]; a.ntfp[1] += r.ntfp[1]; a.ntfp[2] += r.ntfp[2]
-        a.ntf[0] += r.ntf[0]; a.ntf[1] += r.ntf[1]; a.ntf[2] += r.ntf[2]
-        Synthese.l1.forEach(f => { a.q[f] += r.q[f] })
-        Synthese.l2.forEach(f => { a.qt[f] += r.qt[f] })
-        this.tsp.push(r)
-      } else this.tsp.push(null)
+
+    if (row.tsp) for (const id of row.tsp) {
+      const r = row.tsp[id]
+      r.id = id
+      r.pcac = !r.q.qc ? 0 : Math.round(r.qt.qc * 100 / r.q.qc) 
+      r.pcan = !r.q.qn ? 0 : Math.round(r.qt.qn * 100 / r.q.qn) 
+      r.pcav = !r.q.qv ? 0 : Math.round(r.qt.qv * 100 / r.q.qv) 
+      r.pcc = !r.q.qc ? 0 : Math.round(r.qt.c2m * 100 / r.q.qc) 
+      r.pcn = !r.q.qn ? 0 : Math.round(r.qt.n * 100 / (r.q.qn * UNITEN)) 
+      r.pcv = !r.q.qv ? 0 : Math.round(r.qt.v * 100 / (r.q.qv * UNITEV)) 
+    
+      a.nbc += r.nbc
+      a.nbd += r.nbd
+      a.ntfp[0] += r.ntfp[0]; a.ntfp[1] += r.ntfp[1]; a.ntfp[2] += r.ntfp[2]
+      a.ntf[0] += r.ntf[0]; a.ntf[1] += r.ntf[1]; a.ntf[2] += r.ntf[2]
+      Synthese.l1.forEach(f => { a.q[f] += r.q[f] })
+      Synthese.l2.forEach(f => { a.qt[f] += r.qt[f] })
+      this.tsp[id] = r
     }
+
     a.pcac = !a.q.qc ? 0 : Math.round(a.qt.qc * 100 / a.q.qc) 
     a.pcan = !a.q.qn ? 0 : Math.round(a.qt.qn * 100 / a.q.qn) 
     a.pcav = !a.q.qv ? 0 : Math.round(a.qt.qv * 100 / a.q.qv) 
     a.pcc = !a.q.qc ? 0 : Math.round(a.qt.c2m * 100 / a.q.qc) 
     a.pcn = !a.q.qn ? 0 : Math.round(a.qt.n * 100 / (a.q.qn * UNITEN)) 
     a.pcv = !a.q.qv ? 0 : Math.round(a.qt.v * 100 / (a.q.qv * UNITEV)) 
-    this.tsp[0] = a
+    this.tsp['0'] = a
   }
 
 }
 
 /** Partition *********************************
 _data_:
-- `id` : numéro de partition attribué par le Comptable à sa création.
+- `id` : ID de la partition
 - `v` : 1..N
 
 - `nrp`: niveau de restriction de la notification (éventuelle) de niveau _partition_ mémorisée dans `espaces` et dont le texte est crypté par la clé P de la partition.
@@ -427,16 +432,14 @@ this.synth est calculé:
 export class Partition extends GenDoc {
 
   async compile (row) {
-    this.vsh = row.vsh || 0
     const clep = RegCles.get(this.id)
     this.nrp = row.nrp || 0
     this.q = row.q
     this.mcpt = {}
     this.sdel = new Set() // Set des délégués
     
-    if (row.mcpt) for(const idx in row.mcpt) {
-      const id = parseInt(idx)
-      const e = row.mcpt[idx]
+    if (row.mcpt) for(const id in row.mcpt) {
+      const e = row.mcpt[id]
       RegCles.set(await decrypter(clep, e.cleAP))
       const q = { ...e.q }
       q.pcc = !q.qc ? 0 : Math.round(q.c2m * 100 / q.qc) 
@@ -462,12 +465,15 @@ export class Partition extends GenDoc {
 
 /** Compte **********************************************************************
 _data_ :
-- `id` : numéro du compte = id de son avatar principal.
+- `id` : ID du compte = ID de son avatar principal.
 - `v` : 1..N.
-- `hk` : `ns` + `hXR`, hash du PBKFD d'un extrait de la phrase secrète.
+- `hk` : `hXR`, hash du PBKFD d'un extrait de la phrase secrète.
 - `dlv` : dernier jour de validité du compte.
 
-- `rds` : null en session.
+- `vpe` : version du périmètre
+- `vci` : version de Compti
+- `vpe` : version de Invit
+
 - `hXC`: hash du PBKFD de la phrase secrète complète (sans son `ns`).
 - `cleKXC` : clé K cryptée par XC (PBKFD de la phrase secrète complète).
 - `cleEK` : clé de l'espace cryptée par la clé K du compte, à la création de l'espace pour le Comptable. Permet au comptable de lire les reports créés sur le serveur et cryptés par cette clé E.
@@ -488,7 +494,7 @@ _data_ :
 
 _Comptes "O" seulement:_
 - `clePK` : clé P de la partition cryptée par la clé K du compte. Si cette clé a une longueur de 256, la clé P a été cryptée par la clé publique de l'avatar principal du compte suite à une affectation à une partition APRÈS sa création (changement de partition, passage de compte A à O)
-- `idp` : id de la partition (son numéro).
+- `idp` : ID de la partition.
 - `del` : `true` si le compte est délégué de la partition.
 - `notif`: notification de niveau _compte_ dont le texte est crypté par la clé P de la partition (`null` s'il n'y en a pas).
 
@@ -506,8 +512,8 @@ _Comptes "O" seulement:_
     - `lav`: liste de ses avatars participant au groupe. compilé -> sav : Set
 
 **Comptable seulement:**
-- `tpk` : table des partitions {cleP, code } cryptés par la clé K du Comptable. 
-  Son index est le numéro de la partition.
+- `tpk` : map des partitions {cleP, code } cryptés par la clé K du Comptable. 
+  Sa clé est l'ID de la partition.
   - `cleP` : clé P de la partition.
   - `code` : code / commentaire court de convenance attribué par le Comptable
 Compilé en mcode: Map(): clé: idp, valeur: code
@@ -532,20 +538,19 @@ export class Compte extends GenDoc {
 
     if (this.estComptable) {
       this.mcode = new Map()
-      for(let i = 1; i < row.tpk.length; i++) {
-        const x = row.tpk[i]
-        if (x) {
-          const { cleP, code } = decode(await decrypter(clek, x))
-          RegCles.set(cleP)
-          const idp = Cles.id(cleP)
-          if (code) this.mcode.set(idp, code)
-        }
+      for(const idp of row.tpk) {
+        const { cleP, code } = decode(await decrypter(clek, row.tpk[idp]))
+        RegCles.set(cleP)
+        if (code) this.mcode.set(idp, code)
       }
     }
+
+    this.perimetre = []
 
     if (row.idp) {
       this.estA = false
       this.idp = row.idp
+      this.perimetre.push(this.idp)
       if (row.clePK.length === 256) this.clep = RegCles.set(await decrypterRSA(this.priv, row.clePK))
       else this.clep = RegCles.set(await decrypter(clek, row.clePK))
       this.del = row.del || false
@@ -554,20 +559,23 @@ export class Compte extends GenDoc {
     } else this.estA = true
 
     this.mav = new Set()
-    for(const idx in row.mav) {
-      const e = row.mav[idx]
-      const id = parseInt(idx)
+    for(const id in row.mav) {
+      const e = row.mav[id]
+      this.perimetre.push(id)
       RegCles.set(await decrypter(clek, e.cleAK))
       this.mav.add(id)
     }
 
     this.mpg = new Map()
-    for(const idx in row.mpg) {
-      const idg = parseInt(idx)
-      const e = row.mpg[idx]
+    for(const id in row.mpg) {
+      const e = row.mpg[id]
+      this.perimetre.push(id)
       RegCles.set(await decrypter(clek, e.cleGK))
-      this.mpg.set(idg, new Set(e.lav))
+      this.mpg.set(id, new Set(e.lav))
     }
+
+    this.perimetre.sort((a,b) => { return a < b ? -1 : (a > b ? 1 : 0)})
+  
   }
 
   get lstAvatars () {
@@ -618,31 +626,11 @@ export class Compte extends GenDoc {
     this.mpg.forEach((sav, idg) => { if (!ida || sav.has(ida)) x.add(idg) })
     return x
   }
-
-  /* Map(ida, im) des avatars du compte dans mpg 
-  ou les invits des avatars
-  imIdGroupe (idg) { // map (cle:id val:im) pour le groupe idg
-    const m = new Map()
-    this.mpg.forEach((sav, id) => { 
-      if (id === idg && sav && sav.size) 
-        sav.forEach(im => {m.set(id, im)})
-    })
-    return m
-    /*
-    const aSt = stores.avatar
-    aSt.map.forEach(e => {
-      if (e.avatar.invits) e.avatar.invits.forEach(x => { // { ng, im, id }
-        if (x.ng.id === idg) m.set(x.id, x.im)
-      })
-    })
-    return m
-  }
-  */
 }
 
 /** Compta **********************************************************************
 _data_:
-- `id` : numéro du compte = id de son avatar principal.
+- `id` : ID du compte = ID de son avatar principal.
 - `v` : 1..N.
 - `qv` : `{qc, qn, qv, nn, nc, ng, v}`: quotas et nombre de groupes, chats, notes, volume fichiers. Valeurs courantes.
 - `compteurs` sérialisation des quotas, volumes et coûts.
@@ -758,9 +746,8 @@ _data_:
 - `id` : id de l'avatar.
 - `v` : 1..N. Par convention, une version à 999999 désigne un **avatar logiquement détruit** mais dont les données sont encore présentes. L'avatar est _en cours de suppression_.
 - `vcv` : version de la carte de visite afin qu'une opération puisse détecter (sans lire le document) si la carte de visite est plus récente que celle qu'il connaît.
-- `hZR` : `ns` + hash du PBKFD de la phrase de contact réduite.
+- `hZR` : hash du PBKFD de la phrase de contact réduite.
 
-- `rds` : pas transmis en session.
 - `idc` : id du compte de l'avatar (égal à son id pour l'avatar principal).
 - `cleAZC` : clé A cryptée par ZC (PBKFD de la phrase de contact complète).
 - `pcK` : phrase de contact complète cryptée par la clé K du compte.
@@ -776,20 +763,14 @@ export class Avatar extends GenDoc {
   async compile (row) {
     const session = stores.session
     const clek = session.clek
-    // this.vcv = row.vcv || 0
-    // this.hZR = row.hZR
 
-    if (row.pcK) { // phrase de contact cryptée par la clé K.
-      // this.cleAZC = row.cleAZC
-      this.pc = await decrypterStr(clek, row.pcK)
-    }
+    // phrase de contact cryptée par la clé K.
+    if (row.pcK) this.pc = await decrypterStr(clek, row.pcK) 
 
-    // this.idc = row.idc // inutile en session
-    const clea = RegCles.get(this.id)
+    RegCles.get(this.id)
     const cv = await CV.set(row.cvA || CV.fake(this.id))
     cv.store()
     await RegCc.setPriv(this.id, row.privK)
-
   }
 
 }
@@ -797,7 +778,7 @@ export class Avatar extends GenDoc {
 /** Sponsoring ************************************************************
 _data_:
 - `id` : id de l'avatar sponsor.
-- `ids` : `ns` + (hYR) hash du PBKFD de la phrase réduite de parrainage, 
+- `ids` : hYR hash du PBKFD de la phrase réduite de parrainage, 
 - `v`: 1..N.
 - `dlv` : date limite de validité
 
@@ -824,7 +805,7 @@ export class Sponsoring extends GenDoc {
   async comp (row) {
     this.st = row.st
     this.dh = row.dh
-    this.partitionId = row.partitionId || 0
+    this.partitionId = row.partitionId || ''
     this.estA = !this.partitionId
     this.nom = await decrypterStr(this.YC, row.nomYC)
     this.cleA = await decrypter(this.YC, row.cleAYC)
@@ -975,11 +956,11 @@ _data_:
   - `null` : mode simple.
   - `[ids]` : mode unanime : liste des indices des animateurs ayant voté pour le retour au mode simple. La liste peut être vide mais existe.
 - `invits` : map `{ fl, li[] }` des invitations en attente de vote ou de réponse.
-- `tid` : table des ids courts des membres.
+- `tid` : table des ids des membres.
 - `st` : table des statuts.
 - `flags` : tables des flags.
-- `lng` : liste noire _groupe_ des ids (courts) des membres.
-- `lnc` : liste noire _compte_ des ids (courts) des membres.
+- `lng` : liste noire _groupe_ des membres.
+- `lnc` : liste noire _compte_ des membres.
 - `cvG` : carte de visite du groupe, textes cryptés par la clé du groupe `{v, photo, info}`.
 
 Calculée : mmb: Map des membres. Clé: id long du membre, Valeur: son im
@@ -1252,7 +1233,6 @@ export class Note extends GenDoc {
   static clen (id) { return ID.estGroupe(id) ? RegCles.get(id) : stores.session.clek }
 
   async compile (row) {
-    this.vsh = row.vsh || 0
     this.deGroupe = ID.estGroupe(this.id)
     const clek = stores.session.clek
     this.cle = this.deGroupe ? RegCles.get(this.id) : clek
@@ -1320,9 +1300,9 @@ export class Note extends GenDoc {
   // key de la racine de la note de rattachement SSI le rattachement est à une note
   static racNoteP (pkey) { return pkey && pkey.length > 14 ? pkey.substring(0, 14) : null }
   // id d'une key
-  static idDeKey (key) { return parseInt(key.substring(0, 14)) }
+  static idDeKey (key) { const i = key.indexOf('/'); return key.substring(0, i) }
   // ids d'une key
-  static idsDeKey (key) { return parseInt(key.substring(15)) }
+  static idsDeKey (key) { const i = key.indexOf('/'); return key.substring(i + 1) }
 
   get key () { return this.id + '/' + this.ids }
   /* clé du parent:
@@ -1335,16 +1315,7 @@ export class Note extends GenDoc {
     return !this.ref ? '' + this.id : (this.ref[1] ? this.ref[0] + '/' + this.ref[1] : '' + this.ref[0])
   }
 
-  get shIds () { return ('' + (this.ids % 10000)).padStart(4, '0')}
-
-  /* fichier le plus récent portant le nom donné
-  dfDeNom (nom) {
-    let fx = null
-    for (const [, x] of this.mfa)
-      if (x.nom !== nom && (!fx || (fx.dh < x.dh))) fx = x
-    return fx
-  }
-  */
+  get shIds () { return this.ids.substring(this.ids.length - 4) }
 
   async nouvFic (nom, info, lg, type, u8) {
     // propriétés ajoutées : u8 (contenu du fichier gzippé crypté), sha, dh, gz
@@ -1359,7 +1330,7 @@ export class Note extends GenDoc {
   async getFichier (f) {
     async function dec (cle, buf) {
       try {
-        const b = await decrypter(self.cle, buf)
+        const b = await decrypter(cle, buf)
         return f.gz ? await ungzipT(b) : b
       } catch (e) {
         throw new AppExc(E_BRO, 22, [f.idf])
@@ -1368,7 +1339,6 @@ export class Note extends GenDoc {
 
     // Obtenu localement ou par download. Fichier décrypté ET dézippé
     // idf: id du fichier
-    const self = this
     const faSt = stores.ficav
     const session = stores.session
     let buf = faSt.getDataDeCache(f.idf)
@@ -1411,8 +1381,8 @@ NoteLocale:
 */
 export class NoteLocale {
   constructor () {
-    this.id = 0
-    this.txt = 0
+    this.id = ''
+    this.txt = ''
     this.dh = 0
   }
 
@@ -1542,8 +1512,8 @@ const classes = {
   syntheses: Synthese,
   comptes: Compte,
   comptas: Compta,
-  invits: Invit,
   comptis: Compti,
+  invits: Invit,
   avatars: Avatar,
   groupes: Groupe,
   notes: Note,

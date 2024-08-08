@@ -492,10 +492,10 @@ export class OperationS extends Operation {
     - elle est traitée
     - ceci PEUT conduire à avoir des groupes / avatars en plus ou moins
     - le DataStync courant est mis à jour à chaque itération
-  - lrds : liste des notifications reçues et pas traitées
+  - lids : liste des IDs des av / gr reçus en notifications
+  - full: si true, cherche TOUTES les évolutions (pas seulement celles de lids)
   */
-  async syncStd (ds1, lrds) {
-    const fs = stores.session.fssync
+  async syncStd (ds1, lids, full) {
     const session = stores.session
     const cnx = !ds1
     let ds = ds1
@@ -508,15 +508,18 @@ export class OperationS extends Operation {
         token: session.authToken, 
         dataSync: ds ? ds.serial() : null, 
       }
-      if (!nbIter && lrds) args.lrds = lrds || []
+      if (nbiter) {
+        if (full) args.full = true
+        else args.lids = lids || []
+      }
       const ret = await post(this, 'Sync', args)
-      if (cnx && fs) fs.open(ret.credentials, ret.emulator)
       const nvds = DataSync.deserial(ret.dataSync)
       const sb = new SB()
       const buf = new IDBbuffer()
       await this.setCeCiIn(nvds, ret, sb, buf)
 
-      if (cnx && session.synchro && !nbIter) { // Premier retour de Sync a rempli: session. compteId, clek, nomBase
+      if (!ds1 && session.synchro && !nbIter) { 
+        // Premier retour de Sync a rempli: session. compteId, clek, nomBase
         await idb.open()
         const blOK = await idb.checkAge()
         await idb.storeBoot()
@@ -598,7 +601,7 @@ export class OperationS extends Operation {
         }
       }
 
-      if (cnx && !nbIter) {
+      if (!ds1 && !nbIter) { // Premier tour de la connexion
         const ret = await post(this, 'GetEspace', { token: session.authToken })
         sb.setEs(await compile(ret.rowEspace))
         buf.putIDB(ret.rowEspace)  
@@ -671,7 +674,6 @@ export class ConnexionAvion extends OperationS {
         const sb = new SB()
         const [res, rce, rci, rin] = await idb.getECCI()
         sb.setCe(await compile(rce))
-        sb.setCi(await compile(rci))
         sb.setEs(await compile(res))
         sb.setIn(await compile(rin))
         sb.store()
