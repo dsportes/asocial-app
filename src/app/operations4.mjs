@@ -228,6 +228,7 @@ export class CreerEspace extends Operation {
 /* `CreationComptable` : création du comptable d'un nouvel espace
 - token : jeton d'authentification du compte à créer
 - org : code de l'organisation
+- idp : ID de l partition primitive
 - hTC : hash du PBKFD de la phrase de sponsoring du Comptable
 - hXR : hash du PBKFD de la phrase secrète réduite
 - hXC : hash du PBKFD de la phrase secrète complète
@@ -262,6 +263,7 @@ export class CreationComptable extends Operation {
         token: session.authToken,
         org: org,
         hTC,
+        idp: Cles.id(cleP),
         hXR: phrase.hps1,
         hXC: phrase.hpsc,
         pub: kp.publicKey,
@@ -769,12 +771,12 @@ export class SetQuotas extends Operation {
 
 /* OP_NouvellePartition: 'Création d\'une nouvelle partition' *******
 Dans Comptes : **Comptable seulement:**
-- `tpK` : table des partitions cryptée par la clé K du Comptable `[ {cleP, code }]`. Son index est le numéro de la partition.
+- `tpK` : map des partitions cryptée par la clé K du Comptable `[ {cleP, code }]`. Son index est le numéro de la partition.
   - `cleP` : clé P de la partition.
   - `code` : code / commentaire court de convenance attribué par le Comptable
 
 - token: éléments d'authentification du compte.
-- n : numéro de partition
+- idp : ID de la partition
 - itemK: {cleP, code} crypté par la clé K du Comptable.
 - quotas: { qc, qn, qv }
 Retour:
@@ -785,13 +787,12 @@ export class NouvellePartition extends Operation {
   async run (code, q) { // q: [qc, q1, q2]
     try {
       const session = stores.session
-      const n = session.synthese.prochNp
       const cleP = Cles.partition(n)
       const args = { 
         token: session.authToken, 
         itemK: await crypter(session.clek, new Uint8Array(encode({cleP, code}))),
         quotas: { qc: q.qc, qn: q.qn, qv: q.qv },
-        n
+        idp: Cles.id(cleP)
       }
       await post(this, 'NouvellePartition', args)
       this.finOK()

@@ -472,7 +472,7 @@ _data_ :
 
 - `vpe` : version du périmètre
 - `vci` : version de Compti
-- `vpe` : version de Invit
+- `vin` : version de Invit
 
 - `hXC`: hash du PBKFD de la phrase secrète complète (sans son `ns`).
 - `cleKXC` : clé K cryptée par XC (PBKFD de la phrase secrète complète).
@@ -499,15 +499,12 @@ _Comptes "O" seulement:_
 - `notif`: notification de niveau _compte_ dont le texte est crypté par la clé P de la partition (`null` s'il n'y en a pas).
 
 - `mav` : map des avatars du compte. 
-  - _clé_ : id court de l'avatar.
-  - _valeur_ : `{ rds, claAK }`
-    - `rds`: de l'avatar (clé d'accès à son `versions`). null en session.
-    - `cleAK`: clé A de l'avatar crypté par la clé K du compte.
+  - _clé_ : id de l'avatar.
+  - _valeur_ : `cleAK`: clé A de l'avatar crypté par la clé K du compte.
 
 - `mpg` : map des participations aux groupes:
   - _clé_ : id du groupe
   - _valeur_: `{ rds, cleGK, lav }`
-    - `rds`: du groupe (clé d'accès à son `versions`). null en session.
     - `cleGK` : clé G du groupe cryptée par la clé K du compte.
     - `lav`: liste de ses avatars participant au groupe. compilé -> sav : Set
 
@@ -560,9 +557,9 @@ export class Compte extends GenDoc {
 
     this.mav = new Set()
     for(const id in row.mav) {
-      const e = row.mav[id]
+      const cleAK = row.mav[id]
       this.perimetre.push(id)
-      RegCles.set(await decrypter(clek, e.cleAK))
+      RegCles.set(await decrypter(clek, cleAK))
       this.mav.add(id)
     }
 
