@@ -7,8 +7,6 @@ import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, $t } from '../app/util.mjs'
 import { AMJ, ID, AppExc, A_SRV, hash } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
-import { WS } from '../app/ws.mjs'
-import { FsSyncSession } from '../app/fssync.mjs'
 import { GetCompta, GetPartition } from '../app/synchro.mjs'
 import { b64ToU8 } from '../app/util.mjs'
 
@@ -18,8 +16,6 @@ export const useSessionStore = defineStore('session', {
     swev2: false,
     registration: null,
 
-    websocket: null,
-
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
 
@@ -28,6 +24,7 @@ export const useSessionStore = defineStore('session', {
     compteId: 0, // id du compte
     clek: null, // clek du compte
     authToken: '',
+    sessionId: '',
     phrase: null,
     auj: 0,
     dhConnx: 0, // dh de début de la session
@@ -37,9 +34,6 @@ export const useSessionStore = defineStore('session', {
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
     volumeTable: '', // volume des tables de la base locale
-
-    fsSync: null, // Objet de synchro pour Firestore
-    sessionId: '', // identifiant de session si WS (random(6) -> base64)
 
     partitionId: 0, // id de la partition actuelle du compte
     avatarId: 0, // avatar "courant"
@@ -298,14 +292,9 @@ export const useSessionStore = defineStore('session', {
             userVisibleOnly: true,
             applicationServerKey: b64ToU8(stores.config.vapid_public_key)
           })
-        const subJSON = JSON.stringify(subscription)
-        this.config.subJSON = subJSON
-        this.config.subOBJ = subscription
-        this.config.epHash = hash(subscription.endpoint)
+        this.config.subJSON = JSON.stringify(subscription)
       } catch (e) {
         this.config.subJSON = ''
-        this.config.subOBJ = null
-        this.config.epHash = 0
       }
       console.log('Service worker has been registered. endpoint hash: ' + this.config.epHash) 
     },
@@ -322,23 +311,17 @@ export const useSessionStore = defineStore('session', {
     setOrg (org) { this.org = org || '' },
 
     setAuthToken (phrase) {
-      const token = { }
-      if (this.org === 'admin') token.shax = phrase ? phrase.shax : null
-      else {
-        if (this.config.permission && this.config.epHash) {
-          token.subscription = this.config.subJSON
-          this.sessionId = ID.rnd() + '.' + this.config.epHash + '.' + Date.now()
-          token.sessionId = this.sessionId
-        } else {
-          this.sessionId = ''
-        }
-        console.log('sessionId: ', this.sessionId || '(none)')
+      this.sessionId = this.config.pageSessionId + '.' + this.config.sessionNc
+      console.log('sessionId: ', this.sessionId)
 
+      const token = { org: this.org, sessionId: this.sessionId}
+      if (this.org === 'admin') {
+        token.shax = phrase ? phrase.shax : null
+      } else {
         token.hXR = phrase ? phrase.hps1 : null
         token.hXC = phrase ? phrase.hpsc : null
       }
-      token.org = this.org      
-      this.authToken = u8ToB64(new Uint8Array(encode(token)), true)
+      this.authToken = u8ToB64(new Uint8Array(encode(token)), true) 
       this.lsk = '$asocial$-' + phrase.hps1
     },
 
@@ -347,26 +330,15 @@ export const useSessionStore = defineStore('session', {
     */
     async initSession(phrase) {
       this.phrase = phrase
+      this.config.nc++
       this.setAuthToken(phrase)
 
       this.nombase = localStorage.getItem(this.lsk) || ''
-      
       this.auj = AMJ.amjUtc()
       this.dhConnx = Date.now()
       this.compteId = 0
       this.clek = null
       this.status = 1
-
-      if (this.accesNet) {
-        if (stores.config.hasWS) {
-          if (this.websocket) this.websocket.close()
-          this.websocket = new WS()
-          await this.websocket.open()
-          this.fsSync = null
-        } else {
-          this.fsSync = new FsSyncSession()
-        }
-      }
 
       RegCles.reset() 
       stores.reset(true) // reset SAUF session
@@ -523,22 +495,6 @@ export const useSessionStore = defineStore('session', {
     async reloadCompta () {
       await new GetCompta().run()
       if (!this.estA) await new GetPartition().run(this.compte.idp)
-    },
-
-    async msgPush2 (event) {
-      if (event.data && event.data.type === 'pubsub') {
-        try {
-          const obj = decode(b64ToU8(event.data.payload))
-          if (obj.sessionId === stores.session.sessionId)
-            await this.msgPush(obj)
-        } catch (e) {
-          console.log(e.toString())
-        }
-      }
-    },
-
-    async msgPush (msg) {
-      console.log(JSON.stringify(msg))
     }
   }
 })

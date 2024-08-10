@@ -43,7 +43,7 @@
             </div>
 
             <apercu-notif class="q-my-xs" :notif="esp.notifE" :idx="idx" 
-              :type="0" :cible="ID.court(esp.id)"/>
+              :type="0" :cible="esp.id"/>
 
             <div class="q-mb-sm">
               <div class="titre-md">{{$t('PEstm')}}</div>
@@ -260,7 +260,7 @@ export default {
     },
 
     async valider () {
-      await new SetEspaceNprof().run(ID.court(this.esp.id), this.prf)
+      await new SetEspaceNprof().run(this.esp.id, this.prf)
       this.ui.fD()
       await this.loadEsp()
     },

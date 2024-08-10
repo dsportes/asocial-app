@@ -13,7 +13,7 @@ export class Cles {
     const x = new Uint8Array(jssha256(u8).arrayBuffer())
     const y = new Uint8Array(9)
     for(let i = 0; i < 9; i++) y[i] = (x[i] ^ x[i+9]) ^ x[x+18]
-    const z = fromByteArray(y)
+    const s = fromByteArray(y)
     return s.replace(/=/g, '').replace(/\+/g, '0').replace(/\//g, '1')
   }
 
@@ -30,7 +30,6 @@ export class Cles {
   static avatar() { const rnd = random(32); rnd[0] = 4; return rnd }
   static groupe() { const rnd = random(32); rnd[0] = 5; return rnd }
 
-  
   static id (cle) {
     const t = cle[0]
     if (t === 1) return Cles.ns.charAt(cle[1])
@@ -142,6 +141,7 @@ Toggle un ou des flags: n ^= FLAGS.HE ^ FLAGS.DN
 /* retourne un code à 6 lettres majuscules depuis l'id d'un ticket 
 id d'un ticket: aa mm rrr rrr rrr r 
 */
+const d10 = 10000000000
 export function idTkToL6 (t) {
   const am = Math.floor(t / d10)
   const m = am % 100

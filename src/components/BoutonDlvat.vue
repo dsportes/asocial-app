@@ -68,7 +68,7 @@ export default ({
       this.ui.oD('PEdlvat')
     },
     async chgDlvat () {
-      await new SetEspaceDlvat().run(ID.court(this.espace.id), this.dlv)
+      await new SetEspaceDlvat().run(this.espace.id, this.dlv)
       this.ui.fD()
       context.emit('close', true)
     },

@@ -13,9 +13,9 @@ export const useConfigStore = defineStore('config', {
     wssrv: '',
     urlserveur: '',
 
-    subJSON: '',
-    subOBJ: null,
-    epHash: 0,
+    subJSON: '', // subscription obtenu de SW sérialisé
+    pageSessionId: '', // rnd, identifiant universel du chargement de la page (session browser)
+    nc: 0, // numéro d'ordre de connexion dans la session
     permission: false,
 
     aide: {},

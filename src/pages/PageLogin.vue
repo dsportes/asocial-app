@@ -161,7 +161,7 @@ export default {
           return
         }
         try {
-          const row = res.rowSponsoring
+          const row = decode(res.rowSponsoring)
           session.setMode(mode)
           session.setOrg(this.org)
           this.sp = new Sponsoring()

@@ -502,8 +502,6 @@ export class IDBbuffer {
 
   putIDB (row) { 
     if (this.w) {
-      row.id = ID.court(row.id)
-      if (row.ids) row.ids = ID.court(row.ids)
       this.lmaj.push(row)
     }
   }

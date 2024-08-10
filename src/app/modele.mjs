@@ -145,7 +145,7 @@ export class CV {
   get texte () {
     if (this.tx) return this.tx
     const cfg = stores.config
-    if (this.id === 0) return cfg.nomDeAdmin
+    if (!this.id) return cfg.nomDeAdmin
     if (ID.estComptable(this.id)) return cfg.nomDuComptable
     return '#' + this.id
   }
@@ -162,8 +162,7 @@ export class CV {
 
   get nomC () {
     if (!this.tx) return this.texte
-    const s = '' + this.id
-    return this.nom + '#' + s.substring(s.length - 4)
+    return this.nom + '#' + this.id.substring(this.id.length - 4)
   }
 
   /* Retourne un objet {id,v,ph,tx} ph/tx cryptés (pas une CV)*/
@@ -249,35 +248,21 @@ export class GenDoc {
 Si le row a une dlv inférieure à la date du jour, retourne un objet avec _zombi = true
 Les objets ont au moins les proriétés _nom, id, (ids), (dlv) même _zombi
 */
-export async function compile (row) {
+export async function compile (row) { // row est le row._data_ du serveur
   if (!row) return null
   const cl = classes[row._nom]
   if (!cl) return null
   const obj = new cl()
   obj._nom = row._nom
 
-  // _zombi : objet n'ayant pas de _data_
-  if (!row._data_ || !row._data_.length) {
-    obj.id = ID.court(row.id)
-    if (row.ids !== undefined) obj.ids = ID.court(row.ids)
-    obj.v = row.v || 0
-    obj._zombi = true
-    return {
-      id: ID.court(row.id),
-      ids: row.ids !== undefined ? ID.court(row.ids) : '',
-      v: row.v || 0,
-      _zombi: true
-    }
-  }
-
-  const x = decode(row._data_)
+  const x = decode(row)
   obj.id = x.id
   if (x.ids !== undefined) obj.ids = x.ids
   if (x.dlv !== undefined) obj.dlv = x.dlv
   if (row.dfh !== undefined) obj.dfh = x.dfh
   obj.vsh = x.vsh || 0
   obj.v = x.v || 0  
-  await obj.compile(x)
+  if (row._zombi) await obj.compile(x); else obj._zombi = true
   
   return obj
 }
@@ -817,7 +802,6 @@ export class Sponsoring extends GenDoc {
 
   /* Par l'avatar sponsor */
   async compile (row) {
-    this.vsh = row.vsh || 0
     const clek = stores.session.clek
     this.psp = await decrypterStr(clek, row.psK)
     this.YC = await decrypter(clek, row.YCK)
@@ -827,8 +811,7 @@ export class Sponsoring extends GenDoc {
   /* Par l'avatar sponsorisé : HORS SESSION - Registres inutilisables
   Création: await new Sponsoring().compileHS(row, psp)
   */
-  async compileHS (rowSp, cle) {
-    const row = decode(rowSp._data_)
+  async compileHS (row, cle) {
     this.id = row.id
     this.ids = row.ids
     this.v = row.v

@@ -1,5 +1,3 @@
-import { decode } from '@msgpack/msgpack'
-
 import stores from '../stores/stores.mjs'
 import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme, sleep } from './util.mjs'
 import { idb, IDBbuffer } from './db.mjs'
@@ -20,73 +18,79 @@ class Queue {
 
     /* Evénnements à traiter. [version en attente, version traitée] */
     this.vcpt = [0, 0]
-    this.avgrs = new Map() /* clé: rds, valeur: v */
+    this.vesp = [0, 0]
+    this.avgrs = new Map() /* clé: id, valeur: [vn, vt] */
   }
 
   /* Enregistrement de l'arrivée d'un ou plusieurs row versions sur écoute / WS */
-  async setRows (rows) { 
-    const session = stores.session
+  synchro (trLog) { // trlog : { vcpt, vesp, lag }
     let rev = false
-    if (rows) for (const row of rows) {
-      const idEsp = ID.idEsp(row.id)
-      if (idEsp) {
-        await new GetEspace().run(idEsp)
-      } else {
-        if (ID.rdsType(row.id) === ID.RDSCOMPTE) { 
-          if (this.vcpt[0] < row.v) { this.vcpt[0] = row.v; rev = true }
-        } else {
-          const x = this.avgrs.get(row.id)
-          if (!x) { this.avgrs.set(ID.court(row.id), [row.v, 0]); rev = true }
-          else if (x[0] < row.v) { 
-            this.avgrs.set(ID.court(row.id), [row.v, x[1]])
-            rev = true 
-          }
-        }
+
+    if (trLog.vesp && (trLog.vesp > this.vesp[0])) { 
+      this.vesp[0] = trLog.vesp
+      rev = true
+    }
+
+    if (trLog.vcpt && (trLog.vcpt > this.vcpt[0]())) { 
+      this.vcpt[0] = trLog.vcpt
+      rev = true
+    }
+
+    if (trLog.lag && trLog.lag.length) for (const [id, v] of trLog.lag) {
+      const x = this.avgrs.get(id)
+      if (!x) { this.avgrs.set(id, [v, 0]); rev = true }
+      else if (x[0] < v) { 
+        this.avgrs.set(id, [v, x[1]])
+        rev = true 
       }
     }
     if (rev) this.reveil()
   }
 
   reveil () {
-    const ok = stores.session.ok
+    const session = stores.session
+    const ok = session.ok
     if (this.EnCours || !ok) return
     console.log('réveil')
 
     const ds = syncQueue.dataSync
+    let doCpt = false, doEsp = false
 
     if (this.vcpt[0] > this.vcpt[1]) {
       const vx = this.vcpt[0]
       this.vcpt = [vx, vx] // retrait de la tâche en attente
-      if (vx > ds.compte.vs) {
-        // Lancement de l'opération de Sync
-        this.EnCours = true
-        setTimeout(async () => { 
-          await new SyncStd().run([])
-          this.EnCours = false
-          this.reveil()
-        })
-        return // Une opération a été lancée
-      }
+      if (vx > ds.compte.vs) doCpt = true
     }
 
-    const lrds = []
-    const nvm = new Map() // future liste d'attente des rds notifiés
-    for(const [rds, [vn, vt]] of this.avgrs) {
-      if (vn > vt) {
-        lrds.push(rds)
-        nvm.set(rds, [vn, vn]) // version notifiée -> version traitée
-      } else nvm.set(rds, [vn, vt]) // pas de changement
+    if (this.vesp[0] > this.vesp[1]) {
+      const vx = this.vesp[0]
+      this.vesp = [vx, vx] // retrait de la tâche en attente
+      if (session.espace && vx > session.espace.v) doEsp = true
     }
-    if (lrds.length) { // une opération est à lancer
-      this.avgrs = nvm // la liste d'attente a changé
+
+    const lids = []
+    const nvm = new Map() // future liste d'attente des rds notifiés
+    for(const [id, [vn, vt]] of this.avgrs) {
+      if (vn > vt) {
+        lids.push(id)
+        nvm.set(id, [vn, vn]) // version notifiée -> version traitée
+      } else nvm.set(id, [vn, vt]) // pas de changement
+    }
+    this.avgrs = nvm // liste d'attente mise à jour
+
+    if (doCpt || doEsp || lids.length) {
+      // Lancement de l'opération de Sync
       this.EnCours = true
       setTimeout(async () => { 
-        await new SyncStd().run(lrds)
+        if (doEsp)
+          await new GetEspace().run(session.ns)
+        if (doCpt|| lids.length)
+          await new SyncStd().run(lids)
         this.EnCours = false
         this.reveil()
       })
+      return // Une opération a été lancée
     }
-    // il n'y avait pas d'opération à lancer, tout avait déjà été traité
   }
 }
 export const syncQueue = new Queue()
@@ -497,7 +501,7 @@ export class OperationS extends Operation {
   */
   async syncStd (ds1, lids, full) {
     const session = stores.session
-    const cnx = !ds1
+    const config = stores.config
     let ds = ds1
     let fini = false
     let nbIter = 0
@@ -507,6 +511,10 @@ export class OperationS extends Operation {
       const args =  { 
         token: session.authToken, 
         dataSync: ds ? ds.serial() : null, 
+      }
+      if (!ds1 && nbIter === 0) {
+        const sub = config.subJSON
+        if (config.permission && sub) args.subJSON = sub
       }
       if (nbiter) {
         if (full) args.full = true
@@ -626,9 +634,9 @@ export class SyncStd extends OperationS {
   /* Chargement des sous-arbres groupes et avatars de la liste lrds.
   Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever de cette liste)
   */
-  async run(lrds) {
+  async run(lids) {
     try { 
-      await this.syncStd(syncQueue.dataSync, lrds)
+      await this.syncStd(syncQueue.dataSync, lids)
     } catch (e) {
       await this.finKO(e)
     }
@@ -741,7 +749,10 @@ export class ConnexionSynchroIncognito extends OperationS {
 }
 
 /*   OP_SyncSp: 'Acceptation d\'un sponsoring et création d\'un nouveau compte'
-- `token` : éléments d'authentification du compte à créer
+- token: éléments d'authentification du compte à créer
+- pageSessionId: rnd identifiant la _page_ chargée
+- sessionNc: numéro d'ordre de connexion pour cette page
+
 - idsp idssp : identifinat du sponsoring
 - id : id du compte sponsorisé à créer
 - hXR: hash du PBKFD de sa phrase secrète réduite
@@ -779,6 +790,7 @@ export class SyncSp extends OperationS {
   constructor() { super('SyncSp') }
 
   async run(org, sp, texte, ps, dconf) {
+    const config = stores.config
     try {
       const clek = random(32) // du compte
       const cleKXC = await crypter(ps.pcb, clek) // clé K du nouveau compte cryptée par le PBKFD de sa phrase secrète complète
@@ -802,6 +814,9 @@ export class SyncSp extends OperationS {
         privK: await crypter(clek, kp.privateKey),
         cvA: await cv.crypter(cleA)
       }
+      const sub = config.subJSON
+      if (config.permission && sub) args.subJSON = sub
+
       if (!sp.estA) {
         RegCles.set(sp.cleP)
         args.clePK = await crypter(clek, sp.cleP) // clé P de sa partition cryptée par la clé A de son avatar principal
