@@ -125,9 +125,8 @@ export default {
       const l = [{ id: ID.duComptable() }]
       const p = this.session.partition
       if (!p) return l
-      for (const idx in p.mcpt) {
-        const e = p.mcpt[idx]
-        const id = parseInt(idx)
+      for (const id in p.mcpt) {
+        const e = p.mcpt[id]
         if (id !== this.session.compteId)
           l.push({ del: e.del, id: id })
       }

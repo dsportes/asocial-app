@@ -283,8 +283,8 @@ export default {
     nodesTries () {
       const t = this.nSt.nodes
       t.sort((a, b) => {
-        const noma = a.type + this.pSt.getCV(parseInt(a.key)).nom
-        const nomb = b.type + this.pSt.getCV(parseInt(b.key)).nom
+        const noma = a.type + this.pSt.getCV(a.key).nom
+        const nomb = b.type + this.pSt.getCV(b.key).nom
         return noma > nomb ? 1 : (noma < nomb ? -1 : 0)
       })
       return t
@@ -408,15 +408,15 @@ export default {
       const nfnt = this.nSt.nfnt[n.key] || { nf: 0, nt:0 }
       switch (n.type) {
         case 1 : {
-          const nom = this.pSt.nom(parseInt(n.key))
+          const nom = this.pSt.nom(n.key)
           return this.$t('avatar1', [nom, nfnt.nf, nfnt.nt])
         }
         case 2 : {
-          const nom = this.pSt.nom(parseInt(n.key), 1)
+          const nom = this.pSt.nom(n.key, 1)
           return this.$t('groupe1', [nom, nfnt.nf, nfnt.nt])
         }
         case 3 : {
-          const nom = this.pSt.nom(parseInt(n.key), 24)
+          const nom = this.pSt.nom(n.key, 24)
           return this.$t('groupe1', [nom, nfnt.nf, nfnt.nt])
         }
         case 4 : 
@@ -437,15 +437,15 @@ export default {
     libF (n) {
       switch (n.type) {
         case 1 : {
-          const nom = this.pSt.nom(parseInt(n.key))
+          const nom = this.pSt.nom(n.key)
           return this.$t('avatar2', [nom])
         }
         case 2 : {
-          const nom = this.pSt.nom(parseInt(n.key), 1)
+          const nom = this.pSt.nom(n.key, 1)
           return this.$t('groupe2', [nom])
         }
         case 3 : {
-          const nom = this.pSt.nom(parseInt(n.key), 24)
+          const nom = this.pSt.nom(n.key, 24)
           return this.$t('groupe2', [nom])
         }
         case 4 : 

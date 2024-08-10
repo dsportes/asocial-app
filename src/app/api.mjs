@@ -10,7 +10,7 @@ export const version = '1'
 export class Cles {
   // Retourne un hash string sur 12c en base64 URL (sans = + /) d'un u8
   static hash9 (u8) {
-    const x = new Uint8Array(jssha256(u8).arrayBuffer())
+    const x = new Uint8Array(jssha256.arrayBuffer(u8))
     const y = new Uint8Array(9)
     for(let i = 0; i < 9; i++) y[i] = (x[i] ^ x[i+9]) ^ x[x+18]
     const s = fromByteArray(y)
@@ -141,7 +141,7 @@ Toggle un ou des flags: n ^= FLAGS.HE ^ FLAGS.DN
 /* retourne un code à 6 lettres majuscules depuis l'id d'un ticket 
 id d'un ticket: aa mm rrr rrr rrr r 
 */
-const d10 = 10000000000
+export const d10 = 10000000000
 export function idTkToL6 (t) {
   const am = Math.floor(t / d10)
   const m = am % 100

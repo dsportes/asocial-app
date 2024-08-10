@@ -233,10 +233,10 @@ export function toRetry (nbr, dh) {
 }
 
 export function splitPK(pk) {
-  if (!pk) return { id: 0, ids: 0 }
+  if (!pk) return { id: '', ids: '' }
   const i = pk.indexOf('/')
-  if (i === -1) return { id: parseInt(pk), ids: 0}
-  return { id: parseInt(pk.substring(0, i)), ids: parseInt(pk.substring(i + 1))}
+  if (i === -1) return { id: pk, ids: ''}
+  return { id: pk.substring(0, i), ids: pk.substring(i + 1)}
 }
 
 export function deselect (u8, idx) {

@@ -661,9 +661,8 @@ export class Compti extends GenDoc {
   async compile (row) {
     const clek = stores.session.clek
     this.mc = new Map()
-    if (row.mc) for(const idx in row.mc) {
-      const x = row.mc[idx]
-      const id = parseInt(idx)
+    if (row.mc) for(const id in row.mc) {
+      const x = row.mc[id]
       const y = x.ht ? await decrypterStr(clek, x.ht) : null
       const ht = new Set(y ? y.split(' ') : new Set())
       let tx = ''

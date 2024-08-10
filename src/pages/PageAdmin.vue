@@ -71,8 +71,8 @@
         </q-toolbar>
         <q-card-section class="q-pa-xs">
           <div class="row items-center full-width">
-            <q-input class="col-6 q-pr-md" v-model.number="ns" type="number"
-            :label="$t('ESns')" :hint="$t('ESnsh')" dense/>
+            <q-input class="col-6 q-pr-md" v-model="ns"
+              :label="$t('ESns')" :hint="$t('ESnsh')" dense/>
             <div v-if="dns" class="col-6 text-negative bg-yellow-3 text-bold q-px-xs">{{dns}}</div>
           </div>
           <div class="row items-center full-width">
@@ -175,7 +175,7 @@ export default {
 
   watch: {
     ns (ap, av) {
-      if (ap < 10 || ap > 59) { this.dns = this.$t('ESnsh'); return }
+      if (ap.length !== 1 || Cles.nsToInt(ap) === -1) { this.dns = this.$t('ESnsh'); return }
       if (this.aNS(ap)) { this.dns = this.$t('ESnum'); return }
       this.dns = ''
     },

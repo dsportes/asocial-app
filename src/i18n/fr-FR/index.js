@@ -790,7 +790,7 @@ export default {
   ESpgesp: 'Espace #{0} - {1}',
   ESlo: 'Aucune organisations hébergée | Une organisation hébergée | {count} organisations hébergées',
   ESns: 'ID de l\'espace attribué',
-  ESnsh: 'De 10 à 59',
+  ESnsh: '0...9 OU a...z OU A...Z',
   ESdlvat: 'Hébergment des comptes "O" assuré jusqu\'à :',
   ESdlvat2: 'Hébergment des comptes "O" assuré jusqu\'à  {0}.',
   ESdlvat3: 'Hébergment des comptes "O" assuré sans limite de date.',

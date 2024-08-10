@@ -299,7 +299,7 @@ export const useNoteStore = defineStore('note', {
       const pk = this.node.pkey
       const g = ID.estGroupe(id)
       for (const n of this.nodes) { // n est une racine : types 1, 2, 3
-        const idt = parseInt(n.key)
+        const idt = n.key
         if (n.type === 1) { // sous-arbre avatar
           if (!g && id === idt) this.scanST(n, this.node.key, pk, id, g)
         } else { // sous-arbre groupe
