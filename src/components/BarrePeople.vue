@@ -276,7 +276,7 @@ export default {
           const e = tsp[idp]
           const y = { 
             idp,
-            code: '#' + idp + ' [' + code  + ']',
+            code: '#' + idp.substring(idp.length - 4) + ' [' + code  + ']',
             qc: e.q.qc, 
             qn: e.q.qn,
             qv: e.q.qv,

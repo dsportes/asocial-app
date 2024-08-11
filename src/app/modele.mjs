@@ -250,27 +250,20 @@ Les objets ont au moins les proriétés _nom, id, (ids), (dlv) même _zombi
 */
 export async function compile (row) { // row est le row._data_ du serveur
   if (!row) return null
-  const cl = classes[row._nom]
+  const x = decode(row)
+  const cl = classes[x._nom]
   if (!cl) return null
   const obj = new cl()
-  obj._nom = row._nom
-
-  const x = decode(row)
+  obj._nom = x._nom
   obj.id = x.id
   if (x.ids !== undefined) obj.ids = x.ids
   if (x.dlv !== undefined) obj.dlv = x.dlv
   if (row.dfh !== undefined) obj.dfh = x.dfh
   obj.vsh = x.vsh || 0
   obj.v = x.v || 0  
-  if (row._zombi) await obj.compile(x); else obj._zombi = true
+  if (!x._zombi) await obj.compile(x); else obj._zombi = true
   
   return obj
-}
-
-export function estZombi (row) {
-  const z = row.dlv && row.dlv < stores.session.auj
-  // _zombi : objet dont la dlv est dépassée OU n'ayant pas de _data_
-  return z || !row._data_
 }
 
 /** Espaces **************************************

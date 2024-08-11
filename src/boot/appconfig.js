@@ -42,7 +42,7 @@ async function msgPush (event) {
 }
 
 export default boot(async ({ app /* Vue */ }) => {
-  const cfg = { pageSessionId: ID.rnd() }
+  const cfg = { pageSessionId: ID.rnd(), nc: 0 }
   for(const x in config) cfg[x] = config[x]
 
   console.log('debug:' + (cfg.DEBUG ? true : false) +

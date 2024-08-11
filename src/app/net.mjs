@@ -93,6 +93,7 @@ export async function post (op, fonction, args) {
       if (resp.dh) session.setDh(resp.dh)
       if (resp.conso) session.setConso(resp.conso)
       if (resp.trlog) syncQueue.synchro(resp.trlog)
+      if (resp.nhb !== undefined) session.setNhb(resp.nhb)
     }
     return resp
   } catch (e) { // Résultat mal formé

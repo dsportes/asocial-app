@@ -346,6 +346,7 @@ export default {
   EX8801: 'Action impossible du fait de la restriction "lecture seulement"',
   EX8802: 'Action impossible du fait de la restriction "accès minimal"',
 
+  EX8996: 'Cette organisation n\'est pas reconnue.',
   EX8997: 'Le compte a été radié pour non utilisation prolongée.',
   EX8998: 'La phrase secrète fournie ne correspond à aucun compte enregistré',
   EX8999: 'Cette phrase secrète n\'est pas celle de l\'administrateur technique.',
@@ -353,6 +354,7 @@ export default {
   // A_SRV = 9000 // Situation inattendue : assertion trappée sur le serveur
   EX9020: 'Mise à jour [{2} / {1}] d\'un document obtenu autrement que par un getXXX ({0})',
   EX9019: '(BUG) Mode d\'autorisation non reconnu [{0}]',
+  EX9016: '(BUG) Accès impossible au document "synthese" [{0}]',
   // EX9100: 'Erreur de cryptage AES: {0}',
   // EX9101: 'Erreur de cryptage RSA: {0}',
   EX9999: 'L\'administrateur technique a fermé l\'application : {0}.',

@@ -252,7 +252,8 @@ export class CreationComptable extends Operation {
       const session = stores.session
       const config = stores.config
 
-      const cleP = Cles.partition(1) // clé de la partition 1
+      const cleP = Cles.partition() // clé de la partition
+      const idp = Cles.id(cleP)
       const cleK = random(32) // clé K du Comptable
       const cleA = Cles.comptable() // clé A de l'avatar Comptable
       const kp = await genKeyPair()
@@ -263,7 +264,7 @@ export class CreationComptable extends Operation {
         token: session.authToken,
         org: org,
         hTC,
-        idp: Cles.id(cleP),
+        idp,
         hXR: phrase.hps1,
         hXC: phrase.hpsc,
         pub: kp.publicKey,

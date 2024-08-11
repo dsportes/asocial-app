@@ -155,7 +155,7 @@ import { CreationEspace, MajSponsEspace, SetEspaceNprof, InitTachesGC,
   StartDemon, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
-import { ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
+import { Cles, ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
 import { $t, styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
@@ -307,8 +307,8 @@ export default {
   data () {
     return {
       gcop: '',
-      ns: 0,
-      nsc: 0, // ns "courant" de PageEspace à ouvrir
+      ns: '0',
+      nsc: '', // ns "courant" de PageEspace à ouvrir
       org: '',
       ps: null,
       singl: null,
@@ -330,7 +330,8 @@ export default {
     async function loadEsp () {
       const lst = []
       const rows = await new GetEspaces().run()
-      if (rows) for (const row of rows) lst.push(await compile(row))
+      if (rows) for (const row of rows) 
+        lst.push(await compile(row))
       lst.sort((a, b) => { return a.id < b.id ? -1 : (a.id === b.id ? 0 : 1)})
       lstEsp.value = lst
     }

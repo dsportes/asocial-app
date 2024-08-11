@@ -19,9 +19,9 @@ export const useSessionStore = defineStore('session', {
     status: 0, // 0:fermée, 1:en chargement, 2: ouverte, 3: admin
     mode: 0, // 1:synchronisé, 2:incognito, 3:avion
 
-    ns: 0, // namespace de 10 à 89 : pour "admin" : espace "courant", donc peut être 0
+    ns: '', // namespace du compte. Pour "admin" : espace "courant", donc peut être 0
     org: '', // code de l'organisation
-    compteId: 0, // id du compte
+    compteId: '', // id du compte
     clek: null, // clek du compte
     authToken: '',
     sessionId: '',
@@ -31,15 +31,20 @@ export const useSessionStore = defineStore('session', {
     dh: 0, // dh de la dernière opération
     consocumul: { nl: 0, ne: 0, vm: 0, vd: 0}, // nombres de lectures, écritures, volume montant / descendant sur les POST
 
+    nhb: 0, // numéro de heartbeat dans la connexion
+    dhhb: 0, // date-heure du dernier heartbeat de la connexion
+    stSync: 0, // statut de synchro de la connexion
+    // 0: pas synchronisé, 1: synchro en continu, 2: synchro sur demande 
+
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
     volumeTable: '', // volume des tables de la base locale
 
-    partitionId: 0, // id de la partition actuelle du compte
-    avatarId: 0, // avatar "courant"
-    groupeId: 0, // groupe "courant"
-    membreId: 0, // membre "courant" (son im/ids dans son groupe)
-    peopleId: 0, // people "courant"
+    partitionId: '', // id de la partition actuelle du compte
+    avatarId: '', // avatar "courant"
+    groupeId: '', // groupe "courant"
+    membreId: '', // membre "courant" (son im/ids dans son groupe)
+    peopleId: '', // people "courant"
     notifC: null, // notifC du people courant
     notifP: null, // notifP de la partition du compte
     mnotifP: new Map(), // map des notifP compilées
@@ -86,7 +91,7 @@ export const useSessionStore = defineStore('session', {
     nbj (state) { return AMJ.diff(AMJ.dlv(state.dlv), state.auj) },
 
     estComptable (state) { return ID.estComptable(state.compteId) },
-    estAdmin (state) { return state.compteId === 0 },
+    estAdmin (state) { return !state.compteId },
     estDelegue (state) { return state.compte && state.compte.del },
     estA (state) { return state.compte && state.compte.estA },
     estAvc: (state) => { return (id) => { return state.compte && state.compte.mav.has(id) } },
@@ -311,7 +316,7 @@ export const useSessionStore = defineStore('session', {
     setOrg (org) { this.org = org || '' },
 
     setAuthToken (phrase) {
-      this.sessionId = this.config.pageSessionId + '.' + this.config.sessionNc
+      this.sessionId = this.config.pageSessionId + '.' + this.config.nc
       console.log('sessionId: ', this.sessionId)
 
       const token = { org: this.org, sessionId: this.sessionId}
@@ -331,17 +336,26 @@ export const useSessionStore = defineStore('session', {
     async initSession(phrase) {
       this.phrase = phrase
       this.config.nc++
+      this.nhb = 0 // numéro de heartbeat dans la connexion
+      this.dhhb = 0 // date-heure du dernier heartbeat de la connexion
+      this.stSync = 0 // statut de synchro de la connexion
+  
       this.setAuthToken(phrase)
 
       this.nombase = localStorage.getItem(this.lsk) || ''
       this.auj = AMJ.amjUtc()
       this.dhConnx = Date.now()
-      this.compteId = 0
+      this.compteId = ''
       this.clek = null
       this.status = 1
 
       RegCles.reset() 
       stores.reset(true) // reset SAUF session
+    },
+
+    // Retour de sync : numéro de heartbeat connu de PUBSUB pour cette session
+    setNhb (nhb) {
+      this.stSync = nhb === this.nhb ? 1 : 2
     },
 
     chgps (phrase) {
@@ -391,7 +405,7 @@ export const useSessionStore = defineStore('session', {
         if (compte.notif && compte.notif.dh > this.dhvu) this.alire = true
       } else {
         this.compte = null
-        this.compteId = 0
+        this.compteId = ''
       }
       setTimeout(async () => { await this.setNotifP()}, 1)
     },

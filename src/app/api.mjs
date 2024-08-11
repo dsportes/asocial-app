@@ -33,7 +33,7 @@ export class Cles {
   static id (cle) {
     const t = cle[0]
     if (t === 1) return Cles.ns.charAt(cle[1])
-    if (t === 3) return '100000000000'
+    if (t === 3) return ID.duComptable()
     return t + Cles.hash9(cle).substring(1)
   }
 
@@ -45,6 +45,7 @@ export class Cles {
 /** ID **********************************************************************/
 export class ID {
   static type (id) { return parseInt(id.charAt(0))}
+  static duComptable () { return '300000000000' }
   static estPartition (id) { return id.charAt(0) === '2' }
   static estComptable (id) { return id.charAt(0) === '3' }
   static estAvatar (id) { const c = id.charAt(0); return c === '3' || c === '4' }

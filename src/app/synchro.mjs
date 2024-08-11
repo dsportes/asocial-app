@@ -1036,7 +1036,7 @@ export class PingDB extends Operation {
 }
 
 /* OP_RefusSponsoring: 'Rejet d\'une proposition de sponsoring'
-- `token` : éléments d'authentification du compte.
+- org: organisation,
 - id ids : identifiant du sponsoring
 - ardYC : réponse du filleul
 - hYC: hash du PBKFD de la phrase de sponsoring
@@ -1049,7 +1049,7 @@ export class RefusSponsoring extends Operation {
       console.log(texte)
       const session = stores.session
       const args = { 
-        token: session.authToken,
+        org: session.org,
         id: sp.id,
         ids: sp.ids,
         hYC: sp.hYC,
