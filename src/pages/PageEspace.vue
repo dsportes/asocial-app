@@ -39,9 +39,7 @@
           <div :class="dkli(idx) + ' row full-width'">
             <div class="col-3 fs-md">
               <span v-if="!lg.id">{{$t('total')}}</span>
-              <span v-else>#{{lg.id}}
-                <span v-if="session.pow === 2" class= "q-ml-sm">{{session.codePart(lg.id)}}</span>
-              </span>
+              <span v-else>{{session.codePart(lg.id)}}</span>
             </div>
             <div class="col-3">
               {{$t('PEnbc', lg.nbc, { count: lg.nbc })}}, {{$t('PEnbd', lg.nbd, { count: lg.nbd })}}
@@ -186,7 +184,8 @@ export default {
     synth () {
       if (!this.session.synthese) return []
       const l = []
-      this.session.synthese.tsp.forEach(x => { if (x) l.push(x)})
+      const tsp = this.session.synthese.tsp
+      for (const id in tsp) l.push(tsp[id])
       const fv = this.fSt.tri.espace
       const f = fv ? fv.value : 0
       const ct = { f: fx[f][0], m: fx[f][1] }

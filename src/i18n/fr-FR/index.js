@@ -444,6 +444,7 @@ export default {
   OP_TicketsStat: 'Téléchargements en CSV de la liste des tickets d\'un mois',
 
   // Login
+  LOGcrec: 'Le compte du Comptable a été créé: vous pouvez vous y connecter.',
   LOGreinit: 'Ré-initialiser complètement la base locale',
   LOGrazbl: '<b>Attention:</b> la base locale sera effacée et rechargée totalement.' +
   '<BR>Ceci peut alonger <b>significativement</b> la durée d\'initialisation (comme le mode <i>incognito</i>).' +

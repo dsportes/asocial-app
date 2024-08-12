@@ -2,6 +2,9 @@
 <q-layout view="hHh lpR fFf">
   <q-header elevated>
     <q-toolbar class="full-width">
+
+      <btn-cond v-if="session.ok && !session.avion" 
+        :color="clrsync" :icon="iconsync" @ok="dosync"/>
       
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" 
@@ -424,7 +427,7 @@ import stores from './stores/stores.mjs'
 import { AMJ } from './app/api.mjs'
 
 import { set$t, hms, dkli, styp } from './app/util.mjs'
-import { reconnexion, deconnexion } from './app/synchro.mjs'
+import { reconnexion, deconnexion, SyncFull } from './app/synchro.mjs'
 import { CV } from './app/modele.mjs'
 import { SetDhvuCompte } from './app/operations4.mjs'
 
@@ -509,6 +512,10 @@ export default {
    },
 
   computed: {
+    iconsync () { return ['sync_disabled', 'sync', 'sync_problem'][this.session.stSync] },
+
+    clrsync () { return ['grey-5', 'green-5', 'warning'][this.session.stSync] },
+
     offset () { return this.ui.pagetab ? [0, -55] : [0, -25]},
 
     lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
@@ -549,6 +556,10 @@ export default {
   }},
 
   methods: {
+    async dosync () {
+      await new SyncFull().run()
+    },
+
     // deconnexion () { this.ui.fD(); deconnexion() },
     discon () {
       if (this.session.status === 3) deconnexion()
@@ -556,7 +567,11 @@ export default {
     },
     async reconnexion () { this.ui.fD(); await reconnexion() },
 
-    reload () { location.reload(true) },
+    reload () { 
+      setTimeout(() => {
+        location.reload(true) 
+      }, 1000)
+    },
 
     stopop () {
       const op = this.session.opEncours

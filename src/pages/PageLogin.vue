@@ -193,6 +193,7 @@ export default {
 
     async creationComptable (pc) {
       await new CreationComptable().run(this.org, pc, this.cleE, this.hTC)
+      await afficherDiag(this.$t('LOGcrec'))
     },
 
     raz () {

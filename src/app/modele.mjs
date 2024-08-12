@@ -339,7 +339,7 @@ export class Synthese extends GenDoc {
       qt: { qc: 0, qn: 0, qv: 0, c2m: 0, n: 0, v: 0 }
     }
 
-    if (row.tsp) for (const id of row.tsp) {
+    if (row.tsp) for (const id in row.tsp) {
       const r = row.tsp[id]
       r.id = id
       r.pcac = !r.q.qc ? 0 : Math.round(r.qt.qc * 100 / r.q.qc) 
@@ -513,7 +513,7 @@ export class Compte extends GenDoc {
 
     if (this.estComptable) {
       this.mcode = new Map()
-      for(const idp of row.tpk) {
+      for(const idp in row.tpk) {
         const { cleP, code } = decode(await decrypter(clek, row.tpk[idp]))
         RegCles.set(cleP)
         if (code) this.mcode.set(idp, code)

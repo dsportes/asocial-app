@@ -197,10 +197,9 @@ export const useSessionStore = defineStore('session', {
     },
 
     codePart: (state) => { return (id) => { 
-        const code = state.estComptable ? ' [' + state.compte.mcode.get(id) + ']': ''
-        return '#' + id + code
-      }
-    },
+      const s = id.substring(id.length -4)
+      return state.estComptable ? '#' + s + ' ' + state.compte.mcode.get(id) : '#' + s
+    }},
 
     defHT (state) {
       if (state.locale) locale = useI18n().locale
@@ -301,7 +300,7 @@ export const useSessionStore = defineStore('session', {
       } catch (e) {
         this.config.subJSON = ''
       }
-      console.log('Service worker has been registered. endpoint hash: ' + this.config.epHash) 
+      console.log('Service worker has been registered. subscription length: ' + this.config.subJSON.length) 
     },
 
     // ServiceWorker : événements de détection de changement de version

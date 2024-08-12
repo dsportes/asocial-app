@@ -512,11 +512,11 @@ export class OperationS extends Operation {
         token: session.authToken, 
         dataSync: ds ? ds.serial() : null, 
       }
-      if (!ds1 && nbIter === 0) {
+      if ((!ds1 || full) && nbIter === 0) {
         const sub = config.subJSON
         if (config.permission && sub) args.subJSON = sub
       }
-      if (nbiter) {
+      if (nbIter) {
         if (full) args.full = true
         else args.lids = lids || []
       }
@@ -620,7 +620,6 @@ export class OperationS extends Operation {
       sb.store(buf)
       await buf.commit(ds)
       syncQueue.dataSync = ds
-      if (fs) fs.setDS(new Set(ds.setRds))
       fini = ds.estAJour
       nbIter++
     }
@@ -637,6 +636,23 @@ export class SyncStd extends OperationS {
   async run(lids) {
     try { 
       await this.syncStd(syncQueue.dataSync, lids)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+
+/* Synchronisation standard *********************************/
+export class SyncFull extends OperationS {
+  constructor() { super('SyncStd') }
+
+  /* Chargement des sous-arbres groupes et avatars de la liste lrds.
+  Mais si compte évolue, il peut s'ajouter des sous-arbres (ou en enlever de cette liste)
+  */
+  async run() {
+    try { 
+      await this.syncStd(syncQueue.dataSync, null, true)
     } catch (e) {
       await this.finKO(e)
     }
