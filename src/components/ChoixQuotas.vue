@@ -10,7 +10,7 @@
           {{mv.minn + '...' + mv.maxn}}</span>
         <q-btn class="col-1" dense icon="undo" size="sm" color="warning" @click="undo1"/>
       </div>
-      <div class="q-ml-md font-mono">{{ed1(mv.qn)}} {{$t(groupe ? 'notes' : 'unnncng')}}</div>
+      <div class="q-ml-md font-mono">{{ed1(mv.qn)}} {{$t(groupe ? 'nbnotes' : 'nbnnncng')}}</div>
       <div v-if="quotas.n" :class="'q-mt-xs fnt-mono q-pa-xs ' + st(pcn)">{{$t('CQtxut', [pcn])}}</div>
       
       <q-separator color="orange" class="q-my-sm q-mx-md"/>

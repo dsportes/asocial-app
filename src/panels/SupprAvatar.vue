@@ -143,7 +143,7 @@ import { GetPartition, deconnexion } from '../app/synchro.mjs'
 export default ({
   name: 'SupprAvatar',
 
-  props: { avid: Number },
+  props: { avid: String },
 
   components: { BoutonHelp, BoutonConfirm, BtnCond },
 

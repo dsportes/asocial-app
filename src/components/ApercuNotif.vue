@@ -65,7 +65,7 @@ export default {
     - 1 : d'une partition
     - 2 : d'un compte
     */
-    cible: Number, // type 0: ns, type 1: idPartition, type 2: idCompte
+    cible: String, // type 0: ns, type 1: idPartition, type 2: idCompte
     idx: Number
   },
 

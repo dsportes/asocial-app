@@ -170,7 +170,7 @@ export default {
 
   components: { PhraseContact, BtnCond, EditeurMd, PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
 
-  props: { id: Number, part: Boolean },
+  props: { id: String, part: Boolean },
 
   computed: {
     cv () { return this.session.getCV(this.id) },

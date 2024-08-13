@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
-import { ID } from './api.mjs'
 import stores from '../stores/stores.mjs'
+
 import { encode, decode } from '@msgpack/msgpack'
 import { NoteLocale, FichierLocal, Ficav } from './modele.mjs'
 import { crypter, decrypter } from './webcrypto.mjs'

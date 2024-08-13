@@ -307,7 +307,7 @@ export default {
   name: 'ApercuMembre',
 
   props: { 
-    id: Number, // id de l'avatar membre
+    id: String, // id de l'avatar membre
     idx: Number
   },
 

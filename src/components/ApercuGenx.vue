@@ -60,7 +60,7 @@ export default {
   name: 'ApercuGenx',
 
   props: { 
-    id: Number, // id du groupe, avatar du compte ou contact
+    id: String, // id du groupe, avatar du compte ou contact
     del: Boolean, // true si délégué, pour l'afficher
     im: Number, // pour un membre pour l'afficher
     nodet: Boolean, // true si le panel de détail ne peut PAS être ouvert

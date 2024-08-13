@@ -816,6 +816,7 @@ export class SyncSp extends OperationS {
       const cv = new CV(id, 0, null, sp.nom)
       
       const args = {
+        org,
         idsp: sp.id,
         idssp: sp.ids,
         id, // id du compte sponsorisé à créer

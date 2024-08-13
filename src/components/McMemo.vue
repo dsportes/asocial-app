@@ -72,7 +72,7 @@ const LARGE = 380
 export default {
   name: 'McMemo',
 
-  props: { id: Number, idx: Number },
+  props: { id: String, idx: Number },
 
   components: { EditeurMd, HashTags, BtnCond },
 

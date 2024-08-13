@@ -55,6 +55,7 @@
 
 <script>
 import stores from '../stores/stores.mjs'
+import { decode } from '@msgpack/msgpack'
 
 import { afficherDiag, beep } from '../app/util.mjs'
 import { connexion, GetSponsoring } from '../app/synchro.mjs'
@@ -138,7 +139,7 @@ export default {
         stores.reset(true)
         this.hTC = this.pc.hpsc
         const res = await new GetSponsoring().run(this.org, this.pc.hps1, this.pc.hpsc)
-        if (res.cleET) {
+        if (res && res.cleET) {
           if (res.cleET === false) {
             await afficherDiag(this.$t('LOGnosp'))
             this.raz()
