@@ -54,7 +54,7 @@ import { ID } from '../app/api.mjs'
 export default {
   name: 'ApercuAvatar',
 
-  props: { idav: Number, idx: Number },
+  props: { idav: String, idx: Number },
 
   components: { PhraseContact, BoutonHelp, ApercuGenx, BtnCond },
 

@@ -31,7 +31,7 @@ class Queue {
       rev = true
     }
 
-    if (trLog.vcpt && (trLog.vcpt > this.vcpt[0]())) { 
+    if (trLog.vcpt && (trLog.vcpt > this.vcpt[0])) { 
       this.vcpt[0] = trLog.vcpt
       rev = true
     }
