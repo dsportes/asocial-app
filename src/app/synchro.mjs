@@ -516,7 +516,7 @@ export class OperationS extends Operation {
         const sub = config.subJSON
         if (config.permission && sub) args.subJSON = sub
       }
-      if (nbIter) {
+      if (!nbIter) {
         if (full) args.full = true
         else args.lids = lids || []
       }

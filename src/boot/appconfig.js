@@ -1,7 +1,8 @@
 import { boot } from 'quasar/wrappers'
 const pako = require('pako')
+import { decode } from '@msgpack/msgpack'
 
-import { setRequiredModules } from '../app/util.mjs'
+import { setRequiredModules, b64ToU8 } from '../app/util.mjs'
 import { Tarif } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import { config } from '../app/config.mjs'
@@ -34,7 +35,7 @@ async function msgPush (event) {
     try {
       const obj = decode(b64ToU8(event.data.payload))
       if (obj.sessionId === stores.session.sessionId)
-        syncQueue.synchro(obj)
+        syncQueue.synchro(obj.trLog)
     } catch (e) {
       console.log(e.toString())
     }
