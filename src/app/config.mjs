@@ -1,13 +1,13 @@
 // Branch 20240801
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter à chaque déploiement
-  // OPURL: 'http://localhost:8443/op/',
+  OPURL: 'http://localhost:8443/op/',
   // OPURL: 'https://test.sportes.fr:8443/op/',
-  // OPURL: 'http://192.168.5.64:8443/op/',
-  OPURL: 'https://b52d-92-188-103-73.ngrok-free.app/op/',
+  // OPURL: 'https://192.168.5.64:8443/op/',
+  // OPURL: 'https://0a42-92-188-103-73.ngrok-free.app/op/',
   DEV: true,
   DEBUG: true,
-  BUILD: '23:38',
+  BUILD: '24-08-15 12:00',
 
   vapid_public_key: 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew',
 

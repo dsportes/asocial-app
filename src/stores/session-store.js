@@ -290,9 +290,15 @@ export const useSessionStore = defineStore('session', {
   actions: {
     async setRegistration(registration) {
       this.registration = registration
+      await this.setSubscription()
+      console.log('SW ready. subJSON: ' + this.config.subJSON.substring(0, 50))
+    },
+
+    async setSubscription () {
+      if (!this.registration) return
       try {
-        let subscription = await registration.pushManager.getSubscription() // déjà faite
-        if (!subscription) subscription = await registration.pushManager.subscribe({
+        let subscription = await this.registration.pushManager.getSubscription() // déjà faite
+        if (!subscription) subscription = await this.registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: b64ToU8(stores.config.vapid_public_key)
           })
@@ -300,7 +306,6 @@ export const useSessionStore = defineStore('session', {
       } catch (e) {
         this.config.subJSON = '???' + e.message
       }
-      console.log('Service worker has been registered. subscription length: ' + this.config.subJSON.length) 
     },
 
     // ServiceWorker : événements de détection de changement de version

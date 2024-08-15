@@ -70,6 +70,7 @@ export const useUiStore = defineStore('ui', {
       detailspeople: false,
       confirmstopop: false,
       opDialog: false,
+      Pubsub: false, // PageLogin
       PPnvnote: false, // PressePapier
       PPsupprnote: false,
       PPnvfic: false,

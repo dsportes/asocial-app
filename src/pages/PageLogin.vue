@@ -1,8 +1,11 @@
 <template>
 <q-page class="column align-start items-center">
 
-  <div class="font-mono fs-sm self-end text-italic q-ma-xs">
-    {{config.subJSON.substring(0, 70) + '... ' + config.BUILD}}
+  <div class="row self-end items-center">
+    <div v-if="infx" class="font-mono fs-sm text-italic q-mr-sm">
+      {{config.subJSON.substring(0, 70) + '... ' + config.BUILD}}
+    </div>
+    <q-toggle :class="'q-my-xs bg-' + clrInfx " v-model="infx" color="grey-5" size="25px"/>
   </div>
 
   <q-expansion-item class="q-mt-xl spsm" group="g1" v-model="ui.loginitem">
@@ -53,43 +56,40 @@
   <acceptation-sponsoring v-if="ui.d.ASaccsp" :sp="sp" :pc="pc" :org="org"/>
 
 
-  <q-dialog v-model="maperm">
-    <q-card>
-      <q-card-section class="q-pa-md fs-md text-center">
-        {{perm}}
-      </q-card-section>
-      <q-card-actions vertical align="right" class="q-gutter-sm">
-        <q-btn flat dense size="md" padding="xs" color="primary"
-          label="Demande" @click="demperm"/>
-      </q-card-actions>
+  <q-dialog v-model="ui.d.Pubsub" persistent>
+    <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
+      <div class="font-mono fs-xs">[{{perm}}]</div>
+      <div class="titre-lg q-my-md text-center">{{$t('LOGpubsub')}}</div>
+      <btn-cond class="q-my-md" flat :label="$t('jailu')" @ok="demperm"/>
     </q-card>
-
   </q-dialog>
 </q-page>
 </template>
 
 <script>
 import stores from '../stores/stores.mjs'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { decode } from '@msgpack/msgpack'
 
-import { afficherDiag, beep } from '../app/util.mjs'
+import { afficherDiag, beep, styp } from '../app/util.mjs'
 import { connexion, GetSponsoring } from '../app/synchro.mjs'
 import { Sponsoring, RegCles } from '../app/modele.mjs'
 import { AMJ } from '../app/api.mjs'
 import PhraseContact from '../components/PhraseContact.vue'
 import AcceptationSponsoring from '../panels/AcceptationSponsoring.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { decrypter } from '../app/webcrypto.mjs'
 import { CreationComptable } from '../app/operations4.mjs'
 
 export default {
   name: 'PageLogin',
 
-  components: { PhraseContact, AcceptationSponsoring, BoutonHelp },
+  components: { BtnCond, PhraseContact, AcceptationSponsoring, BoutonHelp },
 
   data () {
     return {
+      infx: false,
       loginitem2: false,
       btncd: false,
       initval: '',
@@ -100,7 +100,8 @@ export default {
   },
 
   computed: {
-    loginitem () { return this.ui.loginitem }
+    loginitem () { return this.ui.loginitem },
+    clrInfx () { return this.config.subJSON.startsWith('???') ? 'warning': 'green' }
   },
 
   watch: {
@@ -117,8 +118,12 @@ export default {
   methods: {
     async demperm () {
       const p = await Notification.requestPermission()
-      alert('Perms App.vue 2 ' + Notification.permission)
-      this.maperm = false
+      if (p === 'granted') {
+        this.config.permission = true
+        await this.session.setSubscription()
+        console.log(this.config.subJSON)
+      }
+      this.ui.fD()
     },
 
     ouvrirPS (mode) {
@@ -235,11 +240,17 @@ export default {
     const ui = stores.ui
 
     const perm = ref(Notification.permission)
-    config.permission = Notification.permission === 'granted'
-    const maperm = ref(!config.permission)
+    config.permission = perm.value === 'granted'
+
+    onMounted(async () => {
+      if (!config.permission) 
+        ui.oD('Pubsub')
+      if (config.permission) await session.setSubscription()
+    })
 
     return {
-      session, ui, maperm, perm,
+      session, ui, styp,
+      perm,
       config
     }
   }

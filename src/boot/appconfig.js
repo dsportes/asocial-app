@@ -48,18 +48,6 @@ export default boot(async ({ app /* Vue */ }) => {
 
   console.log('debug:' + (cfg.DEBUG ? true : false) +
     ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
-
-  /*
-  alert('Perms appconfig !!! ' + Notification.permission)
-  if (Notification.permission !== 'granted') { // granted denied default
-    try { 
-      const p = await Notification.requestPermission()
-      // cfg.permission = p === 'granted'
-    } catch (e) { 
-      // cfg.permission = false
-    }
-  } // else cfg.permission = true
-  */
   
   new BroadcastChannel('channel-pubsub').onmessage = msgPush
 
