@@ -49,14 +49,17 @@ export default boot(async ({ app /* Vue */ }) => {
   console.log('debug:' + (cfg.DEBUG ? true : false) +
     ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
 
+  /*
+  alert('Perms appconfig !!! ' + Notification.permission)
   if (Notification.permission !== 'granted') { // granted denied default
     try { 
       const p = await Notification.requestPermission()
-      cfg.permission = p === 'granted'
+      // cfg.permission = p === 'granted'
     } catch (e) { 
-      cfg.permission = false
+      // cfg.permission = false
     }
-  } else cfg.permission = true
+  } // else cfg.permission = true
+  */
   
   new BroadcastChannel('channel-pubsub').onmessage = msgPush
 
@@ -64,13 +67,7 @@ export default boot(async ({ app /* Vue */ }) => {
   
   cfg.search = window.location.search.replace('?', '')
 
-  if (process.env.DEVSRV) {
-    cfg.opsrv = 'http://' + process.env.DEVSRV + '/op/'
-  } else {
-    const srv = process.env.SRV ? process.env.SRV : window.location.host
-    cfg.opsrv = 'https://' + srv + '/op/'
-  }
-  console.log('OPSRV: ' + cfg.opsrv)
+  console.log('OPURL: ' + cfg.OPURL)
 
   console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
 

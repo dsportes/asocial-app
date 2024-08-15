@@ -12,6 +12,9 @@ const ESLintPlugin = require('eslint-webpack-plugin')
 const { configure } = require('quasar/wrappers')
 const path = require('path')
 
+/*
+ATTENTION: obfuscator nique le string "self.__WB_MANIFEST"
+ce qui plante le build du service-worker
 const JavaScriptObfuscator = require('webpack-obfuscator')
 const plugob = new JavaScriptObfuscator({
   // debugProtection: true,
@@ -21,6 +24,7 @@ const plugob = new JavaScriptObfuscator({
   // stringArrayEncoding: 'rc4',
   // stringArrayThreshold: 1
 })
+*/
 
 module.exports = configure(function (ctx) {
   return {
@@ -59,10 +63,6 @@ module.exports = configure(function (ctx) {
       // this is a configuration passed on
       // to the underlying Webpack
       devtool: 'source-map',
-      env: {
-        DEVSRV: 'localhost:8443',
-        SRV: 'test.sportes.fr:8443'
-      },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
@@ -110,7 +110,7 @@ module.exports = configure(function (ctx) {
         cfg.module.rules.push({ test: /\.bin$/i, type: 'asset/inline' })
 
         // Commenter la ligne ci-dessous pour ne pas obfusquer le code
-        if(!ctx.dev && !ctx.debug) { cfg.plugins.push(plugob) }
+        // if(!ctx.dev && !ctx.debug) { cfg.plugins.push(plugob) }
       },
       chainWebpack: chain => {
         chain.module
@@ -215,8 +215,8 @@ module.exports = configure(function (ctx) {
             src: 'icons/favicon-128x128.png',
             sizes: '128x128',
             type: 'image/png'
-          },
-          /*
+          }
+          /*,
           {
             src: 'icons/icon-192x192.png',
             sizes: '192x192',

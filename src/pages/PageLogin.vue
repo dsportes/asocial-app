@@ -1,7 +1,9 @@
 <template>
 <q-page class="column align-start items-center">
 
-  <div class="font-mono fs-sm self-end text-italic q-ma-xs">{{config.BUILD}}</div>
+  <div class="font-mono fs-sm self-end text-italic q-ma-xs">
+    {{config.subJSON.substring(0, 70) + '... ' + config.BUILD}}
+  </div>
 
   <q-expansion-item class="q-mt-xl spsm" group="g1" v-model="ui.loginitem">
     <template v-slot:header>
@@ -50,11 +52,25 @@
   <!-- Dialogue d'acceptation d'un nouveau sponsoring -->
   <acceptation-sponsoring v-if="ui.d.ASaccsp" :sp="sp" :pc="pc" :org="org"/>
 
+
+  <q-dialog v-model="maperm">
+    <q-card>
+      <q-card-section class="q-pa-md fs-md text-center">
+        {{perm}}
+      </q-card-section>
+      <q-card-actions vertical align="right" class="q-gutter-sm">
+        <q-btn flat dense size="md" padding="xs" color="primary"
+          label="Demande" @click="demperm"/>
+      </q-card-actions>
+    </q-card>
+
+  </q-dialog>
 </q-page>
 </template>
 
 <script>
 import stores from '../stores/stores.mjs'
+import { ref } from 'vue'
 import { decode } from '@msgpack/msgpack'
 
 import { afficherDiag, beep } from '../app/util.mjs'
@@ -99,6 +115,12 @@ export default {
   },
 
   methods: {
+    async demperm () {
+      const p = await Notification.requestPermission()
+      alert('Perms App.vue 2 ' + Notification.permission)
+      this.maperm = false
+    },
+
     ouvrirPS (mode) {
       this.session.setMode(mode)
       this.ui.ps = { 
@@ -212,8 +234,12 @@ export default {
     const session = stores.session
     const ui = stores.ui
 
+    const perm = ref(Notification.permission)
+    config.permission = Notification.permission === 'granted'
+    const maperm = ref(!config.permission)
+
     return {
-      session, ui,
+      session, ui, maperm, perm,
       config
     }
   }

@@ -298,7 +298,7 @@ export const useSessionStore = defineStore('session', {
           })
         this.config.subJSON = JSON.stringify(subscription)
       } catch (e) {
-        this.config.subJSON = ''
+        this.config.subJSON = '???' + e.message
       }
       console.log('Service worker has been registered. subscription length: ' + this.config.subJSON.length) 
     },

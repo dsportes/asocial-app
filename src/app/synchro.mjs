@@ -513,8 +513,7 @@ export class OperationS extends Operation {
         dataSync: ds ? ds.serial() : null, 
       }
       if ((!ds1 || full) && nbIter === 0) {
-        const sub = config.subJSON
-        if (config.permission && sub) args.subJSON = sub
+        args.subJSON = config.subJSON
       }
       if (!nbIter) {
         if (full) args.full = true
@@ -831,8 +830,7 @@ export class SyncSp extends OperationS {
         privK: await crypter(clek, kp.privateKey),
         cvA: await cv.crypter(cleA)
       }
-      const sub = config.subJSON
-      if (config.permission && sub) args.subJSON = sub
+      args.subJSON = config.subJSON
 
       if (!sp.estA) {
         RegCles.set(sp.cleP)

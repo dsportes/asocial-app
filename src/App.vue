@@ -419,7 +419,7 @@
 </template>
 
 <script>
-// import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
@@ -609,6 +609,22 @@ export default {
 
     const ui = stores.ui
     ui.setScreenWH($q.screen.width, $q.screen.height)
+
+    /*
+    onMounted(async () => {
+ if (Notification.permission !== 'granted') { // granted denied default
+         alert('Perms App.vue 1 ' + Notification.permission)
+ try { 
+      const p = await Notification.requestPermission()
+      alert('Perms App.vue 2 ' + Notification.permission)
+    } catch (e) { 
+      const m = Notification.permission + ' / ' + e.toString()
+      console.log(m)
+      alert(m)
+    }
+  } // else cfg.permission = true
+    })
+    */
 
     /* Template de onAction ************************************************
     ui.$onAction(({ name, args, after }) => {

@@ -5,14 +5,12 @@ import stores from '../stores/stores.mjs'
 import { isAppExc, AppExc, version, E_BRO, E_SRV, E_BRK } from './api.mjs'
 import { syncQueue } from './synchro.mjs'
 
-const headers = { 'x-api-version': version }
-
 const decoder = new TextDecoder('utf-8')
 
 export async function ping () {
   const config = stores.config
   const ui = stores.ui
-  const u = config.opsrv + 'yoyo'
+  const u = config.OPURL + 'yoyo'
   ui.afficherMessage('ping - ' + u)
   try {
     const r = await axios({
@@ -39,12 +37,11 @@ Retour :
 export async function get (fonction, args) {
   const cfg = stores.config
   try {
-    const u = cfg.opsrv + fonction
+    const u = cfg.OPURL + fonction
     const r = await axios({
       method: 'get',
       url: u,
       params: args,
-      headers: headers,
       responseType: 'arraybuffer',
       timeout: cfg.debug ? 50000000 : 5000
     })
@@ -71,12 +68,13 @@ export async function post (op, fonction, args) {
   let buf
   const config = stores.config
   const session = stores.session
+  let u
   try {
     if (op) op.BRK()
     const data = new Uint8Array(encode(args))
-    const u = config.opsrv + fonction
+    u = config.OPURL + fonction
     if (op) op.cancelToken = axios.CancelToken.source()
-    const par = { method: 'post', url: u, data: data, headers: headers, responseType: 'arraybuffer' }
+    const par = { method: 'post', url: u, data: data, responseType: 'arraybuffer' }
     if (op) par.cancelToken = op.cancelToken.token
     const r = await axios(par)
     if (op) op.cancelToken = null
@@ -84,7 +82,7 @@ export async function post (op, fonction, args) {
     // buf = new Uint8Array(r.data)
     buf = r.data
   } catch (e) {
-    procEx(e, op)
+    procEx(e, op, u)
   }
   // les status HTTP non 2xx sont tombés en exception
   try {
@@ -102,7 +100,7 @@ export async function post (op, fonction, args) {
   }
 }
 
-function procEx (e, op) {
+function procEx (e, op, u) {
   // Exceptions jetées par le this.BRK au-dessus)
   if (isAppExc(e) && e.majeur * 1000 === E_BRK) throw e
   if (axios.isCancel(e)) throw new AppExc(E_BRK)
@@ -125,8 +123,9 @@ function procEx (e, op) {
     throw ex
   } else { 
     // inattendue, pas mise en forme (500 et autres)
+    console.log('URL de POST: ', u || '?')
     const code = !status ? 100 : (status >= 500 && status <= 599 ? 101 : 0)
-    throw new AppExc(E_SRV, code, [status, e.message])
+    throw new AppExc(E_SRV, code, [status, (u || '?'), e.message])
   }
 }
 

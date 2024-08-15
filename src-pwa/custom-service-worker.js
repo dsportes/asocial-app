@@ -4,10 +4,12 @@
  * quasar.config.js > pwa > workboxPluginMode is set to "InjectManifest"
  */
 
-// import { precacheAndRoute } from 'workbox-precaching'
+const mf = self.__WB_MANIFEST
+
+import { precacheAndRoute } from 'workbox-precaching'
 
 // Use with precache injection
-// precacheAndRoute(self.__WB_MANIFEST)
+// precacheAndRoute(mf)
 
 const broadcast = new BroadcastChannel('channel-pubsub')
 
