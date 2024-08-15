@@ -55,7 +55,6 @@
   <!-- Dialogue d'acceptation d'un nouveau sponsoring -->
   <acceptation-sponsoring v-if="ui.d.ASaccsp" :sp="sp" :pc="pc" :org="org"/>
 
-
   <q-dialog v-model="ui.d.Pubsub" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
       <div class="font-mono fs-xs">[{{perm}}]</div>

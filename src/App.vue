@@ -11,6 +11,7 @@
         :alire="session.alire && (session.ntfIco !== 0)" 
         :niv="session.ntfIco" 
         @click="clickNotif"/>
+      
       <!-- Test du look des icones de notification
       <notif-icon v-if="session.status === 2" class="q-ml-xs" alire :niv="1"/>
       <notif-icon v-if="session.status === 2" class="q-ml-xs" :niv="2"/>
@@ -360,12 +361,9 @@
         <bouton-help page="page1"/>
       </q-toolbar>
       <q-card-actions vertical align="center" class="q-gutter-sm">
-        <q-btn dense size="md" padding="xs" color="warning"
-          icon="logout" :label="$t('MLAdecon')" @click="deconnexion"/>
-        <q-btn dense size="md" padding="xs" color="warning"
-          icon="logout" :label="$t('MLArecon')" @click="reconnexion"/>
-        <q-btn dense size="md" padding="xs" color="primary"
-          :label="$t('MLAcont')" @click="ui.fD"/>
+        <btn-cond color="warning" icon="logout" :label="$t('MLAdecon')" @ok="deconnexion"/>
+        <btn-cond color="warning" icon="logout" :label="$t('MLArecon')" @ok="reconnexion2"/>
+        <btn-cond color="primary" :label="$t('MLAcont')" @ok="ui.fD"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -565,7 +563,19 @@ export default {
       if (this.session.status === 3) deconnexion()
       else this.ui.oD('dialoguedrc')
     },
-    async reconnexion () { this.ui.fD(); await reconnexion() },
+
+    async reconnexion2 () { 
+      if (Notification.permission !== 'granted') {
+        const p = await Notification.requestPermission()
+        if (p === 'granted') {
+          this.config.permission = true
+          await this.session.setSubscription()
+          console.log(this.config.subJSON)
+        }
+      }
+      this.ui.fD()
+      await reconnexion() 
+    },
 
     reload () { 
       setTimeout(() => {

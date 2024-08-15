@@ -629,6 +629,19 @@ export default {
   Pficavion: 'Fichiers visibles en avion',
 
   // App.vue
+  MLAnba: 'Le navigateur "accepte" les notifications pour l\'application.',
+  MLAnbb1: 'Le navigateur "bloque les notifications" pour l\'application.',
+  MLAnbb2: 'Pour pouvoir basculer en mise à jour automatique continue des données de la session, se "reconnecter" et faire accepter les notifications par le navigateur pour l\'application.',
+
+  MLAst: 'Mises à jour des données de la session provoquées par d\'autres sessions: ',
+  MLAsta: 'AUTOMATIQUE EN CONTINU',
+  MLAstd: 'SUR DEMANDE',
+  MLAmodea: 'Passer en AUTOMATIQUE CONTINU',
+  MLAmoded: 'Passer en mode SUR DEMANDE',
+  MLAsync: 'RE-SYNCHRONISER',
+  MLAsync1: '"re-synchroniser" remet à niveau les données de la session du fait des actions des autres sessions.',
+  MLAsync2: 'Les données sont a priori déjà à jour, "re-synchroniser" ne nuit pas mais ne devrait rien changer.',
+  
   MLAbrk: 'Opération en cours',
   MLAatt: 'Information importante',
   MLAcf: 'Voulez-vous vraiement arrêter l\'opération en cours "{0}"',
