@@ -1,13 +1,13 @@
 import { encode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { Operation } from './synchro.mjs'
+import { Operation } from './operation.mjs'
+import { getPub } from './synchro.mjs'
 import { random, gzipB } from './util.mjs'
 import { Cles, isAppExc, ID } from './api.mjs'
 import { idb } from '../app/db.mjs'
 import { post, getData, putData } from './net.mjs'
 import { RegCles, compile, CV } from './modele.mjs'
-import { getPub } from './synchro.mjs'
 import { decrypter, crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
 
 /* OP_SetEspaceOptionA: 'Changement de l\'option A de l\'espace'

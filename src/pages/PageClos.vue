@@ -10,8 +10,8 @@
         {{$t('ECmi', [dhcool(session.excKO.args[1])])}}
       </div>
       <show-html class="bord" zoom maxh="10rem" :texte="session.excKO.args[0]"/>
-      <q-btn class="q-mt-lg text-center" flat size="lg"
-        color="warning" :label="$t('jailu')" @click="deconnexion"/>
+      <btn-cond class="q-mt-lg text-center" flat size="lg"
+        color="warning" :label="$t('jailu')" @ok="deconnex"/>
     </q-card>
 
     <!-- Compte disparu en cours de session, chgt phrase ou résiliation -->
@@ -19,16 +19,16 @@
       <div class="text-center titre-lg titre-italic">
         {{$t('compteKO', [session.compteId, pSt.getCV(session.compteId).nom])}}
       </div>
-      <q-btn class="q-mt-lg text-center" flat size="lg"
-        color="warning" :label="$t('jailu')" @click="deconnexion"/>
+      <btn-cond class="q-mt-lg text-center" flat size="lg"
+        color="warning" :label="$t('jailu')" @ok="deconnex"/>
     </q-card>
 
     <!-- Toute exception survenue en synchronisation -->
     <q-card v-if="session.excKO && session.excKO.code < 9900" class="q-mt-lg spsm column justify-center">
       <div class="text-center titre-lg titre-italic">{{$t('sessionKO')}}</div>
       <div class="text-center titre-sm q-my-md q-mx-md" v-html="html(session.excKO)"/>
-      <q-btn class="q-mt-lg text-center" flat size="lg"
-        color="warning" :label="$t('jailu')" @click="deconnexion"/>
+      <btn-cond class="q-mt-lg text-center" flat size="lg"
+        color="warning" :label="$t('jailu')" @ok="deconnex"/>
     </q-card>
   </q-page>
 </template>
@@ -39,15 +39,18 @@ import BoutonBulle from '../components/BoutonBulle.vue'
 import { dhcool, html } from '../app/util.mjs'
 import { deconnexion } from '../app/synchro.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
+import BtnCond from '../components/BtnCond.vue'
 
 export default {
   name: 'PageClos',
 
-  components: { BoutonBulle, ShowHtml },
+  components: { BtnCond, BoutonBulle, ShowHtml },
 
   computed: { },
 
-  methods: { },
+  methods: {
+    async deconnex() { await deconnexion() }
+  },
 
   data () {
     return {

@@ -1,7 +1,8 @@
 import stores from '../stores/stores.mjs'
+import { Operation } from './operation.mjs'
 import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme, sleep } from './util.mjs'
 import { idb, IDBbuffer } from './db.mjs'
-import { DataSync, AppExc, appexc, ID, Cles, AMJ } from './api.mjs'
+import { DataSync, appexc, ID, Cles, AMJ } from './api.mjs'
 import { post } from './net.mjs'
 import { CV, compile, RegCles } from './modele.mjs'
 import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
@@ -252,10 +253,11 @@ class SB {
 
 /* Déconnexion, reconnexion, commexion *************************************************/
 /* garderMode : si true, garder le mode */
-export function deconnexion(garderMode) {
+export async function deconnexion(garderMode) {
   const ui = stores.ui
   // ui.setPage('null')
   const session = stores.session
+  await session.stopHB()
   const mode = session.mode
   const org = session.org
 
@@ -273,7 +275,7 @@ export function deconnexion(garderMode) {
 export async function reconnexion() {
   const session = stores.session
   const phrase = session.phrase
-  deconnexion(true)
+  await deconnexion(true)
   await connexion(phrase)
 }
 
@@ -292,20 +294,20 @@ export async function connexion(phrase, razdb) {
   if (session.avion) {
     if (!session.nombase) { // nom base pas trouvé en localStorage de clé lsk
       await afficherDiag($t('OPmsg1'))
-      deconnexion(true)
+      await deconnexion(true)
       return
     }
     try {
       await idb.open()
     } catch (e) {
       await afficherDiag($t('OPmsg2', [e.message]))
-      deconnexion()
+      await deconnexion()
       return
     }
     // initialisation de compteId et clek depuis boot de IDB
     if (!await idb.getBoot()) { // false si KO 
       await afficherDiag($t('OPmsg3'))
-      deconnexion()
+      await deconnexion()
       return
     }
     try { await new ConnexionAvion().run() } catch (e) { /* */ }
@@ -316,80 +318,14 @@ export async function connexion(phrase, razdb) {
     await idb.delete(session.nombase)
   try { 
     const op = new ConnexionSynchroIncognito()
-    await op.run() 
+    await op.run()
+    setTimeout(async () => {
+      await session.startHB()
+    }, HBINSECONDS * 500)
   } catch (e) { 
     throw e
   }
 
-}
-
-/* Opération générique ******************************************/
-export class Operation {
-  constructor (nomop) { 
-    this.nom = nomop 
-    this.modeSync = this.nom.startsWith('Sync')
-    if (!this.modeSync) {
-      stores.session.startOp(this)
-      this.cancelToken = null
-      this.break = false
-      this.nbretry = 0
-    }
-  }
-
-  get label () { 
-    // console.log('label', 'OP_' + this.nom)
-    return $t('OP_' + this.nom) 
-  }
-
-  /* Utilisé dans PlusTicket */
-  async retry () {
-    if (this.modeSync) return
-    if (this.nbretry++ > 5) 
-      throw new AppExc(E_BRO, 21, [this.label])
-    if (this.retry > 1) await sleep((this.retry * 300))
-    return true
-  }
-
-  BRK () { 
-    if (this.modeSync) return
-    if (this.break) throw new AppExc(E_BRK, 0)
-  }
-
-  stop () {
-    if (this.modeSync) return
-    if (this.cancelToken) {
-      this.cancelToken.cancel('break')
-      this.cancelToken = null
-    }
-    this.break = true
-  }
-
-  finOK (res, silence) {
-    if (!this.modeSync) {
-      const session = stores.session
-      session.finOp()
-      // if (!silence) stores.ui.afficherMessage($t('OPok', [this.label]), false)
-    }
-    return res
-  }
-
-  async finKO (e) {
-    const session = stores.session
-    const exc = appexc(e)
-    if (this.modeSync || exc.code > 8990) {
-      // en mode Sync toutes les exceptions sont "tueuses"
-      session.setExcKO(exc)
-      session.finOp()
-      stores.ui.setPage('clos') 
-      return
-    }
-
-    session.finOp()
-    const ui = stores.ui
-    ui.afficherMessage($t('OPko', [this.label]), true)
-    await ui.afficherExc(exc)
-    throw exc
-  }
 }
 
 /* classe OperationS *******************************************************/

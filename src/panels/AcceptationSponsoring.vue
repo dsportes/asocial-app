@@ -168,7 +168,7 @@ export default ({
     async refuser () {
       await new RefusSponsoring().run(this.sp, this.texte + '\n\n' + this.sp.ard)
       this.fermer()
-      deconnexion()
+      await deconnexion()
     }
   },
 

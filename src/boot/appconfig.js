@@ -2,12 +2,12 @@ import { boot } from 'quasar/wrappers'
 const pako = require('pako')
 import { decode } from '@msgpack/msgpack'
 
-import { setRequiredModules, b64ToU8 } from '../app/util.mjs'
 import { Tarif } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import { config } from '../app/config.mjs'
 import { ID } from '../app/api.mjs'
 import { syncQueue } from '../app/synchro.mjs'
+import { setRequiredModules, b64ToU8 } from '../app/util.mjs'
 
 export function getImgUrl (name) {
   try {

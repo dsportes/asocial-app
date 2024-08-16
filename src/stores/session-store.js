@@ -3,9 +3,10 @@ import { encode, decode } from '@msgpack/msgpack'
 
 import stores from './stores.mjs'
 import { useI18n } from 'vue-i18n'
+import { pubsub } from '../app/net.mjs'
 import { crypter, decrypter } from '../app/webcrypto.mjs'
 import { u8ToB64, $t } from '../app/util.mjs'
-import { AMJ, ID, AppExc, A_SRV, hash } from '../app/api.mjs'
+import { AMJ, ID, AppExc, A_SRV, HBINSECONDS } from '../app/api.mjs'
 import { RegCles, Notification as MaNotification } from '../app/modele.mjs'
 import { GetCompta, GetPartition } from '../app/synchro.mjs'
 import { b64ToU8 } from '../app/util.mjs'
@@ -33,8 +34,8 @@ export const useSessionStore = defineStore('session', {
 
     nhb: 0, // numéro de heartbeat dans la connexion
     dhhb: 0, // date-heure du dernier heartbeat de la connexion
-    stSync: 0, // statut de synchro de la connexion
-    // 0: pas synchronisé, 1: synchro en continu, 2: synchro sur demande 
+    syncauto: false, // statut de synchro de la connexion
+    pubsubTO: null,
 
     lsk: '', // nom de la variable localStorage contenant le nom de la base
     nombase: '', // nom de la base locale
@@ -342,7 +343,7 @@ export const useSessionStore = defineStore('session', {
       this.config.nc++
       this.nhb = 0 // numéro de heartbeat dans la connexion
       this.dhhb = 0 // date-heure du dernier heartbeat de la connexion
-      this.stSync = 0 // statut de synchro de la connexion
+      this.syncauto = false // statut de synchro de la connexion
   
       this.setAuthToken(phrase)
 
@@ -359,7 +360,33 @@ export const useSessionStore = defineStore('session', {
 
     // Retour de sync : numéro de heartbeat connu de PUBSUB pour cette session
     setNhb (nhb) {
-      this.stSync = nhb === this.nhb ? 1 : 2
+      this.syncauto = nhb === this.nhb
+    },
+
+    async startHB () {
+      if (this.avion) return
+      if (this.pubsubTO) clearTimeout(this.pubsubTO)
+      if (this.config.permission) {
+        this.nhb++
+        const ret = await pubsub('heartbeat', { org: this.org, sid: this.sessionId, nhb: this.nhb })
+        if (ret === this.nhb - 1) {
+          this.syncauto = true
+          this.pubsubTO = setTimeout(async () => {
+            await this.startHB()
+          }, HBINSECONDS * 1000)
+        } else {
+          this.syncauto = false
+          this.nhb = 0
+        }
+      }
+    },
+
+    async stopHB () {
+      if (this.avion || !this.ok) return
+      if (this.pubsubTO) clearTimeout(this.pubsubTO)
+      await pubsub('heartbeat', { org: this.org, sid: this.sessionId, nhb: 0 })
+      this.syncauto = false
+      this.nhb = 0
     },
 
     chgps (phrase) {

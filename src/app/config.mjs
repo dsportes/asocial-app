@@ -1,13 +1,17 @@
 // Branch 20240801
+
+const u = 'http://localhost:8443/'
+// const u = 'https://test.sportes.fr:8443/',
+// const u = 'https://192.168.5.64:8443/',
+// const u = 'https://0a42-92-188-103-73.ngrok-free.app/',
+
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter à chaque déploiement
-  OPURL: 'http://localhost:8443/op/',
-  // OPURL: 'https://test.sportes.fr:8443/op/',
-  // OPURL: 'https://192.168.5.64:8443/op/',
-  // OPURL: 'https://0a42-92-188-103-73.ngrok-free.app/op/',
+  OPURL: u + 'op/',
+  PUBSUBURL: u + 'pubsub/',
   DEV: true,
   DEBUG: true,
-  BUILD: '24-08-15 12:00',
+  BUILD: '24-08-16 17:30',
 
   vapid_public_key: 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew',
 

@@ -4,7 +4,7 @@
     <q-toolbar class="full-width">
 
       <btn-cond v-if="session.ok && !session.avion" 
-        :color="clrsync" :icon="iconsync" @ok="dosync"/>
+        :color="clrsync" :icon="iconsync" @ok="ui.oD('PAsync')"/>
       
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" 
@@ -413,16 +413,42 @@
     </q-card>
   </q-dialog>
 
+  <q-dialog v-model="ui.d.PAsync" persistent> <!-- bouton synchro -->
+    <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
+      <div v-if="config.permission" class="titre-lg q-my-md text-center">{{$t('MLAnba')}}</div>
+      <div v-if="!config.permission" class="titre-lg q-mt-md text-center msg">{{$t('MLAnbb1')}}</div>
+      <div v-if="!config.permission" class="titre-md q-mt-sm q-mb-md text-center">{{$t('MLAnbb2')}}</div>
+
+      <div class="titre-lg q-my-md text-center">
+        <span>{{$t('MLAst')}}</span>
+        <span v-if="session.syncauto" class="q-ml-sm">{{$t('MLAsta')}}</span>
+        <span v-else class="q-ml-sm msg">{{$t('MLAstd')}}</span>
+      </div>
+
+      <div v-if="session.syncauto" class="titre-md q-mt-md text-center">{{$t('MLAsync2')}}</div>
+      <btn-cond v-if="session.syncauto" class="q-my-sm" flat :label="$t('MLAsync')" @ok="resync"/>
+      <btn-cond v-if="session.syncauto" class="q-mt-sm q-mb-md" flat 
+        color="warning" :label="$t('MLAmoded')" @ok="moded"/>
+
+      <div v-if="!session.syncauto" class="titre-md q-mt-md text-center">{{$t('MLAsync1')}}</div>
+      <btn-cond v-if="!session.syncauto" class="q-my-sm" flat :label="$t('MLAsync')" @ok="resync"/>
+      <btn-cond v-if="!session.syncauto && config.permission" class="q-mt-sm q-mb-md" flat 
+        color="warning" :label="$t('MLAmodea')" @ok="modea"/>
+
+      <btn-cond class="q-my-md" flat :label="$t('jailu')" @ok="ui.fD"/>
+    </q-card>
+  </q-dialog>
+
 </q-layout>
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+// import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 import stores from './stores/stores.mjs'
-import { AMJ } from './app/api.mjs'
+import { AMJ, HBINSECONDS } from './app/api.mjs'
 
 import { set$t, hms, dkli, styp } from './app/util.mjs'
 import { reconnexion, deconnexion, SyncFull } from './app/synchro.mjs'
@@ -510,9 +536,9 @@ export default {
    },
 
   computed: {
-    iconsync () { return ['sync_disabled', 'sync', 'sync_problem'][this.session.stSync] },
+    iconsync () { return this.session.syncauto ? 'sync' : 'sync_problem' },
 
-    clrsync () { return ['grey-5', 'green-5', 'warning'][this.session.stSync] },
+    clrsync () { return this.session.syncauto ? 'green-5' : 'warning' },
 
     offset () { return this.ui.pagetab ? [0, -55] : [0, -25]},
 
@@ -554,13 +580,26 @@ export default {
   }},
 
   methods: {
-    async dosync () {
+    async resync () {
       await new SyncFull().run()
+      this.ui.fD()
     },
 
-    // deconnexion () { this.ui.fD(); deconnexion() },
-    discon () {
-      if (this.session.status === 3) deconnexion()
+    async modea () {
+      await new SyncFull().run()
+      setTimeout(async () => {
+        await this.session.startHB()
+      }, HBINSECONDS * 500)
+      this.ui.fD()
+    },
+
+    async moded () {
+      await this.session.stopHB()
+      this.ui.fD()
+    },
+
+    async discon () {
+      if (this.session.status === 3) await deconnexion()
       else this.ui.oD('dialoguedrc')
     },
 

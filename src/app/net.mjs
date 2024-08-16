@@ -56,12 +56,48 @@ export async function get (fonction, args) {
 }
 
 /*
+Envoi une requête POST au service PUBSUB :
+- args : arguments qui seront transmis dans le body de la requête.
+Retour :
+- n : le code retour (nhb)
+- 0 : erreur
+*/
+export async function pubsub (fonction, args) {
+  let buf
+  const config = stores.config
+  const u = config.PUBSUBURL + fonction
+  try {
+    const data = new Uint8Array(encode(args))
+    const par = { method: 'post', url: u, data: data, responseType: 'text' }
+    const r = await axios(par)
+    try {
+      return JSON.parse(r.data)
+    } catch (e) {
+      console.log('PUBSUB ' + fonction + ' exc: ', e.toString())
+      return 0  
+    }  
+  } catch (e) {
+    const status = (e.response && e.response.status) || 0
+    if (status === 400 || status === 403) {
+      console.log('PUBSUB ' + fonction + ' exc: ', e.response.data)
+    } else { 
+      // inattendue, pas mise en forme (500 et autres)
+      const code = !status ? 100 : (status >= 500 && status <= 599 ? 101 : 0)
+      const ex = new AppExc(E_SRV, code, [status, (u || '?'), e.message])
+      console.log('PUBSUB ' + fonction + ' exc: ', e.toString())
+    }
+    return 0
+  }
+}
+
+/*
 Envoi une requête POST :
 - op : opération émettrice. Requise si interruptible, sinon facultative
 - fonction : classe de l'opération invoquée
-- args : objet avec les arguments qui seront transmis dans le body de la requête. Encodé par avro ou JSONStringify
+- args : objet avec les arguments qui seront transmis encodé dans le body de la requête.
 Retour :
-- OK : l'objet retourné par la fonction demandée - HTTP 400 : le résultat est un AppExc
+- OK : l'objet retourné par la fonction demandée 
+HTTP 400 : le résultat est un AppExc
 Exception : un AppExc avec les propriétés code, message, stack
 */
 export async function post (op, fonction, args) {

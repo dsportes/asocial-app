@@ -286,7 +286,7 @@ export default ({
       } else {
         const r = await new SupprCompte().run()
         if (r) await afficherDiag(this.$t('SAcptdisp'))
-        deconnexion()
+        await deconnexion()
       }
     }
   },
