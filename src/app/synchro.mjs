@@ -409,18 +409,21 @@ export class OperationS extends Operation {
 
   async setCeCiIn (ds, ret, sb, buf) {
     if (ret.rowCompte) {
-      sb.setCe(await compile(ret.rowCompte))
-      buf.putIDB(ret.rowCompte)
+      const x = await compile(ret.rowCompte)
+      sb.setCe(x)
+      buf.putIDB(x, ret.rowCompte)
       ds.compte.vs = ds.compte.vb
     }
     if (ret.rowCompti) {
-      sb.setCi(await compile(ret.rowCompti))
-      buf.putIDB(ret.rowCompti)
+      const x = await compile(ret.rowCompti)
+      sb.setCi(x)
+      buf.putIDB(x, ret.rowCompti)
       ds.compte.vs = ds.compte.vb
     }
     if (ret.rowInvit) {
-      sb.setIn(await compile(ret.rowInvit))
-      buf.putIDB(ret.rowInvit)
+      const x = await compile(ret.rowInvit)
+      sb.setIn(x)
+      buf.putIDB(x, ret.rowInvit)
       ds.compte.vs = ds.compte.vb
     }
   }
@@ -505,36 +508,44 @@ export class OperationS extends Operation {
         ds = nvds // le nouveau ds devient le ds courant
 
         if (ret.rowAvatars) for(const row of ret.rowAvatars) {
-          sb.setA(await compile(row))
-          buf.putIDB(row)
+          const x = await compile(row)
+          sb.setA(x)
+          buf.putIDB(x, row)
         }
         if (ret.rowChats) for(const row of ret.rowChats) {
-          sb.setC(await compile(row))
-          buf.putIDB(row)
+          const x = await compile(row)
+          sb.setC(x)
+          buf.putIDB(x, row)
         }
         if (ret.rowSponsorings) for(const row of ret.rowSponsorings) {
-          sb.setS(await compile(row))
-          buf.putIDB(row)
+          const x = await compile(row)
+          sb.setS(x)
+          buf.putIDB(x, row)
         }
         if (ret.rowTickets) for(const row of ret.rowTickets) {
-          sb.setT(await compile(row))
-          buf.putIDB(row)
+          const x = await compile(row)
+          sb.setT(x)
+          buf.putIDB(x, row)
         }
         if (ret.rowNotes) for(const row of ret.rowNotes) {
-          sb.setN(await compile(row))
-          buf.putIDB(row)
+          const x = await compile(row)
+          sb.setN(x)
+          buf.putIDB(x, row)
         }
         if (ret.rowGroupes) for(const row of ret.rowGroupes) {
-          sb.setG(await compile(row))
-          buf.putIDB(row)
+          const x = await compile(row)
+          sb.setG(x)
+          buf.putIDB(x, row)
         }
         if (ret.rowChatgrs) for(const row of ret.rowChatgrs) {
-          sb.setH(await compile(row))
-          buf.putIDB(row)
+          const x = await compile(row)
+          sb.setH(x)
+          buf.putIDB(x, row)
         }
         if (ret.rowMembres) for(const row of ret.rowMembres) {
-          sb.setM(await compile(row))
-          buf.putIDB(row)
+          const x = await compile(row)
+          sb.setM(x)
+          buf.putIDB(x, row)
         }
         for (const [,x] of ds.avatars) {
           if (x.chg) { x.chg = false; x.vs = x.vb }
@@ -546,8 +557,9 @@ export class OperationS extends Operation {
 
       if (!ds1 && !nbIter) { // Premier tour de la connexion
         const ret = await post(this, 'GetEspace', { token: session.authToken })
-        sb.setEs(await compile(ret.rowEspace))
-        buf.putIDB(ret.rowEspace)  
+        const x = await compile(ret.rowEspace)
+        sb.setEs(x)
+        buf.putIDB(x, ret.rowEspace)  
       }
 
       // Commit Store et IDB d'un cycle
@@ -633,6 +645,7 @@ export class ConnexionAvion extends OperationS {
         const sb = new SB()
         const [res, rce, rci, rin] = await idb.getECCI()
         sb.setCe(await compile(rce))
+        sb.setCi(await compile(rci))
         sb.setEs(await compile(res))
         sb.setIn(await compile(rin))
         sb.store()
@@ -803,18 +816,20 @@ export class SyncSp extends OperationS {
       const buf = new IDBbuffer()
     
       await this.setCeCiIn(ds, ret, sb, buf)
-      sb.setEs(await compile(ret.rowEspace))
-      buf.putIDB(ret.rowEspace)
+      const espace = await compile(ret.rowEspace)
+      sb.setEs(espace)
+      buf.putIDB(espace, ret.rowEspace)
 
       const avatar = await compile(ret.rowAvatar)
       sb.setA(avatar)
-      buf.putIDB(ret.rowAvatar)
+      buf.putIDB(avatar, ret.rowAvatar)
       const item = ds.avatars.get(avatar.id)
       item.vs = item.vb
 
       if (ret.rowChat) {
-        sb.setC(await compile(ret.rowChat))
-        buf.putIDB(ret.rowChat)
+        const chat = await compile(ret.rowChat)
+        sb.setC(chat)
+        buf.putIDB(chat, ret.rowChat)
       }
 
       if (session.synchro) {

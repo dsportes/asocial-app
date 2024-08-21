@@ -360,7 +360,7 @@
         <q-toolbar-title class="titre-lg full-width text-center">{{$t('MLAdrc')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <q-card-actions vertical align="center" class="q-gutter-sm">
+      <q-card-actions vertical align="stretch" class="q-gutter-sm">
         <btn-cond color="warning" icon="logout" :label="$t('MLAdecon')" @ok="deconnexion"/>
         <btn-cond color="warning" icon="logout" :label="$t('MLArecon')" @ok="reconnexion2"/>
         <btn-cond color="primary" :label="$t('MLAcont')" @ok="ui.fD"/>
@@ -658,30 +658,6 @@ export default {
 
     const ui = stores.ui
     ui.setScreenWH($q.screen.width, $q.screen.height)
-
-    /*
-    onMounted(async () => {
- if (Notification.permission !== 'granted') { // granted denied default
-         alert('Perms App.vue 1 ' + Notification.permission)
- try { 
-      const p = await Notification.requestPermission()
-      alert('Perms App.vue 2 ' + Notification.permission)
-    } catch (e) { 
-      const m = Notification.permission + ' / ' + e.toString()
-      console.log(m)
-      alert(m)
-    }
-  } // else cfg.permission = true
-    })
-    */
-
-    /* Template de onAction ************************************************
-    ui.$onAction(({ name, args, after }) => {
-      after((result) => {
-        if (name === 'setPage') console.log('Ouverture page: ' + args[0])
-      })
-    })
-    */
 
     return {
       session: stores.session,

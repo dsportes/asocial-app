@@ -137,6 +137,7 @@ export default ({
     async valider () {
       await new MajCv().run(this.ncv)
       this.ui.fD()
+      this.ui.fD()
     },
     undoph () {
       this.enEdition = false

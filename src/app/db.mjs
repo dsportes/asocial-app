@@ -7,14 +7,6 @@ import { crypter, decrypter } from './webcrypto.mjs'
 import { isAppExc, AppExc, E_DB, DataSync, IDBOBS } from './api.mjs'
 import { u8ToB64, edvol, sleep } from './util.mjs'
 
-// FAKE
-export function commitRows() {}
-
-function decodeIn (buf, cible) {
-  const x = decode(buf)
-  for (const p in x) cible[p] = x[p]
-}
-
 const STORES = {
   singletons: 'n',
   collections: '[id+n+ids]',
@@ -69,6 +61,7 @@ class IDB {
   static snoms = { boot: 1, espaces: 2, datasync: 3, comptes: 4, comptis: 5, invits: 6 }
   static lnoms = [ '', 'boot', 'espaces', 'datasync', 'comptes', 'comptis', 'invits' ]
   static cnoms = { avatars: 1, groupes: 2, notes: 3, chats: 4, sponsorings: 5, tickets: 6, membres: 7, chatgrs: 8 }
+  static nnoms = [ '', 'avatars', 'groupes', 'notes', 'chats', 'sponsorings', 'tickets', 'membres', 'chatgrs' ]
 
   static EX1 (e) { return isAppExc(e) ? e : new AppExc(E_DB, 1, [e.message])}
   
@@ -195,25 +188,25 @@ class IDB {
       {
         const rec = await this.db.singletons.get(IDB.snoms.espaces)
         if (rec) { 
-          res = decode(await decrypter(session.clek, rec.data))
+          res = await decrypter(session.clek, rec.data)
         }
       }
       {
         const rec = await this.db.singletons.get(IDB.snoms.comptes)
         if (rec) { 
-          rce = decode(await decrypter(session.clek, rec.data))
+          rce = await decrypter(session.clek, rec.data)
         }
       }
       {
         const rec = await this.db.singletons.get(IDB.snoms.comptis)
         if (rec) { 
-          rci = decode(await decrypter(session.clek, rec.data))
+          rci = await decrypter(session.clek, rec.data)
         }
       }
       {
         const rec = await this.db.singletons.get(IDB.snoms.invits)
         if (rec) { 
-          rin = decode(await decrypter(session.clek, rec.data))
+          rin = await decrypter(session.clek, rec.data)
         }
       }
       return [res, rce, rci, rin]
@@ -241,15 +234,15 @@ class IDB {
   */
   async getSA (id) {
     const session = stores.session
-    const idx = u8ToB64(await crypter(session.clek, '' + id, 1), true)
+    const idx = u8ToB64(await crypter(session.clek, id, 1), true)
     try {
       const r = await this.db.collections.where('id').equals(idx).toArray()
       const m = {}
       for(const l of r) {
         const x = await decrypter(session.clek, l.data)
-        const row = decode(x)
-        let e = m[row._nom]; if (!e) { e = []; m[row._nom] = e }
-        e.push(row)
+        const nom = IDB.nnoms[l.n]
+        let e = m[nom]; if (!e) { e = []; m[nom] = e }
+        e.push(x)
       }
       return m
     } catch (e) {
@@ -305,7 +298,7 @@ class IDB {
 
         for (const x of arg.colls) {
           if (x.data) await this.db.collections.put( { id: x.id, n: x.n, ids: x.ids, data: x.data })
-          else await this.db.singletons.where({ id: x.id, n: x.n, ids: x.ids }).delete()
+          else await this.db.collections.where({ id: x.id, n: x.n, ids: x.ids }).delete()
         }
 
         for (const x of arg.ficav) {
@@ -500,9 +493,9 @@ export class IDBbuffer {
     // this.mapSec = {} // map des notes (cle: id/ids, valeur: note) pour gestion des fichiers locaux
   }
 
-  putIDB (row) { 
+  putIDB (obj, row) { 
     if (this.w) {
-      this.lmaj.push(row)
+      this.lmaj.push({ nom: obj._nom, id: obj.id, ids: obj.ids, _data_: row })
     }
   }
   putFIDB (f) { if (this.w) this.lmajf.push(f.toRow()) }
@@ -534,38 +527,38 @@ export class IDBbuffer {
 
     for(const row of this.lmajf) {
       arg.ficav.push({ 
-        id: u8ToB64(await crypter(clek, '' + row.id, 1), true),
+        id: u8ToB64(await crypter(clek, row.id, 1), true),
         data: await crypter(clek, new Uint8Array(encode(row)))
       })
     }
 
     for(const row of this.lmaj) {
-      const n = IDB.snoms[row._nom]
+      const n = IDB.snoms[row.nom]
       if (n) { // c'est un singleton
         arg.singl.push({ 
           n, 
-          data: row._data_ ? await crypter(clek, new Uint8Array(encode(row))) : null
+          data: row._data_ ? await crypter(clek, row._data_) : null
         })
       } else {
         arg.colls.push({ 
-          n: IDB.cnoms[row._nom],
-          id: u8ToB64(await crypter(clek, '' + row.id, 1), true),
-          ids: u8ToB64(await crypter(clek, '' + row.ids, 1), true),
-          data: row._data_ ? await crypter(clek, new Uint8Array(encode(row))) : null
+          n: IDB.cnoms[row.nom],
+          id: u8ToB64(await crypter(clek, row.id, 1), true),
+          ids: row.ids ? u8ToB64(await crypter(clek, row.ids, 1), true) : '',
+          data: row._data_ ? await crypter(clek, row._data_) : null
         })
       }
     }
 
     if (this.lav.size)
-      for (const id of this.lav) arg.idac.push(u8ToB64(await crypter(clek, '' + id, 1), true))   
+      for (const id of this.lav) arg.idac.push(u8ToB64(await crypter(clek, id, 1), true))   
     if (this.lgr.size)
-      for (const id of this.lgr) arg.idgc.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+      for (const id of this.lgr) arg.idgc.push(u8ToB64(await crypter(clek, id, 1), true))
     if (this.lgrmb.size)
-      for (const id of this.lgrmb) arg.idgcmb.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+      for (const id of this.lgrmb) arg.idgcmb.push(u8ToB64(await crypter(clek, id, 1), true))
     if (this.lgrno.size)
-      for (const id of this.lgrno) arg.idgcno.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+      for (const id of this.lgrno) arg.idgcno.push(u8ToB64(await crypter(clek, id, 1), true))
     if (this.lfic.size)
-      for (const id of this.lfic) arg.idf.push(u8ToB64(await crypter(clek, '' + id, 1), true))
+      for (const id of this.lfic) arg.idf.push(u8ToB64(await crypter(clek, id, 1), true))
     
     await idb.commit(arg)
   }

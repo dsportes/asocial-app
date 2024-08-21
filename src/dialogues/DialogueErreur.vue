@@ -8,7 +8,7 @@
       <q-card-section v-if="!special"> <!-- Libellé détaillé de l'erreur -->
         <div class="titre-md" v-html="html"/>
       </q-card-section>
-      <q-card-actions vertical align="right" class="q-gutter-sm">
+      <q-card-actions vertical align="stretch" class="q-gutter-sm">
         <btn-cond v-if="session.status" color="warning" icon="logout" 
           :label="$t('ERdec')" @ok="deconnecter"/>
         <btn-cond v-if="fige" icon="notifications"
