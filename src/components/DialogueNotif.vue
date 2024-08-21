@@ -56,7 +56,7 @@ export default {
     ntf: Object,
     restr: Boolean,
     restrb: Boolean,
-    cible: Number
+    cible: String
   },
 
   components: { BtnCond, BoutonHelp, BoutonBulle, EditeurMd },

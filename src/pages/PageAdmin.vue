@@ -14,11 +14,11 @@
       {{$t('ESlo', lstEsp.length, { count: lstEsp.length })}}</div>
 
     <div class="spmd"> <!-- Liste des espaces -->
-      <q-expansion-item  v-for="(esp, idx) in lstEsp" :key="esp.id" class="q-my-xs"
+      <q-expansion-item  v-for="(esp, idx) in lstEsp" :key="esp.ns" class="q-my-xs"
         switch-toggle-side expand-separator dense group="espaces">
         <template v-slot:header>
           <div :class="dkli(idx) + ' row justify-between text-bold font-mono fs-lg'">
-            <span class="q-mr-md">#{{esp.id}}</span>
+            <span class="q-mr-md">#{{esp.ns}}</span>
             <span>{{esp.org}}</span>
             <span v-if="esp.hTC" class="msg q-mx-sm">{{$t('ESencrea')}}</span>
             <span v-if="!esp.hTC && esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
@@ -43,7 +43,7 @@
             </div>
 
             <apercu-notif class="q-my-xs" :notif="esp.notifE" :idx="idx" 
-              :type="0" :cible="esp.id"/>
+              :type="0" :cible="esp.ns"/>
 
             <div class="q-mb-sm">
               <div class="titre-md">{{$t('PEstm')}}</div>
@@ -332,7 +332,7 @@ export default {
       const rows = await new GetEspaces().run()
       if (rows) for (const row of rows) 
         lst.push(await compile(row))
-      lst.sort((a, b) => { return a.id < b.id ? -1 : (a.id === b.id ? 0 : 1)})
+      lst.sort((a, b) => { return a.ns < b.ns ? -1 : (a.ns === b.ns ? 0 : 1)})
       lstEsp.value = lst
     }
 

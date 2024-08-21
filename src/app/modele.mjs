@@ -289,6 +289,7 @@ export class Espace extends GenDoc {
 
   async compile (row) {
     this.org = row.org
+    this.ns = row.ns
     this.creation = row.creation
     this.cleES = row.cleES
     this.cleET = row.cleET

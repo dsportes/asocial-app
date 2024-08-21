@@ -112,8 +112,8 @@ export default {
   setup (props) {
     const ui = stores.ui
     const idc = ref(ui.getIdc())
-    const cible = toRef(props, 'cible')
-    const notif = toRef(props, 'notif')
+    // const cible = toRef(props, 'cible')
+    // const notif = toRef(props, 'notif')
     return {
       dhcool, dkli, 
       pSt: stores.people,
