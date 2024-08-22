@@ -46,9 +46,8 @@ export default ({
     /* Le chat PEUT être créé en tant que: 
     0:par phrase de contact, 1:comptable, 2:délégué, idg:co-membre du groupe */
     mode: Number,
-    idI: Number, // avatar du compte
-    idE: Number, // avater externe, co-membre d'un groupe ou délégué ou à contacter
-    idc: Number
+    idI: String, // avatar du compte
+    idE: String // avater externe, co-membre d'un groupe ou délégué ou à contacter
   },
 
   components: { PhraseContact, BoutonHelp, ApercuGenx, EditeurMd, BtnCond },
@@ -93,12 +92,12 @@ export default ({
 
   setup () {
     const ui = stores.ui
-    const idc2 = ref(ui.getIdc())
+    const idc = ref(ui.getIdc())
 
     return {
       aSt: stores.avatar,
       session: stores.session,
-      ui, idc2, styp
+      ui, idc, styp
     }
   }
 })

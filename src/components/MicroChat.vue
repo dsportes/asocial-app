@@ -29,7 +29,7 @@
     </div>
   </div>
 
-  <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc"
+  <nouveau-chat v-if="ui.d.CCouvrir[idc]"
     :idI="chat ? chat.id : idI" 
     :idE="chat ? chat.idE : idE"
     :mode="mode"/>
@@ -51,8 +51,8 @@ export default ({
 
   props: { 
     chat: Object, // si chat est donné, c'est lui qui est visualisé
-    idI: Number, // sinon couple d'id (avatar du compte, people)
-    idE: Number, 
+    idI: String, // sinon couple d'id (avatar du compte, people)
+    idE: String, 
     del: Boolean // Quand le chat n'est pas connu et que idE est délégué de la partition du compte de idI
   },
 

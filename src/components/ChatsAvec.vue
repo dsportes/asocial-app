@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="session.compteId" :idE="idE" :mode="2"/>
+  <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idI="session.compteId" :idE="idE" :mode="2"/>
 
 </div>
 </template>
@@ -34,7 +34,7 @@ export default ({
   components: { NouveauChat, BtnCond },
 
   props: { 
-    idE: Number, 
+    idE: String, 
     /* Quand idE est délégué de la partition du compte. 
     Si le compte n'a pas de chat, le bouton de création propose la création */
     del: Boolean

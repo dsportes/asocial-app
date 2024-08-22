@@ -788,7 +788,7 @@ export class NouvellePartition extends Operation {
   async run (code, q) { // q: [qc, q1, q2]
     try {
       const session = stores.session
-      const cleP = Cles.partition(n)
+      const cleP = Cles.partition()
       const args = { 
         token: session.authToken, 
         itemK: await crypter(session.clek, new Uint8Array(encode({cleP, code}))),
