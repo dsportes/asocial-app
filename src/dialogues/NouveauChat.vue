@@ -47,7 +47,8 @@ export default ({
     0:par phrase de contact, 1:comptable, 2:délégué, idg:co-membre du groupe */
     mode: Number,
     idI: String, // avatar du compte
-    idE: String // avater externe, co-membre d'un groupe ou délégué ou à contacter
+    idE: String, // avater externe, co-membre d'un groupe ou délégué ou à contacter
+    idc: Number // idc d'ouverture du dialogue
   },
 
   components: { PhraseContact, BoutonHelp, ApercuGenx, EditeurMd, BtnCond },
@@ -91,13 +92,11 @@ export default ({
   },
 
   setup () {
-    const ui = stores.ui
-    const idc = ref(ui.getIdc())
-
     return {
       aSt: stores.avatar,
       session: stores.session,
-      ui, idc, styp
+      ui: stores.ui, 
+      styp
     }
   }
 })

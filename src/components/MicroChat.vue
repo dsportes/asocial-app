@@ -29,7 +29,7 @@
     </div>
   </div>
 
-  <nouveau-chat v-if="ui.d.CCouvrir[idc]"
+  <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc"
     :idI="chat ? chat.id : idI" 
     :idE="chat ? chat.idE : idE"
     :mode="mode"/>

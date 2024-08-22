@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idI="session.avatarId" :mode="0"/>
+    <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="session.avatarId" :mode="0"/>
 
   </q-page>
 </template>

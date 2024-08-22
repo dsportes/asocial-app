@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idI="session.compteId" :idE="idE" :mode="2"/>
+  <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="session.compteId" :idE="idE" :mode="2"/>
 
 </div>
 </template>
