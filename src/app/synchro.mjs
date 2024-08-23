@@ -84,7 +84,7 @@ class Queue {
       this.EnCours = true
       setTimeout(async () => { 
         if (doEsp)
-          await new GetEspace().run(session.ns)
+          await new GetEspace().run()
         if (doCpt|| lids.length)
           await new SyncStd().run(lids)
         this.EnCours = false
@@ -863,7 +863,7 @@ export class SyncSp extends OperationS {
 
 /* OP_GetEspace: 'Obtention de l\'espace' *********
 args.token donne les éléments d'authentification du compte.
-args.ns
+args.ns : pour l'administrateur seulement
 Retour:
 - rowSynthse
 */
