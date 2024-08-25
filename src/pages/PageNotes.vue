@@ -283,8 +283,8 @@ export default {
     nodesTries () {
       const t = this.nSt.nodes
       t.sort((a, b) => {
-        const noma = a.type + this.pSt.getCV(a.key).nom
-        const nomb = b.type + this.pSt.getCV(b.key).nom
+        const noma = a.type + this.pSt.getCV(a.ids).nom
+        const nomb = b.type + this.pSt.getCV(b.ids).nom
         return noma > nomb ? 1 : (noma < nomb ? -1 : 0)
       })
       return t
@@ -319,7 +319,7 @@ export default {
     },
 
     selected (ap, av) {
-      if (!this.nSt.node || this.nSt.node.key !== ap) {
+      if (!this.nSt.node || this.nSt.node.ids !== ap) {
         this.nSt.setCourant(ap)
         if (this.nSt.estGroupe) {
           const idC = this.nSt.idC
@@ -362,7 +362,7 @@ export default {
     cl (t) { return t > 3 ? '' : 'cl' + t },
 
     styn (n) { const s1 = styles[n ? n.type : 0] 
-      return s1 + (n && this.nSt.node && (n.key === this.nSt.node.key) ? ' msg' : '')
+      return s1 + (n && this.nSt.node && (n.ids === this.nSt.node.ids) ? ' msg' : '')
     },
 
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
@@ -391,7 +391,7 @@ export default {
     clicknode (n) {
       this.nodeDiag = ''
       switch (this.rec) {
-        case 0 : { this.selected = n.key; return }
+        case 0 : { this.selected = n.ids; return }
         case 1 : { 
           if (n.ratt) {
             const idas = Note.idasEdit(this.nSt.node)
@@ -405,18 +405,18 @@ export default {
     },
  
     lib (n) {
-      const nfnt = this.nSt.nfnt[n.key] || { nf: 0, nt:0 }
+      const nfnt = this.nSt.nfnt[n.ids] || { nf: 0, nt:0 }
       switch (n.type) {
         case 1 : {
-          const nom = this.pSt.nom(n.key)
+          const nom = this.pSt.nom(n.ids)
           return this.$t('avatar1', [nom, nfnt.nf, nfnt.nt])
         }
         case 2 : {
-          const nom = this.pSt.nom(n.key, 1)
+          const nom = this.pSt.nom(n.ids, 1)
           return this.$t('groupe1', [nom, nfnt.nf, nfnt.nt])
         }
         case 3 : {
-          const nom = this.pSt.nom(n.key, 24)
+          const nom = this.pSt.nom(n.ids, 24)
           return this.$t('groupe1', [nom, nfnt.nf, nfnt.nt])
         }
         case 4 : 
@@ -429,7 +429,7 @@ export default {
         case 6 : 
         case 7 : {
           const s1 = (nfnt.nt ? ('[' + nfnt.nf + ' / ' + nfnt.nt + '] ') : '') 
-          return s1 + '#' + Note.idsDeKey(n.key)
+          return s1 + '#' + n.ids
         }
       }
     },
@@ -437,15 +437,15 @@ export default {
     libF (n) {
       switch (n.type) {
         case 1 : {
-          const nom = this.pSt.nom(n.key)
+          const nom = this.pSt.nom(n.ids)
           return this.$t('avatar2', [nom])
         }
         case 2 : {
-          const nom = this.pSt.nom(n.key, 1)
+          const nom = this.pSt.nom(n.ids, 1)
           return this.$t('groupe2', [nom])
         }
         case 3 : {
-          const nom = this.pSt.nom(n.key, 24)
+          const nom = this.pSt.nom(n.ids, 24)
           return this.$t('groupe2', [nom])
         }
         case 4 : 
@@ -456,7 +456,7 @@ export default {
         }
         case 6 : 
         case 7 : {
-          return '#' + Note.idsDeKey(n.key)
+          return '#' + n.ids
         }
       }
     },
@@ -478,7 +478,7 @@ export default {
     async okrattacher () {
       const n = this.nSt.note
       const r = this.noderatt
-      const rid = Note.idDeKey(r.key)
+      const rid = r.id
       const rids = r.type > 3 ? r.note.ids : 0
       await new RattNote().run(n.id, n.ids, [rid, rids])
       this.rec = 0

@@ -232,13 +232,6 @@ export function toRetry (nbr, dh) {
   return t < Date.now()
 }
 
-export function splitPK(pk) {
-  if (!pk) return { id: '', ids: '' }
-  const i = pk.indexOf('/')
-  if (i === -1) return { id: pk, ids: ''}
-  return { id: pk.substring(0, i), ids: pk.substring(i + 1)}
-}
-
 export function deselect (u8, idx) {
   if (!u8) return new Uint8Array(0)
   const s = new Set(u8)

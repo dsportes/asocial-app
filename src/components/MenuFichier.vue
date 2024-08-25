@@ -189,7 +189,7 @@ export default {
   methods: {
     voirNote () {
       this.ui.setPage('notes')
-      this.nSt.setPreSelect(this.fa.key, true)
+      this.nSt.setPreSelect(this.fa.noteIds, true)
     },
 
     ouvrirDF () {

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 import stores from './stores.mjs'
-import { splitPK, dhcool } from '../app/util.mjs'
+import { dhcool } from '../app/util.mjs'
 import { getData, post } from '../app/net.mjs'
 import { appexc } from '../app/api.mjs'
 import { IDBbuffer, idb } from '../app/db.mjs'
@@ -10,7 +10,7 @@ import { Ficav } from '../app/modele.mjs'
 export const useFicavStore = defineStore('ficav', {
   state: () => ({
     map: new Map(), // Map des ficav : clé idf
-    keys: new Map(), // Clé: key d'une note: value: Set des idf des fichiers attachés à cette note
+    notes: new Map(), // Clé: ids d'une note: value: Set des idf des fichiers attachés à cette note
     queue: new Set(), // set des idf des fichiers à charger
     encours: null, // sessionId du démon en cours d'éxecution
     cacheDL: [], // cache des N derniers téléchargements : {idf, data}
@@ -24,10 +24,10 @@ export const useFicavStore = defineStore('ficav', {
 
     delaisec: (state) => { return state.cfg.dldemonsec },
 
-    mapDeNote: (state) => { return (key) => {
+    mapDeNote: (state) => { return (ids) => {
         const m = new Map()
-        const lf = state.keys.get(key)
-        if (lf) lf.forEach(id => { m.set(id, state.map.get(id))})
+        const lf = state.notes.get(ids)
+        if (lf) lf.forEach(idf => { m.set(idf, state.map.get(idf))})
         return m
       }
     },
@@ -35,7 +35,7 @@ export const useFicavStore = defineStore('ficav', {
     // Retourne la liste des ficav de cette note et ce nom dans l'ordre décroissant des dh
     lfDeNom: (state) => { return (note, nom) => {
         const l = []
-        const lf = state.keys.get(note.key)
+        const lf = state.notes.get(note.ids)
         if (lf) lf.forEach(idf => { 
           const f = state.map.get(idf)
           if (f.nom === nom) l.push(f)
@@ -47,9 +47,8 @@ export const useFicavStore = defineStore('ficav', {
 
     mapDeNoteC: (state) => {
       const nc = state.nSt.note
-      return nc ? state.mapDeNote(nc.key) : new Map()
+      return nc ? state.mapDeNote(nc.ids) : new Map()
     },
-
 
     echecs: (state) => {
       for (const fa of state.map) if (fa.exc) return true
@@ -96,17 +95,17 @@ export const useFicavStore = defineStore('ficav', {
       if (f.dhdc && !this.queue.has(f.id)) this.queue.add(f.id)
       if (!f.dhdc && this.queue.has(f.id)) this.queue.delete(f.id)
       this.map.set(f.id, f)
-      let e = this.keys.get(f.key); if (!e) { e = new Set(); this.keys.set(f.key, e) }
+      let e = this.notes.get(f.noteIds); if (!e) { e = new Set(); this.notes.set(f.noteIds, e) }
       e.add(f.id)
     },
     
     delFicav (idf) {
       const f = this.map.get(idf)
       if (f) {
-        const e = this.keys.get(f.key)
+        const e = this.notes.get(f.noteIds)
         if (e) {
           e.delete(idf)
-          if (!e.size) this.keys.delete(f.key)
+          if (!e.size) this.notes.delete(f.noteIds)
         }
         this.map.delete(idf)
       }
@@ -125,25 +124,25 @@ export const useFicavStore = defineStore('ficav', {
       // Traitement par note / nom / ficav - 
       const buf = new IDBbuffer()
       lfav.sort((a,b) => { // Tri par note / nom / dh décroissante
-        a.key < b.key ? -1 : (a.key > b.key ? 1 :
+        a.noteIds < b.noteIds ? -1 : (a.noteIds > b.noteIds ? 1 :
           (a.nom < b.nom ? - 1 : (a.nom > b.nom ? 1 :
             (a.dh > b.dh ? -1 : (a.dh < b.dh ? 1 : 0)))))
       })
-      const m = new Map() // clé: note (key) - valeur Map (clé: nom, valeur: liste des ficav par dh)
+      const m = new Map() // clé: note (noteIds) - valeur Map (clé: nom, valeur: liste des ficav par dh)
       for (const f of lfav) {
-        const node = this.nSt.map.get(f.key)
+        const node = this.nSt.map.get(f.noteIds)
         // pas de note portant ce nom, suppression du ficav de IDB
         if (!node || !node.note || !node.note.fnom.has(f.nom)) buf.purgeFIDB(idf)
         else { // ranger dans m pour traitement
-          let e1 = m.get(f.key); if (!e1) { e1 = new Map(); m.set(f.key, e1) }
+          let e1 = m.get(f.noteIds); if (!e1) { e1 = new Map(); m.set(f.noteIds, e1) }
           let e2 = e1.get(f.nom); if (!e2) { e2 = []; e1.set(f.nom, e2) }
           e2.push(f)
         }
       }
 
-      for (const [key, m1] of m) { // les m1 ne sont jamais vide
+      for (const [ids, m1] of m) { // les m1 ne sont jamais vide
         // Pour chaque note
-        const node = this.nSt.map.get(key)
+        const node = this.nSt.map.get(ids)
         const note = node.note
         if (!note) continue
         for (const [nom, m2] of m1) { // les m2 ne sont jamais vides
@@ -325,7 +324,7 @@ export const useFicavStore = defineStore('ficav', {
     // En régime établi (synchro) alors que IDB a été chargé
     setNote (note, idbuf) {
       if (!this.session.ok || !this.session.accesIdb) return
-      let m = this.mapDeNote(note.key) // map des ficav relatifs à cette note
+      let m = this.mapDeNote(note.noteIds) // map des ficav relatifs à cette note
 
       // suppression des ficav ayant des noms inconnus de la note
       m.forEach(fa => {
@@ -369,25 +368,24 @@ export const useFicavStore = defineStore('ficav', {
     // En régime établi (synchro) alors que IDB a été chargé, suppression d'une note
     delNote (id, ids, buf) {
       if (!this.session.ok || !this.session.accesIdb) return
-      const k = id + '/' + ids
-      const lf = this.keys.get(k)
+      const lf = this.notes.get(ids)
       if (lf) for(const idf of lf) {
         this.delFicav(idf)
         buf.purgeFIDB(idf)
       }
-      this.keys.delete(k)
+      this.notes.delete(ids)
     },
 
     // En régime établi (synchro) alors que IDB a été chargé, suppression d'un avatar ou d'un groupe idag
     delNotes (idag, buf) {
       if (!this.session.ok || !this.session.accesIdb) return
-      for(const [k, lf] of this.keys) {
-        const [id, ] = splitPK(k)
-        if (id === idag) lf.forEach(idf => { 
+      for(const [ids, lf] of this.notes) {
+        const n = this.nSt.getNote(ids)
+        if (n && n.id === idag) lf.forEach(idf => { 
           this.delFicav(idf)
           buf.purgeFIDB(idf)
         })
-        this.keys.delete(k)
+        this.notes.delete(ids)
       }
     },
 
@@ -413,8 +411,8 @@ export const useFicavStore = defineStore('ficav', {
             }
             const args = { 
               token: this.session.authToken, 
-              id: fa.ref[0], 
-              ids: fa.ref[1],
+              id: fa.noteId, 
+              ids: fa.noteIds,
               idf: fa.id
             }
             const ret =  await post(null, 'GetUrlNf', args)

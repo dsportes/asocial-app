@@ -111,11 +111,11 @@ export default {
       // note rattachée à une autre note OU note avatar rattachée à une racine de groupe
       if (!this.estgr) { // Note avatar
         const nd = this.nSt.node
-        if (nd.type === 2) ref = [Note.idDeKey(nd.key), 0] // rattachée à une racine de groupe
+        if (nd.type === 2) ref = [nd.id, 0] // rattachée à une racine de groupe
         else if (this.notep) ref = [this.notep.id, this.notep.ids] // rattachée à une note d'un groupe ou de l'avatar
       } else if (this.notep) ref = [this.notep.id, this.notep.ids] // Note de groupe rattachée
 
-      const key = await new NouvelleNote().run(this.id, this.texte, aut, this.exclu, ref)
+      const ids = await new NouvelleNote().run(this.id, this.texte, aut, this.exclu, ref)
       this.ui.fD()
     }
   },

@@ -34,7 +34,6 @@
 <script>
 
 import stores from '../stores/stores.mjs'
-import { splitPK } from '../app/util.mjs'
 import NoteNouvelle from '../panels/NoteNouvelle.vue'
 
 export default ({
@@ -48,7 +47,7 @@ export default ({
     n () { return this.nSt.node }, // OK: est réévalué quand nSt.node change
     t () { return this.n.type },
     estAv () { return this.t === 1 || this.t === 4 },
-    id () { return splitPK(this.n.key).id },
+    id () { return this.n.id },
     groupe () { return this.estAv ? null : this.gSt.egr(this.id).groupe },
     avatar () { return this.estAv ? this.aSt.getElt(this.id).avatar : null },
     lna () { const l = this.session.compte.lstAvatars; return l.length > 1 ? l : null },

@@ -72,7 +72,7 @@ export default ({
     lst () {
       const l = []
       for (const [idf, fa] of this.faSt.map) {
-        const n = this.nSt.getNote(fa.ref[0], fa.ref[1])
+        const n = this.nSt.getNote(fa.noteIds)
         if (!n) continue
         const titre = n ? n.titre : '?'
         const f = n.mfa.get(fa.id)

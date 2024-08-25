@@ -1260,10 +1260,10 @@ export class Note extends GenDoc {
   static idasEdit (n) { // n : node du store notes
     const session = stores.session
     const lav = session.compte.mav
-    if (!Note.estG(n.key)) return lav
+    if (!ID.estGroupe(n.id)) return lav
     const s = new Set()
     const gSt = stores.groupe
-    const e = gSt.egr(Note.idDeKey(n.key))
+    const e = gSt.egr(n.id)
     if (!e) return s
     const gr = e.groupe
     for (const ida of lav) {
@@ -1274,16 +1274,6 @@ export class Note extends GenDoc {
     return s
   }
 
-  static estG (key) { return key.charAt(0) === '3' }
-  // key de la racine de rattachement SSI le rattachement est à une racine
-  static pEstRac (pkey) { return pkey && pkey.length === 14 }
-  // key de la racine de la note de rattachement SSI le rattachement est à une note
-  static racNoteP (pkey) { return pkey && pkey.length > 14 ? pkey.substring(0, 14) : null }
-  // id d'une key
-  static idDeKey (key) { const i = key.indexOf('/'); return key.substring(0, i) }
-  // ids d'une key
-  static idsDeKey (key) { const i = key.indexOf('/'); return key.substring(i + 1) }
-
   get key () { return this.id + '/' + this.ids }
   /* clé du parent:
     - si elle n'est pas rattachée, c'est la racine (avatar ou groupe) de son id
@@ -1291,9 +1281,6 @@ export class Note extends GenDoc {
       - si ref[1] = 0 elle est rattachée à une autre racine (un groupe pour une note d'avatar): ref[0]
       - sinon c'est la note ref[0]/ref[1]
   */
-  get pkey () {
-    return !this.ref ? '' + this.id : (this.ref[1] ? this.ref[0] + '/' + this.ref[1] : '' + this.ref[0])
-  }
 
   get shIds () { return this.ids.substring(this.ids.length - 4) }
 
@@ -1367,7 +1354,7 @@ export class NoteLocale {
   }
 
   nouveau (txt) {
-    this.id = ID.rnd()
+    this.id = ID.noteLoc()
     this.txt = txt
     this.dh = Date.now()
     return this
@@ -1409,7 +1396,7 @@ export class FichierLocal {
   constructor () { }
 
   nouveau (nom, info, type, u8) {
-    this.idf = ID.rnd()
+    this.idf = ID.fic()
     this.nom = nom
     this.info = info
     this.dh = Date.now()
@@ -1449,7 +1436,7 @@ export class FichierLocal {
 }
 
 export class Ficav {
-  get key () { return this.ref[0] + '/' + this.ref[1]}
+  // get key () { return this.ref[0] + '/' + this.ref[1]}
 
   static fromData (buf) {
     const data = decode(buf)
@@ -1459,7 +1446,8 @@ export class Ficav {
     f.dhdc = data.dhdc || 0
     f.exc = data.exc || null
     f.nbr = data.nbr || 0
-    f.ref = data.ref
+    f.noteId = data.noteId
+    f.noteIds = data.noteIds
     f.nom = data.nom
     f.av = data.av
     f.avn = data.avn
@@ -1474,7 +1462,8 @@ export class Ficav {
     f.dhdc = Date.now()
     f.exc = null
     f.nbr = 0
-    f.ref = [note.id, note.ids]
+    f.noteId = note.id
+    f.noteIds = note.ids
     f.nom = nf.nom
     f.av = av
     f.avn = avn

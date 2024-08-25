@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ID } from '../app/api.mjs'
+import { Note } from '../app/modele.mjs'
 import stores from './stores.mjs'
-import { difference, intersection } from '../app/util.mjs'
+import { splitPK, difference, intersection } from '../app/util.mjs'
 
 /* On ne peut recevoir des notes que de ce type:
 - note d'avatar (4) - key:av1/ids1 relative à l'avatar av1 du compte. Elle peut avoir un ref:
@@ -44,14 +45,14 @@ export const useNoteStore = defineStore('note', {
     /* 
     node
       type
-      id: pour une racine égal à ids. Pour une note, id de la note
-      ids: clé de map. ids de la note, id du groupe / avatar pour une racine
-      pid // id du parent - existe toujours, sauf racines
-      pids // ids de la note parent - existe si rattaché à une note, sinon null
-      ratt // true si le node courant peut être rattaché à ce node
+      key : 'id/ids'
+      pkey : clé du parent
+        - null: racine avatar ou groupe
+        - 'id': rattachement direct à une racine de groupe ou d'avatar
+        - 'id/ids': rattachement à une autre note
       children : [] nodes fils
       note : absent pour une racine et une note fake
-
+      
     type:
       1 : racine avatar
       2 : racine groupe
@@ -60,17 +61,19 @@ export const useNoteStore = defineStore('note', {
       6 7 : note fake avatar / groupe
     */
 
-    map: new Map(), // map des nodes cle: id (racine) ids (note), value: node
+    map: new Map(), // map des nodes cle: key, value: node
 
-    nodes: [ ], // liste des nodes racines
+    nodes: [ ],
 
     node: null, // node "courant"
+
+    test: { avs: {}, grs: {} },
 
     presel: '', // note pre-selected avant ouverture PageNote
 
     filtre: { v: '0' }, // paramètres du filtre courant
 
-    /* nfnt est une map claculée par calculNfnt() ayant pour clé une node id / ids:
+    /* nfnt est une map claculée par calculNfnt() ayant pour clé une node.key:
     - les racines ont une entrée dans nfnt,
     - les notes ont une entrée dans nfnt.
     La valeur { nf, nt } donne le nombre de notes dans le sous-arbre en dessous,
@@ -94,7 +97,11 @@ export const useNoteStore = defineStore('note', {
     pSt: (state) => stores.people,
     ui: (state) => stores.ui,
 
-    cvNode: (state) => { return state.session.getCV(state.node.id) },
+    cvNode: (state) => { 
+      const id = Note.idDeKey(state.node.key)
+      const cv = state.session.getCV(id) 
+      return cv
+    },
 
     // Pour le node courant
     note: (state) => { return state.node ? state.node.note : null },
@@ -102,23 +109,15 @@ export const useNoteStore = defineStore('note', {
     // Si le node courant est un groupe
     estGroupe (state) {
       const t = state.node ? state.node.type : 0
-      return t === 2 || t === 3 || t === 5 || t === 7
-    },
-
-    // Si la note du node courant existe et est une note de groupe
-    estGr: (state) => { 
-      return state.node && state.node.note && ID.estGroupe(state.node.note.id)
-    },
-
-    // Si la note du node courant existe et est une note d'avatar
-    estAv: (state) => { 
-      return state.node && state.node.note && ID.estAvatar(state.node.note.id)
+      return t === 2 || t === 5
     },
 
     // id du node courant
-    idC (state) { return state.node.id },
+    idC (state) {
+      return Note.idDeKey(state.node.key)
+    },
 
-    nodeP: (state) => { return state.map.get(state.node.pids) },
+    nodeP: (state) => { return state.map.get(state.node.pkey) },
 
     nbRatt: (state) => {
       let nb = 0
@@ -166,34 +165,46 @@ export const useNoteStore = defineStore('note', {
       return lx
     },
 
-    egr: (state) => {
-      if (!state.estGr) return null
-      return this.gSt.egr(state.node.note.id)
+    estGr: (state) => { 
+      return state.node && state.node.note && ID.estGroupe(state.node.note.id)
     },
 
-    // get de la note ids
-    getNote: (state) => { return (ids) => {
-        const n = state.map.get(ids)
+    estAv: (state) => { 
+      return state.node && state.node.note && ID.estAvatar(state.node.note.id)
+    },
+
+    egr: (state) => {
+      if (!state.estGr) return null
+      const gSt = stores.groupe
+      return gSt.egr(state.node.note.id)
+    },
+
+    // get du node id ou id / ids
+    getNode: (state) => { return (id, ids) => {
+        return state.map.get(ids ? (id + '/' + ids) : ('' + id))
+      }
+    },
+
+    // get de la note id / ids
+    getNote: (state) => { return (id, ids) => {
+        const n = state.map.get(id + '/' + ids)
         return n ? (n.note || null) : null
       }
     },
   
-    // get de la racine du node (elle-même si c'est une racine)
     getRacine: (state) => { return (node) => {
-        const anc = node.type > 3 ? this.getAncetres(node.ids) : [node.ids]
-        return state.map.get(anc[anc.length -1])
+        const anc = this.getAncetres(node.key)
+        const k = anc[anc.length -1]
+        return state.map.get(k)
       }
     },
 
-    // retourne la liste des ancêtres du node dont l'id ou ids est donné 
-    // inclus la note elle-même (première), jusqu'à la racine (dernier de la liste)
-    // liste vide pour une racine
-    getAncetres: (state) => { return (ids) => {
+    getAncetres: (state) => { return (key) => {
         const anc = []
-        let node = state.map.get(ids)
+        let node = state.map.get(key)
         while (node) {
-          anc.push(node.ids)
-          node = node.type < 4 ? null : (node.pids ? state.map.get(node.pids) : null)
+          anc.push(node.key)
+          node = node.pkey ? state.map.get(node.pkey) : null
         }
         return anc
       }
@@ -202,8 +213,8 @@ export const useNoteStore = defineStore('note', {
     // Retourne une map de clé racine et de valeur { nn: nombre de notes, vf }
     statsParRacine: (state) => {
       const m = {}
-      for (const [, node] of state.map) {
-        const id = node.id
+      for (const [key, node] of state.map) {
+        const {id, ids} = splitPK(key)
         if (node.type >= 4 && node.type <= 5) {
           let e = m[id]; if (!e) { e = { nn: 0, vf: 0 }; m[id] = e }
           e.nn++
@@ -211,7 +222,7 @@ export const useNoteStore = defineStore('note', {
         }
       }
       for (const r of state.nodes) {
-        if (!m[r.id]) m[r.id] = { nn: 0, vf: 0 }
+        if (!m[r.key]) m[r.key] = { nn: 0, vf: 0 }
       }
       return m
     }
@@ -222,10 +233,10 @@ export const useNoteStore = defineStore('note', {
     calculNfnt () {
       const m = {}
       if (this.ui.page === 'notes') {
-        this.nodes.forEach(n => { m[n.id] = { nf: 0, nt: 0 }}) // racines
-        this.map.forEach((node, idx) => {
+        this.nodes.forEach(n => m[n.key] = { nf: 0, nt: 0 })
+        this.map.forEach(node => {
           const ok = this.filtrage(node)
-          const anc = this.getAncetres(idx) // pour une racine, seulement son id
+          const anc = this.getAncetres(node.key)
           for(let i = 1; i < anc.length; i++){
             // on ne prend pas la note elle-même, seulement ses ancêtres
             const k = anc[i]
@@ -256,15 +267,15 @@ export const useNoteStore = defineStore('note', {
       this.calculNfnt()
     },
 
-    setCourant (ids) { this.node = this.map.get(ids) },
+    setCourant (key) { this.node = this.map.get(key) },
 
-    setPreSelect (ids, opt) {
+    setPreSelect (key, opt) {
       if (opt) {
         this.presel = ''
         setTimeout(() => {
-          this.presel = ids
+          this.presel = key
         }, 100)
-      } else this.presel = ids
+      } else   this.presel = key
     },
 
     stats (f) { // f(node): function de filtrage
@@ -273,7 +284,8 @@ export const useNoteStore = defineStore('note', {
         const r = this.getRacine(n)
         if (n.type > 3) {
           r.nt++
-          if (f && f(n.note)) r.nf++
+          if (f && f(n.note)) 
+            r.nf++
         }
       })
     },
@@ -282,203 +294,191 @@ export const useNoteStore = defineStore('note', {
       this.map.forEach(n => { n.ratt = tf })
     },
 
-    // Fixe le booléen ratt sur tous les nodes auxquels le node courant
-    // peut être rattaché. Si le node courant est une racine (???), rien à faire
     scanTop () {
-      if (this.node.type < 4) return
-      const nc = this.node
-      const g = this.estGroupe
+      const id = Note.idDeKey(this.node.key)
+      const pk = this.node.pkey
+      const g = ID.estGroupe(id)
       for (const n of this.nodes) { // n est une racine : types 1, 2, 3
-        // sous-arbre avatar : OK si de même id que la note courante
-        // sous-arbre groupe: OK si pas note de groupe ou du même groupe que la note courante
-        if (n.type < 3) {
-          const ok = n.type === 1 ? !g && nc.id === n.id : !g || (g && nc.id === n.id)
-          if (ok) this.scanST(n, nc, g)
+        const idt = n.key
+        if (n.type === 1) { // sous-arbre avatar
+          if (!g && id === idt) this.scanST(n, this.node.key, pk, id, g)
+        } else { // sous-arbre groupe
+          if (!g || (g && id === idt)) this.scanST(n, this.node.key, pk, id, g)
         }
       }
     },
 
-    /* Scan un sous-arbre: 
-    - x: node du (sous-)arbre à scanner
-    - nc: note courante
-    - g: la note courante est une note de groupe
-    */
-    scanST (x, nc, g) {
-      if (nc.ids !== x.ids) x.ratt = true
+    scanST (x, k, pk, id, g) {
+      if (pk !== x.key && x.type !== 3) x.ratt = true
       for (const c of x.children) {
-        if (c.ids === nc.ids || c.ids === nc.pids) continue // pas rattachable dans son propre sous-arbre
-        const okst = (g && (c.id === nc.id)) || (!g && ((c.id === nc.id) || ID.estNoteGr(c.id)))
+        if (c.key === k || c.key === pk) continue // pas rattachable dans son propre sous-arbre
+        const idn = Note.idDeKey(c.key)
+        const okst = (g && (idn === id)) || (!g && ((idn === id) || ID.estGroupe(idn)))
         if (okst && (x.type === 4 || x.type === 5)) c.ratt = true 
-        if (okst) this.scanST(c, nc, g)
+        if (okst) this.scanST(c, k, pk, id, g)
       }
     },
 
-    // Tri des nodes enfants d'un node
     sort1 (a, b) { // les fake à la fin
-      const x = a.note ? '1' + a.note.titre : (a.type > 5 ? '3' + a.ids : '2' + a.ids)
-      const y = b.note ? '1' + a.note.titre : (b.type > 5 ? '3' + b.ids : '2' + b.ids)
+      const x = a.note ? '1' + a.note.titre : (a.idg ? '3' + a.idg + a.key : '2' + a.key)
+      const y = b.note ? '1' + a.note.titre : (b.idg ? '3' + b.idg + b.key : '2' + b.key)
       return x < y ? -1 : (x === y ? 0 : 1)
     },
 
     setNote (note){
       if (!note) return
-      const type = ID.estGroupe(note.id) ? 5 : 4
-      let n = this.map.get(node.ids)
+      const key = note.key
+      const pkey = note.pkey
+      let n = this.map.get(key)
 
       if (n) { // son node existait - remplacement - était fake ou pas, elle est désormais réelle
-        n.type = type
+        n.type = Note.estG(key) ? 5 : 4
         n.note = note
-        if ((n.pid !== note.pid) || (n.pids !== note.pids)) { // son rattachement a changé
+        if (n.pkey !== pkey) { // son rattachement a changé
           this.detachNote(n) // détachement de l'ancien parent
-          n.pid = note.pid || note.id
-          n.pids = note.pids || null
+          n.pkey = pkey
           this.rattachNote(n) // rattachement au nouveau
         }
       } else { // création de son node
         n = {
-          type,
-          id: note.id,
-          ids: note.ids,
-          pid: note.pid || note.id,
-          pids: note.pids || null,
+          type: Note.estG(key) ? 5 : 4,
+          key,
+          pkey,
           children: [],
           note: note
         }
-        this.map.set(n.ids, n)
+        this.map.set(n.key, n)
         this.rattachNote(n) // rattachement à sa racine ou sa note
       }
 
-      this.setPreSelect(n.ids)
+      this.setPreSelect(key)
       this.calculNfnt()
     },
 
-    delNote (ids) {
-      const n = this.map.get(ids)
-      if (!n || (n.type > 5)) return // node inexistant ou était déjà fake
+    delNote (id, ids) {
+      const key = id + '/' + ids
+      const n = this.map.get(key)
+      if (!n || (n.type > 5)) return // node inexistant ou était fake
       
-      if (!n.children.length) { // Note existant SANS enfants
+      if (!n.children.length) { // Node existant SANS enfants
         this.detachNote(n) // détachement de son parent
-        this.map.delete(ids) // suppression
-        this.setPreSelect(n.pids || n.pid) // son parent s'ouvrira
+        this.map.delete(n.key) // suppression
+        this.setPreSelect(n.pkey) // son parent s'ouvrira
       } else {
-        // note ayant des enfants: la rendre fake et la déplacer sous sa racine "naturelle"
-        const nvpid = n.id // sa racine naturelle
-        n.type += 2 // devient fake
-        delete n.note 
-        if (nvpid !== n.pid) { // si elle doit bouger 
-          this.detachNote(n)
-          n.pid = nvpid
-          n.pids = null
+        // node ayant des enfants: la rendre fake et la déplacer sous sa racine "naturelle"
+        const nvpkey = '' + Note.idDeKey(n.key)
+        n.type += 2; delete n.note // devient fake
+        if (nvpkey !== n.pkey) { // si elle doit bouger 
+          this.detachNote(n) 
+          n.pkey = nvpkey
           this.rattachNote(n)
         }
-        this.setPreSelect(n.ids) 
+        this.setPreSelect(n.key) 
       }
 
       this.calculNfnt()
     },
 
-    rattachNote (n) { // n est une note, a toujours un pid
-      let p = this.map.get(n.pids || n.pid)
+    rattachNote (n) {
+      let p = this.map.get(n.pkey)
       if (p) { // cas "normal", la note / racine de rattachement existe
         p.children.push(n)
         p.children.sort(this.sort1)
         return
       }
       // la note / racine de rattachement n'existait pas
-      if (!n.pids) { // C'est un rattachement à une racine (qui peut-être n'existe pas)
+      if (Note.pEstRac(n.pkey)) { // C'est un rattachement à une racine
         this.rattachRac(n)
         return
       }
       /* cas #2a #4b #4d : c'est un rattachement à une note qui n'existe pas: 
       création d'un node fake rattachée à une racine d'avatar ou de groupe */
       const nf = {
-        type: ID.estGroupe(n.pid) ? 7 : 6,
-        id: n.pid,
-        ids: n.pids,
-        pid: n.id,
+        type: Note.estG(n.pkey) ? 7 : 6,
+        key: n.pkey,
+        pkey: Note.racNoteP(n.pkey),
         children: [n]
       }
       this.rattachRac(nf)
-      this.map.set(nf.ids, nf)
+      this.map.set(nf.key, nf)
     },
 
     rattachRac (n) {
-      let r = this.map.get(n.pid)
-      if (!r) r = this.setRacine(n.pid, 3)  // cas "rare": création d'une racine groupe fake
+      let r = this.map.get(n.pkey)
+      if (!r) r = this.setRacine(n.pkey, 3)  // cas "rare": création d'une racine groupe fake
       r.children.push(n)
       return r
     },
 
     detachNote (n) { // détachement d'une note de son parent actuel
-      const p = this.map.get(n.pid)
+      const p = this.map.get(n.pkey)
       if (!p) return
-      const a = []; p.children.forEach(c => { if (c.ids !== n.ids) a.push(c)}); p.children = a
+      const a = []; p.children.forEach(c => { if (c.key !== n.key) a.push(c)}); p.children = a
       if (p.children.length) return
     
       // le node parent n'a plus d'enfants: nettoyages éventels
       if (p.type === 3) { // le parent était une racine groupe fake désormais vide
         // On l'enleve de la liste des nodes racines
-        this.delRacine(p.id)
-        this.map.delete(p.id)
+        const a = []; this.notes.forEach(c => { if (c.key !== p.key) a.push(c)}); this.notes = a
+        this.map.delete(p.key)
         return
       } 
       
       if (p.type > 5) { // était attachée à une note fake désormais vide
         // On enleve la note fake de la liste des nodes de sa racine
-        const rac = this.map.get(p.pid) // racine de la note fake
-        const b = []; rac.children.forEach(c => { if (c.ids !== p.ids) b.push(c)}); rac.children = b
-        this.map.delete(p.ids)
-        if (rac.type === 3 && !rac.children.length) { // la racine elle-même était vide
+        const rac = this.map.get(p.pkey) // racine de la note fake
+        const b = []; rac.children.forEach(c => { if (c.key !== p.key) b.push(c)}); rac.children = b
+        this.map.delete(p.key)
+        if (rac.type === 3 && !rac.children) { // la racine elle-même était vide
           // la supprimer aussi
-          this.delRacine(p.ids)
-          this.map.delete(rac.ids)
+          const d = []; this.notes.forEach(c => { if (c.key !== rac.key) d.push(c)}); this.notes = d
+          this.map.delete(rac.key)
         }
       }
     },
 
-    setRacine (id, type) { // on ajoute un node pour l'avatar / groupe juste à la racine
-      let n = this.map.get(id)
+    setRacine (key, type) { // on ajoute un node pour l'avatar / groupe juste à la racine
+      let n = this.map.get(key)
       if (!n) { 
-        n = { type, id, ids: id, children: [] }
-        this.map.set(id, n)
+        n = { type, key, children: [] }
+        this.map.set(key, n)
         this.nodes.push(n)
         this.calculNfnt()
       } else {
         n.type = type // re-création d'un groupe 3 devenant 2
       }
+      // console.log('setRacine', n.key, n.type)
       return n
     },
 
-    delRacine (ids) { // retire la racine id, si elle existait
-      const a = []
-      for(const n of this.nodes) { if (n.ids !== ids) a.push(n) }
-      if (a.length !== this.nodes.length) this.nodes = a
-    },
-
     setAvatar (id) { // on ajoute un node pour l'avatar juste à la racine
-      this.setRacine(id, 1)
+      this.setRacine('' + id, 1)
     },
 
     setGroupe (id) { // on ajoute un node pour le groupe juste à la racine
-      this.setRacine(id, 2)
+      this.setRacine('' + id, 2)
     },
 
     delAvatar (id) { // delNote de toutes les notes de l'avatar
+      const k = '' + id
       this.map.forEach(n => { 
         if ((n.type === 4 || n.type === 6) && (n.note.id === id))
-          this.delNote(n.note.ids)
+          this.delNote(n.note.id, n.note.ids)
       })
-      this.delRacine(id)
-      this.map.delete(id)
+      const a = []; for(const n of this.notes) { if (n.key !== k) a.push(n)}; this.notes = a
+      this.map.delete(k)
       this.calculNfnt()
     },
 
     delGroupe (id) {  // les notes du groupe ont déjà été supprimées
-      const n = this.map.get(id)
-      if (n && n.children.length) n.type = 3 // il reste des notes zombi / avatar
-      else { // on retire le groupe de la racine
-        this.delRacine(id)
-        this.map.delete(id)
+      const k = '' + id
+      const n = this.map.get(k)
+      if (n && n.children.length) { // il reste des notes zombi / avatar
+        n.type = 3
+        // console.log('delGroupe', n.key, n.type)
+      } else { // on retire le groupe de la racine
+        const a = []; for(const n of this.notes) { if (n.key !== k) a.push(n)}; this.notes = a
+        this.map.delete(k)
       }
       this.calculNfnt()
     }

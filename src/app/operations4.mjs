@@ -1715,8 +1715,7 @@ export class NouvelleNote extends Operation {
       const t = txt ? await crypter(cle, gzipB(txt)) : null
       const args = { token: session.authToken, id, t, ida, exclu, ref }
       const ret = await post(this, 'NouvelleNote', args)
-      // const ret = { key: 'toto' }
-      return this.finOK(ret.key)
+      return this.finOK(ret.ids)
     } catch (e) {
       await this.finKO(e)
     }
