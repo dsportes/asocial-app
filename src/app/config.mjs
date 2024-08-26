@@ -1,14 +1,7 @@
 // Branch 20240801
 
-const u = 'http://localhost:8443/'
-// const u = 'https://test.sportes.fr:8443/',
-// const u = 'https://192.168.5.64:8443/',
-// const u = 'https://0a42-92-188-103-73.ngrok-free.app/',
-
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter à chaque déploiement
-  OPURL: u + 'op/',
-  PUBSUBURL: u + 'pubsub/',
   DEV: true,
   DEBUG: true,
   BUILD: '24-08-16 17:30',
@@ -52,11 +45,5 @@ export const config = {
 
   /* Une base locale IDB non resynchronisée depuis plus de idbObs jours est
   considérée comme obsolète et détruite à la première connexion synchronisée */
-  idbObs: 500, 
-
-  tarifs: [
-    { am: 202201, cu: [0.45, 0.10, 80, 200, 15, 15] },
-    { am: 202305, cu: [0.45, 0.10, 80, 200, 15, 15] },
-    { am: 202309, cu: [0.45, 0.10, 80, 200, 15, 15] }
-  ]
+  idbObs: 500
 }

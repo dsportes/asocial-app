@@ -2,7 +2,7 @@ import stores from '../stores/stores.mjs'
 import { Operation } from './operation.mjs'
 import { afficherDiag, $t, random, gzipB, setTrigramme, getTrigramme, sleep } from './util.mjs'
 import { idb, IDBbuffer } from './db.mjs'
-import { DataSync, appexc, ID, Cles, AMJ, HBINSECONDS } from './api.mjs'
+import { DataSync, appexc, ID, Cles, AMJ, HBINSECONDS, Tarif } from './api.mjs'
 import { post } from './net.mjs'
 import { CV, compile, RegCles } from './modele.mjs'
 import { crypter, genKeyPair, crypterRSA } from './webcrypto.mjs'
@@ -459,6 +459,7 @@ export class OperationS extends Operation {
         else args.lids = lids || []
       }
       const ret = await post(this, 'Sync', args)
+      if (ret.tarifs) Tarif.init(ret.tarifs)
       const nvds = DataSync.deserial(ret.dataSync)
       const sb = new SB()
       const buf = new IDBbuffer()
@@ -810,6 +811,7 @@ export class SyncSp extends OperationS {
       
       args.token = session.authToken
       const ret = await post(this, 'SyncSp', args)
+      if (ret.tarifs) Tarif.init(ret.tarifs)
       const ds = DataSync.deserial(ret.dataSync)
   
       const sb = new SB()

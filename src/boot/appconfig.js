@@ -2,7 +2,6 @@ import { boot } from 'quasar/wrappers'
 const pako = require('pako')
 import { decode } from '@msgpack/msgpack'
 
-import { Tarif } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import { config } from '../app/config.mjs'
 import { ID } from '../app/api.mjs'
@@ -43,19 +42,22 @@ async function msgPush (event) {
 }
 
 export default boot(async ({ app /* Vue */ }) => {
+  const urls = require('/public/etc/urls.json')
+
   const cfg = { pageSessionId: ID.rnd(), nc: 0 }
   for(const x in config) cfg[x] = config[x]
+
+  cfg.OPURL = urls.opurl + '/op/' 
+  console.log('OPURL: ' + cfg.OPURL)
+  cfg.PUBSUBURL = urls.pubsuburl + '/pubsub/'
+  console.log('PUBSUBURL: ' + cfg.PUBSUBURL)
 
   console.log('debug:' + (cfg.DEBUG ? true : false) +
     ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
   
   new BroadcastChannel('channel-pubsub').onmessage = msgPush
-
-  Tarif.tarifs = cfg.tarifs
   
   cfg.search = window.location.search.replace('?', '')
-
-  console.log('OPURL: ' + cfg.OPURL)
 
   console.log('Mode silencieux: ' + (cfg['silence'] ? 'oui' : 'non'))
 
