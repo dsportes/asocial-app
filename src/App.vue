@@ -153,12 +153,11 @@
       </q-toolbar-title>
 
       <!-- Déconnexion -->
-      <q-btn v-if="session.status > 1" 
-        dense size="md" color="warning" icon="logout" padding="none" 
-        @click="discon">
-        <q-tooltip>{{$t('MLAdrc')}}</q-tooltip>
+      <btn-cond v-if="session.status > 1" color="warning" icon="logout" 
+        @ok="discon">
+        <q-tooltip style="height:4rem">{{$t('MLAdrc')}}</q-tooltip>
         <span class="fs-sm font-mono">{{hms(session.dh)}}</span>
-      </q-btn>
+      </btn-cond>
 
     </q-toolbar>
   </q-footer>

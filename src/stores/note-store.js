@@ -118,7 +118,7 @@ export const useNoteStore = defineStore('note', {
     // id du node courant
     idC (state) { return state.node.id },
 
-    nodeP: (state) => { return state.map.get(state.node.pids) },
+    nodeP: (state) => { return state.map.get(state.node.pids || state.node.pid) },
 
     nbRatt: (state) => {
       let nb = 0
