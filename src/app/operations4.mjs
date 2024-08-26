@@ -1701,21 +1701,21 @@ export class TicketsStat extends Operation {
 - id : de la note
 - ida : pour une note de groupe, id de son avatar auteur
 - exclu : auteur est exclusif
-- ref : [id, ids] pour une note rattachée
+- pid, pids : identifiant du parent pour une note rattachée
 - t : texte crypté
 Retour: rien
 */
 export class NouvelleNote extends Operation {
   constructor () { super('NouvelleNote') }
 
-  async run (id, txt, ida, exclu, ref) {
+  async run (id, txt, ida, exclu, pid, pids) {
     try {
       const session = stores.session
       const cle = !ID.estGroupe(id) ? session.clek : RegCles.get(id)
       const t = txt ? await crypter(cle, gzipB(txt)) : null
-      const args = { token: session.authToken, id, t, ida, exclu, ref }
-      const ret = await post(this, 'NouvelleNote', args)
-      return this.finOK(ret.ids)
+      const args = { token: session.authToken, id, t, ida, exclu, pid, pids }
+      await post(this, 'NouvelleNote', args)
+      return this.finOK()
     } catch (e) {
       await this.finKO(e)
     }
@@ -1731,10 +1731,10 @@ Retour: rien
 export class RattNote extends Operation {
   constructor () { super('RattNote') }
 
-  async run (id, ids, ref) {
+  async run (id, ids, pid, pids) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, id, ids, ref }
+      const args = { token: session.authToken, id, ids, pid, pids }
       await post(this, 'RattNote', args)
       return this.finOK()
     } catch (e) {

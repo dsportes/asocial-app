@@ -1229,7 +1229,8 @@ export class Note extends GenDoc {
     this.texte = t ? ungzipB(t) : ''
     this.titre = titre(this.texte)
 
-    this.ref = row.ref || null
+    this.pid = row.pid || null
+    this.pids = row.pid ? (row.pids || null) : null
 
     this.mfa = new Map()
     this.fnom = new Map()

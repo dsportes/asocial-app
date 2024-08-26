@@ -6,7 +6,7 @@
       no-transition
       dense
       accordion
-      node-key="key"
+      node-key="ids"
       selected-color="primary"
       v-model:selected="selected"
       v-model:expanded="expanded"
@@ -478,9 +478,9 @@ export default {
     async okrattacher () {
       const n = this.nSt.note
       const r = this.noderatt
-      const rid = r.id
-      const rids = r.type > 3 ? r.note.ids : 0
-      await new RattNote().run(n.id, n.ids, [rid, rids])
+      const pid = r.id
+      const pids = r.type > 3 ? r.note.ids : null
+      await new RattNote().run(n.id, n.ids, pid, pids)
       this.rec = 0
       this.noderatt = null
       this.nSt.resetRatt(false)

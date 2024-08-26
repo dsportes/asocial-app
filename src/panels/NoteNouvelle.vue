@@ -105,17 +105,17 @@ export default {
     selNa (elt) { this.naAut = elt },
 
     async valider () {
-      let ref = null
-      const aut = this.estgr ? this.naAut.id : 0
+      let pid = null, pids = null
+      const aut = this.estgr ? this.naAut.id : null
 
       // note rattachée à une autre note OU note avatar rattachée à une racine de groupe
       if (!this.estgr) { // Note avatar
         const nd = this.nSt.node
-        if (nd.type === 2) ref = [nd.id, 0] // rattachée à une racine de groupe
-        else if (this.notep) ref = [this.notep.id, this.notep.ids] // rattachée à une note d'un groupe ou de l'avatar
-      } else if (this.notep) ref = [this.notep.id, this.notep.ids] // Note de groupe rattachée
+        if (nd.type === 2) pid = nd.id // rattachée à une racine de groupe
+        else if (this.notep) { pid = this.notep.id; pids = this.notep.ids } // rattachée à une note d'un groupe ou de l'avatar
+      } else if (this.notep) { pid = this.notep.id; pids = this.notep.ids } // Note de groupe rattachée
 
-      const ids = await new NouvelleNote().run(this.id, this.texte, aut, this.exclu, ref)
+      await new NouvelleNote().run(this.id, this.texte, aut, this.exclu, pid, pids)
       this.ui.fD()
     }
   },

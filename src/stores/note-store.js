@@ -193,7 +193,8 @@ export const useNoteStore = defineStore('note', {
         let node = state.map.get(ids)
         while (node) {
           anc.push(node.ids)
-          node = node.type < 4 ? null : (node.pids ? state.map.get(node.pids) : null)
+          if (node.type < 4) break
+          node = state.map.get(node.pids || node.pid)
         }
         return anc
       }
@@ -323,7 +324,7 @@ export const useNoteStore = defineStore('note', {
     setNote (note){
       if (!note) return
       const type = ID.estGroupe(note.id) ? 5 : 4
-      let n = this.map.get(node.ids)
+      let n = this.map.get(note.ids)
 
       if (n) { // son node existait - remplacement - était fake ou pas, elle est désormais réelle
         n.type = type
@@ -410,7 +411,7 @@ export const useNoteStore = defineStore('note', {
     },
 
     detachNote (n) { // détachement d'une note de son parent actuel
-      const p = this.map.get(n.pid)
+      const p = this.map.get(n.pids || n.pid)
       if (!p) return
       const a = []; p.children.forEach(c => { if (c.ids !== n.ids) a.push(c)}); p.children = a
       if (p.children.length) return
