@@ -195,7 +195,7 @@ export default {
     },
     
     async okCreation () {
-      console.log(this.nom, this.quotas.qn, this.quotas.qv, this.una)
+      // console.log(this.nom, this.quotas.qn, this.quotas.qv, this.una)
       await new NouveauGroupe().run(this.nom, this.una, this.quotas)
       this.ui.fD()
     }

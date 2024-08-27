@@ -1214,7 +1214,7 @@ export class NouveauGroupe extends Operation {
       const session = stores.session
 
       const cleg = Cles.groupe()
-      const idg = Cles.id(cleg, session.ns)
+      const idg = Cles.id(cleg)
       const cleA = RegCles.get(session.avatarId)
       const cleAG = await crypter(cleg, cleA)
       const cleGK = await crypter(session.clek, cleg)
