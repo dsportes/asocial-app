@@ -52,10 +52,6 @@ export const useConfigStore = defineStore('config', {
     maxlgtextegen: 250,
     maxlgtextenote: 5000,
     alertedlv: 40,
-
-    /* Une base locale IDB non resynchronisée depuis plus de idbObs jours est
-    considérée comme obsolète et détruite à la première connexion synchronisée */
-    idbObs: 500, 
   
     motscles: {},
 
