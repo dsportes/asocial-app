@@ -47,9 +47,15 @@ export default boot(async ({ app /* Vue */ }) => {
   const cfg = { pageSessionId: ID.rnd(), nc: 0 }
   for(const x in config) cfg[x] = config[x]
 
-  cfg.OPURL = urls.opurl + '/op/' 
+  const h = window.location.host
+  let u = (urls.opurl === 'http' || urls.opurl === 'https') ?
+    urls.opurl + '://' + h : urls.opurl
+  cfg.OPURL = u + '/op/' 
   console.log('OPURL: ' + cfg.OPURL)
-  cfg.PUBSUBURL = urls.pubsuburl + '/pubsub/'
+
+  u = (urls.pubsuburl === 'http' || urls.pubsuburl === 'https') ?
+  urls.pubsuburl + '://' + h : urls.pubsuburl
+  cfg.PUBSUBURL = u + '/pubsub/'
   console.log('PUBSUBURL: ' + cfg.PUBSUBURL)
 
   console.log('debug:' + (cfg.DEBUG ? true : false) +
