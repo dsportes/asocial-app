@@ -1436,8 +1436,30 @@ export class FichierLocal {
 
 }
 
+/*
+Un document par fichier devant être accessible en mode avion:
+- stockés en table `ficav` de IDB (inconnus du serveur).
+
+- `id` : id du fichier (`idf` clé de `Note.mfa`)
+- `dh` : date-heure du fichier.
+- `dhdc` : date-heure de demande de chargement du fichier: ne pas tenter de le charger avant cette heure. Si 0, le fichier est chargé (nbr et exc sont absents).
+- `nbr` : nombre d'essai de chargement. 
+- `exc` : exception rencontrée lors de la dernière tentative de téléchargement.
+- `noteId noteIds` : `id/ids` identifiant de la note à laquelle le fichier est ou était attaché.
+- `nom` : nom du fichier dans son entrée dans Note.mfa
+- `av` : `true` - garder cette version spécifiquement
+- `avn` : `true` - garder la version la plus récente du fichier ayant ce nom
+
+Note.mfa : map des fichiers attachés à une note
+- _clé_: `idf` - identifiant absolu aléatoire du fichier.
+- _valeur_: `{ nom, dh, info, type, gz, lg, sha }`
+
+Plusieurs fichiers peuvent avoir le même nom: ils sont considérés comme des versions successives, l'identifiant de la version est dh, la date-heure de l'opération l'ayant créé.
+- dans la map, `nom/dh` est une clé.
+- `info` est un code court facultatif qualifiant la version.
+- l'item d'un `idf` donné est invariant après création.
+*/
 export class Ficav {
-  // get key () { return this.ref[0] + '/' + this.ref[1]}
 
   static fromData (buf) {
     const data = decode(buf)
