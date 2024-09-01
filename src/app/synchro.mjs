@@ -846,11 +846,6 @@ export class SyncSp extends OperationS {
 
       syncQueue.dataSync = ds
 
-      if (session.fssync) {
-        session.fssync.open(ret.credentials, ret.emulator)
-        session.fssync.setDS(ds)
-      }
-
       session.setStatus(2)
       syncQueue.reveil()
 
