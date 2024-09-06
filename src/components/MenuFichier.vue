@@ -15,7 +15,7 @@
         <q-icon color="primary" size="md" name="save" />
         <span>{{$t('PNFenreg')}}</span>
       </q-item>
-      <q-item v-if="!simple" :clickable="aut !== 0" v-close-popup  @click="ovSuppr" class="row items-center">
+      <q-item v-if="!simple" :clickable="aut !== '0'" v-close-popup  @click="ovSuppr" class="row items-center">
         <q-icon color="warning" size="md" name="delete" />
         <span>{{$t('PNFsuppr')}}</span>
       </q-item>
@@ -154,7 +154,7 @@ export default {
     idf: String,
     simple: Boolean,
     ro: String, // raison du read-only
-    aut: Number // 0: lecture seulement, 1:note perso, ida: id de l'auteur pour un groupe
+    aut: String // 0: lecture seulement, 1:note perso, ida: id de l'auteur pour un groupe
   },
 
   components: { BoutonHelp, BtnCond, BoutonUndo },

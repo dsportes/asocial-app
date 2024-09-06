@@ -335,8 +335,9 @@ export const useGroupeStore = defineStore('groupe', {
       if (!membre) return
       const e = this.map.get(membre.id) // entrée du groupe
       if (!e) return
-      if (membre._zombi) e.membres.delete(membre.ids)
-      else e.membres.set(membre.ids, membre)
+      const im = parseInt(membre.ids)
+      if (membre._zombi) e.membres.delete(im)
+      else e.membres.set(im, membre)
     },
 
     delMembre (id, ids) {

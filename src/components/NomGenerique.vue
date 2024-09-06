@@ -49,7 +49,8 @@ export default {
   },
 
   setup (props, context) {
-    const val = toRef(props, 'modelValue')
+    const mv = toRef(props, 'modelValue')
+    const val = ref(mv.value)
     const lgmin = toRef(props, 'lgmin')
     const lgmax = toRef(props, 'lgmax')
     const min = ref(lgmin.value || 0)

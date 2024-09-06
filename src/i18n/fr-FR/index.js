@@ -135,7 +135,6 @@ export default {
   rac0: 'actifs',
   rac1: 'INDESIRABLES',
 
-  /*
   FLAGS0: 'a activé l\'accès aux membres', // AM
   FLAGS1: 'a activé l\'accès aux notes',  // AN
   FLAGS2: 'a accès de voir membres', // DM
@@ -144,7 +143,6 @@ export default {
   FLAGS5: 'a pu voir les membres', // HM
   FLAGS6: 'a pu voir les notes', // HN
   FLAGS7: 'a pu éditer les notes', // HE
-  */
   
   // FiltreDel
   roledel0: '(ignorer)',

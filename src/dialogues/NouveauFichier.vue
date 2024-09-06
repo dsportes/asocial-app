@@ -114,7 +114,7 @@ export default {
   props: { 
     note: Object,
     nom: String, // nom du fichier pour une nouvelle révision
-    aut: Number,  // pour un groupe, avatar "auteur"
+    aut: String,  // pour un groupe, avatar "auteur"
     pasheb: Boolean
   },
 
@@ -123,7 +123,7 @@ export default {
   computed: {
     estGr () { return ID.estGroupe(this.note.id) },
     egr () { return this.estGr ? this.gSt.egr(this.note.id) : null },
-    groupe () { return this.egr ? egr.groupe : null},
+    groupe () { return this.egr ? this.egr.groupe : null},
 
     valide () { return this.fic.lg && this.nfic },
     ccFic () { return  [this.ppSt.modecc, this.ppSt.ccfic] },

@@ -58,7 +58,7 @@
                 name="airplanemode_active" size="sm" color="warning"/>
               <q-icon v-if="e.fa.av" name="airplanemode_active" size="sm" color="primary"/>
               <menu-fichier :idf="e.f.idf" class="self-start"
-                :aut="ro ? 0 : (estGr ? aut : 1)" :note="note"/>
+                :aut="ro ? '0' : (estGr ? aut : '1')" :note="note"/>
             </div>
           </div>
         </div>
@@ -69,7 +69,7 @@
 
   <!-- Dialogue de création d'un nouveau fichier -->
   <nouveau-fichier v-if="ui.d.NFouvrir" :note="note" :nom="nomf || ''" 
-    :aut="ro ? 0 : (estGr ? aut : 1)" :pasheb="pasHeb" :ro="ro"/>
+    :aut="ro ? '0' : (estGr ? aut : '1')" :pasheb="pasHeb" :ro="ro"/>
 
 </q-layout>
 </q-dialog>
@@ -103,7 +103,7 @@ export default {
 
     estGr () { return ID.estGroupe(this.note.id) },
     egr () { return this.estGr ? this.gSt.egr(this.note.id) : null },
-    groupe () { return this.egr ? egr.groupe : null},
+    groupe () { return this.egr ? this.egr.groupe : null},
 
     // % quota de vf groupe - 0: ok, 1:90%, 2:>100% (RED)
     vgr () { return !this.groupe ? 0 : this.groupe.alVol(0) },
@@ -146,7 +146,7 @@ export default {
   methods: {
     fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
 
-    selAut (elt) { this.aut = elt },
+    selAut (elt) { this.aut = elt.id },
 
     async nouveau (nf) {
       this.nomf = nf || ''
