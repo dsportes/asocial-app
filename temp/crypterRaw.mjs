@@ -1,4 +1,4 @@
-export class TestRSA extends Operation {
+export class TestRSA extends Operation { // udesk
   constructor () { super('TestRSA') }
 
   async run (id, data) { 
