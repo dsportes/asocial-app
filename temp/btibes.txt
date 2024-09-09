@@ -1,3 +1,4 @@
+Depuis udesk
 /** Secret ****************************************************
 _data_:
 - `id` : id de l'avatar ou du groupe.
