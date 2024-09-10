@@ -52,7 +52,7 @@ export default ({
   methods: {
     ouvrirChat (ch) {
       this.chat = ch
-      this.ui.setChatc(ch,id, ch.ids)
+      this.ui.setChatc(ch.id, ch.ids)
       this.ui.oD('ACouvrir')
     },
     creerChat () {

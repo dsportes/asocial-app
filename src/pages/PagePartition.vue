@@ -21,12 +21,11 @@
       </div>
     </q-expansion-item>
 
-    <div class="full-width fs-md bg-primary text-white q-my-xs">{{$t('TUpart', [session.codePart(p.id)])}}</div>
+    <div v-else class="q-ml-xl p-px-xs fs-md bg-primary text-white q-my-xs">{{$t('TUpart', [session.codePart(p.id)])}}</div>
 
     <q-toolbar class="bg-secondary text-white">
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (session.pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
-      <btn-cond v-if="session.estDelegue || session.estComptable"
-        cond="cEdit"
+      <btn-cond v-if="session.estDelegue || session.estComptable" cond="cEdit"
         :label="$t('PTnvc')" @ok="ui.oD('NSnvsp')"/>
     </q-toolbar>
 
@@ -152,7 +151,7 @@ export default {
 
     async selCpt (c) {
       this.session.setPeopleId(c.id)
-      await new GetNotifC().run(this.session.peopleId)
+      if (this.session.pow < 4) await new GetNotifC().run(this.session.peopleId)
     },
 
     voirpage (c) { 

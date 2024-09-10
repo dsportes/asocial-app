@@ -619,6 +619,7 @@ export default {
   Pchats: 'Tous les "chats"',
   Pespace: 'Espace {0}',
   Ppartition: 'Partition {0}',
+  Ppartition2: 'Sponsors de ma partition',
   Pcompta: 'Notifications & abonnement ...',
   Pgroupes: 'Tous les groupes',
   Pgroupesac: 'Groupes de {0}',

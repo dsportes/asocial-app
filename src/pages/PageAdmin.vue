@@ -17,11 +17,14 @@
       <q-expansion-item  v-for="(esp, idx) in lstEsp" :key="esp.ns" class="q-my-xs"
         switch-toggle-side expand-separator dense group="espaces">
         <template v-slot:header>
-          <div :class="dkli(idx) + ' row justify-between text-bold font-mono fs-lg'">
-            <span class="q-mr-md">#{{esp.ns}}</span>
-            <span>{{esp.org}}</span>
-            <span v-if="esp.hTC" class="msg q-mx-sm">{{$t('ESencrea')}}</span>
-            <span v-if="!esp.hTC && esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
+          <div :class="dkli(idx) + ' row full-width justify-between text-bold font-mono fs-lg'">
+            <div class="col">
+              <span class="q-mr-md">#{{esp.ns}}</span>
+              <span>{{esp.org}}</span>
+              <span v-if="esp.hTC" class="msg q-mx-sm">{{$t('ESencrea')}}</span>
+              <span v-if="!esp.hTC && esp.moisStat" class="q-ml-md fs-sm">{{$t('ESdms', [esp.moisStat])}}</span>
+            </div>
+            <notif-icon v-if="esp.notifE" class="col-auto" :niv="nvntf(esp.notifE)"/>
           </div>
         </template>
 
@@ -151,6 +154,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import SaisieMois from '../components/SaisieMois.vue'
+import NotifIcon from '../components/NotifIcon.vue'
 import { CreationEspace, MajSponsEspace, SetEspaceNprof, InitTachesGC, 
   StartDemon, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
@@ -163,7 +167,7 @@ const reg = /^([a-z0-9\-]+)$/
 export default {
   name: 'PageAdmin',
 
-  components: { PhraseContact, BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond, SaisieMois },
+  components: { NotifIcon, PhraseContact, BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond, SaisieMois },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -189,6 +193,10 @@ export default {
   },
 
   methods: {
+    nvntf (ntf) {
+      return ntf.nr === 1 ? 1 : (ntf.nr === 2 ? 4 : 6)
+    },
+
     ev0 (idx) { return mon(this.cfg.profils[idx][0]) },
 
     ev1 (idx) { 

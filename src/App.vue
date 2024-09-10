@@ -552,7 +552,7 @@ export default {
       switch (p) {
         case 'espace' : { return this.$t('Pespace', [this.session.org]) }
         case 'partition' : { 
-          if (this.session.pow > 3) return this.$t('ACspons')
+          if (this.session.pow > 3) return this.$t('Ppartition2')
           const p = this.session.partitionC || this.session.partition
           return this.$t('Ppartition', [this.session.codePart(p.id)])
         }
