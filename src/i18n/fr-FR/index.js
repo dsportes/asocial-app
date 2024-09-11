@@ -207,7 +207,7 @@ export default {
   EX7005: 'La version d\'API [{0}] gérée par le serveur est incompatble avec celle [{1}] de l\'application',
 
   EX7010: 'Trop d\'accès parallèles à la base de données. Réessayer plus tard. Message technique: {0}',
-  EX7001: 'Incident technique d\'accès à la base de données. Peut-être de réessayer plus tard évitera ce problème. Message technique: {0}',
+  EX7011: 'Incident technique d\'accès à la base de données. Peut-être de réessayer plus tard évitera ce problème. Message technique: {0}',
   EX7100: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - URL: [{1}] - message:[{2}]',
   EX7101: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - URL: [{1}] - message:[{2}]',
 
@@ -442,6 +442,9 @@ export default {
   OP_InitTachesGC: 'Initialisation des tâches du GC',
   OP_StartDemon: 'Lancement immédiat du démon',
   OP_TicketsStat: 'Téléchargements en CSV de la liste des tickets d\'un mois',
+  OP_GetTaches: 'Liste des tâches différées',
+  OP_DelTache: 'Suppression d\'une tâche différée',
+  OP_GoTache: 'Lancement immédiat d\'une tâche différée',
 
   // Login
   LOGpubsub: 'Autoriser les "notifications" afin d\'avoir des données à jour en continu suite aux actions des autres sessions',
@@ -792,6 +795,9 @@ export default {
   CNXdeg2: 'Le compte a été restreint à un accès minimal. Seuls les modes "avion" et "incognito" étant admis, la session a été mise en mode "incognito".',
 
   // PageAdmin et ApercuEspace
+  EStabe: 'Liste des Espaces',
+  EStabt: 'Tâches en cours',
+  ESfta: 'Filtre sur le code espace :',
   ESencrea: 'Comptable pas encore créé.',
   ENnpspc: 'Nouvelle phrase de sponsoring du Comptable',
   ESinitgc: 'Tâches du GC initialisées: {0} existante(s), {1} créées',
@@ -801,7 +807,7 @@ export default {
   ESgcop: 'Tester GC op',
   ESdms: 'Dernière stat: {0}',
   ESck: 'Afficher le dernier checkpoint',
-  ESne: 'Nouvelle organisation',
+  ESne: 'Org.',
   ESne2: 'Organisation à héberger',
   ESnex: 'Aucune exécution du GC',
   ESltr: 'Liste des tranches de quotas',
@@ -809,6 +815,7 @@ export default {
   ESlo: 'Aucune organisations hébergée | Une organisation hébergée | {count} organisations hébergées',
   ESns: 'ID de l\'espace attribué',
   ESnsh: '0...9 OU a...z OU A...Z',
+  ESnsh2: '* OU 0...9 OU a...z OU A...Z',
   ESdlvat: 'Hébergment des comptes "O" assuré jusqu\'à :',
   ESdlvat2: 'Hébergment des comptes "O" assuré jusqu\'à  {0}.',
   ESdlvat3: 'Hébergment des comptes "O" assuré sans limite de date.',

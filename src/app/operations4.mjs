@@ -816,13 +816,10 @@ Retour:
 export class SupprPartition extends Operation {
   constructor () { super('SupprPartition') }
 
-  async run (n) { 
+  async run (idp) { 
     try {
       const session = stores.session
-      const args = { 
-        token: session.authToken, 
-        n
-      }
+      const args = { token: session.authToken, idp }
       await post(this, 'SupprPartition', args)
       this.finOK()
     } catch (e) {
@@ -1937,6 +1934,69 @@ export class SupprFichier extends Operation {
       const session = stores.session
       const args = { token: session.authToken, id: note.id, ids: note.ids, idf, aut }
       await post(this, 'SupprFichier', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*****************************************
+GetTaches : retourne la liste des tâches en cours
+args.token: éléments d'authentification du compte.
+args.ns : 
+  - null: toutes
+  - '' : GC
+  - 'x' : du ns x
+*/
+export class GetTaches extends Operation {
+  constructor () { super('GetTaches') }
+
+  async run (ns) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, ns }
+      const ret = await post(this, 'GetTaches', args)
+      return this.finOK(ret.taches)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*****************************************
+DelTache : suppression d'une tâche
+args.token: éléments d'authentification du compte.
+args.op ns id ids : 
+*/
+export class DelTache extends Operation {
+  constructor () { super('DelTache') }
+
+  async run (t) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, op: t.op, ns: t.ns, id: t.id, ids: t.ids }
+      await post(this, 'DelTache', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*****************************************
+GoTache : lancement immédiat d'une tâche
+args.token: éléments d'authentification du compte.
+args.op ns id ids : 
+*/
+export class GoTache extends Operation {
+  constructor () { super('GoTache') }
+
+  async run (t) { 
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, op: t.op, ns: t.ns, id: t.id, ids: t.ids }
+      await post(this, 'GoTache', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

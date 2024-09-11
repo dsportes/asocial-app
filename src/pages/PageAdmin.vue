@@ -1,19 +1,46 @@
 <template>
   <q-page class="q-pa-xs">
-    <div class="column">
 
-      <div class="q-mt-sm row q-gutter-xs justify-center">
-        <btn-cond icon="refresh" :label="$t('rafraichir')" @ok="loadEsp"/>
+    <q-tabs  class="col titre-md" v-model="tab" inline-label outside-arrows mobile-arrows no-caps>
+      <q-tab name="espaces" :label="$t('EStabe')"/>
+      <q-tab name="taches" :label="$t('EStabt')"/>
+    </q-tabs>
+
+    <div v-if="tab==='taches'" class="q-pa-xs">
+      <div class="full-width q-mb-sm row items-center justify-between bg-secondary text-white">
+        <btn-cond icon="refresh" @ok="getTaches"/>
+        <div class="row items-center">
+          <span class="q-mr-sm">{{$t('ESfta')}}</span>
+          <q-input class="w6" v-model="ns"
+              :label="$t('ESns')" :hint="$t('ESnsh2')" dense/>
+        </div>
         <btn-cond color="warning" :label="$t('ESgcin')" @ok="initGC"/>
         <btn-cond color="warning" :label="$t('ESstartd')" @ok="startDemon"/>
-        <btn-cond icon="add" :label="$t('ESne')" @ok="plusNS"/>
+      </div>
+
+      <div v-for="(t, idx) in taches" :key="idx">
+        <div :class="dkli(idx) + ' q-my-sm full-with'">
+          <div class="row font-mono">
+            <div class="col-1 text-center">{{OPNOMS[t.op]}}</div>
+            <div class="col-1 text-center">{{t.ns}}</div>
+            <div class="col-4 text-center">{{dhstring(t.dh, true)}}</div>
+            <div class="col-2 text-center">{{t.id}}</div>
+            <div class="col-2 text-center">{{t.ids}}</div>
+            <btn-cond class="col-1 text-right" icon="delete" @ok="tacheDel(t)"/>
+            <btn-cond class="col-1 text-right" icon="refresh" @ok="tacheGo(t)"/>
+          </div>
+          <q-input v-if="t.exc" type="textarea" autogrow v-model="t.exc" class="q-pa-xs stackclass font-mono"/>
+        </div>
       </div>
     </div>
 
-    <div class="titre-lg text-white bg-secondary q-pa-xs full-width text-center q-my-sm">
-      {{$t('ESlo', lstEsp.length, { count: lstEsp.length })}}</div>
+    <div v-if="tab==='espaces'" class="row justify-between text-white bg-secondary q-pa-xs full-width q-my-sm">
+      <btn-cond icon="refresh" @ok="loadEsp"/>
+      <div class="col titre-lg text-center">{{$t('ESlo', lstEsp.length, { count: lstEsp.length })}}</div>
+      <btn-cond icon="add" :label="$t('ESne')" @ok="plusNS"/>
+    </div>
 
-    <div class="spmd"> <!-- Liste des espaces -->
+    <div v-if="tab==='espaces'" class="spmd"> <!-- Liste des espaces -->
       <q-expansion-item  v-for="(esp, idx) in lstEsp" :key="esp.ns" class="q-my-xs"
         switch-toggle-side expand-separator dense group="espaces">
         <template v-slot:header>
@@ -156,13 +183,27 @@ import PhraseContact from '../components/PhraseContact.vue'
 import SaisieMois from '../components/SaisieMois.vue'
 import NotifIcon from '../components/NotifIcon.vue'
 import { CreationEspace, MajSponsEspace, SetEspaceNprof, InitTachesGC, 
-  StartDemon, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
+  StartDemon, DownloadStatC, DownloadStatC2, 
+  GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
 import { Cles, ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
-import { $t, styp, edvol, mon, nbn, dkli, afficherDiag } from '../app/util.mjs'
+import { $t, styp, edvol, mon, nbn, dkli, afficherDiag, dhstring } from '../app/util.mjs'
 
 const reg = /^([a-z0-9\-]+)$/
+
+const OPNOMS = {
+  1: 'DFH',
+  2: 'DLV',
+  3: 'TRA',
+  4: 'VER',
+  5: 'STA',
+  7: 'FPU',
+  21: 'GRM',
+  22: 'AGN',
+  24: 'AVC',
+  25: 'ESP'
+}
 
 export default {
   name: 'PageAdmin',
@@ -251,7 +292,7 @@ export default {
       this.ps = ps
     },
 
-   async nvspc () {
+    async nvspc () {
       await new MajSponsEspace().run(this.esp.org, this.ps, this.esp.id)
       this.ns = 0
       this.ps = null
@@ -280,7 +321,7 @@ export default {
       this.ui.oD('PAedprf')
     },
 
-   async dlstat (esp, mr) {
+    async dlstat (esp, mr) {
       const cleES = esp.cleES
       const { err, blob, creation, mois } = 
         await new DownloadStatC().run(esp.org, mr, cleES)
@@ -308,12 +349,24 @@ export default {
       } else {
         await afficherDiag($t('PEnd') + err)
       }
-    }
+    },
 
+    async getTaches () {
+      this.taches = await new GetTaches().run(this.ns)
+    },
+
+    async tacheDel (t) {
+      await new DelTache().run(t)
+    },
+
+    async tacheGo (t) {
+      await new GoTache().run(t)
+    }
   },
 
   data () {
     return {
+      tab: 'taches',
       gcop: '',
       ns: '0',
       nsc: '', // ns "courant" de PageEspace à ouvrir
@@ -325,7 +378,8 @@ export default {
       prf: 0,
       profil: 0,
       esp: null,
-      mois: Math.floor(this.session.auj / 100)
+      mois: Math.floor(this.session.auj / 100),
+      taches: []
     }
   },
 
@@ -349,7 +403,7 @@ export default {
     })
 
     return {
-      session, ui, cfg, dkli, styp, lstEsp, loadEsp, ID,
+      session, ui, cfg, dkli, styp, lstEsp, loadEsp, ID, dhstring, OPNOMS,
       AMJ
     }
   }
@@ -359,6 +413,8 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
+.w6
+  with: 6rem
 .bord
   border: 1px solid $grey-5
   border-radius: 5px
