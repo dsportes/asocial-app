@@ -14,11 +14,13 @@
       <!-- maj quotas du compte -->
       <btn-cond v-if="estDelegue || estA"
         icon="settings" :label="$t('CPTedq')" @ok="editerq" cond="cUrgence"/>
+      <!--
       <btn-cond v-if="!estA" color="warning" icon="change_history"
         cond="cEdit" class="justify-start" @ok="ui.oD('PCmuta')"
         :label="$t('PPmuterA')">
         <q-tooltip>{{$t('PPmutA')}}</q-tooltip>
       </btn-cond>
+      -->
     </div>
 
     <div class="row justify-center">

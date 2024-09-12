@@ -832,13 +832,44 @@ export class SupprPartition extends Operation {
 - token: éléments d'authentification du compte.
 Retour:
 */
-export class MuterCompteA extends Operation {
+export class MuterCompteA1 extends Operation {
   constructor () { super('MuterCompteA') }
 
   async run (id, q) { // id du compte, id nouvelle partition
     try {
       const session = stores.session
       const args = { token: session.authToken }
+      await post(this, 'MuterCompteA1', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/*  OP_MuterCompteA: 'Mutation du compte O en compte A' ************
+- token: éléments d'authentification du compte.
+- id : id du compte devenant A
+- hZR: hash de sa phrase de contact réduite
+- hZC: hash de sa phrase de contact complète
+- ids : ids du chat du compte demandeur (Comptable / Délégué)
+- t : texte (crypté) de l'item à ajouter au chat
+Retour:
+*/
+export class MuterCompteA extends Operation {
+  constructor () { super('MuterCompteA') }
+
+  async run (id, chat, txt, pc) { // id du compte à muter, pc: phrase de contact
+    try {
+      const session = stores.session
+      const args = { 
+        token: session.authToken, 
+        id, 
+        hZR: pc.hps1, 
+        hZC: pc.hpsc,
+        t: txt ? await crypter(chat.clec, gzipB(txt)) : null,
+        ids: chat.ids
+      }
       await post(this, 'MuterCompteA', args)
       this.finOK()
     } catch (e) {
@@ -847,19 +878,22 @@ export class MuterCompteA extends Operation {
   }
 }
 
-
 /*  OP_MuterCompteO: 'Mutation d\'un compte A en compte O' ************
 - token: éléments d'authentification du compte.
 - id : id du compte devenant O
+- hZR: hash de sa phrase de contact réduite
+- hZC: hash de sa phrase de contact complète
 - quotas: { qc, qn, qv }
 - cleAP : clé A du compte cryptée par la clé P de la partition
 - clePK : clé de la nouvelle partition cryptée par la clé publique du compte
+- ids : ids du chat du compte demandeur (Comptable / Délégué)
+- t : texte (crypté) de l'item à ajouter au chat
 Retour:
 */
 export class MuterCompteO extends Operation {
   constructor () { super('MuterCompteO') }
 
-  async run (id, q, chat, txt) { // id du compte, id nouvelle partition
+  async run (id, q, chat, txt, pc) { // id du compte, id nouvelle partition
     try {
       const session = stores.session
       const idp = session.compte.idp
@@ -870,6 +904,8 @@ export class MuterCompteO extends Operation {
       const clePK = await crypterRSA(pub, cleP)
       const args = {
         token: session.authToken,
+        hZR: pc.hps1,
+        hZC: pc.hpsc,
         id, cleAP, clePK, 
         quotas: { qc: q.qc, qn: q.qn, qv: q.qv},
         t: txt ? await crypter(chat.clec, gzipB(txt)) : null,

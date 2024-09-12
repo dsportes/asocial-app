@@ -1103,11 +1103,32 @@ export class GetCompta extends Operation {
       const session = stores.session
       const args = { token: session.authToken, id: id || session.compteId }
       const ret = await post(this, 'GetCompta', args)
+      let c
       if (ret.rowCompta) {
-        const c = await compile(ret.rowCompta)
+        c = await compile(ret.rowCompta)
         session.setCompta(c)
       }
-      return this.finOK()
+      return this.finOK(c)
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* GetComptaQv : retourne les compteurs qv de la compta d'un compte
+- `token` : jeton d'authentification du compte
+- `id` : du compte
+Retour: rowCompta
+*/
+export class GetComptaQv extends Operation {
+  constructor () { super('GetCompta') }
+
+  async run (id) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, id: id || session.compteId }
+      const ret = await post(this, 'GetComptaQv', args)
+      return this.finOK(ret.comptaQv)
     } catch (e) {
       await this.finKO(e)
     }

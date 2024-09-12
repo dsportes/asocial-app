@@ -90,6 +90,7 @@ export const useUiStore = defineStore('ui', {
       BPchgSp: {},
       BPcptdial: {},
       BPmut: {},
+      BPmutA: {},
       OTsuppbase: false, // OutilsTests
       OTrunning: false,
       AAeditionpc: {}, // ApercuAvatar
@@ -126,7 +127,7 @@ export const useUiStore = defineStore('ui', {
       PCnvav: false, // PageCompte
       PCchgps: false,
       PCedq: false,
-      PCmuta: false,
+      // PCmuta: false,
       PAedprf: false, // PageAdmin
       PAcreationesp: false,
       PAcheckpoint: false,

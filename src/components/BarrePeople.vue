@@ -6,14 +6,51 @@
     <btn-cond v-if="session.estComptable && id !== session.compteId" 
       cond="cUrgence" :label="$t('PPchdel')" @ok="chgDelegue"/>
     <btn-cond v-if="comptaVis" cond="cUrgence" :label="$t('PPcompta')" @ok="voirCompta"/>
-    <btn-cond v-if="idp === 0" color="warning" icon="change_history"
+    <btn-cond v-if="!idp" color="warning" icon="change_history"
       cond="cEdit" class="justify-start" @ok="muter"
       :label="$t('PPmuterO')">
       <q-tooltip>{{$t('PPmutO')}}</q-tooltip>
     </btn-cond>
+    <btn-cond v-else color="warning" icon="change_history"
+      cond="cEdit" class="justify-start" @ok="muterA"
+      :label="$t('PPmuterA')">
+      <q-tooltip>{{$t('PPmutA')}}</q-tooltip>
+    </btn-cond>
+
   </div>
 
-  <!-- Mutation de type de compte -->
+  <!-- Mutation de type de compte en "A" -->
+  <q-dialog v-model="ui.d.BPmutA[idc]" persistent>
+    <q-card :class="styp('md')">
+      <q-toolbar class="bg-secondary text-white">
+        <btn-cond icon="close" color="warning" @ok="ui.fD"/>
+        <q-toolbar-title class="titre-lg full-width text-center">{{$t('PPmutA')}}</q-toolbar-title>
+      </q-toolbar>
+
+      <micro-chat class="q-pa-xs q-my-md" :chat="chat"/>
+      
+      <q-card-section>
+        <phrase-contact @ok="okpc" :orgext="session.org" declaration/>
+        <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
+      </q-card-section>
+
+      <q-card-section>
+        <div class="titre-md">{{$t('PPmutmc')}}</div>
+        <editeur-md
+          v-model="texte" :lgmax="250" modetxt editable mh="6rem"
+          :texte="txtdefA"/>
+      </q-card-section>
+
+      <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
+        <btn-cond icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+        <btn-cond :disable="!pc" color="warning" icon="change_history" 
+          cond="cUrgence" :label="$t('PPmutA')" @ok="cf=true"/>
+        <bouton-confirm :actif="cf" :confirmer="mutA"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <!-- Mutation de type de compte en "O" -->
   <q-dialog v-model="ui.d.BPmut[idc]" persistent>
     <q-card :class="styp('md')">
       <q-toolbar class="bg-secondary text-white">
@@ -40,12 +77,12 @@
         <div class="titre-md">{{$t('PPmutmc')}}</div>
         <editeur-md
           v-model="texte" :lgmax="250" modetxt editable mh="6rem"
-          :texte="txtdef"/>
+          :texte="txtdefO"/>
       </q-card-section>
 
       <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
         <btn-cond icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-        <btn-cond :disable="(diag !== '') || quotas.err" color="warning" icon="change_history" 
+        <btn-cond :disable="(diag !== '') || quotas.err || !pc" color="warning" icon="change_history" 
           cond="cUrgence" :label="$t('PPmutO2')" @ok="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mut"/>
       </q-card-actions>
@@ -56,7 +93,7 @@
   <q-dialog v-model="ui.d.BPchgTr[idc]" persistent>
     <q-card :class="styp('sm')">
       <div class="titre-lg bg-secondary text-white text-center">
-        {{$t('PPchgpart', [cv.nom, session.codePart(session.partition.id)])}}</div>
+        {{$t('PPchgpart', [cv.nom, session.codePart(idpCpt)])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqvc', [cpt.qv.qc, cpt.pc.pcc])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqvn', [cpt.qv.qn, edn(cpt.qv.qn), cpt.pc.pcn])}}</div>
       <div class="q-mx-sm titre-md">{{$t('PPqvv', [cpt.qv.qv, edv(cpt.qv.qv), cpt.pc.pcv])}}</div>
@@ -75,9 +112,7 @@
       </q-card-section>
 
       <q-card-section style="height: 30vh" class="scroll bord1">
-        <div v-for="x in lst" :key="x.id" 
-          :class="'row items-center cursor-pointer' + (selx && (x.idp === selx.idp) ? ' bord2' : ' bord1')"
-          @click="selx = x">
+        <div v-for="x in lst" :key="x.id" :class="cllst(x)"  @click="selx = x">
           <div class="col-3">{{x.code}}</div>
           <div class="col-3 q-px-xs">
             <div :class="'text-center' + (x.okc ? '' : ' bg-yellow-5 text-bold text-negative')">
@@ -162,8 +197,8 @@ import EditeurMd from '../components/EditeurMd.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import { styp, edvol, afficherDiag } from '../app/util.mjs'
 import { StatutAvatar, ChangerPartition, DeleguePartition, 
-  GetAvatarPC, MuterCompteO } from '../app/operations4.mjs'
-import { GetCompta, GetSynthese, GetPartition } from '../app/synchro.mjs'
+  GetAvatarPC, MuterCompteO, MuterCompteA } from '../app/operations4.mjs'
+import { GetCompta, GetComptaQv, GetSynthese, GetPartition } from '../app/synchro.mjs'
 
 export default {
   name: 'BarrePeople',
@@ -183,7 +218,8 @@ export default {
     opt () { return this.session.espace.opt },
     chat () { return this.aSt.getChatIdIE(this.session.compteId, this.id) },
     cpt () { return this.session.compta },
-    txtdef () { return this.$t('PPmsgo', [this.session.partition.id])}
+    txtdefO () { return this.$t('PPmsgo', [this.session.partition.id])},
+    txtdefA () { return this.$t('PPmsga')}    
   },
 
   watch: {
@@ -193,6 +229,8 @@ export default {
   
   data () {
     return {
+      idpCpt: null,
+      pc: null,
       texte: '',
       selx: null,
       filtre: '',
@@ -213,7 +251,13 @@ export default {
     edn (v) { return v * UNITEN },
     edv (v) { return edvol(v * UNITEV) },
 
+    cllst (x) { const cl = 'row items-center cursor-pointer' + (this.selx && this.selx.idp === x.idp ? ' bord2' : ' bord1')
+      const cx = cl + (this.idpCpt === x.idp ? ' disabled' : '')
+      return cx
+    },    
+
     async okpc (p) {
+      this.pc = p
       const id = await new GetAvatarPC().run(p)
       this.diag = this.idcpt !== id ? this.$t('PPmutpc') : ''
     },
@@ -223,9 +267,8 @@ export default {
         await afficherDiag(this.$t('PPchatreq'))
         return
       }
-      await new GetCompta().run(this.idcpt)
+      const c = await new GetComptaQv().run(this.idcpt)
       await new GetPartition().run(this.session.partition.id)
-      const c = this.cpt.qv
       const s = this.session.partition.synth
       this.quotas = {
         qn: c.qn,
@@ -243,9 +286,27 @@ export default {
       this.ui.oD('BPmut', this.idc)
     },
 
+    async muterA () {
+      if (!this.chat) {
+        await afficherDiag(this.$t('PPchatreq'))
+        return
+      }
+      this.ui.oD('BPmutA', this.idc)
+    },
+
     async mut () {
-      await new MuterCompteO().run(this.idcpt, this.quotas, this.chat, this.texte)
+      await new MuterCompteO().run(this.idcpt, this.quotas, this.chat, this.texte, this.pc)
       this.idp = this.session.partition.id
+      this.pc = null
+      await new GetPartition().run(this.session.partition.id)
+      await new GetSynthese().run()
+      this.ui.fD()
+    },
+
+    async mutA () {
+      await new MuterCompteA().run(this.idcpt, this.chat, this.texte, this.pc)
+      this.idp = null
+      this.pc = null
       await new GetPartition().run(this.session.partition.id)
       await new GetSynthese().run()
       this.ui.fD()
@@ -271,8 +332,7 @@ export default {
       */
       const tsp = this.session.synthese.tsp
       for(const [idp, code] of this.session.compte.mcode) {
-        if ((!this.filtre || (code && code.indexOf(this.filtre) !== -1))
-          && idp !== this.session.partition.id) {
+        if (!this.filtre || (code && code.indexOf(this.filtre) !== -1)) {
           const e = tsp[idp]
           const y = { 
             idp,
@@ -293,6 +353,11 @@ export default {
     },
 
     async chgDelegue () { // comptable
+      const c = await new GetCompta().run(this.id)
+      if (c.estA) {
+        await afficherDiag(this.$t('PPnopart'))
+        return
+      }
       this.ui.oD('BPchgSp', this.idc)
     },
 
@@ -305,7 +370,13 @@ export default {
 
     async chgPartition () { // comptable
       await new GetSynthese().run()
-      await new GetCompta().run(this.id)
+      const c = await new GetCompta().run(this.id)
+      if (c.estA) {
+        await afficherDiag(this.$t('PPnopart'))
+        return
+      }
+      this.idpCpt = c.idp
+      this.selx = null
       this.filtre = ''
       this.filtrer()
       this.ui.oD('BPchgTr', this.idc)
