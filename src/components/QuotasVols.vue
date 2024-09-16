@@ -1,34 +1,13 @@
 <template>
-  <div>
-    <div class="row items-center">
-      <span class="text-italic titre-md">{{$t('QVab' + (groupe ? '0' : '1'))}}</span>
-      <span class="q-ml-md fs-md font-mono text-bold">
-        {{'[' + vols.qn + '] ' + nbn(qnn)}}
-      </span>
-      <span v-if="!noutil && qnn" class="fs-md font-mono text-italic q-ml-md">
-        {{ $t('QVut', [pcn]) }}
-      </span>
-    </div>
-    <div class="row items-center">
-      <span class="text-italic titre-md">{{$t('QVab2')}}</span>
-      <span class="q-ml-md fs-md font-mono text-bold">
-        {{'[' + vols.qv + '] ' + edvol(qvv)}}
-      </span>
-      <span v-if="!noutil && qvv" class="fs-md text-italic font-mono q-ml-md">
-        {{$t('QVut', [pcv])}}
-      </span>
-    </div>
-    <div v-if="vols.qc" class="row items-center">
-      <span class="text-italic titre-md">{{$t('QVplc')}}</span>
-      <span class="q-ml-md fs-md font-mono text-bold">
-        {{'[' + vols.qc + '] ' + mon(vols.qc)}}
-      </span>
-    </div>
+  <div class="row q-gutter-md">
+    <div class="titre-md mh">{{$t('CQnbdocs', qnn)}}</div>
+    <div class="titre-md mh">{{edvol(qvv) + ' ' + $t('CQvolfics')}}</div>
+    <div class="titre-md mh">{{mon(vols.qc) + ' ' + $t('CQconsocalc')}}</div>
   </div>
 </template>
 
 <script>
-import { toRef } from 'vue'
+// import { toRef } from 'vue'
 import { UNITEN, UNITEV } from '../app/api.mjs'
 import { edvol, edqt, nbn, mon } from '../app/util.mjs'
 
@@ -58,7 +37,7 @@ export default {
   },
 
   setup (props) {
-    const vols = toRef(props, 'vols')
+    // const vols = toRef(props, 'vols')
     return {
       edvol, edqt, nbn, mon
     }
@@ -69,21 +48,4 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.btn1
-  padding: 1px !important
-  width: 1.5rem !important
-.larg
-  width: 11rem
-.bdg
-  max-height: 1rem
-.infoc
-  background-color: $blue-grey-3
-  border-radius: 5px
-  padding: 2px
-  color: black
-.infof
-  background-color: $blue-grey-9
-  border-radius: 5px
-  padding: 2px
-  color: white
 </style>

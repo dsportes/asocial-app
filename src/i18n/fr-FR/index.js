@@ -69,6 +69,7 @@ export default {
   conf: 'CONFIDENTIEL', // ...
   total: 'Total', // PageEspace
   ping: 'Ping', // OutilsTests
+
   nbnotes: 'Nb notes', // PageGroupes
   nbnnncng: 'Nb notes, chats et groupes', // PageAdmin
   volv2: 'Volume fichiers', // ChoixQuotas PageAdmin PageGroupes
@@ -1772,10 +1773,14 @@ export default {
 
   // choix quotas
   CQabo: 'Abonnements:',
-  CQtxut: 'Utilisé à {0}%',
+  // CQtxut: 'Utilisé à {0}%',
   CQconso: 'Consommation mensuelle plafond:',
   CQclec: 'Coût des lectures, écritures, transferts de fichiers',
   CQcu: 'En centimes par mois',
+
+  CQnbdocs: 'Pas de document | Un document | {count} documents',
+  CQvolfics: 'de fichiers',
+  CQconsocalc: 'par mois',
 
   EMOsearch1: 'Recherche',
   EMOnotfound: 'rien trouvé',

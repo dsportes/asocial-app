@@ -112,7 +112,7 @@
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
         <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond :disable="quotas.err" icon="check" cond="cUrgence"
+          <btn-cond :disable="quotas.err || !quotas.chg" icon="check" cond="cUrgence"
             :label="$t('ok')" @ok="validerq"/>
         </q-card-actions>
       </q-card>

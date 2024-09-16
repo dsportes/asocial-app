@@ -113,7 +113,7 @@
         <choix-quotas class="q-mt-sm" :quotas="quotas"/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
-          <btn-cond icon="check" :disable="quotas.err" :label="$t('valider')" @ok="validerq"/>
+          <btn-cond icon="check" :disable="quotas.err || !quotas.chg" :label="$t('valider')" @ok="validerq"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
