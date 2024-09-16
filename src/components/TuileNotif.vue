@@ -1,39 +1,43 @@
 <template>  
-  <div :class="(occupation ? 'w3b' : 'w2b') + ' row items-start'">
-    <div class="col-3 titre-md text-italic">{{$t('TUntfp')}}</div>
+  <div class="w3b row items-start">
+    <div class="col-6 row bordgris">
+      <div class="col-5 titre-md text-italic">{{$t('TUntfp')}}</div>
 
-    <div class="col-3 column bordgris">
-      <div class="row full-width">
-        <div class="col-4 text-italic text-center fs-sm">{{$t('TUsim')}}</div>
-        <div class="col-4 text-italic text-center fs-sm">{{$t('TUlec')}}</div>
-        <div class="col-4 text-italic text-center fs-sm">{{$t('TUmin')}}</div>
-      </div>
-      <div class="row items-center full-width">
-        <div class="col-4 font-mono text-center fs-md">{{src.ntfp[0] || '-'}}</div>
-        <div :class="cw(src.ntfp[1])">{{src.ntfp[1] || '-'}}</div>
-        <div :class="cn(src.ntfp[2])">{{src.ntfp[2] || '-'}}</div>
+      <div class="col-7 column">
+        <div class="row full-width">
+          <div class="col-4 text-italic text-center fs-sm">{{$t('TUsim')}}</div>
+          <div class="col-4 text-italic text-center fs-sm">{{$t('TUlec')}}</div>
+          <div class="col-4 text-italic text-center fs-sm">{{$t('TUmin')}}</div>
+        </div>
+        <div class="row items-center full-width">
+          <div class="col-4 font-mono text-center fs-md">{{src.ntfp[0] || '-'}}</div>
+          <div :class="cw(src.ntfp[1])">{{src.ntfp[1] || '-'}}</div>
+          <div :class="cn(src.ntfp[2])">{{src.ntfp[2] || '-'}}</div>
+        </div>
       </div>
     </div>
 
-    <div class="q-pl-sm col-3 titre-md text-italic">{{$t('TUntfc')}}</div>
+    <div class="col-6 row bordgris">
+      <div class="col-5 titre-md text-italic">{{$t('TUntfc')}}</div>
 
-    <div class="col-3 column bordgris">
-      <div class="row full-width">
-        <div class="col-4 text-italic text-center fs-sm">{{$t('TUsim')}}</div>
-        <div class="col-4 text-italic text-center fs-sm">{{$t('TUlec')}}</div>
-        <div class="col-4 text-italic text-center fs-sm">{{$t('TUmin')}}</div>
-      </div>
-      <div class="row items-center full-width">
-        <div class="col-4 font-mono text-center fs-md">{{src.ntf[0] || '-'}}</div>
-        <div :class="cw(src.ntf[1])">{{src.ntf[1] || '-'}}</div>
-        <div :class="cn(src.ntf[2])">{{src.ntf[2] || '-'}}</div>
+      <div class="col-7 column">
+        <div class="row full-width">
+          <div class="col-4 text-italic text-center fs-sm">{{$t('TUsim')}}</div>
+          <div class="col-4 text-italic text-center fs-sm">{{$t('TUlec')}}</div>
+          <div class="col-4 text-italic text-center fs-sm">{{$t('TUmin')}}</div>
+        </div>
+        <div class="row items-center full-width">
+          <div class="col-4 font-mono text-center fs-md">{{src.ntf[0] || '-'}}</div>
+          <div :class="cw(src.ntf[1])">{{src.ntf[1] || '-'}}</div>
+          <div :class="cn(src.ntf[2])">{{src.ntf[2] || '-'}}</div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { toRef } from 'vue'
+// import { toRef } from 'vue'
 
 export default {
   name: 'TuileNotif',
@@ -55,7 +59,7 @@ export default {
   }},
 
   setup (props) {
-    const src = toRef(props, 'src')
+    // const src = toRef(props, 'src')
     return {
     }
   }
@@ -65,8 +69,6 @@ export default {
 
 <style lang="sass" scoped>
 @import '../css/app.sass'
-.w2b
-  width: 21rem
 .w3b
   width: 24rem
 </style>

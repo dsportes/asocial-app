@@ -62,10 +62,10 @@
         </template>
         <div :class="dkli(idx) + 'q-ml-xl q-mb-lg'">
           <div class="row q-gutter-sm justify-center">
-            <tuile-cnv type="qc" :src="lg" occupation/>
-            <tuile-cnv type="qn" :src="lg" occupation/>
-            <tuile-cnv type="qv" :src="lg" occupation/>
-            <tuile-notif :src="lg" :total="idx === 0" occupation/>
+            <tuile-cnv type="qc" :src="lg"/>
+            <tuile-cnv type="qn" :src="lg"/>
+            <tuile-cnv type="qv" :src="lg"/>
+            <tuile-notif :src="lg" :total="idx === 0"/>
           </div>
           
           <div v-if="idx !== 0" class="q-my-xs">

@@ -8,11 +8,11 @@
         <div class="full-width fs-md">{{$t('TUpart', [session.codePart(p.id)])}}</div>
       </template>
       <div class="q-ml-xl q-mb-lg splg">
-        <div class="row justify-around">
-          <tuile-cnv type="qc" :src="lg" occupation/>
-          <tuile-cnv type="qn" :src="lg" occupation/>
-          <tuile-cnv type="qv" :src="lg" occupation/>
-          <tuile-notif :src="lg" occupation/>
+        <div class="row justify-center q-gutter-sm">
+          <tuile-cnv type="qc" :src="lg"/>
+          <tuile-cnv type="qn" :src="lg"/>
+          <tuile-cnv type="qv" :src="lg"/>
+          <tuile-notif :src="lg"/>
         </div>
         <div class="q-my-xs">
           <apercu-notif :editable="session.estComptable || session.estDelegue"

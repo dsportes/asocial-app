@@ -1,41 +1,31 @@
 <template>
-  <div :class="(occupation ? 'w3b' : 'w2b') + ' row items-start'">
+  <div class="w2b">
+    <div v-if="type==='qc'" class="row fs-md items-center bordgris">
+      <span class='col-auto'>{{mon(src.q.qc)}}</span>
+      <span class="q-ml-xs col">{{$t('CQconsocalc')}}</span>
+      <span class='col-2 text-center font-mono'>{{src.q.qc}}</span>
+      <span class='col-2 text-center font-mono'>{{aff}}%</span>
+      <span class='col-2 text-center font-mono'>{{uti}}%</span>
+    </div>
 
-    <div class="titre-md text-italic col-6">{{$t('TUt' + type)}}</div>
+    <div v-if="type==='qn'" class="row fs-md items-center bordgris">
+      <span class="q-ml-xs col">{{$t('CQnbdocs', src.q.qn * UNITEN)}}</span>
+      <span class='col-2 text-center font-mono'>{{src.q.qn}}</span>
+      <span class='col-2 text-center font-mono'>{{aff}}%</span>
+      <span class='col-2 text-center font-mono'>{{uti}}%</span>
+    </div>
 
-    <div class="col-6 row items-center bordgris">
-      <div v-if="type==='qc'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
-        <div class='font-mono fs-sm'>[{{src.q.qc}}]</div>
-        <div class='font-mono fs-md'>{{mon(src.q.qc)}}</div>
-      </div>
-      <div v-if="type==='qn'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
-        <div class='font-mono text-center fs-sm'>[{{src.q.qn}}]</div>
-        <div class='font-mono text-center fs-md'>{{nbn(src.q.qn * UNITEN)}}</div>
-      </div>
-      <div v-if="type==='qv'" :class="(occupation ? 'col-6' : 'col-7') + ' column items-center justify-center'">
-        <div class='font-mono text-center fs-sm'>[{{src.q.qv}}]</div>
-        <div class='font-mono text-center fs-md'>{{edvol(src.q.qv * UNITEV)}}</div>
-      </div>
-      <div :class="(occupation ? 'col-3' : 'col-5') + ' column items-center'">
-        <div class='fs-sm text-italic text-center'>{{$t('TUaff')}}</div>
-        <q-knob show-value font-size="0.8rem" v-model="aff"
-          size="30px" :thickness="0.22" color="primary" track-color="grey-5">
-          {{aff}}%
-        </q-knob>
-      </div>
-      <div v-if="occupation" class="col-3 column items-center">
-        <div class='fs-sm text-italic'>{{$t('TUuti')}}</div>
-        <q-knob show-value font-size="0.8rem" v-model="uti"
-          size="30px" :thickness="0.22" color="secondary" track-color="grey-5">
-          {{uti}}%
-        </q-knob>
-      </div>
+    <div v-if="type==='qv'" class="row fs-md items-center bordgris">
+      <span class='col-auto'>{{edvol(src.q.qv * UNITEV)}}</span>
+      <span class="q-ml-xs col">{{$t('CQvolfics')}}</span>
+      <span class='col-2 text-center font-mono'>{{src.q.qv}}</span>
+      <span class='col-2 text-center font-mono'>{{aff}}%</span>
+      <span class='col-2 text-center font-mono'>{{uti}}%</span>
     </div>
   </div>
 </template>
 
 <script>
-import { toRef, ref, watch } from 'vue'
 import { UNITEN, UNITEV } from '../app/api.mjs'
 import { edvol, mon, nbn } from '../app/util.mjs'
 
@@ -59,7 +49,7 @@ export default {
   data () { return {
   }},
 
-  setup (props) {
+  setup () {
     return {
       edvol, mon, nbn, UNITEN, UNITEV
     }
@@ -71,7 +61,5 @@ export default {
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .w2b
-  width: 21rem
-.w3b
-  width: 24rem
+  width: 16rem
 </style>

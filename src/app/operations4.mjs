@@ -3,7 +3,7 @@ import { encode } from '@msgpack/msgpack'
 import stores from '../stores/stores.mjs'
 import { Operation } from './operation.mjs'
 import { getPub } from './synchro.mjs'
-import { random, gzipB } from './util.mjs'
+import { random, gzipB, $t } from './util.mjs'
 import { Cles, isAppExc, ID } from './api.mjs'
 import { idb } from '../app/db.mjs'
 import { post, getData, putData } from './net.mjs'
@@ -304,7 +304,7 @@ export class CreationComptable extends Operation {
 - `nomYC` : nom du sponsorisé, crypté par le PBKFD de la phrase complète de sponsoring.
 - `cvA` : `{ id, v, ph, tx }` du sponsor, (ph et tx) cryptés par sa cle A.
 - `ardYC` : ardoise de bienvenue du sponsor / réponse du sponsorisé cryptée par le PBKFD de la phrase de sponsoring.
-
+- `htK txK` : hashtag et texte attribué par le sponsor au sponsorisé
 - `quotas` : `{qc, qn, qv}` pour un compte O, quotas attribués par le sponsor.
   - pour un compte "A" `[0, 1, 1]`. Un tel compte n'a pas de `qc` et peut changer à loisir
    `[qn, qv]` qui sont des protections pour lui-même (et fixe le coût de l'abonnement).
@@ -333,6 +333,7 @@ export class AjoutSponsoring extends Operation {
       const cleA = RegCles.get(session.avatarId)
       const cleAC = RegCles.get(session.compteId)
       const cv = session.getCV(session.avatarId)
+      const spht = $t('sponsorise')
       const args = { 
         token: session.authToken, 
         id: session.avatarId,
@@ -342,6 +343,8 @@ export class AjoutSponsoring extends Operation {
         YCK: await crypter(session.clek, arg.pc.pcb),
         cleAYC : await crypter(arg.pc.pcb, cleA),
         nomYC: await crypter(arg.pc.pcb, arg.nom),
+        txK: await crypter(session.clek, gzipB(arg.nom)),
+        htK: await crypter(session.clek, spht),
         cvA: await cv.crypter(cleA),
         ardYC: await crypter(arg.pc.pcb, arg.mot),
         dconf: arg.dconf

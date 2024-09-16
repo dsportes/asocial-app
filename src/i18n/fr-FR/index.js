@@ -51,6 +51,7 @@ export default {
   supprime: 'SUPPRIMÉ', // modele (chat chatgr)
   detail: 'Détails', // PageGroupes ApercuGenx
   details: 'Plus de détails', // PageGroupe
+  sponsorise: 'sponsorise',
 
   avatar: 'Avatar {0}', // FiltreAvgr
   groupe: 'Groupe {0}', // FiltreAvgr
@@ -2013,7 +2014,7 @@ export default {
   SAVabo1: '{4} document(s): {0} note(s) + {1} chat(s) + {2} participation(s) à des groupes',
   SAVabo2: 'Volume des fichiers: {0}',
 
-  TUtqc: 'Plafond conso. mensuelle',
+  TUtqc: '',
   TUtqn: 'Abon. nombre notes...',
   TUtqv: 'Abon. volume fichiers',
   TUaff: 'Affecté',
