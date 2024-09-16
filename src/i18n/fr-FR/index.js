@@ -1,4 +1,7 @@
 export default {
+  nomDuComptable: 'Comptable',
+  nomDeAdmin: 'Administrateur',
+  nomPartitionPrimitive: 'Primitive',
   defhashtags: 'important indesirable alire archive',
   
   aide: 'Un peu d\'aide ... ', // PageAccueil

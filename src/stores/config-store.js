@@ -41,8 +41,6 @@ export const useConfigStore = defineStore('config', {
       'leszsanglotszLONGSzgarezauzGORILLEz',
       'auzvillagezSANSzjaizmauvaisezREPUTATIONz'
     ],
-    nomDuComptable: 'Comptable',
-    nomTribuPrimitive: 'Primitive',
     allocComptable: [8, 2, 4],
     allocPrimitive: [256, 256, 256],
     quotas: { '0': 0, 'XXS': 1, 'XS': 2, 'SM': 4, 'MD': 8, 'LG': 16, 'XL': 32, 'XXL': 64 },
@@ -51,7 +49,6 @@ export const useConfigStore = defineStore('config', {
     lgtitre: 120,
     maxlgtextegen: 250,
     maxlgtextenote: 5000,
-    alertedlv: 40,
   
     motscles: {},
 
@@ -64,12 +61,7 @@ export const useConfigStore = defineStore('config', {
     motsclesLOC (state) { 
       const lg = useI18n().locale.value
       return state.motsclesloc[lg]
-    },
-    getCodeQ: (state) => { return (q) => { 
-        for (const c in state.quotas) { if (state.quotas[c] === q) return c }
-        return ''
-      }
-    },
+    }
   },
 
   actions: {

@@ -165,66 +165,6 @@ export class MajSponsEspace extends Operation {
   }
 }
 
-/* OP_CreerEspace: 'Création d\'un nouvel espace et de son comptable'
-- token : jeton d'authentification du compte de **l'administrateur**
-- ns : numéro de l'espace
-- org : code de l'organisation
-- hXR : hash du PBKFD de la phrase secrète réduite
-- hXC : hash du PBKFD de la phrase secrète complète
-- pub: clé RSA publique du Comptable
-- privK: clé RSA privée du Comptable cryptée par la clé K
-- clePK: clé P de la partition 1 cryptée par la clé K du Comptable
-- cleEK: clé E cryptée par la clé K
-- cleE: clé en clair
-- cleAP: clé A du Comptable cryptée par la clé de la partition
-- cleAK: clé A du Comptable cryptée par la clé K du Comptable
-- cleKXC: clé K du Comptable cryptée par XC du Comptable (PBKFD de la phrase secrète complète).
-- clePA: cle P de la partition cryptée par la clé A du Comptable
-- ck: `{ cleP, code }` crypté par la clé K du comptable
-
-export class CreerEspace extends Operation {
-  constructor() { super('CreerEspace') }
-
-  async run(org, phrase, ns) {
-    try {
-      const session = stores.session
-      const config = stores.config
-
-      const cleP = Cles.partition(1) // clé de la partition 1
-      const cleK = random(32) // clé K du Comptable
-      const cleE = random(32) // clé de l'espace pour lire les rapports générés sur le serveur
-      const cleA = Cles.comptable() // clé A de l'avatar Comptable
-      const kp = await genKeyPair()
-
-      const tp = {cleP: cleP, code: config.nomPartitionPrimitive}
-
-      const args = {
-        token: session.authToken,
-        ns: ns,
-        org: org,
-        hXR: phrase.hps1,
-        hXC: phrase.hpsc,
-        pub: kp.publicKey,
-        privK: await crypter(cleK, kp.privateKey),
-        cleEK: await crypter(cleK, cleE),
-        cleE,
-        clePK: await crypter(cleK, cleP),
-        cleAP: await crypter(cleP, cleA, 1),
-        cleAK: await crypter(cleK, cleA),
-        cleKXC: await crypter(phrase.pcb, cleK),
-        clePA: await crypter(Cles.comptable(), cleP),
-        // `{ cleP, code }` crypté par la clé K du comptable
-        ck: await crypter(cleK, new Uint8Array(encode(tp)))
-      }
-      await post(this, 'CreerEspace', args)
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-*/
-
 /* `CreationComptable` : création du comptable d'un nouvel espace
 - token : jeton d'authentification du compte à créer
 - org : code de l'organisation
@@ -258,7 +198,7 @@ export class CreationComptable extends Operation {
       const cleA = Cles.comptable() // clé A de l'avatar Comptable
       const kp = await genKeyPair()
 
-      const tp = {cleP: cleP, code: config.nomPartitionPrimitive}
+      const tp = {cleP: cleP, code: $t('nomPartitionPrimitive')}
 
       const args = {
         token: session.authToken,

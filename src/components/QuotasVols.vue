@@ -9,7 +9,7 @@
 <script>
 // import { toRef } from 'vue'
 import { UNITEN, UNITEV } from '../app/api.mjs'
-import { edvol, edqt, nbn, mon } from '../app/util.mjs'
+import { edvol, nbn, mon } from '../app/util.mjs'
 
 export default {
   name: 'QuotasVols',
@@ -39,7 +39,7 @@ export default {
   setup (props) {
     // const vols = toRef(props, 'vols')
     return {
-      edvol, edqt, nbn, mon
+      edvol, nbn, mon
     }
   }
 

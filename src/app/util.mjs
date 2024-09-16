@@ -225,13 +225,6 @@ export function ungzipB (arg) {
 
 
 /* divers *****************************************************************/
-export function toRetry (nbr, dh) {
-  const rdl = state.config.retriesdlinmin
-  const d = nbr >= rdl.length ? (nbr - rdl.length) * rdl[rdl.length - 1] : rdl[nbr]
-  const t = dh + (d * 60000)
-  return t < Date.now()
-}
-
 export function deselect (u8, idx) {
   if (!u8) return new Uint8Array(0)
   const s = new Set(u8)
@@ -288,15 +281,6 @@ export function nbn (vol, n, u) { // v: nombre de notes ... n: avec décimales
     return (v / 1000000).toPrecision(3) + 'M ' + (u || '')
   }
   return vol.toFixed(n)
-}
-
-export function edqt (qt, n) { // v: nombre de notes ... n: avec décimales
-  if (!qt) return '[0]'
-  if (Number.isInteger(qt)) {
-    const l = stores.config.getCodeQ(qt)
-    return !l ? '[' + qt +']' : '[' + qt + ' ' + l +']'
-  }
-  return '[' + (qt.toFixed(n === undefined ? 2 : n)) + ']'
 }
 
 export async function readFile (file, bin) {

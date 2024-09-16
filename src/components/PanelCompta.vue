@@ -247,7 +247,7 @@
 <script>
 import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV, AMJ, Compteurs, Tarif } from '../app/api.mjs'
-import { dhcool, edqt, mon, nbn, edvol, dkli } from '../app/util.mjs'
+import { dhcool, mon, nbn, edvol, dkli } from '../app/util.mjs'
 import MoisM from './MoisM.vue'
 import PanelDeta from '../components/PanelDeta.vue'
 
@@ -361,7 +361,7 @@ export default ({
       session: stores.session,
       tarifs: Tarif.tarifs,
       cu,
-      edqt, mon, nbn, edvol, dhcool, dkli, UNITEN, UNITEV
+      mon, nbn, edvol, dhcool, dkli, UNITEN, UNITEV
     }
   }
 })

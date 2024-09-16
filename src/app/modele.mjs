@@ -5,7 +5,7 @@ import { $t, u8ToB64, gzipB, ungzipB, gzipT, ungzipT, titre,
   dhstring, normNomFichier } from './util.mjs'
 import { pbkfd, sha256, crypter, decrypter, decrypterStr, decrypterRSA } from './webcrypto.mjs'
 import { ID, Cles, E_BRO, Compteurs, AMJ,
-  synthesesPartition, FLAGS, UNITEN, UNITEV, hash } from './api.mjs'
+  synthesesPartition, FLAGS, UNITEN, UNITEV } from './api.mjs'
 import { DownloadFichier } from './operations4.mjs'
 
 import { idb } from './db.mjs'
@@ -145,8 +145,8 @@ export class CV {
   get texte () {
     if (this.tx) return this.tx
     const cfg = stores.config
-    if (!this.id) return cfg.nomDeAdmin
-    if (ID.estComptable(this.id)) return cfg.nomDuComptable
+    if (!this.id) return $t('nomDeAdmin')
+    if (ID.estComptable(this.id)) return $t('nomDuComptable')
     return '#' + this.id
   }
 
