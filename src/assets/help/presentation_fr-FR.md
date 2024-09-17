@@ -1,4 +1,3 @@
-@@Index général de la documentation [index](https://raw.githack.com/dsportes/asocial-doc/master/index.md)
 # Vue d'ensemble de l'application
 
 Une organisation, association, un groupe de quelques amis ... peut décider de disposer de son propre **espace a-social**, par exemple `monasso`, ayant des caractéristiques opposées à celles des réseaux dits _sociaux_, et a choisi un prestataire d'hébergement qui lui a créé un espace accessible par une URL comme `https://srv1.monhebergeur.net/` 
@@ -29,9 +28,9 @@ Si le titulaire du nouveau compte accepte les conditions proposées par le spons
 
 > _Revers de cette sécurité_ : si la personne titulaire d'un compte oublie sa **phrase secrète de connexion**, elle est ramenée à l'impuissance du pirate. Son compte s'autodétruira dans un délai d'un an et toutes ses données et notes disparaîtront.
 
-@@ Information détaillée à propos de la gestion des comptes [comptes](./comptes.md)
+@@comptes
 
-@@ L'usage de la cryptographie dans a-social [crypto](../tech/crypto.md)
+@@crypto
 
 # Avatars principal et secondaires d'un compte
 
@@ -330,7 +329,7 @@ Pour tous les comptes (y compris le Comptable)
 - par l'administrateur technique.
 
 
-@@ Maîtrise des coûts d'hébergement de l'application [coutshebergement](./coutshebergements.md).
+@@coutshebergement
 
 # Gérer les _espaces_
 

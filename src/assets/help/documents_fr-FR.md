@@ -1788,4 +1788,3 @@ _**Remarque**_: en session UI, d'autres documents figurent aussi en IndexedDB po
 - la gestion des fichiers locaux: `avnote fetat fdata loctxt locfic locdata`
 - la mémorisation de l'état de synchronisation de la session: `avgrversions sessionsync`. 
 
-@@ L'application UI [uiapp](./uiapp.md)

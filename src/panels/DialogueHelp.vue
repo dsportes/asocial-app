@@ -18,13 +18,14 @@
             >
             <template v-slot:default-header="prop">
               <div @click.stop="goto(prop.node.id)">
-                <div v-if="prop.node.type === 1" class="row items-center">
-                  <q-icon name="library_books" color="orange" size="24px" class="q-mr-sm" />
-                  <div :class="'text-bold text-italic' + cl(prop.node.id)">{{ prop.node.label }}</div>
+                <div v-if="prop.node.type === 1" class="row items-start no-wrap"
+                  :style="!prop.node.children.length ? 'margin-left:8px;' : ''">
+                  <q-icon name="library_books" color="orange" size="24px" class="col-auto q-mr-sm" />
+                  <div :class="'col text-bold text-italic' + cl(prop.node.id)">{{ prop.node.label }}</div>
                 </div>
-                <div v-if="prop.node.type === 2" class="row items-center">
-                  <q-icon name="note" color="primary" size="24px" class="q-mr-sm" />
-                  <div :class="cl(prop.node.id)">{{ prop.node.label }}</div>
+                <div v-if="prop.node.type === 2" class="row items-start no-wrap">
+                  <q-icon name="note" color="primary" size="24px" class="col-auto q-mr-sm" />
+                  <div :class="'col ' + cl(prop.node.id)">{{ prop.node.label }}</div>
                 </div>
               </div>
             </template>
@@ -194,11 +195,14 @@ export default ({
         } else {
           if (l.startsWith('@@')) {
             if (!t) continue // pas de menu dans l'intro
-            const i = l.indexOf('[')
-            if (i === -1 || i < 3) continue
-            const j = l.indexOf(']', i)
-            if (j === -1 || j === i + 1) continue
-            m.push({ label: l.substring(2, i), value: l.substring(i + 1, j) })
+            const code = l.substring(2).trim()
+            if (!pages.has(code)) continue
+            const titre = ($t('A_' + code) || '').trim()
+            if (!titre) continue
+            m.push({ label: titre, value: code })
+          } if (l.startsWith('<a href="$$/')) {
+            const x = l.substring(11)
+            tx.push('<a href="' + config.docsurl + x)
           } else {
             tx.push(remplaceImg(l))
           }
@@ -241,6 +245,11 @@ export default ({
   }
 })
 </script>
+
+<style lang="sass">
+.q-tree__node-header
+  align-items: start !important
+</style>
 
 <style lang="sass" scoped>
 @import '../css/app.sass'

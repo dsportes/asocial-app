@@ -29,4 +29,6 @@ Un tel espace est un réseau _privé_, **a-social**, de cercles réduits de conn
 
 La confidentialité _réelle_ repose in fine sur les femmes et les hommes titulaires des comptes: dès lors que quelqu'un peut lire une note ou un fichier de son espace _a-social_ ou lire / écrire un chat, rien ne peut l'empêcher techniquement de le publier ailleurs. Les notes personnelles sont réellement confidentielles ... du moins tant qu'on n'a pas décidé soi-même de les publier.
 
-@@Index général de la documentation - [index](https://raw.githack.com/dsportes/asocial-doc/master/index.md)
+<a href="$$/fr/about.html" target="_blank">Manuels</a>
+
+<a href="https://quasar.dev" target="_blank">Documentation de Quasar</a>
