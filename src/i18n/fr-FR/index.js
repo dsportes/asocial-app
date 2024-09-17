@@ -2212,6 +2212,16 @@ Fermer TOUTES les fenêtres / onglets où s'exécute l'application.
   - Enlever un hashtag sélectionné à gauche: cliquer dessus
   `,
 
+  BULLEquotas: ` Le nombre de "documents" correspond au nombre total,
+- de chats, les "indésirables" n'étant pas comptés,
+- de notes personnelles et de celles des groupes dont le compte est hébergeur,
+- de participations "actives" à des groupes.
+
+Le "volume des fichiers" est celui total de ceux attachés aux notes personnelles et à celles des groupes dont le compte est hébergeur.
+
+La "consommation mensuelle" de calcul est en centimes et est la somme des coûts des lectures, écritures et de transfert de volume montant et descendant.
+`,
+
   A_pa: 'L\'application "a-social"',
   A_av: 'Les vues, interprétation et saisie',
   A_faq: 'Comment faire pour, questions et réponses',

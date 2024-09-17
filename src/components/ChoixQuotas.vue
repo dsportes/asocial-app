@@ -1,6 +1,7 @@
 <template>
   <div class="q-pa-xs">
-    <div class="row items-center">
+    <div class="row items-center" style="position:relative">
+      <bouton-bulle idtext="quotas" class="bb"/>
       <div class="col-6 row items-center">
         <div class="titre-md mh">{{$t('CQnbdocs', mv.qn * UNITEN)}}</div>
         <div v-if="quotas.n && mv.qn > 0" :class="'font-mono q-ml-sm ' + st(pcn)">[{{pcn}}%]</div>
@@ -8,7 +9,7 @@
 
       <q-input class="col-2 w2 text-center" outlined dense v-model.number="mv.qn" type="number" :disable="lecture"/>
 
-      <div class="col-4 row items-center justify-end">
+      <div class="col-4 row items-center justify-start">
         <div :class="'q-px-xs ' + stmx(mv.qn, mv.minn, mv.maxn)">{{mv.minn + '...' + mv.maxn}}</div>
         <btn-cond v-if="!lecture" :disable="mv.qn === qni" 
           class="q-ml-sm" icon="undo" size="sm" color="warning" @click="undo1"/>
@@ -23,7 +24,7 @@
 
       <q-input class="col-2 w2 text-center" outlined dense v-model.number="mv.qv" type="number" :disable="lecture"/>
 
-      <div class="col-4 row items-center justify-end">
+      <div class="col-4 row items-center justify-start">
         <div :class="'q-px-xs ' + stmx(mv.qv, mv.minv, mv.maxv)">{{mv.minv + '...' + mv.maxv}}</div>
         <btn-cond v-if="!lecture" :disable="mv.qv === qvi" 
           class="q-ml-sm" icon="undo" size="sm" color="warning" @click="undo2"/>
@@ -37,13 +38,12 @@
 
       <q-input class="col-2 w2 text-center" outlined dense v-model.number="mv.qc" type="number" :disable="lecture"/>
 
-      <div class="col-4 row items-center justify-end">
+      <div class="col-4 row items-center justify-start">
         <div :class="'q-px-xs ' + stmx(mv.qc, mv.minc, mv.maxc)">{{mv.minc + '...' + mv.maxc}}</div>
         <btn-cond v-if="!lecture" :disable="mv.qc === qci" 
           class="q-ml-sm" icon="undo" size="sm" color="warning" @click="undoc"/>
       </div>
     </div>
-
   </div>
 </template>
 <script>
@@ -51,6 +51,7 @@ import { edvol, mon } from '../app/util.mjs'
 import { toRef, watch } from 'vue'
 import { UNITEV, UNITEN } from '../app/api.mjs'
 import BtnCond from './BtnCond.vue'
+import BoutonBulle from './BoutonBulle.vue'
 
 export default {
   name: 'ChoixQuotas',
@@ -60,7 +61,7 @@ export default {
     groupe: Boolean
   },
 
-  components: { BtnCond },
+  components: { BtnCond, BoutonBulle },
 
   computed: {
     pcn () { return this.quotas.qn ? Math.floor(this.quotas.n * 100 / (this.quotas.qn * UNITEN)) : 999 },
@@ -142,4 +143,8 @@ export default {
   overflow-y: hidden
 .wi
   width: 3rem
+.bb
+  position: absolute
+  top: 0
+  right: 0
 </style>
