@@ -97,15 +97,20 @@
     </q-item>
     <q-separator v-if="session.groupeId" class="q-my-xs" color="orange"/>
 
-    <q-item v-if="session.groupeId" clickable @click="ui.setPage('groupe', 'groupe')">
-      <span class="text-italic text-bold" style="position:relative;top:3px">{{$t('ACgr')}}</span>
-      <q-btn class="q-ml-md text-bold" dense :label="nomg" no-caps
-        icon-right="open_in_new" @click="ui.setPage('groupe', 'groupe')"/>
+    <q-item class="row items-center">
+      <sel-grid/>
     </q-item>
 
-    <q-item v-if="session.groupeId" clickable @click="ui.setPage('groupe', 'membres')">
-      <q-item-section class="q-ml-lg">
-        <q-item-label lines="1">{{$t('ACnotes')}}
+    <q-item v-if="session.groupeId" clickable class="q-ml-lg" @click="ui.setPage('groupe', 'groupe')">
+      <q-item-section>
+        <q-item-label lines="1">{{$t('ACgr')}}</q-item-label>
+      </q-item-section>
+    </q-item>
+
+    <q-item v-if="session.groupeId" clickable class="q-ml-lg" @click="ui.setPage('groupe', 'membres')">
+      <q-item-section>
+        <q-item-label lines="1">{{$t('ACmb')}}
+          <q-badge color="primary" rounded>{{nbMembres}}</q-badge>
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -118,6 +123,7 @@
 <script>
 import stores from '../stores/stores.mjs'
 import SelAvid from './SelAvid.vue'
+import SelGrid from './SelGrid.vue'
 import { GetPartition } from '../app/synchro.mjs'
 
 export default {
@@ -125,7 +131,7 @@ export default {
 
   props: { menu: Boolean },
 
-  components: { SelAvid },
+  components: { SelAvid, SelGrid },
 
   computed: {
     nbchats () { return this.aSt.nbchats },
@@ -135,6 +141,7 @@ export default {
     nbgrpsT () { return this.session.compte.idGroupes().size },
     nbInvits () { return this.gSt.invitsAtt.length },
     nbContacts () { return this.gSt.contactsAtt.length },
+    nbMembres () { return this.gSt.nbMbC },
     bloc () { return this.session.estMinimal },
     nomg () { const idg = this.session.groupeid
       return idg ? this.session.getCV(idg).nom : ''

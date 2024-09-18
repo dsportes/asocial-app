@@ -760,8 +760,9 @@ export default {
 
   ////////////////////////////////////////////////////////
   SAVtit: 'Avatar sélectionné',
-  ACav: 'Relativement à l\'avatar',
-  ACgr: 'Relativement au groupe',
+  SGRtit: 'Groupe sélectionné',
+  ACgr: 'Détail du groupe',
+  ACmb: 'Liste des membres',
   ACaproposav: 'Information',
   ACnotes: 'Ses notes',
   ACgroupes: 'Ses groupes',

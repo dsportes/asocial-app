@@ -9,16 +9,18 @@
         <div class="col">
           <span class="text-bold titre-lg q-mr-sm">{{cv.nomC}}</span> 
           <span v-if="estAvc" class="fs-md q-mr-sm">[{{$t('moi')}}]</span> 
-          <span v-if="del && !ID.estComptable(id)" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
+          <span v-if="del && !estComptable" class="fs-md q-mr-sm">[{{$t('delegue')}}]</span> 
           <span class="fs-sm font-mono q-mr-sm">{{'#' + id}}</span> 
           <span v-if="im" class="fs-sm font-mono q-mr-sm">{{'[' + im + ']'}}</span> 
         </div>
-        <btn-cond class="col-auto" v-if="!ID.estComptable(id)"
-          icon="zoom_in" round stop @ok="ovcv"/>
+        <div class="col-auto" v-if="!estComptable">
+          <btn-cond v-if="estAvc || estAnim" icon="edit" round stop @ok="edcv"/>
+          <btn-cond v-else icon="zoom_in" round stop @ok="ovcv"/>
+        </div>
       </div>
       <div v-if="cv.texte" class="titre-md">{{titre(cv.texte)}}</div>
 
-      <mc-memo v-if="!ID.estComptable(id)" :id="id" :idx="idx"/>     
+      <mc-memo v-if="!estComptable" :id="id" :idx="idx"/>     
 
       <div class="row">
         <div class="col">
@@ -42,6 +44,10 @@
   <q-dialog v-model="ui.d.ACVouvrir[idc]" persistent>
     <apercu-cv :cv="cv"/>
   </q-dialog>
+
+  <!-- Dialogue d'édition de la carte de visite -->
+  <carte-visite v-model="ui.d.CVedition2[idc]" :cv="cv"/>
+
 </div>
 </template>
 
@@ -49,6 +55,7 @@
 import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import ApercuCv from '../dialogues/ApercuCv.vue'
+import CarteVisite from '../dialogues/CarteVisite.vue'
 import BtnCond from './BtnCond.vue'
 import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
@@ -67,12 +74,14 @@ export default {
     idx: Number
   },
 
-  components: { BtnCond, McMemo, ApercuCv },
+  components: { BtnCond, McMemo, ApercuCv, CarteVisite },
 
   computed: {
     chats () { return this.aSt.chatsDuCompte(this.id, true) },
     groupes () { return this.pSt.getSgr(this.id) },
     estGroupe () { return ID.estGroupe(this.id) },
+    estAnim () { return this.gSt.estAnim(this.id)},
+    estComptable () { return ID.estComptable(this.id )},
     estAvc () { return this.session.compte.mav.has(this.id) },
 
     cv () { return this.session.getCV(this.id) },
@@ -92,6 +101,9 @@ export default {
   methods: {
     ovcv () {
       this.ui.oD('ACVouvrir', this.idc)
+    },
+    edcv () {
+      this.ui.oD('CVedition2', this.idc)
     },
     ouvrirdetails () {
       this.session.setPeopleId(this.id)

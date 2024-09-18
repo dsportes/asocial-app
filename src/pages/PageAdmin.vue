@@ -58,9 +58,9 @@
         <div class="q-ml-lg">
           <btn-cond v-if="esp.hTC" class="q-ma-xs" :label="$t('ENnpspc')" 
             @ok="this.esp = esp; ui.oD('PAnvspc')" />
-          <div class="row justify-between q-my-xs">
-            <span class="fs-md">{{$t('ESprf', [esp.nprof])}}</span>
-            <btn-cond :label="$t('changer')"  @ok="ovchgprf1(esp)"/>
+          <div class="row q-my-xs">
+            <span class="fs-md q-mr-md">{{$t('ESprf', [esp.nprof])}}</span>
+            <btn-cond round icon="edit"  @ok="ovchgprf1(esp)"/>
           </div>
 
           <div v-if="!esp.hTC">
@@ -309,7 +309,7 @@ export default {
     },
 
     async valider () {
-      await new SetEspaceNprof().run(this.esp.id, this.prf)
+      await new SetEspaceNprof().run(this.esp.ns, this.prf)
       this.ui.fD()
       await this.loadEsp()
     },

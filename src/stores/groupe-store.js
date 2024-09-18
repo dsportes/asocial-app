@@ -37,6 +37,10 @@ export const useGroupeStore = defineStore('groupe', {
     // groupe courant
     egrC (state) { return state.map.get(state.session.groupeId) },
 
+    nbMbC (state) { const e = state.egrC
+      return !e ? 0 : e.membres.size
+    },
+
     // chat du groupe courant
     chatgr (state) {
       const id = stores.session.groupeId
@@ -80,6 +84,12 @@ export const useGroupeStore = defineStore('groupe', {
 
     egr: (state) => { return (id) => { 
         return state.map.get(id)
+      }
+    },
+
+    estAnim: (state) => { return (id) => { 
+        const e = state.map.get(id)
+        return e && e.estAnim
       }
     },
 

@@ -74,15 +74,13 @@ export class RegCc {
  * classe Phrase
 ******************************************************/
 export class Phrase {
-  static idxch = [0, 1, 4, 7, 10, 13, 16, 19, 22, 24]
 
   async init (texte) {
     this.phrase = texte
     const u8 = encoder.encode(texte)
     this.pcb = await pbkfd(u8)
     this.hpsc = Cles.hash9(this.pcb)
-    const u8b = Uint8Array.from(u8)
-    Phrase.idxch.forEach(i => { u8b[i + 12] = 0 })
+    const u8b = encoder.encode(texte.substring(0,12))
     const pr = await pbkfd(u8b)
     this.hps1 = Cles.hash9(pr)
     return this

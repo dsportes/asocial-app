@@ -1,6 +1,6 @@
 <template>
 <span class="row items-center">
-  <span class="text-italic text-bold q-mr-sm">{{$t('SAVtit')}}</span>
+  <span class="text-italic text-bold q-mr-sm">{{$t('SGRtit')}}</span>
   <q-select v-model="cav" borderless dense options-dense standard filled
     :options="options" style="min-width:120px;max-width:240px"
     popup-content-class="bg-accent text-white titre-lg text-bold q-pa-sm"/>
@@ -13,7 +13,7 @@ import { toRef, ref } from 'vue'
 import stores from '../stores/stores.mjs'
 
 export default {
-  name: 'SelAvid',
+  name: 'SelGrid',
 
   props: { 
     aucun: Boolean
@@ -22,10 +22,10 @@ export default {
   computed: {
     options () {
       const l = []
-      this.session.compte.mav.forEach(id => { 
+      this.session.compte.mpg.forEach((v, id) => { 
         l.push({ label: this.session.getCV(id).nom, value: id }) 
       })
-      const cid = this.session.avatarId
+      const cid = this.session.groupeId
       l.sort((a,b) => { return a.value === cid ? - 1 : (b.value === cid ? 1 : 
         (a.label < b.label ? -1 : (b.label > a.label ? 1 : 0)))})
       if (this.aucun) l.unshift({ label: '-', value: 0 })
@@ -34,7 +34,7 @@ export default {
   },
 
   watch: {
-    cav (ap) { this.session.setAvatarId(ap.value) }
+    cav (ap) { this.session.setGroupeId(ap.value) }
   },
 
   methods: {
@@ -50,18 +50,22 @@ export default {
     const cav = ref()
     const session = stores.session
 
-    if (session.avatarId) {
+    if (session.groupeId) {
       cav.value = { 
-        label: session.getCV(session.avatarId).nom, 
-        value: session.avatarId 
+        label: session.getCV(session.groupeId).nom, 
+        value: session.groupeId 
       }
     } else if (aucun.value) {
       cav.value = { label: '-', value: '' }
     } else {
-      cav.value = { 
-        label: session.getCV(session.compteId).nom, 
-        value: session.compteId 
-      }
+      const [gid] = session.compte.mpg.keys()
+      if (gid) {
+        session.setGroupeId(gid)
+        cav.value = { 
+          label: session.getCV(session.groupeId).nom, 
+          value: session.groupeId 
+        }
+      } else cav.value = { label: '-', value: '' }
     }
 
     return {

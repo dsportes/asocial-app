@@ -164,6 +164,7 @@ export default ({
       if (ps) {
         if (await new ExistePhrase().run(ps.hps1, 1)) {
           await afficherDiag(this.$t('existe'))
+          this.step = '0'
           return
         }
         this.ps = ps
