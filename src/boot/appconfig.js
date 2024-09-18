@@ -47,7 +47,7 @@ export default boot(async ({ app /* Vue */ }) => {
   const cfg = { pageSessionId: ID.rnd(), nc: 0 }
   for(const x in config) cfg[x] = config[x]
 
-  cfg.docsurl = urls.docsurl || 'http://localhost:4000'
+  cfg.docsurls = urls.docsurls || { 'en-FR': 'http://localhost:4000' }
 
   const h = window.location.host
   let u = (urls.opurl === 'http' || urls.opurl === 'https') ?

@@ -144,9 +144,11 @@ export default ({
 
   setup () {
     const $i18n = useI18n()
+    const locale = $i18n.locale.value
     const ui = stores.ui
 
     const config = stores.config
+    const docsurl = config.docsurls[locale] || 'http://localhost:8080/fr'
     const plan = config.planHelp
     const arbre = []
     const pages = new Map() // Key: nom page, value: nom de sa section
@@ -179,7 +181,7 @@ export default ({
     }
 
     function setChaps (id) {
-      const x = getMd(id, $i18n.locale.value).split('\n')
+      const x = getMd(id, locale).split('\n')
       intro.value = ''
       chaps.value = []
       let t = '', tx = [], m = []
@@ -202,7 +204,7 @@ export default ({
             m.push({ label: titre, value: code })
           } if (l.startsWith('<a href="$$/')) {
             const x = l.substring(11)
-            tx.push('<a href="' + config.docsurl + x)
+            tx.push('<a href="' + docsurl + x)
           } else {
             tx.push(remplaceImg(l))
           }

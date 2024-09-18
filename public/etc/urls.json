@@ -1,8 +1,10 @@
 {
-  "opurlZ": "http",
-  "pubsuburlZ" : "https",
   "opurl" : "http://localhost:8443",
   "pubsuburl" : "http://localhost:8443",
+  "docsurls": { "fr-FR": "http://localhost:4000/fr", "en-EN": "http://localhost:4000/en" },
+
+  "opurlZ": "http",
+  "pubsuburlZ" : "https",
   "opurlX" : "https://test.sportes.fr:8443",
   "pubsuburlX" : "https://test.sportes.fr:8443"
 }
