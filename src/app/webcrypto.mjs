@@ -6,7 +6,6 @@ import { sha256 as jssha256 } from 'js-sha256'
 import { toByteArray, fromByteArray } from './base64.mjs'
 import { AppExc, E_BRO } from './api.mjs'
 import { $t } from './util.mjs'
-// import { app_keys } from './keys.mjs'
 
 const SALTS = new Array(256)
 
