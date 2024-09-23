@@ -455,11 +455,6 @@ class IDB {
         if (buf) await this.db.fdata.put( { id: k, data: buf } )
           else this.db.fdata.where({ id: k }).delete()
       })
-      if (stores.config.DEBUG) {
-        console.log('IDB PUT ficav', f.id, f.dhdc)
-        if (buf) console.log('IDB PUT fdata', f.id, buf.length )
-        else console.log('IDB DEL fdata', f.id )
-      }
     } catch (e) {
       throw EX2(e)
     }

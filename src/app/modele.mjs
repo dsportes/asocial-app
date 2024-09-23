@@ -983,6 +983,12 @@ export class Groupe extends GenDoc {
     this.sts = nx
   }
 
+  get taille () { // nombre d'invités + actifs
+    let n = 0
+    this.st.forEach(st => { if (st > 1) n++})
+    return n
+  }
+
   get pcv () { return !this.qv ? 0 : Math.ceil(this.vf * 100 / this.qv * UNITEV) }
 
   alVol (v) {

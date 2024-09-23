@@ -41,7 +41,7 @@
       </div>
 
       <div class="row justify-between items-center q-my-md">
-        <div v-if="isDev" class="row">
+        <div v-if="config.phrases" class="row">
           <span class="text-primary cursor-pointer q-px-xs" v-for="(p, idx) in config.phrases" 
             :key="idx" @click="selph(p)">{{idx}}</span>
         </div>
@@ -175,7 +175,6 @@ export default ({
     const ui = stores.ui
     const config = stores.config
     const session = stores.session
-    const isDev = config.DEV
 
     const iconValider = ref(ui.ps.iconValider || 'check')
     const verif = ref(ui.ps.verif || false) // vérifier par double saisie
@@ -284,7 +283,6 @@ export default ({
       ui, config, session, styp,
       iconValider, labelValider, orgext, login, verif,
       orgL, ligne1, lgph,
-      isDev: isDev,
       setKB, keyboard,
       forceInput,
       vkb

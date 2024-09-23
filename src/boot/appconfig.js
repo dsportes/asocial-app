@@ -60,8 +60,7 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.PUBSUBURL = u + '/pubsub/'
   console.log('PUBSUBURL: ' + cfg.PUBSUBURL)
 
-  console.log('debug:' + (cfg.DEBUG ? true : false) +
-    ' dev:' + (cfg.DEV ? true : false) + ' build:' + cfg.BUILD)
+  console.log(' build:' + cfg.BUILD)
   
   new BroadcastChannel('channel-pubsub').onmessage = msgPush
   

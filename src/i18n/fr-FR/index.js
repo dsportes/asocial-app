@@ -345,6 +345,7 @@ export default {
   EX8315: '(BUG) Le compte n\'a pas d\'avatar, animateur ou ayant droit d\'écriture et ayant l\'exclusivité (s\'il y en a une).',
   EX8316: '(BUG) Le Comptable a déjà créé son compte, phrase de sponsoring sans utilité.',
   EX8317: '(BUG) La mutation d\'un compte "A" en "O" ou "O" en "A" ne peut être demandée qu\'en ayant eu l\'accord du compte à muter en donnant sa phrase de contact.',
+  EX8318: '(BUG) Taille maximale du groupe atteinte',
 
   EX8401: 'L\'avatar sponsor est introuvable (probablement résilié).',
   EX8402: 'Le compte de l\'avatar sponsor est introuvable (probablement résilié).',
@@ -1439,6 +1440,7 @@ export default {
 
   AMinvit3: 'Invitation en attente de réponse avec droits:',
   AMinvit2: 'Invitation en cours de vote avec droits:',
+  AMinvittg: 'Invitation impossible, le groupe a déjà atteint sa taille maximale de {0} membres actifs / invités.',
   AMinvan: 'd\'animation',
   AMinvam: 'd\'accès aux membres',
   AMinvln: 'de lecture des notes',

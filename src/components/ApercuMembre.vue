@@ -291,8 +291,8 @@ a accès aux membres (donc dans l'onglet "membres").
 <script>
 import { ref } from 'vue'
 
-import { styp, dkli, dhcool, afficher8000 } from 'src/app/util.mjs'
-import { AMJ, edit, FLAGS } from '../app/api.mjs'
+import { styp, dkli, dhcool, afficher8000, afficherDiag } from 'src/app/util.mjs'
+import { AMJ, edit, FLAGS, MAXTAILLEGROUPE } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from './ApercuGenx.vue'
 import BoutonBulle2 from './BoutonBulle2.vue'
@@ -469,7 +469,11 @@ export default {
       this.ui.fD()
     },
 
-    ouvririnvit () { 
+    async ouvririnvit () { 
+      if (this.gr.taille >= MAXTAILLEGROUPE) {
+        await afficherDiag(this.$t('AMinvittg', [MAXTAILLEGROUPE]))
+        return
+      }
       this.rmsv = this.stm === 1 ? 0 : 1
       const fl = this.invits.fl
       this.ina = (fl & FLAGS.AN) !== 0

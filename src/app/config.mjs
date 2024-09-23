@@ -2,15 +2,10 @@
 
 export const config = {
   // CONFIGURATION TECHNIQUE : à adapter à chaque déploiement
-  DEV: true,
-  DEBUG: true,
+  vapid_public_key: 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew',
   BUILD: '24-08-16 17:30',
 
-  vapid_public_key: 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew',
-
-  portupload: 33666, // Ne pas changer en général
-
-  /* Configuration de profilage - obligatoires */  
+  /* Configuration linguistiques - Commenter les langues non souhaitées dans ce déploiement */  
   locale: 'fr-FR',
   localeOptions: [
     { value: 'en-EN', label: 'English',  flag: '🇬🇧' },
@@ -19,16 +14,18 @@ export const config = {
 
   silence: false,
   silenceHome: true,
-  dldemonsec: 10, // ficav-store : délai du démon
-  
-  /* Valeurs à spécifier quand elles contredisent les valeurs par défaut */
-  // En test pour éviter de frapper les "phrases secrètes" de test
+
+  // En test pour éviter de frapper les "phrases secrètes" de test. Vide en production
   phrases: [
     'leszsanglotszLONGSzgarezauzGORILLEz',
     'auzvillagezSANSzjaizmauvaisezREPUTATIONz'
   ],
+
+  /* Valeurs à ne pas changer, sauf rares exception */
+  portupload: 33666, // Ne pas changer en général
+  dldemonsec: 10, // ficav-store : délai du démon
   donorg: 2, // don par défaut à un compte A par création depuis un compte O
-  dons: [50, 100, 200], // choix des dons d'un compte A au sponsotring d'un autre compte A
+  dons: [50, 100, 200], // choix des dons d'un compte A au sponsoring d'un autre compte A
   dons2: [1, 5, 10, 20, 50], // choix des dons pour les dons directs pat chat
   allocComptable: [8, 2, 8],
   allocPrimitive: [256, 256, 256],

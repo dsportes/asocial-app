@@ -390,18 +390,19 @@ export const useFicavStore = defineStore('ficav', {
     },
 
     startDemon (sessionId) {
+      const DEBUG = false
       if (!this.session.accesIdb || (sessionId !== this.session.sessionId)) return
       setTimeout(async () => {
-        if (this.cfg.DEBUG) console.log('Start démon ' + dhcool(Date.now(), true))
+        if (DEBUG) console.log('Start démon ' + dhcool(Date.now(), true))
         while (sessionId === this.session.sessionId) {
           const fa = this.prochain()
           if (!fa) {
-            if (this.cfg.DEBUG) console.log('Attente avant retart démon ' + dhcool(Date.now(), true))
+            if (DEBUG) console.log('Attente avant retart démon ' + dhcool(Date.now(), true))
             setTimeout(() => { this.startDemon(sessionId) }, (this.delaisec * 1000))
             break
           }
           try {
-            if (this.cfg.DEBUG) console.log('Essai DL ' + fa.id + ' ' + fa.nbr + ' ' + dhcool(Date.now(), true))
+            if (DEBUG) console.log('Essai DL ' + fa.id + ' ' + fa.nbr + ' ' + dhcool(Date.now(), true))
             this.idfdl = fa.id
             let buf = this.getDataDeCache(fa.id)
             if (buf) {
@@ -422,7 +423,7 @@ export const useFicavStore = defineStore('ficav', {
               buf = await getData(ret.url)
               if (sessionId !== this.session.sessionId) break
               await this.ok(fa.id, buf)
-              if (this.cfg.DEBUG) console.log(`OK chargement : ${fa.id} ${fa.nom}#${fa.info}`)
+              if (DEBUG) console.log(`OK chargement : ${fa.id} ${fa.nom}#${fa.info}`)
             } catch (e) {
               if (sessionId !== this.session.sessionId) break
               await this.ko(fa.id, [404, e.message])

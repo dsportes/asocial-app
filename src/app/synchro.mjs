@@ -150,7 +150,7 @@ class SB {
 
   setH (d) { this.chatgrs.set(d.id, d) }
 
-  setM (d) { this.membres.set(d.ids, d) }
+  setM (d) { this.membres.set(d.id + '/' + d.ids, d) }
 
   delA (ida) { this.supprAv.add(ida) }
 
