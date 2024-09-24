@@ -1,9 +1,8 @@
 // Branch 20240801
 
 export const config = {
-  // CONFIGURATION TECHNIQUE : à adapter à chaque déploiement
-  vapid_public_key: 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew',
-  BUILD: '24-08-16 17:30',
+  // CONFIGURATION TECHNIQUE : à adapter SI NECESSAIRE à chaque déploiement
+  BUILD: '24-09-24 12:30',
 
   /* Configuration linguistiques - Commenter les langues non souhaitées dans ce déploiement */  
   locale: 'fr-FR',

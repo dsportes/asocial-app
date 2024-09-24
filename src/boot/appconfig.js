@@ -48,6 +48,7 @@ export default boot(async ({ app /* Vue */ }) => {
   for(const x in config) cfg[x] = config[x]
 
   cfg.docsurls = urls.docsurls || { 'en-FR': 'http://localhost:4000' }
+  cfg.vapid_public_key = urls.vapid_public_key || 'BC8J60JGGoZRHWJDrSbRih-0qi4Ug0LPbYsnft668oH56hqApUR0piwzZ_fsr0qGrkbOYSJ0lX1hPRTawQE88Ew'
 
   const h = window.location.host
   let u = (urls.opurl === 'http' || urls.opurl === 'https') ?
