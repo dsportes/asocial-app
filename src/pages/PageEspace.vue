@@ -30,6 +30,28 @@
 
     <q-separator color="orange" class="q-my-sm"/>
 
+    <div class="q-my-sm">
+      <div class="row">
+        <span class="fs-md q-mr-md">{{$t('ESquotas')}}</span>
+      </div>
+      <quotas-vols class="q-mt-xs" noutil :vols="session.espace.quotas"/>
+    </div>
+
+    <div class="q-my-sm">
+      <div class="row">
+        <span class="fs-md q-mr-md">{{$t('PIqa')}}</span>
+        <btn-cond round icon="edit"  @ok="editerqA()"/>
+      </div>
+      <quotas-vols class="q-mt-xs" noutil :vols="esp.quotas"/>
+    </div>
+
+    <div class="q-my-sm">
+      <div class="row">
+        <span class="fs-md q-mr-md">{{$t('PIqo')}}</span>
+      </div>
+      <quotas-vols class="q-mt-xs" noutil :vols="session.synthese.tsp['0'].q"/>
+    </div>
+
     <div v-if="synth.length">
     <div class="q-mx-xs" 
       v-for="(lg, idx) in synth" :key="lg.id">
@@ -76,7 +98,7 @@
           
           <div v-if="session.pow === 2 && idx !== 0" class="row q-mt-xs q-gutter-xs justify-center">
             <btn-cond icon="edit" cond="cUrgence" :label="$t('PEedn')" @ok="editer(lg)"/>
-            <btn-cond cond="cUrgence" icon="settings" :label="$t('PEabo')" @ok="editerq(lg)"/>
+            <btn-cond cond="cUrgence" icon="settings" :label="$t('PEabo')" @ok="editerqP(lg)"/>
             <btn-cond :disable="lg.nbc > 0" cond="cUrgence" icon="close" color="warning"
               :label="$t('supprimer')" @ok="supprimer(lg)"/>
           </div>
@@ -103,17 +125,32 @@
       </q-card>
     </q-dialog>
 
-    <!-- Dialogue de mise à jour des quotas de la partition -->
-    <q-dialog v-model="ui.d.PEedq" persistent>
+    <!-- Dialogue de mise à jour des quotas des comptes A -->
+    <q-dialog v-model="ui.d.PEedqA" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
-          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqut')}}</q-toolbar-title>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTquta')}}</q-toolbar-title>
         </q-toolbar>
         <choix-quotas class="q-mt-sm" :quotas="quotas" />
         <q-card-actions align="right" class="q-gutter-sm">
-          <btn-cond :disable="quotas.err || !quotas.chg" icon="check" cond="cUrgence"
-            :label="$t('ok')" @ok="validerq"/>
+          <btn-cond :disable="quotasA.err || !quotasA.chg" icon="check" cond="cUrgence"
+            :label="$t('ok')" @ok="validerqA"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Dialogue de mise à jour des quotas de la partition -->
+    <q-dialog v-model="ui.d.PEedqP" persistent>
+      <q-card :class="styp('sm')">
+        <q-toolbar class="bg-secondary text-white">
+          <btn-cond color="warning" icon="close" @ok="ui.fD"/>
+          <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqutp', [session.codePart(ligne.id)])}}</q-toolbar-title>
+        </q-toolbar>
+        <choix-quotas class="q-mt-sm" :quotas="quotasP" />
+        <q-card-actions align="right" class="q-gutter-sm">
+          <btn-cond :disable="quotasP.err || !quotasP.chg" icon="check" cond="cUrgence"
+            :label="$t('ok')" @ok="validerqP"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -289,30 +326,73 @@ export default {
       this.ui.fD()
     },
 
-    async editerq (lg) {
+    /*
+      espace.quotas : quotas de l'espace fixés par l'AT
+      synth.qa : quotas réservés aux comptes A
+      synth.tsp['0'] : somme des quotas des partitions
+      this.ligne.q: quotas actuellement attribués à la partition
+    */
+    async editerqP (lg) {
       await this.lgCourante(lg)
-      const q = this.ligne.q
-      this.quotas = { 
+      const q = this.ligne.q // quotas actuels de la partition
+      const synth = this.session.synthese 
+      const qpt = synth.tsp['0'].q
+      const qe = this.session.espace.quotas
+      const rqn = qe.qn - qpt.qn + q.qn
+      const maxn = rqn < 0 ? q.qn : rqn
+      const rqv = qe.qv - qpt.qv + q.qv
+      const maxv = rqv < 0 ? q.qv : rqv
+      const rqc = qe.qc - qpt.qc + q.qc
+      const maxc = rqc < 0 ? q.qc : rqc
+      this.quotasP = { 
         qc: q.qc, qn: q.qn, qv: q.qv,
         minc: 0, minn: 0, minv: 0,
-        maxc: 9999, maxn: 9999, maxv: 9999,
+        maxc, maxn, maxv,
         err: ''
       }
-      this.ui.oD('PEedq')
+      this.ui.oD('PEedqp')
     },
 
-    async validerq () {
-      await new SetQuotasPart().run(this.ligne.id, this.quotas)
+    async validerqP () {
+      await new SetQuotasPart().run(this.ligne.id, this.quotasP)
+      await this.refreshSynth()
+      this.ui.fD()
+    },
+
+    async editerqA () {
+      const synth = this.session.synthese 
+      const q = synth.qA // quotas actuels réservés aux comptes "A"
+      const qpt = synth.tsp['0'].q
+      const qe = this.session.espace.quotas
+      const rqn = qe.qn - qpt.qn + q.qn
+      const maxn = rqn < 0 ? q.qn : rqn
+      const rqv = qe.qv - qpt.qv + q.qv
+      const maxv = rqv < 0 ? q.qv : rqv
+      const rqc = qe.qc - qpt.qc + q.qc
+      const maxc = rqc < 0 ? q.qc : rqc
+      this.quotasA = { 
+        qc: q.qc, qn: q.qn, qv: q.qv,
+        minc: 0, minn: 0, minv: 0,
+        maxc, maxn, maxv,
+        err: ''
+      }
+      this.ui.oD('PEedqa')
+    },
+
+    async validerqA () {
+      await new SetQuotasA().run(this.quotasA)
       await this.refreshSynth()
       this.ui.fD()
     }
+
   },
 
   data () {
     return {
       mois: Math.floor(this.session.auj / 100),
       nom: '',
-      quotas: null,
+      quotasP: null,
+      quotasA: null,
       code: '',
       ligne: null,
       optionsNbmi: [3, 6, 12, 18, 24],

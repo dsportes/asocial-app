@@ -276,7 +276,7 @@ _data_ :
 - `creation` : date de création.
 - `moisStat` : dernier mois de calcul de la statistique des comptas.
 - `moisStatT` : dernier mois de calcul de la statistique des tickets.
-- `nprof` : numéro de profil d'abonnement.
+- `quotas`: { qn, qv, qc }` donne les quotas globaux maximum attribués par l'administrateur technique.
 - `dlvat` : `dlv` de l'administrateur technique.
 - `cleES` : clé de l'espace cryptée par la clé du site. Permet au comptable de lire les reports créés sur le serveur et cryptés par cette clé E.
 - `notifE` : notification pour l'espace de l'administrateur technique. Le texte n'est pas crypté.
@@ -298,7 +298,7 @@ export class Espace extends GenDoc {
     this.moisStat = row.moisStat || 0
     this.moisStatT = row.moisStatT || 0
     this.opt = row.opt || 0
-    this.nprof = row.nprof || 0
+    this.quotas = row.quotas
     this.dlvat = row.dlvat || 0
     this.nbmi = row.nbmi || 6
     this.notifE = row.notifE ? new Notification(row.notifE) : null
@@ -311,6 +311,9 @@ export class Espace extends GenDoc {
 _data_:
 - `id` : ns de son espace.
 - `v` : date-heure de dernière mise à jour (à titre informatif).
+- `qA` : `{ qc, qn, qv }` - quotas **maximum** disponibles pour les comptes A.
+- `qtA` : `{ qc, qn, qv }` - quotas **effectivement attribués** aux comptes A. 
+  En conséquence `qA.qn - qtA.qn` est le quotas qn encore attribuable aux compte A.
 
 - `tsp` : map des _synthèses_ des partitions.
   - _clé_: ID de la partition.
@@ -322,17 +325,19 @@ _data_:
     - `ntf[1,2,3]`
     - `pcac pcan pcav pcc pcn pcv`
 
-L'agrégation des `synth[i]` est calculée en session et stockée en `tsp['0']`.
+L'agrégation des `synth[i]` est calculée à la compilation dans `tsp['0']`.
 */
 export class Synthese extends GenDoc {
   static l1 = ['qc', 'qn', 'qv']
   static l2 = ['qc', 'qn', 'qv', 'c2m', 'n', 'v']
 
   async compile (row) {
+    this.qA = row.qA
+    this.qtA = row.qtA
     this.tsp = {}
 
     const a = { // colonne 0 de totalisation
-      id: 0, 
+      id: '0', 
       nbc: 0, 
       nbd: 0,
       ntfp: [0, 0, 0],

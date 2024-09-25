@@ -139,7 +139,8 @@ export const useUiStore = defineStore('ui', {
       PGctc: {},
       PEnt: false, // PageEspace
       PEedcom: false,
-      PEedq: false,
+      PEedqp: false,
+      PEedqa: false,
       PEdlvat: false,
       PEnotif: {},
       ASaccsp: false, // AcceptationSponsoring

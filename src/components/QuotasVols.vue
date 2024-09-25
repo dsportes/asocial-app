@@ -16,7 +16,7 @@ export default {
 
   props: { 
     noutil: Boolean, // sans % utilisation
-    vols: Object, // {qn qv qc v n} si estA: qc == 0
+    vols: Object, // {qn qv qc v n}
     groupe: Boolean
   },
 

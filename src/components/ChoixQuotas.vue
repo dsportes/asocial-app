@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <div v-if="!groupe && quotas.qc !== 0" class="row items-center">
+    <div v-if="!groupe" class="row items-center">
       <div class="col-6 row items-center">
         <div class="titre-md mh">{{edc(mv.qc) + ' ' + $t('CQconsocalc')}}</div>
       </div>

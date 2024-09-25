@@ -14,13 +14,6 @@
       <!-- maj quotas du compte -->
       <btn-cond v-if="estDelegue || estA"
         icon="settings" :label="$t('CPTedq')" @ok="editerq" cond="cUrgence"/>
-      <!--
-      <btn-cond v-if="!estA" color="warning" icon="change_history"
-        cond="cEdit" class="justify-start" @ok="ui.oD('PCmuta')"
-        :label="$t('PPmuterA')">
-        <q-tooltip>{{$t('PPmutA')}}</q-tooltip>
-      </btn-cond>
-      -->
     </div>
 
     <div class="row justify-center">
@@ -155,7 +148,8 @@ export default {
       ps: null,
       nomav: '',
       avid: 0,
-      quotas: null
+      quotas: null,
+      synth: null
     }
   },
 
@@ -235,22 +229,29 @@ export default {
       await new GetCompta().run()
       const c = this.session.compta
       if (this.estA) {
-        this.quotas = { qn: c.qv.qn, qv: c.qv.qv, qc: 0, minn: 0, minv: 0, minc: 0,
-          maxn: 256,
-          maxv: 256,
-          maxc: 256,
+        await new GetSynthese().run()
+        this.synth = this.session.synthese
+        const qA = this.synth.qA
+        const qtA = this.synth.qtA
+        let maxn = qA.qn - qtA.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
+        let maxc = qA.qc - qtA.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
+        let maxv = qA.qv - qtA.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
+        this.quotas = { qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
+          maxn, maxv, maxc,
           n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
           err: ''
         }
       } else {
         await new GetPartition().run(this.session.compte.idp)
         const s = this.session.partition.synth
-        this.quotas = { qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
-        maxn: s.q.qn - s.qt.qn + c.qv.qn,
-        maxv: s.q.qv - s.qt.qv + c.qv.qv,
-        maxc: s.q.qc - s.qt.qc + c.qv.qc,
-        n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
-        err: ''
+        let maxn = s.q.qn - s.qt.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
+        let maxc =s.q.qc - s.qt.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
+        let maxv = s.q.qv - s.qt.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
+        this.quotas = { 
+          qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
+          maxn, maxv, maxc,
+          n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
+          err: ''
         }
       }
       this.ui.oD('PTedq')

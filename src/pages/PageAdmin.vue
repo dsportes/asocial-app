@@ -58,9 +58,13 @@
         <div class="q-ml-lg">
           <btn-cond v-if="esp.hTC" class="q-ma-xs" :label="$t('ENnpspc')" 
             @ok="this.esp = esp; ui.oD('PAnvspc')" />
-          <div class="row q-my-xs">
-            <span class="fs-md q-mr-md">{{$t('ESprf', [esp.nprof])}}</span>
-            <btn-cond round icon="edit"  @ok="ovchgprf1(esp)"/>
+          
+          <div class="q-my-sm">
+            <div class="row">
+              <span class="fs-md q-mr-md">{{$t('ESquotas')}}</span>
+              <btn-cond round icon="edit"  @ok="ovchgquotas(esp)"/>
+            </div>
+            <quotas-vols class="q-mt-xs" noutil :vols="esp.quotas"/>
           </div>
 
           <div v-if="!esp.hTC">
@@ -137,7 +141,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- Changement du profil de l'espace -->
+    <!-- Changement des quotas de l'espace -->
     <q-dialog v-model="ui.d.PAedprf" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
@@ -145,25 +149,12 @@
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESchg')}}</q-toolbar-title>
         </q-toolbar>
         <q-card-section class="q-my-md q-mx-sm">
-          <div class="row bord4">
-            <div class="col-3 text-center font-mono">#</div>
-            <div class="col-3 text-center font-mono">{{$t('limco')}}</div>
-            <div class="col-3 text-center font-mono">{{$t('nbnnncng')}}</div>
-            <div class="col-3 text-center font-mono">{{$t('volv2')}}</div>
-          </div>
-          <div v-for="(x, idx) of cfg.profils" :key="idx" @click="prf = idx+1">
-            <div :class="'row cursor-pointer ' + dkli(idx) + brd(idx)">
-              <div class="col-3 text-center font-mono">{{idx + 1}}</div>
-              <div class="col-3 text-center font-mono">{{ev0(idx)}}</div>
-              <div class="col-3 text-center font-mono">{{ev1(idx)}}</div>
-              <div class="col-3 text-center font-mono">{{ev2(idx)}}</div>
-            </div>
-          </div>
+          <choix-quotas :quotas="quotas"/>
         </q-card-section>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond color="warning" icon="check" 
-            :label="$t('valider')" :disable="prf === profil" @ok="valider"/>
+            :label="$t('valider')" :disable="quotas.err || !quotas.chg" @ok="valider"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -182,7 +173,9 @@ import BtnCond from '../components/BtnCond.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import SaisieMois from '../components/SaisieMois.vue'
 import NotifIcon from '../components/NotifIcon.vue'
-import { CreationEspace, MajSponsEspace, SetEspaceNprof, InitTachesGC, 
+import QuotasVols from '../components/QuotasVols.vue'
+import ChoixQuotas from '../components/ChoixQuotas.vue'
+import { CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 
   StartDemon, DownloadStatC, DownloadStatC2, 
   GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
@@ -208,7 +201,7 @@ const OPNOMS = {
 export default {
   name: 'PageAdmin',
 
-  components: { NotifIcon, PhraseContact, BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond, SaisieMois },
+  components: { QuotasVols, ChoixQuotas, NotifIcon, PhraseContact, BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond, SaisieMois },
 
   computed: {
     sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
@@ -309,15 +302,16 @@ export default {
     },
 
     async valider () {
-      await new SetEspaceNprof().run(this.esp.ns, this.prf)
+      await new SetEspaceQuotas().run(this.esp.ns, this.quotas)
       this.ui.fD()
       await this.loadEsp()
     },
 
-    ovchgprf1 (e) {
-      this.profil = e.nprof
+    ovchgquotas (e) {
       this.esp = e
-      this.prf = 0
+      // minn, minv, maxn, maxv, minc, maxc, err
+      this.quotas = { ...e.quotas, err: null, minn: 0, minv: 0, minc: 0, 
+        maxn: 1000000, maxv: 1000000, maxc: 1000000 }
       this.ui.oD('PAedprf')
     },
 
@@ -375,8 +369,7 @@ export default {
       singl: null,
       dns: this.$t('ESreq'),
       dorg: this.$t('ESreq'),
-      prf: 0,
-      profil: 0,
+      quotas: null,
       esp: null,
       mois: Math.floor(this.session.auj / 100),
       taches: []

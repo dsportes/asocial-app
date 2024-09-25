@@ -162,15 +162,17 @@ export default {
 
     async editerq (c) {
       // c.q : {qc qn qv c2m nn nc ng v} extraits du document `comptas` du compte.
+      await new GetPartition().run(this.session.compte.idp)
       const s = this.session.partition.synth
-      this.quotas = { qn: c.q.qn, qv: c.q.qv, qc: c.q.qc, minn: 0, minv: 0, minc: 0,
-        maxn: s.q.qn - s.qt.qn + c.q.qn,
-        maxv: s.q.qv - s.qt.qv + c.q.qv,
-        maxc: s.q.qc - s.qt.qc + c.q.qc,
-        n: c.q.nn + c.q.nc + c.q.ng, v: c.q.v,
-        // n: 380, v: 5 * UNITEV,
+      let maxn = s.q.qn - s.qt.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
+      let maxc =s.q.qc - s.qt.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
+      let maxv = s.q.qv - s.qt.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
+      this.quotas = { 
+        qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
+        maxn, maxv, maxc,
+        n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
         err: ''
-        }
+      }
       this.ui.oD('PTedq')
     },
     

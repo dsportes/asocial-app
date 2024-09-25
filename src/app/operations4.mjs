@@ -190,7 +190,6 @@ export class CreationComptable extends Operation {
   async run(org, phrase, cleE, hTC) { // cleE: clé de l'espace pour lire les rapports générés sur le serveur
     try {
       const session = stores.session
-      const config = stores.config
 
       const cleP = Cles.partition() // clé de la partition
       const idp = Cles.id(cleP)
@@ -364,20 +363,21 @@ export class PassifChat extends Operation {
   }
 }
 
-/* OP_SetEspaceT: 'Attribution d\'un profil à un espace' ******************
-args.token donne les éléments d'authentification de l'administrateur.
-args.ns
-args.nprof
-Retour:
+/* OP_SetEspaceQuotas : 'Déclaration des quotas globaux de l\'espace par l\'administrateur technique',
+- `token` : jeton d'authentification du compte de **l'administrateur**
+- `ns` : id de l'espace notifié.
+- `quotas` : quotas globaux
+
+Retour: rien
 */
-export class SetEspaceNprof extends Operation {
+export class SetEspaceQuotas extends Operation {
   constructor () { super('SetEspaceNprof') }
 
-  async run (ns, nprof) {
+  async run (ns, quotas) {
     try {
       const session = stores.session
-      const args = { token: session.authToken, ns, nprof}
-      await post(this, 'SetEspaceNprof', args)
+      const args = { token: session.authToken, ns, quotas}
+      await post(this, 'SetEspaceQuotas', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)
@@ -596,7 +596,7 @@ un avatar principal ou non, d'un compte autonome ou non
 - id : id de l'avatar
 Retour: [idc, idp]
 - `idc`: id du compte
-- `idp`: numéro de tranche de quota si compte "0", 0 si compte "A"
+- `idp`: id de partition si compte "0", null si compte "A"
 */
 export class StatutAvatar extends Operation {
   constructor () { super('StatutAvatar') }
@@ -690,7 +690,7 @@ export class RafraichirCvsGr extends Operation {
   }
 }
 
-/* OP_SetQuotas: 'Fixation des quotas d'un compte dans sa partition'
+/* OP_SetQuotas: 'Fixation des quotas d'un compte dans sa partition ou comme compte A'
 - token: éléments d'authentification du compte.
 - idp : id de la partition
 - idc: id du compte
@@ -931,6 +931,26 @@ export class SetQuotasPart extends Operation {
       const session = stores.session
       const args = { token: session.authToken, idp, quotas}
       await post(this, 'SetQuotasPart', args)
+      this.finOK()
+    } catch (e) {
+      await this.finKO(e)
+    }
+  }
+}
+
+/* OP_SetQuotasA: 'Mise à jour des quotas pour les comptes A'
+- token: éléments d'authentification du compte.
+- quotas: {qc, qn, qv}
+Retour:
+*/
+export class SetQuotasA extends Operation {
+  constructor () { super('SetQuotasA') }
+
+  async run (quotas) {
+    try {
+      const session = stores.session
+      const args = { token: session.authToken, quotas}
+      await post(this, 'SetQuotasA', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)
