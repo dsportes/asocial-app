@@ -1,5 +1,5 @@
 <template>
-  <q-page class="column q-pa-xs">
+  <q-page v-if="session.synthese" class="column q-pa-xs">
     <div class="q-mb-sm">
       <div class="titre-md">{{$t('PEstm')}}</div>
       <div class="row q-gutter-sm q-mb-sm">
@@ -32,24 +32,24 @@
 
     <div class="q-my-sm">
       <div class="row">
-        <span class="fs-md q-mr-md">{{$t('ESquotas')}}</span>
+        <span class="titre-md q-mr-md">{{$t('ESquotas')}}</span>
       </div>
-      <quotas-vols class="q-mt-xs" noutil :vols="session.espace.quotas"/>
+      <quotas-vols class="q-ml-md" noutil :vols="session.espace.quotas"/>
     </div>
 
     <div class="q-my-sm">
       <div class="row">
-        <span class="fs-md q-mr-md">{{$t('PIqa')}}</span>
+        <span class="titre-md q-mr-md">{{$t('PIqa')}}</span>
         <btn-cond round icon="edit"  @ok="editerqA()"/>
       </div>
-      <quotas-vols class="q-mt-xs" noutil :vols="esp.quotas"/>
+      <quotas-vols class="q-ml-md" noutil :vols="session.espace.quotas"/>
     </div>
 
     <div class="q-my-sm">
       <div class="row">
-        <span class="fs-md q-mr-md">{{$t('PIqo')}}</span>
+        <span class="titre-md">{{$t('PIqo')}}</span>
       </div>
-      <quotas-vols class="q-mt-xs" noutil :vols="session.synthese.tsp['0'].q"/>
+      <quotas-vols class="q-ml-md" noutil :vols="session.synthese.tsp['0'].q"/>
     </div>
 
     <div v-if="synth.length">
@@ -60,7 +60,7 @@
         <template v-slot:header>
           <div :class="dkli(idx) + ' row full-width'">
             <div class="col-3 fs-md">
-              <span v-if="!lg.id">{{$t('total')}}</span>
+              <span v-if="lg.id === '0'">{{$t('total')}}</span>
               <span v-else>{{session.codePart(lg.id)}}</span>
             </div>
             <div class="col-3">
@@ -78,7 +78,7 @@
               <q-icon v-else name="check" color="grey-5" size="xs" />
             </div>
             <div class="col-1 text-right">
-              <btn-cond v-if="lg.id" round icon="open_in_new" stop @ok="pagePartition(lg)"/>
+              <btn-cond v-if="lg.id !== '0'" round icon="open_in_new" stop @ok="pagePartition(lg)"/>
             </div>
           </div>
         </template>
@@ -132,7 +132,7 @@
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTquta')}}</q-toolbar-title>
         </q-toolbar>
-        <choix-quotas class="q-mt-sm" :quotas="quotas" />
+        <choix-quotas class="q-mt-sm" :quotas="quotasA" />
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond :disable="quotasA.err || !quotasA.chg" icon="check" cond="cUrgence"
             :label="$t('ok')" @ok="validerqA"/>
@@ -184,11 +184,12 @@ import SaisieMois from '../components/SaisieMois.vue'
 import TuileCnv from '../components/TuileCnv.vue'
 import TuileNotif from '../components/TuileNotif.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
+import QuotasVols from '../components/QuotasVols.vue'
 import ApercuNotif from '../components/ApercuNotif.vue'
 import { dkli, styp, $t, afficherDiag } from '../app/util.mjs'
 import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition } from '../app/synchro.mjs'
-import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, 
+import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, SetQuotasA,
   SetCodePart, SupprPartition, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 
 const fx = [['id', 1], 
@@ -207,7 +208,7 @@ export default {
   name: 'PageEspace',
 
   props: { },
-  components: { BtnCond, SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
+  components: { QuotasVols, BtnCond, SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
 
   computed: {
     maxdl () { 
@@ -350,7 +351,7 @@ export default {
         maxc, maxn, maxv,
         err: ''
       }
-      this.ui.oD('PEedqp')
+      this.ui.oD('PEedqP')
     },
 
     async validerqP () {
@@ -376,7 +377,7 @@ export default {
         maxc, maxn, maxv,
         err: ''
       }
-      this.ui.oD('PEedqa')
+      this.ui.oD('PEedqA')
     },
 
     async validerqA () {

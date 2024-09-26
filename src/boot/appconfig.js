@@ -72,7 +72,7 @@ export default boot(async ({ app /* Vue */ }) => {
   cfg.locales = []
   cfg.localeOptions.forEach(t => {cfg.locales.push(t.value)})
 
-  const mc = cfg['motscles']
+  const mc = cfg.motscles
   cfg.motsclesloc = {}
   cfg.locales.forEach(l => { 
     const lmc = {}

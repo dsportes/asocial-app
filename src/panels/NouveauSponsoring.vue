@@ -42,9 +42,6 @@
           </div>
           <q-stepper-navigation>
             <btn-cond :label="$t('precedent')" @ok="step = session.estA ? 1 : 0" flat/>
-            <!--q-btn flat @click="step = 3" color="primary" padding="none" dense size="md"
-              :label="$t('suivant')" :disable="!pc || !pc.phrase"
-              class="q-ml-sm"/-->
           </q-stepper-navigation>
         </q-step>
 
@@ -70,7 +67,7 @@
           </q-stepper-navigation>
         </q-step>
 
-        <q-step v-if="!estAutonome" :name="5" :title="$t('NPquo1')" icon="settings" :done="step > 5" >
+        <q-step :name="5" :title="$t('NPquo1')" icon="settings" :done="step > 5" >
           <choix-quotas :quotas="quotas"/>
           <q-stepper-navigation>
             <btn-cond flat @ok="step = 4" :label="$t('precedent')" />
@@ -83,17 +80,17 @@
           <div class="titre-md">{{$t('NPphr')}} : <span class="font-mono q-pl-md">{{pc.phrase}}</span></div>
           <div class="titre-md">{{$t('NPnav')}} : <span class="font-mono q-pl-md">{{nom}}</span></div>
           <div class="titre-md">{{$t('NPmotc')}} : <span class="font-mono q-pl-md">{{mot}}</span></div>
-          <div v-if="!estAutonome">
+          <div>
             <div class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO', [partition.id])}}</div>
             <quotas-vols class="q-ml-md" :vols="quotas" noutil/>
           </div>
-          <div v-else class="text-warning titre-md">
+          <div v-if="estAutoneme" class="text-warning titre-md">
             <span>{{$t('compteA')}}</span>
             <span v-if="don" class="q-ml-sm">{{$t('NPdon2', [don])}}</span>
             <span v-if="dconf" class="q-ml-sm">{{$t('conf')}}</span>
           </div>
           <q-stepper-navigation class="row items-center q-gutter-sm q-mt-md">
-            <btn-cond flat @ok="step = estAutonome ? 4 : 5" :label="$t('corriger')"/>
+            <btn-cond flat @ok="step = 5" :label="$t('corriger')"/>
             <btn-cond @ok="confirmer" color="warning" :label="$t('confirmer')" 
             icon="check" cond="cEdit"/>
           </q-stepper-navigation>
@@ -107,7 +104,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -118,7 +115,7 @@ import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import PhraseContact from '../components/PhraseContact.vue'
 import QuotasVols from '../components/QuotasVols.vue'
-import { ExistePhrase, GetCompta } from '../app/synchro.mjs'
+import { ExistePhrase, GetCompta, GetSynthese } from '../app/synchro.mjs'
 import { AjoutSponsoring } from '../app/operations4.mjs'
 
 export default ({
@@ -143,6 +140,7 @@ export default ({
       mot: '',
       don: 0,
       dconf: false,
+      quotas: null,
       diagmot: false
     }
   },
@@ -151,7 +149,7 @@ export default ({
     mot (ap, av) {
       this.diagmot = ap.length < 10 || ap.length > 140
     },
-    step (ap) {
+    async step (ap) {
       if (ap === 2) {
         setTimeout(() => {
           const elt = this.step2.querySelector('input')
@@ -164,6 +162,10 @@ export default ({
           const elt = this.step3.querySelector('input')
           if (elt) elt.focus()
         }, 500)
+        return
+      }
+      if (ap === 5) {
+        this.setQuotas()
         return
       }
       if (ap === 4) {
@@ -208,12 +210,30 @@ export default ({
     okmot () {
       if (this.mot.length > 0) {
         this.mot = this.mot.substring(0, 140)
-        this.step = this.estAutonome ? 6 : 5
+        this.step = 5
       }
     },
+
+    async setQuotas () {
+      let maxn = 0, maxv = 0, maxc = 0
+      if (this.estAutonome) {
+        this.synth = this.session.synthese
+        const qA = this.synth.qA
+        const qtA = this.synth.qtA
+        maxn = qA.qn - qtA.qn
+        maxv = qA.qv - qtA.qv
+        maxc = qA.qc - qtA.qc
+      } else {
+        const s = this.partition.synth
+        maxn = s.q.qn - s.qt.qn
+        maxv = s.q.qv - s.qt.qv
+        maxc = s.q.qc - s.qt.qc
+      }
+      this.quotas = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, minc: 0, maxn, maxv, maxc, err: null }
+    },
+
     async confirmer () {
-      const quotas = this.estAutonome ? { qc: 0, qn: 1, qv: 1 } :
-        { qc : this.quotas.qc, qn: this.quotas.qn, qv: this.quotas.qv }
+      const quotas = { qc : this.quotas.qc, qn: this.quotas.qn, qv: this.quotas.qv }
       try {
         const args = {
           pc: this.pc,
@@ -253,8 +273,6 @@ export default ({
 
     const optDon = ref(0)
 
-    const quotas = ref(null)
-
     if (session.estA) {
       step.value = 1
       optOSA.value = 2
@@ -263,20 +281,17 @@ export default ({
       step.value = 0
       if (accepteA) optionsOSA.push({ label: $t('compteA'), value: 2 })
       optOSA.value = 0
-      const cpt = partition.synth
-      quotas.value = { qc: 1, qn: 1, qv: 1, 
-        maxn: cpt.q.qn > cpt.qt.qn ? cpt.q.qn - cpt.qt.qn : 0, 
-        maxv: cpt.q.qv > cpt.qt.qv ? cpt.q.qv - cpt.qt.qn : 0,
-        maxc: cpt.q.qc > cpt.qt.qc ? cpt.q.qc - cpt.qt.qc : 0,
-        minn: 1, minv: 0, minc: 1 }
     }
+
+    onMounted (async () => {
+      await new GetSynthese().run()
+    })
 
     return {
       ID, ui, dkli, styp,
       step, step4, step2, step3,
       partition, optionsOSA, optOSA, optionsDon, optDon,
-      session: stores.session,
-      quotas
+      session: stores.session
     }
   }
   /*

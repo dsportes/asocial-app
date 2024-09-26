@@ -61,10 +61,10 @@
           
           <div class="q-my-sm">
             <div class="row">
-              <span class="fs-md q-mr-md">{{$t('ESquotas')}}</span>
+              <span class="titre-md q-mr-md">{{$t('ESquotas')}}</span>
               <btn-cond round icon="edit"  @ok="ovchgquotas(esp)"/>
             </div>
-            <quotas-vols class="q-mt-xs" noutil :vols="esp.quotas"/>
+            <quotas-vols class="q-ml-md" noutil :vols="esp.quotas"/>
           </div>
 
           <div v-if="!esp.hTC">
@@ -310,7 +310,7 @@ export default {
     ovchgquotas (e) {
       this.esp = e
       // minn, minv, maxn, maxv, minc, maxc, err
-      this.quotas = { ...e.quotas, err: null, minn: 0, minv: 0, minc: 0, 
+      this.quotas = { ...e.quotas, err: null, minn: 10, minv: 10, minc: 10, 
         maxn: 1000000, maxv: 1000000, maxc: 1000000 }
       this.ui.oD('PAedprf')
     },

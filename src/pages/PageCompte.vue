@@ -129,7 +129,7 @@ import ChoixQuotas from '../components/ChoixQuotas.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { styp, afficherDiag } from '../app/util.mjs'
 import { isAppExc, ID } from '../app/api.mjs'
-import { GetCompta, GetPartition } from '../app/synchro.mjs'
+import { GetCompta, GetPartition, GetSynthese } from '../app/synchro.mjs'
 
 export default {
   name: 'PageCompte',

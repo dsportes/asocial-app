@@ -14,6 +14,15 @@ export const config = {
   silence: false,
   silenceHome: true,
 
+  motscles: {
+    indesirable: { 'fr-FR': 'indesirable', 'en-EN': 'junk'}, 
+    important: { 'fr-FR': 'important', 'en-EN': 'important'}, 
+    obsolete: { 'fr-FR': 'obsolete', 'en-EN': 'obsolete'},
+    ami: { 'fr-FR': 'ami', 'en-EN': 'friend'},
+    alire: { 'fr-FR': 'alire', 'en-EN': 'toread'},
+    afaire: { 'fr-FR': 'afaire', 'en-EN': 'todo'}
+  },
+
   // En test pour éviter de frapper les "phrases secrètes" de test. Vide en production
   phrases: [
     'leszsanglotszLONGSzgarezauzGORILLEz',
@@ -26,11 +35,9 @@ export const config = {
   donorg: 2, // don par défaut à un compte A par création depuis un compte O
   dons: [50, 100, 200], // choix des dons d'un compte A au sponsoring d'un autre compte A
   dons2: [1, 5, 10, 20, 50], // choix des dons pour les dons directs pat chat
-  allocComptable: [8, 2, 8],
-  allocPrimitive: [256, 256, 256],
-  profils: [[100, 10, 10], [1000, 50, 50], [10000, 250, 250], [1000, 50, 10], [10000, 250, 50]],
-  lgtitre: 120,
+
   maxlgtextegen: 250,
-  maxlgtextesecret: 5000
+  maxlgtextesecret: 5000,
+  alerteDlv: 15
 
 }

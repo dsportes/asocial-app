@@ -7,10 +7,6 @@ export const useConfigStore = defineStore('config', {
     $q: null,
     /* Calculées par appconfig.js */
     build: 0,
-    debug: false,
-    dev: false,
-    
-    permission: false,
 
     subJSON: '???', // subscription obtenu de SW sérialisé
     pageSessionId: '', // rnd, identifiant universel du chargement de la page (session browser)
@@ -20,6 +16,7 @@ export const useConfigStore = defineStore('config', {
     aide: {},
     locales: [],
     motsclesloc: {},
+    motscles: {},
 
     pagesHelp: new Set(),
 
@@ -37,20 +34,12 @@ export const useConfigStore = defineStore('config', {
       { value: 'fr-FR', label: 'Français', flag: '🇫🇷' }
     ],
     portupload: 33666,
-    phrases: [
-      'leszsanglotszLONGSzgarezauzGORILLEz',
-      'auzvillagezSANSzjaizmauvaisezREPUTATIONz'
-    ],
-    allocComptable: [8, 2, 4],
-    allocPrimitive: [256, 256, 256],
-    quotas: { '0': 0, 'XXS': 1, 'XS': 2, 'SM': 4, 'MD': 8, 'LG': 16, 'XL': 32, 'XXL': 64 },
-    profils: [[100, 10, 10], [1000, 50, 50], [10000, 250, 250], [1000, 50, 10], [10000, 250, 50]],
+    phrases: [ ],
       
     lgtitre: 120,
     maxlgtextegen: 250,
     maxlgtextenote: 5000,
-  
-    motscles: {},
+    alerteDlv: 15,
 
     /* Autres */
     emojiIndex: null

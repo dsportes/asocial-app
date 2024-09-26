@@ -11,7 +11,7 @@
       :label="$t('PPmuterO')">
       <q-tooltip>{{$t('PPmutO')}}</q-tooltip>
     </btn-cond>
-    <btn-cond v-else color="warning" icon="change_history"
+    <btn-cond v-if="idp && !session.estComptable" color="warning" icon="change_history"
       cond="cEdit" class="justify-start" @ok="muterA"
       :label="$t('PPmuterA')">
       <q-tooltip>{{$t('PPmutA')}}</q-tooltip>

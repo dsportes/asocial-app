@@ -336,16 +336,6 @@ export class Synthese extends GenDoc {
     this.qtA = row.qtA
     this.tsp = {}
 
-    const a = { // colonne 0 de totalisation
-      id: '0', 
-      nbc: 0, 
-      nbd: 0,
-      ntfp: [0, 0, 0],
-      ntf: [0, 0, 0],
-      q: { qc: 0, qn: 0, qv: 0 },
-      qt: { qc: 0, qn: 0, qv: 0, c2m: 0, n: 0, v: 0 }
-    }
-
     if (row.tsp) for (const id in row.tsp) {
       const r = row.tsp[id]
       r.id = id
@@ -355,23 +345,8 @@ export class Synthese extends GenDoc {
       r.pcc = !r.q.qc ? 0 : Math.round(r.qt.c2m * 100 / r.q.qc) 
       r.pcn = !r.q.qn ? 0 : Math.round(r.qt.n * 100 / (r.q.qn * UNITEN)) 
       r.pcv = !r.q.qv ? 0 : Math.round(r.qt.v * 100 / (r.q.qv * UNITEV)) 
-    
-      a.nbc += r.nbc
-      a.nbd += r.nbd
-      a.ntfp[0] += r.ntfp[0]; a.ntfp[1] += r.ntfp[1]; a.ntfp[2] += r.ntfp[2]
-      a.ntf[0] += r.ntf[0]; a.ntf[1] += r.ntf[1]; a.ntf[2] += r.ntf[2]
-      Synthese.l1.forEach(f => { a.q[f] += r.q[f] })
-      Synthese.l2.forEach(f => { a.qt[f] += r.qt[f] })
       this.tsp[id] = r
     }
-
-    a.pcac = !a.q.qc ? 0 : Math.round(a.qt.qc * 100 / a.q.qc) 
-    a.pcan = !a.q.qn ? 0 : Math.round(a.qt.qn * 100 / a.q.qn) 
-    a.pcav = !a.q.qv ? 0 : Math.round(a.qt.qv * 100 / a.q.qv) 
-    a.pcc = !a.q.qc ? 0 : Math.round(a.qt.c2m * 100 / a.q.qc) 
-    a.pcn = !a.q.qn ? 0 : Math.round(a.qt.n * 100 / (a.q.qn * UNITEN)) 
-    a.pcv = !a.q.qv ? 0 : Math.round(a.qt.v * 100 / (a.q.qv * UNITEV)) 
-    this.tsp['0'] = a
   }
 
 }

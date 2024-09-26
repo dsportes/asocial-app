@@ -288,9 +288,9 @@ export class AjoutSponsoring extends Operation {
         ardYC: await crypter(arg.pc.pcb, arg.mot),
         dconf: arg.dconf
       }
+      args.quotas = arg.quotas
       if (arg.partitionId) { // compte O
         const cleP = RegCles.get(arg.partitionId)
-        args.quotas = arg.quotas
         args.partitionId = arg.partitionId
         args.del = arg.del
         args.clePYC = await crypter(arg.pc.pcb, cleP)
