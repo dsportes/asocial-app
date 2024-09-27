@@ -86,7 +86,7 @@
 
     <q-toolbar v-if="ui.page === 'compta'" inset 
       class="full-width bg-secondary text-white row justify-between">
-      <btn-cond icon="refresh" @ok="this.session.reloadCompta()"/>
+      <btn-cond icon="refresh" @ok="session.reloadCompta()"/>
       <q-tabs  class="col titre-md" v-model="ui.pagetab" inline-label outside-arrows mobile-arrows no-caps>
         <q-tab name="notif" :label="$t('PNCntf')" @click="ui.setTab('notif')"/>
         <q-tab name="compta" :label="$t('PNCabo')" @click="ui.setTab('compta')"/>
@@ -373,9 +373,6 @@
   <panel-people v-if="ui.d.detailspeople"/>
   <outils-tests v-if="ui.d.PAoutilsTests"/>
   <phrase-secrete v-if="ui.d.PSouvrir"/>
-  <apercu-chat v-if="ui.d.ACouvrir"/>
-  <apercu-chatgr v-if="ui.d.ACouvrir"/>
-  <apercu-chatgr v-if="ui.d.ACGouvrir"/>
 
   <!-- Opération en cours et son arrêt -->
   <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
@@ -441,8 +438,8 @@
 </q-layout>
 </template>
 
-<script>
-// import { ref, onMounted } from 'vue'
+<script setup>
+import { watchEffect, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
@@ -509,8 +506,6 @@ import PageCompta from './pages/PageCompta.vue'
 import PageNotes from './pages/PageNotes.vue'
 import PagePartition from './pages/PagePartition.vue'
 import PanelPeople from './panels/PanelPeople.vue'
-import ApercuChat from './panels/ApercuChat.vue'
-import ApercuChatgr from './panels/ApercuChatgr.vue'
 
 // Niveau 8
 import PageGroupes from './pages/PageGroupes.vue'
@@ -519,156 +514,106 @@ import PageGroupes from './pages/PageGroupes.vue'
 import PageGroupe from './pages/PageGroupe.vue'
 import PageInvitation from './pages/PageInvitation.vue'
 
-export default {
-  displayName: 'App',
-  name: 'App',
+const $t = useI18n().t
+set$t($t)
+const session = stores.session
+const aSt = stores.avatar 
+const gSt = stores.groupe
+const people = stores.people
+const config = stores.config
+const ui = stores.ui
 
-  components: { 
-    BtnCond, BoutonHelp, BoutonBulle, BoutonLangue, NotifIcon, QueueIcon, OutilsTests,
-    PageGroupe, PageGroupes, PageNotes, PageFicavion,
-    PageAdmin, PageMenu, PageLogin, PageClos, PageSession, PageAccueil, PageCompte, PageSponsorings, PageChats,
-    PageCompta, PageEspace, PagePartition, PagePeople, PanelPeople, PageInvitation,
-    FiltreRac, FiltreNom, FiltreMc, FiltreNbj, FiltreTri, FiltreNotif,
-    FiltreAvecgr, FiltreAvecsp, FiltreDel, FiltreSansheb, FiltreEnexcedent, FiltreAinvits, FiltreStmb,
-    DialogueErreur, DialogueHelp, FiltreAvgr, FiltreVols, FiltreAmbno, 
-    PressePapier, PhraseSecrete, ApercuChat, ApercuChatgr
-   },
+const $q = useQuasar()
+config.$q = $q
+$q.dark.set(true)
 
-  computed: {
-    iconsync () { return this.session.syncauto ? 'sync' : 'sync_problem' },
+ui.setScreenWH($q.screen.width, $q.screen.height)
+watchEffect(() => {
+  console.log($q.screen.width, $q.screen.height)
+  ui.setScreenWH($q.screen.width, $q.screen.height)
+})
 
-    clrsync () { return this.session.syncauto ? 'green-5' : 'warning' },
-
-    offset () { return this.ui.pagetab ? [0, -55] : [0, -25]},
-
-    lidk () { return !this.$q.dark.isActive ? 'sombre0' : 'clair0' },
-
-    aHome () { return (this.session.status === 2 && this.ui.page !== 'accueil')
-      || (!this.session.status && this.ui.page !== 'login') },
-
-    titrePage () {
-      const p = this.ui.page
-      let arg = ''
-      switch (p) {
-        case 'espace' : { return this.$t('Pespace', [this.session.org]) }
-        case 'partition' : { 
-          if (this.session.pow > 3) return this.$t('Ppartition2')
-          const p = this.session.partitionC || this.session.partition
-          return this.$t('Ppartition', [this.session.codePart(p.id)])
-        }
-        case 'sponsorings' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }
-        case 'groupesac' : { arg = this.aSt.avC ? this.people.getCV(this.session.avatarId).nom : '?'; break }
-        case 'groupe' : { arg = this.gSt.egrC ? this.people.getCV(this.session.groupeId).nom : this.$t('disparu'); break }
-        case 'invitation' : { arg = this.gSt.egrC ? this.people.getCV(this.session.groupeId).nom : this.$t('disparu'); break }
-      }
-      return this.$t('P' + p, [arg])
+const iconsync = computed(() => session.syncauto ? 'sync' : 'sync_problem')
+const clrsync = computed(() => session.syncauto ? 'green-5' : 'warning')
+const offset = computed(() => ui.pagetab ? [0, -55] : [0, -25])
+const lidk = computed(() => $q.dark.isActive ? 'sombre0' : 'clair0')
+const aHome = computed(() => session.status === 2 && ui.page !== 'accueil')
+      || (!session.status && ui.page !== 'login')
+const titrePage = computed(() => {
+  const p = ui.page
+  let arg = ''
+  switch (p) {
+    case 'espace' : { return $t('Pespace', [session.org]) }
+    case 'partition' : { 
+      if (session.pow > 3) return $t('Ppartition2')
+      const p = session.partitionC || session.partition
+      return $t('Ppartition', [session.codePart(p.id)])
     }
-  },
+    case 'sponsorings' : { arg = aSt.avC ? people.getCV(session.avatarId).nom : '?'; break }
+    case 'groupesac' : { arg = aSt.avC ? people.getCV(session.avatarId).nom : '?'; break }
+    case 'groupe' : { arg = gSt.egrC ? people.getCV(session.groupeId).nom : $t('disparu'); break }
+    case 'invitation' : { arg = gSt.egrC ? people.getCV(session.groupeId).nom : $t('disparu'); break }
+  }
+  return $t('P' + p, [arg])
+})
 
-  // Gère le franchissement du seuil etroit / large
-  watch: {
-    "$q.screen.width"() {
-      this.ui.setScreenWH(this.$q.screen.width, this.$q.screen.height)
-    },
-    "$q.screen.height"() {
-      this.ui.setScreenWH(this.$q.screen.width, this.$q.screen.height)
-    }
-  },
+async function resync () {
+  await new SyncFull().run()
+  ui.fD()
+}
 
-  data () { return {
-  }},
+async function modea () {
+  await new SyncFull().run()
+  setTimeout(async () => {
+    await session.startHB()
+  }, HBINSECONDS * 500)
+  ui.fD()
+}
 
-  methods: {
-    async resync () {
-      await new SyncFull().run()
-      this.ui.fD()
-    },
+async function moded () {
+  await session.stopHB()
+  ui.fD()
+}
 
-    async modea () {
-      await new SyncFull().run()
-      setTimeout(async () => {
-        await this.session.startHB()
-      }, HBINSECONDS * 500)
-      this.ui.fD()
-    },
+async function discon () {
+  if (session.status === 3) await deconnexion()
+  else ui.oD('dialoguedrc')
+}
 
-    async moded () {
-      await this.session.stopHB()
-      this.ui.fD()
-    },
-
-    async discon () {
-      if (this.session.status === 3) await deconnexion()
-      else this.ui.oD('dialoguedrc')
-    },
-
-    async reconnexion2 () { 
-      if (Notification.permission !== 'granted') {
-        const p = await Notification.requestPermission()
-        if (p === 'granted') {
-          this.config.permission = true
-          await this.session.setSubscription()
-          console.log(this.config.subJSON)
-        }
-      }
-      this.ui.fD()
-      await reconnexion() 
-    },
-
-    reload () { 
-      setTimeout(() => {
-        location.reload(true) 
-      }, 1000)
-    },
-
-    stopop () {
-      const op = this.session.opEncours
-      if (op && op.stop) op.stop()
-      this.ui.fD()
-    },
-
-    clickNotif () {
-      this.ui.setPage('compta', 'notif')
-    },
-    pageFicavion () { 
-      this.ui.setPage('ficavion')
-    },
-    infoSession () { 
-      if (this.session.status === 2) this.ui.setPage('session')
-    },
-    gotoAccueilLogin () {
-      this.ui.setPage(this.session.status === 2 ? 'accueil' : 'login')
-    },
-    fermerqm () {
-      this.ui.fD()
-      setTimeout(() => { this.ui.fD() }, 50)
-    },
-    async jailu () {
-      if (this.session.accesNetNf) await new SetDhvuCompte().run()
-    }
-  },
-
-  setup () {
-    set$t(useI18n().t)
-    const $q = useQuasar()
-    const config = stores.config
-    config.$q = $q
-    $q.dark.set(true)
-
-    const ui = stores.ui
-    ui.setScreenWH($q.screen.width, $q.screen.height)
-
-    return {
-      session: stores.session,
-      aSt: stores.avatar, 
-      gSt: stores.groupe,
-      people: stores.people,
-      config,
-      ui, CV,
-      styp, dkli, hms, deconnexion, AMJ
+async function reconnexion2 () { 
+  if (Notification.permission !== 'granted') {
+    const p = await Notification.requestPermission()
+    if (p === 'granted') {
+      config.permission = true
+      await session.setSubscription()
+      console.log(config.subJSON)
     }
   }
+  ui.fD()
+  await reconnexion() 
 }
+
+function reload () { 
+  setTimeout(() => {
+    location.reload(true) 
+  }, 1000)
+}
+
+function stopop () {
+  const op = session.opEncours
+  if (op && op.stop) op.stop()
+  ui.fD()
+}
+
+function clickNotif () { ui.setPage('compta', 'notif') }
+function pageFicavion () { ui.setPage('ficavion') }
+function infoSession () { if (session.status === 2) ui.setPage('session') }
+function gotoAccueilLogin () { ui.setPage(session.status === 2 ? 'accueil' : 'login') }
+function fermerqm () {
+  ui.fD()
+  setTimeout(() => { ui.fD() }, 50)
+}
+async function jailu () { if (session.accesNetNf) await new SetDhvuCompte().run() }
 </script>
 
 <style lang="css">

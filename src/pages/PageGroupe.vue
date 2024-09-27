@@ -6,7 +6,7 @@
       <btn-cond icon="people" cond="cEdit"
         :label="$t('PGinvitation')" @ok="ui.setPage('invitation')"/>
       <btn-cond v-if="gSt.ambano[0]" icon="chat" :label="$t('PGchat')" cond="cVisu"
-        @ok="this.ui.oD('ACGouvrir')"/>
+        @ok="this.ui.oD('ACGouvrir', idc)"/>
     </div>
 
     <div>
@@ -214,6 +214,11 @@
       </q-page-container>
     </q-layout>
   </q-dialog>
+
+  <q-dialog v-model="ui.d.ACGouvrir[idc]" full-height position="left" persistent>
+    <apercu-chatgr />
+  </q-dialog>
+
 </q-page>
 </template>
 
@@ -229,12 +234,13 @@ import SelAvid from '../components/SelAvid.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
+import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import { ModeSimple, RafraichirCvsGr, HebGroupe } from '../app/operations4.mjs'
 
 export default {
   name: 'PageGroupe',
 
-  components: { BoutonHelp, BtnCond, ApercuGenx, QuotasVols, ApercuMembre,
+  components: { ApercuChatgr, BoutonHelp, BtnCond, ApercuGenx, QuotasVols, ApercuMembre,
     SelAvid, BoutonConfirm, ChoixQuotas },
 
   computed: {

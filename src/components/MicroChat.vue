@@ -34,6 +34,9 @@
     :idE="chat ? chat.idE : idE"
     :mode="mode"/>
 
+  <q-dialog v-model="ui.d.MCACouvrir[idc]" full-height position="left" persistent>
+    <apercu-chat :id="chatx.id" :ids="chatx.ids"/>
+  </q-dialog>
 </div>
 </template>
 <script>
@@ -41,13 +44,14 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import NouveauChat from '../dialogues/NouveauChat.vue'
+import ApercuChat from '../panels/ApercuChat.vue'
 import BtnCond from './BtnCond.vue'
 import { ID } from '../app/api.mjs'
 
 export default ({
   name: 'MicroChat',
 
-  components: { NouveauChat, BtnCond },
+  components: { NouveauChat, BtnCond, ApercuChat },
 
   props: { 
     chat: Object, // si chat est donné, c'est lui qui est visualisé
@@ -80,7 +84,7 @@ export default ({
   methods: {
     ouvrirChat () {
       this.ui.setChatc(this.chatx.id, this.chatx.ids)
-      this.ui.oD('ACouvrir')
+      this.ui.oD('MCACouvrir', this.idc)
     },
     creerChat () {
       this.ui.oD('CCouvrir', this.idc)

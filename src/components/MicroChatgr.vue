@@ -15,17 +15,22 @@
       @click="ouvrirChat()"/>
   </div>
 
+  <q-dialog v-model="ui.d.MCACGouvrir[idc]" full-height position="left" persistent>
+    <apercu-chatgr />
+  </q-dialog>
+
 </div>
 </template>
 <script>
 // import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
+import ApercuChatgr from '../panels/ApercuChatgr.vue'
 
 export default ({
   name: 'MicroChatgr',
 
-  components: { },
+  components: { ApercuChatgr },
 
   props: { 
     chat: Object
@@ -42,14 +47,15 @@ export default ({
   methods: {
     ouvrirChat () {
       this.session.setGroupeId(this.chat.id)
-      this.ui.setChatc(this.chat.id)
-      this.ui.oD('ACGouvrir')
+      this.ui.oD('MCACGouvrir', this.idc)
     },
   },
   
   setup () {
+    const ui = stores.ui
+    const idc = ref(ui.getIdc())
     return {
-      ui: stores.ui,
+      ui, idc,
       aSt: stores.avatar,
       session: stores.session,
       dhcool

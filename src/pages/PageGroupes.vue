@@ -124,6 +124,10 @@
     </q-card>
   </q-dialog>
 
+  <q-dialog v-model="ui.d.PGACGouvrir[idc]" full-height position="left" persistent>
+    <apercu-chatgr />
+  </q-dialog>
+
 </q-page>
 </template>
 
@@ -137,6 +141,7 @@ import NomAvatar from '../components/NomAvatar.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
 import SelAvid from '../components/SelAvid.vue'
+import ApercuChatgr from '../panels/ApercuChatgr.vue'
 import InvitationAcceptation from '../components/InvitationAcceptation.vue'
 import { UNITEN, UNITEV } from '../app/api.mjs'
 import { NouveauGroupe, AnnulerContact } from '../app/operations4.mjs'
@@ -146,7 +151,7 @@ export default {
 
   props: { tous: Boolean },
 
-  components: { SelAvid, BtnCond, ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, InvitationAcceptation },
+  components: { ApercuChatgr,SelAvid, BtnCond, ChoixQuotas, NomAvatar, BoutonHelp, ApercuGenx, InvitationAcceptation },
 
   computed: {
     stt () { return this.gSt.pgLgFT[1] || { nn:0, qn: 0, vf: 0, qv: 0 }},
@@ -175,7 +180,7 @@ export default {
 
     async chat (elt) {
       this.session.setGroupeId(elt.groupe.id)
-      this.ui.oD('ACGouvrir')
+      this.ui.oD('PGACGouvrir', this.idc)
     },
 
     async nvGr () {

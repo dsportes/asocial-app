@@ -95,11 +95,14 @@ export const useUiStore = defineStore('ui', {
       OTrunning: false,
       AAeditionpc: {}, // ApercuAvatar
       ACchatedit: false, // ApercuChat
-      ACouvrir: false,
+      MCACouvrir: {}, // MicroChat
+      CAACouvrir: {}, // ChatAvec
       ACconfirmeff: false,
       ACconfirmrac: false,
       ACGchatedit: false, // ApercuChatgr
-      ACGouvrir: false,
+      MCACGouvrir: {}, // MicroChatgr
+      PGACGouvrir: {}, // PagesGroupes
+      ACGouvrir: {}, // PageGroupe
       ACGconfirmeff: false,
       CVedition: false, // CarteVisite
       AGnvctc: {}, // ApercuGroupe
@@ -339,7 +342,7 @@ export const useUiStore = defineStore('ui', {
     },
 
     setChatc (id, ids) {
-      this.chatc = { id, ids: ids || 1 }
+      this.chatc = { id, ids: ids || '1' }
     },
 
     setZombiChat (id, idsx) {

@@ -19,6 +19,10 @@
 
   <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="session.compteId" :idE="idE" :mode="2"/>
 
+  <q-dialog v-model="ui.d.CAACouvrir[idc]" full-height position="left" persistent>
+    <apercu-chat :id="chat.id" :ids="chat.ids"/>
+  </q-dialog>
+
 </div>
 </template>
 <script>
@@ -26,12 +30,13 @@ import { ref } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import NouveauChat from '../dialogues/NouveauChat.vue'
+import ApercuChat from '../panels/ApercuChat.vue'
 import BtnCond from './BtnCond.vue'
 
 export default ({
   name: 'ChatsAvec',
 
-  components: { NouveauChat, BtnCond },
+  components: { ApercuChat, NouveauChat, BtnCond },
 
   props: { 
     idE: String, 
@@ -43,7 +48,7 @@ export default ({
   computed: {
   },
 
- data () {
+  data () {
     return {
       chat: null
     }
@@ -53,7 +58,7 @@ export default ({
     ouvrirChat (ch) {
       this.chat = ch
       this.ui.setChatc(ch.id, ch.ids)
-      this.ui.oD('ACouvrir')
+      this.ui.oD('CAACouvrir', this.idc)
     },
     creerChat () {
       this.ui.oD('CCouvrir', this.idc)

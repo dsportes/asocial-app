@@ -1,5 +1,4 @@
 <template> <!-- BtnCond incorporés -->
-<q-dialog v-model="ui.d.ACouvrir" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated>
       <q-toolbar class="bg-secondary text-white">
@@ -10,23 +9,23 @@
         <bouton-help page="page1"/>
       </q-toolbar>
       <div v-if="!zombi">
-        <div v-if="chat.stE===0" class="text-warning text-bold bg-yellow-5">
-              {{$t('CHraccroche2', [session.getCV(chat.idE).nom])}}</div>
-        <div v-if="chat.stI===0" class="text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</div>
-        <div v-if="chat.stE === 2" class="text-center full-width bg-yellow-5 titre-lg text-bold text-negative q-paxs">
+        <div v-if="chatX.stE===0" class="text-warning text-bold bg-yellow-5">
+              {{$t('CHraccroche2', [session.getCV(chatX.idE).nom])}}</div>
+        <div v-if="chatX.stI===0" class="text-warning text-bold bg-yellow-5">{{$t('CHraccroche')}}</div>
+        <div v-if="chatX.stE === 2" class="text-center full-width bg-yellow-5 titre-lg text-bold text-negative q-paxs">
           {{$t('disparu')}}</div>
-        <apercu-genx v-else class="bordb" :id="chat.idE" :idx="0" />
+        <apercu-genx v-else class="bordb" :id="chatX.idE" :idx="0" />
         <div :class="sty() + 'q-pa-xs row justify-around items-center'">
-          <div v-if="chat.stE !== 2" class="row q-gutter-xs items-center">
+          <div v-if="chatX.stE !== 2" class="row q-gutter-xs items-center">
             <btn-cond :label="$t('CHadd1')" icon="add" @ok="editer(false)"
               :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
             <btn-cond v-if="session.estA" :label="$t('CHadd2')" icon="savings"
               @ok="editer(true)" :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
           </div>
-          <btn-cond v-if="chat.stI" 
+          <btn-cond v-if="chatX.stI" 
             :label="$t('CHrac')" icon="phone_disabled" @ok="raccrocher()"
             :cond="ui.urgence ? 'cUrgence' : 'cEdit'" />
-          <div v-if="!chat.stI" class="text-warning text-bold titre-md text-italic">
+          <div v-if="!chatX.stI" class="text-warning text-bold titre-md text-italic">
             {{$t('CHraccroche')}}
           </div>
         </div>
@@ -35,13 +34,13 @@
 
     <q-page-container>
       <q-card  v-if="!zombi" class="q-pa-sm">
-        <div v-for="it in chat.items" :key="it.dh + '/' + it.a">
+        <div v-for="it in chatX.items" :key="it.dh + '/' + it.a">
           <q-chat-message :sent="it.a===0" 
             :bg-color="(it.a===0) ? 'primary' : 'secondary'" 
             text-color="white"
             :stamp="dhcool(it.dh)">
             <sd-blanc v-if="!it.dhx" :texte="it.t"/>
-            <div v-else class="text-italic text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
+            <div v-else class="text-italic bg-yellow-3 text-negative">{{$t('CHeffa', [dhcool(it.dhx)])}}</div>
             <template v-slot:name>
               <div class="full-width row justify-between items-center">
                 <span>{{it.a===0 ? $t('moi') : nomE}}</span>
@@ -109,125 +108,110 @@
       </q-card>
     </q-dialog>
   </q-layout>
-</q-dialog>
 </template>
-<script>
 
-// import { } from 'vue'
+<script setup>
+  import { useI18n } from 'vue-i18n'
+  const $t = useI18n().t
 
-import stores from '../stores/stores.mjs'
+  import { ref, computed } from 'vue'
 
-import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
-import { MajChat, StatutAvatar, PassifChat } from '../app/operations4.mjs'
-import { ID } from '../app/api.mjs'
+  import stores from '../stores/stores.mjs'
 
-import SdBlanc from '../components/SdBlanc.vue'
-import EditeurMd from '../components/EditeurMd.vue'
-import ApercuGenx from '../components/ApercuGenx.vue'
-import BoutonHelp from '../components/BoutonHelp.vue'
-import BtnCond from '../components/BtnCond.vue'
-import { GetCompta } from '../app/synchro.mjs'
+  import { styp, sty, dhcool, dkli, afficherDiag } from '../app/util.mjs'
+  import { MajChat, StatutAvatar, PassifChat } from '../app/operations4.mjs'
+  import { ID } from '../app/api.mjs'
 
-export default {
-  name: 'ApercuChat',
+  import SdBlanc from '../components/SdBlanc.vue'
+  import EditeurMd from '../components/EditeurMd.vue'
+  import ApercuGenx from '../components/ApercuGenx.vue'
+  import BoutonHelp from '../components/BoutonHelp.vue'
+  import BtnCond from '../components/BtnCond.vue'
+  import { GetCompta } from '../app/synchro.mjs'
 
-  props: { },
+  const props = defineProps({ 
+    id: String, 
+    ids: String,
+    zombi: Boolean
+  })
+  
+  const zombi = props.zombi || false
 
-  components: { SdBlanc, EditeurMd, ApercuGenx, BoutonHelp, BtnCond },
+  const ui = stores.ui
+  const aSt = stores.avatar
+  const session = stores.session
+  const cfg = stores.config
+  const pSt = stores.people
 
-  computed: {
-    chat () { return this.aSt.getChat(this.ui.chatc.id, this.ui.chatc.ids) },
-    nomE () { return this.chat ? this.session.getCV(this.chat.idE).nom : ''},
-    nomI () { return this.chat ? this.session.getCV(this.chat.id).nom : ''},
-    estDel () { return ID.estComptable(this.idE) || this.session.estDelegue },
-    zombi () { return this.ui.chatc._zombi }
-  },
+  const chatX = computed(() => aSt.getChat(props.id, props.ids))
+  const nomE = computed(() => chatX.value ? session.getCV(chatX.value.idE).nom : '')
+  const nomI = computed(() => chatX.value ? session.getCV(chatX.value.id).nom : '')
+  const estDel = computed(() => ID.estComptable(chatX.value.idE) || session.estDelegue)
 
-  watch: {
-    mod (ap) {
-      console.log(this.idc2, mod)
-    }
-  },
+  // const nbci = ref(chatX.value.items.length) // pour tester l'init d'une variable locale
+  const dconf = ref(false)
+  const txt = ref('')
+  const avecDon = ref(false)
+  const mdon = ref(cfg.dons2[0])
+  const dheff = ref(0)
 
-  data () { return {
-    dconf: false,
-    txt: '',
-    avecDon: false,
-    mdon: this.cfg.dons2[0]
-  }},
-
-  methods: {
-    async effacer (dh) {
-      this.dheff = dh
-      this.ui.oD('ACconfirmeff')
-    },
-
-    async effop () {
-      this.ui.fD()
-      const disp = await new MajChat().run(this.chat, null, this.dheff)
-      if (disp) { await afficherDiag(this.$t('CHdisp')) }
-      this.dheff = 0
-    },
-
-    async addop () {
-      // console.log('ApercuChat.addop', 'fD')
-      this.ui.fD()
-      if (this.avecDon && this.mdon) {
-        await new GetCompta().run()
-        const compta = this.session.compta
-        if (this.mdon * 100 > compta.solde + 2) {
-          await afficherDiag(this.$t('CHcred', [compta.solde, this.mdon * 100]))
-          return
-        }
-      }
-      const don = this.avecDon ? this.mdon * 100 : 0
-      const txt = (this.avecDon && !this.dconf ? (this.$t('CHdonde', [this.mdon]) + '\n') : '') + this.txt
-      const disp = await new MajChat().run(this.chat, txt, 0, don)
-      if (disp) { await afficherDiag(this.$t('CHdisp')) }
-      this.txt = ''
-    },
-
-    async passifop () {
-      // console.log('ApercuChat.passifOp', 'fD')
-      this.ui.fD()
-      const suppr = await new PassifChat().run(this.chat)
-      if (suppr) { await afficherDiag(this.$t('CHsuppr')) }
-    },
-
-    async editer (avecDon) {
-      if (avecDon) {
-        this.dconf = false
-        const [ ,idp] = await new StatutAvatar().run(this.chat.idE)
-        if (idp !== 0) {
-          await afficherDiag(this.$t('CHauto'))
-          return
-        }
-      }
-      this.txt = this.chat ? this.chat.txt : ''
-      this.avecDon = avecDon
-      // console.log('ApercuChat.editer', 'ACchatedit')
-      this.ui.oD('ACchatedit')
-    },
-
-    async raccrocher () {
-      this.txt = ''
-      // console.log('ApercuChat.raccrocher', 'ACconfirmrac')
-      this.ui.oD('ACconfirmrac')
-    }
-  },
-
-  setup (props) {
-    return {
-      ui: stores.ui,
-      styp, sty, dkli, dhcool,
-      cfg: stores.config,
-      session: stores.session,
-      pSt: stores.people, 
-      aSt: stores.avatar
-    }
+  async function effacer (dh) {
+    dheff.value = dh
+    nbci.value--
+    ui.oD('ACconfirmeff')
   }
-}
+
+  async function effop () {
+    ui.fD()
+    const disp = await new MajChat().run(chatX.value, null, dheff.value)
+    if (disp) { await afficherDiag(this.$t('CHdisp')) }
+    dheff.value = 0
+  }
+
+  async function addop () {
+    ui.fD()
+    if (avecDon.value && mdon.value) {
+      await new GetCompta().run()
+      const compta = session.compta
+      if (mdon.value * 100 > compta.solde + 2) {
+        await afficherDiag($t('CHcred', [compta.solde, mdon.value * 100]))
+        return
+      }
+    }
+    const don = avecDon.value ? mdon.value * 100 : 0
+    const t = (avecDon.value && !dconf.value ? ($t('CHdonde', [mdon.value]) + '\n') : '') + txt.value
+    const disp = await new MajChat().run(chatX.value, t, 0, don)
+    if (disp) { await afficherDiag($t('CHdisp')) }
+    txt.value = ''
+  }
+
+  async function passifop () {
+    ui.fD()
+    const suppr = await new PassifChat().run(chatX.value)
+    if (suppr) { await afficherDiag($t('CHsuppr')) }
+  }
+
+  async function editer (avecD) {
+    if (avecD) {
+      dconf.value = false
+      const [ ,idp] = await new StatutAvatar().run(chatX.value.idE)
+      if (idp !== 0) {
+        await afficherDiag($t('CHauto'))
+        return
+      }
+    }
+    txt.value = chatX.value ? chatX.value.txt : ''
+    avecDon.value = avecD
+    ui.oD('ACchatedit')
+  }
+
+  async function raccrocher () {
+    txt.value = ''
+    ui.oD('ACconfirmrac')
+  }
+
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .bordb

@@ -1,5 +1,4 @@
 <template>
-<q-dialog v-model="ui.d.ACGouvrir" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
@@ -71,7 +70,6 @@
     </q-dialog>
 
 </q-layout>
-</q-dialog>
 </template>
 <script>
 
