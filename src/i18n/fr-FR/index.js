@@ -223,6 +223,7 @@ export default {
   EX8010: 'Erreur fonctionnelle volontaire pour test.\nDétail: {0}',
   EX8011: 'Sponsoring non trouvée pour cette phrase.',
   EX8012: 'Ce sponsoring a déjà été accepté ou refusé ou est hors limite. ({0})',
+  EX8013: '(BUG) Opération: [{0}] - argument incorrect: [{1}]',
 
   EX8055: 'Quota du compte dépassé pour le nombre de notes, chats, groupes. Demande:{0} - Quota:{1}',
   EX8056: 'Quota du compte dépassé pour le volume de fichiers. Demande:{0} - Quota:{1}',
