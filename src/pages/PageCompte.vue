@@ -187,7 +187,7 @@ export default {
       this.ps = ps 
     },
 
-    async changerps () { // TODO
+    async changerps () {
       this.ui.fD()
       const ret = await new ExistePhrase().run(this.ps.hps1, 1)
       if (isAppExc(ret)) return this.reset()

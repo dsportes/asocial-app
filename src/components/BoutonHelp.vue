@@ -7,34 +7,31 @@
 </span>
 </template>
 
-<script>
+<script setup>
+import { useI18n } from 'vue-i18n'
+const $t = useI18n().t
+
+import { computed } from 'vue'
 import stores from '../stores/stores.mjs'
 import { afficherDiag } from '../app/util.mjs'
 
-export default ({
-  name: 'BoutonHelp',
-
-  props: { size: String, page: String, label: String },
-
-  computed: {
-    tp () { return !this.ph.has(this.page) ? this.$t('HLPaidebd', [this.page]) : this.$t('A_' + this.page) }
-  },
-
-  methods: {
-    async ouvrir () {
-      if (this.ph.has(this.page)) { this.ui.pushhelp(this.page); return }
-      await afficherDiag(this.$t('HLPaidebd2'))
-    },
-  },
-  
-  setup () {
-    return {
-      ui: stores.ui,
-      ph: stores.config.pagesHelp
-    }
-  } 
+const props = defineProps({ 
+  size: String, 
+  page: String, 
+  label: String
 })
+
+const ph = stores.config.pagesHelp
+const ui = stores.ui
+
+const tp = computed (() => !ph.has(this.page) ? $t('HLPaidebd', [props.page]) : $t('A_' + props.page))
+
+async function ouvrir () {
+  if (ph.has(props.page)) { ui.pushhelp(props.page); return }
+  await afficherDiag($t('HLPaidebd2'))
+}
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 </style>

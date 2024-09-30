@@ -359,7 +359,7 @@
         <q-toolbar-title class="titre-lg full-width text-center">{{$t('MLAdrc')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
-      <q-card-actions vertical align="stretch" class="q-gutter-sm">
+      <q-card-actions vertical align="stretch" class="titre-md q-gutter-sm">
         <btn-cond color="warning" flat icon="logout" :label="$t('MLAdecon')" @ok="deconnexion"/>
         <btn-cond color="warning" flat icon="logout" :label="$t('MLArecon')" @ok="reconnexion"/>
         <btn-cond color="primary" flat :label="$t('MLAcont')" @ok="ui.fD"/>

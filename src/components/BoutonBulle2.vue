@@ -11,35 +11,25 @@
     </q-popup-proxy>
   </q-btn>
 </template>
-<script>
 
+<script setup>
 import { ref } from 'vue'
+
 import SdNb from './SdNb.vue'
 
-export default ({
-  name: 'BoutonBulle2',
-
-  components: { SdNb },
-
-  props: { icon: String, label: String, texte: String },
-
-  computed: {
-  },
-
-  methods: {
-    hide () {
-      this.qpp.hide()
-    }
-  },
-  
-  setup () {
-    const qpp = ref(null)
-    return {
-      qpp
-    }
-  } 
+const props = defineProps({ 
+  icon: String, 
+  label: String, 
+  texte: String 
 })
+
+const qpp = ref(null)
+
+function hide () {
+  qpp.value.hide()
+}
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .bord

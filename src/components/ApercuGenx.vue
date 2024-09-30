@@ -51,83 +51,67 @@
 </div>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup>
+import { computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
-import ApercuCv from '../dialogues/ApercuCv.vue'
-import CarteVisite from '../dialogues/CarteVisite.vue'
-import BtnCond from './BtnCond.vue'
 import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
-// Niveau 4
+import ApercuCv from '../dialogues/ApercuCv.vue'
+import CarteVisite from '../dialogues/CarteVisite.vue'
+import BtnCond from './BtnCond.vue'
 import McMemo from './McMemo.vue'
 
-export default {
-  name: 'ApercuGenx',
+import { useI18n } from 'vue-i18n'
+const $t = useI18n().t
 
-  props: { 
-    id: String, // id du groupe, avatar du compte ou contact
-    del: Boolean, // true si délégué, pour l'afficher
-    im: Number, // pour un membre pour l'afficher
-    nodet: Boolean, // true si le panel de détail ne peut PAS être ouvert
-    idx: Number
-  },
+const props = defineProps({ 
+  id: String, // id du groupe, avatar du compte ou contact
+  del: Boolean, // true si délégué, pour l'afficher
+  im: Number, // pour un membre pour l'afficher
+  nodet: Boolean, // true si le panel de détail ne peut PAS être ouvert
+  idx: Number
+})
 
-  components: { BtnCond, McMemo, ApercuCv, CarteVisite },
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  computed: {
-    chats () { return this.aSt.chatsDuCompte(this.id, true) },
-    groupes () { return this.pSt.getSgr(this.id) },
-    estGroupe () { return ID.estGroupe(this.id) },
-    estAnim () { return this.gSt.estAnim(this.id)},
-    estComptable () { return ID.estComptable(this.id )},
-    estAvc () { return this.session.compte.mav.has(this.id) },
+const aSt = stores.avatar
+const gSt = stores.groupe
+const pSt = stores.people
+const session = stores.session
 
-    cv () { return this.session.getCV(this.id) },
-
-    // true si le panel de détail est déjà ouvert
-    det () { return this.session.peopleId === this.id && this.ui.estOuvert('detailspeople') },
-
+const chats = computed(() => aSt.chatsDuCompte(props.id, true))
+const groupes = computed(() => pSt.getSgr(props.id))
+const estGroupe = computed(() => ID.estGroupe(props.id))
+const estAnim = computed(() => gSt.estAnim(props.id))
+const estComptable = computed(() => ID.estComptable(props.id))
+const estAvc = computed(() => session.compte.mav.has(props.id))
+const cv = computed(() => session.getCV(props.id))
+// true si le panel de détail est déjà ouvert
+const det = computed(() => session.peopleId === props.id && ui.estOuvert('detailspeople'))
     // Peut être choisi pour devenir contact du groupe courant
-    diagC () { return this.gSt.diagContact(this.id) }
-  },
+const diagC  = computed(() => gSt.diagContact(props.id))
 
-  data () {
-    return {
-    }
-  },
+function ovcv () {
+  ui.oD('ACVouvrir', idc)
+}
 
-  methods: {
-    ovcv () {
-      this.ui.oD('ACVouvrir', this.idc)
-    },
-    edcv () {
-      this.ui.oD('CVedition2', this.idc)
-    },
-    ouvrirdetails () {
-      this.session.setPeopleId(this.id)
-      this.ui.oD('detailspeople', 'a')
-    },
-    async select () {
-      this.ui.selectContact(this.id)
-    }
-  },
+function edcv () {
+  ui.oD('CVedition2', idc)
+}
 
-  setup () {
-    const ui = stores.ui
-    const idc =  ref(ui.getIdc())
-    return {
-      dkli, titre, ID, 
-      aSt: stores.avatar, 
-      gSt: stores.groupe, 
-      pSt: stores.people, 
-      session: stores.session, 
-      ui, idc
-    }
-  }
+function ouvrirdetails () {
+  session.setPeopleId(props.id)
+  ui.oD('detailspeople', 'a')
+}
+
+async function select () {
+  ui.selectContact(props.id)
 }
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .bord

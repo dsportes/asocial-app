@@ -3,50 +3,33 @@
     dense outlined standout="bg-warning text-white" :disable="!actif" v-model="text" 
     :label="actif ? $t('confirm', [code]) : $t('rienconf')" />  
 </template>
-<script>
 
-import { ref } from 'vue'
+<script setup>
+import { ref, watch } from 'vue'
+
 import { random } from '../app/util.mjs'
 
-export default ({
-  name: 'BoutonConfirm',
+const props = defineProps({ 
+  actif: Boolean, 
+  confirmer: Function 
+})
 
-  props: { actif: Boolean, confirmer: Function },
+const text = ref('')
+const code = ref('' + random(1))
 
-  computed: {
-  },
+watch(props.actif, (ap, av) => {
+  code.value = '' + random(1)
+  text.value = ''
+})
 
-  watch: {
-    actif (ap, av) {
-      this.code = '' + random(1)
-      this.text = ''
-    },
-    text (ap, av) {
-      if (ap === this.code) {
-        this.text = ''
-        this.confirmer()
-      }
-    }
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  methods: {
-  },
-  
-  setup () {
-    const text = ref('')
-    const code = ref('' + random(1))
-    return {
-      text,
-      code
-    }
-  } 
+watch(text, (ap, av) => {
+  if (ap === code.value) {
+    text.value = ''
+    props.confirmer()
+  }
 })
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .bord9991

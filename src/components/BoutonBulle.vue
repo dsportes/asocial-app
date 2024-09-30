@@ -10,38 +10,28 @@
     </q-popup-proxy>
   </q-btn>
 </template>
-<script>
 
-import { ref } from 'vue'
+<script setup>
+import { useI18n } from 'vue-i18n'
+const $t = useI18n().t
+
+import { ref, computed } from 'vue'
 import SdNb from './SdNb.vue'
 
-export default ({
-  name: 'BoutonBulle',
-
-  components: { SdNb },
-
-  props: { icon: String, idtext: String },
-
-  computed: {
-    txt () {
-      return this.idtext ? this.$t('BULLE' + this.idtext) : '???'
-    }
-  },
-
-  methods: {
-    hide () {
-      this.qpp.hide()
-    }
-  },
-  
-  setup () {
-    const qpp = ref(null)
-    return {
-      qpp
-    }
-  } 
+const props = defineProps({ 
+  icon: String, 
+  idtext: String 
 })
+
+const txt = computed(() => props.idtext ? $t('BULLE' + props.idtext) : '???')
+
+const qpp = ref(null)
+
+function hide () {
+  qpp.value.hide()
+}
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .bord
