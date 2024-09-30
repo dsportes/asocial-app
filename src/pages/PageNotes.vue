@@ -32,13 +32,13 @@
       </template>
     </q-tree>
 
-    <note-edit v-if="ui.d.NE"/>
-    <note-exclu v-if="ui.d.NX"/>
-    <note-fichier v-if="ui.d.NF"/>
-    <note-confirme v-if="ui.d.NC" :op="op"/>
+    <note-edit v-if="ui.d[idc] && ui.d[idc].NE"/>
+    <note-exclu v-if="ui.d[idc] && ui.d[idc].NX"/>
+    <note-fichier v-if="ui.d[idc] && ui.d[idc].NF"/>
+    <note-confirme v-if="ui.d[idc] && ui.d[idc].NC" :op="op"/>
 
     <!-- Download des notes sélectionnées -->
-    <q-dialog v-model="ui.d.PNdl" persistent>
+    <q-dialog v-model="ui.d[idc].PNdl" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="dlfin"/>
@@ -114,7 +114,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.NM" persistent>
+    <q-dialog v-model="ui.d[idc].NM" persistent>
       <div :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="chevron_left" @ok="fermer"/>
@@ -159,7 +159,7 @@
 
         <div v-if="selected && nSt.note" class="q-ml-md row"> 
           <show-html class="col bord1 q-mr-lg" :texte="nSt.note.texte" zoom maxh="4rem" />
-          <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @ok="ui.oD('NE')"/>
+          <btn-cond :disable="rec!==0" class="col-auto self-start" round icon="edit" @ok="ui.oD('NE', idc)"/>
         </div>
 
         <liste-auts v-if="selected && nSt.note && nSt.estGr"/>
@@ -179,7 +179,7 @@
             </span>
             <span class="q-ml-xs">{{nSt.note.mfa.size ? (edvol(nSt.note.vf) + '.') : ''}}</span>
           </div>
-          <btn-cond class="col-auto self-start" round icon="attach_file" @ok="ui.oD('NF')">
+          <btn-cond class="col-auto self-start" round icon="attach_file" @ok="ui.oD('NF', idc)">
             <q-tooltip>{{$t('PNOattach')}}</q-tooltip>
           </btn-cond>
         </div>
@@ -187,7 +187,7 @@
         <div v-if="selected && nSt.note && !rec && nSt.estGr" class="q-mt-xs q-mb-sm row">  
           <div v-if="nSt.mbExclu" class="col titre-sm">{{$t('PNOexclu', [nSt.mbExclu.cv.nomC])}}</div>
           <div v-else class="col text-italic titre-sm">{{$t('PNOnoexclu')}}</div>
-          <btn-cond class="col-auto self-start" round icon="person" @ok="ui.oD('NX')">
+          <btn-cond class="col-auto self-start" round icon="person" @ok="ui.oD('NX', idc)">
             <q-tooltip>{{$t('PNOexclu3')}}</q-tooltip>
           </btn-cond>
         </div>
@@ -195,7 +195,7 @@
         <div v-if="selected && !rec" class="q-my-xs row q-gutter-xs justify-start items-center">
           <note-plus/>
           <btn-cond v-if="nSt.note" color="warning" icon="delete" 
-            :label="$t('PNOsupp')" @ok="op='suppr';ui.oD('NC')"/>
+            :label="$t('PNOsupp')" @ok="op='suppr';ui.oD('NC', idc)"/>
           <btn-cond v-if="rattaut" icon="account_tree" :label="$t('PNOratt')" 
             cond="cEdit" @ok="rattacher"/>
         </div>
@@ -237,7 +237,8 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onUnmounted} from 'vue'
+
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
 import { dkli, sty, styp, $t, u8ToB64, dhcool, edvol, afficherDiag, 
@@ -365,7 +366,7 @@ export default {
       return s1 + (n && this.nSt.node && (n.ids === this.nSt.node.ids) ? ' msg' : '')
     },
 
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm', this.idc); else this.ui.fD() },
 
     s2Str (s) { return Array.from(s).sort().join(' ')},
 
@@ -373,7 +374,7 @@ export default {
       this.ht.clear()
       this.nSt.note.ht.forEach(t => { this.ht.add(t)})
       this.nSt.note.htg.forEach(t => { this.htg.add(t)})
-      this.ui.oD('NM')
+      this.ui.oD('NM', this.idc)
     },
   
     async validerHt () {
@@ -544,7 +545,7 @@ export default {
       if (this.lstn.length) {
         this.dlnc = this.lstn[0]
         this.dlst = 1
-        this.ui.oD('PNdl')
+        this.ui.oD('PNdl', this.idc)
       } else {
         await afficherDiag($t('PNOdlvide'))
       }
@@ -634,6 +635,8 @@ export default {
   },
 
   setup () {
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const nSt = stores.note
     nSt.resetRatt(false) // tous KO
     nSt.calculNfnt()
@@ -641,7 +644,7 @@ export default {
     return {
       tree: ref(null),
       session: stores.session, 
-      ui: stores.ui, 
+      ui, idc, 
       pSt: stores.people, 
       gSt: stores.groupe, 
       cfg: stores.config,

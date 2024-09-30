@@ -239,7 +239,6 @@ export const useAvatarStore = defineStore('avatar', {
     delChat (id, ids) {
       const e = this.map.get(id)
       if (e) e.chats.delete(ids)
-      this.ui.setZombiChat(id, ids)
     }
   }
 })

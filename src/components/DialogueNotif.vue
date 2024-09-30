@@ -40,7 +40,7 @@ import BtnCond from './BtnCond.vue'
 import EditeurMd from './EditeurMd.vue'
 import { styp, dhcool } from '../app/util.mjs'
 import { SetNotifE, SetNotifP, SetNotifC } from '../app/operations4.mjs'
-import { reconnexion, GetSynthese, GetPartition } from '../app/synchro.mjs'
+import { deconnexion, GetSynthese, GetPartition } from '../app/synchro.mjs'
 import { RegCles } from '../app/modele.mjs'
 
 export default {
@@ -86,7 +86,7 @@ export default {
       if (this.type === 0) {
         await new SetNotifE().run(suppr ? null : this.n, this.cible)
         this.session.setOrg('admin')
-        reconnexion()
+        deconnexion(true)
       } else {
         if (this.type === 1) {
           const clep = RegCles.get(this.cible)

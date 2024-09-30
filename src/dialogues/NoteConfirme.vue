@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.NC" persistent>
+<q-dialog v-model="ui.d[idc].NC" persistent>
 <q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
     <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { $t, styp } from '../app/util.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
@@ -63,6 +63,7 @@ export default {
   setup () {
     const session = stores.session
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const aSt = stores.avatar
     const nSt = stores.note
     const msg = ref('')

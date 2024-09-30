@@ -489,7 +489,7 @@ export const useSessionStore = defineStore('session', {
     startOp (op) {
       this.opEncours = op
       this.opSpinner = 0
-      stores.ui.oD('opDialog')
+      stores.ui.oD('opDialog', 'a')
       this.opCount()
       if (this.opTimer2) clearTimeout(this.opTimer2)
       this.signalOp = true

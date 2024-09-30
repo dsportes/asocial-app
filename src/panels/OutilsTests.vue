@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.PAoutilsTests" full-height position="left" persistent>
+<q-dialog v-model="ui.d.a.outilsTests" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
@@ -87,7 +87,7 @@
                 <div class="col fs-md">{{it.nb}}</div>
                 <q-btn v-if="it.vu" class="col-auto self-start q-mr-sm" icon="delete" 
                   size="md" round
-                  color="warning" padding="none" @click="itdel=it; ui.oD('OTsuppbase')"/>
+                  color="warning" padding="none" @click="itdel=it; ui.oD('OTsuppbase', idc)"/>
               </div>
               <div v-if="it.vu" class="q-pl-md q-mb-sm row items.center">
                 <div class="col-1">{{it.trig}}</div>
@@ -99,7 +99,7 @@
                 <div class="col-1">{{it.trig}}</div>
                 <div class="col-3 fs-sm font-mono">{{it.hps1}}</div>
                 <span v-if="!it.vu" class="col-8 text-right">
-                  <q-btn :disable="ui.d.OTrunning" @click.stop="getVU(it)"
+                  <q-btn :disable="ui.d[idc].OTrunning" @click.stop="getVU(it)"
                     size="md" dense color="primary" no-caps padding="xs" :label="$t('GBvol')"/>
                 </span>
               </div>
@@ -109,11 +109,11 @@
         </div>
     </q-card-section>
 
-    <q-dialog v-model="ui.d.HTags[idc]" persistent>
+    <q-dialog v-model="ui.d[idc].HTags" persistent>
       <hash-tags :src="new Set(['toto', 'titi', 'tutu'])" v-model="htx" okbtn @ok="htok" @ko="ui.fD()"/>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.OTrunning" persistent>
+    <q-dialog v-model="ui.d[idc].OTrunning" persistent>
       <q-card :class="styp('sm')">
         <div class="column items-center">
           <q-spinner-hourglass persistent color="primary" size="3rem" @click="ui.fD"/>
@@ -122,7 +122,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.OTsuppbase" persistent>
+    <q-dialog v-model="ui.d[idc].OTsuppbase" persistent>
       <q-card :class="styp('sm') + 'q-pa-sm'">
         <q-card-section>
           <div class="titre-md text-center q-my-sm">{{$t('GBprop', [itdel.trig])}}</div>
@@ -150,7 +150,8 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
+
 import { encode, decode } from '@msgpack/msgpack'
 
 // import CompTest from './CompTest.vue'
@@ -205,7 +206,7 @@ export default ({
         ok: this.okps,
         labelValider: 'test'
       }
-      this.ui.oD('PSouvrir')
+      this.ui.oD('phrasesecrete', this.idc)
     },
 
     async testDiag() {
@@ -292,7 +293,7 @@ export default ({
     },
 
     async getVU (it) {
-      this.ui.oD('OTrunning')
+      this.ui.oD('OTrunning', this.idc)
       try {
         const [v1, v2] = await vuIDB(it.nb)
         it.v1 = v1
@@ -351,6 +352,7 @@ export default ({
     const aSt = stores.avatar
     const config = stores.config
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const bases = {}
     const nbbases = ref(0)
 
@@ -407,8 +409,8 @@ export default ({
     }
     
     return {
-      idc: ref(ui.getIdc()),
-      styp, session, config, ui, aSt,
+      ui, idc,
+      styp, session, config, aSt,
       bases,
       nbbases,
       getBases,

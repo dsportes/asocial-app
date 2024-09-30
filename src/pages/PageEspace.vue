@@ -108,7 +108,7 @@
     </div>
 
     <!-- Edition du code d'une partition -->
-    <q-dialog v-model="ui.d.PEedcom" persistent>
+    <q-dialog v-model="ui.d[idc].PEedcom" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -126,7 +126,7 @@
     </q-dialog>
 
     <!-- Dialogue de mise à jour des quotas des comptes A -->
-    <q-dialog v-model="ui.d.PEedqA" persistent>
+    <q-dialog v-model="ui.d[idc].PEedqA" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -141,7 +141,7 @@
     </q-dialog>
 
     <!-- Dialogue de mise à jour des quotas de la partition -->
-    <q-dialog v-model="ui.d.PEedqP" persistent>
+    <q-dialog v-model="ui.d[idc].PEedqP" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -156,7 +156,7 @@
     </q-dialog>
 
     <!-- Dialogue de création d'une nouvelle partition -->
-    <q-dialog v-model="ui.d.PEnt" persistent>
+    <q-dialog v-model="ui.d[idc].PEnt" persistent>
       <q-card :class="styp('sm')">
         <div class="titre-lg q-my-sm">{{$t('PTnv')}}</div>
         <div class="q-pa-sm">
@@ -176,7 +176,8 @@
 </template>
 
 <script>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
+
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import BtnCond from '../components/BtnCond.vue'
@@ -290,7 +291,7 @@ export default {
         n: 0, v: 0,
         err: false
       }
-      this.ui.oD('PEnt')
+      this.ui.oD('PEnt', this.idc)
     },
 
     async creer () {
@@ -319,7 +320,7 @@ export default {
     async editer (lg) {
       await this.lgCourante(lg)
       this.code = this.session.compte.mcode.get(this.ligne.id)
-      this.ui.oD('PEedcom')
+      this.ui.oD('PEedcom', this.idc)
     },
 
     async valider () {
@@ -351,7 +352,7 @@ export default {
         maxc, maxn, maxv,
         err: ''
       }
-      this.ui.oD('PEedqP')
+      this.ui.oD('PEedqP', this.idc)
     },
 
     async validerqP () {
@@ -377,7 +378,7 @@ export default {
         maxc, maxn, maxv,
         err: ''
       }
-      this.ui.oD('PEedqA')
+      this.ui.oD('PEedqA', this.idc)
     },
 
     async validerqA () {
@@ -402,9 +403,9 @@ export default {
     }
   },
 
-  setup (props) {
+  setup () {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
     async function refreshSynth () {
       await new GetSynthese().run()

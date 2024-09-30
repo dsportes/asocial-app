@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.PSouvrir" persistent position="top"
+<q-dialog v-model="ui.d.a.phrasesecrete" persistent position="top"
   transition-show="slide-down" transition-hide="fade">
   <q-card :class="styp('sm')" style="position:relative; top:2.5rem">
     <q-toolbar class="bg-secondary text-white">
@@ -148,13 +148,13 @@ export default ({
     },
     okem () {
       this.encours = true
+      this.ui.fD()
       setTimeout(async () => {
         const pc = new Phrase()
         await pc.init(this.ligne1)
         // await sleep(5000)
         if (this.login) this.session.setOrg(this.orgL)
-        this.ui.fD()
-        this.ui.ps.ok(pc)
+        await this.ui.ps.ok(pc)
         this.raz()
       }, 300)
     },
@@ -171,8 +171,9 @@ export default ({
     }
   },
 
-  setup (props) {
+  setup () {
     const ui = stores.ui
+
     const config = stores.config
     const session = stores.session
 

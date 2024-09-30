@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <q-dialog v-model="ui.d.MMedition[idc]">
+    <q-dialog v-model="ui.d[idc].MMedition">
       <q-card :class="styp('sm')">
         <q-toolbar class="col-auto bg-secondary text-white">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
@@ -58,7 +58,7 @@
 </template>
 <script>
 
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import EditeurMd from './EditeurMd.vue'
@@ -120,7 +120,7 @@ export default {
     const session = stores.session
     const ui = stores.ui
     const aSt = stores.avatar
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
     const root = ref(null)
     const large = ref(false)

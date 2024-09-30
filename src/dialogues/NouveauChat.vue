@@ -1,5 +1,5 @@
 <template> <!-- BtnCond incorporés -->
-<q-dialog v-model="ui.d.CCouvrir[idc]" persistent>
+<q-dialog v-model="ui.d[idc].CCouvrir" persistent>
   <q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
     <q-btn dense size="md" color="warning" padding="none" icon="close" @click="ui.fD"/>

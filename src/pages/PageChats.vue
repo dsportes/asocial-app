@@ -57,13 +57,14 @@
       </div>
     </div>
 
-    <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc" :idI="session.avatarId" :mode="0"/>
+    <nouveau-chat v-if="ui.d[idc] && ui.d[idc].CCouvrir" :idc="idc" :idI="session.avatarId" :mode="0"/>
 
   </q-page>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { onUnmounted } from 'vue'
+
 import { saveAs } from 'file-saver'
 import mime2ext from 'mime2ext'
 import stores from '../stores/stores.mjs'
@@ -190,7 +191,7 @@ export default {
 
   setup () {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const aSt = stores.avatar
     const gSt = stores.groupe
     const session = stores.session

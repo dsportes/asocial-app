@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.detailspeople" full-height position="left" persistent>
+<q-dialog v-model="ui.d.a.detailspeople" full-height position="left" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>

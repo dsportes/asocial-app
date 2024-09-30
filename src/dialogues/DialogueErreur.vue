@@ -1,5 +1,5 @@
 <template>
-  <q-dialog v-model="ui.d.dialogueerreur" persistent>
+  <q-dialog v-model="ui.d.a.dialogueerreur" persistent>
     <q-card v-if="ui.exc" :class="styp('sm')">
       <q-card-section>
         <div v-if="special" class="titre-lg" v-html="html"/>
@@ -37,7 +37,7 @@
 <script>
 import stores from '../stores/stores.mjs'
 
-import { reconnexion, deconnexion } from '../app/synchro.mjs'
+import { deconnexion } from '../app/synchro.mjs'
 import { styp, html } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 
@@ -79,11 +79,11 @@ export default ({
     async notif () { this.ui.setPage('compta', 'notif')},
     async deconnecter () {
       this.ui.resetExc()
-      await deconnexion(true)
+      await deconnexion()
     },
     async reconnecter () {
       this.ui.resetExc()
-      await reconnexion()
+      await deconnexion(true)
     },
     continuer () {
       const resolve = this.ui.dialogueerreurresolve

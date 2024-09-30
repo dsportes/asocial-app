@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.NSnvsp" full-height position="left" persistent>
+<q-dialog v-model="ui.d[idc].NSnvsp" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -104,7 +104,8 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -255,6 +256,7 @@ export default ({
   setup () {
     const cfg = stores.config
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const session = stores.session
     const accepteA = session.espace.opt > 0
     const partition = session.partition
@@ -288,7 +290,7 @@ export default ({
     })
 
     return {
-      ID, ui, dkli, styp,
+      ID, ui, idc, dkli, styp,
       step, step4, step2, step3,
       partition, optionsOSA, optOSA, optionsDon, optDon,
       session: stores.session

@@ -55,7 +55,7 @@
     </q-page-container>
 
     <!-- Confirmation d'effacement d'un échange -->
-    <q-dialog v-model="ui.d.ACconfirmeff">
+    <q-dialog v-model="ui.d[idc].ACconfirmeff">
       <q-card :class="styp('sm')">
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHeff')}}
@@ -69,7 +69,7 @@
     </q-dialog>
 
     <!-- Confirmation du raccrocher -->
-    <q-dialog v-model="ui.d.ACconfirmrac">
+    <q-dialog v-model="ui.d[idc].ACconfirmrac">
       <q-card :class="styp('sm')">
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHrac2', [nomE])}}
@@ -84,7 +84,7 @@
     </q-dialog>
 
     <!-- Dialogue d'ajout d'un item au chat -->
-    <q-dialog v-model="ui.d.ACchatedit">
+    <q-dialog v-model="ui.d[idc].ACchatedit">
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -114,7 +114,7 @@
   import { useI18n } from 'vue-i18n'
   const $t = useI18n().t
 
-  import { ref, computed } from 'vue'
+  import { ref, computed, onUnmounted } from 'vue'
 
   import stores from '../stores/stores.mjs'
 
@@ -131,19 +131,18 @@
 
   const props = defineProps({ 
     id: String, 
-    ids: String,
-    zombi: Boolean
+    ids: String
   })
-  
-  const zombi = props.zombi || false
 
   const ui = stores.ui
+  const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
   const aSt = stores.avatar
   const session = stores.session
   const cfg = stores.config
   const pSt = stores.people
 
   const chatX = computed(() => aSt.getChat(props.id, props.ids))
+  const zombi = computed(() => !chatX.value )
   const nomE = computed(() => chatX.value ? session.getCV(chatX.value.idE).nom : '')
   const nomI = computed(() => chatX.value ? session.getCV(chatX.value.id).nom : '')
   const estDel = computed(() => ID.estComptable(chatX.value.idE) || session.estDelegue)
@@ -158,7 +157,7 @@
   async function effacer (dh) {
     dheff.value = dh
     nbci.value--
-    ui.oD('ACconfirmeff')
+    ui.oD('ACconfirmeff', idc)
   }
 
   async function effop () {
@@ -202,12 +201,12 @@
     }
     txt.value = chatX.value ? chatX.value.txt : ''
     avecDon.value = avecD
-    ui.oD('ACchatedit')
+    ui.oD('ACchatedit', idc)
   }
 
   async function raccrocher () {
     txt.value = ''
-    ui.oD('ACconfirmrac')
+    ui.oD('ACconfirmrac', idc)
   }
 
 </script>

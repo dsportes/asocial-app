@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.dialoguehelp" full-height position="left" persistent >
+<q-dialog v-model="ui.d.a.dialoguehelp" full-height position="left" persistent >
 <div style="position:relative;height:100vh" :class="styp('xl')">
       <q-splitter :vertical="!ui.portrait" :horizontal="ui.portrait" 
         v-model="splitterModel" :limits="[20, 80]" 

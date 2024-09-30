@@ -17,7 +17,7 @@
     </div>
 
     <!-- Dialogue d'édition de la phrase de contact -->
-    <q-dialog v-model="ui.d.AAeditionpc[idc]" persistent>
+    <q-dialog v-model="ui.d[idc].AAeditionpc" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
@@ -39,7 +39,7 @@
 </template>
 <script>
 
-import { ref } from 'vue'
+import { onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { GetAvatarPC, ChangementPC } from '../app/operations4.mjs'
@@ -111,7 +111,7 @@ export default {
     const session = stores.session
     const ui = stores.ui
     const aSt = stores.avatar
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
     return {
       dkli, ID, idc, styp,

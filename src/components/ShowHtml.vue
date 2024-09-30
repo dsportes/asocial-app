@@ -1,6 +1,6 @@
 <template>
 <div>
-  <div v-if="!ui.d.SHfs[idc]" style="position:relative">
+  <div v-if="!ui.d[idc].SHfs" style="position:relative">
     <div v-if="zoom || edit" class="row btn">
       <btn-cond v-if="zoom" icon="fullscreen" round stop @ok="ui.oD('SHfs', idc)">
         <q-tooltip class="bg-white text-primary">{{$t('SHpe')}}</q-tooltip>
@@ -13,7 +13,7 @@
     <sd-nb :style="styx" :texte="texte || ''" :idx="idx"/>
   </div>
 
-  <q-dialog v-model="ui.d.SHfs[idc]" persistent maximized 
+  <q-dialog v-model="ui.d[idc].SHfs" persistent maximized 
     transition-show="slide-up" transition-hide="slide-down">
     <q-card>
       <q-bar>
@@ -34,7 +34,7 @@
 </template>
 <script>
 
-import { ref, toRef } from 'vue'
+import { onUnmounted, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { sty } from '../app/util.mjs'
 import BtnCond from './BtnCond.vue'
@@ -79,7 +79,7 @@ export default ({
 
   setup (props) {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const t = toRef(props, 'texte')
 
     return {

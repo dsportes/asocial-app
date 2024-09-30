@@ -88,7 +88,7 @@
   </div>
 
 <!-- Gérer le mode simple / unanime -->
-  <q-dialog v-model="ui.d.AGediterUna[idc]" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].AGediterUna" full-height position="left" persistent>
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-primary text-white">
         <q-toolbar>
@@ -140,7 +140,7 @@
   </q-dialog>
 
   <!-- Gérer l'hébergement, changer les quotas -->
-  <q-dialog v-model="ui.d.AGgererheb[idc]" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].AGgererheb" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
@@ -215,7 +215,7 @@
     </q-layout>
   </q-dialog>
 
-  <q-dialog v-model="ui.d.ACGouvrir[idc]" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].ACGouvrir" full-height position="left" persistent>
     <apercu-chatgr />
   </q-dialog>
 

@@ -15,14 +15,14 @@
       @click="ouvrirChat()"/>
   </div>
 
-  <q-dialog v-model="ui.d.MCACGouvrir[idc]" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].MCACGouvrir" full-height position="left" persistent>
     <apercu-chatgr />
   </q-dialog>
 
 </div>
 </template>
 <script>
-// import { ref } from 'vue'
+import { onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
@@ -53,7 +53,7 @@ export default ({
   
   setup () {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
       ui, idc,
       aSt: stores.avatar,

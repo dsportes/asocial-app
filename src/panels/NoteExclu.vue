@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.NX" full-height position="left" persistent>
+<q-dialog v-model="ui.d[idc].NX" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -63,6 +63,8 @@
 </template>
 
 <script>
+import { onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { dkli, styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -122,9 +124,11 @@ export default {
   },
 
   setup () {
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
       session: stores.session,
-      ui: stores.ui, 
+      ui, idc, 
       nSt: stores.note, 
       gSt: stores.groupe, 
       pSt: stores.people,

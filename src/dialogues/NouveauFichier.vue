@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.NFouvrir" persistent>
+<q-dialog v-model="ui.d[idc].NFouvrir" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')" style="height:70vh">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -100,6 +100,8 @@
 </template>
 
 <script>
+import { onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { edvol, dhcool, readFile, styp, sty, dkli, trapex, dhstring } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -236,17 +238,19 @@ export default {
       this.ppSt.modecc = true
       this.ppSt.tab = 'fichiers'
       this.ppSt.ccfic = null
-      this.ui.oD('pressepapier')
+      this.ui.oD('pressepapier', 'a')
     }
 
   },
 
   setup () {
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
       nSt: stores.note,
       aSt: stores.avatar, 
       gSt: stores.groupe, 
-      ui: stores.ui,
+      ui, idc,
       session: stores.session,
       ppSt: stores.pp, 
       edvol, dhcool, dkli, dhstring, styp, sty, ID

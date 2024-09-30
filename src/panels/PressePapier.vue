@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.pressepapier" full-height position="left" persistent>
+<q-dialog v-model="ui.d.a.pressepapier" full-height position="left" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
@@ -65,7 +65,7 @@
 
     <div class="filler"/>
 
-    <q-dialog v-model="ui.d.PPnvnote" persistent>
+    <q-dialog v-model="ui.d[idc].PPnvnote" persistent>
       <q-card :class="styp('md')">
         <q-card-section>
           <div class="titre-lg">{{$t(rec ? 'PPnv1' : 'PPnv2')}}</div>
@@ -79,7 +79,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.PPnvfic" persistent>
+    <q-dialog v-model="ui.d[idc].PPnvfic" persistent>
       <q-card :class="styp('md')">
       <q-card-section>
         <div class="titre-lg">{{$t(fic.id ? 'PPl1' : 'PPl2')}}</div>
@@ -98,7 +98,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.PPsupprnote" persistent>
+    <q-dialog v-model="ui.d[idc].PPsupprnote" persistent>
       <q-card :class="styp('sm')">
         <q-card-section class="column items-center q-my-md">
           <div class="titre-md text-center text-italic">{{$t('PPsuppn')}}</div>
@@ -111,7 +111,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="ui.d.PPsupprfic" persistent>
+    <q-dialog v-model="ui.d[idc].PPsupprfic" persistent>
       <q-card :class="styp('sm')">
         <q-card-section class="column items-center q-my-md">
           <div class="titre-md text-center text-italic">{{$t('PPsuppf')}}</div>
@@ -131,7 +131,8 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
+
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
@@ -187,16 +188,16 @@ export default ({
     ajouternote () {
       this.rec = null
       this.txt = ''
-      this.ui.oD('PPnvnote')
+      this.ui.oD('PPnvnote', this.idc)
     },
     editernote (rec) {
       this.rec = rec
       this.txt = ''
-      this.ui.oD('PPnvnote')
+      this.ui.oD('PPnvnote', this.idc)
     },
     supprn (rec) {
       this.rec = rec
-      this.ui.oD('PPsupprnote')
+      this.ui.oD('PPsupprnote', this.idc)
     },
     async cfSupprnote () {
       await idb.NLdel(this.rec.id)
@@ -214,7 +215,7 @@ export default ({
     },
     ajouterfichier () {
       this.fic = { nom: '', info: '', lg: 0, type: '', u8: null }
-      this.ui.oD('PPnvfic')
+      this.ui.oD('PPnvfic', this.idc)
     },
     async editerfichier (fic) {
       this.info = fic.info
@@ -222,11 +223,11 @@ export default ({
       const u8 = await fic.getU8()
       this.fic = { idf: fic.id, nom: fic.nom, info: fic.info, 
         lg: fic.lg, type: fic.type, u8 }
-      this.ui.oD('PPnvfic')
+      this.ui.oD('PPnvfic', this.idc)
     },
     supprfichier (fic) {
       this.fic = fic
-      this.ui.oD('PPsupprfic')
+      this.ui.oD('PPsupprfic', this.idc)
     },
     async cfSupprfic () {
       await idb.FLdel(this.fic.idf)
@@ -276,6 +277,7 @@ export default ({
   setup () {
     const session = stores.session
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const ppSt = stores.pp
     const cfg = stores.config
     const lgmax = cfg.maxlgtextenote
@@ -283,7 +285,7 @@ export default ({
 
     return {
       dkli, styp,
-      session, ppSt, ui,
+      session, ppSt, ui, idc,
       lgmax, fileList, interdits
     }
   }

@@ -21,7 +21,7 @@ export const useUiStore = defineStore('ui', {
     pageback: '',
     menug: false,
     pfiltre: false,
-    loginitem: true,
+    reLogin: true,
 
     dialogueerreurresolve: null,
     exc: null, // Exception trappée : en attente de décision de l'utilisateu
@@ -48,115 +48,11 @@ export const useUiStore = defineStore('ui', {
 
     ps: null, // objet props du dialogue PhraseSecrete
 
-    idc: 1,
-
-    chatc: {},
-
     // gestion des dialogues
+    reLogin: true,
+    idc: 1,
     dialogStack: [],
-
-    d: {
-      reload: false, // App: reload
-      estzombi: false,
-      aunmessage: false,
-      PSouvrir: false,
-      choixEmoji: false,
-      diag: false, // App
-      confirmFerm: false,
-      dialogueerreur: false,
-      dialoguehelp: false,
-      pressepapier: false,
-      dialoguedrc: false,
-      detailspeople: false,
-      confirmstopop: false,
-      opDialog: false,
-      Pubsub: false, // PageLogin
-      PPnvnote: false, // PressePapier
-      PPsupprnote: false,
-      PPnvfic: false,
-      PPsupprdic: false,
-      PAoutilsTests: false, // PageAccueil
-      PAsync: false,
-      FAdetaildial: false, // PageFicavion
-      AGvisucv: false, // ApercuGenx
-      AMdroits: {}, // ApercuMembre
-      AMradiation: {},
-      AMinvit: {},
-      NSnvsp: false, // NouveauSponsoring
-      PTedq: false, // PagePartition
-      PTcptdial: false,
-      PMdetailsmembre: false, // PanelMembre
-      BPchgTr: {}, // BarrePeople
-      BPchgSp: {},
-      BPcptdial: {},
-      BPmut: {},
-      BPmutA: {},
-      OTsuppbase: false, // OutilsTests
-      OTrunning: false,
-      AAeditionpc: {}, // ApercuAvatar
-      ACchatedit: false, // ApercuChat
-      MCACouvrir: {}, // MicroChat
-      CAACouvrir: {}, // ChatAvec
-      ACconfirmeff: false,
-      ACconfirmrac: false,
-      ACGchatedit: false, // ApercuChatgr
-      MCACGouvrir: {}, // MicroChatgr
-      PGACGouvrir: {}, // PagesGroupes
-      ACGouvrir: {}, // PageGroupe
-      ACGconfirmeff: false,
-      CVedition: false, // CarteVisite
-      AGnvctc: {}, // ApercuGroupe
-      AGediterUna: {},
-      AGgererheb: {},
-      AMmcedit: {}, // ApercuMotscles
-      DNdialoguenotif: {}, // DialogueNotif
-      ATconfirmdel: {}, // ApercuTicket
-      ATdialtk: {},
-      EMmax: {}, // EditeurMd
-      IAaccinvit: {}, // InvitationAcceptation
-      ACVouvrir: {}, // ApercuCv
-      CVedition2: {}, // ApercuGenx
-      MMedition: {}, // McMemo
-      PCnouveautk: false, // PanelCredits
-      PCdialtk: {}, // PanelCredits
-      SHfs: {}, // ShowHtml
-      NFouvrir: false, // NouveauFichier
-      NFsupprfichier: {}, // NoteFichier
-      NFconfirmav1: false,
-      NFconfirmav2: false,
-      DFouvrir: {}, // DetailFichier
-      NNnotenouvelle: false, // NoteNouvelle
-      SAsuppravatar: false, // SupprAvatar
-      SAconfirmsuppr: false,
-      PCnvav: false, // PageCompte
-      PCchgps: false,
-      PCedq: false,
-      // PCmuta: false,
-      PAedprf: false, // PageAdmin
-      PAcreationesp: false,
-      PAcheckpoint: false,
-      PApageespace: false,
-      PAnvspc: false,
-      CCouvrir: {}, // NouveauChat
-      PGcrgr: false, // PageGroupes
-      PGctc: {},
-      PEnt: false, // PageEspace
-      PEedcom: false,
-      PEedqP: false,
-      PEedqA: false,
-      PEdlvat: false,
-      PEnotif: {},
-      ASaccsp: false, // AcceptationSponsoring
-      LOGccc: false,
-      HTags: {}, // HashTags
-      NE: false, // NoteEdit
-      NX: false, // NoteExclu
-      NM: false, // NoteMc
-      NF: false, // NoteFichier
-      NC: false, // NoteConfirme
-      PNdl: false, // PageNotes
-      PInvit: false, // PageInvitation
-    }
+    d: { a: {} }
 
   }),
 
@@ -193,28 +89,32 @@ export const useUiStore = defineStore('ui', {
     },
 
     getIdc () {
-      return this.idc++
+      this.idc++
+      this.d[this.idc] = {}
+      return this.idc
+    },
+
+    closeVue (idc) {
+      const ds = []
+      this.dialogStack.forEach(e => { if (e[0] !== '' + idc) ds.push(e)})
+      this.dialogStack = ds
+      if (idc !== 'a') delete this.d[idc]
     },
 
     fD () {
       const l = this.dialogStack.length
-      const e = this.dialogStack.length ? this.dialogStack[l - 1] : null
-      // console.log('fD:', e ? e[0] : '???', this.edStack)
+      const e = l ? this.dialogStack[l - 1] : null
       if (e) {
         this.dialogStack.length = l - 1
-        if (e[1] !== 0)
-          this.d[e[0]][e[1]] = false
-        else
-          this.d[e[0]] = false
+        delete this.d[e[1]][e[0]]
       }
     },
 
     oD (n, idc) {
-      const ix = idc || 0
+      const ix = '' + idc || 'a'
+      if (!this.d[ix]) this.d[ix] = {}
       this.dialogStack.push([n, ix])
-      // console.log('oD', n, ix, this.edStack)
-      if (typeof this.d[n] === 'object') this.d[n][ix] = true
-      else this.d[n] = true
+      this.d[ix][n] = true
     },
 
     estOuvert (n) {
@@ -227,10 +127,8 @@ export const useUiStore = defineStore('ui', {
 
     resetD () {
       this.dialogStack.forEach(e => { 
-        if (e[1] !== 0)
-          delete this.d[e[0]][e[1]]
-        else
-          this.d[e[0]] = false
+        if (e[0] !== 'a') delete this.d[e[0]] 
+        else this.d.a[e[1]] = false
       })
       this.dialogStack.length = 0
     },
@@ -339,15 +237,7 @@ export const useUiStore = defineStore('ui', {
       this.selContact = id
       this.egrplus = false
       // TODO revenir au dialogue de nouveau contact
-    },
-
-    setChatc (id, ids) {
-      this.chatc = { id, ids: ids || '1' }
-    },
-
-    setZombiChat (id, idsx) {
-      const ids = idsx || 1
-      if (this.chatc.id === id && this.chatc.ids === ids) this.chatc._zombi = true
     }
+
   }
 })

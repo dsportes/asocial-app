@@ -57,7 +57,7 @@
 
         <div class="q-ml-lg">
           <btn-cond v-if="esp.hTC" class="q-ma-xs" :label="$t('ENnpspc')" 
-            @ok="this.esp = esp; ui.oD('PAnvspc')" />
+            @ok="this.esp = esp; ui.oD('PAnvspc', idc)" />
           
           <div class="q-my-sm">
             <div class="row">
@@ -96,7 +96,7 @@
     </div>
 
     <!-- Création d'un espace -->
-    <q-dialog v-model="ui.d.PAcreationesp" persistent>
+    <q-dialog v-model="ui.d[idc].PAcreationesp" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond icon="close" color="warning" @ok="cancelNS"/>
@@ -124,7 +124,7 @@
     </q-dialog>
 
     <!-- Changement de la phrase de sponsoring du Comptable -->
-    <q-dialog v-model="ui.d.PAnvspc" persistent>
+    <q-dialog v-model="ui.d[idc].PAnvspc" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -142,7 +142,7 @@
     </q-dialog>
 
     <!-- Changement des quotas de l'espace -->
-    <q-dialog v-model="ui.d.PAedprf" persistent>
+    <q-dialog v-model="ui.d[idc].PAedprf" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -163,7 +163,8 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonDlvat from '../components/BoutonDlvat.vue'
@@ -271,7 +272,7 @@ export default {
     },
 
     plusNS () {
-      this.ui.oD('PAcreationesp')
+      this.ui.oD('PAcreationesp', this.idc)
     },
 
     cancelNS () {
@@ -312,7 +313,7 @@ export default {
       // minn, minv, maxn, maxv, minc, maxc, err
       this.quotas = { ...e.quotas, err: null, minn: 10, minv: 10, minc: 10, 
         maxn: 1000000, maxv: 1000000, maxc: 1000000 }
-      this.ui.oD('PAedprf')
+      this.ui.oD('PAedprf', this.idc)
     },
 
     async dlstat (esp, mr) {
@@ -379,6 +380,7 @@ export default {
   setup () {
     const session = stores.session
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const cfg = stores.config
     const lstEsp = ref([])
 
@@ -396,7 +398,7 @@ export default {
     })
 
     return {
-      session, ui, cfg, dkli, styp, lstEsp, loadEsp, ID, dhstring, OPNOMS,
+      session, ui, idc, cfg, dkli, styp, lstEsp, loadEsp, ID, dhstring, OPNOMS,
       AMJ
     }
   }

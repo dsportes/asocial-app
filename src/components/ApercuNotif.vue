@@ -37,14 +37,14 @@
     </div>
   </div>
 
-  <q-dialog v-model="ui.d.DNdialoguenotif[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].DNdialoguenotif" persistent>
     <dialogue-notif :type="type" :cible="cible" :ntf="ntf" :restr="restr" :restrb="restrb"/>
   </q-dialog>
 </div>
 </template>
 
 <script>
-import { ref, toRef } from 'vue'
+import { onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import BoutonBulle from './BoutonBulle.vue'
 import BtnCond from './BtnCond.vue'
@@ -111,7 +111,7 @@ export default {
 
   setup (props) {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     // const cible = toRef(props, 'cible')
     // const notif = toRef(props, 'notif')
     return {

@@ -1,6 +1,6 @@
 <!-- https://github.com/serebrov/emoji-mart-vue#i18n -->
 <template>
- <q-dialog v-model="ui.d.choixEmoji">
+ <q-dialog v-model="ui.d[idc].choixEmoji">
   <div style="position:relative">
     <Picker :data="emojiIndex" 
       set="google" title="" emoji="question" native
@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import { onUnmounted } from 'vue'
+
 import data from 'emoji-mart-vue-fast/data/google.json'
 // Note: component needs to be imported from /src subfolder:
 import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src'
@@ -84,6 +86,8 @@ export default {
     }
   },
   setup () {
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const config = stores.config
     const session = stores.session
     let emojiIndex = config.emojiIndex
@@ -93,7 +97,7 @@ export default {
     }
 
     return {
-      ui: stores.ui,
+      ui, idc,
       emojiIndex,
       session
     }

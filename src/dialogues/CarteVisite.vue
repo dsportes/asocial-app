@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.CVedition" persistent>
+<q-dialog v-model="ui.d[idc].CVedition" persistent>
   <q-card :class="styp('md')">
     <q-toolbar class="bg-secondary text-white">
       <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -68,10 +68,11 @@
 </template>
 
 <script>
+import { ref, toRef, onUnmounted } from 'vue'
+
 import Webcam from 'webcam-easy'
 import { Cropper } from 'vue-advanced-cropper'
 
-import { ref, toRef } from 'vue'
 import stores from '../stores/stores.mjs'
 import { styp, readFile } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
@@ -188,6 +189,7 @@ export default ({
     const canvas = ref(null)
 
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const config = stores.config
     const clic = stores.config.cliccamera
 
@@ -195,7 +197,7 @@ export default ({
     const ncv = ref(new CV(cv.value.id, cv.value.v, cv.value.photo, cv.value.tx))
 
     return {
-      ui, styp, config, clic, md, webcam, sound, cropper, canvas, ncv, ID,
+      ui, idc, styp, config, clic, md, webcam, sound, cropper, canvas, ncv, ID,
       session: stores.session
     }
   }

@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.ASaccsp" full-height position="left" persistent>
+<q-dialog v-model="ui.d[idc].ASaccsp" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-primary text-white">
     <q-toolbar>
@@ -95,7 +95,8 @@
 </template>
 
 <script>
-import { toRef } from 'vue'
+import { toRef, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
@@ -146,7 +147,7 @@ export default ({
           ok: this.okps,
           initVal: this.ps ? this.ps.phrase : ''
         }
-        this.ui.oD('PSouvrir')
+        this.ui.oD('phrasesecrete', 'a')
       } else this.ps = null
     }
   },
@@ -186,10 +187,11 @@ export default ({
 
   setup (props) {
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const sp = toRef(props, 'sp')
     // const pc = toRef(props, 'pc')
     return {
-      ui, ID, styp, AMJ,
+      ui, idc, ID, styp, AMJ,
       pSt: stores.people
     }
   }

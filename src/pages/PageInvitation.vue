@@ -21,7 +21,7 @@
     </div>
 
       <!-- Confirmation du contact ------------------------------------------------>
-    <q-dialog v-model="ui.d.PInvit" persistent>
+    <q-dialog v-model="ui.d[idc].PInvit" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -51,6 +51,7 @@
 </template>
 
 <script>
+import { onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -102,7 +103,7 @@ export default {
     }, 
     select (p) {
       this.session.setPeopleId(p.id)
-      this.ui.oD('PInvit')
+      this.ui.oD('PInvit', this.idc)
     },
     async okAjouter () {
       const r = await new NouveauContact().run()
@@ -119,10 +120,12 @@ export default {
   },
 
   setup () {
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
       dkli, styp,
       session: stores.session,
-      ui: stores.ui,
+      ui, idc,
       pSt: stores.people,
       gSt: stores.groupe
     }

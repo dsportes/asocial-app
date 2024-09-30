@@ -59,7 +59,7 @@
 
   </div>
 
-  <q-dialog v-model="ui.d.PCdialtk[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].PCdialtk" persistent>
     <panel-dialtk :min="50" :init="0" titre="TKnv" @ok="generer"/>
   </q-dialog>
 

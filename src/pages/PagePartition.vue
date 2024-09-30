@@ -26,7 +26,7 @@
     <q-toolbar class="bg-secondary text-white">
       <q-toolbar-title class="titre-md q-ma-xs">{{$t('PTtit' + (session.pow === 4 ? '1' : '2'))}}</q-toolbar-title>          
       <btn-cond v-if="session.estDelegue || session.estComptable" cond="cEdit"
-        :label="$t('PTnvc')" @ok="ui.oD('NSnvsp')"/>
+        :label="$t('PTnvc')" @ok="ui.oD('NSnvsp', idc)"/>
     </q-toolbar>
 
     <div v-for="(c, idx) in session.ptLcFT" :key="c.id" class="spmd q-my-xs">
@@ -71,10 +71,10 @@
     </div>
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
-    <nouveau-sponsoring v-if="ui.d.NSnvsp"/>
+    <nouveau-sponsoring v-if="ui.d[idc] && ui.d[idc].NSnvsp"/>
     
     <!-- Dialogue de mise à jour des quotas du compte -->
-    <q-dialog v-model="ui.d.PTedq" persistent>
+    <q-dialog v-model="ui.d[idc].PTedq" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <q-btn dense size="md" color="warning" padding="xs" icon="close" @click="ui.fD"/>
@@ -99,8 +99,8 @@
 </template>
 
 <script>
+import { onUnmounted } from 'vue'
 
-// import { onMounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dkli } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
@@ -157,7 +157,7 @@ export default {
 
     voirpage (c) { 
       this.session.setPeopleId(c.id)
-      this.ui.oD('detailspeople')
+      this.ui.oD('detailspeople', this.idc)
     },
 
     async editerq (c) {
@@ -174,7 +174,7 @@ export default {
         n: c.q.nn + c.q.nc + c.q.ng, v: c.q.v,
         err: ''
       }
-      this.ui.oD('PTedq')
+      this.ui.oD('PTedq', this.idc)
     },
     
     async validerq () {
@@ -191,6 +191,8 @@ export default {
   },
 
   setup () {
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const session = stores.session
   
     async function reload () {
@@ -202,7 +204,7 @@ export default {
       session, 
       aSt: stores.avatar, 
       pSt: stores.people, 
-      ui: stores.ui,
+      ui, idc,
       cfg: stores.config,
       ID, dkli, styp, reload
     }

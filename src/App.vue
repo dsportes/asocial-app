@@ -4,7 +4,7 @@
     <q-toolbar class="full-width">
 
       <btn-cond v-if="session.ok && !session.avion" 
-        :color="clrsync" :icon="iconsync" @ok="ui.oD('PAsync')"/>
+        :color="clrsync" :icon="iconsync" @ok="ui.oD('sync', 'a')"/>
       
       <!-- Notifications -->
       <notif-icon v-if="session.status === 2" class="q-ml-xs" 
@@ -46,7 +46,7 @@
       <q-toolbar-title>
         <div style="position:relative">
           <div class="titre-lg text-right full-width">{{titrePage}}</div>
-          <div v-if="session.swev2" @click="ui.oD('reload')" 
+          <div v-if="session.swev2" @click="ui.oD('reload', 'a')" 
             style="position:absolute;top:-4px;left:0"
             class="row cursor-pointer items-center bg-negative q-px-xs">
             <div class="titre-md text-bold text-white q-mr-sm">{{$t('RLnvver')}}</div>
@@ -67,7 +67,7 @@
       <!-- Presse papier -->
       <q-btn v-if="session.ok" dense size="md" 
         icon="content_paste" round padding="none"
-        @click="ui.oD('pressepapier')">
+        @click="ui.oD('pressepapier', 'a')">
         <q-tooltip>{{$t('MLApp')}}</q-tooltip>
       </q-btn>
 
@@ -121,7 +121,7 @@
       </btn-cond>
 
       <!-- Outils et tests -->
-      <btn-cond icon="settings" round @click="ui.oD('PAoutilsTests')">
+      <btn-cond icon="settings" round @click="ui.oD('outilsTests', 'a')">
         <q-tooltip>{{$t('MLAout')}}</q-tooltip>
       </btn-cond>
 
@@ -267,16 +267,16 @@
     </transition-group>
   </q-page-container>
 
-  <!-- ui.d.aunmessag : Gestion d'un message s'affichant en bas -->
-  <q-dialog v-model="ui.d.aunmessage" seamless position="bottom">
+  <!-- Gestion d'un message s'affichant en bas -->
+  <q-dialog v-model="ui.d.a.aunmessage" seamless position="bottom">
     <div :class="'msg q-pa-sm cursor-pointer text-center titre-sm text-bold bg-yellow-5 ' + (ui.message.important ? 'text-negative' : 'text-black')"  
       @click="ui.effacermessage">
       {{ ui.message.texte }}
     </div>
   </q-dialog>
 
-  <!-- ui.d.diag : Affiche d'un message demandant confirmation 'j'ai lu' -->
-  <q-dialog v-model="ui.d.diag" persistent>
+  <!-- Affiche d'un message demandant confirmation 'j'ai lu' -->
+  <q-dialog v-model="ui.d.a.diag" persistent>
     <q-card :class="lidk + ' spsm q-pa-sm'">
       <div class="text-center titre-lg q-my-sm">{{$t('MLAatt')}}</div>
       <div class="fs-md text-center q-b-md" v-html="ui.diag"></div>
@@ -287,8 +287,8 @@
     </q-card>
   </q-dialog>
 
-  <!-- ui.d.estzombi : Affiche l'annonce de suppression proche du compte -->
-  <q-dialog v-model="ui.d.estzombi" persistent>
+  <!-- Affiche l'annonce de suppression proche du compte -->
+  <q-dialog v-model="ui.d.a.estzombi" persistent>
     <q-card :class="lidk + ' spsm q-pa-sm row'">
       <q-avatar class="q-mr-md col-auto" size="lg" square>
         <img src="~assets/zombi.png">
@@ -302,8 +302,8 @@
     </q-card>
   </q-dialog>
 
-  <!-- ui.d.confirmFerm : demande de confirmation d'une fermeture de dialogue avec perte de saisie -->
-  <q-dialog v-model="ui.d.confirmFerm" persistent>
+  <!-- Demande de confirmation d'une fermeture de dialogue avec perte de saisie -->
+  <q-dialog v-model="ui.d.a.confirmFerm" persistent>
     <q-card :class="styp('sm') + 'q-pa-sm'">
       <q-card-section class="q-my-lg titre-md">{{$t('EMDqss')}}</q-card-section>
       <q-card-actions vertical align="right">
@@ -315,8 +315,8 @@
     </q-card>
   </q-dialog>
 
-  <!-- ui.d.reload : information / option d'installation d'une nouvelle version -->
-  <q-dialog v-model="ui.d.reload" persistent>
+  <!-- Information / option d'installation d'une nouvelle version -->
+  <q-dialog v-model="ui.d.a.reload" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-btn size="md" padding="xs" color="primary" dense icon="close"
         :label="$t('plustard')" @click="ui.fD"/>
@@ -352,30 +352,30 @@
     </q-card>
   </q-dialog>
 
-  <!-- ui.d.dialoguedrc : choix de déconnexion. Déconnexion, reconnexion, continuer -->
-  <q-dialog v-model="ui.d.dialoguedrc" persistent>
+  <!-- Choix de déconnexion. Déconnexion, reconnexion, continuer -->
+  <q-dialog v-model="ui.d.a.dialoguedrc" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
         <q-toolbar-title class="titre-lg full-width text-center">{{$t('MLAdrc')}}</q-toolbar-title>
         <bouton-help page="page1"/>
       </q-toolbar>
       <q-card-actions vertical align="stretch" class="q-gutter-sm">
-        <btn-cond color="warning" icon="logout" :label="$t('MLAdecon')" @ok="deconnexion"/>
-        <btn-cond color="warning" icon="logout" :label="$t('MLArecon')" @ok="reconnexion2"/>
-        <btn-cond color="primary" :label="$t('MLAcont')" @ok="ui.fD"/>
+        <btn-cond color="warning" flat icon="logout" :label="$t('MLAdecon')" @ok="deconnexion"/>
+        <btn-cond color="warning" flat icon="logout" :label="$t('MLArecon')" @ok="reconnexion"/>
+        <btn-cond color="primary" flat :label="$t('MLAcont')" @ok="ui.fD"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
 
-  <dialogue-erreur v-if="ui.d.dialogueerreur"/>
+  <dialogue-erreur v-if="ui.d.a.dialogueerreur"/>
   <dialogue-help v-if="ui.d.dialoguehelp"/>
-  <presse-papier v-if="ui.d.pressepapier"/>
-  <panel-people v-if="ui.d.detailspeople"/>
-  <outils-tests v-if="ui.d.PAoutilsTests"/>
-  <phrase-secrete v-if="ui.d.PSouvrir"/>
+  <presse-papier v-if="ui.d.a.pressepapier"/>
+  <panel-people v-if="ui.d.a.detailspeople"/>
+  <outils-tests v-if="ui.d.a.outilsTests"/>
+  <phrase-secrete v-if="ui.d.a.phrasesecrete"/>
 
   <!-- Opération en cours et son arrêt -->
-  <q-dialog v-model="ui.d.opDialog" seamless position="top" full-width persistent
+  <q-dialog v-model="ui.d.a.opDialog" seamless position="top" full-width persistent
     transition-show="scale" transition-hide="scale">
     <div class="q-mt-sm column items-center" style="width:20rem">
       <transition appear enter-active-class="animated fadeIn" leave-active-class="animated fadeOut">
@@ -387,7 +387,7 @@
             <div class="text-bold oplbl">{{session.opEncours.label}}</div>
           </div>
           <div class="col-auto q-mt-sm cursor-pointer column items-center" style="position:relative"
-            @click="ui.oD('confirmstopop')">
+            @click="ui.oD('confirmstopop', 'a')">
             <q-spinner color="primary" size="3rem" :thickness="4"/>
             <q-badge color="negative" class="text-white stopbtn">{{session.opSpinner}}</q-badge>
           </div>
@@ -396,7 +396,7 @@
     </div>
   </q-dialog>
 
-  <q-dialog v-model="ui.d.confirmstopop">
+  <q-dialog v-model="ui.d.a.confirmstopop">
     <q-card :class="styp('sm')">
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('MLAcf', [session.opEncours ? session.opEncours.label : '???'])}}</q-card-section>
@@ -409,7 +409,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="ui.d.PAsync" persistent> <!-- bouton synchro -->
+  <q-dialog v-model="ui.d.a.sync" persistent> <!-- bouton synchro -->
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
       <div v-if="config.permission" class="titre-lg q-my-md text-center">{{$t('MLAnba')}}</div>
       <div v-if="!config.permission" class="titre-lg q-mt-md text-center msg">{{$t('MLAnbb1')}}</div>
@@ -447,7 +447,7 @@ import stores from './stores/stores.mjs'
 import { AMJ, HBINSECONDS } from './app/api.mjs'
 
 import { set$t, hms, dkli, styp } from './app/util.mjs'
-import { reconnexion, deconnexion, SyncFull } from './app/synchro.mjs'
+import { deconnexion, SyncFull } from './app/synchro.mjs'
 import { CV } from './app/modele.mjs'
 import { SetDhvuCompte } from './app/operations4.mjs'
 
@@ -577,10 +577,10 @@ async function moded () {
 
 async function discon () {
   if (session.status === 3) await deconnexion()
-  else ui.oD('dialoguedrc')
+  else ui.oD('dialoguedrc', 'a')
 }
 
-async function reconnexion2 () { 
+async function reconnexion () { 
   if (Notification.permission !== 'granted') {
     const p = await Notification.requestPermission()
     if (p === 'granted') {
@@ -590,7 +590,7 @@ async function reconnexion2 () {
     }
   }
   ui.fD()
-  await reconnexion() 
+  await deconnexion(true) 
 }
 
 function reload () { 

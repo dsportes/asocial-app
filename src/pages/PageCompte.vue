@@ -52,7 +52,7 @@
     </q-card>
 
     <!-- Dialogue de confirmation de mutation en compte A -->
-    <q-dialog v-model="ui.d.PCmuta" persistent>
+    <q-dialog v-model="ui.d[idc].PCmuta" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
@@ -70,7 +70,7 @@
     </q-dialog>
 
     <!-- Dialogue de création d'un nouvel avatar -->
-    <q-dialog v-model="ui.d.PCnvav" persistent>
+    <q-dialog v-model="ui.d[idc].PCnvav" persistent>
       <q-card :class="styp('md')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond icon="close" color="warning" @ok="ui.fD"/>
@@ -82,7 +82,7 @@
     </q-dialog>
 
     <!-- Dialogue de changement de la phrase secrète -->
-    <q-dialog v-model="ui.d.PCchgps" persistent>
+    <q-dialog v-model="ui.d[idc].PCchgps" persistent>
       <q-card :class="styp('sm') + 'column items-center'">
         <div class="row q-my-md q-gutter-md justify-center items-center">
           <btn-cond :label="$t('renoncer')" icon="close" @ok="ui.fD"/>
@@ -94,10 +94,10 @@
     </q-dialog>
 
     <!-- Dialogue de suppression d'un avatar -->
-    <suppr-avatar v-if="ui.d.SAsuppravatar" :avid="avid"/>
+    <suppr-avatar v-if="ui.d[idc] && ui.d[idc].SAsuppravatar" :avid="avid"/>
 
     <!-- Dialogue de mise à jour des quotas du compte -->
-    <q-dialog v-model="ui.d.PTedq" persistent>
+    <q-dialog v-model="ui.d[idc].PTedq" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -115,6 +115,7 @@
 </template>
 
 <script>
+import { onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { NouvelAvatar, ChangementPS, MuterCompteA } from '../app/operations4.mjs'
@@ -160,12 +161,12 @@ export default {
     },
 
     async ouvrirNvav () { 
-      this.ui.oD('PCnvav')
+      this.ui.oD('PCnvav', this.idc)
       this.nomav = ''
     },
 
     async ouvrirchgps () {
-      this.ui.oD('PCchgps')
+      this.ui.oD('PCchgps', this.idc)
       this.ps = null
     },
 
@@ -176,7 +177,7 @@ export default {
         labelValider: 'ok',
         ok: this.okps
       }
-      this.ui.oD('PSouvrir')
+      this.ui.oD('phrasesecrete', 'a')
     },
 
     reset () { this.ps = null; this.ui.fD() },
@@ -254,7 +255,7 @@ export default {
           err: ''
         }
       }
-      this.ui.oD('PTedq')
+      this.ui.oD('PTedq', this.idc)
     },
     
     async validerq () {
@@ -271,18 +272,19 @@ export default {
         this.avid = 0
       } else 
         this.avid = id
-      this.ui.oD('SAsuppravatar')
+      this.ui.oD('SAsuppravatar', this.idc)
     }
   },
 
   setup () {
     const session = stores.session
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const aSt = stores.avatar
     const fSt = stores.filtre
 
     return {
-      ui, aSt, fSt, session, styp, ID
+      ui, idc, aSt, fSt, session, styp, ID
     }
   }
 

@@ -41,12 +41,12 @@
   </div>
   <!--q-separator color="orange" size="1px"/-->
 
-  <q-dialog v-model="ui.d.ACVouvrir[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].ACVouvrir" persistent>
     <apercu-cv :cv="cv"/>
   </q-dialog>
 
   <!-- Dialogue d'édition de la carte de visite -->
-  <carte-visite v-model="ui.d.CVedition2[idc]" :cv="cv"/>
+  <carte-visite v-model="ui.d[idc].CVedition2" :cv="cv"/>
 
 </div>
 </template>
@@ -107,7 +107,7 @@ export default {
     },
     ouvrirdetails () {
       this.session.setPeopleId(this.id)
-      this.ui.oD('detailspeople')
+      this.ui.oD('detailspeople', 'a')
     },
     async select () {
       this.ui.selectContact(this.id)

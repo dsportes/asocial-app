@@ -1,6 +1,6 @@
 <template>
 <div ref="root">
-  <q-card v-if="!ui.d.EMmax[idc]" :class="dkli(idx)">
+  <q-card v-if="!ui.d[idc].EMmax" :class="dkli(idx)">
     <div :style="'height:' + (mh || '10rem')" class="dlx">
       <q-layout container view="hHh lpR fFf">
         <q-header elevated>
@@ -31,7 +31,7 @@
     </div>
   </q-card>
 
-  <q-dialog v-model="ui.d.EMmax[idc]" full-height full-width 
+  <q-dialog v-model="ui.d[idc].EMmax" full-height full-width 
     transition-show="slide-up" transition-hide="slide-down">
     <div ref="root2" :class="sty() + 'column'">
       <q-header elevated>
@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { ref, toRef, watch } from 'vue'
+import { ref, toRef, watch, onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { sty, dkli } from '../app/util.mjs'
 
@@ -108,11 +108,11 @@ export default ({
   methods: {
     ouvriremojimd1 () {
       this.inp = this.root.querySelector('textarea')
-      this.ui.oD('choixEmoji')
+      this.ui.oD('choixEmoji', this.idc)
     },
     ouvriremojimd2 () {
       this.inp = this.root2.querySelector('textarea')
-      this.ui.oD('choixEmoji')
+      this.ui.oD('choixEmoji', this.idc)
     },
     undo () {
       this.textelocal = this.texteinp
@@ -124,7 +124,7 @@ export default ({
 
   setup (props, context) {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const config = stores.config
     const root = ref(null)
     const root2 = ref(null)

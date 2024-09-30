@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.SAsuppravatar" full-height position="left" persistent>
+<q-dialog v-model="ui.d[idc].SAsuppravatar" full-height position="left" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -115,7 +115,7 @@
     </q-page>
   </q-page-container>
 
-  <q-dialog v-model="ui.d.SAconfirmsuppr" persistent>
+  <q-dialog v-model="ui.d[idc].SAconfirmsuppr" persistent>
     <q-card :class="styp('sm') + 'q-pa-sm'">
       <div class="q-mt-md titre-lg text-italic">{{$t('SAVcf' + (avid !== 0 ? '1' : '2'))}}</div>
       <div class="q-mt-md row justify-center q-gutter-md">
@@ -130,7 +130,7 @@
 </template>
 
 <script>
-import { toRef } from 'vue'
+import { toRef, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -273,7 +273,7 @@ export default ({
 
   methods: {
     cftop () {
-      this.ui.oD('SAconfirmsuppr')
+      this.ui.oD('SAconfirmsuppr', this.idc)
     },
 
     async valider () {
@@ -291,7 +291,9 @@ export default ({
     }
   },
 
-  setup (props) {
+  setup (props) {    
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))    
     const session = stores.session
     const avid = toRef(props, 'avid')
 
@@ -300,7 +302,7 @@ export default ({
 
     return {
       session,
-      ui: stores.ui,
+      ui, idc,
       aSt: stores.avatar,
       nSt: stores.note,
       gSt: stores.groupe,

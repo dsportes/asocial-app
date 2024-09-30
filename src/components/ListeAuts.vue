@@ -11,7 +11,7 @@
       <div v-if="autAvc" class="msg">{{$t('PNOauts2')}}</div>
     </div>
 
-    <q-dialog v-model="ui.d.ACVouvrir[idc]" persistent>
+    <q-dialog v-model="ui.d[idc].ACVouvrir" persistent>
       <apercu-cv :cv="cv"/>
     </q-dialog>
 

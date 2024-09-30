@@ -3,7 +3,7 @@
     <q-card class="spsm fs-md q-pa-sm">
       <div class="row justify-center">
       <!-- Déconnexion -->
-      <div class="btn2" @click="ui.oD('dialoguedrc')">
+      <div class="btn2" @click="ui.oD('dialoguedrc', 'a')">
         <btn-cond v-if="session.ok" color="warning" icon="logout" />
         <span class="q-ml-sm">{{$t('MLAdrc2')}}</span>
       </div>
@@ -23,7 +23,7 @@
       </div>
 
       <!-- Outils et tests -->
-      <div class="btn2" @click="ui.oD('PAoutilsTests')">
+      <div class="btn2" @click="ui.oD('outilsTests', 'a')">
         <btn-cond icon="settings"/>
         <span class="q-ml-xs">{{$t('MLAout')}}</span>
       </div>
@@ -83,7 +83,7 @@
       </div>
 
       <!-- Presse papier -->
-      <div class="btn2" @click="ui.oD('pressepapier')">
+      <div class="btn2" @click="ui.oD('pressepapier', 'a')">
         <btn-cond icon="content_paste"/>
         <span class="q-ml-xs">{{$t('MLApp')}}</span>
       </div>

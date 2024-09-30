@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.NE" persistent full-height position="left">
+<q-dialog v-model="ui.d[idc].NE" persistent full-height position="left">
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -45,7 +45,8 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { styp } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -73,7 +74,7 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm', 'a'); else this.ui.fD() },
 
     async valider () {
       const n = this.note
@@ -102,11 +103,12 @@ export default {
     const pSt = stores.people
     const cfg = stores.config
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const node = ref(nSt.node)
     const note = ref(nSt.note)
 
     return {
-      session, nSt, gSt, pSt, ui, cfg, node, note, styp
+      session, nSt, gSt, pSt, ui, idc, cfg, node, note, styp
     }
   }
 

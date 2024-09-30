@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.NF" full-height position="left" persistent>
+<q-dialog v-model="ui.d[idc].NF" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -68,7 +68,7 @@
   </q-page-container>
 
   <!-- Dialogue de création d'un nouveau fichier -->
-  <nouveau-fichier v-if="ui.d.NFouvrir" :note="note" :nom="nomf || ''" 
+  <nouveau-fichier v-if="ui.d[idc] && ui.d[idc].NFouvrir" :note="note" :nom="nomf || ''" 
     :aut="ro ? '0' : (estGr ? aut : '1')" :pasheb="pasHeb" :ro="ro"/>
 
 </q-layout>
@@ -76,6 +76,8 @@
 </template>
 
 <script>
+import { onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { styp, sty, dkli, edvol, dhcool, suffixe } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -87,7 +89,6 @@ import { Note } from '../app/modele.mjs'
 import ListeAuts from '../components/ListeAuts.vue'
 import NodeParent from '../components/NodeParent.vue'
 import { ID } from '../app/api.mjs'
-
 
 export default {
   name: 'NoteFichier',
@@ -144,13 +145,13 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm', 'a'); else this.ui.fD() },
 
     selAut (elt) { this.aut = elt.id },
 
     async nouveau (nf) {
       this.nomf = nf || ''
-      this.ui.oD('NFouvrir')
+      this.ui.oD('NFouvrir', this.idc)
     }
 
   },
@@ -164,8 +165,10 @@ export default {
   },
 
   setup () {
-     return {
-      ui: stores.ui, 
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+    return {
+      ui, idc, 
       session: stores.session,
       nSt: stores.note, 
       pSt: stores.people, 

@@ -20,7 +20,7 @@
   </div>
 
   <!-- Mutation de type de compte en "A" -->
-  <q-dialog v-model="ui.d.BPmutA[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].BPmutA" persistent>
     <q-card :class="styp('md')">
       <q-toolbar class="bg-secondary text-white">
         <btn-cond icon="close" color="warning" @ok="ui.fD"/>
@@ -51,7 +51,7 @@
   </q-dialog>
 
   <!-- Mutation de type de compte en "O" -->
-  <q-dialog v-model="ui.d.BPmut[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].BPmut" persistent>
     <q-card :class="styp('md')">
       <q-toolbar class="bg-secondary text-white">
         <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -90,7 +90,7 @@
   </q-dialog>
 
   <!-- Changement de partition -->
-  <q-dialog v-model="ui.d.BPchgTr[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].BPchgTr" persistent>
     <q-card :class="styp('sm')">
       <div class="titre-lg bg-secondary text-white text-center">
         {{$t('PPchgpart', [cv.nom, session.codePart(idpCpt)])}}</div>
@@ -148,7 +148,7 @@
   </q-dialog>
 
   <!-- Changement de statut délégué -->
-  <q-dialog v-model="ui.d.BPchgSp[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].BPchgSp" persistent>
     <q-card :class="styp('md') + 'q-pa-sm'">
       <div v-if="estDel" class="text-center q-my-md titre-md">{{$t('PPdel')}}</div>
       <div v-else class="text-center q-my-md titre-md">{{$t('PPndel')}}</div>
@@ -163,7 +163,7 @@
   </q-dialog>
 
   <!-- Affichage des compteurs de compta du compte "courant"-->
-  <q-dialog v-model="ui.d.BPcptdial[idc]" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].BPcptdial" full-height position="left" persistent>
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated class="bg-secondary text-white">
         <q-toolbar>
@@ -184,7 +184,7 @@
 </template>
 <script>
 
-import { ref, toRef, onMounted } from 'vue'
+import { ref, toRef, onMounted, onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
@@ -393,7 +393,7 @@ export default {
   setup (props) {
     const session = stores.session
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const part = toRef(props, 'part')
     const id = toRef(props, 'id')
     const idp = ref(part.value ? session.partition.id : 0)

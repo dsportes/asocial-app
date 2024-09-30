@@ -23,7 +23,7 @@
     :label="$t('NPLnote', [nom])" 
     icon="control_point" color="orange" @click="ok(true)" padding="none" size="md"/>
 
-  <note-nouvelle v-if="ui.d.NNnotenouvelle" 
+  <note-nouvelle v-if="ui.d[idc] && ui.d[idc].NNnotenouvelle" 
     :estgr="estgr" 
     :groupe="estgr ? groupe : null" 
     :avatar="avatarx || (estgr ? null : aSt.getElt(id).avatar)" 
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-
+import { onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import NoteNouvelle from '../panels/NoteNouvelle.vue'
 
@@ -72,12 +72,14 @@ export default ({
   },
   
   setup () {
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
       session: stores.session,
       aSt: stores.avatar,
       gSt: stores.groupe,
       nSt: stores.note,
-      ui: stores.ui
+      ui, idc
     }
   } 
 })

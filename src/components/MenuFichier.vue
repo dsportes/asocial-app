@@ -30,7 +30,7 @@
     </q-list>
   </q-menu>
 
-  <q-dialog v-model="ui.d.DFouvrir[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].DFouvrir" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')" style="height:70vh">
     <q-header elevated class="bg-secondary text-white">
       <q-toolbar>
@@ -116,7 +116,7 @@
   </q-dialog>
 
   <!-- Confirmation de suppression -->
-  <q-dialog v-model="ui.d.NFsupprfichier[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].NFsupprfichier" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm'">
       <q-card-section class="column items-center q-my-md">
         <div class="titre-md text-center text-italic">{{$t('PNFsf')}}</div>
@@ -137,7 +137,7 @@
 
 <script>
 import stores from '../stores/stores.mjs'
-import { ref } from 'vue'
+import { onUnmounted } from 'vue'
 import { edvol, dhcool, styp, trapex, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
@@ -239,7 +239,7 @@ export default {
       this.ui.afficherMessage(this.$t('PNFcpp'))
       this.ppSt.modecc = false
       this.ppSt.setTabFichiers()
-      this.ui.oD('pressepapier')
+      this.ui.oD('pressepapier', 'a')
     },
 
     async affFic () {
@@ -265,7 +265,7 @@ export default {
 
   setup () {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
       ui, idc,
       nSt: stores.note,

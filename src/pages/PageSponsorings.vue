@@ -52,12 +52,13 @@
     </q-card>
 
     <!-- Dialogue de création d'un sponsoring ici la partition est la sienne -->
-    <nouveau-sponsoring v-if="ui.d.NSnvsp"/>
+    <nouveau-sponsoring v-if="ui.d[idc] && ui.d[idc].NSnvsp"/>
 
   </q-page>
 </template>
 
 <script>
+import { onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { AMJ, UNITEN, UNITEV, ID } from '../app/api.mjs'
@@ -100,7 +101,7 @@ export default {
 
     async nouveausp () { 
       if (this.session.compte.idp) await new GetPartition().run(this.session.compte.idp)
-      this.ui.oD('NSnvsp') 
+      this.ui.oD('NSnvsp', this.idc) 
     },
 
     async prolonger (sp, nj) {
@@ -110,11 +111,13 @@ export default {
   },
 
   setup () {
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
       ID, AMJ, dkli, dhcool, clx,
       aSt: stores.avatar, 
       session: stores.session, 
-      ui: stores.ui
+      ui, idc
     }
   }
 

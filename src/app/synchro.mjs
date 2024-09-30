@@ -253,30 +253,29 @@ class SB {
 
 /* Déconnexion, reconnexion, commexion *************************************************/
 /* garderMode : si true, garder le mode */
-export async function deconnexion(garderMode) {
+export async function deconnexion(recon) {
   const ui = stores.ui
   // ui.setPage('null')
   const session = stores.session
   await session.stopHB()
   const mode = session.mode
   const org = session.org
+  const phrase = session.phrase
 
   if (session.accesIdb) idb.close()
   if (session.websocket) session.websocket.close()
   if (session.fsSync) session.fsSync.close()
   stores.reset() // Y compris session
-  if (garderMode) session.setMode(mode)
-  session.org = org
   syncQueue.reset()
-  ui.loginitem = true
-  ui.setPage('login')
-}
-
-export async function reconnexion() {
-  const session = stores.session
-  const phrase = session.phrase
-  await deconnexion(true)
-  await connexion(phrase)
+  session.setMode(mode)
+  session.org = org
+  if (recon) {
+    session.phrase = phrase
+    await connexion(phrase)
+  } else {
+    ui.reLogin = true
+    ui.setPage('login')
+  }
 }
 
 /* Connexion depuis PageLogin ou reconnexion (ci-dessus) **********************/
@@ -686,7 +685,8 @@ export class ConnexionSynchroIncognito extends OperationS {
 
   async run() {
     try {
-      stores.ui.setPage('session')
+      const ui = stores.ui
+      ui.setPage('session')
       const session = stores.session
       await this.syncStd(null, [])
 

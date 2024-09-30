@@ -4,7 +4,7 @@
     @ok="cfDlvat" icon="check" :label="$t('ESdlvat')"/>
 
     <!-- Changement d'une dlvat -->
-  <q-dialog v-model="ui.d.PEdlvat" persistent>
+  <q-dialog v-model="ui.d[idc].PEdlvat" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
         <q-btn dense size="md" color="warning" icon="close" @click="fin"/>
@@ -24,10 +24,12 @@
     </q-card>
   </q-dialog>
 </template>
+
 <script>
+import { onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { ID, AMJ } from '../app/api.mjs'
+import { AMJ } from '../app/api.mjs'
 import SaisieMois from './SaisieMois.vue'
 import BoutonConfirm from './BoutonConfirm.vue'
 import { SetEspaceDlvat } from '../app/operations4.mjs'
@@ -65,7 +67,7 @@ export default ({
   methods: {
     cfDlvat (dlv) {
       this.dlv = AMJ.pjMoisSuiv((dlv * 100) + 1)
-      this.ui.oD('PEdlvat')
+      this.ui.oD('PEdlvat', this.idc)
     },
     async chgDlvat () {
       await new SetEspaceDlvat().run(this.espace.id, this.dlv)
@@ -79,8 +81,10 @@ export default ({
   },
   
   setup () {
+    const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
-      ui: stores.ui, styp, AMJ
+      ui, idc, styp, AMJ
     }
   } 
 })

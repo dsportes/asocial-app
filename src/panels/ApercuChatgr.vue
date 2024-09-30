@@ -41,7 +41,7 @@
     </q-page-container>
 
     <!-- Confirmation d'effacement d'un échange -->
-    <q-dialog v-model="ui.d.ACGconfirmeff">
+    <q-dialog v-model="ui.d[idc].ACGconfirmeff">
       <q-card :class="styp()">
         <q-card-section class="q-pa-md fs-md text-center">
           {{$t('CHeff')}}
@@ -54,7 +54,7 @@
     </q-dialog>
 
     <!-- Dialogue d'ajout d'un item au chat -->
-    <q-dialog v-model="ui.d.ACGchatedit" persistent>
+    <q-dialog v-model="ui.d[idc].ACGchatedit" persistent>
       <q-card :class="styp()">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -73,7 +73,7 @@
 </template>
 <script>
 
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import SdBlanc from '../components/SdBlanc.vue'
@@ -115,7 +115,7 @@ export default {
     async effacer (im, dh) {
       this.im = im
       this.dh = dh
-      this.ui.oD('ACGconfirmeff')
+      this.ui.oD('ACGconfirmeff', this.idc)
     },
 
     async effop () {
@@ -135,13 +135,14 @@ export default {
 
     async editer () {
       this.txt = ''
-      this.ui.oD('ACGchatedit')
+      this.ui.oD('ACGchatedit', this.idc)
     }
   },
 
   setup () {
     const session = stores.session
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const gSt = stores.groupe
     const aSt = stores.avatar
     const naAut = ref()
@@ -155,7 +156,7 @@ export default {
     return {
       selAut, naAut, imAut,
       styp, dkli, dhcool,
-      session, ui, gSt, aSt
+      session, ui, idc, gSt, aSt
     }
   }
 }

@@ -75,12 +75,12 @@
   </div>
 
   <!-- Acceptation / refus de l'invitation -->
-  <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
+  <q-dialog v-model="ui.d[idc].IAaccinvit" full-height persistent position="left">
     <invitation-acceptation :inv="inv"/>
   </q-dialog>
 
   <!-- Contact du groupe ------------------------------------------------>
-  <q-dialog v-model="ui.d.PGctc[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].PGctc" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
         <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -101,7 +101,7 @@
   </q-dialog>
 
   <!-- Nouveau groupe ------------------------------------------------>
-  <q-dialog v-model="ui.d.PGcrgr" persistent>
+  <q-dialog v-model="ui.d[idc].PGcrgr" persistent>
     <q-card :class="styp('sm')">
       <q-toolbar class="bg-secondary text-white">
         <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -124,7 +124,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="ui.d.PGACGouvrir[idc]" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].PGACGouvrir" full-height position="left" persistent>
     <apercu-chatgr />
   </q-dialog>
 
@@ -132,7 +132,8 @@
 </template>
 
 <script>
-import { toRef, ref } from 'vue'
+import { toRef, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { edvol, $t, dkli, styp, afficher8000 } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
@@ -190,7 +191,7 @@ export default {
       this.quotas = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, maxn, maxv, err: ''}
       this.nom = ''
       this.una = false
-      this.ui.oD('PGcrgr')
+      this.ui.oD('PGcrgr', this.idc)
     },
 
     async ctc(ln) {
@@ -217,7 +218,7 @@ export default {
 
   setup (props) {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const session = stores.session
     const aSt = stores.avatar
     const fStore = stores.filtre

@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d.NNnotenouvelle" full-height position="left" persistent>
+<q-dialog v-model="ui.d[idc].NNnotenouvelle" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -54,6 +54,8 @@
 </template>
 
 <script>
+import { onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { dkli, styp } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
@@ -63,7 +65,6 @@ import EditeurMd from '../components/EditeurMd.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { NouvelleNote } from '../app/operations4.mjs'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
-import { Note } from '../app/modele.mjs'
 
 export default {
   name: 'NoteNouvelle',
@@ -100,7 +101,7 @@ export default {
   },
 
   methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm'); else this.ui.fD() },
+    fermer () { if (this.modifie) this.ui.oD('confirmFerm', 'a'); else this.ui.fD() },
 
     selNa (elt) { this.naAut = elt },
 
@@ -128,14 +129,15 @@ export default {
     }
   },
 
-  setup (props) {
+  setup () {
     const ui = stores.ui
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const session = stores.session
     const nSt = stores.note
     const cfg = stores.config
 
     return {
-      ui, session, nSt, cfg, dkli, styp, ID
+      ui, idc, session, nSt, cfg, dkli, styp, ID
     }
   }
 

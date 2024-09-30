@@ -29,18 +29,18 @@
     </div>
   </div>
 
-  <nouveau-chat v-if="ui.d.CCouvrir[idc]" :idc="idc"
+  <nouveau-chat v-if="ui.d[idc] && ui.d[idc].CCouvrir" :idc="idc"
     :idI="chat ? chat.id : idI" 
     :idE="chat ? chat.idE : idE"
     :mode="mode"/>
 
-  <q-dialog v-model="ui.d.MCACouvrir[idc]" full-height position="left" persistent>
+  <q-dialog v-model="ui.d[idc].MCACouvrir" full-height position="left" persistent>
     <apercu-chat :id="chatx.id" :ids="chatx.ids"/>
   </q-dialog>
 </div>
 </template>
 <script>
-import { ref } from 'vue'
+import { onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import NouveauChat from '../dialogues/NouveauChat.vue'
@@ -93,7 +93,7 @@ export default ({
   
   setup () {
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
       ui, idc,
       aSt: stores.avatar,

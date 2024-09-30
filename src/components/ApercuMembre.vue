@@ -114,7 +114,7 @@ a accès aux membres (donc dans l'onglet "membres").
   </q-expansion-item>
 
   <!-- Dialogue d'invitation -->
-  <q-dialog v-model="ui.d.AMinvit[idc]" persistent full-height position="left">
+  <q-dialog v-model="ui.d[idc].AMinvit" persistent full-height position="left">
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated>
         <q-toolbar class="bg-secondary text-white">
@@ -194,7 +194,7 @@ a accès aux membres (donc dans l'onglet "membres").
   </q-dialog>
 
   <!-- Dialogue de gestion des droits -->
-  <q-dialog v-model="ui.d.AMdroits[idc]" persistent full-height position="left">
+  <q-dialog v-model="ui.d[idc].AMdroits" persistent full-height position="left">
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated>
         <q-toolbar class="bg-secondary text-white">
@@ -242,7 +242,7 @@ a accès aux membres (donc dans l'onglet "membres").
   </q-dialog>
 
   <!-- Dialogue de radiation -->
-  <q-dialog v-model="ui.d.AMradiation[idc]" persistent full-height position="left">
+  <q-dialog v-model="ui.d[idc].AMradiation" persistent full-height position="left">
     <q-layout container view="hHh lpR fFf" :class="styp('md')">
       <q-header elevated>
         <q-toolbar class="bg-secondary text-white">
@@ -282,14 +282,14 @@ a accès aux membres (donc dans l'onglet "membres").
     </q-layout>
   </q-dialog>
 
-  <q-dialog v-model="ui.d.IAaccinvit[idc]" full-height persistent position="left">
+  <q-dialog v-model="ui.d[idc].IAaccinvit" full-height persistent position="left">
     <invitation-acceptation :inv="gSt.getInvit(gr.id, id)"/>
   </q-dialog>
 
 </div>
 </template>
 <script>
-import { ref } from 'vue'
+import { onUnmounted } from 'vue'
 
 import { styp, dkli, dhcool, afficher8000, afficherDiag } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS, MAXTAILLEGROUPE } from '../app/api.mjs'
@@ -515,7 +515,7 @@ export default {
   setup () {
     const session = stores.session
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     const gSt = stores.groupe
     const aSt = stores.avatar
 

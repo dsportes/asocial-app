@@ -49,11 +49,11 @@
     </div>
   </q-expansion-item>
 
-  <q-dialog v-model="ui.d.ATdialtk[idc]" persistent>
+  <q-dialog v-model="ui.d[idc].ATdialtk" persistent>
     <panel-dialtk :min="5" :init="tk.ma" titre="TKrec" @ok="reception"/>
   </q-dialog>
 
-  <q-dialog v-model="ui.d.ATconfirmdel[idc]">
+  <q-dialog v-model="ui.d[idc].ATconfirmdel">
     <q-card :class="styp('sm')">
       <q-card-section class="q-pa-md fs-md text-center">
         {{$t('TKdel')}}</q-card-section>
@@ -68,7 +68,7 @@
 </template>
 <script>
 
-import { ref } from 'vue'
+import { onUnmounted } from 'vue'
 import stores from '../stores/stores.mjs'
 import { mon, dkli, styp } from '../app/util.mjs'
 import { AMJ, idTkToL6 } from '../app/api.mjs'
@@ -122,7 +122,7 @@ export default {
   setup (props) {
     const session = stores.session
     const ui = stores.ui
-    const idc = ref(ui.getIdc())
+    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     // const t = toRef(props, 'tk')
 
     return {

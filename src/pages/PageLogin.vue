@@ -8,7 +8,7 @@
     <q-toggle :class="'q-my-xs bg-' + clrInfx " v-model="infx" color="grey-5" size="25px"/>
   </div>
 
-  <q-expansion-item class="q-mt-xl spsm" group="g1" v-model="ui.loginitem">
+  <q-expansion-item class="q-mt-xl spsm" group="g1" v-model="ui.reLogin">
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn2')}}</div>
@@ -33,7 +33,7 @@
     </div>
   </q-expansion-item>
 
-  <q-expansion-item class="q-mt-xl spsm" v-model="loginitem2">
+  <q-expansion-item class="q-mt-xl spsm" group="g1">
     <template v-slot:header>
       <div class="full-width titre-lg row justify-between bord1">
         <div>{{$t('LOGconn3')}}</div>
@@ -53,9 +53,10 @@
   </q-expansion-item>
 
   <!-- Dialogue d'acceptation d'un nouveau sponsoring -->
-  <acceptation-sponsoring v-if="ui.d.ASaccsp" :sp="sp" :pc="pc" :org="org"/>
+  <acceptation-sponsoring v-if="ui.d[idc] && ui.d[idc].ASaccsp" :sp="sp" :pc="pc" :org="org"/>
 
-  <q-dialog v-model="ui.d.Pubsub" persistent>
+  <!-- Dialogue 'a', pas idc - on ne sait pas pourquoi -->
+  <q-dialog v-model="ui.d.a.pubsub" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
       <div class="font-mono fs-xs">[{{perm}}]</div>
       <div class="titre-lg q-my-md text-center">{{$t('LOGpubsub')}}</div>
@@ -65,9 +66,12 @@
 </q-page>
 </template>
 
-<script>
+<script setup>
+import { useI18n } from 'vue-i18n'
+const $t = useI18n().t
+
 import stores from '../stores/stores.mjs'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { decode } from '@msgpack/msgpack'
 
 import { afficherDiag, beep, styp } from '../app/util.mjs'
@@ -81,179 +85,146 @@ import BtnCond from '../components/BtnCond.vue'
 import { decrypter } from '../app/webcrypto.mjs'
 import { CreationComptable } from '../app/operations4.mjs'
 
-export default {
-  name: 'PageLogin',
+const config = stores.config
+const session = stores.session
 
-  components: { BtnCond, PhraseContact, AcceptationSponsoring, BoutonHelp },
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+console.log('vue PageLogin', idc)
 
-  data () {
-    return {
-      infx: false,
-      loginitem2: false,
-      btncd: false,
-      initval: '',
-      sp: null,
-      pc: null,
-      org: ''
-    }
-  },
+const perm = ref(Notification.permission)
+config.permission = perm.value === 'granted'
 
-  computed: {
-    loginitem () { return this.ui.loginitem },
-    clrInfx () { return this.config.subJSON.startsWith('???') ? 'warning': 'green' }
-  },
+onMounted(async () => {
+  if (config.permission) await session.setSubscription()
+})
 
-  watch: {
-    loginitem(ap) {
-      this.loginitem2 = !ap
-      this.initval = ''
-      this.session.setMode(0)
-    },
-    loginitem2 (ap) {
-      this.ui.loginitem = !ap
-    }
-  },
+const clrInfx = computed(() => config.subJSON.startsWith('???') ? 'warning': 'green')
 
-  methods: {
-    async demperm () {
-      const p = await Notification.requestPermission()
-      if (p === 'granted') {
-        this.config.permission = true
-        await this.session.setSubscription()
-        console.log(this.config.subJSON)
-      }
-      this.ui.fD()
-    },
+const infx = ref()
+const btncd = ref()
+const initval = ref()
+const sp = ref()
+const pc = ref()
+const org = ref()
+const hTC = ref()
+const cleE = ref()
 
-    ouvrirPS (mode) {
-      this.session.setMode(mode)
-      this.ui.ps = { 
-        login: true, 
-        labelValider: "LOGconn", 
-        iconValider: "send",
-        ok: this.onps
-        }
-      this.ui.oD('PSouvrir')
-    },
+function raz () {
+  btncd.value = false
+  pc.value = null
+  sp.value = null
+  org.value = ''
+  initval.value = ''
+  session.setMode(0)
+}
 
-    saisiePS () {
-      this.ui.ps = { 
-        orgext: this.org,
-        verif: true,
-        labelValider: 'ok',
-        ok: this.creationComptable
-      }
-      this.ui.oD('PSouvrir')
-    },
+raz()
 
-    reset () {  },
+async function demperm () {
+  const p = await Notification.requestPermission()
+  if (p === 'granted') {
+    config.permission = true
+    await session.setSubscription()
+    console.log(config.subJSON)
+  }
+  ui.fD()
+}
 
-    async onps (phrase) {
-      if (phrase) phrase.phrase = null
-      await connexion(phrase, this.ui.razdb)
-      if (!this.config.silenceHome) await beep()
-    },
+function ouvrirPS (mode) {
+  session.setMode(mode)
+  ui.ps = { 
+    login: true, 
+    labelValider: "LOGconn", 
+    iconValider: "send",
+    ok: onps
+  }
+  ui.oD('phrasesecrete', 'a')
+}
 
-    async crypterphrase (pc) {
-      this.pc = pc
-      this.org = pc.org
-      const session = stores.session
-      try {
-        /* Recherche sponsoring *******/
-        RegCles.reset()
-        const mode = session.mode
-        stores.reset(true)
-        this.hTC = this.pc.hpsc
-        const res = await new GetSponsoring().run(this.org, this.pc.hps1, this.pc.hpsc)
-        if (res && res.cleET) {
-          if (res.cleET === false) {
-            await afficherDiag(this.$t('LOGnosp'))
-            this.raz()
-            return
-          } else {
-            try {
-              this.cleE = await decrypter(pc.pcb, res.cleET)
-              this.saisiePS()
-              return
-            } catch (e) {
-              await afficherDiag(this.$t('LOGnosp2'))
-              this.raz()
-              return
-            }
-          }
-        }
-        if (!res || !res.rowSponsoring) {
-          await afficherDiag(this.$t('LOGnopp'))
-          this.raz()
-          return
-        }
+function saisiePS () {
+  ui.ps = { 
+    orgext: org.value,
+    verif: true,
+    labelValider: 'ok',
+    ok: creationComptable
+  }
+  ui.oD('phrasesecrete', 'a')
+}
+
+async function onps (phrase) {
+  if (phrase) phrase.phrase = null
+  await connexion(phrase, ui.razdb)
+  if (!config.silenceHome) await beep()
+}
+
+async function crypterphrase (pc) {
+  org.value = pc.value.org
+  try {
+    /* Recherche sponsoring *******/
+    RegCles.reset()
+    const mode = session.mode
+    stores.reset(true)
+    hTC.value = pc.hpsc
+    const res = await new GetSponsoring().run(org.value, pc.hps1, pc.hpsc)
+    if (res && res.cleET) {
+      if (res.cleET === false) {
+        await afficherDiag($t('LOGnosp'))
+        raz()
+        return
+      } else {
         try {
-          const row = decode(res.rowSponsoring)
-          session.setMode(mode)
-          session.setOrg(this.org)
-          this.sp = new Sponsoring()
-          await this.sp.compileHS(row, this.pc.pcb)
-          if (this.sp.dlv <  AMJ.amjUtc()) {
-            await afficherDiag(this.$t('LOGppinv'))
-            this.raz()
-            return                  
-          }
-          if (this.sp.st !== 0) {
-            await afficherDiag(this.$t('LOGsp' + this.sp.st))
-            this.raz()
-            return                  
-          }
-          this.ui.oD('ASaccsp')
-          this.qexp = true
+          cleE.value = await decrypter(pc.pcb, res.cleET)
+          saisiePS()
           return
         } catch (e) {
-          await afficherDiag(this.$t('LOGppatt'))
-          this.raz()
-          return         
+          await afficherDiag($t('LOGnosp2'))
+          raz()
+          return
         }
-      } catch (e) {
-        console.log(e)
-        this.raz()
-        return
       }
-    },
-
-    async creationComptable (pc) {
-      await new CreationComptable().run(this.org, pc, this.cleE, this.hTC)
-      await afficherDiag(this.$t('LOGcrec'))
-    },
-
-    raz () {
-      this.btncd = false
-      this.pc = null
-      this.sp = null
-      this.org = ''
-      this.initval = ''
-      this.session.setMode(0)
     }
-  },
-
-  setup () {
-    const config = stores.config
-    const session = stores.session
-    const ui = stores.ui
-
-    const perm = ref(Notification.permission)
-    config.permission = perm.value === 'granted'
-
-    onMounted(async () => {
-      if (!config.permission) 
-        ui.oD('Pubsub')
-      if (config.permission) await session.setSubscription()
-    })
-
-    return {
-      session, ui, styp,
-      perm,
-      config
+    if (!res || !res.rowSponsoring) {
+      await afficherDiag($t('LOGnopp'))
+      raz()
+      return
     }
+    try {
+      const row = decode(res.rowSponsoring)
+      session.setMode(mode)
+      session.setOrg(org.value)
+      sp.value = new Sponsoring()
+      await sp.value.compileHS(row, pc.pcb)
+      if (sp.value.dlv <  AMJ.amjUtc()) {
+        await afficherDiag($t('LOGppinv'))
+        raz()
+        return                  
+      }
+      if (sp.value.st !== 0) {
+        await afficherDiag($t('LOGsp' + sp.value.st))
+        raz()
+        return                  
+      }
+      ui.oD('ASaccsp', idc)
+      return
+    } catch (e) {
+      await afficherDiag($t('LOGppatt'))
+      raz()
+      return         
+    }
+  } catch (e) {
+    console.log(e)
+    raz()
+    return
   }
 }
+
+async function creationComptable (pc) {
+  await new CreationComptable().run(org.value, pc, cleE.value, hTC.value)
+  await afficherDiag($t('LOGcrec'))
+}
+
+if (!config.permission) ui.oD('pubsub', 'a')
 </script>
 
 <style lang="sass" scoped>
