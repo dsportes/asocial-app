@@ -1836,10 +1836,10 @@ export class NouveauFichier extends Operation {
       delete fic.u8
 
       ui.setEtf(2)
-      /* OP_PutUrlNf : retourne l'URL de put d'un fichier d'une note ******
-      - token: éléments d'authentification du compte.
-      - id ids : id de la note
-      - aut: pour une note de groupe, ida de l'auteur de l'enregistrement
+      /* PutUrlNf : retourne l'URL de put d'un fichier d'une note ******
+      id: { t: 'idag' }, // id de la note (avatar ou groupe)
+      ids: { t: 'ids' }, // ids de la note
+      aut: { t: 'ida', n: null } // pour une note de groupe, id de l'auteur de l'enregistrement
       Retour:
       - idf : identifiant du fichier
       - url : url à passer sur le PUT de son contenu
@@ -1850,21 +1850,23 @@ export class NouveauFichier extends Operation {
       const ret = await post(this, 'PutUrlNf', args)
       const url = ret.url
       fic.idf = ret.idf
-
       // Transfert effectif du fichier (si pas d'exception de volume sur putUrl)
       const er = await putData(url, buf)
       if (er) throw new AppExc(E_WS, 5, [er])
       ui.setEtf(3)
 
       /* validerUpload ****************************************
-      - token: éléments d'authentification du compte.
-      - id, ids : de la note
-      - fic : { idf, nom, info, type, lg, gz, sha}
-      - aut: id de l'auteur (pour une note de groupe)
-      - idf : liste des idf fichiers de la note à supprimer
-      Retour: aucun
+      token: éléments d'authentification du compte.
+      id: { t: 'idag' }, // id de la note (avatar ou groupe)
+      ids: { t: 'ids' }, // ids de la note
+      fic: { t: 'fic' }, // { idf, lg, ficN }
+      aut: { t: 'ida', n: true }, // id de l'auteur (pour une note de groupe)
+      lidf: { t: 'lidf', n: true } // liste des idf fichiers de la note à supprimer
       */
-      const args2 = { token: session.authToken, id, ids, fic, lidf, aut }
+      const ficN = await crypter(note.cle, new Uint8Array(encode(fic)))
+      const args2 = { token: session.authToken, id, ids,
+        fic: { idf: fic.idf, lg: fic.lg, ficN },
+        lidf, aut }
       await post(this, 'ValiderUpload', args2)
       if (session.synchro) faSt.putDataEnCache(fic.idf, buf)
       ui.setEtf(4)

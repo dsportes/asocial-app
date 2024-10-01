@@ -1176,6 +1176,11 @@ _data_:
 - `mfa` : map des fichiers attachés.
 - `ref` : couple `[id, ids]` référence de sa note _parent_:
 
+Map des fichiers attachés
+- _clé_ `idf`: identifiant aléatoire généré à la création. L'identifiant _externe_ est `id` du groupe / avatar, `idf`. En pratique `idf` est un identifiant absolu.
+- _valeur_ : `{ idf, lg, ficN }`
+  - `ficN` : `{ nom, info, dh, type, gz, lg, sha }` crypté par la clé de la note
+
 **A propos de `ref`**:
 - Pour un note de groupe:
   - absent: rattachement _virtuel_ au groupe lui-même.
@@ -1221,8 +1226,8 @@ export class Note extends GenDoc {
     this.fnom = new Map()
     this.vf = row.vf
     if (this.vf && row.mfa) for (const idf in row.mfa) {
-      const f = row.mfa[idf]
-      this.mfa.set(f.idf, row.mfa[idf])
+      const f = decode(await decrypter(this.cle, row.mfa[idf].ficN))
+      this.mfa.set(f.idf, f)
       let e = this.fnom.get(f.nom); if (!e) { e = []; this.fnom.set(f.nom, e) }
       e.push(f)
       e.sort((a,b) => { return a.dh > b.dh ? -1 : (a.dh < b.dh ? 1 : 0) })
