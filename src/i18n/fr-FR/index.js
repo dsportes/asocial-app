@@ -213,6 +213,7 @@ export default {
 
   EX7010: 'Trop d\'accès parallèles à la base de données. Réessayer plus tard. Message technique: {0}',
   EX7011: 'Incident technique d\'accès à la base de données. Peut-être de réessayer plus tard évitera ce problème. Message technique: {0}',
+  EX7012: 'Code d\'habilitation du lancement du GC incorrect',
   EX7100: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - URL: [{1}] - message:[{2}]',
   EX7101: 'A priori c\'est une erreur de réseau (internet non joignable, etc.) mais ça peut aussi être le serveur distant qui n\'est pas joignable / lancé : HTTP:[{0}] - URL: [{1}] - message:[{2}]',
 
@@ -839,6 +840,7 @@ export default {
   ESpgesp: 'Espace #{0} - {1}',
   ESlo: 'Aucune organisation hébergée | Une organisation hébergée | {count} organisations hébergées',
   ESns: 'ID de l\'espace attribué',
+  ESgccode: 'Code d\'habilitation',
   ESnsh: '0...9 OU a...z OU A...Z',
   ESnsh2: '* OU 0...9 OU a...z OU A...Z',
   ESdlvat: 'Hébergment des comptes "O" assuré jusqu\'à :',

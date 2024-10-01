@@ -78,25 +78,6 @@ export class InitTachesGC extends Operation {
   }
 }
 
-/* OP_StartDemon: 'Lancement immédiat du démon',
-- token : jeton d'authentification de l'administrateur
-Retour:
-*/
-export class StartDemon extends Operation {
-  constructor() { super('StartDemon') }
-
-  async run() {
-    try {
-      const session = stores.session
-      const args = { token: session.authToken }
-      const ret = await post(this, 'StartDemon', args)
-      this.finOK()
-    } catch (e) {
-      await this.finKO(e)
-    }
-  }
-}
-
 /* `CreationEspace` : création d'un nouvel espace
 - token : jeton d'authentification du compte de **l'administrateur**
 - ns : numéro de l'espace

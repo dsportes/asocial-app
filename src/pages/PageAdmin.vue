@@ -7,15 +7,20 @@
     </q-tabs>
 
     <div v-if="tab==='taches'" class="q-pa-xs">
-      <div class="full-width q-mb-sm row items-center justify-between bg-secondary text-white">
+      <div class="full-width row items-center q-gutter-sm bg-secondary text-white">
         <btn-cond icon="refresh" @ok="getTaches"/>
         <div class="row items-center">
           <span class="q-mr-sm">{{$t('ESfta')}}</span>
           <q-input class="w6" v-model="ns"
               :label="$t('ESns')" :hint="$t('ESnsh2')" dense/>
         </div>
+      </div>
+      <div class="full-width q-mb-sm q-px-sm row items-center justify-between bg-secondary text-white">
         <btn-cond color="warning" :label="$t('ESgcin')" @ok="initGC"/>
-        <btn-cond color="warning" :label="$t('ESstartd')" @ok="startDemon"/>
+        <div class="row items-center">
+          <q-input class="w6 q-mr-sm" v-model="gccode" :label="$t('ESgccode')" dense/>
+          <btn-cond color="warning" :label="$t('ESstartd')" @ok="startDemon"/>
+        </div>
       </div>
 
       <div v-for="(t, idx) in taches" :key="idx">
@@ -96,7 +101,7 @@
     </div>
 
     <!-- Création d'un espace -->
-    <q-dialog v-model="ui.d[idc].PAcreationesp" persistent>
+    <q-dialog v-if="ui.d[idc]" v-model="ui.d[idc].PAcreationesp" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond icon="close" color="warning" @ok="cancelNS"/>
@@ -124,7 +129,7 @@
     </q-dialog>
 
     <!-- Changement de la phrase de sponsoring du Comptable -->
-    <q-dialog v-model="ui.d[idc].PAnvspc" persistent>
+    <q-dialog v-if="ui.d[idc]" v-model="ui.d[idc].PAnvspc" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -142,7 +147,7 @@
     </q-dialog>
 
     <!-- Changement des quotas de l'espace -->
-    <q-dialog v-model="ui.d[idc].PAedprf" persistent>
+    <q-dialog v-if="ui.d[idc]" v-model="ui.d[idc].PAedprf" persistent>
       <q-card :class="styp('sm')">
         <q-toolbar class="bg-secondary text-white">
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
@@ -177,8 +182,9 @@ import NotifIcon from '../components/NotifIcon.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 
-  StartDemon, DownloadStatC, DownloadStatC2, 
+  DownloadStatC, DownloadStatC2, 
   GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
+import { get } from '../app/net.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
 import { Cles, ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
@@ -256,7 +262,13 @@ export default {
     },
 
     async startDemon () {
-      await new StartDemon().run()
+      try {
+        const res = await get('StartDemon', { code: this.gccode})
+        await afficherDiag(new TextDecoder().decode(res))
+      } catch (ex) {
+        const s = ex.code === 7012 ? this.$t('EX7012') : ex.toString()
+        await afficherDiag(s)
+      }
     },
 
     aNS (ns) {
@@ -361,6 +373,7 @@ export default {
 
   data () {
     return {
+      gccode: '???',
       tab: 'taches',
       gcop: '',
       ns: '0',

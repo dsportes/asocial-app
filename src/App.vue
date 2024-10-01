@@ -3,7 +3,7 @@
   <q-header elevated>
     <q-toolbar class="full-width">
 
-      <btn-cond v-if="session.ok && !session.avion" 
+      <btn-cond v-if="session.ok && !session.avion && !session.estAdmin" 
         :color="clrsync" :icon="iconsync" @ok="ui.oD('sync', 'a')"/>
       
       <!-- Notifications -->
