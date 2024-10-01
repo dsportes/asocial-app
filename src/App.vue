@@ -529,7 +529,7 @@ $q.dark.set(true)
 
 ui.setScreenWH($q.screen.width, $q.screen.height)
 watchEffect(() => {
-  console.log($q.screen.width, $q.screen.height)
+  // console.log($q.screen.width, $q.screen.height)
   ui.setScreenWH($q.screen.width, $q.screen.height)
 })
 

@@ -24,7 +24,7 @@ const props = defineProps({
 const ph = stores.config.pagesHelp
 const ui = stores.ui
 
-const tp = computed (() => !ph.has(this.page) ? $t('HLPaidebd', [props.page]) : $t('A_' + props.page))
+const tp = computed (() => !ph.has(props.page) ? $t('HLPaidebd', [props.page]) : $t('A_' + props.page))
 
 async function ouvrir () {
   if (ph.has(props.page)) { ui.pushhelp(props.page); return }

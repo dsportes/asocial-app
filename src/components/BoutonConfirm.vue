@@ -17,7 +17,7 @@ const props = defineProps({
 const text = ref('')
 const code = ref('' + random(1))
 
-watch(props.actif, (ap, av) => {
+watch(() => props.actif, (ap, av) => {
   code.value = '' + random(1)
   text.value = ''
 })

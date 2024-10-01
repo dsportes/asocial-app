@@ -62,7 +62,7 @@
 
         <div class="q-ml-lg">
           <btn-cond v-if="esp.hTC" class="q-ma-xs" :label="$t('ENnpspc')" 
-            @ok="this.esp = esp; ui.oD('PAnvspc', idc)" />
+            @ok="ovnspc(esp)" />
           
           <div class="q-my-sm">
             <div class="row">
@@ -167,8 +167,13 @@
   </q-page>
 </template>
 
-<script>
-import { ref, onMounted, onUnmounted } from 'vue'
+<script setup>
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
+const $t = useI18n().t
+const $q = useQuasar()
+
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
@@ -182,13 +187,15 @@ import NotifIcon from '../components/NotifIcon.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import { CreationEspace, MajSponsEspace, SetEspaceQuotas, InitTachesGC, 
-  DownloadStatC, DownloadStatC2, 
-  GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
+  DownloadStatC, DownloadStatC2, GetTaches, DelTache, GoTache } from '../app/operations4.mjs'
 import { get } from '../app/net.mjs'
 import { GetEspaces } from '../app/synchro.mjs'
 import { compile } from '../app/modele.mjs'
 import { Cles, ID, AMJ, UNITEN, UNITEV } from '../app/api.mjs'
-import { $t, styp, edvol, mon, nbn, dkli, afficherDiag, dhstring } from '../app/util.mjs'
+import { styp, edvol, mon, nbn, dkli, afficherDiag, dhstring } from '../app/util.mjs'
+
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
 const reg = /^([a-z0-9\-]+)$/
 
@@ -205,217 +212,192 @@ const OPNOMS = {
   25: 'ESP'
 }
 
-export default {
-  name: 'PageAdmin',
+const session = stores.session
+const cfg = stores.config
+const lstEsp = ref([])
 
-  components: { QuotasVols, ChoixQuotas, NotifIcon, PhraseContact, BoutonConfirm, ApercuNotif, BoutonHelp, BoutonDlvat, BtnCond, SaisieMois },
+async function loadEsp () {
+  const lst = []
+  const rows = await new GetEspaces().run()
+  if (rows) for (const row of rows) 
+    lst.push(await compile(row))
+  lst.sort((a, b) => { return a.ns < b.ns ? -1 : (a.ns === b.ns ? 0 : 1)})
+  lstEsp.value = lst
+}
 
-  computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    maxdl () { 
-      const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
-      return Math.floor(m / 100)
-    }
-  },
+onMounted(async () => {
+  await loadEsp()
+})
 
-  watch: {
-    ns (ap, av) {
-      if (ap.length !== 1 || Cles.nsToInt(ap) === -1) { this.dns = this.$t('ESnsh'); return }
-      if (this.aNS(ap)) { this.dns = this.$t('ESnum'); return }
-      this.dns = ''
-    },
-    org (ap, av) {
-      if (ap.length < 4) { this.dorg = this.$t('ESorg1'); return }
-      if (ap.length > 8) { this.dorg = this.$t('ESorg2'); return }
-      if (!ap.match(reg)) { this.dorg = this.$t('ESorg3'); return }
-      if (this.aOrg(ap)) { this.dorg = this.$t('ESorg4'); return }
-      this.dorg = ''
-    },
-  },
+const sty = computed(() => $q.dark.isActive ? 'sombre' : 'clair' )
+const maxdl = computed(() => { 
+  const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
+  return Math.floor(m / 100)
+})
 
-  methods: {
-    nvntf (ntf) {
-      return ntf.nr === 1 ? 1 : (ntf.nr === 2 ? 4 : 6)
-    },
+const gccode = ref('???')
+const tab = ref('taches')
+const gcop = ref('')
+const ns = ref('0')
+const nsc = ref('') // ns "courant" de PageEspace à ouvrir
+const org = ref('')
+const ps = ref(null)
+const singl = ref(null)
+const dns = ref($t('ESreq'))
+const dorg = ref($t('ESreq'))
+const quotas = ref(null)
+const esp = ref(null)
+const mois = ref(Math.floor(session.auj / 100))
+const taches = ref([])
+  
+watch (ns, (ap, av) => {
+  if (ap.length !== 1 || Cles.nsToInt(ap) === -1) { dns.value = $t('ESnsh'); return }
+  if (aNS(ap)) { dns.value = $t('ESnum'); return }
+  dns.value = ''
+})
+ 
+watch (org, (ap, av) => {
+  if (ap.length < 4) { dorg.value = $t('ESorg1'); return }
+  if (ap.length > 8) { dorg.value = $t('ESorg2'); return }
+  if (!ap.match(reg)) { dorg.value = $t('ESorg3'); return }
+  if (aOrg(ap)) { dorg.value = $t('ESorg4'); return }
+  dorg.value = ''
+})
 
-    ev0 (idx) { return mon(this.cfg.profils[idx][0]) },
+function nvntf (ntf) {
+  return ntf.nr === 1 ? 1 : (ntf.nr === 2 ? 4 : 6)
+}
 
-    ev1 (idx) { 
-      const n = this.cfg.profils[idx][1]
-      return '[' + n + '] ' + nbn(n * UNITEN)
-    },
+function ev0 (idx) { return mon(cfg.profils[idx][0]) }
 
-    ev2 (idx) { return edvol(this.cfg.profils[idx][2] * UNITEV) },
+function ev1 (idx) { 
+  const n = cfg.profils[idx][1]
+  return '[' + n + '] ' + nbn(n * UNITEN)
+}
 
-    brd (idx) { 
-      const x = this.prf === idx + 1 ? ' bord6': (this.profil === idx + 1 ? ' bord7' : ' bord5') 
-      return x 
-    },
+function ev2 (idx) { return edvol(cfg.profils[idx][2] * UNITEV) }
 
-    async finDlv (tf) {
-      if (tf) await this.loadEsp()
-    },
+async function finDlv (tf) {
+  if (tf) await loadEsp()
+}
 
-    async initGC () {
-      const [nx, nc] = await new InitTachesGC().run()
-      await afficherDiag(this.$t('ESinitgc', [nx, nc]))
-    },
+async function initGC () {
+  const [nx, nc] = await new InitTachesGC().run()
+  await afficherDiag($t('ESinitgc', [nx, nc]))
+}
 
-    async startDemon () {
-      try {
-        const res = await get('StartDemon', { code: this.gccode})
-        await afficherDiag(new TextDecoder().decode(res))
-      } catch (ex) {
-        const s = ex.code === 7012 ? this.$t('EX7012') : ex.toString()
-        await afficherDiag(s)
-      }
-    },
-
-    aNS (ns) {
-      for (const e of this.lstEsp)
-        if (e.id === ns) return true
-      return false
-    },
-
-    aOrg (org) {
-      for (const e of this.lstEsp)
-        if (e.org === org) return true
-      return false
-    },
-
-    plusNS () {
-      this.ui.oD('PAcreationesp', this.idc)
-    },
-
-    cancelNS () {
-      this.ns = 0
-      this.ps = null
-      this.ui.fD()
-    },
-
-    okps (ps) {
-      if (ps) ps.phrase = null
-      this.ps = ps
-    },
-
-    async nvspc () {
-      await new MajSponsEspace().run(this.esp.org, this.ps, this.esp.id)
-      this.ns = 0
-      this.ps = null
-      this.ui.fD()
-      await this.loadEsp()
-    },
-
-    async creerNS () {
-      await new CreationEspace().run(this.org, this.ps, this.ns)
-      this.ns = 0
-      this.ps = null
-      this.ui.fD()
-      await this.loadEsp()
-    },
-
-    async valider () {
-      await new SetEspaceQuotas().run(this.esp.ns, this.quotas)
-      this.ui.fD()
-      await this.loadEsp()
-    },
-
-    ovchgquotas (e) {
-      this.esp = e
-      // minn, minv, maxn, maxv, minc, maxc, err
-      this.quotas = { ...e.quotas, err: null, minn: 10, minv: 10, minc: 10, 
-        maxn: 1000000, maxv: 1000000, maxc: 1000000 }
-      this.ui.oD('PAedprf', this.idc)
-    },
-
-    async dlstat (esp, mr) {
-      const cleES = esp.cleES
-      const { err, blob, creation, mois } = 
-        await new DownloadStatC().run(esp.org, mr, cleES)
-      const nf = esp.org + '-C_' + mois
-      if (!err) {
-        saveAs(blob, nf)
-        await afficherDiag($t('PEsd', [nf]))
-      } else {
-        await afficherDiag($t('PEnd' + err))
-      }
-    },
-
-    mindl (esp) { 
-      return Math.floor(esp.dcreation / 100)
-    },
-
-    async dlstat2 (esp) {
-      const cleES = esp.cleES
-      const { err, blob } = await new DownloadStatC2()
-        .run(esp.org, parseInt(this.mois), 'C', cleES)
-      const nf = esp.org + '-C_' + this.mois
-      if (!err) {
-        saveAs(blob, nf)
-        await afficherDiag($t('PEsd', [nf]))
-      } else {
-        await afficherDiag($t('PEnd') + err)
-      }
-    },
-
-    async getTaches () {
-      this.taches = await new GetTaches().run(this.ns)
-    },
-
-    async tacheDel (t) {
-      await new DelTache().run(t)
-    },
-
-    async tacheGo (t) {
-      await new GoTache().run(t)
-    }
-  },
-
-  data () {
-    return {
-      gccode: '???',
-      tab: 'taches',
-      gcop: '',
-      ns: '0',
-      nsc: '', // ns "courant" de PageEspace à ouvrir
-      org: '',
-      ps: null,
-      singl: null,
-      dns: this.$t('ESreq'),
-      dorg: this.$t('ESreq'),
-      quotas: null,
-      esp: null,
-      mois: Math.floor(this.session.auj / 100),
-      taches: []
-    }
-  },
-
-  setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const cfg = stores.config
-    const lstEsp = ref([])
-
-    async function loadEsp () {
-      const lst = []
-      const rows = await new GetEspaces().run()
-      if (rows) for (const row of rows) 
-        lst.push(await compile(row))
-      lst.sort((a, b) => { return a.ns < b.ns ? -1 : (a.ns === b.ns ? 0 : 1)})
-      lstEsp.value = lst
-    }
-
-    onMounted(async () => {
-      await loadEsp()
-    })
-
-    return {
-      session, ui, idc, cfg, dkli, styp, lstEsp, loadEsp, ID, dhstring, OPNOMS,
-      AMJ
-    }
+async function startDemon () {
+  try {
+    const res = await get('StartDemon', { code: gccode.value })
+    await afficherDiag(new TextDecoder().decode(res))
+  } catch (ex) {
+    const s = ex.code === 7012 ? $t('EX7012') : ex.toString()
+    await afficherDiag(s)
   }
+}
 
+function aNS (ns) {
+  for (const e of lstEsp.value)
+    if (e.id === ns) return true
+  return false
+}
+
+function aOrg (org) {
+  for (const e of lstEsp.value)
+    if (e.org === org) return true
+  return false
+}
+
+function plusNS () {
+  ui.oD('PAcreationesp', idc)
+}
+
+function cancelNS () {
+  ns.value = 0
+  ps.value = null
+  ui.fD()
+}
+
+function okps (p) {
+  if (p) p.phrase = null
+  ps.value = p
+}
+
+function ovnspc (e) {
+  esp.value = e
+  ui.oD('PAnvspc', idc)
+}
+
+async function nvspc () {
+  await new MajSponsEspace().run(esp.value.org, ps.value, esp.value.id)
+  ns.value = 0
+  ps.value = null
+  ui.fD()
+  await loadEsp()
+}
+
+async function creerNS () {
+  await new CreationEspace().run(org.value, ps.value, ns.value)
+  ns.value = 0
+  ps.value = null
+  ui.fD()
+  await loadEsp()
+}
+
+async function valider () {
+  await new SetEspaceQuotas().run(esp.value.ns, quotas.value)
+  ui.fD()
+  await loadEsp()
+}
+
+function ovchgquotas (e) {
+  esp.value = e
+  // minn, minv, maxn, maxv, minc, maxc, err
+  quotas.value = { ...e.quotas, err: null, minn: 10, minv: 10, minc: 10, 
+    maxn: 1000000, maxv: 1000000, maxc: 1000000 }
+  ui.oD('PAedprf', idc)
+}
+
+async function dlstat (esp, mr) {
+  const cleES = esp.cleES
+  const { err, blob, creation, mois } = 
+    await new DownloadStatC().run(esp.org, mr, cleES)
+  const nf = esp.org + '-C_' + mois
+  if (!err) {
+    saveAs(blob, nf)
+    await afficherDiag($t('PEsd', [nf]))
+  } else {
+    await afficherDiag($t('PEnd' + err))
+  }
+}
+
+function mindl (esp) { 
+  return Math.floor(esp.dcreation / 100)
+}
+
+async function dlstat2 (esp) {
+  const cleES = esp.cleES
+  const { err, blob } = await new DownloadStatC2()
+    .run(esp.org, parseInt(mois.value), 'C', cleES)
+  const nf = esp.org + '-C_' + mois.value
+  if (!err) {
+    saveAs(blob, nf)
+    await afficherDiag($t('PEsd', [nf]))
+  } else {
+    await afficherDiag($t('PEnd') + err)
+  }
+}
+
+async function getTaches () {
+  taches.value = await new GetTaches().run(ns.value)
+}
+
+async function tacheDel (t) {
+  await new DelTache().run(t)
+}
+
+async function tacheGo (t) {
+  await new GoTache().run(t)
 }
 </script>
 

@@ -12,20 +12,6 @@ const ESLintPlugin = require('eslint-webpack-plugin')
 const { configure } = require('quasar/wrappers')
 const path = require('path')
 
-/*
-ATTENTION: obfuscator nique le string "self.__WB_MANIFEST"
-ce qui plante le build du service-worker
-const JavaScriptObfuscator = require('webpack-obfuscator')
-const plugob = new JavaScriptObfuscator({
-  // debugProtection: true,
-  // debugProtectionInterval: true,
-  rotateStringArray: true
-  // renameGlobals: true,
-  // stringArrayEncoding: 'rc4',
-  // stringArrayThreshold: 1
-})
-*/
-
 module.exports = configure(function (ctx) {
   return {
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
@@ -89,11 +75,6 @@ module.exports = configure(function (ctx) {
         ignored: '**/node_modules',
       },
       extendWebpack (cfg) {
-        // cfg.module.rules.push({ test: /\.md$/i, use: 'raw-loader' })
-        // cfg.module.rules.push({ test: /\.b64$/i, use: 'raw-loader' })
-        // cfg.module.rules.push({ test: /\.txt$/i, use: 'raw-loader' })
-        // cfg.module.rules.push({ test: /\.svg$/, loader: 'raw-loader' })
-
         cfg.module.rules.push({ test: /\.md$/i, type: 'asset/source' })
         cfg.module.rules.push({ test: /\.txt$/i, type: 'asset/source' })
         cfg.module.rules.push({ 
@@ -108,9 +89,6 @@ module.exports = configure(function (ctx) {
           }
         })
         cfg.module.rules.push({ test: /\.bin$/i, type: 'asset/inline' })
-
-        // Commenter la ligne ci-dessous pour ne pas obfusquer le code
-        // if(!ctx.dev && !ctx.debug) { cfg.plugins.push(plugob) }
       },
       chainWebpack: chain => {
         chain.module
