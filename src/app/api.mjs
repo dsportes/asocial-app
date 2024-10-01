@@ -46,10 +46,13 @@ export class Cles {
 export class ID {
   static regid = new RegExp('^[0-9a-zA-Z]*$')
 
+  static estID (id) { 
+    if (typeof id !== 'string' || id.length !== 12) return false
+    return ID.regid.test(id)
+  }
+
   static type (id) { 
-    if (typeof id !== 'string' || id.length !== 12) return 0
-    if (!ID.regid.test(id)) return 0
-    return parseInt(id.charAt(0))
+    return ID.estID(id) ? parseInt(id.charAt(0)) : -1
   }
 
   static duComptable () { return '300000000000' }
@@ -76,9 +79,6 @@ export class ID {
   static noteLoc () { return '7' + ID.rnd().substring(1) }
   static fic () { return '8' + ID.rnd().substring(1) }
 }
-
-console.log(ID.type('3azertyi00AZ'))
-console.log(ID.type('3aéertyi00AZ'))
 
 export const HBINSECONDS = 20 // 120
 export const ESPTO = 3 // en minutes : rechargement de la cache des espaces

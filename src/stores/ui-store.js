@@ -193,7 +193,7 @@ export const useUiStore = defineStore('ui', {
     async afficherExc (exc) {
       if (this.estOuvert('dialogueerreur')) return
       return new Promise((resolve) => {
-        this.oD('dialogueerreur')
+        this.oD('dialogueerreur', 'a')
         this.dialogueerreurresolve = resolve
         this.exc = exc
       })
