@@ -6,6 +6,12 @@ const pagesF = new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 'grou
 const tabF = new Set(['membres'])
 const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes', 'ficavion'])
 
+// Le compteur de dialogues ouverts DOIT ne pas être remis à 0
+// à la déconnexion (en fait au reset du store ui)
+const X = {
+  idc: 1
+}
+
 export const useUiStore = defineStore('ui', {
   state: () => ({
     diag: '',
@@ -49,8 +55,10 @@ export const useUiStore = defineStore('ui', {
     ps: null, // objet props du dialogue PhraseSecrete
 
     // gestion des dialogues
+    // Le compteur de dialogues ouverts idc DOIT ne pas être remis à 0
+    // à la déconnexion (en fait au reset du store ui)
     reLogin: true,
-    idc: 1,
+    idc: X.idc,
     dialogStack: [],
     d: { a: {} }
 
@@ -89,7 +97,8 @@ export const useUiStore = defineStore('ui', {
     },
 
     getIdc () {
-      this.idc++
+      X.idc++
+      this.idc = X.idc++
       this.d[this.idc] = {}
       return this.idc
     },
@@ -106,15 +115,21 @@ export const useUiStore = defineStore('ui', {
       const e = l ? this.dialogStack[l - 1] : null
       if (e) {
         this.dialogStack.length = l - 1
-        delete this.d[e[1]][e[0]]
+        const x = this.d[e[1]]
+        if (x) x[e[0]] = false
       }
     },
 
     oD (n, idc) {
-      const ix = '' + idc || 'a'
+      const ix = '' + idc
       if (!this.d[ix]) this.d[ix] = {}
-      this.dialogStack.push([n, ix])
       this.d[ix][n] = true
+      this.dialogStack.push([n, ix])
+    },
+
+    xD (n, idc) {
+      if (!idc || !this.d[idc]) return false
+      return this.d[idc][n] !== undefined
     },
 
     estOuvert (n) {

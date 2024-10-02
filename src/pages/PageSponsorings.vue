@@ -52,7 +52,7 @@
     </q-card>
 
     <!-- Dialogue de création d'un sponsoring ici la partition est la sienne -->
-    <nouveau-sponsoring v-if="ui.d[idc] && ui.d[idc].NSnvsp"/>
+    <nouveau-sponsoring v-if="ui.d[idc] && ui.d[idc].NSnvsp" :idc2="idc"/>
 
   </q-page>
 </template>

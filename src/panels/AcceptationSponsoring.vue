@@ -1,6 +1,5 @@
 <template>
-<q-dialog v-model="ui.d[idc].ASaccsp" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+<q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-primary text-white">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
@@ -91,11 +90,13 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</q-dialog>
 </template>
 
-<script>
-import { toRef, onUnmounted } from 'vue'
+<script setup>
+import { useI18n } from 'vue-i18n'
+const $t = useI18n().t
+
+import { ref, onUnmounted, computed, watch } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -107,95 +108,72 @@ import { styp, dhcool, afficherDiag } from '../app/util.mjs'
 import { AMJ, ID } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 
-export default ({
-  name: 'AcceptationSponsoring',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  props: { sp: Object, pc: Object, org: String },
-  /*
-  pc : objet Phrase
-  sp : objet Sponsoring décodé
-  */
-
-  components: { BtnCond, EditeurMd, ShowHtml, BoutonHelp, QuotasVols },
-
-  computed: {
-    textedef () { return this.$t('merci', [this.sp.cv.nom]) }
-  },
-
-  data () {
-    return {
-      step: '0',
-      isPwd: false,
-      jourJ: AMJ.amjUtc(),
-      max: [1, 1],
-      ps: null,
-      apsf: false,
-      texte: '',
-      npi: false,
-      dhcool: dhcool,
-      dconf: false
-    }
-  },
-
-  watch: {
-    step (ap, av) {
-      if (ap === '1' && !this.ps) {
-        this.ui.ps = {
-          labelValider: 'ok',
-          verif: true,
-          orgext: this.org,
-          ok: this.okps,
-          initVal: this.ps ? this.ps.phrase : ''
-        }
-        this.ui.oD('phrasesecrete', 'a')
-      } else this.ps = null
-    }
-  },
-
-  methods: {
-    clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][sp.st] },
-    fermer () {
-      this.texte = ''
-      this.apsf = false
-      this.isPwd = false
-      this.ps = null
-      this.ui.fD()
-    },
-
-    async okps (ps) {
-      if (ps) {
-        if (await new ExistePhrase().run(ps.hps1, 1)) {
-          await afficherDiag(this.$t('existe'))
-          this.step = '0'
-          return
-        }
-        this.ps = ps
-      } else {
-        this.accdec = 0
-      }
-    },
-    async confirmer () {
-      await new SyncSp().run(this.org, this.sp, this.texte, this.ps, this.dconf)
-      this.fermer()
-    },
-    async refuser () {
-      await new RefusSponsoring().run(this.sp, this.texte + '\n\n' + this.sp.ard)
-      this.fermer()
-      await deconnexion()
-    }
-  },
-
-  setup (props) {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const sp = toRef(props, 'sp')
-    // const pc = toRef(props, 'pc')
-    return {
-      ui, idc, ID, styp, AMJ,
-      pSt: stores.people
-    }
-  }
+const props = defineProps({ 
+  sp: Object, // objet Sponsoring décodé
+  pc: Object, // objet Phrase
+  org: String
 })
+
+const textedef = computed(() => $t('merci', [props.sp.cv.nom]))
+
+const step = ref('0')
+const isPwd = ref(false)
+const jourJ = ref(AMJ.amjUtc())
+const max = ref([1, 1])
+const ps = ref(null)
+const apsf = ref(false)
+const texte = ref('')
+const npi = ref(false)
+const dconf = ref(false)
+
+watch(step, (ap, av) => {
+  if (ap === '1' && !ps.value) {
+    ui.ps = {
+      labelValider: 'ok',
+      verif: true,
+      orgext: props.org,
+      ok: okps,
+      initVal: ps.value ? ps.value.phrase : ''
+    }
+    ui.oD('phrasesecrete', 'a')
+  } else ps.value = null
+})
+
+function clr (sp) { return ['primary', 'warning', 'green-5', 'negative'][props.sp.st] }
+    
+function fermer () {
+  texte.value = ''
+  apsf.value = false
+  isPwd.value = false
+  ps.value = null
+  ui.fD()
+}
+
+async function okps (p) {
+  if (p) {
+    if (await new ExistePhrase().run(p.hps1, 1)) {
+      await afficherDiag($t('existe'))
+      step.value = '0'
+      return
+    }
+    ps.value = p
+  }
+}
+
+async function confirmer () {
+  await new SyncSp().run(props.org, props.sp, texte.value, ps.value, dconf.value)
+  fermer()
+}
+
+async function refuser () {
+  await new RefusSponsoring().run(props.sp, texte.value + '\n\n' + props.sp.ard)
+  fermer()
+  await deconnexion()
+}
+
 </script>
 
 <style lang="sass" scoped>

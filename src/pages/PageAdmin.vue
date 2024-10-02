@@ -153,9 +153,7 @@
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('ESchg')}}</q-toolbar-title>
         </q-toolbar>
-        <q-card-section class="q-my-md q-mx-sm">
-          <choix-quotas :quotas="quotas"/>
-        </q-card-section>
+        <choix-quotas :quotas="quotas"/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond color="warning" icon="check" 

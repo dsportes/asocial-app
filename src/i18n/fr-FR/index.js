@@ -945,7 +945,7 @@ export default {
   CHsuppr: 'L\'avatar a DISPARU (résilié, auto-résilié, inactivité prolongée): le "chat" avec lui n\'existe plus.',
   CHauto: 'L\'avatar n\'est pas l\'avatar principal d\'un compte autonome. Lui faire un don n\'est pas possible.',
   CHmdon: 'Montant du don (en €)',
-  CHcdon: 'confidentiel',
+  CHconfid: 'confidentiel',
   CHdonde: '### Don de {0}€',
   CHcred: 'Le solde du compte ({0}c) est insuffisant pour couvrir le montant du don ({1}c).',
 
@@ -1374,6 +1374,7 @@ export default {
   PTopt: 'Comptes "autonomes" autorisés',
 
   CAVtit: 'Chats avec :',
+  CAVtit2: 'Carte de visite inconnue, chat impossible',
   CAVmb: 'Membre des groupes :',
   PIng: 'Groupe {0}',
   PIfi: 'Seulement ceux proposables',

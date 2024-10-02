@@ -1,5 +1,5 @@
 <template>
-<q-dialog v-model="ui.d[idc].NSnvsp" full-height position="left" persistent>
+<q-dialog v-model="ui.d[idc2].NSnvsp" full-height position="left" persistent>
   <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -16,9 +16,9 @@
           <div class="q-my-sm">
             <q-option-group :options="optionsOSA" type="radio" dense v-model="optOSA" />
           </div>
-          <div v-if="optOSA === 2">
+          <div>
             <q-checkbox class="titre-md text-bold" size="md" dense 
-              left-label v-model="dconf" :label="$t('CHcdon')" />
+              left-label v-model="dconf" :label="$t('CHconfid')" />
           </div>
           <q-stepper-navigation>
             <btn-cond flat @ok="step = 2" :label="$t('suivant')"/>
@@ -84,10 +84,10 @@
             <div class="titre-md">{{$t(estDelegue ? 'compteD' : 'compteO', [partition.id])}}</div>
             <quotas-vols class="q-ml-md" :vols="quotas" noutil/>
           </div>
-          <div v-if="estAutoneme" class="text-warning titre-md">
+          <div v-if="dconf" class="titre-md">{{$t('conf')}}</div>
+          <div v-if="estAutonome" class="text-warning titre-md">
             <span>{{$t('compteA')}}</span>
             <span v-if="don" class="q-ml-sm">{{$t('NPdon2', [don])}}</span>
-            <span v-if="dconf" class="q-ml-sm">{{$t('conf')}}</span>
           </div>
           <q-stepper-navigation class="row items-center q-gutter-sm q-mt-md">
             <btn-cond flat @ok="step = 5" :label="$t('corriger')"/>
@@ -122,7 +122,9 @@ import { AjoutSponsoring } from '../app/operations4.mjs'
 export default ({
   name: 'NouveauSponsoring',
 
-  props: { },
+  props: { 
+    idc2: Number
+  },
 
   components: { BtnCond, PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp, QuotasVols },
 

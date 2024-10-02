@@ -71,7 +71,7 @@
     </div>
 
     <!-- Dialogue de création d'un nouveau sponsoring -->
-    <nouveau-sponsoring v-if="ui.d[idc] && ui.d[idc].NSnvsp"/>
+    <nouveau-sponsoring v-if="idc && ui.d[idc].NSnvsp" :idc2="idc"/>
     
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="ui.d[idc].PTedq" persistent>

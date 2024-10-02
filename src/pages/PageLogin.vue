@@ -53,10 +53,12 @@
   </q-expansion-item>
 
   <!-- Dialogue d'acceptation d'un nouveau sponsoring -->
-  <acceptation-sponsoring v-if="ui.d[idc] && ui.d[idc].ASaccsp" :sp="sp" :pc="pc" :org="org"/>
+  <q-dialog v-if="ui.xD('ASaccsp', idc)" v-model="ui.d[idc].ASaccsp" full-height position="left" persistent>
+    <acceptation-sponsoring :sp="sp" :pc="pc" :org="org"/>
+  </q-dialog>
 
   <!-- Dialogue 'a', pas idc - on ne sait pas pourquoi -->
-  <q-dialog v-model="ui.d.a.pubsub" persistent>
+  <q-dialog v-if="ui.xD('pubsub', idc)" v-model="ui.d[idc].pubsub" persistent>
     <q-card :class="styp('sm') + ' q-pa-sm column items-center'">
       <div class="font-mono fs-xs">[{{perm}}]</div>
       <div class="titre-lg q-my-md text-center">{{$t('LOGpubsub')}}</div>
@@ -90,7 +92,6 @@ const session = stores.session
 
 const ui = stores.ui
 const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-console.log('vue PageLogin', idc)
 
 const perm = ref(Notification.permission)
 config.permission = perm.value === 'granted'
@@ -158,15 +159,16 @@ async function onps (phrase) {
   if (!config.silenceHome) await beep()
 }
 
-async function crypterphrase (pc) {
-  org.value = pc.value.org
+async function crypterphrase (p) {
+  pc.value = p
+  org.value = p.org
   try {
     /* Recherche sponsoring *******/
     RegCles.reset()
     const mode = session.mode
     stores.reset(true)
-    hTC.value = pc.hpsc
-    const res = await new GetSponsoring().run(org.value, pc.hps1, pc.hpsc)
+    hTC.value = p.hpsc
+    const res = await new GetSponsoring().run(org.value, p.hps1, p.hpsc)
     if (res && res.cleET) {
       if (res.cleET === false) {
         await afficherDiag($t('LOGnosp'))
@@ -174,7 +176,7 @@ async function crypterphrase (pc) {
         return
       } else {
         try {
-          cleE.value = await decrypter(pc.pcb, res.cleET)
+          cleE.value = await decrypter(p.pcb, res.cleET)
           saisiePS()
           return
         } catch (e) {
@@ -194,7 +196,7 @@ async function crypterphrase (pc) {
       session.setMode(mode)
       session.setOrg(org.value)
       sp.value = new Sponsoring()
-      await sp.value.compileHS(row, pc.pcb)
+      await sp.value.compileHS(row, p.pcb)
       if (sp.value.dlv <  AMJ.amjUtc()) {
         await afficherDiag($t('LOGppinv'))
         raz()
@@ -206,16 +208,13 @@ async function crypterphrase (pc) {
         return                  
       }
       ui.oD('ASaccsp', idc)
-      return
     } catch (e) {
       await afficherDiag($t('LOGppatt'))
-      raz()
-      return         
+      raz()        
     }
   } catch (e) {
     console.log(e)
     raz()
-    return
   }
 }
 
@@ -224,7 +223,7 @@ async function creationComptable (pc) {
   await afficherDiag($t('LOGcrec'))
 }
 
-if (!config.permission) ui.oD('pubsub', 'a')
+if (!config.permission) ui.oD('pubsub', idc)
 </script>
 
 <style lang="sass" scoped>
