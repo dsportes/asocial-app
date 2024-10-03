@@ -183,7 +183,7 @@
             </div>
 
             <div v-if="action !== 0 && action !== 2">
-              <choix-quotas class="q-my-sm" :quotas="q" @change="onChgQ" groupe/>
+              <choix-quotas class="q-my-sm" v-model="q" groupe/>
               <div v-if="q.err" class="q-ma-sm q-pa-xs msg titre-md">{{$t('AGmx')}}</div>
               <div v-else>
                 <div v-if="aln || alv">

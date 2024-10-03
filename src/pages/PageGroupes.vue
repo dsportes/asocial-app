@@ -113,7 +113,7 @@
         <div class="titre-md q-mb-xs text-center">{{$t('PGnom', [nom || '?'])}}</div>
         <nom-avatar class="titre-md q-mb-sm" verif groupe v-model="nom"/>
         <div class="titre-md q-my-sm">{{$t('PGquotas')}}</div>
-        <choix-quotas :quotas="quotas" groupe/>
+        <choix-quotas v-model="quotas" groupe/>
         <q-option-group :options="options" type="radio" v-model="una"/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD" />

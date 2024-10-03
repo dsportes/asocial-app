@@ -57,8 +57,8 @@
   </q-page>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { AMJ, UNITEN, UNITEV, ID } from '../app/api.mjs'
@@ -70,6 +70,12 @@ import BtnCond from '../components/BtnCond.vue'
 import QuotasVols from '../components/QuotasVols.vue'
 import { ProlongerSponsoring, GetPartition } from '../app/synchro.mjs'
 
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+
+const aSt = stores.avatar
+const session = stores.session
+
 const clx = [
   'text-primary',
   'text-warning bg-yellow-3',
@@ -77,51 +83,25 @@ const clx = [
   'text-negative bg-yellow-3',
 ]
 
-export default {
-  name: 'PageSponsorings',
+const sponsorings = computed(() => { 
+  const r = Array.from(aSt.getSponsorings(aSt.avC.id).values()) || []
+  r.sort((a,b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)} )
+  return r
+})
 
-  components: { BtnCond, BoutonHelp, NouveauSponsoring, ShowHtml, QuotasVols },
+const ed1 = (f) => edvol(f * UNITEN)
+const ed2 = (f) => edvol(f * UNITEV)
 
-  computed: {
-    sponsorings () { 
-      const r = Array.from(this.aSt.getSponsorings(this.aSt.avC.id).values()) || []
-      r.sort((a,b) => { return a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)} )
-      return r
-    }
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  methods: {
-    ed1 (f) { return edvol(f * UNITEN) },
-    ed2 (f) { return edvol(f * UNITEV) },
-
-    async nouveausp () { 
-      if (this.session.compte.idp) await new GetPartition().run(this.session.compte.idp)
-      this.ui.oD('NSnvsp', this.idc) 
-    },
-
-    async prolonger (sp, nj) {
-      const ndlv = !nj ? 0 : AMJ.amjUtcPlusNbj(this.session.auj, nj)
-      new ProlongerSponsoring().run(sp, ndlv)
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    return {
-      ID, AMJ, dkli, dhcool, clx,
-      aSt: stores.avatar, 
-      session: stores.session, 
-      ui, idc
-    }
-  }
-
+async function nouveausp () { 
+  if (session.compte.idp) await new GetPartition().run(session.compte.idp)
+  ui.oD('NSnvsp', idc) 
 }
+
+async function prolonger (sp, nj) {
+  const ndlv = !nj ? 0 : AMJ.amjUtcPlusNbj(session.auj, nj)
+  new ProlongerSponsoring().run(sp, ndlv)
+}
+
 </script>
 
 <style lang="sass" scoped>

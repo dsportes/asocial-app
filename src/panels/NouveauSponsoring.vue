@@ -59,7 +59,7 @@
           <div ref="step4">
             <editeur-md :texte="mot1" v-model="mot" editable modetxt mh="10rem"/>
           </div>
-          <div v-if="diagmot" class="fs-sm text-warning">{{$t('NP10s', [mot.length])}}</div>
+          <div v-if="motko" class="fs-sm text-warning">{{$t('NP10s', [mot.length])}}</div>
           <q-stepper-navigation>
             <btn-cond flat @ok="step = 3" :label="$t('precedent')"/>
             <btn-cond flat @ok="okmot" :label="$t('suivant')" 
@@ -68,7 +68,7 @@
         </q-step>
 
         <q-step :name="5" :title="$t('NPquo1')" icon="settings" :done="step > 5" >
-          <choix-quotas :quotas="quotas"/>
+          <choix-quotas v-model="quotas"/>
           <q-stepper-navigation>
             <btn-cond flat @ok="step = 4" :label="$t('precedent')" />
             <btn-cond flat @ok="step = 6" :disable="quotas.err"
@@ -103,8 +103,8 @@
 </q-dialog>
 </template>
 
-<script>
-import { ref, onMounted, onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 import NomAvatar from '../components/NomAvatar.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
@@ -119,190 +119,165 @@ import QuotasVols from '../components/QuotasVols.vue'
 import { ExistePhrase, GetCompta, GetSynthese } from '../app/synchro.mjs'
 import { AjoutSponsoring } from '../app/operations4.mjs'
 
-export default ({
-  name: 'NouveauSponsoring',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  props: { 
-    idc2: Number
-  },
+const cfg = stores.config
+const session = stores.session
+const accepteA = session.espace.opt > 0
+const partition = session.partition
 
-  components: { BtnCond, PhraseContact, ChoixQuotas, NomAvatar, EditeurMd, BoutonHelp, QuotasVols },
-
-  computed: {
-    estDelegue () { return this.optOSA === 1 },
-    estAutonome () { return this.optOSA === 2}
-  },
-
-  data () {
-    return {
-      isPwd: false,
-      max: [],
-      nom: '',
-      npi: false,
-      pc: null,
-      mot: '',
-      don: 0,
-      dconf: false,
-      quotas: null,
-      diagmot: false
-    }
-  },
-
-  watch: {
-    mot (ap, av) {
-      this.diagmot = ap.length < 10 || ap.length > 140
-    },
-    async step (ap) {
-      if (ap === 2) {
-        setTimeout(() => {
-          const elt = this.step2.querySelector('input')
-          elt.focus()
-        }, 50)
-        return
-      }
-      if (ap === 3) {
-        setTimeout(() => {
-          const elt = this.step3.querySelector('input')
-          if (elt) elt.focus()
-        }, 500)
-        return
-      }
-      if (ap === 5) {
-        this.setQuotas()
-        return
-      }
-      if (ap === 4) {
-        setTimeout(() => {
-          const s = this.step4
-          const elt = s ? s.querySelector('textarea') : null
-          if (elt) elt.focus()
-        }, 500)
-        return
-      }
-    }
-  },
-
-  methods: {
-    ed1 (f) { return edvol(f * UNITEN) },
-    ed2 (f) { return edvol(f * UNITEV) },
-    async crypterphrase (pc) {
-      if (await new ExistePhrase().run(pc.hps1, 2)) {
-        await afficherDiag(this.$t('existe'))
-        return
-      }
-      this.pc = pc
-      this.step = 3
-    },
-    async setDon () {
-      await new GetCompta().run(this.session.compteId)
-      const solde = this.session.compta.solde || 0
-      this.don = this.optDon
-      if (solde - this.don <= 0) {
-        await afficherDiag($t('NPcred', [solde, this.don]))
-        return
-      }
-      this.step = 2
-    },
-    oknom (nom) {
-      if (nom) {
-        this.nom = nom
-        this.mot1 = this.mot || this.$t('NPbj', [this.nom])
-        this.step = 4
-      }
-    },
-    okmot () {
-      if (this.mot.length > 0) {
-        this.mot = this.mot.substring(0, 140)
-        this.step = 5
-      }
-    },
-
-    async setQuotas () {
-      let maxn = 0, maxv = 0, maxc = 0
-      if (this.estAutonome) {
-        this.synth = this.session.synthese
-        const qA = this.synth.qA
-        const qtA = this.synth.qtA
-        maxn = qA.qn - qtA.qn
-        maxv = qA.qv - qtA.qv
-        maxc = qA.qc - qtA.qc
-      } else {
-        const s = this.partition.synth
-        maxn = s.q.qn - s.qt.qn
-        maxv = s.q.qv - s.qt.qv
-        maxc = s.q.qc - s.qt.qc
-      }
-      this.quotas = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, minc: 0, maxn, maxv, maxc, err: null }
-    },
-
-    async confirmer () {
-      const quotas = { qc : this.quotas.qc, qn: this.quotas.qn, qv: this.quotas.qv }
-      try {
-        const args = {
-          pc: this.pc,
-          nom: this.nom,
-          estAutonome: this.estAutonome,
-          del: this.estDelegue,
-          quotas,
-          mot: this.mot,
-          don: this.don, 
-          dconf: this.dconf
-        }
-        if (!this.estAutonome) args.partitionId = this.partition.id
-        await new AjoutSponsoring().run(args)
-        this.ui.fD()
-      } catch {}
-    }
-  },
-
-  setup () {
-    const cfg = stores.config
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const session = stores.session
-    const accepteA = session.espace.opt > 0
-    const partition = session.partition
-
-    const step4 = ref(null)
-    const step2 = ref(null)
-    const step3 = ref(null)
-    const step = ref(0)
-    const optionsOSA = [
-      { label: $t('compteO', [partition ? session.codePart(partition.id) : '']), value: 0 },
-      { label: $t('compteD', [partition ? session.codePart(partition.id) : '']), value: 1 }
-    ]
-    const optOSA = ref(0)
-    const optionsDon = [ ]
-    for (const d of cfg.dons) optionsDon.push({ label: $t('don', [d]), value: d})
-
-    const optDon = ref(0)
-
-    if (session.estA) {
-      step.value = 1
-      optOSA.value = 2
-      optDon.value = optionsDon[0].value
-    } else {
-      step.value = 0
-      if (accepteA) optionsOSA.push({ label: $t('compteA'), value: 2 })
-      optOSA.value = 0
-    }
-
-    onMounted (async () => {
-      await new GetSynthese().run()
-    })
-
-    return {
-      ID, ui, idc, dkli, styp,
-      step, step4, step2, step3,
-      partition, optionsOSA, optOSA, optionsDon, optDon,
-      session: stores.session
-    }
-  }
-  /*
-  .q-stepper--vertical
-    padding: 8px 0px !important
-  */
+onMounted (async () => {
+  await new GetSynthese().run()
 })
+
+const props = defineProps({ 
+  idc2: Number
+})
+
+const optionsOSA = [
+  { label: $t('compteO', [partition ? session.codePart(partition.id) : '']), value: 0 },
+  { label: $t('compteD', [partition ? session.codePart(partition.id) : '']), value: 1 }
+]
+
+const isPwd = ref(false)
+const max = ref([])
+const nom = ref('')
+const npi = ref(false)
+const pc = ref(null)
+const mot = ref('')
+const mot1 = ref('')
+const don = ref(0)
+const dconf = ref(false)
+const quotas = ref(null)
+const step4 = ref(null)
+const step2 = ref(null)
+const step3 = ref(null)
+const step = ref(0)
+const optOSA = ref(0)
+const optDon = ref(0)
+
+const optionsDon = ref([ ])
+for (const d of cfg.dons) optionsDon.value.push({ label: $t('don', [d]), value: d})
+
+if (session.estA) {
+  step.value = 1
+  optOSA.value = 2
+  optDon.value = optionsDon.value[0].value
+} else {
+  step.value = 0
+  if (accepteA) optionsOSA.push({ label: $t('compteA'), value: 2 })
+  optOSA.value = 0
+}
+
+const estDelegue = computed(() => optOSA.value === 1)
+const estAutonome = computed(() => optOSA.value === 2)
+const motko = computed(() => mot.value.length < 10 || mot.value.length > 140)
+
+const ed1 = (f) => edvol(f * UNITEN)
+const ed2 = (f) => edvol(f * UNITEV)
+
+watch(step, async (ap) => {
+  if (ap === 2) {
+    setTimeout(() => {
+      const elt = step2.value.querySelector('input')
+      elt.focus()
+    }, 50)
+    return
+  }
+  if (ap === 3) {
+    setTimeout(() => {
+      const elt = step3.value.querySelector('input')
+      if (elt) elt.focus()
+    }, 500)
+    return
+  }
+  if (ap === 5) {
+    setQuotas()
+    return
+  }
+  if (ap === 4) {
+    setTimeout(() => {
+      const s = step4.value
+      const elt = s ? s.querySelector('textarea') : null
+      if (elt) elt.focus()
+    }, 500)
+    return
+  }
+})
+
+async function crypterphrase (p) {
+  if (await new ExistePhrase().run(p.hps1, 2)) {
+    await afficherDiag($t('existe'))
+    return
+  }
+  pc.value = p
+  step.value = 3
+}
+
+async function setDon () {
+  await new GetCompta().run(session.compteId)
+  const solde = session.compta.solde || 0
+  don.value = optDon.value
+  if (solde - don.value <= 0) {
+    await afficherDiag($t('NPcred', [solde, don.value]))
+    return
+  }
+  step.value = 2
+}
+
+function oknom (n) {
+  if (n) {
+    nom.value = n
+    mot1.value = mot.value || $t('NPbj', [n])
+    step.value = 4
+  }
+}
+
+function okmot () {
+  if (mot.value.length > 0) {
+    mot.value = mot.value.substring(0, 140)
+    step.value = 5
+  }
+}
+
+async function setQuotas () {
+  let maxn = 0, maxv = 0, maxc = 0
+  if (estAutonome.value) {
+    const synth = session.synthese
+    const qA = synth.qA
+    const qtA = synth.qtA
+    maxn = qA.qn - qtA.qn
+    maxv = qA.qv - qtA.qv
+    maxc = qA.qc - qtA.qc
+  } else {
+    const s = partition.synth
+    maxn = s.q.qn - s.qt.qn
+    maxv = s.q.qv - s.qt.qv
+    maxc = s.q.qc - s.qt.qc
+  }
+  quotas.value = { qn: 0, qv: 0, qc: 0, minn: 0, minv: 0, minc: 0, maxn, maxv, maxc, err: null }
+}
+
+async function confirmer () {
+  const q = { qc : quotas.value.qc, qn: quotas.value.qn, qv: quotas.value.qv }
+  try {
+    const args = {
+      pc: pc.value,
+      nom: nom.value,
+      estAutonome: estAutonome.value,
+      del: estDelegue.value,
+      quotas : q,
+      mot: mot.value,
+      don: don.value, 
+      dconf: dconf.value
+    }
+    if (!estAutonome.value) args.partitionId = partition.id
+    await new AjoutSponsoring().run(args)
+    ui.fD()
+  } catch {}
+}
+
 </script>
 
 <style lang="sass" scoped>

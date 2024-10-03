@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div ref="root" :class="dkli(idx + 1) + ' mcm'">
-      <div v-if="large" class="row full-width items-center">
+    <div :class="dkli(idx + 1) + ' mcm'">
+      <div v-if="!ui.etroite" class="row full-width items-center">
         <div class="col-6 fs-sm z1">
           <span v-if="memolg">{{memolg}}</span>
           <span v-else class="text-italic">{{$t('MMCnomemo')}}</span>
@@ -54,9 +54,10 @@
     </q-dialog>
   </div>
 </template>
-<script>
 
-import { ref, onMounted, onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
+import { useQuasar } from 'quasar'
 
 import stores from '../stores/stores.mjs'
 import EditeurMd from './EditeurMd.vue'
@@ -65,76 +66,42 @@ import HashTags from './HashTags.vue'
 import { styp, dkli, titre } from '../app/util.mjs'
 import { McMemo } from '../app/operations4.mjs'
 
-const LARGE = 380
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-export default {
-  name: 'McMemo',
+const aSt = stores.avatar
+const session = stores.session
 
-  props: { id: String, idx: Number },
+const props = defineProps({ 
+  id: String, 
+  idx: Number
+})
 
-  components: { EditeurMd, HashTags, BtnCond },
+const diag = ref('')
+const nvht = ref(null)
+const nvtx = ref('')
 
-  computed: { 
-    apropos () { 
-      const e = this.session.compti.mc.get(this.id) 
-      return e || { ht: new Set(), tx: ''} 
-    },
-    memolg () { return titre(this.apropos.tx) },
-    nom () { return this.session.getCV(this.id).nom },
-    chg () { return this.apropos.tx !== this.nvtx || 
-      this.s2Str(this.apropos.ht) !== this.s2Str(this.nvht) }
-  },
+const apropos = computed(() => session.compti.mc.get(props.id) || { ht: new Set(), tx: ''} )
+const memolg = computed(() => titre(apropos.value.valuetx))
+const nom = computed(() => session.getCV(props.id).nom)
+const chg = computed(() => apropos.value.tx !== nvtx.value || s2Str(apropos.value.ht) !== s2Str(nvht.value))
 
-  data () { return {
-    diag: '',
-    nvht: null,
-    nvtx: ''
-  }},
+const s2Str = (s) => Array.from(s).sort().join(' ')
 
-  watch: {
-    "$q.screen.width"() {
-      const l = this.root.offsetWidth > LARGE
-      if (l !== this.large) this.large = l
-    }
-  },
-
-  methods: {
-    s2Str (s) { return Array.from(s).sort().join(' ')},
-
-    zoom () { 
-      this.diag = this.session.cEdit
-      this.nvht = this.apropos.ht || new Set()
-      this.nvtx = this.apropos.tx || ''
-      this.ui.oD('MMedition', this.idc)
-    },
-
-    async valider () {
-      await new McMemo().run(this.id, this.s2Str(this.nvht), this.nvtx)
-      this.ui.fD()
-    }
-   },
-
-  setup (props) {
-    const session = stores.session
-    const ui = stores.ui
-    const aSt = stores.avatar
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-
-    const root = ref(null)
-    const large = ref(false)
-
-    onMounted(() => {
-      large.value = root.value.offsetWidth > LARGE
-    })
-
-    return {
-      session, ui, idc, aSt, 
-      root, large,
-      dkli, styp,
-    }
-  }
+function zoom () { 
+  diag.value = session.cEdit
+  nvht.value = apropos.value.ht || new Set()
+  nvtx.value = apropos.value.tx || ''
+  ui.oD('MMedition', idc)
 }
+
+async function valider () {
+  await new McMemo().run(props.id, s2Str(nvht.value), nvtx.value)
+  ui.fD()
+}
+
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .btn

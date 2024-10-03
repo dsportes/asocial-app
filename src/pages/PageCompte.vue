@@ -103,7 +103,7 @@
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
-        <choix-quotas class="q-mt-sm" :quotas="quotas"/>
+        <choix-quotas class="q-mt-sm" v-model="quotas"/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond icon="check" :disable="quotas.err || !quotas.chg" :label="$t('valider')" @ok="validerq"/>

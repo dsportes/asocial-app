@@ -132,7 +132,7 @@
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTquta')}}</q-toolbar-title>
         </q-toolbar>
-        <choix-quotas class="q-mt-sm" :quotas="quotasA" />
+        <choix-quotas class="q-mt-sm" v-model="quotasA" />
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond :disable="quotasA.err || !quotasA.chg" icon="check" cond="cUrgence"
@@ -148,7 +148,7 @@
           <btn-cond color="warning" icon="close" @ok="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqutp', [session.codePart(ligne.id)])}}</q-toolbar-title>
         </q-toolbar>
-        <choix-quotas class="q-mt-sm" :quotas="quotasP" />
+        <choix-quotas class="q-mt-sm" v-model="quotasP" />
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond :disable="quotasP.err || !quotasP.chg" icon="check" cond="cUrgence"
@@ -166,7 +166,7 @@
             <template v-slot:hint>{{$t('PTinfoh')}}</template>
           </q-input>
         </div>
-        <choix-quotas :quotas="quotas" />
+        <choix-quotas v-model="quotas" />
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond color="warning" icon="add" :disable="!nom || quotas.err" 
@@ -178,9 +178,6 @@
 </template>
 
 <script setup>
-const ui = stores.ui
-const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 import { saveAs } from 'file-saver'
@@ -197,6 +194,9 @@ import { ID, AMJ } from '../app/api.mjs'
 import { GetSynthese, GetPartition } from '../app/synchro.mjs'
 import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, SetQuotasA,
   SetCodePart, SupprPartition, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
+
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
 async function refreshSynth () {
   await new GetSynthese().run()

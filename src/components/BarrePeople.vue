@@ -68,7 +68,7 @@
         <div v-if="diag" class="q-ma-sm q-pa-xs bg-yellow-3 text-negative text-bold">{{diag}}</div>
       </q-card-section>
       
-      <choix-quotas :quotas="quotas"/>
+      <choix-quotas v-model="quotas"/>
       <div v-if="quotas.err" class="bg-yellow-5 text-bold text-black q-pa-xs">
         {{$t('PPquot')}}
       </div>

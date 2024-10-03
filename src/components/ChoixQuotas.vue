@@ -3,133 +3,95 @@
     <div class="row items-center" style="position:relative">
       <bouton-bulle idtext="quotas" class="bb"/>
       <div class="col-5 row items-center">
-        <div class="titre-md mh">{{$t('CQnbdocs', mv.qn * UNITEN)}}</div>
-        <div v-if="quotas.n && mv.qn > 0" :class="'font-mono q-ml-sm ' + st(pcn)">[{{pcn}}%]</div>
+        <div class="titre-md mh">{{$t('CQnbdocs', model.qn * UNITEN)}}</div>
+        <div v-if="model.n && model.qn > 0" :class="'font-mono q-ml-sm ' + st(pcn)">[{{pcn}}%]</div>
       </div>
 
-      <q-input class="col-3 text-center" outlined dense v-model.number="mv.qn" type="number" :disable="lecture"/>
+      <q-input class="col-3 text-center" dense v-model.number="model.qn" type="number" :disable="lecture"/>
 
       <div class="col-4 row items-center justify-start q-pl-sm">
-        <btn-cond v-if="!lecture" :disable="mv.qn === qni" 
+        <btn-cond v-if="!lecture" :disable="model.qn === qni" 
           class="q-ml-sm" icon="undo" size="sm" color="warning" @click="undo1"/>
-        <div :class="'q-px-xs ' + stmx(mv.qn, mv.minn, mv.maxn)">{{mv.minn + '...' + mv.maxn}}</div>
+        <div :class="'q-px-xs ' + stmx(model.qn, model.minn, model.maxn)">{{model.minn + '...' + model.maxn}}</div>
       </div>
     </div>
 
     <div class="row items-center">
       <div class="col-5 row items-center">
-        <div class="titre-md mh">{{ed2(mv.qv) + ' ' + $t('CQvolfics')}}</div>
-        <div v-if="quotas.n && mv.qv > 0" :class="'font-mono q-ml-sm ' + st(pcv)">[{{pcv}}%]</div>
+        <div class="titre-md mh">{{ed2(model.qv) + ' ' + $t('CQvolfics')}}</div>
+        <div v-if="model.n && model.qv > 0" :class="'font-mono q-ml-sm ' + st(pcv)">[{{pcv}}%]</div>
       </div>
 
-      <q-input class="col-3 text-center" outlined dense v-model.number="mv.qv" type="number" :disable="lecture"/>
+      <q-input class="col-3 text-center" dense v-model.number="model.qv" type="number" :disable="lecture"/>
 
       <div class="col-4 row items-center justify-start q-pl-sm">
-        <btn-cond v-if="!lecture" :disable="mv.qv === qvi" 
+        <btn-cond v-if="!lecture" :disable="model.qv === qvi" 
           class="q-ml-sm" icon="undo" size="sm" color="warning" @click="undo2"/>
-        <div :class="'q-px-xs ' + stmx(mv.qv, mv.minv, mv.maxv)">{{mv.minv + '...' + mv.maxv}}</div>
+        <div :class="'q-px-xs ' + stmx(model.qv, model.minv, model.maxv)">{{model.minv + '...' + model.maxv}}</div>
       </div>
     </div>
 
     <div v-if="!groupe" class="row items-center">
       <div class="col-5 row items-center">
-        <div class="titre-md mh">{{edc(mv.qc) + ' ' + $t('CQconsocalc')}}</div>
+        <div class="titre-md mh">{{edc(model.qc) + ' ' + $t('CQconsocalc')}}</div>
       </div>
 
-      <q-input class="col-3 text-center" outlined dense v-model.number="mv.qc" type="number" :disable="lecture"/>
+      <q-input class="col-3 text-center" dense v-model.number="model.qc" type="number" :disable="lecture"/>
 
       <div class="col-4 row items-center justify-start q-pl-sm">
-        <btn-cond v-if="!lecture" :disable="mv.qc === qci" 
+        <btn-cond v-if="!lecture" :disable="model.qc === qci" 
           class="q-ml-sm" icon="undo" size="sm" color="warning" @click="undoc"/>
-        <div :class="'q-px-xs ' + stmx(mv.qc, mv.minc, mv.maxc)">{{mv.minc + '...' + mv.maxc}}</div>
+        <div :class="'q-px-xs ' + stmx(model.qc, model.minc, model.maxc)">{{model.minc + '...' + model.maxc}}</div>
       </div>
     </div>
   </div>
 </template>
-<script>
+
+<script setup>
+import { reactive, watch, computed, onUnmounted } from 'vue'
+
+import stores from '../stores/stores.mjs'
 import { edvol, mon } from '../app/util.mjs'
-import { toRef, watch } from 'vue'
 import { UNITEV, UNITEN } from '../app/api.mjs'
 import BtnCond from './BtnCond.vue'
 import BoutonBulle from './BoutonBulle.vue'
 
-export default {
-  name: 'ChoixQuotas',
-  props: { 
-    quotas: Object, // { qn, qv, qc, minn, minv, maxn, maxv, minc, maxc, err}
-    lecture: Boolean,
-    groupe: Boolean
-  },
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  components: { BtnCond, BoutonBulle },
+const props = defineProps({ 
+  lecture: Boolean,
+  groupe: Boolean
+})
 
-  computed: {
-    pcn () { return this.quotas.qn ? Math.floor(this.quotas.n * 100 / (this.quotas.qn * UNITEN)) : 999 },
-    pcv () { return this.quotas.qv ? Math.floor(this.quotas.v * 100 / (this.quotas.qv * UNITEV)) : 999 }
-  },
+const model = defineModel({ type: Object }) // quotas
 
-  data () {
-    return {
-    }
-  },
+const qni = model.value.qn // valeurs initiales
+const qvi = model.value.qv
+const qci = model.value.qc
 
-  methods: {
-    st (pc) { return pc < 80 ? 'fs-md' : 
-      (pc < 100 ? 'bg-yellow-3 fs-lg text-bold text-negative' : 
-      'bg-yellow-3 fs-xl text-bold text-negative')
-    },
-    stmx (v, min, max) { return v < min || v > max ? 'bg-yellow-3 fs-md text-bold text-negative' :'' },
-    ed2 (v) { return edvol(v * UNITEV) },
-    edc (v) { return mon(v) }
-  },
+const pcn = computed(() => model.value.qn ? Math.floor(model.value.n * 100 / (model.value.qn * UNITEN)) : 999)
+const pcv = computed(() => model.value.qv ? Math.floor(model.value.v * 100 / (model.value.qv * UNITEV)) : 999)
+const err = computed(() =>
+  (model.value.qn < model.value.minn) || (model.value.qn > model.value.maxn) ||
+  (model.value.qv < model.value.minv) || (model.value.qv > model.value.maxv) ||
+  (model.value.qc < model.value.minc) || (model.value.qc > model.value.maxc)
+)
+const chg = computed(() => model.value.qn !== qni || model.value.qv !== qvi || model.value.qc !== qci )
 
-  setup (props, context) {
-    const lecture = toRef(props, 'lecture')
-    const mv = toRef(props, 'quotas')
+watch(err, () => { model.value.err = err.value})
+watch(chg, () => { model.value.chg = chg.value})
 
-    function mx () { mv.value.err = 
-      (mv.value.qn < mv.value.minn) || (mv.value.qn > mv.value.maxn) ||
-      (mv.value.qv < mv.value.minv) || (mv.value.qv > mv.value.maxv) ||
-      (mv.value.qc < mv.value.minc) || (mv.value.qc > mv.value.maxc)
-      mv.value.chg = mv.value.qn !== qni || mv.value.qv !== qvi || mv.value.qc !== qci
-    }
+const st = (pc) => pc < 80 ? 'fs-md' : 
+  (pc < 100 ? 'bg-yellow-3 fs-lg text-bold text-negative' : 'bg-yellow-3 fs-xl text-bold text-negative')
+const stmx = (v, min, max) => v < min || v > max ? 'bg-yellow-3 fs-md text-bold text-negative' :''
+const ed2 = (v) => edvol(v * UNITEV)
+const edc = (v) => mon(v)
 
-    const qni = mv.value.qn // valeurs initiales
-    const qvi = mv.value.qv
-    const qci = mv.value.qc
-    mx()
+function undo1 () { model.value.qn = qni }
+function undo2 () { model.value.qv = qvi }
+function undoc () { model.value.qc = qci }
 
-    function undo1 () {
-      mv.value.qn = qni
-      mx()
-    }
-
-    function undo2 () {
-      mv.value.qv = qvi
-      mx()
-    }
-
-    function undoc () {
-      mv.value.qc = qci
-      mx()
-    }
-
-    watch(mv.value, (ap, av) => {
-      mx()
-      changer()
-    })
-
-    function changer () {
-      if (!lecture.value) context.emit('change')
-    }
-
-    return {
-      UNITEN, UNITEV,
-      undo1, undo2, undoc,
-      mv, qni, qvi, qci
-    }
-  }
-}
 </script>
 
 <style lang="sass" scoped>

@@ -80,7 +80,7 @@
           <q-btn dense size="md" color="warning" padding="xs" icon="close" @click="ui.fD"/>
           <q-toolbar-title class="titre-lg text-center q-mx-sm">{{$t('PTqu')}}</q-toolbar-title>
         </q-toolbar>
-        <choix-quotas class="q-mt-sm" :quotas="quotas"/>
+        <choix-quotas class="q-mt-sm" v-model="quotas"/>
         <q-card-actions align="right" class="q-gutter-sm">
           <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
           <btn-cond icon="check" :disable="quotas.err || !quotas.chg" 
@@ -98,8 +98,8 @@
 </q-page>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { dkli } from '../app/util.mjs'
@@ -118,102 +118,72 @@ import { SetQuotas } from '../app/operations4.mjs'
 import { GetPartition, GetNotifC } from '../app/synchro.mjs'
 import { styp } from '../app/util.mjs'
 
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+
 const ic = ['check', 'report', 'alarm_on', 'lock']
 const txt = ['green-3', 'green-5', 'warning', 'negative']
 const bg = ['none', 'none', 'yellow-1', 'yellow-5']
 
-export default {
-  name: 'PagePartition',
-  components: { ChatsAvec, BtnCond, TuileCnv,TuileNotif, ApercuNotif, ChoixQuotas, ApercuGenx,
-    QuotasVols, NouveauSponsoring, BarrePeople },
+const session = stores.session
+const aSt = stores.avatar
+const pSt = stores.people
+const cfg = stores.config
 
-  props: { },
+const quotas = ref({})
 
-  computed: {
-    ntfp () { return this.session.notifPX(this.p.id) },
-    lg () { return this.p ? this.p.synth : {} },
-    p () { return this.session.partition },
-  },
+const p = computed(() => session.partition)
+const ntfp = computed(() => session.notifPX(p.value.id))
+const lg = computed(() => p.value ? p.value.synth : {})
 
-  methods: {
-    ico (c) { return ic[c.notif.nr || 0] },
-    tclr (c) { return 'text-' + txt[c.notif.nr || 0]},
-    bgclr (c) { return 'bg-' + bg[c.notif.nr || 0] },
+async function reload () {
+  if (session.accesNet && !session.estA) 
+    await new GetPartition().run(session.partition.id)
+}
 
-    vis (c) { 
-      return (this.session.pow < 4 || (c.id === this.session.compteId))
-    },
+const ico = (c) => ic[c.notif.nr || 0]
+const tclr = (c) => 'text-' + txt[c.notif.nr || 0]
+const bgclr = (c) => 'bg-' + bg[c.notif.nr || 0]
+const vis = (c) => session.pow < 4 || (c.id === session.compteId)
+const vis2 = (c) => session.pow < 4 || (c.del && (c.id !== session.compteId))
 
-    vis2 (c) { if (this.session.pow < 4) return true
-      return c.del && (c.id !== this.session.compteId)
-    },
+function type (c) {
+  if (aSt.estAvatar(c.id)) return 1
+  if (pSt.estPeople(c.id)) return 2
+  return 3
+}
 
-    type (c) {
-      if (this.aSt.estAvatar(c.id)) return 1
-      if (this.pSt.estPeople(c.id)) return 2
-      return 3
-    },
+async function selCpt (c) {
+  session.setPeopleId(c.id)
+  if (session.pow < 4) await new GetNotifC().run(session.peopleId)
+}
 
-    async selCpt (c) {
-      this.session.setPeopleId(c.id)
-      if (this.session.pow < 4) await new GetNotifC().run(this.session.peopleId)
-    },
+function voirpage (c) { 
+  session.setPeopleId(c.id)
+  ui.oD('detailspeople', idc)
+}
 
-    voirpage (c) { 
-      this.session.setPeopleId(c.id)
-      this.ui.oD('detailspeople', this.idc)
-    },
-
-    async editerq (c) {
-      // c.q : {qc qn qv c2m nn nc ng v} extraits du document `comptas` du compte.
-      await new GetPartition().run(this.session.compte.idp)
-      const s = this.session.partition.synth
-      let maxn = s.q.qn - s.qt.qn + c.q.qn; 
-      if (maxn <= 0) maxn = c.q.qn
-      let maxc =s.q.qc - s.qt.qc + c.q.qc; if (maxc <= 0) maxc = c.q.qc
-      let maxv = s.q.qv - s.qt.qv + c.q.qv; if (maxv <= 0) maxv = c.q.qv
-      this.quotas = { 
-        qn: c.q.qn, qv: c.q.qv, qc: c.q.qc, minn: 0, minv: 0, minc: 0,
-        maxn, maxv, maxc,
-        n: c.q.nn + c.q.nc + c.q.ng, v: c.q.v,
-        err: ''
-      }
-      this.ui.oD('PTedq', this.idc)
-    },
-    
-    async validerq () {
-      await new SetQuotas().run(this.session.peopleId, this.quotas)
-      await this.reload()
-      this.ui.fD()
-    }
-  },
-
-  data () {
-    return {
-      quotas: {}
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const session = stores.session
-  
-    async function reload () {
-      if (session.accesNet && !session.estA) await new GetPartition().run(session.partition.id)
-    }
-    // if (session.accesNet) onMounted(async () => { await reload() })
-
-    return {
-      session, 
-      aSt: stores.avatar, 
-      pSt: stores.people, 
-      ui, idc,
-      cfg: stores.config,
-      ID, dkli, styp, reload
-    }
+async function editerq (c) {
+  // c.q : {qc qn qv c2m nn nc ng v} extraits du document `comptas` du compte.
+  await new GetPartition().run(session.compte.idp)
+  const s = session.partition.synth
+  let maxn = s.q.qn - s.qt.qn + c.q.qn; 
+  if (maxn <= 0) maxn = c.q.qn
+  let maxc =s.q.qc - s.qt.qc + c.q.qc; if (maxc <= 0) maxc = c.q.qc
+  let maxv = s.q.qv - s.qt.qv + c.q.qv; if (maxv <= 0) maxv = c.q.qv
+  quotas.value = { 
+    qn: c.q.qn, qv: c.q.qv, qc: c.q.qc, minn: 0, minv: 0, minc: 0,
+    maxn, maxv, maxc,
+    n: c.q.nn + c.q.nc + c.q.ng, v: c.q.v,
+    err: ''
   }
+  ui.oD('PTedq', idc)
+}
 
+async function validerq () {
+  await new SetQuotas().run(session.peopleId, quotas.value)
+  await reload()
+  ui.fD()
 }
 </script>
 
