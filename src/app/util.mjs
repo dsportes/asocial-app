@@ -312,9 +312,11 @@ let lgtitre = 0
 export function titre (m) {
   if (!lgtitre) lgtitre = stores.config.lgtitre
   if (m) {
-    const i = m.indexOf('\n')
+    let i = m.indexOf('\n')
     const s = m.substring(0, (i === -1 || i > lgtitre ? lgtitre : i))
-    return s.replaceAll('#', '')
+    i = 0
+    for (let j = 0; j < s.length; j++) if (s.charAt(j) !== '#') { i = j; break }
+    return i ? s.substring(i) : s
   }
   return ''
 }

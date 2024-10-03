@@ -763,6 +763,10 @@ export class SyncSp extends OperationS {
       const id = Cles.id(cleA)
       const kp = await genKeyPair()
       const cv = new CV(id, 0, null, sp.nom)
+
+      const nomsp = sp.cv.nomC
+      const txK = await crypter(clek, gzipB(nomsp))
+      const htK = await crypter(clek, $t('sponsor'))
       
       const args = {
         org,
@@ -778,7 +782,8 @@ export class SyncSp extends OperationS {
         dconf: dconf,
         pub: kp.publicKey,
         privK: await crypter(clek, kp.privateKey),
-        cvA: await cv.crypter(cleA)
+        cvA: await cv.crypter(cleA),
+        txK, htK
       }
       args.subJSON = config.subJSON
 

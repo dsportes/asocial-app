@@ -14,15 +14,13 @@
       </div>
 
       <div v-else class="column full-width">
-        <div class="text-italic fs-sm z1">
-          <span v-if="memolg">{{memolg}}</span>
-          <span v-else class="text-italic">{{$t('MMCnomemo')}}</span>
-        </div>
-        <div class="row items-center">
-          <div v-if="apropos.ht.size" class="font-mono fs-md z1">{{s2Str(apropos.ht)}}</div>
-          <div v-else class="text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
+        <div class="row items-center justify-between">
+          <div v-if="memolg" class="text-italic fs-sm z1">{{memolg}}</div>
+          <div v-else class="text-italic">{{$t('MMCnomemo')}}</div>
           <btn-cond class="col-auto text-right" round icon="zoom_in" @ok="zoom"/>
         </div>
+        <div v-if="apropos.ht.size" class="font-mono fs-md z1">{{s2Str(apropos.ht)}}</div>
+        <div v-else class="text-italic fs-sm z1">{{$t('MMCnomc')}}</div>
       </div>
     </div>
 

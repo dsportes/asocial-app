@@ -55,6 +55,7 @@ export default {
   detail: 'Détails', // PageGroupes ApercuGenx
   details: 'Plus de détails', // PageGroupe
   sponsorise: 'sponsorise',
+  sponsor: 'sponsor',
 
   avatar: 'Avatar {0}', // FiltreAvgr
   groupe: 'Groupe {0}', // FiltreAvgr
@@ -70,7 +71,7 @@ export default {
   compteD: 'Compte de l\'organisation, DÉLÉGUÉ par le Comptable pour la partition {0}.', // NouveauSponsoring
   compteA: 'Compte autonome', // ...
   don: 'Don de {0}c', // PageSponsoring NouveauSponsoring
-  conf: 'CONFIDENTIEL', // ...
+  conf: 'Contact CONFIDENTIEL, sans "chat"', // ...
   total: 'Total', // PageEspace
   ping: 'Ping', // OutilsTests
 

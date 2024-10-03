@@ -39,8 +39,9 @@
         <div v-if="sp.estA" class="text-warning titre-md text-bold">
           <span>{{$t('compteA')}}</span>
           <span v-if="sp.don" class="q-ml-sm">{{$t('NPdon', [sp.don])}}</span>
-          <span v-if="sp.dconf" class="q-ml-sm">{{$t('conf')}}</span>
         </div>
+
+        <div v-if="sp.dconf">{{$t('conf')}}</div>
 
         <div :class="'titre-md ' + (sp.del ? 'text-warning' : 'text.primary')">
           {{$t(sp.del ? 'compteD' : 'compteO', [sp.partitionId])}}

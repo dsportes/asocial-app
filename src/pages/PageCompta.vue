@@ -98,7 +98,7 @@ import BtnCond from '../components/BtnCond.vue'
 import { dkli, edvol, afficher8000 } from '../app/util.mjs'
 import N3Icon from '../components/N3Icon.vue'
 import NotifIcon from '../components/NotifIcon.vue'
-import { UNITEN, UNITEV, ID } from '../app/api.mjs'
+import { UNITEN, UNITEV } from '../app/api.mjs'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
 
 export default {
@@ -122,12 +122,12 @@ export default {
     nj () { return this.c.nbj(this.session.compta.solde) },
     nnj () { return this.nj > 40 ? 1 : (this.nj > 10 ? 2 : 3)},
     lurg () {
-      const l = [{ id: ID.duComptable() }]
+      const l = []
       const p = this.session.partition
       if (!p) return l
       for (const id in p.mcpt) {
         const e = p.mcpt[id]
-        if (id !== this.session.compteId)
+        if (id !== this.session.compteId && e.del)
           l.push({ del: e.del, id: id })
       }
       return l
@@ -165,7 +165,10 @@ export default {
   setup () {
     const session = stores.session
 
-    if (session.accesNet) onMounted( async () => { await session.reloadCompta() } )
+    if (session.accesNet) onMounted( async () => { 
+      await session.reloadCompta() 
+      if (!session.estA) await new GetPartition().run(session.partition.id)
+    })
 
     return {
       session, 

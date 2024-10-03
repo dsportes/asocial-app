@@ -30,7 +30,7 @@
     </q-toolbar>
 
     <div v-for="(c, idx) in session.ptLcFT" :key="c.id" class="spmd q-my-xs">
-      <q-expansion-item dense switch-toggle-side group="g1" :class="dkli(idx)" @click="selCpt(c)">
+      <q-expansion-item v-if="vis2(c)" dense switch-toggle-side group="g1" :class="dkli(idx)" @click="selCpt(c)">
         <template v-slot:header>
           <div class="row full-width items-center justify-between">
             <div class="row items-center">
@@ -48,8 +48,8 @@
           </div>
         </template>
 
-        <div class="q-ml-lg">
-          <apercu-genx v-if="type(c)!==3 && (session.compteId !== c.id)" :id="c.id" :idx="idx" :del="c.del"/>
+        <div class="q-ml-lg"> <!-- type(c)!==3 &&  -->
+          <apercu-genx v-if="(session.compteId !== c.id)" :id="c.id" :idx="idx" :del="c.del"/>
 
           <barre-people v-if="session.estComptable || session.estDelegue" :id="c.id" part />
 
@@ -132,7 +132,7 @@ export default {
   computed: {
     ntfp () { return this.session.notifPX(this.p.id) },
     lg () { return this.p ? this.p.synth : {} },
-    p () { return this.session.partition }
+    p () { return this.session.partition },
   },
 
   methods: {
@@ -141,7 +141,11 @@ export default {
     bgclr (c) { return 'bg-' + bg[c.notif.nr || 0] },
 
     vis (c) { 
-      return (this.session.pow < 4 || (c.id === this.aSt.compteId))
+      return (this.session.pow < 4 || (c.id === this.session.compteId))
+    },
+
+    vis2 (c) { if (this.session.pow < 4) return true
+      return c.del && (c.id !== this.session.compteId)
     },
 
     type (c) {

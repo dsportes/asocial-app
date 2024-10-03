@@ -400,7 +400,7 @@ export class Partition extends GenDoc {
     
     if (row.mcpt) for(const id in row.mcpt) {
       const e = row.mcpt[id]
-      RegCles.set(await decrypter(clep, e.cleAP))
+      if (e.cleAP) RegCles.set(await decrypter(clep, e.cleAP))
       const q = { ...e.q }
       q.pcc = !q.qc ? 0 : Math.round(q.c2m * 100 / q.qc) 
       q.pcn = !q.qn ? 0 : Math.round((q.nn + q.nc + q.ng) * 100 / (q.qn * UNITEN)) 

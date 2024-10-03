@@ -58,7 +58,6 @@ export const useUiStore = defineStore('ui', {
     // Le compteur de dialogues ouverts idc DOIT ne pas être remis à 0
     // à la déconnexion (en fait au reset du store ui)
     reLogin: true,
-    idc: X.idc,
     dialogStack: [],
     d: { a: {} }
 
@@ -98,9 +97,8 @@ export const useUiStore = defineStore('ui', {
 
     getIdc () {
       X.idc++
-      this.idc = X.idc++
-      this.d[this.idc] = {}
-      return this.idc
+      this.d[X.idc] = {}
+      return X.idc
     },
 
     closeVue (idc) {

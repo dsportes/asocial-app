@@ -177,8 +177,11 @@
   </q-page>
 </template>
 
-<script>
-import { onMounted, onUnmounted } from 'vue'
+<script setup>
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
@@ -195,6 +198,14 @@ import { GetSynthese, GetPartition } from '../app/synchro.mjs'
 import { SetEspaceOptionA, NouvellePartition, SetQuotasPart, SetQuotasA,
   SetCodePart, SupprPartition, DownloadStatC, DownloadStatC2 } from '../app/operations4.mjs'
 
+async function refreshSynth () {
+  await new GetSynthese().run()
+}
+
+onMounted(async () => {
+  await refreshSynth()
+})
+
 const fx = [['id', 1], 
   ['ntr2', 1], ['ntr2', -1],
   ['nco2', 1], ['nco2', -1],
@@ -206,229 +217,190 @@ const fx = [['id', 1],
   ['pcv2', 1], ['pcv2', -1],
   ['nbc', 1], ['nbc', -1]
 ]
+const optionsNbmi = [3, 6, 12, 18, 24]
 
-export default {
-  name: 'PageEspace',
+const aSt = stores.avatar
+const fSt = stores.filtre
+const session = stores.session
 
-  props: { },
-  components: { QuotasVols, BtnCond, SaisieMois, ChoixQuotas, TuileCnv, TuileNotif, ApercuNotif },
+const mois = ref(Math.floor(session.auj / 100))
+const nom = ref('')
+const quotasP = ref(null)
+const quotasA = ref(null)
+const code = ref('')
+const ligne = ref(null)
+const nbmi = ref(session.espace ? session.espace.nbmi : 12)
+const optionA = ref(session.espace ? (session.espace.opt ? true : false) : false)
 
-  computed: {
-    maxdl () { 
-      const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
-      return Math.floor(m / 100)
-    },
-    mindl () { 
-      return Math.floor(this.session.espace.dcreation / 100)
-    },
+const maxdl = computed(() => { 
+  const m = AMJ.djMoisN(AMJ.amjUtc(), -1)
+  return Math.floor(m / 100)
+})
+const mindl = computed(() => Math.floor(session.espace.dcreation / 100))
+const synth = computed(() => {
+  if (!session.synthese) return []
+  const l = []
+  const tsp = session.synthese.tsp
+  for (const id in tsp) l.push(tsp[id])
+  const fv = fSt.tri.espace
+  const f = fv ? fv.value : 0
+  const ct = { f: fx[f][0], m: fx[f][1] }
+  l.sort((x, y) => {
+    if (!x.id) return -1
+    if (!y.id) return 1
+    const a = x[ct.f]
+    const b = y[ct.f]
+    return a > b ? ct.m : (a < b ? -ct.m : 0) 
+  })
+  return l
+})
+const optesp = computed(() => session.espace ? (session.espace.opt ? true : false) : false)
+const nbmiesp = computed(() => session.espace ? session.espace.nbmi : 12)
 
-    synth () {
-      if (!this.session.synthese) return []
-      const l = []
-      const tsp = this.session.synthese.tsp
-      for (const id in tsp) l.push(tsp[id])
-      const fv = this.fSt.tri.espace
-      const f = fv ? fv.value : 0
-      const ct = { f: fx[f][0], m: fx[f][1] }
-      l.sort((x, y) => {
-        if (!x.id) return -1
-        if (!y.id) return 1
-        const a = x[ct.f]
-        const b = y[ct.f]
-        return a > b ? ct.m : (a < b ? -ct.m : 0) 
-      })
-      return l
-    },
-    optesp () { return this.session.espace ? (this.session.espace.opt ? true : false) : false },
-    nbmiesp () { return this.session.espace ? this.session.espace.nbmi : 12 }
-  },
+watch(optesp, (ap) => { optionA.value = ap })
+watch(nbmiesp, (ap) => { nbmi.value = session.espace ? session.espace.nbmi : 12 })
+watch(optionA, async (ap) => {
+  if (session.espace && ((session.espace.opt ? true : false) !== ap))
+    await new SetEspaceOptionA().run(ap ? 1 : 0, null)
+  })
+watch(nbmi, async (ap) => {
+  if (session.espace && session.espace.nbmi !== ap) 
+    new SetEspaceOptionA().run(null, ap)
+  })
 
-  watch: {
-    // refixe les valeurs courantes de optionA et nbmi quand elles ont changé dans espace
-    optesp (ap) { this.optionA = ap },
-    nbmiesp (ap) { this.nbmi = this.session.espace ? this.session.espace.nbmi : 12 },
-    async optionA (ap) {
-      if (this.session.espace && ((this.session.espace.opt ? true : false) !== ap))
-        await new SetEspaceOptionA().run(this.optionA ? 1 : 0, null)
-    },
-    async nbmi (ap) {
-      if (this.session.espace && this.session.espace.nbmi !== ap) 
-        new SetEspaceOptionA().run(null, this.nbmi)
-    }
-  },
-
-  methods: {
-    async dlstat (mr) {
-      const cleES = this.session.compte.cleE
-      const { err, blob, creation, mois } = 
-        await new DownloadStatC().run(this.session.espace.org, mr, cleES)
-      const nf = this.session.espace.org + '-C_' + mois
-      if (!err) {
-        saveAs(blob, nf)
-        await afficherDiag($t('PEsd', [nf]))
-      } else {
-        await afficherDiag($t('PEnd' + err))
-      }
-    },
-
-    async dlstat2 () {
-      const cleES = this.session.compte.cleE
-      const { err, blob } = await new DownloadStatC2()
-        .run(this.session.espace.org, parseInt(this.mois), 'C', cleES)
-      const nf = this.session.espace.org + '-C_' + this.mois
-      if (!err) {
-        saveAs(blob, nf)
-        await afficherDiag($t('PEsd', [nf]))
-      } else {
-        await afficherDiag($t('PEnd' + err))
-      }
-    },
-
-    async ovnvPart () { 
-      this.nom = ''
-      this.quotas = { 
-        qc: 1, qn: 1, qv: 1, 
-        minc: 0, minn: 0, minv: 0,
-        maxc: 9999, maxn: 9999, maxv: 9999, 
-        n: 0, v: 0,
-        err: false
-      }
-      this.ui.oD('PEnt', this.idc)
-    },
-
-    async creer () {
-      await new NouvellePartition().run(this.nom || '', this.quotas)
-      await this.refreshSynth()
-      this.ui.fD()
-    },
-
-    async supprimer (lg) {
-      await new SupprPartition().run(lg.id)
-      await this.refreshSynth()
-      this.ui.fD()
-    },
-
-    async lgCourante (lg) {
-      this.ligne = lg
-      if (!this.session.partition || this.session.partition.id !== lg.id)
-        await new GetPartition().run(lg.id)
-    },
-
-    async pagePartition (lg) { // Comptable seulement
-      await this.lgCourante(lg)
-      this.ui.setPage('partition')
-    },
-
-    async editer (lg) {
-      await this.lgCourante(lg)
-      this.code = this.session.compte.mcode.get(this.ligne.id)
-      this.ui.oD('PEedcom', this.idc)
-    },
-
-    async valider () {
-      await new SetCodePart().run(this.ligne.id, this.code)
-      this.ui.fD()
-    },
-
-    /*
-      espace.quotas : quotas de l'espace fixés par l'AT
-      synth.qa : quotas réservés aux comptes A
-      synth.tsp['0'] : somme des quotas des partitions
-      this.ligne.q: quotas actuellement attribués à la partition
-    */
-    async editerqP (lg) {
-      await this.lgCourante(lg)
-      const q = this.ligne.q // quotas actuels de la partition
-      const synth = this.session.synthese 
-      const qpt = synth.tsp['0'].q
-      const qe = this.session.espace.quotas
-      const rqn = qe.qn - qpt.qn + q.qn
-      const maxn = rqn < 0 ? q.qn : rqn
-      const rqv = qe.qv - qpt.qv + q.qv
-      const maxv = rqv < 0 ? q.qv : rqv
-      const rqc = qe.qc - qpt.qc + q.qc
-      const maxc = rqc < 0 ? q.qc : rqc
-      this.quotasP = { 
-        qc: q.qc, qn: q.qn, qv: q.qv,
-        minc: 0, minn: 0, minv: 0,
-        maxc, maxn, maxv,
-        err: ''
-      }
-      this.ui.oD('PEedqP', this.idc)
-    },
-
-    async validerqP () {
-      await new SetQuotasPart().run(this.ligne.id, this.quotasP)
-      await this.refreshSynth()
-      this.ui.fD()
-    },
-
-    async editerqA () {
-      const synth = this.session.synthese 
-      const q = synth.qA // quotas actuels réservés aux comptes "A"
-      const qpt = synth.tsp['0'].q
-      const qe = this.session.espace.quotas
-      const rqn = qe.qn - qpt.qn + q.qn
-      const maxn = rqn < 0 ? q.qn : rqn
-      const rqv = qe.qv - qpt.qv + q.qv
-      const maxv = rqv < 0 ? q.qv : rqv
-      const rqc = qe.qc - qpt.qc + q.qc
-      const maxc = rqc < 0 ? q.qc : rqc
-      this.quotasA = { 
-        qc: q.qc, qn: q.qn, qv: q.qv,
-        minc: 0, minn: 0, minv: 0,
-        maxc, maxn, maxv,
-        err: ''
-      }
-      this.ui.oD('PEedqA', this.idc)
-    },
-
-    async validerqA () {
-      await new SetQuotasA().run(this.quotasA)
-      await this.refreshSynth()
-      this.ui.fD()
-    }
-
-  },
-
-  data () {
-    return {
-      mois: Math.floor(this.session.auj / 100),
-      nom: '',
-      quotasP: null,
-      quotasA: null,
-      code: '',
-      ligne: null,
-      optionsNbmi: [3, 6, 12, 18, 24],
-      nbmi: this.session.espace ? this.session.espace.nbmi : 12,
-      optionA: this.session.espace ? (this.session.espace.opt ? true : false) : false
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-
-    async function refreshSynth () {
-      await new GetSynthese().run()
-    }
-
-    onMounted(async () => {
-      await refreshSynth()
-    })
-
-    return {
-      refreshSynth, // force le rechargement de Synthese (qui n'est pas synchronisé)
-      ID, AMJ, dkli, styp,
-      aSt: stores.avatar,
-      fSt: stores.filtre,
-      session: stores.session,
-      ui, idc
-    }
+async function dlstat (mr) {
+  const cleES = session.compte.cleE
+  const { err, blob, creation, mois } = 
+    await new DownloadStatC().run(session.espace.org, mr, cleES)
+  const nf = session.espace.org + '-C_' + mois
+  if (!err) {
+    saveAs(blob, nf)
+    await afficherDiag($t('PEsd', [nf]))
+  } else {
+    await afficherDiag($t('PEnd' + err))
   }
-
 }
+
+async function dlstat2 () {
+  const cleES = session.compte.cleE
+  const { err, blob } = await new DownloadStatC2()
+    .run(session.espace.org, parseInt(mois.value), 'C', cleES)
+  const nf = session.espace.org + '-C_' + mois.value
+  if (!err) {
+    saveAs(blob, nf)
+    await afficherDiag($t('PEsd', [nf]))
+  } else {
+    await afficherDiag($t('PEnd' + err))
+  }
+}
+
+async function ovnvPart () { 
+  nom.value = ''
+  quotas.value = { 
+    qc: 1, qn: 1, qv: 1, 
+    minc: 0, minn: 0, minv: 0,
+    maxc: 9999, maxn: 9999, maxv: 9999, 
+    n: 0, v: 0,
+    err: false
+  }
+  ui.oD('PEnt', idc)
+}
+
+async function creer () {
+  await new NouvellePartition().run(nom.value || '', quotas.value)
+  await refreshSynth()
+  ui.fD()
+}
+
+async function supprimer (lg) {
+  await new SupprPartition().run(lg.id)
+  await refreshSynth()
+  ui.fD()
+}
+
+async function lgCourante (lg) {
+  ligne.value = lg
+  if (!session.partition || session.partition.id !== lg.id)
+    await new GetPartition().run(lg.id)
+}
+
+async function pagePartition (lg) { // Comptable seulement
+  await lgCourante(lg)
+  ui.setPage('partition')
+}
+
+async function editer (lg) {
+  await lgCourante(lg)
+  code.value = session.compte.mcode.get(ligne.value.id)
+  ui.oD('PEedcom', idc)
+}
+
+async function valider () {
+  await new SetCodePart().run(ligne.value.id, code.value)
+  ui.fD()
+}
+
+/*
+  espace.quotas : quotas de l'espace fixés par l'AT
+  synth.qa : quotas réservés aux comptes A
+  synth.tsp['0'] : somme des quotas des partitions
+  ligne.value.q: quotas actuellement attribués à la partition
+*/
+async function editerqP (lg) {
+  await lgCourante(lg)
+  const q = ligne.value.q // quotas actuels de la partition
+  const synth = session.synthese 
+  const qpt = synth.tsp['0'].q
+  const qe = session.espace.quotas
+  const rqn = qe.qn - qpt.qn + q.qn
+  const maxn = rqn < 0 ? q.qn : rqn
+  const rqv = qe.qv - qpt.qv + q.qv
+  const maxv = rqv < 0 ? q.qv : rqv
+  const rqc = qe.qc - qpt.qc + q.qc
+  const maxc = rqc < 0 ? q.qc : rqc
+  quotasP.value = { 
+    qc: q.qc, qn: q.qn, qv: q.qv,
+    minc: 0, minn: 0, minv: 0,
+    maxc, maxn, maxv,
+    err: ''
+  }
+  ui.oD('PEedqP', idc)
+}
+
+async function validerqP () {
+  await new SetQuotasPart().run(ligne.value.id, quotasP.value)
+  await refreshSynth()
+  ui.fD()
+}
+
+async function editerqA () {
+  const synth = session.synthese 
+  const q = synth.qA // quotas actuels réservés aux comptes "A"
+  const qpt = synth.tsp['0'].q
+  const qe = session.espace.quotas
+  const rqn = qe.qn - qpt.qn + q.qn
+  const maxn = rqn < 0 ? q.qn : rqn
+  const rqv = qe.qv - qpt.qv + q.qv
+  const maxv = rqv < 0 ? q.qv : rqv
+  const rqc = qe.qc - qpt.qc + q.qc
+  const maxc = rqc < 0 ? q.qc : rqc
+  quotasA.value = { 
+    qc: q.qc, qn: q.qn, qv: q.qv,
+    minc: 0, minn: 0, minv: 0,
+    maxc, maxn, maxv,
+    err: ''
+  }
+  ui.oD('PEedqA', idc)
+}
+
+async function validerqA () {
+  await new SetQuotasA().run(quotasA.value)
+  await refreshSynth()
+  ui.fD()
+}
+
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .w10
