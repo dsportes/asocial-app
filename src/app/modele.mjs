@@ -615,7 +615,7 @@ export class Compta extends GenDoc {
     this.tickets = row.tickets || {}
     this.dons = row.dons || []
     if (row.idp) this.idp = row.idp
-    this.estA = !this.qv.qc
+    this.estA = row.estA
   }
 
 }

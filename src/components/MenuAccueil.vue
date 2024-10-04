@@ -1,7 +1,7 @@
 <template>
 <q-list v-if="session.status === 2" class="titre-md" style="min-width: 300px">
   <div v-if="bloc && !session.estComptable" 
-    class="q-px-sm titre-md text-bold text-italic bg-yellow-5 text-warning cursor-pointer"
+    class="q-px-sm titre-md msg cursor-pointer"
     @click="clickNotif2">{{$t('ACbloc')}}
   </div>
 
@@ -120,71 +120,52 @@
 </q-list>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import SelAvid from './SelAvid.vue'
 import SelGrid from './SelGrid.vue'
 import { GetPartition } from '../app/synchro.mjs'
 
-export default {
-  name: 'MenuAccueil',
+const props = defineProps({ 
+  menu: Boolean 
+})
 
-  props: { menu: Boolean },
+const aSt = stores.avatar
+const gSt = stores.groupe
+const session = stores.session
+const ui = stores.ui
+const fSt = stores.filtre
 
-  components: { SelAvid, SelGrid },
+const nbchats = computed(() => aSt.nbchats )
+const nbchatsAv = computed(() => { const x = aSt.eavC; return x ? x.chats.size : 0 })
+const nbspons = computed(() => { const x = aSt.eavC; return x ? x.sponsorings.size : 0 })
+const nbgrps = computed(() => session.compte.idGroupes(session.avatarId).size )
+const nbgrpsT = computed(() => session.compte.idGroupes().size )
+const nbInvits = computed(() => gSt.invitsAtt.length )
+const nbContacts = computed(() => gSt.contactsAtt.length )
+const nbMembres = computed(() => gSt.nbMbC )
+const bloc = computed(() => session.mini )
+const nomg = computed(() => { const idg = session.groupeid; return idg ? session.getCV(idg).nom : '' })
 
-  computed: {
-    nbchats () { return this.aSt.nbchats },
-    nbchatsAv () { const x = this.aSt.eavC; return x ? x.chats.size : 0 },
-    nbspons () { const x = this.aSt.eavC; return x ? x.sponsorings.size : 0 },
-    nbgrps () { return this.session.compte.idGroupes(this.session.avatarId).size },
-    nbgrpsT () { return this.session.compte.idGroupes().size },
-    nbInvits () { return this.gSt.invitsAtt.length },
-    nbContacts () { return this.gSt.contactsAtt.length },
-    nbMembres () { return this.gSt.nbMbC },
-    bloc () { return this.session.estMinimal },
-    nomg () { const idg = this.session.groupeid
-      return idg ? this.session.getCV(idg).nom : ''
-    }
-  },
+function clickNotif2 () {ui.setPage('compta', 'chats')}
 
-  watch: {
-  },
-
-  methods: {
-    clickNotif2 () {
-      this.ui.setPage('compta', 'chats')
-    },
-    async maPartition () { 
-      await new GetPartition().run(this.session.compte.idp)
-      this.ui.setPage('partition')
-    },
-    chatsAv () {
-      this.fSt.filtre.chats.tous = false
-      this.ui.setPage('chats')
-    },
-    tousChats () {
-      this.fSt.filtre.chats.tous = true
-      this.ui.setPage('chats')
-    }
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup () {
-    return {
-      aSt: stores.avatar,
-      gSt: stores.groupe,
-      session: stores.session, 
-      ui: stores.ui, 
-      fSt: stores.filtre
-    }
-  }
-
+async function maPartition () { 
+  await new GetPartition().run(session.compte.idp)
+  ui.setPage('partition')
 }
+
+function chatsAv () {
+  fSt.filtre.chats.tous = false
+  ui.setPage('chats')
+}
+
+function tousChats () {
+  fSt.filtre.chats.tous = true
+  ui.setPage('chats')
+}
+
 </script>
 
 <style lang="sass" scoped>

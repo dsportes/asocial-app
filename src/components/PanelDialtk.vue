@@ -19,70 +19,48 @@
 
     </q-card-section>
     <q-card-actions align="right" class="q-gutter-sm">
-      <btn-cond icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+      <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
       <btn-cond color="warning" icon="check" cond="cUrgence"
         :label="$t('TKgen')" :disable="diag !== ''" @ok="generer"/>
     </q-card-actions>
   </q-card>
 </template>
 
-<script>
-import { toRef, ref, watch } from 'vue'
+<script setup>
+import { ref, watch } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { $t, styp } from '../app/util.mjs'
 import BtnCond from './BtnCond.vue'
 
-export default {
-  name: 'PanelDialtk',
+const props = defineProps({ 
+  min: Number, 
+  init: Number, 
+  titre: String
+})
+const emit = defineEmits(['ok'])
 
-  props: { 
-    min: Number, init: Number, titre: String
-  },
+const ui = stores.ui
 
-  components: { BtnCond },
+const mx = ref(('' + props.init) || '0')
+const m = ref()
+const diag = ref()
+const refx = ref('')
 
-  computed: {
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  methods: {
-    generer () { 
-      this.$emit('ok', { m: this.m, ref: this.refx }) 
-    }
-  },
-
-  setup (props) {
-    const ui = stores.ui
-    const init = toRef(props, 'init')
-    const min = toRef(props, 'min')
-    const mx = ref(('' + init.value) || '0')
-    const m = ref()
-    const diag = ref()
-    const refx = ref('')
-
-    function check (ap) {
-      diag.value = ''
-      m.value = parseInt(ap ? ap.replaceAll(',', '') : '0')
-      if (m.value < min.value || m.value > 10000) diag.value = $t('TKer3')
-    }
-
-    watch(() => mx.value, (ap, av) => {
-        check(ap)
-      }
-    )
-
-    check(mx.value)
-    
-    return {
-      ui, styp, mx, m, diag, refx
-    }
-  }
-
+function check (ap) {
+  diag.value = ''
+  m.value = parseInt(ap ? ap.replaceAll(',', '') : '0')
+  if (m.value < props.min || m.value > 10000) diag.value = $t('TKer3')
 }
+
+watch(mx, (ap, av) => { check(ap) })
+
+check(mx.value)
+
+function generer () { 
+  emit('ok', { m: m.value, ref: refx.value }) 
+}
+
 </script>
 
 <style lang="sass" scoped>

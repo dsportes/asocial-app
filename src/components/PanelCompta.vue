@@ -244,127 +244,77 @@
 </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { UNITEN, UNITEV, AMJ, Compteurs, Tarif } from '../app/api.mjs'
-import { dhcool, mon, nbn, edvol, dkli } from '../app/util.mjs'
+import { $t, dhcool, mon, nbn, edvol, dkli } from '../app/util.mjs'
 import MoisM from './MoisM.vue'
 import PanelDeta from '../components/PanelDeta.vue'
 
+const ui = stores.ui
+const session = stores.session
+
+const tarifs = Tarif.tarifs
 const cu = ['AN', 'AF', 'lec', 'ecr', 'mon', 'des']
 
-export default ({
-  name: 'PanelCompta',
+const idm = ref(0)
 
-  props: { },
+const c = computed(() => session.compta.compteurs)
+const estA = computed(() => session.compta.estA)
+const icoabo1 = computed(() => abo1w.value ? 'report' : (abo1n.value ? 'lock': 'check'))
+const icoabo2 = computed(() => abo2w.value ? 'report' : (abo2n.value ? 'lock': 'check'))
+const icoconso = computed(() => consow.value ? 'report' : (conson.value ? 'lock': 'check'))
+const hcabo1 = computed(() => abo1w.value ? 'titre-md text-bold text-white bg-warning'
+      : (abo1n.value ? 'titre-md text-bold text-white bg-negative' : 'titre-md text-bold text-white bg-primary'))
+const hcabo2 = computed(() => abo2w.value ? 'titre-md text-bold text-white bg-warning'
+      : (abo2n.value ? 'titre-md text-bold text-white bg-negative' : 'titre-md text-bold text-white bg-primary'))
+const hcconso = computed(() => consow.value ? 'titre-md text-bold text-white bg-warning'
+      : (conson.value ? 'titre-md text-bold text-white bg-negative' : 'titre-md text-bold text-white bg-primary'))
+const abo1w = computed(() => pcutq1.value > 90 && pcutq1.value < 100)
+const abo1n = computed(() => pcutq1.value > 100)
+const abo2w = computed(() => pcutq2.value > 90 && pcutq2.value < 100)
+const abo2n = computed(() => pcutq1.value > 100)
+const consow = computed(() => (estA.value && (nbj.value > 0 && nbj.value < 60)) ||
+        (!estA.value && (txconso.value > 80 && txconso.value < 100)))
+const conson = computed(() => (estA.value && nbj.value <= 0) ||
+        (!estA.value && txconso.value > 100))
+const exM = computed(() => c.value.vd[idm.value][Compteurs.MS] !== 0)
+const q2M = computed(() => c.value.vd[idm.value][Compteurs.QV] * UNITEV)
+const v2M = computed(() => c.value.vd[idm.value][Compteurs.V + Compteurs.X2])
+const pcutq2M = computed(() => Math.round(v2M.value * 100 / q2M.value))
+const pcutq2 = computed(() => Math.round(c.value.qv.v * 100 / (c.value.qv.qv * UNITEV)))
 
-  components: { MoisM, PanelDeta },
+const q1M = computed(() => c.value.vd[idm.value][Compteurs.QN] * UNITEN)
+const nnM = computed(() => c.value.vd[idm.value][Compteurs.NN  + Compteurs.X1 + Compteurs.X2])
+const ncM = computed(() => c.value.vd[idm.value][Compteurs.NC + Compteurs.X1 + Compteurs.X2])
+const ngM = computed(() => c.value.vd[idm.value][Compteurs.NG  + Compteurs.X1 + Compteurs.X2])
+const pcutq1M = computed(() => Math.round((nnM.value + ncM.value + ngM.value) * 100 / q1M.value))
+const pcutq1 = computed(() => Math.round((c.value.qv.nn + c.value.qv.nc + c.value.qv.ng) * 100 / (c.value.qv.qn * UNITEN)))
 
-  computed: {
-    c () { const cpt = this.session.compta.compteurs
-      // cpt.print()
-      return cpt
-    },
-    estA () { return this.session.compta.estA },
-    icoabo1 () {
-      if (this.abo1w) return 'report'
-      else if (this.abo1n) return 'lock'
-      else return 'check'
-    },
-    icoabo2 () {
-      if (this.abo2w) return 'report'
-      else if (this.abo2n) return 'lock'
-      else return 'check'
-    },
-    icoconso () {
-      if (this.consow) return 'report'
-      else if (this.conson) return 'lock'
-      else return 'check'
-    },
-    hcabo1 () {
-      if (this.abo1w) return 'titre-md text-bold text-white bg-warning'
-      else if (this.abo1n) return 'titre-md text-bold text-white bg-negative'
-      else return 'titre-md text-bold text-white bg-primary'
-    },
-    hcabo2 () {
-      if (this.abo2w) return 'titre-md text-bold text-white bg-warning'
-      else if (this.abo2n) return 'titre-md text-bold text-white bg-negative'
-      else return 'titre-md text-bold text-white bg-primary'
-    },
-    hcconso () {
-      if (this.consow) return 'titre-md text-bold text-white bg-warning'
-      else if (this.conson) return 'titre-md text-bold text-white bg-negative'
-      else return 'titre-md text-bold text-white bg-primary'
-    },
-    abo1w () { return this.pcutq1 > 90 && this.pcutq1 < 100 },
-    abo1n () { return this.pcutq1 > 100 },
-    abo2w () { return this.pcutq2 > 90 && this.pcutq2 < 100 },
-    abo2n () { return this.pcutq1 > 100 },
-    consow () {
-      return (this.estA && (this.nbj > 0 && this.nbj < 60)) ||
-        (!this.estA && (this.txconso > 80 && this.txconso < 100))
-    },
-    conson () {
-      return (this.estA && this.nbj <= 0) ||
-        (!this.estA && this.txconso > 100)
-    },
+const aboM = computed(() => c.value.vd[idm.value][Compteurs.CA])
+const consoM = computed(() => c.value.vd[idm.value][Compteurs.CC])
+const nbj = computed(() => c.value.nbj(session.compta.solde))
+const txconso = computed(() => c.value.pourcents.pcc)
+const alconso = computed(() => txconso.value < 80 ? '' 
+  : (' bg-yellow-3 text-bold text-' + (txconso.value > 100 ? 'negative' : 'warning')))
 
-    exM () { return this.c.vd[this.idm][Compteurs.MS] !== 0 },
-    q2M () { return this.c.vd[this.idm][Compteurs.QV] * UNITEV },
-    v2M () { return this.c.vd[this.idm][Compteurs.V + Compteurs.X2]},
-    pcutq2M () { return Math.round(this.v2M * 100 / this.q2M)},
-    pcutq2 () { return Math.round(this.c.qv.v * 100 / (this.c.qv.qv * UNITEV)) },
+const ex = (m) => c.value.vd[m][Compteurs.MS] !== 0
+const conso = (m) => c.value.vd[m][Compteurs.CC]
+const nl = (m) => c.value.vd[m][Compteurs.X1 + Compteurs.NL]
+const ne = (m) => c.value.vd[m][Compteurs.X1 + Compteurs.NE]
+const vm = (m) => c.value.vd[m][Compteurs.X1 + Compteurs.VM]
+const vd = (m) => c.value.vd[m][Compteurs.X1 + Compteurs.VD]
+const em = (m) => c.value.mm[m] !== 0
 
-    q1M () { return this.c.vd[this.idm][Compteurs.QN] * UNITEN},
-    nnM () { return this.c.vd[this.idm][Compteurs.NN  + Compteurs.X1 + Compteurs.X2]},
-    ncM () { return this.c.vd[this.idm][Compteurs.NC + Compteurs.X1 + Compteurs.X2]},
-    ngM () { return this.c.vd[this.idm][Compteurs.NG  + Compteurs.X1 + Compteurs.X2]},
-    pcutq1M () { return Math.round((this.nnM + this.ncM + this.ngM) * 100 / this.q1M)},
-    pcutq1 () { return Math.round((this.c.qv.nn + this.c.qv.nc + this.c.qv.ng) * 100 / (this.c.qv.qn * UNITEN)) },
+function libm (idm) {
+  const [ax, mx] = AMJ.am(c.value.dh)
+  const x = mx - idm
+  const m = x <= 0 ? 12 + x : x
+  return $t('mois' + m)
+}
 
-    aboM () { return this.c.vd[this.idm][Compteurs.CA] },
-    consoM () {  return this.c.vd[this.idm][Compteurs.CC] },
-    nbj () { return this.c.nbj(this.session.compta.solde) },
-    txconso () { return this.c.pourcents.pcc },
-    alconso () {
-      if (this.txconso < 80) return ''
-      return ' bg-yellow-3 text-bold text-' + (this.txconso > 100 ? 'negative' : 'warning')
-    },
-  },
-
-  data () {
-    return {
-      idm: 0
-    }
-  },
-
-  methods: {
-    ex (m) { return this.c.vd[m][Compteurs.MS] !== 0  },
-    conso (m) { return this.c.vd[m][Compteurs.CC] },
-    nl (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.NL] },
-    ne (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.NE] },
-    vm (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.VM] },
-    vd (m) { return this.c.vd[m][Compteurs.X1 + Compteurs.VD] },
-    em (m) { return this.c.mm[m] !== 0  },
-
-    libm (idm) {
-      const [ax, mx] = AMJ.am(this.c.dh)
-      const x = mx - idm
-      const m = x <= 0 ? 12 + x : x
-      return this.$t('mois' + m)
-    }
-    
-  },
-
-  setup () {
-    return {
-      session: stores.session,
-      tarifs: Tarif.tarifs,
-      cu,
-      mon, nbn, edvol, dhcool, dkli, UNITEN, UNITEV
-    }
-  }
-})
 </script>
 
 <style lang="sass" scoped>

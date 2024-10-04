@@ -98,7 +98,10 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+import { useQuasar } from 'quasar'
+
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonLangue from '../components/BoutonLangue.vue'
@@ -108,61 +111,21 @@ import QueueIcon from '../components/QueueIcon.vue'
 import MenuAccueil from '../components/MenuAccueil.vue'
 import BtnCond from '../components/BtnCond.vue'
 
-export default {
-  name: 'PageAccueil',
+const $q = useQuasar()
+const ui = stores.ui
+const session = stores.session
+const aSt = stores.avatar
 
-  components: { MenuAccueil, BoutonHelp, BoutonLangue, NotifIcon, N3Icon, QueueIcon, BtnCond },
+const pccl = computed(() => aSt.compta.pc < 80 ? 'bg-transparent' : (aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative'))
 
-  computed: {
-    pccl () {return this.aSt.compta.pc < 80 ? 'bg-transparent' : (this.aSt.compta.pc < 100 ? 'bg-yellow-3' : 'bg-negative') },
-  },
+function tgdark () { $q.dark.toggle() }
+function clickNotif () { ui.setPage('compta', 'notif')}
+function clickChats () { ui.setPage('compta', 'chats')}
+function clickAbo () { ui.setPage('compta', 'compta')}
+function clickCred () { ui.setPage('compta', 'credits')}
+function infoSession () { ui.setPage('session')}
+function ficAvion () {ui.setPage('ficavion')}
 
-  methods: {
-    tgdark () { this.$q.dark.toggle() },
-
-    closeOutils () { this.outilsTests = false },
-
-    clickNotif () {
-      this.ui.setPage('compta', 'notif')
-    },
-
-    clickChats () {
-      this.ui.setPage('compta', 'chats')
-    },
-
-    clickAbo () {
-      this.ui.setPage('compta', 'compta')
-    },
-
-    clickCred () { 
-      this.ui.setPage('compta', 'credits')
-    },
-
-    infoSession () { 
-      this.ui.setPage('session')
-    },
-
-    ficAvion () {
-      this.ui.setPage('ficavion')
-    }
-
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup () {
-
-    return {
-      ui: stores.ui,
-      session: stores.session,
-      aSt: stores.avatar,
-    }
-  }
-
-}
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'

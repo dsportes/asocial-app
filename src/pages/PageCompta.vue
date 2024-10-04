@@ -70,8 +70,7 @@
       {{$t('CPTtitch' + (session.estA ? 'A' : 'O'))}}
     </div>
 
-    <btn-cond class="q-my-sm" 
-      :cond="session.estAdmin ? 'cUrgence' : 'cVisu'"
+    <btn-cond class="q-my-sm" cond="cUrgence"
       :label="$t('CVraf')" @ok="rafCvs"/>
 
     <q-card v-for="(e, idx) in lurg" :key="e.id">
@@ -85,9 +84,10 @@
 </q-page>
 </template>
 
-<script>
+<script setup>
 
-import { onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
 import ApercuGenx from '../components/ApercuGenx.vue'
@@ -95,88 +95,60 @@ import ApercuNotif from '../components/ApercuNotif.vue'
 import PanelCredits from '../components/PanelCredits.vue'
 import MicroChat from '../components/MicroChat.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { dkli, edvol, afficher8000 } from '../app/util.mjs'
+import { $t, dkli, edvol, afficher8000 } from '../app/util.mjs'
 import N3Icon from '../components/N3Icon.vue'
 import NotifIcon from '../components/NotifIcon.vue'
-import { UNITEN, UNITEV } from '../app/api.mjs'
+import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import { RafraichirCvsAv } from '../app/operations4.mjs'
+import { GetPartition } from '../app/synchro.mjs'
 
-export default {
-  name: 'PageCompta',
+const al = 'titre-md text-italic bg-yellow-3 text-negative text-bold q-mb-xs q-ml-xl'
 
-  components: { BtnCond, N3Icon, NotifIcon, MicroChat, ApercuGenx, ApercuNotif, PanelCompta, PanelCredits },
+const session = stores.session
+const ui = stores.ui
 
-  computed: {
-    al () { return 'titre-md text-italic bg-yellow-3 text-negative text-bold q-mb-xs q-ml-xl'},
-    // nbj () { return 5 },
-    nbj () { return this.session.compte.nbj },
-    nnbj () { return this.nbj > 40 ? 1 : (this.nbj > 10 ? 2 : 3)},
-    c () { return this.session.compta.compteurs },
-    s ()  { return this.session.compta.solde },
-    pc () { return this.c.pourcents },
-    npcn () { return this.pc.pcn < 80 ? 1 : (this.pc.pcn <= 90 ? 2 : 3)},
-    // npcv () { return 3 },
-    npcv () { return this.pc.pcv < 80 ? 1 : (this.pc.pcv <= 90 ? 2 : 3)},
-    // npcc () { return 2 },
-    npcc () { return this.pc.pcc < 80 ? 1 : (this.pc.pcc <= 90 ? 2 : 3)},
-    nj () { return this.c.nbj(this.session.compta.solde) },
-    nnj () { return this.nj > 40 ? 1 : (this.nj > 10 ? 2 : 3)},
-    lurg () {
-      const l = []
-      const p = this.session.partition
-      if (!p) return l
-      for (const id in p.mcpt) {
-        const e = p.mcpt[id]
-        if (id !== this.session.compteId && e.del)
-          l.push({ del: e.del, id: id })
-      }
-      return l
-    }
-  },
+if (session.accesNet) onMounted( async () => { 
+  await session.reloadCompta() 
+  if (!session.estA) await new GetPartition().run(session.partition.id)
+})
 
-  data () {
-    return {
-    }
-  },
+const nbj = computed(() => session.compte.nbj)
+const nnbj = computed(() => nbj.value > 40 ? 1 : (nbj.value > 10 ? 2 : 3))
 
-  watch: {
-  },
-
-  methods: {
-    onok (ctx) {
-      console.log(ctx)
-    },
-    async rafCvs () {
-      let nc = 0, nv = 0
-      for (const id of this.session.compte.mav) {
-        const r = await new RafraichirCvsAv().run(id)
-        if (typeof r ==='number') {
-          await afficher8000(r, id, 0)
-          continue
-        }
-        const [x, y] = r
-        nc += x; nv += y
-      }
-      stores.ui.afficherMessage(this.$t('CVraf2', [nc, nv]), false)
-    },
-
-  },
-
-  setup () {
-    const session = stores.session
-
-    if (session.accesNet) onMounted( async () => { 
-      await session.reloadCompta() 
-      if (!session.estA) await new GetPartition().run(session.partition.id)
-    })
-
-    return {
-      session, 
-      ui: stores.ui, 
-      dkli, UNITEN, UNITEV, edvol
-    }
+const c = computed(() => session.compta.compteurs)
+const s = computed(() =>session.compta.solde)
+const pc = computed(() => c.value.pourcents)
+const npcn = computed(() => pc.value.pcn < 80 ? 1 : (pc.value.pcn <= 90 ? 2 : 3))
+const npcv = computed(() => pc.value.pcv < 80 ? 1 : (pc.value.pcv <= 90 ? 2 : 3))
+const npcc = computed(() => pc.value.pcc < 80 ? 1 : (pc.value.pcc <= 90 ? 2 : 3))
+const nj = computed(() => c.value.nbj(session.compta.solde))
+const nnj = computed(() => nj.value > 40 ? 1 : (nj.value > 10 ? 2 : 3))
+const lurg = computed(() => {
+  const p = session.partition
+  if (!p) return [{ del: true, id: ID.duComptable() }]
+  const l = []
+  for (const id in p.mcpt) {
+    const e = p.mcpt[id]
+    if (id !== session.compteId && e.del)
+      l.push({ del: e.del, id: id })
   }
+  return l
+})
+    
+async function rafCvs () {
+  let nc = 0, nv = 0
+  for (const id of session.compte.mav) {
+    const r = await new RafraichirCvsAv().run(id)
+    if (typeof r ==='number') {
+      await afficher8000(r, id, 0)
+      continue
+    }
+    const [x, y] = r
+    nc += x; nv += y
+  }
+  stores.ui.afficherMessage($t('CVraf2', [nc, nv]), false)
 }
+
 </script>
 
 <style lang="sass" scoped>

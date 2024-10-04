@@ -41,8 +41,8 @@
           :texte="txtdefA"/>
       </q-card-section>
 
-      <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
-        <btn-cond icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+      <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center" vertical>
+        <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
         <btn-cond :disable="!pc" color="warning" icon="change_history" 
           cond="cUrgence" :label="$t('PPmutA')" @ok="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mutA"/>
@@ -80,8 +80,8 @@
           :texte="txtdefO"/>
       </q-card-section>
 
-      <q-card-actions class="q-pa-xs q-mt-sm q-gutter-xs" align="right" vertical>
-        <btn-cond icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
+      <q-card-actions class="q-pa-xs q-mt-sm q-gutter-sm" align="center" vertical>
+        <btn-cond icon="undo" flat :label="$t('renoncer')" @ok="ui.fD"/>
         <btn-cond :disable="(diag !== '') || quotas.err || !pc" color="warning" icon="change_history" 
           cond="cUrgence" :label="$t('PPmutO2')" @ok="cf=true"/>
         <bouton-confirm :actif="cf" :confirmer="mut"/>
@@ -182,9 +182,10 @@
 
 </div>
 </template>
-<script>
 
-import { ref, toRef, onMounted, onUnmounted } from 'vue'
+<script setup>
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { ID, UNITEN, UNITEV } from '../app/api.mjs'
 import PanelCompta from '../components/PanelCompta.vue'
@@ -195,223 +196,199 @@ import MicroChat from '../components/MicroChat.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import EditeurMd from '../components/EditeurMd.vue'
 import PhraseContact from '../components/PhraseContact.vue'
-import { styp, edvol, afficherDiag } from '../app/util.mjs'
+import { $t, styp, edvol, afficherDiag } from '../app/util.mjs'
 import { StatutAvatar, ChangerPartition, DeleguePartition, 
   GetAvatarPC, MuterCompteO, MuterCompteA } from '../app/operations4.mjs'
 import { GetCompta, GetComptaQv, GetSynthese, GetPartition } from '../app/synchro.mjs'
 
-export default {
-  name: 'BarrePeople',
+const session = stores.session
+const aSt = stores.avatar
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  components: { PhraseContact, BtnCond, EditeurMd, PanelCompta, BoutonConfirm, MicroChat, ChoixQuotas, BoutonHelp },
+const props = defineProps({ 
+  id: String,
+  part: Boolean
+})
 
-  props: { id: String, part: Boolean },
+if (!props.part) {
+  onMounted(async () => {
+    const [c, p] = await new StatutAvatar().run(props.id)
+    idp.value = p
+    idcpt.value = c
+  })
+}
+const idp = ref(props.part ? session.partition.id : '')
+const idcpt = ref(props.id)
+const idpCpt = ref(null)
+const pc = ref(null)
+const texte = ref('')
+const selx = ref(null)
+const filtre = ref('')
+const lst = ref([])
+const atr = ref([])
+const pcc = ref(0)
+const pcn = ref(0)
+const pcv = ref(0)
+const stp = ref(true) // avatar principal) 
+const sta = ref(true) // compte A
+const cf = ref(false)
+const quotas = ref({}) // { q1) q2) qc) min1) min2) max1) max2) minc) maxc) err}
+const diag = ref('')
 
-  computed: {
-    cv () { return this.session.getCV(this.id) },
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    estDel () { return this.session.partition.estDel(this.id)},
-    comptaVis () { return (this.session.estComptable || 
-      (this.session.estDelegue && !this.session.eltPart(this.id).fake)) && this.id !== this.session.compteId 
-    },
+const cv = computed(() => session.getCV(props.id) )
+const estDel = computed(() => session.partition.estDel(props.id))
+const comptaVis = computed(() => (session.estComptable || 
+  (session.estDelegue && !session.eltPart(props.id).fake)) && props.id !== session.compteId )
+const opt = computed(() => session.espace.opt)
+const chat = computed(() => aSt.getChatIdIE(session.compteId, props.id))
+const cpt = computed(() => session.compta)
+const txtdefO = computed(() => $t('PPmsgo', [session.partition.id]))
+const txtdefA = computed(() => $t('PPmsga'))
 
-    opt () { return this.session.espace.opt },
-    chat () { return this.aSt.getChatIdIE(this.session.compteId, this.id) },
-    cpt () { return this.session.compta },
-    txtdefO () { return this.$t('PPmsgo', [this.session.partition.id])},
-    txtdefA () { return this.$t('PPmsga')}    
-  },
+watch(filtre, (ap, av) => { filtrer() })
 
-  watch: {
-    filtre (ap, av) { this.filtrer() },
-    verif1 (ap) { if (ap) this.verifd = true }
-  },
-  
-  data () {
-    return {
-      idpCpt: null,
-      pc: null,
-      texte: '',
-      selx: null,
-      filtre: '',
-      lst: [],
-      atr: [],
-      pcc: 0,
-      pcn: 0,
-      pcv: 0,
-      stp: true, // avatar principal, 
-      sta: true, // compte A
-      cf: false,
-      quotas: {}, // { q1, q2, qc, min1, min2, max1, max2, minc, maxc, err}
-      diag: ''
-    }
-  },
+const edn = (v) => v * UNITEN
+const edv = (v) => edvol(v * UNITEV)
 
-  methods: {
-    edn (v) { return v * UNITEN },
-    edv (v) { return edvol(v * UNITEV) },
+const cllst = (x) => { const cl = 'row items-center cursor-pointer' + (selx.value && selx.value.idp === x.idp ? ' bord2' : ' bord1')
+  return cl + (idpCpt.value === x.idp ? ' disabled' : '')
+}
 
-    cllst (x) { const cl = 'row items-center cursor-pointer' + (this.selx && this.selx.idp === x.idp ? ' bord2' : ' bord1')
-      const cx = cl + (this.idpCpt === x.idp ? ' disabled' : '')
-      return cx
-    },    
+async function okpc (p) {
+  pc.value = p
+  const id = await new GetAvatarPC().run(p)
+  diag.value = idcpt.value !== id ? $t('PPmutpc') : ''
+}
 
-    async okpc (p) {
-      this.pc = p
-      const id = await new GetAvatarPC().run(p)
-      this.diag = this.idcpt !== id ? this.$t('PPmutpc') : ''
-    },
+async function muter () {
+  if (!chat.value) {
+    await afficherDiag($t('PPchatreq'))
+    return
+  }
+  const c = await new GetComptaQv().run(idcpt.value)
+  await new GetPartition().run(session.partition.id)
+  const s = session.partition.synth
+  quotas.value = {
+    qn: c.qn,
+    qv: c.qv,
+    qc: 1,
+    minn: Math.ceil((c.nc + c.ng + c.nn) / UNITEN),
+    minv: Math.ceil(c.v / UNITEV),
+    minc: 1,
+    maxn: s.q.qn - s.qt.qn,
+    maxv: s.q.qv - s.qt.qv,
+    maxc: s.q.qc - s.qt.qc
+  }
+  cf.value = false
+  diag.value = $t('PPmutpc2')
+  ui.oD('BPmut', idc)
+}
 
-    async muter () {
-      if (!this.chat) {
-        await afficherDiag(this.$t('PPchatreq'))
-        return
+async function muterA () {
+  if (!chat.value) {
+    await afficherDiag($t('PPchatreq'))
+    return
+  }
+  ui.oD('BPmutA', idc)
+}
+
+async function mut () {
+  await new MuterCompteO().run(idcpt.value, quotas.value, chat.value, texte.value, pc.value)
+  idp.value = session.partition.id
+  pc.value = null
+  await new GetPartition().run(session.partition.id)
+  await new GetSynthese().run()
+  ui.fD()
+}
+
+async function mutA () {
+  await new MuterCompteA().run(idcpt.value, chat.value, texte.value, pc.value)
+  idp.value = null
+  pc.value = null
+  await new GetPartition().run(session.partition.id)
+  await new GetSynthese().run()
+  ui.fD()
+}
+
+async function voirCompta () { // comptable OU délégué
+  await new GetCompta().run(props.id)
+  ui.oD('BPcptdial', idc)
+}
+
+function filtrer () {
+  const l = []
+  /*
+  - `tsp` : table des _synthèses_ des partitions.
+    - _index_: numéro de la partition.
+    - _valeur_ : `synth`, objet des compteurs de synthèse calculés de la partition.
+      - `id nbc nbd`
+      - `ntfp[1,2,3]`
+      - `q` : `{ qc, qn, qv }`
+      - `qt` : { qc qn qv c2m n v }`
+      - `ntf[1,2,3]`
+      - `pcac pcan pcav pcc pcn pcv`
+  */
+  const tsp = session.synthese.tsp
+  for(const [idp, code] of session.compte.mcode) {
+    if (!filtre.value || (code && code.indexOf(filtre.value) !== -1)) {
+      const e = tsp[idp]
+      const y = { 
+        idp,
+        code: '#' + idp.substring(idp.length - 4) + ' [' + code  + ']',
+        qc: e.q.qc, 
+        qn: e.q.qn,
+        qv: e.q.qv,
+        dc: e.q.qc - e.qt.qc,
+        dn: e.q.qn - e.qt.qn,
+        dv: e.q.qv - e.qt.qv
       }
-      const c = await new GetComptaQv().run(this.idcpt)
-      await new GetPartition().run(this.session.partition.id)
-      const s = this.session.partition.synth
-      this.quotas = {
-        qn: c.qn,
-        qv: c.qv,
-        qc: 1,
-        minn: Math.ceil((c.nc + c.ng + c.nn) / UNITEN),
-        minv: Math.ceil(c.v / UNITEV),
-        minc: 1,
-        maxn: s.q.qn - s.qt.qn,
-        maxv: s.q.qv - s.qt.qv,
-        maxc: s.q.qc - s.qt.qc
-      }
-      this.cf = false
-      this.diag = this.$t('PPmutpc2')
-      this.ui.oD('BPmut', this.idc)
-    },
-
-    async muterA () {
-      if (!this.chat) {
-        await afficherDiag(this.$t('PPchatreq'))
-        return
-      }
-      this.ui.oD('BPmutA', this.idc)
-    },
-
-    async mut () {
-      await new MuterCompteO().run(this.idcpt, this.quotas, this.chat, this.texte, this.pc)
-      this.idp = this.session.partition.id
-      this.pc = null
-      await new GetPartition().run(this.session.partition.id)
-      await new GetSynthese().run()
-      this.ui.fD()
-    },
-
-    async mutA () {
-      await new MuterCompteA().run(this.idcpt, this.chat, this.texte, this.pc)
-      this.idp = null
-      this.pc = null
-      await new GetPartition().run(this.session.partition.id)
-      await new GetSynthese().run()
-      this.ui.fD()
-    },
-
-    async voirCompta () { // comptable OU délégué
-      await new GetCompta().run(this.id)
-      this.ui.oD('BPcptdial', this.idc)
-    },
-
-    filtrer () {
-      this.lst = []
-      /*
-      - `tsp` : table des _synthèses_ des partitions.
-        - _index_: numéro de la partition.
-        - _valeur_ : `synth`, objet des compteurs de synthèse calculés de la partition.
-          - `id nbc nbd`
-          - `ntfp[1,2,3]`
-          - `q` : `{ qc, qn, qv }`
-          - `qt` : { qc qn qv c2m n v }`
-          - `ntf[1,2,3]`
-          - `pcac pcan pcav pcc pcn pcv`
-      */
-      const tsp = this.session.synthese.tsp
-      for(const [idp, code] of this.session.compte.mcode) {
-        if (!this.filtre || (code && code.indexOf(this.filtre) !== -1)) {
-          const e = tsp[idp]
-          const y = { 
-            idp,
-            code: '#' + idp.substring(idp.length - 4) + ' [' + code  + ']',
-            qc: e.q.qc, 
-            qn: e.q.qn,
-            qv: e.q.qv,
-            dc: e.q.qc - e.qt.qc,
-            dn: e.q.qn - e.qt.qn,
-            dv: e.q.qv - e.qt.qv
-          }
-          y.okc = this.cpt.qv.qc <= y.dc
-          y.okn = this.cpt.qv.qn <= y.dn
-          y.okv = this.cpt.qv.qv <= y.dv
-          this.lst.push(y)
-        }
-      }
-    },
-
-    async chgDelegue () { // comptable
-      const c = await new GetCompta().run(this.id)
-      if (c.estA) {
-        await afficherDiag(this.$t('PPnopart'))
-        return
-      }
-      this.ui.oD('BPchgSp', this.idc)
-    },
-
-    async changerDel(del) {
-      await new DeleguePartition().run(this.id, del)
-      await new GetPartition().run(this.session.partition.id)
-      await new GetSynthese().run()
-      this.ui.fD()
-    },
-
-    async chgPartition () { // comptable
-      await new GetSynthese().run()
-      const c = await new GetCompta().run(this.id)
-      if (c.estA) {
-        await afficherDiag(this.$t('PPnopart'))
-        return
-      }
-      this.idpCpt = c.idp
-      this.selx = null
-      this.filtre = ''
-      this.filtrer()
-      this.ui.oD('BPchgTr', this.idc)
-    },
-
-    async changerPart () {
-      await new ChangerPartition().run(this.id, this.selx.idp, this.session.notifC)
-      await new GetPartition().run(this.session.partition.id)
-      await new GetSynthese().run()
-      this.ui.fD()
-    }
-  },
-
-  setup (props) {
-    const session = stores.session
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const part = toRef(props, 'part')
-    const id = toRef(props, 'id')
-    const idp = ref(part.value ? session.partition.id : 0)
-    const idcpt = ref(id.value)
-
-    if (!part.value) {
-      onMounted(async () => {
-        const [c, p] = await new StatutAvatar().run(id.value)
-        idp.value = p
-        idcpt.value = c
-      })
-    }
-    return {
-      ID, styp, ui, idc, idp, idcpt, session,      
-      aSt: stores.avatar
+      y.okc = cpt.value.qv.qc <= y.dc
+      y.okn = cpt.value.qv.qn <= y.dn
+      y.okv = cpt.value.qv.qv <= y.dv
+      l.push(y)
     }
   }
+  lst.value = l
 }
+
+async function chgDelegue () { // comptable
+  const c = await new GetCompta().run(props.id)
+  if (c.estA) {
+    await afficherDiag($t('PPnopart'))
+    return
+  }
+  ui.oD('BPchgSp', idc)
+}
+
+async function changerDel(del) {
+  await new DeleguePartition().run(props.id, del)
+  await new GetPartition().run(session.partition.id)
+  await new GetSynthese().run()
+  ui.fD()
+}
+
+async function chgPartition () { // comptable
+  await new GetSynthese().run()
+  const c = await new GetCompta().run(props.id)
+  if (c.estA) {
+    await afficherDiag($t('PPnopart'))
+    return
+  }
+  idpCpt.value = c.idp
+  selx.value = null
+  filtre.value = ''
+  filtrer()
+  ui.oD('BPchgTr', idc)
+}
+
+async function changerPart () {
+  await new ChangerPartition().run(props.id, selx.value.idp, session.notifC)
+  await new GetPartition().run(session.partition.id)
+  await new GetSynthese().run()
+  ui.fD()
+}
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'

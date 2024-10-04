@@ -20,39 +20,22 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import { dhcool, mon, dkli } from '../app/util.mjs'
 
-export default {
-  name: 'PanelDeta',
+const props = defineProps({ 
+  total: Number, 
+  c: Object
+})
 
-  props: { 
-    total: Number, c: Object
-  },
+const nbj = computed(() => props.c.nbj(props.total))
+const alsolde = computed(() => {
+  const x = ' bg-yellow-3 text-bold text-'
+  return nbj.value <= 0 ? x + 'negative' : (nbj.value < 60 ? x + 'warning' : '')
+})
 
-  computed: {
-    nbj () { return this.c.nbj(this.total) },
-    alsolde () {
-      const x = ' bg-yellow-3 text-bold text-'
-      return this.nbj <= 0 ? x + 'negative' : (this.nbj < 60 ? x + 'warning' : '')
-    },
-  },
-
-  methods: {
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup (props) {
-    return {
-      dhcool, mon, dkli
-    }
-  }
-
-}
 </script>
 
 <style lang="sass" scoped>

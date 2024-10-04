@@ -270,6 +270,7 @@ export async function deconnexion(recon) {
   session.setMode(mode)
   session.org = org
   if (recon) {
+    ui.setPage('session')
     session.phrase = phrase
     await connexion(phrase)
   } else {

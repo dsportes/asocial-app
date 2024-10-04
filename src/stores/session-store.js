@@ -111,13 +111,15 @@ export const useSessionStore = defineStore('session', {
     ntfP (state) { return state.notifP && state.notifP.nr ? state.notifP : null },
     ntfC (state) { return state.compte && state.compte.notif ? state.compte.notif : null },
 
-    mini (state) { return (state.ntfP && state.ntfP.nr === 3) || (state.ntfC && state.ntfC.nr === 3) },
+    mini (state) { return (state.ntfP && state.ntfP.nr === 3) || (state.ntfC && state.ntfC.nr === 3) || state.ral === 3 },
     lect (state) { return (state.ntfP && state.ntfP.nr >= 2) || (state.ntfC && state.ntfC.nr >= 2) },
     estFige (state) { const n = state.ntfE; return n && (n.nr === 2) },
     estClos (state) { const n = state.ntfE; return n && (n.nr === 3) },
     ral (state) { if (!state.compte) return 0
-      if (state.compte.estA)
-        { const n = state.compte.qv.nbj; return n <= 0 ? 3 : (n < 10 ? 2 : (n < 20 ? 1 : 0)) }
+      if (state.compte.estA) {
+        const n = state.compte.qv.nbj
+        return n <= 0 ? 3 : (n < 10 ? 2 : (n < 20 ? 1 : 0)) 
+      }
       const n = state.compte.qv.pcc; return n >= 100 ? 2 : (n >= 90 ? 1 : 0)
     },
     quotn (state) { if (!state.compte) return 0
@@ -144,7 +146,7 @@ export const useSessionStore = defineStore('session', {
     ntfIco (state) {
       const f = state.ntfE && state.ntfE.nr === 2
       if (f && state.mini) return 6
-      if (state.mini || state.ral === 3) return 5
+      if (state.mini) return 5
       if (f) return 4
       if (state.lect) return 3
       if (state.quotn === 2 || state.quotv === 2) return 2
@@ -354,8 +356,7 @@ export const useSessionStore = defineStore('session', {
       this.clek = null
       this.status = 1
 
-      RegCles.reset() 
-      stores.reset(true) // reset SAUF session
+      RegCles.reset()
     },
 
     // Retour de sync : numéro de heartbeat connu de PUBSUB pour cette session

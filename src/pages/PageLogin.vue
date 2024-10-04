@@ -117,7 +117,6 @@ function raz () {
   sp.value = null
   org.value = ''
   initval.value = ''
-  session.setMode(0)
 }
 
 raz()

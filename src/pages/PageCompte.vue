@@ -114,8 +114,8 @@
   </q-page>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { NouvelAvatar, ChangementPS, MuterCompteA } from '../app/operations4.mjs'
@@ -128,167 +128,146 @@ import SupprAvatar from '../panels/SupprAvatar.vue'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import ChoixQuotas from '../components/ChoixQuotas.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { styp, afficherDiag } from '../app/util.mjs'
+import { $t, styp, afficherDiag } from '../app/util.mjs'
 import { isAppExc, ID } from '../app/api.mjs'
 import { GetCompta, GetPartition, GetSynthese } from '../app/synchro.mjs'
 
-export default {
-  name: 'PageCompte',
+const session = stores.session
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const aSt = stores.avatar
+const fSt = stores.filtre
 
-  components: { BtnCond,
-    ChoixQuotas, NomAvatar, BoutonHelp, ApercuAvatar, SupprAvatar, BoutonConfirm
-  },
+const ps = ref(null)
+const nomav = ref('')
+const avid = ref('')
+const quotas = ref(null)
+const synth = ref(null)
 
-  computed: {
-    estA () { return this.session.estA },
-    estDelegue () { return this.session.estDelegue }
-  },
+const estA = computed(() => session.estA)
+const estDelegue = computed(() => session.estDelegue)
 
-  data () {
-    return {
-      ps: null,
-      nomav: '',
-      avid: 0,
-      quotas: null,
-      synth: null
+async function muterA () {
+  await new MuterCompteA().run()
+  ui.fD()
+}
+
+function ouvrirNvav () { 
+  ui.oD('PCnvav', idc)
+  nomav.value = ''
+}
+
+function ouvrirchgps () {
+  ui.oD('PCchgps', idc)
+  ps.value = null
+}
+
+function saisiePS () {
+  ui.ps = { 
+    orgext: session.org,
+    verif: true,
+    labelValider: 'ok',
+    ok: okps
+  }
+  ui.oD('phrasesecrete', 'a')
+}
+
+function reset () { ps.value = null; ui.fD() }
+
+function okps (p) { 
+  if (ps.value) ps.value.phrase = null
+  ps.value = p
+}
+
+async function changerps () {
+  ui.fD()
+  const ret = await new ExistePhrase().run(ps.value.hps1, 1)
+  if (isAppExc(ret)) return reset()
+  if (ret) {
+    await afficherDiag($t('existe'))
+    return
+  }
+  await new ChangementPS().run(ps.value)
+  reset()
+}
+
+const eltav = (id) => aSt.getElt(id)
+const nbchats = (id) => { const e = eltav(id); return e ? e.chats.size : 0 }
+const nbspons = (id) => { const e = eltav(id); return e ? e.sponsorings.size : 0 }
+const nbgrps = (id) => session.compte.idGroupes(id).size
+
+function courant (id, action) {
+  session.setAvatarId(id)
+  if (action) switch (action){
+    case 2 : { ui.setPage('groupesac'); return }
+    case 3 : { 
+      fSt.filtre.chats.tous = false
+      ui.setPage('chats')
+      return 
     }
-  },
+    case 4 : { ui.setPage('sponsorings'); return }
+  }
+}
 
-  methods: {
-    async muterA () {
-      await new MuterCompteA().run()
-      this.ui.fD()
-    },
+async function oknomav (nom) {
+  if (!nom) { ui.fD(); return }
+  if (session.compte.avatarDeNom(nom)) {
+    await afficherDiag($t('CPTndc'))
+    return
+  }
+  await new NouvelAvatar().run(nom)
+  ui.fD()
+}
 
-    async ouvrirNvav () { 
-      this.ui.oD('PCnvav', this.idc)
-      this.nomav = ''
-    },
-
-    async ouvrirchgps () {
-      this.ui.oD('PCchgps', this.idc)
-      this.ps = null
-    },
-
-    saisiePS () {
-      this.ui.ps = { 
-        orgext: this.session.org,
-        verif: true,
-        labelValider: 'ok',
-        ok: this.okps
-      }
-      this.ui.oD('phrasesecrete', 'a')
-    },
-
-    reset () { this.ps = null; this.ui.fD() },
-
-    okps (ps) { 
-      if (this.ps) this.ps.phrase = null
-      this.ps = ps 
-    },
-
-    async changerps () {
-      this.ui.fD()
-      const ret = await new ExistePhrase().run(this.ps.hps1, 1)
-      if (isAppExc(ret)) return this.reset()
-      if (ret) {
-        await afficherDiag(this.$t('existe'))
-        return
-      }
-      await new ChangementPS().run(this.ps)
-      this.reset()
-    },
-
-    eltav (id) { return this.aSt.getElt(id) },
-    nbchats (id) { const e = this.eltav(id); return e ? e.chats.size : 0 },
-    nbspons (id) { const e = this.eltav(id); return e ? e.sponsorings.size : 0 },
-    nbgrps (id) { return this.session.compte.idGroupes(id).size },
-    courant (id, action) {
-      this.session.setAvatarId(id)
-      if (action) switch (action){
-        case 2 : { this.ui.setPage('groupesac'); return }
-        case 3 : { 
-          this.fSt.filtre.chats.tous = false
-          this.ui.setPage('chats')
-          return 
-        }
-        case 4 : { this.ui.setPage('sponsorings'); return }
-      }
-    },
-
-    async oknomav (nom) {
-      if (!nom) { this.ui.fD(); return }
-      if (this.session.compte.avatarDeNom(nom)) {
-        await afficherDiag(this.$t('CPTndc'))
-        return
-      }
-      await new NouvelAvatar().run(nom)
-      this.ui.fD()
-    },
-
-    async editerq () {
-      await new GetCompta().run()
-      const c = this.session.compta
-      if (this.estA) {
-        await new GetSynthese().run()
-        this.synth = this.session.synthese
-        const qA = this.synth.qA
-        const qtA = this.synth.qtA
-        let maxn = qA.qn - qtA.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
-        let maxc = qA.qc - qtA.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
-        let maxv = qA.qv - qtA.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
-        this.quotas = { qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
-          maxn, maxv, maxc,
-          n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
-          err: ''
-        }
-      } else {
-        await new GetPartition().run(this.session.compte.idp)
-        const s = this.session.partition.synth
-        let maxn = s.q.qn - s.qt.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
-        let maxc =s.q.qc - s.qt.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
-        let maxv = s.q.qv - s.qt.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
-        this.quotas = { 
-          qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
-          maxn, maxv, maxc,
-          n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
-          err: ''
-        }
-      }
-      this.ui.oD('PTedq', this.idc)
-    },
-    
-    async validerq () {
-      await new SetQuotas().run(this.session.compteId, this.quotas)
-      this.ui.fD()
-    },
-
-    async delAvatar (id) {
-      if (this.session.compteId === id) { // c'est le compte
-        if (this.session.compte.mav.size > 1) { // il reste des avatars secondaires
-          await afficherDiag(this.$t('SAVer1'))
-          return
-        }
-        this.avid = 0
-      } else 
-        this.avid = id
-      this.ui.oD('SAsuppravatar', this.idc)
+async function editerq () {
+  await new GetCompta().run()
+  const c = session.compta
+  if (estA.value) {
+    await new GetSynthese().run()
+    const synth = session.synthese
+    const qA = synth.qA
+    const qtA = synth.qtA
+    let maxn = qA.qn - qtA.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
+    let maxc = qA.qc - qtA.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
+    let maxv = qA.qv - qtA.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
+    quotas.value = { qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
+      maxn, maxv, maxc,
+      n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
+      err: ''
     }
-  },
-
-  setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const aSt = stores.avatar
-    const fSt = stores.filtre
-
-    return {
-      ui, idc, aSt, fSt, session, styp, ID
+  } else {
+    await new GetPartition().run(session.compte.idp)
+    const s = session.partition.synth
+    let maxn = s.q.qn - s.qt.qn + c.qv.qn; if (maxn <= 0) maxn = c.qv.qn
+    let maxc =s.q.qc - s.qt.qc + c.qv.qc; if (maxc <= 0) maxc = c.qv.qc
+    let maxv = s.q.qv - s.qt.qv + c.qv.qv; if (maxv <= 0) maxv = c.qv.qv
+    quotas.value = { 
+      qn: c.qv.qn, qv: c.qv.qv, qc: c.qv.qc, minn: 0, minv: 0, minc: 0,
+      maxn, maxv, maxc,
+      n: c.qv.nn + c.qv.nc + c.qv.ng, v: c.qv.v,
+      err: ''
     }
   }
-
+  ui.oD('PTedq', idc)
 }
+
+async function validerq () {
+  await new SetQuotas().run(session.compteId, quotas.value)
+  ui.fD()
+}
+
+async function delAvatar (id) {
+  if (session.compteId === id) { // c'est le compte
+    if (session.compte.mav.size > 1) { // il reste des avatars secondaires
+      await afficherDiag($t('SAVer1'))
+      return
+    }
+    avid.value = ''
+  } else 
+    avid.value = id
+  ui.oD('SAsuppravatar', idc)
+}
+
 </script>
 
 <style lang="sass" scoped>

@@ -356,19 +356,6 @@ export function b64ToU8 (s) {
   return toByteArray(x.replace(/-/g, '+').replace(/_/g, '/'))
 }
 
-export function rnd6 () {
-  const u8 = random(6)
-  let r = u8[0]
-  for (let i = 5; i > 0; i--) r += u8[i] * (p2[i - 1] + 1)
-  return r
-}
-
-/* Génère l'id d'un ticket: aa mm rrr rrr rrr r */
-export function genIdTk (a, m) {
-  const x1 = (((a % 100) * 100) + m)
-  return (rnd6() % d10) + (x1 * d10)
-}
-
 /* Retourne l'année et le mois depuis un code à 6 lettres */
 export function amDeL6 (l6) {
   const a = new Date().getFullYear()

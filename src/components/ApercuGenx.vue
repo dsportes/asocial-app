@@ -55,9 +55,8 @@
 import { computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { dkli, titre } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
-
+import { dkli, titre } from '../app/util.mjs'
 import ApercuCv from '../dialogues/ApercuCv.vue'
 import CarteVisite from '../dialogues/CarteVisite.vue'
 import BtnCond from './BtnCond.vue'

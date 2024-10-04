@@ -39,8 +39,9 @@
   </q-dialog>
 </div>
 </template>
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import NouveauChat from '../dialogues/NouveauChat.vue'
@@ -48,61 +49,37 @@ import ApercuChat from '../panels/ApercuChat.vue'
 import BtnCond from './BtnCond.vue'
 import { ID } from '../app/api.mjs'
 
-export default ({
-  name: 'MicroChat',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  components: { NouveauChat, BtnCond, ApercuChat },
-
-  props: { 
-    chat: Object, // si chat est donné, c'est lui qui est visualisé
-    idI: String, // sinon couple d'id (avatar du compte, people)
-    idE: String, 
-    del: Boolean // Quand le chat n'est pas connu et que idE est délégué de la partition du compte de idI
-  },
-
-  computed: {
-    chatx () { return this.chat || this.aSt.chatDeAvec(this.idI, this.idE) },
-
-    /* Le chat PEUT être créé en tant que: 
-    0:par phrase de contact, 1:comptable, 2:délégué, idg:co-membre du groupe */
-    mode () {
-      if (ID.estComptable(this.idE)) return 1
-      if (this.del) return 2
-      const l = this.pSt.getListeIdGrComb(this.idE, this.idI)
-      return l.length ? l[0] : 0
-    },
-
-    nomE () { return this.session.getCV(this.idE).nom },
-    nomG () { return this.session.getCV(this.mode).nom },
-  },
-
- data () {
-    return {
-    }
-  },
-
-  methods: {
-    ouvrirChat () {
-      this.ui.setChatc(this.chatx.id, this.chatx.ids)
-      this.ui.oD('MCACouvrir', this.idc)
-    },
-    creerChat () {
-      this.ui.oD('CCouvrir', this.idc)
-    },
-  },
-  
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    return {
-      ui, idc,
-      aSt: stores.avatar,
-      pSt: stores.people,
-      session: stores.session,
-      dhcool
-    }
-  } 
+const props = defineProps({ 
+  chat: Object, // si chat est donné, c'est lui qui est visualisé
+  idI: String, // sinon couple d'id (avatar du compte, people)
+  idE: String, 
+  del: Boolean // Quand le chat n'est pas connu et que idE est délégué de la partition du compte de idI
 })
+
+const aSt = stores.avatar
+const pSt = stores.people
+const session = stores.session
+
+const chatx = computed(() => props.chat || aSt.chatDeAvec(props.idI, props.idE))
+
+/* Le chat PEUT être créé en tant que: 
+0:par phrase de contact, 1:comptable, 2:délégué, idg:co-membre du groupe */
+const mode = computed(() => {
+  if (ID.estComptable(props.idE)) return 1
+  if (props.del) return 2
+  const l = pSt.getListeIdGrComb(props.idE, props.idI)
+  return l.length ? l[0] : 0
+})
+
+const nomE = computed(() => session.getCV(this.idE).nom)
+const nomG = computed(() => session.getCV(mode.value).nom)
+
+function ouvrirChat () { ui.oD('MCACouvrir', idc) }
+function creerChat () { ui.oD('CCouvrir', idc)}
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
