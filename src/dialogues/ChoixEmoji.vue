@@ -14,8 +14,8 @@
 </q-dialog>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, onUnmounted } from 'vue'
 
 import data from 'emoji-mart-vue-fast/data/google.json'
 // Note: component needs to be imported from /src subfolder:
@@ -24,86 +24,65 @@ import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src'
 import '../css/emoji.css'
 
 import stores from '../stores/stores.mjs'
+import { $t } from '../app/util.mjs'
 
-export default {
-  name: 'ChoixEmoji',
+const props = defineProps({ 
+  inp: Object, 
+  close: Function, 
+  idc: Number
+})
 
-  components: { Picker },
+const visible = ref(true)
+const entree = ref('')
 
-  props: { inp: Object, close: Function },
+const ui = stores.ui
 
-  computed: { },
+const config = stores.config
+let emojiIndex = config.emojiIndex
+if (!emojiIndex) {
+  emojiIndex = new EmojiIndex(data)
+  config.setEmojiIndex(emojiIndex)
+}
 
-  data() {
-    return {
-      visible: true,
-      entree: ''
-    }
-  },
-  methods: {
-    ok () {
-      const ta = this.inp
-      const ss = ta.selectionStart
-      const sf = ta.selectionEnd
-      const deb = ta.value.substring(0, ss)
-      const fin = ta.value.substring(sf, ta.value.length)
-      ta.value = deb + this.entree + fin
-      const pos = ss + this.entree.length
-      this.entree = ''
-      this.close(pos)
-      setTimeout(() => {
-        ta.focus()
-        ta.selectionStart = pos
-        ta.selectionEnd = pos
-        this.ui.fD()
-      }, 10)
-    },
-    showEmoji (emoji) {
-      this.entree += emoji.native
-    },
-    bs () {
-      this.entree = this.entree.substring(0, this.entree.length - 2)
-    },
-    cfgi18n () {
-      return {
-        search: this.$t('EMOsearch1'),
-        notfound: this.$t('EMOnotfound'),
-        categories: {
-          search: this.$t('EMOsearch2'),
-          recent: this.$t('EMOrecent'),
-          smileys: this.$t('EMOsmileys'),
-          people: this.$t('EMOpeople'),
-          nature: this.$t('EMOnature'),
-          foods: this.$t('EMOfoods'),
-          activity: this.$t('EMOactivity'),
-          places: this.$t('EMOplaces'),
-          objects: this.$t('EMOobjects'),
-          symbols: this.$t('EMOsymbols'),
-          flags: this.$t('EMOflags'),
-          custom: this.$t('EMOcustom')
-        }
-      }
-    }
-  },
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const config = stores.config
-    const session = stores.session
-    let emojiIndex = config.emojiIndex
-    if (!emojiIndex) {
-      emojiIndex = new EmojiIndex(data)
-      config.setEmojiIndex(emojiIndex)
-    }
+function ok () {
+  const ta = props.inp
+  const ss = ta.selectionStart
+  const sf = ta.selectionEnd
+  const deb = ta.value.substring(0, ss)
+  const fin = ta.value.substring(sf, ta.value.length)
+  ta.value = deb + entree.value + fin
+  const pos = ss + entree.value.length
+  entree.value = ''
+  props.close(pos)
+}
 
-    return {
-      ui, idc,
-      emojiIndex,
-      session
+function showEmoji (emoji) { entree.value += emoji.native }
+
+function bs () { entree.value = entree.value.substring(0, entree.value.length - 2) }
+
+function cfgi18n () {
+  return {
+    search: $t('EMOsearch1'),
+    notfound: $t('EMOnotfound'),
+    categories: {
+      search: $t('EMOsearch2'),
+      recent: $t('EMOrecent'),
+      smileys: $t('EMOsmileys'),
+      people: $t('EMOpeople'),
+      nature: $t('EMOnature'),
+      foods: $t('EMOfoods'),
+      activity: $t('EMOactivity'),
+      places: $t('EMOplaces'),
+      objects: $t('EMOobjects'),
+      symbols: $t('EMOsymbols'),
+      flags: $t('EMOflags'),
+      custom: $t('EMOcustom')
     }
   }
 }
+
 </script>
+
 <style lang="scss">
 .emoji-mart {
   background: #141414 !important;

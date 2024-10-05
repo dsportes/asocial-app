@@ -288,10 +288,11 @@ a accès aux membres (donc dans l'onglet "membres").
 
 </div>
 </template>
-<script>
-import { onUnmounted } from 'vue'
 
-import { styp, dkli, dhcool, afficher8000, afficherDiag } from 'src/app/util.mjs'
+<script setup>
+import { ref, watch, computed, onUnmounted } from 'vue'
+
+import { $t, styp, dkli, dhcool, afficher8000, afficherDiag } from 'src/app/util.mjs'
 import { AMJ, edit, FLAGS, MAXTAILLEGROUPE } from '../app/api.mjs'
 import stores from '../stores/stores.mjs'
 import ApercuGenx from './ApercuGenx.vue'
@@ -303,228 +304,209 @@ import ShowHtml from './ShowHtml.vue'
 import InvitationAcceptation from './InvitationAcceptation.vue'
 import EditeurMd from './EditeurMd.vue'
 
-export default {
-  name: 'ApercuMembre',
+const session = stores.session
+const gSt = stores.groupe
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  props: { 
-    id: String, // id de l'avatar membre
-    idx: Number
-  },
+const props = defineProps({ 
+  id: String, // id de l'avatar membre
+  idx: Number
+})
 
-  components: { ApercuGenx, BoutonBulle2, BoutonHelp, ShowHtml, EditeurMd,
-    BtnCond, ShowHtml, InvitationAcceptation },
+const ouvert = ref(false)
+const optRMSV = ref([])
+const optSuppr = ref([
+  { label: $t('AMoptSupp1'), value: 1},
+  { label: $t('AMoptSupp2'), value: 2},
+  { label: $t('AMoptSupp3'), value: 3}
+])
+const optRad = ref([])
+const rmsv = ref(1) // 1 = ref(ne pas changer, 2:modifier, 3 = ref(supprimer, 4 = ref(voter
+const ina = ref(false)
+const idm = ref(false) 
+const idn = ref(false) 
+const ide = ref(false) 
+const iam = ref(false) 
+const ian = ref(false)
+const msg = ref('')
+const invparf = ref(null)
+const suppr = ref(1)
+const flAvant = ref(0)
+const animAp = ref(true)
+const rad = ref(1)
 
-  computed: {
-    avid () { return this.session.avatarId },
-    nomg () { return this.session.getCV(this.gr.id).nom },
-    nomm () { return this.session.getCV(this.id).nomC },
-    pasmoi () { return !this.session.estAvc(this.id)},
+const avid = computed(() => session.avatarId)
+const nomg = computed(() => session.getCV(gr.value.id).nom)
+const nomm = computed(() => session.getCV(props.id).nomC)
+const pasmoi = computed(() => !session.estAvc(props.id))
 
-    mb () { return this.gSt.egrC && this.gSt.egrC.membres ? this.gSt.egrC.membres.get(this.im) : null },
-    im () { return this.gSt.egrC && this.gSt.egrC.groupe ? this.gSt.egrC.groupe.mmb.get(this.id) : 0 },
-    gr () { return this.gSt.egrC.groupe },
-    amb () { return this.gr.accesMembre(this.im) },
-    ano () { return this.gr.accesNote2(this.im) },
-    fl () { return this.gr.flags[this.im] },
-    stm () { return this.gr.st[this.im]},
-    animInv () { return this.gSt.animInv(this.im) },
-    invits () { return this.gr.invits[this.im] || { fl: 0, li: []} },
-    invpar () { const x = invits.li[0]
-      return x ? this.session.getCV(this.gr.tid[x]).nomC : ''
-    },
-    condm () {
-      const s = new Set()
-      const ln = this.gr.enLNG(this.id) || this.gr.enLNC(this.id) 
-      // Peut créer / modifier / supprimer une invitation
-      if (this.stm >= 1 && this.stm <= 3 && this.gSt.egrC.estAnim && !ln) s.add(1)
-      // Peut accepter / refuser SA PROPRE invitation
-      if (this.stm === 3 && this.session.estAvc(this.id) && !ln) s.add(2)
-      // Gestion des droits et accès
-      if (this.stm >= 4 && !ln && (this.session.estAvc(this.id) || this.gSt.egrC.estAnim)) s.add(3)
-      // Gestion radiations
-      if (this.stm > 0 && (this.session.estAvc(this.id) || this.gSt.egrC.estAnim)) s.add(4)
-      return s
-    },
-    edFlagsiv () { 
-      const f = this.invits.fl
-      if (!f) return ''
-      const ed = []
-      if (f & FLAGS.AN) ed.push(this.$t('AMinvan'))
-      if (f & FLAGS.DM) ed.push(this.$t('AMinvdm'))
-      if (f & FLAGS.DE) ed.push(this.$t('AMinvde'))
-      else if (f & FLAGS.DN) ed.push(this.$t('AMinvdn'))
-      return ed.join(', ')
-    },
-    edFlags2 () { 
-      const f = this.fl
-      if (!f) return ''
-      const ed = []
-      if (this.stm === 5) ed.push(this.$t('AMinvan'))
-      if (f & FLAGS.DM) ed.push(this.$t('AMinvdm'))
-      if (f & FLAGS.DE) ed.push(this.$t('AMinvde'))
-      else if (f & FLAGS.DN) ed.push(this.$t('AMinvdn'))
-      return ed.join(', ')
-    },
-    nvfl () { let fl = 0
-      if (this.ina) fl |= FLAGS.AN 
-      if (this.idm) fl |= FLAGS.DM 
-      if (this.idn) fl |= FLAGS.DN
-      if (this.ide) fl |= FLAGS.DE 
-      return fl
-    },
-    nvfl2 () { let fl = 0
-      if (this.iam) fl |= FLAGS.AM
-      if (this.ian) fl |= FLAGS.AN
-      if (this.idm) fl |= FLAGS.DM 
-      if (this.idn) fl |= FLAGS.DN
-      if (this.ide) fl |= FLAGS.DE 
-      return fl
-    },
-    chgDr () { return this.nvfl2 !== this.flAvant || (this.animAp !== (this.stm === 5 ? true : false)) },
-    optAvAnims () { return this.gSt.avcAnims },
-    nbAnimsAp () { const anav = this.stm === 5 ? true : false; const n = this.gr.nbAnims
-      if (this.animAp && !anav) return n + 1
-      if (!this.animAp && anav) return n - 1
-      return n
-    },
-    nbAnimsAp2 () { const anav = this.stm === 5 ? true : false; const n = this.gr.nbAnims
-      return anav ? n - 1 : n
-    },
-    nbActifsAp () { const acav = this.stm >= 4 ? true : false; const n = this.gr.nbActifs
-      return acav ? n - 1 : n
-    },
+const mb = computed(() => gSt.egrC && gSt.egrC.membres ? gSt.egrC.membres.get(im.value) : null)
+const im = computed(() => gSt.egrC && gSt.egrC.groupe ? gSt.egrC.groupe.mmb.get(props.id) : 0)
+const gr = computed(() => gSt.egrC.groupe)
+const amb = computed(() => gr.value.accesMembre(im.value))
+const ano = computed(() => gr.value.accesNote2(im.value))
+const fl = computed(() => gr.value.flags[im.value])
+const stm = computed(() => gr.value.st[im.value])
+const animInv = computed(() => gSt.animInv(im.value))
+const invits = computed(() => gr.value.invits[im.value] || { fl: 0, li: []})
+const invpar = computed(() => { const x = invits.value.li[0]
+  return x ? session.getCV(gr.value.tid[x]).nomC : ''
+})
+const condm = computed(() => {
+  const s = new Set()
+  const ln = gr.value.enLNG(props.id) || gr.value.enLNC(props.id) 
+  // Peut créer / modifier / supprimer une invitation
+  if (stm.value >= 1 && stm.value <= 3 && gSt.egrC.estAnim && !ln) s.add(1)
+  // Peut accepter / refuser SA PROPRE invitation
+  if (stm.value === 3 && session.estAvc(props.id) && !ln) s.add(2)
+  // Gestion des droits et accès
+  if (stm.value >= 4 && !ln && (session.estAvc(props.id) || gSt.egrC.estAnim)) s.add(3)
+  // Gestion radiations
+  if (stm.value > 0 && (session.estAvc(props.id) || gSt.egrC.estAnim)) s.add(4)
+  return s
+})
+const edFlagsiv = computed(() => { 
+  const f = invits.value.fl
+  if (!f) return ''
+  const ed = []
+  if (f & FLAGS.AN) ed.push($t('AMinvan'))
+  if (f & FLAGS.DM) ed.push($t('AMinvdm'))
+  if (f & FLAGS.DE) ed.push($t('AMinvde'))
+  else if (f & FLAGS.DN) ed.push($t('AMinvdn'))
+  return ed.join(', ')
+})
+const edFlags2 = computed(() => { 
+  const f = fl.value
+  if (!f) return ''
+  const ed = []
+  if (stm.value === 5) ed.push($t('AMinvan'))
+  if (f & FLAGS.DM) ed.push($t('AMinvdm'))
+  if (f & FLAGS.DE) ed.push($t('AMinvde'))
+  else if (f & FLAGS.DN) ed.push($t('AMinvdn'))
+  return ed.join(', ')
+})
+const nvfl = computed(() =>{ let fl = 0
+  if (ina.value) fl |= FLAGS.AN 
+  if (idm.value) fl |= FLAGS.DM 
+  if (idn.value) fl |= FLAGS.DN
+  if (ide.value) fl |= FLAGS.DE 
+  return fl
+})
+const nvfl2 = computed(() =>{ let fl = 0
+  if (iam.value) fl |= FLAGS.AM
+  if (ian.value) fl |= FLAGS.AN
+  if (idm.value) fl |= FLAGS.DM 
+  if (idn.value) fl |= FLAGS.DN
+  if (ide.value) fl |= FLAGS.DE 
+  return fl
+})
+const chgDr = computed(() => nvfl2.value !== flAvant.value || (animAp.value !== (stm.value === 5 ? true : false)))
+const optAvAnims = computed(() => gSt.avcAnims)
+const nbAnimsAp = computed(() => { const anav = stm.value === 5 ? true : false; const n = gr.value.nbAnims
+  if (animAp.value && !anav) return n + 1
+  if (!animAp.value && anav) return n - 1
+  return n
+})
+const nbAnimsAp2 = computed(() => { const anav = stm.value === 5 ? true : false; const n = gr.value.nbAnims
+  return anav ? n - 1 : n
+})
+const nbActifsAp = computed(() => { const acav = stm.value >= 4 ? true : false; const n = gr.value.nbActifs
+  return acav ? n - 1 : n
+})
 
-  },
 
-  watch: {
-    ouvert (v) { if (v) this.session.setMembreId(this.im) },
-    // idn () { this.ide = false },
-  },
+watch(ouvert, (v) => { if (v) session.setMembreId(im.value) })
 
-  data () { return {
-    ouvert: false,
-    optRMSV: [],
-    optSuppr: [
-      { label: this.$t('AMoptSupp1'), value: 1},
-      { label: this.$t('AMoptSupp2'), value: 2},
-      { label: this.$t('AMoptSupp3'), value: 3}
-    ],
-    optRad: [],
-    rmsv: 1, // 1: ne pas changer, 2:modifier, 3: supprimer, 4: voter
-    ina: false, idm: false, idn: false, ide: false, iam: false, ian: false,
-    msg: '',
-    invparf: null,
-    suppr: 1,
-    flAvant: 0,
-    animAp: true,
-    rad: 1,
-  }},
-
-  methods: {
-    edd (ad) {
-      let r
-      if (!ad[0] && !ad[1]) r = this.$t('jamais')
-      else if (!ad[0] && ad[1]) r = this.$t('avant', [AMJ.editDeAmj(ad[1], true)])
-      else if (ad[0] && !ad[1]) r = this.$t('depuis', [AMJ.editDeAmj(ad[0], true)])
-      else if (ad[0] && ad[1]) r = this.$t('entre', [AMJ.editDeAmj(ad[0], true), AMJ.editDeAmj(ad[1], true)])
-      // console.log(r)
-      return r
-    },
-
-    xd (d) { return !d ? '-' : AMJ.editDeAmj(d, true) },
-
-    gererDroits () {
-      this.ian = (this.fl & FLAGS.AN) !== 0
-      this.iam = (this.fl & FLAGS.AM) !== 0
-      this.idm = (this.fl & FLAGS.DM) !== 0
-      this.idn = (this.fl & FLAGS.DN) !== 0
-      this.ide = (this.fl & FLAGS.DE) !== 0
-      this.flAvant = this.nvfl2
-
-      this.animAp = this.stm === 5 ? true : false
-
-      this.session.setMembreId(this.im)
-      this.ui.oD('AMdroits', this.idc)
-    },
-
-    async changer () {
-      const r = await new MajDroitsMembre().run(this.id, this.nvfl2, this.animAp)
-      if (r) await afficher8000(r, this.id, this.session.groupeId)
-      this.ui.fD()
-    },
-
-    radiation () {
-      const x = this.session.estAvc(this.id) ? 'b' : 'a'
-      this.optRad = [ ]
-      if (this.gr.st[this.im] > 1) this.optRad.push({ label: this.$t('AMoptRad1' + x), value: 1})
-      this.optRad.push({ label: this.$t('AMoptRad2' + x), value: 2})
-      this.optRad.push({ label: this.$t('AMoptRad3' + x), value: 3})
-      this.session.setMembreId(this.im)
-      this.ui.oD('AMradiation', this.idc)
-    },
-
-    async radier () {
-      const r = await new RadierMembre().run(this.id, this.rad)
-      if (r) await afficher8000(r, this.id, this.session.groupeId)
-      this.ui.fD()
-    },
-
-    async ouvririnvit () { 
-      if (this.gr.taille >= MAXTAILLEGROUPE) {
-        await afficherDiag(this.$t('AMinvittg', [MAXTAILLEGROUPE]))
-        return
-      }
-      this.rmsv = this.stm === 1 ? 0 : 1
-      const fl = this.invits.fl
-      this.ina = (fl & FLAGS.AN) !== 0
-      this.idm = (fl & FLAGS.DM) !== 0
-      this.idn = (fl & FLAGS.DN) !== 0
-      this.ide = (fl & FLAGS.DE) !== 0
-      this.msg = this.mb.msg || ''
-      this.suppr = 1
-
-      this.optRMSV = [
-        { label: this.$t('AMopt1'), value: 1 },
-        { label: this.$t('AMopt2'), value: 2 },
-        { label: this.$t('AMopt3'), value: 3 },
-      ]
-      if (this.stm === 2 && this.animInv[1].size) {
-        let ok = false
-        this.session.compte.mpg.get(this.session.groupeId).forEach(ida => {
-          if (this.animInv[1].has(ida)) ok = true
-        })
-        if (ok) this.optRMSV.push({ label: this.$t('AMopt4'), value: 4 })
-      }
-
-      if (!this.gr.msu && this.optAvAnims.length) this.invparf = this.optAvAnims[0]
-
-      this.session.setMembreId(this.im)
-      this.ui.oD('AMinvit', this.idc)
-    },
-
-    async inviter () { 
-      /* rmsv: 0: inviter, 2: modifier, 3: supprimer, 4: voter pour */
-      const idi = !this.gr.msu && this.invparf ? this.invparf.value : 0
-      const r = await new InvitationGroupe()
-        .run(this.rmsv, this.id, idi, this.nvfl, this.msg, this.suppr)
-      if (r) await afficher8000(r, this.id, this.session.groupeId)
-      this.ui.fD()
-    }
-  },
-
-  setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const gSt = stores.groupe
-    const aSt = stores.avatar
-
-    return {
-      FLAGS, dkli, styp, edit, dhcool,
-      session, gSt, aSt, ui, idc
-    }
-  }
+const edd = (ad) => {
+  let r
+  if (!ad[0] && !ad[1]) r = $t('jamais')
+  else if (!ad[0] && ad[1]) r = $t('avant', [AMJ.editDeAmj(ad[1], true)])
+  else if (ad[0] && !ad[1]) r = $t('depuis', [AMJ.editDeAmj(ad[0], true)])
+  else if (ad[0] && ad[1]) r = $t('entre', [AMJ.editDeAmj(ad[0], true), AMJ.editDeAmj(ad[1], true)])
+  return r
 }
+
+const xd = (d) => !d ? '-' : AMJ.editDeAmj(d, true)
+
+function gererDroits () {
+  ian.value = (fl.value & FLAGS.AN) !== 0
+  iam.value = (fl.value & FLAGS.AM) !== 0
+  idm.value = (fl.value & FLAGS.DM) !== 0
+  idn.value = (fl.value & FLAGS.DN) !== 0
+  ide.value = (fl.value & FLAGS.DE) !== 0
+  flAvant.value = nvfl2.value
+
+  animAp.value = stm.value === 5 ? true : false
+
+  session.setMembreId(im.value)
+  ui.oD('AMdroits', idc)
+}
+
+async function changer () {
+  const r = await new MajDroitsMembre().run(props.id, nvfl2.value, animAp.value)
+  if (r) await afficher8000(r, props.id, session.groupeId)
+  ui.fD()
+}
+
+function radiation () {
+  const x = session.estAvc(props.id) ? 'b' : 'a'
+  optRad.value  = [ ]
+  if (gr.value.st[im.value] > 1) optRad.value .push({ label: $t('AMoptRad1' + x), value: 1})
+  optRad.value .push({ label: $t('AMoptRad2' + x), value: 2})
+  optRad.value .push({ label: $t('AMoptRad3' + x), value: 3})
+  session.setMembreId(im.value)
+  ui.oD('AMradiation', idc)
+}
+
+async function radier () {
+  const r = await new RadierMembre().run(props.id, rad.value)
+  if (r) await afficher8000(r, props.id, session.groupeId)
+  ui.fD()
+}
+
+async function ouvririnvit () { 
+  if (gr.value.taille >= MAXTAILLEGROUPE) {
+    await afficherDiag($t('AMinvittg', [MAXTAILLEGROUPE]))
+    return
+  }
+  rmsv.value  = stm.value === 1 ? 0 : 1
+  const fl = invits.value.fl
+  ina.value = (fl & FLAGS.AN) !== 0
+  idm.value = (fl & FLAGS.DM) !== 0
+  idn.value = (fl & FLAGS.DN) !== 0
+  ide.value = (fl & FLAGS.DE) !== 0
+  msg.value = mb.value.msg || ''
+  suppr.value = 1
+
+  optRMSV.value = [
+    { label: $t('AMopt1'), value: 1 },
+    { label: $t('AMopt2'), value: 2 },
+    { label: $t('AMopt3'), value: 3 },
+  ]
+  if (stm.value === 2 && animInv.value[1].size) {
+    let ok = false
+    session.compte.mpg.get(session.groupeId).forEach(ida => {
+      if (animInv.value[1].has(ida)) ok = true
+    })
+    if (ok) optRMSV.value.push({ label: $t('AMopt4'), value: 4 })
+  }
+
+  if (!gr.value.msu && optAvAnims.value.length) invparf.value = optAvAnims.value[0]
+
+  session.setMembreId(im.value)
+  ui.oD('AMinvit', idc)
+}
+
+async function inviter () { 
+  /* rmsv: 0: inviter, 2: modifier, 3: supprimer, 4: voter pour */
+  const idi = !gr.value.msu && invparf.value ? invparf.value.value : 0
+  const r = await new InvitationGroupe()
+    .run(rmsv.value , props.id, idi, nvfl.value, msg.value, suppr.value)
+  if (r) await afficher8000(r, props.id, session.groupeId)
+  ui.fD()
+}
+
 </script>
 
 <style lang="sass" scoped>

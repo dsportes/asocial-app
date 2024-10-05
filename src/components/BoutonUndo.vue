@@ -3,27 +3,15 @@
     color="primary" />
   <q-icon v-else class="q-mr-sm" color="grey-3" name="undo" size="sm"/>
 </template>
-<script>
 
-export default ({
-  name: 'BoutonUndo',
+<script setup>
 
-  props: { cond: Boolean },
-
-  computed: {
-  },
-
-  methods: {
-    ouvrir () {
-    }
-  },
-  
-  setup () {
-    return {
-    }
-  } 
+const props = defineProps({ 
+  cond: Boolean
 })
+
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .gris

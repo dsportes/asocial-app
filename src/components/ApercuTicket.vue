@@ -66,71 +66,56 @@
   </q-dialog>
 
 </template>
-<script>
 
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
-import { mon, dkli, styp } from '../app/util.mjs'
+import { $t, mon, dkli, styp } from '../app/util.mjs'
 import { AMJ, idTkToL6 } from '../app/api.mjs'
 import PanelDialtk from '../components/PanelDialtk.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { Ticket } from '../app/modele.mjs'
 import { MoinsTicket, ReceptionTicket } from '../app/operations4.mjs'
 
-export default {
-  name: 'ApercuTicket',
+const session = stores.session
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  props: { tk: Object, idx: Number },
+const props = defineProps({
+  tk: Object,
+  idx: Number 
+})
 
-  components: { BtnCond, PanelDialtk },
+const aMj = computed(() => {
+  const [a, m, j] = AMJ.aaaammjj(props.tk.dg)
+  const mx = $t('mois' + m)
+  return { a: a, m: mx, j: j }
+})
+const mt = computed(() => mon(!props.tk.dr ? props.tk.ma : props.tk.mc))
+const cmt = computed(() => !props.tk.dr || (props.tk.ma === props.tk.mc) ? '' : 'bg-yellow-3 text-negative')
+const st = computed(() => $t('TK' + (props.tk.dr ? 2 : 1)))
 
-  computed: { 
-    aMj () {
-      const [a, m, j] = AMJ.aaaammjj(this.tk.dg)
-      const mx = this.$t('mois' + m)
-      return { a: a, m: mx, j: j }
-    },
-    mt () { return mon(!this.tk.dr ? this.tk.ma : this.tk.mc) },
-    cmt () { return !this.tk.dr || (this.tk.ma === this.tk.mc) ? '' : 'bg-yellow-3 text-negative'},
-    st () { return this.$t('TK' + (this.tk.dr ? 2 : 1))},
-  },
+async function deltk () { ui.oD('ATconfirmdel', idc) }
 
-  data () { return {
-  }},
+async function deletetk () { 
+  ui.fD()
+  await new MoinsTicket().run(props.tk.ids)
+}
 
-  methods: {
-    async deltk () {
-      this.ui.oD('ATconfirmdel', this.idc)
-    },
-    async deletetk () {
-      this.ui.fD()
-      await new MoinsTicket().run(this.tk.ids)
-    },
-    async recep1 () { 
-      await new ReceptionTicket().run(this.tk.ids, this.tk.ma, '')
-      this.ui.fD()
-    },
-    async recep2 () { 
-      this.ui.oD('ATdialtk', this.idc)
-    },
-    async reception ({m, ref}) {
-      await new ReceptionTicket().run(this.tk.ids, m, ref)
-      this.ui.fD()
-    }
-  },
+async function recep1 () { 
+  await new ReceptionTicket().run(props.tk.ids, props.tk.ma, '')
+  ui.fD()
+}
 
-  setup (props) {
-    const session = stores.session
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    // const t = toRef(props, 'tk')
+async function recep2 () { ui.oD('ATdialtk', idc) }
 
-    return {
-      idTkToL6, mon, dkli, AMJ, Ticket, session, ui, idc, styp
-    }
-  }
+async function reception ({m, ref}) {
+  await new ReceptionTicket().run(props.tk.ids, m, ref)
+  ui.fD()
 }
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 </style>

@@ -25,8 +25,8 @@
   </q-dialog>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { AMJ } from '../app/api.mjs'
@@ -35,60 +35,40 @@ import BoutonConfirm from './BoutonConfirm.vue'
 import { SetEspaceDlvat } from '../app/operations4.mjs'
 import { styp } from '../app/util.mjs'
 
-export default ({
-  name: 'BoutonDlvat',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  components: { SaisieMois, BoutonConfirm },
+const emit = defineEmits(['close' ])
 
-  emits: ['close' ],
-
-  props: { espace: Object },
-
-  computed: {
-    mindlvat () { 
-      const m = AMJ.djMoisN(AMJ.amjUtc(), 3)
-      return Math.floor(m / 100)
-    },
-    initdlvat () {
-      return this.espace.dlvat ? Math.floor(this.espace.dlvat / 100) : this.mindlvat
-    },
-    maxdlvat () { 
-      return Math.floor(AMJ.max / 100)
-    },
-  },
-
-  data () {
-    return {
-      dlvat: 0, // dlvat saisie
-      dlv: 0, // Premier jour du mois suivant de dlvat saisie
-    }
-  },
-
-  methods: {
-    cfDlvat (dlv) {
-      this.dlv = AMJ.pjMoisSuiv((dlv * 100) + 1)
-      this.ui.oD('PEdlvat', this.idc)
-    },
-    async chgDlvat () {
-      await new SetEspaceDlvat().run(this.espace.id, this.dlv)
-      this.ui.fD()
-      context.emit('close', true)
-    },
-    fin () {
-      this.ui.fD()
-      this.$emit('close', false)
-    }
-  },
-  
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    return {
-      ui, idc, styp, AMJ
-    }
-  } 
+const props = defineProps({ 
+  espace: Object
 })
+
+const dlvat = ref(0) // dlvat saisie
+const dlv = ref(0) // Premier jour du mois suivant de dlvat saisie
+
+const mindlvat = computed(() => Math.floor(AMJ.djMoisN(AMJ.amjUtc(), 3) / 100))
+const initdlvat = computed(() => props.espace.dlvat ? Math.floor(props.espace.dlvat / 100) : mindlvat.value)
+const maxdlvat = computed(() => Math.floor(AMJ.max / 100))
+
+function cfDlvat (dl) {
+  dlv.value = AMJ.pjMoisSuiv((dl * 100) + 1)
+  ui.oD('PEdlvat', idc)
+}
+
+async function chgDlvat () {
+  await new SetEspaceDlvat().run(props.espace.id, dlv.value)
+  ui.fD()
+  emit('close', true)
+}
+
+function fin () {
+  ui.fD()
+  emit('close', false)
+}
+
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 </style>

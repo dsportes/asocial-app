@@ -13,31 +13,23 @@
   </span>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 import stores from '../stores/stores.mjs'
 
-export default ({
-  name: 'ChoixLangue',
+const options = ref({})
+stores.config.localeOptions.forEach(t => { options.value[t.value] = t })
 
-  props: { label: String },
+const locale = ref(useI18n().locale)
 
-  methods: {
-    choix (lg) {
-      this.locale = lg.value
-    }
-  },
-
-  setup () {
-    const options = {}
-    stores.config.localeOptions.forEach(t => { options[t.value] = t })
-    return {
-      options,
-      locale: useI18n().locale
-    }
-  }
+const props = defineProps({ 
+  label: String
 })
+
+function choix (lg) { locale.value = lg.value }
+
 </script>
 
 <style lang="sass" scoped>

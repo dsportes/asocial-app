@@ -5,16 +5,12 @@
       <q-layout container view="hHh lpR fFf">
         <q-header elevated>
           <q-toolbar class="fs-md full-width bg-secondary text-white">
-            <q-btn class="q-mr-xs" @click="ui.oD('EMmax', idc)"
-              icon="zoom_out_map" size="md" padding="none" round dense/>
-            <q-checkbox v-model="md" size="lg" dense color="white"
-              unchecked-icon="text_fields" checked-icon="text_format">
-              <q-tooltip class="fs-md">{{$t('texte')}}</q-tooltip>
-            </q-checkbox>
-            <q-btn v-if="editable" :disable="md" class="q-mr-xs" @click="ouvriremojimd1"
-              icon="insert_emoticon" size="md" padding="none" round dense/>
-            <q-btn v-if="modifie" class="q-mr-xs" @click="undo"
-              icon="undo" size="md" padding="none" round dense/>
+            <btn-cond class="q-mr-xs" @ok="ui.oD('EMmax', idc)" icon="zoom_out_map" flat color="white"/>
+            <btn-cond v-if="editable" flat color="white" :icon="md ? 'edit' : 'visibility'" 
+              round @ok="md = !md"/>
+            <btn-cond v-if="editable && !md" :disable="md" class="q-mr-xs" @ok="ouvriremojimd1"
+              icon="insert_emoticon" flat color="white"/>
+            <btn-cond v-if="modifie" class="q-mr-xs" @ok="undo" icon="undo" flat color="white"/>
             <q-space/>
             <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
               {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
@@ -36,16 +32,12 @@
     <div ref="root2" :class="sty() + 'column'">
       <q-header elevated>
         <q-toolbar class="fs-md full-width bg-secondary text-white">
-          <q-btn class="q-mr-xs" @click="ui.fD"
-            icon="zoom_in_map" size="md" padding="none" round dense/>
-          <q-checkbox v-model="md" size="lg" dense color="white"
-            unchecked-icon="text_fields" checked-icon="text_format">
-            <q-tooltip class="fs-md">{{$t('texte')}}</q-tooltip>
-          </q-checkbox>
-          <q-btn v-if="editable" :disable="md" class="q-mr-xs" @click="ouvriremojimd2"
-            icon="insert_emoticon" size="md" padding="none" round dense/>
-          <q-btn v-if="modifie" class="q-mr-xs" @click="undo"
-            icon="undo" size="md" padding="none" round dense/>
+          <btn-cond class="q-mr-xs" @ok="ui.fD" icon="zoom_in_map" flat color="white"/>
+          <btn-cond v-if="editable" flat color="white" :icon="md ? 'edit' : 'visibility'" 
+            round @ok="md = !md"/>
+          <btn-cond v-if="editable && !md" :disable="md" class="q-mr-xs" @ok="ouvriremojimd2"
+            icon="insert_emoticon" flat color="white"/>
+          <btn-cond v-if="modifie" class="q-mr-xs" @ok="undo" icon="undo" flat color="white"/>
           <q-space/>
           <div :class="'font-mono fs-sm' + (textelocal && textelocal.length >= maxlg ? ' text-bold text-warning bg-yellow-5':'')">
             {{textelocal ? textelocal.length : 0}}/{{maxlg}}c
@@ -61,119 +53,92 @@
     </div>
   </q-dialog>
 
-  <choix-emoji :inp="inp" :close="emojiClose"/>
+  <choix-emoji :inp="inp" :close="emojiClose" :idc="idc"/>
 
 </div>
 </template>
 
-<script>
-import { ref, toRef, watch, onUnmounted } from 'vue'
+<script setup>
+import { ref, toRef, watch, computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { sty, dkli } from '../app/util.mjs'
 
 import ShowHtml from './ShowHtml.vue'
+import BtnCond from './BtnCond.vue'
 import ChoixEmoji from '../dialogues/ChoixEmoji.vue'
 
-export default ({
-  name: 'EditeurMd',
+const model = defineModel({ type: String })
 
-  components: { ShowHtml, ChoixEmoji },
-
-  emits: ['update:modelValue'],
-
-  props: { 
-    help: String,
-    lgmax: Number, 
-    modelValue: String, 
-    texte: String,
-    placeholder: String,
-    editable: Boolean, 
-    idx: Number, 
-    modetxt: Boolean,
-    mh: String
-  },
-
-  computed: {
-    modifie () {
-      return this.textelocal !== this.texteinp
-    }
-  },
-
-  data () {
-    return {
-      inp: null
-    }
-  },
-
-  methods: {
-    ouvriremojimd1 () {
-      this.inp = this.root.querySelector('textarea')
-      this.ui.oD('choixEmoji', this.idc)
-    },
-    ouvriremojimd2 () {
-      this.inp = this.root2.querySelector('textarea')
-      this.ui.oD('choixEmoji', this.idc)
-    },
-    undo () {
-      this.textelocal = this.texteinp
-    },
-    emojiClose () {
-      this.textelocal = this.inp.value
-    }
-  },
-
-  setup (props, context) {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const config = stores.config
-    const root = ref(null)
-    const root2 = ref(null)
-    const taille = ref(0)
-    const tailleM = toRef(props, 'tailleM')
-    const textelocal = ref('') // en Ref parce que sa valeur dépend du changement de la prop texte ET de l'état d'édition
-    const texte = toRef(props, 'texte') // pour pouvoir mettre un watch sur le changement de la propriété
-    const modetxt = toRef(props, 'modetxt')
-    const lgmax = toRef(props, 'lgmax')
-    const maxlg = ref(0)
-    maxlg.value = lgmax.value || config.maxlgtextegen
-    const texteinp = ref('') // dernière valeur source passée sur la prop 'texte'
-    const md = ref(true)
-
-    watch(texte, (ap, av) => { // quand texte change, textelocal ne change pas si en édition
-      if (textelocal.value === texteinp.value && textelocal.value !== ap) {
-        // textelocal n'était PAS modifié, ni égal à la nouvelle valeur : alignement sur la nouvelle valeur
-        textelocal.value = ap
-      }
-      texteinp.value = ap
-    })
-
-    watch(modetxt, (ap, av) => {
-      if (ap) md.value = false
-    })
-
-    watch(textelocal, (ap, av) => {
-      if (ap && ap.length > maxlg.value) textelocal.value = ap.substring(0, maxlg.value)
-      context.emit('update:modelValue', textelocal.value)
-    })
-
-    textelocal.value = texte.value
-    texteinp.value = texte.value
-    taille.value = tailleM.value ? 1 : 0
-    if (modetxt.value) md.value = false
-
-    return {
-      ui, idc, sty, dkli,
-      session: stores.session,
-      md,
-      root,
-      root2,
-      taille,
-      texteinp,
-      textelocal,
-      maxlg
-    }
-  }
+const props = defineProps({ 
+  help: String,
+  lgmax: Number, 
+  texte: String,
+  placeholder: String,
+  editable: Boolean, 
+  idx: Number, 
+  modetxt: Boolean,
+  mh: String
 })
+
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+
+const config = stores.config
+const root = ref()
+const root2 = ref()
+
+const maxlg = ref(props.lgmax || config.maxlgtextegen)
+
+const textelocal = ref(props.texte)
+const texteinp = ref(props.texte) // dernière valeur source passée sur la prop 'texte'
+const md = ref(props.modetxt ? true : false)
+const inp = ref(null)
+
+watch(() => props.texte, (ap, av) => { // quand texte change, textelocal ne change pas si en édition
+  if (textelocal.value === texteinp.value && textelocal.value !== ap) {
+    // textelocal n'était PAS modifié, ni égal à la nouvelle valeur : alignement sur la nouvelle valeur
+    textelocal.value = ap
+  }
+  texteinp.value = ap
+})
+
+watch(() => props.modetxt, (ap, av) => {
+  if (ap) md.value = false
+})
+
+watch(textelocal, (ap, av) => {
+  if (ap && ap.length > maxlg.value) textelocal.value = ap.substring(0, maxlg.value)
+  model.value = textelocal.value
+})
+
+const modifie = computed(() => textelocal.value !== texteinp.value)
+
+function ouvriremojimd1 () {
+  inp.value = root.value.querySelector('textarea')
+  ui.oD('choixEmoji', idc)
+}
+
+function ouvriremojimd2 () {
+  inp.value = root2.value.querySelector('textarea')
+  ui.oD('choixEmoji', idc)
+}
+
+function undo () {
+  textelocal.value = texteinp.value
+}
+
+function emojiClose (pos) {
+  const ta = inp.value
+  textelocal.value = ta.value
+  ui.fD()
+  setTimeout(() => {
+    ta.focus()
+    ta.selectionStart = pos
+    ta.selectionEnd = pos
+  }, 10)
+}
+
 </script>
 
 <style lang="css">

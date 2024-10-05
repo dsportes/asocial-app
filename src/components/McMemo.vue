@@ -82,7 +82,7 @@ const nvht = ref(null)
 const nvtx = ref('')
 
 const apropos = computed(() => session.compti.mc.get(props.id) || { ht: new Set(), tx: ''} )
-const memolg = computed(() => titre(apropos.value.valuetx))
+const memolg = computed(() => titre(apropos.value.tx))
 const nom = computed(() => session.getCV(props.id).nom)
 const chg = computed(() => apropos.value.tx !== nvtx.value || s2Str(apropos.value.ht) !== s2Str(nvht.value))
 

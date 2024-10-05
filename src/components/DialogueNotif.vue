@@ -30,9 +30,10 @@
     </q-card-actions>
   </q-card>
 </template>
-<script>
 
-import { ref, toRef } from 'vue'
+<script setup>
+import { ref, watch, computed } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
@@ -43,84 +44,61 @@ import { SetNotifE, SetNotifP, SetNotifC } from '../app/operations4.mjs'
 import { deconnexion, GetSynthese, GetPartition } from '../app/synchro.mjs'
 import { RegCles } from '../app/modele.mjs'
 
-export default {
-  name: 'DialogueNotif',
+const props = defineProps({  
+  type: Number,
+  /* Type des notifications:
+  - 0 : de l'espace - cible: ns
+  - 1 : d'une partition - cible: idPartition
+  - 2 : d'un compte - cible: idCompte
+  */
+  ntf: Object,
+  restr: Boolean,
+  restrb: Boolean,
+  cible: String
+})
 
-  props: {  
-    type: Number,
-    /* Type des notifications:
-    - 0 : de l'espace - cible: ns
-    - 1 : d'une partition - cible: idPartition
-    - 2 : d'un compte - cible: idCompte
-    */
-    ntf: Object,
-    restr: Boolean,
-    restrb: Boolean,
-    cible: String
-  },
+const session = stores.session
+const ui = stores.ui
 
-  components: { BtnCond, BoutonHelp, BoutonBulle, EditeurMd },
+const n = ref(props.ntf.clone())
+const restrloc = ref(props.restr)
+const restrbloc = ref(props.restrp)
 
-  watch: {
-    restrloc (ap) { if (ap && this.restrbloc) this.restrbloc = false },
-    restrbloc (ap) { if (ap && this.restrloc) this.restrloc = false }
-  },
+watch(restrloc, (ap) => { if (ap && restrbloc.value) restrbloc.value = false })
+watch(restrbloc, (ap) => { if (ap && restrloc.value) restrloc.value = false })
 
-  computed: {
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-  },
-
-  data () { return {
-  }},
-
-  methods: {
-    async valider (suppr) {
-      if (!suppr) {
-        this.n.nr = 1
-        if (this.restrloc) this.n.nr = 2
-        if (this.restrbloc) this.n.nr = 3
-      } else {
-        this.n.nr = 0
-        this.texte = ''
-      }
-      if (this.type === 0) {
-        await new SetNotifE().run(suppr ? null : this.n, this.cible)
-        this.session.setOrg('admin')
-        deconnexion(true)
-      } else {
-        if (this.type === 1) {
-          const clep = RegCles.get(this.cible)
-          const ntf = suppr ? null : await this.n.crypt(clep)
-          await new SetNotifP().run(suppr ? null : ntf, this.cible)
-        } else {
-          const idp = this.session.partition.id
-          const clep = RegCles.get(idp)
-          const ntf = suppr ? null : await this.n.crypt(clep)
-          await new SetNotifC().run (suppr ? null : ntf, this.cible)
-          await new GetPartition().run(idp)
-        }
-        await new GetSynthese().run()
-      }
-      this.ui.fD()
-    }
-  },
-  setup (props) {
-    const session = stores.session
-    const ui = stores.ui
-    const x = toRef(props, 'ntf')
-    const n = ref(x.value.clone())
-    const r1 = toRef(props, 'restr')
-    const restrloc = ref(r1.value)
-    const r2 = toRef(props, 'restrb')
-    const restrbloc = ref(r2.value)
-
-    return {
-      styp, dhcool, n, restrloc, restrbloc,
-      session, ui
-    }
+async function valider (suppr) {
+  if (!suppr) {
+    n.value.nr = 1
+    if (restrloc.value) n.value.nr = 2
+    if (restrbloc.value) n.value.nr = 3
+  } else {
+    n.value.nr = 0
+    n.value.texte = ''
   }
+  if (props.type === 0) {
+    await new SetNotifE().run(suppr ? null : n.value, props.cible)
+    session.setOrg('admin')
+    deconnexion(true)
+  } else {
+    if (props.type === 1) {
+      const clep = RegCles.get(props.cible)
+      const ntf = suppr ? null : await n.value.crypt(clep)
+      await new SetNotifP().run(suppr ? null : ntf, props.cible)
+    } else {
+      const idp = session.partition.id
+      const clep = RegCles.get(idp)
+      const ntf = suppr ? null : await n.value.crypt(clep)
+      await new SetNotifC().run (suppr ? null : ntf, props.cible)
+      await new GetPartition().run(idp)
+    }
+    await new GetSynthese().run()
+  }
+  ui.fD()
 }
+
 </script>
+
 <style lang="sass" scoped>
 @import '../css/app.sass'
 .bord

@@ -43,8 +43,9 @@
 </div>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, watch, computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import BoutonBulle from './BoutonBulle.vue'
 import BtnCond from './BtnCond.vue'
@@ -54,74 +55,55 @@ import { Notification } from '../app/modele.mjs'
 import { dhcool, dkli, $t } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
 
-export default {
-  name: 'ApercuNotif',
+const session = stores.session
+const pSt = stores.people
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  props: { 
-    notif: Object, // notification existante, null pour création éventuelle
-    type: Number,
-    /* Type des notifications:
-    - 0 : de l'espace
-    - 1 : d'une partition
-    - 2 : d'un compte
-    */
-    cible: String, // type 0: ns, type 1: idPartition, type 2: idCompte
-    idx: Number
-  },
+const props = defineProps({ 
+  notif: Object, // notification existante, null pour création éventuelle
+  type: Number,
+  /* Type des notifications:
+  - 0 : de l'espace
+  - 1 : d'une partition
+  - 2 : d'un compte
+  */
+  cible: String, // type 0: ns, type 1: idPartition, type 2: idCompte
+  idx: Number
+})
 
-  components: { BtnCond, BoutonBulle, ShowHtml, DialogueNotif },
+const restr = ref(false)
+const restrb = ref(false)
+const ntf = ref(null)
 
-  watch: {
-    restr (ap) { if (ap && this.restrb) this.restrb = false },
-    restrb (ap) { if (ap && this.restr) this.restr = false }
-  },
+watch(restr, (ap) => { if (ap && restrb.value) restrb.value = false })
+watch(restrb, (ap) => { if (ap && restr.value) restr.value = false })
 
-  computed: {
-    aut () { return this.notif.idDel ? this.notif.idDel : ID.duComptable()},
-    nomSource () {
-      if (this.type === 0) return this.$t('ANadmin')
-      const cv = this.session.getCV(this.aut)
-      return this.$t('ANdel1', [cv.nomC])
-    },
-    diag () {
-      if (this.session.estComptable || !this.notif || !ID.estComptable(this.aut)) return ''
-      return this.$t('ANnotc') 
-    }
-  },
+const aut = computed (() => props.notif.idDel ? props.notif.idDel : ID.duComptable())
 
-  data () { return {
-    restr: false,
-    restrb: false,
-    ntf: null
-  }},
+const nomSource = computed (() => {
+  if (props.type === 0) return $t('ANadmin')
+  const cv = session.getCV(aut.value)
+  return $t('ANdel1', [cv.nomC])
+})
 
-  methods: {
-    async editer () {
-      this.ntf = this.notif.clone()
-      if (this.ntf.nr === 2) { this.restr = true; this.restrb = false }
-      if (this.ntf.nr === 3) { this.restr = false; this.restrb = true }
-      this.ui.oD('DNdialoguenotif', this.idc)
-    },
+const diag = computed (() => {
+  if (session.estComptable || !props.notif || !ID.estComptable(aut.value)) return ''
+  return $t('ANnotc') 
+})
 
-    async creer () {
-      this.ntf = new Notification({})
-      this.ui.oD('DNdialoguenotif', this.idc)
-    }
-  },
-
-  setup (props) {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    // const cible = toRef(props, 'cible')
-    // const notif = toRef(props, 'notif')
-    return {
-      dhcool, dkli, 
-      pSt: stores.people,
-      session: stores.session,
-      ui, idc
-    }
-  }
+async function editer () {
+  ntf.value = props.notif.clone()
+  if (ntf.value.nr === 2) { restr.value = true; restrb.value = false }
+  if (ntf.value.nr === 3) { restr.value = false; restrb.value = true }
+  ui.oD('DNdialoguenotif', idc)
 }
+
+async function creer () {
+  ntf.value = new Notification({})
+  ui.oD('DNdialoguenotif', idc)
+}
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
