@@ -131,7 +131,8 @@
 
   const props = defineProps({ 
     id: String, 
-    ids: String
+    ids: String,
+    urgence: Boolean
   })
 
   const ui = stores.ui
@@ -179,7 +180,7 @@
     }
     const don = avecDon.value ? mdon.value * 100 : 0
     const t = (avecDon.value && !dconf.value ? ($t('CHdonde', [mdon.value]) + '\n') : '') + txt.value
-    const disp = await new MajChat().run(chatX.value, t, 0, don)
+    const disp = await new MajChat().run(chatX.value, t, 0, don, props.urgence)
     if (disp) { await afficherDiag($t('CHdisp')) }
     txt.value = ''
   }

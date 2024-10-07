@@ -32,10 +32,11 @@
   <nouveau-chat v-if="ui.d[idc] && ui.d[idc].CCouvrir" :idc="idc"
     :idI="chat ? chat.id : idI" 
     :idE="chat ? chat.idE : idE"
+    :urgence="urgence"
     :mode="mode"/>
 
   <q-dialog v-model="ui.d[idc].MCACouvrir" full-height position="left" persistent>
-    <apercu-chat :id="chatx.id" :ids="chatx.ids"/>
+    <apercu-chat :id="chatx.id" :ids="chatx.ids" :urgence="urgence"/>
   </q-dialog>
 </div>
 </template>
@@ -56,6 +57,7 @@ const props = defineProps({
   chat: Object, // si chat est donné, c'est lui qui est visualisé
   idI: String, // sinon couple d'id (avatar du compte, people)
   idE: String, 
+  urgence: Boolean,
   del: Boolean // Quand le chat n'est pas connu et que idE est délégué de la partition du compte de idI
 })
 

@@ -298,7 +298,7 @@ Retour:
 export class MajChat extends Operation {
   constructor () { super('MajChat') }
 
-  async run (chat, txt, dh, don) {
+  async run (chat, txt, dh, don, urgence) {
     try {
       const session = stores.session
       const args = { 
@@ -307,6 +307,7 @@ export class MajChat extends Operation {
         ids: chat.ids,
         t: txt ? await crypter(chat.clec, gzipB(txt)) : null,
         dh: dh || 0,
+        urgence: urgence || false,
         don: don
       }
       const ret = await post(this, 'MajChat', args)
@@ -1846,7 +1847,7 @@ export class NouveauFichier extends Operation {
       Remarque: l'excès de volume pour un groupe et un compte, ainsi que le volume 
       descendant seront décomptés à la validation de l'upload
       */
-      const args = { token: session.authToken, id, ids, aut }
+      const args = { token: session.authToken, id, ids, aut, lg: fic.lg, lidf }
       const ret = await post(this, 'PutUrlNf', args)
       const url = ret.url
       fic.idf = ret.idf
