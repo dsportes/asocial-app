@@ -537,7 +537,7 @@ Retour:
 export class NouveauChat extends Operation {
   constructor () { super('NouveauChat') }
 
-  async run (idI, idE, mode, hZC, txt) {
+  async run (idI, idE, mode, hZC, txt, urgence) {
     try {
       const session = stores.session
       const aSt =  stores.avatar
@@ -549,7 +549,7 @@ export class NouveauChat extends Operation {
       const cleAE = RegCles.get(idE)
       const y = gzipB(txt)
       const txtc = await crypter(cc, y)
-      const args = { token: session.authToken, idI, idE, mode, hZC }
+      const args = { token: session.authToken, idI, idE, mode, hZC, urgence: urgence || false }
       args.ch = {
         ccK: await crypter(session.clek, cc), // clé C du chat cryptée par la clé K du compte
         ccP: await crypterRSA(pub, cc), // clé C du chat cryptée par la clé publique de l'avatar sponsor

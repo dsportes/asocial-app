@@ -48,7 +48,8 @@ export default ({
     mode: Number,
     idI: String, // avatar du compte
     idE: String, // avater externe, co-membre d'un groupe ou délégué ou à contacter
-    idc: Number // idc d'ouverture du dialogue
+    idc: Number, // idc d'ouverture du dialogue
+    urgence: Boolean
   },
 
   components: { PhraseContact, BoutonHelp, ApercuGenx, EditeurMd, BtnCond },
@@ -86,7 +87,7 @@ export default ({
 
     async creer () {
       this.chat = await new NouveauChat()
-        .run(this.idI, this.nvIdE || this.idE, this.mode, this.hZC, this.txt)
+        .run(this.idI, this.nvIdE || this.idE, this.mode, this.hZC, this.txt, this.urgence)
       this.ui.fD()
     }
   },

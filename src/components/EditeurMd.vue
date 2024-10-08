@@ -92,7 +92,7 @@ const maxlg = ref(props.lgmax || config.maxlgtextegen)
 
 const textelocal = ref(props.texte)
 const texteinp = ref(props.texte) // dernière valeur source passée sur la prop 'texte'
-const md = ref(props.modetxt ? true : false)
+const md = ref(!props.modetxt)
 const inp = ref(null)
 
 watch(() => props.texte, (ap, av) => { // quand texte change, textelocal ne change pas si en édition
