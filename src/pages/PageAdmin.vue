@@ -35,7 +35,10 @@
             <btn-cond class="col-1 text-right" icon="refresh" @ok="tacheGo(t)"/>
           </div>
           <q-input v-if="t.exc" type="textarea" autogrow v-model="t.exc" class="q-pa-xs stackclass font-mono"/>
-        </div>
+          <div v-if="!t.id && !t.exc" class="q-ml-xl">
+            {{t.dhf ? dhstring(t.dhf, true) : '?'}} - n={{t.nb || 0}}
+          </div>
+        </div>     
       </div>
     </div>
 
@@ -236,7 +239,7 @@ const maxdl = computed(() => {
 const gccode = ref('???')
 const tab = ref('taches')
 const gcop = ref('')
-const ns = ref('0')
+const ns = ref('')
 const nsc = ref('') // ns "courant" de PageEspace à ouvrir
 const org = ref('')
 const ps = ref(null)
