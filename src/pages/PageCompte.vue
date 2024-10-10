@@ -77,7 +77,7 @@
           <q-toolbar-title class="titre-lg full-width text-center">{{$t('CPTnvav2')}}</q-toolbar-title>
           <bouton-help page="page1"/>
         </q-toolbar>
-        <nom-avatar icon-valider="check" verif :label-valider="$t('valider')" @ok-nom="oknomav" />
+        <nom-avatar icon-valider="check" verif :label-valider="$t('valider')" @ok-nom="oknom" />
       </q-card>
     </q-dialog>
 
@@ -209,7 +209,7 @@ function courant (id, action) {
   }
 }
 
-async function oknomav (nom) {
+async function oknom (nom) {
   if (!nom) { ui.fD(); return }
   if (session.compte.avatarDeNom(nom)) {
     await afficherDiag($t('CPTndc'))

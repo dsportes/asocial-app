@@ -4,42 +4,22 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef } from 'vue'
 import { dkli } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreSansheb',
+const props = defineProps({ nom: String, idx: Number })
 
-  props: { nom: String, idx: Number },
+const st = stores.filtre
+const x = st.filtre[props.nom]
+const val = ref(x && x.sansheb ? x.sansheb : false)
 
-  data () {
-    return { 
-    }
-  },
-
-  watch: {
-    val (ap) {
-      this.st.setFiltre(this.nom, 'sansheb', ap === true ? true : false)
-    }
-  },
-
-  computed: {
-  },
-
-  setup (props) {
-    const st = stores.filtre
-    const val = ref('')
-    const nom = toRef(props, 'nom')
-    const x = st.filtre[nom.value]
-    val.value = x && x.avecbl ? x.avecbl : false
-    return {
-      st, dkli,
-      val
-    }
-  }
+watch(val, (ap) => { 
+  st.setFiltre(props.nom, 'sansheb', ap === true ? true : false)
 })
+
 </script>
 
 <style lang="sass" scoped>

@@ -21,47 +21,27 @@
 
 </div>
 </template>
-<script>
+<script setup>
 import { onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { dhcool } from '../app/util.mjs'
 import ApercuChatgr from '../panels/ApercuChatgr.vue'
 
-export default ({
-  name: 'MicroChatgr',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const aSt = stores.avatar
+const session = stores.session
 
-  components: { ApercuChatgr },
-
-  props: { 
-    chat: Object
-  },
-
-  computed: {
-  },
-
- data () {
-    return {
-    }
-  },
-
-  methods: {
-    ouvrirChat () {
-      this.session.setGroupeId(this.chat.id)
-      this.ui.oD('MCACGouvrir', this.idc)
-    },
-  },
-  
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    return {
-      ui, idc,
-      aSt: stores.avatar,
-      session: stores.session,
-      dhcool
-    }
-  } 
+const props = defineProps({ 
+  chat: Object
 })
+
+function ouvrirChat () {
+  session.setGroupeId(props.chat.id)
+  ui.oD('MCACGouvrir', idc)
+}
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'

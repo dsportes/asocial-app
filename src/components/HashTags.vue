@@ -35,118 +35,97 @@
 
 </q-card>
 </template>
-<script>
-import { ref, toRef } from 'vue'
+
+<script setup>
+import { ref, computed, watch } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import BtnCond from './BtnCond.vue'
 import BoutonHelp from './BoutonHelp.vue'
 import BoutonBulle from './BoutonBulle.vue'
-import { styp } from '../app/util.mjs'
+import { styp, $t } from '../app/util.mjs'
+
+const props = defineProps({ 
+  src: Object, // set d'origine, le set resultat est v-model
+  okbtn: Boolean, // true s'il faut afficher le bouton ok
+  titre: String
+})
 
 const min = 2
 const max = 12
 const reg = /^([a-z0-9]{2,12})$/
 
-export default ({
-  name: 'HashTags',
+const session = stores.session
+const ui = stores.ui
 
-  props: { 
-    src: Object, // set d'origine, le set resultat est v-model
-    okbtn: Boolean, // true s'il faut afficher le bouton ok
-    titre: String
-  },
+const sel = ref('')
 
-  components: { BoutonBulle, BoutonHelp, BtnCond },
+const sr = ref(new Set())
+props.src.forEach(t => { sr.value.add(t)})
 
-  emits: ['update:modelValue', 'ok', 'ko'],
+const x = new Set()
+session.defHT.forEach(t => { x.add(t) })
+session.hashtags.forEach(t => { x.add(t) })
+const sb = ref(x)
 
-  computed: {
-    lr () { return Array.from(this.sr).sort()},
-    lc () { return Array.from(this.sc).sort()},
-    chg () { return Array.from(this.src).sort().join(' ') !== this.lr.join(' ') }
-  },
+const sc = ref(null)
 
-  watch: {
-    sel () { this.filtre() }
-  },
+function filtre () {
+  const s = new Set()
+  sb.value.forEach(v => { 
+    if ((!sel.value || v.indexOf(sel.value) !== -1) && !sr.value.has(v)) s.add(v)
+  })
+  sc.value = s
+}
 
-  data () {
-    return {
-    }
-  },
+filtre()
 
-  methods: {
-    r2 (val) { return val.length < min || val.length > max ? this.$t('HTe1', [min, max]) : true},
-    r1 (val) { return !reg.test(val) ? this.$t('HTe2') : true},
+const emit = defineEmits(['update:modelValue', 'ok', 'ko'])
 
-    undo () {
-      this.sr.clear()
-      this.src.forEach(t => { this.sr.add(t)})
-      this.filtre()
-      this.$emit('update:modelValue', this.sr)
-    },
+const lr = computed(() => Array.from(sr.value).sort())
+const lc = computed(() => Array.from(sc.value).sort())
+const chg = computed(() => Array.from(props.src).sort().join(' ') !== lr.value.join(' '))
 
-    val () {
-      if (this.r1(this.sel) === true && this.r2(this.sel) === true) {
-        if (!this.sr.has(this.sel)) {
-          this.sr.add(this.sel)
-          this.sel = ''
-          this.$emit('update:modelValue', this.sr)
-        }
-      }
-    },
+watch(sel, () => { filtre() })
 
-    cllr (t) {
-      this.sr.delete(t)
-      if (!this.sc.has(t)) this.sc.add(t)
-      if (!this.session.defHT.has(t) && !this.sb.has(t)) {
-        this.sb.add(t)
-        this.session.setHT(new Set([t]))
-      }
-      this.$emit('update:modelValue', this.sr)
-    },
+const r2 = (val) => val.length < min || val.length > max ? $t('HTe1', [min, max]) : true
+const r1 = (val) => !reg.test(val) ? $t('HTe2') : true
 
-    cllc (t) {
-      this.sc.delete(t)
-      if (!this.sr.has(t)) {
-        this.sr.add(t)
-        this.$emit('update:modelValue', this.sr)
-      }
-    }
-  },
+function undo () {
+  sr.value.clear()
+  props.src.forEach(t => { sr.value.add(t)})
+  filtre()
+  emit('update:modelValue', sr.value)
+}
 
-  setup (props) {
-    const session = stores.session
-    const ui = stores.ui
-    const sb = ref(null)
-    const sc = ref(null)
-    const sel = ref('')
-    const src = toRef(props, 'src')
-    const sr = ref(new Set())
-    src.value.forEach(t => { sr.value.add(t)})
-
-    function filtre () {
-      const s = new Set()
-      sb.value.forEach(v => { 
-        if ((!sel.value || v.indexOf(sel.value) !== -1) && !sr.value.has(v)) s.add(v)
-      })
-      sc.value = s
-    }
-
-    const x = new Set()
-    session.defHT.forEach(t => { x.add(t) })
-    session.hashtags.forEach(t => { x.add(t) })
-    sb.value = x
-
-    filtre()
-
-    return {
-      styp, filtre,
-      sr, sb, sc, sel,
-      session, ui
+function val () {
+  if (r1(sel.value) === true && r2(sel.value) === true) {
+    if (!sr.value.has(sel.value)) {
+      sr.value.add(sel.value)
+      sel.value = ''
+      emit('update:modelValue', sr.value)
     }
   }
-})
+}
+
+function cllr (t) {
+  sr.value.delete(t)
+  if (!sc.value.has(t)) sc.value.add(t)
+  if (!session.defHT.has(t) && !this.sb.has(t)) {
+    sb.value.add(t)
+    session.setHT(new Set([t]))
+  }
+  emit('update:modelValue', sr.value)
+}
+
+function cllc (t) {
+  sc.value.delete(t)
+  if (!sr.value.has(t)) {
+    sr.value.add(t)
+    emit('update:modelValue', sr.value)
+  }
+}
+
 </script>
 
 <style lang="sass" scoped>

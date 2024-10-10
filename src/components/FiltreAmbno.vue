@@ -27,44 +27,20 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef } from 'vue'
 import { dkli } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreAmbno',
+const props = defineProps({ nom: String, idx: Number })
 
-  props: { nom: String, idx: Number },
+const st = stores.filtre
+const x = st.filtre[props.nom]
+const val = ref(x && x.notif ? x.notif : 0)
 
-  components: { },
+watch(val, (ap) => { st.setFiltre(props.nom, 'ambno', ap)})
 
-  data () {
-    return {
-    }
-  },
-
-  watch: {
-    val (ap) {
-      this.st.setFiltre(this.nom, 'ambno', ap)
-    }
-  },
-
-  computed: {
-  },
-
-  setup (props) {
-    const st = stores.filtre
-    const val = ref('')
-    const nom = toRef(props, 'nom')
-    const x = st.filtre[nom.value]
-    val.value = x && x.notif ? x.notif : 0
-    return {
-      st, dkli,
-      val
-    }
-  }
-})
 </script>
 
 <style lang="css">

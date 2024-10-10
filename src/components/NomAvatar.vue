@@ -19,63 +19,48 @@
         </span>
       </template>
     </q-input>
-    <div v-if="labelValider" class="row justify-between items-center no-wrap">
-      <btn-cond flat icon="close" :label="$t('renoncer')" @ok="ko" />
-      <btn-cond :label="labelValider" :icon="iconValider"
-        :disable="r1(nom) !== true || r2(nom) !== true" @ok="ok" />
+    <div v-if="labelValider" class="row justify-end q-gutter-sm items-center no-wrap">
+      <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ko" />
+      <btn-cond :label="labelValider" :icon="iconValider" :disable="!nomok" @ok="ok" />
     </div>
   </q-card-section>
 </template>
 
-<script>
-import { toRef, ref } from 'vue'
+<script setup>
+import { ref, computed } from 'vue'
+
 import { interdits, regInt } from '../app/api.mjs'
+import { $t } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 
 const min = 6
 const max = 24
 
-export default {
-  name: 'NomAvatar',
-  props: {
-    iconValider: String,
-    groupe: Boolean,
-    labelValider: String,
-    initVal: String
-  },
-  components: { BtnCond },
-  emits: ['update:modelValue', 'ok-nom'],
-  data () {
-    return {
-      interdits: interdits
-    }
-  },
-  watch: {
-    nom (ap) {
-      const ok = this.r2(ap) === true && this.r1(ap) === true
-      this.$emit('update:modelValue', ok ? ap : '')
-    }
-  },
-  methods: {
-    r2 (val) { return val.length < min || val.length > max ? this.$t('NAe1', [min, max]) : true },
-    r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true },
-    ok () {
-      this.$emit('ok-nom', this.nom)
-    },
-    ko () {
-      this.nom = ''
-      this.$emit('ok-nom', null)
-    }
-  },
+const props = defineProps({
+  iconValider: String,
+  groupe: Boolean,
+  labelValider: String,
+  initVal: String
+})
 
-  setup (props) {
-    const vi = toRef(props, 'initVal')
-    const nom = ref(vi.value || '')
-    return {
-      nom, min, max
-    }
-  }
+const nom = ref(props.initVal || '')
+
+const emit = defineEmits(['ok-nom'])
+
+const r2 = (val) => val.length < min || val.length > max ? $t('NAe1', [min, max]) : true
+const r1 = (val) => regInt.test(val) ? $t('NAe2') : true
+
+const nomok = computed(() => r1(nom.value) === true && r2(nom.value) === true)
+
+function ok () {
+  if (nomok.value) emit('ok-nom', nom.value)
 }
+
+function ko () {
+  nom.value = ''
+  emit('ok-nom', null)
+}
+
 </script>
 
 <style lang="sass" scoped>

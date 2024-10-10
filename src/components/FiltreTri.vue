@@ -4,48 +4,27 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef } from 'vue'
-import { $t, dkli } from '../app/util.mjs'
+import { dkli } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreTri',
+const props = defineProps({ nom: String, nbOptions: Number, idx: Number })
 
-  props: { nom: String, nbOptions: Number, idx: Number },
+const st = stores.filtre
+const x = st.tri[props.nom]
+const val = ref()
+const options = []
+for(let i = 0; i < props.nbOptions; i++){
+  options.push({ value: i, label: $t('TRI' + props.nom + i)})
+}
+val.value = options[x || 0]
 
-  data () {
-    return {
-    }
-  },
-
-  watch: {
-    val (ap) {
-      this.st.setTri(this.nom, ap)
-    }
-  },
-
-  computed: {
-  },
-
-  setup (props) {
-    const st = stores.filtre
-    const val = ref('')
-    const nom = toRef(props, 'nom')
-    const nbOptions = toRef(props, 'nbOptions')
-    const x = st.tri[nom.value]
-    const options = []
-    for(let i = 0; i < nbOptions.value; i++){
-      options.push({ value: i, label: $t('TRI' + nom.value + i)})
-    }
-    val.value = options[x || 0]
-    return {
-      st, dkli,
-      val,
-      options
-    }
-  }
+watch(val, (ap) => { 
+  st.setTri(props.nom, ap)
 })
+
 </script>
 
 <style lang="sass" scoped>

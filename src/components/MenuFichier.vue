@@ -135,9 +135,10 @@
 </q-btn>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
-import { onUnmounted } from 'vue'
 import { edvol, dhcool, styp, trapex, afficherDiag } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
@@ -146,137 +147,117 @@ import { saveAs } from 'file-saver'
 import { SupprFichier } from '../app/operations4.mjs'
 import { idb } from '../app/db.mjs'
 
-export default {
-  name: 'MenuFichier',
+const props = defineProps({ 
+  note: Object,
+  idf: String,
+  simple: Boolean,
+  ro: String, // raison du read-only
+  aut: String // 0: lecture seulement, 1:note perso, ida: id de l'auteur pour un groupe
+})
 
-  props: { 
-    note: Object,
-    idf: String,
-    simple: Boolean,
-    ro: String, // raison du read-only
-    aut: String // 0: lecture seulement, 1:note perso, ida: id de l'auteur pour un groupe
-  },
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const nSt = stores.note
+const gSt = stores.groupe
+const faSt = stores.ficav 
+const ppSt = stores.pp
+const session = stores.session
 
-  components: { BoutonHelp, BtnCond, BoutonUndo },
+const xavn = ref('?')
+const xav = ref('?')
 
-  computed: {
-    f () { return this.note.mfa.get(this.idf) || { fake: true } },
-    fa () { return this.faSt.map.get(this.idf) || { fake: true } },
-    fpr () { return this.f.fake ?  { fake: true } : this.note.fnom.get(this.f.nom)[0] },
-    avn () { const fax = this.fpr ? this.faSt.map.get(this.fpr.idf) : null; return fax ? fax.avn : false },
-    av () { return this.fa.av || false },
-    modifAv () { return !(this.i1 && this.i2)},
-    i1 () { return this.avn === this.xavn || this.xavn === '?' },
-    i2 () { return this.av === this.xav || this.xav === '?' },
-    oxn1 () { return this.i1 ? this.$t('inchange') : this.$t(this.xavn ? 'oui' : 'non2') },
-    oxn2 () { return this.i2 ? this.$t('inchange') : this.$t(this.xav ? 'oui' : 'non2') },
-    clr1 () { return this.i1 ? '' : 'bg-warning'},
-    clr2 () { return this.i2 ? '' : 'bg-warning'}
-  },
+const f = computed(() => props.note.mfa.get(props.idf) || { fake: true })
+const fa = computed(() => faSt.map.get(props.idf) || { fake: true })
+const fpr = computed(() => f.value.fake ?  { fake: true } : props.note.fnom.get(f.value.nom)[0])
+const avn = computed(() => { const fax = f.value.pr ? faSt.map.get(f.value.pr.idf) : null; return fax ? fax.avn : false })
+const av = computed(() => fa.value.av || false )
+const modifAv = computed(() => !(i1.value && i2.value))
+const i1 = computed(() => avn.value === xavn.value || xavn.value === '?')
+const i2 = computed(() => av.value === xav.value || xav.value === '?' )
+const oxn1 = computed(() => i1.value ? $t('inchange') : $t(xavn.value ? 'oui' : 'non2'))
+const oxn2 = computed(() => i2.value ? $t('inchange') : $t(xav.value ? 'oui' : 'non2'))
+const clr1 = computed(() => i1.value ? '' : 'bg-warning')
+const clr2 = computed(() => i2.value ? '' : 'bg-warning')
 
-  watch: {
-    av (ap, av) { this.xav = '?' },
-    avn (ap, av) { this.xavn = '?' }
-  },
 
-  data () {
-    return {
-      xavn: '?',
-      xav: '?'
-    }
-  },
+watch(av, () => { xav.value = '?' })
 
-  methods: {
-    voirNote () {
-      this.ui.setPage('notes')
-      this.nSt.setPreSelect(this.fa.noteIds, true)
-    },
+watch(avn, () => { xavn.value = '?' })
 
-    ouvrirDF () {
-      this.xav = '?'
-      this.xavn = '?'
-      this.ui.oD('DFouvrir', this.idc)
-    },
+function voirNote () {
+  ui.setPage('notes')
+  nSt.setPreSelect(fa.value.noteIds, true)
+}
 
-    async validerAv () {
-      const b1 = this.xavn === '?' || this.xavn === this.avn ? this.avn : this.xavn
-      if (this.xav !== '?' && this.xav !== this.av) await this.faSt.setAV (this.note, this.f.nom, b1, this.f.idf, this.xav)
-      else await this.faSt.setAV (this.note, this.f.nom, b1)
-    },
+function ouvrirDF () {
+  xav.value = '?'
+  xavn.value = '?'
+  ui.oD('DFouvrir', idc)
+}
 
-    async retry () {
-      await this.faSt.retry(this.idf)
-    },
+async function validerAv () {
+  const b1 = xavn.value === '?' || xavn.value === avn.value ? avn.value : xavn.value
+  if (xav.value !== '?' && xav.value !== av.value) await faSt.setAV (props.note, f.value.nom, b1, f.value.idf, xav.value)
+  else await faSt.setAV(props.note, f.value.nom, b1)
+}
 
-    ovSuppr () {
-      this.ui.oD('NFsupprfichier', this.idc)
-    },
+async function retry () {
+  await faSt.retry(props.idf)
+}
 
-    async cfSuppr() {
-      const f = this.note.mfa.get(this.idf)
-      const nom = f ? f.nom : ''
-      await new SupprFichier().run(this.note, this.idf, this.aut)
-      await this.faSt.delFic(this.note, nom, this.idf)
-      this.ui.fD()
-    },
+function ovSuppr () {
+  ui.oD('NFsupprfichier', idc)
+}
 
-    async blobde (b) {
-      const buf = await this.note.getFichier(this.f)
-      if (!buf || !buf.length) return null
-      const blob = new Blob([buf], { type: this.f.type })
-      return b ? blob : URL.createObjectURL(blob)
-    },
+async function cfSuppr() {
+  const f = props.note.mfa.get(props.idf)
+  const nom = f ? f.nom : ''
+  await new SupprFichier().run(props.note, props.idf, props.aut)
+  await faSt.delFic(props.note, nom, props.idf)
+  ui.fD()
+}
 
-    async copierFic () {
-      const u8 = await this.note.getFichier(this.f)
-      if (!u8) {
-        await afficherDiag(this.$t('PNFgetEr'))
-        return
-      }
-      try {
-        await idb.FLset(this.f.nom, this.f.info, this.f.type, u8) // throw AppExc
-      } catch (e) { await trapex (e, 2) } // ferme le dialogue
-      this.ui.afficherMessage(this.$t('PNFcpp'))
-      this.ppSt.modecc = false
-      this.ppSt.setTabFichiers()
-      this.ui.oD('pressepapier', 'a')
-    },
+async function blobde (b) {
+  const buf = await props.note.getFichier(f.value)
+  if (!buf || !buf.length) return null
+  const blob = new Blob([buf], { type: f.value.type })
+  return b ? blob : URL.createObjectURL(blob)
+}
 
-    async affFic () {
-      const url = await this.blobde()
-      if (url) {
-        setTimeout(() => { window.open(url, '_blank') }, 100)
-        console.log(url)
-      } else {
-        await afficherDiag(this.$t('PNFgetEr'))
-      }
-    },
+async function copierFic () {
+  const u8 = await props.note.getFichier(f.value)
+  if (!u8) {
+    await afficherDiag($t('PNFgetEr'))
+    return
+  }
+  try {
+    await idb.FLset(f.value.nom, f.value.info, f.value.type, u8) // throw AppExc
+  } catch (e) { await trapex (e, 2) } // ferme le dialogue
+  ui.afficherMessage($t('PNFcpp'))
+  ppSt.modecc = false
+  ppSt.setTabFichiers()
+  ui.oD('pressepapier', 'a')
+}
 
-    async enregFic () {
-      const blob = await this.blobde(true)
-      if (blob) {
-        saveAs(blob, this.note.nomFichier(this.f))
-      } else {
-        await afficherDiag(this.$t('PNFgetEr'))
-      }
-    },
-
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    return {
-      ui, idc,
-      nSt: stores.note,
-      gSt: stores.groupe,
-      faSt: stores.ficav, 
-      ppSt: stores.pp,
-      session: stores.session,
-      edvol, dhcool, styp
-    }
+async function affFic () {
+  const url = await blobde()
+  if (url) {
+    setTimeout(() => { window.open(url, '_blank') }, 100)
+    console.log(url)
+  } else {
+    await afficherDiag($t('PNFgetEr'))
   }
 }
+
+async function enregFic () {
+  const blob = await blobde(true)
+  if (blob) {
+    saveAs(blob, props.note.nomFichier(f.value))
+  } else {
+    await afficherDiag($t('PNFgetEr'))
+  }
+}
+
 </script>
 
 <style lang="sass" scoped>

@@ -10,56 +10,35 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, onUnmounted } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef, onUnmounted } from 'vue'
 import BtnCond from './BtnCond.vue'
 import HashTags from './HashTags.vue'
 import { dkli } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreMc',
+const props = defineProps({ nom: String, attr: String, idx: Number })
 
-  props: { nom: String, attr: String, idx: Number },
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  components : { BtnCond, HashTags },
+const st = stores.filtre
+const s0 = new Set()
+const x = st.filtre[props.nom]
+const src = ref(x && x[props.attr] ? x[props.attr] : s0)
+const ht = ref('')
 
-  data () {
-    return {
-      ht: ''
-    }
-  },
+function ouvDial () {
+  ui.oD('HTags', idc)
+}
 
-  computed: {
-  },
+function htok (ht) {
+  src.value = ht
+  st.setFiltre(props.nom, props.attr, ht)
+  ui.fD()
+}
 
-  methods: {
-    ouvDial () {
-      this.ui.oD('HTags', this.idc)
-    },
-    htok (ht) {
-      this.src = ht
-      this.st.setFiltre(this.nom, this.attr, ht)
-      this.ui.fD()
-    }
-  },
-
-  setup (props) {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const st = stores.filtre
-    const s0 = new Set()
-    const src = ref()
-    const nom = toRef(props, 'nom')
-    const attr = toRef(props, 'attr')
-    const x = st.filtre[nom.value]
-    src.value = x && x[attr.value] ? x[attr.value] : s0
-
-    return {
-      st, ui, idc, dkli, src
-    }
-  }
-})
 </script>
 
 <style lang="sass" scoped>

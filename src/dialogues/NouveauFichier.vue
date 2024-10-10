@@ -1,5 +1,4 @@
 <template>
-<q-dialog v-model="ui.d[idc].NFouvrir" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')" style="height:70vh">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -96,31 +95,44 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</q-dialog>
 </template>
 
 <script>
-import { onUnmounted } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { edvol, dhcool, readFile, styp, sty, dkli, trapex, dhstring } from '../app/util.mjs'
+import { $t, edvol, dhcool, readFile, styp, sty, dkli, trapex, dhstring } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { NouveauFichier } from '../app/operations4.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
 import { isAppExc, ID } from '../app/api.mjs'
 
-export default {
-  name: 'NouveauFichier',
+const ui = stores.ui
+const nSt = stores.note
+const aSt = stores.avatar 
+const gSt = stores.groupe 
+const session = stores.session
+const ppSt = stores.pp 
 
-  props: { 
-    note: Object,
-    nom: String, // nom du fichier pour une nouvelle révision
-    aut: String,  // pour un groupe, avatar "auteur"
-    pasheb: Boolean
-  },
+const props = defineProps({ 
+  note: Object,
+  nom: String, // nom du fichier pour une nouvelle révision
+  aut: String,  // pour un groupe, avatar "auteur"
+  pasheb: Boolean
+})
 
-  components: { BoutonHelp, NomGenerique, BtnCond },
+const fic = ref({ nom: '', info: '', lg: 0, type: '', u8: null })
+const revx = ref(true)
+const nfic = ref(this.nom || '')
+const step = ref(1)
+const etapes = ref([$t('PNFnvs0'), $t('PNFnvs1'), $t('PNFnvs2')])
+const fileList = ref(null)
+const idf = ref(null)
+const sidf = ref(null)
+const lstfic = ref([])
+const volsupp = ref(0)
+const info = ref('')
 
   computed: {
     estGr () { return ID.estGroupe(this.note.id) },
@@ -137,64 +149,46 @@ export default {
       && (this.vcpt === 2 || this.vgr === 2 || this.pasheb) }
   },
 
-  watch: {
-    async fileList (file) {
-      try {
-        if (file) {
-          const { size, name, type, u8 } = await readFile(file, true)
-          const i = name.lastIndexOf('.')
-          const n = i == -1 ? name : name.substring(0, i)
-          this.fic.nom = this.nom || n
-          this.fic.info = ''
-          this.fic.lg = size
-          this.fic.type = type
-          this.fic.u8 = u8
-        }
-      } catch (e) { trapex (e, this.resetFic)}
-    },
-
-    step (s) {
-      if (s === 1) { this.fileList = null; this.resetFic(); return }
-      if (s === 2) { 
-        this.nfic = this.nom || this.fic.nom
-        this.info = this.fic.info
-      }
-      if (s === 3) {
-        this.revx = true
-        this.sidf = new Set()
-        this.volsupp = 0
-        this.getLstfic()
-        this.ui.setEtf(0)
-      }
-    },
-
-    ccFic ([modecc, f], av) {
-      if (!modecc) { // fichier copié
-        this.fic.nom = f.nom
-        this.fic.info = f.info
-        this.fic.lg = f.lg
-        this.fic.type = f.type
-        this.fic.u8 = f.u8
-        this.step = 2
-      }
+watch(fileList, async (file) => {
+  try {
+    if (file) {
+      const { size, name, type, u8 } = await readFile(file, true)
+      const i = name.lastIndexOf('.')
+      const n = i == -1 ? name : name.substring(0, i)
+      this.fic.nom = this.nom || n
+      this.fic.info = ''
+      this.fic.lg = size
+      this.fic.type = type
+      this.fic.u8 = u8
     }
-  },
+  } catch (e) { trapex (e, this.resetFic)}
+})
 
-  data () {
-    return {
-      revx: true,
-      nfic: this.nom || '',
-      fic: { nom: '', info: '', lg: 0, type: '', u8: null },
-      step: 1,
-      etapes: [this.$t('PNFnvs0'), this.$t('PNFnvs1'), this.$t('PNFnvs2')],
-      fileList: null,
-      idf: null,
-      sidf: null,
-      lstfic: [],
-      volsupp: 0,
-      info: ''
-    }
-  },
+watch(step, (s) => {
+  if (s === 1) { this.fileList = null; this.resetFic(); return }
+  if (s === 2) { 
+    this.nfic = this.nom || this.fic.nom
+    this.info = this.fic.info
+  }
+  if (s === 3) {
+    this.revx = true
+    this.sidf = new Set()
+    this.volsupp = 0
+    this.getLstfic()
+    this.ui.setEtf(0)
+  }
+})
+
+watch(ccFic, ([modecc, f], av) => {
+  if (!modecc) { // fichier copié
+    this.fic.nom = f.nom
+    this.fic.info = f.info
+    this.fic.lg = f.lg
+    this.fic.type = f.type
+    this.fic.u8 = f.u8
+    this.step = 2
+  }
+})
 
   methods: {
     async valider () {
@@ -245,7 +239,6 @@ export default {
 
   setup () {
     const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
     return {
       nSt: stores.note,
       aSt: stores.avatar, 

@@ -4,43 +4,23 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef } from 'vue'
 import { dkli } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreNbj',
+const props = defineProps({ nom: String, idx: Number })
 
-  props: { nom: String, idx: Number },
+const st = stores.filtre
+const x = st.filtre[props.nom]
+const val = ref(x && x.nbj ? x.nbj : 9999)
+const options = ref([1, 7, 30, 90, 9999])
 
-  data () {
-    return { 
-      options: [1, 7, 30, 90, 9999]
-    }
-  },
-
-  watch: {
-    val (ap) {
-      this.st.setFiltre(this.nom, 'nbj', ap === 9999 ? 0 : ap)
-    }
-  },
-
-  computed: {
-  },
-
-  setup (props) {
-    const st = stores.filtre
-    const val = ref('')
-    const nom = toRef(props, 'nom')
-    const x = st.filtre[nom.value]
-    val.value = x && x.nbj ? x.nbj : 9999
-    return {
-      st, dkli,
-      val
-    }
-  }
+watch(val, (ap) => { 
+  st.setFiltre(props.nom, 'nbj', ap === 9999 ? 0 : ap)
 })
+
 </script>
 
 <style lang="sass" scoped>

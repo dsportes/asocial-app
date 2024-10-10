@@ -24,66 +24,33 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, computed } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef } from 'vue'
+import { dkli, $t } from '../app/util.mjs'
 import { ID } from '../app/api.mjs'
-import { dkli } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreAvgr',
+const props = defineProps({ nom: String, idx: Number })
 
-  props: { nom: String, idx: Number },
+const fSt = stores.filtre
+const aSt = stores.avatar
+const gSt = stores.groupe
+const val = ref(null)
+const la = ref(aSt.naAvatars)
+const lg = ref(gSt.ngGroupes)
 
-  components: { },
-
-  data () {
-    return {
-    }
-  },
-
-  watch: {
-    val (na) {
-      this.fSt.setFiltre(this.nom, 'avgr', na ? na.id : 0)
-      const b = na && ID.estGroupe(na.id)
-      if (!this.fSt.mcgroupe === b) this.fSt.setMcgroupe(b)
-    }
-  },
-
-  computed: {
-    tit () {
-      if (!this.val) return this.$t('FItavgr')
-      return ID.estGroupe(this.val.id) ? this.$t('groupe', [this.val.nomc]) : this.$t('avatar', [this.val.nom])
-    }
-  },
-
-  setup (props) {
-    const fSt = stores.filtre
-    const aSt = stores.avatar
-    const gSt = stores.groupe
-    const val = ref(null)
-    // const nom = toRef(props, 'nom')
-    // const x = fSt.filtre[nom.value]
-    // val.value = x ? getNg(x) : null
-
-    const la = ref(aSt.naAvatars)
-    const lg = ref(gSt.ngGroupes)
-
-    /*
-    function setm () {
-      la.value = aSt.naAvatars
-      lg.value = gSt.ngGroupes
-    }
-    */
-
-    return {
-      fSt, dkli,
-      val,
-      la,
-      lg
-    }
-  }
+const tit = computed(() => {
+  if (!val.value) return $t('FItavgr')
+  return ID.estGroupe(val.value.id) ? $t('groupe', [val.value.nom]) : $t('avatar', [val.value.nom])
 })
+
+watch(val, (na) => { 
+  fSt.setFiltre(props.nom, 'avgr', na ? na.id : '')
+  const b = na && ID.estGroupe(na.id)
+  if (!fSt.mcgroupe === b) fSt.setMcgroupe(b)
+})
+
 </script>
 
 <style lang="css">

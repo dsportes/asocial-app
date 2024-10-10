@@ -1,6 +1,5 @@
 <template>
-<q-dialog v-model="ui.d[idc].NNnotenouvelle" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+<q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="fermer"/>
@@ -50,11 +49,10 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</q-dialog>
 </template>
 
 <script>
-import { onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { dkli, styp } from '../app/util.mjs'
@@ -66,82 +64,58 @@ import BtnCond from '../components/BtnCond.vue'
 import { NouvelleNote } from '../app/operations4.mjs'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
 
-export default {
-  name: 'NoteNouvelle',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const session = stores.session
+const nSt = stores.note
+const cfg = stores.config
 
-  components: { BoutonHelp, BoutonUndo, EditeurMd, NoteEcritepar, BtnCond },
+const props = defineProps({
+  estgr: Boolean, // note de groupe à créer
+  groupe: Object, // si estgr, le groupe
+  avatar: Object, // si !estgr, l'avatar
+  notep: Object // si sous-note, la note "parent" (en fait celle courante)
+})
 
-  props: {
-    estgr: Boolean, // note de groupe à créer
-    groupe: Object, // si estgr, le groupe
-    avatar: Object, // si !estgr, l'avatar
-    notep: Object // si sous-note, la note "parent" (en fait celle courante)
-  },
+const naAut = ref(null) // {nom, i, im, ida, ko} ko: 1 pas auteur, 2: n'a pas exclusiité (edition seulement) 
+const texte = ref('')
+const exclu = ref(false)
 
-  computed: {
-    id () { return this.estgr ? this.groupe.id : this.avatar.id },
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-    modifie () { return this.texte !== '' },
-    nom () { const cv = this.session.getCV(this.id); return this.estgr ? cv.nomC : cv.nom },
-    nomp () { if (!this.notep) return ''
-      const cv = this.session.getCV(this.notep.id); return ID.estGroupe(this.notep.id) ? cv.nomC : cv.nom 
-    },
-    err () {
-      if (!this.estgr) {
-        if (this.session.compte.qv.pcn >= 100) return 1 // excédent nn + nc + ng / q1
-      } else {
-        if (!this.groupe.imh) return 3 // pas d'hébergeur
-        else if (this.groupe.nn >= this.groupe.qn) return 2 // nb max se notes du groupe dépassé
-      }
-      return 0
-    }
-  },
-
-  watch: {
-  },
-
-  methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm', 'a'); else this.ui.fD() },
-
-    selNa (elt) { this.naAut = elt },
-
-    async valider () {
-      let pid = null, pids = null
-      const aut = this.estgr ? this.naAut.id : null
-
-      // note rattachée à une autre note OU note avatar rattachée à une racine de groupe
-      if (!this.estgr) { // Note avatar
-        const nd = this.nSt.node
-        if (nd.type === 2) pid = nd.id // rattachée à une racine de groupe
-        else if (this.notep) { pid = this.notep.id; pids = this.notep.ids } // rattachée à une note d'un groupe ou de l'avatar
-      } else if (this.notep) { pid = this.notep.id; pids = this.notep.ids } // Note de groupe rattachée
-
-      await new NouvelleNote().run(this.id, this.texte, aut, this.exclu, pid, pids)
-      this.ui.fD()
-    }
-  },
-
-  data () {
-    return {
-      naAut: null, // {nom, i, im, ida, ko} ko: 1 pas auteur, 2: n'a pas exclusiité (edition seulement) 
-      texte: '',
-      exclu: false
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const session = stores.session
-    const nSt = stores.note
-    const cfg = stores.config
-
-    return {
-      ui, idc, session, nSt, cfg, dkli, styp, ID
-    }
+const id = computed(() => props.estgr ? props.groupe.id : props.avatar.id )
+const modifie = computed(() => texte.value !== '')
+const nom = computed(() => { const cv = session.getCV(id.value); return estgr.value ? cv.nomC : cv.nom })
+const nomp = computed(() => { if (!props.notep) return ''
+  const cv = session.getCV(props.notep.id); return ID.estGroupe(props.notep.id) ? cv.nomC : cv.nom 
+})
+const err = computed(() => {
+  if (!estgr.value) {
+    if (session.compte.qv.pcn >= 100) return 1 // excédent nn + nc + ng / q1
+  } else {
+    if (!props.groupe.imh) return 3 // pas d'hébergeur
+    else if (props.groupe.nn >= props.groupe.qn) return 2 // nb max se notes du groupe dépassé
   }
+  return 0
+})
 
+function fermer () { if (modifie.value) ui.oD('confirmFerm', 'a'); else ui.fD() }
+
+function selNa (elt) { naAut.value = elt }
+
+async function valider () {
+  let pid = null, pids = null
+  const aut = estgr.value ? naAut.value.id : null
+
+  // note rattachée à une autre note OU note avatar rattachée à une racine de groupe
+  if (!estgr.value) { // Note avatar
+    const nd = nSt.node
+    if (nd.type === 2) pid = nd.id // rattachée à une racine de groupe
+    else if (props.notep) { pid = props.notep.id; pids = props.notep.ids } // rattachée à une note d'un groupe ou de l'avatar
+  } else if (props.notep) { pid = props.notep.id; pids = props.notep.ids } // Note de groupe rattachée
+
+  await new NouvelleNote().run(id.value, texte.value, aut, exclu.value, pid, pids)
+  ui.fD()
 }
+
 </script>
 
 <style lang="sass" scoped>

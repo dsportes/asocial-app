@@ -18,64 +18,47 @@
   </div>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import ApercuCv from '../dialogues/ApercuCv.vue'
 
-export default {
-  name: 'ListeAuts',
+const cv = ref(null)
 
-  props: { },
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  components: { ApercuCv },
+const session = stores.session
+const nSt = stores.note
+const gSt = stores.groupe
+const autAvc = ref(false)
+const groupe = ref(null)
 
-  computed: {
-    nb () { return this.nSt.note.l.length },
-  },
-
-  data () {
-    return {
-      cv: null
-    }
-  },
-
-  methods: {
-    ida (im) { return this.groupe ? this.groupe.tid[im] : 0 },
-    getCV (im) { 
-      const ida = this.ida(im)
-      return ida ? this.session.getCV(ida) : null
-    }, 
-    nomC (im) { return this.getCV(im).nomC },
-
-    openCv (im) {
-      this.cv = this.getCv(im)
-      this.ui.oD('ACVouvrir', this.idc)
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc()
-    const session = stores.session
-    const nSt = stores.note
-    const gSt = stores.groupe
-    const autAvc = ref(false)
-    const groupe = ref(null)
-    
-    let b = false
-    const egr = gSt.egr(nSt.note.id)
-    if (egr) {
-      groupe.value = egr.groupe
-      nSt.note.l.forEach(im => { if (session.compte.mav.has(egr.groupe.tid[im])) b = true })
-      autAvc.value = b
-    }
-
-    return {
-      session, ui, idc, nSt, gSt, autAvc, groupe
-    }
-  }
+const egr = gSt.egr(nSt.note.id)
+if (egr) {
+  let b = false
+  groupe.value = egr.groupe
+  nSt.note.l.forEach(im => { if (session.compte.mav.has(egr.groupe.tid[im])) b = true })
+  autAvc.value = b
 }
+
+const nb = computed(() => nSt.note.l.length)
+
+const ida = (im) => groupe.value ? groupe.value.tid[im] : 0
+
+const getCV = (im) => { 
+  const id = ida.value(im)
+  return id ? session.getCV(id) : null
+}
+
+const nomC = (im) => getCV(im).nomC
+
+function openCv (im) {
+  cv.value = getCv(im)
+  ui.oD('ACVouvrir', idc)
+}
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'

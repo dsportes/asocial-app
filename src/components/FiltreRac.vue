@@ -4,48 +4,26 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef } from 'vue'
 import { dkli, $t } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreRac',
+const props = defineProps({ nom: String, idx: Number })
 
-  props: { nom: String, idx: Number },
+const st = stores.filtre
+const x = st.filtre[props.nom]
+const val = ref(x.rac || 0)
+const options = [
+  { label: $t('rac0'), value: 0 },
+  { label: $t('rac1'), value: 1 }
+]
 
-  components: { },
-
-  data () {
-    return {
-    }
-  },
-
-  watch: {
-    val (ap) {
-      this.st.setFiltre(this.nom, 'rac', ap)
-    }
-  },
-
-  computed: {
-  },
-
-  setup (props) {
-    const st = stores.filtre
-    const val = ref('')
-    const nom = toRef(props, 'nom')
-    const options = [
-      { label: $t('rac0'), value: 0 },
-      { label: $t('rac1'), value: 1 }
-    ]
-    const x = st.filtre[nom.value]
-    val.value = x.rac || 0
-    return {
-      st, dkli, options,
-      val
-    }
-  }
+watch(val, (ap) => { 
+  st.setFiltre(props.nom, 'rac', ap)
 })
+
 </script>
 
 <style lang="css">

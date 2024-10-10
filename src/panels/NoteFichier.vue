@@ -68,8 +68,10 @@
   </q-page-container>
 
   <!-- Dialogue de création d'un nouveau fichier -->
-  <nouveau-fichier v-if="ui.d[idc] && ui.d[idc].NFouvrir" :note="note" :nom="nomf || ''" 
-    :aut="ro ? '0' : (estGr ? aut : '1')" :pasheb="pasHeb" :ro="ro"/>
+  <q-dialog v-model="ui.d[idc].NFouvrir" persistent>
+    <nouveau-fichier :note="note" :nom="nomf || ''" 
+      :aut="ro ? '0' : (estGr ? aut : '1')" :pasheb="pasHeb" :ro="ro"/>
+  </q-dialog>
 
 </q-layout>
 </q-dialog>

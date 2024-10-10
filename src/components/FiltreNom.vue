@@ -12,42 +12,22 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef } from 'vue'
 import { dkli } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreNom',
+const props = defineProps({ nom: String, prop: String, idx: Number })
 
-  props: { nom: String, prop: String, idx: Number },
+const st = stores.filtre
+const x = st.filtre[props.nom]
+const val = ref(x && x[props.prop] ? x[props.prop] : '')
 
-  data () {
-    return { }
-  },
+function ok () {
+  st.setFiltre(props.nom, props.prop, val.value)
+}
 
-  methods: {
-    ok () {
-      this.st.setFiltre(this.nom, this.prop, this.val)
-    }
-  },
-
-  computed: {
-  },
-
-  setup (props) {
-    const st = stores.filtre
-    const val = ref('')
-    const nom = toRef(props, 'nom')
-    const prop = toRef(props, 'prop')
-    const x = st.filtre[nom.value]
-    val.value = x && x[prop.value] ? x[prop.value] : ''
-    return {
-      st, dkli,
-      val
-    }
-  }
-})
 </script>
 
 <style lang="sass" scoped>

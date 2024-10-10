@@ -47,7 +47,7 @@
 
         <q-step :name="3" :title="$t('NPavp')" icon="settings" :done="step > 3" >
           <div ref="step3">
-            <nom-avatar class="q-ma-xs" v-on:ok-nom="oknom" verif :init-val="nom || ''"
+            <nom-avatar class="q-ma-xs" @ok-nom="oknom" verif :init-val="nom || ''"
               icon-valider="check" :label-valider="$t('suivant')"></nom-avatar>
           </div>
           <q-stepper-navigation>

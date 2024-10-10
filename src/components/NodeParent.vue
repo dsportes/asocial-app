@@ -12,40 +12,22 @@
 </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { Note } from '../app/modele.mjs'
 
-export default ({
-  name: 'NodeParent',
+const nSt = stores.note
+const pSt = stores.people
 
-  props: { },
+const n = computed(() => nSt.nodeP)
+const t = computed(() => n.value.type)
+const estAv = computed(() => t.value === 1 || t.value === 4 || t.value === 6)
+const id = computed(() => n.value.id)
+const nom = computed(() => pSt.nom(id.value))
+const titre = computed(() => t.value.type > 3 ? nSt.note.titre : '')
 
-  components: { },
-
-  computed: {
-    n () { return this.nSt.nodeP },
-    t () { return this.n.type },
-    estAv () { return this.t === 1 || this.t === 4 || this.t === 6 },
-    id () { return this.n.id },
-    nom () { return this.pSt.nom(this.id) },
-    titre () { return this.t.type > 3 ? this.nSt.note.titre : '' }
-  },
-
-  data () { return {
-  }},
-
-  methods: {
-  },
-  
-  setup () {
-    return {
-      nSt: stores.note,
-      pSt: stores.people
-    }
-  } 
-})
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'

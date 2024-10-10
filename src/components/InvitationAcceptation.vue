@@ -82,7 +82,9 @@
   </q-page-container>
 </q-layout>
 </template>
-<script>
+
+<script setup>
+import { ref, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
 
@@ -94,61 +96,46 @@ import BtnCond from './BtnCond.vue'
 import ShowHtml from './ShowHtml.vue'
 
 import { AcceptInvitation } from '../app/operations4.mjs'
-import { styp, afficher8000 } from '../app/util.mjs'
+import { styp, afficher8000, $t } from '../app/util.mjs'
 import { FLAGS } from '../app/api.mjs'
 
-export default ({
-  name: 'InvitationAcceptation',
+const session = stores.session
+const ui = stores.ui
 
-  components: { BtnCond, ShowHtml, EditeurMd, BoutonHelp, ApercuGenx, BoutonBulle },
-
-  props: { 
-    inv: Object // { idg, ida, flags, invpar: Set(id invitant), msg }
-  },
-
-  computed: {
-    nomm () { return this.session.getCV(this.inv.ida).nom },
-    nomg () { return this.session.getCV(this.inv.idg).nom },
-    fl () { return this.inv.flags },
-    edFlags () { 
-      const f = this.inv.flags
-      if (!f) return ''
-      const ed = []
-      if (f & FLAGS.AN) ed.push(this.$t('AMinvan'))
-      if (f & FLAGS.DM) ed.push(this.$t('AMinvdm'))
-      if (f & FLAGS.DE) ed.push(this.$t('AMinvde'))
-      else if (f & FLAGS.DN) ed.push(this.$t('AMinvdn'))
-      return ed.join(', ')
-    },
-  },
-
-  data () { return {
-    msg: '',
-    iam: true,
-    ian: true,
-    defmsg: this.$t('merci'),
-    cfln: 0,
-    decl: 0,
-    acc: 0,
-  }},
-
-  methods: {
-    accref (x) { this.acc = x },
-    async ok (cas) {
-      const r = await new AcceptInvitation().run(cas, this.inv, this.iam, this.ian, this.msg)
-      if (r) await afficher8000(r, this.inv.ida, this.inv.idg)
-      this.ui.fD()
-    }
-  },
-  
-  setup () {
-    return {
-      styp, FLAGS,
-      session: stores.session,
-      ui: stores.ui
-    }
-  } 
+const props = defineProps({ 
+  inv: Object // { idg, ida, flags, invpar: Set(id invitant), msg }
 })
+
+const msg = ref('')
+const iam = ref(true)
+const ian = ref(true)
+const defmsg = ref($t('merci'))
+const cfln = ref(0)
+const decl = ref(0)
+const acc = ref(0)
+
+const nomm = computed(() => session.getCV(props.inv.ida).nom )
+const nomg = computed(() => session.getCV(props.inv.idg).nom )
+const fl = computed(() => inv.flags )
+const edFlags = computed(() => { 
+  const f = props.inv.flags
+  if (!f) return ''
+  const ed = []
+  if (f & FLAGS.AN) ed.push($t('AMinvan'))
+  if (f & FLAGS.DM) ed.push($t('AMinvdm'))
+  if (f & FLAGS.DE) ed.push($t('AMinvde'))
+  else if (f & FLAGS.DN) ed.push($t('AMinvdn'))
+  return ed.join(', ')
+})
+
+const accref = (x) => acc.value = x
+    
+async function ok (cas) {
+  const r = await new AcceptInvitation().run(cas, props.inv, iam.value, ian.value, msg.value)
+  if (r) await afficher8000(r, props.inv.ida, props.inv.idg)
+  ui.fD()
+}
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'

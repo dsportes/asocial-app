@@ -18,44 +18,22 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef } from 'vue'
-import { dkli } from '../app/util.mjs'
+import { dkli, $t } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreDel',
+const props = defineProps({ nom: String, idx: Number })
 
-  props: { nom: String, idx: Number },
+const st = stores.filtre
+const x = st.filtre[props.nom]
+const val = ref(x && x.rolepart ? x.rolepart : 0)
 
-  components: { },
-
-  data () {
-    return {
-    }
-  },
-
-  watch: {
-    val (ap) {
-      this.st.setFiltre(this.nom, 'rolepart', ap)
-    }
-  },
-
-  computed: {
-  },
-
-  setup (props) {
-    const st = stores.filtre
-    const val = ref('')
-    const nom = toRef(props, 'rolepart')
-    const x = st.filtre[nom.value]
-    val.value = x && x.rolepart ? x.rolepart : 0
-    return {
-      st, dkli,
-      val
-    }
-  }
+watch(val, (ap) => { 
+  st.setFiltre(props.nom, 'rolepart', ap)
 })
+
 </script>
 
 <style lang="sass" scoped>

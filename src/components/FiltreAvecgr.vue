@@ -4,42 +4,20 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+
 import stores from "../stores/stores.mjs"
-import { ref, toRef } from 'vue'
 import { dkli } from '../app/util.mjs'
 
-export default ({
-  name: 'FiltreAvecgr',
+const props = defineProps({ nom: String, idx: Number })
 
-  props: { nom: String, idx: Number },
+const st = stores.filtre
+const x = st.filtre[props.nom]
+const val = ref(x && x.avecgr ? x.avecgr : false)
 
-  data () {
-    return { 
-    }
-  },
+watch(val, (ap) => { st.setFiltre(props.nom, 'avecgr', ap === true ? true : false) })
 
-  watch: {
-    val (ap) {
-      this.st.setFiltre(this.nom, 'avecgr', ap === true ? true : false)
-    }
-  },
-
-  computed: {
-  },
-
-  setup (props) {
-    const st = stores.filtre
-    const val = ref('')
-    const nom = toRef(props, 'nom')
-    const x = st.filtre[nom.value]
-    val.value = x && x.avecgr ? x.avecgr : false
-    return {
-      st, dkli,
-      val
-    }
-  }
-})
 </script>
 
 <style lang="sass" scoped>

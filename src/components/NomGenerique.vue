@@ -1,17 +1,18 @@
 <template>
+<!-- @update:modelValue="(newValue) => $emit('update:modelValue', newValue)" -->
   <div>
     <q-input dense counter v-model="val"
       :label="label || ''"
       :rules="[r1,r2]" 
       :maxlength="max"
       :placeholder="placeholder || ''"
-      @update:modelValue="(newValue) => $emit('update:modelValue', newValue)"
       @keydown.enter.prevent="ok"
       type="text">
       <template v-slot:append>
         <span :class="val.length === 0 ? 'disabled' : ''">
           <q-icon name="cancel" class="cursor-pointer"  @click="val=''"/>
         </span>
+        <btn-cond class="q-ml-xs" icon="check" rounded :disable="nomko" @click="ok"/>
       </template>
       <template v-slot:hint>
         <span>{{$t('PPminmax', [min, max])}}</span>
@@ -21,48 +22,34 @@
     </q-input>
   </div>
 </template>
-<script>
-import { ref, toRef } from 'vue'
+
+<script setup>
+import { ref, computed } from 'vue'
+
 import { interdits, regInt } from '../app/api.mjs'
+import { $t } from '../app/util.mjs'
+import BtnCond from './BtnCond.vue'
 
-export default {
-  name: 'NomGenerique',
+const props = defineProps({ 
+  label: String,
+  lgmax: Number,
+  lgmin: Number,
+  modelValue: String,
+  placeholder: String
+})
 
-  emits: ['update:modelValue' ],
+const min = ref(props.lgmin || 0)
+const max = ref(props.lgmax || 32)
 
-  props: { 
-    label: String,
-    lgmax: Number,
-    lgmin: Number,
-    modelValue: String,
-    placeholder: String
-  },
+const model = defineModel({ type: String })
+const val = ref(model.value)
 
-  data () {
-    return {
-    }
-  },
+const r2 = (val) => val.length < min.value || val.length > max.value ? $t('NAe1') : true
+const r1 = (val) => regInt.test(val) ? $t('NAe2') : true
+const oknom = computed(() => r2(val.value === true && r1(val.value === true)))
 
-  methods: {
-    r2 (val) { return val.length < this.min || val.length > this.max ? this.$t('NAe1') : true },
-    r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true }
-  },
+function ok () { if (oknom.value) model.value = val.value }
 
-  setup (props, context) {
-    const mv = toRef(props, 'modelValue')
-    const val = ref(mv.value)
-    const lgmin = toRef(props, 'lgmin')
-    const lgmax = toRef(props, 'lgmax')
-    const min = ref(lgmin.value || 0)
-    const max = ref(lgmax.value || 32)
-
-    function ok () { context.emit('update:modelValue', val.value) }
-
-    return {
-      val, min, max, ok, interdits
-    }
-  }
-}
 </script>
 
 <style lang="sass" scoped>

@@ -23,66 +23,55 @@
     :label="$t('NPLnote', [nom])" 
     icon="control_point" color="orange" @click="ok(true)" padding="none" size="md"/>
 
-  <note-nouvelle v-if="ui.d[idc] && ui.d[idc].NNnotenouvelle" 
-    :estgr="estgr" 
-    :groupe="estgr ? groupe : null" 
-    :avatar="avatarx || (estgr ? null : aSt.getElt(id).avatar)" 
-    :notep="nSt.node.note"/>
+  <q-dialog v-model="ui.d[idc].NNnotenouvelle" full-height position="left" persistent>
+    <note-nouvelle
+      :estgr="estgr" 
+      :groupe="estgr ? groupe : null" 
+      :avatar="avatarx || (estgr ? null : aSt.getElt(id).avatar)" 
+      :notep="nSt.node.note"/>
+  </q-dialog>
 </div>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import NoteNouvelle from '../panels/NoteNouvelle.vue'
 
-export default ({
-  name: 'NotePlus',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
+const session = stores.session
+const aSt = stores.avatar
+const gSt = stores.groupe
+const nSt = stores.note
 
-  props: { k1: String },
-
-  components: { NoteNouvelle },
-
-  computed: {
-    n () { return this.nSt.node }, // OK: est réévalué quand nSt.node change
-    t () { return this.n.type },
-    estAv () { return this.t === 1 || this.t === 4 },
-    id () { return this.n.id },
-    groupe () { return this.estAv ? null : this.gSt.egr(this.id).groupe },
-    avatar () { return this.estAv ? this.aSt.getElt(this.id).avatar : null },
-    lna () { const l = this.session.compte.lstAvatars; return l.length > 1 ? l : null },
-    nom () { const cv = this.session.getCV(this.id); return this.estAv ? cv.nom : cv.nomC }
-  },
-
-  data () { return {
-    avatarx: null,
-    estgr: false
-  }},
-
-  methods: {
-    ok (gr) {
-      this.estgr = gr
-      this.ui.oD('NNnotenouvelle')
-    },
-
-    selNa (id) {
-      this.avatarx = this.aSt.getElt(id).avatar
-      this.ok(false)
-    }
-  },
-  
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    return {
-      session: stores.session,
-      aSt: stores.avatar,
-      gSt: stores.groupe,
-      nSt: stores.note,
-      ui, idc
-    }
-  } 
+const props = defineProps({ 
+  k1: String
 })
+
+const avatarx = ref(null)
+const estgr = ref(false)
+
+const n = computed(() => nSt.node) // OK: est réévalué quand nSt.node change
+const t = computed(() => n.value.type)
+const estAv = computed(() => t.value === 1 || t.value === 4 )
+const id = computed(() => n.value.id )
+const groupe = computed(() => estAv.value ? null : gSt.egr(id.value).groupe )
+const avatar = computed(() => estAv.value ? aSt.getElt(id.value).avatar : null )
+const lna = computed(() => { const l = session.compte.lstAvatars; return l.length > 1 ? l : null })
+const nom = computed(() => { const cv = session.getCV(id.value); return estAv.value ? cv.nom : cv.nomC })
+
+function ok (gr) {
+  estgr.value = gr
+  ui.oD('NNnotenouvelle', idc)
+}
+
+function selNa (id) {
+  avatarx.value = aSt.getElt(id).avatar
+  ok(false)
+}
+
 </script>
 <style lang="sass" scoped>
 @import '../css/app.sass'
