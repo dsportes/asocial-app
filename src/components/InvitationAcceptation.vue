@@ -106,10 +106,10 @@ const props = defineProps({
   inv: Object // { idg, ida, flags, invpar: Set(id invitant), msg }
 })
 
-const msg = ref('')
 const iam = ref(true)
 const ian = ref(true)
 const defmsg = ref($t('merci'))
+const msg = ref(defmsg.value)
 const cfln = ref(0)
 const decl = ref(0)
 const acc = ref(0)

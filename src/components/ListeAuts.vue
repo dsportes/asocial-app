@@ -48,7 +48,7 @@ const nb = computed(() => nSt.note.l.length)
 const ida = (im) => groupe.value ? groupe.value.tid[im] : 0
 
 const getCV = (im) => { 
-  const id = ida.value(im)
+  const id = ida(im)
   return id ? session.getCV(id) : null
 }
 

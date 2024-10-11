@@ -52,11 +52,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { dkli, styp } from '../app/util.mjs'
-import { ID } from '../app/api.mjs'
+import { ID, UNITEN } from '../app/api.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import BoutonUndo from '../components/BoutonUndo.vue'
 import EditeurMd from '../components/EditeurMd.vue'
@@ -65,7 +65,6 @@ import { NouvelleNote } from '../app/operations4.mjs'
 import NoteEcritepar from '../components/NoteEcritepar.vue'
 
 const ui = stores.ui
-const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 const session = stores.session
 const nSt = stores.note
 const cfg = stores.config
@@ -83,16 +82,16 @@ const exclu = ref(false)
 
 const id = computed(() => props.estgr ? props.groupe.id : props.avatar.id )
 const modifie = computed(() => texte.value !== '')
-const nom = computed(() => { const cv = session.getCV(id.value); return estgr.value ? cv.nomC : cv.nom })
+const nom = computed(() => { const cv = session.getCV(id.value); return props.estgr ? cv.nomC : cv.nom })
 const nomp = computed(() => { if (!props.notep) return ''
   const cv = session.getCV(props.notep.id); return ID.estGroupe(props.notep.id) ? cv.nomC : cv.nom 
 })
 const err = computed(() => {
-  if (!estgr.value) {
+  if (!props.estgr) {
     if (session.compte.qv.pcn >= 100) return 1 // excédent nn + nc + ng / q1
   } else {
     if (!props.groupe.imh) return 3 // pas d'hébergeur
-    else if (props.groupe.nn >= props.groupe.qn) return 2 // nb max se notes du groupe dépassé
+    else if (props.groupe.nn >= (props.groupe.qn * UNITEN)) return 2 // nb max se notes du groupe dépassé
   }
   return 0
 })
@@ -103,10 +102,10 @@ function selNa (elt) { naAut.value = elt }
 
 async function valider () {
   let pid = null, pids = null
-  const aut = estgr.value ? naAut.value.id : null
+  const aut = props.estgr ? naAut.value.id : null
 
   // note rattachée à une autre note OU note avatar rattachée à une racine de groupe
-  if (!estgr.value) { // Note avatar
+  if (!props.estgr) { // Note avatar
     const nd = nSt.node
     if (nd.type === 2) pid = nd.id // rattachée à une racine de groupe
     else if (props.notep) { pid = props.notep.id; pids = props.notep.ids } // rattachée à une note d'un groupe ou de l'avatar

@@ -2,7 +2,7 @@
   <div class="row q-gutter-md">
     <div class="titre-md mh">{{$t('CQnbdocs', qnn)}}</div>
     <div class="titre-md mh">{{edvol(qvv) + ' ' + $t('CQvolfics')}}</div>
-    <div class="titre-md mh">{{mon(vols.qc) + ' ' + $t('CQconsocalc')}}</div>
+    <div v-if="!groupe" class="titre-md mh">{{mon(vols.qc) + ' ' + $t('CQconsocalc')}}</div>
   </div>
 </template>
 

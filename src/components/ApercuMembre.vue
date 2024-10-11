@@ -173,7 +173,7 @@ a accès aux membres (donc dans l'onglet "membres").
         <div class="stx fs-md" v-if="nvfl !== invits.fl && stm === 2">{{$t('AMchg')}}</div>
 
         <div class="q-mt-md titre-md text-italic">{{$t('AMbienv')}}</div>
-        <editeur-md class="q-mb-sm bord1" :lgmax="1000" v-model="msg" :texte="mb.msg || $t('invitation')" 
+        <editeur-md class="q-mb-sm bord1" :lgmax="1000" v-model="msg" :texte="msg"
           modetxt mh="8rem" editable/>
       </q-card-section>
 
@@ -476,7 +476,7 @@ async function ouvririnvit () {
   idm.value = (fl & FLAGS.DM) !== 0
   idn.value = (fl & FLAGS.DN) !== 0
   ide.value = (fl & FLAGS.DE) !== 0
-  msg.value = mb.value.msg || ''
+  msg.value = mb.value.msg || $t('invitation')
   suppr.value = 1
 
   optRMSV.value = [
@@ -502,7 +502,7 @@ async function inviter () {
   /* rmsv: 0: inviter, 2: modifier, 3: supprimer, 4: voter pour */
   const idi = !gr.value.msu && invparf.value ? invparf.value.value : 0
   const r = await new InvitationGroupe()
-    .run(rmsv.value , props.id, idi, nvfl.value, msg.value, suppr.value)
+    .run(rmsv.value, props.id, idi, nvfl.value, msg.value, suppr.value)
   if (r) await afficher8000(r, props.id, session.groupeId)
   ui.fD()
 }
