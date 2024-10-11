@@ -1,6 +1,5 @@
 <template>
-<q-dialog v-model="ui.d[idc].NF" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+<q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
@@ -74,14 +73,13 @@
   </q-dialog>
 
 </q-layout>
-</q-dialog>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
-import { styp, sty, dkli, edvol, dhcool, suffixe } from '../app/util.mjs'
+import { styp, dkli, edvol, dhcool, suffixe } from '../app/util.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
 import NouveauFichier from '../dialogues/NouveauFichier.vue'
 import MenuFichier from '../components/MenuFichier.vue'
@@ -92,96 +90,69 @@ import ListeAuts from '../components/ListeAuts.vue'
 import NodeParent from '../components/NodeParent.vue'
 import { ID } from '../app/api.mjs'
 
-export default {
-  name: 'NoteFichier',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
 
-  components: { MenuFichier, BoutonHelp, NouveauFichier, NoteEcritepar, BtnCond, NodeParent, ListeAuts },
+const session = stores.session
+const nSt = stores.note 
+const pSt = stores.people 
+const gSt = stores.groupe
+const faSt = stores.ficav
 
-  props: { },
+const texte = ref('')
+const aut = ref(null)
+const nomf = ref('')
 
-  computed: {
-    note () { return this.nSt.note },
-    nom () { return this.pSt.nom(this.note.id)},
-    modifie () { return false },
+const note = computed(() => nSt.note)
+const nom = computed(() => pSt.nom(note.value.id))
+const modifie = computed(() => false)
 
-    estGr () { return ID.estGroupe(this.note.id) },
-    egr () { return this.estGr ? this.gSt.egr(this.note.id) : null },
-    groupe () { return this.egr ? this.egr.groupe : null},
+const estGr = computed(() => ID.estGroupe(note.value.id))
+const egr = computed(() => estGr.value ? gSt.egr(note.value.id) : null)
+const groupe = computed(() => egr.value ? egr.value.groupe : null)
 
-    // % quota de vf groupe - 0: ok, 1:90%, 2:>100% (RED)
-    vgr () { return !this.groupe ? 0 : this.groupe.alVol(0) },
+// % quota de vf groupe - 0 = ok 1 =90% 2 =>100% (RED)
+const vgr = computed(() => !groupe.value ? 0 : groupe.value.alVol(0))
 
-    // volume fichier du compte (si hébergeur pour un groupe)
-    vcpt () { return !this.groupe || (this.groupe && !this.groupe.cptEstHeb) ? 0 : this.session.compte.alVol(0) },
+// volume fichier du compte (si hébergeur pour un groupe)
+const vcpt = computed(() => !groupe.value || (groupe.value && !groupe.value.cptEstHeb) ? 0 : session.compte.alVol(0))
 
-    pasHeb () { return this.groupe && !this.groupe.imh },
+const pasHeb = computed(() => groupe.value && !groupe.value.imh)
 
-    cptOkExclu () { return !this.groupe || this.groupe.cptOkExclu },
+const cptOkExclu = computed(() => !groupe.value || groupe.value.cptOkExclu)
 
-    editn () { return Note.idasEdit(this.nSt.node).size > 0 },
+const editn = computed(() => Note.idasEdit(nSt.node).size > 0)
 
-    ro () { return this.session.cEdit ? this.session.cEdit :
-      (!this.cptOkExclu ? this.$t('PNOexclu') : (!this.editn ? this.$t('PNOnoedit') : ''))
-    },
+const ro = computed(() => session.cEdit ? session.cEdit : 
+  (!cptOkExclu.value ? $t('PNOexclu') : (!editn.value ? $t('PNOnoedit') : ''))
+)
 
-    red () { return !this.ro && (this.pasHeb ? this.$t('PNOpasheb') : 
-      (this.vcpt === 2 ? this.$t('PNOvcpt2') : (this.vgr === 2 ? this.$t('PNOvgr2') : false)))
-    },
-    
-    mpn () {
-      const m = new Map()
-      for(const nom of this.note.lstNoms) {
-        const l = []
-        const lx = this.note.fnom.get(nom)
-        for(const f of lx) {
-          const fa = this.faSt.map.get(f.idf)
-          l.push({f, fa: fa || { fake: true }})
-        }
-        m.set(nom, l)
-      }
-      return m
+const red = computed(() => !ro.value && (pasHeb.value ? $t('PNOpasheb') :
+  (vcpt.value === 2 ? $t('PNOvcpt2') : (vgr.value === 2 ? $t('PNOvgr2') : false))))
+
+const mpn = computed(() => {
+  const m = new Map()
+  for(const nom of note.value.lstNoms) {
+    const l = []
+    const lx = note.value.fnom.get(nom)
+    for(const f of lx) {
+      const fa = faSt.map.get(f.idf)
+      l.push({f, fa: fa || { fake: true }})
     }
-  },
-
-  watch: {
-  },
-
-  methods: {
-    fermer () { if (this.modifie) this.ui.oD('confirmFerm', 'a'); else this.ui.fD() },
-
-    selAut (elt) { this.aut = elt.id },
-
-    async nouveau (nf) {
-      this.nomf = nf || ''
-      this.ui.oD('NFouvrir', this.idc)
-    }
-
-  },
-
-  data () {
-    return {
-      texte: '',
-      aut: null,
-      nomf: ''
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    return {
-      ui, idc, 
-      session: stores.session,
-      nSt: stores.note, 
-      pSt: stores.people, 
-      gSt: stores.groupe,
-      faSt: stores.ficav,
-
-      styp, sty, dkli, edvol, dhcool, suffixe
-    }
+    m.set(nom, l)
   }
+  return m
+})
 
+function fermer () { if (modifie.value) ui.oD('confirmFerm', 'a'); else ui.fD() }
+
+function selAut (elt) { aut.value = elt.id }
+
+async function nouveau (nf) {
+  nomf.value = nf || ''
+  ui.oD('NFouvrir', idc)
 }
+
 </script>
 
 <style lang="sass" scoped>

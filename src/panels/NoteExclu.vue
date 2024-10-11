@@ -1,6 +1,5 @@
 <template>
-<q-dialog v-model="ui.d[idc].NX" full-height position="left" persistent>
-  <q-layout container view="hHh lpR fFf" :class="styp('md')">
+<q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
       <btn-cond color="warning" icon="chevron_left" @ok="ui.fD"/>
@@ -59,11 +58,10 @@
     </q-page>
   </q-page-container>
 </q-layout>
-</q-dialog>
 </template>
 
-<script>
-import { onUnmounted } from 'vue'
+<script setup>
+import { ref, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import { dkli, styp } from '../app/util.mjs'
@@ -75,69 +73,46 @@ import BtnCond from '../components/BtnCond.vue'
 import NodeParent from '../components/NodeParent.vue'
 import { ExcluNote } from '../app/operations4.mjs'
 
-export default {
-  name: 'NoteExclu',
+const ui = stores.ui
+const session = stores.session
+const nSt = stores.note 
+const gSt = stores.groupe 
+const pSt = stores.people
+const aSt = stores.avatar
 
-  components: { BoutonHelp, BoutonBulle, ApercuGenx, ListeAuts, BtnCond, NodeParent },
+const xap = ref(null)
 
-  props: { },
+const nom = computed(() => pSt.nom(nSt.note.id))
+const mav = computed(() => session.compte.mav)
 
-  computed: { 
-    nom () { return this.pSt.nom(this.nSt.note.id)},
-    mav () { return this.session.compte.mav },
+const egr = computed(() => gSt.egr(nSt.note.id))
+const groupe = computed(() => egr.value.groupe)
+const amb = computed(() => session.compte.ambano(groupe.value)[0])
+const anim = computed(() => egr.value.estAnim)
+const xav = computed(() => nSt.mbExclu) // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
 
-    egr () { return this.gSt.egr(this.nSt.note.id) },
-    groupe () { return this.egr.groupe },
-    amb () { return this.session.compte.ambano(this.groupe)[0] },
-    anim () { return this.egr.estAnim },
-    xav () { return this.nSt.mbExclu }, // retourne { avc: true/false, ida, im, cv } ou null s'il n'y a pas d'exclusivité
+const peutTr = computed(() => !xav.value || anim.value || (xav.value && mav.value.has(xav.value.ida)))
 
-    peutTr () { return !this.xav || this.estAnim || (this.xav && this.mav.has(this.xav.ida)) },
+/* Pour une note de groupe, liste des {im, na, nom} des membres 
+aptes à recevoir l'exclusivité, sauf celui actuel */
+const lst = computed(() => nSt.lstImNa)
 
-    /* Pour une note de groupe, liste des {im, na, nom} des membres 
-    aptes à recevoir l'exclusivité, sauf celui actuel */
-    lst () { return this.nSt.lstImNa }
-  },
-
-  watch: {  },
-
-  methods: {
-    selmb (e) {
-      this.xap = e
-    },
-    async valider () {
-      const n = this.nSt.note
-      const ida = this.xap ? this.xap.ida : 0
-      await new ExcluNote().run(n.id, n.ids, ida)
-      this.xap = null
-    },
-    async perdre () {
-      this.xap = null
-      await this.valider()
-    }
-  },
-
-  data () {
-    return {
-      xap: null // sélection pour prendre l'exclusivité
-    }
-  },
-
-  setup () {
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    return {
-      session: stores.session,
-      ui, idc, 
-      nSt: stores.note, 
-      gSt: stores.groupe, 
-      pSt: stores.people,
-      aSt: stores.avatar,
-      dkli, styp
-    }
-  }
-
+function selmb (e) {
+  xap.value = e
 }
+
+async function valider () {
+  const n = nSt.note
+  const ida = xap.value ? xap.value.ida : null
+  await new ExcluNote().run(n.id, n.ids, ida)
+  xap.value = null
+}
+
+async function perdre () {
+  xap.value = null
+  await valider()
+}
+
 </script>
 
 <style lang="sass" scoped>

@@ -50,7 +50,7 @@
               <div v-for="(f, idx) in lstfic" :key="f.idf">
                 <div v-if="!revx || f.nom === nom" 
                   :class="'row cursor-pointer items-center ' + sty(idx)" @click="clickFic(f)">
-                  <q-checkbox class="col-1" v-model="f.sel" dense/>
+                  <q-checkbox class="col-1" v-model="f.sel" dense disable/>
                   <div class="col-4">{{f.nom}}</div>
                   <div class="col-2">{{f.info}}</div>
                   <div class="col-2 font-mono text-center">{{edvol(f.lg)}}</div>
@@ -97,7 +97,7 @@
 </q-layout>
 </template>
 
-<script>
+<script setup>
 import { ref, watch, computed } from 'vue'
 
 import stores from '../stores/stores.mjs'
@@ -124,7 +124,7 @@ const props = defineProps({
 
 const fic = ref({ nom: '', info: '', lg: 0, type: '', u8: null })
 const revx = ref(true)
-const nfic = ref(this.nom || '')
+const nfic = ref(props.nom || '')
 const step = ref(1)
 const etapes = ref([$t('PNFnvs0'), $t('PNFnvs1'), $t('PNFnvs2')])
 const fileList = ref(null)
@@ -134,20 +134,19 @@ const lstfic = ref([])
 const volsupp = ref(0)
 const info = ref('')
 
-  computed: {
-    estGr () { return ID.estGroupe(this.note.id) },
-    egr () { return this.estGr ? this.gSt.egr(this.note.id) : null },
-    groupe () { return this.egr ? this.egr.groupe : null},
+const estGr = computed(() =>  ID.estGroupe(props.note.id) )
+const egr = computed(() =>  estGr.value ? gSt.egr(props.note.id) : null )
+const groupe = computed(() =>  egr.value ? egr.value.groupe : null)
 
-    valide () { return this.fic.lg && this.nfic },
-    ccFic () { return  [this.ppSt.modecc, this.ppSt.ccfic] },
-    vx () { return (this.fic.lg || 0) - this.volsupp },
-    // volume fichier du compte (si hébergeur pour un groupe)
-    vcpt () { return !this.groupe || (this.groupe && !this.groupe.cptEstHeb) ? 0 : this.session.compte.alVol(this.vx) },
-    vgr () { return !this.groupe ? 0 : this.groupe.alVol(this.vx) },
-    alRed () { return (this.volsupp || 0) < (this.fic.lg || 0) 
-      && (this.vcpt === 2 || this.vgr === 2 || this.pasheb) }
-  },
+const valide = computed(() =>  fic.value.lg && nfic.value)
+const ccFic = computed(() =>   [ppSt.modecc, ppSt.ccfic] )
+const vx = computed(() =>  (fic.value.lg || 0) - volsupp.value)
+// volume fichier du compte (si hébergeur pour un groupe)
+const vcpt = computed(() =>  !groupe.value || (groupe.value && !groupe.value.cptEstHeb) ? 0 : session.compte.alVol(vx.value))
+const vgr = computed(() =>  !groupe.value ? 0 : groupe.value.alVol(vx.value))
+const alRed = computed(() =>  (volsupp.value || 0) < (fic.value.lg || 0)
+  && (vcpt.value === 2 || vgr.value === 2 || props.pasheb))
+
 
 watch(fileList, async (file) => {
   try {
@@ -155,101 +154,87 @@ watch(fileList, async (file) => {
       const { size, name, type, u8 } = await readFile(file, true)
       const i = name.lastIndexOf('.')
       const n = i == -1 ? name : name.substring(0, i)
-      this.fic.nom = this.nom || n
-      this.fic.info = ''
-      this.fic.lg = size
-      this.fic.type = type
-      this.fic.u8 = u8
+      fic.value.nom = props.nom || n
+      fic.value.info = ''
+      fic.value.lg = size
+      fic.value.type = type
+      fic.value.u8 = u8
     }
-  } catch (e) { trapex (e, this.resetFic)}
+  } catch (e) { trapex (e, resetFic)}
 })
 
 watch(step, (s) => {
-  if (s === 1) { this.fileList = null; this.resetFic(); return }
+  if (s === 1) { fileList.value = null; resetFic(); return }
   if (s === 2) { 
-    this.nfic = this.nom || this.fic.nom
-    this.info = this.fic.info
+    nfic.value = props.nom || fic.value.nom
+    info.value = fic.value.info
   }
   if (s === 3) {
-    this.revx = true
-    this.sidf = new Set()
-    this.volsupp = 0
-    this.getLstfic()
-    this.ui.setEtf(0)
+    revx.value = true
+    sidf.value = new Set()
+    volsupp.value = 0
+    getLstfic()
+    ui.setEtf(0)
   }
 })
 
 watch(ccFic, ([modecc, f], av) => {
   if (!modecc) { // fichier copié
-    this.fic.nom = f.nom
-    this.fic.info = f.info
-    this.fic.lg = f.lg
-    this.fic.type = f.type
-    this.fic.u8 = f.u8
-    this.step = 2
+    fic.value.nom = f.nom
+    fic.value.info = f.info
+    fic.value.lg = f.lg
+    fic.value.type = f.type
+    fic.value.u8 = f.u8
+    step.value = 2
   }
 })
 
-  methods: {
-    async valider () {
-      this.step = 4
-      this.ui.setEtf(0)
-      const fic = await this.note.nouvFic(
-        this.nfic, 
-        this.info || '',
-        this.fic.lg, 
-        this.fic.type, 
-        this.fic.u8
-      )
+async function valider () {
+  step.value = 4
+  ui.setEtf(0)
+  const nf = await props.note.nouvFic(
+    nfic.value, 
+    info.value || '',
+    fic.value.lg, 
+    fic.value.type, 
+    fic.value.u8
+  )
 
-      this.ui.etf = 1
-      const res = await new NouveauFichier().run(this.note, this.aut, fic, Array.from(this.sidf))
-      if (!isAppExc(res))
-        this.ui.setFichiercree(fic.nom)
-      else {
-        this.step = 1
-      }
-    },
-
-    getLstfic () {
-      this.lstfic = []
-      for (const [idf, f] of this.note.mfa)
-        this.lstfic.push({ sel: false, idf, nom: f.nom, info: f.info, lg: f.lg, dh: f.dh })
-      this.lstfic.sort((a, b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 :
-        (a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)))})
-    },
-
-    clickFic (f) {
-      if (f.sel) { f.sel = false; this.sidf.delete(f.idf); this.volsupp -= f.lg }
-      else { f.sel = true; this.sidf.add(f.idf); this.volsupp += f.lg }
-    },
-
-    resetFic () { 
-      this.fic.nom = ''; this.fic.info = ''; this.fic.lg = 0; this.fic.type = ''; this.fic.u8 = null
-    },
-
-    selFic () {
-      this.ppSt.modecc = true
-      this.ppSt.tab = 'fichiers'
-      this.ppSt.ccfic = null
-      this.ui.oD('pressepapier', 'a')
-    }
-
-  },
-
-  setup () {
-    const ui = stores.ui
-    return {
-      nSt: stores.note,
-      aSt: stores.avatar, 
-      gSt: stores.groupe, 
-      ui, idc,
-      session: stores.session,
-      ppSt: stores.pp, 
-      edvol, dhcool, dkli, dhstring, styp, sty, ID
-    }
+  ui.etf = 1
+  const ida = props.aut <= '1' ? null : props.aut
+  const res = await new NouveauFichier()
+    .run(props.note, ida, nf, Array.from(sidf.value))
+  if (!isAppExc(res))
+    ui.setFichiercree(nf.nom)
+  else {
+    step.value = 1
   }
 }
+
+function getLstfic () {
+  lstfic.value = []
+  for (const [idf, f] of props.note.mfa)
+    lstfic.value.push({ sel: false, idf, nom: f.nom, info: f.info, lg: f.lg, dh: f.dh })
+  lstfic.value.sort((a, b) => { return a.nom < b.nom ? -1 : (a.nom > b.nom ? 1 :
+    (a.dh < b.dh ? 1 : (a.dh === b.dh ? 0 : -1)))})
+}
+
+function clickFic (f) {
+  if (f.sel) { f.sel = false; sidf.value.delete(f.idf); volsupp.value -= f.lg }
+  else { f.sel = true; sidf.value.add(f.idf); volsupp.value += f.lg }
+}
+
+function resetFic () { 
+  fic.value.nom = ''; fic.value.info = ''; fic.value.lg = 0; fic.value.type = ''; fic.value.u8 = null
+}
+
+function selFic () {
+  ppSt.modecc = true
+  ppSt.tab = 'fichiers'
+  ppSt.ccfic = null
+  ui.oD('pressepapier', 'a')
+}
+
 </script>
 
 <style lang="sass" scoped>

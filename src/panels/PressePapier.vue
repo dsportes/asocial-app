@@ -87,9 +87,9 @@
           max-file-size="50000000" max-file="1"/>
         <div v-if="fic.lg" class="font-mono fs-sm">{{fic.nom}} - {{fic.type}} - {{fic.lg}}o</div>
         <nom-generique class="q-mt-md fs-md" v-model="nomfic" :label="$t('PPndf')"
-          :lgmin="min" :lgmax="max1" :placeholder="$t('PPphf')"/>
+          :lgmax="max1" :placeholder="$t('PPphf')"/>
         <nom-generique class="q-mt-md fs-md" v-model="info" :label="$t('PPapf')"
-          :lgmin="0" :lgmax="max2" :placeholder="$t('PPphf')"/>
+          :lgmax="max2" :placeholder="$t('PPphf')"/>
       </q-card-section>
       <q-card-actions align="right" class="q-gutter-sm">
         <btn-cond flat icon="undo" :label="$t('renoncer')" @ok="ui.fD"/>
@@ -136,12 +136,11 @@ import { ref, onUnmounted } from 'vue'
 import { saveAs } from 'file-saver'
 import stores from '../stores/stores.mjs'
 import ShowHtml from '../components/ShowHtml.vue'
-import { readFile, dhcool, edvol, afficherDiag, dkli, styp } from '../app/util.mjs'
+import { readFile, dhcool, edvol, afficherDiag, dkli, styp, interdits, regInt } from '../app/util.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import { idb } from '../app/db.mjs'
 import NomGenerique from '../components/NomGenerique.vue'
 import BtnCond from '../components/BtnCond.vue'
-import { interdits, regInt } from '../app/api.mjs'
 
 export default ({
   name: 'PressePapier',
@@ -164,7 +163,7 @@ export default ({
   },
 
   computed: {
-    valide () { return this.fic.lg && this.nomfic && this.r1(this.nomfic) === true && this.r1(this.info) === true }
+    valide () { return this.fic.lg && this.nomfic }
   },
 
   watch: {
@@ -182,9 +181,6 @@ export default ({
   },
 
   methods: {
-    r2 (val) { return val.length < this.min || val.length > this.max ? this.$t('NAe1') : true },
-    r1 (val) { return regInt.test(val) ? this.$t('NAe2') : true },
-
     ajouternote () {
       this.rec = null
       this.txt = ''

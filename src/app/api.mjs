@@ -110,14 +110,6 @@ export const UNITEN = 250 // nombre de notes + chats + groupes
 export const UNITEV = 100 * 1000 * 1000 // volume de fichiers
 export const MAXTAILLEGROUPE = 100
 
-export const interdits = '< > : " / \\ | ? *'
-// eslint-disable-next-line no-control-regex
-export const regInt = /[<>:"/\\|?*\x00-\x1F]/
-// eslint-disable-next-line no-control-regex
-export const regIntg = /[<>:"/\\|?*\x00-\x1F]/g
-// eslint-disable-next-line no-control-regex
-export const regInt2g = /[\u{0180}-\u{10FFFF}]/gu
-
 export const limitesjour = { 
   sponsoring: 14, // durée de vie d'un sponsoring
   groupenonheb: 120 // durée de vie d'un groupe non hébbergé

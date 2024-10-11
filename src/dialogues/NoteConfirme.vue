@@ -1,8 +1,7 @@
 <template>
-<q-dialog v-model="ui.d[idc].NC" persistent>
 <q-card :class="styp('sm')">
   <q-toolbar class="bg-secondary text-white">
-    <q-btn dense size="md" color="warning" icon="close" @click="ui.fD"/>
+    <btn-cond color="warning" icon="close" @ok="ui.fD"/>
     <q-toolbar-title class="titre-lg full-width text-center">
       {{$t('NCF' + op)}}
     </q-toolbar-title>
@@ -24,76 +23,48 @@
   </div>
 
 </q-card>
-</q-dialog>
 </template>
 
-<script>
-import { ref, onUnmounted } from 'vue'
+<script setup>
+import { ref } from 'vue'
+
 import stores from '../stores/stores.mjs'
 import { $t, styp } from '../app/util.mjs'
 import BoutonConfirm from '../components/BoutonConfirm.vue'
 import BoutonHelp from '../components/BoutonHelp.vue'
+import BtnCond from '../components/BtnCond.vue'
 import { SupprNote } from '../app/operations4.mjs'
 
-export default {
-  name: 'NoteConfirme',
+const session = stores.session
+const ui = stores.ui
+const aSt = stores.avatar
+const nSt = stores.note
 
-  components: { BoutonConfirm, BoutonHelp},
+const props = defineProps({ 
+  op: String // suppr arch react
+})
 
-  props: { 
-    op: String // suppr arch react
-  },
+const msg = ref('')
 
-  computed: { 
-    sty () { return this.$q.dark.isActive ? 'sombre' : 'clair' },
-  },
+async function noteSuppr () {
+  ui.fD()
+  await new SupprNote().run(props.op)
+}
 
-  methods: { 
-    async noteSuppr () {
-      this.ui.fD()
-      await new SupprNote().run(this.op)
-    }
-  },
-
-  data () {
-    return {
-    }
-  },
-
-  setup () {
-    const session = stores.session
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))
-    const aSt = stores.avatar
-    const nSt = stores.note
-    const msg = ref('')
-
-    /* Conditions requises si la note est une note de groupe
-    - avoir un avatar du compte auteur
-    - si la note A une exclusité pour l'avatar im,
-      - soit im est avatar du compte,
-      - soit un avatar du compte est animateur du groupe.
-    */
-    if (nSt.estGr) {
-      const s = nSt.egr.groupe.avcAuteurs()
-      if (!s.size) { 
-        msg.value = $t('NCFm1')
-      } else {
-        // retourne { avc: true/false, nom } ou null s'il n'y a pas d'exclusivité
-        const xav = nSt.mbExclu
-        if (xav) {
-          if (!xav.avc && !nSt.egr.estAnim) 
-            msg.value = $t('NCFm2', [xav.nom])
-        }
-      }
-    }
-
-    return {
-      session, aSt, nSt, ui, msg, styp
+if (nSt.estGr) {
+  const s = nSt.egr.groupe.avcAuteurs()
+  if (!s.size) { 
+    msg.value = $t('NCFm1')
+  } else {
+    // retourne { avc: true/false, nom } ou null s'il n'y a pas d'exclusivité
+    const xav = nSt.mbExclu
+    if (xav) {
+      if (!xav.avc && !nSt.egr.estAnim) 
+        msg.value = $t('NCFm2', [xav.nom])
     }
   }
-
 }
+
 </script>
 
 <style lang="sass" scoped>

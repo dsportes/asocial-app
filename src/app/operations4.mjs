@@ -1873,6 +1873,7 @@ export class NouveauFichier extends Operation {
       ui.setEtf(4)
       // await sleep(1000)
       this.finOK()
+
     } catch (e) {
       await this.finKO(e)
     }

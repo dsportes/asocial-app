@@ -759,7 +759,7 @@ export default {
   PPapf: 'A propos du fichier (facultatif)',
   PPphf: 'monfic.jpg',
   PPl3: 'Choisir un fichier local (50Mo max)',
-  PPminmax: '{0}..{1} signes.',
+  PPminmax: 'Au plus {0} signes.',
   PPci: 'et non imprimables (CR TAB ...) interdits.',
   PPnoi: '(sans commentaires)',
 

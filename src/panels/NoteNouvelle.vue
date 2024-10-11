@@ -51,7 +51,7 @@
 </q-layout>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'

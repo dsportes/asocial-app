@@ -3,9 +3,17 @@ import { encode, decode } from '@msgpack/msgpack'
 import { useQuasar } from 'quasar'
 
 import { toByteArray, fromByteArray } from './base64.mjs'
-import { AMJ, appexc, d10, regIntg, regInt2g } from './api.mjs'
+import { AMJ, appexc } from './api.mjs'
 
 let pako
+
+export const interdits = '< > : " / \\ | ? *'
+// eslint-disable-next-line no-control-regex
+export const regInt = /[<>:"/\\|?*\x00-\x1F]/
+// eslint-disable-next-line no-control-regex
+export const regIntg = /[<>:"/\\|?*\x00-\x1F]/g
+// eslint-disable-next-line no-control-regex
+export const regInt2g = /[\u{0180}-\u{10FFFF}]/gu
 
 export function setRequiredModules (m) { 
   pako = m.pako
@@ -377,6 +385,12 @@ export function normNomFichier (v) {
   const i = v2.lastIndexOf('.')
   const v3 = i === -1 ? v2 : v2.substring(0, i)
   return v3.replace(regIntg, '_').replace(regInt2g, '')
+}
+
+export function normNom (v, max) {
+  if (!v) return ''
+  const s = v.trim().replace(regIntg, '').replace(regInt2g, '')
+  return s.length > max ? s.substring(0, max) : s
 }
 
 export function u8ToInt (u8) {

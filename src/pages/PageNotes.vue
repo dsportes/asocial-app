@@ -32,10 +32,21 @@
       </template>
     </q-tree>
 
-    <note-edit v-if="ui.d[idc] && ui.d[idc].NE"/>
-    <note-exclu v-if="ui.d[idc] && ui.d[idc].NX"/>
-    <note-fichier v-if="ui.d[idc] && ui.d[idc].NF"/>
-    <note-confirme v-if="ui.d[idc] && ui.d[idc].NC" :op="op"/>
+    <q-dialog v-model="ui.d[idc].NE" persistent full-height position="left">
+      <note-edit/>
+    </q-dialog>
+
+    <q-dialog v-model="ui.d[idc].NX" full-height position="left" persistent>
+      <note-exclu/>
+    </q-dialog>
+
+    <q-dialog v-model="ui.d[idc].NF" full-height position="left" persistent>
+      <note-fichier/>
+    </q-dialog>
+
+    <q-dialog v-model="ui.d[idc].NC" persistent>
+      <note-confirme :op="op"/>
+    </q-dialog>
 
     <!-- Download des notes sélectionnées -->
     <q-dialog v-model="ui.d[idc].PNdl" persistent>
@@ -657,7 +668,7 @@ export default {
 </script>
 
 <style lang="css">
-.q-tree__arrow { font-size: 24px !important; }
+.q-tree__arrow { font-size: 24px !important; position: relative; top: 20px }
 </style>
 
 <style lang="sass" scoped>

@@ -29,8 +29,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-import { interdits, regInt } from '../app/api.mjs'
-import { $t } from '../app/util.mjs'
+import { $t, interdits, regInt } from '../app/util.mjs'
 import BtnCond from '../components/BtnCond.vue'
 
 const min = 6
