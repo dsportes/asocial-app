@@ -1,5 +1,4 @@
 <template>
-<q-dialog v-model="ui.d[idc].SAsuppravatar" full-height position="left" persistent>
 <q-layout container view="hHh lpR fFf" :class="styp('md')">
   <q-header elevated class="bg-secondary text-white">
     <q-toolbar>
@@ -126,11 +125,10 @@
   </q-dialog>
 
 </q-layout>
-</q-dialog>
 </template>
 
-<script>
-import { toRef, onUnmounted } from 'vue'
+<script setup>
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 import stores from '../stores/stores.mjs'
 import BoutonHelp from '../components/BoutonHelp.vue'
@@ -140,176 +138,149 @@ import BtnCond from '../components/BtnCond.vue'
 import { SupprAvatar, SupprCompte } from '../app/operations4.mjs'
 import { GetPartition, deconnexion } from '../app/synchro.mjs'
 
-export default ({
-  name: 'SupprAvatar',
+const ui = stores.ui
+const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))    
+const session = stores.session
+const aSt = stores.avatar
+const nSt = stores.note
+const gSt = stores.groupe
 
-  props: { avid: String },
-
-  components: { BoutonHelp, BoutonConfirm, BtnCond },
-
-  computed: {
-    cv () { return this.session.getCV(this.avid || this.session.compteId) },
-
-    checksOK () { 
-      for (const x in this.s.checks) 
-        if (this.s.checks[x] && !this.checks[x]) return false
-      return true 
-    },
-
-    nbn () { return this.s.nna + this.s.nng },
-
-    nbtot () { return this.nbn + this.s.ch.length + this.s.ng },
-
-    v2n () { return this.s.v2a + this.s.v2g },
-
-    s () { 
-      const s = {
-        checks: { 
-          _notes: false, _chats: false, _spons: false, _ddel: false, _vol: false,
-          _gr0: false, _gr1: false, _gr2: false, _gr3: false 
-        },
-        stats: {}, // map des nbn notes, v1 v2 par avatar et groupe
-        /* gri : { 
-          heb, dan, dac : est hébergeur, dernier actif, dernier animateur
-          nnh, v2h : si hébergeur, nombre de notes et volume des fichiers hébergés
-          nn, v2 : nombre de notes et volume des fichiers
-          gr, im : groupe, indice membre  
-        }
-        */
-        ng: 0, // nombres de groupes accédés
-        gr1: [], // liste des groupes où l'avatar est le dernier actif
-        gr2: [], // liste des groupes dont l'avatar est hébergeur (mais pas dernier actif)
-        gr3: [], // liste des groupes dont l'avatar est le dernier animateur (mais pas hébergeur ni le dernier actif)
-        gr0: [], // liste des autres groupes ou l'avatar apparaît
-
-        sp: [], // liste des sponsorings
-        ch: [], // liste des chats
-
-        nng: 0, // nombre total de notes des groupes disparaissant
-        v2g: 0, // v2 total des fichiers des notes des groupes disparaissant
-
-        nna: 0, // nombre total des notes de l'avatar
-        v2a: 0, // v2 total des fichiers des notes de l'avatar
-
-        // résiliation compte
-        ddel: false // dernier délégué de sa partition
-      }
-
-      const id = this.avid || this.session.compteId
-      s.nng = 0; s.v2g = 0; s.ng = 0
-      s.stats = this.nSt.statsParRacine
-
-      const a = s.stats[id]
-      s.nna = a.nn; s.v2a = a.v2
-
-      const e = this.aSt.getElt(id)
-
-      e.chats.forEach(c => { if (c.stI === 1) s.ch.push(c) })
-      if (s.ch.length) s.checks._chats = true
-
-      e.sponsorings.forEach(sp => { if (sp.st === 0) s.sp.push(sp) })
-      if (s.sp.length) s.checks._spons = true
-
-      for (const [idg, sav] of this.session.compte.mpg) {
-        if (!sav.has(id)) continue
-        s.ng++
-        const gr = this.gSt.egr(idg).groupe
-        const im = gr.mmb.get(id)
-        const x = {
-          nomC: this.session.getCV(gr.id).nomC,
-          nn: gr.nn,
-          v2: gr.vf,
-          heb: false,
-          nnh: 0,
-          v2h: 0
-        }
-        if (gr.imh === im) { x.heb = true; x.nnh = x.nn; x.v2h = x.v2 } 
-        
-        let nan = 0, nac = 0, estAn = false, estAc = false
-        for (let i = 1; i < gr.st.length; i++) {
-          const s = gr.st[i]
-          if (s === 5) { nan++; if (i === x.im) estAn = true }
-          if (s >= 4) { nac++; if (i === x.im) estAc = true }
-        }
-        x.dan = nan === 1 && estAn
-        x.dac = nac === 1 && estAc
-        if (x.dac) {
-          s.nng += x.nn
-          s.v2g += x.v2
-        }
-        
-        x.st = x.dac ? 1 : (x.heb ? 2 : (x.dan ? 3 : 0))
-        s['gr' + x.st] = x
-      }
-
-      if (s.nna + s.nng) s.checks._notes = true
-
-      for (let i = 0; i < 4; i++) if (s['gr' + i].length) s.checks['_gr' + i] = true
-
-      if (this.avid === 0 && this.session.compte.idp) {
-        const ndel = this.session.partition.nbDels
-        if (ndel === 1 && this.session.compte.del) { s.ddel = true; s.checks._ddel = true }
-      }
-      if (this.avid)  s.checks._vol = true // Abonnements - sans intéret si le compte est résilié
-
-      return s
-    }
-  },
-
-  data () {
-    return {
-      checks: { 
-        _notes: false, _chats: false, _spons: false, _ddel: false, _vol: false,
-        _gr0: false, _gr1: false, _gr2: false, _gr3: false, _gr4: false 
-      }
-    }
-  },
-
-  watch: {
-    s () {
-      for (const x in this.checks) this.checks[x] = false 
-    }
-  },
-
-  methods: {
-    cftop () {
-      this.ui.oD('SAconfirmsuppr', this.idc)
-    },
-
-    async valider () {
-      this.ui.fD() // boite de confirmation
-      await sleep(50)
-      this.ui.fD() // Dialogue de suppression
-      if (this.avid) {
-        const r = await new SupprAvatar().run(this.avid)
-        if (r) await afficher8000(r, 0, avid)
-      } else {
-        const r = await new SupprCompte().run()
-        if (r) await afficherDiag(this.$t('SAcptdisp'))
-        await deconnexion()
-      }
-    }
-  },
-
-  setup (props) {    
-    const ui = stores.ui
-    const idc = ui.getIdc(); onUnmounted(() => ui.closeVue(idc))    
-    const session = stores.session
-    const avid = toRef(props, 'avid')
-
-    if (!avid.value && session.compte.idp)
-      onMounted(async () => { await new GetPartition().run(session.compte.idp) })
-
-    return {
-      session,
-      ui, idc,
-      aSt: stores.avatar,
-      nSt: stores.note,
-      gSt: stores.groupe,
-      styp, edvol, dkli
-    }
-  }
+const props = defineProps({ 
+  avid: String
 })
+
+if (!props.avid && session.compte.idp)
+  onMounted(async () => { await new GetPartition().run(session.compte.idp) })
+
+const checks = ref({ 
+  _notes: false, _chats: false, _spons: false, _ddel: false, _vol: false,
+  _gr0: false, _gr1: false, _gr2: false, _gr3: false, _gr4: false 
+})
+
+const cv = computed(() => session.getCV(props.avid || session.compteId))
+
+const checksOK = computed(() => { 
+  for (const x in s.value.checks) 
+    if (s.value.checks[x] && !checks.value[x]) return false
+  return true 
+})
+const nbn = computed(() => s.value.nna + s.value.nng)
+const nbtot = computed(() => nbn.value + s.value.ch.length + s.value.ng)
+const v2n = computed(() => s.value.v2a + s.value.v2g)
+
+const s = computed(() => { 
+  const s = {
+    checks: { 
+      _notes: false, _chats: false, _spons: false, _ddel: false, _vol: false,
+      _gr0: false, _gr1: false, _gr2: false, _gr3: false 
+    },
+    stats: {}, // map des nbn notes, v1 v2 par avatar et groupe
+    /* gri : { 
+      heb, dan, dac : est hébergeur, dernier actif, dernier animateur
+      nnh, v2h : si hébergeur, nombre de notes et volume des fichiers hébergés
+      nn, v2 : nombre de notes et volume des fichiers
+      gr, im : groupe, indice membre  
+    }
+    */
+    ng: 0, // nombres de groupes accédés
+    gr1: [], // liste des groupes où l'avatar est le dernier actif
+    gr2: [], // liste des groupes dont l'avatar est hébergeur (mais pas dernier actif)
+    gr3: [], // liste des groupes dont l'avatar est le dernier animateur (mais pas hébergeur ni le dernier actif)
+    gr0: [], // liste des autres groupes ou l'avatar apparaît
+
+    sp: [], // liste des sponsorings
+    ch: [], // liste des chats
+
+    nng: 0, // nombre total de notes des groupes disparaissant
+    v2g: 0, // v2 total des fichiers des notes des groupes disparaissant
+
+    nna: 0, // nombre total des notes de l'avatar
+    v2a: 0, // v2 total des fichiers des notes de l'avatar
+
+    // résiliation compte
+    ddel: false // dernier délégué de sa partition
+  }
+
+  const id = props.avid || session.compteId
+  s.nng = 0; s.v2g = 0; s.ng = 0
+  s.stats = nSt.statsParRacine
+
+  const a = s.stats[id]
+  s.nna = a.nn; s.v2a = a.v2
+
+  const e = aSt.getElt(id)
+
+  e.chats.forEach(c => { if (c.stI === 1) s.ch.push(c) })
+  if (s.ch.length) s.checks._chats = true
+
+  e.sponsorings.forEach(sp => { if (sp.st === 0) s.sp.push(sp) })
+  if (s.sp.length) s.checks._spons = true
+
+  for (const [idg, sav] of session.compte.mpg) {
+    if (!sav.has(id)) continue
+    s.ng++
+    const gr = gSt.egr(idg).groupe
+    const im = gr.mmb.get(id)
+    const x = {
+      nomC: session.getCV(gr.id).nomC,
+      nn: gr.nn,
+      v2: gr.vf,
+      heb: false,
+      nnh: 0,
+      v2h: 0
+    }
+    if (gr.imh === im) { x.heb = true; x.nnh = x.nn; x.v2h = x.v2 } 
+    
+    let nan = 0, nac = 0, estAn = false, estAc = false
+    for (let i = 1; i < gr.st.length; i++) {
+      const s = gr.st[i]
+      if (s === 5) { nan++; if (i === x.im) estAn = true }
+      if (s >= 4) { nac++; if (i === x.im) estAc = true }
+    }
+    x.dan = nan === 1 && estAn
+    x.dac = nac === 1 && estAc
+    if (x.dac) {
+      s.nng += x.nn
+      s.v2g += x.v2
+    }
+    
+    x.st = x.dac ? 1 : (x.heb ? 2 : (x.dan ? 3 : 0))
+    s['gr' + x.st] = x
+  }
+
+  if (s.nna + s.nng) s.checks._notes = true
+
+  for (let i = 0; i < 4; i++) if (s['gr' + i].length) s.checks['_gr' + i] = true
+
+  if (props.avid === 0 && session.compte.idp) {
+    const ndel = session.partition.nbDels
+    if (ndel === 1 && session.compte.del) { s.ddel = true; s.checks._ddel = true }
+  }
+  if (props.avid)  s.checks._vol = true // Abonnements - sans intéret si le compte est résilié
+
+  return s
+})
+
+watch(s, () => { for (const x in checks.value) checks.value[x] = false })
+
+function cftop () {
+  ui.oD('SAconfirmsuppr', this.idc)
+}
+
+async function valider () {
+  ui.fD() // boite de confirmation
+  await sleep(50)
+  ui.fD() // Dialogue de suppression
+  if (props.avid) {
+    const r = await new SupprAvatar().run(props.avid)
+    if (r) await afficher8000(r, 0, props.avid)
+  } else {
+    const r = await new SupprCompte().run()
+    if (r) await afficherDiag(this.$t('SAcptdisp'))
+    await deconnexion()
+  }
+}
+  
 </script>
 
 <style lang="sass" scoped>

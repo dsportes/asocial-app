@@ -41,7 +41,7 @@
       <btn-cond :disable="!aHome" flat icon="home"
         :color="aHome ? 'green-5' : 'grey'" @ok="gotoAccueilLogin()"/>
 
-      <btn-cond v-if="ui.pageback" icon="arrow_back" round @ok="ui.gotoBack()"/>
+      <btn-cond v-if="ui.pageback && (ui.page !== 'accueil')" icon="arrow_back" round @ok="ui.gotoBack()"/>
 
       <q-toolbar-title>
         <div style="position:relative">
@@ -263,7 +263,7 @@
       <page-groupe class="page" v-if="ui.page === 'groupe'"/>    
       <page-invitation class="page" v-if="ui.page === 'invitation'"/>    
       <page-notes class="page" v-if="ui.page === 'notes'"/>    
-      <page-ficavion class="page" v-if="ui.page === 'ficavion'"/>    
+      <page-ficavion2 class="page" v-if="ui.page === 'ficavion'"/>
     </transition-group>
   </q-page-container>
 
@@ -479,7 +479,7 @@ import PhraseSecrete from './dialogues/PhraseSecrete.vue'
 
 // niveau 2
 import PageSession from './pages/PageSession.vue'
-import PageFicavion from './pages/PageFicavion.vue'
+import PageFicavion2 from './pages/PageFicavion2.vue'
 import OutilsTests from './panels/OutilsTests.vue'
 
 // Niveau 3

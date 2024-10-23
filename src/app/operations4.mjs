@@ -503,8 +503,8 @@ export class ChangementPC extends Operation {
       const session = stores.session
       const pcK = p ? await crypter(session.clek, p.phrase) : null
       const cleAZC = p ? await crypter(p.pcb, RegCles.get(id)) : null
-      const hZR = p ? p.hps1 : 0
-      const hZC = p ? p.hpsc : 0
+      const hZR = p ? p.hps1 : null
+      const hZC = p ? p.hpsc : null
       const args = { token: session.authToken, id, pcK, hZR, hZC, cleAZC }
       await post(this, 'ChangementPC', args)
       this.finOK()

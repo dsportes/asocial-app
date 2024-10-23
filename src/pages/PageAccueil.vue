@@ -75,7 +75,7 @@
       </div>
 
       <!-- Fichiers avion -->
-      <div v-if="!session.incognito" class="btn2" @click="ficAvion">
+      <div v-if="!session.incognito" class="btn2" @click="ficAvion2">
         <btn-cond icon="save">
           <queue-icon/>
         </btn-cond>
@@ -124,7 +124,7 @@ function clickChats () { ui.setPage('compta', 'chats')}
 function clickAbo () { ui.setPage('compta', 'compta')}
 function clickCred () { ui.setPage('compta', 'credits')}
 function infoSession () { ui.setPage('session')}
-function ficAvion () {ui.setPage('ficavion')}
+function ficAvion2 () { ui.setPage('ficavion')}
 
 </script>
 <style lang="sass" scoped>

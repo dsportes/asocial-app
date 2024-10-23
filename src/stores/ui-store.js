@@ -4,7 +4,7 @@ import { $t, hms } from '../app/util.mjs'
 const seuillarge = 900
 const pagesF = new Set(['chats', 'espace', 'tranche', 'people', 'groupes', 'groupesac', 'groupe', 'invitation', 'notes'])
 const tabF = new Set(['membres'])
-const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes', 'ficavion'])
+const pagesB = new Set(['espace', 'compte', 'groupes', 'groupesac', 'notes'])
 
 // Le compteur de dialogues ouverts DOIT ne pas être remis à 0
 // à la déconnexion (en fait au reset du store ui)
@@ -171,7 +171,7 @@ export const useUiStore = defineStore('ui', {
 
     setPage (p, t) {
       this.resetD()
-      this.pageback = pagesB.has(this.page) ? this.page : ''
+      this.pageback = pagesB.has(this.page) ? this.page : 'accueil'
       this.page = p
       this.menug = false
       this.setTab(t)
@@ -182,7 +182,7 @@ export const useUiStore = defineStore('ui', {
     },
 
     gotoBack () {
-      if (this.pageback) this.setPage(this.pageback)
+      if (this.page !== 'accueil') this.setPage(this.pageback)
     },
 
     closeMenug () { 

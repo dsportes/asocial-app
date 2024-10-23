@@ -2,22 +2,15 @@
   <span v-if="c2 || c1" :class="c2 ? 'rond1' : 'rond2'"/>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import stores from '../stores/stores.mjs'
 
-export default ({
-  name: 'QueueIcon',
-  props: { },
-  computed: {
-    c1 () { return this.faSt.queue.size !== 0 },
-    c2 () { return this.faSt.echecs }
-  },
-  setup () {
-    return { 
-      faSt: stores.ficav
-    }
-  }
-})
+const faSt = stores.ficav
+
+const c1 = computed(() => faSt.queue.size !== 0)
+const c2 = computed(() => faSt.echecs)
 </script>
 
 <style lang="sass" scoped>

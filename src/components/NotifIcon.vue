@@ -8,35 +8,34 @@
 </span>
 </template>
 
-<script>
+<script setup>
+
+import { computed } from 'vue'
 
 const txt = ['green-5', 'green-5', 'orange-9', 'orange-9', 'negative', 'negative', 'negative', 'orange-9', 'negative']
 const bg = ['none', 'none', 'yellow-1', 'yellow-3', 'yellow-5', 'yellow-7', 'yellow-9', 'yellow-5', 'yellow-7']
 const ic = ['circle', 'report', 'trending_down', 'edit_off', 'edit_off', 'emergency', 'lock', 'speed', 'speed']
 
-export default ({
-  name: 'NotifIcon',
-  props: { 
-    /* niveau d'information / restriction: 
-    - 0 : aucune notification
-    - 1 : au moins une notification informative
-    - 2 : accroissement de volume interdit
-    - 3 : accés en lecture seule (sauf urgence)
-    - 4 : accés en lecture seule (strict, figé)
-    - 5 : accès d'urgence seulement
-    - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
-    - 7 : ralentissement 1
-    - 8 : ralentissement 2
-    */
-    niv: Number,
-    alire: Boolean // présence de l'indicateur à lire
-  },
-  computed: {
-    tclr () { return 'text-' + txt[this.niv || 0]},
-    bgclr () { return 'bg-' + bg[this.niv || 0] },
-    ico () { return ic[this.niv || 0] }
-  }
+const props = defineProps({ 
+  /* niveau d'information / restriction: 
+  - 0 : aucune notification
+  - 1 : au moins une notification informative
+  - 2 : accroissement de volume interdit
+  - 3 : accés en lecture seule (sauf urgence)
+  - 4 : accés en lecture seule (strict, figé)
+  - 5 : accès d'urgence seulement
+  - 6 : accés en lecture seule (strict, figé) SANS accès d'urgence
+  - 7 : ralentissement 1
+  - 8 : ralentissement 2
+  */
+  niv: Number,
+  alire: Boolean // présence de l'indicateur à lire
 })
+
+const tclr = computed(() => 'text-' + txt[props.niv || 0])
+const bgclr = computed(() => 'bg-' + bg[props.niv || 0])
+const ico = computed(() => ic[props.niv || 0])
+
 </script>
 
 <style lang="sass" scoped>

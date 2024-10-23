@@ -3,17 +3,20 @@
     <apercu-genx :id="idav" :idx="idx"/>
 
     <div class="q-mt-sm" v-if="avatar.pc">
-      <div>
-        <span class="titre-md text-italic">{{$t('FApc')}}</span>
-        <btn-cond cond="cEdit" class="q-ml-lg" flat
-          :label="$t('FApcms')" @ok="editerpc"/>
+      <div class="row justify-between">
+        <div class="titre-md text-italic">{{$t('FApc')}}</div>
+        <div>
+          <btn-cond class="q-mr-xs" cond="cEdit" round icon="delete" 
+            color="warning" @ok="supprPC"/>
+          <btn-cond cond="cEdit" round icon="edit" @ok="editerpc"/>
+        </div>
         </div>
       <div class="q-ml-lg font-mono fs-md text-bold">[{{avatar.pc}}]</div>
     </div>
-    <div v-else>
+    <div v-else class="row justify-between">
       <span class="titre-md text-italic">{{$t('FAnpc')}}</span>
-      <btn-cond v-if="!ID.estComptable(idav)" cond="cEdit" class="q-ml-lg" flat
-        :label="$t('FApcms')" @ok="editerpc"/>
+      <btn-cond v-if="!ID.estComptable(idav)" cond="cEdit"
+        round icon="edit" @ok="editerpc"/>
     </div>
 
     <!-- Dialogue d'édition de la phrase de contact -->
@@ -28,10 +31,6 @@
           <phrase-contact @ok="declPC" :init-val="avatar.pc || ''"
             declaration :orgext="session.org"/>
         </q-card-section>
-        <q-card-actions align="right">
-          <btn-cond v-if="avatar.pc" :label="$t('FAsup')" @ok="supprPC"
-            flat color="warning" cond="cEdit"/>
-        </q-card-actions>
       </q-card>
     </q-dialog>
 

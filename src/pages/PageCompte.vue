@@ -36,14 +36,14 @@
         </div>
         <div :class="'col ' + (id === session.avatarId ? 'courant' : 'zone')">
           <apercu-avatar edit  :idav="id" :idx="idx"/>
-          <div class="row q-mt-sm q-gutter-sm">
-            <btn-cond class="q-ml-sm" icon="group" cond="cVisu"
+          <div class="row q-mt-sm q-gutter-xs justify-center">
+            <btn-cond icon="group" cond="cVisu"
               :label="$t('ACgroupes')" @ok="courant(id, 2)"/>
             <q-badge class="cl1" color="secondary">{{nbgrps(id)}}</q-badge>
-            <btn-cond class="q-ml-sm" icon="chat" cond="cVisu"
+            <btn-cond icon="chat" cond="cVisu"
               :label="$t('ACseschats')" @ok="courant(id, 3)"/>
             <q-badge class="cl1" color="secondary">{{nbchats(id)}}</q-badge>
-            <btn-cond class="q-ml-sm" icon="diversity_3" cond="cVisu"
+            <btn-cond icon="diversity_3" cond="cVisu"
               :label="$t('ACsponsorings')" @ok="courant(id, 4)"/>
             <q-badge class="cl1" color="secondary">{{nbspons(id)}}</q-badge>
           </div>
@@ -94,7 +94,9 @@
     </q-dialog>
 
     <!-- Dialogue de suppression d'un avatar -->
-    <suppr-avatar v-if="ui.d[idc] && ui.d[idc].SAsuppravatar" :avid="avid"/>
+    <q-dialog v-model="ui.d[idc].SAsuppravatar" full-height position="left" persistent>
+      <suppr-avatar :avid="avid"/>
+    </q-dialog>
 
     <!-- Dialogue de mise à jour des quotas du compte -->
     <q-dialog v-model="ui.d[idc].PTedq" persistent>

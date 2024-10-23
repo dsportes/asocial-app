@@ -30,72 +30,50 @@
 
 </div>
 </template>
-<script>
 
-import { ref, toRef } from 'vue'
+<script setup>
+
+import { ref, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import BtnCond from '../components/BtnCond.vue'
 import { Phrase } from '../app/modele.mjs'
-import { afficherDiag } from '../app/util.mjs'
+import { afficherDiag, $t } from '../app/util.mjs'
 
 const min = 24
 
-export default ({
-  name: 'PhraseContact',
-  components: { BtnCond },
-  props: { 
-    initVal: String, 
-    orgext: String, 
-    declaration: Boolean 
-  },
-  data () {
-    return {
-      isPwd: false,
-      encours: false
-    }
-  },
-  watch: {
-    initVal (ap) { this.phrase = '' }
-  },
-  methods: {
-    r1 (val) { return val.length >= min || this.$t('NP16', [min]) },
-
-    async crypterphrase () {
-      if (this.r1(this.phrase) !== true) return
-      if (!this.org) {
-        await afficherDiag(this.$t('PSctc3'))
-        return
-      }
-      this.encours = true
-      // const org = this.session.org
-      this.pc = new Phrase()
-      setTimeout(async () => {
-        await this.pc.init(this.phrase)
-        this.encours = false
-        this.pc.org = this.org
-        this.$emit('ok', this.pc)
-      }, 1)
-    }
-  },
-
-  setup (props) {
-    const session = stores.session
-    const config = stores.config
-    const init = toRef(props, 'initVal')
-    const phrase = ref(init.value || '')
-    const orgext = toRef(props, 'orgext')
-    const org = ref('')
-    if (orgext.value) {
-      org.value = orgext.value
-    } else if (config.search) org.value = config.search
-
-    return {
-      phrase,
-      org,
-      session, min
-    }
-  }
+const props = defineProps({ 
+  initVal: String, 
+  orgext: String, 
+  declaration: Boolean 
 })
+
+const emit = defineEmits('ok')
+
+const session = stores.session
+const config = stores.config
+const phrase = ref(props.initVal || '')
+const org = ref(props.orgext ? props.orgext : (config.search ? config.search : ''))
+const isPwd = ref(false)
+const encours = ref(false)
+
+const r1 = (val) => val.length >= min || $t('NP16', [min])
+
+async function crypterphrase () {
+  if (r1(phrase.value) !== true) return
+  if (!org.value) {
+    await afficherDiag($t('PSctc3'))
+    return
+  }
+  encours.value = true
+  const pc = new Phrase()
+  setTimeout(async () => {
+    await pc.init(phrase.value)
+    encours.value = false
+    pc.org = org.value
+    emit('ok', pc)
+  }, 1)
+}
+
 </script>
 
 <style lang="sass" scoped>

@@ -1747,7 +1747,6 @@ export default {
   FAdpc: 'Définir la phrase de contact',
   FApc: 'Phrase de contact',
   FAnpc: 'Pas de phrase de contact ',
-  FApcms: 'La modifier / supprimer',
   FAdeclpc: 'En déclarer une',
   FAerr1: 'Cette phrase est déjà celle de l\'avatar : rien n\'est changé',
   FAerr2: 'Cette phrase a déjà choisie par un autre avatar. En attribuer une autre',
