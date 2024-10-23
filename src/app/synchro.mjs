@@ -714,7 +714,7 @@ export class ConnexionSynchroIncognito extends OperationS {
   }
 }
 
-/*   OP_SyncSp: 'Acceptation d\'un sponsoring et création d\'un nouveau compte'
+/*   OP_AcceptationSponsoring: 'Acceptation d\'un sponsoring et création d\'un nouveau compte'
 - token: éléments d'authentification du compte à créer
 - pageSessionId: rnd identifiant la _page_ chargée
 - sessionNc: numéro d'ordre de connexion pour cette page
@@ -743,16 +743,8 @@ export class ConnexionSynchroIncognito extends OperationS {
   - cleE2C: clé A de l'avatar E (sponsorisé) cryptée par la clé du chat.
   - t1c: mot du sponsor crypté par la clé C
   - t2c: mot du sponsorisé crypté par la clé C
-
-Retour: 
-- rowEspace
-- rowPartition si compte O
-- rowCompte 
-- rowInvit
-- rowAvater 
-- rowChat si la confidentialité n'a pas été requise
 */
-export class SyncSp extends OperationS {
+export class AcceptationSponsoring extends OperationS {
   constructor() { super('SyncSp') }
 
   async run(org, sp, texte, ps, dconf) {
@@ -809,54 +801,9 @@ export class SyncSp extends OperationS {
 
       const session = stores.session
       session.setOrg(org)
-      await session.initSession(ps)
-      // Reset après ça, dont RegCles (mais pas session)
-      // set compteId, avatarId, ns, clek, nomBase
-      await session.setIdClek(id, null, clek) 
-      RegCles.set(cleA)
-      
+      await session.initSession(ps)    
       args.token = session.authToken
-      const ret = await post(this, 'SyncSp', args)
-      if (ret.tarifs) Tarif.init(ret.tarifs)
-      const ds = DataSync.deserial(ret.dataSync)
-  
-      const sb = new SB()
-      const buf = new IDBbuffer()
-    
-      await this.setCeCiIn(ds, ret, sb, buf)
-      const espace = await compile(ret.rowEspace)
-      sb.setEs(espace)
-      buf.putIDB(espace, ret.rowEspace)
-
-      const avatar = await compile(ret.rowAvatar)
-      sb.setA(avatar)
-      buf.putIDB(avatar, ret.rowAvatar)
-      const item = ds.avatars.get(avatar.id)
-      item.vs = item.vb
-
-      if (ret.rowChat) {
-        const chat = await compile(ret.rowChat)
-        sb.setC(chat)
-        buf.putIDB(chat, ret.rowChat)
-      }
-
-      if (session.synchro) {
-        await idb.delete(session.nombase)
-        await idb.open()
-        await idb.storeBoot()
-        setTrigramme(session.nombase, await getTrigramme())
-      }
-
-      sb.store(buf)
-      await buf.commit(ds)
-
-      syncQueue.dataSync = ds
-
-      session.setStatus(2)
-      syncQueue.reveil()
-
-      console.log('Connexion compte : ' + session.compteId)
-      stores.ui.setPage('accueil')
+      await post(this, 'AcceptationSponsoring', args)
       this.finOK()
     } catch (e) {
       await this.finKO(e)

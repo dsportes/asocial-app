@@ -102,7 +102,7 @@ import { ref, onUnmounted, computed, watch } from 'vue'
 import stores from '../stores/stores.mjs'
 import EditeurMd from '../components/EditeurMd.vue'
 import ShowHtml from '../components/ShowHtml.vue'
-import { deconnexion, SyncSp, RefusSponsoring, ExistePhrase } from '../app/synchro.mjs'
+import { connexion, deconnexion, AcceptationSponsoring, RefusSponsoring, ExistePhrase } from '../app/synchro.mjs'
 import QuotasVols from '../components/QuotasVols.vue'
 import BtnCond from '../components/BtnCond.vue'
 import { styp, dhcool, afficherDiag } from '../app/util.mjs'
@@ -126,7 +126,7 @@ const jourJ = ref(AMJ.amjUtc())
 const max = ref([1, 1])
 const ps = ref(null)
 const apsf = ref(false)
-const texte = ref('')
+const texte = ref(textedef.value)
 const npi = ref(false)
 const dconf = ref(false)
 
@@ -165,8 +165,10 @@ async function okps (p) {
 }
 
 async function confirmer () {
-  await new SyncSp().run(props.org, props.sp, texte.value, ps.value, dconf.value)
+  const x = ps.value
+  await new AcceptationSponsoring().run(props.org, props.sp, texte.value, x, dconf.value)
   fermer()
+  await connexion(x)
 }
 
 async function refuser () {

@@ -63,7 +63,7 @@
           <q-stepper-navigation>
             <btn-cond flat @ok="step = 3" :label="$t('precedent')"/>
             <btn-cond flat @ok="okmot" :label="$t('suivant')" 
-              :disable="mot.length<10" class="q-ml-sm" />
+              :disable="motko" class="q-ml-sm" />
           </q-stepper-navigation>
         </q-step>
 
@@ -192,16 +192,16 @@ watch(step, async (ap) => {
     }, 500)
     return
   }
-  if (ap === 5) {
-    setQuotas()
-    return
-  }
   if (ap === 4) {
     setTimeout(() => {
       const s = step4.value
       const elt = s ? s.querySelector('textarea') : null
       if (elt) elt.focus()
     }, 500)
+    return
+  }
+  if (ap === 5) {
+    setQuotas()
     return
   }
 })
@@ -229,7 +229,8 @@ async function setDon () {
 function oknom (n) {
   if (n) {
     nom.value = n
-    mot1.value = mot.value || $t('NPbj', [n])
+    if (!mot.value) mot.value = $t('NPbj', [n])
+    mot1.value = mot.value
     step.value = 4
   }
 }

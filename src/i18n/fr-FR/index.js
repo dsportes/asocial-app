@@ -456,7 +456,7 @@ export default {
   OP_MoinsTicket: 'Suppression d\'un ticket de crédit',
   OP_StatutAvatar: 'Vérification que le bénéficiaire envisagé d\'un don est bien un compte autonome',
   OP_ReceptionTicket: 'Réception d\'un ticket par le Comptable',
-  OP_SyncSp: 'Acceptation d\'un sponsoring et création d\'un nouveau compte',
+  OP_AcceptationSponsoring: 'Acceptation d\'un sponsoring et création d\'un nouveau compte',
   OP_RefusSponsoring: 'Rejet d\'une proposition de sponsoring',
   OP_ProlongerSponsoring: 'Prolongation / annulation d\'un sponsoring',
   OP_CreationEspace: 'Création d\'un nouvel espace',

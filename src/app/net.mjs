@@ -2,7 +2,7 @@ import axios from 'axios'
 import { encode, decode } from '@msgpack/msgpack'
 
 import stores from '../stores/stores.mjs'
-import { isAppExc, AppExc, version, E_BRO, E_SRV, E_BRK } from './api.mjs'
+import { isAppExc, AppExc, E_BRO, E_SRV, E_BRK } from './api.mjs'
 import { syncQueue } from './synchro.mjs'
 
 const decoder = new TextDecoder('utf-8')

@@ -8,7 +8,7 @@
 import { ref, watch } from 'vue'
 
 import stores from "../stores/stores.mjs"
-import { dkli } from '../app/util.mjs'
+import { dkli, $t } from '../app/util.mjs'
 
 const props = defineProps({ nom: String, nbOptions: Number, idx: Number })
 
